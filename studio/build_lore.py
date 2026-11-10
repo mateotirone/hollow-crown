@@ -176,13 +176,16 @@ scenes = []
 for npc in json.loads(dump):
     for node_id, node in npc["nodes"].items():
         assert len(node["opts"]) <= 6, f"{npc['id']}/{node_id}: more than 6 buttons"
-        scenes.append({
-            "scene_tag": f"siege_lore_{npc['id']}_{node_id}",
-            "npc_name": npc["name"],
-            "text": node["text"],
-            "buttons": [{"name": opt[0], "commands": [f"/scriptevent siege:lore_say {npc['id']} {node_id} {i}"]}
-                        for i, opt in enumerate(node["opts"])],
-        })
+        # a node the player comes back to many times carries "greets": other ways of saying its text, so it
+        # is not the same line every visit. Each becomes its own scene (..._hub__1, __2, ...) with the same buttons.
+        for v, text in enumerate([node["text"], *node.get("greets", [])]):
+            scenes.append({
+                "scene_tag": f"siege_lore_{npc['id']}_{node_id}" + (f"__{v}" if v else ""),
+                "npc_name": npc["name"],
+                "text": text,
+                "buttons": [{"name": opt[0], "commands": [f"/scriptevent siege:lore_say {npc['id']} {node_id} {i}"]}
+                            for i, opt in enumerate(node["opts"])],
+            })
 write_json(os.path.join(BP, "dialogue", "siege_lore.json"),
            {"format_version": "1.17", "minecraft:npc_dialogue": {"scenes": scenes}})
 print(f"dialogue: {len(scenes)} scenes")

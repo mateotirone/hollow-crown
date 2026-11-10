@@ -79,12 +79,27 @@ function tick() {
       if (!close) { if (hinted.get(p.id) === door.id) hinted.delete(p.id); continue; }
       if (hinted.get(p.id) === door.id) continue;
       hinted.set(p.id, door.id);
-      p.sendMessage(open
-        ? `§7A ${door.carving === "full" ? "full" : "dark"} moon is carved here. §fThe way is open.§7 It will not stay open past dawn.`
-        : `§7A ${door.carving === "full" ? "full" : "dark"} moon is carved in the stone here. Nothing opens.`);
+      const moon = door.carving === "full" ? "full" : "dark";
+      const pool = open ? DOOR_LINES.open : DOOR_LINES.shut;
+      p.sendMessage(pool[(door.id + world.getDay()) % pool.length].replaceAll("{moon}", moon));
     }
   }
 }
+// Said each time you walk up to one, so each has several wordings (which one depends on the door and the day)
+export const DOOR_LINES = {
+  open: [
+    "§7A {moon} moon is carved here. §fThe way is open.§7 It will not stay open past dawn.",
+    "§7The stone under the carved {moon} moon is simply not there tonight. §fThe way is open.§7 Dawn will put it back.",
+    "§7Cold air is coming out of the wall beneath a carved {moon} moon. §fThe way is open,§7 until first light.",
+    "§7Where the {moon} moon is carved, the wall has stood aside. §fThe way is open.§7 It keeps the hours, not you.",
+  ],
+  shut: [
+    "§7A {moon} moon is carved in the stone here. Nothing opens.",
+    "§7A {moon} moon, cut deep, and worn smooth where hands have pushed. The stone does not move.",
+    "§7There is a carved {moon} moon here, and a wall behind it that is only a wall tonight.",
+    "§7A {moon} moon in the stone. You look up to see what tonight's is doing.",
+  ],
+};
 onTick("lore_moon_doors", 40, tick);
 
 system.afterEvents.scriptEventReceive.subscribe(({ id, message, sourceEntity: player }) => {

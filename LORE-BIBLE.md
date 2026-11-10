@@ -277,3 +277,32 @@ Mateo, 2026-11-10: the raids start as men (Grey Host variants) and one night bec
 - At first light your own people talk about it (three versions if you were there, one if you were away). Nobody names it.
 - Five people then have one new conversation each, and each holds one corner only. Sigrun: the Host never brought anything like that, it was the last thing the Host saw, and "last night it sent one of its own". Brother Cael: an unlabelled drawer of eleven reports over three hundred years, each written the season before a village went silent; the old brothers' phrase "tall company". Old Mag: it was not angry, it was sent to look, to see how high you build; she will not say what it is. Sir Aldous: he reported one and watched the clerk burn the page without surprise. Archivist Pell: nothing in the books, but pages neatly cut from four of them.
 - Nobody says the Hollow's name for itself, Morvane, or Oswin in any of it. The player should leave with the question "sent by what?".
+
+## Where the mobs come from (agreed with the wiki thread, 2026-11-10; not yet seen by Mateo)
+
+- Bell-Ringer: carries a small copy of the bell the marchers hear under the ice, so they never stop hearing it.
+- Siege Ogre: Ice Isles giants the Grey Host used to pull down bell towers; taken with the Host.
+- Crow-Mage: the Host's war-priests, the ones who nailed a raven up for every bell. Their own ravens left them that night. Bellcrows are what they were given instead, and are not ravens. The silent ravens on a wall serve nobody.
+- Wrongling: a copy (like the Returned) left above too long with nobody to copy.
+- Echo Hound: Sir Gerrit's pack. It followed him under the ice and turned on him (The Huntsman's Tally). Blind; it was bred to hunt Corvin's students by the hum of the Ember.
+- Rimewolf: ordinary Frostmarch wolves that have started answering the Huntsman's horn. Not of the Hollow.
+- Mirror Knight: one of the Hollow's people who studied the knights that went down the Gate. It copies how you fight, not our world.
+- Tolling Shade: a loose echo of the bell below. Gloamwing: the Hollow's carrion birds.
+- Bog Hag: NOT Corvin's students. The thing under the Witchroot swamp has kept people for as long as there has been a swamp; the hags are the ones it kept before Mag, and less kindly.
+- Twelve students: Mag was one of the twelve. Gerrit truly caught ten. His hounds lost Mag in the swamp and he notched her anyway rather than report a failure; the twelfth went under the Rimehold ice. So "eleven notches" has one lie in it, and Mag's "he got the others" is what she believes.
+- Barrow Wight: the kings' buried household at King's Barrow, woken by the seep. Never say what they guard (the tomb is empty; that is a late clue).
+- Brine Lurker: one of the things the lighthouse lamp guides ashore (late spoiler, belongs to the mystery The Keeper's Light).
+- Inquisitor: its silence is the bell-wardens' Vigil (Quiet Mind), turned outward.
+- Frost Stag, Ash Scarab, Dune Wyrm, Mire Toad: plain animals.
+
+## Never the same line twice (Mateo, 2026-11-10: "it should never, ever, ever get repetitive and/or boring")
+
+Rule for all lore text: anything a player can hear more than a few times needs a pool, and the picker must never give the same wording twice running. Built so far: every story character's "hub" greeting has four wordings (`greets` on the node; the self-test fails if a hub has fewer than three extra), the dusk ravens have eight lines for each state, moon doors four each, traders' rumors 22. One-time scenes need no variants.
+
+## Doors left open for later updates (design thread's proposals, NOT approved by Mateo)
+
+- Lights over the sea / land past the charts: in the traders' rumors only. No answer exists.
+- A book in letters nobody reads: rumor only. If built, keep it distinct from the cipher (Lighthouse Letters) and the backward writing.
+- One sealed door per region: rumor only. A moon door with no carving would do it (`moondoors.js` would need a carving that never opens).
+- A crossed-out name in Aldric's journal: NOT added. The journal "names nothing" by Mateo's ruling and its entry 11 is quoted word for word in the reveal, so this needs his say first.
+- A "Chronicle" book that gains a page each update: not built; needs Mateo's say (it would be a second starting book beside the journal).

@@ -299,6 +299,99 @@
         ]
       },
       {
+        "scene_tag": "siege_lore_wren_hub__1",
+        "npc_name": "Sister Wren",
+        "text": "You again. Good. Wipe your feet, somebody has to pretend it's morning.",
+        "buttons": [
+          {
+            "name": "The Lost Days.",
+            "commands": [
+              "/scriptevent siege:lore_say wren hub 0"
+            ]
+          },
+          {
+            "name": "The clocks.",
+            "commands": [
+              "/scriptevent siege:lore_say wren hub 1"
+            ]
+          },
+          {
+            "name": "The knights.",
+            "commands": [
+              "/scriptevent siege:lore_say wren hub 2"
+            ]
+          },
+          {
+            "name": "Nothing. Be well.",
+            "commands": [
+              "/scriptevent siege:lore_say wren hub 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_wren_hub__2",
+        "npc_name": "Sister Wren",
+        "text": "Hold this. No, the other end. Now. What is it?",
+        "buttons": [
+          {
+            "name": "The Lost Days.",
+            "commands": [
+              "/scriptevent siege:lore_say wren hub 0"
+            ]
+          },
+          {
+            "name": "The clocks.",
+            "commands": [
+              "/scriptevent siege:lore_say wren hub 1"
+            ]
+          },
+          {
+            "name": "The knights.",
+            "commands": [
+              "/scriptevent siege:lore_say wren hub 2"
+            ]
+          },
+          {
+            "name": "Nothing. Be well.",
+            "commands": [
+              "/scriptevent siege:lore_say wren hub 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_wren_hub__3",
+        "npc_name": "Sister Wren",
+        "text": "I've a pot on and a boy with a fever. Talk while I work.",
+        "buttons": [
+          {
+            "name": "The Lost Days.",
+            "commands": [
+              "/scriptevent siege:lore_say wren hub 0"
+            ]
+          },
+          {
+            "name": "The clocks.",
+            "commands": [
+              "/scriptevent siege:lore_say wren hub 1"
+            ]
+          },
+          {
+            "name": "The knights.",
+            "commands": [
+              "/scriptevent siege:lore_say wren hub 2"
+            ]
+          },
+          {
+            "name": "Nothing. Be well.",
+            "commands": [
+              "/scriptevent siege:lore_say wren hub 3"
+            ]
+          }
+        ]
+      },
+      {
         "scene_tag": "siege_lore_wren_lost_gate",
         "npc_name": "Sister Wren",
         "text": "You say those words like someone who has heard them, not someone who has read them.\n\nThere's a notice in the square about it. The Reeve's office wants everyone to know there is no cause for alarm. Read it. Then tell me if you believe it.",
@@ -555,6 +648,99 @@
         "scene_tag": "siege_lore_aldous_hub",
         "npc_name": "Sir Aldous Vane",
         "text": "Well met again. The roads are worse every month. What can I do for you?",
+        "buttons": [
+          {
+            "name": "Tell me about the Order.",
+            "commands": [
+              "/scriptevent siege:lore_say aldous hub 0"
+            ]
+          },
+          {
+            "name": "Why do the sieges come?",
+            "commands": [
+              "/scriptevent siege:lore_say aldous hub 1"
+            ]
+          },
+          {
+            "name": "Who was Saint Ashe?",
+            "commands": [
+              "/scriptevent siege:lore_say aldous hub 2"
+            ]
+          },
+          {
+            "name": "Good day.",
+            "commands": [
+              "/scriptevent siege:lore_say aldous hub 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_aldous_hub__1",
+        "npc_name": "Sir Aldous Vane",
+        "text": "You look tired. So do I. Nobody warns you about the paperwork.",
+        "buttons": [
+          {
+            "name": "Tell me about the Order.",
+            "commands": [
+              "/scriptevent siege:lore_say aldous hub 0"
+            ]
+          },
+          {
+            "name": "Why do the sieges come?",
+            "commands": [
+              "/scriptevent siege:lore_say aldous hub 1"
+            ]
+          },
+          {
+            "name": "Who was Saint Ashe?",
+            "commands": [
+              "/scriptevent siege:lore_say aldous hub 2"
+            ]
+          },
+          {
+            "name": "Good day.",
+            "commands": [
+              "/scriptevent siege:lore_say aldous hub 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_aldous_hub__2",
+        "npc_name": "Sir Aldous Vane",
+        "text": "Ah, good, a face that isn't asking me for a horse. Go on.",
+        "buttons": [
+          {
+            "name": "Tell me about the Order.",
+            "commands": [
+              "/scriptevent siege:lore_say aldous hub 0"
+            ]
+          },
+          {
+            "name": "Why do the sieges come?",
+            "commands": [
+              "/scriptevent siege:lore_say aldous hub 1"
+            ]
+          },
+          {
+            "name": "Who was Saint Ashe?",
+            "commands": [
+              "/scriptevent siege:lore_say aldous hub 2"
+            ]
+          },
+          {
+            "name": "Good day.",
+            "commands": [
+              "/scriptevent siege:lore_say aldous hub 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_aldous_hub__3",
+        "npc_name": "Sir Aldous Vane",
+        "text": "I have the watch in an hour. Until then I am yours.",
         "buttons": [
           {
             "name": "Tell me about the Order.",
@@ -908,6 +1094,135 @@
         ]
       },
       {
+        "scene_tag": "siege_lore_mag_hub__1",
+        "npc_name": "Old Mag",
+        "text": "You're letting the damp out. In or out.",
+        "buttons": [
+          {
+            "name": "Your teacher.",
+            "commands": [
+              "/scriptevent siege:lore_say mag hub 0"
+            ]
+          },
+          {
+            "name": "The moon.",
+            "commands": [
+              "/scriptevent siege:lore_say mag hub 1"
+            ]
+          },
+          {
+            "name": "Mirelight's villagers.",
+            "commands": [
+              "/scriptevent siege:lore_say mag hub 2"
+            ]
+          },
+          {
+            "name": "The backward hymns.",
+            "commands": [
+              "/scriptevent siege:lore_say mag hub 3"
+            ]
+          },
+          {
+            "name": "The day they took the king.",
+            "commands": [
+              "/scriptevent siege:lore_say mag hub 4"
+            ]
+          },
+          {
+            "name": "Goodbye, Mag.",
+            "commands": [
+              "/scriptevent siege:lore_say mag hub 5"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_mag_hub__2",
+        "npc_name": "Old Mag",
+        "text": "Back, are you. The frogs said you would be.",
+        "buttons": [
+          {
+            "name": "Your teacher.",
+            "commands": [
+              "/scriptevent siege:lore_say mag hub 0"
+            ]
+          },
+          {
+            "name": "The moon.",
+            "commands": [
+              "/scriptevent siege:lore_say mag hub 1"
+            ]
+          },
+          {
+            "name": "Mirelight's villagers.",
+            "commands": [
+              "/scriptevent siege:lore_say mag hub 2"
+            ]
+          },
+          {
+            "name": "The backward hymns.",
+            "commands": [
+              "/scriptevent siege:lore_say mag hub 3"
+            ]
+          },
+          {
+            "name": "The day they took the king.",
+            "commands": [
+              "/scriptevent siege:lore_say mag hub 4"
+            ]
+          },
+          {
+            "name": "Goodbye, Mag.",
+            "commands": [
+              "/scriptevent siege:lore_say mag hub 5"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_mag_hub__3",
+        "npc_name": "Old Mag",
+        "text": "I was asleep. I've been asleep since Tuesday. Which Tuesday, I couldn't say. Ask.",
+        "buttons": [
+          {
+            "name": "Your teacher.",
+            "commands": [
+              "/scriptevent siege:lore_say mag hub 0"
+            ]
+          },
+          {
+            "name": "The moon.",
+            "commands": [
+              "/scriptevent siege:lore_say mag hub 1"
+            ]
+          },
+          {
+            "name": "Mirelight's villagers.",
+            "commands": [
+              "/scriptevent siege:lore_say mag hub 2"
+            ]
+          },
+          {
+            "name": "The backward hymns.",
+            "commands": [
+              "/scriptevent siege:lore_say mag hub 3"
+            ]
+          },
+          {
+            "name": "The day they took the king.",
+            "commands": [
+              "/scriptevent siege:lore_say mag hub 4"
+            ]
+          },
+          {
+            "name": "Goodbye, Mag.",
+            "commands": [
+              "/scriptevent siege:lore_say mag hub 5"
+            ]
+          }
+        ]
+      },
+      {
         "scene_tag": "siege_lore_mag_trowel",
         "npc_name": "Old Mag",
         "text": "What did you say?\n\nSay it again. Slowly.\n\n...\"Like a trowel.\" He said that to me the morning I was nine, the first day, in front of all eleven of the others, and I cried, and he gave me his own pen and never asked for it back.\n\nThree hundred years. I thought I was waiting to see what came back out of that Crack. I think I was only waiting to be told off one more time.\n\nSit down, child. I've a notebook under the bed I've been denying for a long while.",
@@ -1182,6 +1497,99 @@
         ]
       },
       {
+        "scene_tag": "siege_lore_elias_hub__1",
+        "npc_name": "The Lighthouse Keeper",
+        "text": "Is that the tide or is that you? Come up, come up.",
+        "buttons": [
+          {
+            "name": "The tide and the chapel.",
+            "commands": [
+              "/scriptevent siege:lore_say elias hub 0"
+            ]
+          },
+          {
+            "name": "The man from the sea.",
+            "commands": [
+              "/scriptevent siege:lore_say elias hub 1"
+            ]
+          },
+          {
+            "name": "Why never put it out?",
+            "commands": [
+              "/scriptevent siege:lore_say elias hub 2"
+            ]
+          },
+          {
+            "name": "Goodbye, Elias.",
+            "commands": [
+              "/scriptevent siege:lore_say elias hub 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elias_hub__2",
+        "npc_name": "The Lighthouse Keeper",
+        "text": "Careful on the stair. It has one more step than it used to.",
+        "buttons": [
+          {
+            "name": "The tide and the chapel.",
+            "commands": [
+              "/scriptevent siege:lore_say elias hub 0"
+            ]
+          },
+          {
+            "name": "The man from the sea.",
+            "commands": [
+              "/scriptevent siege:lore_say elias hub 1"
+            ]
+          },
+          {
+            "name": "Why never put it out?",
+            "commands": [
+              "/scriptevent siege:lore_say elias hub 2"
+            ]
+          },
+          {
+            "name": "Goodbye, Elias.",
+            "commands": [
+              "/scriptevent siege:lore_say elias hub 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elias_hub__3",
+        "npc_name": "The Lighthouse Keeper",
+        "text": "I was just writing to her. It will keep. What can I tell you?",
+        "buttons": [
+          {
+            "name": "The tide and the chapel.",
+            "commands": [
+              "/scriptevent siege:lore_say elias hub 0"
+            ]
+          },
+          {
+            "name": "The man from the sea.",
+            "commands": [
+              "/scriptevent siege:lore_say elias hub 1"
+            ]
+          },
+          {
+            "name": "Why never put it out?",
+            "commands": [
+              "/scriptevent siege:lore_say elias hub 2"
+            ]
+          },
+          {
+            "name": "Goodbye, Elias.",
+            "commands": [
+              "/scriptevent siege:lore_say elias hub 3"
+            ]
+          }
+        ]
+      },
+      {
         "scene_tag": "siege_lore_elias_tide",
         "npc_name": "The Lighthouse Keeper",
         "text": "Once a month, when the moon is dark, the sea goes out nearly as far as it did that night. You can see the tower of Saint Brannoc's from here.\n\nI have the place worked out to the very stone. It's all in the seventh letter. I keep meaning to go.",
@@ -1424,6 +1832,135 @@
         ]
       },
       {
+        "scene_tag": "siege_lore_sage_hub__1",
+        "npc_name": "Archivist Pell",
+        "text": "Don't move that pile, it's in an order. What have you found?",
+        "buttons": [
+          {
+            "name": "Two tomes disagree.",
+            "commands": [
+              "/scriptevent siege:lore_say sage hub 0"
+            ]
+          },
+          {
+            "name": "I can't read this one.",
+            "commands": [
+              "/scriptevent siege:lore_say sage hub 1"
+            ]
+          },
+          {
+            "name": "Where should I look next?",
+            "commands": [
+              "/scriptevent siege:lore_say sage hub 2"
+            ]
+          },
+          {
+            "name": "The seven thin places.",
+            "commands": [
+              "/scriptevent siege:lore_say sage hub 3"
+            ]
+          },
+          {
+            "name": "How do I solve a thread?",
+            "commands": [
+              "/scriptevent siege:lore_say sage hub 4"
+            ]
+          },
+          {
+            "name": "Carry on, Pell.",
+            "commands": [
+              "/scriptevent siege:lore_say sage hub 5"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_sage_hub__2",
+        "npc_name": "Archivist Pell",
+        "text": "Oh, it's you! I was hoping it was you and not a draught.",
+        "buttons": [
+          {
+            "name": "Two tomes disagree.",
+            "commands": [
+              "/scriptevent siege:lore_say sage hub 0"
+            ]
+          },
+          {
+            "name": "I can't read this one.",
+            "commands": [
+              "/scriptevent siege:lore_say sage hub 1"
+            ]
+          },
+          {
+            "name": "Where should I look next?",
+            "commands": [
+              "/scriptevent siege:lore_say sage hub 2"
+            ]
+          },
+          {
+            "name": "The seven thin places.",
+            "commands": [
+              "/scriptevent siege:lore_say sage hub 3"
+            ]
+          },
+          {
+            "name": "How do I solve a thread?",
+            "commands": [
+              "/scriptevent siege:lore_say sage hub 4"
+            ]
+          },
+          {
+            "name": "Carry on, Pell.",
+            "commands": [
+              "/scriptevent siege:lore_say sage hub 5"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_sage_hub__3",
+        "npc_name": "Archivist Pell",
+        "text": "Ink's wet, mind your sleeve. Go on, what's the question?",
+        "buttons": [
+          {
+            "name": "Two tomes disagree.",
+            "commands": [
+              "/scriptevent siege:lore_say sage hub 0"
+            ]
+          },
+          {
+            "name": "I can't read this one.",
+            "commands": [
+              "/scriptevent siege:lore_say sage hub 1"
+            ]
+          },
+          {
+            "name": "Where should I look next?",
+            "commands": [
+              "/scriptevent siege:lore_say sage hub 2"
+            ]
+          },
+          {
+            "name": "The seven thin places.",
+            "commands": [
+              "/scriptevent siege:lore_say sage hub 3"
+            ]
+          },
+          {
+            "name": "How do I solve a thread?",
+            "commands": [
+              "/scriptevent siege:lore_say sage hub 4"
+            ]
+          },
+          {
+            "name": "Carry on, Pell.",
+            "commands": [
+              "/scriptevent siege:lore_say sage hub 5"
+            ]
+          }
+        ]
+      },
+      {
         "scene_tag": "siege_lore_sage_contra",
         "npc_name": "Archivist Pell",
         "text": "Good! They're supposed to. Ask three things of any book. Who wrote it? Who were they afraid of? And were they there?\n\nMaster Quill wrote what the court told him, but he couldn't stop himself noting the small true things. The Order wrote what it wanted believed. The mage wrote what he saw and was burned for it. Weigh them accordingly.",
@@ -1620,6 +2157,99 @@
         "scene_tag": "siege_lore_cael_hub",
         "npc_name": "Brother Cael",
         "text": "The reading room is open. The archive is not. I say this every day. Some days I even mean it.",
+        "buttons": [
+          {
+            "name": "What did the Order burn?",
+            "commands": [
+              "/scriptevent siege:lore_say cael hub 0"
+            ]
+          },
+          {
+            "name": "Tell me about Corvin Hale.",
+            "commands": [
+              "/scriptevent siege:lore_say cael hub 1"
+            ]
+          },
+          {
+            "name": "The portraits you burned. Whose?",
+            "commands": [
+              "/scriptevent siege:lore_say cael hub 2"
+            ]
+          },
+          {
+            "name": "Good day.",
+            "commands": [
+              "/scriptevent siege:lore_say cael hub 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_cael_hub__1",
+        "npc_name": "Brother Cael",
+        "text": "Quietly, please. The books are used to it.",
+        "buttons": [
+          {
+            "name": "What did the Order burn?",
+            "commands": [
+              "/scriptevent siege:lore_say cael hub 0"
+            ]
+          },
+          {
+            "name": "Tell me about Corvin Hale.",
+            "commands": [
+              "/scriptevent siege:lore_say cael hub 1"
+            ]
+          },
+          {
+            "name": "The portraits you burned. Whose?",
+            "commands": [
+              "/scriptevent siege:lore_say cael hub 2"
+            ]
+          },
+          {
+            "name": "Good day.",
+            "commands": [
+              "/scriptevent siege:lore_say cael hub 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_cael_hub__2",
+        "npc_name": "Brother Cael",
+        "text": "You came back. Most people need only one look at this room.",
+        "buttons": [
+          {
+            "name": "What did the Order burn?",
+            "commands": [
+              "/scriptevent siege:lore_say cael hub 0"
+            ]
+          },
+          {
+            "name": "Tell me about Corvin Hale.",
+            "commands": [
+              "/scriptevent siege:lore_say cael hub 1"
+            ]
+          },
+          {
+            "name": "The portraits you burned. Whose?",
+            "commands": [
+              "/scriptevent siege:lore_say cael hub 2"
+            ]
+          },
+          {
+            "name": "Good day.",
+            "commands": [
+              "/scriptevent siege:lore_say cael hub 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_cael_hub__3",
+        "npc_name": "Brother Cael",
+        "text": "I have misfiled something on purpose today. It was very satisfying. Yes?",
         "buttons": [
           {
             "name": "What did the Order burn?",
@@ -1922,6 +2552,135 @@
         ]
       },
       {
+        "scene_tag": "siege_lore_sigrun_hub__1",
+        "npc_name": "Sigrun Ashby",
+        "text": "You'll want feeding. Southerners always do. Talk first.",
+        "buttons": [
+          {
+            "name": "The shrine by the lake.",
+            "commands": [
+              "/scriptevent siege:lore_say sigrun hub 0"
+            ]
+          },
+          {
+            "name": "The hunter's lodge.",
+            "commands": [
+              "/scriptevent siege:lore_say sigrun hub 1"
+            ]
+          },
+          {
+            "name": "Does the ice ever open?",
+            "commands": [
+              "/scriptevent siege:lore_say sigrun hub 2"
+            ]
+          },
+          {
+            "name": "Why did the Grey Host come?",
+            "commands": [
+              "/scriptevent siege:lore_say sigrun hub 3"
+            ]
+          },
+          {
+            "name": "The ravens.",
+            "commands": [
+              "/scriptevent siege:lore_say sigrun hub 4"
+            ]
+          },
+          {
+            "name": "Nothing. Keep warm.",
+            "commands": [
+              "/scriptevent siege:lore_say sigrun hub 5"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_sigrun_hub__2",
+        "npc_name": "Sigrun Ashby",
+        "text": "Boots off or stay by the door. What now?",
+        "buttons": [
+          {
+            "name": "The shrine by the lake.",
+            "commands": [
+              "/scriptevent siege:lore_say sigrun hub 0"
+            ]
+          },
+          {
+            "name": "The hunter's lodge.",
+            "commands": [
+              "/scriptevent siege:lore_say sigrun hub 1"
+            ]
+          },
+          {
+            "name": "Does the ice ever open?",
+            "commands": [
+              "/scriptevent siege:lore_say sigrun hub 2"
+            ]
+          },
+          {
+            "name": "Why did the Grey Host come?",
+            "commands": [
+              "/scriptevent siege:lore_say sigrun hub 3"
+            ]
+          },
+          {
+            "name": "The ravens.",
+            "commands": [
+              "/scriptevent siege:lore_say sigrun hub 4"
+            ]
+          },
+          {
+            "name": "Nothing. Keep warm.",
+            "commands": [
+              "/scriptevent siege:lore_say sigrun hub 5"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_sigrun_hub__3",
+        "npc_name": "Sigrun Ashby",
+        "text": "Lake's still there, if that's what you came to check.",
+        "buttons": [
+          {
+            "name": "The shrine by the lake.",
+            "commands": [
+              "/scriptevent siege:lore_say sigrun hub 0"
+            ]
+          },
+          {
+            "name": "The hunter's lodge.",
+            "commands": [
+              "/scriptevent siege:lore_say sigrun hub 1"
+            ]
+          },
+          {
+            "name": "Does the ice ever open?",
+            "commands": [
+              "/scriptevent siege:lore_say sigrun hub 2"
+            ]
+          },
+          {
+            "name": "Why did the Grey Host come?",
+            "commands": [
+              "/scriptevent siege:lore_say sigrun hub 3"
+            ]
+          },
+          {
+            "name": "The ravens.",
+            "commands": [
+              "/scriptevent siege:lore_say sigrun hub 4"
+            ]
+          },
+          {
+            "name": "Nothing. Keep warm.",
+            "commands": [
+              "/scriptevent siege:lore_say sigrun hub 5"
+            ]
+          }
+        ]
+      },
+      {
         "scene_tag": "siege_lore_sigrun_calling",
         "npc_name": "Sigrun Ashby",
         "text": "You've been reading. Nobody asks that who hasn't.\n\nWe don't tell southerners this. My people were the Host. The ones who stayed behind with the wounded, anyway. And the old women say nobody ordered that crossing. There was a sound under the ice, one winter, like a bell a long way down, and every fighting man on the Isles got up and started sharpening things. Couldn't have told you why. Couldn't have stopped.\n\nGran said you never hear it with your ears. You hear it with whatever part of you is already angry.",
@@ -2146,6 +2905,81 @@
         ]
       },
       {
+        "scene_tag": "siege_lore_isolde_hub__1",
+        "npc_name": "Warden Isolde",
+        "text": "Sunscar thanks you for your visit. I am required to say so. What do you want?",
+        "buttons": [
+          {
+            "name": "Statues.",
+            "commands": [
+              "/scriptevent siege:lore_say isolde hub 0"
+            ]
+          },
+          {
+            "name": "Who rules Sunscar?",
+            "commands": [
+              "/scriptevent siege:lore_say isolde hub 1"
+            ]
+          },
+          {
+            "name": "Just passing through.",
+            "commands": [
+              "/scriptevent siege:lore_say isolde hub 2"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_isolde_hub__2",
+        "npc_name": "Warden Isolde",
+        "text": "Mind the statues on your way out. They were here first.",
+        "buttons": [
+          {
+            "name": "Statues.",
+            "commands": [
+              "/scriptevent siege:lore_say isolde hub 0"
+            ]
+          },
+          {
+            "name": "Who rules Sunscar?",
+            "commands": [
+              "/scriptevent siege:lore_say isolde hub 1"
+            ]
+          },
+          {
+            "name": "Just passing through.",
+            "commands": [
+              "/scriptevent siege:lore_say isolde hub 2"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_isolde_hub__3",
+        "npc_name": "Warden Isolde",
+        "text": "I have a petition about a goat and then I have you. Go on.",
+        "buttons": [
+          {
+            "name": "Statues.",
+            "commands": [
+              "/scriptevent siege:lore_say isolde hub 0"
+            ]
+          },
+          {
+            "name": "Who rules Sunscar?",
+            "commands": [
+              "/scriptevent siege:lore_say isolde hub 1"
+            ]
+          },
+          {
+            "name": "Just passing through.",
+            "commands": [
+              "/scriptevent siege:lore_say isolde hub 2"
+            ]
+          }
+        ]
+      },
+      {
         "scene_tag": "siege_lore_isolde_hub2",
         "npc_name": "Warden Isolde",
         "text": "You again. You've got me looking at them on my rounds now. I hope you're pleased.",
@@ -2311,6 +3145,99 @@
         ]
       },
       {
+        "scene_tag": "siege_lore_nessa_hub__1",
+        "npc_name": "Nessa Dunn",
+        "text": "Loaves are a penny. You're not here for loaves, are you.",
+        "buttons": [
+          {
+            "name": "Tell me again what to look for.",
+            "commands": [
+              "/scriptevent siege:lore_say nessa hub 0"
+            ]
+          },
+          {
+            "name": "Nessa, that is not Harl.",
+            "commands": [
+              "/scriptevent siege:lore_say nessa hub 1"
+            ]
+          },
+          {
+            "name": "He's your husband. He's only tired.",
+            "commands": [
+              "/scriptevent siege:lore_say nessa hub 2"
+            ]
+          },
+          {
+            "name": "Not yet.",
+            "commands": [
+              "/scriptevent siege:lore_say nessa hub 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nessa_hub__2",
+        "npc_name": "Nessa Dunn",
+        "text": "Keep your voice down, he's only through there.",
+        "buttons": [
+          {
+            "name": "Tell me again what to look for.",
+            "commands": [
+              "/scriptevent siege:lore_say nessa hub 0"
+            ]
+          },
+          {
+            "name": "Nessa, that is not Harl.",
+            "commands": [
+              "/scriptevent siege:lore_say nessa hub 1"
+            ]
+          },
+          {
+            "name": "He's your husband. He's only tired.",
+            "commands": [
+              "/scriptevent siege:lore_say nessa hub 2"
+            ]
+          },
+          {
+            "name": "Not yet.",
+            "commands": [
+              "/scriptevent siege:lore_say nessa hub 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nessa_hub__3",
+        "npc_name": "Nessa Dunn",
+        "text": "I've been counting how long he stands at the back door. Ask me how long.",
+        "buttons": [
+          {
+            "name": "Tell me again what to look for.",
+            "commands": [
+              "/scriptevent siege:lore_say nessa hub 0"
+            ]
+          },
+          {
+            "name": "Nessa, that is not Harl.",
+            "commands": [
+              "/scriptevent siege:lore_say nessa hub 1"
+            ]
+          },
+          {
+            "name": "He's your husband. He's only tired.",
+            "commands": [
+              "/scriptevent siege:lore_say nessa hub 2"
+            ]
+          },
+          {
+            "name": "Not yet.",
+            "commands": [
+              "/scriptevent siege:lore_say nessa hub 3"
+            ]
+          }
+        ]
+      },
+      {
         "scene_tag": "siege_lore_nessa_verdict_yes",
         "npc_name": "Nessa Dunn",
         "text": "...No. No, it isn't, is it.\n\nHe kneads with his left. I've known since the second morning. I wanted someone else to say it so it wouldn't be me.\n\nThe awful thing is he doesn't know. He thinks he's Harl. He asked me this morning why I was crying and he meant it.\n\nThere's a hand-bell on the chapel step. I can't. Would you? Or don't. I don't know which I'm asking.",
@@ -2417,6 +3344,99 @@
         "scene_tag": "siege_lore_jorund_hub",
         "npc_name": "Jorund Kell",
         "text": "Well? You've seen him. What is he?",
+        "buttons": [
+          {
+            "name": "What does the dog make of him?",
+            "commands": [
+              "/scriptevent siege:lore_say jorund hub 0"
+            ]
+          },
+          {
+            "name": "He's your father. Leave him be.",
+            "commands": [
+              "/scriptevent siege:lore_say jorund hub 1"
+            ]
+          },
+          {
+            "name": "That is not Bram Kell.",
+            "commands": [
+              "/scriptevent siege:lore_say jorund hub 2"
+            ]
+          },
+          {
+            "name": "I need longer.",
+            "commands": [
+              "/scriptevent siege:lore_say jorund hub 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_jorund_hub__1",
+        "npc_name": "Jorund Kell",
+        "text": "Mind the nets. Well? I've not slept.",
+        "buttons": [
+          {
+            "name": "What does the dog make of him?",
+            "commands": [
+              "/scriptevent siege:lore_say jorund hub 0"
+            ]
+          },
+          {
+            "name": "He's your father. Leave him be.",
+            "commands": [
+              "/scriptevent siege:lore_say jorund hub 1"
+            ]
+          },
+          {
+            "name": "That is not Bram Kell.",
+            "commands": [
+              "/scriptevent siege:lore_say jorund hub 2"
+            ]
+          },
+          {
+            "name": "I need longer.",
+            "commands": [
+              "/scriptevent siege:lore_say jorund hub 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_jorund_hub__2",
+        "npc_name": "Jorund Kell",
+        "text": "He asked after you this morning. By name. I don't know what to make of that.",
+        "buttons": [
+          {
+            "name": "What does the dog make of him?",
+            "commands": [
+              "/scriptevent siege:lore_say jorund hub 0"
+            ]
+          },
+          {
+            "name": "He's your father. Leave him be.",
+            "commands": [
+              "/scriptevent siege:lore_say jorund hub 1"
+            ]
+          },
+          {
+            "name": "That is not Bram Kell.",
+            "commands": [
+              "/scriptevent siege:lore_say jorund hub 2"
+            ]
+          },
+          {
+            "name": "I need longer.",
+            "commands": [
+              "/scriptevent siege:lore_say jorund hub 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_jorund_hub__3",
+        "npc_name": "Jorund Kell",
+        "text": "Tell me you've watched him. Tell me something.",
         "buttons": [
           {
             "name": "What does the dog make of him?",
@@ -2598,6 +3618,81 @@
         ]
       },
       {
+        "scene_tag": "siege_lore_tilly_hub__1",
+        "npc_name": "Tilly Marsh",
+        "text": "I saved you a place on the wall. It's the dry bit.",
+        "buttons": [
+          {
+            "name": "I'll say nothing, Tilly.",
+            "commands": [
+              "/scriptevent siege:lore_say tilly hub 0"
+            ]
+          },
+          {
+            "name": "Your mother has to be told.",
+            "commands": [
+              "/scriptevent siege:lore_say tilly hub 1"
+            ]
+          },
+          {
+            "name": "Still thinking.",
+            "commands": [
+              "/scriptevent siege:lore_say tilly hub 2"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_tilly_hub__2",
+        "npc_name": "Tilly Marsh",
+        "text": "He's down there again. Look. Right on the line.",
+        "buttons": [
+          {
+            "name": "I'll say nothing, Tilly.",
+            "commands": [
+              "/scriptevent siege:lore_say tilly hub 0"
+            ]
+          },
+          {
+            "name": "Your mother has to be told.",
+            "commands": [
+              "/scriptevent siege:lore_say tilly hub 1"
+            ]
+          },
+          {
+            "name": "Still thinking.",
+            "commands": [
+              "/scriptevent siege:lore_say tilly hub 2"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_tilly_hub__3",
+        "npc_name": "Tilly Marsh",
+        "text": "Did you decide? You don't have to say. I can tell if you've decided.",
+        "buttons": [
+          {
+            "name": "I'll say nothing, Tilly.",
+            "commands": [
+              "/scriptevent siege:lore_say tilly hub 0"
+            ]
+          },
+          {
+            "name": "Your mother has to be told.",
+            "commands": [
+              "/scriptevent siege:lore_say tilly hub 1"
+            ]
+          },
+          {
+            "name": "Still thinking.",
+            "commands": [
+              "/scriptevent siege:lore_say tilly hub 2"
+            ]
+          }
+        ]
+      },
+      {
         "scene_tag": "siege_lore_tilly_kept",
         "npc_name": "Tilly Marsh",
         "text": "...Thank you.\n\nI do know it's not him. I say goodnight to the real one after. Out the window. In case it carries.",
@@ -2704,6 +3799,99 @@
         "scene_tag": "siege_lore_hesper_hub",
         "npc_name": "Hesper Lowe",
         "text": "Did you see him? Did you see how he looks at the house?",
+        "buttons": [
+          {
+            "name": "Odo is himself, Hesper.",
+            "commands": [
+              "/scriptevent siege:lore_say hesper hub 0"
+            ]
+          },
+          {
+            "name": "You're right. That's not Odo.",
+            "commands": [
+              "/scriptevent siege:lore_say hesper hub 1"
+            ]
+          },
+          {
+            "name": "Hesper. Which hand is your cup in?",
+            "commands": [
+              "/scriptevent siege:lore_say hesper hub 2"
+            ]
+          },
+          {
+            "name": "Not yet.",
+            "commands": [
+              "/scriptevent siege:lore_say hesper hub 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_hesper_hub__1",
+        "npc_name": "Hesper Lowe",
+        "text": "You're back. Good. I've kept the tea warm, I don't know why.",
+        "buttons": [
+          {
+            "name": "Odo is himself, Hesper.",
+            "commands": [
+              "/scriptevent siege:lore_say hesper hub 0"
+            ]
+          },
+          {
+            "name": "You're right. That's not Odo.",
+            "commands": [
+              "/scriptevent siege:lore_say hesper hub 1"
+            ]
+          },
+          {
+            "name": "Hesper. Which hand is your cup in?",
+            "commands": [
+              "/scriptevent siege:lore_say hesper hub 2"
+            ]
+          },
+          {
+            "name": "Not yet.",
+            "commands": [
+              "/scriptevent siege:lore_say hesper hub 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_hesper_hub__2",
+        "npc_name": "Hesper Lowe",
+        "text": "He's out with the reeds. He's always out with the reeds now.",
+        "buttons": [
+          {
+            "name": "Odo is himself, Hesper.",
+            "commands": [
+              "/scriptevent siege:lore_say hesper hub 0"
+            ]
+          },
+          {
+            "name": "You're right. That's not Odo.",
+            "commands": [
+              "/scriptevent siege:lore_say hesper hub 1"
+            ]
+          },
+          {
+            "name": "Hesper. Which hand is your cup in?",
+            "commands": [
+              "/scriptevent siege:lore_say hesper hub 2"
+            ]
+          },
+          {
+            "name": "Not yet.",
+            "commands": [
+              "/scriptevent siege:lore_say hesper hub 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_hesper_hub__3",
+        "npc_name": "Hesper Lowe",
+        "text": "Tell me what you saw. Take your time. I've nothing but time.",
         "buttons": [
           {
             "name": "Odo is himself, Hesper.",
@@ -2864,6 +4052,135 @@
         "scene_tag": "siege_lore_corvin_hub",
         "npc_name": "A Voice in the Water",
         "text": "Ask. Quickly. Every word I say to you is a word I'm not singing, and they notice.",
+        "buttons": [
+          {
+            "name": "What did the truce really say?",
+            "commands": [
+              "/scriptevent siege:lore_say corvin hub 0"
+            ]
+          },
+          {
+            "name": "Tell me about the King.",
+            "commands": [
+              "/scriptevent siege:lore_say corvin hub 1"
+            ]
+          },
+          {
+            "name": "Your last page stops mid-sentence.",
+            "commands": [
+              "/scriptevent siege:lore_say corvin hub 2"
+            ]
+          },
+          {
+            "name": "Old Mag is still alive.",
+            "commands": [
+              "/scriptevent siege:lore_say corvin hub 3"
+            ]
+          },
+          {
+            "name": "Who sits in the chair down here?",
+            "commands": [
+              "/scriptevent siege:lore_say corvin hub 4"
+            ]
+          },
+          {
+            "name": "Go back to your note.",
+            "commands": [
+              "/scriptevent siege:lore_say corvin hub 5"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_corvin_hub__1",
+        "npc_name": "A Voice in the Water",
+        "text": "Stand still. The water carries better when you stand still.",
+        "buttons": [
+          {
+            "name": "What did the truce really say?",
+            "commands": [
+              "/scriptevent siege:lore_say corvin hub 0"
+            ]
+          },
+          {
+            "name": "Tell me about the King.",
+            "commands": [
+              "/scriptevent siege:lore_say corvin hub 1"
+            ]
+          },
+          {
+            "name": "Your last page stops mid-sentence.",
+            "commands": [
+              "/scriptevent siege:lore_say corvin hub 2"
+            ]
+          },
+          {
+            "name": "Old Mag is still alive.",
+            "commands": [
+              "/scriptevent siege:lore_say corvin hub 3"
+            ]
+          },
+          {
+            "name": "Who sits in the chair down here?",
+            "commands": [
+              "/scriptevent siege:lore_say corvin hub 4"
+            ]
+          },
+          {
+            "name": "Go back to your note.",
+            "commands": [
+              "/scriptevent siege:lore_say corvin hub 5"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_corvin_hub__2",
+        "npc_name": "A Voice in the Water",
+        "text": "You again. Good. I had half a sentence saved for you and I've lost it. Ask.",
+        "buttons": [
+          {
+            "name": "What did the truce really say?",
+            "commands": [
+              "/scriptevent siege:lore_say corvin hub 0"
+            ]
+          },
+          {
+            "name": "Tell me about the King.",
+            "commands": [
+              "/scriptevent siege:lore_say corvin hub 1"
+            ]
+          },
+          {
+            "name": "Your last page stops mid-sentence.",
+            "commands": [
+              "/scriptevent siege:lore_say corvin hub 2"
+            ]
+          },
+          {
+            "name": "Old Mag is still alive.",
+            "commands": [
+              "/scriptevent siege:lore_say corvin hub 3"
+            ]
+          },
+          {
+            "name": "Who sits in the chair down here?",
+            "commands": [
+              "/scriptevent siege:lore_say corvin hub 4"
+            ]
+          },
+          {
+            "name": "Go back to your note.",
+            "commands": [
+              "/scriptevent siege:lore_say corvin hub 5"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_corvin_hub__3",
+        "npc_name": "A Voice in the Water",
+        "text": "Speak low. I am borrowing this breath from a tune and it will be wanted back.",
         "buttons": [
           {
             "name": "What did the truce really say?",

@@ -43,6 +43,8 @@ const TAG_SAFE = "siege_hollowfolk_safe";
 const VAULT_BLOCK = "minecraft:reinforced_deepslate";
 
 const store = moduleStore("hc:hollowfolk", () => ({
+  v: 1, // version of this saved data: raise it and convert old saves when the shape changes
+  deepDoor: false, // the sealed door in the Vault is in place
   built: {}, // village id -> true once its huts stand
   vaultBuilt: false,
   stock: {}, // village id -> raw ore in its Tally
@@ -275,7 +277,25 @@ function buildVault() {
     fill(dim, s.x - 2, s.y + 3, s.z - 2, s.x - 2, s.y + 3, s.z - 2, B.glimbulb);
   }
   store.data.vaultBuilt = true;
+  buildDeepDoor();
   store.save();
+}
+
+// The Deep Door: a sealed arch in the Vault's north wall. It does not open. It is a hook for a later
+// expansion (the Deep), so nothing may depend on what is behind it yet.
+const DEEP_LINES = [
+  "Sealed stone, colder than the rest of the wall. It does not open.",
+  "You press your ear to it. Far below, something answers your breathing a moment late.",
+  "There is no handle on this side. There are scratches, low down, at the height of a hand.",
+  "The seal hums one note under the Vault's. Whatever is down there is not finished.",
+];
+const deepDoorAt = (l) => l.z === VAULT.z + 5 && Math.abs(l.x - VAULT.x) <= 1 && l.y >= VAULT.y && l.y <= VAULT.y + 2;
+function buildDeepDoor() {
+  const dim = hollow(), v = VAULT;
+  fill(dim, v.x - 2, v.y, v.z + 5, v.x + 2, v.y + 3, v.z + 5, B.polished);
+  fill(dim, v.x - 1, v.y, v.z + 5, v.x + 1, v.y + 2, v.z + 5, B.seal);
+  fill(dim, v.x, v.y + 3, v.z + 5, v.x, v.y + 3, v.z + 5, B.copper);
+  store.data.deepDoor = true;
 }
 
 const hollowPlayers = () => world.getAllPlayers().filter((p) => p.dimension.id === UNDERTOW_ID);
@@ -295,6 +315,8 @@ onTick("hollowfolk:build", 60, () => {
     staffVillage(v);
   }
   if (!store.data.vaultBuilt && players.some((p) => p.location.z > STAIR_Z - 80) && areaBuilt(pathX(STAIR_Z) + 5, STAIR_Z, 4)) buildVault();
+  // Vaults built before the Deep Door existed get theirs when someone is next down there.
+  if (store.data.vaultBuilt && !store.data.deepDoor && players.some((p) => Math.abs(p.location.x - VAULT.x) < 12 && Math.abs(p.location.z - VAULT.z) < 12 && Math.abs(p.location.y - VAULT.y) < 8)) { buildDeepDoor(); store.save(); }
 });
 
 // ---- the day: digging and the dawn cart -------------------------------------------------------
@@ -509,6 +531,16 @@ world.beforeEvents.playerInteractWithEntity.subscribe((e) => {
     const line = wardenData().id === player.id ? "Crown-wearer. We are yours. Say the word." : LINES[m][Math.floor(Math.random() * LINES[m].length)];
     say(player, `§7Miner: §f"${line}"`);
   });
+});
+
+const deepTries = new Map(); // player id -> how many times they have tried the Deep Door this session
+world.beforeEvents.playerInteractWithBlock.subscribe((e) => {
+  if (e.block.typeId !== B.seal || e.block.dimension.id !== UNDERTOW_ID || !deepDoorAt(e.block.location)) return;
+  if (e.isFirstEvent === false) return;
+  e.cancel = true;
+  const player = e.player, n = deepTries.get(player.id) ?? 0;
+  deepTries.set(player.id, n + 1);
+  system.run(() => say(player, `§8${DEEP_LINES[Math.min(n, DEEP_LINES.length - 1)]}`));
 });
 
 world.beforeEvents.playerInteractWithBlock.subscribe((e) => {
