@@ -163,7 +163,9 @@ class Blueprint:
         o, size = self._grid()
         pal, blocks = self.palette_and_blocks()
         data = {"name": self.name, "format": "hollow-crown-stamp/1", "size": list(size),
-                "origin": list(o), "ground_y": 0, "note": "y=0 is the ground surface; cells not listed are left as they are",
+                "origin": list(o), "ground_y": 0,
+                "rotations": getattr(self, "rotations", [0, 90, 180, 270]),
+                "fill_below": getattr(self, "fill_below", "cobblestone"), "note": "y=0 is the ground surface; cells not listed are left as they are",
                 "markers": self.markers, "palette": pal,
                 "blocks": [[x - o[0], y - o[1], z - o[2], i] for x, y, z, i in blocks]}
         with open(path, "w") as f: json.dump(data, f, separators=(",", ":"))
