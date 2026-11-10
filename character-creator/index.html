@@ -1,0 +1,736 @@
+<title>Hollow Crown Character Creator</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&display=swap">
+<style>
+/* Layout: one narrow "ledger" column for the questions, opening into a two-column character sheet. */
+:root{
+  --bg:#dde4df; --panel:#edf1ed; --ink:#1b2725; --muted:#52625c; --line:#b3bfb8;
+  --verd:#2c6b60; --verd-ink:#f2f7f4; --brass:#84651b; --ember:#a3432b; --shade:rgba(20,34,31,.08);
+  --display:"IM Fell English","Iowan Old Style","Palatino Linotype",Georgia,serif;
+  --caps:"IM Fell English SC","IM Fell English",Georgia,serif;
+  --body:"Alegreya Sans","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0f1716; --panel:#172220; --ink:#dae4de; --muted:#8ea198; --line:#2b3a36;
+  --verd:#74bcab; --verd-ink:#0c1514; --brass:#cba859; --ember:#dc7a55; --shade:rgba(0,0,0,.35); color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#0f1716; --panel:#172220; --ink:#dae4de; --muted:#8ea198; --line:#2b3a36;
+  --verd:#74bcab; --verd-ink:#0c1514; --brass:#cba859; --ember:#dc7a55; --shade:rgba(0,0,0,.35); color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5}
+.wrap{max-width:980px;margin:0 auto;padding-block:28px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;text-wrap:balance;line-height:1.12}
+h1{font-size:clamp(2.2rem,7vw,3.6rem);letter-spacing:-.01em}
+h2{font-size:clamp(1.6rem,4.6vw,2.2rem)}
+h3{font-size:1.3rem}
+p{margin:0}
+.eyebrow{font-family:var(--caps);letter-spacing:.14em;font-size:.95rem;color:var(--brass)}
+.muted{color:var(--muted)}
+.small{font-size:.9rem}
+.stack{display:flex;flex-direction:column;gap:16px}
+.stack-lg{display:flex;flex-direction:column;gap:30px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.narrow{max-width:640px}
+.rule{height:1px;background:var(--line);border:0;margin:0}
+
+button{font:inherit;color:inherit;cursor:pointer}
+.btn{border:1px solid var(--verd);background:var(--verd);color:var(--verd-ink);padding:11px 20px;border-radius:3px;font-weight:700;letter-spacing:.02em}
+.btn.ghost{background:transparent;color:var(--verd)}
+.btn.quiet{border-color:var(--line);background:transparent;color:var(--ink);font-weight:500}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+
+/* cover */
+.cover{display:grid;grid-template-columns:1fr;gap:28px;align-items:center}
+@media(min-width:820px){.cover{grid-template-columns:1.05fr .95fr}}
+.cover ul{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:6px}
+.mapframe{align-self:start;border:1px solid var(--line);padding:6px;background:var(--panel);box-shadow:0 10px 30px var(--shade)}
+.mapframe canvas{display:block;width:100%;height:auto;aspect-ratio:1}
+
+/* steps */
+.progress{display:flex;gap:4px}
+.progress i{flex:1;height:3px;background:var(--line)}
+.progress i.on{background:var(--verd)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:var(--panel);padding:9px 14px;border-radius:999px}
+.chip[aria-pressed="true"]{background:var(--verd);border-color:var(--verd);color:var(--verd-ink);font-weight:700}
+.answers{display:flex;flex-direction:column;gap:8px}
+.ans{text-align:left;border:1px solid var(--line);background:var(--panel);padding:13px 16px;border-radius:3px;display:flex;gap:12px;align-items:baseline}
+.ans::before{content:"";flex:none;width:9px;height:9px;transform:rotate(45deg) translateY(-1px);border:1px solid var(--muted)}
+.ans:hover{border-color:var(--verd)}
+.ans[aria-pressed="true"]{border-color:var(--verd);box-shadow:inset 3px 0 0 var(--verd)}
+.ans[aria-pressed="true"]::before{background:var(--verd);border-color:var(--verd)}
+.question{font-family:var(--display);font-size:clamp(1.35rem,4.2vw,1.8rem);line-height:1.2;text-wrap:balance}
+fieldset{border:0;padding:0;margin:0;min-width:0}
+legend{padding:0;font-weight:700;margin-bottom:8px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-weight:700}
+input[type=text],select{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:9px 10px;width:100%;min-width:0}
+
+/* sheet */
+.namebar{display:flex;flex-direction:column;gap:6px}
+.charname{font-size:clamp(2.4rem,9vw,4.4rem);line-height:1}
+.epithet{font-family:var(--display);font-style:italic;font-size:1.35rem;color:var(--muted)}
+.looks{display:grid;grid-template-columns:1fr;gap:22px}
+@media(min-width:720px){.looks{grid-template-columns:1fr 1fr}}
+.plate{display:flex;flex-direction:column;gap:10px;min-width:0}
+.plate figcaption{font-family:var(--caps);letter-spacing:.12em;color:var(--brass);font-size:.9rem}
+figure{margin:0}
+.portrait{border:1px solid var(--line);padding:8px;background:var(--panel);box-shadow:0 10px 30px var(--shade)}
+.portrait canvas{display:block;width:100%;height:auto;aspect-ratio:4/5}
+.stagebox{border:1px solid var(--line);background:linear-gradient(#3a4b4a,#232f2e 62%,#1a2221 62%,#263231);box-shadow:0 10px 30px var(--shade);aspect-ratio:4/5;position:relative;overflow:hidden;touch-action:pan-y;cursor:grab;display:flex;align-items:center;justify-content:center;perspective:900px}
+.stagebox .hint{position:absolute;left:0;right:0;bottom:8px;text-align:center;font-size:.8rem;color:#b9c7c1;pointer-events:none}
+.mob{position:relative;width:0;height:0;transform-style:preserve-3d;transform:scale(var(--k,1)) rotateX(-8deg) rotateY(-28deg)}
+.mob.sway{animation:sway 9s ease-in-out infinite alternate}
+@keyframes sway{from{transform:scale(var(--k,1)) rotateX(-8deg) rotateY(-40deg)}to{transform:scale(var(--k,1)) rotateX(-8deg) rotateY(40deg)}}
+@media(prefers-reduced-motion:reduce){.mob.sway{animation:none}}
+.mob .box{position:absolute;left:0;top:0;transform-style:preserve-3d}
+.mob canvas{position:absolute;image-rendering:pixelated;backface-visibility:hidden}
+.skinrow{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap}
+.skinrow img{width:128px;height:128px;image-rendering:pixelated;border:1px solid var(--line);background:repeating-conic-gradient(var(--panel) 0 25%,var(--bg) 0 50%) 0 0/16px 16px}
+.skinrow>div{flex:1;min-width:200px}
+.controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media(min-width:720px){.controls{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.controls label{font-size:.85rem;font-weight:700;color:var(--muted)}
+.two{display:grid;grid-template-columns:1fr;gap:30px}
+@media(min-width:820px){.two{grid-template-columns:1fr 1fr}}
+.two>*{min-width:0}
+.facts{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;margin:0}
+.facts dt{font-family:var(--caps);letter-spacing:.1em;color:var(--brass);font-size:.9rem;padding-top:2px}
+.facts dd{margin:0;min-width:0}
+.swatch{display:inline-block;width:.8em;height:.8em;border:1px solid var(--ink);margin-right:6px;vertical-align:baseline}
+.bars{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;align-items:center}
+.bars span{font-size:.95rem}
+.bars i{display:block;height:8px;background:var(--line);position:relative}
+.bars i b{position:absolute;inset:0 auto 0 0;background:var(--muted)}
+.bars .top b{background:var(--verd)}
+.bars .top span,.bars span.top{font-weight:700}
+.prose{font-size:1.1rem;max-width:62ch}
+.quote{font-family:var(--display);font-style:italic;font-size:1.25rem;border-left:2px solid var(--brass);padding-left:14px;max-width:56ch}
+textarea{font:inherit;font-size:.9rem;width:100%;min-height:90px;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:3px;padding:10px;resize:vertical}
+.toast{font-size:.9rem;color:var(--verd);min-height:1.4em}
+.foot{font-size:.9rem;color:var(--muted);max-width:70ch}
+</style>
+
+<div class="wrap">
+  <main id="app" class="stack-lg">
+    <section id="cover" class="cover">
+      <div class="stack">
+        <p class="eyebrow">The Hollow Crown</p>
+        <h1>Who comes to Kingsrest?</h1>
+        <p class="prose">Everyone arrives the same way: on the coach, with one bag, as nobody in particular. What you become after that is up to you and the land. Answer a few questions and this will suggest who you were before you got here.</p>
+        <ul>
+          <li>A name, and what people call you behind your back</li>
+          <li>What you look like, as a painted portrait and as a skin you can wear in the game</li>
+          <li>The road you are likely to walk: Knight, Sorcerer, Dragon Rider, Forgemaster, Captain or Witch</li>
+          <li>Which of the twelve settlement plots to claim, and which train gets you there</li>
+        </ul>
+        <div class="row">
+          <button class="btn" id="begin">Begin</button>
+          <button class="btn ghost" id="resume" hidden>Back to my character</button>
+        </div>
+        <p class="small muted">About four minutes. Nothing here is binding. You can change every part of the result.</p>
+      </div>
+      <div class="mapframe"><canvas id="covermap" width="1000" height="1000" role="img" aria-label="Map of the land: Aldmere Vale in the middle, Frostmarch north, Saltreach west, Blackfen south, Emberwaste east, with twelve settlement plots"></canvas></div>
+    </section>
+    <section id="stage" hidden></section>
+  </main>
+</div>
+
+<script>
+(function(){
+"use strict";
+/* ---------- small helpers ---------- */
+const $=(s,r=document)=>r.querySelector(s);
+const el=(tag,attrs={},...kids)=>{const e=document.createElement(tag);for(const k in attrs){const v=attrs[k];if(k==='class')e.className=v;else if(k==='html')e.innerHTML=v;else if(k.startsWith('on'))e.addEventListener(k.slice(2),v);else if(v!==false&&v!=null)e.setAttribute(k,v===true?'':v)}for(const k of kids.flat()){if(k==null||k===false)continue;e.append(k.nodeType?k:document.createTextNode(k))}return e};
+function hash(str){let h=2166136261>>>0;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+function rng(seed){let a=seed>>>0;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const pick=(r,arr)=>arr[Math.floor(r()*arr.length)];
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+function shade(hex,f){const n=parseInt(hex.slice(1),16);let r=n>>16,g=n>>8&255,b=n&255;if(f<0){r*=1+f;g*=1+f;b*=1+f}else{r+=(255-r)*f;g+=(255-g)*f;b+=(255-b)*f}return'#'+[r,g,b].map(v=>Math.round(clamp(v,0,255)).toString(16).padStart(2,'0')).join('')}
+function mix(a,b,t){const x=parseInt(a.slice(1),16),y=parseInt(b.slice(1),16);const c=[16,8,0].map(s=>Math.round((x>>s&255)*(1-t)+(y>>s&255)*t));return'#'+c.map(v=>v.toString(16).padStart(2,'0')).join('')}
+const hex=s=>Array.from(new TextEncoder().encode(s)).map(b=>b.toString(16).padStart(2,'0')).join('');
+const unhex=h=>{try{return new TextDecoder().decode(new Uint8Array((h.match(/../g)||[]).map(x=>parseInt(x,16))))}catch(e){return''}};
+
+/* ---------- the world ---------- */
+const REG={
+ va:{name:'Aldmere Vale',col:'#7f9a6c',blurb:'Green country in the middle of everything. Rivers, oak woods and good grazing. Every rail line starts here.',power:'the Royal Stud and the best cavalry in the land',dyes:[13,4,14,12]},
+ fr:{name:'Frostmarch',col:'#cdd7da',blurb:'North of the Greyspine. Snow, pines and long nights. Sound carries a long way over the ice.',power:'the Deepforge: the finest steel and siege engines',dyes:[3,0,7,11]},
+ sa:{name:'Saltreach',col:'#c3bd8e',blurb:'The western coast. Cliffs, dunes and gulls. The tide brings things in.',power:'the harbor, the fleet and the sea trade',dyes:[9,11,8,0]},
+ em:{name:'Emberwaste',col:'#c48c5c',blurb:'Red desert in the east. Mesas, dunes and heat. The nights are colder than they should be.',power:'dragons, which nest nowhere else',dyes:[1,14,4,15]},
+ bl:{name:'Blackfen',col:'#56695b',blurb:'The southern marsh. Reeds, black water and lantern light. The paths are not always where you left them.',power:'witchcraft: brews, salves and things kept in jars',dyes:[10,13,2,15]}
+};
+const REGK=['va','fr','sa','em','bl'];
+const SEEDS={va:[[-100,-100],[200,150],[-250,-350],[150,-400],[350,-150],[-220,200],[-480,-300],[60,380]],
+ fr:[[-450,-900],[100,-1000],[600,-880],[950,-560],[-150,-1150],[-560,-720]],
+ sa:[[-820,-780],[-720,-400],[-800,380],[-640,640],[-480,860],[-1000,0],[-560,-560]],
+ bl:[[-100,850],[150,1050],[260,860],[-200,1150],[-230,600],[60,640]],
+ em:[[800,150],[700,650],[1050,900],[1050,-50],[650,1050],[560,330]]};
+const K=[-150,-150];
+const VILL={Kingsrest:K,Millbrook:[-60,-470],Hollowfast:[-80,-1080],"Gull's Rest":[-800,400],Sunscar:[850,450],Mirelight:[-60,900]};
+const ST={Harrowford:[-385,-345],Oakmere:[165,-477],Thistledown:[225,25],Wrenfield:[-110,190],Rimeholt:[-587,-693],Wolfcairn:[426,-1021],Gullcliff:[-655,-505],Tidewatch:[-520,555],Reedmoor:[-140,520],Lanternbog:[180,900],Redmesa:[640,150],Dunehold:[865,805]};
+const RAILS=[
+ [K,[-130,-320],VILL.Millbrook,[-20,-680],[-110,-900],VILL.Hollowfast,[200,-1120],ST.Wolfcairn],
+ [VILL.Millbrook,[50,-500],ST.Oakmere],
+ [K,[-270,-230],ST.Harrowford,[-540,-440],ST.Gullcliff,[-640,-640],ST.Rimeholt],
+ [K,[-300,-10],[-440,120],[-500,280],[-680,330],VILL["Gull's Rest"]],
+ [K,[-130,20],ST.Wrenfield,[-90,360],ST.Reedmoor,[-150,740],VILL.Mirelight,[60,900],ST.Lanternbog],
+ [ST.Reedmoor,[-250,440],[-400,480],ST.Tidewatch,[-680,480],VILL["Gull's Rest"]],
+ [K,[40,-60],ST.Thistledown,[430,70],[560,170],ST.Redmesa,[800,260],VILL.Sunscar,[900,640],ST.Dunehold,[800,1000],[520,1080],[330,1090],[150,1010],[130,930],ST.Lanternbog]];
+const RIVERS=[[[140,-830],[40,-640],[-70,-470],[-90,-300],[-150,-150],[-330,-60],[-540,40]],[[830,-520],[540,-340],[330,-270],[120,-210],[-150,-150]],[[-60,330],[-30,520],[-120,720],[-60,900],[-200,1010],[-340,1060]]];
+const COAST=[[-960,-1250],[-900,-930],[-1010,-640],[-850,-330],[-600,-90],[-530,60],[-560,230],[-830,250],[-930,420],[-760,560],[-720,760],[-420,930],[-330,1090],[-260,1250]];
+const RIDGE=[[-760,-1080],[-300,-830],[180,-900],[640,-730],[960,-410],[1190,-60]];
+const PLOTS=[
+ {n:'Harrowford',r:'va',x:-470,z:-300,far:.3,land:'a river meadow above the lower Alder',odd:'Mist comes up the Alder most evenings and is gone before anyone is awake to check.',
+  route:[[K,[-270,-230],ST.Harrowford]],way:'Coast Line, first stop',tags:{farm:2,sea:1,trade:1}},
+ {n:'Oakmere',r:'va',x:260,z:-480,far:.45,land:'oak forest between the two rivers',odd:'The oaks are older than the roads. A few have iron nails in them, and nobody says who put them there.',
+  route:[[K,[-130,-320],VILL.Millbrook],[VILL.Millbrook,[50,-500],ST.Oakmere]],way:'North Line to Millbrook, then the Oakmere Branch',tags:{lore:2,explore:1,build:1,s:1,w:1}},
+ {n:'Thistledown',r:'va',x:300,z:130,far:.35,land:'open downs south of the Greywater',odd:'You can see weather coming an hour away. Other things too.',
+  route:[[K,[40,-60],ST.Thistledown]],way:'Sun Line, first stop',tags:{horses:3,fight:1,k:2}},
+ {n:'Wrenfield',r:'va',x:-200,z:220,far:.15,land:'lakeside fields by Wren Water',odd:'Wren Water is very still. People skip stones on it and count the skips carefully.',
+  route:[[K,[-130,20],ST.Wrenfield]],way:'Fen Line, first stop',tags:{farm:1,team:2,build:1}},
+ {n:'Rimeholt',r:'fr',x:-520,z:-760,far:.75,land:'a shelf in the western foothills',odd:'The last stop on the Coast Line. Snow up here keeps footprints for days.',
+  route:[[K,[-270,-230],ST.Harrowford,[-540,-440],ST.Gullcliff,[-640,-640],ST.Rimeholt]],way:'Coast Line, to the end',tags:{mining:2,sea:1,build:1}},
+ {n:'Wolfcairn',r:'fr',x:520,z:-1010,far:1,land:'a high plateau north of the range',odd:'The farthest plot from Kingsrest. On clear nights you hear the train long before it arrives.',
+  route:[[K,[-130,-320],VILL.Millbrook,[-20,-680],[-110,-900],VILL.Hollowfast,[200,-1120],ST.Wolfcairn]],way:'North Line through Stag Pass and Hollowfast, to the end',tags:{explore:2,mining:1,fight:1}},
+ {n:'Gullcliff',r:'sa',x:-760,z:-560,far:.6,land:'a clifftop over the northern coast',odd:'The gulls go quiet a little before the fog arrives.',
+  route:[[K,[-270,-230],ST.Harrowford,[-540,-440],ST.Gullcliff]],way:'Coast Line, second stop',tags:{build:2,fight:1,mining:1}},
+ {n:'Tidewatch',r:'sa',x:-560,z:650,far:.7,land:'dunes above the southern shore',odd:'The tide leaves things on the sand. Mostly driftwood.',
+  route:[[K,[-130,20],ST.Wrenfield,[-90,360],ST.Reedmoor],[ST.Reedmoor,[-250,440],[-400,480],ST.Tidewatch]],way:'Fen Line to Reedmoor, then the Shore Branch',tags:{sea:2,farm:1,trade:1}},
+ {n:'Reedmoor',r:'bl',x:-230,z:560,far:.55,land:'the firm northern edge of the fen',odd:'Firm ground with the fen at your back. The lanterns out there at night are probably fishermen.',
+  route:[[K,[-130,20],ST.Wrenfield,[-90,360],ST.Reedmoor]],way:'Fen Line, second stop',tags:{trade:1,team:1,potions:1,farm:1}},
+ {n:'Lanternbog',r:'bl',x:260,z:980,far:.9,land:'a dry island deep in the fen',odd:'One dry island, one causeway. You will always know who is coming.',
+  route:[[K,[-130,20],ST.Wrenfield,[-90,360],ST.Reedmoor,[-150,740],VILL.Mirelight,[60,900],ST.Lanternbog]],way:'Fen Line through Mirelight, to the end',tags:{potions:2,lore:1,magic:1,w:1}},
+ {n:'Redmesa',r:'em',x:700,z:60,far:.65,land:'a mesa top at the desert’s edge',odd:'High, dry and hard to climb. The wind up there sounds like talking if you let it.',
+  route:[[K,[40,-60],ST.Thistledown,[430,70],[560,170],ST.Redmesa]],way:'Sun Line, second stop',tags:{build:2,fight:1,dragons:1}},
+ {n:'Dunehold',r:'em',x:760,z:860,far:.95,land:'an oasis among the dunes',odd:'Water, palms and a long view. The dunes are in a slightly different place each morning.',
+  route:[[K,[40,-60],ST.Thistledown,[430,70],[560,170],ST.Redmesa,[800,260],VILL.Sunscar,[900,640],ST.Dunehold]],way:'Sun Line through Sunscar',tags:{explore:1,farm:1,dragons:2,r:1}}
+];
+
+/* ---------- roads (proposed roles) ---------- */
+const PATHS={
+ k:{name:'Knight',home:'va',line:'You hold the gate.',text:'When the raiders reach the wall you are the one already standing there. Oaths, a good horse and people who know you will not run.',play:'Knights ride with the cavalry of Aldmere Vale. The road runs through ranks and sworn techniques.'},
+ s:{name:'Sorcerer',home:null,line:'It noticed you. You looked back.',text:'Whatever is wrong with the land at night leaves most people alone. A few it notices. You would be one of those, and you would want to know why.',play:'The Sorcerer’s road is not tied to any region. It opens after your first siege is won, and it asks more of you the further you go.'},
+ r:{name:'Dragon Rider',home:'em',line:'You would rather be above it.',text:'You do not like walls much, yours or anyone else’s. You want the long view and something enormous that answers to your voice.',play:'Dragons nest only in the Emberwaste. People who settle there can raise one from the egg. Everyone else rides behind.'},
+ f:{name:'Forgemaster',home:'fr',line:'If it breaks, you make a better one.',text:'You trust what you can build, weigh and test. Other people pray on the third night. You check the hinges.',play:'The Deepforge of the Frostmarch makes the best steel and the heaviest siege engines. Its smiths settle in the north.'},
+ c:{name:'Captain',home:'sa',line:'Everyone ends up owing you.',text:'You know what things are worth and who needs them. You would rather own the harbor than the castle above it.',play:'Saltreach holds the harbor and the fleet. Its captains run the sea trade along the western coast.'},
+ w:{name:'Witch',home:'bl',line:'You would rather bargain than fight.',text:'You are patient, and you notice small things. When something strange turns up you neither run nor reach for a sword. You put out a saucer.',play:'Blackfen keeps the old craft: brews, salves and lanterns that burn the wrong colour. Its witches settle in the marsh.'}
+};
+const PATHK=['k','s','r','f','c','w'];
+const TRAITS={bold:'bold',steady:'steady',curious:'curious',shrewd:'shrewd',kind:'kind',cunning:'sly'};
+const EPI={bold:['Goes-First','the Unflinching','Gate-Opener'],steady:['the Steady','Last-to-Leave','Slow-to-Startle'],curious:['Fog-Listener','the Asker','Door-Knocker'],shrewd:['Sharp-Count','the Ledger','Two-Purses'],kind:['the Lamplighter','Open-Door','Bread-Sharer'],cunning:['Soft-Step','the Quiet One','Back-Stairs']};
+
+/* ---------- questions ---------- */
+const LIKES=[
+ ['build','Building big',{f:1,k:1},{},0],['fight','A good fight',{k:2,r:1},{},0],['explore','Exploring far',{r:1,c:1},{},2],
+ ['farm','Farming and animals',{k:1,w:1},{va:1},0],['horses','Horses',{k:2},{va:2},0],['magic','Magic',{s:3,w:1},{},0],
+ ['lore','Mysteries and old books',{s:2,w:1},{},0],['trade','Trading and getting rich',{c:3},{sa:1},-1],['sea','Boats and fishing',{c:2},{sa:2},0],
+ ['mining','Mining and smithing',{f:3},{fr:1},0],['redstone','Machines and redstone',{f:2},{},0],['potions','Potions and brewing',{w:3},{bl:1},0],
+ ['dragons','Dragons',{r:4},{em:2},0],['team','Playing as a team',{k:1},{},-2]];
+const Q=[
+ {q:'The coach to Kingsrest stops at a crossroads. Fog has come down and the driver will not go on until it lifts. You…',a:[
+  ['Walk ahead with the lantern and find the road.',{k:1,r:1},{},1,'bold'],
+  ['Check the horses and the harness while you wait.',{k:1,f:1},{va:1},0,'steady'],
+  ['Listen. Something in the fog sounds a little like singing.',{s:2,w:1},{},1,'curious'],
+  ['Get the other passengers talking and learn what each one is carrying.',{c:2},{},-1,'shrewd']]},
+ {q:'What did you do before any of this?',a:[
+  ['Worked a forge, or a quarry.',{f:2},{fr:1},0,'steady'],
+  ['Worked the boats, the nets or the docks.',{c:2},{sa:1},0,'shrewd'],
+  ['Kept animals: horses, hounds, hawks.',{k:1,r:1},{va:1},0,'kind'],
+  ['Gathered herbs and mended people.',{w:2},{bl:1},0,'kind'],
+  ['Copied books and kept accounts.',{s:2},{},0,'curious'],
+  ['Farmed a strip of land that flooded every spring.',{k:1},{va:1},0,'steady']]},
+ {q:'Every third night, the raiders come. Where are you when they reach the wall?',a:[
+  ['At the gate, in front.',{k:3},{},0,'bold'],
+  ['On the wall, behind the biggest ballista I could build.',{f:2,c:1},{},0,'steady'],
+  ['Somewhere they will not think to look.',{w:1,s:1,c:1},{},0,'cunning'],
+  ['Above them.',{r:3},{em:1},0,'bold'],
+  ['At the keep, with the people who cannot fight.',{w:1,k:1},{},-1,'kind']]},
+ {q:'There is a door in your cellar that was not there yesterday.',a:[
+  ['Open it.',{s:2,r:1},{},1,'bold'],
+  ['Mark it with chalk and come back with friends.',{k:2},{},-2,'kind'],
+  ['Brick it up. Then build a second wall in front of the first.',{f:2},{},0,'steady'],
+  ['Sit on the stairs and watch it for a night.',{w:2,s:1},{},1,'curious']]},
+ {q:'Which of these sounds like home?',a:[
+  ['Wind in tall grass, and a river somewhere near.',{},{va:3},0,null],
+  ['Snow creaking underfoot and a forge going.',{},{fr:3},0,null],
+  ['Gulls, rope and a harbor bell.',{},{sa:3},0,null],
+  ['Heat coming off red stone at dusk.',{},{em:3},0,null],
+  ['Frogs, reeds and lantern light on black water.',{},{bl:3},0,null]]},
+ {q:'A peddler owes you a favour and lets you keep one thing off the cart.',a:[
+  ['A horseshoe worn thin as a coin.',{k:2},{va:1},0,null,'a horseshoe worn thin as a coin'],
+  ['A stone that is warm to hold. It might be an egg.',{r:3},{em:1},0,null,'a warm stone that might be an egg'],
+  ['A hammer head with no handle.',{f:2},{fr:1},0,null,'a hammer head with no handle'],
+  ['A chart of a coast that is on no other map.',{c:2},{sa:1},0,null,'a chart of a coast that is on no other map'],
+  ['A stoppered jar. Whatever is inside glows a little.',{w:2},{bl:1},0,null,'a stoppered jar with something faintly glowing inside'],
+  ['A cinder that is still warm three days later.',{s:3},{},0,null,'a cinder that has not gone cold']]},
+ {q:'Your friends would say you are the one who…',a:[
+  ['Goes first.',{k:1,r:1},{},0,'bold'],
+  ['Has a plan, and a second plan.',{c:1,f:1},{},0,'shrewd'],
+  ['Remembers everyone’s name.',{k:1,w:1},{},-2,'kind'],
+  ['Wanders off and comes back with something strange.',{s:1,r:1},{},2,'curious'],
+  ['Never, ever gives up.',{f:1,k:1},{},0,'steady']]},
+ {q:'How do you want to win?',a:[
+  ['With the thickest walls anyone has seen.',{f:3},{},0,'steady'],
+  ['By being everywhere, fast.',{k:2,r:1},{va:1},0,'bold'],
+  ['By making sure everyone owes me something.',{c:3},{},-1,'shrewd'],
+  ['By knowing what nobody else knows.',{s:2,w:2},{},1,'curious'],
+  ['By owning the sky.',{r:3},{em:1},1,'bold']]},
+ {q:'At night the land is not quite right. How do you feel about that?',a:[
+  ['I want to understand it.',{s:3},{},0,'curious'],
+  ['I want to keep it out.',{k:2,f:2},{},0,'steady'],
+  ['I would rather come to an arrangement with it.',{w:2,c:1},{},0,'cunning'],
+  ['I would rather be a long way above it.',{r:2},{},1,'bold']]},
+ {q:'Every night, something moves your things one inch to the left. You…',a:[
+  ['Stay up and catch it.',{k:1,r:1},{},0,'bold',0],
+  ['Leave it a bowl of milk.',{w:2},{},0,'kind',1],
+  ['Move everything back each morning and say nothing.',{f:1,c:1},{},0,'steady',2],
+  ['Find out where it sleeps, and start moving its things.',{s:1,w:1},{},0,'cunning',3]]}
+];
+const LANDS=['Let the road decide'].concat(REGK.map(k=>REG[k].name));
+const NEARS=['I don’t mind','Close to Kingsrest and other people','Out at the edge, on my own','Sharing a plot with a friend'];
+const LEANS=['Any name','Leans masculine','Leans feminine'];
+
+/* ---------- names ---------- */
+const GIVEN=[
+ ['Rowan','Robin','Lark','Bryn','Finch','Hollis','Marlow','Perry','Tansy','Wynn','Arden','Blythe','Ellis','Kit','Reed','Sparrow','Teal','Vesper','Merle','Ridley','Shaw','Darcy'],
+ ['Alder','Bram','Cuthric','Dunstan','Edric','Garrick','Hob','Ivo','Jory','Kenrick','Leofric','Merrick','Ned','Osric','Perrin','Rafe','Simeon','Tam','Ulric','Wat','Wystan','Godric','Anselm','Emeric'],
+ ['Ada','Brida','Cecily','Dara','Elfrith','Gwen','Hild','Idony','Joan','Linnet','Mabel','Nell','Oriel','Petra','Rowena','Tamsin','Una','Avice','Bethan','Emmot','Maud','Marit','Thora','Sabin']];
+const RGIVEN={
+ va:[['Fallow','Hayes'],['Hewin','Col','Barnaby'],['Clover','Hawise','Marjory']],
+ fr:[['Frey','Storm'],['Arne','Bjarni','Eskil','Gunnar','Ketil'],['Astrid','Gudrun','Ingrid','Solveig','Yrsa']],
+ sa:[['Morgan','Kerris'],['Corin','Davy','Pascoe','Jago'],['Morwenna','Kerra','Tegan','Jenifer']],
+ em:[['Sunny','Flint'],['Farron','Orrin','Zeb','Brand'],['Sabra','Tirzah','Zillah','Amber']],
+ bl:[['Sedge','Moss'],['Tolly','Mosse','Gil','Odo'],['Meg','Agnes','Hester','Griselda']]};
+const SUR={
+ va:['Harrow','Millward','Oakley','Thistlewood','Fallowfield','Hayward','Alderman','Barleycorn','Meadows','Greenhalgh'],
+ fr:['Coldbrook','Stagg','Fellborn','Snowe','Hearthside','Icehewer','Rimeson','Wolfsbane','Pinewarden','Greyfell'],
+ sa:['Tidewell','Gullsby','Saltmarsh','Netter','Shoal','Wrack','Brinewood','Harbour','Dunnage','Spindrift'],
+ em:['Ashdown','Kilnworth','Emberley','Sandys','Cindermoor','Dustan','Redcliff','Sunward','Scorby','Drywell'],
+ bl:['Reedy','Mirewood','Sedgewick','Mudlark','Willowmere','Peatman','Marshall','Fenwick','Lanternby','Eelpot']};
+
+/* ---------- looks ---------- */
+const SKIN=[['Pale','#f0d2bb'],['Fair','#e2b792'],['Tawny','#c99368'],['Brown','#a8744c'],['Deep brown','#7d5234'],['Dark','#553623']];
+const HSTY=['Cropped','Shoulder length','Long','Braid over the shoulder','Tied up','Shaved','Hood up'];
+const HCOL=[['Black','#1f1c1c'],['Dark brown','#3b2a20'],['Chestnut','#6a4028'],['Red','#8c3f22'],['Fair','#c9a45c'],['Ash grey','#8d8f8c'],['White','#d9d8d2']];
+const EYES=[['Brown','#4a3222'],['Hazel','#6f6a35'],['Grey','#6e7b82'],['Green','#4d6b4f'],['Blue','#476a8a']];
+const BEARD=['None','Stubble','Full beard'];
+const OUTFIT=[
+ {n:'Smith’s apron',c:'#6a5a4d',d:'#3c2c22',leg:'#4a4038',say:'a leather apron over rolled sleeves'},
+ {n:'Sailor’s coat',c:'#2f4552',d:'#1f2f39',leg:'#3d3a34',say:'a heavy oilcloth coat with the collar up'},
+ {n:'Rider’s jerkin',c:'#5d5a3a',d:'#3f3d27',leg:'#4b3a2a',say:'a quilted riding jerkin'},
+ {n:'Herbalist’s cloak',c:'#3f5246',d:'#2b3a31',leg:'#3a352c',say:'a moss-green travelling cloak'},
+ {n:'Scribe’s robe',c:'#4a3f52',d:'#342c3b',leg:'#4a3f52',say:'a long ink-stained robe'},
+ {n:'Farmer’s smock',c:'#8a7a5a',d:'#6a5c42',leg:'#5a4a36',say:'a plain homespun smock'}];
+const DYE=[['White','#e9ecec'],['Orange','#f9801d'],['Magenta','#c74ebd'],['Light blue','#3ab3da'],['Yellow','#fed83d'],['Lime','#80c71f'],['Pink','#f38baa'],['Gray','#474f52'],['Light gray','#9d9d97'],['Cyan','#169c9c'],['Purple','#8932b8'],['Blue','#3c44aa'],['Brown','#835432'],['Green','#5e7c16'],['Red','#b02e26'],['Black','#1d1d21']];
+const MARK=['None','Freckles','A scar through one brow','Weathered','A pale streak in the hair','A soot smudge'];
+const LOOKF=[['Skin',SKIN.map(x=>x[0])],['Hair',HSTY],['Hair colour',HCOL.map(x=>x[0])],['Eyes',EYES.map(x=>x[0])],['Beard',BEARD],['Clothes',OUTFIT.map(x=>x.n)],['Banner colour',DYE.map(x=>x[0])],['Mark',MARK]];
+
+/* ---------- state ---------- */
+const S={likes:[],quiz:[],land:0,near:0,lean:0,by:'',look:null,nameSeed:0,custom:''};
+let step=0; // 0 likes, 1..Q.length quiz, Q.length+1 picks, then sheet
+const B36=n=>n.toString(36);
+function encode(){
+ let mask=0;S.likes.forEach(i=>mask|=1<<i);
+ return['c1',B36(mask),S.quiz.map(B36).join(''),[S.land,S.near,S.lean].map(B36).join(''),S.look.map(B36).join(''),B36(S.nameSeed),S.custom?hex(S.custom):'0',S.by?hex(S.by):'0'].join('-');
+}
+function decode(code){
+ const p=(code||'').replace(/^#/,'').split('-');
+ if(p[0]!=='c1'||p.length<8)return false;
+ const mask=parseInt(p[1],36);if(isNaN(mask))return false;
+ const quiz=[...p[2]].map(c=>parseInt(c,36));if(quiz.length!==Q.length||quiz.some((v,i)=>!(v>=0&&v<Q[i].a.length)))return false;
+ const pk=[...p[3]].map(c=>parseInt(c,36));const lk=[...p[4]].map(c=>parseInt(c,36));
+ if(pk.length!==3||lk.length!==8||lk.some((v,i)=>!(v>=0&&v<LOOKF[i][1].length)))return false;
+ S.likes=LIKES.map((_,i)=>i).filter(i=>mask>>i&1);S.quiz=quiz;
+ S.land=clamp(pk[0]||0,0,5);S.near=clamp(pk[1]||0,0,3);S.lean=clamp(pk[2]||0,0,2);
+ S.look=lk;S.nameSeed=parseInt(p[5],36)||0;S.custom=p[6]==='0'?'':unhex(p[6]).slice(0,40);S.by=p[7]==='0'?'':unhex(p[7]).slice(0,24);
+ return true;
+}
+function save(){const c=encode();try{localStorage.setItem('hc-char',c)}catch(e){}try{history.replaceState(null,'','#'+c)}catch(e){try{location.hash=c}catch(_){}}}
+const baseSeed=()=>hash(S.likes.slice().sort((a,b)=>a-b).join(',')+'|'+S.quiz.join(',')+'|'+S.land+S.near+S.lean);
+
+/* ---------- scoring ---------- */
+function compute(){
+ const P={k:0,s:0,r:0,f:0,c:0,w:0},R={va:0,fr:0,sa:0,em:0,bl:0},T={bold:0,steady:0,curious:0,shrewd:0,kind:0,cunning:0};let sol=0;
+ const add=(p,r,s,w=1)=>{for(const k in p)P[k]+=p[k]*w;for(const k in r)R[k]+=r[k]*w;sol+=s*w};
+ S.likes.forEach(i=>add(LIKES[i][2],LIKES[i][3],LIKES[i][4]));
+ S.quiz.forEach((ai,qi)=>{const a=Q[qi].a[ai];add(a[1],a[2],a[3]);if(a[4])T[a[4]]+=1});
+ const r=rng(baseSeed());
+ const order=PATHK.map(k=>[k,P[k]+r()*.4]).sort((a,b)=>b[1]-a[1]);
+ const top=order[0][0];
+ const R2=Object.assign({},R);
+ PATHK.forEach(k=>{const h=PATHS[k].home;if(h)R2[h]+=P[k]*.5});
+ if(PATHS[top].home)R2[PATHS[top].home]+=3;
+ if(S.near===1||S.near===3)R2.va+=3; if(S.near===2)R2.va-=2;
+ let region=S.land>0?REGK[S.land-1]:REGK.map(k=>[k,R2[k]+r()*.3]).sort((a,b)=>b[1]-a[1])[0][0];
+ if(S.near===1||S.near===3)sol=-9; if(S.near===2)sol=9;
+ const solN=clamp(sol/4,-1,1)*3;
+ const likeIds=S.likes.map(i=>LIKES[i][0]);
+ const pscore=p=>{let v=p.far*solN+r()*.2;for(const t in p.tags){if(likeIds.includes(t))v+=p.tags[t];if(t===top)v+=p.tags[t]}return v};
+ const ranked=PLOTS.filter(p=>p.r===region).map(p=>[p,pscore(p)]).sort((a,b)=>b[1]-a[1]);
+ const plot=ranked[0][0],alt=ranked[1][0];
+ const why=Object.keys(plot.tags).filter(t=>likeIds.includes(t)).map(t=>LIKES.find(l=>l[0]===t)[1].toLowerCase());
+ const traits=Object.keys(T).map(k=>[k,T[k]+r()*.3]).sort((a,b)=>b[1]-a[1]).map(x=>x[0]);
+ const maxP=Math.max(1,order[0][1]);
+ return{order,top,second:order[1][0],region,plot,alt,why,traits,maxP,P};
+}
+function defaultLook(res){
+ const r=rng(baseSeed()^0x9e3779b9);
+ const beard=S.lean===1?(r()<.5?pick(r,[1,2]):0):S.lean===0?(r()<.15?1:0):0;
+ return[Math.floor(r()*6),Math.floor(r()*7),Math.floor(r()*7),Math.floor(r()*5),beard,S.quiz[1],pick(r,REG[res.region].dyes),r()<.55?0:1+Math.floor(r()*5)];
+}
+function genName(res){
+ const r=rng(baseSeed()+S.nameSeed*7919+17);
+ const pools=S.lean===0?[0,1,2]:[0,S.lean];
+ const useR=r()<.4;const col=pick(r,pools);
+ const given=pick(r,useR?RGIVEN[res.region][col]:GIVEN[col]);
+ const sur=pick(r,SUR[res.region]);
+ const epi=pick(r,EPI[res.traits[0]]);
+ return{given,sur,full:given+' '+sur,epi};
+}
+function story(res,name){
+ const r=rng(baseSeed()+101);
+ const trade=['worked a forge','worked the boats','kept horses and hounds','gathered herbs and set bones','copied ledgers for people who could not read them','farmed a strip of land that flooded every spring'][S.quiz[1]];
+ const from=pick(r,['a hill town three weeks east','a river village the newer maps leave off','a port on the far side of the Western Sea','a toll house on a road nobody takes any more','a farm at the edge of somebody else’s war']);
+ const reason={bold:'left the day the notice went up that Kingsrest was giving land to anyone who could hold it',steady:'came when the work at home ran out, because Kingsrest still needed hands',curious:'came because of a story about clocks that nobody at home would finish telling',shrewd:'came because land is cheap where people are afraid to sleep',kind:'came on a cart full of other people’s children, and stayed when the cart went back',cunning:'came at night, on someone else’s ticket, and has not explained why'}[res.traits[0]];
+ const odd=['Sleeps well everywhere except near wells.','Counts the bells in any town before unpacking.','Has not liked fog since the crossroads.','Keeps a candle lit every third night, and could not tell you why.','Swears the road in was shorter than the road out would be.','Dreams of deep water sometimes, having grown up nowhere near any.'][(S.quiz[9]+S.quiz[3]+Math.floor(r()*2))%6];
+ const keep=Q[5].a[S.quiz[5]][5];
+ const g=S.custom||name.given;
+ return{p1:`${S.custom||name.full} ${trade} in ${from}, and ${reason}.`,p2:`${g} steps off the coach in Kingsrest with one bag, ${keep}, and an old king’s journal that somebody left on the seat. ${odd}`,keep};
+}
+function lookText(L,res){
+ const hair=L[1]===5?'a shaved head':L[1]===6?`${HCOL[L[2]][0].toLowerCase()} hair under a raised hood`:`${HCOL[L[2]][0].toLowerCase()} hair, ${['cropped short','cut to the shoulder','worn long','in a braid over one shoulder','tied up','','' ][L[1]]}`;
+ const beard=L[4]===1?', a few days of stubble':L[4]===2?', a full beard':'';
+ const mark=['','Freckles across the nose.','A scar runs through one eyebrow.','A face that has seen a lot of weather.','One pale streak in the hair.','A smudge of soot that never quite washes off.'][L[7]];
+ return`${SKIN[L[0]][0]} skin, ${EYES[L[3]][0].toLowerCase()} eyes, ${hair}${beard}. Wears ${OUTFIT[L[5]].say} with a ${DYE[L[6]][0].toLowerCase()} trim. ${mark}`.trim();
+}
+
+/* ---------- map ---------- */
+function spline(pts,n=14){const p=[pts[0],...pts,pts[pts.length-1]],o=[];for(let i=1;i<p.length-2;i++){const[a,b,c,d]=[p[i-1],p[i],p[i+1],p[i+2]];for(let j=0;j<n;j++){const t=j/n,t2=t*t,t3=t2*t;o.push([0,1].map(k=>.5*(2*b[k]+(-a[k]+c[k])*t+(2*a[k]-5*b[k]+4*c[k]-d[k])*t2+(-a[k]+3*b[k]-3*c[k]+d[k])*t3)))}}o.push(pts[pts.length-1]);return o}
+let baseMap=null;
+function buildBase(){
+ const N=1000,c=document.createElement('canvas');c.width=c.height=N;const g=c.getContext('2d');
+ const n=200,t=document.createElement('canvas');t.width=t.height=n;const tg=t.getContext('2d'),im=tg.createImageData(n,n);
+ const cols={};REGK.forEach(k=>{const v=parseInt(REG[k].col.slice(1),16);cols[k]=[v>>16,v>>8&255,v&255]});
+ const r=rng(7);
+ for(let j=0;j<n;j++)for(let i=0;i<n;i++){
+  const x=-1250+2500*i/n,z=-1250+2500*j/n;
+  const wx=x+150*Math.sin(z/190+1.3)+70*Math.sin(x/90+z/140)+30*Math.sin(z/37),wz=z+150*Math.sin(x/210+.4)+70*Math.cos(z/80-x/170)+30*Math.sin(x/41);
+  let best=1e9,bk='va';for(const k of REGK)for(const s of SEEDS[k]){const d=(wx-s[0])**2+(wz-s[1])**2;if(d<best){best=d;bk=k}}
+  const tex=(r()-.5)*12,o=(j*n+i)*4,cc=cols[bk];
+  im.data[o]=cc[0]+tex;im.data[o+1]=cc[1]+tex;im.data[o+2]=cc[2]+tex;im.data[o+3]=255}
+ tg.putImageData(im,0,0);g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';g.drawImage(t,0,0,N,N);
+ const X=v=>(v+1250)/2500*N;
+ const path=(pts)=>{g.beginPath();pts.forEach((p,i)=>i?g.lineTo(X(p[0]),X(p[1])):g.moveTo(X(p[0]),X(p[1])))};
+ // mountains
+ const rs=spline(RIDGE,20);g.lineCap=g.lineJoin='round';
+ [[70,.10],[52,.14],[36,.2],[20,.3],[8,.5]].forEach(([w,a])=>{path(rs);g.strokeStyle=`rgba(244,246,246,${a})`;g.lineWidth=w;g.stroke()});
+ path(rs);g.strokeStyle='rgba(70,76,78,.35)';g.lineWidth=1.5;g.setLineDash([2,7]);g.stroke();g.setLineDash([]);
+ // sea
+ const cs=spline(COAST,16);g.beginPath();g.moveTo(0,0);cs.forEach(p=>g.lineTo(X(p[0]),X(p[1])));g.lineTo(0,N);g.closePath();
+ const sg=g.createLinearGradient(0,0,N*.3,0);sg.addColorStop(0,'#3f627b');sg.addColorStop(1,'#6a8fa3');g.fillStyle=sg;g.fill();
+ path(cs);g.strokeStyle='rgba(232,224,190,.9)';g.lineWidth=5;g.stroke();path(cs);g.strokeStyle='rgba(40,60,70,.5)';g.lineWidth=1;g.stroke();
+ // rivers and lakes
+ RIVERS.forEach(rv=>{path(spline(rv,14));g.strokeStyle='#5f8aa3';g.lineWidth=3;g.stroke()});
+ [[-60,300,70,45],[60,-1130,60,35]].forEach(([x,z,a,b])=>{g.beginPath();g.ellipse(X(x),X(z),a/2.5,b/2.5,0,0,7);g.fillStyle='#6f98ae';g.fill()});
+ // rails
+ RAILS.forEach(l=>{const s=spline(l,14);path(s);g.strokeStyle='rgba(240,234,214,.9)';g.lineWidth=5;g.stroke();path(s);g.strokeStyle='#3d332c';g.lineWidth=2;g.setLineDash([7,4]);g.stroke();g.setLineDash([])});
+ // vignette
+ const vg=g.createRadialGradient(N/2,N/2,N*.35,N/2,N/2,N*.75);vg.addColorStop(0,'rgba(30,40,38,0)');vg.addColorStop(1,'rgba(30,40,38,.35)');g.fillStyle=vg;g.fillRect(0,0,N,N);
+ return c;
+}
+function drawMap(cv,sel,alt){
+ if(!baseMap)baseMap=buildBase();
+ const N=1000,g=cv.getContext('2d');g.setTransform(1,0,0,1,0,0);g.drawImage(baseMap,0,0);
+ const css=cv.clientWidth||500,u=N/css,compact=css<520;
+ const X=v=>(v+1250)/2500*N;
+ const serif='"IM Fell English",Georgia,serif',caps='"IM Fell English SC","IM Fell English",Georgia,serif';
+ const label=(t,x,y,px,font,fill,align='center',base='top')=>{g.font=`${px*u}px ${font}`;g.textAlign=align;g.textBaseline=base;g.lineJoin='round';g.strokeStyle='rgba(240,236,220,.9)';g.lineWidth=3*u;g.strokeText(t,x,y);g.fillStyle=fill;g.fillText(t,x,y)};
+ // region names
+ [['FROSTMARCH',330,-1185],['SALTREACH',-640,930],['EMBERWASTE',900,330],['BLACKFEN',30,745],['ALDMERE VALE',110,-255]].forEach(([t,x,z])=>{g.save();g.globalAlpha=.75;label(t.split('').join(' '),X(x),X(z),compact?11:14,caps,'#2a2f2b','center','middle');g.restore()});
+ if(!compact)[['The Greyspine',640,-640],['Gull Bay',-800,110],['The Western Sea',-1060,-300],['Wren Water',-40,360]].forEach(([t,x,z])=>label(t,X(x),X(z),11,serif,'#3a4a55','center','middle'));
+ // route
+ if(sel){g.lineCap=g.lineJoin='round';sel.route.forEach(seg=>{const s=spline(seg,14);g.beginPath();s.forEach((p,i)=>i?g.lineTo(X(p[0]),X(p[1])):g.moveTo(X(p[0]),X(p[1])));g.strokeStyle='rgba(255,236,170,.95)';g.lineWidth=9*Math.max(1,u*.6);g.stroke();g.strokeStyle='#8a3a22';g.lineWidth=3.5*Math.max(1,u*.6);g.stroke()})}
+ // villages
+ for(const n in VILL){const[x,z]=VILL[n],k=n==='Kingsrest',r=(k?6:4)*u;g.beginPath();for(let i=0;i<6;i++){const a=Math.PI/3*i+Math.PI/6;g[i?'lineTo':'moveTo'](X(x)+r*Math.cos(a),X(z)+r*Math.sin(a))}g.closePath();g.fillStyle=k?'#9c2f28':'#e0c468';g.fill();g.strokeStyle='#1c1c1c';g.lineWidth=1*u;g.stroke();
+  if(k||!compact)label(n,X(x),X(z)-r-2*u,k?12:10.5,serif,'#5c1a16','center','bottom')}
+ // plots
+ PLOTS.forEach(p=>{const cx=X(p.x),cy=X(p.z),isS=sel&&p.n===sel.n,isA=alt&&p.n===alt.n,rr=80/2.5;
+  g.beginPath();g.arc(cx,cy,rr,0,7);
+  if(isS){g.fillStyle='rgba(255,226,140,.35)';g.fill();g.strokeStyle='#8a3a22';g.lineWidth=4*u}else{g.strokeStyle=isA?'rgba(255,244,210,1)':'rgba(255,244,210,.8)';g.lineWidth=(isA?2.2:1.4)*u;if(isA)g.setLineDash([5*u,4*u])}
+  g.stroke();g.setLineDash([]);
+  const q=(isS?5:3)*u;g.fillStyle=isS?'#8a3a22':'#d6ae48';g.fillRect(cx-q,cy-q,q*2,q*2);g.strokeStyle='#111';g.lineWidth=u;g.strokeRect(cx-q,cy-q,q*2,q*2);
+  if(!sel||isS||isA||!compact)label(p.n,cx,cy+rr+2*u,isS?13:10.5,serif,isS?'#5c1a16':'#1e1e1e')});
+}
+
+/* ---------- skin (64x64, classic arms) ---------- */
+function drawSkin(L,seed){
+ const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d');const r=rng(seed);
+ const sk=SKIN[L[0]][1],hc=HCOL[L[2]][1],ey=EYES[L[3]][1],of=OUTFIT[L[5]],ac=mix(DYE[L[6]][1],'#6a6a66',.25),sty=L[1];
+ const fill=(x,y,w,h,col,j=.07)=>{for(let b=0;b<h;b++)for(let a=0;a<w;a++){g.fillStyle=shade(col,(r()-.5)*2*j);g.fillRect(x+a,y+b,1,1)}};
+ const dot=(x,y,col)=>{g.fillStyle=col;g.fillRect(x,y,1,1)};
+ // head: skin everywhere
+ fill(8,0,16,8,sk);fill(0,8,32,8,sk);
+ const hair=(x,y,w,h)=>fill(x,y,w,h,hc,.1);
+ if(sty===5){fill(8,0,8,8,mix(sk,hc,.45),.05);fill(0,8,8,2,mix(sk,hc,.4),.05);fill(16,8,16,2,mix(sk,hc,.4),.05);fill(8,8,8,1,mix(sk,hc,.4),.05)}
+ else{
+  const P={0:{f:1,s:3,b:5},1:{f:2,s:8,b:8},2:{f:2,s:8,b:8},3:{f:2,s:5,b:8},4:{f:1,s:3,b:6},6:{f:1,s:2,b:3}}[sty];
+  hair(8,0,8,8);hair(8,8,8,P.f);dot(8,8+P.f,shade(hc,-.1));dot(15,8+P.f,shade(hc,-.1));
+  hair(0,8,8,Math.min(P.s,3));hair(16,8,8,Math.min(P.s,3));
+  if(P.s>3){hair(0,11,5,P.s-3);hair(19,11,5,P.s-3)}
+  hair(24,8,8,P.b);
+  if(sty===4){fill(27,10,2,2,shade(hc,-.25),.03);fill(11,3,2,2,shade(hc,-.2),.03)}
+  if(L[7]===4){for(let y=0;y<8;y++)dot(10,y,shade(hc,.45));for(let y=8;y<8+P.f;y++)dot(10,y,shade(hc,.45))}
+ }
+ // face
+ dot(9,11,mix(sk,hc,.5));dot(10,11,mix(sk,hc,.5));dot(13,11,mix(sk,hc,.5));dot(14,11,mix(sk,hc,.5));
+ dot(9,12,'#eceae4');dot(10,12,ey);dot(13,12,ey);dot(14,12,'#eceae4');
+ dot(11,13,shade(sk,-.1));dot(12,13,shade(sk,-.1));
+ if(L[4]===2){fill(8,13,8,3,hc,.1);fill(4,13,4,3,hc,.1);fill(16,13,4,3,hc,.1);dot(11,13,shade(sk,-.1));dot(12,13,shade(sk,-.1));dot(9,13,sk);dot(14,13,sk)}
+ if(L[4]===1){fill(8,14,8,2,mix(sk,hc,.35),.04);fill(5,14,3,2,mix(sk,hc,.3),.04);fill(16,14,3,2,mix(sk,hc,.3),.04)}
+ dot(11,14,mix(sk,'#5a2620',.55));dot(12,14,mix(sk,'#5a2620',.55));
+ if(L[7]===1){dot(9,13,shade(sk,-.14));dot(14,13,shade(sk,-.14));dot(10,13,shade(sk,-.07))}
+ if(L[7]===2){dot(13,10,mix(sk,'#e6b0a6',.7));dot(13,11,mix(sk,'#e6b0a6',.7));dot(13,13,mix(sk,'#e6b0a6',.6))}
+ if(L[7]===3){dot(9,13,shade(sk,-.16));dot(14,13,shade(sk,-.16));dot(10,10,shade(sk,-.1));dot(13,10,shade(sk,-.1))}
+ if(L[7]===5){dot(14,14,mix(sk,'#222',.5));dot(13,13,mix(sk,'#222',.3))}
+ // body
+ const o=L[5];
+ fill(16,16,24,16,of.c);fill(20,16,16,4,shade(of.c,-.08));
+ fill(16,28,24,1,'#2e241c',.04);dot(23,28,ac);dot(24,28,ac);
+ if(o===0){fill(21,21,6,7,of.d,.06);fill(21,29,6,3,of.d,.06);dot(21,20,of.d);dot(26,20,of.d);fill(22,20,4,1,sk)}
+ if(o===1){fill(20,20,8,1,ac,.05);fill(32,20,8,1,of.d);for(let y=22;y<32;y+=2){if(y===28)continue;dot(22,y,'#c9c2a8');dot(25,y,'#c9c2a8')}fill(23,21,2,11,of.d,.03)}
+ if(o===2){for(let y=20;y<32;y++)for(let x=16;x<40;x++)if((x+y)%3===0&&y!==28)dot(x,y,shade(of.c,-.14));fill(20,20,8,1,ac,.05);fill(22,20,4,1,sk)}
+ if(o===3){fill(32,20,8,12,of.d,.06);fill(20,20,1,12,of.d);fill(27,20,1,12,of.d);fill(16,20,4,12,of.d,.06);fill(28,20,4,12,of.d,.06);fill(21,20,6,1,of.d);dot(23,21,ac);dot(24,21,ac)}
+ if(o===4){fill(22,20,4,8,mix(ac,of.c,.35),.05);fill(22,29,4,3,mix(ac,of.c,.35),.05);fill(23,20,2,1,sk)}
+ if(o===5){fill(21,20,6,1,ac,.05);fill(23,21,2,2,sk);fill(16,28,24,1,'#a89868',.05)}
+ // arms
+ const arm=(u,v)=>{const sl=o===0?4:9;fill(u,v+4,16,sl,o===3?of.d:of.c);fill(u,v+4+sl,16,12-sl,sk);fill(u+4,v,4,4,o===3?of.d:of.c);fill(u+8,v,4,4,sk);if(o!==0)fill(u,v+4+sl-1,16,1,ac,.04)};
+ arm(40,16);arm(32,48);
+ // legs
+ const leg=(u,v)=>{const b=o===4?10:8;fill(u,v+4,16,b,of.leg);fill(u,v+4+b,16,12-b,'#2b211a',.06);fill(u+4,v,4,4,of.leg);fill(u+8,v,4,4,'#241b15',.04);if(o===4)fill(u,v+4+b-1,16,1,mix(ac,of.c,.35),.04)};
+ leg(0,16);leg(16,48);
+ // hair that falls on the body
+ if(sty===2){hair(33,20,6,6)}
+ if(sty===3){for(let y=20;y<26;y++)dot(26,y,shade(hc,y%2?-.18:.08));dot(26,26,ac)}
+ // hood (hat layer)
+ if(sty===6){const hd=shade(of.d,-.05);fill(40,0,8,8,hd);fill(32,8,8,8,hd);fill(48,8,16,8,hd);fill(40,8,8,1,hd);fill(40,9,1,7,hd);fill(47,9,1,7,hd);
+  g.clearRect(38,13,2,3);g.clearRect(48,13,2,3)}
+ return c;
+}
+function buildModel(host,skin){
+ host.textContent='';const U=8;
+ const part=(u,v,w,h,d,cx,cy,sc)=>{
+  const box=el('div',{class:'box'});box.style.transform=`translate3d(${cx*U}px,${cy*U}px,0)`+(sc?` scale3d(${sc},${sc},${sc})`:'');
+  const face=(sx,sy,sw,sh,tf,br)=>{const c=el('canvas');c.width=sw;c.height=sh;c.getContext('2d').drawImage(skin,sx,sy,sw,sh,0,0,sw,sh);
+   c.style.cssText=`width:${sw*U}px;height:${sh*U}px;left:${-sw*U/2}px;top:${-sh*U/2}px;transform:${tf};filter:brightness(${br})`;box.append(c)};
+  face(u+d,v+d,w,h,`translateZ(${d/2*U}px)`,1);
+  face(u+d+w+d,v+d,w,h,`rotateY(180deg) translateZ(${d/2*U}px)`,.86);
+  face(u,v+d,d,h,`rotateY(-90deg) translateZ(${w/2*U}px)`,.78);
+  face(u+d+w,v+d,d,h,`rotateY(90deg) translateZ(${w/2*U}px)`,.78);
+  face(u+d,v,w,d,`rotateX(90deg) translateZ(${h/2*U}px)`,1.08);
+  face(u+d+w,v,w,d,`rotateX(-90deg) translateZ(${h/2*U}px)`,.6);
+  host.append(box)};
+ part(0,16,4,12,4,-2,10);part(16,48,4,12,4,2,10);
+ part(16,16,8,12,4,0,-2);
+ part(40,16,4,12,4,-6,-2);part(32,48,4,12,4,6,-2);
+ part(0,0,8,8,8,0,-12);part(32,0,8,8,8,0,-12,1.13);
+}
+
+/* ---------- portrait ---------- */
+function drawPortrait(cv,L,region,seed){
+ const g=cv.getContext('2d'),W=400,H=500,r=rng(seed);g.setTransform(cv.width/W,0,0,cv.height/H,0,0);
+ const sk=SKIN[L[0]][1],skd=shade(sk,-.22),hc=HCOL[L[2]][1],hd=shade(hc,-.3),hl=shade(hc,.14),ey=EYES[L[3]][1],of=OUTFIT[L[5]],ac=mix(DYE[L[6]][1],'#77756c',.3),sty=L[1],o=L[5];
+ // sky
+ const SKY={va:['#7f958c','#c6cbb2'],fr:['#7c8e9c','#d5dcde'],sa:['#70868f','#c9ccb9'],em:['#94796a','#dbbd97'],bl:['#55665e','#a6af97']}[region];
+ let gr=g.createLinearGradient(0,0,0,H);gr.addColorStop(0,SKY[0]);gr.addColorStop(.75,SKY[1]);g.fillStyle=gr;g.fillRect(0,0,W,H);
+ g.fillStyle='rgba(255,250,235,.5)';g.beginPath();g.arc(310,95,26,0,7);g.fill();g.fillStyle='rgba(255,250,235,.12)';g.beginPath();g.arc(310,95,46,0,7);g.fill();
+ // land behind
+ const land=(col,fn)=>{g.fillStyle=col;g.beginPath();g.moveTo(0,H);for(let x=0;x<=W;x+=8)g.lineTo(x,fn(x));g.lineTo(W,H);g.fill()};
+ if(region==='fr'){land('#9fb0b8',x=>300-Math.abs(((x+60)%160)-80)*1.3+Math.sin(x/9)*4);land('#c9d3d6',x=>350+Math.sin(x/40)*10)}
+ else if(region==='sa'){land('#5f7f8e',x=>330);land('#a9a682',x=>372+Math.sin(x/60+1)*8-(x>250?(x-250)*.25:0))}
+ else if(region==='em'){land('#b27a55',x=>(x>40&&x<150)||(x>290&&x<370)?285:340);land('#c99766',x=>365+Math.sin(x/50)*9)}
+ else if(region==='bl'){land('#46574e',x=>345+Math.sin(x/70)*6);g.strokeStyle='#33423a';g.lineWidth=2;for(let i=0;i<46;i++){const x=r()*W,h=30+r()*45;g.beginPath();g.moveTo(x,362);g.quadraticCurveTo(x+4,362-h/2,x+(r()-.5)*12,362-h);g.stroke()}}
+ else{land('#6f8a66',x=>330+Math.sin(x/55)*14);land('#86a074',x=>362+Math.sin(x/80+2)*10);g.fillStyle='#4f6a4c';for(let i=0;i<9;i++){const x=20+r()*360;g.beginPath();g.arc(x,338+Math.sin(x/55)*14,9+r()*6,0,7);g.fill()}}
+ // fog
+ for(let i=0;i<4;i++){const y=300+i*26;gr=g.createLinearGradient(0,y-22,0,y+22);gr.addColorStop(0,'rgba(226,232,226,0)');gr.addColorStop(.5,'rgba(226,232,226,.34)');gr.addColorStop(1,'rgba(226,232,226,0)');g.fillStyle=gr;g.fillRect(0,y-22,W,44)}
+ const P=d=>new Path2D(d);
+ const head=P('M126 205 C124 136 276 136 274 205 C274 250 262 286 232 308 Q200 326 168 308 C138 286 126 250 126 205Z');
+ const cap=P('M120 222 C106 112 294 112 280 222 L272 196 C258 160 230 152 200 156 C170 152 142 160 128 196Z');
+ const hoodCol=shade(of.d,-.05);
+ // back hair / hood back
+ g.fillStyle=hc;
+ if(sty===1)g.fill(P('M110 205 C100 95 300 95 290 205 L297 335 Q262 362 200 350 Q138 362 103 335Z'));
+ if(sty===2)g.fill(P('M110 205 C100 95 300 95 290 205 L306 470 Q200 500 94 470Z'));
+ if(sty===3)g.fill(P('M114 205 C104 100 296 100 286 205 L284 285 Q200 330 116 285Z'));
+ if(sty===4){g.beginPath();g.arc(200,112,30,0,7);g.fill();g.strokeStyle=hd;g.lineWidth=2;g.beginPath();g.arc(200,112,19,.6,3.6);g.stroke()}
+ if(sty===6){g.fillStyle=hoodCol;g.fill(P('M88 250 C70 50 330 50 312 250 L318 420 L82 420Z'));g.fillStyle=shade(hoodCol,-.3);g.fill(P('M112 240 C100 100 300 100 288 240 L288 360 L112 360Z'))}
+ // shoulders
+ const torso=P('M30 500 C36 430 70 400 160 372 Q200 392 240 372 C330 400 364 430 370 500Z');
+ g.fillStyle=o===3?of.d:of.c;g.fill(torso);
+ g.save();g.clip(torso);
+ gr=g.createLinearGradient(200,0,400,0);gr.addColorStop(0,'rgba(0,0,0,0)');gr.addColorStop(1,'rgba(0,0,0,.28)');g.fillStyle=gr;g.fillRect(0,340,W,160);
+ if(o===0){g.fillStyle=of.d;g.fill(P('M150 430 L250 430 L262 500 L138 500Z'));g.strokeStyle=of.d;g.lineWidth=11;g.beginPath();g.moveTo(152,434);g.lineTo(140,382);g.moveTo(248,434);g.lineTo(260,382);g.stroke();g.fillStyle=ac;g.fillRect(150,430,100,5)}
+ if(o===1){g.strokeStyle=of.d;g.lineWidth=3;g.beginPath();g.moveTo(200,392);g.lineTo(200,500);g.stroke();g.fillStyle='#c9c2a8';[[182,430],[218,430],[180,468],[220,468]].forEach(([x,y])=>{g.beginPath();g.arc(x,y,5,0,7);g.fill()})}
+ if(o===2){g.strokeStyle=shade(of.c,-.2);g.lineWidth=1.5;for(let i=-10;i<24;i++){g.beginPath();g.moveTo(i*26,340);g.lineTo(i*26+170,510);g.moveTo(i*26+170,340);g.lineTo(i*26,510);g.stroke()}g.strokeStyle=ac;g.lineWidth=4;g.stroke(P('M160 374 Q200 396 240 374'))}
+ if(o===3){g.fillStyle=of.c;g.fill(P('M176 392 L224 392 L232 500 L168 500Z'))}
+ if(o===4){g.fillStyle=mix(ac,of.c,.35);g.fill(P('M172 386 L228 386 L236 500 L164 500Z'));g.fillStyle=of.d;g.fill(P('M178 384 L200 430 L222 384Z'))}
+ if(o===5){g.strokeStyle=shade(of.c,-.25);g.lineWidth=2;g.beginPath();g.moveTo(200,398);g.lineTo(200,455);g.stroke();for(let y=408;y<455;y+=12){g.beginPath();g.moveTo(192,y);g.lineTo(208,y+7);g.moveTo(208,y);g.lineTo(192,y+7);g.stroke()}}
+ g.restore();
+ // neck
+ g.fillStyle=sk;g.fill(P('M168 285 L168 372 Q200 398 232 372 L232 285Z'));
+ g.fillStyle=skd;g.globalAlpha=.55;g.fill(P('M168 300 Q200 340 232 300 L232 322 Q200 356 168 322Z'));g.globalAlpha=1;
+ // collars drawn over the neck
+ if(o===1){g.fillStyle=ac;g.fill(P('M160 352 Q200 384 240 352 L246 380 Q200 412 154 380Z'));g.fillStyle=of.c;g.fill(P('M140 352 L166 344 L176 398 L150 392Z'));g.fill(P('M260 352 L234 344 L224 398 L250 392Z'))}
+ if(o===3||sty===6){g.fillStyle=o===3?of.d:hoodCol;g.fill(P('M132 372 Q200 420 268 372 L276 398 Q200 446 124 398Z'));g.fillStyle=ac;g.beginPath();g.arc(200,412,8,0,7);g.fill();g.strokeStyle='rgba(0,0,0,.4)';g.lineWidth=1.5;g.stroke()}
+ if(o===5){g.fillStyle=ac;g.fill(P('M162 360 Q200 388 238 360 L230 384 L200 404 L170 384Z'))}
+ if(o===0||o===4||o===2){g.strokeStyle=shade(of.c,-.25);g.lineWidth=3;g.stroke(P('M160 372 Q200 394 240 372'))}
+ // ears
+ g.fillStyle=shade(sk,-.08);g.beginPath();g.ellipse(124,224,10,20,0,0,7);g.ellipse(276,224,10,20,0,0,7);g.fill();
+ // head
+ g.fillStyle=sk;g.fill(head);
+ g.save();g.clip(head);
+ gr=g.createLinearGradient(190,0,290,0);gr.addColorStop(0,'rgba(0,0,0,0)');gr.addColorStop(1,'rgba(40,20,20,.3)');g.fillStyle=gr;g.fillRect(100,100,200,240);
+ gr=g.createLinearGradient(0,120,0,200);gr.addColorStop(0,'rgba(30,20,20,.25)');gr.addColorStop(1,'rgba(30,20,20,0)');g.fillStyle=gr;g.fillRect(100,100,200,110);
+ const jaw=P('M126 246 C138 300 170 324 200 326 C230 324 262 300 274 246 C258 274 232 272 200 270 C168 272 142 274 126 246Z');
+ if(L[4]===1){g.globalAlpha=.3;g.fillStyle=hc;g.fill(jaw);g.globalAlpha=1}
+ if(L[4]===2){g.fillStyle=hc;g.fill(jaw);g.fill(P('M172 286 Q200 268 228 286 L228 330 L172 330Z'))}
+ if(L[7]===1){g.fillStyle=shade(sk,-.25);g.globalAlpha=.7;for(let i=0;i<26;i++){const x=150+r()*100,y=238+r()*26;g.beginPath();g.arc(x,y,1.5,0,7);g.fill()}g.globalAlpha=1}
+ if(L[7]===3){g.strokeStyle=skd;g.lineWidth=1.5;g.globalAlpha=.7;['M152 244 Q168 252 184 246','M216 246 Q232 252 248 244','M160 178 Q200 172 240 178','M166 190 Q200 185 234 190','M172 268 Q166 282 172 296','M228 268 Q234 282 228 296'].forEach(d=>g.stroke(P(d)));g.globalAlpha=1}
+ if(L[7]===5){g.fillStyle='rgba(30,30,30,.4)';g.beginPath();g.ellipse(244,266,16,9,-.5,0,7);g.fill()}
+ g.restore();
+ if(L[4]===2){g.fillStyle=hc;g.fill(P('M150 300 C165 322 235 322 250 300 Q240 352 200 356 Q160 352 150 300Z'))}
+ // features
+ g.strokeStyle=hd;g.lineWidth=6;g.lineCap='round';g.stroke(P('M150 208 Q168 198 186 206'));g.stroke(P('M214 206 Q232 198 250 208'));
+ [168,232].forEach(x=>{const e=P(`M${x-16} 229 Q${x} 216 ${x+16} 229 Q${x} 238 ${x-16} 229Z`);g.fillStyle='#ece9e0';g.fill(e);g.save();g.clip(e);g.fillStyle=ey;g.beginPath();g.arc(x,228,7.5,0,7);g.fill();g.fillStyle='#161212';g.beginPath();g.arc(x,228,3.2,0,7);g.fill();g.fillStyle='rgba(255,255,255,.8)';g.beginPath();g.arc(x+2.5,225.5,1.4,0,7);g.fill();g.restore();g.strokeStyle='#2a1f1c';g.lineWidth=2.5;g.stroke(P(`M${x-16} 229 Q${x} 216 ${x+16} 229`));g.strokeStyle=skd;g.lineWidth=1.2;g.stroke(P(`M${x-13} 236 Q${x} 242 ${x+13} 236`))});
+ g.strokeStyle=skd;g.lineWidth=2.5;g.stroke(P('M197 236 Q192 258 190 266 Q200 276 212 267'));
+ g.strokeStyle=mix(sk,'#5a2620',.6);g.lineWidth=3;g.stroke(P('M178 291 Q200 297 222 291'));
+ g.strokeStyle=skd;g.lineWidth=1.5;g.globalAlpha=.6;g.stroke(P('M188 302 Q200 306 212 302'));g.globalAlpha=1;
+ if(L[4]===2){g.strokeStyle=hc;g.lineWidth=7;g.stroke(P('M176 284 Q200 274 224 284'))}
+ if(L[7]===2){g.strokeStyle=mix(sk,'#f0c0b4',.7);g.lineWidth=3;g.stroke(P('M222 192 L240 246'));g.strokeStyle='rgba(90,40,40,.35)';g.lineWidth=1;g.stroke(P('M224 192 L242 246'))}
+ // front hair
+ if(sty===5){g.save();g.clip(head);g.globalAlpha=.3;g.fillStyle=hc;g.fill(cap);g.restore();g.globalAlpha=1}
+ else if(sty===6){g.fillStyle=hc;g.save();g.clip(head);g.fill(P('M126 190 C140 150 260 150 274 190 L274 120 L126 120Z'));g.restore();
+  g.fillStyle=hoodCol;g.fill(P('M88 250 C70 50 330 50 312 250 L312 330 L286 330 C290 250 282 160 200 158 C118 160 110 250 114 330 L88 330Z'));
+  g.strokeStyle=shade(hoodCol,.18);g.lineWidth=2;g.stroke(P('M114 330 C110 250 118 160 200 158 C282 160 290 250 286 330'))}
+ else{g.fillStyle=hc;g.fill(cap);
+  if(sty===1||sty===2){g.fill(P('M120 215 C118 250 122 280 128 300 L138 250 L132 196Z'));g.fill(P('M280 215 C282 250 278 280 272 300 L262 250 L268 196Z'))}
+  g.strokeStyle=hl;g.lineWidth=2;g.globalAlpha=.6;g.stroke(P('M150 150 Q190 128 240 142'));g.stroke(P('M140 172 Q170 146 210 142'));g.globalAlpha=1;
+  if(L[7]===4){g.strokeStyle=shade(hc,.55);g.lineWidth=9;g.stroke(P('M168 158 Q176 134 196 124'))}}
+ if(sty===3){for(let i=0;i<8;i++){const t=i/7,x=268+t*10+(i%2?5:-5),y=292+t*150,rr=17-t*6;g.fillStyle=i%2?hc:hd;g.beginPath();g.ellipse(x,y,rr,rr*.8,i%2?.5:-.5,0,7);g.fill()}g.fillStyle=ac;g.fillRect(266,440,26,8);g.fillStyle=hc;g.beginPath();g.ellipse(279,460,7,12,0,0,7);g.fill()}
+ // finish
+ gr=g.createRadialGradient(200,230,120,200,250,360);gr.addColorStop(0,'rgba(20,28,26,0)');gr.addColorStop(1,'rgba(20,28,26,.55)');g.fillStyle=gr;g.fillRect(0,0,W,H);
+ g.fillStyle='rgba(222,230,224,.10)';g.fillRect(0,0,W,H);
+ for(let i=0;i<2600;i++){g.fillStyle=r()<.5?'rgba(255,255,255,.05)':'rgba(0,0,0,.06)';g.fillRect(r()*W,r()*H,1.6,1.6)}
+}
+
+/* The add-on's look builder (studio/build_looks.mjs) loads this file in Node and stops here. */
+if(typeof module!=='undefined'&&module&&module.exports){module.exports={S,decode,compute,genName,drawSkin,baseSeed,lookText};return}
+
+/* ---------- screens ---------- */
+const stage=$('#stage'),cover=$('#cover');
+const TOTAL=Q.length+2;
+function show(node){stage.textContent='';stage.append(node);cover.hidden=true;stage.hidden=false;window.scrollTo(0,0)}
+function progress(){return el('div',{class:'progress','aria-hidden':'true'},Array.from({length:TOTAL},(_,i)=>el('i',{class:i<=step?'on':''})))}
+function nav(canNext,nextLabel='Next'){return el('div',{class:'row'},el('button',{class:'btn quiet',onclick:()=>{if(step===0){cover.hidden=false;stage.hidden=true;drawMap($('#covermap'))}else{step--;render()}}},'Back'),el('button',{class:'btn',id:'next',disabled:!canNext,onclick:()=>{step++;render()}},nextLabel))}
+function render(){
+ if(step===0){
+  const chips=el('div',{class:'chips'},LIKES.map((l,i)=>el('button',{class:'chip',type:'button','aria-pressed':S.likes.includes(i)?'true':'false',onclick:e=>{const on=S.likes.includes(i);if(on)S.likes=S.likes.filter(x=>x!==i);else{if(S.likes.length>=4)return;S.likes.push(i)}e.currentTarget.setAttribute('aria-pressed',on?'false':'true');$('#cnt').textContent=S.likes.length+' of 4 picked';$('#next').disabled=S.likes.length<1}},l[1])));
+  show(el('div',{class:'stack-lg narrow'},progress(),el('div',{class:'stack'},el('p',{class:'eyebrow'},'What you like'),el('h2',{},'What do you actually enjoy doing in Minecraft?'),el('p',{class:'muted'},'Pick up to four. Be honest: this decides more than the rest put together.')),chips,el('p',{class:'small muted',id:'cnt'},S.likes.length+' of 4 picked'),nav(S.likes.length>0)));
+ }else if(step<=Q.length){
+  const qi=step-1,q=Q[qi];
+  show(el('div',{class:'stack-lg narrow'},progress(),el('div',{class:'stack'},el('p',{class:'eyebrow'},`The road in · ${qi+1} of ${Q.length}`),el('p',{class:'question',id:'qq'},q.q)),
+   el('div',{class:'answers',role:'group','aria-labelledby':'qq'},q.a.map((a,i)=>el('button',{class:'ans',type:'button','aria-pressed':S.quiz[qi]===i?'true':'false',onclick:()=>{S.quiz[qi]=i;step++;render()}},a[0]))),
+   nav(S.quiz[qi]!=null)));
+ }else if(step===Q.length+1){
+  const radio=(legend,arr,key)=>el('fieldset',{},el('legend',{},legend),el('div',{class:'chips'},arr.map((t,i)=>el('button',{class:'chip',type:'button','aria-pressed':S[key]===i?'true':'false',onclick:e=>{S[key]=i;[...e.currentTarget.parentNode.children].forEach((b,j)=>b.setAttribute('aria-pressed',j===i?'true':'false'))}},t))));
+  show(el('div',{class:'stack-lg narrow'},progress(),el('div',{class:'stack'},el('p',{class:'eyebrow'},'Your picks'),el('h2',{},'Last few things, and these ones you decide outright.')),
+   radio('Is there a land you already know you want?',LANDS,'land'),
+   radio('Neighbours?',NEARS,'near'),
+   radio('What kind of name?',LEANS,'lean'),
+   el('div',{class:'field'},el('label',{for:'by'},'Who is playing? (optional)'),el('input',{type:'text',id:'by',maxlength:'24',placeholder:'Your name or gamertag',value:S.by,oninput:e=>S.by=e.target.value.trim()}),el('p',{class:'small muted'},'Only shown on your sheet, so the Realm owner knows whose character this is.')),
+   nav(true,'Show me who I am')));
+ }else{S.look=null;S.nameSeed=0;S.custom='';sheet()}
+}
+
+function sheet(){
+ const res=compute();if(!S.look)S.look=defaultLook(res);save();
+ const reg=REG[res.region],path=PATHS[res.top],p2=PATHS[res.second];
+ let name=genName(res);
+ const nameEl=el('h1',{class:'charname'}),epiEl=el('p',{class:'epithet'}),p1=el('p',{class:'prose'}),p2el=el('p',{class:'prose'}),lookP=el('p',{}),bannerDD=el('dd',{}),promptTA=el('textarea',{id:'prompt',readonly:true,'aria-label':'Portrait prompt'}),toast=el('p',{class:'toast',role:'status'});
+ const pcv=el('canvas',{width:800,height:1000,role:'img','aria-label':'Painted portrait of your character'}),mob=el('div',{class:'mob sway'}),skinImg=el('img',{alt:'Your skin file, 64 by 64 pixels',width:128,height:128});
+ let skinCv=null;
+ const say=t=>{toast.textContent=t;clearTimeout(say.t);say.t=setTimeout(()=>toast.textContent='',4000)};
+ const copy=(text,ok)=>{const done=()=>say(ok);try{navigator.clipboard.writeText(text).then(done,()=>fallback())}catch(e){fallback()}
+  function fallback(){promptTA.value=text;promptTA.focus();promptTA.select();say('Copying is blocked here. The text is selected below: copy it by hand.')}};
+ const sheetText=()=>{const st=story(res,name);return[`THE HOLLOW CROWN: ${S.custom||name.full}, called ${name.epi}`,S.by?`Played by ${S.by}`:'',``,`Road: ${path.name} (second: ${p2.name})`,`Settlement plot: ${res.plot.n}, ${reg.name} (${res.plot.land}). If taken: ${res.alt.n}.`,`From Kingsrest: ${res.plot.way}.`,`Banner colour: ${DYE[S.look[6]][0]}`,`Looks: ${lookText(S.look,res)}`,``,st.p1,st.p2,``,`Link: ${location.href}`].filter((l,i,a)=>l!==''||a[i-1]!=='').join('\n')};
+ function paintName(){name=genName(res);nameEl.textContent=S.custom||name.full;epiEl.textContent='called '+name.epi;const st=story(res,name);p1.textContent=st.p1;p2el.textContent=st.p2;nameIn.value=S.custom}
+ function paintLook(){
+  const seed=baseSeed()+hash(S.look.join(''));
+  drawPortrait(pcv,S.look,res.region,seed);skinCv=drawSkin(S.look,seed);buildModel(mob,skinCv);skinImg.src=skinCv.toDataURL('image/png');
+  lookP.textContent=lookText(S.look,res);
+  bannerDD.textContent='';bannerDD.append(el('span',{class:'swatch',style:`background:${DYE[S.look[6]][1]}`}),DYE[S.look[6]][0]+'. Banner colours are one per player, so if a friend has it already, take the next one you like.');
+  promptTA.value=`Portrait of a traveller in a muted medieval fantasy world. ${lookText(S.look,res)} Standing in ${res.plot.land} in ${reg.name}, overcast evening light, low fog. Serious, watchful expression. Oil painting, restrained colour, slightly uneasy mood, not horror.`;
+ }
+ const nameIn=el('input',{type:'text',id:'ownname',maxlength:'40',placeholder:'Or type your own name',oninput:e=>{S.custom=e.target.value.trim();nameEl.textContent=S.custom||name.full;const st=story(res,name);p1.textContent=st.p1;p2el.textContent=st.p2;save()}});
+ const controls=el('div',{class:'controls'},LOOKF.map((f,i)=>el('div',{class:'field'},el('label',{for:'lk'+i},f[0]),el('select',{id:'lk'+i,onchange:e=>{S.look[i]=+e.target.value;paintLook();save()}},f[1].map((o,j)=>el('option',{value:j,selected:S.look[i]===j},o))))));
+ const stagebox=el('div',{class:'stagebox'},mob,el('span',{class:'hint'},'Drag to turn'));
+ let ry=-28,drag=null;const fit=()=>{mob.style.setProperty('--k',(stagebox.clientHeight/330).toFixed(3))};
+ stagebox.addEventListener('pointerdown',e=>{drag=e.clientX;mob.classList.remove('sway');stagebox.setPointerCapture(e.pointerId)});
+ stagebox.addEventListener('pointermove',e=>{if(drag==null)return;ry+=(e.clientX-drag)*.7;drag=e.clientX;mob.style.transform=`scale(var(--k,1)) rotateX(-8deg) rotateY(${ry}deg)`});
+ ['pointerup','pointercancel'].forEach(t=>stagebox.addEventListener(t,()=>drag=null));
+ const mapCv=el('canvas',{width:1000,height:1000,role:'img','aria-label':`Map with ${res.plot.n} marked and the rail route from Kingsrest`});
+ const dist=Math.round(Math.hypot(res.plot.x-K[0],res.plot.z-K[1])/50)*50;
+ const homeNote=res.top==='s'?`The Sorcerer’s road goes with you wherever you settle.`:path.home===res.region?`${reg.name} is the home of this road, so settling at ${res.plot.n} keeps it open to you.`:`This road belongs to ${REG[path.home].name}. Settling in ${reg.name} instead puts ${reg.power} on your doorstep, so your second road may end up the easier one. Or make friends in ${REG[path.home].name}.`;
+ const saveBtn=el('button',{class:'btn',hidden:true,onclick:async()=>{try{const blob=await new Promise(r=>skinCv.toBlob(r,'image/png'));await dl.save({filename:(S.custom||name.full).replace(/[^A-Za-z0-9]+/g,'-').toLowerCase()+'-skin.png',data:blob});say('Skin saved.')}catch(e){if(e&&e.code==='declined')return;say('Could not save here. Press and hold the small skin image and save it instead.')}}},'Save skin file');
+ let dl=null;if(window.claude&&window.claude.use)window.claude.use('downloads').then(d=>{if(d){dl=d;saveBtn.hidden=false}}).catch(()=>{});
+ show(el('div',{class:'stack-lg'},
+  el('div',{class:'namebar'},el('p',{class:'eyebrow'},S.by?`${S.by} comes to Kingsrest as`:'You come to Kingsrest as'),nameEl,epiEl,
+   el('div',{class:'row',style:'margin-top:8px'},el('button',{class:'btn ghost',onclick:()=>{S.nameSeed++;S.custom='';paintName();save()}},'Another name'),el('div',{style:'flex:1;min-width:180px;max-width:280px'},nameIn))),
+  el('div',{class:'stack'},p1,p2el),
+  el('hr',{class:'rule'}),
+  el('div',{class:'stack'},el('h2',{},'What you look like'),
+   el('div',{class:'looks'},
+    el('figure',{class:'plate'},el('figcaption',{},'As a painter in Kingsrest would see you'),el('div',{class:'portrait'},pcv)),
+    el('figure',{class:'plate'},el('figcaption',{},'As the Realm will see you'),stagebox)),
+   lookP,controls,
+   el('div',{class:'row'},el('button',{class:'btn ghost',onclick:()=>{const r=rng(Date.now());S.look=[Math.floor(r()*6),Math.floor(r()*7),Math.floor(r()*7),Math.floor(r()*5),S.look[4],S.look[5],S.look[6],r()<.5?0:1+Math.floor(r()*5)];controls.querySelectorAll('select').forEach((s,i)=>s.value=S.look[i]);paintLook();save()}},'Shuffle face and hair'),saveBtn),
+   el('div',{class:'skinrow'},skinImg,el('div',{class:'stack small'},el('p',{},el('strong',{},'To wear it in the game: '),'save the skin file (use the button, or press and hold the small image and save it). In Minecraft open Dressing Room, then Classic Skins, Owned, Import, Choose New Skin, and pick the wider-arm model. This works on PC and phones, not on consoles.'),el('p',{class:'muted'},'Want a more detailed portrait? Copy the description below into any image maker.'),promptTA,el('div',{class:'row'},el('button',{class:'btn quiet',onclick:()=>copy(promptTA.value,'Portrait description copied.')},'Copy portrait description'))))),
+  el('hr',{class:'rule'}),
+  el('div',{class:'two'},
+   el('div',{class:'stack'},el('p',{class:'eyebrow'},'The road ahead of you'),el('h2',{},path.name),el('p',{class:'quote'},path.line),el('p',{class:'prose'},path.text),el('p',{},path.play),el('p',{class:'muted'},homeNote),
+    el('p',{},el('strong',{},'People say you are: '),res.traits.slice(0,3).map(t=>TRAITS[t]).join(', ')+'.')),
+   el('div',{class:'stack'},el('h3',{},'How strongly each road pulls'),
+    el('div',{class:'bars'},res.order.map(([k,v],i)=>[el('span',{class:i===0?'top':''},PATHS[k].name),el('i',{class:i===0?'top':''},el('b',{style:`width:${Math.round(clamp(v/res.maxP,0.03,1)*100)}%`}))]).flat()),
+    el('p',{class:'small muted'},`Your second road is ${p2.name}: “${p2.line}” Nobody is given a road. Everyone starts as an ordinary person and earns one in play, so treat this as a guess about where you will end up.`))),
+  el('hr',{class:'rule'}),
+  el('div',{class:'two'},
+   el('div',{class:'stack'},el('p',{class:'eyebrow'},'Where to settle'),el('h2',{},`${res.plot.n}, ${reg.name}`),el('p',{class:'prose'},reg.blurb),el('p',{class:'quote'},res.plot.odd),
+    el('dl',{class:'facts'},
+     el('dt',{},'The plot'),el('dd',{},res.plot.land.charAt(0).toUpperCase()+res.plot.land.slice(1)+`, about ${dist} blocks from Kingsrest.`),
+     el('dt',{},'Getting there'),el('dd',{},`From Kingsrest station take the ${res.plot.way}. A road runs beside the track if you would rather ride.`),
+     el('dt',{},'Why here'),el('dd',{},(res.why.length?`You like ${res.why.slice(0,2).join(' and ')}. `:'')+(S.near===3?'It has room for two keeps if you are sharing. ':'')+`${reg.name} is known for ${reg.power}.`),
+     el('dt',{},'If it’s taken'),el('dd',{},`${res.alt.n}: ${res.alt.land}. It is the dashed ring on the map.`),
+     el('dt',{},'Your banner'),bannerDD,
+     el('dt',{},'In your bag'),el('dd',{},`${story(res,name).keep.charAt(0).toUpperCase()+story(res,name).keep.slice(1)}, and the old king’s journal.`))),
+   el('div',{class:'mapframe'},mapCv)),
+  el('hr',{class:'rule'}),
+  el('div',{class:'stack'},el('h2',{},'Send it to the Realm owner'),el('p',{class:'muted narrow'},'The link holds your whole character, so whoever opens it sees exactly this sheet.'),
+   el('div',{class:'row'},el('button',{class:'btn',onclick:()=>copy(location.href,'Link copied.')},'Copy my link'),el('button',{class:'btn ghost',onclick:()=>copy(sheetText(),'Character sheet copied.')},'Copy as text'),el('button',{class:'btn quiet',onclick:()=>{S.likes=[];S.quiz=[];S.land=S.near=S.lean=0;S.look=null;S.custom='';S.nameSeed=0;step=0;try{localStorage.removeItem('hc-char');history.replaceState(null,'','#')}catch(e){}render()}},'Start again')),toast),
+  el('p',{class:'foot'},'Everything on this sheet is a suggestion. In the game everyone steps off the same coach in Kingsrest with nothing, and the roads, the powers of each land and the plots are still being built, so details may change before the Realm opens.')));
+ paintName();paintLook();fit();
+ requestAnimationFrame(()=>{fit();drawMap(mapCv,res.plot,res.alt)});
+ sheet.redraw=()=>{fit();drawMap(mapCv,res.plot,res.alt)};
+}
+
+/* ---------- boot ---------- */
+$('#begin').addEventListener('click',()=>{step=0;render()});
+let stored=null;try{stored=localStorage.getItem('hc-char')}catch(e){}
+if(stored){const b=$('#resume');b.hidden=false;b.addEventListener('click',()=>{if(decode(stored)){step=TOTAL;sheet()}})}
+function fromHash(){if(decode(location.hash)){step=TOTAL;sheet();return true}return false}
+if(!fromHash())drawMap($('#covermap'));
+window.addEventListener('hashchange',()=>{if(location.hash.length>4&&location.hash.slice(1)!==(S.look?encode():''))fromHash()});
+let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{if(!cover.hidden)drawMap($('#covermap'));else if(step>=TOTAL&&sheet.redraw)sheet.redraw()},150)});
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{if(!cover.hidden)drawMap($('#covermap'));else if(step>=TOTAL&&sheet.redraw)sheet.redraw()});
+})();
+</script>

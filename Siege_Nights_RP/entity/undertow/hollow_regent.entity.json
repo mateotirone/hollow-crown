@@ -1,0 +1,20 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:hollow_regent",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/siege/undertow/hollow_regent"
+   },
+   "geometry": {
+    "default": "geometry.siege_u.hollow_regent"
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ]
+  }
+ }
+}

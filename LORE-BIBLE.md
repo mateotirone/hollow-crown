@@ -1,86 +1,231 @@
 # The Hollow Crown: lore bible
 
-**Spoilers for everything.** This is the whole truth, for the builder and for anyone writing story content. Players only ever get it in pieces. The tomes themselves are in `Siege_Nights_BP/scripts/lore/data/` (`tomes_a.js`, `tomes_b.js`, `tomes_c.js`), mysteries and places in `world.js`, conversations in `dialogue.js`.
+**Spoilers. This is the whole truth, for the builder only.** Players should learn it over weeks, from tomes that disagree with each other. History follows Mateo's version of 2026-11-10 (two worlds, a truce, an overthrown king, a war the Hollow lost, the Gate). Names follow the naming pass Mateo accepted the same day: "Hollow" is kept for the Hollow, the Hollow Crown and the Heart of the Hollow only (so Hallowmere, the Choir, Rimehold, Frostvein Gap, the Sung Verses, the Voice Below). Code ids are unchanged.
 
 ## The truth, in order
 
-1. **Hallowmere.** Before Aldmere there was a marsh kingdom called Hallowmere. Its people are the Hollow Choir.
-2. **Queen Maelis** came out of the marsh with a bell (the Founding Bell). She rang it and the people of Hallowmere fell asleep and woke under the water, in the Hollow. **The Hollow is not a copy of our world.** It is a separate, older, drowned world (what Hallowmere became) with its own towns and its own sky, lying under ours and seeping up into it through thin places: wells, lakes, the sea, caves. She built Aldmere on top of them. From the bell's bronze she cast the **Bell Crown**. Whoever wears it, the Choir hears and obeys.
-3. The Choir is hungry for what it lost: warmth, walls, names, held ground. The crown lets its wearer aim that hunger, but the hunger slowly takes the wearer. Maelis ended up on a drowned throne at the bottom of the Hollow.
-4. **The Grey War** (300 years ago). Vorlund, Thane of the Ice Isles, invaded because his priests heard a bell under the ice. His army attacked every third night, when the bell tolled.
-5. **King Oswin** did not make a bargain. He went down with the mage **Corvin Hale**, killed Maelis, took the crown, and told the Choir to swallow the Grey Host. It did, at **3:17** in the night. That is the "miracle".
-6. The crown began to turn Oswin (he came back left-handed, wouldn't take it off, wouldn't stand under a bell). When he caught himself wondering how his daughter would sound in the Choir, he **walked back down willingly** so it would feed on him and not on his city.
-7. His daughter **Princess Edda**, 17, shut the door behind him. She founded the **Order of the Ashen Gate** to guard it, erased her father from history so nothing below could hear his name and answer, let Corvin burn because he refused to forget, and renamed herself **Saint Ashe**.
-8. The Choir still **tolls every third night**. Anything angry or empty hears it and marches on the brightest keep. Winning makes a keep brighter. The **Warlord King** is Vorlund, spat back up with a crown splinter in his brow.
-9. The Gate (the Rift) **wanders** between seven thin places and settles near the brightest keep. Nobody in the Order knows where it is now.
-10. **The Ember** is a shard of the crown sent up to find the brightest keep: the player's. The Choir already calls the player "the third name".
-11. **The twist:** kill Oswin, take the crown, and you become the next one below. Maelis did, Oswin did.
-12. **The third way** (hidden ending): learn the Choir's true name, **Hallowmere**, ring the Founding Bell backward and say it. The Choir remembers itself, and the crown comes off clean. Corvin guessed it, Oswin confirms it, neither knew the name. It is in one hymn (*The Name We Were*).
+1. **Hallowmere (about 700 years ago).** The Hollow is another world: a drowned country of leaning towers and black water under a roof too far up to see. It is not a copy of ours. It ran aground on our world at a marsh, and for a while the place where they met was one kingdom that belonged to both, called Hallowmere.
+2. **Queen Maelis** did not want to share. She cast the Founding Bell, rang it, and pushed the Hollow back out. She named what was left **Aldmere** and scraped the old name off the charters. The Hollow's people call this being "rung out".
+3. **The pressing-in (about 360 years ago).** The Hollow began to seep back. **King Aldric** saw salt wells, long nights, a second moon, frost in summer, people who came back wrong. He never understood it. He kept a journal. (This is the journal every player starts with.)
+4. **The Grey Host (about 310 years ago).** The Hollow called an army down from the Ice Isles with a bell under the ice, to cut down Aldmere's bells for it. Thane **Vorlund** led it. Aldric's son, **King Oswin**, was losing the war.
+5. **The Truce of the Third Night.** Oswin went below with his mage **Corvin Hale** and met five lords of the Hollow at a table of wet stone. Terms: the Hollow takes back the Grey Host (it swallowed the whole army at **3:17**); in return every third night belongs to the Hollow, no bell is rung that night, and its people may walk above as guests. It was sworn on **the Hollow Crown**, the Hollow's own crown, which nobody at the table could wear. The Hollow broke a splinter from it and gave it to Oswin as a pledge.
+6. **The Lost Days.** On third nights people went below, some willingly, and shapes came up in their places. Aldmere came to hate the peace.
+7. **The overthrow.** Princess **Edda** and the lords took Oswin on the walls on a third night. He did not draw his sword. She put him through the Crack alive. Then they rang every bell in Aldmere to break the truce on purpose.
+8. **Bellhollow.** The Hollow came up in fury and lost. The last stroke of the Founding Bell tore every thin place shut at once and left one wound in the rock: **the Gate** (the Rift). The bell split. The Hollow is behind the Gate and cannot get back through.
+9. **The cover-up.** Edda took vows, became **Saint Ashe**, and founded the **Order of the Ashen Gate**. It burned the portraits, the chronicles and Corvin, and taught everyone that there was never a King Oswin.
+10. **Now.** The Hollow wants back in, "because they're pissed". Everything strange in the land is the Hollow working at the Gate: the seep, the Slips, the Returned, the wrong moon. Every third night is still theirs by the truce, so on that night they call, and Vorlund (kept as their hound, with a splinter of the Crown in his brow) marches the angry and the empty against the brightest keep. **Every siege is a debt being collected.** The Gate is growing. It has even moved: it now sits at one of seven thin places.
+11. **The Ember** that falls after a player's first siege win is that pledged splinter of the Hollow Crown, sent to find the brightest keep.
 
-## Keeping the twist secret (reveal order)
+## The leader: Morvane (who he was is secret until the end)
 
-Mateo's rule: the twist (items 5, 6 and 11 above) reveals itself slowly and is never stated early. The tomes are written in four layers. **Place them so the layers can't be skipped.**
+Decided by Mateo, 2026-11-10. The one who controls the Hollow is **Morvane**. That is the name the Hollow gave him. Players may hear "Morvane" early (Vorlund, the Sung Verses, raider camps, rumors). **What stays secret until the final fight is that Morvane was King Oswin.** The Hollow took in the one human who ever kept his word to it, put its Crown on him, and renamed him. He has directed the sieges for three hundred years and taught the Hollow our walls. He drops *The Last Testament*. The Ledger mystery "Who Is Morvane?" can only be answered with a clue from the Hollow itself.
 
-| Layer | What the player believes | Tomes that carry it | Where they can sit |
+## The Hollow Crown, and the endings
+
+- **The Hollow Crown is the crown of the Hollow's ruler** (Mateo, 2026-11-10). Its seat stood empty from the war until the Hollow set it on Morvane, which only worked because it took the king out of him first. It kills anyone who puts it on **except a max-level Sorcerer**, who can hear the whole Hollow at once and not break. The game says this plainly.
+- **Defeat the leader** and you win something great to carry back up (a separate relic and title; the Crown thread is naming it) and your settlement transforms. You do not rule the Hollow.
+- **After Morvane falls the seat can stay empty**, open for any max-level Sorcerer to claim later. In a solo world an NPC takes it (the Undertow feature's "Regent"; names and lines in `lore/data/lords.js`), and a new one rises whenever the last is killed.
+- **Hidden third ending:** solve every mystery, learn the land's old name, and say **Hallowmere** at the throne to offer the truce again.
+- The old idea that the wearer slowly becomes the next monster is **gone**.
+
+## The Old King's Journal
+
+Every player has it from their first minute (`siege:kings_journal`, text in `lore/data/journal.js`). It is an ordinary book and reading it is optional. Twelve entries by King Aldric over about ten years: salt in an inland well, the bell humming, a "hollowed" ewe (the shepherds' word, which is where "the Hollowing" comes from), a night that is too long, a second moon, frost in a summer cellar, a child who visited a town with no sky, singing under the floor on nights he can't find the pattern in (it is every third night), a scraped charter with an H, a dream that leaves his feet wet, his fearless nine-year-old son hearing "them" ask something politely, and a last entry: "Listen before you ring."
+
+It names nothing: no Hollow, no Oswin, not even himself (signed "A.", name scraped off the cover). A test enforces that. Finishing it opens the mystery "The Old King's Journal"; the answer (**Aldric**) comes from matching the son in the journal to Quill's description of Oswin "son of Aldric". Sister Wren recognises the book. Who put it in every traveler's pack is deliberately never answered.
+
+## The paintings (the Long Gallery)
+
+Eight "old paintings" made by `studio/build_lore_plates.py`, printed in the PDF book: Hallowmere before; the Convergence; the Truce; the King put down; Bellhollow; the Gate; the Third Night; the Forty-Second Portrait (a king with his face scraped off, sword in his left hand). They are in `lore-book/plates/` and could later hang in game as custom paintings.
+
+## Where the Sorcerer's powers come from
+
+Mateo, 2026-11-10: every power needs an origin, and a book in the game that hints at it without showing how.
+
+**The one idea:** there is no magic in Aldmere. The Ember is a splinter of the Hollow Crown, and the Crown is how the Hollow's ruler hears the whole Hollow. Whoever carries a splinter hears a little of it and can borrow what the Hollow's people do by nature. Every power is something the Hollow does, done badly by one of us. Resonance is the other half: the more you borrow, the better the Hollow hears you.
+
+| Power | Mag calls it | Where it really comes from |
+|---|---|---|
+| Ember Bolt | The Pale Fire | The cold fire of the Hollow's lamps. Everyone does this first, by accident |
+| Ward | Guest-Right | The truce's promise that guests come to no harm, still clinging to the splinter |
+| Quiet Mind | The Vigil | Not the Hollow's: the bell-wardens' discipline of holding the rope and not ringing. The knights still do it |
+| Blink | The Short Way | In the Hollow no street is the same length twice. You cross a piece of it. You arrive damp |
+| Echo Sight | Seeing by the Note | No sky, little light: the Hollow sees by the hum of things. It ruined Brother Fennick |
+| Bind | The Standing | The hold the Hollow keeps on the Returned, borrowed |
+| Ashen Skin | The Grey | The scorch of the Founding Bell's last stroke. Edda had it on her palm, hence "Ashe" |
+| Halfstep | Leaning | A Slip, done on purpose |
+| Choir's Call | The Calling | The bell under the ice that called the Grey Host, and calls every third night |
+| Resonant Soul | Being Loud | The Hollow answering through you. Tam Hallet got as loud as it goes and Ashby Cross is now a pit of black glass with the village under it |
+| Hollowborn (to be renamed Choirborn) | The Ones Who Went Willingly | Families descended from truce-time guests of the Hollow; or long use |
+| Veilstep | The Door You Carry | Every thin place is shut but the Gate, yet a splinter remembers the far side: you are a door your own size |
+| Voice of the Hollow (to be renamed) | Hearing All of It | Bearing the whole Hollow at once, which is what the Crown demands. The page hints at the one man who wore it with no art, and what it cost him. It does not name him |
+| Crownless | The Roof-Fire | The storms on the underside of the Hollow's roof. "Crownless" is the Hollow's word for one of ours who answers to nobody |
+
+**The book** is *The Fourteen Arts* (`siege:fourteen_arts`, text in `lore/data/powers.js`): Old Mag's copybook from when she was eleven, "things the Master said when he thought I was asleep". Mag gives it to any Sorcerer she has come to trust. It never says Hollow, Crown, truce, Oswin or Morvane (a test enforces that).
+
+**Powers you have to go somewhere for.** Four stay "Unknown" at the Tree of Oaths until the story opens them (`powerOrigin` event; the town hall does the gating): Echo Sight (read a Field Note), Halfstep (the First Slip), Choir's Call (Sigrun Ashby in Rimehold tells you why the Host came), Veilstep (name the real thin place in your Library).
+
+## Corvin Hale comes back
+
+Mateo said yes, 2026-11-10. The Order scattered Corvin's ashes "in running water so that nothing could gather them", and water runs down. He has been in the Choir for three hundred years and is the one voice in it slightly off the note, because he is still arguing. **Only a Sorcerer hears him.** First at Resonance 70 or more, on a third night or in the Hollow ("Flat. Whoever that is up there, you are FLAT."). After that he has one rude, exact remark the first time the Sorcerer has each of the fourteen arts (`scripts/lore/data/corvin.js`), and never says how any of it is done. He can be spoken to in the Hollow as the story character `corvin`, "A Voice in the Water" (place the NPC in still water there). He gives the truce word for word, says the King took the splinter bare-handed because it would have been rude to ask for a cloth, and finishes his last page: "Someone must go down and say good morning." He will NOT say who sits in the chair until Morvane has fallen. Tell Old Mag his message ("she still holds a pen like a trowel") and she breaks.
+
+## Moon doors
+
+Corvin's rule made real (`scripts/lore/moondoors.js`): a door carved with a full moon opens only on the night our moon is dark, a door carved with a dark moon only under our full moon, and it closes at dawn. A builder marks any patch of blocks with `/scriptevent siege:moon_door full|dark [wide] [tall]`. Use it at the Rimehold lake shrine and the Chapel of Saint Brannoc, and for the Hall of Bells' late tome.
+
+## What Morvane says aloud
+
+Mateo's ruling on a decision card, 2026-11-10: in the fight he says outright that he was a king, their king, and **never speaks the name Oswin**. The name is only ever written (the journal's last page) and then said by Brother Cael. His stage 6 lines are `REVEAL.fall` in `data/reveal.js`.
+
+## The King's hand
+
+Settled 2026-11-10 with the novel thread. At the truce Oswin took the splinter of the Hollow Crown in his **right** hand, and that hand never served him properly again. From then on he wrote, ate and fought with his left. That is why the Chronicles and the lighthouse letters describe a left-handed king, why Edda believed her father was one of the Returned, and why she was "right about everything except me". He was never a copy. **Morvane fights left-handed and is grey-eyed. The boy in the reveal scene writes with his right.**
+
+## Twelve settlements, twelve ways in
+
+Mateo, 2026-11-10: every settlement needs its own lore and library, "so the game is playable differently 12 times". Each plot has a past, three local books (the Papers of that place), a local Ledger mystery, three prior leaders whose portraits hang in its Library, and a first lead that differs from every other plot. Data: `scripts/lore/data/plots.js` and `data/portraits.js`. The first book is on the Library's bottom shelf on arrival, the second turns up at Town, the third at City. Local books never count toward the 74 or the 16 mysteries.
+
+| Plot | What stood there | The door it opens | Its mystery (answer) | Prior leaders |
+|---|---|---|---|---|
+| Harrowford | The Alder ferry; a meadow full of rusted iron and no bones | The night the Grey Host was taken | The Field Without Bones (3:17) | Ned Harrow, the Warden of the Clock, Jessamy Harrow |
+| Oakmere | King Aldric's hunting lodge, with a second cellar | The journal in every player's pack | The Cellar in the Oakwood (Aldric) | King Aldric, Rafe Aske, Giles Lorimer |
+| Thistledown | An empty bell frame on the down | Corvin Hale before the court | The Empty Frame (Corvin) | Tam Burdock, the Tenant of the Down, Alys Burdock |
+| Wrenfield | A royal summer house by the lake | Edda as a child | The Letter in the Apple Tree (Edda) | Mistress Thorpe, E. aged seven, Garth Appleyard |
+| Rimeholt | Queen Maelis's copper diggings | The casting of the Founding Bell | Forty Tons of Copper (the Founding Bell) | Queen Maelis, Brand Holt, Master Ysolt |
+| Wolfcairn | The cairn of six thousand and four stones | The Calling that fetched the Host | Six Thousand and Four Stones (a bell under the ice) | The First Cairn-Wife, Vorlund before he sailed, Runa Ashby |
+| Gullcliff | A beacon station | Proof Corvin could not have called the Host | Sails Without Wind (two winters) | Ines Marrow, Piers Gannet, Brother-Clerk Aldhelm |
+| Tidewatch | A tide-readers' house | The first Returned | The Last Post (the Returned) | Prior Benet, Brother Caedmon, Wat Tolley after |
+| Reedmoor | The Even Market, a ring of nine posts | Two worlds trading before the Bell | The Even Market (every third night) | The Reeve, Old Sedge, Friar Colm |
+| Lanternbog | A lantern house for the fen's lost | Slips, centuries before yours | The Loose Board (the Hollow) | Marn, Ilse Tarn, Wenna Sedge |
+| Redmesa | The carver's yard of the forty statues | The faceless statues; one face survives | The Forty-First Stone (forty) | Maren Sard, Lord Sorrel, "Under the Bench" |
+| Dunehold | The Order's house of exiled copyists | The cover-up, from inside | The House at the Well ("On the Kingless Years") | Sister Imre, Prior Aubrey, Brother Osric |
+
+None of the local books or portraits names or shows the last king as a man. Each plot's `build` note in `plots.js` lists the small landmark the map needs there; the map thread has reserved a spot (`PLOT_PLAN[i].relic`).
+
+**Portraits and paintings** hang as entity `siege:portrait` (`scripts/lore/portraits.js`, generator `studio/build_lore_portraits.py`, painter's brief `studio/art/PORTRAIT-BRIEF.md`). The eight Long Gallery paintings are in the same system. Click one to read it.
+
+## Ravens
+
+The Ice Isles' birds. Every man of the Host fed one, and a raven carried his name home if he died abroad. When the Host cut down a bell it nailed up a raven in its place: a voice for a voice. When the Host was taken, six thousand birds were left with no names to carry, so they go where the Host is going next and wait. **Ravens on your wall at dusk mean a raid tonight**, and more come the longer your keep has stood. Sigrun explains it. (`scripts/lore/ravens.js`. A real raven bird is asked of the mobs thread; until then it is a line of text at dusk.)
+
+## Places now on the map
+
+Crownhold, the ruined capital with the Hall of Bells, is at -235, -345. Bellhollow, with the sealed Crack in the Deep, is at 155, -100: a dead door, there from the first day, guarded for nothing. Kingsrest is the spawn town below the old capital, not the capital.
+
+## The reveal: who Morvane was
+
+Mateo, 2026-11-10: the reveal must be "a huge poetic cinematic staged reveal", and the story, through the NPCs, must explain enough that the player knows who he is at the end. This replaces the older rule that the twist is never stated at all. The rule now: **nobody says it before the fight, the scene shows it without a name, and afterwards it is said plainly.** Words are in `scripts/lore/data/reveal.js`; the scene itself is the Hollow and mobs threads' work.
+
+**Before the fight, three people each hold one piece**, and none of them knows the other two:
+
+| Who | The piece | Sets |
+|---|---|---|
+| Brother Cael ("The portraits you burned. Whose?") | The Order listed forty-one burned portraits and the lamp oil it used. It never paid for a coffin or a grave for the king. | `heard_no_body` |
+| Sigrun Ashby (after the Grey Host talk, "Say it outdoors, then.") | Those below have no names. If there is a name down there, Morvane, they made it for someone who had lost his own. | `heard_named` |
+| Old Mag ("The day they took the king.") | She was eleven and watched. He was not thrown. He asked them to cut the rope and walked in upright, "like a man going down to his own cellar". | `heard_walked_in` |
+
+When a player has all three, **Archivist Pell** greets them with the three cards side by side and refuses to finish the sentence: "You say it." He points at the Ledger page "Who Is Morvane?" and tells the player to look at his eyes and which hand he uses: the journal describes a right-handed boy, and Quill says the King came back from below using his left. All three pieces are also Ledger clues for that mystery.
+
+**In the fight** (between the sixth and seventh stage, about a minute): a boy of nine at a desk, writing. One line writes itself across the screen, word for word from the journal's eleventh entry: "He is nine, grey-eyed, quick with his right hand and quicker to laugh, and he is afraid of nothing, which frightens me more than the rest of this book together." The room ages around him, boy to king to Morvane. He looks up and says the only spoken line: **"You kept my father's book."** Every bell in Aldmere tolls. No name is spoken.
+
+**The journal's last page.** At that moment the Old King's Journal in every fighter's pack gains a thirteenth page in a different hand (`emit("journalLastPage", { player })`, and again as a safety net on his defeat). It says he found the book at nine, listened before he rang, heard a people asking for one night in three, knocked on the door every third night for three hundred years, and that the name they made for him means "the one who stayed". It ends: "You did not pack this book. I did." Signed **Oswin, son of Aldric, last King of Aldmere**. This pays off the item's first line, "You do not remember packing it."
+
+**After the fight** (flag `morvane_fallen`): Brother Cael says it aloud, "Morvane was King Oswin. Aldric's son," and decides to write the thirteenth volume plainly. Sister Wren offers to remember the boy.
+
+Proposed by the lore thread, for Mateo to overrule: that Morvane means "the one who stayed", and that it was he who put the journal in every player's pack.
+
+## The singing
+
+The Choir's one note, a low held hum (`scripts/lore/singing.js`, sound `siege.choir.hum`). Heard faintly everywhere on every third night and louder near a thin place or the Gate; all the time in the Hollow; within six blocks of a hidden Returned (the fifth tell); louder and a shade higher for a Sorcerer, more with Resonance; at full volume during a Slip. A player can stop their ears with `/scriptevent siege:hum off`. The sound file is a code-made placeholder until a real choir recording replaces it (`studio/build_lore_sound.py --from <file>`).
+
+## The hidden Returned (four families)
+
+Ordinary villagers who are secretly copies (the villagers and tells are `scripts/bestiary/returned.js`; the families and the truth are `scripts/lore/data/returned.js`). Tells the player can test: stands facing the Hollow when nobody is looking, tamed wolves growl, cannot bear a bell (it walks back to the Hollow and may take two villagers with it), and the hum. "Uses the wrong hand" is only ever told by the family, because a villager cannot show a hand.
+
+| Asker | Suspect | Truth |
+|---|---|---|
+| Nessa Dunn, Millbrook bakery | her husband Harl | A copy. Kinder than the real one. |
+| Jorund Kell, Rimehold net sheds | his father Bram | Himself: a ruined arm and failing eyes. Two tells are not proof. |
+| Tilly Marsh, Gull's Rest sea wall | her little brother Pip | A copy, and she knows. She asks you to say nothing. Both choices are rewarded the same. |
+| Hesper Lowe, Mirelight | her husband Odo | Odo is himself. Hesper is the copy and does not know. Ring a bell beside her. |
+
+Place them with `/scriptevent siege:lore_npc <asker>` and `/scriptevent siege:lore_case <harl|bram|pip|hesper>`.
+
+## Keeping it secret (reveal order)
+
+Mateo's rule: the truth reveals itself slowly and is never stated early (see "The reveal" above for the end of it). **Place the tomes so the layers can't be skipped.**
+
+| Layer | What the player believes | Carried by | Where it can sit |
 |---|---|---|---|
-| 1. The official story (Act I) | A good king made a bargain and saved the realm; a wicked mage stole him away | Chronicles 1 to 8 and 10, Sealed 1 to 5, most Testimonies | Open places: chapels, villages, ruins, the Order's reading room |
-| 2. Something is off (Act II) | The king came back wrong (left-handed, never takes off the crown). The Order is hiding things. The coffin was light | Chronicle 9, 11, 12; Sealed 6 to 9; Letters; Corvin I to V, VII, VIII; boss confessions of the Reeve, Huntsman, Bride, Seneschal, Mother | Behind puzzles and regional bosses |
-| 3. What really happened (late Act II, Act III) | There was no bargain: he killed the one below and took the crown. He went back willingly. The saint was his daughter | **Corvin VI** (under the sea, needs the cipher letters), **Corvin IX**, **Sealed 10** (under the tomb floor), Vorlund's Oath | Only behind the hardest gates |
-| 4. It's happening to you (Act III and IV) | Whoever kills the one below becomes the one below, and the Choir is already singing your name | **Corvin X** (Burned Archive), **Litany of the Crowned**, **Oswin's Final Testament**, *The Name We Were* | The Burned Archive, the Rift, the Hollow, the throne |
+| 0. Something is wrong | Odd things happen and nobody knows why | The Old King's Journal, Sister Wren, the First Slip | The first hour |
+| 1. The official story (Act I) | A good king made some bargain and saved the realm; a wicked mage stole him away; raiders are just raiders | Chronicles 1 to 8 and 10, Sealed 1 to 5, most Testimonies | Open places: chapels, villages, ruins, the Order's reading room |
+| 2. Something is off (Act II) | There is another world under this one. The Returned are not the people who left. The Order is hiding a king | Chronicles 9, 11, 12; Sealed 6 to 9; Letters; Corvin I to IV, VII, VIII; the regional bosses' confessions | Behind puzzles and regional bosses |
+| 3. What really happened (late Act II, Act III) | There was a truce. We broke it. The saint was the king's daughter and she threw him in | **Corvin V** (Sunscar vault), **Corvin IX**, **Sealed 10** (under the tomb floor), Vorlund's Oath | Only behind the hardest gates |
+| 4. Who is down there (Act IV) | The sieges are a debt, someone is leading them, and there is a third way | **Corvin X** (Burned Archive), **Litany of the Oathbreakers**, **The Last Testament**, *The Name We Were* | The Burned Archive, the Rift, the Hollow, the throne |
 
-Seeds planted early that only make sense later: the wrong hand (Chronicle 9, Letter 5, Fennick's last notes), "you will keep the door, little Ash" (Chronicle 7), "the third name is coming" (scripture), the Ember whispering names. No character says the twist aloud. Aldous, Cael and Mag only react once the player has read the tome that proves each piece. The mystery "The Hollow Crown" in the Ledger needs three clues that only layer 3 and 4 tomes give, so it can't be answered early.
+The mysteries "The Missing King", "The Broken Truce" and "Who Is Morvane?" each need one specific late clue before they can be answered, so the answers never appear early in a list. Aldous, Cael and Mag only react once the player has read the tome that proves each piece.
 
 ## Who lies, and why
 
 | Voice | Collection | Reliability |
 |---|---|---|
-| Master Bertram Quill | The Oswin Chronicles (12) | Writes what the court tells him, but can't help noting true details (the coffin was too light, the King changed hands). Volume 10 was dictated to him |
+| Master Bertram Quill | The Oswin Chronicles (12) | Writes what the court tells him, but can't help noting true details (the coffin was too light, the King would not let him write the terms) |
 | The Order | Sealed Records of the Ashen Gate (12) | Public records lie outright. Internal orders tell the truth. One unsent letter by Edda confesses everything |
-| Corvin Hale | Corvin's Notebooks (10) | Truthful. He was there. Burned for it |
-| Brother Fennick | The Surveyor's Field Notes (7) | Truthful but deliberately split up, and he is slowly being turned |
-| Elias Marrow | The Lighthouse Letters (8) | Honest and wrong: he doesn't know he's an echo, or that his lamp guides the Choir's creatures ashore. Written in cipher |
-| The Choir | Hollow Scripture (8) | True from the Choir's side, and meant to tempt. Written right to left (needs Tide Glass) |
+| Corvin Hale | Corvin's Notebooks (10) | Truthful. He held the lamp at the truce. Burned for refusing to forget |
+| Brother Fennick | The Surveyor's Field Notes (7) | Truthful but deliberately split up |
+| Elias Marrow | The Lighthouse Letters (8) | Honest and wrong: he doesn't know he's an echo, or that his lamp guides things ashore. Written in cipher |
+| The Choir | The Sung Verses (8) | True from the Hollow's side: they are the wronged party in their own telling. Written right to left (needs Tide Glass) |
 | Ordinary people | Testimonies of the Lost Days (10) | Mixed. Officials lie, children and old women don't, and one is written by a changeling |
 | The bosses | The Fallen (7) | True. Each boss tome is a confession |
+| King Aldric | The Old King's Journal | Truthful and understands none of it |
 
 ### Deliberate contradictions players can catch
 
-| One tome says | Another says | Truth |
+| One source says | Another says | Truth |
 |---|---|---|
-| Chronicle 8: the King "struck a bargain" and paid nothing | Corvin VI: "We did not bargain." He killed Maelis | Corvin |
-| Chronicle 10: Corvin dragged the King below by treachery | Edda's unsent letter: "He went willingly" | Edda |
-| Sealed 2: there was never a King Oswin | The whole Chronicle; the lighthouse keeper saw him | He existed |
-| Sealed 3: the war was won by prayer | Corvin VI, Vorlund's Oath | The Choir ate the Host |
-| Sealed 4: Saint Ashe was a shepherd's daughter | Chronicle 3 (grey mark on the princess's left palm), unsent letter | She was Edda |
-| Sealed 5: Corvin called the Grey Host with his bells | Chronicle 2 and 4: he arrived two years after the Host | The trial was a sham |
+| Chronicle 8: the King "struck a bargain" and would not say what | Corvin V gives the terms word for word | Corvin |
+| Chronicle 10: Corvin dragged the King below by treachery | Edda's unsent letter: "I put him through the Crack with my own hands, alive" | Edda |
+| Sealed 2: there was never a King Oswin | The whole Chronicle; the journal's "my son"; the lighthouse keeper saw him | He existed |
+| Sealed 3: the war was won by prayer | Corvin V, Vorlund's Oath | The Hollow took the Host as its side of the truce |
+| The Order: the Hollow attacked us unprovoked | Corvin X: "We broke the truce, not they" | Corvin |
+| Sealed 4: Saint Ashe was a shepherd's daughter | Chronicle 3, the unsent letter | She was Edda |
+| Sealed 5: Corvin called the Grey Host with his bells | Chronicles 2 and 4: he arrived two years after the Host | The trial was a sham |
 | Notice to Millbrook: the returned are "only tired" | The Order's own standing orders; Wren's account | They are shapes sent up from the Hollow |
-| Parish register: Annet died of a fever | Letters 1 and 4 | The sea took her the night the war ended |
-| Sunscar record: the wind wore the faces off | The Order's inventory; the Seneschal's confession | Lord Sorrel did it with a chisel |
+| Parish register: Annet died of a fever | Letters 1 and 4 | The sea took her the night of the truce |
+| Sunscar record: the wind wore the faces off | The Order's inventory; the Seneschal's confession | It was done with a chisel |
 | Bestiary: "there is no single Warlord King" | Vorlund's Oath | It is one man, 300 years old |
 | Chronicle 12: "Here lies Oswin" | Same tome: "It was too light" | The tomb is empty |
+- **How long the peace lasted.** Chronicle 10 (the ordered lie) says the King was taken "in the second year of peace". Chronicle 3 has Edda born in the fourth year of the war and Chronicle 11 has her Regent at seventeen. The peace lasted about thirteen years. Dates if ever needed: Aldric's thirtieth year 399, crowning 409, truce 419, overthrow 432.
+- **The King's hand.** Chronicle 9 and the fifth lighthouse letter make him left-handed after the truce, which reads like the mark of a Returned. He was not one: see "The King's hand". Corvin's fifth notebook now has him take the splinter in his right hand and flinch.
 
 ## The mysteries players solve (in the Ledger of Whispers)
 
-Reading a tome copies its clues into the Ledger under the right mystery. With enough clues the player can answer. Typed answers can't be guessed from a list; a wrong answer locks the thread for a day.
+Reading copies clues into the Ledger under the right mystery. With enough clues the player can answer. Typed answers can't be guessed from a list; a wrong answer locks the thread for a day. Everything here can be solved by one player alone.
 
 | Mystery | Answer | How |
 |---|---|---|
-| The Lost Days | Shapes sent up from the Hollow to replace people the Choir took | Choice |
-| The Stopped Clocks | **3:17** | Typed |
-| The Missing King | Went down willingly, sealed in by his daughter, still alive | Choice |
-| The Saint of the Gate | **Edda** | Typed |
-| The Bell Beneath | The Choir tolls every third night; the angry and empty march on the brightest keep | Choice |
-| The Wrong Moon | A door carved with a full moon opens on the new moon | Choice |
-| The Ember | A shard of the Bell Crown | Choice |
-| The King of Raiders | **Vorlund** | Typed |
-| The Hollow Crown | He killed the last wearer and took it; whoever does becomes the next | Choice |
-| The Keeper's Light | The lamp shows the Choir's creatures the shore | Choice |
-| The Faceless Statues | **Oswin** | Typed |
+| The Old King's Journal | **Aldric** | Typed |
 | Where Was I? (opens with the First Slip) | **The Hollow** | Typed |
-| The Name We Were | **Hallowmere** (sets the `true_name` flag for the third ending) | Typed |
+| The Lost Days | Shapes sent up from the Hollow to fill the place of someone it took | Choice |
+| The Stopped Clocks | **3:17** | Typed |
+| The Missing King | Overthrown by his daughter and put through the Crack alive | Choice, needs a late clue |
+| The Saint of the Gate | **Edda** | Typed |
+| The Bell Beneath | The Hollow calls every third night; the angry and the empty march on the brightest keep | Choice |
+| The Wrong Moon | The Hollow has its own moon; a full-moon door opens when ours is dark | Choice |
+| The Ember | A splinter of the Hollow's own crown | Choice |
+| The King of Raiders | **Vorlund** | Typed |
+| The Broken Truce | A truce for every third night; his own people overthrew him and broke it | Choice, needs a late clue |
+| The Keeper's Light | The lamp shows the Hollow's creatures the shore | Choice |
+| The Faceless Statues | **Oswin** | Typed |
+| The Name We Were | **Hallowmere** (the older spelling Hollowmere is accepted too; sets `true_name` for the third ending) | Typed |
+| Who Is Morvane? | **Oswin** | Typed, needs a clue from the Hollow itself |
 | The Wandering Gate | The real thin place, named in a Library | Deduction, below |
 
-Solving all 14 fires `loreAllSolved` (the key to the hidden ending).
+Solving them all fires `loreAllSolved` (the key to the hidden ending).
+
+## A world played alone (voices for NPC "players")
+
+In `lore/data/lords.js`: twelve **Rival Lords** (name, seat, region, one of six temperaments, eleven lines each including a third-night remark and a rumor that points at the story); ten names and all the lines for the **NPC rulers of the Hollow**; and extra job text for the town hall's **Rumor Board**. The lore module sends them out at load (`rivalLordVoices`, `rumorParts`, `setRegentVoice`).
 
 ## The First Slip
 
@@ -96,7 +241,7 @@ The Source and Rift sit at one of these, picked secretly per world. Six Field No
 | The Bellfounders' Mine | Frostmarch | no | yes | yes | yes | no | no |
 | King's Barrow | Vale | no | no | yes | no | no | yes |
 | The Saltglass Grotto | Emberwaste | no | no | no | no | yes | no |
-| Frostvein Hollow | Frostmarch | no | no | no | yes | no | no |
+| Frostvein Gap | Frostmarch | no | no | no | yes | no | no |
 | The Sunken Quarry | Vale | yes | no | yes | no | no | no |
 | The Witchroot Caves | Blackfen | yes | no | no | no | no | yes |
 
@@ -106,16 +251,16 @@ A player shelves the six notes, reads them, visits the sites, and uses **Name th
 
 | Id | Who | Where | What they lead to |
 |---|---|---|---|
-| `wren` | Sister Wren, healer whose brother came back wrong | Millbrook | The clock tower, the Order's waystation, Hollowfast and Sigrun. Gives *What Happened to Tobin* |
-| `aldous` | Sir Aldous Vane, young knight who believes the Order | Comes for the Ember, then the chapterhouse | The chapterhouse, Corvin's Tower (if you are Marked), Brother Cael. Turns ally once you've read Edda's letter |
+| `wren` | Sister Wren, healer whose brother came back wrong | Millbrook | Recognises the Old King's Journal. The clock tower, the Order's waystation, Rimehold and Sigrun. Gives *What Happened to Tobin* |
+| `aldous` | Sir Aldous Vane, young knight who believes the Order | Comes for the Ember, then the chapterhouse | The chapterhouse, Corvin's Tower (if you are a Sorcerer), Brother Cael. Turns ally once you've read Edda's letter |
 | `mag` | Old Mag, Corvin's last apprentice, 311 | Mirelight | Corvin's Tower, the frozen lake, the changeling. Gives Notebook III, a hymn, and (once all ten notebooks are read) *The Name We Were* |
 | `elias` | The Lighthouse Keeper, an echo who doesn't know it | Gull's Rest lighthouse | The letters, the Cipher Wheel, the sunken chapel. Ends by asking you to put the lamp out |
 | `sage` | Archivist Pell, thrown out of the Order for reading | Your town hall or Library | The hint system: how the Library works, how to weigh sources, how to find the Source |
 | `cael` | Brother Cael, the Order's archivist | Chapterhouse archive | The Burned Archive (only if Aldous sends you), then King's Barrow |
-| `sigrun` | Sigrun Ashby, Wren's northern cousin | Hollowfast | The lake, the shrine, the hunter's lodge. Gives *Grandmother Ashby's Account* |
+| `sigrun` | Sigrun Ashby, Wren's northern cousin | Rimehold | The lake, the shrine, the hunter's lodge. Gives *Grandmother Ashby's Account* |
 | `isolde` | Warden Isolde | Sunscar | The statue fragments, the vault riddle ("grey eyes over a laughing mouth, the right hand raised") |
 
-What a character says depends on what you've read, solved and done, and whether you are Marked.
+What a character says depends on what you've read, solved and done, and whether you are a Sorcerer.
 
 ## Placing things on the map
 
@@ -123,3 +268,12 @@ What a character says depends on what you've read, solved and done, and whether 
 - **Characters:** `/scriptevent siege:lore_npc <id>` spawns one where you stand (`list` shows them all).
 - **Places:** `/scriptevent siege:lore_mark_place <id>` records a town or ruin so Ledgers can show a heading to it. Hidden places never get a heading.
 - Drops need no placing: each boss drops its confession, some night creatures drop hymns and testimonies, the first siege win drops *Hymn for the Coming Crown*.
+- **The journal** needs no placing either: every player is given it the first time they join. `/scriptevent siege:journal` gives another copy.
+
+## The first sighting and the morning after
+
+Mateo, 2026-11-10: the raids start as men (Grey Host variants) and one night become actual soldiers of the Hollow, "the first real what the heck is that moment", before anyone knows what the Hollow is. The siege raids feature stages the night itself (the army stops, looks back, and a Veinsworn walks up through it). Lore owns the morning after (`scripts/lore/glimpse.js`).
+
+- At first light your own people talk about it (three versions if you were there, one if you were away). Nobody names it.
+- Five people then have one new conversation each, and each holds one corner only. Sigrun: the Host never brought anything like that, it was the last thing the Host saw, and "last night it sent one of its own". Brother Cael: an unlabelled drawer of eleven reports over three hundred years, each written the season before a village went silent; the old brothers' phrase "tall company". Old Mag: it was not angry, it was sent to look, to see how high you build; she will not say what it is. Sir Aldous: he reported one and watched the clerk burn the page without surprise. Archivist Pell: nothing in the books, but pages neatly cut from four of them.
+- Nobody says the Hollow's name for itself, Morvane, or Oswin in any of it. The player should leave with the question "sent by what?".

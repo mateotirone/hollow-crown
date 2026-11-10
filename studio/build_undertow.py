@@ -16,10 +16,10 @@ def write_json(path, data):
 # name: (display, map color, options)
 BLOCKS = {
     "veinstone": ("Veinstone", "#2a2230", dict(hard=2.5, sound="deepslate")),
-    "undertow_moss": ("Hollow Moss", "#5a2f6e", dict(hard=0.8, sound="moss_block")),
+    "undertow_moss": ("Veilmoss", "#5a2f6e", dict(hard=0.8, sound="moss_block")),
     "veil_rock": ("Veil Rock", "#1c1622", dict(unbreakable=True, lets_light=True, sound="deepslate")),
-    "hollowwood_lattice": ("Hollowwood Lattice", "#7a4a8a", dict(hard=1.5, cutout=True, sound="nether_wood")),
-    "hollowwood_core": ("Hollowwood Core", "#ff9ad0", dict(hard=1.5, light=12, sound="nether_wood")),
+    "hollowwood_lattice": ("Latticewood", "#7a4a8a", dict(hard=1.5, cutout=True, sound="nether_wood")),
+    "hollowwood_core": ("Latticewood Core", "#ff9ad0", dict(hard=1.5, light=12, sound="nether_wood")),
     "veilcap": ("Veilcap", "#ff8fd0", dict(plant=True, light=9, sound="fungus")),
     "glimbulb": ("Glimbulb", "#a8e4ff", dict(plant=True, light=7, sound="fungus")),
     "glimmerflow": ("Glimmerflow", "#bfeaff", dict(ghost=True, light=13, unbreakable=True, sound="powder_snow")),
@@ -75,7 +75,7 @@ ITEMS = {
     "choir_shard": ("Choir Shard", 16),
     "raw_choir_ore": ("Raw Choir Ore", 64),
     "choirsteel_ingot": ("Choirsteel Ingot", 64),
-    "wardens_bell": ("Bell of the Hollow Crown", 1),
+    "wardens_bell": ("The Deep Bell", 1),
 }
 
 def item_json(name, stack):

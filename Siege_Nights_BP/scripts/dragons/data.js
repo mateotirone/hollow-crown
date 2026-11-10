@@ -31,6 +31,14 @@ export const DRAGON_SETTINGS = {
   archerReach: 28,
   archerDamage: 1, // per archer, per second, up to 4 archers
   archerStamina: 0.04,
+  // Shot down or beaten to its last strength, a dragon falls unconscious instead of dying
+  downedLife: 20, // how much more punishment an unconscious dragon takes before it dies (a sword blow is 4, an arrow 3)
+  bleedOutTicks: 12000, // untended, it bleeds out in 10 minutes (the clock only runs while its owner is online)
+  tendItems: ["minecraft:golden_apple", "minecraft:enchanted_golden_apple"], // what its owner or an ally tends it with
+  wakeTicks: 1200, // tended, it wakes after a minute
+  wakeHealth: 0.3, // with this share of its health
+  wakeGroundedTicks: 2400, // and won't fly for two minutes
+  corpseTicks: 6000, // a dead dragon lies where it fell for 5 minutes (longer if a siege is still going), then crumbles to ash
   permadeath: true, // a dead dragon is gone for good (false: it wakes wounded at its Roost)
   mournDays: 3, // after a death the nests give that player no egg for this long
   woundedDays: 2, // (permadeath off) days it rests at the Roost
@@ -45,7 +53,40 @@ export const ROOST = "siege:dragon_roost";
 export const NEST = "hc:dragon_nest"; // placed by the map builder (hc: because Siege Nights refuses siege: blocks off your land)
 export const DAY = 24000;
 
-export const HUES = ["Ember", "Ash", "Sand", "Obsidian"];
+export const RESERVE = 30; // hidden health under every dragon (studio/build_dragons.py): at this much left it falls unconscious
+
+// The four species. Shifts move it up or down the speed and health ladders (one step = one training level).
+export const SPECIES = [
+  { key: "cinderwing", name: "Cinderwing", flight: 0, ground: 0, air: 0, vigor: 0, breath: "fire", breathBonus: 3, gift: "minecraft:blaze_powder",
+    blurb: "Four-legged, broad-winged. The all-rounder, with the hottest fire." },
+  { key: "wyvern", name: "Ashen Wyvern", flight: 0, ground: -1, air: 1, vigor: -1, breath: "ash", breathBonus: 0, gift: "minecraft:feather",
+    blurb: "Two legs and wings for arms. The fastest flier, easily hurt. Breathes blinding ash." },
+  { key: "drake", name: "Dune Drake", flight: -10, ground: 1, air: -1, vigor: 1, breath: "sand", breathBonus: 0, gift: "minecraft:gold_nugget",
+    blurb: "Low, wide and armoured. Hard to bring down, quick on foot, tires fast in the air. Its sandblast throws things back." },
+  { key: "wyrm", name: "Glass Wyrm", flight: 10, ground: -1, air: 0, vigor: -1, breath: "glass", breathBonus: 0, gift: "minecraft:amethyst_shard",
+    blurb: "A long frilled serpent with four narrow wings. Stays up longest, frail. Its breath leaves things slow and weak." },
+];
+export const speciesOf = (rec) => SPECIES[rec.species] ?? SPECIES[0];
+const step = (level, shift) => Math.max(0, Math.min(7, level + 1 + shift));
+export const groundStep = (rec) => step(rec.stats.speed, speciesOf(rec).ground);
+export const airStep = (rec) => step(rec.stats.speed, speciesOf(rec).air);
+export const healthStep = (rec) => step(rec.stats.vigor, speciesOf(rec).vigor);
+
+// Who it is. Rolled when it hatches and never changes.
+export const TEMPERS = {
+  proud: { name: "Proud", desc: "Holds itself apart. Slow to trust, hates being ordered about, never forgets a slight." },
+  curious: { name: "Curious", desc: "Into everything. Bonds fast, wanders, brings you things." },
+  gentle: { name: "Gentle", desc: "Stays close. Frets when you are hurt. Slow to fight." },
+  fierce: { name: "Fierce", desc: "Spoiling for it. First to defend you, quick to bite a stranger." },
+  wary: { name: "Wary", desc: "Watches everything. Senses danger from far off, startles easily." },
+};
+export const newMind = () => ({
+  temper: Object.keys(TEMPERS)[Math.floor(Math.random() * 5)],
+  hunger: 30, mood: 20, // hunger 0 (full) .. 100 (starving); mood -100 (sullen) .. 100 (devoted)
+  fav: FOODS[Math.floor(Math.random() * (FOODS.length - 1))], favKnown: false,
+  grudges: {}, // player id -> { name, until }
+  lastSeen: 0, sulking: 0, giftAt: 0,
+});
 export const STAGES = ["hatchling", "fledgling", "adult"];
 export const STAGE_NAMES = { egg: "Egg", hatchling: "Hatchling", fledgling: "Fledgling", adult: "Adult" };
 export const FOODS = ["minecraft:beef", "minecraft:porkchop", "minecraft:mutton", "minecraft:chicken", "minecraft:rabbit",
@@ -60,7 +101,7 @@ export const TRAINING = {
 };
 
 export const newDragon = (owner, ownerName, now) => ({
-  owner, ownerName, name: "Dragon Egg", hue: Math.floor(Math.random() * HUES.length),
+  owner, ownerName, name: "Dragon Egg", species: Math.floor(Math.random() * SPECIES.length),
   stage: "egg", status: "carried", // carried -> warming -> out | roosted | wounded
   bond: 0, level: 1, xp: 0, tp: 0, stats: { wings: 0, speed: 0, vigor: 0, breath: 0 },
   saddled: false, order: "follow", gen: 0, takenAt: now,
@@ -84,7 +125,7 @@ export function addXp(rec, amount) {
 
 export const addBond = (rec, amount) => (rec.bond = Math.max(0, Math.min(100, rec.bond + amount)));
 
-export const flightTicks = (rec) => (DRAGON_SETTINGS.flightSeconds + DRAGON_SETTINGS.flightSecondsPerWings * (rec.stats?.wings ?? 0)) * 20;
+export const flightTicks = (rec) => (DRAGON_SETTINGS.flightSeconds + speciesOf(rec).flight + DRAGON_SETTINGS.flightSecondsPerWings * (rec.stats?.wings ?? 0)) * 20;
 
 // The stage this dragon has earned by age and bond. It never goes backwards.
 export function earnedStage(rec, now) {

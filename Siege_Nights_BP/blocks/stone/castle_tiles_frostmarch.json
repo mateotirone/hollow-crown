@@ -1,0 +1,70 @@
+{
+  "format_version": "1.21.60",
+  "minecraft:block": {
+    "description": {
+      "identifier": "siege:castle_tiles_frostmarch",
+      "menu_category": {
+        "category": "construction"
+      },
+      "states": {
+        "siege:cracks": [
+          0,
+          1,
+          2
+        ]
+      }
+    },
+    "components": {
+      "minecraft:display_name": "tile.siege:castle_tiles_frostmarch.name",
+      "minecraft:destructible_by_mining": {
+        "seconds_to_destroy": 2.5
+      },
+      "minecraft:destructible_by_explosion": {
+        "explosion_resistance": 30
+      },
+      "minecraft:geometry": "minecraft:geometry.full_block",
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "siege_castle_tiles_frostmarch",
+          "render_method": "opaque"
+        }
+      },
+      "minecraft:map_color": "#5a6270"
+    },
+    "permutations": [
+      {
+        "condition": "q.block_state('siege:cracks') == 0",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_castle_tiles_frostmarch_stone_0",
+              "render_method": "opaque"
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:cracks') == 1",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_castle_tiles_frostmarch_stone_1",
+              "render_method": "opaque"
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:cracks') == 2",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_castle_tiles_frostmarch_stone_2",
+              "render_method": "opaque"
+            }
+          }
+        }
+      }
+    ]
+  }
+}

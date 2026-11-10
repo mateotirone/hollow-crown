@@ -4,10 +4,11 @@
 import { world, system, ItemStack } from "@minecraft/server";
 import { isReady, on, getState, keepOf } from "../siege/api.js";
 import { IDS, CROWN } from "./config.js";
-import { crown, saveCrown, giveItem, addClaim, ruler } from "./state.js";
+import { crown, saveCrown, giveItem, addClaim, ruler, lords } from "./state.js";
 import { clickCornerstone, raiseCitadel, citadel } from "./citadel.js";
-import { throneMenu, offerCrown, crownPlayer, addHollowing, crownStatus } from "./reign.js";
-import { claimantWins } from "./usurp.js";
+import { throneMenu, crownPlayer, addHollowing, crownStatus } from "./reign.js";
+import { restHeart } from "./heart.js";
+import { claimantWins, lordChallenge, npcWins } from "./usurp.js";
 import "./exile.js";
 import "./tests.js";
 
@@ -27,16 +28,19 @@ world.afterEvents.playerInteractWithBlock.subscribe((event) => {
 // ---------- The handoff from the Undertow: the Hollow Choir is dead ----------
 
 function bossDefeated(data) {
-  if (data?.boss !== "hollow_choir") return;
-  offerCrown([data.killer, ...(data.allies ?? [])].filter(Boolean)).catch((e) => console.warn(`[Hollow Crown] crown offer: ${e}`));
+  if (!CROWN.heartBosses.includes(data?.boss)) return;
+  if (crown().resting && data.boss !== CROWN.heartBosses[0]) return; // only the final boss moves a Heart that is already lying somewhere
+  const killer = world.getPlayers().find((p) => p.id === data.killer); // the Heart comes to rest where the killing blow was struck
+  if (killer) return restHeart(killer.location, killer.dimension.id);
+  if (typeof data.x === "number") restHeart(data, data.dimension ?? "siege:undertow");
 }
 on("siege:boss_defeated", bossDefeated);
 
 // ---------- Commands for testing (need cheats): /scriptevent siege:crown_<something> ----------
 
 const COMMANDS = {
-  // Offer the Crown to you and every player within 48 blocks, as if you had just killed the final boss
-  crown_offer: (player) => { offerCrown(player.dimension.getPlayers({ location: player.location, maxDistance: 48 }).map((p) => p.id)).catch((e) => player.sendMessage(`§c${e}`)); },
+  // Lay the Heart at your feet, as if the final boss had just died here. Click it to reach for it.
+  crown_offer: (player) => restHeart(player.location, player.dimension.id),
   crown_me: (player) => crownPlayer(player),
   crown_claim: (player, n) => addClaim(player, Number(n) || CROWN.claimNeeded, "test command"),
   crown_shard: (player) => giveItem(player, new ItemStack(IDS.shardItem, 1)),
@@ -45,6 +49,21 @@ const COMMANDS = {
   crown_grace: () => { crown().graceUntil = 0; saveCrown(); },
   // End a running Storm in the claimant's favor
   crown_usurp: () => claimantWins("a test command broke the Seal"),
+  // Rival lords. crown_rival: a lord throws down the Gauntlet against the ruler (their army comes next siege night).
+  // crown_lord: a lord takes the throne from you right now, so you can try winning it back.
+  crown_rival: (player) => {
+    const c = crown();
+    if (!c.ruler || c.ruler.npc) return player.sendMessage("§7A player has to hold the throne first (/scriptevent siege:crown_me).");
+    if (c.challenge) return player.sendMessage("§7A Gauntlet is already down.");
+    c.graceUntil = 0;
+    lordChallenge(lords()[0]);
+  },
+  crown_lord: (player) => {
+    const c = crown();
+    if (c.ruler?.id !== player.id) return player.sendMessage("§7You have to hold the throne first (/scriptevent siege:crown_me).");
+    if (!c.challenge?.npc) lordChallenge(lords()[0]);
+    npcWins("a test command opened the gates");
+  },
   // Drop a Crown Shard 6 blocks east of you
   crown_shardfall: (player) => {
     crown().shards.push({ x: Math.floor(player.location.x) + 6, z: Math.floor(player.location.z), placed: false });

@@ -1,5 +1,5 @@
 // Lore exhibits for the test world (/scriptevent siege:showcase): a small Library, a Dusty Tome,
-// the reading tools, and all eight story characters standing in a row.
+// the reading tools, and all thirteen story characters standing in a row.
 
 import { ItemStack } from "@minecraft/server";
 import { on } from "../siege/api.js";
@@ -10,6 +10,7 @@ import { stockShelf } from "./library.js";
 import { placeCache } from "./caches.js";
 import { spawnNpc } from "./npcs.js";
 import { makeJournal } from "./journal.js";
+import { makeArtsBook } from "./arts.js";
 
 on("showcase", ({ player, dim, nextSpot, label }) => {
   const owner = player.id;
@@ -55,6 +56,7 @@ on("showcase", ({ player, dim, nextSpot, label }) => {
   saveProgress(player);
   for (const typeId of [LEDGER, CIPHER_WHEEL, MIRROR_GLASS]) giveItem(player, new ItemStack(typeId, 1));
   giveItem(player, makeJournal());
+  giveItem(player, makeArtsBook());
   for (const id of ["surv_01", "scri_01", "fall_01", "corv_01"]) giveItem(player, makeTome(id));
-  player.sendMessage("§6Lore:§r the Library shelves, a Dusty Tome and the eight characters are in the back row. You have the Old King's Journal (every player starts with one), a Ledger of Whispers, a Cipher Wheel, a Tide Glass and four tomes. More: /scriptevent siege:lore_give all");
+  player.sendMessage("§6Lore:§r the Library shelves, a Dusty Tome and the thirteen characters are in the back row (four are families who suspect someone of being a Returned; the last is a voice only a Sorcerer can understand). You have the Old King's Journal (every player starts with one), The Fourteen Arts (Old Mag gives it to Sorcerers), a Ledger of Whispers, a Cipher Wheel, a Tide Glass and four tomes. The singing: /scriptevent siege:hum. The journal's last page: /scriptevent siege:journal_last_page. Local books: /scriptevent siege:local_lore harrowford (any plot name). Portraits: look at a wall and run /scriptevent siege:portrait gallery (or a plot name). Ravens: /scriptevent siege:ravens. Moon doors: /scriptevent siege:moon_door. Corvin: /scriptevent siege:corvin. More: /scriptevent siege:lore_give all");
 });

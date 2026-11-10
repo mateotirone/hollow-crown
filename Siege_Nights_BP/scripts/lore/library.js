@@ -5,7 +5,7 @@ import { world, system, ItemStack } from "@minecraft/server";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
 import { emit, keepOf, isAlly, isReady, onTick } from "../siege/api.js";
 import { isTesting } from "../core/tests.js";
-import { TOME, TOMES, COLLECTION, tomesOf, hasReadAll, libraryRank } from "./logic.js";
+import { TOME, TOMES, COLLECTION, tomesOf, hasReadAll, libraryRank, isLocal } from "./logic.js";
 import { COLLECTIONS, MILESTONES, PLACES, SITE_IDS, THREADS } from "./data/world.js";
 import {
   tomeIdOf, makeTome, progressOf, saveProgress, sourceSite, giveItem, awardPoints, setFlag, landOwnerAt, ensureLedger,
@@ -39,7 +39,8 @@ function saveLib(owner) {
 
 // Every tome id shelved anywhere in this owner's Library
 export const shelvedIn = (owner) => Object.values(libOf(owner)).flat();
-export const libraryCount = (owner) => (owner ? shelvedIn(owner).length : 0);
+// local books sit on the shelves but do not count toward the 74 or Library rank
+export const libraryCount = (owner) => (owner ? shelvedIn(owner).filter((id) => !isLocal(id)).length : 0);
 
 function showFill(block, count) {
   try {

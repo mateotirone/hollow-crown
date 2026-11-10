@@ -2,9 +2,9 @@
 
 import { addTests, assert, assertEqual } from "../siege/api.js";
 import { BlockTypes, ItemTypes } from "@minecraft/server";
-import { DRAGON_SETTINGS as S, DAY, EGG, SADDLE, HORN, ROOST, NEST, TRAINING, newDragon, addXp, flightTicks, earnedStage, nextStageNeeds, trainProblem, train } from "./data.js";
+import { DRAGON_SETTINGS as S, DAY, EGG, SADDLE, HORN, ROOST, NEST, TRAINING, SPECIES, TEMPERS, newDragon, newMind, groundStep, airStep, healthStep, addXp, flightTicks, earnedStage, nextStageNeeds, trainProblem, train } from "./data.js";
 
-const hatched = (extra = {}) => Object.assign(newDragon("p1", "Tester", 0), { stage: "hatchling", bornAt: 0 }, extra);
+const hatched = (extra = {}) => Object.assign(newDragon("p1", "Tester", 0), { stage: "hatchling", bornAt: 0, species: 0 }, extra);
 
 addTests("dragons", {
   "flight lasts 45 seconds untrained and 60 fully trained": () => {
@@ -46,6 +46,29 @@ addTests("dragons", {
     rec.tp = 0;
     assert(!train(rec, "wings"), "no points left");
     assertEqual(S.breathDamage.length, TRAINING.breath.max + 1);
+  },
+});
+
+addTests("dragons (species and minds)", {
+  "four species, each different, all within the speed and health ladders": () => {
+    assertEqual(SPECIES.length, 4);
+    const seen = new Set();
+    SPECIES.forEach((sp, i) => {
+      seen.add(`${sp.flight},${sp.ground},${sp.air},${sp.vigor},${sp.breath}`);
+      for (const level of [0, 5]) {
+        const rec = hatched({ species: i, stats: { wings: 0, speed: level, vigor: level, breath: 0 } });
+        for (const stepOf of [groundStep, airStep, healthStep]) assert(stepOf(rec) >= 0 && stepOf(rec) <= 7, `${sp.name} off the ladder`);
+      }
+      assert(flightTicks(hatched({ species: i })) >= 30 * 20, `${sp.name} can barely fly`);
+    });
+    assertEqual(seen.size, 4, "two species are the same");
+  },
+  "a new mind has a temperament and a favourite food to discover": () => {
+    for (let i = 0; i < 20; i++) {
+      const mind = newMind();
+      assert(TEMPERS[mind.temper], "unknown temperament");
+      assert(mind.fav && !mind.favKnown && mind.fav !== "minecraft:rotten_flesh");
+    }
   },
 });
 

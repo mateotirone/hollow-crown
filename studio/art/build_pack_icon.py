@@ -33,21 +33,15 @@ for a, b in zip(crack, crack[1:]):
     for (x, y) in line(a, b):
         t.set(x, y, R(VIOLET, 5)); t.set(x - 1, y, R(VIOLET, 3)); t.set(x + 1, y, R(VIOLET, 2))
 for (x, y) in [(17, 26), (18, 27), (12, 28), (11, 29)]: t.set(x, y, R(VIOLET, 3))
-# the crown: gold rim, hollow inside
-CROWN = ["..g.....g..gg..g.....g..",
-         "..gG...gGg.gG.gGg...gG..",
-         ".gGGg.gGGGgGGgGGGg.gGGg.",
-         ".gGdGgGGdGGGGGGdGGgGdGg.",
-         ".gGd.GGd..GGGG..dGG.dGg.",
-         ".gGd................dGg.",
-         ".gGGGGGGGGGGGGGGGGGGGGg.",
-         ".gGrGGdGGGvGGvGGGdGGrGg.",
-         ".dddddddddddddddddddddd."]
-CL = {'g': R(G, 5), 'G': R(G, 3), 'd': R(G, 1), 'r': R(M['ruby'], 3), 'v': R(VIOLET, 4)}
+# the crown: violet cracked stone, magenta veins, blue gems, amethyst in the tall centre spike (Mateo's reference)
+CROWN = ["...........oo...........", "..........oaao..........", "....o.....oaAo.....o....", "...oPo...oPAApo...oPo...", ".o.oPo..oPp..pdo..oPo.o.", "oPooPpo.oPp.w.pdo.opdoPo",
+         "oPdoPpdooPv.b.vdoopddoPd", "oPpdPvpdoPpv.vpdopvpdppd", "oPpppvppPpvpvpvpdppvpppd", "oPbppvvpbppvbvppbpvvppbd", "opppppvppppvpvppppvppppd", ".dddddddddddddddddddddd."]
+ST = fixed('#150c1e', '#2a1838', '#402654', '#583670', '#744c90', '#9670b2')
+CL = {'o': R(ST, 0), 'd': R(ST, 1), 'p': R(ST, 3), 'P': R(ST, 5), 'v': (255, 96, 204, 255), 'a': R(VIOLET, 5), 'A': R(VIOLET, 3), 'b': (184, 226, 248, 255), 'w': (255, 255, 255, 255)}
 for j, row in enumerate(CROWN):
+    assert len(row) == 24
     for i, ch in enumerate(row):
-        if ch in CL: t.set(4 + i, 7 + j, CL[ch])
-        elif ch == '.' and 4 <= j <= 5 and 3 < i < 20: t.set(4 + i, 7 + j, R(NIGHT, 0))   # the hollow
+        if ch in CL: t.set(4 + i, 5 + j, CL[ch])
 outline = t.im.copy()
 big = t.im.resize((256, 256), Image.NEAREST).convert('RGBA')
 for p in ('/mnt/project-files/siege-nights/Siege_Nights_RP/pack_icon.png', '/mnt/project-files/siege-nights/Siege_Nights_BP/pack_icon.png'): big.save(p)

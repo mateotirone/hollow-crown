@@ -1,0 +1,45 @@
+{
+  "about": "Hand-designed centre of the Hollow (Hollow world thread, 2026-11-10). Mateo: 'The main center where you spawn in and where you can explore will all be custom: have paths, have the villages, have custom structures, whatever. Bridges'. Everything past it stays generated. Positions were checked against undertow/terrain.js heightAt and rivers.js riverDistance: every site is dry, within 5 blocks of flat over a 14-block radius, and at least 22 blocks from a river. Names are working names, not confirmed by Mateo. Merge into undertow/roads.js (SITES, ROADS); roads here run site to site, so ROADS needs a 'from' as well as 'leaveZ'.",
+  "extent": { "x": [-700, 560], "z": [-48, 1540], "note": "south of the Court wall; north of it stays as it is" },
+  "sites": [
+    { "id": "pilgrims_cross", "name": "Pilgrim's Cross", "x": -342, "z": 760, "y": 72, "r": 10, "what": "West crossroads. Stone signpost with four arms, a lamp, a bench, a waystone-style marker. No building." },
+    { "id": "cartmeet", "name": "Cartmeet", "x": 338, "z": 792, "y": 64, "r": 10, "what": "East crossroads where the ore carts turn. Signpost, lamp, an empty cart on a short rail stub." },
+    { "id": "truce_hall", "name": "The Truce Hall", "x": -276, "z": 916, "y": 70, "r": 24, "what": "Long stone hall with a broken roof where the truce was signed. One table, two chairs, one of them overturned. Lore thread places a tome here." },
+    { "id": "far_door", "name": "The Far Door", "x": -646, "z": 774, "y": 85, "r": 26, "what": "The Hollow's side of the Gate in the far west wall: a tall sealed arch in the rock, scaffolds and dig pits in front of it." },
+    { "id": "lattice_gate", "name": "The Lattice Wood", "x": 330, "z": 250, "y": 84, "r": 8, "what": "Small clearing where the lane ends at the edge of the thick Latticewood forest. Keep trees dense around it (raise tree chance within 120 blocks), a woodcutter's lean-to, a stack of cut lattice." },
+    { "id": "drift_foot", "name": "The Drift", "x": 100, "z": 836, "y": 85, "r": 10, "what": "Foot of the floating rocks: the first three rocks hang low enough to jump to. A lookout marker at the top is a later job." },
+    { "id": "the_seams", "name": "The Seams", "x": 528, "z": 904, "y": 65, "r": 16, "what": "Open ore face in a cliff, richer Choir Ore than anywhere south of the Court. Timbered mouth, rail to Cartmeet." },
+    { "id": "wound_dock", "name": "The Wound landing", "x": -58, "z": 153, "y": 66, "r": 8, "what": "First dock a new arrival sees. Plank dock, one moored Latticewood Boat frame (prop), a lamp, a signpost: Glimwade by water, the Spine on foot." }
+  ],
+  "roads": [
+    { "id": "west_road_south", "from": "glimwade", "to": "pilgrims_cross", "wander": 14 },
+    { "id": "west_road_mid", "from": "pilgrims_cross", "to": "truce_hall", "wander": 6 },
+    { "id": "west_road_north", "from": "truce_hall", "to": "tollrest", "wander": 14 },
+    { "id": "door_track", "from": "pilgrims_cross", "to": "far_door", "wander": 10, "surface": "rough track, 2 wide, no lamps" },
+    { "id": "cross_west", "leaveZ": 760, "to": "pilgrims_cross", "wander": 10 },
+    { "id": "cross_east", "leaveZ": 760, "to": "cartmeet", "wander": 10 },
+    { "id": "east_road_south", "from": "lowseam", "to": "cartmeet", "wander": 12 },
+    { "id": "east_road_mid", "from": "cartmeet", "to": "standing_ranks", "wander": 8 },
+    { "id": "east_road_north", "from": "standing_ranks", "to": "highcut", "wander": 12 },
+    { "id": "lattice_lane", "leaveZ": 250, "to": "lattice_gate", "wander": 12 },
+    { "id": "wood_road", "from": "lattice_gate", "to": "lowseam", "wander": 14 },
+    { "id": "drift_path", "leaveZ": 820, "to": "drift_foot", "wander": 4, "surface": "narrow path, 2 wide" },
+    { "id": "seam_rail", "from": "cartmeet", "to": "the_seams", "wander": 4, "surface": "road with a single cart rail down the middle" }
+  ],
+  "bridges": [
+    { "id": "long_arch", "name": "The Long Arch", "on": "story path", "x": 16, "z": 648, "span": 9, "style": "three stone arches, the showpiece from Mateo's bridge picture; replaces the flat deck" },
+    { "id": "glim_bridge", "on": "west_road_south", "x": -348, "z": 421, "span": 18, "style": "two arches" },
+    { "id": "pilgrim_bridge", "on": "cross_west", "x": -288, "z": 760, "span": 7, "style": "one arch" },
+    { "id": "hall_bridge", "on": "west_road_mid", "x": -314, "z": 827, "span": 13, "style": "one wide arch, one parapet broken" },
+    { "id": "low_bridge", "on": "east_road_south", "x": 395, "z": 585, "span": 19, "style": "two arches" },
+    { "id": "seam_bridge", "on": "seam_rail", "x": 426, "z": 844, "span": 8, "style": "timber trestle carrying the cart rail" }
+  ],
+  "rules": [
+    "Bridge decks sit at y 67 or higher (water is y 62) with the arch open underneath, so a boat passes under every bridge. Roads ramp up to the deck.",
+    "Bridge crossings were found on straight lines between sites. Once the roads wander, place each bridge where its road really meets the water (riverDistance <= 3.5) and treat the x, z here as a guide.",
+    "Roads are 4 wide, cobbled deepslate with worn edges, a lamp post about every 24 blocks on alternating sides. Tracks and paths are 2 wide with no lamps.",
+    "A signpost stands where every road leaves the story path and at both crossroads, naming what is down each arm.",
+    "Nothing lines up: no two sites share an x or z, and the two crossroads are not opposite each other across the Spine.",
+    "Sites flatten the ground like the villages do. Generated landmarks, trees and spires stay out of sites and off roads, as they already do for the existing ones."
+  ]
+}

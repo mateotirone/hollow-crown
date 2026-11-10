@@ -1,0 +1,13 @@
+{
+  "note": "One row per look built into the add-on. Add rows with: node studio/build_looks.mjs add \"<creator link>\" [Gamertag]. Never change or reuse an n: players' saved choice points at it.",
+  "looks": [
+    { "n": 1, "code": "c1-j-1201000110-100-231202e1-0-0-0" },
+    { "n": 2, "code": "c1-2c-1012124012-201-10342035-0-0-0" },
+    { "n": 3, "code": "c1-a8-3111231223-300-42010190-0-0-0" },
+    { "n": 4, "code": "c1-1nk-2323443321-502-063103a5-0-0-0" },
+    { "n": 5, "code": "c1-rs-0233314430-420-34101212-0-0-0" },
+    { "n": 6, "code": "c1-1c-2420052303-000-065204a3-0-0-0" },
+    { "n": 7, "code": "c1-9-1541002112-111-550015d0-0-0-0" },
+    { "n": 8, "code": "c1-3k-2343142321-202-11430331-0-0-0" }
+  ]
+}

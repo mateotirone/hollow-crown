@@ -325,6 +325,420 @@
     },
     "siege_dragon_nest_top": {
       "textures": "textures/blocks/dragons/siege_dragon_nest_top"
+    },
+    "siege_mason_bench_side": {
+      "textures": "textures/blocks/siege_mason_bench_side"
+    },
+    "siege_mason_bench_top": {
+      "textures": "textures/blocks/siege_mason_bench_top"
+    },
+    "siege_foundation_stone_side": {
+      "textures": "textures/blocks/siege_foundation_stone_side"
+    },
+    "siege_foundation_stone_top": {
+      "textures": "textures/blocks/siege_foundation_stone_top"
+    },
+    "hc_looking_glass_side": {
+      "textures": "textures/blocks/looks/hc_looking_glass_side"
+    },
+    "hc_looking_glass_top": {
+      "textures": "textures/blocks/looks/hc_looking_glass_top"
+    },
+    "siege_castle_tiles_stone_0": {
+      "textures": "textures/blocks/siege_castle_tiles_stone_0"
+    },
+    "siege_castle_tiles_stone_1": {
+      "textures": "textures/blocks/siege_castle_tiles_stone_1"
+    },
+    "siege_castle_tiles_stone_2": {
+      "textures": "textures/blocks/siege_castle_tiles_stone_2"
+    },
+    "siege_castle_tiles": {
+      "textures": "textures/blocks/siege_castle_tiles"
+    },
+    "siege_castle_bricks_stone_0": {
+      "textures": "textures/blocks/siege_castle_bricks_stone_0"
+    },
+    "siege_castle_bricks_stone_1": {
+      "textures": "textures/blocks/siege_castle_bricks_stone_1"
+    },
+    "siege_castle_bricks_stone_2": {
+      "textures": "textures/blocks/siege_castle_bricks_stone_2"
+    },
+    "siege_castle_bricks": {
+      "textures": "textures/blocks/siege_castle_bricks"
+    },
+    "siege_castle_cobbled_stone_0": {
+      "textures": "textures/blocks/siege_castle_cobbled_stone_0"
+    },
+    "siege_castle_cobbled_stone_1": {
+      "textures": "textures/blocks/siege_castle_cobbled_stone_1"
+    },
+    "siege_castle_cobbled_stone_2": {
+      "textures": "textures/blocks/siege_castle_cobbled_stone_2"
+    },
+    "siege_castle_cobbled": {
+      "textures": "textures/blocks/siege_castle_cobbled"
+    },
+    "siege_castle_smooth_stone_0": {
+      "textures": "textures/blocks/siege_castle_smooth_stone_0"
+    },
+    "siege_castle_smooth_stone_1": {
+      "textures": "textures/blocks/siege_castle_smooth_stone_1"
+    },
+    "siege_castle_smooth_stone_2": {
+      "textures": "textures/blocks/siege_castle_smooth_stone_2"
+    },
+    "siege_castle_smooth": {
+      "textures": "textures/blocks/siege_castle_smooth"
+    },
+    "siege_castle_stone_frostmarch_stone_0": {
+      "textures": "textures/blocks/regional/siege_castle_stone_frostmarch_stone_0"
+    },
+    "siege_castle_stone_frostmarch_stone_1": {
+      "textures": "textures/blocks/regional/siege_castle_stone_frostmarch_stone_1"
+    },
+    "siege_castle_stone_frostmarch_stone_2": {
+      "textures": "textures/blocks/regional/siege_castle_stone_frostmarch_stone_2"
+    },
+    "siege_castle_stone_frostmarch_iron_0": {
+      "textures": "textures/blocks/regional/siege_castle_stone_frostmarch_iron_0"
+    },
+    "siege_castle_stone_frostmarch_iron_1": {
+      "textures": "textures/blocks/regional/siege_castle_stone_frostmarch_iron_1"
+    },
+    "siege_castle_stone_frostmarch_iron_2": {
+      "textures": "textures/blocks/regional/siege_castle_stone_frostmarch_iron_2"
+    },
+    "siege_castle_stone_frostmarch_diamond_0": {
+      "textures": "textures/blocks/regional/siege_castle_stone_frostmarch_diamond_0"
+    },
+    "siege_castle_stone_frostmarch_diamond_1": {
+      "textures": "textures/blocks/regional/siege_castle_stone_frostmarch_diamond_1"
+    },
+    "siege_castle_stone_frostmarch_diamond_2": {
+      "textures": "textures/blocks/regional/siege_castle_stone_frostmarch_diamond_2"
+    },
+    "siege_castle_stone_frostmarch_netherite_0": {
+      "textures": "textures/blocks/regional/siege_castle_stone_frostmarch_netherite_0"
+    },
+    "siege_castle_stone_frostmarch_netherite_1": {
+      "textures": "textures/blocks/regional/siege_castle_stone_frostmarch_netherite_1"
+    },
+    "siege_castle_stone_frostmarch_netherite_2": {
+      "textures": "textures/blocks/regional/siege_castle_stone_frostmarch_netherite_2"
+    },
+    "siege_castle_stone_frostmarch": {
+      "textures": "textures/blocks/regional/siege_castle_stone_frostmarch"
+    },
+    "siege_castle_tiles_frostmarch_stone_0": {
+      "textures": "textures/blocks/regional/siege_castle_tiles_frostmarch_stone_0"
+    },
+    "siege_castle_tiles_frostmarch_stone_1": {
+      "textures": "textures/blocks/regional/siege_castle_tiles_frostmarch_stone_1"
+    },
+    "siege_castle_tiles_frostmarch_stone_2": {
+      "textures": "textures/blocks/regional/siege_castle_tiles_frostmarch_stone_2"
+    },
+    "siege_castle_tiles_frostmarch": {
+      "textures": "textures/blocks/regional/siege_castle_tiles_frostmarch"
+    },
+    "siege_castle_bricks_frostmarch_stone_0": {
+      "textures": "textures/blocks/regional/siege_castle_bricks_frostmarch_stone_0"
+    },
+    "siege_castle_bricks_frostmarch_stone_1": {
+      "textures": "textures/blocks/regional/siege_castle_bricks_frostmarch_stone_1"
+    },
+    "siege_castle_bricks_frostmarch_stone_2": {
+      "textures": "textures/blocks/regional/siege_castle_bricks_frostmarch_stone_2"
+    },
+    "siege_castle_bricks_frostmarch": {
+      "textures": "textures/blocks/regional/siege_castle_bricks_frostmarch"
+    },
+    "siege_castle_cobbled_frostmarch_stone_0": {
+      "textures": "textures/blocks/regional/siege_castle_cobbled_frostmarch_stone_0"
+    },
+    "siege_castle_cobbled_frostmarch_stone_1": {
+      "textures": "textures/blocks/regional/siege_castle_cobbled_frostmarch_stone_1"
+    },
+    "siege_castle_cobbled_frostmarch_stone_2": {
+      "textures": "textures/blocks/regional/siege_castle_cobbled_frostmarch_stone_2"
+    },
+    "siege_castle_cobbled_frostmarch": {
+      "textures": "textures/blocks/regional/siege_castle_cobbled_frostmarch"
+    },
+    "siege_castle_smooth_frostmarch_stone_0": {
+      "textures": "textures/blocks/regional/siege_castle_smooth_frostmarch_stone_0"
+    },
+    "siege_castle_smooth_frostmarch_stone_1": {
+      "textures": "textures/blocks/regional/siege_castle_smooth_frostmarch_stone_1"
+    },
+    "siege_castle_smooth_frostmarch_stone_2": {
+      "textures": "textures/blocks/regional/siege_castle_smooth_frostmarch_stone_2"
+    },
+    "siege_castle_smooth_frostmarch": {
+      "textures": "textures/blocks/regional/siege_castle_smooth_frostmarch"
+    },
+    "siege_castle_stone_saltreach_stone_0": {
+      "textures": "textures/blocks/regional/siege_castle_stone_saltreach_stone_0"
+    },
+    "siege_castle_stone_saltreach_stone_1": {
+      "textures": "textures/blocks/regional/siege_castle_stone_saltreach_stone_1"
+    },
+    "siege_castle_stone_saltreach_stone_2": {
+      "textures": "textures/blocks/regional/siege_castle_stone_saltreach_stone_2"
+    },
+    "siege_castle_stone_saltreach_iron_0": {
+      "textures": "textures/blocks/regional/siege_castle_stone_saltreach_iron_0"
+    },
+    "siege_castle_stone_saltreach_iron_1": {
+      "textures": "textures/blocks/regional/siege_castle_stone_saltreach_iron_1"
+    },
+    "siege_castle_stone_saltreach_iron_2": {
+      "textures": "textures/blocks/regional/siege_castle_stone_saltreach_iron_2"
+    },
+    "siege_castle_stone_saltreach_diamond_0": {
+      "textures": "textures/blocks/regional/siege_castle_stone_saltreach_diamond_0"
+    },
+    "siege_castle_stone_saltreach_diamond_1": {
+      "textures": "textures/blocks/regional/siege_castle_stone_saltreach_diamond_1"
+    },
+    "siege_castle_stone_saltreach_diamond_2": {
+      "textures": "textures/blocks/regional/siege_castle_stone_saltreach_diamond_2"
+    },
+    "siege_castle_stone_saltreach_netherite_0": {
+      "textures": "textures/blocks/regional/siege_castle_stone_saltreach_netherite_0"
+    },
+    "siege_castle_stone_saltreach_netherite_1": {
+      "textures": "textures/blocks/regional/siege_castle_stone_saltreach_netherite_1"
+    },
+    "siege_castle_stone_saltreach_netherite_2": {
+      "textures": "textures/blocks/regional/siege_castle_stone_saltreach_netherite_2"
+    },
+    "siege_castle_stone_saltreach": {
+      "textures": "textures/blocks/regional/siege_castle_stone_saltreach"
+    },
+    "siege_castle_tiles_saltreach_stone_0": {
+      "textures": "textures/blocks/regional/siege_castle_tiles_saltreach_stone_0"
+    },
+    "siege_castle_tiles_saltreach_stone_1": {
+      "textures": "textures/blocks/regional/siege_castle_tiles_saltreach_stone_1"
+    },
+    "siege_castle_tiles_saltreach_stone_2": {
+      "textures": "textures/blocks/regional/siege_castle_tiles_saltreach_stone_2"
+    },
+    "siege_castle_tiles_saltreach": {
+      "textures": "textures/blocks/regional/siege_castle_tiles_saltreach"
+    },
+    "siege_castle_bricks_saltreach_stone_0": {
+      "textures": "textures/blocks/regional/siege_castle_bricks_saltreach_stone_0"
+    },
+    "siege_castle_bricks_saltreach_stone_1": {
+      "textures": "textures/blocks/regional/siege_castle_bricks_saltreach_stone_1"
+    },
+    "siege_castle_bricks_saltreach_stone_2": {
+      "textures": "textures/blocks/regional/siege_castle_bricks_saltreach_stone_2"
+    },
+    "siege_castle_bricks_saltreach": {
+      "textures": "textures/blocks/regional/siege_castle_bricks_saltreach"
+    },
+    "siege_castle_cobbled_saltreach_stone_0": {
+      "textures": "textures/blocks/regional/siege_castle_cobbled_saltreach_stone_0"
+    },
+    "siege_castle_cobbled_saltreach_stone_1": {
+      "textures": "textures/blocks/regional/siege_castle_cobbled_saltreach_stone_1"
+    },
+    "siege_castle_cobbled_saltreach_stone_2": {
+      "textures": "textures/blocks/regional/siege_castle_cobbled_saltreach_stone_2"
+    },
+    "siege_castle_cobbled_saltreach": {
+      "textures": "textures/blocks/regional/siege_castle_cobbled_saltreach"
+    },
+    "siege_castle_smooth_saltreach_stone_0": {
+      "textures": "textures/blocks/regional/siege_castle_smooth_saltreach_stone_0"
+    },
+    "siege_castle_smooth_saltreach_stone_1": {
+      "textures": "textures/blocks/regional/siege_castle_smooth_saltreach_stone_1"
+    },
+    "siege_castle_smooth_saltreach_stone_2": {
+      "textures": "textures/blocks/regional/siege_castle_smooth_saltreach_stone_2"
+    },
+    "siege_castle_smooth_saltreach": {
+      "textures": "textures/blocks/regional/siege_castle_smooth_saltreach"
+    },
+    "siege_castle_stone_emberwaste_stone_0": {
+      "textures": "textures/blocks/regional/siege_castle_stone_emberwaste_stone_0"
+    },
+    "siege_castle_stone_emberwaste_stone_1": {
+      "textures": "textures/blocks/regional/siege_castle_stone_emberwaste_stone_1"
+    },
+    "siege_castle_stone_emberwaste_stone_2": {
+      "textures": "textures/blocks/regional/siege_castle_stone_emberwaste_stone_2"
+    },
+    "siege_castle_stone_emberwaste_iron_0": {
+      "textures": "textures/blocks/regional/siege_castle_stone_emberwaste_iron_0"
+    },
+    "siege_castle_stone_emberwaste_iron_1": {
+      "textures": "textures/blocks/regional/siege_castle_stone_emberwaste_iron_1"
+    },
+    "siege_castle_stone_emberwaste_iron_2": {
+      "textures": "textures/blocks/regional/siege_castle_stone_emberwaste_iron_2"
+    },
+    "siege_castle_stone_emberwaste_diamond_0": {
+      "textures": "textures/blocks/regional/siege_castle_stone_emberwaste_diamond_0"
+    },
+    "siege_castle_stone_emberwaste_diamond_1": {
+      "textures": "textures/blocks/regional/siege_castle_stone_emberwaste_diamond_1"
+    },
+    "siege_castle_stone_emberwaste_diamond_2": {
+      "textures": "textures/blocks/regional/siege_castle_stone_emberwaste_diamond_2"
+    },
+    "siege_castle_stone_emberwaste_netherite_0": {
+      "textures": "textures/blocks/regional/siege_castle_stone_emberwaste_netherite_0"
+    },
+    "siege_castle_stone_emberwaste_netherite_1": {
+      "textures": "textures/blocks/regional/siege_castle_stone_emberwaste_netherite_1"
+    },
+    "siege_castle_stone_emberwaste_netherite_2": {
+      "textures": "textures/blocks/regional/siege_castle_stone_emberwaste_netherite_2"
+    },
+    "siege_castle_stone_emberwaste": {
+      "textures": "textures/blocks/regional/siege_castle_stone_emberwaste"
+    },
+    "siege_castle_tiles_emberwaste_stone_0": {
+      "textures": "textures/blocks/regional/siege_castle_tiles_emberwaste_stone_0"
+    },
+    "siege_castle_tiles_emberwaste_stone_1": {
+      "textures": "textures/blocks/regional/siege_castle_tiles_emberwaste_stone_1"
+    },
+    "siege_castle_tiles_emberwaste_stone_2": {
+      "textures": "textures/blocks/regional/siege_castle_tiles_emberwaste_stone_2"
+    },
+    "siege_castle_tiles_emberwaste": {
+      "textures": "textures/blocks/regional/siege_castle_tiles_emberwaste"
+    },
+    "siege_castle_bricks_emberwaste_stone_0": {
+      "textures": "textures/blocks/regional/siege_castle_bricks_emberwaste_stone_0"
+    },
+    "siege_castle_bricks_emberwaste_stone_1": {
+      "textures": "textures/blocks/regional/siege_castle_bricks_emberwaste_stone_1"
+    },
+    "siege_castle_bricks_emberwaste_stone_2": {
+      "textures": "textures/blocks/regional/siege_castle_bricks_emberwaste_stone_2"
+    },
+    "siege_castle_bricks_emberwaste": {
+      "textures": "textures/blocks/regional/siege_castle_bricks_emberwaste"
+    },
+    "siege_castle_cobbled_emberwaste_stone_0": {
+      "textures": "textures/blocks/regional/siege_castle_cobbled_emberwaste_stone_0"
+    },
+    "siege_castle_cobbled_emberwaste_stone_1": {
+      "textures": "textures/blocks/regional/siege_castle_cobbled_emberwaste_stone_1"
+    },
+    "siege_castle_cobbled_emberwaste_stone_2": {
+      "textures": "textures/blocks/regional/siege_castle_cobbled_emberwaste_stone_2"
+    },
+    "siege_castle_cobbled_emberwaste": {
+      "textures": "textures/blocks/regional/siege_castle_cobbled_emberwaste"
+    },
+    "siege_castle_smooth_emberwaste_stone_0": {
+      "textures": "textures/blocks/regional/siege_castle_smooth_emberwaste_stone_0"
+    },
+    "siege_castle_smooth_emberwaste_stone_1": {
+      "textures": "textures/blocks/regional/siege_castle_smooth_emberwaste_stone_1"
+    },
+    "siege_castle_smooth_emberwaste_stone_2": {
+      "textures": "textures/blocks/regional/siege_castle_smooth_emberwaste_stone_2"
+    },
+    "siege_castle_smooth_emberwaste": {
+      "textures": "textures/blocks/regional/siege_castle_smooth_emberwaste"
+    },
+    "siege_castle_stone_blackfen_stone_0": {
+      "textures": "textures/blocks/regional/siege_castle_stone_blackfen_stone_0"
+    },
+    "siege_castle_stone_blackfen_stone_1": {
+      "textures": "textures/blocks/regional/siege_castle_stone_blackfen_stone_1"
+    },
+    "siege_castle_stone_blackfen_stone_2": {
+      "textures": "textures/blocks/regional/siege_castle_stone_blackfen_stone_2"
+    },
+    "siege_castle_stone_blackfen_iron_0": {
+      "textures": "textures/blocks/regional/siege_castle_stone_blackfen_iron_0"
+    },
+    "siege_castle_stone_blackfen_iron_1": {
+      "textures": "textures/blocks/regional/siege_castle_stone_blackfen_iron_1"
+    },
+    "siege_castle_stone_blackfen_iron_2": {
+      "textures": "textures/blocks/regional/siege_castle_stone_blackfen_iron_2"
+    },
+    "siege_castle_stone_blackfen_diamond_0": {
+      "textures": "textures/blocks/regional/siege_castle_stone_blackfen_diamond_0"
+    },
+    "siege_castle_stone_blackfen_diamond_1": {
+      "textures": "textures/blocks/regional/siege_castle_stone_blackfen_diamond_1"
+    },
+    "siege_castle_stone_blackfen_diamond_2": {
+      "textures": "textures/blocks/regional/siege_castle_stone_blackfen_diamond_2"
+    },
+    "siege_castle_stone_blackfen_netherite_0": {
+      "textures": "textures/blocks/regional/siege_castle_stone_blackfen_netherite_0"
+    },
+    "siege_castle_stone_blackfen_netherite_1": {
+      "textures": "textures/blocks/regional/siege_castle_stone_blackfen_netherite_1"
+    },
+    "siege_castle_stone_blackfen_netherite_2": {
+      "textures": "textures/blocks/regional/siege_castle_stone_blackfen_netherite_2"
+    },
+    "siege_castle_stone_blackfen": {
+      "textures": "textures/blocks/regional/siege_castle_stone_blackfen"
+    },
+    "siege_castle_tiles_blackfen_stone_0": {
+      "textures": "textures/blocks/regional/siege_castle_tiles_blackfen_stone_0"
+    },
+    "siege_castle_tiles_blackfen_stone_1": {
+      "textures": "textures/blocks/regional/siege_castle_tiles_blackfen_stone_1"
+    },
+    "siege_castle_tiles_blackfen_stone_2": {
+      "textures": "textures/blocks/regional/siege_castle_tiles_blackfen_stone_2"
+    },
+    "siege_castle_tiles_blackfen": {
+      "textures": "textures/blocks/regional/siege_castle_tiles_blackfen"
+    },
+    "siege_castle_bricks_blackfen_stone_0": {
+      "textures": "textures/blocks/regional/siege_castle_bricks_blackfen_stone_0"
+    },
+    "siege_castle_bricks_blackfen_stone_1": {
+      "textures": "textures/blocks/regional/siege_castle_bricks_blackfen_stone_1"
+    },
+    "siege_castle_bricks_blackfen_stone_2": {
+      "textures": "textures/blocks/regional/siege_castle_bricks_blackfen_stone_2"
+    },
+    "siege_castle_bricks_blackfen": {
+      "textures": "textures/blocks/regional/siege_castle_bricks_blackfen"
+    },
+    "siege_castle_cobbled_blackfen_stone_0": {
+      "textures": "textures/blocks/regional/siege_castle_cobbled_blackfen_stone_0"
+    },
+    "siege_castle_cobbled_blackfen_stone_1": {
+      "textures": "textures/blocks/regional/siege_castle_cobbled_blackfen_stone_1"
+    },
+    "siege_castle_cobbled_blackfen_stone_2": {
+      "textures": "textures/blocks/regional/siege_castle_cobbled_blackfen_stone_2"
+    },
+    "siege_castle_cobbled_blackfen": {
+      "textures": "textures/blocks/regional/siege_castle_cobbled_blackfen"
+    },
+    "siege_castle_smooth_blackfen_stone_0": {
+      "textures": "textures/blocks/regional/siege_castle_smooth_blackfen_stone_0"
+    },
+    "siege_castle_smooth_blackfen_stone_1": {
+      "textures": "textures/blocks/regional/siege_castle_smooth_blackfen_stone_1"
+    },
+    "siege_castle_smooth_blackfen_stone_2": {
+      "textures": "textures/blocks/regional/siege_castle_smooth_blackfen_stone_2"
+    },
+    "siege_castle_smooth_blackfen": {
+      "textures": "textures/blocks/regional/siege_castle_smooth_blackfen"
     }
   }
 }

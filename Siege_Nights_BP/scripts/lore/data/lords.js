@@ -1,0 +1,277 @@
+// Voices for a world played alone (Mateo, 2026-11-10: "whatever an actual player would do, we have
+// NPCs that would fill that role"). Words only; the features that run these characters own the rules.
+//
+//   RIVAL_LORDS   twelve NPC lords who hold the plots no player has claimed
+//   REGENT_VOICE  the NPC rulers of the Hollow: later wearers of the Hollow Crown, after Morvane
+//                 falls. They may say his name. Nobody here says who Morvane used to be.
+//   RUMOR_PARTS   extra job text for the town hall's Rumor Board
+//
+// Each lord: temper is one of proud | grasping | devout | wary | bold | kind. Every line stands alone,
+// so a feature can use only the ones it needs. {player} is replaced with the player's name.
+
+export const LORD_TEMPERS = {
+  proud: "Wants respect before anything. Insult them and it is war; flatter them and they overpay.",
+  grasping: "Everything is a deal. Never attacks without profit in it, never helps without a price.",
+  devout: "Follows the Order of the Ashen Gate. Friendly to Knights, cold to Sorcerers, rings no bell on a third night.",
+  wary: "Keeps to their own walls. Slow to ally, slow to anger, never forgets either.",
+  bold: "Loves a fight and respects whoever gives a good one. Will besiege a friend for sport and send wine after.",
+  kind: "Takes in the lost. Will not strike first. Terrible when someone under their roof is harmed.",
+};
+
+export const RIVAL_LORDS = [
+  {
+    id: "harrowgate", name: "Lady Ysmay Harrowgate", seat: "Harrow Keep", region: "Aldmere Vale", temper: "proud",
+    about: "Oldest name in the Vale and will tell you so. Her family held these walls before the war that nobody discusses.",
+    lines: {
+      greet: "You are standing in my light, {player}. Stand somewhere else and tell me what you want.",
+      friend: "{player}. Sit. You are one of the few people in this valley I do not have to explain things to.",
+      foe: "I had a word for people like you. My grandmother had a better one.",
+      trade: "I do not haggle. That is the price. My family was setting prices here when yours was setting snares.",
+      refuse: "No. And do not ask twice. It makes you look poor.",
+      demand: "Your walls are on land my family once hunted. A small tribute would settle my mind about it.",
+      war: "I have sent my banners. I thought you should hear it from me and not from the gate.",
+      beaten: "Well. You have manners in a siege, at least. Take what the terms allow and no more.",
+      won: "Your keep stood longer than I expected. I will say that at dinner.",
+      third: "On the third night we close the shutters and we do not discuss it. That is how one behaves.",
+      rumor: "There were forty-one portraits in the old gallery. My great-grandfather counted forty-two frames.",
+    },
+  },
+  {
+    id: "pike", name: "Lord Doran Pike", seat: "Pikestead", region: "Aldmere Vale", temper: "bold",
+    about: "A big cheerful man who treats a siege as other men treat a fair.",
+    lines: {
+      greet: "Ha! {player}! Is it a fight or a drink? I have time for one and a half.",
+      friend: "There's my favourite neighbour. I nearly besieged you last week out of plain affection.",
+      foe: "Good. I was getting fat. Go home and get ready, I want this to be worth the walk.",
+      trade: "Take it, take it. I'd rather have a neighbour with good arrows. Makes for a better evening.",
+      refuse: "Not that. That one I need for hitting things.",
+      demand: "Send me a cask and twenty arrows and I'll call it friendship. Don't, and I'll call it sport.",
+      war: "Pikestead marches! Nothing personal. Put your best men on the east wall, that's where I'm coming.",
+      beaten: "Ha! Oh, well struck. Help me up. You'll dine with me after this, I insist.",
+      won: "A good wall, that. You'll want a second gate. I'll send my mason, no charge.",
+      third: "Every third night, regular as a tax. I've stopped asking who sends them. I just like that they come.",
+      rumor: "The raider king. I've put him down twice with this hand. Same scar on his brow both times. Explain that.",
+    },
+  },
+  {
+    id: "marsh", name: "Mother Aveline Marsh", seat: "Lanternhouse", region: "Aldmere Vale", temper: "kind",
+    about: "Runs her keep as a refuge. Half her garrison are people who wandered in and never left.",
+    lines: {
+      greet: "Come in out of it, {player}. There's soup. There is always soup. Then tell me.",
+      friend: "Oh, it's you. Good. The children have been asking. Stay the night, the roads are wrong after dark.",
+      foe: "I will not raise a hand first. But you have frightened people who trusted me, and I will remember where you live.",
+      trade: "Pay what you can. If you can't, carry something to the next village for me and we are square.",
+      refuse: "No, love. That is promised to people who need it more than you do.",
+      demand: "I have forty more mouths than I planned for. If your stores are full, I am asking. Only asking.",
+      war: "You hurt one of mine. I have never done this before. I find I know how.",
+      beaten: "Enough. Enough. Take what you came for and let my people sleep.",
+      won: "I am sorry about your gate. Send your wounded to me. I mean it.",
+      third: "We light every lantern and we count heads at dusk and again at dawn. The count has never once matched.",
+      rumor: "A girl came to my door last winter, wet to the knees on a dry night. She eats with her left hand. I have not asked.",
+    },
+  },
+  {
+    id: "vane", name: "Ser Benedick Vane", seat: "Greywatch", region: "Frostmarch", temper: "devout",
+    about: "A knight-commander of the Ashen Gate in all but name. Keeps a perfect, silent keep.",
+    lines: {
+      greet: "State your business, {player}, and state it plainly. The Order has taught me to distrust a long answer.",
+      friend: "You keep your oaths. That is rarer than steel up here. You are welcome in Greywatch.",
+      foe: "I know what you have been reading. Burn it and come back, or do not come back.",
+      trade: "A fair price, set by the chapterhouse. I neither raise it nor lower it.",
+      refuse: "That is not mine to give. It is not yours to want.",
+      demand: "The Order asks a tithe of every keep that stands. I am the one who has been sent to ask.",
+      war: "You rang a bell on a third night. I heard it from here. I am coming to take the bell.",
+      beaten: "I yield the field. Not the argument.",
+      won: "It is done. Your bells come down. The rest you may keep.",
+      third: "No bell. No song. No name spoken aloud. Three hundred years we have held to it and you want reasons.",
+      rumor: "There is a cell under the chapterhouse that we are sworn never to open. I have never asked why it is locked from the outside.",
+    },
+  },
+  {
+    id: "skarn", name: "Jarl Hreda Skarn", seat: "Skarnhold", region: "Frostmarch", temper: "bold",
+    about: "Descended from Grey Host stragglers who stayed. Proud of it, which does not make her popular.",
+    lines: {
+      greet: "{player}. You walk like someone who has won a siege. Good. I don't speak to the other kind.",
+      friend: "Shield-friend. My hall is yours. My mead is yours. My axe you may borrow.",
+      foe: "My grandmothers crossed the ice to burn this land. I only have to cross a valley.",
+      trade: "Iron for iron, fur for grain. I don't count coins. Coins are for people with no winters.",
+      refuse: "No. Ask me again in spring.",
+      demand: "The pass is mine and you have used it. Pay the pass-geld, or use it once more and see.",
+      war: "Skarnhold comes down the mountain. Hear the horns? I told them to blow early. It's only polite.",
+      beaten: "Hah. So. The south has teeth after all. I'll make a song of you.",
+      won: "A good fight. Keep your hall. I only wanted to know if I could.",
+      third: "My people came here following a bell under the ice. Now something comes for us every third night. We call that fair.",
+      rumor: "Our oldest song says the whole host went into the lake in one night. The newer verses have a name in them that is none of ours. Morvane. We sing those quietly.",
+    },
+  },
+  {
+    id: "orrin", name: "Old Tam Orrin", seat: "The Rookery", region: "Frostmarch", temper: "wary",
+    about: "A trapper who built a tower because everything else kept dying. Talks to visitors through a slot.",
+    lines: {
+      greet: "That's close enough, {player}. Say it from there. I hear fine.",
+      friend: "It's you. All right. Door's unbarred. Wipe your feet and show me both your hands first. Habit.",
+      foe: "I've marked your face. I've marked the way you walk. Don't come up my hill again.",
+      trade: "Leave it on the stone. Step back. I'll leave yours when you're at the treeline.",
+      refuse: "No. And I'd not ask the next keep either, the mood they're in.",
+      demand: "Something's been at my traplines from your side. I want it made right, or I want it stopped.",
+      war: "I warned you from the hill. Twice. I don't warn three times, three's an unlucky number round here.",
+      beaten: "Take it. Take it and go. You'll not see me again and that suits us both.",
+      won: "I only wanted you off my hill. Stay off it.",
+      third: "I count the tracks every morning after. Coming up to the wall, plenty. Going away from it, none. Think on that.",
+      rumor: "There's lights under the lake ice. They keep pace with you if you walk the shore. I walk the ridge now.",
+    },
+  },
+  {
+    id: "calder", name: "Dame Isaura Calder", seat: "Saltgate", region: "Saltreach", temper: "grasping",
+    about: "Owns the harbour, the salt pans and most of the debts on the coast.",
+    lines: {
+      greet: "{player}. Good. I was just pricing you. What are you buying?",
+      friend: "My best customer. Don't blush, it's the highest thing I call anyone.",
+      foe: "You're a bad debt, and I do with bad debts what everyone does. I collect.",
+      trade: "That's the price today. It was lower yesterday and it'll be higher tomorrow. That's what today is for.",
+      refuse: "Not for sale. Everything else is. Make of that what you like.",
+      demand: "Your carts use my road to the sea. I've let it run for a season. Now we settle.",
+      war: "I've hired the men and I've costed the siege. You come out cheaper taken than left. Nothing personal.",
+      beaten: "Fine. Name your terms. I'll have them back off you inside a year, one cart at a time.",
+      won: "I'll leave you the walls. A tenant with walls pays better.",
+      third: "The third night costs me eleven men a year and a new gate every four. I've put it in the ledger under weather.",
+      rumor: "The lamp at Gull's Rest burns no oil that I've sold. Three hundred years. I've been through the books. Someone owes me an explanation.",
+    },
+  },
+  {
+    id: "brine", name: "Captain Jessamy Brine", seat: "Wrecker's Rest", region: "Saltreach", temper: "bold",
+    about: "A retired privateer, by her own account. The retirement is the doubtful part.",
+    lines: {
+      greet: "Well now, {player}! Come aboard. It's a keep, I know. Humour an old woman.",
+      friend: "My own crew! Sit. I'll tell you a lie about a whale and you'll pretend to believe it.",
+      foe: "I've sunk prettier things than your keep, and I felt worse about those.",
+      trade: "Fell off a ship, that did. Don't ask which. Half price, since you didn't.",
+      refuse: "Not that, pet. That's sentimental. Took it off a man I liked.",
+      demand: "There's a thing called harbour dues. I've just invented it. You owe some.",
+      war: "Run out the ballistas! Sorry, {player}. The crew gets restless with nothing to board.",
+      beaten: "Struck, by thunder. I strike my colours. You'll take a drink with me, that's the custom.",
+      won: "I'll take the cargo and leave the ship. You'd do the same. Well, you would now.",
+      third: "Third night, the tide goes out too far and comes back too quiet. I don't put to sea. I've never been afraid of water before.",
+      rumor: "I dragged a church bell up in my nets off the point. Rang by itself on the deck, once. I put it back. Carefully.",
+    },
+  },
+  {
+    id: "senna", name: "Magister Idris Senna", seat: "The Sunward Tower", region: "Emberwaste", temper: "wary",
+    about: "A scholar who came to the desert because it has the fewest wells. Studies the thing nobody names.",
+    lines: {
+      greet: "{player}. One moment. I am writing down that you arrived. Now. What did you see on the way here?",
+      friend: "Ah, good, a mind. Come up. I have a question I cannot ask anyone who would repeat it.",
+      foe: "You are a variable I can no longer afford. I regret it. I did like your questions.",
+      trade: "I will trade for books. For anything written before the war I will trade unwisely.",
+      refuse: "No. Not until I understand what it does. Possibly not then.",
+      demand: "You have dug something up. Do not tell me you haven't, I can see it in your sleeve. I want one hour with it.",
+      war: "I have run the figures and I cannot leave that thing in your keep. Forgive me. I will try to break very little.",
+      beaten: "Then you keep it. Write down everything it does. Everything. Promise me that.",
+      won: "I have taken only the one thing. I will return it if I am wrong. I do not think I am wrong.",
+      third: "I chose a place with no water and no bells. They still come. So it is not the water and it is not the bells. It is us.",
+      rumor: "There is a vault at Sunscar that opens only for someone who remembers a face. I stood before it a day. I could not think whose.",
+    },
+  },
+  {
+    id: "ashdown", name: "Lord Garrick Ashdown", seat: "Cinderhall", region: "Emberwaste", temper: "proud",
+    about: "Keeps dragons' bones on his walls and hints he killed them. He found them.",
+    lines: {
+      greet: "You may approach, {player}. Mind the skull. It is older than your whole house.",
+      friend: "{player}! My equal, or near enough. Come and admire something with me.",
+      foe: "I have ended bigger things than you and hung them over the gate.",
+      trade: "Cinderhall does not sell. Cinderhall bestows, for a consideration.",
+      refuse: "Out of the question. People would talk.",
+      demand: "It is customary to send a gift to the greatest lord of the waste. I am told yours is late.",
+      war: "You have laughed at Cinderhall. I heard of it. I ride at dusk, with banners. Many banners.",
+      beaten: "This never happened. You understand me? You may have the gold. You may not have the story.",
+      won: "Let it be recorded that I was merciful. Someone write that down.",
+      third: "They come for the brightest keep first. Naturally they come here. I have chosen to be flattered.",
+      rumor: "The dragons did not die of spears. I have looked at the bones. Every one of them fell out of the sky on the same night.",
+    },
+  },
+  {
+    id: "fenwick", name: "Goodwife Petra Fenwick", seat: "Mirelight Stockade", region: "Blackfen", temper: "kind",
+    about: "A midwife who ended up in charge because nobody else in the fen would do it.",
+    lines: {
+      greet: "{player}, is it? Scrape your boots. Then sit by the fire and I'll look at that cut you're hiding.",
+      friend: "There you are. I've kept a bed aired. Don't argue, you look like a week of bad road.",
+      foe: "I've buried better people than you and delivered worse. Get out of my fen.",
+      trade: "Herbs I'll give you. Iron I'll need paying for, we've little of it.",
+      refuse: "No, dear. That's the last of it, and there's a child with a fever.",
+      demand: "The fever's back in the low houses. If you've honey or clean cloth, I'm not too proud to say please.",
+      war: "You burned the reed-cutters' huts. They came to me. So now I've come to you.",
+      beaten: "Stop. We're done. Let me see to the hurt ones. Yours as well, I'm not a monster.",
+      won: "Go home. Mend. Don't make me come out here again.",
+      third: "On the third night the babies all go quiet at the same moment. Every one, across the fen. Then they all start again.",
+      rumor: "The witchroot trees won't grow near one cave. They lean away from it like people from a bad smell.",
+    },
+  },
+  {
+    id: "wyck", name: "The Reeve of Wyck", seat: "Wyck Toll", region: "Blackfen", temper: "grasping",
+    about: "Nobody has learned the Reeve's name. Collects a toll on a causeway that floods every third night.",
+    lines: {
+      greet: "Toll first, {player}. Talk after. That is the order things are done in.",
+      friend: "Paid up and prompt. You may pass, and you may have my opinion, which is that it will rain.",
+      foe: "Your name is in the red column. Nobody comes out of the red column.",
+      trade: "Everything on the causeway is for sale, as it happens. So is the causeway. You cannot afford the causeway.",
+      refuse: "Not at any price. And I have thought about the price.",
+      demand: "You are three crossings in arrears. I have it written. I have everything written.",
+      war: "I am foreclosing on your keep. It is all in order. You may read the notice while my men are on the ladders.",
+      beaten: "Then the account is closed. Sign here. No, I insist. It has to be written.",
+      won: "Paid in full. There. Was that so hard?",
+      third: "Every third night the water rises over my causeway and in the morning there is one more toll in the box than there were travelers.",
+      rumor: "Someone pays my toll on third nights in coins I've never seen. Grey. No face on them. They're always wet.",
+    },
+  },
+];
+
+export const REGENT_VOICE = {
+  // Each new NPC ruler of the Hollow takes one of these. None of them is the leader the story ends on.
+  names: ["Ilveth", "Maren Saltlow", "Osric Vey", "Thessaly", "Harrow of the Nine Wells", "Sefa", "Quillon Marr", "Ysolde the Younger", "Brannoch", "Edrith Lowe"],
+  lines: {
+    greet: {
+      greedy: "You came a long way down to be poor. The ore is mine. Everything here is mine. Start with what you have in your pockets.",
+      fair: "The Hollow keeps accounts and so do I. Pay for what you take and you will leave the way you came.",
+      zealot: "The ore is not sold. It was sung into the rock by people you will never meet. Bring the Hollow something it has lost, and I may let you carry a little of it into the sun.",
+    },
+    permitSold: "Then dig. The Crown hears every stroke, so I will know when you have had your share.",
+    jobDone: "Yes. That is the thing. Go and dig, and be gone before I stop being pleased.",
+    noCoin: "You are short. Come back with the rest, or do not come back.",
+    thief: "I can hear every swing.",
+    dying: "It was so loud. All of them, at once. Morvane bore it three hundred years. How? Someone always puts it on.",
+  },
+};
+
+export const RUMOR_PARTS = {
+  givers: [
+    "A bell-warden with no bell", "A woman who will not give her name", "One of Mother Marsh's lantern boys", "A knight of the Order, out of his armour",
+    "A salt-carter from the coast", "A fen midwife", "A child who should be in bed", "A man who keeps glancing at the well",
+  ],
+  places: [
+    "by the dry well", "under the leaning milestone", "where the old rail bed ends", "past the chapel with no bell", "at the edge of the mist",
+    "by the scraped signpost", "near the stones that hum", "where the dogs won't go",
+  ],
+  reasons: {
+    bounty: [
+      "They face the village all night and do nothing. People would rather they did something.",
+      "The Order says to leave them be. The Order does not live here.",
+      "There are more every third night, and they are learning the paths.",
+    ],
+    camp: [
+      "They are waiting for a night that is not tonight.",
+      "Their fires burn the wrong colour and give no smoke.",
+      "A man with a scar on his brow rode in at dusk. They all stood up at once.",
+      "They were chanting one word around the fire. Morvane. Nobody here knows what it means.",
+    ],
+    rescue: [
+      "Walked into the mist to fetch a goat. The goat came back.",
+      "Was seen on the road at dusk, going the wrong way and humming.",
+      "The family says it has been one night. The neighbours say it has been six.",
+    ],
+    supply: [
+      "Mother Marsh has taken in another twenty and will not turn them out.",
+      "The chapterhouse is laying in stores. Nobody will say what for.",
+      "A keep to the north lost its gate on the third night and its granary with it.",
+    ],
+  },
+};

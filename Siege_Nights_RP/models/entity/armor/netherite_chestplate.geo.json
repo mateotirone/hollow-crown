@@ -97,7 +97,8 @@
        "uv": [
         64,
         8
-       ]
+       ],
+       "inflate": 0.03
       },
       {
        "origin": [
@@ -158,7 +159,8 @@
         64,
         8
        ],
-       "mirror": true
+       "mirror": true,
+       "inflate": 0.03
       },
       {
        "origin": [

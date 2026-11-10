@@ -1,0 +1,104 @@
+{
+  "format_version": "1.21.60",
+  "minecraft:entity": {
+    "description": {
+      "identifier": "siege:carriage",
+      "runtime_identifier": "minecraft:minecart",
+      "is_spawnable": false,
+      "is_summonable": true
+    },
+    "components": {
+      "minecraft:type_family": {
+        "family": [
+          "minecart",
+          "siege_carriage",
+          "inanimate"
+        ]
+      },
+      "minecraft:collision_box": {
+        "width": 0.98,
+        "height": 0.9
+      },
+      "minecraft:health": {
+        "value": 12,
+        "max": 12
+      },
+      "minecraft:physics": {},
+      "minecraft:is_stackable": {},
+      "minecraft:pushable": {
+        "is_pushable": true,
+        "is_pushable_by_piston": true
+      },
+      "minecraft:rail_movement": {
+        "max_speed": 0.6
+      },
+      "minecraft:rail_sensor": {
+        "eject_on_activate": true
+      },
+      "minecraft:rideable": {
+        "seat_count": 4,
+        "crouching_skip_interact": true,
+        "pull_in_entities": false,
+        "family_types": [
+          "player"
+        ],
+        "interact_text": "action.interact.ride.minecart",
+        "seats": [
+          {
+            "position": [
+              -0.32,
+              0.05,
+              0.45
+            ],
+            "min_rider_count": 0,
+            "max_rider_count": 4
+          },
+          {
+            "position": [
+              0.32,
+              0.05,
+              0.45
+            ],
+            "min_rider_count": 2,
+            "max_rider_count": 4
+          },
+          {
+            "position": [
+              -0.32,
+              0.05,
+              -0.5
+            ],
+            "min_rider_count": 3,
+            "max_rider_count": 4
+          },
+          {
+            "position": [
+              0.32,
+              0.05,
+              -0.5
+            ],
+            "min_rider_count": 4,
+            "max_rider_count": 4
+          }
+        ]
+      },
+      "minecraft:persistent": {},
+      "minecraft:nameable": {},
+      "minecraft:loot": {
+        "table": "loot_tables/entities/carriage.json"
+      },
+      "minecraft:damage_sensor": {
+        "triggers": [
+          {
+            "cause": "fall",
+            "deals_damage": "no"
+          },
+          {
+            "cause": "drowning",
+            "deals_damage": "no"
+          }
+        ]
+      }
+    }
+  }
+}

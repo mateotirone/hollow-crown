@@ -65,7 +65,7 @@
         0,
         48
        ],
-       "inflate": 0.5
+       "inflate": 0.53
       },
       {
        "origin": [
@@ -108,7 +108,7 @@
         0,
         48
        ],
-       "inflate": 0.5,
+       "inflate": 0.56,
        "mirror": true
       },
       {
@@ -126,7 +126,8 @@
         64,
         48
        ],
-       "mirror": true
+       "mirror": true,
+       "inflate": 0.09
       }
      ]
     }

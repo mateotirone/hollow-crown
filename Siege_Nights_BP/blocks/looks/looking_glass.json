@@ -1,0 +1,33 @@
+{
+  "format_version": "1.21.60",
+  "minecraft:block": {
+    "description": {
+      "identifier": "hc:looking_glass",
+      "menu_category": {
+        "category": "items"
+      }
+    },
+    "components": {
+      "minecraft:display_name": "tile.hc:looking_glass.name",
+      "minecraft:geometry": "minecraft:geometry.full_block",
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "hc_looking_glass_side",
+          "render_method": "opaque"
+        },
+        "up": {
+          "texture": "hc_looking_glass_top",
+          "render_method": "opaque"
+        },
+        "down": {
+          "texture": "hc_looking_glass_top",
+          "render_method": "opaque"
+        }
+      },
+      "minecraft:map_color": "#8fa7a8",
+      "minecraft:destructible_by_mining": false,
+      "minecraft:destructible_by_explosion": false,
+      "minecraft:light_emission": 4
+    }
+  }
+}

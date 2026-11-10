@@ -22,6 +22,12 @@ import "./bestiary/index.js";
 import "./lore/index.js";
 import "./crown/index.js";
 import "./dragons/index.js";
+import "./settle/index.js";
+import "./rivals/index.js";
+import "./hollowfolk/index.js";
+import "./looks/index.js";
+import "./economy/index.js";
+import "./reach/index.js";
 
 // Start the shared loop last, once every file has registered its work
 import { startLoop } from "./core/loop.js";

@@ -17,6 +17,7 @@
 //   loreSourceMisnamed { player, guess }
 //   loreFlag         { player, flag }                     e.g. journal_read, true_name, lamp_out, aldous_ally, loremaster
 //   loreTalk         { player, npc, node, choice, next }
+//   rivalLordVoices  { lords, tempers }                   names, temperaments and lines for the NPC lords (data/lords.js)
 //   slip             { player, id, npc, returnTo, dimension, handled }   a Slip into the Hollow should happen now.
 //                    The Undertow feature sets data.handled = true, does the glimpse, then emits slipEnded { player, id }.
 // Per-player progress is the player dynamic property "hc:lore_progress" (JSON, see blankProgress).
@@ -29,20 +30,97 @@ import {
 import { COLLECTIONS, PLACES, SITE_IDS, THREADS, MILESTONES } from "./data/world.js";
 import { NPCS } from "./data/dialogue.js";
 import { JOURNAL, JOURNAL_CLUES } from "./data/journal.js";
+import { POWERS, ARTS_BOOK } from "./data/powers.js";
+import { CASES, TELLS } from "./data/returned.js";
+import { SKILLS } from "../townhall/skills.js";
+import { RIVAL_LORDS, LORD_TEMPERS, REGENT_VOICE, RUMOR_PARTS } from "./data/lords.js";
 import "./player.js";
 import "./reader.js";
 import "./library.js";
 import "./ledger.js";
 import "./journal.js";
+import "./voices.js";
+import "./reveal.js";
+import "./local.js";
+import "./portraits.js";
+import "./ravens.js";
+import "./moondoors.js";
+import "./corvin.js";
+import "./glimpse.js";
+import { PLOT_LORE, LOCAL_TOMES, LOCAL_THREADS } from "./data/plots.js";
+import { PLOT_PLAN } from "../plots/config.js";
+import "./cases.js";
+import "./singing.js";
+import { REVEAL } from "./data/reveal.js";
+import { ART_IDS, GATED } from "./arts.js";
 import { BOSS_TOMES, MOB_TOMES } from "./caches.js";
 import { dialogueProblems, SCRIPT_CLUES } from "./npcs.js";
 import "./showcase.js";
 
 addTests("lore", {
+  "local lore: every one of the twelve plots has its past, three books and a mystery it can solve": () => {
+    assertEqual(Object.keys(PLOT_LORE).sort(), PLOT_PLAN.map((p) => p.name).sort());
+    assertEqual(LOCAL_TOMES.length, 36);
+    for (const [name, plot] of Object.entries(PLOT_LORE)) {
+      assert(plot.was.length > 80 && PLACES[plot.lead], `${name}: past and lead`);
+      assertEqual(plot.tomes.length, 3);
+      for (const t of plot.tomes) assert(t.pages.length >= 2 && t.pages.every((pg) => pg.length < 900), `${name}: ${t.title}`);
+      assert(plot.mystery.accept.length && plot.mystery.clues.length === 3, name);
+      // none of them gives the ending away
+      for (const t of plot.tomes) assert(!/Morvane|Oswin/.test(t.pages.join(" ")), `${name}: ${t.title} names him`);
+    }
+    for (const t of LOCAL_THREADS) assert(answerIsRight(t, t.accept[0]) && !answerIsRight(t, "nobody"), t.id);
+    assertEqual(new Set(LOCAL_TOMES.map((t) => t.title)).size, 36);
+    assertEqual(TOMES.length, 74); // the local books never count toward the Unburned Library
+  },
+  "the reveal: the scene's line is the journal's own, and nobody names him before the fight": () => {
+    assert(JOURNAL.entries.some((e) => e.text.includes(REVEAL.journalLine)), "the line must be word for word from the journal");
+    for (const text of [REVEAL.journalLine, REVEAL.lookUp, REVEAL.bells, ...REVEAL.fall]) assert(!/Oswin|Morvane/.test(text), "the scene names nobody");
+    assert(/Oswin/.test(REVEAL.lastPage.sign), "the last page is signed");
+    // the three pieces and the man who lays them side by side
+    const sets = (id) => new Set(NPCS.find((n) => n.id === id).nodes && Object.values(NPCS.find((n) => n.id === id).nodes).flatMap((node) => node.opts.flatMap((o) => o[2] ?? [])));
+    assert(sets("cael").has("flag:heard_no_body") && sets("sigrun").has("flag:heard_named") && sets("mag").has("flag:heard_walked_in"));
+    const npc = (id) => NPCS.find((n) => n.id === id);
+    for (const id of ["sigrun", "mag", "sage"]) for (const [key, node] of Object.entries(npc(id).nodes)) assert(!/was (King )?Oswin|is (King )?Oswin/.test(node.text), `${id}.${key} says it too soon`);
+    // only after he has fallen does anyone say it plainly
+    assert(npc("cael").start.some(([conds, node]) => node === "plain" && conds.includes("flag:morvane_fallen")));
+    assert(/Morvane was King Oswin/.test(npc("cael").nodes.plain.text));
+  },
+  "the hidden Returned: every case has an asker who can reach every one of its outcomes": () => {
+    assertEqual(CASES.length, 4);
+    for (const c of CASES) {
+      const npc = NPCS.find((n) => n.id === c.asker);
+      assert(npc, c.id);
+      const set = new Set(Object.values(npc.nodes).flatMap((node) => node.opts.flatMap((o) => o[2] ?? [])).filter((e) => e.startsWith("flag:")).map((e) => e.slice(5)));
+      for (const flag of Object.values(c.flags)) assert(set.has(flag), `${c.id}: nothing sets ${flag}`);
+      for (const tell of [...c.show, ...(c.askerShows ?? [])]) assert(TELLS[tell], tell);
+    }
+    assert(CASES.some((c) => !c.returned), "some suspects must be innocent");
+  },
+  "every Sorcerer power has an origin and a page, and the book keeps the secrets": () => {
+    const arcana = SKILLS.filter((s) => s.branch === "arcana").map((s) => s.id);
+    assertEqual([...ART_IDS].sort(), [...arcana].sort());
+    for (const id of ART_IDS) for (const key of ["tree", "art", "origin", "page", "known"]) assert(POWERS[id][key]?.length > 5, `${id}.${key}`);
+    for (const id of Object.keys(GATED)) assert(POWERS[id], id);
+    const shown = ARTS_BOOK.cover + ARTS_BOOK.intro + ARTS_BOOK.outro + ART_IDS.map((id) => POWERS[id].page + POWERS[id].known + POWERS[id].tree + POWERS[id].art).join(" ");
+    for (const secret of ["Oswin", "Morvane", "Edda", "Hollow", "truce", "Crown"]) assert(!shown.includes(secret), `the book says "${secret}"`);
+    for (const id of ART_IDS) if (POWERS[id].lead) assert(PLACES[POWERS[id].lead], id);
+  },
+  "twelve rival lords with full voices; the Hollow's NPC rulers never use a story name": () => {
+    assertEqual(RIVAL_LORDS.length, 12);
+    const keys = Object.keys(RIVAL_LORDS[0].lines);
+    for (const lord of RIVAL_LORDS) {
+      assert(LORD_TEMPERS[lord.temper], lord.id);
+      assertEqual(Object.keys(lord.lines), keys, lord.id);
+    }
+    for (const name of REGENT_VOICE.names) for (const taken of ["Oswin", "Morvane", "Corvin", "Edda", "Aldric", "Maelis", "Vorlund"]) assert(!name.includes(taken), name);
+    assert(REGENT_VOICE.lines.thief.length <= 40);
+    for (const type of ["bounty", "camp", "rescue", "supply"]) assert(RUMOR_PARTS.reasons[type].length >= 3, type);
+  },
   "the starting journal explains nothing: no names, no answers": () => {
     assertEqual(JOURNAL.entries.length, 12);
     const text = JOURNAL.entries.map((e) => e.date + " " + e.text).join(" ");
-    for (const secret of ["Oswin", "Aldric", "the Hollow", "Hollowmere", "Choir", "3:17", "third night", "Edda", "truce"]) assert(!text.includes(secret), `journal says "${secret}"`);
+    for (const secret of ["Oswin", "Aldric", "the Hollow", "Hallowmere", "Hollowmere", "Morvane", "Choir", "3:17", "third night", "Edda", "truce"]) assert(!text.includes(secret), `journal says "${secret}"`);
     for (const clue of JOURNAL_CLUES) assert(CLUE_THREADS[clue], clue);
     assert(answerIsRight(THREAD.old_journal, "King Aldric"));
   },
@@ -58,7 +136,7 @@ addTests("lore", {
     assertEqual(COLLECTIONS.reduce((sum, c) => sum + c.count, 0), TOMES.length);
   },
   "every clue a tome gives belongs to a mystery, and every mystery clue can be found": () => {
-    const given = new Set(TOMES.flatMap((t) => t.clues));
+    const given = new Set([...TOMES, ...LOCAL_TOMES].flatMap((t) => t.clues));
     for (const clue of given) assert(CLUE_THREADS[clue], `clue ${clue} is in no thread`);
     const fromTalk = new Set(NPCS.flatMap((n) => Object.values(n.nodes).flatMap((node) => node.opts.flatMap((o) => o[2] ?? []))).filter((e) => e.startsWith("clue:")).map((e) => e.slice(5)));
     for (const clue of Object.keys(CLUE_THREADS)) assert(given.has(clue) || fromTalk.has(clue) || SCRIPT_CLUES.includes(clue), `nothing gives clue ${clue}`);
@@ -120,7 +198,7 @@ addTests("lore", {
     assert(canAnswer(p, THREAD.the_crown));
     addClues(p, ["leader_five_lords", "warlord_is_vorlund", "leader_unknown", "voice_in_rock", "oswin_overthrown"]);
     assert(!canAnswer(p, THREAD.who_leads), "the leader stays unknown until the Litany");
-    assert(answerIsRight(THREAD.who_leads, "King Oswin") && answerIsRight(THREAD.the_name, "Hollowmere"));
+    assert(answerIsRight(THREAD.who_leads, "King Oswin") && answerIsRight(THREAD.the_name, "Hallowmere"));
     for (const t of THREADS) for (const c of t.must ?? []) assert(t.clues[c], `${t.id}: must-clue ${c} is not in the thread`);
   },
   "clues file under their mystery once": () => {

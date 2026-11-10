@@ -18,8 +18,8 @@
     ]
    },
    "minecraft:health": {
-    "value": 200,
-    "max": 200
+    "value": 120,
+    "max": 120
    },
    "minecraft:collision_box": {
     "width": 1.2,
@@ -74,7 +74,7 @@
     "value": 0.33
    },
    "minecraft:experience_reward": {
-    "on_death": "query.last_hit_by_player ? 50 : 0"
+    "on_death": "query.last_hit_by_player ? 30 : 0"
    },
    "minecraft:behavior.look_at_player": {
     "priority": 8,
@@ -131,7 +131,7 @@
     ]
    },
    "minecraft:attack": {
-    "damage": 10
+    "damage": 9
    },
    "minecraft:behavior.melee_attack": {
     "priority": 3,

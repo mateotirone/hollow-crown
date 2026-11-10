@@ -9,8 +9,8 @@ import { bossDefs } from "./bossCore.js";
 import { effect } from "./util.js";
 
 const FOREVER = 20000000;
-const FAMILY_LABEL = { raider: "Choir raider", hollow: "Hollow thing", summon: "Summoned", wild: "Beast (peaceful)", wild_hostile: "Beast", undead: "Beast", order: "Ashen Gate", boss: "BOSS", boss_add: "Boss helper", boss_prop: "Fight prop" };
-const ORDER = ["boss", "raider", "hollow", "undead", "wild", "wild_hostile", "order", "summon", "boss_add", "boss_prop"];
+const FAMILY_LABEL = { raider: "Choir raider", hollow: "From the Hollow", summon: "Summoned", wild: "Beast (peaceful)", wild_hostile: "Beast", undead: "Beast", order: "Ashen Gate", boss: "BOSS", boss_add: "Boss helper", boss_prop: "Fight prop", seep: "Hollow incursion", champion: "NPC fighter" };
+const ORDER = ["boss", "raider", "hollow", "undead", "wild", "wild_hostile", "order", "champion", "seep", "summon", "boss_add", "boss_prop"];
 
 export function exhibits() {
   return Object.entries(MOBS)

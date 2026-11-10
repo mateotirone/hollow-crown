@@ -7,18 +7,31 @@
 //   mobs.js      what each mob does beyond walking and biting
 //   relics.js    the named boss loot and the boss keys
 //   spawns.js    Choir raiders in sieges, Hollow things at night and in the Undertow
+//   seeps.js     Seep sites: random Hollow incursions in the overworld that widen until someone closes them
+//   gloam.js     Gloamwings: flyers that build up the longer a visitor stays in the Hollow
+//   champions.js NPC stand-ins for players that fight like one (spawnChampion, setStance)
+//   bodies.js    the dead fall and lie on the field until the fight is over, then sink away
 //   showcase.js  our exhibits in the /scriptevent siege:showcase test world
 //
 // Other features hear from us by script event:
 //   siege:boss_defeated       {"boss","x","y","z","dimension","players":[ids]}
 //   siege:mob_killed          {"mob","x","y","z","dimension","killer"?}   (six lore-bearing mobs only)
 //   siege:award_skill_points  {"player","points","renown"?,"reason"}
+//   siege:seep_opened / siege:seep_closed  {"x","y","z","dimension","level","players"?:[ids]}
+//   siege:champion_defeated   {"id","name","role","tier","tags","x","y","z","dimension","players"}
 // and can start a fight with:  /scriptevent siege:bestiary_summon <boss id> [x y z]
-// Boss ids: reeve, huntsman, bride, seneschal, mother, warlord_king, oswin.
+// Boss ids: reeve, huntsman, bride, seneschal, mother, warlord_king, morvane (seven stages: see morvane.js).
 
 import "./bossCore.js";
 import "./bosses.js";
+import "./reveal.js";
+import "./morvane.js";
+import "./returned.js";
 import "./mobs.js";
 import "./relics.js";
 import "./spawns.js";
+import "./seeps.js";
+import "./gloam.js";
+import "./champions.js";
+import "./bodies.js";
 import "./showcase.js";

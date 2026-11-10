@@ -24,13 +24,20 @@ import { on, isNight } from "../siege/api.js";
 import { UNDERTOW_ID, UNDERTOW_LAYOUT as L, COURT, HEART, TEXT, stageAt, pathX } from "./layout.js";
 import { getSourceSite, getSites, markSite, openRift, riftExit, sourceSignsTick, SITE_NAMES, SOURCE_SITE_IDS } from "./source.js";
 import { VEIL, planCrack } from "./rift.js";
-import { buildTick, piecesTick, flush, pieces, openCourtGate, waystoneSpot, WAYSTONE, isBuilt } from "./builder.js";
-import { heightAt, planChunk, isRiver } from "./terrain.js";
+import { buildTick, piecesTick, flush, pieces, openCourtGate, openRiverGate, rebuildHeart, waystoneSpot, WAYSTONE, isBuilt } from "./builder.js";
+import { heightAt, planChunk, isRiver, regionAt, columnAt } from "./terrain.js";
+import { RIVER_NODES, riverSegments, riverDistance } from "./rivers.js";
+import { SITES, roadLines } from "./roads.js";
+import { STRUCTURE_IDS, planStructure } from "./structures.js";
+import { POCKETS, planPocket, pocketTick, requestPockets, REVEAL_LOOKS, ROOM_LOOKS } from "./pockets.js";
+import { overworldStage } from "./finale.js";
+import { ItemStack } from "@minecraft/server";
 import { load, save, say, runCmd } from "./data.js";
 import { choirTick, singerSpot, CHOIR } from "./choir.js";
 import { slipSeconds, slipLanding, isSlipping } from "./slips.js";
-import { shouldAlarm, oreOutcome, noteEntry, crownTick, crownVerdict, WARDEN } from "./warden.js";
+import { shouldAlarm, oreOutcome, noteEntry, crownTick, crownVerdict, CLAIM_SECONDS, WARDEN } from "./warden.js";
 import { oreChance } from "./terrain.js";
+import { shouldRise, regentOutcome, REGENT, TEMPERS, JOBS } from "./regent.js";
 
 const IN_TAG = "siege_undertow_in";
 const FOG_ID = "siege:undertow_fog";
@@ -152,6 +159,9 @@ onTick("undertow:build", 1, () => {
   buildTick(players);
 });
 onTick("undertow:pieces", 40, () => piecesTick());
+// The river's water gate in the sealed wall may be generated long after the Court falls: open it then.
+let riverGateOpen = false;
+onTick("undertow:rivergate", 100, () => { if (!riverGateOpen && progress().oswin) riverGateOpen = openRiverGate(); });
 onTick("undertow:save", 200, () => flush());
 
 // ---- atmosphere: lightning in the fog above, blue motes along the rivers --------------------
@@ -171,6 +181,7 @@ onTick("undertow:sky", 20, () => {
     const due = nextFlash.get(p.id) ?? system.currentTick + 200;
     if (system.currentTick < due) { nextFlash.set(p.id, due); continue; }
     nextFlash.set(p.id, system.currentTick + 160 + Math.floor(Math.random() * 340));
+    if (columnAt(Math.floor(l.x), Math.floor(l.z))?.site === "standing_ranks") continue; // the Standing Ranks are silent
     p.playSound("ambient.weather.thunder", { volume: 0.5, pitch: 0.6 + Math.random() * 0.3 });
     if (Math.random() < 0.4) {
       const ang = Math.random() * Math.PI * 2, far = 24 + Math.random() * 20;
@@ -226,24 +237,51 @@ function useWaystone(player, loc) {
   });
 }
 
-// ---- the Drowned Court and the Choir's Heart ---------------------------------------------
-let courtOccupied = false, courtEmptySince = 0;
+// ---- the Court (the Choir) and the Seat (the last fight) -----------------------------------
+let seatOccupied = false, seatEmptySince = 0;
 onTick("undertow:arenas", 20, () => {
   const prog = progress();
-  const d = undertow();
-  const inCourt = world.getAllPlayers().filter((p) => inUndertow(p) && dist2(p.location, COURT.center) < (COURT.radius - 4) ** 2);
-  if (!prog.oswin && pieces().court) {
-    if (inCourt.length && !courtOccupied) {
-      courtOccupied = true;
-      sendEvent("siege:undertow_arena_ready", COURT.bossId);
-    } else if (!inCourt.length && courtOccupied) {
-      if (!courtEmptySince) courtEmptySince = system.currentTick;
-      if (system.currentTick - courtEmptySince > 1200) { courtOccupied = false; courtEmptySince = 0; } // re-arm after 60 s empty
-    } else courtEmptySince = 0;
+  choirTick(); // the Choir wakes when someone walks into the Court
+  // After the Choir: tell the boss code when someone steps onto the Seat.
+  if (prog.choir && !prog.morvane && pieces().heart) {
+    const there = world.getAllPlayers().some((p) => inUndertow(p) && dist2(p.location, HEART.center) < HEART.outerRadius ** 2);
+    if (there && !seatOccupied) {
+      seatOccupied = true;
+      requestPockets();
+      sendEvent("siege:undertow_arena_ready", "morvane");
+    } else if (!there && seatOccupied) {
+      if (!seatEmptySince) seatEmptySince = system.currentTick;
+      if (system.currentTick - seatEmptySince > 1200) { seatOccupied = false; seatEmptySince = 0; } // re-arm after 60 s empty
+    } else seatEmptySince = 0;
   }
-  choirTick(); // the Hollow Choir wakes when someone walks into the Heart
   crownTick(); // the Hollow Crown: a Sorcerer who wears it rules, anyone else dies
 });
+onTick("undertow:pockets", 2, () => pocketTick());
+
+// The Crown thread tells us when the throne below is empty again: the last fight can be fought again.
+on("crownVacant", () => {
+  const prog = progress();
+  prog.morvane = false;
+  save(K_PROGRESS, prog);
+  world.sendMessage("§5Far below, something takes its seat again.");
+});
+
+// The Hollow Crown falls from its wearer into a chest at the middle of the Seat. Once.
+function leaveCrown() {
+  const prog = progress();
+  if (prog.crownOut) return;
+  const d = undertow(), at = { x: HEART.center.x, y: HEART.center.y, z: HEART.center.z };
+  try {
+    const crown = new ItemStack("siege:hollow_crown", 1);
+    try { crown.setLore(["§5It hums with many voices.", "§4It will not suffer the unworthy."]); } catch { /* plain crown */ }
+    d.setBlockType(at, "minecraft:chest");
+    const box = d.getBlock(at)?.getComponent("inventory")?.container;
+    if (box) box.setItem(13, crown); else d.spawnItem(crown, { x: at.x + 0.5, y: at.y + 1, z: at.z + 0.5 });
+    prog.crownOut = true;
+    save(K_PROGRESS, prog);
+  } catch { /* the Seat is not loaded: the tick below tries again when someone is there */ }
+}
+onTick("undertow:crownfall", 100, () => { const p = progress(); if (p.morvane && !p.crownOut) leaveCrown(); });
 
 function sendEvent(id, message) {
   try { system.sendScriptEvent(id, message); } catch { runCmd(undertow(), `scriptevent ${id} ${message}`); }
@@ -258,13 +296,25 @@ system.afterEvents.scriptEventReceive.subscribe((e) => {
     case "siege:boss_defeated": {
       let boss;
       try { boss = JSON.parse(e.message).boss; } catch { boss = e.message.trim(); }
-      if (boss === COURT.bossId) {
+      if (boss === "choir" || boss === COURT.bossId) {
         const prog = progress();
-        if (!prog.oswin) {
-          prog.oswin = true;
+        if (!prog.choir || !prog.oswin) {
+          prog.choir = true;
+          prog.oswin = true; // "the Court is cleared": the gate and the river's water gate stay open
           save(K_PROGRESS, prog);
           openCourtGate();
-          world.sendMessage("§5The Drowned Court falls silent. Behind the throne, the sealed gate cracks open.");
+          requestPockets(); // get the last fight's places built while players make the Long Climb
+          world.sendMessage("§5The Court falls silent. Behind the throne, the sealed gate cracks open.");
+        }
+      }
+      if (boss === "morvane") {
+        const prog = progress();
+        if (!prog.morvane) {
+          prog.morvane = true;
+          save(K_PROGRESS, prog);
+          rebuildHeart(); // so nobody is left standing on a falling floor
+          leaveCrown();
+          world.sendMessage("§5The singing stops. For the first time in living memory, the land above is quiet.");
         }
       }
       break;
@@ -290,7 +340,7 @@ system.afterEvents.scriptEventReceive.subscribe((e) => {
     case "hc:undertow_status":
       if (player) {
         const p = pieces(), marked = Object.keys(getSites()).length;
-        say(player, `§dThe Hollow: wound ${p.wound ? "built" : "pending"}, court ${p.court ? "built" : "pending"}, heart ${p.heart ? "built" : "pending"}, waystones ${p.waystones.length}/${L.waystoneZ.length}. Source sites marked ${marked}/7. Court boss ${progress().oswin ? "defeated" : "waiting"}.`);
+        say(player, `§dThe Hollow: wound ${p.wound ? "built" : "pending"}, court ${p.court ? "built" : "pending"}, heart ${p.heart ? "built" : "pending"}, waystones ${p.waystones.length}/${L.waystoneZ.length}. Source sites marked ${marked}/7. Choir ${progress().choir ? "silenced" : "singing"}, the Seat ${progress().morvane ? "empty" : "held"}.`);
       }
       break;
   }
@@ -304,8 +354,8 @@ on("showcase", ({ player, dim, nextSpot, label }) => {
     singer.addTag("siege_showcase");
     singer.addTag("siege_boss_shielded");
   } catch { /* entity missing */ }
-  label(at, "Singer\n(Hollow Choir)");
-  say(player, "§dThe Hollow: step into the Rift Veil block, or type §f/scriptevent hc:undertow_go§d, to visit it. §f/scriptevent hc:slip§d gives you a Slip. The Hollow Choir wakes when you walk into the Heart at the far end (z 2400).");
+  label(at, "Singer\n(the Choir)");
+  say(player, "§dThe Hollow: step into the Rift Veil block, or type §f/scriptevent hc:undertow_go§d, to visit it. §f/scriptevent hc:slip§d gives you a Slip. The Choir wakes when you walk into the Court (z 1600); the Seat is at the far end (z 2400).");
 });
 
 // ---- signs at the real Source -----------------------------------------------------------
@@ -322,8 +372,76 @@ addTests("undertow", {
       assert(Math.abs(a - b) <= 1, `step of ${Math.abs(a - b)} at z ${z}`);
     }
   },
+  "open country has all four kinds of land": () => {
+    const seen = new Set();
+    for (let x = -680; x <= 680; x += 40) for (let z = 0; z < 2280; z += 40) if (Math.abs(x) > 200) seen.add(regionAt(x, z));
+    for (const k of ["wood", "high", "fen", "waste"]) assert(seen.has(k), `no ${k} land`);
+  },
+  "light rivers are one boatable network": () => {
+    // Every stretch of river is water at one level, unless the story path bridges over it.
+    for (const [x1, z1, x2, z2] of riverSegments()) for (let t = 0; t <= 1; t += 0.1) {
+      const x = Math.round(x1 + (x2 - x1) * t), z = Math.round(z1 + (z2 - z1) * t);
+      const c = columnAt(x, z);
+      assert(c !== null, `river over the void at ${x},${z}`);
+      assert((c.under ?? c.h) <= L.seaY - 2, `river blocked at ${x},${z} (ground ${c.h})`);
+    }
+    // Every landing can be reached from the Wound landing.
+    const segs = riverSegments(), key = (x, z) => `${Math.round(x)},${Math.round(z)}`;
+    const reached = new Set([key(RIVER_NODES[0].x, RIVER_NODES[0].z)]);
+    for (let grew = true; grew; ) {
+      grew = false;
+      for (const [x1, z1, x2, z2] of segs) {
+        const a = key(x1, z1), b = key(x2, z2);
+        if (reached.has(a) !== reached.has(b)) { reached.add(a); reached.add(b); grew = true; }
+      }
+    }
+    for (const n of RIVER_NODES) assert(reached.has(key(n.x, n.z)) && riverDistance(n.x, n.z) < 1, `${n.id} is cut off`);
+  },
+  "roads are dry and gentle, and cross rivers on bridges a boat fits under": () => {
+    let bridges = 0;
+    for (const pts of roadLines()) {
+      let last, onBridge = false;
+      for (const [fx, fz] of pts) {
+        const x = Math.round(fx), z = Math.round(fz), c = columnAt(x, z);
+        assert(c !== null && c.h > L.seaY, `road under water or over the void at ${x},${z}`);
+        if (c.river <= 3.5) {
+          assert(c.under !== undefined && c.under < L.seaY, `road blocks the river at ${x},${z}`);
+          assert(c.h - 1 - L.seaY >= 4, `bridge too low for a boat at ${x},${z}`);
+          if (!onBridge) bridges++;
+          onBridge = true;
+        } else if (c.river > 12) onBridge = false;
+        if (last !== undefined && !c.site) assert(Math.abs(c.h - last) <= 3, `road too steep at ${x},${z}`);
+        last = c.h;
+      }
+    }
+    assert(bridges >= 5, `only ${bridges} road bridges`);
+  },
+  "every centre structure stays on its site": () => {
+    for (const id of STRUCTURE_IDS) {
+      const s = SITES.find((x) => x.id === id), ops = planStructure(id);
+      assert(s && ops.length > 0, `${id} has no site or no plan`);
+      for (const op of ops) for (const c of [op.a, op.b]) assert(Math.hypot(c[0] - s.x, c[2] - s.z) <= s.r + 4, `${id} builds outside its site`);
+    }
+  },
+  "village sites are flat": () => {
+    for (const s of SITES) if (s.y !== undefined) for (const [dx, dz] of [[0, 0], [s.r - 2, 0], [0, 2 - s.r], [-Math.floor(s.r / 2), Math.floor(s.r / 2)]]) {
+      assert(heightAt(s.x + dx, s.z + dz) === s.y, `${s.id} is not flat at ${s.x + dx},${s.z + dz}`);
+    }
+  },
+  "pockets are outside the world and small enough to build": () => {
+    for (const look of Object.values(REVEAL_LOOKS)) assert(ROOM_LOOKS[look], `no room look ${look}`);
+    assert(POCKETS.length === 13 && overworldStage() === undefined);
+    for (const p of POCKETS) {
+      assert(p.min.x > L.reach + 200, `${p.id} is too close to the world`);
+      for (const op of planPocket(p.id)) {
+        const v = (Math.abs(op.b[0] - op.a[0]) + 1) * (Math.abs(op.b[1] - op.a[1]) + 1) * (Math.abs(op.b[2] - op.a[2]) + 1);
+        assert(v <= 32768, `${p.id}: fill of ${v} blocks`);
+        for (const k of [0, 1, 2]) for (const c of [op.a, op.b]) assert(c[k] >= [p.min.x, p.min.y, p.min.z][k] && c[k] <= [p.max.x, p.max.y, p.max.z][k], `${p.id}: fill outside its bounds`);
+      }
+    }
+  },
   "no fill is too big": () => {
-    for (let cx = -10; cx < 10; cx += 3) for (let cz = -3; cz < 154; cz += 11)
+    for (let cx = -44; cx < 44; cx += 5) for (let cz = -3; cz < 154; cz += 11)
       for (const op of planChunk(cx, cz)) {
         const v = (Math.abs(op.b[0] - op.a[0]) + 1) * (Math.abs(op.b[1] - op.a[1]) + 1) * (Math.abs(op.b[2] - op.a[2]) + 1);
         assert(v <= 32768, `fill of ${v} blocks`);
@@ -344,13 +462,23 @@ addTests("undertow", {
   },
   "the Hollow Crown only suffers a Sorcerer": () => {
     assert(crownVerdict(true, false, 0) === "claims" && crownVerdict(true, true, 99) === "rules");
+    assert(CLAIM_SECONDS >= 10, "taking the Crown must be slow enough to contest");
     assert(crownVerdict(false, false, 0) === "warned" && crownVerdict(false, false, 4) === "warned" && crownVerdict(false, false, 5) === "dies");
+  },
+  "an NPC ruler rises when no player rules, and returns after being killed": () => {
+    const none = { active: false, fellOn: undefined };
+    assert(!shouldRise({ choirDead: false, playerRules: false, regent: none, day: 99 }), "not while the Choir lives");
+    assert(!shouldRise({ choirDead: true, choirFellOn: 10, playerRules: false, regent: none, day: 11 }) && shouldRise({ choirDead: true, choirFellOn: 10, playerRules: false, regent: none, day: 12 }));
+    assert(!shouldRise({ choirDead: true, choirFellOn: 10, playerRules: true, regent: none, day: 50 }), "never over a player ruler");
+    assert(!shouldRise({ choirDead: true, choirFellOn: 10, playerRules: false, regent: { active: false, fellOn: 20 }, day: 26 }) && shouldRise({ choirDead: true, choirFellOn: 10, playerRules: false, regent: { active: false, fellOn: 20 }, day: 27 }));
+    assert(REGENT.permitDays > 0 && JOBS.length >= 3 && !TEMPERS.zealot.sells);
+    assert(regentOutcome(true, "greedy", 0.4) === "tithe" && regentOutcome(true, "fair", 0.4) === "ore" && regentOutcome(false, "greedy", 0.01) === "ore");
   },
   "the tithe and the offline yield": () => {
     const w = { id: "w", permits: { friend: "Friend" }, tithe: 25 };
     assert(oreOutcome(w, "friend", true, 0.1) === "tithe" && oreOutcome(w, "friend", true, 0.9) === "ore");
-    assert(oreOutcome(w, "thief", false, 0.9) === "nothing" && oreOutcome(w, "thief", false, 0.1) === "ore" && oreOutcome(w, "thief", true, 0.9) === "ore");
-    assert(oreOutcome(w, "w", false, 0.99) === "ore" && WARDEN.offlineYield === 0.5);
+    assert(oreOutcome(w, "thief", false, 0.9) === "nothing" && oreOutcome(w, "thief", false, 0.1) === "nothing" && oreOutcome(w, "thief", true, 0.9) === "ore");
+    assert(oreOutcome(w, "w", false, 0.99) === "ore" && WARDEN.offlineYield === 0);
   },
   "ore is in the cliffs, more of it deeper in": () => {
     assert(oreChance(0) === 0 && oreChance(2000) > oreChance(200));
@@ -360,7 +488,7 @@ addTests("undertow", {
   },
   "seven singers stand on the ring": () => {
     for (let i = 0; i < 7; i++) {
-      const s = singerSpot(i), r = Math.hypot(s.x - 0.5 - HEART.center.x, s.z - 0.5 - HEART.center.z);
+      const s = singerSpot(i), r = Math.hypot(s.x - 0.5 - COURT.center.x, s.z - 0.5 - COURT.center.z);
       assert(r > HEART.innerRadius + 4 && r < CHOIR.fallBands[1], `singer ${i} at radius ${r}`);
     }
   },

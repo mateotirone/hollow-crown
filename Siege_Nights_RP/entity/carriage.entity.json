@@ -1,0 +1,23 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "siege:carriage",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "default": "textures/entity/siege/carriage"
+      },
+      "geometry": {
+        "default": "geometry.siege_carriage"
+      },
+      "scripts": {
+        "should_update_bones_and_effects_offscreen": "1.0"
+      },
+      "render_controllers": [
+        "controller.render.default"
+      ]
+    }
+  }
+}

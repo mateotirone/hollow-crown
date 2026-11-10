@@ -1,0 +1,39 @@
+{
+ "format_version": "1.8.0",
+ "animations": {
+  "animation.siege_weapon.first_person": {
+   "loop": true,
+   "bones": {
+    "weapon": {
+     "rotation": [
+      95,
+      -15,
+      190
+     ],
+     "position": [
+      0,
+      14,
+      -6
+     ]
+    }
+   }
+  },
+  "animation.siege_weapon.third_person": {
+   "loop": true,
+   "bones": {
+    "weapon": {
+     "rotation": [
+      -90,
+      0,
+      0
+     ],
+     "position": [
+      0,
+      13.5,
+      -1.5
+     ]
+    }
+   }
+  }
+ }
+}

@@ -4,12 +4,12 @@ import { world, system, ItemStack, ItemLockMode } from "@minecraft/server";
 import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
 import {
   isReady, getState, keepOf, overworld, title, onTick, on, emit, takeItems, countItem,
-  addSiegeSkipHook, addPlanHook, addRewardHook, FACTIONS, isGuard, guardOwner, guardCount, guardLimit,
+  addSiegeSkipHook, addPlanHook, addRewardHook, FACTIONS, isGuard, guardOwner, guardCount, guardLimit, isOnline,
 } from "../siege/api.js";
 import { CROWN, IDS } from "./config.js";
-import { hollowStage, nightfall, tithed, resolveCrown, claimNeeded, clamp } from "./rules.js";
+import { hollowStage, nightfall, tithed, claimNeeded, clamp, npcDecreeTarget } from "./rules.js";
 import {
-  crown, saveCrown, ruler, isRuler, isCourt, rulerLabel, playerById, announce, giveItem, claimOf, seat,
+  crown, saveCrown, ruler, isRuler, isCourt, rulerLabel, playerById, announce, giveItem, claimOf, seat, lords, lordOf,
 } from "./state.js";
 import { citadel, inCitadel, throneSpots } from "./citadel.js";
 
@@ -97,52 +97,8 @@ export function endReign(how) {
 
 // ---------- Who takes the relic when the Hollow is beaten ----------
 
-// Mateo's rule, said in game: the Hollow Crown is not the prize. It would kill anyone but a master Sorcerer.
-const OFFER_TEXT = [
-  "The thing on the throne is dead.",
-  "",
-  "Its crown has rolled to the foot of the dais. Your hand stops a finger's width from it, and you know, the way you know not to step off a cliff, that putting it on would kill you. The Hollow Crown is for someone who can bend the Hollow. That is not you. Not yet.",
-  "",
-  `But in the ruin of its chest ${CROWN.relic} is still beating, and nothing warns you away from that.`,
-  "",
-  "Only one of you can carry it home.",
-].join("\n");
-
-const answerWithin = (promise, ticks, fallback) => Promise.race([
-  promise.catch(() => fallback),
-  new Promise((resolve) => system.runTimeout(() => resolve(fallback), ticks)),
-]);
-
-export async function offerCrown(fighterIds) {
-  const c = crown();
-  if (c.ruler || c.pendingCrown) return;
-  const fighters = fighterIds.map(playerById).filter(Boolean);
-  if (!fighters.length) return;
-  if (fighters.length === 1) return award(fighters[0].id, []);
-
-  for (const p of fighters) title(p, `§6${CROWN.relicName}`, "§7It is still beating");
-  const answers = await Promise.all(fighters.map((p) => answerWithin(
-    new ActionFormData().title(CROWN.relicName).body(OFFER_TEXT)
-      .button(`Take ${CROWN.relic}`).button("Yield").show(p).then((r) => (!r.canceled && r.selection === 0)), 600, false)));
-  const takers = fighters.filter((_, i) => answers[i]);
-  let votes = {};
-  if (takers.length > 1) {
-    announce(`§6${takers.map((t) => t.name).join(", ")} have each reached for ${CROWN.relic}. Those who fought will choose.`);
-    const picks = await Promise.all(fighters.map((p) => {
-      const form = new ActionFormData().title(`Who carries ${CROWN.relic}?`).body("Vote for the one who should rule. A tie is settled by the bell.");
-      for (const t of takers) form.button(t.name);
-      return answerWithin(form.show(p).then((r) => (r.canceled ? undefined : takers[r.selection]?.id)), 1200, undefined);
-    }));
-    fighters.forEach((p, i) => { if (picks[i]) votes[p.id] = picks[i]; });
-  }
-  const result = resolveCrown({ takers: takers.map((t) => t.id), votes, fighters: fighters.map((p) => p.id), roll: Math.random() });
-  if (result.how === "chosen") announce(`§5The vote is tied. The bell tolls once, and ${CROWN.relic} chooses.`, "block.bell.hit");
-  if (result.how === "nearest") announce(`§5No one reached for it. ${CROWN.relic} chooses anyway.`, "block.bell.hit");
-  award(result.winner, [...takers.map((t) => t.id), ...fighters.map((p) => p.id)].filter((id, i, all) => id !== result.winner && all.indexOf(id) === i));
-}
-
 // Crown them now, or hold the Crown until they have a keep to rule from
-function award(id, others) {
+export function award(id, others) {
   const c = crown();
   const player = playerById(id);
   if (player && keepOf(id)) return crownPlayer(player, { victor: true });
@@ -189,13 +145,22 @@ export function vacate(why) {
 // Command of the Host: raiders never march on the ruler (until the Crown turns on them). A Decree of Peace spares one settlement.
 addSiegeSkipHook((owner) => {
   const c = crown();
-  if (c.ruler?.id === owner) return !(doom() && c.ruler.hollowing >= 100);
+  if (c.ruler?.id === owner) {
+    if (c.challenge?.npc && isOnline(owner)) return false; // a rival lord's army does not answer to the Heart
+    return !(doom() && c.ruler.hollowing >= 100);
+  }
   return c.decrees.peace === owner;
 });
 
 addPlanHook((plan, owner) => {
   const c = crown();
   if (c.ruler?.id === owner && doom() && c.ruler.hollowing >= 100) plan.budget *= 2; // the Choir turns on its host
+  const lord = c.ruler?.id === owner && c.challenge?.npc && lordOf(c.challenge.claimant);
+  if (lord) { // a rival lord marches on the throne in person
+    plan.budget = Math.round(plan.budget * CROWN.npcStormThreat);
+    if (!plan.grand) plan.warlord = `${lord.title} ${lord.name}`;
+    plan.npcStorm = true;
+  }
   const decree = c.decrees.siege;
   if (!decree || decree.target !== owner || !c.ruler) return;
   plan.budget = Math.round(plan.budget * CROWN.decreeSiegeThreat);
@@ -243,18 +208,34 @@ on("siegeEnd", () => {
   if (!r) return;
   const before = hollowStage(r.hollowing);
   const next = nightfall({ hollowing: r.hollowing, unrest: c.unrest, tithe: c.tithe });
-  r.hollowing = next.hollowing;
+  if (!r.npc) r.hollowing = next.hollowing;
   c.unrest = next.unrest;
   c.decrees.siege = null;
   c.decrees.peace = null;
+  if (r.npc) lordDecree();
   saveCrown();
   stageChanged(before);
   creep();
 });
 
+// A ruling lord does what a ruling player would: sends the raiders at someone for the next siege night
+function lordDecree() {
+  const c = crown();
+  const st = getState();
+  const owners = Object.keys(st.keeps).filter((o) => isOnline(o));
+  const target = npcDecreeTarget(owners, c.decrees.lastTarget, Math.random());
+  c.decrees.lastTarget = target ?? null;
+  if (!target) return;
+  const factions = Object.keys(FACTIONS).filter((f) => f !== "grand");
+  const faction = factions[Math.floor(Math.random() * factions.length)];
+  c.decrees.siege = { target, faction };
+  c.names[target] = st.keeps[target].name;
+  announce(`§4By decree of ${rulerLabel()}, the ${FACTIONS[faction].name} marches on ${st.keeps[target].name} next siege night.`, "raid.horn");
+}
+
 export function addHollowing(amount) {
   const r = ruler();
-  if (!r || CROWN.hunger === "off") return;
+  if (!r || r.npc || CROWN.hunger === "off") return;
   const before = hollowStage(r.hollowing);
   r.hollowing = clamp(r.hollowing + amount, 0, 100);
   saveCrown();
@@ -399,6 +380,8 @@ export function crownStatus(viewer) {
     `Royal Tithe: ${c.tithe}%   Unrest: ${c.unrest}`,
     c.challenge ? `§c${c.challenge.name} has thrown down the Gauntlet. The Storm comes on the next siege night both are here.` : `Grace: ${Math.max(0, c.graceUntil - getState().siegeNumber)} siege nights`,
   ];
+  if (CROWN.npcRivals && !r.npc) lines.push(`Rival lords: ${lords().map((l) => `${l.name} §5${l.claim}§r`).join(", ")}`);
+  if (r.npc) lines.push(`§7${r.title} ${r.name} answers to no player. Earn a Claim and throw down the Gauntlet to unseat them.`);
   if (viewer && !isRuler(viewer.id)) {
     lines.push("", isCourt(viewer.id) ? "§6You are in the Court." : `Your Claim: §5${claimOf(viewer.id)}§r of ${claimNeeded(r.hollowing)}`);
   }

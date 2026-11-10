@@ -40,6 +40,7 @@ STAND = {'minecraft:blackstone': blackstone, 'minecraft:basalt': lambda: basalt_
 tex = {}
 for name in blocks:
     im = Image.open(B + 'siege_' + name.split(':')[1] + '.png').convert('RGBA') if name.startswith('siege:') else STAND[name]()
+    if im.height > im.width: im = im.crop((0, 0, im.width, im.width))   # flipbook strip: first frame
     buf = io.BytesIO(); im.save(buf, 'PNG'); tex[name] = 'data:image/png;base64,' + base64.b64encode(buf.getvalue()).decode()
 tpl = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'mockup_template.html')).read()
 open(sys.argv[2], 'w').write(tpl.replace('__WORLD__', world).replace('__TEX__', json.dumps(tex)))

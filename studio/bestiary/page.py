@@ -6,11 +6,17 @@ E = html.escape
 TRICK = {
  "hollow_footman": "The rank and file. Nothing special, lots of them.", "bell_ringer": "Every 3 seconds its bell gives raiders within 10 blocks Speed and Strength. Runs from you.",
  "shieldwall_brute": "Takes a quarter damage from arrows. Slow, hits like a cart.", "torchbearer": "Lights wooden blocks it walks past and sets you on fire. Immune to fire.",
- "siege_ogre": "Replaces the ravager as the battering ram: its walk cracks walls. 120 health.", "crow_mage": "Throws blinding bolts from range and summons Hollow Crows (they fade after 30 seconds).",
+ "siege_ogre": "Replaces the ravager as the battering ram: its walk cracks walls. 120 health.", "crow_mage": "Throws blinding bolts from range and summons Bellcrows (they fade after 30 seconds).",
  "lost_villager": "Frozen while you look at it. Look away and it steps closer. If it reaches you unseen it strikes and the world goes dark.",
  "changeling": "Looks like a villager until you turn your back within 5 blocks, or hit it. Then it shows its real face.",
  "wrongling": "Only moves when nobody is looking. While watched it's frozen and takes a quarter damage. Fast and brutal the moment you blink.",
  "stone_vigil": "A winged stone mourner. While anyone is looking at it, it's a statue and only a pickaxe can chip it. Look away, or get blinded, and it crosses the room. Its touch throws you somewhere else nearby, in the dark, away from your friends.",
+ "seep": "Not a mob: a crack where the Hollow pushes through. One opens somewhere near a player every so often, day or night, alone or with friends. Things from the Hollow climb out of it. Kill its guards, then break it to close it. Ignore it and it widens, then splits.",
+ "champion_knight": "Sword up close, bow at range. Raises a shield in cycles (an axe breaks it for 5 seconds). Strafes, hops back after a hit, drinks a potion when low (hit them mid-drink to spoil it), pearls after you if you run. War-cry and shield bash.",
+ "champion_sorcerer": "Keeps its distance and throws Veilbolts that lead your movement. Marks the ground under you: two seconds to move. Blinks away when cornered. Drinks potions too.",
+ "champion_lord": "Everything the Rival Knight does with more health, and calls two Retainers at 65% and again at 30%.",
+ "champion_retainer": "A lord's man-at-arms: shield cycles and strafing, no bow and no potions. The rank and file of an NPC army.",
+ "gloamwing": "A ray-shaped flyer that lives in the Hollow's fog. Stay in the Hollow five minutes and the first one finds you; another joins every two minutes, up to six. They swoop, hit lightly and wheel away. Leave and they give up. Each drops a Gloamquill.",
  "echo_hound": "Blind. Tracks Marked players with loud Resonance from 64 blocks away, in pairs.", "mirror_knight": "Learns your last attack type: sword it and swords stop working, shoot it and arrows do. Alternate.",
  "tolling_shade": "Floats. Every 5 seconds its bell slows you and darkens your screen.", "frost_stag": "Peaceful until hit. Drops Pale Antler for horse gear.",
  "rimewolf": "Pack hunter. Bites slow you.", "brine_lurker": "Amphibious ambusher. Bites slow you and drag you down in water.", "ash_scarab": "Swarms of 4 to 7. Bites set you alight.",
@@ -19,8 +25,9 @@ TRICK = {
  "ashen_squire": "Fights monsters. Attacks only Marked players or anyone who attacks the Order.", "ashen_knight": "Same loyalties as the Squire, with plate that halves arrow damage.",
  "inquisitor": "Crossbow. Marked players within 10 blocks are silenced (no spells).", "hollow_warlord": "Named warlords now use this body instead of a vindicator.",
 }
-FAMS = [("Choir-called raiders", "Take over your sieges: 15% of the army from your 3rd siege, 15% more each siege after, up to 85%.", ["hollow_footman", "bell_ringer", "shieldwall_brute", "torchbearer", "siege_ogre", "crow_mage", "hollow_warlord"]),
-        ("Hollow things", "Walk the night after the first boss falls anywhere, and haunt the Hollow (the world below). This is where the unease lives.", ["lost_villager", "changeling", "wrongling", "stone_vigil", "echo_hound", "mirror_knight", "tolling_shade"]),
+FAMS = [("NPC fighters", "Stand-ins for other players when you play alone or a seat is empty: rival lords, their armies, an NPC ruler's champions. They come in five tiers and get tougher per extra player nearby. They can be allies, neutral or enemies. They can't place or break blocks.", ["champion_knight", "champion_sorcerer", "champion_lord", "champion_retainer"]),
+        ("Choir-called raiders", "Take over your sieges: 15% of the army from your 3rd siege, 15% more each siege after, up to 85%.", ["hollow_footman", "bell_ringer", "shieldwall_brute", "torchbearer", "siege_ogre", "crow_mage", "hollow_warlord"]),
+        ("Things from the Hollow", "Walk the night after the first boss falls anywhere, and haunt the Hollow (the world below). This is where the unease lives.", ["lost_villager", "changeling", "wrongling", "stone_vigil", "echo_hound", "mirror_knight", "tolling_shade", "gloamwing", "seep"]),
         ("Regional beasts", "Spawn naturally in their region's biomes.", ["barrow_wight", "frost_stag", "rimewolf", "brine_lurker", "ash_scarab", "dune_wyrm", "bog_hag", "mire_toad"]),
         ("Order of the Ashen Gate", "Friend to Knights, enemy to the Marked. Placed at outposts by the map, not spawned.", ["ashen_squire", "ashen_knight", "inquisitor"])]
 BOSS = {
@@ -44,7 +51,7 @@ out.append('<section><h2>The seven bosses</h2><p class="lede">Each has a boss ba
 for b in roster.BOSSES:
     key, beats, loot = BOSS[b["id"]]
     out.append(f'<article class="boss"><img src="{img(b, 220)}" alt="{E(b["name"])}" width="220" height="220"><div><p class="eyebrow">{E(b["region"])} · {b["hp"] // 2} hearts</p><h3>{E(b["name"])}</h3><p class="lore">{E(b["lore"])}</p><ul>{"".join(f"<li>{E(x)}</li>" for x in beats)}</ul><p class="loot"><b>Relic</b> {E(loot)}</p><p class="stat">Starts with: {E(key)}</p></div></article>')
-out.append('<p class="note">The eighth boss, the Hollow Choir, is being built with the Hollow (the world below) on this same fight framework.</p></section>')
+out.append('<p class="note">The eighth boss, the Choir, is being built with the Hollow (the world below) on this same fight framework.</p></section>')
 for name, blurb, ids in FAMS:
     out.append(f'<section><h2>{E(name)}</h2><p class="lede">{E(blurb)}</p><div class="grid">{"".join(card(i) for i in ids)}</div></section>')
 out.append('''<section><h2>Try them</h2><ol class="steps"><li>In a flat creative world, type <code>/scriptevent siege:showcase</code>. Every mob and boss stands behind you as a labelled statue that can't move or fight, so you can walk around and look.</li><li>To fight one for real, use its spawn egg.</li><li>Place a boss egg on open flat ground and the fight starts where it stands. Or hold a boss key and use it.</li><li>Other features can start a fight with <code>/scriptevent siege:bestiary_summon reeve</code> (also huntsman, bride, seneschal, mother, warlord_king, oswin).</li></ol>

@@ -3,10 +3,11 @@
 
 import { world, system } from "@minecraft/server";
 import { smash } from "./breachers.js";
-import { CASTLE_BLOCKS, CHARGE, GATES, REINFORCEABLE, UNBREAKABLE } from "./constants.js";
+import { CASTLE_BLOCKS, CASTLE_STONES, CHARGE, GATES, REINFORCEABLE, STONE_FAMILY, UNBREAKABLE } from "./constants.js";
 import { SETTINGS } from "./settings.js";
 import { isAlly, settlementAt } from "./territory.js";
 import { consumeHeld, isOnline } from "./util.js";
+import { applyFilter } from "../core/events.js";
 
 // ---------- Wall strength: reinforcement, damage and repair ----------
 // Castle Stone and gates can be reinforced with iron, then diamond, then netherite.
@@ -58,15 +59,20 @@ export function armorOf(block) {
   return REINFORCEABLE.includes(block.typeId) ? block.permutation.getState("siege:armor") ?? 0 : 0;
 }
 
-export function wallHp(block) {
-  if (block.typeId === "siege:castle_stone") return WALL_HP.castle[armorOf(block)];
+function baseHp(block) {
+  if (CASTLE_STONES.includes(block.typeId)) return WALL_HP.castle[armorOf(block)];
   if (GATES.includes(block.typeId)) return WALL_HP.gate[armorOf(block)];
   if (CASTLE_BLOCKS.includes(block.typeId)) return WALL_HP.otherCastle;
   return WALL_HP.other;
 }
 
+// Features can make a block tougher with addFilter("wallHp", (hp, { block }) => hp) (a settlement wall's level does)
+export function wallHp(block) {
+  return applyFilter("wallHp", baseHp(block), { block });
+}
+
 export function showCracks(block, damage) {
-  if (block.typeId !== "siege:castle_stone") return;
+  if (!STONE_FAMILY.includes(block.typeId)) return;
   const frac = damage / wallHp(block);
   const cracks = frac >= 0.66 ? 2 : frac >= 0.33 ? 1 : 0;
   if (block.permutation.getState("siege:cracks") !== cracks) {
@@ -96,11 +102,13 @@ export function hitWall(block, amount) {
 
 // Returns true if the click was a reinforce or repair (so gates don't also toggle)
 export function workOnWall(block, player, item) {
-  if (!item || !REINFORCEABLE.includes(block.typeId)) return false;
+  if (!item) return false;
+  const canArmor = REINFORCEABLE.includes(block.typeId);
+  if (!canArmor && !CASTLE_BLOCKS.includes(block.typeId)) return false; // the whole Castle Stone family can be patched; only Castle Stone and gates take armor
   const land = settlementAt(block.location);
   const yours = land && (land === player.id || isAlly(land, player.id));
 
-  const tier = REINFORCE_ITEMS[item.typeId];
+  const tier = canArmor ? REINFORCE_ITEMS[item.typeId] : undefined;
   if (tier !== undefined) {
     if (!yours) {
       player.onScreenDisplay.setActionBar("§cYou can only reinforce walls on your own land.");

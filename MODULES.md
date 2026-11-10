@@ -112,6 +112,34 @@ Not possible: Quartermaster prices. They are a fixed trade table (`trading/quart
 
 Need another hook? Ask the "Prepare Siege Nights code for parallel work" thread rather than editing `siege/` files yourself.
 
+## Feature APIs
+
+A feature that other features need to read exposes its own `scripts/<feature>/api.js`. Import from that file only.
+Add a line here when you publish one.
+
+- **plots** (`scripts/plots/api.js`): `allPlots, plotAt, holderOf, npcOf, isFree, plotOf, freePlots, giveToNpc, releaseNpc,
+  mapMode, outsideMap, wardAt, MAP, PLOT_PLAN, WARDS, WELCOME, pickOf, statusOf, hallBuilt`. Towns and landmarks are "wards"
+  (`plots/config.js` WARDS): in map mode Survival players can't break or place there. The welcome hall (`plots/welcome.js`)
+  emits **`plotChosen` `{ player, plot }`** when a new player picks their starting plot, just before they are set down beside
+  its Plot Stone: listen for it to raise their first building. `pickOf(plot)` is who a plot is being kept for.
+
+- **looks** (`scripts/looks/index.js`): `lookOf(player)`, `setLook(player, look)`, `chooseLook(player)`, `looksFor(name)`. The add-on now ships
+  `entities/player.json` (BP) and `entity/player.entity.json` (RP), both written by `studio/build_looks.mjs` from vanilla copies
+  in `studio/looks/vanilla/`. **Need to change the player entity? Add it to that script, not to the JSON**, or the next run undoes it.
+
+- **economy** (`scripts/economy/api.js`): the world currency (iron-backed coin; item ids `siege:coin`, `siege:gold_coin` = 64).
+  `funds(player)`, `charge(player, n, why?)` (false if short, free in Creative), `pay(player, n, why?)`, `coins(n)` for menu text,
+  `fromEmeralds(e)` (x8), `WALLET` for the Mason's `setWallet`, `spawnJobNpc(dim, loc, jobId, region?)`, `regionAt(loc)`.
+  Events `coinsPaid`, `coinsSpent`, `goodsSold`. **Pricing something? Charge with `charge()`, not emeralds**; an old emerald price is 8 coins.
+
+- **reach** (`scripts/reach/api.js`): how sieges escalate. One world number, the Reach (0-100), picks a stage 1-6 (`reach/rules.js` STAGES:
+  Counted Nights, Leaning, Miscount, Uncounted Nights, Long Night, Quiet After). `reachStage()`, `reachValue()`, `stageInfo()`,
+  `tonightKind()` ("counted" | "stolen" | "probe" | "long" | "muster" | undefined), `isSiegeNight()`, `hollowShareNow()`, `addReach(n, why)`,
+  `rectify()` (the source is dealt with), `LONG` = 5, `AFTER` = 6. Events `reachStage { stage, before, name }`, `reachChanged`, `firstGlimpse { owners }`.
+  Filter `hollowSoldier` (type, { role, glimpse }) picks the soldier it adds. **Sieges are no longer simply every third night**: ask `isSiegeNight()`
+  instead of doing `day % 3`. It also added hooks to `siege/siege.js` that anyone may use: filters `siegeDue`, `assaultCount`, `assaultDelay`,
+  `assaultShare`, `dawnEndsSiege`, `nextSiegeDay`, and events `assaultIncoming` / `assaultSpawned` `{ assault, total }`.
+
 ## Checking and building
 
 - `node tools/check.mjs` (from `siege-nights/`): parses every pack JSON, checks imports, finds undefined names,

@@ -1,14 +1,14 @@
-// Lore Tomes, part C: Hollow Scripture, Testimonies of the Lost Days, The Fallen (boss tomes).
+// Lore Tomes, part C: The Sung Verses, Testimonies of the Lost Days, The Fallen (boss tomes).
 // Extra fields:
 //   mirror: true -> printed right-to-left (the old script of the Hollow) unless the reader carries Tide Glass,
 //                   is on the Marked path, or is standing in the Hollow.
 //   boss: id     -> dropped to everyone who helped kill that boss (siege:boss_defeated).
 
 export const TOMES_C = [
-  // ---------------- UNDERTOW SCRIPTURE (hymns of the Hollow Choir, written right to left) ----------------
+  // ---------------- UNDERTOW SCRIPTURE (hymns of the Choir, written right to left) ----------------
   {
     id: "scri_01", col: "scripture", n: 1, mirror: true,
-    title: "Hymn of the Held Ground", author: "The Hollow Choir",
+    title: "Hymn of the Held Ground", author: "The Choir",
     where: "Witchroot Caves, on a root-altar. Also dropped by Tolling Shades.",
     hint: "A hymn written backward. It turns up where the Hollow is close.",
     pages: [
@@ -21,7 +21,7 @@ export const TOMES_C = [
   },
   {
     id: "scri_02", col: "scripture", n: 2, mirror: true,
-    title: "The Toll", author: "The Hollow Choir",
+    title: "The Toll", author: "The Choir",
     where: "Bellfounders' Mine, the deepest gallery, by an upside-down bell.",
     hint: "Where bells were born, one hangs the wrong way up.",
     pages: [
@@ -34,7 +34,7 @@ export const TOMES_C = [
   },
   {
     id: "scri_03", col: "scripture", n: 3, mirror: true,
-    title: "Canticle of the Lantern Keeps", author: "The Hollow Choir",
+    title: "Canticle of the Lantern Keeps", author: "The Choir",
     where: "Dropped by Choir-called raiders in sieges (rare). One copy at the Sunken Quarry.",
     hint: "Carried by the things that march on keeps. Win sieges and look at what they drop.",
     pages: [
@@ -47,7 +47,7 @@ export const TOMES_C = [
   },
   {
     id: "scri_04", col: "scripture", n: 4, mirror: true,
-    title: "Psalm of the Wrong Hand", author: "The Hollow Choir",
+    title: "Psalm of the Wrong Hand", author: "The Choir",
     where: "Mirelight, carved inside the well bucket (write it out by hand onto a tome: given by Old Mag).",
     hint: "The swamp witch can copy it out for you, if she trusts you.",
     pages: [
@@ -60,12 +60,12 @@ export const TOMES_C = [
   },
   {
     id: "scri_05", col: "scripture", n: 5, mirror: true,
-    title: "Litany of the Oathbreakers", author: "The Hollow Choir",
+    title: "Litany of the Oathbreakers", author: "The Choir",
     where: "The Rift. It appears on the ground at the real Source site once the Rift opens. (Before that, dropped by the Mother of Changelings.)",
     hint: "The Choir's list of those who wronged it. Kept very close to the door.",
     pages: [
       "Hear the names of those who wronged us. Maelis, who rang us out of the marsh where the worlds first touched. The daughter, who broke what her father swore. The grey knights, who burned the proof.",
-      "Hear the name of the one who kept faith. No. We do not sing it. You burned that name yourselves, and we will not give it back to you.",
+      "Hear the name of the one who kept faith. We named him ourselves: Morvane. The name he had before, you burned, and we will not give it back to you.",
       "He sits with us now. He taught us your walls. He taught us your nights. When the Gate is wide enough he will walk up through it first, and he will be so glad to be home.",
     ],
     clues: ["leader_is_ours"],
@@ -73,7 +73,7 @@ export const TOMES_C = [
   },
   {
     id: "scri_06", col: "scripture", n: 6, mirror: true,
-    title: "The Mercy of the Bell", author: "The Hollow Choir",
+    title: "The Mercy of the Bell", author: "The Choir",
     where: "Any Lost Villager may drop it. One copy at the Drowned Chapel steps.",
     hint: "The Choir's sweetest hymn. The Lost carry it.",
     pages: [
@@ -86,24 +86,24 @@ export const TOMES_C = [
   },
   {
     id: "scri_07", col: "scripture", n: 7, mirror: true,
-    title: "The Name We Were", author: "The Hollow Choir",
+    title: "The Name We Were", author: "The Choir",
     where: "Hidden: deep in the Hollow, in the bell-chapel of the drowned town. Before then, only via Old Mag after Corvin's Notebooks are complete.",
     hint: "The land once had another name. It is kept in a chapel no living person has prayed in.",
     pages: [
-      "Before your bells there was a marsh where our world ran aground on yours. We came up through the reeds as guests. Your people called the place Hollowmere, the mere where the Hollow shows, and for a while it was the name of a kingdom, and it was both of ours.",
+      "Before your bells there was a marsh where our world ran aground on yours. We came up through the reeds as guests. Your people called the place Hallowmere, the mere where the Hollow shows, and for a while it was the name of a kingdom, and it was both of ours.",
       "A queen came with a bell. She rang us out, and named what was left Aldmere, and for four hundred years your bells said: go away, go away, go away.",
-      "One of yours came down and spoke to us as people. We remember. Say the old name and we will know that you remember too. Hollowmere. Hollowmere. It was both of ours.",
+      "One of yours came down and spoke to us as people. We remember. Say the old name and we will know that you remember too. Hallowmere. Hallowmere. It was both of ours.",
     ],
     clues: ["choir_true_name", "maelis_rang_out"],
     leads: [],
   },
   {
     id: "scri_08", col: "scripture", n: 8, mirror: true,
-    title: "Hymn for the Coming Crown", author: "The Hollow Choir",
+    title: "Hymn for the Coming Crown", author: "The Choir",
     where: "Lands next to the Falling Ember on the night it falls (each player's first siege win).",
     hint: "It fell from the sky with something else.",
     pages: [
-      "A lantern brighter than the rest. A shard of the bell breaks loose to find it. A hand that takes it hears us. A hand that gives it away is watched by those who shut the door.",
+      "A lantern brighter than the rest. A splinter of the crown breaks loose to find it. A hand that takes it hears us. A hand that gives it away is watched by those who shut the door.",
       "Either way, little lantern, you are coming down to us. Either way the road ends at the throne.",
       "We will sing your name when you arrive. We are learning it already.",
     ],
@@ -153,8 +153,8 @@ export const TOMES_C = [
   },
   {
     id: "test_04", col: "testimony", n: 4,
-    title: "Grandmother Ashby's Account", author: "Hild Ashby of Hollowfast, as told to her granddaughter Sigrun",
-    where: "Hollowfast, Sigrun's longhouse, in the rafters. Sigrun gives it after you talk to her about the lake.",
+    title: "Grandmother Ashby's Account", author: "Hild Ashby of Rimehold, as told to her granddaughter Sigrun",
+    where: "Rimehold, Sigrun's longhouse, in the rafters. Sigrun gives it after you talk to her about the lake.",
     hint: "An old woman's memory, passed down in a northern family.",
     pages: [
       "Half the village walked out onto the lake that night. Not running, not afraid. Walking, in their nightclothes, in a line, humming.",
@@ -167,10 +167,10 @@ export const TOMES_C = [
   {
     id: "test_05", col: "testimony", n: 5,
     title: "Report of Sir Gerrit the Pale", author: "Sir Gerrit, Master of Hounds of the Ashen Gate",
-    where: "Hollowfast, the Order hunting lodge on the lake shore.",
+    where: "Rimehold, the Order hunting lodge on the lake shore.",
     hint: "An Order huntsman's report from the north. They kept a lodge by the lake.",
     pages: [
-      "Grandmaster: I have run down eleven of the mage's twelve students. The twelfth fled onto the Hollowfast lake with a satchel of books.",
+      "Grandmaster: I have run down eleven of the mage's twelve students. The twelfth fled onto the Rimehold lake with a satchel of books.",
       "She went to the shrine and waited. There was no moon in the sky that night, but when I looked down at the ice there was a moon in it, full and white. Then the ice opened like a door, and she went down into it, and it closed.",
       "I mean to wait for it to open again and follow her. If I do not report again, assume I have.",
     ],
@@ -264,7 +264,7 @@ export const TOMES_C = [
     hint: "Carried by the hunter of the northern lake.",
     pages: [
       "Eleven notches for eleven students. The twelfth I followed down through the ice.",
-      "Below the ice there is a town. It is not Hollowfast. It is no town of ours at all: black water in the streets, leaning towers, a sky with its own moon. And the half of Hollowfast who walked out onto the lake are standing in its square, facing a wall, humming. The twelfth student was with them. She smiled at me. Then the hounds turned on me.",
+      "Below the ice there is a town. It is not Rimehold. It is no town of ours at all: black water in the streets, leaning towers, no sky, and a moon of its own in the dark. And the half of Rimehold who walked out onto the lake are standing in its square, facing a wall, humming. The twelfth student was with them. She smiled at me. Then the hounds turned on me.",
       "I have been hunting my way back up ever since. I do not remember what I was hunting when I started.",
     ],
     clues: ["mirror_hollowfast"],
@@ -317,20 +317,20 @@ export const TOMES_C = [
     pages: [
       "I was Thane of the Ice Isles. I led the Grey Host. Our priests heard a bell under the ice, and a voice in it that said: cut down the bells of Aldmere and the world is yours. So we came for them.",
       "The voice sold us. One night their king went below, and before dawn the thing that had called us reached up and took my whole army in one stroke, as its part of a bargain. They kept me. They put a splinter of their crown in my brow so that I would hear them.",
-      "Every third night it tells me where to march. I have led your enemies for three hundred years and never once chosen where to go. Kill me, and see if they let me stay dead.",
+      "Every third night Morvane tells me where to march. I have never seen him. I know the voice. I have led your enemies for three hundred years and never once chosen where to go. Kill me, and see if they let me stay dead.",
     ],
     clues: ["warlord_is_vorlund"],
     leads: [],
   },
   {
-    id: "fall_07", col: "fallen", n: 7, boss: "oswin",
-    title: "The Last Testament", author: "Oswin, last King of Aldmere, Voice of the Hollow",
+    id: "fall_07", col: "fallen", n: 7, boss: "morvane",
+    title: "The Last Testament", author: "Morvane, the Voice Below, who was Oswin, last King of Aldmere",
     where: "Dropped by the leader of the Hollow (the final boss before the throne).",
     hint: "Carried by whoever sits on the throne at the bottom of the Hollow.",
     pages: [
-      "So you know me now. There is no portrait of me left above, so I will tell you: I was Oswin. I made a peace, and my daughter threw me down a hole for it.",
-      "They took me in. I was the only one of yours who had ever kept his word to them, so they made me their voice, and I have spent three hundred years collecting what was owed. Every third night. Every keep. I taught them your walls. I am not sorry. I am very tired.",
-      "The crown behind me is theirs, not mine. I never wore it. I would have died of it, as you will, unless you have the art: it sits only on one who can hear the whole of the Hollow at once and not break. I was their voice and no more. Take what you have won back up into the sun, and leave the seat empty for whoever can bear it. Or do the thing I could not make my own child do, and keep the truce. Tell Edda the door was well made. Tell her I knocked every third night.",
+      "So you know me now. Morvane is the name they gave me. There is no portrait of me left above, so I will tell you the other: I was Oswin. I made a peace, and my daughter threw me down a hole for it.",
+      "They took me in. I was the only one of yours who had ever kept his word to them, so they crowned me and renamed me, and I have spent three hundred years collecting what was owed. Every third night. Every keep. I taught them your walls. I am not sorry. I am very tired.",
+      "The crown is theirs, not mine. It should have killed me. They put it on me themselves and held me while it took the king out of me, and that is the only way it ever fit one of ours. It will kill you, unless you have the art: it sits only on one who can hear the whole of the Hollow at once and not break. Take what you have won back up into the sun, and leave the seat empty for whoever can bear it. Or do the thing I could not make my own child do, and keep the truce. Tell Edda the door was well made. Tell her I knocked every third night.",
     ],
     clues: ["leader_is_oswin", "third_way_confirmed"],
     leads: [],

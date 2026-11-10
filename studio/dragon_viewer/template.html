@@ -1,0 +1,311 @@
+<title>Emberwaste Dragons</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: a dusk-lit stage for the animal on the left, a field-guide card on the right; stacks on a phone. One dark look by choice. */
+:root {
+  color-scheme: dark;
+  --night: #17131a; --dune: #221b22; --ridge: #33272c; --line: #4a3a3c;
+  --sand: #e9dcc4; --dust: #a8978a; --ember: #e2783a; --ember-ink: #1c0f08; --blood: #c24a3f; --ok: #8fb573;
+  --display: "Fraunces", Georgia, serif; --body: "Inter", system-ui, sans-serif;
+}
+body { background: var(--night); color: var(--sand); font-family: var(--body); line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 20px 40px; }
+.wrap { max-width: 1180px; margin: 0 auto; display: grid; gap: 20px; }
+header h1 { font-family: var(--display); font-size: clamp(1.7rem, 4vw, 2.4rem); margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
+header p { color: var(--dust); margin: 4px 0 0; max-width: 65ch; }
+.main { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 860px) { .main { grid-template-columns: minmax(0, 1fr); } }
+.stage { position: relative; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: radial-gradient(ellipse at 50% 110%, #5a3524 0%, #2a1c22 45%, #15111a 100%); }
+.stage canvas { display: block; width: 100%; aspect-ratio: 4 / 3; max-width: 100%; touch-action: none; cursor: grab; }
+.stage .hint { position: absolute; left: 12px; bottom: 10px; font-size: 12px; color: var(--dust); pointer-events: none; }
+.stage .state { position: absolute; left: 12px; top: 10px; font-size: 13px; color: var(--sand); background: #0008; padding: 4px 8px; border-radius: 4px; max-width: calc(100% - 24px); }
+.card { display: grid; gap: 16px; min-width: 0; }
+.tabs, .row { display: flex; flex-wrap: wrap; gap: 6px; }
+button { font: 500 13px var(--body); color: var(--sand); background: var(--dune); border: 1px solid var(--line); border-radius: 4px; padding: 7px 10px; cursor: pointer; }
+button:hover { border-color: var(--dust); }
+button:focus-visible { outline: 2px solid var(--ember); outline-offset: 2px; }
+button[aria-pressed="true"] { background: var(--ember); color: var(--ember-ink); border-color: var(--ember); font-weight: 600; }
+.tabs button { font-size: 14px; padding: 8px 12px; }
+h2 { font-family: var(--display); font-size: 1.5rem; margin: 0; }
+h3 { font: 600 11px var(--body); letter-spacing: 0.09em; text-transform: uppercase; color: var(--dust); margin: 0 0 6px; }
+.blurb { margin: 4px 0 0; color: var(--sand); max-width: 60ch; }
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 0; }
+.stats div { background: var(--dune); border: 1px solid var(--ridge); border-radius: 4px; padding: 8px; }
+.stats dt { font-size: 11px; color: var(--dust); }
+.stats dd { margin: 2px 0 0; font-weight: 600; font-variant-numeric: tabular-nums; }
+.note { font-size: 13px; color: var(--dust); margin: 0; max-width: 62ch; }
+.extras { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; border-top: 1px solid var(--ridge); padding-top: 20px; }
+.things { display: flex; flex-wrap: wrap; gap: 14px; }
+.thing { display: grid; justify-items: center; gap: 4px; font-size: 12px; color: var(--dust); }
+.thing img { width: 64px; height: 64px; image-rendering: pixelated; background: var(--dune); border: 1px solid var(--ridge); border-radius: 4px; padding: 6px; }
+.thing .cube { display: flex; gap: 2px; }
+ul { margin: 0; padding-left: 18px; color: var(--sand); font-size: 13.5px; }
+li { margin: 3px 0; max-width: 62ch; }
+li b { color: var(--ember); font-weight: 600; }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Emberwaste Dragons</h1>
+    <p>The four species as they are in the add-on right now. Drag to turn, scroll or pinch to zoom. Skins are painted in the shared art style. Shapes are still rough block-outs, and the voices are a first pass.</p>
+  </header>
+
+  <div class="main">
+    <div class="stage">
+      <canvas id="view"></canvas>
+      <div class="state" id="state"></div>
+      <div class="hint">drag to turn · scroll to zoom</div>
+    </div>
+
+    <div class="card">
+      <div class="tabs" id="species" role="group" aria-label="Species"></div>
+      <div>
+        <h2 id="name"></h2>
+        <p class="blurb" id="blurb"></p>
+      </div>
+      <dl class="stats" id="stats"></dl>
+      <div><h3>What it is doing</h3><div class="row" id="poses" role="group" aria-label="Pose"></div></div>
+      <div><h3>Age</h3><div class="row" id="ages" role="group" aria-label="Age"></div></div>
+      <div><h3>Options</h3><div class="row">
+        <button id="saddle" aria-pressed="true">Saddle</button>
+        <button id="spin" aria-pressed="true">Slow turn</button>
+      </div></div>
+      <div><h3>Its voice</h3><div class="row" id="sounds"></div>
+        <p class="note" style="margin-top:6px">Every species has its own throat. Hatchlings and fledglings use the same sounds pitched up, as in game.</p></div>
+    </div>
+  </div>
+
+  <div class="extras">
+    <div>
+      <h3>Egg, saddle, horn, roost and nest</h3>
+      <div class="things" id="things"></div>
+    </div>
+    <div>
+      <h3>Down, not dead</h3>
+      <ul>
+        <li><b>Unconscious</b>: sprawled on its side, wings limp, chest rising fast, bleeding. A golden apple from its owner or an ally stops the bleeding and it wakes a minute later.</li>
+        <li><b>Left alone</b> it bleeds out in about ten minutes. An enemy can finish it where it lies.</li>
+        <li><b>Dead</b>: the same sprawl rolled further, jaw slack, nothing moving. The body stays until the fighting is over, then crumbles to ash.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Five temperaments</h3>
+      <ul id="tempers"></ul>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const DATA = /*DATA*/;
+const S = (d) => Math.sin(d * Math.PI / 180), C = (d) => Math.cos(d * Math.PI / 180);
+const ANIMS = /*ANIMS*/;
+const SOUNDS = /*SOUNDS*/;
+const INFO = /*INFO*/;
+
+const POSES = [
+  { key: "stand", label: "Standing", text: "Awake, wings folded." },
+  { key: "walk", label: "Walking", text: "On foot, as a fledgling carries you." },
+  { key: "fly", label: "Flying", text: "In the air." },
+  { key: "breath", label: "Breath", text: "Flying, jaw open, using its breath." },
+  { key: "sleep", label: "Asleep", text: "Curled up, slow deep breaths." },
+  { key: "downed", label: "Unconscious", text: "Shot down. Breathing fast and shallow. It can still be saved." },
+  { key: "dead", label: "Dead", text: "Not breathing." },
+  { key: "roar", label: "Roar", text: "Greeting you, or warning something off." },
+  { key: "nuzzle", label: "Nuzzle", text: "Being petted." },
+  { key: "snarl", label: "Snarl", text: "It has sensed something, or remembers who hurt it." },
+  { key: "tilt", label: "Head tilt", text: "Curious about what you are holding." },
+];
+const AGES = [["hatchling", "Hatchling"], ["fledgling", "Fledgling"], ["adult", "Adult"]];
+const state = { species: 0, pose: "stand", age: "adult", saddle: true, spin: true };
+
+// Which animations run, exactly as the entity file decides it in game
+function active() {
+  const p = state.pose, flying = p === "fly" || p === "breath";
+  const pose = p === "sleep" ? 1 : p === "downed" ? 2 : p === "dead" ? 3 : 0;
+  const list = [];
+  if (pose === 0) list.push("look", "idle");
+  if (pose === 0 && !flying) list.push("walk");
+  if (pose < 2 && !flying) list.push("fold");
+  if (flying) list.push("fly");
+  if (p === "breath") list.push("breath");
+  if (pose === 1) list.push("sleep");
+  if (pose === 2) list.push("downed");
+  if (pose === 3) list.push("dead");
+  if (["roar", "nuzzle", "snarl", "tilt"].includes(p)) list.push(p);
+  return list;
+}
+
+// ---------- three.js scene ----------
+const canvas = document.getElementById("view");
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(32, 4 / 3, 1, 2000);
+scene.add(new THREE.HemisphereLight(0xffe6c8, 0x3a2430, 0.95));
+const sun = new THREE.DirectionalLight(0xffc890, 0.75); sun.position.set(-60, 90, -70); scene.add(sun);
+const ground = new THREE.Mesh(new THREE.CircleGeometry(70, 48), new THREE.MeshLambertMaterial({ color: 0x33222a }));
+ground.rotation.x = -Math.PI / 2; scene.add(ground);
+const holder = new THREE.Group(); scene.add(holder);
+let bones = {}, rig = null;
+
+function boxUV(geom, uv, w, h, d, W, H) {
+  const [u, v] = uv;
+  const rects = [[u, v + d, d, h], [u + d + w, v + d, d, h], [u + d, v, w, d], [u + d + w, v, w, d], [u + 2 * d + w, v + d, w, h], [u + d, v + d, w, h]]; // +x -x +y -y +z -z
+  const a = geom.attributes.uv;
+  rects.forEach(([x, y, rw, rh], f) => {
+    const pts = [[x, y], [x + rw, y], [x, y + rh], [x + rw, y + rh]];
+    pts.forEach(([px, py], i) => a.setXY(f * 4 + i, px / W, 1 - py / H));
+  });
+  a.needsUpdate = true;
+}
+
+function build() {
+  if (rig) holder.remove(rig);
+  const sp = DATA.species[state.species], geo = sp.geo;
+  const W = geo.description.texture_width, H = geo.description.texture_height;
+  const tex = new THREE.TextureLoader().load(sp.texture);
+  tex.magFilter = THREE.NearestFilter; tex.minFilter = THREE.NearestFilter;
+  const mat = new THREE.MeshLambertMaterial({ map: tex, alphaTest: 0.5 });
+  bones = {}; rig = new THREE.Group();
+  for (const b of geo.bones) {
+    const g = new THREE.Group();
+    g.rotation.order = "ZYX";
+    const piv = [-b.pivot[0], b.pivot[1], b.pivot[2]];
+    const parent = b.parent ? bones[b.parent] : null;
+    const pp = parent ? parent.userData.pivot : [0, 0, 0];
+    g.position.set(piv[0] - pp[0], piv[1] - pp[1], piv[2] - pp[2]);
+    g.userData = { pivot: piv, rest: g.position.clone() };
+    for (const c of b.cubes || []) {
+      const [w, h, d] = c.size, [ox, oy, oz] = c.origin, inf = 2 * (c.inflate || 0);  // inflate lifts overlay cubes off the plane they share with the hide (no flicker)
+      const geomBox = new THREE.BoxGeometry(Math.max(w + inf, 0.01), Math.max(h + inf, 0.01), Math.max(d + inf, 0.01));
+      boxUV(geomBox, c.uv, w, h, d, W, H);
+      const mesh = new THREE.Mesh(geomBox, mat);
+      mesh.position.set(-(ox + w / 2) - piv[0], oy + h / 2 - piv[1], oz + d / 2 - piv[2]);
+      g.add(mesh);
+    }
+    (parent || rig).add(g); bones[b.name] = g;
+  }
+  holder.add(rig);
+  refresh();
+}
+
+function pose(t) {
+  if (!rig) return;
+  const q = { t, dist: state.pose === "walk" ? t * 3.2 : 0, speed: state.pose === "walk" ? 0.6 : 0 };
+  const acc = {};
+  for (const name of active()) {
+    for (const [bone, ch] of Object.entries(ANIMS[name] || {})) {
+      const a = (acc[bone] ||= { r: [0, 0, 0], p: [0, 0, 0], s: [1, 1, 1] });
+      if (ch.rotation) ch.rotation.forEach((f, i) => a.r[i] += f(q));
+      if (ch.position) ch.position.forEach((f, i) => a.p[i] += f(q));
+      if (ch.scale) ch.scale.forEach((f, i) => a.s[i] *= f(q));
+    }
+  }
+  const rad = Math.PI / 180;
+  for (const [name, g] of Object.entries(bones)) {
+    const a = acc[name] || { r: [0, 0, 0], p: [0, 0, 0], s: [1, 1, 1] };
+    g.rotation.set(-a.r[0] * rad, -a.r[1] * rad, a.r[2] * rad);
+    g.position.set(g.userData.rest.x - a.p[0], g.userData.rest.y + a.p[1], g.userData.rest.z + a.p[2]);
+    g.scale.set(a.s[0], a.s[1], a.s[2]);
+  }
+  if (bones.saddle) bones.saddle.visible = state.saddle && state.age !== "hatchling";
+  const flying = state.pose === "fly" || state.pose === "breath";
+  const k = DATA.stages[state.age];
+  holder.scale.setScalar(k);
+  holder.position.y = flying ? 26 * k : 0;
+}
+
+// ---------- camera: drag to orbit, wheel / pinch to zoom ----------
+const cam = { yaw: 0.9, pitch: 0.3, dist: 125 };
+function place() {
+  const k = DATA.stages[state.age], ty = 16 * k + (state.pose === "fly" || state.pose === "breath" ? 26 * k : 0);
+  camera.position.set(Math.sin(cam.yaw) * Math.cos(cam.pitch) * cam.dist, ty + Math.sin(cam.pitch) * cam.dist, -Math.cos(cam.yaw) * Math.cos(cam.pitch) * cam.dist);
+  camera.lookAt(0, ty, 0);
+}
+const pointers = new Map(); let pinch = 0;
+canvas.addEventListener("pointerdown", (e) => { canvas.setPointerCapture(e.pointerId); pointers.set(e.pointerId, [e.clientX, e.clientY]); canvas.style.cursor = "grabbing"; });
+canvas.addEventListener("pointerup", (e) => { pointers.delete(e.pointerId); pinch = 0; canvas.style.cursor = "grab"; });
+canvas.addEventListener("pointercancel", (e) => { pointers.delete(e.pointerId); pinch = 0; });
+canvas.addEventListener("pointermove", (e) => {
+  const prev = pointers.get(e.pointerId); if (!prev) return;
+  pointers.set(e.pointerId, [e.clientX, e.clientY]);
+  if (pointers.size === 1) {
+    cam.yaw += (e.clientX - prev[0]) * 0.008;
+    cam.pitch = Math.max(-0.1, Math.min(1.35, cam.pitch + (e.clientY - prev[1]) * 0.006));
+  } else {
+    const [a, b] = [...pointers.values()], gap = Math.hypot(a[0] - b[0], a[1] - b[1]);
+    if (pinch) cam.dist = Math.max(50, Math.min(420, cam.dist * pinch / gap));
+    pinch = gap;
+  }
+});
+canvas.addEventListener("wheel", (e) => { e.preventDefault(); cam.dist = Math.max(50, Math.min(420, cam.dist * (1 + Math.sign(e.deltaY) * 0.08))); }, { passive: false });
+
+function resize() {
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  if (canvas.width !== Math.round(w * renderer.getPixelRatio()) || canvas.height !== Math.round(h * renderer.getPixelRatio())) {
+    renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+  }
+}
+const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+let last = performance.now();
+function frame(now) {
+  resize();
+  if (state.spin && !pointers.size && !still) cam.yaw += (now - last) * 0.00012;
+  last = now;
+  pose(still ? 0.4 : now / 1000);
+  place();
+  renderer.render(scene, camera);
+  requestAnimationFrame(frame);
+}
+
+// ---------- the card ----------
+const $ = (id) => document.getElementById(id);
+function buttons(el, items, current, pick) {
+  el.textContent = "";
+  for (const [key, label] of items) {
+    const b = document.createElement("button");
+    b.textContent = label; b.setAttribute("aria-pressed", String(key === current()));
+    b.addEventListener("click", () => { pick(key); refresh(); });
+    el.appendChild(b);
+  }
+}
+let audio;
+function play(file) {
+  if (audio) audio.pause();
+  audio = new Audio(SOUNDS[file]);
+  audio.preservesPitch = false; audio.mozPreservesPitch = false; audio.webkitPreservesPitch = false;
+  audio.playbackRate = { hatchling: 1.7, fledgling: 1.25, adult: 1 }[state.age];
+  audio.play().catch(() => {});
+}
+function refresh() {
+  const sp = DATA.species[state.species], info = INFO.species[state.species];
+  buttons($("species"), DATA.species.map((s, i) => [i, s.name]), () => state.species, (k) => { const changed = k !== state.species; state.species = k; if (changed) build(); });
+  buttons($("poses"), POSES.map((p) => [p.key, p.label]), () => state.pose, (k) => state.pose = k);
+  buttons($("ages"), AGES, () => state.age, (k) => state.age = k);
+  $("name").textContent = sp.name; $("blurb").textContent = info.blurb;
+  $("stats").innerHTML = "";
+  for (const [k, v] of info.stats) { const d = document.createElement("div"); d.innerHTML = "<dt></dt><dd></dd>"; d.firstChild.textContent = k; d.lastChild.textContent = v; $("stats").appendChild(d); }
+  $("state").textContent = POSES.find((p) => p.key === state.pose).text + (state.age === "hatchling" ? " (A hatchling can't be ridden or fly yet.)" : "");
+  $("saddle").setAttribute("aria-pressed", String(state.saddle)); $("spin").setAttribute("aria-pressed", String(state.spin));
+  const snd = $("sounds"); snd.textContent = "";
+  const voiced = [["idle", "Rumble"], ["roar", "Roar"], ["purr", "Purr"], ["snarl", "Snarl"], ["hurt", "Hurt"], ["whimper", "Whimper"], ["death", "Dying"], ["chirp", "Hatchling chirp"]];
+  for (const [kind, label] of voiced) { const b = document.createElement("button"); b.textContent = label; b.addEventListener("click", () => play(sp.key + "_" + kind)); snd.appendChild(b); }
+  for (const [file, label] of [["flap", "Wingbeat"], ["fire", "Breath"], ["breathe", "Breathing (unconscious)"], ["egg_crack", "Egg cracking"]]) {
+    const b = document.createElement("button"); b.textContent = label; b.addEventListener("click", () => play(file)); snd.appendChild(b);
+  }
+}
+$("saddle").addEventListener("click", () => { state.saddle = !state.saddle; refresh(); });
+$("spin").addEventListener("click", () => { state.spin = !state.spin; refresh(); });
+for (const [name, src] of Object.entries(DATA.items)) {
+  const d = document.createElement("div"); d.className = "thing"; d.innerHTML = '<img alt=""><span></span>'; d.firstChild.src = src; d.lastChild.textContent = name; $("things").appendChild(d);
+}
+for (const [name, faces] of Object.entries(DATA.blocks)) {
+  const d = document.createElement("div"); d.className = "thing"; d.innerHTML = '<div class="cube"><img alt=""><img alt=""></div><span></span>';
+  d.firstChild.children[0].src = faces.top; d.firstChild.children[1].src = faces.side; d.lastChild.textContent = name + " (top, side)"; $("things").appendChild(d);
+}
+for (const [name, desc] of INFO.tempers) { const li = document.createElement("li"); li.innerHTML = "<b></b> "; li.firstChild.textContent = name + "."; li.append(desc); $("tempers").appendChild(li); }
+build();
+requestAnimationFrame(frame);
+</script>

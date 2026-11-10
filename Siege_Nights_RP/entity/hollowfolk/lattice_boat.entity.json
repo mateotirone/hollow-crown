@@ -1,0 +1,20 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "siege:lattice_boat",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "default": "textures/entity/hollowfolk/lattice_boat"
+      },
+      "geometry": {
+        "default": "geometry.siege_lattice_boat"
+      },
+      "render_controllers": [
+        "controller.render.default"
+      ]
+    }
+  }
+}

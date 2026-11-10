@@ -1,8 +1,8 @@
 // Travel rules for The Hollow Crown map: no elytra (rails and horses instead), and a map edge.
 
-import { world, ItemStack, EquipmentSlot } from "@minecraft/server";
+import { world, system, ItemStack, EquipmentSlot, GameMode } from "@minecraft/server";
 import { onTick } from "../core/loop.js";
-import { MAP, OVERWORLD } from "./config.js";
+import { MAP, OVERWORLD, WARDS } from "./config.js";
 import { mapMode } from "./claims.js";
 
 // ---------- No elytra ----------
@@ -65,6 +65,30 @@ function mapEdgeTick() {
     player.onScreenDisplay.setActionBar("§7The mists close in. The map ends here.");
   }
 }
+
+// ---------- Wards: towns and landmarks can't be dug up ----------
+// The map's hand-built places stay as built. Creative players (the builders) can still edit them.
+
+export function wardAt(loc) {
+  return WARDS.find((w) => Math.hypot(loc.x - w.x, loc.z - w.z) <= w.r);
+}
+
+function guardWard(event, block, player) {
+  if (!mapMode() || block.dimension.id !== OVERWORLD || player.getGameMode() === GameMode.Creative) return;
+  const ward = wardAt(block.location);
+  if (!ward) return;
+  event.cancel = true;
+  system.run(() => player.onScreenDisplay.setActionBar(`§7${ward.name} is protected. Nothing here can be broken or built.`));
+}
+
+world.beforeEvents.playerBreakBlock.subscribe((event) => guardWard(event, event.block, event.player));
+world.beforeEvents.playerPlaceBlock?.subscribe((event) => guardWard(event, event.block, event.player));
+world.beforeEvents.explosion?.subscribe((event) => {
+  if (!mapMode() || event.dimension.id !== OVERWORLD) return;
+  const blocks = event.getImpactedBlocks();
+  const safe = blocks.filter((b) => !wardAt(b.location));
+  if (safe.length !== blocks.length) event.setImpactedBlocks(safe);
+});
 
 onTick("plots_elytra", 10, () => {
   if (MAP.noElytra) elytraTick();

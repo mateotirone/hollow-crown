@@ -140,7 +140,7 @@ grid(CAPARISON, H + 'siege_caparison', RED, G)
 grid(EMBERORB, 'siege_hollow_ember', VIOLET, r3=VIOLET); grid(BOUND, 'siege_bound_ember', VIOLET, BS)
 grid(WHEEL, 'siege_cipher_wheel', BRASS, BRASS, BS); grid(SHARD, 'siege_crown_shard', VIOLET); grid(SHARD, 'siege_mirror_glass', SEA)
 grid(GAUNTLET, 'siege_gauntlet_of_challenge', S, RED); grid(HALL, 'siege_hall_cornerstone', REGIONS['vale']['stone'], RED, DOAK)
-grid(CROWN, 'siege_hollow_crown', G, VIOLET, VIOLET); grid(BOOK, 'siege_lore_tome', L, G, P); grid(LEDGER, 'siege_ledger', fixed('#0c2414', '#163c22', '#245634', '#36744a', '#52946a', '#80b894'), G, P)
+grid(BOOK, 'siege_lore_tome', L, G, P); grid(LEDGER, 'siege_ledger', fixed('#0c2414', '#163c22', '#245634', '#36744a', '#52946a', '#80b894'), G, P)
 grid(BANNER, 'siege_oath_banner', RED, DOAK, G); grid(SCEPTER, 'siege_royal_scepter', G, G, VIOLET)
 print('hc items done')
 
@@ -155,3 +155,5 @@ BELL = ["................", ".......oo.......", "......oLMo......", "......oMDo.
 grid(LUMP, 'siege_raw_choir_ore', REGIONS['undertow']['stone'], VIOLET)
 grid(INGOT, 'siege_choirsteel_ingot', CHOIR)
 grid(BELL, 'siege_wardens_bell', fixed('#120a1c', '#22143a', '#382258', '#523678', '#74529c', '#a07ec4'), BRASS)
+
+import build_crown_art; build_crown_art.icon()   # the Hollow Crown icon follows Mateo's reference

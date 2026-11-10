@@ -1,0 +1,89 @@
+{
+ "format_version": "1.21.60",
+ "minecraft:entity": {
+  "description": {
+   "identifier": "siege:body",
+   "is_spawnable": false,
+   "is_summonable": true,
+   "is_experimental": false,
+   "properties": {
+    "siege:kind": {
+     "type": "int",
+     "range": [
+      0,
+      63
+     ],
+     "default": 0,
+     "client_sync": true
+    },
+    "siege:size": {
+     "type": "float",
+     "range": [
+      0.2,
+      4.0
+     ],
+     "default": 1.0,
+     "client_sync": true
+    },
+    "siege:fading": {
+     "type": "bool",
+     "default": false,
+     "client_sync": true
+    }
+   }
+  },
+  "component_groups": {
+   "siege:gone": {
+    "minecraft:instant_despawn": {}
+   }
+  },
+  "components": {
+   "minecraft:type_family": {
+    "family": [
+     "inanimate",
+     "siege_body"
+    ]
+   },
+   "minecraft:collision_box": {
+    "width": 0.5,
+    "height": 0.3
+   },
+   "minecraft:health": {
+    "value": 1,
+    "max": 1
+   },
+   "minecraft:damage_sensor": {
+    "triggers": [
+     {
+      "cause": "all",
+      "deals_damage": "no"
+     }
+    ]
+   },
+   "minecraft:physics": {},
+   "minecraft:pushable": {
+    "is_pushable": false,
+    "is_pushable_by_piston": true
+   },
+   "minecraft:knockback_resistance": {
+    "value": 1
+   },
+   "minecraft:timer": {
+    "time": 900,
+    "looping": false,
+    "time_down_event": {
+     "event": "siege:gone"
+    }
+   }
+  },
+  "events": {
+   "siege:gone": {
+    "add": {
+     "component_groups": [
+      "siege:gone"
+     ]
+    }
+   }
+  }
+ }
+}

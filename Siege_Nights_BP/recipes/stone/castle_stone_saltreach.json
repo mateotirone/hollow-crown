@@ -1,0 +1,31 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "siege:castle_stone_saltreach_recipe"
+    },
+    "tags": [
+      "siege_workshop"
+    ],
+    "pattern": [
+      "SSS",
+      "SIS",
+      "SSS"
+    ],
+    "key": {
+      "S": {
+        "item": "minecraft:calcite"
+      },
+      "I": {
+        "item": "minecraft:iron_ingot"
+      }
+    },
+    "result": {
+      "item": "siege:castle_stone_saltreach",
+      "count": 16
+    },
+    "unlock": {
+      "context": "AlwaysUnlocked"
+    }
+  }
+}
