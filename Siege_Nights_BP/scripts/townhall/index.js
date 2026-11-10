@@ -38,7 +38,7 @@ import { ROLES, RANKS, ROLE_LORE } from "./skills.js";
 import { treeCells, treeLayout, COLS, ROWS } from "./tree_layout.js";
 import { wallMenu, flyby } from "./flyby.js";
 export { flyby };
-import { rumorMenu, rumorTick, rumorsFor, describe, jobTier, remember, KEEPSAKES } from "./rumors.js";
+import { rumorMenu, rumorTick, rumorsFor, describe, jobTier, remember, KEEPSAKES, JOB_KIND } from "./rumors.js";
 
 export { grantPoints, grantRenown, heroOf, hallOf };
 export { startBuild } from "./build.js"; // other features can raise their own templates with the same engine
@@ -292,6 +292,11 @@ api.addGuardLimitHook((owner, limit) => {
 });
 
 api.addTests("rumor board variety", {
+  "the Storyteller's choice of jobs is what the board shows": () => {
+    const jobs = rumorsFor(5, "tester", 10, { types: ["supply", "rescue", "bounty"] });
+    api.assertEqual(jobs.map((j) => j.type).join(), "supply,rescue,bounty");
+    api.assert(Object.keys(JOB_KIND).length >= 3 && new Set(Object.values(JOB_KIND)).size >= 2, "the rumors deck needs 3 options of 2 kinds");
+  },
   "the board never repeats itself": () => {
     // play 120 days, always taking the first job offered
     const hero = {}, seen = new Map();
