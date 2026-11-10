@@ -449,12 +449,15 @@ In the real game the first claimant comes 5 days after Morvane falls, then one e
 
 Walk into a mining village in the Hollow: at most once every 8 minutes something is going on, and it should never be the same thing, or the same kind of thing, twice in a row. `/scriptevent hc:folk_happen` while standing in a village forces the next one. Check: the rich seam adds 6 ore to that Tally; the half price shows in the Tally menu for 5 minutes; the nest spawns three endermites by the mine mouth; an errand names a place, and walking to that place pays 4 raw Choir Ore once. Before Morvane falls only the three quiet, frightened ones and the errands appear.
 
+### The Hollow's air (particles)
+
+Stand in the Hollow near Veilcaps, Glint Clusters, hanging moss, pale ash and plain veined ground: each should give off its own small effect now and then, and a few pale motes should drift near you everywhere. It needs the particle effects from the art pull request (#57); without them nothing shows and nothing breaks. `/scriptevent hc:hollow_air off` stops it, `on` starts it again. Watch for lag with several players in the Hollow.
 ## Horses, horse upgrading and the Train Carriage (scripts/horses/, scripts/rails/)
 
 In game: Creative, cheats on. `/scriptevent siege:showcase` puts eight steeds in the extras row behind you that are already yours (one of each of the five breeds, **Valiant** the Knight Warhorse, **Whisper** the Glimstrider and **Sprout** the foal), a Breeder's Post, and two Station Posts with a short powered rail line and a Train Carriage on it. Your Stables counts as level 3 there, so every menu option is open, and in Creative nothing costs anything. Take a **Riding Crop** and a **Horse Whistle** from the item chests.
 
 **Looks and riding**
-1. Walk along the steeds. ✅ Eight horses with name tags and signs, the five breeds in different coats, the foal small. Valiant wears diamond horse armor and cloth in your banner color. Whisper looks unearthly (a glowing tint).
+1. Walk along the steeds. ✅ Eight horses with name tags and signs, the foal small. Each breed has its own painted coat: chestnut with a white blaze (Courser), heavy white-grey with feathered legs (Destrier), dapple grey (Runner), pale gold (Sandstrider), shaggy black-brown (Mire-Pony). All of them still show a saddle. The Courser wears cloth in your banner color, the Destrier wears diamond horse armor, and Valiant is bigger with plate on its head and neck. Whisper is pale blue-white and you can see through it. Sprout is piebald.
 2. Sneak + click any of them with an empty hand. ✅ Its sheet opens: breed, trait, level, Speed, Jump, Health and Stamina, and "Training points 5" on the breed horses.
 3. Climb on a breed horse and ride. ✅ It steers like a normal horse, with the jump bar. A stamina bar shows above your hotbar.
 4. Use the Riding Crop while riding. ✅ A gallop sound and it is clearly faster; the stamina bar drains. Use the crop again ✅ it slows back down. Gallop until the bar is empty ✅ it drops out of the gallop by itself, and using the crop straight away says it is winded.
@@ -484,6 +487,7 @@ In game: Creative, cheats on. `/scriptevent siege:showcase` puts eight steeds in
 22. `/give @s siege:train_carriage` and use it on any rail. ✅ Your own carriage. Sneak + click it with an empty hand ✅ it packs back into the item.
 23. Leave a called carriage empty for a minute or two. ✅ It tidies itself away.
 
+Things I could not check without the game, so please look closely: that the steeds look and ride like real horses (saddle, armor and jump bar all there), that the painted coats line up on the horse with no patches of a different color showing through, that the caparison color only tints the cloth, that the Glimstrider really is see-through, that four people really fit in the carriage and it faces the right way on the rail, and whether the carriage speed feels right.
 Things I could not check without the game, so please look closely: that the steeds look and ride like real horses (saddle, armor and jump bar all there), that the caparison color only tints the cloth, how the Glimstrider's glow looks, that four people really fit in the carriage and it faces the right way on the rail, and whether the carriage speed feels right.
 ## Sounds (scripts/sound/, SOUND-LIST.md)
 
@@ -503,3 +507,8 @@ Tell me about: anything too loud, too quiet, silent, or that made you jump. Noth
 - Walk up to them, hit them, push them: nothing happens and they do not turn. They make no sound.
 - Wait for morning, or start a siege: they are gone.
 
+
+### Clue Sense
+1. `/scriptevent siege:townhall_renown 30`, learn Clue Sense in the Wayfarer branch, and carry the Ledger of Whispers.
+2. Walk toward a Dusty Tome you have not clicked (the showcase has some). ✅ Within 16 blocks a page turns softly and the action bar says "Your Ledger whispers: something written, N blocks <direction>". After you copy the tome it goes quiet.
+3. Drop a Lore Tome and walk away and back. ✅ It is sensed the same way. Without the Ledger in your pack nothing happens.

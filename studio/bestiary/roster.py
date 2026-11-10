@@ -649,7 +649,13 @@ boss(id="oswin_the_last", name="Morvane", region="The Hollow", model=m_oswin, pa
      hp=1000, speed=0.31, dmg=13, kb=1.0, collision=(1.2, 3.0), scale=1.05, bare_flag=True, anim_extra=[("hcrown", "scale", "query.is_charged ? 0 : 1")],
      swim=True, egg=("#3c5460", "#c8f0ff"),
      lore="He holds the Seat at the bottom of the Hollow, and he has been waiting a long time for someone to get this far.")
-mob(id="oswin_reflection", name="Standing Rank", family="boss_add", model=m_oswin, material="entity_alphablend",
+def m_rank(m):
+    """A Standing Rank: Morvane's armour with a blade for either hand. The empty suits show the right-hand one, the suit he is
+    really in shows the left (he is left-handed). Which one shows is the entity's charged flag (events siege:bare_on / siege:bare_off)."""
+    m_oswin(m)
+    hold(m, "greatsword", side="r", bone="blade_r", blade="steel", hilt="crown", long=24)
+mob(id="oswin_reflection", name="Standing Rank", family="boss_add", model=m_rank, material="entity_alphablend", bare_flag=True,
+    anim_extra=[("blade", "scale", "query.is_charged ? 1 : 0"), ("blade_r", "scale", "query.is_charged ? 0 : 1")],
     pal={**OSWIN_PAL, "plate": {"c": (170, 210, 230, 170), "style": "metal"}, "cape": {"c": (120, 160, 200, 150), "style": "cloth"}, "tabard": {"c": (150, 190, 210, 160), "style": "cloth"}, "skin": (190, 220, 230, 190)},
     hp=120, speed=0.33, dmg=9, kb=1.0, collision=(1.2, 3.0), scale=1.05, egg=("#a0d2e6", "#ffffff"), no_loot=True,
     lore="Empty armour in his shape, standing in ranks. One of them is not empty.")
@@ -756,8 +762,9 @@ def m_at_desk(m, age):
         m.box("head", [-3.5, 19, -3.5], [7, 3, 7], "hair", inflate=0.2); m.box("head", [-3.5, 16, 2.5], [7, 4, 1], "hair", inflate=0.2)      # a mop of hair
     elif age == "king":
         biped(m, L=12, B=12, bw=8, bd=4, head=(8, 8, 8), arm=(4, 12, 4), mats={"head": "skin", "body": "robe", "arm": "robe", "leg": "robe", "belt": "trim", "shoulder": "trim"}, face="eyes")
-        m.box("head", [-4.5, 31, -4.5], [9, 2, 9], "crown"); 
-        for x in (-4.5, -0.5, 3.5): m.box("head", [x, 33, -4.5], [1, 2, 1], "crown")                                                           # a plain gold circlet
+        m.box("head", [-4, 31, -4], [8, 1, 8], "hair", inflate=0.2); m.box("head", [-4, 25, 2.5], [8, 6, 1.5], "hair", inflate=0.2)            # grey hair, cut short
+        for o, sz in (([-4.5, 31, -4.5], [9, 1.5, 1]), ([-4.5, 31, 3.5], [9, 1.5, 1]), ([-4.5, 31, -3.5], [1, 1.5, 7]), ([3.5, 31, -3.5], [1, 1.5, 7])): m.box("head", o, sz, "crown")   # a plain gold circlet: a ring, not a cap
+        for x in (-3.5, -0.5, 2.5): m.box("head", [x, 32.5, -4.6], [1, 1.5, 1], "crown")
         m.box("head", [-3, 22, -4.6], [6, 3, 1], "hair")                                                                                       # a beard going grey
         cloak(m, "robe", length=20, width=10)
     else:

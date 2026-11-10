@@ -935,6 +935,15 @@
     },
     "siege_portcullis_blackfen_netherite": {
       "textures": "textures/blocks/regional/siege_portcullis_blackfen_netherite"
+    },
+    "siege_veilcap_cap": {
+      "textures": "textures/blocks/siege_veilcap_cap"
+    },
+    "siege_veilcap_stem": {
+      "textures": "textures/blocks/siege_veilcap_stem"
+    },
+    "siege_veilmoss_strands": {
+      "textures": "textures/blocks/siege_veilmoss_strands"
     }
   }
 }

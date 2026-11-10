@@ -256,6 +256,66 @@
   },
   "siege_b_pretender_seal": {
    "textures": "textures/items/bestiary/pretender_seal"
+  },
+  "siege_guard_vale_helmet": {
+   "textures": "textures/items/siege_guard_vale_helmet"
+  },
+  "siege_guard_vale_chestplate": {
+   "textures": "textures/items/siege_guard_vale_chestplate"
+  },
+  "siege_guard_vale_leggings": {
+   "textures": "textures/items/siege_guard_vale_leggings"
+  },
+  "siege_guard_vale_boots": {
+   "textures": "textures/items/siege_guard_vale_boots"
+  },
+  "siege_guard_frostmarch_helmet": {
+   "textures": "textures/items/siege_guard_frostmarch_helmet"
+  },
+  "siege_guard_frostmarch_chestplate": {
+   "textures": "textures/items/siege_guard_frostmarch_chestplate"
+  },
+  "siege_guard_frostmarch_leggings": {
+   "textures": "textures/items/siege_guard_frostmarch_leggings"
+  },
+  "siege_guard_frostmarch_boots": {
+   "textures": "textures/items/siege_guard_frostmarch_boots"
+  },
+  "siege_guard_saltreach_helmet": {
+   "textures": "textures/items/siege_guard_saltreach_helmet"
+  },
+  "siege_guard_saltreach_chestplate": {
+   "textures": "textures/items/siege_guard_saltreach_chestplate"
+  },
+  "siege_guard_saltreach_leggings": {
+   "textures": "textures/items/siege_guard_saltreach_leggings"
+  },
+  "siege_guard_saltreach_boots": {
+   "textures": "textures/items/siege_guard_saltreach_boots"
+  },
+  "siege_guard_emberwaste_helmet": {
+   "textures": "textures/items/siege_guard_emberwaste_helmet"
+  },
+  "siege_guard_emberwaste_chestplate": {
+   "textures": "textures/items/siege_guard_emberwaste_chestplate"
+  },
+  "siege_guard_emberwaste_leggings": {
+   "textures": "textures/items/siege_guard_emberwaste_leggings"
+  },
+  "siege_guard_emberwaste_boots": {
+   "textures": "textures/items/siege_guard_emberwaste_boots"
+  },
+  "siege_guard_blackfen_helmet": {
+   "textures": "textures/items/siege_guard_blackfen_helmet"
+  },
+  "siege_guard_blackfen_chestplate": {
+   "textures": "textures/items/siege_guard_blackfen_chestplate"
+  },
+  "siege_guard_blackfen_leggings": {
+   "textures": "textures/items/siege_guard_blackfen_leggings"
+  },
+  "siege_guard_blackfen_boots": {
+   "textures": "textures/items/siege_guard_blackfen_boots"
   }
  }
 }

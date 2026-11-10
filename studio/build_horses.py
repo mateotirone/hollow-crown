@@ -101,6 +101,7 @@ steed = {
             "properties": {
                 "siege:coat": {"type": "int", "range": [0, 6], "default": 3, "client_sync": True},
                 "siege:mark": {"type": "int", "range": [0, 4], "default": 0, "client_sync": True},
+                "siege:breed": {"type": "int", "range": [0, 6], "default": 0, "client_sync": True},  # BREEDS[..].prop in data.js
                 "siege:special": {"type": "int", "range": [0, 2], "default": 0, "client_sync": True},
                 "siege:cap": {"type": "bool", "default": False, "client_sync": True},
                 "siege:cap_r": {"type": "float", "range": [0.0, 1.0], "default": 1.0, "client_sync": True},
@@ -155,7 +156,7 @@ write(RP + "entity/steed.entity.json", {
     "minecraft:client_entity": {"description": {
         "identifier": "siege:steed",
         "min_engine_version": "1.17.10",
-        "materials": {"default": "horse_leather_armor"},
+        "materials": {"default": "horse_leather_armor", "ghost": "entity_alphablend"},
         "textures": {
             "base_white": "textures/entity/horse2/horse_white", "base_creamy": "textures/entity/horse2/horse_creamy",
             "base_chestnut": "textures/entity/horse2/horse_chestnut", "base_brown": "textures/entity/horse2/horse_brown",
@@ -169,7 +170,14 @@ write(RP + "entity/steed.entity.json", {
             "armor_iron": "textures/entity/horse2/armor/horse_armor_iron", "armor_gold": "textures/entity/horse2/armor/horse_armor_gold",
             "armor_diamond": "textures/entity/horse2/armor/horse_armor_diamond", "armor_copper": "textures/entity/horse2/armor/horse_armor_copper",
             "armor_netherite": "textures/entity/horse2/armor/horse_armor_netherite",
-            "caparison": "textures/entity/horse2/armor/horse_armor_leather",
+            # Painted by studio/art/build_steeds.py. Breed coats go on the markings layer, over a vanilla coat that
+            # supplies the saddle and tack (the painted coats leave those transparent).
+            "coat_vale": "textures/entity/siege/steed_vale", "coat_frostmarch": "textures/entity/siege/steed_frostmarch",
+            "coat_saltreach": "textures/entity/siege/steed_saltreach", "coat_emberwaste": "textures/entity/siege/steed_emberwaste",
+            "coat_blackfen": "textures/entity/siege/steed_blackfen", "coat_crossbred": "textures/entity/siege/steed_crossbred",
+            "glimstrider": "textures/entity/siege/steed_hollow",
+            "barding": "textures/entity/siege/steed_warhorse",
+            "caparison": "textures/entity/siege/steed_caparison",
         },
         "geometry": {"default": "geometry.horse.v3"},
         "animations": {
@@ -188,10 +196,15 @@ write(RP + "entity/steed.entity.json", {
             ],
             "animate": ["walk", "look_at_player", {"rear": "variable.stand_anim > 0.0"}, {"eat": "!query.is_standing"}, {"tail": "variable.shake_tail"}],
         },
-        "render_controllers": ["controller.render.siege_steed"],
+        "render_controllers": [
+            {"controller.render.siege_steed": "query.property('siege:special') != 2"},
+            {"controller.render.siege_steed_glim": "query.property('siege:special') == 2"},
+        ],
     }},
 })
 CAP = "query.property('siege:cap')"
+BREED = "query.property('siege:breed')"
+BARDING = "(query.property('siege:special') == 1 ? Texture.barding : Texture.armor_none)"
 write(RP + "render_controllers/siege_steed.render_controllers.json", {
     "format_version": "1.8.0",
     "render_controllers": {"controller.render.siege_steed": {
@@ -206,13 +219,17 @@ write(RP + "render_controllers/siege_steed.render_controllers.json", {
                                "Texture.markings_whitedots", "Texture.markings_blackdots"],
             "Array.armor": ["Texture.armor_none", "Texture.armor_leather", "Texture.armor_iron", "Texture.armor_gold",
                             "Texture.armor_diamond", "Texture.armor_copper", "Texture.armor_netherite"],
+            # index = siege:breed (0 is a common horse, which keeps its vanilla coat and markings)
+            "Array.breed": ["Texture.markings_none", "Texture.coat_vale", "Texture.coat_frostmarch", "Texture.coat_saltreach",
+                            "Texture.coat_emberwaste", "Texture.coat_blackfen", "Texture.coat_crossbred"],
         }},
         "geometry": "Geometry.default",
         "materials": [{"*": "Material.default"}],
         "textures": [
             "Array.base[query.property('siege:coat')]",
-            "Array.markings[query.property('siege:mark')]",
-            f"variable.armor_texture_slot ? Array.armor[variable.armor_texture_slot] : ({CAP} ? Texture.caparison : Texture.armor_none)",
+            f"{BREED} > 0 ? Array.breed[{BREED}] : Array.markings[query.property('siege:mark')]",
+            # worn horse armor first, then the Caparison, then a Knight Warhorse's own barding
+            f"variable.armor_texture_slot ? Array.armor[variable.armor_texture_slot] : ({CAP} ? Texture.caparison : {BARDING})",
         ],
         "color": {
             "r": f"variable.armor_texture_slot ? query.armor_color_slot(4, 0) : ({CAP} ? query.property('siege:cap_r') : this)",
@@ -220,8 +237,15 @@ write(RP + "render_controllers/siege_steed.render_controllers.json", {
             "b": f"variable.armor_texture_slot ? query.armor_color_slot(4, 2) : ({CAP} ? query.property('siege:cap_b') : this)",
             "a": f"variable.armor_texture_slot ? query.armor_color_slot(4, 3) : this",
         },
-        # The Glimstrider: a pale, ghostly wash until it gets its own texture
-        "overlay_color": {"r": "0.72", "g": "0.95", "b": "1.0", "a": "query.property('siege:special') == 2 ? 0.55 : 0.0"},
+    },
+    # The Glimstrider: one see-through layer. Worn armor and cloth still work but are not drawn on it.
+    "controller.render.siege_steed_glim": {
+        "part_visibility": [
+            {"Saddle": False}, {"Bit*": False}, {"Bridle": False}, {"Reins*": False}, {"Bag*": False}, {"MuleEar*": False},
+        ],
+        "geometry": "Geometry.default",
+        "materials": [{"*": "Material.ghost"}],
+        "textures": ["Texture.glimstrider"],
     }},
 })
 

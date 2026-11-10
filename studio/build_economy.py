@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Pack files for the economy: the two coin items, placeholder icons, names.
+"""Pack files for the economy: the two coin items, placeholder icons, names, and the job NPC entity.
 Run from the siege-nights folder:   python3 studio/build_economy.py
 Safe to re-run: never overwrites a PNG that exists (the textures thread paints the real ones),
 and only adds missing lines to the shared lang and texture-atlas files."""
@@ -71,7 +71,58 @@ if added:
         json.dump(atlas, f, indent=2)
         f.write("\n")
 
+# ---------- the job NPC: one entity, eight painted skins (textures/entity/siege/npc/job_<id>.png, studio/art/build_job_npcs.py) ----------
+# The order is the value of the siege:job property and must match JOB_IDS in scripts/economy/config.js. Only ever add at the end.
+JOB_SKINS = ["farmer", "woodcutter", "quarryman", "smith", "fisher", "hunter", "herbalist", "moneyer"]
+
+job_entity = {"format_version": "1.21.60", "minecraft:entity": {
+    "description": {"identifier": "siege:job_npc", "is_spawnable": False, "is_summonable": True, "is_experimental": False,
+                    "properties": {"siege:job": {"type": "int", "range": [0, len(JOB_SKINS) - 1], "default": 0, "client_sync": True}}},
+    "components": {
+        "minecraft:type_family": {"family": ["npc", "siege_job", "mob"]},
+        "minecraft:health": {"value": 20, "max": 20},
+        "minecraft:collision_box": {"width": 0.6, "height": 1.9},
+        "minecraft:damage_sensor": {"triggers": [{"cause": "all", "deals_damage": "no"}]},
+        "minecraft:knockback_resistance": {"value": 1},
+        "minecraft:pushable": {"is_pushable": False, "is_pushable_by_piston": False},
+        "minecraft:physics": {},
+        "minecraft:persistent": {},
+        "minecraft:nameable": {"always_show": False, "allow_name_tag_renaming": False},
+        "minecraft:fire_immune": {},
+        "minecraft:breathable": {"total_supply": 15, "suffocate_time": 0, "breathes_water": True},
+        "minecraft:interact": {"interactions": [{"interact_text": "action.interact.trade",
+                                                 "on_interact": {"filters": {"test": "is_family", "subject": "other", "value": "player"}}}]},
+        "minecraft:behavior.look_at_player": {"priority": 1, "look_distance": 8, "probability": 1},
+        "minecraft:behavior.random_look_around": {"priority": 2},
+    }}}
+job_client = {"format_version": "1.10.0", "minecraft:client_entity": {"description": {
+    "identifier": "siege:job_npc",
+    "materials": {"default": "villager"},
+    "textures": {n: f"textures/entity/siege/npc/job_{n}" for n in JOB_SKINS},
+    "geometry": {"default": "geometry.villager.v1.8"},
+    "scripts": {"scale": "0.9375", "animate": ["look_at_target"]},
+    "animations": {"look_at_target": "animation.common.look_at_target"},
+    "render_controllers": ["controller.render.siege_job_npc"],
+}}}
+job_render = {"format_version": "1.8.0", "render_controllers": {"controller.render.siege_job_npc": {
+    "arrays": {"textures": {"Array.job": [f"Texture.{n}" for n in JOB_SKINS]}},
+    "geometry": "Geometry.default",
+    "materials": [{"*": "Material.default"}],
+    "textures": ["Array.job[query.property('siege:job')]"],
+}}}
+for path, data in ((os.path.join(BP, "entities", "economy", "job_npc.json"), job_entity),
+                   (os.path.join(RP, "entity", "economy", "job_npc.entity.json"), job_client),
+                   (os.path.join(RP, "render_controllers", "siege_job_npc.render_controllers.json"), job_render)):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf8") as f:
+        json.dump(data, f, indent=2)
+        f.write("\n")
+missing_skins = [n for n in JOB_SKINS if not os.path.exists(os.path.join(RP, "textures", "entity", "siege", "npc", f"job_{n}.png"))]
+if missing_skins:
+    print("economy: WARNING, no skin painted for: " + ", ".join(missing_skins) + " (run studio/art/build_job_npcs.py)")
+
 names = {f"item.siege:{n}.name": label for n, (label, _, _) in ITEMS.items()}
+names["entity.siege:job_npc.name"] = "Tradesman"
 langs = sum(add_lang(os.path.join(p, "texts", "en_US.lang"), names) for p in (BP, RP))
 
 todo = os.path.join(ROOT, "TEXTURE-LIST.md")
@@ -82,4 +133,5 @@ if "## Economy" not in open(todo, encoding="utf8").read():
                 "- `textures/items/siege_gold_coin.png` (the Gold Regal, worth 64): placeholder\n"
                 "- Job NPCs (Farmer, Woodcutter, Quarryman, Smith, Fisher, Hunter, Herbalist, Moneyer) use built-in NPC skins for now: own skins wanted\n")
 
-print(f"economy: {len(ITEMS)} items, {len(painted)} placeholder icons painted, {added} atlas entries, {langs} lang lines")
+print(f"economy: job NPC entity with {len(JOB_SKINS)} skins,", end=" ")
+print(f"{len(ITEMS)} items, {len(painted)} placeholder icons painted, {added} atlas entries, {langs} lang lines")

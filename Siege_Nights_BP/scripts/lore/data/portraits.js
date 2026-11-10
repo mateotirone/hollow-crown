@@ -29,7 +29,7 @@ export const LEADERS = {
     L("E., aged seven", "about 300 years ago", "The child of the house", "A fierce small girl of seven with hair as pale as ash, standing in a rowing boat far too big for her and holding an oar upright like a spear. A faint grey smudge on her left palm. She is not smiling. An apple tree on the bank behind.", "\"I will be someone who says the true thing out loud even when everybody at the table goes quiet.\""),
     L("Garth Appleyard", "about 285 years ago", "Gardener. He burned the house and kept the tree", "Old bent gardener holding one apple. Behind him a blackened chimney stack, and beside it an apple tree in full leaf, untouched.", "She had them burn the house. She did not have them burn the tree. He wondered about that every year."),
   ],
-  Rimeholt: [
+  Frosthelm: [
     L("Maelis, the Queen", "about 700 years ago", "Came down the mine herself to listen", "A hard young queen in travelling furs with a plain bronze circlet, standing in a mine gallery with her head tilted, listening, one hand flat against green-veined rock. A single miner's lamp. Stiff, very old style of painting.", "She listened a long while and said, \"Good. Then I know what pitch to cast against.\""),
     L("Brand Holt", "about 700 years ago", "Captain of the Queen's diggings", "Huge bearded miner with a pick over one shoulder and an ingot of copper in his hand, silver and gold showing ignored in the rock behind him.", "Silver they left in the wall. Gold they left in the wall. She wanted forty tons of copper and nothing else."),
     L("Master Ysolt", "about 700 years ago", "Bell-founder to the Queen", "Grey woman in a scorched leather apron holding a two-pronged tuning fork up to her ear, eyes closed. The glow of a furnace behind. She looks sorry.", "\"It is cast well. I am sorry for that, some nights.\""),
@@ -79,7 +79,11 @@ export const GALLERY = [
   { title: "Bellhollow", line: "The last ringing of the Founding Bell. The Order hung copies of this in every chapterhouse. This is not a copy." },
   { title: "The Gate", line: "What the bell left behind: one wound in the rock, shut. Look at the edges of the Crack. The painter went back and added the hands." },
   { title: "The Third Night", line: "A keep of Aldmere, on the night that is not ours. Count the moons." },
-  { title: "The Forty-Second Portrait", line: "The Order burned forty-one portraits of one man. This is another. The face was scraped back to the board before it was hidden, and not by the Order.", tall: true },
+  { title: "The Forty-Second Portrait", line: "The Order burned forty-one portraits of one man. This is another. The face was scraped back to the board before it was hidden, and not by the Order.", tall: true,
+    // Secrecy: this one never hangs where a player can reach it early. It belongs in the Burned Archive only (late Act III).
+    late: "burned_archive",
+    // what the same picture says once Morvane has fallen (the board itself does not change)
+    after: "Oswin, son of Aldric, last King of Aldmere. He scraped the face off himself, the night before they came for him, so that nobody would have to be asked whose it was." },
 ];
 
 const slug = (name) => String(name).toLowerCase().replace(/[^a-z]/g, "");
@@ -88,7 +92,11 @@ export const PICS = [
   ...Object.entries(LEADERS).flatMap(([plot, people]) =>
     people.map((p, i) => ({ id: `${slug(plot)}_${i + 1}`, plot, size: 0, title: p.name, sub: `${p.role}. ${plot}, ${p.era}.`, line: p.line, look: p.look })),
   ),
-  ...GALLERY.map((g, i) => ({ id: `plate_${i + 1}`, size: g.tall ? 2 : 1, title: g.title, sub: "The Long Gallery", line: g.line })),
+  ...GALLERY.map((g, i) => ({ id: `plate_${i + 1}`, size: g.tall ? 2 : 1, title: g.title, sub: "The Long Gallery", line: g.line, after: g.after })),
 ];
+// the caption a player reads: the late picture changes its words after the last fight, and only then
+export const captionOf = (pic, flags = []) => (pic.after && flags.includes("morvane_fallen") ? pic.after : pic.line);
+// the paintings that may hang anywhere from the first day (the Long Gallery at Crownhold, the Libraries)
+export const OPEN_PLATES = GALLERY.map((g, i) => ({ ...g, n: i + 1 })).filter((g) => !g.late).map((g) => g.n);
 export const picIndex = (id) => PICS.findIndex((p) => p.id === id);
 export const leaderPics = (plot) => PICS.map((p, i) => ({ ...p, index: i })).filter((p) => p.plot === plot);
