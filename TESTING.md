@@ -439,3 +439,7 @@ In the real game the first claimant comes 5 days after Morvane falls, then one e
 ### Village happenings (mining villages)
 
 Walk into a mining village in the Hollow: at most once every 8 minutes something is going on, and it should never be the same thing, or the same kind of thing, twice in a row. `/scriptevent hc:folk_happen` while standing in a village forces the next one. Check: the rich seam adds 6 ore to that Tally; the half price shows in the Tally menu for 5 minutes; the nest spawns three endermites by the mine mouth; an errand names a place, and walking to that place pays 4 raw Choir Ore once. Before Morvane falls only the three quiet, frightened ones and the errands appear.
+
+### The Hollow's air (particles)
+
+Stand in the Hollow near Veilcaps, Glint Clusters, hanging moss, pale ash and plain veined ground: each should give off its own small effect now and then, and a few pale motes should drift near you everywhere. It needs the particle effects from the art pull request (#57); without them nothing shows and nothing breaks. `/scriptevent hc:hollow_air off` stops it, `on` starts it again. Watch for lag with several players in the Hollow.
