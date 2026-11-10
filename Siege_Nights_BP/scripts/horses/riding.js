@@ -6,6 +6,7 @@ import { GUARD_TYPES, guardTag, isAlly, RAIDER_TAG } from "../siege/api.js";
 import { HORSE_SETTINGS as S, TERRAIN, addXp, effectiveStats, gallopTicks, hasPerk, bar } from "./data.js";
 import { recordOf, saveRecord } from "./store.js";
 import { STEED, uidOf, valid } from "./steed.js";
+import { sfx } from "../core/sfx.js";
 
 const TICK = 5; // this file's loop runs every 5 ticks
 const rides = new Map(); // horse uid -> { stamina, galloping, burstUntil, last, carry, hit: Map, rallyAt, stepAt, dirty }
@@ -38,7 +39,7 @@ function announceLevel(player, rec, gained) {
     subtitle: `§7+${gained.levels} training point${gained.levels === 1 ? "" : "s"}${gained.perks ? " · §e+1 perk point" : ""}§7 · spend them at your Stables`,
     fadeInDuration: 10, stayDuration: 60, fadeOutDuration: 20,
   });
-  player.playSound("random.levelup");
+  sfx(player, "random.levelup");
 }
 
 export function giveXp(player, rec, amount) {
@@ -95,7 +96,7 @@ function runDown(player, mount, rec, ride) {
   }
   if (ride.hit.size > 40) for (const [id, until] of ride.hit) if (until < now) ride.hit.delete(id);
   if (!struck) return;
-  mount.dimension.playSound("mob.horse.angry", at);
+  sfx(mount.dimension, "mob.horse.angry", at);
   if (charge && now >= ride.rallyAt) {
     ride.rallyAt = now + 600;
     let rallied = 0;
@@ -149,7 +150,7 @@ export function ridingTick() {
       if (ride.stamina <= 0) {
         ride.stamina = 0;
         ride.galloping = false;
-        player.playSound("mob.horse.breathe");
+        sfx(player, "mob.horse.breathe");
       }
     } else {
       ride.stamina = Math.min(maxStamina, ride.stamina + TICK * (hasPerk(rec, "second_wind") ? 1 : 0.5));
@@ -200,7 +201,7 @@ export function useCrop(player) {
   }
   ride.galloping = true;
   if (hasPerk(rec, "sprint_burst")) ride.burstUntil = system.currentTick + 40;
-  mount.dimension.playSound("mob.horse.gallop", mount.location);
+  sfx(mount.dimension, "mob.horse.gallop", mount.location);
 }
 
 const passable = (block) => {
@@ -243,7 +244,7 @@ export function undertowStep(player) {
         // particle name differs on this version
       }
       mount.teleport({ x: spot.x + 0.5, y: spot.y, z: spot.z + 0.5 }, { dimension: dim });
-      dim.playSound("mob.endermen.portal", { x: spot.x, y: spot.y, z: spot.z });
+      sfx(dim, "mob.endermen.portal", { x: spot.x, y: spot.y, z: spot.z });
       ride.stepAt = now + S.stepCooldownTicks;
       ride.last = null; // the blink doesn't count as distance ridden
       return true;

@@ -13,6 +13,7 @@ Siege_Nights_BP/scripts/
     store.js           moduleStore(): a saved JSON blob per feature
     firstjoin.js       addJoinStep(): the one ordered sequence that greets a joining player
     tests.js           addTests(): self-tests, run at world load and by /scriptevent siege:selftest
+    sfx.js             sfx(): play a sound. Use it instead of playSound (see "Sounds" below)
   siege/               the original Siege Nights, split by topic (keep, siege, warplan, walls ...)
     settings.js        SETTINGS: the numbers Mateo tweaks
     api.js             THE PUBLIC API. Import from here, not from the other siege/ files
@@ -45,6 +46,22 @@ tools/check.mjs        offline check: loads every script in Node with a fake Min
   Nights state, start with `if (!isReady()) return;`.
 - **Tests:** add a few with `addTests("<feature>", { "name": () => { assert(...) } })`. Pure ones run
   in Node and in game; pass `{ gameOnly: true }` for ones that need the real world.
+
+## Sounds: `sfx`
+
+Play every sound with `sfx()` from `core/sfx.js`, not `playSound`. It takes the same arguments with the target first:
+
+```js
+import { sfx } from "../core/sfx.js";
+sfx(player, "random.levelup");                               // only that player hears it
+sfx(dimension, "block.bell.hit", location, { pitch: 0.5 });  // everyone near that spot
+```
+
+A vanilla id with a recipe in `core/sfx_cues.js` comes out reworked (lower, layered, a little different each time); your pitch
+and volume still apply on top. A named cue such as `"sig.toll_317"` plays Mateo's recording once it is installed
+(`python3 tools/install_sounds.py`) and a vanilla stand-in until then. Any other id is played as it is. `sfx` never throws.
+`SOUND-LIST.md` is generated from those files by `node tools/sound-list.mjs`; the check fails if it is stale, so run it
+after you add or remove a sound.
 
 ## Greeting a player who joins: `addJoinStep`
 

@@ -37,6 +37,8 @@ import { coins, worth, fromEmeralds } from "../economy/rules.js";
 import { ECON } from "../economy/config.js";
 
 export { setFolkVoice } from "./rules.js";
+import { setHollowAir } from "./ambience.js";
+export { setHollowAir };
 
 const RAW = "siege:raw_choir_ore";
 const BOAT = "siege:lattice_boat";
@@ -660,6 +662,11 @@ system.afterEvents.scriptEventReceive.subscribe((e) => {
       if (!v) { if (p) say(p, "§7Stand inside a mining village first."); break; }
       lastHappening.delete(p.id);
       arrive(p, v);
+      break;
+    }
+    case "hc:hollow_air": { // /scriptevent hc:hollow_air off   (or on): the Hollow's drifting particles
+      setHollowAir(e.message.trim() !== "off");
+      if (p) say(p, `§dThe Hollow's air is ${e.message.trim() === "off" ? "still" : "moving"}.`);
       break;
     }
     case "hc:folk_dawn": {
