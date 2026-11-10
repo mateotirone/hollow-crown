@@ -302,7 +302,11 @@ function standRanks(f, place) {
     const e = f.place(MORVANE.suit, spots[i]);
     if (!e) continue;
     try { e.nameTag = "§7Standing Rank"; } catch { /* cosmetic */ }
-    if (i === truth) { s.trueId = e.id; freeze(e, true); continue; }
+    if (i === truth) { // his suit holds the blade in its LEFT hand; the empty ones hold theirs in the right
+      s.trueId = e.id; freeze(e, true);
+      try { e.triggerEvent("siege:bare_on"); } catch { /* the light on the hand still gives him away */ }
+      continue;
+    }
     if (toWake > 0) { toWake--; s.awake.add(e.id); } else freeze(e, true);
   }
 }
@@ -372,7 +376,7 @@ const TICK = {
       return standRanks(f, place);
     }
     if (f.tick % 40) return;
-    // the tell: a cold light on the LEFT hand of his suit, on the right hand of the empty ones
+    // the tell: his suit holds its blade left-handed (model), and a cold light sits on that hand; on the right hand of the empty ones
     for (const e of f.adds(MORVANE.suit)) {
       try {
         const v = e.getViewDirection(), side = e.id === s.trueId ? 1 : -1; // +1 is the entity's left
