@@ -28,6 +28,11 @@ BLOCKS = {
     "rift_veil": ("Rift Veil", "#c9a0ff", dict(ghost=True, light=15, unbreakable=True, no_select=True, sound="amethyst_block")),
     "waystone": ("Waystone", "#9ad8ff", dict(unbreakable=True, light=11, sound="amethyst_block")),
     "choir_ore": ("Choir Ore", "#b98cff", dict(ore=True, light=6, sound="amethyst_block")),
+    # Hollow masonry and ground cover (art by the textures thread; ids agreed 2026-11-10)
+    "veinstone_bricks": ("Veinstone Bricks", "#33263f", dict(hard=3, sound="deepslate_bricks")),
+    "cracked_veinstone_bricks": ("Cracked Veinstone Bricks", "#2d2238", dict(hard=3, sound="deepslate_bricks")),
+    "pale_ash": ("Pale Ash", "#b9b4c4", dict(hard=0.5, sound="sand")),
+    "glint_cluster": ("Glint Cluster", "#6fc6ff", dict(plant=True, light=12, sound="amethyst_cluster")),
     "court_seal": ("Court Seal", "#16323a", dict(unbreakable=True, sound="stone")),
 }
 
@@ -146,6 +151,18 @@ def glimbulb(x, y):
         if abs(x - sx) <= 1 and abs(y - top) <= 1: return (200, 240, 255, 255)
         if x == sx and y > top: return (150, 170, 200, 255)
     return None
+def bricks(x, y, cracked=False):
+    row = y // 4
+    mortar = y % 4 == 3 or (x + (4 if row % 2 else 0)) % 8 == 7
+    if mortar: return jitter((24, 18, 30), 4)
+    if cracked and ((x * 5 + y * 3) % 11 == 0 or (x - y * 2) % 13 == 0): return jitter((150, 70, 190), 18)
+    return jitter((58, 42, 72), 7)
+def cracked_bricks(x, y): return bricks(x, y, True)
+def ash(x, y): return jitter((188, 183, 198), 9) if random.random() < 0.9 else jitter((140, 132, 156), 8)
+def glint(x, y):
+    for sx, top, wide in ((4, 7, 1), (8, 2, 2), (12, 9, 1)):
+        if y >= top and abs(x - sx) <= (wide if y > top + 1 else 0): return jitter((120, 205, 255), 22) if x != sx else (215, 245, 255, 255)
+    return None
 def flow(x, y): return jitter((170, 225, 255), 18, 150 + ((x + y * 2) % 5) * 12)
 def seam(x, y):
     mid = 7 + (1 if (y // 3) % 2 else 0)
@@ -190,7 +207,8 @@ if __name__ == "__main__":
 
     for name, fn in dict(veinstone=veinstone, undertow_moss=moss, veil_rock=veil_rock, hollowwood_lattice=lattice,
                          hollowwood_core=core, veilcap=veilcap, glimbulb=glimbulb, glimmerflow=flow, rift_seam=seam,
-                         rift_edge=edge, rift_veil=veil, waystone=waystone, court_seal=seal, choir_ore=ore).items():
+                         rift_edge=edge, rift_veil=veil, waystone=waystone, court_seal=seal, choir_ore=ore,
+                         veinstone_bricks=bricks, cracked_veinstone_bricks=cracked_bricks, pale_ash=ash, glint_cluster=glint).items():
         tex(name, fn)
     tex("tuning_fork", fork, "items")
     tex("choir_shard", shard, "items")
@@ -204,11 +222,13 @@ if __name__ == "__main__":
 
     # Shared files: re-read right before writing, touch only our keys.
     p = f"{RP}/textures/terrain_texture.json"; d = json.load(open(p))
-    for name in BLOCKS: d["texture_data"][f"siege_{name}"] = {"textures": f"textures/blocks/siege_{name}"}
+    # setdefault: the textures thread may have replaced an entry with variants; leave theirs alone.
+    for name in BLOCKS: d["texture_data"].setdefault(f"siege_{name}", {"textures": f"textures/blocks/siege_{name}"})
     write_json(p, d)
     p = f"{RP}/textures/item_texture.json"; d = json.load(open(p))
-    for name in ITEMS: d["texture_data"][f"siege_{name}"] = {"textures": f"textures/items/siege_{name}"}
-    write_json(p, d)
+    before = json.dumps(d)
+    for name in ITEMS: d["texture_data"].setdefault(f"siege_{name}", {"textures": f"textures/items/siege_{name}"})
+    if json.dumps(d) != before: write_json(p, d)  # shared file: leave it byte for byte alone unless we add something
     p = f"{RP}/blocks.json"; d = json.load(open(p))
     for name, (_, _, o) in BLOCKS.items(): d[f"siege:{name}"] = {"sound": o["sound"]}
     write_json(p, d)
@@ -218,7 +238,9 @@ if __name__ == "__main__":
         lines = open(p).read().splitlines()
         want = {f"tile.siege:{n}.name": v[0] for n, v in BLOCKS.items()}
         want.update({f"item.siege:{n}.name": v[0] for n, v in ITEMS.items()})
-        lines = [l for l in lines if l.split("=")[0] not in want]
-        lines += [f"{k}={v}" for k, v in want.items()]
+        # Shared file: change our lines in place and only append what is new, so nothing is reordered.
+        have = {l.split("=")[0] for l in lines}
+        lines = [f"{l.split('=')[0]}={want[l.split('=')[0]]}" if l.split("=")[0] in want else l for l in lines]
+        lines += [f"{k}={v}" for k, v in want.items() if k not in have]
         open(p, "w").write("\n".join(lines) + "\n")
     print("Undertow content built.")

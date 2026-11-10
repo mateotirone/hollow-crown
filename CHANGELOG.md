@@ -9,6 +9,7 @@ How versions work is in [`docs/RELEASING.md`](docs/RELEASING.md).
 Everything merged to `main` since the last release goes here. Each pull request that changes what players see adds a line under one of these headings.
 
 ### Added
+- The Hollow: four new blocks. Veinstone Bricks and Cracked Veinstone Bricks now build the Seat, the bridges, the Truce Hall and the Far Door; Pale Ash covers the waste regions; glowing blue Glint Clusters grow in the highlands and thickly on the climb to the Seat. Their textures are placeholders until the art pass lands.
 - The Hollow Crown expansion on top of Siege Nights: plots, town hall and skill tree, horses and rails, lore tomes and dialogue, new mobs and bosses, the Undertow dimension, the Crown and Citadel. None of it has been played in a real game yet.
 - A player who takes over a Rival Lord's settlement starts where the lord left off: the same tier, town hall, buildings and wall. A newcomer can pick a lord's plot and the lord steps down. Everything inherited can be changed or pulled down.
 - Rival Lords build on the same mapped layout as players, facing the plot's gate, and raise settlement walls that keep pace with their tier.
