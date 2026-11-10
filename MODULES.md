@@ -230,14 +230,14 @@ Add a line here when you publish one.
   `rectify()` (the source is dealt with), `LONG` = 5, `AFTER` = 6. Events `reachStage { stage, before, name }`, `reachChanged`,
   `firstGlimpse { owners }` (now once per settlement, so it fires more than once per world; `owners` are the keeps having theirs tonight),
   `lordRaid { lord, name, plot, owners }` (after the story a Rival Lord's army has come). The Long Night starts when the Rift opens
-  (script event `siege:undertow_rift_opened`), not when the Choir falls. Reach answers the `nextSiegeLine` filter with a hint at stage 3 and after the story.
+  (script event `siege:undertow_rift_opened`), not when the Choir falls. Omens are acts in the world (`reach/omens.js`: `ACTS`, `SOUNDS` to swap sounds, `performOmen(id, player, keepCentre, side)`), one per hour line. Reach answers the `nextSiegeLine` filter with a hint at stage 3 and after the story.
   Filter `hollowSoldier` (type, { role, glimpse }) picks the soldier it adds. **Sieges are no longer simply every third night**: ask `isSiegeNight()`
   instead of doing `day % 3`. It also added hooks to `siege/siege.js` that anyone may use: filters `siegeDue`, `assaultCount`, `assaultDelay`,
   `assaultShare`, `dawnEndsSiege`, `nextSiegeDay`, and events `assaultIncoming` / `assaultSpawned` `{ assault, total }`.
 
 ## Checking and building
 
-- `node tools/check.mjs` (from `siege-nights/`): parses every pack JSON, checks imports, finds undefined names,
+- `node tools/check.mjs` (from `siege-nights/`): parses every pack JSON, checks item icons and texture files exist, checks imports, finds undefined names,
   loads everything with a fake Minecraft, runs every loop task and all self-tests. Files main.js doesn't load
   yet only produce notes, so you can run it while your feature is half done.
 - `python3 tools/build.py`: runs the check, then builds `hollow-crown.mcaddon` (only scripts main.js loads are packed).

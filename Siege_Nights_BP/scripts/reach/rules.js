@@ -370,6 +370,36 @@ export const HOUR_LINES = [
   "§8Something small runs past you, away from the wall, and does not stop.",
   "§8The moon is up. You would not swear it is where it was last night.",
 ];
+// What happens in the world with each hour line, in the same order (Mateo: omens you see and hear, the text is the backup).
+// The game side (omens.js) performs them around each player who is inside a settlement. Ids are for the test command.
+export const HOUR_ACTS = [
+  "pets_hide", // dogs and cats bolt away from the wall and cower
+  "stillness", // every sound stops for a moment
+  "humming", // the hum, from nowhere in particular
+  "torches_lean", // flames at every torch and lantern nearby drift the same way
+  "far_bell", // a single far bell
+  "animals_face", // livestock turn to face one wall and hold still
+  "gate_creak", // a door creaks from the wall side, with no wind
+  "ticking", // something far off keeps time
+  "voices", // the townsfolk all speak at once
+  "water_trembles", // ripples on any water nearby
+  "arrows", // the sound of someone counting arrows
+  "cellar", // cold dust drifts up from the ground
+  "doors_shut", // every open door nearby shuts
+  "guards_quiet", // guards turn to the wall and stop
+  "small_thing", // something small runs past, away from the wall
+  "light_changes", // the light dips for a breath
+];
+export const DUSK_ACT = "torches_gutter"; // at dusk every flame nearby gutters at once
+// The wall the omens point at tonight: one of the four sides, fixed for the evening
+export const omenSide = (day, salt = 0) => Math.floor(dayRoll(day, salt, 22) * 4) * (Math.PI / 2);
+// The hour's omen: its line and what happens with it. Never the same one twice in an evening.
+export function hourOmen(day, salt, hour) {
+  const line = hourLine(day, salt, hour);
+  const i = HOUR_LINES.indexOf(line);
+  return { id: HOUR_ACTS[i], line };
+}
+
 export function duskLine(kind, stageId, day = 0) {
   const key = kind === "long" ? "long" : kind === "muster" ? "muster" : stageId >= 4 ? "uncounted" : kind === "stolen" ? "stolen" : "counted";
   const lines = DUSK_LINES[key];
