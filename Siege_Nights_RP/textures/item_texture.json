@@ -223,6 +223,9 @@
   },
   "siege_gold_coin": {
    "textures": "textures/items/siege_gold_coin"
+  },
+  "siege_b_pretender_seal": {
+   "textures": "textures/items/bestiary/pretender_seal"
   }
  }
 }

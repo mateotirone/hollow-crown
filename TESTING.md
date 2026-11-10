@@ -376,3 +376,14 @@ the darkness and knockback effects, and the rain.
 - New attacks to look for: the Reeve puts you back where you stood ("The hands turn back"), the Huntsman lays snares, the Mother hums (look away).
 - In a siege from the third on, roughly one raider in seven has a yellow name such as "Fleet Grey Host Axeman" and behaves to match.
 - `/scriptevent siege:variety` lists what you have killed most and flags anything met more than 40 times per variant.
+
+## Pretenders (bestiary)
+
+In the real game the first claimant comes 5 days after Morvane falls, then one every 6 to 11 days, standing at the Seat in the Hollow.
+
+- `/scriptevent siege:pretender_rise` makes one rise now, standing where you are. Add a number (`siege:pretender_rise 42`) to get the same one again. Chat names it and its claim.
+- `/scriptevent siege:pretender_status` shows its claim, its four powers, how long it has sat and how much the seep is surging.
+- Fight it. Every warned attack should be one of the four listed powers, never the same twice running. The claim should hold: Unbled heals when nobody is within 6 blocks, Mirrored sends arrows back, Followed calls a shade at each fifth of its life, Hungering heals when it hits you, Twinned is unhurtable at half life until its twin dies.
+- Kill it: chat tells everyone, you get a "Seal of <its name>", and the next `siege:pretender_rise` gives a different body, claim and name.
+- Leave one alive for 5 in-game days: a message says the seep is everywhere, and Seeps open more often.
+

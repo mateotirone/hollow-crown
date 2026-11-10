@@ -8,6 +8,7 @@
 //   relics.js    the named boss loot and the boss keys
 //   spawns.js    Choir raiders in sieges, Hollow things at night and in the Undertow
 //   seeps.js     Seep sites: random Hollow incursions in the overworld that widen until someone closes them
+//   pretenders.js  generated claimants who rise in the Hollow after Morvane falls (events: siege:pretender_risen / _marching / _fallen)
 //   gloam.js     Gloamwings: flyers that build up the longer a visitor stays in the Hollow
 //   champions.js NPC stand-ins for players that fight like one (spawnChampion, setStance)
 //   bodies.js    the dead fall and lie on the field until the fight is over, then sink away
@@ -32,6 +33,7 @@ import "./relics.js";
 import "./spawns.js";
 import "./veterans.js";
 import "./seeps.js";
+import "./pretenders.js";
 import "./gloam.js";
 import "./champions.js";
 import "./bodies.js";

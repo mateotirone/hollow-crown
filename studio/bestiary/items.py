@@ -12,6 +12,7 @@ MATERIALS = [
     ("clockwork_cog", "Clockwork Cog", (218, 176, 70), "A cog from the Clockwork Reeve. It ticks on its own."),
     ("drowned_pearl", "Drowned Pearl", (200, 240, 236), "A pearl from the Bride's veil."),
     ("gloamquill", "Gloamquill", (124, 64, 156), "A Gloamwing's flight quill. It never quite stops trembling."),
+    ("pretender_seal", "Claimant's Seal", (160, 70, 190), "Pressed by someone who meant to rule the Hollow. Every one is different, because every one of them was."),
     ("changeling_ichor", "Changeling Ichor", (230, 220, 80), "Shifts colour while you look at it."),
 ]
 # boss summoning keys: what the regional puzzles hand out
