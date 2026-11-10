@@ -13,6 +13,8 @@
 //
 // None of these names who Morvane was. They are small true things the Order did not think worth burning.
 
+import { wrenPage, REGION_BOSS, PLOT_REGION } from "./spine.js";
+
 const P = (title, author, pages, hint) => ({ title, author, pages, hint });
 
 export const PLOT_LORE = {
@@ -330,9 +332,9 @@ export const PLOT_LORE = {
         "The keeper: nine people, who never met, described the same high ledge, mist with lights in it, no sky, and one note.",
         "The blue lamp: \"It is a whole country.\" Its people are trying to come up, and cannot.",
       ],
-      question: "Where did the fen's lost days go? Name the place the nine described.",
-      accept: ["thehollow", "hollow", "theotherworld", "otherworld", "below", "theledge", "thewound"],
-      solved: "The Hollow. People have been slipping into it from your island for centuries, for a breath or for eleven years, and one of them liked what she saw enough to go back.",
+      question: "How long was Wenna Sedge gone, the first time?",
+      accept: ["elevenyears", "eleven", "11", "11years", "elevenwinters"],
+      solved: "Eleven years, in the same wet shoes. People have been stepping off your island into somewhere else for centuries, for a breath or for eleven years. It is a whole country, with no sky and one note, and one of yours liked what she saw enough to go back.",
     },
   },
 
@@ -418,8 +420,9 @@ export const LOCAL_COLLECTIONS = PLOT_NAMES.map((name) => ({
 export const LOCAL_TOMES = PLOT_NAMES.flatMap((name) =>
   PLOT_LORE[name].tomes.map((t, i) => ({
     id: `loc_${slugOf(name)}_${i + 1}`, col: `local_${slugOf(name)}`, n: i + 1, local: name,
-    title: t.title, author: t.author, where: FOUND[i], hint: t.hint, pages: t.pages,
-    clues: [`loc_${slugOf(name)}_${i + 1}`], leads: i === 0 ? [PLOT_LORE[name].lead] : [],
+    title: t.title, author: t.author, where: FOUND[i], hint: t.hint,
+    pages: i === 0 && wrenPage(name) ? [...t.pages, wrenPage(name)] : t.pages, // the first book ends by sending you to Sister Wren
+    clues: [`loc_${slugOf(name)}_${i + 1}`], leads: i === 0 ? [PLOT_LORE[name].lead, "millbrook"] : [],
   })),
 );
 export const LOCAL_THREADS = PLOT_NAMES.map((name) => {
@@ -427,6 +430,7 @@ export const LOCAL_THREADS = PLOT_NAMES.map((name) => {
   return {
     id: `local_${slugOf(name)}`, name: m.name, need: 2, local: name, intro: m.intro,
     clues: Object.fromEntries(m.clues.map((text, i) => [`loc_${slugOf(name)}_${i + 1}`, text])),
-    kind: "text", question: m.question, accept: m.accept, solved: m.solved, sp: 2,
+    kind: "text", question: m.question, accept: m.accept, sp: 2,
+    solved: `${m.solved}\n\n${REGION_BOSS[PLOT_REGION[name]].line}`, bossLead: REGION_BOSS[PLOT_REGION[name]].place, // home boss first
   };
 });

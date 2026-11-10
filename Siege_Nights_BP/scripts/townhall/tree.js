@@ -3,7 +3,8 @@
 import { world, GameMode, ItemStack } from "@minecraft/server";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
 import * as api from "../siege/api.js";
-import { SKILLS, SKILL, BRANCHES, RINGS, RANKS, ROLES, HALL_NAMES, LEVEL_UNLOCKS, canBranch, blockedReason, spentIn, rankOf, levelFromRenown, levelTitle, POWER_ORIGINS } from "./skills.js";
+import { SKILLS, SKILL, BRANCHES, RINGS, RANKS, ROLES, HALL_NAMES, LEVEL_UNLOCKS, canBranch, blockedReason, spentIn, rankOf, levelFromRenown, levelTitle, POWER_ORIGINS, ROLE_LORE } from "./skills.js";
+import { STYLES } from "./styles.js";
 import { treeCells, TREE_FLAG, BRANCH_FLAG, SPACER } from "./tree_layout.js";
 import { heroOf, saveHero, setPath, grantPoints } from "./hero.js";
 import { hallLevelAt, setTreeLook } from "./townhall.js";
@@ -31,7 +32,7 @@ export function treeMenu(player, hallLevel) {
   const { into, need } = levelFromRenown(hero.renown);
   const rank = rankOf(hero.path, hero.skills);
   const nextUnlock = Object.entries(LEVEL_UNLOCKS).find(([lvl]) => Number(lvl) > hero.level);
-  const pathLine = hero.path === "knight" ? `§6Oathsworn§r, ${rank.name}` : hero.path === "marked" ? `§5Marked§r, ${rank.name}` : "§7No path yet";
+  const pathLine = hero.path === "knight" ? `§6Oathsworn§r, ${rank.name}` : hero.path === "marked" ? `§5Marked§r, ${rank.name}` : ROLES[hero.path] ? `${ROLES[hero.path].color ?? "§6"}${ROLES[hero.path].name}§r, ${rank.name}` : "§7No path yet";
   const lines = [
     `§lRenown ${hero.level}§r  ${levelTitle(hero.level)}`,
     need ? `${bar(into / need)} ${into}/${need}` : "§6Renown is at its height.",
@@ -45,8 +46,9 @@ export function treeMenu(player, hallLevel) {
   const actions = [];
   for (const [id, branch] of Object.entries(BRANCHES)) {
     const open = canBranch(id, hero.path);
+    if (branch.regional && !open) continue;
     const spent = spentIn(hero.skills, id);
-    form.button(`${open ? "" : "§8"}${branch.name}${open ? `\n§8${spent} point${spent === 1 ? "" : "s"} sworn` : `\n§8${branch.who === "knight" ? "Knights only" : "The Marked only"}`}`, branch.icon);
+    form.button(`${open ? "" : "§8"}${branch.name}${open ? `\n§8${spent} point${spent === 1 ? "" : "s"} sworn` : `\n§8${ROLES[branch.who]?.noun ?? "Others"} only`}`, branch.icon);
     actions.push(() => branchMenu(player, hallLevel, id));
   }
   form.button(hero.plainTree ? "Show branches as a tree\n§8now: plain lists" : "Show branches as plain lists\n§8now: the tree screen", "textures/items/painting");
@@ -58,7 +60,7 @@ export function treeMenu(player, hallLevel) {
   if (hero.path === "none") {
     form.button("§6Choose your path", "textures/items/siege_hollow_ember");
     actions.push(() => pathMenu(player, hallLevel));
-  } else {
+  } else if (hero.path === "knight" || hero.path === "marked") {
     const item = hero.path === "knight" ? OATH_BANNER : BOUND_EMBER;
     if (!has(player, item)) {
       form.button(hero.path === "knight" ? "Take a new Oath Banner" : "Call the Ember back to your hand");
@@ -216,6 +218,11 @@ function pathMenu(player, hallLevel) {
     form.button("§5Take the Ember\n§8become Marked");
     choices.push("marked");
   }
+  for (const role of hero.offers) {
+    if (role === "knight" || !ROLES[role]?.region) continue;
+    form.button(`${ROLES[role].color}Become a ${ROLES[role].name}\n§8offered to you in ${STYLES[ROLES[role].region].name}`);
+    choices.push(role);
+  }
   form.button("Back");
   form.show(player).then((r) => {
     if (r.canceled) return;
@@ -225,7 +232,22 @@ function pathMenu(player, hallLevel) {
   }).catch(() => {});
 }
 
+function roleHistory(path) {
+  const lore = ROLE_LORE[path];
+  if (!lore) return "";
+  return (lore.saying ? `\n§7§o${lore.saying}§r` : "") + (lore.before ? `\n\n§8${lore.before}` : "") + (lore.why ? `\n§8${lore.why}` : "") + "§r";
+}
+
 export function confirmPath(player, path, back) {
+  if (ROLES[path]?.region) {
+    return void new MessageFormData().title(ROLES[path].name)
+      .body(`${ROLES[path].oath}${roleHistory(path)}\n\nYou become a ${ROLES[path].name} and the ${BRANCHES[ROLES[path].branch].name} branch of the Tree opens to you. You can hold only one role. §cThis cannot be undone.`)
+      .button1("I will").button2("Not yet")
+      .show(player).then((r) => {
+        if (r.canceled || r.selection !== 0) return back?.();
+        choosePath(player, path);
+      }).catch(() => {});
+  }
   new MessageFormData().title(path === "knight" ? "The Squire's Oath" : "The Ember")
     .body(path === "knight"
       ? "\"I will hold the gate. I will keep the silence. I will not ask what lies beneath.\"\n\nIf you carry the Ember, it is taken from you and sealed. You become a Squire of the Ashen Gate. §cThis cannot be undone."
@@ -256,11 +278,16 @@ export function choosePath(player, path) {
     player.addEffect("darkness", 80, { showParticles: false });
     player.sendMessage("§5The Ember is part of you now.§7 The Arcana branch of the Tree is open. Hold the §fBound Ember§7: use it to cast your chosen power, sneak and use it to choose another. Watch your Resonance.");
   }
+  if (ROLES[path]?.region) {
+    api.title(player, `${ROLES[path].color}${ROLES[path].name}`, `§7${RANKS[path][0].name}`);
+    player.playSound("random.levelup");
+    player.sendMessage(`${ROLES[path].color}You are a ${ROLES[path].name} now.§7 The ${BRANCHES[ROLES[path].branch].name} branch of the Tree of Oaths is open to you.`);
+  }
   hero.offers = [];
   saveHero(player);
   api.emit("pathChosen", { player, path });
   if (path !== "none") api.emit("roleChosen", { player, role: path });
-  if (path !== "none") world.sendMessage(path === "knight" ? `§6${player.name} has sworn the Squire's Oath.` : `§5${player.name} has been Marked.`);
+  if (path !== "none") world.sendMessage(path === "knight" ? `§6${player.name} has sworn the Squire's Oath.` : path === "marked" ? `§5${player.name} has been Marked.` : `${ROLES[path].color}${player.name} has become a ${ROLES[path].name}.`);
   return true;
 }
 

@@ -11,11 +11,12 @@
 //   /scriptevent siege:lore_reset                                   wipe YOUR lore progress (for testing)
 // To bind a Dusty Tome: place it, then click it in creative while holding the Lore Tome.
 
+import { BOSS_LEADS, CONVERGE, fallenCount } from "./data/spine.js";
 import { world, system, GameMode } from "@minecraft/server";
 import { on, moduleStore } from "../siege/api.js";
 import { TOME, TOMES, COLLECTION, tomesOf, blankProgress } from "./logic.js";
 import { PLACES } from "./data/world.js";
-import { tomeIdOf, makeTome, grantTome, giveItem, progressOf, saveProgress } from "./player.js";
+import { tomeIdOf, makeTome, grantTome, giveItem, progressOf, saveProgress, setFlag, learnLeads } from "./player.js";
 import { markPlace } from "./ledger.js";
 
 export const CACHE = "hc:tome_cache";
@@ -93,12 +94,30 @@ function parse(message) {
   }
 }
 
+// Each of the five regional bosses leaves two leads in two other regions, on top of its confession. Once three of
+// the five are down, every route turns to the Surveyor's Field Notes and the thin place (data/spine.js).
+function bossLeads(player, boss) {
+  const left = BOSS_LEADS[boss];
+  if (!left || !setFlag(player, `fell_${boss}`)) return;
+  player.sendMessage(`§7§o${left.scrap}`);
+  learnLeads(player, left.leads);
+  if (fallenCount(progressOf(player).flags) >= CONVERGE.at && setFlag(player, CONVERGE.flag)) {
+    system.runTimeout(() => {
+      try {
+        player.sendMessage(`§5${CONVERGE.line}`);
+        grantTome(player, CONVERGE.tome);
+      } catch { /* left the game */ }
+    }, 100);
+  }
+}
+
 function bossDefeated(data) {
   const at = { x: data.x, y: data.y, z: data.z };
   for (const id of data.players ?? []) {
     const player = playerById(id);
     if (!player) continue;
     for (const tome of BOSS_TOMES[data.boss] ?? []) grantTome(player, tome, player.dimension.id === data.dimension ? at : undefined);
+    bossLeads(player, data.boss);
   }
 }
 

@@ -7,7 +7,7 @@ import { ActionFormData } from "@minecraft/server-ui";
 import { CROWN } from "./config.js";
 import { payE } from "../economy/coins.js";
 import { EXILE_STAGES, nextExileStage } from "./rules.js";
-import { crown, saveCrown, playerById, addClaim, claimOf, announce, rulerLabel } from "./state.js";
+import { crown, saveCrown, playerById, addClaim, claimOf, announce, rulerLabel, citadelName } from "./state.js";
 import { crownStatus, annalLines, endReign, vacate } from "./reign.js";
 import { banish, npcWins } from "./usurp.js";
 
@@ -49,7 +49,7 @@ on("keepFallen", ({ owner, keep }) => {
   if (c.ruler?.id !== owner) return;
   if (c.challenge?.npc) return npcWins("the keep fell to their army", keep); // a rival lord took it
   const old = endReign("swallowed by the Hollow");
-  announce(`§4${old.title} ${old.name} is gone. The raiders they once commanded have taken the throne room. ${CROWN.citadelName} stands empty.`);
+  announce(`§4${old.title} ${old.name} is gone. The raiders they once commanded have taken the throne room. ${citadelName()} stands empty.`);
   banish(old.id, old.name);
   vacate("The throne is empty");
 });

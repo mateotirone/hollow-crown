@@ -1,0 +1,32 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:pretender_blade",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/pretender_blade"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.pretender_blade"
+   },
+   "animations": {
+    "main": "animation.siege_b.pretender_blade"
+   },
+   "scripts": {
+    "animate": [
+     "main"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ],
+   "spawn_egg": {
+    "base_color": "#3c344e",
+    "overlay_color": "#e646c8"
+   }
+  }
+ }
+}

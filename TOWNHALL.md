@@ -136,3 +136,16 @@ Each branch opens as a graphical tree: a 6 by 6 grid of nodes, one row per ring,
 ## Rumor Board variety
 
 `rumorsFor(day, playerId, level, memory)` never offers the kind of job the player did last and avoids givers, places, reasons and targets they saw recently. One job in three carries a twist that shows when it is finished: a keepsake (ten named items, each given once), double pay, extra Renown, or a debt (no pay, one more guard on your walls, up to three). A self-test plays 120 days and fails if a job repeats.
+
+## Regional roles
+
+Besides Knight and Marked there are four regional roles, each with a branch of nine skills (rings 1 to 5) and five ranks. A player holds one role only.
+
+| Role | Region | Branch | What it is good at | Ranks |
+|---|---|---|---|---|
+| Dragon Rider (`rider`) | Emberwaste | Wing | Fireproof, heals and shields the dragon you ride, hits harder from the saddle | Fledgling, Rider, Wing-Sworn, Drake-Captain, Dragonlord |
+| Forgemaster (`forgemaster`) | Frostmarch | Forge | Faster with tools, sharper weapons, self-mending gear, better-armed guards | Apprentice, Journeyman, Smith, Master Smith, Forgemaster |
+| Captain (`captain`) | Saltreach | Helm | Commands guards, stronger arrows, more siege pay, fights best in rain | Deckhand, Bosun, Mate, Captain, Admiral |
+| Witch (`witch`) | Blackfen | Hex | Immune to poison, poisons and rots enemies, heals from kills, curses attackers | Bog-Touched, Herbwife, Witch, Crone, Fen Mother |
+
+Data is in `townhall/skills.js` (ROLES, RANKS, BRANCHES, skills `wing_*`, `forge_*`, `helm_*`, `hex_*`); effects are in `townhall/roles.js`. A role is offered when its region's hall reaches tier 2 (`hallBuilt`), or by the story with `emit("offerRole", { player, role })` / `emit("grantRole", ...)`. Test: `/scriptevent siege:townhall_path rider` (or forgemaster, captain, witch, none). Names and powers are proposals until Mateo confirms them. Not played in the game yet.

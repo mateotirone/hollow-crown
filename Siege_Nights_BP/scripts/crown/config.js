@@ -13,7 +13,8 @@ export const CROWN = {
   relic: "the Heart of the Hollow", // what the victor brings back from the Hollow (Mateo's pick, 2026-11-10)
   relicName: "The Heart of the Hollow", // the same, as an item name
   throne: "the High Throne", // the overworld rulership the relic gives
-  citadelName: "Aldspire", // the Citadel (placeholder)
+  citadelName: "Aldspire", // the Citadel, until its ruler names it (Mateo: each ruler names their own). Also a ruling lord's name for it
+  citadelNameMax: 24, // longest name a ruler can type
   shard: "Oath Shard", // the fallen shards that give a Claim
   titles: ["Heartbearer", "High King", "High Queen", "Monarch", "Emperor", "Empress", "Warlord"],
 
@@ -43,9 +44,9 @@ export const CROWN = {
 
   // The Hunger: what the Heart quietly does to whoever carries it. Always hidden from players.
   //   "full"     as designed: symptoms, then easier challenges, then the raiders turn on the ruler
-  //   "cosmetic" symptoms only (whispers, dying grass, the letter), no penalties
+  //   "cosmetic" whispers, a few dead patches of grass, the letter. Nothing harms, changes or removes the bearer
   //   "off"      nothing happens
-  hunger: "full",
+  hunger: "cosmetic", // Mateo's pick, 2026-11-10: whispers and small wrong things, and nothing ever happens to the bearer
   hollowPerNight: 3, hollowPerDecree: 4, hollowPerDefense: 10, hollowShatter: 5,
   unrestPerDecree: 2,
 
