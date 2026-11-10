@@ -6,6 +6,7 @@ import { world, system, ItemStack } from "@minecraft/server";
 import { ActionFormData } from "@minecraft/server-ui";
 import { emit } from "../siege/api.js";
 import { JOURNAL, JOURNAL_CLUES } from "./data/journal.js";
+import { REVEAL } from "./data/reveal.js";
 import { progressOf, saveProgress, giveItem, learnClues } from "./player.js";
 
 export const JOURNAL_ITEM = "siege:kings_journal";
@@ -27,7 +28,10 @@ export function giveJournal(player, announce = true) {
 
 // page -1 is the cover; 0..n-1 are the entries
 export async function readJournal(player, page = -1) {
-  const entries = JOURNAL.entries;
+  // after the last fight the book has one more page, in another hand (data/reveal.js)
+  const entries = progressOf(player).flags.includes("journal_last_page")
+    ? [...JOURNAL.entries, { date: REVEAL.lastPage.date, text: `${REVEAL.lastPage.text}\n\n${REVEAL.lastPage.sign}` }]
+    : JOURNAL.entries;
   const last = page >= entries.length - 1;
   const body = page < 0
     ? `§7${JOURNAL.cover}§r\n\n§8${entries.length} entries, in a careful hand that gets worse.`
@@ -39,7 +43,7 @@ export async function readJournal(player, page = -1) {
   buttons.push("close");
   for (const b of buttons) form.button({ next: page < 0 ? "Open it" : "Next entry", back: "Previous entry", close: "Close the journal" }[b]);
 
-  if (last) finishJournal(player);
+  if (page >= JOURNAL.entries.length - 1) finishJournal(player);
   const answer = await form.show(player);
   if (answer.canceled) return;
   const picked = buttons[answer.selection];

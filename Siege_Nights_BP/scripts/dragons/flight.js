@@ -7,8 +7,13 @@
 
 import { world, system, InputButton, ButtonState, EntityDamageCause } from "@minecraft/server";
 import { settlementAt, isAlly, guardTag, keepOf, BALLISTA } from "../siege/api.js";
-import { DRAGON_SETTINGS as S, DRAGON, addXp, addBond, flightTicks, bar } from "./data.js";
+import { DRAGON_SETTINGS as S, DRAGON, addXp, addBond, flightTicks, bar, speciesOf } from "./data.js";
 import { dragonOf, ownerIdOf, valid, save, setFlying, isFlying, canHarness } from "./dragon.js";
+import { speak, noise } from "./voice.js";
+import { refusal, tell } from "./mind.js";
+
+let crashed = () => {}; // set by index.js: what happens when a shot-down dragon hits the ground
+export const onCrash = (fn) => (crashed = fn);
 
 const STEP = 2; // the flight loop runs every 2 ticks
 const rides = new Map(); // owner id -> { stamina, airTicks, groundedUntil, breathAt, last, carry, bondCarry, warned, dirty }
@@ -68,12 +73,19 @@ export function takeOff(player, entity, rec) {
   if (!canHarness(player)) return say(player, `§7${rec.name} will not leave the ground for someone from outside the ${S.homeRegion}.`);
   if (now < ride.groundedUntil) return say(player, `§c${rec.name} is shaken and won't fly yet (${Math.ceil((ride.groundedUntil - now) / 20)}s).`);
   if (ride.stamina < flightTicks(rec) * S.takeoffAt) return say(player, `§c${rec.name} is spent. Let it rest.`);
+  if (now < (ride.balkUntil ?? 0)) return;
+  const no = player.id === rec.owner ? refusal(rec, "fly") : undefined;
+  if (no) {
+    ride.balkUntil = now + 100;
+    speak(entity, rec, "snarl", 0.5);
+    return tell(player, rec, no);
+  }
   setFlying(entity, rec, true);
   ride.airTicks = 0;
   ride.warned = false;
   try {
     entity.applyImpulse({ x: 0, y: 0.9, z: 0 });
-    entity.dimension.playSound("mob.enderdragon.flap", entity.location, { volume: 1.5, pitch: 0.8 });
+    noise(entity, "flap", 2, 0.9);
   } catch {
     // the lift and the sound are niceties
   }
@@ -96,7 +108,8 @@ export function breathe(player, entity, rec) {
   const ride = rideOf(rec);
   const level = rec.stats.breath;
   const now = system.currentTick;
-  if (!level) return say(player, `§7${rec.name} hasn't learned to breathe fire. Train Breath at your Roost.`);
+  if (!level) return say(player, `§7${rec.name} hasn't learned to use its breath. Train Breath at your Roost.`);
+  const kind = speciesOf(rec).breath;
   if (now < ride.breathAt) return say(player, `§7${rec.name} is drawing breath (${Math.ceil((ride.breathAt - now) / 20)}s).`);
   ride.breathAt = now + S.breathCooldownTicks;
   ride.stamina = Math.max(0, ride.stamina - S.breathStaminaTicks);
@@ -106,9 +119,10 @@ export function breathe(player, entity, rec) {
   try {
     entity.setProperty("siege:breath", true);
     system.runTimeout(() => valid(entity) && entity.setProperty("siege:breath", false), 20);
-    dim.playSound("mob.blaze.shoot", from, { volume: 2, pitch: 0.6 });
+    noise(entity, "fire", 2.5, kind === "fire" ? 1 : kind === "sand" ? 0.7 : 1.4);
+    const puff = { fire: "minecraft:mobflame_single", ash: "minecraft:basic_smoke_particle", sand: "minecraft:falling_dust_sand_particle", glass: "minecraft:endrod" }[kind];
     for (let d = 2; d <= S.breathRange; d += 1.5) {
-      dim.spawnParticle("minecraft:mobflame_single", { x: from.x + view.x * d, y: from.y + view.y * d, z: from.z + view.z * d });
+      dim.spawnParticle(puff, { x: from.x + view.x * d, y: from.y + view.y * d, z: from.z + view.z * d });
     }
   } catch {
     // looks only
@@ -119,8 +133,11 @@ export function breathe(player, entity, rec) {
     const dist = Math.hypot(to.x, to.y, to.z) || 1;
     if ((to.x * view.x + to.y * view.y + to.z * view.z) / dist < 0.8) continue; // outside the cone
     try {
-      target.applyDamage(S.breathDamage[level], { cause: EntityDamageCause.fire, damagingEntity: player });
-      target.setOnFire(4 + level * 2, true);
+      target.applyDamage(S.breathDamage[level] + speciesOf(rec).breathBonus, { cause: kind === "fire" ? EntityDamageCause.fire : EntityDamageCause.magic, damagingEntity: player });
+      if (kind === "fire") target.setOnFire(4 + level * 2, true);
+      else if (kind === "ash") target.addEffect("blindness", 60 + level * 40), target.addEffect("slowness", 60 + level * 40, { amplifier: 1 });
+      else if (kind === "sand") target.applyKnockback({ x: view.x * (2 + level), z: view.z * (2 + level) }, 0.5);
+      else target.addEffect("weakness", 100 + level * 60, { amplifier: 1 }), target.addEffect("slowness", 100 + level * 60, { amplifier: 2 });
       burned++;
     } catch {
       // target gone
@@ -148,15 +165,21 @@ export function flightTick() {
   }
   for (const entity of dragons) {
     const rec = dragonOf(ownerIdOf(entity));
-    if (!rec || rec.status !== "out") continue;
+    if (!rec || rec.status !== "out" || rec.down) continue;
     seen.add(rec.owner);
     const ride = rideOf(rec);
     const max = flightTicks(rec);
     const flying = isFlying(entity);
     const pilot = pilotOf(entity);
 
+    if (ride.crash && !flying && nearGround(entity)) {
+      ride.crash = false;
+      crashed(rec, entity);
+      continue;
+    }
     if (flying) {
       ride.airTicks += STEP;
+      if (ride.airTicks % 14 < STEP) noise(entity, "flap", 0.8, 1);
       ride.stamina -= STEP;
       const press = pilot && jumping(pilot);
       if (!pilot) {
@@ -171,7 +194,7 @@ export function flightTick() {
       else if (ride.stamina <= 0) {
         ride.stamina = 0;
         land(entity, rec, "spent");
-        pilot.playSound("mob.ravager.stun");
+        speak(entity, rec, "whimper");
         say(pilot, `§c${rec.name} is spent and glides down.`);
       } else if (ride.airTicks > 30 && !press && nearGround(entity)) land(entity, rec, "ground");
       else if (!ride.warned && ride.stamina < max * 0.25) {
@@ -233,7 +256,7 @@ export function defenceTick() {
   const now = system.currentTick;
   for (const entity of dragons) {
     const rec = dragonOf(ownerIdOf(entity));
-    if (!rec || !isFlying(entity)) continue;
+    if (!rec || rec.down || !isFlying(entity)) continue;
     const pilot = pilotOf(entity);
     if (!pilot) continue;
     const at = entity.location;
@@ -277,6 +300,13 @@ export function defenceTick() {
     if (ride.stamina <= 0) {
       ride.stamina = 0;
       land(entity, rec, "shot");
+      ride.crash = true; // it hits the ground unconscious
+      try {
+        entity.removeEffect("slow_falling");
+        entity.addEffect("slow_falling", 400, { amplifier: 0, showParticles: false });
+      } catch {
+        // falls as it falls
+      }
       pilot.onScreenDisplay.setTitle("§cShot down", { subtitle: `§7${rec.name} is falling`, fadeInDuration: 5, stayDuration: 50, fadeOutDuration: 15 });
     }
   }

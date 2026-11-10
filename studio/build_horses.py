@@ -220,7 +220,7 @@ write(RP + "render_controllers/siege_steed.render_controllers.json", {
             "b": f"variable.armor_texture_slot ? query.armor_color_slot(4, 2) : ({CAP} ? query.property('siege:cap_b') : this)",
             "a": f"variable.armor_texture_slot ? query.armor_color_slot(4, 3) : this",
         },
-        # The Hollow Steed: a pale, ghostly wash until it gets its own texture
+        # The Glimstrider: a pale, ghostly wash until it gets its own texture
         "overlay_color": {"r": "0.72", "g": "0.95", "b": "1.0", "a": "query.property('siege:special') == 2 ? 0.55 : 0.0"},
     }},
 })

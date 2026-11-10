@@ -35,7 +35,7 @@ on("showcase", ({ player, dim, nextSpot, label }) => {
   show(make("mirepony", "Whisper", {
     level: 20, tp: 3, stats: { speed: 4, jump: 5, health: 4, stamina: 5 }, special: "hollow", shoes: "diamond", saddle: "cavalry",
     perks: ["second_wind", "fearless", "skyleap", "loyal"],
-  }), "Hollow Steed\nWhistle while\nriding: Step");
+  }), "Glimstrider\nWhistle while\nriding: Veilstep");
   const born = breedFoal(byBreed.courser, byBreed.destrier);
   show(Object.assign(make("common", "Sprout"), born, { foal: true, grownAt: Number.MAX_SAFE_INTEGER / 2 }),
     "Crossbred foal\nCourser x\nDestrier");
@@ -49,5 +49,5 @@ on("showcase", ({ player, dim, nextSpot, label }) => {
     console.warn(`[Hollow Crown] showcase breeder post: ${e}`);
   }
   meta.save();
-  player.sendMessage("§6Horses: 8 steeds behind you are yours (5 breeds, a Warhorse, a Hollow Steed, a foal). Use the Riding Crop from the item chests to gallop, and click the Stables block to train them.");
+  player.sendMessage("§6Horses: 8 steeds behind you are yours (5 breeds, a Warhorse, a Glimstrider, a foal). Use the Riding Crop from the item chests to gallop, and click the Stables block to train them.");
 });

@@ -1,0 +1,32 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:gloamwing",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/gloamwing"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.gloamwing"
+   },
+   "animations": {
+    "main": "animation.siege_b.gloamwing"
+   },
+   "scripts": {
+    "animate": [
+     "main"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ],
+   "spawn_egg": {
+    "base_color": "#34224e",
+    "overlay_color": "#d650be"
+   }
+  }
+ }
+}

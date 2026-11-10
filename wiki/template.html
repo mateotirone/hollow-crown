@@ -1,0 +1,210 @@
+<title>Hollow Crown Wiki</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: an archive ledger. Sticky header with search, a contents rail on the left, one article or the index on the right. */
+:root {
+  --bg: #f2f1f6; --surface: #ffffff; --ink: #1d1a26; --muted: #5f5a70; --line: #d8d4e3;
+  --vein: #9a1f86; --brass: #7d5a0c; --veil: #efe5f2; --plate: #e7e4ef;
+  --display: "IM Fell English", "Iowan Old Style", Georgia, serif;
+  --body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #14111b; --surface: #1d1928; --ink: #ece8f4; --muted: #a8a2ba; --line: #332d44;
+  --vein: #ec7ad8; --brass: #dab660; --veil: #2a1f33; --plate: #262133; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #14111b; --surface: #1d1928; --ink: #ece8f4; --muted: #a8a2ba; --line: #332d44;
+  --vein: #ec7ad8; --brass: #dab660; --veil: #2a1f33; --plate: #262133; color-scheme: dark }
+
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--ink); font: 16px/1.55 var(--body); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface) }
+a { color: var(--vein); text-underline-offset: 2px }
+button, input { font: inherit; color: inherit }
+:focus-visible { outline: 2px solid var(--vein); outline-offset: 2px }
+
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 9; background: var(--surface); border-bottom: 1px solid var(--line) }
+.bar-in, .wrap { max-width: 1180px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
+.bar-in { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; padding-block: 10px }
+.brand { font: 1.45rem/1.1 var(--display); color: var(--ink); text-decoration: none; margin-right: auto; white-space: nowrap }
+.brand i { color: var(--vein) }
+#q { flex: 1 1 200px; min-width: 0; max-width: 340px; padding: 7px 12px; border: 1px solid var(--line); border-radius: 4px; background: var(--bg) }
+.toggle { display: flex; align-items: center; gap: 8px; font-size: .9rem; color: var(--muted); cursor: pointer; user-select: none }
+.toggle input { width: 16px; height: 16px; accent-color: var(--vein) }
+
+.wrap { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 36px; padding-block: 24px 64px }
+nav.rail { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 72px); align-self: start; max-height: calc(100vh - 96px); overflow: auto; font-size: .92rem }
+.rail h2 { font: 600 .72rem var(--body); letter-spacing: .09em; text-transform: uppercase; color: var(--brass); margin: 16px 0 4px }
+.rail h2:first-child { margin-top: 0 }
+.rail a { display: block; padding: 2px 0 2px 10px; border-left: 2px solid var(--line); color: var(--ink); text-decoration: none }
+.rail a:hover { border-color: var(--vein) }
+.rail a[aria-current] { border-color: var(--vein); color: var(--vein); font-weight: 600 }
+main { min-width: 0 }
+
+h1 { font: 2.3rem/1.1 var(--display); margin: 0 0 6px; text-wrap: balance }
+h2.sec { font: 1.55rem/1.2 var(--display); margin: 40px 0 4px; text-wrap: balance }
+h3 { font: 600 .74rem var(--body); letter-spacing: .09em; text-transform: uppercase; color: var(--brass); margin: 26px 0 4px }
+p { margin: 0 0 10px; max-width: 68ch }
+.lede { font: italic 1.2rem/1.4 var(--display); color: var(--muted); max-width: 60ch }
+.note { font-size: .9rem; color: var(--muted); border-left: 2px solid var(--brass); padding: 2px 0 2px 12px; margin: 14px 0; max-width: 68ch }
+ul.does { margin: 0; padding-left: 18px; max-width: 68ch }
+ul.does li { margin-bottom: 4px }
+
+details.spoiler { background: var(--veil); border-left: 3px solid var(--vein); padding: 8px 14px; margin: 12px 0; max-width: 72ch }
+details.spoiler summary { cursor: pointer; font-weight: 600; color: var(--vein); font-size: .9rem }
+details.spoiler p { margin: 8px 0 2px }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: 12px; margin-top: 14px }
+.card { display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 10px; text-decoration: none; color: var(--ink); min-width: 0 }
+.card:hover { border-color: var(--vein) }
+.grid.guides { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)) }
+.card.wide { gap: 4px; padding: 12px 14px }
+.card.wide span { font-size: .88rem }
+details.spoiler ul { margin-top: 8px }
+.card .pic { aspect-ratio: 1; display: grid; place-items: center; background: var(--plate); border-radius: 2px; margin-bottom: 8px; overflow: hidden }
+.card img { width: 100%; height: 100%; object-fit: contain; image-rendering: auto }
+.card .glyph, .info .glyph { font: 3rem var(--display); color: var(--muted) }
+.card b { font-weight: 600; line-height: 1.25 }
+.card span { font-size: .8rem; color: var(--muted) }
+.tag { display: inline-block; font: 600 .68rem var(--body); letter-spacing: .06em; text-transform: uppercase; padding: 1px 6px; border-radius: 2px; border: 1px solid currentColor; color: var(--vein); margin-top: 4px; align-self: flex-start }
+.tag.brass { color: var(--brass) }
+
+.article { display: grid; grid-template-columns: minmax(0, 1fr) 250px; gap: 32px; align-items: start }
+.info { background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 12px; font-size: .9rem }
+.info .pic { aspect-ratio: 1; display: grid; place-items: center; background: var(--plate); border-radius: 2px; margin-bottom: 10px }
+.info img { width: 100%; height: 100%; object-fit: contain }
+.info dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 0 }
+.info dt { color: var(--muted) }
+.info dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; overflow-wrap: anywhere }
+.info code { font: .78rem var(--mono) }
+.crumb { font-size: .88rem; color: var(--muted); margin-bottom: 10px }
+.pager { display: flex; justify-content: space-between; gap: 16px; margin-top: 40px; padding-top: 14px; border-top: 1px solid var(--line); font-size: .95rem }
+.empty { color: var(--muted); padding: 30px 0 }
+
+@media (max-width: 860px) {
+  .wrap { grid-template-columns: minmax(0, 1fr); gap: 16px }
+  nav.rail { position: static; max-height: none; display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px }
+  .rail h2 { display: none }
+  .rail a { white-space: nowrap; border: 1px solid var(--line); border-radius: 3px; padding: 3px 9px; background: var(--surface) }
+  .rail a.leaf { display: none }
+  .article { grid-template-columns: minmax(0, 1fr) }
+  .info { order: -1; display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 12px; align-items: center }
+  .info .pic { margin: 0 }
+  h1 { font-size: 1.9rem }
+}
+</style>
+
+<header class="bar"><div class="bar-in">
+  <a class="brand" href="#home">The <i>Hollow Crown</i> Wiki</a>
+  <input id="q" type="search" placeholder="Search the wiki" aria-label="Search the wiki">
+  <label class="toggle" id="spoilwrap"><input type="checkbox" id="spoil"> Show spoilers</label>
+</div></header>
+<div class="wrap">
+  <nav class="rail" id="rail" aria-label="Contents"></nav>
+  <main id="main"></main>
+</div>
+
+<script>
+const D = /*DATA*/null;
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const byKey = Object.fromEntries(D.entries.map((e) => [e.key, e]));
+const groupOf = Object.fromEntries(D.groups.map((g) => [g.id, g]));
+let spoil = false;
+try { spoil = localStorage.getItem("hc-wiki-spoil") === "1"; } catch {}
+if (D.players) $("#spoilwrap").hidden = true;
+$("#spoil").checked = spoil;
+
+const pic = (e) => e.img ? `<img src="${D.img[e.img]}" alt="${esc(e.name)}" loading="lazy">` : `<span class="glyph" aria-hidden="true">${esc(e.name.replace(/^The /, "")[0])}</span>`;
+const spoiler = (label, text) => text ? `<details class="spoiler"${spoil ? " open" : ""}><summary>Spoiler: ${esc(label)}</summary><p>${esc(text)}</p></details>` : "";
+const hearts = (hp) => `${hp} (${hp / 2} hearts)`;
+
+function card(e) {
+  if (e.sections) return `<a class="card wide" href="#${e.key}"><b>${esc(e.name)}</b><span>${esc(e.line)}</span>${e.hide ? '<span class="tag">Spoiler page</span>' : ""}</a>`;
+  return `<a class="card" href="#${e.key}"><div class="pic">${pic(e)}</div><b>${esc(e.name)}</b><span>${esc(e.region || (e.hp ? e.hp + " health" : ""))}</span>${e.hide ? '<span class="tag">Spoiler page</span>' : ""}</a>`;
+}
+
+function home(filter) {
+  const f = (filter || "").trim().toLowerCase();
+  const hit = (e) => !f || [e.name, e.line, e.region, e.purpose, e.origin, e.where, e.drops, (e.does || []).join(" "), (e.sections || []).filter((x) => spoil || !x.s).map((x) => x.h + " " + [].concat(x.p).join(" ")).join(" ")].join(" ").toLowerCase().includes(f);
+  let out = "";
+  if (!f) {
+    out += `<h1>The Hollow Crown Wiki</h1><p class="lede">The land of Aldmere, how it plays, and every creature in it: what each is for, where it comes from, where you meet it, what it does and what it leaves behind.</p>`;
+    out += `<p class="note">${D.players ? "" : "This is the full version, for the builder. Anything a player should discover in the story sits behind a spoiler bar, and whole pages that are secrets are tagged. "}Behaviour is described as it is built in the add-on. None of it has been tested in a real game yet, and numbers will change with playtesting.</p>`;
+    for (const w of D.world) out += `<h3>${esc(w.title)}</h3>${w.text ? `<p>${esc(w.text)}</p>` : ""}${spoiler(w.title.toLowerCase(), w.secret)}`;
+  } else out += `<h1>Search</h1>`;
+  let n = 0;
+  for (const g of D.groups) {
+    const list = D.entries.filter((e) => e.group === g.id && hit(e));
+    if (!list.length) continue;
+    n += list.length;
+    out += `<h2 class="sec" id="g-${g.id}">${esc(g.name)}</h2>`;
+    if (!f) out += `<p>${esc(g.about)}</p>${spoiler("where they come from", g.secret)}`;
+    out += `<div class="grid${list[0].sections ? " guides" : ""}">${list.map(card).join("")}</div>`;
+  }
+  if (!n) out += `<p class="empty">Nothing matches "${esc(filter)}".</p>`;
+  $("#main").innerHTML = out;
+}
+
+const block = (p) => Array.isArray(p) ? `<ul class="does">${p.map((d) => `<li>${esc(d)}</li>`).join("")}</ul>` : `<p>${esc(p)}</p>`;
+function guide(e, g, pager) {
+  $("#main").innerHTML = `
+    <div class="crumb"><a href="#home">Wiki</a> / <a href="#g-${g.id}">${esc(g.name)}</a></div>
+    <h1>${esc(e.name)}</h1><p class="lede">${esc(e.line)}</p>
+    ${e.hide ? '<span class="tag">Spoiler page: players should not see this before the story shows it</span>' : ""}
+    ${e.sections.map((x) => x.s ? `<details class="spoiler"${spoil ? " open" : ""}><summary>Spoiler: ${esc(x.h)}</summary>${block(x.p)}</details>` : `<h3>${esc(x.h)}</h3>${block(x.p)}`).join("")}
+    ${pager}`;
+}
+function article(e) {
+  const g = groupOf[e.group], sibs = D.entries.filter((x) => x.group === e.group), i = sibs.indexOf(e);
+  const pager = `<div class="pager"><span>${i > 0 ? `<a href="#${sibs[i - 1].key}">&larr; ${esc(sibs[i - 1].name)}</a>` : ""}</span><span>${i < sibs.length - 1 ? `<a href="#${sibs[i + 1].key}">${esc(sibs[i + 1].name)} &rarr;</a>` : ""}</span></div>`;
+  if (e.sections) return guide(e, g, pager);
+  const rows = [["Kind", g.name]];
+  if (e.region) rows.push(["Found in", e.region]);
+  if (e.hp) rows.push(["Health", hearts(e.hp)]);
+  if (e.dmg) rows.push(["Attack", e.dmg]);
+  if (e.gid) rows.push(["Game id", `<code>${esc(e.gid)}</code>`]);
+  const sec = (h, body) => body ? `<h3>${h}</h3>${body}` : "";
+  $("#main").innerHTML = `
+    <div class="crumb"><a href="#home">Wiki</a> / <a href="#g-${g.id}">${esc(g.name)}</a></div>
+    <div class="article"><div>
+      <h1>${esc(e.name)}</h1><p class="lede">${esc(e.line)}</p>
+      ${e.hide ? '<span class="tag">Spoiler page: players should not see this before the story shows it</span>' : ""}
+      ${sec("What it is for", `<p>${esc(e.purpose)}</p>`)}
+      ${sec("Where it comes from", `<p>${esc(e.origin)}</p>${spoiler("the truth behind it", e.secret)}${e.prop ? '<span class="tag brass">Part of this origin is the wiki\'s proposal, not yet canon</span>' : ""}`)}
+      ${sec("Where it appears", `<p>${esc(e.where)}</p>`)}
+      ${sec("What it does", `<ul class="does">${(e.does || []).map((d) => `<li>${esc(d)}</li>`).join("")}</ul>`)}
+      ${sec("What it leaves", `<p>${esc(e.drops)}</p>`)}
+      ${sec("How to deal with it", `<p>${esc(e.tip)}</p>`)}
+    </div>
+    <aside class="info"><div class="pic">${pic(e)}</div><dl>${rows.map(([k, v]) => `<dt>${k}</dt><dd>${k === "Game id" ? v : esc(v)}</dd>`).join("")}</dl></aside></div>
+    <div class="pager"><span>${i > 0 ? `<a href="#${sibs[i - 1].key}">&larr; ${esc(sibs[i - 1].name)}</a>` : ""}</span><span>${i < sibs.length - 1 ? `<a href="#${sibs[i + 1].key}">${esc(sibs[i + 1].name)} &rarr;</a>` : ""}</span></div>`;
+}
+
+function rail(current) {
+  $("#rail").innerHTML = D.groups.map((g) => `<h2>${esc(g.name)}</h2><a href="#g-${g.id}">${esc(g.name)}</a>` +
+    D.entries.filter((e) => e.group === g.id).map((e) => `<a class="leaf" href="#${e.key}"${e.key === current ? ' aria-current="page"' : ""}>${esc(e.name)}</a>`).join("")).join("");
+  for (const a of document.querySelectorAll('#rail a[href^="#g-"]')) a.classList.add("grouplink");
+}
+
+function route() {
+  const h = decodeURIComponent(location.hash.slice(1));
+  const e = byKey[h];
+  rail(e ? h : "");
+  if (e) { $("#q").value = ""; article(e); window.scrollTo(0, 0); return; }
+  home($("#q").value);
+  if (h.startsWith("g-")) document.getElementById(h)?.scrollIntoView(); else window.scrollTo(0, 0);
+}
+addEventListener("hashchange", route);
+$("#q").addEventListener("input", () => { if (byKey[location.hash.slice(1)]) location.hash = "home"; else home($("#q").value); });
+$("#spoil").addEventListener("change", (ev) => {
+  spoil = ev.target.checked;
+  try { localStorage.setItem("hc-wiki-spoil", spoil ? "1" : "0"); } catch {}
+  for (const d of document.querySelectorAll("details.spoiler")) d.open = spoil;
+});
+route();
+</script>
+<style>
+@media (min-width: 861px) { .rail a.grouplink { display: none } }
+</style>

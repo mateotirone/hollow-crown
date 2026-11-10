@@ -131,25 +131,38 @@ CRACKS = {1: [[(2, 0), (3, 2), (5, 3), (4, 6), (6, 8)], [(13, 15), (12, 13), (12
           2: [[(6, 8), (8, 7), (10, 9), (12, 9), (15, 8)], [(0, 11), (2, 12), (3, 14), (5, 15)], [(9, 0), (8, 2), (10, 4)]]}
 CHIPS = [(0, 0), (1, 0), (0, 1), (15, 15), (14, 15), (15, 14), (11, 3), (4, 10)]
 
+CHUNKS = [[(10, 12), (11, 12), (10, 13), (11, 13), (12, 13)], [(3, 6), (4, 6), (3, 7)], [(13, 4), (14, 4), (14, 5)]]
+
 def damage(img, level, crack=(24, 20, 26)):
-    """Return a copy of a 16x16 block texture at damage stage 0, 1 or 2."""
+    """Return a copy of a 16x16 block texture at damage stage 0, 1 or 2.
+    Stage 1: dark splits you can read from across a courtyard. Stage 2: more splits, broken corners and missing chunks."""
     im = img.copy(); px = im.load()
     if not level: return im
+    crack = brighten(crack, 0.6)
     paths = CRACKS[1] + (CRACKS[2] if level >= 2 else [])
     cr = set()
     for path in paths:
-        for a, b in zip(path, path[1:]): cr.update(p for p in line(a, b) if 0 <= p[0] < 16 and 0 <= p[1] < 16)
+        pts = [p for a, b in zip(path, path[1:]) for p in line(a, b)]
+        for i, (x, y) in enumerate(pts):
+            cr.add((x, y))
+            if i % 3 == 1 or level >= 2 and i % 2 == 0: cr.add((x + 1, y))      # the split widens along its length
+    cr = {p for p in cr if 0 <= p[0] < 16 and 0 <= p[1] < 16}
     for (x, y) in cr:
-        if px[x, y][3] == 0: continue
-        px[x, y] = crack + (255,)
-    for (x, y) in cr:   # lit lower-right lip and a soft shadow on the upper-left: reads as a split, not a drawn line
-        for (dx, dy, k) in ((1, 1, 1.12), (-1, -1, 0.82)):
+        if px[x, y][3]: px[x, y] = crack + (255,)
+    for (x, y) in cr:   # lit lower-right lip and a shadow on the upper-left: reads as a split, not a drawn line
+        for (dx, dy, k) in ((1, 1, 1.18), (-1, -1, 0.72)):
             q = (x + dx, y + dy)
             if 0 <= q[0] < 16 and 0 <= q[1] < 16 and q not in cr and px[q][3]:
                 px[q] = brighten(px[q], k) + (px[q][3],)
     if level >= 2:
         for (x, y) in CHIPS:
-            if px[x, y][3]: px[x, y] = brighten(px[x, y], 0.55) + (px[x, y][3],)
+            if px[x, y][3]: px[x, y] = brighten(px[x, y], 0.45) + (px[x, y][3],)
+        for chunk in CHUNKS:                                                     # pieces knocked out of the face
+            for (x, y) in chunk:
+                if px[x, y][3] and (x, y) not in cr: px[x, y] = brighten(px[x, y], 0.5) + (px[x, y][3],)
+            for (x, y) in chunk:
+                q = (x, y + 1)
+                if q[1] < 16 and q not in chunk and q not in cr and px[q][3]: px[q] = brighten(px[q], 1.15) + (px[q][3],)
     return im
 
 def damage_set(img, crack=(24, 20, 26)):

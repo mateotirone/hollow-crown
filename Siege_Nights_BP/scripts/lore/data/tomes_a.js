@@ -16,7 +16,7 @@ export const TOMES_A = [
     hint: "A chronicler's first volume. Village chapels in the Vale keep such things.",
     pages: [
       "In the four hundred and ninth year of Aldmere, in the month of Thaw, Oswin son of Aldric was crowned in the Hall of Bells at Crownhold, being nineteen years of age. I, Bertram Quill, set this down with my own hand, as my father set down the crowning of Aldric before him.",
-      "The crown was set upon his head by the eldest of the bell-wardens. It is the Bell Crown, cast in the first days from the same bronze as the Founding Bell of Queen Maelis, who raised Aldmere out of the marsh that the old people called Hollowmere, and rang the land quiet. Every king of Aldmere has worn it. It is said to be warm to the touch, though I have never touched it.",
+      "The crown was set upon his head by the eldest of the bell-wardens. It is the Bell Crown, cast in the first days from the same bronze as the Founding Bell of Queen Maelis, who raised Aldmere out of the marsh that the old people called Hallowmere, and rang the land quiet. Every king of Aldmere has worn it. It is said to be warm to the touch, though I have never touched it.",
       "The King was tall and grey-eyed and favored his right hand in all things, and laughed easily, and was loved. Let it be written that on the day of his crowning every bell in Crownhold rang, and not one of them rang out of tune.",
     ],
     clues: ["missing_king_exists", "hollowmere_old_name"],
@@ -64,12 +64,12 @@ export const TOMES_A = [
   {
     id: "chron_05", col: "chronicles", n: 5,
     title: "The Fall of Frostmarch", author: "Master Bertram Quill",
-    where: "Hollowfast, the longhouse, under the high seat.",
+    where: "Rimehold, the longhouse, under the high seat.",
     hint: "The north fell first. Its longhouses remember.",
     pages: [
-      "In the fifth year Frostmarch fell. Hollowfast held for forty nights under Sir Gerrit, whom men called the Pale for his white hair and whiter temper.",
+      "In the fifth year Frostmarch fell. Rimehold held for forty nights under Sir Gerrit, whom men called the Pale for his white hair and whiter temper.",
       "The Host attacked on every third night and never between. Sir Gerrit said their war-priests knelt in the snow on the nights between with their ears to the ice, as if listening for a bell beneath it, and rose only when they heard it.",
-      "When Hollowfast was lost, Gerrit led its people out across the frozen lake by night. The Chronicle does not know what became of them.",
+      "When Rimehold was lost, Gerrit led its people out across the frozen lake by night. The Chronicle does not know what became of them.",
     ],
     clues: ["toll_every_third"],
     leads: ["hollowfast", "frozen_lake"],
@@ -273,7 +273,7 @@ export const TOMES_A = [
   },
   {
     id: "seal_09", col: "sealed", n: 9,
-    title: "Concerning the Third Night", author: "Grandmaster Hesper of the Ashen Gate",
+    title: "Concerning the Third Night", author: "Grandmaster Halbrand of the Ashen Gate",
     where: "Ashen Gate chapterhouse, the Grandmaster's study, in the desk.",
     hint: "The Order knows why the sieges come. Their Grandmaster wrote it down.",
     pages: [

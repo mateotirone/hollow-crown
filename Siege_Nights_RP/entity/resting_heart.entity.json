@@ -1,0 +1,20 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "siege:resting_heart",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "default": "textures/entity/siege_resting_heart"
+      },
+      "geometry": {
+        "default": "geometry.siege_resting_heart"
+      },
+      "render_controllers": [
+        "controller.render.default"
+      ]
+    }
+  }
+}

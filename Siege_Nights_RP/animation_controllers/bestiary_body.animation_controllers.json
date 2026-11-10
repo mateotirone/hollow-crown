@@ -1,0 +1,26 @@
+{
+ "format_version": "1.10.0",
+ "animation_controllers": {
+  "controller.animation.siege_b.body": {
+   "initial_state": "lying",
+   "states": {
+    "lying": {
+     "animations": [
+      "fall"
+     ],
+     "transitions": [
+      {
+       "fading": "query.property('siege:fading')"
+      }
+     ]
+    },
+    "fading": {
+     "animations": [
+      "down",
+      "sink"
+     ]
+    }
+   }
+  }
+ }
+}

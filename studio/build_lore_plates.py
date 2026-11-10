@@ -14,7 +14,7 @@ os.makedirs(OUT, exist_ok=True)
 W, H = 2200, 1600          # painted at double size, saved at half
 
 PLATES = [
-    ("Hollowmere, before", "The mere and the old town in summer, before the two worlds met. The only picture known of the land under its first name. Oil on oak. Painter unknown."),
+    ("Hallowmere, before", "The mere and the old town in summer, before the two worlds met. The only picture known of the land under its first name. Oil on oak. Painter unknown."),
     ("The Convergence", "The night the other shore arrived. The sun has been painted out by a later hand. There are two moons. Nobody has been able to say which one was added."),
     ("The Truce of the Third Night", "One of ours and five of theirs at a table of wet stone. The man holding the lamp is thought to be the mage Corvin Hale. Cut from its frame and hidden in a bell."),
     ("The King Is Put Down", "Painted from the wall of Crownhold, by someone who was there. The Order's inventory lists it as \"a hunting scene, burned\"."),
@@ -62,7 +62,8 @@ class Painting:
         return np.asarray(m, dtype=np.float32)[..., None] / 255
 
     def paint(self, m, color, alpha=1.0, mottle=10):
-        col = np.array(color, np.float32) + cloud(self.rng, 36)[..., None] * mottle
+        if not hasattr(self, "mot"): self.mot = cloud(self.rng, 36)[..., None]
+        col = np.array(color, np.float32) + (np.roll(self.mot, int(self.rng.integers(0, W)), 1) * mottle if mottle else 0)
         self.a = self.a * (1 - m * alpha) + col * m * alpha
 
     def poly(self, pts, color, alpha=1.0, blur=2, mottle=10):
@@ -116,11 +117,11 @@ class Painting:
                 yy = base - h * i / 4.2
                 self.ellipse(x - w * 0.12 + lean * (base - yy), yy, w * 0.07, w * 0.14, windows, blur=1, mottle=0)
 
-    def figure(self, x, feet, h, color, crown=None, arm=None, lean=0.0):
-        hw = h * 0.16
+    def figure(self, x, feet, h, color, crown=None, arm=None, lean=0.0, thin=1.0):
+        hw = h * 0.105 * thin
         head_y = feet - h * 0.9
         self.poly([(x - hw * 1.25, feet), (x + hw * 1.25, feet), (x + hw * 0.7 + lean * h, feet - h * 0.78), (x - hw * 0.7 + lean * h, feet - h * 0.78)], color, blur=1.5, mottle=6)
-        self.ellipse(x + lean * h, head_y, h * 0.075 * H / W * 1.35, h * 0.085, [min(255, c * 1.15 + 14) for c in color], blur=1.2)
+        self.ellipse(x + lean * h, head_y, h * 0.062, h * 0.085, [min(255, c * 1.15 + 14) for c in color], blur=1.2)
         if arm:
             self.line([(x + lean * h, feet - h * 0.68), (x + arm[0] * h, feet - h * 0.68 + arm[1] * h)], color, width=max(3, int(h * H * 0.07)))
         if crown:
@@ -146,7 +147,7 @@ class Painting:
 
     def finish(self, path, darkness=0.9, warmth=(1.0, 0.92, 0.70)):
         rng = self.rng
-        im = Image.fromarray(np.clip(self.a, 0, 255).astype(np.uint8)).filter(ImageFilter.MedianFilter(9))
+        im = Image.fromarray(np.clip(self.a, 0, 255).astype(np.uint8)).filter(ImageFilter.MedianFilter(7))
         a = np.asarray(im, dtype=np.float32)
         strokes = np.asarray(Image.fromarray((rng.random((H // 3, W // 40)) * 255).astype(np.uint8)).resize((W, H), Image.BICUBIC), dtype=np.float32) / 255 - 0.5
         dabs = cloud(rng, 10) * 0.9 + cloud(rng, 26) * 0.6
@@ -155,7 +156,7 @@ class Painting:
         a *= (1 + weave)[..., None]
         # cracked varnish: fine dark lines where two noise fields cross zero
         cr = np.zeros((H, W), np.float32)
-        for scale, width, weight in ((34, 0.020, 0.6), (70, 0.012, 0.55), (150, 0.007, 0.5)):
+        for scale, width, weight in ((46, 0.010, 0.4), (90, 0.009, 0.5), (190, 0.006, 0.5)):
             n = cloud(rng, scale)
             cr = np.maximum(cr, np.exp(-(n / width) ** 2) * weight)
         cr *= np.clip(0.55 + cloud(rng, 300) * 2.2, 0, 1)
@@ -185,7 +186,7 @@ def reeds(p, y, color, n=120, seed=5):
         x = r.uniform(0, 1); h = r.uniform(0.03, 0.09); yb = y + r.uniform(0, 0.12)
         p.line([(x, yb), (x + r.uniform(-0.012, 0.012), yb - h)], [c * r.uniform(0.6, 1.2) for c in color], width=int(r.uniform(3, 7)))
 
-# ------------------------------------------------------------------ 1. Hollowmere, before
+# ------------------------------------------------------------------ 1. Hallowmere, before
 def plate_1(p):
     p.sky((112, 150, 178), (246, 214, 150), 0.52)
     p.glow(0.66, 0.40, 0.16, (110, 86, 30), 1.0); p.ellipse(0.66, 0.41, 0.022, 0.03, (255, 244, 200), blur=5, mottle=0)
@@ -238,8 +239,7 @@ def plate_3(p):
     p.figure(0.17, 0.84, 0.3, (64, 44, 34), arm=(0.2, -0.26)); p.ellipse(0.232, 0.5, 0.012, 0.02, (255, 214, 120), blur=3, mottle=0)                 # Corvin and the lamp
     p.figure(0.3, 0.86, 0.36, (126, 40, 34), crown=(226, 184, 80), arm=(0.22, 0.0))                # the king
     for i, x in enumerate((0.60, 0.67, 0.74, 0.81, 0.88)):                                        # five of theirs: tall, thin, pale
-        p.figure(x, 0.86 - (i % 2) * 0.015, 0.47 + (i % 3) * 0.03, (128, 140, 138), lean=0.0)
-        p.ellipse(x, 0.86 - (i % 2) * 0.015 - (0.47 + (i % 3) * 0.03) * 0.9, 0.012, 0.022, (196, 208, 200), blur=2, mottle=0)
+        p.figure(x, 0.86 - (i % 2) * 0.015, 0.5 + (i % 3) * 0.035, (118 + i * 5, 132 + i * 4, 130 + i * 4), thin=0.42)
     p.fog(0.7, 0.95, (70, 84, 84), 0.4)
 
 # ------------------------------------------------------------------ 4. The King Is Put Down
@@ -276,7 +276,7 @@ def plate_5(p):
     r = np.random.default_rng(8)
     for i in range(34): p.figure(r.uniform(0.02, 0.46), 0.82 + r.uniform(-0.06, 0.16), 0.11 + r.uniform(0, 0.05), (r.uniform(50, 80), r.uniform(30, 44), 30))
     p.torches([(r.uniform(0.03, 0.45), r.uniform(0.66, 0.8)) for _ in range(14)], 0.006)
-    for i in range(30): p.figure(r.uniform(0.56, 0.99), 0.84 + r.uniform(-0.06, 0.15), 0.17 + r.uniform(0, 0.08), [r.uniform(110, 150)] * 3, lean=r.uniform(0.05, 0.3))
+    for i in range(30): p.figure(r.uniform(0.56, 0.99), 0.84 + r.uniform(-0.06, 0.15), 0.17 + r.uniform(0, 0.08), [r.uniform(110, 150)] * 3, lean=r.uniform(0.05, 0.3), thin=0.55)
     p.fog(0.62, 0.9, (130, 146, 142), 0.5)
     for x in (0.1, 0.2, 0.31): p.line([(x, 0.78), (x, 0.58)], (30, 26, 24), width=5); 
     for x in (0.1, 0.2, 0.31): p.poly([(x, 0.58), (x + 0.045, 0.595), (x, 0.625)], (150, 50, 40), blur=1.5)

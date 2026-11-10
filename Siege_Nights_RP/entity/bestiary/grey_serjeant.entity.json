@@ -1,0 +1,32 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:grey_serjeant",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/grey_serjeant"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.grey_serjeant"
+   },
+   "animations": {
+    "main": "animation.siege_b.grey_serjeant"
+   },
+   "scripts": {
+    "animate": [
+     "main"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ],
+   "spawn_egg": {
+    "base_color": "#606c74",
+    "overlay_color": "#787054"
+   }
+  }
+ }
+}

@@ -17,7 +17,7 @@ export { isNight, startSiege, endSiege, spawnRaider, raidersLeft, nextSiegeDay }
 export { FACTIONS, MODIFIERS, planSiege } from "./warplan.js";
 
 // ----- walls -----
-export { hitWall, blastDamage, wallHp, armorOf, lightCharge, offlineSafe } from "./walls.js";
+export { hitWall, blastDamage, wallHp, armorOf, lightCharge, offlineSafe, damageMap, saveDamage, blockKey, WALL_HP } from "./walls.js";
 
 // ----- guards -----
 export { guardTag, guardOwner, guardCount, guardLimit, isGuard, markWanted, GUARD_ARMOR, armorTier, equipGuard } from "./guards.js";

@@ -7,7 +7,11 @@
    "is_summonable": true,
    "is_experimental": false
   },
-  "component_groups": {},
+  "component_groups": {
+   "siege:bare": {
+    "minecraft:is_charged": {}
+   }
+  },
   "components": {
    "minecraft:type_family": {
     "family": [
@@ -18,8 +22,8 @@
     ]
    },
    "minecraft:health": {
-    "value": 500,
-    "max": 500
+    "value": 1000,
+    "max": 1000
    },
    "minecraft:collision_box": {
     "width": 1.2,
@@ -158,6 +162,21 @@
    "minecraft:persistent": {},
    "minecraft:fire_immune": {}
   },
-  "events": {}
+  "events": {
+   "siege:bare_on": {
+    "add": {
+     "component_groups": [
+      "siege:bare"
+     ]
+    }
+   },
+   "siege:bare_off": {
+    "remove": {
+     "component_groups": [
+      "siege:bare"
+     ]
+    }
+   }
+  }
  }
 }

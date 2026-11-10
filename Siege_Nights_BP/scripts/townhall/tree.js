@@ -3,7 +3,7 @@
 import { world, GameMode, ItemStack } from "@minecraft/server";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
 import * as api from "../siege/api.js";
-import { SKILLS, SKILL, BRANCHES, RINGS, RANKS, ROLES, HALL_NAMES, LEVEL_UNLOCKS, canBranch, blockedReason, spentIn, rankOf, levelFromRenown, levelTitle } from "./skills.js";
+import { SKILLS, SKILL, BRANCHES, RINGS, RANKS, ROLES, HALL_NAMES, LEVEL_UNLOCKS, canBranch, blockedReason, spentIn, rankOf, levelFromRenown, levelTitle, POWER_ORIGINS } from "./skills.js";
 import { heroOf, saveHero, setPath, grantPoints } from "./hero.js";
 import { hallLevelAt, setTreeLook } from "./townhall.js";
 
@@ -98,6 +98,7 @@ function skillMenu(player, hallLevel, skill) {
     `§l${skill.name}§r  ${have}/${skill.max}${skill.power ? "  §d(power)" : ""}`,
     "",
     ...skill.desc,
+    ...(POWER_ORIGINS.lines[skill.id] ? ["", `§5§o${POWER_ORIGINS.lines[skill.id]}§r`] : []),
     "",
     `§7${ring.name}: ${HALL_NAMES[ring.hall]}, Renown ${ring.level}${skill.needs ? `, after ${SKILL[skill.needs].name}` : ""}`,
     `§7Cost: ${skill.cost} point${skill.cost === 1 ? "" : "s"} per rank. You have ${hero.points}.`,
@@ -126,7 +127,7 @@ export function learn(player, skill, hallLevel) {
   player.playSound("random.levelup", { pitch: 1.3 });
   player.sendMessage(`§b${skill.name}§7 ${hero.skills[skill.id]}/${skill.max} sworn.`);
   if (skill.id === "arc_warden") {
-    api.title(player, "§5Voice of the Hollow", "§7It is waiting for you to claim it");
+    api.title(player, "§5The Last Art", "§7It is waiting for you to claim it");
     api.emit("hollowClaimReady", { player });
   }
   const after = rankOf(hero.path, hero.skills)?.name;
@@ -170,7 +171,7 @@ function pathMenu(player, hallLevel) {
     "",
     "§5The Marked.§r Take the Ember into your hand. It gives you powers no one living understands: bolts of pale fire, a step through the air, a call that turns armies on themselves. Every casting raises your Resonance, and loud Resonance is heard. Stages: " + RANKS.marked.map((r) => r.name).join(", ") + ".",
     "",
-    holding ? "§7The Hollow Ember hums in your pack." : "§7You need the Hollow Ember to choose. It falls near your keep the night you first hold a siege.",
+    holding ? "§7The Ember hums in your pack." : "§7You need the Ember to choose. It falls near your keep the night you first hold a siege.",
   ].join("\n");
   const form = new ActionFormData().title("Choose your path").body(body);
   const choices = [];

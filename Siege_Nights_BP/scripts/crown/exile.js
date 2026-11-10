@@ -9,7 +9,7 @@ import { CROWN } from "./config.js";
 import { EXILE_STAGES } from "./rules.js";
 import { crown, saveCrown, playerById, giveItem, addClaim, claimOf, announce, rulerLabel } from "./state.js";
 import { crownStatus, annalLines, endReign, vacate } from "./reign.js";
-import { banish } from "./usurp.js";
+import { banish, npcWins } from "./usurp.js";
 
 // Finish the exile's current stage if it is `stage`, pay its reward and announce the next one
 function complete(player, stage) {
@@ -43,9 +43,10 @@ onTick("crown exile road", 100, () => {
 });
 
 // The New Source: if raiders take the Citadel from a fully Hollow ruler, nobody inherits
-on("keepFallen", ({ owner }) => {
+on("keepFallen", ({ owner, keep }) => {
   const c = crown();
   if (c.ruler?.id !== owner) return;
+  if (c.challenge?.npc) return npcWins("the keep fell to their army", keep); // a rival lord took it
   const old = endReign("swallowed by the Hollow");
   announce(`§4${old.title} ${old.name} is gone. The raiders they once commanded have taken the throne room. ${CROWN.citadelName} stands empty.`);
   banish(old.id, old.name);

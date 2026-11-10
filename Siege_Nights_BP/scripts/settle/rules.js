@@ -6,7 +6,9 @@
 //   wilds     everything outside a claim. No building, only making camp.
 // Someone else's land is "foreign"; Siege Nights' own protection already handles that.
 
-import { SETTLE, CAMP_KIT, RESERVE_ALLOWED, HALL_REACH, MATERIAL_RATE } from "./config.js";
+import { drawHall } from "../townhall/halls.js";
+import { STYLES } from "../townhall/styles.js";
+import { SETTLE, CAMP_KIT, RESERVE_ALLOWED, MATERIAL_RATE } from "./config.js";
 
 export const matches = (list, typeId) => list.some((re) => re.test(typeId));
 export const isCampKit = (typeId) => matches(CAMP_KIT, typeId);
@@ -32,9 +34,26 @@ export function footprint(origin, forward, bounds) {
   };
 }
 
+// How far a style's halls reach from the cornerstone, over all five tiers, in the hall's own
+// directions: `side` blocks left and right, `back` behind the door line, `deep` ahead. Measured
+// from the real templates (once per style), so it follows the town hall designs as they change.
+const reaches = {};
+export function hallReach(styleId) {
+  const id = STYLES[styleId] ? styleId : "vale";
+  if (!reaches[id]) {
+    const r = { side: 0, back: 0, deep: 0 };
+    for (let level = 1; level <= 5; level++) {
+      const b = drawHall(level, STYLES[id]).bounds();
+      r.side = Math.max(r.side, -b.x0, b.x1); r.back = Math.max(r.back, -b.z0); r.deep = Math.max(r.deep, b.z1);
+    }
+    reaches[id] = r;
+  }
+  return reaches[id];
+}
+
 // The reserve for a hall: the biggest hall its cornerstone can grow into, plus a margin
 export function hallReserve(hall, margin = SETTLE.reserveMargin) {
-  const reach = HALL_REACH[hall.style] ?? HALL_REACH.vale;
+  const reach = hallReach(hall.style);
   const box = footprint(hall, { x: hall.fx, z: hall.fz }, { x0: -reach.side, x1: reach.side, z0: -reach.back, z1: reach.deep });
   return { ...grow(box, margin), label: "your hall" };
 }
@@ -62,9 +81,9 @@ export function placeVerdict(s) {
 
 // ---------- paying for a pre-designed building ----------
 
-const any = (...parts) => (id) => parts.some((p) => id.endsWith(p));
+const any = (...parts) => (id) => parts.some((p) => id.endsWith(p)) || /^siege:castle_(stone|tiles|bricks|cobbled|smooth)(_|$)/.test(id);
 export const MATERIALS = {
-  timber: { label: "planks", match: any("_planks", ":planks") },
+  timber: { label: "planks", match: (id) => id.endsWith("_planks") || id.endsWith(":planks") },
   stone: {
     label: "building stone",
     match: any("cobblestone", "cobbled_deepslate", ":stone", "stone_bricks", "stonebrick", "deepslate_bricks", "sandstone", "mud_bricks", "calcite", "andesite"),

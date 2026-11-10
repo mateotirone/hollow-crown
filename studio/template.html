@@ -368,7 +368,7 @@ function buildCube(c, tw, th, getMat) {
   if (c.rotation) {
     const p = c.pivot || [0, 0, 0];
     const outer = new THREE.Group(); outer.position.set(-p[0], p[1], p[2]);
-    outer.rotation.set(D(c.rotation[0]), D(-c.rotation[1]), D(-c.rotation[2]), "ZYX");
+    outer.rotation.set(D(-c.rotation[0]), D(-c.rotation[1]), D(c.rotation[2]), "ZYX");   // Bedrock to x-mirrored space, as Blockbench does
     grp.position.set(p[0], -p[1], -p[2]);
     outer.add(grp); return outer;
   }
@@ -384,7 +384,7 @@ function buildGeo(geo, getMat) {
     let r = b.rotation || b.bind_pose_rotation || [0, 0, 0];
     // Old-format models give each bone its total rotation, so take the parent's away
     if (geo.legacy && parent) { const pr = geo.bones.find((x) => x.name === parent).rotation || [0, 0, 0]; r = r.map((v, k) => v - pr[k]); }
-    g.rotation.set(D(r[0]), D(-r[1]), D(-r[2]), "ZYX");
+    g.rotation.set(D(-r[0]), D(-r[1]), D(r[2]), "ZYX");
     for (const c of b.cubes || []) {
       const cube = buildCube(c, geo.tw, geo.th, getMat);
       cube.position.x -= me[0]; cube.position.y -= me[1]; cube.position.z -= me[2];
@@ -422,6 +422,39 @@ function buildVariant(v) {
       g.add(buildGeo(M.geos["geometry.armor1"], () => l1));
       return g;
     }
+    case "build": {
+      // a sample build made of blocks: [x, y, z, role] or [x, y, z, role, [x1,y1,z1,x2,y2,z2]] (sub-box in block fractions)
+      const blocks = M.builds[v.build], full = new Set(), acc = {};
+      for (const b of blocks) if (!b[4]) full.add(b[0] + "," + b[1] + "," + b[2]);
+      const quad = (role, p, uvs) => {
+        const a = (acc[role] ??= { pos: [], uv: [], idx: [] }), n = a.pos.length / 3;
+        for (const q of p) a.pos.push(...q); a.uv.push(...uvs); a.idx.push(n, n + 2, n + 1, n + 1, n + 2, n + 3);
+      };
+      let minX = 1e9, maxX = -1e9, minZ = 1e9, maxZ = -1e9;
+      for (const b of blocks) {
+        const [x, y, z, role, s] = b, bx = s || [0, 0, 0, 1, 1, 1];
+        const x1 = x + bx[0], y1 = y + bx[1], z1 = z + bx[2], x2 = x + bx[3], y2 = y + bx[4], z2 = z + bx[5];
+        minX = Math.min(minX, x1); maxX = Math.max(maxX, x2); minZ = Math.min(minZ, z1); maxZ = Math.max(maxZ, z2);
+        const open = (dx, dy, dz) => s || !full.has((x + dx) + "," + (y + dy) + "," + (z + dz));
+        const u1 = bx[0], u2 = bx[3], v1 = bx[1], v2 = bx[4], w1 = bx[2], w2 = bx[5];
+        if (open(0, 0, -1)) quad(role, [[x1, y2, z1], [x2, y2, z1], [x1, y1, z1], [x2, y1, z1]], [u1, v2, u2, v2, u1, v1, u2, v1]);
+        if (open(0, 0, 1)) quad(role, [[x2, y2, z2], [x1, y2, z2], [x2, y1, z2], [x1, y1, z2]], [1 - u2, v2, 1 - u1, v2, 1 - u2, v1, 1 - u1, v1]);
+        if (open(-1, 0, 0)) quad(role, [[x1, y2, z2], [x1, y2, z1], [x1, y1, z2], [x1, y1, z1]], [1 - w2, v2, 1 - w1, v2, 1 - w2, v1, 1 - w1, v1]);
+        if (open(1, 0, 0)) quad(role, [[x2, y2, z1], [x2, y2, z2], [x2, y1, z1], [x2, y1, z2]], [w1, v2, w2, v2, w1, v1, w2, v1]);
+        if (open(0, 1, 0)) quad(role, [[x1, y2, z2], [x2, y2, z2], [x1, y2, z1], [x2, y2, z1]], [u1, w2, u2, w2, u1, w1, u2, w1]);
+        if (open(0, -1, 0)) quad(role, [[x1, y1, z1], [x2, y1, z1], [x1, y1, z2], [x2, y1, z2]], [u1, w1, u2, w1, u1, w2, u2, w2]);
+      }
+      const g = new THREE.Group();
+      for (const [role, a] of Object.entries(acc)) {
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute("position", new THREE.Float32BufferAttribute(a.pos, 3));
+        geo.setAttribute("uv", new THREE.Float32BufferAttribute(a.uv, 2));
+        geo.setIndex(a.idx); geo.computeVertexNormals();
+        g.add(new THREE.Mesh(geo, getMat(role)));
+      }
+      g.position.set(-(minX + maxX) / 2, 0, -(minZ + maxZ) / 2);
+      const o = new THREE.Group(); o.add(g); return o;
+    }
     case "lineup": {
       const g = new THREE.Group();
       const cols = v.cols || v.items.length, gap = v.gap || 1.25, rows = Math.ceil(v.items.length / cols);
@@ -454,7 +487,7 @@ function buildVariant(v) {
         mesh.position.z = (i - (layers - 1) / 2) * (1 / 16) / (layers - 1 || 1);
         g.add(mesh);
       }
-      g.position.y = 0.5;
+      g.position.y = 0.5; g.rotation.y = Math.PI;   // the camera looks from -Z, so turn the picture to face it (was mirrored)
       return g;
     }
   }

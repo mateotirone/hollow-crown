@@ -1,5 +1,5 @@
 // Horses for The Hollow Crown: steeds you raise (breeds, training, gear, perks, breeding), the Stables,
-// Breeder's Posts, the Knight Warhorse and the Marked Hollow Steed.
+// Breeder's Posts, the Knight Warhorse and the Glimstrider.
 // The full design is in the "Hollow Crown: Horses and Rail Network" doc. Numbers to tweak: data.js.
 
 import { world, system } from "@minecraft/server";

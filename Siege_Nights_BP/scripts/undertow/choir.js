@@ -1,25 +1,28 @@
-// The Hollow Choir: the final boss, in the Choir's Heart. Built on the shared boss framework
-// (bestiary/bossCore.js). The boss entity is the Conductor; 7 Singers stand around the ring.
+// The Choir: the Hollow's people, singing the Gate wider. They hold the Court, the hall across the
+// story path, and must be silenced before anyone can go on to the Seat (Mateo: the Choir stays its
+// own fight, before the last one). Built on the shared boss framework (bestiary/bossCore.js).
+// The boss entity is the Conductor; 7 Singers stand around the hall.
 //
-//   The Hymn   The Singers shield the Conductor. Kill six of them. Every verse still singing
-//              calls phantom raiders: the same armies that lay siege to the keeps above.
-//              The seventh Singer (the one bound to the real Source) cannot be hurt yet.
-//   The Toll   The Conductor can be hurt. Toll: a shockwave you jump. Undertow: a pull toward
-//              the edge you crouch against. Echo: your hits come back at you, so hold them.
-//   The Fall   At a quarter health the ring falls away band by band. The last Singer comes to
-//              the centre and feeds the Conductor until it is killed.
+//   The Hymn     The Singers shield the Conductor. Kill six of them. Every verse still singing
+//                calls phantom raiders: the same armies that lay siege to the keeps above.
+//                The seventh Singer (the one bound to the real Source) cannot be hurt yet.
+//   The Toll     The Conductor can be hurt. Toll: a shockwave you jump. Undertow: a pull toward
+//                the walls you crouch against. Echo: your hits come back at you, so hold them.
+//   The Closing  At a quarter health the song closes in from the walls, ring by ring: stand outside
+//                it and it hurts. The last Singer comes to the centre and feeds the Conductor
+//                until it is killed.
 //
-// Whoever lands the killing blow is handed to the Crown thread with everyone in the arena as allies.
+// When the Conductor dies the Court's gate (and the river's water gate) opens. The framework
+// announces siege:boss_defeated {boss:"choir"}; the last handoff now belongs to boss "morvane".
 // Numbers to tweak are in CHOIR below.
 
 import { world, system } from "@minecraft/server";
-import { on } from "../siege/api.js";
 import { registerBoss, fightOf, stack } from "../bestiary/bossCore.js";
-import { announce, effect, flat, heal, hurt, ring, shove, sound, particle } from "../bestiary/util.js";
-import { UNDERTOW_ID, HEART } from "./layout.js";
+import { effect, flat, heal, hurt, ring, shove, sound, particle } from "../bestiary/util.js";
+import { UNDERTOW_ID, COURT } from "./layout.js";
 import { SOURCE_SITE_IDS, SITE_NAMES, getSourceSite } from "./source.js";
-import { rebuildHeart, dropHeartBand, pieces } from "./builder.js";
-import { load, save } from "./data.js";
+import { pieces } from "./builder.js";
+import { load } from "./data.js";
 
 export const CHOIR = {
   singersToSilence: 6, // of 7; the last one is bound to the Source
@@ -27,11 +30,15 @@ export const CHOIR = {
   maxPhantoms: 10,
   tollDamage: 9,
   echoTicks: 80,
-  fallAt: 0.25, // health fraction where the ring starts to fall
-  fallBands: [26, 21, 16, 11], // each band is everything at or beyond this radius
-  fallEvery: 240, // 12 s between bands, each warned 6 s ahead
+  fallAt: 0.25, // health fraction where the song starts to close in
+  fallBands: [26, 21, 16, 11], // each ring: everything at or beyond this radius hurts
+  fallEvery: 240, // 12 s between rings, each warned 6 s ahead
+  closingDamage: 4, // each second you stand outside the ring
   rootFeed: 6, // health the last Singer feeds the Conductor each second
 };
+
+// The fight's floor plan, inside the Court's round hall.
+const HEART = { center: { x: COURT.center.x, y: COURT.floorY, z: COURT.center.z }, outerRadius: COURT.radius - 3, innerRadius: 7, singerRadius: 22 };
 
 const CONDUCTOR = "siege:choir_conductor";
 const SINGER = "siege:choir_singer";
@@ -49,7 +56,6 @@ export function singerSpot(i) {
   return { x: HEART.center.x + Math.round(Math.cos(a) * r) + 0.5, y: HEART.center.y, z: HEART.center.z + Math.round(Math.sin(a) * r) + 0.5 };
 }
 
-let lastHitter; // player id of whoever hurt the Conductor last (the killer, if the death event names nobody)
 
 function placeSingers(f) {
   const root = SOURCE_SITE_IDS.indexOf(getSourceSite());
@@ -67,12 +73,12 @@ const rootSinger = (f) => singers(f).find((s) => s.hasTag(ROOT_TAG));
 const verses = (f) => singers(f).filter((s) => !s.hasTag(ROOT_TAG)).length;
 
 function stage(f) {
-  // 0 the Hymn, 1 the Toll, 2 the Fall
+  // 0 the Hymn, 1 the Toll, 2 the Closing
   return f.data.stage ?? 0;
 }
 
 function title(f, sub) {
-  for (const p of f.players()) p.onScreenDisplay.setTitle("§5The Hollow Choir", { subtitle: `§7${sub}`, fadeInDuration: 5, stayDuration: 50, fadeOutDuration: 15 });
+  for (const p of f.players()) p.onScreenDisplay.setTitle("§5The Choir", { subtitle: `§7${sub}`, fadeInDuration: 5, stayDuration: 50, fadeOutDuration: 15 });
 }
 
 function raid(f) {
@@ -93,9 +99,9 @@ function raid(f) {
 }
 
 registerBoss({
-  id: "choir", type: CONDUCTOR, name: "The Hollow Choir", radius: HEART.outerRadius + 2, phases: [CHOIR.fallAt], points: 25,
+  id: "choir", type: CONDUCTOR, name: "The Choir", radius: HEART.outerRadius + 2, phases: [CHOIR.fallAt], points: 25,
   intro: "turns toward you. Seven voices begin to sing.",
-  phaseNames: ["", "The Fall"],
+  phaseNames: ["", "The Closing"],
   attacks: [
     { id: "toll", every: 200, windup: 30, rest: 50, warn: "The Toll! Jump the ring!", sound: "block.bell.hit",
       when: (f) => stage(f) >= 1,
@@ -145,12 +151,10 @@ registerBoss({
     }
   },
 
-  onReset: () => rebuildHeart(),
 
   onHurt: (f, event) => {
     const by = event.damageSource.damagingEntity;
     if (by?.typeId === "minecraft:player") {
-      lastHitter = by.id;
       if ((f.data.echoUntil ?? 0) > f.tick) {
         hurt(by, Math.max(2, Math.round(event.damage * 0.75)), "magic");
         heal(f.entity, event.damage);
@@ -160,7 +164,7 @@ registerBoss({
   },
 
   onPhase: (f) => {
-    // The Fall
+    // The Closing
     f.data.stage = 2;
     f.data.nextBand = f.tick + 120;
     const root = rootSinger(f);
@@ -171,7 +175,7 @@ registerBoss({
       } catch { /* gone */ }
     }
     f.say("§5The last Singer steps down to the centre. Its voice is one you have heard before.");
-    f.say("§cThe ring is breaking. Get to the middle!");
+    f.say("§cThe song is closing in from the walls. Get to the middle!");
   },
 
   tick: (f) => {
@@ -194,20 +198,25 @@ registerBoss({
       if (f.tick % 20 === 0) for (const s of singers(f)) particle(f.dim, "minecraft:villager_happy", { x: s.location.x, y: s.location.y + 2.6, z: s.location.z });
     }
     if (st === 2) {
-      // The ring falls, band by band, each one warned first.
+      // The song closes in, ring by ring, each one warned first. Outside the ring it hurts.
+      const c = centre();
       if (f.data.band < CHOIR.fallBands.length) {
         const r = CHOIR.fallBands[f.data.band];
         const left = f.data.nextBand - f.tick;
         if (left <= 120 && left > 0) {
-          if (left % 20 === 0) ring(f.dim, { x: centre().x, y: HEART.center.y + 0.2, z: centre().z }, r, "minecraft:basic_flame_particle", r * 4);
-          f.bar(`§cThe floor beyond the flames falls in ${Math.ceil(left / 20)}`);
+          if (left % 20 === 0) ring(f.dim, { x: c.x, y: c.y + 0.2, z: c.z }, r, "minecraft:basic_flame_particle", r * 4);
+          f.bar(`§cThe song closes to the flames in ${Math.ceil(left / 20)}`);
         }
         if (left <= 0) {
-          dropHeartBand(r);
-          for (const p of f.players()) sound(f.dim, "random.explode", p.location, 0.5, 1);
+          for (const p of f.players()) sound(f.dim, "block.bell.hit", p.location, 0.5, 1);
           f.data.band++;
           f.data.nextBand = f.tick + CHOIR.fallEvery;
         }
+      }
+      if (f.data.band > 0 && f.tick % 20 === 0) {
+        const r = CHOIR.fallBands[f.data.band - 1];
+        ring(f.dim, { x: c.x, y: c.y + 0.4, z: c.z }, r, "minecraft:soul_particle", r * 3);
+        for (const p of f.players()) if (flat(p.location, c) >= r) hurt(p, CHOIR.closingDamage, "magic");
       }
       // The last Singer feeds the Conductor while it lives.
       const root = rootSinger(f);
@@ -220,30 +229,17 @@ registerBoss({
   },
 
   loot: (f, player, first) => [stack("minecraft:netherite_ingot", first ? 4 : 1), stack("minecraft:diamond", first ? 16 : 4)],
-  // The Hollow Crown is left in the vault chest, once. It is not a prize for the killer: it kills
-  // anyone but a Sorcerer who wears it (warden.js). If it is ever lost, /scriptevent hc:give_crown.
-  hoard: () => {
-    const prog = load(K_PROGRESS, {});
-    const out = [stack("minecraft:enchanted_golden_apple", 2), stack("minecraft:emerald_block", 16)];
-    if (!prog.crownOut) {
-      prog.crownOut = true;
-      save(K_PROGRESS, prog);
-      const crown = stack("siege:hollow_crown", 1);
-      try { crown?.setLore(["§5It hums with seven voices.", "§4It will not suffer the unworthy."]); } catch { /* plain crown */ }
-      out.push(crown);
-    }
-    return out;
-  },
+  hoard: () => [stack("minecraft:enchanted_golden_apple", 2), stack("minecraft:emerald_block", 16)],
 });
 
 // ---- starting the fight ------------------------------------------------------------------
-// The Conductor appears when someone walks into the Heart, unless the Crown is already held.
+// The Conductor appears when someone walks into the Court, until the Choir has been silenced.
 export function choirTick() {
-  if (load(K_PROGRESS, {}).choir || !pieces().heart || fightOf("choir")) return;
+  if (load(K_PROGRESS, {}).choir || !pieces().court || fightOf("choir")) return;
   let dim;
   try { dim = world.getDimension(UNDERTOW_ID); } catch { return; }
   const c = centre();
-  const near = dim.getPlayers({ location: c, maxDistance: HEART.outerRadius });
+  const near = dim.getPlayers({ location: c, maxDistance: HEART.outerRadius - 2 });
   if (!near.length) return;
   try {
     if (dim.getEntities({ type: CONDUCTOR, location: c, maxDistance: 64 }).length) return; // already there, the framework will pick it up
@@ -251,31 +247,13 @@ export function choirTick() {
   } catch { /* not loaded yet */ }
 }
 
-// ---- the kill and the Crown ----------------------------------------------------------------
+// ---- the kill ------------------------------------------------------------------------------
+// The gate opening and the announcement are in index.js (it hears the framework's siege:boss_defeated).
 world.afterEvents.entityDie.subscribe((event) => {
   const dead = event.deadEntity;
   if (dead.typeId !== CONDUCTOR) return;
-  const loc = dead.location, dim = dead.dimension;
-  const by = event.damageSource.damagingEntity;
-  const online = world.getAllPlayers();
-  const killer = (by?.typeId === "minecraft:player" ? by : undefined) ?? online.find((p) => p.id === lastHitter);
-  const allies = online.filter((p) => p.dimension.id === dim.id && flat(p.location, loc) <= HEART.outerRadius + 10 && p.id !== killer?.id);
+  const dim = dead.dimension;
   system.run(() => {
-    const prog = load(K_PROGRESS, {});
-    prog.choir = true;
-    save(K_PROGRESS, prog);
-    rebuildHeart(); // so nobody is left standing on a falling floor
     for (const s of dim.getEntities({ type: SINGER })) { try { s.remove(); } catch { /* gone */ } }
-    world.sendMessage("§5The singing stops. For the first time in living memory, the land above is quiet.");
-    if (!killer) return;
-    announce("siege:boss_defeated", { boss: "hollow_choir", killer: killer.id, killerName: killer.name, allies: allies.map((p) => p.id) });
   });
-});
-
-// The Crown thread tells us when the Crown is back on the throne below: the fight can be won again.
-on("crownVacant", () => {
-  const prog = load(K_PROGRESS, {});
-  prog.choir = false;
-  save(K_PROGRESS, prog);
-  world.sendMessage("§5Far below, seven voices begin to sing again.");
 });

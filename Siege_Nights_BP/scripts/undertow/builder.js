@@ -6,13 +6,17 @@ import { world, BlockVolume } from "@minecraft/server";
 import { UNDERTOW_ID, UNDERTOW_LAYOUT as L, COURT, HEART, pathX } from "./layout.js";
 import { planChunk, chunkInRange, heightAt, B } from "./terrain.js";
 import { planCrack, placeCells } from "./rift.js";
+import { SEAL_RIVER_X } from "./rivers.js";
+import { SITES } from "./roads.js";
+import { hash } from "./noise.js";
+import { STRUCTURE_IDS, planStructure } from "./structures.js";
 import { load, save } from "./data.js";
 
-const K_BUILT = "hc:undertow_built"; // hex bitset of finished chunks
+const K_BUILT = "hc:undertow_built2"; // hex bitset of finished chunks
 const K_PIECES = "hc:undertow_pieces"; // { wound, court, heart, waystones: [..] }
-const CX_MIN = -10, CX_MAX = 9, CZ_MIN = -3, CZ_MAX = 153;
+const CX_MIN = -44, CX_MAX = 43, CZ_MIN = -3, CZ_MAX = 153;
 const ROW = CZ_MAX - CZ_MIN + 1;
-const OPS_PER_TICK = 150;
+const OPS_PER_TICK = 250;
 const RADIUS = 3; // chunks around each player (Realms only keep 4 loaded)
 
 export const WAYSTONE = "siege:waystone";
@@ -118,6 +122,17 @@ export function waystoneSpot(i) {
   return { x, y: h + 1, z };
 }
 
+// Where the armour stands of the Standing Ranks go (pure: the same every time).
+export function ranksSpots() {
+  const s = SITES.find((x) => x.id === "standing_ranks"), out = [];
+  for (let i = -5; i <= 5; i++) for (let j = -5; j <= 5; j++) {
+    const x = s.x + i * 6 + Math.round((hash(i, j, 701) - 0.5) * 2), z = s.z + j * 6 + Math.round((hash(i, j, 702) - 0.5) * 3);
+    if (Math.hypot(x - s.x, z - s.z) > s.r - 5 || hash(i, j, 703) < 0.12) continue; // a few gaps in the rows
+    out.push({ x: x + 0.5, y: s.y + 1, z: z + 0.5 });
+  }
+  return out;
+}
+
 export function piecesTick() {
   const d = dim();
   const p = pieces();
@@ -139,6 +154,23 @@ export function piecesTick() {
       && apply(d, { a: [s.x, s.y, s.z], b: [s.x, s.y, s.z], block: WAYSTONE });
     if (ok) { p.waystones.push(i); changed = true; }
   });
+
+  // The Standing Ranks: rows of empty armour, each a little out of line, all facing the Seat.
+  const ranks = SITES.find((s) => s.id === "standing_ranks");
+  if (!p.ranks && chunksBuilt(ranks.x - ranks.r, ranks.z - ranks.r, ranks.x + ranks.r, ranks.z + ranks.r)) {
+    try {
+      for (const at of ranksSpots()) d.spawnEntity("minecraft:armor_stand", at).setRotation({ x: 0, y: 0 });
+      p.ranks = true; changed = true;
+    } catch { /* not loaded yet: try again when someone is near */ }
+  }
+
+  // What stands at each hand-designed place, once its ground is built.
+  for (const id of STRUCTURE_IDS) {
+    if ((p.sites ?? []).includes(id)) continue;
+    const s = SITES.find((x) => x.id === id), reach = s.r + 4;
+    if (!chunksBuilt(s.x - reach, s.z - reach, s.x + reach, s.z + reach)) continue;
+    if (fillAll(d, planStructure(id))) { p.sites = [...(p.sites ?? []), id]; changed = true; }
+  }
 
   // The Drowned Court and the sealed wall across the valley.
   if (!p.court && chunksBuilt(-COURT.radius - 2, COURT.center.z - COURT.radius - 2, COURT.radius + 2, COURT.gateZ + 14)) {
@@ -200,7 +232,18 @@ export function openCourtGate() {
   const { x: cx } = COURT.center, f = COURT.floorY;
   const d = dim();
   apply(d, { a: [cx - 3, f, COURT.gateZ], b: [cx + 3, f + 8, COURT.gateZ], block: "minecraft:air" });
+  // The water gate where the light river runs through the wall (only if that part is built yet;
+  // riverGateTick opens it later otherwise).
+  openRiverGate();
   try { d.playSound("block.end_portal.spawn", { x: cx, y: f + 2, z: COURT.gateZ }, { volume: 2, pitch: 0.6 }); } catch {}
+}
+
+// The river's way through the sealed wall. Safe to call again and again.
+export function openRiverGate() {
+  const d = dim(), x = SEAL_RIVER_X, y = L.seaY;
+  if (!isBuilt(Math.floor(x / 16), Math.floor(COURT.gateZ / 16))) return false;
+  return apply(d, { a: [x - 3, y - 1, COURT.gateZ], b: [x + 3, y, COURT.gateZ], block: "minecraft:water" })
+    && apply(d, { a: [x - 3, y + 1, COURT.gateZ], b: [x + 3, y + 5, COURT.gateZ], block: "minecraft:air" });
 }
 
 // The Choir's Heart: a ring cathedral floating in the fog, 7 Singer pillars, a central disc,

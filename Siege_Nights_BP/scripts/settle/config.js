@@ -6,9 +6,11 @@ export const SETTLE = {
   // "always" = forbidden everywhere, "off" = allowed. /scriptevent siege:settle_wilds changes it in a world.
   wilds: "map",
   reserveMargin: 3, // clear blocks kept around the biggest hall your cornerstone can grow into
-  localBonus: 1.5, // your own region's materials: this many times more blocks per emerald
-  maxSpend: 32, // most emeralds one purchase can spend
+  // Prices below are in lots. A lot was one emerald and is 8 coins of the world currency (wallet.js, coins.js).
+  localBonus: 1.5, // your own region's materials: this many times more blocks per lot
+  maxSpend: 32, // most lots one purchase can buy
   maxBenches: 2, // Mason's Benches per settlement
+  stonePrice: 4, // lots for a Foundation Stone at the mason (it can also be crafted)
   riseTicks: 160, // about how long a pre-designed building takes to rise (160 = 8 seconds)
   firstBuildRenown: 40, // Renown the first time you raise each kind of building
   previewSeconds: 90, // how long the outline of a chosen building stays up
@@ -21,18 +23,7 @@ export const CAMP_KIT = [
 ];
 
 // The reserve around your hall takes nothing but these (they are lost or replaced when the hall grows).
-export const RESERVE_ALLOWED = [/^siege:hall_cornerstone$/, /^siege:archive_shelf$/, /torch$/, /^minecraft:lantern$/];
-
-// How far each style's biggest hall (the Sovereign's Throne) reaches from its cornerstone, in the
-// hall's own directions: `side` blocks left and right, `back` blocks behind the door line, `deep`
-// blocks ahead. A test checks these against the real templates.
-export const HALL_REACH = {
-  vale: { side: 15, back: 2, deep: 40 },
-  frostmarch: { side: 15, back: 2, deep: 40 },
-  saltreach: { side: 15, back: 2, deep: 40 },
-  emberwaste: { side: 15, back: 2, deep: 39 },
-  blackfen: { side: 15, back: 0, deep: 43 },
-};
+export const RESERVE_ALLOWED = [/^siege:hall_cornerstone$/, /^siege:keep_banner$/, /^siege:archive_shelf$/, /torch$/, /^minecraft:lantern$/];
 
 export const REGION_TO_STYLE = {
   "Aldmere Vale": "vale", Frostmarch: "frostmarch", Saltreach: "saltreach", Emberwaste: "emberwaste", Blackfen: "blackfen",
@@ -40,7 +31,8 @@ export const REGION_TO_STYLE = {
 
 // ---------- The mason's stock ----------
 // [item id, blocks per emerald]. Ids the running game doesn't know are left out of the shop.
-// Castle Stone, gates and the other siege blocks are NOT sold: defences stay earned.
+// The Castle Stone family is stocked separately (STONE_RATE below). Gates, battlements and the other
+// siege blocks are NOT sold: those stay crafted.
 const m = (id) => `minecraft:${id}`;
 export const CATALOG = [
   { name: "Stone", icon: "textures/blocks/stonebrick", stock: [
@@ -77,6 +69,9 @@ export const CATALOG = [
 
 // Roles of a regional style that count as that region's "local materials"
 export const LOCAL_ROLES = ["foundation", "wall", "wallLow", "wallUpper", "floor", "pillar", "beam", "roofBlock", "roofStair", "roofSlab", "crenel", "rail"];
+// The Castle Stone family (five blocks per region, ids from siege/constants.js): blocks per coin.
+// Castle Stone itself is the wall block that can be reinforced, so it costs the most.
+export const STONE_RATE = { stone: 8, tiles: 12, bricks: 12, cobbled: 16, smooth: 12 };
 export const LOCAL_RATE = 16; // blocks per emerald for a local material the stock list doesn't price
 
 // What pre-designed buildings are paid in. The mason supplies what you lack at these rates.

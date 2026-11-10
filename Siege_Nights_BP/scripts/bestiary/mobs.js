@@ -304,7 +304,7 @@ world.afterEvents.entityHurt.subscribe((event) => {
 // ---------- kills: first kills, the skill point trickle, and the lore thread's drops ----------
 const TOME_MOBS = ["barrow_wight", "inquisitor", "ashen_knight", "lost_villager", "changeling", "tolling_shade"];
 const TRICKLE_EVERY = 25;
-export const countsForBestiary = (typeId) => !!MOBS[typeId] && !["boss", "boss_add", "boss_prop", "projectile", "summon"].includes(MOBS[typeId].family);
+export const countsForBestiary = (typeId) => !!MOBS[typeId] && !["boss", "boss_add", "boss_prop", "projectile", "summon", "seep", "champion"].includes(MOBS[typeId].family);
 
 world.afterEvents.entityDie.subscribe((event) => {
   const dead = event.deadEntity;

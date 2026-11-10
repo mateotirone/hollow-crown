@@ -78,12 +78,12 @@ export const SKILLS = [
   S("arc_echo", "arcana", 2, "Echo Sight", 3, 2, ["Power. For 10 / 15 / 20s see in the dark, sense every creature within 24 / 32 / 40 blocks, and reveal hidden doors. Resonance +10."], { power: true }),
   S("arc_bind", "arcana", 2, "Bind", 3, 2, ["Power. Root the creature you look at for 3 / 5 / 7s (half on bosses). Resonance +14. Cooldown 10s."], { power: true, needs: "arc_bolt" }),
   S("arc_ashen", "arcana", 2, "Ashen Skin", 2, 2, ["Fire Resistance always. Rank 2: Resistance I while Resonance is 50 or more."], { needs: "arc_ward" }),
-  S("arc_step", "arcana", 3, "Undertow Step", 3, 3, ["Power. Slip half into the mirror world for 3 / 4 / 5s: invisible, untouchable, fast. Resonance +20. Cooldown 30s."], { power: true, needs: "arc_blink" }),
+  S("arc_step", "arcana", 3, "Halfstep", 3, 3, ["Power. Slip half out of the world, toward the Hollow, for 3 / 4 / 5s: invisible, untouchable, fast. Resonance +20. Cooldown 30s."], { power: true, needs: "arc_blink" }),
   S("arc_choir", "arcana", 3, "Choir's Call", 3, 3, ["Power. Raiders within 10 / 14 / 18 blocks hear the bell and turn on each other for 6 / 8 / 10s. Resonance +30. Cooldown 60s."], { power: true, needs: "arc_echo" }),
   S("arc_resonant", "arcana", 3, "Resonant Soul", 2, 3, ["While Resonance is 70 or more, powers are 25% / 50% stronger."], { needs: "arc_quiet" }),
-  S("arc_hollowborn", "arcana", 4, "Hollowborn", 1, 6, ["Powers cost 25% less Resonance and cool down 30% faster. At 100 Resonance you enter a Crescendo: 10s of free casting, then you crash."], { needs: "arc_step" }),
-  S("arc_hollowstep", "arcana", 4, "Hollow Step", 1, 5, ["Power. Step out of the world and into the Hollow, wherever you stand. Cast it again there to step back to where you left. Resonance +40. Cooldown 60s."], { power: true, needs: "arc_step" }),
-  S("arc_warden", "arcana", 5, "Voice of the Hollow", 1, 8, ["The peak of the Marked. The Hollow answers to you now: you may claim its throne and rule it as its Warden."], { needs: "arc_hollowstep" }),
+  S("arc_hollowborn", "arcana", 4, "Choirborn", 1, 6, ["Powers cost 25% less Resonance and cool down 30% faster. At 100 Resonance you enter a Crescendo: 10s of free casting, then you crash."], { needs: "arc_step" }),
+  S("arc_hollowstep", "arcana", 4, "Veilstep", 1, 5, ["Power. Step out of the world and into the Hollow, wherever you stand. Cast it again there to step back to where you left. Resonance +40. Cooldown 60s."], { power: true, needs: "arc_step" }),
+  S("arc_warden", "arcana", 5, "The Last Art", 1, 8, ["The peak of the Marked. The Hollow answers to you now: you may claim its throne and rule it as its Warden."], { needs: "arc_hollowstep" }),
   S("arc_crownless", "arcana", 5, "Crownless", 1, 8, ["Ember Bolt arcs to 2 more enemies near the first."], { needs: "arc_hollowborn" }),
 ];
 
@@ -110,7 +110,7 @@ export const RANKS = {
     { at: 0, name: "Touched" },
     { at: 3, name: "Listener" },
     { at: 8, name: "Adept" },
-    { at: 15, name: "Hollowborn" },
+    { at: 15, name: "Veilwalker" },
     { at: 26, name: "Sorcerer" }, // the top rank: needed to rule the Hollow
   ],
 };
@@ -170,6 +170,10 @@ export function rankOf(path, skills) {
 
 // Why a skill can't be learned right now, or undefined if it can.
 // hero = { path, level, points, skills }, hallLevel = 0-5 of the tree being used.
+// Where powers come from (filled in by the lore feature): gated = { skillId: hint shown until the player finds the origin },
+// lines = { skillId: one line of lore shown in the Tree }.
+export const POWER_ORIGINS = { gated: {}, lines: {} };
+
 export function blockedReason(skill, hero, hallLevel) {
   const have = hero.skills[skill.id] ?? 0;
   if (have >= skill.max) return "Mastered";
@@ -178,6 +182,7 @@ export function blockedReason(skill, hero, hallLevel) {
   if (hallLevel < ring.hall) return `Needs a ${HALL_NAMES[ring.hall]}`;
   if (hero.level < ring.level && !(hero.victor && skill.branch === "arcana")) return `Needs Renown ${ring.level}`; // the Hollow's victor skips the Renown climb
   if (skill.needs && !(hero.skills[skill.needs] > 0)) return `Needs ${SKILL[skill.needs].name}`;
+  if (POWER_ORIGINS.gated[skill.id] && !have && !hero.origins?.[skill.id]) return POWER_ORIGINS.gated[skill.id]; // its origin must be found in the world first
   if (hero.points < skill.cost) return `Needs ${skill.cost} point${skill.cost === 1 ? "" : "s"}`;
   return undefined;
 }

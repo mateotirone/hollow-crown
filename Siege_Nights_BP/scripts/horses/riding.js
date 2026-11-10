@@ -1,5 +1,5 @@
 // Horses: everything that happens in the saddle. Horse XP, gallop and stamina, terrain traits,
-// Trample, the Warhorse Charge and the Hollow Steed's Undertow Step.
+// Trample, the Warhorse Charge and the Glimstrider's Veilstep.
 
 import { world, system, EntityDamageCause } from "@minecraft/server";
 import { GUARD_TYPES, guardTag, isAlly, RAIDER_TAG } from "../siege/api.js";
@@ -211,7 +211,7 @@ const passable = (block) => {
   }
 };
 
-// Hollow Steed: blink ahead with your rider, through walls. Returns true if it handled the whistle.
+// Glimstrider: blink ahead with your rider, through walls. Returns true if it handled the whistle.
 export function undertowStep(player) {
   const mount = mountOf(player);
   const rec = mount && recordOf(uidOf(mount));
@@ -219,7 +219,7 @@ export function undertowStep(player) {
   const ride = rideOf(rec);
   const now = system.currentTick;
   if (now < ride.stepAt) {
-    player.onScreenDisplay.setActionBar(`§7The Undertow is still settling (${Math.ceil((ride.stepAt - now) / 20)}s).`);
+    player.onScreenDisplay.setActionBar(`§7The Veil is still settling (${Math.ceil((ride.stepAt - now) / 20)}s).`);
     return true;
   }
   const view = player.getViewDirection();

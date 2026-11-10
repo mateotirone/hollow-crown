@@ -1,0 +1,73 @@
+{
+  "format_version": "1.8.0",
+  "render_controllers": {
+    "controller.render.siege_portrait": {
+      "arrays": {
+        "textures": {
+          "Array.pics": [
+            "Texture.p0",
+            "Texture.p1",
+            "Texture.p2",
+            "Texture.p3",
+            "Texture.p4",
+            "Texture.p5",
+            "Texture.p6",
+            "Texture.p7",
+            "Texture.p8",
+            "Texture.p9",
+            "Texture.p10",
+            "Texture.p11",
+            "Texture.p12",
+            "Texture.p13",
+            "Texture.p14",
+            "Texture.p15",
+            "Texture.p16",
+            "Texture.p17",
+            "Texture.p18",
+            "Texture.p19",
+            "Texture.p20",
+            "Texture.p21",
+            "Texture.p22",
+            "Texture.p23",
+            "Texture.p24",
+            "Texture.p25",
+            "Texture.p26",
+            "Texture.p27",
+            "Texture.p28",
+            "Texture.p29",
+            "Texture.p30",
+            "Texture.p31",
+            "Texture.p32",
+            "Texture.p33",
+            "Texture.p34",
+            "Texture.p35",
+            "Texture.p36",
+            "Texture.p37",
+            "Texture.p38",
+            "Texture.p39",
+            "Texture.p40",
+            "Texture.p41",
+            "Texture.p42",
+            "Texture.p43"
+          ]
+        },
+        "geometries": {
+          "Array.shapes": [
+            "Geometry.tall",
+            "Geometry.wide",
+            "Geometry.grand"
+          ]
+        }
+      },
+      "geometry": "Array.shapes[q.property('siege:size')]",
+      "materials": [
+        {
+          "*": "Material.default"
+        }
+      ],
+      "textures": [
+        "Array.pics[q.property('siege:pic')]"
+      ]
+    }
+  }
+}

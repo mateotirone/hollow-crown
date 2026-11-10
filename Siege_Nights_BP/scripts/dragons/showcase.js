@@ -2,7 +2,7 @@
 // as display dragons, and (if you have no dragon yet) a grown, saddled, trained one that is yours to fly.
 
 import { on } from "../siege/api.js";
-import { DRAGON, ROOST, NEST, HUES, newDragon } from "./data.js";
+import { DRAGON, ROOST, NEST, SPECIES, newDragon } from "./data.js";
 import { store, dragonOf, save, spawnDragon, roostDragon } from "./dragon.js";
 
 const TAG = "siege_showcase";
@@ -20,16 +20,22 @@ on("showcase", ({ player, dim, nextSpot, label }) => {
   }
 
   // Display dragons: no owner, so they just stand there
-  [["hatchling", 1], ["fledgling", 2], ["adult", 3]].forEach(([stage, hue]) => {
+  // every species as an adult, a hatchling and a fledgling, one asleep, one unconscious, one dead
+  [["adult", 0, 0], ["adult", 1, 0], ["adult", 2, 0], ["adult", 3, 0], ["hatchling", 1, 0], ["fledgling", 2, 0], ["adult", 0, 1], ["adult", 3, 2], ["adult", 2, 3]].forEach(([stage, hue, pose]) => {
     const at = nextSpot();
-    if (stage === "adult") nextSpot(); // an adult with folded wings needs two spots
+    if (stage === "adult") nextSpot(); // an adult needs two spots
     try {
       const statue = dim.spawnEntity(DRAGON, { x: at.x + 0.5, y: at.y, z: at.z + 0.5 });
       statue.addTag(TAG);
       statue.triggerEvent(`siege:stage_${stage}`);
-      statue.setProperty("siege:hue", hue);
-      statue.nameTag = `${HUES[hue]} ${stage}`;
-      label(at, `Dragon\n${stage}\n${HUES[hue]}`);
+      statue.setProperty("siege:species", hue);
+      if (pose) {
+        statue.triggerEvent("siege:go_down");
+        statue.setProperty("siege:pose", pose);
+      }
+      const state = ["", "asleep", "unconscious", "dead"][pose];
+      statue.nameTag = pose === 3 ? "" : `${SPECIES[hue].name}${state ? ` (${state})` : ""}`;
+      label(at, `${SPECIES[hue].name}\n${state || stage}`);
     } catch (e) {
       console.warn(`[Hollow Crown] dragons showcase ${stage}: ${e}`);
     }
@@ -42,12 +48,12 @@ on("showcase", ({ player, dim, nextSpot, label }) => {
     rec = undefined;
   }
   if (rec) {
-    return player.sendMessage("§6Dragons: a Roost, a Nest and three display dragons are behind you. You already have a dragon of your own, so no test dragon was added.");
+    return player.sendMessage("§6Dragons: a Roost, a Nest and nine display dragons are behind you. You already have a dragon of your own, so no test dragon was added.");
   }
   const mine = nextSpot();
   nextSpot();
   rec = Object.assign(newDragon(player.id, player.name, 0), {
-    showcase: true, name: "Cinder", hue: 0, stage: "adult", bond: 100, level: 12, tp: 4, bornAt: 0, saddled: true, order: "stay",
+    showcase: true, name: "Cinder", species: 0, stage: "adult", bond: 100, level: 12, tp: 4, bornAt: 0, saddled: true, order: "stay",
     stats: { wings: 3, speed: 2, vigor: 2, breath: 2 }, roost: { x: roost.x, y: roost.y, z: roost.z },
   });
   store.data.dragons[player.id] = rec;

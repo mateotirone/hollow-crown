@@ -1,0 +1,32 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:champion_knight",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/champion_knight"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.champion_knight"
+   },
+   "animations": {
+    "main": "animation.siege_b.champion_knight"
+   },
+   "scripts": {
+    "animate": [
+     "main"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ],
+   "spawn_egg": {
+    "base_color": "#a0a4ac",
+    "overlay_color": "#962824"
+   }
+  }
+ }
+}

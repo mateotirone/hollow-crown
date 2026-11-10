@@ -16,7 +16,17 @@ Craft a **Hall Cornerstone** at the Siege Workshop (3 logs over cobblestone, eme
 
 "Building stone" is any of cobblestone, stone, stone bricks, cobbled deepslate, deepslate bricks, sandstone, mud bricks or calcite. Iron is vanilla iron. Each new hall replaces the old one in the same spot and **overwrites everything in its footprint** (the menu warns you). Raising a hall for the first time gives skill points equal to its tier.
 
-**Regional styles.** The same five halls in five sets of materials: Vale (stone brick, timber frame, slate), Frostmarch (deepslate, dark oak, steep snowy roofs), Saltreach (calcite, quartz, prismarine roofs), Emberwaste (sandstone, flat crenellated roofs), Blackfen (mangrove on stilts, moss). The style is picked from the biome and can be changed in the menu for free. Styles are data in `styles.js`; halls are drawn by code in `halls.js`, so adding a style is about 25 lines and it applies to every hall.
+**Regional styles.** Each region builds a different kind of hall, not the same hall in other materials. All five grow through the same five tiers and hold the same things inside (Tree of Oaths, Sage, war room, throne, vault), so the rest of the game does not care which one you have. The style is picked from the biome and can be changed in the menu for free.
+
+| Region | Architecture | Drawn from | File |
+|---|---|---|---|
+| Vale (plains, forest) | Stone keep with square corner towers, timber upper floors, slate gables | Norman keeps, Tudor hall-houses | `halls.js` |
+| Frostmarch (snow, taiga) | Mead hall with stacked steep roofs, a clerestory, crossed gable finials, turrets on the ridge, a stave chapel as vault | Borgund stave church, Viking longhouses, Meduseld | `halls_frost.js` |
+| Saltreach (coast) | White basilica with an arcade across the front, flat roof carrying domes, a round lighthouse that gets taller each tier, a rotunda vault | St Mark's in Venice, Hagia Sophia, Dol Amroth | `halls_salt.js` |
+| Emberwaste (desert, badlands) | Mud-brick kasbah growing into a stepped ziggurat: tapering towers with patterned crowns, roof beams poking out, a domed pavilion on top, obelisks at the door | Ait Benhaddou, the ziggurat of Ur, Dorne | `halls_ember.js` |
+| Blackfen (swamp) | Stilt village: a round great hut under a mossy cone roof, side huts joined at the walls, a witch's tower with an overhanging top room | Lake-town, Ganvie, crannogs | `halls_fen.js` |
+
+Materials are data in `styles.js` (each style names its architecture with `arch`); shared pieces (walls, domes, cones, round rooms, arcades, the furniture every hall needs) are in `hallparts.js`. A new region is one file exporting five builder functions.
 
 ## Renown and skill points
 
@@ -31,13 +41,13 @@ Skill points also come straight from deeds: siege held +2, settlement tier up +2
 - **Keep** (everyone): Hearthwarden, Stonewright, Muster Roll, Masonry Wards, Watchfire, Spoils of War, Plunder, Rally the Walls, Master Builder, The Unbreakable Keep, Sovereign's Court.
 - **Wayfarer** (everyone): Fleetfoot, Forager, Clue Sense, Horse Whisperer, Pathfinder, Silver Tongue, Night Eyes, Mapwright, Tidewalker, Roadwise, The Long Road Home.
 - **Blade** (Knights): Shield Bash, Lunge, Iron Constitution, Riposte, Rallying Cry, Armor Mastery, Guard Captain, Execution, Warhorse Charge, Banner of the Keep, Second Wind, Oathsworn Champion, Crownbreaker.
-- **Arcana** (Marked): Ember Bolt, Ward, Quiet Mind, Blink, Echo Sight, Bind, Ashen Skin, Undertow Step, Choir's Call, Resonant Soul, Hollowborn, Hollow Step, Crownless, Voice of the Hollow.
+- **Arcana** (Marked): Ember Bolt, Ward, Quiet Mind, Blink, Echo Sight, Bind, Ashen Skin, Halfstep, Choir's Call, Resonant Soul, Choirborn, Veilstep, Crownless, The Last Art.
 
 Exact numbers are in `skills.js`, one line per skill. You can unbind everything and get the points back for 20 emeralds (10 from Renown 10).
 
 ## The two paths
 
-After your first siege win the **Hollow Ember** falls near your keep. Use it to take it into your hand (Marked), or carry it to the Tree and swear the Squire's Oath (Knight). Permanent.
+After your first siege win the **Ember** falls near your keep. Use it to take it into your hand (Marked), or carry it to the Tree and swear the Squire's Oath (Knight). Permanent.
 
 - **Knight (Oathsworn):** Squire, Man-at-Arms, Knight, Banneret, Knight-Commander, by points sworn in Blade (0 / 3 / 8 / 15 / 26). Techniques trigger from how you fight: sneak + hit with a shield, sprint + hit, being hit while guarding. The **Oath Banner** item rallies (use) or is planted (sneak + use).
 - **Marked:** Touched, Listener, Adept, Hollowborn, Sorcerer. Hold the **Bound Ember**: use casts, sneak + use picks the power. Each cast adds **Resonance**. It fades after 3 quiet seconds. At 70 you are "loud" (Hollow mobs can track you, and Resonant Soul makes powers stronger). At 100 you are Overwhelmed: sick, blind and silenced for 8 seconds. With the Hollowborn capstone, 100 instead starts a 10 second Crescendo of free casting, then a crash.
@@ -52,8 +62,8 @@ After your first siege win the **Hollow Ember** falls near your keep. Use it to 
 
 ## Ruling the Hollow (Marked endgame)
 
-- **Hollow Step** (Arcana, capstone ring, after Undertow Step): cast it anywhere to step into the Hollow, cast it there to step back to where you left. The Undertow code does the travel; until it answers, the power says the Hollow does not open and costs nothing.
-- **Voice of the Hollow** (Arcana, Crown Ring, after Hollow Step): the peak of the Marked path. Learning it is what lets a player claim the Hollow's throne and rule it (the ore, the alerts when someone mines it, the prices). Those ruling systems live with the Undertow and Crown features and read `skills.arc_warden`.
+- **Veilstep** (Arcana, capstone ring, after Halfstep): cast it anywhere to step into the Hollow, cast it there to step back to where you left. The Undertow code does the travel; until it answers, the power says the Hollow does not open and costs nothing.
+- **The Last Art** (Arcana, Crown Ring, after Veilstep): the peak of the Marked path. Learning it is what lets a player claim the Hollow's throne and rule it (the ore, the alerts when someone mines it, the prices). Those ruling systems live with the Undertow and Crown features and read `skills.arc_warden`.
 
 ## Roles are earned, not picked
 
@@ -62,3 +72,57 @@ Everyone starts as a plain human (`path: "none"`) with the shared Keep and Wayfa
 ## The victor's offer
 
 Whoever defeats the Hollow can't wear its crown, but is offered the Sorcerer's path with a head start (the Crown feature sends `hollowVictor`). Accepting at the Tree of Oaths gives 15 skill points, opens every Arcana ring without the Renown requirement (the hall tier still applies), and makes powers cost 25% less Resonance. A Knight who accepts lays down the Knight's oath: Blade points are refunded and the Order rank is lost. Someone already on the magic path gets the head start at once.
+
+## The Rumor Board (jobs that never run out)
+
+Open it from the Town Hall menu once any hall stands. Three rumors arrive each in-game day, built from parts (who tells it, where, why), and you hold one job at a time. Everything works alone.
+
+| Job | What you do | Pays (grows with Renown) |
+|---|---|---|
+| Bounty | Kill a number of one kind of monster | 55+ Renown, 2+ emeralds |
+| Raider camp | Travel 70 to 200 blocks, find the camp, kill every raider | 80+ Renown, 2+ emeralds |
+| Missing traveller | Find the captive, kill the captors, keep the traveller alive | 80+ Renown, 2+ emeralds |
+| Supplies | Bring food, arrows, iron or the like to the board | 40+ Renown, 3+ emeralds |
+
+Every third job also pays one skill point, so the board is a steady trickle that never beats story rewards. Jobs get bigger every 8 Renown levels. Code: `scripts/townhall/rumors.js`. Other features can add flavour lines with `emit("rumorParts", { givers, places, reasons })` and hear `rumorDone`.
+
+Not built yet from the same proposal: escorts, tome hunts and lord favors (they need the story NPCs and Lore Tomes), story beats gated by tier, sieges and rank, and the Legacy/heir option.
+
+## The Rumor Board (jobs that never run out)
+
+Open it from the Town Hall menu once any hall stands. Three rumors arrive each in-game day, built from parts (who tells it, where, why), and you hold one job at a time. Everything works alone.
+
+| Job | What you do | Pays (grows with Renown) |
+|---|---|---|
+| Bounty | Kill a number of one kind of monster | 55+ Renown, 2+ emeralds |
+| Raider camp | Travel 70 to 200 blocks, find the camp, kill every raider | 80+ Renown, 2+ emeralds |
+| Missing traveller | Find the captive, kill the captors, keep the traveller alive | 80+ Renown, 2+ emeralds |
+| Supplies | Bring food, arrows, iron or the like to the board | 40+ Renown, 3+ emeralds |
+
+Every third job also pays one skill point, so the board is a steady trickle that never beats story rewards. Jobs get bigger every 8 Renown levels. Code: `scripts/townhall/rumors.js`. Other features can add flavour lines with `emit("rumorParts", { givers, places, reasons })` and hear `rumorDone`.
+
+Not built yet from the same proposal: escorts, tome hunts and lord favors (they need the story NPCs and Lore Tomes), story beats gated by tier, sieges and rank, and the Legacy/heir option.
+
+## Who's online
+
+One screen listing every player in the world with their role, rank, Renown level and where they are (overworld, the Hollow, the Nether), sorted by Renown. The top lines say whether the Hollow's ruler and the High Throne's ruler are online right now, since the Hollow's ruler can only be robbed or besieged while online. Everyone also gets a quiet chat line when the Hollow's ruler joins or leaves.
+
+Open it from the Town Hall menu, the keep menu, or anywhere with `/scriptevent siege:who`. Code: `townhall/roster.js`. Other features add a line under a player by listening for `rosterNotes` and calling `notes.add(playerId, "text")`. Rulers are learned from the `wardenChanged`, `crowned` and `stormEnd` events.
+
+## The upgrade fly-by, and walls
+
+When a hall is raised or upgraded, the owner's camera lifts off and circles the hall while it rises, then returns (sneak to return early). Code: `townhall/flyby.js`, `flyby(player, { center, radius, height, seconds, title })`, usable by any feature.
+
+**Settlement wall.** The Town Hall menu has a "Settlement wall" entry that shows the current wall level, the next level and its cost, and raises it with the same fly-by round the whole wall. The town hall owns the menu and the camera; the feature that owns walls answers `wallInfo` and `wallUpgrade` (the contract is at the top of `flyby.js`). Until something answers, the entry says the masons have not surveyed a wall yet.
+
+## Levels, and who can see them
+
+- **Player level** is Renown, 1 to 50, earned from kills, sieges, Rumor Board jobs and upgrades. On top of it sits the rank on your path (Squire to Knight-Commander, Touched to Sorcerer).
+- **Settlement level** is the settlement tier (Hamlet, Town, City, Castle, Sovereign) and the hall that goes with it.
+- Everyone can see both on the Who's online screen. Levels are remembered for players who are away: any feature can ask with `emit("levelsQuery", q = { playerId })` and read `q.level`, `q.rank`, `q.role`, `q.settlement`, `q.tier`, `q.hall`, `q.online`.
+
+**Castle Stone.** Every region's stonework comes from its own Castle Stone family: cobbled for foundations, castle stone for the lower walls, bricks for walls, smooth for daises, tiles for flat roofs and domes (Saltreach, Emberwaste). Blackfen keeps wooden walls and stilts on a castle stone footing. Roof stairs, slabs and crenels stay vanilla until the family has those shapes. Castle Stone also counts as "building stone" when paying for a hall.
+
+## Power origins
+
+Every Arcana power has an origin written by the lore feature (`scripts/lore/data/powers.js`, book `siege:fourteen_arts`). The Tree shows one line of it under each power. Four powers stay locked until the player finds where they come from: Echo Sight, Halfstep, Choir's Call and Veilstep. The lore feature sends `powerOriginInfo` (hints and lines) and `powerOrigin` ({ player, skill }) when one is found; the town hall remembers it on the player.

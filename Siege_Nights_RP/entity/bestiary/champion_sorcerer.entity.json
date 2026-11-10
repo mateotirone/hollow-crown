@@ -1,0 +1,32 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:champion_sorcerer",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/champion_sorcerer"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.champion_sorcerer"
+   },
+   "animations": {
+    "main": "animation.siege_b.champion_sorcerer"
+   },
+   "scripts": {
+    "animate": [
+     "main"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ],
+   "spawn_egg": {
+    "base_color": "#342c54",
+    "overlay_color": "#b08cec"
+   }
+  }
+ }
+}

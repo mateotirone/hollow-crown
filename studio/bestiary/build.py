@@ -20,7 +20,7 @@ FAMILIES = {
     "raider": ["monster", "mob", "hollow", "siege_raider"], "hollow": ["monster", "mob", "hollow"], "summon": ["monster", "mob", "hollow"],
     "wild": ["mob", "beast"], "wild_hostile": ["monster", "mob", "beast"], "undead": ["monster", "undead", "mob", "hollow"],
     "order": ["mob", "ashen_order"], "boss": ["monster", "mob", "hollow", "siege_boss"], "boss_add": ["monster", "mob", "hollow", "siege_boss_add"],
-    "boss_prop": ["inanimate", "siege_boss_prop"], "projectile": ["inanimate"],
+    "boss_prop": ["inanimate", "siege_boss_prop"], "seep": ["inanimate", "siege_seep"], "champion": ["mob", "siege_champion"], "projectile": ["inanimate"],
 }
 # mobs whose abilities are run by scripts/bestiary/mobs.js
 SCRIPTED = {"bell_ringer", "torchbearer", "crow_mage", "lost_villager", "changeling", "wrongling", "stone_vigil", "echo_hound", "tolling_shade",
@@ -36,6 +36,21 @@ DROPS = {
     "changeling": [("siege:changeling_ichor", 1, 1, 0.5), ("siege:hollow_ash", 0, 2, 1)],
     "wrongling": [("siege:hollow_ash", 2, 4, 1), ("minecraft:ender_pearl", 1, 1, 0.3)],
     "stone_vigil": [("siege:hollow_ash", 2, 4, 1), ("minecraft:quartz", 1, 3, 1), ("minecraft:amethyst_shard", 1, 2, 0.4)],
+    "seep": [("siege:hollow_ash", 4, 8, 1), ("minecraft:amethyst_shard", 2, 4, 1), ("minecraft:echo_shard", 1, 1, 0.25)],
+    "grey_spearman": [("siege:hollow_ash", 0, 2, 1), ("minecraft:iron_nugget", 1, 4, 1)],
+    "grey_axeman": [("siege:hollow_ash", 0, 2, 1), ("minecraft:iron_nugget", 1, 4, 1), ("minecraft:iron_axe", 1, 1, 0.04)],
+    "grey_bowman": [("siege:hollow_ash", 0, 2, 1), ("minecraft:arrow", 2, 6, 1), ("minecraft:packed_ice", 0, 1, 0.5)],
+    "grey_bellcutter": [("siege:hollow_ash", 1, 2, 1), ("minecraft:copper_ingot", 1, 3, 1), ("minecraft:shears", 1, 1, 0.08)],
+    "grey_serjeant": [("siege:hollow_ash", 2, 4, 1), ("minecraft:iron_ingot", 1, 3, 1), ("minecraft:emerald", 2, 5, 1), ("minecraft:white_banner", 1, 1, 0.25)],
+    "veinsworn": [("siege:hollow_ash", 2, 3, 1), ("minecraft:amethyst_shard", 1, 2, 1)],
+    "shardcaster": [("siege:hollow_ash", 1, 3, 1), ("minecraft:amethyst_shard", 2, 4, 1), ("minecraft:echo_shard", 1, 1, 0.1)],
+    "gatebreaker": [("siege:hollow_ash", 4, 8, 1), ("minecraft:amethyst_shard", 3, 6, 1), ("minecraft:echo_shard", 1, 1, 0.5), ("minecraft:diamond", 1, 2, 0.5)],
+    "hollow_warlord": [("siege:hollow_ash", 4, 8, 1), ("minecraft:iron_ingot", 3, 6, 1), ("minecraft:gold_ingot", 1, 3, 1), ("minecraft:white_banner", 1, 1, 1), ("minecraft:diamond", 1, 1, 0.25)],
+    "champion_knight": [("minecraft:emerald", 6, 12, 1), ("minecraft:iron_ingot", 3, 6, 1), ("minecraft:golden_apple", 1, 1, 0.5), ("minecraft:arrow", 4, 12, 1)],
+    "champion_sorcerer": [("minecraft:emerald", 6, 12, 1), ("siege:hollow_ash", 4, 8, 1), ("minecraft:amethyst_shard", 2, 5, 1), ("minecraft:golden_apple", 1, 1, 0.5)],
+    "champion_lord": [("minecraft:emerald", 12, 24, 1), ("minecraft:gold_ingot", 3, 6, 1), ("minecraft:golden_apple", 1, 2, 1), ("minecraft:diamond", 1, 2, 0.5)],
+    "champion_retainer": [("minecraft:emerald", 0, 2, 1), ("minecraft:iron_nugget", 2, 6, 1), ("minecraft:arrow", 0, 4, 1)],
+    "gloamwing": [("siege:gloamquill", 1, 1, 1), ("siege:hollow_ash", 0, 1, 1)],
     "echo_hound": [("minecraft:bone", 1, 2, 1), ("siege:hollow_ash", 0, 2, 1)],
     "mirror_knight": [("minecraft:iron_ingot", 1, 3, 1), ("minecraft:amethyst_shard", 1, 2, 1)],
     "tolling_shade": [("siege:hollow_ash", 2, 3, 1), ("minecraft:gold_nugget", 1, 4, 1)],
@@ -69,6 +84,12 @@ def sensor_for(m):
     if mid == "stone_vigil":   # while it is being watched it is solid stone: only a pickaxe bites
         picks = [{"test": "has_equipment", "subject": "other", "domain": "hand", "operator": "not", "value": f"minecraft:{k}_pickaxe"} for k in ("wooden", "stone", "copper", "iron", "golden", "diamond", "netherite")]
         t.append({"on_damage": {"filters": {"all_of": [self_tag("siege_watched")] + picks}}, "deals_damage": "no"})
+    if mid == "seep":   # it can't be closed while the things that came through it are still standing guard
+        t.append({"on_damage": {"filters": self_tag("siege_seep_fed")}, "deals_damage": "no"})
+    if m.get("family") == "champion":   # shield up: blades glance off, arrows stop dead (an axe breaks the guard, in the script)
+        t.append({"on_damage": {"filters": self_tag("siege_champ_guard")}, "cause": "entity_attack", "damage_multiplier": 0.15})
+        t.append({"on_damage": {"filters": self_tag("siege_champ_guard")}, "cause": "projectile", "deals_damage": "no"})
+        t.append({"cause": "fall", "damage_multiplier": 0.4})
     if mid == "mirror_knight":
         t.append({"on_damage": {"filters": self_tag("siege_mirror_melee")}, "cause": "entity_attack", "damage_multiplier": 0.25})
         t.append({"on_damage": {"filters": self_tag("siege_mirror_ranged")}, "cause": "projectile", "damage_multiplier": 0.1})
@@ -112,6 +133,7 @@ def entity_bp(m):
     groups = {}; events = {}
     if m.get("static"):
         c["minecraft:movement"] = {"value": 0}; c["minecraft:persistent"] = {}
+        if not m.get("no_loot") and mid in DROPS: c["minecraft:loot"] = {"table": f"loot_tables/entities/bestiary/{mid}.json"}
         if mid == "chapel_bell":
             groups["siege:ringing"] = {"minecraft:is_charged": {}}
             events["siege:ring"] = {"add": {"component_groups": ["siege:ringing"]}}
@@ -128,7 +150,7 @@ def entity_bp(m):
         c.update(roster.swimmer()); c["minecraft:jump.static"] = {}
         c["minecraft:behavior.random_stroll"] = {"priority": 7, "speed_multiplier": 0.8}
     else:
-        c["minecraft:navigation.walk"] = {"can_path_over_water": True, "avoid_water": True, "can_open_doors": fam in ("raider", "order"), "can_pass_doors": True, "avoid_damage_blocks": True}
+        c["minecraft:navigation.walk"] = {"can_path_over_water": True, "avoid_water": True, "can_open_doors": fam in ("raider", "order", "champion"), "can_pass_doors": True, "avoid_damage_blocks": True}
         c["minecraft:movement.basic"] = {}; c["minecraft:jump.static"] = {}
         c["minecraft:behavior.float"] = {"priority": 0}
         c["minecraft:behavior.random_stroll"] = {"priority": 7, "speed_multiplier": 0.8}
@@ -146,7 +168,7 @@ def entity_bp(m):
     if m.get("ranged_def"):
         fight.update(roster.ranged(m["ranged_def"][0], aux=m["ranged_def"][1], radius=18 if m.get("boss") else 14))
         fight["minecraft:attack"] = {"damage": m["dmg"]}
-    elif mid == "crow_mage":
+    elif mid == "crow_mage" or m.get("hollow_bolts"):
         fight.update(roster.ranged("siege:hollow_bolt", interval=(2.5, 4), radius=16)); fight["minecraft:attack"] = {"damage": m["dmg"]}
     else:
         fight.update(roster.melee(m["dmg"], 1.25, m.get("effect")))
@@ -167,14 +189,42 @@ def entity_bp(m):
     if m.get("lifetime"):
         c["minecraft:timer"] = {"time": m["lifetime"], "looping": False, "time_down_event": {"event": "siege:fade"}}
         groups["siege:gone"] = {"minecraft:instant_despawn": {}}; events["siege:fade"] = {"add": {"component_groups": ["siege:gone"]}}
+    if m.get("bare_flag"):   # a part of the model that can be taken off: event siege:bare_on / siege:bare_off (the Hollow Crown, knocked from his head)
+        groups["siege:bare"] = {"minecraft:is_charged": {}}
+        events["siege:bare_on"] = {"add": {"component_groups": ["siege:bare"]}}; events["siege:bare_off"] = {"remove": {"component_groups": ["siege:bare"]}}
     if mid == "stone_vigil":   # mapmakers: /event entity @e[type=siege:stone_vigil,r=4] siege:place makes one stay for good
         groups["siege:placed"] = {"minecraft:persistent": {}}; events["siege:place"] = {"add": {"component_groups": ["siege:placed"]}}
+    if fam == "champion":
+        # NPC stand-ins for players (scripts/bestiary/champions.js drives them). Who they fight is a stance, set by event:
+        #   siege:hostile  hunts players and guards     siege:realm  hunts monsters     siege:calm  only hits back
+        # Three flags the script flips, which the animation reads: bow out (charged), shield up (saddled), drinking (ignited).
+        monsters = {"all_of": [roster.fam("monster"), roster.fam("creeper", "!=")]}
+        groups["siege:stance_hostile"] = roster.targets(roster.any_of(roster.fam("player"), roster.fam("siege_guard")), 32)
+        groups["siege:stance_realm"] = roster.targets(monsters, 20)
+        events["siege:hostile"] = {"remove": {"component_groups": ["siege:stance_realm"]}, "add": {"component_groups": ["siege:stance_hostile"]}}
+        events["siege:realm"] = {"remove": {"component_groups": ["siege:stance_hostile"]}, "add": {"component_groups": ["siege:stance_realm"]}}
+        events["siege:calm"] = {"remove": {"component_groups": ["siege:stance_hostile", "siege:stance_realm"]}}
+        for flag, comp in (("bow", "minecraft:is_charged"), ("guard", "minecraft:is_saddled"), ("drink", "minecraft:is_ignited")):
+            groups[f"siege:{flag}"] = {comp: {}}
+            events[f"siege:{flag}_on"] = {"add": {"component_groups": [f"siege:{flag}"]}}; events[f"siege:{flag}_off"] = {"remove": {"component_groups": [f"siege:{flag}"]}}
+        c["minecraft:persistent"] = {}; c.pop("minecraft:despawn", None)
     if m.get("boss"):
         c["minecraft:boss"] = {"should_darken_sky": False, "hud_range": 48}; c["minecraft:persistent"] = {}
         c["minecraft:fire_immune"] = {}
     elif fam in ("boss_add", "raider"): c["minecraft:persistent"] = {}
-    else: c["minecraft:despawn"] = {"despawn_from_distance": {}}
+    elif fam != "champion": c["minecraft:despawn"] = {"despawn_from_distance": {}}
     if not m.get("no_loot") and mid in DROPS: c["minecraft:loot"] = {"table": f"loot_tables/entities/bestiary/{mid}.json"}
+    if m.get("glider"):   # flies the way a phantom does: circles high over its target, then swoops
+        for k in list(c):
+            if k.startswith(("minecraft:navigation", "minecraft:movement.", "minecraft:jump", "minecraft:behavior.")) and k not in ("minecraft:behavior.nearest_attackable_target", "minecraft:behavior.hurt_by_target"): c.pop(k)
+        c.update({"minecraft:physics": {"has_gravity": False}, "minecraft:can_fly": {}, "minecraft:flying_speed": {"value": 0.2},
+                  "minecraft:movement.glide": {"start_speed": 0.1, "speed_when_turning": 0.2}, "minecraft:attack": {"damage": m["dmg"]},
+                  "minecraft:behavior.swoop_attack": {"priority": 2, "damage_reach": 0.3, "speed_multiplier": 1.0, "delay_range": [8.0, 16.0]},
+                  "minecraft:behavior.circle_around_anchor": {"priority": 3, "radius_change": 1.0, "radius_adjustment_chance": 0.004, "height_adjustment_chance": 0.002857,
+                      "goal_radius": 1.0, "angle_change": 15.0, "radius_range": [5.0, 15.0], "height_offset_range": [-4.0, 5.0], "height_above_target_range": [8.0, 14.0]},
+                  "minecraft:persistent": {}})
+        c["minecraft:damage_sensor"] = {"triggers": [{"cause": "fall", "deals_damage": "no"}, {"cause": "suffocation", "deals_damage": "no"}]}
+        c.pop("minecraft:despawn", None)
     return {"format_version": "1.21.60", "minecraft:entity": {"description": desc, "component_groups": groups, "components": c, "events": events}}
 
 # ---------- animations ----------
@@ -188,7 +238,7 @@ def anim_for(m, model):
         k = 45 if plan == "biped" else 8
         rot("leg_r", f"{WALK}*{k}"); rot("leg_l", f"-{WALK}*{k}")
         idle = "math.sin(query.life_time*90)*3"
-        raised = "-80+" if m["id"] in ("lost_villager", "wrongling", "barrow_wight", "drowned_bride", "tolling_shade", "mother_echo", "mother_of_changelings") and m["id"] not in ("wrongling", "lost_villager") else ""
+        raised = "-80+" if m["id"] in ("lost_villager", "wrongling", "drowned_bride", "tolling_shade", "mother_echo", "mother_of_changelings") and m["id"] not in ("wrongling", "lost_villager") else ""
         rot("arm_r", f"{raised}-{WALK}*35 - math.sin(variable.attack_time*180)*95 + {idle}"); rot("arm_l", f"{raised}{WALK}*35 - {idle}")
     if plan == "float" and "body" in names: b.setdefault("body", {})["position"] = ["0", "math.sin(query.life_time*120)*1.5", "0"]
     if plan == "quad":
@@ -332,6 +382,57 @@ def merge_lang(path, lines):
     out = [l for l in old if l.split("=")[0] not in keys] + lines
     write(path, "\n".join(out) + "\n")
 
+# ---------- bodies: what a mob leaves on the field when it dies ----------
+# One entity (siege:body) wears any mob's shape and skin, picked by its siege:kind property, so a
+# battlefield of bodies costs one cheap entity each: no AI, no collisions with players, no ticking parts.
+NO_BODY_FAMILIES = ("boss_prop", "projectile", "summon", "seep")
+def write_bodies(built):
+    kinds = [mid for mid, (m, model) in built.items() if m.get("family", "boss") not in NO_BODY_FAMILIES
+             and m.get("material", "entity_alphatest") == "entity_alphatest"      # ghosts and shades leave nothing behind
+             and any(b["name"] == "root" for b in model.bones)]
+    assert len(kinds) <= 64, "raise the siege:kind range"
+    geo = {f"g{i}": f"geometry.siege_b.{k}" for i, k in enumerate(kinds)}; tex = {f"t{i}": f"textures/entity/siege/bestiary/{k}" for i, k in enumerate(kinds)}
+    write(BP + "entities/bestiary/body.json", {"format_version": "1.21.60", "minecraft:entity": {
+        "description": {"identifier": "siege:body", "is_spawnable": False, "is_summonable": True, "is_experimental": False, "properties": {
+            "siege:kind": {"type": "int", "range": [0, 63], "default": 0, "client_sync": True},
+            "siege:size": {"type": "float", "range": [0.2, 4.0], "default": 1.0, "client_sync": True},
+            "siege:fading": {"type": "bool", "default": False, "client_sync": True}}},
+        "component_groups": {"siege:gone": {"minecraft:instant_despawn": {}}},
+        "components": {
+            "minecraft:type_family": {"family": ["inanimate", "siege_body"]},
+            "minecraft:collision_box": {"width": 0.5, "height": 0.3},
+            "minecraft:health": {"value": 1, "max": 1},
+            "minecraft:damage_sensor": {"triggers": [{"cause": "all", "deals_damage": "no"}]},
+            "minecraft:physics": {}, "minecraft:pushable": {"is_pushable": False, "is_pushable_by_piston": True},
+            "minecraft:knockback_resistance": {"value": 1},
+            "minecraft:timer": {"time": 900, "looping": False, "time_down_event": {"event": "siege:gone"}}},   # failsafe: never outlives 15 minutes
+        "events": {"siege:gone": {"add": {"component_groups": ["siege:gone"]}}}}})
+    write(RP + "entity/bestiary/body.entity.json", {"format_version": "1.10.0", "minecraft:client_entity": {"description": {
+        "identifier": "siege:body", "materials": {"default": "entity_alphatest"}, "textures": tex, "geometry": geo,
+        "animations": {"fall": "animation.siege_b.body.fall", "down": "animation.siege_b.body.down", "sink": "animation.siege_b.body.sink", "size": "animation.siege_b.body.size",
+                       "life": "controller.animation.siege_b.body"},
+        "scripts": {"animate": ["life", "size"]}, "render_controllers": ["controller.render.siege_body"]}}})
+    write(RP + "animations/bestiary_body.animation.json", {"format_version": "1.8.0", "animations": {
+        # tips over backwards, hits the ground, settles
+        "animation.siege_b.body.fall": {"loop": "hold_on_last_frame", "animation_length": 0.7, "bones": {"root": {
+            "rotation": {"0.0": [0, 0, 0], "0.15": [-12, 0, 2], "0.45": [-94, 0, 4], "0.55": [-86, 0, 3], "0.7": [-90, 0, 3]},
+            "position": {"0.0": [0, 0, 0], "0.45": [0, 1, 0], "0.55": [0, 2.5, 0], "0.7": [0, 1, 0]}}}},
+        "animation.siege_b.body.down": {"loop": True, "bones": {"root": {"rotation": [-90, 0, 3]}}},
+        # sinks into the ground over five seconds
+        "animation.siege_b.body.sink": {"loop": "hold_on_last_frame", "animation_length": 5.0, "bones": {"root": {
+            "position": {"0.0": [0, 1, 0], "5.0": [0, -9, 0]}, "scale": {"0.0": [1, 1, 1], "5.0": [0.9, 0.9, 0.55]}}}},
+        "animation.siege_b.body.size": {"loop": True, "bones": {"root": {"scale": "query.property('siege:size')"}}}}})
+    write(RP + "animation_controllers/bestiary_body.animation_controllers.json", {"format_version": "1.10.0", "animation_controllers": {
+        "controller.animation.siege_b.body": {"initial_state": "lying", "states": {
+            "lying": {"animations": ["fall"], "transitions": [{"fading": "query.property('siege:fading')"}]},
+            "fading": {"animations": ["down", "sink"]}}}}})
+    write(RP + "render_controllers/siege_body.render_controllers.json", {"format_version": "1.8.0", "render_controllers": {
+        "controller.render.siege_body": {"arrays": {"geometries": {"Array.shapes": [f"Geometry.g{i}" for i in range(len(kinds))]},
+                                                    "textures": {"Array.skins": [f"Texture.t{i}" for i in range(len(kinds))]}},
+            "geometry": "Array.shapes[query.property('siege:kind')]", "materials": [{"*": "Material.default"}],
+            "textures": ["Array.skins[query.property('siege:kind')]"]}}})
+    return {"siege:" + k: {"kind": i, "size": built[k][0].get("scale", 1)} for i, k in enumerate(kinds)}
+
 def main():
     lang = []; anims = {}; data_mobs = {}; built = {}
     for m in roster.MOBS:
@@ -356,6 +457,7 @@ def main():
         "controller.render.siege_bestiary": {"geometry": "Geometry.default", "materials": [{"*": "Material.default"}], "textures": ["Texture.default"]},
         "controller.render.siege_bestiary_variant": {"arrays": {"textures": {"Array.skins": ["Texture.default", "Texture.alt"]}},
             "geometry": "Geometry.default", "materials": [{"*": "Material.default"}], "textures": ["Array.skins[query.variant]"]}}})
+    bodies = write_bodies(built)
     # items
     all_items = [(i, n, "gem", c, {}, l) for i, n, c, l in items.MATERIALS] + [(i, n, "sigil", c, {}, l) for i, n, _, c, l in items.SIGILS] + list(items.RELICS)
     tex = {}; data_items = {}
@@ -376,7 +478,8 @@ def main():
     sig = {"siege:" + i: "siege:" + b for i, _, b, _, _ in items.SIGILS}
     write(BP + "scripts/bestiary/data.js", "// GENERATED by studio/bestiary/build.py from roster.py and items.py. Do not edit by hand.\n"
           + "export const MOBS = " + json.dumps(data_mobs, indent=1) + ";\n\nexport const ITEMS = " + json.dumps(data_items, indent=1)
-          + ";\n\nexport const SIGILS = " + json.dumps(sig, indent=1) + ";\n")
+          + ";\n\nexport const SIGILS = " + json.dumps(sig, indent=1)
+          + ";\n\n// Which fallen body each mob leaves (see bodies.js): kind picks its shape and skin, size is its scale.\nexport const BODIES = " + json.dumps(bodies, indent=1) + ";\n")
     print(len(roster.MOBS), "entities,", len(all_items), "items")
     return built
 

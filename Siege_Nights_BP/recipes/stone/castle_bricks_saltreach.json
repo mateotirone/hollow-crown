@@ -1,0 +1,27 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "siege:castle_bricks_saltreach_recipe"
+    },
+    "tags": [
+      "siege_workshop"
+    ],
+    "pattern": [
+      "SS",
+      "SS"
+    ],
+    "key": {
+      "S": {
+        "item": "siege:castle_stone_saltreach"
+      }
+    },
+    "result": {
+      "item": "siege:castle_bricks_saltreach",
+      "count": 4
+    },
+    "unlock": {
+      "context": "AlwaysUnlocked"
+    }
+  }
+}

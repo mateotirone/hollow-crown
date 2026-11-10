@@ -23,12 +23,22 @@ def T(p):
         masks[p]=''.join(mask); buf=io.BytesIO(); im.save(buf,'PNG')
         tex[p]='data:image/png;base64,'+base64.b64encode(buf.getvalue()).decode()
     else:
-        tex[p]='data:image/png;base64,'+base64.b64encode(open(RP+p,'rb').read()).decode()
+        raw=open(RP+p,'rb').read()
+        if 'textures/blocks/' in p:
+            # animated blocks are vertical flipbook strips: show the first frame
+            from PIL import Image
+            import io
+            im=Image.open(io.BytesIO(raw))
+            if im.height>im.width and im.height%im.width==0:
+                buf=io.BytesIO(); im.convert('RGBA').crop((0,0,im.width,im.width)).save(buf,'PNG'); raw=buf.getvalue()
+        tex[p]='data:image/png;base64,'+base64.b64encode(raw).decode()
     return p
 groups=[]
 def g(id,name,cat,variants,note=None):
     for v in variants:
         for k,p in v.get('mats',{}).items(): T(p)
+        for it in v.get('items',[]):
+            for k,p in it.get('mats',{}).items(): T(p)
     groups.append({"id":id,"name":name,"cat":cat,"variants":variants,**({"note":note} if note else {})})
 cube=lambda label,mats:{"label":label,"model":"cube","mats":mats}
 one=lambda p:{"*":B+p+'.png'}
@@ -49,9 +59,62 @@ for k,n in [("","Vale")]+RG:
     pre='siege_castle_stone'+('_'+k if k else ''); sub='' if not k else 'regional/'
     for c,cn in enumerate(['clean','light cracks','heavy cracks']): regall.append(cube(f"{n}, {cn}",one(f'{sub}{pre}_stone_{c}')))
     regall.append(cube(f"{n}, mossy",one(f'{sub}siege_mossy_castle_stone'+('_'+k if k else ''))))
+    regall.append(cube(f"{n}, cracked block",one(f'{sub}siege_cracked_castle_stone'+('_'+k if k else ''))))
 g("regional","Castle Stone by region","Regional styles",[{"label":"All regions","model":"lineup","cols":6,"gap":1.2,"items":reg,"mats":one('siege_castle_stone')},
-  {"label":"Damage stages","model":"lineup","cols":4,"gap":1.2,"items":regall,"mats":one('siege_castle_stone')}]+reg,
+  {"label":"Damage stages","model":"lineup","cols":5,"gap":1.2,"items":regall,"mats":one('siege_castle_stone')}]+reg,
   "The same Castle Stone painted in each region's palette. Every region gets the same 3 crack stages and the iron, diamond and netherite tiers, so the damage model works everywhere.")
+# ---- Castle Stone family: the five building blocks, per region
+FR=[("","Vale")]+[x for x in RG if x[0]!='undertow']
+FK=[("stone","Castle Stone"),("tiles","Tiles"),("bricks","Bricks"),("cobbled","Cobbled"),("smooth","Smooth")]
+def fam(kind,k): return ('' if not k else 'regional/')+('siege_castle_stone' if kind=='stone' else 'siege_castle_'+kind)+('_'+k if k else '')
+allfam=[cube(f"{n} {kn}",one(fam(kd,k))) for k,n in FR for kd,kn in FK]
+vs=[{"label":"All 25","model":"lineup","cols":5,"gap":1.2,"items":allfam,"mats":one('siege_castle_stone')}]
+for k,n in FR:
+    items=[cube(kn,one(fam(kd,k))) for kd,kn in FK]
+    vs.append({"label":n,"model":"lineup","cols":5,"gap":1.2,"items":items,"mats":one(fam('stone',k))})
+for kd,kn in FK[1:]:
+    items=[cube(f"{n}, {cn}",one(fam(kd,k)+f'_stone_{c}')) for k,n in FR for c,cn in enumerate(['clean','light cracks','heavy cracks'])]
+    vs.append({"label":kn+" damage","model":"lineup","cols":3,"gap":1.2,"items":items,"mats":one(fam(kd,''))})
+g("stone_family","Castle Stone family","Regional styles",vs,"The five building blocks every settlement uses from the first hut to the top tier: Castle Stone, Tiles, Bricks, Cobbled and Smooth. Same shapes in every region, only the colours change. Each one cracks in three stages like the walls.")
+# ---- settlement wall levels: a sample section of every level in every region's blocks
+import sys as _sys; _sys.path.insert(0,'/mnt/project-files/siege-nights/studio/art')
+import build_walls as _bw
+builds={}
+for _L in _bw.LEVELS: builds[f"wall_{_L['n']}"]=_bw.section(_L)
+_BAN={"":"red","frostmarch":"light_blue","saltreach":"cyan","emberwaste":"orange","blackfen":"lime"}
+def _tiered(k,t): return f"siege_castle_stone_{t}_0" if not k else f"regional/siege_castle_stone_{k}_{t}_0"
+for k,n in FR:
+    rk=k or 'vale'; vs=[]
+    for _L in _bw.LEVELS:
+        tier=_L.get('tier'); woodgate=_L['gate']=='wood'
+        m={"*":B+fam('stone',k)+'.png',"stone":B+fam('stone',k)+'.png',"bricks":B+fam('bricks',k)+'.png',"cobbled":B+fam('cobbled',k)+'.png',
+           "smooth":B+fam('smooth',k)+'.png',"tiles":B+fam('tiles',k)+'.png',"log":B+f'regional/siege_palisade_{rk}.png',"planks":B+f'regional/siege_wall_planks_{rk}.png',
+           "gate":B+(f'regional/siege_wall_planks_{rk}.png' if woodgate else f'regional/siege_castle_gate_{rk}'+('_'+tier if tier else '')+'.png'),
+           "port":B+f'regional/siege_portcullis_{rk}'+('_'+tier if tier else '')+'.png',"roof":B+'siege_roof_shingles.png',"banner":B+f'siege_banner_{_BAN[k]}.png',
+           "rein":B+_tiered(k,_L.get('rein','iron'))+'.png'}
+        used={b[3] for b in builds[f"wall_{_L['n']}"]}
+        vs.append({"label":f"{_L['n']}. {_L['name']}","model":"build","build":f"wall_{_L['n']}","mats":{r:p for r,p in m.items() if r in used or r=="*"}})
+    g("walls_"+rk,f"Settlement wall, {n}","Walls and gates",vs,"A sample stretch of your settlement wall with its gate, at every level from 1 to 10, in this region's blocks. Higher levels have more towers around the plot than this short stretch can show.")
+gt=[]
+for k,n in FR:
+    rk=k or 'vale'
+    for gid in ('castle_gate','portcullis'):
+        for t in ['','iron','diamond','netherite']:
+            gt.append({"label":f"{n} {'gate' if gid=='castle_gate' else 'portcullis'}{', '+t if t else ''}","model":"geo","geo":"geometry.siege_gate_panel","mats":one(f'regional/siege_{gid}_{rk}'+('_'+t if t else ''))})
+g("gates_regional","Gates and portcullises by region","Walls and gates",[{"label":"All 40","model":"lineup","cols":8,"gap":1.2,"items":gt,"mats":one('siege_castle_gate')}]+gt,"Each region's gate uses that region's wood, and its portcullis picks up a hint of the local stone. Metal tiers are the same everywhere.")
+# ---- menu skin proposal (mock-ups, not in game yet)
+g("ui_mock","Menu mock-ups","Menus (proposal)",[{"label":n,"model":"flat","mats":{"*":f"../art/ui/mockup_{k}_1x.png"}} for k,n in [("mason","Mason shop"),("townhall","Town hall"),("npc","Talking to an NPC"),("oaths","Tree of Oaths"),("knight","Knight skill tree"),("sorcerer","Sorcerer skill tree")]],
+  "A proposal for how our menus could look instead of the stock grey pop-up. These are pictures, not working menus yet.")
+g("ui_parts","Menu pieces","Menus (proposal)",[{"label":n,"model":"flat","mats":{"*":f"textures/ui/hc/{k}.png"}} for k,n in [("panel","Panel"),("button","Button"),("button_hover","Button, selected"),("slot","Item slot"),("slot_hover","Item slot, selected"),("parchment","Parchment"),("coin","Coin")]],
+  "The pieces the menu skin is built from. The coin is a stand-in until the currency is designed.")
+g("coins","Coins","Economy",[{"label":"Iron coin","model":"item","mats":{"*":I+"siege_coin.png"}},{"label":"Gold coin","model":"item","mats":{"*":I+"siege_gold_coin.png"}}],"The everyday iron coin and the gold coin worth 64, both struck with the old king's crowned head.")
+# ---- portraits of each settlement's prior leaders (lore thread's brief, studio/art/PORTRAIT-BRIEF.md)
+import re as _re
+_rows=[_re.split(r'\s*\|\s*',l.strip().strip('|')) for l in open('/mnt/project-files/siege-nights/studio/art/PORTRAIT-BRIEF.md') if l.startswith('| `')]
+_pl={}
+for r_ in _rows: _pl.setdefault(r_[1],[]).append(r_)
+for pl,rs in _pl.items():
+    g("portrait_"+pl.lower(),pl+" portraits","Portraits",[{"label":r_[2],"model":"flat","mats":{"*":"textures/entity/portrait/"+r_[0].strip(' `')}} for r_ in rs],"The three people who held this ground before you, as they hang in the settlement's Library.")
 g("mossy","Mossy Castle Stone","Blocks",[cube("Block",one('siege_mossy_castle_stone'))])
 g("cracked","Cracked Castle Stone","Blocks",[cube("Block",one('siege_cracked_castle_stone'))])
 for gid,gname in [("portcullis","Portcullis"),("castle_gate","Castle Gate")]:
@@ -145,6 +208,30 @@ for mb in _roster.MOBS:
     nm=mb['name']+(' (echo)' if mb['id']=='mother_echo' else '')
     g("b_"+mb['id'],nm,cat,[{"label":mb['name'],"model":"entity","geo":gi,"mats":{"*":tp}}],note)
 
+# ---- Dragons, the Choir, Throne Seal, worn crown (auto-skips anything whose files are missing)
+def _ent(gid,name,cat,geofile,variants,note=None):
+    if not os.path.exists(RP+geofile): return
+    x=json.load(open(RP+geofile))['minecraft:geometry'][0]; gi=x['description']['identifier']
+    bgeos[gi]={"tw":x['description']['texture_width'],"th":x['description']['texture_height'],"bones":x['bones']}
+    vs=[{"label":l,"model":"entity","geo":gi,"mats":{"*":p}} for l,p in variants if os.path.exists(RP+p)]
+    if vs: g(gid,name,cat,vs,note)
+for _k,_n in [("cinderwing","Cinderwing"),("wyvern","Wyvern"),("drake","Drake"),("wyrm","Wyrm")]:
+    _ent("dragon_"+_k,_n,"Dragons",f'models/entity/dragons/{_k}.geo.json',[(_n,f'textures/entity/siege/dragons/{_k}.png')],"Adult shape. Hatchlings and fledglings are the same model, smaller.")
+if os.path.exists(RP+B+'dragons/siege_dragon_roost_side.png'):
+    g("dragon_blocks","Dragon Roost and Nest","Dragons",[sided("Roost",'dragons/siege_dragon_roost_side','dragons/siege_dragon_roost_top','dragons/siege_dragon_roost_side'),sided("Nest",'dragons/siege_dragon_nest_side','dragons/siege_dragon_nest_top','dragons/siege_dragon_nest_side')])
+    g("dragon_items","Dragon item icons","Dragons",[item(n,'dragons/siege_dragon_'+k) for n,k in [("Egg","egg"),("Saddle","saddle"),("Horn","horn")]])
+# ---- 3D held weapons for players
+for _k,_n in [("longsword","Longsword"),("warhammer","Warhammer"),("minute_hand","Minute Hand"),("oath_of_oswin","The Kept Oath"),("warlords_brand","The Warlord's Brand"),("rimefang_bow","Rimefang Bow")]:
+    _ent("weapon_"+_k,_n,"Player weapons",f'models/entity/weapons/{_k}.geo.json',[(_n,f'textures/entity/siege/weapons/{_k}.png')],"How it looks in your hand. The inventory icon stays flat.")
+_ent("u_boat","Latticewood Boat","The Hollow",'models/entity/hollowfolk/lattice_boat.geo.json',[("Boat",'textures/entity/hollowfolk/lattice_boat.png')])
+_ent("u_heart","Heart of the Hollow, resting","Crown",'models/entity/resting_heart.geo.json',[("Resting",'textures/entity/siege_resting_heart.png')])
+for k,n in [("choir_conductor","The Conductor"),("choir_singer","Singer"),("hollow_regent","Hollow Regent")]:
+    _ent("u_"+k,n,"The Hollow Choir",f'models/entity/undertow/{k}.geo.json',[(n,f'textures/entity/siege/undertow/{k}.png')])
+_ent("carriage","Train Carriage","Horses and rail",'models/entity/carriage.geo.json',[("Carriage",'textures/entity/siege/carriage.png')],"Rides normal Minecraft rails. Four seats on two benches.")
+if os.path.exists(RP+I+'horses/siege_train_carriage.png'): g("carriage_icon","Train Carriage icon","Horses and rail",[item("Icon",'horses/siege_train_carriage')])
+_ent("throne_seal","Throne Seal","Crown and Citadel",'models/entity/throne_seal.geo.json',[("Seal",'textures/entity/siege_throne_seal.png')],"Floats in front of the throne during a Storm.")
+_ent("crown_worn","The Hollow Crown (worn)","Crown and Citadel",'models/entity/hollow_crown.geo.json',[("Crown",'textures/models/armor/siege_hollow_crown.png')])
+
 # ---- geometry
 geos={}
 for f in os.listdir(RP+'models/blocks'):
@@ -180,8 +267,20 @@ geos['geometry.armor1']={"tw":64,"th":32,"bones":[bone("head",[0,24,0],[c([-4,24
 geos['geometry.armor2']={"tw":64,"th":32,"bones":[bone("body",[0,24,0],[c([-4,12,-2],[8,12,4],[16,16],0.5)]),
   bone("rightLeg",[-1.9,12,0],[c([-3.9,0,-2],[4,12,4],[0,16],0.5)]),bone("leftLeg",[1.9,12,0],[c([-0.1,0,-2],[4,12,4],[0,16],0.5,True)])]}
 geos.update(bgeos)
+# ---- catch-all: every PNG in the pack that no group above shows gets a place, so nothing can be missing from the Studio
+_seen=set(tex); _left={}
+for _d,_,_fs in os.walk(RP+'textures'):
+    for _f in sorted(_fs):
+        _p=os.path.relpath(os.path.join(_d,_f),RP)
+        if _f.endswith('.png') and _p not in _seen and 'invisible' not in _f: _left.setdefault(os.path.dirname(_p),[]).append(_p)
+_NAMES={'textures/blocks':'More blocks','textures/blocks/regional':'Regional blocks: reinforced tiers and open gates','textures/items':'More item icons','textures/models/armor':'Worn relic sheets','textures/ui/hc':'Menu pieces: skill tree sockets'}
+for _d,_ps in sorted(_left.items()):
+    _kind='cube' if '/blocks' in _d else 'item' if '/items' in _d else 'flat'
+    _vs=[{"label":nice(os.path.basename(q)[:-4].replace('siege_','').replace('hc_','')),"model":_kind,"mats":{"*":q}} for q in _ps]
+    if len(_vs)>12 and _kind=='cube': _vs=[{"label":"All","model":"lineup","cols":7,"gap":1.2,"items":_vs,"mats":{"*":_ps[0]}}]+_vs
+    g("rest_"+_d.replace('/','_'),_NAMES.get(_d,'More: '+_d.replace('textures/','')),"Everything else",_vs,"Shown as a flat sheet or plain cube because no 3D model is set up for it here yet." if _kind!='item' else None)
 _o=[];[_o.append(x["cat"]) for x in groups if x["cat"] not in _o]
 _o.remove("Other");_o.append("Other")
 groups.sort(key=lambda x:_o.index(x["cat"]))
-json.dump({"groups":groups,"textures":tex,"geos":geos,"masks":masks},open(OUT,'w'))
+json.dump({"builds":builds,"groups":groups,"textures":tex,"geos":geos,"masks":masks},open(OUT,'w'))
 print(len(groups),'groups',len(tex),'textures',os.path.getsize(OUT)//1024,'KB')

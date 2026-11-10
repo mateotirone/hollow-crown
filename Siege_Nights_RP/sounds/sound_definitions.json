@@ -1,0 +1,375 @@
+{
+ "format_version": "1.14.0",
+ "sound_definitions": {
+  "siege.dragon.cinderwing.idle": {
+   "category": "neutral",
+   "max_distance": 24,
+   "sounds": [
+    {
+     "name": "sounds/siege/dragon/cinderwing_idle",
+     "volume": 1.0
+    }
+   ]
+  },
+  "siege.dragon.cinderwing.roar": {
+   "category": "neutral",
+   "max_distance": 64,
+   "sounds": [
+    {
+     "name": "sounds/siege/dragon/cinderwing_roar",
+     "volume": 1.0
+    }
+   ]
+  },
+  "siege.dragon.cinderwing.hurt": {
+   "category": "neutral",
+   "max_distance": 24,
+   "sounds": [
+    {
+     "name": "sounds/siege/dragon/cinderwing_hurt",
+     "volume": 1.0
+    }
+   ]
+  },
+  "siege.dragon.cinderwing.purr": {
+   "category": "neutral",
+   "max_distance": 24,
+   "sounds": [
+    {
+     "name": "sounds/siege/dragon/cinderwing_purr",
+     "volume": 1.0
+    }
+   ]
+  },
+  "siege.dragon.cinderwing.snarl": {
+   "category": "neutral",
+   "max_distance": 24,
+   "sounds": [
+    {
+     "name": "sounds/siege/dragon/cinderwing_snarl",
+     "volume": 1.0
+    }
+   ]
+  },
+  "siege.dragon.cinderwing.whimper": {
+   "category": "neutral",
+   "max_distance": 24,
+   "sounds": [
+    {
+     "name": "sounds/siege/dragon/cinderwing_whimper",
+     "volume": 1.0
+    }
+   ]
+  },
+  "siege.dragon.cinderwing.death": {
+   "category": "neutral",
+   "max_distance": 64,
+   "sounds": [
+    {
+     "name": "sounds/siege/dragon/cinderwing_death",
+     "volume": 1.0
+    }
+   ]
+  },
+  "siege.dragon.cinderwing.chirp": {
+   "category": "neutral",
+   "max_distance": 24,
+   "sounds": [
+    {
+     "name": "sounds/siege/dragon/cinderwing_chirp",
+     "volume": 1.0
+    }
+   ]
+  },
+  "siege.dragon.wyvern.idle": {
+   "category": "neutral",
+   "max_distance": 24,
+   "sounds": [
+    {
+     "name": "sounds/siege/dragon/wyvern_idle",
+     "volume": 1.0
+    }
+   ]
+  },
+  "siege.dragon.wyvern.roar": {
+   "category": "neutral",
+   "max_distance": 64,
+   "sounds": [
+    {
+     "name": "sounds/siege/dragon/wyvern_roar",
+     "volume": 1.0
+    }
+   ]
+  },
+  "siege.dragon.wyvern.hurt": {
+   "category": "neutral",
+   "max_distance": 24,
+   "sounds": [
+    {
+     "name": "sounds/siege/dragon/wyvern_hurt",
+     "volume": 1.0
+    }
+   ]
+  },
+  "siege.dragon.wyvern.purr": {
+   "category": "neutral",
+   "max_distance": 24,
+   "sounds": [
+    {
+     "name": "sounds/siege/dragon/wyvern_purr",
+     "volume": 1.0
+    }
+   ]
+  },
+  "siege.dragon.wyvern.snarl": {
+   "category": "neutral",
+   "max_distance": 24,
+   "sounds": [
+    {
+     "name": "sounds/siege/dragon/wyvern_snarl",
+     "volume": 1.0
+    }
+   ]
+  },
+  "siege.dragon.wyvern.whimper": {
+   "category": "neutral",
+   "max_distance": 24,
+   "sounds": [
+    {
+     "name": "sounds/siege/dragon/wyvern_whimper",
+     "volume": 1.0
+    }
+   ]
+  },
+  "siege.dragon.wyvern.death": {
+   "category": "neutral",
+   "max_distance": 64,
+   "sounds": [
+    {
+     "name": "sounds/siege/dragon/wyvern_death",
+     "volume": 1.0
+    }
+   ]
+  },
+  "siege.dragon.wyvern.chirp": {
+   "category": "neutral",
+   "max_distance": 24,
+   "sounds": [
+    {
+     "name": "sounds/siege/dragon/wyvern_chirp",
+     "volume": 1.0
+    }
+   ]
+  },
+  "siege.dragon.drake.idle": {
+   "category": "neutral",
+   "max_distance": 24,
+   "sounds": [
+    {
+     "name": "sounds/siege/dragon/drake_idle",
+     "volume": 1.0
+    }
+   ]
+  },
+  "siege.dragon.drake.roar": {
+   "category": "neutral",
+   "max_distance": 64,
+   "sounds": [
+    {
+     "name": "sounds/siege/dragon/drake_roar",
+     "volume": 1.0
+    }
+   ]
+  },
+  "siege.dragon.drake.hurt": {
+   "category": "neutral",
+   "max_distance": 24,
+   "sounds": [
+    {
+     "name": "sounds/siege/dragon/drake_hurt",
+     "volume": 1.0
+    }
+   ]
+  },
+  "siege.dragon.drake.purr": {
+   "category": "neutral",
+   "max_distance": 24,
+   "sounds": [
+    {
+     "name": "sounds/siege/dragon/drake_purr",
+     "volume": 1.0
+    }
+   ]
+  },
+  "siege.dragon.drake.snarl": {
+   "category": "neutral",
+   "max_distance": 24,
+   "sounds": [
+    {
+     "name": "sounds/siege/dragon/drake_snarl",
+     "volume": 1.0
+    }
+   ]
+  },
+  "siege.dragon.drake.whimper": {
+   "category": "neutral",
+   "max_distance": 24,
+   "sounds": [
+    {
+     "name": "sounds/siege/dragon/drake_whimper",
+     "volume": 1.0
+    }
+   ]
+  },
+  "siege.dragon.drake.death": {
+   "category": "neutral",
+   "max_distance": 64,
+   "sounds": [
+    {
+     "name": "sounds/siege/dragon/drake_death",
+     "volume": 1.0
+    }
+   ]
+  },
+  "siege.dragon.drake.chirp": {
+   "category": "neutral",
+   "max_distance": 24,
+   "sounds": [
+    {
+     "name": "sounds/siege/dragon/drake_chirp",
+     "volume": 1.0
+    }
+   ]
+  },
+  "siege.dragon.wyrm.idle": {
+   "category": "neutral",
+   "max_distance": 24,
+   "sounds": [
+    {
+     "name": "sounds/siege/dragon/wyrm_idle",
+     "volume": 1.0
+    }
+   ]
+  },
+  "siege.dragon.wyrm.roar": {
+   "category": "neutral",
+   "max_distance": 64,
+   "sounds": [
+    {
+     "name": "sounds/siege/dragon/wyrm_roar",
+     "volume": 1.0
+    }
+   ]
+  },
+  "siege.dragon.wyrm.hurt": {
+   "category": "neutral",
+   "max_distance": 24,
+   "sounds": [
+    {
+     "name": "sounds/siege/dragon/wyrm_hurt",
+     "volume": 1.0
+    }
+   ]
+  },
+  "siege.dragon.wyrm.purr": {
+   "category": "neutral",
+   "max_distance": 24,
+   "sounds": [
+    {
+     "name": "sounds/siege/dragon/wyrm_purr",
+     "volume": 1.0
+    }
+   ]
+  },
+  "siege.dragon.wyrm.snarl": {
+   "category": "neutral",
+   "max_distance": 24,
+   "sounds": [
+    {
+     "name": "sounds/siege/dragon/wyrm_snarl",
+     "volume": 1.0
+    }
+   ]
+  },
+  "siege.dragon.wyrm.whimper": {
+   "category": "neutral",
+   "max_distance": 24,
+   "sounds": [
+    {
+     "name": "sounds/siege/dragon/wyrm_whimper",
+     "volume": 1.0
+    }
+   ]
+  },
+  "siege.dragon.wyrm.death": {
+   "category": "neutral",
+   "max_distance": 64,
+   "sounds": [
+    {
+     "name": "sounds/siege/dragon/wyrm_death",
+     "volume": 1.0
+    }
+   ]
+  },
+  "siege.dragon.wyrm.chirp": {
+   "category": "neutral",
+   "max_distance": 24,
+   "sounds": [
+    {
+     "name": "sounds/siege/dragon/wyrm_chirp",
+     "volume": 1.0
+    }
+   ]
+  },
+  "siege.dragon.flap": {
+   "category": "neutral",
+   "max_distance": 32,
+   "sounds": [
+    {
+     "name": "sounds/siege/dragon/flap",
+     "volume": 1.0
+    }
+   ]
+  },
+  "siege.dragon.fire": {
+   "category": "neutral",
+   "max_distance": 32,
+   "sounds": [
+    {
+     "name": "sounds/siege/dragon/fire",
+     "volume": 1.0
+    }
+   ]
+  },
+  "siege.dragon.breathe": {
+   "category": "neutral",
+   "max_distance": 32,
+   "sounds": [
+    {
+     "name": "sounds/siege/dragon/breathe",
+     "volume": 1.0
+    }
+   ]
+  },
+  "siege.dragon.egg_crack": {
+   "category": "neutral",
+   "max_distance": 32,
+   "sounds": [
+    {
+     "name": "sounds/siege/dragon/egg_crack",
+     "volume": 1.0
+    }
+   ]
+  },
+  "siege.choir.hum": {
+   "category": "ambient",
+   "sounds": [
+    {
+     "name": "sounds/siege/choir/hum",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  }
+ }
+}
