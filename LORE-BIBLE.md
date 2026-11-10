@@ -317,3 +317,13 @@ Mateo's pick on a decision card, 2026-11-10 (relayed by the whole-mod review). D
 4. **Three down and the routes converge.** The third regional boss gives the first Surveyor's Field Note and says the three were "standing round" the cause. The six notes leave one thin place, and that is the Rift. (Three of five is the lore thread's number, not Mateo's.)
 
 Layers are kept: none of the new text names the Hollow, the truce, Edda or who leads. Lanternbog's mystery used to take "the Hollow" as its typed answer in the first chapter; it now asks how long Wenna Sedge was gone (eleven years).
+## The four regional roles (lore thread's proposal, not yet read by Mateo)
+
+None of the four is the Hollow's; each is what a region already knew before the bells. Full text in `scripts/lore/data/roles.js`.
+
+| Role | Region | First to hold it | Why the region keeps it |
+|---|---|---|---|
+| Dragon Rider | Emberwaste | Ysolt Cinder, a salt-carrier's daughter | The Waste was the one province the Grey Host never held. The dragons will not fly on the third night |
+| Forgemaster | Frostmarch | Hroda Deepforge, bellfounder; the Founding Bell was poured at her fire three generations later | The Order took the bell moulds but could not carry off the fire |
+| Captain | Saltreach | Merrin Holt, who burned forty Saltreach boats to stop the Host's second fleet | Every captain carries a share of Holt's Debt, which has never been marked paid |
+| Witch | Blackfen | Nobody; "Goody Sedge" has three graves | No books to burn: it is handed over in a cup |

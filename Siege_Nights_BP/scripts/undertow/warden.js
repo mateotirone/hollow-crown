@@ -152,7 +152,7 @@ world.afterEvents.playerBreakBlock.subscribe((e) => {
   if (p.getGameMode() === GameMode.Creative) return;
   const tool = p.getComponent("equippable")?.getEquipment(EquipmentSlot.Mainhand)?.typeId ?? "";
   const at = { x: e.block.location.x + 0.5, y: e.block.location.y + 0.5, z: e.block.location.z + 0.5 };
-  if (!/(diamond|netherite)_pickaxe$/.test(tool)) {
+  if (!/(diamond|netherite|choirsteel)_pickaxe$/.test(tool)) {
     say(p, "§7The ore crumbles to dust. It takes a diamond or netherite pickaxe to free it whole.");
     return;
   }
