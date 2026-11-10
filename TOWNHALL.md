@@ -126,3 +126,13 @@ When a hall is raised or upgraded, the owner's camera lifts off and circles the 
 ## Power origins
 
 Every Arcana power has an origin written by the lore feature (`scripts/lore/data/powers.js`, book `siege:fourteen_arts`). The Tree shows one line of it under each power. Four powers stay locked until the player finds where they come from: Echo Sight, Halfstep, Choir's Call and Veilstep. The lore feature sends `powerOriginInfo` (hints and lines) and `powerOrigin` ({ player, skill }) when one is found; the town hall remembers it on the player.
+
+## The tree screen
+
+Each branch opens as a graphical tree: a 6 by 6 grid of nodes, one row per ring, with connector lines behind them. The script sends an ordinary button form whose title starts with an invisible flag (`TREE_FLAG` in `townhall/tree_layout.js`); `Siege_Nights_RP/ui/server_form.json` draws any flagged form as the tree and leaves every other form alone. Buttons are sent in grid order and a button named `-` is an empty cell. Node pictures are `textures/ui/hc/node_*.png`; the lines are `tree_<branch>.png`.
+
+`python3 studio/build_tree_ui.py` writes the screen file and the line art from the layout, so rerun it when skills are added or moved. Players can switch to plain lists from the Tree's first page (saved per player as `plainTree`). This screen has not been seen in the game yet.
+
+## Rumor Board variety
+
+`rumorsFor(day, playerId, level, memory)` never offers the kind of job the player did last and avoids givers, places, reasons and targets they saw recently. One job in three carries a twist that shows when it is finished: a keepsake (ten named items, each given once), double pay, extra Renown, or a debt (no pay, one more guard on your walls, up to three). A self-test plays 120 days and fails if a job repeats.

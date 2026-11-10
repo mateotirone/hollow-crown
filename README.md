@@ -195,7 +195,7 @@ Builder commands: `/scriptevent siege:lore_list [collection]`, `siege:lore_give 
 
 - **Windows / phone / tablet:** open `hollow-crown.mcaddon`. Minecraft imports both packs.
 - Create or edit a world, go to **Behavior Packs**, activate **Siege Nights**. The resource pack turns on with it.
-- Built for Minecraft 1.21.90 or newer.
+- Built for Minecraft 26.30 or newer.
 
 ## Quick test (cheats on)
 
