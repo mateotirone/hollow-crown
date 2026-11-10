@@ -147,17 +147,20 @@ Every region builds with the same five blocks from the first hut to the top sett
 - **Boulder** projectile model (the trebuchet hurls an invisible one with a smoke trail) (right now it's a smoke trail)
 - **Banner patterns** so settlements can have different emblems, not just colors
 
-## The Undertow (16×16, final art by `studio/art/build_hollowcrown.py`; do not regenerate these PNGs from `studio/build_undertow.py`)
+## The Undertow (16×16, final art by `studio/art/build_hollowcrown.py` and the later pass `studio/art/build_hollow_blocks.py`; do not regenerate these PNGs from `studio/build_undertow.py`)
 
 Look comes from Mateo's Undertow concept art: purple twilight, dark basalt, hollow lattice trees, glowing pink and blue fungi, rivers of pale blue light. No sky.
 
 | Asset | File | Status |
 |---|---|---|
-| Veinstone (dark rock with glowing purple veins, the main ground rock) | `textures/blocks/siege_veinstone.png` | **Final style, awaiting your review** |
-| Veilmoss (`siege:undertow_moss`, purple web-like moss, ground cover) | `textures/blocks/siege_undertow_moss.png` | **Final style, awaiting your review**, wants separate top and side later |
+| Veinstone (dark rock, the main ground rock). Repainted 2026-11-10: quiet base, and four variants mixed at random (plain, and three with one short vein each) so hillsides no longer stripe | `textures/blocks/siege_veinstone.png`, `siege_veinstone_1.png` to `_3.png` (weights 5, 2, 2, 1 in `terrain_texture.json`) | **Final style, awaiting your review.** Random mixing not yet checked in game |
+| Veilmoss (`siege:undertow_moss`, purple moss in soft large clumps, ground cover). Repainted 2026-11-10, the checker web is gone | `textures/blocks/siege_undertow_moss.png` | **Final style, awaiting your review**, wants separate top and side later |
 | Veil Rock (the ceiling, near black) | `textures/blocks/siege_veil_rock.png` | **Final style, awaiting your review** |
-| Latticewood (see-through honeycomb wood of the giant trees, transparent holes) | `textures/blocks/siege_hollowwood_lattice.png` | **Final style, awaiting your review** |
-| Latticewood Core (same lattice with glowing pink-orange filling the holes) | `textures/blocks/siege_hollowwood_core.png` | **Final style, awaiting your review** |
+| Latticewood (see-through wood of the giant trees). Repainted 2026-11-10 as an organic honeycomb with uneven cells instead of four square holes | `textures/blocks/siege_hollowwood_lattice.png` | **Final style, awaiting your review** |
+| Latticewood Core (same honeycomb with glowing pink-orange filling the cells) | `textures/blocks/siege_hollowwood_core.png` | **Final style, awaiting your review** |
+| Veinstone Bricks and Cracked Veinstone Bricks (new 2026-11-10: dark violet stone bricks with magenta root veins, from the Hollow Crown reference; the cracked kind has glowing violet cracks) | `textures/blocks/siege_veinstone_bricks.png`, `siege_cracked_veinstone_bricks.png` | **Final style, awaiting your review.** Blocks registered in pull request #22 |
+| Pale Ash (new 2026-11-10: soft grey-lilac dust for the wastes) | `textures/blocks/siege_pale_ash.png` | **Final style, awaiting your review.** Block registered in pull request #22 |
+| Glint Cluster (`siege:glint_cluster`, new 2026-11-10: pale blue crystal cluster, cross plant, transparent background, should give light) | `textures/blocks/siege_glint_cluster.png` | **Final style, awaiting your review.** Block registered in pull request #22 |
 | Veilcap (glowing pink umbrella fungus, cross plant, transparent background) | `textures/blocks/siege_veilcap.png` | **Final style, awaiting your review** |
 | Veinstone Bricks (`siege:veinstone_bricks`, dark violet stone bricks: the Seat, bridges, the Truce Hall, the Far Door) | `textures/blocks/siege_veinstone_bricks.png` | Placeholder, textures thread is painting it |
 | Cracked Veinstone Bricks (`siege:cracked_veinstone_bricks`, same bricks with glowing violet cracks, scattered among the plain ones) | `textures/blocks/siege_cracked_veinstone_bricks.png` | Placeholder, textures thread is painting it |
@@ -339,9 +342,13 @@ All models were rebuilt in detail on 2026-11-10 (weapons in the hand, cloaks, ho
 Add a row here with the file path, size, what it should look like, and whether it needs transparency. A flat placeholder PNG at the right path is fine. The textures thread paints the final art over it and keeps the file name, size and transparency, so your JSON keeps working. Once a row says "Final style", don't regenerate that PNG from a placeholder script.
 | The Choir, the Conductor (64×64 box-UV skin; tall faceless robe, ring crown, long spread arms, baton) | `textures/entity/siege/undertow/choir_conductor.png`, model `models/entity/undertow/choir_conductor.geo.json` | Placeholder (flat colour), model is a rough block-out |
 | Singer (64×64 box-UV skin; narrow pale robe, head tipped back, mouth a dark hollow) | `textures/entity/siege/undertow/choir_singer.png`, model `models/entity/undertow/choir_singer.geo.json` | Placeholder (flat colour), model is a rough block-out |
-| Choir Ore (Veinstone with humming violet crystals, glows faintly) | `textures/blocks/siege_choir_ore.png` | **Final style, awaiting your review** |
+| Choir Ore (repainted 2026-11-10: big bright violet crystals on a calm dark base so it reads from a distance, glows faintly) | `textures/blocks/siege_choir_ore.png` | **Final style, awaiting your review** |
 | Raw Choir Ore (item, violet crystal lump) | `textures/items/siege_raw_choir_ore.png` | **Final style, awaiting your review** |
 | Choirsteel Ingot (item, pale violet metal bar) | `textures/items/siege_choirsteel_ingot.png` | **Final style, awaiting your review** |
+| Pretender, blade body (armoured claimant, half a home-made crown, greatsword, a vein of the Hollow up the breastplate) | `textures/entity/siege/bestiary/pretender_blade.png` | **Final style, awaiting your review** (`studio/art/build_pretenders.py`) |
+| Pretender, seer body (hooded robe, shards hanging round the head, staff) | `textures/entity/siege/bestiary/pretender_seer.png` | **Final style, awaiting your review** (`studio/art/build_pretenders.py`) |
+| Pretender, brute body (huge, horned, stone on the shoulders, axe) | `textures/entity/siege/bestiary/pretender_brute.png` | **Final style, awaiting your review** (`studio/art/build_pretenders.py`) |
+| Claimant's Seal (item: a wax seal pressed with a crooked crown, violet) | `textures/items/bestiary/pretender_seal.png` | **Final style, awaiting your review** (`studio/art/build_pretenders.py`) |
 | Choirsteel Helm (item icon: open-faced helm, pale violet metal, one blue gem on the brow) | `textures/items/siege_choirsteel_helmet.png` | **Final style, awaiting your review** (`studio/art/build_choirsteel.py`) |
 | Choirsteel Cuirass (item icon: breastplate with a blue gem at the heart) | `textures/items/siege_choirsteel_chestplate.png` | **Final style, awaiting your review** (`studio/art/build_choirsteel.py`) |
 | Choirsteel Greaves (item icon: leg plates) | `textures/items/siege_choirsteel_leggings.png` | **Final style, awaiting your review** (`studio/art/build_choirsteel.py`) |

@@ -122,3 +122,15 @@ addTests("plots", {
     }
   },
 });
+
+addTests("plots", {
+  "seven thin places, each with a protected clearing clear of plots and towns": () => {
+    const thin = WARDS.filter((w) => w.thin);
+    assertEqual(thin.length, 7);
+    for (const w of thin) {
+      assert(!outsideMap(w, []), `${w.name} is off the map`);
+      for (const p of PLOT_PLAN) assert(Math.hypot(p.x - w.x, p.z - w.z) > MAP.plotRadius + w.r + 40, `${w.name} crowds ${p.name}`);
+      for (const o of WARDS) if (o !== w) assert(Math.hypot(o.x - w.x, o.z - w.z) > o.r + w.r, `${w.name} overlaps ${o.name}`);
+    }
+  },
+});
