@@ -23,7 +23,7 @@ let plots;
 
 export function allPlots() {
   if (!plots) {
-    // Saved as { v, plots }. Worlds from before versioning saved the bare list: read that too.
+    // Saved as { _v, plots }, the same version stamp moduleStore() uses. Older worlds saved the bare list: read that too.
     const saved = JSON.parse(world.getDynamicProperty("siege:plots_registry") ?? "[]");
     plots = Array.isArray(saved) ? saved : saved.plots ?? [];
   }
@@ -32,7 +32,7 @@ export function allPlots() {
 
 const REGISTRY_VERSION = 1; // raise it, and upgrade older saves in allPlots(), whenever a plot's saved shape changes
 function savePlots() {
-  world.setDynamicProperty("siege:plots_registry", JSON.stringify({ v: REGISTRY_VERSION, plots }));
+  world.setDynamicProperty("siege:plots_registry", JSON.stringify({ _v: REGISTRY_VERSION, plots }));
 }
 
 export const mapMode = () => allPlots().length > 0;

@@ -42,8 +42,8 @@ function elytraTick() {
 
 const lastInside = new Map(); // player id -> last spot inside the edge
 
-// Zones an update has opened are remembered in the world (v = layout of this saved data, for later upgrades)
-const zones = moduleStore("siege:plots_zones", () => ({ v: 1, open: [] }));
+// Zones an update has opened are remembered in the world
+const zones = moduleStore("siege:plots_zones", () => ({ open: [] }));
 const openIds = () => {
   try {
     return zones.data.open;
