@@ -1,7 +1,7 @@
 // The four regional roles: Dragon Rider (Emberwaste), Forgemaster (Frostmarch), Captain (Saltreach), Witch (Blackfen).
 // Their skills are in skills.js (branches wing, forge, helm, hex). This file makes the skills do things.
 //
-// How a player gets one: raising a Stone Hall (tier 2) or better in a region's style has that region's role
+// How a player gets one: by a deed in the role's region (ROLE_DEEDS at the bottom), after which it is
 // offered at the Tree of Oaths. Any feature can also offer or grant one from the story:
 //   emit("offerRole", { player, role: "rider" | "forgemaster" | "captain" | "witch" })
 //   emit("grantRole", { player, role })
@@ -180,14 +180,32 @@ api.addGuardLimitHook((owner, limit) => {
 });
 
 // ---------- how a role is offered ----------
-// A region's people offer their role once you have raised a real hall among them.
+// Earned by a deed in the role's own region (Mateo, 2026-11-10), never by hall level.
+// boss: felling it offers the role to every player without a role who is close by when it dies.
+// event: another feature tells us the deed is done with emit("offerRole", { player, role }).
+export const ROLE_DEEDS = {
+  rider: { event: "the dragons feature, when your first dragon hatches", deed: "Hatch your first dragon in the Emberwaste" },
+  forgemaster: { boss: "siege:pale_huntsman", deed: "Bring down the Pale Huntsman in the Frostmarch" },
+  captain: { boss: "siege:drowned_bride", deed: "Lay the Drowned Bride to rest in Saltreach" },
+  witch: { boss: "siege:mother_of_changelings", deed: "End the Mother of Changelings in the Blackfen" },
+};
 export const roleForStyle = (style) => Object.keys(ROLES).find((id) => ROLES[id].region === style);
+export const roleForBoss = (type) => Object.keys(ROLE_DEEDS).find((id) => ROLE_DEEDS[id].boss === type);
+const DEED_REACH = 64; // blocks from the boss when it falls
 
-api.on("hallBuilt", ({ owner, level, style }) => {
-  const role = roleForStyle(style);
-  const player = playerById(owner);
-  if (!role || !player || level < 2) return;
-  const hero = heroOf(player);
-  if (hero.path !== "none" || hero.offers.includes(role)) return;
-  api.emit("offerRole", { player, role });
+world.afterEvents.entityDie.subscribe((event) => {
+  let role, where, dimension;
+  try {
+    role = roleForBoss(event.deadEntity.typeId);
+    if (!role) return;
+    where = event.deadEntity.location;
+    dimension = event.deadEntity.dimension;
+  } catch {
+    return;
+  }
+  for (const player of dimension.getPlayers({ location: where, maxDistance: DEED_REACH })) {
+    const hero = heroOf(player);
+    if (hero.path !== "none" || hero.offers.includes(role)) continue;
+    api.emit("offerRole", { player, role });
+  }
 });

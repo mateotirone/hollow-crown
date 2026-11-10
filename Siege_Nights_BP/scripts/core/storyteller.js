@@ -58,10 +58,11 @@ export const CHAPTERS = [
   { id: 3, name: "The Leaning", begins: (f) => (f.bossesFallen ?? 0) >= 1 },
   { id: 4, name: "The Miscount", begins: (f) => (f.bossesFallen ?? 0) >= 3 },
   { id: 5, name: "The Thin Place", begins: (f) => (f.bossesFallen ?? 0) >= 5 },
-  { id: 6, name: "The Long Night", begins: (f) => !!f.choirFallen },
+  // The Rift opening starts the Long Night (Mateo's choice). Until a feature reports riftOpened, the Choir falling stands in.
+  { id: 6, name: "The Long Night", begins: (f) => !!(f.riftOpened ?? f.choirFallen) },
   { id: 7, name: "The Quiet After", begins: (f) => !!f.morvaneFallen },
 ];
-export const FACTS = ["keepRaised", "siegesWon", "bossesFallen", "choirFallen", "morvaneFallen"];
+export const FACTS = ["keepRaised", "siegesWon", "bossesFallen", "choirFallen", "riftOpened", "morvaneFallen"];
 
 const factProviders = new Map(); // fact name -> (player | undefined) => value
 
@@ -386,6 +387,8 @@ addTests("storyteller", {
     assertEqual(chapterFor({ bossesFallen: 3 }), 4);
     assertEqual(chapterFor({ bossesFallen: 5 }), 5);
     assertEqual(chapterFor({ bossesFallen: 5, choirFallen: true }), 6);
+    assertEqual(chapterFor({ bossesFallen: 5, choirFallen: true, riftOpened: false }), 5);
+    assertEqual(chapterFor({ bossesFallen: 5, riftOpened: true }), 6);
     assertEqual(chapterFor({ bossesFallen: 5, choirFallen: true, morvaneFallen: true }), 7);
     assertEqual(CHAPTERS.map((c) => c.id), [0, 1, 2, 3, 4, 5, 6, 7]);
   },

@@ -48,8 +48,11 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - The story now has one spine from any of the twelve plots: your plot's first book sends you to Sister Wren in Millbrook, your plot's mystery leads to your own region's boss, each regional boss leaves two leads in other regions, and the third one down points you at the Surveyor's Field Notes.
 - The four regional roles (Dragon Rider, Forgemaster, Captain, Witch) each have a history, and their top four powers show a line of it in the Tree of Oaths.
 
+- The morning after the first Hollow soldiers appear is now told settlement by settlement, to the people of the settlement that saw them, instead of to everyone in the world at once.
+
 ### Changed
 - On the map a settlement's land is full size (60 blocks) from the day you arrive, and siege wins no longer grow it. Tiers still unlock wall levels, buildings and keep health. A Castle's keep now really has 600 health.
+- Regional roles are now earned by a deed in their region instead of by raising a Stone Hall there: Forgemaster for bringing down the Pale Huntsman, Captain for the Drowned Bride, Witch for the Mother of Changelings, and Dragon Rider when your first dragon hatches.
 - The endless siege (the Long Night) now begins when the Rift is opened, not when the Choir falls. Thunderstorms roll in with each wave of it and clear between them.
 - Every settlement gets its own night when the army stops at 3:17 and something else walks out. It is no longer once per world.
 - The evening before a siege is long for a settlement's first three sieges, then shortens, and shortens again after six.
