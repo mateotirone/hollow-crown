@@ -13,15 +13,15 @@ import vale
 
 ap = argparse.ArgumentParser(); ap.add_argument("out"); ap.add_argument("--render", action="store_true")
 ap.add_argument("--textures", default=""); ap.add_argument("--three", default=""); ap.add_argument("--shots", default="front-left,front-right,high,street")
-ap.add_argument("--dusk", action="store_true")
+ap.add_argument("--dusk", action="store_true"); ap.add_argument("--style", default="tudor")
 a = ap.parse_args(); os.makedirs(a.out, exist_ok=True)
 
-inn = vale.coaching_inn()
+inn = vale.coaching_inn(style=a.style)
 houses = [
-    (vale.townhouse(11, width=7, depth=9, storeys=2, ground="stone", roof="slate", chimney_side="w"), -10, 2),
-    (vale.townhouse(12, width=6, depth=8, storeys=3, ground="stone", roof="wood", chimney_side="e"), -18, 3),
-    (vale.townhouse(13, width=7, depth=10, storeys=2, ground="timber", jetty=False, chimney_side="w"), -27, 1),
-    (vale.townhouse(14, width=8, depth=9, storeys=2, ground="stone", chimney_side="e"), 26, 2),
+    (vale.townhouse(11, width=7, depth=9, storeys=2, ground="stone", roof="slate", chimney_side="w", style=a.style), -10, 2),
+    (vale.townhouse(12, width=6, depth=8, storeys=3, ground="stone", roof="wood", chimney_side="e", style=a.style), -18, 3),
+    (vale.townhouse(13, width=7, depth=10, storeys=2, ground="timber", jetty=False, chimney_side="w", style=a.style), -27, 1),
+    (vale.townhouse(14, width=8, depth=9, storeys=2, ground="stone", chimney_side="e", style=a.style), 26, 2),
 ]
 for b in [inn] + [h for h, _, _ in houses]:
     b.save_mcstructure(os.path.join(a.out, b.name + ".mcstructure"))

@@ -165,7 +165,7 @@ class Building:
                 for j in range(h):
                     bp.set(x + rx * i + ox, y + j, z + rz * i + oz, P["pane"]); bp.set(x + rx * i, y + j, z + rz * i, "air")
                 c = bp.get(x + rx * i + ox, y - 1, z + rz * i + oz)
-                if not c[0].endswith("_log"): bp.set(x + rx * i + ox, y - 1, z + rz * i + oz, P["trim"], facing=OPP[side], half="bottom")
+                if not c[0].endswith("_log"): bp.set(x + rx * i + ox, y - 1, z + rz * i + oz, P.get("wsill", P["trim"]), facing=OPP[side], half="bottom")
             if shutters is None: shutters = h3(x, y, z, self.seed + 31) < self.P.get("shutters", 0.3)
             for sx, sz in (((x - rx + 2 * ox, z - rz + 2 * oz), (x + rx * w + 2 * ox, z + rz * w + 2 * oz)) if shutters else ()):
                 if bp.get(sx, y, sz)[0] in ("keep", "air"):

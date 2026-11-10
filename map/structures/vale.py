@@ -4,12 +4,26 @@ from bp import Blueprint, DIRS, OPP, RIGHT
 from kit import Building, VALE, mix, grow, h3, side_cells
 
 
-def coaching_inn(seed=1):
+STYLES = {
+    # A: white plaster and dark timber under slate (the first proof)
+    "tudor": {},
+    # B: Norman stone throughout, ashlar piers where the timber was, slate roof
+    "stone": dict(frame="stone_bricks", infill=VALE["stone"], bracket="stone_brick_stairs",
+                  shutter="dark_oak_trapdoor", shutters=0.15, wsill="stone_brick_stairs"),
+    # C: warm red brick between pale spruce frames, dark oak shingle roof
+    "brick": dict(frame="stripped_spruce_log", infill=mix([("brick_block", 85), ("mud_bricks", 15)], 41),
+                  roof="dark_oak_stairs", roof_block="dark_oak_planks", roof_slab="dark_oak_slab",
+                  trim="spruce_stairs", trim_block="spruce_planks", trim_slab="spruce_slab", bracket="spruce_stairs",
+                  shutter="spruce_trapdoor"),
+}
+
+
+def coaching_inn(seed=1, style="tudor"):
     """Kingsrest's coaching inn: a long stone-and-timber range with a carriage arch,
     a jettied cross wing whose tall gable faces the street, dormers and two chimneys.
     Front (street) faces south (+z). Ground floor at y=1."""
-    bp = Blueprint("kingsrest_inn")
-    P = dict(VALE)
+    bp = Blueprint("kingsrest_inn" + ("" if style == "tudor" else "_" + style))
+    P = {**VALE, **STYLES[style]}
     B = Building(bp, P, seed)
     main = (0, 0, 22, 8)              # long range, ridge east-west
     wing = (13, 8, 21, 18)            # cross wing, gable to the street
@@ -153,7 +167,7 @@ def coaching_inn(seed=1):
     return bp
 
 
-def townhouse(seed, width=7, depth=9, storeys=2, ground="stone", jetty=True, infill=None, roof=None, chimney_side="w"):
+def townhouse(seed, width=7, depth=9, storeys=2, ground="stone", jetty=True, infill=None, roof=None, chimney_side="w", style="tudor"):
     """A gable-fronted town house facing south. Different seeds change materials and details."""
     rnd = random.Random(seed)
     bp = Blueprint(f"vale_house_{seed}")
@@ -165,6 +179,10 @@ def townhouse(seed, width=7, depth=9, storeys=2, ground="stone", jetty=True, inf
         P.update(roof="dark_oak_stairs", roof_block="dark_oak_planks", roof_slab="dark_oak_slab",
                  trim="spruce_stairs", trim_block="spruce_planks", trim_slab="spruce_slab")
     P["frame"] = rnd.choice(["dark_oak_log", "dark_oak_log", "spruce_log"])
+    if style != "tudor":
+        P.update(STYLES[style])
+        if style == "stone" and rnd.random() < 0.5: P["infill"] = VALE["infill"]   # some plastered upper floors
+        bp.name += "_" + style
     B = Building(bp, P, seed)
     w, d = width - 1, depth - 1
     rect = (0, 0, w, d)
