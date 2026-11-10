@@ -1,7 +1,9 @@
 // Job NPCs: the Farmer, Woodcutter, Quarryman, Smith, Fisher, Hunter, Herbalist and the Moneyer.
 //
-// Each is Bedrock's built-in NPC (minecraft:npc), so it works on a Realm and alone. They buy the raw goods
-// of their trade for coins and sell the finished ones. Goods and prices: config.js. Price rules: rules.js.
+// Each is our own siege:job_npc entity (villager shape, one painted skin per job, picked by the siege:job
+// property), so it works on a Realm and alone and never shares a look with a lore NPC. Job NPCs placed before
+// the skins existed were Bedrock's built-in NPC: those still trade, and turn into the new kind on the first click.
+// They buy the raw goods of their trade for coins and sell the finished ones. Goods and prices: config.js. Price rules: rules.js.
 //   Map builders: /scriptevent siege:economy_npc farmer      puts one where you stand
 //   The region (for regional prices) is taken from the nearest Plot Stone, or name it:
 //                 /scriptevent siege:economy_npc farmer Frostmarch
@@ -17,7 +19,9 @@ import { funds, charge, pay, carried } from "./coins.js";
 export const JOB_TAG = "siege_job";
 const jobTag = (id) => `siege_job_${id}`;
 const regionTag = (region) => `siege_region_${REGIONS.indexOf(region)}`;
-const NPC_TYPE = "minecraft:npc";
+const NPC_TYPE = "siege:job_npc";
+const OLD_NPC_TYPE = "minecraft:npc"; // job NPCs placed before the painted skins
+const JOB_PROP = "siege:job"; // which skin: the job's place in JOB_IDS
 const SOLD = "siege:economy_sold"; // per player: { day, n: { "<region>|<item>": units sold today } }
 
 const known = (id) => {
@@ -54,13 +58,32 @@ export function spawnJobNpc(dim, location, jobId, region = regionAt(location)) {
   if (region && REGIONS.includes(region)) npc.addTag(regionTag(region));
   npc.nameTag = job.name;
   try {
-    const comp = npc.getComponent("minecraft:npc");
-    comp.name = job.name;
-    comp.skinIndex = job.skin;
+    npc.setProperty(JOB_PROP, JOB_IDS.indexOf(jobId));
   } catch {
     // looks are optional
   }
   return npc;
+}
+
+// A job NPC from before the painted skins: put the new kind in its place, same job, same region, same spot
+function renew(old) {
+  const jobId = jobOf(old);
+  if (!jobId) return old;
+  try {
+    const npc = spawnJobNpc(old.dimension, old.location, jobId, REGIONS.find((r) => old.hasTag(regionTag(r))) ?? null);
+    if (!npc) return old;
+    for (const tag of old.getTags()) if (!npc.hasTag(tag)) npc.addTag(tag);
+    try {
+      npc.setRotation(old.getRotation());
+    } catch {
+      // facing is optional
+    }
+    old.remove();
+    return npc;
+  } catch (e) {
+    console.warn(`[Hollow Crown] job NPC renew: ${e}`);
+    return old;
+  }
 }
 
 // ---------- today's sales ----------
@@ -233,11 +256,14 @@ export async function openShop(player, npc) {
 
 world.beforeEvents.playerInteractWithEntity.subscribe((event) => {
   const { player, target } = event;
-  if (target.typeId !== NPC_TYPE || !target.hasTag(JOB_TAG)) return;
-  if (player.isSneaking && player.getGameMode() === GameMode.Creative) return; // builder: the normal NPC editor
+  const old = target.typeId === OLD_NPC_TYPE;
+  if ((target.typeId !== NPC_TYPE && !old) || !target.hasTag(JOB_TAG)) return;
+  if (old && player.isSneaking && player.getGameMode() === GameMode.Creative) return; // builder: the normal NPC editor
   event.cancel = true;
   system.run(() => {
-    if (isReady()) openShop(player, target).catch((e) => console.warn(`[Hollow Crown] job shop: ${e}`));
+    if (!target.isValid) return;
+    const npc = old ? renew(target) : target;
+    if (isReady()) openShop(player, npc).catch((e) => console.warn(`[Hollow Crown] job shop: ${e}`));
   });
 });
 
@@ -250,5 +276,5 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
   const region = REGIONS.find((r) => r.toLowerCase() === named || r.toLowerCase().split(" ").includes(named)) ?? regionAt(player.location);
   if (!JOBS[jobId]) return player.sendMessage(`§cWhich job? One of: ${JOB_IDS.join(", ")}. Add a region name for regional prices.`);
   spawnJobNpc(player.dimension, player.location, jobId, region);
-  player.sendMessage(`§a${JOBS[jobId].name} placed${region ? ` (${region} prices)` : " (no region: plain prices)"}. Sneak + click in Creative to edit, or /kill @e[tag=${jobTag(jobId)},c=1] to remove.`);
+  player.sendMessage(`§a${JOBS[jobId].name} placed${region ? ` (${region} prices)` : " (no region: plain prices)"}. Remove with /kill @e[tag=${jobTag(jobId)},c=1] to remove.`);
 });

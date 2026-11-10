@@ -7,6 +7,9 @@ const iron = JOBS.moneyer.buys.find((g) => g.id === "minecraft:iron_ingot");
 const wheat = JOBS.farmer.buys.find((g) => g.id === "minecraft:wheat");
 
 addTests("economy", {
+  // the job's place in this list is its skin (siege:job on siege:job_npc, written by studio/build_economy.py): only add at the end
+  "job order matches the painted skins": () =>
+    assertEqual(JOB_IDS.join(","), "farmer,woodcutter,quarryman,smith,fisher,hunter,herbalist,moneyer"),
   "the coin is backed by iron: 8 in, 10 out": () => {
     assertEqual(payout(iron, 1), 8);
     assertEqual(cost(JOBS.moneyer.sells[0], 1), 10);

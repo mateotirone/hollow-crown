@@ -259,3 +259,4 @@ item.siege:choirsteel_pickaxe.name=Choirsteel Pick
 item.siege:choirsteel_axe.name=Choirsteel Axe
 item.siege:choirsteel_shovel.name=Choirsteel Spade
 item.siege:choirsteel_hoe.name=Choirsteel Hoe
+entity.siege:job_npc.name=Tradesman
