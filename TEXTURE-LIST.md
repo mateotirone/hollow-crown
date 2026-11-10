@@ -445,6 +445,13 @@ Painted in final style, replacing the placeholders listed in earlier sections:
 - `studio/art/build_hollow_skins.py`: Choir Conductor and Singer, Hollow Regent, Latticewood Boat skin, Throne Seal, resting Heart of the Hollow
 - `studio/art/build_weapons3d.py`: 3D held models, textures and attachables for longsword, warhammer, minute_hand, oath_of_oswin, warlords_brand, rimefang_bow (`attachables/weapon_<id>.json`, `animations/siege_weapons.animation.json`: hold offsets UNTESTED in game)
 - `studio/art/build_coins.py`: iron and gold coin
+Still stand-ins: skins for the eight job NPCs, a left-handed Standing Rank, real models for the three reveal-scene actors.
+The Texture Studio now lists every PNG under `textures/` automatically (catch-all at the end of `studio/build_manifest.py`).
+
+## Skill icons (2026-11-10, textures thread)
+Painted by `studio/art/build_skill_icons.py`, which reads the skill ids from `Siege_Nights_BP/scripts/townhall/skills.js` so new skills get an icon on the next run (add a glyph to `PICK` first).
+- `textures/ui/hc/skill/<skill id>.png`: 85 icons, 16x16, one glyph per skill, coloured by branch. Not wired: the tree still shows the node state frames (`node_*.png`); the town hall thread decides how to use them.
+- Sheet: `art/skill-icons.png`
 Still stand-ins: 49 skill icons, a left-handed Standing Rank, real models for the three reveal-scene actors.
 
 Job NPC skins (Farmer, Woodcutter, Quarryman, Smith, Fisher, Hunter, Herbalist, Moneyer): painted 2026-11-10 at `textures/entity/siege/npc/job_<name>.png` (64×64, villager layout, `studio/art/build_job_npcs.py`). **Final style, awaiting your review**, not wired yet: the job NPCs still use stock NPC skins.

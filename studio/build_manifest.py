@@ -285,6 +285,8 @@ geos['geometry.armor1']={"tw":64,"th":32,"bones":[bone("head",[0,24,0],[c([-4,24
 geos['geometry.armor2']={"tw":64,"th":32,"bones":[bone("body",[0,24,0],[c([-4,12,-2],[8,12,4],[16,16],0.5)]),
   bone("rightLeg",[-1.9,12,0],[c([-3.9,0,-2],[4,12,4],[0,16],0.5)]),bone("leftLeg",[1.9,12,0],[c([-0.1,0,-2],[4,12,4],[0,16],0.5,True)])]}
 geos.update(bgeos)
+import glob as _g
+g("skill_icons","Skill icons","Town hall",[{"label":os.path.basename(f)[:-4].replace('_',' ').title(),"model":"item","mats":{"*":'textures/ui/hc/skill/'+os.path.basename(f)}} for f in sorted(_g.glob(os.path.join(RP,'textures/ui/hc/skill/*.png')))],"One icon for every skill on the Tree of Oaths, coloured by branch. Painted, not shown in the menu yet.")
 # ---- catch-all: every PNG in the pack that no group above shows gets a place, so nothing can be missing from the Studio
 _seen=set(tex); _left={}
 for _d,_,_fs in os.walk(RP+'textures'):
