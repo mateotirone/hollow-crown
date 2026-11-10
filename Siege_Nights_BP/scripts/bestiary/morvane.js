@@ -545,6 +545,7 @@ const canSwing = stageIs(0, 6);
 
 registerBoss({
   id: "morvane", type: MORVANE.type, name: "Morvane", radius: MORVANE.radius, points: MORVANE.points,
+  noTemper: true, // a story fight, fought once: it has its own seven shapes
   intro: "rises from the Seat. \"You came all this way to sit down.\"",
   attacks: [
     // Stages 1 and 7: two blows, then the Toll

@@ -365,3 +365,11 @@ In game (cheats on, a settlement founded, or `/scriptevent siege:showcase` first
 
 Things I could not check offline: whether a dusk-to-midnight wait feels right, whether Hollow soldiers march on the keep heart like raiders do,
 the darkness and knockback effects, and the rain.
+
+## Never the same fight twice (bestiary)
+
+- Beat any regional boss once, then summon it again (`/scriptevent siege:bestiary_summon reeve`): its name carries a temper (for example "The Clockwork Reeve, Unquiet") and the fight has one extra problem. Beat it again and you get a named echo shard for that temper. The next rematch wears a different temper.
+- Watch a boss for a minute: it should not use the same warned attack twice in a row when it has another ready.
+- New attacks to look for: the Reeve puts you back where you stood ("The hands turn back"), the Huntsman lays snares, the Mother hums (look away).
+- In a siege from the third on, roughly one raider in seven has a yellow name such as "Fleet Grey Host Axeman" and behaves to match.
+- `/scriptevent siege:variety` lists what you have killed most and flags anything met more than 40 times per variant.
