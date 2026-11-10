@@ -181,6 +181,10 @@ for n,x,z in sources:
     c=Q(x,z); d.ellipse([c[0]-5,c[1]-5,c[0]+5,c[1]+5],fill=(110,60,150),outline=(255,255,255),width=2); label((c[0],c[1]+7),n,fs,(60,20,90),sw=2)
 for n,x,z in order:
     c=Q(x,z); d.polygon([(c[0],c[1]-8),(c[0]+7,c[1]+6),(c[0]-7,c[1]+6)],fill=(80,80,80),outline=(255,255,255)); label((c[0],c[1]+8),n,fs,(30,30,30),sw=2)
+# sealed ways out, kept for later updates (EXPANSION in scripts/plots/config.js)
+for nm,x,z,an in [("The Shut Pass ▶\n(sealed, for a later update)",1225,-190,"rm"),("◀ The Far Shore\n(across the sea, later)",-1225,300,"lm"),("▼ The Horizon Isles (later)",-700,1225,"mb")]:
+    c=Q(x,z); d.ellipse([c[0]-6,c[1]-6,c[0]+6,c[1]+6],fill=(250,245,230),outline=(60,40,90),width=2)
+    off={"rm":(-12,0),"lm":(12,0),"mb":(0,-10)}[an]; d.multiline_text((c[0]+off[0],c[1]+off[1]),nm,font=fs,fill=(60,40,90),anchor=an,stroke_width=3,stroke_fill=(250,245,230),align="right" if an=="rm" else "left")
 for x,z in camps:
     c=Q(x,z); d.line([c[0]-6,c[1]-6,c[0]+6,c[1]+6],fill=(160,20,20),width=4); d.line([c[0]-6,c[1]+6,c[0]+6,c[1]-6],fill=(160,20,20),width=4)
 for t,(x,z) in {"F R O S T M A R C H":(330,-1180),"S A L T R E A C H":(-600,900),"E M B E R W A S T E":(900,330),"B L A C K F E N":(60,1150),"A L D M E R E   V A L E":(60,-30)}.items():
