@@ -11,6 +11,8 @@ Everything merged to `main` since the last release goes here. Each pull request 
 ### Added
 - The Hollow Crown expansion on top of Siege Nights: plots, town hall and skill tree, horses and rails, lore tomes and dialogue, new mobs and bosses, the Undertow dimension, the Crown and Citadel. None of it has been played in a real game yet.
 
+- The Vault under the Seat has a sealed door in its north wall. It does not open yet.
+
 ### Changed
 - The add-on is renamed from Siege Nights to The Hollow Crown. The install file is `hollow-crown.mcaddon`. Existing ids keep the `siege:` prefix.
 - Needs Bedrock 26.30 or newer.
