@@ -16,6 +16,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - Needs Bedrock 26.30 or newer.
 
 ### Fixed
+- The install guide and README now say the right Minecraft version: Bedrock 26.30 or newer.
 
 ### Known issues
 - The keep's health is capped at 400, but the Castle tier is meant to have 600.
