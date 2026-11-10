@@ -69,6 +69,79 @@ for (const root of [BP, RP]) {
 }
 console.log(`${jsonCount} files, ${pack.blocks.size} blocks, ${pack.items.size} items, ${pack.entities.size} entities`);
 
+// ---------- 1b. Icons and textures ----------
+// An item whose icon key is missing from item_texture.json, or a texture path with no image
+// file behind it, shows up in game as a black and purple square. Bedrock does not report either.
+step("Icons and textures");
+{
+  const readJson = (file) => {
+    try { return parseJson(readFileSync(file, "utf8").replace(/^﻿/, "")); } catch { return null; }
+  };
+  const IMAGE_EXT = [".png", ".tga", ".jpg", ".jpeg"];
+  const hasImage = (path) => IMAGE_EXT.some((ext) => existsSync(join(RP, path + ext))) || existsSync(join(RP, path));
+  // Textures that ship with the base game, so this pack has no file for them. Anything else that
+  // is missing is a mistake. Using another base-game texture on purpose? Add it here.
+  const VANILLA_TEXTURES = ["textures/misc/", "textures/entity/horse2/", "textures/entity/steve", "textures/entity/cape_invisible"];
+  const isVanillaPath = (path) => VANILLA_TEXTURES.some((v) => (v.endsWith("/") ? path.startsWith(v) : path === v));
+
+  // every texture path one atlas entry points at (string, list, or { path } objects, with variations)
+  const atlasPaths = (entry) => {
+    const out = [];
+    const add = (v) => {
+      if (typeof v === "string") out.push(v);
+      else if (Array.isArray(v)) v.forEach(add);
+      else if (v && typeof v === "object") { add(v.path); add(v.variations); add(v.textures); }
+    };
+    add(entry?.textures);
+    return out;
+  };
+
+  let checked = 0;
+  const missingFile = (where, path) => {
+    checked++;
+    if (typeof path !== "string" || !path.startsWith("textures/")) return;
+    if (hasImage(path) || isVanillaPath(path)) return;
+    fail(`${where}: texture "${path}" has no image file in ${rel(RP)}`);
+  };
+
+  const atlases = {};
+  for (const [name, file] of [["item", "textures/item_texture.json"], ["terrain", "textures/terrain_texture.json"]]) {
+    const full = join(RP, file);
+    const data = existsSync(full) ? readJson(full) : null;
+    atlases[name] = data?.texture_data ?? {};
+    if (!data) { fail(`${rel(full)} is missing or unreadable`); continue; }
+    for (const [key, entry] of Object.entries(atlases[name])) {
+      for (const path of atlasPaths(entry)) missingFile(`${file} "${key}"`, path);
+    }
+  }
+
+  const flip = join(RP, "textures/flipbook_textures.json");
+  if (existsSync(flip)) for (const f of readJson(flip) ?? []) missingFile("textures/flipbook_textures.json", f?.flipbook_texture);
+
+  for (const folder of ["entity", "attachables"]) {
+    const dir = join(RP, folder);
+    if (!existsSync(dir)) continue;
+    for (const file of walk(dir, ".json")) {
+      const d = readJson(file);
+      const desc = (d?.["minecraft:client_entity"] ?? d?.["minecraft:attachable"])?.description;
+      for (const path of Object.values(desc?.textures ?? {})) missingFile(rel(file), path);
+    }
+  }
+
+  // item icons: the key must be in item_texture.json
+  const iconKeys = (icon) => (typeof icon === "string" ? [icon] : icon?.textures ? Object.values(icon.textures) : icon?.texture ? [icon.texture] : []);
+  let icons = 0;
+  for (const file of walk(join(BP, "items"), ".json")) {
+    const item = readJson(file)?.["minecraft:item"];
+    if (!item) continue;
+    for (const key of iconKeys(item.components?.["minecraft:icon"])) {
+      icons++;
+      if (!(key in atlases.item)) fail(`${rel(file)}: icon "${key}" is not in textures/item_texture.json`);
+    }
+  }
+  console.log(`${icons} item icons, ${checked} texture paths`);
+}
+
 const manifest = parseJson(readFileSync(join(BP, "manifest.json"), "utf8"));
 const scriptModule = manifest.modules.find((m) => m.type === "script");
 const entry = join(BP, scriptModule.entry);
