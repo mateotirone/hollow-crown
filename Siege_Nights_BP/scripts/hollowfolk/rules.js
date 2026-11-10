@@ -75,6 +75,46 @@ export function vaultLoot(vault) {
   return { ore: Math.floor(vault.ore * FOLK.vaultShare), emeralds: Math.floor(vault.emeralds * FOLK.vaultShare) };
 }
 
+// Things that can be going on when a visitor walks into a village. The Storyteller (core/storyteller.js)
+// chooses between them, so a player never meets the same one, or the same kind, twice running.
+// Ids are saved in worlds: never rename one. moods: when it can happen. site: an errand to a place
+// in undertow/roads.js SITES, offered once per player.
+const OPEN = ["free", "crowned", "regent"];
+export const HAPPENINGS = [
+  { id: "rich_seam", kind: "build", moods: OPEN },
+  { id: "half_price", kind: "social", moods: OPEN, notRuler: true },
+  { id: "fireside", kind: "quiet", moods: OPEN },
+  { id: "seam_mites", kind: "fight", moods: OPEN },
+  { id: "bound_scrap", kind: "mystery", moods: ["bound"] },
+  { id: "bound_cart", kind: "quiet", moods: ["bound"] },
+  { id: "bound_warning", kind: "social", moods: ["bound"] },
+  { id: "errand_truce_hall", kind: "journey", site: "truce_hall", once: true },
+  { id: "errand_far_door", kind: "mystery", site: "far_door", once: true },
+  { id: "errand_seams", kind: "journey", site: "the_seams", once: true },
+  { id: "errand_drift", kind: "mystery", site: "drift_foot", once: true },
+  { id: "errand_ranks", kind: "journey", site: "standing_ranks", once: true },
+];
+export const HAPPENING_GAP_SECONDS = 480; // at most one per player in this long
+export const ERRAND_ORE = 4; // raw ore a miner pays for an errand walked
+export const ERRAND_ASKS = {
+  errand_truce_hall: "My mother swore there is a hall west of the Cross where two kings sat down. Nobody here is let out to look. Would you? Tell me if the table is still there.",
+  errand_far_door: "At night you can hear them digging at the far west wall. Go and see what they are digging at. I would rather know.",
+  errand_seams: "They say the rock past Cartmeet bleeds ore. If it is true, we are digging in the wrong place. Walk the rail and look.",
+  errand_drift: "There are stones east of the path that forgot to fall. My boy thinks you can stand on them. Find out before he tries.",
+  errand_ranks: "My brother went east with the army. They say every suit still stands in its row. I cannot go and count. Would you walk the rows for me?",
+};
+// Which happenings can be offered right now. Pure.
+export function happeningsFor(mood, isRuler) {
+  return HAPPENINGS.filter((h) => (!h.moods || h.moods.includes(mood)) && !(h.notRuler && isRuler));
+}
+// A line that is never the one this speaker said last. Pure: returns [line, index].
+export function freshLine(lines, lastIndex, rng = Math.random) {
+  if (lines.length < 2) return [lines[0], 0];
+  let i = Math.floor(rng() * (lines.length - 1));
+  if (i >= lastIndex && lastIndex >= 0) i++;
+  return [lines[Math.min(i, lines.length - 1)], Math.min(i, lines.length - 1)];
+}
+
 // What the miners say. Hand-written, a few per mood; the lore thread may replace these with setFolkVoice().
 export const LINES = {
   bound: [

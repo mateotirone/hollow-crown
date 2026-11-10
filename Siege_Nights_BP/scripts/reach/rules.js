@@ -210,27 +210,56 @@ export const WAVES = {
   flank: { name: "The Flank", weight: 0.9, line: "§7Seventeen past. From the other side." },
   breach: { name: "The Breach", weight: 1, line: "§7Seventeen past. They have brought tools." },
   dark: { name: "The Dark Hour", weight: 0.9, line: "§7Seventeen past. The torches go low." },
+  feint: { kind: "mystery", name: "The Feint", weight: 0.5, line: "§7Seventeen past. Noise at the far wall." },
+  ring: { kind: "journey", name: "The Ring", weight: 0.8, line: "§7Seventeen past. From everywhere, thinly." },
+  quiet: { name: "The Held Breath", weight: 0.05, line: "§7Seventeen past. Nothing comes. You would rather something did." },
   toll: { name: "The Toll", weight: 1.3, line: "§43:17" },
   tide: { name: "A Tide", weight: 0, line: "§7Daylight. They come anyway." },
 };
-export function waveRole(n, waves) {
-  if (n > waves) return "tide";
+const baseRoles = (waves) => {
   const list = ROLES[clamp(waves, 1, 6)];
-  if (waves > 6) return n === waves ? "toll" : list[(n - 1) % 5]; // very long nights repeat the middle waves
-  return list[n - 1];
+  if (waves <= 6) return [...list];
+  return Array.from({ length: waves }, (_, i) => (i === waves - 1 ? "toll" : ROLES[6][i % 5])); // very long nights repeat the middle waves
+};
+
+// Night shapes: the same number of waves, put together differently. No shape comes twice in a row,
+// so two sieges in a row never play out the same way. `from` is the first stage that uses the shape.
+const middle = (list, fn) => list.map((r, i) => (i === 0 || i === list.length - 1 ? r : fn(r, i)));
+// kind: how the night feels, in the Storyteller's words (fight, mystery, journey, quiet, social, build). Shape ids are saved; never rename one.
+export const SHAPES = {
+  old: { kind: "fight", name: "The Old Count", from: 1, min: 1, about: "A knock, then the press, then the toll.", roles: (w) => baseRoles(w) },
+  feint: { kind: "mystery", name: "The Feint", from: 1, min: 3, about: "The first wave was noise at the wrong wall.", roles: (w) => ["feint", ...baseRoles(w).slice(1)] },
+  hammer: { kind: "fight", name: "The Hammer", from: 1, min: 3, about: "They led with their strength and knocked afterwards.", roles: (w) => { const l = baseRoles(w); [l[0], l[1]] = [l[1], l[0]]; return l; } },
+  ring: { kind: "journey", name: "The Ring", from: 1, min: 3, about: "Every wave came from every side.", roles: (w) => baseRoles(w).map((r) => (r === "toll" ? r : "ring")) },
+  breath: { kind: "quiet", name: "The Held Breath", from: 1, min: 3, about: "Hours of nothing, and then all of it at once.", roles: (w) => baseRoles(w).map((r, i) => (i < Math.ceil((w - 1) / 2) ? "quiet" : r === "knock" ? "press" : r)) },
+  sappers: { kind: "build", name: "The Sappers' Night", from: 2, min: 3, about: "They came for the wall and not for you.", roles: (w) => middle(baseRoles(w), () => "breach") },
+  blind: { kind: "mystery", name: "The Blind Night", from: 3, min: 4, about: "The torches kept going low.", roles: (w) => middle(baseRoles(w), (r, i) => (i % 2 ? "dark" : r)) },
+};
+
+// Tonight's shape: one the stage has opened, that fits the wave count, and is not the one from last time
+export function pickShape(day, salt, stageId, waves, last) {
+  const fits = Object.keys(SHAPES).filter((id) => SHAPES[id].from <= stageId && SHAPES[id].min <= waves);
+  const pool = fits.filter((id) => id !== last);
+  const from = pool.length ? pool : fits.length ? fits : ["old"];
+  return from[Math.floor(dayRoll(day, salt, 31) * from.length)];
+}
+
+export function waveRole(n, waves, shape = "old") {
+  if (n > waves) return "tide";
+  return (SHAPES[shape] ?? SHAPES.old).roles(waves)[n - 1];
 }
 
 // The share of the night's budget wave n spends. The shares of one night add up to 1.
-export function waveShare(n, waves) {
-  const role = waveRole(n, waves);
-  if (role === "tide") return REACH.long.tideShare;
+export function waveShare(n, waves, shape = "old") {
+  if (n > waves) return REACH.long.tideShare;
+  const roles = (SHAPES[shape] ?? SHAPES.old).roles(waves);
   let sum = 0;
-  for (let i = 1; i <= waves; i++) sum += WAVES[waveRole(i, waves)].weight;
-  return WAVES[role].weight / sum;
+  for (const r of roles) sum += WAVES[r].weight;
+  return WAVES[roles[n - 1]].weight / sum;
 }
 
 // Hollow soldiers added to a wave, per settlement
-export const hollowCount = (stageId, role) => (role === "tide" ? Math.ceil(stage(stageId).hollow.wave / 2) : role === "toll" ? stage(stageId).hollow.toll : stage(stageId).hollow.wave);
+export const hollowCount = (stageId, role) => (role === "quiet" ? 0 : role === "tide" ? Math.ceil(stage(stageId).hollow.wave / 2) : role === "toll" ? stage(stageId).hollow.toll : stage(stageId).hollow.wave);
 
 // The share of the ordinary army that should be Hollow rather than men (for whoever picks the raider types)
 export const hollowShare = (stageId) => [0, 0, 0, 0.3, 0.6, 1, 0][clamp(stageId, 1, 6)];
@@ -266,11 +295,36 @@ export const HOLLOW_TWISTS_FROM = 3; // the two twists above only appear from th
 
 // Omens: what a player is told as a siege night comes on. Nothing here names what is coming.
 export const DUSK_LINES = {
-  counted: ["§8No bell is rung this evening. It is the third night.", "§8The bell ropes hang still. You have counted, and it is the third night."],
-  stolen: ["§8No bell is rung this evening. You count again. It is not the third night.", "§8The bell ropes hang still. It is the wrong night for that."],
-  uncounted: ["§8Nobody rings the bells any more."],
-  long: ["§8The light goes. It does not feel like evening. It feels like a door closing."],
-  muster: ["§7Smoke on the road. Someone means to try your walls tonight."],
+  counted: [
+    "§8No bell is rung this evening. It is the third night.",
+    "§8The bell ropes hang still. You have counted, and it is the third night.",
+    "§8Somebody has tied the clapper of the bell with cloth. It is the third night.",
+    "§8The ringer went home early and did not say why. You know why. It is the third night.",
+  ],
+  stolen: [
+    "§8No bell is rung this evening. You count again. It is not the third night.",
+    "§8The bell ropes hang still. It is the wrong night for that.",
+    "§8You counted this morning and you count now. The numbers agree. The evening does not.",
+    "§8It is not the third night. The dogs have decided that it is.",
+  ],
+  uncounted: [
+    "§8Nobody rings the bells any more.",
+    "§8Evening. Nobody looks at the bell.",
+    "§8Someone has scratched a tally on the gatepost and then scratched it out.",
+    "§8The light goes. People are already at the wall. Nobody told them to be.",
+  ],
+  long: [
+    "§8The light goes. It does not feel like evening. It feels like a door closing.",
+    "§8Dusk. You notice you have stopped calling it dusk.",
+    "§8The rain does not stop for evening. Nothing else does either.",
+    "§8It gets dark the way a room does when someone stands in the doorway.",
+  ],
+  muster: [
+    "§7Smoke on the road. Someone means to try your walls tonight.",
+    "§7A rider turned back at the sight of your gate, and rode off fast. Expect company tonight.",
+    "§7Cookfires, out past the fields, where nobody lives. They will come tonight.",
+    "§7A stranger was counting your towers this afternoon. Tonight, then.",
+  ],
 };
 export const HOUR_LINES = [
   "§8The dogs have gone under the porches.",
@@ -281,12 +335,41 @@ export const HOUR_LINES = [
   "§8The animals are all facing the same wall.",
   "§8You can hear your own gate creak, and there is no wind.",
   "§8Far off, something is keeping time.",
+  "§8A child asks what night it is, and three people answer at once.",
+  "§8The water in the trough is trembling. Only a little.",
+  "§8You count your arrows. You count them again.",
+  "§8There is a smell like a cellar that has been opened.",
+  "§8Every door on the street is shut. You did not hear them shut.",
+  "§8The guards have stopped talking.",
+  "§8Something small runs past you, away from the wall, and does not stop.",
+  "§8The moon is up. You would not swear it is where it was last night.",
 ];
 export function duskLine(kind, stageId, day = 0) {
   const key = kind === "long" ? "long" : kind === "muster" ? "muster" : stageId >= 4 ? "uncounted" : kind === "stolen" ? "stolen" : "counted";
   const lines = DUSK_LINES[key];
-  return lines[Math.floor(dayRoll(day, 0, 9) * lines.length)];
+  return lines[day % lines.length]; // four lines and sieges at most three days apart: never the same line two sieges running
 }
+// One line an hour, and never the same line twice in one evening
+export function hourLine(day, salt, hour) {
+  const start = Math.floor(dayRoll(day, salt, 20) * HOUR_LINES.length);
+  const stride = 1 + 2 * Math.floor(dayRoll(day, salt, 21) * (HOUR_LINES.length / 2)); // odd, so it visits every line
+  return HOUR_LINES[(start + hour * stride) % HOUR_LINES.length];
+}
+
+// Things a player can earn once from siege nights. Each is named, kept for good, and shown at the Keep Banner.
+export const HONOURS = {
+  first_held: "Held the Third Night",
+  stolen_held: "Held a Night That Was Not Owed",
+  knock_answered: "Answered a Knock",
+  glimpse: "Stood at the Wall When They First Came",
+  captain_slain: "Brought Down a Captain at 3:17",
+  nemesis_slain: "Finished What a Captain Started",
+  long_broken: "Broke a Long Night",
+  long_carried: "Broke a Siege That Had Seen the Dawn",
+  remembered: "Rang the Bell on Purpose",
+  ...Object.fromEntries(Object.entries(SHAPES).map(([id, sh]) => [`shape_${id}`, `Held ${sh.name}`])),
+};
+export const NEMESIS = { perEscape: 0.1, maxEscapes: 3 }; // a captain you let live comes back, with a bigger army each time
 
 export const CAPTAIN_NAMES = ["Harrow", "Sexton", "Thurl", "Ansgar", "Wend", "Orlec", "Maud", "Tamsin", "Brec", "Isolt"];
 export const CAPTAIN_TITLES = ["of the Count", "Seventeen-Past", "the Patient", "Who Keeps the Hour", "the Unrung", "of the Low Bell"];

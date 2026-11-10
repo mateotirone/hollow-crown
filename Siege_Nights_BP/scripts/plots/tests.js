@@ -1,5 +1,5 @@
 import { addTests, assert, assertEqual } from "../core/tests.js";
-import { MAP, PLOT_PLAN, WARDS, WELCOME, REGION_BLOCK, SETTLEMENT } from "./config.js";
+import { MAP, PLOT_PLAN, WARDS, WELCOME, REGION_BLOCK, SETTLEMENT, EXPANSION } from "./config.js";
 import { pedestalLayout, arrivalSpot } from "./welcome.js";
 import { compass } from "./claims.js";
 import { outsideMap, wardAt } from "./travel.js";
@@ -101,6 +101,36 @@ addTests("plots", {
       assert(d > SETTLEMENT.flatRadius && d < MAP.plotRadius, `${p.name} landmark is ${Math.round(d)} from the stone`);
       const bearing = (Math.atan2(p.relic.x - p.x, -(p.relic.z - p.z)) * 180) / Math.PI;
       assert(Math.abs(((bearing - p.gate + 540) % 360) - 180) >= 55, `${p.name} landmark is in front of the gate`);
+    }
+  },
+});
+
+addTests("plots", {
+  "expansion zones: doors on today's map, land beyond the edge, none overlapping": () => {
+    assertEqual(new Set(EXPANSION.map((z) => z.id)).size, EXPANSION.length);
+    for (const z of EXPANSION) {
+      assert(!outsideMap(z.door, []), `${z.name}: its door must be on today's map`);
+      const mid = { x: (z.beyond.x0 + z.beyond.x1) / 2, z: (z.beyond.z0 + z.beyond.z1) / 2 };
+      assert(outsideMap(mid, []), `${z.name}: its land must be outside today's map`);
+      assert(!outsideMap(mid, [z.id]), `${z.name}: opening it must let players in`);
+      for (const p of PLOT_PLAN) assert(Math.hypot(p.x - z.door.x, p.z - z.door.z) > 200, `${z.name} door is on top of ${p.name}`);
+      for (const o of EXPANSION) {
+        if (o === z) continue;
+        const apart = z.beyond.x1 <= o.beyond.x0 || o.beyond.x1 <= z.beyond.x0 || z.beyond.z1 <= o.beyond.z0 || o.beyond.z1 <= z.beyond.z0;
+        assert(apart, `${z.name} and ${o.name} overlap`);
+      }
+    }
+  },
+});
+
+addTests("plots", {
+  "seven thin places, each with a protected clearing clear of plots and towns": () => {
+    const thin = WARDS.filter((w) => w.thin);
+    assertEqual(thin.length, 7);
+    for (const w of thin) {
+      assert(!outsideMap(w, []), `${w.name} is off the map`);
+      for (const p of PLOT_PLAN) assert(Math.hypot(p.x - w.x, p.z - w.z) > MAP.plotRadius + w.r + 40, `${w.name} crowds ${p.name}`);
+      for (const o of WARDS) if (o !== w) assert(Math.hypot(o.x - w.x, o.z - w.z) > o.r + w.r, `${w.name} overlaps ${o.name}`);
     }
   },
 });

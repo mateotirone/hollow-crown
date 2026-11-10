@@ -41,14 +41,14 @@ on("showcase", ({ player, dim, nextSpot, label }) => {
       console.warn(`[Hollow Crown] bestiary showcase could not spawn ${typeId}: ${e}`);
     }
   }
-  player.sendMessage(`§6Bestiary:§7 ${shown} mobs and bosses are standing behind you as statues. To fight a boss, use its key from the "Every item" chest, or §f/scriptevent siege:bestiary_summon reeve§7 (also huntsman, bride, seneschal, mother, warlord_king, oswin).`);
+  player.sendMessage(`§6Bestiary:§7 ${shown} mobs and bosses are standing behind you as statues. To fight a boss, use its key from the "Every item" chest, or §f/scriptevent siege:bestiary_summon reeve§7 (also huntsman, bride, seneschal, mother, warlord_king, morvane; a Pretender: /scriptevent siege:pretender_rise).`);
 });
 
 addTests("bestiary", {
   "the showcase shows every mob and boss, with a sign that fits": () => {
     const list = exhibits();
     assert(list.length >= 37, `only ${list.length} exhibits`);
-    assert(list.filter((x) => x.text.includes("BOSS")).length === 7, "seven boss statues");
+    assert(list.filter((x) => x.text.includes("BOSS")).length === 10, "seven bosses and three Pretender bodies");
     for (const x of list) for (const lineText of x.text.split("\n")) assert(lineText.length <= 26, `sign line too long: ${lineText}`);
   },
 });

@@ -247,3 +247,6 @@ def _choir_ore():
             if 0 <= x < 16 and 0 <= y < 16: px[x, y] = h(V[i])
     im.save(RP + 'blocks/siege_choir_ore.png')
 _choir_ore()
+
+# The 2026-11-10 Hollow pass repaints Veinstone, Choir Ore, Latticewood and Veilmoss: keep it last.
+import build_hollow_blocks  # noqa

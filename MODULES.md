@@ -11,6 +11,7 @@ Siege_Nights_BP/scripts/
     loop.js            onTick(): the shared main loop
     events.js          on()/emit() events, and hooks
     store.js           moduleStore(): a saved JSON blob per feature
+    firstjoin.js       addJoinStep(): the one ordered sequence that greets a joining player
     tests.js           addTests(): self-tests, run at world load and by /scriptevent siege:selftest
   siege/               the original Siege Nights, split by topic (keep, siege, warplan, walls ...)
     settings.js        SETTINGS: the numbers Mateo tweaks
@@ -44,6 +45,32 @@ tools/check.mjs        offline check: loads every script in Node with a fake Min
   Nights state, start with `if (!isReady()) return;`.
 - **Tests:** add a few with `addTests("<feature>", { "name": () => { assert(...) } })`. Pure ones run
   in Node and in game; pass `{ gameOnly: true }` for ones that need the real world.
+
+## Greeting a player who joins: `addJoinStep`
+
+Do not subscribe to `playerSpawn` to greet, teleport, open a form or hand out an item. Add a step to the join
+conductor (`core/firstjoin.js`, also exported from `siege/api.js`). Steps run one after another, each awaited, so
+nothing lands on top of anything else.
+
+```js
+addJoinStep(20, "welcome hall", async (player, { first, wait }) => {
+  // teleport, title, message ...
+  await wait(60);                // ticks; hold the next step back for 3 seconds
+}, { when: "first" });           // "first" | "returning" | "always" (default); timeout: seconds (default 30)
+```
+
+| order | step | owner | when |
+|---|---|---|---|
+| 10 | look picker (reserved looks just apply) | looks | first |
+| 20 | welcome hall teleport, title and message (map mode only) | plots | first |
+| 30 | journal handed over (after "How things stand", or about 20 s; about 3 s after the picker with no hall) | lore | first |
+| 40+ | returning-player notices: unspent skill points and so on | town hall and others | returning |
+
+- Return (or resolve) only when the player is done with your step, for example after `form.show()` resolves.
+- After `timeout` seconds the conductor moves on without you, so a form left open can't stall the rest.
+- The sequence starts 3 seconds after the player spawns. If they leave midway it starts over next time.
+- `on("joined", ({ player, first }) => ...)` fires when every step has run.
+- Quiet housekeeping on spawn (restoring state, re-applying an effect) can stay on `playerSpawn`.
 
 ## `scripts/siege/api.js`
 
@@ -89,6 +116,7 @@ import {
 | `warlordSlain` | `{ owner, name, king }` | a warlord (or the Warlord King) died |
 | `raiderKilled` | `{ entity, killer, owner }` | any siege raider died during a siege |
 | `sovereignCrowned` | `{ owner }` | a Castle beat the Grand Siege |
+| `chapter` | `{ player, from, to, name }` | a player reached a new story chapter (see The Storyteller) |
 
 Listeners run inside a try/catch, so a broken listener only logs a warning.
 
@@ -112,6 +140,67 @@ Not possible: Quartermaster prices. They are a fixed trade table (`trading/quart
 
 Need another hook? Ask the "Prepare Siege Nights code for parallel work" thread rather than editing `siege/` files yourself.
 
+## The Storyteller (`core/storyteller.js`): pacing and the story chapter
+
+The rule from the design doc is "a director, not a dice roll". Anything that would otherwise pick with
+`Math.random()` what a player gets next (a rumor, a siege shape, a seep, a Rival Lord's move, a twist) asks the
+Storyteller instead. It remembers what each player did and was offered lately and picks for **contrast**: quiet after a
+siege, a mystery after a run of fights, a journey after days at home. From one deck it never gives the same option, or
+the same kind of option, twice running, and it favours what the player has seen least.
+
+```js
+import { registerDeck, storyPick, pickSeveral, maybePick, note, markDone, chapterOf } from "../siege/api.js";
+
+registerDeck("rumors", [                                    // at load time, once. Deck name = your feature's
+  { id: "bounty_wolves", kind: "fight", from: 1 },          // from / to: story chapters it fits (default: all)
+  { id: "lost_child", kind: "mystery", weight: 2 },         // weight: how common (default 1)
+  { id: "escort_salt", kind: "journey", from: 2, to: 6 },
+  { id: "founders_grave", kind: "mystery", once: true },    // never again once markDone
+  // any other fields are yours; you get the same object back
+]);
+
+const job = storyPick("rumors", player);          // one option, or undefined if nothing fits
+const board = pickSeveral("rumors", player, 3);   // three different ones, kinds mixed
+const twist = maybePick("rumor_twists", player);  // usually undefined; likelier the longer since the last
+note(player, "journey");                          // the player really DID this kind of thing
+markDone(player, "rumors", job.id);               // things stay done
+```
+
+- **Kinds** (fixed, saved in worlds): `fight`, `mystery`, `journey`, `quiet`, `social`, `build`. Pick the one that says
+  how the beat *feels* to the player.
+- **Subject**: a player, or an id string for something that is not one (`"lord:" + lord.id`, `"world"`). A lord's own
+  memory keeps a lord from making the same move twice; pass `{ chapter: chapterOf(player) }` to pick at a player's level.
+- **Options are data.** An update adds rows with `addOptions("rumors", [...])`. Option ids are saved, so never rename or
+  reuse one. A deck used with `storyPick` needs at least 3 options of 2 kinds (a self-test fails otherwise); decks for
+  `maybePick` are registered with `{ chance: 0.25 }` and may be small.
+- **Tell it what happened.** It already notes `fight` after a siege and `build` when a keep is founded or grows. Call
+  `note()` for the rest: a boss or lord fought, a long ride finished, a mystery solved, a trade or talk (`social`),
+  a night nothing came (`quiet`).
+- `storyPick(deck, subject, { peek: true })` looks without counting. `{ exclude: [ids] }` leaves some out.
+  (In `core/storyteller.js` the function is called `pick`; api.js already had a `pick`.)
+- **Measuring:** `/scriptevent siege:storyteller` shows your chapter, what you did lately, what each deck would give you
+  next, and anything served more than four times (`overserved(player)`). Content on that list needs more variants.
+
+### Story chapters
+
+The one shared chapter number, from the story spine. A chapter begins when a fact becomes true, never after a count of
+days. `chapterOf(player)` never goes backwards. `worldChapter()` is the furthest the world has gone (chapters 3 and up).
+`on("chapter", ({ player, from, to, name }) => ...)` fires once per player per step.
+
+| # | name | begins when | fact | reported by |
+|---|---|---|---|---|
+| 0 | Arrival | first join | | |
+| 1 | The Counted Nights | the player raises a Keep Banner | `keepRaised` | siege |
+| 2 | The Ember | the player wins a first siege | `siegesWon` | siege |
+| 3 | The Leaning | the first regional boss falls | `bossesFallen` >= 1 | reach |
+| 4 | The Miscount | three bosses have fallen | `bossesFallen` >= 3 | reach |
+| 5 | The Thin Place | five bosses have fallen | `bossesFallen` >= 5 | reach |
+| 6 | The Long Night | the Choir falls | `choirFallen` | reach |
+| 7 | The Quiet After | Morvane falls | `morvaneFallen` | reach |
+
+The feature that owns a fact reports it once at load: `provideFact("bossesFallen", () => count)`. Until it does, the
+fact counts as not yet true, and `/scriptevent siege:storyteller` lists it as missing.
+
 ## Feature APIs
 
 A feature that other features need to read exposes its own `scripts/<feature>/api.js`. Import from that file only.
@@ -122,6 +211,8 @@ Add a line here when you publish one.
   (`plots/config.js` WARDS): in map mode Survival players can't break or place there. The welcome hall (`plots/welcome.js`)
   emits **`plotChosen` `{ player, plot }`** when a new player picks their starting plot, just before they are set down beside
   its Plot Stone: listen for it to raise their first building. `pickOf(plot)` is who a plot is being kept for.
+  `EXPANSION` lists the sealed zones kept for later updates; an update calls `openZone(id)` to let players past the map
+  edge into that zone's land. Zone ids are saved in worlds, so never rename or reuse one.
 
 - **looks** (`scripts/looks/index.js`): `lookOf(player)`, `setLook(player, look)`, `chooseLook(player)`, `looksFor(name)`. The add-on now ships
   `entities/player.json` (BP) and `entity/player.entity.json` (RP), both written by `studio/build_looks.mjs` from vanilla copies
@@ -148,3 +239,5 @@ Add a line here when you publish one.
 - `python3 tools/build.py`: runs the check, then builds `hollow-crown.mcaddon` (only scripts main.js loads are packed).
 - In game: `/scriptevent siege:selftest`. It also runs at world load and tells players if something failed.
 - `archive/main-before-split.js` is the original single file, for reference.
+  Storyteller: reach reports the facts `bossesFallen`, `choirFallen`, `morvaneFallen` and owns the deck `siege_shapes` (seven night
+  shapes, each with a kind; picked for subject `"world"`). It notes `quiet` for keep owners on the first night after a siege on which nothing came.

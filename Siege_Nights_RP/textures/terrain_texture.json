@@ -183,7 +183,14 @@
       "textures": "textures/blocks/siege_plot_stone_bottom"
     },
     "siege_veinstone": {
-      "textures": "textures/blocks/siege_veinstone"
+      "textures": {
+        "variations": [
+          { "path": "textures/blocks/siege_veinstone", "weight": 5 },
+          { "path": "textures/blocks/siege_veinstone_1", "weight": 2 },
+          { "path": "textures/blocks/siege_veinstone_2", "weight": 2 },
+          { "path": "textures/blocks/siege_veinstone_3", "weight": 1 }
+        ]
+      }
     },
     "siege_undertow_moss": {
       "textures": "textures/blocks/siege_undertow_moss"
@@ -739,6 +746,18 @@
     },
     "siege_castle_smooth_blackfen": {
       "textures": "textures/blocks/regional/siege_castle_smooth_blackfen"
+    },
+    "siege_veinstone_bricks": {
+      "textures": "textures/blocks/siege_veinstone_bricks"
+    },
+    "siege_cracked_veinstone_bricks": {
+      "textures": "textures/blocks/siege_cracked_veinstone_bricks"
+    },
+    "siege_pale_ash": {
+      "textures": "textures/blocks/siege_pale_ash"
+    },
+    "siege_glint_cluster": {
+      "textures": "textures/blocks/siege_glint_cluster"
     }
   }
 }

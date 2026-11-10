@@ -3,7 +3,7 @@
 import { addTests, assert, assertEqual } from "../core/tests.js";
 import {
   REACH, STAGES, LONG, AFTER, stageFor, capReach, nightKind, isSiegeKind, profile, openTime, waveTime, waveRole, waveShare,
-  hollowCount, hollowShare, tideLull, pressureMult, clock, nextSiege, duskLine, troopMix,
+  hollowCount, hollowShare, tideLull, pressureMult, clock, nextSiege, duskLine, troopMix, SHAPES, pickShape, WAVES, hourLine, HONOURS,
 } from "./rules.js";
 
 const none = { bosses: 0, choir: false, source: false };
@@ -100,6 +100,52 @@ addTests("reach", {
     assertEqual(nextSiege(7, 4), 7);
     assert(nextSiege(7, AFTER, { salt: 2 }) - 7 < 10);
     assert(isSiegeKind("stolen") && !isSiegeKind("probe") && !isSiegeKind(undefined));
+  },
+  "no two sieges in a row have the same shape": () => {
+    for (let id = 1; id <= 6; id++) {
+      const waves = STAGES[id - 1].waves;
+      const seen = new Set();
+      let last = null;
+      for (let day = 5; day < 305; day++) {
+        const shape = pickShape(day, 77, id, waves, last);
+        assert(shape !== last, `stage ${id} day ${day} repeated ${shape}`);
+        assert(SHAPES[shape].from <= id, `${shape} too early for stage ${id}`);
+        seen.add(shape);
+        last = shape;
+      }
+      assert(seen.size >= 5, `stage ${id} only has ${seen.size} shapes`);
+    }
+  },
+  "every shape is a real night: right length, ends on the toll, shares add up": () => {
+    for (const [id, shape] of Object.entries(SHAPES)) {
+      for (let waves = shape.min; waves <= 8; waves++) {
+        const roles = shape.roles(waves);
+        assertEqual(roles.length, waves, `${id} with ${waves} waves`);
+        assertEqual(roles[waves - 1], "toll", `${id} ends on the toll`);
+        for (const r of roles) assert(WAVES[r], `${id} uses unknown wave ${r}`);
+        let sum = 0;
+        for (let n = 1; n <= waves; n++) sum += waveShare(n, waves, id);
+        assert(Math.abs(sum - 1) < 1e-9, `${id} shares ${sum}`);
+      }
+    }
+    const distinct = new Set(Object.values(SHAPES).map((s) => s.roles(4).join(",")));
+    assert(distinct.size >= 6, "shapes must actually differ");
+    const kinds = ["fight", "mystery", "journey", "quiet", "social", "build"];
+    for (const [id, sh] of Object.entries(SHAPES)) assert(kinds.includes(sh.kind), `${id} has no Storyteller kind`);
+    const early = Object.values(SHAPES).filter((sh) => sh.from <= 1 && sh.min <= 3);
+    assert(new Set(early.map((sh) => sh.kind)).size >= 3, "the first stage needs nights of at least three kinds");
+  },
+  "an evening never repeats an omen, and neither do two sieges running": () => {
+    for (let day = 5; day < 60; day++) {
+      const lines = new Set();
+      for (let hour = 1; hour <= 8; hour++) lines.add(hourLine(day, 5, hour));
+      assertEqual(lines.size, 8, `day ${day}`);
+    }
+    for (const gap of [1, 2, 3]) for (let day = 5; day < 40; day++) assert(duskLine("counted", 1, day) !== duskLine("counted", 1, day + gap));
+  },
+  "every shape has an honour to earn": () => {
+    for (const id of Object.keys(SHAPES)) assert(HONOURS[`shape_${id}`], id);
+    assert(Object.keys(HONOURS).length >= 14);
   },
   "no omen names what is coming": () => {
     for (const kind of ["counted", "stolen", "long", "muster"]) {

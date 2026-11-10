@@ -35,8 +35,11 @@ const GUARDS = [
 // Pure pieces, so the self-tests can check them
 export const seepLevel = (ageSeconds) => Math.min(3, 1 + Math.floor(ageSeconds / SEEP_SETTINGS.widenSeconds));
 export const guardsWanted = (level, playerCount) => level + 1 + Math.min(3, Math.max(0, playerCount - 1));
-export function shouldOpen({ awake, nearby, roll }) {
-  return awake && nearby < SEEP_SETTINGS.nearbyCap && roll < SEEP_SETTINGS.chance;
+// Something can make the seep surge for a while (a Pretender sitting unchallenged in the Hollow does)
+let surge = () => 1;
+export function setSeepSurge(fn) { surge = fn ?? (() => 1); }
+export function shouldOpen({ awake, nearby, roll, surge: by = 1 }) {
+  return awake && nearby < SEEP_SETTINGS.nearbyCap && roll < SEEP_SETTINGS.chance * by;
 }
 
 function openSeep(dim, at, level = 1) {
@@ -66,7 +69,7 @@ function openTick() {
       const dim = p.dimension;
       if (dim.id !== "minecraft:overworld") continue;
       const nearby = dim.getEntities({ type: SEEP, location: p.location, maxDistance: 160 }).length;
-      if (!shouldOpen({ awake: bestiaryStore.data.hollowAwake, nearby, roll: Math.random() })) continue;
+      if (!shouldOpen({ awake: bestiaryStore.data.hollowAwake, nearby, roll: Math.random(), surge: surge() })) continue;
       const at = groundNear(dim, p.location, SEEP_SETTINGS.minDistance, SEEP_SETTINGS.maxDistance);
       if (at) openSeep(dim, at);
     } catch {

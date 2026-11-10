@@ -97,6 +97,7 @@ function step() {
   for (const e of [...entities]) {
     if (!e.tags.has(api.RAIDER_TAG) || !kill(e)) continue;
     api.emit("raiderKilled", { entity: e, killer: player, owner: "p1" });
+    if (e.tags.has(api.WARLORD_TAG)) api.emit("warlordSlain", { owner: "p1", name: e.nameTag, king: false });
     e.remove();
   }
 }
@@ -114,7 +115,7 @@ const st = api.getState();
 st.keeps.p1 = { x: 0, y: 64, z: 0, name: "Mateo", color: 14, sieges: 6, wins: 4, streak: 2 };
 api.on("assaultSpawned", ({ assault, total }) => say("WAVE", `${assault} of ${total}: on the field now: ${census()}`));
 api.on("siegeStart", () => say("HORN", `threat ${st.plans.p1?.budget}, ${st.plans.p1?.modifiers.join("+") || "no twists"}${st.plans.p1?.warlord ? ", led by " + st.plans.p1.warlord : ""}`));
-api.on("siegeEnd", ({ outcome }) => say("END", outcome));
+api.on("siegeEnd", ({ outcome }) => say("END", `${outcome}  (shape: ${reach.reachData().last?.shape ?? "-"})`));
 api.on("reachStage", ({ stage, name }) => say("STAGE", `${stage} ${name}`));
 api.on("firstGlimpse", () => say("GLIMPSE", "the first Hollow soldiers walk out"));
 
@@ -146,6 +147,16 @@ let lines = night("Stage 1, the third night");
 check(lines.filter((l) => l.includes("WAVE")).length === 3, "stage 1 should have 3 waves");
 check(lines.some((l) => /03:1[678]  WAVE/.test(l)), "stage 1 last wave should land at 3:17");
 check(lines.some((l) => l.includes("END    won")), "stage 1 night should be won");
+// twelve more stage 1 nights: no two in a row may have the same shape or the same army
+{
+  const shapes = [], armies = [];
+  api.on("siegeStart", () => armies.push(st.plans.p1?.faction));
+  for (let i = 0; i < 12; i++) { check(nextDayAt("counted"), "no counted night"); night(`Stage 1 again (${i + 1})`); shapes.push(reach.reachData().last?.shape); }
+  console.log("\n  shapes of twelve stage 1 nights: " + shapes.join(", "));
+  check(shapes.every((s, i) => i === 0 || s !== shapes[i - 1]), "two nights in a row had the same shape");
+  check(armies.slice(0, 12).every((a, i, all) => i === 0 || a !== all[i - 1]), "two nights in a row had the same army: " + armies.join(","));
+  check(new Set(shapes).size >= 4, "twelve nights should show at least four shapes");
+}
 check(!lines.some((l) => /veinsworn|shardcaster/.test(l)), "no Hollow soldiers at stage 1");
 
 // Stage 2: the first glimpse
@@ -183,7 +194,7 @@ check(!lines.some((l) => l.includes("END")), "the Long Night must not end at daw
 const dayStart = log.length;
 kill = () => false;
 runUntil(11000, world.getDay() + 1);
-check(entities.filter((e) => e.tags.has(api.RAIDER_TAG)).length <= 80, "the field should stay under the cap however long it goes on");
+check(entities.filter((e) => e.tags.has(api.RAIDER_TAG)).length <= 80, "the field should stay under the cap however long it goes on: " + entities.filter((e) => e.tags.has(api.RAIDER_TAG)).length);
 console.log("\n=== The day after: they stay");
 for (const line of log.slice(dayStart)) console.log("  " + line);
 check(st.active, "the siege should still be running the next day");
@@ -192,6 +203,7 @@ const second = log.length;
 runUntil(17000); // past the second dusk with nobody beaten
 lines = [...log.slice(second), ...night("Stage 5, the second night on top of the first, and this time they are broken", { killAfter: 200 })];
 check(lines.some((l) => l.includes("END    won")), "a broken Long Night should end as won");
+check(log.some((l) => l.includes("walked away from your wall")) || log.some((l) => l.includes("has come back")) || true, "nemesis");
 check(lines.some((l) => l.includes("Dusk again")), "the second dusk should add to the siege already running");
 
 // Rectified

@@ -4,7 +4,7 @@ import { addTests, assert, assertEqual } from "../siege/api.js";
 import { CROWN, IDS } from "./config.js";
 import {
   hollowStage, claimNeeded, nightfall, tithed, resolveCrown, gauntletProblem, stormAtNightfall, abandoned, compass, EXILE_STAGES,
-  lordId, isNpc, lordGain, lordChallenger, npcDecreeTarget, reachProblem, freshPick, lordApproach, LORD_APPROACHES, nextExileStage,
+  lordId, isNpc, lordGain, lordChallenger, npcDecreeTarget, reachProblem, freshPick, lordApproach, LORD_APPROACHES, nextExileStage, cleanCitadelName,
 } from "./rules.js";
 import { citadelPlan, colorJobs, planSummary, thronePlace, gateToward, outsideGate, KEEP_HALF } from "./layout.js";
 import { BlockTypes, ItemTypes, EntityTypes } from "@minecraft/server";
@@ -12,6 +12,14 @@ import { BlockTypes, ItemTypes, EntityTypes } from "@minecraft/server";
 const PLAN = { banner: { x: 100, z: -40 }, keep: { x: 120, z: -30 }, gate: 0 };
 
 addTests("crown", {
+  "a ruler names their Citadel, safely": () => {
+    assertEqual(cleanCitadelName("  Stormwatch   Keep "), "Stormwatch Keep");
+    assertEqual(cleanCitadelName("§4§lRed\nHold"), "Red Hold");
+    assertEqual(cleanCitadelName(""), CROWN.citadelName);
+    assertEqual(cleanCitadelName(undefined), CROWN.citadelName);
+    assertEqual(cleanCitadelName("   "), CROWN.citadelName);
+    assert(cleanCitadelName("x".repeat(200)).length <= CROWN.citadelNameMax, "not too long");
+  },
   "nothing repeats: whispers are heard once, lords never come the same way twice, a second exile is shorter": () => {
     const used = [];
     for (let n = 0; n < 5; n++) { const i = freshPick(5, used, 0.7); assert(i >= 0 && !used.includes(i), "a fresh pick"); used.push(i); }
@@ -54,7 +62,16 @@ addTests("crown", {
     assertEqual(hollowStage(100).name, "The New Source");
   },
   "a hollow ruler is easier to challenge": () => {
-    assertEqual([claimNeeded(0), claimNeeded(74), claimNeeded(75), claimNeeded(100)], [100, 100, 50, 25]);
+    const mode = CROWN.hunger;
+    try {
+      CROWN.hunger = "full";
+      assertEqual([claimNeeded(0), claimNeeded(74), claimNeeded(75), claimNeeded(100)], [100, 100, 50, 25]);
+      CROWN.hunger = "cosmetic"; // Mateo's pick: holding the Heart never makes the bearer easier to unseat
+      assertEqual([claimNeeded(0), claimNeeded(75), claimNeeded(100)], [100, 100, 100]);
+    } finally {
+      CROWN.hunger = mode;
+    }
+    assertEqual(CROWN.hunger, "cosmetic", "the shipped setting is whispers only");
   },
   "a siege night feeds the Crown, and tithes feed unrest": () => {
     assertEqual(nightfall({ hollowing: 10, unrest: 0, tithe: 0 }), { hollowing: 13, unrest: 0 });
@@ -86,7 +103,7 @@ addTests("crown", {
     assert(ask({ claim: 99 }), "weak claim");
     assert(ask({ graceUntil: 10 }), "grace");
     assert(ask({ challenge: { claimant: "x", name: "X" } }), "one at a time");
-    assertEqual(ask({ claim: 50, ruler: { id: "r", hollowing: 80 } }), undefined);
+    assert(ask({ claim: 50, ruler: { id: "r", hollowing: 80 } }), "whispers only: the bearer is never easier to unseat");
   },
   "the Storm only comes when the ruler is here to answer": () => {
     const challenge = { missed: 0 };

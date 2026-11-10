@@ -7,7 +7,7 @@ import { emit } from "../siege/api.js";
 import { isTesting } from "../core/tests.js";
 import { TOMES, tomesOf, answerIsRight, cluesFound, canAnswer as enoughClues, surveyLine, ALL_THREADS, isLocal, loadSaved, stampSaved } /* saves carry a version: SAVE_VERSION in logic.js */ from "./logic.js";
 import { COLLECTIONS, PLACES, THREADS } from "./data/world.js";
-import { LEDGER, progressOf, saveProgress, sourceSite, awardPoints, setFlag } from "./player.js";
+import { LEDGER, progressOf, saveProgress, sourceSite, awardPoints, setFlag, learnLeads } from "./player.js";
 
 const WRONG_ANSWER_DAYS = 1;
 const K_PLACES = "hc:lore_places"; // { place id: { x, y, z } } marked by the map builder
@@ -111,6 +111,7 @@ export function solveThread(player, thread) {
   player.sendMessage(`§aMystery solved: §f${thread.name}§r\n§7${thread.solved}`);
   awardPoints(player, thread.sp, `mystery:${thread.id}`, thread.sp * 20);
   emit("loreThreadSolved", { player, thread: thread.id });
+  if (thread.bossLead) learnLeads(player, [thread.bossLead]); // your plot's mystery leads to your region's boss
   if (THREADS.every((t) => p.solved.includes(t.id)) && setFlag(player, "all_mysteries")) {
     player.sendMessage("§5Every thread is tied off. You know the whole truth of Aldmere. Remember the name when you stand at the throne.");
     emit("loreAllSolved", { player });

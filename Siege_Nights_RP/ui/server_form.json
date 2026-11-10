@@ -232,6 +232,114 @@
         }
       },
       {
+        "hc_lines_wing": {
+          "type": "image",
+          "texture": "textures/ui/hc/tree_wing",
+          "size": [
+            312,
+            174
+          ],
+          "anchor_from": "top_middle",
+          "anchor_to": "top_middle",
+          "offset": [
+            0,
+            36
+          ],
+          "layer": 2,
+          "bindings": [
+            {
+              "binding_name": "#title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#title_text - '§h§c§5') = #title_text))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "hc_lines_forge": {
+          "type": "image",
+          "texture": "textures/ui/hc/tree_forge",
+          "size": [
+            312,
+            174
+          ],
+          "anchor_from": "top_middle",
+          "anchor_to": "top_middle",
+          "offset": [
+            0,
+            36
+          ],
+          "layer": 2,
+          "bindings": [
+            {
+              "binding_name": "#title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#title_text - '§h§c§6') = #title_text))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "hc_lines_helm": {
+          "type": "image",
+          "texture": "textures/ui/hc/tree_helm",
+          "size": [
+            312,
+            174
+          ],
+          "anchor_from": "top_middle",
+          "anchor_to": "top_middle",
+          "offset": [
+            0,
+            36
+          ],
+          "layer": 2,
+          "bindings": [
+            {
+              "binding_name": "#title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#title_text - '§h§c§7') = #title_text))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
+        "hc_lines_hex": {
+          "type": "image",
+          "texture": "textures/ui/hc/tree_hex",
+          "size": [
+            312,
+            174
+          ],
+          "anchor_from": "top_middle",
+          "anchor_to": "top_middle",
+          "offset": [
+            0,
+            36
+          ],
+          "layer": 2,
+          "bindings": [
+            {
+              "binding_name": "#title_text"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#title_text - '§h§c§8') = #title_text))",
+              "target_property_name": "#visible"
+            }
+          ]
+        }
+      },
+      {
         "hc_grid": {
           "type": "grid",
           "size": [
