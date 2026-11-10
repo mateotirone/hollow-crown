@@ -4,10 +4,10 @@ import {
   on, onTick, getState, guardCount, addKeepMenuButtons, title,
 } from "../siege/api.js";
 import { ActionFormData } from "@minecraft/server-ui";
-import { ItemStack } from "@minecraft/server";
 import { CROWN } from "./config.js";
+import { payE } from "../economy/coins.js";
 import { EXILE_STAGES, nextExileStage } from "./rules.js";
-import { crown, saveCrown, playerById, giveItem, addClaim, claimOf, announce, rulerLabel } from "./state.js";
+import { crown, saveCrown, playerById, addClaim, claimOf, announce, rulerLabel, citadelName } from "./state.js";
 import { crownStatus, annalLines, endReign, vacate } from "./reign.js";
 import { banish, npcWins } from "./usurp.js";
 import { sfx } from "../core/sfx.js";
@@ -20,7 +20,7 @@ function complete(player, stage) {
   const done = EXILE_STAGES[stage];
   exile.stage = nextExileStage(stage, c.exiledTimes?.[player.id] ?? 1);
   saveCrown();
-  if (done.emeralds) giveItem(player, new ItemStack("minecraft:emerald", done.emeralds));
+  if (done.emeralds) payE(player, done.emeralds, "exile");
   if (done.claim) addClaim(player, done.claim, done.name);
   const next = EXILE_STAGES[exile.stage];
   title(player, `§5${done.name}`, "§7The Long Road Back");
@@ -50,7 +50,7 @@ on("keepFallen", ({ owner, keep }) => {
   if (c.ruler?.id !== owner) return;
   if (c.challenge?.npc) return npcWins("the keep fell to their army", keep); // a rival lord took it
   const old = endReign("swallowed by the Hollow");
-  announce(`§4${old.title} ${old.name} is gone. The raiders they once commanded have taken the throne room. ${CROWN.citadelName} stands empty.`);
+  announce(`§4${old.title} ${old.name} is gone. The raiders they once commanded have taken the throne room. ${citadelName()} stands empty.`);
   banish(old.id, old.name);
   vacate("The throne is empty");
 });

@@ -6,7 +6,7 @@
 //   Each has a Foreman (keeps the Tally) and three miners. They are Bedrock's built-in NPC entity,
 //   but we answer the click ourselves, so what they say can follow who rules the Hollow.
 //   Every in-game dawn each village digs ore into its Tally and half is carted to the Vault.
-//   Visitors buy ore from a Foreman for emeralds, or rob the Tally. The Vault is reached from the
+//   Visitors buy ore from a Foreman for coins, or rob the Tally. The Vault is reached from the
 //   Vault Stair, a copper pad on the path just before the Seat: stand on it and sneak.
 //
 // Other threads
@@ -17,11 +17,11 @@
 //       so its guardians come (same event the ore cliffs use).
 //   inVillage(location), vaultStock(), takeFromVault(ore, emeralds), villageSpot(id) are exported.
 //   Players standing in a village carry the tag siege_hollowfolk_safe (Gloamwings must not hunt them).
-// Testing (creative): /scriptevent hc:folk_go <village|vault>   hc:folk_dawn   hc:folk_freed   hc:folk_status
+// Testing (creative): /scriptevent hc:folk_go <village|vault>   hc:folk_dawn   hc:folk_freed   hc:folk_status   hc:folk_happen
 
 import { world, system, ItemStack } from "@minecraft/server";
 import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
-import { on, emit, onTick, moduleStore, addTests, assert, assertEqual, countItem, takeItems } from "../siege/api.js";
+import { on, emit, onTick, moduleStore, addTests, assert, assertEqual, registerDeck, storyPick, note, markDone } from "../siege/api.js";
 import { UNDERTOW_ID, UNDERTOW_LAYOUT as L, HEART, pathX } from "../undertow/layout.js";
 import { RIVER_NODES, riverDistance } from "../undertow/rivers.js";
 import { SITES } from "../undertow/roads.js";
@@ -30,7 +30,11 @@ import { isBuilt } from "../undertow/builder.js";
 import { wardenData, wardenOnline, hollowStep } from "../undertow/warden.js";
 import { regentRules } from "../undertow/regent.js";
 import { say, runCmd } from "../undertow/data.js";
-import { FOLK, LINES, moodOf, robVerdict, dig, cart, priceOf, vaultLoot } from "./rules.js";
+import { FOLK, LINES, moodOf, robVerdict, dig, cart, priceOf, vaultLoot, HAPPENINGS, HAPPENING_GAP_SECONDS, ERRAND_ORE, ERRAND_ASKS, happeningsFor, freshLine } from "./rules.js";
+// Prices and the Vault's takings (vault.emeralds, saved) are counted in the old unit: one is 8 coins.
+import { funds, chargeE, giveCoins } from "../economy/coins.js";
+import { coins, worth, fromEmeralds } from "../economy/rules.js";
+import { ECON } from "../economy/config.js";
 
 export { setFolkVoice } from "./rules.js";
 
@@ -45,6 +49,7 @@ const VAULT_BLOCK = "minecraft:reinforced_deepslate";
 const store = moduleStore("hc:hollowfolk", () => ({
   v: 1, // version of this saved data: raise it and convert old saves when the shape changes
   deepDoor: false, // the sealed door in the Vault is in place
+  errands: {}, // player id -> id of the errand a miner has asked of them
   built: {}, // village id -> true once its huts stand
   vaultBuilt: false,
   stock: {}, // village id -> raw ore in its Tally
@@ -350,9 +355,80 @@ onTick("hollowfolk:day", 200, () => {
 onTick("hollowfolk:safe", 40, () => {
   for (const p of world.getAllPlayers()) {
     const safe = p.dimension.id === UNDERTOW_ID && !!inVillage(p.location);
-    if (safe !== p.hasTag(TAG_SAFE)) safe ? p.addTag(TAG_SAFE) : p.removeTag(TAG_SAFE);
+    if (safe !== p.hasTag(TAG_SAFE)) {
+      safe ? p.addTag(TAG_SAFE) : p.removeTag(TAG_SAFE);
+      if (safe) arrive(p, FOLK.villages.find((v) => v.id === inVillage(p.location)));
+    }
+    if (p.dimension.id === UNDERTOW_ID) errandTick(p);
   }
 });
+
+// ---- village happenings: something different is going on each time you walk in ------------------
+registerDeck("hollow_village", HAPPENINGS);
+const lastHappening = new Map(); // player id -> tick of their last one
+const deals = new Map(); // player id -> { village, until } : the Foreman's half price
+const lastLine = new Map(); // player id -> index of the miner line they heard last
+const dealFor = (player, v) => { const d = deals.get(player.id); return !!d && d.village === v.id && system.currentTick < d.until; };
+const priceFor = (player, v, m) => { const p = priceOf(m, store.data.price); return dealFor(player, v) ? Math.max(1, Math.floor(p / 2)) : p; };
+function minerLine(player, m) {
+  const [line, i] = freshLine(LINES[m], lastLine.get(player.id) ?? -1);
+  lastLine.set(player.id, i);
+  return line;
+}
+
+function arrive(player, v) {
+  if (!v) return;
+  const now = system.currentTick, last = lastHappening.get(player.id);
+  if (last !== undefined && now - last < HAPPENING_GAP_SECONDS * 20) return;
+  const m = mood(), mine = wardenData().id === player.id, d = store.data;
+  const fits = happeningsFor(m, mine).filter((h) => !h.site || !d.errands[player.id]).map((h) => h.id);
+  const h = storyPick("hollow_village", player, { exclude: HAPPENINGS.filter((x) => !fits.includes(x.id)).map((x) => x.id) });
+  if (!h) return;
+  lastHappening.set(player.id, now);
+  if (h.site) {
+    d.errands[player.id] = h.id;
+    store.save();
+    return say(player, `§7A miner of ${v.name} stops you: §f"${ERRAND_ASKS[h.id]}"`);
+  }
+  if (h.id === "rich_seam") {
+    d.stock[v.id] = Math.min(FOLK.tallyCap, (d.stock[v.id] ?? 0) + 6);
+    store.save();
+    say(player, `§bShouting from the mine mouth of ${v.name}: they have broken into a rich seam. Six more ore go into the Tally while you watch.`);
+  } else if (h.id === "half_price") {
+    deals.set(player.id, { village: v.id, until: now + 20 * 300 });
+    say(player, `§bThe Foreman of ${v.name} is in a rare mood. §f"Half price for you, for as long as this pipe lasts."§b (5 minutes, at this Tally.)`);
+  } else if (h.id === "fireside") {
+    try { player.addEffect("regeneration", 20 * 20, { amplifier: 0, showParticles: false }); } catch { /* effect ids differ on old builds */ }
+    say(player, `§7The miners of ${v.name} make room at the fire. Nobody asks you anything. For a while nothing hunts you.`);
+    note(player, "quiet");
+  } else if (h.id === "seam_mites") {
+    const c = villageSpot(v.id);
+    for (let i = 0; i < 3; i++) try { hollow().spawnEntity("minecraft:endermite", { x: c.x - 11 + i, y: c.y + 1, z: c.z + 9 }); } catch { /* chunk not ready */ }
+    say(player, `§cA shout from the seam at ${v.name}: the picks have broken into a nest. Things are coming out of the rock.`);
+    note(player, "fight");
+  } else if (h.id === "bound_scrap") {
+    give(player, RAW, 1);
+    say(player, "§8A miner brushes past and something drops into your hand. §7\"He counts the stone. He does not count the dust. Go.\"");
+  } else if (h.id === "bound_cart") {
+    say(player, `§8The cart is leaving ${v.name}. Every miner stands with their back to it until it is gone. Nobody watches where it goes.`);
+  } else if (h.id === "bound_warning") {
+    say(player, "§7A miner, not looking at you: §f\"If you hear the note change, stop walking. Do not run. He hears running.\"");
+  }
+}
+
+function errandTick(player) {
+  const d = store.data, id = d.errands[player.id];
+  if (!id) return;
+  const h = HAPPENINGS.find((x) => x.id === id), s = h && SITES.find((x) => x.id === h.site);
+  if (!s) { delete d.errands[player.id]; return store.save(); }
+  if (Math.hypot(player.location.x - s.x, player.location.z - s.z) > s.r + 8) return;
+  delete d.errands[player.id];
+  store.save();
+  markDone(player, "hollow_village", id);
+  note(player, h.kind);
+  give(player, RAW, ERRAND_ORE);
+  say(player, `§b${s.name}. You have seen it for the one who asked. Tucked in your pack you find what they pressed on you before you left: ${ERRAND_ORE} raw Choir Ore.`);
+}
 
 const onPad = (p, s) => Math.abs(p.location.x - (s.x + 0.5)) < 1.5 && Math.abs(p.location.z - (s.z + 0.5)) < 1.5 && Math.abs(p.location.y - s.y) < 1.5;
 onTick("hollowfolk:stair", 10, () => {
@@ -450,8 +526,8 @@ onTick("hollowfolk:vault", 10, () => {
     const loot = vaultLoot(store.data.vault);
     const got = takeFromVault(loot.ore, loot.emeralds);
     if (got.ore) give(p, RAW, got.ore);
-    if (got.emeralds) give(p, "minecraft:emerald", got.emeralds);
-    world.sendMessage(`§c${p.name} has broken the Vault of the Hollow and carried off ${got.ore} ore and ${got.emeralds} emeralds.`);
+    if (got.emeralds) giveCoins(p, fromEmeralds(got.emeralds));
+    world.sendMessage(`§c${p.name} has broken the Vault of the Hollow and carried off ${got.ore} ore and ${worth(got.emeralds)}.`);
   }
 });
 
@@ -460,14 +536,14 @@ function tallyMenu(player, v) {
   const d = store.data, m = mood(), w = wardenData();
   const mine = w.id === player.id;
   const stock = d.stock[v.id] ?? 0;
-  const price = priceOf(m, d.price);
+  const price = priceFor(player, v, m);
   const rulerLine = m === "crowned" ? (wardenOnline() ? `§a${w.name} wears the Crown and is here.` : `§7${w.name} wears the Crown but is away. Nothing can be stolen until they return.`)
     : m === "regent" ? "§dThe Crown is worn. It is watching."
     : m === "free" ? "§7Nobody wears the Crown."
     : "§8Everything here belongs to the one below.";
-  const greeting = mine ? "Crown-wearer! Whatever you need, it is yours." : LINES[m][Math.floor(Math.random() * LINES[m].length)];
+  const greeting = mine ? "Crown-wearer! Whatever you need, it is yours." : minerLine(player, m);
   const form = new ActionFormData().title(`The Tally of ${v.name}`)
-    .body(`§o"${greeting}"§r\n\nIn the Tally: §f${stock}§r raw Choir Ore\n${m === "bound" ? "" : `Price: §f${price}§r emeralds each\n`}${rulerLine}${mine ? `\n\nYour Vault holds §f${d.vault.ore}§r ore and §f${d.vault.emeralds}§r emeralds.` : ""}`);
+    .body(`§o"${greeting}"§r\n\nIn the Tally: §f${stock}§r raw Choir Ore\n${m === "bound" ? "" : `Price: §f${worth(price)}§r each\n`}${rulerLine}${mine ? `\n\nYour Vault holds §f${d.vault.ore}§r ore and §f${worth(d.vault.emeralds)}§r.` : ""}`);
   const acts = [];
   const add = (label, fn) => { form.button(label); acts.push(fn); };
   if (mine) {
@@ -479,13 +555,13 @@ function tallyMenu(player, v) {
       say(player, `§dThe miners load the cart at once. ${stock} ore is on its way to your Vault.`);
     });
   } else if (m !== "bound") {
-    if (stock >= 1) add(`Buy 1 (${price} emeralds)`, () => buy(player, v, 1));
-    if (stock >= 8) add(`Buy 8 (${price * 8} emeralds)`, () => buy(player, v, 8));
+    if (stock >= 1) add(`Buy 1 (${worth(price)})`, () => buy(player, v, 1));
+    if (stock >= 8) add(`Buy 8 (${worth(price * 8)})`, () => buy(player, v, 8));
     add("§cRob the Tally", () => robTally(player, v));
   }
   if (mine) add("Have a boat brought to the dock", () => { give(player, BOAT, 1); say(player, "§dA Latticewood Boat, and gladly."); });
-  else if (m !== "bound") add(`Buy a boat (${FOLK.boatPrice} emeralds)`, () => {
-    if (!takeItems(player, "minecraft:emerald", FOLK.boatPrice)) return say(player, `§7A boat is ${FOLK.boatPrice} emeralds.`);
+  else if (m !== "bound") add(`Buy a boat (${worth(FOLK.boatPrice)})`, () => {
+    if (!chargeE(player, FOLK.boatPrice, "boat")) return say(player, `§7A boat is ${worth(FOLK.boatPrice)}.`);
     give(player, BOAT, 1);
     say(player, "§bThe Foreman points you to a Latticewood Boat. The light rivers reach every village.");
   });
@@ -496,8 +572,8 @@ function tallyMenu(player, v) {
 function buy(player, v, n) {
   const d = store.data, m = mood();
   if ((d.stock[v.id] ?? 0) < n) return say(player, "§7The Tally does not hold that much.");
-  const cost = priceOf(m, d.price) * n;
-  if (!takeItems(player, "minecraft:emerald", cost)) return say(player, `§7That is ${cost} emeralds. You have ${countItem(player, "minecraft:emerald")}.`);
+  const cost = priceFor(player, v, m) * n;
+  if (!chargeE(player, cost, "choir ore")) return say(player, `§7That is ${worth(cost)}. You have ${coins(funds(player))}.`);
   d.stock[v.id] -= n;
   if (m === "crowned" || m === "regent") d.vault.emeralds += cost;
   store.save();
@@ -508,12 +584,12 @@ function buy(player, v, n) {
 function priceMenu(player) {
   const d = store.data;
   new ModalFormData().title("Price of Choir Ore")
-    .slider("Emeralds for one raw ore, at every Tally", FOLK.minPrice, FOLK.maxPrice, { valueStep: 1, defaultValue: priceOf("crowned", d.price) })
+    .slider(`${ECON.many} for one raw ore, at every Tally`, fromEmeralds(FOLK.minPrice), fromEmeralds(FOLK.maxPrice), { valueStep: ECON.perEmerald, defaultValue: fromEmeralds(priceOf("crowned", d.price)) })
     .show(player).then((r) => {
       if (r.canceled) return;
-      d.price = priceOf("crowned", Number(r.formValues[0]));
+      d.price = priceOf("crowned", Number(r.formValues[0]) / ECON.perEmerald);
       store.save();
-      say(player, `§dEvery Tally now sells at ${d.price} emeralds.`);
+      say(player, `§dEvery Tally now sells at ${worth(d.price)}.`);
     }).catch(() => {});
 }
 
@@ -528,7 +604,7 @@ world.beforeEvents.playerInteractWithEntity.subscribe((e) => {
     if (!v) return;
     if (foreman) return tallyMenu(player, v);
     const m = mood();
-    const line = wardenData().id === player.id ? "Crown-wearer. We are yours. Say the word." : LINES[m][Math.floor(Math.random() * LINES[m].length)];
+    const line = wardenData().id === player.id ? "Crown-wearer. We are yours. Say the word." : minerLine(player, m);
     say(player, `§7Miner: §f"${line}"`);
   });
 });
@@ -553,13 +629,13 @@ world.beforeEvents.playerInteractWithBlock.subscribe((e) => {
   system.run(() => {
     const d = store.data, mine = wardenData().id === player.id;
     const form = new ActionFormData().title("The Vault of the Hollow")
-      .body(mine ? `Yours. It holds §f${d.vault.ore}§r raw Choir Ore and §f${d.vault.emeralds}§r emeralds.` : "A block of dark stone with no door and no lock. Something inside it hums.");
+      .body(mine ? `Yours. It holds §f${d.vault.ore}§r raw Choir Ore and §f${worth(d.vault.emeralds)}§r.` : "A block of dark stone with no door and no lock. Something inside it hums.");
     const acts = [];
     if (mine) { form.button("Take everything"); acts.push(() => {
       const got = takeFromVault(d.vault.ore, d.vault.emeralds);
       if (got.ore) give(player, RAW, got.ore);
-      if (got.emeralds) give(player, "minecraft:emerald", got.emeralds);
-      say(player, `§dThe Vault gives up ${got.ore} ore and ${got.emeralds} emeralds.`);
+      if (got.emeralds) giveCoins(player, fromEmeralds(got.emeralds));
+      say(player, `§dThe Vault gives up ${got.ore} ore and ${worth(got.emeralds)}.`);
     }); } else { form.button("§cBreak it open"); acts.push(() => startVault(player)); }
     form.button("Leave"); acts.push(() => {});
     form.show(player).then((r) => { if (!r.canceled) acts[r.selection]?.(); }).catch(() => {});
@@ -579,6 +655,13 @@ system.afterEvents.scriptEventReceive.subscribe((e) => {
       system.runTimeout(() => { try { p.teleport({ x: at.x + 3.5, y: at.y + 1, z: at.z + 3.5 }, { dimension: hollow() }); } catch { /* not ready */ } }, 10);
       break;
     }
+    case "hc:folk_happen": { // something happens at the village you are standing in, ignoring the wait
+      const v = p && FOLK.villages.find((x) => x.id === inVillage(p.location));
+      if (!v) { if (p) say(p, "§7Stand inside a mining village first."); break; }
+      lastHappening.delete(p.id);
+      arrive(p, v);
+      break;
+    }
     case "hc:folk_dawn": {
       const n = dawn();
       if (p) say(p, `§dA day's digging done. ${n} ore carted to the Vault.`);
@@ -592,7 +675,7 @@ system.afterEvents.scriptEventReceive.subscribe((e) => {
     case "hc:folk_status": {
       if (!p) return;
       const d = store.data;
-      say(p, `§dMiners: ${mood()}. Price ${d.price}. Vault ${d.vault.ore} ore, ${d.vault.emeralds} emeralds.\n` + FOLK.villages.map((v) => `${v.name}: ${d.stock[v.id] ?? 0} ore${d.built[v.id] ? "" : " (not built yet)"}`).join("\n"));
+      say(p, `§dMiners: ${mood()}. Price ${d.price}. Vault ${d.vault.ore} ore, ${worth(d.vault.emeralds)}.\n` + FOLK.villages.map((v) => `${v.name}: ${d.stock[v.id] ?? 0} ore${d.built[v.id] ? "" : " (not built yet)"}`).join("\n"));
       break;
     }
   }
@@ -614,6 +697,27 @@ on("showcase", ({ player, dim, nextSpot, label }) => {
 
 // ---- self-tests ---------------------------------------------------------------------------------
 addTests("hollowfolk", {
+  "every errand leads to a real place, and has its ask written": () => {
+    for (const h of HAPPENINGS.filter((x) => x.site)) {
+      assert(SITES.some((s) => s.id === h.site), `${h.id} points at a site that does not exist (${h.site})`);
+      assert(ERRAND_ASKS[h.id], `${h.id} has no words`);
+    }
+  },
+  "a village always has several kinds of thing going on, whoever rules": () => {
+    for (const m of ["bound", "free", "crowned", "regent"]) {
+      const fit = happeningsFor(m, false);
+      assert(fit.length >= 5, `${m}: only ${fit.length} happenings`);
+      assert(new Set(fit.map((h) => h.kind)).size >= 3, `${m}: too few kinds`);
+    }
+  },
+  "a miner never says the same line twice running": () => {
+    let last = -1;
+    for (let i = 0; i < 50; i++) {
+      const [, n] = freshLine(LINES.free, last);
+      assert(n !== last, "repeated a line");
+      last = n;
+    }
+  },
   "villages stand on real ground inside the valley": () => {
     for (const v of FOLK.villages) assert(villageSpot(v.id), `${v.id} is over the void`);
   },

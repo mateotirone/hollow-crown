@@ -1,7 +1,7 @@
 // The Rumor Board: endless jobs put together from parts, so there is always something to do after
 // (and during) the story. Everything here works alone: no job needs a second player.
 //
-// Open it from the Town Hall menu. Three rumors a day, one job at a time. Jobs pay Renown and emeralds,
+// Open it from the Town Hall menu. Three rumors a day, one job at a time. Jobs pay Renown and coins,
 // and every third job pays a skill point, so the board is a steady trickle and never beats the story.
 //
 // Other features can add flavour text:  emit("rumorParts", { givers: [...], places: [...], reasons: { camp: [...] } })
@@ -11,7 +11,12 @@ import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
 import * as api from "../siege/api.js";
 import { heroOf, saveHero, grantPoints, grantRenown } from "./hero.js";
 import { heading } from "./progress.js";
+<<<<<<< HEAD
 import { sfx } from "../core/sfx.js";
+=======
+import { payE } from "../economy/coins.js";
+import { worth } from "../economy/rules.js";
+>>>>>>> origin/main
 
 export const JOBS_PER_POINT = 3;
 const RUMOR_TAG = "siege_rumor";
@@ -40,6 +45,18 @@ const SUPPLIES = [
   ["minecraft:coal", "coal", 20], ["minecraft:torch", "torches", 32], ["minecraft:leather", "leather", 8], ["minecraft:wheat", "wheat", 24], ["minecraft:cooked_cod", "cooked cod", 10],
 ];
 
+// ---------- the Storyteller (core pacing director) ----------
+// The board's jobs and twists are decks, so the director can mix them against whatever else the player
+// has been doing (quiet work after a siege, a fight after days at home). Ids are saved: never rename one.
+// If the Storyteller is not in this build, the board falls back to its own seeded dice.
+export const JOB_KIND = { bounty: "fight", camp: "fight", rescue: "mystery", supply: "quiet" };
+const TWIST_KIND = { keepsake: "quiet", windfall: "build", tale: "social", debt: "social" };
+const storyteller = () => typeof api.pickSeveral === "function" && typeof api.registerDeck === "function";
+if (storyteller()) {
+  api.registerDeck("rumors", Object.entries(JOB_KIND).map(([id, kind]) => ({ id, kind })));
+  api.registerDeck("rumor_twists", Object.entries(TWIST_KIND).map(([id, kind]) => ({ id, kind })), { chance: 0.25 });
+}
+
 // ---------- a small seeded dice, so the board shows the same three rumors all day ----------
 export function dice(seed) {
   let a = seed >>> 0;
@@ -63,9 +80,11 @@ export const jobTier = (level) => Math.min(4, Math.floor(level / 8));
 export function rumorsFor(day, playerId, level, memory = {}) {
   const roll = dice(hash(`${day}:${playerId}`));
   const tier = jobTier(level);
-  const types = ["bounty", "camp", "rescue", "supply"];
+  let types = ["bounty", "camp", "rescue", "supply"];
   const drop = types.includes(memory.lastType) ? types.indexOf(memory.lastType) : Math.floor(roll() * types.length);
   types.splice(drop, 1); // three of the four kinds each day, never the kind you just did
+  // the Storyteller's choice for today, when it made one, wins over the dice
+  if (memory.types?.length && memory.types.every((t) => JOB_KIND[t])) types = [...memory.types];
   const recent = new Set(memory.recent ?? []);
   const onBoard = new Set();
   const fresh = (list, key = (v) => v) => {
@@ -88,7 +107,7 @@ export function rumorsFor(day, playerId, level, memory = {}) {
     } else if (type === "camp") job.need = 3 + tier;
     else job.need = 2 + Math.ceil(tier / 2);
     job.renown = Math.round((type === "supply" ? 40 : type === "bounty" ? 55 : 80) * (1 + tier * 0.35));
-    job.emeralds = (type === "supply" ? 3 : 2) + tier;
+    job.emeralds = (type === "supply" ? 3 : 2) + tier; // old unit (saved with the job): paid as 8 coins each
     // one job in three is not what it seemed; what the twist is only shows when the job is done
     if (roll() < 0.34) job.twist = pickFrom(roll, TWISTS);
     return job;
@@ -132,8 +151,14 @@ export function describe(job) {
 function board(player) {
   const hero = heroOf(player);
   const day = world.getDay();
-  if (hero.boardDay !== day) { hero.boardDay = day; hero.boardTaken = []; saveHero(player); }
-  return rumorsFor(day, player.id, hero.level, { lastType: hero.lastJobType, recent: hero.rumorRecent }).filter((j) => !hero.boardTaken.includes(j.slot));
+  if (hero.boardDay !== day) {
+    hero.boardDay = day;
+    hero.boardTaken = [];
+    // asked once a day, so the board stays the same until dawn
+    hero.boardTypes = storyteller() ? api.pickSeveral("rumors", player, 3).map((o) => o.id) : undefined;
+    saveHero(player);
+  }
+  return rumorsFor(day, player.id, hero.level, { lastType: hero.lastJobType, recent: hero.rumorRecent, types: hero.boardTypes }).filter((j) => !hero.boardTaken.includes(j.slot));
 }
 
 export function rumorMenu(player) {
@@ -152,7 +177,7 @@ export function rumorMenu(player) {
     form.body(offers.length ? `${head}\n\nThree rumors reach the hall each day. Take one at a time.` : `${head}\n\nNothing new today. Rumors travel with the dawn.`);
     for (const job of offers) {
       const d = describe(job);
-      form.button(`${d.title}\n§8+${job.renown} Renown, ${job.emeralds} emeralds`);
+      form.button(`${d.title}\n§8+${job.renown} Renown, ${worth(job.emeralds)}`);
       actions.push(() => offerMenu(player, job));
     }
   }
@@ -162,7 +187,7 @@ export function rumorMenu(player) {
 
 function offerMenu(player, job) {
   const d = describe(job);
-  new MessageFormData().title(d.title).body(`${d.text}\n\nPays ${job.renown} Renown and ${job.emeralds} emeralds.`)
+  new MessageFormData().title(d.title).body(`${d.text}\n\nPays ${job.renown} Renown and ${worth(job.emeralds)}.`)
     .button1("Take the job").button2("Back")
     .show(player).then((r) => {
       if (r.canceled || r.selection !== 0) return rumorMenu(player);
@@ -180,6 +205,8 @@ function take(player, job) {
     job.z = Math.floor(from.z + Math.sin(job.angle) * job.far);
     job.spawned = false;
   }
+  // with the Storyteller, twists come likelier the longer it has been since the last one
+  if (storyteller()) job.twist = api.maybePick("rumor_twists", player)?.id;
   hero.job = job;
   hero.boardTaken = [...(hero.boardTaken ?? []), job.slot];
   saveHero(player);
@@ -239,8 +266,9 @@ function complete(player) {
   api.title(player, "§6Job done", `§7${describe(job).title}`);
   sfx(player, "random.levelup");
   grantRenown(player, renown, "rumor", true);
-  if (emeralds > 0) player.dimension.spawnItem(new ItemStack("minecraft:emerald", emeralds), player.location);
+  if (emeralds > 0) payE(player, emeralds, "rumor");
   if (hero.jobsDone % JOBS_PER_POINT === 0) grantPoints(player, 1, "word of your deeds spreads");
+  if (storyteller()) api.note?.(player, JOB_KIND[job.type] ?? "quiet");
   api.emit("rumorDone", { player, job });
 }
 

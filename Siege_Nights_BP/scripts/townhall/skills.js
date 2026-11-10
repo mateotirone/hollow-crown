@@ -24,6 +24,11 @@ export const BRANCHES = {
   wayfarer: { name: "Wayfarer", who: "all", icon: "textures/items/compass_item", blurb: "The road, the horse, the hunt for answers." },
   blade: { name: "Blade", who: "knight", icon: "textures/items/siege_longsword", blurb: "Techniques of the Order of the Ashen Gate." },
   arcana: { name: "Arcana", who: "marked", icon: "textures/items/siege_hollow_ember", blurb: "What the Ember lets you do, and what it costs." },
+  // regional roles: shown in the Tree only to those who hold the role
+  wing: { name: "Wing", who: "rider", regional: true, icon: "textures/items/blaze_powder", blurb: "The saddle, the fire, and the beast that lets you ride it." },
+  forge: { name: "Forge", who: "forgemaster", regional: true, icon: "textures/items/iron_ingot", blurb: "Steel made right, and the arm to use it." },
+  helm: { name: "Helm", who: "captain", regional: true, icon: "textures/items/spyglass", blurb: "A crew that obeys, and weather that favours you." },
+  hex: { name: "Hex", who: "witch", regional: true, icon: "textures/items/fermented_spider_eye", blurb: "What the fen takes, you learn to take too." },
 };
 
 const S = (id, branch, ring, name, max, cost, desc, extra = {}) => ({ id, branch, ring, name, max, cost, desc, ...extra });
@@ -35,8 +40,8 @@ export const SKILLS = [
   S("keep_muster", "keep", 1, "Muster Roll", 3, 1, ["+1 guard slot per rank."]),
   S("keep_wards", "keep", 2, "Masonry Wards", 3, 2, ["During a siege your keep mends itself: 3 / 6 / 9 health every 2 seconds."], { needs: "keep_hearth" }),
   S("keep_watchfire", "keep", 2, "Watchfire", 1, 2, ["When a siege begins you learn which sides of your land they will hit, and raiders inside your land are marked with a rising flare for the first 20 seconds of every wave."]),
-  S("keep_spoils", "keep", 2, "Spoils of War", 2, 2, ["Holding your keep pays 25% / 50% more emeralds."]),
-  S("keep_plunder", "keep", 2, "Plunder", 3, 2, ["Raiders you kill have a 15% / 30% / 45% chance to drop an extra emerald."]),
+  S("keep_spoils", "keep", 2, "Spoils of War", 2, 2, ["Holding your keep pays 25% / 50% more coin."]),
+  S("keep_plunder", "keep", 2, "Plunder", 3, 2, ["Raiders you kill have a 15% / 30% / 45% chance to drop 8 Regals."]),
   S("keep_rally", "keep", 3, "Rally the Walls", 2, 3, ["During a siege you and your guards in your land get Resistance I. Rank 2: guards also get Strength I."], { needs: "keep_wards" }),
   S("keep_masterbuilder", "keep", 3, "Master Builder", 1, 3, ["Town hall upgrades cost 25% less and rise twice as fast."], { needs: "keep_stonewright" }),
   S("keep_unbreakable", "keep", 4, "The Unbreakable Keep", 1, 6, ["Once per siege, when your keep drops below 25% it surges back to 60% and hurls nearby raiders away."], { needs: "keep_rally" }),
@@ -83,8 +88,52 @@ export const SKILLS = [
   S("arc_resonant", "arcana", 3, "Resonant Soul", 2, 3, ["While Resonance is 70 or more, powers are 25% / 50% stronger."], { needs: "arc_quiet" }),
   S("arc_hollowborn", "arcana", 4, "Choirborn", 1, 6, ["Powers cost 25% less Resonance and cool down 30% faster. At 100 Resonance you enter a Crescendo: 10s of free casting, then you crash."], { needs: "arc_step" }),
   S("arc_hollowstep", "arcana", 4, "Veilstep", 1, 5, ["Power. Step out of the world and into the Hollow, wherever you stand. Cast it again there to step back to where you left. Resonance +40. Cooldown 60s."], { power: true, needs: "arc_step" }),
-  S("arc_warden", "arcana", 5, "The Last Art", 1, 8, ["The peak of the Marked. The Hollow answers to you now: you may claim its throne and rule it as its Warden."], { needs: "arc_hollowstep" }),
+  S("arc_warden", "arcana", 5, "The Last Art", 1, 8, ["The peak of the Marked. The Hollow answers to you now: you may claim its throne and rule it as its Warden.", "Asks three things of you: a Sovereign's Throne, which only a settlement that has won the Grand Siege can raise; Renown 30; and Veilstep."], { needs: "arc_hollowstep" }),
   S("arc_crownless", "arcana", 5, "Crownless", 1, 8, ["Ember Bolt arcs to 2 more enemies near the first."], { needs: "arc_hollowborn" }),
+
+  // ---------------- WING (Dragon Rider, Emberwaste) ----------------
+  S("wing_heat", "wing", 1, "Emberblood", 1, 1, ["Fire and lava cannot hurt you."]),
+  S("wing_bond", "wing", 1, "Saddle Bond", 3, 1, ["The dragon you ride mends as it flies: Regeneration I / II / III."]),
+  S("wing_fall", "wing", 1, "Windcatch", 2, 1, ["You fall slowly instead of hard. Rank 2: you also jump higher on foot."]),
+  S("wing_scale", "wing", 2, "Scale Guard", 3, 2, ["In the saddle you take less harm: Resistance I. Rank 2: your dragon too. Rank 3: Resistance II for you."], { needs: "wing_bond" }),
+  S("wing_eye", "wing", 2, "Hawk Eye", 1, 2, ["Night Vision whenever you are mounted."]),
+  S("wing_dive", "wing", 3, "Stoop", 3, 3, ["Hits you land from the saddle deal +3 / +5 / +8 damage."], { needs: "wing_scale" }),
+  S("wing_brand", "wing", 3, "Firebrand", 2, 3, ["Your melee hits set enemies alight for 3 / 6 seconds."], { needs: "wing_heat" }),
+  S("wing_heart", "wing", 4, "Dragonheart", 1, 6, ["+4 hearts of health. In the saddle, you and your dragon both have Strength I."], { needs: "wing_dive" }),
+  S("wing_wyrmfire", "wing", 5, "Wyrmfire", 1, 8, ["Each kill from the saddle heals you and your dragon and gives you both a burst of speed."], { needs: "wing_heart" }),
+
+  // ---------------- FORGE (Forgemaster, Frostmarch) ----------------
+  S("forge_arm", "forge", 1, "Hammer Arm", 3, 1, ["Haste I / II / III while you hold a pickaxe, axe or hammer."]),
+  S("forge_temper", "forge", 1, "A Second Skin", 3, 1, ["Out of combat, your armour settles: 2 / 4 / 6 extra hearts of Absorption, renewed every 30 seconds."]),
+  S("forge_cold", "forge", 1, "Frostborn", 1, 1, ["Slowness and Mining Fatigue do not hold you."]),
+  S("forge_edge", "forge", 2, "Keen Edge", 3, 2, ["Your sword, axe and hammer hits deal +1 / +2 / +3 damage."], { needs: "forge_arm" }),
+  S("forge_mend", "forge", 2, "Field Repair", 2, 2, ["The tool or weapon in your hand mends itself, slowly / steadily."], { needs: "forge_temper" }),
+  S("forge_stance", "forge", 3, "Anvil Stance", 2, 3, ["While sneaking you are hard to hurt: Resistance I / II."], { needs: "forge_edge" }),
+  S("forge_guardsteel", "forge", 3, "Guardsteel", 2, 3, ["Guards within 16 blocks carry your steel: Resistance I. Rank 2: Strength I too."], { needs: "forge_mend" }),
+  S("forge_master", "forge", 4, "Masterwork", 1, 6, ["One hit in five strikes true: +6 damage, and the enemy staggers."], { needs: "forge_edge" }),
+  S("forge_deep", "forge", 5, "Deepforge", 1, 8, ["Haste II and Resistance I, always. The fire below answers to you."], { needs: "forge_master" }),
+
+  // ---------------- HELM (Captain, Saltreach) ----------------
+  S("helm_legs", "helm", 1, "Sea Legs", 3, 1, ["Breathe underwater. In water or rain: Speed I at rank 2, Speed II at rank 3."]),
+  S("helm_voice", "helm", 1, "Captain's Voice", 3, 1, ["Guards within 12 / 16 / 24 blocks move at your word: Speed I."]),
+  S("helm_purse", "helm", 1, "Harbor Purse", 3, 1, ["+8 / +16 / +24 Regals from every siege you hold."]),
+  S("helm_volley", "helm", 2, "Volley", 3, 2, ["Your arrows and bolts deal +2 / +3 / +4 damage."], { needs: "helm_voice" }),
+  S("helm_crew", "helm", 2, "Press Gang", 2, 2, ["+1 / +2 guards on your walls."], { needs: "helm_purse" }),
+  S("helm_boarding", "helm", 3, "Boarding Action", 2, 3, ["Your first hit on an unhurt enemy deals +4 / +7 damage."], { needs: "helm_volley" }),
+  S("helm_storm", "helm", 3, "Stormwise", 1, 3, ["In rain or thunder: Strength I and Regeneration I."], { needs: "helm_legs" }),
+  S("helm_fleet", "helm", 4, "Fleet Command", 1, 6, ["During a siege, guards within 24 blocks get Strength I and Regeneration I."], { needs: "helm_volley" }),
+  S("helm_tide", "helm", 5, "Tide-Turner", 1, 8, ["Once every 5 minutes, when you drop below 3 hearts, every guard within 24 blocks is healed and you gain a wall of Absorption."], { needs: "helm_fleet" }),
+
+  // ---------------- HEX (Witch, Blackfen) ----------------
+  S("hex_blood", "hex", 1, "Fen Blood", 2, 1, ["Poison does not take in you. Rank 2: nor does Wither."]),
+  S("hex_eyes", "hex", 1, "Cat's Eyes", 1, 1, ["Night Vision, always."]),
+  S("hex_touch", "hex", 1, "Witch's Touch", 3, 1, ["Your hits poison for 2 / 3 / 4 seconds."]),
+  S("hex_rot", "hex", 2, "Rot", 2, 2, ["Hitting something already poisoned withers it for 3 / 5 seconds."], { needs: "hex_touch" }),
+  S("hex_leech", "hex", 2, "Leech", 3, 2, ["Each kill gives back 1 / 2 / 3 health."], { needs: "hex_blood" }),
+  S("hex_eye", "hex", 3, "Evil Eye", 2, 3, ["Whatever strikes you is weakened for 4 seconds. Rank 2: and slowed."], { needs: "hex_touch" }),
+  S("hex_slip", "hex", 3, "Slip Away", 2, 3, ["When you are hit there is a 15% / 25% chance you vanish for 3 seconds and run."], { needs: "hex_eyes" }),
+  S("hex_contagion", "hex", 4, "Contagion", 1, 6, ["The poison you deal spreads to enemies within 4 blocks of your target."], { needs: "hex_rot" }),
+  S("hex_bane", "hex", 5, "Baneful", 1, 8, ["What you kill bursts: 6 damage to enemies within 4 blocks."], { needs: "hex_contagion" }),
 ];
 
 export const SKILL = Object.fromEntries(SKILLS.map((s) => [s.id, s]));
@@ -95,6 +144,11 @@ export const SKILL = Object.fromEntries(SKILLS.map((s) => [s.id, s]));
 export const ROLES = {
   knight: { name: "Oathsworn", noun: "Knights", branch: "blade" },
   marked: { name: "Marked", noun: "The Marked", branch: "arcana" },
+  // The regional roles. region = the hall style whose people teach it.
+  rider: { name: "Dragon Rider", noun: "Dragon Riders", branch: "wing", region: "emberwaste", oath: "The dragons of the Emberwaste choose few. You climb into the saddle knowing one of you may not come down.", color: "§c" },
+  forgemaster: { name: "Forgemaster", noun: "Forgemasters", branch: "forge", region: "frostmarch", oath: "The Deepforge of the Frostmarch has not gone cold in four hundred years. You take the hammer, and the cold stops mattering.", color: "§b" },
+  captain: { name: "Captain", noun: "Captains", branch: "helm", region: "saltreach", oath: "Saltreach gives its captains a crew and a debt. You sign the articles, and people start doing what you say.", color: "§3" },
+  witch: { name: "Witch", noun: "Witches", branch: "hex", region: "blackfen", oath: "The Blackfen teaches by taking. You drink what the old woman hands you and do not ask what was in it.", color: "§2" },
 };
 
 // Path ranks, earned by points spent in your path's branch.
@@ -113,6 +167,10 @@ export const RANKS = {
     { at: 15, name: "Veilwalker" },
     { at: 26, name: "Sorcerer" }, // the top rank: needed to rule the Hollow
   ],
+  rider: [{ at: 0, name: "Fledgling" }, { at: 3, name: "Rider" }, { at: 8, name: "Wing-Sworn" }, { at: 15, name: "Drake-Captain" }, { at: 26, name: "Dragonlord" }],
+  forgemaster: [{ at: 0, name: "Apprentice" }, { at: 3, name: "Journeyman" }, { at: 8, name: "Smith" }, { at: 15, name: "Master Smith" }, { at: 26, name: "Forgemaster" }],
+  captain: [{ at: 0, name: "Deckhand" }, { at: 3, name: "Bosun" }, { at: 8, name: "Mate" }, { at: 15, name: "Captain" }, { at: 26, name: "Admiral" }],
+  witch: [{ at: 0, name: "Bog-Touched" }, { at: 3, name: "Herbwife" }, { at: 8, name: "Witch" }, { at: 15, name: "Crone" }, { at: 26, name: "Fen Mother" }],
 };
 
 // ---------- Renown: the player's level ----------
@@ -188,3 +246,7 @@ export function blockedReason(skill, hero, hallLevel) {
 }
 
 export const HALL_NAMES = ["no hall", "Longhouse", "Stone Hall", "Keep", "Fortress", "Sovereign's Throne"];
+
+// Histories of the regional roles, filled by the lore module through the "roleLore" event:
+// { rider: { region, before, why, saying }, ... }. Empty until lore answers.
+export const ROLE_LORE = {};

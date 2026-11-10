@@ -9,10 +9,10 @@ Craft a **Hall Cornerstone** at the Siege Workshop (3 logs over cobblestone, eme
 | Hall | Needs settlement | Size (wide × deep × tall) | Cost | Gives |
 |---|---|---|---|---|
 | Longhouse | Hamlet | 11 × 15 × 12 | 48 planks, 32 building stone | Tree of Oaths, first ring of skills |
-| Stone Hall | Town | 15 × 23 × 16 | 64 planks, 128 stone, 8 iron, 10 emeralds | Second ring, Great Hall, Cartographer's Table, Sage |
-| Keep | City | 21 × 27 × 21 | 256 stone, 16 iron, 30 emeralds, 4 diamonds | Third ring, four towers, war room |
-| Fortress | Castle | 31 × 37 × 30 | 384 stone, 32 iron, 64 emeralds, 12 diamonds, 2 netherite scrap | Capstones, gatehouse, spires, throne room |
-| Sovereign's Throne | Sovereign | 31 × 43 × 34 | 32 gold, 64 emeralds, 16 diamonds, 2 netherite ingots | Crown Ring, gilded hall, crown vault |
+| Stone Hall | Town | 15 × 23 × 16 | 64 planks, 128 stone, 8 iron, 80 Regals | Second ring, Great Hall, Cartographer's Table, Sage |
+| Keep | City | 21 × 27 × 21 | 256 stone, 16 iron, 240 Regals, 4 diamonds | Third ring, four towers, war room |
+| Fortress | Castle | 31 × 37 × 30 | 384 stone, 32 iron, 512 Regals, 12 diamonds, 2 netherite scrap | Capstones, gatehouse, spires, throne room |
+| Sovereign's Throne | Sovereign | 31 × 43 × 34 | 32 gold, 512 Regals, 16 diamonds, 2 netherite ingots | Crown Ring, gilded hall, crown vault |
 
 "Building stone" is any of cobblestone, stone, stone bricks, cobbled deepslate, deepslate bricks, sandstone, mud bricks or calcite. Iron is vanilla iron. Each new hall replaces the old one in the same spot and **overwrites everything in its footprint** (the menu warns you). Raising a hall for the first time gives skill points equal to its tier.
 
@@ -43,7 +43,7 @@ Skill points also come straight from deeds: siege held +2, settlement tier up +2
 - **Blade** (Knights): Shield Bash, Lunge, Iron Constitution, Riposte, Rallying Cry, Armor Mastery, Guard Captain, Execution, Warhorse Charge, Banner of the Keep, Second Wind, Oathsworn Champion, Crownbreaker.
 - **Arcana** (Marked): Ember Bolt, Ward, Quiet Mind, Blink, Echo Sight, Bind, Ashen Skin, Halfstep, Choir's Call, Resonant Soul, Choirborn, Veilstep, Crownless, The Last Art.
 
-Exact numbers are in `skills.js`, one line per skill. You can unbind everything and get the points back for 20 emeralds (10 from Renown 10).
+Exact numbers are in `skills.js`, one line per skill. You can unbind everything and get the points back for 160 Regals (80 from Renown 10).
 
 ## The two paths
 
@@ -79,10 +79,10 @@ Open it from the Town Hall menu once any hall stands. Three rumors arrive each i
 
 | Job | What you do | Pays (grows with Renown) |
 |---|---|---|
-| Bounty | Kill a number of one kind of monster | 55+ Renown, 2+ emeralds |
-| Raider camp | Travel 70 to 200 blocks, find the camp, kill every raider | 80+ Renown, 2+ emeralds |
-| Missing traveller | Find the captive, kill the captors, keep the traveller alive | 80+ Renown, 2+ emeralds |
-| Supplies | Bring food, arrows, iron or the like to the board | 40+ Renown, 3+ emeralds |
+| Bounty | Kill a number of one kind of monster | 55+ Renown, 16+ Regals |
+| Raider camp | Travel 70 to 200 blocks, find the camp, kill every raider | 80+ Renown, 16+ Regals |
+| Missing traveller | Find the captive, kill the captors, keep the traveller alive | 80+ Renown, 16+ Regals |
+| Supplies | Bring food, arrows, iron or the like to the board | 40+ Renown, 24+ Regals |
 
 Every third job also pays one skill point, so the board is a steady trickle that never beats story rewards. Jobs get bigger every 8 Renown levels. Code: `scripts/townhall/rumors.js`. Other features can add flavour lines with `emit("rumorParts", { givers, places, reasons })` and hear `rumorDone`.
 
@@ -94,10 +94,10 @@ Open it from the Town Hall menu once any hall stands. Three rumors arrive each i
 
 | Job | What you do | Pays (grows with Renown) |
 |---|---|---|
-| Bounty | Kill a number of one kind of monster | 55+ Renown, 2+ emeralds |
-| Raider camp | Travel 70 to 200 blocks, find the camp, kill every raider | 80+ Renown, 2+ emeralds |
-| Missing traveller | Find the captive, kill the captors, keep the traveller alive | 80+ Renown, 2+ emeralds |
-| Supplies | Bring food, arrows, iron or the like to the board | 40+ Renown, 3+ emeralds |
+| Bounty | Kill a number of one kind of monster | 55+ Renown, 16+ Regals |
+| Raider camp | Travel 70 to 200 blocks, find the camp, kill every raider | 80+ Renown, 16+ Regals |
+| Missing traveller | Find the captive, kill the captors, keep the traveller alive | 80+ Renown, 16+ Regals |
+| Supplies | Bring food, arrows, iron or the like to the board | 40+ Renown, 24+ Regals |
 
 Every third job also pays one skill point, so the board is a steady trickle that never beats story rewards. Jobs get bigger every 8 Renown levels. Code: `scripts/townhall/rumors.js`. Other features can add flavour lines with `emit("rumorParts", { givers, places, reasons })` and hear `rumorDone`.
 
@@ -136,3 +136,16 @@ Each branch opens as a graphical tree: a 6 by 6 grid of nodes, one row per ring,
 ## Rumor Board variety
 
 `rumorsFor(day, playerId, level, memory)` never offers the kind of job the player did last and avoids givers, places, reasons and targets they saw recently. One job in three carries a twist that shows when it is finished: a keepsake (ten named items, each given once), double pay, extra Renown, or a debt (no pay, one more guard on your walls, up to three). A self-test plays 120 days and fails if a job repeats.
+
+## Regional roles
+
+Besides Knight and Marked there are four regional roles, each with a branch of nine skills (rings 1 to 5) and five ranks. A player holds one role only.
+
+| Role | Region | Branch | What it is good at | Ranks |
+|---|---|---|---|---|
+| Dragon Rider (`rider`) | Emberwaste | Wing | Fireproof, heals and shields the dragon you ride, hits harder from the saddle | Fledgling, Rider, Wing-Sworn, Drake-Captain, Dragonlord |
+| Forgemaster (`forgemaster`) | Frostmarch | Forge | Faster with tools, sharper weapons, self-mending gear, better-armed guards | Apprentice, Journeyman, Smith, Master Smith, Forgemaster |
+| Captain (`captain`) | Saltreach | Helm | Commands guards, stronger arrows, more siege pay, fights best in rain | Deckhand, Bosun, Mate, Captain, Admiral |
+| Witch (`witch`) | Blackfen | Hex | Immune to poison, poisons and rots enemies, heals from kills, curses attackers | Bog-Touched, Herbwife, Witch, Crone, Fen Mother |
+
+Data is in `townhall/skills.js` (ROLES, RANKS, BRANCHES, skills `wing_*`, `forge_*`, `helm_*`, `hex_*`); effects are in `townhall/roles.js`. A role is earned by a deed in its region (`ROLE_DEEDS` in `roles.js`; Mateo's ruling of 2026-11-10): Forgemaster for felling the Pale Huntsman, Captain for the Drowned Bride, Witch for the Mother of Changelings (offered to every player without a role within 64 blocks when the boss dies), and Dragon Rider when the dragons feature reports a first hatching. Hall level no longer offers a role. The story can also offer one with `emit("offerRole", { player, role })` / `emit("grantRole", ...)`. Test: `/scriptevent siege:townhall_path rider` (or forgemaster, captain, witch, none). Names and powers are proposals until Mateo confirms them. Not played in the game yet.

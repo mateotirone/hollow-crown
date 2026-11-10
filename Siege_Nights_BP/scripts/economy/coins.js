@@ -5,9 +5,12 @@
 // Keep Banner menu, and shops on your own land draw on it once your pockets are empty.
 
 import { GameMode, ItemStack } from "@minecraft/server";
-import { countItem, takeItems, settlementAt, keepOf, moduleStore, emit } from "../siege/api.js";
+// siege/ files import this one, so nothing from siege/api.js may be used while this file loads (only inside functions)
+import { countItem, takeItems, settlementAt, keepOf } from "../siege/api.js";
+import { moduleStore } from "../core/store.js";
+import { emit } from "../core/events.js";
 import { COIN, GOLD, ECON } from "./config.js";
-import { asCoins } from "./rules.js";
+import { asCoins, fromEmeralds } from "./rules.js";
 
 const BANK = "siege:economy_bank";
 const ledger = moduleStore("siege:economy", () => ({ minted: 0, sunk: 0 })); // world totals, for tuning
@@ -92,6 +95,32 @@ export function pay(player, amount, reason = "sale") {
   ledger.save();
   emit("coinsPaid", { player, amount, reason });
 }
+
+// dropCoins(dimension, location, amount): new coins on the ground (boss and warlord drops).
+export function dropCoins(dimension, location, amount, reason = "drop") {
+  amount = Math.floor(amount);
+  if (amount <= 0) return;
+  const { gold, coin } = asCoins(amount);
+  for (let left = gold; left > 0; left -= 64) dimension.spawnItem(new ItemStack(GOLD, Math.min(64, left)), location);
+  if (coin) dimension.spawnItem(new ItemStack(COIN, coin), location);
+  ledger.data.minted += amount;
+  ledger.save();
+  emit("coinsPaid", { amount, reason });
+}
+
+// Coin stacks for a loot list: coinStacks(200) -> [ItemStack(gold x3), ItemStack(coin x8)]
+export function coinStacks(amount) {
+  const { gold, coin } = asCoins(Math.floor(amount));
+  const out = [];
+  for (let left = gold; left > 0; left -= 64) out.push(new ItemStack(GOLD, Math.min(64, left)));
+  if (coin) out.push(new ItemStack(COIN, coin));
+  return out;
+}
+
+// Prices that were written in emeralds (one emerald = ECON.perEmerald coins): the same calls, in the old unit
+export const fundsE = (player) => Math.floor(funds(player) / ECON.perEmerald);
+export const chargeE = (player, emeralds, reason) => charge(player, fromEmeralds(emeralds), reason);
+export const payE = (player, emeralds, reason) => pay(player, fromEmeralds(emeralds), reason);
 
 // Pockets to strongbox and back. Both return the amount actually moved.
 export function deposit(player, amount) {

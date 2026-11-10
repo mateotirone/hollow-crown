@@ -1,0 +1,32 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:pretender_brute",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/pretender_brute"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.pretender_brute"
+   },
+   "animations": {
+    "main": "animation.siege_b.pretender_brute"
+   },
+   "scripts": {
+    "animate": [
+     "main"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ],
+   "spawn_egg": {
+    "base_color": "#42363c",
+    "overlay_color": "#3a284e"
+   }
+  }
+ }
+}

@@ -13,7 +13,8 @@ export const CROWN = {
   relic: "the Heart of the Hollow", // what the victor brings back from the Hollow (Mateo's pick, 2026-11-10)
   relicName: "The Heart of the Hollow", // the same, as an item name
   throne: "the High Throne", // the overworld rulership the relic gives
-  citadelName: "Aldspire", // the Citadel (placeholder)
+  citadelName: "Aldspire", // the Citadel, until its ruler names it (Mateo: each ruler names their own). Also a ruling lord's name for it
+  citadelNameMax: 24, // longest name a ruler can type
   shard: "Oath Shard", // the fallen shards that give a Claim
   titles: ["Heartbearer", "High King", "High Queen", "Monarch", "Emperor", "Empress", "Warlord"],
 
@@ -28,11 +29,11 @@ export const CROWN = {
   keepMaxFromBanner: 40, // the Citadel Cornerstone must be placed this close to the Keep Banner
   buildTicks: 3600, // how long the Citadel takes to rise (3600 = 3 minutes)
   royalGuardBonus: 8, // extra guard slots for the ruler
-  guardCost: 5, // emeralds the Treasury gets for each guard paid off when a new ruler moves in
+  guardCost: 5, // (old unit: x8 coins) the Treasury gets for each guard paid off when a new ruler moves in
   citadelKeepHealth: 400, // keep heart health if raiders ever march on the Citadel (400 is the most a keep heart can have)
 
   // Ruler powers
-  decreeSiegeCost: 16, // emeralds
+  decreeSiegeCost: 16, // old unit: every cost here is x8 in coins (16 = 128 Regals)
   decreeSiegeThreat: 1.5, // a decreed siege is this much bigger
   decreePeaceCost: 8,
   titheSteps: [0, 10, 20, 30], // percent of other settlements' siege winnings
@@ -43,16 +44,16 @@ export const CROWN = {
 
   // The Hunger: what the Heart quietly does to whoever carries it. Always hidden from players.
   //   "full"     as designed: symptoms, then easier challenges, then the raiders turn on the ruler
-  //   "cosmetic" symptoms only (whispers, dying grass, the letter), no penalties
+  //   "cosmetic" whispers, a few dead patches of grass, the letter. Nothing harms, changes or removes the bearer
   //   "off"      nothing happens
-  hunger: "full",
+  hunger: "cosmetic", // Mateo's pick, 2026-11-10: whispers and small wrong things, and nothing ever happens to the bearer
   hollowPerNight: 3, hollowPerDecree: 4, hollowPerDefense: 10, hollowShatter: 5,
   unrestPerDecree: 2,
 
   // Claims
   claimNeeded: 100,
   claimShard: 25, claimSiegeWin: 5, claimWarlord: 10, claimExileStart: 40,
-  shardTreasury: 8, // emeralds the ruler's Treasury gets for shattering a shard
+  shardTreasury: 8, // (x8 coins) the ruler's Treasury gets for shattering a shard
   shardMinDistance: 150, shardMaxDistance: 400, shardsMax: 3,
   shardHeadStartTicks: 1200, // exiles on stage 4+ hear a Shardfall this much earlier (60 seconds)
 
@@ -65,7 +66,7 @@ export const CROWN = {
   claimantLives: 3,
   awayTicks: 2400, // logging out for 2 minutes during the Storm forfeits it
   banishNights: 3, // siege nights an exile can't enter Citadel land
-  defenseReward: 16, // emeralds into the Treasury when the ruler holds
+  defenseReward: 16, // (x8 coins) into the Treasury when the ruler holds
 
   // Rival lords: computer-run claimants, so the throne is contested even when you play alone.
   // They build a Claim against a player ruler, march on the keep, and rule if they win.

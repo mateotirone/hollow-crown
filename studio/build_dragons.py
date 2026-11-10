@@ -322,8 +322,9 @@ ANIMATIONS = {
              "neck": rot(f"-18+math.sin({T}*40)*2", 0, 0), "neck2": rot(-14, 0, 0), "head": rot(30, 0, 0),
              "body": {"scale": ["1", f"1+math.sin({T}*70)*0.012", "1"]}},
     "walk": {"leg_fl": rot(SWING, 0, 0), "leg_br": rot(SWING, 0, 0), "leg_fr": rot("-" + SWING, 0, 0), "leg_bl": rot("-" + SWING, 0, 0)},
-    "fold": {"wing_l": rot(0, 62, -12), "wing_l_tip": rot(0, -150, 0), "wing_r": rot(0, -62, 12), "wing_r_tip": rot(0, 150, 0),
-             "wing2_l": rot(0, 70, -10), "wing2_r": rot(0, -70, 10)},
+    # Folded: the arm swings back along the flank, the membrane hangs down from it, and the outer half folds flat over the inner.
+    "fold": {"wing_l": rot(-100, -80, 0), "wing_l_tip": rot(0, 0, 170), "wing_r": rot(-100, 80, 0), "wing_r_tip": rot(0, 0, -170),
+             "wing2_l": rot(-100, -74, 0), "wing2_r": rot(-100, 74, 0)},
     "fly": {"wing_l": rot(0, 0, f"math.sin({T}*300)*32"), "wing_l_tip": rot(0, 0, f"math.sin({T}*300-50)*28"),
             "wing_r": rot(0, 0, f"-math.sin({T}*300)*32"), "wing_r_tip": rot(0, 0, f"-math.sin({T}*300-50)*28"),
             "wing2_l": rot(0, 0, f"math.sin({T}*300-90)*26"), "wing2_r": rot(0, 0, f"-math.sin({T}*300-90)*26"),
@@ -332,7 +333,8 @@ ANIMATIONS = {
     "breath": {"jaw": rot(28, 0, 0)},
     # Asleep: curled, slow deep breathing
     "sleep": {**LYING, "body": {"position": ["0", "-7", "0"], "scale": ["1", f"1+math.sin({T}*45)*0.035", "1"]},
-              "neck": rot(30, 35, 0), "neck2": rot(18, 40, 0), "head": rot(-6, 30, 0), "tail": rot(6, 30, 0), "tail2": rot(4, 40, 0), "tail3": rot(0, 45, 0)},
+              "neck": rot(30, 35, 0), "neck2": rot(18, 40, 0), "head": rot(-6, 30, 0), "tail": rot(6, 30, 0), "tail2": rot(4, 40, 0), "tail3": rot(0, 45, 0),
+              "wing_l": rot(50, 0, 0), "wing_r": rot(50, 0, 0), "wing2_l": rot(50, 0, 0), "wing2_r": rot(50, 0, 0)},   # wings mantle out over the ground
     # Unconscious: sprawled on its side, wings limp, shallow fast breathing you can see
     "downed": {**LYING, **LIMP_WINGS, "root": rot(0, 0, 14), "body": {"position": ["0", "-8", "0"], "scale": ["1", f"1+math.sin({T}*110)*0.03", "1"]},
                "head": rot(-10, 10, 20), "jaw": rot(f"6+math.sin({T}*110)*4", 0, 0)},
@@ -340,7 +342,8 @@ ANIMATIONS = {
     "dead": {**LYING, **LIMP_WINGS, "wing_r": rot(0, -30, -50), "wing_r_tip": rot(0, 60, -40), "wing2_r": rot(0, -30, -50), "root": rot(0, 0, 32), "body": {"position": ["0", "-9", "0"]},
              "head": rot(-4, 18, 38), "jaw": rot(22, 0, 0), "neck": rot(34, 20, 0), "tail3": rot(0, -34, 0)},
     "roar": {"neck": rot(-40, 0, 0), "neck2": rot(-25, 0, 0), "head": rot(f"-20+math.sin({T}*900)*3", 0, 0), "jaw": rot(34, 0, 0),
-             "wing_l": rot(0, -40, 30), "wing_r": rot(0, 40, -30)},
+             "wing_l": rot(80, 45, 0), "wing_r": rot(80, -45, 0), "wing_l_tip": rot(0, 0, -130), "wing_r_tip": rot(0, 0, 130),
+             "wing2_l": rot(80, 40, 0), "wing2_r": rot(80, -40, 0)},   # on top of the fold: wings flare half open
     "nuzzle": {"neck": rot(34, 0, 0), "neck2": rot(18, 0, 0), "head": rot(f"10+math.sin({T}*240)*8", 0, f"math.sin({T}*120)*6")},
     "snarl": {"neck": rot(14, 0, 0), "head": rot(18, f"math.sin({T}*500)*4", 0), "jaw": rot(14, 0, 0), "tail": rot(0, f"math.sin({T}*400)*14", 0)},
     "tilt": {"head": rot(0, 0, f"22*math.sin({T}*90)")},

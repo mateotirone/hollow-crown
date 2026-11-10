@@ -7,7 +7,7 @@ import { addFilter } from "../core/events.js";
 export { isReady, getState, saveState, saveTracked } from "./state.js";
 
 // ----- settlements -----
-export { settlementAt, tierOf, TIERS, MAX_RADIUS, isAlly, foreignSettlement, colorTaken, freeColor, recordWin } from "./territory.js";
+export { settlementAt, landRadius, tierOf, TIERS, MAX_RADIUS, isAlly, foreignSettlement, colorTaken, freeColor, recordWin } from "./territory.js";
 export { keepCenter, keepBlock, keepHealth, heartsOf, raiseKeepHeart, keepFallen } from "./keep.js";
 import { getState } from "./state.js";
 export const keepOf = (owner) => getState().keeps[owner];
@@ -49,6 +49,7 @@ export const addPlanHook = (fn) => addFilter("plan", (plan, { owner, keep }) => 
 export const addRaiderTypeHook = (fn) => addFilter("raiderType", (type, context) => fn(type, context));
 
 // ({ player, emeralds, threat }) => newEmeralds. Change a defender's siege pay before it is handed out.
+// The number is in the old unit: it is paid out in coins at 8 to one (economy/config.js perEmerald).
 export const addRewardHook = (fn) => addFilter("siegeReward", (emeralds, { player, threat }) => fn({ player, emeralds, threat }));
 
 // (owner, base) => number. Change how many guards a settlement can keep.
@@ -65,3 +66,11 @@ export { onTick } from "../core/loop.js";
 export { moduleStore } from "../core/store.js";
 export { addTests, assert, assertEqual } from "../core/tests.js";
 export { addJoinStep, wait } from "../core/firstjoin.js";
+
+// ----- the Storyteller (pacing director) and the story chapter. See MODULES.md -----
+// `pick` is exported as `storyPick` here, because api.js already has a `pick` (random array element).
+export {
+  KINDS, CHAPTERS, FACTS, provideFact, missingFacts, chapterFor, chapterOf, worldChapter,
+  registerDeck, addOptions, deckNames, optionsOf, pick as storyPick, pickSeveral, maybePick,
+  note, markDone, recentKinds, servedCount, isDone, overserved,
+} from "../core/storyteller.js";

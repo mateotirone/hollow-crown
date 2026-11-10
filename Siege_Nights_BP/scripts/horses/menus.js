@@ -3,6 +3,7 @@
 import { world, ItemStack, GameMode } from "@minecraft/server";
 import { ActionFormData, MessageFormData, ModalFormData } from "@minecraft/server-ui";
 import { countItem, takeItems } from "../siege/api.js";
+import { funds, charge } from "../economy/coins.js";
 import {
   HORSE_SETTINGS as S, STATS, STAT_NAMES, SPEED_BPS, JUMP_BLOCKS, HEALTH_VALUES, gallopTicks, MAX_TRAINED, TRAIN_COST,
   TRAITS, PERKS, SHOES, SADDLES, SPECIALS, STABLES_LEVELS, rosterCap, trainCap, xpToNext, effectiveStats, bonusesOf,
@@ -14,10 +15,10 @@ import { sfx } from "../core/sfx.js";
 
 export const isBuilder = (player) => player.getGameMode() === GameMode.Creative;
 
-export const canPay = (player, cost) => isBuilder(player) || cost.every((c) => countItem(player, c.item) >= c.count);
+export const canPay = (player, cost) => isBuilder(player) || cost.every((c) => (c.item === "coins" ? funds(player) : countItem(player, c.item)) >= c.count);
 export function pay(player, cost) {
   if (!canPay(player, cost)) return false;
-  for (const c of cost) takeItems(player, c.item, c.count);
+  for (const c of cost) c.item === "coins" ? charge(player, c.count, "horses") : takeItems(player, c.item, c.count);
   return true;
 }
 
@@ -107,7 +108,7 @@ function putAway(player, rec, ctx) {
 }
 
 function fetch(player, rec) {
-  const cost = [{ item: "minecraft:emerald", count: 4 }];
+  const cost = [{ item: "coins", count: 32 }];
   if (!pay(player, cost)) return player.sendMessage(`§cA groom wants ${costText(cost)} to fetch ${rec.name}.`);
   stallSteed(rec, entityOf(rec));
   player.sendMessage(`§6A groom rides out and brings ${rec.name} back to the stalls.`);
@@ -135,7 +136,7 @@ export async function horseMenu(player, rec, ctx) {
     if (rec.status === "stabled") entries.push({ label: "Bring out of the stalls", action: () => bringOut(player, rec, ctx) });
     if (rec.status === "out") {
       entries.push({ label: "Put in the stalls", action: () => putAway(player, rec, ctx) });
-      entries.push({ label: "Send a groom to fetch it\n§84 emeralds", action: () => fetch(player, rec) });
+      entries.push({ label: "Send a groom to fetch it\n§832 Regals", action: () => fetch(player, rec) });
     }
     if (rec.status === "fallen") {
       entries.push({

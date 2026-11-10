@@ -34,7 +34,7 @@ Make the world **Flat** if you can, stand somewhere open, and type `/scriptevent
 - a piece of castle wall with battlements, arrow slits and a working portcullis
 - a Ballista, a Trebuchet and a Battering Ram
 - five Archers, one in each armor, a Man-at-Arms at the Barracks with two villagers to recruit, and a Quartermaster at his desk
-- chests behind you with one of every item, plus emeralds, iron, diamonds, cobblestone and dyes
+- chests behind you with one of every item, plus coins, iron, diamonds, cobblestone and dyes
 
 Then type `/scriptevent siege:showcase siege` to make it night and start a siege on it.
 
@@ -66,13 +66,13 @@ Type the commands in chat (`/` opens it).
 11. `/give @s siege:trebuchet` and `/give @s cobblestone 16`. Place it, look at a spot about 30 blocks away, and click the trebuchet holding cobblestone. ✅ It turns, the arm swings over, and a boulder smashes a crater.
 
 **Guards**
-12. `/give @s siege:barracks`, place it, `/summon villager` next to it, then click the Barracks holding 5 emeralds (`/give @s emerald 20`). ✅ The villager becomes a Man-at-Arms.
-13. Sneak + click the guard. ✅ He goes into your inventory. Place him on a wall. Repeat with sneak + emeralds on the Barracks for an Archer.
+12. `/give @s siege:barracks`, place it, `/summon villager` next to it, then click the Barracks with coins in hand (`/scriptevent siege:economy_give 200`; a guard is 40 Regals). ✅ The villager becomes a Man-at-Arms.
+13. Sneak + click the guard. ✅ He goes into your inventory. Place him on a wall. Repeat with sneak + coins in hand on the Barracks for an Archer.
 
 **Siege**
 14. `/time set 13000`, then `/give @s siege:war_horn` and use it. ✅ "Siege Night" title, then raiders arrive from one direction.
 15. Watch for a while. ✅ Raiders head toward your banner, your archers shoot them, and men-at-arms run out.
-16. `/gamemode s` and fight. Try to win (kill all three waves). ✅ You get emeralds and a win message.
+16. `/gamemode s` and fight. Try to win (kill all three waves). ✅ You get Regals and a win message.
 
 **Quartermaster**
 17. `/give @s siege:quartermaster_desk`, place it, and `/summon villager` next to it. ✅ He becomes the Quartermaster and you can trade with him.
@@ -82,7 +82,7 @@ Type the commands in chat (`/` opens it).
 - Place a Keep Banner anywhere else. ✅ Refused: "Keep Banners can only be raised on a Plot Stone."
 - Place a Keep Banner on top of the Plot Stone. ✅ "Settlement founded" and "You hold <plot>".
 - Click the Plot Stone. ✅ A menu with the region, style and a Plot Atlas button.
-- `/give @s elytra`. ✅ It crumbles within a second and you get 24 emeralds.
+- `/give @s elytra`. ✅ It crumbles within a second and you get 3 Gold Regals.
 - Switch to Survival and try to mine the Plot Stone. ✅ It doesn't break.
 
 **Welcome hall and test area (in the sky)** Creative, after at least one Plot Stone is placed.
@@ -131,6 +131,15 @@ Needs a settlement first (place a Keep Banner). Cheats on for the `/scriptevent`
 
 If step 2 shows a blank or broken screen, press Escape, open the Tree again and choose **Show branches as plain lists** on its first page. Everything works from the lists. Send me a screenshot of what the broken screen looked like.
 
+### The four regional roles
+
+For each of `rider`, `forgemaster`, `captain`, `witch`: type `/scriptevent siege:townhall_path none`, then `/scriptevent siege:townhall_path <role>`, then `/scriptevent siege:townhall_renown 5000`.
+
+1. ✅ A title shows the role name, and chat says the role's branch is open.
+2. Open the Tree of Oaths. ✅ The first page shows your role and rank, and one extra branch (Wing, Forge, Helm or Hex). The other three roles' branches are not listed.
+3. Swear a first-ring skill and check it: Witch's Touch poisons what you hit, Emberblood lets you stand in fire, Hammer Arm gives Haste with a pickaxe in hand, Sea Legs lets you breathe underwater.
+4. To see the offer the normal way: `/scriptevent siege:townhall_path none`, then kill the Mother of Changelings (summon `siege:mother_of_changelings` and fell her while standing within 64 blocks). ✅ Chat says a path has opened, and "Choose your path" at the Tree offers Witch. The Pale Huntsman offers Forgemaster and the Drowned Bride offers Captain the same way. Building a hall no longer offers a role.
+
 ### Rumor Board variety
 
 Take and finish a few jobs from the Rumor Board over several in-game days. ✅ The board never offers the kind of job you just did, the three jobs come from three different people, and about one job in three ends with a surprise: a named keepsake, double pay, extra Renown, or someone who cannot pay and stands with your walls instead.
@@ -142,7 +151,7 @@ Needs a settlement (place a Keep Banner on flat, open land) and cheats on. Best 
 **The quick way:** after `/scriptevent siege:showcase`, run `/scriptevent siege:crown_showcase`. It makes you the Heartbearer and raises the whole Citadel around the showcase in about 30 seconds, with the Great Keep just south of the exhibits. Then skip to step 3. (While you hold the Heart, raiders leave you alone, so do your `showcase siege` test first.)
 
 1. **Become the Heartbearer.** `/scriptevent siege:crown_me`. You should get a title menu, a server-wide "All hail", the Heart of the Hollow and a Citadel Cornerstone. Try to drop the Heart: it shouldn't leave your inventory. For the real scene, run `/scriptevent siege:crown_offer` first instead: the Heart should appear at your feet with a warning about the Hollow Crown in chat. Click it. Everyone should see "is reaching for the Heart", a 10 second countdown should run, and then it is yours. Try again (`siege:crown_reset`, reload) and this time walk away or take damage during the countdown (jump off something, or have a friend hit you): the reach should break and the Heart should stay put.
-2. **Raise the Citadel.** Place the Cornerstone 15 to 40 blocks from your banner. A gold outline shows the Great Keep's square. Click the stone and confirm. Over about 3 minutes the walls, towers, gatehouse and Great Keep should rise. Tell me about: holes in the wall, towers floating or buried, anything that never finished (a message tells you if pieces are waiting), and how bad the lag was.
+2. **Raise the Citadel.** Place the Cornerstone 15 to 40 blocks from your banner. A gold outline shows the Great Keep's square. Click the stone, type a name for your Citadel (or leave it empty for Aldspire) and press Raise it. The name you typed should appear in the announcement and when you walk across the border. Over about 3 minutes the walls, towers, gatehouse and Great Keep should rise. Tell me about: holes in the wall, towers floating or buried, anything that never finished (a message tells you if pieces are waiting), and how bad the lag was.
 3. **Walk it.** Gate opens when clicked? Wall walk goes through the towers? Ladder in the Great Keep reaches the roof? Throne on the dais facing the door?
 4. **Throne menu.** Click the Throne. Set a tithe, make a Decree of Siege on another settlement, check the Treasury line.
 5. **The Heart.** Use it near mobs (Kneel), sneak + use (Rally), look straight up + use away from home (Return to the Throne).
@@ -184,6 +193,8 @@ Run the showcase first (`/scriptevent siege:showcase`): the back row has four Ar
 
 0l. **The morning after the first sighting.** Run `/scriptevent siege:morning_after`. Three lines from your own townsfolk should appear a few seconds apart. Then talk to Sigrun, Brother Cael, Old Mag, Sir Aldous or Archivist Pell (after you have met them): each opens once with a new conversation about the tall thing at your wall, and never repeats it. In a real game this happens the dawn after the siege where the first Hollow soldiers appear.
 
+0m. **The story spine.** `/scriptevent siege:local_lore <plot>` and read the first book: its last page, in a newer hand, should send you to Millbrook and Sister Wren, and Millbrook should appear as a lead in the Ledger. Solve the plot's mystery in the Ledger: the answer ends with a paragraph about your own region's boss and adds its place as a lead. Kill a regional boss (`/scriptevent siege:bestiary_summon reeve`): besides its book you get a line about a scrap and two new leads in two other regions. After the third regional boss, a purple line about a surveyor appears and the first Field Note is in your pack.
+
 ## Dragons (the Emberwaste's power)
 
 Look first, without the game: the 3D viewer at https://claude.ai/artifact/D42qsWXjEcxWAbsYacsw4v shows all four species, every pose and every sound.
@@ -191,8 +202,8 @@ Look first, without the game: the 3D viewer at https://claude.ai/artifact/D42qsW
 In game: Creative, cheats on. `/scriptevent siege:showcase` puts a Roost, a Nest, nine display dragons (the four species, a hatchling, a fledgling, one asleep, one unconscious, one dead) and **Cinder**, a grown Cinderwing that is yours, in the extras row behind you. Take a **Dragon Horn** from the chests, and `/give @s beef 16` and `/give @s golden_apple 4`.
 
 **Looks and flying**
-1. Walk along the display dragons. ✅ Four clearly different animals (four-legged Cinderwing, two-legged Ashen Wyvern, squat armoured Dune Drake, long frilled Glass Wyrm). Wings folded back along the body. The sleeper breathes slowly, the unconscious one breathes fast and drips red, the dead one lies rolled over and does not move.
-2. Click Cinder. ✅ You sit on its back and can walk it with WASD. The action bar shows a green Flight bar.
+1. Walk along the display dragons. ✅ Four clearly different animals (four-legged Cinderwing, two-legged Ashen Wyvern, squat armoured Dune Drake, long frilled Glass Wyrm). Wings tucked down along the flanks, the outer half folded over the inner (not sticking out sideways or lying flat). The sleeper breathes slowly, the unconscious one breathes fast and drips red, the dead one lies rolled over and does not move.
+2. Click Cinder with an empty hand. ✅ It nuzzles you and you do not climb on. Left-click (punch) it with an empty hand ✅ the same nuzzle, no damage, no red flash. Now click it holding anything (the Dragon Horn). ✅ You sit on its back and can walk it with WASD. The action bar shows a green Flight bar.
 3. Press jump. ✅ It lifts off, wings flap with a wingbeat sound. You fly where the camera looks; jump climbs, looking down descends. The bar drains (about 54 seconds).
 4. Fly low over flat ground without holding jump. ✅ It lands by itself and the bar slowly refills.
 5. Stay up until the bar is empty. ✅ "is spent and glides down", no fall damage.
@@ -206,7 +217,7 @@ In game: Creative, cheats on. `/scriptevent siege:showcase` puts a Roost, a Nest
 11. `/scriptevent siege:dragons_hungry`, then stand near it holding beef. ✅ Within a few seconds: "It is staring at the beef in your hand". Put the beef away near some sheep ✅ it takes one for itself.
 12. `/summon zombie ~12 ~ ~`. ✅ Within a few seconds it snarls and you are told which compass direction it is staring.
 13. Get off, switch to Survival and let a zombie hit you. ✅ Cinder throws itself at the zombie ("puts itself between you and it").
-14. Hit Cinder yourself. ✅ "It flinches away from you", bond drops. With a second player: they hit it, then try to pet or ride it ✅ it snarls and refuses them, and its sheet says it holds a grudge.
+14. Hit Cinder yourself with a sword or any item in hand. ✅ "It flinches away from you", bond drops. With a second player: they hit it with an item, then try to pet or ride it ✅ it snarls and refuses them, and its sheet says it holds a grudge.
 15. `/time set midnight`, tell it "Stay here" and walk 20 blocks away. ✅ It curls up asleep. Walk back ✅ "opens one eye at your footsteps".
 16. Use the horn from 30 blocks away. ✅ It comes, roaring. (When it is sulking or sullen it may refuse.)
 
@@ -226,8 +237,8 @@ The showcase (`/scriptevent siege:showcase`) puts a Mason's Bench with its mason
 
 1. **Build zones.** `/scriptevent siege:settle_zone` says which zone you stand in. On your land away from the hall you should be able to place anything. Hold any block and walk toward the town hall: a line of blue flame marks the ground kept clear for the hall to grow into, and placing a block inside it should be refused with a message.
 2. **The wilds.** In a test world with no Plot Stones, building outside your land is still allowed. `/scriptevent siege:settle_wilds on` turns the real rule on: outside your land you should only be able to place camp things (torch, bed, chest, crafting table, furnace, campfire, ladder, sapling). `off` and `map` switch back.
-3. **The Mason.** Click the mason. Buy a few blocks with emeralds (the Supplies chest has 64). The first shelf is your region's own materials at a better price. Check the slider, that the blocks arrive, and that the emeralds go.
-4. **A pre-designed building.** Take the Foundation Stone (or buy one from the mason for 4 emeralds), place it on open ground on your land while facing the way the building should run, click it and pick a building. A green outline shows where it will stand. Click the stone again to see the price (planks and building stone you carry, emeralds for what you lack) and raise it. The stone should come back to your pack when it is done. Try placing one so the outline crosses the hall reserve or your border: it should refuse.
+3. **The Mason.** Click the mason. Buy a few blocks with Regals (the Supplies chest has 8 Gold Regals). The first shelf is your region's own materials at a better price. Check the slider, that the blocks arrive, and that the coins go.
+4. **A pre-designed building.** Take the Foundation Stone (or buy one from the mason for 32 Regals), place it on open ground on your land while facing the way the building should run, click it and pick a building. A green outline shows where it will stand. Click the stone again to see the price (planks and building stone you carry, emeralds for what you lack) and raise it. The stone should come back to your pack when it is done. Try placing one so the outline crosses the hall reserve or your border: it should refuse.
 5. **Any building, free.** `/scriptevent siege:settle_build cottage frostmarch` raises one in front of you (cottage, smithy, stable, storehouse, watchtower, market, well, garden; vale, frostmarch, saltreach, emberwaste, blackfen). Tell me about stairs facing the wrong way, anything floating, and which designs look too plain.
 6. **A town mason.** `/scriptevent siege:settle_mason` puts a mason where you stand, with no bench (for Kingsrest and villages).
 
@@ -250,8 +261,18 @@ Rival Lords only settle on a map with Plot Stones. Place three or four Plot Ston
 1. `/scriptevent siege:rivals all` then `/scriptevent siege:rivals settle` (repeat `settle` for each new lord; normally one arrives per day). `/scriptevent siege:rivals list` shows who holds what.
 2. Walk to a lord's Plot Stone. Their longhouse, a cottage and a well should rise near it, and the lord stands by the stone. In Survival you should not be able to break or place blocks on their land, or raise your own banner on their stone.
 3. `/scriptevent siege:rivals grow <id>` moves a lord up a tier (the id is in the list); more buildings rise. `/scriptevent siege:rivals night` plays one siege night for all of them.
-4. Click the lord and choose "Lay siege" (you need your own settlement). Kill every soldier within 10 minutes: the lord falls, you get emeralds, and the plot with its buildings is free to claim. Die or walk away and they hold.
+4. Click the lord and choose "Lay siege" (you need your own settlement). Kill every soldier within 10 minutes: the lord falls, you get Regals, and the plot with its buildings is free to claim. Die or walk away and they hold.
 5. `/scriptevent siege:rivals none` removes them all.
+
+**Lords as active neighbours.** Needs your own settlement and at least two lords. Normally one lord acts every other day; these commands make it happen now. `/scriptevent siege:rivals court` shows where everything stands.
+
+6. **War.** `/scriptevent siege:rivals deed march <id>`. You should get a title and a message saying how they will come. Click the lord: "Pay them to turn back" should be the first button. Leave it, and start a siege night: the lord's Men-at-arms should come with the first assault and their Captain with the last, on top of the usual army. Win and you should get coins and a promise of peace; lose the keep and they take coins and grow. Tell me if the lord's soldiers do not attack, or do not count as raiders.
+7. **Never the same twice.** Run `deed march <id>` again after the peace ends (or `deed` alone a few times): the same lord should not do the same kind of thing twice running, and a second march should come a different way.
+8. **Feud.** `/scriptevent siege:rivals deed feud <id>`. Everyone is told who rides against whom. Click either lord and back them with coin, then `/scriptevent siege:rivals feud_end`: one lord should kneel to the other (shown in their menu), and if you backed the winner you get a share.
+9. **Tribute.** `deed demand <id>`, then click the lord and pay or refuse. Refusing should make them colder and likelier to march.
+10. **Trade.** Click a lord and choose Trade: three goods for coins and one thing they want to buy (four lots only). `deed wares <id>` changes the goods. With `/scriptevent siege:rivals relation <id> -60` they should refuse to trade.
+11. **Oaths.** `relation <id> 50`, then "Gifts and oaths": swear a truce, seal an alliance (costs coins). With an alliance, start a siege night: their Sworn Swords should appear by your keep, fight the raiders, and leave at the end. Tell me if they attack you or your guards. Then lay siege to that lord, or choose "Break your alliance": every lord should think less of you.
+12. **Land.** On the map, stand 58 blocks from your Plot Stone as a new Hamlet: it should count as your land, and winning sieges should not move the border.
 
 ## Mobs, bosses and NPC fighters (The Hollow Crown)
 
@@ -306,7 +327,7 @@ Not yet played in a real game. In a creative test world:
 
 1. `/scriptevent hc:folk_go glimwade` takes you to the first mining village (also `lowseam`, `tollrest`, `highcut`). The village builds itself a few seconds after you arrive: cottages, mine mouths, a smithy, a fire, and a plank walk down to a dock on the light river.
 2. Click a miner. While Morvane rules they are frightened and say little. `/scriptevent hc:folk_freed` frees them and their lines change.
-3. Click the Foreman (blue name) to open the Tally. `/scriptevent hc:folk_dawn` runs one day of digging so there is ore to buy. Buy 1 or 8 with emeralds, or buy a boat.
+3. Click the Foreman (blue name) to open the Tally. `/scriptevent hc:folk_dawn` runs one day of digging so there is ore to buy. Buy 1 or 8 with Regals, or buy a boat.
 4. `/scriptevent hc:set_warden` makes you the ruler. Now the Foreman greets you as Crown-wearer, you can set the price, and each dawn half of every Tally goes to your Vault.
 5. Robbing needs a second player: with the ruler online, "Rob the Tally" hands over ore and the ruler is brought to the village at once. With the ruler offline it is refused and only buying works.
 6. `/scriptevent hc:folk_go vault` takes you to the Vault Stair near the Seat. Stand on the copper pad and sneak to go down. Click the dark block in the middle: the ruler collects, anyone else can try to break it open (20 seconds beside it).
@@ -341,7 +362,7 @@ One coin for the whole world, backed by iron. None of this has run in a real gam
 5. Click your Keep Banner: the menu has **Strongbox**. Put coins in, walk off your land and check a shop no longer counts them, come home and check it does.
 6. `/scriptevent siege:economy_give 500` gives coins, `/scriptevent siege:economy_stats` shows how many coins the world has paid out and taken in.
 
-Things to look for: whether the NPC skins suit the jobs, whether the sell list is readable on a phone screen, and whether any price feels too generous. Every number is in `scripts/economy/config.js`. The Mason, Quartermaster, Barracks and the rest still charge emeralds until their own threads switch them over; the Moneyer buys emeralds for 4 Regals in the meantime.
+Things to look for: whether the NPC skins suit the jobs, whether the sell list is readable on a phone screen, and whether any price feels too generous. Every number is in `scripts/economy/config.js`. Every shop and reward in the add-on now uses Regals: sieges, guards, the Quartermaster, the Mason, town hall costs, horses, the Throne and the Hollow. Sneak + use a Gold Regal to break it into 64 Regals, and sneak + use a full stack of 64 to bind one. The Quartermaster is a villager trade and cannot make change, so check that paying him with a mix of Gold Regals and Regals feels fine. Emeralds are no longer taken anywhere; the Moneyer buys them for 4 Regals.
 
 ## Siege nights and the Reach (scripts/reach/)
 
@@ -352,22 +373,41 @@ In game (cheats on, a settlement founded, or `/scriptevent siege:showcase` first
 1. `/scriptevent siege:reach` shows the Reach, the stage and what tonight is.
 2. `/scriptevent siege:reach_night` makes tonight a siege night and jumps to just before the horn. Expect: the horn and war plan, then one wave an
    hour at seventeen past, the last at 3:17 with a bell and "3:17" on screen. `/scriptevent siege:reach_toll` jumps to 3:16.
-3. `/scriptevent siege:reach_stage 2` then `reach_night`: four waves, and at 3:17 the army stops and three Hollow soldiers walk out (once per world;
-   `/scriptevent siege:reach_glimpse` lets it happen again).
-4. `/scriptevent siege:reach_stage 3` and `4`: check the Keep Banner's "The night watch" button, the stolen nights (`reach_night stolen`), the knock
+3. `/scriptevent siege:reach_stage 2` then `reach_night`: four waves, and at 3:17 the army stops and three Hollow soldiers walk out. Every settlement
+   gets this once, on its own night; only players at that settlement are told. `/scriptevent siege:reach_glimpse` lets it happen again.
+4. `/scriptevent siege:reach_stage 3` and `4`: check the Keep Banner's "The night watch" button (at stage 3 and after the story it gives a
+   hint such as "The watch is uneasy tonight", never a day), the stolen nights (`reach_night stolen`), the knock
    (`reach_night probe`), the twists "The Fallen Rise" and "The Pull".
-5. `/scriptevent siege:reach_stage 5` then `reach_night`: the Long Night. Leave raiders alive past 5:00: "Dawn. They do not leave", then a tide every
-   two minutes. Kill everything between tides to break it. It should rain, and patrols should find you outside the settlement.
-6. `/scriptevent siege:reach_boss morvane`: everything stops ("The knocking has stopped"). `reach_night muster` for an after-story raid; the night
-   watch now offers Remembered Nights.
+5. `/scriptevent siege:reach_rift` (or opening the Rift for real) starts the Long Night; the Choir falling no longer does. Then `reach_night`. Leave
+   raiders alive past 5:00: "Dawn. They do not leave", then a tide every two minutes. Kill everything between tides to break it. A thunderstorm
+   should roll in with each wave and tide and clear about a minute later. Patrols should find you outside the settlement.
+6. `/scriptevent siege:reach_boss morvane`: everything stops ("The knocking has stopped"). After the story a rival town raids at random, two to
+   nine nights apart, at an hour of its own (no 3:17); `/scriptevent siege:reach` shows the day, `reach_night muster` forces one. With a Rival
+   Lord in the world the raid names them ("The banners of Ser Bram Holt, out of Wrenfield"). The night watch now offers Remembered Nights.
+9. The wait before the horn: a settlement's first three full sieges keep the whole evening of omens (about five minutes for three waves). After
+   that the evening visibly hurries (the sky moves faster) to about three minutes, and after six sieges to about ninety seconds. With several
+   settlements the newest one sets the pace.
 8. Variety: play three siege nights in a row (`reach_night` each evening). Each should have a different shape (named in chat after the
    night, and under "The night watch") and a different army. Let a captain live through a night you lose: the next full night it returns by name.
    Honours you earn appear in chat as "Night honour: ..." and under "The night watch".
+   `/scriptevent siege:storyteller` should list no missing facts from reach, and show the next `siege_shapes` pick.
 7. `/scriptevent siege:reach_reset` puts it all back. `/scriptevent siege:reach_boss <reeve|huntsman|bride|seneschal|mother|warlord_king|choir>` and
    `/scriptevent siege:reach_set <0-100>` move the story by hand.
 
 Things I could not check offline: whether a dusk-to-midnight wait feels right, whether Hollow soldiers march on the keep heart like raiders do,
-the darkness and knockback effects, and the rain.
+the darkness and knockback effects, the storms, and how the hurried evening looks in the sky.
+
+## Choirsteel gear (bestiary)
+
+`/scriptevent siege:choirsteel_kit` gives the full set, the tools, 32 ingots and 8 Gloamquills.
+
+- Recipes: in a crafting table, each piece is its netherite piece plus Choirsteel Ingots plus one Gloamquill (two for the Blade). Enchantments on the netherite piece are not carried over.
+- Helm: you see in the dark. Greaves: slowness never sticks. Treads: jump off something high, you drift down and take no fall damage.
+- Cuirass: let zombies hit you. About one hit in four rings and throws the attacker back.
+- Full set: a chime, then Resistance and four extra hearts. Take one piece off and both go.
+- Blade: hit one mob in a crowd four times. The fourth hit rings and hurts the others near it.
+- Pick: break an ore next to other ore. A line of sparks points to the nearest one. It also mines Choir Ore whole.
+- The first time you wear or hold each piece, chat tells you what it does.
 
 ## Never the same fight twice (bestiary)
 
@@ -376,6 +416,29 @@ the darkness and knockback effects, and the rain.
 - New attacks to look for: the Reeve puts you back where you stood ("The hands turn back"), the Huntsman lays snares, the Mother hums (look away).
 - In a siege from the third on, roughly one raider in seven has a yellow name such as "Fleet Grey Host Axeman" and behaves to match.
 - `/scriptevent siege:variety` lists what you have killed most and flags anything met more than 40 times per variant.
+
+## Seep kinds (bestiary)
+
+Seeps open near players once the first boss has fallen; which kind opens is the Storyteller's pick (`/scriptevent siege:storyteller` shows what it would give you next for the deck "seeps").
+
+- Guarded: guards climb out, kill them, break it. Hungry (chapter 4 on): opens already widened, guards every 10 seconds.
+- Still: nothing comes out. Stand within 6 blocks and it murmurs a line in grey every 30 seconds. Break it to close it.
+- Drifting (chapter 2 on): walk up to it and it slips away, three times, a shorter hop each time. Then it stays and guards come.
+- Weeping (chapter 2 on): harmless. Stay near for 4 minutes and it closes by itself and leaves Veil Ash.
+
+## Pretenders (bestiary)
+
+In the real game the first claimant comes 5 days after Morvane falls, then one every 6 to 11 days, standing at the Seat in the Hollow.
+
+- `/scriptevent siege:pretender_rise` makes one rise now, standing where you are. Add a number (`siege:pretender_rise 42`) to get the same one again. Chat names it and its claim.
+- `/scriptevent siege:pretender_status` shows its claim, its four powers, how long it has sat and how much the seep is surging.
+- Fight it. Every warned attack should be one of the four listed powers, never the same twice running. The claim should hold: Unbled heals when nobody is within 6 blocks, Mirrored sends arrows back, Followed calls a shade at each fifth of its life, Hungering heals when it hits you, Twinned is unhurtable at half life until its twin dies.
+- Kill it: chat tells everyone, you get a "Seal of <its name>", and the next `siege:pretender_rise` gives a different body, claim and name.
+- Leave one alive for 5 in-game days: a message says the seep is everywhere, and Seeps open more often.
+
+### Village happenings (mining villages)
+
+Walk into a mining village in the Hollow: at most once every 8 minutes something is going on, and it should never be the same thing, or the same kind of thing, twice in a row. `/scriptevent hc:folk_happen` while standing in a village forces the next one. Check: the rich seam adds 6 ore to that Tally; the half price shows in the Tally menu for 5 minutes; the nest spawns three endermites by the mine mouth; an errand names a place, and walking to that place pays 4 raw Choir Ore once. Before Morvane falls only the three quiet, frightened ones and the errands appear.
 
 ## Sounds (scripts/sound/, SOUND-LIST.md)
 

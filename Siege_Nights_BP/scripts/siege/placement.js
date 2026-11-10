@@ -8,7 +8,7 @@ import { markWanted } from "./guards.js";
 import { keepBlock } from "./keep.js";
 import { placeBefore, placementAllowed } from "./protection.js";
 import { saveState, saveTracked, state, tracked } from "./state.js";
-import { MAX_RADIUS, freeColor, isAlly, settlementAt, tierOf } from "./territory.js";
+import { MAX_RADIUS, freeColor, isAlly, settlementAt, tierOf, landRadius } from "./territory.js";
 import { overworld, title } from "./util.js";
 import { blockKey, damageMap, lightCharge, saveDamage } from "./walls.js";
 import { sfx } from "../core/sfx.js";
@@ -17,7 +17,7 @@ import { sfx } from "../core/sfx.js";
 
 export const PLACE_MESSAGES = {
   [DESK]: "§7Quartermaster's desk set up. Bring an unemployed villager to it and they'll take the job.",
-  "siege:barracks": "§7Barracks built. Bring an unemployed villager here and click it with 5 emeralds to recruit a Man-at-Arms (sneak + click for an Archer).",
+  "siege:barracks": "§7Barracks built. Bring an unemployed villager here and click it with coins in hand (40 Regals) to recruit a Man-at-Arms (sneak + click for an Archer).",
 };
 
 // Undo a placement and hand the block back
@@ -55,8 +55,13 @@ export function foundSettlement(player, block) {
   state.keeps[player.id] = { x: loc.x, y: loc.y, z: loc.z, name: player.name, color, wins: old?.wins ?? 0, allies: old?.allies ?? [] };
   saveState();
   title(player, old ? "§6Settlement moved" : "§6Settlement founded",
+<<<<<<< HEAD
     `§7Your ${tierOf(state.keeps[player.id]).name} reaches ${tierOf(state.keeps[player.id]).radius} blocks from your banner`);
   sfx(player, "random.levelup");
+=======
+    `§7Your ${tierOf(state.keeps[player.id]).name} reaches ${landRadius(state.keeps[player.id], player.id)} blocks from your banner`);
+  sfx(player, "random.levelup");
+>>>>>>> origin/main
   if (!old) player.sendMessage("§6Your Keep is raised! Craft a Siege Workshop to make castle blocks. Raiders will march on this banner on siege nights. Use dye on it to change its color.");
   emit("keepFounded", { player, keep: state.keeps[player.id], moved: !!old });
 }

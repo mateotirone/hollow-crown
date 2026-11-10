@@ -1,7 +1,7 @@
 // Siege nights: starting, assaults, the end of the siege, and the sidebar.
 // Split from the original main.js; the code is unchanged apart from the event/hook calls.
 
-import { world, system, ItemStack, DisplaySlotId } from "@minecraft/server";
+import { world, system, DisplaySlotId } from "@minecraft/server";
 import { emit, applyFilter } from "../core/events.js";
 import { KEEP_HEART, RAIDER_TAG, RAM_TAG, SAPPER_TAG } from "./constants.js";
 import { checkKeeps, keepBlock, keepCenter, raiseKeepHeart } from "./keep.js";
@@ -9,6 +9,8 @@ import { SETTINGS } from "./settings.js";
 import { saveState, state } from "./state.js";
 import { recordWin } from "./territory.js";
 import { isOnline, overworld, ownerOf, ownerTag, title } from "./util.js";
+import { pay } from "../economy/coins.js";
+import { fromEmeralds, coins } from "../economy/rules.js";
 import { FACTIONS, announcePlan, buff, buyArmy, planSiege, rememberSiege, spawnWarlord } from "./warplan.js";
 import { sfx } from "../core/sfx.js";
 
@@ -133,10 +135,16 @@ export function endSiege(outcome) {
     if (outcome === "won" && defended) {
       const threat = plans[player.id]?.budget ?? 12;
       const emeralds = applyFilter("siegeReward", 2 + Math.round(threat / 5), { player, threat }); // bigger armies pay better
-      if (emeralds > 0) player.dimension.spawnItem(new ItemStack("minecraft:emerald", emeralds), player.location);
+      // the reward (and every hook on it) is still counted in the old unit; it is paid in coins, 8 to one
+      if (emeralds > 0) pay(player, fromEmeralds(emeralds), "siege");
       player.addExperience(20 + threat * 2);
+<<<<<<< HEAD
       title(player, "§aSiege Broken!", `§7You held the keep. +${emeralds} emeralds`);
       sfx(player, "random.levelup");
+=======
+      title(player, "§aSiege Broken!", `§7You held the keep. +${coins(fromEmeralds(emeralds))}`);
+      sfx(player, "random.levelup");
+>>>>>>> origin/main
       emit("siegeReward", { player, emeralds, threat });
     } else if (outcome === "won") {
       title(player, "§aThe siege is over", "§7The raiders have been driven off");

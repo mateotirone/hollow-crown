@@ -33,10 +33,12 @@ import { knightTick, chargeTick } from "./knight.js";
 import { markedTick } from "./marked.js";
 import "./showcase.js";
 import { rosterMenu } from "./roster.js";
+import { rolesTick, roleForStyle, roleForBoss, ROLE_DEEDS } from "./roles.js";
+import { ROLES, RANKS, ROLE_LORE } from "./skills.js";
 import { treeCells, treeLayout, COLS, ROWS } from "./tree_layout.js";
 import { wallMenu, flyby } from "./flyby.js";
 export { flyby };
-import { rumorMenu, rumorTick, rumorsFor, describe, jobTier, remember, KEEPSAKES } from "./rumors.js";
+import { rumorMenu, rumorTick, rumorsFor, describe, jobTier, remember, KEEPSAKES, JOB_KIND } from "./rumors.js";
 
 export { grantPoints, grantRenown, heroOf, hallOf };
 export { startBuild } from "./build.js"; // other features can raise their own templates with the same engine
@@ -54,7 +56,9 @@ api.on("powerOrigin", ({ player, skill }) => {
   saveHero(p);
   if (hero.path === "marked") p.sendMessage(`§5You know where ${SKILL[skill].name} comes from now. The Tree of Oaths will teach it.`);
 });
+api.on("roleLore", ({ roles }) => { for (const id of Object.keys(roles ?? {})) if (ROLES[id]) ROLE_LORE[id] = { ...roles[id] }; });
 system.runTimeout(() => api.emit("powerOriginsWanted", {}), 40);
+system.runTimeout(() => api.emit("roleLoreWanted", {}), 40);
 
 // ---------- clicking the cornerstone and the Tree ----------
 const lastClick = new Map();
@@ -85,10 +89,11 @@ api.addKeepMenuButtons(({ player, owner }) => [
 
 hallMenuExtras.push({ label: "Settlement wall\n§8raise it and watch it rise", icon: "textures/blocks/stonebrick", action: (player, owner) => wallMenu(player, owner) });
 hallMenuExtras.push({ label: "Who's online\n§8players, roles and rulers", icon: "textures/ui/multiplayer_glyph_color", action: (player) => rosterMenu(player) });
-hallMenuExtras.push({ label: "Rumor Board\n§8jobs for Renown and emeralds", icon: "textures/items/paper", action: (player) => rumorMenu(player) });
+hallMenuExtras.push({ label: "Rumor Board\n§8jobs for Renown and coins", icon: "textures/items/paper", action: (player) => rumorMenu(player) });
 
 // ---------- loops ----------
 api.onTick("townhall_rumors", 40, rumorTick);
+api.onTick("townhall_roles", 20, rolesTick);
 api.onTick("townhall_build", 1, buildTick);
 api.onTick("townhall_passives", 20, passiveTick);
 api.onTick("townhall_knight", 20, knightTick);
@@ -98,13 +103,20 @@ api.onTick("townhall_watchfire", 20, watchfireTick);
 
 api.on("ready", () => resumeBuilds());
 
+// What a joining player is told. With the first-join conductor (core, addJoinStep) this waits its turn at
+// order 40, after the look picker, the welcome hall and the journal; without it, it falls back to a short delay.
+const pointsNotice = (player) => {
+  const hero = heroOf(player);
+  if (hero.points > 0) player.sendMessage(`§bYou have ${hero.points} unspent skill point${hero.points === 1 ? "" : "s"}.§7 Spend them at the Tree of Oaths in your town hall.`);
+};
+const hasConductor = typeof api.addJoinStep === "function";
+if (hasConductor) api.addJoinStep(40, "town hall notices", async (player) => pointsNotice(player), { when: "returning" });
 world.afterEvents.playerSpawn.subscribe((event) => {
   if (!event.initialSpawn) return;
-  const hero = heroOf(event.player);
   system.runTimeout(() => {
     if (!event.player.isValid) return;
-    setTreeLook(event.player.id);
-    if (hero.points > 0) event.player.sendMessage(`§bYou have ${hero.points} unspent skill point${hero.points === 1 ? "" : "s"}.§7 Spend them at the Tree of Oaths in your town hall.`);
+    setTreeLook(event.player.id); // quiet bookkeeping, not something the player sees
+    if (!hasConductor) pointsNotice(event.player);
   }, 100);
 });
 world.afterEvents.playerLeave.subscribe((event) => forgetHero(event.playerId));
@@ -122,7 +134,7 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
   const hero = heroOf(player);
   switch (event.id) {
     case "siege:townhall_path":
-      if (!["knight", "marked", "none"].includes(args[0])) return player.sendMessage("§cUse knight, marked or none.");
+      if (args[0] !== "none" && !ROLES[args[0]]) return player.sendMessage(`§cUse ${Object.keys(ROLES).join(", ")} or none.`);
       hero.path = "none";
       hero.ember = "none";
       if (args[0] === "none") { saveHero(player); setTreeLook(player.id); return player.sendMessage("§7Path cleared."); }
@@ -280,6 +292,11 @@ api.addGuardLimitHook((owner, limit) => {
 });
 
 api.addTests("rumor board variety", {
+  "the Storyteller's choice of jobs is what the board shows": () => {
+    const jobs = rumorsFor(5, "tester", 10, { types: ["supply", "rescue", "bounty"] });
+    api.assertEqual(jobs.map((j) => j.type).join(), "supply,rescue,bounty");
+    api.assert(Object.keys(JOB_KIND).length >= 3 && new Set(Object.values(JOB_KIND)).size >= 2, "the rumors deck needs 3 options of 2 kinds");
+  },
   "the board never repeats itself": () => {
     // play 120 days, always taking the first job offered
     const hero = {}, seen = new Map();
@@ -297,5 +314,28 @@ api.addTests("rumor board variety", {
       last = job.type;
     }
     api.assert(KEEPSAKES.length >= 10 && new Set(KEEPSAKES.map((k) => k[1])).size === KEEPSAKES.length, "keepsakes are all different");
+  },
+});
+
+api.addTests("roles", {
+  "every role has a branch, a ladder and enough skills to reach its top rank": () => {
+    for (const [id, role] of Object.entries(ROLES)) {
+      api.assert(BRANCHES[role.branch]?.who === id, `${id} owns its branch`);
+      api.assertEqual(RANKS[id]?.length, 5);
+      const mine = SKILLS.filter((s) => s.branch === role.branch);
+      const total = mine.reduce((n, s) => n + s.max * s.cost, 0);
+      api.assert(total >= RANKS[id][4].at, `${id} can reach ${RANKS[id][4].name} (${total} points of skills)`);
+      for (let ring = 1; ring <= 5; ring++) api.assert(mine.some((s) => s.ring === ring), `${id} has a ring ${ring} skill`);
+      api.assert(canBranch(role.branch, id) && !canBranch(role.branch, "none"), `${id} branch is theirs alone`);
+    }
+    api.assertEqual(roleForStyle("blackfen"), "witch");
+    api.assertEqual(roleForStyle("emberwaste"), "rider");
+    api.assertEqual(roleForStyle("vale"), undefined);
+    for (const id of Object.keys(ROLES)) if (ROLES[id].region) api.assert(ROLE_DEEDS[id]?.deed && (ROLE_DEEDS[id].boss || ROLE_DEEDS[id].event), `${id} is earned by a deed`);
+    api.assertEqual(roleForBoss("siege:pale_huntsman"), "forgemaster");
+    api.assertEqual(roleForBoss("siege:drowned_bride"), "captain");
+    api.assertEqual(roleForBoss("siege:mother_of_changelings"), "witch");
+    api.assertEqual(roleForBoss("minecraft:zombie"), undefined);
+    api.assertEqual(new Set(Object.values(ROLES).map((r) => r.branch)).size, Object.keys(ROLES).length);
   },
 });

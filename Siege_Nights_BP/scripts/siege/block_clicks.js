@@ -37,7 +37,7 @@ world.afterEvents.playerInteractWithBlock.subscribe((event) => {
     if (DYES[event.itemStack?.typeId] !== undefined) dyeBanner(block, player, event.itemStack);
     else keepMenu(block, player);
   } else if (block.typeId === BARRACKS) {
-    if (event.itemStack?.typeId === "minecraft:emerald") recruitGuard(block, player, event.itemStack);
+    if (event.itemStack?.typeId === "siege:coin" || event.itemStack?.typeId === "siege:gold_coin") recruitGuard(block, player, event.itemStack);
     else barracksMenu(block, player);
   }
 });

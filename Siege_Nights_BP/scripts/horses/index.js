@@ -188,7 +188,7 @@ async function breederMenu(player, block) {
     return say(player, "§7Nobody is selling horses here yet.");
   }
   const info = BREEDS[breed];
-  const cost = [{ item: "minecraft:emerald", count: S.breederPostPrice }];
+  const cost = [{ item: "coins", count: S.breederPostPrice }];
   const boughtKey = `${key}|${player.id}`;
   const wait = (meta.data.bought[boughtKey] ?? -1e9) + S.breederPostCooldownTicks - world.getAbsoluteTime();
   const body = [

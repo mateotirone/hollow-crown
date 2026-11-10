@@ -88,10 +88,14 @@ const scriptEvent = (id, message = "") => { for (const s of mock.subscriptions) 
 
 // ----- time -----
 const STEP = 20;
+let st;
+const waits = [];
+let duskTick = 0;
 let kill = () => false; // (raider) => true to have the defenders kill it this step
 function step() {
   abs += STEP;
   mock.advance(STEP);
+  if (!st?.active && world.getTimeOfDay() >= 12000 && world.getTimeOfDay() < 12020) duskTick = system.currentTick;
   for (const t of timers.splice(0).filter((t) => (t.at <= system.currentTick ? (t.fn(), false) : true))) timers.push(t);
   for (const i of mock.intervals) if (system.currentTick % i.ticks === 0) i.fn();
   for (const e of [...entities]) {
@@ -111,13 +115,17 @@ const census = () => {
 
 // one player with a keep that has seen a few sieges
 step();
-const st = api.getState();
+st = api.getState();
 st.keeps.p1 = { x: 0, y: 64, z: 0, name: "Mateo", color: 14, sieges: 6, wins: 4, streak: 2 };
 api.on("assaultSpawned", ({ assault, total }) => say("WAVE", `${assault} of ${total}: on the field now: ${census()}`));
 api.on("siegeStart", () => say("HORN", `threat ${st.plans.p1?.budget}, ${st.plans.p1?.modifiers.join("+") || "no twists"}${st.plans.p1?.warlord ? ", led by " + st.plans.p1.warlord : ""}`));
 api.on("siegeEnd", ({ outcome }) => say("END", `${outcome}  (shape: ${reach.reachData().last?.shape ?? "-"})`));
 api.on("reachStage", ({ stage, name }) => say("STAGE", `${stage} ${name}`));
 api.on("firstGlimpse", () => say("GLIMPSE", "the first Hollow soldiers walk out"));
+
+// how long the evening really took, from the first omen to the horn (in ticks; 20 a second)
+api.on("siegeStart", () => { if (duskTick) waits.push(system.currentTick - duskTick); duskTick = 0; });
+const rivalsMod = await import(pathToFileURL(join(SCRIPTS, "rivals/index.js")).href);
 
 const problems = [];
 const check = (ok, what) => { if (!ok) problems.push(what); };
@@ -128,14 +136,14 @@ function night(label, { killAfter = 300, holdDawn = false } = {}) {
   kill = (e) => { if (!born.has(e.id)) born.set(e.id, system.currentTick); return system.currentTick - born.get(e.id) >= killAfter; };
   if (holdDawn) kill = () => false;
   runUntil(23900, day);
-  console.log(`\n=== ${label} (day ${day}, stage ${reach.reachData().stage}, Reach ${reach.reachData().reach}, tonight: ${rules.nightKind(day, reach.reachData().stage, { salt: reach.reachData().salt }) ?? "quiet"})`);
+  console.log(`\n=== ${label} (day ${day}, stage ${reach.reachData().stage}, Reach ${reach.reachData().reach}, tonight: ${reach.tonightKind(day) ?? "quiet"})`);
   for (const line of log.slice(from)) console.log("  " + line);
   return log.slice(from);
 }
 const nextDayAt = (kind) => { // run forward to the morning of the next day whose night is `kind`
   for (let i = 0; i < 60; i++) {
     runUntil(1000, world.getDay() + (world.getTimeOfDay() >= 1000 ? 1 : 0));
-    if (rules.nightKind(world.getDay(), reach.reachData().stage, { salt: reach.reachData().salt }) === kind) return true;
+    if (reach.tonightKind(world.getDay()) === kind) return true;
     kill = () => true;
   }
   return false;
@@ -158,6 +166,10 @@ check(lines.some((l) => l.includes("END    won")), "stage 1 night should be won"
   check(new Set(shapes).size >= 4, "twelve nights should show at least four shapes");
 }
 check(!lines.some((l) => /veinsworn|shardcaster/.test(l)), "no Hollow soldiers at stage 1");
+console.log("\n  the wait from dusk to the horn, in seconds, night by night: " + waits.map((w) => Math.round(w / 20)).join(", "));
+check(waits[0] > 5000 && waits[2] > 5000, "a settlement's first three sieges keep the long evening");
+check(waits[4] < waits[0] * 0.7 && waits[8] < waits[4] * 0.7, "the evening should shorten after the third siege and again after the sixth: " + waits.join(","));
+check(waits[8] >= 1200, "the evening should never be under a minute");
 
 // Stage 2: the first glimpse
 scriptEvent("siege:reach_boss", "reeve");
@@ -187,7 +199,9 @@ check(lines.filter((l) => l.includes("WAVE")).length === 5, "stage 4 should have
 // Stage 5: the Long Night. First night the defenders can't clear it: it must carry through the day.
 scriptEvent("siege:reach_boss", "warlord_king");
 scriptEvent("siege:reach_boss", "choir");
-check(reach.reachData().stage === 5, "the Choir falling should start the Long Night");
+check(reach.reachData().stage === 4, "the Choir falling should not start the Long Night any more");
+scriptEvent("siege:undertow_rift_opened", "{}");
+check(reach.reachData().stage === 5, "opening the Rift should start the Long Night");
 runUntil(1000, world.getDay() + 1);
 lines = night("Stage 5, the Long Night: a night the defenders do not break", { holdDawn: true });
 check(!lines.some((l) => l.includes("END")), "the Long Night must not end at dawn");
@@ -213,9 +227,12 @@ scriptEvent("siege:reach_boss", "morvane");
 check(reach.reachData().stage === 6, "Morvane falling should end it");
 console.log("\n=== The source is rectified");
 for (const line of log.slice(before)) console.log("  " + line);
+rivalsMod.rivalLords().push({ id: "wrenfield", name: "Ser Bram Holt", plot: "Wrenfield", temperament: "grasping", relations: {} });
 check(nextDayAt("muster"), "no muster night after the story");
 lines = night("Stage 6, the Quiet After: a muster");
 check(lines.filter((l) => l.includes("WAVE")).length === 4, "a muster should have 4 waves");
+check(lines.some((l) => l.includes("The banners of Ser Bram Holt, out of Wrenfield")), "a rival raid should name the lord who sent it");
+check(reach.reachData().musterDay > world.getDay(), "the next rival raid should be rolled after this one");
 check(!lines.some((l) => /veinsworn|shardcaster|gatebreaker/.test(l)), "no Hollow soldiers after the story");
 
 console.warn = realWarn;

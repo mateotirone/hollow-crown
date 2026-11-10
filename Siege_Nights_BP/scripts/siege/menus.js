@@ -9,8 +9,10 @@ import { GUARD_ARMOR, GUARD_COST, armorTier, guardCount, guardLimit, guardTag, r
 import { keepHealth } from "./keep.js";
 import { nextSiegeDay } from "./siege.js";
 import { state } from "./state.js";
-import { TIERS, settlementAt, tierOf } from "./territory.js";
+import { TIERS, settlementAt, tierOf, landRadius } from "./territory.js";
 import { countItem, overworld } from "./util.js";
+import { funds } from "../economy/coins.js";
+import { coins, worth } from "../economy/rules.js";
 
 // ---------- Menus: the Keep, the Barracks ----------
 
@@ -32,11 +34,11 @@ export function keepMenu(block, player) {
   const until = nextSiegeDay() - world.getDay();
   const lines = [
     `§l${keep.sovereign ? "Sovereign " : ""}${keep.name}'s ${tier.name}§r`,
-    `Banner: ${COLORS[keep.color ?? 14].replace(/_/g, " ")}   Land: ${tier.radius} blocks   Keep: ${keepHealth(owner, keep)} health`,
+    `Banner: ${COLORS[keep.color ?? 14].replace(/_/g, " ")}   Land: ${landRadius(keep, owner)} blocks   Keep: ${keepHealth(owner, keep)} health`,
     `Sieges won: ${keep.wins ?? 0}   Win streak: ${keep.streak ?? 0}   Warlords slain: ${keep.warlordsSlain ?? 0}`,
     nextTierText(keep),
     "",
-    state.active ? "§cA siege is happening right now!" : until === 0 ? "§cThe next siege comes tonight." : `Next siege: in ${until} day${until === 1 ? "" : "s"} (day ${nextSiegeDay()}).`,
+    state.active ? "§cA siege is happening right now!" : applyFilter("nextSiegeLine", until === 0 ? "§cThe next siege comes tonight." : `Next siege: in ${until} day${until === 1 ? "" : "s"} (day ${nextSiegeDay()}).`, { until, day: nextSiegeDay(), owner, keep }),
     keep.lastSiege ? `Last siege: ${keep.lastSiege.faction}, threat ${keep.lastSiege.threat}, ${keep.lastSiege.won ? "§aheld§r" : "§cnot held§r"}` : "No sieges faced yet.",
     keep.lastTactic ? `They remember your ${keep.lastTactic === "archery" ? "archers" : keep.lastTactic === "melee" ? "sword" : keep.lastTactic}. Expect a counter.` : "",
     "",
@@ -59,15 +61,14 @@ export function keepMenu(block, player) {
 export function barracksMenu(block, player) {
   if (settlementAt(block.location) !== player.id) return player.onScreenDisplay.setActionBar("§cOnly the settlement's owner can use these Barracks.");
   const count = guardCount(player.id), limit = guardLimit(player.id);
-  const emeralds = countItem(player, "minecraft:emerald");
   const form = new ActionFormData().title("Barracks").body([
-    `Guards: ${count}/${limit}   Your emeralds: ${emeralds}`,
+    `Guards: ${count}/${limit}   You have ${coins(funds(player))}`,
     "",
-    `Recruiting costs ${GUARD_COST} emeralds and needs an unemployed villager standing next to the Barracks.`,
+    `Recruiting costs ${worth(GUARD_COST)} and needs an unemployed villager standing next to the Barracks.`,
     "Men-at-Arms wait here and charge out during sieges. Archers stay wherever you place them.",
   ].join("\n"));
-  form.button(`Recruit a Man-at-Arms\n§8${GUARD_COST} emeralds`, "textures/items/siege_man_at_arms");
-  form.button(`Recruit an Archer\n§8${GUARD_COST} emeralds`, "textures/items/siege_archer");
+  form.button(`Recruit a Man-at-Arms\n§8${worth(GUARD_COST)}`, "textures/items/siege_man_at_arms");
+  form.button(`Recruit an Archer\n§8${worth(GUARD_COST)}`, "textures/items/siege_archer");
   form.button(`Your guards (${count})`, "textures/items/iron_sword");
   form.button("Close");
   form.show(player).then((r) => {

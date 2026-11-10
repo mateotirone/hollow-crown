@@ -7,7 +7,7 @@
 //            killed and still no player takes the Crown, another rises a week later. Forever.
 //   Where    They stand at the centre of the Choir's Heart. Talk to them there.
 //   Temper   Each Regent has a temperament (TEMPERS) that sets the permit price and the tithe.
-//   Permits  Buy one with emeralds, or earn one with a job (bring what they ask for). A permit
+//   Permits  Buy one with coins, or earn one with a job (bring what they ask for). A permit
 //            lasts a few days: no alarm, you keep what the tithe leaves you.
 //   Thieves  Mine without a permit and the Regent notices: a warning, then the Hollow strikes
 //            you if you keep at it. ("oreAlarm" with regent: true also lets the mobs thread send guardians.)
@@ -26,6 +26,8 @@ import { onTick } from "../core/loop.js";
 import { emit, countItem, takeItems } from "../siege/api.js";
 import { UNDERTOW_ID, HEART, TEXT } from "./layout.js";
 import { load, save, say } from "./data.js";
+import { chargeE } from "../economy/coins.js";
+import { worth } from "../economy/rules.js";
 import { spawnChampion } from "../bestiary/champions.js";
 import { sfx } from "../core/sfx.js";
 
@@ -144,9 +146,9 @@ function audience(p) {
   const job = JOBS[r.job % JOBS.length];
   const held = regentPermit(p.id, day);
   const form = new ActionFormData().title(`${r.name} ${t.title}`)
-    .body(`"${VOICE.lines.greet[r.temper]}"\n\nPermit: ${t.sells ? `${t.price} emeralds` : "not for sale"} for ${REGENT.permitDays} days\nTithe: ${t.tithe}% of what you dig\n` + (held ? `\n§2You hold a permit until day ${r.permits[p.id]}.` : "\n§7You hold no permit."));
+    .body(`"${VOICE.lines.greet[r.temper]}"\n\nPermit: ${t.sells ? worth(t.price) : "not for sale"} for ${REGENT.permitDays} days\nTithe: ${t.tithe}% of what you dig\n` + (held ? `\n§2You hold a permit until day ${r.permits[p.id]}.` : "\n§7You hold no permit."));
   const acts = [];
-  if (t.sells) { form.button(`Buy a permit\n${t.price} emeralds`); acts.push(() => buy(p)); }
+  if (t.sells) { form.button(`Buy a permit\n${worth(t.price)}`); acts.push(() => buy(p)); }
   form.button(`Earn a permit\n${job[1]} × ${job[0].replace("minecraft:", "").replace(/_/g, " ")}`); acts.push(() => work(p));
   form.button("Leave"); acts.push(() => {});
   form.show(p).then((res) => { if (!res.canceled && res.selection !== undefined) acts[res.selection](); });
@@ -160,7 +162,7 @@ function grant(p) {
 }
 function buy(p) {
   const r = regentData(), t = TEMPERS[r.temper];
-  if (!takeItems(p, "minecraft:emerald", t.price)) return say(p, `§d${r.name}: §f"${VOICE.lines.noCoin}"`);
+  if (!chargeE(p, t.price, "permit")) return say(p, `§d${r.name}: §f"${VOICE.lines.noCoin}"`);
   grant(p);
   say(p, `§d${r.name}: §f"${VOICE.lines.permitSold}"`);
 }

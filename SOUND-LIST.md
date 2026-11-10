@@ -330,29 +330,29 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 
 | Vanilla sound | What it means here | Made of | Places | Used by |
 |---|---|---|---|---|
-| `block.bell.hit` | Any bell | `block.bell.hit` + `block.bell.hit` pitch 0.5 vol 0.4 after 0.05 s + `block.bell.hit` pitch 1.03 vol 0.22 after 0.15 s | 38 | bestiary (14), undertow (14), lore (4), townhall (4), crown (2) |
-| `random.levelup` | Done, bought, learned | `random.levelup` pitch 0.8 vol 0.5 + `note.harp` pitch 0.6 vol 0.35 after 0.1 s | 21 | horses (6), siege (5), townhall (3), dragons (2), lore (2), crown, reach, settle |
-| `mob.endermen.portal` | A step between places | `mob.endermen.portal` pitch 0.85 vol 0.8 + `random.orb` pitch 0.4 vol 0.15 after 0.1 s | 9 | bestiary (4), townhall (2), crown, horses, undertow |
-| `raid.horn` | A horn | `raid.horn` pitch 0.85 + `raid.horn` pitch 0.64 vol 0.4 after 0.25 s | 8 | bestiary (4), townhall (2), crown, dragons |
+| `block.bell.hit` | Any bell | `block.bell.hit` + `block.bell.hit` pitch 0.5 vol 0.4 after 0.05 s + `block.bell.hit` pitch 1.03 vol 0.22 after 0.15 s | 40 | bestiary (15), undertow (14), lore (4), townhall (4), crown (2), reach |
+| `random.levelup` | Done, bought, learned | `random.levelup` pitch 0.8 vol 0.5 + `note.harp` pitch 0.6 vol 0.35 after 0.1 s | 25 | siege (7), horses (6), townhall (4), dragons (2), lore (2), crown, reach, rivals, settle |
+| `raid.horn` | A horn | `raid.horn` pitch 0.85 + `raid.horn` pitch 0.64 vol 0.4 after 0.25 s | 11 | bestiary (5), townhall (3), crown, dragons, rivals |
+| `mob.endermen.portal` | A step between places | `mob.endermen.portal` pitch 0.85 vol 0.8 + `random.orb` pitch 0.4 vol 0.15 after 0.1 s | 11 | bestiary (6), townhall (2), crown, horses, undertow |
+| `ui.toast.challenge_complete` | Something earned | `ui.toast.challenge_complete` pitch 0.9 vol 0.7 + `block.bell.hit` pitch 0.6 vol 0.3 after 0.4 s | 10 | siege (4), rivals (2), bestiary, crown, settle, townhall |
 | `random.anvil_land` | A heavy blow | `random.anvil_land` pitch 0.9 vol 0.8 + `dig.stone` pitch 0.5 vol 0.7 | 8 | bestiary (2), siege (2), undertow (2), dragons, townhall |
+| `ambient.cave` | Something is wrong | `ambient.cave` pitch 0.85 vol 0.8 | 8 | reach (3), undertow (3), bestiary (2) |
 | `random.orb` | A small yes | `random.orb` pitch 0.75 vol 0.55 | 7 | townhall (2), dragons, economy, rails, settle, undertow |
-| `ui.toast.challenge_complete` | Something earned | `ui.toast.challenge_complete` pitch 0.9 vol 0.7 + `block.bell.hit` pitch 0.6 vol 0.3 after 0.4 s | 7 | siege (2), bestiary, crown, rivals, settle, townhall |
 | `random.anvil_use` | Building and mending | `random.anvil_use` pitch 0.8 vol 0.55 + `dig.stone` pitch 0.7 vol 0.5 after 0.1 s | 7 | townhall (3), settle (2), horses, siege |
-| `ambient.cave` | Something is wrong | `ambient.cave` pitch 0.85 vol 0.8 | 7 | reach (3), undertow (3), bestiary |
 | `item.book.page_turn` | A page | `item.book.page_turn` pitch 0.9 | 6 | lore (5), bestiary |
-| `mob.wither.spawn` | Something old arrives | `mob.wither.spawn` pitch 0.85 vol 0.7 + `block.bell.hit` pitch 0.4 vol 0.4 after 0.4 s | 5 | undertow (3), bestiary, townhall |
-| `random.totem` | A great change | `random.totem` pitch 0.8 vol 0.55 + `block.bell.hit` pitch 0.5 vol 0.4 after 0.2 s | 4 | townhall (2), crown, horses |
-| `random.glass` | Something breaks that should not | `random.glass` pitch 0.9 vol 0.8 | 4 | bestiary (3), crown |
+| `random.glass` | Something breaks that should not | `random.glass` pitch 0.9 vol 0.8 | 6 | bestiary (4), crown (2) |
+| `mob.wither.spawn` | Something old arrives | `mob.wither.spawn` pitch 0.85 vol 0.7 + `block.bell.hit` pitch 0.4 vol 0.4 after 0.4 s | 6 | undertow (3), bestiary (2), townhall |
+| `random.totem` | A great change | `random.totem` pitch 0.8 vol 0.55 + `block.bell.hit` pitch 0.5 vol 0.4 after 0.2 s | 5 | crown (2), townhall (2), horses |
+| `dig.stone` | Stone moving | `dig.stone` pitch 0.9 | 4 | crown (2), siege, townhall |
 | `mob.ravager.roar` | Something big | `mob.ravager.roar` pitch 0.9 vol 0.9 | 4 | bestiary (3), undertow |
 | `random.break` | Not allowed, or something gave way | `random.break` pitch 0.8 vol 0.7 | 3 | bestiary, plots, siege |
-| `dig.stone` | Stone moving | `dig.stone` pitch 0.9 | 3 | crown, siege, townhall |
 | `random.explode` | A blast | `random.explode` pitch 0.85 | 3 | bestiary, siege, undertow |
 | `ambient.weather.thunder` | Thunder with no sky | `ambient.weather.thunder` pitch 0.9 vol 0.9 | 3 | undertow (2), crown |
 | `mob.wither.ambient` | A breath from below | `mob.wither.ambient` pitch 0.9 vol 0.8 | 3 | bestiary (3) |
+| `mob.wither.death` | Something great ends | `mob.wither.death` pitch 0.9 vol 0.8 + `block.bell.hit` pitch 0.35 vol 0.5 after 0.6 s | 3 | crown (2), siege |
 | `mob.warden.heartbeat` | A heartbeat that is not yours | `mob.warden.heartbeat` pitch 0.9 | 3 | bestiary, crown, undertow |
 | `random.toast` | A note is added | `random.toast` pitch 0.8 vol 0.7 | 2 | lore (2) |
 | `random.click` | A catch or a lever | `random.click` pitch 0.85 vol 0.8 | 2 | rails, siege |
-| `mob.wither.death` | Something great ends | `mob.wither.death` pitch 0.9 vol 0.8 + `block.bell.hit` pitch 0.35 vol 0.5 after 0.6 s | 2 | crown, siege |
 | `portal.travel` | The Hollow pulling | `portal.travel` pitch 0.9 | 2 | townhall (2) |
 | `random.pop` | A small pop | `random.pop` pitch 0.85 vol 0.7 | 1 | dragons |
 
@@ -360,8 +360,9 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 
 | Vanilla sound | Places | Used by |
 |---|---|---|
+| `block.amethyst_block.chime` | 5 | bestiary (4), undertow |
+| `armor.equip_leather` | 4 | dragons (2), horses, looks |
 | `item.shield.block` | 4 | bestiary (3), townhall |
-| `armor.equip_leather` | 3 | dragons, horses, looks |
 | `random.eat` | 3 | dragons (2), bestiary |
 | `crossbow.shoot` | 2 | dragons, siege |
 | `mob.elderguardian.curse` | 2 | bestiary, undertow |
@@ -373,7 +374,6 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `armor.equip_iron` | 1 | horses |
 | `armor.equip_netherite` | 1 | siege |
 | `beacon.activate` | 1 | townhall |
-| `block.amethyst_block.chime` | 1 | undertow |
 | `block.amethyst_block.resonate` | 1 | undertow |
 | `block.bell.resonate` | 1 | undertow |
 | `block.campfire.crackle` | 1 | dragons |

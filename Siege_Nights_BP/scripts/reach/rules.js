@@ -23,8 +23,12 @@ export const REACH = {
     nightHeld: -1, // a siege night that ended with the raiders beaten
   },
   bosses: ["reeve", "huntsman", "bride", "seneschal", "mother", "warlord_king"],
-  choir: "choir", // when it falls the Reach jumps to the Long Night's threshold
+  choir: "choir", // an under-boss met inside the Long Night; when it falls the besiegers press harder (long.choirPressure)
   source: "morvane", // when he falls, it is over
+
+  // ----- the wait between the first omen at dusk and the horn (Mateo: long at first, shorter later) -----
+  // A settlement's first sieges keep the whole evening of omens. After that the evening hurries, so it is never just waiting.
+  omens: { fullFor: 3, halfFor: 3, half: 3600, short: 1800 }, // sieges seen -> the wait in ticks (20 a second)
 
   // ----- a knock: a small raid on a night that isn't a siege night -----
   probe: { waves: 1, mult: 0.4, firstHour: 15284, hours: 6 }, // one wave between 21:17 and 2:17
@@ -37,7 +41,8 @@ export const REACH = {
     lull: 2400, // seconds x 20 between daytime tides at pressure 0 (2 minutes) ...
     minLull: 1200, // ... shrinking to this (1 minute)
     tideShare: 0.2, // a daytime tide is this share of the night's budget
-    greySky: true, // it rains for as long as the Long Night lasts
+    stormHold: 1500, // a thunderstorm rolls in with each wave and tide and eases this long after (Mateo: storms that come and go)
+    choirPressure: 3, // the Choir falling inside the Long Night adds this much pressure at once
     strayRange: 80, // by day, raiders with no player this close give up
     picketEvery: 1200, // how often a traveller outside any settlement may be found (ticks)
     picketChance: 0.35,
@@ -45,7 +50,8 @@ export const REACH = {
   },
 
   // ----- after the source is rectified (stage 6) -----
-  musterCycle: 5, // one raid somewhere in every 5 nights
+  // Raids are sent by the rival towns at random (Mateo: "They come randomly from the CPU towns").
+  muster: { minGap: 2, maxGap: 9, firstHour: 13284, hours: 7 }, // nights between raids; the first wave at 19:17 ... 1:17
 
   liveCap: 40, // raiders alive per besieged settlement before new waves shrink (keeps a Realm from choking)
 
@@ -82,14 +88,14 @@ export const STAGES = [
     about: "Nobody counts any more. Every night, five waves, and fewer of them are men.",
   },
   {
-    id: 5, key: "long", name: "The Long Night", from: 85, gate: { choir: true },
+    id: 5, key: "long", name: "The Long Night", from: 85, gate: { rift: true },
     rhythm: "Without end", waves: 6, mult: 2.4, stolenMult: 2.4, probe: 0, twists: 2, harden: 3,
     hollow: { wave: 5, toll: 8 }, captain: true,
     about: "Dawn does not send them home. It ends when you break them, and it starts again at dusk.",
   },
   {
     id: 6, key: "after", name: "The Quiet After", from: 0, gate: { source: true },
-    rhythm: "Now and then, when someone wants what you have", waves: 4, mult: 1.4, stolenMult: 0, probe: 0, twists: 1, harden: 1,
+    rhythm: "When a rival town wants what you have", waves: 4, mult: 1.4, stolenMult: 0, probe: 0, twists: 1, harden: 1,
     hollow: { wave: 0, toll: 0 }, captain: false,
     about: "The knocking has stopped. What comes for your walls now is only people.",
   },
@@ -99,14 +105,15 @@ export const LONG = 5, AFTER = 6;
 export const stage = (id) => STAGES[Math.max(1, Math.min(STAGES.length, id)) - 1];
 export const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
 
-// facts = { bosses: how many under-bosses have fallen, choir: bool, source: bool }
+// facts = { bosses: how many under-bosses have fallen, rift: the Rift has been opened, source: bool }
 export const gateOpen = (s, facts) =>
-  (!s.gate.bosses || (facts.bosses ?? 0) >= s.gate.bosses) && (!s.gate.choir || !!facts.choir) && (!s.gate.source || !!facts.source);
+  (!s.gate.bosses || (facts.bosses ?? 0) >= s.gate.bosses) && (!s.gate.rift || !!facts.rift) && (!s.gate.source || !!facts.source);
 
 // Stages never go backwards. The source falling ends it whatever the Reach says.
 export function stageFor(reach, facts, current = 1) {
   if (facts.source) return AFTER;
   if (current >= AFTER) return AFTER;
+  if (facts.rift) return Math.max(current, LONG); // opening the Rift starts the Long Night, whatever the count was
   let best = current;
   for (const s of STAGES) {
     if (s.id === AFTER || s.id <= best) continue;
@@ -119,6 +126,7 @@ export function stageFor(reach, facts, current = 1) {
 
 // The Reach waits just under a stage whose part of the story hasn't happened yet
 export function capReach(reach, facts) {
+  if (facts.rift) return clamp(Math.round(reach), 0, 100);
   let cap = 100;
   for (const s of STAGES) {
     if (s.id === 1 || s.id === AFTER) continue;
@@ -146,15 +154,12 @@ export function dayRoll(day, salt = 0, k = 0) {
 //   "stolen"   a siege on a night that isn't owed
 //   "probe"    a knock: one small wave at some hour
 //   "long"     the Long Night
-//   "muster"   after the story: ordinary enemies
+//   "muster"   after the story: a rival town's army, on the night index.js rolled (musterDay)
 //   undefined  a quiet night
-export function nightKind(day, stageId, { firstDay = 5, every = 3, salt = 0 } = {}) {
+export function nightKind(day, stageId, { firstDay = 5, every = 3, salt = 0, musterDay } = {}) {
   if (day < firstDay) return undefined;
   const s = stage(stageId);
-  if (stageId === AFTER) {
-    const cycle = Math.floor(day / REACH.musterCycle);
-    return day % REACH.musterCycle === Math.floor(dayRoll(cycle, salt, 5) * REACH.musterCycle) ? "muster" : undefined;
-  }
+  if (stageId === AFTER) return day === musterDay ? "muster" : undefined;
   if (stageId === LONG) return "long";
   if (day % every === 0) return "counted";
   if (stageId === 4) return "stolen";
@@ -165,6 +170,15 @@ export function nightKind(day, stageId, { firstDay = 5, every = 3, salt = 0 } = 
     if (day % every === taken) return "stolen";
   }
   return dayRoll(day, salt, 1) < s.probe ? "probe" : undefined;
+}
+
+// How many nights until the rival towns try again, counted from the night of `day`. Never the same wait twice running.
+export function musterGap(day, salt = 0, last = 0) {
+  const { minGap, maxGap } = REACH.muster;
+  const span = maxGap - minGap + 1;
+  let gap = minGap + Math.floor(dayRoll(day, salt, 5) * span);
+  if (gap === last) gap = minGap + ((gap - minGap + 1 + Math.floor(dayRoll(day, salt, 6) * (span - 1))) % span);
+  return gap;
 }
 
 export const isSiegeKind = (kind) => !!kind && kind !== "probe";
@@ -180,7 +194,7 @@ export function profile(kind, stageId, pressure = 0) {
     case "counted": return { waves: s.waves, mult: s.mult, clock: true, warlord: true };
     case "stolen": return { waves: Math.max(3, s.waves - 1), mult: s.stolenMult || s.mult, clock: true, warlord: true };
     case "long": return { waves: s.waves, mult: pressureMult(pressure), clock: true, warlord: true };
-    case "muster": return { waves: s.waves, mult: s.mult, clock: true, warlord: true };
+    case "muster": return { waves: s.waves, mult: s.mult, clock: false, warlord: true }; // people keep no clock
     case "probe": return { waves: REACH.probe.waves, mult: REACH.probe.mult, clock: false, warlord: false };
     default: return { waves: 3, mult: s.mult, clock: false, warlord: true }; // "horn": someone called them early
   }
@@ -189,8 +203,20 @@ export function profile(kind, stageId, pressure = 0) {
 // When the horn sounds (time of day). A knock comes at its own hour.
 export function openTime(kind, waves, day = 0, salt = 0) {
   if (kind === "probe") return REACH.probe.firstHour + Math.floor(dayRoll(day, salt, 2) * REACH.probe.hours) * REACH.hour - 100;
+  if (kind === "muster") return REACH.muster.firstHour + Math.floor(dayRoll(day, salt, 7) * REACH.muster.hours) * REACH.hour - REACH.musterLead;
   return REACH.tollTime - (waves - 1) * REACH.hour - REACH.musterLead;
 }
+
+// The wait from the first omen to the horn that a settlement which has seen `seen` sieges gets, in ticks
+export function omenWait(seen, full) {
+  const o = REACH.omens;
+  return Math.min(full, seen < o.fullFor ? full : seen < o.fullFor + o.halfFor ? o.half : o.short);
+}
+// How fast the evening runs between dusk and the horn (1 = as it falls). `seen` is the greenest settlement's count.
+export const duskSpeed = (seen, open) => {
+  const full = Math.max(1, open - REACH.duskTime);
+  return Math.max(1, Math.round((full / omenWait(seen, full)) * 10) / 10);
+};
 
 // When wave n of `waves` arrives (time of day). The last is always the toll.
 export const waveTime = (n, waves) => REACH.tollTime - (waves - n) * REACH.hour;
@@ -225,14 +251,15 @@ const baseRoles = (waves) => {
 // Night shapes: the same number of waves, put together differently. No shape comes twice in a row,
 // so two sieges in a row never play out the same way. `from` is the first stage that uses the shape.
 const middle = (list, fn) => list.map((r, i) => (i === 0 || i === list.length - 1 ? r : fn(r, i)));
+// kind: how the night feels, in the Storyteller's words (fight, mystery, journey, quiet, social, build). Shape ids are saved; never rename one.
 export const SHAPES = {
-  old: { name: "The Old Count", from: 1, min: 1, about: "A knock, then the press, then the toll.", roles: (w) => baseRoles(w) },
-  feint: { name: "The Feint", from: 1, min: 3, about: "The first wave was noise at the wrong wall.", roles: (w) => ["feint", ...baseRoles(w).slice(1)] },
-  hammer: { name: "The Hammer", from: 1, min: 3, about: "They led with their strength and knocked afterwards.", roles: (w) => { const l = baseRoles(w); [l[0], l[1]] = [l[1], l[0]]; return l; } },
-  ring: { name: "The Ring", from: 1, min: 3, about: "Every wave came from every side.", roles: (w) => baseRoles(w).map((r) => (r === "toll" ? r : "ring")) },
-  breath: { name: "The Held Breath", from: 1, min: 3, about: "Hours of nothing, and then all of it at once.", roles: (w) => baseRoles(w).map((r, i) => (i < Math.ceil((w - 1) / 2) ? "quiet" : r === "knock" ? "press" : r)) },
-  sappers: { name: "The Sappers' Night", from: 2, min: 3, about: "They came for the wall and not for you.", roles: (w) => middle(baseRoles(w), () => "breach") },
-  blind: { name: "The Blind Night", from: 3, min: 4, about: "The torches kept going low.", roles: (w) => middle(baseRoles(w), (r, i) => (i % 2 ? "dark" : r)) },
+  old: { kind: "fight", name: "The Old Count", from: 1, min: 1, about: "A knock, then the press, then the toll.", roles: (w) => baseRoles(w) },
+  feint: { kind: "mystery", name: "The Feint", from: 1, min: 3, about: "The first wave was noise at the wrong wall.", roles: (w) => ["feint", ...baseRoles(w).slice(1)] },
+  hammer: { kind: "fight", name: "The Hammer", from: 1, min: 3, about: "They led with their strength and knocked afterwards.", roles: (w) => { const l = baseRoles(w); [l[0], l[1]] = [l[1], l[0]]; return l; } },
+  ring: { kind: "journey", name: "The Ring", from: 1, min: 3, about: "Every wave came from every side.", roles: (w) => baseRoles(w).map((r) => (r === "toll" ? r : "ring")) },
+  breath: { kind: "quiet", name: "The Held Breath", from: 1, min: 3, about: "Hours of nothing, and then all of it at once.", roles: (w) => baseRoles(w).map((r, i) => (i < Math.ceil((w - 1) / 2) ? "quiet" : r === "knock" ? "press" : r)) },
+  sappers: { kind: "build", name: "The Sappers' Night", from: 2, min: 3, about: "They came for the wall and not for you.", roles: (w) => middle(baseRoles(w), () => "breach") },
+  blind: { kind: "mystery", name: "The Blind Night", from: 3, min: 4, about: "The torches kept going low.", roles: (w) => middle(baseRoles(w), (r, i) => (i % 2 ? "dark" : r)) },
 };
 
 // Tonight's shape: one the stage has opened, that fits the wave count, and is not the one from last time
@@ -315,7 +342,7 @@ export const DUSK_LINES = {
   long: [
     "§8The light goes. It does not feel like evening. It feels like a door closing.",
     "§8Dusk. You notice you have stopped calling it dusk.",
-    "§8The rain does not stop for evening. Nothing else does either.",
+    "§8The storm has gone quiet. It is only waiting, like the rest of them.",
     "§8It gets dark the way a room does when someone stands in the doorway.",
   ],
   muster: [
@@ -348,6 +375,35 @@ export function duskLine(kind, stageId, day = 0) {
   const lines = DUSK_LINES[key];
   return lines[day % lines.length]; // four lines and sieges at most three days apart: never the same line two sieges running
 }
+// What the night watch says once the count can't be trusted (Mateo: a hint, never a date).
+// near: tonight or tomorrow. soon: two or three nights. far: longer, or nothing in sight.
+export const WATCH_HINTS = {
+  near: [
+    "The watch is uneasy tonight.",
+    "The guards have doubled the torches and will not say why.",
+    "Nobody on the wall is sitting down.",
+    "The sergeant has counted the arrows twice. He is counting them again.",
+  ],
+  soon: [
+    "The watch is restless, but not yet afraid.",
+    "The guards keep looking at the road.",
+    "Somebody has been sharpening things. Nobody ordered it.",
+    "The watch says nothing is wrong. They say it a little too quickly.",
+  ],
+  far: [
+    "The watch is easy. They are playing dice.",
+    "The guards are bored. Be glad of it.",
+    "Somebody on the wall is singing, badly. Nobody stops him.",
+    "The watch has nothing to report, and looks as if it means it.",
+  ],
+};
+export const watchBand = (nights) => (nights === undefined || nights > 3 ? "far" : nights > 1 ? "soon" : "near");
+// The hint for a night that is `nights` away. A new line each day, so it is never yesterday's.
+export function watchHint(nights, day = 0) {
+  const lines = WATCH_HINTS[watchBand(nights)];
+  return lines[day % lines.length];
+}
+
 // One line an hour, and never the same line twice in one evening
 export function hourLine(day, salt, hour) {
   const start = Math.floor(dayRoll(day, salt, 20) * HOUR_LINES.length);

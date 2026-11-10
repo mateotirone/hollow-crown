@@ -1,4 +1,4 @@
-// The Mason: sells building blocks for emeralds, so building doesn't mean weeks of quarrying.
+// The Mason: sells building blocks for coins, so building doesn't mean weeks of quarrying.
 //
 // A mason is Bedrock's built-in NPC (minecraft:npc), so it works on a Realm. Two ways to get one:
 //   - place a Mason's Bench on your land (Siege Workshop recipe): a mason sets up beside it
@@ -184,7 +184,7 @@ world.afterEvents.playerPlaceBlock.subscribe(({ block, player }) => {
       return player.onScreenDisplay.setActionBar(`§cA settlement keeps at most ${SETTLE.maxBenches} masons.`);
     }
     registerBench(placed, owner);
-    player.sendMessage("§6A mason has set up at the bench.§7 Talk to them to buy building blocks with emeralds.");
+    player.sendMessage("§6A mason has set up at the bench.§7 Talk to them to buy building blocks.");
   });
 });
 

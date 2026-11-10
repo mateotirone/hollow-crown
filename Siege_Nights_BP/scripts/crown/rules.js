@@ -33,6 +33,14 @@ export function nightfall({ hollowing, unrest, tithe }) {
   };
 }
 
+// ---------- The Citadel's name ----------
+
+// What a ruler typed, made safe to show everyone: no color codes or line breaks, one line, not too long. Blank = the default.
+export function cleanCitadelName(text) {
+  const name = String(text ?? "").replace(/§./g, "").replace(/[\u0000-\u001f\u007f]/g, " ").replace(/\s+/g, " ").trim().slice(0, CROWN.citadelNameMax).trim();
+  return name || CROWN.citadelName;
+}
+
 // ---------- Money ----------
 
 // Split a defender's siege pay between them and the Crown
@@ -139,7 +147,7 @@ export const abandoned = (challenge, nowMs) =>
 // ---------- The Long Road Back ----------
 
 export const EXILE_STAGES = [
-  { name: "Ashes and Oaths", goal: "Raise a new Keep Banner on free land.", claim: 0, emeralds: 16 },
+  { name: "Ashes and Oaths", goal: "Raise a new Keep Banner on free land.", claim: 0, emeralds: 16 }, // emeralds: old unit, paid as 8 coins each
   { name: "The Loyalists", goal: "Recruit 2 guards on your new land.", claim: 10, emeralds: 10 },
   { name: "Hold the Line", goal: "Win a siege at your new settlement.", claim: 15, emeralds: 0 },
   { name: "The Underground", goal: `Bind an ${CROWN.shard}.`, claim: 10, emeralds: 0 },

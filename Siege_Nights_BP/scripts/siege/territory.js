@@ -23,6 +23,12 @@ export function tierOf(keep) {
   return [...TIERS].reverse().find((t) => (keep.wins ?? 0) >= t.wins && (keep.warlordsSlain ?? 0) >= (t.warlords ?? 0));
 }
 
+const ownerOfKeep = (keep) => Object.keys(state.keeps).find((id) => state.keeps[id] === keep);
+
+// How far a settlement's land reaches from its banner: the tier's radius, unless a feature fixes it
+// (filter "landRadius": on a mapped plot the land is full size from day one and wins do not grow it)
+export const landRadius = (keep, owner = ownerOfKeep(keep)) => applyFilter("landRadius", tierOf(keep).radius, { keep, owner });
+
 export function recordWin(owner) {
   const keep = state.keeps[owner];
   if (!keep) return;
@@ -38,8 +44,14 @@ export function recordWin(owner) {
   }
   for (const p of world.getPlayers()) {
     if (p.id === owner) {
+<<<<<<< HEAD
       title(p, `§6Your ${before.name} is now a ${after.name}!`, `§7Your land reaches ${after.radius} blocks and your keep is tougher`);
       sfx(p, "ui.toast.challenge_complete");
+=======
+      const grew = landRadius(keep, owner) === after.radius && after.radius !== before.radius;
+      title(p, `§6Your ${before.name} is now a ${after.name}!`, grew ? `§7Your land reaches ${after.radius} blocks and your keep is tougher` : "§7Your keep is tougher, and there is more to build");
+      sfx(p, "ui.toast.challenge_complete");
+>>>>>>> origin/main
     } else {
       p.sendMessage(`§6${keep.name}'s ${before.name} has grown into a ${after.name}!`);
     }
@@ -81,7 +93,7 @@ world.afterEvents.itemUse.subscribe((event) => {
 // Which settlement a spot belongs to (owner id), or undefined in the wilds
 export function settlementAt(location) {
   for (const [owner, keep] of Object.entries(state.keeps)) {
-    if (Math.hypot(location.x - keep.x, location.z - keep.z) <= tierOf(keep).radius) return owner;
+    if (Math.hypot(location.x - keep.x, location.z - keep.z) <= landRadius(keep, owner)) return owner;
   }
   return applyFilter("landOwner", undefined, { location }); // extra land from addLandClaim; undefined if none
 }

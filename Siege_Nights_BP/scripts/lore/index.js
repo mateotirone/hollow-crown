@@ -33,7 +33,8 @@ import { NPCS } from "./data/dialogue.js";
 import { JOURNAL, JOURNAL_CLUES } from "./data/journal.js";
 import { POWERS, ARTS_BOOK } from "./data/powers.js";
 import { CASES, TELLS } from "./data/returned.js";
-import { SKILLS } from "../townhall/skills.js";
+import { SKILLS, ROLES } from "../townhall/skills.js";
+import { ROLE_LORE, ROLE_LINES } from "./data/roles.js";
 import { RIVAL_LORDS, LORD_TEMPERS, REGENT_VOICE, RUMOR_PARTS } from "./data/lords.js";
 import "./player.js";
 import "./reader.js";
@@ -49,6 +50,7 @@ import "./moondoors.js";
 import "./corvin.js";
 import "./glimpse.js";
 import { PLOT_LORE, LOCAL_TOMES, LOCAL_THREADS } from "./data/plots.js";
+import { PLOT_REGION, REGION_BOSS, BOSS_LEADS, REGIONAL_BOSSES, CONVERGE, fallenCount } from "./data/spine.js";
 import { PLOT_PLAN } from "../plots/config.js";
 import "./cases.js";
 import "./singing.js";
@@ -216,6 +218,48 @@ addTests("lore", {
       assertEqual(loadSaved("progress", JSON.stringify({ seen: ["a"] }), [(d) => ({ read: d.seen })]), { read: ["a"] });
       assertEqual(loadSaved("progress", JSON.stringify({ read: ["b"], _v: 2 }), [() => ({ read: ["wrong"] })]), { read: ["b"] }, "current saves are not upgraded again");
     } finally { SAVE_VERSION.progress = before; }
+  },
+  "story spine: every first book sends you to Wren, every plot mystery to its home boss, every boss to two other regions": () => {
+    for (const plan of PLOT_PLAN) assertEqual(PLOT_REGION[plan.name], plan.region, plan.name);
+    for (const name of Object.keys(PLOT_LORE)) {
+      const first = LOCAL_TOMES.find((t) => t.local === name && t.n === 1);
+      assert(/Millbrook/.test(first.pages.at(-1)) && /Sister Wren/.test(first.pages.at(-1)), `${name}: the first book does not end at Wren`);
+      assert(first.leads.includes("millbrook"));
+      const thread = LOCAL_THREADS.find((t) => t.local === name);
+      const home = REGION_BOSS[PLOT_REGION[name]];
+      assertEqual(thread.bossLead, home.place);
+      assertEqual(PLACES[home.place].region, PLOT_REGION[name], `${name}: the home boss is in another region`);
+      assert(thread.solved.endsWith(home.line));
+      // first chapter: no local book or answer may name the place below, or who leads it
+      assert(!thread.accept.some((a) => /hollow|morvane|oswin/.test(a)), `${name}: the typed answer gives too much away`);
+    }
+    assertEqual(Object.values(REGION_BOSS).map((r) => r.boss).sort(), [...REGIONAL_BOSSES].sort());
+    const pairs = new Set();
+    for (const [boss, left] of Object.entries(BOSS_LEADS)) {
+      assert(BOSS_TOMES[boss], `${boss} has no confession`);
+      assertEqual(left.leads.length, 2, `${boss} must leave two leads, never one`);
+      const own = Object.entries(REGION_BOSS).find(([, r]) => r.boss === boss)[0];
+      const regions = left.leads.map((id) => PLACES[id].region);
+      assert(!regions.includes(own) && regions[0] !== regions[1], `${boss}: leads must be in two other regions`);
+      pairs.add([...regions].sort().join("+"));
+      assert(!/Hollow|Morvane|Oswin|Edda|truce/i.test(left.scrap), `${boss}: the scrap gives too much away`);
+    }
+    assertEqual(pairs.size, 5, "no two bosses send you to the same pair of regions");
+    for (const region of Object.keys(REGION_BOSS)) {
+      assert(Object.values(BOSS_LEADS).some((l) => l.leads.some((id) => PLACES[id].region === region)), `nothing ever leads to ${region}`);
+    }
+    assert(TOME[CONVERGE.tome]?.col === "survey" && CONVERGE.at >= 2 && CONVERGE.at <= 5);
+    assertEqual(fallenCount(["fell_reeve", "fell_bride", "fell_morvane", "wren_met"]), 2);
+  },
+  "regional roles: each has a past, a reason and a saying, and every origin line names a real skill of that role": () => {
+    const branch = { rider: "wing", forgemaster: "forge", captain: "helm", witch: "hex" };
+    for (const [role, lore] of Object.entries(ROLE_LORE)) {
+      for (const key of ["before", "why", "saying"]) assert(lore[key]?.length > 20, `${role}.${key}`);
+      assertEqual(ROLES[role].region, lore.region, role);
+      assert(Object.keys(ROLE_LINES).filter((id) => id.startsWith(`${branch[role]}_`)).length >= 4, `${role} has under four origin lines`);
+      assert(!/Hollow|Morvane|Oswin|magic/.test(lore.before + lore.why + lore.saying), `${role}: these roles are not the Hollow's`);
+    }
+    for (const id of Object.keys(ROLE_LINES)) assert(SKILLS.some((s) => s.id === id), `${id} is not a skill`);
   },
   "clues file under their mystery once": () => {
     const p = blankProgress();

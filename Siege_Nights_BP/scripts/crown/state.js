@@ -28,6 +28,7 @@ const fresh = () => ({
   lords: null, // rival lords: [{ key, name, title, pace, claim }] (filled from config the first time)
   npcKeep: null, // while a lord rules: the keep they took { x, y, z, wins, ... }, handed to whoever unseats them
   resting: null, // the Heart lying untaken where the Choir fell: { x, y, z, dim }
+  citadelName: null, // what the ruler named the Citadel (null = the default in config)
   vacant: false, // the Crown is back in the Undertow, waiting to be won again
 });
 const store = moduleStore("siege:crown", fresh);
@@ -53,6 +54,8 @@ export const isCourt = (id) => {
   const r = crown().ruler;
   return !!r && r.id !== id && !!keepOf(r.id) && isAlly(r.id, id);
 };
+
+export const citadelName = () => crown().citadelName ?? CROWN.citadelName;
 
 export const claimOf = (id) => crown().claims[id] ?? 0;
 

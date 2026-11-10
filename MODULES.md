@@ -126,13 +126,14 @@ import {
 | `ready` | `{}` | once, on the first tick after the world and saved state are loaded |
 | `siegeStart` | `{ provokedBy }` | a siege night begins (after plans are made) |
 | `siegeEnd` | `{ outcome, besieged }` | outcome is `"won"`, `"dawn"` or `"empty"` |
-| `siegeReward` | `{ player, emeralds, threat }` | a defender was just paid for holding their keep (after `addRewardHook`) |
+| `siegeReward` | `{ player, emeralds, threat }` | (`emeralds` is the old unit: 8 coins each) a defender was just paid for holding their keep (after `addRewardHook`) |
 | `keepFounded` | `{ player, keep, moved }` | a Keep Banner founded (or moved) a settlement |
 | `keepFallen` | `{ owner, keep }` | a keep fell during a siege |
 | `tierUp` | `{ owner, before, after }` | Hamlet → Town → City → Castle |
 | `warlordSlain` | `{ owner, name, king }` | a warlord (or the Warlord King) died |
 | `raiderKilled` | `{ entity, killer, owner }` | any siege raider died during a siege |
 | `sovereignCrowned` | `{ owner }` | a Castle beat the Grand Siege |
+| `chapter` | `{ player, from, to, name }` | a player reached a new story chapter (see The Storyteller) |
 
 Listeners run inside a try/catch, so a broken listener only logs a warning.
 
@@ -149,12 +150,74 @@ Listeners run inside a try/catch, so a broken listener only logs a warning.
 | `addGuardLimitHook` | `(owner, base) => number` | Change how many guards a settlement can keep. |
 | `addKeepHealthHook` | `(owner, base) => number` | Change keep heart health. The `siege:keep_heart` entity's max health (400 today) still caps it. |
 | `addKeepMenuButtons` | `({ player, keep, owner, mine }) => [{ label, icon?, action }]` | Extra buttons on the Keep Banner menu, above "Close". |
+| filter `nextSiegeLine` | `addFilter("nextSiegeLine", (line, { until, day, owner, keep }) => newLine)` | Replace the "Next siege: in N days" line on the Keep Banner menu, for when the count can't be trusted. |
 
 Anything else: `addFilter(name, (value, context) => newValue)` is the general form these are built on.
 
 Not possible: Quartermaster prices. They are a fixed trade table (`trading/quartermaster_trades.json`), and scripts cannot change or observe villager trades.
 
 Need another hook? Ask the "Prepare Siege Nights code for parallel work" thread rather than editing `siege/` files yourself.
+
+## The Storyteller (`core/storyteller.js`): pacing and the story chapter
+
+The rule from the design doc is "a director, not a dice roll". Anything that would otherwise pick with
+`Math.random()` what a player gets next (a rumor, a siege shape, a seep, a Rival Lord's move, a twist) asks the
+Storyteller instead. It remembers what each player did and was offered lately and picks for **contrast**: quiet after a
+siege, a mystery after a run of fights, a journey after days at home. From one deck it never gives the same option, or
+the same kind of option, twice running, and it favours what the player has seen least.
+
+```js
+import { registerDeck, storyPick, pickSeveral, maybePick, note, markDone, chapterOf } from "../siege/api.js";
+
+registerDeck("rumors", [                                    // at load time, once. Deck name = your feature's
+  { id: "bounty_wolves", kind: "fight", from: 1 },          // from / to: story chapters it fits (default: all)
+  { id: "lost_child", kind: "mystery", weight: 2 },         // weight: how common (default 1)
+  { id: "escort_salt", kind: "journey", from: 2, to: 6 },
+  { id: "founders_grave", kind: "mystery", once: true },    // never again once markDone
+  // any other fields are yours; you get the same object back
+]);
+
+const job = storyPick("rumors", player);          // one option, or undefined if nothing fits
+const board = pickSeveral("rumors", player, 3);   // three different ones, kinds mixed
+const twist = maybePick("rumor_twists", player);  // usually undefined; likelier the longer since the last
+note(player, "journey");                          // the player really DID this kind of thing
+markDone(player, "rumors", job.id);               // things stay done
+```
+
+- **Kinds** (fixed, saved in worlds): `fight`, `mystery`, `journey`, `quiet`, `social`, `build`. Pick the one that says
+  how the beat *feels* to the player.
+- **Subject**: a player, or an id string for something that is not one (`"lord:" + lord.id`, `"world"`). A lord's own
+  memory keeps a lord from making the same move twice; pass `{ chapter: chapterOf(player) }` to pick at a player's level.
+- **Options are data.** An update adds rows with `addOptions("rumors", [...])`. Option ids are saved, so never rename or
+  reuse one. A deck used with `storyPick` needs at least 3 options of 2 kinds (a self-test fails otherwise); decks for
+  `maybePick` are registered with `{ chance: 0.25 }` and may be small.
+- **Tell it what happened.** It already notes `fight` after a siege and `build` when a keep is founded or grows. Call
+  `note()` for the rest: a boss or lord fought, a long ride finished, a mystery solved, a trade or talk (`social`),
+  a night nothing came (`quiet`).
+- `storyPick(deck, subject, { peek: true })` looks without counting. `{ exclude: [ids] }` leaves some out.
+  (In `core/storyteller.js` the function is called `pick`; api.js already had a `pick`.)
+- **Measuring:** `/scriptevent siege:storyteller` shows your chapter, what you did lately, what each deck would give you
+  next, and anything served more than four times (`overserved(player)`). Content on that list needs more variants.
+
+### Story chapters
+
+The one shared chapter number, from the story spine. A chapter begins when a fact becomes true, never after a count of
+days. `chapterOf(player)` never goes backwards. `worldChapter()` is the furthest the world has gone (chapters 3 and up).
+`on("chapter", ({ player, from, to, name }) => ...)` fires once per player per step.
+
+| # | name | begins when | fact | reported by |
+|---|---|---|---|---|
+| 0 | Arrival | first join | | |
+| 1 | The Counted Nights | the player raises a Keep Banner | `keepRaised` | siege |
+| 2 | The Ember | the player wins a first siege | `siegesWon` | siege |
+| 3 | The Leaning | the first regional boss falls | `bossesFallen` >= 1 | reach |
+| 4 | The Miscount | three bosses have fallen | `bossesFallen` >= 3 | reach |
+| 5 | The Thin Place | five bosses have fallen | `bossesFallen` >= 5 | reach |
+| 6 | The Long Night | the Rift is opened (the Choir falling stands in until `riftOpened` is reported) | `riftOpened` | reach |
+| 7 | The Quiet After | Morvane falls | `morvaneFallen` | reach |
+
+The feature that owns a fact reports it once at load: `provideFact("bossesFallen", () => count)`. Until it does, the
+fact counts as not yet true, and `/scriptevent siege:storyteller` lists it as missing.
 
 ## Feature APIs
 
@@ -175,13 +238,16 @@ Add a line here when you publish one.
 
 - **economy** (`scripts/economy/api.js`): the world currency (iron-backed coin; item ids `siege:coin`, `siege:gold_coin` = 64).
   `funds(player)`, `charge(player, n, why?)` (false if short, free in Creative), `pay(player, n, why?)`, `coins(n)` for menu text,
-  `fromEmeralds(e)` (x8), `WALLET` for the Mason's `setWallet`, `spawnJobNpc(dim, loc, jobId, region?)`, `regionAt(loc)`.
+  `fromEmeralds(e)` (x8), `worth(e)` for text, `chargeE`/`payE`/`fundsE` for prices still written in the old unit, `dropCoins`, `coinStacks`, `WALLET` for the Mason's `setWallet`, `spawnJobNpc(dim, loc, jobId, region?)`, `regionAt(loc)`.
   Events `coinsPaid`, `coinsSpent`, `goodsSold`. **Pricing something? Charge with `charge()`, not emeralds**; an old emerald price is 8 coins.
 
 - **reach** (`scripts/reach/api.js`): how sieges escalate. One world number, the Reach (0-100), picks a stage 1-6 (`reach/rules.js` STAGES:
   Counted Nights, Leaning, Miscount, Uncounted Nights, Long Night, Quiet After). `reachStage()`, `reachValue()`, `stageInfo()`,
   `tonightKind()` ("counted" | "stolen" | "probe" | "long" | "muster" | undefined), `isSiegeNight()`, `hollowShareNow()`, `addReach(n, why)`,
-  `rectify()` (the source is dealt with), `LONG` = 5, `AFTER` = 6. Events `reachStage { stage, before, name }`, `reachChanged`, `firstGlimpse { owners }`.
+  `rectify()` (the source is dealt with), `LONG` = 5, `AFTER` = 6. Events `reachStage { stage, before, name }`, `reachChanged`,
+  `firstGlimpse { owners }` (now once per settlement, so it fires more than once per world; `owners` are the keeps having theirs tonight),
+  `lordRaid { lord, name, plot, owners }` (after the story a Rival Lord's army has come). The Long Night starts when the Rift opens
+  (script event `siege:undertow_rift_opened`), not when the Choir falls. Reach answers the `nextSiegeLine` filter with a hint at stage 3 and after the story.
   Filter `hollowSoldier` (type, { role, glimpse }) picks the soldier it adds. **Sieges are no longer simply every third night**: ask `isSiegeNight()`
   instead of doing `day % 3`. It also added hooks to `siege/siege.js` that anyone may use: filters `siegeDue`, `assaultCount`, `assaultDelay`,
   `assaultShare`, `dawnEndsSiege`, `nextSiegeDay`, and events `assaultIncoming` / `assaultSpawned` `{ assault, total }`.
@@ -194,3 +260,5 @@ Add a line here when you publish one.
 - `python3 tools/build.py`: runs the check, then builds `hollow-crown.mcaddon` (only scripts main.js loads are packed).
 - In game: `/scriptevent siege:selftest`. It also runs at world load and tells players if something failed.
 - `archive/main-before-split.js` is the original single file, for reference.
+  Storyteller: reach reports the facts `bossesFallen`, `choirFallen`, `morvaneFallen` and owns the deck `siege_shapes` (seven night
+  shapes, each with a kind; picked for subject `"world"`). It notes `quiet` for keep owners on the first night after a siege on which nothing came.

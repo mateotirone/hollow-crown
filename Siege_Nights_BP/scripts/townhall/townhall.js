@@ -4,6 +4,8 @@
 
 import { flyby } from "./flyby.js";
 import { world, system, GameMode, ItemStack } from "@minecraft/server";
+import { ECON } from "../economy/config.js";
+import { funds, charge } from "../economy/coins.js";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
 import * as api from "../siege/api.js";
 import { HALL_TIERS, drawHall } from "./halls.js";
@@ -27,14 +29,15 @@ const VANILLA_STONE = any("cobblestone", "cobbled_deepslate", ":stone", "stone_b
 const STONE = (id) => VANILLA_STONE(id) || id.startsWith("siege:castle_"); // every region's Castle Stone counts too
 const WOOD = any("_planks", ":planks");
 const is = (id) => (other) => other === id;
+const COINS = "coins"; // a cost paid in the world currency (pockets, and the strongbox at home) instead of an item
 
 export const HALL_COSTS = [
   null,
   [["planks", 48, WOOD], ["building stone", 32, STONE]],
-  [["planks", 64, WOOD], ["building stone", 128, STONE], ["iron ingots", 8, is("minecraft:iron_ingot")], ["emeralds", 10, is("minecraft:emerald")]],
-  [["building stone", 256, STONE], ["iron ingots", 16, is("minecraft:iron_ingot")], ["emeralds", 30, is("minecraft:emerald")], ["diamonds", 4, is("minecraft:diamond")]],
-  [["building stone", 384, STONE], ["iron ingots", 32, is("minecraft:iron_ingot")], ["emeralds", 64, is("minecraft:emerald")], ["diamonds", 12, is("minecraft:diamond")], ["netherite scrap", 2, is("minecraft:netherite_scrap")]],
-  [["gold ingots", 32, is("minecraft:gold_ingot")], ["emeralds", 64, is("minecraft:emerald")], ["diamonds", 16, is("minecraft:diamond")], ["netherite ingots", 2, is("minecraft:netherite_ingot")]],
+  [["planks", 64, WOOD], ["building stone", 128, STONE], ["iron ingots", 8, is("minecraft:iron_ingot")], [ECON.many, 80, COINS]],
+  [["building stone", 256, STONE], ["iron ingots", 16, is("minecraft:iron_ingot")], [ECON.many, 240, COINS], ["diamonds", 4, is("minecraft:diamond")]],
+  [["building stone", 384, STONE], ["iron ingots", 32, is("minecraft:iron_ingot")], [ECON.many, 512, COINS], ["diamonds", 12, is("minecraft:diamond")], ["netherite scrap", 2, is("minecraft:netherite_scrap")]],
+  [["gold ingots", 32, is("minecraft:gold_ingot")], [ECON.many, 512, COINS], ["diamonds", 16, is("minecraft:diamond")], ["netherite ingots", 2, is("minecraft:netherite_ingot")]],
 ];
 
 const UNLOCKS = [
@@ -49,6 +52,7 @@ const UNLOCKS = [
 const invOf = (player) => player.getComponent("minecraft:inventory").container;
 
 export function countMatching(player, match) {
+  if (match === COINS) return funds(player);
   const inv = invOf(player);
   let n = 0;
   for (let i = 0; i < inv.size; i++) {
@@ -59,6 +63,7 @@ export function countMatching(player, match) {
 }
 
 export function takeMatching(player, match, amount) {
+  if (match === COINS) return void charge(player, amount, "town hall");
   const inv = invOf(player);
   for (let i = 0; i < inv.size && amount > 0; i++) {
     const item = inv.getItem(i);

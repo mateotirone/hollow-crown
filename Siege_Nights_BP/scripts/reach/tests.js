@@ -4,6 +4,7 @@ import { addTests, assert, assertEqual } from "../core/tests.js";
 import {
   REACH, STAGES, LONG, AFTER, stageFor, capReach, nightKind, isSiegeKind, profile, openTime, waveTime, waveRole, waveShare,
   hollowCount, hollowShare, tideLull, pressureMult, clock, nextSiege, duskLine, troopMix, SHAPES, pickShape, WAVES, hourLine, HONOURS,
+  musterGap, omenWait, duskSpeed, watchHint, watchBand, WATCH_HINTS,
 } from "./rules.js";
 
 const none = { bosses: 0, choir: false, source: false };
@@ -17,17 +18,20 @@ addTests("reach", {
   "the story gates the stages, and they never go back": () => {
     assertEqual(stageFor(99, none, 1), 1, "no boss, no change");
     assertEqual(stageFor(25, { bosses: 1 }, 1), 2);
-    assertEqual(stageFor(99, { bosses: 6 }, 1), 4, "the Long Night needs the Choir to fall");
-    assertEqual(stageFor(85, { bosses: 6, choir: true }, 1), 5);
-    assertEqual(stageFor(0, { bosses: 6, choir: true }, 4), 4, "a falling Reach doesn't undo a stage");
+    assertEqual(stageFor(99, { bosses: 6 }, 1), 4, "the Long Night needs the Rift to be opened");
+    assertEqual(stageFor(99, { bosses: 6, choir: true }, 4), 4, "the Choir falling does not start it any more");
+    assertEqual(stageFor(85, { bosses: 6, rift: true }, 1), 5);
+    assertEqual(stageFor(30, { bosses: 2, rift: true }, 2), 5, "opening the Rift starts the Long Night whatever the count was");
+    assertEqual(stageFor(0, { bosses: 6 }, 4), 4, "a falling Reach doesn't undo a stage");
     assertEqual(stageFor(10, { source: true }, 2), AFTER);
-    assertEqual(stageFor(100, { bosses: 6, choir: true }, AFTER), AFTER);
+    assertEqual(stageFor(100, { bosses: 6, rift: true }, AFTER), AFTER);
   },
   "the Reach waits under a stage the story hasn't opened": () => {
     assertEqual(capReach(50, none), 19);
     assertEqual(capReach(50, { bosses: 1 }), 39);
     assertEqual(capReach(120, { bosses: 6 }), 84);
-    assertEqual(capReach(120, { bosses: 6, choir: true }), 100);
+    assertEqual(capReach(120, { bosses: 6, rift: true }), 100);
+    assertEqual(capReach(120, { bosses: 2, rift: true }), 100);
     assertEqual(capReach(-5, none), 0);
   },
   "stage 1 is exactly every third night": () => {
@@ -40,8 +44,9 @@ addTests("reach", {
     assertEqual(count(3, ["counted", "stolen"]), 200, "two nights in three");
     assertEqual(count(4, ["counted", "stolen"]), 300, "every night");
     assertEqual(count(LONG, ["long"]), 300);
-    assertEqual(count(AFTER, ["muster"]), 60, "one night in five after the story");
-    assertEqual(count(AFTER, ["counted", "stolen", "long", "probe"]), 0);
+    assertEqual(count(AFTER, ["muster", "counted", "stolen", "long", "probe"]), 0, "after the story nothing comes by the count");
+    assertEqual(nightKind(40, AFTER, { musterDay: 40 }), "muster");
+    assertEqual(nightKind(41, AFTER, { musterDay: 40 }), undefined);
   },
   "the stolen night moves about": () => {
     const offsets = new Set();
@@ -98,7 +103,7 @@ addTests("reach", {
   "the banner can say when the next siege is": () => {
     assertEqual(nextSiege(7, 1), 9);
     assertEqual(nextSiege(7, 4), 7);
-    assert(nextSiege(7, AFTER, { salt: 2 }) - 7 < 10);
+    assertEqual(nextSiege(7, AFTER, { salt: 2, musterDay: 12 }), 12);
     assert(isSiegeKind("stolen") && !isSiegeKind("probe") && !isSiegeKind(undefined));
   },
   "no two sieges in a row have the same shape": () => {
@@ -130,6 +135,10 @@ addTests("reach", {
     }
     const distinct = new Set(Object.values(SHAPES).map((s) => s.roles(4).join(",")));
     assert(distinct.size >= 6, "shapes must actually differ");
+    const kinds = ["fight", "mystery", "journey", "quiet", "social", "build"];
+    for (const [id, sh] of Object.entries(SHAPES)) assert(kinds.includes(sh.kind), `${id} has no Storyteller kind`);
+    const early = Object.values(SHAPES).filter((sh) => sh.from <= 1 && sh.min <= 3);
+    assert(new Set(early.map((sh) => sh.kind)).size >= 3, "the first stage needs nights of at least three kinds");
   },
   "an evening never repeats an omen, and neither do two sieges running": () => {
     for (let day = 5; day < 60; day++) {
@@ -142,6 +151,41 @@ addTests("reach", {
   "every shape has an honour to earn": () => {
     for (const id of Object.keys(SHAPES)) assert(HONOURS[`shape_${id}`], id);
     assert(Object.keys(HONOURS).length >= 14);
+  },
+  "after the story the rival towns come at random, never on a rhythm": () => {
+    const gaps = [];
+    let day = 50, last = 0;
+    for (let i = 0; i < 60; i++) { last = musterGap(day, 9, last); gaps.push(last); day += last; }
+    assert(gaps.every((g) => g >= REACH.muster.minGap && g <= REACH.muster.maxGap), "a gap out of range");
+    assert(gaps.every((g, i) => i === 0 || g !== gaps[i - 1]), "the same wait twice running");
+    assert(new Set(gaps).size >= 5, "the waits should really vary");
+    const hours = new Set();
+    for (let d = 0; d < 60; d++) {
+      const open = openTime("muster", 4, d, 9);
+      assert(open >= REACH.duskTime && open < 20000, `a raid at ${clock(open)}`);
+      hours.add(open);
+    }
+    assert(hours.size >= 4, "raids should come at different hours");
+    assert(!profile("muster", AFTER).clock, "people keep no clock");
+  },
+  "the wait before the horn is long at first and shorter later": () => {
+    const full = openTime("counted", 3) - REACH.duskTime;
+    assertEqual(omenWait(0, full), full);
+    assertEqual(omenWait(2, full), full);
+    assert(omenWait(3, full) < full && omenWait(6, full) < omenWait(3, full), "it should shorten in two steps");
+    assertEqual(duskSpeed(0, openTime("counted", 3)), 1);
+    assert(duskSpeed(10, openTime("counted", 3)) > 2);
+    assertEqual(duskSpeed(10, REACH.duskTime + 900), 1, "an evening that is already short is left alone");
+  },
+  "the night watch gives a hint, never a date": () => {
+    assertEqual(watchBand(0), "near");
+    assertEqual(watchBand(3), "soon");
+    assertEqual(watchBand(undefined), "far");
+    for (const lines of Object.values(WATCH_HINTS)) {
+      assert(lines.length >= 3);
+      for (const l of lines) assert(!/\d|day|night after|tomorrow/i.test(l), `"${l}" gives the date away`);
+    }
+    for (let d = 0; d < 20; d++) assert(watchHint(1, d) !== watchHint(1, d + 1), "never yesterday's line");
   },
   "no omen names what is coming": () => {
     for (const kind of ["counted", "stolen", "long", "muster"]) {

@@ -6,16 +6,22 @@ import { applyFilter } from "../core/events.js";
 import { BARRACKS, GUARD_GEAR, GUARD_TYPES, WANTED_TAG } from "./constants.js";
 import { saveState, state, tracked } from "./state.js";
 import { isAlly, settlementAt, tierOf } from "./territory.js";
+<<<<<<< HEAD
 import { countItem, isOnline, overworld, takeItems } from "./util.js";
 import { sfx } from "../core/sfx.js";
+=======
+import { isOnline, overworld, takeItems } from "./util.js";
+import { fundsE, chargeE } from "../economy/coins.js";
+import { worth } from "../economy/rules.js";
+>>>>>>> origin/main
 
 // ---------- Guards: Archers hold the walls, Men-at-Arms wait in the Barracks ----------
-// Bring an unemployed villager to your Barracks and click it with 5 emeralds to recruit a
+// Bring an unemployed villager to your Barracks and click it with coins in hand (40 Regals) to recruit a
 // Man-at-Arms (sneak + click for an Archer). Sneak + click your own guard to pick them up,
 // then place them wherever you want: Archers stay exactly where you put them, and Men-at-Arms
 // report to your nearest Barracks and only come out to fight.
 
-export const GUARD_COST = 5; // emeralds
+export const GUARD_COST = 5; // in the old unit: one is 8 coins (economy/config.js perEmerald), so 40 Regals
 export const GUARD_LIMIT = { Hamlet: 4, Town: 8, City: 12, Castle: 16 }; // a Sovereign gets 4 more
 export const WANTED_TICKS = 6000; // 5 minutes
 export const wanted = new Map(); // player id -> { owner, until }
@@ -60,8 +66,8 @@ export function recruitGuard(block, player, item, chosenType) {
   if (settlementAt(block.location) !== player.id) {
     return player.onScreenDisplay.setActionBar("§cOnly the settlement's owner can recruit here.");
   }
-  if (countItem(player, "minecraft:emerald") < GUARD_COST && player.getGameMode() !== GameMode.Creative) {
-    return player.onScreenDisplay.setActionBar(`§7Bring an unemployed villager here and ${GUARD_COST} emeralds.`);
+  if (fundsE(player) < GUARD_COST && player.getGameMode() !== GameMode.Creative) {
+    return player.onScreenDisplay.setActionBar(`§7Bring an unemployed villager here and ${worth(GUARD_COST)}.`);
   }
   const limit = guardLimit(player.id);
   if (guardCount(player.id) >= limit) {
@@ -72,7 +78,7 @@ export function recruitGuard(block, player, item, chosenType) {
   const recruit = dim.getEntities({ type: "minecraft:villager_v2", families: ["unskilled"], location: center, maxDistance: 4 })[0];
   if (!recruit) return player.onScreenDisplay.setActionBar("§7There's no unemployed villager next to the Barracks.");
 
-  takeItems(player, "minecraft:emerald", GUARD_COST);
+  if (!chargeE(player, GUARD_COST, "guard")) return;
   const type = chosenType ?? (player.isSneaking ? "siege:archer" : "siege:man_at_arms");
   const at = { ...recruit.location };
   const name = recruit.nameTag;

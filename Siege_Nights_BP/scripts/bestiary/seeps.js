@@ -8,8 +8,8 @@
 //
 // The Seep itself is an entity (siege:seep), so nothing is written into the map and no blocks change.
 
-import { world } from "@minecraft/server";
-import { on, onTick, settlementAt, addTests, assert, assertEqual } from "../siege/api.js";
+import { world, ItemStack } from "@minecraft/server";
+import { on, onTick, settlementAt, addTests, assert, assertEqual, registerDeck, storyPick, note } from "../siege/api.js";
 import { bestiaryStore } from "./bossCore.js";
 import { announce, effect, flat, healthOf, heal, particle, pickOne, ring, sound } from "./util.js";
 
@@ -32,22 +32,62 @@ const GUARDS = [
   ["siege:wrongling", "siege:tolling_shade", "siege:stone_vigil", "siege:mirror_knight", "siege:echo_hound"],
 ];
 
+// Not every Seep is the same thing. The Storyteller picks which kind opens near a player, for contrast with what
+// they did lately (ids are saved in worlds: never rename one).
+//   guarded   the plain one: guards climb out, kill them, break it
+//   hungry    opens already widened and its guards come twice as fast (later chapters)
+//   still     no guards at all. It only murmurs. Break it or listen; it tells you something each time you come near
+//   drifting  it will not stay put: it slips away when you get close, a little shorter each time, until it is cornered
+//   weeping   harmless. It closes on its own in a few minutes, and leaves ash for whoever stayed to watch
+export const SEEP_KINDS = [
+  { id: "guarded", kind: "fight", weight: 2 },
+  { id: "hungry", kind: "fight", from: 4 },
+  { id: "still", kind: "mystery" },
+  { id: "drifting", kind: "journey", from: 2 },
+  { id: "weeping", kind: "quiet", from: 2 },
+];
+registerDeck("seeps", SEEP_KINDS);
+const KIND_PROP = "siege:seep_kind";
+const kindOf = (seep) => seep.getDynamicProperty(KIND_PROP) ?? "guarded";
+const OPENING = {
+  guarded: "§5Something gives way nearby. §7The Hollow is seeping through.",
+  hungry: "§5Something tears open nearby, wide. §7It is already letting things out.",
+  still: "§5Something gives way nearby, quietly. §7Nothing comes out of it. It seems to be talking.",
+  drifting: "§5Something gives way nearby, and will not hold still.",
+  weeping: "§5A thin place nearby has started to weep. §7It does not look like it will last.",
+};
+export const MURMURS = [
+  "…counted them at the gate, and counted them again…", "…he said sit, so we sat…", "…the bell was for us, we thought…",
+  "…it is not dark here. It is only not lit…", "…somebody up there is using my name…", "…the water remembers which way was down…",
+  "…we were promised the same thing you were…", "…do not answer if it sounds like home…",
+];
+// Pure: how many times a drifting Seep slips away before it is cornered, and how far each time
+export const DRIFTS = 3;
+export const driftDistance = (slipsLeft) => 14 + 8 * Math.max(0, slipsLeft);
+export const WEEP_SECONDS = 240;
+
 // Pure pieces, so the self-tests can check them
 export const seepLevel = (ageSeconds) => Math.min(3, 1 + Math.floor(ageSeconds / SEEP_SETTINGS.widenSeconds));
 export const guardsWanted = (level, playerCount) => level + 1 + Math.min(3, Math.max(0, playerCount - 1));
-export function shouldOpen({ awake, nearby, roll }) {
-  return awake && nearby < SEEP_SETTINGS.nearbyCap && roll < SEEP_SETTINGS.chance;
+// Something can make the seep surge for a while (a Pretender sitting unchallenged in the Hollow does)
+let surge = () => 1;
+export function setSeepSurge(fn) { surge = fn ?? (() => 1); }
+export function shouldOpen({ awake, nearby, roll, surge: by = 1 }) {
+  return awake && nearby < SEEP_SETTINGS.nearbyCap && roll < SEEP_SETTINGS.chance * by;
 }
 
-function openSeep(dim, at, level = 1) {
+function openSeep(dim, at, level = 1, kind = "guarded") {
+  if (kind === "hungry") level = Math.max(level, 2);
   const seep = dim.spawnEntity(SEEP, at);
+  seep.setDynamicProperty(KIND_PROP, kind);
+  if (kind === "drifting") seep.setDynamicProperty("siege:seep_slips", DRIFTS);
   seep.setDynamicProperty(LEVEL_PROP, level);
   seep.setDynamicProperty(AGE_PROP, (level - 1) * SEEP_SETTINGS.widenSeconds);
   sound(dim, "ambient.cave", at, 1, 0.6);
   for (const p of dim.getPlayers({ location: at, maxDistance: 96 })) {
-    p.sendMessage("§5Something gives way nearby. §7The Hollow is seeping through.");
+    p.sendMessage(OPENING[kind] ?? OPENING.guarded);
   }
-  announce("siege:seep_opened", { x: Math.floor(at.x), y: Math.floor(at.y), z: Math.floor(at.z), dimension: dim.id, level });
+  announce("siege:seep_opened", { x: Math.floor(at.x), y: Math.floor(at.y), z: Math.floor(at.z), dimension: dim.id, level, kind });
   return seep;
 }
 
@@ -66,9 +106,9 @@ function openTick() {
       const dim = p.dimension;
       if (dim.id !== "minecraft:overworld") continue;
       const nearby = dim.getEntities({ type: SEEP, location: p.location, maxDistance: 160 }).length;
-      if (!shouldOpen({ awake: bestiaryStore.data.hollowAwake, nearby, roll: Math.random() })) continue;
+      if (!shouldOpen({ awake: bestiaryStore.data.hollowAwake, nearby, roll: Math.random(), surge: surge() })) continue;
       const at = groundNear(dim, p.location, SEEP_SETTINGS.minDistance, SEEP_SETTINGS.maxDistance);
-      if (at) openSeep(dim, at);
+      if (at) openSeep(dim, at, 1, storyPick("seeps", p)?.id ?? "guarded");
     } catch {
       // that spot wasn't loaded
     }
@@ -96,7 +136,19 @@ function seepTick() {
       const players = dim.getPlayers({ location: at, maxDistance: 48 });
       const age = (seep.getDynamicProperty(AGE_PROP) ?? 0) + STEP / 20;
       seep.setDynamicProperty(AGE_PROP, age);
-      const was = seep.getDynamicProperty(LEVEL_PROP) ?? 1, level = seepLevel(age);
+      const kind = kindOf(seep);
+      if (kind === "weeping") { // harmless, and gone in a few minutes
+        particle(dim, "minecraft:falling_obsidian_tear", { x: at.x, y: at.y + 2, z: at.z });
+        particle(dim, "minecraft:portal_directional", { x: at.x, y: at.y + 1.2, z: at.z });
+        if (age >= WEEP_SECONDS) {
+          for (const p of players) { p.sendMessage("§dThe thin place closes by itself. §7You watched it go."); note(p, "quiet"); }
+          if (players.length) dim.spawnItem(new ItemStack("siege:hollow_ash", 3), at);
+          sound(dim, "random.glass", at, 1.6, 0.3);
+          seep.remove();
+        }
+        continue;
+      }
+      const was = seep.getDynamicProperty(LEVEL_PROP) ?? 1, level = kind === "still" ? was : Math.max(was, seepLevel(age));
       if (level > was) {
         seep.setDynamicProperty(LEVEL_PROP, level);
         heal(seep, 1000);
@@ -112,6 +164,33 @@ function seepTick() {
       particle(dim, "minecraft:portal_directional", { x: at.x, y: at.y + 1.2, z: at.z });
       if (!players.length) continue;
       ring(dim, at, 1.5 + level, "minecraft:sculk_soul_particle");
+      if (kind === "still") { // no guards: it murmurs to whoever comes close
+        const last = seep.getDynamicProperty("siege:seep_said") ?? -100;
+        const listener = players.find((p) => flat(p.location, at) < 6);
+        if (listener && age - last >= 30) {
+          seep.setDynamicProperty("siege:seep_said", age);
+          const n = seep.getDynamicProperty("siege:seep_line") ?? Math.floor(Math.random() * MURMURS.length);
+          seep.setDynamicProperty("siege:seep_line", (n + 1) % MURMURS.length);
+          listener.sendMessage(`§8§o${MURMURS[n % MURMURS.length]}`);
+          sound(dim, "ambient.cave", at, 1.4, 0.4);
+        }
+        continue;
+      }
+      if (kind === "drifting") { // slips away when someone gets close, until it is cornered
+        const slips = seep.getDynamicProperty("siege:seep_slips") ?? 0;
+        if (slips > 0 && players.some((p) => flat(p.location, at) < 5)) {
+          const to = groundNear(dim, at, driftDistance(slips) - 4, driftDistance(slips));
+          if (to) {
+            seep.setDynamicProperty("siege:seep_slips", slips - 1);
+            particle(dim, "minecraft:large_explosion", { x: at.x, y: at.y + 1, z: at.z });
+            seep.teleport(to);
+            sound(dim, "mob.endermen.portal", to, 0.5, 1);
+            for (const p of players) p.onScreenDisplay.setActionBar(slips > 1 ? "§5It slips away from you. Follow the sound." : "§5It slips away again, but not far. It is tiring.");
+          }
+          continue;
+        }
+        if (slips > 0) continue; // nothing climbs out of it while it can still run
+      }
       // guards: the things that came through
       const guards = dim.getEntities({ tags: [GUARD_TAG], location: at, maxDistance: SEEP_SETTINGS.guardRadius });
       const fed = guards.length > 0;
@@ -122,7 +201,7 @@ function seepTick() {
         const g = dim.spawnEntity(pickOne(GUARDS[level - 1]), { x: at.x + Math.cos(a) * 3, y: at.y, z: at.z + Math.sin(a) * 3 });
         g.addTag(GUARD_TAG);
         sound(dim, "mob.endermen.portal", at, 0.7, 0.5);
-        seep.setDynamicProperty("siege:seep_next", age + (guards.length ? 20 : 4)); // quick first guard, then one every 20 seconds
+        seep.setDynamicProperty("siege:seep_next", age + (guards.length ? (kind === "hungry" ? 10 : 20) : 4)); // quick first guard, then one every 20 seconds (10 if hungry)
       }
       // standing in it is a bad idea
       for (const p of players) if (flat(p.location, at) < 2.5 && healthOf(p).now > 0) effect(p, "darkness", 60, 0);
@@ -149,7 +228,9 @@ world.afterEvents.entityDie.subscribe((event) => {
     const players = dim.getPlayers({ location: at, maxDistance: 32 });
     sound(dim, "random.glass", at, 1.2, 0.5);
     particle(dim, "minecraft:large_explosion", { x: at.x, y: at.y + 1, z: at.z });
+    const felt = SEEP_KINDS.find((k) => k.id === kindOf(seep))?.kind ?? "fight";
     for (const p of players) {
+      note(p, felt); // the Storyteller hears what kind of thing the player just did
       p.sendMessage("§dThe Seep closes. §7The air here is ordinary again.");
       announce("siege:award_skill_points", { player: p.id, points: level >= 3 ? 1 : 0, renown: 25 * level, reason: "seep_closed" });
     }
@@ -193,6 +274,13 @@ on("oreAlarm", (e) => {
 on("regentAttacked", (e) => sendGuardians(e?.player, undefined, true));
 
 addTests("bestiary", {
+  "Seeps come in kinds the Storyteller can tell apart": () => {
+    assert(new Set(SEEP_KINDS.map((k) => k.kind)).size >= 4, "seep kinds should feel different");
+    assert(SEEP_KINDS.every((k) => OPENING[k.id]), "every kind announces itself in its own words");
+    assert(SEEP_KINDS.filter((k) => !k.from).length >= 2, "at least two kinds from the first chapter");
+    assertEqual([3, 2, 1].map(driftDistance), [38, 30, 22]);
+    assert(MURMURS.length >= 8 && new Set(MURMURS).size === MURMURS.length);
+  },
   "the Hollow sends guardians sized to the party": () => {
     assertEqual(guardiansFor(1, false), 2);
     assertEqual(guardiansFor(1, true), 3);

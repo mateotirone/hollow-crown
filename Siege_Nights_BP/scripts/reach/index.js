@@ -29,12 +29,16 @@ import {
   isReady, getState, saveState, keepOf, keepCenter, settlementAt, isNight, startSiege, endSiege, spawnRaider, raidersLeft,
   MODIFIERS, FACTIONS, SETTINGS, title, overworld, ownerTag, pick, on, emit, addFilter,
   addPlanHook, addSiegeSkipHook, addKeepMenuButtons, onTick, moduleStore,
+  provideFact, registerDeck, storyPick, note,
 } from "../siege/api.js";
 import { bestiaryStore } from "../bestiary/bossCore.js";
 import * as troops from "../bestiary/spawns.js";
+import * as rivals from "../rivals/index.js";
+import * as riftSite from "../undertow/source.js";
 import {
   REACH, STAGES, LONG, AFTER, stage, stageFor, capReach, nightKind, isSiegeKind, profile, openTime, waveTime, waveRole, waveShare,
   hollowCount, tideLull, pressureMult, clock, nextSiege, duskLine, dayRoll, clamp, troopMix, WATCHER_FROM_REACH,
+  musterGap, duskSpeed, watchHint,
   WAVES, SHAPES, pickShape, hourLine, HONOURS, NEMESIS, NEW_MODIFIERS, HOLLOW_TWISTS_FROM, CAPTAIN_NAMES, CAPTAIN_TITLES,
 } from "./rules.js";
 import "./tests.js";
@@ -44,7 +48,10 @@ Object.assign(MODIFIERS, NEW_MODIFIERS); // so the war plan can name them
 
 const store = moduleStore("siege:reach", () => ({
   lastShape: null, // the shape of the last full night, so the next one is different
-  keeps: {}, // owner -> { faction, twists, nemesis: { name, escapes }, roll: [captains slain] }
+  keeps: {}, // owner -> { faction, twists, nemesis: { name, escapes }, roll: [captains slain], seen: full nights, glimpsed }
+  perKeepGlimpse: false, // the world-wide first glimpse has been handed on to the keeps that stood then
+  rift: false, // the Rift has been opened: the Long Night has begun
+  musterDay: -1, musterGap: 0, musterLord: null, // after the story: the night the next rival town comes, and who came last
   honours: {}, // player id -> [honour keys]
   reach: 0, stage: 1, salt: Math.floor(Math.random() * 1e6),
   bosses: {}, choir: false, source: false,
@@ -54,14 +61,21 @@ const store = moduleStore("siege:reach", () => ({
   forced: null, // test command: { day, kind }
   remembered: null, // after the story: { by, stage } while a Remembered Night runs
   omen: "", lastDawn: -1, sky: false, last: null,
+  quietNoted: true, // the Storyteller has been told about the quiet since the last siege
 }));
 // New saved fields get their defaults from moduleStore. A siege that was running when the pack was updated is topped up here.
 export function reachData() {
   const d = store.data;
+  if (d.night && !Array.isArray(d.night.glimpse)) d.night.glimpse = [];
   if (d.night && !d.night.captains) Object.assign(d.night, { shape: d.night.shape ?? "old", captains: {}, slain: {}, tolled: false, sawDawn: false });
   return d;
 }
-const keepNotes = (owner) => (reachData().keeps[owner] ??= { roll: [] });
+const keepNotes = (owner) => {
+  const d = reachData();
+  const notes = (d.keeps[owner] ??= { roll: [] });
+  return notes;
+};
+const hasGlimpsed = (owner) => !!keepNotes(owner).glimpsed;
 
 // A named honour: earned once, kept for good, worth a skill point
 function honour(player, key) {
@@ -81,8 +95,29 @@ const RISEN_TAG = "siege_reach_risen";
 const PICKET_TAG = "siege_reach_picket";
 const FULL_NIGHTS = ["counted", "stolen", "long", "muster"];
 
-const facts = () => ({ bosses: Object.keys(store.data.bosses).length, choir: store.data.choir, source: store.data.source });
-const opts = () => ({ firstDay: SETTINGS.firstSiegeDay, every: SETTINGS.siegeEveryNNights, salt: store.data.salt });
+// ---------- the Storyteller: story facts the Reach owns, and the night shapes as a deck ----------
+const saved = () => { try { return reachData(); } catch { return undefined; } };
+provideFact("bossesFallen", () => Object.keys(saved()?.bosses ?? {}).length);
+provideFact("choirFallen", () => !!saved()?.choir);
+provideFact("morvaneFallen", () => !!saved()?.source);
+try { provideFact("riftOpened", () => !!saved()?.rift || (saved()?.stage ?? 1) >= LONG); } catch { /* the Storyteller does not ask for this one yet */ }
+// The deck carries no from/to: a shape opens with a Reach stage and a wave count, which chooseShape checks itself.
+registerDeck("siege_shapes", Object.entries(SHAPES).map(([id, sh]) => ({ id, kind: sh.kind, stage: sh.from, min: sh.min })));
+
+// Tonight's shape. The Storyteller picks among the shapes this stage and wave count allow, leaning on what the
+// world has seen lately; the Reach's own rule (never last night's shape) has the last word.
+function chooseShape(day, d, stageId, waves) {
+  const unfit = Object.keys(SHAPES).filter((id) => SHAPES[id].from > stageId || SHAPES[id].min > waves);
+  try {
+    const id = storyPick("siege_shapes", "world", { exclude: unfit })?.id;
+    if (id && SHAPES[id] && id !== d.lastShape) return id;
+  } catch { /* the Storyteller isn't ready: fall back to the day's own roll */ }
+  return pickShape(day, d.salt, stageId, waves, d.lastShape);
+}
+const storyNote = (player, kind) => { try { note(player, kind); } catch { /* not ready */ } };
+
+const facts = () => ({ bosses: Object.keys(store.data.bosses).length, choir: store.data.choir, rift: store.data.rift, source: store.data.source });
+const opts = () => ({ firstDay: SETTINGS.firstSiegeDay, every: SETTINGS.siegeEveryNNights, salt: store.data.salt, musterDay: store.data.musterDay });
 const everyone = () => world.getPlayers();
 const tell = (text) => { for (const p of everyone()) p.sendMessage(text); };
 const sound = (player, id, options) => { try { sfx(player, id, options); } catch { /* cosmetic */ } };
@@ -111,6 +146,7 @@ function checkStage() {
   const before = d.stage;
   d.stage = next;
   if (next === LONG) d.pressure = 0;
+  if (next === AFTER) scheduleMuster(world.getDay());
   const news = STAGE_NEWS[next];
   for (const p of everyone()) {
     if (news?.[1]) title(p, news[0], news[1]);
@@ -134,14 +170,48 @@ function bossFell(id) {
   const d = store.data;
   if (id === REACH.source) return rectify();
   if (id === REACH.choir && !d.choir) {
-    d.choir = true;
-    d.reach = Math.max(d.reach, stage(LONG).from); // the Choir was the last thing holding the count
-    return addReach(0, "choir");
+    d.choir = true; // met inside the Long Night: its fall makes them press harder
+    if (d.stage === LONG) d.pressure = clamp(d.pressure + REACH.long.choirPressure, 0, REACH.long.maxPressure);
+    return store.save();
   }
   if (REACH.bosses.includes(id) && !d.bosses[id]) {
     d.bosses[id] = true;
     addReach(REACH.gain.boss, `boss ${id}`);
   }
+}
+
+// The Rift is opened: the count is over and the Long Night begins (Mateo's call; it used to wait for the Choir)
+export function riftOpened() {
+  const d = store.data;
+  if (d.rift || d.source) return;
+  d.rift = true;
+  d.reach = Math.max(d.reach, stage(LONG).from);
+  addReach(0, "rift");
+}
+function syncRift() {
+  try { if (riftSite.getRift?.()?.open) riftOpened(); } catch { /* the Hollow has nothing saved yet */ }
+}
+
+// After the story: the next night a rival town comes. Random, and never the same wait twice running.
+function scheduleMuster(fromDay) {
+  const d = store.data;
+  d.musterGap = musterGap(fromDay, d.salt, d.musterGap);
+  d.musterDay = fromDay + d.musterGap;
+}
+// Which rival lord sends tonight's army: the grasping and the proud more often, anyone who dislikes a
+// besieged player more often still, and never the lord who came last time if there is another.
+function musterLord() {
+  let all = [];
+  try { all = rivals.rivalLords?.() ?? []; } catch { /* no rival towns in this world */ }
+  if (!all.length) return undefined;
+  const d = store.data;
+  const pool = all.length > 1 ? all.filter((l) => l.id !== d.musterLord) : all;
+  const owners = Object.keys(getState().keeps);
+  const weight = (l) => ({ grasping: 3, proud: 2, steady: 1, kindly: 0.5 }[l.temperament] ?? 1)
+    * (1 + owners.reduce((worst, o) => Math.max(worst, -(l.relations?.[o] ?? 0)), 0) / 50);
+  let roll = Math.random() * pool.reduce((sum, l) => sum + weight(l), 0);
+  for (const l of pool) { roll -= weight(l); if (roll <= 0) return l; }
+  return pool[pool.length - 1];
 }
 
 // The source is rectified: everything the Hollow sent stops where it stands
@@ -164,7 +234,18 @@ function syncBosses() {
     for (const id of Object.keys(bestiaryStore.data.defeated ?? {})) bossFell(id);
   } catch { /* the bestiary has nothing saved yet */ }
 }
-on("ready", () => { reachData(); syncBosses(); });
+on("ready", () => {
+  const d = reachData();
+  syncBosses();
+  syncRift();
+  // worlds from before each settlement had its own first glimpse: the one the world saw counts for the keeps standing now
+  if (!d.perKeepGlimpse) {
+    if (d.glimpsed) for (const owner of Object.keys(getState().keeps)) keepNotes(owner).glimpsed = true;
+    d.perKeepGlimpse = true;
+    store.save();
+  }
+  if (d.stage === AFTER && d.musterDay < world.getDay()) scheduleMuster(world.getDay());
+});
 on("siege:boss_defeated", (data) => bossFell(data?.boss));
 on("keepFallen", () => addReach(REACH.gain.keepFallen, "keep fallen"));
 
@@ -175,9 +256,12 @@ function beginNight(kind, stageId, offset = 0) {
   const p = profile(kind, stageId, d.pressure);
   const now = world.getTimeOfDay();
   const onTime = p.clock && now <= openTime(kind, p.waves) + 400 && now >= REACH.nightTime;
-  const shape = FULL_NIGHTS.includes(kind) ? pickShape(world.getDay(), d.salt, stageId, p.waves, d.lastShape) : "old";
+  const lord = kind === "muster" ? musterLord() : undefined;
+  if (lord) d.musterLord = lord.id;
+  const shape = FULL_NIGHTS.includes(kind) ? chooseShape(world.getDay(), d, stageId, p.waves) : "old";
   d.night = { day: world.getDay(), kind, stage: stageId, waves: p.waves, mult: p.mult, clock: onTime, warlord: p.warlord, offset, shape,
-    carried: false, sawDawn: false, nextTide: 0, kills: 0, glimpse: false, captains: {}, slain: {}, tolled: false };
+    carried: false, sawDawn: false, nextTide: 0, kills: 0, glimpse: [], captains: {}, slain: {}, tolled: false,
+    lord: lord ? { id: lord.id, name: lord.name, plot: lord.plot } : undefined };
   store.save();
   return d.night;
 }
@@ -219,10 +303,20 @@ addFilter("assaultShare", (share, { assault }) => {
 
 addFilter("nextSiegeDay", (day) => {
   const d = store.data;
-  if (d.stage <= 2) return undefined; // the count still holds
+  if (d.stage <= 3) return undefined; // the count still holds; in the Miscount it is the one night anyone is sure of
   const from = world.getDay() + (getState().lastSiegeDay === world.getDay() ? 1 : 0);
   return nextSiege(from, d.stage, opts()) ?? day;
 });
+
+// Once the count can't be trusted (the Miscount, and after the story) the watch gives a feeling, never a date
+const hinting = () => store.data.stage === 3 || store.data.stage === AFTER;
+function nightsUntilSiege(day = world.getDay()) {
+  if (isSiegeKind(tonightKind(day)) && getState().lastSiegeDay !== day) return 0;
+  const next = nextSiege(day + 1, store.data.stage, opts());
+  return next === undefined ? undefined : next - day;
+}
+// The Keep Banner's own "Next siege" line (siege/menus.js) says the same as the night watch
+addFilter("nextSiegeLine", (line) => (hinting() ? watchHint(nightsUntilSiege(), world.getDay()) : line));
 
 addSiegeSkipHook((owner) => !!store.data.remembered && store.data.remembered.by !== owner); // a Remembered Night is only for whoever rang it
 
@@ -257,6 +351,7 @@ addPlanHook((plan, owner) => {
     }
     notes.twists = added;
   }
+  if (n.lord && !plan.grand) plan.warlord = n.lord.name; // a rival town's army is led by its lord, by name
   if (FULL_NIGHTS.includes(n.kind)) notes.faction = FACTIONS[plan.faction]?.name;
   if (plan.warlord && !plan.grand) n.captains[owner] = plan.warlord;
   plan.reach = { kind: n.kind, stage: n.stage };
@@ -269,7 +364,7 @@ const NIGHT_NEWS = {
   stolen: (n) => `§8This is not the third night, and they have come anyway. ${n.waves} waves.`,
   probe: () => "§8Something is trying the walls. It is not a siege night.",
   long: (n) => `§8${n.waves} waves before 3:17. Dawn will not help. Break them, or they stay.`,
-  muster: (n) => `§7Somebody's army, come for what you have. ${n.waves} waves.`,
+  muster: (n) => (n.lord ? `§7The banners of ${n.lord.name}, out of ${n.lord.plot}. ${n.waves} waves.` : `§7Somebody's army, come for what you have. ${n.waves} waves.`),
   horn: () => "§8You called, and they heard.",
 };
 
@@ -280,6 +375,7 @@ on("siegeStart", () => {
   if (n.kind === "long") d.pressure = clamp(d.pressure + 1, 0, REACH.long.maxPressure);
   store.save();
   tell(NIGHT_NEWS[n.kind]?.(n) ?? "");
+  if (n.lord) emit("lordRaid", { lord: n.lord.id, name: n.lord.name, plot: n.lord.plot, owners: [...getState().besieged] });
   for (const p of everyone()) {
     const plan = getState().plans[p.id];
     if (plan?.returning) p.sendMessage(`§8${plan.warlord} has come back. ${plan.returning > 1 ? "Again." : "You let that one walk away."}`);
@@ -325,13 +421,20 @@ on("assaultIncoming", ({ assault }) => {
       plan.warlord = undefined; // the captain came at 3:17; tides have no leader
     }
   }
-  n.glimpse = role === "toll" && !store.data.glimpsed && n.stage >= 2 && n.stage !== AFTER && FULL_NIGHTS.includes(n.kind);
+  // every settlement gets its own first glimpse: the keeps besieged tonight that have not had theirs
+  n.glimpse = role === "toll" && n.stage >= 2 && n.stage !== AFTER && FULL_NIGHTS.includes(n.kind) ? st.besieged.filter((o) => !hasGlimpsed(o)) : [];
+  if (role !== "tide" && n.kind === "long") storm();
   const line = n.clock || role === "tide" ? WAVES[role].line : waveOf(assault) >= n.waves ? "§7The last of them." : "§7They come again.";
   system.runTimeout(() => {
     for (const p of everyone()) {
       if (role === "toll" && n.clock) {
+<<<<<<< HEAD
         title(p, "§43:17", n.glimpse ? "§7 " : n.kind === "muster" ? "§7The last of them" : "§7Everything that was waiting, comes");
         sound(p, "sig.toll_317");
+=======
+        title(p, "§43:17", n.glimpse.includes(settlementAt(p.location) ?? p.id) ? "§7 " : n.kind === "muster" ? "§7The last of them" : "§7Everything that was waiting, comes");
+        sound(p, "block.bell.hit", { pitch: 0.5, volume: 1 });
+>>>>>>> origin/main
       } else {
         p.onScreenDisplay.setActionBar(line);
         if (role === "tide") sound(p, "sig.storm_tide");
@@ -355,20 +458,22 @@ const soldierType = (role, glimpse) =>
   applyFilter("hollowSoldier", glimpse || Math.random() < 0.7 ? "siege:veinsworn" : "siege:shardcaster", { role, glimpse });
 
 // Who the ordinary army is made of follows the stage (the bestiary swaps the raiders; we tell it the mix)
-troops.setTroopPlan?.(() => troopMix(store.data.stage, store.data.glimpsed));
+troops.setTroopPlan?.(({ owner } = {}) => troopMix(store.data.stage, owner ? hasGlimpsed(owner) : store.data.glimpsed));
 // The bestiary's Watcher (one Hollow soldier at the back who only watches) belongs to the nights just before the
 // first glimpse. It follows this once the bestiary has a setWatcherPlan(); until then it keeps its own timing.
-export const watcherDueNow = () => {
+export const watcherDueNow = (owner) => {
   const d = store.data;
-  return !d.glimpsed && d.stage !== AFTER && d.reach >= WATCHER_FROM_REACH;
+  const seen = owner ? hasGlimpsed(owner) : Object.keys(getState().keeps).every((o) => hasGlimpsed(o));
+  return !seen && d.stage !== AFTER && d.reach >= WATCHER_FROM_REACH;
 };
-troops.setWatcherPlan?.(() => watcherDueNow());
+const ownerOfKeep = (keep) => Object.keys(getState().keeps).find((o) => getState().keeps[o] === keep);
+troops.setWatcherPlan?.(({ keep } = {}) => watcherDueNow(keep && ownerOfKeep(keep)));
 
-function sendSoldiers(count, role, glimpse) {
+function sendSoldiers(count, role, glimpse, owners) {
   const st = getState();
   let sent = 0;
   if (!glimpse && raidersLeft().length >= liveCap()) return sent;
-  for (const owner of st.besieged) {
+  for (const owner of owners ?? st.besieged) {
     const keep = keepOf(owner), plan = st.plans[owner];
     if (!keep || !plan) continue;
     for (let i = 0; i < count; i++) {
@@ -379,16 +484,21 @@ function sendSoldiers(count, role, glimpse) {
   return sent;
 }
 
-// The first time: the army of men stops and looks back, and something else walks up through it
-function firstGlimpse() {
+// A settlement's first time: its army of men stops and looks back, and something else walks up through it
+function firstGlimpse(owners) {
   const d = store.data;
-  d.glimpsed = true;
+  d.glimpsed = true; // somebody in the world has seen them
+  for (const owner of owners) keepNotes(owner).glimpsed = true;
   store.save();
-  for (const p of everyone()) if (settlementAt(p.location)) honour(p, "glimpse");
+  const there = (p) => owners.includes(settlementAt(p.location)) || owners.includes(p.id);
+  for (const p of everyone()) if (owners.includes(settlementAt(p.location))) honour(p, "glimpse");
   for (const raider of raidersLeft()) {
-    try { raider.addEffect("slowness", 200, { amplifier: 6, showParticles: false }); } catch { /* gone */ }
+    try {
+      if (owners.some((o) => raider.hasTag(ownerTag(o)))) raider.addEffect("slowness", 200, { amplifier: 6, showParticles: false });
+    } catch { /* gone */ }
   }
   for (const p of everyone()) {
+    if (!there(p)) continue;
     p.sendMessage("§8The army has stopped. All of them. They are looking back the way they came.");
     if (settlementAt(p.location)) {
       try { p.addEffect("darkness", 100, { showParticles: false }); } catch { /* cosmetic */ }
@@ -396,12 +506,13 @@ function firstGlimpse() {
   }
   system.runTimeout(() => {
     if (!getState().active) return;
-    sendSoldiers(3, "toll", true);
+    sendSoldiers(3, "toll", true, owners);
     for (const p of everyone()) {
+      if (!there(p)) continue;
       p.sendMessage("§8Something is walking up between them. It is not one of them.");
       sound(p, "sig.first_glimpse");
     }
-    emit("firstGlimpse", { owners: [...getState().besieged] });
+    emit("firstGlimpse", { owners: [...owners] });
   }, 120);
 }
 
@@ -424,8 +535,11 @@ on("assaultSpawned", () => {
   if (!n) return;
   harden(stage(n.stage).harden);
   if (n.kind === "probe" || n.kind === "horn") return;
-  if (n.glimpse) return firstGlimpse();
-  if (store.data.glimpsed) sendSoldiers(hollowCount(n.stage, n.role), n.role, false);
+  const first = n.glimpse ?? [];
+  if (first.length) firstGlimpse(first);
+  // the keeps that have already had their night get the Hollow's soldiers as the stage sends them
+  const known = getState().besieged.filter((o) => hasGlimpsed(o) && !first.includes(o));
+  if (known.length) sendSoldiers(hollowCount(n.stage, n.role), n.role, false, known);
 });
 
 on("raiderKilled", ({ entity, owner }) => {
@@ -453,6 +567,9 @@ on("siegeEnd", ({ outcome, besieged }) => {
   const won = outcome === "won";
   if (n.kind === "long" && won) d.pressure = clamp(d.pressure - 2, 0, REACH.long.maxPressure); // +1 at dusk, so a broken night is a net -1
   if (full) d.lastShape = n.shape;
+  if (full) for (const owner of besieged ?? []) keepNotes(owner).seen = (keepNotes(owner).seen ?? 0) + 1;
+  if (n.kind === "muster") scheduleMuster(n.day);
+  d.quietNoted = false;
   d.last = { day: n.day, kind: n.kind, outcome, kills: n.kills, waves: getState().assaultsTotal ?? n.waves, shape: full ? n.shape : undefined };
   // a captain who reached the wall and was not killed remembers the way
   for (const owner of besieged) {
@@ -518,6 +635,7 @@ function longTick() {
       st.assaultsLeft = 1;
       st.nextAssaultTick = system.currentTick;
       n.nextTide = system.currentTick + tideLull(d.pressure);
+      storm();
       saveState();
       store.save();
     }
@@ -544,14 +662,22 @@ function longTick() {
   }
 }
 
+// The Long Night's weather: a thunderstorm rolls in with each wave and tide and eases between them,
+// so the sky says when to brace.
+let stormUntil = 0;
+function storm() {
+  const d = store.data;
+  stormUntil = system.currentTick + REACH.long.stormHold;
+  try { overworld().setWeather(WeatherType.Thunder, REACH.long.stormHold + 400); } catch { /* weather is cosmetic */ }
+  if (!d.sky) { d.sky = true; store.save(); }
+}
 function skyTick() {
   const d = store.data;
-  const want = REACH.long.greySky && d.stage === LONG;
-  try {
-    if (want) overworld().setWeather(WeatherType.Rain, 2400);
-    else if (d.sky) overworld().setWeather(WeatherType.Clear);
-  } catch { /* weather is cosmetic */ }
-  if (d.sky !== want) { d.sky = want; store.save(); }
+  if (!d.sky) return;
+  if (d.stage === LONG && getState().active && system.currentTick < stormUntil) return;
+  try { overworld().setWeather(WeatherType.Clear); } catch { /* weather is cosmetic */ }
+  d.sky = false;
+  store.save();
 }
 
 // In the Long Night the roads are not safe either
@@ -587,6 +713,12 @@ function reachTick() {
     const passed = d.lastDawn < 0 ? 0 : clamp(day - d.lastDawn, 0, 3);
     d.lastDawn = day;
     if (d.forced && d.forced.day < day) d.forced = null;
+    if (d.stage === AFTER && d.musterDay < day) scheduleMuster(day - 1); // nobody was home, or it was beaten: roll the next one
+    // The first night after a siege on which nothing came is a quiet beat, said once so the quiet nights don't drown the rest
+    if (!d.quietNoted && passed > 0 && !st.active && st.lastSiegeDay < day - 1) {
+      d.quietNoted = true;
+      for (const p of everyone()) if (keepOf(p.id)) storyNote(p, "quiet");
+    }
     store.save();
     if (passed > 0 && day >= SETTINGS.firstSiegeDay) addReach(REACH.gain.dawn * passed, "dawn");
   }
@@ -595,8 +727,14 @@ function reachTick() {
   const kind = tonightKind(day);
   if (!isSiegeKind(kind)) return;
   const now = world.getTimeOfDay();
-  const open = openTime(kind, profile(kind, d.stage, d.pressure).waves);
+  const open = openTime(kind, profile(kind, d.stage, d.pressure).waves, day, d.salt);
   if (now < REACH.duskTime || now >= open) return;
+  // Long at first, shorter later: once every settlement has seen a few sieges the evening hurries to the horn.
+  // The greenest settlement sets the pace, so nobody's first sieges are cut short.
+  const speed = duskSpeed(Math.min(...Object.keys(st.keeps).map((o) => keepNotes(o).seen ?? 0)), open);
+  if (speed > 1 && open - now > 60) {
+    try { world.setTimeOfDay(Math.min(open - 40, Math.floor(now + (speed - 1) * REACH_TICK))); } catch { /* the clock is not ours tonight */ }
+  }
   const hour = Math.floor((now - REACH.duskTime) / REACH.hour);
   const key = `${day}:${hour}`;
   if (d.omen === key) return;
@@ -611,6 +749,8 @@ function reachTick() {
     }
   }
 }
+
+const REACH_TICK = 40;
 
 function pullTick() {
   const st = getState();
@@ -627,9 +767,9 @@ function pullTick() {
   }
 }
 
-onTick("reach", 40, reachTick);
+onTick("reach", REACH_TICK, reachTick);
 onTick("reach pull", REACH.pullEvery, pullTick);
-onTick("reach sky", 1200, skyTick);
+onTick("reach sky", 200, skyTick);
 onTick("reach pickets", REACH.long.picketEvery, picketTick);
 
 // Nobody sleeps through a siege night, even before the horn
@@ -657,15 +797,17 @@ function watchMenu(player, mine) {
   const day = world.getDay();
   const kind = tonightKind(day);
   const next = nextSiege(day + 1, d.stage, opts());
+  const coming = nightsUntilSiege(day);
   const notes = keepOf(player.id) ? keepNotes(player.id) : undefined;
   const earned = (d.honours[player.id] ?? []).filter((k) => HONOURS[k]);
   const lines = [
     `§l${s.name}§r`,
     s.about,
     "",
-    `Sieges: ${s.rhythm.toLowerCase()}. ${s.waves} waves on a full night, one an hour, the last at ${clock(REACH.tollTime)}.`,
-    getState().active ? "§cA siege is under way." : KIND_WORDS[kind] ?? (next === undefined ? "The watch expects a quiet night." : `The watch expects a quiet night. The next siege they are sure of is in ${next - day} day${next - day === 1 ? "" : "s"}.`),
-    d.stage === 2 || d.stage === 3 ? "§7Not every night that is quiet at dusk stays quiet." : "",
+    d.stage === AFTER ? `Sieges: ${s.rhythm.toLowerCase()}. ${s.waves} waves, at whatever hour suits them.`
+      : `Sieges: ${s.rhythm.toLowerCase()}. ${s.waves} waves on a full night, one an hour, the last at ${clock(REACH.tollTime)}.`,
+    getState().active ? "§cA siege is under way." : hinting() ? watchHint(coming, day) : KIND_WORDS[kind] ?? (next === undefined ? "The watch expects a quiet night." : `The watch expects a quiet night. The next siege they are sure of is in ${next - day} day${next - day === 1 ? "" : "s"}.`),
+    d.stage === 2 ? "§7Not every night that is quiet at dusk stays quiet." : "",
     d.stage === LONG ? `§7Their strength: ${Math.round(pressureMult(d.pressure) * 100)}% of an ordinary army. Break a night to wear them down.` : "",
     d.last ? `Last time (day ${d.last.day}): ${d.last.shape ? SHAPES[d.last.shape].name + ", " : ""}${d.last.waves} waves, ${d.last.kills} fallen, ${d.last.outcome === "won" ? "§aheld§r" : "§cnot beaten§r"}.` : "",
     notes?.nemesis ? `§c${notes.nemesis.name} walked away from this wall${notes.nemesis.escapes > 1 ? ` ${notes.nemesis.escapes} times` : ""} and will be back.§r` : "",
@@ -711,9 +853,9 @@ function status(player) {
   const kind = tonightKind();
   const f = facts();
   player.sendMessage([
-    `§6The Reach: ${d.reach}/100, stage ${d.stage} (${s.name}). Bosses fallen ${f.bosses}/6, Choir ${f.choir ? "fallen" : "standing"}, source ${f.source ? "rectified" : "not rectified"}.`,
+    `§6The Reach: ${d.reach}/100, stage ${d.stage} (${s.name}). Bosses fallen ${f.bosses}/6, Rift ${f.rift ? "open" : "shut"}, Choir ${f.choir ? "fallen" : "standing"}, source ${f.source ? "rectified" : "not rectified"}.`,
     `§7Tonight (day ${world.getDay()}): ${kind ?? "quiet"}${kind ? `, horn at ${clock(openTime(kind, profile(kind, d.stage, d.pressure).waves, world.getDay(), d.salt))}` : ""}. Now ${clock(world.getTimeOfDay())}.`,
-    `§7Long Night pressure ${d.pressure}. First Hollow soldiers seen: ${d.glimpsed ? "yes" : "no"}. ${d.night ? `Siege running: ${d.night.kind}, ${d.night.waves} waves.` : ""}`,
+    `§7Long Night pressure ${d.pressure}. First glimpse had by ${Object.keys(getState().keeps).filter((o) => hasGlimpsed(o)).length} of ${Object.keys(getState().keeps).length} settlements.${d.stage === AFTER ? ` Next rival raid: day ${d.musterDay}.` : ""} ${d.night ? `Siege running: ${d.night.kind}, ${d.night.waves} waves.` : ""}`,
   ].join("\n"));
 }
 
@@ -723,6 +865,7 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
   let data;
   try { data = JSON.parse(event.message); } catch { data = undefined; }
   if (id === "siege:boss_defeated") return bossFell(data?.boss);
+  if (id === "siege:undertow_rift_opened") return riftOpened();
   if (id === "siege:seep_opened") return addReach(REACH.gain.seepOpened, "seep opened");
   if (id === "siege:seep_closed") return addReach(REACH.gain.seepClosed, "seep closed");
   if (!id.startsWith("siege:reach")) return;
@@ -738,7 +881,9 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
     case "siege:reach_stage": {
       const want = clamp(Math.round(Number(word)) || 1, 1, 6);
       d.source = want === AFTER;
+      d.rift = want >= LONG;
       d.stage = want;
+      if (want === AFTER) scheduleMuster(world.getDay());
       d.reach = want === AFTER ? d.reach : Math.max(stage(want).from, want === 1 ? 0 : d.reach);
       if (want === 1) d.reach = 0;
       if (want !== LONG) d.pressure = 0;
@@ -762,9 +907,13 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
       break;
     case "siege:reach_glimpse":
       d.glimpsed = false;
+      for (const notes of Object.values(d.keeps)) notes.glimpsed = false;
+      break;
+    case "siege:reach_rift":
+      riftOpened();
       break;
     case "siege:reach_reset":
-      Object.assign(d, { reach: 0, stage: 1, bosses: {}, choir: false, source: false, pressure: 0, glimpsed: false, night: null, forced: null, remembered: null, last: null, lastShape: null, keeps: {} });
+      Object.assign(d, { reach: 0, stage: 1, bosses: {}, choir: false, rift: false, source: false, pressure: 0, glimpsed: false, musterDay: -1, musterGap: 0, musterLord: null, night: null, forced: null, remembered: null, last: null, lastShape: null, keeps: {} });
       skyTick();
       break;
     default:

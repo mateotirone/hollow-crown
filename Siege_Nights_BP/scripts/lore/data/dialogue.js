@@ -312,7 +312,7 @@ export const NPCS = [
         opts: [["...", "end"]],
       },
       cough: {
-        text: "Marsh mallow root, honey, don't breathe the fog after dark. Two emeralds, which I'll waive, because you asked a sensible question in a house full of nonsense.\n\nNow. Do you want the cough cure, or do you want to know why I'm old?",
+        text: "Marsh mallow root, honey, don't breathe the fog after dark. Two coins, which I'll waive, because you asked a sensible question in a house full of nonsense.\n\nNow. Do you want the cough cure, or do you want to know why I'm old?",
         opts: [
           ["Why are you old?", "believe"],
           ["Just the cure.", "end"],
@@ -773,7 +773,7 @@ export const NPCS = [
     ],
     nodes: {
       first: {
-        text: "Welcome to Sunscar. Water is two emeralds a skin, shade is free, and before you ask: the wind.\n\nThe statues. Everyone asks. The desert wind wore the faces away. It's in the town record.",
+        text: "Welcome to Sunscar. Water is two coins a skin, shade is free, and before you ask: the wind.\n\nThe statues. Everyone asks. The desert wind wore the faces away. It's in the town record.",
         opts: [
           ["All of them? Only the faces?", "doubt", ["flag:isolde_met"]],
           ["Who were the statues of?", "who", ["flag:isolde_met"]],

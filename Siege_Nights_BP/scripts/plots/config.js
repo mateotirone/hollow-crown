@@ -9,7 +9,7 @@ export const MAP = {
   mapCenter: { x: 0, z: 0 }, // middle of the map (Kingsrest, the spawn town, is at -150, -150)
   mapHalfSize: 1250, // the map runs this far from the center each way (0 turns the edge off)
   noElytra: true,
-  elytraReward: [{ item: "minecraft:emerald", count: 24 }], // what an elytra is swapped for
+  elytraReward: [{ item: "siege:gold_coin", count: 3, name: "Gold Regals" }], // what an elytra is swapped for (3 x 64 coins, once 24 emeralds)
 };
 
 // The 12 plots. x/z are the planned Plot Stone spots (builders can adjust; the stone's real spot wins).
@@ -55,6 +55,15 @@ export const WARDS = [
   { name: "Mirelight", x: -60, z: 900, r: 70 },
   { name: "the Ashen Gate Chapterhouse", x: 420, z: -170, r: 45 },
   { name: "the Ashen Watch", x: 480, z: 560, r: 35 },
+  // The seven thin places: caves where the Rift may stand (one is real in each world). Each keeps a clearing in
+  // front of it, big enough for the overworld stage of the last fight, so nobody may build or dig there.
+  { name: "Kingsbarrow Hollow", x: 120, z: 520, r: 45, thin: true },
+  { name: "the Greywater Sink", x: 560, z: -420, r: 45, thin: true },
+  { name: "the Rimecut Caves", x: -650, z: -1080, r: 45, thin: true },
+  { name: "the Drowned Grotto", x: -870, z: -860, r: 45, thin: true },
+  { name: "the Fenmouth Deeps", x: -250, z: 860, r: 45, thin: true },
+  { name: "the Scorched Throat", x: 1050, z: 720, r: 45, thin: true },
+  { name: "the Witchroot Sink", x: 520, z: 1160, r: 45, thin: true },
   { name: "the Shut Pass", x: 1225, z: -190, r: 30 }, // sealed way out, kept for a later update (see EXPANSION)
   { name: "Bellhollow", x: 155, z: -100, r: 60 }, // the valley with the broken bell frame, the shrine and the sealed Crack in the Deep
   { name: "Crownhold", x: -235, z: -345, r: 65 }, // the ruined capital and its Hall of Bells, on the rise north-west of Kingsrest

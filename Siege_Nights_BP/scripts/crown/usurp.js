@@ -7,12 +7,13 @@ import {
 } from "../siege/api.js";
 import { spawnChampion } from "../bestiary/champions.js";
 import { CROWN, IDS } from "./config.js";
+import { worth } from "../economy/rules.js";
 import {
   claimNeeded, gauntletProblem, stormAtNightfall, abandoned, compass, EXILE_STAGES, lordId, lordGain, lordChallenger, lordApproach,
 } from "./rules.js";
 import {
   crown, saveCrown, ruler, isRuler, isCourt, rulerLabel, playerById, announce, giveItem, claimOf, addClaim, seat, surfaceY, siegeNumber,
-  lords, lordOf,
+  lords, lordOf, citadelName,
 } from "./state.js";
 import { citadel, throneSpots, exilePoint, moveIn } from "./citadel.js";
 import { crownPlayer, endReign, addHollowing } from "./reign.js";
@@ -107,8 +108,13 @@ function useShard(player) {
     c.treasury += CROWN.shardTreasury;
     saveCrown();
     addHollowing(-CROWN.hollowShatter);
+<<<<<<< HEAD
     sfx(player, "random.glass");
     return player.sendMessage(`§aThe shard shatters. One less Claim against you. §7+${CROWN.shardTreasury} emeralds to the Treasury.${c.ruler.hollowing >= 25 ? " §8§oFor a moment, everything is quiet." : ""}`);
+=======
+    sfx(player, "random.glass");
+    return player.sendMessage(`§aThe shard shatters. One less Claim against you. §7+${worth(CROWN.shardTreasury)} to the Treasury.${c.ruler.hollowing >= 25 ? " §8§oFor a moment, everything is quiet." : ""}`);
+>>>>>>> origin/main
   }
   sfx(player, "block.end_portal_frame.fill");
   addClaim(player, CROWN.claimShard, `an ${CROWN.shard} bound`);
@@ -130,7 +136,7 @@ function useGauntlet(player) {
   c.challenge = { claimant: player.id, name: player.name, declaredMs: Date.now(), missed: 0, stormed: false };
   c.names[player.id] = player.name;
   saveCrown();
-  announce(`§4§l${player.name} has thrown down the Gauntlet!§r §4They will storm ${CROWN.citadelName} on the next siege night that ${rulerLabel()} is here to answer.`, "raid.horn");
+  announce(`§4§l${player.name} has thrown down the Gauntlet!§r §4They will storm ${citadelName()} on the next siege night that ${rulerLabel()} is here to answer.`, "raid.horn");
   const r = playerById(c.ruler.id);
   if (r) title(r, "§4You are challenged", `§7${player.name} comes for your throne on the next siege night`);
 }
@@ -172,7 +178,7 @@ function beginStorm() {
   c.challenge.stormed = true;
   c.storm = { claimant: c.challenge.claimant, deaths: 0, rulerAway: 0, claimantAway: 0 };
   saveCrown();
-  announce(`§4§lThe Storm.§r §4${c.challenge.name} marches on ${CROWN.citadelName}. Break the Throne Seal before dawn and ${CROWN.relic} changes hands.`, "mob.wither.spawn");
+  announce(`§4§lThe Storm.§r §4${c.challenge.name} marches on ${citadelName()}. Break the Throne Seal before dawn and ${CROWN.relic} changes hands.`, "mob.wither.spawn");
   const r = playerById(c.ruler.id);
   if (r) title(r, "§4Defend the throne", "§7Hold the Throne Seal until dawn");
   const claimant = playerById(c.storm.claimant);
@@ -273,10 +279,11 @@ export function npcWins(why, fallen) {
   c.npcKeep = keep ? { ...keep } : null;
   c.ruler = { id, name: lord.name, title: lord.title, sinceDay: world.getDay(), hollowing: 0, restored: false, npc: true };
   c.tithe = CROWN.npcTithe;
+  c.citadelName = null; // a lord calls it by its old name
   c.vacant = false;
   c.formerRulers = [...c.formerRulers.filter((f) => f !== old.id), old.id];
   saveCrown();
-  announce(`§4§lThe throne has fallen:§r §4${why}. ${old.title} ${old.name} is cast out, and ${label} rules from ${CROWN.citadelName}. §7${CROWN.npcTithe}% of all siege winnings are theirs now.`, "mob.wither.death");
+  announce(`§4§lThe throne has fallen:§r §4${why}. ${old.title} ${old.name} is cast out, and ${label} rules from ${citadelName()}. §7${CROWN.npcTithe}% of all siege winnings are theirs now.`, "mob.wither.death");
   banish(old.id, old.name);
   emit("stormEnd", { winner: id, ruler: old.id, claimant: id, usurped: true, npc: true });
 }
@@ -455,10 +462,15 @@ function castOut(player) {
   player.teleport(exilePoint(from), { dimension: overworld() });
   exile.pending = false;
   saveCrown();
+<<<<<<< HEAD
   title(player, `§4Banished from ${CROWN.citadelName}`, "§7You were a ruler this morning");
   sfx(player, "mob.wither.death", { volume: 0.5 });
+=======
+  title(player, `§4Banished from ${citadelName()}`, "§7You were a ruler this morning");
+  sfx(player, "mob.wither.death", { volume: 0.5 });
+>>>>>>> origin/main
   giveItem(player, new ItemStack(KEEP_BANNER, 1));
-  player.sendMessage(`§7You are cast out with what you carry. ${CROWN.citadelName} is closed to you for ${CROWN.banishNights} siege nights.`);
+  player.sendMessage(`§7You are cast out with what you carry. ${citadelName()} is closed to you for ${CROWN.banishNights} siege nights.`);
   player.sendMessage(`§5But you held it once, and the throne remembers: your Blood Claim starts at ${CROWN.claimExileStart}. §7${EXILE_STAGES[0].name}: ${EXILE_STAGES[0].goal}`);
 }
 
