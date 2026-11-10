@@ -360,6 +360,9 @@ In game (cheats on, a settlement founded, or `/scriptevent siege:showcase` first
    two minutes. Kill everything between tides to break it. It should rain, and patrols should find you outside the settlement.
 6. `/scriptevent siege:reach_boss morvane`: everything stops ("The knocking has stopped"). `reach_night muster` for an after-story raid; the night
    watch now offers Remembered Nights.
+8. Variety: play three siege nights in a row (`reach_night` each evening). Each should have a different shape (named in chat after the
+   night, and under "The night watch") and a different army. Let a captain live through a night you lose: the next full night it returns by name.
+   Honours you earn appear in chat as "Night honour: ..." and under "The night watch".
 7. `/scriptevent siege:reach_reset` puts it all back. `/scriptevent siege:reach_boss <reeve|huntsman|bride|seneschal|mother|warlord_king|choir>` and
    `/scriptevent siege:reach_set <0-100>` move the story by hand.
 
