@@ -237,6 +237,7 @@ export function passiveTick() {
       fx(player, "jump_boost", 60, 0);
       if (riding && second % 10 === 0) fx(player, "saturation", 1, 0);
     }
+    if (s.way_clue && second % 3 === 0 && !(s.way_mapwright && heldType(player) === "minecraft:compass")) clueSense(player);
     if (s.way_mapwright && heldType(player) === "minecraft:compass") {
       const target = hallOrigin(player);
       if (target && overworld) {
@@ -249,6 +250,46 @@ export function passiveTick() {
   // Siege skills that act on the keep itself
   if (state.active) for (const owner of state.besieged ?? []) keepSkills(owner);
   else surged.clear();
+}
+
+// ---------- Clue Sense (way_clue) ----------
+// While you carry the Ledger of Whispers, it whispers when an unread Dusty Tome (the lore feature answers
+// "clueSense") or a Lore Tome lying loose on the ground is within 16 blocks. A soft page turn the first
+// time each one comes into range, a heading on the action bar while it stays close.
+export const CLUE_RANGE = 16;
+const LEDGER_ITEM = "siege:ledger", TOME_ITEM = "siege:lore_tome";
+const sensed = new Map(); // player id -> key of the nearest thing last whispered about
+
+export function nearestClue(at, hits) {
+  let best;
+  for (const h of hits) {
+    const d = Math.hypot(h.x + 0.5 - at.x, h.y - at.y, h.z + 0.5 - at.z);
+    if (d <= CLUE_RANGE && (!best || d < best.d)) best = { ...h, d };
+  }
+  return best;
+}
+
+function clueSense(player) {
+  if (!api.countItem(player, LEDGER_ITEM)) return sensed.delete(player.id);
+  const q = { player, radius: CLUE_RANGE, hits: [] };
+  api.emit("clueSense", q);
+  try {
+    for (const e of player.dimension.getEntities({ type: "minecraft:item", location: player.location, maxDistance: CLUE_RANGE })) {
+      if (e.getComponent("minecraft:item")?.itemStack?.typeId === TOME_ITEM) q.hits.push({ ...e.location, x: Math.floor(e.location.x), z: Math.floor(e.location.z), kind: "loose" });
+    }
+  } catch {
+    // no loose tomes to sense
+  }
+  const near = nearestClue(player.location, q.hits);
+  if (!near) return sensed.delete(player.id);
+  const key = `${near.x},${near.y},${near.z}`;
+  if (sensed.get(player.id) !== key) {
+    sensed.set(player.id, key);
+    player.playSound("item.book.page_turn", { volume: 0.4, pitch: 0.7 });
+  }
+  const dx = near.x + 0.5 - player.location.x, dz = near.z + 0.5 - player.location.z;
+  const where = near.d < 3 ? "right here" : `${Math.round(near.d)} blocks ${heading(dx, dz)}`;
+  player.onScreenDisplay.setActionBar(`§5Your Ledger whispers:§7 something written, ${where}`);
 }
 
 export function heldType(player) {

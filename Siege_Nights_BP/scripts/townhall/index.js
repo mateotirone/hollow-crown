@@ -28,7 +28,7 @@ import { buildTick } from "./build.js";
 import { heroOf, saveHero, forgetHero, grantPoints, grantRenown, listenForGrants, blankHero } from "./hero.js";
 import { CORNERSTONE, TREE, hallMenu, hallOf, halls, saveHalls, resumeBuilds, beginBuild, setTreeLook, allowedLevel, HALL_COSTS, hallMenuExtras } from "./townhall.js";
 import { openTree, choosePath, treeMenu, EMBER, BOUND_EMBER, OATH_BANNER } from "./tree.js";
-import { passiveTick, watchfireTick, dropEmber } from "./progress.js";
+import { passiveTick, watchfireTick, dropEmber, nearestClue } from "./progress.js";
 import { knightTick, chargeTick } from "./knight.js";
 import { markedTick } from "./marked.js";
 import "./showcase.js";
@@ -289,6 +289,16 @@ api.addTests("tree screen", {
 api.addGuardLimitHook((owner, limit) => {
   const p = world.getAllPlayers().find((x) => x.id === owner);
   return limit + (p ? Math.min(3, heroOf(p).rumorDebts ?? 0) : 0);
+});
+
+api.addTests("clue sense", {
+  "the nearest clue in range wins, anything past 16 blocks is ignored": () => {
+    const at = { x: 0, y: 64, z: 0 };
+    api.assertEqual(nearestClue(at, []), undefined);
+    api.assertEqual(nearestClue(at, [{ x: 30, y: 64, z: 0 }]), undefined);
+    const near = nearestClue(at, [{ x: 10, y: 64, z: 0, kind: "tome" }, { x: 3, y: 64, z: 3, kind: "loose" }, { x: 40, y: 64, z: 0 }]);
+    api.assertEqual(near.kind, "loose");
+  },
 });
 
 api.addTests("rumor board variety", {
