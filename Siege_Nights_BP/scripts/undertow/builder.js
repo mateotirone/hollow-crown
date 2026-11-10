@@ -2,7 +2,7 @@
 // set pieces (the Wound's return crack, waystones, the Drowned Court, the Choir's Heart).
 // Work is spread over ticks with a block budget so the Realm never stalls.
 
-import { world, BlockVolume } from "@minecraft/server";
+import { world, BlockVolume, BlockPermutation } from "@minecraft/server";
 import { UNDERTOW_ID, UNDERTOW_LAYOUT as L, COURT, HEART, pathX } from "./layout.js";
 import { planChunk, chunkInRange, heightAt, B } from "./terrain.js";
 import { planCrack, placeCells } from "./rift.js";
@@ -58,7 +58,14 @@ const dim = () => world.getDimension(UNDERTOW_ID);
 function apply(d, op) {
   try {
     const [x1, y1, z1] = op.a, [x2, y2, z2] = op.b;
-    if (x1 === x2 && y1 === y2 && z1 === z2) d.setBlockType({ x: x1, y: y1, z: z1 }, op.block);
+    if (op.states) {
+      // A single block that must face a certain way (an amethyst growth pointing up). If the game
+      // does not know the state, place the plain block rather than stalling the chunk.
+      let perm;
+      try { perm = BlockPermutation.resolve(op.block, op.states); } catch { perm = undefined; }
+      if (perm) d.setBlockPermutation({ x: x1, y: y1, z: z1 }, perm);
+      else d.setBlockType({ x: x1, y: y1, z: z1 }, op.block);
+    } else if (x1 === x2 && y1 === y2 && z1 === z2) d.setBlockType({ x: x1, y: y1, z: z1 }, op.block);
     else d.fillBlocks(new BlockVolume({ x: x1, y: y1, z: z1 }, { x: x2, y: y2, z: z2 }), op.block);
     return true;
   } catch {

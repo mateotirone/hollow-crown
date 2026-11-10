@@ -93,6 +93,7 @@ world.afterEvents.entityHurt.subscribe((event) => {
       chordHits.set(by.id, n);
       if (chordDue(n)) {
         ring(victim.dimension, victim.location, CHOIRSTEEL.chordReach, "minecraft:sonic_explosion", 6);
+        particle(victim.dimension, "siege:choir_ring", { x: victim.location.x, y: victim.location.y + 0.4, z: victim.location.z }); particle(victim.dimension, "siege:glint", victim.getHeadLocation());
         sound(victim.dimension, "block.amethyst_block.chime", victim.location, 0.5, 1.4);
         for (const e of victim.dimension.getEntities({ location: victim.location, maxDistance: CHOIRSTEEL.chordReach, families: ["monster"] })) {
           if (e.id !== victim.id) hurt(e, CHOIRSTEEL.chordDamage, "magic");
@@ -102,6 +103,7 @@ world.afterEvents.entityHurt.subscribe((event) => {
     // the Cuirass
     if (victim.typeId === "minecraft:player" && held(victim, EquipmentSlot.Chest) === ID("chestplate") && answers(Math.random())) {
       ring(victim.dimension, victim.location, 2, "minecraft:sonic_explosion", 4);
+      particle(victim.dimension, "siege:choir_ring", { x: victim.location.x, y: victim.location.y + 0.4, z: victim.location.z });
       sound(victim.dimension, "block.amethyst_block.chime", victim.location, 0.8, 1);
       hurt(by, CHOIRSTEEL.answerDamage, "magic");
       shove(by, by.location.x - victim.location.x, by.location.z - victim.location.z, 1.1, 0.35);
@@ -129,6 +131,7 @@ world.afterEvents.playerBreakBlock.subscribe((event) => {
     const from = { x: at.x + 0.5, y: at.y + 0.5, z: at.z + 0.5 }, to = { x: next.x + 0.5, y: next.y + 0.5, z: next.z + 0.5 };
     line(event.dimension, from, to, "minecraft:endrod", 0.7);
     particle(event.dimension, "minecraft:sonic_explosion", to);
+    particle(event.dimension, "siege:glint", to); particle(event.dimension, "siege:vein_spark", from);
     sound(event.dimension, "block.amethyst_block.chime", to, 1.6, 1);
   } catch {
     // unloaded rock
