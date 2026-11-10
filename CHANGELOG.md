@@ -44,6 +44,8 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - The four regional roles (Dragon Rider, Forgemaster, Captain, Witch) each have a history, and their top four powers show a line of it in the Tree of Oaths.
 
 ### Changed
+- Holding the Heart of the Hollow is now whispers only: the Heartbearer hears things and a few patches of grass die near the throne, but nothing ever harms them, changes them or makes them easier to unseat.
+- Each ruler names their own Citadel when they raise it or take it. Leave the name empty and it is Aldspire.
 - The Hollow looks less busy: Veinstone is quieter and comes in four mixed variants, Choir Ore shows big bright crystals, Latticewood is an uneven honeycomb and Veilmoss grows in soft clumps. Veinstone Bricks, Pale Ash and the Glint Cluster have their real art.
 - The High Throne no longer repeats itself: each whisper the Heart gives is heard once per reign, a rival lord brings a different and bigger army every time they come back, a ruling lord never sends the same host twice running, Oath Shard news is worded differently each time, and a ruler banished a second time walks a shorter road back.
 - The "Who steps off the coach?" character menu is now the first thing a new player sees, and the welcome and the journal wait until it is answered or closed.

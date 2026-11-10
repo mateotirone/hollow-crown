@@ -1,7 +1,7 @@
 // The Citadel: raising it from the Cornerstone, its land, its border, and who sits in it.
 
 import { world, system, ItemStack, BlockPermutation, BlockVolume, MolangVariableMap, GameMode } from "@minecraft/server";
-import { MessageFormData } from "@minecraft/server-ui";
+import { ModalFormData } from "@minecraft/server-ui";
 import {
   isReady, getState, saveState, keepOf, keepBlock, overworld, title, onTick, on,
   addLandClaim, addFoundingCheck, addKeepHealthHook, addGuardLimitHook,
@@ -9,7 +9,8 @@ import {
 } from "../siege/api.js";
 import { CROWN, IDS } from "./config.js";
 import { citadelPlan, colorJobs, gateToward, thronePlace, outsideGate, GATE_NAMES, KEEP_HALF } from "./layout.js";
-import { crown, saveCrown, ruler, isRuler, rulerLabel, announce, giveItem, surfaceY, seat } from "./state.js";
+import { crown, saveCrown, ruler, isRuler, rulerLabel, announce, giveItem, surfaceY, seat, citadelName } from "./state.js";
+import { cleanCitadelName } from "./rules.js";
 
 export const citadel = () => crown().citadel;
 export const inCitadel = (loc) => {
@@ -26,7 +27,7 @@ addLandClaim((location) => {
 });
 
 addFoundingCheck((player) => (isRuler(player.id) && citadel()
-  ? `§cYour seat is ${CROWN.citadelName}. The throne does not move house.` : undefined));
+  ? `§cYour seat is ${citadelName()}. The throne does not move house.` : undefined));
 
 // While a rival lord rules, nobody settles on their doorstep
 addFoundingCheck((player, block) => {
@@ -97,7 +98,7 @@ world.afterEvents.playerPlaceBlock.subscribe((event) => {
   const keep = keepOf(player.id);
   let problem;
   if (!isRuler(player.id)) problem = `§cOnly the bearer of ${CROWN.relic} can lay the Citadel's Cornerstone.`;
-  else if (c.citadel) problem = `§c${CROWN.citadelName} already stands.`;
+  else if (c.citadel) problem = `§c${citadelName()} already stands.`;
   else if (!keep) problem = "§cRaise a Keep Banner first. The Citadel grows around it.";
   else if (Math.hypot(block.location.x - keep.x, block.location.z - keep.z) > CROWN.keepMaxFromBanner) problem = `§cToo far out. Lay it within ${CROWN.keepMaxFromBanner} blocks of your Keep Banner.`;
   else if (block.location.y + 80 > block.dimension.heightRange.max) problem = "§cToo high up. The Great Keep is 76 blocks tall.";
@@ -112,7 +113,7 @@ world.afterEvents.playerPlaceBlock.subscribe((event) => {
   c.cornerstone = { ...block.location };
   saveCrown();
   const gate = gateToward(keep, world.getDefaultSpawnLocation());
-  player.sendMessage(`§6The Great Keep will stand here, 25 blocks square around this stone, and everything inside that square will be cleared. The gatehouse will face ${GATE_NAMES[gate]}. §7Break the stone to move it, or click it to raise ${CROWN.citadelName}.`);
+  player.sendMessage(`§6The Great Keep will stand here, 25 blocks square around this stone, and everything inside that square will be cleared. The gatehouse will face ${GATE_NAMES[gate]}. §7Break the stone to move it, or click it to raise ${citadelName()}.`);
 });
 
 function outlineTick() {
@@ -142,12 +143,14 @@ export function clickCornerstone(block, player) {
   if (!isRuler(player.id)) return player.onScreenDisplay.setActionBar("§7The Citadel's Cornerstone. Only the ruler can raise it.");
   const keep = keepOf(player.id);
   if (!keep || c.citadel) return;
-  new MessageFormData()
-    .title(`Raise ${CROWN.citadelName}?`)
-    .body("The Citadel will rise here over about 3 minutes.\n\nThe Great Keep (25 by 25, 76 tall) replaces everything in the outlined square. The curtain wall rises 92 blocks out from your Keep Banner, outside your old land.\n\nThis can't be undone.")
-    .button1("Not yet").button2("Raise it")
+  // One screen: name it, and confirm. Closing the screen (X) means "not yet".
+  new ModalFormData()
+    .title("Raise your Citadel?")
+    .textField(`The Citadel will rise here over about 3 minutes.\n\nThe Great Keep (25 by 25, 76 tall) replaces everything in the outlined square. The curtain wall rises 92 blocks out from your Keep Banner, outside your old land.\n\nThis can't be undone.\n\n§6Name your Citadel§r (everyone will see it; leave it empty for ${CROWN.citadelName}):`, CROWN.citadelName)
+    .submitButton("Raise it")
     .show(player).then((r) => {
-      if (r.selection !== 1 || crown().citadel) return;
+      if (r.canceled || crown().citadel || !isRuler(player.id)) return;
+      crown().citadelName = cleanCitadelName(r.formValues?.[0]);
       raiseCitadel(player, block.location);
     }).catch(() => {});
 }
@@ -177,8 +180,8 @@ export function raiseCitadel(player, stone, { fast = false } = {}) {
   c.cornerstone = null;
   saveCrown();
   tickingAreas(c.citadel, true);
-  announce(`§6The ground shakes. ${CROWN.citadelName} is rising around ${rulerLabel()}'s keep!`, "mob.wither.spawn");
-  title(player, `§6${CROWN.citadelName}`, "§7The Citadel rises");
+  announce(`§6The ground shakes. ${citadelName()} is rising around ${rulerLabel()}'s keep!`, "mob.wither.spawn");
+  title(player, `§6${citadelName()}`, "§7The Citadel rises");
 }
 
 function buildTick() {
@@ -193,7 +196,7 @@ function buildTick() {
       saveCrown(); // every 10 seconds
       const pct = Math.floor((c.next / jobs.length) * 100);
       for (const p of overworld().getPlayers({ location: { x: c.x, y: c.y, z: c.z }, maxDistance: 160 })) {
-        p.onScreenDisplay.setActionBar(`§6${CROWN.citadelName} rises: ${pct}%`);
+        p.onScreenDisplay.setActionBar(`§6${citadelName()} rises: ${pct}%`);
         p.playSound("dig.stone", { volume: 0.6, pitch: 0.6 });
       }
     }
@@ -210,7 +213,7 @@ function buildTick() {
     delete c.next;
     saveCrown();
     tickingAreas(c, false);
-    announce(`§6${CROWN.citadelName} stands. All roads now lead to ${rulerLabel()}.`, "ui.toast.challenge_complete");
+    announce(`§6${citadelName()} stands. All roads now lead to ${rulerLabel()}.`, "ui.toast.challenge_complete");
   }
 }
 
@@ -267,7 +270,7 @@ world.beforeEvents.playerBreakBlock.subscribe((event) => {
   if (!banner && !throne) return;
   event.cancel = true;
   system.run(() => player.onScreenDisplay.setActionBar(banner
-    ? `§c${CROWN.citadelName} can't be toppled by taking its banner. Earn a Claim and throw down the Gauntlet.`
+    ? `§c${citadelName()} can't be toppled by taking its banner. Earn a Claim and throw down the Gauntlet.`
     : "§cThe throne does not move."));
 });
 
@@ -296,7 +299,7 @@ function borderTick() {
     const now = d <= r;
     if (now !== (inside.get(player.id) ?? false)) {
       inside.set(player.id, now);
-      if (now) player.onScreenDisplay.setActionBar(ruler() ? `§6Entering ${CROWN.citadelName}, seat of ${rulerLabel()}` : `§7Entering ${CROWN.citadelName}. Its throne stands empty.`);
+      if (now) player.onScreenDisplay.setActionBar(ruler() ? `§6Entering ${citadelName()}, seat of ${rulerLabel()}` : `§7Entering ${citadelName()}. Its throne stands empty.`);
     }
     if (Math.abs(d - r) > 10) continue;
     const angle = Math.atan2(loc.z - c.z - 0.5, loc.x - c.x - 0.5);

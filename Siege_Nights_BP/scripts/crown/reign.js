@@ -7,9 +7,9 @@ import {
   addSiegeSkipHook, addPlanHook, addRewardHook, FACTIONS, isGuard, guardOwner, guardCount, guardLimit, isOnline,
 } from "../siege/api.js";
 import { CROWN, IDS } from "./config.js";
-import { hollowStage, nightfall, tithed, claimNeeded, clamp, npcDecreeTarget, freshPick, lordApproach } from "./rules.js";
+import { hollowStage, nightfall, tithed, claimNeeded, clamp, npcDecreeTarget, freshPick, lordApproach, cleanCitadelName } from "./rules.js";
 import {
-  crown, saveCrown, ruler, isRuler, isCourt, rulerLabel, playerById, announce, giveItem, claimOf, seat, lords, lordOf,
+  crown, saveCrown, ruler, isRuler, isCourt, rulerLabel, playerById, announce, giveItem, claimOf, seat, lords, lordOf, citadelName,
 } from "./state.js";
 import { citadel, inCitadel, throneSpots } from "./citadel.js";
 
@@ -60,15 +60,20 @@ export function crownPlayer(player, { hollowing = 0, restored = false, victor = 
   player.playSound("ui.toast.challenge_complete");
 
   const proclaim = () => {
-    announce(`§6§lAll hail ${rulerLabel()} of ${CROWN.citadelName}!§r ${restored ? "§7The rightful ruler has returned." : `§7${CROWN.relicName} beats in a new hand.`}`, "raid.horn");
-    if (!c.citadel) player.sendMessage(`§6Place the Citadel Cornerstone within ${CROWN.keepMaxFromBanner} blocks of your Keep Banner to raise ${CROWN.citadelName}.`);
-    emit("crowned", { ruler: player.id, name: player.name, title: c.ruler.title });
+    announce(`§6§lAll hail ${rulerLabel()} of ${citadelName()}!§r ${restored ? "§7The rightful ruler has returned." : `§7${CROWN.relicName} beats in a new hand.`}`, "raid.horn");
+    if (!c.citadel) player.sendMessage(`§6Place the Citadel Cornerstone within ${CROWN.keepMaxFromBanner} blocks of your Keep Banner to raise ${citadelName()}.`);
+    emit("crowned", { ruler: player.id, name: player.name, title: c.ruler.title, citadel: citadelName() });
     // Whoever beat the Hollow is offered the Sorcerer's road, with a head start (the town hall thread's side)
     if (victor) emit("hollowVictor", { player });
   };
-  new ModalFormData().title("How will you be known?").dropdown("Title", CROWN.titles).show(player).then((r) => {
+  const renames = !!c.citadel; // taking a Citadel that already stands: it gets a new name with its new ruler
+  if (renames) c.citadelName = null;
+  const form = new ModalFormData().title("How will you be known?").dropdown("Title", CROWN.titles);
+  if (renames) form.textField(`Name your Citadel (everyone will see it; leave it empty for ${CROWN.citadelName}):`, CROWN.citadelName);
+  form.show(player).then((r) => {
     if (!r.canceled && isRuler(player.id)) {
       c.ruler.title = CROWN.titles[r.formValues[0]] ?? "Heartbearer";
+      if (renames) c.citadelName = cleanCitadelName(r.formValues[1]); // a new ruler names the Citadel they took
       saveCrown();
     }
     proclaim();
@@ -80,7 +85,7 @@ export function endReign(how) {
   const c = crown();
   const r = c.ruler;
   if (!r) return undefined;
-  c.annals.push({ name: r.name, title: r.title, from: r.sinceDay, to: world.getDay(), how, hollowing: r.hollowing, restored: r.restored });
+  c.annals.push({ name: r.name, title: r.title, seat: c.citadel ? citadelName() : undefined, from: r.sinceDay, to: world.getDay(), how, hollowing: r.hollowing, restored: r.restored });
   c.annals = c.annals.slice(-30);
   c.ruler = null;
   c.decrees = { siege: null, peace: null, lastTarget: null };
@@ -274,7 +279,7 @@ function stageChanged(before) {
   }
   if (now.name === "Hollow Monarch" && doom()) announce(`§5The bell tolled twice tonight. People say ${rulerLabel()} no longer blinks. Lesser Claims feel heavier than they did.`, "block.bell.hit");
   if (now.name === "The New Source" && doom()) {
-    announce(`§4§lThe bell is ringing from inside ${CROWN.citadelName}.§r §4The raiders have turned around. They are marching on ${rulerLabel()}.`, "mob.warden.nearby_closest");
+    announce(`§4§lThe bell is ringing from inside ${citadelName()}.§r §4The raiders have turned around. They are marching on ${rulerLabel()}.`, "mob.warden.nearby_closest");
   }
 }
 
@@ -284,13 +289,15 @@ function creep() {
   const r = ruler();
   if (!c || !r || r.hollowing < 50) return;
   const dim = overworld();
-  for (let i = 0; i < (r.hollowing >= 75 ? 60 : 30); i++) {
+  const patches = doom() ? (r.hollowing >= 75 ? 60 : 30) : 3; // for show only: a few bare patches, never a blight
+  for (let i = 0; i < patches; i++) {
     const a = Math.random() * Math.PI * 2, d = Math.sqrt(Math.random()) * CROWN.citadelRadius;
     const x = Math.floor(c.x + Math.cos(a) * d), z = Math.floor(c.z + Math.sin(a) * d);
     try {
       const block = dim.getTopmostBlock({ x, z });
-      if (block && ["minecraft:grass_block", "minecraft:dirt", "minecraft:podzol", "minecraft:coarse_dirt"].includes(block.typeId)) {
-        block.setType(Math.random() < 0.7 ? "minecraft:sculk" : "minecraft:soul_soil");
+      const soil = doom() ? ["minecraft:grass_block", "minecraft:dirt", "minecraft:podzol", "minecraft:coarse_dirt"] : ["minecraft:grass_block"];
+      if (block && soil.includes(block.typeId)) {
+        block.setType(!doom() ? "minecraft:coarse_dirt" : Math.random() < 0.7 ? "minecraft:sculk" : "minecraft:soul_soil");
       }
     } catch { /* not loaded */ }
   }
@@ -333,7 +340,7 @@ function useScepter(player) {
   }
 
   if (!ready(player, "Kneel", CROWN.kneelCooldown)) return;
-  const range = r.hollowing >= 50 ? 12 : CROWN.kneelRange;
+  const range = doom() && r.hollowing >= 50 ? 12 : CROWN.kneelRange;
   for (const e of dim.getEntities({ location: player.location, maxDistance: range, excludeTypes: ["minecraft:item", "minecraft:xp_orb", IDS.seal, "siege:keep_heart"] })) {
     if (onMySide(e, r)) continue;
     try {
@@ -348,7 +355,7 @@ function useScepter(player) {
 
 function returnToThrone(player) {
   const spots = throneSpots();
-  if (!spots || !citadel().built) return player.onScreenDisplay.setActionBar(`§7${CROWN.citadelName} isn't standing yet.`);
+  if (!spots || !citadel().built) return player.onScreenDisplay.setActionBar(`§7${citadelName()} isn't standing yet.`);
   if (getState().active) return player.onScreenDisplay.setActionBar("§cNot on a siege night.");
   if (player.dimension.id !== "minecraft:overworld") return player.onScreenDisplay.setActionBar("§cThe throne can't hear you from here.");
   if (!ready(player, "Return to the Throne", CROWN.returnCooldown)) return;
@@ -393,7 +400,7 @@ export function crownStatus(viewer) {
   const r = c.ruler;
   if (!r) return [c.vacant ? `§5${CROWN.relicName} waits in the Hollow for someone to win it.` : "No one has beaten the Hollow yet. The High Throne stands empty.", "", ...annalLines().slice(0, 6)];
   const lines = [
-    `§l${rulerLabel()}§r of ${CROWN.citadelName}${r.restored ? " §7(restored)" : ""}`,
+    `§l${rulerLabel()}§r of ${citadelName()}${r.restored ? " §7(restored)" : ""}`,
     `Reigning since day ${r.sinceDay} (${world.getDay() - r.sinceDay} days)`,
     `Royal Tithe: ${c.tithe}%   Unrest: ${c.unrest}`,
     c.challenge ? `§c${c.challenge.name} has thrown down the Gauntlet. The Storm comes on the next siege night both are here.` : `Grace: ${Math.max(0, c.graceUntil - getState().siegeNumber)} siege nights`,
@@ -409,7 +416,7 @@ export function crownStatus(viewer) {
 export function annalLines() {
   const list = [...crown().annals].reverse();
   if (!list.length) return ["The Annals of the High Throne are empty."];
-  return ["§lThe Annals of the High Throne§r", ...list.map((a) => `${a.title} ${a.name}${a.restored ? " (restored)" : ""}: day ${a.from} to ${a.to}, ${a.how}`)];
+  return ["§lThe Annals of the High Throne§r", ...list.map((a) => `${a.title} ${a.name}${a.seat ? ` of ${a.seat}` : ""}${a.restored ? " (restored)" : ""}: day ${a.from} to ${a.to}, ${a.how}`)];
 }
 
 function show(player, form, actions) {
@@ -445,7 +452,7 @@ export function throneMenu(player) {
     for (; left > 0; left -= 64) giveItem(player, new ItemStack("minecraft:emerald", Math.min(64, left)));
   }, "textures/items/emerald");
   // Hidden until the ruler has found and read the letter: only then do they know there is something to quiet
-  if (r.readLetter) add(`Quiet it (${CROWN.purifyCost} emeralds)`, () => {
+  if (doom() && r.readLetter) add(`Quiet it (${CROWN.purifyCost} emeralds)`, () => {
     if (c.purifiedDay === world.getDay()) return player.sendMessage("§7It will not be quieted twice in one day.");
     if (!pay(player, CROWN.purifyCost)) return player.sendMessage("§cNot enough emeralds in the Treasury or your pack.");
     c.purifiedDay = world.getDay();
@@ -509,14 +516,14 @@ function reignTick() {
     if (r?.id === player.id) {
       r.name = player.name;
       const stage = hollowStage(r.hollowing);
-      const tag = `${stage.at >= 75 ? "§5" : "§6"}${r.title} ${player.name}§r`;
+      const tag = `${doom() && stage.at >= 75 ? "§5" : "§6"}${r.title} ${player.name}§r`;
       if (player.nameTag !== tag) player.nameTag = tag;
       const home = player.dimension.id === "minecraft:overworld" && (inCitadel(player.location) || nearSeat(player.location));
       if (carriesRelic(player) && home) {
         player.addEffect("strength", 100, { amplifier: 0, showParticles: false });
         player.addEffect("resistance", 100, { amplifier: 0, showParticles: false });
       }
-      if ((carriesRelic(player) && home) || r.hollowing >= 25) player.addEffect("night_vision", 300, { amplifier: 0, showParticles: false });
+      if ((carriesRelic(player) && home) || (doom() && r.hollowing >= 25)) player.addEffect("night_vision", 300, { amplifier: 0, showParticles: false });
       continue;
     }
     if (carriesRelic(player)) stripRegalia(player);
