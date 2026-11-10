@@ -415,7 +415,8 @@ registerBoss({
 // =====================================================================================
 // 6. The Warlord King (the Grand Siege)
 //    Rides a Siege Ogre and takes much less damage until he's off it. At 66% (or when the ogre dies)
-//    he fights on foot with the crown shard. At 30% the Hollow Crown wakes: jump the quakes.
+//    he fights on foot with the crown shard. At 30% the shard set in his iron crown wakes: jump the quakes.
+//    (His crown is NOT the Hollow Crown, which is on Morvane's head until the end. It is a warlord's crown with a splinter of the Hollow in it.)
 //    Siege Nights still decides what his death means (Sovereign); this is only the fight.
 // =====================================================================================
 const armyTags = (f) => {
@@ -430,7 +431,7 @@ registerBoss({
   id: "warlord_king", type: "siege:warlord_king", name: "The Warlord King", radius: 40, phases: [0.66, 0.3],
   roaming: true, dropLoot: true, points: 8,
   intro: "rides onto the field on the back of an ogre.",
-  phaseNames: ["", "On foot, crown burning", "The Hollow Crown wakes"],
+  phaseNames: ["", "On foot, the shard burning", "The shard wakes"],
   onStart: (f, fresh) => {
     if (!fresh) return;
     const [ogre] = f.summon("siege:siege_ogre", 1, 0.5, f.entity.location, armyTags(f));
@@ -448,10 +449,10 @@ registerBoss({
     { id: "warcry", every: 300, windup: 20, phases: [0], warn: "The Warlord King bellows an order!", sound: "raid.horn",
       hit: (f) => { for (const e of f.dim.getEntities({ families: ["siege_raider"], location: f.entity.location, maxDistance: 16 })) effect(e, "strength", 200, 0, true); } },
     { id: "lance", every: 130, windup: 40, phases: [1, 2], warn: "The shard takes aim. Sidestep!", ...lance(18, 10) },
-    { id: "toll", every: 480, windup: 30, phases: [1, 2], warn: "The crown tolls. More of them answer.", sound: "block.bell.hit",
+    { id: "toll", every: 480, windup: 30, phases: [1, 2], warn: "The shard tolls. More of them answer.", sound: "block.bell.hit",
       when: (f) => f.adds("siege:hollow_footman").length < 3,
       hit: (f) => { f.summon("siege:hollow_footman", perPlayer(f, 3, 1), 8, f.entity.location, armyTags(f)); f.summon("siege:bell_ringer", 1, 8, f.entity.location, armyTags(f)); } },
-    { id: "quake", every: 150, windup: 30, phases: [2], warn: "Crown Quake! JUMP!",
+    { id: "quake", every: 150, windup: 30, phases: [2], warn: "The shard strikes the ground. JUMP!",
       show: (f) => ring(f.dim, f.entity.location, 4 + (f.tick % 30) / 3, "minecraft:basic_smoke_particle"),
       hit: (f) => {
         ring(f.dim, f.entity.location, 10, "minecraft:large_explosion", 10);
