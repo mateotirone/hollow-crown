@@ -8,6 +8,7 @@ import { world, system } from "@minecraft/server";
 import { emit, on } from "../siege/api.js";
 import { REVEAL } from "./data/reveal.js";
 import { setFlag } from "./player.js";
+import { sfx } from "../core/sfx.js";
 
 const send = () => emit("revealWords", REVEAL);
 on("revealWordsWanted", send);
@@ -21,7 +22,7 @@ export function addLastPage(who) {
   if (!setFlag(player, "journal_last_page")) return false;
   try {
     player.sendMessage("§7§oThe old journal in your pack is heavier than it was. By about one page.");
-    player.playSound("item.book.page_turn", { pitch: 0.6 });
+    sfx(player, "item.book.page_turn", { pitch: 0.6 });
   } catch {}
   return true;
 }

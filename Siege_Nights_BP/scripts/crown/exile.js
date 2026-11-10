@@ -10,6 +10,7 @@ import { EXILE_STAGES, nextExileStage } from "./rules.js";
 import { crown, saveCrown, playerById, giveItem, addClaim, claimOf, announce, rulerLabel } from "./state.js";
 import { crownStatus, annalLines, endReign, vacate } from "./reign.js";
 import { banish, npcWins } from "./usurp.js";
+import { sfx } from "../core/sfx.js";
 
 // Finish the exile's current stage if it is `stage`, pay its reward and announce the next one
 function complete(player, stage) {
@@ -23,7 +24,7 @@ function complete(player, stage) {
   if (done.claim) addClaim(player, done.claim, done.name);
   const next = EXILE_STAGES[exile.stage];
   title(player, `§5${done.name}`, "§7The Long Road Back");
-  player.playSound("random.levelup");
+  sfx(player, "random.levelup");
   if (stage === 0) player.sendMessage("§7A note is pinned to your new banner: §o\"Not everyone has forgotten you. Look for the ones who still wear your color.\"");
   if (stage === 3) player.sendMessage("§5The underground is yours now. You will hear of every Shardfall a minute before anyone else, and exactly where.");
   if (exile.stage > stage + 1) player.sendMessage("§7You have walked this road before. The loyalists never left, and nobody doubts you can hold a wall: the middle of the road is already behind you.");

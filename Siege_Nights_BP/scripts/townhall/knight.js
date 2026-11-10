@@ -5,6 +5,7 @@ import * as api from "../siege/api.js";
 import { heroOf } from "./hero.js";
 import { recover, guardsNear } from "./progress.js";
 import { OATH_BANNER } from "./tree.js";
+import { sfx } from "../core/sfx.js";
 
 const isKnight = (player) => player?.typeId === "minecraft:player" && heroOf(player).path === "knight";
 const rank = (player, id) => heroOf(player).skills[id] ?? 0;
@@ -74,7 +75,7 @@ world.afterEvents.entityHitEntity.subscribe((event) => {
   if (s.blade_bash && player.isSneaking && hasShield(player) && ready(player, "bash", [0, 120, 100, 80][s.blade_bash])) {
     push(player, target, 2.2, 0.35);
     fx(target, "slowness", 20 * (1 + s.blade_bash), 3);
-    player.dimension.playSound("item.shield.block", player.location, { pitch: 0.7 });
+    sfx(player.dimension, "item.shield.block", player.location, { pitch: 0.7 });
     player.onScreenDisplay.setActionBar("§6Shield Bash");
   } else if (s.blade_lunge && player.isSprinting && ready(player, "lunge", 100)) {
     const view = player.getViewDirection();
@@ -91,12 +92,12 @@ world.afterEvents.entityHitEntity.subscribe((event) => {
   const health = target.isValid ? target.getComponent("minecraft:health") : undefined;
   if (s.blade_execution && health && health.currentValue > 0 && health.currentValue < health.effectiveMax * 0.2) {
     bonusDamage(player, target, isBoss(target) ? 4 : 8);
-    player.dimension.playSound("random.anvil_land", target.location, { volume: 0.5, pitch: 1.5 });
+    sfx(player.dimension, "random.anvil_land", target.location, { volume: 0.5, pitch: 1.5 });
   }
 
   if (s.blade_crownbreaker && Math.random() < 0.15 && target.isValid) {
     const at = target.location;
-    player.dimension.playSound("block.bell.hit", at, { volume: 2, pitch: 0.6 });
+    sfx(player.dimension, "block.bell.hit", at, { volume: 2, pitch: 0.6 });
     try {
       player.dimension.spawnParticle("minecraft:critical_hit_emitter", { x: at.x, y: at.y + 1, z: at.z });
     } catch {
@@ -132,7 +133,7 @@ world.afterEvents.entityHurt.subscribe((event) => {
   if (s.blade_secondwind && health && health.currentValue > 0 && health.currentValue < 4 && ready(player, "secondwind", 6000 / quick(player))) {
     health.setCurrentValue(Math.min(health.effectiveMax, 12));
     fx(player, "resistance", 80, 1);
-    player.playSound("random.totem", { volume: 0.6 });
+    sfx(player, "random.totem", { volume: 0.6 });
     api.title(player, "§6Second Wind", "§7Not today");
   }
 });
@@ -150,7 +151,7 @@ world.afterEvents.itemUse.subscribe((event) => {
     if (!s.blade_banner) return player.onScreenDisplay.setActionBar("§7Learn Banner of the Keep at the Tree of Oaths to plant this.");
     if (!ready(player, "banner", 1800, false)) return;
     banners.set(player.id, { dim: player.dimension.id, at: { ...player.location }, until: system.currentTick + (s.blade_banner === 2 ? 600 : 400) });
-    player.dimension.playSound("raid.horn", player.location, { volume: 4 });
+    sfx(player.dimension, "raid.horn", player.location, { volume: 4 });
     return api.title(player, "§6Banner planted", "§7Hold this ground");
   }
 
@@ -167,7 +168,7 @@ world.afterEvents.itemUse.subscribe((event) => {
     fx(e, "strength", 160, 0);
     if (s.blade_champion && api.isGuard(e)) fx(e, "speed", 160, 1);
   }
-  player.dimension.playSound("raid.horn", player.location, { volume: 4, pitch: 1.3 });
+  sfx(player.dimension, "raid.horn", player.location, { volume: 4, pitch: 1.3 });
   player.onScreenDisplay.setActionBar("§6Rallying Cry!");
 });
 
@@ -223,7 +224,7 @@ export function chargeTick() {
       trampled.set(e.id, now);
       bonusDamage(player, e, r === 2 ? 7 : 4);
       push(horse, e, 2.5, 0.5);
-      horse.dimension.playSound("mob.horse.gallop", horse.location, { volume: 2 });
+      sfx(horse.dimension, "mob.horse.gallop", horse.location, { volume: 2 });
     }
   }
   if (trampled.size > 200) trampled.clear();

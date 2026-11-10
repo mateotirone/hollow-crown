@@ -5,6 +5,7 @@ import { onTick } from "../core/loop.js";
 import { moduleStore } from "../core/store.js";
 import { MAP, OVERWORLD, WARDS, EXPANSION } from "./config.js";
 import { mapMode } from "./claims.js";
+import { sfx } from "../core/sfx.js";
 
 // ---------- No elytra ----------
 // Any elytra a player gets (End ships, chests, trades) crumbles and pays out instead.
@@ -16,7 +17,7 @@ function payForElytra(player) {
   }
   const what = MAP.elytraReward.map((r) => `${r.count} ${r.item.replace("minecraft:", "").replaceAll("_", " ")}`).join(" and ");
   player.sendMessage(`§6The wings crumble to dust. Nobody flies in this land, but you get ${what} for them.`);
-  player.playSound("random.break");
+  sfx(player, "random.break");
 }
 
 function elytraTick() {

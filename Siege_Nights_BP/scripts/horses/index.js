@@ -15,6 +15,7 @@ import { ridingTick, useCrop, undertowStep, mountOf } from "./riding.js";
 import { horseMenu, stablesMenu, stallMenu, buyFoal, give, pay, isBuilder, sheetText } from "./menus.js";
 import "./tests.js";
 import "./showcase.js";
+import { sfx } from "../core/sfx.js";
 
 export { stallMenu }; // the rail stations use the same stalls
 export { isGalloping } from "./riding.js";
@@ -60,7 +61,7 @@ function register(player, horse) {
     applyRecord(horse, rec);
     saveRecord(rec);
   }
-  player.playSound("random.levelup");
+  sfx(player, "random.levelup");
   player.sendMessage(`§6${rec.name} is now your steed. Ride to earn it levels, and train it at a Stables. Sneak and click it with an empty hand to see its sheet.`);
 }
 
@@ -75,7 +76,7 @@ function fitGear(player, entity, rec, itemId) {
   if (old) give(player, old);
   rec[gear.slot] = gear.key;
   refresh(rec);
-  entity.dimension.playSound("armor.equip_iron", entity.location);
+  sfx(entity.dimension, "armor.equip_iron", entity.location);
   say(player, `§6${rec.name} is fitted with ${table[gear.key].name}.`);
 }
 
@@ -85,7 +86,7 @@ function fitCaparison(player, entity, rec) {
   if (!rec.caparison) consumeHeld(player);
   rec.caparison = color;
   refresh(rec);
-  entity.dimension.playSound("armor.equip_leather", entity.location);
+  sfx(entity.dimension, "armor.equip_leather", entity.location);
   say(player, `§6${rec.name} wears your banner's colors.`);
 }
 
@@ -136,7 +137,7 @@ function whistle(player) {
   if (mountOf(player)) return;
   const mine = horsesOf(player.id).filter((r) => r.status !== "fallen" && !r.foal);
   if (!mine.length) return say(player, "§7You have no horse to call.");
-  player.dimension.playSound("note.flute", player.location, { pitch: 1.6 });
+  sfx(player.dimension, "note.flute", player.location, { pitch: 1.6 });
   const here = player.location;
   const near = mine.map((rec) => ({ rec, entity: entityOf(rec) }))
     .filter((h) => h.entity && h.entity.dimension.id === player.dimension.id)

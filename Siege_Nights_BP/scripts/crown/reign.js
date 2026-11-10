@@ -12,6 +12,7 @@ import {
   crown, saveCrown, ruler, isRuler, isCourt, rulerLabel, playerById, announce, giveItem, claimOf, seat, lords, lordOf,
 } from "./state.js";
 import { citadel, inCitadel, throneSpots } from "./citadel.js";
+import { sfx } from "../core/sfx.js";
 
 const doom = () => CROWN.hunger === "full"; // does the Hunger have teeth, or is it only for show?
 
@@ -57,7 +58,7 @@ export function crownPlayer(player, { hollowing = 0, restored = false, victor = 
   giveRegalia(player);
   if (!c.citadel) giveItem(player, new ItemStack(IDS.cornerstone, 1));
   title(player, `§6${CROWN.relicName} is yours`, "§7Choose how you will be known");
-  player.playSound("ui.toast.challenge_complete");
+  sfx(player, "ui.toast.challenge_complete");
 
   const proclaim = () => {
     announce(`§6§lAll hail ${rulerLabel()} of ${CROWN.citadelName}!§r ${restored ? "§7The rightful ruler has returned." : `§7${CROWN.relicName} beats in a new hand.`}`, "raid.horn");
@@ -270,7 +271,7 @@ function stageChanged(before) {
   if (now.name === "Whispering") player?.sendMessage("§8§oYou slept badly. Someone was counting keeps, all night, in a voice a little like yours.");
   if (now.name === "Hollowing") {
     player?.sendMessage("§8§oThe throne feels different under you. Something is tucked beneath the seat.");
-    for (const p of world.getPlayers()) p.playSound("block.bell.hit", { pitch: 0.4, volume: 0.5 });
+    for (const p of world.getPlayers()) sfx(p, "block.bell.hit", { pitch: 0.4, volume: 0.5 });
   }
   if (now.name === "Hollow Monarch" && doom()) announce(`§5The bell tolled twice tonight. People say ${rulerLabel()} no longer blinks. Lesser Claims feel heavier than they did.`, "block.bell.hit");
   if (now.name === "The New Source" && doom()) {
@@ -328,7 +329,7 @@ function useScepter(player) {
       e.addEffect("regeneration", CROWN.rallyTicks, { amplifier: 1 });
       n++;
     }
-    dim.playSound("raid.horn", player.location, { pitch: 1.3 });
+    sfx(dim, "raid.horn", player.location, { pitch: 1.3 });
     return player.onScreenDisplay.setActionBar(`§6Rally! ${n - 1} of your people answer.`);
   }
 
@@ -342,7 +343,7 @@ function useScepter(player) {
       if (doom() && r.hollowing >= 75) e.addEffect("wither", CROWN.kneelTicks, { amplifier: 0 });
     } catch { /* not something that can kneel */ }
   }
-  dim.playSound("block.bell.hit", player.location, { pitch: 0.5 });
+  sfx(dim, "block.bell.hit", player.location, { pitch: 0.5 });
   player.onScreenDisplay.setActionBar("§6Kneel.");
 }
 
@@ -353,7 +354,7 @@ function returnToThrone(player) {
   if (player.dimension.id !== "minecraft:overworld") return player.onScreenDisplay.setActionBar("§cThe throne can't hear you from here.");
   if (!ready(player, "Return to the Throne", CROWN.returnCooldown)) return;
   player.teleport(spots.seal, { dimension: overworld() });
-  player.playSound("mob.endermen.portal");
+  sfx(player, "mob.endermen.portal");
 }
 
 world.afterEvents.itemUse.subscribe((event) => {
@@ -451,7 +452,7 @@ export function throneMenu(player) {
     c.purifiedDay = world.getDay();
     r.hollowing = clamp(r.hollowing - CROWN.purifyAmount, 0, 100);
     saveCrown();
-    player.playSound("random.totem");
+    sfx(player, "random.totem");
     player.sendMessage("§7You pour emeralds into the dark under the throne. §aThe whispers fade a little.");
   });
   if (r.hollowing >= 50 || r.readLetter) add("§8Something is tucked under the seat", () => {

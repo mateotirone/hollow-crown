@@ -10,6 +10,7 @@ import {
 import { CROWN, IDS } from "./config.js";
 import { citadelPlan, colorJobs, gateToward, thronePlace, outsideGate, GATE_NAMES, KEEP_HALF } from "./layout.js";
 import { crown, saveCrown, ruler, isRuler, rulerLabel, announce, giveItem, surfaceY, seat } from "./state.js";
+import { sfx } from "../core/sfx.js";
 
 export const citadel = () => crown().citadel;
 export const inCitadel = (loc) => {
@@ -194,7 +195,7 @@ function buildTick() {
       const pct = Math.floor((c.next / jobs.length) * 100);
       for (const p of overworld().getPlayers({ location: { x: c.x, y: c.y, z: c.z }, maxDistance: 160 })) {
         p.onScreenDisplay.setActionBar(`§6${CROWN.citadelName} rises: ${pct}%`);
-        p.playSound("dig.stone", { volume: 0.6, pitch: 0.6 });
+        sfx(p, "dig.stone", { volume: 0.6, pitch: 0.6 });
       }
     }
     return;

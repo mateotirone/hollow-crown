@@ -11,6 +11,7 @@ import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
 import * as api from "../siege/api.js";
 import { heroOf, saveHero, grantPoints, grantRenown } from "./hero.js";
 import { heading } from "./progress.js";
+import { sfx } from "../core/sfx.js";
 
 export const JOBS_PER_POINT = 3;
 const RUMOR_TAG = "siege_rumor";
@@ -182,7 +183,7 @@ function take(player, job) {
   hero.job = job;
   hero.boardTaken = [...(hero.boardTaken ?? []), job.slot];
   saveHero(player);
-  player.playSound("random.orb");
+  sfx(player, "random.orb");
   player.sendMessage(`§6Job taken: ${describe(job).title}.§7 ${progressLine(player, job)}`);
 }
 
@@ -236,7 +237,7 @@ function complete(player) {
   }
   saveHero(player);
   api.title(player, "§6Job done", `§7${describe(job).title}`);
-  player.playSound("random.levelup");
+  sfx(player, "random.levelup");
   grantRenown(player, renown, "rumor", true);
   if (emeralds > 0) player.dimension.spawnItem(new ItemStack("minecraft:emerald", emeralds), player.location);
   if (hero.jobsDone % JOBS_PER_POINT === 0) grantPoints(player, 1, "word of your deeds spreads");

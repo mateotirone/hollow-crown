@@ -37,6 +37,7 @@ import { WALL_LEVELS } from "../settle/walldata.js";
 import { raiseFree } from "../settle/plans.js";
 import { RIVALS, TIER_NAMES, LINES, STAGES, makeLord, radiusOf, wanted, night, nextPiece, partKey, hallSpot, partSpot, estateOf, winsForEstate, takeEstate } from "./data.js";
 import "./tests.js";
+import { sfx } from "../core/sfx.js";
 
 const OVERWORLD = "minecraft:overworld";
 const NPC_TYPE = "minecraft:npc";
@@ -348,7 +349,7 @@ function endSiege(lord, won) {
   const spoils = RIVALS.spoils[lord.tier];
   const left = player.getComponent("minecraft:inventory").container.addItem(new ItemStack("minecraft:emerald", spoils));
   if (left) player.dimension.spawnItem(left, player.location);
-  player.playSound("ui.toast.challenge_complete");
+  sfx(player, "ui.toast.challenge_complete");
   title(player, `§6${lord.plot} is taken`, `§7${spoils} emeralds in spoils. Claim it and it is yours as it stands.`);
   emit("skillPoints", { player, amount: 1 + lord.tier, source: `toppled ${lord.name}`, renown: 80 * (lord.tier + 1) });
 }

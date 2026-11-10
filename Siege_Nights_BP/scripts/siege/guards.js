@@ -7,6 +7,7 @@ import { BARRACKS, GUARD_GEAR, GUARD_TYPES, WANTED_TAG } from "./constants.js";
 import { saveState, state, tracked } from "./state.js";
 import { isAlly, settlementAt, tierOf } from "./territory.js";
 import { countItem, isOnline, overworld, takeItems } from "./util.js";
+import { sfx } from "../core/sfx.js";
 
 // ---------- Guards: Archers hold the walls, Men-at-Arms wait in the Barracks ----------
 // Bring an unemployed villager to your Barracks and click it with 5 emeralds to recruit a
@@ -81,7 +82,7 @@ export function recruitGuard(block, player, item, chosenType) {
   enlist(guard, player.id, type === "siege:archer" ? at : block.location);
   state.guards[player.id] = guardCount(player.id) + 1;
   saveState();
-  dim.playSound("random.levelup", at, { volume: 0.6 });
+  sfx(dim, "random.levelup", at, { volume: 0.6 });
   dim.spawnParticle("minecraft:villager_happy", { x: at.x, y: at.y + 1.8, z: at.z });
   player.sendMessage(type === "siege:archer"
     ? "§6A new Archer has joined! Sneak + click to pick them up, then place them on your walls."
@@ -181,7 +182,7 @@ export function upgradeGuard(guard, player, item) {
   }
   if (!takeItems(player, next.item, next.cost)) return player.onScreenDisplay.setActionBar(`§cYou need ${next.label} for ${next.name}.`);
   equipGuard(guard, tier + 1);
-  guard.dimension.playSound("armor.equip_netherite", guard.location);
+  sfx(guard.dimension, "armor.equip_netherite", guard.location);
   player.onScreenDisplay.setActionBar(`§6Your guard now wears ${next.name}!`);
 }
 

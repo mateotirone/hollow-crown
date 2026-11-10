@@ -376,3 +376,16 @@ the darkness and knockback effects, and the rain.
 - New attacks to look for: the Reeve puts you back where you stood ("The hands turn back"), the Huntsman lays snares, the Mother hums (look away).
 - In a siege from the third on, roughly one raider in seven has a yellow name such as "Fleet Grey Host Axeman" and behaves to match.
 - `/scriptevent siege:variety` lists what you have killed most and flags anything met more than 40 times per variant.
+
+## Sounds (scripts/sound/, SOUND-LIST.md)
+
+Nothing here has been heard in the game yet, so your ears are the test.
+
+1. Run `/scriptevent siege:sound`. **Expect:** a "Sound board" menu with three groups. Pick "Signature sounds" and click a few: each plays, and the action bar names it and says "stand-in" (or "recording" once you have installed one).
+2. Run `/scriptevent siege:sound signature`. **Expect:** the signature sounds one after another, about 8 seconds apart, each named on screen. The Rift and the Hollow's ambience are silent here until their recordings exist.
+3. Ring a vanilla bell, then run `/scriptevent siege:sound block.bell.hit`. **Expect:** ours is the same bell with a deeper note under it and a slightly sour edge.
+4. Open any menu that buys or confirms something. **Expect:** the "done" sound is lower and quieter than the vanilla level-up jingle.
+5. Start a siege (`/scriptevent siege:reach_night`). **Expect:** a low doubled horn with a far thunder under it, not the plain raid horn.
+6. After installing a recording (see SOUND-LIST.md), rebuild, reload the world and run step 1 again. **Expect:** that sound says "recording" and plays your file.
+
+Tell me about: anything too loud, too quiet, silent, or that made you jump. Nothing should.

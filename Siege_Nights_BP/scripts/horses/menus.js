@@ -10,6 +10,7 @@ import {
 } from "./data.js";
 import { horsesOf, saveRecord, deleteRecord, newUid, meta, stablesLevelFor } from "./store.js";
 import { entityOf, spawnSteed, stallSteed, refresh } from "./steed.js";
+import { sfx } from "../core/sfx.js";
 
 export const isBuilder = (player) => player.getGameMode() === GameMode.Creative;
 
@@ -90,7 +91,7 @@ function bringOut(player, rec, ctx) {
   if (entityOf(rec)) return player.sendMessage(`§7${rec.name} is already out.`);
   spawnSteed(rec, ctx.at.dimension, ctx.at.location);
   player.sendMessage(`§6${rec.name} is led out, rested and ready.`);
-  player.playSound("mob.horse.idle");
+  sfx(player, "mob.horse.idle");
 }
 
 function putAway(player, rec, ctx) {
@@ -163,7 +164,7 @@ async function train(player, rec, stat, cap) {
   rec.tp--;
   rec.stats[stat] = next;
   refresh(rec);
-  player.playSound("random.levelup");
+  sfx(player, "random.levelup");
   player.sendMessage(`§6${rec.name}'s ${STAT_NAMES[stat]} is now ${next}.`);
 }
 
@@ -176,7 +177,7 @@ async function perkMenu(player, rec, back) {
       rec.pp--;
       rec.perks.push(id);
       refresh(rec);
-      player.playSound("random.levelup");
+      sfx(player, "random.levelup");
       player.sendMessage(`§5${rec.name} learned ${perk.name}.`);
       return back();
     },
@@ -215,7 +216,7 @@ async function rite(player, rec, key, back) {
   rec.special = key;
   refresh(rec);
   world.sendMessage(`§d${player.name}'s ${rec.name} has become a ${special.name}.`);
-  player.playSound("random.totem");
+  sfx(player, "random.totem");
 }
 
 async function release(player, rec) {
@@ -265,7 +266,7 @@ export async function stablesMenu(player, owner, at, ownerName) {
         if (!pay(player, next.cost)) return player.sendMessage(`§cThe upgrade needs ${costText(next.cost)}.`);
         meta.data.stables[owner] = next.level;
         meta.save();
-        player.playSound("random.anvil_use");
+        sfx(player, "random.anvil_use");
         player.sendMessage(`§6Your Stables is now level ${next.level}: ${next.unlocks}.`);
         return again();
       },
@@ -292,7 +293,7 @@ async function breedMenu(player, ctx) {
     saveRecord(sire);
     saveRecord(dam);
     spawnSteed(foal, ctx.at.dimension, ctx.at.location);
-    player.playSound("random.levelup");
+    sfx(player, "random.levelup");
     player.sendMessage(`§6A foal is born: §f${foal.name}§6, ${foal.breedName}. Traits: ${foal.traits.map((t) => TRAITS[t].name).join(", ") || "none"}. It grows up in a day.`);
   }));
 }
@@ -310,7 +311,7 @@ export function buyFoal(player, breed, at) {
   rec.foal = true;
   rec.grownAt = world.getAbsoluteTime() + S.foalGrowTicks;
   spawnSteed(rec, at.dimension, at.location);
-  player.playSound("random.levelup");
+  sfx(player, "random.levelup");
   player.sendMessage(`§6You bought §f${rec.name}§6, a ${BREEDS[breed].name} foal. ${TRAITS[BREEDS[breed].trait].name}: ${TRAITS[BREEDS[breed].trait].desc}`);
   return rec;
 }

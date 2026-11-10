@@ -12,6 +12,7 @@ import { STYLES } from "../townhall/styles.js";
 import { SETTLE, CATALOG, LOCAL_ROLES, LOCAL_RATE, STONE_RATE, MASON_LINES } from "./config.js";
 import { purse, charge, coins, coinName, coinIcon, lot } from "./wallet.js";
 import { styleOf, FOUNDATION } from "./plans.js";
+import { sfx } from "../core/sfx.js";
 
 export const BENCH = "siege:mason_bench";
 export const MASON_TAG = "siege_mason";
@@ -97,7 +98,7 @@ async function buy(player, shelf, [typeId, per], mason) {
   const spend = Math.max(1, Math.min(most, Math.floor(res.formValues[0])));
   if (!charge(player, spend * lot())) return;
   hand(player, typeId, spend * per);
-  player.playSound("random.orb");
+  sfx(player, "random.orb");
   player.onScreenDisplay.setActionBar(`§6${spend * per} ${niceName(typeId)}§7 for ${coins(spend * lot())}`);
   openShelf(player, shelf, mason);
 }
