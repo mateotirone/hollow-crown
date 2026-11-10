@@ -138,7 +138,7 @@ For each of `rider`, `forgemaster`, `captain`, `witch`: type `/scriptevent siege
 1. ✅ A title shows the role name, and chat says the role's branch is open.
 2. Open the Tree of Oaths. ✅ The first page shows your role and rank, and one extra branch (Wing, Forge, Helm or Hex). The other three roles' branches are not listed.
 3. Swear a first-ring skill and check it: Witch's Touch poisons what you hit, Emberblood lets you stand in fire, Hammer Arm gives Haste with a pickaxe in hand, Sea Legs lets you breathe underwater.
-4. To see the offer the normal way: `/scriptevent siege:townhall_path none`, set the hall's style to Blackfen in the Town Hall menu and build a Stone Hall. ✅ Chat says a path has opened, and "Choose your path" at the Tree offers Witch.
+4. To see the offer the normal way: `/scriptevent siege:townhall_path none`, then kill the Mother of Changelings (summon `siege:mother_of_changelings` and fell her while standing within 64 blocks). ✅ Chat says a path has opened, and "Choose your path" at the Tree offers Witch. The Pale Huntsman offers Forgemaster and the Drowned Bride offers Captain the same way. Building a hall no longer offers a role.
 
 ### Rumor Board variety
 

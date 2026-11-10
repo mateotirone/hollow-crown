@@ -33,7 +33,7 @@ import { knightTick, chargeTick } from "./knight.js";
 import { markedTick } from "./marked.js";
 import "./showcase.js";
 import { rosterMenu } from "./roster.js";
-import { rolesTick, roleForStyle } from "./roles.js";
+import { rolesTick, roleForStyle, roleForBoss, ROLE_DEEDS } from "./roles.js";
 import { ROLES, RANKS, ROLE_LORE } from "./skills.js";
 import { treeCells, treeLayout, COLS, ROWS } from "./tree_layout.js";
 import { wallMenu, flyby } from "./flyby.js";
@@ -331,6 +331,11 @@ api.addTests("roles", {
     api.assertEqual(roleForStyle("blackfen"), "witch");
     api.assertEqual(roleForStyle("emberwaste"), "rider");
     api.assertEqual(roleForStyle("vale"), undefined);
+    for (const id of Object.keys(ROLES)) if (ROLES[id].region) api.assert(ROLE_DEEDS[id]?.deed && (ROLE_DEEDS[id].boss || ROLE_DEEDS[id].event), `${id} is earned by a deed`);
+    api.assertEqual(roleForBoss("siege:pale_huntsman"), "forgemaster");
+    api.assertEqual(roleForBoss("siege:drowned_bride"), "captain");
+    api.assertEqual(roleForBoss("siege:mother_of_changelings"), "witch");
+    api.assertEqual(roleForBoss("minecraft:zombie"), undefined);
     api.assertEqual(new Set(Object.values(ROLES).map((r) => r.branch)).size, Object.keys(ROLES).length);
   },
 });
