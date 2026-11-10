@@ -4,7 +4,7 @@
 import { world, system, ItemStack } from "@minecraft/server";
 import { isReady, on, getState, keepOf } from "../siege/api.js";
 import { IDS, CROWN } from "./config.js";
-import { crown, saveCrown, giveItem, addClaim, ruler, lords } from "./state.js";
+import { crown, saveCrown, giveItem, addClaim, ruler, lords, resetCrown } from "./state.js";
 import { clickCornerstone, raiseCitadel, citadel } from "./citadel.js";
 import { throneMenu, crownPlayer, addHollowing, crownStatus } from "./reign.js";
 import { restHeart } from "./heart.js";
@@ -80,7 +80,7 @@ const COMMANDS = {
     if (ruler()?.id !== player.id) crownPlayer(player);
     raiseCitadel(player, { x: keep.x, y: keep.y, z: keep.z + 38 }, { fast: true });
   },
-  crown_reset: () => { world.setDynamicProperty("siege:crown", undefined); world.sendMessage("§7High Throne data wiped. Reload the world."); },
+  crown_reset: () => { resetCrown(); world.sendMessage("§7High Throne data wiped."); },
 };
 
 system.afterEvents.scriptEventReceive.subscribe((event) => {
