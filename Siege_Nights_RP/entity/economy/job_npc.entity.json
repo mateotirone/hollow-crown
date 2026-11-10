@@ -1,0 +1,36 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "siege:job_npc",
+      "materials": {
+        "default": "villager"
+      },
+      "textures": {
+        "farmer": "textures/entity/siege/npc/job_farmer",
+        "woodcutter": "textures/entity/siege/npc/job_woodcutter",
+        "quarryman": "textures/entity/siege/npc/job_quarryman",
+        "smith": "textures/entity/siege/npc/job_smith",
+        "fisher": "textures/entity/siege/npc/job_fisher",
+        "hunter": "textures/entity/siege/npc/job_hunter",
+        "herbalist": "textures/entity/siege/npc/job_herbalist",
+        "moneyer": "textures/entity/siege/npc/job_moneyer"
+      },
+      "geometry": {
+        "default": "geometry.villager.v1.8"
+      },
+      "scripts": {
+        "scale": "0.9375",
+        "animate": [
+          "look_at_target"
+        ]
+      },
+      "animations": {
+        "look_at_target": "animation.common.look_at_target"
+      },
+      "render_controllers": [
+        "controller.render.siege_job_npc"
+      ]
+    }
+  }
+}

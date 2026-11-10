@@ -9,6 +9,7 @@ import { SETTINGS } from "./settings.js";
 import { saveState, state } from "./state.js";
 import { colorTaken } from "./territory.js";
 import { workOnWall } from "./walls.js";
+import { sfx } from "../core/sfx.js";
 
 // ---------- Clicking blocks: gates and banner dyeing ----------
 
@@ -63,7 +64,7 @@ export function toggleGate(block) {
   }
   for (const b of gate) b.setPermutation(b.permutation.withState("siege:open", open));
   const sounds = GATE_SOUNDS[gateType];
-  dim.playSound(open ? sounds.open : sounds.close, block.location, { volume: 0.6 });
+  sfx(dim, open ? sounds.open : sounds.close, block.location, { volume: 0.6 });
 }
 
 export function dyeBanner(block, player, item) {
@@ -79,7 +80,7 @@ export function dyeBanner(block, player, item) {
   keep.color = color;
   saveState();
   block.setPermutation(block.permutation.withState("siege:color", color));
-  block.dimension.playSound("dye.use", block.location);
+  sfx(block.dimension, "dye.use", block.location);
   if (player.getGameMode() !== GameMode.Creative) {
     const inv = player.getComponent("minecraft:inventory").container;
     const held = inv.getItem(player.selectedSlotIndex);

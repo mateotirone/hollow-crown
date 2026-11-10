@@ -8,6 +8,7 @@ import { isTesting } from "../core/tests.js";
 import { TOMES, tomesOf, answerIsRight, cluesFound, canAnswer as enoughClues, surveyLine, ALL_THREADS, isLocal, loadSaved, stampSaved } /* saves carry a version: SAVE_VERSION in logic.js */ from "./logic.js";
 import { COLLECTIONS, PLACES, THREADS } from "./data/world.js";
 import { LEDGER, progressOf, saveProgress, sourceSite, awardPoints, setFlag, learnLeads } from "./player.js";
+import { sfx } from "../core/sfx.js";
 
 const WRONG_ANSWER_DAYS = 1;
 const K_PLACES = "hc:lore_places"; // { place id: { x, y, z } } marked by the map builder
@@ -94,7 +95,7 @@ async function answerView(player, thread) {
   if (!answerIsRight(thread, given)) {
     p.locks[thread.id] = world.getDay() + WRONG_ANSWER_DAYS;
     saveProgress(player);
-    player.playSound("block.bell.hit");
+    sfx(player, "block.bell.hit");
     player.sendMessage(`§c${thread.name}: that isn't it. The ink fades as you write. Read the clues again and try tomorrow.`);
     return;
   }
@@ -107,7 +108,7 @@ export function solveThread(player, thread) {
   p.solved.push(thread.id);
   saveProgress(player);
   if (thread.flag) setFlag(player, thread.flag);
-  player.playSound("random.toast");
+  sfx(player, "random.toast");
   player.sendMessage(`§aMystery solved: §f${thread.name}§r\n§7${thread.solved}`);
   awardPoints(player, thread.sp, `mystery:${thread.id}`, thread.sp * 20);
   emit("loreThreadSolved", { player, thread: thread.id });

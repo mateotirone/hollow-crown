@@ -3,6 +3,7 @@
 
 import { world, system, BlockPermutation } from "@minecraft/server";
 import { buildOrder, frameFor, toWorld, statesFor } from "./halls.js";
+import { sfx } from "../core/sfx.js";
 
 const permCache = new Map();
 
@@ -107,7 +108,7 @@ function step(job) {
       job.lastLayer = c.y;
       const at = toWorld(job.frame, job.origin, 0, c.y, 4);
       try {
-        dim.playSound("dig.stone", at, { volume: 1, pitch: 0.7 + Math.random() * 0.3 });
+        sfx(dim, "dig.stone", at, { volume: 1, pitch: 0.7 + Math.random() * 0.3 });
         dim.spawnParticle("minecraft:knockback_roar_particle", at);
       } catch {
         // sounds and sparkles are optional

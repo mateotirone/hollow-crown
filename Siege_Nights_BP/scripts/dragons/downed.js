@@ -10,6 +10,7 @@ import { store, dragonOf, ownerIdOf, valid, save, entityOf, applyRecord, roostDr
 import { speak, noise } from "./voice.js";
 import { rideOf } from "./flight.js";
 import { rememberAttacker, shiftMood, tell } from "./mind.js";
+import { sfx } from "../core/sfx.js";
 
 const CORPSE = "siege:dragons_corpse"; // on a dead body: the time it crumbles
 const ownerOf = (rec) => world.getPlayers().find((p) => p.id === rec.owner);
@@ -137,7 +138,7 @@ export function tend(player, entity, rec, item) {
   rec.down.wakeAt = system.currentTick + (item === "minecraft:enchanted_golden_apple" ? 100 : S.wakeTicks);
   shiftMood(rec, 20);
   if (player.id === rec.owner) rec.bond = Math.min(100, rec.bond + 5);
-  entity.dimension.playSound("random.eat", entity.location, { pitch: 0.6 });
+  sfx(entity.dimension, "random.eat", entity.location, { pitch: 0.6 });
   save();
   player.sendMessage(`§6You tend ${rec.name}'s wounds. §7The bleeding stops. Stay with it until it wakes.`);
   return true;
@@ -191,7 +192,7 @@ export function downedTick() {
     try {
       const at = body.location;
       for (let i = 0; i < 12; i++) body.dimension.spawnParticle("minecraft:basic_smoke_particle", { x: at.x + Math.random() * 3 - 1.5, y: at.y + Math.random(), z: at.z + Math.random() * 3 - 1.5 });
-      body.dimension.playSound("dig.sand", at, { pitch: 0.5 });
+      sfx(body.dimension, "dig.sand", at, { pitch: 0.5 });
     } catch {
       // looks only
     }

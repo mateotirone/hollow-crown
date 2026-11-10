@@ -8,6 +8,7 @@ import { state } from "./state.js";
 import { isAlly, settlementAt } from "./territory.js";
 import { isOnline, overworld } from "./util.js";
 import { BLAST, blastDamage, offlineSafe } from "./walls.js";
+import { sfx } from "../core/sfx.js";
 
 // ---------- Trebuchet: hurl boulders at walls ----------
 // A big machine you place anywhere. Stand behind it and look where you want to fire.
@@ -23,7 +24,7 @@ export function useTrebuchet(trebuchet, player, item) {
     const next = (range + 1) % RANGES.length;
     trebuchet.setDynamicProperty("siege:range", next);
     player.onScreenDisplay.setActionBar(`§6Trebuchet range: ${RANGES[next]} blocks`);
-    trebuchet.dimension.playSound("random.click", trebuchet.location);
+    sfx(trebuchet.dimension, "random.click", trebuchet.location);
     return;
   }
   if (system.currentTick < (trebuchetReady.get(trebuchet.id) ?? 0)) {
@@ -52,7 +53,7 @@ export function useTrebuchet(trebuchet, player, item) {
   const dim = trebuchet.dimension;
   const at = trebuchet.location;
   dim.runCommand(`playanimation @e[type=${TREBUCHET},r=0.5,x=${at.x},y=${at.y},z=${at.z}] animation.siege_trebuchet.fire`);
-  dim.playSound("random.door_open", at, { volume: 1, pitch: 0.5 });
+  sfx(dim, "random.door_open", at, { volume: 1, pitch: 0.5 });
   system.runTimeout(() => {
     // the sling lets go near the top of the swing
     const start = { x: at.x + dir.x, y: at.y + 6, z: at.z + dir.z };
@@ -61,7 +62,7 @@ export function useTrebuchet(trebuchet, player, item) {
 }
 
 export function launchBoulder(dim, start, dir, range) {
-  dim.playSound("random.explode", start, { volume: 0.4, pitch: 1.6 });
+  sfx(dim, "random.explode", start, { volume: 0.4, pitch: 1.6 });
   const flightTicks = 30;
   const apex = range / 3;
   let t = 0;
@@ -209,7 +210,7 @@ export function shoot(dim, from, target) {
       z: from.z + (to.z - from.z) * f,
     });
   }
-  dim.playSound("crossbow.shoot", from, { volume: 0.8 });
+  sfx(dim, "crossbow.shoot", from, { volume: 0.8 });
   target.addTag(BALLISTA_HIT);
   target.applyDamage(SETTINGS.ballistaDamage, { cause: EntityDamageCause.projectile });
 }

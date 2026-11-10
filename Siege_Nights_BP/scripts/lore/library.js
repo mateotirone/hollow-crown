@@ -11,6 +11,7 @@ import {
   tomeIdOf, makeTome, progressOf, saveProgress, sourceSite, giveItem, awardPoints, setFlag, landOwnerAt, ensureLedger,
 } from "./player.js";
 import { readTome } from "./reader.js";
+import { sfx } from "../core/sfx.js";
 
 export const SHELF = "siege:archive_shelf";
 export const SHELF_SIZE = 6;
@@ -68,11 +69,11 @@ function shelve(player, block, owner, id) {
   const col = COLLECTION[tome.col];
   const have = tomesOf(tome.col).filter((t) => shelvedIn(owner).includes(t.id)).length;
   const total = libraryCount(owner);
-  player.playSound("item.book.put");
+  sfx(player, "item.book.put");
   player.sendMessage(`§6Shelved §f${tome.title}§6. ${col.name}: §f${have}/${col.count}§6. Library: §f${total}/${TOMES.length}`);
   if (have === col.count) {
     player.sendMessage(`§a${col.name} is complete! Open the catalog to claim its reward.`);
-    player.playSound("random.levelup");
+    sfx(player, "random.levelup");
   }
   const rank = libraryRank(total);
   if (rank?.at === total) player.sendMessage(`§aYour collection is now a ${rank.name}. Open the catalog to see what turned up.`);
@@ -89,7 +90,7 @@ function takeBack(player, block, owner, id) {
   saveLib(owner);
   showFill(block, lib[key]?.length ?? 0);
   giveItem(player, makeTome(id));
-  player.playSound("item.book.page_turn");
+  sfx(player, "item.book.page_turn");
 }
 
 // A shelf that was broken (or blown up) spills its tomes
@@ -287,7 +288,7 @@ function claimAll(player, owner, ready) {
     emit("loreReward", { player, owner, kind: r.kind, id: r.kind === "col" ? r.col.id : r.m.at });
   }
   saveProgress(player);
-  player.playSound("random.levelup");
+  sfx(player, "random.levelup");
 }
 
 // ---------- Naming the thin place ----------
@@ -315,7 +316,7 @@ async function nameThePlace(player, owner) {
   if (guess !== real) {
     p.locks.source = day + WRONG_NAME_DAYS;
     saveProgress(player);
-    player.playSound("block.bell.hit");
+    sfx(player, "block.bell.hit");
     player.sendMessage(`§cYou write "${PLACES[guess].name}" in the catalog. Somewhere far below, a bell rings once, and the ink runs. That is not the place. (Try again in ${WRONG_NAME_DAYS} days.)`);
     emit("loreSourceMisnamed", { player, guess });
     return;
@@ -324,7 +325,7 @@ async function nameThePlace(player, owner) {
   if (!p.leads.includes(real)) p.leads.push(real);
   saveProgress(player);
   setFlag(player, "source_named");
-  player.playSound("random.toast");
+  sfx(player, "random.toast");
   player.sendMessage(`§5${PLACES[real].name}.§r §7${sourceThread.solved}`);
   awardPoints(player, sourceThread.sp, "mystery:source", 60);
   emit("loreThreadSolved", { player, thread: "source" });
