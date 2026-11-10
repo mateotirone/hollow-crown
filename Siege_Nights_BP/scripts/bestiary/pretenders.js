@@ -135,6 +135,7 @@ const ATTACKS = [
     show: (f) => ring(f.dim, f.entity.location, 4 + (f.tick % 30) / 3, "minecraft:sonic_explosion", 10),
     hit: (f) => {
       ring(f.dim, f.entity.location, 12, "minecraft:sonic_explosion", 24);
+      particle(f.dim, "siege:choir_ring", { x: f.entity.location.x, y: f.entity.location.y + 0.4, z: f.entity.location.z });
       for (const p of f.players()) if (p.isOnGround && flat(p.location, f.entity.location) <= 12) { hurt(p, 9, "magic", f.entity); shove(p, p.location.x - f.entity.location.x, p.location.z - f.entity.location.z, 1.2, 0.5); }
     } },
   { id: "call", every: 420, windup: 20, warn: "It calls, and the Hollow's soldiers answer.", sound: "raid.horn", when: (f) => has("call")(f) && f.adds().length < 3,
@@ -148,6 +149,7 @@ const ATTACKS = [
       if (!alive(t)) return;
       const v = t.getViewDirection(), at = { x: t.location.x - v.x * 2.5, y: t.location.y, z: t.location.z - v.z * 2.5 };
       try { f.entity.teleport(at, { facingLocation: t.location }); } catch { return; }
+      particle(f.dim, "siege:vein_spark", { x: at.x, y: at.y + 1, z: at.z });
       f.zone(floor(f, at), 3, 14, (q) => hurt(q, 10, "entityAttack", f.entity), "minecraft:basic_crit_particle");
     } },
   { id: "rain", every: 210, windup: 20, warn: "Shards are falling. Watch the floor!", when: has("rain"),

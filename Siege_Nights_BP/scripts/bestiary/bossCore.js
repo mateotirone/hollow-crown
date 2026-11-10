@@ -337,6 +337,7 @@ function temperAct(f, players) {
     particle(f.dim, "minecraft:large_explosion", { x: loc.x, y: loc.y + 1, z: loc.z });
     try { f.entity.teleport({ x: to.x, y: loc.y, z: to.z }); } catch { /* chunk not ready */ }
     sound(f.dim, "mob.endermen.portal", to, 0.6, 1);
+    particle(f.dim, "siege:vein_spark", { x: to.x, y: loc.y + 1, z: to.z });
   }
 }
 
