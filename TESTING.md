@@ -191,8 +191,8 @@ Look first, without the game: the 3D viewer at https://claude.ai/artifact/D42qsW
 In game: Creative, cheats on. `/scriptevent siege:showcase` puts a Roost, a Nest, nine display dragons (the four species, a hatchling, a fledgling, one asleep, one unconscious, one dead) and **Cinder**, a grown Cinderwing that is yours, in the extras row behind you. Take a **Dragon Horn** from the chests, and `/give @s beef 16` and `/give @s golden_apple 4`.
 
 **Looks and flying**
-1. Walk along the display dragons. ✅ Four clearly different animals (four-legged Cinderwing, two-legged Ashen Wyvern, squat armoured Dune Drake, long frilled Glass Wyrm). Wings folded back along the body. The sleeper breathes slowly, the unconscious one breathes fast and drips red, the dead one lies rolled over and does not move.
-2. Click Cinder. ✅ You sit on its back and can walk it with WASD. The action bar shows a green Flight bar.
+1. Walk along the display dragons. ✅ Four clearly different animals (four-legged Cinderwing, two-legged Ashen Wyvern, squat armoured Dune Drake, long frilled Glass Wyrm). Wings tucked down along the flanks, the outer half folded over the inner (not sticking out sideways or lying flat). The sleeper breathes slowly, the unconscious one breathes fast and drips red, the dead one lies rolled over and does not move.
+2. Click Cinder with an empty hand. ✅ It nuzzles you and you do not climb on. Left-click (punch) it with an empty hand ✅ the same nuzzle, no damage, no red flash. Now click it holding anything (the Dragon Horn). ✅ You sit on its back and can walk it with WASD. The action bar shows a green Flight bar.
 3. Press jump. ✅ It lifts off, wings flap with a wingbeat sound. You fly where the camera looks; jump climbs, looking down descends. The bar drains (about 54 seconds).
 4. Fly low over flat ground without holding jump. ✅ It lands by itself and the bar slowly refills.
 5. Stay up until the bar is empty. ✅ "is spent and glides down", no fall damage.
@@ -206,7 +206,7 @@ In game: Creative, cheats on. `/scriptevent siege:showcase` puts a Roost, a Nest
 11. `/scriptevent siege:dragons_hungry`, then stand near it holding beef. ✅ Within a few seconds: "It is staring at the beef in your hand". Put the beef away near some sheep ✅ it takes one for itself.
 12. `/summon zombie ~12 ~ ~`. ✅ Within a few seconds it snarls and you are told which compass direction it is staring.
 13. Get off, switch to Survival and let a zombie hit you. ✅ Cinder throws itself at the zombie ("puts itself between you and it").
-14. Hit Cinder yourself. ✅ "It flinches away from you", bond drops. With a second player: they hit it, then try to pet or ride it ✅ it snarls and refuses them, and its sheet says it holds a grudge.
+14. Hit Cinder yourself with a sword or any item in hand. ✅ "It flinches away from you", bond drops. With a second player: they hit it with an item, then try to pet or ride it ✅ it snarls and refuses them, and its sheet says it holds a grudge.
 15. `/time set midnight`, tell it "Stay here" and walk 20 blocks away. ✅ It curls up asleep. Walk back ✅ "opens one eye at your footsteps".
 16. Use the horn from 30 blocks away. ✅ It comes, roaring. (When it is sulking or sullen it may refuse.)
 

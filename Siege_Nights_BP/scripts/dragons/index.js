@@ -12,7 +12,7 @@
 //   /scriptevent siege:dragons_down     knock yours unconscious
 //   /scriptevent siege:dragons_hungry   make it starving
 
-import { world, system, ItemStack } from "@minecraft/server";
+import { world, system, ItemStack, EquipmentSlot } from "@minecraft/server";
 import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
 import { onTick, isReady, settlementAt, isAlly, keepOf, consumeHeld, countItem } from "../siege/api.js";
 import {
@@ -291,7 +291,8 @@ world.beforeEvents.playerInteractWithEntity.subscribe((event) => {
     } catch {
       // not rideable yet
     }
-    if (riders < 1 || item) {
+    // Empty hand pets it. Something in the hand climbs on behind the owner.
+    if (riders < 1 || !item) {
       event.cancel = true;
       return system.run(() => valid(target) && (item ? say(player, `§c${rec.name} answers only to ${rec.ownerName}.`) : pet(player, target, rec)));
     }
@@ -318,11 +319,12 @@ world.beforeEvents.playerInteractWithEntity.subscribe((event) => {
       rec.saddled = true;
       refresh(rec);
       target.dimension.playSound("armor.equip_leather", target.location);
-      say(player, `§6${rec.name} takes the saddle.`);
+      say(player, `§6${rec.name} takes the saddle. §7Click it holding anything to climb on. An empty hand pets it.`);
     });
   }
   if (player.isSneaking && !item) return act(() => dragonMenu(player, rec));
-  if (!item && (rec.stage === "hatchling" || !rec.saddled)) return act(() => pet(player, target, rec));
+  // An empty hand always pets it, saddled or not. Climbing on takes something in the hand.
+  if (!item) return act(() => pet(player, target, rec));
   if (rec.stage === "hatchling") return refuse(`§7${rec.name} is a hatchling. Feed it raw meat or fish and give it time.`);
   if (!rec.saddled) return refuse(`§7${rec.name} needs a Dragon Saddle.`);
   if (!canHarness(player)) refuse(`§7${rec.name} will not carry someone who doesn't live in the ${S.homeRegion}.`);
@@ -394,11 +396,55 @@ world.afterEvents.entityDie.subscribe((event) => {
   }
 });
 
+// ---------- A bare hand is a pat, never a punch ----------
+// Left-clicking a dragon with an empty hand pets it: no damage, no grudge. Any item in the hand is a real blow.
+
+const heldItem = (player) => {
+  try {
+    return player.getComponent("minecraft:equippable")?.getEquipment(EquipmentSlot.Mainhand)?.typeId;
+  } catch {
+    return undefined;
+  }
+};
+const patted = new Map(); // dragon entity id -> tick of the last pat, so one click is one pat
+function isPat(hurt, attacker) {
+  if (hurt?.typeId !== DRAGON || attacker?.typeId !== "minecraft:player" || heldItem(attacker)) return false;
+  const rec = recordOfEntity(hurt);
+  return !!rec && !rec.down;
+}
+function pat(player, entity) {
+  const now = system.currentTick;
+  if (now - (patted.get(entity.id) ?? -99) < 4) return;
+  patted.set(entity.id, now);
+  const rec = recordOfEntity(entity);
+  if (rec && !rec.down && mountOf(player)?.id !== entity.id) pet(player, entity, rec);
+}
+try {
+  // Where the game lets a script stop the blow before it lands, the dragon doesn't even flinch
+  world.beforeEvents.entityHurt?.subscribe((event) => {
+    const attacker = event.damageSource?.damagingEntity;
+    if (!isPat(event.hurtEntity, attacker)) return;
+    event.cancel = true;
+    const entity = event.hurtEntity;
+    system.run(() => valid(entity) && pat(attacker, entity));
+  });
+} catch {
+  // older script engine: the after-event below gives the health back instead
+}
+world.afterEvents.entityHitEntity.subscribe(({ damagingEntity, hitEntity }) => {
+  if (isPat(hitEntity, damagingEntity) && valid(hitEntity)) pat(damagingEntity, hitEntity);
+});
+
 world.afterEvents.entityHurt.subscribe((event) => {
   const hurt = event.hurtEntity;
   const attacker = event.damageSource?.damagingEntity;
   try {
     if (hurt?.typeId === DRAGON) {
+      if (event.damageSource?.cause === "entityAttack" && isPat(hurt, attacker) && valid(hurt)) {
+        const health = hurt.getComponent("minecraft:health");
+        if (health) health.setCurrentValue(Math.min(health.effectiveMax, health.currentValue + event.damage));
+        return pat(attacker, hurt);
+      }
       const rec = dragonOf(ownerIdOf(hurt));
       if (!rec || rec.status !== "out" || rec.down || !valid(hurt)) return;
       const health = hurt.getComponent("minecraft:health")?.currentValue ?? 99;
