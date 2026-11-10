@@ -10,7 +10,7 @@
 
 import { world, system, ItemStack, GameMode } from "@minecraft/server";
 import { emit, on } from "../siege/api.js";
-import { startNode, sceneTag, holds, blankProgress, nextNode, nextNodes } from "./logic.js";
+import { startNode, sceneTag, holds, blankProgress, nextNode, nextNodes, greetCount, pickGreet, variantTag } from "./logic.js";
 import { NPCS } from "./data/dialogue.js";
 import { progressOf, saveProgress, contextOf, grantTome, learnClues, learnLeads, awardPoints, setFlag, giveItem, landOwnerAt } from "./player.js";
 import { libraryCount } from "./library.js";
@@ -30,10 +30,14 @@ function contextFor(player) {
   return contextOf(player, libraryCount(owner ?? player.id));
 }
 
+const lastGreet = new Map(); // player/npc/node -> wording last shown
 function openScene(player, npcId, node) {
   const selector = `@e[type=${NPC_TYPE},tag=${tagOf(npcId)},c=1]`;
   try {
-    player.runCommand(`dialogue open ${selector} @s ${sceneTag(npcId, node)}`);
+    const key = `${player.id}/${npcId}/${node}`;
+    const v = pickGreet(greetCount(NPC[npcId]?.nodes[node]), lastGreet.get(key), Math.random());
+    lastGreet.set(key, v);
+    player.runCommand(`dialogue open ${selector} @s ${variantTag(npcId, node, v)}`);
   } catch (e) {
     console.warn(`[Lore] dialogue ${npcId}/${node}: ${e}`);
   }
@@ -188,6 +192,9 @@ export function dialogueProblems() {
     }
     for (const [id, node] of Object.entries(npc.nodes)) {
       if (node.opts.length > 6) problems.push(`${npc.id}/${id}: more than 6 buttons`);
+      // anything called "hub" is heard every visit, for as long as the world lasts
+      if (id === "hub" && (node.greets?.length ?? 0) < 3) problems.push(`${npc.id}/hub: needs at least 3 greets so it is not the same line every visit`);
+      if (new Set([node.text, ...(node.greets ?? [])]).size !== 1 + (node.greets?.length ?? 0)) problems.push(`${npc.id}/${id}: two greets are the same`);
       for (const [label, next] of node.opts) {
         for (const to of nextNodes(next)) {
           if (to !== "end" && to !== "start" && !npc.nodes[to]) problems.push(`${npc.id}/${id}: "${label}" points at missing node "${to}"`);

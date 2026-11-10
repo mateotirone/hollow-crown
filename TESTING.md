@@ -121,6 +121,20 @@ Needs a settlement first (place a Keep Banner). Cheats on for the `/scriptevent`
 7. **Knight.** `/scriptevent siege:townhall_path knight` switches you for testing. Learn Shield Bash (sneak + hit with a shield in the off hand), Lunge (sprint + hit), Rallying Cry (use the Oath Banner).
 8. `/scriptevent siege:townhall_path none` clears your path, `/scriptevent siege:townhall_reset` wipes your progress.
 
+
+### The tree screen (new: please check this one first)
+
+1. Run `/scriptevent siege:showcase`, walk into the hall and click the Tree of Oaths. Pick **Arcana** or **Keep**.
+2. ✅ A wide dark panel opens with the branch name in gold, your skill points under it, and the skills laid out in rows (first ring at the top) with lines joining them. Each skill is a small round badge with its name under it. Empty spots are empty.
+3. Click a skill. ✅ Its page opens with what it does and a button to swear it. Go back: the badge has changed.
+4. Open a normal menu (the Town Hall menu, the Rumor Board). ✅ These still look like ordinary Minecraft menus.
+
+If step 2 shows a blank or broken screen, press Escape, open the Tree again and choose **Show branches as plain lists** on its first page. Everything works from the lists. Send me a screenshot of what the broken screen looked like.
+
+### Rumor Board variety
+
+Take and finish a few jobs from the Rumor Board over several in-game days. ✅ The board never offers the kind of job you just did, the three jobs come from three different people, and about one job in three ends with a surprise: a named keepsake, double pay, extra Renown, or someone who cannot pay and stands with your walls instead.
+
 ## The High Throne, the Citadel and usurping (The Hollow Crown)
 
 Needs a settlement (place a Keep Banner on flat, open land) and cheats on. Best with a second player for steps 6 to 9.
@@ -225,6 +239,8 @@ The showcase (`/scriptevent siege:showcase`) puts a Mason's Bench with its mason
 - **Castle Stone family.** Ask the Mason for Castle Stone, Tiles, Bricks, Cobbled and Smooth. In your own region you get your region's stone at the local price; the other regions' stone costs more.
 - **Wall damage and repair.** The generated wall takes damage like any Siege Nights wall: rams and blasts wear blocks down, the stone shows two stages of cracks, then breaks. From level 6 up the wall is as tough as iron-reinforced Castle Stone, level 9 as diamond, level 10 as netherite. Stand by your wall and run `/scriptevent siege:wall_repair break` to rough it up, then talk to the Mason and pick **Mend the wall**: he names a price that follows the damage and the wall is made whole. `/scriptevent siege:wall_repair free` mends without paying. The masons refuse during a siege; patching one block by hand with stone bricks still works then, now on Tiles, Bricks, Cobbled and Smooth too.
 - **Library.** `/scriptevent siege:settle_arrive` (or picking a plot on the real map) now also raises the town's Library near the gate: two storeys of bookshelves, a reading table, a lectern and eight Archive Shelves on the back wall. Click an Archive Shelf with a Lore Tome to check it works. To see just the building: `/scriptevent siege:settle_build library frostmarch`.
+- **Taking over a lord's settlement.** With a Rival Lord settled (`/scriptevent siege:rivals settle`, then `grow <id>` a couple of times and stand near while it builds), topple them and raise your Keep Banner on their Plot Stone. You should become the same tier they were, with their hall, buildings and wall now yours. Tell me if anything of theirs is missing or cannot be changed.
+- **Wall variation.** Walk a level 8 wall (`/scriptevent siege:wall 8`): look for patches of rougher stone, arrow slits, lanterns on the wall top and towers of different heights. Break a stretch, mend it at the Mason, and check it comes back looking the same.
 - See the whole thing in 3D first: https://claude.ai/artifact/McgJY7tPcd84szWCqsJzoK
 
 ## Rival Lords: NPC neighbours for single-player (The Hollow Crown)
@@ -349,3 +365,11 @@ In game (cheats on, a settlement founded, or `/scriptevent siege:showcase` first
 
 Things I could not check offline: whether a dusk-to-midnight wait feels right, whether Hollow soldiers march on the keep heart like raiders do,
 the darkness and knockback effects, and the rain.
+
+## Never the same fight twice (bestiary)
+
+- Beat any regional boss once, then summon it again (`/scriptevent siege:bestiary_summon reeve`): its name carries a temper (for example "The Clockwork Reeve, Unquiet") and the fight has one extra problem. Beat it again and you get a named echo shard for that temper. The next rematch wears a different temper.
+- Watch a boss for a minute: it should not use the same warned attack twice in a row when it has another ready.
+- New attacks to look for: the Reeve puts you back where you stood ("The hands turn back"), the Huntsman lays snares, the Mother hums (look away).
+- In a siege from the third on, roughly one raider in seven has a yellow name such as "Fleet Grey Host Axeman" and behaves to match.
+- `/scriptevent siege:variety` lists what you have killed most and flags anything met more than 40 times per variant.

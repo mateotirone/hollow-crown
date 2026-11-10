@@ -57,27 +57,64 @@ const pickFrom = (roll, list) => list[Math.floor(roll() * list.length)];
 export const jobTier = (level) => Math.min(4, Math.floor(level / 8));
 
 // Three rumors for a day. Pure: same day, player and level give the same board.
-export function rumorsFor(day, playerId, level) {
+// memory = { lastType, recent: [things this player was offered or did lately] }: the board never offers the kind of
+// job you did last, and avoids givers, places, reasons and targets you have seen recently, so no two days feel alike.
+export function rumorsFor(day, playerId, level, memory = {}) {
   const roll = dice(hash(`${day}:${playerId}`));
   const tier = jobTier(level);
   const types = ["bounty", "camp", "rescue", "supply"];
-  types.splice(Math.floor(roll() * types.length), 1); // three of the four kinds each day
+  const drop = types.includes(memory.lastType) ? types.indexOf(memory.lastType) : Math.floor(roll() * types.length);
+  types.splice(drop, 1); // three of the four kinds each day, never the kind you just did
+  const recent = new Set(memory.recent ?? []);
+  const onBoard = new Set();
+  const fresh = (list, key = (v) => v) => {
+    let pool = list.filter((v) => !recent.has(key(v)) && !onBoard.has(key(v)));
+    if (!pool.length) pool = list.filter((v) => !onBoard.has(key(v))); // seen everything lately: at least never twice on one board
+    const pick = pickFrom(roll, pool.length ? pool : list);
+    onBoard.add(key(pick));
+    return pick;
+  };
   return types.map((type, slot) => {
-    const job = { type, slot, day, tier, giver: pickFrom(roll, PARTS.givers), place: pickFrom(roll, PARTS.places), reason: pickFrom(roll, PARTS.reasons[type]) };
+    const job = { type, slot, day, tier, giver: fresh(PARTS.givers), place: fresh(PARTS.places), reason: fresh(PARTS.reasons[type]) };
     job.angle = roll() * Math.PI * 2;
     job.far = 70 + Math.floor(roll() * 70) + tier * 15;
     if (type === "bounty") {
-      const [mob, name, scale = 1] = pickFrom(roll, BOUNTIES);
+      const [mob, name, scale = 1] = fresh(BOUNTIES, (b) => b[1]);
       Object.assign(job, { mob, name, need: Math.max(2, Math.round((6 + tier * 2) * scale)), have: 0 });
     } else if (type === "supply") {
-      const [item, name, base] = pickFrom(roll, SUPPLIES);
+      const [item, name, base] = fresh(SUPPLIES, (x) => x[1]);
       Object.assign(job, { item, name, need: Math.round(base * (1 + tier * 0.5)) });
     } else if (type === "camp") job.need = 3 + tier;
     else job.need = 2 + Math.ceil(tier / 2);
     job.renown = Math.round((type === "supply" ? 40 : type === "bounty" ? 55 : 80) * (1 + tier * 0.35));
     job.emeralds = (type === "supply" ? 3 : 2) + tier;
+    // one job in three is not what it seemed; what the twist is only shows when the job is done
+    if (roll() < 0.34) job.twist = pickFrom(roll, TWISTS);
     return job;
   });
+}
+
+// Twists: what a finished job turns out to have been.
+export const TWISTS = ["keepsake", "windfall", "tale", "debt"];
+// Keepsakes: named things people press on you. Each is given once; a player can collect them all.
+export const KEEPSAKES = [
+  ["minecraft:bell", "The Drover's Bell", "It rang for cattle once. It rings lower now."],
+  ["minecraft:compass", "Ferryman's Compass", "It points true on the water and nowhere else."],
+  ["minecraft:clock", "The Miller's Clock", "Stopped at the hour the wheel did."],
+  ["minecraft:spyglass", "Old Soldier's Glass", "He watched the same hill for thirty years."],
+  ["minecraft:lantern", "Pilgrim's Lantern", "Carried to the Gate and, unusually, back."],
+  ["minecraft:goat_horn", "Shepherd's Horn", "Three notes. The flock still comes to two of them."],
+  ["minecraft:book", "A Tinker's Ledger", "Every debt in the valley, in a hand nobody can read."],
+  ["minecraft:feather", "Poacher's Feather", "From a bird that should not have been there either."],
+  ["minecraft:candle", "Charcoal Burner's Candle", "It smells of the low ground."],
+  ["minecraft:name_tag", "A Name Nobody Claimed", "Found on the road. It was not addressed to you."],
+];
+
+// What a player remembers of the board, for rumorsFor
+export function remember(hero, job) {
+  const keys = [job.giver, job.place, job.reason, job.name].filter(Boolean);
+  hero.rumorRecent = [...(hero.rumorRecent ?? []), ...keys].slice(-18);
+  hero.lastJobType = job.type;
 }
 
 export function describe(job) {
@@ -95,7 +132,7 @@ function board(player) {
   const hero = heroOf(player);
   const day = world.getDay();
   if (hero.boardDay !== day) { hero.boardDay = day; hero.boardTaken = []; saveHero(player); }
-  return rumorsFor(day, player.id, hero.level).filter((j) => !hero.boardTaken.includes(j.slot));
+  return rumorsFor(day, player.id, hero.level, { lastType: hero.lastJobType, recent: hero.rumorRecent }).filter((j) => !hero.boardTaken.includes(j.slot));
 }
 
 export function rumorMenu(player) {
@@ -169,11 +206,39 @@ function complete(player) {
   const job = hero.job;
   hero.job = null;
   hero.jobsDone = (hero.jobsDone ?? 0) + 1;
+  remember(hero, job);
+  let renown = job.renown, emeralds = job.emeralds;
+  const kept = hero.keepsakes ?? [];
+  let twist = job.twist;
+  if (twist === "keepsake" && kept.length >= KEEPSAKES.length) twist = "windfall";
+  if (twist === "keepsake") {
+    const left = KEEPSAKES.map((k, i) => i).filter((i) => !kept.includes(i));
+    const i = left[(hero.jobsDone * 7) % left.length];
+    const [id, name, line] = KEEPSAKES[i];
+    hero.keepsakes = [...kept, i];
+    try {
+      const item = new ItemStack(id, 1);
+      item.nameTag = `§r§6${name}`;
+      item.setLore([`§7${line}`, `§8Given by ${job.giver.toLowerCase()}`]);
+      player.dimension.spawnItem(item, player.location);
+    } catch { emeralds += 3; }
+    player.sendMessage(`§6${job.giver} presses something into your hands: ${name}.§7 (${hero.keepsakes.length} of ${KEEPSAKES.length} keepsakes)`);
+  } else if (twist === "windfall") {
+    emeralds *= 2;
+    player.sendMessage(`§6${job.giver} had more put by than they let on. The pay is doubled.`);
+  } else if (twist === "tale") {
+    renown = Math.round(renown * 1.5);
+    player.sendMessage(`§6${job.giver} tells it at every door for a week, and it grows in the telling.§7 More Renown.`);
+  } else if (twist === "debt") {
+    hero.rumorDebts = (hero.rumorDebts ?? 0) + 1;
+    emeralds = 0;
+    player.sendMessage(`§6${job.giver} cannot pay, and says so plainly. §7"I'll not forget it." (They will stand with your walls at the next siege.)`);
+  }
   saveHero(player);
   api.title(player, "§6Job done", `§7${describe(job).title}`);
   player.playSound("random.levelup");
-  grantRenown(player, job.renown, "rumor", true);
-  player.dimension.spawnItem(new ItemStack("minecraft:emerald", job.emeralds), player.location);
+  grantRenown(player, renown, "rumor", true);
+  if (emeralds > 0) player.dimension.spawnItem(new ItemStack("minecraft:emerald", emeralds), player.location);
   if (hero.jobsDone % JOBS_PER_POINT === 0) grantPoints(player, 1, "word of your deeds spreads");
   api.emit("rumorDone", { player, job });
 }

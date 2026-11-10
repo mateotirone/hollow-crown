@@ -5,7 +5,7 @@ import { world } from "@minecraft/server";
 import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
 import { emit } from "../siege/api.js";
 import { isTesting } from "../core/tests.js";
-import { TOMES, tomesOf, answerIsRight, cluesFound, canAnswer as enoughClues, surveyLine, ALL_THREADS, isLocal } from "./logic.js";
+import { TOMES, tomesOf, answerIsRight, cluesFound, canAnswer as enoughClues, surveyLine, ALL_THREADS, isLocal, loadSaved, stampSaved } /* saves carry a version: SAVE_VERSION in logic.js */ from "./logic.js";
 import { COLLECTIONS, PLACES, THREADS } from "./data/world.js";
 import { LEDGER, progressOf, saveProgress, sourceSite, awardPoints, setFlag } from "./player.js";
 
@@ -14,12 +14,12 @@ const K_PLACES = "hc:lore_places"; // { place id: { x, y, z } } marked by the ma
 
 export function markedPlaces() {
   const raw = world.getDynamicProperty(K_PLACES);
-  return typeof raw === "string" ? JSON.parse(raw) : {};
+  return loadSaved("places", raw) ?? {};
 }
 export function markPlace(id, location) {
   const places = markedPlaces();
   places[id] = { x: Math.floor(location.x), y: Math.floor(location.y), z: Math.floor(location.z) };
-  if (!isTesting()) world.setDynamicProperty(K_PLACES, JSON.stringify(places));
+  if (!isTesting()) world.setDynamicProperty(K_PLACES, stampSaved("places", places));
 }
 
 const clueText = (text) => text.replace(/\{SURVEY(\d)\}/, (_, n) => `Fennick: "${surveyLine(sourceSite(), Number(n))}"`);
