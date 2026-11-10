@@ -32,7 +32,7 @@ import { STRUCTURE_IDS, planStructure } from "./structures.js";
 import { POCKETS, planPocket, pocketTick, requestPockets, REVEAL_LOOKS, ROOM_LOOKS } from "./pockets.js";
 import { overworldStage } from "./finale.js";
 import { ItemStack } from "@minecraft/server";
-import { load, save, say, runCmd } from "./data.js";
+import { load, save, say, runCmd, upgradeSteps, DATA_VERSION } from "./data.js";
 import { choirTick, singerSpot, CHOIR } from "./choir.js";
 import { slipSeconds, slipLanding, isSlipping } from "./slips.js";
 import { shouldAlarm, oreOutcome, noteEntry, crownTick, crownVerdict, CLAIM_SECONDS, WARDEN } from "./warden.js";
@@ -363,6 +363,11 @@ onTick("undertow:source", 600, () => sourceSignsTick(isNight()));
 
 // ---- self-tests ---------------------------------------------------------------------------
 addTests("undertow", {
+  "saved data: old worlds get every upgrade step, in order, once": () => {
+    const steps = [{ to: 3 }, { to: 2 }, { to: 4 }];
+    assert(upgradeSteps(1, 3, steps).map((s) => s.to).join() === "2,3" && upgradeSteps(3, 3, steps).length === 0 && upgradeSteps(2, 4, steps).map((s) => s.to).join() === "3,4");
+    assert(upgradeSteps(1).every((s) => s.to <= DATA_VERSION) && upgradeSteps(DATA_VERSION).length === 0);
+  },
   "site ids match the lore list": () => assert(SOURCE_SITE_IDS.length === 7),
   "terrain is deterministic": () => assert(JSON.stringify(planChunk(2, 5)) === JSON.stringify(planChunk(2, 5))),
   "arrival ledge is solid": () => assert(heightAt(0, 0) === L.woundLedgeY),

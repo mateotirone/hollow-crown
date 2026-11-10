@@ -38,7 +38,7 @@ for (const id of Object.keys(STYLES)) {
   for (let l = 1; l <= 5; l++) { const p = drawHall(l, STYLES[id]); s.halls.push(cellsOf(p, STYLES[id], hallAt)); s.hallBox.push(box(p)); }
   for (const slot of SLOTS) { const p = drawBuilding(slot.building, id); s.slots[slot.id] = cellsOf(p, st, place(center, GATE, slot)); s.slotBox[slot.building] = box(p); }
   const first = (list, fallback) => short((list ?? [fallback])[0]);
-  s.kinds = { log: first(st.roles.beam, "spruce_log"), fence: first(st.roles.rail, "spruce_fence"), plank: first(st.roles.floor, "spruce_planks"), tooth: "siege:battlement", light: "lantern", gate: "siege:castle_gate", port: "siege:portcullis" };
+  s.kinds = { log: first(st.roles.beam, "spruce_log"), fence: first(st.roles.rail, "spruce_fence"), plank: first(st.roles.floor, "spruce_planks"), tooth: "siege:battlement", light: "lantern", gate: "siege:castle_gate", port: "siege:portcullis", slit: "siege:arrow_slit" };
   for (const k of STONE_KINDS) s.kinds[k] = stoneId(k, id);
 }
 
