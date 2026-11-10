@@ -10,6 +10,10 @@ Everything merged to `main` since the last release goes here. Each pull request 
 
 ### Added
 - The Hollow Crown expansion on top of Siege Nights: plots, town hall and skill tree, horses and rails, lore tomes and dialogue, new mobs and bosses, the Undertow dimension, the Crown and Citadel. None of it has been played in a real game yet.
+- Sieges escalate with the story (the Reach): every third night at first, then nights nobody can predict, then every night, then the Long Night that dawn does not end, until Morvane falls. A siege night runs on the clock, one wave an hour, the last at 3:17.
+- No two sieges in a row play out the same way: seven night shapes (The Feint, The Hammer, The Ring, The Held Breath and more), a different army each time, and omens that do not repeat.
+- A captain who reaches your wall and survives comes back for you by name, up to three times. Captains you bring down are listed at your Keep Banner.
+- Night honours: 16 named things to earn once from siege nights, each worth a skill point, shown under "The night watch" at the Keep Banner.
 
 ### Changed
 - The add-on is renamed from Siege Nights to The Hollow Crown. The install file is `hollow-crown.mcaddon`. Existing ids keep the `siege:` prefix.
