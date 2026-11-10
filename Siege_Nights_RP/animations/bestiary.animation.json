@@ -673,7 +673,7 @@
       "0"
      ]
     },
-    "leg_r1": {
+    "leg_l1": {
      "rotation": [
       "0",
       "math.sin(query.life_time*900+1960)*20*query.modified_move_speed",
@@ -687,17 +687,10 @@
       "0"
      ]
     },
-    "leg_r2": {
+    "leg_l2": {
      "rotation": [
       "0",
       "math.sin(query.life_time*900+2000)*20*query.modified_move_speed",
-      "0"
-     ]
-    },
-    "leg_l1": {
-     "rotation": [
-      "0",
-      "math.sin(query.life_time*900+1960)*20*query.modified_move_speed",
       "0"
      ]
     },
@@ -708,7 +701,14 @@
       "0"
      ]
     },
-    "leg_l2": {
+    "leg_r1": {
+     "rotation": [
+      "0",
+      "math.sin(query.life_time*900+1960)*20*query.modified_move_speed",
+      "0"
+     ]
+    },
+    "leg_r2": {
      "rotation": [
       "0",
       "math.sin(query.life_time*900+2000)*20*query.modified_move_speed",

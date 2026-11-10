@@ -762,8 +762,9 @@ def m_at_desk(m, age):
         m.box("head", [-3.5, 19, -3.5], [7, 3, 7], "hair", inflate=0.2); m.box("head", [-3.5, 16, 2.5], [7, 4, 1], "hair", inflate=0.2)      # a mop of hair
     elif age == "king":
         biped(m, L=12, B=12, bw=8, bd=4, head=(8, 8, 8), arm=(4, 12, 4), mats={"head": "skin", "body": "robe", "arm": "robe", "leg": "robe", "belt": "trim", "shoulder": "trim"}, face="eyes")
-        m.box("head", [-4.5, 31, -4.5], [9, 2, 9], "crown"); 
-        for x in (-4.5, -0.5, 3.5): m.box("head", [x, 33, -4.5], [1, 2, 1], "crown")                                                           # a plain gold circlet
+        m.box("head", [-4, 31, -4], [8, 1, 8], "hair", inflate=0.2); m.box("head", [-4, 25, 2.5], [8, 6, 1.5], "hair", inflate=0.2)            # grey hair, cut short
+        for o, sz in (([-4.5, 31, -4.5], [9, 1.5, 1]), ([-4.5, 31, 3.5], [9, 1.5, 1]), ([-4.5, 31, -3.5], [1, 1.5, 7]), ([3.5, 31, -3.5], [1, 1.5, 7])): m.box("head", o, sz, "crown")   # a plain gold circlet: a ring, not a cap
+        for x in (-3.5, -0.5, 2.5): m.box("head", [x, 32.5, -4.6], [1, 1.5, 1], "crown")
         m.box("head", [-3, 22, -4.6], [6, 3, 1], "hair")                                                                                       # a beard going grey
         cloak(m, "robe", length=20, width=10)
     else:

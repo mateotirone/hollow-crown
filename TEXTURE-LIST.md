@@ -288,9 +288,9 @@ Every mob has a box model in `models/entity/bestiary/<id>.geo.json` and a genera
 | Veinsworn (soldier of the Hollow: too tall, thin, no face, one lit seam, dark purple cracked stone with magenta veins and pale blue crystal, right arm a shard) | `veinsworn.png` | generated size | House style, generated |
 | Shardcaster (Hollow ranged: a legless column of stone drifting above the ground, shards circling its head) | `shardcaster.png` | generated size | House style, generated |
 | Gatebreaker (Hollow wall-breaker: a slab on short legs, four arms, crystal where a head should be) | `gatebreaker.png` | generated size | House style, generated |
-| The Boy at the Desk (reveal scene stand-in: a boy of nine, grey eyes, writing with his right hand, desk, book and candle in the model) | `reveal_boy.png` | generated size | **Stand-in, needs a real model and skin** |
-| The King at the Desk (reveal scene stand-in: the same pose, grown, plain gold circlet, red robe) | `reveal_king.png` | generated size | **Stand-in, needs a real model and skin** |
-| The One at the Desk (reveal scene stand-in: the same pose as Morvane, the pen now a sword, cold candle) | `reveal_morvane.png` | generated size | **Stand-in, needs a real model and skin** |
+| The Boy at the Desk (reveal scene stand-in: a boy of nine, grey eyes, writing with his right hand, desk, book and candle in the model) | `reveal_boy.png` | generated size | Final geometry (mobs thread), house-style skin; needs painting |
+| The King at the Desk (reveal scene stand-in: the same pose, grown, plain gold circlet, red robe) | `reveal_king.png` | generated size | Final geometry (mobs thread), house-style skin; needs painting |
+| The One at the Desk (reveal scene stand-in: the same pose as Morvane, the pen now a sword, cold candle) | `reveal_morvane.png` | generated size | Final geometry (mobs thread), house-style skin; needs painting |
 | Warlord (Mob) | `hollow_warlord.png` | 128×128 | House style, generated |
 | Rime Pillar (Fight prop, ghost (alpha)) | `rime_pillar.png` | 128×128 | House style, generated |
 | Chapel Bell (Fight prop) | `chapel_bell.png` | 64×64 | House style, generated |
@@ -442,5 +442,5 @@ Painted in final style, replacing the placeholders listed in earlier sections:
 - `studio/art/build_hollow_skins.py`: Choir Conductor and Singer, Hollow Regent, Latticewood Boat skin, Throne Seal, resting Heart of the Hollow
 - `studio/art/build_weapons3d.py`: 3D held models, textures and attachables for longsword, warhammer, minute_hand, oath_of_oswin, warlords_brand, rimefang_bow (`attachables/weapon_<id>.json`, `animations/siege_weapons.animation.json`: hold offsets UNTESTED in game)
 - `studio/art/build_coins.py`: iron and gold coin
-Still stand-ins: skins for the eight job NPCs, 49 skill icons, real models for the three reveal-scene actors.
+Still stand-ins: skins for the eight job NPCs, 49 skill icons, the three reveal-scene actors are final geometry and need painting.
 The Texture Studio now lists every PNG under `textures/` automatically (catch-all at the end of `studio/build_manifest.py`).
