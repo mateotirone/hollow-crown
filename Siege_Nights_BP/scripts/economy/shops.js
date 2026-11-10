@@ -15,6 +15,7 @@ import { allPlots } from "../plots/claims.js"; // same function plots/api.js re-
 import { ECON, JOBS, JOB_IDS, LINES, REGIONS } from "./config.js";
 import { regional, appetite, payout, cost, coins, niceName } from "./rules.js";
 import { funds, charge, pay, carried } from "./coins.js";
+import { sfx } from "../core/sfx.js";
 
 export const JOB_TAG = "siege_job";
 const jobTag = (id) => `siege_job_${id}`;
@@ -174,7 +175,7 @@ async function sellMenu(player, npc, jobId, region) {
 }
 
 function done(player, text) {
-  player.playSound("random.orb");
+  sfx(player, "random.orb");
   player.onScreenDisplay.setActionBar(text);
 }
 

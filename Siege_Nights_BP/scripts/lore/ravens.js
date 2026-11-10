@@ -7,7 +7,9 @@
 //   /scriptevent siege:ravens      see tonight's omen now (testing)
 
 import { world, system } from "@minecraft/server";
-import { onTick, keepOf, SETTINGS, addTests, assert, assertEqual } from "../siege/api.js";
+import { onTick, keepOf, keepCenter, SETTINGS, addTests, assert, assertEqual } from "../siege/api.js";
+import { perchRavens, clearRavens } from "../bestiary/ravens.js";
+import { wallRing } from "../settle/walls.js";
 import { progressOf } from "./player.js";
 import { isSiegeNight } from "../reach/api.js";
 import { pickGreet } from "./logic.js";
@@ -60,7 +62,48 @@ function show(player, force) {
   told.set(player.id, day);
   const pick = pickGreet(OMENS.plain.length, lastOmen.get(player.id), Math.random());
   lastOmen.set(player.id, pick);
-  player.sendMessage(omenText(ravenCount(keep?.wins), progressOf(player).flags.includes("heard_ravens"), pick));
+  const knows = progressOf(player).flags.includes("heard_ravens");
+  player.sendMessage(omenText(ravenCount(keep?.wins), knows, pick));
+  if (keep) perch(player, keep, ravenCount(keep.wins), !knows && pick === GAP_LINE);
+}
+
+// The birds themselves (Mateo: omens must be real things you see). The mobs feature owns the raven and clears them
+// at dawn and when the siege starts; this only decides where they sit: in a row along the wall top nearest the
+// player, two blocks apart, every one of them looking out the same way. With no wall yet, they ring the keep.
+const GAP_LINE = OMENS.plain.findIndex((line) => line.includes("a gap in it")); // that line leaves one place empty
+const NEAR_HOME = 96, SPACING = 2, NO_WALL_RADIUS = 9;
+export function perchPlan(center, radius, toward, count, gap = false) {
+  const mid = Math.atan2(toward.z - center.z, toward.x - center.x);
+  const places = gap ? count + 1 : count;
+  const step = SPACING / radius;
+  const spots = [];
+  for (let i = 0; i < places; i++) {
+    if (gap && i === Math.floor(places / 2)) continue; // a place being kept
+    const a = mid + (i - (places - 1) / 2) * step;
+    spots.push({ x: Math.floor(center.x + Math.cos(a) * radius) + 0.5, z: Math.floor(center.z + Math.sin(a) * radius) + 0.5 });
+  }
+  // all facing the same way: straight out from the middle of the row
+  return { spots, lookAt: { x: center.x + Math.cos(mid) * (radius + 64), z: center.z + Math.sin(mid) * (radius + 64) } };
+}
+function perch(player, keep, count, gap) {
+  try {
+    const center = keepCenter(keep);
+    if (player.dimension.id !== "minecraft:overworld" || Math.hypot(player.location.x - center.x, player.location.z - center.z) > NEAR_HOME) return;
+    let ring;
+    try { ring = wallRing(player.id); } catch { /* no walls feature */ }
+    const mid = ring ?? center;
+    const plan = perchPlan(mid, ring ? ring.radius - 1 : NO_WALL_RADIUS, player.location, count, gap);
+    const dim = player.dimension;
+    const spots = [];
+    for (const at of plan.spots) {
+      const top = dim.getTopmostBlock({ x: Math.floor(at.x), z: Math.floor(at.z) });
+      if (top && !top.isLiquid) spots.push({ x: at.x, y: top.location.y + 1, z: at.z });
+    }
+    clearRavens(player.id);
+    perchRavens(dim, spots, { facing: plan.lookAt, owner: player.id });
+  } catch (e) {
+    console.warn(`[Hollow Crown] ravens: ${e}`);
+  }
 }
 
 onTick("lore_ravens", 100, () => {
@@ -78,6 +121,16 @@ addTests("lore", {
   "ravens: they come at dusk on a raid day, and more of them the longer a keep has stood": () => {
     assert(isRaidDay(6, 3, 5) && !isRaidDay(7, 3, 5) && !isRaidDay(3, 3, 5));
     assert(isDusk(12000) && !isDusk(13000) && !isDusk(6000));
+    // the birds sit in a row on the ring nearest you, two blocks apart, and the "gap" line really leaves a gap
+    const plan = perchPlan({ x: 0, z: 0 }, 55, { x: 100, z: 0 }, 5);
+    assertEqual(plan.spots.length, 5);
+    for (const at of plan.spots) assert(Math.abs(Math.hypot(at.x, at.z) - 55) < 1.5 && at.x > 50, "on the ring, on your side");
+    assert(Math.abs(plan.spots[0].z - plan.spots[1].z) >= 1 && Math.abs(plan.spots[0].z - plan.spots[1].z) <= 3);
+    assert(plan.lookAt.x > 100 && Math.abs(plan.lookAt.z) < 1, "they all look straight out");
+    const gapped = perchPlan({ x: 0, z: 0 }, 55, { x: 100, z: 0 }, 5, true);
+    assertEqual(gapped.spots.length, 5);
+    assert(!gapped.spots.some((at) => Math.abs(at.z - 0.5) < 0.6), "the middle place is kept empty");
+    assert(GAP_LINE >= 0);
     assertEqual(ravenCount(0), 3);
     assert(ravenCount(10) > ravenCount(2) && ravenCount(500) === 40);
     assert(omenText(3, false).includes("Three") && omenText(5, true).includes("Sigrun") && omenText(20, false).includes("20"));

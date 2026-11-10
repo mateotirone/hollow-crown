@@ -5,6 +5,7 @@ import { emit, settlementAt, isReady, isNight } from "../siege/api.js";
 import { isTesting } from "../core/tests.js";
 import { blankProgress, addClues, TOME, COLLECTION, loadSaved, stampSaved } /* saves carry a version: SAVE_VERSION in logic.js */ from "./logic.js";
 import { SITE_IDS, PLACES } from "./data/world.js";
+import { sfx } from "../core/sfx.js";
 
 export const TOME_ITEM = "siege:lore_tome";
 export const LEDGER = "siege:ledger";
@@ -101,7 +102,7 @@ export function grantTome(player, id, at) {
   p.got.push(id);
   saveProgress(player);
   player.sendMessage(`§6You found a Lore Tome: §f${TOME[id].title}`);
-  player.playSound("item.book.page_turn");
+  sfx(player, "item.book.page_turn");
   return true;
 }
 

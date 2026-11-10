@@ -15,6 +15,7 @@ import { on, addTests, assert, assertEqual } from "../siege/api.js";
 import { plotAt } from "../plots/api.js";
 import { PICS, LEADERS, GALLERY, picIndex, leaderPics } from "./data/portraits.js";
 import { PLOT_NAMES, slugOf } from "./data/plots.js";
+import { sfx } from "../core/sfx.js";
 
 export const PORTRAIT = "siege:portrait";
 const WIDTH = [1, 3, 2]; // blocks wide, by size
@@ -54,7 +55,7 @@ function describe(player, entity) {
   const pic = PICS[entity.getProperty("siege:pic")];
   if (!pic) return;
   player.sendMessage(`§6${pic.title}§r\n§8${pic.sub}\n§7§o${pic.line}`);
-  player.playSound("item.book.page_turn", { pitch: 0.8 });
+  sfx(player, "item.book.page_turn", { pitch: 0.8 });
 }
 world.afterEvents.playerInteractWithEntity.subscribe(({ player, target }) => {
   if (target?.typeId === PORTRAIT) describe(player, target);
