@@ -6,7 +6,7 @@
 import { SITES } from "./roads.js";
 import { hash } from "./noise.js";
 
-const STONE = "minecraft:polished_blackstone_bricks", COBBLE = "minecraft:cobbled_deepslate";
+const STONE = "siege:veinstone_bricks", CRACKED = "siege:cracked_veinstone_bricks", COBBLE = "minecraft:cobbled_deepslate";
 const POST = "minecraft:cobbled_deepslate_wall", LAMP = "minecraft:soul_lantern";
 const PLANK = "minecraft:dark_oak_planks", LOG = "minecraft:dark_oak_log", FENCE = "minecraft:dark_oak_fence";
 
@@ -39,7 +39,7 @@ const PLANS = {
       if (Math.abs(x) !== 7 && Math.abs(z) !== 15) continue;
       if (z === -15 && Math.abs(x) <= 1) continue; // the door
       const tall = 2 + Math.floor(hash(s.x + x, s.z + z, 901) * 6); // walls broken to different heights
-      m.box(x, 1, z, x, tall, z, hash(s.x + x, s.z + z, 902) < 0.3 ? "minecraft:cracked_polished_blackstone_bricks" : STONE);
+      m.box(x, 1, z, x, tall, z, hash(s.x + x, s.z + z, 902) < 0.3 ? CRACKED : STONE);
     }
     for (let z = -12; z <= 12; z += 6) if (hash(s.x, s.z + z, 903) < 0.6) m.box(-7, 7, z, 7, 7, z, LOG); // what is left of the roof beams
     m.box(-1, 1, 4, 1, 1, 4, PLANK); // the table

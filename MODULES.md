@@ -11,6 +11,7 @@ Siege_Nights_BP/scripts/
     loop.js            onTick(): the shared main loop
     events.js          on()/emit() events, and hooks
     store.js           moduleStore(): a saved JSON blob per feature
+    firstjoin.js       addJoinStep(): the one ordered sequence that greets a joining player
     tests.js           addTests(): self-tests, run at world load and by /scriptevent siege:selftest
   siege/               the original Siege Nights, split by topic (keep, siege, warplan, walls ...)
     settings.js        SETTINGS: the numbers Mateo tweaks
@@ -44,6 +45,32 @@ tools/check.mjs        offline check: loads every script in Node with a fake Min
   Nights state, start with `if (!isReady()) return;`.
 - **Tests:** add a few with `addTests("<feature>", { "name": () => { assert(...) } })`. Pure ones run
   in Node and in game; pass `{ gameOnly: true }` for ones that need the real world.
+
+## Greeting a player who joins: `addJoinStep`
+
+Do not subscribe to `playerSpawn` to greet, teleport, open a form or hand out an item. Add a step to the join
+conductor (`core/firstjoin.js`, also exported from `siege/api.js`). Steps run one after another, each awaited, so
+nothing lands on top of anything else.
+
+```js
+addJoinStep(20, "welcome hall", async (player, { first, wait }) => {
+  // teleport, title, message ...
+  await wait(60);                // ticks; hold the next step back for 3 seconds
+}, { when: "first" });           // "first" | "returning" | "always" (default); timeout: seconds (default 30)
+```
+
+| order | step | owner | when |
+|---|---|---|---|
+| 10 | look picker (reserved looks just apply) | looks | first |
+| 20 | welcome hall teleport, title and message (map mode only) | plots | first |
+| 30 | journal handed over (after "How things stand", or about 20 s; about 3 s after the picker with no hall) | lore | first |
+| 40+ | returning-player notices: unspent skill points and so on | town hall and others | returning |
+
+- Return (or resolve) only when the player is done with your step, for example after `form.show()` resolves.
+- After `timeout` seconds the conductor moves on without you, so a form left open can't stall the rest.
+- The sequence starts 3 seconds after the player spawns. If they leave midway it starts over next time.
+- `on("joined", ({ player, first }) => ...)` fires when every step has run.
+- Quiet housekeeping on spawn (restoring state, re-applying an effect) can stay on `playerSpawn`.
 
 ## `scripts/siege/api.js`
 

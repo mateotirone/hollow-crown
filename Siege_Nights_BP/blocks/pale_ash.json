@@ -1,0 +1,28 @@
+{
+  "format_version": "1.21.60",
+  "minecraft:block": {
+    "description": {
+      "identifier": "siege:pale_ash",
+      "menu_category": {
+        "category": "nature"
+      }
+    },
+    "components": {
+      "minecraft:display_name": "tile.siege:pale_ash.name",
+      "minecraft:map_color": "#b9b4c4",
+      "minecraft:geometry": "minecraft:geometry.full_block",
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "siege_pale_ash",
+          "render_method": "opaque"
+        }
+      },
+      "minecraft:destructible_by_mining": {
+        "seconds_to_destroy": 0.5
+      },
+      "minecraft:destructible_by_explosion": {
+        "explosion_resistance": 6
+      }
+    }
+  }
+}

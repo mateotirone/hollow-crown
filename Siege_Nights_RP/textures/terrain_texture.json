@@ -739,6 +739,18 @@
     },
     "siege_castle_smooth_blackfen": {
       "textures": "textures/blocks/regional/siege_castle_smooth_blackfen"
+    },
+    "siege_veinstone_bricks": {
+      "textures": "textures/blocks/siege_veinstone_bricks"
+    },
+    "siege_cracked_veinstone_bricks": {
+      "textures": "textures/blocks/siege_cracked_veinstone_bricks"
+    },
+    "siege_pale_ash": {
+      "textures": "textures/blocks/siege_pale_ash"
+    },
+    "siege_glint_cluster": {
+      "textures": "textures/blocks/siege_glint_cluster"
     }
   }
 }
