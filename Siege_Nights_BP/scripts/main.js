@@ -3,6 +3,7 @@
 
 // Core (no gameplay)
 import "./core/selftest.js";
+import "./core/firstjoin.js";
 
 // Siege Nights
 import "./siege/index.js";

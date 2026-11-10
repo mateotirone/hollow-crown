@@ -255,14 +255,14 @@ function buildHeart(d) {
   for (let dx = -HEART.outerRadius; dx <= HEART.outerRadius; dx++) for (let dz = -HEART.outerRadius; dz <= HEART.outerRadius; dz++) {
     const dd = Math.sqrt(dx * dx + dz * dz);
     const x = cx + dx, z = cz + dz;
-    if (dd <= HEART.innerRadius) op([x, cy - 3, z], [x, cy - 1, z], dd < 2 ? B.core : "minecraft:polished_blackstone");
-    else if (dd >= HEART.innerRadius + 4 && dd <= HEART.outerRadius) op([x, cy - 2, z], [x, cy - 1, z], dd > HEART.outerRadius - 1.2 ? B.lattice : B.rock);
+    if (dd <= HEART.innerRadius) op([x, cy - 3, z], [x, cy - 1, z], dd < 2 ? B.core : hash(x, z, 404) < 0.2 ? B.deckCracked : B.deck);
+    else if (dd >= HEART.innerRadius + 4 && dd <= HEART.outerRadius) op([x, cy - 2, z], [x, cy - 1, z], dd > HEART.outerRadius - 1.2 ? B.lattice : hash(x, z, 404) < 0.2 ? B.deckCracked : B.deck);
   }
   // Bridges from the ring to the disc, at the four corners
   for (const [ux, uz] of [[1, 1], [-1, 1], [1, -1], [-1, -1]]) {
     for (let s = HEART.innerRadius; s <= HEART.innerRadius + 5; s++) {
       const x = cx + Math.round(ux * s * 0.707), z = cz + Math.round(uz * s * 0.707);
-      op([x - 1, cy - 1, z - 1], [x + 1, cy - 1, z + 1], "minecraft:polished_blackstone");
+      op([x - 1, cy - 1, z - 1], [x + 1, cy - 1, z + 1], B.deck);
     }
   }
   // 7 Singer pillars with lattice arches

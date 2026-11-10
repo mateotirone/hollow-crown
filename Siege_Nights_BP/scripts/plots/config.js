@@ -55,6 +55,7 @@ export const WARDS = [
   { name: "Mirelight", x: -60, z: 900, r: 70 },
   { name: "the Ashen Gate Chapterhouse", x: 420, z: -170, r: 45 },
   { name: "the Ashen Watch", x: 480, z: 560, r: 35 },
+  { name: "the Shut Pass", x: 1225, z: -190, r: 30 }, // sealed way out, kept for a later update (see EXPANSION)
   { name: "Bellhollow", x: 155, z: -100, r: 60 }, // the valley with the broken bell frame, the shrine and the sealed Crack in the Deep
   { name: "Crownhold", x: -235, z: -345, r: 65 }, // the ruined capital and its Hall of Bells, on the rise north-west of Kingsrest
 ];
@@ -92,3 +93,16 @@ export const SETTLEMENT = {
   hallPad: { halfWidth: 22, depth: 50 }, // biggest town hall in any style, behind the stone, away from the gate
   clearHeight: 25, // nothing taller than this within 45 blocks of the hall, so the fly-by camera can see
 };
+
+// Room to grow. The map file is never replaced once players have moved in, so the first map keeps three sealed
+// ways out, and the land beyond each stays empty until an update opens it (the add-on places what is there).
+// `door` is the sealed place on today's map; `beyond` is the empty land outside the map edge kept for it.
+// Names are working titles. Never reuse or renumber an id: saved worlds remember which zones are open.
+export const EXPANSION = [
+  { id: "shut_pass", name: "the Shut Pass", how: "a pass at the east end of the Greyspine, buried under snow and rockfall",
+    door: { x: 1225, z: -190, r: 30 }, beyond: { x0: 1250, z0: -800, x1: 2250, z1: 400 } },
+  { id: "far_shore", name: "the Far Shore", how: "a coast across the Western Sea that no ship from Gull's Rest reaches yet",
+    door: { x: -1225, z: 300, r: 30 }, beyond: { x0: -2650, z0: -900, x1: -1250, z1: 900 } },
+  { id: "horizon_isles", name: "the Horizon Isles", how: "islands seen on clear days from the southern shore",
+    door: { x: -700, z: 1225, r: 30 }, beyond: { x0: -1250, z0: 1250, x1: -250, z1: 2000 } },
+];

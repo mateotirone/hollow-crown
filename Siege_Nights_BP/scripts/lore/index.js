@@ -26,6 +26,7 @@ import { addTests, assert, assertEqual } from "../siege/api.js";
 import {
   TOMES, TOME, tomesOf, CLUE_THREADS, surveyLine, sitesMatching, encipher, mirror, pagesFor, normalize,
   answerIsRight, blankProgress, holds, startNode, addClues, libraryRank, THREAD, canAnswer,
+  loadSaved, stampSaved, SAVE_VERSION,
 } from "./logic.js";
 import { COLLECTIONS, PLACES, SITE_IDS, THREADS, MILESTONES } from "./data/world.js";
 import { NPCS } from "./data/dialogue.js";
@@ -200,6 +201,21 @@ addTests("lore", {
     assert(!canAnswer(p, THREAD.who_leads), "the leader stays unknown until the Litany");
     assert(answerIsRight(THREAD.who_leads, "King Oswin") && answerIsRight(THREAD.the_name, "Hallowmere"));
     for (const t of THREADS) for (const c of t.must ?? []) assert(t.clues[c], `${t.id}: must-clue ${c} is not in the thread`);
+  },
+  "saved lore data carries a version, and saves from before versions load unchanged": () => {
+    const old = JSON.stringify({ read: ["corv_01"], flags: ["wren_met"] });
+    assertEqual(loadSaved("progress", old), { read: ["corv_01"], flags: ["wren_met"] });
+    const stamped = stampSaved("library", { "1,2,3": ["corv_01"] });
+    assertEqual(JSON.parse(stamped)._v, SAVE_VERSION.library);
+    assertEqual(loadSaved("library", stamped), { "1,2,3": ["corv_01"] }, "the stamp never shows up as a shelf");
+    assertEqual(loadSaved("places", undefined), undefined);
+    // a made-up upgrade: version 1 called the field "seen"
+    const before = SAVE_VERSION.progress;
+    SAVE_VERSION.progress = 2;
+    try {
+      assertEqual(loadSaved("progress", JSON.stringify({ seen: ["a"] }), [(d) => ({ read: d.seen })]), { read: ["a"] });
+      assertEqual(loadSaved("progress", JSON.stringify({ read: ["b"], _v: 2 }), [() => ({ read: ["wrong"] })]), { read: ["b"] }, "current saves are not upgraded again");
+    } finally { SAVE_VERSION.progress = before; }
   },
   "clues file under their mystery once": () => {
     const p = blankProgress();

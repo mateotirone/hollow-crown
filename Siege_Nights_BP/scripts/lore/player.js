@@ -3,7 +3,7 @@
 import { world, system, ItemStack } from "@minecraft/server";
 import { emit, settlementAt, isReady, isNight } from "../siege/api.js";
 import { isTesting } from "../core/tests.js";
-import { blankProgress, addClues, TOME, COLLECTION } from "./logic.js";
+import { blankProgress, addClues, TOME, COLLECTION, loadSaved, stampSaved } /* saves carry a version: SAVE_VERSION in logic.js */ from "./logic.js";
 import { SITE_IDS, PLACES } from "./data/world.js";
 
 export const TOME_ITEM = "siege:lore_tome";
@@ -22,7 +22,7 @@ export function progressOf(player) {
   p = blankProgress();
   try {
     const raw = player.getDynamicProperty(PROP);
-    if (typeof raw === "string") Object.assign(p, JSON.parse(raw));
+    Object.assign(p, loadSaved("progress", raw));
   } catch (e) {
     console.warn(`[Lore] bad progress for ${player.name}: ${e}`);
   }
@@ -33,7 +33,7 @@ export function progressOf(player) {
 export function saveProgress(player) {
   if (isTesting()) return;
   const p = cache.get(player.id);
-  if (p) player.setDynamicProperty(PROP, JSON.stringify(p));
+  if (p) player.setDynamicProperty(PROP, stampSaved("progress", p));
 }
 
 world.afterEvents.playerLeave.subscribe((event) => cache.delete(event.playerId));

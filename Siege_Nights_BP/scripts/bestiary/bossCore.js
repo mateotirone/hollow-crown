@@ -19,13 +19,15 @@
 
 import { world, system } from "@minecraft/server";
 import { onTick, moduleStore, addTests, assertEqual } from "../siege/api.js";
+import { chooseAttack, pickTemper, temperById, TEMPERS } from "./variety.js";
 import { MOBS } from "./data.js";
-import { activeDimensions, alive, announce, effect, flat, give, heal, healthOf, particle, ring, sound, makeItem, playerList, addToPlayerList } from "./util.js";
+import { activeDimensions, alive, announce, effect, flat, give, heal, healthOf, hurt, particle, ring, sound, makeItem, playerList, addToPlayerList } from "./util.js";
 
 const STEP = 5; // the framework ticks every 5 game ticks
 export const SHIELD_TAG = "siege_boss_shielded";
 const FIGHT_PROP = "siege:bestiary_fight";
 const BEATEN_PROP = "siege:bestiary_bosses";
+const TEMPERS_PROP = "siege:bestiary_tempers"; // "boss:temper" for every temper a player has beaten a boss in
 
 const defs = new Map(); // boss id -> definition
 const byType = new Map(); // entity type -> definition
@@ -75,24 +77,32 @@ function attach(entity, def, center, fresh) {
   };
   Object.assign(f, helpers(f));
   fights.set(entity.id, f);
-  try {
-    entity.nameTag = `§c${def.name}`;
-  } catch {
-    // name is cosmetic
-  }
+  // A boss someone has already beaten comes back in a temper, and never the one it wore last time
+  f.temper = saved ? temperById(saved.temper) : undefined;
+  if (!saved && !def.noTemper && (store.data.defeated[def.id] ?? 0) > 0) f.temper = pickTemper(store.data.lastTemper?.[def.id]);
+  nameBoss(f);
   saveFight(f);
   for (const a of def.attacks ?? []) f.next[a.id] = Math.round(a.every * (0.5 + Math.random() * 0.5));
   if (fresh || !saved) {
     f.say(`§4${def.name}§7 ${def.intro ?? "has come."}`);
+    if (f.temper) f.say(`§c${f.temper.name}.§7 ${f.temper.line}`);
     for (const p of f.players()) sound(f.dim, "mob.wither.spawn", p.location, 0.7, 0.6);
   }
   def.onStart?.(f, !saved);
   return f;
 }
 
+function nameBoss(f) {
+  try {
+    f.entity.nameTag = `§c${f.def.name}${f.temper ? `§7, ${f.temper.name}` : ""}`;
+  } catch {
+    // name is cosmetic
+  }
+}
+
 function saveFight(f) {
   try {
-    f.entity.setDynamicProperty(FIGHT_PROP, JSON.stringify({ id: f.def.id, center: f.center, damagers: [...f.damagers] }));
+    f.entity.setDynamicProperty(FIGHT_PROP, JSON.stringify({ id: f.def.id, center: f.center, damagers: [...f.damagers], temper: f.temper?.id }));
   } catch {
     // boss gone
   }
@@ -103,7 +113,7 @@ export function rebind(f, entity) {
   fights.delete(f.id);
   f.entity = entity; f.id = entity.id; f.dim = entity.dimension;
   fights.set(entity.id, f);
-  try { entity.nameTag = `§c${f.def.name}`; } catch { /* cosmetic */ }
+  nameBoss(f);
   saveFight(f);
 }
 
@@ -284,10 +294,17 @@ function bossTick() {
 
     // Attacks: one at a time, each on its own clock, each warned about before it lands
     if (!f.paused && f.tick >= f.busyUntil) {
+      const due = [];
       for (const a of f.def.attacks ?? []) {
         f.next[a.id] -= STEP;
         if (f.next[a.id] > 0 || (a.phases && !a.phases.includes(f.phase)) || (a.when && !a.when(f))) continue;
-        f.next[a.id] = a.every;
+        due.push(a.id);
+      }
+      // never the same attack twice running while another one is ready
+      const chosen = chooseAttack(due, f.lastAttack);
+      for (const a of (f.def.attacks ?? []).filter((x) => x.id === chosen)) {
+        f.lastAttack = a.id;
+        f.next[a.id] = Math.round(a.every * (f.temper?.pace ?? 1));
         if (a.warn) f.bar(`§c⚠ ${a.warn}`);
         for (const p of players) sound(f.dim, a.sound ?? "note.pling", p.location, 0.5, 0.8);
         let ctx;
@@ -295,11 +312,31 @@ function bossTick() {
         const windup = a.windup ?? 0;
         if (a.show) for (let t = STEP; t < windup; t += STEP) f.after(t, () => a.show(f, ctx));
         f.after(windup, () => a.hit?.(f, ctx));
-        f.busyUntil = f.tick + windup + (a.rest ?? 20);
+        f.busyUntil = f.tick + windup + Math.round((a.rest ?? 20) * (f.temper?.rest ?? 1));
         break;
       }
     }
+    if (f.temper?.act && !f.paused && f.tick % f.temper.every < STEP) safely(f, () => temperAct(f, players));
     safely(f, () => f.def.tick?.(f, players));
+  }
+}
+
+// What a temper adds on top of the boss's own attacks
+function temperAct(f, players) {
+  if (f.temper.act === "ground") {
+    f.bar("§c⚠ The ground remembers. Move!");
+    for (const p of players) f.zone({ x: p.location.x, y: p.location.y, z: p.location.z }, 3, 40, (hit) => hurt(hit, 6, "magic", f.entity), "minecraft:soul_particle");
+  } else if (f.temper.act === "court") {
+    if (f.adds("siege:tolling_shade").length >= 2) return;
+    f.bar("§c⚠ Something has come to stand with it.");
+    f.summon("siege:tolling_shade", f.solo() ? 1 : 2, 6);
+  } else if (f.temper.act === "slip") {
+    const loc = f.entity.location;
+    if (f.tick < f.busyUntil || !players.some((p) => flat(p.location, loc) < 4)) return;
+    const to = f.spot(5, Math.max(6, (f.radius ?? f.def.radius) * 0.6));
+    particle(f.dim, "minecraft:large_explosion", { x: loc.x, y: loc.y + 1, z: loc.z });
+    try { f.entity.teleport({ x: to.x, y: loc.y, z: to.z }); } catch { /* chunk not ready */ }
+    sound(f.dim, "mob.endermen.portal", to, 0.6, 1);
   }
 }
 
@@ -391,6 +428,7 @@ function finish(f, slayer) {
   if (!players.length) players = online.filter((p) => p.dimension.id === f.dim.id && flat(p.location, loc) < def.radius + 16);
 
   store.data.defeated[def.id] = (store.data.defeated[def.id] ?? 0) + 1;
+  if (f.temper) (store.data.lastTemper ??= {})[def.id] = f.temper.id;
   store.data.hollowAwake = true; // the first boss to fall wakes the Hollow things everywhere
   store.save();
 
@@ -399,6 +437,15 @@ function finish(f, slayer) {
     safely(f, () => {
       for (const stack of def.loot?.(f, p, first) ?? []) give(p, stack);
     });
+    if (f.temper && addToPlayerList(p, TEMPERS_PROP, `${def.id}:${f.temper.id}`)) {
+      // a keepsake for each temper beaten: something to collect, with a name on it, not a stat
+      const token = makeItem("minecraft:echo_shard", 1);
+      if (token) {
+        token.nameTag = `§d${def.name}, ${f.temper.name}`;
+        token.setLore([`§7Taken from it the time it came back ${f.temper.name.toLowerCase()}.`, `§8One of ${TEMPERS.length}.`]);
+        give(p, token);
+      }
+    }
     p.onScreenDisplay.setTitle(`§6${def.name}`, { subtitle: "§7has fallen", fadeInDuration: 10, stayDuration: 70, fadeOutDuration: 20 });
     p.playSound("ui.toast.challenge_complete");
     announce("siege:award_skill_points", { player: p.id, points: first ? def.points ?? 5 : 1, renown: first ? 150 : 30, reason: `boss:${def.id}` });
@@ -407,7 +454,7 @@ function finish(f, slayer) {
   safely(f, () => def.onDeath?.(f, players));
   // Whoever landed the last blow (or hurt it last, if it died to something else), and everyone else who fought
   const killer = (slayer?.typeId === "minecraft:player" ? slayer : undefined) ?? online.find((p) => p.id === f.lastHitter) ?? players[0];
-  announce("siege:boss_defeated", { boss: def.id, x: Math.floor(loc.x), y: Math.floor(loc.y), z: Math.floor(loc.z), dimension: f.dim.id, players: players.map((p) => p.id),
+  announce("siege:boss_defeated", { boss: def.id, x: Math.floor(loc.x), y: Math.floor(loc.y), z: Math.floor(loc.z), dimension: f.dim.id, players: players.map((p) => p.id), ...(f.temper ? { temper: f.temper.id } : {}),
     killer: killer?.id, killerName: killer?.name, allies: players.filter((p) => p.id !== killer?.id).map((p) => p.id) });
   for (const p of online) if (!players.includes(p)) p.sendMessage(`§6${def.name} has been slain by ${players.map((x) => x.name).join(", ") || "someone"}.`);
 }
@@ -437,6 +484,7 @@ function vault(f, loc, stacks) {
 }
 
 export const hasBeaten = (player, bossId) => playerList(player, BEATEN_PROP).includes(bossId);
+export const tempersBeaten = (player, bossId) => playerList(player, TEMPERS_PROP).filter((t) => t.startsWith(`${bossId}:`)).map((t) => t.split(":")[1]);
 
 // Convenience for loot lists: stack("siege:hollow_ash", 6)
 export const stack = (id, n = 1) => makeItem(id, n);
