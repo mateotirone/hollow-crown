@@ -465,3 +465,8 @@ The Texture Studio now lists every PNG under `textures/` automatically (catch-al
 | Particle sheet (32×16, eight 8×8 sprites: mote, vein spark, glint, ash flake, spore, sung note, ember, moss drip) | `textures/particle/hc_particles.png` | **Final style, awaiting your review** |
 | Seven particle effects: `siege:hollow_mote`, `vein_spark`, `glint`, `pale_ash`, `veil_spore`, `choir_ring`, `moss_drip` | `particles/<name>.particle.json` | Written, untested in game, nothing spawns them yet |
 | The moon (128×64, vanilla phase layout): a hairline violet crack that shows more the fuller the moon is | `textures/environment/moon_phases.png` | **Final style, awaiting your review.** Replaces the vanilla moon everywhere |
+## Regional Castle Guard armor (2026-11-10, textures thread; Mateo chose regional sets)
+Painted by `studio/art/build_regional_guard.py`. Same leather-dye trick as the Castle Guard armor (alpha 255 grey = banner colour, alpha 1 = own colour). Items `siege:guard_<region>_<piece>`, same stats as `siege:guard_*`; shapeless workshop recipe = Castle Guard piece + that region's Castle Stone (Vale uses plain Castle Stone). Shop entries: economy thread.
+| Worn sheets x5 regions | `textures/models/armor/guard_<vale/frostmarch/saltreach/emberwaste/blackfen>_layer_1.png`, `_layer_2.png` | Final style, untested in game |
+| Icons x20 | `textures/items/siege_guard_<region>_<helmet/chestplate/leggings/boots>.png` | Final style |
+| Sheet | `art/regional-guard-armor.png` | |

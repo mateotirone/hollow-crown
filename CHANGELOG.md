@@ -62,6 +62,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - The water of the Blackfen is black: near-opaque on the surface and almost blind underwater. (It follows the mangrove swamp biome, which only the Blackfen uses on the map.)
 
 - The eighth old painting, the Forty-Second Portrait, is kept for the Burned Archive, and what its caption says changes once the story is over.
+- Regional Castle Guard armor: Vale, Frostmarch, Saltreach, Emberwaste and Blackfen sets with the same stats as the Castle Guard armor and their own look (kettle hat and brigandine, fur hood and quilted wool, bleached sallet and rope belt, blackened scale with a veil, laced leather lamellar). Each keeps the banner-colour tabard. Make one at the siege workshop from a Castle Guard piece and that region's Castle Stone.
 
 ### Changed
 - The northern town is now called Rimehold wherever it shows (its protected-area message, the map and the character creator), and its frozen lake Hallowmere, following the naming pass. The Frostmarch plot once called Rimeholt is now Frosthelm, so the two are no longer one letter apart.
