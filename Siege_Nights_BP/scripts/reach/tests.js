@@ -130,6 +130,10 @@ addTests("reach", {
     }
     const distinct = new Set(Object.values(SHAPES).map((s) => s.roles(4).join(",")));
     assert(distinct.size >= 6, "shapes must actually differ");
+    const kinds = ["fight", "mystery", "journey", "quiet", "social", "build"];
+    for (const [id, sh] of Object.entries(SHAPES)) assert(kinds.includes(sh.kind), `${id} has no Storyteller kind`);
+    const early = Object.values(SHAPES).filter((sh) => sh.from <= 1 && sh.min <= 3);
+    assert(new Set(early.map((sh) => sh.kind)).size >= 3, "the first stage needs nights of at least three kinds");
   },
   "an evening never repeats an omen, and neither do two sieges running": () => {
     for (let day = 5; day < 60; day++) {
