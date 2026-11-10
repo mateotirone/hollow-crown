@@ -141,6 +141,8 @@ g("ut_hollow_brick","Veinstone Bricks","The Hollow",[cube("Brick",one('siege_vei
 g("ut_pale_ash","Pale Ash","The Hollow",[cube("Block",one('siege_pale_ash'))],"New block. Soft grey-lilac dust for the wastes.")
 g("ut_glow_crystal","Glint Cluster","The Hollow",[{"label":"Cluster","model":"item","mats":{"*":B+'siege_glint_cluster.png'}}],"New block. Cross-shaped in game, gives light. Shown flat here.")
 g("ut_choirsteel","Choirsteel gear","The Hollow",[{"label":n.title(),"model":"item","mats":{"*":I+'siege_choirsteel_%s.png'%n}} for n in ("sword","pickaxe","axe","shovel","hoe","helmet","chestplate","leggings","boots")]+[{"label":"Worn sheet %d"%k,"model":"item","mats":{"*":'textures/models/armor/choirsteel_layer_%d.png'%k}} for k in (1,2)],"Pale violet forged metal with a pale blue gem or band. Worn sheets are shown flat.")
+g("ut_veilcap_giant","Giant Veilcap","The Hollow",[cube("Cap",one('siege_veilcap_cap')),cube("Stem",one('siege_veilcap_stem'))],"The giant pink mushroom trees. The cap gives a soft glow.")
+g("ut_veilmoss_strands","Veilmoss Strands","The Hollow",[{"label":"Strands","model":"item","mats":{"*":B+'siege_veilmoss_strands.png'}}],"Hangs down cliff edges, one to three blocks long. Cross-shaped in game, shown flat here.")
 g("ut_plants","Veilcap and Glimbulb","The Hollow",[{"label":"Veilcap","model":"item","mats":{"*":B+'siege_veilcap.png'}},{"label":"Glimbulb","model":"item","mats":{"*":B+'siege_glimbulb.png'}}],"Cross-shaped plants in game. Shown flat here.")
 g("ut_items","Tuning Fork and Choir Shard","The Hollow",[{"label":"Tuning Fork","model":"item","mats":{"*":I+'siege_tuning_fork.png'}},{"label":"Choir Shard","model":"item","mats":{"*":I+'siege_choir_shard.png'}}])
 g("plot_stone","Plot Stone","Plots",[sided("Block",'siege_plot_stone_side','siege_plot_stone_top','siege_plot_stone_bottom')])
@@ -177,6 +179,12 @@ g("trebuchet","Trebuchet","Siege machines",[{"label":"Trebuchet","model":"entity
 g("ballista","Ballista","Siege machines",[{"label":"Ballista","model":"entity","geo":"geometry.siege_ballista","mats":{"*":E+'siege_ballista.png'}}],"Turns to face its target, then the arms snap forward and the bolt flies.")
 g("ram","Battering Ram","Siege machines",[{"label":"Ram","model":"entity","geo":"geometry.siege_battering_ram","mats":{"*":E+'siege_battering_ram.png'}}],"Shown at model size. In game it's scaled up 1.35x.")
 g("quartermaster","Quartermaster","Mobs",[{"label":"Quartermaster","model":"entity","geo":"geometry.villager.v1.8","mats":{"*":E+'siege_quartermaster.png'}}])
+g("roofs_regional","Roof shingles by region","Regional styles",[cube(r.title(),one('regional/siege_roof_shingles_'+r)) for r in ("vale","frostmarch","saltreach","emberwaste","blackfen")],"Slate, frosted slate, driftwood shakes, fired clay, mossy thatch. Painted, not wired as blocks yet.")
+g("plates","Your eight paintings, game size","Lore and library",[{"label":"Plate %d"%k,"model":"item","mats":{"*":'textures/entity/portrait/plate_%d.png'%k}} for k in range(1,9)],"Your own paintings, only made smaller (three blocks by two). They hang in the settlement Libraries; the last one only in the Burned Archive.")
+g("particles","Particles","The Hollow",[{"label":"Sheet","model":"item","mats":{"*":'textures/particle/hc_particles.png'}}],"Mote, vein spark, glint, ash flake, spore, sung note, ember, moss drip. Seven effects are defined; nothing uses them yet.")
+g("moon","The moon","Other",[{"label":"Phases","model":"item","mats":{"*":'textures/environment/moon_phases.png'}}],"A hairline violet crack that shows more the fuller the moon is.")
+g("job_npcs","Job NPCs","Mobs",[{"label":n.title(),"model":"entity","geo":"geometry.villager.v1.8","mats":{"*":E+'siege/npc/job_%s.png'%n}} for n in ("farmer","woodcutter","quarryman","smith","fisher","hunter","herbalist","moneyer")],"The people you sell goods to. Painted, not wired into the game yet.")
+g("steeds","Steed coats","Horses and rail",[{"label":n,"model":"horse","geo":"geometry.horse.v2","mats":{"*":E+'siege/steed_%s.png'%k}} for n,k in (("Vale Courser","vale"),("Frostmarch Destrier","frostmarch"),("Saltreach Runner","saltreach"),("Emberwaste Sandstrider","emberwaste"),("Blackfen Mire-Pony","blackfen"),("Crossbred","crossbred"),("Glimstrider","hollow"),("Knight Warhorse barding (overlay)","warhorse"),("Caparison (overlay)","caparison"))],"One coat per region, the crossbred, the Glimstrider, and two layers worn over a coat. Painted, not wired into the game yet.")
 g("barding","Castle Guard Barding","Mobs",[{"label":"On a horse","model":"horse","geo":"geometry.horse.v2","mats":{"*":E+'horse2/armor/horse_armor_iron.png'}}],"Replaces iron horse armor.")
 for gid,name in [("archer","Archer"),("man_at_arms","Man-at-Arms")]:
     g(gid,name,"Mobs",[{"label":nice(c),"model":"entity","geo":"geometry.humanoid.custom","swatch":DYE[c],"mats":{"*":E+f'siege/{gid}_{c}.png'}} for c in ['red']+[c for c in COLORS if c!='red']],
@@ -278,6 +286,8 @@ geos['geometry.armor1']={"tw":64,"th":32,"bones":[bone("head",[0,24,0],[c([-4,24
 geos['geometry.armor2']={"tw":64,"th":32,"bones":[bone("body",[0,24,0],[c([-4,12,-2],[8,12,4],[16,16],0.5)]),
   bone("rightLeg",[-1.9,12,0],[c([-3.9,0,-2],[4,12,4],[0,16],0.5)]),bone("leftLeg",[1.9,12,0],[c([-0.1,0,-2],[4,12,4],[0,16],0.5,True)])]}
 geos.update(bgeos)
+import glob as _g
+g("skill_icons","Skill icons","Town hall",[{"label":os.path.basename(f)[:-4].replace('_',' ').title(),"model":"item","mats":{"*":'textures/ui/hc/skill/'+os.path.basename(f)}} for f in sorted(_g.glob(os.path.join(RP,'textures/ui/hc/skill/*.png')))],"One icon for every skill on the Tree of Oaths, coloured by branch. Painted, not shown in the menu yet.")
 # ---- catch-all: every PNG in the pack that no group above shows gets a place, so nothing can be missing from the Studio
 _seen=set(tex); _left={}
 for _d,_,_fs in os.walk(RP+'textures'):

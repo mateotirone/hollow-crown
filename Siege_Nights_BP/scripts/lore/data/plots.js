@@ -146,7 +146,7 @@ export const PLOT_LORE = {
     },
   },
 
-  Rimeholt: {
+  Frosthelm: {
     was: "A mining camp, older than the kingdom. The shelf you stand on is not natural: it is the spoil of hundreds of years of digging, levelled and grown over. There is green in the rock here, copper, and a cart road that runs up into the mountain and stops at a wall of ice.",
     angle: "Queen Maelis and the casting of the Founding Bell.",
     lead: "bellfounders_mine",
@@ -160,7 +160,7 @@ export const PLOT_LORE = {
         "A bell does not make silence. Any fool knows that. But two notes a hair apart will eat each other, and where they meet there is a stillness you can stand in.\n\nThat is all the Queen is asking of me. One note, a hair off theirs, loud enough to cover a country. She calls it ringing the land quiet. I call it a wall you cannot see.",
         "I have told her what she will not hear. A wall keeps two sides apart. It does not make the other side go away, and it does not make them stop singing. It only means we will no longer hear them when they ask.\n\nShe said, \"Then cast it well, and nobody will ever need to.\" It is cast well. I am sorry for that, some nights.",
       ], "A bell-founder's notes went with the bronze. A town's smiths would have kept a copy."),
-      P("Why We Left the Low Gallery", "The miners of Rimeholt, by their marks", [
+      P("Why We Left the Low Gallery", "The miners of Frosthelm, by their marks", [
         "After the great bell was rung the note in the low gallery stopped. The captain said good riddance. But a mine with a sound in it that suddenly has none is a worse thing to work in, and the men would not go below the third level.\n\nWe walled it with ice, which here is cheaper than stone and lasts as long.",
         "Set down so that our grandchildren know: we did not wall it because of what was in there. Nothing was in there. We walled it because of what it felt like after, which was a room where someone had been talking and had been shut out mid-sentence.\n\nIf it ever sings again, do not be frightened. Be ashamed, and then listen.",
       ], "Miners sealed their own best gallery and wrote down why. It took a city to dig the record out."),
@@ -172,7 +172,7 @@ export const PLOT_LORE = {
         "The founder: one note, a hair off theirs, loud enough to cover a country. \"She calls it ringing the land quiet.\"",
         "The miners: after the great bell was rung, the note in the low gallery stopped.",
       ],
-      question: "What was cast from the copper of Rimeholt?",
+      question: "What was cast from the copper of Frosthelm?",
       accept: ["thefoundingbell", "foundingbell", "abell", "bell", "thebell", "thegreatbell", "maelisbell"],
       solved: "The Founding Bell of Queen Maelis. It did not drive anything away. It was a wall of sound, cast a hair off the other world's own note, and your settlement stands on the spoil heap it was dug from.",
     },
@@ -405,7 +405,7 @@ export const PLOT_LORE = {
 
 export const slugOf = (name) => String(name ?? "").toLowerCase().replace(/[^a-z]/g, "");
 export const PLOT_NAMES = Object.keys(PLOT_LORE);
-const COLORS = { Harrowford: "§2", Oakmere: "§2", Thistledown: "§2", Wrenfield: "§2", Rimeholt: "§b", Wolfcairn: "§b", Gullcliff: "§3", Tidewatch: "§3", Reedmoor: "§5", Lanternbog: "§5", Redmesa: "§c", Dunehold: "§c" };
+const COLORS = { Harrowford: "§2", Oakmere: "§2", Thistledown: "§2", Wrenfield: "§2", Frosthelm: "§b", Wolfcairn: "§b", Gullcliff: "§3", Tidewatch: "§3", Reedmoor: "§5", Lanternbog: "§5", Redmesa: "§c", Dunehold: "§c" };
 const FOUND = [
   "Under the Plot Stone, the day the first settler arrives.",
   "Turns up when the settlement becomes a Town.",

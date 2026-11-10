@@ -40,6 +40,12 @@ export const CHOIR = {
 // The fight's floor plan, inside the Court's round hall.
 const HEART = { center: { x: COURT.center.x, y: COURT.floorY, z: COURT.center.z }, outerRadius: COURT.radius - 3, innerRadius: 7, singerRadius: 22 };
 
+// The Choir's own effect: a ring of violet light (resource pack particle siege:choir_ring).
+// particle() swallows errors, so the fight is unaffected if the effect is missing.
+const RING = "siege:choir_ring";
+const ringAt = (f, loc, up = 0.3) => particle(f.dim, RING, { x: loc.x, y: loc.y + up, z: loc.z });
+const windUp = (f) => { try { ringAt(f, f.entity.location, 1.6); } catch { /* the Conductor is gone */ } }; // around the Conductor while it gathers a note
+
 const CONDUCTOR = "siege:choir_conductor";
 const SINGER = "siege:choir_singer";
 const ROOT_TAG = "siege_choir_root";
@@ -103,7 +109,7 @@ registerBoss({
   intro: "turns toward you. Seven voices begin to sing.",
   phaseNames: ["", "The Closing"],
   attacks: [
-    { id: "toll", every: 200, windup: 30, rest: 50, warn: "The Toll! Jump the ring!", sound: "block.bell.hit",
+    { id: "toll", show: windUp, every: 200, windup: 30, rest: 50, warn: "The Toll! Jump the ring!", sound: "block.bell.hit",
       when: (f) => stage(f) >= 1,
       hit: (f) => {
         const c = centre();
@@ -111,6 +117,7 @@ registerBoss({
           f.after(step * 5, () => {
             const r = step * 2 + 3;
             ring(f.dim, { x: c.x, y: c.y + 0.3, z: c.z }, r, "minecraft:sonic_explosion", Math.max(6, r));
+            if (step % 3 === 0) ringAt(f, c);
             for (const p of f.players()) {
               if (Math.abs(flat(p.location, c) - r) > 1.6 || !p.isOnGround) continue;
               hurt(p, CHOIR.tollDamage, "magic");
@@ -119,7 +126,7 @@ registerBoss({
           });
         }
       } },
-    { id: "undertow", every: 320, windup: 40, rest: 70, warn: "The Hollow pulls! Crouch and hold on!", sound: "mob.elderguardian.curse",
+    { id: "undertow", show: windUp, every: 320, windup: 40, rest: 70, warn: "The Hollow pulls! Crouch and hold on!", sound: "mob.elderguardian.curse",
       when: (f) => stage(f) >= 1,
       hit: (f) => {
         const c = centre();
@@ -132,10 +139,11 @@ registerBoss({
           });
         }
       } },
-    { id: "echo", every: 280, windup: 25, rest: 20, warn: "Echo! Hold your blows!", sound: "block.amethyst_block.resonate",
+    { id: "echo", show: windUp, every: 280, windup: 25, rest: 20, warn: "Echo! Hold your blows!", sound: "block.amethyst_block.resonate",
       when: (f) => stage(f) >= 1,
       hit: (f) => {
         f.data.echoUntil = f.tick + CHOIR.echoTicks;
+        windUp(f);
         f.say("§dThe Choir holds one long note. Anything you strike with now comes back.");
       } },
   ],
@@ -196,6 +204,8 @@ registerBoss({
       }
       // A thread of light from each living Singer to the Conductor shows what is shielding it.
       if (f.tick % 20 === 0) for (const s of singers(f)) particle(f.dim, "minecraft:villager_happy", { x: s.location.x, y: s.location.y + 2.6, z: s.location.z });
+      // The Hymn: a ring of light at the foot of every Singer still singing, and one round the Conductor they shield.
+      if (f.tick % 40 === 0) { for (const s of singers(f)) ringAt(f, s.location); windUp(f); }
     }
     if (st === 2) {
       // The song closes in, ring by ring, each one warned first. Outside the ring it hurts.

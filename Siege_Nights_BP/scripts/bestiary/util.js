@@ -2,6 +2,7 @@
 
 import { world, system, ItemStack, EquipmentSlot } from "@minecraft/server";
 import { ITEMS } from "./data.js";
+import { sfx } from "../core/sfx.js";
 
 export const rand = (a, b) => a + Math.random() * (b - a);
 export const pickOne = (list) => list[Math.floor(Math.random() * list.length)];
@@ -49,11 +50,7 @@ export function line(dim, from, to, id, step = 0.8) {
 }
 
 export function sound(dim, id, loc, pitch = 1, volume = 1) {
-  try {
-    dim.playSound(id, loc, { pitch, volume });
-  } catch {
-    // cosmetic only
-  }
+  sfx(dim, id, loc, { pitch, volume });
 }
 
 export function effect(entity, name, ticks, amplifier = 0, showParticles = false) {

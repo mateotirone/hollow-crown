@@ -7,6 +7,7 @@ import { KEEP_BANNER, KEEP_HEART } from "./constants.js";
 import { saveState, state } from "./state.js";
 import { tierOf } from "./territory.js";
 import { overworld, ownerOf, ownerTag, title } from "./util.js";
+import { sfx } from "../core/sfx.js";
 
 // ---------- Settlements and keeps ----------
 // Each player founds one settlement by placing a Keep Banner. Custom blocks can only be
@@ -78,7 +79,7 @@ export function keepFallen(owner) {
   for (const player of world.getPlayers()) {
     if (player.id === owner) {
       title(player, "§4Your Keep has fallen", "§7Raise a new Keep Banner and rebuild");
-      player.playSound("mob.wither.death", { volume: 0.5 });
+      sfx(player, "mob.wither.death", { volume: 0.5 });
     } else {
       player.sendMessage(`§c${keep?.name ?? "A"}'s keep has fallen to the raiders!`);
     }
