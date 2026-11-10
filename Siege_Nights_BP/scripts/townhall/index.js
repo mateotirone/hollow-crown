@@ -33,9 +33,10 @@ import { knightTick, chargeTick } from "./knight.js";
 import { markedTick } from "./marked.js";
 import "./showcase.js";
 import { rosterMenu } from "./roster.js";
+import { treeCells, treeLayout, COLS, ROWS } from "./tree_layout.js";
 import { wallMenu, flyby } from "./flyby.js";
 export { flyby };
-import { rumorMenu, rumorTick, rumorsFor, describe, jobTier } from "./rumors.js";
+import { rumorMenu, rumorTick, rumorsFor, describe, jobTier, remember, KEEPSAKES } from "./rumors.js";
 
 export { grantPoints, grantRenown, heroOf, hallOf };
 export { startBuild } from "./build.js"; // other features can raise their own templates with the same engine
@@ -254,3 +255,47 @@ api.addTests("townhall", {
     api.assert(typeof halls() === "object");
   },
 }, { gameOnly: true });
+
+api.addTests("tree screen", {
+  "every skill has its own place on the tree screen": () => {
+    for (const branch of Object.keys(BRANCHES)) {
+      const pos = treeLayout(branch), seen = new Set();
+      for (const s of SKILLS.filter((k) => k.branch === branch)) {
+        const p = pos[s.id];
+        api.assert(p && p.col >= 0 && p.col < COLS && p.row === s.ring - 1, `${s.id} is placed`);
+        api.assert(!seen.has(`${p.col},${p.row}`), `${s.id} shares a cell`);
+        seen.add(`${p.col},${p.row}`);
+      }
+      const cells = treeCells(branch);
+      api.assertEqual(cells.length, COLS * ROWS);
+      api.assertEqual(cells.filter((c) => c && c !== "back").length, SKILLS.filter((k) => k.branch === branch).length);
+    }
+  },
+});
+
+// Debts from the Rumor Board: people you worked for unpaid stand with your walls. +1 guard each, up to 3.
+api.addGuardLimitHook((owner, limit) => {
+  const p = world.getAllPlayers().find((x) => x.id === owner);
+  return limit + (p ? Math.min(3, heroOf(p).rumorDebts ?? 0) : 0);
+});
+
+api.addTests("rumor board variety", {
+  "the board never repeats itself": () => {
+    // play 120 days, always taking the first job offered
+    const hero = {}, seen = new Map();
+    let last;
+    for (let day = 0; day < 120; day++) {
+      const jobs = rumorsFor(day, "tester", Math.floor(day / 3), { lastType: hero.lastJobType, recent: hero.rumorRecent });
+      api.assertEqual(jobs.length, 3);
+      api.assert(!jobs.some((j) => j.type === last), `day ${day} offers the kind of job just done`);
+      api.assertEqual(new Set(jobs.map((j) => j.giver)).size, 3, "three different people ask");
+      const job = jobs[0];
+      const key = `${job.type}|${job.giver}|${job.place}|${job.reason}`;
+      seen.set(key, (seen.get(key) ?? 0) + 1);
+      api.assert(seen.get(key) <= 4, `the same job came up ${seen.get(key)} times: ${key}`);
+      remember(hero, job);
+      last = job.type;
+    }
+    api.assert(KEEPSAKES.length >= 10 && new Set(KEEPSAKES.map((k) => k[1])).size === KEEPSAKES.length, "keepsakes are all different");
+  },
+});

@@ -121,6 +121,20 @@ Needs a settlement first (place a Keep Banner). Cheats on for the `/scriptevent`
 7. **Knight.** `/scriptevent siege:townhall_path knight` switches you for testing. Learn Shield Bash (sneak + hit with a shield in the off hand), Lunge (sprint + hit), Rallying Cry (use the Oath Banner).
 8. `/scriptevent siege:townhall_path none` clears your path, `/scriptevent siege:townhall_reset` wipes your progress.
 
+
+### The tree screen (new: please check this one first)
+
+1. Run `/scriptevent siege:showcase`, walk into the hall and click the Tree of Oaths. Pick **Arcana** or **Keep**.
+2. ✅ A wide dark panel opens with the branch name in gold, your skill points under it, and the skills laid out in rows (first ring at the top) with lines joining them. Each skill is a small round badge with its name under it. Empty spots are empty.
+3. Click a skill. ✅ Its page opens with what it does and a button to swear it. Go back: the badge has changed.
+4. Open a normal menu (the Town Hall menu, the Rumor Board). ✅ These still look like ordinary Minecraft menus.
+
+If step 2 shows a blank or broken screen, press Escape, open the Tree again and choose **Show branches as plain lists** on its first page. Everything works from the lists. Send me a screenshot of what the broken screen looked like.
+
+### Rumor Board variety
+
+Take and finish a few jobs from the Rumor Board over several in-game days. ✅ The board never offers the kind of job you just did, the three jobs come from three different people, and about one job in three ends with a surprise: a named keepsake, double pay, extra Renown, or someone who cannot pay and stands with your walls instead.
+
 ## The High Throne, the Citadel and usurping (The Hollow Crown)
 
 Needs a settlement (place a Keep Banner on flat, open land) and cheats on. Best with a second player for steps 6 to 9.
@@ -346,8 +360,19 @@ In game (cheats on, a settlement founded, or `/scriptevent siege:showcase` first
    two minutes. Kill everything between tides to break it. It should rain, and patrols should find you outside the settlement.
 6. `/scriptevent siege:reach_boss morvane`: everything stops ("The knocking has stopped"). `reach_night muster` for an after-story raid; the night
    watch now offers Remembered Nights.
+8. Variety: play three siege nights in a row (`reach_night` each evening). Each should have a different shape (named in chat after the
+   night, and under "The night watch") and a different army. Let a captain live through a night you lose: the next full night it returns by name.
+   Honours you earn appear in chat as "Night honour: ..." and under "The night watch".
 7. `/scriptevent siege:reach_reset` puts it all back. `/scriptevent siege:reach_boss <reeve|huntsman|bride|seneschal|mother|warlord_king|choir>` and
    `/scriptevent siege:reach_set <0-100>` move the story by hand.
 
 Things I could not check offline: whether a dusk-to-midnight wait feels right, whether Hollow soldiers march on the keep heart like raiders do,
 the darkness and knockback effects, and the rain.
+
+## Never the same fight twice (bestiary)
+
+- Beat any regional boss once, then summon it again (`/scriptevent siege:bestiary_summon reeve`): its name carries a temper (for example "The Clockwork Reeve, Unquiet") and the fight has one extra problem. Beat it again and you get a named echo shard for that temper. The next rematch wears a different temper.
+- Watch a boss for a minute: it should not use the same warned attack twice in a row when it has another ready.
+- New attacks to look for: the Reeve puts you back where you stood ("The hands turn back"), the Huntsman lays snares, the Mother hums (look away).
+- In a siege from the third on, roughly one raider in seven has a yellow name such as "Fleet Grey Host Axeman" and behaves to match.
+- `/scriptevent siege:variety` lists what you have killed most and flags anything met more than 40 times per variant.
