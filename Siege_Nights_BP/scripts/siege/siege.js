@@ -12,6 +12,7 @@ import { isOnline, overworld, ownerOf, ownerTag, title } from "./util.js";
 import { pay } from "../economy/coins.js";
 import { fromEmeralds, coins } from "../economy/rules.js";
 import { FACTIONS, announcePlan, buff, buyArmy, planSiege, rememberSiege, spawnWarlord } from "./warplan.js";
+import { sfx } from "../core/sfx.js";
 
 // ---------- Siege waves ----------
 
@@ -46,7 +47,7 @@ export function startSiege(provokedBy) {
     const plan = state.plans[player.id];
     if (plan) announcePlan(player, plan);
     else title(player, "§cSiege Night", "§7The settlements are under attack!");
-    player.playSound("raid.horn");
+    sfx(player, "sig.siege_horn");
   }
   emit("siegeStart", { provokedBy });
 }
@@ -103,7 +104,7 @@ export function spawnAssault() {
 
   for (const player of world.getPlayers()) {
     player.onScreenDisplay.setActionBar(`§6Assault ${assaultNumber} of ${total} incoming!`);
-    player.playSound("raid.horn");
+    sfx(player, "horn.assault");
   }
   state.assaultsLeft -= 1;
   state.nextAssaultTick = system.currentTick + applyFilter("assaultDelay", SETTINGS.ticksBetweenAssaults, { assault: assaultNumber + 1, total });
@@ -138,7 +139,7 @@ export function endSiege(outcome) {
       if (emeralds > 0) pay(player, fromEmeralds(emeralds), "siege");
       player.addExperience(20 + threat * 2);
       title(player, "§aSiege Broken!", `§7You held the keep. +${coins(fromEmeralds(emeralds))}`);
-      player.playSound("random.levelup");
+      sfx(player, "random.levelup");
       emit("siegeReward", { player, emeralds, threat });
     } else if (outcome === "won") {
       title(player, "§aThe siege is over", "§7The raiders have been driven off");

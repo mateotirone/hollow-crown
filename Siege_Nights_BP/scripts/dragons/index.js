@@ -26,6 +26,7 @@ import { store, dragonOf, save, valid, entityOf, recordOfEntity, ownerIdOf, canH
 import { flightTick, defenceTick, mountOf, breathe, takeOff, land, announceLevel, rideOf, onCrash } from "./flight.js";
 import "./tests.js";
 import "./showcase.js";
+import { sfx } from "../core/sfx.js";
 
 const say = (player, text) => player.onScreenDisplay.setActionBar(text);
 const posKey = (loc) => `${loc.x},${loc.y},${loc.z}`;
@@ -58,7 +59,7 @@ function takeEgg(player, block) {
   }
   save();
   give(player, EGG);
-  player.playSound("random.pop");
+  sfx(player, "random.pop");
   player.sendMessage("§6You lift a Dragon Egg from the nest. It is heavier than it looks, and warm on one side. §7Set it on a Dragon Roost in your settlement to hatch it.");
 }
 
@@ -70,7 +71,7 @@ function hatchEgg(player, rec, block) {
   rec.warmAt = world.getAbsoluteTime();
   rec.roost = { x: block.location.x, y: block.location.y, z: block.location.z };
   save();
-  block.dimension.playSound("block.campfire.crackle", block.location);
+  sfx(block.dimension, "block.campfire.crackle", block.location);
   player.sendMessage(`§6The egg settles into the Roost. §7It will hatch in about ${S.hatchDays} days. Stay close when it does: it bonds with whoever feeds it.`);
 }
 
@@ -143,7 +144,7 @@ async function trainMenu(player, rec) {
   else {
     train(rec, key);
     refresh(rec);
-    player.playSound("random.orb");
+    sfx(player, "random.orb");
     player.sendMessage(`§6${rec.name} learns: ${TRAINING[key].name} ${rec.stats[key]}/${TRAINING[key].max}.`);
   }
   return trainMenu(player, rec);
@@ -237,7 +238,7 @@ function feed(player, entity, rec) {
   const leveled = addXp(rec, S.feedXp);
   try {
     entity.addEffect("regeneration", 100, { amplifier: 1, showParticles: false });
-    entity.dimension.playSound("random.eat", entity.location, { pitch: 0.7 });
+    sfx(entity.dimension, "random.eat", entity.location, { pitch: 0.7 });
     entity.dimension.spawnParticle("minecraft:heart_particle", { x: entity.location.x, y: entity.location.y + 1.5, z: entity.location.z });
   } catch {
     // looks only
@@ -338,7 +339,7 @@ world.beforeEvents.playerInteractWithEntity.subscribe((event) => {
       consumeHeld(player);
       rec.saddled = true;
       refresh(rec);
-      target.dimension.playSound("armor.equip_leather", target.location);
+      sfx(target.dimension, "armor.equip_leather", target.location);
       say(player, `§6${rec.name} takes the saddle. §7Click it holding anything to climb on. An empty hand pets it.`);
     });
   }
@@ -367,7 +368,7 @@ function horn(player) {
   if (rec.status === "wounded") return say(player, `§7${rec.name} is wounded and resting at its Roost.`);
   const now = system.currentTick;
   if ((called.get(player.id) ?? 0) > now) return say(player, `§7Give ${rec.name} a moment (${Math.ceil((called.get(player.id) - now) / 20)}s).`);
-  player.dimension.playSound("raid.horn", player.location, { volume: 3, pitch: 0.7 });
+  sfx(player.dimension, "raid.horn", player.location, { volume: 3, pitch: 0.7 });
   if (rec.down) return say(player, `§c${rec.name} does not stir.`);
   const no = refusal(rec, "come");
   if (no) return tell(player, rec, no);
@@ -525,7 +526,7 @@ function growthTick() {
   }
   scanDragons((rec) => {
     const owner = world.getPlayers().find((p) => p.id === rec.owner);
-    owner?.playSound("random.levelup");
+    sfx(owner, "random.levelup");
     owner?.sendMessage(rec.stage === "adult"
       ? `§6${rec.name} is grown. §7Saddle it, climb on and press jump to fly. Watch its Flight bar: when it empties, it comes down.`
       : `§6${rec.name} is a Fledgling now. §7With a Dragon Saddle it will carry you on foot. It cannot fly yet.`);

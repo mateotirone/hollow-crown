@@ -44,6 +44,7 @@ import { playReveal } from "./reveal.js";
 import { REVEAL } from "../lore/data/reveal.js";
 import { spawnChampion } from "./champions.js";
 import { announce, effect, flat, heal, healthOf, heroOf, hurt, particle, ring, shove, sound } from "./util.js";
+import { sfx } from "../core/sfx.js";
 
 export const MORVANE = {
   type: "siege:oswin_the_last", // the entity keeps its old id; players only ever see "Morvane"
@@ -236,7 +237,7 @@ function enter(f, n, { restart = false, quiet = false } = {}) {
     for (const p of party(f)) {
       try {
         p.onScreenDisplay.setTitle(`§5${st.name}`, { subtitle: `§7${n + 1} of ${STAGES.length}${restart ? "  ·  again" : ""}`, fadeInDuration: 5, stayDuration: 50, fadeOutDuration: 15 });
-        p.playSound("mob.wither.ambient", { pitch: 0.6, volume: 0.7 });
+        sfx(p, "mob.wither.ambient", { pitch: 0.6, volume: 0.7 });
       } catch { /* offline */ }
     }
   }
@@ -536,6 +537,7 @@ function tollRing(f, damage) {
     f.after(step * 5, () => {
       const r = step * 2 + 3;
       ring(f.dim, { x: c.x, y: c.y + 0.3, z: c.z }, r, "minecraft:sonic_explosion", Math.max(6, r));
+      particle(f.dim, "siege:choir_ring", { x: c.x, y: c.y + 0.4, z: c.z });
       for (const p of f.players()) {
         if (Math.abs(flat(p.location, c) - r) > 1.6 || !p.isOnGround) continue;
         hurt(p, damage, "magic");
@@ -579,7 +581,9 @@ registerBoss({
         const t = c && f.players().find((p) => p.id === c.id);
         if (!t) return;
         const v = t.getViewDirection();
+        particle(f.dim, "siege:vein_spark", f.entity.getHeadLocation()); // where he was
         try { f.entity.teleport({ x: t.location.x - v.x * 1.6, y: t.location.y, z: t.location.z - v.z * 1.6 }, { facingLocation: t.location }); } catch { /* blocked */ }
+        particle(f.dim, "siege:vein_spark", f.entity.getHeadLocation()); // where he is
         if (flat(t.location, c.at) < 3) hurt(t, dmg(f, 10), "entityAttack", f.entity);
       } },
     { id: "tollmen", every: 600, windup: 20, warn: "The Crown tolls. Tollmen answer!", sound: "block.bell.hit",

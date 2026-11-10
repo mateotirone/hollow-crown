@@ -20,9 +20,9 @@ addTests("rails", {
     assertEqual(nextId(list), 4);
   },
   "the network map hides stations you haven't found": () => {
-    const lines = networkLines([S(1, "Kingsrest", 0, 0), S(2, "Hollowfast", 0, -400), S(3, "Mateo's Depot", 9, 9, { owner: "p" })], [1, 3], { x: 0, z: 0 });
+    const lines = networkLines([S(1, "Kingsrest", 0, 0), S(2, "Rimehold", 0, -400), S(3, "Mateo's Depot", 9, 9, { owner: "p" })], [1, 3], { x: 0, z: 0 });
     assert(lines.some((l) => l.includes("Kingsrest")), "found one is named");
-    assert(lines.some((l) => l.includes("???")) && !lines.some((l) => l.includes("Hollowfast")), "unfound one is hidden");
+    assert(lines.some((l) => l.includes("???")) && !lines.some((l) => l.includes("Rimehold")), "unfound one is hidden");
     assert(lines.some((l) => l.includes("Depots")), "depots get their own group");
   },
   "express only pushes on straight, flat track": () => {
