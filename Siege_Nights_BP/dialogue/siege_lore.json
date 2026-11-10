@@ -784,7 +784,7 @@
       {
         "scene_tag": "siege_lore_mag_cough",
         "npc_name": "Old Mag",
-        "text": "Marsh mallow root, honey, don't breathe the fog after dark. Two emeralds, which I'll waive, because you asked a sensible question in a house full of nonsense.\n\nNow. Do you want the cough cure, or do you want to know why I'm old?",
+        "text": "Marsh mallow root, honey, don't breathe the fog after dark. Two coins, which I'll waive, because you asked a sensible question in a house full of nonsense.\n\nNow. Do you want the cough cure, or do you want to know why I'm old?",
         "buttons": [
           {
             "name": "Why are you old?",
@@ -2066,7 +2066,7 @@
       {
         "scene_tag": "siege_lore_isolde_first",
         "npc_name": "Warden Isolde",
-        "text": "Welcome to Sunscar. Water is two emeralds a skin, shade is free, and before you ask: the wind.\n\nThe statues. Everyone asks. The desert wind wore the faces away. It's in the town record.",
+        "text": "Welcome to Sunscar. Water is two coins a skin, shade is free, and before you ask: the wind.\n\nThe statues. Everyone asks. The desert wind wore the faces away. It's in the town record.",
         "buttons": [
           {
             "name": "All of them? Only the faces?",

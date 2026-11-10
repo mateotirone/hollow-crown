@@ -9,8 +9,8 @@
             {
               "wants": [
                 {
-                  "item": "minecraft:emerald",
-                  "quantity": 6
+                  "item": "siege:coin",
+                  "quantity": 48
                 }
               ],
               "gives": [
@@ -25,8 +25,8 @@
             {
               "wants": [
                 {
-                  "item": "minecraft:emerald",
-                  "quantity": 2
+                  "item": "siege:coin",
+                  "quantity": 16
                 }
               ],
               "gives": [
@@ -41,8 +41,8 @@
             {
               "wants": [
                 {
-                  "item": "minecraft:emerald",
-                  "quantity": 3
+                  "item": "siege:coin",
+                  "quantity": 24
                 }
               ],
               "gives": [
@@ -57,8 +57,8 @@
             {
               "wants": [
                 {
-                  "item": "minecraft:emerald",
-                  "quantity": 2
+                  "item": "siege:coin",
+                  "quantity": 16
                 }
               ],
               "gives": [
@@ -73,8 +73,8 @@
             {
               "wants": [
                 {
-                  "item": "minecraft:emerald",
-                  "quantity": 4
+                  "item": "siege:coin",
+                  "quantity": 32
                 }
               ],
               "gives": [
@@ -89,8 +89,8 @@
             {
               "wants": [
                 {
-                  "item": "minecraft:emerald",
-                  "quantity": 1
+                  "item": "siege:coin",
+                  "quantity": 8
                 }
               ],
               "gives": [
@@ -115,8 +115,12 @@
             {
               "wants": [
                 {
-                  "item": "minecraft:emerald",
-                  "quantity": 10
+                  "item": "siege:gold_coin",
+                  "quantity": 1
+                },
+                {
+                  "item": "siege:coin",
+                  "quantity": 16
                 }
               ],
               "gives": [
@@ -131,8 +135,12 @@
             {
               "wants": [
                 {
-                  "item": "minecraft:emerald",
-                  "quantity": 14
+                  "item": "siege:gold_coin",
+                  "quantity": 1
+                },
+                {
+                  "item": "siege:coin",
+                  "quantity": 48
                 }
               ],
               "gives": [
@@ -147,8 +155,12 @@
             {
               "wants": [
                 {
-                  "item": "minecraft:emerald",
-                  "quantity": 12
+                  "item": "siege:gold_coin",
+                  "quantity": 1
+                },
+                {
+                  "item": "siege:coin",
+                  "quantity": 32
                 }
               ],
               "gives": [
@@ -173,8 +185,8 @@
             {
               "wants": [
                 {
-                  "item": "minecraft:emerald",
-                  "quantity": 5
+                  "item": "siege:coin",
+                  "quantity": 40
                 }
               ],
               "gives": [
@@ -189,8 +201,12 @@
             {
               "wants": [
                 {
-                  "item": "minecraft:emerald",
-                  "quantity": 9
+                  "item": "siege:gold_coin",
+                  "quantity": 1
+                },
+                {
+                  "item": "siege:coin",
+                  "quantity": 8
                 }
               ],
               "gives": [
@@ -205,8 +221,8 @@
             {
               "wants": [
                 {
-                  "item": "minecraft:emerald",
-                  "quantity": 7
+                  "item": "siege:coin",
+                  "quantity": 56
                 }
               ],
               "gives": [
@@ -221,8 +237,8 @@
             {
               "wants": [
                 {
-                  "item": "minecraft:emerald",
-                  "quantity": 5
+                  "item": "siege:coin",
+                  "quantity": 40
                 }
               ],
               "gives": [
@@ -237,8 +253,8 @@
             {
               "wants": [
                 {
-                  "item": "minecraft:emerald",
-                  "quantity": 4
+                  "item": "siege:coin",
+                  "quantity": 32
                 }
               ],
               "gives": [
@@ -258,8 +274,8 @@
             {
               "wants": [
                 {
-                  "item": "minecraft:emerald",
-                  "quantity": 16
+                  "item": "siege:gold_coin",
+                  "quantity": 2
                 }
               ],
               "gives": [
@@ -284,8 +300,8 @@
             {
               "wants": [
                 {
-                  "item": "minecraft:emerald",
-                  "quantity": 8
+                  "item": "siege:coin",
+                  "quantity": 64
                 }
               ],
               "gives": [
@@ -300,8 +316,8 @@
             {
               "wants": [
                 {
-                  "item": "minecraft:emerald",
-                  "quantity": 4
+                  "item": "siege:coin",
+                  "quantity": 32
                 }
               ],
               "gives": [
@@ -316,8 +332,8 @@
             {
               "wants": [
                 {
-                  "item": "minecraft:emerald",
-                  "quantity": 3
+                  "item": "siege:coin",
+                  "quantity": 24
                 }
               ],
               "gives": [
@@ -332,8 +348,8 @@
             {
               "wants": [
                 {
-                  "item": "minecraft:emerald",
-                  "quantity": 2
+                  "item": "siege:coin",
+                  "quantity": 16
                 }
               ],
               "gives": [
@@ -348,8 +364,8 @@
             {
               "wants": [
                 {
-                  "item": "minecraft:emerald",
-                  "quantity": 6
+                  "item": "siege:coin",
+                  "quantity": 48
                 }
               ],
               "gives": [
@@ -364,8 +380,8 @@
             {
               "wants": [
                 {
-                  "item": "minecraft:emerald",
-                  "quantity": 5
+                  "item": "siege:coin",
+                  "quantity": 40
                 }
               ],
               "gives": [
@@ -390,8 +406,8 @@
             {
               "wants": [
                 {
-                  "item": "minecraft:emerald",
-                  "quantity": 32
+                  "item": "siege:gold_coin",
+                  "quantity": 4
                 }
               ],
               "gives": [
@@ -406,8 +422,8 @@
             {
               "wants": [
                 {
-                  "item": "minecraft:emerald",
-                  "quantity": 48
+                  "item": "siege:gold_coin",
+                  "quantity": 6
                 }
               ],
               "gives": [
@@ -427,8 +443,12 @@
             {
               "wants": [
                 {
-                  "item": "minecraft:emerald",
-                  "quantity": 12
+                  "item": "siege:gold_coin",
+                  "quantity": 1
+                },
+                {
+                  "item": "siege:coin",
+                  "quantity": 32
                 }
               ],
               "gives": [

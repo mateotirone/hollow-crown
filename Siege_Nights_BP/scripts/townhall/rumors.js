@@ -1,16 +1,18 @@
 // The Rumor Board: endless jobs put together from parts, so there is always something to do after
 // (and during) the story. Everything here works alone: no job needs a second player.
 //
-// Open it from the Town Hall menu. Three rumors a day, one job at a time. Jobs pay Renown and emeralds,
+// Open it from the Town Hall menu. Three rumors a day, one job at a time. Jobs pay Renown and coins,
 // and every third job pays a skill point, so the board is a steady trickle and never beats the story.
 //
 // Other features can add flavour text:  emit("rumorParts", { givers: [...], places: [...], reasons: { camp: [...] } })
 
-import { world, system, ItemStack } from "@minecraft/server";
+import { world, system } from "@minecraft/server";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
 import * as api from "../siege/api.js";
 import { heroOf, saveHero, grantPoints, grantRenown } from "./hero.js";
 import { heading } from "./progress.js";
+import { payE } from "../economy/coins.js";
+import { worth } from "../economy/rules.js";
 
 export const JOBS_PER_POINT = 3;
 const RUMOR_TAG = "siege_rumor";
@@ -75,7 +77,7 @@ export function rumorsFor(day, playerId, level) {
     } else if (type === "camp") job.need = 3 + tier;
     else job.need = 2 + Math.ceil(tier / 2);
     job.renown = Math.round((type === "supply" ? 40 : type === "bounty" ? 55 : 80) * (1 + tier * 0.35));
-    job.emeralds = (type === "supply" ? 3 : 2) + tier;
+    job.emeralds = (type === "supply" ? 3 : 2) + tier; // old unit (saved with the job): paid as 8 coins each
     return job;
   });
 }
@@ -114,7 +116,7 @@ export function rumorMenu(player) {
     form.body(offers.length ? `${head}\n\nThree rumors reach the hall each day. Take one at a time.` : `${head}\n\nNothing new today. Rumors travel with the dawn.`);
     for (const job of offers) {
       const d = describe(job);
-      form.button(`${d.title}\n§8+${job.renown} Renown, ${job.emeralds} emeralds`);
+      form.button(`${d.title}\n§8+${job.renown} Renown, ${worth(job.emeralds)}`);
       actions.push(() => offerMenu(player, job));
     }
   }
@@ -124,7 +126,7 @@ export function rumorMenu(player) {
 
 function offerMenu(player, job) {
   const d = describe(job);
-  new MessageFormData().title(d.title).body(`${d.text}\n\nPays ${job.renown} Renown and ${job.emeralds} emeralds.`)
+  new MessageFormData().title(d.title).body(`${d.text}\n\nPays ${job.renown} Renown and ${worth(job.emeralds)}.`)
     .button1("Take the job").button2("Back")
     .show(player).then((r) => {
       if (r.canceled || r.selection !== 0) return rumorMenu(player);
@@ -173,7 +175,7 @@ function complete(player) {
   api.title(player, "§6Job done", `§7${describe(job).title}`);
   player.playSound("random.levelup");
   grantRenown(player, job.renown, "rumor", true);
-  player.dimension.spawnItem(new ItemStack("minecraft:emerald", job.emeralds), player.location);
+  payE(player, job.emeralds, "rumor");
   if (hero.jobsDone % JOBS_PER_POINT === 0) grantPoints(player, 1, "word of your deeds spreads");
   api.emit("rumorDone", { player, job });
 }

@@ -68,7 +68,7 @@ export const mirrorPoint = (p, c) => ({ x: 2 * c.x - p.x, y: p.y, z: 2 * c.z - p
 const materials = (...pairs) => pairs.map(([id, n]) => stack(id, n));
 const regionalHoard = (extra) => (f, players) => [
   stack("siege:choir_shard", 1), // the Undertow thread's item: five of these make the Tuning Fork
-  stack("minecraft:emerald", 24 + 8 * players.length), stack("minecraft:diamond", 3 + players.length),
+  stack("siege:gold_coin", 3 + players.length), stack("minecraft:diamond", 3 + players.length),
   stack("siege:hollow_ash", 12), ...extra,
 ];
 
@@ -431,7 +431,7 @@ registerBoss({
     if (alive(ogre)) effect(f.entity, "resistance", 15, 2);
     else if (f.phase === 0 && !f.data.unhorsed) { f.data.unhorsed = true; f.say("§6The ogre falls, and the Warlord King with it. He gets up angry."); }
   },
-  loot: (f, p, first) => (first ? [stack("siege:warlords_brand")] : []).concat(materials(["siege:hollow_ash", 8], ["minecraft:emerald", 16])),
+  loot: (f, p, first) => (first ? [stack("siege:warlords_brand")] : []).concat(materials(["siege:hollow_ash", 8], ["siege:gold_coin", 2])),
   hoard: () => [],
 });
 

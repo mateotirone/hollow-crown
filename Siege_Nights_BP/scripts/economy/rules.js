@@ -38,6 +38,9 @@ export const coins = (n) => `${n} ${n === 1 ? ECON.one : ECON.many}`;
 // An old emerald price in coins
 export const fromEmeralds = (emeralds) => Math.round(emeralds * ECON.perEmerald);
 
+// "16 Regals" for a price that was written as 2 emeralds
+export const worth = (emeralds) => coins(fromEmeralds(emeralds));
+
 export const niceName = (id) => id.replace(/^[a-z]+:/, "").replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
 // Every way to buy something from one NPC and sell it straight back to the same kind of NPC in the same

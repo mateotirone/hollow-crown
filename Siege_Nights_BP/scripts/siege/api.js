@@ -49,6 +49,7 @@ export const addPlanHook = (fn) => addFilter("plan", (plan, { owner, keep }) => 
 export const addRaiderTypeHook = (fn) => addFilter("raiderType", (type, context) => fn(type, context));
 
 // ({ player, emeralds, threat }) => newEmeralds. Change a defender's siege pay before it is handed out.
+// The number is in the old unit: it is paid out in coins at 8 to one (economy/config.js perEmerald).
 export const addRewardHook = (fn) => addFilter("siegeReward", (emeralds, { player, threat }) => fn({ player, emeralds, threat }));
 
 // (owner, base) => number. Change how many guards a settlement can keep.

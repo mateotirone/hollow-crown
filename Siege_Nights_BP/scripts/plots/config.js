@@ -9,7 +9,7 @@ export const MAP = {
   mapCenter: { x: 0, z: 0 }, // middle of the map (Kingsrest, the spawn town, is at -150, -150)
   mapHalfSize: 1250, // the map runs this far from the center each way (0 turns the edge off)
   noElytra: true,
-  elytraReward: [{ item: "minecraft:emerald", count: 24 }], // what an elytra is swapped for
+  elytraReward: [{ item: "siege:gold_coin", count: 3, name: "Gold Regals" }], // what an elytra is swapped for (3 x 64 coins, once 24 emeralds)
 };
 
 // The 12 plots. x/z are the planned Plot Stone spots (builders can adjust; the stone's real spot wins).

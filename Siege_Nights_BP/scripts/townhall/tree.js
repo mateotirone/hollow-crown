@@ -6,6 +6,8 @@ import * as api from "../siege/api.js";
 import { SKILLS, SKILL, BRANCHES, RINGS, RANKS, ROLES, HALL_NAMES, LEVEL_UNLOCKS, canBranch, blockedReason, spentIn, rankOf, levelFromRenown, levelTitle, POWER_ORIGINS } from "./skills.js";
 import { heroOf, saveHero, setPath, grantPoints } from "./hero.js";
 import { hallLevelAt, setTreeLook } from "./townhall.js";
+import { chargeE } from "../economy/coins.js";
+import { worth } from "../economy/rules.js";
 
 export const EMBER = "siege:hollow_ember"; // the fallen shard, before you choose
 export const BOUND_EMBER = "siege:bound_ember"; // the Marked player's focus
@@ -144,12 +146,11 @@ function respec(player, hallLevel) {
   const price = player.getGameMode() === GameMode.Creative ? 0 : hero.level >= 10 ? 10 : 20;
   const refund = spentIn(hero.skills);
   new MessageFormData().title("Unbind your oaths")
-    .body(`Every skill is forgotten and all ${refund} points come back to spend again. Your path, rank progress and Renown stay.\n\nThe Tree asks ${price} emeralds.`)
+    .body(`Every skill is forgotten and all ${refund} points come back to spend again. Your path, rank progress and Renown stay.\n\nThe Tree asks ${worth(price)}.`)
     .button1("Unbind").button2("Back")
     .show(player).then((r) => {
       if (r.canceled || r.selection !== 0) return treeMenu(player, hallLevel);
-      if (api.countItem(player, "minecraft:emerald") < price) return player.sendMessage(`§cYou need ${price} emeralds.`);
-      if (price) api.takeItems(player, "minecraft:emerald", price);
+      if (price && !chargeE(player, price, "respec")) return player.sendMessage(`§cYou need ${worth(price)}.`);
       hero.points += refund;
       hero.skills = {};
       saveHero(player);

@@ -84,7 +84,7 @@ api.addKeepMenuButtons(({ player, owner }) => [
 
 hallMenuExtras.push({ label: "Settlement wall\n§8raise it and watch it rise", icon: "textures/blocks/stonebrick", action: (player, owner) => wallMenu(player, owner) });
 hallMenuExtras.push({ label: "Who's online\n§8players, roles and rulers", icon: "textures/ui/multiplayer_glyph_color", action: (player) => rosterMenu(player) });
-hallMenuExtras.push({ label: "Rumor Board\n§8jobs for Renown and emeralds", icon: "textures/items/paper", action: (player) => rumorMenu(player) });
+hallMenuExtras.push({ label: "Rumor Board\n§8jobs for Renown and coins", icon: "textures/items/paper", action: (player) => rumorMenu(player) });
 
 // ---------- loops ----------
 api.onTick("townhall_rumors", 40, rumorTick);

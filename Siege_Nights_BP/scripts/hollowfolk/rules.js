@@ -20,11 +20,11 @@ export const FOLK = {
   perDay: 8, // raw Choir Ore each village digs per in-game day
   tallyCap: 48, // the most a village Tally holds
   cartShare: 0.5, // share of each Tally carted to the Vault at dawn
-  price: 8, // emeralds per raw ore until the ruler sets a price
+  price: 8, // per raw ore until the ruler sets a price. Old unit: every price here is x8 in coins (8 = 64 Regals)
   minPrice: 1,
   maxPrice: 64,
   freePrice: 12, // price while nobody rules (the miners sell a little for themselves)
-  boatPrice: 4, // emeralds for a Latticewood Boat at a Tally (free for the ruler)
+  boatPrice: 4, // (x8 coins) for a Latticewood Boat at a Tally (free for the ruler)
   robGrab: 16, // most ore a thief takes from one Tally in one go
   robCooldownSeconds: 300, // per village
   vaultSeconds: 20, // how long a thief must stand at the Vault to break it open

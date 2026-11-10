@@ -7,6 +7,7 @@ import {
 } from "../siege/api.js";
 import { spawnChampion } from "../bestiary/champions.js";
 import { CROWN, IDS } from "./config.js";
+import { worth } from "../economy/rules.js";
 import {
   claimNeeded, gauntletProblem, stormAtNightfall, abandoned, compass, EXILE_STAGES, lordId, lordGain, lordChallenger,
 } from "./rules.js";
@@ -100,7 +101,7 @@ function useShard(player) {
     saveCrown();
     addHollowing(-CROWN.hollowShatter);
     player.playSound("random.glass");
-    return player.sendMessage(`§aThe shard shatters. One less Claim against you. §7+${CROWN.shardTreasury} emeralds to the Treasury.${c.ruler.hollowing >= 25 ? " §8§oFor a moment, everything is quiet." : ""}`);
+    return player.sendMessage(`§aThe shard shatters. One less Claim against you. §7+${worth(CROWN.shardTreasury)} to the Treasury.${c.ruler.hollowing >= 25 ? " §8§oFor a moment, everything is quiet." : ""}`);
   }
   player.playSound("block.end_portal_frame.fill");
   addClaim(player, CROWN.claimShard, `an ${CROWN.shard} bound`);

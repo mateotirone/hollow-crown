@@ -13,7 +13,7 @@ function payForElytra(player) {
     const leftover = player.getComponent("minecraft:inventory").container.addItem(new ItemStack(r.item, r.count));
     if (leftover) player.dimension.spawnItem(leftover, player.location);
   }
-  const what = MAP.elytraReward.map((r) => `${r.count} ${r.item.replace("minecraft:", "").replaceAll("_", " ")}`).join(" and ");
+  const what = MAP.elytraReward.map((r) => `${r.count} ${r.name ?? r.item.replace("minecraft:", "").replaceAll("_", " ")}`).join(" and ");
   player.sendMessage(`§6The wings crumble to dust. Nobody flies in this land, but you get ${what} for them.`);
   player.playSound("random.break");
 }

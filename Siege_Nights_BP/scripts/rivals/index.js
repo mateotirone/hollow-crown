@@ -20,10 +20,12 @@
 // Commands: /scriptevent siege:rivals none|few|all     how many empty plots get a lord
 //           /scriptevent siege:rivals list | night | settle | grow <id> | clear
 
-import { world, system, GameMode, ItemStack } from "@minecraft/server";
+import { world, system, GameMode } from "@minecraft/server";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
 import { isReady, getState, keepOf, onTick, moduleStore, on, emit, addFoundingCheck, pick, title } from "../siege/api.js";
 import { applyFilter } from "../core/events.js";
+import { pay } from "../economy/coins.js";
+import { coins, fromEmeralds } from "../economy/rules.js";
 import * as plotsApi from "../plots/claims.js"; // giveToNpc / releaseNpc mark a plot as a lord's in the Plot Atlas (where plots has them)
 import { allPlots, holderOf, mapMode } from "../plots/claims.js";
 import { startBuild, buildFor, worldCells } from "../townhall/build.js";
@@ -321,10 +323,9 @@ function endSiege(lord, won) {
   for (const p of world.getPlayers()) p.sendMessage(`§6${lord.name} has fallen. ${lord.plot} stands empty, hall and all.`);
   if (!player) return;
   const spoils = RIVALS.spoils[lord.tier];
-  const left = player.getComponent("minecraft:inventory").container.addItem(new ItemStack("minecraft:emerald", spoils));
-  if (left) player.dimension.spawnItem(left, player.location);
+  pay(player, fromEmeralds(spoils), "rival lord");
   player.playSound("ui.toast.challenge_complete");
-  title(player, `§6${lord.plot} is taken`, `§7${spoils} emeralds in spoils. The plot can be claimed.`);
+  title(player, `§6${lord.plot} is taken`, `§7${coins(fromEmeralds(spoils))} in spoils. The plot can be claimed.`);
   emit("skillPoints", { player, amount: 1 + lord.tier, source: `toppled ${lord.name}`, renown: 80 * (lord.tier + 1) });
 }
 

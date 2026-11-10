@@ -722,7 +722,7 @@ registerBoss({
   // Knights take his oath-blade, the Marked take the mantle. (No path yet: the blade.)
   loot: (f, p, first) => (first ? [stack(heroOf(p).path === "marked" ? "siege:crownless_mantle" : "siege:oath_of_oswin")] : [])
     .concat([stack("siege:hollow_ash", first ? 16 : 6), stack("minecraft:diamond", first ? 4 : 1)]),
-  hoard: (f, players) => [stack("minecraft:netherite_ingot", 2 + players.length), stack("minecraft:emerald", 64), stack("minecraft:diamond", 8 + players.length), stack("minecraft:enchanted_golden_apple", 2)],
+  hoard: (f, players) => [stack("minecraft:netherite_ingot", 2 + players.length), stack("siege:gold_coin", 8), stack("minecraft:diamond", 8 + players.length), stack("minecraft:enchanted_golden_apple", 2)],
 });
 
 // One of his stage 6 lines, to each player by name
