@@ -16,7 +16,7 @@ import { world, system, BlockPermutation } from "@minecraft/server";
 import { isReady, keepOf, tierOf, TIERS, onTick, moduleStore, on, emit, addFilter, addLandClaim, stoneId, STONE_KINDS, title, CASTLE_BLOCKS, WALL_HP } from "../siege/api.js";
 import { STYLES } from "../townhall/styles.js";
 import { PLOT_PLAN } from "../plots/config.js";
-import { plotAt } from "../plots/claims.js";
+import { plotAt, mapMode } from "../plots/claims.js";
 import { WALLS, WALL_LEVELS, MAX_WALL, bearingToAngle, smoothGround, stationSpots, groundProblem, wallColumns, onWallLine, gateSpot, materialKind, wallArmor, columnKinds, wallSeed } from "./walldata.js";
 import { styleOf } from "./plans.js";
 
@@ -275,6 +275,16 @@ const wallAround = (location, extra) => Object.entries(walls()).find(([, w]) => 
 addLandClaim((location) => {
   const found = wallAround(location, WALLS.landBeyond);
   return found && keepOf(found[0]) ? found[0] : undefined;
+});
+
+// On the map a settlement's land is full size from the day you arrive: just past the wall ring, and siege
+// wins do not grow it (Mateo, 2026-11-10). Off the map the old rule stays: land grows with the tier.
+addFilter("landRadius", (radius) => {
+  try {
+    return mapMode() ? WALLS.radius + WALLS.landBeyond : radius;
+  } catch {
+    return radius;
+  }
 });
 
 // Raiders come at a walled settlement from outside the wall

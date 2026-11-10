@@ -9,7 +9,7 @@ import { GUARD_ARMOR, GUARD_COST, armorTier, guardCount, guardLimit, guardTag, r
 import { keepHealth } from "./keep.js";
 import { nextSiegeDay } from "./siege.js";
 import { state } from "./state.js";
-import { TIERS, settlementAt, tierOf } from "./territory.js";
+import { TIERS, settlementAt, tierOf, landRadius } from "./territory.js";
 import { countItem, overworld } from "./util.js";
 
 // ---------- Menus: the Keep, the Barracks ----------
@@ -32,7 +32,7 @@ export function keepMenu(block, player) {
   const until = nextSiegeDay() - world.getDay();
   const lines = [
     `§l${keep.sovereign ? "Sovereign " : ""}${keep.name}'s ${tier.name}§r`,
-    `Banner: ${COLORS[keep.color ?? 14].replace(/_/g, " ")}   Land: ${tier.radius} blocks   Keep: ${keepHealth(owner, keep)} health`,
+    `Banner: ${COLORS[keep.color ?? 14].replace(/_/g, " ")}   Land: ${landRadius(keep, owner)} blocks   Keep: ${keepHealth(owner, keep)} health`,
     `Sieges won: ${keep.wins ?? 0}   Win streak: ${keep.streak ?? 0}   Warlords slain: ${keep.warlordsSlain ?? 0}`,
     nextTierText(keep),
     "",

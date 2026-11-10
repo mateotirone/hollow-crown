@@ -15,6 +15,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - The Hollow Crown expansion on top of Siege Nights: plots, town hall and skill tree, horses and rails, lore tomes and dialogue, new mobs and bosses, the Undertow dimension, the Crown and Citadel. None of it has been played in a real game yet.
 - A player who takes over a Rival Lord's settlement starts where the lord left off: the same tier, town hall, buildings and wall. A newcomer can pick a lord's plot and the lord steps down. Everything inherited can be changed or pulled down.
 - Rival Lords build on the same mapped layout as players, facing the plot's gate, and raise settlement walls that keep pace with their tier.
+- Rival Lords are active neighbours. Every other day one of them acts, and never does the same kind of thing twice running: they declare war and join the next siege night at your settlement (never the same way twice running), feud with each other until one kneels, demand tribute, send gifts and rumours, offer a truce or an alliance, and put new goods up for trade. From a lord's menu you can trade, send gifts, back them in a feud, buy off a march, and swear or break an oath. A sworn ally sends soldiers to your wall on siege nights. Nothing happens to a player who is offline.
 - Settlement walls vary: stone weathers in patches, towers stand at different heights, arrow slits and lanterns break up long runs, palisade stakes are uneven. Each settlement's wall is its own, and a rebuilt or repaired wall comes out the same.
 
 - Story characters greet you in four different ways instead of one, the dusk ravens have eight lines for each state, moon doors four, and traders have twelve more rumors. No line of lore is heard twice running.
@@ -25,6 +26,8 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - Rumor Board jobs no longer repeat: the board never offers the kind of job you just did, and one job in three ends with a twist. Ten named keepsakes to collect.
 
 ### Changed
+- On the map a settlement's land is full size (60 blocks) from the day you arrive, and siege wins no longer grow it. Tiers still unlock wall levels, buildings and keep health. A Castle's keep now really has 600 health.
+- Toppling a Rival Lord pays its spoils in coins, not emeralds.
 - The High Throne no longer repeats itself: each whisper the Heart gives is heard once per reign, a rival lord brings a different and bigger army every time they come back, a ruling lord never sends the same host twice running, Oath Shard news is worded differently each time, and a ruler banished a second time walks a shorter road back.
 - The add-on is renamed from Siege Nights to The Hollow Crown. The install file is `hollow-crown.mcaddon`. Existing ids keep the `siege:` prefix.
 - Needs Bedrock 26.30 or newer.
