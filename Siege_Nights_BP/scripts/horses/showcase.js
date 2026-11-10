@@ -44,7 +44,7 @@ on("showcase", ({ player, dim, nextSpot, label }) => {
   try {
     dim.getBlock(post)?.setType("hc:breeder_post");
     meta.data.posts[`${post.x},${post.y},${post.z}`] = "sandstrider";
-    label(post, `Breeder's Post\nfoal: ${S.breederPostPrice} emeralds`);
+    label(post, `Breeder's Post\nfoal: ${S.breederPostPrice} Regals`);
   } catch (e) {
     console.warn(`[Hollow Crown] showcase breeder post: ${e}`);
   }

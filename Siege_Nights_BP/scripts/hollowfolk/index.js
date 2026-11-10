@@ -6,7 +6,7 @@
 //   Each has a Foreman (keeps the Tally) and three miners. They are Bedrock's built-in NPC entity,
 //   but we answer the click ourselves, so what they say can follow who rules the Hollow.
 //   Every in-game dawn each village digs ore into its Tally and half is carted to the Vault.
-//   Visitors buy ore from a Foreman for emeralds, or rob the Tally. The Vault is reached from the
+//   Visitors buy ore from a Foreman for coins, or rob the Tally. The Vault is reached from the
 //   Vault Stair, a copper pad on the path just before the Seat: stand on it and sneak.
 //
 // Other threads
@@ -21,7 +21,7 @@
 
 import { world, system, ItemStack } from "@minecraft/server";
 import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
-import { on, emit, onTick, moduleStore, addTests, assert, assertEqual, countItem, takeItems, registerDeck, storyPick, note, markDone } from "../siege/api.js";
+import { on, emit, onTick, moduleStore, addTests, assert, assertEqual, registerDeck, storyPick, note, markDone } from "../siege/api.js";
 import { UNDERTOW_ID, UNDERTOW_LAYOUT as L, HEART, pathX } from "../undertow/layout.js";
 import { RIVER_NODES, riverDistance } from "../undertow/rivers.js";
 import { SITES } from "../undertow/roads.js";
@@ -31,6 +31,10 @@ import { wardenData, wardenOnline, hollowStep } from "../undertow/warden.js";
 import { regentRules } from "../undertow/regent.js";
 import { say, runCmd } from "../undertow/data.js";
 import { FOLK, LINES, moodOf, robVerdict, dig, cart, priceOf, vaultLoot, HAPPENINGS, HAPPENING_GAP_SECONDS, ERRAND_ORE, ERRAND_ASKS, happeningsFor, freshLine } from "./rules.js";
+// Prices and the Vault's takings (vault.emeralds, saved) are counted in the old unit: one is 8 coins.
+import { funds, chargeE, giveCoins } from "../economy/coins.js";
+import { coins, worth, fromEmeralds } from "../economy/rules.js";
+import { ECON } from "../economy/config.js";
 
 export { setFolkVoice } from "./rules.js";
 
@@ -522,8 +526,8 @@ onTick("hollowfolk:vault", 10, () => {
     const loot = vaultLoot(store.data.vault);
     const got = takeFromVault(loot.ore, loot.emeralds);
     if (got.ore) give(p, RAW, got.ore);
-    if (got.emeralds) give(p, "minecraft:emerald", got.emeralds);
-    world.sendMessage(`§c${p.name} has broken the Vault of the Hollow and carried off ${got.ore} ore and ${got.emeralds} emeralds.`);
+    if (got.emeralds) giveCoins(p, fromEmeralds(got.emeralds));
+    world.sendMessage(`§c${p.name} has broken the Vault of the Hollow and carried off ${got.ore} ore and ${worth(got.emeralds)}.`);
   }
 });
 
@@ -539,7 +543,7 @@ function tallyMenu(player, v) {
     : "§8Everything here belongs to the one below.";
   const greeting = mine ? "Crown-wearer! Whatever you need, it is yours." : minerLine(player, m);
   const form = new ActionFormData().title(`The Tally of ${v.name}`)
-    .body(`§o"${greeting}"§r\n\nIn the Tally: §f${stock}§r raw Choir Ore\n${m === "bound" ? "" : `Price: §f${price}§r emeralds each\n`}${rulerLine}${mine ? `\n\nYour Vault holds §f${d.vault.ore}§r ore and §f${d.vault.emeralds}§r emeralds.` : ""}`);
+    .body(`§o"${greeting}"§r\n\nIn the Tally: §f${stock}§r raw Choir Ore\n${m === "bound" ? "" : `Price: §f${worth(price)}§r each\n`}${rulerLine}${mine ? `\n\nYour Vault holds §f${d.vault.ore}§r ore and §f${worth(d.vault.emeralds)}§r.` : ""}`);
   const acts = [];
   const add = (label, fn) => { form.button(label); acts.push(fn); };
   if (mine) {
@@ -551,13 +555,13 @@ function tallyMenu(player, v) {
       say(player, `§dThe miners load the cart at once. ${stock} ore is on its way to your Vault.`);
     });
   } else if (m !== "bound") {
-    if (stock >= 1) add(`Buy 1 (${price} emeralds)`, () => buy(player, v, 1));
-    if (stock >= 8) add(`Buy 8 (${price * 8} emeralds)`, () => buy(player, v, 8));
+    if (stock >= 1) add(`Buy 1 (${worth(price)})`, () => buy(player, v, 1));
+    if (stock >= 8) add(`Buy 8 (${worth(price * 8)})`, () => buy(player, v, 8));
     add("§cRob the Tally", () => robTally(player, v));
   }
   if (mine) add("Have a boat brought to the dock", () => { give(player, BOAT, 1); say(player, "§dA Latticewood Boat, and gladly."); });
-  else if (m !== "bound") add(`Buy a boat (${FOLK.boatPrice} emeralds)`, () => {
-    if (!takeItems(player, "minecraft:emerald", FOLK.boatPrice)) return say(player, `§7A boat is ${FOLK.boatPrice} emeralds.`);
+  else if (m !== "bound") add(`Buy a boat (${worth(FOLK.boatPrice)})`, () => {
+    if (!chargeE(player, FOLK.boatPrice, "boat")) return say(player, `§7A boat is ${worth(FOLK.boatPrice)}.`);
     give(player, BOAT, 1);
     say(player, "§bThe Foreman points you to a Latticewood Boat. The light rivers reach every village.");
   });
@@ -569,7 +573,7 @@ function buy(player, v, n) {
   const d = store.data, m = mood();
   if ((d.stock[v.id] ?? 0) < n) return say(player, "§7The Tally does not hold that much.");
   const cost = priceFor(player, v, m) * n;
-  if (!takeItems(player, "minecraft:emerald", cost)) return say(player, `§7That is ${cost} emeralds. You have ${countItem(player, "minecraft:emerald")}.`);
+  if (!chargeE(player, cost, "choir ore")) return say(player, `§7That is ${worth(cost)}. You have ${coins(funds(player))}.`);
   d.stock[v.id] -= n;
   if (m === "crowned" || m === "regent") d.vault.emeralds += cost;
   store.save();
@@ -580,12 +584,12 @@ function buy(player, v, n) {
 function priceMenu(player) {
   const d = store.data;
   new ModalFormData().title("Price of Choir Ore")
-    .slider("Emeralds for one raw ore, at every Tally", FOLK.minPrice, FOLK.maxPrice, { valueStep: 1, defaultValue: priceOf("crowned", d.price) })
+    .slider(`${ECON.many} for one raw ore, at every Tally`, fromEmeralds(FOLK.minPrice), fromEmeralds(FOLK.maxPrice), { valueStep: ECON.perEmerald, defaultValue: fromEmeralds(priceOf("crowned", d.price)) })
     .show(player).then((r) => {
       if (r.canceled) return;
-      d.price = priceOf("crowned", Number(r.formValues[0]));
+      d.price = priceOf("crowned", Number(r.formValues[0]) / ECON.perEmerald);
       store.save();
-      say(player, `§dEvery Tally now sells at ${d.price} emeralds.`);
+      say(player, `§dEvery Tally now sells at ${worth(d.price)}.`);
     }).catch(() => {});
 }
 
@@ -625,13 +629,13 @@ world.beforeEvents.playerInteractWithBlock.subscribe((e) => {
   system.run(() => {
     const d = store.data, mine = wardenData().id === player.id;
     const form = new ActionFormData().title("The Vault of the Hollow")
-      .body(mine ? `Yours. It holds §f${d.vault.ore}§r raw Choir Ore and §f${d.vault.emeralds}§r emeralds.` : "A block of dark stone with no door and no lock. Something inside it hums.");
+      .body(mine ? `Yours. It holds §f${d.vault.ore}§r raw Choir Ore and §f${worth(d.vault.emeralds)}§r.` : "A block of dark stone with no door and no lock. Something inside it hums.");
     const acts = [];
     if (mine) { form.button("Take everything"); acts.push(() => {
       const got = takeFromVault(d.vault.ore, d.vault.emeralds);
       if (got.ore) give(player, RAW, got.ore);
-      if (got.emeralds) give(player, "minecraft:emerald", got.emeralds);
-      say(player, `§dThe Vault gives up ${got.ore} ore and ${got.emeralds} emeralds.`);
+      if (got.emeralds) giveCoins(player, fromEmeralds(got.emeralds));
+      say(player, `§dThe Vault gives up ${got.ore} ore and ${worth(got.emeralds)}.`);
     }); } else { form.button("§cBreak it open"); acts.push(() => startVault(player)); }
     form.button("Leave"); acts.push(() => {});
     form.show(player).then((r) => { if (!r.canceled) acts[r.selection]?.(); }).catch(() => {});
@@ -671,7 +675,7 @@ system.afterEvents.scriptEventReceive.subscribe((e) => {
     case "hc:folk_status": {
       if (!p) return;
       const d = store.data;
-      say(p, `§dMiners: ${mood()}. Price ${d.price}. Vault ${d.vault.ore} ore, ${d.vault.emeralds} emeralds.\n` + FOLK.villages.map((v) => `${v.name}: ${d.stock[v.id] ?? 0} ore${d.built[v.id] ? "" : " (not built yet)"}`).join("\n"));
+      say(p, `§dMiners: ${mood()}. Price ${d.price}. Vault ${d.vault.ore} ore, ${worth(d.vault.emeralds)}.\n` + FOLK.villages.map((v) => `${v.name}: ${d.stock[v.id] ?? 0} ore${d.built[v.id] ? "" : " (not built yet)"}`).join("\n"));
       break;
     }
   }

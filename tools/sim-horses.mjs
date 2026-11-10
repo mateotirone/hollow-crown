@@ -141,7 +141,7 @@ blocks.set("5,64,5", "siege:stables");
 const stables = mkBlock({ x: 5, y: 64, z: 5 });
 fireEv("world.afterEvents.playerPlaceBlock", { block: stables, player: P });
 ok(store.meta.data.stables.p1 === 1, "stables registered at level 1");
-P.give("minecraft:hay_block", 64); P.give("minecraft:golden_carrot", 64); P.give("minecraft:golden_apple", 20); P.give("minecraft:emerald", 64);
+P.give("minecraft:hay_block", 64); P.give("minecraft:golden_carrot", 64); P.give("minecraft:golden_apple", 20); P.give("siege:gold_coin", 8);
 steed.location = { x: 6, y: 64, z: 6 };
 answers.push("Shadowfax", "Train Jump to 3");
 fireEv("world.beforeEvents.playerInteractWithBlock", { block: stables, player: P }); await settle();

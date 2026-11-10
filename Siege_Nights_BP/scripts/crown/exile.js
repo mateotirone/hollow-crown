@@ -4,10 +4,10 @@ import {
   on, onTick, getState, guardCount, addKeepMenuButtons, title,
 } from "../siege/api.js";
 import { ActionFormData } from "@minecraft/server-ui";
-import { ItemStack } from "@minecraft/server";
 import { CROWN } from "./config.js";
+import { payE } from "../economy/coins.js";
 import { EXILE_STAGES, nextExileStage } from "./rules.js";
-import { crown, saveCrown, playerById, giveItem, addClaim, claimOf, announce, rulerLabel, citadelName } from "./state.js";
+import { crown, saveCrown, playerById, addClaim, claimOf, announce, rulerLabel, citadelName } from "./state.js";
 import { crownStatus, annalLines, endReign, vacate } from "./reign.js";
 import { banish, npcWins } from "./usurp.js";
 
@@ -19,7 +19,7 @@ function complete(player, stage) {
   const done = EXILE_STAGES[stage];
   exile.stage = nextExileStage(stage, c.exiledTimes?.[player.id] ?? 1);
   saveCrown();
-  if (done.emeralds) giveItem(player, new ItemStack("minecraft:emerald", done.emeralds));
+  if (done.emeralds) payE(player, done.emeralds, "exile");
   if (done.claim) addClaim(player, done.claim, done.name);
   const next = EXILE_STAGES[exile.stage];
   title(player, `§5${done.name}`, "§7The Long Road Back");

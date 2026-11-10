@@ -34,7 +34,7 @@ Make the world **Flat** if you can, stand somewhere open, and type `/scriptevent
 - a piece of castle wall with battlements, arrow slits and a working portcullis
 - a Ballista, a Trebuchet and a Battering Ram
 - five Archers, one in each armor, a Man-at-Arms at the Barracks with two villagers to recruit, and a Quartermaster at his desk
-- chests behind you with one of every item, plus emeralds, iron, diamonds, cobblestone and dyes
+- chests behind you with one of every item, plus coins, iron, diamonds, cobblestone and dyes
 
 Then type `/scriptevent siege:showcase siege` to make it night and start a siege on it.
 
@@ -66,13 +66,13 @@ Type the commands in chat (`/` opens it).
 11. `/give @s siege:trebuchet` and `/give @s cobblestone 16`. Place it, look at a spot about 30 blocks away, and click the trebuchet holding cobblestone. ✅ It turns, the arm swings over, and a boulder smashes a crater.
 
 **Guards**
-12. `/give @s siege:barracks`, place it, `/summon villager` next to it, then click the Barracks holding 5 emeralds (`/give @s emerald 20`). ✅ The villager becomes a Man-at-Arms.
-13. Sneak + click the guard. ✅ He goes into your inventory. Place him on a wall. Repeat with sneak + emeralds on the Barracks for an Archer.
+12. `/give @s siege:barracks`, place it, `/summon villager` next to it, then click the Barracks with coins in hand (`/scriptevent siege:economy_give 200`; a guard is 40 Regals). ✅ The villager becomes a Man-at-Arms.
+13. Sneak + click the guard. ✅ He goes into your inventory. Place him on a wall. Repeat with sneak + coins in hand on the Barracks for an Archer.
 
 **Siege**
 14. `/time set 13000`, then `/give @s siege:war_horn` and use it. ✅ "Siege Night" title, then raiders arrive from one direction.
 15. Watch for a while. ✅ Raiders head toward your banner, your archers shoot them, and men-at-arms run out.
-16. `/gamemode s` and fight. Try to win (kill all three waves). ✅ You get emeralds and a win message.
+16. `/gamemode s` and fight. Try to win (kill all three waves). ✅ You get Regals and a win message.
 
 **Quartermaster**
 17. `/give @s siege:quartermaster_desk`, place it, and `/summon villager` next to it. ✅ He becomes the Quartermaster and you can trade with him.
@@ -82,7 +82,7 @@ Type the commands in chat (`/` opens it).
 - Place a Keep Banner anywhere else. ✅ Refused: "Keep Banners can only be raised on a Plot Stone."
 - Place a Keep Banner on top of the Plot Stone. ✅ "Settlement founded" and "You hold <plot>".
 - Click the Plot Stone. ✅ A menu with the region, style and a Plot Atlas button.
-- `/give @s elytra`. ✅ It crumbles within a second and you get 24 emeralds.
+- `/give @s elytra`. ✅ It crumbles within a second and you get 3 Gold Regals.
 - Switch to Survival and try to mine the Plot Stone. ✅ It doesn't break.
 
 **Welcome hall and test area (in the sky)** Creative, after at least one Plot Stone is placed.
@@ -237,8 +237,8 @@ The showcase (`/scriptevent siege:showcase`) puts a Mason's Bench with its mason
 
 1. **Build zones.** `/scriptevent siege:settle_zone` says which zone you stand in. On your land away from the hall you should be able to place anything. Hold any block and walk toward the town hall: a line of blue flame marks the ground kept clear for the hall to grow into, and placing a block inside it should be refused with a message.
 2. **The wilds.** In a test world with no Plot Stones, building outside your land is still allowed. `/scriptevent siege:settle_wilds on` turns the real rule on: outside your land you should only be able to place camp things (torch, bed, chest, crafting table, furnace, campfire, ladder, sapling). `off` and `map` switch back.
-3. **The Mason.** Click the mason. Buy a few blocks with emeralds (the Supplies chest has 64). The first shelf is your region's own materials at a better price. Check the slider, that the blocks arrive, and that the emeralds go.
-4. **A pre-designed building.** Take the Foundation Stone (or buy one from the mason for 4 emeralds), place it on open ground on your land while facing the way the building should run, click it and pick a building. A green outline shows where it will stand. Click the stone again to see the price (planks and building stone you carry, emeralds for what you lack) and raise it. The stone should come back to your pack when it is done. Try placing one so the outline crosses the hall reserve or your border: it should refuse.
+3. **The Mason.** Click the mason. Buy a few blocks with Regals (the Supplies chest has 8 Gold Regals). The first shelf is your region's own materials at a better price. Check the slider, that the blocks arrive, and that the coins go.
+4. **A pre-designed building.** Take the Foundation Stone (or buy one from the mason for 32 Regals), place it on open ground on your land while facing the way the building should run, click it and pick a building. A green outline shows where it will stand. Click the stone again to see the price (planks and building stone you carry, emeralds for what you lack) and raise it. The stone should come back to your pack when it is done. Try placing one so the outline crosses the hall reserve or your border: it should refuse.
 5. **Any building, free.** `/scriptevent siege:settle_build cottage frostmarch` raises one in front of you (cottage, smithy, stable, storehouse, watchtower, market, well, garden; vale, frostmarch, saltreach, emberwaste, blackfen). Tell me about stairs facing the wrong way, anything floating, and which designs look too plain.
 6. **A town mason.** `/scriptevent siege:settle_mason` puts a mason where you stand, with no bench (for Kingsrest and villages).
 
@@ -261,7 +261,7 @@ Rival Lords only settle on a map with Plot Stones. Place three or four Plot Ston
 1. `/scriptevent siege:rivals all` then `/scriptevent siege:rivals settle` (repeat `settle` for each new lord; normally one arrives per day). `/scriptevent siege:rivals list` shows who holds what.
 2. Walk to a lord's Plot Stone. Their longhouse, a cottage and a well should rise near it, and the lord stands by the stone. In Survival you should not be able to break or place blocks on their land, or raise your own banner on their stone.
 3. `/scriptevent siege:rivals grow <id>` moves a lord up a tier (the id is in the list); more buildings rise. `/scriptevent siege:rivals night` plays one siege night for all of them.
-4. Click the lord and choose "Lay siege" (you need your own settlement). Kill every soldier within 10 minutes: the lord falls, you get emeralds, and the plot with its buildings is free to claim. Die or walk away and they hold.
+4. Click the lord and choose "Lay siege" (you need your own settlement). Kill every soldier within 10 minutes: the lord falls, you get Regals, and the plot with its buildings is free to claim. Die or walk away and they hold.
 5. `/scriptevent siege:rivals none` removes them all.
 
 ## Mobs, bosses and NPC fighters (The Hollow Crown)
@@ -317,7 +317,7 @@ Not yet played in a real game. In a creative test world:
 
 1. `/scriptevent hc:folk_go glimwade` takes you to the first mining village (also `lowseam`, `tollrest`, `highcut`). The village builds itself a few seconds after you arrive: cottages, mine mouths, a smithy, a fire, and a plank walk down to a dock on the light river.
 2. Click a miner. While Morvane rules they are frightened and say little. `/scriptevent hc:folk_freed` frees them and their lines change.
-3. Click the Foreman (blue name) to open the Tally. `/scriptevent hc:folk_dawn` runs one day of digging so there is ore to buy. Buy 1 or 8 with emeralds, or buy a boat.
+3. Click the Foreman (blue name) to open the Tally. `/scriptevent hc:folk_dawn` runs one day of digging so there is ore to buy. Buy 1 or 8 with Regals, or buy a boat.
 4. `/scriptevent hc:set_warden` makes you the ruler. Now the Foreman greets you as Crown-wearer, you can set the price, and each dawn half of every Tally goes to your Vault.
 5. Robbing needs a second player: with the ruler online, "Rob the Tally" hands over ore and the ruler is brought to the village at once. With the ruler offline it is refused and only buying works.
 6. `/scriptevent hc:folk_go vault` takes you to the Vault Stair near the Seat. Stand on the copper pad and sneak to go down. Click the dark block in the middle: the ruler collects, anyone else can try to break it open (20 seconds beside it).
@@ -352,7 +352,7 @@ One coin for the whole world, backed by iron. None of this has run in a real gam
 5. Click your Keep Banner: the menu has **Strongbox**. Put coins in, walk off your land and check a shop no longer counts them, come home and check it does.
 6. `/scriptevent siege:economy_give 500` gives coins, `/scriptevent siege:economy_stats` shows how many coins the world has paid out and taken in.
 
-Things to look for: whether the NPC skins suit the jobs, whether the sell list is readable on a phone screen, and whether any price feels too generous. Every number is in `scripts/economy/config.js`. The Mason, Quartermaster, Barracks and the rest still charge emeralds until their own threads switch them over; the Moneyer buys emeralds for 4 Regals in the meantime.
+Things to look for: whether the NPC skins suit the jobs, whether the sell list is readable on a phone screen, and whether any price feels too generous. Every number is in `scripts/economy/config.js`. Every shop and reward in the add-on now uses Regals: sieges, guards, the Quartermaster, the Mason, town hall costs, horses, the Throne and the Hollow. Sneak + use a Gold Regal to break it into 64 Regals, and sneak + use a full stack of 64 to bind one. The Quartermaster is a villager trade and cannot make change, so check that paying him with a mix of Gold Regals and Regals feels fine. Emeralds are no longer taken anywhere; the Moneyer buys them for 4 Regals.
 
 ## Siege nights and the Reach (scripts/reach/)
 

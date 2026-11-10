@@ -147,7 +147,7 @@ export const abandoned = (challenge, nowMs) =>
 // ---------- The Long Road Back ----------
 
 export const EXILE_STAGES = [
-  { name: "Ashes and Oaths", goal: "Raise a new Keep Banner on free land.", claim: 0, emeralds: 16 },
+  { name: "Ashes and Oaths", goal: "Raise a new Keep Banner on free land.", claim: 0, emeralds: 16 }, // emeralds: old unit, paid as 8 coins each
   { name: "The Loyalists", goal: "Recruit 2 guards on your new land.", claim: 10, emeralds: 10 },
   { name: "Hold the Line", goal: "Win a siege at your new settlement.", claim: 15, emeralds: 0 },
   { name: "The Underground", goal: `Bind an ${CROWN.shard}.`, claim: 10, emeralds: 0 },

@@ -39,6 +39,11 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - Four regional roles, each with its own branch of nine skills and five ranks: Dragon Rider (Emberwaste), Forgemaster (Frostmarch), Captain (Saltreach) and Witch (Blackfen). Raise a Stone Hall in a region's style and its role is offered to you at the Tree of Oaths.
 - The Old King's Journal now arrives after the look picker and the welcome hall instead of at the same moment: once you have read "How things stand" on the Waystone, or after about 20 seconds.
 - Mining villages in the Hollow now have something different going on each time you walk in: a rich seam, a Foreman's half price, a seat by the fire, a nest broken open in the mine, or a miner asking you to go and look at a place for them. The game's Storyteller picks, so the same thing never comes up twice running. Miners no longer repeat the line they said last.
+
+
+- The story now has one spine from any of the twelve plots: your plot's first book sends you to Sister Wren in Millbrook, your plot's mystery leads to your own region's boss, each regional boss leaves two leads in other regions, and the third one down points you at the Surveyor's Field Notes.
+- The four regional roles (Dragon Rider, Forgemaster, Captain, Witch) each have a history, and their top four powers show a line of it in the Tree of Oaths.
+- A world currency backed by iron: the Regal and the Gold Regal (worth 64). The Moneyer swaps iron ingots for coins and back. Job NPCs (Farmer, Woodcutter, Quarryman, Smith, Fisher, Hunter, Herbalist) buy what you gather and sell supplies, with prices that differ by region. A Strongbox on the Keep Banner menu keeps coins safe. Sneak + use a Gold Regal to break it into 64 Regals, or a full stack of 64 to bind one.
 - The story now has one spine from any of the twelve plots: your plot's first book sends you to Sister Wren in Millbrook, your plot's mystery leads to your own region's boss, each regional boss leaves two leads in other regions, and the third one down points you at the Surveyor's Field Notes.
 - The four regional roles (Dragon Rider, Forgemaster, Captain, Witch) each have a history, and their top four powers show a line of it in the Tree of Oaths.
 
@@ -56,6 +61,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - The "Who steps off the coach?" character menu is now the first thing a new player sees, and the welcome and the journal wait until it is answered or closed.
 - The add-on is renamed from Siege Nights to The Hollow Crown. The install file is `hollow-crown.mcaddon`. Existing ids keep the `siege:` prefix.
 - Needs Bedrock 26.30 or newer.
+- Everything is now paid for and paid out in Regals instead of emeralds: siege winnings, warlord and boss drops, guards, the Quartermaster, town hall upgrades, Rumor Board jobs, horses, the Throne's decrees and Treasury, Rival Lord spoils, the Hollow's ore, boats and permits, and the elytra refund. One old emerald is 8 Regals. Emeralds are no longer taken anywhere; the Moneyer buys them for 4 Regals each.
 
 ### Fixed
 - Lanternbog's local mystery no longer asks you to type the name of the place below in the first chapter.

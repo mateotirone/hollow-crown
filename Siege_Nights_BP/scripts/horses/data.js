@@ -1,4 +1,5 @@
 // Horses: every number and table as plain data (no Minecraft imports, so it loads in Node tests).
+import { coins } from "../economy/rules.js"; // pure, loads in Node
 // Mateo: the numbers you might want to tweak are in HORSE_SETTINGS at the top.
 
 export const HORSE_SETTINGS = {
@@ -9,14 +10,14 @@ export const HORSE_SETTINGS = {
   perkLevels: [5, 10, 15, 20], // a perk point at each of these horse levels
   foalGrowTicks: 24000, // 1 in-game day (20 minutes) for a foal to grow up
   breedCooldownTicks: 24000, // each parent breeds once per in-game day
-  breederPostPrice: 24, // emeralds for a regional foal
+  breederPostPrice: 192, // coins for a regional foal (3 Gold Regals)
   breederPostCooldownTicks: 72000, // one foal per post every 3 in-game days, per player
   whistleRange: 64,
   loyalWhistleCooldownTicks: 1200, // 60 seconds
   stepDistance: 10, // Glimstrider's Veilstep
   stepCooldownTicks: 400, // 20 seconds
   chargeRallyRange: 24, // Warhorse Charge rallies your guards this close
-  reviveCost: [{ item: "minecraft:totem_of_undying", count: 1 }, { item: "minecraft:emerald", count: 16 }],
+  reviveCost: [{ item: "minecraft:totem_of_undying", count: 1 }, { item: "coins", count: 128 }],
   breedCost: [{ item: "minecraft:golden_carrot", count: 4 }, { item: "minecraft:golden_apple", count: 2 }],
 };
 
@@ -256,7 +257,8 @@ export function levelFromValue(value, table) {
   return Math.min(MAX_TRAINED, best + 1);
 }
 
-export const costText = (cost) => cost.map((c) => `${c.count} ${c.item.replace(/^\w+:/, "").replaceAll("_", " ")}`).join(", ");
+// A cost line { item: "coins", count } is paid in the world currency
+export const costText = (cost) => cost.map((c) => (c.item === "coins" ? coins(c.count) : `${c.count} ${c.item.replace(/^\w+:/, "").replaceAll("_", " ")}`)).join(", ");
 
 export function bar(value, max, width = 10) {
   const filled = Math.round((value / max) * width);

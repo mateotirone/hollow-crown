@@ -6,6 +6,8 @@ import { heroOf, saveHero, grantPoints, grantRenown, playerById } from "./hero.j
 import { hallOf } from "./townhall.js";
 import { EMBER, choosePath, offerVictor } from "./tree.js";
 import { ROLES } from "./skills.js";
+import { dropCoins } from "../economy/coins.js";
+import { fromEmeralds } from "../economy/rules.js";
 
 const rank = (player, id) => heroOf(player).skills[id] ?? 0;
 const fx = (entity, effect, ticks, amplifier = 0) => {
@@ -78,7 +80,7 @@ world.afterEvents.entityDie.subscribe((event) => {
   }
   // Plunder
   const plunder = rank(killer, "keep_plunder");
-  if (raider && plunder && Math.random() < plunder * 0.15) dead.dimension.spawnItem(new ItemStack("minecraft:emerald", 1), dead.location);
+  if (raider && plunder && Math.random() < plunder * 0.15) dropCoins(dead.dimension, dead.location, fromEmeralds(1), "plunder");
 });
 
 api.on("siegeReward", ({ player, threat }) => {
