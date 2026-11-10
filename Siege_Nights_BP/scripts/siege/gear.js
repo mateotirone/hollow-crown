@@ -4,6 +4,7 @@
 import { world, EquipmentSlot, GameMode } from "@minecraft/server";
 import { COLORS, DYE_RGB, GUARD_SET, WEAPONS } from "./constants.js";
 import { state } from "./state.js";
+import { sfx } from "../core/sfx.js";
 
 // ---------- Weapons: durability, and the warhammer staggers what it hits ----------
 
@@ -27,7 +28,7 @@ world.afterEvents.entityHitEntity.subscribe((event) => {
   if (!durability) return;
   if (durability.damage + 1 >= durability.maxDurability) {
     gear.setEquipment(EquipmentSlot.Mainhand, undefined);
-    player.playSound("random.break");
+    sfx(player, "random.break");
   } else {
     durability.damage += 1;
     gear.setEquipment(EquipmentSlot.Mainhand, weapon);

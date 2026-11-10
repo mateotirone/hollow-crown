@@ -19,6 +19,7 @@ import { PLOT_PLAN } from "../plots/config.js";
 import { plotAt, mapMode } from "../plots/claims.js";
 import { WALLS, WALL_LEVELS, MAX_WALL, bearingToAngle, smoothGround, stationSpots, groundProblem, wallColumns, onWallLine, gateSpot, materialKind, wallArmor, columnKinds, wallSeed } from "./walldata.js";
 import { styleOf } from "./plans.js";
+import { sfx } from "../core/sfx.js";
 
 const OVERWORLD = "minecraft:overworld";
 const store = moduleStore("siege:settle_walls", () => ({ walls: {} }));
@@ -215,7 +216,7 @@ function step(id, job) {
   const player = world.getPlayers().find((p) => p.id === id);
   if (player) {
     title(player, `§6${job.L.name} complete`, "§7Your land now reaches a little past your wall");
-    player.playSound("ui.toast.challenge_complete");
+    sfx(player, "ui.toast.challenge_complete");
   }
 }
 

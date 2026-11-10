@@ -11,6 +11,7 @@ import { SITES } from "./roads.js";
 import { hash } from "./noise.js";
 import { STRUCTURE_IDS, planStructure } from "./structures.js";
 import { load, save } from "./data.js";
+import { sfx } from "../core/sfx.js";
 
 const K_BUILT = "hc:undertow_built2"; // hex bitset of finished chunks
 const K_PIECES = "hc:undertow_pieces"; // { wound, court, heart, waystones: [..] }
@@ -235,7 +236,7 @@ export function openCourtGate() {
   // The water gate where the light river runs through the wall (only if that part is built yet;
   // riverGateTick opens it later otherwise).
   openRiverGate();
-  try { d.playSound("block.end_portal.spawn", { x: cx, y: f + 2, z: COURT.gateZ }, { volume: 2, pitch: 0.6 }); } catch {}
+  try { sfx(d, "block.end_portal.spawn", { x: cx, y: f + 2, z: COURT.gateZ }, { volume: 2, pitch: 0.6 }); } catch {}
 }
 
 // The river's way through the sealed wall. Safe to call again and again.
