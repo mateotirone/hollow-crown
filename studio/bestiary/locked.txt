@@ -95,3 +95,13 @@ textures/entity/siege/bestiary/reveal_boy.png
 textures/entity/siege/bestiary/reveal_king.png
 textures/entity/siege/bestiary/reveal_morvane.png
 textures/entity/siege/bestiary/oswin_reflection.png
+textures/models/armor/guard_vale_layer_*.png
+textures/items/siege_guard_vale_*.png
+textures/models/armor/guard_frostmarch_layer_*.png
+textures/items/siege_guard_frostmarch_*.png
+textures/models/armor/guard_saltreach_layer_*.png
+textures/items/siege_guard_saltreach_*.png
+textures/models/armor/guard_emberwaste_layer_*.png
+textures/items/siege_guard_emberwaste_*.png
+textures/models/armor/guard_blackfen_layer_*.png
+textures/items/siege_guard_blackfen_*.png

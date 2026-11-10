@@ -30,6 +30,22 @@ export function placeCache(block, id) {
   caches.save();
 }
 
+// Clue Sense (town hall skill way_clue) asks which Dusty Tomes this player has not copied yet lie close by:
+//   emit("clueSense", q = { player, radius, hits: [] })  ->  we push { x, y, z, kind: "tome" } into q.hits
+on("clueSense", (q) => {
+  const { player, radius = 16 } = q ?? {};
+  if (!player?.location || !Array.isArray(q.hits)) return;
+  const got = progressOf(player).got;
+  const dim = player.dimension.id, at = player.location;
+  for (const [key, id] of Object.entries(caches.data.at)) {
+    if (got.includes(id)) continue;
+    const [d, pos] = key.split("|");
+    if (d !== dim) continue;
+    const [x, y, z] = pos.split(",").map(Number);
+    if (Math.abs(x - at.x) <= radius && Math.abs(z - at.z) <= radius && Math.hypot(x - at.x, y - at.y, z - at.z) <= radius) q.hits.push({ x, y, z, kind: "tome" });
+  }
+});
+
 const lastClick = new Map();
 world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
   const { block, player } = event;

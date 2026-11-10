@@ -9,6 +9,7 @@ How versions work is in [`docs/RELEASING.md`](docs/RELEASING.md).
 Everything merged to `main` since the last release goes here. Each pull request that changes what players see adds a line under one of these headings.
 
 ### Added
+- Clue Sense works: while you carry the Ledger of Whispers, it whispers on the action bar (with a soft page turn) when a Dusty Tome you have not copied, or a Lore Tome lying on the ground, is within 16 blocks, and says which way.
 - Every skill on the Tree of Oaths shows its own painted icon: on the tree screen for skills you hold or can swear now, and on every row of the plain lists.
 - Steeds wear their own painted coats: one for each of the five regional breeds, a piebald coat for crossbreds, a see-through Glimstrider, plate barding on the Knight Warhorse, and a proper cloth Caparison in your banner color. Horses you already own change over by themselves.
 - Sound has its own voice now. The bell, the horns and about 25 other sounds are lower, softer and layered wherever the game uses them, and nothing is heard twice exactly the same. The 3:17 toll, the siege horn, the first glimpse, a storm tide and every boss's arrival each have their own sound. These are stand-ins built from vanilla sounds until the real recordings are made: `SOUND-LIST.md` has the list and the prompts, `sounds-inbox/` is where the files go, and `/scriptevent siege:sound` opens a sound board in game. No music yet.
@@ -62,6 +63,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - The water of the Blackfen is black: near-opaque on the surface and almost blind underwater. (It follows the mangrove swamp biome, which only the Blackfen uses on the map.)
 
 - The eighth old painting, the Forty-Second Portrait, is kept for the Burned Archive, and what its caption says changes once the story is over.
+- Regional Castle Guard armor: Vale, Frostmarch, Saltreach, Emberwaste and Blackfen sets with the same stats as the Castle Guard armor and their own look (kettle hat and brigandine, fur hood and quilted wool, bleached sallet and rope belt, blackened scale with a veil, laced leather lamellar). Each keeps the banner-colour tabard. Make one at the siege workshop from a Castle Guard piece and that region's Castle Stone.
 
 ### Changed
 - The northern town is now called Rimehold wherever it shows (its protected-area message, the map and the character creator), and its frozen lake Hallowmere, following the naming pass. The Frostmarch plot once called Rimeholt is now Frosthelm, so the two are no longer one letter apart.
@@ -69,6 +71,11 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - The Hollow bolt is a violet shard with a white-hot heart instead of a flat colour.
 - A few late-story figures and the Standing Rank got a hand-detail pass on their skins.
 - In the Standing Ranks stage of Morvane's fight, the suit he is really in now holds its blade in the left hand while the empty suits hold theirs in the right, as well as the light on the hand.
+- In the Standing Ranks stage of Morvane's fight, the suit he is really in now holds its blade in the left hand while the empty suits hold theirs in the right, as well as the light on the hand.
+- The northern town is now called Rimehold wherever it shows (its protected-area message, the map and the character creator), and its frozen lake Hallowmere, following the naming pass. The Frostmarch plot once called Rimeholt is now Frosthelm, so the two are no longer one letter apart.
+- The moon has a hairline violet crack that shows more the fuller it is.
+- The Hollow bolt is a violet shard with a white-hot heart instead of a flat colour.
+- The Choirsteel chestplate now covers the whole arm (vambrace and cuff under the shoulder plate), not just the shoulders.
 - On the map a settlement's land is full size (60 blocks) from the day you arrive, and siege wins no longer grow it. Tiers still unlock wall levels, buildings and keep health. A Castle's keep now really has 600 health.
 - Regional roles are now earned by a deed in their region instead of by raising a Stone Hall there: Forgemaster for bringing down the Pale Huntsman, Captain for the Drowned Bride, Witch for the Mother of Changelings, and Dragon Rider when your first dragon hatches.
 - The endless siege (the Long Night) now begins when the Rift is opened, not when the Choir falls. Thunderstorms roll in with each wave of it and clear between them.
