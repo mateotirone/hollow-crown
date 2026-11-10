@@ -1,6 +1,5 @@
-"""Missing art, batch 2 (2026-11-10 audit): regional roof shingles, Mateo's eight paintings at game size,
-a particle sprite sheet with four particle effects, and an uneasy moon.   python3 build_missing2.py [repo root]
-Mateo's paintings are only resized, never repainted."""
+"""Missing art, batch 2 (2026-11-10 audit): regional roof shingles,
+a particle sprite sheet with four particle effects, and an uneasy moon.   python3 build_missing2.py [repo root]"""
 import os, sys, json, math, random
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from PIL import Image
@@ -35,13 +34,10 @@ os.makedirs(RP + 'textures/blocks/regional', exist_ok=True); roofs = []
 for i, (reg, (rp, kw)) in enumerate(ROOFS.items()):
     t = shingles(rp, seed=7 + i, **kw); t.save(RP + f'textures/blocks/regional/siege_roof_shingles_{reg}.png'); roofs.append(t.im.copy())
 
-# ---- 2. Mateo's paintings, resized only (32 px per block: 3x2 blocks, plate 8 is 2x3)
-os.makedirs(RP + 'textures/entity/painting', exist_ok=True); plates = []
-for n in range(1, 9):
-    src = ROOT + f'lore-book/plates/art/plate_{n}.jpg'
-    if not os.path.exists(src): continue
-    im = Image.open(src).convert('RGB'); size = (96, 64) if im.width > im.height else (64, 96)
-    im = im.resize(size, Image.LANCZOS).convert('RGBA'); im.save(RP + f'textures/entity/painting/plate_{n}.png'); plates.append(im)
+# ---- 2. Mateo's paintings: already in the game as textures/entity/portrait/plate_1..8.png (lore thread,
+# studio/build_lore_portraits.py). Only shown on the sheet here, nothing is written.
+plates = [Image.open(RP + f'textures/entity/portrait/plate_{n}.png').convert('RGBA') for n in range(1, 9)
+          if os.path.exists(RP + f'textures/entity/portrait/plate_{n}.png')]
 
 # ---- 3. particle sheet: 8 sprites of 8x8 on a 32x16 sheet
 VI = fixed('#2a1250', '#4a1e88', '#7234c4', '#a05cf0', '#c896ff', '#ecd8ff'); MG = fixed('#3a0c38', '#6a1660', '#a0248c', '#d040b4', '#f078d4', '#ffc0ee')
