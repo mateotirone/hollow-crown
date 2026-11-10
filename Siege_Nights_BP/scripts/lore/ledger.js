@@ -5,7 +5,7 @@ import { world } from "@minecraft/server";
 import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
 import { emit } from "../siege/api.js";
 import { isTesting } from "../core/tests.js";
-import { TOMES, tomesOf, answerIsRight, cluesFound, canAnswer as enoughClues, surveyLine } from "./logic.js";
+import { TOMES, tomesOf, answerIsRight, cluesFound, canAnswer as enoughClues, surveyLine, ALL_THREADS, isLocal } from "./logic.js";
 import { COLLECTIONS, PLACES, THREADS } from "./data/world.js";
 import { LEDGER, progressOf, saveProgress, sourceSite, awardPoints, setFlag } from "./player.js";
 
@@ -26,10 +26,10 @@ const clueText = (text) => text.replace(/\{SURVEY(\d)\}/, (_, n) => `Fennick: "$
 
 export async function openLedger(player) {
   const p = progressOf(player);
-  const known = THREADS.filter((t) => cluesFound(p, t).length > 0 || p.solved.includes(t.id));
+  const known = ALL_THREADS.filter((t) => cluesFound(p, t).length > 0 || p.solved.includes(t.id));
   const form = new ActionFormData()
     .title("Ledger of Whispers")
-    .body(`§7Tomes read: §f${p.read.length} / ${TOMES.length}\n§7Mysteries solved: §f${p.solved.length} / ${THREADS.length}\n\n§7A mystery appears here when you read your first clue about it.`);
+    .body(`§7Tomes read: §f${p.read.filter((id) => !isLocal(id)).length} / ${TOMES.length}\n§7Mysteries solved: §f${p.solved.filter((id) => !isLocal(id)).length} / ${THREADS.length}\n\n§7A mystery appears here when you read your first clue about it.`);
   const actions = [];
   for (const t of known) {
     const found = cluesFound(p, t).length;

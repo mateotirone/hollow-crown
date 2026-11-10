@@ -7,6 +7,7 @@
 //     attacks: [{ id, every, windup, phases?, warn?, start(f), show?(f, ctx), hit(f, ctx) }],
 //     onStart(f), onPhase(f, n), tick(f), onHurt(f, event), onStruck(f, attacker), onAddDie(f, add, killer),
 //     onPropHit(f, prop, player), onReset(f), onDeath(f, players),
+//     whileEmpty(f) -> true to hold the fight instead of resetting, onLost(f) while the boss entity is unloaded,
 //     loot(f, player, firstKill) -> [stacks]   handed straight to each player who fought
 //     hoard(f, players) -> [stacks]            the shared vault chest
 //   });
@@ -45,6 +46,11 @@ export function phaseFor(fraction, thresholds = []) {
   return thresholds.filter((t) => fraction <= t).length;
 }
 
+// Every boss is tuned to be beaten alone. Each extra player in the arena makes it half again as tough:
+// 1 player = its real health, 2 = 1.5x, 4 = 2.5x, capped at 10 players. Done by giving back a share of each hit.
+export const bossToughness = (playerCount) => 1 + 0.5 * (Math.min(10, Math.max(1, playerCount)) - 1);
+export const hitGivenBack = (damage, playerCount) => damage * (1 - 1 / bossToughness(playerCount));
+
 export function startBoss(id, dim, location) {
   const def = defs.get(id);
   if (!def) return undefined;
@@ -71,10 +77,10 @@ function attach(entity, def, center, fresh) {
   fights.set(entity.id, f);
   try {
     entity.nameTag = `§c${def.name}`;
-    entity.setDynamicProperty(FIGHT_PROP, JSON.stringify({ id: def.id, center: f.center, damagers: [...f.damagers] }));
   } catch {
     // name is cosmetic
   }
+  saveFight(f);
   for (const a of def.attacks ?? []) f.next[a.id] = Math.round(a.every * (0.5 + Math.random() * 0.5));
   if (fresh || !saved) {
     f.say(`§4${def.name}§7 ${def.intro ?? "has come."}`);
@@ -82,6 +88,23 @@ function attach(entity, def, center, fresh) {
   }
   def.onStart?.(f, !saved);
   return f;
+}
+
+function saveFight(f) {
+  try {
+    f.entity.setDynamicProperty(FIGHT_PROP, JSON.stringify({ id: f.def.id, center: f.center, damagers: [...f.damagers] }));
+  } catch {
+    // boss gone
+  }
+}
+
+// If a boss comes out of a move as a new entity (another dimension), carry the fight over to it.
+export function rebind(f, entity) {
+  fights.delete(f.id);
+  f.entity = entity; f.id = entity.id; f.dim = entity.dimension;
+  fights.set(entity.id, f);
+  try { entity.nameTag = `§c${f.def.name}`; } catch { /* cosmetic */ }
+  saveFight(f);
 }
 
 function helpers(f) {
@@ -92,7 +115,7 @@ function helpers(f) {
     },
     players: (extra = 8) => {
       try {
-        return f.dim.getPlayers({ location: f.def.roaming ? f.entity.location : f.center, maxDistance: f.def.radius + extra })
+        return f.dim.getPlayers({ location: f.def.roaming ? f.entity.location : f.center, maxDistance: (f.radius ?? f.def.radius) + extra })
           .filter((p) => healthOf(p).now > 0);
       } catch {
         return [];
@@ -103,6 +126,16 @@ function helpers(f) {
     },
     bar: (text) => {
       for (const p of f.players()) p.onScreenDisplay.setActionBar(text);
+    },
+    solo: () => f.players().length <= 1,
+    // Move the whole fight somewhere else (another arena, even another dimension). The boss and the
+    // players are moved by whoever calls this; helpers left behind are removed.
+    moveTo: (dim, center, radius) => {
+      clearAdds(f);
+      f.zones = [];
+      f.dim = dim; f.center = { x: center.x, y: center.y, z: center.z }; f.radius = radius;
+      f.emptySince = undefined;
+      saveFight(f);
     },
     after: (ticks, fn) => f.timers.push({ at: f.tick + ticks, fn }),
     // A marked circle on the ground that goes off after `delay` ticks. hit(player) runs for everyone still inside.
@@ -185,6 +218,7 @@ function findBosses() {
     }
     for (const e of found) {
       if (fights.has(e.id) || e.hasTag("siege_showcase")) continue; // showcase statues don't fight
+      if (activeFights().some((x) => x.def.type === e.typeId && !alive(x.entity) && x.def.onLost)) continue; // that fight is mid-move: it claims its own boss
       const def = byType.get(e.typeId);
       if (def) attach(e, def, e.location, false);
     }
@@ -194,7 +228,10 @@ function findBosses() {
 function bossTick() {
   findBosses();
   for (const f of fights.values()) {
-    if (!alive(f.entity)) continue; // unloaded: it picks up again when someone comes back
+    if (!alive(f.entity)) { // unloaded: it picks up again when someone comes back
+      safely(f, () => f.def.onLost?.(f));
+      continue;
+    }
     f.tick += STEP;
     f.lastLoc = f.entity.location;
     const players = f.players();
@@ -202,13 +239,16 @@ function bossTick() {
     // Nobody here for 30 seconds: the boss resets
     if (!players.length) {
       f.emptySince ??= f.tick;
+      let held = false; // a fight can ask to wait (everyone is down and coming back) instead of resetting
+      safely(f, () => (held = !!f.def.whileEmpty?.(f)));
+      if (held) { f.emptySince = undefined; continue; }
       if (!f.def.roaming && f.tick - f.emptySince > 600 && (f.phase > 0 || f.hp() < 1)) reset(f);
       continue;
     }
     f.emptySince = undefined;
 
     // Leash to the arena
-    if (!f.def.roaming && flat(f.entity.location, f.center) > f.def.radius) {
+    if (!f.def.roaming && flat(f.entity.location, f.center) > (f.radius ?? f.def.radius)) {
       try {
         f.entity.teleport(f.center);
       } catch {
@@ -312,7 +352,9 @@ world.afterEvents.entityHurt.subscribe((event) => {
   const f = fights.get(event.hurtEntity.id);
   if (!f) return;
   const by = event.damageSource.damagingEntity;
-  if (by?.typeId === "minecraft:player") f.damagers.add(by.id);
+  if (by?.typeId === "minecraft:player") { f.damagers.add(by.id); f.lastHitter = by.id; }
+  const back = hitGivenBack(event.damage, f.players().length);
+  if (back > 0 && healthOf(f.entity).now > 0) heal(f.entity, back);
   safely(f, () => f.def.onHurt?.(f, event));
 });
 
@@ -334,13 +376,13 @@ world.afterEvents.projectileHitEntity.subscribe((event) => {
 world.afterEvents.entityDie.subscribe((event) => {
   const dead = event.deadEntity;
   const f = fights.get(dead.id);
-  if (f) return finish(f);
+  if (f) return finish(f, event.damageSource.damagingEntity);
   if (!MOBS[dead.typeId]) return;
   const owner = fightByAddTag(dead);
   if (owner) safely(owner, () => owner.def.onAddDie?.(owner, dead, event.damageSource.damagingEntity));
 });
 
-function finish(f) {
+function finish(f, slayer) {
   fights.delete(f.id);
   clearAdds(f);
   const def = f.def, loc = f.lastLoc;
@@ -363,7 +405,10 @@ function finish(f) {
   }
   safely(f, () => vault(f, loc, def.hoard?.(f, players) ?? []));
   safely(f, () => def.onDeath?.(f, players));
-  announce("siege:boss_defeated", { boss: def.id, x: Math.floor(loc.x), y: Math.floor(loc.y), z: Math.floor(loc.z), dimension: f.dim.id, players: players.map((p) => p.id) });
+  // Whoever landed the last blow (or hurt it last, if it died to something else), and everyone else who fought
+  const killer = (slayer?.typeId === "minecraft:player" ? slayer : undefined) ?? online.find((p) => p.id === f.lastHitter) ?? players[0];
+  announce("siege:boss_defeated", { boss: def.id, x: Math.floor(loc.x), y: Math.floor(loc.y), z: Math.floor(loc.z), dimension: f.dim.id, players: players.map((p) => p.id),
+    killer: killer?.id, killerName: killer?.name, allies: players.filter((p) => p.id !== killer?.id).map((p) => p.id) });
   for (const p of online) if (!players.includes(p)) p.sendMessage(`§6${def.name} has been slain by ${players.map((x) => x.name).join(", ") || "someone"}.`);
 }
 
@@ -416,6 +461,15 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
 onTick("bestiary_bosses", STEP, bossTick);
 
 addTests("bestiary", {
+  "bosses are solo-sized and toughen with the party": () => {
+    assertEqual(bossToughness(0), 1);
+    assertEqual(bossToughness(1), 1);
+    assertEqual(bossToughness(2), 1.5);
+    assertEqual(bossToughness(4), 2.5);
+    assertEqual(bossToughness(50), 5.5);
+    assertEqual(hitGivenBack(10, 1), 0);
+    assertEqual(hitGivenBack(10, 3), 5);
+  },
   "boss phases follow health": () => {
     assertEqual(phaseFor(1, [0.6, 0.3]), 0);
     assertEqual(phaseFor(0.6, [0.6, 0.3]), 1);

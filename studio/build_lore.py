@@ -44,6 +44,7 @@ ITEMS = {
     "cipher_wheel": ("Cipher Wheel", "siege_cipher_wheel", "items"),
     "mirror_glass": ("Tide Glass", "siege_mirror_glass", "items"),
     "kings_journal": ("The Old King's Journal", "siege_kings_journal", "items"),
+    "fourteen_arts": ("The Fourteen Arts", "siege_fourteen_arts", "items"),
 }
 for name, (label, icon, cat) in ITEMS.items():
     write_json(os.path.join(BP, "items", f"{name}.json"), {
@@ -282,3 +283,19 @@ if not os.path.exists(_journal):
     for y in range(2, 14): px[10, y] = tuple(int(v * 0.8) for v in px[10, y][:3]) + (255,)                  # strap
     im.save(_journal)
     print("journal icon written")
+
+# The Fourteen Arts icon (Mag's copybook): drawn only if missing.
+_arts = os.path.join(RP, "textures", "items", "siege_fourteen_arts.png")
+if not os.path.exists(_arts):
+    im = Image.new("RGBA", (16, 16), (0, 0, 0, 0)); px = im.load()
+    for y in range(2, 14):
+        for x in range(3, 13):
+            px[x, y] = ((96, 104, 92) if (x * 3 + y * 5) % 6 else (80, 88, 78)) + (255,)
+        px[3, y] = (54, 60, 54, 255); px[12, y] = (214, 204, 172, 255)
+    for x in range(4, 12): px[x, 13] = (190, 180, 150, 255)
+    for x in range(5, 11): px[x, 4] = (206, 196, 164, 255); px[x, 5] = (206, 196, 164, 255)   # paper label
+    for x in (6, 8, 9): px[x, 5] = (70, 60, 50, 255)                                        # a child's writing
+    for x, y in [(7, 9), (8, 8), (8, 10), (9, 9)]: px[x, y] = (196, 220, 214, 255)            # pale fire
+    px[8, 9] = (240, 250, 246, 255)
+    im.save(_arts)
+    print("arts icon written")

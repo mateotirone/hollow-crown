@@ -1,0 +1,27 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "siege:castle_cobbled_blackfen_recipe"
+    },
+    "tags": [
+      "siege_workshop"
+    ],
+    "pattern": [
+      "S",
+      "S"
+    ],
+    "key": {
+      "S": {
+        "item": "siege:castle_stone_blackfen"
+      }
+    },
+    "result": {
+      "item": "siege:castle_cobbled_blackfen",
+      "count": 2
+    },
+    "unlock": {
+      "context": "AlwaysUnlocked"
+    }
+  }
+}

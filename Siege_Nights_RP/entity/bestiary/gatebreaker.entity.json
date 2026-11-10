@@ -1,0 +1,32 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:gatebreaker",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/gatebreaker"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.gatebreaker"
+   },
+   "animations": {
+    "main": "animation.siege_b.gatebreaker"
+   },
+   "scripts": {
+    "animate": [
+     "main"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ],
+   "spawn_egg": {
+    "base_color": "#221830",
+    "overlay_color": "#e646c8"
+   }
+  }
+ }
+}

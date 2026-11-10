@@ -131,5 +131,86 @@
   },
   "hc:dragon_nest": {
     "sound": "grass"
+  },
+  "siege:mason_bench": {
+    "sound": "wood"
+  },
+  "siege:foundation_stone": {
+    "sound": "stone"
+  },
+  "hc:looking_glass": {
+    "sound": "glass"
+  },
+  "siege:castle_tiles": {
+    "sound": "stone"
+  },
+  "siege:castle_bricks": {
+    "sound": "stone"
+  },
+  "siege:castle_cobbled": {
+    "sound": "stone"
+  },
+  "siege:castle_smooth": {
+    "sound": "stone"
+  },
+  "siege:castle_stone_frostmarch": {
+    "sound": "stone"
+  },
+  "siege:castle_tiles_frostmarch": {
+    "sound": "stone"
+  },
+  "siege:castle_bricks_frostmarch": {
+    "sound": "stone"
+  },
+  "siege:castle_cobbled_frostmarch": {
+    "sound": "stone"
+  },
+  "siege:castle_smooth_frostmarch": {
+    "sound": "stone"
+  },
+  "siege:castle_stone_saltreach": {
+    "sound": "stone"
+  },
+  "siege:castle_tiles_saltreach": {
+    "sound": "stone"
+  },
+  "siege:castle_bricks_saltreach": {
+    "sound": "stone"
+  },
+  "siege:castle_cobbled_saltreach": {
+    "sound": "stone"
+  },
+  "siege:castle_smooth_saltreach": {
+    "sound": "stone"
+  },
+  "siege:castle_stone_emberwaste": {
+    "sound": "stone"
+  },
+  "siege:castle_tiles_emberwaste": {
+    "sound": "stone"
+  },
+  "siege:castle_bricks_emberwaste": {
+    "sound": "stone"
+  },
+  "siege:castle_cobbled_emberwaste": {
+    "sound": "stone"
+  },
+  "siege:castle_smooth_emberwaste": {
+    "sound": "stone"
+  },
+  "siege:castle_stone_blackfen": {
+    "sound": "stone"
+  },
+  "siege:castle_tiles_blackfen": {
+    "sound": "stone"
+  },
+  "siege:castle_bricks_blackfen": {
+    "sound": "stone"
+  },
+  "siege:castle_cobbled_blackfen": {
+    "sound": "stone"
+  },
+  "siege:castle_smooth_blackfen": {
+    "sound": "stone"
   }
 }

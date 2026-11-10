@@ -13,7 +13,7 @@ export const HORSE_SETTINGS = {
   breederPostCooldownTicks: 72000, // one foal per post every 3 in-game days, per player
   whistleRange: 64,
   loyalWhistleCooldownTicks: 1200, // 60 seconds
-  stepDistance: 10, // Hollow Steed's Undertow Step
+  stepDistance: 10, // Glimstrider's Veilstep
   stepCooldownTicks: 400, // 20 seconds
   chargeRallyRange: 24, // Warhorse Charge rallies your guards this close
   reviveCost: [{ item: "minecraft:totem_of_undying", count: 1 }, { item: "minecraft:emerald", count: 16 }],
@@ -113,10 +113,10 @@ export const SPECIALS = {
     desc: "12% bigger, +1 Health. Warhorse Charge: gallop into enemies to throw them down (7 damage) and rally your guards.",
   },
   hollow: {
-    name: "Marked Hollow Steed", prop: 2, path: "marked", bonus: {},
+    name: "Glimstrider", prop: 2, path: "marked", bonus: {},
     needs: { level: 15, stamina: 4 },
     cost: [{ item: "minecraft:echo_shard", count: 8 }, { item: "minecraft:amethyst_shard", count: 4 }, { item: "minecraft:ender_eye", count: 1 }],
-    desc: "Spectral: no fall damage, fire immune. Undertow Step: blow the Horse Whistle while riding to blink 10 blocks ahead, through walls.",
+    desc: "Spectral: no fall damage, fire immune. Veilstep: blow the Horse Whistle while riding to blink 10 blocks ahead, through walls.",
   },
 };
 
@@ -137,7 +137,7 @@ export const STABLES_LEVELS = [
   null,
   { level: 1, roster: 3, trainCap: 3, cost: null, unlocks: "Training, breeding, perks and stalls" },
   { level: 2, roster: 5, trainCap: 4, cost: [{ item: "minecraft:hay_block", count: 32 }, { item: "minecraft:iron_ingot", count: 16 }, { item: "minecraft:leather", count: 8 }], unlocks: "Reviving fallen horses" },
-  { level: 3, roster: 8, trainCap: 5, cost: [{ item: "minecraft:diamond", count: 8 }, { item: "minecraft:golden_carrot", count: 32 }, { item: "minecraft:gold_block", count: 4 }], unlocks: "The Warhorse and Hollow Steed rites" },
+  { level: 3, roster: 8, trainCap: 5, cost: [{ item: "minecraft:diamond", count: 8 }, { item: "minecraft:golden_carrot", count: 32 }, { item: "minecraft:gold_block", count: 4 }], unlocks: "The Warhorse and Glimstrider rites" },
 ];
 export const rosterCap = (stablesLevel) => (stablesLevel > 0 ? STABLES_LEVELS[Math.min(3, stablesLevel)].roster : 1);
 export const trainCap = (stablesLevel) => (stablesLevel > 0 ? STABLES_LEVELS[Math.min(3, stablesLevel)].trainCap : 0);

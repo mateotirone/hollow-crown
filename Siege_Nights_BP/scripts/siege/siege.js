@@ -18,12 +18,16 @@ export function isNight() {
   return t >= 13000 && t < 23000;
 }
 
+// How many assaults this siege has. Features can change it with the "assaultCount" filter (scripts/reach does).
+export const assaultsTotal = () => state.assaultsTotal ?? SETTINGS.assaultsPerSiege;
+
 export function startSiege(provokedBy) {
   state.active = true;
   state.siegeNumber += 1;
   state.lastSiegeDay = world.getDay();
-  state.assaultsLeft = SETTINGS.assaultsPerSiege;
-  state.nextAssaultTick = system.currentTick + 100; // 5 seconds to get ready
+  state.assaultsTotal = applyFilter("assaultCount", SETTINGS.assaultsPerSiege, { provokedBy });
+  state.assaultsLeft = state.assaultsTotal;
+  state.nextAssaultTick = system.currentTick + applyFilter("assaultDelay", 100, { assault: 1, total: state.assaultsTotal }); // 5 seconds to get ready
   state.fallen = [];
   state.besieged = [];
   state.spawnedAny = false;
@@ -62,9 +66,11 @@ export function spawnRaider(dim, type, x, z, fallbackY, tags, name) {
 }
 
 export function spawnAssault() {
-  const assaultNumber = SETTINGS.assaultsPerSiege - state.assaultsLeft + 1;
-  const share = [0.3, 0.33, 0.37][assaultNumber - 1] ?? 0.34; // each assault spends part of the budget
+  const total = assaultsTotal();
+  const assaultNumber = total - state.assaultsLeft + 1;
+  const share = applyFilter("assaultShare", [0.3, 0.33, 0.37][assaultNumber - 1] ?? 0.34, { assault: assaultNumber, total }); // each assault spends part of the budget
   const dim = overworld();
+  emit("assaultIncoming", { assault: assaultNumber, total }); // listeners may adjust state.plans for this assault
 
   // Each settlement gets its own army, marching on its keep
   for (const [owner, keep] of Object.entries(state.keeps)) {
@@ -78,7 +84,7 @@ export function spawnAssault() {
     // Raiders come from the planned side(s), spread a little like a real attack
     const spot = (i) => {
       const a = plan.sides[i % plan.sides.length] + (Math.random() - 0.5) * 0.6;
-      const d = SETTINGS.spawnDistance + Math.random() * 6;
+      const d = applyFilter("spawnDistance", SETTINGS.spawnDistance, { owner, keep }) + Math.random() * 6; // a walled settlement is attacked from outside its wall
       return [Math.floor(center.x + Math.cos(a) * d), Math.floor(center.z + Math.sin(a) * d)];
     };
     buyArmy(plan, keep.sieges, Math.round(plan.budget * share))
@@ -90,16 +96,17 @@ export function spawnAssault() {
       for (let i = 0; i < rams; i++) spawnRaider(dim, faction.ram, ...spot(i), center.y, [...tags, RAM_TAG], "§cBattering Ram");
       for (let i = 0; i < sappers; i++) buff(spawnRaider(dim, faction.sapper, ...spot(i), center.y, [...tags, SAPPER_TAG], "§cSapper"), plan);
     }
-    if (plan.warlord && assaultNumber === SETTINGS.assaultsPerSiege) spawnWarlord(dim, plan, spot(0), center.y, tags);
+    if (plan.warlord && assaultNumber === total) spawnWarlord(dim, plan, spot(0), center.y, tags);
   }
 
   for (const player of world.getPlayers()) {
-    player.onScreenDisplay.setActionBar(`§6Assault ${assaultNumber} of ${SETTINGS.assaultsPerSiege} incoming!`);
+    player.onScreenDisplay.setActionBar(`§6Assault ${assaultNumber} of ${total} incoming!`);
     player.playSound("raid.horn");
   }
   state.assaultsLeft -= 1;
-  state.nextAssaultTick = system.currentTick + SETTINGS.ticksBetweenAssaults;
+  state.nextAssaultTick = system.currentTick + applyFilter("assaultDelay", SETTINGS.ticksBetweenAssaults, { assault: assaultNumber + 1, total });
   saveState();
+  emit("assaultSpawned", { assault: assaultNumber, total });
 }
 
 export function raidersLeft() {
@@ -164,13 +171,13 @@ export function siegeTick() {
 
   if (!state.active) {
     const day = world.getDay();
-    const siegeDue = day >= SETTINGS.firstSiegeDay && day % SETTINGS.siegeEveryNNights === 0;
+    const siegeDue = applyFilter("siegeDue", day >= SETTINGS.firstSiegeDay && day % SETTINGS.siegeEveryNNights === 0, { day });
     const anySettlement = Object.keys(state.keeps).length > 0;
     if (night && siegeDue && anySettlement && day !== state.lastSiegeDay) startSiege();
     return;
   }
 
-  if (!night) {
+  if (!night && applyFilter("dawnEndsSiege", true, {})) {
     endSiege("dawn");
     return;
   }
@@ -218,7 +225,7 @@ export function nextSiegeDay() {
   let day = Math.max(world.getDay(), SETTINGS.firstSiegeDay);
   if (day === state.lastSiegeDay) day++;
   while (day % SETTINGS.siegeEveryNNights !== 0) day++;
-  return day;
+  return applyFilter("nextSiegeDay", day, {});
 }
 
 // ---------- Siege tracker: a sidebar while the siege is on ----------
@@ -236,7 +243,7 @@ export function siegeHud() {
     board.setObjectiveAtDisplaySlot(DisplaySlotId.Sidebar, { objective: obj });
   }
   const want = new Map();
-  want.set("§7Waves sent", SETTINGS.assaultsPerSiege - state.assaultsLeft);
+  want.set("§7Waves sent", assaultsTotal() - state.assaultsLeft);
   want.set("§7Waves left", state.assaultsLeft);
   want.set("§cRaiders", raidersLeft().length);
   for (const heart of overworld().getEntities({ type: KEEP_HEART })) {

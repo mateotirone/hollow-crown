@@ -1,0 +1,32 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:reveal_boy",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/reveal_boy"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.reveal_boy"
+   },
+   "animations": {
+    "main": "animation.siege_b.reveal_boy"
+   },
+   "scripts": {
+    "animate": [
+     "main"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ],
+   "spawn_egg": {
+    "base_color": "#6e4e2e",
+    "overlay_color": "#8a8e96"
+   }
+  }
+ }
+}

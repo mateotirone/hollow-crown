@@ -4,6 +4,7 @@ import { addTests, assert, assertEqual } from "../siege/api.js";
 import { CROWN, IDS } from "./config.js";
 import {
   hollowStage, claimNeeded, nightfall, tithed, resolveCrown, gauntletProblem, stormAtNightfall, abandoned, compass, EXILE_STAGES,
+  lordId, isNpc, lordGain, lordChallenger, npcDecreeTarget, reachProblem,
 } from "./rules.js";
 import { citadelPlan, colorJobs, planSummary, thronePlace, gateToward, outsideGate, KEEP_HALF } from "./layout.js";
 import { BlockTypes, ItemTypes, EntityTypes } from "@minecraft/server";
@@ -11,6 +12,31 @@ import { BlockTypes, ItemTypes, EntityTypes } from "@minecraft/server";
 const PLAN = { banner: { x: 100, z: -40 }, keep: { x: 120, z: -30 }, gate: 0 };
 
 addTests("crown", {
+  "a hand stays on the Heart only while its owner stays close": () => {
+    assertEqual(reachProblem({ here: true, distance: 2 }), undefined);
+    assert(reachProblem({ here: true, distance: CROWN.reachRange + 1 }), "stepping away lets go");
+    assert(reachProblem({ here: false, distance: 0 }), "leaving lets go");
+    assert(CROWN.reachSeconds >= 3, "time for someone to object");
+  },
+  "rival lords build a Claim and the strongest one challenges": () => {
+    assert(isNpc(lordId("kell")) && !isNpc("-4294967295") && !isNpc(undefined));
+    assertEqual(lordGain({ claim: 10, pace: 7 }, 2, 0), 19);
+    assertEqual(lordGain({ claim: 10, pace: 7 }, 0, 0.99), 20);
+    const list = [{ key: "a", claim: 100 }, { key: "b", claim: 130 }, { key: "c", claim: 40 }];
+    const ask = { need: 100, challenge: null, siegeNumber: 9, graceUntil: 9 };
+    assertEqual(lordChallenger(list, ask).key, "b");
+    assertEqual(lordChallenger(list, { ...ask, graceUntil: 10 }), undefined, "not during grace");
+    assertEqual(lordChallenger(list, { ...ask, challenge: { claimant: "x" } }), undefined, "one Gauntlet at a time");
+    assertEqual(lordChallenger(list, { ...ask, need: 200 }), undefined);
+    assert(CROWN.lords.length >= 1 && CROWN.lords.every((l) => l.key && l.name && l.title && l.pace > 0), "config lords");
+  },
+  "a lord's challenge is a siege, and a ruling lord never decrees the same target twice": () => {
+    assertEqual(stormAtNightfall({ challenge: { npc: true, missed: 0 }, rulerOnline: true, claimantOnline: false }), "wait");
+    assertEqual(npcDecreeTarget(["p1"], null, 0.5), "p1");
+    assertEqual(npcDecreeTarget(["p1"], "p1", 0.5), undefined, "a lone player gets every other night off");
+    assertEqual(npcDecreeTarget(["p1", "p2"], "p1", 0.99), "p2");
+    assertEqual(npcDecreeTarget([], null, 0), undefined);
+  },
   "hollowing stages": () => {
     assertEqual(hollowStage(0).name, "Crowned");
     assertEqual(hollowStage(49).name, "Whispering");
@@ -125,5 +151,6 @@ addTests("crown", {
     for (const id of [IDS.cornerstone, IDS.throne, IDS.shardBlock]) assert(BlockTypes.get(id), `missing block ${id}`);
     for (const id of [IDS.scepter, IDS.shardItem, IDS.gauntlet]) assert(ItemTypes.get(id), `missing item ${id}`);
     assert(EntityTypes.get(IDS.seal), "missing the Throne Seal entity");
+    assert(EntityTypes.get(IDS.restingHeart), "missing the resting Heart entity");
   },
 });

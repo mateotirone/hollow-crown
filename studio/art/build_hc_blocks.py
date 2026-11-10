@@ -62,13 +62,14 @@ def leaves(ramp_, seed):
         t.set(x, y, R(ramp_, k + 1)); t.set((x + 1) % 16, y, R(ramp_, k)); t.set(x, (y + 1) % 16, R(ramp_, k)); t.set((x + 1) % 16, (y + 1) % 16, R(ramp_, k - 1))
     return t
 sv(leaves(LEAF, 57), 'siege_oath_tree_crown')
-t = leaves(LEAF, 58)      # Knight: oath pennants hang among the leaves
-for x0, rp in ((1, M['blood_red']), (6, M['royal_blue']), (11, G)):
-    for y in range(4, 13):
-        for dx in range(4):
-            if y == 12 and dx in (1, 2): continue
-            t.set(x0 + dx, y, R(rp, 4 if dx == 0 else 2 if dx == 3 else 3))
-    for dx in range(4): t.set(x0 + dx, 3, R(PLASTER := fixed('#8a806c', '#b0a68e', '#cfc6ae', '#e2dac4', '#efe9d8', '#f8f4ea'), 4))
+t = leaves(LEAF, 58)      # Knight: the same canopy with gold oath-leaves and a small steel sword laid at its heart
+r = random.Random(158)
+for _ in range(9):
+    x, y = r.randrange(16), r.randrange(16)
+    t.set(x, y, R(G, 5)); t.set((x + 1) % 16, y, R(G, 3)); t.set(x, (y + 1) % 16, R(G, 2))
+for i in range(6): t.set(5 + i, 10 - i, R(M['steel'], 5 if i % 2 else 4)); t.set(6 + i, 10 - i, R(M['steel'], 2))
+for (x, y) in [(5, 9), (7, 11)]: t.set(x, y, R(G, 4))
+t.set(4, 11, R(M['leather'], 2)); t.set(3, 12, R(G, 3))
 sv(t, 'siege_oath_tree_crown_knight')
 t = leaves(fixed('#0c0814', '#1a1226', '#2a1c3c', '#3c2a54', '#52386e', '#6c4a8c'), 59)      # Marked: dark leaves, glowing veins
 r = random.Random(60)

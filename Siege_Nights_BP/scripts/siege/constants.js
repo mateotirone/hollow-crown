@@ -15,8 +15,17 @@ export const DESK = "siege:quartermaster_desk";
 export const CHARGE = "siege:breaching_charge";
 
 export const GATES = ["siege:portcullis", "siege:castle_gate"];
+
+// The Castle Stone family: every region has Castle Stone, Tiles, Bricks, Cobbled and Smooth (blocks/stone/).
+// The Vale's have no region in their id. Castle Stone itself can be reinforced; all of them show cracks.
+export const STONE_REGIONS = ["vale", "frostmarch", "saltreach", "emberwaste", "blackfen"];
+export const STONE_KINDS = ["stone", "tiles", "bricks", "cobbled", "smooth"];
+export const stoneId = (kind, region = "vale") => `siege:castle_${kind}${region === "vale" ? "" : `_${region}`}`;
+export const CASTLE_STONES = STONE_REGIONS.map((r) => stoneId("stone", r));
+export const STONE_FAMILY = STONE_REGIONS.flatMap((r) => STONE_KINDS.map((k) => stoneId(k, r)));
+
 export const CASTLE_BLOCKS = [
-  "siege:castle_stone", "siege:mossy_castle_stone", "siege:cracked_castle_stone",
+  ...STONE_FAMILY, "siege:mossy_castle_stone", "siege:cracked_castle_stone",
   "siege:battlement", "siege:arrow_slit", "siege:portcullis",
 ];
 export const UNBREAKABLE = ["minecraft:bedrock", "minecraft:barrier", "minecraft:obsidian", KEEP_BANNER];
@@ -33,7 +42,7 @@ export const WANTED_TAG = "siege_wanted";
 export const GUARD_GEAR = "siege:guardgear_";
 export const WEAPONS = ["siege:longsword", "siege:warhammer"];
 
-export const REINFORCEABLE = ["siege:castle_stone", "siege:portcullis", "siege:castle_gate"];
+export const REINFORCEABLE = [...CASTLE_STONES, "siege:portcullis", "siege:castle_gate"];
 
 export const COLORS = ["white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray",
   "light_gray", "cyan", "purple", "blue", "brown", "green", "red", "black"];

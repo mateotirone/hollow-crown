@@ -56,3 +56,7 @@ sheet([f"vale{i}" for i in range(1,6)],["Longhouse","Stone Hall","Keep","Fortres
 sheet([f"{s}3" for s in ["vale","frostmarch","saltreach","emberwaste","blackfen"]],["Vale","Frostmarch","Saltreach","Emberwaste","Blackfen"],D+"keep-in-five-styles.png",S=8)
 sheet(["vale2","vale4"],["Stone Hall, cut open","Fortress, cut open"],D+"hall-interiors.png",S=9,cut=True)
 print("missing",missing)
+for s,n in [("frostmarch","Frostmarch"),("saltreach","Saltreach"),("emberwaste","Emberwaste"),("blackfen","Blackfen")]:
+    sheet([f"{s}{i}" for i in range(1,6)],[f"{n} {i}" for i in range(1,6)],D+f"hall-tiers-{s}.png",S=6)
+sheet([f"{s}5" for s in ["vale","frostmarch","saltreach","emberwaste","blackfen"]],["Vale","Frostmarch","Saltreach","Emberwaste","Blackfen"],D+"thrones-in-five-styles.png",S=6)
+print("missing",missing)

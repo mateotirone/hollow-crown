@@ -9,8 +9,11 @@ export const TEXT = {
 };
 
 export const UNDERTOW_LAYOUT = {
-  // The playable valley. Outside it there is only fog and void.
-  halfWidth: 150, // valley runs from x = -150 to x = 150
+  // The Spine: the walled valley down the middle that the story path follows.
+  halfWidth: 150, // the Spine runs from x = -150 to x = 150
+  // The open country around it, generated as players explore. Past this there is only fog and void.
+  reach: 700, // the Hollow runs from about x = -700 to x = 700
+  seaY: 62, // the one water level of every light river and pool
   zStart: -48,
   zEnd: 2460,
   floorY: 40, // lowest solid layer (blackstone); below it, void

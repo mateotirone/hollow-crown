@@ -112,7 +112,28 @@ write(f"{BP}/entities/throne_seal.json", {"format_version": "1.21.60", "minecraf
                 {"test": "has_tag", "subject": "other", "value": "siege_crown_storm"}]}}, "deals_damage": "yes"},
             {"deals_damage": "no"}]}}}})
 
+# The Heart of the Hollow, lying where the Choir fell until someone reaches for it. Nothing can hurt it.
+write(f"{BP}/entities/resting_heart.json", {"format_version": "1.21.60", "minecraft:entity": {
+    "description": {"identifier": "siege:resting_heart", "is_spawnable": False, "is_summonable": True},
+    "components": {
+        "minecraft:type_family": {"family": ["resting_heart", "inanimate"]},
+        "minecraft:health": {"value": 20, "max": 20},
+        "minecraft:collision_box": {"width": 0.8, "height": 1.0},
+        "minecraft:physics": {"has_gravity": False, "has_collision": False},
+        "minecraft:pushable": {"is_pushable": False, "is_pushable_by_piston": False},
+        "minecraft:knockback_resistance": {"value": 1},
+        "minecraft:movement": {"value": 0},
+        "minecraft:persistent": {},
+        "minecraft:fire_immune": {},
+        "minecraft:nameable": {"always_show": True, "allow_name_tag_renaming": False},
+        "minecraft:damage_sensor": {"triggers": [{"deals_damage": "no"}]}}}})
+
 # ---------------- Resource pack ----------------
+
+write(f"{RP}/entity/resting_heart.entity.json", {"format_version": "1.10.0", "minecraft:client_entity": {"description": {
+    "identifier": "siege:resting_heart", "materials": {"default": "entity_alphatest"},
+    "textures": {"default": "textures/entity/siege_resting_heart"}, "geometry": {"default": "geometry.siege_resting_heart"},
+    "render_controllers": ["controller.render.default"]}}})
 
 write(f"{RP}/entity/throne_seal.entity.json", {"format_version": "1.10.0", "minecraft:client_entity": {"description": {
     "identifier": "siege:throne_seal", "materials": {"default": "entity_alphatest"},
@@ -161,13 +182,21 @@ geo(f"{RP}/models/entity/throne_seal.geo.json", "geometry.siege_throne_seal", [
     {"origin": [-2, 0, -2], "size": [4, 6, 4], "uv": [0, 20]},
     {"origin": [-7, 16, -7], "size": [14, 2, 14], "uv": [0, 32]}]}])
 
+geo(f"{RP}/models/entity/resting_heart.geo.json", "geometry.siege_resting_heart", [
+    {"origin": [-3, 4, -3], "size": [6, 7, 6], "uv": [0, 0]},
+], tex=(32, 32), bones=[{"name": "heart", "pivot": [0, 0, 0], "cubes": [
+    {"origin": [-3, 5, -3], "size": [6, 7, 6], "uv": [0, 0]},
+    {"origin": [-4, 7, -2], "size": [8, 4, 4], "uv": [0, 14]},
+    {"origin": [-1, 12, -1], "size": [2, 2, 2], "uv": [0, 24]}]}])
+
 # The Hollow Crown, worn: a gold band sitting on the head with six tall points
 band = [{"origin": [-4.5, 31, -4.5], "size": [9, 2, 9], "uv": [0, 0]}]
 points = [{"origin": [x, 33, z], "size": [w, h, d], "uv": [0, 12]} for x, z, w, d, h in [
     (-4.5, -4.5, 1, 1, 3), (3.5, -4.5, 1, 1, 3), (-4.5, 3.5, 1, 1, 3), (3.5, 3.5, 1, 1, 3),
     (-1, -4.5, 2, 1, 4), (-1, 3.5, 2, 1, 2), (-4.5, -1, 1, 2, 2), (3.5, -1, 1, 2, 2)]]
 gem = [{"origin": [-0.5, 31.5, -5], "size": [1, 1, 1], "uv": [8, 12]}]
-geo(f"{RP}/models/entity/hollow_crown.geo.json", "geometry.siege_hollow_crown", None, tex=(64, 32),
+# The worn Hollow Crown model is final art from studio/art/build_crown_art.py: only write a stand-in if it is missing
+if not os.path.exists(f"{RP}/models/entity/hollow_crown.geo.json"): geo(f"{RP}/models/entity/hollow_crown.geo.json", "geometry.siege_hollow_crown", None, tex=(64, 32),
     bones=[{"name": "head", "pivot": [0, 24, 0], "cubes": band + points + gem}])
 write(f"{RP}/attachables/hollow_crown.json", {"format_version": "1.8.0", "minecraft:attachable": {"description": {
     "identifier": "siege:hollow_crown", "materials": {"default": "armor", "enchanted": "armor_enchanted"},
@@ -263,6 +292,12 @@ def seal(d, img):  # 64x64, a pale violet seal-stone
     d.rectangle((0, 32, 55, 47), fill=GOLD[2]); d.line([(0, 32), (55, 32)], fill=GOLD[4])
 tex(f"{RP}/textures/entity/siege_throne_seal.png", (64, 64), seal)
 
+def resting_heart(d, img):  # 32x32, dark flesh with pale veins
+    d.rectangle((0, 0, 31, 31), fill=VOID[1])
+    for y in range(2, 32, 5): d.line([(0, y), (31, y - 2)], fill=VOID[4])
+    d.rectangle((0, 24, 7, 27), fill=GOLD[3])
+tex(f"{RP}/textures/entity/siege_resting_heart.png", (32, 32), resting_heart)
+
 # ---------------- Shared lists ----------------
 
 merge(f"{RP}/textures/terrain_texture.json", "texture_data", {n: {"textures": f"textures/blocks/{n}"} for n in
@@ -281,6 +316,7 @@ NAMES = {
     "item.siege:crown_shard.name": "Oath Shard",
     "item.siege:gauntlet_of_challenge.name": "Gauntlet of Challenge",
     "entity.siege:throne_seal.name": "Throne Seal",
+    "entity.siege:resting_heart.name": "The Heart of the Hollow",
 }
 for pack in (BP, RP):
     path = f"{pack}/texts/en_US.lang"

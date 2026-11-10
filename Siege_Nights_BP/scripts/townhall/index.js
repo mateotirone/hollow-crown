@@ -6,31 +6,54 @@
 //   on("hallBuilt", ({ owner, level, style, marks, first }) => ...)     marks = world spots: tree, sage, throne ...
 //   on("pathChosen", ({ player, path }))   on("rankUp", ({ player, path, rank }))   on("emberFell", ...)
 //   player dynamic property "siege:townhall_hero": JSON { path, rank, level, skills, resonance, ... }
-//   on("hollowStep", (request) => ...)   a Marked player cast Hollow Step: move request.player into the Hollow (or back out)
+//   on("hollowStep", (request) => ...)   a Marked player cast Veilstep: move request.player into the Hollow (or back out)
 //                                        and set request.handled = true, or set request.refused = "why not"
-//   on("hollowClaimReady", ({ player }))  a player learned Voice of the Hollow (skills.arc_warden): they may rule the Hollow
+//   on("hollowClaimReady", ({ player }))  a player learned The Last Art (skills.arc_warden): they may rule the Hollow
 //   emit("offerRole", { player, role }) / emit("grantRole", { player, role })   story-driven roles ("knight", "marked");
 //                                        answered by "roleOffered", "roleChosen" or "roleRefused" ({ player, role, why })
+//   on("rosterNotes", (notes) => notes.add(playerId, "text"))   add a line under a player on the Who's online screen
+//                                        (/scriptevent siege:who opens it anywhere)
+//   on("wallInfo", q) / on("wallUpgrade", q)   answer these to put your settlement wall in the Town Hall menu (see flyby.js)
+//   flyby(player, { center, radius, height, seconds, title })   the upgrade camera, for anything that rises
+//   emit("levelsQuery", q = { playerId })   fills q.level, q.rank, q.role, q.settlement, q.tier, q.hall, q.online (works for offline players)
 //   player tags: siege_resonant (Marked and loud, Resonance 70+), siege_echo_sight (Echo Sight is up)
 
 import { world, system } from "@minecraft/server";
 import * as api from "../siege/api.js";
+import { POWER_ORIGINS } from "./skills.js";
 import { SKILLS, SKILL, RINGS, BRANCHES, blockedReason, levelFromRenown, renownForNext, pointsForLevel, rankOf, spentIn, canBranch } from "./skills.js";
 import { STYLES, STYLE_IDS, styleFromBiome, styleFromGround } from "./styles.js";
 import { drawHall, frameFor, toWorld, statesFor, buildOrder } from "./halls.js";
 import { buildTick } from "./build.js";
 import { heroOf, saveHero, forgetHero, grantPoints, grantRenown, listenForGrants, blankHero } from "./hero.js";
-import { CORNERSTONE, TREE, hallMenu, hallOf, halls, saveHalls, resumeBuilds, beginBuild, setTreeLook, allowedLevel, HALL_COSTS } from "./townhall.js";
+import { CORNERSTONE, TREE, hallMenu, hallOf, halls, saveHalls, resumeBuilds, beginBuild, setTreeLook, allowedLevel, HALL_COSTS, hallMenuExtras } from "./townhall.js";
 import { openTree, choosePath, treeMenu, EMBER, BOUND_EMBER, OATH_BANNER } from "./tree.js";
 import { passiveTick, watchfireTick, dropEmber } from "./progress.js";
 import { knightTick, chargeTick } from "./knight.js";
 import { markedTick } from "./marked.js";
 import "./showcase.js";
+import { rosterMenu } from "./roster.js";
+import { wallMenu, flyby } from "./flyby.js";
+export { flyby };
+import { rumorMenu, rumorTick, rumorsFor, describe, jobTier } from "./rumors.js";
 
 export { grantPoints, grantRenown, heroOf, hallOf };
 export { startBuild } from "./build.js"; // other features can raise their own templates with the same engine
 
 listenForGrants();
+
+// ---------- where powers come from (the lore feature tells us) ----------
+api.on("powerOriginInfo", ({ gated, lines }) => { POWER_ORIGINS.gated = { ...gated }; POWER_ORIGINS.lines = { ...lines }; });
+api.on("powerOrigin", ({ player, skill }) => {
+  const p = typeof player === "string" ? world.getAllPlayers().find((x) => x.id === player) : player;
+  if (!p || !SKILL[skill]) return;
+  const hero = heroOf(p);
+  if (hero.origins?.[skill]) return;
+  hero.origins = { ...(hero.origins ?? {}), [skill]: true };
+  saveHero(p);
+  if (hero.path === "marked") p.sendMessage(`§5You know where ${SKILL[skill].name} comes from now. The Tree of Oaths will teach it.`);
+});
+system.runTimeout(() => api.emit("powerOriginsWanted", {}), 40);
 
 // ---------- clicking the cornerstone and the Tree ----------
 const lastClick = new Map();
@@ -54,11 +77,17 @@ world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
 });
 
 api.addKeepMenuButtons(({ player, owner }) => [
+  { label: "Who's online", icon: "textures/ui/multiplayer_glyph_color", action: () => rosterMenu(player) },
   { label: "Town hall", icon: "textures/items/siege_hall_cornerstone", action: () => hallMenu(player, owner) },
   ...(hallOf(owner)?.level ? [{ label: "Tree of Oaths", icon: "textures/items/siege_hollow_ember", action: () => treeMenu(player, hallOf(owner).level) }] : []),
 ]);
 
+hallMenuExtras.push({ label: "Settlement wall\n§8raise it and watch it rise", icon: "textures/blocks/stonebrick", action: (player, owner) => wallMenu(player, owner) });
+hallMenuExtras.push({ label: "Who's online\n§8players, roles and rulers", icon: "textures/ui/multiplayer_glyph_color", action: (player) => rosterMenu(player) });
+hallMenuExtras.push({ label: "Rumor Board\n§8jobs for Renown and emeralds", icon: "textures/items/paper", action: (player) => rumorMenu(player) });
+
 // ---------- loops ----------
+api.onTick("townhall_rumors", 40, rumorTick);
 api.onTick("townhall_build", 1, buildTick);
 api.onTick("townhall_passives", 20, passiveTick);
 api.onTick("townhall_knight", 20, knightTick);
@@ -197,6 +226,19 @@ api.addTests("townhall", {
     api.assertEqual(styleFromBiome("minecraft:plains"), "vale");
     api.assertEqual(styleFromGround({ "minecraft:sand": 30, "minecraft:grass_block": 10 }), "emberwaste");
     api.assertEqual(styleFromGround({}), "vale");
+  },
+  "the rumor board deals three steady jobs a day": () => {
+    const a = rumorsFor(12, "p1", 1), b = rumorsFor(12, "p1", 1), c = rumorsFor(13, "p1", 1);
+    api.assertEqual(a, b);
+    api.assertEqual(a.length, 3);
+    api.assert(JSON.stringify(a) !== JSON.stringify(c), "a new day brings new rumors");
+    for (let day = 0; day < 40; day++) for (const job of rumorsFor(day, "someone", day * 2)) {
+      api.assert(job.need >= 2 && job.renown > 0 && job.emeralds > 0, JSON.stringify(job));
+      const d = describe(job);
+      api.assert(d.title && d.text && !/undefined/.test(d.title + d.text), d.text);
+    }
+    api.assertEqual(jobTier(0), 0);
+    api.assertEqual(jobTier(50), 4);
   },
   "settlement tier decides the biggest hall": () => {
     api.assertEqual(allowedLevel(undefined), 0);

@@ -1,0 +1,21 @@
+{
+  "format_version": "1.21.60",
+  "minecraft:item": {
+    "description": {
+      "identifier": "siege:lattice_boat",
+      "menu_category": {
+        "category": "items"
+      }
+    },
+    "components": {
+      "minecraft:icon": "siege_lattice_boat",
+      "minecraft:display_name": {
+        "value": "item.siege:lattice_boat.name"
+      },
+      "minecraft:max_stack_size": 1,
+      "minecraft:entity_placer": {
+        "entity": "siege:lattice_boat"
+      }
+    }
+  }
+}

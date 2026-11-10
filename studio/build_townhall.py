@@ -256,7 +256,7 @@ write_json(os.path.join(BP, "recipes", "hall_cornerstone.json"), {
 NAMES = {
     "tile.siege:hall_cornerstone.name": "Hall Cornerstone",
     "tile.siege:tree_of_oaths.name": "Tree of Oaths",
-    "item.siege:hollow_ember.name": "Hollow Ember",
+    "item.siege:hollow_ember.name": "The Ember",
     "item.siege:bound_ember.name": "Bound Ember",
     "item.siege:oath_banner.name": "Oath Banner",
 }

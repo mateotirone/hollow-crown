@@ -118,7 +118,7 @@ if __name__ == "__main__":
     skin("choir_singer", (150, 130, 170), (255, 150, 210))
     p = f"{RP}/texts/en_US.lang"
     lines = open(p).read().splitlines()
-    want = {"entity.siege:choir_conductor.name": "The Hollow Choir", "entity.siege:choir_singer.name": "Singer", "entity.siege:hollow_regent.name": "The Hollow Crown"}
+    want = {"entity.siege:choir_conductor.name": "The Choir", "entity.siege:choir_singer.name": "Singer", "entity.siege:hollow_regent.name": "The Hollow Crown"}
     lines = [l for l in lines if l.split("=")[0] not in want] + [f"{k}={v}" for k, v in want.items()]
     open(p, "w").write("\n".join(lines) + "\n")
     print("Hollow Choir entities built.")

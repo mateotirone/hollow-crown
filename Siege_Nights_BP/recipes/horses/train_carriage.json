@@ -1,0 +1,40 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "siege:train_carriage_recipe"
+    },
+    "tags": [
+      "siege_workshop"
+    ],
+    "pattern": [
+      "PLP",
+      "PWP",
+      "MIM"
+    ],
+    "key": {
+      "P": {
+        "tag": "minecraft:planks"
+      },
+      "L": {
+        "item": "minecraft:lantern"
+      },
+      "W": {
+        "tag": "minecraft:wool"
+      },
+      "M": {
+        "item": "minecraft:minecart"
+      },
+      "I": {
+        "item": "minecraft:iron_ingot"
+      }
+    },
+    "result": {
+      "item": "siege:train_carriage",
+      "count": 1
+    },
+    "unlock": {
+      "context": "AlwaysUnlocked"
+    }
+  }
+}

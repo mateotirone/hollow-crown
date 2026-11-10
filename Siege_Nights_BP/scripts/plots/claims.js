@@ -10,7 +10,7 @@
 
 import { world, system, GameMode } from "@minecraft/server";
 import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
-import { isReady, getState, on, addKeepMenuButtons, addFoundingCheck } from "../siege/api.js";
+import { isReady, getState, on, emit, addKeepMenuButtons, addFoundingCheck } from "../siege/api.js";
 import { onTick } from "../core/loop.js";
 import { MAP, PLOT_PLAN, REGION_STYLE, PLOT_STONE, KEEP_BANNER, OVERWORLD, DAY_TICKS } from "./config.js";
 
@@ -47,10 +47,40 @@ export function holderOf(plot) {
   return undefined;
 }
 
+// ---------- NPC lords ----------
+// For single-player and half-empty Realms, an NPC Rival Lord can hold a plot. This file only
+// records who holds it; the settlement-building feature builds and runs the lord's settlement.
+// npc = { id: "any unique string", name: "Lord Garrick" }
+
+export const npcOf = (plot) => plot.npc;
+export const isFree = (plot) => !holderOf(plot) && !plot.npc;
+
+// Returns the plot, or undefined if it doesn't exist or isn't free
+export function giveToNpc(plotName, npc) {
+  const plot = allPlots().find((p) => p.name === plotName);
+  if (!plot || !isFree(plot) || !npc?.id) return undefined;
+  plot.npc = { id: String(npc.id), name: String(npc.name ?? "a rival lord") };
+  plot.reservedFor = undefined;
+  savePlots();
+  emit("plotNpcClaimed", { plot, npc: plot.npc });
+  return plot;
+}
+
+// Frees an NPC's plot (the lord was beaten, bought out or left). Returns the plot or undefined.
+export function releaseNpc(plotName) {
+  const plot = allPlots().find((p) => p.name === plotName);
+  if (!plot?.npc) return undefined;
+  const npc = plot.npc;
+  plot.npc = undefined;
+  savePlots();
+  emit("plotNpcReleased", { plot, npc });
+  return plot;
+}
+
 export const plotOf = (playerId) => allPlots().find((p) => holderOf(p) === playerId);
 const isHeldAgainst = (plot, playerId) =>
   !!plot.reservedFor && plot.reservedFor !== playerId && world.getAbsoluteTime() < plot.reservedUntil;
-export const freePlots = (player) => allPlots().filter((p) => !holderOf(p) && !isHeldAgainst(p, player.id));
+export const freePlots = (player) => allPlots().filter((p) => isFree(p) && !isHeldAgainst(p, player.id));
 
 export function compass(from, to) {
   const dx = to.x - from.x;
@@ -72,6 +102,7 @@ export function claimProblem(player, block) {
   if (holder && holder !== player.id) {
     return `§c${keeps()[holder].name} holds ${plot.name}. Ask them for a Writ of Alliance to build here together.`;
   }
+  if (plot.npc) return `§c${plot.npc.name} holds ${plot.name}. Deal with them first.`;
   if (isHeldAgainst(plot, player.id)) {
     const days = Math.ceil((plot.reservedUntil - world.getAbsoluteTime()) / DAY_TICKS);
     return `§c${plot.name} is held for ${plot.reservedName} for ${days} more day${days === 1 ? "" : "s"}.`;
@@ -191,6 +222,7 @@ function statusOf(plot, viewer) {
     const allies = n ? ` + ${n} all${n === 1 ? "y" : "ies"}` : "";
     return holder === viewer.id ? "§ayours" : `§6held by ${keep.name}${allies}`;
   }
+  if (plot.npc) return `§cheld by ${plot.npc.name}`;
   if (isHeldAgainst(plot, viewer.id)) return `§7held for ${plot.reservedName}`;
   return "§afree";
 }
@@ -214,6 +246,8 @@ async function plotMenu(player, plot) {
     "",
     holder
       ? "§7Its Keep Banner stands on this stone."
+      : plot.npc
+        ? `§7${plot.npc.name} rules here.`
       : plotOf(player.id)
         ? "§7You already hold a plot. Raising your banner here would move your settlement and leave your old plot."
         : "§7Place your Keep Banner on top of this stone to claim it.",
@@ -286,7 +320,7 @@ function plotEdgeTick() {
     }
     // A free plot shows its full 80-block edge in green sparks near where you stand
     for (const plot of plots) {
-      if (holderOf(plot)) continue; // claimed plots show their settlement border instead
+      if (!isFree(plot)) continue; // claimed plots show their settlement border instead
       const cx = plot.x + 0.5;
       const cz = plot.z + 0.5;
       const r = MAP.plotRadius;
@@ -303,17 +337,6 @@ function plotEdgeTick() {
     }
   }
 }
-
-// ---------- Arrivals ----------
-
-world.afterEvents.playerSpawn.subscribe((event) => {
-  if (!event.initialSpawn) return;
-  const player = event.player;
-  system.runTimeout(() => {
-    if (!isReady() || !mapMode() || plotOf(player.id)) return;
-    player.sendMessage(`§6Welcome to Aldmere. ${freePlots(player).length} of ${plots.length} plots are free. Ride the rails from Kingsrest, find a Plot Stone, and raise your Keep Banner on it.`);
-  }, 60);
-});
 
 onTick("plots_edges", 20, () => {
   if (isReady() && mapMode()) plotEdgeTick();

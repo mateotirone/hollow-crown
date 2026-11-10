@@ -1,0 +1,8 @@
+[
+ {
+  "flipbook_texture": "textures/blocks/siege_glimmerflow",
+  "atlas_tile": "siege_glimmerflow",
+  "ticks_per_frame": 4,
+  "blend_frames": true
+ }
+]

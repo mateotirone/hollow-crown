@@ -3,7 +3,7 @@
 import { world, system, GameMode } from "@minecraft/server";
 import { moduleStore, isOnline, isAlly, keepOf } from "../siege/api.js";
 import { mapMode, plotOf, allPlots, holderOf } from "../plots/claims.js";
-import { DRAGON_SETTINGS as S, DRAGON, STAGES, earnedStage } from "./data.js";
+import { DRAGON_SETTINGS as S, DRAGON, STAGES, earnedStage, groundStep, airStep, healthStep, newMind } from "./data.js";
 
 // dragons: owner id -> record. nests: "x,y,z" -> time the next egg is ready. mourning: owner id -> time they may take an egg again.
 export const store = moduleStore("siege:dragons", () => ({ dragons: {}, nests: {}, mourning: {} }));
@@ -71,8 +71,9 @@ function setProp(entity, id, value) {
   }
 }
 
+export { fire, setProp };
 export function setFlying(entity, rec, flying) {
-  fire(entity, `siege:to_${flying ? "air" : "ground"}_${rec.stats.speed}`);
+  fire(entity, flying ? `siege:to_air_${airStep(rec)}` : `siege:to_ground_${groundStep(rec)}`);
 }
 export const isFlying = (entity) => {
   try {
@@ -85,15 +86,30 @@ export const isFlying = (entity) => {
 // Makes the entity match its record: size, health, speed, saddle, orders, colour, name
 export function applyRecord(entity, rec, { keepMode = false } = {}) {
   if (!valid(entity)) return;
+  rec.mind ??= newMind();
+  setProp(entity, "siege:species", rec.species ?? 0);
+  if (rec.down) {
+    // unconscious: it just lies there until it is tended, finished off, or bleeds out
+    entity.setDynamicProperty(OWNER, rec.owner);
+    entity.setDynamicProperty(GEN, rec.gen);
+    fire(entity, "siege:go_down");
+    setProp(entity, "siege:pose", 2);
+    entity.nameTag = rec.name;
+    return;
+  }
   entity.setDynamicProperty(OWNER, rec.owner);
   entity.setDynamicProperty(GEN, rec.gen);
   fire(entity, `siege:stage_${STAGES.includes(rec.stage) ? rec.stage : "hatchling"}`);
-  fire(entity, `siege:health_${rec.stats.vigor}`);
+  if (entity.getDynamicProperty("siege:dragons_hs") !== healthStep(rec)) {
+    // only when it changes: swapping the health group refills its health
+    entity.setDynamicProperty("siege:dragons_hs", healthStep(rec));
+    fire(entity, `siege:health_${healthStep(rec)}`);
+  }
   setFlying(entity, rec, keepMode && isFlying(entity));
   fire(entity, rec.saddled && rec.stage !== "hatchling" ? "siege:saddle_on" : "siege:saddle_off");
   fire(entity, rec.order === "stay" ? "siege:order_stay" : "siege:order_follow");
   fire(entity, isOnline(rec.owner) ? "siege:ds_normal" : "siege:ds_protected");
-  setProp(entity, "siege:hue", rec.hue);
+  if (!rec.asleep) setProp(entity, "siege:pose", 0);
   entity.nameTag = rec.name;
   try {
     const owner = world.getPlayers().find((p) => p.id === rec.owner);
@@ -166,6 +182,7 @@ export function scanDragons(onGrown) {
         continue;
       }
       live.set(owner, entity);
+      if (rec.down) continue;
       const stage = earnedStage(rec, now);
       if (stage !== rec.stage) {
         rec.stage = stage;

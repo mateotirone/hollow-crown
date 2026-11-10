@@ -21,10 +21,10 @@ export const TOMES_B = [
   {
     id: "corv_02", col: "corvin", n: 2,
     title: "Notebook II: On the Hollow", author: "Corvin Hale",
-    where: "Hollowfast, frozen lake shore, in a drowned satchel under the ice hut.",
+    where: "Rimehold, frozen lake shore, in a drowned satchel under the ice hut.",
     hint: "One of his students fled north with this. The north's frozen lakes keep secrets.",
     pages: [
-      "Under Aldmere there is another country. It is not a copy of ours and it never was. It is older than Aldmere, with its own towns and roads and its own sky, and it lies beneath us as cold water lies under ice. I call it the Hollow, because everything warm has been scooped out of it.",
+      "Under Aldmere there is another country. It is not a copy of ours and it never was. It is older than Aldmere, with its own towns and roads, and no sky at all, only a roof of dark too far up to see, and it lies beneath us as cold water lies under ice. I call it the Hollow, because everything warm has been scooped out of it.",
       "It is drowned. It is dim. Its streets are black water and its towers lean. Its people stand facing the walls, and its bells hang mouth upward. And it is leaking. It seeps up into our world wherever the ice is thin: through wells, through lakes, through the sea at low tide.",
       "Things that live there want what we have: warmth, walls, names, being remembered. They cannot take it. They can only be given it, or be let in.",
     ],
@@ -37,8 +37,8 @@ export const TOMES_B = [
     where: "Mirelight, Old Mag's hut, under her bed (she will say she has never seen it).",
     hint: "His apprentice took this one into the swamp. She is still alive, if you believe her.",
     pages: [
-      "The Hollow has a sky of its own, and a moon of its own, and their moon keeps the opposite time to ours. When our moon is full, theirs is dark. When ours is new, theirs is full.",
-      "Any door that belongs to both worlds obeys THEIR moon, not ours. So a door carved with a full moon opens on the night our moon is dark. I have tested this four times at the lake in Hollowfast. Four times it was true.",
+      "The Hollow has no sky, only a roof of dark. But it has a moon of its own, a pale light that crosses that roof, and their moon keeps the opposite time to ours. When our moon is full, theirs is dark. When ours is new, theirs is full.",
+      "Any door that belongs to both worlds obeys THEIR moon, not ours. So a door carved with a full moon opens on the night our moon is dark. I have tested this four times at the lake in Rimehold. Four times it was true.",
       "Remember it this way: what the carving shows, the sky must not.",
     ],
     clues: ["wrong_moon_rule"],
@@ -50,9 +50,9 @@ export const TOMES_B = [
     where: "Gull's Rest, inside the lighthouse, behind the lamp's oil store.",
     hint: "Hidden by a student who reached the coast. Somewhere a light is always kept burning.",
     pages: [
-      "The Hollow Choir is not a god and not a demon. I went close enough to listen. The Choir is a people.",
+      "The Choir is not a god and not a demon. I went close enough to listen. The Choir is a people.",
       "They have streets and trades and children. They have lords: I counted five voices that the others fall silent for. And some of the voices are ours. I heard a fisherman counting nets. I heard my own teacher, dead forty years, humming the tune she tuned bells by. Those who walk down to them on a Lost Day are not eaten. They are kept.",
-      "The bell they ring is older than any of ours. They rang it when their world first ran aground on our own, in the marsh they still call Hollowmere, and they have rung it every third night since, to ask whether anyone is listening.",
+      "The bell they ring is older than any of ours. They rang it when their world first ran aground on our own, in the marsh they still call Hallowmere, and they have rung it every third night since, to ask whether anyone is listening.",
     ],
     clues: ["choir_is_people", "hollow_bell", "leader_five_lords"],
     leads: ["lighthouse"],
@@ -65,7 +65,7 @@ export const TOMES_B = [
     pages: [
       "I have the terms by heart, for I held the lamp while they were spoken. There were five of them and one of him, at a table of wet stone.",
       "The Hollow shall call off the Grey Host, whom it called. The Host shall trouble Aldmere no more. In return, every third night belongs to the Hollow. On that night no bell shall be rung in Aldmere, and the people of the Hollow may walk above as guests, and any of ours who wish to walk below may go.",
-      "It was sworn on a crown, and not his. They set their own on the table: a grey thing with no jewel in it, and hollow, for it had no band inside to sit upon a head. None of the five would touch it with a bare hand. 'Whoever wears it rules us,' the eldest said, 'and it would kill you where you sit.' They broke a splinter from it and gave it to him as their pledge. He said to me on the way up: 'It is not a good peace, Corvin. It is only better than the war.' I have never heard a king say a truer thing, nor one that would be less forgiven.",
+      "It was sworn on a crown, and not his. They set their own on the table: a grey thing with no jewel in it, and hollow, for it had no band inside to sit upon a head. None of the five would touch it with a bare hand. 'Whoever wears it rules us,' the eldest said, 'and it would kill you where you sit.' They broke a splinter from it and gave it to him as their pledge. He took it in his right hand, and I saw him flinch. He said to me on the way up: 'It is not a good peace, Corvin. It is only better than the war.' I have never heard a king say a truer thing, nor one that would be less forgiven.",
     ],
     clues: ["truce_terms", "crown_marked"],
     leads: ["faceless_vault"],
@@ -104,7 +104,7 @@ export const TOMES_B = [
     pages: [
       "The Crack in the Deep will not stay where it is. A door like that drifts toward warmth, and sooner or later it will slide to whichever thin place lies nearest the brightest keep in the land. There are seven thin places I know of.",
       "THE DROWNED CHAPEL, under the sea at Gull's Rest. THE BELLFOUNDERS' MINE in Frostmarch, where Maelis dug her bronze. KING'S BARROW in the Vale, under the royal mound. THE SALTGLASS GROTTO, in the Emberwaste salt flats.",
-      "FROSTVEIN HOLLOW, an ice cave in the north. THE SUNKEN QUARRY, the flooded pit west of Millbrook. THE WITCHROOT CAVES, under Blackfen. Whoever finds the door again: it will look like a crack in a cave wall, nothing more, until you are close enough to hear it breathing.",
+      "FROSTVEIN GAP, an ice cave in the north. THE SUNKEN QUARRY, the flooded pit west of Millbrook. THE WITCHROOT CAVES, under Blackfen. Whoever finds the door again: it will look like a crack in a cave wall, nothing more, until you are close enough to hear it breathing.",
     ],
     clues: ["seven_thin_places"],
     leads: ["drowned_chapel", "bellfounders_mine", "kings_barrow", "saltglass_grotto", "frostvein_hollow", "sunken_quarry", "witchroot_caves"],
@@ -181,7 +181,7 @@ export const TOMES_B = [
   {
     id: "surv_04", col: "survey", n: 4, survey: 3,
     title: "Field Notes IV: Cold", author: "Brother Ide Fennick",
-    where: "Frostvein Hollow, frozen into the ice near the entrance (break the ice to get it).",
+    where: "Frostvein Gap, frozen into the ice near the entrance (break the ice to get it).",
     hint: "Fourth of six. Fennick's ink froze somewhere in the north.",
     pages: [
       "Fourth. The tune is louder. I have been humming it without meaning to.",

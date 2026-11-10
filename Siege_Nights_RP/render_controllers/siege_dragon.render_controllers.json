@@ -4,22 +4,30 @@
   "controller.render.siege_dragon": {
    "arrays": {
     "textures": {
-     "Array.hues": [
-      "Texture.ember",
-      "Texture.ash",
-      "Texture.sand",
-      "Texture.obsidian"
+     "Array.skins": [
+      "Texture.cinderwing",
+      "Texture.wyvern",
+      "Texture.drake",
+      "Texture.wyrm"
+     ]
+    },
+    "geometries": {
+     "Array.geos": [
+      "Geometry.cinderwing",
+      "Geometry.wyvern",
+      "Geometry.drake",
+      "Geometry.wyrm"
      ]
     }
    },
-   "geometry": "Geometry.default",
+   "geometry": "Array.geos[query.property('siege:species')]",
    "materials": [
     {
      "*": "Material.default"
     }
    ],
    "textures": [
-    "Array.hues[query.property('siege:hue')]"
+    "Array.skins[query.property('siege:species')]"
    ],
    "part_visibility": [
     {

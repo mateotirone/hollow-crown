@@ -2,6 +2,7 @@
 // It grows with your settlement tier (Longhouse, Stone Hall, Keep, Fortress, Sovereign's Throne)
 // and is rebuilt in place each time, in your region's style.
 
+import { flyby } from "./flyby.js";
 import { world, system, GameMode, ItemStack } from "@minecraft/server";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
 import * as api from "../siege/api.js";
@@ -21,7 +22,8 @@ export const saveHalls = () => store.save();
 // ---------- what each tier costs (vanilla materials only) ----------
 
 const any = (...parts) => (id) => parts.some((p) => id.endsWith(p));
-const STONE = any("cobblestone", "cobbled_deepslate", ":stone", "stone_bricks", "stonebrick", "deepslate_bricks", "sandstone", "mud_bricks", "calcite");
+const VANILLA_STONE = any("cobblestone", "cobbled_deepslate", ":stone", "stone_bricks", "stonebrick", "deepslate_bricks", "sandstone", "mud_bricks", "calcite");
+const STONE = (id) => VANILLA_STONE(id) || id.startsWith("siege:castle_"); // every region's Castle Stone counts too
 const WOOD = any("_planks", ":planks");
 const is = (id) => (other) => other === id;
 
@@ -45,7 +47,7 @@ const UNLOCKS = [
 
 const invOf = (player) => player.getComponent("minecraft:inventory").container;
 
-function countMatching(player, match) {
+export function countMatching(player, match) {
   const inv = invOf(player);
   let n = 0;
   for (let i = 0; i < inv.size; i++) {
@@ -55,7 +57,7 @@ function countMatching(player, match) {
   return n;
 }
 
-function takeMatching(player, match, amount) {
+export function takeMatching(player, match, amount) {
   const inv = invOf(player);
   for (let i = 0; i < inv.size && amount > 0; i++) {
     const item = inv.getItem(i);
@@ -232,6 +234,16 @@ export function beginBuild(owner, level, style, resumeIndex = 0) {
       }
     },
   });
+  // watch it rise: the camera circles the hall while it is built (not when a build resumes after a restart)
+  const watcher = playerById(owner);
+  if (watcher && !resumeIndex) {
+    const b = plan.bounds(), mid = (b.z0 + b.z1) / 2, size = Math.max(b.x1 - b.x0, b.z1 - b.z0);
+    flyby(watcher, {
+      center: { x: hall.x + forward.x * mid, y: hall.y, z: hall.z + forward.z * mid },
+      radius: size * 0.75 + 10, height: b.y1 * 0.8 + 8,
+      seconds: Math.min(24, Math.max(8, plan.cells.size / perTick / 20)), title: `§6${HALL_TIERS[level].name} rising`,
+    });
+  }
   return true;
 }
 
@@ -263,6 +275,9 @@ export function resumeBuilds() {
 }
 
 // ---------- menus ----------
+
+// Extra buttons for the Town Hall menu, shown once a hall stands: { label, icon?, action(player, owner) }
+export const hallMenuExtras = [];
 
 const tierLine = (keep) => (keep.sovereign ? "Sovereign" : api.tierOf(keep).name);
 
@@ -315,6 +330,10 @@ export function hallMenu(player, owner) {
       form.button("Repair the hall\n§8puts every block back", "textures/items/iron_pickaxe");
       actions.push(() => confirmBuild(player, owner, hall.level, hall.style, [], true));
     }
+  }
+  if (hall.level >= 1) for (const extra of hallMenuExtras) {
+    form.button(extra.label, extra.icon);
+    actions.push(() => extra.action(player, owner));
   }
   if (hall.level >= 2) {
     form.button("Ask the Sage", "textures/items/book_writable");

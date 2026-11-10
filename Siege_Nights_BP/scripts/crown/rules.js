@@ -55,6 +55,13 @@ export function resolveCrown({ takers, votes = {}, fighters, roll = 0 }) {
   return { winner: tied[Math.min(tied.length - 1, Math.floor(roll * tied.length))], how: "chosen", tally };
 }
 
+// Why a hand comes off the resting Heart, or undefined while the reach holds
+export function reachProblem({ here, distance }) {
+  if (!here) return "is gone";
+  if (distance > CROWN.reachRange) return "stepped away from it";
+  return undefined;
+}
+
 // ---------- The Storm ----------
 
 // Can this player throw down the Gauntlet right now? Returns a refusal message, or undefined if they can.
@@ -75,9 +82,30 @@ export function gauntletProblem({ ruler, playerId, isCourt, claim, challenge, si
 // What a pending challenge does when a siege night begins
 export function stormAtNightfall({ challenge, rulerOnline, claimantOnline }) {
   if (!challenge) return "none";
+  if (challenge.npc) return "wait"; // a lord's army comes as a siege on the ruler's keep (usurp.js)
   if (rulerOnline && claimantOnline) return "storm";
   if (rulerOnline) return challenge.missed + 1 >= CROWN.claimantMisses ? "lapse" : "claimantMissed";
   return "wait"; // ruler away: nobody gets robbed in their sleep
+}
+
+// ---------- Rival lords (computer-run claimants) ----------
+
+export const lordId = (key) => `npc:${key}`;
+export const isNpc = (id) => typeof id === "string" && id.startsWith("npc:");
+
+// A lord's Claim after one more siege night under a player ruler. roll: 0..1
+export const lordGain = (lord, unrest, roll = 0) => lord.claim + lord.pace + unrest + Math.floor(roll * 4);
+
+// The lord who throws down the Gauntlet tonight, if any: the strongest Claim that is strong enough
+export function lordChallenger(lords, { need, challenge, siegeNumber, graceUntil }) {
+  if (challenge || siegeNumber < graceUntil) return undefined;
+  return [...lords].sort((a, b) => b.claim - a.claim).find((l) => l.claim >= need);
+}
+
+// Who a ruling lord sends the raiders against: never the same settlement twice in a row. roll: 0..1
+export function npcDecreeTarget(owners, lastTarget, roll = 0) {
+  const open = owners.filter((o) => o !== lastTarget);
+  return open.length ? open[Math.min(open.length - 1, Math.floor(roll * open.length))] : undefined;
 }
 
 export const abandoned = (challenge, nowMs) =>

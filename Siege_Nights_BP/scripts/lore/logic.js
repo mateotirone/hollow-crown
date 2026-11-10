@@ -3,15 +3,21 @@
 import { TOMES_A } from "./data/tomes_a.js";
 import { TOMES_B } from "./data/tomes_b.js";
 import { TOMES_C } from "./data/tomes_c.js";
+import { LOCAL_TOMES, LOCAL_COLLECTIONS, LOCAL_THREADS } from "./data/plots.js";
 import { COLLECTIONS, SITE_FEATURES, SITE_IDS, SURVEY_LINES, THREADS, MILESTONES } from "./data/world.js";
 
 export const TOMES = [...TOMES_A, ...TOMES_B, ...TOMES_C];
-export const TOME = Object.fromEntries(TOMES.map((t) => [t.id, t]));
-export const COLLECTION = Object.fromEntries(COLLECTIONS.map((c) => [c.id, c]));
-export const THREAD = Object.fromEntries(THREADS.map((t) => [t.id, t]));
-export const tomesOf = (col) => TOMES.filter((t) => t.col === col).sort((a, b) => a.n - b.n);
+// The 74 tomes are TOMES. Each settlement plot also has three local books (data/plots.js): they can be read,
+// shelved and solved like any other, but they never count toward the 74, the 16 mysteries or Library rank.
+export const ALL_TOMES = [...TOMES, ...LOCAL_TOMES];
+export const ALL_THREADS = [...THREADS, ...LOCAL_THREADS];
+export const isLocal = (id) => String(id).startsWith("loc_") || String(id).startsWith("local_");
+export const TOME = Object.fromEntries(ALL_TOMES.map((t) => [t.id, t]));
+export const COLLECTION = Object.fromEntries([...COLLECTIONS, ...LOCAL_COLLECTIONS].map((c) => [c.id, c]));
+export const THREAD = Object.fromEntries(ALL_THREADS.map((t) => [t.id, t]));
+export const tomesOf = (col) => ALL_TOMES.filter((t) => t.col === col).sort((a, b) => a.n - b.n);
 export const CLUE_THREADS = {}; // clue id -> [thread ids]
-for (const t of THREADS) for (const clue of Object.keys(t.clues)) (CLUE_THREADS[clue] ??= []).push(t.id);
+for (const t of ALL_THREADS) for (const clue of Object.keys(t.clues)) (CLUE_THREADS[clue] ??= []).push(t.id);
 
 // ---------- The Surveyor's notes ----------
 export const surveyLine = (site, n) => SURVEY_LINES[n][SITE_FEATURES[site][n] ? 0 : 1];
