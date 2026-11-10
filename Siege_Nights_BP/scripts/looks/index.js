@@ -5,11 +5,11 @@
 // The resource pack's player file swaps the texture when it is above 0. The list of looks is data.js,
 // written by studio/build_looks.mjs. A look with a `player` is reserved for that gamertag.
 //
-// Players choose on their first join, at a Looking Glass block, or from their Keep Banner menu.
+// Players choose on their first join (step 10 of the join sequence), at a Looking Glass block, or from their Keep Banner menu.
 
 import { world, system } from "@minecraft/server";
 import { ActionFormData } from "@minecraft/server-ui";
-import { on, addKeepMenuButtons } from "../siege/api.js";
+import { on, addKeepMenuButtons, addJoinStep } from "../siege/api.js";
 import { LOOKS } from "./data.js";
 import "./tests.js";
 
@@ -59,6 +59,7 @@ export async function chooseLook(player) {
   } catch {
     return false;
   }
+  if (res.canceled && res.cancelationReason === "UserBusy") return "busy";
   if (res.canceled || res.selection === undefined) return false;
   const look = mine[res.selection];
   if (!setLook(player, look)) {
@@ -70,32 +71,34 @@ export async function chooseLook(player) {
   return true;
 }
 
-// First join: a reserved look is put on straight away, everyone else is asked once.
-function welcome(player, triesLeft = 5) {
-  if (!player.isValid) return;
+// On every spawn, quietly keep the number in step with the chosen id, in case the list was rebuilt.
+world.afterEvents.playerSpawn.subscribe(({ player, initialSpawn }) => {
+  if (!initialSpawn) return;
   const chosen = player.getDynamicProperty(CHOSEN);
-  if (typeof chosen === "string") {
-    // Keep the number in step with the id, in case the list was rebuilt
-    const look = LOOKS.find((l) => l.id === chosen);
-    const n = look && (!look.player || same(look.player, player.name)) ? look.n : 0;
-    try {
-      if (player.getProperty(PROP) !== n) player.setProperty(PROP, n);
-    } catch { /* no player file: nothing to keep in step */ }
-    return;
-  }
+  if (typeof chosen !== "string") return;
+  const look = LOOKS.find((l) => l.id === chosen);
+  const n = look && (!look.player || same(look.player, player.name)) ? look.n : 0;
+  try {
+    if (player.getProperty(PROP) !== n) player.setProperty(PROP, n);
+  } catch { /* no player file: nothing to keep in step */ }
+});
+
+// First join, first step of the join sequence (see MODULES.md): a reserved look is put on straight
+// away, everyone else is asked once. The step ends when the player has picked or closed the menu,
+// so the welcome that follows never lands on top of it.
+addJoinStep(10, "look picker", async (player, { wait }) => {
+  if (typeof player.getDynamicProperty(CHOSEN) === "string") return;
   const reserved = reservedFor(player.name);
   if (reserved) {
     if (setLook(player, reserved)) player.sendMessage(`§7You arrive as §f${reserved.name}§7. Any Looking Glass will let you change.`);
     return;
   }
-  chooseLook(player).then((answered) => {
-    // The form can't open while the loading screen or another menu is up: try again a few times
-    if (!answered && triesLeft > 0) system.runTimeout(() => welcome(player, triesLeft - 1), 100);
-  });
-}
-world.afterEvents.playerSpawn.subscribe(({ player, initialSpawn }) => {
-  if (initialSpawn) system.runTimeout(() => welcome(player), 80);
-});
+  // The menu can't open while another screen (chat, pause, loading) is up: wait and try again
+  for (let tries = 0; tries < 8 && player.isValid; tries++) {
+    if ((await chooseLook(player)) !== "busy") return;
+    await wait(40);
+  }
+}, { when: "first", timeout: 120 });
 
 world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
   if (event.isFirstEvent === false || event.block.typeId !== LOOKING_GLASS) return;

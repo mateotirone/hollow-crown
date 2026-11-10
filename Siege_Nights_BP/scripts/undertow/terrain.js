@@ -44,7 +44,10 @@ export const B = {
   cobble: "minecraft:cobbled_deepslate",
   post: "minecraft:cobbled_deepslate_wall",
   lantern: "minecraft:soul_lantern",
-  deck: "minecraft:polished_blackstone_bricks",
+  deck: "siege:veinstone_bricks",
+  deckCracked: "siege:cracked_veinstone_bricks",
+  ash: "siege:pale_ash",
+  glint: "siege:glint_cluster",
   parapet: "minecraft:polished_blackstone_brick_wall",
 };
 
@@ -261,6 +264,9 @@ export function isRiver(x, z) {
   return c !== null && c.river <= RIVER_HALF_WIDTH && c.under === undefined;
 }
 
+// How likely a blue crystal cluster is: sparse in the highlands, denser the nearer the Seat.
+const glintChance = (kind, z) => (kind === "high" ? 0.012 : 0) + (z > 1900 ? 0.03 * Math.min(1, (z - 1900) / 400) : 0);
+
 const landmarkNearRoad = (cx, cz, col) => {
   for (let i = 0; i < 16; i += 3) for (let j = 0; j < 16; j += 3) if (col(i, j)?.road !== undefined && !inSpine(cx * 16 + i)) return true;
   return false;
@@ -346,12 +352,16 @@ function planLand(cx, cz) {
       fill(x, start, z, x, top, z, kind === "mirror" || kind === "high" ? B.polished : B.basalt);
       // Choir ore shows in the cliff faces, richer the deeper into the Hollow you go.
       if (hash(x, z, 301) < oreChance(z)) set(x, top - 1 - Math.floor(hash(x, z, 302) * 3), z, B.ore);
+      // Blue crystal clusters on the ledges of the highlands, and thick on the climb to the Seat.
+      if (c.road === undefined && !c.site && hash(x, z, 303) < glintChance(kind, z) * 2) set(x, top + 1, z, B.glint);
     } else {
-      fill(x, start, z, x, top - 1, z, B.rock);
+      const ashy = kind === "waste" && !c.paved && top >= SEA && !onWater;
+      fill(x, start, z, x, ashy ? top - 2 : top - 1, z, B.rock);
+      if (ashy) fill(x, Math.max(start, top - 1), z, x, top - 1, z, B.ash); // pale ash lies a layer or two deep on the wastes
       if (onWater) set(x, top, z, B.flow); // the glowing bed of a light river
       else if (top < SEA) set(x, top, z, B.tuff);
       else if (c.paved) set(x, top, z, hash(x, z, 401) < (c.road < 1.2 ? 0.8 : 0.4) ? B.cobble : B.road); // cobbles, worn away to dirt at the edges
-      else set(x, top, z, wound ? B.rock : kind === "waste" ? B.tuff : B.moss);
+      else set(x, top, z, wound ? B.rock : kind === "waste" ? B.ash : B.moss);
     }
     // Everything below the water line is under water: one level across the whole Hollow, so nothing spills.
     if (top < SEA) fill(x, top + 1, z, x, SEA, z, B.water);
@@ -365,7 +375,7 @@ function planLand(cx, cz) {
         const t = ((Math.floor(c.roadS) % 10) + 10) % 10;
         depth = t < 2 ? 99 : 1 + Math.round(4 * (1 - Math.sin((Math.PI * (t - 2)) / 8)) ** 2);
       }
-      fill(x, Math.max(top + 1, c.h - depth), z, x, c.h - 1, z, B.deck);
+      fill(x, Math.max(top + 1, c.h - depth), z, x, c.h - 1, z, hash(x, z, 403) < 0.2 ? B.deckCracked : B.deck);
       set(x, c.h, z, c.paved ? (hash(x, z, 401) < 0.3 ? B.cobble : B.deck) : B.deck);
       if (!c.paved) set(x, c.h + 1, z, B.parapet); // low walls along both sides
       continue;
@@ -385,6 +395,8 @@ function planLand(cx, cz) {
       fill(x, top + 1, z, x, top + tall, z, kind === "mirror" ? B.glass : B.basalt);
     } else if (r < (spineCol ? 0.06 : PLANTS[kind])) {
       set(x, top + 1, z, hash(x, z, 7) < (kind === "fen" ? 0.3 : 0.6) ? B.veilcap : B.glimbulb);
+    } else if (hash(x, z, 304) < glintChance(kind, z)) {
+      set(x, top + 1, z, B.glint);
     }
   }
 
