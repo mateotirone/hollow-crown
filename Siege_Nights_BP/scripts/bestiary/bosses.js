@@ -3,12 +3,11 @@
 //
 // Numbers worth tweaking are near the top of each boss. Times are in game ticks (20 = 1 second).
 
-import { world, system } from "@minecraft/server";
+import { system } from "@minecraft/server";
 import { RAIDER_TAG, WARLORD_TAG, KING_TAG, addTests, assert, assertEqual } from "../siege/api.js";
-import { UNDERTOW_ID, COURT } from "../undertow/layout.js";
-import { registerBoss, startBoss, bossDefs, fightOf, stack } from "./bossCore.js";
+import { registerBoss, bossDefs, stack } from "./bossCore.js";
 import { MOBS, ITEMS } from "./data.js";
-import { alive, effect, flat, heal, heroOf, hurt, held, line, particle, ring, shove, sound } from "./util.js";
+import { alive, effect, flat, heal, hurt, held, line, particle, ring, shove, sound } from "./util.js";
 
 const perPlayer = (f, base, each) => base + each * Math.max(0, f.players().length - 1);
 const floorOf = (f, p) => ({ x: p.x, y: f.def.roaming ? p.y : f.center.y, z: p.z });
@@ -36,7 +35,7 @@ function tiles(count, onMiss, missText) {
 }
 
 // Shared: a straight line from the boss toward where a player was standing. Dodge sideways.
-function lance(length, damage, after) {
+export function lance(length, damage, after) {
   return {
     start: (f) => {
       const t = f.target();
@@ -234,7 +233,7 @@ registerBoss({
     f.data.rung[bell.id] = f.tick;
     sound(f.dim, "block.bell.hit", bell.location, 0.8 + Object.keys(f.data.rung).length * 0.15, 2);
     try { bell.triggerEvent("siege:ring"); } catch { /* bell gone */ }
-    const fresh = Object.values(f.data.rung).filter((t) => f.tick - t <= 200).length;
+    const fresh = Object.values(f.data.rung).filter((t) => f.tick - t <= (f.solo() ? 360 : 200)).length; // alone you get 18 seconds to reach all three
     if (fresh < 3) return player.onScreenDisplay.setActionBar(`§6${fresh} of 3 bells ringing...`);
     f.data.tide = 0; f.data.rung = {}; f.data.bellLock = f.tick + 240;
     f.stun(60);
@@ -445,76 +444,7 @@ function dismount(f, text) {
   f.say(text);
 }
 
-// =====================================================================================
-// 7. Oswin the Last (the Drowned Court, in the Undertow)
-//    STORY RULE (Mateo): what Oswin really is stays secret and comes out slowly. Nothing a player reads
-//    here (names, boss lines, loot text) may say it outright. Hints only.
-//    A duel. When he raises his guard, don't swing: it comes back at you. At 66% and 33% the Hollow
-//    pours through him: you're thrown across the hall and must beat the thing that steps out of him
-//    before he can be hurt again. (Canon, Mateo: the Hollow is NOT a mirror of our world. No mirror talk.) In the last phase the Choir tolls through him: stand on the quiet tiles.
-// =====================================================================================
-registerBoss({
-  id: "oswin", type: "siege:oswin_the_last", name: "Oswin the Last", radius: COURT.radius, phases: [0.66, 0.33], points: 10,
-  intro: "stands up from the drowned throne. \"You came all this way to sit down.\"",
-  phaseNames: ["", "Something steps out of him", "The Choir sings through him"],
-  attacks: [
-    { id: "parry", every: 210, windup: 10, rest: 60, warn: "Oswin raises his guard. Hold your blade!",
-      hit: (f) => {
-        try { f.entity.addTag("siege_parry"); } catch { /* gone */ }
-        f.data.parry = true;
-        f.after(55, () => { f.data.parry = false; try { f.entity.removeTag("siege_parry"); } catch { /* gone */ } });
-      } },
-    { id: "lunge", every: 120, windup: 25, warn: "Oswin lunges! Sidestep!",
-      ...lance(16, 9, (f, c) => {
-        const reach = Math.max(0, c.reach - 4);
-        try { f.entity.teleport({ x: c.from.x + c.dir.x * reach, y: c.from.y, z: c.from.z + c.dir.z * reach }); } catch { /* blocked */ }
-      }) },
-    { id: "toll", every: 260, windup: 70, phases: [2], warn: "The Choir tolls! Stand where it is quiet!", sound: "block.bell.hit",
-      ...tiles(() => 2, (f, p) => { hurt(p, 10); effect(p, "darkness", 80, 0); effect(p, "slowness", 60, 1); }, "§5The toll goes straight through you.") },
-  ],
-  onStruck: (f, attacker) => {
-    if (!f.data.parry || attacker?.typeId !== "minecraft:player") return;
-    hurt(attacker, 7, "thorns", f.entity);
-    heal(f.entity, 12);
-    attacker.onScreenDisplay.setActionBar("§cRiposte! Don't swing into his guard.");
-    sound(f.dim, "random.anvil_land", f.entity.location, 1.4, 0.7);
-  },
-  onPhase: (f) => {
-    f.shield(true); f.stun(100000); f.data.mirrored = true;
-    try { f.entity.teleport(f.center); } catch { /* chunk not ready */ }
-    for (const p of f.players()) {
-      effect(p, "blindness", 30, 0); effect(p, "nausea", 80, 0);
-      try { p.teleport(mirrorPoint(p.location, f.center), { facingLocation: f.center }); } catch { /* blocked */ }
-    }
-    f.summon("siege:oswin_reflection", 1, 6, f.center);
-    f.say("§3The hall lurches and goes dark. Something steps out of the king and leaves him kneeling.");
-  },
-  tick: (f) => {
-    if (!f.data.mirrored || f.adds("siege:oswin_reflection").length) return;
-    f.data.mirrored = false;
-    f.shield(false);
-    try { f.entity.removeEffect("slowness"); f.entity.removeEffect("weakness"); } catch { /* gone */ }
-    f.busyUntil = f.tick + 40;
-    f.say("§3It sinks back into him. Oswin rises again.");
-  },
-  // Knights take his oath-blade, the Marked take the mantle. (No path yet: the blade.)
-  loot: (f, p, first) => (first ? [stack(heroOf(p).path === "marked" ? "siege:crownless_mantle" : "siege:oath_of_oswin")] : [])
-    .concat(materials(["siege:hollow_ash", 16], ["minecraft:diamond", 4])),
-  hoard: (f, players) => [stack("minecraft:netherite_ingot", 1 + players.length), stack("minecraft:emerald", 64), stack("minecraft:diamond", 8 + players.length), stack("minecraft:enchanted_golden_apple", 2)],
-});
-
-// The Undertow thread tells us when someone walks into the Drowned Court
-system.afterEvents.scriptEventReceive.subscribe((event) => {
-  if (event.id !== "siege:undertow_arena_ready" || !event.message.includes("oswin")) return;
-  if (fightOf("oswin")) return;
-  try {
-    const dim = world.getDimension(UNDERTOW_ID);
-    if (dim.getEntities({ type: "siege:oswin_the_last" }).length) return;
-    startBoss("oswin", dim, { x: COURT.center.x + 0.5, y: COURT.floorY + 1, z: COURT.center.z + 0.5 });
-  } catch (e) {
-    console.warn(`[Bestiary] Oswin could not rise: ${e}`);
-  }
-});
+// Morvane, the last fight, has his own file: morvane.js.
 
 // ---------- Siege Nights: warlords use the new bodies ----------
 export function warlordBody(type, tags) {
@@ -525,7 +455,7 @@ export function warlordBody(type, tags) {
 
 addTests("bestiary", {
   "every boss has a body, a name and loot that exists": () => {
-    for (const id of ["reeve", "huntsman", "bride", "seneschal", "mother", "warlord_king", "oswin"]) assert(bossDefs().some((d) => d.id === id), `boss ${id} is not registered`);
+    for (const id of ["reeve", "huntsman", "bride", "seneschal", "mother", "warlord_king"]) assert(bossDefs().some((d) => d.id === id), `boss ${id} is not registered`);
     for (const def of bossDefs()) {
       if (!MOBS[def.type]) continue; // another feature's boss (the Hollow Choir): it tests itself
       assert(MOBS[def.type]?.family === "boss", `${def.id}: ${def.type} is not a boss entity`);
@@ -542,7 +472,6 @@ addTests("bestiary", {
     assert(distanceToLine({ x: 5, z: 3 }, from, dir, 10) > 1.6);
     assert(distanceToLine({ x: -4, z: 0 }, from, dir, 10) > 1.6, "behind the boss is safe");
   },
-  "the lurching hall throws you across the centre": () => assertEqual(mirrorPoint({ x: 3, y: 91, z: 1590 }, { x: 0, y: 90, z: 1600 }), { x: -3, y: 91, z: 1610 }),
   "warlords get their own bodies": () => {
     assertEqual(warlordBody("minecraft:vindicator", [RAIDER_TAG, KING_TAG]), "siege:warlord_king");
     assertEqual(warlordBody("minecraft:vindicator", [RAIDER_TAG, WARLORD_TAG]), "siege:hollow_warlord");

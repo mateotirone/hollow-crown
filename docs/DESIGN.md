@@ -16,3 +16,4 @@ In this repo:
 - [`TEXTURE-LIST.md`](../TEXTURE-LIST.md): every asset that needs a texture, and its state.
 - [`art/STYLE-GUIDE.md`](../art/STYLE-GUIDE.md): texture style and palette.
 - [`CONTRIBUTING.md`](../CONTRIBUTING.md): how to work in this repo.
+- [`CHANGELOG.md`](../CHANGELOG.md), [`BACKLOG.md`](BACKLOG.md), [`RELEASING.md`](RELEASING.md): what changed, what is planned, and how versions and releases work.

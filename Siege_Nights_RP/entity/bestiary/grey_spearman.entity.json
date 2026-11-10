@@ -1,0 +1,32 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:grey_spearman",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/grey_spearman"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.grey_spearman"
+   },
+   "animations": {
+    "main": "animation.siege_b.grey_spearman"
+   },
+   "scripts": {
+    "animate": [
+     "main"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ],
+   "spawn_egg": {
+    "base_color": "#606c74",
+    "overlay_color": "#cee2ec"
+   }
+  }
+ }
+}

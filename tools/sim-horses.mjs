@@ -72,8 +72,10 @@ for (const cls of ["ActionFormData", "MessageFormData", "ModalFormData"]) {
   };
 }
 
+const walkJs = (d) => readdirSync(d).flatMap((f) => { const p = join(d, f); return statSync(p).isDirectory() ? walkJs(p) : p.endsWith(".js") ? [p] : []; });
+const mcNames = [...new Set(walkJs(ROOT + "/Siege_Nights_BP/scripts").flatMap((f) => [...readFileSync(f, "utf8").matchAll(/import\s+\{([^}]*)\}\s+from\s+["']@minecraft\/[^"']+["']/g)].flatMap((m) => m[1].split(",").map((n) => n.trim().split(/\s+as\s+/)[0]).filter(Boolean))))];
 const hooks = `export async function resolve(s,c,n){ if(s.startsWith("@minecraft/")) return {url:"mock:"+s, shortCircuit:true}; return n(s,c);} 
-export async function load(u,c,n){ if(!u.startsWith("mock:")) return n(u,c); const names=${JSON.stringify(["BlockPermutation","BlockTypes","BlockVolume","DisplaySlotId","EntityDamageCause","EntityTypes","EquipmentSlot","GameMode","ItemLockMode","ItemStack","ItemTypes","MolangVariableMap","system","world","ActionFormData","MessageFormData","ModalFormData"])}; return {format:"module", shortCircuit:true, source:names.map(n=>"export const "+n+" = globalThis.__mc.lookup("+JSON.stringify(n)+");").join("\\n")}; }`;
+export async function load(u,c,n){ if(!u.startsWith("mock:")) return n(u,c); const names=${JSON.stringify(mcNames)}; return {format:"module", shortCircuit:true, source:names.map(n=>"export const "+n+" = globalThis.__mc.lookup("+JSON.stringify(n)+");").join("\\n")}; }`;
 register("data:text/javascript," + encodeURIComponent(hooks), import.meta.url);
 await import(pathToFileURL(ROOT + "/Siege_Nights_BP/scripts/main.js").href);
 const api = await import(pathToFileURL(ROOT + "/Siege_Nights_BP/scripts/siege/api.js").href);
@@ -225,6 +227,27 @@ const guard = mkEntity("siege:man_at_arms", { x: steed.location.x + 5, y: 64, z:
 fireEv("world.afterEvents.itemUse", { source: P, itemStack: { typeId: "siege:riding_crop" } }); tick(5);
 ok(zombie.hurt === 7 && guard.effects.strength === 0, "Warhorse Charge: 7 damage and the guards rally");
 
+// 7b. Train Carriage: called at a station, four seats, shows the way, packs up
+P.location = { x: 101, y: 64, z: 1 };
+for (const e of entities.filter((x) => x.typeId === "minecraft:minecart")) e.remove();
+answers.push("Call a carriage");
+fireEv("world.beforeEvents.playerInteractWithBlock", { block: mkBlock({ x: 100, y: 64, z: 0 }), player: P }); await settle();
+const carriage = entities.find((e) => e.typeId === "siege:carriage");
+ok(carriage && carriage.tags.has("siege_rails_cart"), "a station calls a Train Carriage onto the rail");
+P.dyn["siege:rails_dest"] = 2; P.comps["minecraft:riding"] = { entityRidingOn: carriage }; carriage.comps["minecraft:rideable"] = { getRiders: () => [P] };
+P.location = { x: 110, y: 64, z: 0 }; tick(20);
+ok(P.bar.includes("Millbrook"), "riding a carriage counts as riding the line");
+delete P.comps["minecraft:riding"]; P.dyn["siege:rails_dest"] = undefined;
+const own = mkEntity("siege:carriage", { x: 105, y: 64, z: 0 }); own.comps["minecraft:rideable"] = { getRiders: () => [] };
+P.isSneaking = true;
+fireEv("world.beforeEvents.playerInteractWithEntity", { player: P, target: own, itemStack: undefined });
+fireEv("world.beforeEvents.playerInteractWithEntity", { player: P, target: carriage, itemStack: undefined });
+P.isSneaking = false;
+ok(!own.isValid && P.count("siege:train_carriage") === 1 && carriage.isValid, "your own carriage packs up; a station carriage does not");
+const cfg = JSON.parse(readFileSync(ROOT + "/Siege_Nights_BP/entities/carriage.json", "utf8"))["minecraft:entity"].components;
+const railsData = await import(pathToFileURL(ROOT + "/Siege_Nights_BP/scripts/rails/data.js").href);
+ok(cfg["minecraft:rail_movement"].max_speed === railsData.CARRIAGE_SPEED && cfg["minecraft:rideable"].seat_count === 4, "carriage: 4 seats, top speed 0.6 on rails");
+
 // 8. The test world exhibits
 const ev2 = await import(pathToFileURL(ROOT + "/Siege_Nights_BP/scripts/core/events.js").href);
 let spot = 0; const signs = [];
@@ -235,7 +258,7 @@ for (let run = 0; run < 2; run++) {
   ev2.emit("showcase", { player: T, dim, origin: { x: 2000, y: 64, z: 0 }, nextSpot: () => ({ x: 2000 + spot++ * 3, y: 64, z: -8 }), label: (at, text) => signs.push(text) });
 }
 const shown = store.horsesOf("t1");
-ok(shown.length === 8 && shown.filter((r) => r.special !== "none").length === 2 && shown.some((r) => r.foal && r.breed === "crossbred"), "showcase: 8 steeds (5 breeds, Warhorse, Hollow Steed, foal), no duplicates on a second run");
+ok(shown.length === 8 && shown.filter((r) => r.special !== "none").length === 2 && shown.some((r) => r.foal && r.breed === "crossbred"), "showcase: 8 steeds (5 breeds, Warhorse, Glimstrider, foal), no duplicates on a second run");
 ok(entities.filter((e) => e.typeId === "siege:steed" && e.tags.has("siege_showcase")).length === 8 && store.meta.data.stables.t1 === 3, "showcase horses are in the world with a level 3 Stables");
 const halt = rails.allStations().find((s) => s.name === "Showcase Halt");
 ok(rails.allStations().filter((s) => s.showcase).length === 2 && blocks.get(`${halt.x},64,-8`) === "hc:station_post" && blocks.get(`${halt.x},64,-10`)?.includes("rail"), "showcase: two stations on a powered line");

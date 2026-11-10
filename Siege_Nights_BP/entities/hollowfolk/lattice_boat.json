@@ -1,0 +1,75 @@
+{
+  "format_version": "1.21.0",
+  "minecraft:entity": {
+    "description": {
+      "identifier": "siege:lattice_boat",
+      "runtime_identifier": "minecraft:boat",
+      "is_spawnable": false,
+      "is_summonable": true
+    },
+    "components": {
+      "minecraft:type_family": {
+        "family": [
+          "boat",
+          "inanimate",
+          "siege_lattice_boat"
+        ]
+      },
+      "minecraft:collision_box": {
+        "width": 1.4,
+        "height": 0.455
+      },
+      "minecraft:is_stackable": {},
+      "minecraft:physics": {},
+      "minecraft:pushable": {
+        "is_pushable": true,
+        "is_pushable_by_piston": true
+      },
+      "minecraft:rideable": {
+        "seat_count": 2,
+        "controlling_seat": 0,
+        "crouching_skip_interact": true,
+        "family_types": [
+          "player"
+        ],
+        "interact_text": "action.interact.ride.boat",
+        "pull_in_entities": false,
+        "seats": [
+          {
+            "position": [
+              0.0,
+              -0.2,
+              0.0
+            ],
+            "min_rider_count": 0,
+            "max_rider_count": 1,
+            "rotate_rider_by": -90,
+            "lock_rider_rotation": 90
+          },
+          {
+            "position": [
+              0.2,
+              -0.2,
+              0.0
+            ],
+            "min_rider_count": 2,
+            "max_rider_count": 2,
+            "rotate_rider_by": "query.has_any_family('blaze', 'creeper', 'enderman', 'illager', 'magmacube', 'piglin', 'player', 'skeleton', 'slime', 'villager', 'wandering_trader', 'witch', 'zombie', 'zombie_pigman') ? -90 : 0",
+            "lock_rider_rotation": 90
+          },
+          {
+            "position": [
+              -0.6,
+              -0.2,
+              0.0
+            ],
+            "min_rider_count": 2,
+            "max_rider_count": 2,
+            "rotate_rider_by": -90,
+            "lock_rider_rotation": 90
+          }
+        ]
+      }
+    }
+  }
+}

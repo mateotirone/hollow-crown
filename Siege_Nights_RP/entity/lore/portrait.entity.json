@@ -1,0 +1,65 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "siege:portrait",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "p0": "textures/entity/portrait/harrowford_1",
+        "p1": "textures/entity/portrait/harrowford_2",
+        "p2": "textures/entity/portrait/harrowford_3",
+        "p3": "textures/entity/portrait/oakmere_1",
+        "p4": "textures/entity/portrait/oakmere_2",
+        "p5": "textures/entity/portrait/oakmere_3",
+        "p6": "textures/entity/portrait/thistledown_1",
+        "p7": "textures/entity/portrait/thistledown_2",
+        "p8": "textures/entity/portrait/thistledown_3",
+        "p9": "textures/entity/portrait/wrenfield_1",
+        "p10": "textures/entity/portrait/wrenfield_2",
+        "p11": "textures/entity/portrait/wrenfield_3",
+        "p12": "textures/entity/portrait/rimeholt_1",
+        "p13": "textures/entity/portrait/rimeholt_2",
+        "p14": "textures/entity/portrait/rimeholt_3",
+        "p15": "textures/entity/portrait/wolfcairn_1",
+        "p16": "textures/entity/portrait/wolfcairn_2",
+        "p17": "textures/entity/portrait/wolfcairn_3",
+        "p18": "textures/entity/portrait/gullcliff_1",
+        "p19": "textures/entity/portrait/gullcliff_2",
+        "p20": "textures/entity/portrait/gullcliff_3",
+        "p21": "textures/entity/portrait/tidewatch_1",
+        "p22": "textures/entity/portrait/tidewatch_2",
+        "p23": "textures/entity/portrait/tidewatch_3",
+        "p24": "textures/entity/portrait/reedmoor_1",
+        "p25": "textures/entity/portrait/reedmoor_2",
+        "p26": "textures/entity/portrait/reedmoor_3",
+        "p27": "textures/entity/portrait/lanternbog_1",
+        "p28": "textures/entity/portrait/lanternbog_2",
+        "p29": "textures/entity/portrait/lanternbog_3",
+        "p30": "textures/entity/portrait/redmesa_1",
+        "p31": "textures/entity/portrait/redmesa_2",
+        "p32": "textures/entity/portrait/redmesa_3",
+        "p33": "textures/entity/portrait/dunehold_1",
+        "p34": "textures/entity/portrait/dunehold_2",
+        "p35": "textures/entity/portrait/dunehold_3",
+        "p36": "textures/entity/portrait/plate_1",
+        "p37": "textures/entity/portrait/plate_2",
+        "p38": "textures/entity/portrait/plate_3",
+        "p39": "textures/entity/portrait/plate_4",
+        "p40": "textures/entity/portrait/plate_5",
+        "p41": "textures/entity/portrait/plate_6",
+        "p42": "textures/entity/portrait/plate_7",
+        "p43": "textures/entity/portrait/plate_8"
+      },
+      "geometry": {
+        "tall": "geometry.siege_portrait_tall",
+        "wide": "geometry.siege_portrait_wide",
+        "grand": "geometry.siege_portrait_grand"
+      },
+      "render_controllers": [
+        "controller.render.siege_portrait"
+      ]
+    }
+  }
+}

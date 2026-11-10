@@ -70,7 +70,7 @@ plots=[("Harrowford","Aldmere Vale",-470,-300,"river meadow above the lower Alde
 ("Redmesa","Emberwaste",700,60,"mesa top at the desert's edge"),("Dunehold","Emberwaste",760,860,"an oasis among the dunes")]
 villages={"Kingsrest":(-150,-150),"Millbrook":(-60,-470),"Hollowfast":(-80,-1080),"Gull's Rest":(-800,400),"Sunscar":(850,450),"Mirelight":(-60,900)}
 sources=[("Kingsbarrow Hollow",120,520),("Greywater Sink",560,-420),("Rimecut Caves",-650,-1080),("Drowned Grotto",-870,-860),("Fenmouth Deeps",-250,860),("Scorched Throat",1050,720),("Witchroot Sink",520,1160)]
-order=[("Ashen Gate Chapterhouse",420,-170),("Ashen Watch",480,560)]
+order=[("Ashen Gate Chapterhouse",420,-170),("Ashen Watch",480,560),("Crownhold (ruin)",-235,-345),("Bellhollow",155,-100)]
 camps=[(1050,-800),(-820,-1150),(1100,1150),(-120,1190)]
 rivers={"River Alder":[(140,-830),(40,-640),(-70,-470),(-90,-300),(-150,-150),(-330,-60),(-540,40)],
 "Greywater":[(830,-520),(540,-340),(330,-270),(120,-210),(-150,-150)],
@@ -214,6 +214,19 @@ Yf=SEA+1+shore*(3+rolling*(1-0.85*fen)+m*150+plateau*38+mesa+cliff)
 rv=blurmask(lambda d:[d.line([px(*p) for p in spline(pts,22,22,i+7)],fill=255,width=5) for i,(n_,pts) in enumerate(rivers.items())],9)
 Yf=Yf-np.clip(rv*2.2,0,1)*np.minimum(Yf-SEA-1,10)*shore
 Yf[~land]=SEA-np.clip((seaf[~land]-0.5)/0.4,0,1)*30
+# plot terraces: every plot gets a near-flat disc for its final settlement (hall, buildings, wall at r52),
+# eased back into the natural ground by r115, so a generated wall can follow the ground all the way round
+PLOT_FLAT,PLOT_EASE=64,115
+for n_,_,x_,z_,_ in plots:
+    dist=np.hypot(X-x_,Z-z_)
+    core=(dist<=46)&land
+    T=float(np.median(Yf[core]))
+    w=np.clip((PLOT_EASE-dist)/(PLOT_EASE-PLOT_FLAT),0,1); w=w*w*(3-2*w)
+    Yf=np.where(land,Yf*(1-w)+(T+n3*1.6)*w,Yf)
+# story sites shaped into the land: Crownhold stands on a low rise, Bellhollow lies in a hollow
+for (x_,z_,amp,rad) in [(-235,-345,9,120),(155,-100,-13,80)]:
+    w=np.clip(1-np.hypot(X-x_,Z-z_)/rad,0,1); w=w*w*(3-2*w)
+    Yf=np.where(land,Yf+amp*w,Yf)
 Yb=np.round(Yf).astype(int)
 def y_at(x,z):
     c,r=px(x,z); return int(Yb[int(r),int(c)])
@@ -289,3 +302,71 @@ for i,k in enumerate(names_):
         pd.line([20+j*8*sc,f(ys[j]),20+(j+1)*8*sc,f(ys[j+1])],fill=(200,40,40) if g>0.5 else (50,90,50),width=3)
 pim.save('/mnt/project-files/siege-nights/map/hollow-crown-rail-profiles.png')
 json.dump({**elev_out,"lines":{k:{a:b for a,b in v.items() if a!='ys'} for k,v in prof.items()}},open('elev.json','w'),indent=1)
+
+# ================= STORY MAP =================
+story=[(1,"I","Kingsrest: arrive, choose a plot",-150,-150),(2,"I","Your plot: first siege, the Falling Ember, the choice",None,None),
+(3,"I","Millbrook: the stopped clocks",-60,-470),(4,"I","Under the Millbrook well: the Clockwork Reeve",-40,-440),
+(5,"I","Ashen Gate Chapterhouse: the sealed archive, cipher wheel",420,-170),
+(6,"II","Gull's Rest: the lighthouse letters",-800,400),(7,"II","Drowned chapel in Gull Bay: the Drowned Bride",-690,130),
+(8,"II","Mirelight: the testimony of five villagers",-60,900),(9,"II","The Hollow Tree: the Mother of Changelings",-120,1060),
+(10,"II","Ashen Watch and the desert ruins: statue fragments",480,560),(11,"II","Sunscar: the faceless statues, the vault, the Ash Seneschal",850,450),
+(12,"II","Stag Pass: the only road north",-105,-865),(13,"II","Hollowfast: the moon shrine",-80,-1080),(14,"II","Hollow Mere ice door: the Pale Huntsman",60,-1130),
+(15,"III","Seven caves: find which one holds the Rift",None,None),(16,"IV","The throne, then the Citadel rises on the victor's plot",None,None)]
+ACT={"I":(40,120,60),"II":(40,70,150),"III":(110,60,150),"IV":(160,30,30)}
+# seep sites: scattered wild spots away from everything
+occupied=[(x,z) for _,_,x,z,_ in plots]; other=[v for v in villages.values()]+[(x,z) for _,x,z in sources+order]+list(camps)+[(s[3],s[4]) for s in story if s[3] is not None]
+r5=np.random.default_rng(42); seeps=[]
+tries=0
+while len(seeps)<12 and tries<20000:
+    tries+=1; x,z=r5.uniform(-1180,1180,2)
+    if not land_at(x,z) or y_at(x,z)>150: continue
+    if min(math.hypot(x-a,z-b) for a,b in occupied)<230: continue
+    if min(math.hypot(x-a,z-b) for a,b in other)<170: continue
+    if seeps and min(math.hypot(x-a,z-b) for a,b in seeps)<380: continue
+    if min(math.dist((x,z),q) for v in railpts.values() for q in v[::4])<60: continue
+    seeps.append((round(x/10)*10,round(z/10)*10))
+seeps.sort(key=lambda p:(region_at(*p),p))
+print('seeps',[(p,region_at(*p),y_at(*p)) for p in seeps])
+sm_=im.copy().convert('L').convert('RGB'); sm_=Image.blend(sm_,im,0.45)
+c3=Image.new('RGB',(N+2*M,N+2*M+10),(38,44,54)); c3.paste(sm_,(M,M)); d=ImageDraw.Draw(c3)
+for k,v in railpts.items(): d.line([Q(*p) for p in v],fill=(90,80,70),width=2)
+for n,r,x,z,_ in plots:
+    c=Q(x,z); rr=80*S; d.ellipse([c[0]-rr,c[1]-rr,c[0]+rr,c[1]+rr],outline=(255,244,210),width=2); label((c[0],c[1]),n,fs,(60,60,60),"mm",2)
+for n,x,z in sources:
+    c=Q(x,z); d.ellipse([c[0]-7,c[1]-7,c[0]+7,c[1]+7],fill=ACT["III"],outline=(255,255,255),width=2); label((c[0],c[1]+9),n,fs,(60,20,90),sw=2)
+for x,z in camps:
+    c=Q(x,z); d.line([c[0]-6,c[1]-6,c[0]+6,c[1]+6],fill=(160,20,20),width=4); d.line([c[0]-6,c[1]+6,c[0]+6,c[1]-6],fill=(160,20,20),width=4)
+for x,z in seeps:
+    c=Q(x,z); d.polygon([(c[0],c[1]-7),(c[0]+7,c[1]),(c[0],c[1]+7),(c[0]-7,c[1])],fill=(20,150,150),outline=(255,255,255))
+prev=None
+for num,act,text,x,z in story:
+    if x is None: continue
+    c=Q(x,z)
+    if prev: 
+        # dotted leg
+        a=np.array(prev); b=np.array(c); L=np.linalg.norm(b-a)
+        for t0 in np.arange(0,L,10): 
+            p0=a+(b-a)*t0/L; p1=a+(b-a)*min(t0+5,L)/L; d.line([tuple(p0),tuple(p1)],fill=(30,30,30),width=2)
+    prev=c
+for num,act,text,x,z in story:
+    if x is None: continue
+    c=Q(x,z); d.ellipse([c[0]-11,c[1]-11,c[0]+11,c[1]+11],fill=ACT[act],outline=(255,255,255),width=2); d.text(c,str(num),font=fb_,fill=(255,255,255),anchor="mm")
+d.text(((N+2*M)/2,26),"The Hollow Crown: where the story goes",font=ft,fill=(240,230,210),anchor="mm")
+lx,ly=M+12,M+N-330
+d.rectangle([lx,ly,lx+430,ly+318],fill=(250,245,230),outline=(0,0,0))
+for i,(num,act,text,x,z) in enumerate(story):
+    d.ellipse([lx+8,ly+8+i*16,lx+22,ly+22+i*16],fill=ACT[act]); d.text((lx+15,ly+15+i*16),str(num),font=ImageFont.truetype(F+'DejaVuSans-Bold.ttf',9),fill=(255,255,255),anchor="mm")
+    d.text((lx+28,ly+8+i*16),f"Act {act}: {text}",font=fs,fill=(20,20,20))
+yy=ly+8+len(story)*16+4
+d.ellipse([lx+8,yy,lx+22,yy+14],fill=ACT["III"],outline=(255,255,255)); d.text((lx+28,yy),"Source candidate cave (one is real, different each world)",font=fs,fill=(20,20,20))
+d.polygon([(lx+15,yy+18),(lx+22,yy+25),(lx+15,yy+32),(lx+8,yy+25)],fill=(20,150,150)); d.text((lx+28,yy+18),"Seep site: random Hollow incursions, forever",font=fs,fill=(20,20,20))
+d.text((lx+10,yy+34),"✕",font=fs,fill=(160,20,20)); d.text((lx+28,yy+36),"Warlord camp",font=fs,fill=(20,20,20))
+c3.save('/mnt/project-files/siege-nights/map/hollow-crown-story-map.png')
+
+# ================= EXPORT for world generation =================
+roadm=blurmask(lambda d:[d.line([px(*p) for p in v],fill=255,width=3) for v in railpts.values()],0.8)
+trailm=blurmask(lambda d:[d.line([px(*p) for p in v],fill=255,width=2) for v in trailpts.values()],0.6)
+np.savez_compressed('terrain.npz',Y=Yf.astype(np.float32),reg=reg.astype(np.uint8),land=land,forest=((n3+n2*0.6)).astype(np.float32),river=rv.astype(np.float32),road=roadm.astype(np.float32),trail=trailm.astype(np.float32),H=H,N=N)
+
+json.dump({"rivers":{n:[[float(a),float(b)] for a,b in spline(pts,22,22,i+7)] for i,(n,pts) in enumerate(rivers.items())},
+ "roads":{k:[[float(a),float(b)] for a,b in v] for k,v in railpts.items()},"trails":{k:[[float(a),float(b)] for a,b in v] for k,v in trailpts.items()}},open('lines.json','w'))

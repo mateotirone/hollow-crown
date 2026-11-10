@@ -1,0 +1,18 @@
+{
+  "format_version": "1.21.60",
+  "minecraft:item": {
+    "description": {
+      "identifier": "siege:fourteen_arts",
+      "menu_category": {
+        "category": "items"
+      }
+    },
+    "components": {
+      "minecraft:icon": "siege_fourteen_arts",
+      "minecraft:display_name": {
+        "value": "item.siege:fourteen_arts.name"
+      },
+      "minecraft:max_stack_size": 1
+    }
+  }
+}

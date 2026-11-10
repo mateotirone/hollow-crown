@@ -33,15 +33,11 @@ def tier_iron(t):
     band(t, IRON, 2, rivets=(2, 7, 12)); band(t, IRON, 11, rivets=(4, 9, 14)); return t
 
 def tier_diamond(t):
-    for i in range(16):
-        t.set(i, 0, R(IRON, 4)); t.set(0, i, R(IRON, 4)); t.set(i, 15, R(IRON, 1)); t.set(15, i, R(IRON, 1))
-        t.set(i, 1, R(IRON, 2)) if 0 < i < 15 else None; t.set(1, i, R(IRON, 3)) if 0 < i < 15 else None
-    for cx, cy in [(2, 2), (13, 2), (2, 13), (13, 13)]: t.set(cx, cy, R(DIA, 4))
-    gem = {(7, 5): 5, (8, 5): 4, (6, 6): 4, (7, 6): 5, (8, 6): 3, (9, 6): 3, (5, 7): 4, (6, 7): 4, (7, 7): 3, (8, 7): 3, (9, 7): 2, (10, 7): 2,
-           (5, 8): 3, (6, 8): 3, (7, 8): 2, (8, 8): 2, (9, 8): 2, (10, 8): 1, (6, 9): 2, (7, 9): 2, (8, 9): 1, (9, 9): 1, (7, 10): 1, (8, 10): 1}
-    ring = {(x + dx, y + dy) for (x, y) in gem for dx in (-1, 0, 1) for dy in (-1, 0, 1)} - set(gem)
-    for (x, y) in ring: t.set(x, y, R(IRON, 3 if x + y < 15 else 1))
-    for (x, y), k in gem.items(): t.set(x, y, R(DIA, k))
+    # the same banded wall as the iron tier, in brighter steel with diamond studs: one family, clearly a step up
+    band(t, STEEL, 2, rivets=()); band(t, STEEL, 11, rivets=())
+    for y, xs in ((2, (2, 7, 12)), (11, (4, 9, 14))):
+        for x in xs:
+            t.set(x, y, R(DIA, 5)); t.set(x + 1, y, R(DIA, 3)); t.set(x, y + 1, R(DIA, 3)); t.set(x + 1, y + 1, R(DIA, 1))
     return t
 
 def tier_netherite(t):
@@ -53,9 +49,8 @@ def tier_netherite(t):
             k = 4 if (v == 0 or u == 0) else 1 if (v == 2 or u == 6) else 2
             if (x * 7 + y * 3) % 11 == 0 and k == 2: k = 3
             t.set(x, y, R(NETH, k))
-    for x in range(16):
-        t.set(x, 0, R(GOLD, 4)); t.set(x, 1, R(GOLD, 2)); t.set(x, 14, R(GOLD, 3)); t.set(x, 15, R(GOLD, 1))
-    for x, y in [(3, 5), (11, 5), (7, 9), (15, 9), (3, 12)]: t.set(x, y, R(GOLD, 4))
+    for x, y in [(3, 1), (11, 1), (7, 5), (15, 5), (3, 9), (11, 9), (7, 13), (15, 13)]:   # gold studs, one per brick; no loud bands
+        t.set(x, y, R(GOLD, 4)); t.set(x, y + 1, R(GOLD, 1))
     return t
 
 TIERS = {'stone': lambda t: t, 'iron': tier_iron, 'diamond': tier_diamond, 'netherite': tier_netherite}
@@ -98,6 +93,8 @@ def cracked(base, rg):
     for (x, y) in [(1, 9), (2, 9), (1, 10), (2, 10), (3, 10)]: t.set(x, y, R(rg['mortar'], 0))
     return t
 save(cracked(base, V), 'siege_cracked_castle_stone')
+for rk, rg in REGIONS.items():
+    if rk != 'vale': save(cracked(castle_stone(rg), rg), f'siege_cracked_castle_stone_{rk}', 'regional/')
 
 # ---------------- gates ----------------
 def gate_wood(seed=4):

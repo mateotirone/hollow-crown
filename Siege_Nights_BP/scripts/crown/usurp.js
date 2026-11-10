@@ -3,12 +3,16 @@
 import { world, system, ItemStack } from "@minecraft/server";
 import {
   isReady, keepOf, keepCenter, overworld, title, onTick, on, emit, isOnline, isNight, isAlly,
-  settlementAt, consumeHeld, addSiegeSkipHook, KEEP_BANNER,
+  settlementAt, consumeHeld, addSiegeSkipHook, KEEP_BANNER, getState, saveState,
 } from "../siege/api.js";
+import { spawnChampion } from "../bestiary/champions.js";
 import { CROWN, IDS } from "./config.js";
-import { claimNeeded, gauntletProblem, stormAtNightfall, abandoned, compass, EXILE_STAGES } from "./rules.js";
+import {
+  claimNeeded, gauntletProblem, stormAtNightfall, abandoned, compass, EXILE_STAGES, lordId, lordGain, lordChallenger,
+} from "./rules.js";
 import {
   crown, saveCrown, ruler, isRuler, isCourt, rulerLabel, playerById, announce, giveItem, claimOf, addClaim, seat, surfaceY, siegeNumber,
+  lords, lordOf,
 } from "./state.js";
 import { citadel, throneSpots, exilePoint, moveIn } from "./citadel.js";
 import { crownPlayer, endReign, addHollowing } from "./reign.js";
@@ -143,7 +147,7 @@ addSiegeSkipHook((owner) => stormSide(owner));
 on("siegeStart", () => {
   const c = crown();
   if (!c.ruler || !c.challenge || c.storm) return;
-  const what = stormAtNightfall({ challenge: c.challenge, rulerOnline: isOnline(c.ruler.id), claimantOnline: isOnline(c.challenge.claimant) });
+  const what = stormAtNightfall({ challenge: c.challenge, rulerOnline: !!c.ruler.npc || isOnline(c.ruler.id), claimantOnline: isOnline(c.challenge.claimant) });
   if (what === "storm") return beginStorm();
   if (what === "claimantMissed") {
     c.challenge.missed += 1;
@@ -172,11 +176,132 @@ function beginStorm() {
 function sealSpot() {
   const spots = citadel()?.built ? throneSpots() : undefined;
   if (spots) return spots.seal;
-  const keep = ruler() && keepOf(ruler().id);
+  const keep = ruler()?.npc ? seat() : ruler() && keepOf(ruler().id); // a ruling lord holds the keep they took
   if (!keep) return undefined;
   const center = keepCenter(keep);
   return { x: center.x + 1, y: center.y, z: center.z };
 }
+
+// ---------- Rival lords: the computer's claimants ----------
+
+// Each siege night a player holds the throne, the lords' Claims grow, and the strongest may throw down the Gauntlet
+on("siegeEnd", () => {
+  const c = crown();
+  const r = c.ruler;
+  if (c.storm?.npc && r) return rulerHolds("their army broke against the walls");
+  if (!CROWN.npcRivals || !r || r.npc) return;
+  const list = lords();
+  for (const lord of list) lord.claim = lordGain(lord, c.unrest, Math.random());
+  const lord = lordChallenger(list, { need: claimNeeded(r.hollowing), challenge: c.challenge, siegeNumber: siegeNumber(), graceUntil: c.graceUntil });
+  if (lord) lordChallenge(lord);
+  saveCrown();
+});
+
+// The Rival Lords who hold plots on the map (rivals/) are the claimants. The names in config.js are
+// only stand-ins for a world where no Rival Lord has settled, and step aside once one does.
+const rivalPace = (tier) => 5 + 2 * (tier ?? 0);
+function rivalEntry(lord) {
+  const [first, ...rest] = lord.name.split(" ");
+  return { key: lord.id, name: rest.join(" ") || first, title: rest.length ? first : "Lord", pace: rivalPace(lord.tier), claim: 0, rival: true };
+}
+const busy = (key) => [crown().ruler?.id, crown().challenge?.claimant].includes(lordId(key)); // on the throne or marching on it
+
+function addRival({ lord }) {
+  const c = crown();
+  const mine = lords().find((l) => l.rival && l.key === lord.id);
+  if (mine) mine.pace = rivalPace(lord.tier);
+  else c.lords = [...c.lords.filter((l) => l.rival || busy(l.key)), rivalEntry(lord)];
+  saveCrown();
+}
+on("rivalSettled", addRival);
+on("rivalRose", addRival); // also catches a lord who settled before this was listening
+on("rivalFallen", ({ lord }) => {
+  const c = crown();
+  if (busy(lord.id)) return; // they have bigger plans than the plot they lost
+  c.lords = lords().filter((l) => l.key !== lord.id);
+  saveCrown();
+});
+
+export function lordChallenge(lord) {
+  const c = crown();
+  const label = `${lord.title} ${lord.name}`;
+  c.challenge = { claimant: lordId(lord.key), name: label, npc: true, declaredMs: Date.now(), missed: 0, stormed: false };
+  saveCrown();
+  announce(`§4§l${label} has thrown down the Gauntlet!§r §4Their army marches on ${rulerLabel()}'s keep on the next siege night. If the keep falls, so does the throne.`, "raid.horn");
+  const r = playerById(c.ruler.id);
+  if (r) title(r, "§4You are challenged", `§7${label} comes for your throne on the next siege night`);
+}
+
+// A lord's Storm is a siege: no Throne Seal, the ruler's keep is the prize
+function beginLordStorm() {
+  const c = crown();
+  c.challenge.stormed = true;
+  c.storm = { claimant: c.challenge.claimant, npc: true, deaths: 0, rulerAway: 0, claimantAway: 0 };
+  saveCrown();
+  announce(`§4§lThe Storm.§r §4${c.challenge.name} marches on ${rulerLabel()}. Hold the keep until the siege breaks, or the throne is theirs.`, "mob.wither.spawn");
+  const r = playerById(c.ruler.id);
+  if (r) title(r, "§4Defend the throne", `§7Hold your keep against ${c.challenge.name}`);
+  emit("stormStart", { ruler: c.ruler.id, claimant: c.storm.claimant, npc: true });
+}
+
+// A lord takes the throne. `fallen` is the ruler's keep if the raiders have already torn it down.
+export function npcWins(why, fallen) {
+  const c = crown();
+  const st = getState();
+  const id = c.storm?.claimant ?? c.challenge?.claimant;
+  const lord = lordOf(id);
+  if (!lord || !c.ruler) return endStorm();
+  const label = `${lord.title} ${lord.name}`;
+  const keep = st.keeps[c.ruler.id] ?? fallen;
+  const old = endReign(`usurped by ${label}`);
+  endStorm();
+  lord.claim = 0;
+  if (st.keeps[old.id]) { // the ruler fled with the keep still standing: the lord takes it anyway
+    try { overworld().runCommand(`setblock ${keep.x} ${keep.y} ${keep.z} air destroy`); } catch { /* not loaded */ }
+    delete st.keeps[old.id];
+    saveState();
+  }
+  c.npcKeep = keep ? { ...keep } : null;
+  c.ruler = { id, name: lord.name, title: lord.title, sinceDay: world.getDay(), hollowing: 0, restored: false, npc: true };
+  c.tithe = CROWN.npcTithe;
+  c.vacant = false;
+  c.formerRulers = [...c.formerRulers.filter((f) => f !== old.id), old.id];
+  saveCrown();
+  announce(`§4§lThe throne has fallen:§r §4${why}. ${old.title} ${old.name} is cast out, and ${label} rules from ${CROWN.citadelName}. §7${CROWN.npcTithe}% of all siege winnings are theirs now.`, "mob.wither.death");
+  banish(old.id, old.name);
+  emit("stormEnd", { winner: id, ruler: old.id, claimant: id, usurped: true, npc: true });
+}
+
+// The lord and their soldiers, waiting by the Seal when a player storms them
+function spawnHost(spot) {
+  const dim = overworld();
+  const r = ruler();
+  const put = (type, name, i) => {
+    const a = (i / (CROWN.npcHost + 1)) * Math.PI * 2;
+    const mob = dim.spawnEntity(type, { x: spot.x + Math.cos(a) * 2.5, y: spot.y, z: spot.z + Math.sin(a) * 2.5 });
+    mob.addTag(IDS.hostTag);
+    mob.nameTag = name;
+    return mob;
+  };
+  try {
+    // The lord fights like a player (the bestiary's champions); the soldiers are retainers
+    const add = (role, tier, name, i) => {
+      const a = (i / (CROWN.npcHost + 1)) * Math.PI * 2;
+      return spawnChampion(dim, { x: spot.x + Math.cos(a) * 2.5, y: spot.y, z: spot.z + Math.sin(a) * 2.5 }, { role, tier, name, stance: "hostile", tags: [IDS.hostTag] });
+    };
+    add("lord", 5, `§4${r.title} ${r.name}`, 0);
+    for (let i = 1; i <= CROWN.npcHost; i++) add("retainer", 3, "§cThrone Host", i);
+  } catch { // champions missing or that spot isn't loaded: plain soldiers
+    try {
+      const lord = put("minecraft:vindicator", `§4${r.title} ${r.name}`, 0);
+      lord.addEffect("health_boost", 20000000, { amplifier: CROWN.npcLordHealthBoost, showParticles: false });
+      lord.addEffect("instant_health", 20, { amplifier: 10, showParticles: false });
+      lord.addEffect("strength", 20000000, { amplifier: 1, showParticles: false });
+      for (let i = 1; i <= CROWN.npcHost; i++) put(i % 2 ? "minecraft:vindicator" : "minecraft:pillager", "§cThrone Host", i);
+    } catch { /* not loaded */ }
+  }
+}
+const hosts = () => overworld().getEntities({ tags: [IDS.hostTag] });
 
 const seals = () => overworld().getEntities({ type: IDS.seal, excludeTags: ["siege_showcase"] }); // not the test-world exhibit
 
@@ -188,13 +313,22 @@ function stormTick() {
     if (should !== player.hasTag(IDS.stormTag)) should ? player.addTag(IDS.stormTag) : player.removeTag(IDS.stormTag);
   }
   if (!storm) {
-    if (system.currentTick % 200 < 20) for (const seal of seals()) seal.remove();
+    if (c.challenge?.npc && c.ruler && !c.ruler.npc && getState().active && isOnline(c.ruler.id) && keepOf(c.ruler.id)) return beginLordStorm();
+    if (system.currentTick % 200 < 20) {
+      for (const seal of seals()) seal.remove();
+      for (const mob of hosts()) mob.remove();
+    }
     return;
   }
   if (!c.ruler) return endStorm();
+  if (storm.npc) { // a lord's army is at the walls: the siege itself decides it (keepFallen or siegeEnd)
+    storm.rulerAway = isOnline(c.ruler.id) ? 0 : storm.rulerAway + 20;
+    if (storm.rulerAway >= CROWN.awayTicks) npcWins("the ruler fled the throne");
+    return;
+  }
   if (!isNight()) return rulerHolds("dawn broke over an unbroken Seal");
 
-  const rulerHere = isOnline(c.ruler.id), claimantHere = isOnline(storm.claimant);
+  const rulerHere = !!c.ruler.npc || isOnline(c.ruler.id), claimantHere = isOnline(storm.claimant);
   storm.rulerAway = rulerHere ? 0 : storm.rulerAway + 20;
   storm.claimantAway = claimantHere ? 0 : storm.claimantAway + 20;
   if (storm.claimantAway >= CROWN.awayTicks) return rulerHolds("the claimant fled the field");
@@ -209,6 +343,7 @@ function stormTick() {
         seal.getComponent("minecraft:health")?.setCurrentValue(CROWN.sealHealth);
         storm.sealUp = true;
         saveCrown();
+        if (c.ruler.npc) spawnHost(spot);
       }
     } catch { /* the throne room isn't loaded until someone is near it */ }
   }
@@ -241,13 +376,16 @@ function endStorm() {
   c.graceUntil = siegeNumber() + CROWN.graceNights;
   saveCrown();
   for (const seal of seals()) seal.remove();
+  for (const mob of hosts()) mob.remove();
 }
 
 function rulerHolds(why) {
   const c = crown();
   const claimant = c.storm?.claimant ?? c.challenge?.claimant;
   const name = c.challenge?.name ?? "The claimant";
-  c.claims[claimant] = 0;
+  if (lordOf(claimant)) { // a beaten lord starts over, and the others think twice
+    for (const lord of lords()) lord.claim = lordId(lord.key) === claimant ? 0 : Math.max(0, lord.claim - CROWN.npcBackOff);
+  } else c.claims[claimant] = 0;
   c.treasury += CROWN.defenseReward;
   endStorm();
   addHollowing(CROWN.hollowPerDefense);
@@ -269,7 +407,12 @@ export function claimantWins(why) {
   announce(`§4§lThe throne has fallen:§r §4${why}. ${old.title} ${old.name} is cast out.`, "mob.wither.death");
   if (spot) moveIn(claimant, spot);
   crownPlayer(claimant, { hollowing: wasExile ? 0 : Math.floor(old.hollowing / 2), restored: wasExile });
-  banish(old.id, old.name);
+  if (old.npc) { // the lord rides off to plot a return
+    const lord = lordOf(old.id);
+    if (lord) lord.claim = CROWN.npcReturnClaim;
+    c.npcKeep = null;
+    saveCrown();
+  } else banish(old.id, old.name);
   emit("stormEnd", { winner: claimantId, ruler: old.id, claimant: claimantId, usurped: true });
 }
 
@@ -277,6 +420,7 @@ export function claimantWins(why) {
 function abandonTick() {
   const c = crown();
   if (!c.ruler || !abandoned(c.challenge, Date.now())) return;
+  if (c.challenge.npc) return npcWins(`${rulerLabel()} would not answer the challenge for ${CROWN.abandonDays} days`);
   if (!playerById(c.challenge.claimant)) return; // wait until the claimant is here to be crowned
   claimantWins(`${rulerLabel()} would not answer the challenge for ${CROWN.abandonDays} days, and ${CROWN.relic} went cold in their hand`);
 }
@@ -330,7 +474,11 @@ function exileTick() {
     if (player.nameTag !== tag) player.nameTag = tag;
     if (c.storm && stormSide(player.id)) continue; // an exile storming the throne may enter
     if (siegeNumber() >= exile.until || player.dimension.id !== "minecraft:overworld") continue;
-    if (settlementAt(player.location) !== r.id) continue;
+    const s = r.npc && seat();
+    const onTheirLand = r.npc
+      ? !!s && Math.hypot(player.location.x - s.x, player.location.z - s.z) <= (citadel() ? CROWN.citadelRadius : CROWN.npcLand)
+      : settlementAt(player.location) === r.id;
+    if (!onTheirLand) continue;
     player.teleport(exilePoint(seat() ?? player.location), { dimension: overworld() });
     player.onScreenDisplay.setActionBar(`§cYou are banished for ${exile.until - siegeNumber()} more siege nights.`);
   }

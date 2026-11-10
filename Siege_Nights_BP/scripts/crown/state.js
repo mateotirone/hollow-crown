@@ -2,6 +2,7 @@
 
 import { world } from "@minecraft/server";
 import { moduleStore, getState, keepOf, isAlly, overworld } from "../siege/api.js";
+import { CROWN } from "./config.js";
 
 const store = moduleStore("siege:crown", () => ({
   ruler: null, // { id, name, title, sinceDay, hollowing, restored }
@@ -23,6 +24,9 @@ const store = moduleStore("siege:crown", () => ({
   formerRulers: [], // their Royal Guard and machines at the Citadel pass to the Crown
   strays: [], // guards left at a new ruler's old plot, to be paid off: { id, x, z }
   purifiedDay: -1,
+  lords: null, // rival lords: [{ key, name, title, pace, claim }] (filled from config the first time)
+  npcKeep: null, // while a lord rules: the keep they took { x, y, z, wins, ... }, handed to whoever unseats them
+  resting: null, // the Heart lying untaken where the Choir fell: { x, y, z, dim }
   vacant: false, // the Crown is back in the Undertow, waiting to be won again
 }));
 
@@ -41,6 +45,14 @@ export const isCourt = (id) => {
 };
 
 export const claimOf = (id) => crown().claims[id] ?? 0;
+
+// The rival lords, and the one behind an id like "npc:ashgrave"
+export function lords() {
+  const c = crown();
+  c.lords ??= CROWN.lords.map((l) => ({ ...l, claim: 0 }));
+  return c.lords;
+}
+export const lordOf = (id) => lords().find((l) => `npc:${l.key}` === id);
 
 export function addClaim(player, amount, why) {
   const c = crown();
@@ -66,6 +78,7 @@ export function giveItem(player, stack) {
 export function seat() {
   const c = crown();
   if (c.citadel) return { x: c.citadel.x, y: c.citadel.y, z: c.citadel.z };
+  if (c.ruler?.npc) return c.npcKeep ? { x: c.npcKeep.x, y: c.npcKeep.y, z: c.npcKeep.z } : undefined;
   const keep = c.ruler && keepOf(c.ruler.id);
   return keep ? { x: keep.x, y: keep.y, z: keep.z } : undefined;
 }

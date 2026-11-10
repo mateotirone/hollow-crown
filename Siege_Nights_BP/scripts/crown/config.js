@@ -1,6 +1,8 @@
 // The High Throne, the Citadel and usurping: every number and name Mateo might want to tweak.
 // Full design: the "Crown, Citadel and Usurpation" doc.
 //
+// Winning it: no vote. The Heart lies where the boss fell; reach for it and everyone is told (heart.js).
+//
 // Who is who (Mateo, 2026-11-10): the HOLLOW CROWN belongs to the ruler of the Hollow, a max-level
 // Sorcerer (the Undertow thread's code). This folder is the OTHER prize: whoever defeats the Hollow
 // brings back a relic, becomes the most powerful player in the overworld, and their settlement
@@ -14,6 +16,11 @@ export const CROWN = {
   citadelName: "Aldspire", // the Citadel (placeholder)
   shard: "Oath Shard", // the fallen shards that give a Claim
   titles: ["Heartbearer", "High King", "High Queen", "Monarch", "Emperor", "Empress", "Warlord"],
+
+  // Taking the Heart where the Choir fell
+  heartBosses: ["morvane"], // whose death leaves the Heart behind (Morvane, the final boss, at the Seat)
+  reachSeconds: 10, // how long a hand must stay on it; any damage in that time knocks it away
+  reachRange: 4, // step further than this and you let go
 
   // The Citadel
   citadelRadius: 100, // Citadel land reaches this far from its Keep Banner (a Castle reaches 80)
@@ -59,6 +66,24 @@ export const CROWN = {
   awayTicks: 2400, // logging out for 2 minutes during the Storm forfeits it
   banishNights: 3, // siege nights an exile can't enter Citadel land
   defenseReward: 16, // emeralds into the Treasury when the ruler holds
+
+  // Rival lords: computer-run claimants, so the throne is contested even when you play alone.
+  // They build a Claim against a player ruler, march on the keep, and rule if they win.
+  npcRivals: true, // false = only real players ever challenge
+  // The Rival Lords settled on the map's plots are the claimants (a bigger settlement = a faster Claim).
+  // These three only stand in on a world where none has settled yet.
+  lords: [ // pace = Claim gained each siege night a player holds the throne
+    { key: "ashgrave", name: "Corwin Ashgrave", title: "Lord", pace: 10 },
+    { key: "marrow", name: "Ysolde Marrow", title: "Lady", pace: 7 },
+    { key: "kell", name: "Brandt Kell", title: "Lord", pace: 5 },
+  ],
+  npcStormThreat: 1.6, // a lord's army is this much bigger than a normal siege
+  npcBackOff: 25, // Claim the other lords lose when one of them is beaten at the walls
+  npcReturnClaim: 40, // a lord thrown off the throne starts again with this much Claim
+  npcTithe: 20, // percent a ruling lord takes of your siege winnings
+  npcHost: 6, // soldiers beside the lord in the throne room when you storm them
+  npcLordHealthBoost: 9, // each level is 2 extra hearts on the lord
+  npcLand: 48, // how far a ruling lord's ground reaches if no Citadel was ever raised
 };
 
 export const IDS = {
@@ -69,5 +94,7 @@ export const IDS = {
   shardBlock: "siege:fallen_shard",
   gauntlet: "siege:gauntlet_of_challenge",
   seal: "siege:throne_seal",
+  restingHeart: "siege:resting_heart", // the Heart lying where the Choir fell
   stormTag: "siege_crown_storm", // on the claimant's side during a Storm: only they can hurt the Seal
+  hostTag: "siege_crown_host", // a ruling lord's soldiers in the throne room
 };

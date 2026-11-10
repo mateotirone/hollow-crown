@@ -85,6 +85,16 @@ Type the commands in chat (`/` opens it).
 - `/give @s elytra`. ✅ It crumbles within a second and you get 24 emeralds.
 - Switch to Survival and try to mine the Plot Stone. ✅ It doesn't break.
 
+**Welcome hall and test area (in the sky)** Creative, after at least one Plot Stone is placed.
+- `/scriptevent siege:welcome build here` on flat ground (or `build` on the real map: it takes you to the hall's place high over Gull Bay). ✅ A round stone terrace with the Waystone in the middle and twelve pedestals round the rim, each with a sign.
+- Click the Waystone. ✅ A menu with "How things stand", "Where you start" and "Choosing a home".
+- Click a pedestal whose plot has a stone. ✅ The plot's region, land and style, and "Free". Pedestals for plots with no stone yet say "Not on this map yet".
+- Switch to Survival, click a free pedestal, choose "Start in ...", confirm. ✅ You land beside that Plot Stone holding a Keep Banner, and everyone is told.
+- `/scriptevent siege:welcome go` (Creative) and click the same pedestal. ✅ Its top has gone dark and it shows who chose it, their level and their settlement level.
+- With a friend (or second account) in Survival with no keep: they join. ✅ They arrive in the hall, can't walk off it, and the taken plot can't be picked.
+- `/scriptevent siege:welcome testarea`. ✅ A glass floor in the sky with the whole showcase laid out on it. Running it again just takes you back there.
+- `/scriptevent siege:welcome release <name>` frees someone's pick; `status` lists all twelve.
+
 ## What I most want to know
 
 - Click your Keep Banner with an empty hand, and a Barracks with an empty hand. Do the menus open, and does the info look right?
@@ -117,7 +127,7 @@ Needs a settlement (place a Keep Banner on flat, open land) and cheats on. Best 
 
 **The quick way:** after `/scriptevent siege:showcase`, run `/scriptevent siege:crown_showcase`. It makes you the Heartbearer and raises the whole Citadel around the showcase in about 30 seconds, with the Great Keep just south of the exhibits. Then skip to step 3. (While you hold the Heart, raiders leave you alone, so do your `showcase siege` test first.)
 
-1. **Become the Heartbearer.** `/scriptevent siege:crown_me`. You should get a title menu, a server-wide "All hail", the Heart of the Hollow and a Citadel Cornerstone. Try to drop the Heart: it shouldn't leave your inventory. (`/scriptevent siege:crown_offer` shows the real scene instead, where the game warns you off the Hollow Crown.)
+1. **Become the Heartbearer.** `/scriptevent siege:crown_me`. You should get a title menu, a server-wide "All hail", the Heart of the Hollow and a Citadel Cornerstone. Try to drop the Heart: it shouldn't leave your inventory. For the real scene, run `/scriptevent siege:crown_offer` first instead: the Heart should appear at your feet with a warning about the Hollow Crown in chat. Click it. Everyone should see "is reaching for the Heart", a 10 second countdown should run, and then it is yours. Try again (`siege:crown_reset`, reload) and this time walk away or take damage during the countdown (jump off something, or have a friend hit you): the reach should break and the Heart should stay put.
 2. **Raise the Citadel.** Place the Cornerstone 15 to 40 blocks from your banner. A gold outline shows the Great Keep's square. Click the stone and confirm. Over about 3 minutes the walls, towers, gatehouse and Great Keep should rise. Tell me about: holes in the wall, towers floating or buried, anything that never finished (a message tells you if pieces are waiting), and how bad the lag was.
 3. **Walk it.** Gate opens when clicked? Wall walk goes through the towers? Ladder in the Great Keep reaches the roof? Throne on the dais facing the door?
 4. **Throne menu.** Click the Throne. Set a tithe, make a Decree of Siege on another settlement, check the Treasury line.
@@ -128,10 +138,27 @@ Needs a settlement (place a Keep Banner on flat, open land) and cheats on. Best 
 9. **Exile.** As the old ruler, open any Keep Banner menu and press "The High Throne" to see the Long Road Back.
 10. **Shards.** `/scriptevent siege:crown_shardfall` drops one 6 blocks east of you. Mine it, use it.
 
+**Alone (rival lords).** No second player needed for any of this.
+
+11. **A lord challenges you.** As the Heartbearer, run `/scriptevent siege:crown_rival`. Lord Corwin Ashgrave should throw down the Gauntlet. Start a siege night (`/time set 12900` on a siege day). Raiders should march on you even though you hold the Heart, with a bigger army, and Lord Corwin Ashgrave should take the field in the last assault. Win the siege and you should see "holds the throne".
+12. **A lord takes the throne.** `/scriptevent siege:crown_lord`. You should lose the Heart, land outside as an [Exile] with a Keep Banner, and the throne menu should say Lord Corwin Ashgrave rules. Your siege winnings should be tithed at 20%, and after a siege night the lord should decree a siege on you (every other night when you're the only settlement).
+13. **Take it back.** Found a new keep away from the old one (it should refuse close by), then `/scriptevent siege:crown_claim 100`, `/scriptevent siege:crown_grace`, use a Gauntlet (`/scriptevent siege:crown_gauntlet`) and start a siege night. A Throne Seal should stand in the throne room (or beside your old banner spot if there's no Citadel) guarded by the lord and six soldiers. Break the Seal: the Heart, the keep and the lord's Treasury should be yours.
+
 ## Lore, Library and Ledger (The Hollow Crown)
 
-Run the showcase first (`/scriptevent siege:showcase`): the back row has four Archive Shelves, a Dusty Tome and the eight characters, and you are given a Ledger, a Cipher Wheel, a Tide Glass and four tomes.
+Run the showcase first (`/scriptevent siege:showcase`): the back row has four Archive Shelves, a Dusty Tome and the twelve characters, and you are given the Old King's Journal, a Ledger, a Cipher Wheel, a Tide Glass and four tomes.
 
+0. Use the Old King's Journal. **Expect:** a cover page, then 12 entries; after the last, "Ledger updated: The Old King's Journal". In a brand new world you should get the journal by yourself about 5 seconds after first joining, with the message "There is an old journal in your pack." Show it to Sister Wren ("I have an old journal").
+0c. Run `/scriptevent siege:hum`. **Expect:** a low held note for about 7 seconds (placeholder sound). Then stand in the Hollow, or wait for a third night, or spawn a Returned with `/scriptevent siege:returned_spawn` and stand next to it: the same note, quietly, with no gaps. `/scriptevent siege:hum off` should silence it for you only.
+0d. Run `/scriptevent siege:journal_last_page`, then read the journal to the end. **Expect:** "The old journal in your pack is heavier than it was", and a 13th page in another hand, signed.
+0e. Hidden Returned: `/scriptevent siege:lore_case harl` then ring a bell within 16 blocks. **Expect:** Harl Dunn stops and walks off, and talking to Nessa afterwards gets her "after" scene. `siege:lore_case bram` and a bell: nothing happens (he is himself). Ring a bell beside Hesper (not the showcase one): she speaks, walks off and is gone.
+0f. Talk to Brother Cael ("The portraits you burned"), Sigrun ("Why did the Grey Host come?", "Is it still being rung?", "Say it outdoors, then.") and Old Mag ("The day they took the king."). Then talk to Archivist Pell. **Expect:** he opens with three "cards" and will not say the name.
+0g. Local books: `/scriptevent siege:local_lore harrowford`. **Expect:** what stood at Harrowford, a builder note, and three books in your pack; reading two of them opens the Ledger page "The Field Without Bones", which accepts 3:17. On a real plot, picking it at the welcome hall should tell you its past after a few seconds, and the Library should have one book on its bottom shelf.
+0h. Portraits: in creative, look at the side of a wall block from close up and run `/scriptevent siege:portrait gallery`. **Expect:** eight paintings in a row along the wall to your right (seven wide, one tall), flat against it and facing you. `/scriptevent siege:portrait wrenfield` hangs three portraits. Click one in survival: a name, a role and a line. Punch one in creative: it comes down. PLEASE CHECK which way they face and whether they sit flush; this has never run in a real game.
+0i. Ravens: `/scriptevent siege:ravens`. **Expect:** one grey line about ravens on your wall. In play it appears by itself at dusk on a raid day.
+0j. Moon door: in creative, build a 2 by 3 wall of any blocks, look at its bottom-left block and run `/scriptevent siege:moon_door full`, then `/scriptevent siege:moon_door test`. **Expect:** the six blocks vanish for 30 seconds and come back exactly as they were. `/time set midnight` on a new-moon day should open it too, and dawn should close it. Walk up to it: a line says which moon is carved there.
+0k. Corvin: `/scriptevent siege:corvin` plays his first three lines. As a Sorcerer with a skill learned and the flag set, a remark about that art follows within ten seconds. `/scriptevent siege:lore_npc corvin`: as a Knight you get only "the pool is singing"; as a Sorcerer he talks.
+0b. Use The Fourteen Arts (given in the showcase; in play, Old Mag hands it over once you are a Sorcerer and she believes you). **Expect:** a cover, 14 pages and a last page. A page for a power you have sworn ends with an extra purple line. Reading a Field Note, finishing the First Slip, asking Sigrun "Why did the Grey Host come?", and naming the thin place should each show "Something you did not understand before makes sense now."
 1. Use a tome. **Expect:** a book screen with Next page, and on the last page "Ledger updated".
 2. Hold a tome and click the empty shelf. **Expect:** the tome leaves your hand and a spine appears on the shelf front. Six fill a shelf.
 3. Click a shelf with an empty hand. **Expect:** the catalog, The Oswin Chronicles at 12 / 12, and missing tomes in other collections showing a hint.
@@ -141,24 +168,43 @@ Run the showcase first (`/scriptevent siege:showcase`): the back row has four Ar
 7. Click Sister Wren in survival. **Expect:** her greeting with buttons, and a different greeting next time. Ask "Why is it always night?" then "Which clock was first?". **Expect:** she is cut off, you Slip into the Hollow for a few seconds (or black out, if the Hollow isn't set up), and when you click her again she reacts. If dialogue buttons do nothing, tell me: that's the one part I could not check offline.
 8. `/scriptevent siege:lore_give survey`, read and shelve notes I to VI, then "Name the Thin Place" in the catalog.
 
+0l. **The morning after the first sighting.** Run `/scriptevent siege:morning_after`. Three lines from your own townsfolk should appear a few seconds apart. Then talk to Sigrun, Brother Cael, Old Mag, Sir Aldous or Archivist Pell (after you have met them): each opens once with a new conversation about the tall thing at your wall, and never repeats it. In a real game this happens the dawn after the siege where the first Hollow soldiers appear.
+
 ## Dragons (the Emberwaste's power)
 
-Creative, cheats on. The showcase (`/scriptevent siege:showcase`) puts a Roost, a Nest, three display dragons and **Cinder**, a grown dragon that is yours, in the extras row behind you. Take a **Dragon Horn** and some raw beef from the chests (`/give @s beef 16`).
+Look first, without the game: the 3D viewer at https://claude.ai/artifact/D42qsWXjEcxWAbsYacsw4v shows all four species, every pose and every sound.
 
-1. Look at Cinder and the three display dragons. ✅ Blocky dragons in four colours, small / medium / large, wings folded back along the body (not sticking forward or straight out). Cinder wears a saddle, the others don't.
-2. Click Cinder. ✅ You sit on its back and can walk it around with WASD like a horse. The action bar shows a green Flight bar.
-3. Press jump. ✅ It lifts off and the wings flap. You fly toward wherever the camera looks; jump climbs, looking down descends. The Flight bar drains (about 54 seconds).
+In game: Creative, cheats on. `/scriptevent siege:showcase` puts a Roost, a Nest, nine display dragons (the four species, a hatchling, a fledgling, one asleep, one unconscious, one dead) and **Cinder**, a grown Cinderwing that is yours, in the extras row behind you. Take a **Dragon Horn** from the chests, and `/give @s beef 16` and `/give @s golden_apple 4`.
+
+**Looks and flying**
+1. Walk along the display dragons. ✅ Four clearly different animals (four-legged Cinderwing, two-legged Ashen Wyvern, squat armoured Dune Drake, long frilled Glass Wyrm). Wings folded back along the body. The sleeper breathes slowly, the unconscious one breathes fast and drips red, the dead one lies rolled over and does not move.
+2. Click Cinder. ✅ You sit on its back and can walk it with WASD. The action bar shows a green Flight bar.
+3. Press jump. ✅ It lifts off, wings flap with a wingbeat sound. You fly where the camera looks; jump climbs, looking down descends. The bar drains (about 54 seconds).
 4. Fly low over flat ground without holding jump. ✅ It lands by itself and the bar slowly refills.
-5. Take off again and stay up until the bar is empty. ✅ "is spent and glides down": it sinks slowly, you take no fall damage.
-6. In the air, `/summon zombie` below you, face it and use the Dragon Horn. ✅ A line of flame, the zombie burns. No blocks catch fire.
-7. In the air, sneak to jump off. ✅ You float down slowly, and so does Cinder.
-8. Walk 30 blocks away and use the Dragon Horn. ✅ Cinder appears next to you.
-9. Sneak + click Cinder with an empty hand. ✅ Its sheet: bond, level, training. Try "Stay here" and "Go to your Roost".
-10. Click the Dragon Roost. ✅ Menu with Train (Cinder has 4 points), Wake it / Send it to roost, Rename. Train Wings and check the sheet says Flight 57s.
-11. Raising one from an egg: `/scriptevent siege:dragons_reset`, click the **Dragon Nest** ✅ you get a Dragon Egg; click the Roost holding it ✅ "The egg settles"; then `/scriptevent siege:dragons_grow` ✅ a tiny hatchling that follows you. Feed it beef ✅ hearts, "Bond 8/100", and it refuses a second piece for a minute. Run the grow command twice more ✅ Fledgling (rideable on foot only), then Adult (flies).
-12. Shot down: with a second player's settlement that has a Ballista, fly over it. ✅ The ballista turns and fires, "ballista hits", the Flight bar drops by a quarter per bolt, and at empty you get "Shot down" and can't take off for 30 seconds. Over your own or an ally's settlement nothing shoots.
+5. Stay up until the bar is empty. ✅ "is spent and glides down", no fall damage.
+6. In the air, `/summon zombie` below you, face it and use the Dragon Horn. ✅ A line of flame and a roar of fire; the zombie burns. No blocks catch fire.
+7. In the air, sneak to jump off. ✅ You both float down.
+8. `/scriptevent siege:dragons_species 1` (then 2, 3, 0). ✅ Cinder changes species. Each breath is different: 1 ash (blinds), 2 sand (throws back), 3 glass (slows and weakens).
 
-Things I could not check without the game, so please look closely: the wings fold backward (step 1), flying actually steers by camera (step 3), flying speed feels right (faster than a horse's walk, not absurd), and the hatchling follows you.
+**Its mind**
+9. Sneak + click Cinder with an empty hand. ✅ Its sheet shows a temperament, a mood and "Favourite food: not found yet". Choose "Pet it". ✅ It nuzzles, purrs, and a grey italic line describes what it does.
+10. Feed it beef, then other raw meats and fish a minute apart. ✅ One of them gets "You have found its favourite". Offer rotten flesh ✅ a proud or well-fed dragon spits it back.
+11. `/scriptevent siege:dragons_hungry`, then stand near it holding beef. ✅ Within a few seconds: "It is staring at the beef in your hand". Put the beef away near some sheep ✅ it takes one for itself.
+12. `/summon zombie ~12 ~ ~`. ✅ Within a few seconds it snarls and you are told which compass direction it is staring.
+13. Get off, switch to Survival and let a zombie hit you. ✅ Cinder throws itself at the zombie ("puts itself between you and it").
+14. Hit Cinder yourself. ✅ "It flinches away from you", bond drops. With a second player: they hit it, then try to pet or ride it ✅ it snarls and refuses them, and its sheet says it holds a grudge.
+15. `/time set midnight`, tell it "Stay here" and walk 20 blocks away. ✅ It curls up asleep. Walk back ✅ "opens one eye at your footsteps".
+16. Use the horn from 30 blocks away. ✅ It comes, roaring. (When it is sulking or sullen it may refuse.)
+
+**Down, not dead**
+17. `/scriptevent siege:dragons_down`. ✅ Cinder collapses on its side, breathing fast (you can hear it), dripping red. You can't ride it. Title: "Cinder is down. It is still breathing".
+18. Click it with a golden apple. ✅ "You tend its wounds", bleeding stops, breathing slows; a minute later it wakes and won't fly for two minutes.
+19. Knock it down again and, as a second player who is not your ally, hit it five times. ✅ It dies: rolled over, jaw slack, no breathing, no name. The body stays about five minutes (longer during a siege), then crumbles to ash. The owner sees "Cinder is dead".
+20. Shot down: fly over a second player's settlement with a Ballista. ✅ Bolts knock the Flight bar down a quarter each; at empty you get "Shot down", it falls, and it hits the ground unconscious.
+
+**Raising one**: `/scriptevent siege:dragons_reset`, click the **Dragon Nest** ✅ an egg; click the Roost holding it ✅ "The egg settles"; `/scriptevent siege:dragons_grow` ✅ cracking sound, a tiny chirping hatchling of a random species that follows you. Run the grow command twice more ✅ Fledgling (walks with you on its back), then Adult (flies).
+
+Things I could not check without the game, so please look closely: flying actually steers by camera, flying speed feels right, the hatchling follows you, the sounds are any good in game, and the unconscious dragon really can't be killed by one more hit.
 
 ## Settlement building: zones, the Mason and pre-designed buildings (The Hollow Crown)
 
@@ -190,3 +236,116 @@ Rival Lords only settle on a map with Plot Stones. Place three or four Plot Ston
 3. `/scriptevent siege:rivals grow <id>` moves a lord up a tier (the id is in the list); more buildings rise. `/scriptevent siege:rivals night` plays one siege night for all of them.
 4. Click the lord and choose "Lay siege" (you need your own settlement). Kill every soldier within 10 minutes: the lord falls, you get emeralds, and the plot with its buildings is free to claim. Die or walk away and they hold.
 5. `/scriptevent siege:rivals none` removes them all.
+
+## Mobs, bosses and NPC fighters (The Hollow Crown)
+
+1. Run `/scriptevent siege:showcase` and walk the row of statues: every mob and boss should stand there, labelled, with its weapon in its hand.
+2. Spawn a **Stone Vigil** from its egg in survival. Look at it: it must not move and only a pickaxe should hurt it. Turn around: it should close in. Let it touch you: you should land somewhere nearby in the dark.
+3. `/scriptevent siege:champion_summon knight 3 hostile`. It should shoot arrows from range, switch to its sword up close, raise a shield (hit it with an axe: "Guard broken!"), and back off to drink when low. Try `sorcerer` and `lord` too.
+4. Kill any of our mobs. It should fall over and lie there, not puff into smoke, then sink into the ground about 45 seconds after the area is quiet.
+**Grey Host and Hollow soldiers.** Spawn eggs: Grey Host Shield-bearer, Axeman, Bowman, Bell-cutter, Vorlund's Guard, and Veinsworn, Shardcaster, Gatebreaker. Check each attacks you and guards, the Bowman and Shardcaster shoot from range, and the Gatebreaker is slow and very tough. In sieges they replace some raiders from a keep's 6th siege (Grey Host) and 10th (Hollow soldiers). On the 7th, 8th and 9th one Veinsworn should stand about 30 blocks from the keep, facing it, doing nothing; walk within 9 blocks and it vanishes in smoke.
+
+**Hidden Returned (a villager that is secretly one of them).** In a village run `/scriptevent siege:returned_mark` (marks the nearest villager) or `/scriptevent siege:returned_spawn`. It should look and trade like any villager.
+
+- Walk away and look elsewhere, then glance back: it should be standing still, facing toward the Rift (west if the world has no Rift yet). Stare at it and it should wander off like normal.
+- Bring a tamed wolf within 8 blocks: the wolf should growl and show angry puffs.
+- Ring a bell within 16 blocks: it should stop, turn and walk toward the Hollow, sometimes with one or two villagers following.
+- Kill it while it walks: Veil Ash drops and the followers stay. Let it go about 64 blocks: it and its followers vanish.
+- `/scriptevent siege:returned_reveal` puts a beam on every Returned near you if you lose track.
+- On their own, villages of five or more get one at night once the first boss is dead (slowly: a small chance every two minutes, one per village).
+
+**Morvane, the last fight (seven stages).** On flat open ground run `/scriptevent siege:bestiary_summon morvane`. Away from the Seat all seven stages play on the spot, which is the quick way to check the mechanics. `/scriptevent siege:morvane_skip 4` jumps a running fight to stage 4 (any number 1 to 7).
+
+- Stage 1: two warned blows then a Toll ring you jump; he appears behind whoever hit him last; Tollmen arrive.
+- Stage 2: suits stand in a ring, a few attack. Blue light on the left hand marks his suit, on the right hand an empty one. Hit his: he should be open for 12 seconds, then hide again with more suits.
+- Stage 3: three waves of old court fighters while he cannot be seen or hurt.
+- Stage 4: he only appears to strike; hit him in the 5 seconds he is up. Stand in water: it should hurt and put you back, never kill.
+- Stage 5: he lances, shakes the ground and calls Tollmen. Near a settlement wall he should crack it like a ram. He should not die here.
+- Stage 6: about 40 seconds of the ground giving way under you while he talks. This is the only place he says who he was.
+- The reveal (between stages 6 and 7): `/scriptevent siege:reveal_test` plays it alone on open ground, 8 blocks in front of you. Your controls should lock and the screen go black with one bell. Then: a boy at a desk seen from behind, a line of the journal appearing word by word at the bottom of the screen, the camera swinging round to his face and right hand, a slow push in while the boy becomes a king and then Morvane, one line of speech, a page-turn sound (the journal gains its last page), bells and a server-wide line, black, and your controls back. About a minute. Run it again and you should get the short version (black and his one line). `/scriptevent siege:reveal_forget` makes you a first-time viewer again. Tell me about: the camera clipping through walls, seeing your own armour in shot, text running off the screen, or controls not coming back.
+- Stage 7: rings of fire mark floor that is about to go; standing outside hurts. Dodge the overhead blow, hit him while he staggers until the Crown comes off, then keep hitting to hold him back from it and finish him.
+- Die alone: the first death in a stage should bring you straight back (second wind); the next two restart the stage; the one after that restarts the whole fight.
+- The real thing: beat the Choir, step onto the Seat. Each stage should move everyone to its own place and bring them back. Tell me about anyone left behind, him not arriving, or anyone falling into nothing.
+
+5. `/scriptevent siege:bestiary_summon reeve` alone, then with a friend. With two of you the boss should take noticeably longer to wear down.
+6. After any boss has died once, wait near open ground: a **Seep** should open within 10 to 30 minutes ("Something gives way nearby"). Kill its guards, then break it.
+7. Stay in the Hollow for 5 minutes: a **Gloamwing** should arrive, and another every 2 minutes. Leave the Hollow and come back: the count should start again.
+
+Tell me which of these did not happen, and anything that looked wrong (weapons floating, bodies standing upright, missing textures).
+
+## The Hollow: the world below (The Hollow Crown)
+
+A map of the generated world is in `docs-hollow/hollow-map.png`.
+
+- `/scriptevent hc:undertow_go` takes you to the Wound, the arrival ledge. The land builds itself around you as you walk; give it a few seconds when you first arrive.
+- Walk the gold path down the valley, or leave it through a gap in the cliffs into the open country. Look for: four kinds of land (lattice groves, basalt highlands, glowing fens, grey flats), nothing lined up in rows, no holes in the ground.
+- Light rivers: from the Wound walk to about x -60, z 130. Put a boat in the pale blue water and follow it. It should never drop or dead-end, and the story path should cross it on a bridge near z 650.
+- Choir ore shows in cliff faces and in veins inside the rock. It needs a diamond or netherite pickaxe.
+- `/scriptevent hc:slip` gives a Slip, `/scriptevent hc:give_crown` gives the Hollow Crown (putting it on warns the whole server), `/scriptevent hc:regent_now` raises the NPC ruler.
+- `/scriptevent hc:undertow_status` prints what has been built.
+
+## The Hollow's mining villages, the Vault and the Latticewood Boat (scripts/hollowfolk/)
+
+Not yet played in a real game. In a creative test world:
+
+1. `/scriptevent hc:folk_go glimwade` takes you to the first mining village (also `lowseam`, `tollrest`, `highcut`). The village builds itself a few seconds after you arrive: cottages, mine mouths, a smithy, a fire, and a plank walk down to a dock on the light river.
+2. Click a miner. While Morvane rules they are frightened and say little. `/scriptevent hc:folk_freed` frees them and their lines change.
+3. Click the Foreman (blue name) to open the Tally. `/scriptevent hc:folk_dawn` runs one day of digging so there is ore to buy. Buy 1 or 8 with emeralds, or buy a boat.
+4. `/scriptevent hc:set_warden` makes you the ruler. Now the Foreman greets you as Crown-wearer, you can set the price, and each dawn half of every Tally goes to your Vault.
+5. Robbing needs a second player: with the ruler online, "Rob the Tally" hands over ore and the ruler is brought to the village at once. With the ruler offline it is refused and only buying works.
+6. `/scriptevent hc:folk_go vault` takes you to the Vault Stair near the Seat. Stand on the copper pad and sneak to go down. Click the dark block in the middle: the ruler collects, anyone else can try to break it open (20 seconds beside it).
+7. Craft a Latticewood Boat from 5 Latticewood (boat shape) and put it on a light river. `/scriptevent hc:folk_status` prints every Tally and the Vault.
+
+Things to look for: villages sitting badly on the bank or in the water, mine mouths hanging in the air, the boat's look and whether it paddles like a normal boat, and what it drops when broken.
+
+## Character looks (pick your person)
+
+The add-on carries character skins made on the creator page and draws each player as the one they picked. Nobody imports a skin.
+
+1. Join the world for the first time. After a few seconds a menu asks "Who steps off the coach?". Pick a character.
+2. Press F5. You should see that character's skin on your own body. Check that armor, a held item and a cape (if you have one) still show.
+3. Have a second player join and pick someone else. Each of you should see the other's character.
+4. `/scriptevent siege:showcase` places a **Looking Glass**. Click it to change look, and pick "My own skin" to go back.
+5. Click your Keep Banner: the menu has "Change my look".
+
+Things to watch for, because none of this has run in a real game yet:
+- If a player with a slim-arm or Character Creator skin looks broken after picking a look, tell Claude: the look is drawn on the plain wide-arm model.
+- If nothing changes when you pick, the world is not using the add-on's player file (another add-on that also changes the player would win or lose depending on pack order).
+
+To add a friend's character: `node studio/build_looks.mjs add "<their creator link>" TheirGamertag`, then `python3 tools/build.py`. With a gamertag the look is theirs alone and is put on automatically when they join.
+
+## Currency and job NPCs
+
+One coin for the whole world, backed by iron. None of this has run in a real game yet.
+
+1. `/scriptevent siege:showcase` puts one of each job NPC in the row (Farmer, Woodcutter, Quarryman, Smith, Fisher, Hunter, Herbalist, Moneyer) and gives you 200 Regals. Anywhere else: `/scriptevent siege:economy_npc farmer` (add a region name, such as `Frostmarch`, for that region's prices).
+2. In Survival, carry some wheat and click the **Farmer**. Choose Sell: 16 wheat should fetch 6 Regals at plain prices, less in Aldmere Vale, more in Frostmarch or Emberwaste. Sell more than 8 lots in a day and the price should start to drop; it recovers the next morning.
+3. Click the **Moneyer** with iron ingots: 8 Regals each for the first 64 a day, then 4. Buy one back for 10. "Change coins" swaps 64 Regals for a Gold Regal and back.
+4. Buy something that costs more Regals than you carry in small coins while holding a Gold Regal: you should get the right change.
+5. Click your Keep Banner: the menu has **Strongbox**. Put coins in, walk off your land and check a shop no longer counts them, come home and check it does.
+6. `/scriptevent siege:economy_give 500` gives coins, `/scriptevent siege:economy_stats` shows how many coins the world has paid out and taken in.
+
+Things to look for: whether the NPC skins suit the jobs, whether the sell list is readable on a phone screen, and whether any price feels too generous. Every number is in `scripts/economy/config.js`. The Mason, Quartermaster, Barracks and the rest still charge emeralds until their own threads switch them over; the Moneyer buys emeralds for 4 Regals in the meantime.
+
+## Siege nights and the Reach (scripts/reach/)
+
+The plan for Mateo is the Claude Doc "The Third Night: siege plan". Offline, `node tools/sim-reach.mjs` plays a night at every stage and prints it.
+
+In game (cheats on, a settlement founded, or `/scriptevent siege:showcase` first):
+
+1. `/scriptevent siege:reach` shows the Reach, the stage and what tonight is.
+2. `/scriptevent siege:reach_night` makes tonight a siege night and jumps to just before the horn. Expect: the horn and war plan, then one wave an
+   hour at seventeen past, the last at 3:17 with a bell and "3:17" on screen. `/scriptevent siege:reach_toll` jumps to 3:16.
+3. `/scriptevent siege:reach_stage 2` then `reach_night`: four waves, and at 3:17 the army stops and three Hollow soldiers walk out (once per world;
+   `/scriptevent siege:reach_glimpse` lets it happen again).
+4. `/scriptevent siege:reach_stage 3` and `4`: check the Keep Banner's "The night watch" button, the stolen nights (`reach_night stolen`), the knock
+   (`reach_night probe`), the twists "The Fallen Rise" and "The Pull".
+5. `/scriptevent siege:reach_stage 5` then `reach_night`: the Long Night. Leave raiders alive past 5:00: "Dawn. They do not leave", then a tide every
+   two minutes. Kill everything between tides to break it. It should rain, and patrols should find you outside the settlement.
+6. `/scriptevent siege:reach_boss morvane`: everything stops ("The knocking has stopped"). `reach_night muster` for an after-story raid; the night
+   watch now offers Remembered Nights.
+7. `/scriptevent siege:reach_reset` puts it all back. `/scriptevent siege:reach_boss <reeve|huntsman|bride|seneschal|mother|warlord_king|choir>` and
+   `/scriptevent siege:reach_set <0-100>` move the story by hand.
+
+Things I could not check offline: whether a dusk-to-midnight wait feels right, whether Hollow soldiers march on the keep heart like raiders do,
+the darkness and knockback effects, and the rain.

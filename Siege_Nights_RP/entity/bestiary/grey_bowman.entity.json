@@ -1,0 +1,32 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:grey_bowman",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/grey_bowman"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.grey_bowman"
+   },
+   "animations": {
+    "main": "animation.siege_b.grey_bowman"
+   },
+   "scripts": {
+    "animate": [
+     "main"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ],
+   "spawn_egg": {
+    "base_color": "#606c74",
+    "overlay_color": "#aac8d7"
+   }
+  }
+ }
+}

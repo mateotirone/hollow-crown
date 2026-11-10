@@ -338,6 +338,12 @@
     "siege_foundation_stone_top": {
       "textures": "textures/blocks/siege_foundation_stone_top"
     },
+    "hc_looking_glass_side": {
+      "textures": "textures/blocks/looks/hc_looking_glass_side"
+    },
+    "hc_looking_glass_top": {
+      "textures": "textures/blocks/looks/hc_looking_glass_top"
+    },
     "siege_castle_tiles_stone_0": {
       "textures": "textures/blocks/siege_castle_tiles_stone_0"
     },

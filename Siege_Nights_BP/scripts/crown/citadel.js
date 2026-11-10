@@ -9,7 +9,7 @@ import {
 } from "../siege/api.js";
 import { CROWN, IDS } from "./config.js";
 import { citadelPlan, colorJobs, gateToward, thronePlace, outsideGate, GATE_NAMES, KEEP_HALF } from "./layout.js";
-import { crown, saveCrown, ruler, isRuler, rulerLabel, announce, giveItem, surfaceY } from "./state.js";
+import { crown, saveCrown, ruler, isRuler, rulerLabel, announce, giveItem, surfaceY, seat } from "./state.js";
 
 export const citadel = () => crown().citadel;
 export const inCitadel = (loc) => {
@@ -27,6 +27,16 @@ addLandClaim((location) => {
 
 addFoundingCheck((player) => (isRuler(player.id) && citadel()
   ? `§cYour seat is ${CROWN.citadelName}. The throne does not move house.` : undefined));
+
+// While a rival lord rules, nobody settles on their doorstep
+addFoundingCheck((player, block) => {
+  const r = ruler();
+  const s = r?.npc && seat();
+  if (!s) return undefined;
+  const reach = citadel() ? CROWN.citadelRadius : CROWN.npcLand;
+  return Math.hypot(block.location.x - s.x, block.location.z - s.z) <= reach
+    ? `§cThis is ${rulerLabel()}'s ground now. Take the throne back before you raise a banner here.` : undefined;
+});
 
 addKeepHealthHook((owner, hp) => (isRuler(owner) && citadel() ? Math.max(hp, CROWN.citadelKeepHealth) : hp));
 addGuardLimitHook((owner, limit) => (isRuler(owner) ? limit + CROWN.royalGuardBonus : limit));
@@ -320,7 +330,8 @@ export function moveIn(to, spot) {
     c.strays.push({ id: to.id, x: mine.x, z: mine.z });
     c.strays = c.strays.slice(-6);
   }
-  const base = holder ? st.keeps[holder] : { x: spot.x, y: spot.y, z: spot.z, wins: 10, warlordsSlain: 2, tier: "Castle" };
+  const taken = c.npcKeep && c.npcKeep.x === spot.x && c.npcKeep.z === spot.z ? c.npcKeep : undefined; // won back from a lord
+  const base = holder ? st.keeps[holder] : taken ?? { x: spot.x, y: spot.y, z: spot.z, wins: 10, warlordsSlain: 2, tier: "Castle" };
   if (holder) {
     delete st.keeps[holder];
     c.formerRulers = [...c.formerRulers.filter((id) => id !== holder), holder];
@@ -354,7 +365,7 @@ function loyaltyTick() {
     }
   }
   const spot = citadel() ?? (r && keepOf(r.id));
-  if (!r || !spot || !c.formerRulers.length) return;
+  if (!r || r.npc || !spot || !c.formerRulers.length) return; // a lord brings their own soldiers
   const near = { location: { x: spot.x, y: spot.y, z: spot.z }, maxDistance: CROWN.citadelRadius + 60 };
   const color = keepOf(r.id)?.color ?? 14;
   for (const old of c.formerRulers) {

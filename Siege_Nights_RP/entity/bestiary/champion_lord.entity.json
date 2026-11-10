@@ -1,0 +1,32 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:champion_lord",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/champion_lord"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.champion_lord"
+   },
+   "animations": {
+    "main": "animation.siege_b.champion_lord"
+   },
+   "scripts": {
+    "animate": [
+     "main"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ],
+   "spawn_egg": {
+    "base_color": "#284682",
+    "overlay_color": "#dab046"
+   }
+  }
+ }
+}

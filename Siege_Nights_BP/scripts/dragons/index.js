@@ -7,16 +7,23 @@
 //   /scriptevent siege:dragons_egg      give yourself an egg
 //   /scriptevent siege:dragons_grow     hatch it / grow it one stage (max bond, +5 training points)
 //   /scriptevent siege:dragons_reset    forget your dragon
+//   /scriptevent siege:dragons_species 0-3     change yours: 0 Cinderwing, 1 Ashen Wyvern, 2 Dune Drake, 3 Glass Wyrm
+//   /scriptevent siege:dragons_temper <name>   proud, curious, gentle, fierce, wary
+//   /scriptevent siege:dragons_down     knock yours unconscious
+//   /scriptevent siege:dragons_hungry   make it starving
 
 import { world, system, ItemStack } from "@minecraft/server";
 import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
 import { onTick, isReady, settlementAt, isAlly, keepOf, consumeHeld, countItem } from "../siege/api.js";
 import {
-  DRAGON_SETTINGS as S, DRAGON, EGG, SADDLE, HORN, ROOST, NEST, DAY, HUES, FOODS, TRAINING, STAGE_NAMES,
-  newDragon, addXp, addBond, flightTicks, nextStageNeeds, trainProblem, train, bar,
+  DRAGON_SETTINGS as S, DRAGON, EGG, SADDLE, HORN, ROOST, NEST, DAY, SPECIES, RESERVE, FOODS, TRAINING, STAGE_NAMES, TEMPERS,
+  newDragon, newMind, speciesOf, addXp, addBond, flightTicks, nextStageNeeds, trainProblem, train, bar,
 } from "./data.js";
+import { speak, noise, emote } from "./voice.js";
+import { mindOf, mindLines, refusal, tell, onFed, pet, onHurt, think, guard, onOwnerDied } from "./mind.js";
+import { goDown, lose, tend, downedTick, isCorpse } from "./downed.js";
 import { store, dragonOf, save, valid, entityOf, recordOfEntity, ownerIdOf, canHarness, isBuilder, spawnDragon, roostDragon, refresh, scanDragons, isFlying } from "./dragon.js";
-import { flightTick, defenceTick, mountOf, breathe, takeOff, land, announceLevel, rideOf } from "./flight.js";
+import { flightTick, defenceTick, mountOf, breathe, takeOff, land, announceLevel, rideOf, onCrash } from "./flight.js";
 import "./tests.js";
 import "./showcase.js";
 
@@ -71,21 +78,25 @@ function hatch(rec, dim) {
   rec.stage = "hatchling";
   rec.bornAt = world.getAbsoluteTime();
   rec.name = `${rec.ownerName}'s Dragon`.slice(0, 24);
-  spawnDragon(rec, dim, above(rec.roost));
+  rec.mind = newMind();
+  rec.mind.lastSeen = rec.bornAt;
+  const born = spawnDragon(rec, dim, above(rec.roost));
   try {
-    dim.playSound("mob.turtle_baby.born", rec.roost, { volume: 2, pitch: 0.6 });
+    noise(born, "egg_crack", 2);
+    system.runTimeout(() => speak(born, rec, "chirp"), 20);
     dim.spawnParticle("minecraft:lava_particle", above(rec.roost));
   } catch {
     // looks only
   }
   const owner = world.getPlayers().find((p) => p.id === rec.owner);
-  owner?.sendMessage(`§6Your egg has hatched: a ${HUES[rec.hue]} hatchling. §7Feed it raw meat or fish to build its bond. Sneak and click it with an empty hand for its sheet.`);
+  owner?.sendMessage(`§6Your egg has hatched: ${/^[AEIOU]/.test(speciesOf(rec).name) ? "an" : "a"} ${speciesOf(rec).name}. §7${speciesOf(rec).blurb} §7Feed it raw meat or fish to build its bond. Sneak and click it with an empty hand for its sheet.`);
 }
 
 function sheetText(rec) {
   const now = world.getAbsoluteTime();
   const lines = [
-    `§6${rec.name}§7, ${HUES[rec.hue]} ${STAGE_NAMES[rec.stage]}`,
+    `§6${rec.name}§7, ${speciesOf(rec).name} ${STAGE_NAMES[rec.stage]}`,
+    ...mindLines(rec, now),
     `§7Bond  ${bar(rec.bond, 100)} §f${Math.floor(rec.bond)}`,
     `§7Level §f${rec.level}§7${rec.level < S.maxLevel ? `  (${rec.xp}/${30 + rec.level * 15} xp)` : " (max)"}   Training points §f${rec.tp}`,
     `§7Flight §f${flightTicks(rec) / 20}s§7   ${Object.entries(TRAINING).map(([k, t]) => `${t.name} §f${rec.stats[k]}/${t.max}§7`).join("  ")}`,
@@ -200,6 +211,7 @@ function feed(player, entity, rec) {
   const wait = (fedAt.get(rec.owner) ?? 0) - now;
   if (wait > 0) return say(player, `§7${rec.name} isn't hungry (${Math.ceil(wait / 20)}s).`);
   fedAt.set(rec.owner, now + S.feedCooldownTicks);
+  if (!onFed(player, entity, rec, player.getComponent("minecraft:equippable")?.getEquipment("Mainhand")?.typeId)) return;
   consumeHeld(player);
   addBond(rec, S.feedBond);
   const leveled = addXp(rec, S.feedXp);
@@ -222,7 +234,13 @@ async function dragonMenu(player, rec) {
     form.button(label);
     actions.push(fn);
   };
+  add("Pet it", () => {
+    const entity = entityOf(rec);
+    if (entity) pet(player, entity, rec);
+  });
   add(rec.order === "stay" ? "Follow me" : "Stay here", () => {
+    const no = refusal(rec, "order");
+    if (no) return tell(player, rec, no);
     rec.order = rec.order === "stay" ? "follow" : "stay";
     refresh(rec);
     say(player, rec.order === "stay" ? `§7${rec.name} settles where it is.` : `§7${rec.name} follows you.`);
@@ -249,8 +267,18 @@ world.beforeEvents.playerInteractWithEntity.subscribe((event) => {
   const { player, target, itemStack } = event;
   if (target?.typeId !== DRAGON) return;
   const rec = recordOfEntity(target);
-  if (!rec) return; // a display dragon
+  if (!rec) {
+    if (isCorpse(target)) {
+      event.cancel = true;
+      system.run(() => say(player, "§7It is not breathing."));
+    }
+    return; // a display dragon
+  }
   const item = itemStack?.typeId;
+  if (rec.down) {
+    event.cancel = true;
+    return system.run(() => valid(target) && tend(player, target, rec, item));
+  }
   const refuse = (text) => {
     event.cancel = true;
     system.run(() => say(player, text));
@@ -263,7 +291,18 @@ world.beforeEvents.playerInteractWithEntity.subscribe((event) => {
     } catch {
       // not rideable yet
     }
-    if (riders < 1 || item) refuse(`§c${rec.name} answers only to ${rec.ownerName}. You can ride behind them.`);
+    if (riders < 1 || item) {
+      event.cancel = true;
+      return system.run(() => valid(target) && (item ? say(player, `§c${rec.name} answers only to ${rec.ownerName}.`) : pet(player, target, rec)));
+    }
+    const no = refusal(rec, "passenger", player);
+    if (no) {
+      event.cancel = true;
+      system.run(() => {
+        speak(target, rec, "snarl");
+        tell(player, rec, no);
+      });
+    }
     return;
   }
   const act = (fn) => {
@@ -283,6 +322,7 @@ world.beforeEvents.playerInteractWithEntity.subscribe((event) => {
     });
   }
   if (player.isSneaking && !item) return act(() => dragonMenu(player, rec));
+  if (!item && (rec.stage === "hatchling" || !rec.saddled)) return act(() => pet(player, target, rec));
   if (rec.stage === "hatchling") return refuse(`§7${rec.name} is a hatchling. Feed it raw meat or fish and give it time.`);
   if (!rec.saddled) return refuse(`§7${rec.name} needs a Dragon Saddle.`);
   if (!canHarness(player)) refuse(`§7${rec.name} will not carry someone who doesn't live in the ${S.homeRegion}.`);
@@ -306,6 +346,9 @@ function horn(player) {
   const now = system.currentTick;
   if ((called.get(player.id) ?? 0) > now) return say(player, `§7Give ${rec.name} a moment (${Math.ceil((called.get(player.id) - now) / 20)}s).`);
   player.dimension.playSound("raid.horn", player.location, { volume: 3, pitch: 0.7 });
+  if (rec.down) return say(player, `§c${rec.name} does not stir.`);
+  const no = refusal(rec, "come");
+  if (no) return tell(player, rec, no);
   const entity = entityOf(rec);
   const here = player.location;
   if (rec.status === "out" && entity) {
@@ -319,6 +362,8 @@ function horn(player) {
     return say(player, `§7${rec.name} is too far to hear. The horn carries ${S.hornRange} blocks.`);
   }
   called.set(player.id, now + 200);
+  const came = entityOf(rec);
+  if (came) speak(came, rec, "roar", 0.7), emote(came, "roar");
   say(player, `§6${rec.name} answers the horn.`);
 }
 
@@ -330,30 +375,61 @@ world.afterEvents.itemUse.subscribe((event) => {
 
 // ---------- Death ----------
 
+// A dragon is never simply deleted by a blow: at its last strength it falls unconscious (downed.js).
+// This only fires for the void, /kill, or one blow bigger than everything it had left.
 world.afterEvents.entityDie.subscribe((event) => {
   const dead = event.deadEntity;
-  let rec;
   try {
+    if (dead?.typeId === "minecraft:player") {
+      const rec = dragonOf(dead.id);
+      const entity = rec && entityOf(rec);
+      if (entity && !rec.down && Math.hypot(entity.location.x - dead.location.x, entity.location.z - dead.location.z) < 32) onOwnerDied(entity, rec, dead);
+      return;
+    }
     if (dead?.typeId !== DRAGON) return;
-    rec = dragonOf(ownerIdOf(dead));
+    const rec = dragonOf(ownerIdOf(dead));
+    if (rec && rec.status === "out") lose(rec, "has died");
   } catch {
-    return;
-  }
-  if (!rec || rec.status !== "out") return;
-  const now = world.getAbsoluteTime();
-  const owner = world.getPlayers().find((p) => p.id === rec.owner);
-  if (S.permadeath) {
-    delete store.data.dragons[rec.owner];
-    store.data.mourning[rec.owner] = now + S.mournDays * DAY;
-    save();
-    owner?.onScreenDisplay.setTitle(`§c${rec.name} has fallen`, { subtitle: "§7The nests will be silent for you a while", fadeInDuration: 10, stayDuration: 80, fadeOutDuration: 30 });
-    for (const p of world.getPlayers()) if (p.id !== rec.owner) p.sendMessage(`§7${rec.ownerName}'s dragon ${rec.name} has fallen.`);
-  } else {
-    rec.woundedUntil = now + S.woundedDays * DAY;
-    roostDragon(rec, "wounded");
-    owner?.sendMessage(`§c${rec.name} was struck down. §7It crawls back to its Roost and will need ${S.woundedDays} days.`);
+    // entity already gone
   }
 });
+
+world.afterEvents.entityHurt.subscribe((event) => {
+  const hurt = event.hurtEntity;
+  const attacker = event.damageSource?.damagingEntity;
+  try {
+    if (hurt?.typeId === DRAGON) {
+      const rec = dragonOf(ownerIdOf(hurt));
+      if (!rec || rec.status !== "out" || rec.down || !valid(hurt)) return;
+      const health = hurt.getComponent("minecraft:health")?.currentValue ?? 99;
+      if (health <= RESERVE) goDown(rec, hurt, attacker);
+      else onHurt(hurt, rec, attacker);
+    } else if (hurt?.typeId === "minecraft:player" && attacker) {
+      const rec = dragonOf(hurt.id);
+      const entity = rec && entityOf(rec);
+      if (entity && Math.hypot(entity.location.x - hurt.location.x, entity.location.z - hurt.location.z) < 14) guard(entity, rec, hurt, attacker);
+    }
+  } catch {
+    // entity already gone
+  }
+});
+
+onCrash((rec, entity) => goDown(rec, entity, undefined));
+
+function mindTick() {
+  if (!isReady()) return;
+  for (const rec of Object.values(store.data.dragons)) {
+    if (rec.status !== "out" || rec.down || rec.stage === "egg") continue;
+    const entity = entityOf(rec);
+    if (!entity) continue;
+    try {
+      think(entity, rec);
+    } catch (e) {
+      console.warn(`[Hollow Crown] dragon mind: ${e}`);
+    }
+  }
+  if (system.currentTick % 1200 < 100) save();
+}
 
 // ---------- Loops ----------
 
@@ -392,6 +468,8 @@ function growthTick() {
 onTick("dragons_growth", 40, growthTick);
 onTick("dragons_flight", 2, () => isReady() && flightTick());
 onTick("dragons_defence", 20, () => isReady() && defenceTick());
+onTick("dragons_downed", 20, () => isReady() && downedTick());
+onTick("dragons_mind", 100, mindTick);
 
 // ---------- Test commands ----------
 
@@ -414,6 +492,29 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
     save();
     give(player, EGG);
     return player.sendMessage("§7Egg given. Click a Dragon Roost with it, then /scriptevent siege:dragons_grow.");
+  }
+  if (event.id === "siege:dragons_species") {
+    if (!rec) return player.sendMessage("§7No dragon yet.");
+    rec.species = Math.max(0, Math.min(SPECIES.length - 1, Number(event.message) || 0));
+    refresh(rec);
+    return player.sendMessage(`§7${rec.name} is now ${speciesOf(rec).name}. ${speciesOf(rec).blurb}`);
+  }
+  if (event.id === "siege:dragons_temper") {
+    if (!rec || !TEMPERS[event.message]) return player.sendMessage(`§7Tempers: ${Object.keys(TEMPERS).join(", ")}`);
+    mindOf(rec).temper = event.message;
+    save();
+    return player.sendMessage(`§7${rec.name} is now ${TEMPERS[event.message].name}.`);
+  }
+  if (event.id === "siege:dragons_down") {
+    const entity = rec && entityOf(rec);
+    if (!entity) return player.sendMessage("§7Your dragon isn't out.");
+    goDown(rec, entity, undefined);
+    return player.sendMessage("§7Knocked out. Tend it with a golden apple, hit it as another player to finish it, or wait.");
+  }
+  if (event.id === "siege:dragons_hungry") {
+    if (!rec) return;
+    mindOf(rec).hunger = 92;
+    return player.sendMessage(`§7${rec.name} is now starving.`);
   }
   if (event.id === "siege:dragons_grow") {
     if (!rec) rec = store.data.dragons[player.id] = newDragon(player.id, player.name, now);

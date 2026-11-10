@@ -1,0 +1,32 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:seep",
+   "materials": {
+    "default": "entity_alphablend"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/seep"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.seep"
+   },
+   "animations": {
+    "main": "animation.siege_b.seep"
+   },
+   "scripts": {
+    "animate": [
+     "main"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ],
+   "spawn_egg": {
+    "base_color": "#1a1628",
+    "overlay_color": "#b08cec"
+   }
+  }
+ }
+}

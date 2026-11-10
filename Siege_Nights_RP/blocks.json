@@ -138,6 +138,9 @@
   "siege:foundation_stone": {
     "sound": "stone"
   },
+  "hc:looking_glass": {
+    "sound": "glass"
+  },
   "siege:castle_tiles": {
     "sound": "stone"
   },

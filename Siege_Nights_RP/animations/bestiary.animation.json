@@ -676,10 +676,10 @@
       "0"
      ]
     },
-    "leg_l2": {
+    "leg_l1": {
      "rotation": [
       "0",
-      "math.sin(query.life_time*900+2000)*20*query.modified_move_speed",
+      "math.sin(query.life_time*900+1960)*20*query.modified_move_speed",
       "0"
      ]
     },
@@ -690,13 +690,6 @@
       "0"
      ]
     },
-    "leg_r2": {
-     "rotation": [
-      "0",
-      "math.sin(query.life_time*900+2000)*20*query.modified_move_speed",
-      "0"
-     ]
-    },
     "leg_r1": {
      "rotation": [
       "0",
@@ -704,10 +697,17 @@
       "0"
      ]
     },
-    "leg_l1": {
+    "leg_r2": {
      "rotation": [
       "0",
-      "math.sin(query.life_time*900+1960)*20*query.modified_move_speed",
+      "math.sin(query.life_time*900+2000)*20*query.modified_move_speed",
+      "0"
+     ]
+    },
+    "leg_l2": {
+     "rotation": [
+      "0",
+      "math.sin(query.life_time*900+2000)*20*query.modified_move_speed",
       "0"
      ]
     }
@@ -873,14 +873,14 @@
     },
     "arm_r": {
      "rotation": [
-      "-80+-math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*35 - math.sin(variable.attack_time*180)*95 + math.sin(query.life_time*90)*3",
+      "-math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*35 - math.sin(variable.attack_time*180)*95 + math.sin(query.life_time*90)*3",
       "0",
       "0"
      ]
     },
     "arm_l": {
      "rotation": [
-      "-80+math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*35 - math.sin(query.life_time*90)*3",
+      "math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*35 - math.sin(query.life_time*90)*3",
       "0",
       "0"
      ]
@@ -1406,6 +1406,9 @@
       "0",
       "0"
      ]
+    },
+    "hcrown": {
+     "scale": "query.is_charged ? 0 : 1"
     }
    }
   },
@@ -1448,6 +1451,331 @@
      ]
     }
    }
+  },
+  "animation.siege_b.grey_axeman": {
+   "loop": true,
+   "bones": {
+    "head": {
+     "rotation": [
+      "query.target_x_rotation",
+      "query.target_y_rotation",
+      "0"
+     ]
+    },
+    "leg_r": {
+     "rotation": [
+      "math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*45",
+      "0",
+      "0"
+     ]
+    },
+    "leg_l": {
+     "rotation": [
+      "-math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*45",
+      "0",
+      "0"
+     ]
+    },
+    "arm_r": {
+     "rotation": [
+      "-math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*35 - math.sin(variable.attack_time*180)*95 + math.sin(query.life_time*90)*3",
+      "0",
+      "0"
+     ]
+    },
+    "arm_l": {
+     "rotation": [
+      "math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*35 - math.sin(query.life_time*90)*3",
+      "0",
+      "0"
+     ]
+    }
+   }
+  },
+  "animation.siege_b.grey_bellcutter": {
+   "loop": true,
+   "bones": {
+    "head": {
+     "rotation": [
+      "query.target_x_rotation",
+      "query.target_y_rotation",
+      "0"
+     ]
+    },
+    "leg_r": {
+     "rotation": [
+      "math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*45",
+      "0",
+      "0"
+     ]
+    },
+    "leg_l": {
+     "rotation": [
+      "-math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*45",
+      "0",
+      "0"
+     ]
+    },
+    "arm_r": {
+     "rotation": [
+      "-math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*35 - math.sin(variable.attack_time*180)*95 + math.sin(query.life_time*90)*3",
+      "0",
+      "0"
+     ]
+    },
+    "arm_l": {
+     "rotation": [
+      "math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*35 - math.sin(query.life_time*90)*3",
+      "0",
+      "0"
+     ]
+    }
+   }
+  },
+  "animation.siege_b.grey_spearman": {
+   "loop": true,
+   "bones": {
+    "head": {
+     "rotation": [
+      "query.target_x_rotation",
+      "query.target_y_rotation",
+      "0"
+     ]
+    },
+    "leg_r": {
+     "rotation": [
+      "math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*45",
+      "0",
+      "0"
+     ]
+    },
+    "leg_l": {
+     "rotation": [
+      "-math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*45",
+      "0",
+      "0"
+     ]
+    },
+    "arm_r": {
+     "rotation": [
+      "-math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*35 - math.sin(variable.attack_time*180)*95 + math.sin(query.life_time*90)*3",
+      "0",
+      "0"
+     ]
+    },
+    "arm_l": {
+     "rotation": [
+      "math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*35 - math.sin(query.life_time*90)*3",
+      "0",
+      "0"
+     ]
+    }
+   }
+  },
+  "animation.siege_b.grey_bowman": {
+   "loop": true,
+   "bones": {
+    "head": {
+     "rotation": [
+      "query.target_x_rotation",
+      "query.target_y_rotation",
+      "0"
+     ]
+    },
+    "leg_r": {
+     "rotation": [
+      "math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*45",
+      "0",
+      "0"
+     ]
+    },
+    "leg_l": {
+     "rotation": [
+      "-math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*45",
+      "0",
+      "0"
+     ]
+    },
+    "arm_r": {
+     "rotation": [
+      "-math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*35 - math.sin(variable.attack_time*180)*95 + math.sin(query.life_time*90)*3",
+      "0",
+      "0"
+     ]
+    },
+    "arm_l": {
+     "rotation": [
+      "math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*35 - math.sin(query.life_time*90)*3",
+      "0",
+      "0"
+     ]
+    }
+   }
+  },
+  "animation.siege_b.grey_serjeant": {
+   "loop": true,
+   "bones": {
+    "head": {
+     "rotation": [
+      "query.target_x_rotation",
+      "query.target_y_rotation",
+      "0"
+     ]
+    },
+    "leg_r": {
+     "rotation": [
+      "math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*45",
+      "0",
+      "0"
+     ]
+    },
+    "leg_l": {
+     "rotation": [
+      "-math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*45",
+      "0",
+      "0"
+     ]
+    },
+    "arm_r": {
+     "rotation": [
+      "-math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*35 - math.sin(variable.attack_time*180)*95 + math.sin(query.life_time*90)*3",
+      "0",
+      "0"
+     ]
+    },
+    "arm_l": {
+     "rotation": [
+      "math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*35 - math.sin(query.life_time*90)*3",
+      "0",
+      "0"
+     ]
+    }
+   }
+  },
+  "animation.siege_b.veinsworn": {
+   "loop": true,
+   "bones": {
+    "head": {
+     "rotation": [
+      "query.target_x_rotation",
+      "query.target_y_rotation",
+      "0"
+     ]
+    },
+    "leg_r": {
+     "rotation": [
+      "math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*45",
+      "0",
+      "0"
+     ]
+    },
+    "leg_l": {
+     "rotation": [
+      "-math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*45",
+      "0",
+      "0"
+     ]
+    },
+    "arm_r": {
+     "rotation": [
+      "-math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*35 - math.sin(variable.attack_time*180)*95 + math.sin(query.life_time*90)*3",
+      "0",
+      "0"
+     ]
+    },
+    "arm_l": {
+     "rotation": [
+      "math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*35 - math.sin(query.life_time*90)*3",
+      "0",
+      "0"
+     ]
+    }
+   }
+  },
+  "animation.siege_b.shardcaster": {
+   "loop": true,
+   "bones": {
+    "head": {
+     "rotation": [
+      "query.target_x_rotation",
+      "query.target_y_rotation",
+      "0"
+     ]
+    },
+    "arm_r": {
+     "rotation": [
+      "-math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*35 - math.sin(variable.attack_time*180)*95 + math.sin(query.life_time*90)*3",
+      "0",
+      "0"
+     ]
+    },
+    "arm_l": {
+     "rotation": [
+      "math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*35 - math.sin(query.life_time*90)*3",
+      "0",
+      "0"
+     ]
+    },
+    "body": {
+     "position": [
+      "0",
+      "math.sin(query.life_time*120)*1.5",
+      "0"
+     ]
+    }
+   }
+  },
+  "animation.siege_b.gatebreaker": {
+   "loop": true,
+   "bones": {
+    "head": {
+     "rotation": [
+      "query.target_x_rotation",
+      "query.target_y_rotation",
+      "0"
+     ]
+    },
+    "leg_r": {
+     "rotation": [
+      "math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*45",
+      "0",
+      "0"
+     ]
+    },
+    "leg_l": {
+     "rotation": [
+      "-math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*45",
+      "0",
+      "0"
+     ]
+    },
+    "arm_r": {
+     "rotation": [
+      "-math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*35 - math.sin(variable.attack_time*180)*95 + math.sin(query.life_time*90)*3",
+      "0",
+      "0"
+     ]
+    },
+    "arm_l": {
+     "rotation": [
+      "math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*35 - math.sin(query.life_time*90)*3",
+      "0",
+      "0"
+     ]
+    }
+   }
+  },
+  "animation.siege_b.reveal_boy": {
+   "loop": true,
+   "bones": {}
+  },
+  "animation.siege_b.reveal_king": {
+   "loop": true,
+   "bones": {}
+  },
+  "animation.siege_b.reveal_morvane": {
+   "loop": true,
+   "bones": {}
   },
   "animation.siege_b.hollow_warlord": {
    "loop": true,
@@ -1504,6 +1832,269 @@
      ]
     }
    }
+  },
+  "animation.siege_b.champion_knight": {
+   "loop": true,
+   "bones": {
+    "head": {
+     "rotation": [
+      "query.target_x_rotation",
+      "query.target_y_rotation",
+      "0"
+     ]
+    },
+    "leg_r": {
+     "rotation": [
+      "math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*45",
+      "0",
+      "0"
+     ]
+    },
+    "leg_l": {
+     "rotation": [
+      "-math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*45",
+      "0",
+      "0"
+     ]
+    },
+    "arm_r": {
+     "rotation": [
+      "query.is_ignited ? -100 : (query.is_charged ? -57 : -math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*35 - math.sin(variable.attack_time*180)*95)",
+      "query.is_ignited ? -25 : 0",
+      "0"
+     ]
+    },
+    "arm_l": {
+     "rotation": [
+      "query.is_saddled ? -70 : (query.is_charged ? -80 : math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*35)",
+      "query.is_saddled ? 35 : 0",
+      "0"
+     ]
+    },
+    "blade": {
+     "scale": [
+      "(query.is_charged || query.is_ignited) ? 0 : 1",
+      "(query.is_charged || query.is_ignited) ? 0 : 1",
+      "(query.is_charged || query.is_ignited) ? 0 : 1"
+     ]
+    },
+    "bow": {
+     "position": [
+      "query.is_charged ? 6 : 0",
+      "query.is_charged ? 2.4 : 0",
+      "query.is_charged ? -12.4 : 0"
+     ],
+     "rotation": [
+      "0",
+      "0",
+      "query.is_charged ? -35 : 0"
+     ]
+    }
+   }
+  },
+  "animation.siege_b.champion_sorcerer": {
+   "loop": true,
+   "bones": {
+    "head": {
+     "rotation": [
+      "query.target_x_rotation",
+      "query.target_y_rotation",
+      "0"
+     ]
+    },
+    "leg_r": {
+     "rotation": [
+      "math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*45",
+      "0",
+      "0"
+     ]
+    },
+    "leg_l": {
+     "rotation": [
+      "-math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*45",
+      "0",
+      "0"
+     ]
+    },
+    "arm_r": {
+     "rotation": [
+      "query.is_ignited ? -100 : (query.is_charged ? -57 : -math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*35 - math.sin(variable.attack_time*180)*95)",
+      "query.is_ignited ? -25 : 0",
+      "0"
+     ]
+    },
+    "arm_l": {
+     "rotation": [
+      "query.is_saddled ? -70 : (query.is_charged ? -80 : math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*35)",
+      "query.is_saddled ? 35 : 0",
+      "0"
+     ]
+    },
+    "blade": {
+     "scale": [
+      "(query.is_charged || query.is_ignited) ? 0 : 1",
+      "(query.is_charged || query.is_ignited) ? 0 : 1",
+      "(query.is_charged || query.is_ignited) ? 0 : 1"
+     ]
+    }
+   }
+  },
+  "animation.siege_b.champion_lord": {
+   "loop": true,
+   "bones": {
+    "head": {
+     "rotation": [
+      "query.target_x_rotation",
+      "query.target_y_rotation",
+      "0"
+     ]
+    },
+    "leg_r": {
+     "rotation": [
+      "math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*45",
+      "0",
+      "0"
+     ]
+    },
+    "leg_l": {
+     "rotation": [
+      "-math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*45",
+      "0",
+      "0"
+     ]
+    },
+    "arm_r": {
+     "rotation": [
+      "query.is_ignited ? -100 : (query.is_charged ? -57 : -math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*35 - math.sin(variable.attack_time*180)*95)",
+      "query.is_ignited ? -25 : 0",
+      "0"
+     ]
+    },
+    "arm_l": {
+     "rotation": [
+      "query.is_saddled ? -70 : (query.is_charged ? -80 : math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*35)",
+      "query.is_saddled ? 35 : 0",
+      "0"
+     ]
+    },
+    "blade": {
+     "scale": [
+      "(query.is_charged || query.is_ignited) ? 0 : 1",
+      "(query.is_charged || query.is_ignited) ? 0 : 1",
+      "(query.is_charged || query.is_ignited) ? 0 : 1"
+     ]
+    },
+    "bow": {
+     "position": [
+      "query.is_charged ? 6 : 0",
+      "query.is_charged ? 2.4 : 0",
+      "query.is_charged ? -12.4 : 0"
+     ],
+     "rotation": [
+      "0",
+      "0",
+      "query.is_charged ? -35 : 0"
+     ]
+    }
+   }
+  },
+  "animation.siege_b.champion_retainer": {
+   "loop": true,
+   "bones": {
+    "head": {
+     "rotation": [
+      "query.target_x_rotation",
+      "query.target_y_rotation",
+      "0"
+     ]
+    },
+    "leg_r": {
+     "rotation": [
+      "math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*45",
+      "0",
+      "0"
+     ]
+    },
+    "leg_l": {
+     "rotation": [
+      "-math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*45",
+      "0",
+      "0"
+     ]
+    },
+    "arm_r": {
+     "rotation": [
+      "query.is_ignited ? -100 : (query.is_charged ? -57 : -math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*35 - math.sin(variable.attack_time*180)*95)",
+      "query.is_ignited ? -25 : 0",
+      "0"
+     ]
+    },
+    "arm_l": {
+     "rotation": [
+      "query.is_saddled ? -70 : (query.is_charged ? -80 : math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*35)",
+      "query.is_saddled ? 35 : 0",
+      "0"
+     ]
+    },
+    "blade": {
+     "scale": [
+      "(query.is_charged || query.is_ignited) ? 0 : 1",
+      "(query.is_charged || query.is_ignited) ? 0 : 1",
+      "(query.is_charged || query.is_ignited) ? 0 : 1"
+     ]
+    }
+   }
+  },
+  "animation.siege_b.gloamwing": {
+   "loop": true,
+   "bones": {
+    "wing_r": {
+     "rotation": [
+      "0",
+      "0",
+      "math.sin(query.life_time*260)*26"
+     ]
+    },
+    "wing_l": {
+     "rotation": [
+      "0",
+      "0",
+      "-math.sin(query.life_time*260)*26"
+     ]
+    },
+    "tip_r": {
+     "rotation": [
+      "0",
+      "0",
+      "math.sin(query.life_time*260-70)*30"
+     ]
+    },
+    "tip_l": {
+     "rotation": [
+      "0",
+      "0",
+      "-math.sin(query.life_time*260-70)*30"
+     ]
+    },
+    "tail": {
+     "rotation": [
+      "math.sin(query.life_time*130)*8",
+      "math.sin(query.life_time*90)*14",
+      "0"
+     ]
+    },
+    "tail2": {
+     "rotation": [
+      "0",
+      "math.sin(query.life_time*90-80)*20",
+      "0"
+     ]
+    }
+   }
+  },
+  "animation.siege_b.seep": {
+   "loop": true,
+   "bones": {}
   },
   "animation.siege_b.hollow_bolt": {
    "loop": true,

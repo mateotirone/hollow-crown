@@ -1,8 +1,8 @@
 // Rails self-tests (pure ones run offline too).
 
-import { BlockTypes } from "@minecraft/server";
+import { BlockTypes, EntityTypes, ItemTypes } from "@minecraft/server";
 import { addTests, assert, assertEqual } from "../siege/api.js";
-import { heading, distance, nearestStation, networkLines, nextId, expressAxis, RAIL_SETTINGS } from "./data.js";
+import { heading, distance, nearestStation, networkLines, nextId, expressAxis, RAIL_SETTINGS, CARRIAGE, CARRIAGE_ITEM, RIDES } from "./data.js";
 
 const S = (id, name, x, z, extra = {}) => ({ id, name, region: "Aldmere Vale", x, y: 64, z, dim: "minecraft:overworld", ...extra });
 
@@ -33,7 +33,8 @@ addTests("rails", {
     assertEqual(expressAxis({ x: 0.05, y: 0, z: 0 }), undefined);
     assert(RAIL_SETTINGS.expressSpeed > 0.4, "express is faster than vanilla");
   },
-  "the pack has the station blocks": () => {
+  "the pack has the station blocks and the carriage": () => {
     for (const id of ["hc:station_post", "siege:rail_depot"]) assert(BlockTypes.get(id), id);
+    assert(EntityTypes.get(CARRIAGE) && ItemTypes.get(CARRIAGE_ITEM) && RIDES.includes(CARRIAGE), "train carriage");
   },
 });

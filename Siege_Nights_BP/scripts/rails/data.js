@@ -12,6 +12,10 @@ export const RAIL_SETTINGS = {
 };
 
 export const REGIONS = ["Aldmere Vale", "Frostmarch", "Saltreach", "Emberwaste", "Blackfen", "Kingsrest"];
+export const CARRIAGE = "siege:carriage"; // the four-seat Train Carriage (pack files: studio/build_carriage.py)
+export const CARRIAGE_ITEM = "siege:train_carriage";
+export const CARRIAGE_SPEED = 0.6; // its top speed on rails, set in the entity file (a minecart's is 0.4)
+export const RIDES = ["minecraft:minecart", CARRIAGE]; // what counts as riding the line
 export const RAILS = ["minecraft:rail", "minecraft:golden_rail", "minecraft:detector_rail", "minecraft:activator_rail"];
 
 const POINTS = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];

@@ -13,7 +13,8 @@ This repo is the home of The Hollow Crown, a Bedrock add-on that grew out of Sie
 | `art/` | Style guide, reference art, backups of placeholder textures |
 | `map/`, `lab/` | Map image and the wall-damage lab page |
 | `archive/` | The original single-file `main.js` from before the module split |
-| `docs/` | Links to the design docs |
+| `docs/` | Links to the design docs, the update backlog, how releases work |
+| `wiki/`, `lore-book/`, `design/`, `character-creator/` | Player wiki pages, the lore book, layout data and the character creator |
 
 ## Check and build
 
@@ -33,3 +34,5 @@ In game, `/scriptevent siege:selftest` runs the self-tests (they also run at wor
 4. Shared files many features touch (`scripts/main.js`, `manifest.json`, `texts/*.lang`, `terrain_texture.json`, `item_texture.json`, `blocks.json`, `TEXTURE-LIST.md`) get small, additive edits: add your lines, don't reorder or reformat. Rebase on `main` just before merging.
 5. Generated files are committed along with the generator change that produced them.
 6. Build output (`*.mcaddon`) and `node_modules/` stay out of git.
+7. A pull request that changes what players see adds a line to `CHANGELOG.md` under "Unreleased". Planned work is listed in `docs/BACKLOG.md`. Versions and releases: `docs/RELEASING.md`.
+8. Never rename or remove an id or saved property that may already be in a live world without a migration. See "Safe on an existing world" in `docs/RELEASING.md`.

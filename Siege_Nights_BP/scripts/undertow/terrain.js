@@ -1,6 +1,12 @@
-// The Undertow terrain generator. Custom dimensions on Bedrock are void only, so we build the
-// land ourselves, one 16x16 chunk at a time, as players come near. Everything comes from a fixed
-// seed, so the land is identical for every player and every rebuild.
+// The Hollow's terrain generator. Custom dimensions on Bedrock are void only, so we generate the
+// land ourselves the way Minecraft does: from one fixed seed, one 16x16 chunk at a time, as players
+// explore. The land is identical for every player and every rebuild.
+//
+// Shape of the world (about 1,400 x 2,500 blocks):
+//   the Spine     the walled valley down the middle (|x| <= 150) that the story path follows
+//   open country  everything else out to x = +-700: four kinds of land (REGIONS) that blend into
+//                 each other, picked by slow noise, so nothing lines up or mirrors
+//   light rivers  one boatable network at a single water level (rivers.js), carved into the land
 //
 // planChunk(cx, cz) is pure (no Minecraft calls): it returns a list of fill operations. The
 // builder in index.js applies them a few at a time so the server never stalls.
@@ -8,6 +14,11 @@
 // trees, glowing pink and blue fungi, rivers of pale blue light, fog above and a far ceiling.
 
 import { UNDERTOW_LAYOUT as L, COURT, pathX, stageAt } from "./layout.js";
+import { hash, fbm, smooth } from "./noise.js";
+import { riverDistance, RIVER_HALF_WIDTH } from "./rivers.js";
+import { siteAt, roadAt, SITE_SKIRT, ROAD_HALF_WIDTH, ROAD_SHOULDER } from "./roads.js";
+
+export { hash, fbm };
 
 export const B = {
   floor: "minecraft:blackstone",
@@ -29,45 +40,100 @@ export const B = {
   glass: "minecraft:tinted_glass",
   seal: "siege:court_seal",
   ore: "siege:choir_ore",
+  road: "minecraft:coarse_dirt",
+  cobble: "minecraft:cobbled_deepslate",
+  post: "minecraft:cobbled_deepslate_wall",
+  lantern: "minecraft:soul_lantern",
+  deck: "minecraft:polished_blackstone_bricks",
+  parapet: "minecraft:polished_blackstone_brick_wall",
 };
 
-const SEED = 7741;
 
-// ---- deterministic noise ---------------------------------------------------------------
-export function hash(x, z, salt = 0) {
-  let h = (x * 374761393 + z * 668265263 + (SEED + salt) * 2147483647) | 0;
-  h = Math.imul(h ^ (h >>> 13), 1274126177);
-  h ^= h >>> 16;
-  return (h >>> 0) / 4294967296; // 0..1
-}
-const smooth = (t) => t * t * (3 - 2 * t);
-function value(x, z, salt) {
-  const x0 = Math.floor(x), z0 = Math.floor(z);
-  const fx = smooth(x - x0), fz = smooth(z - z0);
-  const a = hash(x0, z0, salt), b = hash(x0 + 1, z0, salt);
-  const c = hash(x0, z0 + 1, salt), d = hash(x0 + 1, z0 + 1, salt);
-  return a + (b - a) * fx + (c - a) * fz + (a - b - c + d) * fx * fz;
-}
-export function fbm(x, z, salt = 0) {
-  return value(x, z, salt) * 0.55 + value(x * 2.1, z * 2.1, salt + 11) * 0.3 + value(x * 4.3, z * 4.3, salt + 23) * 0.15;
-}
-
+const SEA = L.seaY;
+const clamp01 = (t) => Math.max(0, Math.min(1, t));
 const inCourt = (x, z) => z >= 1540 && z < 1660;
 const inHeart = (z) => z >= 2330;
-const nearPath = (x, z, d) => Math.abs(x - pathX(z)) <= d;
-const inValley = (x, z) => Math.abs(x) <= L.halfWidth && z >= L.zStart && z < L.zEnd;
+const inSpine = (x) => Math.abs(x) <= L.halfWidth;
+const nearPath = (x, z, d) => inSpine(x) && Math.abs(x - pathX(z)) <= d;
 
-// Ground height at a column, or null for void.
-export function heightAt(x, z) {
-  if (!inValley(x, z)) return null;
-  if (inHeart(z)) return null; // the final arena floats in the fog; built separately
+// ---- open country ----------------------------------------------------------------------
+// Four kinds of land. Two slow noise fields pick between them, like temperature and humidity
+// pick biomes in a normal world. (Bedrock allows the dimension only one real biome.)
+export const REGIONS = {
+  wood: "lattice groves on rolling ground",
+  high: "basalt highlands: terraces, cliffs and spires",
+  fen: "low glowing fens and pools",
+  waste: "bare grey flats and dunes",
+};
+const CENTRES = [["high", 0.5, 0.45], ["wood", 0.35, -0.5], ["fen", -0.55, 0.4], ["waste", -0.45, -0.55]];
+function regionWeights(x, z) {
+  const t = (fbm(x / 330, z / 330, 91) - 0.5) * 4.2, m = (fbm(x / 290, z / 290, 92) - 0.5) * 4.2;
+  const w = {};
+  let sum = 0, best, bestW = -1;
+  for (const [id, ct, cm] of CENTRES) {
+    const d2 = (t - ct) * (t - ct) + (m - cm) * (m - cm);
+    const v = 1 / (d2 * d2 + 0.02);
+    w[id] = v; sum += v;
+    if (v > bestW) { bestW = v; best = id; }
+  }
+  for (const id in w) w[id] /= sum;
+  w.top = best;
+  return w;
+}
+
+// How far inside the open country's ragged outer edge a column is (negative = void).
+function margin(x, z) {
+  const side = L.reach - Math.abs(x) - fbm(x / 40, z / 40, 71) * 60;
+  const south = z - (-24 + fbm(x / 30, 0.5, 72) * 20);
+  const north = 2290 + fbm(x / 30, 1.5, 73) * 40 - z;
+  return Math.min(side, south, north);
+}
+function wild(x, z) {
+  const mg = margin(x, z);
+  if (mg < 0) return null;
+  const w = regionWeights(x, z);
+  const cont = fbm(x / 260, z / 260, 81);
+  const terr = (v, step) => Math.floor(v / step) * step;
+  let h = w.fen * (50 + cont * 10 + fbm(x / 50, z / 50, 82) * 12)
+    + w.wood * (62 + cont * 24 + fbm(x / 45, z / 45, 83) * 12)
+    + w.high * terr(80 + cont * 44 + fbm(x / 60, z / 60, 84) * 30, 5)
+    + w.waste * (64 + cont * 14 + Math.sin(x / 11 + fbm(x / 30, z / 30, 9) * 4) * 2);
+  if (mg < 12) h = Math.max(h, SEA + 2); // a lip at the world's edge so no water pours into the void
+  return { h, region: w.top };
+}
+
+// ---- the Spine -------------------------------------------------------------------------
+const BLENDS = [[500, "mirror"], [1000, "bells"], [1540, "court"]];
+function stageHeight(stage, x, z, n) {
+  if (stage === "court") return COURT.floorY - 2;
+  if (stage === "wound") return 60 + n * 20;
+  if (stage === "shallows") return 52 + n * 22; // low: most of it lies under the water
+  if (stage === "mirror") return 70 + n * 30; // high basalt terraces
+  if (stage === "bells") return 68 + n * 16 + Math.sin(x / 11) * 2 * fbm(x / 30, z / 30, 9); // dunes
+  const t = Math.min(1, Math.max(0, (z - 1660) / 640)); // the Long Climb rises toward the Heart
+  return 86 + t * 30 + n * 12;
+}
+// The Spine's rim: a wall of cliffs with natural gaps (passes) out into the open country.
+// No gaps beside the Wound, the Court, or where there is only void outside.
+// Where the rim stands: it wanders in and out so the Spine is not a straight-sided box.
+function rimAt(x, z) {
+  const wander = fbm(z / 110, x < 0 ? 7.7 : 3.1, 62) * 46 * smooth(clamp01((z - 30) / 60));
+  return L.halfWidth - wander;
+}
+function rimWall(x, z) {
+  const side = x < 0 ? -1 : 1;
+  if (z < 60 || (z > 1500 && z < 1700) || margin(side * (L.halfWidth + 45), z) < 0) return 1;
+  return smooth(clamp01((fbm(z / 70, side * 3.3, 61) - 0.4) / 0.14));
+}
+function spine(x, z) {
+  if (z < L.zStart || z >= L.zEnd || inHeart(z)) return null; // the final arena floats in the fog; built separately
 
   // The Wound: a ledge at y 100 with a wall behind it and a ramp down along the path.
   if (z < 40) {
     if (z < -10) return Math.abs(x) <= 24 ? 126 - Math.floor(fbm(x / 9, z / 9, 5) * 6) : null;
     if (Math.abs(x) <= 14 && z <= 10) return L.woundLedgeY;
     if (Math.abs(x) <= 3 && z > 10) {
-      const foot = heightAt(pathX(40), 40); // ramp lands exactly on the valley floor
+      const foot = spine(pathX(40), 40); // ramp lands exactly on the valley floor
       return Math.round(L.woundLedgeY - ((z - 10) / 30) * (L.woundLedgeY - foot));
     }
   }
@@ -81,46 +147,141 @@ export function heightAt(x, z) {
     if (z >= edge - 60 && z < edge) h += (stageHeight(next, x, z, n) - h) * smooth((z - (edge - 60)) / 60);
   }
   if (z >= 1660 && z < 1720) h = COURT.floorY - 2 + (h - (COURT.floorY - 2)) * smooth((z - 1660) / 60);
-  const d0 = Math.abs(x - pathX(z));
-  // The Shallows flood below y 66: a lip at the near end holds the water in, and the path is a causeway.
-  if (z >= 36 && z < 56) h = Math.max(h, 68);
-  if (stage === "shallows" && d0 <= 2) h = Math.max(h, 67);
+  const d = Math.abs(x - pathX(z));
+  // The path is a causeway just above the water through the Shallows.
+  if (z >= 36 && z < 56) h = Math.max(h, SEA + 2);
+  if (stage === "shallows" && d <= 2) h = Math.max(h, SEA + 1);
 
   // Terraces and cliffs away from the path; the path itself stays walkable.
   const step = stage === "mirror" ? 5 : 3;
   const terraced = Math.floor(h / step) * step;
-  const d = Math.abs(x - pathX(z));
   if (d > 7) h = terraced;
   else if (d > 4) h = Math.round(h + (terraced - h) * ((d - 4) / 3));
   else h = Math.round(h);
 
-  // The valley rim: cliffs that rise, then drop away into fog.
-  const edge = L.halfWidth - Math.abs(x);
-  if (edge < 22) h += Math.round((22 - edge) * 1.8 + fbm(x / 7, z / 7, 3) * 6);
+  const edge = rimAt(x, z) - Math.abs(x);
+  if (edge < 22) h += Math.round(((22 - edge) * 1.8 + fbm(x / 7, z / 7, 3) * 6) * rimWall(x, z));
   return Math.max(L.floorY + 4, Math.min(L.ceilingY - 30, h));
 }
 
-const BLENDS = [[500, "mirror"], [1000, "bells"], [1540, "court"]];
-function stageHeight(stage, x, z, n) {
-  if (stage === "court") return COURT.floorY - 2;
-  if (stage === "wound" || stage === "shallows") return 58 + n * 22; // low and flooded
-  if (stage === "mirror") return 70 + n * 30; // high basalt terraces
-  if (stage === "bells") return 68 + n * 16 + Math.sin(x / 11) * 2 * fbm(x / 30, z / 30, 9); // dunes
-  const t = Math.min(1, Math.max(0, (z - 1660) / 640)); // the Long Climb rises toward the Heart
-  return 86 + t * 30 + n * 12;
+// The land before the rivers cut into it: { h, region } or null for void.
+function natural(x, z) {
+  if (z < L.zStart || z >= L.zEnd) return null;
+  const ax = Math.abs(x);
+  const rimX = ax <= L.halfWidth + 45 ? rimAt(x, z) : L.halfWidth;
+  if (ax <= rimX) {
+    const h = spine(x, z);
+    return h === null ? null : { h, region: stageAt(z)?.id ?? "wound" };
+  }
+  const w = wild(x, z);
+  if (w === null) return null;
+  if (ax < rimX + 40) { // the outer foot of the rim eases into the open country
+    const rim = spine(x < 0 ? -rimX : rimX, z);
+    if (rim !== null) w.h = rim + (w.h - rim) * smooth((ax - rimX) / 40);
+  }
+  w.h = Math.max(L.floorY + 4, Math.min(L.ceilingY - 30, w.h));
+  return w;
+}
+
+// How low a river lets the land stand at this distance from its middle: bed, bank, then a valley side.
+function riverLimit(d) {
+  if (d <= RIVER_HALF_WIDTH) return SEA - 2;
+  if (d <= RIVER_HALF_WIDTH + 2) return SEA + 1;
+  if (d < 40) return SEA + 1 + (d - RIVER_HALF_WIDTH - 2) * 0.8;
+  return SEA + 1 + (40 - RIVER_HALF_WIDTH - 2) * 0.8 + (d - 40) * 2;
+}
+
+// A column before any road is laid: rivers carved, village sites flattened.
+function beforeRoads(x, z) {
+  const n = natural(x, z);
+  if (n === null) return null;
+  const river = (inSpine(x) && (z < 60 || inCourt(x, z))) ? Infinity : riverDistance(x, z);
+  let h = Math.round(n.h), under;
+  if (river !== Infinity) {
+    const lim = Math.round(riverLimit(river));
+    if (lim < h) {
+      if (!nearPath(x, z, 3)) h = lim;
+      else if (h - lim >= 4) under = lim; // the path carries on across as a bridge
+    }
+  }
+  const c = { h, region: n.region, river, under };
+  const st = siteAt(x, z);
+  if (st && river > RIVER_HALF_WIDTH + 2) {
+    if (st.d <= st.site.r + 2) c.site = st.site.id;
+    if (st.site.y !== undefined) c.h = Math.round(st.site.y + (h - st.site.y) * smooth(clamp01((st.d - st.site.r) / SITE_SKIRT)));
+  }
+  return c;
+}
+const groundBeforeRoads = (x, z) => beforeRoads(x, z)?.h ?? null;
+
+// One column of the finished land:
+//   h       ground height            region  kind of land (a Spine stage or one of REGIONS)
+//   river   distance to a light river's middle (Infinity when far)
+//   under   set where the story path bridges a river: the river bed's height beneath the deck
+//   site    id of the village site this column is inside
+//   road    distance to the middle of a road or the story path, when on or beside one; paved = on it
+//   roadS   blocks along that road (for spacing lantern posts)
+export function columnAt(x, z) {
+  const c = beforeRoads(x, z);
+  if (c === null) return null;
+  if (inSpine(x) && z > 10 && z < 2330 && !inCourt(x, z)) {
+    const d = Math.abs(x - pathX(z));
+    if (d <= 4) { c.road = d; c.roadS = z; c.paved = d <= ROAD_HALF_WIDTH; return c; }
+  }
+  if (c.site || c.under !== undefined) return c;
+  const r = roadAt(x, z, groundBeforeRoads, SEA + 1);
+  if (r) {
+    c.road = r.d; c.roadS = r.s; c.lamps = r.lamps;
+    if (r.d <= r.half + 0.5) {
+      // High over the land (a river valley): a bridge deck, the ground staying as it is beneath.
+      if (r.y - c.h >= 3) c.under = c.h;
+      else if (c.river <= RIVER_HALF_WIDTH + 2) { c.road = undefined; return c; } // never fill a river in
+      c.h = r.y; c.paved = r.d <= r.half;
+    } else if (r.y - c.h < 3 && c.river > RIVER_HALF_WIDTH + 2) {
+      c.h = Math.round(r.y + (c.h - r.y) * smooth((r.d - r.half - 0.5) / (ROAD_SHOULDER - r.half - 0.5)));
+    }
+  }
+  return c;
+}
+
+// Ground height at a column, or null for void.
+export function heightAt(x, z) {
+  const c = columnAt(x, z);
+  return c === null ? null : c.h;
+}
+export function regionAt(x, z) {
+  return columnAt(x, z)?.region;
 }
 
 export const oreChance = (z) => (z < 60 ? 0 : 0.015 + 0.05 * Math.min(1, z / 2300));
 
+// True on the water of a light river.
 export function isRiver(x, z) {
-  if (z < 40 || inCourt(x, z) || z > 2250) return false;
-  if (Math.abs(x) > L.halfWidth - 24) return false;
-  const r = fbm(x / 70, z / 110, 41);
-  return Math.abs(r - 0.5) < 0.032;
+  const c = columnAt(x, z);
+  return c !== null && c.river <= RIVER_HALF_WIDTH && c.under === undefined;
 }
 
+const landmarkNearRoad = (cx, cz, col) => {
+  for (let i = 0; i < 16; i += 3) for (let j = 0; j < 16; j += 3) if (col(i, j)?.road !== undefined && !inSpine(cx * 16 + i)) return true;
+  return false;
+};
+
 // ---- the plan for one chunk ------------------------------------------------------------
+const PLANTS = { wood: 0.08, fen: 0.1, high: 0.02, waste: 0.012 };
+const SPIRES = { wood: 0.002, fen: 0.002, high: 0.012, waste: 0.004 };
+
 export function planChunk(cx, cz) {
+  const ops = planLand(cx, cz);
+  const X0 = cx * 16, Z0 = cz * 16;
+  // The sealed wall across the whole Hollow behind the Court (its gates open when the Court's boss dies).
+  // Added last, so nothing in the chunk overwrites it.
+  if (COURT.gateZ >= Z0 && COURT.gateZ <= Z0 + 15 && X0 + 15 >= -L.reach && X0 <= L.reach) {
+    ops.push({ a: [Math.max(X0, -L.reach), L.floorY, COURT.gateZ], b: [Math.min(X0 + 15, L.reach), L.ceilingY + L.ceilingThickness - 1, COURT.gateZ], block: B.seal });
+  }
+  return ops;
+}
+
+function planLand(cx, cz) {
   const ops = [];
   const fill = (x1, y1, z1, x2, y2, z2, block) => {
     if (y2 < y1) return;
@@ -129,98 +290,139 @@ export function planChunk(cx, cz) {
   const set = (x, y, z, block) => ops.push({ a: [x, y, z], b: [x, y, z], block });
   const X0 = cx * 16, Z0 = cz * 16;
 
-  // Heights for the chunk plus a 1-block border (for cliff detection).
-  const H = [];
+  // Columns for the chunk plus a 1-block border (for cliff detection).
+  const C = [];
   for (let i = -1; i <= 16; i++) {
-    H[i + 1] = [];
-    for (let j = -1; j <= 16; j++) H[i + 1][j + 1] = heightAt(X0 + i, Z0 + j);
+    C[i + 1] = [];
+    for (let j = -1; j <= 16; j++) C[i + 1][j + 1] = columnAt(X0 + i, Z0 + j);
   }
-  const h = (i, j) => H[i + 1][j + 1];
+  const col = (i, j) => C[i + 1][j + 1];
+  const h = (i, j) => { const c = col(i, j); return c === null ? null : c.under ?? c.h; };
 
-  let minH = Infinity, any = false;
+  let minH = Infinity, any = false, full = true;
   for (let i = 0; i < 16; i++) for (let j = 0; j < 16; j++) {
     const v = h(i, j);
-    if (v !== null) { any = true; minH = Math.min(minH, v); }
+    if (v !== null) { any = true; minH = Math.min(minH, v); } else full = false;
   }
 
-  // Ceiling over the whole valley width (also above the Heart, where there is no ground).
-  if (Math.abs(X0 + 8) <= L.halfWidth + 8 && Z0 + 16 > L.zStart && Z0 < L.zEnd) {
-    const x1 = Math.max(X0, -L.halfWidth), x2 = Math.min(X0 + 15, L.halfWidth);
+  // Ceiling over the whole Hollow (also above the Heart, where there is no ground).
+  {
+    const x1 = Math.max(X0, -L.reach), x2 = Math.min(X0 + 15, L.reach);
     const z1 = Math.max(Z0, L.zStart), z2 = Math.min(Z0 + 15, L.zEnd - 1);
-    if (x1 <= x2 && z1 <= z2) fill(x1, L.ceilingY, z1, x2, L.ceilingY + L.ceilingThickness - 1, z2, B.ceiling);
-    // Hanging basalt spires
-    for (let i = 0; i < 16; i += 2) for (let j = 0; j < 16; j += 2) {
-      const x = X0 + i, z = Z0 + j;
-      if (x < x1 || x > x2 || z < z1 || z > z2) continue;
-      const r = hash(x, z, 77);
-      if (r < 0.03) fill(x, L.ceilingY - 4 - Math.floor(hash(x, z, 78) * 22), z, x, L.ceilingY - 1, z, B.basalt);
+    if (x1 <= x2 && z1 <= z2) {
+      fill(x1, L.ceilingY, z1, x2, L.ceilingY + L.ceilingThickness - 1, z2, B.ceiling);
+      // Hanging basalt spires
+      for (let i = 0; i < 16; i += 2) for (let j = 0; j < 16; j += 2) {
+        const x = X0 + i, z = Z0 + j;
+        if (x < x1 || x > x2 || z < z1 || z > z2) continue;
+        if (hash(x, z, 77) < 0.03) fill(x, L.ceilingY - 4 - Math.floor(hash(x, z, 78) * 22), z, x, L.ceilingY - 1, z, B.basalt);
+      }
     }
-  }
-  // The sealed wall across the whole valley behind the Drowned Court (gate opens when Oswin dies).
-  if (COURT.gateZ >= Z0 && COURT.gateZ <= Z0 + 15 && X0 + 15 >= -L.halfWidth && X0 <= L.halfWidth) {
-    fill(Math.max(X0, -L.halfWidth), L.floorY, COURT.gateZ, Math.min(X0 + 15, L.halfWidth), L.ceilingY + L.ceilingThickness - 1, COURT.gateZ, B.seal);
   }
   if (!any) return ops;
 
-  // Solid base for the whole chunk in one fill where every column has ground.
-  const full = H.slice(1, 17).every((row) => row.slice(1, 17).every((v) => v !== null));
-  const baseTop = minH - 4;
-  if (full && baseTop > L.floorY) fill(X0, L.floorY, Z0, X0 + 15, baseTop, Z0 + 15, B.floor);
+  // Solid ground under the whole chunk in two fills where every column has ground.
+  let start = L.floorY;
+  if (full && minH - 1 > L.floorY) {
+    const stoneTop = Math.max(L.floorY, minH - 5);
+    fill(X0, L.floorY, Z0, X0 + 15, stoneTop, Z0 + 15, B.floor);
+    fill(X0, stoneTop + 1, Z0, X0 + 15, minH - 1, Z0 + 15, B.rock);
+    start = minH;
+  }
 
-  const stage = stageAt(Z0 + 8)?.id;
   for (let i = 0; i < 16; i++) for (let j = 0; j < 16; j++) {
-    const x = X0 + i, z = Z0 + j, top = h(i, j);
-    if (top === null) continue;
-    const start = full && baseTop > L.floorY ? baseTop + 1 : L.floorY;
+    const c = col(i, j);
+    if (c === null) continue;
+    const x = X0 + i, z = Z0 + j, top = c.under ?? c.h;
+    const spineCol = inSpine(x), kind = c.region;
+    const onWater = c.river <= RIVER_HALF_WIDTH;
     let drop = 0;
     for (const [di, dj] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
       const n = h(i + di, j + dj);
       drop = Math.max(drop, n === null ? 99 : top - n);
     }
-    const cliff = drop >= 3;
-    const wound = z < 40;
-    if (cliff && !wound) {
-      fill(x, start, z, x, top, z, stage === "mirror" ? B.polished : B.basalt);
+    const wound = spineCol && z < 40;
+    if (drop >= 3 && !wound && !onWater) {
+      fill(x, start, z, x, top, z, kind === "mirror" || kind === "high" ? B.polished : B.basalt);
       // Choir ore shows in the cliff faces, richer the deeper into the Hollow you go.
       if (hash(x, z, 301) < oreChance(z)) set(x, top - 1 - Math.floor(hash(x, z, 302) * 3), z, B.ore);
+    } else {
+      fill(x, start, z, x, top - 1, z, B.rock);
+      if (onWater) set(x, top, z, B.flow); // the glowing bed of a light river
+      else if (top < SEA) set(x, top, z, B.tuff);
+      else if (c.paved) set(x, top, z, hash(x, z, 401) < (c.road < 1.2 ? 0.8 : 0.4) ? B.cobble : B.road); // cobbles, worn away to dirt at the edges
+      else set(x, top, z, wound ? B.rock : kind === "waste" ? B.tuff : B.moss);
+    }
+    // Everything below the water line is under water: one level across the whole Hollow, so nothing spills.
+    if (top < SEA) fill(x, top + 1, z, x, SEA, z, B.water);
+    // Where the story path crosses a river: a stone deck with the river running beneath.
+    if (c.under !== undefined) {
+      // The underside is an arch: thin over the water, thickening to solid stone at the banks,
+      // and on long bridges a row of arches on piers every 10 blocks.
+      const overWater = c.river <= 6;
+      let depth = overWater ? 1 + Math.round(4 * (c.river / 6) ** 2) : 99;
+      if (!overWater && c.h - top > 12) {
+        const t = ((Math.floor(c.roadS) % 10) + 10) % 10;
+        depth = t < 2 ? 99 : 1 + Math.round(4 * (1 - Math.sin((Math.PI * (t - 2)) / 8)) ** 2);
+      }
+      fill(x, Math.max(top + 1, c.h - depth), z, x, c.h - 1, z, B.deck);
+      set(x, c.h, z, c.paved ? (hash(x, z, 401) < 0.3 ? B.cobble : B.deck) : B.deck);
+      if (!c.paved) set(x, c.h + 1, z, B.parapet); // low walls along both sides
       continue;
     }
-    fill(x, start, z, x, top - 1, z, B.rock);
-    if (isRiver(x, z) && !nearPath(x, z, 1)) {
-      // A channel of pale blue light: you sink in one block and wade.
-      set(x, top, z, B.flow);
+    // A lantern post beside the road about every 24 blocks.
+    if (c.road !== undefined && !c.paved && c.lamps !== false && c.road < ROAD_HALF_WIDTH + 1.6 && top >= SEA && Math.floor(c.roadS) % 24 === 0) {
+      if (!c.site) { fill(x, top + 1, z, x, top + 2, z, B.post); set(x, top + 3, z, B.lantern); }
       continue;
     }
-    set(x, top, z, wound ? B.rock : B.moss);
+    if (c.road !== undefined || c.site) continue; // nothing grows on a road's verge or in a village
 
-    // Shallows: low ground floods.
-    if (stage === "shallows" && z >= 56 && top < 66) fill(x, top + 1, z, x, 66, z, B.water);
-
-    // Plants and spires (never on the path)
-    if (nearPath(x, z, 3) || wound) continue;
+    // Plants and spires (never on the path, in the water, or on a river bank)
+    if (top < SEA || drop >= 3 || wound || nearPath(x, z, 3) || c.river < RIVER_HALF_WIDTH + 3) continue;
     const r = hash(x, z, 5);
-    if (r < 0.006 && stage !== "shallows") {
+    if (r < (spineCol ? (kind === "shallows" ? 0 : 0.006) : SPIRES[kind])) {
       const tall = 8 + Math.floor(hash(x, z, 6) * 22);
-      fill(x, top + 1, z, x, top + tall, z, stage === "mirror" ? B.glass : B.basalt);
-    } else if (r < 0.06 && !(stage === "shallows" && top < 66)) {
-      set(x, top + 1, z, hash(x, z, 7) < 0.6 ? B.veilcap : B.glimbulb);
+      fill(x, top + 1, z, x, top + tall, z, kind === "mirror" ? B.glass : B.basalt);
+    } else if (r < (spineCol ? 0.06 : PLANTS[kind])) {
+      set(x, top + 1, z, hash(x, z, 7) < (kind === "fen" ? 0.3 : 0.6) ? B.veilcap : B.glimbulb);
+    }
+  }
+
+  // Veins of Choir ore inside the rock, more of them the deeper into the Hollow you go.
+  if (full && Z0 >= 60) {
+    const veins = Math.floor(hash(cx, cz, 310) * (2 + 5 * Math.min(1, Z0 / 2300)));
+    for (let v = 0; v < veins; v++) {
+      const i = 1 + Math.floor(hash(cx, cz, 311 + v) * 13), j = 1 + Math.floor(hash(cx, cz, 331 + v) * 13);
+      const roof = Math.min(h(i, j), h(i + 1, j), h(i, j + 1), h(i + 1, j + 1)) - 4;
+      if (roof <= L.floorY + 2) continue;
+      const y = L.floorY + 1 + Math.floor(hash(cx, cz, 351 + v) * (roof - L.floorY - 1));
+      fill(X0 + i, y, Z0 + j, X0 + i + 1, y + (hash(cx, cz, 371 + v) < 0.5 ? 1 : 0), Z0 + j + 1, B.ore);
     }
   }
 
   // One landmark per chunk at most, kept inside the chunk.
-  const cxm = X0 + 8, czm = Z0 + 8, ch = h(8, 8);
-  if (ch === null || czm < 40 || inCourt(cxm, czm) || nearPath(cxm, czm, 12)) return ops;
-  const roll = hash(cx, cz, 101);
+  const cxm = X0 + 8, czm = Z0 + 8, mid = col(8, 8);
+  if (mid === null || mid.h < SEA || mid.river < 16 || siteAt(cxm, czm) || landmarkNearRoad(cx, cz, col) || (inSpine(cxm) && (czm < 40 || inCourt(cxm, czm) || nearPath(cxm, czm, 12)))) return ops;
+  const roll = hash(cx, cz, 101), kind = mid.region;
   // Nudge each landmark off the chunk's middle so they don't line up in a grid (still inside the chunk).
   const nudge = (max, salt) => Math.round((hash(cx, cz, salt) - 0.5) * 2 * max);
   const at = (max) => {
     const x = cxm + nudge(max, 105), z = czm + nudge(max, 106);
-    return [x, heightAt(x, z), z];
+    const y = heightAt(x, z);
+    return [x, y !== null && y >= SEA ? y : null, z];
   };
-  if (roll < 0.17) { const [x, y, z] = at(1); if (y !== null) latticeTree(ops, x, y + 1, z, cx, cz); }
-  else if (stage === "shallows" && roll < 0.4) { const [x, y, z] = at(4); if (y !== null) ruin(ops, x, y, z, cx, cz); }
-  else if (stage === "bells" && roll < 0.35) { const [x, y, z] = at(2); if (y !== null) brokenBell(ops, x, y + 1, z, cx, cz); }
-  else if (roll > 0.93) { const [x, , z] = at(3); island(ops, x, 150 + Math.floor(hash(cx, cz, 103) * 25), z, cx, cz); }
+  const tree = () => { const [x, y, z] = at(1); if (y !== null) latticeTree(ops, x, y + 1, z, cx, cz); };
+  const bell = () => { const [x, y, z] = at(2); if (y !== null) brokenBell(ops, x, y + 1, z, cx, cz); };
+  const isle = () => { const [x, , z] = at(3); island(ops, x, 150 + Math.floor(hash(cx, cz, 103) * 25), z, cx, cz); };
+  if (Math.hypot(cxm - 330, czm - 250) < 120 && !inSpine(cxm)) { if (roll < 0.85) tree(); } // the Lattice Wood: thick forest
+  else if (kind === "wood") { if (roll < 0.5) tree(); else if (roll > 0.97) isle(); }
+  else if (kind === "fen") { if (roll < 0.1) tree(); else if (roll > 0.95) isle(); }
+  else if (kind === "high") { if (roll < 0.05) tree(); else if (roll > 0.82) isle(); }
+  else if (kind === "waste") { if (roll < 0.03) tree(); else if (roll < 0.13) bell(); else if (roll > 0.97) isle(); }
+  else if (roll < 0.17) tree();
+  else if (kind === "shallows" && roll < 0.4) { const [x, y, z] = at(4); if (y !== null) ruin(ops, x, y, z, cx, cz); }
+  else if (kind === "bells" && roll < 0.35) bell();
+  else if (roll > 0.93) isle();
   return ops;
 }
 
@@ -290,5 +492,5 @@ function island(ops, x, y, z, cx, cz) {
 // Chunks the generator covers.
 export function chunkInRange(cx, cz) {
   const x0 = cx * 16, z0 = cz * 16;
-  return x0 + 15 >= -L.halfWidth && x0 <= L.halfWidth && z0 + 15 >= L.zStart && z0 < L.zEnd;
+  return x0 + 15 >= -L.reach && x0 <= L.reach && z0 + 15 >= L.zStart && z0 < L.zEnd;
 }

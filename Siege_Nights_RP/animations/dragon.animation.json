@@ -57,6 +57,13 @@
       "0",
       "0"
      ]
+    },
+    "body": {
+     "scale": [
+      "1",
+      "1+math.sin(query.life_time*70)*0.012",
+      "1"
+     ]
     }
    }
   },
@@ -123,6 +130,20 @@
       "150",
       "0"
      ]
+    },
+    "wing2_l": {
+     "rotation": [
+      "0",
+      "70",
+      "-10"
+     ]
+    },
+    "wing2_r": {
+     "rotation": [
+      "0",
+      "-70",
+      "10"
+     ]
     }
    }
   },
@@ -155,6 +176,20 @@
       "0",
       "0",
       "-math.sin(query.life_time*300-50)*28"
+     ]
+    },
+    "wing2_l": {
+     "rotation": [
+      "0",
+      "0",
+      "math.sin(query.life_time*300-90)*26"
+     ]
+    },
+    "wing2_r": {
+     "rotation": [
+      "0",
+      "0",
+      "-math.sin(query.life_time*300-90)*26"
      ]
     },
     "body": {
@@ -202,6 +237,511 @@
       "28",
       "0",
       "0"
+     ]
+    }
+   }
+  },
+  "animation.siege_dragon.sleep": {
+   "loop": true,
+   "bones": {
+    "leg_fl": {
+     "rotation": [
+      "-70",
+      "0",
+      "-25"
+     ]
+    },
+    "leg_fr": {
+     "rotation": [
+      "-70",
+      "0",
+      "25"
+     ]
+    },
+    "leg_bl": {
+     "rotation": [
+      "75",
+      "0",
+      "-25"
+     ]
+    },
+    "leg_br": {
+     "rotation": [
+      "75",
+      "0",
+      "25"
+     ]
+    },
+    "neck": {
+     "rotation": [
+      "30",
+      "35",
+      "0"
+     ]
+    },
+    "neck2": {
+     "rotation": [
+      "18",
+      "40",
+      "0"
+     ]
+    },
+    "tail": {
+     "rotation": [
+      "6",
+      "30",
+      "0"
+     ]
+    },
+    "tail2": {
+     "rotation": [
+      "4",
+      "40",
+      "0"
+     ]
+    },
+    "tail3": {
+     "rotation": [
+      "0",
+      "45",
+      "0"
+     ]
+    },
+    "body": {
+     "position": [
+      "0",
+      "-7",
+      "0"
+     ],
+     "scale": [
+      "1",
+      "1+math.sin(query.life_time*45)*0.035",
+      "1"
+     ]
+    },
+    "head": {
+     "rotation": [
+      "-6",
+      "30",
+      "0"
+     ]
+    }
+   }
+  },
+  "animation.siege_dragon.downed": {
+   "loop": true,
+   "bones": {
+    "leg_fl": {
+     "rotation": [
+      "-70",
+      "0",
+      "-25"
+     ]
+    },
+    "leg_fr": {
+     "rotation": [
+      "-70",
+      "0",
+      "25"
+     ]
+    },
+    "leg_bl": {
+     "rotation": [
+      "75",
+      "0",
+      "-25"
+     ]
+    },
+    "leg_br": {
+     "rotation": [
+      "75",
+      "0",
+      "25"
+     ]
+    },
+    "neck": {
+     "rotation": [
+      "28",
+      "12",
+      "0"
+     ]
+    },
+    "neck2": {
+     "rotation": [
+      "14",
+      "14",
+      "0"
+     ]
+    },
+    "tail": {
+     "rotation": [
+      "6",
+      "-14",
+      "0"
+     ]
+    },
+    "tail2": {
+     "rotation": [
+      "4",
+      "-18",
+      "0"
+     ]
+    },
+    "tail3": {
+     "rotation": [
+      "0",
+      "-20",
+      "0"
+     ]
+    },
+    "wing_l": {
+     "rotation": [
+      "0",
+      "25",
+      "-22"
+     ]
+    },
+    "wing_l_tip": {
+     "rotation": [
+      "0",
+      "-40",
+      "30"
+     ]
+    },
+    "wing_r": {
+     "rotation": [
+      "0",
+      "-25",
+      "22"
+     ]
+    },
+    "wing_r_tip": {
+     "rotation": [
+      "0",
+      "40",
+      "-30"
+     ]
+    },
+    "wing2_l": {
+     "rotation": [
+      "0",
+      "30",
+      "-20"
+     ]
+    },
+    "wing2_r": {
+     "rotation": [
+      "0",
+      "-30",
+      "20"
+     ]
+    },
+    "root": {
+     "rotation": [
+      "0",
+      "0",
+      "14"
+     ]
+    },
+    "body": {
+     "position": [
+      "0",
+      "-8",
+      "0"
+     ],
+     "scale": [
+      "1",
+      "1+math.sin(query.life_time*110)*0.03",
+      "1"
+     ]
+    },
+    "head": {
+     "rotation": [
+      "-10",
+      "10",
+      "20"
+     ]
+    },
+    "jaw": {
+     "rotation": [
+      "6+math.sin(query.life_time*110)*4",
+      "0",
+      "0"
+     ]
+    }
+   }
+  },
+  "animation.siege_dragon.dead": {
+   "loop": true,
+   "bones": {
+    "leg_fl": {
+     "rotation": [
+      "-70",
+      "0",
+      "-25"
+     ]
+    },
+    "leg_fr": {
+     "rotation": [
+      "-70",
+      "0",
+      "25"
+     ]
+    },
+    "leg_bl": {
+     "rotation": [
+      "75",
+      "0",
+      "-25"
+     ]
+    },
+    "leg_br": {
+     "rotation": [
+      "75",
+      "0",
+      "25"
+     ]
+    },
+    "neck": {
+     "rotation": [
+      "34",
+      "20",
+      "0"
+     ]
+    },
+    "neck2": {
+     "rotation": [
+      "14",
+      "14",
+      "0"
+     ]
+    },
+    "tail": {
+     "rotation": [
+      "6",
+      "-14",
+      "0"
+     ]
+    },
+    "tail2": {
+     "rotation": [
+      "4",
+      "-18",
+      "0"
+     ]
+    },
+    "tail3": {
+     "rotation": [
+      "0",
+      "-34",
+      "0"
+     ]
+    },
+    "wing_l": {
+     "rotation": [
+      "0",
+      "25",
+      "-22"
+     ]
+    },
+    "wing_l_tip": {
+     "rotation": [
+      "0",
+      "-40",
+      "30"
+     ]
+    },
+    "wing_r": {
+     "rotation": [
+      "0",
+      "-30",
+      "-50"
+     ]
+    },
+    "wing_r_tip": {
+     "rotation": [
+      "0",
+      "60",
+      "-40"
+     ]
+    },
+    "wing2_l": {
+     "rotation": [
+      "0",
+      "30",
+      "-20"
+     ]
+    },
+    "wing2_r": {
+     "rotation": [
+      "0",
+      "-30",
+      "-50"
+     ]
+    },
+    "root": {
+     "rotation": [
+      "0",
+      "0",
+      "32"
+     ]
+    },
+    "body": {
+     "position": [
+      "0",
+      "-9",
+      "0"
+     ]
+    },
+    "head": {
+     "rotation": [
+      "-4",
+      "18",
+      "38"
+     ]
+    },
+    "jaw": {
+     "rotation": [
+      "22",
+      "0",
+      "0"
+     ]
+    }
+   }
+  },
+  "animation.siege_dragon.roar": {
+   "loop": true,
+   "bones": {
+    "neck": {
+     "rotation": [
+      "-40",
+      "0",
+      "0"
+     ]
+    },
+    "neck2": {
+     "rotation": [
+      "-25",
+      "0",
+      "0"
+     ]
+    },
+    "head": {
+     "rotation": [
+      "-20+math.sin(query.life_time*900)*3",
+      "0",
+      "0"
+     ]
+    },
+    "jaw": {
+     "rotation": [
+      "34",
+      "0",
+      "0"
+     ]
+    },
+    "wing_l": {
+     "rotation": [
+      "0",
+      "-40",
+      "30"
+     ]
+    },
+    "wing_r": {
+     "rotation": [
+      "0",
+      "40",
+      "-30"
+     ]
+    }
+   }
+  },
+  "animation.siege_dragon.nuzzle": {
+   "loop": true,
+   "bones": {
+    "neck": {
+     "rotation": [
+      "34",
+      "0",
+      "0"
+     ]
+    },
+    "neck2": {
+     "rotation": [
+      "18",
+      "0",
+      "0"
+     ]
+    },
+    "head": {
+     "rotation": [
+      "10+math.sin(query.life_time*240)*8",
+      "0",
+      "math.sin(query.life_time*120)*6"
+     ]
+    }
+   }
+  },
+  "animation.siege_dragon.snarl": {
+   "loop": true,
+   "bones": {
+    "neck": {
+     "rotation": [
+      "14",
+      "0",
+      "0"
+     ]
+    },
+    "head": {
+     "rotation": [
+      "18",
+      "math.sin(query.life_time*500)*4",
+      "0"
+     ]
+    },
+    "jaw": {
+     "rotation": [
+      "14",
+      "0",
+      "0"
+     ]
+    },
+    "tail": {
+     "rotation": [
+      "0",
+      "math.sin(query.life_time*400)*14",
+      "0"
+     ]
+    }
+   }
+  },
+  "animation.siege_dragon.tilt": {
+   "loop": true,
+   "bones": {
+    "head": {
+     "rotation": [
+      "0",
+      "0",
+      "22*math.sin(query.life_time*90)"
+     ]
+    }
+   }
+  },
+  "animation.siege_dragon.shake": {
+   "loop": true,
+   "bones": {
+    "head": {
+     "rotation": [
+      "0",
+      "math.sin(query.life_time*700)*24",
+      "0"
+     ]
+    },
+    "body": {
+     "rotation": [
+      "0",
+      "0",
+      "math.sin(query.life_time*700)*4"
      ]
     }
    }

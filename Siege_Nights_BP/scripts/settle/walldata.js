@@ -3,8 +3,8 @@
 // The wall is a ring around the Plot Stone. It follows the ground: each stretch of wall stands on
 // the ground under it and the wall-walk steps up and down a block at a time.
 //
-// The ten levels below are provisional. The textures thread is drawing the final ten for Mateo;
-// when they are settled, replace this table and nothing else needs to change.
+// Mateo approved these ten levels on 2026-11-10 (drawn by the textures thread). If they change,
+// replace this table and nothing else needs to change.
 
 export const WALLS = {
   radius: 56, // blocks from the Plot Stone to the outer face. The biggest hall (its back corners reach about 49) fits inside with room to walk. The map is flat to 60.

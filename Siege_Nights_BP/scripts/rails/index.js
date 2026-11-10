@@ -5,7 +5,7 @@
 import { world, system } from "@minecraft/server";
 import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
 import { onTick, isReady, moduleStore, settlementAt, isAlly, keepOf, title, on } from "../siege/api.js";
-import { RAIL_SETTINGS as R, REGIONS, RAILS, nextId, nearestStation, networkLines, wayTo, expressAxis } from "./data.js";
+import { RAIL_SETTINGS as R, REGIONS, RAILS, RIDES, CARRIAGE, CARRIAGE_ITEM, nextId, nearestStation, networkLines, wayTo, expressAxis } from "./data.js";
 import { stallMenu } from "../horses/index.js";
 import { isBuilder, give } from "../horses/menus.js";
 import "./tests.js";
@@ -143,17 +143,17 @@ function findRail(block) {
   return best;
 }
 
-function callCart(player, block) {
+function callCart(player, block, type = "minecraft:minecart") {
   const rail = findRail(block);
   if (!rail) return player.sendMessage(`§7There is no rail within ${R.railSearch} blocks of this post.`);
   const at = { x: rail.location.x + 0.5, y: rail.location.y + 0.1, z: rail.location.z + 0.5 };
-  const waiting = block.dimension.getEntities({ type: "minecraft:minecart", location: at, maxDistance: 2 });
-  if (waiting.length) return say(player, "§7A cart is already waiting on the platform.");
-  const cart = block.dimension.spawnEntity("minecraft:minecart", at);
+  const waiting = RIDES.flatMap((ride) => block.dimension.getEntities({ type: ride, location: at, maxDistance: 2 }));
+  if (waiting.length) return say(player, "§7Something is already waiting on the platform.");
+  const cart = block.dimension.spawnEntity(type, at);
   cart.addTag(CART_TAG);
   cart.setDynamicProperty("siege:rails_idle", system.currentTick);
   player.playSound("random.click");
-  say(player, "§6A cart rolls up to the platform.");
+  say(player, type === CARRIAGE ? "§6A carriage rolls up to the platform. It seats four." : "§6A cart rolls up to the platform.");
 }
 
 async function pickDestination(player, here, back) {
@@ -184,6 +184,7 @@ async function stationMenu(player, block, station) {
     dest ? `§7Destination: §f${dest.name}§7, ${wayTo(player.location, dest)}` : "§7No destination set.",
   ].join("\n");
   const entries = [
+    { label: "Call a carriage\n§8seats four, faster than a cart", action: () => callCart(player, block, CARRIAGE) },
     { label: "Call a minecart", action: () => callCart(player, block) },
     { label: "Choose a destination", action: () => pickDestination(player, station, again) },
     dest && { label: "Clear destination", action: () => { player.setDynamicProperty(DEST, undefined); return again(); } },
@@ -236,7 +237,7 @@ world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
 const cartOf = (player) => {
   try {
     const mount = player.getComponent("minecraft:riding")?.entityRidingOn;
-    return mount?.typeId === "minecraft:minecart" ? mount : undefined;
+    return RIDES.includes(mount?.typeId) ? mount : undefined;
   } catch {
     return undefined;
   }
@@ -263,6 +264,21 @@ function travelTick() {
     if (dest && cartOf(player) && dest.dim === player.dimension.id) say(player, `§6${dest.name} §7· §f${wayTo(player.location, dest)}`);
   }
 }
+
+// Sneak + click your own Train Carriage with an empty hand to pack it up (station carriages tidy themselves)
+world.beforeEvents.playerInteractWithEntity?.subscribe((event) => {
+  const { player, target, itemStack } = event;
+  if (target.typeId !== CARRIAGE || !player.isSneaking || itemStack) return;
+  event.cancel = true;
+  system.run(() => {
+    if (!target.isValid) return;
+    if (target.hasTag(CART_TAG)) return say(player, "§7Station carriages put themselves away.");
+    if ((target.getComponent("minecraft:rideable")?.getRiders() ?? []).length) return say(player, "§7Someone is still aboard.");
+    target.remove();
+    give(player, CARRIAGE_ITEM);
+    say(player, "§6Carriage packed up.");
+  });
+});
 
 // Express track: nudge a cart with a destination along straight, flat rail. Curves and slopes stay vanilla.
 function expressTick() {
@@ -292,7 +308,7 @@ function expressTick() {
 function tidyTick() {
   const now = system.currentTick;
   for (const player of world.getPlayers()) {
-    for (const cart of player.dimension.getEntities({ type: "minecraft:minecart", tags: [CART_TAG], location: player.location, maxDistance: 96 })) {
+    for (const cart of RIDES.flatMap((ride) => player.dimension.getEntities({ type: ride, tags: [CART_TAG], location: player.location, maxDistance: 96 }))) {
       const riders = cart.getComponent("minecraft:rideable")?.getRiders() ?? [];
       const idleSince = cart.getDynamicProperty("siege:rails_idle") ?? now;
       if (riders.length || idleSince > now) cart.setDynamicProperty("siege:rails_idle", now); // (a reload restarts the tick count)
@@ -318,6 +334,7 @@ on("showcase", ({ player, dim, nextSpot, label }) => {
       dim.getBlock({ x, y: y - 1, z })?.setType(powered ? "minecraft:redstone_block" : "minecraft:stone_bricks");
       dim.getBlock({ x, y, z })?.setType(powered ? "minecraft:golden_rail" : "minecraft:rail");
     }
+    dim.spawnEntity(CARRIAGE, { x: first.x + 1.5, y: y + 0.1, z: z + 0.5 }).addTag("siege_showcase");
     [[first, "Showcase Halt"], [second, "Far Platform"]].forEach(([at, name]) => {
       const block = dim.getBlock(at);
       if (!block) return;
@@ -331,5 +348,5 @@ on("showcase", ({ player, dim, nextSpot, label }) => {
   } catch (e) {
     console.warn(`[Hollow Crown] showcase rails: ${e}`);
   }
-  player.sendMessage("§6Rails: two Station Posts behind you with a powered line. Click one to call a cart, walk to the other to discover it, then set it as your destination.");
+  player.sendMessage("§6Rails: two Station Posts behind you with a powered line and a Train Carriage on it (click to board, push forward to go). Click a post to call another, walk to the other to discover it, then set it as your destination.");
 });

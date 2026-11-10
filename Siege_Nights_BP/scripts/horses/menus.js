@@ -207,7 +207,7 @@ async function rite(player, rec, key, back) {
   const missing = [];
   if (rec.level < needs.level) missing.push(`horse level ${needs.level}`);
   for (const stat of STATS) if (needs[stat] && rec.stats[stat] < needs[stat]) missing.push(`${STAT_NAMES[stat]} trained to ${needs[stat]}`);
-  if (horsesOf(player.id).some((r) => r.special !== "none")) missing.push("no other Warhorse or Hollow Steed (one per rider)");
+  if (horsesOf(player.id).some((r) => r.special !== "none")) missing.push("no other Warhorse or Glimstrider (one per rider)");
   const body = `${special.desc}\n\n§7Cost: §f${costText(special.cost)}${missing.length ? `\n\n§cStill needed: ${missing.join(", ")}` : ""}`;
   if (missing.length) return menu(player, special.name, body, [], back);
   if (!(await confirm(player, special.name, `${body}\n\nPerform the rite on ${rec.name}? This is forever.`, "Perform the rite"))) return back();

@@ -24,13 +24,10 @@
    "siege:dragon": {
     "volume": 1.0,
     "pitch": [
-     0.6,
-     0.8
+     0.7,
+     0.9
     ],
     "events": {
-     "ambient": "mob.ravager.ambient",
-     "hurt": "mob.ravager.hurt",
-     "death": "mob.ravager.death",
      "step": "mob.ravager.step"
     }
    }

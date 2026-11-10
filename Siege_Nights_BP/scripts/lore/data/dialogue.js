@@ -18,6 +18,7 @@ export const NPCS = [
   {
     id: "wren", name: "Sister Wren", where: "Millbrook, in or outside the chapel. Healer, about 60 (in a village where the night never ends, nobody is sure).",
     start: [
+      [["flag:morvane_fallen", "!flag:wren_boy"], "boy"],
       [["flag:slipped_first", "!flag:wren_slip_talked"], "slipback"],
       [["solved:lost_days"], "after"],
       [["flag:wren_trust"], "hub2"],
@@ -25,6 +26,10 @@ export const NPCS = [
       [[], "first"],
     ],
     nodes: {
+      boy: {
+        text: "They're saying in the square that the knocking has stopped. The first third night in three hundred years that nobody had to count.\n\nDo you still have the journal? Turn to the lambing entry. \"He is nine, grey-eyed, quick with his right hand and quicker to laugh.\"\n\nEverybody is going to remember the thing you fought down there. Somebody ought to remember that one as well. I'll do it, if you like. I'm good with the ones nobody else sits up for.",
+        opts: [["Thank you, Sister.", "end", ["flag:wren_boy"]]],
+      },
       first: {
         text: "Mind the step, traveler. It's dark, I know. It's been dark in Millbrook since before I was born.\n\nI'm Sister Wren. I patch people up. You're from one of the new keeps, aren't you? You have that look. Like someone who has started counting to three.",
         opts: [
@@ -152,9 +157,9 @@ export const NPCS = [
         opts: [["I'll work it out.", "hub2"]],
       },
       where: {
-        text: "Down. Tobin went to the well. In Hollowfast they walked out onto the lake. In Gull's Rest it was the sea.\n\nAlways water, always the third night. If you want to know more about the lake, there's a woman in Hollowfast called Sigrun whose grandmother followed the footprints.",
+        text: "Down. Tobin went to the well. In Rimehold they walked out onto the lake. In Gull's Rest it was the sea.\n\nAlways water, always the third night. If you want to know more about the lake, there's a woman in Rimehold called Sigrun whose grandmother followed the footprints.",
         opts: [
-          ["Hollowfast. North?", "end", ["lead:hollowfast", "lead:millbrook_well"]],
+          ["Rimehold. North?", "end", ["lead:hollowfast", "lead:millbrook_well"]],
           ["Back.", "hub2"],
         ],
       },
@@ -172,6 +177,7 @@ export const NPCS = [
   {
     id: "aldous", name: "Sir Aldous Vane", where: "Rides to a player's keep the morning after their first siege win (spawned by the story engine), then waits at the Ashen Gate chapterhouse. Young, earnest, believes everything the Order told him.",
     start: [
+      [["flag:morning_after", "flag:aldous_met", "!flag:aldous_saw"], "saw"],
       [["read:seal_10"], "edda"],
       [["read:seal_09"], "confront"],
       [["path:marked"], "marked"],
@@ -179,6 +185,14 @@ export const NPCS = [
       [[], "first"],
     ],
     nodes: {
+      saw: {
+        text: "You saw one. No, don't, I can tell. I saw one too. From the chapterhouse roof, on the east road, standing in the wheat. It did not flatten the wheat.\n\nI reported it. I wrote it out properly, time and place and what it looked like, the way they teach us. The Grandmaster's clerk read it in front of me and put it on the fire and asked if there was anything else.",
+        opts: [["What did you say?", "saw2"]],
+      },
+      saw2: {
+        text: "I said no, sir. God help me, I said no, sir, and I saluted.\n\nI have been thinking about that since. Not the thing in the wheat. The clerk. He wasn't surprised. He had the look of a man who has burned that page before.\n\nWe are sworn to stand between the people and the dark. I did not know there was a part of the dark we had agreed not to mention.",
+        opts: [["Ask Brother Cael about a drawer.", "hub", ["flag:aldous_saw"]], ["Keep your eyes open, Aldous.", "hub", ["flag:aldous_saw"]]],
+      },
       first: {
         text: "Hold. Sir Aldous Vane, Order of the Ashen Gate.\n\nA light fell near this keep last night. Pale, about so big, and it hums. I am charged to take it into the Order's keeping. Have you seen it?",
         opts: [
@@ -262,12 +276,27 @@ export const NPCS = [
   {
     id: "mag", name: "Old Mag", where: "Her hut past the last lantern of Mirelight. Says she is 311. She is.",
     start: [
+      [["flag:morning_after", "flag:mag_believed", "!flag:mag_saw"], "saw"],
+      [["flag:corvin_says_mag", "!flag:mag_heard_corvin"], "trowel"],
+      [["path:marked", "flag:mag_believed", "!flag:mag_arts"], "arts"],
       [["col:corvin", "flag:mag_believed"], "allbooks"],
       [["flag:mag_believed"], "hub"],
       [["flag:mag_met"], "second"],
       [[], "first"],
     ],
     nodes: {
+      saw: {
+        text: "Don't tell me. I can smell it on your coat. Cold stone and the inside of a bell.\n\nSo they've come up the long way and walked to your wall on their own feet. Well. I wondered if I'd live to see that again, and it turns out I live to see everything.\n\nSit. You'll want to know what it was, and I'm not going to tell you, and you'll want to know why not.",
+        opts: [["Why not?", "saw2"]],
+      },
+      saw2: {
+        text: "Because you'd go home thinking you understood it, and that's how people get careless at gates.\n\nI'll give you what's safe. It wasn't angry at you. Did you notice? Your raiders hate you, it's all over them. That one didn't. It walked up to your wall the way a man walks up to a field he's been told to measure.\n\nIt was sent to look. Something wanted to know how high you build.",
+        opts: [["Sent by what?", "saw3", ["flag:mag_saw"]], ["Then I'll build higher.", "hub", ["flag:mag_saw"]]],
+      },
+      saw3: {
+        text: "There. That's the right question, and you asked it in the right order, after the fright and before the bragging.\n\nKeep asking it. Ask the bell-keepers and the grey brothers and that girl on the ice. They've each got a piece and they each think it's the whole.\n\nI've got a piece too. You'll get it when it won't kill you.",
+        opts: [["I'll come back.", "hub"]],
+      },
       first: {
         text: "Wipe your feet. Not there. THERE.\n\nI'm Mag. I'm three hundred and eleven years old. Go on, laugh. They all do. Then they ask for something for a cough.",
         opts: [
@@ -287,6 +316,17 @@ export const NPCS = [
           ["Just the cure.", "end"],
         ],
       },
+      arts: {
+        text: "Stop. Stand there. Don't come in yet.\n\n...Oh, child. You picked it up. I can hear it on you from across the room, like a wet finger on a glass.\n\nWell. It's done, and nobody is going to teach you, because the last man who could is ash. But I was his prentice and I was a nosy one. Take this. I wrote it when I was eleven. I understood about a third of it then and I wish I'd kept it that way.",
+        opts: [
+          ["What is it?", "arts2", ["flag:mag_arts", "item:siege:fourteen_arts"]],
+          ["Thank you, Mag.", "hub", ["flag:mag_arts", "item:siege:fourteen_arts"]],
+        ],
+      },
+      arts2: {
+        text: "Everything he let slip about what your sort can do. Fourteen of them, he counted. It won't tell you how. He never told ME how. It'll tell you what happened to the people who found out.\n\nRead the third one twice. Read the tenth one before you get proud of yourself.\n\nAnd some of them you'll not manage until you've been somewhere or met someone. The book says where, if you squint.",
+        opts: [["I'll read it.", "hub"]],
+      },
       second: {
         text: "You again. Seen anything impossible yet?",
         opts: [
@@ -305,8 +345,21 @@ export const NPCS = [
           ["The moon.", "moon"],
           ["Mirelight's villagers.", "villagers"],
           ["The backward hymns.", "hymns"],
+          ["The day they took the king.", "king"],
           ["Goodbye, Mag.", "end"],
         ],
+      },
+      trowel: {
+        text: "What did you say?\n\nSay it again. Slowly.\n\n...\"Like a trowel.\" He said that to me the morning I was nine, the first day, in front of all eleven of the others, and I cried, and he gave me his own pen and never asked for it back.\n\nThree hundred years. I thought I was waiting to see what came back out of that Crack. I think I was only waiting to be told off one more time.\n\nSit down, child. I've a notebook under the bed I've been denying for a long while.",
+        opts: [["I'm glad I told you.", "hub", ["flag:mag_heard_corvin", "sp:2"]]],
+      },
+      king: {
+        text: "I was eleven, and small enough to be under the cart.\n\nThey'll tell you she threw him in. She didn't throw him. Nobody threw that man anywhere. They walked him down into the valley to the Crack with his hands tied, and at the edge he asked them to cut the rope, and the girl nodded, and they cut it.\n\nHe turned round once. He was looking for her face. She had already put her back to him.\n\nThen he walked in. Upright. Like a man going down to his own cellar.",
+        opts: [["And then?", "king2", ["clue:walked_in", "flag:heard_walked_in"]]],
+      },
+      king2: {
+        text: "And then nothing. That's what I'm telling you, child. No scream. No fall. I've seen folk die every way there is to do it, and that wasn't one of them.\n\nThree hundred years I've kept myself going on roots and spite. Did you never wonder what I was waiting to see come back out?",
+        opts: [["Back.", "hub"]],
       },
       corvin: {
         text: "Corvin Hale. Rude, brilliant, never washed. He wrote ten notebooks and twelve of us carried them off in twelve directions the night before the fire. A hunter with hounds got eleven of us.\n\nThe notebooks are still out there. His tower in the Vale hills, the north lake, the lighthouse, the desert vault. One of them is under my bed and I will deny it.",
@@ -320,7 +373,7 @@ export const NPCS = [
         opts: [["I will.", "hub", ["tome:corv_03"]]],
       },
       moon: {
-        text: "\"What the carving shows, the sky must not.\" He made us chant it.\n\nThere's a door in the north, at the Hollowfast lake. A shrine with a moon cut into it. One of us went through that door with the hunter behind her. I don't know which of them I feel sorrier for.",
+        text: "\"What the carving shows, the sky must not.\" He made us chant it.\n\nThere's a door in the north, at the Rimehold lake. A shrine with a moon cut into it. One of us went through that door with the hunter behind her. I don't know which of them I feel sorrier for.",
         opts: [["Back.", "hub", ["clue:wrong_moon_rule", "lead:frozen_lake"]]],
       },
       villagers: {
@@ -423,11 +476,36 @@ export const NPCS = [
   {
     id: "sage", name: "Archivist Pell", where: "The Sage who moves into a player's town hall at Town tier. Also fine standing in any Library. A cheerful ex-novice of the Order who was thrown out for reading. This NPC is the hint system.",
     start: [
+      [["flag:morning_after", "flag:pell_met", "!flag:sage_saw"], "saw"],
+      [["flag:heard_no_body", "flag:heard_named", "flag:heard_walked_in", "!flag:pell_summed"], "sum"],
       [["shelved:74"], "all"],
       [["flag:pell_met"], "hub"],
       [[], "first"],
     ],
     nodes: {
+      saw: {
+        text: "Oh, thank goodness, you're in one piece. I watched from the upstairs window. Well. I watched from under the upstairs window, with a book over my head, but I heard a great deal.\n\nNow, I have been through the shelves since four this morning and I want to show you something that is not there. Sieges, raiders, the Grey Host, every third night, there are pages and pages. A tall thing with no face that the raiders bow to? Not a line. Not one.",
+        opts: [["Maybe nobody saw one before.", "saw2"]],
+      },
+      saw2: {
+        text: "That's what I thought! For about an hour. Then I started looking at what's been cut.\n\nThere are pages gone from four of our books, all near the end, all in chapters about the last year of a siege somewhere. Cut with a blade, neatly, by somebody who cared about the binding.\n\nSo people have seen them. And then somebody tidied up. A missing page is still a clue, you know. It tells you which way the scissors were facing.",
+        opts: [["Who cuts pages that neatly?", "saw3", ["flag:sage_saw"]], ["Keep looking, Pell.", "hub", ["flag:sage_saw"]]],
+      },
+      saw3: {
+        text: "A librarian, I'm sorry to say. Somebody trained. Somebody with a house style.\n\nI used to work for people with a house style.\n\nIf you find a book out in the world with its last pages still in it, bring it to me before you bring it to anyone in grey. I'll make you a copy and hide the copy.",
+        opts: [["I will.", "hub"]],
+      },
+      sum: {
+        text: "Sit down, sit down. I've been cataloguing what people TOLD you instead of what you shelved, and I don't like where the cards have ended up.\n\nCard one. A king was overthrown, and the Order that burned forty-one of his portraits never paid for a grave.\n\nCard two. He went into the Crack alive, on his own two feet.\n\nCard three. Those below have no names, and yet they have given one to somebody. Morvane.\n\nI'm an archivist. I don't draw conclusions, I file them. But I've only the one drawer left, and all three cards fit in it.",
+        opts: [
+          ["Say it, Pell.", "sum2", ["flag:pell_summed", "flag:pell_met"]],
+          ["Not yet. I'm not ready.", "hub", ["flag:pell_summed", "flag:pell_met"]],
+        ],
+      },
+      sum2: {
+        text: "No. You say it. Your Ledger has a page for it, \"Who Is Morvane?\", and it wants a name in your own hand.\n\nAnd if we're right, then when you stand in front of him at last, look at his eyes, and at which hand he uses. The old journal in your pack describes a right-handed boy. Master Quill says the King came back from below using his left. I should like to know which of them is still in there.",
+        opts: [["I'll look.", "hub", ["sp:1"]]],
+      },
       first: {
         text: "Oh! A keep with shelves. Do you know how rare that is? The Order threw me out for reading, and I've been walking ever since looking for somewhere that keeps books instead of burning them.\n\nPell. Archivist, formerly Novice. I'll catalogue for my supper.",
         opts: [
@@ -486,6 +564,8 @@ export const NPCS = [
   {
     id: "cael", name: "Brother Cael", where: "The archive of the Ashen Gate chapterhouse. Old, tired, has read everything he was told to burn.",
     start: [
+      [["flag:morning_after", "flag:cael_met", "!flag:cael_saw"], "saw"],
+      [["flag:morvane_fallen", "!flag:cael_said_it"], "plain"],
       [["flag:cael_opened"], "after"],
       [["flag:aldous_sent"], "sent"],
       [["read:seal_07"], "after"],
@@ -493,6 +573,18 @@ export const NPCS = [
       [[], "first"],
     ],
     nodes: {
+      saw: {
+        text: "Close the door, please. All the way.\n\nYou are going to describe something to me and I am going to tell you the Order has no record of it. Both of us will know what that is worth. So let me save you the breath. Taller than a man. Nothing where the face goes. The raiders made way.\n\nThere is a drawer in this room with no label on it. I was told to burn what is in it forty years ago. I am a slow worker.",
+        opts: [["What is in the drawer?", "saw2"]],
+      },
+      saw2: {
+        text: "Eleven reports. The oldest is three hundred years old and the newest is a good deal younger than I am. A reeve, two priests, a child, a knight of this house. None of them knew about the others. They all draw the same thing in the margin, badly.\n\nAnd every one of them was written in the season before a village stopped answering letters.\n\nI am not telling you this to frighten you. I am telling you because you are the twelfth, and you are the first one who came and asked.",
+        opts: [["What does the Order call them?", "saw3", ["flag:cael_saw"]], ["Keep the drawer safe.", "hub", ["flag:cael_saw"]]],
+      },
+      saw3: {
+        text: "Officially, nothing. A thing with no name cannot be in a report, and a thing in no report did not happen. That is very nearly our whole method.\n\nUnofficially the old brothers called them the tall company. As in, \"he keeps tall company these nights.\" They said it about men who had stopped sleeping.\n\nGo home and sleep. I mean it kindly.",
+        opts: [["Thank you, Brother.", "hub"]],
+      },
       first: {
         text: "The reading room is open to guests. The archive is not. Please don't lean on the shelves.\n\nYou may read the Chronicle volume on the lectern. We keep that one on display. You'll see why.",
         opts: [
@@ -518,6 +610,7 @@ export const NPCS = [
         opts: [
           ["What did the Order burn?", "burn"],
           ["Tell me about Corvin Hale.", "corvin"],
+          ["The portraits you burned. Whose?", "nobody"],
           ["Good day.", "end"],
         ],
       },
@@ -529,6 +622,25 @@ export const NPCS = [
         text: "Tried for calling the Grey Host down on Aldmere with his bells. He arrived at court two years AFTER the Host landed. The tribunal did not find that worth noting.\n\nHis cell is still here, downstairs. Nobody has ever cleaned it. I think nobody could bear to.",
         opts: [["Back.", "hub", ["lead:ashen_chapterhouse"]]],
       },
+      nobody: {
+        text: "One man's. Forty-one portraits, a great seal, a coronation robe, a child's wooden horse with a name cut in the belly. All burned, all listed.\n\nI will tell you what is not on the list, because I have read it more often than my prayers. A coffin. A shroud. A gravedigger's fee. The Order kept receipts for the lamp oil it used that week. It did not pay to bury a king.\n\nI do not know what that means. I know what I think on the third nights.",
+        opts: [
+          ["What do you think?", "nobody2", ["clue:no_body", "flag:heard_no_body"]],
+          ["Good day, Brother.", "end", ["clue:no_body", "flag:heard_no_body"]],
+        ],
+      },
+      nobody2: {
+        text: "That a man nobody buried is a man nobody saw die.\n\nI didn't say that either. Good day.",
+        opts: [["Good day.", "end"]],
+      },
+      plain: {
+        text: "You've come from below. No, don't tell me, it's in how you're standing. Sit. Let an old man say something aloud in this building once before he dies.\n\nMorvane was King Oswin. Aldric's son. The boy in that journal of yours, nine years old and afraid of nothing. He made a peace with the Hollow and he kept it, and for that his own daughter put him through the Crack alive, took a saint's name, and founded this Order to burn his face off the world so that nobody would know him if he ever came back up.\n\nHe did not come back up. They crowned him down there instead. Every third night for three hundred years, that was him. Knocking.",
+        opts: [["He kept his father's journal.", "plain2", ["flag:cael_said_it"]]],
+      },
+      plain2: {
+        text: "Then it was his to give, and he gave it to you. I wonder what he hoped you would do with it.\n\nMaster Quill wrote twelve volumes and we display one. I am going to write the thirteenth. Plainly, this time, and nobody will have to tell me to.\n\nThank you. Lean on the shelves if you like.",
+        opts: [["Good day, Brother.", "end", ["sp:2"]]],
+      },
       sent: {
         text: "Aldous sent you. Aldous is asking.\n\nForty years I've waited for one of them to ask. I thought it would be someone cleverer, to be truthful. I'm glad it was someone kind.\n\nThe stair is behind the third shelf. Take the inventory. It's time somebody other than me had read it.",
         opts: [["Thank you, Brother.", "after", ["flag:cael_opened", "tome:seal_07", "lead:burned_archive"]]],
@@ -537,21 +649,35 @@ export const NPCS = [
         text: "You've seen the list. Forty-one portraits. I used to recite it at night, like a rosary.\n\nTwo things on it were never found: the mage's notebooks and the chronicler's last volume. And one thing was never ON it, because nobody knew to look. Our saint wrote a letter she never sent. If it exists, it's wherever she went to grieve. Where does a daughter go to grieve?",
         opts: [
           ["Her father's tomb.", "end", ["lead:kings_barrow", "sp:1"]],
+          ["Forty-one portraits of whom?", "nobody"],
           ["I'll think about it.", "end"],
         ],
       },
     },
   },
 
-  // ------------------------------------------------------------------ Sigrun of Hollowfast
+  // ------------------------------------------------------------------ Sigrun of Rimehold
   {
-    id: "sigrun", name: "Sigrun Ashby", where: "Hollowfast, her longhouse nearest the frozen lake. Blunt, practical, descended from the half of the village that stayed.",
+    id: "sigrun", name: "Sigrun Ashby", where: "Rimehold, her longhouse nearest the frozen lake. Blunt, practical, descended from the half of the village that stayed.",
     start: [
+      [["flag:morning_after", "flag:sigrun_met", "!flag:sigrun_saw"], "saw"],
       [["solved:wrong_moon"], "after"],
       [["flag:sigrun_met"], "hub"],
       [[], "first"],
     ],
     nodes: {
+      saw: {
+        text: "You've the look. Sit down before you fall down.\n\nTall. No face. Walked like it was remembering how. And your raiders stood aside for it.\n\nGran had a word for those and I'll not teach it you, it does no good in a mouth. But I'll tell you what she said. She said the Host never crossed the water with anything like that. They met it here. On the last night. It was the last thing any of them looked at.",
+        opts: [["Then it took the Host.", "saw2"]],
+      },
+      saw2: {
+        text: "Something did. At seventeen past three, six thousand men, and not a boot left on the grass.\n\nSo think on this, southerner. Whatever is sending raiders at your wall every third night has been sending men. Other people's men. Angry and borrowed. Last night it sent one of its own.\n\nYou don't do that until you've stopped being careful.",
+        opts: [["Why would it stop being careful?", "saw3", ["flag:sigrun_saw"]], ["I'll bar the gate.", "hub", ["flag:sigrun_saw"]]],
+      },
+      saw3: {
+        text: "Because it's nearer than it was. That's all I've got. I'm a fisherman's daughter with a bad shoulder.\n\nCount your ravens tonight. If there's more of them than yesterday, they know something too.",
+        opts: [["I will.", "hub"]],
+      },
       first: {
         text: "Shut the door, you're letting the cold in.\n\nYou'll be wanting the lake. Southerners always want the lake. Go and look, then. Don't walk to the middle.",
         opts: [
@@ -565,7 +691,7 @@ export const NPCS = [
         opts: [["Tell me.", "lake"]],
       },
       lake: {
-        text: "Three hundred years back, half of Hollowfast got out of bed on one night and walked onto the ice. My grandmother's grandmother's... it goes on a while... followed the prints at dawn. They go to the middle and stop.\n\nGran wrote down what her gran told her. It's up in my rafters. Take it down yourself, I've a bad shoulder.",
+        text: "Three hundred years back, half of Rimehold got out of bed on one night and walked onto the ice. My grandmother's grandmother's... it goes on a while... followed the prints at dawn. They go to the middle and stop.\n\nGran wrote down what her gran told her. It's up in my rafters. Take it down yourself, I've a bad shoulder.",
         opts: [["I'll take it.", "hub", ["tome:test_04", "lead:frozen_lake"]]],
       },
       middle: {
@@ -578,8 +704,37 @@ export const NPCS = [
           ["The shrine by the lake.", "shrine"],
           ["The hunter's lodge.", "lodge"],
           ["Does the ice ever open?", "open"],
+          ["Why did the Grey Host come?", "calling"],
+          ["The ravens.", "ravens"],
           ["Nothing. Keep warm.", "end"],
         ],
+      },
+      calling: {
+        text: "You've been reading. Nobody asks that who hasn't.\n\nWe don't tell southerners this. My people were the Host. The ones who stayed behind with the wounded, anyway. And the old women say nobody ordered that crossing. There was a sound under the ice, one winter, like a bell a long way down, and every fighting man on the Isles got up and started sharpening things. Couldn't have told you why. Couldn't have stopped.\n\nGran said you never hear it with your ears. You hear it with whatever part of you is already angry.",
+        opts: [
+          ["Is it still being rung?", "calling2", ["flag:heard_the_calling"]],
+          ["Thank you for telling me.", "hub", ["flag:heard_the_calling"]],
+        ],
+      },
+      calling2: {
+        text: "Every third night. You've got walls, you know that better than I do.\n\nThere's a name goes with it now, in the newer verses. I'll not say it indoors.\n\nIf you ever find you can make that sound yourself, and I've a feeling about you, think hard about who you'd be copying.",
+        opts: [["Say it outdoors, then.", "named"], ["I will.", "hub"]],
+      },
+      ravens: {
+        text: "Ours. Every man of the Isles fed one from his own hand, and it was said that if you died abroad your raven carried your name home.\n\nWhen the Host cut down one of your bells they nailed a raven up in its place, and you southerners took it for spite. It was a trade. A voice for a voice. They'd been told to take the bells, and some part of them was still decent enough to leave something.",
+        opts: [["And now?", "ravens2", ["flag:heard_ravens"]]],
+      },
+      ravens2: {
+        text: "Now there's six thousand birds that flew home that winter with no names to carry. They've not known what to do with themselves since.\n\nSo they do the one thing they've left. They go where the Host is going next, and they get there first, and they wait.\n\nIf you see ravens on your wall at dusk, count them. Then bar the gate.",
+        opts: [["I'll count.", "hub"]],
+      },
+      named: {
+        text: "...Fine. Stand in the doorway. Half out.\n\nMorvane. There. The verses say he sits at the middle of it, and the rest go quiet when he speaks.\n\nBut here's what Gran had from her gran. Those below don't have names. Not one of them, not ever. They've no use for them. So if there's a name down there, they made it for somebody who came to them needing one. Somebody who'd lost his own.\n\nNow shut the door. You're letting it listen.",
+        opts: [["Who loses a name?", "named2", ["clue:named_by_them", "flag:heard_named"]]],
+      },
+      named2: {
+        text: "Somebody who had it burned off every wall in the country, I'd think.\n\nAsk the knights whose that was. They kept a list. They always keep a list.",
+        opts: [["I will.", "hub", ["lead:ashen_chapterhouse"]]],
       },
       shrine: {
         text: "Older than the village. There's a moon cut into it, round and full. Folk go out on the full moon and leave offerings and nothing happens, and they go home pleased that nothing happened.\n\nGran used to say, \"it's the other one you want.\" She said it the way you'd say it about a spoon.",
@@ -664,6 +819,315 @@ export const NPCS = [
       },
     },
   },
+  // ================================================================== THE HIDDEN RETURNED
+  // Four families who ask the player to find out whether someone they love came back as themselves.
+  // The suspects are ordinary-looking villagers (the mobs feature spawns them; see data/returned.js for
+  // the truth of each case and the tells). Not every suspect is a copy, and one asker is the copy herself.
+  // ------------------------------------------------------------------ Nessa Dunn, Millbrook
+  {
+    id: "nessa", name: "Nessa Dunn", where: "Millbrook, behind the counter of the bakery. Her husband Harl works the ovens in the back. The shop bell has been taken off the door.",
+    start: [
+      [["flag:case_harl_right"], "after_right"],
+      [["flag:case_harl_wrong"], "after_wrong"],
+      [["flag:nessa_met"], "hub"],
+      [[], "first"],
+    ],
+    nodes: {
+      first: {
+        text: "Two loaves is all that's left. He's baking less.\n\nYou're the one from the keep. Sister Wren says you look at things properly. Would you look at something for me? It's my husband. Don't turn round. He's in the back.",
+        opts: [
+          ["What about him?", "what", ["flag:nessa_met"]],
+          ["Just the bread, thanks.", "end", ["flag:nessa_met"]],
+        ],
+      },
+      what: {
+        text: "Harl went out for flour four nights back and came home at dawn, damp, saying the road was long. It's a mile.\n\nHe's kind as ever. Kinder. He remembered my name-day, which he never has in nineteen years.\n\nBut he took the bell off the shop door. Said it gave him a head. And I came down in the night and he was stood in the pantry. Just stood. With his face to the wall.",
+        opts: [
+          ["What should I look for?", "tells"],
+          ["I'll watch him.", "hub"],
+        ],
+      },
+      tells: {
+        text: "Wren told me the three things, and I wish she hadn't.\n\nThe hand. Harl's right-handed, always was.\n\nThe wall. When they think nobody's by, they turn and face it.\n\nAnd bells. They can't bear one. Ring one close and they... go home, she said. She wouldn't say where home was.\n\nWatch him knead. Watch him when the shop's empty. Then come and tell me, and tell me true.",
+        opts: [["I'll watch him.", "hub"]],
+      },
+      hub: {
+        text: "Well? Have you watched him?",
+        opts: [
+          ["Tell me again what to look for.", "tells"],
+          ["Nessa, that is not Harl.", "verdict_yes"],
+          ["He's your husband. He's only tired.", "verdict_no"],
+          ["Not yet.", "end"],
+        ],
+      },
+      verdict_yes: {
+        text: "...No. No, it isn't, is it.\n\nHe kneads with his left. I've known since the second morning. I wanted someone else to say it so it wouldn't be me.\n\nThe awful thing is he doesn't know. He thinks he's Harl. He asked me this morning why I was crying and he meant it.\n\nThere's a hand-bell on the chapel step. I can't. Would you? Or don't. I don't know which I'm asking.",
+        opts: [["I'm sorry, Nessa.", "end", ["flag:case_harl_right", "sp:1"]]],
+      },
+      verdict_no: {
+        text: "Tired. Yes. That'll be it. The road, and the damp.\n\nThank you. You've no idea. I'll make him a posset and we'll say no more about it.",
+        opts: [["Be well.", "end", ["flag:case_harl_wrong"]]],
+      },
+      after_right: {
+        text: "I still set two places. He still sits at one, some nights. I've stopped coming down to look.\n\nYou told me true. I asked you to. Take a loaf.",
+        opts: [["Thank you.", "end"]],
+      },
+      after_wrong: {
+        text: "You said he was tired.\n\nThe bed was empty this morning and there were wet footprints to the well, and none back. And the pantry wall's damp at the height of a man's face.\n\nI don't blame you. I wanted to hear it. Next time somebody asks you, look harder.",
+        opts: [["I'm sorry.", "end"]],
+      },
+    },
+  },
+  // ------------------------------------------------------------------ Jorund Kell, Rimehold
+  {
+    id: "jorund", name: "Jorund Kell", where: "Rimehold, the net sheds by the frozen lake. His father, old Bram Kell, mends nets inside with a grey dog at his feet.",
+    start: [
+      [["flag:case_bram_right"], "after_right"],
+      [["flag:case_bram_wrong"], "after_wrong"],
+      [["flag:jorund_met"], "hub"],
+      [[], "first"],
+    ],
+    nodes: {
+      first: {
+        text: "You. Southerner. You've been asking about the lake, so you know what comes out of it.\n\nMy father went through the ice at midwinter. We had him out inside a hundred breaths. He's not been the same and I need someone who isn't kin to tell me what he is.",
+        opts: [
+          ["Not the same how?", "what", ["flag:jorund_met"]],
+          ["Ask someone else.", "end", ["flag:jorund_met"]],
+        ],
+      },
+      what: {
+        text: "He mends with his left hand now. Seventy years a right-handed man.\n\nHe sits with his face to the shed wall, hours at a time.\n\nYou know what that makes him, round here. There's men saying we should take him out on the ice with the fishing bell and be done. I've an axe by the door that says they won't. But I have to know.",
+        opts: [
+          ["I'll go and look at him.", "hub"],
+          ["What does the dog make of him?", "dog"],
+        ],
+      },
+      dog: {
+        text: "The dog? Sleeps on his feet. Same as ever.\n\n...Why? What's the dog to do with it?",
+        opts: [["I'll go and look at him.", "hub"]],
+      },
+      hub: {
+        text: "Well? You've seen him. What is he?",
+        opts: [
+          ["What does the dog make of him?", "dog"],
+          ["He's your father. Leave him be.", "verdict_no"],
+          ["That is not Bram Kell.", "verdict_yes"],
+          ["I need longer.", "end"],
+        ],
+      },
+      verdict_no: {
+        text: "Say why. I'll need to say it to the others.\n\n...His right arm hangs. Aye. Since the ice. I'd taken it for stubbornness. And the wall's where the lamp hook is, and his eyes are going. And he rings the dawn bell himself, every morning, same as he has since before I was born. Would one of them do that?\n\nGods. I nearly let them take a sick old man out on the lake.\n\nYou've done my house a good turn. Left hand and a wall, and I was ready to believe it. That's how it gets you, isn't it. It doesn't even have to send one.",
+        opts: [["Look after him.", "end", ["flag:case_bram_right", "sp:1"]]],
+      },
+      verdict_yes: {
+        text: "Then that's that.\n\n...I'll do it myself. He taught me the knots. It should be me.",
+        opts: [["...", "end", ["flag:case_bram_wrong"]]],
+      },
+      after_right: {
+        text: "He's in the shed. Swearing at a net with his wrong hand. Dog on his feet.\n\nGo in and say good day. He likes you. He says you look at things properly.",
+        opts: [["I will.", "end"]],
+      },
+      after_wrong: {
+        text: "We rang the fishing bell at him on the ice. He put his good hand over his ear and asked me what in the cold hells I was doing.\n\nHe's forgiven me. I've not. Get out of my shed.",
+        opts: [["I was wrong. I'm sorry.", "end"]],
+      },
+    },
+  },
+  // ------------------------------------------------------------------ Tilly Marsh, Gull's Rest
+  {
+    id: "tilly", name: "Tilly Marsh", where: "Gull's Rest, sitting on the sea wall below the lighthouse. About twelve. Her little brother Pip plays on the shingle below, always at the tideline.",
+    start: [
+      [["flag:case_pip_kept"], "after_kept"],
+      [["flag:case_pip_told"], "after_told"],
+      [["flag:tilly_met"], "hub"],
+      [[], "first"],
+    ],
+    nodes: {
+      first: {
+        text: "That's my brother. Pip. He's six.\n\nYou're going to look at him and then you're going to look at me. Grown-ups do. So I'll save you the bother. Yes. I know.",
+        opts: [
+          ["Know what?", "what", ["flag:tilly_met"]],
+          ["I'll leave you be.", "end", ["flag:tilly_met"]],
+        ],
+      },
+      what: {
+        text: "He went off the rocks in the spring. Third night. I was meant to be minding him.\n\nHe walked back up the beach in the morning. Wet. Smiling. Mam screamed the whole street awake, she was that glad.\n\nHe throws with his left now. He doesn't like the chapel. When he thinks I'm asleep he gets up and stands by the wall on the sea side.\n\nHe's not Pip. He's ever so nice, though. He lets me win.",
+        opts: [
+          ["Does your mother know?", "mam"],
+          ["Why are you telling me?", "why"],
+        ],
+      },
+      mam: {
+        text: "Mam sings again. She does his hair every morning. She didn't get out of bed for a month before he came back.\n\nShe doesn't know. Or she does and she's better at it than me.",
+        opts: [["Why are you telling me?", "why"]],
+      },
+      why: {
+        text: "Because you'd have worked it out. You've got a bell on your pack, or you'll get one. Everybody who works it out gets a bell.\n\nI'm asking you not to. That's all. He's not hurting anybody. And the real Pip's not coming back whether you ring it or not, is he.\n\nIs he?",
+        opts: [
+          ["I'll say nothing, Tilly.", "kept", ["flag:case_pip_kept", "sp:1"]],
+          ["Your mother has to be told.", "told", ["flag:case_pip_told", "sp:1"]],
+          ["I need to think.", "hub"],
+        ],
+      },
+      hub: {
+        text: "Have you thought?",
+        opts: [
+          ["I'll say nothing, Tilly.", "kept", ["flag:case_pip_kept", "sp:1"]],
+          ["Your mother has to be told.", "told", ["flag:case_pip_told", "sp:1"]],
+          ["Still thinking.", "end"],
+        ],
+      },
+      kept: {
+        text: "...Thank you.\n\nI do know it's not him. I say goodnight to the real one after. Out the window. In case it carries.",
+        opts: [["Goodnight, Tilly.", "end"]],
+      },
+      told: {
+        text: "Then you tell her. I'm not going to. And you ring it, if it's got to be rung. Not me.\n\nI was minding him the first time. I'm not doing it twice.",
+        opts: [["I understand.", "end"]],
+      },
+      after_kept: {
+        text: "He found a crab today. He named it after me.\n\nYou kept your word. Grown-ups mostly don't.",
+        opts: [["Look after each other.", "end"]],
+      },
+      after_told: {
+        text: "Mam knows now. She hasn't rung anything. She just does his hair slower.\n\nI suppose you thought it was right. I suppose it might be.",
+        opts: [["I'm sorry, Tilly.", "end"]],
+      },
+    },
+  },
+  // ------------------------------------------------------------------ Hesper Lowe, Mirelight
+  {
+    id: "hesper", name: "Hesper Lowe", where: "Mirelight, the last house before the lanterns stop. She stands in her doorway with a cup of tea in her LEFT hand, half turned toward the door-post. Her husband Odo cuts reeds out back, and the dog stays out there with him.",
+    start: [
+      [["flag:case_hesper_right"], "after_right"],
+      [["flag:case_hesper_done"], "after_other"],
+      [["flag:hesper_met"], "hub"],
+      [[], "first"],
+    ],
+    nodes: {
+      first: {
+        text: "Oh, thank goodness, someone with sense. Come in. No, stay there, the dog's in a mood, he's been in a mood for weeks.\n\nIt's my Odo. I think he's one of them. One of the ones that come back. Will you look at him for me? I daren't ask anyone in the village.",
+        opts: [
+          ["What makes you think so?", "what", ["flag:hesper_met"]],
+          ["Not today.", "end", ["flag:hesper_met"]],
+        ],
+      },
+      what: {
+        text: "He looks at me strangely. Sideways. Like he's counting something.\n\nHe's taken to sleeping in the reed shed. He's taken the dog with him, and that dog was MINE, he was mine from a pup, and now he growls when I come near.\n\nAnd Odo's started ringing the chapel bell of an evening. Every evening. He knows I can't abide it lately, it goes right through my head, and he rings it anyway and watches the house.\n\nSomething's wrong with him. You'll see it.",
+        opts: [
+          ["What should I look for?", "tells"],
+          ["I'll go and see him.", "hub"],
+        ],
+      },
+      tells: {
+        text: "Old Mag says three things. The wrong hand. Standing to the wall. And they can't bear a bell.\n\nWell, Odo's right-handed same as ever, I'll grant. And I've not caught him at a wall. But he's sly. He'd hide it.\n\nGo round the back and watch him. I'll wait here. I like it here by the door-post, it's restful.",
+        opts: [["I'll go and see him.", "hub"]],
+      },
+      hub: {
+        text: "Did you see him? Did you see how he looks at the house?",
+        opts: [
+          ["Odo is himself, Hesper.", "verdict_odo_fine"],
+          ["You're right. That's not Odo.", "verdict_odo"],
+          ["Hesper. Which hand is your cup in?", "verdict_her"],
+          ["Not yet.", "end"],
+        ],
+      },
+      verdict_odo_fine: {
+        text: "Himself? Then why does he look at me like that? Why did he take my dog?\n\n...You're kind to say it. I expect you're right. I expect I'm tired. I haven't felt myself since the night I went out for the washing and the fog came down.\n\nIt was only a moment. I was only gone a moment.",
+        opts: [["...Rest, Hesper.", "end", ["flag:case_hesper_done"]]],
+      },
+      verdict_odo: {
+        text: "I KNEW it. I knew. Oh, my poor Odo.\n\nI'll tell the neighbours. They'll know what to do. They've a bell.\n\nThank you. Thank you. Mind the dog as you go, he's not been right.",
+        opts: [["...", "end", ["flag:case_hesper_done", "flag:case_hesper_blamed_odo"]]],
+      },
+      verdict_her: {
+        text: "My...\n\nThe left. It's in my left.\n\nI'm right-handed. I've always been...\n\nThe dog. The bell. He isn't ringing it AT me. He's ringing it to see if I'll... And I've been stood at this door-post since noon, haven't I. Facing it.\n\nOh.\n\nOh, poor Odo. He's known for weeks. He's been sleeping in the shed and he still brings me my tea.\n\nDon't tell him I know. Please. Let me have the winter. I'll go quiet in the spring, I promise. I'd just like to see him cut the reeds once more.",
+        opts: [["I won't tell him.", "end", ["flag:case_hesper_right", "sp:2"]]],
+      },
+      after_right: {
+        text: "He brought me tea again this morning. I held it in my right. It took all my mind to do it, but I did, and he smiled.\n\nThank you for asking about the cup. Nobody else looked at ME.",
+        opts: [["Until spring, Hesper.", "end"]],
+      },
+      after_other: {
+        text: "Oh, it's you. I'm sorry, I can't talk, I've such a head. That bell.\n\nIt's restful here by the post. I'll just stand a while.",
+        opts: [["...", "end"]],
+      },
+    },
+  },
+  // ------------------------------------------------------------------ Corvin Hale, in the Hollow
+  {
+    id: "corvin", name: "A Voice in the Water", where: "THE HOLLOW. A still pool beside the light river below the Wound ledge, or any quiet water in the Hollow. There is no body: stand the NPC in the water and make it invisible if you can (a potion of invisibility on the NPC, or sink it to the neck). Only a Sorcerer gets words out of it.",
+    start: [
+      [["!path:marked"], "deaf"],
+      [["flag:morvane_fallen", "!flag:corvin_after"], "after"],
+      [["flag:corvin_met"], "hub"],
+      [[], "first"],
+    ],
+    nodes: {
+      deaf: {
+        text: "§7The pool is singing. Thousands of voices on one note.\n\nOne of them, somewhere near the bottom, is very slightly off it, and seems to be swearing.\n\nYou cannot make out the words. Someone with the art might.",
+        opts: [["Leave the water.", "end"]],
+      },
+      first: {
+        text: "No. No, no. Stand still. You're dripping warmth into it.\n\nSo it's you. The flat one. I've been listening to you murder those arts from down here for longer than I care to say, and now you've walked in, on legs, and you want to chat.\n\nWell? Three hundred years I've held this note with every soul they ever took. Make it worth my dropping it.",
+        opts: [
+          ["Who are you?", "who", ["flag:corvin_met"]],
+          ["Are you dead?", "dead", ["flag:corvin_met"]],
+        ],
+      },
+      who: {
+        text: "I was burned. Thoroughly, at dawn, with my books. And then some careful soul put what was left into a river, on the theory that nothing could gather it.\n\nNot one man on that tribunal had ever asked himself where rivers go.\n\nHale. Corvin Hale. I tuned the hundred bells of Crownhold and I held a lamp at a table of wet stone, and I was right about everything, and it did me no good at all.",
+        opts: [["I have read your notebooks.", "hub", ["sp:1"]], ["Old Mag sent me, in a way.", "mag"]],
+      },
+      dead: {
+        text: "I wrote it down myself. \"Those who walk down to them are not eaten. They are kept.\" I simply never expected to be evidence.\n\nI'm not alive. I'm not gone. I am a note with opinions. It turns out that's most of what I was before.",
+        opts: [["Who were you?", "who"]],
+      },
+      hub: {
+        text: "Ask. Quickly. Every word I say to you is a word I'm not singing, and they notice.",
+        opts: [
+          ["What did the truce really say?", "truce"],
+          ["Tell me about the King.", "king"],
+          ["Your last page stops mid-sentence.", "sentence"],
+          ["Old Mag is still alive.", "mag"],
+          ["Who sits in the chair down here?", "chair"],
+          ["Go back to your note.", "end"],
+        ],
+      },
+      truce: {
+        text: "Three lines. I can still see his breath in the lamp.\n\nThey take back the army they called. Every third night is theirs: no bell is rung, they walk above as guests, and any of ours who wish may walk below. And it is sworn on their crown, not his, which he may not wear and they would not touch.\n\nThat's all. No souls. No firstborn. No trick. Everything that went wrong after went wrong on our side of the paper.",
+        opts: [["Back.", "hub", ["clue:truce_terms"]]],
+      },
+      king: {
+        text: "He was the only man at court who never laughed at me. Do you know how rare that is, for a king? They're raised to it.\n\nHe took their pledge in his bare right hand because it was offered to him, and it would have been rude to ask for a cloth. It bit him to the bone. He never used that hand again and he never once mentioned it.\n\nAt my trial I had one defence. \"I remember him.\" It was true and it was sufficient and they burned me for it.",
+        opts: [["Back.", "hub"]],
+      },
+      sentence: {
+        text: "\"Someone must.\" Yes. I ran out of candle. They came for me before I could find another.\n\nYou'll have imagined something grand. Someone must wear the crown. Someone must slay the thing.\n\nIt was: someone must go down and say good morning. That's the whole discovery. Thirty years, a hundred bells, and that's all of it. They had been knocking for four hundred years and nobody had answered the door.\n\nA thing sworn can be sworn again. But only by someone who's first bothered to say hello.",
+        opts: [["Good morning, Master Hale.", "sentence2", ["flag:corvin_ending"]]],
+      },
+      sentence2: {
+        text: "...\n\nWell.\n\nThat's the first time anyone's said it to me, as it happens. In either world.\n\nGet out before I become sentimental. It puts me off the note.",
+        opts: [["Back.", "hub", ["sp:2"]]],
+      },
+      mag: {
+        text: "Magda? The small one? She's ALIVE?\n\nShe was twelve. She carried the ninth notebook into a swamp in the dark with hounds behind her, and I never knew if...\n\nTell her this, exactly. Tell her she still holds a pen like a trowel. She'll know it's me. Nobody else was ever that rude to her.",
+        opts: [["I'll tell her.", "hub", ["flag:corvin_says_mag"]]],
+      },
+      chair: {
+        text: "No.\n\nNot from me. I'll teach you every art there is and I'll tell you what was said at that table to the word. But who sits there is a thing you'll want to have worked out yourself, standing up, before you see him. It will matter to you that you did. It will matter to him.\n\nYou have all the pieces. Three people up there are each holding one. Go and be a nuisance to an archivist.",
+        opts: [["Back.", "hub"]],
+      },
+      after: {
+        text: "He's stopped.\n\nI felt it go out of the note like a string cut. The whole Choir went a hair sharp. They don't know what to do without him. Neither do I, as it happens.\n\nI held the lamp for him once, at the table. I should have liked to hold it at the end. I gather you did that instead, in your fashion. Was he...\n\nNo. Don't tell me. I remember him. That was always the point of me.",
+        opts: [["He kept his father's book.", "after2", ["flag:corvin_after"]]],
+      },
+      after2: {
+        text: "Of course he did. The red one. He used to read it on the walls on the third nights, when he thought no one could see.\n\nThe chair's empty now, and it wants someone who can hear all of this at once and not break. If that's to be you, then listen to an old flat voice: keep the truce. It was a good one. It was only ever kept by one man.",
+        opts: [["I'll remember him too.", "hub", ["sp:2"]]],
+      },
+    },
+  },
 ];
 
 // Quartermaster gossip (one line shown when you open his shop; the quartermaster thread can use it)
@@ -676,6 +1140,6 @@ export const RUMORS = [
   "Ever notice it's always the third night? I count stock. I notice counts.",
   "A fellow sold me a book once, all the writing backward. I sold it on quick. Gave me a headache.",
   "Sunscar's statues have no faces. Wind, they say. I've sold enough chisels to know a chisel mark.",
-  "Half of Hollowfast walked onto a lake once. The other half won't talk about it. Bad for trade.",
+  "Half of Rimehold walked onto a lake once. The other half won't talk about it. Bad for trade.",
   "People who keep books say the old king's name turns up if you read enough of them. What old king?",
 ];

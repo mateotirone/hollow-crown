@@ -3,6 +3,19 @@
   "minecraft:npc_dialogue": {
     "scenes": [
       {
+        "scene_tag": "siege_lore_wren_boy",
+        "npc_name": "Sister Wren",
+        "text": "They're saying in the square that the knocking has stopped. The first third night in three hundred years that nobody had to count.\n\nDo you still have the journal? Turn to the lambing entry. \"He is nine, grey-eyed, quick with his right hand and quicker to laugh.\"\n\nEverybody is going to remember the thing you fought down there. Somebody ought to remember that one as well. I'll do it, if you like. I'm good with the ones nobody else sits up for.",
+        "buttons": [
+          {
+            "name": "Thank you, Sister.",
+            "commands": [
+              "/scriptevent siege:lore_say wren boy 0"
+            ]
+          }
+        ]
+      },
+      {
         "scene_tag": "siege_lore_wren_first",
         "npc_name": "Sister Wren",
         "text": "Mind the step, traveler. It's dark, I know. It's been dark in Millbrook since before I was born.\n\nI'm Sister Wren. I patch people up. You're from one of the new keeps, aren't you? You have that look. Like someone who has started counting to three.",
@@ -389,10 +402,10 @@
       {
         "scene_tag": "siege_lore_wren_where",
         "npc_name": "Sister Wren",
-        "text": "Down. Tobin went to the well. In Hollowfast they walked out onto the lake. In Gull's Rest it was the sea.\n\nAlways water, always the third night. If you want to know more about the lake, there's a woman in Hollowfast called Sigrun whose grandmother followed the footprints.",
+        "text": "Down. Tobin went to the well. In Rimehold they walked out onto the lake. In Gull's Rest it was the sea.\n\nAlways water, always the third night. If you want to know more about the lake, there's a woman in Rimehold called Sigrun whose grandmother followed the footprints.",
         "buttons": [
           {
-            "name": "Hollowfast. North?",
+            "name": "Rimehold. North?",
             "commands": [
               "/scriptevent siege:lore_say wren where 0"
             ]
@@ -420,6 +433,38 @@
             "name": "Tell me about the clocks.",
             "commands": [
               "/scriptevent siege:lore_say wren after 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_aldous_saw",
+        "npc_name": "Sir Aldous Vane",
+        "text": "You saw one. No, don't, I can tell. I saw one too. From the chapterhouse roof, on the east road, standing in the wheat. It did not flatten the wheat.\n\nI reported it. I wrote it out properly, time and place and what it looked like, the way they teach us. The Grandmaster's clerk read it in front of me and put it on the fire and asked if there was anything else.",
+        "buttons": [
+          {
+            "name": "What did you say?",
+            "commands": [
+              "/scriptevent siege:lore_say aldous saw 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_aldous_saw2",
+        "npc_name": "Sir Aldous Vane",
+        "text": "I said no, sir. God help me, I said no, sir, and I saluted.\n\nI have been thinking about that since. Not the thing in the wheat. The clerk. He wasn't surprised. He had the look of a man who has burned that page before.\n\nWe are sworn to stand between the people and the dark. I did not know there was a part of the dark we had agreed not to mention.",
+        "buttons": [
+          {
+            "name": "Ask Brother Cael about a drawer.",
+            "commands": [
+              "/scriptevent siege:lore_say aldous saw2 0"
+            ]
+          },
+          {
+            "name": "Keep your eyes open, Aldous.",
+            "commands": [
+              "/scriptevent siege:lore_say aldous saw2 1"
             ]
           }
         ]
@@ -654,6 +699,51 @@
         ]
       },
       {
+        "scene_tag": "siege_lore_mag_saw",
+        "npc_name": "Old Mag",
+        "text": "Don't tell me. I can smell it on your coat. Cold stone and the inside of a bell.\n\nSo they've come up the long way and walked to your wall on their own feet. Well. I wondered if I'd live to see that again, and it turns out I live to see everything.\n\nSit. You'll want to know what it was, and I'm not going to tell you, and you'll want to know why not.",
+        "buttons": [
+          {
+            "name": "Why not?",
+            "commands": [
+              "/scriptevent siege:lore_say mag saw 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_mag_saw2",
+        "npc_name": "Old Mag",
+        "text": "Because you'd go home thinking you understood it, and that's how people get careless at gates.\n\nI'll give you what's safe. It wasn't angry at you. Did you notice? Your raiders hate you, it's all over them. That one didn't. It walked up to your wall the way a man walks up to a field he's been told to measure.\n\nIt was sent to look. Something wanted to know how high you build.",
+        "buttons": [
+          {
+            "name": "Sent by what?",
+            "commands": [
+              "/scriptevent siege:lore_say mag saw2 0"
+            ]
+          },
+          {
+            "name": "Then I'll build higher.",
+            "commands": [
+              "/scriptevent siege:lore_say mag saw2 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_mag_saw3",
+        "npc_name": "Old Mag",
+        "text": "There. That's the right question, and you asked it in the right order, after the fright and before the bragging.\n\nKeep asking it. Ask the bell-keepers and the grey brothers and that girl on the ice. They've each got a piece and they each think it's the whole.\n\nI've got a piece too. You'll get it when it won't kill you.",
+        "buttons": [
+          {
+            "name": "I'll come back.",
+            "commands": [
+              "/scriptevent siege:lore_say mag saw3 0"
+            ]
+          }
+        ]
+      },
+      {
         "scene_tag": "siege_lore_mag_first",
         "npc_name": "Old Mag",
         "text": "Wipe your feet. Not there. THERE.\n\nI'm Mag. I'm three hundred and eleven years old. Go on, laugh. They all do. Then they ask for something for a cough.",
@@ -706,6 +796,38 @@
             "name": "Just the cure.",
             "commands": [
               "/scriptevent siege:lore_say mag cough 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_mag_arts",
+        "npc_name": "Old Mag",
+        "text": "Stop. Stand there. Don't come in yet.\n\n...Oh, child. You picked it up. I can hear it on you from across the room, like a wet finger on a glass.\n\nWell. It's done, and nobody is going to teach you, because the last man who could is ash. But I was his prentice and I was a nosy one. Take this. I wrote it when I was eleven. I understood about a third of it then and I wish I'd kept it that way.",
+        "buttons": [
+          {
+            "name": "What is it?",
+            "commands": [
+              "/scriptevent siege:lore_say mag arts 0"
+            ]
+          },
+          {
+            "name": "Thank you, Mag.",
+            "commands": [
+              "/scriptevent siege:lore_say mag arts 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_mag_arts2",
+        "npc_name": "Old Mag",
+        "text": "Everything he let slip about what your sort can do. Fourteen of them, he counted. It won't tell you how. He never told ME how. It'll tell you what happened to the people who found out.\n\nRead the third one twice. Read the tenth one before you get proud of yourself.\n\nAnd some of them you'll not manage until you've been somewhere or met someone. The book says where, if you squint.",
+        "buttons": [
+          {
+            "name": "I'll read it.",
+            "commands": [
+              "/scriptevent siege:lore_say mag arts2 0"
             ]
           }
         ]
@@ -772,9 +894,54 @@
             ]
           },
           {
-            "name": "Goodbye, Mag.",
+            "name": "The day they took the king.",
             "commands": [
               "/scriptevent siege:lore_say mag hub 4"
+            ]
+          },
+          {
+            "name": "Goodbye, Mag.",
+            "commands": [
+              "/scriptevent siege:lore_say mag hub 5"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_mag_trowel",
+        "npc_name": "Old Mag",
+        "text": "What did you say?\n\nSay it again. Slowly.\n\n...\"Like a trowel.\" He said that to me the morning I was nine, the first day, in front of all eleven of the others, and I cried, and he gave me his own pen and never asked for it back.\n\nThree hundred years. I thought I was waiting to see what came back out of that Crack. I think I was only waiting to be told off one more time.\n\nSit down, child. I've a notebook under the bed I've been denying for a long while.",
+        "buttons": [
+          {
+            "name": "I'm glad I told you.",
+            "commands": [
+              "/scriptevent siege:lore_say mag trowel 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_mag_king",
+        "npc_name": "Old Mag",
+        "text": "I was eleven, and small enough to be under the cart.\n\nThey'll tell you she threw him in. She didn't throw him. Nobody threw that man anywhere. They walked him down into the valley to the Crack with his hands tied, and at the edge he asked them to cut the rope, and the girl nodded, and they cut it.\n\nHe turned round once. He was looking for her face. She had already put her back to him.\n\nThen he walked in. Upright. Like a man going down to his own cellar.",
+        "buttons": [
+          {
+            "name": "And then?",
+            "commands": [
+              "/scriptevent siege:lore_say mag king 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_mag_king2",
+        "npc_name": "Old Mag",
+        "text": "And then nothing. That's what I'm telling you, child. No scream. No fall. I've seen folk die every way there is to do it, and that wasn't one of them.\n\nThree hundred years I've kept myself going on roots and spite. Did you never wonder what I was waiting to see come back out?",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say mag king2 0"
             ]
           }
         ]
@@ -814,7 +981,7 @@
       {
         "scene_tag": "siege_lore_mag_moon",
         "npc_name": "Old Mag",
-        "text": "\"What the carving shows, the sky must not.\" He made us chant it.\n\nThere's a door in the north, at the Hollowfast lake. A shrine with a moon cut into it. One of us went through that door with the hunter behind her. I don't know which of them I feel sorrier for.",
+        "text": "\"What the carving shows, the sky must not.\" He made us chant it.\n\nThere's a door in the north, at the Rimehold lake. A shrine with a moon cut into it. One of us went through that door with the hunter behind her. I don't know which of them I feel sorrier for.",
         "buttons": [
           {
             "name": "Back.",
@@ -1080,6 +1247,83 @@
         ]
       },
       {
+        "scene_tag": "siege_lore_sage_saw",
+        "npc_name": "Archivist Pell",
+        "text": "Oh, thank goodness, you're in one piece. I watched from the upstairs window. Well. I watched from under the upstairs window, with a book over my head, but I heard a great deal.\n\nNow, I have been through the shelves since four this morning and I want to show you something that is not there. Sieges, raiders, the Grey Host, every third night, there are pages and pages. A tall thing with no face that the raiders bow to? Not a line. Not one.",
+        "buttons": [
+          {
+            "name": "Maybe nobody saw one before.",
+            "commands": [
+              "/scriptevent siege:lore_say sage saw 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_sage_saw2",
+        "npc_name": "Archivist Pell",
+        "text": "That's what I thought! For about an hour. Then I started looking at what's been cut.\n\nThere are pages gone from four of our books, all near the end, all in chapters about the last year of a siege somewhere. Cut with a blade, neatly, by somebody who cared about the binding.\n\nSo people have seen them. And then somebody tidied up. A missing page is still a clue, you know. It tells you which way the scissors were facing.",
+        "buttons": [
+          {
+            "name": "Who cuts pages that neatly?",
+            "commands": [
+              "/scriptevent siege:lore_say sage saw2 0"
+            ]
+          },
+          {
+            "name": "Keep looking, Pell.",
+            "commands": [
+              "/scriptevent siege:lore_say sage saw2 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_sage_saw3",
+        "npc_name": "Archivist Pell",
+        "text": "A librarian, I'm sorry to say. Somebody trained. Somebody with a house style.\n\nI used to work for people with a house style.\n\nIf you find a book out in the world with its last pages still in it, bring it to me before you bring it to anyone in grey. I'll make you a copy and hide the copy.",
+        "buttons": [
+          {
+            "name": "I will.",
+            "commands": [
+              "/scriptevent siege:lore_say sage saw3 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_sage_sum",
+        "npc_name": "Archivist Pell",
+        "text": "Sit down, sit down. I've been cataloguing what people TOLD you instead of what you shelved, and I don't like where the cards have ended up.\n\nCard one. A king was overthrown, and the Order that burned forty-one of his portraits never paid for a grave.\n\nCard two. He went into the Crack alive, on his own two feet.\n\nCard three. Those below have no names, and yet they have given one to somebody. Morvane.\n\nI'm an archivist. I don't draw conclusions, I file them. But I've only the one drawer left, and all three cards fit in it.",
+        "buttons": [
+          {
+            "name": "Say it, Pell.",
+            "commands": [
+              "/scriptevent siege:lore_say sage sum 0"
+            ]
+          },
+          {
+            "name": "Not yet. I'm not ready.",
+            "commands": [
+              "/scriptevent siege:lore_say sage sum 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_sage_sum2",
+        "npc_name": "Archivist Pell",
+        "text": "No. You say it. Your Ledger has a page for it, \"Who Is Morvane?\", and it wants a name in your own hand.\n\nAnd if we're right, then when you stand in front of him at last, look at his eyes, and at which hand he uses. The old journal in your pack describes a right-handed boy. Master Quill says the King came back from below using his left. I should like to know which of them is still in there.",
+        "buttons": [
+          {
+            "name": "I'll look.",
+            "commands": [
+              "/scriptevent siege:lore_say sage sum2 0"
+            ]
+          }
+        ]
+      },
+      {
         "scene_tag": "siege_lore_sage_first",
         "npc_name": "Archivist Pell",
         "text": "Oh! A keep with shelves. Do you know how rare that is? The Order threw me out for reading, and I've been walking ever since looking for somewhere that keeps books instead of burning them.\n\nPell. Archivist, formerly Novice. I'll catalogue for my supper.",
@@ -1258,6 +1502,51 @@
         ]
       },
       {
+        "scene_tag": "siege_lore_cael_saw",
+        "npc_name": "Brother Cael",
+        "text": "Close the door, please. All the way.\n\nYou are going to describe something to me and I am going to tell you the Order has no record of it. Both of us will know what that is worth. So let me save you the breath. Taller than a man. Nothing where the face goes. The raiders made way.\n\nThere is a drawer in this room with no label on it. I was told to burn what is in it forty years ago. I am a slow worker.",
+        "buttons": [
+          {
+            "name": "What is in the drawer?",
+            "commands": [
+              "/scriptevent siege:lore_say cael saw 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_cael_saw2",
+        "npc_name": "Brother Cael",
+        "text": "Eleven reports. The oldest is three hundred years old and the newest is a good deal younger than I am. A reeve, two priests, a child, a knight of this house. None of them knew about the others. They all draw the same thing in the margin, badly.\n\nAnd every one of them was written in the season before a village stopped answering letters.\n\nI am not telling you this to frighten you. I am telling you because you are the twelfth, and you are the first one who came and asked.",
+        "buttons": [
+          {
+            "name": "What does the Order call them?",
+            "commands": [
+              "/scriptevent siege:lore_say cael saw2 0"
+            ]
+          },
+          {
+            "name": "Keep the drawer safe.",
+            "commands": [
+              "/scriptevent siege:lore_say cael saw2 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_cael_saw3",
+        "npc_name": "Brother Cael",
+        "text": "Officially, nothing. A thing with no name cannot be in a report, and a thing in no report did not happen. That is very nearly our whole method.\n\nUnofficially the old brothers called them the tall company. As in, \"he keeps tall company these nights.\" They said it about men who had stopped sleeping.\n\nGo home and sleep. I mean it kindly.",
+        "buttons": [
+          {
+            "name": "Thank you, Brother.",
+            "commands": [
+              "/scriptevent siege:lore_say cael saw3 0"
+            ]
+          }
+        ]
+      },
+      {
         "scene_tag": "siege_lore_cael_first",
         "npc_name": "Brother Cael",
         "text": "The reading room is open to guests. The archive is not. Please don't lean on the shelves.\n\nYou may read the Chronicle volume on the lectern. We keep that one on display. You'll see why.",
@@ -1345,9 +1634,15 @@
             ]
           },
           {
-            "name": "Good day.",
+            "name": "The portraits you burned. Whose?",
             "commands": [
               "/scriptevent siege:lore_say cael hub 2"
+            ]
+          },
+          {
+            "name": "Good day.",
+            "commands": [
+              "/scriptevent siege:lore_say cael hub 3"
             ]
           }
         ]
@@ -1379,6 +1674,64 @@
         ]
       },
       {
+        "scene_tag": "siege_lore_cael_nobody",
+        "npc_name": "Brother Cael",
+        "text": "One man's. Forty-one portraits, a great seal, a coronation robe, a child's wooden horse with a name cut in the belly. All burned, all listed.\n\nI will tell you what is not on the list, because I have read it more often than my prayers. A coffin. A shroud. A gravedigger's fee. The Order kept receipts for the lamp oil it used that week. It did not pay to bury a king.\n\nI do not know what that means. I know what I think on the third nights.",
+        "buttons": [
+          {
+            "name": "What do you think?",
+            "commands": [
+              "/scriptevent siege:lore_say cael nobody 0"
+            ]
+          },
+          {
+            "name": "Good day, Brother.",
+            "commands": [
+              "/scriptevent siege:lore_say cael nobody 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_cael_nobody2",
+        "npc_name": "Brother Cael",
+        "text": "That a man nobody buried is a man nobody saw die.\n\nI didn't say that either. Good day.",
+        "buttons": [
+          {
+            "name": "Good day.",
+            "commands": [
+              "/scriptevent siege:lore_say cael nobody2 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_cael_plain",
+        "npc_name": "Brother Cael",
+        "text": "You've come from below. No, don't tell me, it's in how you're standing. Sit. Let an old man say something aloud in this building once before he dies.\n\nMorvane was King Oswin. Aldric's son. The boy in that journal of yours, nine years old and afraid of nothing. He made a peace with the Hollow and he kept it, and for that his own daughter put him through the Crack alive, took a saint's name, and founded this Order to burn his face off the world so that nobody would know him if he ever came back up.\n\nHe did not come back up. They crowned him down there instead. Every third night for three hundred years, that was him. Knocking.",
+        "buttons": [
+          {
+            "name": "He kept his father's journal.",
+            "commands": [
+              "/scriptevent siege:lore_say cael plain 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_cael_plain2",
+        "npc_name": "Brother Cael",
+        "text": "Then it was his to give, and he gave it to you. I wonder what he hoped you would do with it.\n\nMaster Quill wrote twelve volumes and we display one. I am going to write the thirteenth. Plainly, this time, and nobody will have to tell me to.\n\nThank you. Lean on the shelves if you like.",
+        "buttons": [
+          {
+            "name": "Good day, Brother.",
+            "commands": [
+              "/scriptevent siege:lore_say cael plain2 0"
+            ]
+          }
+        ]
+      },
+      {
         "scene_tag": "siege_lore_cael_sent",
         "npc_name": "Brother Cael",
         "text": "Aldous sent you. Aldous is asking.\n\nForty years I've waited for one of them to ask. I thought it would be someone cleverer, to be truthful. I'm glad it was someone kind.\n\nThe stair is behind the third shelf. Take the inventory. It's time somebody other than me had read it.",
@@ -1403,9 +1756,60 @@
             ]
           },
           {
-            "name": "I'll think about it.",
+            "name": "Forty-one portraits of whom?",
             "commands": [
               "/scriptevent siege:lore_say cael after 1"
+            ]
+          },
+          {
+            "name": "I'll think about it.",
+            "commands": [
+              "/scriptevent siege:lore_say cael after 2"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_sigrun_saw",
+        "npc_name": "Sigrun Ashby",
+        "text": "You've the look. Sit down before you fall down.\n\nTall. No face. Walked like it was remembering how. And your raiders stood aside for it.\n\nGran had a word for those and I'll not teach it you, it does no good in a mouth. But I'll tell you what she said. She said the Host never crossed the water with anything like that. They met it here. On the last night. It was the last thing any of them looked at.",
+        "buttons": [
+          {
+            "name": "Then it took the Host.",
+            "commands": [
+              "/scriptevent siege:lore_say sigrun saw 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_sigrun_saw2",
+        "npc_name": "Sigrun Ashby",
+        "text": "Something did. At seventeen past three, six thousand men, and not a boot left on the grass.\n\nSo think on this, southerner. Whatever is sending raiders at your wall every third night has been sending men. Other people's men. Angry and borrowed. Last night it sent one of its own.\n\nYou don't do that until you've stopped being careful.",
+        "buttons": [
+          {
+            "name": "Why would it stop being careful?",
+            "commands": [
+              "/scriptevent siege:lore_say sigrun saw2 0"
+            ]
+          },
+          {
+            "name": "I'll bar the gate.",
+            "commands": [
+              "/scriptevent siege:lore_say sigrun saw2 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_sigrun_saw3",
+        "npc_name": "Sigrun Ashby",
+        "text": "Because it's nearer than it was. That's all I've got. I'm a fisherman's daughter with a bad shoulder.\n\nCount your ravens tonight. If there's more of them than yesterday, they know something too.",
+        "buttons": [
+          {
+            "name": "I will.",
+            "commands": [
+              "/scriptevent siege:lore_say sigrun saw3 0"
             ]
           }
         ]
@@ -1451,7 +1855,7 @@
       {
         "scene_tag": "siege_lore_sigrun_lake",
         "npc_name": "Sigrun Ashby",
-        "text": "Three hundred years back, half of Hollowfast got out of bed on one night and walked onto the ice. My grandmother's grandmother's... it goes on a while... followed the prints at dawn. They go to the middle and stop.\n\nGran wrote down what her gran told her. It's up in my rafters. Take it down yourself, I've a bad shoulder.",
+        "text": "Three hundred years back, half of Rimehold got out of bed on one night and walked onto the ice. My grandmother's grandmother's... it goes on a while... followed the prints at dawn. They go to the middle and stop.\n\nGran wrote down what her gran told her. It's up in my rafters. Take it down yourself, I've a bad shoulder.",
         "buttons": [
           {
             "name": "I'll take it.",
@@ -1498,9 +1902,111 @@
             ]
           },
           {
-            "name": "Nothing. Keep warm.",
+            "name": "Why did the Grey Host come?",
             "commands": [
               "/scriptevent siege:lore_say sigrun hub 3"
+            ]
+          },
+          {
+            "name": "The ravens.",
+            "commands": [
+              "/scriptevent siege:lore_say sigrun hub 4"
+            ]
+          },
+          {
+            "name": "Nothing. Keep warm.",
+            "commands": [
+              "/scriptevent siege:lore_say sigrun hub 5"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_sigrun_calling",
+        "npc_name": "Sigrun Ashby",
+        "text": "You've been reading. Nobody asks that who hasn't.\n\nWe don't tell southerners this. My people were the Host. The ones who stayed behind with the wounded, anyway. And the old women say nobody ordered that crossing. There was a sound under the ice, one winter, like a bell a long way down, and every fighting man on the Isles got up and started sharpening things. Couldn't have told you why. Couldn't have stopped.\n\nGran said you never hear it with your ears. You hear it with whatever part of you is already angry.",
+        "buttons": [
+          {
+            "name": "Is it still being rung?",
+            "commands": [
+              "/scriptevent siege:lore_say sigrun calling 0"
+            ]
+          },
+          {
+            "name": "Thank you for telling me.",
+            "commands": [
+              "/scriptevent siege:lore_say sigrun calling 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_sigrun_calling2",
+        "npc_name": "Sigrun Ashby",
+        "text": "Every third night. You've got walls, you know that better than I do.\n\nThere's a name goes with it now, in the newer verses. I'll not say it indoors.\n\nIf you ever find you can make that sound yourself, and I've a feeling about you, think hard about who you'd be copying.",
+        "buttons": [
+          {
+            "name": "Say it outdoors, then.",
+            "commands": [
+              "/scriptevent siege:lore_say sigrun calling2 0"
+            ]
+          },
+          {
+            "name": "I will.",
+            "commands": [
+              "/scriptevent siege:lore_say sigrun calling2 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_sigrun_ravens",
+        "npc_name": "Sigrun Ashby",
+        "text": "Ours. Every man of the Isles fed one from his own hand, and it was said that if you died abroad your raven carried your name home.\n\nWhen the Host cut down one of your bells they nailed a raven up in its place, and you southerners took it for spite. It was a trade. A voice for a voice. They'd been told to take the bells, and some part of them was still decent enough to leave something.",
+        "buttons": [
+          {
+            "name": "And now?",
+            "commands": [
+              "/scriptevent siege:lore_say sigrun ravens 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_sigrun_ravens2",
+        "npc_name": "Sigrun Ashby",
+        "text": "Now there's six thousand birds that flew home that winter with no names to carry. They've not known what to do with themselves since.\n\nSo they do the one thing they've left. They go where the Host is going next, and they get there first, and they wait.\n\nIf you see ravens on your wall at dusk, count them. Then bar the gate.",
+        "buttons": [
+          {
+            "name": "I'll count.",
+            "commands": [
+              "/scriptevent siege:lore_say sigrun ravens2 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_sigrun_named",
+        "npc_name": "Sigrun Ashby",
+        "text": "...Fine. Stand in the doorway. Half out.\n\nMorvane. There. The verses say he sits at the middle of it, and the rest go quiet when he speaks.\n\nBut here's what Gran had from her gran. Those below don't have names. Not one of them, not ever. They've no use for them. So if there's a name down there, they made it for somebody who came to them needing one. Somebody who'd lost his own.\n\nNow shut the door. You're letting it listen.",
+        "buttons": [
+          {
+            "name": "Who loses a name?",
+            "commands": [
+              "/scriptevent siege:lore_say sigrun named 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_sigrun_named2",
+        "npc_name": "Sigrun Ashby",
+        "text": "Somebody who had it burned off every wall in the country, I'd think.\n\nAsk the knights whose that was. They kept a list. They always keep a list.",
+        "buttons": [
+          {
+            "name": "I will.",
+            "commands": [
+              "/scriptevent siege:lore_say sigrun named2 0"
             ]
           }
         ]
@@ -1718,6 +2224,785 @@
             "name": "It was worth looking.",
             "commands": [
               "/scriptevent siege:lore_say isolde after 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nessa_first",
+        "npc_name": "Nessa Dunn",
+        "text": "Two loaves is all that's left. He's baking less.\n\nYou're the one from the keep. Sister Wren says you look at things properly. Would you look at something for me? It's my husband. Don't turn round. He's in the back.",
+        "buttons": [
+          {
+            "name": "What about him?",
+            "commands": [
+              "/scriptevent siege:lore_say nessa first 0"
+            ]
+          },
+          {
+            "name": "Just the bread, thanks.",
+            "commands": [
+              "/scriptevent siege:lore_say nessa first 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nessa_what",
+        "npc_name": "Nessa Dunn",
+        "text": "Harl went out for flour four nights back and came home at dawn, damp, saying the road was long. It's a mile.\n\nHe's kind as ever. Kinder. He remembered my name-day, which he never has in nineteen years.\n\nBut he took the bell off the shop door. Said it gave him a head. And I came down in the night and he was stood in the pantry. Just stood. With his face to the wall.",
+        "buttons": [
+          {
+            "name": "What should I look for?",
+            "commands": [
+              "/scriptevent siege:lore_say nessa what 0"
+            ]
+          },
+          {
+            "name": "I'll watch him.",
+            "commands": [
+              "/scriptevent siege:lore_say nessa what 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nessa_tells",
+        "npc_name": "Nessa Dunn",
+        "text": "Wren told me the three things, and I wish she hadn't.\n\nThe hand. Harl's right-handed, always was.\n\nThe wall. When they think nobody's by, they turn and face it.\n\nAnd bells. They can't bear one. Ring one close and they... go home, she said. She wouldn't say where home was.\n\nWatch him knead. Watch him when the shop's empty. Then come and tell me, and tell me true.",
+        "buttons": [
+          {
+            "name": "I'll watch him.",
+            "commands": [
+              "/scriptevent siege:lore_say nessa tells 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nessa_hub",
+        "npc_name": "Nessa Dunn",
+        "text": "Well? Have you watched him?",
+        "buttons": [
+          {
+            "name": "Tell me again what to look for.",
+            "commands": [
+              "/scriptevent siege:lore_say nessa hub 0"
+            ]
+          },
+          {
+            "name": "Nessa, that is not Harl.",
+            "commands": [
+              "/scriptevent siege:lore_say nessa hub 1"
+            ]
+          },
+          {
+            "name": "He's your husband. He's only tired.",
+            "commands": [
+              "/scriptevent siege:lore_say nessa hub 2"
+            ]
+          },
+          {
+            "name": "Not yet.",
+            "commands": [
+              "/scriptevent siege:lore_say nessa hub 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nessa_verdict_yes",
+        "npc_name": "Nessa Dunn",
+        "text": "...No. No, it isn't, is it.\n\nHe kneads with his left. I've known since the second morning. I wanted someone else to say it so it wouldn't be me.\n\nThe awful thing is he doesn't know. He thinks he's Harl. He asked me this morning why I was crying and he meant it.\n\nThere's a hand-bell on the chapel step. I can't. Would you? Or don't. I don't know which I'm asking.",
+        "buttons": [
+          {
+            "name": "I'm sorry, Nessa.",
+            "commands": [
+              "/scriptevent siege:lore_say nessa verdict_yes 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nessa_verdict_no",
+        "npc_name": "Nessa Dunn",
+        "text": "Tired. Yes. That'll be it. The road, and the damp.\n\nThank you. You've no idea. I'll make him a posset and we'll say no more about it.",
+        "buttons": [
+          {
+            "name": "Be well.",
+            "commands": [
+              "/scriptevent siege:lore_say nessa verdict_no 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nessa_after_right",
+        "npc_name": "Nessa Dunn",
+        "text": "I still set two places. He still sits at one, some nights. I've stopped coming down to look.\n\nYou told me true. I asked you to. Take a loaf.",
+        "buttons": [
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say nessa after_right 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nessa_after_wrong",
+        "npc_name": "Nessa Dunn",
+        "text": "You said he was tired.\n\nThe bed was empty this morning and there were wet footprints to the well, and none back. And the pantry wall's damp at the height of a man's face.\n\nI don't blame you. I wanted to hear it. Next time somebody asks you, look harder.",
+        "buttons": [
+          {
+            "name": "I'm sorry.",
+            "commands": [
+              "/scriptevent siege:lore_say nessa after_wrong 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_jorund_first",
+        "npc_name": "Jorund Kell",
+        "text": "You. Southerner. You've been asking about the lake, so you know what comes out of it.\n\nMy father went through the ice at midwinter. We had him out inside a hundred breaths. He's not been the same and I need someone who isn't kin to tell me what he is.",
+        "buttons": [
+          {
+            "name": "Not the same how?",
+            "commands": [
+              "/scriptevent siege:lore_say jorund first 0"
+            ]
+          },
+          {
+            "name": "Ask someone else.",
+            "commands": [
+              "/scriptevent siege:lore_say jorund first 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_jorund_what",
+        "npc_name": "Jorund Kell",
+        "text": "He mends with his left hand now. Seventy years a right-handed man.\n\nHe sits with his face to the shed wall, hours at a time.\n\nYou know what that makes him, round here. There's men saying we should take him out on the ice with the fishing bell and be done. I've an axe by the door that says they won't. But I have to know.",
+        "buttons": [
+          {
+            "name": "I'll go and look at him.",
+            "commands": [
+              "/scriptevent siege:lore_say jorund what 0"
+            ]
+          },
+          {
+            "name": "What does the dog make of him?",
+            "commands": [
+              "/scriptevent siege:lore_say jorund what 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_jorund_dog",
+        "npc_name": "Jorund Kell",
+        "text": "The dog? Sleeps on his feet. Same as ever.\n\n...Why? What's the dog to do with it?",
+        "buttons": [
+          {
+            "name": "I'll go and look at him.",
+            "commands": [
+              "/scriptevent siege:lore_say jorund dog 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_jorund_hub",
+        "npc_name": "Jorund Kell",
+        "text": "Well? You've seen him. What is he?",
+        "buttons": [
+          {
+            "name": "What does the dog make of him?",
+            "commands": [
+              "/scriptevent siege:lore_say jorund hub 0"
+            ]
+          },
+          {
+            "name": "He's your father. Leave him be.",
+            "commands": [
+              "/scriptevent siege:lore_say jorund hub 1"
+            ]
+          },
+          {
+            "name": "That is not Bram Kell.",
+            "commands": [
+              "/scriptevent siege:lore_say jorund hub 2"
+            ]
+          },
+          {
+            "name": "I need longer.",
+            "commands": [
+              "/scriptevent siege:lore_say jorund hub 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_jorund_verdict_no",
+        "npc_name": "Jorund Kell",
+        "text": "Say why. I'll need to say it to the others.\n\n...His right arm hangs. Aye. Since the ice. I'd taken it for stubbornness. And the wall's where the lamp hook is, and his eyes are going. And he rings the dawn bell himself, every morning, same as he has since before I was born. Would one of them do that?\n\nGods. I nearly let them take a sick old man out on the lake.\n\nYou've done my house a good turn. Left hand and a wall, and I was ready to believe it. That's how it gets you, isn't it. It doesn't even have to send one.",
+        "buttons": [
+          {
+            "name": "Look after him.",
+            "commands": [
+              "/scriptevent siege:lore_say jorund verdict_no 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_jorund_verdict_yes",
+        "npc_name": "Jorund Kell",
+        "text": "Then that's that.\n\n...I'll do it myself. He taught me the knots. It should be me.",
+        "buttons": [
+          {
+            "name": "...",
+            "commands": [
+              "/scriptevent siege:lore_say jorund verdict_yes 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_jorund_after_right",
+        "npc_name": "Jorund Kell",
+        "text": "He's in the shed. Swearing at a net with his wrong hand. Dog on his feet.\n\nGo in and say good day. He likes you. He says you look at things properly.",
+        "buttons": [
+          {
+            "name": "I will.",
+            "commands": [
+              "/scriptevent siege:lore_say jorund after_right 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_jorund_after_wrong",
+        "npc_name": "Jorund Kell",
+        "text": "We rang the fishing bell at him on the ice. He put his good hand over his ear and asked me what in the cold hells I was doing.\n\nHe's forgiven me. I've not. Get out of my shed.",
+        "buttons": [
+          {
+            "name": "I was wrong. I'm sorry.",
+            "commands": [
+              "/scriptevent siege:lore_say jorund after_wrong 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_tilly_first",
+        "npc_name": "Tilly Marsh",
+        "text": "That's my brother. Pip. He's six.\n\nYou're going to look at him and then you're going to look at me. Grown-ups do. So I'll save you the bother. Yes. I know.",
+        "buttons": [
+          {
+            "name": "Know what?",
+            "commands": [
+              "/scriptevent siege:lore_say tilly first 0"
+            ]
+          },
+          {
+            "name": "I'll leave you be.",
+            "commands": [
+              "/scriptevent siege:lore_say tilly first 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_tilly_what",
+        "npc_name": "Tilly Marsh",
+        "text": "He went off the rocks in the spring. Third night. I was meant to be minding him.\n\nHe walked back up the beach in the morning. Wet. Smiling. Mam screamed the whole street awake, she was that glad.\n\nHe throws with his left now. He doesn't like the chapel. When he thinks I'm asleep he gets up and stands by the wall on the sea side.\n\nHe's not Pip. He's ever so nice, though. He lets me win.",
+        "buttons": [
+          {
+            "name": "Does your mother know?",
+            "commands": [
+              "/scriptevent siege:lore_say tilly what 0"
+            ]
+          },
+          {
+            "name": "Why are you telling me?",
+            "commands": [
+              "/scriptevent siege:lore_say tilly what 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_tilly_mam",
+        "npc_name": "Tilly Marsh",
+        "text": "Mam sings again. She does his hair every morning. She didn't get out of bed for a month before he came back.\n\nShe doesn't know. Or she does and she's better at it than me.",
+        "buttons": [
+          {
+            "name": "Why are you telling me?",
+            "commands": [
+              "/scriptevent siege:lore_say tilly mam 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_tilly_why",
+        "npc_name": "Tilly Marsh",
+        "text": "Because you'd have worked it out. You've got a bell on your pack, or you'll get one. Everybody who works it out gets a bell.\n\nI'm asking you not to. That's all. He's not hurting anybody. And the real Pip's not coming back whether you ring it or not, is he.\n\nIs he?",
+        "buttons": [
+          {
+            "name": "I'll say nothing, Tilly.",
+            "commands": [
+              "/scriptevent siege:lore_say tilly why 0"
+            ]
+          },
+          {
+            "name": "Your mother has to be told.",
+            "commands": [
+              "/scriptevent siege:lore_say tilly why 1"
+            ]
+          },
+          {
+            "name": "I need to think.",
+            "commands": [
+              "/scriptevent siege:lore_say tilly why 2"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_tilly_hub",
+        "npc_name": "Tilly Marsh",
+        "text": "Have you thought?",
+        "buttons": [
+          {
+            "name": "I'll say nothing, Tilly.",
+            "commands": [
+              "/scriptevent siege:lore_say tilly hub 0"
+            ]
+          },
+          {
+            "name": "Your mother has to be told.",
+            "commands": [
+              "/scriptevent siege:lore_say tilly hub 1"
+            ]
+          },
+          {
+            "name": "Still thinking.",
+            "commands": [
+              "/scriptevent siege:lore_say tilly hub 2"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_tilly_kept",
+        "npc_name": "Tilly Marsh",
+        "text": "...Thank you.\n\nI do know it's not him. I say goodnight to the real one after. Out the window. In case it carries.",
+        "buttons": [
+          {
+            "name": "Goodnight, Tilly.",
+            "commands": [
+              "/scriptevent siege:lore_say tilly kept 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_tilly_told",
+        "npc_name": "Tilly Marsh",
+        "text": "Then you tell her. I'm not going to. And you ring it, if it's got to be rung. Not me.\n\nI was minding him the first time. I'm not doing it twice.",
+        "buttons": [
+          {
+            "name": "I understand.",
+            "commands": [
+              "/scriptevent siege:lore_say tilly told 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_tilly_after_kept",
+        "npc_name": "Tilly Marsh",
+        "text": "He found a crab today. He named it after me.\n\nYou kept your word. Grown-ups mostly don't.",
+        "buttons": [
+          {
+            "name": "Look after each other.",
+            "commands": [
+              "/scriptevent siege:lore_say tilly after_kept 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_tilly_after_told",
+        "npc_name": "Tilly Marsh",
+        "text": "Mam knows now. She hasn't rung anything. She just does his hair slower.\n\nI suppose you thought it was right. I suppose it might be.",
+        "buttons": [
+          {
+            "name": "I'm sorry, Tilly.",
+            "commands": [
+              "/scriptevent siege:lore_say tilly after_told 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_hesper_first",
+        "npc_name": "Hesper Lowe",
+        "text": "Oh, thank goodness, someone with sense. Come in. No, stay there, the dog's in a mood, he's been in a mood for weeks.\n\nIt's my Odo. I think he's one of them. One of the ones that come back. Will you look at him for me? I daren't ask anyone in the village.",
+        "buttons": [
+          {
+            "name": "What makes you think so?",
+            "commands": [
+              "/scriptevent siege:lore_say hesper first 0"
+            ]
+          },
+          {
+            "name": "Not today.",
+            "commands": [
+              "/scriptevent siege:lore_say hesper first 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_hesper_what",
+        "npc_name": "Hesper Lowe",
+        "text": "He looks at me strangely. Sideways. Like he's counting something.\n\nHe's taken to sleeping in the reed shed. He's taken the dog with him, and that dog was MINE, he was mine from a pup, and now he growls when I come near.\n\nAnd Odo's started ringing the chapel bell of an evening. Every evening. He knows I can't abide it lately, it goes right through my head, and he rings it anyway and watches the house.\n\nSomething's wrong with him. You'll see it.",
+        "buttons": [
+          {
+            "name": "What should I look for?",
+            "commands": [
+              "/scriptevent siege:lore_say hesper what 0"
+            ]
+          },
+          {
+            "name": "I'll go and see him.",
+            "commands": [
+              "/scriptevent siege:lore_say hesper what 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_hesper_tells",
+        "npc_name": "Hesper Lowe",
+        "text": "Old Mag says three things. The wrong hand. Standing to the wall. And they can't bear a bell.\n\nWell, Odo's right-handed same as ever, I'll grant. And I've not caught him at a wall. But he's sly. He'd hide it.\n\nGo round the back and watch him. I'll wait here. I like it here by the door-post, it's restful.",
+        "buttons": [
+          {
+            "name": "I'll go and see him.",
+            "commands": [
+              "/scriptevent siege:lore_say hesper tells 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_hesper_hub",
+        "npc_name": "Hesper Lowe",
+        "text": "Did you see him? Did you see how he looks at the house?",
+        "buttons": [
+          {
+            "name": "Odo is himself, Hesper.",
+            "commands": [
+              "/scriptevent siege:lore_say hesper hub 0"
+            ]
+          },
+          {
+            "name": "You're right. That's not Odo.",
+            "commands": [
+              "/scriptevent siege:lore_say hesper hub 1"
+            ]
+          },
+          {
+            "name": "Hesper. Which hand is your cup in?",
+            "commands": [
+              "/scriptevent siege:lore_say hesper hub 2"
+            ]
+          },
+          {
+            "name": "Not yet.",
+            "commands": [
+              "/scriptevent siege:lore_say hesper hub 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_hesper_verdict_odo_fine",
+        "npc_name": "Hesper Lowe",
+        "text": "Himself? Then why does he look at me like that? Why did he take my dog?\n\n...You're kind to say it. I expect you're right. I expect I'm tired. I haven't felt myself since the night I went out for the washing and the fog came down.\n\nIt was only a moment. I was only gone a moment.",
+        "buttons": [
+          {
+            "name": "...Rest, Hesper.",
+            "commands": [
+              "/scriptevent siege:lore_say hesper verdict_odo_fine 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_hesper_verdict_odo",
+        "npc_name": "Hesper Lowe",
+        "text": "I KNEW it. I knew. Oh, my poor Odo.\n\nI'll tell the neighbours. They'll know what to do. They've a bell.\n\nThank you. Thank you. Mind the dog as you go, he's not been right.",
+        "buttons": [
+          {
+            "name": "...",
+            "commands": [
+              "/scriptevent siege:lore_say hesper verdict_odo 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_hesper_verdict_her",
+        "npc_name": "Hesper Lowe",
+        "text": "My...\n\nThe left. It's in my left.\n\nI'm right-handed. I've always been...\n\nThe dog. The bell. He isn't ringing it AT me. He's ringing it to see if I'll... And I've been stood at this door-post since noon, haven't I. Facing it.\n\nOh.\n\nOh, poor Odo. He's known for weeks. He's been sleeping in the shed and he still brings me my tea.\n\nDon't tell him I know. Please. Let me have the winter. I'll go quiet in the spring, I promise. I'd just like to see him cut the reeds once more.",
+        "buttons": [
+          {
+            "name": "I won't tell him.",
+            "commands": [
+              "/scriptevent siege:lore_say hesper verdict_her 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_hesper_after_right",
+        "npc_name": "Hesper Lowe",
+        "text": "He brought me tea again this morning. I held it in my right. It took all my mind to do it, but I did, and he smiled.\n\nThank you for asking about the cup. Nobody else looked at ME.",
+        "buttons": [
+          {
+            "name": "Until spring, Hesper.",
+            "commands": [
+              "/scriptevent siege:lore_say hesper after_right 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_hesper_after_other",
+        "npc_name": "Hesper Lowe",
+        "text": "Oh, it's you. I'm sorry, I can't talk, I've such a head. That bell.\n\nIt's restful here by the post. I'll just stand a while.",
+        "buttons": [
+          {
+            "name": "...",
+            "commands": [
+              "/scriptevent siege:lore_say hesper after_other 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_corvin_deaf",
+        "npc_name": "A Voice in the Water",
+        "text": "§7The pool is singing. Thousands of voices on one note.\n\nOne of them, somewhere near the bottom, is very slightly off it, and seems to be swearing.\n\nYou cannot make out the words. Someone with the art might.",
+        "buttons": [
+          {
+            "name": "Leave the water.",
+            "commands": [
+              "/scriptevent siege:lore_say corvin deaf 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_corvin_first",
+        "npc_name": "A Voice in the Water",
+        "text": "No. No, no. Stand still. You're dripping warmth into it.\n\nSo it's you. The flat one. I've been listening to you murder those arts from down here for longer than I care to say, and now you've walked in, on legs, and you want to chat.\n\nWell? Three hundred years I've held this note with every soul they ever took. Make it worth my dropping it.",
+        "buttons": [
+          {
+            "name": "Who are you?",
+            "commands": [
+              "/scriptevent siege:lore_say corvin first 0"
+            ]
+          },
+          {
+            "name": "Are you dead?",
+            "commands": [
+              "/scriptevent siege:lore_say corvin first 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_corvin_who",
+        "npc_name": "A Voice in the Water",
+        "text": "I was burned. Thoroughly, at dawn, with my books. And then some careful soul put what was left into a river, on the theory that nothing could gather it.\n\nNot one man on that tribunal had ever asked himself where rivers go.\n\nHale. Corvin Hale. I tuned the hundred bells of Crownhold and I held a lamp at a table of wet stone, and I was right about everything, and it did me no good at all.",
+        "buttons": [
+          {
+            "name": "I have read your notebooks.",
+            "commands": [
+              "/scriptevent siege:lore_say corvin who 0"
+            ]
+          },
+          {
+            "name": "Old Mag sent me, in a way.",
+            "commands": [
+              "/scriptevent siege:lore_say corvin who 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_corvin_dead",
+        "npc_name": "A Voice in the Water",
+        "text": "I wrote it down myself. \"Those who walk down to them are not eaten. They are kept.\" I simply never expected to be evidence.\n\nI'm not alive. I'm not gone. I am a note with opinions. It turns out that's most of what I was before.",
+        "buttons": [
+          {
+            "name": "Who were you?",
+            "commands": [
+              "/scriptevent siege:lore_say corvin dead 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_corvin_hub",
+        "npc_name": "A Voice in the Water",
+        "text": "Ask. Quickly. Every word I say to you is a word I'm not singing, and they notice.",
+        "buttons": [
+          {
+            "name": "What did the truce really say?",
+            "commands": [
+              "/scriptevent siege:lore_say corvin hub 0"
+            ]
+          },
+          {
+            "name": "Tell me about the King.",
+            "commands": [
+              "/scriptevent siege:lore_say corvin hub 1"
+            ]
+          },
+          {
+            "name": "Your last page stops mid-sentence.",
+            "commands": [
+              "/scriptevent siege:lore_say corvin hub 2"
+            ]
+          },
+          {
+            "name": "Old Mag is still alive.",
+            "commands": [
+              "/scriptevent siege:lore_say corvin hub 3"
+            ]
+          },
+          {
+            "name": "Who sits in the chair down here?",
+            "commands": [
+              "/scriptevent siege:lore_say corvin hub 4"
+            ]
+          },
+          {
+            "name": "Go back to your note.",
+            "commands": [
+              "/scriptevent siege:lore_say corvin hub 5"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_corvin_truce",
+        "npc_name": "A Voice in the Water",
+        "text": "Three lines. I can still see his breath in the lamp.\n\nThey take back the army they called. Every third night is theirs: no bell is rung, they walk above as guests, and any of ours who wish may walk below. And it is sworn on their crown, not his, which he may not wear and they would not touch.\n\nThat's all. No souls. No firstborn. No trick. Everything that went wrong after went wrong on our side of the paper.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say corvin truce 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_corvin_king",
+        "npc_name": "A Voice in the Water",
+        "text": "He was the only man at court who never laughed at me. Do you know how rare that is, for a king? They're raised to it.\n\nHe took their pledge in his bare right hand because it was offered to him, and it would have been rude to ask for a cloth. It bit him to the bone. He never used that hand again and he never once mentioned it.\n\nAt my trial I had one defence. \"I remember him.\" It was true and it was sufficient and they burned me for it.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say corvin king 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_corvin_sentence",
+        "npc_name": "A Voice in the Water",
+        "text": "\"Someone must.\" Yes. I ran out of candle. They came for me before I could find another.\n\nYou'll have imagined something grand. Someone must wear the crown. Someone must slay the thing.\n\nIt was: someone must go down and say good morning. That's the whole discovery. Thirty years, a hundred bells, and that's all of it. They had been knocking for four hundred years and nobody had answered the door.\n\nA thing sworn can be sworn again. But only by someone who's first bothered to say hello.",
+        "buttons": [
+          {
+            "name": "Good morning, Master Hale.",
+            "commands": [
+              "/scriptevent siege:lore_say corvin sentence 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_corvin_sentence2",
+        "npc_name": "A Voice in the Water",
+        "text": "...\n\nWell.\n\nThat's the first time anyone's said it to me, as it happens. In either world.\n\nGet out before I become sentimental. It puts me off the note.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say corvin sentence2 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_corvin_mag",
+        "npc_name": "A Voice in the Water",
+        "text": "Magda? The small one? She's ALIVE?\n\nShe was twelve. She carried the ninth notebook into a swamp in the dark with hounds behind her, and I never knew if...\n\nTell her this, exactly. Tell her she still holds a pen like a trowel. She'll know it's me. Nobody else was ever that rude to her.",
+        "buttons": [
+          {
+            "name": "I'll tell her.",
+            "commands": [
+              "/scriptevent siege:lore_say corvin mag 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_corvin_chair",
+        "npc_name": "A Voice in the Water",
+        "text": "No.\n\nNot from me. I'll teach you every art there is and I'll tell you what was said at that table to the word. But who sits there is a thing you'll want to have worked out yourself, standing up, before you see him. It will matter to you that you did. It will matter to him.\n\nYou have all the pieces. Three people up there are each holding one. Go and be a nuisance to an archivist.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say corvin chair 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_corvin_after",
+        "npc_name": "A Voice in the Water",
+        "text": "He's stopped.\n\nI felt it go out of the note like a string cut. The whole Choir went a hair sharp. They don't know what to do without him. Neither do I, as it happens.\n\nI held the lamp for him once, at the table. I should have liked to hold it at the end. I gather you did that instead, in your fashion. Was he...\n\nNo. Don't tell me. I remember him. That was always the point of me.",
+        "buttons": [
+          {
+            "name": "He kept his father's book.",
+            "commands": [
+              "/scriptevent siege:lore_say corvin after 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_corvin_after2",
+        "npc_name": "A Voice in the Water",
+        "text": "Of course he did. The red one. He used to read it on the walls on the third nights, when he thought no one could see.\n\nThe chair's empty now, and it wants someone who can hear all of this at once and not break. If that's to be you, then listen to an old flat voice: keep the truce. It was a good one. It was only ever kept by one man.",
+        "buttons": [
+          {
+            "name": "I'll remember him too.",
+            "commands": [
+              "/scriptevent siege:lore_say corvin after2 0"
             ]
           }
         ]

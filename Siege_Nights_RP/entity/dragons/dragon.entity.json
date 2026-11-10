@@ -7,13 +7,16 @@
     "default": "entity_alphatest"
    },
    "textures": {
-    "ember": "textures/entity/siege/dragons/dragon_ember",
-    "ash": "textures/entity/siege/dragons/dragon_ash",
-    "sand": "textures/entity/siege/dragons/dragon_sand",
-    "obsidian": "textures/entity/siege/dragons/dragon_obsidian"
+    "cinderwing": "textures/entity/siege/dragons/cinderwing",
+    "wyvern": "textures/entity/siege/dragons/wyvern",
+    "drake": "textures/entity/siege/dragons/drake",
+    "wyrm": "textures/entity/siege/dragons/wyrm"
    },
    "geometry": {
-    "default": "geometry.siege_dragon"
+    "cinderwing": "geometry.siege_dragon.cinderwing",
+    "wyvern": "geometry.siege_dragon.wyvern",
+    "drake": "geometry.siege_dragon.drake",
+    "wyrm": "geometry.siege_dragon.wyrm"
    },
    "animations": {
     "look": "animation.siege_dragon.look",
@@ -21,23 +24,59 @@
     "walk": "animation.siege_dragon.walk",
     "fold": "animation.siege_dragon.fold",
     "fly": "animation.siege_dragon.fly",
-    "breath": "animation.siege_dragon.breath"
+    "breath": "animation.siege_dragon.breath",
+    "sleep": "animation.siege_dragon.sleep",
+    "downed": "animation.siege_dragon.downed",
+    "dead": "animation.siege_dragon.dead",
+    "roar": "animation.siege_dragon.roar",
+    "nuzzle": "animation.siege_dragon.nuzzle",
+    "snarl": "animation.siege_dragon.snarl",
+    "tilt": "animation.siege_dragon.tilt",
+    "shake": "animation.siege_dragon.shake"
    },
    "scripts": {
     "animate": [
-     "look",
-     "idle",
      {
-      "walk": "!query.property('siege:flying')"
+      "look": "query.property('siege:pose') == 0"
      },
      {
-      "fold": "!query.property('siege:flying')"
+      "idle": "query.property('siege:pose') == 0"
+     },
+     {
+      "walk": "query.property('siege:pose') == 0 && !query.property('siege:flying')"
+     },
+     {
+      "fold": "query.property('siege:pose') < 2 && !query.property('siege:flying')"
      },
      {
       "fly": "query.property('siege:flying')"
      },
      {
       "breath": "query.property('siege:breath')"
+     },
+     {
+      "sleep": "query.property('siege:pose') == 1"
+     },
+     {
+      "downed": "query.property('siege:pose') == 2"
+     },
+     {
+      "dead": "query.property('siege:pose') == 3"
+     },
+     {
+      "roar": "query.property('siege:pose') == 0 && query.property('siege:emote') == 1"
+     },
+     {
+      "nuzzle": "query.property('siege:pose') == 0 && query.property('siege:emote') == 2"
+     },
+     {
+      "snarl": "query.property('siege:pose') == 0 && query.property('siege:emote') == 3"
+     },
+     {
+      "tilt": "query.property('siege:pose') == 0 && query.property('siege:emote') == 4"
+     },
+     {
+      "shake": "query.property('siege:pose') == 0 && query.property('siege:emote') == 5"
      }
     ]
    },

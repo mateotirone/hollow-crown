@@ -17,7 +17,9 @@ data = json.loads(subprocess.run(
     ["node", "--input-type=module", "-e",
      "const L = await import('file://' + process.argv[1] + '/logic.js');"
      "const W = await import('file://' + process.argv[1] + '/data/world.js');"
-     "console.log(JSON.stringify({ tomes: L.TOMES, collections: W.COLLECTIONS }))", LORE],
+     "const J = await import('file://' + process.argv[1] + '/data/journal.js');"
+     "const P = await import('file://' + process.argv[1] + '/data/powers.js');"
+     "console.log(JSON.stringify({ tomes: L.TOMES, collections: W.COLLECTIONS, journal: J.JOURNAL, arts: P.ARTS_BOOK, powers: P.POWERS }))", LORE],
     capture_output=True, text=True, check=True).stdout)
 
 # ---------------------------------------------------------------- painted textures
@@ -87,19 +89,65 @@ pages.append(f'''<section class="page cover"><img class="bg" src="{{LEATHER}}">
   </div></div></section>''')
 
 page(f'''<div class="half"><div class="orn">{ORNAMENT}</div><h1>The Unburned Library</h1>
-  <p class="sub">Seventy-four tomes in eight collections,<br>gathered from chapels, ruins, drowned places<br>and the pockets of the dead</p>
+  <p class="sub">Seventy-four tomes in eight collections,<br>with eight paintings, a king's journal<br>and a child's copybook,<br>gathered from chapels, ruins, drowned places<br>and the pockets of the dead</p>
   <div class="orn">{ORNAMENT}</div><p class="imprint">Catalogued by Archivist Pell,<br>formerly Novice of the Ashen Gate</p></div>''')
 
 page(f'''<h2 class="center">To the Reader</h2><div class="rule"></div>
   <p class="body first">These are the books they burned. Forty-one portraits, every chronicle they could find, a mage's whole library. Yet a book is a hard thing to burn completely when the man holding the torch can read.</p>
   <p class="body">I have bound them here as I found them, and I have not corrected them, because they do not agree. A chronicler writes what his court tells him. An order of knights writes what it wants believed. A mage writes what he saw, and is burned for it. Ask three things of every page: who wrote it, who they were afraid of, and whether they were there.</p>
   <p class="body">The letters of the lighthouse keeper were in a cipher, and the hymns of the Choir run right to left in the old way. I have set both down plainly. Do not read the hymns aloud.</p>
+  <p class="body">I have put two things before the collections. The first is the paintings, eight of them, which were hidden with the books. The second is a king's journal with the name cut off its cover. He saw all of it begin and understood none of it.</p>
   <p class="body">Six pages of the Surveyor's notes I have left blank. What they say is different for every reader, and you must find your own.</p>
   <p class="sign">Pell</p>
   <p class="warn">Whoever reads this book to the end will know the whole truth of Aldmere.<br>If you would rather find it out yourself, close it now.</p>''')
 
+# ---- the paintings (made by studio/build_lore_plates.py) and the starting journal
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from build_lore_plates import PLATES
+def plate_tall(n):
+    art = os.path.join(OUT_DIR, "plates", "art", f"plate_{n}.jpg")
+    w, h = Image.open(art if os.path.exists(art) else os.path.join(OUT_DIR, "plates", f"plate_{n}.jpg")).size
+    return h > w
+def plate_uri(n):
+    # a painting dropped into lore-book/plates/art/ (Mateo's own) wins over the code-painted one
+    art = os.path.join(OUT_DIR, "plates", "art", f"plate_{n}.jpg")
+    with open(art if os.path.exists(art) else os.path.join(OUT_DIR, "plates", f"plate_{n}.jpg"), "rb") as f:
+        return "data:image/jpeg;base64," + base64.b64encode(f.read()).decode()
+def plate_page(n):
+    title, caption = PLATES[n - 1]
+    page(f'''<div class="runhead">The Long Gallery &middot; Plate {ROMAN[n]}</div>
+      <div class="plate{" tall" if plate_tall(n) else ""}"><img src="{plate_uri(n)}"></div>
+      <h2 class="center ptitle">{esc(title)}</h2><div class="rule short"></div>
+      <p class="caption">{esc(caption)}</p><div class="orn end">{ORNAMENT}</div>''', cls="platepage")
+
 toc = "".join(f'<tr><td class="num">{ROMAN[i + 1]}</td><td>{esc(c["name"])}</td><td class="cnt">{c["count"]} tomes</td></tr>' for i, c in enumerate(data["collections"]))
 page(f'<h2 class="center">The Collections</h2><div class="rule"></div><table class="toc">{toc}</table><div class="orn low">{ORNAMENT}</div>')
+
+page(f'''<div class="divider"><div class="part">Before the Collections</div><h1>The Long Gallery</h1>
+  <div class="rule"></div><p class="blurb">Eight paintings that should not exist. The Order of the Ashen Gate burned the royal gallery to the nails. These were cut from their frames first, rolled, and hidden by people who are not named anywhere. I found them in a bell.</p>
+  <p class="blurb">The first shows this land as it was, under the name it had before ours.</p></div>''', cls="div")
+for n in range(1, len(PLATES) + 1): plate_page(n)
+
+J = data["journal"]
+page(f'''<div class="divider"><div class="part">Before the Collections</div><h1>{esc(J["title"])}</h1>
+  <div class="rule"></div><p class="blurb">{esc(J["cover"])}</p>
+  <p class="blurb">Every traveler who comes to Aldmere seems to have a copy of this in their pack, and none of them remember where they got it. I have stopped asking. I set it first because he came first, and because he understood none of it, which is the honest place to begin.</p></div>''', cls="div")
+for e in J["entries"]:
+    paras = "".join(f'<p class="body hand{" first" if i == 0 else ""}">{esc(t)}</p>' for i, t in enumerate(e["text"].split("\n\n")))
+    page(f'''<div class="runhead">{esc(J["title"])}</div><div class="jdate">{esc(e["date"])}</div><div class="rule"></div>
+      <div class="text">{paras}</div><div class="orn end">{ORNAMENT}</div>''', cls="tome journal")
+
+A = data["arts"]
+def arts_page(head, text, n=""):
+    paras = "".join(f'<p class="body hand{" first" if i == 0 else ""}">{esc(t)}</p>' for i, t in enumerate(text.split("\n\n")))
+    page(f'''<div class="runhead">{esc(A["title"])}</div><div class="jdate">{esc(head)}</div><div class="rule"></div>
+      <div class="text">{paras}</div><div class="orn end">{ORNAMENT}</div>''', cls="tome journal")
+page(f'''<div class="divider"><div class="part">Before the Collections</div><h1>{esc(A["title"])}</h1>
+  <div class="rule"></div><p class="blurb">{esc(A["cover"])}</p>
+  <p class="blurb">Old Mag of Mirelight lent me this and wants it back. It is the only account I know of what those who carry an Ember can do. It explains none of it. I have come to think that is the most honest thing about it.</p></div>''', cls="div")
+arts_page("Under the blanket", A["intro"])
+for i, pw in enumerate(data["powers"].values()): arts_page(f'{ROMAN[i + 1] if i < 12 else ["XIII", "XIV"][i - 12]}. {pw["art"]}', pw["page"])
+arts_page("The last page", A["outro"])
 
 for ci, col in enumerate(data["collections"]):
     tomes = sorted([t for t in data["tomes"] if t["col"] == col["id"]], key=lambda t: t["n"])
@@ -121,7 +169,7 @@ for ci, col in enumerate(data["collections"]):
           {f'<div class="note">{note}</div>' if note else ''}<div class="rule"></div>
           <div class="text">{"".join(paras)}</div><div class="orn end">{ORNAMENT}</div>''', cls="tome")
 
-page(f'<div class="half"><div class="orn">{ORNAMENT}</div><p class="sub">Here the Library ends.</p><p class="imprint">Say their name.</p></div>')
+page(f'<div class="half"><div class="orn">{ORNAMENT}</div><p class="sub">Here the Library ends.</p><p class="imprint">Say the old name.</p></div>')
 pages.append('<section class="page cover"><img class="bg" src="{LEATHER}"><div class="frame"><div class="frame2"></div></div></section>')
 
 CSS = '''
@@ -154,6 +202,16 @@ h2.center, .center { text-align: center; }
 .orn.end { position: absolute; left: 0; right: 0; bottom: 0; font-size: 13pt; line-height: 1; }
 .text { padding-bottom: .3in; }
 .orn.low { margin-top: .5in; }
+.plate { margin: .1in -.12in .3in; padding: .11in; background: linear-gradient(135deg, #b98f3c, #6d4b17 30%, #caa24e 52%, #5c3d12 78%, #a67c2e);
+  box-shadow: 0 3px 9px rgba(30,15,5,.6), inset 0 0 0 1.5px rgba(40,20,5,.7); }
+.plate img { display: block; width: 100%; box-shadow: 0 0 0 2px #2a180a, 0 0 0 3.5px #d2ab57; }
+.platepage .plate { margin-top: .75in; }
+.platepage .plate.tall { width: 3.1in; margin: .1in auto .25in; }
+.ptitle { font-size: 17pt; } .rule.short { width: 1.6in; margin: .14in auto .18in; }
+.caption { font-style: italic; font-size: 10.6pt; line-height: 1.55; text-align: center; margin: 0 .25in; color: #4a3117; }
+.jdate { font-style: italic; font-size: 12.5pt; color: #5a2a18; text-align: right; }
+.hand { font-style: italic; color: #2c2218; }
+.journal .body.first::first-letter { font-style: normal; }
 .blank { border: 1px dashed rgba(90,58,28,.55); height: 1.25in; margin: .1in 0 .2in; display: flex; align-items: center; justify-content: center;
   text-align: center; font-style: italic; font-size: 9.5pt; color: #6f5230; background: rgba(120,80,40,.07); }
 .half { text-align: center; padding-top: 1.9in; }

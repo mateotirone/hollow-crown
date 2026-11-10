@@ -1,0 +1,28 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "siege:lattice_boat_recipe"
+    },
+    "tags": [
+      "crafting_table",
+      "siege_workshop"
+    ],
+    "pattern": [
+      "L L",
+      "LLL"
+    ],
+    "key": {
+      "L": {
+        "item": "siege:hollowwood_lattice"
+      }
+    },
+    "result": {
+      "item": "siege:lattice_boat",
+      "count": 1
+    },
+    "unlock": {
+      "context": "AlwaysUnlocked"
+    }
+  }
+}
