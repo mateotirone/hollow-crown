@@ -578,6 +578,47 @@ def hollow_crown(m, top, bone="hcrown", parent="head"):
     B([-0.5, y + 2, 4], [1, 3, 1], "hstone", rot=[8, 0, 0], pivot=[0, y + 2, 4.5]); B([-0.5, y + 5, 4], [1, 2, 1], "hstone", inflate=-0.2, rot=[8, 0, 0], pivot=[0, y + 2, 4.5])
 HCROWN = dict(hstone={"c": (58, 40, 78), "style": "stone"}, hvein={"c": (230, 70, 200), "style": "glow"}, hgem={"c": (120, 190, 255), "style": "glow"})
 
+
+# ---------- Pretenders: claimants who rise in the Hollow after Morvane falls (scripts/bestiary/pretenders.js) ----------
+# Three bodies; the name, the powers and the claim are generated per Pretender, so no two are the same fight.
+def m_pretender_blade(m):
+    biped(m, L=13, B=14, bw=9, bd=5, head=(8, 8, 8), arm=(4, 14, 4), mats={"head": "plate", "body": "plate", "arm": "plate", "leg": "plate", "belt": "trim"}, face="visor", nose=False)
+    m.box("head", [-4.5, 35, -4.5], [9, 1, 9], "hstone")
+    for x, h in ((-4.5, 3), (-1.5, 1), (1.5, 4), (3.5, 2)): m.box("head", [x, 36, -4.5], [1, h, 1], "hstone")   # half a crown: he made it himself
+    m.box("head", [1.5, 38, -4.7], [1, 1, 1], "hvein", inflate=-0.2)
+    for s in (-1, 1): m.box("arm_r" if s < 0 else "arm_l", [s * 6.5 - 3, 24, -3], [6, 4, 6], "plate")
+    m.box("body", [-1, 17, -3], [2, 7, 1], "hvein", inflate=-0.2)                                                # a vein of the Hollow up the breastplate
+    cloak(m, "cape", length=24, width=11)
+    hold(m, "greatsword", bone="blade", blade="steel", hilt="trim")
+def m_pretender_seer(m):
+    biped(m, L=12, B=13, bw=8, bd=4, mats={"head": "skin", "body": "robe", "arm": "robe", "leg": "robe", "belt": "trim"}, face="eyes")
+    cloak(m, "hood", hood=True, length=22)
+    m.box("body", [-4.5, 0, -2.5], [9, 12, 5], "robe"); m.box("body", [-0.5, 2, -2.8], [1, 21, 1], "hvein", inflate=-0.2)
+    for s in (-1, 1): m.box("arm_r" if s < 0 else "arm_l", [s * 6 - 2.5, 12, -2.5], [5, 5, 5], "robe")
+    m.bone("shards", [0, 36, 0], "head")
+    for x, y, z in ((-5, 35, -2), (4, 36, 1), (-1, 38, 4), (0, 37, -5)): m.box("shards", [x, y, z], [1, 3, 1], "hgem", inflate=-0.15)   # a crown that will not settle: shards hang round the head
+    hold(m, "staff", bone="blade", haft="trim", orb="hvein", long=30)
+def m_pretender_brute(m):
+    biped(m, L=12, B=16, bw=14, bd=8, head=(8, 8, 8), arm=(6, 18, 6), mats={"head": "skin", "body": "hide", "arm": "skin", "leg": "hide", "belt": "trim"}, face="eyes")
+    horns(m, "hstone", up=6, out=4)
+    m.box("head", [-4.5, 35, -4.5], [9, 1, 9], "hstone"); m.box("head", [-0.5, 36, -4.5], [1, 2, 1], "hvein", inflate=-0.2)
+    for s in (-1, 1): m.box("arm_r" if s < 0 else "arm_l", [s * 10 - 4, 26, -4.5], [8, 4, 9], "hstone")           # stone on the shoulders
+    m.box("body", [-7.5, 10, -4.5], [15, 4, 9], "trim")
+    hold(m, "axe", bone="blade", blade="steel", haft="trim")
+PRETENDER = dict(HCROWN, trim={"c": (92, 62, 120), "style": "metal"}, steel={"c": (150, 140, 176), "style": "metal"}, eye=(230, 70, 200))
+boss(id="pretender_blade", name="The Pretender", region="The Hollow, after the story", model=m_pretender_blade,
+     pal=P(plate={"c": (60, 52, 78), "style": "metal"}, cape={"c": (70, 30, 96), "style": "cloth"}, **PRETENDER),
+     hp=420, speed=0.3, dmg=11, kb=0.9, collision=(1.0, 2.6), scale=1.05, egg=("#3c344e", "#e646c8"),
+     lore="Somebody always thinks the Seat is empty. This one brought a sword and half a crown.")
+boss(id="pretender_seer", name="The Pretender", region="The Hollow, after the story", model=m_pretender_seer,
+     pal=P(skin=PALE, robe={"c": (48, 36, 70), "style": "cloth"}, hood={"c": (38, 28, 58), "style": "cloth"}, **PRETENDER),
+     hp=360, speed=0.28, dmg=9, kb=0.6, collision=(0.9, 2.4), egg=("#302446", "#78beff"),
+     lore="It heard the Hollow had no voice now, and came to be one.")
+boss(id="pretender_brute", name="The Pretender", region="The Hollow, after the story", model=m_pretender_brute,
+     pal=P(skin=GREY, hide={"c": (66, 54, 60), "style": "cloth"}, **PRETENDER),
+     hp=520, speed=0.26, dmg=13, kb=1.0, collision=(1.5, 3.0), scale=1.1, egg=("#42363c", "#3a284e"),
+     lore="It does not want to rule anything. It wants nobody else to.")
+
 def m_oswin(m):
     biped(m, L=14, B=16, bw=10, bd=6, head=(8, 9, 8), arm=(5, 16, 5), mats={"head": "skin", "body": "plate", "arm": "plate", "leg": "plate", "belt": "crown"}, face="hollow")
     hollow_crown(m, 39)                                                                                                        # he wears the Hollow Crown itself (Mateo). Stage 7 knocks it off: event siege:bare_on

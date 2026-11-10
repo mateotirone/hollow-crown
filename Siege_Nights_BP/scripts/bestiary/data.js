@@ -212,6 +212,27 @@ export const MOBS = {
   "lore": "Something in his crown catches the light wrong. He has lost before. He keeps coming back.",
   "region": "Grand Siege"
  },
+ "siege:pretender_blade": {
+  "name": "The Pretender",
+  "family": "boss",
+  "hp": 420,
+  "lore": "Somebody always thinks the Seat is empty. This one brought a sword and half a crown.",
+  "region": "The Hollow, after the story"
+ },
+ "siege:pretender_seer": {
+  "name": "The Pretender",
+  "family": "boss",
+  "hp": 360,
+  "lore": "It heard the Hollow had no voice now, and came to be one.",
+  "region": "The Hollow, after the story"
+ },
+ "siege:pretender_brute": {
+  "name": "The Pretender",
+  "family": "boss",
+  "hp": 520,
+  "lore": "It does not want to rule anything. It wants nobody else to.",
+  "region": "The Hollow, after the story"
+ },
  "siege:oswin_the_last": {
   "name": "Morvane",
   "family": "boss",
@@ -397,6 +418,10 @@ export const ITEMS = {
  "siege:gloamquill": {
   "name": "Gloamquill",
   "lore": "A Gloamwing's flight quill. It never quite stops trembling."
+ },
+ "siege:pretender_seal": {
+  "name": "Claimant's Seal",
+  "lore": "Pressed by someone who meant to rule the Hollow. Every one is different, because every one of them was."
  },
  "siege:changeling_ichor": {
   "name": "Changeling Ichor",
@@ -590,64 +615,76 @@ export const BODIES = {
   "kind": 29,
   "size": 1.05
  },
- "siege:oswin_the_last": {
+ "siege:pretender_blade": {
   "kind": 30,
   "size": 1.05
  },
- "siege:grey_axeman": {
+ "siege:pretender_seer": {
   "kind": 31,
   "size": 1
  },
- "siege:grey_bellcutter": {
+ "siege:pretender_brute": {
   "kind": 32,
-  "size": 1
+  "size": 1.1
  },
- "siege:grey_spearman": {
+ "siege:oswin_the_last": {
   "kind": 33,
-  "size": 1
+  "size": 1.05
  },
- "siege:grey_bowman": {
+ "siege:grey_axeman": {
   "kind": 34,
   "size": 1
  },
- "siege:grey_serjeant": {
+ "siege:grey_bellcutter": {
   "kind": 35,
   "size": 1
  },
- "siege:veinsworn": {
+ "siege:grey_spearman": {
   "kind": 36,
-  "size": 1.05
+  "size": 1
  },
- "siege:shardcaster": {
+ "siege:grey_bowman": {
   "kind": 37,
   "size": 1
  },
- "siege:gatebreaker": {
+ "siege:grey_serjeant": {
   "kind": 38,
   "size": 1
  },
- "siege:hollow_warlord": {
+ "siege:veinsworn": {
   "kind": 39,
-  "size": 1
+  "size": 1.05
  },
- "siege:champion_knight": {
+ "siege:shardcaster": {
   "kind": 40,
   "size": 1
  },
- "siege:champion_sorcerer": {
+ "siege:gatebreaker": {
   "kind": 41,
   "size": 1
  },
- "siege:champion_lord": {
+ "siege:hollow_warlord": {
   "kind": 42,
   "size": 1
  },
- "siege:champion_retainer": {
+ "siege:champion_knight": {
   "kind": 43,
   "size": 1
  },
- "siege:gloamwing": {
+ "siege:champion_sorcerer": {
   "kind": 44,
+  "size": 1
+ },
+ "siege:champion_lord": {
+  "kind": 45,
+  "size": 1
+ },
+ "siege:champion_retainer": {
+  "kind": 46,
+  "size": 1
+ },
+ "siege:gloamwing": {
+  "kind": 47,
   "size": 1
  }
 };

@@ -33,6 +33,14 @@ export function nightfall({ hollowing, unrest, tithe }) {
   };
 }
 
+// ---------- The Citadel's name ----------
+
+// What a ruler typed, made safe to show everyone: no color codes or line breaks, one line, not too long. Blank = the default.
+export function cleanCitadelName(text) {
+  const name = String(text ?? "").replace(/§./g, "").replace(/[\u0000-\u001f\u007f]/g, " ").replace(/\s+/g, " ").trim().slice(0, CROWN.citadelNameMax).trim();
+  return name || CROWN.citadelName;
+}
+
 // ---------- Money ----------
 
 // Split a defender's siege pay between them and the Crown
