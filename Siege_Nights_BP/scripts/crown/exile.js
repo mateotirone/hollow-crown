@@ -6,7 +6,7 @@ import {
 import { ActionFormData } from "@minecraft/server-ui";
 import { ItemStack } from "@minecraft/server";
 import { CROWN } from "./config.js";
-import { EXILE_STAGES } from "./rules.js";
+import { EXILE_STAGES, nextExileStage } from "./rules.js";
 import { crown, saveCrown, playerById, giveItem, addClaim, claimOf, announce, rulerLabel } from "./state.js";
 import { crownStatus, annalLines, endReign, vacate } from "./reign.js";
 import { banish, npcWins } from "./usurp.js";
@@ -17,7 +17,7 @@ function complete(player, stage) {
   const exile = c.exiles[player.id];
   if (!exile || exile.stage !== stage) return;
   const done = EXILE_STAGES[stage];
-  exile.stage = stage + 1;
+  exile.stage = nextExileStage(stage, c.exiledTimes?.[player.id] ?? 1);
   saveCrown();
   if (done.emeralds) giveItem(player, new ItemStack("minecraft:emerald", done.emeralds));
   if (done.claim) addClaim(player, done.claim, done.name);
@@ -26,6 +26,7 @@ function complete(player, stage) {
   player.playSound("random.levelup");
   if (stage === 0) player.sendMessage("§7A note is pinned to your new banner: §o\"Not everyone has forgotten you. Look for the ones who still wear your color.\"");
   if (stage === 3) player.sendMessage("§5The underground is yours now. You will hear of every Shardfall a minute before anyone else, and exactly where.");
+  if (exile.stage > stage + 1) player.sendMessage("§7You have walked this road before. The loyalists never left, and nobody doubts you can hold a wall: the middle of the road is already behind you.");
   if (next) player.sendMessage(`§5Next, ${next.name}: §7${next.goal}`);
 }
 
