@@ -112,6 +112,11 @@ Not possible: Quartermaster prices. They are a fixed trade table (`trading/quart
 
 Need another hook? Ask the "Prepare Siege Nights code for parallel work" thread rather than editing `siege/` files yourself.
 
+- **economy** (`scripts/economy/api.js`): the world currency (iron-backed coin; item ids `siege:coin`, `siege:gold_coin` = 64).
+  `funds(player)`, `charge(player, n, why?)` (false if short, free in Creative), `pay(player, n, why?)`, `coins(n)` for menu text,
+  `fromEmeralds(e)` (x8), `WALLET` for the Mason's `setWallet`, `spawnJobNpc(dim, loc, jobId, region?)`, `regionAt(loc)`.
+  Events `coinsPaid`, `coinsSpent`, `goodsSold`. **Pricing something? Charge with `charge()`, not emeralds**; an old emerald price is 8 coins.
+
 ## Checking and building
 
 - `node tools/check.mjs` (from `siege-nights/`): parses every pack JSON, checks imports, finds undefined names,

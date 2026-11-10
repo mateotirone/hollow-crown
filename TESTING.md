@@ -159,3 +159,16 @@ Creative, cheats on. The showcase (`/scriptevent siege:showcase`) puts a Roost, 
 12. Shot down: with a second player's settlement that has a Ballista, fly over it. ✅ The ballista turns and fires, "ballista hits", the Flight bar drops by a quarter per bolt, and at empty you get "Shot down" and can't take off for 30 seconds. Over your own or an ally's settlement nothing shoots.
 
 Things I could not check without the game, so please look closely: the wings fold backward (step 1), flying actually steers by camera (step 3), flying speed feels right (faster than a horse's walk, not absurd), and the hatchling follows you.
+
+## Currency and job NPCs
+
+One coin for the whole world, backed by iron. None of this has run in a real game yet.
+
+1. `/scriptevent siege:showcase` puts one of each job NPC in the row (Farmer, Woodcutter, Quarryman, Smith, Fisher, Hunter, Herbalist, Moneyer) and gives you 200 Regals. Anywhere else: `/scriptevent siege:economy_npc farmer` (add a region name, such as `Frostmarch`, for that region's prices).
+2. In Survival, carry some wheat and click the **Farmer**. Choose Sell: 16 wheat should fetch 6 Regals at plain prices, less in Aldmere Vale, more in Frostmarch or Emberwaste. Sell more than 8 lots in a day and the price should start to drop; it recovers the next morning.
+3. Click the **Moneyer** with iron ingots: 8 Regals each for the first 64 a day, then 4. Buy one back for 10. "Change coins" swaps 64 Regals for a Gold Regal and back.
+4. Buy something that costs more Regals than you carry in small coins while holding a Gold Regal: you should get the right change.
+5. Click your Keep Banner: the menu has **Strongbox**. Put coins in, walk off your land and check a shop no longer counts them, come home and check it does.
+6. `/scriptevent siege:economy_give 500` gives coins, `/scriptevent siege:economy_stats` shows how many coins the world has paid out and taken in.
+
+Things to look for: whether the NPC skins suit the jobs, whether the sell list is readable on a phone screen, and whether any price feels too generous. Every number is in `scripts/economy/config.js`. The Mason, Quartermaster, Barracks and the rest still charge emeralds until their own threads switch them over; the Moneyer buys emeralds for 4 Regals in the meantime.

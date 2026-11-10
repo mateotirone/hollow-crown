@@ -314,3 +314,9 @@ Add a row here with the file path, size, what it should look like, and whether i
 
 Still to do for dragons: real wing-fold and flap animation pass once seen in game, own sounds (ravager and ender dragon sounds are borrowed).
 | NPC ruler of the Hollow (64×64 box-UV skin; Sorcerer in a dark violet robe wearing the Hollow Crown) | `textures/entity/siege/undertow/hollow_regent.png`, model `models/entity/undertow/hollow_regent.geo.json` | Placeholder (flat colour), model is a rough block-out |
+
+## Economy (2026-11-10)
+Written by `studio/build_economy.py` (never overwrites a PNG that exists).
+- `textures/items/siege_coin.png` (the Regal: iron-grey coin with the old king's crowned head): placeholder
+- `textures/items/siege_gold_coin.png` (the Gold Regal, worth 64): placeholder
+- Job NPCs (Farmer, Woodcutter, Quarryman, Smith, Fisher, Hunter, Herbalist, Moneyer) use built-in NPC skins for now: own skins wanted

@@ -208,6 +208,12 @@
     },
     "siege_kings_journal": {
       "textures": "textures/items/siege_kings_journal"
+    },
+    "siege_coin": {
+      "textures": "textures/items/siege_coin"
+    },
+    "siege_gold_coin": {
+      "textures": "textures/items/siege_gold_coin"
     }
   }
 }

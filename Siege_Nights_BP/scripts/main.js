@@ -22,6 +22,7 @@ import "./bestiary/index.js";
 import "./lore/index.js";
 import "./crown/index.js";
 import "./dragons/index.js";
+import "./economy/index.js";
 
 // Start the shared loop last, once every file has registered its work
 import { startLoop } from "./core/loop.js";
