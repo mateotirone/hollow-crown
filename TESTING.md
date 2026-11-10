@@ -4,7 +4,7 @@ About 20 minutes. Go down the list, and for anything that doesn't happen the way
 
 ## 1. Install
 
-You need Minecraft Bedrock **1.21.90 or newer**.
+You need Minecraft Bedrock **26.30 or newer** (the pack will not load on anything older).
 
 - **Windows PC:** double-click `hollow-crown.mcaddon`. Minecraft opens and says it imported two packs.
 - **Android:** download the file, open it from your Downloads or Files app, and pick Minecraft.
