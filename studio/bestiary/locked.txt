@@ -5,3 +5,7 @@ textures/entity/siege/bestiary/pretender_*.png
 textures/items/siege_choirsteel_*.png
 textures/models/armor/choirsteel_layer_*.png
 textures/entity/siege/bestiary/omen_raven.png
+textures/entity/siege/bestiary/reveal_boy.png
+textures/entity/siege/bestiary/reveal_king.png
+textures/entity/siege/bestiary/reveal_morvane.png
+textures/entity/siege/bestiary/oswin_reflection.png
