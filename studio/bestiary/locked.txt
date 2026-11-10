@@ -91,6 +91,10 @@ textures/ui/hc/skill/wing_scale.png
 textures/ui/hc/skill/wing_wyrmfire.png
 textures/entity/siege/bestiary/hollow_bolt.png
 textures/entity/siege/bestiary/omen_raven.png
+textures/entity/siege/bestiary/reveal_boy.png
+textures/entity/siege/bestiary/reveal_king.png
+textures/entity/siege/bestiary/reveal_morvane.png
+textures/entity/siege/bestiary/oswin_reflection.png
 textures/models/armor/guard_vale_layer_*.png
 textures/items/siege_guard_vale_*.png
 textures/models/armor/guard_frostmarch_layer_*.png

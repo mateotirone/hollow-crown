@@ -66,6 +66,11 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - Regional Castle Guard armor: Vale, Frostmarch, Saltreach, Emberwaste and Blackfen sets with the same stats as the Castle Guard armor and their own look (kettle hat and brigandine, fur hood and quilted wool, bleached sallet and rope belt, blackened scale with a veil, laced leather lamellar). Each keeps the banner-colour tabard. Make one at the siege workshop from a Castle Guard piece and that region's Castle Stone.
 
 ### Changed
+- The northern town is now called Rimehold wherever it shows (its protected-area message, the map and the character creator), and its frozen lake Hallowmere, following the naming pass. The Frostmarch plot once called Rimeholt is now Frosthelm, so the two are no longer one letter apart.
+- The moon has a hairline violet crack that shows more the fuller it is.
+- The Hollow bolt is a violet shard with a white-hot heart instead of a flat colour.
+- A few late-story figures and the Standing Rank got a hand-detail pass on their skins.
+- In the Standing Ranks stage of Morvane's fight, the suit he is really in now holds its blade in the left hand while the empty suits hold theirs in the right, as well as the light on the hand.
 - In the Standing Ranks stage of Morvane's fight, the suit he is really in now holds its blade in the left hand while the empty suits hold theirs in the right, as well as the light on the hand.
 - The northern town is now called Rimehold wherever it shows (its protected-area message, the map and the character creator), and its frozen lake Hallowmere, following the naming pass. The Frostmarch plot once called Rimeholt is now Frosthelm, so the two are no longer one letter apart.
 - The moon has a hairline violet crack that shows more the fuller it is.
