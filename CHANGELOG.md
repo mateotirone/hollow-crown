@@ -63,11 +63,14 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - The water of the Blackfen is black: near-opaque on the surface and almost blind underwater. (It follows the mangrove swamp biome, which only the Blackfen uses on the map.)
 
 - The eighth old painting, the Forty-Second Portrait, is kept for the Burned Archive, and what its caption says changes once the story is over.
+- Regional Castle Guard armor: Vale, Frostmarch, Saltreach, Emberwaste and Blackfen sets with the same stats as the Castle Guard armor and their own look (kettle hat and brigandine, fur hood and quilted wool, bleached sallet and rope belt, blackened scale with a veil, laced leather lamellar). Each keeps the banner-colour tabard. Make one at the siege workshop from a Castle Guard piece and that region's Castle Stone.
 
 ### Changed
+- In the Standing Ranks stage of Morvane's fight, the suit he is really in now holds its blade in the left hand while the empty suits hold theirs in the right, as well as the light on the hand.
 - The northern town is now called Rimehold wherever it shows (its protected-area message, the map and the character creator), and its frozen lake Hallowmere, following the naming pass. The Frostmarch plot once called Rimeholt is now Frosthelm, so the two are no longer one letter apart.
 - The moon has a hairline violet crack that shows more the fuller it is.
 - The Hollow bolt is a violet shard with a white-hot heart instead of a flat colour.
+- The Choirsteel chestplate now covers the whole arm (vambrace and cuff under the shoulder plate), not just the shoulders.
 - On the map a settlement's land is full size (60 blocks) from the day you arrive, and siege wins no longer grow it. Tiers still unlock wall levels, buildings and keep health. A Castle's keep now really has 600 health.
 - Regional roles are now earned by a deed in their region instead of by raising a Stone Hall there: Forgemaster for bringing down the Pale Huntsman, Captain for the Drowned Bride, Witch for the Mother of Changelings, and Dragon Rider when your first dragon hatches.
 - The endless siege (the Long Night) now begins when the Rift is opened, not when the Choir falls. Thunderstorms roll in with each wave of it and clear between them.

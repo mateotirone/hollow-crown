@@ -1,0 +1,25 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shapeless": {
+    "description": {
+      "identifier": "siege:guard_blackfen_leggings_recipe"
+    },
+    "tags": [
+      "siege_workshop"
+    ],
+    "ingredients": [
+      {
+        "item": "siege:guard_leggings"
+      },
+      {
+        "item": "siege:castle_stone_blackfen"
+      }
+    ],
+    "result": {
+      "item": "siege:guard_blackfen_leggings"
+    },
+    "unlock": {
+      "context": "AlwaysUnlocked"
+    }
+  }
+}

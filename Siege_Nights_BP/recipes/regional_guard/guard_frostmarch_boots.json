@@ -1,0 +1,25 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shapeless": {
+    "description": {
+      "identifier": "siege:guard_frostmarch_boots_recipe"
+    },
+    "tags": [
+      "siege_workshop"
+    ],
+    "ingredients": [
+      {
+        "item": "siege:guard_boots"
+      },
+      {
+        "item": "siege:castle_stone_frostmarch"
+      }
+    ],
+    "result": {
+      "item": "siege:guard_frostmarch_boots"
+    },
+    "unlock": {
+      "context": "AlwaysUnlocked"
+    }
+  }
+}

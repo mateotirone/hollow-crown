@@ -7,7 +7,11 @@
    "is_summonable": true,
    "is_experimental": false
   },
-  "component_groups": {},
+  "component_groups": {
+   "siege:bare": {
+    "minecraft:is_charged": {}
+   }
+  },
   "components": {
    "minecraft:type_family": {
     "family": [
@@ -140,6 +144,21 @@
    },
    "minecraft:persistent": {}
   },
-  "events": {}
+  "events": {
+   "siege:bare_on": {
+    "add": {
+     "component_groups": [
+      "siege:bare"
+     ]
+    }
+   },
+   "siege:bare_off": {
+    "remove": {
+     "component_groups": [
+      "siege:bare"
+     ]
+    }
+   }
+  }
  }
 }
