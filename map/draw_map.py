@@ -64,7 +64,7 @@ def land_at(x,z):
 # ---- places
 plots=[("Harrowford","Aldmere Vale",-470,-300,"river meadow above the lower Alder"),("Oakmere","Aldmere Vale",260,-480,"oak forest between the two rivers"),
 ("Thistledown","Aldmere Vale",300,130,"open downs south of the Greywater"),("Wrenfield","Aldmere Vale",-200,220,"lakeside fields by Wren Water"),
-("Rimeholt","Frostmarch",-520,-760,"a shelf in the western foothills"),("Wolfcairn","Frostmarch",520,-1010,"high plateau north of the range"),
+("Frosthelm","Frostmarch",-520,-760,"a shelf in the western foothills"),("Wolfcairn","Frostmarch",520,-1010,"high plateau north of the range"),
 ("Gullcliff","Saltreach",-760,-560,"clifftop over the northern coast"),("Tidewatch","Saltreach",-560,650,"dunes above the southern shore"),
 ("Reedmoor","Blackfen",-230,560,"the firm northern edge of the fen"),("Lanternbog","Blackfen",260,980,"a dry island deep in the fen"),
 ("Redmesa","Emberwaste",700,60,"mesa top at the desert's edge"),("Dunehold","Emberwaste",760,860,"an oasis among the dunes")]
@@ -80,18 +80,18 @@ V=villages; P={n:(x,z) for n,_,x,z,_ in plots}
 def stn(name,toward):
     x,z=P[name]; dx,dz=toward[0]-x,toward[1]-z; L=math.hypot(dx,dz); return (x+95*dx/L,z+95*dz/L)
 ST={"Harrowford":(-385,-345),"Oakmere":stn("Oakmere",V["Millbrook"]),"Thistledown":(225,25),"Wrenfield":(-110,190),
-"Rimeholt":stn("Rimeholt",(-640,-640)),"Wolfcairn":stn("Wolfcairn",V["Rimehold"]),"Gullcliff":(-655,-505),"Tidewatch":(-520,555),
+"Frosthelm":stn("Frosthelm",(-640,-640)),"Wolfcairn":stn("Wolfcairn",V["Rimehold"]),"Gullcliff":(-655,-505),"Tidewatch":(-520,555),
 "Reedmoor":(-140,520),"Lanternbog":(180,900),"Redmesa":(640,150),"Dunehold":(865,805)}
 rails={"North Line":[V["Kingsrest"],(-130,-320),V["Millbrook"],(-20,-680),(-110,-900),V["Rimehold"],(200,-1120),ST["Wolfcairn"]],
 "Oakmere Branch":[V["Millbrook"],(50,-500),ST["Oakmere"]],
-"Coast Line":[V["Kingsrest"],(-270,-230),ST["Harrowford"],(-540,-440),ST["Gullcliff"],(-640,-640),ST["Rimeholt"]],
+"Coast Line":[V["Kingsrest"],(-270,-230),ST["Harrowford"],(-540,-440),ST["Gullcliff"],(-640,-640),ST["Frosthelm"]],
 "Bay Line":[V["Kingsrest"],(-300,-10),(-440,120),(-500,280),(-680,330),V["Gull's Rest"]],
 "Fen Line":[V["Kingsrest"],(-130,20),ST["Wrenfield"],(-90,360),ST["Reedmoor"],(-150,740),V["Mirelight"],(60,900),ST["Lanternbog"]],
 "Shore Branch":[ST["Reedmoor"],(-250,440),(-400,480),ST["Tidewatch"],(-680,480),V["Gull's Rest"]],
 "Sun Line":[V["Kingsrest"],(40,-60),ST["Thistledown"],(430,70),(560,170),ST["Redmesa"],(800,260),V["Sunscar"],(900,640),ST["Dunehold"],(800,1000),(520,1080),(330,1090),(150,1010),(130,930),ST["Lanternbog"]]}
 railpts={k:spline(v,16,6 if len(v)>3 else 0,i+20) for i,(k,v) in enumerate(rails.items())}
 trails={"Greywater Road":[ST["Oakmere"],(190,-370),(330,-290),(420,-170),(380,-40),ST["Thistledown"]],
-"High Road":[ST["Rimeholt"],(-430,-610),(-250,-560),V["Millbrook"]],
+"High Road":[ST["Frosthelm"],(-430,-610),(-250,-560),V["Millbrook"]],
 "Drover's Way":[ST["Wrenfield"],(20,180),(110,90),ST["Thistledown"]],
 "Dune Track":[(110,90),(250,330),(480,560),(680,540),V["Sunscar"]],
 "Smugglers' Path":[ST["Tidewatch"],(-400,600),(-340,760),(-250,860),V["Mirelight"]],

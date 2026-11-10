@@ -38,7 +38,7 @@ export function againstWall(at, yaw) {
   return { x: at.x + 0.5 - f.x * 0.46, y: at.y, z: at.z + 0.5 - f.z * 0.46, yaw: f.yaw };
 }
 // Which of the eight old paintings hangs over each Library's door: the one nearest that plot's own story
-export const PLOT_PAINTING = { Harrowford: 3, Oakmere: 7, Thistledown: 5, Wrenfield: 4, Rimeholt: 5, Wolfcairn: 2, Gullcliff: 2, Tidewatch: 7, Reedmoor: 1, Lanternbog: 6, Redmesa: 4, Dunehold: 6 };
+export const PLOT_PAINTING = { Harrowford: 3, Oakmere: 7, Thistledown: 5, Wrenfield: 4, Frosthelm: 5, Wolfcairn: 2, Gullcliff: 2, Tidewatch: 7, Reedmoor: 1, Lanternbog: 6, Redmesa: 4, Dunehold: 6 };
 
 export function hang(dimension, spot, index) {
   const pic = PICS[index];

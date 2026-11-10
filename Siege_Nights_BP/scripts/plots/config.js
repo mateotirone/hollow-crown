@@ -22,7 +22,7 @@ export const PLOT_PLAN = [
   { name: "Oakmere", region: "Aldmere Vale", x: 260, z: -480, gate: 270, relic: { x: 332, z: -480 }, site: "oak forest between the two rivers" },
   { name: "Thistledown", region: "Aldmere Vale", x: 300, z: 130, gate: 0, relic: { x: 370, z: 111 }, site: "open downs south of the Greywater" },
   { name: "Wrenfield", region: "Aldmere Vale", x: -200, z: 220, gate: 90, relic: { x: -164, z: 282 }, site: "lakeside fields by Wren Water" },
-  { name: "Rimeholt", region: "Frostmarch", x: -520, z: -760, gate: 180, relic: { x: -479, z: -819 }, site: "a shelf in the western foothills" },
+  { name: "Frosthelm", region: "Frostmarch", x: -520, z: -760, gate: 180, relic: { x: -479, z: -819 }, site: "a shelf in the western foothills" },
   { name: "Wolfcairn", region: "Frostmarch", x: 520, z: -1010, gate: 270, relic: { x: 575, z: -1056 }, site: "high plateau north of the range" },
   { name: "Gullcliff", region: "Saltreach", x: -760, z: -560, gate: 90, relic: { x: -825, z: -530 }, site: "clifftop over the northern coast" },
   { name: "Tidewatch", region: "Saltreach", x: -560, z: 650, gate: 0, relic: { x: -596, z: 712 }, site: "dunes above the southern shore" },

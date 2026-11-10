@@ -91,7 +91,7 @@ Mateo, 2026-11-10: every settlement needs its own lore and library, "so the game
 | Oakmere | King Aldric's hunting lodge, with a second cellar | The journal in every player's pack | The Cellar in the Oakwood (Aldric) | King Aldric, Rafe Aske, Giles Lorimer |
 | Thistledown | An empty bell frame on the down | Corvin Hale before the court | The Empty Frame (Corvin) | Tam Burdock, the Tenant of the Down, Alys Burdock |
 | Wrenfield | A royal summer house by the lake | Edda as a child | The Letter in the Apple Tree (Edda) | Mistress Thorpe, E. aged seven, Garth Appleyard |
-| Rimeholt | Queen Maelis's copper diggings | The casting of the Founding Bell | Forty Tons of Copper (the Founding Bell) | Queen Maelis, Brand Holt, Master Ysolt |
+| Frosthelm | Queen Maelis's copper diggings | The casting of the Founding Bell | Forty Tons of Copper (the Founding Bell) | Queen Maelis, Brand Holt, Master Ysolt |
 | Wolfcairn | The cairn of six thousand and four stones | The Calling that fetched the Host | Six Thousand and Four Stones (a bell under the ice) | The First Cairn-Wife, Vorlund before he sailed, Runa Ashby |
 | Gullcliff | A beacon station | Proof Corvin could not have called the Host | Sails Without Wind (two winters) | Ines Marrow, Piers Gannet, Brother-Clerk Aldhelm |
 | Tidewatch | A tide-readers' house | The first Returned | The Last Post (the Returned) | Prior Benet, Brother Caedmon, Wat Tolley after |
