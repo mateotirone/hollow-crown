@@ -9,7 +9,7 @@ export const COIN = "siege:coin"; // the everyday coin
 export const GOLD = "siege:gold_coin"; // worth ECON.goldWorth coins
 
 export const ECON = {
-  // Display name only. Change it here and in the two lines of en_US.lang; nothing else depends on it.
+  // Display name only; Regal is confirmed by Mateo (2026-11-10). It also appears in some player texts and docs.
   one: "Regal", many: "Regals", gold: "Gold Regal",
   icon: "textures/items/siege_coin",
   goldWorth: 64,

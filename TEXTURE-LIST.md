@@ -422,7 +422,7 @@ Painted by `studio/art/build_gates.py` and `studio/art/build_walls.py`. Final st
 ## Menu skin (proposal, 2026-11-10)
 Painted by `studio/art/build_ui.py`. Not wired: needs `ui/` JSON files in the resource pack and an in-game check.
 - `textures/ui/hc/panel.png`, `button.png`, `button_hover.png`, `slot.png`, `slot_hover.png`, `parchment.png`: first pass
-- `textures/ui/hc/coin.png`: stand-in until the currency is designed
+- `textures/ui/hc/coin.png`: the Regal at 8x8, painted (`studio/art/build_coins.py`)
 - Mock-up screens: `art/ui/mockup_mason.png`, `mockup_townhall.png`, `mockup_npc.png` (and `mockups.png`)
 
 ## Economy (2026-11-10)
