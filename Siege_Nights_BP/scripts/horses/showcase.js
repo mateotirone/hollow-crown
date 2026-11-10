@@ -22,16 +22,19 @@ on("showcase", ({ player, dim, nextSpot, label }) => {
   const make = (breed, name, extra = {}) => Object.assign(
     newRecord({ uid: newUid(), owner: player.id, ownerName: player.name, breed, name }), extra);
 
+  // Worn layers, one each so every look can be seen: banner cloth on the Courser, plate armor on the Destrier,
+  // and the Warhorse left in its own barding (worn armor or a Caparison would cover it).
+  const worn = { courser: { caparison: bannerColorOf(player.id) }, destrier: { gearArmor: "minecraft:diamond_horse_armor" } };
   const byBreed = {};
   for (const breed of REGIONAL_BREEDS) {
     const info = BREEDS[breed];
-    byBreed[breed] = show(make(breed, info.short, { level: 6, tp: 5, pp: 1, stats: { speed: 2, jump: 2, health: 2, stamina: 2 } }),
+    byBreed[breed] = show(make(breed, info.short, { level: 6, tp: 5, pp: 1, stats: { speed: 2, jump: 2, health: 2, stamina: 2 }, ...worn[breed] }),
       `${info.name}\n${TRAITS[info.trait].name}\n5 points to train`);
   }
   show(make("courser", "Valiant", {
     level: 20, tp: 3, stats: { speed: 5, jump: 4, health: 5, stamina: 4 }, special: "warhorse", shoes: "netherite", saddle: "royal",
-    caparison: bannerColorOf(player.id), perks: ["trample", "sprint_burst", "fleet", "loyal"], gearArmor: "minecraft:diamond_horse_armor",
-  }), "Knight Warhorse\nGallop into mobs\nfull gear");
+    perks: ["trample", "sprint_burst", "fleet", "loyal"],
+  }), "Knight Warhorse\nGallop into mobs\nits own barding");
   show(make("mirepony", "Whisper", {
     level: 20, tp: 3, stats: { speed: 4, jump: 5, health: 4, stamina: 5 }, special: "hollow", shoes: "diamond", saddle: "cavalry",
     perks: ["second_wind", "fearless", "skyleap", "loyal"],

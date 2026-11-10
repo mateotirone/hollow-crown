@@ -33,6 +33,10 @@ BLOCKS = {
     "cracked_veinstone_bricks": ("Cracked Veinstone Bricks", "#2d2238", dict(hard=3, sound="deepslate_bricks")),
     "pale_ash": ("Pale Ash", "#b9b4c4", dict(hard=0.5, sound="sand")),
     "glint_cluster": ("Glint Cluster", "#6fc6ff", dict(plant=True, light=12, sound="amethyst_cluster")),
+    # Giant Veilcaps and hanging moss (Hollow world thread, Mateo said yes 2026-11-10)
+    "veilcap_cap": ("Veilcap Cap", "#ff9ad0", dict(hard=0.4, light=11, sound="fungus")),
+    "veilcap_stem": ("Veilcap Stem", "#e6dcef", dict(hard=0.6, sound="fungus")),
+    "veilmoss_strands": ("Veilmoss Strands", "#8a3f86", dict(plant=True, light=3, sound="fungus")),
     "court_seal": ("Court Seal", "#16323a", dict(unbreakable=True, sound="stone")),
 }
 
@@ -163,6 +167,15 @@ def glint(x, y):
     for sx, top, wide in ((4, 7, 1), (8, 2, 2), (12, 9, 1)):
         if y >= top and abs(x - sx) <= (wide if y > top + 1 else 0): return jitter((120, 205, 255), 22) if x != sx else (215, 245, 255, 255)
     return None
+def cap(x, y):
+    spot = ((x * 7 + y * 13) % 11 == 0) or ((x * 5 + y * 3) % 17 == 0)
+    return jitter((255, 214, 236), 8) if spot else jitter((238, 132, 190), 14) if (x + y * 2) % 5 else jitter((214, 104, 168), 10)
+def stem(x, y):
+    return jitter((206, 190, 222), 8) if x % 4 == 0 else jitter((236, 226, 244), 7)
+def strands(x, y):
+    length = [11, 0, 14, 7, 0, 16, 9, 0, 12, 15, 0, 6, 13, 0, 10, 16][x]
+    if y >= length: return None
+    return jitter((220, 120, 200), 12) if y == length - 1 else jitter((138, 63, 134), 14)
 def flow(x, y): return jitter((170, 225, 255), 18, 150 + ((x + y * 2) % 5) * 12)
 def seam(x, y):
     mid = 7 + (1 if (y // 3) % 2 else 0)
@@ -208,7 +221,8 @@ if __name__ == "__main__":
     for name, fn in dict(veinstone=veinstone, undertow_moss=moss, veil_rock=veil_rock, hollowwood_lattice=lattice,
                          hollowwood_core=core, veilcap=veilcap, glimbulb=glimbulb, glimmerflow=flow, rift_seam=seam,
                          rift_edge=edge, rift_veil=veil, waystone=waystone, court_seal=seal, choir_ore=ore,
-                         veinstone_bricks=bricks, cracked_veinstone_bricks=cracked_bricks, pale_ash=ash, glint_cluster=glint).items():
+                         veinstone_bricks=bricks, cracked_veinstone_bricks=cracked_bricks, pale_ash=ash, glint_cluster=glint,
+                         veilcap_cap=cap, veilcap_stem=stem, veilmoss_strands=strands).items():
         tex(name, fn)
     tex("tuning_fork", fork, "items")
     tex("choir_shard", shard, "items")
