@@ -17,13 +17,14 @@ for path in sorted(glob.glob(os.path.join(SCRIPTS, "**", "*.js"), recursive=True
     if rel in SKIP: continue
     src = open(path, encoding="utf8").read()
     out, n = CALL.subn(lambda m: f"sfx({m.group(1)}, ", src)
-    if not n: continue
+    if not n and not re.search(r"\bsfx\(", out): continue
     if not re.search(r"^import \{[^}]*\bsfx\b[^}]*\} from ", out, re.M):
         line = f'import {{ sfx }} from "{"../" * rel.count("/") or "./"}core/sfx.js";\n'
         imports = list(re.finditer(r"^import [^;]*?;\n", out, re.M | re.S))
         at = imports[-1].end() if imports else 0
         out = out[:at] + line + out[at:]
+    if out == src: continue
     open(path, "w", encoding="utf8").write(out)
     total += n
-    print(f"{rel}: {n}")
-print(f"{total} call(s) rewritten" if total else "nothing to do: every sound already goes through sfx()")
+    print(f"{rel}: {n} call(s)" if n else f"{rel}: import added")
+print(f"{total} call(s) rewritten" if total else "no direct playSound calls left")

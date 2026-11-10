@@ -8,12 +8,9 @@ import { STYLES } from "./styles.js";
 import { treeCells, TREE_FLAG, BRANCH_FLAG, SPACER } from "./tree_layout.js";
 import { heroOf, saveHero, setPath, grantPoints } from "./hero.js";
 import { hallLevelAt, setTreeLook } from "./townhall.js";
-<<<<<<< HEAD
-import { sfx } from "../core/sfx.js";
-=======
 import { chargeE } from "../economy/coins.js";
 import { worth } from "../economy/rules.js";
->>>>>>> origin/main
+import { sfx } from "../core/sfx.js";
 
 export const EMBER = "siege:hollow_ember"; // the fallen shard, before you choose
 export const BOUND_EMBER = "siege:bound_ember"; // the Marked player's focus

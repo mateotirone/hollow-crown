@@ -44,14 +44,9 @@ export function recordWin(owner) {
   }
   for (const p of world.getPlayers()) {
     if (p.id === owner) {
-<<<<<<< HEAD
-      title(p, `§6Your ${before.name} is now a ${after.name}!`, `§7Your land reaches ${after.radius} blocks and your keep is tougher`);
-      sfx(p, "ui.toast.challenge_complete");
-=======
       const grew = landRadius(keep, owner) === after.radius && after.radius !== before.radius;
       title(p, `§6Your ${before.name} is now a ${after.name}!`, grew ? `§7Your land reaches ${after.radius} blocks and your keep is tougher` : "§7Your keep is tougher, and there is more to build");
       sfx(p, "ui.toast.challenge_complete");
->>>>>>> origin/main
     } else {
       p.sendMessage(`§6${keep.name}'s ${before.name} has grown into a ${after.name}!`);
     }

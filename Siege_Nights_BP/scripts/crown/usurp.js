@@ -108,13 +108,8 @@ function useShard(player) {
     c.treasury += CROWN.shardTreasury;
     saveCrown();
     addHollowing(-CROWN.hollowShatter);
-<<<<<<< HEAD
-    sfx(player, "random.glass");
-    return player.sendMessage(`§aThe shard shatters. One less Claim against you. §7+${CROWN.shardTreasury} emeralds to the Treasury.${c.ruler.hollowing >= 25 ? " §8§oFor a moment, everything is quiet." : ""}`);
-=======
     sfx(player, "random.glass");
     return player.sendMessage(`§aThe shard shatters. One less Claim against you. §7+${worth(CROWN.shardTreasury)} to the Treasury.${c.ruler.hollowing >= 25 ? " §8§oFor a moment, everything is quiet." : ""}`);
->>>>>>> origin/main
   }
   sfx(player, "block.end_portal_frame.fill");
   addClaim(player, CROWN.claimShard, `an ${CROWN.shard} bound`);
@@ -462,13 +457,8 @@ function castOut(player) {
   player.teleport(exilePoint(from), { dimension: overworld() });
   exile.pending = false;
   saveCrown();
-<<<<<<< HEAD
-  title(player, `§4Banished from ${CROWN.citadelName}`, "§7You were a ruler this morning");
-  sfx(player, "mob.wither.death", { volume: 0.5 });
-=======
   title(player, `§4Banished from ${citadelName()}`, "§7You were a ruler this morning");
   sfx(player, "mob.wither.death", { volume: 0.5 });
->>>>>>> origin/main
   giveItem(player, new ItemStack(KEEP_BANNER, 1));
   player.sendMessage(`§7You are cast out with what you carry. ${citadelName()} is closed to you for ${CROWN.banishNights} siege nights.`);
   player.sendMessage(`§5But you held it once, and the throne remembers: your Blood Claim starts at ${CROWN.claimExileStart}. §7${EXILE_STAGES[0].name}: ${EXILE_STAGES[0].goal}`);

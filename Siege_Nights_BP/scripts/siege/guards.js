@@ -6,14 +6,10 @@ import { applyFilter } from "../core/events.js";
 import { BARRACKS, GUARD_GEAR, GUARD_TYPES, WANTED_TAG } from "./constants.js";
 import { saveState, state, tracked } from "./state.js";
 import { isAlly, settlementAt, tierOf } from "./territory.js";
-<<<<<<< HEAD
-import { countItem, isOnline, overworld, takeItems } from "./util.js";
-import { sfx } from "../core/sfx.js";
-=======
 import { isOnline, overworld, takeItems } from "./util.js";
 import { fundsE, chargeE } from "../economy/coins.js";
 import { worth } from "../economy/rules.js";
->>>>>>> origin/main
+import { sfx } from "../core/sfx.js";
 
 // ---------- Guards: Archers hold the walls, Men-at-Arms wait in the Barracks ----------
 // Bring an unemployed villager to your Barracks and click it with coins in hand (40 Regals) to recruit a

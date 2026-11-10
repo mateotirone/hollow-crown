@@ -428,13 +428,8 @@ on("assaultIncoming", ({ assault }) => {
   system.runTimeout(() => {
     for (const p of everyone()) {
       if (role === "toll" && n.clock) {
-<<<<<<< HEAD
-        title(p, "§43:17", n.glimpse ? "§7 " : n.kind === "muster" ? "§7The last of them" : "§7Everything that was waiting, comes");
-        sound(p, "sig.toll_317");
-=======
         title(p, "§43:17", n.glimpse.includes(settlementAt(p.location) ?? p.id) ? "§7 " : n.kind === "muster" ? "§7The last of them" : "§7Everything that was waiting, comes");
-        sound(p, "block.bell.hit", { pitch: 0.5, volume: 1 });
->>>>>>> origin/main
+        sound(p, "sig.toll_317");
       } else {
         p.onScreenDisplay.setActionBar(line);
         if (role === "tide") sound(p, "sig.storm_tide");

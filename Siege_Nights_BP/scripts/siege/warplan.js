@@ -11,12 +11,9 @@ import { spawnRaider } from "./siege.js";
 import { state } from "./state.js";
 import { tierOf } from "./territory.js";
 import { overworld, ownerOf, pick, title } from "./util.js";
-<<<<<<< HEAD
-import { sfx } from "../core/sfx.js";
-=======
 import { dropCoins } from "../economy/coins.js";
 import { fromEmeralds } from "../economy/rules.js";
->>>>>>> origin/main
+import { sfx } from "../core/sfx.js";
 
 // ---------- Procedural raiders: every siege army is planned from what you've done ----------
 // When a siege starts, each settlement gets its own war plan:
@@ -234,14 +231,9 @@ export function crownSovereign(owner) {
   const player = world.getPlayers().find((p) => p.id === owner);
   if (player) {
     title(player, "§6Long live the Sovereign!", `§7${keep.name}'s Castle has broken the Warlord King`);
-<<<<<<< HEAD
-    sfx(player, "ui.toast.challenge_complete");
-    for (const [id, n] of [["minecraft:emerald", 48], ["minecraft:netherite_ingot", 1], ["minecraft:totem_of_undying", 1]]) {
-=======
     sfx(player, "ui.toast.challenge_complete");
     dropCoins(player.dimension, player.location, fromEmeralds(48), "sovereign");
     for (const [id, n] of [["minecraft:netherite_ingot", 1], ["minecraft:totem_of_undying", 1]]) {
->>>>>>> origin/main
       player.dimension.spawnItem(new ItemStack(id, n), player.location);
     }
   }

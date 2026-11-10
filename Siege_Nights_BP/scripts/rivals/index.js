@@ -40,11 +40,8 @@ import { WALL_LEVELS } from "../settle/walldata.js";
 import { raiseFree } from "../settle/plans.js";
 import { RIVALS, TIER_NAMES, LINES, STAGES, makeLord, radiusOf, wanted, night, nextPiece, partKey, hallSpot, partSpot, estateOf, winsForEstate, takeEstate } from "./data.js";
 import "./tests.js";
-<<<<<<< HEAD
 import { sfx } from "../core/sfx.js";
-=======
 import "./court.js"; // what lords do: marches, feuds, trade, oaths
->>>>>>> origin/main
 
 const OVERWORLD = "minecraft:overworld";
 const NPC_TYPE = "minecraft:npc";
@@ -358,16 +355,9 @@ function endSiege(lord, won) {
   for (const p of world.getPlayers()) p.sendMessage(`§6${lord.name} has fallen. ${lord.plot} stands empty, hall and all.`);
   if (!player) return;
   const spoils = RIVALS.spoils[lord.tier];
-<<<<<<< HEAD
-  const left = player.getComponent("minecraft:inventory").container.addItem(new ItemStack("minecraft:emerald", spoils));
-  if (left) player.dimension.spawnItem(left, player.location);
-  sfx(player, "ui.toast.challenge_complete");
-  title(player, `§6${lord.plot} is taken`, `§7${spoils} emeralds in spoils. Claim it and it is yours as it stands.`);
-=======
   pay(player, fromEmeralds(spoils), "rival lord");
   sfx(player, "ui.toast.challenge_complete");
   title(player, `§6${lord.plot} is taken`, `§7${coins(fromEmeralds(spoils))} in spoils. Claim it and it is yours as it stands.`);
->>>>>>> origin/main
   emit("skillPoints", { player, amount: 1 + lord.tier, source: `toppled ${lord.name}`, renown: 80 * (lord.tier + 1) });
 }
 

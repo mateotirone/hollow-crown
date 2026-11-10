@@ -7,12 +7,8 @@ import { emit } from "../siege/api.js";
 import { isTesting } from "../core/tests.js";
 import { TOMES, tomesOf, answerIsRight, cluesFound, canAnswer as enoughClues, surveyLine, ALL_THREADS, isLocal, loadSaved, stampSaved } /* saves carry a version: SAVE_VERSION in logic.js */ from "./logic.js";
 import { COLLECTIONS, PLACES, THREADS } from "./data/world.js";
-<<<<<<< HEAD
-import { LEDGER, progressOf, saveProgress, sourceSite, awardPoints, setFlag } from "./player.js";
-import { sfx } from "../core/sfx.js";
-=======
 import { LEDGER, progressOf, saveProgress, sourceSite, awardPoints, setFlag, learnLeads } from "./player.js";
->>>>>>> origin/main
+import { sfx } from "../core/sfx.js";
 
 const WRONG_ANSWER_DAYS = 1;
 const K_PLACES = "hc:lore_places"; // { place id: { x, y, z } } marked by the map builder

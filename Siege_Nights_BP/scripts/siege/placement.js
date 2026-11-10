@@ -55,13 +55,8 @@ export function foundSettlement(player, block) {
   state.keeps[player.id] = { x: loc.x, y: loc.y, z: loc.z, name: player.name, color, wins: old?.wins ?? 0, allies: old?.allies ?? [] };
   saveState();
   title(player, old ? "§6Settlement moved" : "§6Settlement founded",
-<<<<<<< HEAD
-    `§7Your ${tierOf(state.keeps[player.id]).name} reaches ${tierOf(state.keeps[player.id]).radius} blocks from your banner`);
-  sfx(player, "random.levelup");
-=======
     `§7Your ${tierOf(state.keeps[player.id]).name} reaches ${landRadius(state.keeps[player.id], player.id)} blocks from your banner`);
   sfx(player, "random.levelup");
->>>>>>> origin/main
   if (!old) player.sendMessage("§6Your Keep is raised! Craft a Siege Workshop to make castle blocks. Raiders will march on this banner on siege nights. Use dye on it to change its color.");
   emit("keepFounded", { player, keep: state.keeps[player.id], moved: !!old });
 }

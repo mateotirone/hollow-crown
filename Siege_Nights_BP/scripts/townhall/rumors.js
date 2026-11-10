@@ -11,12 +11,9 @@ import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
 import * as api from "../siege/api.js";
 import { heroOf, saveHero, grantPoints, grantRenown } from "./hero.js";
 import { heading } from "./progress.js";
-<<<<<<< HEAD
-import { sfx } from "../core/sfx.js";
-=======
 import { payE } from "../economy/coins.js";
 import { worth } from "../economy/rules.js";
->>>>>>> origin/main
+import { sfx } from "../core/sfx.js";
 
 export const JOBS_PER_POINT = 3;
 const RUMOR_TAG = "siege_rumor";

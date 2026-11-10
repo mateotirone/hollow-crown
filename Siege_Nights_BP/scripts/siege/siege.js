@@ -138,13 +138,8 @@ export function endSiege(outcome) {
       // the reward (and every hook on it) is still counted in the old unit; it is paid in coins, 8 to one
       if (emeralds > 0) pay(player, fromEmeralds(emeralds), "siege");
       player.addExperience(20 + threat * 2);
-<<<<<<< HEAD
-      title(player, "§aSiege Broken!", `§7You held the keep. +${emeralds} emeralds`);
-      sfx(player, "random.levelup");
-=======
       title(player, "§aSiege Broken!", `§7You held the keep. +${coins(fromEmeralds(emeralds))}`);
       sfx(player, "random.levelup");
->>>>>>> origin/main
       emit("siegeReward", { player, emeralds, threat });
     } else if (outcome === "won") {
       title(player, "§aThe siege is over", "§7The raiders have been driven off");

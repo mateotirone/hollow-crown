@@ -339,13 +339,8 @@ world.beforeEvents.playerInteractWithEntity.subscribe((event) => {
       consumeHeld(player);
       rec.saddled = true;
       refresh(rec);
-<<<<<<< HEAD
-      sfx(target.dimension, "armor.equip_leather", target.location);
-      say(player, `§6${rec.name} takes the saddle.`);
-=======
       sfx(target.dimension, "armor.equip_leather", target.location);
       say(player, `§6${rec.name} takes the saddle. §7Click it holding anything to climb on. An empty hand pets it.`);
->>>>>>> origin/main
     });
   }
   if (player.isSneaking && !item) return act(() => dragonMenu(player, rec));

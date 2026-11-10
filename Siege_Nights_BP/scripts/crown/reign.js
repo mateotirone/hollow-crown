@@ -459,13 +459,8 @@ export function throneMenu(player) {
     c.purifiedDay = world.getDay();
     r.hollowing = clamp(r.hollowing - CROWN.purifyAmount, 0, 100);
     saveCrown();
-<<<<<<< HEAD
-    sfx(player, "random.totem");
-    player.sendMessage("§7You pour emeralds into the dark under the throne. §aThe whispers fade a little.");
-=======
     sfx(player, "random.totem");
     player.sendMessage("§7You pour coin into the dark under the throne. §aThe whispers fade a little.");
->>>>>>> origin/main
   });
   if (r.hollowing >= 50 || r.readLetter) add("§8Something is tucked under the seat", () => {
     r.readLetter = true;

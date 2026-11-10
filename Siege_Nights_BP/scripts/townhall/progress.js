@@ -6,12 +6,9 @@ import { heroOf, saveHero, grantPoints, grantRenown, playerById } from "./hero.j
 import { hallOf } from "./townhall.js";
 import { EMBER, choosePath, offerVictor } from "./tree.js";
 import { ROLES } from "./skills.js";
-<<<<<<< HEAD
-import { sfx } from "../core/sfx.js";
-=======
 import { dropCoins } from "../economy/coins.js";
 import { fromEmeralds } from "../economy/rules.js";
->>>>>>> origin/main
+import { sfx } from "../core/sfx.js";
 
 const rank = (player, id) => heroOf(player).skills[id] ?? 0;
 const fx = (entity, effect, ticks, amplifier = 0) => {

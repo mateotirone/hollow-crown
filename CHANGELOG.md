@@ -9,9 +9,7 @@ How versions work is in [`docs/RELEASING.md`](docs/RELEASING.md).
 Everything merged to `main` since the last release goes here. Each pull request that changes what players see adds a line under one of these headings.
 
 ### Added
-<<<<<<< HEAD
 - Sound has its own voice now. The bell, the horns and about 25 other sounds are lower, softer and layered wherever the game uses them, and nothing is heard twice exactly the same. The 3:17 toll, the siege horn, the first glimpse, a storm tide and every boss's arrival each have their own sound. These are stand-ins built from vanilla sounds until the real recordings are made: `SOUND-LIST.md` has the list and the prompts, `sounds-inbox/` is where the files go, and `/scriptevent siege:sound` opens a sound board in game. No music yet.
-=======
 - Seeps now come in five kinds, chosen by the Storyteller to contrast with what you did lately: guarded (as before), hungry (opens wide, guards come fast), still (no guards, it murmurs to you), drifting (it slips away until cornered) and weeping (harmless, closes by itself).
 - Pretenders: after Morvane falls, claimants rise at the empty Seat in the Hollow every week or so. Each is generated (a name, one of three bodies, four powers out of nine, and a claim that changes how you must fight it) and the same one never comes twice. While one sits unchallenged the seep surges in the overworld. Each drops a Claimant's Seal with its name on it, plus Choirsteel.
 - The shape of a siege night now follows what the world has been through lately: after a run of hard fights the next night is likelier to be a strange or a waiting one. The story chapter now moves past chapter 2 as bosses fall.
@@ -19,7 +17,6 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - Dragons: hatching your first dragon opens the Dragon Rider path at the Tree of Oaths.
 - Dragons: an empty hand now always pets a dragon, whether you click it or punch it (no damage, it nuzzles you). To climb onto a saddled dragon, click it holding any item. Folded wings now tuck down along the flanks instead of lying flat.
 - Choirsteel gear, made from the Hollow's ore: Helm, Cuirass, Greaves, Treads, Blade, Pick, Axe, Spade and Hoe. Each is crafted from its netherite piece, Choirsteel Ingots and a Gloamquill. Armour protects like netherite and lasts half again as long, and each piece does something of its own; the full set makes you Resonant (a fifth of all damage turned aside, four more hearts). The Blade's every fourth hit rings through nearby enemies. The Pick shows you the next ore, and can mine Choir Ore.
->>>>>>> origin/main
 - Bosses never use the same attack twice running while another is ready, and a boss you have already beaten comes back in one of five tempers (Hasty, Relentless, Unquiet, Attended, Wary), never the one it wore last time. Beating a temper for the first time gives a named keepsake.
 - The Clockwork Reeve (the minute runs backwards), the Pale Huntsman (snares under the snow) and the Mother of Changelings (a lullaby you must look away from) each have a new attack.
 - About one raider in seven is a named veteran with a trait (Fleet, Stubborn, Cruel, Leaping, Ashen). The Grey Warlord now drops loot. `/scriptevent siege:variety` shows what you have met most.
