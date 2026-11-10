@@ -47,7 +47,7 @@ export function addClaim(player, amount, why) {
   c.claims[player.id] = Math.max(0, claimOf(player.id) + amount);
   c.names[player.id] = player.name;
   saveCrown();
-  if (amount > 0) player.sendMessage(`§5+${amount} Claim §7(${why}). Your Claim on the Crown: §5${c.claims[player.id]}`);
+  if (amount > 0) player.sendMessage(`§5+${amount} Claim §7(${why}). Your Claim on the throne: §5${c.claims[player.id]}`);
 }
 
 export function announce(text, sound) {

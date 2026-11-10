@@ -143,7 +143,10 @@ export function buildTick() {
 // World positions of every cell of a plan (used to clear an old hall before a new one rises)
 export function worldCells(plan, origin, forward) {
   const frame = frameFor(forward);
-  return [...plan.cells.values()].filter((c) => c.role !== "air").map((c) => toWorld(frame, origin, c.x, c.y, c.z));
+  const out = [...plan.cells.values()].filter((c) => c.role !== "air").map((c) => toWorld(frame, origin, c.x, c.y, c.z));
+  // stilts standing above the ground count too
+  for (const col of plan.columns.values()) for (let y = 1; y <= col.top; y++) out.push(toWorld(frame, origin, col.x, y, col.z));
+  return out;
 }
 
 export function worldMarks(plan, origin, forward) {

@@ -18,6 +18,7 @@ export function blankHero() {
     skills: {}, // id -> rank
     resonance: 0, // 0-100, Marked only
     spell: "arc_bolt", // the Marked player's selected power
+    offers: [], // roles the story has offered this player (see "offerRole")
     firstKills: [], // vanilla mob types killed at least once
     kills: 0,
     siegesHeld: 0,
@@ -65,7 +66,7 @@ export function grantPoints(player, points, reason = "") {
   hero.earned += points;
   note(hero, `+${points} SP ${reason}`.trim());
   saveHero(player);
-  player.sendMessage(`§b+${points} skill point${points === 1 ? "" : "s"}§7${reason ? ` (${reason})` : ""}. Spend them at the Tree of Oaths in your town hall.`);
+  player.sendMessage(`§b+${points} skill point${points === 1 ? "" : "s"}§7${reason ? ` (${reason})` : ""}.`);
   player.playSound("random.orb", { pitch: 1.4 });
 }
 

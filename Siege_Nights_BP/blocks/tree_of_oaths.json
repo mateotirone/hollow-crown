@@ -1,0 +1,109 @@
+{
+  "format_version": "1.21.60",
+  "minecraft:block": {
+    "description": {
+      "identifier": "siege:tree_of_oaths",
+      "menu_category": {
+        "category": "none"
+      },
+      "states": {
+        "siege:look": [
+          0,
+          1,
+          2
+        ]
+      }
+    },
+    "components": {
+      "minecraft:display_name": "tile.siege:tree_of_oaths.name",
+      "minecraft:geometry": "geometry.siege_tree_of_oaths",
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "siege_oath_tree_bark",
+          "render_method": "opaque"
+        },
+        "plinth": {
+          "texture": "siege_oath_tree_plinth",
+          "render_method": "opaque"
+        },
+        "crown": {
+          "texture": "siege_oath_tree_crown",
+          "render_method": "opaque"
+        }
+      },
+      "minecraft:light_emission": 10,
+      "minecraft:light_dampening": 0,
+      "minecraft:loot": "loot_tables/blocks/siege_nothing.json",
+      "minecraft:destructible_by_mining": {
+        "seconds_to_destroy": 8
+      },
+      "minecraft:destructible_by_explosion": false,
+      "minecraft:collision_box": {
+        "origin": [
+          -7,
+          0,
+          -7
+        ],
+        "size": [
+          14,
+          16,
+          14
+        ]
+      },
+      "minecraft:selection_box": {
+        "origin": [
+          -7,
+          0,
+          -7
+        ],
+        "size": [
+          14,
+          16,
+          14
+        ]
+      },
+      "minecraft:map_color": "#42803a"
+    },
+    "permutations": [
+      {
+        "condition": "q.block_state('siege:look') == 1",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_oath_tree_bark",
+              "render_method": "opaque"
+            },
+            "plinth": {
+              "texture": "siege_oath_tree_plinth",
+              "render_method": "opaque"
+            },
+            "crown": {
+              "texture": "siege_oath_tree_crown_knight",
+              "render_method": "opaque"
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:look') == 2",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_oath_tree_bark_marked",
+              "render_method": "opaque"
+            },
+            "plinth": {
+              "texture": "siege_oath_tree_plinth",
+              "render_method": "opaque"
+            },
+            "crown": {
+              "texture": "siege_oath_tree_crown_marked",
+              "render_method": "opaque"
+            }
+          },
+          "minecraft:light_emission": 14
+        }
+      }
+    ]
+  }
+}

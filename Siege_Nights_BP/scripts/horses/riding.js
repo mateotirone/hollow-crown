@@ -3,7 +3,7 @@
 
 import { world, system, EntityDamageCause } from "@minecraft/server";
 import { GUARD_TYPES, guardTag, isAlly, RAIDER_TAG } from "../siege/api.js";
-import { HORSE_SETTINGS as S, TERRAIN, addXp, effectiveStats, gallopTicks, hasPerk, hasTrait, bar } from "./data.js";
+import { HORSE_SETTINGS as S, TERRAIN, addXp, effectiveStats, gallopTicks, hasPerk, bar } from "./data.js";
 import { recordOf, saveRecord } from "./store.js";
 import { STEED, uidOf, valid } from "./steed.js";
 

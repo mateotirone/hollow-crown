@@ -14,6 +14,7 @@ import { STEED, uidOf, valid, entityOf, spawnSteed, applyRecord, readGear, refre
 import { ridingTick, useCrop, undertowStep, mountOf } from "./riding.js";
 import { horseMenu, stablesMenu, stallMenu, buyFoal, give, pay, isBuilder, sheetText } from "./menus.js";
 import "./tests.js";
+import "./showcase.js";
 
 export { stallMenu }; // the rail stations use the same stalls
 export { isGalloping } from "./riding.js";

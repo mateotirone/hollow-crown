@@ -1,0 +1,1175 @@
+{
+ "format_version": "1.26.30",
+ "minecraft:entity": {
+  "description": {
+   "identifier": "siege:dragon",
+   "is_spawnable": false,
+   "is_summonable": true,
+   "properties": {
+    "siege:hue": {
+     "type": "int",
+     "range": [
+      0,
+      3
+     ],
+     "default": 0,
+     "client_sync": true
+    },
+    "siege:flying": {
+     "type": "bool",
+     "default": false,
+     "client_sync": true
+    },
+    "siege:saddled": {
+     "type": "bool",
+     "default": false,
+     "client_sync": true
+    },
+    "siege:breath": {
+     "type": "bool",
+     "default": false,
+     "client_sync": true
+    }
+   }
+  },
+  "component_groups": {
+   "siege:stage_hatchling": {
+    "minecraft:scale": {
+     "value": 0.25
+    },
+    "minecraft:is_baby": {}
+   },
+   "siege:stage_fledgling": {
+    "minecraft:scale": {
+     "value": 0.6
+    }
+   },
+   "siege:stage_adult": {
+    "minecraft:scale": {
+     "value": 1.0
+    }
+   },
+   "siege:health_0": {
+    "minecraft:health": {
+     "value": 40,
+     "max": 40
+    }
+   },
+   "siege:health_1": {
+    "minecraft:health": {
+     "value": 50,
+     "max": 50
+    }
+   },
+   "siege:health_2": {
+    "minecraft:health": {
+     "value": 60,
+     "max": 60
+    }
+   },
+   "siege:health_3": {
+    "minecraft:health": {
+     "value": 70,
+     "max": 70
+    }
+   },
+   "siege:health_4": {
+    "minecraft:health": {
+     "value": 80,
+     "max": 80
+    }
+   },
+   "siege:health_5": {
+    "minecraft:health": {
+     "value": 100,
+     "max": 100
+    }
+   },
+   "siege:ground_0": {
+    "minecraft:physics": {},
+    "minecraft:movement": {
+     "value": 0.22
+    },
+    "minecraft:movement.basic": {},
+    "minecraft:navigation.walk": {
+     "can_path_over_water": false,
+     "avoid_water": true,
+     "avoid_damage_blocks": true
+    },
+    "minecraft:jump.static": {},
+    "minecraft:input_ground_controlled": {},
+    "minecraft:variable_max_auto_step": {
+     "base_value": 1.0625,
+     "controlled_value": 1.0625,
+     "jump_prevented_value": 0.5625
+    }
+   },
+   "siege:air_0": {
+    "minecraft:physics": {
+     "has_gravity": false
+    },
+    "minecraft:can_fly": {},
+    "minecraft:movement": {
+     "value": 0.04
+    },
+    "minecraft:flying_speed": {
+     "value": 0.04
+    },
+    "minecraft:navigation.float": {
+     "can_path_over_water": true,
+     "avoid_damage_blocks": true
+    },
+    "minecraft:jump.static": {},
+    "minecraft:free_camera_controlled": {
+     "strafe_speed_modifier": 0.6,
+     "backwards_movement_modifier": 0.3
+    },
+    "minecraft:vertical_movement_action": {
+     "vertical_velocity": 0.45
+    }
+   },
+   "siege:ground_1": {
+    "minecraft:physics": {},
+    "minecraft:movement": {
+     "value": 0.24
+    },
+    "minecraft:movement.basic": {},
+    "minecraft:navigation.walk": {
+     "can_path_over_water": false,
+     "avoid_water": true,
+     "avoid_damage_blocks": true
+    },
+    "minecraft:jump.static": {},
+    "minecraft:input_ground_controlled": {},
+    "minecraft:variable_max_auto_step": {
+     "base_value": 1.0625,
+     "controlled_value": 1.0625,
+     "jump_prevented_value": 0.5625
+    }
+   },
+   "siege:air_1": {
+    "minecraft:physics": {
+     "has_gravity": false
+    },
+    "minecraft:can_fly": {},
+    "minecraft:movement": {
+     "value": 0.045
+    },
+    "minecraft:flying_speed": {
+     "value": 0.045
+    },
+    "minecraft:navigation.float": {
+     "can_path_over_water": true,
+     "avoid_damage_blocks": true
+    },
+    "minecraft:jump.static": {},
+    "minecraft:free_camera_controlled": {
+     "strafe_speed_modifier": 0.6,
+     "backwards_movement_modifier": 0.3
+    },
+    "minecraft:vertical_movement_action": {
+     "vertical_velocity": 0.45
+    }
+   },
+   "siege:ground_2": {
+    "minecraft:physics": {},
+    "minecraft:movement": {
+     "value": 0.26
+    },
+    "minecraft:movement.basic": {},
+    "minecraft:navigation.walk": {
+     "can_path_over_water": false,
+     "avoid_water": true,
+     "avoid_damage_blocks": true
+    },
+    "minecraft:jump.static": {},
+    "minecraft:input_ground_controlled": {},
+    "minecraft:variable_max_auto_step": {
+     "base_value": 1.0625,
+     "controlled_value": 1.0625,
+     "jump_prevented_value": 0.5625
+    }
+   },
+   "siege:air_2": {
+    "minecraft:physics": {
+     "has_gravity": false
+    },
+    "minecraft:can_fly": {},
+    "minecraft:movement": {
+     "value": 0.05
+    },
+    "minecraft:flying_speed": {
+     "value": 0.05
+    },
+    "minecraft:navigation.float": {
+     "can_path_over_water": true,
+     "avoid_damage_blocks": true
+    },
+    "minecraft:jump.static": {},
+    "minecraft:free_camera_controlled": {
+     "strafe_speed_modifier": 0.6,
+     "backwards_movement_modifier": 0.3
+    },
+    "minecraft:vertical_movement_action": {
+     "vertical_velocity": 0.45
+    }
+   },
+   "siege:ground_3": {
+    "minecraft:physics": {},
+    "minecraft:movement": {
+     "value": 0.28
+    },
+    "minecraft:movement.basic": {},
+    "minecraft:navigation.walk": {
+     "can_path_over_water": false,
+     "avoid_water": true,
+     "avoid_damage_blocks": true
+    },
+    "minecraft:jump.static": {},
+    "minecraft:input_ground_controlled": {},
+    "minecraft:variable_max_auto_step": {
+     "base_value": 1.0625,
+     "controlled_value": 1.0625,
+     "jump_prevented_value": 0.5625
+    }
+   },
+   "siege:air_3": {
+    "minecraft:physics": {
+     "has_gravity": false
+    },
+    "minecraft:can_fly": {},
+    "minecraft:movement": {
+     "value": 0.055
+    },
+    "minecraft:flying_speed": {
+     "value": 0.055
+    },
+    "minecraft:navigation.float": {
+     "can_path_over_water": true,
+     "avoid_damage_blocks": true
+    },
+    "minecraft:jump.static": {},
+    "minecraft:free_camera_controlled": {
+     "strafe_speed_modifier": 0.6,
+     "backwards_movement_modifier": 0.3
+    },
+    "minecraft:vertical_movement_action": {
+     "vertical_velocity": 0.45
+    }
+   },
+   "siege:ground_4": {
+    "minecraft:physics": {},
+    "minecraft:movement": {
+     "value": 0.3
+    },
+    "minecraft:movement.basic": {},
+    "minecraft:navigation.walk": {
+     "can_path_over_water": false,
+     "avoid_water": true,
+     "avoid_damage_blocks": true
+    },
+    "minecraft:jump.static": {},
+    "minecraft:input_ground_controlled": {},
+    "minecraft:variable_max_auto_step": {
+     "base_value": 1.0625,
+     "controlled_value": 1.0625,
+     "jump_prevented_value": 0.5625
+    }
+   },
+   "siege:air_4": {
+    "minecraft:physics": {
+     "has_gravity": false
+    },
+    "minecraft:can_fly": {},
+    "minecraft:movement": {
+     "value": 0.06
+    },
+    "minecraft:flying_speed": {
+     "value": 0.06
+    },
+    "minecraft:navigation.float": {
+     "can_path_over_water": true,
+     "avoid_damage_blocks": true
+    },
+    "minecraft:jump.static": {},
+    "minecraft:free_camera_controlled": {
+     "strafe_speed_modifier": 0.6,
+     "backwards_movement_modifier": 0.3
+    },
+    "minecraft:vertical_movement_action": {
+     "vertical_velocity": 0.45
+    }
+   },
+   "siege:ground_5": {
+    "minecraft:physics": {},
+    "minecraft:movement": {
+     "value": 0.32
+    },
+    "minecraft:movement.basic": {},
+    "minecraft:navigation.walk": {
+     "can_path_over_water": false,
+     "avoid_water": true,
+     "avoid_damage_blocks": true
+    },
+    "minecraft:jump.static": {},
+    "minecraft:input_ground_controlled": {},
+    "minecraft:variable_max_auto_step": {
+     "base_value": 1.0625,
+     "controlled_value": 1.0625,
+     "jump_prevented_value": 0.5625
+    }
+   },
+   "siege:air_5": {
+    "minecraft:physics": {
+     "has_gravity": false
+    },
+    "minecraft:can_fly": {},
+    "minecraft:movement": {
+     "value": 0.066
+    },
+    "minecraft:flying_speed": {
+     "value": 0.066
+    },
+    "minecraft:navigation.float": {
+     "can_path_over_water": true,
+     "avoid_damage_blocks": true
+    },
+    "minecraft:jump.static": {},
+    "minecraft:free_camera_controlled": {
+     "strafe_speed_modifier": 0.6,
+     "backwards_movement_modifier": 0.3
+    },
+    "minecraft:vertical_movement_action": {
+     "vertical_velocity": 0.45
+    }
+   },
+   "siege:order_follow": {
+    "minecraft:behavior.follow_owner": {
+     "priority": 4,
+     "speed_multiplier": 1.2,
+     "start_distance": 9,
+     "stop_distance": 4,
+     "can_teleport": true
+    },
+    "minecraft:behavior.random_stroll": {
+     "priority": 7,
+     "speed_multiplier": 0.8,
+     "xz_dist": 6,
+     "interval": 200
+    }
+   },
+   "siege:order_stay": {},
+   "siege:saddled_on": {
+    "minecraft:rideable": {
+     "seat_count": 2,
+     "family_types": [
+      "player"
+     ],
+     "crouching_skip_interact": true,
+     "pull_in_entities": false,
+     "interact_text": "action.interact.ride.horse",
+     "seats": [
+      {
+       "position": [
+        0.0,
+        1.55,
+        -0.2
+       ],
+       "min_rider_count": 0,
+       "max_rider_count": 2,
+       "third_person_camera_radius": 7.0,
+       "camera_relax_distance_smoothing": 6.0
+      },
+      {
+       "position": [
+        0.0,
+        1.55,
+        0.7
+       ],
+       "min_rider_count": 1,
+       "max_rider_count": 2,
+       "third_person_camera_radius": 7.0,
+       "camera_relax_distance_smoothing": 6.0
+      }
+     ]
+    },
+    "minecraft:behavior.player_ride_tamed": {
+     "priority": 1
+    }
+   },
+   "siege:ds_normal": {
+    "minecraft:damage_sensor": {
+     "triggers": [
+      {
+       "cause": "fall",
+       "deals_damage": "no"
+      },
+      {
+       "cause": "suffocation",
+       "deals_damage": "no"
+      },
+      {
+       "cause": "fire",
+       "deals_damage": "no"
+      },
+      {
+       "cause": "fire_tick",
+       "deals_damage": "no"
+      },
+      {
+       "cause": "lava",
+       "deals_damage": "no"
+      }
+     ]
+    }
+   },
+   "siege:ds_protected": {
+    "minecraft:damage_sensor": {
+     "triggers": [
+      {
+       "cause": "all",
+       "deals_damage": "no"
+      }
+     ]
+    }
+   }
+  },
+  "components": {
+   "minecraft:type_family": {
+    "family": [
+     "siege_dragon",
+     "mob"
+    ]
+   },
+   "minecraft:collision_box": {
+    "width": 2.2,
+    "height": 2.2
+   },
+   "minecraft:nameable": {},
+   "minecraft:persistent": {},
+   "minecraft:fire_immune": {},
+   "minecraft:is_tamed": {},
+   "minecraft:tameable": {
+    "probability": 0.0,
+    "tame_items": []
+   },
+   "minecraft:knockback_resistance": {
+    "value": 0.7
+   },
+   "minecraft:pushable": {
+    "is_pushable": true,
+    "is_pushable_by_piston": true
+   },
+   "minecraft:breathable": {
+    "total_supply": 15,
+    "suffocate_time": 0
+   },
+   "minecraft:follow_range": {
+    "value": 32,
+    "max": 32
+   },
+   "minecraft:conditional_bandwidth_optimization": {},
+   "minecraft:behavior.float": {
+    "priority": 0
+   },
+   "minecraft:behavior.look_at_player": {
+    "priority": 8,
+    "look_distance": 8,
+    "probability": 0.02
+   },
+   "minecraft:behavior.random_look_around": {
+    "priority": 9
+   }
+  },
+  "events": {
+   "minecraft:entity_spawned": {
+    "add": {
+     "component_groups": [
+      "siege:stage_adult",
+      "siege:health_0",
+      "siege:ground_0",
+      "siege:order_stay",
+      "siege:ds_normal"
+     ]
+    }
+   },
+   "siege:stage_hatchling": {
+    "sequence": [
+     {
+      "remove": {
+       "component_groups": [
+        "siege:stage_fledgling",
+        "siege:stage_adult"
+       ]
+      }
+     },
+     {
+      "add": {
+       "component_groups": [
+        "siege:stage_hatchling"
+       ]
+      }
+     }
+    ]
+   },
+   "siege:stage_fledgling": {
+    "sequence": [
+     {
+      "remove": {
+       "component_groups": [
+        "siege:stage_hatchling",
+        "siege:stage_adult"
+       ]
+      }
+     },
+     {
+      "add": {
+       "component_groups": [
+        "siege:stage_fledgling"
+       ]
+      }
+     }
+    ]
+   },
+   "siege:stage_adult": {
+    "sequence": [
+     {
+      "remove": {
+       "component_groups": [
+        "siege:stage_hatchling",
+        "siege:stage_fledgling"
+       ]
+      }
+     },
+     {
+      "add": {
+       "component_groups": [
+        "siege:stage_adult"
+       ]
+      }
+     }
+    ]
+   },
+   "siege:health_0": {
+    "sequence": [
+     {
+      "remove": {
+       "component_groups": [
+        "siege:health_1",
+        "siege:health_2",
+        "siege:health_3",
+        "siege:health_4",
+        "siege:health_5"
+       ]
+      }
+     },
+     {
+      "add": {
+       "component_groups": [
+        "siege:health_0"
+       ]
+      }
+     }
+    ]
+   },
+   "siege:to_ground_0": {
+    "sequence": [
+     {
+      "remove": {
+       "component_groups": [
+        "siege:ground_1",
+        "siege:ground_2",
+        "siege:ground_3",
+        "siege:ground_4",
+        "siege:ground_5",
+        "siege:air_0",
+        "siege:air_1",
+        "siege:air_2",
+        "siege:air_3",
+        "siege:air_4",
+        "siege:air_5"
+       ]
+      }
+     },
+     {
+      "add": {
+       "component_groups": [
+        "siege:ground_0"
+       ]
+      }
+     },
+     {
+      "set_property": {
+       "siege:flying": false
+      }
+     }
+    ]
+   },
+   "siege:to_air_0": {
+    "sequence": [
+     {
+      "remove": {
+       "component_groups": [
+        "siege:ground_0",
+        "siege:ground_1",
+        "siege:ground_2",
+        "siege:ground_3",
+        "siege:ground_4",
+        "siege:ground_5",
+        "siege:air_1",
+        "siege:air_2",
+        "siege:air_3",
+        "siege:air_4",
+        "siege:air_5"
+       ]
+      }
+     },
+     {
+      "add": {
+       "component_groups": [
+        "siege:air_0"
+       ]
+      }
+     },
+     {
+      "set_property": {
+       "siege:flying": true
+      }
+     }
+    ]
+   },
+   "siege:health_1": {
+    "sequence": [
+     {
+      "remove": {
+       "component_groups": [
+        "siege:health_0",
+        "siege:health_2",
+        "siege:health_3",
+        "siege:health_4",
+        "siege:health_5"
+       ]
+      }
+     },
+     {
+      "add": {
+       "component_groups": [
+        "siege:health_1"
+       ]
+      }
+     }
+    ]
+   },
+   "siege:to_ground_1": {
+    "sequence": [
+     {
+      "remove": {
+       "component_groups": [
+        "siege:ground_0",
+        "siege:ground_2",
+        "siege:ground_3",
+        "siege:ground_4",
+        "siege:ground_5",
+        "siege:air_0",
+        "siege:air_1",
+        "siege:air_2",
+        "siege:air_3",
+        "siege:air_4",
+        "siege:air_5"
+       ]
+      }
+     },
+     {
+      "add": {
+       "component_groups": [
+        "siege:ground_1"
+       ]
+      }
+     },
+     {
+      "set_property": {
+       "siege:flying": false
+      }
+     }
+    ]
+   },
+   "siege:to_air_1": {
+    "sequence": [
+     {
+      "remove": {
+       "component_groups": [
+        "siege:ground_0",
+        "siege:ground_1",
+        "siege:ground_2",
+        "siege:ground_3",
+        "siege:ground_4",
+        "siege:ground_5",
+        "siege:air_0",
+        "siege:air_2",
+        "siege:air_3",
+        "siege:air_4",
+        "siege:air_5"
+       ]
+      }
+     },
+     {
+      "add": {
+       "component_groups": [
+        "siege:air_1"
+       ]
+      }
+     },
+     {
+      "set_property": {
+       "siege:flying": true
+      }
+     }
+    ]
+   },
+   "siege:health_2": {
+    "sequence": [
+     {
+      "remove": {
+       "component_groups": [
+        "siege:health_0",
+        "siege:health_1",
+        "siege:health_3",
+        "siege:health_4",
+        "siege:health_5"
+       ]
+      }
+     },
+     {
+      "add": {
+       "component_groups": [
+        "siege:health_2"
+       ]
+      }
+     }
+    ]
+   },
+   "siege:to_ground_2": {
+    "sequence": [
+     {
+      "remove": {
+       "component_groups": [
+        "siege:ground_0",
+        "siege:ground_1",
+        "siege:ground_3",
+        "siege:ground_4",
+        "siege:ground_5",
+        "siege:air_0",
+        "siege:air_1",
+        "siege:air_2",
+        "siege:air_3",
+        "siege:air_4",
+        "siege:air_5"
+       ]
+      }
+     },
+     {
+      "add": {
+       "component_groups": [
+        "siege:ground_2"
+       ]
+      }
+     },
+     {
+      "set_property": {
+       "siege:flying": false
+      }
+     }
+    ]
+   },
+   "siege:to_air_2": {
+    "sequence": [
+     {
+      "remove": {
+       "component_groups": [
+        "siege:ground_0",
+        "siege:ground_1",
+        "siege:ground_2",
+        "siege:ground_3",
+        "siege:ground_4",
+        "siege:ground_5",
+        "siege:air_0",
+        "siege:air_1",
+        "siege:air_3",
+        "siege:air_4",
+        "siege:air_5"
+       ]
+      }
+     },
+     {
+      "add": {
+       "component_groups": [
+        "siege:air_2"
+       ]
+      }
+     },
+     {
+      "set_property": {
+       "siege:flying": true
+      }
+     }
+    ]
+   },
+   "siege:health_3": {
+    "sequence": [
+     {
+      "remove": {
+       "component_groups": [
+        "siege:health_0",
+        "siege:health_1",
+        "siege:health_2",
+        "siege:health_4",
+        "siege:health_5"
+       ]
+      }
+     },
+     {
+      "add": {
+       "component_groups": [
+        "siege:health_3"
+       ]
+      }
+     }
+    ]
+   },
+   "siege:to_ground_3": {
+    "sequence": [
+     {
+      "remove": {
+       "component_groups": [
+        "siege:ground_0",
+        "siege:ground_1",
+        "siege:ground_2",
+        "siege:ground_4",
+        "siege:ground_5",
+        "siege:air_0",
+        "siege:air_1",
+        "siege:air_2",
+        "siege:air_3",
+        "siege:air_4",
+        "siege:air_5"
+       ]
+      }
+     },
+     {
+      "add": {
+       "component_groups": [
+        "siege:ground_3"
+       ]
+      }
+     },
+     {
+      "set_property": {
+       "siege:flying": false
+      }
+     }
+    ]
+   },
+   "siege:to_air_3": {
+    "sequence": [
+     {
+      "remove": {
+       "component_groups": [
+        "siege:ground_0",
+        "siege:ground_1",
+        "siege:ground_2",
+        "siege:ground_3",
+        "siege:ground_4",
+        "siege:ground_5",
+        "siege:air_0",
+        "siege:air_1",
+        "siege:air_2",
+        "siege:air_4",
+        "siege:air_5"
+       ]
+      }
+     },
+     {
+      "add": {
+       "component_groups": [
+        "siege:air_3"
+       ]
+      }
+     },
+     {
+      "set_property": {
+       "siege:flying": true
+      }
+     }
+    ]
+   },
+   "siege:health_4": {
+    "sequence": [
+     {
+      "remove": {
+       "component_groups": [
+        "siege:health_0",
+        "siege:health_1",
+        "siege:health_2",
+        "siege:health_3",
+        "siege:health_5"
+       ]
+      }
+     },
+     {
+      "add": {
+       "component_groups": [
+        "siege:health_4"
+       ]
+      }
+     }
+    ]
+   },
+   "siege:to_ground_4": {
+    "sequence": [
+     {
+      "remove": {
+       "component_groups": [
+        "siege:ground_0",
+        "siege:ground_1",
+        "siege:ground_2",
+        "siege:ground_3",
+        "siege:ground_5",
+        "siege:air_0",
+        "siege:air_1",
+        "siege:air_2",
+        "siege:air_3",
+        "siege:air_4",
+        "siege:air_5"
+       ]
+      }
+     },
+     {
+      "add": {
+       "component_groups": [
+        "siege:ground_4"
+       ]
+      }
+     },
+     {
+      "set_property": {
+       "siege:flying": false
+      }
+     }
+    ]
+   },
+   "siege:to_air_4": {
+    "sequence": [
+     {
+      "remove": {
+       "component_groups": [
+        "siege:ground_0",
+        "siege:ground_1",
+        "siege:ground_2",
+        "siege:ground_3",
+        "siege:ground_4",
+        "siege:ground_5",
+        "siege:air_0",
+        "siege:air_1",
+        "siege:air_2",
+        "siege:air_3",
+        "siege:air_5"
+       ]
+      }
+     },
+     {
+      "add": {
+       "component_groups": [
+        "siege:air_4"
+       ]
+      }
+     },
+     {
+      "set_property": {
+       "siege:flying": true
+      }
+     }
+    ]
+   },
+   "siege:health_5": {
+    "sequence": [
+     {
+      "remove": {
+       "component_groups": [
+        "siege:health_0",
+        "siege:health_1",
+        "siege:health_2",
+        "siege:health_3",
+        "siege:health_4"
+       ]
+      }
+     },
+     {
+      "add": {
+       "component_groups": [
+        "siege:health_5"
+       ]
+      }
+     }
+    ]
+   },
+   "siege:to_ground_5": {
+    "sequence": [
+     {
+      "remove": {
+       "component_groups": [
+        "siege:ground_0",
+        "siege:ground_1",
+        "siege:ground_2",
+        "siege:ground_3",
+        "siege:ground_4",
+        "siege:air_0",
+        "siege:air_1",
+        "siege:air_2",
+        "siege:air_3",
+        "siege:air_4",
+        "siege:air_5"
+       ]
+      }
+     },
+     {
+      "add": {
+       "component_groups": [
+        "siege:ground_5"
+       ]
+      }
+     },
+     {
+      "set_property": {
+       "siege:flying": false
+      }
+     }
+    ]
+   },
+   "siege:to_air_5": {
+    "sequence": [
+     {
+      "remove": {
+       "component_groups": [
+        "siege:ground_0",
+        "siege:ground_1",
+        "siege:ground_2",
+        "siege:ground_3",
+        "siege:ground_4",
+        "siege:ground_5",
+        "siege:air_0",
+        "siege:air_1",
+        "siege:air_2",
+        "siege:air_3",
+        "siege:air_4"
+       ]
+      }
+     },
+     {
+      "add": {
+       "component_groups": [
+        "siege:air_5"
+       ]
+      }
+     },
+     {
+      "set_property": {
+       "siege:flying": true
+      }
+     }
+    ]
+   },
+   "siege:order_follow": {
+    "sequence": [
+     {
+      "remove": {
+       "component_groups": [
+        "siege:order_stay"
+       ]
+      }
+     },
+     {
+      "add": {
+       "component_groups": [
+        "siege:order_follow"
+       ]
+      }
+     }
+    ]
+   },
+   "siege:order_stay": {
+    "sequence": [
+     {
+      "remove": {
+       "component_groups": [
+        "siege:order_follow"
+       ]
+      }
+     },
+     {
+      "add": {
+       "component_groups": [
+        "siege:order_stay"
+       ]
+      }
+     }
+    ]
+   },
+   "siege:saddle_on": {
+    "add": {
+     "component_groups": [
+      "siege:saddled_on"
+     ]
+    },
+    "set_property": {
+     "siege:saddled": true
+    }
+   },
+   "siege:saddle_off": {
+    "remove": {
+     "component_groups": [
+      "siege:saddled_on"
+     ]
+    },
+    "set_property": {
+     "siege:saddled": false
+    }
+   },
+   "siege:ds_normal": {
+    "sequence": [
+     {
+      "remove": {
+       "component_groups": [
+        "siege:ds_protected"
+       ]
+      }
+     },
+     {
+      "add": {
+       "component_groups": [
+        "siege:ds_normal"
+       ]
+      }
+     }
+    ]
+   },
+   "siege:ds_protected": {
+    "sequence": [
+     {
+      "remove": {
+       "component_groups": [
+        "siege:ds_normal"
+       ]
+      }
+     },
+     {
+      "add": {
+       "component_groups": [
+        "siege:ds_protected"
+       ]
+      }
+     }
+    ]
+   }
+  }
+ }
+}

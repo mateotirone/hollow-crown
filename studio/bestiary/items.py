@@ -27,9 +27,9 @@ RELICS = [
     ("rimefang_bow", "Rimefang Bow", "bow", (200, 226, 240), dict(durability=900), "From the Pale Huntsman. Its arrows root targets in ice."),
     ("widows_veil", "Widow's Veil", "helmet", (220, 236, 240), dict(protection=3, durability=420), "From the Drowned Bride. Breathe water, see in the dark, and see Hollow things for what they are."),
     ("seneschal_greatshield", "Seneschal's Greatshield", "shield", (120, 100, 80), dict(durability=1200), "From the Ash Seneschal. Hold it in your offhand and sneak to brace: big resistance and you throw attackers back."),
-    ("faceless_crown_shard", "Faceless Crown Shard", "shard", (200, 190, 170), dict(), "A shard of the Hollow Crown. It whispers when you hold it."),
+    ("faceless_crown_shard", "Faceless Crown Shard", "shard", (200, 190, 170), dict(), "A sliver of something that was once worn. It whispers when you hold it."),
     ("mire_heart", "Mire Heart", "charm", (130, 160, 60), dict(), "From the Mother of Changelings. Hold it in your offhand: at night, your hits heal you."),
     ("warlords_brand", "The Warlord's Brand", "sword", (180, 40, 30), dict(damage=9, durability=1600), "From the Warlord King. Sets foes alight; every fifth hit lets out a war-cry shockwave."),
-    ("oath_of_oswin", "Oath of Oswin", "sword", (150, 190, 200), dict(damage=10, durability=2400), "Knight path. Oswin's own blade. Executes foes below a fifth of their health and rallies your guards."),
+    ("oath_of_oswin", "Oath of Oswin", "sword", (150, 190, 200), dict(damage=10, durability=2400), "Knight path. A king's oath-blade, still keeping its oath. Executes foes below a fifth of their health and rallies your guards."),
     ("crownless_mantle", "Crownless Mantle", "chest", (40, 60, 80), dict(protection=8, durability=600), "Marked path. Woven from the dark under the crown. Hits sometimes pass straight through you."),
 ]

@@ -19,7 +19,7 @@ export function emit(name, data = {}) {
     try {
       fn(data);
     } catch (e) {
-      console.warn(`[Siege Nights] "${name}" listener failed: ${e}`);
+      console.warn(`[Hollow Crown] "${name}" listener failed: ${e}`);
     }
   }
 }
@@ -35,7 +35,7 @@ export function applyFilter(name, value, context = {}) {
       const result = fn(value, context);
       if (result !== undefined) value = result;
     } catch (e) {
-      console.warn(`[Siege Nights] "${name}" hook failed: ${e}`);
+      console.warn(`[Hollow Crown] "${name}" hook failed: ${e}`);
     }
   }
   return value;

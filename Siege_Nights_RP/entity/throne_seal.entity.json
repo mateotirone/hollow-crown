@@ -1,0 +1,20 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "siege:throne_seal",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "default": "textures/entity/siege_throne_seal"
+      },
+      "geometry": {
+        "default": "geometry.siege_throne_seal"
+      },
+      "render_controllers": [
+        "controller.render.default"
+      ]
+    }
+  }
+}

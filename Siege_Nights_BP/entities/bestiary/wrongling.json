@@ -91,10 +91,20 @@
       "filters": {
        "any_of": [
         {
-         "test": "is_family",
-         "subject": "other",
-         "operator": "==",
-         "value": "player"
+         "all_of": [
+          {
+           "test": "is_family",
+           "subject": "other",
+           "operator": "==",
+           "value": "player"
+          },
+          {
+           "test": "has_tag",
+           "subject": "other",
+           "operator": "!=",
+           "value": "siege_hollow_ruler"
+          }
+         ]
         },
         {
          "test": "is_family",

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Build siege-nights.mcaddon from Siege_Nights_BP and Siege_Nights_RP.
+"""Build hollow-crown.mcaddon from Siege_Nights_BP and Siege_Nights_RP.
 Run from the siege-nights folder:   python3 tools/build.py
 It runs the offline check first and refuses to build if that fails.
 Only scripts that main.js actually loads are packed, so half-finished feature folders stay out."""
 import os, re, subprocess, sys, zipfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-OUT = os.path.join(ROOT, sys.argv[1] if len(sys.argv) > 1 else "siege-nights.mcaddon")
+OUT = os.path.join(ROOT, sys.argv[1] if len(sys.argv) > 1 else "hollow-crown.mcaddon")
 SCRIPTS = os.path.join(ROOT, "Siege_Nights_BP", "scripts")
 
 if subprocess.run(["node", os.path.join(ROOT, "tools", "check.mjs")]).returncode != 0:

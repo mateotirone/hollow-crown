@@ -3,8 +3,8 @@
 import { world, GameMode, ItemStack } from "@minecraft/server";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
 import * as api from "../siege/api.js";
-import { SKILLS, SKILL, BRANCHES, RINGS, RANKS, HALL_NAMES, LEVEL_UNLOCKS, canBranch, blockedReason, spentIn, rankOf, levelFromRenown, levelTitle } from "./skills.js";
-import { heroOf, saveHero, setPath } from "./hero.js";
+import { SKILLS, SKILL, BRANCHES, RINGS, RANKS, ROLES, HALL_NAMES, LEVEL_UNLOCKS, canBranch, blockedReason, spentIn, rankOf, levelFromRenown, levelTitle } from "./skills.js";
+import { heroOf, saveHero, setPath, grantPoints } from "./hero.js";
 import { hallLevelAt, setTreeLook } from "./townhall.js";
 
 export const EMBER = "siege:hollow_ember"; // the fallen shard, before you choose
@@ -45,6 +45,10 @@ export function treeMenu(player, hallLevel) {
     const spent = spentIn(hero.skills, id);
     form.button(`${open ? "" : "§8"}${branch.name}${open ? `\n§8${spent} point${spent === 1 ? "" : "s"} sworn` : `\n§8${branch.who === "knight" ? "Knights only" : "The Marked only"}`}`, branch.icon);
     actions.push(() => branchMenu(player, hallLevel, id));
+  }
+  if (hero.victorOffer && !hero.victor) {
+    form.button("§5The Hollow's offer\n§8the Sorcerer's path, with a head start", "textures/items/siege_bound_ember");
+    actions.push(() => victorMenu(player, hallLevel));
   }
   if (hero.path === "none") {
     form.button("§6Choose your path", "textures/items/siege_hollow_ember");
@@ -121,6 +125,10 @@ export function learn(player, skill, hallLevel) {
   saveHero(player);
   player.playSound("random.levelup", { pitch: 1.3 });
   player.sendMessage(`§b${skill.name}§7 ${hero.skills[skill.id]}/${skill.max} sworn.`);
+  if (skill.id === "arc_warden") {
+    api.title(player, "§5Voice of the Hollow", "§7It is waiting for you to claim it");
+    api.emit("hollowClaimReady", { player });
+  }
   const after = rankOf(hero.path, hero.skills)?.name;
   if (after && after !== before) {
     api.title(player, `§6${after}`, hero.path === "knight" ? "§7The Order raises your rank" : "§7The Ember sinks deeper");
@@ -165,22 +173,28 @@ function pathMenu(player, hallLevel) {
     holding ? "§7The Hollow Ember hums in your pack." : "§7You need the Hollow Ember to choose. It falls near your keep the night you first hold a siege.",
   ].join("\n");
   const form = new ActionFormData().title("Choose your path").body(body);
+  const choices = [];
+  if (holding || hero.offers.includes("knight")) {
+    form.button(holding ? "§6Swear the Squire's Oath\n§8give up the Ember" : "§6Swear the Squire's Oath\n§8the Order has offered it");
+    choices.push("knight");
+  }
   if (holding) {
-    form.button("§6Swear the Squire's Oath\n§8give up the Ember");
     form.button("§5Take the Ember\n§8become Marked");
+    choices.push("marked");
   }
   form.button("Back");
   form.show(player).then((r) => {
     if (r.canceled) return;
-    if (!holding || r.selection === 2) return treeMenu(player, hallLevel);
-    confirmPath(player, r.selection === 0 ? "knight" : "marked", () => treeMenu(player, hallLevel));
+    const role = choices[r.selection];
+    if (!role) return treeMenu(player, hallLevel);
+    confirmPath(player, role, () => treeMenu(player, hallLevel));
   }).catch(() => {});
 }
 
 export function confirmPath(player, path, back) {
   new MessageFormData().title(path === "knight" ? "The Squire's Oath" : "The Ember")
     .body(path === "knight"
-      ? "\"I will hold the gate. I will keep the silence. I will not ask what lies beneath.\"\n\nThe Ember is taken from you and sealed. You become a Squire of the Ashen Gate. §cThis cannot be undone."
+      ? "\"I will hold the gate. I will keep the silence. I will not ask what lies beneath.\"\n\nIf you carry the Ember, it is taken from you and sealed. You become a Squire of the Ashen Gate. §cThis cannot be undone."
       : "It is not warm. It is not cold. It fits the hollow of your palm as if it had been cut from it.\n\nThe Ember fuses to your hand and you become Marked. §cThis cannot be undone.")
     .button1(path === "knight" ? "I swear it" : "Close your hand").button2("Not yet")
     .show(player).then((r) => {
@@ -191,7 +205,7 @@ export function confirmPath(player, path, back) {
 
 export function choosePath(player, path) {
   const hero = heroOf(player);
-  if (hero.path !== "none" && path !== "none") return false;
+  if (path !== "none" && (hero.path !== "none" || !ROLES[path])) return false;
   api.takeItems(player, EMBER, api.countItem(player, EMBER));
   hero.ember = path === "marked" ? "taken" : path === "knight" ? "refused" : "none";
   setPath(player, path);
@@ -208,8 +222,65 @@ export function choosePath(player, path) {
     player.addEffect("darkness", 80, { showParticles: false });
     player.sendMessage("§5The Ember is part of you now.§7 The Arcana branch of the Tree is open. Hold the §fBound Ember§7: use it to cast your chosen power, sneak and use it to choose another. Watch your Resonance.");
   }
+  hero.offers = [];
+  saveHero(player);
   api.emit("pathChosen", { player, path });
+  if (path !== "none") api.emit("roleChosen", { player, role: path });
   if (path !== "none") world.sendMessage(path === "knight" ? `§6${player.name} has sworn the Squire's Oath.` : `§5${player.name} has been Marked.`);
+  return true;
+}
+
+// ---------- the victor's offer ----------
+// Whoever defeats the Hollow cannot wear its crown, but is offered the Sorcerer's path with a head start:
+// 15 skill points, Arcana rings without the Renown climb, and powers that cost a quarter less Resonance.
+export const VICTOR_POINTS = 15;
+
+export function offerVictor(player) {
+  const hero = heroOf(player);
+  if (hero.victor) return;
+  if (hero.path === "marked") return acceptVictor(player); // already on the path: the head start is simply theirs
+  hero.victorOffer = true;
+  saveHero(player);
+  api.title(player, "§5The Hollow knows you", "§7It offers what it would not give its crown");
+  player.sendMessage("§5You broke the Hollow, and it cannot crown you.§7 But it will teach you. Go to the Tree of Oaths and hear its offer: the Sorcerer's path, with a head start no one else gets.");
+  api.emit("roleOffered", { player, role: "marked", victor: true });
+}
+
+function victorMenu(player, hallLevel) {
+  const hero = heroOf(player);
+  const knight = hero.path === "knight";
+  new MessageFormData().title("The Hollow's offer")
+    .body([
+      "The crown would kill you. The Hollow does not answer to the one who broke it. It answers to the one who can hear it.",
+      "",
+      `Take the Sorcerer's path and you begin ahead: ${VICTOR_POINTS} skill points, every ring of Arcana open without the Renown climb (your hall must still be grand enough), and powers that cost a quarter less Resonance.`,
+      knight ? "\n§cYou would lay down your Knight's oath. Every point sworn to the Blade comes back to you, and your rank in the Order is gone. This cannot be undone." : "\n§cThis cannot be undone.",
+    ].join("\n"))
+    .button1("Accept").button2("Not yet")
+    .show(player).then((r) => {
+      if (r.canceled || r.selection !== 0) return treeMenu(player, hallLevel);
+      acceptVictor(player);
+    }).catch(() => {});
+}
+
+export function acceptVictor(player) {
+  const hero = heroOf(player);
+  if (hero.victor) return false;
+  if (hero.path === "knight") {
+    for (const id of Object.keys(hero.skills)) {
+      if (SKILL[id]?.branch !== "blade") continue;
+      hero.points += SKILL[id].cost * hero.skills[id];
+      delete hero.skills[id];
+    }
+    for (const effect of ["health_boost", "strength"]) player.removeEffect(effect);
+    api.takeItems(player, OATH_BANNER, api.countItem(player, OATH_BANNER));
+    hero.path = "none";
+  }
+  hero.victor = true;
+  hero.victorOffer = false;
+  saveHero(player);
+  if (hero.path === "none") choosePath(player, "marked");
+  grantPoints(player, VICTOR_POINTS, "the Hollow's teaching");
   return true;
 }
 

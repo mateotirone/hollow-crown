@@ -27,7 +27,7 @@ const fx = (entity, effect, ticks, amplifier = 0) => {
 
 const POWERS = SKILLS.filter((s) => s.power).map((s) => s.id);
 //                 Resonance cost, cooldown ticks
-const COST = { arc_bolt: [8, 12], arc_ward: [15, 400], arc_blink: [12, 80], arc_echo: [10, 100], arc_bind: [14, 200], arc_step: [20, 600], arc_choir: [30, 1200] };
+const COST = { arc_bolt: [8, 12], arc_ward: [15, 400], arc_blink: [12, 80], arc_echo: [10, 100], arc_bind: [14, 200], arc_step: [20, 600], arc_choir: [30, 1200], arc_hollowstep: [40, 1200] };
 
 const cooldowns = new Map(); // "playerId:power" -> ready tick
 const lastCast = new Map(); // player id -> tick
@@ -187,6 +187,19 @@ const CAST = {
     return true;
   },
 
+  // The Undertow feature owns the journey. It listens for "hollowStep" and sets request.handled = true
+  // once it has moved the player (in, or back out), or request.refused = "why" if it can't right now.
+  arc_hollowstep(player) {
+    const request = { player, handled: false, refused: undefined };
+    api.emit("hollowStep", request);
+    if (request.handled) {
+      player.dimension.playSound("portal.travel", player.location, { volume: 0.2, pitch: 0.6 });
+      return true;
+    }
+    player.onScreenDisplay.setActionBar(`§7${request.refused ?? "The Hollow does not open. Not yet."}`);
+    return false;
+  },
+
   arc_choir(player, lvl) {
     const radius = [0, 10, 14, 18][lvl];
     const raiders = player.dimension.getEntities({ tags: [api.RAIDER_TAG], location: player.location, maxDistance: radius });
@@ -218,7 +231,7 @@ export function cast(player, id) {
   cooldowns.set(key, now + Math.round(COST[id][1] * (born ? 0.7 : 1)));
   lastCast.set(player.id, now);
   if (!free) {
-    hero.resonance = Math.min(100, hero.resonance + COST[id][0] * (born ? 0.75 : 1));
+    hero.resonance = Math.min(100, hero.resonance + COST[id][0] * (born ? 0.75 : 1) * (hero.victor ? 0.75 : 1));
     if (hero.resonance >= 100) overflow(player, hero, born);
   }
   saveHero(player);

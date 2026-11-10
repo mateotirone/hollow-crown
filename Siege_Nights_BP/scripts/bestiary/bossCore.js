@@ -19,7 +19,7 @@
 import { world, system } from "@minecraft/server";
 import { onTick, moduleStore, addTests, assertEqual } from "../siege/api.js";
 import { MOBS } from "./data.js";
-import { activeDimensions, alive, announce, effect, flat, give, heal, healthOf, hurt, particle, ring, sound, makeItem, playerList, addToPlayerList } from "./util.js";
+import { activeDimensions, alive, announce, effect, flat, give, heal, healthOf, particle, ring, sound, makeItem, playerList, addToPlayerList } from "./util.js";
 
 const STEP = 5; // the framework ticks every 5 game ticks
 export const SHIELD_TAG = "siege_boss_shielded";
@@ -184,7 +184,7 @@ function findBosses() {
       continue;
     }
     for (const e of found) {
-      if (fights.has(e.id)) continue;
+      if (fights.has(e.id) || e.hasTag("siege_showcase")) continue; // showcase statues don't fight
       const def = byType.get(e.typeId);
       if (def) attach(e, def, e.location, false);
     }
@@ -424,4 +424,3 @@ addTests("bestiary", {
     assertEqual(phaseFor(0.1, undefined), 0);
   },
 });
-export { hurt };

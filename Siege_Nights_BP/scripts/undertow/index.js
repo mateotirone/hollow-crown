@@ -13,6 +13,8 @@
 //   /scriptevent hc:reveal_source           tell only you which site was picked (spoils it!)
 //   /scriptevent hc:undertow_go             go to the Undertow now (testing)
 //   /scriptevent hc:undertow_status         build progress
+//   /scriptevent hc:slip [seconds]          a Slip: a few seconds in the Hollow, then back where you stood
+//   /scriptevent hc:flicker [seconds]       a Flicker: Hollow fog and shapes, no teleport
 
 import { world, system, GameMode } from "@minecraft/server";
 import { ActionFormData } from "@minecraft/server-ui";
@@ -25,6 +27,10 @@ import { VEIL, planCrack } from "./rift.js";
 import { buildTick, piecesTick, flush, pieces, openCourtGate, waystoneSpot, WAYSTONE, isBuilt } from "./builder.js";
 import { heightAt, planChunk, isRiver } from "./terrain.js";
 import { load, save, say, runCmd } from "./data.js";
+import { choirTick, singerSpot, CHOIR } from "./choir.js";
+import { slipSeconds, slipLanding, isSlipping } from "./slips.js";
+import { shouldAlarm, oreOutcome, noteEntry, crownTick, crownVerdict, WARDEN } from "./warden.js";
+import { oreChance } from "./terrain.js";
 
 const IN_TAG = "siege_undertow_in";
 const FOG_ID = "siege:undertow_fog";
@@ -62,6 +68,7 @@ function enter(player) {
   player.addEffect("resistance", 300, { amplifier: 4, showParticles: false });
   player.addEffect("darkness", 60, { amplifier: 0, showParticles: false });
   player.teleport(L.arrival, { dimension: undertow(), facingLocation: { x: 0, y: 95, z: 60 } });
+  noteEntry(player, "rift");
   system.runTimeout(() => {
     player.onScreenDisplay.setTitle("§5" + cap(TEXT.name), { subtitle: "§7The Wound", fadeInDuration: 20, stayDuration: 60, fadeOutDuration: 30 });
     player.playSound("ambient.cave", { volume: 1, pitch: 0.5 });
@@ -93,7 +100,7 @@ onTick("undertow:contact", 5, () => {
   for (const p of world.getAllPlayers()) {
     const feet = blockAt(p, 0.1), head = blockAt(p, 1.2);
     const touching = feet?.typeId === VEIL || head?.typeId === VEIL;
-    if (touching && (cooldown.get(p.id) ?? 0) < system.currentTick) {
+    if (touching && !isSlipping(p) && (cooldown.get(p.id) ?? 0) < system.currentTick) {
       if (inUndertow(p)) leave(p);
       else if (p.dimension.id === "minecraft:overworld") enter(p);
     }
@@ -117,6 +124,7 @@ onTick("undertow:fog", 40, () => {
       runCmd(p, `fog @s remove ${FOG_LAYER}`);
     }
     if (!inside) continue;
+    if (isSlipping(p)) continue; // no place names during a Slip: they shouldn't know where they are
     const st = stageAt(Math.floor(p.location.z));
     const rec = (players[p.id] ??= { lit: [], stage: "" });
     if (st && rec.stage !== st.id) {
@@ -219,7 +227,7 @@ function useWaystone(player, loc) {
 }
 
 // ---- the Drowned Court and the Choir's Heart ---------------------------------------------
-let courtOccupied = false, courtEmptySince = 0, heartWarned = new Set();
+let courtOccupied = false, courtEmptySince = 0;
 onTick("undertow:arenas", 20, () => {
   const prog = progress();
   const d = undertow();
@@ -233,12 +241,8 @@ onTick("undertow:arenas", 20, () => {
       if (system.currentTick - courtEmptySince > 1200) { courtOccupied = false; courtEmptySince = 0; } // re-arm after 60 s empty
     } else courtEmptySince = 0;
   }
-  // The Heart: the Hollow Choir fight comes in a later build.
-  for (const p of world.getAllPlayers()) {
-    if (!inUndertow(p) || dist2(p.location, HEART.center) > (HEART.outerRadius + 2) ** 2 || heartWarned.has(p.id)) continue;
-    heartWarned.add(p.id);
-    p.onScreenDisplay.setTitle("§5The Choir's Heart", { subtitle: "§7The singers are silent. For now.", fadeInDuration: 20, stayDuration: 80, fadeOutDuration: 30 });
-  }
+  choirTick(); // the Hollow Choir wakes when someone walks into the Heart
+  crownTick(); // the Hollow Crown: a Sorcerer who wears it rules, anyone else dies
 });
 
 function sendEvent(id, message) {
@@ -260,7 +264,7 @@ system.afterEvents.scriptEventReceive.subscribe((e) => {
           prog.oswin = true;
           save(K_PROGRESS, prog);
           openCourtGate();
-          world.sendMessage("§5Oswin the Last is finished. Behind his throne, the sealed gate cracks open.");
+          world.sendMessage("§5The Drowned Court falls silent. Behind the throne, the sealed gate cracks open.");
         }
       }
       break;
@@ -286,10 +290,22 @@ system.afterEvents.scriptEventReceive.subscribe((e) => {
     case "hc:undertow_status":
       if (player) {
         const p = pieces(), marked = Object.keys(getSites()).length;
-        say(player, `§dUndertow: wound ${p.wound ? "built" : "pending"}, court ${p.court ? "built" : "pending"}, heart ${p.heart ? "built" : "pending"}, waystones ${p.waystones.length}/${L.waystoneZ.length}. Source sites marked ${marked}/7. Oswin ${progress().oswin ? "defeated" : "waiting"}.`);
+        say(player, `§dThe Hollow: wound ${p.wound ? "built" : "pending"}, court ${p.court ? "built" : "pending"}, heart ${p.heart ? "built" : "pending"}, waystones ${p.waystones.length}/${L.waystoneZ.length}. Source sites marked ${marked}/7. Court boss ${progress().oswin ? "defeated" : "waiting"}.`);
       }
       break;
   }
+});
+
+// ---- showcase exhibits (/scriptevent siege:showcase) ------------------------------------------
+on("showcase", ({ player, dim, nextSpot, label }) => {
+  const at = nextSpot();
+  try {
+    const singer = dim.spawnEntity("siege:choir_singer", { x: at.x + 0.5, y: at.y, z: at.z + 0.5 });
+    singer.addTag("siege_showcase");
+    singer.addTag("siege_boss_shielded");
+  } catch { /* entity missing */ }
+  label(at, "Singer\n(Hollow Choir)");
+  say(player, "§dThe Hollow: step into the Rift Veil block, or type §f/scriptevent hc:undertow_go§d, to visit it. §f/scriptevent hc:slip§d gives you a Slip. The Hollow Choir wakes when you walk into the Heart at the far end (z 2400).");
 });
 
 // ---- signs at the real Source -----------------------------------------------------------
@@ -312,6 +328,41 @@ addTests("undertow", {
         const v = (Math.abs(op.b[0] - op.a[0]) + 1) * (Math.abs(op.b[1] - op.a[1]) + 1) * (Math.abs(op.b[2] - op.a[2]) + 1);
         assert(v <= 32768, `fill of ${v} blocks`);
       }
+  },
+  "slips grow, and land on the ledge": () => {
+    assert(slipSeconds(0) === 10 && slipSeconds(1) === 14 && slipSeconds(99) === 30);
+    for (const n of [0, 0.2, 0.49, 0.5, 0.77, 0.999]) {
+      const s = slipLanding(n);
+      assert(heightAt(Math.floor(s.x), Math.floor(s.z)) === L.woundLedgeY, `landing ${s.x},${s.z} is not on the ledge`);
+    }
+  },
+  "the ore alarm spares the Warden and permit holders": () => {
+    const w = { id: "w", permits: { friend: "Friend" }, tithe: 25 };
+    assert(shouldAlarm("thief", w, 1000, undefined) && !shouldAlarm("w", w, 1000, undefined) && !shouldAlarm("friend", w, 1000, undefined));
+    assert(!shouldAlarm("thief", w, 1000, 900), "one alarm per miner at a time");
+    assert(!shouldAlarm("thief", { id: undefined, permits: {} }, 1000, undefined), "no Warden, no alarm");
+  },
+  "the Hollow Crown only suffers a Sorcerer": () => {
+    assert(crownVerdict(true, false, 0) === "claims" && crownVerdict(true, true, 99) === "rules");
+    assert(crownVerdict(false, false, 0) === "warned" && crownVerdict(false, false, 4) === "warned" && crownVerdict(false, false, 5) === "dies");
+  },
+  "the tithe and the offline yield": () => {
+    const w = { id: "w", permits: { friend: "Friend" }, tithe: 25 };
+    assert(oreOutcome(w, "friend", true, 0.1) === "tithe" && oreOutcome(w, "friend", true, 0.9) === "ore");
+    assert(oreOutcome(w, "thief", false, 0.9) === "nothing" && oreOutcome(w, "thief", false, 0.1) === "ore" && oreOutcome(w, "thief", true, 0.9) === "ore");
+    assert(oreOutcome(w, "w", false, 0.99) === "ore" && WARDEN.offlineYield === 0.5);
+  },
+  "ore is in the cliffs, more of it deeper in": () => {
+    assert(oreChance(0) === 0 && oreChance(2000) > oreChance(200));
+    let n = 0;
+    for (let cx = -10; cx < 10; cx++) for (let cz = 30; cz < 60; cz++) n += planChunk(cx, cz).filter((o) => o.block === "siege:choir_ore").length;
+    assert(n > 20 && n < 2000, `${n} ore in 600 chunks`);
+  },
+  "seven singers stand on the ring": () => {
+    for (let i = 0; i < 7; i++) {
+      const s = singerSpot(i), r = Math.hypot(s.x - 0.5 - HEART.center.x, s.z - 0.5 - HEART.center.z);
+      assert(r > HEART.innerRadius + 4 && r < CHOIR.fallBands[1], `singer ${i} at radius ${r}`);
+    }
   },
   "rift crack is 14 tall": () => {
     const ys = planCrack({ x: 0, y: 0, z: 0 }, "south").filter((c) => c.block === VEIL).map((c) => c.y);

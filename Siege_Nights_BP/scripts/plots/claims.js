@@ -233,7 +233,7 @@ world.afterEvents.playerInteractWithBlock.subscribe((event) => {
   lastClick.set(player.id, system.currentTick);
   const plot = plotAtStone(block.location);
   if (plot) plotMenu(player, plot);
-  else if (isBuilder(player)) player.sendMessage("§eThis Plot Stone isn't registered. Break it and place it again.");
+  else if (isBuilder(player)) player.sendMessage("§eThis Plot Stone is only for show. Place one yourself in Creative to make a real plot.");
 });
 
 addKeepMenuButtons(({ player }) => (mapMode() ? [{ label: "Plot Atlas", action: () => showAtlas(player) }] : []));
@@ -323,4 +323,13 @@ onTick("plots_holds", 40, () => {
 });
 onTick("plots_restore", 200, () => {
   if (isReady() && mapMode()) restoreStones();
+});
+
+// ---------- Showcase ----------
+// A display Plot Stone. It's set by script, so it isn't registered and doesn't turn map mode on
+// in the test world. Place your own in Creative to try claiming.
+on("showcase", ({ dim, nextSpot, label }) => {
+  const at = nextSpot();
+  dim.getBlock(at)?.setType(PLOT_STONE);
+  label(at, "Plot Stone\n(display only)\nPlace your own");
 });

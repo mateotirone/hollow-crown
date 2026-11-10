@@ -82,10 +82,20 @@ export const SKILLS = [
   S("arc_choir", "arcana", 3, "Choir's Call", 3, 3, ["Power. Raiders within 10 / 14 / 18 blocks hear the bell and turn on each other for 6 / 8 / 10s. Resonance +30. Cooldown 60s."], { power: true, needs: "arc_echo" }),
   S("arc_resonant", "arcana", 3, "Resonant Soul", 2, 3, ["While Resonance is 70 or more, powers are 25% / 50% stronger."], { needs: "arc_quiet" }),
   S("arc_hollowborn", "arcana", 4, "Hollowborn", 1, 6, ["Powers cost 25% less Resonance and cool down 30% faster. At 100 Resonance you enter a Crescendo: 10s of free casting, then you crash."], { needs: "arc_step" }),
+  S("arc_hollowstep", "arcana", 4, "Hollow Step", 1, 5, ["Power. Step out of the world and into the Hollow, wherever you stand. Cast it again there to step back to where you left. Resonance +40. Cooldown 60s."], { power: true, needs: "arc_step" }),
+  S("arc_warden", "arcana", 5, "Voice of the Hollow", 1, 8, ["The peak of the Marked. The Hollow answers to you now: you may claim its throne and rule it as its Warden."], { needs: "arc_hollowstep" }),
   S("arc_crownless", "arcana", 5, "Crownless", 1, 8, ["Ember Bolt arcs to 2 more enemies near the first."], { needs: "arc_hollowborn" }),
 ];
 
 export const SKILL = Object.fromEntries(SKILLS.map((s) => [s.id, s]));
+
+// Roles (stored as hero.path). Everyone starts as "none", a plain human. A role is earned in the story
+// and opens one branch of its own. To add a role: an entry here, a branch in BRANCHES (who: "<role id>"),
+// its skills, a rank ladder in RANKS, and an effects file like knight.js or marked.js.
+export const ROLES = {
+  knight: { name: "Oathsworn", noun: "Knights", branch: "blade" },
+  marked: { name: "Marked", noun: "The Marked", branch: "arcana" },
+};
 
 // Path ranks, earned by points spent in your path's branch.
 export const RANKS = {
@@ -101,7 +111,7 @@ export const RANKS = {
     { at: 3, name: "Listener" },
     { at: 8, name: "Adept" },
     { at: 15, name: "Hollowborn" },
-    { at: 26, name: "Crownless" },
+    { at: 26, name: "Sorcerer" }, // the top rank: needed to rule the Hollow
   ],
 };
 
@@ -154,7 +164,7 @@ export function spentIn(skills, branch) {
 export function rankOf(path, skills) {
   const list = RANKS[path];
   if (!list) return undefined;
-  const spent = spentIn(skills, path === "knight" ? "blade" : "arcana");
+  const spent = spentIn(skills, ROLES[path].branch);
   return [...list].reverse().find((r) => spent >= r.at);
 }
 
@@ -163,10 +173,10 @@ export function rankOf(path, skills) {
 export function blockedReason(skill, hero, hallLevel) {
   const have = hero.skills[skill.id] ?? 0;
   if (have >= skill.max) return "Mastered";
-  if (!canBranch(skill.branch, hero.path)) return skill.branch === "blade" ? "Knights only" : "The Marked only";
+  if (!canBranch(skill.branch, hero.path)) return `${ROLES[BRANCHES[skill.branch].who]?.noun ?? "Another role"} only`;
   const ring = RINGS[skill.ring];
   if (hallLevel < ring.hall) return `Needs a ${HALL_NAMES[ring.hall]}`;
-  if (hero.level < ring.level) return `Needs Renown ${ring.level}`;
+  if (hero.level < ring.level && !(hero.victor && skill.branch === "arcana")) return `Needs Renown ${ring.level}`; // the Hollow's victor skips the Renown climb
   if (skill.needs && !(hero.skills[skill.needs] > 0)) return `Needs ${SKILL[skill.needs].name}`;
   if (hero.points < skill.cost) return `Needs ${skill.cost} point${skill.cost === 1 ? "" : "s"}`;
   return undefined;

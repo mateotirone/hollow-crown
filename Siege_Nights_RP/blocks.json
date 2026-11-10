@@ -89,5 +89,47 @@
   },
   "siege:court_seal": {
     "sound": "stone"
+  },
+  "siege:hall_cornerstone": {
+    "sound": "stone"
+  },
+  "siege:tree_of_oaths": {
+    "sound": "wood"
+  },
+  "siege:stables": {
+    "sound": "wood"
+  },
+  "siege:rail_depot": {
+    "sound": "wood"
+  },
+  "hc:station_post": {
+    "sound": "stone"
+  },
+  "hc:breeder_post": {
+    "sound": "wood"
+  },
+  "siege:archive_shelf": {
+    "sound": "wood"
+  },
+  "hc:tome_cache": {
+    "sound": "wood"
+  },
+  "siege:citadel_cornerstone": {
+    "sound": "stone"
+  },
+  "siege:throne": {
+    "sound": "stone"
+  },
+  "siege:fallen_shard": {
+    "sound": "amethyst_block"
+  },
+  "siege:choir_ore": {
+    "sound": "amethyst_block"
+  },
+  "siege:dragon_roost": {
+    "sound": "stone"
+  },
+  "hc:dragon_nest": {
+    "sound": "grass"
   }
 }

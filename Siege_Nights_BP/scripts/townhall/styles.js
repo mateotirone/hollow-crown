@@ -174,9 +174,9 @@ export const STYLE_IDS = Object.keys(STYLES);
 // Pick a style from what's around: biome name if the game tells us, otherwise the ground blocks.
 export function styleFromBiome(biomeId = "") {
   const b = biomeId.toLowerCase();
+  if (/(swamp|mangrove)/.test(b)) return "blackfen";
   if (/(snow|frozen|ice|taiga|grove|peak|cold)/.test(b)) return "frostmarch";
   if (/(desert|badlands|mesa|savanna)/.test(b)) return "emberwaste";
-  if (/(swamp|mangrove)/.test(b)) return "blackfen";
   if (/(beach|ocean|shore)/.test(b)) return "saltreach";
   if (b) return "vale";
   return undefined;

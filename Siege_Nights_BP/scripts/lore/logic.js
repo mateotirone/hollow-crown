@@ -1,0 +1,119 @@
+// Pure helpers for the lore feature: no Minecraft imports, so they run in the offline check.
+
+import { TOMES_A } from "./data/tomes_a.js";
+import { TOMES_B } from "./data/tomes_b.js";
+import { TOMES_C } from "./data/tomes_c.js";
+import { COLLECTIONS, SITE_FEATURES, SITE_IDS, SURVEY_LINES, THREADS, MILESTONES } from "./data/world.js";
+
+export const TOMES = [...TOMES_A, ...TOMES_B, ...TOMES_C];
+export const TOME = Object.fromEntries(TOMES.map((t) => [t.id, t]));
+export const COLLECTION = Object.fromEntries(COLLECTIONS.map((c) => [c.id, c]));
+export const THREAD = Object.fromEntries(THREADS.map((t) => [t.id, t]));
+export const tomesOf = (col) => TOMES.filter((t) => t.col === col).sort((a, b) => a.n - b.n);
+export const CLUE_THREADS = {}; // clue id -> [thread ids]
+for (const t of THREADS) for (const clue of Object.keys(t.clues)) (CLUE_THREADS[clue] ??= []).push(t.id);
+
+// ---------- The Surveyor's notes ----------
+export const surveyLine = (site, n) => SURVEY_LINES[n][SITE_FEATURES[site][n] ? 0 : 1];
+
+// Which sites are still possible given the survey tomes (0-5) someone has read
+export function sitesMatching(realSite, surveyNumbers) {
+  return SITE_IDS.filter((id) => surveyNumbers.every((n) => SITE_FEATURES[id][n] === SITE_FEATURES[realSite][n]));
+}
+
+// ---------- Unreadable writing ----------
+// Cipher: a fixed letter swap (Elias and Annet's wheel). Mirror: each line written backward.
+const PLAIN = "abcdefghijklmnopqrstuvwxyz";
+const WHEEL = "qhzmwtkbxnaysovflcdjpreugi";
+export function encipher(text) {
+  return text.replace(/[a-z]/gi, (ch) => {
+    const out = WHEEL[PLAIN.indexOf(ch.toLowerCase())];
+    return ch === ch.toLowerCase() ? out : out.toUpperCase();
+  });
+}
+export const mirror = (text) => text.split("\n").map((line) => [...line].reverse().join("")).join("\n");
+
+// Pages as this reader sees them. can = { cipher, mirror }
+export function pagesFor(tome, site, can = {}) {
+  let pages = tome.pages.map((p) => (p === "{SURVEY}" ? surveyLine(site, tome.survey) : p));
+  if (tome.cipher && !can.cipher) pages = pages.map(encipher);
+  if (tome.mirror && !can.mirror) pages = pages.map(mirror);
+  return pages;
+}
+export const readable = (tome, can = {}) => !(tome.cipher && !can.cipher) && !(tome.mirror && !can.mirror);
+
+// ---------- Answers ----------
+export const normalize = (text) => String(text ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
+export function answerIsRight(thread, given) {
+  if (thread.kind === "choice") return given === thread.answer;
+  if (thread.kind === "text") return thread.accept.map(normalize).includes(normalize(given));
+  return false;
+}
+
+// ---------- Player progress (plain object, saved by player.js) ----------
+export const blankProgress = () => ({
+  read: [], // tome ids read to the last page
+  got: [], // tome ids received from a cache, drop or NPC (each is given once)
+  clues: [], // clue ids in the Ledger
+  leads: [], // place ids in the Ledger
+  flags: [], // dialogue and reward flags
+  solved: [], // thread ids
+  claimed: [], // "col:<id>" and "mile:<n>" rewards taken
+  once: [], // effects already applied ("npc|node|i")
+  locks: {}, // thread id -> world day the next answer is allowed
+});
+
+export const hasReadAll = (p, col) => tomesOf(col).every((t) => p.read.includes(t.id));
+
+// Dialogue conditions. ctx = { path, resonance, night, shelved }
+export function holds(cond, p, ctx = {}) {
+  if (cond.startsWith("!")) return !holds(cond.slice(1), p, ctx);
+  const [kind, value] = [cond.slice(0, cond.indexOf(":")), cond.slice(cond.indexOf(":") + 1)];
+  if (cond === "night") return !!ctx.night;
+  switch (kind) {
+    case "flag": return p.flags.includes(value);
+    case "read": return p.read.includes(value);
+    case "clue": return p.clues.includes(value);
+    case "solved": return p.solved.includes(value);
+    case "col": return hasReadAll(p, value);
+    case "path": return ctx.path === value || (value === "marked" && ctx.path === "sorcerer"); // the magic role, either name
+    case "resonance": return (ctx.resonance ?? 0) >= Number(value);
+    case "shelved": return (ctx.shelved ?? 0) >= Number(value);
+    default: return false;
+  }
+}
+
+export function startNode(npc, p, ctx) {
+  for (const [conds, node] of npc.start) if (conds.every((c) => holds(c, p, ctx))) return node;
+  return npc.start[npc.start.length - 1][1];
+}
+
+// Where a button leads: a node id, "end", "start", or a list of [conditions, node] like start
+export function nextNode(next, p, ctx) {
+  if (!Array.isArray(next)) return next;
+  return (next.find(([conds]) => conds.every((c) => holds(c, p, ctx))) ?? next[next.length - 1])[1];
+}
+export const nextNodes = (next) => (Array.isArray(next) ? next.map(([, node]) => node) : [next]);
+
+export const sceneTag = (npcId, node) => `siege_lore_${npcId}_${node}`;
+
+// Adds clues to a progress object; returns the names of threads that gained a clue
+export function addClues(p, clues) {
+  const touched = new Set();
+  for (const clue of clues) {
+    if (p.clues.includes(clue)) continue;
+    p.clues.push(clue);
+    for (const id of CLUE_THREADS[clue] ?? []) touched.add(THREAD[id].name);
+  }
+  return [...touched];
+}
+
+// Enough clues, including any the thread insists on
+export const canAnswer = (p, thread) =>
+  cluesFound(p, thread).length >= thread.need && (thread.must ?? []).every((c) => p.clues.includes(c));
+
+export const cluesFound = (p, thread) => Object.keys(thread.clues).filter((c) => p.clues.includes(c));
+
+export function libraryRank(count) {
+  return [...MILESTONES].reverse().find((m) => count >= m.at);
+}

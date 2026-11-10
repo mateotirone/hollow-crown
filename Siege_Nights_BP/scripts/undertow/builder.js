@@ -239,3 +239,18 @@ function buildHeart(d) {
   }
   return fillAll(d, ops);
 }
+
+// Put the Heart back as new (after a failed attempt, or once the fight is won).
+export function rebuildHeart() {
+  try { buildHeart(dim()); } catch { /* not loaded: the next attempt rebuilds it */ }
+}
+
+// The Fall: everything in the Heart at or beyond this radius drops away into the fog.
+export function dropHeartBand(radius) {
+  const { x: cx, y: cy, z: cz } = HEART.center, d = dim(), R = HEART.outerRadius + 1;
+  for (let dx = -R; dx <= R; dx++) for (let dz = -R; dz <= R; dz++) {
+    const dd = Math.sqrt(dx * dx + dz * dz);
+    if (dd < radius || dd > R) continue;
+    apply(d, { a: [cx + dx, cy - 3, cz + dz], b: [cx + dx, cy + 16, cz + dz], block: "minecraft:air" });
+  }
+}

@@ -1,6 +1,6 @@
 # Working in this repo
 
-This repo is the home of the Siege Nights / Hollow Crown Bedrock add-on.
+This repo is the home of The Hollow Crown, a Bedrock add-on that grew out of Siege Nights (folder names and the `siege:` namespace keep the old name).
 
 ## Layout
 
@@ -20,7 +20,7 @@ This repo is the home of the Siege Nights / Hollow Crown Bedrock add-on.
 ```
 cd tools && npm install     # once
 node tools/check.mjs        # must end with ALL OK
-python3 tools/build.py      # writes siege-nights.mcaddon (not committed)
+python3 tools/build.py      # writes hollow-crown.mcaddon (not committed)
 ```
 
 In game, `/scriptevent siege:selftest` runs the self-tests (they also run at world load).

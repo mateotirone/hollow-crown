@@ -28,6 +28,7 @@ export const B = {
   copper: "minecraft:oxidized_copper",
   glass: "minecraft:tinted_glass",
   seal: "siege:court_seal",
+  ore: "siege:choir_ore",
 };
 
 const SEED = 7741;
@@ -109,6 +110,8 @@ function stageHeight(stage, x, z, n) {
   return 86 + t * 30 + n * 12;
 }
 
+export const oreChance = (z) => (z < 60 ? 0 : 0.015 + 0.05 * Math.min(1, z / 2300));
+
 export function isRiver(x, z) {
   if (z < 40 || inCourt(x, z) || z > 2250) return false;
   if (Math.abs(x) > L.halfWidth - 24) return false;
@@ -178,6 +181,8 @@ export function planChunk(cx, cz) {
     const wound = z < 40;
     if (cliff && !wound) {
       fill(x, start, z, x, top, z, stage === "mirror" ? B.polished : B.basalt);
+      // Choir ore shows in the cliff faces, richer the deeper into the Hollow you go.
+      if (hash(x, z, 301) < oreChance(z)) set(x, top - 1 - Math.floor(hash(x, z, 302) * 3), z, B.ore);
       continue;
     }
     fill(x, start, z, x, top - 1, z, B.rock);

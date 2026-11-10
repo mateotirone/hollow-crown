@@ -1,0 +1,198 @@
+<title>Hollow Crown Hall Viewer</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* Layout: a drafting table. Controls on top, the model fills the middle, the spec sheet sits under it. */
+:root {
+  --bg: #eef0ee; --panel: #ffffff; --ink: #1d2422; --muted: #5d6a66; --line: #cfd6d2;
+  --accent: #2f6f5e; --accent-ink: #ffffff; --stage: #dfe6e2; --ground: #b9c4b4;
+  --display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --body: Inter, "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #141a19; --panel: #1c2423; --ink: #e6ece9; --muted: #96a5a0; --line: #2f3b39;
+  --accent: #6fc7ad; --accent-ink: #0d1716; --stage: #1a2221; --ground: #2c3a33; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #141a19; --panel: #1c2423; --ink: #e6ece9; --muted: #96a5a0; --line: #2f3b39;
+  --accent: #6fc7ad; --accent-ink: #0d1716; --stage: #1a2221; --ground: #2c3a33; color-scheme: dark }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 1100px; margin: 0 auto; padding-block: 20px 32px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; gap: 14px; }
+h1 { font-family: var(--display); font-size: 1.5rem; margin: 0; text-wrap: balance; }
+.sub { color: var(--muted); margin: 2px 0 0; max-width: 65ch; }
+.controls { display: flex; flex-wrap: wrap; gap: 10px 22px; align-items: center; }
+.group { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.label { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-right: 2px; }
+button.opt { font: 500 0.88rem var(--body); color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 6px 11px; cursor: pointer; }
+button.opt:hover { border-color: var(--accent); }
+button.opt[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+button.opt:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.stage { position: relative; background: var(--stage); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; height: min(62vh, 620px); min-height: 320px; touch-action: none; }
+.stage canvas { display: block; width: 100%; height: 100%; cursor: grab; }
+.stage canvas:active { cursor: grabbing; }
+.hint { position: absolute; left: 12px; bottom: 10px; font-size: 0.78rem; color: var(--muted); pointer-events: none; }
+.fail { position: absolute; inset: 0; display: grid; place-items: center; padding: 20px; text-align: center; color: var(--muted); }
+.sliders { display: flex; flex-wrap: wrap; gap: 10px 24px; align-items: center; }
+.sliders label { display: flex; gap: 8px; align-items: center; font-size: 0.88rem; color: var(--muted); }
+input[type=range] { width: 170px; max-width: 46vw; accent-color: var(--accent); }
+.spec { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px 28px; border-top: 1px solid var(--line); padding-top: 14px; }
+.spec > div { min-width: 0; }
+.spec h2 { font-family: var(--display); font-size: 1.15rem; margin: 0 0 4px; }
+.spec dt { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.spec dd { margin: 0 0 8px; font-variant-numeric: tabular-nums; }
+.spec dl { margin: 0; }
+.swatches { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 0.85rem; }
+.swatches span { display: inline-flex; align-items: center; gap: 6px; }
+.swatches i { width: 12px; height: 12px; border-radius: 2px; border: 1px solid var(--line); display: inline-block; }
+</style>
+<div class="wrap">
+  <header>
+    <h1>Town halls of the Hollow Crown</h1>
+    <p class="sub">Every hall the cornerstone can raise, block for block as the add-on builds it. Drag to turn, scroll or pinch to zoom, and slide the cutaway to look inside.</p>
+  </header>
+  <div class="controls">
+    <div class="group" id="tiers" role="group" aria-label="Hall tier"><span class="label">Hall</span></div>
+    <div class="group" id="styles" role="group" aria-label="Regional style"><span class="label">Style</span></div>
+  </div>
+  <div class="stage" id="stage"><canvas id="view"></canvas><div class="hint">Front door faces you at the start</div></div>
+  <div class="sliders">
+    <label for="cut">Cutaway <input type="range" id="cut" min="0" max="100" value="0"></label>
+    <label for="lift">Peel off the top <input type="range" id="lift" min="0" max="100" value="0"></label>
+    <button class="opt" id="spin" aria-pressed="true">Auto-turn</button>
+  </div>
+  <section class="spec">
+    <div><h2 id="name"></h2><p id="blurb" style="margin:0;color:var(--muted)"></p></div>
+    <div><dl>
+      <dt>Needs settlement</dt><dd id="needs"></dd>
+      <dt>Size (wide × deep × tall)</dt><dd id="size"></dd>
+      <dt>Blocks placed</dt><dd id="count"></dd>
+    </dl></div>
+    <div><dl>
+      <dt>Cost</dt><dd id="cost"></dd>
+      <dt>Unlocks</dt><dd id="unlocks"></dd>
+    </dl></div>
+    <div><dl><dt>Main materials</dt><dd><div class="swatches" id="mats"></div></dd></dl></div>
+  </section>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const PALETTE = /*PALETTE*/;
+const DATA = /*DATA*/;
+const TIERS = [
+  { name: "Longhouse", needs: "Hamlet", cost: "48 planks, 32 building stone", unlocks: "Tree of Oaths, first ring of skills" },
+  { name: "Stone Hall", needs: "Town (3 sieges won)", cost: "64 planks, 128 building stone, 8 iron, 10 emeralds", unlocks: "Second ring, Great Hall, Cartographer's Table, Sage's study" },
+  { name: "Keep", needs: "City (6 sieges won)", cost: "256 building stone, 16 iron, 30 emeralds, 4 diamonds", unlocks: "Third ring, four towers, war room" },
+  { name: "Fortress", needs: "Castle (10 wins, 2 warlords)", cost: "384 building stone, 32 iron, 64 emeralds, 12 diamonds, 2 netherite scrap", unlocks: "Capstone skills, gatehouse, spired towers, throne room" },
+  { name: "Sovereign's Throne", needs: "Sovereign (Grand Siege won)", cost: "32 gold, 64 emeralds, 16 diamonds, 2 netherite ingots", unlocks: "Crown Ring of skills, gilded hall, crown vault" },
+];
+const STYLES = [
+  ["vale", "Vale", "Stone brick, timber frame and steep slate roofs."],
+  ["frostmarch", "Frostmarch", "Deepslate and dark oak under snow-heavy roofs."],
+  ["saltreach", "Saltreach", "White calcite and quartz with sea-green roofs."],
+  ["emberwaste", "Emberwaste", "Sandstone and terracotta, thick walls, flat roofs."],
+  ["blackfen", "Blackfen", "Mangrove halls on stilts, moss on the ridge."],
+];
+let tier = 3, style = "vale", spin = true;
+try { const s = JSON.parse(localStorage.getItem("hallview") || "{}"); if (s.tier) tier = s.tier; if (DATA[s.style + "1"]) style = s.style; } catch (e) {}
+const $ = (id) => document.getElementById(id);
+function decode(key) {
+  const bin = atob(DATA[key]); const out = [];
+  for (let i = 0; i < bin.length; i += 4) out.push([bin.charCodeAt(i) - 32, bin.charCodeAt(i + 1), bin.charCodeAt(i + 2) - 8, bin.charCodeAt(i + 3)]);
+  return out;
+}
+function buttons(host, items, get, set) {
+  items.forEach(([value, text]) => {
+    const b = document.createElement("button"); b.className = "opt"; b.textContent = text; b.id = host.id + "-" + value;
+    b.onclick = () => { set(value); refresh(); };
+    host.appendChild(b); b._v = value;
+  });
+  host._sync = () => host.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b._v === get())));
+}
+buttons($("tiers"), TIERS.map((t, i) => [i + 1, t.name]), () => tier, (v) => (tier = v));
+buttons($("styles"), STYLES.map((s) => [s[0], s[1]]), () => style, (v) => (style = v));
+$("spin").onclick = () => { spin = !spin; $("spin").setAttribute("aria-pressed", String(spin)); };
+
+let renderer, scene, camera, mesh, ground, cells = [], bounds, target = new THREE.Vector3(), yaw = -0.6, pitch = 0.5, dist = 60;
+const SHAPES = [[1, 1, 1, 0], [1, 0.08, 1, -0.46], [0.45, 0.6, 0.45, -0.2], [0.4, 1, 0.4, 0], [1, 0.5, 1, -0.25], [0.9, 0.9, 0.9, 0], [0.9, 1.4, 0.9, 0.2]];
+function init() {
+  const canvas = $("view");
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(38, 1, 0.5, 600);
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x556055, 0.75));
+  const sun = new THREE.DirectionalLight(0xfff2dd, 0.75); sun.position.set(-0.6, 1, -0.8); scene.add(sun);
+  const fill = new THREE.DirectionalLight(0xbfd0ff, 0.25); fill.position.set(0.8, 0.4, 0.6); scene.add(fill);
+  ground = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial({ color: 0x888888 }));
+  scene.add(ground);
+  let drag = null, pinch = 0; const pts = new Map();
+  canvas.addEventListener("pointerdown", (e) => { canvas.setPointerCapture(e.pointerId); pts.set(e.pointerId, e); drag = { x: e.clientX, y: e.clientY }; stopSpin(); });
+  canvas.addEventListener("pointermove", (e) => {
+    if (!pts.has(e.pointerId)) return; pts.set(e.pointerId, e);
+    if (pts.size === 2) { const [a, b] = [...pts.values()]; const d = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY); if (pinch) zoom(pinch / d); pinch = d; return; }
+    yaw -= (e.clientX - drag.x) * 0.008; pitch = Math.max(-0.1, Math.min(1.45, pitch + (e.clientY - drag.y) * 0.006)); drag = { x: e.clientX, y: e.clientY };
+  });
+  const up = (e) => { pts.delete(e.pointerId); pinch = 0; };
+  canvas.addEventListener("pointerup", up); canvas.addEventListener("pointercancel", up);
+  canvas.addEventListener("wheel", (e) => { e.preventDefault(); zoom(e.deltaY > 0 ? 1.1 : 0.9); }, { passive: false });
+  new ResizeObserver(resize).observe($("stage")); resize();
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches; if (reduce) stopSpin();
+  (function loop() { if (spin) yaw += 0.003; place(); renderer.render(scene, camera); requestAnimationFrame(loop); })();
+}
+function stopSpin() { spin = false; $("spin").setAttribute("aria-pressed", "false"); }
+function zoom(f) { dist = Math.max(12, Math.min(260, dist * f)); }
+function resize() { const s = $("stage"); renderer.setSize(s.clientWidth, s.clientHeight, false); camera.aspect = s.clientWidth / s.clientHeight; camera.updateProjectionMatrix(); }
+function place() {
+  camera.position.set(target.x + dist * Math.cos(pitch) * Math.sin(yaw), target.y + dist * Math.sin(pitch), target.z - dist * Math.cos(pitch) * Math.cos(yaw));
+  camera.lookAt(target);
+}
+function build(keepView) {
+  cells = decode(style + tier);
+  const b = { x0: 99, x1: -99, y1: 0, z0: 99, z1: -99 };
+  for (const [x, y, z] of cells) { b.x0 = Math.min(b.x0, x); b.x1 = Math.max(b.x1, x); b.y1 = Math.max(b.y1, y); b.z0 = Math.min(b.z0, z); b.z1 = Math.max(b.z1, z); }
+  bounds = b;
+  if (mesh) { scene.remove(mesh); mesh.geometry.dispose(); mesh.material.dispose(); }
+  mesh = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshLambertMaterial(), cells.length);
+  scene.add(mesh);
+  target.set((b.x0 + b.x1) / 2, b.y1 * 0.38, (b.z0 + b.z1) / 2);
+  if (!keepView) dist = Math.max(b.x1 - b.x0, b.z1 - b.z0, b.y1) * 2.1 + 10;
+  const w = b.x1 - b.x0 + 13, d = b.z1 - b.z0 + 13;
+  ground.scale.set(w, 0.6, d); ground.position.set(target.x, -0.8, target.z);
+  ground.material.color.set(getComputedStyle(document.documentElement).getPropertyValue("--ground").trim() || "#888");
+  fillInstances();
+}
+function fillInstances() {
+  const cut = bounds.x1 + 1 - ($("cut").value / 100) * (bounds.x1 - bounds.x0 + 1);
+  const top = bounds.y1 + 1 - ($("lift").value / 100) * (bounds.y1 + 1);
+  const m = new THREE.Matrix4(), c = new THREE.Color(), q = new THREE.Quaternion(), p = new THREE.Vector3(), s = new THREE.Vector3();
+  let n = 0;
+  for (const [x, y, z, i] of cells) {
+    if (x >= cut || y >= top) continue;
+    const pal = PALETTE[i], sh = SHAPES[pal[3]];
+    p.set(x, y + sh[3], z); s.set(sh[0], sh[1], sh[2]); m.compose(p, q, s);
+    mesh.setMatrixAt(n, m); c.setRGB(pal[0] / 255, pal[1] / 255, pal[2] / 255); mesh.setColorAt(n, c); n++;
+  }
+  mesh.count = n; mesh.instanceMatrix.needsUpdate = true; if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+}
+function refresh(keepView) {
+  $("tiers")._sync(); $("styles")._sync();
+  const t = TIERS[tier - 1], st = STYLES.find((s) => s[0] === style);
+  $("name").textContent = st[1] + " " + t.name; $("blurb").textContent = st[2];
+  $("needs").textContent = t.needs; $("cost").textContent = t.cost; $("unlocks").textContent = t.unlocks;
+  try { localStorage.setItem("hallview", JSON.stringify({ tier, style })); } catch (e) {}
+  if (!renderer) return;
+  build(keepView);
+  $("size").textContent = (bounds.x1 - bounds.x0 + 1) + " × " + (bounds.z1 - bounds.z0 + 1) + " × " + (bounds.y1 + 1);
+  $("count").textContent = cells.length.toLocaleString();
+  const tally = {}; for (const c of cells) tally[c[3]] = (tally[c[3]] || 0) + 1;
+  $("mats").innerHTML = "";
+  Object.entries(tally).sort((a, b) => b[1] - a[1]).slice(0, 8).forEach(([i, n]) => {
+    const pal = PALETTE[i], el = document.createElement("span"), sw = document.createElement("i");
+    sw.style.background = "rgb(" + pal[0] + "," + pal[1] + "," + pal[2] + ")"; el.appendChild(sw); el.appendChild(document.createTextNode(pal[4] + " " + n)); $("mats").appendChild(el);
+  });
+}
+try { init(); } catch (e) { const f = document.createElement("div"); f.className = "fail"; f.textContent = "This browser could not start the 3D view. The hall details below still apply."; $("stage").appendChild(f); }
+$("cut").oninput = () => { stopSpin(); fillInstances(); }; $("lift").oninput = () => { stopSpin(); fillInstances(); };
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => refresh(true));
+new MutationObserver(() => refresh(true)).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+refresh();
+</script>

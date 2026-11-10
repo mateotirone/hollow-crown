@@ -1,0 +1,14 @@
+{
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "item",
+          "name": "siege:crown_shard",
+          "weight": 1
+        }
+      ]
+    }
+  ]
+}

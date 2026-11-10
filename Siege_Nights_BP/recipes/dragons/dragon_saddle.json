@@ -1,0 +1,37 @@
+{
+ "format_version": "1.20.10",
+ "minecraft:recipe_shaped": {
+  "description": {
+   "identifier": "siege:dragon_saddle_recipe"
+  },
+  "tags": [
+   "siege_workshop"
+  ],
+  "pattern": [
+   "LSL",
+   "CIC",
+   "L L"
+  ],
+  "key": {
+   "L": {
+    "item": "minecraft:leather"
+   },
+   "S": {
+    "item": "minecraft:saddle"
+   },
+   "C": {
+    "item": "minecraft:chain"
+   },
+   "I": {
+    "item": "minecraft:iron_ingot"
+   }
+  },
+  "result": {
+   "item": "siege:dragon_saddle",
+   "count": 1
+  },
+  "unlock": {
+   "context": "AlwaysUnlocked"
+  }
+ }
+}
