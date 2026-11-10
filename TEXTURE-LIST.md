@@ -345,6 +345,7 @@ Add a row here with the file path, size, what it should look like, and whether i
 | Choir Ore (repainted 2026-11-10: big bright violet crystals on a calm dark base so it reads from a distance, glows faintly) | `textures/blocks/siege_choir_ore.png` | **Final style, awaiting your review** |
 | Raw Choir Ore (item, violet crystal lump) | `textures/items/siege_raw_choir_ore.png` | **Final style, awaiting your review** |
 | Choirsteel Ingot (item, pale violet metal bar) | `textures/items/siege_choirsteel_ingot.png` | **Final style, awaiting your review** |
+| Raven (omen bird, perched with wings folded; black with a blue-grey sheen, heavy dark beak, grey eye; one in a flock could have a ring of grey round one eye) | `textures/entity/siege/bestiary/omen_raven.png` | Placeholder (generated), needs painting |
 | Pretender, blade body (armoured claimant, half a home-made crown, greatsword, a vein of the Hollow up the breastplate) | `textures/entity/siege/bestiary/pretender_blade.png` | **Final style, awaiting your review** (`studio/art/build_pretenders.py`) |
 | Pretender, seer body (hooded robe, shards hanging round the head, staff) | `textures/entity/siege/bestiary/pretender_seer.png` | **Final style, awaiting your review** (`studio/art/build_pretenders.py`) |
 | Pretender, brute body (huge, horned, stone on the shoulders, axe) | `textures/entity/siege/bestiary/pretender_brute.png` | **Final style, awaiting your review** (`studio/art/build_pretenders.py`) |
