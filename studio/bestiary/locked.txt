@@ -1,3 +1,4 @@
 # Textures build.py must never overwrite (hand-painted or owned by the texture thread).
 # One path or glob per line, relative to Siege_Nights_RP/. New files are still created once.
 textures/items/bestiary/*.png
+textures/entity/siege/bestiary/pretender_*.png
