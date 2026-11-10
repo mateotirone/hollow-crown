@@ -533,6 +533,7 @@ function tollRing(f, damage) {
     f.after(step * 5, () => {
       const r = step * 2 + 3;
       ring(f.dim, { x: c.x, y: c.y + 0.3, z: c.z }, r, "minecraft:sonic_explosion", Math.max(6, r));
+      particle(f.dim, "siege:choir_ring", { x: c.x, y: c.y + 0.4, z: c.z });
       for (const p of f.players()) {
         if (Math.abs(flat(p.location, c) - r) > 1.6 || !p.isOnGround) continue;
         hurt(p, damage, "magic");
@@ -576,7 +577,9 @@ registerBoss({
         const t = c && f.players().find((p) => p.id === c.id);
         if (!t) return;
         const v = t.getViewDirection();
+        particle(f.dim, "siege:vein_spark", f.entity.getHeadLocation()); // where he was
         try { f.entity.teleport({ x: t.location.x - v.x * 1.6, y: t.location.y, z: t.location.z - v.z * 1.6 }, { facingLocation: t.location }); } catch { /* blocked */ }
+        particle(f.dim, "siege:vein_spark", f.entity.getHeadLocation()); // where he is
         if (flat(t.location, c.at) < 3) hurt(t, dmg(f, 10), "entityAttack", f.entity);
       } },
     { id: "tollmen", every: 600, windup: 20, warn: "The Crown tolls. Tollmen answer!", sound: "block.bell.hit",

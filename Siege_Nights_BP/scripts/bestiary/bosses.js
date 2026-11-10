@@ -131,7 +131,7 @@ registerBoss({
 });
 
 // =====================================================================================
-// 2. The Pale Huntsman (Hollowfast, Frostmarch)
+// 2. The Pale Huntsman (Rimehold, Frostmarch)
 //    He vanishes into the blizzard: watch for his breath. "Marked" shots miss if you break line of
 //    sight. At 60% the Rimewolves come. At 25% he anchors himself in three Rime Pillars: break them.
 // =====================================================================================
