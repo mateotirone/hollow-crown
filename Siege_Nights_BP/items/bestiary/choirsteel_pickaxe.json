@@ -1,0 +1,59 @@
+{
+ "format_version": "1.21.60",
+ "minecraft:item": {
+  "description": {
+   "identifier": "siege:choirsteel_pickaxe",
+   "menu_category": {
+    "category": "equipment",
+    "group": "minecraft:itemGroup.name.pickaxe"
+   }
+  },
+  "components": {
+   "minecraft:icon": "siege_choirsteel_pickaxe",
+   "minecraft:display_name": {
+    "value": "item.siege:choirsteel_pickaxe.name"
+   },
+   "minecraft:max_stack_size": 1,
+   "minecraft:repairable": {
+    "repair_items": [
+     {
+      "items": [
+       "siege:choirsteel_ingot"
+      ],
+      "repair_amount": "q.max_durability * 0.25"
+     }
+    ]
+   },
+   "minecraft:glint": false,
+   "minecraft:hand_equipped": true,
+   "minecraft:damage": 7,
+   "minecraft:durability": {
+    "max_durability": 3000
+   },
+   "minecraft:enchantable": {
+    "slot": "pickaxe",
+    "value": 22
+   },
+   "minecraft:can_destroy_in_creative": true,
+   "minecraft:tags": {
+    "tags": [
+     "minecraft:is_pickaxe",
+     "minecraft:is_tool",
+     "minecraft:netherite_tier",
+     "siege:choirsteel"
+    ]
+   },
+   "minecraft:digger": {
+    "use_efficiency": true,
+    "destroy_speeds": [
+     {
+      "block": {
+       "tags": "q.any_tag('minecraft:is_pickaxe_item_destructible')"
+      },
+      "speed": 11
+     }
+    ]
+   }
+  }
+ }
+}

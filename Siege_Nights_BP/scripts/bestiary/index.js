@@ -6,6 +6,7 @@
 //   bosses.js    the seven fights
 //   mobs.js      what each mob does beyond walking and biting
 //   relics.js    the named boss loot and the boss keys
+//   choirsteel.js  the Choirsteel gear set: what the armour, Blade and Pick do (items from studio/bestiary/choirsteel.py)
 //   spawns.js    Choir raiders in sieges, Hollow things at night and in the Undertow
 //   seeps.js     Seep sites: random Hollow incursions in the overworld that widen until someone closes them
 //   pretenders.js  generated claimants who rise in the Hollow after Morvane falls (events: siege:pretender_risen / _marching / _fallen)
@@ -30,6 +31,7 @@ import "./morvane.js";
 import "./returned.js";
 import "./mobs.js";
 import "./relics.js";
+import "./choirsteel.js";
 import "./spawns.js";
 import "./veterans.js";
 import "./seeps.js";
