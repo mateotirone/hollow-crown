@@ -17,10 +17,11 @@
 //
 // Other features: on("plotChosen", ({ player, plot }) => ...) fires the moment a player picks a plot, before
 // they arrive, so a first building can be raised for them. pickOf(plot) is in plots/api.js.
+// on("waystoneRead", ({ player }) => ...) fires each time a player opens the Waystone's "How things stand".
 
 import { world, system, ItemStack, GameMode } from "@minecraft/server";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
-import { isReady, keepOf, tierOf, on, emit, addFoundingCheck } from "../siege/api.js";
+import { isReady, keepOf, tierOf, on, emit, addFoundingCheck, addJoinStep } from "../siege/api.js";
 import { onTick } from "../core/loop.js";
 import { moduleStore } from "../core/store.js";
 import { PLOT_PLAN, REGION_STYLE, REGION_BLOCK, WELCOME, WARDS, PLOT_STONE, KEEP_BANNER, OVERWORLD } from "./config.js";
@@ -263,6 +264,7 @@ const PAGES = [
 
 function storyPage(player, i = 0) {
   const [title, body] = PAGES[i];
+  if (i === 0) emit("waystoneRead", { player }); // the journal is handed over once they have heard how things stand
   const form = new ActionFormData().title(title).body(body);
   if (i < PAGES.length - 1) form.button("Next");
   form.button("Close");
@@ -384,7 +386,13 @@ function pick(player, plan) {
   for (const other of world.getPlayers()) {
     if (other.id !== player.id) other.sendMessage(`§6${player.name} has chosen ${status.plot.name} in ${status.plot.region}.`);
   }
-  player.sendMessage(`§6${status.plot.name} is yours to found. Raise your Keep Banner on the Plot Stone beside you. Kingsrest lies ${compass(status.plot, KINGSREST)}.`);
+  // Chat order on arrival: the plot's past (lore, at once), then what has been laid out (settlement), then this
+  // one clear next step, last, so it is the line left on screen.
+  const plotName = status.plot.name;
+  const toward = compass(status.plot, KINGSREST);
+  system.runTimeout(() => {
+    if (player.isValid) player.sendMessage(`§6Next: raise your Keep Banner on the Plot Stone beside you to found ${plotName}. Kingsrest lies ${toward}.`);
+  }, 160);
   player.onScreenDisplay.setTitle(`§6${status.plot.name}`, { subtitle: status.plot.region, fadeInDuration: 10, stayDuration: 70, fadeOutDuration: 20 });
   refreshHall();
 }
@@ -443,28 +451,34 @@ function toHall(player) {
 const mustChoose = (player) =>
   hallBuilt() && mapMode() && !isBuilder(player) && !store.data.picks[player.id] && !keepOf(player.id);
 
-world.afterEvents.playerSpawn.subscribe(({ player, initialSpawn }) => {
-  system.runTimeout(() => {
-    if (!isReady() || !player.isValid || !mapMode()) return;
-    if (mustChoose(player)) {
-      player.addTag(ARRIVING);
-      toHall(player);
-      if (initialSpawn) {
-        player.onScreenDisplay.setTitle("§6Aldmere", { subtitle: "Click the Waystone", fadeInDuration: 10, stayDuration: 80, fadeOutDuration: 20 });
-        player.sendMessage("§6Welcome to Aldmere. Click the Waystone in the middle to hear how things stand, then choose one of the stones on the rim as your start.");
-      }
-    } else if (initialSpawn && !hallBuilt() && !plotOf(player.id)) {
-      const free = allPlots().filter((p) => ["free", "lord"].includes(statusOf(p).state)).length;
-      player.sendMessage(`§6Welcome to Aldmere. ${free} of ${allPlots().length} plots are free. Ride the rails from Kingsrest, find a Plot Stone, and raise your Keep Banner on it.`);
-    }
-  }, 60);
-});
+// First join, step 20 of the join sequence (after the look picker, before the journal): up to the hall.
+addJoinStep(20, "welcome hall", async (player, { wait }) => {
+  if (!isReady() || !player.isValid || !mapMode()) return;
+  if (mustChoose(player)) {
+    player.addTag(ARRIVING);
+    toHall(player);
+    await wait(20); // let the hall load round them before the words appear
+    if (!player.isValid) return;
+    player.onScreenDisplay.setTitle("§6Aldmere", { subtitle: "Click the Waystone", fadeInDuration: 10, stayDuration: 80, fadeOutDuration: 20 });
+    player.sendMessage("§6Welcome to Aldmere. Click the Waystone in the middle to hear how things stand, then choose one of the stones on the rim as your start.");
+  } else if (!hallBuilt() && !plotOf(player.id)) {
+    const free = allPlots().filter((p) => ["free", "lord"].includes(statusOf(p).state)).length;
+    player.sendMessage(`§6Welcome to Aldmere. ${free} of ${allPlots().length} plots are free. Ride the rails from Kingsrest, find a Plot Stone, and raise your Keep Banner on it.`);
+  }
+}, { when: "first" });
 
 // Nobody leaves the hall without choosing, and nobody falls out of the sky
+const seenAt = new Map(); // player id -> tick the hold check first saw them
 onTick("plots_welcome_hold", 20, () => {
   if (!hallBuilt()) return;
   for (const player of world.getPlayers()) {
-    if (!player.hasTag(ARRIVING)) continue;
+    if (!player.hasTag(ARRIVING)) {
+      // Someone who was here before the hall existed and still has no home is brought up too, quietly, once
+      // they have been on for a minute (so this never cuts in front of the join sequence).
+      if (!seenAt.has(player.id)) seenAt.set(player.id, system.currentTick);
+      if (system.currentTick - seenAt.get(player.id) >= 1200 && mustChoose(player)) player.addTag(ARRIVING);
+      continue;
+    }
     if (!mustChoose(player)) player.removeTag(ARRIVING);
     else if (player.dimension.id !== OVERWORLD || !inHall(player.location)) toHall(player);
   }

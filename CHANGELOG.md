@@ -11,6 +11,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 ### Added
 - The Hollow Crown expansion on top of Siege Nights: plots, town hall and skill tree, horses and rails, lore tomes and dialogue, new mobs and bosses, the Undertow dimension, the Crown and Citadel. None of it has been played in a real game yet.
 - In the welcome hall, a plot run by a Rival Lord can be chosen by a newcomer, who takes it over as it stands.
+- First join now runs in order: look picker, then the welcome hall, then the journal. After you pick a plot the last line in chat is your next step.
 - The map keeps three sealed ways out for later updates (the Shut Pass, the Far Shore, the Horizon Isles). Nothing is behind them yet.
 
 ### Changed
