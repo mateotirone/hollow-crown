@@ -212,5 +212,17 @@
   },
   "siege:castle_smooth_blackfen": {
     "sound": "stone"
+  },
+  "siege:veinstone_bricks": {
+    "sound": "deepslate_bricks"
+  },
+  "siege:cracked_veinstone_bricks": {
+    "sound": "deepslate_bricks"
+  },
+  "siege:pale_ash": {
+    "sound": "sand"
+  },
+  "siege:glint_cluster": {
+    "sound": "amethyst_cluster"
   }
 }
