@@ -9,6 +9,7 @@ How versions work is in [`docs/RELEASING.md`](docs/RELEASING.md).
 Everything merged to `main` since the last release goes here. Each pull request that changes what players see adds a line under one of these headings.
 
 ### Added
+- Every skill on the Tree of Oaths shows its own painted icon: on the tree screen for skills you hold or can swear now, and on every row of the plain lists.
 - Siege omens now happen around you, not only in grey text: animals turn to face one wall, flames lean, open doors shut, water trembles, dogs bolt, a far bell, something small runs past. One each hour of a siege evening, never the same twice in a night.
 - Ravens are now a real bird in the world: small, black, silent and perfectly still. They cannot be hurt, drop nothing, do not move for you, and leave at dawn or the moment a siege starts. (The omen that puts them on your wall at dusk is wired up separately.)
 - Seeps now come in five kinds, chosen by the Storyteller to contrast with what you did lately: guarded (as before), hungry (opens wide, guards come fast), still (no guards, it murmurs to you), drifting (it slips away until cornered) and weeping (harmless, closes by itself).
