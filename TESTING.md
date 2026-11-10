@@ -454,3 +454,8 @@ Walk into a mining village in the Hollow: at most once every 8 minutes something
 - Walk up to them, hit them, push them: nothing happens and they do not turn. They make no sound.
 - Wait for morning, or start a siege: they are gone.
 
+
+### Clue Sense
+1. `/scriptevent siege:townhall_renown 30`, learn Clue Sense in the Wayfarer branch, and carry the Ledger of Whispers.
+2. Walk toward a Dusty Tome you have not clicked (the showcase has some). ✅ Within 16 blocks a page turns softly and the action bar says "Your Ledger whispers: something written, N blocks <direction>". After you copy the tome it goes quiet.
+3. Drop a Lore Tome and walk away and back. ✅ It is sensed the same way. Without the Ledger in your pack nothing happens.
