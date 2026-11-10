@@ -288,3 +288,6 @@ item.siege:choirsteel_pickaxe.name=Choirsteel Pick
 item.siege:choirsteel_axe.name=Choirsteel Axe
 item.siege:choirsteel_shovel.name=Choirsteel Spade
 item.siege:choirsteel_hoe.name=Choirsteel Hoe
+tile.siege:veilcap_cap.name=Veilcap Cap
+tile.siege:veilcap_stem.name=Veilcap Stem
+tile.siege:veilmoss_strands.name=Veilmoss Strands

@@ -25,7 +25,7 @@ import { on, emit, onTick, moduleStore, addTests, assert, assertEqual, registerD
 import { UNDERTOW_ID, UNDERTOW_LAYOUT as L, HEART, pathX } from "../undertow/layout.js";
 import { RIVER_NODES, riverDistance } from "../undertow/rivers.js";
 import { SITES } from "../undertow/roads.js";
-import { heightAt, B, shardAt } from "../undertow/terrain.js";
+import { heightAt, B, shardAt, giantCapAt, strandsAt } from "../undertow/terrain.js";
 import { isBuilt } from "../undertow/builder.js";
 import { wardenData, wardenOnline, hollowStep } from "../undertow/warden.js";
 import { regentRules } from "../undertow/regent.js";
@@ -697,6 +697,19 @@ on("showcase", ({ player, dim, nextSpot, label }) => {
 
 // ---- self-tests ---------------------------------------------------------------------------------
 addTests("hollowfolk", {
+  "giant Veilcaps stand in the fens and groves, rare elsewhere, and are tree sized": () => {
+    const count = (kind) => { let n = 0; for (let x = -500; x < 500; x += 1) for (let z = 200; z < 700; z += 1) { const g = giantCapAt(x, z, kind); if (g) { n++; assert(g.tall >= 4 && g.tall <= 9 && (g.wide === 2 || g.wide === 3), "odd shape"); } } return n; };
+    const fen = count("fen"), waste = count("waste");
+    assert(fen > 1000 && fen < 3500, `fens: ${fen} giant Veilcaps in 500,000 columns`);
+    assert(waste < fen / 8, "the wastes should be nearly bare of them");
+  },
+  "moss hangs from ledges but never past the foot of the cliff, and not in the wastes": () => {
+    for (let x = 0; x < 300; x++) for (let side = 0; side < 4; side++) for (const drop of [1, 2, 3, 4, 9]) {
+      const len = strandsAt(x, 500, side, drop, "wood");
+      assert(len === 0 || (drop >= 3 && len <= drop - 1 && len <= 3), `strands ${len} long on a drop of ${drop}`);
+      assertEqual(strandsAt(x, 500, side, drop, "waste"), 0);
+    }
+  },
   "amethyst grows in patches across the Hollow, at every stage, and never carpets it": () => {
     const stages = new Set();
     let grown = 0, total = 0;
