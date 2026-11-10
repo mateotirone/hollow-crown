@@ -4,7 +4,7 @@ import { addTests, assert, assertEqual } from "../siege/api.js";
 import { CROWN, IDS } from "./config.js";
 import {
   hollowStage, claimNeeded, nightfall, tithed, resolveCrown, gauntletProblem, stormAtNightfall, abandoned, compass, EXILE_STAGES,
-  lordId, isNpc, lordGain, lordChallenger, npcDecreeTarget, reachProblem,
+  lordId, isNpc, lordGain, lordChallenger, npcDecreeTarget, reachProblem, freshPick, lordApproach, LORD_APPROACHES, nextExileStage,
 } from "./rules.js";
 import { citadelPlan, colorJobs, planSummary, thronePlace, gateToward, outsideGate, KEEP_HALF } from "./layout.js";
 import { BlockTypes, ItemTypes, EntityTypes } from "@minecraft/server";
@@ -12,6 +12,16 @@ import { BlockTypes, ItemTypes, EntityTypes } from "@minecraft/server";
 const PLAN = { banner: { x: 100, z: -40 }, keep: { x: 120, z: -30 }, gate: 0 };
 
 addTests("crown", {
+  "nothing repeats: whispers are heard once, lords never come the same way twice, a second exile is shorter": () => {
+    const used = [];
+    for (let n = 0; n < 5; n++) { const i = freshPick(5, used, 0.7); assert(i >= 0 && !used.includes(i), "a fresh pick"); used.push(i); }
+    assertEqual(freshPick(5, used, 0.3), -1, "then silence");
+    const seen = LORD_APPROACHES.map((_, t) => JSON.stringify(lordApproach(t).modifiers));
+    assertEqual(new Set(seen).size, seen.length, "every approach differs");
+    for (let t = 1; t < 9; t++) assert(lordApproach(t).threat >= lordApproach(t - 1).threat, "each attempt is at least as big");
+    assert(lordApproach(9).threat > lordApproach(4).threat || lordApproach(9).threat === 3, "still growing past the last approach");
+    assertEqual([nextExileStage(0, 1), nextExileStage(0, 2), nextExileStage(3, 2)], [1, 3, 4]);
+  },
   "a hand stays on the Heart only while its owner stays close": () => {
     assertEqual(reachProblem({ here: true, distance: 2 }), undefined);
     assert(reachProblem({ here: true, distance: CROWN.reachRange + 1 }), "stepping away lets go");

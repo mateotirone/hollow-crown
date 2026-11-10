@@ -48,6 +48,8 @@ const GREY = {
   "minecraft:skeleton": ["siege:grey_bowman"],
   "minecraft:stray": ["siege:grey_bowman"],
   "minecraft:pillager": ["siege:grey_bowman", "siege:grey_bellcutter"],
+  "minecraft:witch": ["siege:grey_bellcutter"],
+  "minecraft:evocation_illager": ["siege:grey_serjeant"],
   "minecraft:wither_skeleton": ["siege:grey_serjeant"],
 };
 // Soldiers of the Hollow itself: not men, and not copies of men
@@ -150,8 +152,8 @@ on("siegeStart", () => system.runTimeout(placeWatchers, 100));
 onTick("bestiary_watcher", 10, watcherTick);
 
 // ---------- Hollow things ----------
-const NIGHT_HOLLOW = ["siege:lost_villager", "siege:lost_villager", "siege:changeling", "siege:tolling_shade", "siege:wrongling", "siege:stone_vigil"];
-const UNDERTOW_HOLLOW = ["siege:wrongling", "siege:stone_vigil", "siege:tolling_shade", "siege:mirror_knight", "siege:echo_hound", "siege:lost_villager", "siege:mirror_knight"];
+export const NIGHT_HOLLOW = ["siege:lost_villager", "siege:lost_villager", "siege:changeling", "siege:tolling_shade", "siege:wrongling", "siege:stone_vigil"];
+export const UNDERTOW_HOLLOW = ["siege:wrongling", "siege:stone_vigil", "siege:tolling_shade", "siege:mirror_knight", "siege:echo_hound", "siege:lost_villager", "siege:mirror_knight"];
 
 export function hollowFor({ undertow, marked, resonance, awake, roll }) {
   if (undertow) return roll < SPAWN_SETTINGS.hollowChanceUndertow ? "undertow" : undefined;
@@ -211,7 +213,7 @@ addTests("bestiary", {
     assertEqual(troopKind({ grey: 0.4, hollow: 0.3 }, 0.9), "choir");
     assertEqual(choirSwap("minecraft:skeleton", [], 10, 0.01, 0.5, { grey: 1, hollow: 0 }), "siege:grey_bowman");
     assertEqual(choirSwap("minecraft:ravager", [RAM_TAG], 10, 0, 0, { grey: 0, hollow: 1 }), "siege:gatebreaker");
-    assertEqual(choirSwap("minecraft:witch", [], 10, 0.01, 0.5, { grey: 1, hollow: 0 }), "siege:bell_ringer", "the Grey Host has no witch: a Choir raider fills in");
+    assertEqual(choirSwap("minecraft:ravager", [], 10, 0.01, 0.5, { grey: 1, hollow: 0 }), "siege:siege_ogre", "the Grey Host has no beast: a Choir raider fills in");
     assertEqual(choirSwap("minecraft:zombie", [], 1, 0, 0, { grey: 0, hollow: 1 }), undefined, "nothing is swapped before the third siege");
     for (const set of Object.values(TROOPS)) for (const list of Object.values(set)) for (const id of list) assert(MOBS_HAVE(id), `${id} is not a mob`);
   },

@@ -9,9 +9,19 @@ import { DESK } from "./constants.js";
 export let state; // loaded on the first tick (the world isn't ready while the script first loads)
 export let tracked; // machine blocks the script runs: type -> [{ dim, x, y, z }]
 
+// Raise this when the SHAPE of the saved state changes, and bring old worlds forward in upgradeState
+export const STATE_VERSION = 1;
+
+function upgradeState(old, from) {
+  // if (from < 2) { ...rename or restructure fields here... }
+  return old;
+}
+
 export function loadState() {
   const saved = world.getDynamicProperty("siege:state");
   state = saved ? JSON.parse(saved) : {};
+  if (saved && (state.version ?? 1) < STATE_VERSION) state = upgradeState(state, state.version ?? 1);
+  state.version = STATE_VERSION;
   state.active ??= false;
   state.siegeNumber ??= 0;
   state.lastSiegeDay ??= -1;

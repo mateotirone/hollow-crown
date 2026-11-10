@@ -101,7 +101,33 @@ export function nextNode(next, p, ctx) {
 }
 export const nextNodes = (next) => (Array.isArray(next) ? next.map(([, node]) => node) : [next]);
 
+// ---------- Saved data versions ----------
+// Lore saves three things outside moduleStore(), because their keys are per player or per settlement: a player's
+// progress, each settlement's shelves, and the map builder's marked places. Each is stamped with _v when saved.
+// To change the SHAPE of one (rename or restructure a field), raise its version here and add a step to UPGRADES.
+// Adding a new field with a default needs no bump. Saves from before versions existed count as version 1.
+export const SAVE_VERSION = { progress: 1, library: 1, places: 1 };
+const UPGRADES = { progress: [], library: [], places: [] }; // UPGRADES.progress[0] takes v1 data to v2, and so on
+export function loadSaved(kind, raw, upgrades = UPGRADES[kind]) {
+  if (typeof raw !== "string") return undefined;
+  let { _v: from = 1, ...data } = JSON.parse(raw);
+  for (let v = from; v < SAVE_VERSION[kind] && upgrades[v - 1]; v++) data = upgrades[v - 1](data) ?? data;
+  return data;
+}
+export const stampSaved = (kind, data) => JSON.stringify({ ...data, _v: SAVE_VERSION[kind] });
+
 export const sceneTag = (npcId, node) => `siege_lore_${npcId}_${node}`;
+// Nodes a player returns to (every "hub") carry greets: other wordings of the same node. Mateo, 2026-11-10: the game
+// "should never, ever, ever get repetitive". pickGreet never gives the same wording twice running.
+export const greetCount = (node) => 1 + (node?.greets?.length ?? 0);
+export function pickGreet(count, last, roll) {
+  if (count <= 1) return 0;
+  const v = Math.floor(roll * count) % count;
+  return v === last ? (v + 1) % count : v;
+}
+export const variantTag = (npcId, node, v) => sceneTag(npcId, node) + (v ? `__${v}` : "");
+// The same idea for one-line omens: a pool, picked so the last one heard is never repeated
+export function pickLine(pool, last, roll) { return pool[pickGreet(pool.length, pool.indexOf(last), roll)]; }
 
 // Adds clues to a progress object; returns the names of threads that gained a clue
 export function addClues(p, clues) {

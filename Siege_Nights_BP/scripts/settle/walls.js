@@ -17,7 +17,7 @@ import { isReady, keepOf, tierOf, TIERS, onTick, moduleStore, on, emit, addFilte
 import { STYLES } from "../townhall/styles.js";
 import { PLOT_PLAN } from "../plots/config.js";
 import { plotAt } from "../plots/claims.js";
-import { WALLS, WALL_LEVELS, MAX_WALL, bearingToAngle, smoothGround, stationSpots, groundProblem, wallColumns, onWallLine, gateSpot, materialKind, wallArmor } from "./walldata.js";
+import { WALLS, WALL_LEVELS, MAX_WALL, bearingToAngle, smoothGround, stationSpots, groundProblem, wallColumns, onWallLine, gateSpot, materialKind, wallArmor, columnKinds, wallSeed } from "./walldata.js";
 import { styleOf } from "./plans.js";
 
 const OVERWORLD = "minecraft:overworld";
@@ -80,6 +80,8 @@ export function palette(style, L) {
     air: perm("minecraft:air"),
     gate: (dir) => (L.gate === "open" ? undefined : perm(`siege:${L.gate}`, gateStates(dir))),
     port: (dir) => perm("siege:portcullis", gateStates(dir)),
+    // an arrow slit looks out along the way its stretch of wall faces (angle 0 = east, a quarter turn = south)
+    slit: (angle) => perm("siege:arrow_slit", { "minecraft:cardinal_direction": ["east", "south", "west", "north"][((Math.round(angle / (Math.PI / 2)) % 4) + 4) % 4] }) ?? kinds[L.body],
   };
 }
 
@@ -112,42 +114,45 @@ function setBlock(dim, x, y, z, p) {
   return true;
 }
 
+// The block for one cell of wall (kinds come from columnKinds in walldata.js)
+export function permFor(P, w, kind, col) {
+  if (kind === "tooth") return P.tooth;
+  if (kind === "light") return P.light;
+  if (kind === "gate") return P.gate(w.gateDir);
+  if (kind === "port") return P.port(w.gateDir);
+  if (kind === "slit") return P.slit(col?.a ?? 0);
+  return P.kinds[kind];
+}
+
 // One column of wall. Returns blocks placed, or -1 if the chunk isn't loaded.
 function placeColumn(dim, w, job, col) {
   const { L, palette: P } = job;
   const { x, z, base } = col;
-  let top = col.top, n = 0;
-  if (!dim.getBlock({ x, y: base, z })) return -1;
+  const ground = dim.getBlock({ x, y: base, z });
+  if (!ground) return -1;
+  const cells = new Map(columnKinds(L, col, wallSeed(w)));
+  let n = 0;
   if (col.role === "gap" || col.role === "gate" || col.role === "port") {
-    setBlock(dim, x, base, z, dim.getBlock({ x, y: base, z }).isAir ? P.kinds.cobbled : undefined); // something to walk on
-    const leaf = col.role === "gate" ? P.gate(w.gateDir) : col.role === "port" ? P.port(w.gateDir) : undefined;
-    const open = L.gate === "open";
-    const gateH = Math.min(L.gateH ?? WALLS.gateHeight, Math.max(2, L.h - (L.h > 3 ? 1 : 0)));
-    for (let y = base + 1; y <= (open ? top + 2 : top); y++) {
-      const inGate = y <= base + gateH;
-      setBlock(dim, x, y, z, inGate ? leaf ?? P.air : open ? P.air : materialAt(L, P, y - base, y === top));
+    if (ground.isAir) setBlock(dim, x, base, z, P.kinds.cobbled); // something to walk on
+    for (let y = base + 1; y <= col.top + (L.gate === "open" ? 2 : 0); y++) {
+      setBlock(dim, x, y, z, cells.has(y) ? permFor(P, w, cells.get(y), col) : P.air); // the gateway is cleared
       n++;
     }
     return n;
   }
-  const tower = col.role === "tower";
-  const walk = col.role === "walk";
-  if (!tower && !walk && L.body === "log") top += (x + z) & 1; // a palisade's uneven points
-  // down to solid ground (the measured ground can sit a little above a dip), up to the top
-  for (let y = top; y >= base - 8; y--) {
-    const block = dim.getBlock({ x, y, z });
-    if (!block) return -1;
-    if (y <= base && !SOFT.test(block.typeId)) break;
-    const p = walk ? P.kinds.plank : materialAt(L, P, Math.max(1, y - base), y === top);
-    if (block.permutation !== p) block.setPermutation(p);
+  for (const [y, kind] of cells) {
+    if (!setBlock(dim, x, y, z, permFor(P, w, kind, col))) return -1;
     n++;
   }
-  if (tower) {
-    if (col.tooth) setBlock(dim, x, top + 1, z, P.tooth);
-    if (col.mid) setBlock(dim, x, top + 1, z, P.light);
-    return n + 1;
+  // down to solid ground (the measured ground can sit a little above a dip)
+  const footing = col.role === "walk" ? P.kinds.plank : materialAt(L, P, 1, false);
+  for (let y = base; y >= base - 8; y--) {
+    const block = dim.getBlock({ x, y, z });
+    if (!block) return -1;
+    if (!SOFT.test(block.typeId)) break;
+    if (block.permutation !== footing) block.setPermutation(footing);
+    n++;
   }
-  if (!walk && L.battlements && col.d === 0 && ((x + z) & 1) === 0) { setBlock(dim, x, top + 1, z, P.tooth); n++; }
   return n;
 }
 
@@ -232,7 +237,7 @@ export function raiseWall(id, level, { center, style, bearing } = {}) {
   if (style) w.style = style;
   w.building = { level, index: 0 };
   save();
-  try {
+  if (!String(id).startsWith("npc:")) try { // a lord's wall only rises while players are near, so it needs no ticking area
     world.getDimension(OVERWORLD).runCommand(`tickingarea add circle ${w.x} ${w.y} ${w.z} 4 ${areaName(id)}`); // keeps the ring loaded while it rises
   } catch {
     // out of ticking areas: the wall rises as players come near
@@ -296,6 +301,20 @@ addFilter("settleReservedAt", (found, { owner, location }) => {
 });
 
 // ---------- a claimed plot gets its first wall ----------
+
+// Which side of a plot its gate is on: "north" | "east" | "south" | "west"
+export const gateDirFor = (center) => CARDINALS.find((c) => c[0] === ((Math.round(bearingFor(center) / 90) * 90) % 360 + 360) % 360)?.[1] ?? "south";
+
+// Hand a wall from one holder to another (a Rival Lord's wall to the player who takes the settlement over)
+export function adoptWall(fromId, toId) {
+  const w = walls()[fromId];
+  if (!w || walls()[toId]) return false;
+  walls()[toId] = w;
+  delete walls()[fromId];
+  if (jobs.has(fromId)) { jobs.set(toId, jobs.get(fromId)); jobs.delete(fromId); } // a wall still rising carries on for its new holder
+  save();
+  return true;
+}
 
 export function bearingFor(center) {
   try {

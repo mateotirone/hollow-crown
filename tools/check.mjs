@@ -125,6 +125,30 @@ const allowed = new Set(Object.keys(manifest.dependencies.reduce((o, d) => (d.mo
 for (const spec of mcNames.keys()) if (!allowed.has(spec)) fail(`scripts import ${spec}, but manifest.json has no dependency on it`);
 console.log(`${scripts.length} script files, ${reachable.size} loaded by main.js`);
 
+// ---------- 2b. saved data must be versioned ----------
+// Rule: every saved store carries a version and an upgrade step, so worlds survive updates.
+// moduleStore() does this for you. Saving straight to the world is only OK if the blob has its own version.
+step("Saved data versions");
+{
+  let raw = 0;
+  for (const file of scripts) {
+    const name = rel(file);
+    if (name.endsWith("core/store.js") || name.endsWith("siege/state.js")) continue;
+    const src = readFileSync(file, "utf8");
+    if (!/world\.setDynamicProperty\(/.test(src)) continue;
+    if (/\b_v\b|\bversion\b|STORE_VERSION|SAVE_VERSION/i.test(src)) continue; // carries its own version
+    raw++;
+    warnings.push(`${name} saves to the world without a version. Use moduleStore() from core/store.js, or put a version field in the saved data and upgrade old saves when you load.`);
+  }
+  for (const file of scripts) {
+    const src = readFileSync(file, "utf8");
+    for (const m of src.matchAll(/moduleStore\(\s*["'`]([^"'`]+)["'`][\s\S]{0,400}?version:\s*(\d+)/g)) {
+      if (+m[2] > 1 && !/upgrade\s*[(:]/.test(src)) failIn(file, `${rel(file)}: store "${m[1]}" is at version ${m[2]} but has no upgrade step`);
+    }
+  }
+  console.log(raw ? `${raw} file(s) save unversioned data (see notes)` : "every saved store is versioned");
+}
+
 // ---------- 3. deep check (optional) ----------
 step("Undefined names and unused imports");
 await deepCheck();
