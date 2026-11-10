@@ -108,6 +108,31 @@ export function npcDecreeTarget(owners, lastTarget, roll = 0) {
   return open.length ? open[Math.min(open.length - 1, Math.floor(roll * open.length))] : undefined;
 }
 
+// ---------- Never the same twice (Mateo's rule: nothing may get repetitive) ----------
+
+// An index 0..count-1 that isn't in `used`, or -1 once everything has been used. roll: 0..1
+export function freshPick(count, used = [], roll = 0) {
+  const open = [...Array(count).keys()].filter((i) => !used.includes(i));
+  return open.length ? open[Math.min(open.length - 1, Math.floor(roll * open.length))] : -1;
+}
+
+// How a rival lord comes at the throne on their 1st, 2nd, 3rd... attempt: a different army every time, and a bigger one
+export const LORD_APPROACHES = [
+  { modifiers: [], line: "They come the old way: banners up, straight at the gate." },
+  { modifiers: ["siegeTrain"], line: "This time they have brought rams from the first horn." },
+  { modifiers: ["sappers", "march"], line: "This time they come fast and low, with twice the sappers." },
+  { modifiers: ["shields", "bloodlust"], line: "This time every soldier is armored, and they have been promised your walls." },
+  { modifiers: ["siegeTrain", "shields", "march"], line: "This time they have brought everything they own." },
+];
+export function lordApproach(tries) {
+  const base = LORD_APPROACHES[Math.min(tries, LORD_APPROACHES.length - 1)];
+  const extra = Math.max(0, tries - (LORD_APPROACHES.length - 1)); // past the last approach, only the size keeps growing
+  return { ...base, threat: Math.min(3, CROWN.npcStormThreat + 0.15 * tries + 0.1 * extra) };
+}
+
+// A banished ruler who has walked the Long Road before doesn't walk the middle of it again
+export const nextExileStage = (stage, timesExiled) => (stage === 0 && timesExiled > 1 ? 3 : stage + 1);
+
 export const abandoned = (challenge, nowMs) =>
   !!challenge && !challenge.stormed && nowMs - challenge.declaredMs >= CROWN.abandonDays * 86400000;
 

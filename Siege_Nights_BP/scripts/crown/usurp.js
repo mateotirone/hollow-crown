@@ -8,7 +8,7 @@ import {
 import { spawnChampion } from "../bestiary/champions.js";
 import { CROWN, IDS } from "./config.js";
 import {
-  claimNeeded, gauntletProblem, stormAtNightfall, abandoned, compass, EXILE_STAGES, lordId, lordGain, lordChallenger,
+  claimNeeded, gauntletProblem, stormAtNightfall, abandoned, compass, EXILE_STAGES, lordId, lordGain, lordChallenger, lordApproach,
 } from "./rules.js";
 import {
   crown, saveCrown, ruler, isRuler, isCourt, rulerLabel, playerById, announce, giveItem, claimOf, addClaim, seat, surfaceY, siegeNumber,
@@ -32,6 +32,13 @@ on("warlordSlain", ({ owner }) => {
 
 // ---------- Shardfall ----------
 
+const SHARD_LINES = [
+  (where) => `§5An ${CROWN.shard} has fallen ${where}. Whoever binds it strengthens their Claim on the throne.`,
+  (where) => `§5Something bright came down ${where} while the horns were still sounding. An ${CROWN.shard}, the old soldiers say.`,
+  (where) => `§5The sky gave up another ${CROWN.shard}, ${where}. The throne will be counting who goes looking.`,
+  (where) => `§5A light that isn't a star is burning ${where}. An ${CROWN.shard}, and it won't lie there long.`,
+];
+
 on("siegeEnd", () => {
   const c = crown();
   const s = seat();
@@ -51,7 +58,7 @@ on("siegeEnd", () => {
     const where = compass(player.location, spot);
     player.sendMessage(exact
       ? `§5Your people send word: an ${CROWN.shard} has fallen at ${spot.x}, ${spot.z} (${where.text}). The others will know in a minute.`
-      : `§5An ${CROWN.shard} has fallen ${where.text}. Whoever binds it strengthens their Claim on the throne.`);
+      : SHARD_LINES[siegeNumber() % SHARD_LINES.length](where.text));
     player.playSound("ambient.weather.thunder", { volume: 0.4 });
   };
   const early = (p) => (c.exiles[p.id]?.stage ?? 0) >= 3;
@@ -226,8 +233,9 @@ export function lordChallenge(lord) {
   const c = crown();
   const label = `${lord.title} ${lord.name}`;
   c.challenge = { claimant: lordId(lord.key), name: label, npc: true, declaredMs: Date.now(), missed: 0, stormed: false };
+  lord.tries = (lord.tries ?? 0) + 1; // each attempt comes differently (rules.js LORD_APPROACHES)
   saveCrown();
-  announce(`§4§l${label} has thrown down the Gauntlet!§r §4Their army marches on ${rulerLabel()}'s keep on the next siege night. If the keep falls, so does the throne.`, "raid.horn");
+  announce(`§4§l${label} has thrown down the Gauntlet!§r §4Their army marches on ${rulerLabel()}'s keep on the next siege night. If the keep falls, so does the throne. §7${lordApproach(lord.tries - 1).line}`, "raid.horn");
   const r = playerById(c.ruler.id);
   if (r) title(r, "§4You are challenged", `§7${label} comes for your throne on the next siege night`);
 }
@@ -430,6 +438,8 @@ function abandonTick() {
 export function banish(id, name) {
   const c = crown();
   c.exiles[id] = { name, stage: 0, until: siegeNumber() + CROWN.banishNights, pending: true };
+  c.exiledTimes ??= {};
+  c.exiledTimes[id] = (c.exiledTimes[id] ?? 0) + 1;
   c.claims[id] = CROWN.claimExileStart;
   saveCrown();
   const player = playerById(id);

@@ -22,12 +22,17 @@ export const isBuilder = (player) => player.getGameMode() === GameMode.Creative;
 let plots;
 
 export function allPlots() {
-  plots ??= JSON.parse(world.getDynamicProperty("siege:plots_registry") ?? "[]");
+  if (!plots) {
+    // Saved as { _v, plots }, the same version stamp moduleStore() uses. Older worlds saved the bare list: read that too.
+    const saved = JSON.parse(world.getDynamicProperty("siege:plots_registry") ?? "[]");
+    plots = Array.isArray(saved) ? saved : saved.plots ?? [];
+  }
   return plots;
 }
 
+const REGISTRY_VERSION = 1; // raise it, and upgrade older saves in allPlots(), whenever a plot's saved shape changes
 function savePlots() {
-  world.setDynamicProperty("siege:plots_registry", JSON.stringify(plots));
+  world.setDynamicProperty("siege:plots_registry", JSON.stringify({ _v: REGISTRY_VERSION, plots }));
 }
 
 export const mapMode = () => allPlots().length > 0;

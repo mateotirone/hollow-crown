@@ -17,20 +17,22 @@
 //
 // Other features: on("plotChosen", ({ player, plot }) => ...) fires the moment a player picks a plot, before
 // they arrive, so a first building can be raised for them. pickOf(plot) is in plots/api.js.
+// on("waystoneRead", ({ player }) => ...) fires each time a player closes the Waystone's "How things stand" page.
 
 import { world, system, ItemStack, GameMode } from "@minecraft/server";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
-import { isReady, keepOf, tierOf, on, emit, addFoundingCheck } from "../siege/api.js";
+import { isReady, keepOf, tierOf, on, emit, addFoundingCheck, addJoinStep } from "../siege/api.js";
 import { onTick } from "../core/loop.js";
 import { moduleStore } from "../core/store.js";
 import { PLOT_PLAN, REGION_STYLE, REGION_BLOCK, WELCOME, WARDS, PLOT_STONE, KEEP_BANNER, OVERWORLD } from "./config.js";
-import { allPlots, holderOf, npcOf, plotOf, isBuilder, compass, mapMode } from "./claims.js";
+import { allPlots, holderOf, npcOf, plotOf, isBuilder, compass, mapMode, releaseNpc } from "./claims.js";
 
 const store = moduleStore("siege:plots_welcome", () => ({ hall: null, test: null, kingsrest: null, picks: {} }));
 const ARRIVING = "siege_plots_arriving"; // on a player who is in the hall and has not chosen yet
 const WAYSTONE = "minecraft:lodestone";
 const FREE_LIGHT = "minecraft:sea_lantern";
 const TAKEN_BLOCK = "minecraft:polished_blackstone";
+const LORD_LIGHT = "minecraft:glowstone"; // run by a lord of the land: a newcomer can still choose it
 
 export const hallBuilt = () => !!store.data.hall;
 const overworld = () => world.getDimension(OVERWORLD);
@@ -90,7 +92,8 @@ export function pickOf(plot) {
   return found ? { id: found[0], name: found[1].name } : undefined;
 }
 
-// "free" | "taken" (a keep stands on it) | "kept" (chosen, no keep yet) | "lord" (an NPC lord) | "missing" (no stone yet)
+// "free" | "taken" (a keep stands on it) | "kept" (chosen, no keep yet) | "lord" (run by an NPC lord; a newcomer can
+// still choose it and inherits what the lord built) | "missing" (no stone yet)
 export function statusOf(plan) {
   const plot = plotFor(plan);
   if (!plot) return { state: "missing" };
@@ -99,7 +102,12 @@ export function statusOf(plan) {
   const pick = pickOf(plot);
   if (pick) return { state: "kept", plot, id: pick.id, name: pick.name };
   const npc = npcOf(plot);
-  if (npc) return { state: "lord", plot, name: npc.name };
+  if (npc) {
+    // Whoever runs the lords can say how far this one has built: on("plotLordQuery", (q) => { q.tier = "Town"; })
+    const q = { plot, npc };
+    emit("plotLordQuery", q);
+    return { state: "lord", plot, name: npc.name, tier: typeof q.tier === "string" ? q.tier : undefined };
+  }
   return { state: "free", plot };
 }
 
@@ -158,7 +166,7 @@ function writeSign(dim, x, y, z, rot, text) {
 function signText(plan, status) {
   if (status.state === "free") return `${plan.name}\n${plan.region}\n§2Free§r\nClick the stone`;
   if (status.state === "missing") return `${plan.name}\n${plan.region}\n§8Not on this\nmap yet`;
-  if (status.state === "lord") return `${plan.name}\n${plan.region}\n§4Held by§r\n${status.name}`;
+  if (status.state === "lord") return `${plan.name}\n${plan.region}\n§6Run by§r\n${status.name}`;
   return `${plan.name}\n${plan.region}\n§4${status.state === "kept" ? "Chosen by" : "Held by"}§r\n${status.name}`;
 }
 
@@ -217,7 +225,7 @@ function refreshHall() {
     const status = statusOf(p.plan);
     const top = dim.getBlock({ x: o.x + p.dx, y: o.y + 2, z: o.z + p.dz });
     if (!top) return; // nobody is up here, so the hall isn't loaded
-    const want = status.state === "free" ? FREE_LIGHT : TAKEN_BLOCK;
+    const want = status.state === "free" ? FREE_LIGHT : status.state === "lord" ? LORD_LIGHT : TAKEN_BLOCK;
     if (top.typeId !== want) top.setType(want);
     writeSign(dim, o.x + p.sx, o.y + 1, o.z + p.sz, p.rot, signText(p.plan, status));
   }
@@ -260,6 +268,8 @@ function storyPage(player, i = 0) {
   if (i < PAGES.length - 1) form.button("Next");
   form.button("Close");
   form.show(player).then((r) => {
+    // The journal is handed over once they have heard how things stand (the game being busy doesn't count as reading)
+    if (i === 0 && r.cancelationReason !== "UserBusy") emit("waystoneRead", { player });
     if (!r.canceled && i < PAGES.length - 1 && r.selection === 0) storyPage(player, i + 1);
   }).catch(() => {});
 }
@@ -294,17 +304,18 @@ function pedestalMenu(player, p) {
   ];
   const mine = store.data.picks[player.id];
   let canTake = false;
-  if (status.state === "free") {
-    if (mine) lines.push(`§2Free.§r You have already chosen ${mine.plot ?? "to start in Kingsrest"}.`);
-    else if (keepOf(player.id)) lines.push("§2Free.§r You already hold a settlement.");
+  if (status.state === "free" || status.state === "lord") {
+    // A lord of the land only keeps a place warm: a newcomer who chooses it is handed it as it stands
+    const lord = status.state === "lord";
+    const what = lord ? `§6Run by ${status.name}${status.tier ? ` (${status.tier})` : ""}.§r` : "§2Free.§r";
+    if (mine) lines.push(`${what} You have already chosen ${mine.plot ?? "to start in Kingsrest"}.`);
+    else if (keepOf(player.id)) lines.push(`${what} You already hold a settlement.`);
     else {
-      lines.push("§2Free.§r Nobody has taken it.");
+      lines.push(lord ? `${what} Choose it and they hand it over to you as it stands.` : `${what} Nobody has taken it.`);
       canTake = true;
     }
   } else if (status.state === "missing") {
     lines.push("§7This place is not on the map yet.");
-  } else if (status.state === "lord") {
-    lines.push(`§4Held by ${status.name}§r, one of the lords of the land. They will have to be dealt with on the ground.`);
   } else {
     lines.push(status.state === "kept" ? "§4Chosen by:" : "§4Held by:", describe(status.id, status.name));
   }
@@ -355,12 +366,13 @@ function arriveAt(player, plot, at) {
 function pick(player, plan) {
   // Somebody else may have clicked first while this player was reading
   const status = statusOf(plan);
-  if (status.state !== "free") return player.sendMessage(`§c${plan.name} was taken a moment ago. Choose another stone.`);
+  if (status.state !== "free" && status.state !== "lord") return player.sendMessage(`§c${plan.name} was taken a moment ago. Choose another stone.`);
   if (store.data.picks[player.id] || keepOf(player.id)) return;
   store.data.picks[player.id] = { plot: status.plot.name, name: player.name, day: Math.floor(world.getAbsoluteTime() / 24000) };
   store.save();
   player.removeTag(ARRIVING);
-  emit("plotChosen", { player, plot: status.plot });
+  emit("plotChosen", { player, plot: status.plot, lord: status.state === "lord" ? npcOf(status.plot) : undefined });
+  if (npcOf(status.plot)) releaseNpc(status.plot.name); // the lord steps down, if whoever runs the lords hasn't done it already
   if (WELCOME.bannerOnArrival) {
     const inv = player.getComponent("minecraft:inventory")?.container;
     let has = false;
@@ -375,7 +387,13 @@ function pick(player, plan) {
   for (const other of world.getPlayers()) {
     if (other.id !== player.id) other.sendMessage(`§6${player.name} has chosen ${status.plot.name} in ${status.plot.region}.`);
   }
-  player.sendMessage(`§6${status.plot.name} is yours to found. Raise your Keep Banner on the Plot Stone beside you. Kingsrest lies ${compass(status.plot, KINGSREST)}.`);
+  // Chat order on arrival: the plot's past (lore, at once), then what has been laid out (settlement), then this
+  // one clear next step, last, so it is the line left on screen.
+  const plotName = status.plot.name;
+  const toward = compass(status.plot, KINGSREST);
+  system.runTimeout(() => {
+    if (player.isValid) player.sendMessage(`§6Next: raise your Keep Banner on the Plot Stone beside you to found ${plotName}. Kingsrest lies ${toward}.`);
+  }, 160);
   player.onScreenDisplay.setTitle(`§6${status.plot.name}`, { subtitle: status.plot.region, fadeInDuration: 10, stayDuration: 70, fadeOutDuration: 20 });
   refreshHall();
 }
@@ -434,28 +452,34 @@ function toHall(player) {
 const mustChoose = (player) =>
   hallBuilt() && mapMode() && !isBuilder(player) && !store.data.picks[player.id] && !keepOf(player.id);
 
-world.afterEvents.playerSpawn.subscribe(({ player, initialSpawn }) => {
-  system.runTimeout(() => {
-    if (!isReady() || !player.isValid || !mapMode()) return;
-    if (mustChoose(player)) {
-      player.addTag(ARRIVING);
-      toHall(player);
-      if (initialSpawn) {
-        player.onScreenDisplay.setTitle("§6Aldmere", { subtitle: "Click the Waystone", fadeInDuration: 10, stayDuration: 80, fadeOutDuration: 20 });
-        player.sendMessage("§6Welcome to Aldmere. Click the Waystone in the middle to hear how things stand, then choose one of the stones on the rim as your start.");
-      }
-    } else if (initialSpawn && !hallBuilt() && !plotOf(player.id)) {
-      const free = allPlots().filter((p) => statusOf(p).state === "free").length;
-      player.sendMessage(`§6Welcome to Aldmere. ${free} of ${allPlots().length} plots are free. Ride the rails from Kingsrest, find a Plot Stone, and raise your Keep Banner on it.`);
-    }
-  }, 60);
-});
+// First join, step 20 of the join sequence (after the look picker, before the journal): up to the hall.
+addJoinStep(20, "welcome hall", async (player, { wait }) => {
+  if (!isReady() || !player.isValid || !mapMode()) return;
+  if (mustChoose(player)) {
+    player.addTag(ARRIVING);
+    toHall(player);
+    await wait(20); // let the hall load round them before the words appear
+    if (!player.isValid) return;
+    player.onScreenDisplay.setTitle("§6Aldmere", { subtitle: "Click the Waystone", fadeInDuration: 10, stayDuration: 80, fadeOutDuration: 20 });
+    player.sendMessage("§6Welcome to Aldmere. Click the Waystone in the middle to hear how things stand, then choose one of the stones on the rim as your start.");
+  } else if (!hallBuilt() && !plotOf(player.id)) {
+    const free = allPlots().filter((p) => ["free", "lord"].includes(statusOf(p).state)).length;
+    player.sendMessage(`§6Welcome to Aldmere. ${free} of ${allPlots().length} plots are free. Ride the rails from Kingsrest, find a Plot Stone, and raise your Keep Banner on it.`);
+  }
+}, { when: "first" });
 
 // Nobody leaves the hall without choosing, and nobody falls out of the sky
+const seenAt = new Map(); // player id -> tick the hold check first saw them
 onTick("plots_welcome_hold", 20, () => {
   if (!hallBuilt()) return;
   for (const player of world.getPlayers()) {
-    if (!player.hasTag(ARRIVING)) continue;
+    if (!player.hasTag(ARRIVING)) {
+      // Someone who was here before the hall existed and still has no home is brought up too, quietly, once
+      // they have been on for a minute (so this never cuts in front of the join sequence).
+      if (!seenAt.has(player.id)) seenAt.set(player.id, system.currentTick);
+      if (system.currentTick - seenAt.get(player.id) >= 1200 && mustChoose(player)) player.addTag(ARRIVING);
+      continue;
+    }
     if (!mustChoose(player)) player.removeTag(ARRIVING);
     else if (player.dimension.id !== OVERWORLD || !inHall(player.location)) toHall(player);
   }

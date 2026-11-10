@@ -4,7 +4,8 @@
 
 import { world, system, ItemStack } from "@minecraft/server";
 import { ActionFormData } from "@minecraft/server-ui";
-import { emit } from "../siege/api.js";
+import { emit, on, addJoinStep, addTests, assertEqual } from "../siege/api.js";
+import { mapMode } from "../plots/api.js";
 import { JOURNAL, JOURNAL_CLUES } from "./data/journal.js";
 import { REVEAL } from "./data/reveal.js";
 import { progressOf, saveProgress, giveItem, learnClues } from "./player.js";
@@ -65,20 +66,44 @@ world.afterEvents.itemUse.subscribe((event) => {
   readJournal(event.source).catch((e) => console.warn(`[Hollow Crown] journal: ${e}`));
 });
 
-// First time in the world: the journal is simply there.
-world.afterEvents.playerSpawn.subscribe(({ player, initialSpawn }) => {
-  if (!initialSpawn) return;
+// First time in the world: the journal is simply there. It is step 30 of the join sequence (core/firstjoin.js),
+// after the look picker (10) and the welcome hall (20), so it never lands on top of either.
+//   on a map with a welcome hall: once the player has read the Waystone's "How things stand"
+//   ("waystoneRead" { player } from the plots feature), or after 20 seconds if they walk past it
+//   with no hall (no Plot Stones on the map): 3 seconds after the picker
+export const JOURNAL_WAIT = { read: 400, noHall: 60, afterRead: 40 };
+export const journalWait = (hall) => (hall ? JOURNAL_WAIT.read : JOURNAL_WAIT.noHall);
+const readers = new Map(); // player id -> resolve, while the journal step is waiting on the Waystone
+on("waystoneRead", ({ player }) => readers.get(player?.id)?.());
+
+addJoinStep(30, "journal", async (player, { wait }) => {
   const p = progressOf(player);
-  if (p.flags.includes("journal_given")) return;
+  if (p.flags.includes("journal_given")) return; // worlds from before the join sequence gave it already
+  let hall = false;
+  try { hall = mapMode(); } catch { /* plots not ready: treat as no hall */ }
+  if (hall) {
+    const read = new Promise((resolve) => readers.set(player.id, () => resolve(true)));
+    const wasRead = await Promise.race([read, wait(journalWait(true))]);
+    readers.delete(player.id);
+    if (wasRead) await wait(JOURNAL_WAIT.afterRead); // let them close the Waystone first
+  } else {
+    await wait(journalWait(false));
+  }
+  if (!player.isValid) return; // left: the sequence runs again next time, and the flag is not set yet
   p.flags.push("journal_given");
   saveProgress(player);
-  system.runTimeout(() => {
-    if (player.isValid) giveJournal(player);
-  }, 100);
-});
+  giveJournal(player);
+}, { when: "first", timeout: 40 });
 
 system.afterEvents.scriptEventReceive.subscribe(({ id, sourceEntity: player }) => {
   if (id !== "siege:journal" || player?.typeId !== "minecraft:player") return;
   giveJournal(player, false);
   player.sendMessage("§aAnother copy of the Old King's Journal is in your pack.");
+});
+
+addTests("lore", {
+  "the journal waits for the Waystone, or 20 seconds, or 3 seconds with no hall": () => {
+    assertEqual(journalWait(true), 400);
+    assertEqual(journalWait(false), 60);
+  },
 });

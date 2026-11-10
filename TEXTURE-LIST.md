@@ -159,6 +159,10 @@ Look comes from Mateo's Undertow concept art: purple twilight, dark basalt, holl
 | Latticewood (see-through honeycomb wood of the giant trees, transparent holes) | `textures/blocks/siege_hollowwood_lattice.png` | **Final style, awaiting your review** |
 | Latticewood Core (same lattice with glowing pink-orange filling the holes) | `textures/blocks/siege_hollowwood_core.png` | **Final style, awaiting your review** |
 | Veilcap (glowing pink umbrella fungus, cross plant, transparent background) | `textures/blocks/siege_veilcap.png` | **Final style, awaiting your review** |
+| Veinstone Bricks (`siege:veinstone_bricks`, dark violet stone bricks: the Seat, bridges, the Truce Hall, the Far Door) | `textures/blocks/siege_veinstone_bricks.png` | Placeholder, textures thread is painting it |
+| Cracked Veinstone Bricks (`siege:cracked_veinstone_bricks`, same bricks with glowing violet cracks, scattered among the plain ones) | `textures/blocks/siege_cracked_veinstone_bricks.png` | Placeholder, textures thread is painting it |
+| Pale Ash (`siege:pale_ash`, pale grey ash covering the waste regions) | `textures/blocks/siege_pale_ash.png` | Placeholder, textures thread is painting it |
+| Glint Cluster (`siege:glint_cluster`, glowing blue crystal cluster, cross plant, transparent background) | `textures/blocks/siege_glint_cluster.png` | Placeholder, textures thread is painting it |
 | Glimbulb (pale blue glowing bulbs on thin stalks, cross plant) | `textures/blocks/siege_glimbulb.png` | **Final style, awaiting your review** |
 | Glimmerflow (river of pale blue light, semi-transparent) | `textures/blocks/siege_glimmerflow.png` | **Final style, awaiting your review.** Reworked from Mateo's light river reference (`art/reference/hollow-light-river.png`): 16-frame flipbook (16×256) by `studio/art/build_glimmerflow.py`, registered in `textures/flipbook_textures.json`. Animation not yet checked in game |
 | Strange Seam (cave rock with a thin violet crack down the middle) | `textures/blocks/siege_rift_seam.png` | **Final style, awaiting your review** |
