@@ -1,7 +1,7 @@
 import numpy as np, json, math
 t=np.load('terrain.npz'); Y=t['Y']; H=int(t['H']); N=int(t['N']); S=N/(2*H)
 L=json.load(open('lines.json'))
-PL={"Harrowford":(-470,-300),"Oakmere":(260,-480),"Thistledown":(300,130),"Wrenfield":(-200,220),"Rimeholt":(-520,-760),"Wolfcairn":(520,-1010),"Gullcliff":(-760,-560),"Tidewatch":(-560,650),"Reedmoor":(-230,560),"Lanternbog":(260,980),"Redmesa":(700,60),"Dunehold":(760,860)}
+PL={"Harrowford":(-470,-300),"Oakmere":(260,-480),"Thistledown":(300,130),"Wrenfield":(-200,220),"Frosthelm":(-520,-760),"Wolfcairn":(520,-1010),"Gullcliff":(-760,-560),"Tidewatch":(-560,650),"Reedmoor":(-230,560),"Lanternbog":(260,980),"Redmesa":(700,60),"Dunehold":(760,860)}
 def h(x,z):
     fx=(x+H)*S; fz=(z+H)*S; i=int(fx); j=int(fz); a=fx-i; b=fz-j
     return (Y[j,i]*(1-a)+Y[j,i+1]*a)*(1-b)+(Y[j+1,i]*(1-a)+Y[j+1,i+1]*a)*b

@@ -63,6 +63,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - The eighth old painting, the Forty-Second Portrait, is kept for the Burned Archive, and what its caption says changes once the story is over.
 
 ### Changed
+- The northern town is now called Rimehold wherever it shows (its protected-area message, the map and the character creator), and its frozen lake Hallowmere, following the naming pass. The Frostmarch plot once called Rimeholt is now Frosthelm, so the two are no longer one letter apart.
 - The moon has a hairline violet crack that shows more the fuller it is.
 - The Hollow bolt is a violet shard with a white-hot heart instead of a flat colour.
 - On the map a settlement's land is full size (60 blocks) from the day you arrive, and siege wins no longer grow it. Tiers still unlock wall levels, buildings and keep health. A Castle's keep now really has 600 health.
