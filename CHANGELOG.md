@@ -34,6 +34,8 @@ Everything merged to `main` since the last release goes here. Each pull request 
 
 - The Old King's Journal now arrives after the look picker and the welcome hall instead of at the same moment: once you have read "How things stand" on the Waystone, or after about 20 seconds.
 
+- The story now has one spine from any of the twelve plots: your plot's first book sends you to Sister Wren in Millbrook, your plot's mystery leads to your own region's boss, each regional boss leaves two leads in other regions, and the third one down points you at the Surveyor's Field Notes.
+
 ### Changed
 - The High Throne no longer repeats itself: each whisper the Heart gives is heard once per reign, a rival lord brings a different and bigger army every time they come back, a ruling lord never sends the same host twice running, Oath Shard news is worded differently each time, and a ruler banished a second time walks a shorter road back.
 - The "Who steps off the coach?" character menu is now the first thing a new player sees, and the welcome and the journal wait until it is answered or closed.
@@ -41,6 +43,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - Needs Bedrock 26.30 or newer.
 
 ### Fixed
+- Lanternbog's local mystery no longer asks you to type the name of the place below in the first chapter.
 - Joining for the first time now happens in one ordered sequence (look picker, welcome hall, journal) instead of several things appearing at once. Each part moves onto it as its own change lands.
 - The install guide and README now say the right Minecraft version: Bedrock 26.30 or newer.
 

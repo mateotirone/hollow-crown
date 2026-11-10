@@ -96,7 +96,7 @@ Mateo, 2026-11-10: every settlement needs its own lore and library, "so the game
 | Gullcliff | A beacon station | Proof Corvin could not have called the Host | Sails Without Wind (two winters) | Ines Marrow, Piers Gannet, Brother-Clerk Aldhelm |
 | Tidewatch | A tide-readers' house | The first Returned | The Last Post (the Returned) | Prior Benet, Brother Caedmon, Wat Tolley after |
 | Reedmoor | The Even Market, a ring of nine posts | Two worlds trading before the Bell | The Even Market (every third night) | The Reeve, Old Sedge, Friar Colm |
-| Lanternbog | A lantern house for the fen's lost | Slips, centuries before yours | The Loose Board (the Hollow) | Marn, Ilse Tarn, Wenna Sedge |
+| Lanternbog | A lantern house for the fen's lost | Slips, centuries before yours | The Loose Board (eleven years) | Marn, Ilse Tarn, Wenna Sedge |
 | Redmesa | The carver's yard of the forty statues | The faceless statues; one face survives | The Forty-First Stone (forty) | Maren Sard, Lord Sorrel, "Under the Bench" |
 | Dunehold | The Order's house of exiled copyists | The cover-up, from inside | The House at the Well ("On the Kingless Years") | Sister Imre, Prior Aubrey, Brother Osric |
 
@@ -229,7 +229,7 @@ In `lore/data/lords.js`: twelve **Rival Lords** (name, seat, region, one of six 
 
 ## The First Slip
 
-Early in Act I the player asks Sister Wren in Millbrook "Which clock was first?". She is cut off mid-sentence and the player Slips: about ten seconds at a lookout spot in the Hollow (a drowned town that is nothing like ours), then back, soaking wet. Wren's next conversation is her reaction: she counted nine heartbeats with the chair empty, and she has seen this once before, when her brother went and did not come back the same. She never names the place. The Ledger opens a mystery called "Where Was I?" that records what happened as a question. The player can only answer it (the Hollow) after finding the name in a tome.
+Early in Act I the player asks Sister Wren in Millbrook "Which clock was first?". She is cut off mid-sentence and the player Slips: about ten seconds at a lookout spot in the Hollow (the lookout on the Wound ledge: mist below with lights moving in it, no sky, one note; nothing like ours), then back, soaking wet. Wren's next conversation is her reaction: she counted nine heartbeats with the chair empty, and she has seen this once before, when her brother went and did not come back the same. She never names the place. The Ledger opens a mystery called "Where Was I?" that records what happened as a question. The player can only answer it (the Hollow) after finding the name in a tome.
 
 ## The seven thin places (build each one to match)
 
@@ -306,3 +306,14 @@ Rule for all lore text: anything a player can hear more than a few times needs a
 - One sealed door per region: rumor only. A moon door with no carving would do it (`moondoors.js` would need a carving that never opens).
 - A crossed-out name in Aldric's journal: NOT added. The journal "names nothing" by Mateo's ruling and its entry 11 is quoted word for word in the reveal, so this needs his say first.
 - A "Chronicle" book that gains a page each update: not built; needs Mateo's say (it would be a second starting book beside the journal).
+
+## The story spine: home boss first, then your order
+
+Mateo's pick on a decision card, 2026-11-10 (relayed by the whole-mod review). Data in `scripts/lore/data/spine.js`.
+
+1. **Every first book ends at Sister Wren.** Players land on their plot and never pass through Millbrook, so each plot's first local book has a last page in a newer hand that gives that plot's own reason to go to Millbrook and ask for her. It also puts Millbrook in the Ledger.
+2. **Your plot's mystery leads to your region's boss.** Solving it adds a closing paragraph and a lead: Vale to the Clockwork Reeve (Millbrook clock tower), Frostmarch to the Pale Huntsman (the lake at Rimehold), Saltreach to the Drowned Bride (the sunken chapel), Emberwaste to the Ash Seneschal (the Faceless Vault), Blackfen to the Mother of Changelings (the Witchroot Caves).
+3. **Each of the five leaves two leads, in two other regions,** as a scrap found on it, on top of its confession. Reeve: Rimehold lake and the lighthouse. Huntsman: the sunken chapel and Mag's hut. Bride: Sunscar and Mirelight. Seneschal: King's Barrow and Rimehold. Mother: the Faceless Vault and Crownhold. No two bosses send you to the same pair of regions.
+4. **Three down and the routes converge.** The third regional boss gives the first Surveyor's Field Note and says the three were "standing round" the cause. The six notes leave one thin place, and that is the Rift. (Three of five is the lore thread's number, not Mateo's.)
+
+Layers are kept: none of the new text names the Hollow, the truce, Edda or who leads. Lanternbog's mystery used to take "the Hollow" as its typed answer in the first chapter; it now asks how long Wenna Sedge was gone (eleven years).
