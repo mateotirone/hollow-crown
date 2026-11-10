@@ -4,8 +4,10 @@ import { addTests, assert, assertEqual } from "../core/tests.js";
 import {
   REACH, STAGES, LONG, AFTER, stageFor, capReach, nightKind, isSiegeKind, profile, openTime, waveTime, waveRole, waveShare,
   hollowCount, hollowShare, tideLull, pressureMult, clock, nextSiege, duskLine, troopMix, SHAPES, pickShape, WAVES, hourLine, HONOURS,
+  HOUR_LINES, HOUR_ACTS, DUSK_ACT, hourOmen, omenSide,
   musterGap, omenWait, duskSpeed, watchHint, watchBand, WATCH_HINTS,
 } from "./rules.js";
+import { ACTS } from "./omens.js";
 
 const none = { bosses: 0, choir: false, source: false };
 const count = (stageId, kinds, salt = 11) => {
@@ -186,6 +188,20 @@ addTests("reach", {
       for (const l of lines) assert(!/\d|day|night after|tomorrow/i.test(l), `"${l}" gives the date away`);
     }
     for (let d = 0; d < 20; d++) assert(watchHint(1, d) !== watchHint(1, d + 1), "never yesterday's line");
+  },
+  "every omen line has something that happens with it": () => {
+    assertEqual(HOUR_ACTS.length, HOUR_LINES.length, "one act per line");
+    assertEqual(new Set(HOUR_ACTS).size, HOUR_ACTS.length, "no act is used for two lines");
+    for (const id of [...HOUR_ACTS, DUSK_ACT]) assert(typeof ACTS[id] === "function", `no act called ${id}`);
+    for (let day = 5; day < 25; day++) {
+      const seen = new Set();
+      for (let hour = 1; hour <= 9; hour++) {
+        const omen = hourOmen(day, 3, hour);
+        assert(omen.id && !seen.has(omen.id), `day ${day} repeats ${omen.id} in one evening`);
+        seen.add(omen.id);
+      }
+      assert([0, 1, 2, 3].some((q) => Math.abs(omenSide(day, 3) - q * (Math.PI / 2)) < 1e-9), "the omens point at one of the four walls");
+    }
   },
   "no omen names what is coming": () => {
     for (const kind of ["counted", "stolen", "long", "muster"]) {
