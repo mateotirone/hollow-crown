@@ -30,15 +30,12 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - A player who takes over a Rival Lord's settlement starts where the lord left off: the same tier, town hall, buildings and wall. A newcomer can pick a lord's plot and the lord steps down. Everything inherited can be changed or pulled down.
 - Rival Lords build on the same mapped layout as players, facing the plot's gate, and raise settlement walls that keep pace with their tier.
 - Settlement walls vary: stone weathers in patches, towers stand at different heights, arrow slits and lanterns break up long runs, palisade stakes are uneven. Each settlement's wall is its own, and a rebuilt or repaired wall comes out the same.
-
 - Story characters greet you in four different ways instead of one, the dusk ravens have eight lines for each state, moon doors four, and traders have twelve more rumors. No line of lore is heard twice running.
 
 - The Vault under the Seat has a sealed door in its north wall. It does not open yet.
-
 - The Tree of Oaths opens as a real skill tree screen: skills in rings with lines between them. A button on its first page switches back to plain lists.
 - Rumor Board jobs no longer repeat: the board never offers the kind of job you just did, and one job in three ends with a twist. Ten named keepsakes to collect.
 - First join now runs in order: look picker, then the welcome hall, then the journal. After you pick a plot the last line in chat is your next step.
-
 - Four regional roles, each with its own branch of nine skills and five ranks: Dragon Rider (Emberwaste), Forgemaster (Frostmarch), Captain (Saltreach) and Witch (Blackfen). Raise a Stone Hall in a region's style and its role is offered to you at the Tree of Oaths.
 - The Old King's Journal now arrives after the look picker and the welcome hall instead of at the same moment: once you have read "How things stand" on the Waystone, or after about 20 seconds.
 - Mining villages in the Hollow now have something different going on each time you walk in: a rich seam, a Foreman's half price, a seat by the fire, a nest broken open in the mine, or a miner asking you to go and look at a place for them. The game's Storyteller picks, so the same thing never comes up twice running. Miners no longer repeat the line they said last.
@@ -47,8 +44,15 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - The story now has one spine from any of the twelve plots: your plot's first book sends you to Sister Wren in Millbrook, your plot's mystery leads to your own region's boss, each regional boss leaves two leads in other regions, and the third one down points you at the Surveyor's Field Notes.
 - The four regional roles (Dragon Rider, Forgemaster, Captain, Witch) each have a history, and their top four powers show a line of it in the Tree of Oaths.
 - A world currency backed by iron: the Regal and the Gold Regal (worth 64). The Moneyer swaps iron ingots for coins and back. Job NPCs (Farmer, Woodcutter, Quarryman, Smith, Fisher, Hunter, Herbalist) buy what you gather and sell supplies, with prices that differ by region. A Strongbox on the Keep Banner menu keeps coins safe. Sneak + use a Gold Regal to break it into 64 Regals, or a full stack of 64 to bind one.
+- The story now has one spine from any of the twelve plots: your plot's first book sends you to Sister Wren in Millbrook, your plot's mystery leads to your own region's boss, each regional boss leaves two leads in other regions, and the third one down points you at the Surveyor's Field Notes.
+- The four regional roles (Dragon Rider, Forgemaster, Captain, Witch) each have a history, and their top four powers show a line of it in the Tree of Oaths.
 
 ### Changed
+- The endless siege (the Long Night) now begins when the Rift is opened, not when the Choir falls. Thunderstorms roll in with each wave of it and clear between them.
+- Every settlement gets its own night when the army stops at 3:17 and something else walks out. It is no longer once per world.
+- The evening before a siege is long for a settlement's first three sieges, then shortens, and shortens again after six.
+- After the story, raids are sent by the rival towns at random, at their own hour, led by the lord by name.
+- Once the count can't be trusted, the night watch gives a hint ("The watch is uneasy tonight") and never a date.
 - The Warlord King's crown is no longer called the Hollow Crown anywhere. It is an iron crown with a shard of the Hollow set in it; his later phases are "On foot, the shard burning" and "The shard wakes".
 - Holding the Heart of the Hollow is now whispers only: the Heartbearer hears things and a few patches of grass die near the throne, but nothing ever harms them, changes them or makes them easier to unseat.
 - Each ruler names their own Citadel when they raise it or take it. Leave the name empty and it is Aldspire.

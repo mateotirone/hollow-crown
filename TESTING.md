@@ -363,14 +363,20 @@ In game (cheats on, a settlement founded, or `/scriptevent siege:showcase` first
 1. `/scriptevent siege:reach` shows the Reach, the stage and what tonight is.
 2. `/scriptevent siege:reach_night` makes tonight a siege night and jumps to just before the horn. Expect: the horn and war plan, then one wave an
    hour at seventeen past, the last at 3:17 with a bell and "3:17" on screen. `/scriptevent siege:reach_toll` jumps to 3:16.
-3. `/scriptevent siege:reach_stage 2` then `reach_night`: four waves, and at 3:17 the army stops and three Hollow soldiers walk out (once per world;
-   `/scriptevent siege:reach_glimpse` lets it happen again).
-4. `/scriptevent siege:reach_stage 3` and `4`: check the Keep Banner's "The night watch" button, the stolen nights (`reach_night stolen`), the knock
+3. `/scriptevent siege:reach_stage 2` then `reach_night`: four waves, and at 3:17 the army stops and three Hollow soldiers walk out. Every settlement
+   gets this once, on its own night; only players at that settlement are told. `/scriptevent siege:reach_glimpse` lets it happen again.
+4. `/scriptevent siege:reach_stage 3` and `4`: check the Keep Banner's "The night watch" button (at stage 3 and after the story it gives a
+   hint such as "The watch is uneasy tonight", never a day), the stolen nights (`reach_night stolen`), the knock
    (`reach_night probe`), the twists "The Fallen Rise" and "The Pull".
-5. `/scriptevent siege:reach_stage 5` then `reach_night`: the Long Night. Leave raiders alive past 5:00: "Dawn. They do not leave", then a tide every
-   two minutes. Kill everything between tides to break it. It should rain, and patrols should find you outside the settlement.
-6. `/scriptevent siege:reach_boss morvane`: everything stops ("The knocking has stopped"). `reach_night muster` for an after-story raid; the night
-   watch now offers Remembered Nights.
+5. `/scriptevent siege:reach_rift` (or opening the Rift for real) starts the Long Night; the Choir falling no longer does. Then `reach_night`. Leave
+   raiders alive past 5:00: "Dawn. They do not leave", then a tide every two minutes. Kill everything between tides to break it. A thunderstorm
+   should roll in with each wave and tide and clear about a minute later. Patrols should find you outside the settlement.
+6. `/scriptevent siege:reach_boss morvane`: everything stops ("The knocking has stopped"). After the story a rival town raids at random, two to
+   nine nights apart, at an hour of its own (no 3:17); `/scriptevent siege:reach` shows the day, `reach_night muster` forces one. With a Rival
+   Lord in the world the raid names them ("The banners of Ser Bram Holt, out of Wrenfield"). The night watch now offers Remembered Nights.
+9. The wait before the horn: a settlement's first three full sieges keep the whole evening of omens (about five minutes for three waves). After
+   that the evening visibly hurries (the sky moves faster) to about three minutes, and after six sieges to about ninety seconds. With several
+   settlements the newest one sets the pace.
 8. Variety: play three siege nights in a row (`reach_night` each evening). Each should have a different shape (named in chat after the
    night, and under "The night watch") and a different army. Let a captain live through a night you lose: the next full night it returns by name.
    Honours you earn appear in chat as "Night honour: ..." and under "The night watch".
@@ -379,7 +385,7 @@ In game (cheats on, a settlement founded, or `/scriptevent siege:showcase` first
    `/scriptevent siege:reach_set <0-100>` move the story by hand.
 
 Things I could not check offline: whether a dusk-to-midnight wait feels right, whether Hollow soldiers march on the keep heart like raiders do,
-the darkness and knockback effects, and the rain.
+the darkness and knockback effects, the storms, and how the hurried evening looks in the sky.
 
 ## Choirsteel gear (bestiary)
 
