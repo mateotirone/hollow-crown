@@ -250,6 +250,9 @@
   },
   "siege_choirsteel_hoe": {
    "textures": "textures/items/siege_choirsteel_hoe"
+  },
+  "siege_b_pretender_seal": {
+   "textures": "textures/items/bestiary/pretender_seal"
   }
  }
 }
