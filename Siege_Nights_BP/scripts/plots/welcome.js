@@ -17,7 +17,7 @@
 //
 // Other features: on("plotChosen", ({ player, plot }) => ...) fires the moment a player picks a plot, before
 // they arrive, so a first building can be raised for them. pickOf(plot) is in plots/api.js.
-// on("waystoneRead", ({ player }) => ...) fires each time a player opens the Waystone's "How things stand".
+// on("waystoneRead", ({ player }) => ...) fires each time a player closes the Waystone's "How things stand" page.
 
 import { world, system, ItemStack, GameMode } from "@minecraft/server";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
@@ -264,11 +264,12 @@ const PAGES = [
 
 function storyPage(player, i = 0) {
   const [title, body] = PAGES[i];
-  if (i === 0) emit("waystoneRead", { player }); // the journal is handed over once they have heard how things stand
   const form = new ActionFormData().title(title).body(body);
   if (i < PAGES.length - 1) form.button("Next");
   form.button("Close");
   form.show(player).then((r) => {
+    // The journal is handed over once they have heard how things stand (the game being busy doesn't count as reading)
+    if (i === 0 && r.cancelationReason !== "UserBusy") emit("waystoneRead", { player });
     if (!r.canceled && i < PAGES.length - 1 && r.selection === 0) storyPage(player, i + 1);
   }).catch(() => {});
 }
