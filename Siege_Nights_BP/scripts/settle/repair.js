@@ -15,6 +15,7 @@ import { isReady, getState, onTick, on, emit, damageMap, saveDamage, hitWall } f
 import { WALLS, WALL_LEVELS, wallColumns, columnKinds, repairCost, wallSeed } from "./walldata.js";
 import { wallOf, wallRising, palette, permFor } from "./walls.js";
 import { purse, charge, coins, lot } from "./wallet.js";
+import { sfx } from "../core/sfx.js";
 
 const OVERWORLD = "minecraft:overworld";
 const jobs = new Map(); // owner -> { cells, index, fix, missing, cracked, P, onDone, waited }
@@ -112,7 +113,7 @@ export function offerRepair(player, owner = player.id, { free = false } = {}) {
         onDone: (done) => {
           if (!player.isValid) return;
           player.sendMessage(`§aYour wall is mended: ${done.missing} blocks set back, ${done.cracked} made whole.${farNote(done)}`);
-          player.playSound("random.anvil_use");
+          sfx(player, "random.anvil_use");
         },
       });
       if (go !== true) player.sendMessage(`§c${go}`);

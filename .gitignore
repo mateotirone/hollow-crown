@@ -13,3 +13,7 @@ __pycache__/
 Thumbs.db
 .vscode/
 .idea/
+
+# Generated sound takes waiting to be installed (the converted .ogg in the pack is what is kept)
+sounds-inbox/*
+!sounds-inbox/README.md

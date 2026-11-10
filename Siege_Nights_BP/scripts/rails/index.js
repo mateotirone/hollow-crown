@@ -9,6 +9,7 @@ import { RAIL_SETTINGS as R, REGIONS, RAILS, RIDES, CARRIAGE, CARRIAGE_ITEM, nex
 import { stallMenu } from "../horses/index.js";
 import { isBuilder, give } from "../horses/menus.js";
 import "./tests.js";
+import { sfx } from "../core/sfx.js";
 
 export const STATION_POST = "hc:station_post";
 export const RAIL_DEPOT = "siege:rail_depot";
@@ -41,7 +42,7 @@ function discover(player, station, quiet) {
   player.setDynamicProperty(FOUND, JSON.stringify(found));
   if (!quiet) {
     title(player, `§6${station.name}`, `§7Station discovered · ${found.length} of ${stations().length}`);
-    player.playSound("random.orb");
+    sfx(player, "random.orb");
   }
   return true;
 }
@@ -152,7 +153,7 @@ function callCart(player, block, type = "minecraft:minecart") {
   const cart = block.dimension.spawnEntity(type, at);
   cart.addTag(CART_TAG);
   cart.setDynamicProperty("siege:rails_idle", system.currentTick);
-  player.playSound("random.click");
+  sfx(player, "random.click");
   say(player, type === CARRIAGE ? "§6A carriage rolls up to the platform. It seats four." : "§6A cart rolls up to the platform.");
 }
 
@@ -253,7 +254,7 @@ function travelTick() {
       if (dest && dest.id === here.id) {
         player.setDynamicProperty(DEST, undefined);
         title(player, `§6${here.name}`, "§7You have arrived.");
-        player.playSound("note.bell");
+        sfx(player, "note.bell");
         continue;
       }
       if (!fresh && cartOf(player) && player.getDynamicProperty("siege:rails_last") !== here.id) say(player, `§7Passing §f${here.name}`);

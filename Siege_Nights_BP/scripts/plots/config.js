@@ -82,6 +82,18 @@ export const WELCOME = {
   bannerOnArrival: true, // hand a Keep Banner to someone who picks a plot and has none
 };
 
+// The built-in biome each region is generated as. The resource pack restyles some of them: the Blackfen's
+// (mangrove_swamp) has black water, in Siege_Nights_RP/biomes/ and fogs/blackfen_fog.json. Keep each biome to one
+// region, because a restyle follows the biome wherever it appears. Rivers and pools inside the Blackfen must be
+// written as mangrove_swamp too (not river), or their water stays blue.
+export const REGION_BIOME = {
+  "Aldmere Vale": "minecraft:plains",
+  Frostmarch: "minecraft:ice_plains",
+  Saltreach: "minecraft:stone_beach",
+  Emberwaste: "minecraft:desert",
+  Blackfen: "minecraft:mangrove_swamp",
+};
+
 // What each region's pedestal is made of
 export const REGION_BLOCK = {
   "Aldmere Vale": "minecraft:mossy_stone_bricks",

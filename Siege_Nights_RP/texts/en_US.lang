@@ -289,3 +289,7 @@ item.siege:mire_heart.name=Mire Heart
 item.siege:warlords_brand.name=The Warlord's Brand
 item.siege:oath_of_oswin.name=The Kept Oath
 item.siege:crownless_mantle.name=Crownless Mantle
+entity.siege:job_npc.name=Tradesman
+tile.siege:veilcap_cap.name=Veilcap Cap
+tile.siege:veilcap_stem.name=Veilcap Stem
+tile.siege:veilmoss_strands.name=Veilmoss Strands

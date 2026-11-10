@@ -24,6 +24,7 @@ import { activeFights } from "../bestiary/bossCore.js";
 import { UNDERTOW_ID, UNDERTOW_LAYOUT as L } from "./layout.js";
 import { isBuilt } from "./builder.js";
 import { runCmd, say } from "./data.js";
+import { sfx } from "../core/sfx.js";
 
 export const SLIPS = {
   firstSeconds: 10,
@@ -93,7 +94,7 @@ export function startSlip(playerOrId, opts = {}) {
   // The sound cuts out and the screen snaps dark. The black hides the change of worlds.
   runCmd(player, "stopsound @s");
   runCmd(player, "camera @s fade time 0.15 1.6 0.8 color 0 0 0");
-  player.playSound("block.bell.hit", { volume: 0.6, pitch: 0.3 });
+  sfx(player, "block.bell.hit", { volume: 0.6, pitch: 0.3 });
   return true;
 }
 
@@ -119,13 +120,13 @@ function atmosphere(s) {
   const at = { x: l.x + Math.cos(a) * r, y: l.y + Math.random() * 2, z: l.z + Math.sin(a) * r };
   try {
     for (let h = 0; h < 3; h++) p.spawnParticle("minecraft:sculk_soul_particle", { x: at.x, y: at.y + h * 0.7, z: at.z });
-    if (s.t % 40 === 0) p.playSound(s.t % 80 ? "mob.warden.heartbeat" : "ambient.cave", { volume: 1, pitch: 0.6, location: at });
-    if (s.t === 60) p.playSound("ambient.weather.thunder", { volume: 0.5, pitch: 0.5 });
-    if (s.t === 100) p.playSound("block.bell.hit", { volume: 0.4, pitch: 0.3 }); // far off, something tolls
+    if (s.t % 40 === 0) sfx(p, s.t % 80 ? "mob.warden.heartbeat" : "ambient.cave", { volume: 1, pitch: 0.6, location: at });
+    if (s.t === 60) sfx(p, "ambient.weather.thunder", { volume: 0.5, pitch: 0.5 });
+    if (s.t === 100) sfx(p, "block.bell.hit", { volume: 0.4, pitch: 0.3 }); // far off, something tolls
     if (s.t === 30 || s.t === 130) {
       // Something huge, moving far below the ledge
       const below = { x: l.x, y: l.y - 25, z: l.z + 30 };
-      p.playSound("mob.ravager.roar", { volume: 2, pitch: 0.3, location: below });
+      sfx(p, "mob.ravager.roar", { volume: 2, pitch: 0.3, location: below });
       runCmd(p, "camerashake add @s 0.15 1.5 positional");
     }
   } catch { /* not loaded */ }
@@ -146,7 +147,7 @@ function sendBack(s, early) {
     p.setDynamicProperty(P_ORIGIN, undefined);
     p.setDynamicProperty(P_COUNT, (p.getDynamicProperty(P_COUNT) ?? 0) + 1);
     p.removeEffect("resistance");
-    p.playSound("random.orb", { volume: 0.3, pitch: 0.4 });
+    sfx(p, "random.orb", { volume: 0.3, pitch: 0.4 });
   } catch { /* player left mid-Slip: put back when they next join (see playerSpawn below) */ }
   emit("slipEnded", { player: p.id, id: s.id, early, tookItem });
 }
@@ -202,8 +203,8 @@ export function flicker(playerOrId, seconds = 3) {
   runCmd(p, `fog @s push ${FOG_ID} hc_flicker`);
   try {
     p.addEffect("darkness", ticks, { amplifier: 0, showParticles: false });
-    p.playSound("block.bell.hit", { volume: 0.5, pitch: 0.3 });
-    p.playSound("ambient.cave", { volume: 1, pitch: 0.5 });
+    sfx(p, "block.bell.hit", { volume: 0.5, pitch: 0.3 });
+    sfx(p, "ambient.cave", { volume: 1, pitch: 0.5 });
   } catch { /* gone */ }
   for (let t = 5; t < ticks; t += 10) {
     system.runTimeout(() => {
