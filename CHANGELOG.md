@@ -9,6 +9,8 @@ How versions work is in [`docs/RELEASING.md`](docs/RELEASING.md).
 Everything merged to `main` since the last release goes here. Each pull request that changes what players see adds a line under one of these headings.
 
 ### Added
+- Pretenders: after Morvane falls, claimants rise at the empty Seat in the Hollow every week or so. Each is generated (a name, one of three bodies, four powers out of nine, and a claim that changes how you must fight it) and the same one never comes twice. While one sits unchallenged the seep surges in the overworld. Each drops a Claimant's Seal with its name on it, plus Choirsteel.
+- The shape of a siege night now follows what the world has been through lately: after a run of hard fights the next night is likelier to be a strange or a waiting one. The story chapter now moves past chapter 2 as bosses fall.
 - The Rumor Board now takes its three daily jobs and its twists from the Storyteller, so jobs contrast with what you have been doing lately (quiet work after a fight, a mystery after a run of bounties) and twists turn up more evenly.
 - Choirsteel gear, made from the Hollow's ore: Helm, Cuirass, Greaves, Treads, Blade, Pick, Axe, Spade and Hoe. Each is crafted from its netherite piece, Choirsteel Ingots and a Gloamquill. Armour protects like netherite and lasts half again as long, and each piece does something of its own; the full set makes you Resonant (a fifth of all damage turned aside, four more hearts). The Blade's every fourth hit rings through nearby enemies. The Pick shows you the next ore, and can mine Choir Ore.
 - Bosses never use the same attack twice running while another is ready, and a boss you have already beaten comes back in one of five tempers (Hasty, Relentless, Unquiet, Attended, Wary), never the one it wore last time. Beating a temper for the first time gives a named keepsake.
@@ -36,11 +38,16 @@ Everything merged to `main` since the last release goes here. Each pull request 
 
 - Four regional roles, each with its own branch of nine skills and five ranks: Dragon Rider (Emberwaste), Forgemaster (Frostmarch), Captain (Saltreach) and Witch (Blackfen). Raise a Stone Hall in a region's style and its role is offered to you at the Tree of Oaths.
 - The Old King's Journal now arrives after the look picker and the welcome hall instead of at the same moment: once you have read "How things stand" on the Waystone, or after about 20 seconds.
+- Mining villages in the Hollow now have something different going on each time you walk in: a rich seam, a Foreman's half price, a seat by the fire, a nest broken open in the mine, or a miner asking you to go and look at a place for them. The game's Storyteller picks, so the same thing never comes up twice running. Miners no longer repeat the line they said last.
+
 
 - The four regional roles (Dragon Rider, Forgemaster, Captain, Witch) each have a history, and their top four powers show a line of it in the Tree of Oaths.
 
 ### Changed
 - Regional roles are now earned by a deed in their region instead of by raising a Stone Hall there: Forgemaster for bringing down the Pale Huntsman, Captain for the Drowned Bride, Witch for the Mother of Changelings, and Dragon Rider when your first dragon hatches.
+- Holding the Heart of the Hollow is now whispers only: the Heartbearer hears things and a few patches of grass die near the throne, but nothing ever harms them, changes them or makes them easier to unseat.
+- Each ruler names their own Citadel when they raise it or take it. Leave the name empty and it is Aldspire.
+- The Hollow looks less busy: Veinstone is quieter and comes in four mixed variants, Choir Ore shows big bright crystals, Latticewood is an uneven honeycomb and Veilmoss grows in soft clumps. Veinstone Bricks, Pale Ash and the Glint Cluster have their real art.
 - The High Throne no longer repeats itself: each whisper the Heart gives is heard once per reign, a rival lord brings a different and bigger army every time they come back, a ruling lord never sends the same host twice running, Oath Shard news is worded differently each time, and a ruler banished a second time walks a shorter road back.
 - The "Who steps off the coach?" character menu is now the first thing a new player sees, and the welcome and the journal wait until it is answered or closed.
 - The add-on is renamed from Siege Nights to The Hollow Crown. The install file is `hollow-crown.mcaddon`. Existing ids keep the `siege:` prefix.
