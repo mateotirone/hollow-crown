@@ -12,7 +12,7 @@
 
 export const PLOT_REGION = {
   Harrowford: "Aldmere Vale", Oakmere: "Aldmere Vale", Thistledown: "Aldmere Vale", Wrenfield: "Aldmere Vale",
-  Rimeholt: "Frostmarch", Wolfcairn: "Frostmarch", Gullcliff: "Saltreach", Tidewatch: "Saltreach",
+  Frosthelm: "Frostmarch", Wolfcairn: "Frostmarch", Gullcliff: "Saltreach", Tidewatch: "Saltreach",
   Reedmoor: "Blackfen", Lanternbog: "Blackfen", Redmesa: "Emberwaste", Dunehold: "Emberwaste",
 };
 
@@ -22,7 +22,7 @@ export const WREN_NOTES = {
   Oakmere: "If you hear singing in this wood and it is not wind, do not sit in the cellar about it. Go to Millbrook and ask for Sister Wren. She has a way of looking at people who have heard it. She looked at me.",
   Thistledown: "The frame on the down hums on some nights with no bell in it. I walked to Millbrook, where no bell is ever rung, to ask why. A Sister Wren at the chapel gave me soup and told me to come back when I was ready to hear it. I never went back.",
   Wrenfield: "Wren Water is named for a family, not a bird. The last of them I know of is Sister Wren, who keeps the chapel at Millbrook. If you have questions about who lived in this house, hers is the family that was paid not to answer them.",
-  Rimeholt: "A carter who buys our copper says there is a village in the Vale called Millbrook where they have taken down every bell and it is always dark. He says the healer, Sister Wren, asked him what we cast here. He would not tell me what he answered.",
+  Frosthelm: "A carter who buys our copper says there is a village in the Vale called Millbrook where they have taken down every bell and it is always dark. He says the healer, Sister Wren, asked him what we cast here. He would not tell me what he answered.",
   Wolfcairn: "A woman came up from the Vale to read these stones. Sister Wren, of Millbrook. She said the thing our people heard under the ice is heard in her village too, from the well. She left before the third night and told us to send anyone who asked.",
   Gullcliff: "The grey ships came for something that was never on this coast. A healer who walks the shore road each spring, Sister Wren of Millbrook, says it was under her village the whole time. She does not say it as a boast.",
   Tidewatch: "If one of yours comes back from the sea kinder than they left, do not send for a priest. Send to Millbrook for Sister Wren. She will not cure it. She will tell you how to live in the house.",

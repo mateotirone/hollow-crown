@@ -11,6 +11,7 @@ import { DRAGON_SETTINGS as S, DRAGON, addXp, addBond, flightTicks, bar, species
 import { dragonOf, ownerIdOf, valid, save, setFlying, isFlying, canHarness } from "./dragon.js";
 import { speak, noise } from "./voice.js";
 import { refusal, tell } from "./mind.js";
+import { sfx } from "../core/sfx.js";
 
 let crashed = () => {}; // set by index.js: what happens when a shot-down dragon hits the ground
 export const onCrash = (fn) => (crashed = fn);
@@ -151,7 +152,7 @@ export function announceLevel(player, rec) {
   player.onScreenDisplay.setTitle(`§6${rec.name} reached level ${rec.level}`, {
     subtitle: "§7A training point to spend at your Roost", fadeInDuration: 10, stayDuration: 60, fadeOutDuration: 20,
   });
-  player.playSound("random.levelup");
+  sfx(player, "random.levelup");
   save();
 }
 
@@ -199,7 +200,7 @@ export function flightTick() {
       } else if (ride.airTicks > 30 && !press && nearGround(entity)) land(entity, rec, "ground");
       else if (!ride.warned && ride.stamina < max * 0.25) {
         ride.warned = true;
-        pilot.playSound("note.bass");
+        sfx(pilot, "note.bass");
       }
     } else {
       ride.stamina = Math.min(max, ride.stamina + STEP * S.restFactor);
@@ -273,7 +274,7 @@ export function defenceTick() {
         const b = ballista.location;
         ballista.setRotation({ x: 0, y: (Math.atan2(-(at.x - b.x), at.z - b.z) * 180) / Math.PI });
         dim.runCommand(`playanimation @e[type=${BALLISTA},r=0.5,x=${b.x},y=${b.y},z=${b.z}] animation.siege_ballista.fire`);
-        dim.playSound("crossbow.shoot", b, { volume: 2, pitch: 0.6 });
+        sfx(dim, "crossbow.shoot", b, { volume: 2, pitch: 0.6 });
       } catch {
         // looks only
       }
@@ -294,7 +295,7 @@ export function defenceTick() {
     }
     if (!valid(entity)) continue;
     if (bolts) {
-      pilot.playSound("random.anvil_land", { volume: 0.6, pitch: 1.4 });
+      sfx(pilot, "random.anvil_land", { volume: 0.6, pitch: 1.4 });
       pilot.sendMessage(`§c${keepOf(lord)?.name ?? "The settlement"}'s ballista hits ${rec.name}!`);
     }
     if (ride.stamina <= 0) {

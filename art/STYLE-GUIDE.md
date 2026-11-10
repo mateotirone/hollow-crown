@@ -16,7 +16,7 @@
 | Region | Stone | Wood | Accent | Mood |
 |---|---|---|---|---|
 | The Vale (Millbrook), the default | warm grey | oak | banner red | warm, homely farmland |
-| Frostmarch (Hollowfast) | blue-grey, pale highlights | spruce | ice blue | cold, blue shadows |
+| Frostmarch (Rimehold) | blue-grey, pale highlights | spruce | ice blue | cold, blue shadows |
 | Saltreach (Gull's Rest) | sandy limestone | bleached driftwood | sea-glass teal | sun-bleached coast |
 | Emberwaste (Sunscar) | scorched red rock | charred timber | ember orange | cinders and heat |
 | Blackfen (Mirelight) | dark moss-green stone | dark bogwood | sickly green glow | drowned and overgrown |

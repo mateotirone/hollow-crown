@@ -6,6 +6,7 @@ import { emit, applyFilter } from "../core/events.js";
 import { COLORS, WRIT } from "./constants.js";
 import { saveState, state } from "./state.js";
 import { title } from "./util.js";
+import { sfx } from "../core/sfx.js";
 
 // ---------- Settlement growth: Hamlet → Town → City ----------
 // Every siege your keep survives counts as a win. Wins grow your settlement.
@@ -45,7 +46,7 @@ export function recordWin(owner) {
     if (p.id === owner) {
       const grew = landRadius(keep, owner) === after.radius && after.radius !== before.radius;
       title(p, `§6Your ${before.name} is now a ${after.name}!`, grew ? `§7Your land reaches ${after.radius} blocks and your keep is tougher` : "§7Your keep is tougher, and there is more to build");
-      p.playSound("ui.toast.challenge_complete");
+      sfx(p, "ui.toast.challenge_complete");
     } else {
       p.sendMessage(`§6${keep.name}'s ${before.name} has grown into a ${after.name}!`);
     }
@@ -74,7 +75,7 @@ export function useWrit(player) {
     keep.allies.push(target.id);
     player.sendMessage(`§6${target.name} is now your ally and can build on your land.`);
     target.sendMessage(`§6${player.name} has made you an ally. You can build on their land.`);
-    player.playSound("random.levelup");
+    sfx(player, "random.levelup");
   }
   saveState();
 }

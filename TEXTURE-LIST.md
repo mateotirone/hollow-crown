@@ -166,6 +166,9 @@ Look comes from Mateo's Undertow concept art: purple twilight, dark basalt, holl
 | Cracked Veinstone Bricks (`siege:cracked_veinstone_bricks`, same bricks with glowing violet cracks, scattered among the plain ones) | `textures/blocks/siege_cracked_veinstone_bricks.png` | Placeholder, textures thread is painting it |
 | Pale Ash (`siege:pale_ash`, pale grey ash covering the waste regions) | `textures/blocks/siege_pale_ash.png` | Placeholder, textures thread is painting it |
 | Glint Cluster (`siege:glint_cluster`, glowing blue crystal cluster, cross plant, transparent background) | `textures/blocks/siege_glint_cluster.png` | Placeholder, textures thread is painting it |
+| Veilcap Cap (`siege:veilcap_cap`, new 2026-11-10: the glowing pink cap of a giant Veilcap, full block, soft spots of paler pink) | `textures/blocks/siege_veilcap_cap.png` | **Final style, awaiting your review** (`studio/art/build_veilcap.py`) |
+| Veilcap Stem (`siege:veilcap_stem`, new 2026-11-10: pale lilac-white stem of a giant Veilcap, full block, faint vertical ribs) | `textures/blocks/siege_veilcap_stem.png` | **Final style, awaiting your review** (`studio/art/build_veilcap.py`) |
+| Veilmoss Strands (`siege:veilmoss_strands`, new 2026-11-10: magenta moss hanging in strands of uneven length from the top of the tile, cross plant, transparent background, tiles downward) | `textures/blocks/siege_veilmoss_strands.png` | **Final style, awaiting your review** (`studio/art/build_veilcap.py`) |
 | Glimbulb (pale blue glowing bulbs on thin stalks, cross plant) | `textures/blocks/siege_glimbulb.png` | **Final style, awaiting your review** |
 | Glimmerflow (river of pale blue light, semi-transparent) | `textures/blocks/siege_glimmerflow.png` | **Final style, awaiting your review.** Reworked from Mateo's light river reference (`art/reference/hollow-light-river.png`): 16-frame flipbook (16×256) by `studio/art/build_glimmerflow.py`, registered in `textures/flipbook_textures.json`. Animation not yet checked in game |
 | Strange Seam (cave rock with a thin violet crack down the middle) | `textures/blocks/siege_rift_seam.png` | **Final style, awaiting your review** |
@@ -201,15 +204,15 @@ Icons and blocks are painted. The horse coats further down are still to do. Keep
 | Train Carriage (64×64 atlas of 16×16 swatches: planks, dark floor wood, iron, red bench cloth, wheel, lantern glow) with 3D model `models/entity/carriage.geo.json` (open four-seat wagon: floor, walls, iron top rail, two benches, lantern post, four wheels; the model is a blocky first pass and can be reshaped, keep the identifier `geometry.siege_carriage`) | `textures/entity/siege/carriage.png` | **Final style, awaiting your review** (`studio/art/build_dragon_art.py`, `build_carriage()`) |
 | Train Carriage icon (16×16, transparent) | `textures/items/horses/siege_train_carriage.png` | **Final style, awaiting your review** (`studio/art/build_dragon_art.py`, `build_carriage()`) |
 
-**Still needed, no file yet (the steed uses vanilla horse art until then).** Each is a 64×64 horse texture in the vanilla `horse2` layout; add the path to `entity/steed.entity.json` when painted.
+**Painted and wired 2026-11-10.** Each is a 64×64 horse texture in the vanilla `horse2` layout, listed in `entity/steed.entity.json` (written by `studio/build_horses.py`). Breed coats sit on the markings layer over a vanilla coat, which supplies the saddle and tack. Common horses made with a Halter keep their vanilla coat.
 
 | Asset | Suggested file | Status |
 |---|---|---|
-| Five breed coats: Vale Courser (bright chestnut, white blaze), Frostmarch Destrier (heavy white-grey, feathered legs), Saltreach Runner (dapple grey, sea-salt mane), Emberwaste Sandstrider (pale gold), Blackfen Mire-Pony (black-brown, shaggy) | `textures/entity/siege/steed_<breed>.png` | Needed (now: vanilla coat colors) |
-| Crossbred coat (piebald mix) | `textures/entity/siege/steed_crossbred.png` | Needed (now: a parent's vanilla coat) |
-| Knight Warhorse overlay (armored chamfron and crinet, heavier build) | `textures/entity/siege/steed_warhorse.png` | Needed (now: just 12% bigger) |
-| Glimstrider (spectral pale blue-white, hollow eyes, needs transparency) | `textures/entity/siege/steed_hollow.png` | Needed (now: a pale wash over the normal coat) |
-| Caparison worn layer (armor layer, white cloth so the banner color tints it) | `textures/entity/siege/steed_caparison.png` | Needed (now: tinted vanilla leather horse armor) |
+| Five breed coats: Vale Courser (bright chestnut, white blaze), Frostmarch Destrier (heavy white-grey, feathered legs), Saltreach Runner (dapple grey, sea-salt mane), Emberwaste Sandstrider (pale gold), Blackfen Mire-Pony (black-brown, shaggy) | `textures/entity/siege/steed_vale.png`, `steed_frostmarch.png`, `steed_saltreach.png`, `steed_emberwaste.png`, `steed_blackfen.png` | **Final style, awaiting your review** (`studio/art/build_steeds.py`), wired into `steed.entity.json` |
+| Crossbred coat (piebald mix) | `textures/entity/siege/steed_crossbred.png` | **Final style, awaiting your review** (`studio/art/build_steeds.py`), wired into `steed.entity.json` |
+| Knight Warhorse overlay (armored chamfron and crinet, heavier build) | `textures/entity/siege/steed_warhorse.png` | **Final style, awaiting your review** (`studio/art/build_steeds.py`), wired into `steed.entity.json` |
+| Glimstrider (spectral pale blue-white, hollow eyes, needs transparency) | `textures/entity/siege/steed_hollow.png` | **Final style, awaiting your review** (`studio/art/build_steeds.py`), wired into `steed.entity.json` |
+| Caparison worn layer (armor layer, white cloth so the banner color tints it) | `textures/entity/siege/steed_caparison.png` | **Final style, awaiting your review** (`studio/art/build_steeds.py`), wired into `steed.entity.json` |
 | Horseshoes and saddle kits on the horse (optional small overlays on hooves and saddle) | `textures/entity/siege/steed_gear_<kit>.png` | Optional |
 
 ## Lore, tomes and library (final art by `studio/art/build_hc_items.py` and `build_hc_blocks.py`; run `studio/build_lore.py` only with `--no-art`)
@@ -294,7 +297,7 @@ Every mob has a box model in `models/entity/bestiary/<id>.geo.json` and a genera
 | Warlord (Mob) | `hollow_warlord.png` | 128×128 | House style, generated |
 | Rime Pillar (Fight prop, ghost (alpha)) | `rime_pillar.png` | 128×128 | House style, generated |
 | Chapel Bell (Fight prop) | `chapel_bell.png` | 64×64 | House style, generated |
-| Hollow Bolt (Projectile) | `hollow_bolt.png` | 64×32 | House style, generated |
+| Hollow Bolt (Projectile) | `hollow_bolt.png` | 64×32 | **Final style** (`studio/art/build_bolt.py`) |
 
 ### Bestiary items (16×16, in `textures/items/bestiary/`)
 
@@ -422,14 +425,14 @@ Painted by `studio/art/build_gates.py` and `studio/art/build_walls.py`. Final st
 ## Menu skin (proposal, 2026-11-10)
 Painted by `studio/art/build_ui.py`. Not wired: needs `ui/` JSON files in the resource pack and an in-game check.
 - `textures/ui/hc/panel.png`, `button.png`, `button_hover.png`, `slot.png`, `slot_hover.png`, `parchment.png`: first pass
-- `textures/ui/hc/coin.png`: stand-in until the currency is designed
+- `textures/ui/hc/coin.png`: the Regal at 8x8, painted (`studio/art/build_coins.py`)
 - Mock-up screens: `art/ui/mockup_mason.png`, `mockup_townhall.png`, `mockup_npc.png` (and `mockups.png`)
 
 ## Economy (2026-11-10)
 Written by `studio/build_economy.py` (never overwrites a PNG that exists).
 - `textures/items/siege_coin.png` (the Regal: iron-grey coin with the old king's crowned head): painted (`studio/art/build_coins.py`)
 - `textures/items/siege_gold_coin.png` (the Gold Regal, worth 64): painted
-- Job NPCs (Farmer, Woodcutter, Quarryman, Smith, Fisher, Hunter, Herbalist, Moneyer) use built-in NPC skins for now: own skins wanted
+- Job NPCs (Farmer, Woodcutter, Quarryman, Smith, Fisher, Hunter, Herbalist, Moneyer): painted skins `textures/entity/siege/npc/job_<name>.png`, worn by the `siege:job_npc` entity (wired 2026-11-10, not seen in game yet)
 
 ## Leader portraits (2026-11-10)
 Brief by the lore thread in `studio/art/PORTRAIT-BRIEF.md`; painted by `studio/art/build_portraits.py` (first pass, awaiting Mateo's review).
@@ -449,3 +452,16 @@ The Texture Studio now lists every PNG under `textures/` automatically (catch-al
 Painted by `studio/art/build_skill_icons.py`, which reads the skill ids from `Siege_Nights_BP/scripts/townhall/skills.js` so new skills get an icon on the next run (add a glyph to `PICK` first).
 - `textures/ui/hc/skill/<skill id>.png`: 85 icons, 16x16, one glyph per skill, coloured by branch. Not wired: the tree still shows the node state frames (`node_*.png`); the town hall thread decides how to use them.
 - Sheet: `art/skill-icons.png`
+Still stand-ins: 49 skill icons, a left-handed Standing Rank, real models for the three reveal-scene actors.
+
+Job NPC skins (Farmer, Woodcutter, Quarryman, Smith, Fisher, Hunter, Herbalist, Moneyer): painted 2026-11-10 at `textures/entity/siege/npc/job_<name>.png` (64×64, villager layout, `studio/art/build_job_npcs.py`). **Final style, awaiting your review**, not wired yet: the job NPCs still use stock NPC skins.
+The Texture Studio now lists every PNG under `textures/` automatically (catch-all at the end of `studio/build_manifest.py`).
+
+## Missing art, batch 2 (2026-11-10, `studio/art/build_missing2.py`)
+
+| Asset | File | Status |
+|---|---|---|
+| Roof shingles per region (Vale blue slate, Frostmarch frosted dark slate, Saltreach driftwood shakes, Emberwaste fired clay, Blackfen mossy thatch) | `textures/blocks/regional/siege_roof_shingles_<region>.png` | **Final style, awaiting your review.** Not wired as blocks; all regions still use `siege_roof_shingles.png` |
+| Particle sheet (32×16, eight 8×8 sprites: mote, vein spark, glint, ash flake, spore, sung note, ember, moss drip) | `textures/particle/hc_particles.png` | **Final style, awaiting your review** |
+| Seven particle effects: `siege:hollow_mote`, `vein_spark`, `glint`, `pale_ash`, `veil_spore`, `choir_ring`, `moss_drip` | `particles/<name>.particle.json` | Written, untested in game, nothing spawns them yet |
+| The moon (128×64, vanilla phase layout): a hairline violet crack that shows more the fuller the moon is | `textures/environment/moon_phases.png` | **Final style, awaiting your review.** Replaces the vanilla moon everywhere |

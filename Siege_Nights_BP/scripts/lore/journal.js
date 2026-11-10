@@ -9,6 +9,7 @@ import { mapMode } from "../plots/api.js";
 import { JOURNAL, JOURNAL_CLUES } from "./data/journal.js";
 import { REVEAL } from "./data/reveal.js";
 import { progressOf, saveProgress, giveItem, learnClues } from "./player.js";
+import { sfx } from "../core/sfx.js";
 
 export const JOURNAL_ITEM = "siege:kings_journal";
 
@@ -23,7 +24,7 @@ export function giveJournal(player, announce = true) {
   giveItem(player, makeJournal());
   if (announce) {
     player.sendMessage("§6There is an old journal in your pack.§r §7You do not remember putting it there. Use it to read it, or don't.");
-    player.playSound("item.book.page_turn");
+    sfx(player, "item.book.page_turn");
   }
 }
 

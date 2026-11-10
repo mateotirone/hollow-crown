@@ -13,8 +13,10 @@
 import { world, system, GameMode } from "@minecraft/server";
 import { on, addTests, assert, assertEqual } from "../siege/api.js";
 import { plotAt } from "../plots/api.js";
-import { PICS, LEADERS, GALLERY, picIndex, leaderPics } from "./data/portraits.js";
+import { PICS, LEADERS, GALLERY, picIndex, leaderPics, captionOf, OPEN_PLATES } from "./data/portraits.js";
+import { progressOf } from "./player.js";
 import { PLOT_NAMES, slugOf } from "./data/plots.js";
+import { sfx } from "../core/sfx.js";
 
 export const PORTRAIT = "siege:portrait";
 const WIDTH = [1, 3, 2]; // blocks wide, by size
@@ -38,7 +40,7 @@ export function againstWall(at, yaw) {
   return { x: at.x + 0.5 - f.x * 0.46, y: at.y, z: at.z + 0.5 - f.z * 0.46, yaw: f.yaw };
 }
 // Which of the eight old paintings hangs over each Library's door: the one nearest that plot's own story
-export const PLOT_PAINTING = { Harrowford: 3, Oakmere: 7, Thistledown: 5, Wrenfield: 4, Rimeholt: 5, Wolfcairn: 2, Gullcliff: 2, Tidewatch: 7, Reedmoor: 1, Lanternbog: 6, Redmesa: 4, Dunehold: 6 };
+export const PLOT_PAINTING = { Harrowford: 3, Oakmere: 7, Thistledown: 5, Wrenfield: 4, Frosthelm: 5, Wolfcairn: 2, Gullcliff: 2, Tidewatch: 7, Reedmoor: 1, Lanternbog: 6, Redmesa: 4, Dunehold: 6 };
 
 export function hang(dimension, spot, index) {
   const pic = PICS[index];
@@ -53,8 +55,8 @@ export function hang(dimension, spot, index) {
 function describe(player, entity) {
   const pic = PICS[entity.getProperty("siege:pic")];
   if (!pic) return;
-  player.sendMessage(`§6${pic.title}§r\n§8${pic.sub}\n§7§o${pic.line}`);
-  player.playSound("item.book.page_turn", { pitch: 0.8 });
+  player.sendMessage(`§6${pic.title}§r\n§8${pic.sub}\n§7§o${captionOf(pic, progressOf(player).flags)}`);
+  sfx(player, "item.book.page_turn", { pitch: 0.8 });
 }
 world.afterEvents.playerInteractWithEntity.subscribe(({ player, target }) => {
   if (target?.typeId === PORTRAIT) describe(player, target);
@@ -94,7 +96,7 @@ system.afterEvents.scriptEventReceive.subscribe(({ id, message, sourceEntity: pl
   if (!arg || arg === "list") return player.sendMessage(`§7Pictures: ${PICS.map((p) => p.id).join(", ")}\n§7Or a plot name, or "gallery".`);
   if (player.getGameMode() !== GameMode.Creative) return player.sendMessage("§cOnly a builder in creative can hang pictures.");
   const plot = PLOT_NAMES.find((n) => slugOf(n) === slugOf(arg));
-  const list = plot ? leaderPics(plot).map((p) => p.index) : arg === "gallery" ? GALLERY.map((_, i) => picIndex(`plate_${i + 1}`)) : [picIndex(arg)];
+  const list = plot ? leaderPics(plot).map((p) => p.index) : arg === "gallery" ? OPEN_PLATES.map((n) => picIndex(`plate_${n}`)) : [picIndex(arg)];
   if (list.some((i) => i < 0)) return player.sendMessage(`§cNo picture called "${arg}". Try /scriptevent siege:portrait list`);
   const hit = player.getBlockFromViewDirection({ maxDistance: 8 });
   const first = hit && hangSpot(hit.block.location, hit.face);
@@ -106,9 +108,18 @@ system.afterEvents.scriptEventReceive.subscribe(({ id, message, sourceEntity: pl
     offset += w + 1;
   }
   player.sendMessage(`§aHung ${list.length} picture${list.length === 1 ? "" : "s"}. Click one to read it. Punch it in creative to take it down.`);
+  if (arg === "gallery") player.sendMessage("§7The eighth painting (plate_8, the Forty-Second Portrait) is left out on purpose. Hang it only in the Burned Archive: /scriptevent siege:portrait plate_8");
+  if (arg === "plate_8") player.sendMessage("§eBuilder note: this one belongs in the Burned Archive and nowhere a new player can walk to.");
 });
 
 addTests("lore", {
+  "paintings: seven hang openly, the eighth only late, and it only says whose it is after the end": () => {
+    assertEqual(OPEN_PLATES, [1, 2, 3, 4, 5, 6, 7]);
+    for (const plate of Object.values(PLOT_PAINTING)) assert(OPEN_PLATES.includes(plate), `a Library hangs plate ${plate}`);
+    const last = PICS[picIndex("plate_8")];
+    assert(!/Oswin|Morvane/.test(captionOf(last, ["wren_met"])) && /Oswin/.test(captionOf(last, ["morvane_fallen"])));
+    for (const pic of PICS) if (pic.id !== "plate_8") assertEqual(captionOf(pic, ["morvane_fallen"]), pic.line);
+  },
   "portraits: every plot has three prior leaders, and no portrait gives the ending away": () => {
     assertEqual(Object.keys(LEADERS).sort(), [...PLOT_NAMES].sort());
     for (const [plot, people] of Object.entries(LEADERS)) {

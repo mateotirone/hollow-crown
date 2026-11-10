@@ -89,4 +89,5 @@ textures/ui/hc/skill/wing_heart.png
 textures/ui/hc/skill/wing_heat.png
 textures/ui/hc/skill/wing_scale.png
 textures/ui/hc/skill/wing_wyrmfire.png
+textures/entity/siege/bestiary/hollow_bolt.png
 textures/entity/siege/bestiary/omen_raven.png
