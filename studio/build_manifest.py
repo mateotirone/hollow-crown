@@ -131,9 +131,15 @@ g("workshop","Siege Workshop","Blocks",[sided("Block",'siege_workshop_side','sie
 g("desk","Quartermaster's Desk","Blocks",[sided("Block",'siege_desk_side','siege_desk_top','siege_desk_bottom')])
 g("barracks","Barracks","Blocks",[sided("Block",'siege_barracks_side','siege_barracks_top','siege_desk_bottom')])
 # ---- Hollow Crown
-for n,name in [("veinstone","Veinstone"),("undertow_moss","Hollow Moss"),("veil_rock","Veil Rock"),("hollowwood_lattice","Hollowwood Lattice"),("hollowwood_core","Hollowwood Core"),
+for n,name in [("veinstone","Veinstone"),("undertow_moss","Veilmoss"),("veil_rock","Veil Rock"),("hollowwood_lattice","Latticewood"),("hollowwood_core","Latticewood Core"),
                ("glimmerflow","Glimmerflow"),("rift_seam","Strange Seam"),("rift_edge","Rift Edge"),("rift_veil","Rift Veil"),("waystone","Waystone"),("court_seal","Court Seal")]:
+    if n=="veinstone":
+        g("ut_"+n,name,"The Hollow",[cube("Plain (most common)",one('siege_veinstone'))]+[cube("Vein %d"%k,one('siege_veinstone_%d'%k)) for k in (1,2,3)],"Four variants mixed at random in the ground so hillsides do not stripe.")
+        continue
     g("ut_"+n,name,"The Hollow",[cube("Block",one('siege_'+n))])
+g("ut_hollow_brick","Veinstone Bricks","The Hollow",[cube("Brick",one('siege_veinstone_bricks')),cube("Cracked",one('siege_cracked_veinstone_bricks'))],"New block. Dark violet stone bricks with magenta root veins; the cracked kind has glowing violet cracks.")
+g("ut_pale_ash","Pale Ash","The Hollow",[cube("Block",one('siege_pale_ash'))],"New block. Soft grey-lilac dust for the wastes.")
+g("ut_glow_crystal","Glint Cluster","The Hollow",[{"label":"Cluster","model":"item","mats":{"*":B+'siege_glint_cluster.png'}}],"New block. Cross-shaped in game, gives light. Shown flat here.")
 g("ut_choirsteel","Choirsteel gear","The Hollow",[{"label":n.title(),"model":"item","mats":{"*":I+'siege_choirsteel_%s.png'%n}} for n in ("sword","pickaxe","axe","shovel","hoe","helmet","chestplate","leggings","boots")]+[{"label":"Worn sheet %d"%k,"model":"item","mats":{"*":'textures/models/armor/choirsteel_layer_%d.png'%k}} for k in (1,2)],"Pale violet forged metal with a pale blue gem or band. Worn sheets are shown flat.")
 g("ut_plants","Veilcap and Glimbulb","The Hollow",[{"label":"Veilcap","model":"item","mats":{"*":B+'siege_veilcap.png'}},{"label":"Glimbulb","model":"item","mats":{"*":B+'siege_glimbulb.png'}}],"Cross-shaped plants in game. Shown flat here.")
 g("ut_items","Tuning Fork and Choir Shard","The Hollow",[{"label":"Tuning Fork","model":"item","mats":{"*":I+'siege_tuning_fork.png'}},{"label":"Choir Shard","model":"item","mats":{"*":I+'siege_choir_shard.png'}}])
@@ -282,6 +288,11 @@ for _d,_ps in sorted(_left.items()):
     _vs=[{"label":nice(os.path.basename(q)[:-4].replace('siege_','').replace('hc_','')),"model":_kind,"mats":{"*":q}} for q in _ps]
     if len(_vs)>12 and _kind=='cube': _vs=[{"label":"All","model":"lineup","cols":7,"gap":1.2,"items":_vs,"mats":{"*":_ps[0]}}]+_vs
     g("rest_"+_d.replace('/','_'),_NAMES.get(_d,'More: '+_d.replace('textures/','')),"Everything else",_vs,"Shown as a flat sheet or plain cube because no 3D model is set up for it here yet." if _kind!='item' else None)
+# ---- everything from the Hollow reviewed in one place (Hollow world thread's ask, 2026-11-10)
+_HOLLOW={'b_reveal_boy','b_reveal_king','b_reveal_morvane','b_oswin_reflection','b_oswin_the_last','b_gloamwing','b_veinsworn','b_shardcaster','b_gatebreaker','u_boat','u_choir_conductor','u_choir_singer','u_hollow_regent'}
+for _g in groups:
+    if _g['id'] in _HOLLOW or _g['cat']=='The Hollow Choir': _g['cat']='The Hollow'
+    if _g['cat']=='Crown': _g['cat']='Crown and Citadel'
 _o=[];[_o.append(x["cat"]) for x in groups if x["cat"] not in _o]
 _o.remove("Other");_o.append("Other")
 groups.sort(key=lambda x:_o.index(x["cat"]))
