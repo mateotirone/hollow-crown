@@ -5,7 +5,7 @@ import { world, system, MolangVariableMap } from "@minecraft/server";
 import { CHARGE, COLORS, DYE_RGB, KEEP_BANNER } from "./constants.js";
 import { keepFallen } from "./keep.js";
 import { saveState, state } from "./state.js";
-import { foreignSettlement, settlementAt, tierOf } from "./territory.js";
+import { foreignSettlement, settlementAt, tierOf, landRadius } from "./territory.js";
 import { isOnline, title } from "./util.js";
 
 // ---------- Borders: see where land begins, and get told when you cross ----------
@@ -32,7 +32,7 @@ export function borderTick() {
 
     // Draw the nearby stretch of each border in that settlement's banner color
     for (const keep of Object.values(state.keeps)) {
-      const r = tierOf(keep).radius;
+      const r = landRadius(keep);
       const cx = keep.x + 0.5;
       const cz = keep.z + 0.5;
       const d = Math.hypot(loc.x - cx, loc.z - cz);

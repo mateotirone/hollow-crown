@@ -264,6 +264,16 @@ Rival Lords only settle on a map with Plot Stones. Place three or four Plot Ston
 4. Click the lord and choose "Lay siege" (you need your own settlement). Kill every soldier within 10 minutes: the lord falls, you get Regals, and the plot with its buildings is free to claim. Die or walk away and they hold.
 5. `/scriptevent siege:rivals none` removes them all.
 
+**Lords as active neighbours.** Needs your own settlement and at least two lords. Normally one lord acts every other day; these commands make it happen now. `/scriptevent siege:rivals court` shows where everything stands.
+
+6. **War.** `/scriptevent siege:rivals deed march <id>`. You should get a title and a message saying how they will come. Click the lord: "Pay them to turn back" should be the first button. Leave it, and start a siege night: the lord's Men-at-arms should come with the first assault and their Captain with the last, on top of the usual army. Win and you should get coins and a promise of peace; lose the keep and they take coins and grow. Tell me if the lord's soldiers do not attack, or do not count as raiders.
+7. **Never the same twice.** Run `deed march <id>` again after the peace ends (or `deed` alone a few times): the same lord should not do the same kind of thing twice running, and a second march should come a different way.
+8. **Feud.** `/scriptevent siege:rivals deed feud <id>`. Everyone is told who rides against whom. Click either lord and back them with coin, then `/scriptevent siege:rivals feud_end`: one lord should kneel to the other (shown in their menu), and if you backed the winner you get a share.
+9. **Tribute.** `deed demand <id>`, then click the lord and pay or refuse. Refusing should make them colder and likelier to march.
+10. **Trade.** Click a lord and choose Trade: three goods for coins and one thing they want to buy (four lots only). `deed wares <id>` changes the goods. With `/scriptevent siege:rivals relation <id> -60` they should refuse to trade.
+11. **Oaths.** `relation <id> 50`, then "Gifts and oaths": swear a truce, seal an alliance (costs coins). With an alliance, start a siege night: their Sworn Swords should appear by your keep, fight the raiders, and leave at the end. Tell me if they attack you or your guards. Then lay siege to that lord, or choose "Break your alliance": every lord should think less of you.
+12. **Land.** On the map, stand 58 blocks from your Plot Stone as a new Hamlet: it should count as your land, and winning sieges should not move the border.
+
 ## Mobs, bosses and NPC fighters (The Hollow Crown)
 
 1. Run `/scriptevent siege:showcase` and walk the row of statues: every mob and boss should stand there, labelled, with its weapon in its hand.

@@ -15,6 +15,7 @@
 //   on("rivalBesieged", ({ lord, player }))   on("rivalHeld", ({ lord, player }))   on("rivalFallen", ({ lord, player }))
 //   addFilter("rivalSoldier", (entity, { dim, at, role, tier, name, tags, lord }) => entity ?? yourSpawn(...))   supply the soldiers a
 //                                     besieged lord calls out (role "knight" | "sorcerer" | "retainer", tier 1-4). Put every tag on them.
+//   What lords do (marches, feuds, tribute, trade, oaths) and its events: court.js. Rules and numbers: deeds.js.
 //   addFilter("rivalMenu", (buttons, { lord, player }) => [...buttons, { label, action }])   extra buttons when a player talks to a lord
 //
 // Commands: /scriptevent siege:rivals none|few|all     how many empty plots get a lord
@@ -39,6 +40,7 @@ import { WALL_LEVELS } from "../settle/walldata.js";
 import { raiseFree } from "../settle/plans.js";
 import { RIVALS, TIER_NAMES, LINES, STAGES, makeLord, radiusOf, wanted, night, nextPiece, partKey, hallSpot, partSpot, estateOf, winsForEstate, takeEstate } from "./data.js";
 import "./tests.js";
+import "./court.js"; // what lords do: marches, feuds, trade, oaths
 
 const OVERWORLD = "minecraft:overworld";
 const NPC_TYPE = "minecraft:npc";
@@ -61,6 +63,8 @@ export const rivalById = (id) => lords().find((l) => l.id === id);
 export const rivalOnPlot = (plotName) => lords().find((l) => l.plot === plotName);
 export const rivalAt = (location) => lords().find((l) => Math.hypot(location.x - (l.x + 0.5), location.z - (l.z + 0.5)) <= radiusOf(l));
 export const strongestRival = (role) => lords().filter((l) => !role || l.role === role).sort((a, b) => b.wins - a.wins)[0];
+export const rivalData = () => store.data; // for court.js
+export const saveRivals = () => store.save();
 export const relationOf = (lord, playerId) => lord.relations[playerId] ?? 0;
 export function changeRelation(lord, playerId, by) {
   lord.relations[playerId] = Math.max(-100, Math.min(100, relationOf(lord, playerId) + by));
@@ -74,6 +78,8 @@ export function changeRelation(lord, playerId, by) {
 let voices = [];
 on("rivalLordVoices", ({ lords: written }) => { voices = written ?? []; });
 const voiceOf = (lord) => voices.find((v) => v.id === lord.voice);
+export const lordSays = (lord, kind, player) => say(lord, kind, player);
+export const lordFullName = (lord) => fullName(lord);
 const say = (lord, kind, player) => voiceOf(lord)?.lines?.[kind]?.replace(/\{player\}/g, player?.name ?? "stranger");
 
 function giveVoice(lord) {
@@ -393,6 +399,7 @@ async function talk(player, lord) {
     `§o"${say(lord, r <= -40 ? "foe" : r >= 40 ? "friend" : "greet", player) ?? pick(LINES[lord.temperament] ?? LINES.steady)}"§r`, "",
     `§7${fullName(lord)}, ${lord.region}`,
     `§7Holds a ${TIER_NAMES[lord.tier]} · ${lord.wins} siege nights survived · ${mood(lord, player)}`,
+    ...applyFilter("rivalTalkLines", [], { lord, player }),
   ];
   const form = new ActionFormData().title(lord.name).body(body.join("\n"));
   for (const b of buttons) form.button(b.label, b.icon);
@@ -514,6 +521,7 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
   const player = event.sourceEntity;
   if (player?.typeId !== "minecraft:player" || !isReady()) return;
   const [cmd, arg] = event.message.trim().split(/\s+/);
+  if (["deed", "feud_end", "relation", "court"].includes(cmd)) return; // court.js answers these
   if (["none", "few", "all"].includes(cmd)) {
     store.data.mode = cmd;
     save();
