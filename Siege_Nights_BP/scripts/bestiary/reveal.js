@@ -25,6 +25,7 @@ import { on, emit, addTests, assert, assertEqual } from "../siege/api.js";
 import { UNDERTOW_ID } from "../undertow/layout.js";
 import { pocket, pocketReady } from "../undertow/finale.js";
 import { announce } from "./util.js";
+import { sfx } from "../core/sfx.js";
 
 // When each beat happens, in ticks from the start (20 = 1 second)
 export const BEATS = { black: 0, room: 30, words: 140, eyes: 470, age: 620, age_king: 710, age_morvane: 810, look_up: 930, page: 1010, bells: 1070, out: 1150, end: 1185 };
@@ -143,7 +144,7 @@ export function playReveal(players, { dim, center, openGround = false, onStage, 
   each(players, (p) => {
     lock(p, true);
     fade(p, 1, stage ? 3 : (BEATS.end - 40) / 20, 1.5); // with nowhere to stage it, the words are shown over black
-    p.playSound("block.bell.hit", { pitch: 0.5, volume: 0.35 });
+    sfx(p, "block.bell.hit", { pitch: 0.5, volume: 0.35 });
     p.addEffect("resistance", BEATS.end + 100, { amplifier: 255, showParticles: false });
   });
 
@@ -178,7 +179,7 @@ export function playReveal(players, { dim, center, openGround = false, onStage, 
   // one unbroken shot: the room ages around the same pose
   at(BEATS.age, () => { if (stage) each(players, (p) => shot(p, cams.close, (BEATS.look_up - BEATS.age - 20) / 20)); });
   at(BEATS.age_king, () => { beat("age_king"); setActor(stage, "king"); });
-  at(BEATS.age_morvane, () => { beat("age_morvane"); setActor(stage, "morvane"); each(players, (p) => p.playSound("mob.wither.ambient", { pitch: 0.5, volume: 0.4 })); });
+  at(BEATS.age_morvane, () => { beat("age_morvane"); setActor(stage, "morvane"); each(players, (p) => sfx(p, "mob.wither.ambient", { pitch: 0.5, volume: 0.4 })); });
 
   // he looks up
   at(BEATS.look_up, () => {
@@ -190,16 +191,16 @@ export function playReveal(players, { dim, center, openGround = false, onStage, 
   // the journal changes
   at(BEATS.page, () => {
     beat("page");
-    each(players, (player) => { emit("journalLastPage", { player }); player.playSound("item.book.page_turn", { volume: 1 }); });
+    each(players, (player) => { emit("journalLastPage", { player }); sfx(player, "item.book.page_turn", { volume: 1 }); });
   });
 
   // every bell, for everyone on the server
   at(BEATS.bells, () => {
     beat("bells");
-    for (const p of world.getAllPlayers()) { try { p.playSound("block.bell.hit", { pitch: 0.7, volume: 0.9 }); } catch { /* gone */ } }
+    for (const p of world.getAllPlayers()) { try { sfx(p, "block.bell.hit", { pitch: 0.7, volume: 0.9 }); } catch { /* gone */ } }
     if (words.bells) world.sendMessage(`§5${words.bells}`);
   });
-  at(BEATS.bells + 25, () => { for (const p of world.getAllPlayers()) { try { p.playSound("block.bell.hit", { pitch: 0.6, volume: 0.7 }); } catch { /* gone */ } } });
+  at(BEATS.bells + 25, () => { for (const p of world.getAllPlayers()) { try { sfx(p, "block.bell.hit", { pitch: 0.6, volume: 0.7 }); } catch { /* gone */ } } });
 
   at(BEATS.out, () => { if (stage) each(players, (p) => fade(p, 1, 1.5, 1)); });
   at(BEATS.end, () => { beat("end"); finish(done); });

@@ -10,6 +10,7 @@ import { heroOf, saveHero, setPath, grantPoints } from "./hero.js";
 import { hallLevelAt, setTreeLook } from "./townhall.js";
 import { chargeE } from "../economy/coins.js";
 import { worth } from "../economy/rules.js";
+import { sfx } from "../core/sfx.js";
 
 export const EMBER = "siege:hollow_ember"; // the fallen shard, before you choose
 export const BOUND_EMBER = "siege:bound_ember"; // the Marked player's focus
@@ -165,7 +166,7 @@ export function learn(player, skill, hallLevel) {
   hero.skills[skill.id] = (hero.skills[skill.id] ?? 0) + 1;
   if (skill.power && hero.skills[skill.id] === 1 && !hero.skills[hero.spell]) hero.spell = skill.id;
   saveHero(player);
-  player.playSound("random.levelup", { pitch: 1.3 });
+  sfx(player, "random.levelup", { pitch: 1.3 });
   player.sendMessage(`§b${skill.name}§7 ${hero.skills[skill.id]}/${skill.max} sworn.`);
   if (skill.id === "arc_warden") {
     api.title(player, "§5The Last Art", "§7It is waiting for you to claim it");
@@ -274,18 +275,18 @@ export function choosePath(player, path) {
   if (path === "knight") {
     give(player, OATH_BANNER);
     api.title(player, "§6Oathsworn", "§7Squire of the Ashen Gate");
-    player.playSound("random.anvil_use");
+    sfx(player, "random.anvil_use");
     player.sendMessage("§6You are a Squire of the Ashen Gate.§7 The Blade branch of the Tree is open to you. Your §fOath Banner§7 is in your pack: once you learn Rallying Cry, use it to rally, sneak and use it to plant it.");
   } else if (path === "marked") {
     give(player, BOUND_EMBER);
     api.title(player, "§5Marked", "§7Something heard you");
-    player.playSound("mob.wither.spawn", { volume: 0.4, pitch: 1.6 });
+    sfx(player, "mob.wither.spawn", { volume: 0.4, pitch: 1.6 });
     player.addEffect("darkness", 80, { showParticles: false });
     player.sendMessage("§5The Ember is part of you now.§7 The Arcana branch of the Tree is open. Hold the §fBound Ember§7: use it to cast your chosen power, sneak and use it to choose another. Watch your Resonance.");
   }
   if (ROLES[path]?.region) {
     api.title(player, `${ROLES[path].color}${ROLES[path].name}`, `§7${RANKS[path][0].name}`);
-    player.playSound("random.levelup");
+    sfx(player, "random.levelup");
     player.sendMessage(`${ROLES[path].color}You are a ${ROLES[path].name} now.§7 The ${BRANCHES[ROLES[path].branch].name} branch of the Tree of Oaths is open to you.`);
   }
   hero.offers = [];

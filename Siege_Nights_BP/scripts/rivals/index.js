@@ -40,6 +40,7 @@ import { WALL_LEVELS } from "../settle/walldata.js";
 import { raiseFree } from "../settle/plans.js";
 import { RIVALS, TIER_NAMES, LINES, STAGES, makeLord, radiusOf, wanted, night, nextPiece, partKey, hallSpot, partSpot, estateOf, winsForEstate, takeEstate } from "./data.js";
 import "./tests.js";
+import { sfx } from "../core/sfx.js";
 import "./court.js"; // what lords do: marches, feuds, trade, oaths
 
 const OVERWORLD = "minecraft:overworld";
@@ -355,7 +356,7 @@ function endSiege(lord, won) {
   if (!player) return;
   const spoils = RIVALS.spoils[lord.tier];
   pay(player, fromEmeralds(spoils), "rival lord");
-  player.playSound("ui.toast.challenge_complete");
+  sfx(player, "ui.toast.challenge_complete");
   title(player, `§6${lord.plot} is taken`, `§7${coins(fromEmeralds(spoils))} in spoils. Claim it and it is yours as it stands.`);
   emit("skillPoints", { player, amount: 1 + lord.tier, source: `toppled ${lord.name}`, renown: 80 * (lord.tier + 1) });
 }
