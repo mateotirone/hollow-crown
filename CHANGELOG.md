@@ -9,7 +9,7 @@ How versions work is in [`docs/RELEASING.md`](docs/RELEASING.md).
 Everything merged to `main` since the last release goes here. Each pull request that changes what players see adds a line under one of these headings.
 
 ### Added
-- A world currency backed by iron: the Regal and the Gold Regal (worth 64). The Moneyer swaps iron ingots for coins and back. Job NPCs (Farmer, Woodcutter, Quarryman, Smith, Fisher, Hunter, Herbalist) buy what you gather and sell supplies, with prices that differ by region. A Strongbox on the Keep Banner menu keeps coins safe. Sneak + use a Gold Regal to break it into 64 Regals, or a full stack of 64 to bind one.
+- Seeps now come in five kinds, chosen by the Storyteller to contrast with what you did lately: guarded (as before), hungry (opens wide, guards come fast), still (no guards, it murmurs to you), drifting (it slips away until cornered) and weeping (harmless, closes by itself).
 - Pretenders: after Morvane falls, claimants rise at the empty Seat in the Hollow every week or so. Each is generated (a name, one of three bodies, four powers out of nine, and a claim that changes how you must fight it) and the same one never comes twice. While one sits unchallenged the seep surges in the overworld. Each drops a Claimant's Seal with its name on it, plus Choirsteel.
 - The shape of a siege night now follows what the world has been through lately: after a run of hard fights the next night is likelier to be a strange or a waiting one. The story chapter now moves past chapter 2 as bosses fall.
 - The Rumor Board now takes its three daily jobs and its twists from the Storyteller, so jobs contrast with what you have been doing lately (quiet work after a fight, a mystery after a run of bounties) and twists turn up more evenly.
@@ -46,9 +46,10 @@ Everything merged to `main` since the last release goes here. Each pull request 
 
 - The story now has one spine from any of the twelve plots: your plot's first book sends you to Sister Wren in Millbrook, your plot's mystery leads to your own region's boss, each regional boss leaves two leads in other regions, and the third one down points you at the Surveyor's Field Notes.
 - The four regional roles (Dragon Rider, Forgemaster, Captain, Witch) each have a history, and their top four powers show a line of it in the Tree of Oaths.
+- A world currency backed by iron: the Regal and the Gold Regal (worth 64). The Moneyer swaps iron ingots for coins and back. Job NPCs (Farmer, Woodcutter, Quarryman, Smith, Fisher, Hunter, Herbalist) buy what you gather and sell supplies, with prices that differ by region. A Strongbox on the Keep Banner menu keeps coins safe. Sneak + use a Gold Regal to break it into 64 Regals, or a full stack of 64 to bind one.
 
 ### Changed
-- Everything is now paid for and paid out in Regals instead of emeralds: siege winnings, warlord and boss drops, guards, the Quartermaster, town hall upgrades, Rumor Board jobs, horses, the Throne's decrees and Treasury, Rival Lord spoils, the Hollow's ore, boats and permits, and the elytra refund. One old emerald is 8 Regals. Emeralds are no longer taken anywhere; the Moneyer buys them for 4 Regals each.
+- The Warlord King's crown is no longer called the Hollow Crown anywhere. It is an iron crown with a shard of the Hollow set in it; his later phases are "On foot, the shard burning" and "The shard wakes".
 - Holding the Heart of the Hollow is now whispers only: the Heartbearer hears things and a few patches of grass die near the throne, but nothing ever harms them, changes them or makes them easier to unseat.
 - Each ruler names their own Citadel when they raise it or take it. Leave the name empty and it is Aldspire.
 - The Hollow looks less busy: Veinstone is quieter and comes in four mixed variants, Choir Ore shows big bright crystals, Latticewood is an uneven honeycomb and Veilmoss grows in soft clumps. Veinstone Bricks, Pale Ash and the Glint Cluster have their real art.
@@ -56,6 +57,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - The "Who steps off the coach?" character menu is now the first thing a new player sees, and the welcome and the journal wait until it is answered or closed.
 - The add-on is renamed from Siege Nights to The Hollow Crown. The install file is `hollow-crown.mcaddon`. Existing ids keep the `siege:` prefix.
 - Needs Bedrock 26.30 or newer.
+- Everything is now paid for and paid out in Regals instead of emeralds: siege winnings, warlord and boss drops, guards, the Quartermaster, town hall upgrades, Rumor Board jobs, horses, the Throne's decrees and Treasury, Rival Lord spoils, the Hollow's ore, boats and permits, and the elytra refund. One old emerald is 8 Regals. Emeralds are no longer taken anywhere; the Moneyer buys them for 4 Regals each.
 
 ### Fixed
 - Lanternbog's local mystery no longer asks you to type the name of the place below in the first chapter.

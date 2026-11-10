@@ -401,6 +401,15 @@ the darkness and knockback effects, and the rain.
 - In a siege from the third on, roughly one raider in seven has a yellow name such as "Fleet Grey Host Axeman" and behaves to match.
 - `/scriptevent siege:variety` lists what you have killed most and flags anything met more than 40 times per variant.
 
+## Seep kinds (bestiary)
+
+Seeps open near players once the first boss has fallen; which kind opens is the Storyteller's pick (`/scriptevent siege:storyteller` shows what it would give you next for the deck "seeps").
+
+- Guarded: guards climb out, kill them, break it. Hungry (chapter 4 on): opens already widened, guards every 10 seconds.
+- Still: nothing comes out. Stand within 6 blocks and it murmurs a line in grey every 30 seconds. Break it to close it.
+- Drifting (chapter 2 on): walk up to it and it slips away, three times, a shorter hop each time. Then it stays and guards come.
+- Weeping (chapter 2 on): harmless. Stay near for 4 minutes and it closes by itself and leaves Veil Ash.
+
 ## Pretenders (bestiary)
 
 In the real game the first claimant comes 5 days after Morvane falls, then one every 6 to 11 days, standing at the Seat in the Hollow.
