@@ -39,3 +39,10 @@ Needs Mojang's textures (not in this repo) and three.js 0.170.0:
 
 - Trapdoor `direction` numbers (shutters) are mapped as 0 east, 1 west, 2 south, 3 north.
 - Footprints over 64 x 64 should be cut into tiles for `/structure load`.
+
+## Building catalogue
+
+    python3 build_catalogue.py OUT --textures <bedrock-samples>/resource_pack/textures/blocks --three <node_modules/three>
+    python3 render/catalogue_page.py OUT catalogue.html
+
+One picture per design per style plus catalogue.json (size, floors, blocks, map spot). Add every new design to DESIGNS in build_catalogue.py.

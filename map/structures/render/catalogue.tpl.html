@@ -1,0 +1,95 @@
+<title>Hollow Crown Building Catalogue</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+SC:wght@500;700&family=Alegreya+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a builder's pattern book. Header with counts, a style filter, then one plate per design in a wrapping grid. */
+:root {
+  --bg: #f3f1ec; --panel: #fbfaf7; --ink: #23201c; --muted: #6b655c; --rule: #d9d3c8;
+  --accent: #6e4a2a; --accent-ink: #fbfaf7; --chip: #ebe6dc;
+  --display: "Alegreya SC", Georgia, serif; --body: "Alegreya Sans", system-ui, sans-serif; --mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #1b1a18; --panel: #24221f; --ink: #ece7de; --muted: #a59d90; --rule: #3a3631; --accent: #d2a676; --accent-ink: #1b1a18; --chip: #2f2c28; color-scheme: dark } }
+:root[data-theme="dark"] { --bg: #1b1a18; --panel: #24221f; --ink: #ece7de; --muted: #a59d90; --rule: #3a3631; --accent: #d2a676; --accent-ink: #1b1a18; --chip: #2f2c28; color-scheme: dark }
+body { background: var(--bg); color: var(--ink); font: 16px/1.5 var(--body); }
+.wrap { max-width: 1180px; margin: 0 auto; padding-block: 40px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header { display: grid; gap: 12px; border-bottom: 1px solid var(--rule); padding-bottom: 24px; }
+.eyebrow { font: 500 12px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0; }
+h1 { font: 700 clamp(30px, 5vw, 46px)/1.05 var(--display); margin: 0; text-wrap: balance; }
+.lede { max-width: 64ch; margin: 0; color: var(--muted); }
+.counts { display: flex; flex-wrap: wrap; gap: 28px; margin-top: 8px; }
+.counts div { display: grid; }
+.counts b { font: 700 28px/1 var(--display); font-variant-numeric: tabular-nums; }
+.counts span { font-size: 13px; color: var(--muted); }
+.bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 24px 0; }
+.bar span { font-size: 14px; color: var(--muted); margin-right: 4px; }
+button { font: 500 14px var(--body); border: 1px solid var(--rule); background: var(--chip); color: var(--ink); border-radius: 4px; padding: 6px 12px; cursor: pointer; }
+button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 440px), 1fr)); gap: 24px; }
+.card { background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; display: grid; grid-template-rows: auto 1fr; }
+.card:first-child { grid-column: 1 / -1; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); grid-template-rows: none; }
+.pic { background: #8fb3dc; aspect-ratio: 720 / 552; max-width: 100%; }
+[hidden] { display: none !important; }
+.pic img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.body { padding: 18px 20px 20px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.body p { margin: 0; }
+.kind { font: 500 11px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+h2 { font: 700 23px/1.15 var(--display); margin: 0; }
+.styles { display: flex; flex-wrap: wrap; gap: 6px; }
+.styles button { font-size: 13px; padding: 4px 10px; }
+dl { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 4px 0; padding: 10px 0; border-block: 1px solid var(--rule); }
+dt { font: 500 11px/1.2 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+dd { margin: 2px 0 0; font: 500 16px var(--mono); font-variant-numeric: tabular-nums; }
+.inside, .where { font-size: 15px; }
+.file { font: 400 12px var(--mono); color: var(--muted); }
+section.next { margin-top: 48px; border-top: 1px solid var(--rule); padding-top: 24px; display: grid; gap: 12px; }
+section.next h2 { font-size: 26px; }
+section.next ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; max-width: 70ch; }
+.note { font-size: 14px; color: var(--muted); max-width: 70ch; }
+@media (max-width: 760px) { .card:first-child { grid-template-columns: 1fr; } dl { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+</style>
+<div class="wrap">
+<header>
+  <p class="eyebrow">The Hollow Crown · map structures</p>
+  <h1>Building Catalogue</h1>
+  <p class="lede">Every building designed so far for the map. Each one comes in the three Vale styles. Sizes are in blocks, footprint first (width × depth), and every size is odd so each building has a true centre.</p>
+  <div class="counts">
+    <div><b>__N__</b><span>designs</span></div>
+    <div><b>__V__</b><span>buildable versions (3 styles each)</span></div>
+    <div><b>0</b><span>placed on the map so far</span></div>
+  </div>
+</header>
+<div class="bar" role="group" aria-label="Show every building in one style">
+  <span>Show all in:</span>
+  <button type="button" class="all" data-style="tudor" aria-pressed="true">Plaster and timber</button>
+  <button type="button" class="all" data-style="stone" aria-pressed="false">Norman stone</button>
+  <button type="button" class="all" data-style="brick" aria-pressed="false">Brick and spruce</button>
+</div>
+<main class="grid">
+__CARDS__
+</main>
+<section class="next">
+  <h2>Still to design</h2>
+  <ul>
+    <li>The rest of Kingsrest: town hall, station, smithy, market stalls, chapel, bridges over the two rivers, and more house shapes.</li>
+    <li>Millbrook, Rimehold, Gull's Rest, Sunscar and Mirelight, each with its own regional style.</li>
+    <li>The five boss arenas and the seven thin-place caves.</li>
+    <li>Ruins, Crownhold, Bellhollow and the two Ashen sites.</li>
+    <li>Rail lines, stations and signposts as blocks.</li>
+  </ul>
+  <p class="note">Map spots fill in as each town's layout is planned. Kingsrest is next: plaster and timber for most buildings, stone for the important ones, and some brick.</p>
+</section>
+</div>
+<script>
+function show(card, style) {
+  card.querySelectorAll(".pic img").forEach(i => i.hidden = i.dataset.style !== style);
+  card.querySelectorAll(".sw").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.style === style)));
+}
+document.querySelectorAll(".card").forEach(c => c.querySelectorAll(".sw").forEach(b => b.addEventListener("click", () => show(c, b.dataset.style))));
+document.querySelectorAll(".all").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll(".all").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  document.querySelectorAll(".card").forEach(c => show(c, b.dataset.style));
+}));
+</script>

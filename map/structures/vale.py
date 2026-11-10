@@ -202,7 +202,7 @@ def free(bp, x, y, z): return bp.get(x, y, z)[0] in ("air", "keep")
 def house_interior(bp, w, d, levels, front_d):
     """Hearth and table downstairs, a stair up the east side, bedrooms above."""
     sx = w - 1
-    for k in range(len(levels) - 1):
+    for k in range(len(levels) - 2):          # the last level is the roof base: no stair up into the roof
         L0, L1 = levels[k], levels[k + 1]
         F.stair_flight(bp, sx, d - 2, L0 + 1, L1 - L0, "n")
     L = levels[0]
@@ -223,9 +223,7 @@ def townhouse(seed, width=7, depth=9, storeys=2, ground="stone", jetty=True, inf
     rnd = random.Random(seed)
     bp = Blueprint(f"vale_house_{seed}")
     P = dict(VALE)
-    P["infill"] = infill or rnd.choice([VALE["infill"], mix([("packed_mud", 70), ("mud_bricks", 30)], seed),
-                                        mix([("spruce_planks", 80), ("stripped_spruce_log", 20)], seed),
-                                        mix([("bricks" if False else "brick_block", 85), ("mud_bricks", 15)], seed)])
+    P["infill"] = infill or VALE["infill"]         # plaster; plank and brick looks belong to the brick style
     if roof == "wood" or (roof is None and rnd.random() < 0.2):
         P.update(roof="dark_oak_stairs", roof_block="dark_oak_planks", roof_slab="dark_oak_slab",
                  trim="spruce_stairs", trim_block="spruce_planks", trim_slab="spruce_slab")
@@ -260,7 +258,7 @@ def townhouse(seed, width=7, depth=9, storeys=2, ground="stone", jetty=True, inf
     B.roof(up, "z", y, overhang=1, verge=1)
     B.build_roofs()
     B.gable_walls(up, "z", y)
-    B.window((up[0] + up[2]) // 2, y + 1, up[3] - 1, "s", 1, 2, shutters=False)
+    B.window((up[0] + up[2]) // 2, y + 1, up[3] - 1, "s", 1, 2 if width > 5 else 1, shutters=False)   # a narrow gable only has room for one pane
     house_interior(bp, w, d, levels if ground == "stone" else [1] + levels[1:], up[3])
     cx = -1 if chimney_side == "w" else w + 1
     B.chimney(cx, d // 2, 1)
