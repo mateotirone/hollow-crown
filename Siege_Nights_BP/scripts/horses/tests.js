@@ -2,6 +2,7 @@
 
 import { EntityTypes, ItemTypes, BlockTypes } from "@minecraft/server";
 import { addTests, assert, assertEqual } from "../siege/api.js";
+import { upgradeRecord, RECORD_VERSION } from "./store.js";
 import {
   HORSE_SETTINGS as S, BREEDS, REGIONAL_BREEDS, TRAITS, PERKS, SHOES, SADDLES, SPECIALS, STATS, MAX_EFFECTIVE, SPEED_VALUES,
   TRAIN_COST, STABLES_LEVELS, GEAR_ITEMS, HALTER, WHISTLE, CROP, CAPARISON,
@@ -15,6 +16,14 @@ const seeded = (...values) => {
 };
 
 addTests("horses", {
+  "old horse records are upgraded when they load": () => {
+    const old = { uid: "a", name: "Bramble", stats: { speed: 3 } };
+    assertEqual(upgradeRecord({ ...old }), { ...old, _v: RECORD_VERSION }, "a record saved before versioning counts as version 1 and keeps its data");
+    const steps = { 1: (r) => { r.title = r.name; delete r.name; } };
+    const seen = upgradeRecord({ ...old }, 2, { mood: "calm" }, steps);
+    assertEqual(seen, { uid: "a", stats: { speed: 3 }, title: "Bramble", mood: "calm", _v: 2 }, "renamed field moves over and a new field gets its default");
+    assertEqual(upgradeRecord({ ...seen, mood: "bold" }, 2, { mood: "calm" }, steps).mood, "bold", "an up to date record is left alone");
+  },
   "every breed has a real trait and coat": () => {
     for (const key of REGIONAL_BREEDS) {
       const b = BREEDS[key];
