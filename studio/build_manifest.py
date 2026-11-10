@@ -227,6 +227,8 @@ _ent("u_boat","Latticewood Boat","The Hollow",'models/entity/hollowfolk/lattice_
 _ent("u_heart","Heart of the Hollow, resting","Crown",'models/entity/resting_heart.geo.json',[("Resting",'textures/entity/siege_resting_heart.png')])
 for k,n in [("choir_conductor","The Conductor"),("choir_singer","Singer"),("hollow_regent","Hollow Regent")]:
     _ent("u_"+k,n,"The Hollow Choir",f'models/entity/undertow/{k}.geo.json',[(n,f'textures/entity/siege/undertow/{k}.png')])
+for _k,_n in (("blade","Pretender, blade"),("seer","Pretender, seer"),("brute","Pretender, brute")):
+    _ent("u_pretender_"+_k,_n,"The Hollow",f'models/entity/bestiary/pretender_{_k}.geo.json',[(_n,f'textures/entity/siege/bestiary/pretender_{_k}.png')],"Claimants who rise in the Hollow after the story. Name and powers are different each time.")
 _ent("carriage","Train Carriage","Horses and rail",'models/entity/carriage.geo.json',[("Carriage",'textures/entity/siege/carriage.png')],"Rides normal Minecraft rails. Four seats on two benches.")
 if os.path.exists(RP+I+'horses/siege_train_carriage.png'): g("carriage_icon","Train Carriage icon","Horses and rail",[item("Icon",'horses/siege_train_carriage')])
 _ent("throne_seal","Throne Seal","Crown and Citadel",'models/entity/throne_seal.geo.json',[("Seal",'textures/entity/siege_throne_seal.png')],"Floats in front of the throne during a Storm.")

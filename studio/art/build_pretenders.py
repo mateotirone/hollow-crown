@@ -117,6 +117,10 @@ def seer():
                 g = fr[s]
                 for y in range(g[3]):
                     for x in range(g[2]): shade(im, g, x, y, 0.5)
+        if nm == 'head' and i == 1:
+            for g in fr.values():
+                for y in range(g[3]):
+                    for x in range(g[2]): shade(im, g, x, y, 0.6)
         if nm == 'head' and i == 2:
             f = fr['north']
             for y in range(2, f[3]):
