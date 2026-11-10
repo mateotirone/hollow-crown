@@ -246,3 +246,7 @@ export function blockedReason(skill, hero, hallLevel) {
 }
 
 export const HALL_NAMES = ["no hall", "Longhouse", "Stone Hall", "Keep", "Fortress", "Sovereign's Throne"];
+
+// Histories of the regional roles, filled by the lore module through the "roleLore" event:
+// { rider: { region, before, why, saying }, ... }. Empty until lore answers.
+export const ROLE_LORE = {};

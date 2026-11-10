@@ -34,7 +34,7 @@ import { markedTick } from "./marked.js";
 import "./showcase.js";
 import { rosterMenu } from "./roster.js";
 import { rolesTick, roleForStyle } from "./roles.js";
-import { ROLES, RANKS } from "./skills.js";
+import { ROLES, RANKS, ROLE_LORE } from "./skills.js";
 import { treeCells, treeLayout, COLS, ROWS } from "./tree_layout.js";
 import { wallMenu, flyby } from "./flyby.js";
 export { flyby };
@@ -56,7 +56,9 @@ api.on("powerOrigin", ({ player, skill }) => {
   saveHero(p);
   if (hero.path === "marked") p.sendMessage(`§5You know where ${SKILL[skill].name} comes from now. The Tree of Oaths will teach it.`);
 });
+api.on("roleLore", ({ roles }) => { for (const id of Object.keys(roles ?? {})) if (ROLES[id]) ROLE_LORE[id] = { ...roles[id] }; });
 system.runTimeout(() => api.emit("powerOriginsWanted", {}), 40);
+system.runTimeout(() => api.emit("roleLoreWanted", {}), 40);
 
 // ---------- clicking the cornerstone and the Tree ----------
 const lastClick = new Map();
