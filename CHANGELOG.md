@@ -59,6 +59,8 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - The Hollow's air moves: spores drift from Veilcaps, moss drips, crystals glint, ash lifts off the wastes, sparks run along the veined stone and pale motes float around you.
 - The water of the Blackfen is black: near-opaque on the surface and almost blind underwater. (It follows the mangrove swamp biome, which only the Blackfen uses on the map.)
 
+- The eighth old painting, the Forty-Second Portrait, is kept for the Burned Archive, and what its caption says changes once the story is over.
+
 ### Changed
 - The moon has a hairline violet crack that shows more the fuller it is.
 - The Hollow bolt is a violet shard with a white-hot heart instead of a flat colour.
