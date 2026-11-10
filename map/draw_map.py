@@ -68,21 +68,21 @@ plots=[("Harrowford","Aldmere Vale",-470,-300,"river meadow above the lower Alde
 ("Gullcliff","Saltreach",-760,-560,"clifftop over the northern coast"),("Tidewatch","Saltreach",-560,650,"dunes above the southern shore"),
 ("Reedmoor","Blackfen",-230,560,"the firm northern edge of the fen"),("Lanternbog","Blackfen",260,980,"a dry island deep in the fen"),
 ("Redmesa","Emberwaste",700,60,"mesa top at the desert's edge"),("Dunehold","Emberwaste",760,860,"an oasis among the dunes")]
-villages={"Kingsrest":(-150,-150),"Millbrook":(-60,-470),"Hollowfast":(-80,-1080),"Gull's Rest":(-800,400),"Sunscar":(850,450),"Mirelight":(-60,900)}
+villages={"Kingsrest":(-150,-150),"Millbrook":(-60,-470),"Rimehold":(-80,-1080),"Gull's Rest":(-800,400),"Sunscar":(850,450),"Mirelight":(-60,900)}
 sources=[("Kingsbarrow Hollow",120,520),("Greywater Sink",560,-420),("Rimecut Caves",-650,-1080),("Drowned Grotto",-870,-860),("Fenmouth Deeps",-250,860),("Scorched Throat",1050,720),("Witchroot Sink",520,1160)]
 order=[("Ashen Gate Chapterhouse",420,-170),("Ashen Watch",480,560),("Crownhold (ruin)",-235,-345),("Bellhollow",155,-100)]
 camps=[(1050,-800),(-820,-1150),(1100,1150),(-120,1190)]
 rivers={"River Alder":[(140,-830),(40,-640),(-70,-470),(-90,-300),(-150,-150),(-330,-60),(-540,40)],
 "Greywater":[(830,-520),(540,-340),(330,-270),(120,-210),(-150,-150)],
 "Blackwater":[(-60,330),(-30,520),(-120,720),(-60,900),(-200,1010),(-340,1060)]}
-lakes=[("Wren Water",-60,300,70,45),("Hollow Mere",60,-1130,60,35)]
+lakes=[("Wren Water",-60,300,70,45),("Hallowmere",60,-1130,60,35)]
 V=villages; P={n:(x,z) for n,_,x,z,_ in plots}
 def stn(name,toward):
     x,z=P[name]; dx,dz=toward[0]-x,toward[1]-z; L=math.hypot(dx,dz); return (x+95*dx/L,z+95*dz/L)
 ST={"Harrowford":(-385,-345),"Oakmere":stn("Oakmere",V["Millbrook"]),"Thistledown":(225,25),"Wrenfield":(-110,190),
-"Rimeholt":stn("Rimeholt",(-640,-640)),"Wolfcairn":stn("Wolfcairn",V["Hollowfast"]),"Gullcliff":(-655,-505),"Tidewatch":(-520,555),
+"Rimeholt":stn("Rimeholt",(-640,-640)),"Wolfcairn":stn("Wolfcairn",V["Rimehold"]),"Gullcliff":(-655,-505),"Tidewatch":(-520,555),
 "Reedmoor":(-140,520),"Lanternbog":(180,900),"Redmesa":(640,150),"Dunehold":(865,805)}
-rails={"North Line":[V["Kingsrest"],(-130,-320),V["Millbrook"],(-20,-680),(-110,-900),V["Hollowfast"],(200,-1120),ST["Wolfcairn"]],
+rails={"North Line":[V["Kingsrest"],(-130,-320),V["Millbrook"],(-20,-680),(-110,-900),V["Rimehold"],(200,-1120),ST["Wolfcairn"]],
 "Oakmere Branch":[V["Millbrook"],(50,-500),ST["Oakmere"]],
 "Coast Line":[V["Kingsrest"],(-270,-230),ST["Harrowford"],(-540,-440),ST["Gullcliff"],(-640,-640),ST["Rimeholt"]],
 "Bay Line":[V["Kingsrest"],(-300,-10),(-440,120),(-500,280),(-680,330),V["Gull's Rest"]],
@@ -152,7 +152,7 @@ for i,(n,pts) in enumerate(rivers.items()):
         w=1.5+3.5*j/k; d.line([px(*sp[j]),px(*sp[j+1])],fill=RIV,width=int(round(w)))
 for n,x,z,a,b in lakes:
     c=px(x,z); pts=[(c[0]+(a*S)*math.cos(t)*(1+0.18*math.sin(3*t+1)), c[1]+(b*S)*math.sin(t)*(1+0.2*math.cos(2*t))) for t in np.linspace(0,6.28,40)]
-    d.polygon(pts,fill=(196,222,236) if n=="Hollow Mere" else RIV)
+    d.polygon(pts,fill=(196,222,236) if n=="Hallowmere" else RIV)
 im=im.filter(ImageFilter.GaussianBlur(0.6))
 canvas=Image.new('RGB',(N+2*M,N+2*M+10),(38,44,54)); canvas.paste(im,(M,M)); d=ImageDraw.Draw(canvas)
 def Q(x,z): a=px(x,z); return (a[0]+M,a[1]+M)
@@ -189,7 +189,7 @@ for x,z in camps:
     c=Q(x,z); d.line([c[0]-6,c[1]-6,c[0]+6,c[1]+6],fill=(160,20,20),width=4); d.line([c[0]-6,c[1]+6,c[0]+6,c[1]-6],fill=(160,20,20),width=4)
 for t,(x,z) in {"F R O S T M A R C H":(330,-1180),"S A L T R E A C H":(-600,900),"E M B E R W A S T E":(900,330),"B L A C K F E N":(60,1150),"A L D M E R E   V A L E":(60,-30)}.items():
     label(Q(x,z),t,fr,(40,36,30),"mm")
-for t,(x,z) in {"The Greyspine":(640,-640),"Stag Pass":(-190,-870),"Gull Bay":(-800,110),"The Western Sea":(-1090,-300),"River Alder":(10,-590),"Greywater":(430,-340),"Blackwater":(-10,650),"Wren Water":(-40,355),"Hollow Mere":(100,-1085)}.items():
+for t,(x,z) in {"The Greyspine":(640,-640),"Stag Pass":(-190,-870),"Gull Bay":(-800,110),"The Western Sea":(-1090,-300),"River Alder":(10,-590),"Greywater":(430,-340),"Blackwater":(-10,650),"Wren Water":(-40,355),"Hallowmere":(100,-1085)}.items():
     label(Q(x,z),t,fi,(30,50,90) if any(w in t for w in ("Bay","Sea","River","water","Water","Mere")) else (60,50,40),"mm",2)
 d.text(((N+2*M)/2,26),"The Hollow Crown: map plan (2,500 × 2,500 blocks, north up)",font=ft,fill=(240,230,210),anchor="mm")
 lx,ly=M+12,M+N-188
@@ -237,7 +237,7 @@ def y_at(x,z):
 def y_site(x,z,rad=40):
     c,r=px(x,z); k=int(rad*S); return int(np.median(Yb[int(r)-k:int(r)+k+1,int(c)-k:int(c)+k+1]))
 elev_out={"plots":{n:y_site(x,z) for n,_,x,z,_ in plots},"villages":{n:y_site(x,z,30) for n,(x,z) in villages.items()},
- "features":{"Stag Pass":y_at(-105,-865),"highest peak":int(Yb.max()),"Hollow Mere":y_at(60,-1130),"Wren Water":y_at(-60,300)}}
+ "features":{"Stag Pass":y_at(-105,-865),"highest peak":int(Yb.max()),"Hallowmere":y_at(60,-1130),"Wren Water":y_at(-60,300)}}
 prof={}
 for k,v in list(railpts.items())+list(trailpts.items()):
     # resample every ~8 blocks
@@ -314,7 +314,7 @@ story=[(1,"I","Kingsrest: arrive, choose a plot",-150,-150),(2,"I","Your plot: f
 (6,"II","Gull's Rest: the lighthouse letters",-800,400),(7,"II","Drowned chapel in Gull Bay: the Drowned Bride",-690,130),
 (8,"II","Mirelight: the testimony of five villagers",-60,900),(9,"II","The Hollow Tree: the Mother of Changelings",-120,1060),
 (10,"II","Ashen Watch and the desert ruins: statue fragments",480,560),(11,"II","Sunscar: the faceless statues, the vault, the Ash Seneschal",850,450),
-(12,"II","Stag Pass: the only road north",-105,-865),(13,"II","Hollowfast: the moon shrine",-80,-1080),(14,"II","Hollow Mere ice door: the Pale Huntsman",60,-1130),
+(12,"II","Stag Pass: the only road north",-105,-865),(13,"II","Rimehold: the moon shrine",-80,-1080),(14,"II","Hallowmere ice door: the Pale Huntsman",60,-1130),
 (15,"III","Seven caves: find which one holds the Rift",None,None),(16,"IV","The throne, then the Citadel rises on the victor's plot",None,None)]
 ACT={"I":(40,120,60),"II":(40,70,150),"III":(110,60,150),"IV":(160,30,30)}
 # seep sites: scattered wild spots away from everything

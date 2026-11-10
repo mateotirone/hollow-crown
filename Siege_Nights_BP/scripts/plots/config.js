@@ -49,7 +49,7 @@ export const DAY_TICKS = 24000;
 export const WARDS = [
   { name: "Kingsrest", x: -150, z: -150, r: 90 },
   { name: "Millbrook", x: -60, z: -470, r: 70 },
-  { name: "Hollowfast", x: -80, z: -1080, r: 70 },
+  { name: "Rimehold", x: -80, z: -1080, r: 70 },
   { name: "Gull's Rest", x: -800, z: 400, r: 70 },
   { name: "Sunscar", x: 850, z: 450, r: 80 },
   { name: "Mirelight", x: -60, z: 900, r: 70 },

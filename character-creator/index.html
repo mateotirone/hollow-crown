@@ -168,10 +168,10 @@ const SEEDS={va:[[-100,-100],[200,150],[-250,-350],[150,-400],[350,-150],[-220,2
  bl:[[-100,850],[150,1050],[260,860],[-200,1150],[-230,600],[60,640]],
  em:[[800,150],[700,650],[1050,900],[1050,-50],[650,1050],[560,330]]};
 const K=[-150,-150];
-const VILL={Kingsrest:K,Millbrook:[-60,-470],Hollowfast:[-80,-1080],"Gull's Rest":[-800,400],Sunscar:[850,450],Mirelight:[-60,900]};
+const VILL={Kingsrest:K,Millbrook:[-60,-470],Rimehold:[-80,-1080],"Gull's Rest":[-800,400],Sunscar:[850,450],Mirelight:[-60,900]};
 const ST={Harrowford:[-385,-345],Oakmere:[165,-477],Thistledown:[225,25],Wrenfield:[-110,190],Rimeholt:[-587,-693],Wolfcairn:[426,-1021],Gullcliff:[-655,-505],Tidewatch:[-520,555],Reedmoor:[-140,520],Lanternbog:[180,900],Redmesa:[640,150],Dunehold:[865,805]};
 const RAILS=[
- [K,[-130,-320],VILL.Millbrook,[-20,-680],[-110,-900],VILL.Hollowfast,[200,-1120],ST.Wolfcairn],
+ [K,[-130,-320],VILL.Millbrook,[-20,-680],[-110,-900],VILL.Rimehold,[200,-1120],ST.Wolfcairn],
  [VILL.Millbrook,[50,-500],ST.Oakmere],
  [K,[-270,-230],ST.Harrowford,[-540,-440],ST.Gullcliff,[-640,-640],ST.Rimeholt],
  [K,[-300,-10],[-440,120],[-500,280],[-680,330],VILL["Gull's Rest"]],
@@ -193,7 +193,7 @@ const PLOTS=[
  {n:'Rimeholt',r:'fr',x:-520,z:-760,far:.75,land:'a shelf in the western foothills',odd:'The last stop on the Coast Line. Snow up here keeps footprints for days.',
   route:[[K,[-270,-230],ST.Harrowford,[-540,-440],ST.Gullcliff,[-640,-640],ST.Rimeholt]],way:'Coast Line, to the end',tags:{mining:2,sea:1,build:1}},
  {n:'Wolfcairn',r:'fr',x:520,z:-1010,far:1,land:'a high plateau north of the range',odd:'The farthest plot from Kingsrest. On clear nights you hear the train long before it arrives.',
-  route:[[K,[-130,-320],VILL.Millbrook,[-20,-680],[-110,-900],VILL.Hollowfast,[200,-1120],ST.Wolfcairn]],way:'North Line through Stag Pass and Hollowfast, to the end',tags:{explore:2,mining:1,fight:1}},
+  route:[[K,[-130,-320],VILL.Millbrook,[-20,-680],[-110,-900],VILL.Rimehold,[200,-1120],ST.Wolfcairn]],way:'North Line through Stag Pass and Rimehold, to the end',tags:{explore:2,mining:1,fight:1}},
  {n:'Gullcliff',r:'sa',x:-760,z:-560,far:.6,land:'a clifftop over the northern coast',odd:'The gulls go quiet a little before the fog arrives.',
   route:[[K,[-270,-230],ST.Harrowford,[-540,-440],ST.Gullcliff]],way:'Coast Line, second stop',tags:{build:2,fight:1,mining:1}},
  {n:'Tidewatch',r:'sa',x:-560,z:650,far:.7,land:'dunes above the southern shore',odd:'The tide leaves things on the sand. Mostly driftwood.',
