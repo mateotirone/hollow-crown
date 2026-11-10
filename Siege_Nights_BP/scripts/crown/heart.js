@@ -8,6 +8,7 @@ import { CROWN, IDS } from "./config.js";
 import { reachProblem } from "./rules.js";
 import { crown, saveCrown, announce, playerById } from "./state.js";
 import { award } from "./reign.js";
+import { sfx } from "../core/sfx.js";
 
 let reach = null; // { id, name, left } while someone has a hand on it (not saved: a reload lets go)
 
@@ -95,7 +96,7 @@ function heartTick() {
   try {
     for (const p of dim.getPlayers({ location: rest, maxDistance: 64 })) {
       p.onScreenDisplay.setActionBar(`§4${reach.name} is taking ${CROWN.relic}: ${reach.left}s`);
-      p.playSound("mob.warden.heartbeat");
+      sfx(p, "mob.warden.heartbeat");
     }
   } catch { /* not loaded */ }
 }
