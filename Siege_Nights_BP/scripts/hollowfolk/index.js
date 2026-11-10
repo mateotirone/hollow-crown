@@ -25,7 +25,7 @@ import { on, emit, onTick, moduleStore, addTests, assert, assertEqual, registerD
 import { UNDERTOW_ID, UNDERTOW_LAYOUT as L, HEART, pathX } from "../undertow/layout.js";
 import { RIVER_NODES, riverDistance } from "../undertow/rivers.js";
 import { SITES } from "../undertow/roads.js";
-import { heightAt, B } from "../undertow/terrain.js";
+import { heightAt, B, shardAt } from "../undertow/terrain.js";
 import { isBuilt } from "../undertow/builder.js";
 import { wardenData, wardenOnline, hollowStep } from "../undertow/warden.js";
 import { regentRules } from "../undertow/regent.js";
@@ -697,6 +697,17 @@ on("showcase", ({ player, dim, nextSpot, label }) => {
 
 // ---- self-tests ---------------------------------------------------------------------------------
 addTests("hollowfolk", {
+  "amethyst grows in patches across the Hollow, at every stage, and never carpets it": () => {
+    const stages = new Set();
+    let grown = 0, total = 0;
+    for (let x = -600; x < 600; x += 3) for (let z = 100; z < 2200; z += 3) {
+      const s = shardAt(x, z, "wood");
+      total++;
+      if (s >= 0) { grown++; stages.add(s); }
+    }
+    assert(stages.size === 4, `only ${stages.size} of 4 growth stages appear`);
+    assert(grown / total > 0.005 && grown / total < 0.06, `amethyst covers ${(100 * grown / total).toFixed(1)}% of the ground`);
+  },
   "every errand leads to a real place, and has its ask written": () => {
     for (const h of HAPPENINGS.filter((x) => x.site)) {
       assert(SITES.some((s) => s.id === h.site), `${h.id} points at a site that does not exist (${h.site})`);

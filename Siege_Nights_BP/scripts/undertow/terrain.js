@@ -48,6 +48,7 @@ export const B = {
   deckCracked: "siege:cracked_veinstone_bricks",
   ash: "siege:pale_ash",
   glint: "siege:glint_cluster",
+  budding: "minecraft:budding_amethyst",
   parapet: "minecraft:polished_blackstone_brick_wall",
 };
 
@@ -267,6 +268,20 @@ export function isRiver(x, z) {
 // How likely a blue crystal cluster is: sparse in the highlands, denser the nearer the Seat.
 const glintChance = (kind, z) => (kind === "high" ? 0.012 : 0) + (z > 1900 ? 0.03 * Math.min(1, (z - 1900) / 400) : 0);
 
+// Shard beds (Mateo, 2026-11-10: "add amethyst shards into the dimension as a naturally occurring
+// plant"). Vanilla amethyst growing out of the ground in patches: a budding amethyst block set into
+// the rock with a growth on top, at mixed stages. Because the root is real budding amethyst, a
+// harvested growth grows back by itself, and a full cluster drops vanilla amethyst shards.
+export const SHARD_STAGES = ["minecraft:small_amethyst_bud", "minecraft:medium_amethyst_bud", "minecraft:large_amethyst_bud", "minecraft:amethyst_cluster"];
+const SHARD_BED = { wood: 0.1, fen: 0.05, high: 0.16, waste: 0.08 }; // share of 8x8 patches that are beds
+// The growth stage (0 to 3) standing on this column, or -1 for none. Pure.
+export function shardAt(x, z, kind) {
+  const px = Math.floor(x / 8), pz = Math.floor(z / 8);
+  if (hash(px, pz, 311) >= (SHARD_BED[kind] ?? 0.08)) return -1;
+  if (hash(x, z, 312) >= 0.22) return -1;
+  return Math.min(3, Math.floor(hash(x, z, 313) * 4.6)); // a little more often full grown
+}
+
 const landmarkNearRoad = (cx, cz, col) => {
   for (let i = 0; i < 16; i += 3) for (let j = 0; j < 16; j += 3) if (col(i, j)?.road !== undefined && !inSpine(cx * 16 + i)) return true;
   return false;
@@ -397,6 +412,12 @@ function planLand(cx, cz) {
       set(x, top + 1, z, hash(x, z, 7) < (kind === "fen" ? 0.3 : 0.6) ? B.veilcap : B.glimbulb);
     } else if (hash(x, z, 304) < glintChance(kind, z)) {
       set(x, top + 1, z, B.glint);
+    } else {
+      const stage = shardAt(x, z, kind);
+      if (stage >= 0) {
+        set(x, top, z, B.budding);
+        ops.push({ a: [x, top + 1, z], b: [x, top + 1, z], block: SHARD_STAGES[stage], states: { "minecraft:block_face": "up" } });
+      }
     }
   }
 
