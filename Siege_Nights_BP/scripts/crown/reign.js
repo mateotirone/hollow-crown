@@ -2,11 +2,10 @@
 
 import { world, system, ItemStack, ItemLockMode } from "@minecraft/server";
 import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
-import {
-  isReady, getState, keepOf, overworld, title, onTick, on, emit, takeItems, countItem,
-  addSiegeSkipHook, addPlanHook, addRewardHook, FACTIONS, isGuard, guardOwner, guardCount, guardLimit, isOnline,
-} from "../siege/api.js";
+import { isReady, getState, keepOf, overworld, title, onTick, on, emit, countItem, addSiegeSkipHook, addPlanHook, addRewardHook, FACTIONS, isGuard, guardOwner, guardCount, guardLimit, isOnline } from "../siege/api.js";
 import { CROWN, IDS } from "./config.js";
+import { chargeE, giveCoins } from "../economy/coins.js";
+import { worth, fromEmeralds } from "../economy/rules.js";
 import { hollowStage, nightfall, tithed, claimNeeded, clamp, npcDecreeTarget, freshPick, lordApproach, cleanCitadelName } from "./rules.js";
 import {
   crown, saveCrown, ruler, isRuler, isCourt, rulerLabel, playerById, announce, giveItem, claimOf, seat, lords, lordOf, citadelName,
@@ -183,7 +182,7 @@ addRewardHook(({ player, emeralds }) => {
   if (cut > 0) {
     c.treasury += cut;
     saveCrown();
-    player.sendMessage(`§5The Royal Tithe takes ${cut} of your ${emeralds} emeralds for ${rulerLabel()}.`);
+    player.sendMessage(`§5The Royal Tithe takes ${worth(cut)} of your ${worth(emeralds)} for ${rulerLabel()}.`);
   }
   return kept;
 });
@@ -386,10 +385,11 @@ const OSWIN_LETTER = [
   "§r§8[There is no name. The wax seal has been pressed flat with a thumb.]",
 ].join("\n");
 
+// Costs and the Treasury are counted in the old unit (CROWN config, saved state); one is 8 coins.
 const pay = (player, cost) => {
   const c = crown();
   const fromTreasury = Math.min(c.treasury, cost);
-  if (!takeItems(player, "minecraft:emerald", cost - fromTreasury)) return false;
+  if (!chargeE(player, cost - fromTreasury, "throne")) return false;
   c.treasury -= fromTreasury;
   saveCrown();
   return true;
@@ -430,36 +430,36 @@ export function throneMenu(player) {
     const form = new ActionFormData().title("The Throne").body([...crownStatus(player), "", ...annalLines()].join("\n")).button("Close");
     return show(player, form, []);
   }
-  const body = [...crownStatus(player), `Royal Treasury: §a${c.treasury} emeralds§r`, `Royal Guard: ${guardCount(r.id)}/${guardLimit(r.id)}`,
+  const body = [...crownStatus(player), `Royal Treasury: §a${worth(c.treasury)}§r`, `Royal Guard: ${guardCount(r.id)}/${guardLimit(r.id)}`,
     c.decrees.siege ? `§cDecree of Siege: ${c.names[c.decrees.siege.target] ?? "a settlement"} (${FACTIONS[c.decrees.siege.faction]?.name ?? "any"})` : "",
     c.decrees.peace ? `§aDecree of Peace: ${c.names[c.decrees.peace] ?? "a settlement"}` : ""].filter((l, i, all) => l || all[i - 1]);
   const form = new ActionFormData().title(`${rulerLabel()}`).body(body.join("\n"));
   const actions = [];
   const add = (label, action, icon) => { form.button(label, icon); actions.push(action); };
-  add(`Decree of Siege (${CROWN.decreeSiegeCost} emeralds)`, () => decreeMenu(player, "siege"), "textures/items/siege_war_horn");
-  add(`Decree of Peace (${CROWN.decreePeaceCost} emeralds)`, () => decreeMenu(player, "peace"), "textures/items/siege_writ");
+  add(`Decree of Siege (${worth(CROWN.decreeSiegeCost)})`, () => decreeMenu(player, "siege"), "textures/items/siege_war_horn");
+  add(`Decree of Peace (${worth(CROWN.decreePeaceCost)})`, () => decreeMenu(player, "peace"), "textures/items/siege_writ");
   add(`Royal Tithe: ${c.tithe}% (change)`, () => {
     c.tithe = CROWN.titheSteps[(CROWN.titheSteps.indexOf(c.tithe) + 1) % CROWN.titheSteps.length];
     saveCrown();
     announce(c.tithe ? `§5By royal decree, ${c.tithe}% of all siege winnings now go to ${rulerLabel()}.` : "§aThe Royal Tithe has been lifted.");
     throneMenu(player);
-  }, "textures/items/emerald");
-  add(`Withdraw the Treasury (${c.treasury})`, () => {
+  }, "textures/items/siege_gold_coin");
+  add(`Withdraw the Treasury (${worth(c.treasury)})`, () => {
     if (!c.treasury) return player.sendMessage("§7The Treasury is empty.");
     let left = c.treasury;
     c.treasury = 0;
     saveCrown();
-    for (; left > 0; left -= 64) giveItem(player, new ItemStack("minecraft:emerald", Math.min(64, left)));
-  }, "textures/items/emerald");
+    giveCoins(player, fromEmeralds(left)); // coins that were already paid in as tithes and decrees
+  }, "textures/items/siege_gold_coin");
   // Hidden until the ruler has found and read the letter: only then do they know there is something to quiet
-  if (doom() && r.readLetter) add(`Quiet it (${CROWN.purifyCost} emeralds)`, () => {
+  if (doom() && r.readLetter) add(`Quiet it (${worth(CROWN.purifyCost)})`, () => {
     if (c.purifiedDay === world.getDay()) return player.sendMessage("§7It will not be quieted twice in one day.");
-    if (!pay(player, CROWN.purifyCost)) return player.sendMessage("§cNot enough emeralds in the Treasury or your pack.");
+    if (!pay(player, CROWN.purifyCost)) return player.sendMessage("§cNot enough coin in the Treasury or your pack.");
     c.purifiedDay = world.getDay();
     r.hollowing = clamp(r.hollowing - CROWN.purifyAmount, 0, 100);
     saveCrown();
     player.playSound("random.totem");
-    player.sendMessage("§7You pour emeralds into the dark under the throne. §aThe whispers fade a little.");
+    player.sendMessage("§7You pour coin into the dark under the throne. §aThe whispers fade a little.");
   });
   if (r.hollowing >= 50 || r.readLetter) add("§8Something is tucked under the seat", () => {
     r.readLetter = true;
@@ -485,7 +485,7 @@ function decreeMenu(player, kind) {
     const [owner, keep] = targets[r.selection];
     c.names[owner] = keep.name;
     if (kind === "peace") {
-      if (!pay(player, CROWN.decreePeaceCost)) return player.sendMessage("§cNot enough emeralds.");
+      if (!pay(player, CROWN.decreePeaceCost)) return player.sendMessage("§cNot enough coin.");
       c.decrees.peace = owner;
       c.unrest = Math.max(0, c.unrest - 1);
       saveCrown();
@@ -496,7 +496,7 @@ function decreeMenu(player, kind) {
     for (const f of factions) pickForm.button(FACTIONS[f].name);
     pickForm.show(player).then((p) => {
       if (p.canceled) return;
-      if (!pay(player, CROWN.decreeSiegeCost)) return player.sendMessage("§cNot enough emeralds.");
+      if (!pay(player, CROWN.decreeSiegeCost)) return player.sendMessage("§cNot enough coin.");
       c.decrees.siege = { target: owner, faction: factions[p.selection] };
       c.decrees.lastTarget = owner;
       c.unrest += CROWN.unrestPerDecree;

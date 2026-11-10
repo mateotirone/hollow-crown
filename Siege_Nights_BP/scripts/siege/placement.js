@@ -16,7 +16,7 @@ import { blockKey, damageMap, lightCharge, saveDamage } from "./walls.js";
 
 export const PLACE_MESSAGES = {
   [DESK]: "§7Quartermaster's desk set up. Bring an unemployed villager to it and they'll take the job.",
-  "siege:barracks": "§7Barracks built. Bring an unemployed villager here and click it with 5 emeralds to recruit a Man-at-Arms (sneak + click for an Archer).",
+  "siege:barracks": "§7Barracks built. Bring an unemployed villager here and click it with coins in hand (40 Regals) to recruit a Man-at-Arms (sneak + click for an Archer).",
 };
 
 // Undo a placement and hand the block back

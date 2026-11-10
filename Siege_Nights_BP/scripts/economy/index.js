@@ -5,10 +5,10 @@
 //   /scriptevent siege:economy_give <coins>         coins into your pockets (testing)
 //   /scriptevent siege:economy_stats                coins paid out and taken in so far, world-wide
 
-import { system } from "@minecraft/server";
+import { world, system, GameMode } from "@minecraft/server";
 import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
-import { addKeepMenuButtons } from "../siege/api.js";
-import { ECON } from "./config.js";
+import { addKeepMenuButtons, takeItems } from "../siege/api.js";
+import { ECON, COIN, GOLD } from "./config.js";
 import { coins } from "./rules.js";
 import { carried, banked, deposit, withdraw, giveCoins, totals } from "./coins.js";
 import "./shops.js";
@@ -56,5 +56,24 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
   } else if (event.id === "siege:economy_stats") {
     const t = totals();
     player.sendMessage(`§6Economy:§7 ${coins(t.minted)} paid out to players, ${coins(t.sunk)} spent at shops. You carry ${coins(carried(player))}, strongbox ${coins(banked(player))}.`);
+  }
+});
+
+// ---------- making change in your hand ----------
+// Sneak + use a Gold Regal to break it into 64 Regals. Sneak + use a full stack of 64 Regals to bind it into a Gold Regal.
+// Villager trades (the Quartermaster) can't make change, so players need a way to do it anywhere.
+
+world.afterEvents.itemUse.subscribe(({ source: player, itemStack }) => {
+  if (player?.typeId !== "minecraft:player" || !itemStack || !player.isSneaking) return;
+  if (itemStack.typeId === GOLD) {
+    if (!takeItems(player, GOLD, 1)) return;
+    if (player.getGameMode() === GameMode.Creative) return; // takeItems is free there: don't print money
+    giveCoins(player, ECON.goldWorth - 1); // 63 + 1 below, so they arrive as small coins, not as the same Gold Regal
+    giveCoins(player, 1);
+    player.onScreenDisplay.setActionBar(`§7One ${ECON.gold} broken into ${coins(ECON.goldWorth)}`);
+  } else if (itemStack.typeId === COIN && itemStack.amount >= ECON.goldWorth) {
+    if (player.getGameMode() === GameMode.Creative || !takeItems(player, COIN, ECON.goldWorth)) return;
+    giveCoins(player, ECON.goldWorth);
+    player.onScreenDisplay.setActionBar(`§7${coins(ECON.goldWorth)} bound into one ${ECON.gold}`);
   }
 });

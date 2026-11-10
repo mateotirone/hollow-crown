@@ -1,7 +1,7 @@
 import { addTests, assert, assertEqual } from "../core/tests.js";
 import { ItemTypes } from "@minecraft/server";
 import { ECON, JOBS, JOB_IDS, LINES, REGIONS, COIN, GOLD } from "./config.js";
-import { regional, appetite, payout, cost, asCoins, coins, fromEmeralds, loopholes } from "./rules.js";
+import { regional, appetite, payout, cost, asCoins, coins, worth, fromEmeralds, loopholes } from "./rules.js";
 
 const iron = JOBS.moneyer.buys.find((g) => g.id === "minecraft:iron_ingot");
 const wheat = JOBS.farmer.buys.find((g) => g.id === "minecraft:wheat");
@@ -49,6 +49,10 @@ addTests("economy", {
       assert(LINES[id]?.day.length && LINES[id]?.night.length, `${id} has nothing to say`);
       assert(cost(job.sells[0] ?? { price: 1, lot: 1 }, 3, 0.01) >= 3, "never free");
     }
+  },
+  "old emerald prices read as coins": () => {
+    assertEqual(worth(5), `40 ${ECON.many}`);
+    assertEqual(fromEmeralds(24), 3 * ECON.goldWorth, "an elytra, or a foal, is 3 Gold Regals");
   },
   "the coin items exist": () => assert(ItemTypes.get(COIN) && ItemTypes.get(GOLD), "siege:coin / siege:gold_coin missing from the pack"),
 });

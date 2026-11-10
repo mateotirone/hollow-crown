@@ -21,7 +21,7 @@ import { freeColor } from "../siege/territory.js";
 import { BALLISTA, BARRACKS, DESK, KEEP_BANNER, QUARTERMASTER, RAM_ENGINE, TREBUCHET } from "../siege/constants.js";
 
 const SUPPLIES = [
-  ["minecraft:emerald", 64], ["minecraft:iron_ingot", 64], ["minecraft:diamond", 32], ["minecraft:netherite_scrap", 16],
+  ["siege:gold_coin", 8], ["minecraft:iron_ingot", 64], ["minecraft:diamond", 32], ["minecraft:netherite_scrap", 16],
   ["minecraft:netherite_ingot", 4], ["minecraft:cobblestone", 64], ["minecraft:stone_bricks", 64],
   ["minecraft:red_dye", 8], ["minecraft:blue_dye", 8], ["minecraft:yellow_dye", 8], ["minecraft:bow", 1], ["minecraft:arrow", 64],
 ];
