@@ -191,6 +191,8 @@ Run the showcase first (`/scriptevent siege:showcase`): the back row has four Ar
 7. Click Sister Wren in survival. **Expect:** her greeting with buttons, and a different greeting next time. Ask "Why is it always night?" then "Which clock was first?". **Expect:** she is cut off, you Slip into the Hollow for a few seconds (or black out, if the Hollow isn't set up), and when you click her again she reacts. If dialogue buttons do nothing, tell me: that's the one part I could not check offline.
 8. `/scriptevent siege:lore_give survey`, read and shelve notes I to VI, then "Name the Thin Place" in the catalog.
 
+0k2. **Ravens on the wall.** Stand inside your settlement and run `/scriptevent siege:ravens`. Besides the message, that many ravens should be sitting in a row on top of the wall nearest you (or in a ring near the keep if you have no wall), all facing outward. Check they sit on the wall top and not inside it or in the air.
+
 0l. **The morning after the first sighting.** Run `/scriptevent siege:morning_after`. Three lines from your own townsfolk should appear a few seconds apart. Then talk to Sigrun, Brother Cael, Old Mag, Sir Aldous or Archivist Pell (after you have met them): each opens once with a new conversation about the tall thing at your wall, and never repeats it. In a real game this happens the dawn after the siege where the first Hollow soldiers appear.
 
 0m. **The story spine.** `/scriptevent siege:local_lore <plot>` and read the first book: its last page, in a newer hand, should send you to Millbrook and Sister Wren, and Millbrook should appear as a lead in the Ledger. Solve the plot's mystery in the Ledger: the answer ends with a paragraph about your own region's boss and adds its place as a lead. Kill a regional boss (`/scriptevent siege:bestiary_summon reeve`): besides its book you get a line about a scrap and two new leads in two other regions. After the third regional boss, a purple line about a surveyor appears and the first Field Note is in your pack.
@@ -394,7 +396,13 @@ In game (cheats on, a settlement founded, or `/scriptevent siege:showcase` first
 7. `/scriptevent siege:reach_reset` puts it all back. `/scriptevent siege:reach_boss <reeve|huntsman|bride|seneschal|mother|warlord_king|choir>` and
    `/scriptevent siege:reach_set <0-100>` move the story by hand.
 
-Things I could not check offline: whether a dusk-to-midnight wait feels right, whether Hollow soldiers march on the keep heart like raiders do,
+10. Omens you can see and hear: stand inside a settlement with torches, a door left open, some water, a few farm animals and a dog nearby, then
+   `/scriptevent siege:reach_omen <name>` plays one at once (no name: a random one, and it lists them all). Names: pets_hide, stillness, humming,
+   torches_lean, far_bell, animals_face, gate_creak, ticking, voices, water_trembles, arrows, cellar, doors_shut, guards_quiet, small_thing,
+   light_changes, torches_gutter. On a real siege evening one happens each in-game hour from dusk, with its grey line, and never twice in an evening.
+   All of them point at the same wall for the night.
+
+Things I could not check offline (every omen is in this list: none of them can be seen in the simulator): whether a dusk-to-midnight wait feels right, whether Hollow soldiers march on the keep heart like raiders do,
 the darkness and knockback effects, the storms, and how the hurried evening looks in the sky.
 
 ## Choirsteel gear (bestiary)
@@ -476,3 +484,21 @@ In game: Creative, cheats on. `/scriptevent siege:showcase` puts eight steeds in
 23. Leave a called carriage empty for a minute or two. ✅ It tidies itself away.
 
 Things I could not check without the game, so please look closely: that the steeds look and ride like real horses (saddle, armor and jump bar all there), that the caparison color only tints the cloth, how the Glimstrider's glow looks, that four people really fit in the carriage and it faces the right way on the rail, and whether the carriage speed feels right.
+## Sounds (scripts/sound/, SOUND-LIST.md)
+
+Nothing here has been heard in the game yet, so your ears are the test.
+
+1. Run `/scriptevent siege:sound`. **Expect:** a "Sound board" menu with three groups. Pick "Signature sounds" and click a few: each plays, and the action bar names it and says "stand-in" (or "recording" once you have installed one).
+2. Run `/scriptevent siege:sound signature`. **Expect:** the signature sounds one after another, about 8 seconds apart, each named on screen. The Rift and the Hollow's ambience are silent here until their recordings exist.
+3. Ring a vanilla bell, then run `/scriptevent siege:sound block.bell.hit`. **Expect:** ours is the same bell with a deeper note under it and a slightly sour edge.
+4. Open any menu that buys or confirms something. **Expect:** the "done" sound is lower and quieter than the vanilla level-up jingle.
+5. Start a siege (`/scriptevent siege:reach_night`). **Expect:** a low doubled horn with a far thunder under it, not the plain raid horn.
+6. After installing a recording (see SOUND-LIST.md), rebuild, reload the world and run step 1 again. **Expect:** that sound says "recording" and plays your file.
+
+Tell me about: anything too loud, too quiet, silent, or that made you jump. Nothing should.
+## Omen ravens (bestiary)
+
+- At dusk or night, `/scriptevent siege:raven_row 9` puts nine ravens in a row in front of you, all facing north, with one place left empty. `/scriptevent siege:raven_clear` removes them.
+- Walk up to them, hit them, push them: nothing happens and they do not turn. They make no sound.
+- Wait for morning, or start a siege: they are gone.
+

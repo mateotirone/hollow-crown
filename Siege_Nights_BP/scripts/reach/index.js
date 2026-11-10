@@ -38,10 +38,12 @@ import * as riftSite from "../undertow/source.js";
 import {
   REACH, STAGES, LONG, AFTER, stage, stageFor, capReach, nightKind, isSiegeKind, profile, openTime, waveTime, waveRole, waveShare,
   hollowCount, tideLull, pressureMult, clock, nextSiege, duskLine, dayRoll, clamp, troopMix, WATCHER_FROM_REACH,
-  musterGap, duskSpeed, watchHint,
-  WAVES, SHAPES, pickShape, hourLine, HONOURS, NEMESIS, NEW_MODIFIERS, HOLLOW_TWISTS_FROM, CAPTAIN_NAMES, CAPTAIN_TITLES,
+  musterGap, duskSpeed, watchHint, hourOmen, omenSide, DUSK_ACT,
+  WAVES, SHAPES, pickShape, HONOURS, NEMESIS, NEW_MODIFIERS, HOLLOW_TWISTS_FROM, CAPTAIN_NAMES, CAPTAIN_TITLES,
 } from "./rules.js";
+import { performOmen, ACTS } from "./omens.js";
 import "./tests.js";
+import { sfx } from "../core/sfx.js";
 
 Object.assign(MODIFIERS, NEW_MODIFIERS); // so the war plan can name them
 
@@ -119,7 +121,7 @@ const facts = () => ({ bosses: Object.keys(store.data.bosses).length, choir: sto
 const opts = () => ({ firstDay: SETTINGS.firstSiegeDay, every: SETTINGS.siegeEveryNNights, salt: store.data.salt, musterDay: store.data.musterDay });
 const everyone = () => world.getPlayers();
 const tell = (text) => { for (const p of everyone()) p.sendMessage(text); };
-const sound = (player, id, options) => { try { player.playSound(id, options); } catch { /* cosmetic */ } };
+const sound = (player, id, options) => { try { sfx(player, id, options); } catch { /* cosmetic */ } };
 const anyKeeps = () => Object.keys(getState().keeps).length > 0;
 
 export function tonightKind(day = world.getDay()) {
@@ -428,9 +430,10 @@ on("assaultIncoming", ({ assault }) => {
     for (const p of everyone()) {
       if (role === "toll" && n.clock) {
         title(p, "§43:17", n.glimpse.includes(settlementAt(p.location) ?? p.id) ? "§7 " : n.kind === "muster" ? "§7The last of them" : "§7Everything that was waiting, comes");
-        sound(p, "block.bell.hit", { pitch: 0.5, volume: 1 });
+        sound(p, "sig.toll_317");
       } else {
         p.onScreenDisplay.setActionBar(line);
+        if (role === "tide") sound(p, "sig.storm_tide");
       }
       if (role === "dark" && settlementAt(p.location)) {
         try { p.addEffect("darkness", 120, { showParticles: false }); } catch { /* cosmetic */ }
@@ -503,7 +506,7 @@ function firstGlimpse(owners) {
     for (const p of everyone()) {
       if (!there(p)) continue;
       p.sendMessage("§8Something is walking up between them. It is not one of them.");
-      sound(p, "ambient.cave", { volume: 1 });
+      sound(p, "sig.first_glimpse");
     }
     emit("firstGlimpse", { owners: [...owners] });
   }, 120);
@@ -735,10 +738,16 @@ function reachTick() {
   store.save();
   for (const p of everyone()) {
     if (p.dimension.id !== "minecraft:overworld") continue;
-    if (hour === 0) p.sendMessage(duskLine(kind, d.stage, day));
-    else if (kind !== "muster") {
-      p.onScreenDisplay.setActionBar(hourLine(day, d.salt, hour));
-      sound(p, "ambient.cave", { volume: 0.4 });
+    // the omen happens around anyone standing in a settlement; its line is the backup, and all anyone elsewhere gets
+    const home = keepOf(settlementAt(p.location));
+    const here = home ? keepCenter(home) : undefined;
+    if (hour === 0) {
+      p.sendMessage(duskLine(kind, d.stage, day));
+      if (kind !== "muster") performOmen(DUSK_ACT, p, here, omenSide(day, d.salt));
+    } else if (kind !== "muster") {
+      const omen = hourOmen(day, d.salt, hour);
+      p.onScreenDisplay.setActionBar(omen.line);
+      if (!performOmen(omen.id, p, here, omenSide(day, d.salt))) sound(p, "ambient.cave", { volume: 0.4 });
     }
   }
 }
@@ -902,6 +911,16 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
       d.glimpsed = false;
       for (const notes of Object.values(d.keeps)) notes.glimpsed = false;
       break;
+    case "siege:reach_omen": {
+      // play one omen around you now (stand in a settlement): /scriptevent siege:reach_omen torches_lean, or no name for a random one
+      const ids = Object.keys(ACTS);
+      const id = ids.includes(word) ? word : ids[Math.floor(Math.random() * ids.length)];
+      const home = player && keepOf(settlementAt(player.location));
+      if (!home) { say("§7Stand inside a settlement first."); return; }
+      performOmen(id, player, keepCenter(home), omenSide(world.getDay(), d.salt));
+      say(`§7Omen: ${id}. All of them: ${ids.join(", ")}`);
+      return;
+    }
     case "siege:reach_rift":
       riftOpened();
       break;

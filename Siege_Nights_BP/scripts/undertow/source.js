@@ -13,6 +13,7 @@ import { world, system, GameMode, EquipmentSlot } from "@minecraft/server";
 import { load, save, loadPlain, savePlain, say, FACING } from "./data.js";
 import { planSeam, placeCells, tearOpen, standPoint, SEAM } from "./rift.js";
 import { TEXT } from "./layout.js";
+import { sfx } from "../core/sfx.js";
 
 export const SOURCE_SITE_IDS = [
   "drowned_chapel",
@@ -96,7 +97,7 @@ export function openRift(by) {
   tearOpen(world.getDimension(OVERWORLD), site, site.facing, () => {
     world.sendMessage(TEXT.riftOpened);
     for (const p of world.getAllPlayers()) {
-      try { p.playSound("mob.warden.roar", { volume: 0.6, pitch: 0.5 }); } catch {}
+      try { sfx(p, "mob.warden.roar", { volume: 0.6, pitch: 0.5 }); } catch {}
     }
     try { system.sendScriptEvent("siege:undertow_rift_opened", JSON.stringify({ site: id, by: by?.name })); } catch {}
   });
@@ -137,14 +138,14 @@ function strike(player, loc) {
   useUpFork(player);
   if (!real) {
     try {
-      player.dimension.playSound("random.anvil_land", at, { volume: 1, pitch: 0.5 });
+      sfx(player.dimension, "random.anvil_land", at, { volume: 1, pitch: 0.5 });
       player.dimension.spawnParticle("minecraft:critical_hit_emitter", at);
     } catch {}
     say(player, "§7The fork rings against dead stone and shatters. Nothing answers here.");
     try { system.sendScriptEvent("siege:undertow_fork_failed", JSON.stringify({ site, player: player.name })); } catch {}
     return;
   }
-  try { player.dimension.playSound("block.bell.resonate", at, { volume: 2, pitch: 0.5 }); } catch {}
+  try { sfx(player.dimension, "block.bell.resonate", at, { volume: 2, pitch: 0.5 }); } catch {}
   say(player, "§dThe fork sings. Something on the other side of the stone sings back.");
   openRift(player);
 }
@@ -160,7 +161,7 @@ export function sourceSignsTick(isNight) {
   const near = world.getAllPlayers().some((p) => p.dimension.id === OVERWORLD && dist2(p.location, at) < 32 * 32);
   if (!near) return;
   try {
-    if (isNight) dim.playSound("block.bell.hit", at, { volume: 1.2, pitch: 0.35 });
+    if (isNight) sfx(dim, "block.bell.hit", at, { volume: 1.2, pitch: 0.35 });
     dim.spawnParticle("minecraft:portal_reverse_particle", at);
   } catch {}
   const signs = load(K_SIGNS, { sculk: 0 });

@@ -3,6 +3,7 @@
 
 import { world, system } from "@minecraft/server";
 import { levelFromRenown, pointsForLevel, levelTitle, rankOf, LEVEL_UNLOCKS, MAX_LEVEL } from "./skills.js";
+import { sfx } from "../core/sfx.js";
 
 export const HERO_PROP = "siege:townhall_hero";
 
@@ -67,7 +68,7 @@ export function grantPoints(player, points, reason = "") {
   note(hero, `+${points} SP ${reason}`.trim());
   saveHero(player);
   player.sendMessage(`§b+${points} skill point${points === 1 ? "" : "s"}§7${reason ? ` (${reason})` : ""}.`);
-  player.playSound("random.orb", { pitch: 1.4 });
+  sfx(player, "random.orb", { pitch: 1.4 });
 }
 
 // Give Renown (XP). Levels up as needed, each level paying out skill points.
@@ -90,7 +91,7 @@ export function grantRenown(player, amount, reason = "", quiet = false) {
       subtitle: `§7${levelTitle(now)} · +${gained} skill point${gained === 1 ? "" : "s"}${unlock ? ` · §e${unlock}` : ""}`,
       fadeInDuration: 10, stayDuration: 60, fadeOutDuration: 20,
     });
-    player.playSound("random.levelup");
+    sfx(player, "random.levelup");
     if (now === MAX_LEVEL) world.sendMessage(`§6${player.name} has become a Legend of the Realm.`);
     return;
   }

@@ -6,6 +6,7 @@
 import { system } from "@minecraft/server";
 import { FACING } from "./data.js";
 import { hash } from "./terrain.js";
+import { sfx } from "../core/sfx.js";
 
 export const SEAM = "siege:rift_seam";
 export const EDGE = "siege:rift_edge";
@@ -72,12 +73,14 @@ export function tearOpen(dim, bottom, facing, onDone) {
   const mid = CRACK_HEIGHT / 2;
   const steps = 8;
   const center = { x: bottom.x + 0.5, y: bottom.y + mid, z: bottom.z + 0.5 };
+  // one recording for the whole tear once it is installed; until then each band cracks on its own
+  const recorded = sfx(dim, "sig.rift_open", center, { volume: 4 });
   for (let s = 0; s <= steps; s++) {
     system.runTimeout(() => {
       const band = cells.filter((c) => Math.min(steps, Math.floor(Math.abs(c.row - mid) * (steps / (mid + 1)))) === s);
       placeCells(dim, band);
       try {
-        dim.playSound(s % 2 ? "random.explode" : "block.bell.hit", center, { volume: 1.5, pitch: 0.4 + s * 0.05 });
+        if (!recorded) sfx(dim, s % 2 ? "random.explode" : "block.bell.hit", center, { volume: 1.5, pitch: 0.4 + s * 0.05 });
         dim.spawnParticle("minecraft:huge_explosion_emitter", center);
       } catch {}
       try {

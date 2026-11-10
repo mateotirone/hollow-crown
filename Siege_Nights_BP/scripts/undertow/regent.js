@@ -29,6 +29,7 @@ import { load, save, say } from "./data.js";
 import { chargeE } from "../economy/coins.js";
 import { worth } from "../economy/rules.js";
 import { spawnChampion } from "../bestiary/champions.js";
+import { sfx } from "../core/sfx.js";
 
 export const REGENT = {
   riseAfterDays: 2, // days after the Hollow's lord falls with no player ruler
@@ -185,7 +186,7 @@ export function regentNotices(p, block) {
   if (last !== undefined && now - last < 900) return false;
   warned.set(p.id, now);
   p.onScreenDisplay.setTitle("§5The Hollow has noticed you", { subtitle: `§7${r.name}: "${VOICE.lines.thief}"`, fadeInDuration: 5, stayDuration: 60, fadeOutDuration: 15 });
-  p.playSound("block.bell.hit", { volume: 1, pitch: 0.4 });
+  sfx(p, "block.bell.hit", { volume: 1, pitch: 0.4 });
   emit("oreAlarm", { miner: p.id, minerName: p.name, x: block.x, y: block.y, z: block.z, wardenOnline: false, regent: true });
   system.runTimeout(() => {
     try {
@@ -227,7 +228,7 @@ world.afterEvents.entityHurt.subscribe((e) => {
       dim.spawnParticle("minecraft:sonic_explosion", seatAt);
       for (const p of dim.getPlayers({ location: seatAt, maxDistance: 40 })) {
         p.onScreenDisplay.setTitle(`§5${r.name} rises`, { subtitle: "§7The audience is over", fadeInDuration: 5, stayDuration: 50, fadeOutDuration: 15 });
-        p.playSound("mob.wither.spawn", { volume: 0.6, pitch: 0.7 });
+        sfx(p, "mob.wither.spawn", { volume: 0.6, pitch: 0.7 });
       }
     } catch { /* champions not available: the seated Regent simply stays killable */ }
     emit("regentAttacked", { player: by.id, x: seatAt.x, y: seatAt.y, z: seatAt.z });
