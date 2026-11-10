@@ -1,7 +1,7 @@
 // Settlement building in the test world (/scriptevent siege:showcase): a Mason's Bench with its
 // mason, a Foundation Stone to try, and every pre-designed building raised in a row to the east.
 
-import { on } from "../siege/api.js";
+import { on, regionalId, STONE_REGIONS } from "../siege/api.js";
 import { STYLE_IDS } from "../townhall/styles.js";
 import { BUILDINGS } from "./buildings.js";
 import { BENCH, registerBench } from "./mason.js";
@@ -18,6 +18,19 @@ on("showcase", ({ player, dim, origin, nextSpot, label }) => {
   const stone = nextSpot();
   dim.getBlock(stone)?.setType(FOUNDATION);
   label(stone, "Foundation Stone\nPick it up, place\nit, click it");
+
+  // Every region's wall and roof blocks, one stack per region: palisade, wall planks, roof shingles, gate, portcullis
+  for (const region of STONE_REGIONS) {
+    const spot = nextSpot();
+    ["palisade", "wall_planks", "roof_shingles", "castle_gate", "portcullis"].forEach((name, i) => {
+      try {
+        dim.getBlock({ x: spot.x, y: spot.y + i, z: spot.z })?.setType(regionalId(name, region));
+      } catch {
+        // a block this pack does not have yet
+      }
+    });
+    label(spot, `${region}\nPalisade, planks,\nshingles, gates`);
+  }
 
   // One of each building, east of the settlement, each in the next regional style
   BUILDINGS.forEach((b, i) => {

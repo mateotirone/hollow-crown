@@ -1,0 +1,31 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "siege:portcullis_emberwaste_recipe"
+    },
+    "tags": [
+      "siege_workshop"
+    ],
+    "pattern": [
+      "BBB",
+      "BSB",
+      "BBB"
+    ],
+    "key": {
+      "B": {
+        "item": "minecraft:iron_bars"
+      },
+      "S": {
+        "item": "siege:castle_stone_emberwaste"
+      }
+    },
+    "result": {
+      "item": "siege:portcullis_emberwaste",
+      "count": 4
+    },
+    "unlock": {
+      "context": "AlwaysUnlocked"
+    }
+  }
+}

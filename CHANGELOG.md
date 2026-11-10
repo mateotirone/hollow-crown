@@ -9,6 +9,7 @@ How versions work is in [`docs/RELEASING.md`](docs/RELEASING.md).
 Everything merged to `main` since the last release goes here. Each pull request that changes what players see adds a line under one of these headings.
 
 ### Added
+- Every region has its own Castle Gate, Portcullis, Palisade, Wall Planks and Roof Shingles, craftable at the Siege Workshop. Settlement walls are built from them: a Blackfen palisade no longer looks like a Vale one, and each region's gate and portcullis match its wall. Flat roofs and snowy ridges on settlement buildings use the region's shingles.
 - Clue Sense works: while you carry the Ledger of Whispers, it whispers on the action bar (with a soft page turn) when a Dusty Tome you have not copied, or a Lore Tome lying on the ground, is within 16 blocks, and says which way.
 - Every skill on the Tree of Oaths shows its own painted icon: on the tree screen for skills you hold or can swear now, and on every row of the plain lists.
 - Steeds wear their own painted coats: one for each of the five regional breeds, a piebald coat for crossbreds, a see-through Glimstrider, plate barding on the Knight Warhorse, and a proper cloth Caparison in your banner color. Horses you already own change over by themselves.
