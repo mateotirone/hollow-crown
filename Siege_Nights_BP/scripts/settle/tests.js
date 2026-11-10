@@ -9,7 +9,7 @@ import { localStock, stoneStock, niceName } from "./mason.js";
 import { STONE_FAMILY, CASTLE_STONES, stoneId } from "../siege/api.js";
 import { MATERIALS } from "./rules.js";
 import { HALL, MASON, SLOTS, place, slotsFor } from "./layout.js";
-import { WALLS, WALL_LEVELS, MAX_WALL, smoothGround, groundProblem, wallColumns, onWallLine, bearingToAngle, columnKinds, repairCost, wallArmor } from "./walldata.js";
+import { WALLS, WALL_LEVELS, MAX_WALL, smoothGround, groundProblem, wallColumns, onWallLine, bearingToAngle, columnKinds, repairCost, wallArmor, wallSeed, VARIATION } from "./walldata.js";
 
 const base = { creative: false, overworld: true, typeId: "minecraft:stone_bricks", land: "me", mine: true, reserve: undefined, wildsClosed: true, hasKeep: true };
 
@@ -203,5 +203,27 @@ addTests("settle walls", {
     assertEqual(wallArmor(1), 0);
     assertEqual(wallArmor(10), 3);
     for (let level = 2; level <= MAX_WALL; level++) assert(wallArmor(level) >= wallArmor(level - 1), `level ${level} is weaker than the one before`);
+  },
+});
+addTests("settle walls", {
+  "walls vary along their length and from one settlement to the next, the same way every time": () => {
+    const smooth = new Array(WALLS.stations).fill(64);
+    const wall = (center, level) => {
+      const out = [];
+      for (const col of wallColumns({ center, level, gateAngle: bearingToAngle(180), smooth })) {
+        for (const [y, kind] of columnKinds(WALL_LEVELS[level], col, wallSeed(center))) out.push(`${col.x - center.x},${y},${col.z - center.z},${kind}`);
+      }
+      return out;
+    };
+    const here = { x: 100, y: 64, z: -300 }, there = { x: -820, y: 64, z: 415 };
+    for (const level of [2, 5, 8, 10]) {
+      const a = wall(here, level);
+      assertEqual(a.join("|"), wall(here, level).join("|"), `level ${level} must rebuild exactly the same`);
+      assert(a.join("|") !== wall(there, level).join("|"), `level ${level}: two settlements have the same wall`);
+    }
+    const kinds = (level) => new Set(wall(here, level).map((c) => c.split(",")[3]));
+    assert(kinds(8).has("slit") && kinds(8).has("light") && kinds(8).has("stone") && kinds(8).has("smooth"), "a Curtain Wall has slits, lanterns and weathered stone");
+    const weathered = wall(here, 8).filter((c) => c.endsWith(",stone")).length / wall(here, 8).length;
+    assert(weathered > 0.03 && weathered < VARIATION.weather, `weathering should be a little, got ${weathered}`);
   },
 });

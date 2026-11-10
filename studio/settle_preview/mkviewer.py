@@ -8,7 +8,7 @@ COL = eval(re.search(r"COL = (\{.*?\})\ndef render", src, re.S).group(1))
 COL.update({"anvil": (68, 68, 72), "barrel": (122, 90, 52), "blast_furnace": (80, 80, 84), "cauldron": (58, 58, 62), "chest": (160, 112, 40),
     "composter": (118, 84, 48), "crafting_table": (140, 100, 60), "farmland": (92, 60, 34), "furnace": (110, 110, 110), "grass_path": (150, 126, 70),
     "grindstone": (140, 140, 140), "hay_block": (200, 170, 40), "water": (60, 110, 200), "white_wool": (234, 236, 236), "siege:portcullis": (66, 68, 74),
-    "plot marker": (204, 172, 96), "hall ground": (178, 122, 104), "siege:mason_bench": (150, 130, 100), "siege:archive_shelf": (126, 84, 58)})
+    "plot marker": (204, 172, 96), "hall ground": (178, 122, 104), "siege:mason_bench": (150, 130, 100), "siege:archive_shelf": (126, 84, 58), "siege:arrow_slit": (58, 56, 54)})
 tt = json.load(open(os.path.join(ROOT, "Siege_Nights_RP/textures/terrain_texture.json")))["texture_data"]
 def avg(block):
     tex = tt.get(block.replace(":", "_"), {}).get("textures")
@@ -41,7 +41,7 @@ def shape(b):
 nice = lambda n: n.replace("siege:", "").replace("_", " ")
 palette = [[*COL[n], shape(n), nice(n)] for n in names]
 idx = {n: i for i, n in enumerate(names)}
-KINDS = ["log", "fence", "plank", "stone", "tiles", "bricks", "cobbled", "smooth", "tooth", "light", "gate", "port"]
+KINDS = ["log", "fence", "plank", "stone", "tiles", "bricks", "cobbled", "smooth", "tooth", "light", "gate", "port", "slit"]
 def pack(cells, look):
     buf = bytearray()
     for x, y, z, b in cells: buf += bytes([x + 128, max(0, y), z + 128, look[b]])
