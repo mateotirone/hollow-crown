@@ -33,6 +33,14 @@ const [V, F, S, E, B] = REGIONS;
 const m = (id) => `minecraft:${id}`;
 // A good: [item id, lot size, coins for the lot, extra]. Prices are for a whole lot.
 const g = (id, lot, price, extra = {}) => ({ id: id.includes(":") ? id : m(id), lot, price, ...extra });
+
+// Regional Castle Guard armor (textures thread, PR #69; Mateo chose regional looks 2026-11-10): each region's Smith sells
+// only that region's set, at a flat price (no regional markup: it is the local make). About a quarter over the plain
+// Castle Guard piece at the Quartermaster (40 / 72 / 56 / 40). `region` limits a good to NPCs of that region.
+export const GUARD_PRICES = { helmet: 50, chestplate: 90, leggings: 70, boots: 50 };
+const GUARD_KEY = { "Aldmere Vale": "vale", Frostmarch: "frostmarch", Saltreach: "saltreach", Emberwaste: "emberwaste", Blackfen: "blackfen" };
+const REGIONAL_GUARD = REGIONS.flatMap((region) => Object.entries(GUARD_PRICES).map(([piece, price]) =>
+  g(`siege:guard_${GUARD_KEY[region]}_${piece}`, 1, price, { region, flat: true })));
 const LOGS = ["oak_log", "spruce_log", "birch_log", "dark_oak_log", "acacia_log", "mangrove_log", "jungle_log", "cherry_log"];
 
 // buys: what the NPC pays you for. sells: what it charges you for.
@@ -60,7 +68,7 @@ export const JOBS = {
     buys: [g("coal", 16, 8), g("raw_copper", 16, 6), g("copper_ingot", 16, 8), g("raw_gold", 4, 16), g("gold_ingot", 1, 5, { want: 16, step: 8 }),
       g("redstone", 16, 6), g("lapis_lazuli", 16, 8)],
     sells: [g("coal", 16, 14), g("iron_pickaxe", 1, 34), g("iron_axe", 1, 34), g("iron_shovel", 1, 14), g("iron_sword", 1, 24),
-      g("shears", 1, 24), g("bucket", 1, 34), g("rail", 16, 64), g("anvil", 1, 320)],
+      g("shears", 1, 24), g("bucket", 1, 34), g("rail", 16, 64), g("anvil", 1, 320), ...REGIONAL_GUARD],
   },
   fisher: {
     name: "Fisher", home: [S], scarce: [E, F],

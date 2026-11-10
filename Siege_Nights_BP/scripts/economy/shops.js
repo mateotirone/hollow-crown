@@ -32,6 +32,9 @@ const known = (id) => {
   }
 };
 
+// On sale here: the item exists in this pack, and a region-only good is sold only by that region's NPCs
+const forSale = (good, region) => known(good.id) && (!good.region || good.region === region);
+
 // The region a spot belongs to: that of the nearest Plot Stone (undefined on a world with no map)
 export function regionAt(location) {
   let best, bestD = Infinity;
@@ -180,15 +183,16 @@ function done(player, text) {
 async function buyMenu(player, npc, jobId, region) {
   const job = JOBS[jobId];
   const { charges } = regional(job, region);
-  const stock = job.sells.filter((good) => known(good.id));
+  const stock = job.sells.filter((good) => forSale(good, region));
+  const charge_ = (good) => (good.flat ? 1 : charges); // a region's own make has no regional markup
   const form = new ActionFormData().title(`${job.name}: buying`).body(`You have ${coins(funds(player))}.`);
-  for (const good of stock) form.button(`${niceName(good.id)}${good.lot > 1 ? ` x${good.lot}` : ""}\n§8${coins(cost(good, 1, charges))}`);
+  for (const good of stock) form.button(`${niceName(good.id)}${good.lot > 1 ? ` x${good.lot}` : ""}\n§8${coins(cost(good, 1, charge_(good)))}`);
   form.button("Back");
   const res = await form.show(player);
   if (res.canceled) return;
   const good = stock[res.selection];
   if (!good) return openShop(player, npc);
-  const each = cost(good, 1, charges);
+  const each = cost(good, 1, charge_(good));
   const have = player.getGameMode() === GameMode.Creative ? each * ECON.maxLots : funds(player);
   const most = Math.min(ECON.maxLots, Math.floor(have / each));
   if (most < 1) {
@@ -203,7 +207,7 @@ async function buyMenu(player, npc, jobId, region) {
     if (res2.canceled) return buyMenu(player, npc, jobId, region);
     lots = Math.max(1, Math.min(most, Math.floor(res2.formValues[0])));
   }
-  const price = cost(good, lots, charges);
+  const price = cost(good, lots, charge_(good));
   if (!charge(player, price, jobId)) return;
   hand(player, good.id, lots * good.lot);
   done(player, `§6${lots * good.lot} ${niceName(good.id)}§7 for ${coins(price)}`);
@@ -247,7 +251,7 @@ export async function openShop(player, npc) {
   const form = new ActionFormData().title(job.name).body(`§o"${line}"§r\n\n${note ? note + "\n\n" : ""}You have ${coins(funds(player))}.`);
   const acts = [];
   form.button("Sell"); acts.push(() => sellMenu(player, npc, jobId, region));
-  if (job.sells.some((good) => known(good.id))) { form.button("Buy"); acts.push(() => buyMenu(player, npc, jobId, region)); }
+  if (job.sells.some((good) => forSale(good, region))) { form.button("Buy"); acts.push(() => buyMenu(player, npc, jobId, region)); }
   if (job.mint) { form.button("Change coins"); acts.push(() => changeMenu(player, npc)); }
   form.button("Leave");
   const res = await form.show(player);

@@ -8,6 +8,14 @@ const wheat = JOBS.farmer.buys.find((g) => g.id === "minecraft:wheat");
 
 addTests("economy", {
   // the job's place in this list is its skin (siege:job on siege:job_npc, written by studio/build_economy.py): only add at the end
+  "each region's Smith sells its own Castle Guard set, a little over the plain one": () => {
+    for (const region of REGIONS) assertEqual(JOBS.smith.sells.filter((good) => good.region === region).length, 4);
+    const plain = { helmet: 40, chestplate: 72, leggings: 56, boots: 40 }; // Quartermaster, trading/quartermaster_trades.json
+    for (const good of JOBS.smith.sells.filter((g) => g.region)) {
+      const piece = good.id.split("_").pop();
+      assert(good.flat && good.price > plain[piece] && good.price <= plain[piece] * 1.5, good.id);
+    }
+  },
   "job order matches the painted skins": () =>
     assertEqual(JOB_IDS.join(","), "farmer,woodcutter,quarryman,smith,fisher,hunter,herbalist,moneyer"),
   "the coin is backed by iron: 8 in, 10 out": () => {
