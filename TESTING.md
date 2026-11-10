@@ -121,6 +121,20 @@ Needs a settlement first (place a Keep Banner). Cheats on for the `/scriptevent`
 7. **Knight.** `/scriptevent siege:townhall_path knight` switches you for testing. Learn Shield Bash (sneak + hit with a shield in the off hand), Lunge (sprint + hit), Rallying Cry (use the Oath Banner).
 8. `/scriptevent siege:townhall_path none` clears your path, `/scriptevent siege:townhall_reset` wipes your progress.
 
+
+### The tree screen (new: please check this one first)
+
+1. Run `/scriptevent siege:showcase`, walk into the hall and click the Tree of Oaths. Pick **Arcana** or **Keep**.
+2. ✅ A wide dark panel opens with the branch name in gold, your skill points under it, and the skills laid out in rows (first ring at the top) with lines joining them. Each skill is a small round badge with its name under it. Empty spots are empty.
+3. Click a skill. ✅ Its page opens with what it does and a button to swear it. Go back: the badge has changed.
+4. Open a normal menu (the Town Hall menu, the Rumor Board). ✅ These still look like ordinary Minecraft menus.
+
+If step 2 shows a blank or broken screen, press Escape, open the Tree again and choose **Show branches as plain lists** on its first page. Everything works from the lists. Send me a screenshot of what the broken screen looked like.
+
+### Rumor Board variety
+
+Take and finish a few jobs from the Rumor Board over several in-game days. ✅ The board never offers the kind of job you just did, the three jobs come from three different people, and about one job in three ends with a surprise: a named keepsake, double pay, extra Renown, or someone who cannot pay and stands with your walls instead.
+
 ## The High Throne, the Citadel and usurping (The Hollow Crown)
 
 Needs a settlement (place a Keep Banner on flat, open land) and cheats on. Best with a second player for steps 6 to 9.
