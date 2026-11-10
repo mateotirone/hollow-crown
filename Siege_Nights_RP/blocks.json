@@ -224,5 +224,14 @@
   },
   "siege:glint_cluster": {
     "sound": "amethyst_cluster"
+  },
+  "siege:veilcap_cap": {
+    "sound": "fungus"
+  },
+  "siege:veilcap_stem": {
+    "sound": "fungus"
+  },
+  "siege:veilmoss_strands": {
+    "sound": "fungus"
   }
 }

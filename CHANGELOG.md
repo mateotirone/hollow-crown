@@ -53,6 +53,9 @@ Everything merged to `main` since the last release goes here. Each pull request 
 
 - The ravens are on your wall for real: at dusk on a siege night they perch in a row on the stretch of wall nearest you, as many as the message counts, and leave when the siege starts.
 - The morning after the first Hollow soldiers appear is now told settlement by settlement, to the people of the settlement that saw them, instead of to everyone in the world at once.
+- Amethyst grows wild in the Hollow: patches of purple crystal at every stage of growth rise out of the ground, thickest in the basalt highlands. Break a full cluster for amethyst shards and it grows back in time.
+- Giant Veilcaps: the Hollow's pink mushrooms now also grow to the size of trees, with glowing caps on pale stems, mostly in the fens and groves. Veilmoss spills over ledges and hangs down cliff faces in strands.
+- The Hollow's air moves: spores drift from Veilcaps, moss drips, crystals glint, ash lifts off the wastes, sparks run along the veined stone and pale motes float around you.
 - The water of the Blackfen is black: near-opaque on the surface and almost blind underwater. (It follows the mangrove swamp biome, which only the Blackfen uses on the map.)
 
 ### Changed
