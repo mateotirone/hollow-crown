@@ -5,7 +5,7 @@ import { SKILLS } from "./skills.js";
 
 export const COLS = 6, ROWS = 6; // rows 0-4 are rings one to five, row 5 holds Back
 export const TREE_FLAG = "§h§c"; // invisible marker in a form title: draw this form as the tree screen
-export const BRANCH_FLAG = { keep: "§1", wayfarer: "§2", blade: "§3", arcana: "§4" };
+export const BRANCH_FLAG = { keep: "§1", wayfarer: "§2", blade: "§3", arcana: "§4", wing: "§5", forge: "§6", helm: "§7", hex: "§8" };
 export const SPACER = "-"; // a button with this text is an empty grid cell
 
 // { skillId: { col, row } }
