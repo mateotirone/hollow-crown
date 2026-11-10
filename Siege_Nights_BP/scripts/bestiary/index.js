@@ -14,7 +14,7 @@
 //   showcase.js  our exhibits in the /scriptevent siege:showcase test world
 //
 // Other features hear from us by script event:
-//   siege:boss_defeated       {"boss","x","y","z","dimension","players":[ids]}
+//   siege:boss_defeated       {"boss","x","y","z","dimension","players":[ids],"temper"?}
 //   siege:mob_killed          {"mob","x","y","z","dimension","killer"?}   (six lore-bearing mobs only)
 //   siege:award_skill_points  {"player","points","renown"?,"reason"}
 //   siege:seep_opened / siege:seep_closed  {"x","y","z","dimension","level","players"?:[ids]}
@@ -30,6 +30,7 @@ import "./returned.js";
 import "./mobs.js";
 import "./relics.js";
 import "./spawns.js";
+import "./veterans.js";
 import "./seeps.js";
 import "./gloam.js";
 import "./champions.js";

@@ -114,7 +114,10 @@
     "speed_multiplier": 1.25,
     "track_target": true
    },
-   "minecraft:persistent": {}
+   "minecraft:persistent": {},
+   "minecraft:loot": {
+    "table": "loot_tables/entities/bestiary/hollow_warlord.json"
+   }
   },
   "events": {}
  }
