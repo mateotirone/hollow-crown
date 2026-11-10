@@ -17,7 +17,7 @@ import { plotAt } from "../plots/claims.js";
 import { SETTLE, REGION_TO_STYLE } from "./config.js";
 import { BUILDINGS, BUILDING, drawBuilding, styleFor } from "./buildings.js";
 import { footprint, corners, boxesTouch, bill, priceOf, MATERIALS } from "./rules.js";
-import { reservesOf, drawBox } from "./zones.js";
+import { reservesOf, reserveAt, drawBox } from "./zones.js";
 
 export const FOUNDATION = "siege:foundation_stone";
 const OVERWORLD = "minecraft:overworld";
@@ -86,7 +86,8 @@ const boxOf = (key, stone, buildingId, style) =>
 // Why this building can't stand here, or undefined
 export function siteProblem(owner, box, exceptKey) {
   if (!corners(box).every((c) => settlementAt(c) === owner)) return "It would reach past the edge of this settlement's land.";
-  const reserve = reservesOf(owner).find((r) => boxesTouch(r, box));
+  const reserve = reservesOf(owner).find((r) => boxesTouch(r, box))
+    ?? [...corners(box), { x: (box.x0 + box.x1) / 2, z: (box.z0 + box.z1) / 2 }].map((c) => reserveAt(owner, c)).find(Boolean);
   if (reserve) return `It would stand on ground kept clear for ${reserve.label}.`;
   for (const [key, other] of Object.entries(stones())) {
     if (key === exceptKey || !other.building) continue;

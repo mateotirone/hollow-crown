@@ -171,6 +171,14 @@ The showcase (`/scriptevent siege:showcase`) puts a Mason's Bench with its mason
 5. **Any building, free.** `/scriptevent siege:settle_build cottage frostmarch` raises one in front of you (cottage, smithy, stable, storehouse, watchtower, market, well, garden; vale, frostmarch, saltreach, emberwaste, blackfen). Tell me about stairs facing the wrong way, anything floating, and which designs look too plain.
 6. **A town mason.** `/scriptevent siege:settle_mason` puts a mason where you stand, with no bench (for Kingsrest and villages).
 
+### Walls, Castle Stone and the laid-out plot
+
+- **Wall round your plot.** With a Keep Banner up, run `/scriptevent siege:wall 1`. A stake fence should rise in a ring 56 blocks out, with a gap facing the gate side. Try `/scriptevent siege:wall 5`, then `8`, then `10`, and tell me if each one follows hills cleanly, if the gate and portcullis hang straight, and how long level 10 takes to rise. Add a region to see its stone: `/scriptevent siege:wall 6 frostmarch`.
+- **Raiders outside the wall.** Start a siege with a wall up. Raiders should appear just outside the ring and walk in. If they stand still out there, tell me: that means they are too far for the Realm to move them.
+- **Arrival.** `/scriptevent siege:settle_arrive` lays out your settlement: the wall, a Longhouse rising behind the banner, a Mason at a bench, and a signpost on every spot where a building will go. On the real map this happens by itself when you pick a plot in the welcome hall.
+- **Castle Stone family.** Ask the Mason for Castle Stone, Tiles, Bricks, Cobbled and Smooth. In your own region you get your region's stone at the local price; the other regions' stone costs more.
+- See the whole thing in 3D first: https://claude.ai/artifact/McgJY7tPcd84szWCqsJzoK
+
 ## Rival Lords: NPC neighbours for single-player (The Hollow Crown)
 
 Rival Lords only settle on a map with Plot Stones. Place three or four Plot Stones in Creative at least 160 blocks apart (two are always left free for players).

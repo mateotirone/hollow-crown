@@ -1,0 +1,144 @@
+// Arriving on a plot. When a Keep Banner goes up on a Plot Stone the settlement is laid out at once:
+// a palisade round the plot (walls.js), a Longhouse already standing behind the banner, a mason at
+// a bench beside it, and a signpost on every slot where a building will stand later.
+//
+// It runs when walls are automatic (a map with Plot Stones). Test anywhere:
+//   /scriptevent siege:settle_arrive      lay your settlement out round your keep now
+
+import { world, system } from "@minecraft/server";
+import { isReady, keepOf, on, TIERS } from "../siege/api.js";
+import { buildFor } from "../townhall/build.js";
+import { CORNERSTONE, halls, saveHalls, beginBuild } from "../townhall/townhall.js";
+import { mapMode } from "../plots/claims.js";
+import { BUILDING } from "./buildings.js";
+import { REGION_TO_STYLE } from "./config.js";
+import { HALL, MASON, SLOTS, place } from "./layout.js";
+import { BENCH, registerBench } from "./mason.js";
+import { styleOf } from "./plans.js";
+import { WALLS } from "./walldata.js";
+import { wallOf, raiseWall, bearingFor } from "./walls.js";
+
+const OVERWORLD = "minecraft:overworld";
+const SOFT = /(air|water|grass|fern|flower|snow_layer|leaves|vine|bush|sapling|tallgrass|dandelion|poppy|mushroom|_log$|deadbush)/;
+
+function standY(dim, x, z) {
+  try {
+    let block = dim.getTopmostBlock({ x, z });
+    for (let i = 0; block && i < 40 && SOFT.test(block.typeId); i++) block = block.below();
+    return block ? block.location.y + 1 : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function signpost(dim, at, text) {
+  try {
+    const block = dim.getBlock(at);
+    if (!block || !SOFT.test(block.typeId)) return; // something already stands here
+    block.setType("minecraft:standing_sign");
+    block.getComponent("minecraft:sign")?.setText(text);
+  } catch {
+    // signs are a nicety
+  }
+}
+
+// at: lay out round this spot (a Plot Stone) for a player who has no Keep Banner up yet
+export function layOut(player, { force = false, at, style: wanted } = {}) {
+  const keep = keepOf(player.id) ?? at;
+  if (!keep) return "Raise a Keep Banner first.";
+  const dim = world.getDimension(OVERWORLD);
+  const center = { x: keep.x, y: keep.y, z: keep.z };
+  if (!dim.getBlock(center)) return "That ground is not loaded yet.";
+  const style = wanted ?? styleOf(player.id, dim.getBlock(center));
+  const fresh = !wallOf(player.id) || wallOf(player.id).x !== center.x || wallOf(player.id).z !== center.z;
+
+  // 1. the wall (its gate decides which way everything faces)
+  let wall = wallOf(player.id);
+  if (!wall || wall.x !== center.x || wall.z !== center.z) {
+    raiseWall(player.id, 1, { center, style, bearing: bearingFor(center) });
+    wall = wallOf(player.id);
+  }
+  const gateDir = wall?.gateDir ?? "south";
+
+  // 2. the Longhouse, already paid for
+  const old = halls()[player.id];
+  const hallAt = place(center, gateDir, HALL);
+  const y = standY(dim, hallAt.x, hallAt.z);
+  if (y !== undefined && (!old || old.lost || force) && !buildFor(player.id)) {
+    dim.getBlock({ x: hallAt.x, y, z: hallAt.z })?.setType(CORNERSTONE);
+    halls()[player.id] = {
+      x: hallAt.x, y, z: hallAt.z, fx: hallAt.forward.x, fz: hallAt.forward.z,
+      level: 0, paid: Math.max(1, old?.paid ?? 0), best: old?.best ?? 0, style: old?.style ?? style, building: null, marks: {},
+    };
+    saveHalls();
+    beginBuild(player.id, 1, halls()[player.id].style);
+  }
+
+  // 3. the mason, from day one
+  const benchAt = place(center, gateDir, MASON);
+  const by = standY(dim, benchAt.x, benchAt.z);
+  if (by !== undefined) {
+    const block = dim.getBlock({ x: benchAt.x, y: by, z: benchAt.z });
+    if (block && block.typeId !== BENCH && SOFT.test(block.typeId)) {
+      block.setType(BENCH);
+      registerBench(block, player.id);
+    }
+  }
+
+  // 4. a signpost on every slot
+  for (const slot of SLOTS) {
+    const spot = place(center, gateDir, slot);
+    const sy = standY(dim, spot.x, spot.z);
+    if (sy === undefined) continue;
+    const when = slot.tier === 0 ? "Open now" : `Opens: ${TIERS[slot.tier]?.name ?? "later"}`;
+    signpost(dim, { x: spot.x, y: sy, z: spot.z }, `${BUILDING[slot.building].name}\n${when}\n(${slot.who})`);
+  }
+  return fresh ? true : "already";
+}
+
+const LAID = "§6Your settlement is laid out.§7 A Longhouse is rising behind the Plot Stone, a mason has set up beside it, and signposts mark where each building will stand. Put a Foundation Stone on a signpost to raise that building.";
+
+// The plots thread's welcome hall: the moment a plot is picked, lay it out so the first building is
+// already going up when the player lands. The plot may not be loaded yet, so keep trying for a while.
+on("plotChosen", ({ player, plot }) => {
+  if (WALLS.auto === "off" || !plot) return;
+  const at = { x: plot.x, y: plot.y, z: plot.z };
+  let tries = 0;
+  const attempt = () => {
+    let result;
+    try {
+      result = player.isValid ? layOut(player, { at, style: REGION_TO_STYLE[plot.region] }) : "gone";
+    } catch (e) {
+      console.warn(`[Hollow Crown] arrival: ${e}`);
+      return;
+    }
+    if (result === true) player.sendMessage(LAID);
+    else if (result === "That ground is not loaded yet." && ++tries < 30) system.runTimeout(attempt, 20);
+  };
+  system.runTimeout(attempt, 5);
+});
+
+on("keepFounded", ({ player }) => {
+  let on_ = WALLS.auto === "always";
+  try {
+    on_ ||= WALLS.auto === "map" && mapMode();
+  } catch {
+    // no plots
+  }
+  if (!on_) return;
+  system.runTimeout(() => {
+    try {
+      if (layOut(player) === true) player.sendMessage(LAID);
+    } catch (e) {
+      console.warn(`[Hollow Crown] arrival: ${e}`);
+    }
+  }, 10);
+});
+
+system.afterEvents.scriptEventReceive.subscribe((event) => {
+  if (event.id !== "siege:settle_arrive") return;
+  const player = event.sourceEntity;
+  if (player?.typeId !== "minecraft:player" || !isReady()) return;
+  const result = layOut(player, { force: true });
+  player.sendMessage(result === true || result === "already" ? "§6Settlement laid out round your keep: palisade, Longhouse, mason and slot signposts." : `§c${result}`);
+});

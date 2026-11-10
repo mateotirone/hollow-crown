@@ -9,6 +9,7 @@
 //
 // Other features can reserve ground too (the Citadel, a rail depot yard ...):
 //   addFilter("settleReserves", (boxes, { owner }) => [...boxes, { x0, z0, x1, z1, label: "the Citadel" }])
+//   addFilter("settleReservedAt", (found, { owner, location }) => found ?? (mine(location) ? { label: "your wall" } : undefined))
 // and ask about a spot:
 //   zoneAt(player, location)  ->  { zone: "free" | "reserve" | "wilds" | "foreign", owner?, label? }
 
@@ -48,7 +49,9 @@ export function reservesOf(owner) {
   return applyFilter("settleReserves", boxes, { owner });
 }
 
-export const reserveAt = (owner, location) => reservesOf(owner).find((box) => inBox(box, location));
+// Reserves that are not boxes (the line of the wall) answer through "settleReservedAt": return { label } or nothing
+export const reserveAt = (owner, location) =>
+  reservesOf(owner).find((box) => inBox(box, location)) ?? applyFilter("settleReservedAt", undefined, { owner, location });
 
 export function zoneAt(player, location, dimensionId = OVERWORLD) {
   if (dimensionId !== OVERWORLD) return { zone: "free" };

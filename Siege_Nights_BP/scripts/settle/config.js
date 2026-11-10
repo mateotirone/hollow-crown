@@ -22,7 +22,7 @@ export const CAMP_KIT = [
 ];
 
 // The reserve around your hall takes nothing but these (they are lost or replaced when the hall grows).
-export const RESERVE_ALLOWED = [/^siege:hall_cornerstone$/, /^siege:archive_shelf$/, /torch$/, /^minecraft:lantern$/];
+export const RESERVE_ALLOWED = [/^siege:hall_cornerstone$/, /^siege:keep_banner$/, /^siege:archive_shelf$/, /torch$/, /^minecraft:lantern$/];
 
 export const REGION_TO_STYLE = {
   "Aldmere Vale": "vale", Frostmarch: "frostmarch", Saltreach: "saltreach", Emberwaste: "emberwaste", Blackfen: "blackfen",

@@ -8,6 +8,8 @@ import { hallReserve, hallReach, inBox, footprint, boxesTouch, placeVerdict, bil
 import { localStock, stoneStock, niceName } from "./mason.js";
 import { STONE_FAMILY, CASTLE_STONES, stoneId } from "../siege/api.js";
 import { MATERIALS } from "./rules.js";
+import { HALL, MASON, SLOTS, place, slotsFor } from "./layout.js";
+import { WALLS, WALL_LEVELS, MAX_WALL, smoothGround, groundProblem, wallColumns, onWallLine, bearingToAngle } from "./walldata.js";
 
 const base = { creative: false, overworld: true, typeId: "minecraft:stone_bricks", land: "me", mine: true, reserve: undefined, wildsClosed: true, hasKeep: true };
 
@@ -87,6 +89,69 @@ addTests("settle", {
       const local = localStock(id, () => true);
       assert(local.length >= 5, `${id} has ${local.length}`);
       assert(local.every(([, per]) => per >= 9), id);
+    }
+  },
+});
+addTests("settle walls", {
+  "ten levels, each at least as tall and thick as the last": () => {
+    assertEqual(MAX_WALL, 10);
+    for (let n = 2; n <= MAX_WALL; n++) {
+      const a = WALL_LEVELS[n - 1], b = WALL_LEVELS[n];
+      assert(b.h >= a.h && b.thick >= a.thick && (b.towers ?? 0) >= (a.towers ?? 0), `${b.name} is smaller than ${a.name}`);
+      assert(b.name && b.cost.length, `${b.name} needs a cost`);
+      for (const [, amount, kind] of b.cost) assert(amount > 0 && ["log", "plank", "stone", "cobbled", "bricks", "tiles", "smooth", "iron", "diamond", "netherite"].includes(kind), `${b.name}: ${kind}`);
+      for (const kind of [b.body, b.foot, b.cap, ...Object.values(b.bands ?? {})]) assert(!kind || ["log", "fence", "stone", "cobbled", "bricks", "tiles", "smooth"].includes(kind), `${b.name}: ${kind}`);
+    }
+  },
+  "the ring has no holes, one gate, and follows the ground": () => {
+    const smooth = smoothGround(Array.from({ length: WALLS.stations }, (_, i) => 64 + Math.round(2 * Math.sin(i / 7))));
+    assertEqual(groundProblem(smooth), undefined);
+    for (const level of [1, 4, 10]) {
+      const cols = wallColumns({ center: { x: 0, z: 0 }, level, gateAngle: bearingToAngle(180), smooth });
+      const at = new Set(cols.map((c) => `${c.x},${c.z}`));
+      for (const c of cols) {
+        let near = 0;
+        for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) if ((dx || dz) && at.has(`${c.x + dx},${c.z + dz}`)) near++;
+        assert(near >= 2, `level ${level}: a hole at ${c.x},${c.z}`);
+        assert(c.top - c.base === WALL_LEVELS[level].h || c.role === "tower" || c.role === "walk", "height");
+      }
+      const open = cols.filter((c) => c.role === "gap" || c.role === "gate" || c.role === "port");
+      assert(open.length >= WALLS.gateWidth && open.every((c) => c.z > 40 && Math.abs(c.x) <= 2), `level ${level}: the gate should be due south`);
+      assert(cols.every((c) => Math.hypot(c.x, c.z) <= WALLS.radius + 5), "inside the ring");
+    }
+  },
+  "steep ground is refused, the wall line is reserved": () => {
+    assert(groundProblem([64, 64, 75, 64]));
+    assert(onWallLine({ x: 0, z: 0 }, { x: WALLS.radius - 1, z: 0 }) && !onWallLine({ x: 0, z: 0 }, { x: 20, z: 0 }));
+    assertEqual(Math.round(Math.cos(bearingToAngle(90))), 1); // east is +x
+    assertEqual(Math.round(Math.sin(bearingToAngle(0))), -1); // north is -z
+  },
+  "every slot is clear of the hall, the wall and the other slots, whichever way the gate faces": () => {
+    for (const gateDir of ["north", "east", "south", "west"]) {
+      const center = { x: 1000, y: 64, z: -500 };
+      const hallAt = place(center, gateDir, HALL);
+      const boxes = STYLE_IDS.map((style) => hallReserve({ x: hallAt.x, z: hallAt.z, fx: hallAt.forward.x, fz: hallAt.forward.z, style }, 1));
+      assert(!boxes.some((b) => inBox(b, center)), `${gateDir}: the hall would cover the Keep Banner`);
+      for (const slot of SLOTS) {
+        assert(BUILDINGS.some((b) => b.id === slot.building), slot.building);
+        const at = place(center, gateDir, slot);
+        const box = footprint(at, at.forward, drawBuilding(slot.building, "vale").bounds());
+        for (const hall of boxes) assert(!boxesTouch(box, hall), `${gateDir}: ${slot.id} stands where the hall grows`);
+        for (const c of [{ x: box.x0, z: box.z0 }, { x: box.x1, z: box.z0 }, { x: box.x0, z: box.z1 }, { x: box.x1, z: box.z1 }]) {
+          assert(Math.hypot(c.x - center.x, c.z - center.z) < WALLS.radius - WALLS.reserve - 3, `${gateDir}: ${slot.id} reaches the wall`);
+        }
+        assert(!inBox(box, center), `${slot.id} covers the banner`);
+        boxes.push(box);
+      }
+      const bench = place(center, gateDir, MASON);
+      assert(!boxes.some((b) => inBox(b, bench)), `${gateDir}: the mason's bench is in the way`);
+    }
+    assert(slotsFor(0).length >= 2 && slotsFor(3).length === SLOTS.length);
+  },
+  "the biggest hall fits inside the wall": () => {
+    for (const id of STYLE_IDS) {
+      const r = hallReach(id);
+      assert(Math.hypot(r.side, HALL.ahead + r.deep) < WALLS.radius - 3, `${id}: hall reaches ${Math.round(Math.hypot(r.side, HALL.ahead + r.deep))}`);
     }
   },
 });

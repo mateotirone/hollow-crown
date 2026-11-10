@@ -78,7 +78,7 @@ export function spawnAssault() {
     // Raiders come from the planned side(s), spread a little like a real attack
     const spot = (i) => {
       const a = plan.sides[i % plan.sides.length] + (Math.random() - 0.5) * 0.6;
-      const d = SETTINGS.spawnDistance + Math.random() * 6;
+      const d = applyFilter("spawnDistance", SETTINGS.spawnDistance, { owner, keep }) + Math.random() * 6; // a walled settlement is attacked from outside its wall
       return [Math.floor(center.x + Math.cos(a) * d), Math.floor(center.z + Math.sin(a) * d)];
     };
     buyArmy(plan, keep.sieges, Math.round(plan.budget * share))
