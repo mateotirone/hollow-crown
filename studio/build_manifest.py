@@ -176,6 +176,10 @@ g("trebuchet","Trebuchet","Siege machines",[{"label":"Trebuchet","model":"entity
 g("ballista","Ballista","Siege machines",[{"label":"Ballista","model":"entity","geo":"geometry.siege_ballista","mats":{"*":E+'siege_ballista.png'}}],"Turns to face its target, then the arms snap forward and the bolt flies.")
 g("ram","Battering Ram","Siege machines",[{"label":"Ram","model":"entity","geo":"geometry.siege_battering_ram","mats":{"*":E+'siege_battering_ram.png'}}],"Shown at model size. In game it's scaled up 1.35x.")
 g("quartermaster","Quartermaster","Mobs",[{"label":"Quartermaster","model":"entity","geo":"geometry.villager.v1.8","mats":{"*":E+'siege_quartermaster.png'}}])
+g("roofs_regional","Roof shingles by region","Regional styles",[cube(r.title(),one('regional/siege_roof_shingles_'+r)) for r in ("vale","frostmarch","saltreach","emberwaste","blackfen")],"Slate, frosted slate, driftwood shakes, fired clay, mossy thatch. Painted, not wired as blocks yet.")
+g("plates","Your eight paintings, game size","Lore and library",[{"label":"Plate %d"%k,"model":"item","mats":{"*":'textures/entity/painting/plate_%d.png'%k}} for k in range(1,9)],"Your own paintings, only made smaller (three blocks by two). Not hanging in the game yet.")
+g("particles","Particles","The Hollow",[{"label":"Sheet","model":"item","mats":{"*":'textures/particle/hc_particles.png'}}],"Mote, vein spark, glint, ash flake, spore, sung note, ember, moss drip. Seven effects are defined; nothing uses them yet.")
+g("moon","The moon","Other",[{"label":"Phases","model":"item","mats":{"*":'textures/environment/moon_phases.png'}}],"A hairline violet crack that shows more the fuller the moon is.")
 g("barding","Castle Guard Barding","Mobs",[{"label":"On a horse","model":"horse","geo":"geometry.horse.v2","mats":{"*":E+'horse2/armor/horse_armor_iron.png'}}],"Replaces iron horse armor.")
 for gid,name in [("archer","Archer"),("man_at_arms","Man-at-Arms")]:
     g(gid,name,"Mobs",[{"label":nice(c),"model":"entity","geo":"geometry.humanoid.custom","swatch":DYE[c],"mats":{"*":E+f'siege/{gid}_{c}.png'}} for c in ['red']+[c for c in COLORS if c!='red']],

@@ -443,3 +443,13 @@ Painted in final style, replacing the placeholders listed in earlier sections:
 - `studio/art/build_coins.py`: iron and gold coin
 Still stand-ins: skins for the eight job NPCs, 49 skill icons, a left-handed Standing Rank, real models for the three reveal-scene actors.
 The Texture Studio now lists every PNG under `textures/` automatically (catch-all at the end of `studio/build_manifest.py`).
+
+## Missing art, batch 2 (2026-11-10, `studio/art/build_missing2.py`)
+
+| Asset | File | Status |
+|---|---|---|
+| Roof shingles per region (Vale blue slate, Frostmarch frosted dark slate, Saltreach driftwood shakes, Emberwaste fired clay, Blackfen mossy thatch) | `textures/blocks/regional/siege_roof_shingles_<region>.png` | **Final style, awaiting your review.** Not wired as blocks; all regions still use `siege_roof_shingles.png` |
+| Mateo's eight paintings at game size (96×64, plate 8 is 64×96; resized only, never repainted) | `textures/entity/painting/plate_1.png` to `plate_8.png` | Ready. Needs a hanging entity like `siege:portrait` (lore thread) |
+| Particle sheet (32×16, eight 8×8 sprites: mote, vein spark, glint, ash flake, spore, sung note, ember, moss drip) | `textures/particle/hc_particles.png` | **Final style, awaiting your review** |
+| Seven particle effects: `siege:hollow_mote`, `vein_spark`, `glint`, `pale_ash`, `veil_spore`, `choir_ring`, `moss_drip` | `particles/<name>.particle.json` | Written, untested in game, nothing spawns them yet |
+| The moon (128×64, vanilla phase layout): a hairline violet crack that shows more the fuller the moon is | `textures/environment/moon_phases.png` | **Final style, awaiting your review.** Replaces the vanilla moon everywhere |
