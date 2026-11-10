@@ -8,6 +8,7 @@ import { EMBER, choosePath, offerVictor } from "./tree.js";
 import { ROLES } from "./skills.js";
 import { dropCoins } from "../economy/coins.js";
 import { fromEmeralds } from "../economy/rules.js";
+import { sfx } from "../core/sfx.js";
 
 const rank = (player, id) => heroOf(player).skills[id] ?? 0;
 const fx = (entity, effect, ticks, amplifier = 0) => {
@@ -335,7 +336,7 @@ function keepSkills(owner) {
           // some machines can't be thrown
         }
       }
-      heart.dimension.playSound("random.totem", heart.location, { volume: 2 });
+      sfx(heart.dimension, "random.totem", heart.location, { volume: 2 });
       const player = playerById(owner);
       if (player) api.title(player, "§6The Keep will not break", "§7Your walls surge back to strength");
     }
@@ -389,5 +390,5 @@ world.afterEvents.itemUse.subscribe((event) => {
   if (!target) return player.onScreenDisplay.setActionBar("§cYou have no home to return to.");
   homeCooldown.set(player.id, system.currentTick + 12000);
   player.teleport(target, { dimension: world.getDimension("overworld") });
-  player.playSound("mob.endermen.portal");
+  sfx(player, "mob.endermen.portal");
 });

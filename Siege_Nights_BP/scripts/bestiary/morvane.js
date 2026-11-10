@@ -44,6 +44,7 @@ import { playReveal } from "./reveal.js";
 import { REVEAL } from "../lore/data/reveal.js";
 import { spawnChampion } from "./champions.js";
 import { announce, effect, flat, heal, healthOf, heroOf, hurt, particle, ring, shove, sound } from "./util.js";
+import { sfx } from "../core/sfx.js";
 
 export const MORVANE = {
   type: "siege:oswin_the_last", // the entity keeps its old id; players only ever see "Morvane"
@@ -236,7 +237,7 @@ function enter(f, n, { restart = false, quiet = false } = {}) {
     for (const p of party(f)) {
       try {
         p.onScreenDisplay.setTitle(`§5${st.name}`, { subtitle: `§7${n + 1} of ${STAGES.length}${restart ? "  ·  again" : ""}`, fadeInDuration: 5, stayDuration: 50, fadeOutDuration: 15 });
-        p.playSound("mob.wither.ambient", { pitch: 0.6, volume: 0.7 });
+        sfx(p, "mob.wither.ambient", { pitch: 0.6, volume: 0.7 });
       } catch { /* offline */ }
     }
   }

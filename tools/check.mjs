@@ -14,6 +14,7 @@ import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
 import { join, dirname, relative, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { register, createRequire } from "node:module";
+import { spawnSync } from "node:child_process";
 import { makeMock } from "./mock-minecraft.mjs";
 
 const TOOLS = dirname(fileURLToPath(import.meta.url));
@@ -220,6 +221,37 @@ step("Saved data versions");
     }
   }
   console.log(raw ? `${raw} file(s) save unversioned data (see notes)` : "every saved store is versioned");
+}
+
+// ---------- 2c. sounds ----------
+// Every custom sound has its file, every installed recording is wired in, and scripts play sounds through sfx().
+step("Sounds");
+{
+  const defsFile = join(RP, "sounds/sound_definitions.json");
+  const defs = existsSync(defsFile) ? parseJson(readFileSync(defsFile, "utf8")).sound_definitions ?? {} : {};
+  for (const [id, def] of Object.entries(defs)) {
+    for (const s of def.sounds ?? []) {
+      const name = typeof s === "string" ? s : s.name;
+      if (name?.startsWith("sounds/siege/") && !["ogg", "wav", "fsb"].some((ext) => existsSync(join(RP, `${name}.${ext}`)))) fail(`sound ${id}: no file at ${name}.ogg`);
+    }
+  }
+  const installedFile = join(SCRIPTS, "core/sfx_installed.js");
+  let installed = 0;
+  if (existsSync(installedFile)) {
+    for (const [, id] of readFileSync(installedFile, "utf8").matchAll(/^\s*"([^"]+)":/gm)) {
+      installed++;
+      if (!defs[id]) fail(`core/sfx_installed.js lists ${id}, but sound_definitions.json does not define it (run python3 tools/install_sounds.py)`);
+    }
+  }
+  let direct = 0;
+  for (const file of walk(SCRIPTS, ".js")) {
+    if (rel(file).endsWith("core/sfx.js") || rel(file).endsWith("dragons/voice.js")) continue;
+    const n = (readFileSync(file, "utf8").match(/\.playSound\??\.?\(/g) ?? []).length;
+    if (n) { direct += n; warnings.push(`${rel(file)}: ${n} direct playSound call(s). Use sfx() from core/sfx.js so the sound gets the house treatment (SOUND-LIST.md).`); }
+  }
+  const listed = spawnSync(process.execPath, [join(TOOLS, "sound-list.mjs"), "--check"]);
+  if (listed.status !== 0) fail("SOUND-LIST.md is out of date: run  node tools/sound-list.mjs");
+  console.log(`${Object.keys(defs).length} custom sounds defined, ${installed} recordings installed, ${direct} direct playSound calls`);
 }
 
 // ---------- 3. deep check (optional) ----------

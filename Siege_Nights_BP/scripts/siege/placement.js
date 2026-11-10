@@ -11,6 +11,7 @@ import { saveState, saveTracked, state, tracked } from "./state.js";
 import { MAX_RADIUS, freeColor, isAlly, settlementAt, tierOf, landRadius } from "./territory.js";
 import { overworld, title } from "./util.js";
 import { blockKey, damageMap, lightCharge, saveDamage } from "./walls.js";
+import { sfx } from "../core/sfx.js";
 
 // ---------- Placing blocks: settlements and building rights ----------
 
@@ -55,7 +56,7 @@ export function foundSettlement(player, block) {
   saveState();
   title(player, old ? "§6Settlement moved" : "§6Settlement founded",
     `§7Your ${tierOf(state.keeps[player.id]).name} reaches ${landRadius(state.keeps[player.id], player.id)} blocks from your banner`);
-  player.playSound("random.levelup");
+  sfx(player, "random.levelup");
   if (!old) player.sendMessage("§6Your Keep is raised! Craft a Siege Workshop to make castle blocks. Raiders will march on this banner on siege nights. Use dye on it to change its color.");
   emit("keepFounded", { player, keep: state.keeps[player.id], moved: !!old });
 }
