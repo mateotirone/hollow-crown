@@ -212,3 +212,5 @@ Add a line here when you publish one.
 - `python3 tools/build.py`: runs the check, then builds `hollow-crown.mcaddon` (only scripts main.js loads are packed).
 - In game: `/scriptevent siege:selftest`. It also runs at world load and tells players if something failed.
 - `archive/main-before-split.js` is the original single file, for reference.
+  Storyteller: reach reports the facts `bossesFallen`, `choirFallen`, `morvaneFallen` and owns the deck `siege_shapes` (seven night
+  shapes, each with a kind; picked for subject `"world"`). It notes `quiet` for keep owners on the first night after a siege on which nothing came.

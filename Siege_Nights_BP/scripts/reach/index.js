@@ -29,6 +29,7 @@ import {
   isReady, getState, saveState, keepOf, keepCenter, settlementAt, isNight, startSiege, endSiege, spawnRaider, raidersLeft,
   MODIFIERS, FACTIONS, SETTINGS, title, overworld, ownerTag, pick, on, emit, addFilter,
   addPlanHook, addSiegeSkipHook, addKeepMenuButtons, onTick, moduleStore,
+  provideFact, registerDeck, storyPick, note,
 } from "../siege/api.js";
 import { bestiaryStore } from "../bestiary/bossCore.js";
 import * as troops from "../bestiary/spawns.js";
@@ -53,6 +54,7 @@ const store = moduleStore("siege:reach", () => ({
   forced: null, // test command: { day, kind }
   remembered: null, // after the story: { by, stage } while a Remembered Night runs
   omen: "", lastDawn: -1, sky: false, last: null,
+  quietNoted: true, // the Storyteller has been told about the quiet since the last siege
 }));
 // New saved fields get their defaults from moduleStore. A siege that was running when the pack was updated is topped up here.
 export function reachData() {
@@ -79,6 +81,26 @@ const HARD_TAG = "siege_reach_hard";
 const RISEN_TAG = "siege_reach_risen";
 const PICKET_TAG = "siege_reach_picket";
 const FULL_NIGHTS = ["counted", "stolen", "long", "muster"];
+
+// ---------- the Storyteller: story facts the Reach owns, and the night shapes as a deck ----------
+const saved = () => { try { return reachData(); } catch { return undefined; } };
+provideFact("bossesFallen", () => Object.keys(saved()?.bosses ?? {}).length);
+provideFact("choirFallen", () => !!saved()?.choir);
+provideFact("morvaneFallen", () => !!saved()?.source);
+// The deck carries no from/to: a shape opens with a Reach stage and a wave count, which chooseShape checks itself.
+registerDeck("siege_shapes", Object.entries(SHAPES).map(([id, sh]) => ({ id, kind: sh.kind, stage: sh.from, min: sh.min })));
+
+// Tonight's shape. The Storyteller picks among the shapes this stage and wave count allow, leaning on what the
+// world has seen lately; the Reach's own rule (never last night's shape) has the last word.
+function chooseShape(day, d, stageId, waves) {
+  const unfit = Object.keys(SHAPES).filter((id) => SHAPES[id].from > stageId || SHAPES[id].min > waves);
+  try {
+    const id = storyPick("siege_shapes", "world", { exclude: unfit })?.id;
+    if (id && SHAPES[id] && id !== d.lastShape) return id;
+  } catch { /* the Storyteller isn't ready: fall back to the day's own roll */ }
+  return pickShape(day, d.salt, stageId, waves, d.lastShape);
+}
+const storyNote = (player, kind) => { try { note(player, kind); } catch { /* not ready */ } };
 
 const facts = () => ({ bosses: Object.keys(store.data.bosses).length, choir: store.data.choir, source: store.data.source });
 const opts = () => ({ firstDay: SETTINGS.firstSiegeDay, every: SETTINGS.siegeEveryNNights, salt: store.data.salt });
@@ -174,7 +196,7 @@ function beginNight(kind, stageId, offset = 0) {
   const p = profile(kind, stageId, d.pressure);
   const now = world.getTimeOfDay();
   const onTime = p.clock && now <= openTime(kind, p.waves) + 400 && now >= REACH.nightTime;
-  const shape = FULL_NIGHTS.includes(kind) ? pickShape(world.getDay(), d.salt, stageId, p.waves, d.lastShape) : "old";
+  const shape = FULL_NIGHTS.includes(kind) ? chooseShape(world.getDay(), d, stageId, p.waves) : "old";
   d.night = { day: world.getDay(), kind, stage: stageId, waves: p.waves, mult: p.mult, clock: onTime, warlord: p.warlord, offset, shape,
     carried: false, sawDawn: false, nextTide: 0, kills: 0, glimpse: false, captains: {}, slain: {}, tolled: false };
   store.save();
@@ -451,6 +473,7 @@ on("siegeEnd", ({ outcome, besieged }) => {
   const won = outcome === "won";
   if (n.kind === "long" && won) d.pressure = clamp(d.pressure - 2, 0, REACH.long.maxPressure); // +1 at dusk, so a broken night is a net -1
   if (full) d.lastShape = n.shape;
+  d.quietNoted = false;
   d.last = { day: n.day, kind: n.kind, outcome, kills: n.kills, waves: getState().assaultsTotal ?? n.waves, shape: full ? n.shape : undefined };
   // a captain who reached the wall and was not killed remembers the way
   for (const owner of besieged) {
@@ -585,6 +608,11 @@ function reachTick() {
     const passed = d.lastDawn < 0 ? 0 : clamp(day - d.lastDawn, 0, 3);
     d.lastDawn = day;
     if (d.forced && d.forced.day < day) d.forced = null;
+    // The first night after a siege on which nothing came is a quiet beat, said once so the quiet nights don't drown the rest
+    if (!d.quietNoted && passed > 0 && !st.active && st.lastSiegeDay < day - 1) {
+      d.quietNoted = true;
+      for (const p of everyone()) if (keepOf(p.id)) storyNote(p, "quiet");
+    }
     store.save();
     if (passed > 0 && day >= SETTINGS.firstSiegeDay) addReach(REACH.gain.dawn * passed, "dawn");
   }
