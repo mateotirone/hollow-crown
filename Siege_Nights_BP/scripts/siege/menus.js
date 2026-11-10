@@ -38,7 +38,7 @@ export function keepMenu(block, player) {
     `Sieges won: ${keep.wins ?? 0}   Win streak: ${keep.streak ?? 0}   Warlords slain: ${keep.warlordsSlain ?? 0}`,
     nextTierText(keep),
     "",
-    state.active ? "§cA siege is happening right now!" : until === 0 ? "§cThe next siege comes tonight." : `Next siege: in ${until} day${until === 1 ? "" : "s"} (day ${nextSiegeDay()}).`,
+    state.active ? "§cA siege is happening right now!" : applyFilter("nextSiegeLine", until === 0 ? "§cThe next siege comes tonight." : `Next siege: in ${until} day${until === 1 ? "" : "s"} (day ${nextSiegeDay()}).`, { until, day: nextSiegeDay(), owner, keep }),
     keep.lastSiege ? `Last siege: ${keep.lastSiege.faction}, threat ${keep.lastSiege.threat}, ${keep.lastSiege.won ? "§aheld§r" : "§cnot held§r"}` : "No sieges faced yet.",
     keep.lastTactic ? `They remember your ${keep.lastTactic === "archery" ? "archers" : keep.lastTactic === "melee" ? "sword" : keep.lastTactic}. Expect a counter.` : "",
     "",
