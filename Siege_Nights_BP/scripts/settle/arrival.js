@@ -100,7 +100,9 @@ export function layOut(player, { force = false, at, style: wanted } = {}) {
   return fresh ? true : "already";
 }
 
-const LAID = "§6Your settlement is laid out.§7 A Longhouse is rising behind the Plot Stone, the town's library is going up near the gate, a mason has set up beside it, and signposts mark where each building will stand. Put a Foundation Stone on a signpost to raise that building.";
+const LAID_OUT = "§6Your settlement is laid out.§7 A Longhouse is rising behind the Plot Stone, the town's library is going up near the gate, a mason has set up beside it, and signposts mark where each building will stand.";
+const LAID = `${LAID_OUT} Put a Foundation Stone on a signpost to raise that building.`;
+const ARRIVAL_SAY_AT = 110; // ticks after the plot is picked: after the plot's past (3 s), before "raise your Keep Banner" (8 s)
 
 // The plots thread's welcome hall: the moment a plot is picked, lay it out so the first building is
 // already going up when the player lands. The plot may not be loaded yet, so keep trying for a while.
@@ -108,6 +110,7 @@ on("plotChosen", ({ player, plot }) => {
   if (WALLS.auto === "off" || !plot) return;
   const at = { x: plot.x, y: plot.y, z: plot.z };
   let tries = 0;
+  const picked = system.currentTick;
   const attempt = () => {
     let result;
     try {
@@ -116,7 +119,7 @@ on("plotChosen", ({ player, plot }) => {
       console.warn(`[Hollow Crown] arrival: ${e}`);
       return;
     }
-    if (result === true) player.sendMessage(LAID);
+    if (result === true) system.runTimeout(() => { if (player.isValid) player.sendMessage(LAID_OUT); }, Math.max(1, picked + ARRIVAL_SAY_AT - system.currentTick));
     else if (result === "That ground is not loaded yet." && ++tries < 30) system.runTimeout(attempt, 20);
   };
   system.runTimeout(attempt, 5);

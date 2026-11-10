@@ -81,10 +81,10 @@ export function spawnChampion(dim, at, { role = "knight", tier = 2, name, stance
 }
 
 // The settlement feature asks for a rival lord's soldiers through this filter, so it never has to import us.
-addFilter("rivalSoldier", (entity, { dim, at, role, tier, name, tags } = {}) => {
+addFilter("rivalSoldier", (entity, { dim, at, role, tier, name, tags, stance } = {}) => {
   if (entity) return entity;
   try {
-    return spawnChampion(dim, at, { role, tier, name, stance: "hostile", tags: tags ?? [] });
+    return spawnChampion(dim, at, { role, tier, name, stance: stance ?? "hostile", tags: tags ?? [] }); // "realm" = a lord's soldiers sent to help a player
   } catch {
     return undefined; // they fall back to pillagers
   }

@@ -133,6 +133,7 @@ Listeners run inside a try/catch, so a broken listener only logs a warning.
 | `addGuardLimitHook` | `(owner, base) => number` | Change how many guards a settlement can keep. |
 | `addKeepHealthHook` | `(owner, base) => number` | Change keep heart health. The `siege:keep_heart` entity's max health (400 today) still caps it. |
 | `addKeepMenuButtons` | `({ player, keep, owner, mine }) => [{ label, icon?, action }]` | Extra buttons on the Keep Banner menu, above "Close". |
+| filter `nextSiegeLine` | `addFilter("nextSiegeLine", (line, { until, day, owner, keep }) => newLine)` | Replace the "Next siege: in N days" line on the Keep Banner menu, for when the count can't be trusted. |
 
 Anything else: `addFilter(name, (value, context) => newValue)` is the general form these are built on.
 
@@ -195,7 +196,7 @@ days. `chapterOf(player)` never goes backwards. `worldChapter()` is the furthest
 | 3 | The Leaning | the first regional boss falls | `bossesFallen` >= 1 | reach |
 | 4 | The Miscount | three bosses have fallen | `bossesFallen` >= 3 | reach |
 | 5 | The Thin Place | five bosses have fallen | `bossesFallen` >= 5 | reach |
-| 6 | The Long Night | the Choir falls | `choirFallen` | reach |
+| 6 | The Long Night | the Rift is opened (the Choir falling stands in until `riftOpened` is reported) | `riftOpened` | reach |
 | 7 | The Quiet After | Morvane falls | `morvaneFallen` | reach |
 
 The feature that owns a fact reports it once at load: `provideFact("bossesFallen", () => count)`. Until it does, the
@@ -236,7 +237,7 @@ Add a line here when you publish one.
 
 ## Checking and building
 
-- `node tools/check.mjs` (from `siege-nights/`): parses every pack JSON, checks imports, finds undefined names,
+- `node tools/check.mjs` (from `siege-nights/`): parses every pack JSON, checks item icons and texture files exist, checks imports, finds undefined names,
   loads everything with a fake Minecraft, runs every loop task and all self-tests. Files main.js doesn't load
   yet only produce notes, so you can run it while your feature is half done.
 - `python3 tools/build.py`: runs the check, then builds `hollow-crown.mcaddon` (only scripts main.js loads are packed).
