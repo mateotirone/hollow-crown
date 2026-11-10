@@ -369,6 +369,18 @@ In game (cheats on, a settlement founded, or `/scriptevent siege:showcase` first
 Things I could not check offline: whether a dusk-to-midnight wait feels right, whether Hollow soldiers march on the keep heart like raiders do,
 the darkness and knockback effects, and the rain.
 
+## Choirsteel gear (bestiary)
+
+`/scriptevent siege:choirsteel_kit` gives the full set, the tools, 32 ingots and 8 Gloamquills.
+
+- Recipes: in a crafting table, each piece is its netherite piece plus Choirsteel Ingots plus one Gloamquill (two for the Blade). Enchantments on the netherite piece are not carried over.
+- Helm: you see in the dark. Greaves: slowness never sticks. Treads: jump off something high, you drift down and take no fall damage.
+- Cuirass: let zombies hit you. About one hit in four rings and throws the attacker back.
+- Full set: a chime, then Resistance and four extra hearts. Take one piece off and both go.
+- Blade: hit one mob in a crowd four times. The fourth hit rings and hurts the others near it.
+- Pick: break an ore next to other ore. A line of sparks points to the nearest one. It also mines Choir Ore whole.
+- The first time you wear or hold each piece, chat tells you what it does.
+
 ## Never the same fight twice (bestiary)
 
 - Beat any regional boss once, then summon it again (`/scriptevent siege:bestiary_summon reeve`): its name carries a temper (for example "The Clockwork Reeve, Unquiet") and the fight has one extra problem. Beat it again and you get a named echo shard for that temper. The next rematch wears a different temper.

@@ -223,6 +223,33 @@
   },
   "siege_gold_coin": {
    "textures": "textures/items/siege_gold_coin"
+  },
+  "siege_choirsteel_helmet": {
+   "textures": "textures/items/siege_choirsteel_helmet"
+  },
+  "siege_choirsteel_chestplate": {
+   "textures": "textures/items/siege_choirsteel_chestplate"
+  },
+  "siege_choirsteel_leggings": {
+   "textures": "textures/items/siege_choirsteel_leggings"
+  },
+  "siege_choirsteel_boots": {
+   "textures": "textures/items/siege_choirsteel_boots"
+  },
+  "siege_choirsteel_sword": {
+   "textures": "textures/items/siege_choirsteel_sword"
+  },
+  "siege_choirsteel_pickaxe": {
+   "textures": "textures/items/siege_choirsteel_pickaxe"
+  },
+  "siege_choirsteel_axe": {
+   "textures": "textures/items/siege_choirsteel_axe"
+  },
+  "siege_choirsteel_shovel": {
+   "textures": "textures/items/siege_choirsteel_shovel"
+  },
+  "siege_choirsteel_hoe": {
+   "textures": "textures/items/siege_choirsteel_hoe"
   }
  }
 }
