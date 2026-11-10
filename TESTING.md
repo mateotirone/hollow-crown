@@ -193,6 +193,8 @@ Run the showcase first (`/scriptevent siege:showcase`): the back row has four Ar
 
 0l. **The morning after the first sighting.** Run `/scriptevent siege:morning_after`. Three lines from your own townsfolk should appear a few seconds apart. Then talk to Sigrun, Brother Cael, Old Mag, Sir Aldous or Archivist Pell (after you have met them): each opens once with a new conversation about the tall thing at your wall, and never repeats it. In a real game this happens the dawn after the siege where the first Hollow soldiers appear.
 
+0m. **The story spine.** `/scriptevent siege:local_lore <plot>` and read the first book: its last page, in a newer hand, should send you to Millbrook and Sister Wren, and Millbrook should appear as a lead in the Ledger. Solve the plot's mystery in the Ledger: the answer ends with a paragraph about your own region's boss and adds its place as a lead. Kill a regional boss (`/scriptevent siege:bestiary_summon reeve`): besides its book you get a line about a scrap and two new leads in two other regions. After the third regional boss, a purple line about a surveyor appears and the first Field Note is in your pack.
+
 ## Dragons (the Emberwaste's power)
 
 Look first, without the game: the 3D viewer at https://claude.ai/artifact/D42qsWXjEcxWAbsYacsw4v shows all four species, every pose and every sound.

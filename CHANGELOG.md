@@ -41,7 +41,11 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - Mining villages in the Hollow now have something different going on each time you walk in: a rich seam, a Foreman's half price, a seat by the fire, a nest broken open in the mine, or a miner asking you to go and look at a place for them. The game's Storyteller picks, so the same thing never comes up twice running. Miners no longer repeat the line they said last.
 
 
+<<<<<<< HEAD
+- The story now has one spine from any of the twelve plots: your plot's first book sends you to Sister Wren in Millbrook, your plot's mystery leads to your own region's boss, each regional boss leaves two leads in other regions, and the third one down points you at the Surveyor's Field Notes.
+=======
 - The four regional roles (Dragon Rider, Forgemaster, Captain, Witch) each have a history, and their top four powers show a line of it in the Tree of Oaths.
+>>>>>>> 02891b391f7209218a372bb8f55ffa30f6fe418a
 
 ### Changed
 - Holding the Heart of the Hollow is now whispers only: the Heartbearer hears things and a few patches of grass die near the throne, but nothing ever harms them, changes them or makes them easier to unseat.
@@ -53,6 +57,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - Needs Bedrock 26.30 or newer.
 
 ### Fixed
+- Lanternbog's local mystery no longer asks you to type the name of the place below in the first chapter.
 - Joining for the first time now happens in one ordered sequence (look picker, welcome hall, journal) instead of several things appearing at once. Each part moves onto it as its own change lands.
 - The install guide and README now say the right Minecraft version: Bedrock 26.30 or newer.
 
