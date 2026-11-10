@@ -45,9 +45,33 @@ export const MAX_WALL = WALL_LEVELS.length - 1;
 // How strong a wall of this level is, as a Castle Stone armor tier (0 stone, 1 iron, 2 diamond, 3 netherite)
 export const wallArmor = (level) => WALL_LEVELS[level]?.gateArmor ?? 0;
 
+// ---------- variation ----------
+// No two stretches of wall are quite alike, and no two settlements' walls are the same: stone weathers
+// in patches, towers stand at slightly different heights, arrow slits and lanterns break up the long
+// runs, and a palisade's stakes are uneven. It is all worked out from the position (and the wall's
+// centre), never at random, so a wall rebuilt or repaired comes out exactly as it was.
+export const VARIATION = { weather: 0.22, slitEvery: 9, lightEvery: 14, postEvery: 8, towerBump: 2 };
+
+// A repeatable number 0..1 for a block position
+export function hash3(x, y, z, seed = 0) {
+  let h = Math.imul(x | 0, 374761393) ^ Math.imul(y | 0, 668265263) ^ Math.imul(z | 0, 1274126177) ^ Math.imul(seed | 0, 1103515245);
+  h = Math.imul(h ^ (h >>> 13), 1274126177);
+  return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+}
+export const wallSeed = (center) => (Math.imul(center.x | 0, 73856093) ^ Math.imul(center.z | 0, 19349663)) >>> 0;
+
+const WEATHERED = { smooth: "stone", stone: "cobbled", cobbled: "stone" };
+// Stone weathers in patches a few blocks across; bands of brick and tile stay crisp
+function weather(kind, x, y, z, seed) {
+  if (!WEATHERED[kind]) return kind;
+  const patch = hash3(Math.floor(x / 3), Math.floor(y / 2), Math.floor(z / 3), seed) < VARIATION.weather;
+  return patch && hash3(x, y, z, seed + 1) < 0.7 ? WEATHERED[kind] : kind;
+}
+const every = (along, n, at) => ((Math.round(along) % n) + n) % n === at;
+
 // Everything that stands above the ground in one column of wall: [[y, kind], ...] where kind is a
-// material ("log", "fence", "plank", a Castle Stone kind) or "tooth", "light", "gate", "port".
-export function columnKinds(L, col) {
+// material ("log", "fence", "plank", a Castle Stone kind) or "tooth", "light", "slit", "gate", "port".
+export function columnKinds(L, col, seed = 0) {
   const { x, z, base } = col, out = [];
   let top = col.top;
   if (col.role === "gap" || col.role === "gate" || col.role === "port") {
@@ -60,12 +84,31 @@ export function columnKinds(L, col) {
     return out;
   }
   const tower = col.role === "tower", walk = col.role === "walk";
-  if (!tower && !walk && L.body === "log") top += (x + z) & 1;
-  for (let y = base + 1; y <= top; y++) out.push([y, walk ? "plank" : materialKind(L, Math.max(1, y - base), y === top)]);
+  const wood = L.body === "log" || L.body === "fence";
+  const along = col.along ?? 0;
+  if (!tower && !walk && L.body === "log") {
+    top += (x + z) & 1; // a palisade's uneven points
+    if (every(along, VARIATION.postEvery, 0)) top += 1; // a taller post now and then
+    else if (hash3(x, 0, z, seed) < 0.1) top -= 1; // and the odd short stake
+  }
+  for (let y = base + 1; y <= top; y++) {
+    if (walk) { out.push([y, "plank"]); continue; }
+    const rel = Math.max(1, y - base);
+    let kind = materialKind(L, rel, y === top);
+    if (!wood && !L.bands?.[rel]) kind = weather(kind, x, y, z, seed);
+    // arrow slits: along the upper wall, and on each face of a tower
+    if (!wood && col.d === 0 && L.h >= 5 && ((!tower && rel === L.h - 1 && every(along, VARIATION.slitEvery, 4)) || (tower && col.face && (rel === L.h + 1 || rel === 3)))) kind = "slit";
+    out.push([y, kind]);
+  }
+  if (walk) return out;
   if (tower) {
     if (col.tooth) out.push([top + 1, "tooth"]);
     if (col.mid) out.push([top + 1, "light"]);
-  } else if (!walk && L.battlements && col.d === 0 && ((x + z) & 1) === 0) out.push([top + 1, "tooth"]);
+    return out;
+  }
+  const tooth = L.battlements && col.d === 0 && ((x + z) & 1) === 0;
+  if (tooth) out.push([top + 1, "tooth"]);
+  else if (col.d === 0 && L.body !== "log" && every(along, L.body === "fence" ? VARIATION.lightEvery + 2 : VARIATION.lightEvery, 7) && (L.h >= 4 || L.body === "fence")) out.push([top + 1, "light"]); // a lantern on the wall top
   return out;
 }
 
@@ -140,20 +183,22 @@ export function wallColumns({ center, radius = WALLS.radius, level, gateAngle, s
         const gg = groundAt(smooth, gateAngle);
         if (L.gate === "open") put(x, z, { role: "gap", base: gg, top: gg + L.h, d, a });
         else put(x, z, { role: d === gateD ? "gate" : d === 0 && L.port ? "port" : "gap", base: gg, top: gg + L.h, d, a });
-      } else if (d >= L.thick) put(x, z, { role: "walk", base: g, top: g + L.walk, d, a });
-      else put(x, z, { role: "wall", base: g, top: g + L.h, d, a });
+      } else if (d >= L.thick) put(x, z, { role: "walk", base: g, top: g + L.walk, d, a, along });
+      else put(x, z, { role: "wall", base: g, top: g + L.h, d, a, along });
     }
   }
   // towers, evenly spaced, the first pair either side of the gate
+  // each tower stands a little taller or shorter than its neighbours; the gatehouse pair match and stand proud
+  const seed = wallSeed(center);
   const towers = [];
-  for (let k = 0; k < (L.towers ?? 0); k++) towers.push(gateAngle + ((k + 0.5) / L.towers) * TAU);
-  if (L.gatehouse) for (const side of [-1, 1]) towers.push(gateAngle + (side * (half + L.r + 1)) / radius);
-  for (const a of towers) {
+  for (let k = 0; k < (L.towers ?? 0); k++) towers.push([gateAngle + ((k + 0.5) / L.towers) * TAU, Math.floor(hash3(k, 7, 0, seed) * (VARIATION.towerBump + 1))]);
+  if (L.gatehouse) for (const side of [-1, 1]) towers.push([gateAngle + (side * (half + L.r + 1)) / radius, 1]);
+  for (const [a, bump] of towers) {
     const cx = Math.round(center.x + Math.cos(a) * (radius - 1)), cz = Math.round(center.z + Math.sin(a) * (radius - 1));
     const g = groundAt(smooth, a);
     for (let dx = -L.r; dx <= L.r; dx++) for (let dz = -L.r; dz <= L.r; dz++) {
       const edge = Math.abs(dx) === L.r || Math.abs(dz) === L.r;
-      put(cx + dx, cz + dz, { role: "tower", base: g, top: g + L.h + L.up, d: edge ? 0 : 1, a, mid: dx === 0 && dz === 0, tooth: edge && (dx + dz) % 2 === 0 });
+      put(cx + dx, cz + dz, { role: "tower", base: g, top: g + L.h + L.up + bump, d: edge ? 0 : 1, a, mid: dx === 0 && dz === 0, tooth: edge && (dx + dz) % 2 === 0, face: edge && (dx === 0 || dz === 0) });
     }
   }
   const order = (c) => { let o = turn(c.a - gateAngle); return o; };
