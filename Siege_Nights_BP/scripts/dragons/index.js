@@ -14,7 +14,7 @@
 
 import { world, system, ItemStack, EquipmentSlot } from "@minecraft/server";
 import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
-import { onTick, isReady, settlementAt, isAlly, keepOf, consumeHeld, countItem } from "../siege/api.js";
+import { onTick, isReady, settlementAt, isAlly, keepOf, consumeHeld, countItem, emit } from "../siege/api.js";
 import {
   DRAGON_SETTINGS as S, DRAGON, EGG, SADDLE, HORN, ROOST, NEST, DAY, SPECIES, RESERVE, FOODS, TRAINING, STAGE_NAMES, TEMPERS,
   newDragon, newMind, speciesOf, addXp, addBond, flightTicks, nextStageNeeds, trainProblem, train, bar,
@@ -74,7 +74,26 @@ function hatchEgg(player, rec, block) {
   player.sendMessage(`§6The egg settles into the Roost. §7It will hatch in about ${S.hatchDays} days. Stay close when it does: it bonds with whoever feeds it.`);
 }
 
+// The Dragon Rider role is earned by a deed: your first dragon hatching. The town hall listens for "offerRole".
+// The owner may be offline when the egg cracks, so the offer waits in the save until they are here to hear it.
+function offerRider() {
+  const owed = (store.data.riderOwed ??= {}); // player id -> true while the offer is still to be made
+  for (const id of Object.keys(owed)) {
+    const player = world.getPlayers().find((p) => p.id === id);
+    if (!player) continue;
+    delete owed[id];
+    (store.data.riderOffered ??= {})[id] = true;
+    save();
+    try {
+      emit("offerRole", { player, role: "rider" });
+    } catch {
+      // the town hall is not loaded
+    }
+  }
+}
+
 function hatch(rec, dim) {
+  if (!store.data.riderOffered?.[rec.owner]) (store.data.riderOwed ??= {})[rec.owner] = true;
   rec.stage = "hatchling";
   rec.bornAt = world.getAbsoluteTime();
   rec.name = `${rec.ownerName}'s Dragon`.slice(0, 24);
@@ -88,6 +107,7 @@ function hatch(rec, dim) {
   } catch {
     // looks only
   }
+  save();
   const owner = world.getPlayers().find((p) => p.id === rec.owner);
   owner?.sendMessage(`§6Your egg has hatched: ${/^[AEIOU]/.test(speciesOf(rec).name) ? "an" : "a"} ${speciesOf(rec).name}. §7${speciesOf(rec).blurb} §7Feed it raw meat or fish to build its bond. Sneak and click it with an empty hand for its sheet.`);
 }
@@ -481,6 +501,7 @@ function mindTick() {
 
 function growthTick() {
   if (!isReady()) return;
+  offerRider();
   const now = world.getAbsoluteTime();
   for (const rec of Object.values(store.data.dragons)) {
     if (rec.status === "warming" && now >= rec.warmAt + S.hatchDays * DAY) {
