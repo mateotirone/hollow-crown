@@ -10,6 +10,7 @@ import { state } from "./state.js";
 import { settlementAt } from "./territory.js";
 import { isOnline, ownerOf } from "./util.js";
 import { BLAST, DAMAGE, hitWall, lightCharge } from "./walls.js";
+import { sfx } from "../core/sfx.js";
 
 // ---------- Breachers: battering rams and sappers ----------
 
@@ -51,7 +52,7 @@ export function ramTick() {
     try {
       const block = blockAhead(ram, 1.8);
       if (!block) continue;
-      ram.dimension.playSound("random.anvil_land", block.location, { volume: 0.8, pitch: 0.5 });
+      sfx(ram.dimension, "random.anvil_land", block.location, { volume: 0.8, pitch: 0.5 });
       hitWall(block, DAMAGE.ram);
     } catch {
       // ram unloaded or gone
@@ -108,7 +109,7 @@ export function swingRam(ram, player) {
   const dim = ram.dimension;
   dim.runCommand(`playanimation @e[type=${RAM_ENGINE},r=0.5,x=${ram.location.x},y=${ram.location.y},z=${ram.location.z}] animation.siege_ram.strike`);
   const block = blockAhead(ram, 3, facing(ram)); // the ram is big, the beam reaches 3 blocks out
-  if (!block) return dim.playSound("mob.ravager.attack", ram.location, { volume: 0.6, pitch: 0.6 });
+  if (!block) return sfx(dim, "mob.ravager.attack", ram.location, { volume: 0.6, pitch: 0.6 });
   const owner = dim.id === "minecraft:overworld" ? settlementAt(block.location) : undefined;
   if (owner && !isOnline(owner)) {
     return player.onScreenDisplay.setActionBar(`§c${state.keeps[owner]?.name ?? "The owner"} is away. Their walls can't be touched.`);
@@ -116,7 +117,7 @@ export function swingRam(ram, player) {
   if (owner) markWanted(player, owner);
   system.runTimeout(() => {
     try {
-      dim.playSound("random.anvil_land", block.location, { volume: 1, pitch: 0.4 });
+      sfx(dim, "random.anvil_land", block.location, { volume: 1, pitch: 0.4 });
       hitWall(block, DAMAGE.playerRam);
     } catch {
       // block area unloaded

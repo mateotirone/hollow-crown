@@ -9,6 +9,8 @@ How versions work is in [`docs/RELEASING.md`](docs/RELEASING.md).
 Everything merged to `main` since the last release goes here. Each pull request that changes what players see adds a line under one of these headings.
 
 ### Added
+- Steeds wear their own painted coats: one for each of the five regional breeds, a piebald coat for crossbreds, a see-through Glimstrider, plate barding on the Knight Warhorse, and a proper cloth Caparison in your banner color. Horses you already own change over by themselves.
+- Sound has its own voice now. The bell, the horns and about 25 other sounds are lower, softer and layered wherever the game uses them, and nothing is heard twice exactly the same. The 3:17 toll, the siege horn, the first glimpse, a storm tide and every boss's arrival each have their own sound. These are stand-ins built from vanilla sounds until the real recordings are made: `SOUND-LIST.md` has the list and the prompts, `sounds-inbox/` is where the files go, and `/scriptevent siege:sound` opens a sound board in game. No music yet.
 - Siege omens now happen around you, not only in grey text: animals turn to face one wall, flames lean, open doors shut, water trembles, dogs bolt, a far bell, something small runs past. One each hour of a siege evening, never the same twice in a night.
 - Ravens are now a real bird in the world: small, black, silent and perfectly still. They cannot be hurt, drop nothing, do not move for you, and leave at dawn or the moment a siege starts. (The omen that puts them on your wall at dusk is wired up separately.)
 - Seeps now come in five kinds, chosen by the Storyteller to contrast with what you did lately: guarded (as before), hungry (opens wide, guards come fast), still (no guards, it murmurs to you), drifting (it slips away until cornered) and weeping (harmless, closes by itself).
@@ -52,10 +54,16 @@ Everything merged to `main` since the last release goes here. Each pull request 
 
 - The ravens are on your wall for real: at dusk on a siege night they perch in a row on the stretch of wall nearest you, as many as the message counts, and leave when the siege starts.
 - The morning after the first Hollow soldiers appear is now told settlement by settlement, to the people of the settlement that saw them, instead of to everyone in the world at once.
+- Amethyst grows wild in the Hollow: patches of purple crystal at every stage of growth rise out of the ground, thickest in the basalt highlands. Break a full cluster for amethyst shards and it grows back in time.
+- Giant Veilcaps: the Hollow's pink mushrooms now also grow to the size of trees, with glowing caps on pale stems, mostly in the fens and groves. Veilmoss spills over ledges and hangs down cliff faces in strands.
+- The Hollow's air moves: spores drift from Veilcaps, moss drips, crystals glint, ash lifts off the wastes, sparks run along the veined stone and pale motes float around you.
+- The water of the Blackfen is black: near-opaque on the surface and almost blind underwater. (It follows the mangrove swamp biome, which only the Blackfen uses on the map.)
 
 - The eighth old painting, the Forty-Second Portrait, is kept for the Burned Archive, and what its caption says changes once the story is over.
 
 ### Changed
+- The moon has a hairline violet crack that shows more the fuller it is.
+- The Hollow bolt is a violet shard with a white-hot heart instead of a flat colour.
 - On the map a settlement's land is full size (60 blocks) from the day you arrive, and siege wins no longer grow it. Tiers still unlock wall levels, buildings and keep health. A Castle's keep now really has 600 health.
 - Regional roles are now earned by a deed in their region instead of by raising a Stone Hall there: Forgemaster for bringing down the Pale Huntsman, Captain for the Drowned Bride, Witch for the Mother of Changelings, and Dragon Rider when your first dragon hatches.
 - The endless siege (the Long Night) now begins when the Rift is opened, not when the Choir falls. Thunderstorms roll in with each wave of it and clear between them.
@@ -72,6 +80,8 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - The add-on is renamed from Siege Nights to The Hollow Crown. The install file is `hollow-crown.mcaddon`. Existing ids keep the `siege:` prefix.
 - Needs Bedrock 26.30 or newer.
 - Everything is now paid for and paid out in Regals instead of emeralds: siege winnings, warlord and boss drops, guards, the Quartermaster, town hall upgrades, Rumor Board jobs, horses, the Throne's decrees and Treasury, Rival Lord spoils, the Hollow's ore, boats and permits, and the elytra refund. One old emerald is 8 Regals. Emeralds are no longer taken anywhere; the Moneyer buys them for 4 Regals each.
+- The eight job NPCs (Farmer, Woodcutter, Quarryman, Smith, Fisher, Hunter, Herbalist, Moneyer) now wear their own painted clothes instead of a stock NPC look. Ones already placed in a world change over the first time someone clicks them.
+- Each region's Smith sells that region's Castle Guard armor set for Regals (helmet 50, chestplate 90, leggings 70, boots 50), a little over the plain set at the Quartermaster. The sets appear once the regional armor is in the pack.
 
 ### Fixed
 - Lanternbog's local mystery no longer asks you to type the name of the place below in the first chapter.

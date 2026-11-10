@@ -25,7 +25,7 @@ import { on, emit, onTick, moduleStore, addTests, assert, assertEqual, registerD
 import { UNDERTOW_ID, UNDERTOW_LAYOUT as L, HEART, pathX } from "../undertow/layout.js";
 import { RIVER_NODES, riverDistance } from "../undertow/rivers.js";
 import { SITES } from "../undertow/roads.js";
-import { heightAt, B } from "../undertow/terrain.js";
+import { heightAt, B, shardAt, giantCapAt, strandsAt } from "../undertow/terrain.js";
 import { isBuilt } from "../undertow/builder.js";
 import { wardenData, wardenOnline, hollowStep } from "../undertow/warden.js";
 import { regentRules } from "../undertow/regent.js";
@@ -37,6 +37,8 @@ import { coins, worth, fromEmeralds } from "../economy/rules.js";
 import { ECON } from "../economy/config.js";
 
 export { setFolkVoice } from "./rules.js";
+import { setHollowAir } from "./ambience.js";
+export { setHollowAir };
 
 const RAW = "siege:raw_choir_ore";
 const BOAT = "siege:lattice_boat";
@@ -662,6 +664,11 @@ system.afterEvents.scriptEventReceive.subscribe((e) => {
       arrive(p, v);
       break;
     }
+    case "hc:hollow_air": { // /scriptevent hc:hollow_air off   (or on): the Hollow's drifting particles
+      setHollowAir(e.message.trim() !== "off");
+      if (p) say(p, `§dThe Hollow's air is ${e.message.trim() === "off" ? "still" : "moving"}.`);
+      break;
+    }
     case "hc:folk_dawn": {
       const n = dawn();
       if (p) say(p, `§dA day's digging done. ${n} ore carted to the Vault.`);
@@ -697,6 +704,30 @@ on("showcase", ({ player, dim, nextSpot, label }) => {
 
 // ---- self-tests ---------------------------------------------------------------------------------
 addTests("hollowfolk", {
+  "giant Veilcaps stand in the fens and groves, rare elsewhere, and are tree sized": () => {
+    const count = (kind) => { let n = 0; for (let x = -500; x < 500; x += 1) for (let z = 200; z < 700; z += 1) { const g = giantCapAt(x, z, kind); if (g) { n++; assert(g.tall >= 4 && g.tall <= 9 && (g.wide === 2 || g.wide === 3), "odd shape"); } } return n; };
+    const fen = count("fen"), waste = count("waste");
+    assert(fen > 1000 && fen < 3500, `fens: ${fen} giant Veilcaps in 500,000 columns`);
+    assert(waste < fen / 8, "the wastes should be nearly bare of them");
+  },
+  "moss hangs from ledges but never past the foot of the cliff, and not in the wastes": () => {
+    for (let x = 0; x < 300; x++) for (let side = 0; side < 4; side++) for (const drop of [1, 2, 3, 4, 9]) {
+      const len = strandsAt(x, 500, side, drop, "wood");
+      assert(len === 0 || (drop >= 3 && len <= drop - 1 && len <= 3), `strands ${len} long on a drop of ${drop}`);
+      assertEqual(strandsAt(x, 500, side, drop, "waste"), 0);
+    }
+  },
+  "amethyst grows in patches across the Hollow, at every stage, and never carpets it": () => {
+    const stages = new Set();
+    let grown = 0, total = 0;
+    for (let x = -600; x < 600; x += 3) for (let z = 100; z < 2200; z += 3) {
+      const s = shardAt(x, z, "wood");
+      total++;
+      if (s >= 0) { grown++; stages.add(s); }
+    }
+    assert(stages.size === 4, `only ${stages.size} of 4 growth stages appear`);
+    assert(grown / total > 0.005 && grown / total < 0.06, `amethyst covers ${(100 * grown / total).toFixed(1)}% of the ground`);
+  },
   "every errand leads to a real place, and has its ask written": () => {
     for (const h of HAPPENINGS.filter((x) => x.site)) {
       assert(SITES.some((s) => s.id === h.site), `${h.id} points at a site that does not exist (${h.site})`);

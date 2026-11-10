@@ -43,6 +43,7 @@ import {
 } from "./rules.js";
 import { performOmen, ACTS } from "./omens.js";
 import "./tests.js";
+import { sfx } from "../core/sfx.js";
 
 Object.assign(MODIFIERS, NEW_MODIFIERS); // so the war plan can name them
 
@@ -120,7 +121,7 @@ const facts = () => ({ bosses: Object.keys(store.data.bosses).length, choir: sto
 const opts = () => ({ firstDay: SETTINGS.firstSiegeDay, every: SETTINGS.siegeEveryNNights, salt: store.data.salt, musterDay: store.data.musterDay });
 const everyone = () => world.getPlayers();
 const tell = (text) => { for (const p of everyone()) p.sendMessage(text); };
-const sound = (player, id, options) => { try { player.playSound(id, options); } catch { /* cosmetic */ } };
+const sound = (player, id, options) => { try { sfx(player, id, options); } catch { /* cosmetic */ } };
 const anyKeeps = () => Object.keys(getState().keeps).length > 0;
 
 export function tonightKind(day = world.getDay()) {
@@ -429,9 +430,10 @@ on("assaultIncoming", ({ assault }) => {
     for (const p of everyone()) {
       if (role === "toll" && n.clock) {
         title(p, "§43:17", n.glimpse.includes(settlementAt(p.location) ?? p.id) ? "§7 " : n.kind === "muster" ? "§7The last of them" : "§7Everything that was waiting, comes");
-        sound(p, "block.bell.hit", { pitch: 0.5, volume: 1 });
+        sound(p, "sig.toll_317");
       } else {
         p.onScreenDisplay.setActionBar(line);
+        if (role === "tide") sound(p, "sig.storm_tide");
       }
       if (role === "dark" && settlementAt(p.location)) {
         try { p.addEffect("darkness", 120, { showParticles: false }); } catch { /* cosmetic */ }
@@ -504,7 +506,7 @@ function firstGlimpse(owners) {
     for (const p of everyone()) {
       if (!there(p)) continue;
       p.sendMessage("§8Something is walking up between them. It is not one of them.");
-      sound(p, "ambient.cave", { volume: 1 });
+      sound(p, "sig.first_glimpse");
     }
     emit("firstGlimpse", { owners: [...owners] });
   }, 120);

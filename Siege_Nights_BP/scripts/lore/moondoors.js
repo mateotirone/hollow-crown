@@ -14,6 +14,7 @@
 
 import { world, system, BlockPermutation, GameMode } from "@minecraft/server";
 import { onTick, isNight, moduleStore, addTests, assert, assertEqual } from "../siege/api.js";
+import { sfx } from "../core/sfx.js";
 
 const store = moduleStore("hc:moon_doors", () => ({ doors: [] }));
 const FULL = 0, DARK = 4; // Minecraft moon phases: 0 full ... 4 new
@@ -46,7 +47,7 @@ function setOpen(dim, door, open) {
     door.saved = saved;
     store.save();
     for (const c of cells) dim.getBlock(c)?.setType("minecraft:air");
-    dim.playSound?.("block.bell.hit", cells[0], { pitch: 0.4, volume: 1 });
+    sfx(dim, "block.bell.hit", cells[0], { pitch: 0.4, volume: 1 });
     return true;
   }
   if (!open && door.saved) {
