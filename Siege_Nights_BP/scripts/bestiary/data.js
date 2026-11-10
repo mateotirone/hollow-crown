@@ -42,6 +42,12 @@ export const MOBS = {
   "hp": 4,
   "lore": "Summoned by Crow-Mages. They come apart into ash after half a minute."
  },
+ "siege:omen_raven": {
+  "name": "Raven",
+  "family": "omen",
+  "hp": 4,
+  "lore": "They come to the wall at dusk and face the way the raid will come. They do not make a sound, and they do not move for you."
+ },
  "siege:lost_villager": {
   "name": "Lost Villager",
   "family": "hollow",

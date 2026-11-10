@@ -9,6 +9,8 @@ How versions work is in [`docs/RELEASING.md`](docs/RELEASING.md).
 Everything merged to `main` since the last release goes here. Each pull request that changes what players see adds a line under one of these headings.
 
 ### Added
+- Siege omens now happen around you, not only in grey text: animals turn to face one wall, flames lean, open doors shut, water trembles, dogs bolt, a far bell, something small runs past. One each hour of a siege evening, never the same twice in a night.
+- Ravens are now a real bird in the world: small, black, silent and perfectly still. They cannot be hurt, drop nothing, do not move for you, and leave at dawn or the moment a siege starts. (The omen that puts them on your wall at dusk is wired up separately.)
 - Seeps now come in five kinds, chosen by the Storyteller to contrast with what you did lately: guarded (as before), hungry (opens wide, guards come fast), still (no guards, it murmurs to you), drifting (it slips away until cornered) and weeping (harmless, closes by itself).
 - Pretenders: after Morvane falls, claimants rise at the empty Seat in the Hollow every week or so. Each is generated (a name, one of three bodies, four powers out of nine, and a claim that changes how you must fight it) and the same one never comes twice. While one sits unchallenged the seep surges in the overworld. Each drops a Claimant's Seal with its name on it, plus Choirsteel.
 - The shape of a siege night now follows what the world has been through lately: after a run of hard fights the next night is likelier to be a strange or a waiting one. The story chapter now moves past chapter 2 as bosses fall.
@@ -48,6 +50,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - The story now has one spine from any of the twelve plots: your plot's first book sends you to Sister Wren in Millbrook, your plot's mystery leads to your own region's boss, each regional boss leaves two leads in other regions, and the third one down points you at the Surveyor's Field Notes.
 - The four regional roles (Dragon Rider, Forgemaster, Captain, Witch) each have a history, and their top four powers show a line of it in the Tree of Oaths.
 
+- The ravens are on your wall for real: at dusk on a siege night they perch in a row on the stretch of wall nearest you, as many as the message counts, and leave when the siege starts.
 - The morning after the first Hollow soldiers appear is now told settlement by settlement, to the people of the settlement that saw them, instead of to everyone in the world at once.
 - Amethyst grows wild in the Hollow: patches of purple crystal at every stage of growth rise out of the ground, thickest in the basalt highlands. Break a full cluster for amethyst shards and it grows back in time.
 - Giant Veilcaps: the Hollow's pink mushrooms now also grow to the size of trees, with glowing caps on pale stems, mostly in the fens and groves. Veilmoss spills over ledges and hangs down cliff faces in strands.
