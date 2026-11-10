@@ -22,18 +22,22 @@
 
 import { world, system, GameMode } from "@minecraft/server";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
-import { isReady, getState, keepOf, onTick, moduleStore, on, emit, addFoundingCheck, pick, title } from "../siege/api.js";
+import { isReady, getState, saveState, keepOf, onTick, moduleStore, on, emit, addFoundingCheck, pick, title } from "../siege/api.js";
 import { applyFilter } from "../core/events.js";
 import { pay } from "../economy/coins.js";
 import { coins, fromEmeralds } from "../economy/rules.js";
 import * as plotsApi from "../plots/claims.js"; // giveToNpc / releaseNpc mark a plot as a lord's in the Plot Atlas (where plots has them)
 import { allPlots, holderOf, mapMode } from "../plots/claims.js";
 import { startBuild, buildFor, worldCells } from "../townhall/build.js";
+import { CORNERSTONE, halls, saveHalls, beginBuild } from "../townhall/townhall.js";
 import { drawHall } from "../townhall/halls.js";
 import { STYLES } from "../townhall/styles.js";
 import { REGION_TO_STYLE } from "../settle/config.js";
-import { drawBuilding, styleFor } from "../settle/buildings.js";
-import { RIVALS, TIER_NAMES, LINES, HALL_SPOT, makeLord, radiusOf, wanted, night, nextPiece, partKey } from "./data.js";
+import { drawBuilding, styleFor, BUILDING } from "../settle/buildings.js";
+import { wallOf, wallRising, raiseWall, bearingFor, gateDirFor, adoptWall } from "../settle/walls.js";
+import { WALL_LEVELS } from "../settle/walldata.js";
+import { raiseFree } from "../settle/plans.js";
+import { RIVALS, TIER_NAMES, LINES, STAGES, makeLord, radiusOf, wanted, night, nextPiece, partKey, hallSpot, partSpot, estateOf, winsForEstate, takeEstate } from "./data.js";
 import "./tests.js";
 
 const OVERWORLD = "minecraft:overworld";
@@ -42,7 +46,9 @@ const LORD_TAG = "siege_rival";
 const DEFENDER_TAG = "siege_rival_defender";
 const DAY = 24000;
 
-const store = moduleStore("siege:rivals", () => ({ mode: null, lords: [], fallen: [], lastArrival: 0, seed: 0 }));
+const store = moduleStore("siege:rivals", () => ({ mode: null, lords: [], fallen: [], lastArrival: 0, seed: 0, estates: {} }));
+const estates = () => (store.data.estates ??= {}); // plot name -> what the last lord left there
+const wallId = (lord) => `npc:${lord.id}`;
 const lords = () => store.data.lords;
 const save = () => store.save();
 const lordTag = (lord) => `siege_rival_${lord.id}`;
@@ -103,6 +109,7 @@ function settleTick() {
   if (!plot) return;
   const lord = makeLord(plot, `${store.data.seed}|${store.data.fallen.length}`, [...lords().map((l) => l.name), ...store.data.fallen]);
   giveVoice(lord);
+  if (estates()[plot.name]) { takeEstate(lord, estates()[plot.name]); delete estates()[plot.name]; } // carries on where the last lord stopped
   lords().push(lord);
   plotsApi.giveToNpc?.(lord.plot, { id: lord.id, name: lord.name });
   store.data.lastArrival = now;
@@ -163,35 +170,52 @@ function buildTick() {
     const piece = nextPiece(lord);
     if (!piece) continue;
     const style = styleOfLord(lord);
+    lord.gateDir ??= gateDirFor(lord);
     if (piece.hall) {
-      lord.hallAt ??= (() => {
-        const y = surface(dim, lord.x + HALL_SPOT.dx, lord.z + HALL_SPOT.dz, lord.y + 1);
-        return y === undefined ? undefined : { x: lord.x + HALL_SPOT.dx, y, z: lord.z + HALL_SPOT.dz };
-      })();
-      if (!lord.hallAt) continue;
+      if (!lord.hallAt) {
+        const spot = hallSpot(lord, lord.gateDir);
+        const y = surface(dim, spot.x, spot.z, lord.y + 1);
+        if (y === undefined) continue;
+        lord.hallAt = { x: spot.x, y, z: spot.z };
+        lord.hallF = spot.forward;
+      }
       const plan = drawHall(piece.hall, STYLES[style]);
       let remove;
       if (lord.built.hall > 0) {
-        const keepCells = new Set(worldCells(plan, lord.hallAt, HALL_SPOT.f).map((c) => `${c.x},${c.y},${c.z}`));
-        remove = worldCells(drawHall(lord.built.hall, STYLES[style]), lord.hallAt, HALL_SPOT.f)
+        const keepCells = new Set(worldCells(plan, lord.hallAt, lord.hallF).map((c) => `${c.x},${c.y},${c.z}`));
+        remove = worldCells(drawHall(lord.built.hall, STYLES[style]), lord.hallAt, lord.hallF)
           .filter((c) => !keepCells.has(`${c.x},${c.y},${c.z}`)).sort((a, b) => b.y - a.y);
       }
       startBuild({
-        id, dimensionId: OVERWORLD, origin: lord.hallAt, forward: HALL_SPOT.f, plan, style: STYLES[style], remove,
+        id, dimensionId: OVERWORLD, origin: lord.hallAt, forward: lord.hallF, plan, style: STYLES[style], remove,
         perTick: Math.max(8, Math.ceil(plan.cells.size / 1200)),
         onDone() { lord.built.hall = piece.hall; save(); },
       });
     } else {
-      const { b, dx, dz, f } = piece.part;
-      const y = surface(dim, lord.x + dx, lord.z + dz, lord.y + 1);
+      const spot = partSpot(lord, lord.gateDir, piece.part);
+      const y = surface(dim, spot.x, spot.z, lord.y + 1);
       if (y === undefined) continue;
-      const plan = drawBuilding(b, style);
+      const plan = drawBuilding(piece.part.building, style);
       startBuild({
-        id, dimensionId: OVERWORLD, origin: { x: lord.x + dx, y, z: lord.z + dz }, forward: f, plan, style: styleFor(style),
+        id, dimensionId: OVERWORLD, origin: { x: spot.x, y, z: spot.z }, forward: spot.forward, plan, style: styleFor(style),
         perTick: Math.max(4, Math.ceil(plan.cells.size / 200)),
         onDone() { lord.built.parts.push(partKey(piece.tier, piece.i)); save(); },
       });
     }
+  }
+}
+
+// A lord's wall keeps pace with their tier
+function wallTick() {
+  const players = world.getPlayers().filter((p) => p.dimension.id === OVERWORLD);
+  for (const lord of lords()) {
+    if (lord.built.hall < 1 || sieges.has(lord.id) || wallRising(wallId(lord))) continue;
+    if (!players.some((p) => Math.hypot(p.location.x - lord.x, p.location.z - lord.z) <= RIVALS.buildRange)) continue;
+    const want = RIVALS.wallLevel[lord.tier] ?? 1;
+    const w = wallOf(wallId(lord));
+    if ((w?.level ?? 0) >= want) continue;
+    const center = { x: lord.x, y: lord.y, z: lord.z };
+    raiseWall(wallId(lord), want, w ? {} : { center, style: styleOfLord(lord), bearing: bearingFor(center) });
   }
 }
 
@@ -318,6 +342,7 @@ function endSiege(lord, won) {
   const beaten = say(lord, "beaten", player);
   if (beaten) player?.sendMessage(`§7${lord.name}: §f${beaten}`);
   store.data.fallen.push(lord.name);
+  estates()[lord.plot] = { ...estateOf(lord), wall: wallId(lord) }; // whoever claims the plot starts from what stands there
   removeLord(lord);
   emit("rivalFallen", { lord, player });
   for (const p of world.getPlayers()) p.sendMessage(`§6${lord.name} has fallen. ${lord.plot} stands empty, hall and all.`);
@@ -325,7 +350,7 @@ function endSiege(lord, won) {
   const spoils = RIVALS.spoils[lord.tier];
   pay(player, fromEmeralds(spoils), "rival lord");
   player.playSound("ui.toast.challenge_complete");
-  title(player, `§6${lord.plot} is taken`, `§7${coins(fromEmeralds(spoils))} in spoils. The plot can be claimed.`);
+  title(player, `§6${lord.plot} is taken`, `§7${coins(fromEmeralds(spoils))} in spoils. Claim it and it is yours as it stands.`);
   emit("skillPoints", { player, amount: 1 + lord.tier, source: `toppled ${lord.name}`, renown: 80 * (lord.tier + 1) });
 }
 
@@ -407,7 +432,81 @@ on("ready", () => {
 
 onTick("rivals_settle", 200, () => { if (isReady()) settleTick(); });
 onTick("rivals_build", 100, () => { if (isReady()) buildTick(); });
+onTick("rivals_walls", 200, () => { if (isReady()) wallTick(); });
 onTick("rivals_siege", 20, () => { if (isReady()) siegeTick(); });
+
+// ---------- handing a settlement to a player ----------
+// A player who takes a lord's plot starts where the lord left off: the same tier, hall, buildings and wall.
+// Nothing is locked by it: every building is theirs to change or pull down, the hall and wall upgrade as
+// usual, anything the lord had not built yet is still there to build, and their own role and story are untouched.
+// Two ways in: a newcomer picks the lord's plot in the welcome hall (the lord steps down), or a lord
+// is toppled and somebody raises a Keep Banner on the empty plot.
+
+// The buildings and the wall change hands (can happen before the player has a keep)
+function adopt(player, estate) {
+  if (estate.adopted) return;
+  estate.adopted = player.id;
+  const dim = world.getDimension(OVERWORLD);
+  const style = REGION_TO_STYLE[allPlots().find((p) => p.name === estate.plot)?.region] ?? "vale";
+  adoptWall(estate.wall, player.id);
+  const old = halls()[player.id];
+  if (estate.hall > 0 && estate.hallAt && (!old || old.lost)) {
+    try {
+      dim.getBlock(estate.hallAt)?.setType(CORNERSTONE);
+    } catch {
+      // not loaded: the record below is enough, the block appears when the hall is rebuilt
+    }
+    halls()[player.id] = {
+      x: estate.hallAt.x, y: estate.hallAt.y, z: estate.hallAt.z, fx: estate.hallF.x, fz: estate.hallF.z,
+      level: 0, paid: Math.max(old?.paid ?? 0, estate.hall, estate.tier + 1), best: Math.max(old?.best ?? 0, estate.hall), style, building: null, marks: {},
+    };
+    saveHalls();
+    beginBuild(player.id, estate.hall, style); // the same hall on the same spot: this wakes its Tree of Oaths and rooms for the new owner
+  }
+  // a town always has its library, even if the lord never got to it
+  STAGES.forEach((stage, tier) => stage.forEach((slot, i) => {
+    if (!slot.arrival || estate.parts.includes(partKey(tier, i)) || !estate.gateDir) return;
+    const spot = partSpot(estate, estate.gateDir, slot);
+    const y = surface(dim, spot.x, spot.z, undefined);
+    if (y !== undefined && BUILDING[slot.building]) raiseFree(player, { x: spot.x, y, z: spot.z }, spot.forward, slot.building, style);
+  }));
+  save();
+  const wall = wallOf(player.id);
+  player.sendMessage(`§6You take up ${estate.plot} where ${estate.from} left it:§7 a ${TIER_NAMES[estate.tier]}${estate.hall ? `, its hall` : ""}, ${estate.parts.length} building${estate.parts.length === 1 ? "" : "s"}${wall?.level ? ` and a ${WALL_LEVELS[wall.level]?.name ?? "wall"}` : ""}. All of it is yours to keep, change or pull down.`);
+}
+
+// A newcomer chose a lord's plot in the welcome hall: the lord steps down for them
+on("plotChosen", ({ player, plot }) => {
+  const lord = plot && rivalOnPlot(plot.name);
+  if (lord) {
+    if (sieges.has(lord.id)) endSiege(lord, false);
+    estates()[lord.plot] = { ...estateOf(lord), wall: wallId(lord), heir: player.id };
+    removeLord(lord);
+    emit("rivalStoodDown", { lord, player });
+    for (const p of world.getPlayers()) p.sendMessage(`§6${lord.name} has handed ${lord.plot} to ${player.name}.`);
+  }
+  const estate = plot && estates()[plot.name];
+  if (estate && (!estate.heir || estate.heir === player.id)) adopt(player, estate);
+});
+
+// The welcome hall asks what tier a lord-run plot stands at, for its label
+on("plotLordQuery", (q) => {
+  const lord = q?.plot && rivalOnPlot(q.plot.name);
+  if (lord) q.tier = TIER_NAMES[lord.tier];
+});
+
+// The Keep Banner goes up: the settlement's standing comes with it
+on("keepFounded", ({ player, keep }) => {
+  const estate = Object.values(estates()).find((e) => e.x === keep.x && e.z === keep.z);
+  if (!estate) return;
+  adopt(player, estate);
+  keep.wins = winsForEstate(estate, keep.wins ?? 0);
+  if (estate.tier >= 3) keep.warlordsSlain = Math.max(keep.warlordsSlain ?? 0, 2); // a Castle stays a Castle
+  saveState();
+  delete estates()[estate.plot];
+  save();
+  emit("rivalInherited", { player, estate });
+});
 
 // ---------- commands ----------
 system.afterEvents.scriptEventReceive.subscribe((event) => {

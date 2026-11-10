@@ -6,7 +6,7 @@ import { isReady, getState, keepOf, overworld, title, onTick, on, emit, countIte
 import { CROWN, IDS } from "./config.js";
 import { chargeE, giveCoins } from "../economy/coins.js";
 import { worth, fromEmeralds } from "../economy/rules.js";
-import { hollowStage, nightfall, tithed, claimNeeded, clamp, npcDecreeTarget } from "./rules.js";
+import { hollowStage, nightfall, tithed, claimNeeded, clamp, npcDecreeTarget, freshPick, lordApproach } from "./rules.js";
 import {
   crown, saveCrown, ruler, isRuler, isCourt, rulerLabel, playerById, announce, giveItem, claimOf, seat, lords, lordOf,
 } from "./state.js";
@@ -156,7 +156,9 @@ addPlanHook((plan, owner) => {
   if (c.ruler?.id === owner && doom() && c.ruler.hollowing >= 100) plan.budget *= 2; // the Choir turns on its host
   const lord = c.ruler?.id === owner && c.challenge?.npc && lordOf(c.challenge.claimant);
   if (lord) { // a rival lord marches on the throne in person
-    plan.budget = Math.round(plan.budget * CROWN.npcStormThreat);
+    const approach = lordApproach(Math.max(0, (lord.tries ?? 1) - 1)); // never the same army twice
+    plan.budget = Math.round(plan.budget * approach.threat);
+    for (const m of approach.modifiers) if (!plan.modifiers.includes(m)) plan.modifiers.push(m);
     if (!plan.grand) plan.warlord = `${lord.title} ${lord.name}`;
     plan.npcStorm = true;
   }
@@ -186,6 +188,12 @@ const WHISPERS = [
   "§8§oSend them. They are yours to send. They were always going to be yours.",
   "§8§oThe bell is not under the keep any more. Listen. It is closer than that.",
   "§8§oDo you hear every keep in the land yet? You will.",
+  "§8§oYou counted the towers again tonight. You did not need to. You knew.",
+  "§8§oIt is warm in your hand. Was it warm when you picked it up?",
+  "§8§oThey kneel so easily. Have you noticed how easily?",
+  "§8§oSomeone wrote to you, once, and left it where you would sit. Not yet. Later.",
+  "§8§oThe third night is yours now. It was someone's before. It will be someone's after.",
+  "§8§oYou have stopped hearing the bell. That is not the same as the bell stopping.",
 ];
 
 on("siegeStart", () => {
@@ -198,7 +206,15 @@ on("siegeStart", () => {
     title(target, "§4By Royal Decree", `§7${rulerLabel()} has sent this army against you`);
   }
   const player = playerById(r.id);
-  if (player && r.hollowing >= 25) player.sendMessage(WHISPERS[Math.floor(Math.random() * WHISPERS.length)]);
+  if (player && r.hollowing >= 25) { // each whisper is heard once in a reign, and then it goes quiet
+    r.heard ??= [];
+    const i = freshPick(WHISPERS.length, r.heard, Math.random());
+    if (i >= 0) {
+      r.heard.push(i);
+      saveCrown();
+      player.sendMessage(WHISPERS[i]);
+    }
+  }
 });
 
 on("siegeEnd", () => {
@@ -226,7 +242,9 @@ function lordDecree() {
   c.decrees.lastTarget = target ?? null;
   if (!target) return;
   const factions = Object.keys(FACTIONS).filter((f) => f !== "grand");
-  const faction = factions[Math.floor(Math.random() * factions.length)];
+  const fresh = factions.filter((f) => f !== c.decrees.lastFaction); // never the same host twice running
+  const faction = fresh[Math.floor(Math.random() * fresh.length)] ?? factions[0];
+  c.decrees.lastFaction = faction;
   c.decrees.siege = { target, faction };
   c.names[target] = st.keeps[target].name;
   announce(`§4By decree of ${rulerLabel()}, the ${FACTIONS[faction].name} marches on ${st.keeps[target].name} next siege night.`, "raid.horn");

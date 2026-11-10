@@ -1,3 +1,5 @@
+import { HALL, SLOTS, place } from "../settle/layout.js";
+
 // Rival Lords: the pure part (names, who settles where, how they grow). Runs in Node too.
 // A Rival Lord is an NPC who holds a plot nobody claimed, so the map is alive in single-player.
 
@@ -13,6 +15,7 @@ export const RIVALS = {
   siegeMinutes: 10, // a siege on a lord fails after this long
   siegeCooldownDays: 1, // a lord can't be besieged again for this long after holding
   spoils: [12, 24, 40, 64], // for toppling a lord, by tier (old unit: x8 coins, so 96 to 512 Regals)
+  wallLevel: [2, 4, 7, 9], // the settlement wall a lord raises, by tier (walls: settle/walldata.js)
   buildRange: 96, // their buildings only rise while a player is this close (so chunks are loaded)
 };
 
@@ -72,15 +75,12 @@ export function night(lord, nightNumber) {
 }
 
 // ---------- their settlement, in template stages ----------
-// Spots are measured from the Plot Stone: dx east, dz south, f = the way the building runs.
-// The hall always stands south of the stone; everything else keeps clear of the ground it grows into.
-export const HALL_SPOT = { dx: 0, dz: 6, f: { x: 0, z: 1 } };
-export const STAGES = [
-  [{ b: "cottage", dx: -10, dz: -6, f: { x: 0, z: -1 } }, { b: "well", dx: 0, dz: -6, f: { x: 0, z: -1 } }],
-  [{ b: "cottage", dx: 10, dz: -6, f: { x: 0, z: -1 } }, { b: "market", dx: 0, dz: -16, f: { x: 0, z: -1 } }, { b: "garden", dx: -10, dz: -20, f: { x: 0, z: -1 } }],
-  [{ b: "smithy", dx: 24, dz: 4, f: { x: 1, z: 0 } }, { b: "stable", dx: -24, dz: 6, f: { x: -1, z: 0 } }],
-  [{ b: "storehouse", dx: 24, dz: 20, f: { x: 1, z: 0 } }, { b: "watchtower", dx: -24, dz: 24, f: { x: -1, z: 0 } }, { b: "watchtower", dx: 22, dz: -18, f: { x: 0, z: -1 } }],
-];
+// A lord builds on the same mapped layout a player's settlement uses (settle/layout.js), turned to the
+// plot's gate, so a player who takes the settlement over finds every building on its proper spot.
+// STAGES[tier] = the layout slots that open at that tier.
+export const STAGES = [0, 1, 2, 3].map((tier) => SLOTS.filter((slot) => slot.tier === tier));
+export const hallSpot = (lord, gateDir) => place({ x: lord.x, z: lord.z }, gateDir, HALL);
+export const partSpot = (lord, gateDir, slot) => place({ x: lord.x, z: lord.z }, gateDir, slot);
 export const partKey = (tier, i) => `${tier}:${i}`;
 
 // The next thing this lord's settlement is missing: { hall: level } or { part, tier, i }, or undefined
@@ -117,3 +117,23 @@ export const LINES = {
     "We all hear it, you know. The quiet before the bell. You are not alone in that.",
   ],
 };
+
+// ---------- handing a settlement on ----------
+// What a lord leaves behind on a plot: whoever holds the plot next (a player, or another lord) starts from it.
+export function estateOf(lord) {
+  return {
+    plot: lord.plot, x: lord.x, z: lord.z, from: lord.name, tier: lord.tier, wins: lord.wins,
+    hall: lord.built.hall, parts: [...lord.built.parts], hallAt: lord.hallAt, hallF: lord.hallF, gateDir: lord.gateDir,
+  };
+}
+
+// The sieges a player's keep must have won to stand at a lord's tier (never lowers what the player has)
+export const winsForEstate = (estate, winsNow = 0) => Math.max(winsNow, estate.wins ?? 0, RIVALS.tierWins[estate.tier] ?? 0);
+
+// A new lord on a plot with an estate carries on from it
+export function takeEstate(lord, estate) {
+  lord.tier = estate.tier; lord.wins = Math.max(estate.wins ?? 0, RIVALS.tierWins[estate.tier] ?? 0);
+  lord.built = { hall: estate.hall, parts: [...estate.parts] };
+  lord.hallAt = estate.hallAt; lord.hallF = estate.hallF; lord.gateDir = estate.gateDir;
+  return lord;
+}

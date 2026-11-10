@@ -7,7 +7,7 @@ import { system } from "@minecraft/server";
 import { RAIDER_TAG, WARLORD_TAG, KING_TAG, addTests, assert, assertEqual } from "../siege/api.js";
 import { registerBoss, bossDefs, stack } from "./bossCore.js";
 import { MOBS, ITEMS } from "./data.js";
-import { alive, effect, flat, heal, hurt, held, line, particle, ring, shove, sound } from "./util.js";
+import { alive, effect, flat, heal, hurt, held, isLookingAt, line, particle, ring, shove, sound } from "./util.js";
 
 const perPlayer = (f, base, each) => base + each * Math.max(0, f.players().length - 1);
 const floorOf = (f, p) => ({ x: p.x, y: f.def.roaming ? p.y : f.center.y, z: p.z });
@@ -91,6 +91,18 @@ registerBoss({
       start: (f) => {
         for (const p of f.players()) f.zone(floorOf(f, p.location), 2.5, 25, (q) => hurt(q, 7, "entityAttack", f.entity), "minecraft:basic_crit_particle");
       } },
+    // The minute runs backwards: everyone is put back where they stood when the hands began to turn, and a cog is already on its way there
+    { id: "rewind", every: 260, windup: 40, warn: "The hands turn back. Remember where you are standing!", sound: "block.bell.hit",
+      start: (f) => f.players().map((p) => ({ p, at: { ...p.location } })),
+      show: (f, marks) => { for (const m of marks) ring(f.dim, m.at, 1.2, "minecraft:endrod", 8); },
+      hit: (f, marks) => {
+        for (const m of marks) {
+          if (!alive(m.p)) continue;
+          try { m.p.teleport(m.at); } catch { continue; }
+          m.p.onScreenDisplay.setActionBar("§bThe minute runs backwards. Move!");
+          f.zone(floorOf(f, m.at), 2.5, 20, (q) => hurt(q, 8, "entityAttack", f.entity), "minecraft:basic_crit_particle");
+        }
+      } },
   ],
   onPhase: (f, n) => {
     if (n === 1) {
@@ -145,6 +157,17 @@ registerBoss({
     { id: "pack", every: 500, windup: 30, phases: [1, 2], warn: "A horn in the snow. The pack is coming.", sound: "raid.horn",
       when: (f) => f.adds("siege:rimewolf").length < 2,
       hit: (f) => f.summon("siege:rimewolf", perPlayer(f, 2, 1), 9, f.center) },
+    // Snares under the snow: step in one and you are held where the next marked shot can find you
+    { id: "snare", every: 230, windup: 20, warn: "Snares under the snow. Watch where you run!",
+      hit: (f) => {
+        for (const p of f.players()) {
+          for (let i = 0; i < 3; i++) {
+            const a = Math.random() * Math.PI * 2, d = 3 + Math.random() * 4;
+            f.zone(floorOf(f, { x: p.location.x + Math.cos(a) * d, y: p.location.y, z: p.location.z + Math.sin(a) * d }), 1.8, 60 + i * 30,
+              (q) => { effect(q, "slowness", 70, 255); hurt(q, 4, "freezing"); q.onScreenDisplay.setActionBar("§bThe snare closes on your leg."); }, "minecraft:snowflake_particle");
+          }
+        }
+      } },
   ],
   tick: (f, players) => {
     // The blizzard: he is hidden most of the time, and only his breath gives him away
@@ -357,6 +380,19 @@ registerBoss({
       start: (f) => { for (const p of f.players()) f.zone(floorOf(f, p.location), 2, 30, (q) => { effect(q, "slowness", 70, 255); hurt(q, 5); }, "minecraft:villager_angry"); } },
     { id: "brood", every: 380, windup: 20, phases: [1, 2], warn: "She calls her children.", when: (f) => f.adds("siege:changeling").length < 4,
       hit: (f) => { for (const c of f.summon("siege:changeling", 2, 6)) try { c.triggerEvent("siege:reveal"); } catch { /* gone */ } } },
+    // She hums something you half know. Anyone still looking at her when it ends forgets where they are.
+    { id: "lullaby", every: 260, windup: 40, warn: "She begins to hum. Look away from her!", sound: "note.flute", when: (f) => !f.data.masq,
+      show: (f) => particle(f.dim, "minecraft:note_particle", f.entity.getHeadLocation()),
+      hit: (f) => {
+        const head = f.entity.getHeadLocation();
+        for (const p of f.players()) {
+          let looking = false;
+          try { looking = isLookingAt(p.getHeadLocation(), p.getViewDirection(), head, 0.7); } catch { /* gone */ }
+          if (!looking) continue;
+          effect(p, "blindness", 80, 0); effect(p, "nausea", 160, 0); hurt(p, 6);
+          p.onScreenDisplay.setActionBar("§2You know this song. You cannot think whose it was.");
+        }
+      } },
   ],
   tick: (f, players) => {
     const m = f.data.masq;

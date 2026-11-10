@@ -2,7 +2,8 @@
 
 import { world, system, ItemStack, EquipmentSlot, GameMode } from "@minecraft/server";
 import { onTick } from "../core/loop.js";
-import { MAP, OVERWORLD, WARDS } from "./config.js";
+import { moduleStore } from "../core/store.js";
+import { MAP, OVERWORLD, WARDS, EXPANSION } from "./config.js";
 import { mapMode } from "./claims.js";
 
 // ---------- No elytra ----------
@@ -41,9 +42,29 @@ function elytraTick() {
 
 const lastInside = new Map(); // player id -> last spot inside the edge
 
-export function outsideMap(loc) {
+// Zones an update has opened are remembered in the world
+const zones = moduleStore("siege:plots_zones", () => ({ open: [] }));
+const openIds = () => {
+  try {
+    return zones.data.open;
+  } catch {
+    return []; // world not ready yet
+  }
+};
+export const zoneOpen = (id) => openIds().includes(id);
+
+/** Open a sealed expansion zone for good: the map edge then lets players into its land. For updates to call. */
+export function openZone(id) {
+  if (!EXPANSION.some((z) => z.id === id) || zoneOpen(id)) return false;
+  zones.data.open.push(id);
+  zones.save();
+  return true;
+}
+
+export function outsideMap(loc, open = openIds()) {
   if (!MAP.mapHalfSize) return false;
-  return Math.max(Math.abs(loc.x - MAP.mapCenter.x), Math.abs(loc.z - MAP.mapCenter.z)) > MAP.mapHalfSize;
+  if (Math.max(Math.abs(loc.x - MAP.mapCenter.x), Math.abs(loc.z - MAP.mapCenter.z)) <= MAP.mapHalfSize) return false;
+  return !EXPANSION.some((z) => open.includes(z.id) && loc.x >= z.beyond.x0 && loc.x <= z.beyond.x1 && loc.z >= z.beyond.z0 && loc.z <= z.beyond.z1);
 }
 
 function mapEdgeTick() {

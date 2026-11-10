@@ -4,6 +4,7 @@ import { world, GameMode, ItemStack } from "@minecraft/server";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
 import * as api from "../siege/api.js";
 import { SKILLS, SKILL, BRANCHES, RINGS, RANKS, ROLES, HALL_NAMES, LEVEL_UNLOCKS, canBranch, blockedReason, spentIn, rankOf, levelFromRenown, levelTitle, POWER_ORIGINS } from "./skills.js";
+import { treeCells, TREE_FLAG, BRANCH_FLAG, SPACER } from "./tree_layout.js";
 import { heroOf, saveHero, setPath, grantPoints } from "./hero.js";
 import { hallLevelAt, setTreeLook } from "./townhall.js";
 import { chargeE } from "../economy/coins.js";
@@ -48,6 +49,8 @@ export function treeMenu(player, hallLevel) {
     form.button(`${open ? "" : "§8"}${branch.name}${open ? `\n§8${spent} point${spent === 1 ? "" : "s"} sworn` : `\n§8${branch.who === "knight" ? "Knights only" : "The Marked only"}`}`, branch.icon);
     actions.push(() => branchMenu(player, hallLevel, id));
   }
+  form.button(hero.plainTree ? "Show branches as a tree\n§8now: plain lists" : "Show branches as plain lists\n§8now: the tree screen", "textures/items/painting");
+  actions.push(() => { hero.plainTree = !hero.plainTree; saveHero(player); treeMenu(player, hallLevel); });
   if (hero.victorOffer && !hero.victor) {
     form.button("§5The Hollow's offer\n§8the Sorcerer's path, with a head start", "textures/items/siege_bound_ember");
     actions.push(() => victorMenu(player, hallLevel));
@@ -72,8 +75,37 @@ export function treeMenu(player, hallLevel) {
   form.show(player).then((r) => { if (!r.canceled) actions[r.selection]?.(); }).catch(() => {});
 }
 
+// The graphical tree: the same choices as the list, laid out on a grid that the resource pack draws as a tree
+// (ui/server_form.json looks for TREE_FLAG in the title). Players can switch back to plain lists.
+const NODE = "textures/ui/hc/node_";
+function branchGrid(player, hallLevel, branchId) {
+  const hero = heroOf(player);
+  const branch = BRANCHES[branchId];
+  const cells = treeCells(branchId);
+  const last = cells.reduce((n, c, i) => (c ? i : n), 0);
+  const form = new ActionFormData().title(`${TREE_FLAG}${BRANCH_FLAG[branchId]}§r${branch.name}`).body(`§bSkill points: ${hero.points}§r   ${branch.blurb}`);
+  for (let i = 0; i <= last; i++) {
+    const c = cells[i];
+    if (!c) form.button(SPACER);
+    else if (c === "back") form.button("Back", "textures/ui/hc/slot");
+    else {
+      const have = hero.skills[c.id] ?? 0, why = blockedReason(c, hero, hallLevel);
+      const unknown = !have && POWER_ORIGINS.gated[c.id] && !hero.origins?.[c.id];
+      form.button(c.name, NODE + (have >= c.max ? "full" : have ? "some" : unknown ? "unknown" : !why ? "open" : "locked"));
+    }
+  }
+  form.show(player).then((r) => {
+    if (r.canceled) return;
+    const c = cells[r.selection];
+    if (c === "back") return treeMenu(player, hallLevel);
+    if (!c) return branchGrid(player, hallLevel, branchId);
+    skillMenu(player, hallLevel, c);
+  }).catch(() => {});
+}
+
 function branchMenu(player, hallLevel, branchId) {
   const hero = heroOf(player);
+  if (!hero.plainTree && BRANCH_FLAG[branchId]) return branchGrid(player, hallLevel, branchId);
   const branch = BRANCHES[branchId];
   const list = SKILLS.filter((s) => s.branch === branchId);
   const form = new ActionFormData().title(branch.name).body(`${branch.blurb}\n§bSkill points: ${hero.points}`);

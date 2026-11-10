@@ -10,7 +10,7 @@
 // so leave that much solid rock behind and around the seam.
 
 import { world, system, GameMode, EquipmentSlot } from "@minecraft/server";
-import { load, save, say, FACING } from "./data.js";
+import { load, save, loadPlain, savePlain, say, FACING } from "./data.js";
 import { planSeam, placeCells, tearOpen, standPoint, SEAM } from "./rift.js";
 import { TEXT } from "./layout.js";
 
@@ -42,10 +42,10 @@ export const FORK = "siege:tuning_fork";
 const OVERWORLD = "minecraft:overworld";
 
 export function getSourceSite() {
-  let id = world.getDynamicProperty(K_SITE);
+  let id = loadPlain(K_SITE); // saved as the plain site id, not JSON
   if (typeof id !== "string" || !SOURCE_SITE_IDS.includes(id)) {
     id = SOURCE_SITE_IDS[Math.floor(Math.random() * SOURCE_SITE_IDS.length)];
-    world.setDynamicProperty(K_SITE, id);
+    savePlain(K_SITE, id);
   }
   return id;
 }

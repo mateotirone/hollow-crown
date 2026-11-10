@@ -114,6 +114,7 @@ export const NPCS = [
         opts: [["I will.", "end"]],
       },
       hub: {
+        greets: ["You again. Good. Wipe your feet, somebody has to pretend it's morning.", "Hold this. No, the other end. Now. What is it?", "I've a pot on and a boy with a fever. Talk while I work."],
         text: "Still dark, still here. What do you need?",
         opts: [
           ["The Lost Days.", "lost_gate"],
@@ -223,6 +224,7 @@ export const NPCS = [
         ],
       },
       hub: {
+        greets: ["You look tired. So do I. Nobody warns you about the paperwork.", "Ah, good, a face that isn't asking me for a horse. Go on.", "I have the watch in an hour. Until then I am yours."],
         text: "Well met again. The roads are worse every month. What can I do for you?",
         opts: [
           ["Tell me about the Order.", "order"],
@@ -339,6 +341,7 @@ export const NPCS = [
         opts: [["Tell me more.", "hub", ["flag:mag_believed", "tome:test_08", "lead:mags_hut"]]],
       },
       hub: {
+        greets: ["You're letting the damp out. In or out.", "Back, are you. The frogs said you would be.", "I was asleep. I've been asleep since Tuesday. Which Tuesday, I couldn't say. Ask."],
         text: "Sit. Ask. Don't touch the jars.",
         opts: [
           ["Your teacher.", "corvin"],
@@ -441,6 +444,7 @@ export const NPCS = [
         ],
       },
       hub: {
+        greets: ["Is that the tide or is that you? Come up, come up.", "Careful on the stair. It has one more step than it used to.", "I was just writing to her. It will keep. What can I tell you?"],
         text: "Mind the lamp. Have you read them? Any of them? I'd like to know someone has.",
         opts: [
           ["The tide and the chapel.", "tide"],
@@ -523,6 +527,7 @@ export const NPCS = [
         opts: [["Back.", "hub"]],
       },
       hub: {
+        greets: ["Don't move that pile, it's in an order. What have you found?", "Oh, it's you! I was hoping it was you and not a draught.", "Ink's wet, mind your sleeve. Go on, what's the question?"],
         text: "Catalogue's up to date. What are we puzzling over?",
         opts: [
           ["Two tomes disagree.", "contra"],
@@ -606,6 +611,7 @@ export const NPCS = [
         opts: [["Back.", "hub"]],
       },
       hub: {
+        greets: ["Quietly, please. The books are used to it.", "You came back. Most people need only one look at this room.", "I have misfiled something on purpose today. It was very satisfying. Yes?"],
         text: "The reading room is open. The archive is not. I say this every day. Some days I even mean it.",
         opts: [
           ["What did the Order burn?", "burn"],
@@ -699,6 +705,7 @@ export const NPCS = [
         opts: [["What happened there?", "lake"]],
       },
       hub: {
+        greets: ["You'll want feeding. Southerners always do. Talk first.", "Boots off or stay by the door. What now?", "Lake's still there, if that's what you came to check."],
         text: "Door. Shut. What is it?",
         opts: [
           ["The shrine by the lake.", "shrine"],
@@ -785,6 +792,7 @@ export const NPCS = [
         ],
       },
       hub: {
+        greets: ["Sunscar thanks you for your visit. I am required to say so. What do you want?", "Mind the statues on your way out. They were here first.", "I have a petition about a goat and then I have you. Go on."],
         text: "Water, shade, or statues?",
         opts: [
           ["Statues.", "doubt"],
@@ -852,6 +860,7 @@ export const NPCS = [
         opts: [["I'll watch him.", "hub"]],
       },
       hub: {
+        greets: ["Loaves are a penny. You're not here for loaves, are you.", "Keep your voice down, he's only through there.", "I've been counting how long he stands at the back door. Ask me how long."],
         text: "Well? Have you watched him?",
         opts: [
           ["Tell me again what to look for.", "tells"],
@@ -907,6 +916,7 @@ export const NPCS = [
         opts: [["I'll go and look at him.", "hub"]],
       },
       hub: {
+        greets: ["Mind the nets. Well? I've not slept.", "He asked after you this morning. By name. I don't know what to make of that.", "Tell me you've watched him. Tell me something."],
         text: "Well? You've seen him. What is he?",
         opts: [
           ["What does the dog make of him?", "dog"],
@@ -970,6 +980,7 @@ export const NPCS = [
         ],
       },
       hub: {
+        greets: ["I saved you a place on the wall. It's the dry bit.", "He's down there again. Look. Right on the line.", "Did you decide? You don't have to say. I can tell if you've decided."],
         text: "Have you thought?",
         opts: [
           ["I'll say nothing, Tilly.", "kept", ["flag:case_pip_kept", "sp:1"]],
@@ -1024,6 +1035,7 @@ export const NPCS = [
         opts: [["I'll go and see him.", "hub"]],
       },
       hub: {
+        greets: ["You're back. Good. I've kept the tea warm, I don't know why.", "He's out with the reeds. He's always out with the reeds now.", "Tell me what you saw. Take your time. I've nothing but time."],
         text: "Did you see him? Did you see how he looks at the house?",
         opts: [
           ["Odo is himself, Hesper.", "verdict_odo_fine"],
@@ -1084,6 +1096,7 @@ export const NPCS = [
         opts: [["Who were you?", "who"]],
       },
       hub: {
+        greets: ["Stand still. The water carries better when you stand still.", "You again. Good. I had half a sentence saved for you and I've lost it. Ask.", "Speak low. I am borrowing this breath from a tune and it will be wanted back."],
         text: "Ask. Quickly. Every word I say to you is a word I'm not singing, and they notice.",
         opts: [
           ["What did the truce really say?", "truce"],
@@ -1142,4 +1155,18 @@ export const RUMORS = [
   "Sunscar's statues have no faces. Wind, they say. I've sold enough chisels to know a chisel mark.",
   "Half of Rimehold walked onto a lake once. The other half won't talk about it. Bad for trade.",
   "People who keep books say the old king's name turns up if you read enough of them. What old king?",
+  // doors left open for later updates (design thread's proposals, 2026-11-10; none has an answer in the game yet)
+  "The Gullcliff boats saw lights again, out past where the charts stop. Low on the water. Moving together.",
+  "A fisherman's wife told me there's land west of the last sounding. Her husband told me to stop listening to his wife.",
+  "Bought a crate of books off a wreck. One of them isn't in any letters I know. Nor any the priest knows. He kept it, mind.",
+  "There's a door in the hills with no moon carved on it and no handle either. Shepherds eat their dinner against it.",
+  "Every region's got one door nobody's opened. Ask anywhere. They'll all say theirs is the only one.",
+  "My grandfather sold maps. Said the honest ones had an edge and the dishonest ones had a sea serpent.",
+  // plain talk, so the same ten are not heard for ever
+  "Iron's dear this year. It's the walls. Everybody's building walls.",
+  "A raven sat on my cart from Oakmere to the ford and never once asked for anything. Unnatural.",
+  "The grey brothers bought every candle I had and wouldn't say what for. Paid, though. They always pay.",
+  "I knew a man who slept through a third night. Said it was the best sleep of his life. Moved to the coast after.",
+  "They're ringing fewer bells in the Vale this year. Don't know if that's good news or the other kind.",
+  "Somebody's been leaving bread out on the Rimehold ice. Nobody admits to it. It's always gone by morning.",
 ];
