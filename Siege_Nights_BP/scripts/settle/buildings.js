@@ -16,6 +16,7 @@ const EXTRA = {
   water: W("water"), farmland: W("farmland"), composter: W("composter"), cobble: W("cobblestone"),
   awning: W("white_wool", "wool"), awningTrim: W("red_wool", "wool"), ladder: W("ladder"), bell: W("bell"),
   path: W("grass_path", "dirt_path", "gravel"),
+  archive: ["siege:archive_shelf", "minecraft:bookshelf"], // the lore feature's Archive Shelf: it holds Lore Tomes
 };
 
 const cache = {};
@@ -193,6 +194,32 @@ function garden(p) {
   for (const [x, z] of [[x0, z0], [x1, z0], [x0, z1], [x1, z1]]) { p.set(x, 1, z, "pillar", { axis: "y" }); p.set(x, 2, z, "light"); }
 }
 
+// The town's library: two storeys of books round a reading table, with eight Archive Shelves on the
+// back wall (marks shelf0..shelf7, lower row first) and a lectern (mark "lectern") in front of them.
+// The lore feature fills the shelves with this town's own books when the library is built.
+function library(p) {
+  const x0 = -4, x1 = 4, z0 = 1, z1 = 9, H = 5;
+  floor(p, x0, x1, z0, z1);
+  walls(p, x0, x1, z0, z1, 1, H, (y) => (y <= 2 ? "wall" : "wallUpper"));
+  hollow(p, x0, x1, z0, z1, 1, H);
+  door(p, 0, z0);
+  for (const z of [3, 5, 7]) for (const y of [2, 4]) { p.set(x0, y, z, "window"); p.set(x1, y, z, "window"); }
+  p.set(-2, 2, z0, "window"); p.set(2, 2, z0, "window"); p.set(0, 4, z0, "window"); p.set(0, 4, z1, "window");
+  roof(p, x0, x1, z0, z1, H + 1);
+  // ordinary bookshelves between the side windows, floor to ceiling
+  for (const x of [x0 + 1, x1 - 1]) for (const z of [2, 4, 6, 8]) p.fill(x, 1, z, x, H - 1, z, "bookshelf");
+  // the Archive Shelves, two rows of four, either side of the middle of the back wall
+  let n = 0;
+  for (const y of [1, 2]) for (const x of [-2, -1, 1, 2]) { p.set(x, y, z1 - 1, "archive"); p.mark(`shelf${n++}`, x, y, z1 - 1); }
+  p.fill(0, 1, z1 - 1, 0, 2, z1 - 1, "bookshelf");
+  for (const x of [-2, -1, 0, 1, 2]) p.set(x, 3, z1 - 1, "bookshelf");
+  p.set(0, 1, z1 - 3, "lectern"); p.mark("lectern", 0, 1, z1 - 3);
+  // reading table, a runner from the door
+  p.set(0, 1, 4, "table", { half: "top" }); p.set(-1, 1, 4, "seat", stair("-x")); p.set(1, 1, 4, "seat", stair("+x"));
+  p.fill(0, 0, 2, 0, 0, 3, "royalBlock");
+  hang(p, 0, H, 3); hang(p, 0, H, 6);
+}
+
 export const BUILDINGS = [
   { id: "cottage", name: "Cottage", blurb: "A small house with a hearth corner, a chest and a workbench.", draw: cottage },
   { id: "smithy", name: "Smithy", blurb: "Stone workshop with a forge porch: anvil, grindstone, furnaces.", draw: smithy },
@@ -201,6 +228,7 @@ export const BUILDINGS = [
   { id: "watchtower", name: "Watchtower", blurb: "A lookout over your land with a brazier on top.", draw: watchtower },
   { id: "market", name: "Market Stall", blurb: "A striped awning over a counter. Put one by your gate.", draw: marketStall },
   { id: "well", name: "Well", blurb: "A roofed well for the middle of the settlement.", draw: well },
+  { id: "library", name: "Library", blurb: "Two storeys of books, a reading table and eight Archive Shelves for the town's own lore.", draw: library },
   { id: "garden", name: "Kitchen Garden", blurb: "Fenced beds with a water channel, ready to plant.", draw: garden },
 ];
 export const BUILDING = Object.fromEntries(BUILDINGS.map((b) => [b.id, b]));

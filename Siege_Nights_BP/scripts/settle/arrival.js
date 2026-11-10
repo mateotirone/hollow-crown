@@ -14,7 +14,7 @@ import { BUILDING } from "./buildings.js";
 import { REGION_TO_STYLE } from "./config.js";
 import { HALL, MASON, SLOTS, place } from "./layout.js";
 import { BENCH, registerBench } from "./mason.js";
-import { styleOf } from "./plans.js";
+import { styleOf, raiseFree } from "./plans.js";
 import { WALLS } from "./walldata.js";
 import { wallOf, raiseWall, bearingFor } from "./walls.js";
 
@@ -85,18 +85,22 @@ export function layOut(player, { force = false, at, style: wanted } = {}) {
     }
   }
 
-  // 4. a signpost on every slot
+  // 4. the buildings every town starts with (the library), then a signpost on every other slot
   for (const slot of SLOTS) {
     const spot = place(center, gateDir, slot);
     const sy = standY(dim, spot.x, spot.z);
     if (sy === undefined) continue;
+    if (slot.arrival) {
+      if (fresh || force) raiseFree(player, { x: spot.x, y: sy, z: spot.z }, spot.forward, slot.building, style);
+      continue;
+    }
     const when = slot.tier === 0 ? "Open now" : `Opens: ${TIERS[slot.tier]?.name ?? "later"}`;
     signpost(dim, { x: spot.x, y: sy, z: spot.z }, `${BUILDING[slot.building].name}\n${when}\n(${slot.who})`);
   }
   return fresh ? true : "already";
 }
 
-const LAID = "§6Your settlement is laid out.§7 A Longhouse is rising behind the Plot Stone, a mason has set up beside it, and signposts mark where each building will stand. Put a Foundation Stone on a signpost to raise that building.";
+const LAID = "§6Your settlement is laid out.§7 A Longhouse is rising behind the Plot Stone, the town's library is going up near the gate, a mason has set up beside it, and signposts mark where each building will stand. Put a Foundation Stone on a signpost to raise that building.";
 
 // The plots thread's welcome hall: the moment a plot is picked, lay it out so the first building is
 // already going up when the player lands. The plot may not be loaded yet, so keep trying for a while.

@@ -3,14 +3,15 @@
 // raise it. You pay in planks and building stone you already have; whatever you lack, the mason
 // supplies for emeralds. The stone comes back to you when the building is done.
 //
-// Events: emit("settleBuilt", { owner, player, building, style, origin, forward, box })
+// Events: emit("settleBuilt", { owner, player, building, style, origin, forward, box, marks })
+//   marks = the design's named spots in the world, e.g. a library's shelf0..shelf7 and lectern
 // Test: /scriptevent siege:settle_build <building> [style]   raise one where you stand, free
 
 import { world, system, GameMode, ItemStack } from "@minecraft/server";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
 import { isReady, settlementAt, isAlly, keepOf, onTick, moduleStore, on, emit } from "../siege/api.js";
 import { purse, charge, coins, lot } from "./wallet.js";
-import { startBuild, buildFor } from "../townhall/build.js";
+import { startBuild, buildFor, worldMarks } from "../townhall/build.js";
 import { hallOf } from "../townhall/townhall.js";
 import { STYLES, STYLE_IDS, styleFromGround } from "../townhall/styles.js";
 import { plotAt } from "../plots/claims.js";
@@ -130,7 +131,7 @@ export function raise(key, stone, buildingId, style, { quiet = false } = {}) {
       const first = !done.includes(buildingId);
       if (first) done.push(buildingId);
       store.save();
-      emit("settleBuilt", { owner: stone.owner, player: stone.placer, building: buildingId, style, origin, forward, box: footprint(origin, forward, plan.bounds()) });
+      emit("settleBuilt", { owner: stone.owner, player: stone.placer, building: buildingId, style, origin, forward, box: footprint(origin, forward, plan.bounds()), marks: worldMarks(plan, origin, forward) });
       if (!player || quiet) return;
       player.playSound("random.levelup");
       player.sendMessage(`§6Your ${BUILDING[buildingId].name} is built.§7 It is yours to change: knock out a wall, add a door, move in. The Foundation Stone is back in your pack.`);

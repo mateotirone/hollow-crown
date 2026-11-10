@@ -31,5 +31,5 @@ on("showcase", ({ player, dim, origin, nextSpot, label }) => {
     raiseFree(player, at, { x: 1, z: 0 }, b.id, style);
     label({ x: at.x - 1, y: at.y, z: at.z + 1 }, `${b.name}\n${style}`);
   });
-  player.sendMessage("§6Settlement building:§7 the mason is in the row behind you. The eight pre-designed buildings are rising in a line to the east. §f/scriptevent siege:settle_zone§7 tells you which build zone you stand in.");
+  player.sendMessage("§6Settlement building:§7 the mason is in the row behind you. The nine pre-designed buildings are rising in a line to the east. §f/scriptevent siege:settle_zone§7 tells you which build zone you stand in.");
 });

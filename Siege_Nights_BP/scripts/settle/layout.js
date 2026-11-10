@@ -7,7 +7,7 @@
 // building runs, in the same terms.
 //
 //                 gate (wall, 56 out)
-//        market        |        watchtower
+//        market        |  library   watchtower
 //   cottage    well    |    cottage
 //        ------- Keep Banner -------
 //   stable     [ town hall, grows   ]   smithy
@@ -21,6 +21,7 @@ export const MASON = { right: 6, ahead: -5 }; // the Mason's Bench, beside the b
 export const SLOTS = [
   { id: "cottage_west", building: "cottage", tier: 0, right: -10, ahead: -6, f: "back", who: "you" },
   { id: "well", building: "well", tier: 0, right: 0, ahead: -8, f: "back", who: "everyone" },
+  { id: "library", building: "library", tier: 0, right: 11, ahead: -18, f: "back", who: "everyone", arrival: true }, // raised on arrival, holds the town's own books
   { id: "cottage_east", building: "cottage", tier: 1, right: 10, ahead: -6, f: "back", who: "settlers" },
   { id: "market", building: "market", tier: 1, right: 0, ahead: -16, f: "back", who: "Quartermaster" },
   { id: "garden", building: "garden", tier: 1, right: -10, ahead: -20, f: "back", who: "Farmer" },
