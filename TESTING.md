@@ -191,6 +191,8 @@ Run the showcase first (`/scriptevent siege:showcase`): the back row has four Ar
 7. Click Sister Wren in survival. **Expect:** her greeting with buttons, and a different greeting next time. Ask "Why is it always night?" then "Which clock was first?". **Expect:** she is cut off, you Slip into the Hollow for a few seconds (or black out, if the Hollow isn't set up), and when you click her again she reacts. If dialogue buttons do nothing, tell me: that's the one part I could not check offline.
 8. `/scriptevent siege:lore_give survey`, read and shelve notes I to VI, then "Name the Thin Place" in the catalog.
 
+0k2. **Ravens on the wall.** Stand inside your settlement and run `/scriptevent siege:ravens`. Besides the message, that many ravens should be sitting in a row on top of the wall nearest you (or in a ring near the keep if you have no wall), all facing outward. Check they sit on the wall top and not inside it or in the air.
+
 0l. **The morning after the first sighting.** Run `/scriptevent siege:morning_after`. Three lines from your own townsfolk should appear a few seconds apart. Then talk to Sigrun, Brother Cael, Old Mag, Sir Aldous or Archivist Pell (after you have met them): each opens once with a new conversation about the tall thing at your wall, and never repeats it. In a real game this happens the dawn after the siege where the first Hollow soldiers appear.
 
 0m. **The story spine.** `/scriptevent siege:local_lore <plot>` and read the first book: its last page, in a newer hand, should send you to Millbrook and Sister Wren, and Millbrook should appear as a lead in the Ledger. Solve the plot's mystery in the Ledger: the answer ends with a paragraph about your own region's boss and adds its place as a lead. Kill a regional boss (`/scriptevent siege:bestiary_summon reeve`): besides its book you get a line about a scrap and two new leads in two other regions. After the third regional boss, a purple line about a surveyor appears and the first Field Note is in your pack.
@@ -394,7 +396,13 @@ In game (cheats on, a settlement founded, or `/scriptevent siege:showcase` first
 7. `/scriptevent siege:reach_reset` puts it all back. `/scriptevent siege:reach_boss <reeve|huntsman|bride|seneschal|mother|warlord_king|choir>` and
    `/scriptevent siege:reach_set <0-100>` move the story by hand.
 
-Things I could not check offline: whether a dusk-to-midnight wait feels right, whether Hollow soldiers march on the keep heart like raiders do,
+10. Omens you can see and hear: stand inside a settlement with torches, a door left open, some water, a few farm animals and a dog nearby, then
+   `/scriptevent siege:reach_omen <name>` plays one at once (no name: a random one, and it lists them all). Names: pets_hide, stillness, humming,
+   torches_lean, far_bell, animals_face, gate_creak, ticking, voices, water_trembles, arrows, cellar, doors_shut, guards_quiet, small_thing,
+   light_changes, torches_gutter. On a real siege evening one happens each in-game hour from dusk, with its grey line, and never twice in an evening.
+   All of them point at the same wall for the night.
+
+Things I could not check offline (every omen is in this list: none of them can be seen in the simulator): whether a dusk-to-midnight wait feels right, whether Hollow soldiers march on the keep heart like raiders do,
 the darkness and knockback effects, the storms, and how the hurried evening looks in the sky.
 
 ## Choirsteel gear (bestiary)
@@ -443,3 +451,57 @@ Walk into a mining village in the Hollow: at most once every 8 minutes something
 ### The Hollow's air (particles)
 
 Stand in the Hollow near Veilcaps, Glint Clusters, hanging moss, pale ash and plain veined ground: each should give off its own small effect now and then, and a few pale motes should drift near you everywhere. It needs the particle effects from the art pull request (#57); without them nothing shows and nothing breaks. `/scriptevent hc:hollow_air off` stops it, `on` starts it again. Watch for lag with several players in the Hollow.
+## Horses, horse upgrading and the Train Carriage (scripts/horses/, scripts/rails/)
+
+In game: Creative, cheats on. `/scriptevent siege:showcase` puts eight steeds in the extras row behind you that are already yours (one of each of the five breeds, **Valiant** the Knight Warhorse, **Whisper** the Glimstrider and **Sprout** the foal), a Breeder's Post, and two Station Posts with a short powered rail line and a Train Carriage on it. Your Stables counts as level 3 there, so every menu option is open, and in Creative nothing costs anything. Take a **Riding Crop** and a **Horse Whistle** from the item chests.
+
+**Looks and riding**
+1. Walk along the steeds. ✅ Eight horses with name tags and signs, the five breeds in different coats, the foal small. Valiant wears diamond horse armor and cloth in your banner color. Whisper looks unearthly (a glowing tint).
+2. Sneak + click any of them with an empty hand. ✅ Its sheet opens: breed, trait, level, Speed, Jump, Health and Stamina, and "Training points 5" on the breed horses.
+3. Climb on a breed horse and ride. ✅ It steers like a normal horse, with the jump bar. A stamina bar shows above your hotbar.
+4. Use the Riding Crop while riding. ✅ A gallop sound and it is clearly faster; the stamina bar drains. Use the crop again ✅ it slows back down. Gallop until the bar is empty ✅ it drops out of the gallop by itself, and using the crop straight away says it is winded.
+5. Try to climb on Sprout. ✅ You can't ride a foal.
+6. Ride Valiant at a gallop into `/summon zombie`. ✅ The zombie is knocked aside and hurt (Trample).
+
+**Upgrading**
+7. Click the **Stables** in the block row (or place `/give @s siege:stables` inside the settlement). ✅ A list of your horses, plus "Breed two horses".
+8. Pick a breed horse and train Speed. ✅ "Speed is now 3", one training point fewer, and it really is faster when you ride it. Train Jump ✅ it clears a higher wall. Train Health ✅ more hearts when you sit on it.
+9. On the same horse choose "Choose a perk". ✅ A list of perks with one line each; picking one says the horse learned it.
+10. Hold **Horseshoes** (`/give @s siege:horseshoes_iron`) and click your horse. ✅ They are fitted and its sheet shows the bonus. Same with a **Caparison** ✅ it wears cloth in your banner color.
+11. "Breed two horses", pick two grown horses. ✅ "A foal is born" with a name, a breed and traits, and a small foal stands by the Stables.
+12. On a horse choose "Put in the stalls". ✅ It disappears and the list shows it as stabled. "Bring out of the stalls" ✅ it is back, with its saddle and armor still on.
+13. Walk 40 blocks from your horses and use the Horse Whistle. ✅ A flute note, and the nearest one appears beside you ("comes running").
+14. Ride Whisper and use the Horse Whistle while riding. ✅ The Veilstep: you and the horse blink about 10 blocks ahead, even through a wall. Use it again at once ✅ "The Veil is still settling".
+15. Switch to Survival and kill one of your horses. ✅ "has fallen", and the Stables offers "Revive" for it.
+
+**Getting a horse the normal way**
+16. `/summon horse`, tame it, then use a **Halter** (`/give @s siege:halter`) on it. ✅ "is now your steed", it keeps its coat, and it shows up at the Stables.
+17. Click the Breeder's Post. ✅ It offers a Sandstrider foal for 192 Regals (free in Creative), and buying gives you a named foal.
+
+**Rails and the Train Carriage**
+18. Click the Train Carriage on the line to board, then push forward. ✅ You sit inside, it rolls along the rails faster than a minecart. With friends: up to four people can sit in it.
+19. Click the nearer Station Post (**Showcase Halt**). ✅ A Station menu: "Call a carriage", "Call a minecart", "Choose a destination", "Network map", "Horse stalls".
+20. "Call a carriage". ✅ A fresh carriage appears on the rail by the post. "Call a minecart" ✅ a plain minecart instead.
+21. Walk to the second post. ✅ Title "Far Platform, Station discovered · 2 of 2". Go back, "Choose a destination", pick Far Platform, and ride there. ✅ The bar shows the direction and distance while you ride, and "You have arrived" when you get there.
+22. `/give @s siege:train_carriage` and use it on any rail. ✅ Your own carriage. Sneak + click it with an empty hand ✅ it packs back into the item.
+23. Leave a called carriage empty for a minute or two. ✅ It tidies itself away.
+
+Things I could not check without the game, so please look closely: that the steeds look and ride like real horses (saddle, armor and jump bar all there), that the caparison color only tints the cloth, how the Glimstrider's glow looks, that four people really fit in the carriage and it faces the right way on the rail, and whether the carriage speed feels right.
+## Sounds (scripts/sound/, SOUND-LIST.md)
+
+Nothing here has been heard in the game yet, so your ears are the test.
+
+1. Run `/scriptevent siege:sound`. **Expect:** a "Sound board" menu with three groups. Pick "Signature sounds" and click a few: each plays, and the action bar names it and says "stand-in" (or "recording" once you have installed one).
+2. Run `/scriptevent siege:sound signature`. **Expect:** the signature sounds one after another, about 8 seconds apart, each named on screen. The Rift and the Hollow's ambience are silent here until their recordings exist.
+3. Ring a vanilla bell, then run `/scriptevent siege:sound block.bell.hit`. **Expect:** ours is the same bell with a deeper note under it and a slightly sour edge.
+4. Open any menu that buys or confirms something. **Expect:** the "done" sound is lower and quieter than the vanilla level-up jingle.
+5. Start a siege (`/scriptevent siege:reach_night`). **Expect:** a low doubled horn with a far thunder under it, not the plain raid horn.
+6. After installing a recording (see SOUND-LIST.md), rebuild, reload the world and run step 1 again. **Expect:** that sound says "recording" and plays your file.
+
+Tell me about: anything too loud, too quiet, silent, or that made you jump. Nothing should.
+## Omen ravens (bestiary)
+
+- At dusk or night, `/scriptevent siege:raven_row 9` puts nine ravens in a row in front of you, all facing north, with one place left empty. `/scriptevent siege:raven_clear` removes them.
+- Walk up to them, hit them, push them: nothing happens and they do not turn. They make no sound.
+- Wait for morning, or start a siege: they are gone.
+

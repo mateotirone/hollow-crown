@@ -176,6 +176,8 @@ g("trebuchet","Trebuchet","Siege machines",[{"label":"Trebuchet","model":"entity
 g("ballista","Ballista","Siege machines",[{"label":"Ballista","model":"entity","geo":"geometry.siege_ballista","mats":{"*":E+'siege_ballista.png'}}],"Turns to face its target, then the arms snap forward and the bolt flies.")
 g("ram","Battering Ram","Siege machines",[{"label":"Ram","model":"entity","geo":"geometry.siege_battering_ram","mats":{"*":E+'siege_battering_ram.png'}}],"Shown at model size. In game it's scaled up 1.35x.")
 g("quartermaster","Quartermaster","Mobs",[{"label":"Quartermaster","model":"entity","geo":"geometry.villager.v1.8","mats":{"*":E+'siege_quartermaster.png'}}])
+g("job_npcs","Job NPCs","Mobs",[{"label":n.title(),"model":"entity","geo":"geometry.villager.v1.8","mats":{"*":E+'siege/npc/job_%s.png'%n}} for n in ("farmer","woodcutter","quarryman","smith","fisher","hunter","herbalist","moneyer")],"The people you sell goods to. Painted, not wired into the game yet.")
+g("steeds","Steed coats","Horses and rail",[{"label":n,"model":"horse","geo":"geometry.horse.v2","mats":{"*":E+'siege/steed_%s.png'%k}} for n,k in (("Vale Courser","vale"),("Frostmarch Destrier","frostmarch"),("Saltreach Runner","saltreach"),("Emberwaste Sandstrider","emberwaste"),("Blackfen Mire-Pony","blackfen"),("Crossbred","crossbred"),("Glimstrider","hollow"),("Knight Warhorse barding (overlay)","warhorse"),("Caparison (overlay)","caparison"))],"One coat per region, the crossbred, the Glimstrider, and two layers worn over a coat. Painted, not wired into the game yet.")
 g("barding","Castle Guard Barding","Mobs",[{"label":"On a horse","model":"horse","geo":"geometry.horse.v2","mats":{"*":E+'horse2/armor/horse_armor_iron.png'}}],"Replaces iron horse armor.")
 for gid,name in [("archer","Archer"),("man_at_arms","Man-at-Arms")]:
     g(gid,name,"Mobs",[{"label":nice(c),"model":"entity","geo":"geometry.humanoid.custom","swatch":DYE[c],"mats":{"*":E+f'siege/{gid}_{c}.png'}} for c in ['red']+[c for c in COLORS if c!='red']],
@@ -236,6 +238,7 @@ for k,n in [("choir_conductor","The Conductor"),("choir_singer","Singer"),("holl
     _ent("u_"+k,n,"The Hollow Choir",f'models/entity/undertow/{k}.geo.json',[(n,f'textures/entity/siege/undertow/{k}.png')])
 for _k,_n in (("blade","Pretender, blade"),("seer","Pretender, seer"),("brute","Pretender, brute")):
     _ent("u_pretender_"+_k,_n,"The Hollow",f'models/entity/bestiary/pretender_{_k}.geo.json',[(_n,f'textures/entity/siege/bestiary/pretender_{_k}.png')],"Claimants who rise in the Hollow after the story. Name and powers are different each time.")
+_ent("b_omen_raven_art","Raven (omen)","New mobs",'models/entity/bestiary/omen_raven.geo.json',[("Raven",'textures/entity/siege/bestiary/omen_raven.png')],"Perches on the wall at dusk, facing the way the raid will come.")
 _ent("carriage","Train Carriage","Horses and rail",'models/entity/carriage.geo.json',[("Carriage",'textures/entity/siege/carriage.png')],"Rides normal Minecraft rails. Four seats on two benches.")
 if os.path.exists(RP+I+'horses/siege_train_carriage.png'): g("carriage_icon","Train Carriage icon","Horses and rail",[item("Icon",'horses/siege_train_carriage')])
 _ent("throne_seal","Throne Seal","Crown and Citadel",'models/entity/throne_seal.geo.json',[("Seal",'textures/entity/siege_throne_seal.png')],"Floats in front of the throne during a Storm.")

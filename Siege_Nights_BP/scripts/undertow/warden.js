@@ -29,6 +29,7 @@ import { isBuilt } from "./builder.js";
 import { isSlipping } from "./slips.js";
 import { load, save, say, runCmd } from "./data.js";
 import { regentRules, regentNotices, regentPermit, regentOutcome, regentData } from "./regent.js";
+import { sfx } from "../core/sfx.js";
 
 export const WARDEN = {
   descendSeconds: 60, // how long the Warden has to teleport to a thief
@@ -109,11 +110,11 @@ world.afterEvents.entityHitBlock.subscribe((e) => {
   const b = e.hitBlock.location;
   alarm = { miner: p.id, minerName: p.name, x: b.x, y: b.y, z: b.z, dim: p.dimension.id, until: now + WARDEN.descendSeconds * 20 };
   p.onScreenDisplay.setTitle("§5The Hollow has noticed you", { subtitle: `§7${w.name} knows you are here`, fadeInDuration: 5, stayDuration: 50, fadeOutDuration: 15 });
-  p.playSound("block.bell.hit", { volume: 1, pitch: 0.4 });
+  sfx(p, "block.bell.hit", { volume: 1, pitch: 0.4 });
   const warden = wardenOnline();
   if (warden) {
     warden.onScreenDisplay.setTitle("§cChoir ore is being taken", { subtitle: `§f${p.name}§7 is mining at ${b.x}, ${b.y}, ${b.z}`, fadeInDuration: 5, stayDuration: 70, fadeOutDuration: 15 });
-    warden.playSound("block.bell.hit", { volume: 1, pitch: 0.7 });
+    sfx(warden, "block.bell.hit", { volume: 1, pitch: 0.7 });
     say(warden, `§c${p.name} is mining your Choir ore. §7Ring your bell within ${WARDEN.descendSeconds} seconds to Descend on them.`);
   }
   emit("oreAlarm", { miner: p.id, minerName: p.name, x: b.x, y: b.y, z: b.z, wardenOnline: !!warden });
@@ -129,7 +130,7 @@ export function descend(warden) {
   warden.teleport({ x: m.x - miner.getViewDirection().x * 3, y: m.y, z: m.z - miner.getViewDirection().z * 3 }, { dimension: miner.dimension, facingLocation: m });
   try {
     miner.dimension.spawnEntity("minecraft:lightning_bolt", { x: m.x + 4, y: m.y, z: m.z + 4 });
-    miner.playSound("mob.wither.spawn", { volume: 0.6, pitch: 1.4 });
+    sfx(miner, "mob.wither.spawn", { volume: 0.6, pitch: 1.4 });
     miner.onScreenDisplay.setTitle("§cThe Hollow Crown is here", { fadeInDuration: 0, stayDuration: 40, fadeOutDuration: 10 });
   } catch { /* cosmetic */ }
   emit("wardenDescended", { warden: warden.id, miner: miner.id });
@@ -205,7 +206,7 @@ export function hollowStep(playerOrId, { ignoreCooldown = false } = {}) {
     noteEntry(p, "step");
   }
   stepAt.set(p.id, now);
-  p.playSound("mob.endermen.portal", { volume: 0.7, pitch: 0.5 });
+  sfx(p, "mob.endermen.portal", { volume: 0.7, pitch: 0.5 });
   return undefined;
 }
 
@@ -330,7 +331,7 @@ function announceAttempt(p) {
   world.sendMessage(`§5§l${p.name} is trying to take the Hollow Crown§r§5, ${where}.`);
   for (const other of world.getAllPlayers()) {
     try {
-      other.playSound("block.bell.hit", { volume: 1, pitch: 0.5 });
+      sfx(other, "block.bell.hit", { volume: 1, pitch: 0.5 });
       if (other.id !== p.id) other.onScreenDisplay.setTitle("§5The Hollow Crown", { subtitle: `§d${p.name}§7 is trying to take it`, fadeInDuration: 5, stayDuration: 60, fadeOutDuration: 15 });
     } catch { /* gone */ }
   }
@@ -344,7 +345,7 @@ function knockOff(p, by) {
     eq.setEquipment(EquipmentSlot.Head, undefined);
     const item = p.dimension.spawnItem(new ItemStack(CROWN, 1), { x: p.location.x, y: p.location.y + 1.6, z: p.location.z });
     try { item.applyImpulse({ x: (Math.random() - 0.5) * 0.4, y: 0.35, z: (Math.random() - 0.5) * 0.4 }); } catch { /* fine */ }
-    p.dimension.playSound("random.anvil_land", p.location, { volume: 1, pitch: 1.4 });
+    sfx(p.dimension, "random.anvil_land", p.location, { volume: 1, pitch: 1.4 });
   } catch { /* gone */ }
   claiming.delete(p.id);
   wornFor.delete(p.id);
@@ -377,12 +378,12 @@ export function crownTick() {
       p.onScreenDisplay.setActionBar(`§dThe Crown is taking hold: ${CLAIM_SECONDS - t}  §7(a blow from another player will knock it off)`);
       try {
         for (let h = 0; h < 4; h++) p.dimension.spawnParticle("minecraft:totem_particle", { x: p.location.x, y: p.location.y + 2 + h, z: p.location.z });
-        if (t % 5 === 0) p.dimension.playSound("block.bell.hit", p.location, { volume: 2, pitch: 0.5 + t / 60 });
+        if (t % 5 === 0) sfx(p.dimension, "block.bell.hit", p.location, { volume: 2, pitch: 0.5 + t / 60 });
       } catch { /* not loaded */ }
     } else if (verdict === "warned") {
       wornFor.set(p.id, worn + 1);
       p.onScreenDisplay.setTitle("§4The Crown is not yours", { subtitle: `§cTake it off. ${CROWN_GRACE - worn}`, fadeInDuration: 0, stayDuration: 25, fadeOutDuration: 5 });
-      p.playSound("block.bell.hit", { volume: 1, pitch: 0.3 + worn * 0.1 });
+      sfx(p, "block.bell.hit", { volume: 1, pitch: 0.3 + worn * 0.1 });
       p.addEffect("wither", 30, { amplifier: 0, showParticles: false });
     } else if (verdict === "dies") {
       wornFor.delete(p.id);
@@ -419,7 +420,7 @@ on("hollowRobbery", (req) => {
     ruler.teleport({ x: req.x + 2.5, y: req.y, z: req.z + 2.5 }, { dimension: world.getDimension(UNDERTOW_ID), facingLocation: { x: req.x, y: req.y, z: req.z } });
     const robber = world.getAllPlayers().find((p) => p.id === req.robber);
     robber?.onScreenDisplay.setTitle("§cThe Hollow Crown is here", { fadeInDuration: 0, stayDuration: 40, fadeOutDuration: 10 });
-    robber?.playSound("mob.wither.spawn", { volume: 0.6, pitch: 1.4 });
+    sfx(robber, "mob.wither.spawn", { volume: 0.6, pitch: 1.4 });
   } catch { return; } // could not move them: leave it unhandled so the sender can try
   req.handled = true;
   emit("wardenDescended", { warden: ruler.id, miner: req.robber, robbery: req.place });

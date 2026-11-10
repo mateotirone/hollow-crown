@@ -22,6 +22,7 @@ import { onTick, moduleStore, addTests, assertEqual, note } from "../siege/api.j
 import { chooseAttack, pickTemper, temperById, TEMPERS } from "./variety.js";
 import { MOBS } from "./data.js";
 import { activeDimensions, alive, announce, effect, flat, give, heal, healthOf, hurt, particle, ring, sound, makeItem, playerList, addToPlayerList } from "./util.js";
+import { sfx, hasCue } from "../core/sfx.js";
 
 const STEP = 5; // the framework ticks every 5 game ticks
 export const SHIELD_TAG = "siege_boss_shielded";
@@ -86,7 +87,8 @@ function attach(entity, def, center, fresh) {
   if (fresh || !saved) {
     f.say(`§4${def.name}§7 ${def.intro ?? "has come."}`);
     if (f.temper) f.say(`§c${f.temper.name}.§7 ${f.temper.line}`);
-    for (const p of f.players()) sound(f.dim, "mob.wither.spawn", p.location, 0.7, 0.6);
+    const voice = hasCue(`sig.boss.${def.id}`) ? `sig.boss.${def.id}` : "boss.arrive"; // each boss has its own sound (SOUND-LIST.md)
+    for (const p of f.players()) sfx(p, voice);
   }
   def.onStart?.(f, !saved);
   return f;
@@ -306,7 +308,10 @@ function bossTick() {
         f.lastAttack = a.id;
         f.next[a.id] = Math.round(a.every * (f.temper?.pace ?? 1));
         if (a.warn) f.bar(`§c⚠ ${a.warn}`);
-        for (const p of players) sound(f.dim, a.sound ?? "note.pling", p.location, 0.5, 0.8);
+        for (const p of players) {
+          if (a.sound) sound(f.dim, a.sound, p.location, 0.5, 0.8);
+          else sfx(p, "boss.warn");
+        }
         let ctx;
         safely(f, () => (ctx = a.start?.(f)));
         const windup = a.windup ?? 0;
@@ -448,7 +453,7 @@ function finish(f, slayer) {
       }
     }
     p.onScreenDisplay.setTitle(`§6${def.name}`, { subtitle: "§7has fallen", fadeInDuration: 10, stayDuration: 70, fadeOutDuration: 20 });
-    p.playSound("ui.toast.challenge_complete");
+    sfx(p, "ui.toast.challenge_complete");
     announce("siege:award_skill_points", { player: p.id, points: first ? def.points ?? 5 : 1, renown: first ? 150 : 30, reason: `boss:${def.id}` });
   }
   safely(f, () => vault(f, loc, def.hoard?.(f, players) ?? []));
