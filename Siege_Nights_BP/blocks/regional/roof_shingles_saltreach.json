@@ -1,0 +1,28 @@
+{
+  "format_version": "1.21.60",
+  "minecraft:block": {
+    "description": {
+      "identifier": "siege:roof_shingles_saltreach",
+      "menu_category": {
+        "category": "construction"
+      }
+    },
+    "components": {
+      "minecraft:display_name": "tile.siege:roof_shingles_saltreach.name",
+      "minecraft:destructible_by_mining": {
+        "seconds_to_destroy": 2
+      },
+      "minecraft:destructible_by_explosion": {
+        "explosion_resistance": 20
+      },
+      "minecraft:geometry": "minecraft:geometry.full_block",
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "siege_roof_shingles_saltreach",
+          "render_method": "opaque"
+        }
+      },
+      "minecraft:map_color": "#3c6a62"
+    }
+  }
+}

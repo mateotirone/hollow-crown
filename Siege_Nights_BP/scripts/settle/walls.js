@@ -13,7 +13,7 @@
 // Test: /scriptevent siege:wall <1-10> [style]     raise that level round your keep (or where you stand)
 
 import { world, system, BlockPermutation } from "@minecraft/server";
-import { isReady, keepOf, tierOf, TIERS, onTick, moduleStore, on, emit, addFilter, addLandClaim, stoneId, STONE_KINDS, title, CASTLE_BLOCKS, WALL_HP } from "../siege/api.js";
+import { isReady, keepOf, tierOf, TIERS, onTick, moduleStore, on, emit, addFilter, addLandClaim, stoneId, STONE_KINDS, title, CASTLE_BLOCKS, WALL_HP, PORTCULLISES, regionalId } from "../siege/api.js";
 import { STYLES } from "../townhall/styles.js";
 import { PLOT_PLAN } from "../plots/config.js";
 import { plotAt, mapMode } from "../plots/claims.js";
@@ -64,9 +64,10 @@ const first = (ids) => ids.map((id) => perm(id)).find(Boolean) ?? perm("minecraf
 export function palette(style, L) {
   const roles = (STYLES[style] ?? STYLES.vale).roles;
   const kinds = {
-    log: first(roles.beam ?? ["minecraft:spruce_log"]),
+    // the region's own palisade stakes and wall planks, with its timber behind them in case the block is missing
+    log: perm(regionalId("palisade", style)) ?? first(roles.beam ?? ["minecraft:spruce_log"]),
     fence: first(roles.rail ?? ["minecraft:spruce_fence"]),
-    plank: first(roles.floor ?? ["minecraft:spruce_planks"]),
+    plank: perm(regionalId("wall_planks", style)) ?? first(roles.floor ?? ["minecraft:spruce_planks"]),
   };
   for (const kind of STONE_KINDS) {
     kinds[kind] = perm(stoneId(kind, style), kind === "stone" ? { "siege:armor": 0, "siege:cracks": 0 } : undefined) ?? perm("minecraft:stone_bricks");
@@ -78,8 +79,8 @@ export function palette(style, L) {
     tooth: perm("siege:battlement") ?? kinds[L.body],
     light: perm("minecraft:lantern"),
     air: perm("minecraft:air"),
-    gate: (dir) => (L.gate === "open" ? undefined : perm(`siege:${L.gate}`, gateStates(dir))),
-    port: (dir) => perm("siege:portcullis", gateStates(dir)),
+    gate: (dir) => (L.gate === "open" ? undefined : perm(regionalId(L.gate, style), gateStates(dir)) ?? perm(`siege:${L.gate}`, gateStates(dir))),
+    port: (dir) => perm(regionalId("portcullis", style), gateStates(dir)) ?? perm("siege:portcullis", gateStates(dir)),
     // an arrow slit looks out along the way its stretch of wall faces (angle 0 = east, a quarter turn = south)
     slit: (angle) => perm("siege:arrow_slit", { "minecraft:cardinal_direction": ["east", "south", "west", "north"][((Math.round(angle / (Math.PI / 2)) % 4) + 4) % 4] }) ?? kinds[L.body],
   };
@@ -296,7 +297,7 @@ addFilter("spawnDistance", (distance, { owner }) => {
 // A settlement wall is as strong as its level: the whole Castle Stone family on the line of a
 // level 6+ wall takes hits like reinforced Castle Stone (iron, then diamond at 9, netherite at 10)
 addFilter("wallHp", (hp, { block }) => {
-  if (!CASTLE_BLOCKS.includes(block.typeId) || block.typeId === "siege:portcullis") return hp;
+  if (!CASTLE_BLOCKS.includes(block.typeId) || PORTCULLISES.includes(block.typeId)) return hp;
   for (const w of Object.values(walls())) {
     if (w.level > 0 && onWallLine(w, block.location, w.radius)) return Math.max(hp, WALL_HP.castle[wallArmor(w.level)]);
   }

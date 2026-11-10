@@ -224,5 +224,74 @@
   },
   "siege:glint_cluster": {
     "sound": "amethyst_cluster"
+  },
+  "siege:palisade": {
+    "sound": "wood"
+  },
+  "siege:wall_planks": {
+    "sound": "wood"
+  },
+  "siege:roof_shingles": {
+    "sound": "stone"
+  },
+  "siege:palisade_frostmarch": {
+    "sound": "wood"
+  },
+  "siege:wall_planks_frostmarch": {
+    "sound": "wood"
+  },
+  "siege:roof_shingles_frostmarch": {
+    "sound": "stone"
+  },
+  "siege:castle_gate_frostmarch": {
+    "sound": "wood"
+  },
+  "siege:portcullis_frostmarch": {
+    "sound": "metal"
+  },
+  "siege:palisade_saltreach": {
+    "sound": "wood"
+  },
+  "siege:wall_planks_saltreach": {
+    "sound": "wood"
+  },
+  "siege:roof_shingles_saltreach": {
+    "sound": "stone"
+  },
+  "siege:castle_gate_saltreach": {
+    "sound": "wood"
+  },
+  "siege:portcullis_saltreach": {
+    "sound": "metal"
+  },
+  "siege:palisade_emberwaste": {
+    "sound": "wood"
+  },
+  "siege:wall_planks_emberwaste": {
+    "sound": "wood"
+  },
+  "siege:roof_shingles_emberwaste": {
+    "sound": "stone"
+  },
+  "siege:castle_gate_emberwaste": {
+    "sound": "wood"
+  },
+  "siege:portcullis_emberwaste": {
+    "sound": "metal"
+  },
+  "siege:palisade_blackfen": {
+    "sound": "wood"
+  },
+  "siege:wall_planks_blackfen": {
+    "sound": "wood"
+  },
+  "siege:roof_shingles_blackfen": {
+    "sound": "stone"
+  },
+  "siege:castle_gate_blackfen": {
+    "sound": "wood"
+  },
+  "siege:portcullis_blackfen": {
+    "sound": "metal"
   }
 }

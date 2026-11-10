@@ -1,0 +1,31 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "siege:castle_gate_frostmarch_recipe"
+    },
+    "tags": [
+      "siege_workshop"
+    ],
+    "pattern": [
+      "PNP",
+      "PPP",
+      "PNP"
+    ],
+    "key": {
+      "P": {
+        "item": "siege:wall_planks_frostmarch"
+      },
+      "N": {
+        "item": "minecraft:iron_nugget"
+      }
+    },
+    "result": {
+      "item": "siege:castle_gate_frostmarch",
+      "count": 4
+    },
+    "unlock": {
+      "context": "AlwaysUnlocked"
+    }
+  }
+}

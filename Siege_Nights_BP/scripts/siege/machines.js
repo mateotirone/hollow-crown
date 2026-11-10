@@ -2,7 +2,7 @@
 // Split from the original main.js; the code is unchanged apart from the event/hook calls.
 
 import { world, system, ItemStack, EntityDamageCause, GameMode } from "@minecraft/server";
-import { BALLISTA, BALLISTA_HIT, DIMENSIONS, TREBUCHET } from "./constants.js";
+import { BALLISTA, BALLISTA_HIT, DIMENSIONS, PORTCULLISES, TREBUCHET } from "./constants.js";
 import { SETTINGS } from "./settings.js";
 import { state } from "./state.js";
 import { isAlly, settlementAt } from "./territory.js";
@@ -195,7 +195,7 @@ export function canSee(dim, from, entity) {
     includePassableBlocks: false,
   });
   // Shoots straight through portcullis bars and arrow slits, but not through solid walls
-  return !hit || hit.block.typeId === "siege:portcullis" || hit.block.typeId === "siege:arrow_slit";
+  return !hit || PORTCULLISES.includes(hit.block.typeId) || hit.block.typeId === "siege:arrow_slit";
 }
 
 export function shoot(dim, from, target) {

@@ -2,7 +2,7 @@
 // Split from the original main.js; the code is unchanged apart from the event/hook calls.
 
 import { world, system, GameMode } from "@minecraft/server";
-import { BARRACKS, COLORS, KEEP_BANNER } from "./constants.js";
+import { BARRACKS, CASTLE_GATES, COLORS, KEEP_BANNER, PORTCULLISES } from "./constants.js";
 import { recruitGuard } from "./guards.js";
 import { barracksMenu, keepMenu } from "./menus.js";
 import { SETTINGS } from "./settings.js";
@@ -12,10 +12,10 @@ import { workOnWall } from "./walls.js";
 
 // ---------- Clicking blocks: gates and banner dyeing ----------
 
-export const GATE_SOUNDS = {
-  "siege:portcullis": { open: "random.door_open", close: "random.anvil_land" },
-  "siege:castle_gate": { open: "random.door_open", close: "random.door_close" },
-};
+export const GATE_SOUNDS = Object.fromEntries([
+  ...PORTCULLISES.map((id) => [id, { open: "random.door_open", close: "random.anvil_land" }]),
+  ...CASTLE_GATES.map((id) => [id, { open: "random.door_open", close: "random.door_close" }]),
+]);
 
 
 export const DYES = Object.fromEntries(COLORS.map((c, i) => [`minecraft:${c}_dye`, i]));

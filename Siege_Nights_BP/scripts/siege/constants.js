@@ -14,7 +14,6 @@ export const QUARTERMASTER = "siege:quartermaster";
 export const DESK = "siege:quartermaster_desk";
 export const CHARGE = "siege:breaching_charge";
 
-export const GATES = ["siege:portcullis", "siege:castle_gate"];
 
 // The Castle Stone family: every region has Castle Stone, Tiles, Bricks, Cobbled and Smooth (blocks/stone/).
 // The Vale's have no region in their id. Castle Stone itself can be reinforced; all of them show cracks.
@@ -24,9 +23,17 @@ export const stoneId = (kind, region = "vale") => `siege:castle_${kind}${region 
 export const CASTLE_STONES = STONE_REGIONS.map((r) => stoneId("stone", r));
 export const STONE_FAMILY = STONE_REGIONS.flatMap((r) => STONE_KINDS.map((k) => stoneId(k, r)));
 
+
+// Regional gates, portcullises, palisades, wall planks and roof shingles (blocks/regional/). The Vale's have no
+// region in their id: siege:castle_gate, siege:portcullis, siege:palisade, siege:wall_planks, siege:roof_shingles.
+export const regionalId = (name, region = "vale") => `siege:${name}${region === "vale" ? "" : `_${region}`}`;
+export const PORTCULLISES = STONE_REGIONS.map((r) => regionalId("portcullis", r));
+export const CASTLE_GATES = STONE_REGIONS.map((r) => regionalId("castle_gate", r));
+export const GATES = [...PORTCULLISES, ...CASTLE_GATES];
+
 export const CASTLE_BLOCKS = [
   ...STONE_FAMILY, "siege:mossy_castle_stone", "siege:cracked_castle_stone",
-  "siege:battlement", "siege:arrow_slit", "siege:portcullis",
+  "siege:battlement", "siege:arrow_slit", ...PORTCULLISES,
 ];
 export const UNBREAKABLE = ["minecraft:bedrock", "minecraft:barrier", "minecraft:obsidian", KEEP_BANNER];
 
@@ -42,7 +49,7 @@ export const WANTED_TAG = "siege_wanted";
 export const GUARD_GEAR = "siege:guardgear_";
 export const WEAPONS = ["siege:longsword", "siege:warhammer"];
 
-export const REINFORCEABLE = [...CASTLE_STONES, "siege:portcullis", "siege:castle_gate"];
+export const REINFORCEABLE = [...CASTLE_STONES, ...GATES];
 
 export const COLORS = ["white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray",
   "light_gray", "cyan", "purple", "blue", "brown", "green", "red", "black"];
