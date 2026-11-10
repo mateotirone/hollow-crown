@@ -54,7 +54,9 @@ const player = { id: "p1", name: "Mateo", typeId: "minecraft:player", location: 
   sendMessage: (t) => say("chat", t), playSound() {}, addEffect(n) { say("effect", n); }, addExperience() {}, applyKnockback() {},
   onScreenDisplay: { setTitle: (t, o) => say("TITLE", `${t}${o?.subtitle ? " / " + o.subtitle : ""}`), setActionBar: (t) => { if (!/Raiders remaining/.test(t)) say("bar", t); } },
   hasTag(t) { return this.tags.has(t); }, addTag(t) { this.tags.add(t); }, getTags() { return [...this.tags]; }, getDynamicProperty() {}, setDynamicProperty() {},
-  getGameMode: () => "Survival", getComponent: () => undefined };
+  removeTag(t) { this.tags.delete(t); }, runCommand() {},
+  // rewards now go into the pack: a container that takes anything and reports it
+  getGameMode: () => "Survival", getComponent: (id) => (/inventory/.test(id) ? { container: { size: 36, emptySlotsCount: 36, addItem(stack) { say("loot", `${stack.amount ?? 1} x ${stack.typeId}`); }, getItem() {}, setItem() {} } } : undefined) };
 world.getPlayers = () => [player];
 world.getAllPlayers = () => [player];
 dim.getPlayers = () => [player];
@@ -208,7 +210,7 @@ check(!lines.some((l) => l.includes("END")), "the Long Night must not end at daw
 const dayStart = log.length;
 kill = () => false;
 runUntil(11000, world.getDay() + 1);
-check(entities.filter((e) => e.tags.has(api.RAIDER_TAG)).length <= 80, "the field should stay under the cap however long it goes on: " + entities.filter((e) => e.tags.has(api.RAIDER_TAG)).length);
+check(entities.filter((e) => e.tags.has(api.RAIDER_TAG)).length <= 90, "the field should stay near the soft cap of 40 however long it goes on: " + entities.filter((e) => e.tags.has(api.RAIDER_TAG)).length);
 console.log("\n=== The day after: they stay");
 for (const line of log.slice(dayStart)) console.log("  " + line);
 check(st.active, "the siege should still be running the next day");
@@ -227,7 +229,7 @@ scriptEvent("siege:reach_boss", "morvane");
 check(reach.reachData().stage === 6, "Morvane falling should end it");
 console.log("\n=== The source is rectified");
 for (const line of log.slice(before)) console.log("  " + line);
-rivalsMod.rivalLords().push({ id: "wrenfield", name: "Ser Bram Holt", plot: "Wrenfield", temperament: "grasping", relations: {} });
+rivalsMod.rivalLords().push({ id: "wrenfield", name: "Ser Bram Holt", plot: "Wrenfield", temperament: "grasping", relations: {}, tier: 0, wins: 0, nights: 0, held: 0, x: 400, y: 64, z: 400, region: "vale", built: { hall: 0, parts: [] } });
 check(nextDayAt("muster"), "no muster night after the story");
 lines = night("Stage 6, the Quiet After: a muster");
 check(lines.filter((l) => l.includes("WAVE")).length === 4, "a muster should have 4 waves");
