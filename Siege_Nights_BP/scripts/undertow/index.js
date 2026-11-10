@@ -38,6 +38,7 @@ import { slipSeconds, slipLanding, isSlipping } from "./slips.js";
 import { shouldAlarm, oreOutcome, noteEntry, crownTick, crownVerdict, CLAIM_SECONDS, WARDEN } from "./warden.js";
 import { oreChance } from "./terrain.js";
 import { shouldRise, regentOutcome, REGENT, TEMPERS, JOBS } from "./regent.js";
+import { sfx } from "../core/sfx.js";
 
 const IN_TAG = "siege_undertow_in";
 const FOG_ID = "siege:undertow_fog";
@@ -78,7 +79,7 @@ function enter(player) {
   noteEntry(player, "rift");
   system.runTimeout(() => {
     player.onScreenDisplay.setTitle("§5" + cap(TEXT.name), { subtitle: "§7The Wound", fadeInDuration: 20, stayDuration: 60, fadeOutDuration: 30 });
-    player.playSound("ambient.cave", { volume: 1, pitch: 0.5 });
+    sfx(player, "ambient.cave", { volume: 1, pitch: 0.5 });
   }, 20);
 }
 
@@ -182,7 +183,7 @@ onTick("undertow:sky", 20, () => {
     if (system.currentTick < due) { nextFlash.set(p.id, due); continue; }
     nextFlash.set(p.id, system.currentTick + 160 + Math.floor(Math.random() * 340));
     if (columnAt(Math.floor(l.x), Math.floor(l.z))?.site === "standing_ranks") continue; // the Standing Ranks are silent
-    p.playSound("ambient.weather.thunder", { volume: 0.5, pitch: 0.6 + Math.random() * 0.3 });
+    sfx(p, "ambient.weather.thunder", { volume: 0.5, pitch: 0.6 + Math.random() * 0.3 });
     if (Math.random() < 0.4) {
       const ang = Math.random() * Math.PI * 2, far = 24 + Math.random() * 20;
       const x = Math.floor(l.x + Math.cos(ang) * far), z = Math.floor(l.z + Math.sin(ang) * far);
@@ -220,7 +221,7 @@ function useWaystone(player, loc) {
   }
   save(K_PLAYERS, players);
   try {
-    player.dimension.playSound("block.amethyst_block.chime", loc, { volume: 1.5, pitch: 0.6 });
+    sfx(player.dimension, "block.amethyst_block.chime", loc, { volume: 1.5, pitch: 0.6 });
     player.dimension.spawnParticle("minecraft:totem_particle", { x: loc.x + 0.5, y: loc.y + 1.2, z: loc.z + 0.5 });
   } catch {}
   for (const p of fresh) say(p, "§dThe waystone takes your light. You can return here from the Wound.");

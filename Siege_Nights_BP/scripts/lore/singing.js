@@ -16,6 +16,7 @@ import { isSlipping } from "../undertow/slips.js";
 import { isReturned } from "../bestiary/returned.js";
 import { heroOf } from "./player.js";
 import { tonightKind, reachStage, LONG, AFTER } from "../reach/api.js";
+import { sfx } from "../core/sfx.js";
 
 export const HUM = {
   sound: "siege.choir.hum",
@@ -107,7 +108,7 @@ function tick() {
         sorcerer, resonance: hero.resonance ?? 0,
       });
       if (volume < HUM.quietBelow) continue;
-      player.playSound(HUM.sound, { volume, pitch: humPitch({ sorcerer, slipping }) });
+      sfx(player, HUM.sound, { volume, pitch: humPitch({ sorcerer, slipping }) });
     } catch { /* left the game */ }
   }
 }
@@ -118,7 +119,7 @@ system.afterEvents.scriptEventReceive.subscribe(({ id, message, sourceEntity: pl
   const arg = message.trim();
   if (arg === "off") { player.addTag(OFF_TAG); player.sendMessage("§7You stop your ears. You will not hear the singing. (/scriptevent siege:hum on to hear it again)"); return; }
   if (arg === "on") { player.removeTag(OFF_TAG); player.sendMessage("§7You listen again."); return; }
-  player.playSound(HUM.sound, { volume: 1, pitch: 1 });
+  sfx(player, HUM.sound, { volume: 1, pitch: 1 });
   player.sendMessage("§7§oOne note, held. It does not stop for breath.");
 });
 

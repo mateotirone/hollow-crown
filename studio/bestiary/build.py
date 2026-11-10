@@ -20,7 +20,7 @@ FAMILIES = {
     "raider": ["monster", "mob", "hollow", "siege_raider"], "hollow": ["monster", "mob", "hollow"], "summon": ["monster", "mob", "hollow"],
     "wild": ["mob", "beast"], "wild_hostile": ["monster", "mob", "beast"], "undead": ["monster", "undead", "mob", "hollow"],
     "order": ["mob", "ashen_order"], "boss": ["monster", "mob", "hollow", "siege_boss"], "boss_add": ["monster", "mob", "hollow", "siege_boss_add"],
-    "boss_prop": ["inanimate", "siege_boss_prop"], "seep": ["inanimate", "siege_seep"], "champion": ["mob", "siege_champion"], "projectile": ["inanimate"],
+    "boss_prop": ["inanimate", "siege_boss_prop"], "omen": ["inanimate", "siege_omen"], "seep": ["inanimate", "siege_seep"], "champion": ["mob", "siege_champion"], "projectile": ["inanimate"],
 }
 # mobs whose abilities are run by scripts/bestiary/mobs.js
 SCRIPTED = {"bell_ringer", "torchbearer", "crow_mage", "lost_villager", "changeling", "wrongling", "stone_vigil", "echo_hound", "tolling_shade",
@@ -385,7 +385,7 @@ def merge_lang(path, lines):
 # ---------- bodies: what a mob leaves on the field when it dies ----------
 # One entity (siege:body) wears any mob's shape and skin, picked by its siege:kind property, so a
 # battlefield of bodies costs one cheap entity each: no AI, no collisions with players, no ticking parts.
-NO_BODY_FAMILIES = ("boss_prop", "projectile", "summon", "seep")
+NO_BODY_FAMILIES = ("boss_prop", "projectile", "summon", "seep", "omen")
 def write_bodies(built):
     kinds = [mid for mid, (m, model) in built.items() if m.get("family", "boss") not in NO_BODY_FAMILIES
              and m.get("material", "entity_alphatest") == "entity_alphatest"      # ghosts and shades leave nothing behind

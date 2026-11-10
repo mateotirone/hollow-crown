@@ -5,3 +5,4 @@ textures/entity/siege/bestiary/pretender_*.png
 textures/items/siege_choirsteel_*.png
 textures/models/armor/choirsteel_layer_*.png
 textures/entity/siege/bestiary/hollow_bolt.png
+textures/entity/siege/bestiary/omen_raven.png

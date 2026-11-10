@@ -4,6 +4,7 @@
 import { world } from "@minecraft/server";
 import { DESK, QUARTERMASTER } from "./constants.js";
 import { forEachMachine } from "./placement.js";
+import { sfx } from "../core/sfx.js";
 
 // ---------- Quartermaster: a villager who takes the desk as their job ----------
 
@@ -23,7 +24,7 @@ export function quartermasterTick() {
     if (name) qm.nameTag = name;
     qm.setDynamicProperty("siege:desk", JSON.stringify({ x: t.x, y: t.y, z: t.z }));
     dim.spawnParticle("minecraft:villager_happy", { x: at.x, y: at.y + 1.8, z: at.z });
-    dim.playSound("random.levelup", at, { volume: 0.6 });
+    sfx(dim, "random.levelup", at, { volume: 0.6 });
     for (const p of dim.getPlayers({ location: at, maxDistance: 16 })) {
       p.sendMessage("§6A villager has taken the post of Quartermaster! Spend your siege winnings with them.");
     }

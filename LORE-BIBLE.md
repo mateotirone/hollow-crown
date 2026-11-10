@@ -106,7 +106,7 @@ None of the local books or portraits names or shows the last king as a man. Each
 
 ## Ravens
 
-The Ice Isles' birds. Every man of the Host fed one, and a raven carried his name home if he died abroad. When the Host cut down a bell it nailed up a raven in its place: a voice for a voice. When the Host was taken, six thousand birds were left with no names to carry, so they go where the Host is going next and wait. **Ravens on your wall at dusk mean a raid tonight**, and more come the longer your keep has stood. Sigrun explains it. (`scripts/lore/ravens.js`. A real raven bird is asked of the mobs thread; until then it is a line of text at dusk.)
+The Ice Isles' birds. Every man of the Host fed one, and a raven carried his name home if he died abroad. When the Host cut down a bell it nailed up a raven in its place: a voice for a voice. When the Host was taken, six thousand birds were left with no names to carry, so they go where the Host is going next and wait. **Ravens on your wall at dusk mean a raid tonight**, and more come the longer your keep has stood. Sigrun explains it. (`scripts/lore/ravens.js`. A real raven bird is asked of the mobs thread; until then it is a line of text at dusk.) The birds are real in the game: at dusk on a siege night they sit in a row along the stretch of wall nearest you, two blocks apart, all looking out the same way, and they are gone when the siege starts.
 
 ## Places now on the map
 
