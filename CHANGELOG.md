@@ -10,6 +10,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 
 ### Added
 - Pretenders: after Morvane falls, claimants rise at the empty Seat in the Hollow every week or so. Each is generated (a name, one of three bodies, four powers out of nine, and a claim that changes how you must fight it) and the same one never comes twice. While one sits unchallenged the seep surges in the overworld. Each drops a Claimant's Seal with its name on it, plus Choirsteel.
+- The shape of a siege night now follows what the world has been through lately: after a run of hard fights the next night is likelier to be a strange or a waiting one. The story chapter now moves past chapter 2 as bosses fall.
 - The Rumor Board now takes its three daily jobs and its twists from the Storyteller, so jobs contrast with what you have been doing lately (quiet work after a fight, a mystery after a run of bounties) and twists turn up more evenly.
 - Choirsteel gear, made from the Hollow's ore: Helm, Cuirass, Greaves, Treads, Blade, Pick, Axe, Spade and Hoe. Each is crafted from its netherite piece, Choirsteel Ingots and a Gloamquill. Armour protects like netherite and lasts half again as long, and each piece does something of its own; the full set makes you Resonant (a fifth of all damage turned aside, four more hearts). The Blade's every fourth hit rings through nearby enemies. The Pick shows you the next ore, and can mine Choir Ore.
 - Bosses never use the same attack twice running while another is ready, and a boss you have already beaten comes back in one of five tempers (Hasty, Relentless, Unquiet, Attended, Wary), never the one it wore last time. Beating a temper for the first time gives a named keepsake.
@@ -37,6 +38,8 @@ Everything merged to `main` since the last release goes here. Each pull request 
 
 - Four regional roles, each with its own branch of nine skills and five ranks: Dragon Rider (Emberwaste), Forgemaster (Frostmarch), Captain (Saltreach) and Witch (Blackfen). Raise a Stone Hall in a region's style and its role is offered to you at the Tree of Oaths.
 - The Old King's Journal now arrives after the look picker and the welcome hall instead of at the same moment: once you have read "How things stand" on the Waystone, or after about 20 seconds.
+- Mining villages in the Hollow now have something different going on each time you walk in: a rich seam, a Foreman's half price, a seat by the fire, a nest broken open in the mine, or a miner asking you to go and look at a place for them. The game's Storyteller picks, so the same thing never comes up twice running. Miners no longer repeat the line they said last.
+
 
 - The four regional roles (Dragon Rider, Forgemaster, Captain, Witch) each have a history, and their top four powers show a line of it in the Tree of Oaths.
 
