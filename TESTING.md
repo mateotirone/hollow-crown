@@ -131,6 +131,15 @@ Needs a settlement first (place a Keep Banner). Cheats on for the `/scriptevent`
 
 If step 2 shows a blank or broken screen, press Escape, open the Tree again and choose **Show branches as plain lists** on its first page. Everything works from the lists. Send me a screenshot of what the broken screen looked like.
 
+### The four regional roles
+
+For each of `rider`, `forgemaster`, `captain`, `witch`: type `/scriptevent siege:townhall_path none`, then `/scriptevent siege:townhall_path <role>`, then `/scriptevent siege:townhall_renown 5000`.
+
+1. ✅ A title shows the role name, and chat says the role's branch is open.
+2. Open the Tree of Oaths. ✅ The first page shows your role and rank, and one extra branch (Wing, Forge, Helm or Hex). The other three roles' branches are not listed.
+3. Swear a first-ring skill and check it: Witch's Touch poisons what you hit, Emberblood lets you stand in fire, Hammer Arm gives Haste with a pickaxe in hand, Sea Legs lets you breathe underwater.
+4. To see the offer the normal way: `/scriptevent siege:townhall_path none`, set the hall's style to Blackfen in the Town Hall menu and build a Stone Hall. ✅ Chat says a path has opened, and "Choose your path" at the Tree offers Witch.
+
 ### Rumor Board variety
 
 Take and finish a few jobs from the Rumor Board over several in-game days. ✅ The board never offers the kind of job you just did, the three jobs come from three different people, and about one job in three ends with a surprise: a named keepsake, double pay, extra Renown, or someone who cannot pay and stands with your walls instead.
@@ -363,6 +372,7 @@ In game (cheats on, a settlement founded, or `/scriptevent siege:showcase` first
 8. Variety: play three siege nights in a row (`reach_night` each evening). Each should have a different shape (named in chat after the
    night, and under "The night watch") and a different army. Let a captain live through a night you lose: the next full night it returns by name.
    Honours you earn appear in chat as "Night honour: ..." and under "The night watch".
+   `/scriptevent siege:storyteller` should list no missing facts from reach, and show the next `siege_shapes` pick.
 7. `/scriptevent siege:reach_reset` puts it all back. `/scriptevent siege:reach_boss <reeve|huntsman|bride|seneschal|mother|warlord_king|choir>` and
    `/scriptevent siege:reach_set <0-100>` move the story by hand.
 

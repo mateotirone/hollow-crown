@@ -306,3 +306,14 @@ Rule for all lore text: anything a player can hear more than a few times needs a
 - One sealed door per region: rumor only. A moon door with no carving would do it (`moondoors.js` would need a carving that never opens).
 - A crossed-out name in Aldric's journal: NOT added. The journal "names nothing" by Mateo's ruling and its entry 11 is quoted word for word in the reveal, so this needs his say first.
 - A "Chronicle" book that gains a page each update: not built; needs Mateo's say (it would be a second starting book beside the journal).
+
+## The four regional roles (lore thread's proposal, not yet read by Mateo)
+
+None of the four is the Hollow's; each is what a region already knew before the bells. Full text in `scripts/lore/data/roles.js`.
+
+| Role | Region | First to hold it | Why the region keeps it |
+|---|---|---|---|
+| Dragon Rider | Emberwaste | Ysolt Cinder, a salt-carrier's daughter | The Waste was the one province the Grey Host never held. The dragons will not fly on the third night |
+| Forgemaster | Frostmarch | Hroda Deepforge, bellfounder; the Founding Bell was poured at her fire three generations later | The Order took the bell moulds but could not carry off the fire |
+| Captain | Saltreach | Merrin Holt, who burned forty Saltreach boats to stop the Host's second fleet | Every captain carries a share of Holt's Debt, which has never been marked paid |
+| Witch | Blackfen | Nobody; "Goody Sedge" has three graves | No books to burn: it is handed over in a cup |
