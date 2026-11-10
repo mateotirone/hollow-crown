@@ -99,7 +99,7 @@ const saved = () => { try { return reachData(); } catch { return undefined; } };
 provideFact("bossesFallen", () => Object.keys(saved()?.bosses ?? {}).length);
 provideFact("choirFallen", () => !!saved()?.choir);
 provideFact("morvaneFallen", () => !!saved()?.source);
-try { provideFact("riftOpened", () => !!saved()?.rift); } catch { /* the Storyteller does not ask for this one yet */ }
+try { provideFact("riftOpened", () => !!saved()?.rift || (saved()?.stage ?? 1) >= LONG); } catch { /* the Storyteller does not ask for this one yet */ }
 // The deck carries no from/to: a shape opens with a Reach stage and a wave count, which chooseShape checks itself.
 registerDeck("siege_shapes", Object.entries(SHAPES).map(([id, sh]) => ({ id, kind: sh.kind, stage: sh.from, min: sh.min })));
 
@@ -306,6 +306,16 @@ addFilter("nextSiegeDay", (day) => {
   const from = world.getDay() + (getState().lastSiegeDay === world.getDay() ? 1 : 0);
   return nextSiege(from, d.stage, opts()) ?? day;
 });
+
+// Once the count can't be trusted (the Miscount, and after the story) the watch gives a feeling, never a date
+const hinting = () => store.data.stage === 3 || store.data.stage === AFTER;
+function nightsUntilSiege(day = world.getDay()) {
+  if (isSiegeKind(tonightKind(day)) && getState().lastSiegeDay !== day) return 0;
+  const next = nextSiege(day + 1, store.data.stage, opts());
+  return next === undefined ? undefined : next - day;
+}
+// The Keep Banner's own "Next siege" line (siege/menus.js) says the same as the night watch
+addFilter("nextSiegeLine", (line) => (hinting() ? watchHint(nightsUntilSiege(), world.getDay()) : line));
 
 addSiegeSkipHook((owner) => !!store.data.remembered && store.data.remembered.by !== owner); // a Remembered Night is only for whoever rang it
 
@@ -780,8 +790,7 @@ function watchMenu(player, mine) {
   const day = world.getDay();
   const kind = tonightKind(day);
   const next = nextSiege(day + 1, d.stage, opts());
-  const hinting = d.stage === 3 || d.stage === AFTER; // the count can't be trusted: the watch gives a feeling, never a date
-  const coming = isSiegeKind(kind) && getState().lastSiegeDay !== day ? 0 : next === undefined ? undefined : next - day;
+  const coming = nightsUntilSiege(day);
   const notes = keepOf(player.id) ? keepNotes(player.id) : undefined;
   const earned = (d.honours[player.id] ?? []).filter((k) => HONOURS[k]);
   const lines = [
@@ -790,7 +799,7 @@ function watchMenu(player, mine) {
     "",
     d.stage === AFTER ? `Sieges: ${s.rhythm.toLowerCase()}. ${s.waves} waves, at whatever hour suits them.`
       : `Sieges: ${s.rhythm.toLowerCase()}. ${s.waves} waves on a full night, one an hour, the last at ${clock(REACH.tollTime)}.`,
-    getState().active ? "§cA siege is under way." : hinting ? watchHint(coming, day) : KIND_WORDS[kind] ?? (next === undefined ? "The watch expects a quiet night." : `The watch expects a quiet night. The next siege they are sure of is in ${next - day} day${next - day === 1 ? "" : "s"}.`),
+    getState().active ? "§cA siege is under way." : hinting() ? watchHint(coming, day) : KIND_WORDS[kind] ?? (next === undefined ? "The watch expects a quiet night." : `The watch expects a quiet night. The next siege they are sure of is in ${next - day} day${next - day === 1 ? "" : "s"}.`),
     d.stage === 2 ? "§7Not every night that is quiet at dusk stays quiet." : "",
     d.stage === LONG ? `§7Their strength: ${Math.round(pressureMult(d.pressure) * 100)}% of an ordinary army. Break a night to wear them down.` : "",
     d.last ? `Last time (day ${d.last.day}): ${d.last.shape ? SHAPES[d.last.shape].name + ", " : ""}${d.last.waves} waves, ${d.last.kills} fallen, ${d.last.outcome === "won" ? "§aheld§r" : "§cnot beaten§r"}.` : "",
