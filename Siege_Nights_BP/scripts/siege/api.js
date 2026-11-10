@@ -64,3 +64,4 @@ export const addKeepMenuButtons = (fn) => addFilter("keepMenuButtons", (buttons,
 export { onTick } from "../core/loop.js";
 export { moduleStore } from "../core/store.js";
 export { addTests, assert, assertEqual } from "../core/tests.js";
+export { addJoinStep, wait } from "../core/firstjoin.js";

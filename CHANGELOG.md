@@ -36,6 +36,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - Needs Bedrock 26.30 or newer.
 
 ### Fixed
+- Joining for the first time now happens in one ordered sequence (look picker, welcome hall, journal) instead of several things appearing at once. Each part moves onto it as its own change lands.
 - The install guide and README now say the right Minecraft version: Bedrock 26.30 or newer.
 
 ### Known issues
