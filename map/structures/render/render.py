@@ -11,9 +11,10 @@ ap = argparse.ArgumentParser()
 ap.add_argument("scene"); ap.add_argument("out"); ap.add_argument("--title", default="Preview"); ap.add_argument("--blurb", default="")
 ap.add_argument("--textures", required=True); ap.add_argument("--shots", default=""); ap.add_argument("--dusk", action="store_true")
 ap.add_argument("--three", default=os.environ.get("THREE_DIR", ""))
+ap.add_argument("--cut", type=int, default=None, help="hide every block at this y and above (cutaway)")
 a = ap.parse_args()
 d = json.load(open(a.scene))
-cells = {(x, y, z): tuple(d["palette"][i]) for x, y, z, i in d["blocks"]}
+cells = {(x, y, z): tuple(d["palette"][i]) for x, y, z, i in d["blocks"] if a.cut is None or y < a.cut}
 m = Mesher(cells, a.textures).run()
 os.makedirs(a.out, exist_ok=True); texdir = os.path.join(a.out, "tex")
 names = m.textures(texdir)

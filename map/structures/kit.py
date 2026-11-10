@@ -65,6 +65,20 @@ def grow(rect, sides, n=1):
     if "s" in sides: z1 += n
     return (x0, z0, x1, z1)
 
+def odd_posts(L, bay):
+    """Post positions along a wall of L cells, corners included, so that every gap is odd
+    (posts an even step apart). Leftover length goes to the middle bays."""
+    s = bay + (bay % 2)
+    span = L - 1
+    if span % 2:      # even wall length cannot be split into odd gaps: fall back to even-ish spacing
+        nb = max(1, round(span / s)); return sorted({round(k * span / nb) for k in range(nb + 1)})
+    n = max(1, span // s); steps = [s] * n; rem = span - n * s; i = n // 2
+    while rem > 0:
+        steps[i % n] += 2; rem -= 2; i += 1
+    out = [0]
+    for st in steps: out.append(out[-1] + st)
+    return out
+
 class Building:
     """A building made of masses (boxes with storeys) and a combined roof height field."""
     def __init__(self, bp, pal, seed=0):
@@ -108,12 +122,11 @@ class Building:
         x0, z0, x1, z1 = rect
         inf = infill or P["infill"]
         yt = y0 + h - 1
-        self.clear(rect, y0, yt)
+        self.clear(rect, y0 + 1, yt)          # y0 inside is the floor
         if not hasattr(self, "bays"): self.bays = {}
         for side in "nsew":
             cells = side_cells(x0, z0, x1, z1, side)
-            L = len(cells); nb = max(1, round((L - 1) / bay))
-            posts = sorted({round(k * (L - 1) / nb) for k in range(nb + 1)})
+            L = len(cells); posts = odd_posts(L, bay)
             self.bays[(rect, y0, side)] = (cells, posts, h)
             axis = "x" if side in "ns" else "z"
             ix, iz = {"n": (0, 1), "s": (0, -1), "e": (-1, 0), "w": (1, 0)}[side]
@@ -133,7 +146,7 @@ class Building:
             for b, (p0, p1) in enumerate(zip(posts, posts[1:])):
                 gap = p1 - p0 - 1
                 if gap < 1 or b in skip: continue
-                w = 2 if gap >= wide else 1
+                w = 3 if gap >= wide else 1
                 start = p0 + 1 + (gap - w) // 2
                 x, z = cells[start]
                 if any(not callable(self.bp.get(*c[:1], y0 + 1, c[1])) and self.bp.get(c[0], y0 + 1, c[1])[0] in ("air", "keep") for c in cells[start:start + w]): continue
@@ -182,23 +195,29 @@ class Building:
         for i in range(w):
             self.bp.set(x + rx * i + ox, y, z + rz * i + oz, self.P["shutter"], facing=side, open=True)
 
-    def door(self, x, y, z, side, double=False, canopy=True, lanterns=True):
+    def door(self, x, y, z, side, canopy=True, lanterns=True, frame=None):
+        """A single centred door in the wall plane at x,y,z. Stone or timber jambs, a lintel,
+        wall lanterns hung from brackets, and a small 3-wide pent canopy when there is room above."""
         bp, P = self.bp, self.P
         rx, rz = DIRS[RIGHT[side]][0], DIRS[RIGHT[side]][2]
         ox, oz = DIRS[side][0], DIRS[side][2]
-        n = 2 if double else 1
-        for i in range(n):
-            hinge = (i == 1)
-            bp.set(x + rx * i, y, z + rz * i, P["door"], facing=OPP[side], hinge=hinge)
-            bp.set(x + rx * i, y + 1, z + rz * i, P["door"], facing=OPP[side], upper=True, hinge=hinge)
-            bp.set(x + rx * i - ox, y, z + rz * i - oz, "air"); bp.set(x + rx * i - ox, y + 1, z + rz * i - oz, "air")
-            bp.set(x + rx * i + ox, y - 1, z + rz * i + oz, P["sill"], facing=OPP[side], half="bottom")   # step
-        if canopy:
-            for i in range(-1, n + 1):
-                bp.set(x + rx * i + ox, y + 2, z + rz * i + oz, P["trim"] if i in (-1, n) else P["trim"], facing=OPP[side], half="top" if i in (-1, n) else "bottom")
-        if lanterns:
-            for i in (-1, n):
-                bp.set(x + rx * i + ox, y + 1, z + rz * i + oz, "lantern")
+        bp.set(x, y, z, P["door"], facing=OPP[side])
+        bp.set(x, y + 1, z, P["door"], facing=OPP[side], upper=True)
+        bp.set(x - ox, y, z - oz, "air"); bp.set(x - ox, y + 1, z - oz, "air")
+        jamb = frame or P.get("jamb", P["frame"])
+        for s in (-1, 1):
+            for j in range(2): bp.set(x + rx * s, y + j, z + rz * s, jamb, axis="y")
+        bp.set(x, y + 2, z, P.get("lintel", P["frame"]), axis="x" if side in "ns" else "z")
+        room = all(self.bp.get(x + rx * s + ox, y + 3, z + rz * s + oz)[0] in ("keep", "air") for s in (-1, 0, 1))
+        if canopy and room:
+            for s in (-1, 0, 1): bp.set(x + rx * s + ox, y + 2, z + rz * s + oz, P["trim"], facing=OPP[side], half="bottom")
+            if lanterns:
+                for s in (-1, 1): bp.set(x + rx * s + ox, y + 1, z + rz * s + oz, "lantern", hanging=True)
+        elif lanterns:
+            for s in (-2, 2):
+                if self.bp.get(x + rx * s + ox, y + 2, z + rz * s + oz)[0] in ("keep", "air"):
+                    bp.set(x + rx * s + ox, y + 2, z + rz * s + oz, P["trim"], facing=OPP[side], half="top")   # bracket
+                    bp.set(x + rx * s + ox, y + 1, z + rz * s + oz, "lantern", hanging=True)
 
     # ---- roofs
     def roof(self, rect, ridge, base, overhang=1, verge=1, pitch=1, mats=None):

@@ -62,7 +62,12 @@ def cube_tex(n, p):
               "azalea_leaves": {"side": "azalea_leaves"}, "azalea_leaves_flowered": {"side": "azalea_leaves_flowers"},
               "water": {"side": "water_still_grey#water"}, "glass": {"side": "glass"},
               "composter": {"top": "composter_top", "side": "composter_side", "bottom": "composter_bottom"},
-              "smooth_stone": {"top": "stone_slab_top", "side": "stone_slab_side"}}
+              "smooth_stone": {"top": "stone_slab_top", "side": "stone_slab_side"},
+              "bookshelf": {"top": "planks_oak", "side": "bookshelf"},
+              "furnace": {"top": "furnace_top", "side": "furnace_side", "front": "furnace_front_off"},
+              "smoker": {"top": "smoker_top", "side": "smoker_side", "front": "smoker_front_off", "bottom": "smoker_bottom"},
+              "loom": {"top": "loom_top", "side": "loom_side", "front": "loom_front"},
+              "cartography_table": {"top": "cartography_table_top", "side": "cartography_table_side1"}}
     if n in simple: return simple[n]
     if n.endswith("_terracotta") and not n.startswith("glazed"):
         c = n[:-11].replace("light_gray", "silver")
@@ -170,6 +175,19 @@ def model(n, p):
         t = {"side": "campfire_log"}
         return [((1 / 16, 0, 4 / 16, 15 / 16, 4 / 16, 8 / 16), t, {}), ((1 / 16, 0, 8 / 16, 15 / 16, 4 / 16, 12 / 16), t, {}),
                 ((4 / 16, 3 / 16, 1 / 16, 8 / 16, 7 / 16, 15 / 16), t, {}), ((8 / 16, 3 / 16, 1 / 16, 12 / 16, 7 / 16, 15 / 16), t, {})]
+    if n == "bed":
+        head = p.get("head"); part = "head" if head else "feet"
+        return [((0, 3 / 16, 0, 1, 9 / 16, 1), {"side": f"bed_{part}_side", "top": f"bed_{part}_top", "bottom": "planks_oak"}, {}),
+                ((0, 0, 0, 3 / 16, 3 / 16, 3 / 16), {"side": "planks_oak"}, {}), ((13 / 16, 0, 13 / 16, 1, 3 / 16, 1), {"side": "planks_oak"}, {})]
+    if n.endswith("pressure_plate"):
+        return [((1 / 16, 0, 1 / 16, 15 / 16, 1 / 16, 15 / 16), {"side": base_material(n.replace("_pressure_plate", "_planks"))}, {})]
+    if n == "chest":
+        return [((1 / 16, 0, 1 / 16, 15 / 16, 14 / 16, 15 / 16), {"side": "chest_side", "top": "chest_top", "front": "chest_front"}, {"front": p.get("facing", "s")})]
+    if n == "cauldron":
+        return [((0, 0, 0, 1, 1, 1), {"side": "cauldron_side", "top": "cauldron_top", "bottom": "cauldron_bottom"}, {"cut": 1})]
+    if n == "lectern":
+        return [((0, 0, 0, 1, 2 / 16, 1), {"side": "lectern_base"}, {}), ((4 / 16, 2 / 16, 4 / 16, 12 / 16, 13 / 16, 12 / 16), {"side": "lectern_front"}, {}),
+                ((0, 12 / 16, 0, 1, 15 / 16, 1), {"side": "lectern_sides", "top": "lectern_top"}, {})]
     if n in ("bell",):
         return [((4 / 16, 4 / 16, 4 / 16, 12 / 16, 13 / 16, 12 / 16), {"side": "bell_side", "top": "bell_top"}, {})]
     if n in ("air", "keep"): return []
@@ -178,6 +196,7 @@ def model(n, p):
     if n == "glass": fl["cut"] = 1
     if n.endswith("_log") and p.get("axis", "y") != "y": fl["axis"] = p["axis"]
     if n == "hay_block" and p.get("axis", "y") != "y": fl["axis"] = p["axis"]
+    if "front" in cube_tex(n, p): fl["front"] = p.get("facing", "s")
     return [((0, 0, 0, 1, 1, 1), cube_tex(n, p), fl)]
 
 
@@ -256,6 +275,7 @@ class Mesher:
         return (axis == "x" and f in ("up", "down", "north", "south")) or (axis == "z" and f in ("east", "west"))
 
     def face_tex(self, tex, f, fl):
+        if fl.get("front") and "front" in tex and FACE_OF[fl["front"]] == f: return tex["front"]
         ax = fl.get("axis", "y")
         endf = {"y": ("up", "down"), "x": ("east", "west"), "z": ("north", "south")}[ax]
         if f in endf:

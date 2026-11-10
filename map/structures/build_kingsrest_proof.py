@@ -19,9 +19,9 @@ a = ap.parse_args(); os.makedirs(a.out, exist_ok=True)
 inn = vale.coaching_inn(style=a.style)
 houses = [
     (vale.townhouse(11, width=7, depth=9, storeys=2, ground="stone", roof="slate", chimney_side="w", style=a.style), -10, 2),
-    (vale.townhouse(12, width=6, depth=8, storeys=3, ground="stone", roof="wood", chimney_side="e", style=a.style), -18, 3),
-    (vale.townhouse(13, width=7, depth=10, storeys=2, ground="timber", jetty=False, chimney_side="w", style=a.style), -27, 1),
-    (vale.townhouse(14, width=8, depth=9, storeys=2, ground="stone", chimney_side="e", style=a.style), 26, 2),
+    (vale.townhouse(12, width=5, depth=9, storeys=3, ground="stone", roof="wood", chimney_side="e", style=a.style), -18, 3),
+    (vale.townhouse(13, width=7, depth=11, storeys=2, ground="timber", jetty=False, chimney_side="w", style=a.style), -27, 1),
+    (vale.townhouse(14, width=9, depth=9, storeys=2, ground="stone", chimney_side="e", style=a.style), 26, 2),
 ]
 for b in [inn] + [h for h, _, _ in houses]:
     b.save_mcstructure(os.path.join(a.out, b.name + ".mcstructure"))
@@ -58,7 +58,7 @@ def tree(x, z, s):
 for (tx, tz) in ((-6, -10), (30, -6), (-34, 8), (40, 16), (-44, 12), (44, 34), (-40, 30)): tree(tx, tz, tx)
 scene.finish()
 scene.camera = {"views": {"inn": [28, 14, 44, 11, 7, 11], "inn-left": [-30, 18, 46, 9, 7, 8], "street": [-62, 4, 30, 4, 5, 20],
-                          "town": [-20, 30, 90, 0, 4, 8], "yard": [200, 30, 50, 11, 6, 2]}}
+                          "town": [-20, 30, 90, 0, 4, 8], "cutaway": [15, 62, 48, 9, 2, 8], "cutaway-houses": [10, 60, 46, -14, 2, 7], "yard": [200, 30, 50, 11, 6, 2]}}
 scene.save_logical(os.path.join(a.out, "scene.json"))
 print("scene blocks", len(scene.cells))
 if a.render:
@@ -66,3 +66,7 @@ if a.render:
            "--title", "Kingsrest coaching inn", "--blurb", "Proof build for the map: the inn and a street of town houses, real Bedrock textures.",
            "--textures", a.textures, "--three", a.three, "--shots", a.shots] + (["--dusk"] if a.dusk else [])
     subprocess.run(cmd, check=True)
+    for cut in (5, 10):
+        sub = os.path.join(a.out, f"cut{cut}")
+        subprocess.run([sys.executable, os.path.join(HERE, "render", "render.py"), os.path.join(a.out, "scene.json"), sub, "--cut", str(cut),
+                        "--textures", a.textures, "--three", a.three, "--shots", "cutaway,cutaway-houses"], check=True)

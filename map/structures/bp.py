@@ -38,6 +38,7 @@ def solid_full(name, p):
     """True for blocks that fill their whole cell (used for connections and render culling)."""
     if name in NONSOLID or name.endswith("_carpet") or name.endswith("_leaves"): return False
     if is_stairs(name) or is_slab(name) or is_fence(name) or is_wall(name) or is_pane(name): return False
+    if name in ("bed", "chest", "cauldron", "lectern", "brewing_stand") or name.endswith("pressure_plate"): return False
     if name.endswith("trapdoor") or name.endswith("_door") or name.endswith("fence_gate") or name.endswith("_sign"): return False
     if name in ("campfire", "bell", "chain", "iron_chain", "cauldron", "anvil", "grindstone", "lectern", "end_rod", "candle"): return False
     return True
@@ -129,6 +130,9 @@ class Blueprint:
         if "minecraft:cardinal_direction" in st and f and not name.endswith("_door"):
             st["minecraft:cardinal_direction"] = {"n": "north", "s": "south", "e": "east", "w": "west"}[f]
         if "hanging" in st: st["hanging"] = bool(p.get("hanging"))
+        if name == "bed":
+            # Bedrock bed direction: 0 south, 1 west, 2 north, 3 east (head end); flagged for an in-game check
+            st["direction"] = {"s": 0, "w": 1, "n": 2, "e": 3}[f or "s"]; st["head_piece_bit"] = bool(p.get("head"))
         if "persistent_bit" in st: st["persistent_bit"] = True
         if "extinguished" in st: st["extinguished"] = bool(p.get("out", False))
         if "facing_direction" in st and name in ("barrel",): st["facing_direction"] = 1
