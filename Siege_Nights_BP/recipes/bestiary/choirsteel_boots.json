@@ -1,0 +1,35 @@
+{
+ "format_version": "1.20.10",
+ "minecraft:recipe_shaped": {
+  "description": {
+   "identifier": "siege:choirsteel_boots_recipe"
+  },
+  "tags": [
+   "crafting_table"
+  ],
+  "pattern": [
+   "CNC",
+   "CQC"
+  ],
+  "key": {
+   "C": {
+    "item": "siege:choirsteel_ingot"
+   },
+   "Q": {
+    "item": "siege:gloamquill"
+   },
+   "N": {
+    "item": "minecraft:netherite_boots"
+   }
+  },
+  "result": {
+   "item": "siege:choirsteel_boots",
+   "count": 1
+  },
+  "unlock": [
+   {
+    "item": "siege:choirsteel_ingot"
+   }
+  ]
+ }
+}

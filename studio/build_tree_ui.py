@@ -15,8 +15,9 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RP = os.path.join(ROOT, "Siege_Nights_RP")
 CELL_W, CELL_H = 52, 29            # one grid cell, in UI pixels
 FLAG = "§h§c"
-BRANCH = {"keep": "§1", "wayfarer": "§2", "blade": "§3", "arcana": "§4"}
-TINT = {"keep": (127, 178, 217), "wayfarer": (143, 201, 138), "blade": (217, 121, 106), "arcana": (180, 140, 240)}
+BRANCH = {"keep": "§1", "wayfarer": "§2", "blade": "§3", "arcana": "§4", "wing": "§5", "forge": "§6", "helm": "§7", "hex": "§8"}
+TINT = {"keep": (127, 178, 217), "wayfarer": (143, 201, 138), "blade": (217, 121, 106), "arcana": (180, 140, 240),
+        "wing": (232, 140, 80), "forge": (150, 200, 225), "helm": (90, 170, 190), "hex": (120, 190, 110)}
 
 layout = json.loads(subprocess.check_output(["node", os.path.join(ROOT, "studio/townhall_preview/dumplayout.mjs")]))
 COLS, ROWS = layout["COLS"], layout["ROWS"]
