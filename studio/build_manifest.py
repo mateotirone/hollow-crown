@@ -158,6 +158,7 @@ g("guard_tokens","Guard icons","Items",[item("Archer","siege_archer"),item("Man-
 A='textures/models/armor/'
 g("armor","Castle Guard armor (worn)","Armor",[{"label":nice(c),"model":"armor","swatch":DYE[c],"tint":DYE[c],"mats":{"layer1":A+'guard_layer_1.png',"layer2":A+'guard_layer_2.png'}} for c in ['red']+[c for c in COLORS if c!='red']],
   "Grey cloth pixels take your banner color in game. Pick a color to preview it. Everything that isn't cloth keeps its own color.")
+g("regional_guard","Castle Guard armor, regional sets","Armor",[{"label":r.title()+" (worn)","model":"armor","swatch":DYE["red"],"tint":DYE["red"],"mats":{"layer1":A+'guard_%s_layer_1.png'%r,"layer2":A+'guard_%s_layer_2.png'%r}} for r in ("vale","frostmarch","saltreach","emberwaste","blackfen")]+[{"label":r.title()+" icons","model":"item","mats":{"*":'textures/items/siege_guard_%s_chestplate.png'%r}} for r in ("vale","frostmarch","saltreach","emberwaste","blackfen")],"Same stats as the Castle Guard armor, one look per region. Grey cloth takes your banner color (shown in red).")
 VA='textures/models/siege_armor/'
 for m,name,note in [("chainmail","Chainmail armor: mail and gambeson","Replaces vanilla chainmail armor. 3D extra: a mail mantle over the shoulders."),("iron","Iron armor: chainmail and surcoat","Replaces vanilla iron armor. 3D extras: kettle hat brim, surcoat flaps front and back."),
                     ("diamond","Diamond armor: knight's plate","Replaces vanilla diamond armor. 3D extras: closed great helm with a red plume, shoulder plates, knee guards."),

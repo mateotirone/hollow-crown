@@ -444,3 +444,11 @@ Painted in final style, replacing the placeholders listed in earlier sections:
 - `studio/art/build_coins.py`: iron and gold coin
 Still stand-ins: skins for the eight job NPCs, 49 skill icons, a left-handed Standing Rank, real models for the three reveal-scene actors.
 The Texture Studio now lists every PNG under `textures/` automatically (catch-all at the end of `studio/build_manifest.py`).
+
+## Regional Castle Guard armor (2026-11-10, textures thread; Mateo chose regional sets)
+Painted by `studio/art/build_regional_guard.py`. Same leather-dye trick as the Castle Guard armor (alpha 255 grey = banner colour, alpha 1 = own colour). Items `siege:guard_<region>_<piece>`, same stats as `siege:guard_*`; shapeless workshop recipe = Castle Guard piece + that region's Castle Stone (Vale uses plain Castle Stone). Shop entries: economy thread.
+| Asset | File | Status |
+|---|---|---|
+| Worn sheets x5 regions | `textures/models/armor/guard_<vale/frostmarch/saltreach/emberwaste/blackfen>_layer_1.png`, `_layer_2.png` | Final style, untested in game |
+| Icons x20 | `textures/items/siege_guard_<region>_<helmet/chestplate/leggings/boots>.png` | Final style |
+| Sheet | `art/regional-guard-armor.png` | |

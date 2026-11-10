@@ -52,6 +52,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 
 - The ravens are on your wall for real: at dusk on a siege night they perch in a row on the stretch of wall nearest you, as many as the message counts, and leave when the siege starts.
 - The morning after the first Hollow soldiers appear is now told settlement by settlement, to the people of the settlement that saw them, instead of to everyone in the world at once.
+- Regional Castle Guard armor: Vale, Frostmarch, Saltreach, Emberwaste and Blackfen sets with the same stats as the Castle Guard armor and their own look (kettle hat and brigandine, fur hood and quilted wool, bleached sallet and rope belt, blackened scale with a veil, laced leather lamellar). Each keeps the banner-colour tabard. Make one at the siege workshop from a Castle Guard piece and that region's Castle Stone.
 
 ### Changed
 - On the map a settlement's land is full size (60 blocks) from the day you arrive, and siege wins no longer grow it. Tiers still unlock wall levels, buildings and keep health. A Castle's keep now really has 600 health.
