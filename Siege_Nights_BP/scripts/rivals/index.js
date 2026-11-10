@@ -488,6 +488,12 @@ on("plotChosen", ({ player, plot }) => {
   if (estate && (!estate.heir || estate.heir === player.id)) adopt(player, estate);
 });
 
+// The welcome hall asks what tier a lord-run plot stands at, for its label
+on("plotLordQuery", (q) => {
+  const lord = q?.plot && rivalOnPlot(q.plot.name);
+  if (lord) q.tier = TIER_NAMES[lord.tier];
+});
+
 // The Keep Banner goes up: the settlement's standing comes with it
 on("keepFounded", ({ player, keep }) => {
   const estate = Object.values(estates()).find((e) => e.x === keep.x && e.z === keep.z);
