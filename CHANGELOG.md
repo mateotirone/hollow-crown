@@ -50,6 +50,8 @@ Everything merged to `main` since the last release goes here. Each pull request 
 
 - The morning after the first Hollow soldiers appear is now told settlement by settlement, to the people of the settlement that saw them, instead of to everyone in the world at once.
 
+- The eighth old painting, the Forty-Second Portrait, is kept for the Burned Archive, and what its caption says changes once the story is over.
+
 ### Changed
 - On the map a settlement's land is full size (60 blocks) from the day you arrive, and siege wins no longer grow it. Tiers still unlock wall levels, buildings and keep health. A Castle's keep now really has 600 health.
 - Regional roles are now earned by a deed in their region instead of by raising a Stone Hall there: Forgemaster for bringing down the Pale Huntsman, Captain for the Drowned Bride, Witch for the Mother of Changelings, and Dragon Rider when your first dragon hatches.
