@@ -3,6 +3,7 @@
 
 // Core (no gameplay)
 import "./core/selftest.js";
+import "./core/storyteller.js";
 
 // Siege Nights
 import "./siege/index.js";

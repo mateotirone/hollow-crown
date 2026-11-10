@@ -17,6 +17,7 @@ import "./guards.js";
 import "./menus.js";
 import "./gear.js";
 import "./tests.js";
+import "./story.js";
 
 import { onTick } from "../core/loop.js";
 import { SETTINGS } from "./settings.js";

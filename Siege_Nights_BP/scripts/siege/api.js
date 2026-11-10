@@ -64,3 +64,11 @@ export const addKeepMenuButtons = (fn) => addFilter("keepMenuButtons", (buttons,
 export { onTick } from "../core/loop.js";
 export { moduleStore } from "../core/store.js";
 export { addTests, assert, assertEqual } from "../core/tests.js";
+
+// ----- the Storyteller (pacing director) and the story chapter. See MODULES.md -----
+// `pick` is exported as `storyPick` here, because api.js already has a `pick` (random array element).
+export {
+  KINDS, CHAPTERS, FACTS, provideFact, missingFacts, chapterFor, chapterOf, worldChapter,
+  registerDeck, addOptions, deckNames, optionsOf, pick as storyPick, pickSeveral, maybePick,
+  note, markDone, recentKinds, servedCount, isDone, overserved,
+} from "../core/storyteller.js";
