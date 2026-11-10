@@ -9,6 +9,7 @@ How versions work is in [`docs/RELEASING.md`](docs/RELEASING.md).
 Everything merged to `main` since the last release goes here. Each pull request that changes what players see adds a line under one of these headings.
 
 ### Added
+- Steeds wear their own painted coats: one for each of the five regional breeds, a piebald coat for crossbreds, a see-through Glimstrider, plate barding on the Knight Warhorse, and a proper cloth Caparison in your banner color. Horses you already own change over by themselves.
 - Sound has its own voice now. The bell, the horns and about 25 other sounds are lower, softer and layered wherever the game uses them, and nothing is heard twice exactly the same. The 3:17 toll, the siege horn, the first glimpse, a storm tide and every boss's arrival each have their own sound. These are stand-ins built from vanilla sounds until the real recordings are made: `SOUND-LIST.md` has the list and the prompts, `sounds-inbox/` is where the files go, and `/scriptevent siege:sound` opens a sound board in game. No music yet.
 - Siege omens now happen around you, not only in grey text: animals turn to face one wall, flames lean, open doors shut, water trembles, dogs bolt, a far bell, something small runs past. One each hour of a siege evening, never the same twice in a night.
 - Ravens are now a real bird in the world: small, black, silent and perfectly still. They cannot be hurt, drop nothing, do not move for you, and leave at dawn or the moment a siege starts. (The omen that puts them on your wall at dusk is wired up separately.)

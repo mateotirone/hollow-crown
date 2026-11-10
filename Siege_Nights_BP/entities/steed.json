@@ -25,6 +25,15 @@
           "default": 0,
           "client_sync": true
         },
+        "siege:breed": {
+          "type": "int",
+          "range": [
+            0,
+            6
+          ],
+          "default": 0,
+          "client_sync": true
+        },
         "siege:special": {
           "type": "int",
           "range": [
