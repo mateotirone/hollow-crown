@@ -5,7 +5,7 @@ import { world, system, ItemStack } from "@minecraft/server";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
 import { emit, keepOf, isAlly, isReady, onTick } from "../siege/api.js";
 import { isTesting } from "../core/tests.js";
-import { TOME, TOMES, COLLECTION, tomesOf, hasReadAll, libraryRank, isLocal } from "./logic.js";
+import { TOME, TOMES, COLLECTION, tomesOf, hasReadAll, libraryRank, isLocal, loadSaved, stampSaved } /* saves carry a version: SAVE_VERSION in logic.js */ from "./logic.js";
 import { COLLECTIONS, MILESTONES, PLACES, SITE_IDS, THREADS } from "./data/world.js";
 import {
   tomeIdOf, makeTome, progressOf, saveProgress, sourceSite, giveItem, awardPoints, setFlag, landOwnerAt, ensureLedger,
@@ -26,7 +26,7 @@ function libOf(owner) {
   let lib = libs.get(owner);
   if (!lib) {
     const raw = world.getDynamicProperty(propOf(owner));
-    lib = typeof raw === "string" ? JSON.parse(raw) : {};
+    lib = loadSaved("library", raw) ?? {};
     libs.set(owner, lib);
   }
   return lib;
@@ -34,7 +34,7 @@ function libOf(owner) {
 function saveLib(owner) {
   if (isTesting()) return;
   const lib = libOf(owner);
-  world.setDynamicProperty(propOf(owner), Object.keys(lib).length ? JSON.stringify(lib) : undefined);
+  world.setDynamicProperty(propOf(owner), Object.keys(lib).length ? stampSaved("library", lib) : undefined);
 }
 
 // Every tome id shelved anywhere in this owner's Library
