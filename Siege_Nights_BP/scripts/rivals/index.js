@@ -24,6 +24,7 @@ import { world, system, GameMode, ItemStack } from "@minecraft/server";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
 import { isReady, getState, keepOf, onTick, moduleStore, on, emit, addFoundingCheck, pick, title } from "../siege/api.js";
 import { applyFilter } from "../core/events.js";
+import * as plotsApi from "../plots/claims.js"; // giveToNpc / releaseNpc mark a plot as a lord's in the Plot Atlas (where plots has them)
 import { allPlots, holderOf, mapMode } from "../plots/claims.js";
 import { startBuild, buildFor, worldCells } from "../townhall/build.js";
 import { drawHall } from "../townhall/halls.js";
@@ -89,7 +90,7 @@ function settleTick() {
     if (!plot || holderOf(plot)) removeLord(lord);
   }
   const now = world.getAbsoluteTime();
-  const free = plots.filter((p) => !holderOf(p) && !rivalOnPlot(p.name) && !(p.reservedFor && now < p.reservedUntil));
+  const free = plots.filter((p) => !holderOf(p) && !rivalOnPlot(p.name) && !p.npc && !(p.reservedFor && now < p.reservedUntil));
   if (lords().length >= wanted(rivalMode(), free.length, lords().length)) return;
   if (lords().length && now - store.data.lastArrival < RIVALS.arriveEveryDays * DAY) return;
   store.data.seed ||= Math.floor(Math.random() * 1e9) + 1;
@@ -101,6 +102,7 @@ function settleTick() {
   const lord = makeLord(plot, `${store.data.seed}|${store.data.fallen.length}`, [...lords().map((l) => l.name), ...store.data.fallen]);
   giveVoice(lord);
   lords().push(lord);
+  plotsApi.giveToNpc?.(lord.plot, { id: lord.id, name: lord.name });
   store.data.lastArrival = now;
   save();
   emit("rivalSettled", { lord });
@@ -111,6 +113,7 @@ function removeLord(lord) {
   const i = lords().indexOf(lord);
   if (i >= 0) lords().splice(i, 1);
   save();
+  if (allPlots().find((p) => p.name === lord.plot)?.npc?.id === lord.id) plotsApi.releaseNpc?.(lord.plot);
   try {
     for (const e of world.getDimension(OVERWORLD).getEntities({ tags: [lordTag(lord)] })) e.remove();
   } catch {
@@ -397,6 +400,7 @@ world.beforeEvents.playerInteractWithEntity.subscribe((event) => {
 // Tell late listeners (and old saves) who is already settled
 on("ready", () => {
   emit("rivalLordsWanted", {});
+  for (const lord of lords()) plotsApi.giveToNpc?.(lord.plot, { id: lord.id, name: lord.name }); // saves from before plots knew about lords
   for (const lord of lords()) emit("rivalSettled", { lord, known: true });
 });
 
