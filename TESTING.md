@@ -74,3 +74,19 @@ Type the commands in chat (`/` opens it).
 - Put on full iron, diamond and netherite armor (`/give @s diamond_helmet` and so on). Do the new 3D shapes show, and do they move with you?
 - Did guards hold their posts and fight?
 - Was the siege too easy, too hard, or about right?
+
+## Character looks (pick your person)
+
+The add-on carries character skins made on the creator page and draws each player as the one they picked. Nobody imports a skin.
+
+1. Join the world for the first time. After a few seconds a menu asks "Who steps off the coach?". Pick a character.
+2. Press F5. You should see that character's skin on your own body. Check that armor, a held item and a cape (if you have one) still show.
+3. Have a second player join and pick someone else. Each of you should see the other's character.
+4. `/scriptevent siege:showcase` places a **Looking Glass**. Click it to change look, and pick "My own skin" to go back.
+5. Click your Keep Banner: the menu has "Change my look".
+
+Things to watch for, because none of this has run in a real game yet:
+- If a player with a slim-arm or Character Creator skin looks broken after picking a look, tell Claude: the look is drawn on the plain wide-arm model.
+- If nothing changes when you pick, the world is not using the add-on's player file (another add-on that also changes the player would win or lose depending on pack order).
+
+To add a friend's character: `node studio/build_looks.mjs add "<their creator link>" TheirGamertag`, then `python3 tools/build.py`. With a gamertag the look is theirs alone and is put on automatically when they join.

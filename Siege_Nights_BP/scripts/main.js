@@ -12,6 +12,7 @@ import "./siege/index.js";
 // (none yet)
 import "./undertow/index.js";
 import "./plots/index.js";
+import "./looks/index.js";
 
 // Start the shared loop last, once every file has registered its work
 import { startLoop } from "./core/loop.js";

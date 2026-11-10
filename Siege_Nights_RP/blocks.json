@@ -89,5 +89,8 @@
   },
   "siege:court_seal": {
     "sound": "stone"
+  },
+  "hc:looking_glass": {
+    "sound": "glass"
   }
 }

@@ -112,6 +112,10 @@ Not possible: Quartermaster prices. They are a fixed trade table (`trading/quart
 
 Need another hook? Ask the "Prepare Siege Nights code for parallel work" thread rather than editing `siege/` files yourself.
 
+- **looks** (`scripts/looks/index.js`): `lookOf(player)`, `setLook(player, look)`, `chooseLook(player)`, `looksFor(name)`. The add-on now ships
+  `entities/player.json` (BP) and `entity/player.entity.json` (RP), both written by `studio/build_looks.mjs` from vanilla copies
+  in `studio/looks/vanilla/`. **Need to change the player entity? Add it to that script, not to the JSON**, or the next run undoes it.
+
 ## Checking and building
 
 - `node tools/check.mjs` (from `siege-nights/`): parses every pack JSON, checks imports, finds undefined names,

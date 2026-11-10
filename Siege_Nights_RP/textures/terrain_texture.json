@@ -220,6 +220,12 @@
     },
     "siege_court_seal": {
       "textures": "textures/blocks/siege_court_seal"
+    },
+    "hc_looking_glass_side": {
+      "textures": "textures/blocks/looks/hc_looking_glass_side"
+    },
+    "hc_looking_glass_top": {
+      "textures": "textures/blocks/looks/hc_looking_glass_top"
     }
   }
 }
