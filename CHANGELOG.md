@@ -43,6 +43,11 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - The four regional roles (Dragon Rider, Forgemaster, Captain, Witch) each have a history, and their top four powers show a line of it in the Tree of Oaths.
 
 ### Changed
+- The endless siege (the Long Night) now begins when the Rift is opened, not when the Choir falls. Thunderstorms roll in with each wave of it and clear between them.
+- Every settlement gets its own night when the army stops at 3:17 and something else walks out. It is no longer once per world.
+- The evening before a siege is long for a settlement's first three sieges, then shortens, and shortens again after six.
+- After the story, raids are sent by the rival towns at random, at their own hour, led by the lord by name.
+- Once the count can't be trusted, the night watch gives a hint ("The watch is uneasy tonight") and never a date.
 - The High Throne no longer repeats itself: each whisper the Heart gives is heard once per reign, a rival lord brings a different and bigger army every time they come back, a ruling lord never sends the same host twice running, Oath Shard news is worded differently each time, and a ruler banished a second time walks a shorter road back.
 - The "Who steps off the coach?" character menu is now the first thing a new player sees, and the welcome and the journal wait until it is answered or closed.
 - The add-on is renamed from Siege Nights to The Hollow Crown. The install file is `hollow-crown.mcaddon`. Existing ids keep the `siege:` prefix.

@@ -226,7 +226,10 @@ Add a line here when you publish one.
 - **reach** (`scripts/reach/api.js`): how sieges escalate. One world number, the Reach (0-100), picks a stage 1-6 (`reach/rules.js` STAGES:
   Counted Nights, Leaning, Miscount, Uncounted Nights, Long Night, Quiet After). `reachStage()`, `reachValue()`, `stageInfo()`,
   `tonightKind()` ("counted" | "stolen" | "probe" | "long" | "muster" | undefined), `isSiegeNight()`, `hollowShareNow()`, `addReach(n, why)`,
-  `rectify()` (the source is dealt with), `LONG` = 5, `AFTER` = 6. Events `reachStage { stage, before, name }`, `reachChanged`, `firstGlimpse { owners }`.
+  `rectify()` (the source is dealt with), `LONG` = 5, `AFTER` = 6. Events `reachStage { stage, before, name }`, `reachChanged`,
+  `firstGlimpse { owners }` (now once per settlement, so it fires more than once per world; `owners` are the keeps having theirs tonight),
+  `lordRaid { lord, name, plot, owners }` (after the story a Rival Lord's army has come). The Long Night starts when the Rift opens
+  (script event `siege:undertow_rift_opened`), not when the Choir falls.
   Filter `hollowSoldier` (type, { role, glimpse }) picks the soldier it adds. **Sieges are no longer simply every third night**: ask `isSiegeNight()`
   instead of doing `day % 3`. It also added hooks to `siege/siege.js` that anyone may use: filters `siegeDue`, `assaultCount`, `assaultDelay`,
   `assaultShare`, `dawnEndsSiege`, `nextSiegeDay`, and events `assaultIncoming` / `assaultSpawned` `{ assault, total }`.
