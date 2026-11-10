@@ -4,7 +4,8 @@
 // supplies for emeralds. The stone comes back to you when the building is done.
 //
 // Events: emit("settleBuilt", { owner, player, building, style, origin, forward, box, marks })
-//   marks = the design's named spots in the world, e.g. a library's shelf0..shelf7 and lectern
+//   marks = the design's named spots in the world, e.g. a library's shelf0..shelf7, lectern, portrait0..2, painting0
+//   a library also sends portraitYaw and paintingYaw: the way those pictures face (0 south, 90 west, 180 north, -90 east)
 // Test: /scriptevent siege:settle_build <building> [style]   raise one where you stand, free
 
 import { world, system, GameMode, ItemStack } from "@minecraft/server";
@@ -99,6 +100,8 @@ export function siteProblem(owner, box, exceptKey) {
 
 // ---------- raising ----------
 
+const yawOf = (d) => (d.z === 1 ? 0 : d.x === -1 ? 90 : d.z === -1 ? 180 : -90);
+
 export function raise(key, stone, buildingId, style, { quiet = false } = {}) {
   if (buildFor(jobId(key))) return false;
   const plan = drawBuilding(buildingId, style);
@@ -131,7 +134,8 @@ export function raise(key, stone, buildingId, style, { quiet = false } = {}) {
       const first = !done.includes(buildingId);
       if (first) done.push(buildingId);
       store.save();
-      emit("settleBuilt", { owner: stone.owner, player: stone.placer, building: buildingId, style, origin, forward, box: footprint(origin, forward, plan.bounds()), marks: worldMarks(plan, origin, forward) });
+      const yaws = Object.fromEntries(Object.entries(BUILDING[buildingId].faces ?? {}).map(([name, sign]) => [name, yawOf({ x: forward.x * sign, z: forward.z * sign })]));
+      emit("settleBuilt", { ...yaws, owner: stone.owner, player: stone.placer, building: buildingId, style, origin, forward, box: footprint(origin, forward, plan.bounds()), marks: worldMarks(plan, origin, forward) });
       if (!player || quiet) return;
       player.playSound("random.levelup");
       player.sendMessage(`§6Your ${BUILDING[buildingId].name} is built.§7 It is yours to change: knock out a wall, add a door, move in. The Foundation Stone is back in your pack.`);

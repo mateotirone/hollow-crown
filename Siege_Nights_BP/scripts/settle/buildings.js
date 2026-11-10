@@ -204,7 +204,7 @@ function library(p) {
   hollow(p, x0, x1, z0, z1, 1, H);
   door(p, 0, z0);
   for (const z of [3, 5, 7]) for (const y of [2, 4]) { p.set(x0, y, z, "window"); p.set(x1, y, z, "window"); }
-  p.set(-2, 2, z0, "window"); p.set(2, 2, z0, "window"); p.set(0, 4, z0, "window"); p.set(0, 4, z1, "window");
+  p.set(-2, 2, z0, "window"); p.set(2, 2, z0, "window"); // the upper front and back walls stay blank for pictures
   roof(p, x0, x1, z0, z1, H + 1);
   // ordinary bookshelves between the side windows, floor to ceiling
   for (const x of [x0 + 1, x1 - 1]) for (const z of [2, 4, 6, 8]) p.fill(x, 1, z, x, H - 1, z, "bookshelf");
@@ -214,6 +214,11 @@ function library(p) {
   p.fill(0, 1, z1 - 1, 0, 2, z1 - 1, "bookshelf");
   for (const x of [-2, -1, 0, 1, 2]) p.set(x, 3, z1 - 1, "bookshelf");
   p.set(0, 1, z1 - 3, "lectern"); p.mark("lectern", 0, 1, z1 - 3);
+  // picture spots (the lore feature hangs them): three portraits above the shelves on the back wall, facing the
+  // door, and one 3 wide by 2 tall painting over the door, facing the shelves. Each mark is the air block in
+  // front of the wall at the bottom of its patch (the painting's is the bottom middle).
+  [-2, 0, 2].forEach((x, i) => p.mark(`portrait${i}`, x, 4, z1 - 1));
+  p.mark("painting0", 0, 4, z0 + 1);
   // reading table, a runner from the door
   p.set(0, 1, 4, "table", { half: "top" }); p.set(-1, 1, 4, "seat", stair("-x")); p.set(1, 1, 4, "seat", stair("+x"));
   p.fill(0, 0, 2, 0, 0, 3, "royalBlock");
@@ -228,7 +233,7 @@ export const BUILDINGS = [
   { id: "watchtower", name: "Watchtower", blurb: "A lookout over your land with a brazier on top.", draw: watchtower },
   { id: "market", name: "Market Stall", blurb: "A striped awning over a counter. Put one by your gate.", draw: marketStall },
   { id: "well", name: "Well", blurb: "A roofed well for the middle of the settlement.", draw: well },
-  { id: "library", name: "Library", blurb: "Two storeys of books, a reading table and eight Archive Shelves for the town's own lore.", draw: library },
+  { id: "library", name: "Library", blurb: "Two storeys of books, a reading table and eight Archive Shelves for the town's own lore.", draw: library, faces: { portraitYaw: -1, paintingYaw: 1 } },
   { id: "garden", name: "Kitchen Garden", blurb: "Fenced beds with a water channel, ready to plant.", draw: garden },
 ];
 export const BUILDING = Object.fromEntries(BUILDINGS.map((b) => [b.id, b]));
