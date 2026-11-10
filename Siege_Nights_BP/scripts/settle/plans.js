@@ -9,7 +9,7 @@
 import { world, system, GameMode, ItemStack } from "@minecraft/server";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
 import { isReady, settlementAt, isAlly, keepOf, onTick, moduleStore, on, emit } from "../siege/api.js";
-import { purse, charge, coins } from "./wallet.js";
+import { purse, charge, coins, lot } from "./wallet.js";
 import { startBuild, buildFor } from "../townhall/build.js";
 import { hallOf } from "../townhall/townhall.js";
 import { STYLES, STYLE_IDS, styleFromGround } from "../townhall/styles.js";
@@ -225,9 +225,10 @@ async function confirmBuilding(player, key, stone) {
   const need = priceOf(drawBuilding(building.id, style));
   const { due, lines } = costLines(player, need);
   const emeralds = purse(player);
+  due.emeralds *= lot(); // the bill counts lots; this is what the wallet is charged
   const body = [`${building.blurb}`, "", ...lines];
   if (free) body.push("", "§aFree in Creative.");
-  else if (due.emeralds) body.push("", `${emeralds >= due.emeralds ? "§a" : "§c"}The mason supplies the rest for ${coins(due.emeralds)}§7 (you carry ${emeralds})`);
+  else if (due.emeralds) body.push("", `${emeralds >= due.emeralds ? "§a" : "§c"}The mason supplies the rest for ${coins(due.emeralds)}§7 (you carry ${coins(emeralds)})`);
   body.push("", "§7Anything standing inside the outline is replaced.");
   const res = await new MessageFormData().title(`Raise the ${building.name}?`).body(body.join("\n"))
     .button1("Pick something else").button2(free || emeralds >= due.emeralds ? "Raise it" : "Not enough yet").show(player);

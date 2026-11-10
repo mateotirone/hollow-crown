@@ -6,10 +6,11 @@ export const SETTLE = {
   // "always" = forbidden everywhere, "off" = allowed. /scriptevent siege:settle_wilds changes it in a world.
   wilds: "map",
   reserveMargin: 3, // clear blocks kept around the biggest hall your cornerstone can grow into
-  localBonus: 1.5, // your own region's materials: this many times more blocks per emerald
-  maxSpend: 32, // most emeralds one purchase can spend
+  // Prices below are in lots. A lot was one emerald and is 8 coins of the world currency (wallet.js, coins.js).
+  localBonus: 1.5, // your own region's materials: this many times more blocks per lot
+  maxSpend: 32, // most lots one purchase can buy
   maxBenches: 2, // Mason's Benches per settlement
-  stonePrice: 4, // emeralds for a Foundation Stone at the mason (it can also be crafted)
+  stonePrice: 4, // lots for a Foundation Stone at the mason (it can also be crafted)
   riseTicks: 160, // about how long a pre-designed building takes to rise (160 = 8 seconds)
   firstBuildRenown: 40, // Renown the first time you raise each kind of building
   previewSeconds: 90, // how long the outline of a chosen building stays up

@@ -14,7 +14,7 @@ import { MessageFormData } from "@minecraft/server-ui";
 import { isReady, getState, onTick, on, emit, damageMap, saveDamage, hitWall } from "../siege/api.js";
 import { WALLS, WALL_LEVELS, wallColumns, columnKinds, repairCost } from "./walldata.js";
 import { wallOf, wallRising, palette } from "./walls.js";
-import { purse, charge, coins } from "./wallet.js";
+import { purse, charge, coins, lot } from "./wallet.js";
 
 const OVERWORLD = "minecraft:overworld";
 const jobs = new Map(); // owner -> { cells, index, fix, missing, cracked, P, onDone, waited }
@@ -105,7 +105,7 @@ export function offerRepair(player, owner = player.id, { free = false } = {}) {
   const started = repairWall(owner, {
     onDone: async (found) => {
       if (!player.isValid) return;
-      const price = free ? 0 : repairCost(found);
+      const price = free ? 0 : repairCost(found, lot());
       if (found.missing + found.cracked === 0) return player.sendMessage(`§aYour wall is whole. Nothing to mend.${farNote(found)}`);
       if (!free) {
         const res = await new MessageFormData().title("Mend the wall")

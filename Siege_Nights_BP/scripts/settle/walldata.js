@@ -17,7 +17,7 @@ export const WALLS = {
   auto: "map", // raise level 1 when a plot is claimed: "map" (only on a map with Plot Stones), "always", "off"
   gateWidth: 3, gateHeight: 4,
   tierCap: [3, 5, 8, 10],
-  repair: { perBlock: 0.25, perCrack: 0.1, least: 1, perTick: 600 }, // price of a repair in coins: per missing block, per cracked block, and the least it costs. perTick = blocks looked at per tick. // the highest wall level a Hamlet, Town, City and Castle may raise
+  repair: { perBlock: 0.25, perCrack: 0.1, least: 1, perTick: 600 }, // price of a repair in lots (wallet.js): per missing block, per cracked block, and the least it costs. perTick = blocks looked at per tick. // the highest wall level a Hamlet, Town, City and Castle may raise
 };
 
 const cost = (...rows) => rows; // [label, amount, kind]: kind is matched to items in walls.js
@@ -173,9 +173,9 @@ export function gateSpot(center, gateAngle, smooth, radius = WALLS.radius) {
   };
 }
 
-// What a repair costs, in coins (wallet.js): nothing if nothing is wrong
-export function repairCost({ missing = 0, cracked = 0 }) {
+// What a repair costs, in coins: nothing if nothing is wrong. lot = coins in a lot (wallet.js).
+export function repairCost({ missing = 0, cracked = 0 }, lot = 1) {
   if (missing + cracked === 0) return 0;
   const R = WALLS.repair;
-  return Math.max(R.least, Math.ceil(missing * R.perBlock + cracked * R.perCrack));
+  return Math.max(R.least * lot, Math.ceil((missing * R.perBlock + cracked * R.perCrack) * lot));
 }

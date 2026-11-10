@@ -10,7 +10,7 @@ import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
 import { isReady, settlementAt, keepOf, isAlly, isNight, onTick, moduleStore, pick, emit, STONE_KINDS, stoneId } from "../siege/api.js";
 import { STYLES } from "../townhall/styles.js";
 import { SETTLE, CATALOG, LOCAL_ROLES, LOCAL_RATE, STONE_RATE, MASON_LINES } from "./config.js";
-import { purse, charge, coins, coinName, coinIcon } from "./wallet.js";
+import { purse, charge, coins, coinName, coinIcon, lot } from "./wallet.js";
 import { styleOf, FOUNDATION } from "./plans.js";
 
 export const BENCH = "siege:mason_bench";
@@ -82,7 +82,8 @@ function hand(player, typeId, count) {
 }
 
 async function buy(player, shelf, [typeId, per], mason) {
-  const have = player.getGameMode() === GameMode.Creative ? SETTLE.maxSpend : purse(player);
+  const carried = purse(player);
+  const have = player.getGameMode() === GameMode.Creative ? SETTLE.maxSpend : Math.floor(carried / lot()); // lots they can pay for
   if (have < 1) {
     player.sendMessage(`§7Mason: §fThat takes ${coinName()}. Come back when you have some.`);
     return;
@@ -90,20 +91,20 @@ async function buy(player, shelf, [typeId, per], mason) {
   const most = Math.min(have, SETTLE.maxSpend);
   const res = await new ModalFormData()
     .title(niceName(typeId))
-    .slider(`${per} for ${coins(1)}. You carry ${have}.\n\nHow many ${coinName()} to spend`, 1, most, { valueStep: 1, defaultValue: Math.min(most, 4) })
+    .slider(`${per} for ${coins(lot())}. You carry ${coins(carried)}.\n\nHow many lots of ${per}`, 1, most, { valueStep: 1, defaultValue: Math.min(most, 4) })
     .show(player);
   if (res.canceled) return openShelf(player, shelf, mason);
   const spend = Math.max(1, Math.min(most, Math.floor(res.formValues[0])));
-  if (!charge(player, spend)) return;
+  if (!charge(player, spend * lot())) return;
   hand(player, typeId, spend * per);
   player.playSound("random.orb");
-  player.onScreenDisplay.setActionBar(`§6${spend * per} ${niceName(typeId)}§7 for ${coins(spend)}`);
+  player.onScreenDisplay.setActionBar(`§6${spend * per} ${niceName(typeId)}§7 for ${coins(spend * lot())}`);
   openShelf(player, shelf, mason);
 }
 
 async function openShelf(player, shelf, mason) {
   const form = new ActionFormData().title(shelf.name).body(`You carry ${coins(purse(player))}.`);
-  for (const [id, per] of shelf.stock) form.button(`${niceName(id)}\n§8${per} for ${coins(1)}`);
+  for (const [id, per] of shelf.stock) form.button(`${niceName(id)}\n§8${per} for ${coins(lot())}`);
   form.button("Back");
   const res = await form.show(player);
   if (res.canceled) return;
@@ -119,13 +120,14 @@ export async function openShop(player, mason) {
   const all = shelves(styleId);
   const form = new ActionFormData().title("Mason").body(`§o"${line}"§r\n\nYou carry ${coins(purse(player))}.`);
   for (const shelf of all) form.button(shelf.name, shelf.icon);
-  form.button(`Foundation Stone\n§8Places a pre-designed building. ${coins(SETTLE.stonePrice)}`);
+  form.button(`Foundation Stone\n§8Places a pre-designed building. ${coins(SETTLE.stonePrice * lot())}`);
   if (home) form.button("Mend the wall\n§8The masons survey it and name a price");
   const res = await form.show(player);
   if (res.canceled) return;
   if (res.selection < all.length) return openShelf(player, all[res.selection], mason);
   if (res.selection === all.length + 1) return emit("wallRepair", { owner: home, player }); // repair.js
-  if (purse(player) < SETTLE.stonePrice && player.getGameMode() !== GameMode.Creative || !charge(player, SETTLE.stonePrice)) return player.sendMessage(`§7Mason: §fA Foundation Stone is ${coins(SETTLE.stonePrice)}.`);
+  const stonePrice = SETTLE.stonePrice * lot();
+  if (purse(player) < stonePrice && player.getGameMode() !== GameMode.Creative || !charge(player, stonePrice)) return player.sendMessage(`§7Mason: §fA Foundation Stone is ${coins(stonePrice)}.`);
   hand(player, FOUNDATION, 1);
   player.sendMessage("§7Mason: §fSet it where the front should be, facing the way the building runs. Click it and choose. You get the stone back after.");
 }
