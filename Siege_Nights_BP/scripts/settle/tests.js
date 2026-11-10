@@ -5,7 +5,9 @@ import { STYLES, STYLE_IDS } from "../townhall/styles.js";
 import { SETTLE, CATALOG, MASON_LINES } from "./config.js";
 import { BUILDINGS, drawBuilding } from "./buildings.js";
 import { hallReserve, hallReach, inBox, footprint, boxesTouch, placeVerdict, bill, priceOf, isCampKit } from "./rules.js";
-import { localStock } from "./mason.js";
+import { localStock, stoneStock, niceName } from "./mason.js";
+import { STONE_FAMILY, CASTLE_STONES, stoneId } from "../siege/api.js";
+import { MATERIALS } from "./rules.js";
 
 const base = { creative: false, overworld: true, typeId: "minecraft:stone_bricks", land: "me", mine: true, reserve: undefined, wildsClosed: true, hasKeep: true };
 
@@ -89,7 +91,23 @@ addTests("settle", {
   },
 });
 addTests("settle", {
+  "every region has its five Castle Stone blocks at the mason": () => {
+    assertEqual(STONE_FAMILY.length, 25);
+    assertEqual(CASTLE_STONES[0], "siege:castle_stone");
+    assertEqual(stoneId("tiles", "frostmarch"), "siege:castle_tiles_frostmarch");
+    for (const id of STYLE_IDS) {
+      const stock = stoneStock(id, true, () => true);
+      assertEqual(stock.length, 5, id);
+      assert(stock.every(([block, per]) => STONE_FAMILY.includes(block) && per >= 8), id);
+      assert(stoneStock(id, false, () => true)[0][1] < stock[0][1], "local stone is cheaper");
+    }
+    assertEqual(niceName("siege:castle_cobbled_blackfen"), "Blackfen Cobbled Castle Stone");
+    assertEqual(niceName("siege:castle_tiles"), "Castle Stone Tiles");
+    assert(MATERIALS.stone.match("siege:castle_bricks_saltreach") && !MATERIALS.timber.match("siege:castle_bricks_saltreach"));
+  },
+});
+addTests("settle", {
   "the new blocks are in the pack": () => {
-    for (const id of ["siege:mason_bench", "siege:foundation_stone"]) assert(BlockTypes.get(id), `missing ${id}`);
+    for (const id of ["siege:mason_bench", "siege:foundation_stone", ...STONE_FAMILY]) assert(BlockTypes.get(id), `missing ${id}`);
   },
 }, { gameOnly: true });

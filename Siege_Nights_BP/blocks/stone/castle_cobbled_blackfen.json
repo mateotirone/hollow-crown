@@ -1,0 +1,70 @@
+{
+  "format_version": "1.21.60",
+  "minecraft:block": {
+    "description": {
+      "identifier": "siege:castle_cobbled_blackfen",
+      "menu_category": {
+        "category": "construction"
+      },
+      "states": {
+        "siege:cracks": [
+          0,
+          1,
+          2
+        ]
+      }
+    },
+    "components": {
+      "minecraft:display_name": "tile.siege:castle_cobbled_blackfen.name",
+      "minecraft:destructible_by_mining": {
+        "seconds_to_destroy": 2.5
+      },
+      "minecraft:destructible_by_explosion": {
+        "explosion_resistance": 30
+      },
+      "minecraft:geometry": "minecraft:geometry.full_block",
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "siege_castle_cobbled_blackfen",
+          "render_method": "opaque"
+        }
+      },
+      "minecraft:map_color": "#5c6450"
+    },
+    "permutations": [
+      {
+        "condition": "q.block_state('siege:cracks') == 0",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_castle_cobbled_blackfen_stone_0",
+              "render_method": "opaque"
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:cracks') == 1",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_castle_cobbled_blackfen_stone_1",
+              "render_method": "opaque"
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:cracks') == 2",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_castle_cobbled_blackfen_stone_2",
+              "render_method": "opaque"
+            }
+          }
+        }
+      }
+    ]
+  }
+}

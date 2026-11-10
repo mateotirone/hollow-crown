@@ -81,9 +81,9 @@ export function placeVerdict(s) {
 
 // ---------- paying for a pre-designed building ----------
 
-const any = (...parts) => (id) => parts.some((p) => id.endsWith(p));
+const any = (...parts) => (id) => parts.some((p) => id.endsWith(p)) || /^siege:castle_(stone|tiles|bricks|cobbled|smooth)(_|$)/.test(id);
 export const MATERIALS = {
-  timber: { label: "planks", match: any("_planks", ":planks") },
+  timber: { label: "planks", match: (id) => id.endsWith("_planks") || id.endsWith(":planks") },
   stone: {
     label: "building stone",
     match: any("cobblestone", "cobbled_deepslate", ":stone", "stone_bricks", "stonebrick", "deepslate_bricks", "sandstone", "mud_bricks", "calcite", "andesite"),

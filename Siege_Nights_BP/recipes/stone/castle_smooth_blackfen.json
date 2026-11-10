@@ -1,0 +1,26 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "siege:castle_smooth_blackfen_recipe"
+    },
+    "tags": [
+      "siege_workshop"
+    ],
+    "pattern": [
+      "SSS"
+    ],
+    "key": {
+      "S": {
+        "item": "siege:castle_stone_blackfen"
+      }
+    },
+    "result": {
+      "item": "siege:castle_smooth_blackfen",
+      "count": 3
+    },
+    "unlock": {
+      "context": "AlwaysUnlocked"
+    }
+  }
+}

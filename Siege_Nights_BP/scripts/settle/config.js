@@ -30,7 +30,8 @@ export const REGION_TO_STYLE = {
 
 // ---------- The mason's stock ----------
 // [item id, blocks per emerald]. Ids the running game doesn't know are left out of the shop.
-// Castle Stone, gates and the other siege blocks are NOT sold: defences stay earned.
+// The Castle Stone family is stocked separately (STONE_RATE below). Gates, battlements and the other
+// siege blocks are NOT sold: those stay crafted.
 const m = (id) => `minecraft:${id}`;
 export const CATALOG = [
   { name: "Stone", icon: "textures/blocks/stonebrick", stock: [
@@ -67,6 +68,9 @@ export const CATALOG = [
 
 // Roles of a regional style that count as that region's "local materials"
 export const LOCAL_ROLES = ["foundation", "wall", "wallLow", "wallUpper", "floor", "pillar", "beam", "roofBlock", "roofStair", "roofSlab", "crenel", "rail"];
+// The Castle Stone family (five blocks per region, ids from siege/constants.js): blocks per coin.
+// Castle Stone itself is the wall block that can be reinforced, so it costs the most.
+export const STONE_RATE = { stone: 8, tiles: 12, bricks: 12, cobbled: 16, smooth: 12 };
 export const LOCAL_RATE = 16; // blocks per emerald for a local material the stock list doesn't price
 
 // What pre-designed buildings are paid in. The mason supplies what you lack at these rates.

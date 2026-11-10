@@ -8,7 +8,8 @@
 
 import { world, system, GameMode, ItemStack } from "@minecraft/server";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
-import { isReady, settlementAt, isAlly, keepOf, onTick, moduleStore, on, emit, countItem, takeItems } from "../siege/api.js";
+import { isReady, settlementAt, isAlly, keepOf, onTick, moduleStore, on, emit } from "../siege/api.js";
+import { purse, charge, coins } from "./wallet.js";
 import { startBuild, buildFor } from "../townhall/build.js";
 import { hallOf } from "../townhall/townhall.js";
 import { STYLES, STYLE_IDS, styleFromGround } from "../townhall/styles.js";
@@ -179,7 +180,7 @@ async function chooseBuilding(player, key, stone) {
   const style = stone.style ?? styleOf(stone.owner, player.dimension.getBlock(locOf(key)));
   const form = new ActionFormData()
     .title("Foundation Stone")
-    .body(`Pick a building. It rises in front of this stone, the way you were facing when you set it, in the §f${STYLES[style].name}§r style.\n\n§7Any planks and any building stone will do. The mason supplies what you lack for emeralds.`);
+    .body(`Pick a building. It rises in front of this stone, the way you were facing when you set it, in the §f${STYLES[style].name}§r style.\n\n§7Any planks and any building stone will do. The mason supplies what you lack, for a price.`);
   for (const b of BUILDINGS) {
     const box = drawBuilding(b.id, style).bounds();
     const need = priceOf(drawBuilding(b.id, style));
@@ -222,19 +223,19 @@ async function confirmBuilding(player, key, stone) {
   const free = isCreative(player);
   const need = priceOf(drawBuilding(building.id, style));
   const { due, lines } = costLines(player, need);
-  const emeralds = countItem(player, "minecraft:emerald");
+  const emeralds = purse(player);
   const body = [`${building.blurb}`, "", ...lines];
   if (free) body.push("", "§aFree in Creative.");
-  else if (due.emeralds) body.push("", `${emeralds >= due.emeralds ? "§a" : "§c"}The mason supplies the rest for ${due.emeralds} emerald${due.emeralds === 1 ? "" : "s"}§7 (you carry ${emeralds})`);
+  else if (due.emeralds) body.push("", `${emeralds >= due.emeralds ? "§a" : "§c"}The mason supplies the rest for ${coins(due.emeralds)}§7 (you carry ${emeralds})`);
   body.push("", "§7Anything standing inside the outline is replaced.");
   const res = await new MessageFormData().title(`Raise the ${building.name}?`).body(body.join("\n"))
     .button1("Pick something else").button2(free || emeralds >= due.emeralds ? "Raise it" : "Not enough yet").show(player);
   if (res.canceled) return;
   if (res.selection === 0) return chooseBuilding(player, key, stone);
   if (!free) {
-    if (emeralds < due.emeralds) return player.sendMessage(`§7You are ${due.emeralds - emeralds} emerald${due.emeralds - emeralds === 1 ? "" : "s"} short. Bring more planks or stone, or more emeralds.`);
+    if (emeralds < due.emeralds) return player.sendMessage(`§7You are ${coins(due.emeralds - emeralds)} short. Bring more planks or stone.`);
+    if (due.emeralds && !charge(player, due.emeralds)) return;
     for (const [kind, mat] of Object.entries(MATERIALS)) takeMatching(player, mat.match, due.use[kind]);
-    if (due.emeralds) takeItems(player, "minecraft:emerald", due.emeralds);
   }
   if (!raise(key, stone, building.id, style)) return;
   player.playSound("random.anvil_use");

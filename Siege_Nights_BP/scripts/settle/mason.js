@@ -7,9 +7,10 @@
 
 import { world, system, GameMode, ItemStack, ItemTypes } from "@minecraft/server";
 import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
-import { isReady, settlementAt, keepOf, isAlly, isNight, onTick, moduleStore, countItem, takeItems, pick } from "../siege/api.js";
+import { isReady, settlementAt, keepOf, isAlly, isNight, onTick, moduleStore, pick, STONE_KINDS, stoneId } from "../siege/api.js";
 import { STYLES } from "../townhall/styles.js";
-import { SETTLE, CATALOG, LOCAL_ROLES, LOCAL_RATE, MASON_LINES } from "./config.js";
+import { SETTLE, CATALOG, LOCAL_ROLES, LOCAL_RATE, STONE_RATE, MASON_LINES } from "./config.js";
+import { purse, charge, coins, coinName, coinIcon } from "./wallet.js";
 import { styleOf, FOUNDATION } from "./plans.js";
 
 export const BENCH = "siege:mason_bench";
@@ -24,6 +25,7 @@ const benchTag = (b) => `siege_mason_at_${b.x}_${b.y}_${b.z}`;
 const same = (a, b) => a.x === b.x && a.y === b.y && a.z === b.z;
 
 export const niceName = (id) => id.replace(/^[a-z]+:/, "").replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+  .replace(/^Castle (Stone|Tiles|Bricks|Cobbled|Smooth)( \w+)?$/, (_, kind, region) => `${region ? `${region.trim()} ` : ""}${{ Stone: "Castle Stone", Tiles: "Castle Stone Tiles", Bricks: "Castle Stone Bricks", Cobbled: "Cobbled Castle Stone", Smooth: "Smooth Castle Stone" }[kind]}`)
   .replace(/^Wooden Door$/, "Oak Door").replace(/^Trapdoor$/, "Oak Trapdoor").replace(/^Fence Gate$/, "Oak Fence Gate").replace(/^Brick Block$/, "Bricks");
 
 // ---------- stock ----------
@@ -50,10 +52,19 @@ export function localStock(styleId, isKnown = known) {
   return [...out];
 }
 
+// The Castle Stone family of a region: [id, per coin]. Your own region's is cheaper, like its other materials.
+export function stoneStock(styleId, local = true, isKnown = known) {
+  return STONE_KINDS.map((kind) => [stoneId(kind, styleId), Math.round(STONE_RATE[kind] * (local ? SETTLE.localBonus : 1))]).filter(([id]) => isKnown(id));
+}
+
 function shelves(styleId) {
   const out = CATALOG.map((c) => ({ ...c, stock: c.stock.filter(([id]) => known(id)) })).filter((c) => c.stock.length);
+  const far = Object.keys(STYLES).filter((id) => id !== styleId).flatMap((id) => stoneStock(id, false));
+  if (far.length) out.unshift({ name: "Castle Stone from other regions", icon: "textures/blocks/siege_castle_bricks", stock: far });
   const local = localStock(styleId);
-  if (local.length) out.unshift({ name: `${STYLES[styleId].name} materials (local price)`, icon: "textures/items/emerald", stock: local });
+  if (local.length) out.unshift({ name: `${STYLES[styleId].name} materials (local price)`, icon: coinIcon(), stock: local });
+  const stone = stoneStock(styleId);
+  if (stone.length) out.unshift({ name: `${STYLES[styleId].name} Castle Stone`, icon: "textures/blocks/siege_castle_stone", stock: stone });
   return out;
 }
 
@@ -71,28 +82,28 @@ function hand(player, typeId, count) {
 }
 
 async function buy(player, shelf, [typeId, per], mason) {
-  const have = player.getGameMode() === GameMode.Creative ? SETTLE.maxSpend : countItem(player, "minecraft:emerald");
+  const have = player.getGameMode() === GameMode.Creative ? SETTLE.maxSpend : purse(player);
   if (have < 1) {
-    player.sendMessage("§7Mason: §fThat takes emeralds. Hold your keep on a siege night and you'll have some.");
+    player.sendMessage(`§7Mason: §fThat takes ${coinName()}. Come back when you have some.`);
     return;
   }
   const most = Math.min(have, SETTLE.maxSpend);
   const res = await new ModalFormData()
     .title(niceName(typeId))
-    .slider(`${per} for each emerald. You carry ${have}.\n\nEmeralds to spend`, 1, most, { valueStep: 1, defaultValue: Math.min(most, 4) })
+    .slider(`${per} for ${coins(1)}. You carry ${have}.\n\nHow many ${coinName()} to spend`, 1, most, { valueStep: 1, defaultValue: Math.min(most, 4) })
     .show(player);
   if (res.canceled) return openShelf(player, shelf, mason);
   const spend = Math.max(1, Math.min(most, Math.floor(res.formValues[0])));
-  if (!takeItems(player, "minecraft:emerald", spend)) return;
+  if (!charge(player, spend)) return;
   hand(player, typeId, spend * per);
   player.playSound("random.orb");
-  player.onScreenDisplay.setActionBar(`§6${spend * per} ${niceName(typeId)}§7 for ${spend} emerald${spend === 1 ? "" : "s"}`);
+  player.onScreenDisplay.setActionBar(`§6${spend * per} ${niceName(typeId)}§7 for ${coins(spend)}`);
   openShelf(player, shelf, mason);
 }
 
 async function openShelf(player, shelf, mason) {
-  const form = new ActionFormData().title(shelf.name).body(`You carry ${countItem(player, "minecraft:emerald")} emeralds.`);
-  for (const [id, per] of shelf.stock) form.button(`${niceName(id)}\n§8${per} for 1 emerald`);
+  const form = new ActionFormData().title(shelf.name).body(`You carry ${coins(purse(player))}.`);
+  for (const [id, per] of shelf.stock) form.button(`${niceName(id)}\n§8${per} for ${coins(1)}`);
   form.button("Back");
   const res = await form.show(player);
   if (res.canceled) return;
@@ -106,13 +117,13 @@ export async function openShop(player, mason) {
   const styleId = home ? styleOf(home, undefined) : land ? styleOf(land, undefined) : "vale";
   const line = !home ? MASON_LINES.noLand : pick(isNight() ? MASON_LINES.night : MASON_LINES.day);
   const all = shelves(styleId);
-  const form = new ActionFormData().title("Mason").body(`§o"${line}"§r\n\nYou carry ${countItem(player, "minecraft:emerald")} emeralds.`);
+  const form = new ActionFormData().title("Mason").body(`§o"${line}"§r\n\nYou carry ${coins(purse(player))}.`);
   for (const shelf of all) form.button(shelf.name, shelf.icon);
-  form.button(`Foundation Stone\n§8Places a pre-designed building. ${SETTLE.stonePrice} emeralds`);
+  form.button(`Foundation Stone\n§8Places a pre-designed building. ${coins(SETTLE.stonePrice)}`);
   const res = await form.show(player);
   if (res.canceled) return;
   if (res.selection < all.length) return openShelf(player, all[res.selection], mason);
-  if (!takeItems(player, "minecraft:emerald", SETTLE.stonePrice)) return player.sendMessage(`§7Mason: §fA Foundation Stone is ${SETTLE.stonePrice} emeralds.`);
+  if (purse(player) < SETTLE.stonePrice && player.getGameMode() !== GameMode.Creative || !charge(player, SETTLE.stonePrice)) return player.sendMessage(`§7Mason: §fA Foundation Stone is ${coins(SETTLE.stonePrice)}.`);
   hand(player, FOUNDATION, 1);
   player.sendMessage("§7Mason: §fSet it where the front should be, facing the way the building runs. Click it and choose. You get the stone back after.");
 }

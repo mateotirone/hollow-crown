@@ -3,7 +3,7 @@
 
 import { world, system } from "@minecraft/server";
 import { smash } from "./breachers.js";
-import { CASTLE_BLOCKS, CHARGE, GATES, REINFORCEABLE, UNBREAKABLE } from "./constants.js";
+import { CASTLE_BLOCKS, CASTLE_STONES, CHARGE, GATES, REINFORCEABLE, STONE_FAMILY, UNBREAKABLE } from "./constants.js";
 import { SETTINGS } from "./settings.js";
 import { isAlly, settlementAt } from "./territory.js";
 import { consumeHeld, isOnline } from "./util.js";
@@ -59,14 +59,14 @@ export function armorOf(block) {
 }
 
 export function wallHp(block) {
-  if (block.typeId === "siege:castle_stone") return WALL_HP.castle[armorOf(block)];
+  if (CASTLE_STONES.includes(block.typeId)) return WALL_HP.castle[armorOf(block)];
   if (GATES.includes(block.typeId)) return WALL_HP.gate[armorOf(block)];
   if (CASTLE_BLOCKS.includes(block.typeId)) return WALL_HP.otherCastle;
   return WALL_HP.other;
 }
 
 export function showCracks(block, damage) {
-  if (block.typeId !== "siege:castle_stone") return;
+  if (!STONE_FAMILY.includes(block.typeId)) return;
   const frac = damage / wallHp(block);
   const cracks = frac >= 0.66 ? 2 : frac >= 0.33 ? 1 : 0;
   if (block.permutation.getState("siege:cracks") !== cracks) {

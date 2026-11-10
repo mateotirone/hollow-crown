@@ -1,0 +1,207 @@
+{
+  "format_version": "1.21.60",
+  "minecraft:block": {
+    "description": {
+      "identifier": "siege:castle_stone_emberwaste",
+      "menu_category": {
+        "category": "construction"
+      },
+      "states": {
+        "siege:armor": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "siege:cracks": [
+          0,
+          1,
+          2
+        ]
+      }
+    },
+    "components": {
+      "minecraft:display_name": "tile.siege:castle_stone_emberwaste.name",
+      "minecraft:destructible_by_mining": {
+        "seconds_to_destroy": 3
+      },
+      "minecraft:destructible_by_explosion": {
+        "explosion_resistance": 60
+      },
+      "minecraft:geometry": "minecraft:geometry.full_block",
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "siege_castle_stone_emberwaste",
+          "render_method": "opaque"
+        }
+      },
+      "minecraft:map_color": "#c09a64"
+    },
+    "permutations": [
+      {
+        "condition": "q.block_state('siege:armor') == 0",
+        "components": {
+          "minecraft:destructible_by_mining": {
+            "seconds_to_destroy": 3
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:armor') == 0 && q.block_state('siege:cracks') == 0",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_castle_stone_emberwaste_stone_0",
+              "render_method": "opaque"
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:armor') == 0 && q.block_state('siege:cracks') == 1",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_castle_stone_emberwaste_stone_1",
+              "render_method": "opaque"
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:armor') == 0 && q.block_state('siege:cracks') == 2",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_castle_stone_emberwaste_stone_2",
+              "render_method": "opaque"
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:armor') == 1",
+        "components": {
+          "minecraft:destructible_by_mining": {
+            "seconds_to_destroy": 6
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:armor') == 1 && q.block_state('siege:cracks') == 0",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_castle_stone_emberwaste_iron_0",
+              "render_method": "opaque"
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:armor') == 1 && q.block_state('siege:cracks') == 1",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_castle_stone_emberwaste_iron_1",
+              "render_method": "opaque"
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:armor') == 1 && q.block_state('siege:cracks') == 2",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_castle_stone_emberwaste_iron_2",
+              "render_method": "opaque"
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:armor') == 2",
+        "components": {
+          "minecraft:destructible_by_mining": {
+            "seconds_to_destroy": 10
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:armor') == 2 && q.block_state('siege:cracks') == 0",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_castle_stone_emberwaste_diamond_0",
+              "render_method": "opaque"
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:armor') == 2 && q.block_state('siege:cracks') == 1",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_castle_stone_emberwaste_diamond_1",
+              "render_method": "opaque"
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:armor') == 2 && q.block_state('siege:cracks') == 2",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_castle_stone_emberwaste_diamond_2",
+              "render_method": "opaque"
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:armor') == 3",
+        "components": {
+          "minecraft:destructible_by_mining": {
+            "seconds_to_destroy": 15
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:armor') == 3 && q.block_state('siege:cracks') == 0",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_castle_stone_emberwaste_netherite_0",
+              "render_method": "opaque"
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:armor') == 3 && q.block_state('siege:cracks') == 1",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_castle_stone_emberwaste_netherite_1",
+              "render_method": "opaque"
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:armor') == 3 && q.block_state('siege:cracks') == 2",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_castle_stone_emberwaste_netherite_2",
+              "render_method": "opaque"
+            }
+          }
+        }
+      }
+    ]
+  }
+}
