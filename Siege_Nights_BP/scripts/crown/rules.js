@@ -18,6 +18,7 @@ export const hollowStage = (hollowing) => [...HOLLOW_STAGES].reverse().find((s) 
 
 // How much Claim a challenger needs: a Hollow ruler is easier to challenge
 export function claimNeeded(hollowing) {
+  if (CROWN.hunger !== "full") return CROWN.claimNeeded;
   if (hollowing >= 100) return CROWN.claimNeeded / 4;
   if (hollowing >= 75) return CROWN.claimNeeded / 2;
   return CROWN.claimNeeded;
@@ -27,7 +28,7 @@ export function claimNeeded(hollowing) {
 export function nightfall({ hollowing, unrest, tithe }) {
   const steps = Math.floor(tithe / 10);
   return {
-    hollowing: clamp(hollowing + CROWN.hollowPerNight + steps, 0, 100),
+    hollowing: CROWN.hunger === "off" ? hollowing : clamp(hollowing + CROWN.hollowPerNight + steps, 0, 100),
     unrest: Math.max(0, unrest + steps - 1),
   };
 }
@@ -58,8 +59,8 @@ export function resolveCrown({ takers, votes = {}, fighters, roll = 0 }) {
 
 // Can this player throw down the Gauntlet right now? Returns a refusal message, or undefined if they can.
 export function gauntletProblem({ ruler, playerId, isCourt, claim, challenge, siegeNumber, graceUntil }) {
-  if (!ruler) return "No one wears the Crown. There is nothing to challenge.";
-  if (ruler.id === playerId) return "You already wear the Crown.";
+  if (!ruler) return "The throne is empty. There is nothing to challenge.";
+  if (ruler.id === playerId) return "You already hold the throne.";
   if (isCourt) return "You are in the ruler's Court. Leave it before you turn on them.";
   if (challenge) return challenge.claimant === playerId ? "Your Gauntlet is already down." : `${challenge.name} has already thrown down the Gauntlet.`;
   if (siegeNumber < graceUntil) {
@@ -67,7 +68,7 @@ export function gauntletProblem({ ruler, playerId, isCourt, claim, challenge, si
     return `The ruler is under grace for ${n} more siege night${n === 1 ? "" : "s"}.`;
   }
   const need = claimNeeded(ruler.hollowing);
-  if (claim < need) return `Your Claim is ${claim} of ${need}. Bind Crown Shards and win sieges to raise it.`;
+  if (claim < need) return `Your Claim is ${claim} of ${need}. Bind ${CROWN.shard}s and win sieges to raise it.`;
   return undefined;
 }
 
@@ -88,7 +89,7 @@ export const EXILE_STAGES = [
   { name: "Ashes and Oaths", goal: "Raise a new Keep Banner on free land.", claim: 0, emeralds: 16 },
   { name: "The Loyalists", goal: "Recruit 2 guards on your new land.", claim: 10, emeralds: 10 },
   { name: "Hold the Line", goal: "Win a siege at your new settlement.", claim: 15, emeralds: 0 },
-  { name: "The Underground", goal: "Bind a Crown Shard.", claim: 10, emeralds: 0 },
+  { name: "The Underground", goal: `Bind an ${CROWN.shard}.`, claim: 10, emeralds: 0 },
   { name: "The Return", goal: "Throw down the Gauntlet and win the Storm.", claim: 0, emeralds: 0 },
 ];
 

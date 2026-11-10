@@ -113,7 +113,7 @@ def m_ogre(m):
 mob(id="siege_ogre", name="Siege Ogre", family="raider", model=m_ogre,
     pal=P(skin=(120, 128, 92), hide={"c": (110, 84, 60), "style": "fur"}, belt=(60, 40, 26), pants=(70, 56, 40), tusk=(230, 220, 190), log=WOOD, ironcap=DARKIRON, eye=(250, 220, 80)),
     hp=120, speed=0.22, dmg=14, kb=1.0, collision=(1.6, 3.0), rideable=True, egg=("#78805c", "#6e543c"),
-    lore="Carries a whole tree trunk as a ram. Walls crack where it walks. The Warlord King rides one.")
+    lore="Carries a whole tree trunk as a ram. Walls crack where it walks.")
 
 def m_crowmage(m):
     biped(m, mats={"head": "mask", "body": "feather", "leg": "feather"}, face="glow")
@@ -155,7 +155,7 @@ mob(id="changeling", name="Changeling", family="hollow", model=m_changeling, var
     pal=P(skin=(184, 150, 120), robe={"c": (60, 90, 70), "style": "cloth"}, eye=(40, 30, 20)),
     pal_alt=P(skin=(120, 150, 110), robe={"c": (40, 60, 44), "style": "fur"}, eye=(255, 230, 80)),
     hp=28, speed=0.24, dmg=6, groups="changeling", egg=("#3c5a46", "#ffe650"),
-    lore="Something from the Undertow wearing a villager. It gets the face nearly right. Nearly.")
+    lore="Something wearing a villager. It gets the face nearly right. Nearly.")
 
 def m_wrongling(m):
     biped(m, L=20, B=14, bw=6, bd=3, head=(6, 10, 6), arm=(2, 26, 2), mats={"head": "skin", "body": "skin", "leg": "skin"}, face="hollow")
@@ -164,6 +164,25 @@ mob(id="wrongling", name="Wrongling", family="hollow", model=m_wrongling,
     pal=P(skin=(214, 210, 200), eye=(10, 8, 10)),
     hp=40, speed=0.45, dmg=10, collision=(0.6, 2.9), groups="wrongling", egg=("#d6d2c8", "#0a080a"),
     lore="It only moves when nobody is looking. Don't blink. Don't turn around. Don't go alone.")
+
+def m_vigil(m):
+    # A carved mourner: hooded, hands folded, wings shut behind it. Nothing moves in the model on purpose.
+    m.bone("root", [0, 0, 0]); m.bone("body", [0, 12, 0], "root")
+    m.box("body", [-5, 0, -3], [10, 2, 6], "plinth")
+    m.box("body", [-4, 2, -2.5], [8, 12, 5], "robe"); m.box("body", [-4, 14, -2], [8, 11, 4], "robe")
+    m.box("body", [-2, 15, -4], [4, 3, 2], "stone")                           # folded hands
+    m.bone("head", [0, 25, 0], "body"); m.box("head", [-3.5, 25, -3.5], [7, 7, 7], "stone", face="blank")   # no face: a veil of stone with one crack
+    m.box("head", [-4.5, 25, -2.5], [9, 8, 7], "robe"); m.box("head", [-4.5, 31, -4.5], [9, 2, 2], "robe")   # hood and its brim
+    m.box("head", [-4.5, 25, -4.5], [1, 6, 2], "robe"); m.box("head", [3.5, 25, -4.5], [1, 6, 2], "robe")
+    m.bone("arm_r", [-5, 23, 0], "body"); m.box("arm_r", [-6, 14, -1.5], [2, 11, 3], "robe")
+    m.bone("arm_l", [5, 23, 0], "body"); m.box("arm_l", [4, 14, -1.5], [2, 11, 3], "robe", mirror=True)
+    m.bone("wing_r", [-2, 22, 2], "body"); m.box("wing_r", [-10, 7, 2.5], [8, 29, 1], "wing", rot=[0, 18, 0], pivot=[-2, 22, 2.5])
+    m.bone("wing_l", [2, 22, 2], "body"); m.box("wing_l", [2, 7, 2.5], [8, 29, 1], "wing", rot=[0, -18, 0], pivot=[2, 22, 2.5], mirror=True)
+mob(id="stone_vigil", name="Stone Vigil", family="hollow", model=m_vigil, plan="none",
+    pal=P(stone={"c": (150, 152, 146), "style": "bone"}, robe={"c": (124, 128, 124), "style": "cloth"}, wing={"c": (100, 108, 104), "style": "stone"},
+          plinth={"c": (84, 92, 84), "style": "stone"}, eye=(18, 16, 22)),
+    hp=60, speed=0.5, dmg=8, kb=1, collision=(0.7, 2.1), resist=dict(projectile=0.0, fire=True, drown=True), groups=None, egg=("#8c908a", "#12101a"),
+    lore="The Order carved them to keep watch over its dead. Something else is keeping watch through them now. It is only a statue while somebody is looking.")
 
 def m_hound(m):
     q = quadruped(m, legh=9, body=(7, 7, 16), head=(6, 6, 8), mats={"body": "hide", "head": "bone"}, face="glow")
@@ -193,7 +212,7 @@ def m_shade(m):
 mob(id="tolling_shade", name="Tolling Shade", family="hollow", model=m_shade, plan="float", material="entity_alphablend",
     pal=P(shroud={"c": (60, 70, 90, 190), "style": "cloth"}, wisp={"c": (90, 110, 140, 120), "style": "cloth"}, bell=GOLD, eye=(140, 230, 255)),
     hp=30, speed=0.25, dmg=4, fly=0.25, groups=None, egg=("#3c465a", "#8ce6ff"), anim_extra=[("bell", "rotation", ["math.sin(query.life_time*300)*25", "0", "0"])],
-    lore="Its little bell is the Choir's toll, carried up to the surface. Each ring drags you down and darkens the world.")
+    lore="You have heard that bell before, under your own keep. Each ring drags at your legs and darkens the world.")
 
 # ======================================================================================
 # Family 3: Regional wildlife and beasts
@@ -301,7 +320,7 @@ def m_squire(m):
 mob(id="ashen_squire", name="Ashen Squire", family="order", model=m_squire,
     pal=P(skin=SKIN, tabard={"c": (200, 196, 190), "style": "cloth"}, mail={"c": (120, 122, 128), "style": "metal"}, pants=(60, 60, 64), helm=IRON, steel=IRON, eye=(60, 80, 110)),
     hp=24, speed=0.3, dmg=5, egg=("#c8c4be", "#5a5a64"),
-    lore="Young, loyal, and sure the Order has never lied to them.")
+    lore="Young, loyal, and certain the Order has nothing to hide.")
 
 def m_knight(m):
     biped(m, mats={"head": "plate", "body": "tabard", "arm": "plate", "leg": "plate"}, face="visor")
@@ -312,7 +331,7 @@ def m_knight(m):
 mob(id="ashen_knight", name="Ashen Knight", family="order", model=m_knight,
     pal=P(plate={"c": (178, 182, 190), "style": "metal"}, tabard={"c": (210, 206, 198), "style": "cloth"}, plume=(160, 30, 30), steel=IRON, shield={"c": (90, 90, 96), "style": "metal"}, eye=(30, 30, 40)),
     hp=44, speed=0.29, dmg=8, kb=0.6, resist=dict(projectile=0.5), egg=("#b2b6be", "#a01e1e"),
-    lore="Sworn to the Ashen Gate. An honest blade in service of a very old lie.")
+    lore="Sworn to the Ashen Gate. An honest blade. Ask what the Gate guards and the conversation ends.")
 
 def m_inquisitor(m):
     biped(m, mats={"head": "skin", "body": "coat", "arm": "coat", "leg": "coat"}, face="eyes")
@@ -348,7 +367,7 @@ boss(id="clockwork_reeve", name="The Clockwork Reeve", region="Aldmere Vale", mo
      anim_extra=[("gear0", "rotation", ["0", "0", "query.life_time*90"]), ("gear1", "rotation", ["0", "0", "-query.life_time*120"]),
                  ("gear2", "rotation", ["0", "0", "query.life_time*160"]), ("hand_minute", "rotation", ["0", "0", "-query.life_time*360"]),
                  ("hand_hour", "rotation", ["0", "0", "-query.life_time*30"]), ("pendulum", "rotation", ["0", "0", "math.sin(query.life_time*180)*25"])],
-     lore="Millbrook's town clock, given legs. It keeps the minute King Oswin made his bargain, and it will not let that minute end.")
+     lore="Millbrook's town clock, given legs. It is keeping one minute safe, and it will not let that minute end.")
 mob(id="reeve_cog", name="Reeve's Cog", family="boss_add", model=m_reeve, pal=REEVE_PAL, scale=0.55, hp=60, speed=0.32, dmg=6,
     collision=(0.8, 1.6), egg=("#b88c3c", "#46464f"), no_loot=True, anim_extra=[("gear0", "rotation", ["0", "0", "query.life_time*200"])],
     lore="A third of the Reeve, ticking on its own.")
@@ -384,7 +403,7 @@ def m_seneschal(m):
 boss(id="ash_seneschal", name="The Ash Seneschal", region="Emberwaste", model=m_seneschal,
      pal=P(face={"c": (200, 190, 170), "style": "stone"}, plate={"c": (90, 80, 76), "style": "metal"}, tabard={"c": (150, 60, 30), "style": "cloth"}, gold=GOLD, shield={"c": (120, 100, 80), "style": "metal"}),
      hp=420, speed=0.27, dmg=12, kb=1.0, collision=(1.2, 3.2), scale=1.1, resist=dict(fire=True), egg=("#5a504c", "#963c1e"),
-     lore="Sunscar chiseled the king's face off every statue. The Seneschal chiseled off his own, so he could never be made to forget.")
+     lore="Sunscar chiseled a face off every statue. The Seneschal chiseled off his own.")
 
 def m_mother(m):
     biped(m, L=18, B=16, bw=8, bd=5, head=(8, 9, 8), arm=(3, 28, 3), mats={"head": "skin", "body": "moss", "arm": "skin", "leg": "root"}, face="glow")
@@ -408,7 +427,7 @@ def m_king(m):
 boss(id="warlord_king", name="The Warlord King", region="Grand Siege", model=m_king,
      pal=P(skin=SKIN, plate={"c": (56, 50, 54), "style": "metal"}, crown=GOLD, shard={"c": (200, 220, 255), "style": "glow"}, cape={"c": (110, 20, 24), "style": "cloth"}, steel=IRON, eye=(255, 60, 40)),
      hp=300, speed=0.3, dmg=12, kb=1.0, collision=(1.2, 3.0), scale=1.05, raider=True, egg=("#383236", "#dab046"),
-     lore="He wears a shard of the Hollow Crown. It is why he keeps coming back, and why he cannot stop.")
+     lore="Something in his crown catches the light wrong. He has lost before. He keeps coming back.")
 
 def m_oswin(m):
     biped(m, L=14, B=16, bw=10, bd=6, head=(8, 9, 8), arm=(5, 16, 5), mats={"head": "skin", "body": "plate", "arm": "plate", "leg": "plate"}, face="hollow")
@@ -417,13 +436,13 @@ def m_oswin(m):
     m.box("body", [-6, 2, 3], [12, 28, 1], "cape"); m.box("body", [-5.5, 14, -3.5], [11, 16, 7], "tabard", inflate=0.1)
     m.bone("blade", [-8, 14, 0], "arm_r"); m.box("blade", [-9, 1, -20], [2, 2, 22], "steel")
 OSWIN_PAL = P(skin=(150, 170, 170), plate={"c": (60, 84, 90), "style": "metal"}, crown={"c": (180, 170, 140), "style": "metal"}, void=(6, 4, 10), cape={"c": (40, 60, 80), "style": "cloth"}, tabard={"c": (90, 110, 120), "style": "cloth"}, steel={"c": (150, 190, 200), "style": "metal"}, eye=(200, 240, 255))
-boss(id="oswin_the_last", name="Oswin the Last", region="The Undertow", model=m_oswin, pal=OSWIN_PAL,
+boss(id="oswin_the_last", name="Oswin the Last", region="The Hollow", model=m_oswin, pal=OSWIN_PAL,
      hp=500, speed=0.31, dmg=13, kb=1.0, collision=(1.2, 3.0), scale=1.05, swim=True, egg=("#3c5460", "#c8f0ff"),
-     lore="The last king of Aldmere. He never died. He went down to the Undertow and he is still sitting on its throne.")
-mob(id="oswin_reflection", name="Oswin's Reflection", family="boss_add", model=m_oswin, material="entity_alphablend",
+     lore="A king on a drowned throne, in a hall nobody built for the living. He has been waiting a long time for someone to get this far.")
+mob(id="oswin_reflection", name="The King's Hollow", family="boss_add", model=m_oswin, material="entity_alphablend",
     pal={**OSWIN_PAL, "plate": {"c": (170, 210, 230, 170), "style": "metal"}, "cape": {"c": (120, 160, 200, 150), "style": "cloth"}, "tabard": {"c": (150, 190, 210, 160), "style": "cloth"}, "skin": (190, 220, 230, 190)},
     hp=200, speed=0.33, dmg=10, kb=1.0, collision=(1.2, 3.0), scale=1.05, egg=("#a0d2e6", "#ffffff"), no_loot=True,
-    lore="The room turns over, and the king in the water fights you instead.")
+    lore="Something steps out of the king and leaves him kneeling. He cannot be touched until it is dealt with.")
 
 # Warlords that aren't the King also get their own body now
 mob(id="hollow_warlord", name="Warlord", family="raider", model=m_king,

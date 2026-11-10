@@ -12,6 +12,7 @@ In this repo:
 - [`README.md`](../README.md): how the add-on plays.
 - [`MODULES.md`](../MODULES.md): how the scripts are organised, and the events and hooks feature folders use.
 - [`TESTING.md`](../TESTING.md): how to check and playtest.
+- [`LORE-BIBLE.md`](../LORE-BIBLE.md) and [`TOWNHALL.md`](../TOWNHALL.md): lore reference and the town hall and skill tree notes.
 - [`TEXTURE-LIST.md`](../TEXTURE-LIST.md): every asset that needs a texture, and its state.
 - [`art/STYLE-GUIDE.md`](../art/STYLE-GUIDE.md): texture style and palette.
 - [`CONTRIBUTING.md`](../CONTRIBUTING.md): how to work in this repo.

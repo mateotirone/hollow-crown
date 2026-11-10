@@ -28,7 +28,7 @@ export const MOBS = {
   "name": "Siege Ogre",
   "family": "raider",
   "hp": 120,
-  "lore": "Carries a whole tree trunk as a ram. Walls crack where it walks. The Warlord King rides one."
+  "lore": "Carries a whole tree trunk as a ram. Walls crack where it walks."
  },
  "siege:crow_mage": {
   "name": "Crow-Mage",
@@ -52,13 +52,19 @@ export const MOBS = {
   "name": "Changeling",
   "family": "hollow",
   "hp": 28,
-  "lore": "Something from the Undertow wearing a villager. It gets the face nearly right. Nearly."
+  "lore": "Something wearing a villager. It gets the face nearly right. Nearly."
  },
  "siege:wrongling": {
   "name": "Wrongling",
   "family": "hollow",
   "hp": 40,
   "lore": "It only moves when nobody is looking. Don't blink. Don't turn around. Don't go alone."
+ },
+ "siege:stone_vigil": {
+  "name": "Stone Vigil",
+  "family": "hollow",
+  "hp": 60,
+  "lore": "The Order carved them to keep watch over its dead. Something else is keeping watch through them now. It is only a statue while somebody is looking."
  },
  "siege:echo_hound": {
   "name": "Echo Hound",
@@ -76,7 +82,7 @@ export const MOBS = {
   "name": "Tolling Shade",
   "family": "hollow",
   "hp": 30,
-  "lore": "Its little bell is the Choir's toll, carried up to the surface. Each ring drags you down and darkens the world."
+  "lore": "You have heard that bell before, under your own keep. Each ring drags at your legs and darkens the world."
  },
  "siege:frost_stag": {
   "name": "Frost Stag",
@@ -138,13 +144,13 @@ export const MOBS = {
   "name": "Ashen Squire",
   "family": "order",
   "hp": 24,
-  "lore": "Young, loyal, and sure the Order has never lied to them."
+  "lore": "Young, loyal, and certain the Order has nothing to hide."
  },
  "siege:ashen_knight": {
   "name": "Ashen Knight",
   "family": "order",
   "hp": 44,
-  "lore": "Sworn to the Ashen Gate. An honest blade in service of a very old lie."
+  "lore": "Sworn to the Ashen Gate. An honest blade. Ask what the Gate guards and the conversation ends."
  },
  "siege:inquisitor": {
   "name": "Inquisitor",
@@ -156,7 +162,7 @@ export const MOBS = {
   "name": "The Clockwork Reeve",
   "family": "boss",
   "hp": 320,
-  "lore": "Millbrook's town clock, given legs. It keeps the minute King Oswin made his bargain, and it will not let that minute end.",
+  "lore": "Millbrook's town clock, given legs. It is keeping one minute safe, and it will not let that minute end.",
   "region": "Aldmere Vale"
  },
  "siege:reeve_cog": {
@@ -183,7 +189,7 @@ export const MOBS = {
   "name": "The Ash Seneschal",
   "family": "boss",
   "hp": 420,
-  "lore": "Sunscar chiseled the king's face off every statue. The Seneschal chiseled off his own, so he could never be made to forget.",
+  "lore": "Sunscar chiseled a face off every statue. The Seneschal chiseled off his own.",
   "region": "Emberwaste"
  },
  "siege:mother_of_changelings": {
@@ -203,21 +209,21 @@ export const MOBS = {
   "name": "The Warlord King",
   "family": "boss",
   "hp": 300,
-  "lore": "He wears a shard of the Hollow Crown. It is why he keeps coming back, and why he cannot stop.",
+  "lore": "Something in his crown catches the light wrong. He has lost before. He keeps coming back.",
   "region": "Grand Siege"
  },
  "siege:oswin_the_last": {
   "name": "Oswin the Last",
   "family": "boss",
   "hp": 500,
-  "lore": "The last king of Aldmere. He never died. He went down to the Undertow and he is still sitting on its throne.",
-  "region": "The Undertow"
+  "lore": "A king on a drowned throne, in a hall nobody built for the living. He has been waiting a long time for someone to get this far.",
+  "region": "The Hollow"
  },
  "siege:oswin_reflection": {
-  "name": "Oswin's Reflection",
+  "name": "The King's Hollow",
   "family": "boss_add",
   "hp": 200,
-  "lore": "The room turns over, and the king in the water fights you instead."
+  "lore": "Something steps out of the king and leaves him kneeling. He cannot be touched until it is dealt with."
  },
  "siege:hollow_warlord": {
   "name": "Warlord",
@@ -328,7 +334,7 @@ export const ITEMS = {
  },
  "siege:faceless_crown_shard": {
   "name": "Faceless Crown Shard",
-  "lore": "A shard of the Hollow Crown. It whispers when you hold it."
+  "lore": "A sliver of something that was once worn. It whispers when you hold it."
  },
  "siege:mire_heart": {
   "name": "Mire Heart",
@@ -340,7 +346,7 @@ export const ITEMS = {
  },
  "siege:oath_of_oswin": {
   "name": "Oath of Oswin",
-  "lore": "Knight path. Oswin's own blade. Executes foes below a fifth of their health and rallies your guards."
+  "lore": "Knight path. A king's oath-blade, still keeping its oath. Executes foes below a fifth of their health and rallies your guards."
  },
  "siege:crownless_mantle": {
   "name": "Crownless Mantle",

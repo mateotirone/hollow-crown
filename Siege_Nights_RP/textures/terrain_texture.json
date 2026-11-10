@@ -220,6 +220,111 @@
     },
     "siege_court_seal": {
       "textures": "textures/blocks/siege_court_seal"
+    },
+    "siege_hall_cornerstone_side": {
+      "textures": "textures/blocks/siege_hall_cornerstone_side"
+    },
+    "siege_hall_cornerstone_top": {
+      "textures": "textures/blocks/siege_hall_cornerstone_top"
+    },
+    "siege_oath_tree_bark": {
+      "textures": "textures/blocks/siege_oath_tree_bark"
+    },
+    "siege_oath_tree_bark_marked": {
+      "textures": "textures/blocks/siege_oath_tree_bark_marked"
+    },
+    "siege_oath_tree_plinth": {
+      "textures": "textures/blocks/siege_oath_tree_plinth"
+    },
+    "siege_oath_tree_crown": {
+      "textures": "textures/blocks/siege_oath_tree_crown"
+    },
+    "siege_oath_tree_crown_knight": {
+      "textures": "textures/blocks/siege_oath_tree_crown_knight"
+    },
+    "siege_oath_tree_crown_marked": {
+      "textures": "textures/blocks/siege_oath_tree_crown_marked"
+    },
+    "siege_stables_side": {
+      "textures": "textures/blocks/travel/siege_stables_side"
+    },
+    "siege_stables_top": {
+      "textures": "textures/blocks/travel/siege_stables_top"
+    },
+    "siege_rail_depot_side": {
+      "textures": "textures/blocks/travel/siege_rail_depot_side"
+    },
+    "siege_rail_depot_top": {
+      "textures": "textures/blocks/travel/siege_rail_depot_top"
+    },
+    "siege_station_post_side": {
+      "textures": "textures/blocks/travel/siege_station_post_side"
+    },
+    "siege_station_post_top": {
+      "textures": "textures/blocks/travel/siege_station_post_top"
+    },
+    "siege_breeder_post_side": {
+      "textures": "textures/blocks/travel/siege_breeder_post_side"
+    },
+    "siege_breeder_post_top": {
+      "textures": "textures/blocks/travel/siege_breeder_post_top"
+    },
+    "siege_shelf_side": {
+      "textures": "textures/blocks/siege_shelf_side"
+    },
+    "siege_shelf_top": {
+      "textures": "textures/blocks/siege_shelf_top"
+    },
+    "siege_shelf_front_0": {
+      "textures": "textures/blocks/siege_shelf_front_0"
+    },
+    "siege_shelf_front_1": {
+      "textures": "textures/blocks/siege_shelf_front_1"
+    },
+    "siege_shelf_front_2": {
+      "textures": "textures/blocks/siege_shelf_front_2"
+    },
+    "siege_shelf_front_3": {
+      "textures": "textures/blocks/siege_shelf_front_3"
+    },
+    "siege_shelf_front_4": {
+      "textures": "textures/blocks/siege_shelf_front_4"
+    },
+    "siege_shelf_front_5": {
+      "textures": "textures/blocks/siege_shelf_front_5"
+    },
+    "siege_shelf_front_6": {
+      "textures": "textures/blocks/siege_shelf_front_6"
+    },
+    "hc_tome_cache": {
+      "textures": "textures/blocks/hc_tome_cache"
+    },
+    "siege_cornerstone_side": {
+      "textures": "textures/blocks/siege_cornerstone_side"
+    },
+    "siege_cornerstone_top": {
+      "textures": "textures/blocks/siege_cornerstone_top"
+    },
+    "siege_throne": {
+      "textures": "textures/blocks/siege_throne"
+    },
+    "siege_fallen_shard": {
+      "textures": "textures/blocks/siege_fallen_shard"
+    },
+    "siege_choir_ore": {
+      "textures": "textures/blocks/siege_choir_ore"
+    },
+    "siege_dragon_roost_side": {
+      "textures": "textures/blocks/dragons/siege_dragon_roost_side"
+    },
+    "siege_dragon_roost_top": {
+      "textures": "textures/blocks/dragons/siege_dragon_roost_top"
+    },
+    "siege_dragon_nest_side": {
+      "textures": "textures/blocks/dragons/siege_dragon_nest_side"
+    },
+    "siege_dragon_nest_top": {
+      "textures": "textures/blocks/dragons/siege_dragon_nest_top"
     }
   }
 }

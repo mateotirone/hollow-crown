@@ -42,7 +42,7 @@ for tier in ['stone','iron','diamond','netherite']:
 cs.append({"label":"As battlement","model":"geo","geo":"geometry.siege_battlement","mats":one('siege_castle_stone')})
 cs.append({"label":"As arrow slit","model":"geo","geo":"geometry.siege_arrow_slit","mats":one('siege_castle_stone')})
 g("castle_stone","Castle Stone","Blocks",[{"label":"All tiers","model":"lineup","cols":3,"gap":1.2,"items":cs[1:13],"mats":one('siege_castle_stone')}]+cs,"The main wall block. Reinforcement tiers (iron, diamond, netherite) and crack stages are separate textures.")
-RG=[("frostmarch","Frostmarch"),("saltreach","Saltreach"),("emberwaste","Emberwaste"),("blackfen","Blackfen"),("undertow","Undertow")]
+RG=[("frostmarch","Frostmarch"),("saltreach","Saltreach"),("emberwaste","Emberwaste"),("blackfen","Blackfen"),("undertow","The Hollow")]
 reg=[cube("Vale (default)",one('siege_castle_stone'))]+[cube(n,one(f'regional/siege_castle_stone_{k}')) for k,n in RG]
 regall=[]
 for k,n in [("","Vale")]+RG:
@@ -68,11 +68,11 @@ g("workshop","Siege Workshop","Blocks",[sided("Block",'siege_workshop_side','sie
 g("desk","Quartermaster's Desk","Blocks",[sided("Block",'siege_desk_side','siege_desk_top','siege_desk_bottom')])
 g("barracks","Barracks","Blocks",[sided("Block",'siege_barracks_side','siege_barracks_top','siege_desk_bottom')])
 # ---- Hollow Crown
-for n,name in [("veinstone","Veinstone"),("undertow_moss","Undertow Moss"),("veil_rock","Veil Rock"),("hollowwood_lattice","Hollowwood Lattice"),("hollowwood_core","Hollowwood Core"),
+for n,name in [("veinstone","Veinstone"),("undertow_moss","Hollow Moss"),("veil_rock","Veil Rock"),("hollowwood_lattice","Hollowwood Lattice"),("hollowwood_core","Hollowwood Core"),
                ("glimmerflow","Glimmerflow"),("rift_seam","Strange Seam"),("rift_edge","Rift Edge"),("rift_veil","Rift Veil"),("waystone","Waystone"),("court_seal","Court Seal")]:
-    g("ut_"+n,name,"The Undertow",[cube("Block",one('siege_'+n))])
-g("ut_plants","Veilcap and Glimbulb","The Undertow",[{"label":"Veilcap","model":"item","mats":{"*":B+'siege_veilcap.png'}},{"label":"Glimbulb","model":"item","mats":{"*":B+'siege_glimbulb.png'}}],"Cross-shaped plants in game. Shown flat here.")
-g("ut_items","Tuning Fork and Choir Shard","The Undertow",[{"label":"Tuning Fork","model":"item","mats":{"*":I+'siege_tuning_fork.png'}},{"label":"Choir Shard","model":"item","mats":{"*":I+'siege_choir_shard.png'}}])
+    g("ut_"+n,name,"The Hollow",[cube("Block",one('siege_'+n))])
+g("ut_plants","Veilcap and Glimbulb","The Hollow",[{"label":"Veilcap","model":"item","mats":{"*":B+'siege_veilcap.png'}},{"label":"Glimbulb","model":"item","mats":{"*":B+'siege_glimbulb.png'}}],"Cross-shaped plants in game. Shown flat here.")
+g("ut_items","Tuning Fork and Choir Shard","The Hollow",[{"label":"Tuning Fork","model":"item","mats":{"*":I+'siege_tuning_fork.png'}},{"label":"Choir Shard","model":"item","mats":{"*":I+'siege_choir_shard.png'}}])
 g("plot_stone","Plot Stone","Plots",[sided("Block",'siege_plot_stone_side','siege_plot_stone_top','siege_plot_stone_bottom')])
 # ---- items
 item=lambda label,p:{"label":label,"model":"item","mats":{"*":I+p+'.png'}}
@@ -112,6 +112,39 @@ for gid,name in [("archer","Archer"),("man_at_arms","Man-at-Arms")]:
       "One skin per banner color. Tip: change one color and I'll copy the design to the rest.")
 g("pack_icon","Pack icon","Other",[{"label":"Icon","model":"flat","mats":{"*":'pack_icon.png'}}],"Shown in Minecraft's pack list.")
 
+# ---- Hollow Crown: citadel, town hall, library, travel, new item icons
+blk=lambda label,p:cube(label,one(p))
+g("hc_cornerstone","Cornerstone","Crown and Citadel",[sided("Cornerstone",'siege_cornerstone_side','siege_cornerstone_top','siege_cornerstone_top'),sided("Hall Cornerstone",'siege_hall_cornerstone_side','siege_hall_cornerstone_top','siege_hall_cornerstone_top')],"The block a settlement and its town hall grow from.")
+g("hc_throne","Throne, Fallen Shard and Choir Ore","Crown and Citadel",[blk("Throne",'siege_throne'),blk("Fallen Shard",'siege_fallen_shard'),blk("Choir Ore",'siege_choir_ore')])
+ot=[sided(n,b,c,'siege_oath_tree_plinth') for n,b,c in [("Unsworn",'siege_oath_tree_bark','siege_oath_tree_crown'),("Knight",'siege_oath_tree_bark','siege_oath_tree_crown_knight'),("Marked",'siege_oath_tree_bark_marked','siege_oath_tree_crown_marked')]]
+g("hc_oath_tree","Tree of Oaths","Town hall",[{"label":"All three","model":"lineup","gap":1.2,"items":ot,"mats":one('siege_oath_tree_bark')}]+ot+[blk("Plinth",'siege_oath_tree_plinth')],"The skill tree block. Its crown changes with the path you swear to.")
+sh=[sided(f"{n} of 6 filled",f'siege_shelf_front_{n}','siege_shelf_top','siege_shelf_top') for n in range(7)]
+for v in sh: v["mats"]["east"]=v["mats"]["west"]=v["mats"]["south"]=B+'siege_shelf_side.png'
+g("hc_shelf","Archive Shelf","Lore and library",[{"label":"Filling up","model":"lineup","cols":4,"gap":1.2,"items":sh,"mats":one('siege_shelf_side')}]+sh+[blk("Tome Cache",'hc_tome_cache')],"The shelf fills as you return Lore Tomes to the Library.")
+tv=[sided(n,f'travel/siege_{k}_side',f'travel/siege_{k}_top',f'travel/siege_{k}_top') for k,n in [("stables","Stables"),("breeder_post","Breeder's Post"),("rail_depot","Rail Depot"),("station_post","Station Post")]]
+g("hc_travel","Stables and rail blocks","Horses and rail",[{"label":"All four","model":"lineup","gap":1.2,"items":tv,"mats":one('travel/siege_stables_side')}]+tv)
+g("hc_horse_items","Horse gear icons","Horses and rail",[item(n,'horses/siege_'+k) for n,k in [("Iron Horseshoes","horseshoes_iron"),("Diamond Horseshoes","horseshoes_diamond"),("Netherite Horseshoes","horseshoes_netherite"),("Cavalry Saddle","saddle_cavalry"),("Royal Saddle","saddle_royal"),("Padded Saddlecloth","saddlecloth_padded"),("Caparison","caparison"),("Halter","halter"),("Riding Crop","riding_crop"),("Horse Whistle","horse_whistle")]])
+g("hc_crown_items","Crown and relic icons","Crown and Citadel",[item(n,'siege_'+k) for n,k in [("Hollow Crown","hollow_crown"),("Crown Shard","crown_shard"),("Royal Scepter","royal_scepter"),("Gauntlet of Challenge","gauntlet_of_challenge"),("Oath Banner","oath_banner"),("Warden's Bell","wardens_bell"),("Hall Cornerstone","hall_cornerstone"),("Ledger","ledger"),("Raw Choir Ore","raw_choir_ore"),("Choirsteel Ingot","choirsteel_ingot"),("Hollow Ember","hollow_ember"),("Bound Ember","bound_ember")]])
+g("hc_lore_items","Lore and puzzle icons","Lore and library",[item(n,'siege_'+k) for n,k in [("Lore Tome","lore_tome"),("Cipher Wheel","cipher_wheel"),("Mirror Glass","mirror_glass")]])
+bi=sorted(f[:-4] for f in os.listdir(RP+I+'bestiary') if f.endswith('.png'))
+g("hc_bestiary_items","Mob drops and boss relics","Mob drops",[item(nice(k).replace('Widows','Widow\'s').replace('Warlords','Warlord\'s'),'bestiary/'+k) for k in bi],"Icons for what the new mobs and bosses drop. The mob skins themselves are being repainted and will get their own group.")
+
+# ---- Bestiary (skins painted by the mobs thread, studio/bestiary/skin.py)
+import sys; sys.path.insert(0,os.path.dirname(os.path.abspath(__file__))+'/bestiary')
+import roster as _roster
+BG=RP+'models/entity/bestiary/'
+bgeos={}
+for mb in _roster.MOBS:
+    tp='textures/entity/siege/bestiary/'+mb['id']+'.png'
+    if not (os.path.exists(RP+tp) and os.path.exists(BG+mb['id']+'.geo.json')): continue
+    x=json.load(open(BG+mb['id']+'.geo.json'))['minecraft:geometry'][0]; gi=x['description']['identifier']
+    bgeos[gi]={"tw":x['description']['texture_width'],"th":x['description']['texture_height'],"bones":x['bones']}
+    cat="Bosses" if mb.get('boss') else "Regional mobs" if mb.get('region') else "New mobs"
+    lore=mb.get('lore') if isinstance(mb.get('lore'),str) else None
+    note=' '.join(t for t in [mb.get('region') and (('Boss of ' if mb.get('boss') else 'Found in ')+mb['region']+'.'), lore] if t) or None
+    nm=mb['name']+(' (echo)' if mb['id']=='mother_echo' else '')
+    g("b_"+mb['id'],nm,cat,[{"label":mb['name'],"model":"entity","geo":gi,"mats":{"*":tp}}],note)
+
 # ---- geometry
 geos={}
 for f in os.listdir(RP+'models/blocks'):
@@ -146,5 +179,9 @@ geos['geometry.armor1']={"tw":64,"th":32,"bones":[bone("head",[0,24,0],[c([-4,24
   bone("rightBoot",[-1.9,12,0],[c([-3.9,0,-2],[4,12,4],[0,16],1)]),bone("leftBoot",[1.9,12,0],[c([-0.1,0,-2],[4,12,4],[0,16],1,True)])]}
 geos['geometry.armor2']={"tw":64,"th":32,"bones":[bone("body",[0,24,0],[c([-4,12,-2],[8,12,4],[16,16],0.5)]),
   bone("rightLeg",[-1.9,12,0],[c([-3.9,0,-2],[4,12,4],[0,16],0.5)]),bone("leftLeg",[1.9,12,0],[c([-0.1,0,-2],[4,12,4],[0,16],0.5,True)])]}
+geos.update(bgeos)
+_o=[];[_o.append(x["cat"]) for x in groups if x["cat"] not in _o]
+_o.remove("Other");_o.append("Other")
+groups.sort(key=lambda x:_o.index(x["cat"]))
 json.dump({"groups":groups,"textures":tex,"geos":geos,"masks":masks},open(OUT,'w'))
 print(len(groups),'groups',len(tex),'textures',os.path.getsize(OUT)//1024,'KB')

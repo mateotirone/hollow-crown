@@ -1,8 +1,8 @@
 {
   "format_version": 2,
   "header": {
-    "name": "Siege Nights (Behavior)",
-    "description": "Raider waves attack at night. Build castle walls, portcullis gates and ballista towers to hold them off.",
+    "name": "The Hollow Crown (Behavior)",
+    "description": "Found a settlement, build a castle and hold it on siege nights. Then find out why the raiders come.",
     "uuid": "4009658f-d02c-499a-8280-80fb76713ee9",
     "version": [
       1,

@@ -1,0 +1,45 @@
+{
+  "format_version": "1.12.0",
+  "minecraft:geometry": [
+    {
+      "description": {
+        "identifier": "geometry.hc_tome_cache",
+        "texture_width": 32,
+        "texture_height": 16
+      },
+      "bones": [
+        {
+          "name": "book",
+          "pivot": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            20,
+            0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -5,
+                0,
+                -4
+              ],
+              "size": [
+                10,
+                3,
+                8
+              ],
+              "uv": [
+                0,
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

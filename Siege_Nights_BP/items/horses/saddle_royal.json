@@ -1,0 +1,18 @@
+{
+  "format_version": "1.21.60",
+  "minecraft:item": {
+    "description": {
+      "identifier": "siege:saddle_royal",
+      "menu_category": {
+        "category": "equipment"
+      }
+    },
+    "components": {
+      "minecraft:icon": "siege_saddle_royal",
+      "minecraft:display_name": {
+        "value": "item.siege:saddle_royal.name"
+      },
+      "minecraft:max_stack_size": 16
+    }
+  }
+}

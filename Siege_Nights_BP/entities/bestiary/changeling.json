@@ -11,9 +11,6 @@
    "siege:disguised": {
     "minecraft:variant": {
      "value": 0
-    },
-    "minecraft:behavior.move_towards_dwelling_restriction": {
-     "priority": 6
     }
    },
    "siege:revealed": {
@@ -30,10 +27,20 @@
        "filters": {
         "any_of": [
          {
-          "test": "is_family",
-          "subject": "other",
-          "operator": "==",
-          "value": "player"
+          "all_of": [
+           {
+            "test": "is_family",
+            "subject": "other",
+            "operator": "==",
+            "value": "player"
+           },
+           {
+            "test": "has_tag",
+            "subject": "other",
+            "operator": "!=",
+            "value": "siege_hollow_ruler"
+           }
+          ]
          },
          {
           "test": "is_family",

@@ -1,0 +1,20 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:choir_singer",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/siege/undertow/choir_singer"
+   },
+   "geometry": {
+    "default": "geometry.siege_u.choir_singer"
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ]
+  }
+ }
+}

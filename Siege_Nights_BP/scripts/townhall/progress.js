@@ -4,7 +4,8 @@ import { world, system, ItemStack, EntityDamageCause } from "@minecraft/server";
 import * as api from "../siege/api.js";
 import { heroOf, saveHero, grantPoints, grantRenown, playerById } from "./hero.js";
 import { hallOf } from "./townhall.js";
-import { EMBER } from "./tree.js";
+import { EMBER, choosePath, offerVictor } from "./tree.js";
+import { ROLES } from "./skills.js";
 
 const rank = (player, id) => heroOf(player).skills[id] ?? 0;
 const fx = (entity, effect, ticks, amplifier = 0) => {
@@ -115,6 +116,37 @@ api.on("skillPoints", ({ player, amount, source, renown }) => {
   if (!who) return;
   if (amount > 0) grantPoints(who, Math.floor(amount), source ?? "");
   if (renown > 0) grantRenown(who, renown, source ?? "");
+});
+
+// Roles are earned in the story, not picked from a class menu. The story engine drives them:
+//   emit("offerRole", { player, role })   an NPC offers a role; the player can then swear it at the Tree of Oaths
+//   emit("grantRole", { player, role })   give the role outright (the Ember does this for "marked")
+// We answer with "roleOffered", "roleChosen" ({ player, role }) or "roleRefused" ({ player, role, why }).
+const who = (player) => (typeof player === "string" ? playerById(player) : player);
+
+api.on("offerRole", ({ player, role }) => {
+  const p = who(player);
+  if (!p) return;
+  const hero = heroOf(p);
+  if (!ROLES[role]) return api.emit("roleRefused", { player: p, role, why: "unknown role" });
+  if (hero.path !== "none") return api.emit("roleRefused", { player: p, role, why: "already has a role" });
+  if (!hero.offers.includes(role)) hero.offers.push(role);
+  saveHero(p);
+  p.sendMessage(`§6A path has opened to you: ${ROLES[role].name}.§7 Swear it at the Tree of Oaths in a town hall, if you choose.`);
+  api.emit("roleOffered", { player: p, role });
+});
+
+api.on("grantRole", ({ player, role }) => {
+  const p = who(player);
+  if (!p) return;
+  if (!ROLES[role]) return api.emit("roleRefused", { player: p, role, why: "unknown role" });
+  if (!choosePath(p, role)) api.emit("roleRefused", { player: p, role, why: "already has a role" });
+});
+
+// The crown feature tells us who defeated the Hollow
+api.on("hollowVictor", ({ player }) => {
+  const p = who(player);
+  if (p) offerVictor(p);
 });
 
 api.addRewardHook(({ player, emeralds }) => Math.round(emeralds * (1 + 0.25 * rank(player, "keep_spoils"))));

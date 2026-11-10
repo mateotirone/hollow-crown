@@ -234,3 +234,16 @@ from_grid(["................",
            ".....odeo.......",
            "......oo........"], CL).save(RP + 'items/siege_choir_shard.png')
 print('hollow crown done')
+
+# ---- Choir Ore: veinstone with humming violet crystals
+def _choir_ore():
+    from PIL import Image
+    im = Image.open(RP + 'blocks/siege_veinstone.png').convert('RGBA'); px = im.load()
+    V = ['#2a1250', '#4a1e88', '#7234c4', '#a05cf0', '#c896ff', '#ecd8ff']
+    h = lambda s: tuple(int(s[i:i + 2], 16) for i in (1, 3, 5)) + (255,)
+    for cx, cy in ((3, 3), (10, 2), (6, 8), (12, 9), (3, 12), (9, 13)):
+        for dx, dy, i in ((0, 0, 4), (1, 0, 3), (0, 1, 3), (1, 1, 2), (-1, 1, 1), (0, 2, 1), (1, -1, 5), (2, 1, 0), (1, 2, 0)):
+            x, y = cx + dx, cy + dy
+            if 0 <= x < 16 and 0 <= y < 16: px[x, y] = h(V[i])
+    im.save(RP + 'blocks/siege_choir_ore.png')
+_choir_ore()

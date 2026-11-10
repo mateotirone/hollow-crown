@@ -1,0 +1,26 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shapeless": {
+    "description": {
+      "identifier": "siege:horseshoes_netherite_recipe"
+    },
+    "tags": [
+      "siege_workshop"
+    ],
+    "ingredients": [
+      {
+        "item": "siege:horseshoes_diamond"
+      },
+      {
+        "item": "minecraft:netherite_ingot"
+      }
+    ],
+    "result": {
+      "item": "siege:horseshoes_netherite",
+      "count": 1
+    },
+    "unlock": {
+      "context": "AlwaysUnlocked"
+    }
+  }
+}

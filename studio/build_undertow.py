@@ -16,7 +16,7 @@ def write_json(path, data):
 # name: (display, map color, options)
 BLOCKS = {
     "veinstone": ("Veinstone", "#2a2230", dict(hard=2.5, sound="deepslate")),
-    "undertow_moss": ("Undertow Moss", "#5a2f6e", dict(hard=0.8, sound="moss_block")),
+    "undertow_moss": ("Hollow Moss", "#5a2f6e", dict(hard=0.8, sound="moss_block")),
     "veil_rock": ("Veil Rock", "#1c1622", dict(unbreakable=True, lets_light=True, sound="deepslate")),
     "hollowwood_lattice": ("Hollowwood Lattice", "#7a4a8a", dict(hard=1.5, cutout=True, sound="nether_wood")),
     "hollowwood_core": ("Hollowwood Core", "#ff9ad0", dict(hard=1.5, light=12, sound="nether_wood")),
@@ -27,6 +27,7 @@ BLOCKS = {
     "rift_edge": ("Rift Edge", "#8a3fd0", dict(unbreakable=True, light=10, sound="amethyst_block")),
     "rift_veil": ("Rift Veil", "#c9a0ff", dict(ghost=True, light=15, unbreakable=True, no_select=True, sound="amethyst_block")),
     "waystone": ("Waystone", "#9ad8ff", dict(unbreakable=True, light=11, sound="amethyst_block")),
+    "choir_ore": ("Choir Ore", "#b98cff", dict(ore=True, light=6, sound="amethyst_block")),
     "court_seal": ("Court Seal", "#16323a", dict(unbreakable=True, sound="stone")),
 }
 
@@ -40,7 +41,13 @@ def block_json(name, display, color, o):
             "render_method": "blend" if o.get("ghost") else "alpha_test" if (o.get("plant") or o.get("cutout")) else "opaque",
         }},
     }
-    if o.get("unbreakable"):
+    if o.get("ore"):
+        # Slow by hand, quicker with a diamond or netherite pickaxe: mining it is a race against the Warden.
+        comp["minecraft:destructible_by_mining"] = {"seconds_to_destroy": 30, "item_specific_speeds": [
+            {"item": {"tags": "q.any_tag('minecraft:diamond_tier', 'minecraft:netherite_tier') && q.any_tag('minecraft:is_pickaxe')"}, "destroy_speed": 6}]}
+        comp["minecraft:destructible_by_explosion"] = False
+        comp["minecraft:loot"] = "loot_tables/blocks/siege_nothing.json"  # the script hands out the ore (yield, tithe)
+    elif o.get("unbreakable"):
         comp["minecraft:destructible_by_mining"] = False
         comp["minecraft:destructible_by_explosion"] = False
     else:
@@ -66,6 +73,9 @@ def block_json(name, display, color, o):
 ITEMS = {
     "tuning_fork": ("Tuning Fork", 1),
     "choir_shard": ("Choir Shard", 16),
+    "raw_choir_ore": ("Raw Choir Ore", 64),
+    "choirsteel_ingot": ("Choirsteel Ingot", 64),
+    "wardens_bell": ("Bell of the Hollow Crown", 1),
 }
 
 def item_json(name, stack):
@@ -154,6 +164,18 @@ def fork(x, y):
     if (x - y) in (5, 9) and 12 >= x >= 8 and d < 20: return (215, 190, 255, 255)  # tines
     if d == 15 and 8 < x <= 10: return (215, 190, 255, 255)
     return None
+def ore(x, y):
+    cx, cy = (x % 8) - 3.5, (y % 8) - 3.5
+    return jitter((200, 150, 255), 25) if abs(cx) + abs(cy) < 2.6 and (x // 8 + y // 8) % 2 == 0 else veinstone(x, y)
+def raw_ore(x, y):
+    return jitter((190, 140, 255), 30) if (x - 7.5) ** 2 + (y - 8) ** 2 < 22 + (x * 7 + y * 3) % 9 else None
+def ingot(x, y):
+    return jitter((215, 185, 255), 14) if 5 <= y <= 10 and 2 + (10 - y) // 2 <= x <= 12 + (10 - y) // 2 else None
+def bell(x, y):
+    if y < 3: return (150, 110, 60, 255) if x in (7, 8) else None
+    w = [0, 0, 0, 2, 3, 3, 4, 4, 5, 5, 5, 6, 6, 0, 0, 0][y]
+    if y == 13 and x in (7, 8): return (90, 60, 140, 255)
+    return jitter((170, 120, 240), 16) if w and abs(x - 7.5) < w else None
 def shard(x, y):
     inside = abs(x - 7.5) + abs(y - 7.5) * 0.55 < 4.5
     return jitter((185, 130, 255), 30) if inside else None
@@ -168,10 +190,17 @@ if __name__ == "__main__":
 
     for name, fn in dict(veinstone=veinstone, undertow_moss=moss, veil_rock=veil_rock, hollowwood_lattice=lattice,
                          hollowwood_core=core, veilcap=veilcap, glimbulb=glimbulb, glimmerflow=flow, rift_seam=seam,
-                         rift_edge=edge, rift_veil=veil, waystone=waystone, court_seal=seal).items():
+                         rift_edge=edge, rift_veil=veil, waystone=waystone, court_seal=seal, choir_ore=ore).items():
         tex(name, fn)
     tex("tuning_fork", fork, "items")
     tex("choir_shard", shard, "items")
+    tex("raw_choir_ore", raw_ore, "items")
+    tex("choirsteel_ingot", ingot, "items")
+    tex("wardens_bell", bell, "items")
+    write_json(f"{BP}/loot_tables/blocks/siege_nothing.json", {"pools": []})
+    write_json(f"{BP}/recipes/choirsteel_ingot.json", {"format_version": "1.20.10", "minecraft:recipe_furnace": {
+        "description": {"identifier": "siege:choirsteel_ingot_smelt"}, "tags": ["blast_furnace"],
+        "input": "siege:raw_choir_ore", "output": "siege:choirsteel_ingot"}})
 
     # Shared files: re-read right before writing, touch only our keys.
     p = f"{RP}/textures/terrain_texture.json"; d = json.load(open(p))

@@ -12,10 +12,10 @@ function report(result, player) {
   const total = result.passed + result.failed.length;
   const say = (text) => (player ? player.sendMessage(text) : console.warn(text.replace(/§./g, "")));
   if (!result.failed.length) {
-    say(`§a[Siege Nights] Self-test passed: ${total} checks, ${tickTasks().length} loop tasks running.`);
+    say(`§a[Hollow Crown] Self-test passed: ${total} checks, ${tickTasks().length} loop tasks running.`);
     return;
   }
-  say(`§c[Siege Nights] Self-test: ${result.failed.length} of ${total} checks failed.`);
+  say(`§c[Hollow Crown] Self-test: ${result.failed.length} of ${total} checks failed.`);
   for (const f of result.failed.slice(0, 12)) say(`§c - ${f.group}: ${f.name}§7 (${f.error})`);
   if (result.failed.length > 12) say(`§7 ...and ${result.failed.length - 12} more (see the content log)`);
 }

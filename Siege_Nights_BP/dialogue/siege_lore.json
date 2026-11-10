@@ -1,0 +1,1727 @@
+{
+  "format_version": "1.17",
+  "minecraft:npc_dialogue": {
+    "scenes": [
+      {
+        "scene_tag": "siege_lore_wren_first",
+        "npc_name": "Sister Wren",
+        "text": "Mind the step, traveler. It's dark, I know. It's been dark in Millbrook since before I was born.\n\nI'm Sister Wren. I patch people up. You're from one of the new keeps, aren't you? You have that look. Like someone who has started counting to three.",
+        "buttons": [
+          {
+            "name": "Counting to three?",
+            "commands": [
+              "/scriptevent siege:lore_say wren first 0"
+            ]
+          },
+          {
+            "name": "Why is it always night?",
+            "commands": [
+              "/scriptevent siege:lore_say wren first 1"
+            ]
+          },
+          {
+            "name": "I have an old journal. Do you know it?",
+            "commands": [
+              "/scriptevent siege:lore_say wren first 2"
+            ]
+          },
+          {
+            "name": "I should go.",
+            "commands": [
+              "/scriptevent siege:lore_say wren first 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_wren_journal",
+        "npc_name": "Sister Wren",
+        "text": "Let me see. Red leather, the royal seal... and the name cut off the cover. Put that away. Now, please.\n\nThe knights burned every book that king ever touched, and his son's after him. Whoever put that one in your pack wanted it to outlive them.\n\nI won't ask where you got it. I notice you don't know either.",
+        "buttons": [
+          {
+            "name": "Which king?",
+            "commands": [
+              "/scriptevent siege:lore_say wren journal 0"
+            ]
+          },
+          {
+            "name": "Why is it always night?",
+            "commands": [
+              "/scriptevent siege:lore_say wren journal 1"
+            ]
+          },
+          {
+            "name": "I'll keep it hidden.",
+            "commands": [
+              "/scriptevent siege:lore_say wren journal 2"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_wren_journal2",
+        "npc_name": "Sister Wren",
+        "text": "If I knew his name I wouldn't say it in a house with a well. Read old Quill's chronicle, if you can find a volume the Order missed. Chroniclers write down who was whose father. It's most of what they do.\n\nAnd read the journal itself. A man tells you who he is by what frightens him.",
+        "buttons": [
+          {
+            "name": "Why is it always night?",
+            "commands": [
+              "/scriptevent siege:lore_say wren journal2 0"
+            ]
+          },
+          {
+            "name": "Thank you, Sister.",
+            "commands": [
+              "/scriptevent siege:lore_say wren journal2 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_wren_three",
+        "npc_name": "Sister Wren",
+        "text": "Every third night they come for your walls. You've noticed. Everyone with walls notices.\n\nNobody here will tell you why, because nobody here knows. The knights know. Ask a knight and watch his face go smooth as a plate.",
+        "buttons": [
+          {
+            "name": "Where are the knights?",
+            "commands": [
+              "/scriptevent siege:lore_say wren three 0"
+            ]
+          },
+          {
+            "name": "Why is it always night?",
+            "commands": [
+              "/scriptevent siege:lore_say wren three 1"
+            ]
+          },
+          {
+            "name": "Thank you, Sister.",
+            "commands": [
+              "/scriptevent siege:lore_say wren three 2"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_wren_night",
+        "npc_name": "Sister Wren",
+        "text": "The clocks. Six of them, and every one reads the same minute. Old Reeve Tock stopped them, long ago, and the night stopped with them.\n\nPeople here like it. In the dark you can't see who is facing the wall.\n\nThe Reeve left a statement in the clock tower. Read it before you go asking villagers which clock is which. Some of them will lie to you.",
+        "buttons": [
+          {
+            "name": "Which clock was first?",
+            "commands": [
+              "/scriptevent siege:lore_say wren night 0"
+            ]
+          },
+          {
+            "name": "Facing the wall?",
+            "commands": [
+              "/scriptevent siege:lore_say wren night 1"
+            ]
+          },
+          {
+            "name": "Where's the clock tower?",
+            "commands": [
+              "/scriptevent siege:lore_say wren night 2"
+            ]
+          },
+          {
+            "name": "Thank you, Sister.",
+            "commands": [
+              "/scriptevent siege:lore_say wren night 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_wren_which_cut",
+        "npc_name": "Sister Wren",
+        "text": "The first one? Now that IS the question, and I'll tell you what my mother told me. The Reeve started with the clock in the\n\nTraveler?\n\nTraveler, your nose is bleeding. Look at me. Look at ME, not at the wall, what are you looking at the w",
+        "buttons": [
+          {
+            "name": "...",
+            "commands": [
+              "/scriptevent siege:lore_say wren which_cut 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_wren_slipback",
+        "npc_name": "Sister Wren",
+        "text": "There you are. THERE you are. Sit. Sit down.\n\nYou went grey as tallow, and then the chair was empty. I counted. Nine. Then you were in it again, wet to the skin, and my floor is bone dry.\n\nI have seen that once before. I was nine years old and it was my brother. He was gone the whole night.",
+        "buttons": [
+          {
+            "name": "Where was I?",
+            "commands": [
+              "/scriptevent siege:lore_say wren slipback 0"
+            ]
+          },
+          {
+            "name": "I'm fine.",
+            "commands": [
+              "/scriptevent siege:lore_say wren slipback 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_wren_slipwhere",
+        "npc_name": "Sister Wren",
+        "text": "Don't tell me what you saw. I can see it on you. It wasn't anywhere, was it? Nowhere on any map of ours. I can smell the water on you.\n\nI don't have a name for it. I think the knights do, and I think they've spent three hundred years making sure nobody else does.\n\nAll I know is that it let go of you. It didn't let go of Tobin. Stay away from the well tonight.",
+        "buttons": [
+          {
+            "name": "Tell me about Tobin.",
+            "commands": [
+              "/scriptevent siege:lore_say wren slipwhere 0"
+            ]
+          },
+          {
+            "name": "I need some air.",
+            "commands": [
+              "/scriptevent siege:lore_say wren slipwhere 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_wren_slipfine",
+        "npc_name": "Sister Wren",
+        "text": "You are not fine. Your sleeves are dripping and you're holding that cup in your left hand. You came in here right-handed.\n\n...There. It's passing. You've switched back. Saints, I hoped I'd never watch that happen twice.\n\nIt let go of you. It didn't let go of my brother. I'd like to know why, and so should you.",
+        "buttons": [
+          {
+            "name": "Tell me about Tobin.",
+            "commands": [
+              "/scriptevent siege:lore_say wren slipfine 0"
+            ]
+          },
+          {
+            "name": "I need some air.",
+            "commands": [
+              "/scriptevent siege:lore_say wren slipfine 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_wren_which",
+        "npc_name": "Sister Wren",
+        "text": "The first clock. I was about to say, wasn't I, before you... went.\n\nI find I've lost the nerve to say it out loud. Maybe that was the point. Read the Reeve's statement in the tower, then ask the villagers which clock he stopped first. All six will answer. One of them will be lying, and you'll know which once you've heard the other five.",
+        "buttons": [
+          {
+            "name": "I'll ask them.",
+            "commands": [
+              "/scriptevent siege:lore_say wren which 0"
+            ]
+          },
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say wren which 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_wren_knights",
+        "npc_name": "Sister Wren",
+        "text": "The Ashen Gate keep a chapterhouse east of the Vale road. Grey banners. They used to keep a waystation here too, by the mill. It's empty now, but they left in a hurry, and people who leave in a hurry leave things in cupboards.",
+        "buttons": [
+          {
+            "name": "I'll look.",
+            "commands": [
+              "/scriptevent siege:lore_say wren knights 0"
+            ]
+          },
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say wren knights 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_wren_walls",
+        "npc_name": "Sister Wren",
+        "text": "Forget I said it.\n\n...No. You have kind eyes, and I am tired of forgetting things on purpose. Come back when you've read something about the Lost Days. Then you'll know what to ask me, and I'll know you're serious.",
+        "buttons": [
+          {
+            "name": "I will.",
+            "commands": [
+              "/scriptevent siege:lore_say wren walls 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_wren_hub",
+        "npc_name": "Sister Wren",
+        "text": "Still dark, still here. What do you need?",
+        "buttons": [
+          {
+            "name": "The Lost Days.",
+            "commands": [
+              "/scriptevent siege:lore_say wren hub 0"
+            ]
+          },
+          {
+            "name": "The clocks.",
+            "commands": [
+              "/scriptevent siege:lore_say wren hub 1"
+            ]
+          },
+          {
+            "name": "The knights.",
+            "commands": [
+              "/scriptevent siege:lore_say wren hub 2"
+            ]
+          },
+          {
+            "name": "Nothing. Be well.",
+            "commands": [
+              "/scriptevent siege:lore_say wren hub 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_wren_lost_gate",
+        "npc_name": "Sister Wren",
+        "text": "You say those words like someone who has heard them, not someone who has read them.\n\nThere's a notice in the square about it. The Reeve's office wants everyone to know there is no cause for alarm. Read it. Then tell me if you believe it.",
+        "buttons": [
+          {
+            "name": "I read it. It's a lie.",
+            "commands": [
+              "/scriptevent siege:lore_say wren lost_gate 0"
+            ]
+          },
+          {
+            "name": "I'll go and read it.",
+            "commands": [
+              "/scriptevent siege:lore_say wren lost_gate 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_wren_hub2",
+        "npc_name": "Sister Wren",
+        "text": "Ask, then. Quietly.",
+        "buttons": [
+          {
+            "name": "Tell me about Tobin.",
+            "commands": [
+              "/scriptevent siege:lore_say wren hub2 0"
+            ]
+          },
+          {
+            "name": "How do I tell the Returned?",
+            "commands": [
+              "/scriptevent siege:lore_say wren hub2 1"
+            ]
+          },
+          {
+            "name": "Where do they go?",
+            "commands": [
+              "/scriptevent siege:lore_say wren hub2 2"
+            ]
+          },
+          {
+            "name": "The clocks.",
+            "commands": [
+              "/scriptevent siege:lore_say wren hub2 3"
+            ]
+          },
+          {
+            "name": "Be well, Sister.",
+            "commands": [
+              "/scriptevent siege:lore_say wren hub2 4"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_wren_tobin1",
+        "npc_name": "Sister Wren",
+        "text": "My brother. He was eleven. He went to the well on a third night and came home in the morning, and my mother said he was only tired.\n\nHe lived in our house for forty more years. He was kind to me every day of them. He was not my brother.",
+        "buttons": [
+          {
+            "name": "How did you know?",
+            "commands": [
+              "/scriptevent siege:lore_say wren tobin1 0"
+            ]
+          },
+          {
+            "name": "I'm sorry.",
+            "commands": [
+              "/scriptevent siege:lore_say wren tobin1 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_wren_tobin2",
+        "npc_name": "Sister Wren",
+        "text": "I wrote it down when I was nine, so I would never talk myself out of it. It's in a box under my stairs.\n\nTake it. I know it by heart. Put it somewhere it will be kept. That is all I ever wanted for it.",
+        "buttons": [
+          {
+            "name": "I'll keep it safe.",
+            "commands": [
+              "/scriptevent siege:lore_say wren tobin2 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_wren_tells",
+        "npc_name": "Sister Wren",
+        "text": "Three things. My mother's generation knew them and were fined two silver for saying so.\n\nI won't hand them to you. You'll find them written in more than one place, by people who never met each other, and that is how you'll know they're true. Write in your Ledger when you're sure what the Returned are.",
+        "buttons": [
+          {
+            "name": "I'll work it out.",
+            "commands": [
+              "/scriptevent siege:lore_say wren tells 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_wren_where",
+        "npc_name": "Sister Wren",
+        "text": "Down. Tobin went to the well. In Hollowfast they walked out onto the lake. In Gull's Rest it was the sea.\n\nAlways water, always the third night. If you want to know more about the lake, there's a woman in Hollowfast called Sigrun whose grandmother followed the footprints.",
+        "buttons": [
+          {
+            "name": "Hollowfast. North?",
+            "commands": [
+              "/scriptevent siege:lore_say wren where 0"
+            ]
+          },
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say wren where 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_wren_after",
+        "npc_name": "Sister Wren",
+        "text": "You worked it out. I can see it on you.\n\nThen you know my real brother has been singing under that well for longer than I've been alive. If you ever get down there, traveler: his name is Tobin Ashby. Say it to them. I think they forget.",
+        "buttons": [
+          {
+            "name": "I'll say his name.",
+            "commands": [
+              "/scriptevent siege:lore_say wren after 0"
+            ]
+          },
+          {
+            "name": "Tell me about the clocks.",
+            "commands": [
+              "/scriptevent siege:lore_say wren after 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_aldous_first",
+        "npc_name": "Sir Aldous Vane",
+        "text": "Hold. Sir Aldous Vane, Order of the Ashen Gate.\n\nA light fell near this keep last night. Pale, about so big, and it hums. I am charged to take it into the Order's keeping. Have you seen it?",
+        "buttons": [
+          {
+            "name": "What is it?",
+            "commands": [
+              "/scriptevent siege:lore_say aldous first 0"
+            ]
+          },
+          {
+            "name": "Why does the Order want it?",
+            "commands": [
+              "/scriptevent siege:lore_say aldous first 1"
+            ]
+          },
+          {
+            "name": "I haven't seen anything.",
+            "commands": [
+              "/scriptevent siege:lore_say aldous first 2"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_aldous_what",
+        "npc_name": "Sir Aldous Vane",
+        "text": "A fallen star. That is what I was told and that is what I will tell you.\n\n...It did not look like a star to me either. Stars do not whisper. But a knight of the Gate does not ask what lies below. It is the second line of the Rule.",
+        "buttons": [
+          {
+            "name": "What's the first line?",
+            "commands": [
+              "/scriptevent siege:lore_say aldous what 0"
+            ]
+          },
+          {
+            "name": "Why does the Order want it?",
+            "commands": [
+              "/scriptevent siege:lore_say aldous what 1"
+            ]
+          },
+          {
+            "name": "Good day, Sir Aldous.",
+            "commands": [
+              "/scriptevent siege:lore_say aldous what 2"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_aldous_why",
+        "npc_name": "Sir Aldous Vane",
+        "text": "\"If ever a light falls from below, a knight shall ride to it and take it, before it takes anyone.\" That is the Rule.\n\nFrom below. I have always thought that a strange word to use about something that fell out of the sky.",
+        "buttons": [
+          {
+            "name": "May I read this Rule?",
+            "commands": [
+              "/scriptevent siege:lore_say aldous why 0"
+            ]
+          },
+          {
+            "name": "Good day.",
+            "commands": [
+              "/scriptevent siege:lore_say aldous why 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_aldous_rule",
+        "npc_name": "Sir Aldous Vane",
+        "text": "Every knight carries a copy. Take mine, I know it by heart. If you would rather swear to it than fight beside it, come to the chapterhouse, east of the Vale road.\n\nAnd if you find that light: do not pick it up with your bare hand.",
+        "buttons": [
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say aldous rule 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_aldous_hub",
+        "npc_name": "Sir Aldous Vane",
+        "text": "Well met again. The roads are worse every month. What can I do for you?",
+        "buttons": [
+          {
+            "name": "Tell me about the Order.",
+            "commands": [
+              "/scriptevent siege:lore_say aldous hub 0"
+            ]
+          },
+          {
+            "name": "Why do the sieges come?",
+            "commands": [
+              "/scriptevent siege:lore_say aldous hub 1"
+            ]
+          },
+          {
+            "name": "Who was Saint Ashe?",
+            "commands": [
+              "/scriptevent siege:lore_say aldous hub 2"
+            ]
+          },
+          {
+            "name": "Good day.",
+            "commands": [
+              "/scriptevent siege:lore_say aldous hub 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_aldous_order",
+        "npc_name": "Sir Aldous Vane",
+        "text": "We were eleven hundred once. We are eleven now. We keep the Gate shut and the ash cold, and we watch the keeps.\n\nIf you want our history, ask Brother Cael in the archive. He will give you the version we give to guests. Ask him twice and he may give you another.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say aldous order 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_aldous_sieges",
+        "npc_name": "Sir Aldous Vane",
+        "text": "Bandits. Illagers out of the badlands, the restless dead, sellswords. It is a lawless age.\n\nEvery third night. Yes. I have noticed that too. I asked the Grandmaster once and he looked at me the way my father did when I asked where the dog had gone.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say aldous sieges 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_aldous_ashe",
+        "npc_name": "Sir Aldous Vane",
+        "text": "Our founder. A shepherd's daughter from the hills above Bellhollow, marked on the palm by the saints. There's a shrine there, and a little book of her life in every chapel of ours.\n\nShe never wept, they say. I have always found that the saddest thing about her.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say aldous ashe 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_aldous_marked",
+        "npc_name": "Sir Aldous Vane",
+        "text": "Your hand. Show me your hand.\n\n...Saints. You picked it up.\n\nI am supposed to bring you in. I am supposed to bring you to the Inquisitors. I have known you since the morning after your first siege and I find I am not drawing my sword. Go. Before I remember my oath.",
+        "buttons": [
+          {
+            "name": "What will it do to me?",
+            "commands": [
+              "/scriptevent siege:lore_say aldous marked 0"
+            ]
+          },
+          {
+            "name": "Thank you, Aldous.",
+            "commands": [
+              "/scriptevent siege:lore_say aldous marked 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_aldous_marked2",
+        "npc_name": "Sir Aldous Vane",
+        "text": "I don't know. That is the truth and it shames me. We take the lights and we are never told what becomes of them.\n\nThere was a mage, once. The Order burned him. They say his students hid his notebooks all over Aldmere. If anyone wrote down what you are now, it was him.",
+        "buttons": [
+          {
+            "name": "I'll find them.",
+            "commands": [
+              "/scriptevent siege:lore_say aldous marked2 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_aldous_confront",
+        "npc_name": "Sir Aldous Vane",
+        "text": "You've read it. The Grandmaster's own hand. \"Let them think it is bandits.\"\n\nI have told forty keeps it was bandits. I told YOU it was bandits. I believed it.\n\nGive me a little time. A man cannot put down his whole life in one afternoon.",
+        "buttons": [
+          {
+            "name": "Help me find the rest.",
+            "commands": [
+              "/scriptevent siege:lore_say aldous confront 0"
+            ]
+          },
+          {
+            "name": "Take the time you need.",
+            "commands": [
+              "/scriptevent siege:lore_say aldous confront 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_aldous_confront2",
+        "npc_name": "Sir Aldous Vane",
+        "text": "There is a vault under the chapterhouse they call the Burned Archive. I have stood guard on its door a hundred nights and never once asked what was behind it.\n\nBrother Cael has the key. Tell him I sent you. Tell him I'm asking now.",
+        "buttons": [
+          {
+            "name": "I'll tell him.",
+            "commands": [
+              "/scriptevent siege:lore_say aldous confront2 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_aldous_edda",
+        "npc_name": "Sir Aldous Vane",
+        "text": "She was his daughter. Our saint overthrew her own father, put him down a hole alive, and built us to stand on the lid.\n\nI thought I would be angry at her. I think she was seventeen, and watched her people get out of bed and walk into the water every third night, and did a terrible thing to stop it. Then she lied for the rest of her life so no one would undo it. I don't know if she was right. I don't think she knew.\n\nI'm with you. Whatever is at the bottom of this, I'm with you.",
+        "buttons": [
+          {
+            "name": "Then let's finish it.",
+            "commands": [
+              "/scriptevent siege:lore_say aldous edda 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_mag_first",
+        "npc_name": "Old Mag",
+        "text": "Wipe your feet. Not there. THERE.\n\nI'm Mag. I'm three hundred and eleven years old. Go on, laugh. They all do. Then they ask for something for a cough.",
+        "buttons": [
+          {
+            "name": "I believe you.",
+            "commands": [
+              "/scriptevent siege:lore_say mag first 0"
+            ]
+          },
+          {
+            "name": "That's impossible.",
+            "commands": [
+              "/scriptevent siege:lore_say mag first 1"
+            ]
+          },
+          {
+            "name": "Something for a cough?",
+            "commands": [
+              "/scriptevent siege:lore_say mag first 2"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_mag_doubt",
+        "npc_name": "Old Mag",
+        "text": "So is an army marching on your walls every third night with nobody leading it. Yet here you are, with mud from a keep on your boots.\n\nCome back when you've seen something impossible and stopped arguing with it.",
+        "buttons": [
+          {
+            "name": "...",
+            "commands": [
+              "/scriptevent siege:lore_say mag doubt 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_mag_cough",
+        "npc_name": "Old Mag",
+        "text": "Marsh mallow root, honey, don't breathe the fog after dark. Two emeralds, which I'll waive, because you asked a sensible question in a house full of nonsense.\n\nNow. Do you want the cough cure, or do you want to know why I'm old?",
+        "buttons": [
+          {
+            "name": "Why are you old?",
+            "commands": [
+              "/scriptevent siege:lore_say mag cough 0"
+            ]
+          },
+          {
+            "name": "Just the cure.",
+            "commands": [
+              "/scriptevent siege:lore_say mag cough 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_mag_second",
+        "npc_name": "Old Mag",
+        "text": "You again. Seen anything impossible yet?",
+        "buttons": [
+          {
+            "name": "Yes. I believe you now.",
+            "commands": [
+              "/scriptevent siege:lore_say mag second 0"
+            ]
+          },
+          {
+            "name": "Not yet.",
+            "commands": [
+              "/scriptevent siege:lore_say mag second 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_mag_believe",
+        "npc_name": "Old Mag",
+        "text": "Hm. You said that like you meant it.\n\nI was twelve when they burned my teacher. He was the King's mage. You won't find the King in any book the knights let you read, either. I ran into the fen with a satchel and a head full of things I didn't understand, and something under the swamp took a liking to me, and I stopped getting older.\n\nHere. My testimony. Wrote it myself, for the day someone believed me.",
+        "buttons": [
+          {
+            "name": "Tell me more.",
+            "commands": [
+              "/scriptevent siege:lore_say mag believe 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_mag_hub",
+        "npc_name": "Old Mag",
+        "text": "Sit. Ask. Don't touch the jars.",
+        "buttons": [
+          {
+            "name": "Your teacher.",
+            "commands": [
+              "/scriptevent siege:lore_say mag hub 0"
+            ]
+          },
+          {
+            "name": "The moon.",
+            "commands": [
+              "/scriptevent siege:lore_say mag hub 1"
+            ]
+          },
+          {
+            "name": "Mirelight's villagers.",
+            "commands": [
+              "/scriptevent siege:lore_say mag hub 2"
+            ]
+          },
+          {
+            "name": "The backward hymns.",
+            "commands": [
+              "/scriptevent siege:lore_say mag hub 3"
+            ]
+          },
+          {
+            "name": "Goodbye, Mag.",
+            "commands": [
+              "/scriptevent siege:lore_say mag hub 4"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_mag_corvin",
+        "npc_name": "Old Mag",
+        "text": "Corvin Hale. Rude, brilliant, never washed. He wrote ten notebooks and twelve of us carried them off in twelve directions the night before the fire. A hunter with hounds got eleven of us.\n\nThe notebooks are still out there. His tower in the Vale hills, the north lake, the lighthouse, the desert vault. One of them is under my bed and I will deny it.",
+        "buttons": [
+          {
+            "name": "Under your bed?",
+            "commands": [
+              "/scriptevent siege:lore_say mag corvin 0"
+            ]
+          },
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say mag corvin 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_mag_bed",
+        "npc_name": "Old Mag",
+        "text": "I never said that.\n\n...Fine. Notebook Three. It's the one about the moon. It's the only one I ever understood. Take it. Bring the rest together some day, all ten on one shelf, and come and tell me. I have waited three hundred years to hear someone say they did.",
+        "buttons": [
+          {
+            "name": "I will.",
+            "commands": [
+              "/scriptevent siege:lore_say mag bed 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_mag_moon",
+        "npc_name": "Old Mag",
+        "text": "\"What the carving shows, the sky must not.\" He made us chant it.\n\nThere's a door in the north, at the Hollowfast lake. A shrine with a moon cut into it. One of us went through that door with the hunter behind her. I don't know which of them I feel sorrier for.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say mag moon 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_mag_villagers",
+        "npc_name": "Old Mag",
+        "text": "Five of them have lost days. Four of those came back as themselves, only frightened. One didn't.\n\nI know which. I won't say. If I name it, it runs, and the Mother makes another. You'll have to catch it in a lie. Talk to all five. A shape wears the person like a borrowed glove. It gets the small things wrong.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say mag villagers 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_mag_hymns",
+        "npc_name": "Old Mag",
+        "text": "Choir scripture. It's written right to left, the way they wrote before there was an Aldmere. Don't read it at night and don't read it aloud.\n\nThere's one carved inside the well bucket here. I copied it out fair, years ago. You may have it if you promise not to hum.",
+        "buttons": [
+          {
+            "name": "I promise.",
+            "commands": [
+              "/scriptevent siege:lore_say mag hymns 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_mag_allbooks",
+        "npc_name": "Old Mag",
+        "text": "All ten. On one shelf. You did it.\n\n...Give me a moment.\n\nHe told me one thing he never wrote down, because he was afraid of who might read it. This land had another name, before the bells. He never learned it. But he knew who still uses it: they do. It's in one of their hymns, and their hymns sometimes wash up.\n\nThis washed up in my fen forty years ago. I've never dared read it. You do it.",
+        "buttons": [
+          {
+            "name": "Thank you, Magda.",
+            "commands": [
+              "/scriptevent siege:lore_say mag allbooks 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elias_first",
+        "npc_name": "The Lighthouse Keeper",
+        "text": "Mind the lamp. Don't stand between it and the sea.\n\nI'm the keeper. Elias. Forgive me, I'm writing to my wife, and I lose the thread if I stop.",
+        "buttons": [
+          {
+            "name": "Where is your wife?",
+            "commands": [
+              "/scriptevent siege:lore_say elias first 0"
+            ]
+          },
+          {
+            "name": "What are you writing?",
+            "commands": [
+              "/scriptevent siege:lore_say elias first 1"
+            ]
+          },
+          {
+            "name": "I'll leave you to it.",
+            "commands": [
+              "/scriptevent siege:lore_say elias first 2"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elias_wife",
+        "npc_name": "The Lighthouse Keeper",
+        "text": "Out. She went down to the strand to see the seabed, the night the sea drew back. She'll be home when she can see the light.\n\nThe parish register says a fever. The parish register is wrong. I've told them and told them.",
+        "buttons": [
+          {
+            "name": "When was this?",
+            "commands": [
+              "/scriptevent siege:lore_say elias wife 0"
+            ]
+          },
+          {
+            "name": "What are you writing?",
+            "commands": [
+              "/scriptevent siege:lore_say elias wife 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elias_when",
+        "npc_name": "The Lighthouse Keeper",
+        "text": "Oh... a little while ago. The night the war ended.\n\nWhich war? THE war. The Grey Host. Their ships were lying on the sand like dead whales.\n\nYou're looking at me the way the new priest does.",
+        "buttons": [
+          {
+            "name": "What are you writing?",
+            "commands": [
+              "/scriptevent siege:lore_say elias when 0"
+            ]
+          },
+          {
+            "name": "I should go.",
+            "commands": [
+              "/scriptevent siege:lore_say elias when 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elias_writing",
+        "npc_name": "The Lighthouse Keeper",
+        "text": "Letters. I put them in bottles, mostly. The sea brings some back and the gulls take others. You'll find them up and down this coast if you look.\n\nYou won't be able to read them. Annet and I wrote in a cipher of our own when we were courting, so her father couldn't. There was a brass wheel for it. I lost mine years ago, somewhere inland.",
+        "buttons": [
+          {
+            "name": "A brass wheel?",
+            "commands": [
+              "/scriptevent siege:lore_say elias writing 0"
+            ]
+          },
+          {
+            "name": "I'll look for them.",
+            "commands": [
+              "/scriptevent siege:lore_say elias writing 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elias_wheel",
+        "npc_name": "The Lighthouse Keeper",
+        "text": "Two rings of letters, one turning inside the other. A scholar's toy. I lent it to a man from the Vale who was collecting old books, and he never brought it back.\n\nIf you keep books yourself, look between them. That's where such things end up.",
+        "buttons": [
+          {
+            "name": "I'll look.",
+            "commands": [
+              "/scriptevent siege:lore_say elias wheel 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elias_second",
+        "npc_name": "The Lighthouse Keeper",
+        "text": "Mind the lamp. Oh, it's you. Did you find any of my letters?",
+        "buttons": [
+          {
+            "name": "Tell me about the cipher.",
+            "commands": [
+              "/scriptevent siege:lore_say elias second 0"
+            ]
+          },
+          {
+            "name": "Tell me about Annet.",
+            "commands": [
+              "/scriptevent siege:lore_say elias second 1"
+            ]
+          },
+          {
+            "name": "Not yet.",
+            "commands": [
+              "/scriptevent siege:lore_say elias second 2"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elias_hub",
+        "npc_name": "The Lighthouse Keeper",
+        "text": "Mind the lamp. Have you read them? Any of them? I'd like to know someone has.",
+        "buttons": [
+          {
+            "name": "The tide and the chapel.",
+            "commands": [
+              "/scriptevent siege:lore_say elias hub 0"
+            ]
+          },
+          {
+            "name": "The man from the sea.",
+            "commands": [
+              "/scriptevent siege:lore_say elias hub 1"
+            ]
+          },
+          {
+            "name": "Why never put it out?",
+            "commands": [
+              "/scriptevent siege:lore_say elias hub 2"
+            ]
+          },
+          {
+            "name": "Goodbye, Elias.",
+            "commands": [
+              "/scriptevent siege:lore_say elias hub 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elias_tide",
+        "npc_name": "The Lighthouse Keeper",
+        "text": "Once a month, when the moon is dark, the sea goes out nearly as far as it did that night. You can see the tower of Saint Brannoc's from here.\n\nI have the place worked out to the very stone. It's all in the seventh letter. I keep meaning to go.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say elias tide 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elias_man",
+        "npc_name": "The Lighthouse Keeper",
+        "text": "I never told anyone that. You must have read the fifth.\n\nHe was very polite. He was soaked and he wasn't cold. He held his sword in his left hand, and I remember thinking: that's not right, the coins all show him right-handed.\n\nI've never said whose face it was. I'm not going to now.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say elias man 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elias_lamp",
+        "npc_name": "The Lighthouse Keeper",
+        "text": "Because she has to find the shore.\n\nPeople say things come up the beach on the third night. That they follow the light. Annet herself said it, in a dream I had.\n\nIt was only a dream. I can't put it out. If I put it out she'll never find me.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say elias lamp 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elias_freed",
+        "npc_name": "The Lighthouse Keeper",
+        "text": "You've seen her. Don't tell me how she looked.\n\n...She said to put it out. She said she wasn't angry.\n\nShe always sang a little sharp, you know. I could pick her out of a hundred voices.\n\nThere's one more letter. I left it where I said I'd go. Read it, and then come back, and I'll do what she asked.",
+        "buttons": [
+          {
+            "name": "I'll find it.",
+            "commands": [
+              "/scriptevent siege:lore_say elias freed 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_elias_last",
+        "npc_name": "The Lighthouse Keeper",
+        "text": "So now you know what I am. A habit that kept climbing the stairs after the man went down them.\n\nShe's free? Then it's time.\n\nWould you do it? I don't think my hands can. Just close the shutter. Thank you. It was a long watch. It was a very long watch.",
+        "buttons": [
+          {
+            "name": "Close the shutter.",
+            "commands": [
+              "/scriptevent siege:lore_say elias last 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_sage_first",
+        "npc_name": "Archivist Pell",
+        "text": "Oh! A keep with shelves. Do you know how rare that is? The Order threw me out for reading, and I've been walking ever since looking for somewhere that keeps books instead of burning them.\n\nPell. Archivist, formerly Novice. I'll catalogue for my supper.",
+        "buttons": [
+          {
+            "name": "How does a Library work?",
+            "commands": [
+              "/scriptevent siege:lore_say sage first 0"
+            ]
+          },
+          {
+            "name": "Where do I find tomes?",
+            "commands": [
+              "/scriptevent siege:lore_say sage first 1"
+            ]
+          },
+          {
+            "name": "Welcome, Pell.",
+            "commands": [
+              "/scriptevent siege:lore_say sage first 2"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_sage_how",
+        "npc_name": "Archivist Pell",
+        "text": "Build Archive Shelves at your Siege Workshop. Hold a Lore Tome and click a shelf to shelve it. Click a shelf with an empty hand to open the catalogue: read anything you've shelved, take tomes back out, and claim what you've earned.\n\nFinish a whole collection and something always turns up. The Library grows, too: at ten tomes, at twenty-five. Old books keep secrets in their bindings.",
+        "buttons": [
+          {
+            "name": "Where do I find tomes?",
+            "commands": [
+              "/scriptevent siege:lore_say sage how 0"
+            ]
+          },
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say sage how 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_sage_where",
+        "npc_name": "Archivist Pell",
+        "text": "Everywhere somebody once had a reason to hide one. Chapels. Ruins. Under floors. The great beasts of each region carry one, and things that walk at night sometimes drop them.\n\nA tome you've found leaves the next reader's copy where it was, so nobody can strip the land bare. But a tome on your shelf is yours, and a thief with a Breaching Charge might disagree.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say sage where 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_sage_hub",
+        "npc_name": "Archivist Pell",
+        "text": "Catalogue's up to date. What are we puzzling over?",
+        "buttons": [
+          {
+            "name": "Two tomes disagree.",
+            "commands": [
+              "/scriptevent siege:lore_say sage hub 0"
+            ]
+          },
+          {
+            "name": "I can't read this one.",
+            "commands": [
+              "/scriptevent siege:lore_say sage hub 1"
+            ]
+          },
+          {
+            "name": "Where should I look next?",
+            "commands": [
+              "/scriptevent siege:lore_say sage hub 2"
+            ]
+          },
+          {
+            "name": "The seven thin places.",
+            "commands": [
+              "/scriptevent siege:lore_say sage hub 3"
+            ]
+          },
+          {
+            "name": "How do I solve a thread?",
+            "commands": [
+              "/scriptevent siege:lore_say sage hub 4"
+            ]
+          },
+          {
+            "name": "Carry on, Pell.",
+            "commands": [
+              "/scriptevent siege:lore_say sage hub 5"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_sage_contra",
+        "npc_name": "Archivist Pell",
+        "text": "Good! They're supposed to. Ask three things of any book. Who wrote it? Who were they afraid of? And were they there?\n\nMaster Quill wrote what the court told him, but he couldn't stop himself noting the small true things. The Order wrote what it wanted believed. The mage wrote what he saw and was burned for it. Weigh them accordingly.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say sage contra 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_sage_unread",
+        "npc_name": "Archivist Pell",
+        "text": "Two kinds of unreadable. If it's scrambled letters, it's a cipher, and you need a Cipher Wheel in your pack. If the letters are fine but the words run backward, it's Hollow writing, right to left, and you need a Tide Glass. Or, ahem, a certain kind of hand.\n\nBoth turn up in a well-stocked Library sooner or later.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say sage unread 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_sage_next",
+        "npc_name": "Archivist Pell",
+        "text": "The catalogue lists every tome you're missing with a note on where such a thing would be kept. Open it at any shelf and look for the grey entries.\n\nIf you want my advice: finish the Testimonies first. Ordinary people notice more than chroniclers.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say sage next 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_sage_source",
+        "npc_name": "Archivist Pell",
+        "text": "Brother Fennick's field notes! Six notebooks, each stating one true thing about the place where the Gate now sits: water, bells, hands, cold, salt, roots.\n\nVisit the seven places with the notes in hand and strike off the ones that don't fit. When all six are on your shelf you may Name the Thin Place in the catalogue. Name it wrong and you'll lose days. Name it right and you'll have found a thing the Order lost.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say sage source 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_sage_threads",
+        "npc_name": "Archivist Pell",
+        "text": "Your Ledger of Whispers copies down every clue you read, sorted by the mystery it belongs to. When a thread has enough clues, it asks you a question.\n\nSome questions give you choices. The best ones make you write the answer yourself. A wrong answer closes the thread for a day, so read before you guess.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say sage threads 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_sage_all",
+        "npc_name": "Archivist Pell",
+        "text": "Seventy-four. Every one. I counted three times and then I sat down on the floor.\n\nThey burned all of this, you know. Forty-one portraits and every chronicle they could find, and you put it back, book by book, on your own shelves.\n\nYou don't need an archivist any more. I'll stay anyway, if that's all right. I like it here.",
+        "buttons": [
+          {
+            "name": "Stay as long as you like.",
+            "commands": [
+              "/scriptevent siege:lore_say sage all 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_cael_first",
+        "npc_name": "Brother Cael",
+        "text": "The reading room is open to guests. The archive is not. Please don't lean on the shelves.\n\nYou may read the Chronicle volume on the lectern. We keep that one on display. You'll see why.",
+        "buttons": [
+          {
+            "name": "Why that one?",
+            "commands": [
+              "/scriptevent siege:lore_say cael first 0"
+            ]
+          },
+          {
+            "name": "What's in the archive?",
+            "commands": [
+              "/scriptevent siege:lore_say cael first 1"
+            ]
+          },
+          {
+            "name": "Thank you, Brother.",
+            "commands": [
+              "/scriptevent siege:lore_say cael first 2"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_cael_why",
+        "npc_name": "Brother Cael",
+        "text": "Because it says what we need it to say. \"The Treachery of the Mage.\" Master Quill wrote twelve volumes. We display one.\n\nRead the last line of it carefully. \"I have been told to set it down plainly, and I have.\" A chronicler doesn't write that sentence by accident.",
+        "buttons": [
+          {
+            "name": "What happened to the rest?",
+            "commands": [
+              "/scriptevent siege:lore_say cael why 0"
+            ]
+          },
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say cael why 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_cael_rest",
+        "npc_name": "Brother Cael",
+        "text": "Burned. Officially.\n\nUnofficially, a book is a hard thing to burn completely when the man holding the torch can read. My predecessors had a way of finding that a volume had been 'lost' in a village chapel or a ruined nursery.\n\nI didn't say that. Good day.",
+        "buttons": [
+          {
+            "name": "Good day.",
+            "commands": [
+              "/scriptevent siege:lore_say cael rest 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_cael_archive",
+        "npc_name": "Brother Cael",
+        "text": "Our history. \"On the Kingless Years.\" It will tell you there was never a king called Oswin and that the name is a peasant's mistake for a saint's day.\n\nI copy it out fresh every ten years, so that it will last. I have very neat handwriting. It is the only part of the task I can be proud of.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say cael archive 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_cael_hub",
+        "npc_name": "Brother Cael",
+        "text": "The reading room is open. The archive is not. I say this every day. Some days I even mean it.",
+        "buttons": [
+          {
+            "name": "What did the Order burn?",
+            "commands": [
+              "/scriptevent siege:lore_say cael hub 0"
+            ]
+          },
+          {
+            "name": "Tell me about Corvin Hale.",
+            "commands": [
+              "/scriptevent siege:lore_say cael hub 1"
+            ]
+          },
+          {
+            "name": "Good day.",
+            "commands": [
+              "/scriptevent siege:lore_say cael hub 2"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_cael_burn",
+        "npc_name": "Brother Cael",
+        "text": "There is a list. There is always a list: an Order that burns things without an inventory is just a mob.\n\nIt's kept below, in the place it describes. I am not permitted to take guests there. I would need a knight of the Gate to ask me.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say cael burn 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_cael_corvin",
+        "npc_name": "Brother Cael",
+        "text": "Tried for calling the Grey Host down on Aldmere with his bells. He arrived at court two years AFTER the Host landed. The tribunal did not find that worth noting.\n\nHis cell is still here, downstairs. Nobody has ever cleaned it. I think nobody could bear to.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say cael corvin 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_cael_sent",
+        "npc_name": "Brother Cael",
+        "text": "Aldous sent you. Aldous is asking.\n\nForty years I've waited for one of them to ask. I thought it would be someone cleverer, to be truthful. I'm glad it was someone kind.\n\nThe stair is behind the third shelf. Take the inventory. It's time somebody other than me had read it.",
+        "buttons": [
+          {
+            "name": "Thank you, Brother.",
+            "commands": [
+              "/scriptevent siege:lore_say cael sent 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_cael_after",
+        "npc_name": "Brother Cael",
+        "text": "You've seen the list. Forty-one portraits. I used to recite it at night, like a rosary.\n\nTwo things on it were never found: the mage's notebooks and the chronicler's last volume. And one thing was never ON it, because nobody knew to look. Our saint wrote a letter she never sent. If it exists, it's wherever she went to grieve. Where does a daughter go to grieve?",
+        "buttons": [
+          {
+            "name": "Her father's tomb.",
+            "commands": [
+              "/scriptevent siege:lore_say cael after 0"
+            ]
+          },
+          {
+            "name": "I'll think about it.",
+            "commands": [
+              "/scriptevent siege:lore_say cael after 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_sigrun_first",
+        "npc_name": "Sigrun Ashby",
+        "text": "Shut the door, you're letting the cold in.\n\nYou'll be wanting the lake. Southerners always want the lake. Go and look, then. Don't walk to the middle.",
+        "buttons": [
+          {
+            "name": "What happened there?",
+            "commands": [
+              "/scriptevent siege:lore_say sigrun first 0"
+            ]
+          },
+          {
+            "name": "Why not the middle?",
+            "commands": [
+              "/scriptevent siege:lore_say sigrun first 1"
+            ]
+          },
+          {
+            "name": "Wren of Millbrook sent me.",
+            "commands": [
+              "/scriptevent siege:lore_say sigrun first 2"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_sigrun_wren",
+        "npc_name": "Sigrun Ashby",
+        "text": "Cousin Wren. Still patching people up in the dark? Good. We Ashbys are spread thin since the Lost Days, but we keep count of each other.\n\nSit. If Wren sent you, you get the long version.",
+        "buttons": [
+          {
+            "name": "Tell me.",
+            "commands": [
+              "/scriptevent siege:lore_say sigrun wren 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_sigrun_lake",
+        "npc_name": "Sigrun Ashby",
+        "text": "Three hundred years back, half of Hollowfast got out of bed on one night and walked onto the ice. My grandmother's grandmother's... it goes on a while... followed the prints at dawn. They go to the middle and stop.\n\nGran wrote down what her gran told her. It's up in my rafters. Take it down yourself, I've a bad shoulder.",
+        "buttons": [
+          {
+            "name": "I'll take it.",
+            "commands": [
+              "/scriptevent siege:lore_say sigrun lake 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_sigrun_middle",
+        "npc_name": "Sigrun Ashby",
+        "text": "Because that's where they stopped.\n\nAnd because some nights, if you stand there and look straight down, there are lights under the ice. Towers. A town. Not ours. Nobody ever built a town down there.",
+        "buttons": [
+          {
+            "name": "What happened there?",
+            "commands": [
+              "/scriptevent siege:lore_say sigrun middle 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_sigrun_hub",
+        "npc_name": "Sigrun Ashby",
+        "text": "Door. Shut. What is it?",
+        "buttons": [
+          {
+            "name": "The shrine by the lake.",
+            "commands": [
+              "/scriptevent siege:lore_say sigrun hub 0"
+            ]
+          },
+          {
+            "name": "The hunter's lodge.",
+            "commands": [
+              "/scriptevent siege:lore_say sigrun hub 1"
+            ]
+          },
+          {
+            "name": "Does the ice ever open?",
+            "commands": [
+              "/scriptevent siege:lore_say sigrun hub 2"
+            ]
+          },
+          {
+            "name": "Nothing. Keep warm.",
+            "commands": [
+              "/scriptevent siege:lore_say sigrun hub 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_sigrun_shrine",
+        "npc_name": "Sigrun Ashby",
+        "text": "Older than the village. There's a moon cut into it, round and full. Folk go out on the full moon and leave offerings and nothing happens, and they go home pleased that nothing happened.\n\nGran used to say, \"it's the other one you want.\" She said it the way you'd say it about a spoon.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say sigrun shrine 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_sigrun_lodge",
+        "npc_name": "Sigrun Ashby",
+        "text": "The knights kept a hunting lodge on the far shore. A man with white hair and a pack of hounds, hunting people, the story goes. He went out on the ice one night and the hounds came back without him.\n\nNobody goes in. Nobody's stopping you.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say sigrun lodge 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_sigrun_open",
+        "npc_name": "Sigrun Ashby",
+        "text": "I've seen it. Once. I was nine.\n\nThere was no moon at all that night, black as a boot. But I looked down, and there was a moon IN the ice, full and white, right under the shrine. And the ice by it had a seam in it, like a door ajar.\n\nI ran home. I'd run home again.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say sigrun open 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_sigrun_after",
+        "npc_name": "Sigrun Ashby",
+        "text": "So you've worked out the moon. Then you're going down there.\n\nIf you see people facing the walls of houses that look like ours: the Ashbys who walked were Hild's brother Orm, and his three girls. I'd take it kindly if you told them the family still keeps count.",
+        "buttons": [
+          {
+            "name": "I'll tell them.",
+            "commands": [
+              "/scriptevent siege:lore_say sigrun after 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_isolde_first",
+        "npc_name": "Warden Isolde",
+        "text": "Welcome to Sunscar. Water is two emeralds a skin, shade is free, and before you ask: the wind.\n\nThe statues. Everyone asks. The desert wind wore the faces away. It's in the town record.",
+        "buttons": [
+          {
+            "name": "All of them? Only the faces?",
+            "commands": [
+              "/scriptevent siege:lore_say isolde first 0"
+            ]
+          },
+          {
+            "name": "Who were the statues of?",
+            "commands": [
+              "/scriptevent siege:lore_say isolde first 1"
+            ]
+          },
+          {
+            "name": "Thank you, Warden.",
+            "commands": [
+              "/scriptevent siege:lore_say isolde first 2"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_isolde_who",
+        "npc_name": "Warden Isolde",
+        "text": "Kings. Old ones. Nobody remembers which.\n\nThere are forty statues on the avenue and one face between them. I mean, there WAS one face. They were all the same man. At different ages. I shouldn't know that. You can tell from the hands.",
+        "buttons": [
+          {
+            "name": "All the same man?",
+            "commands": [
+              "/scriptevent siege:lore_say isolde who 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_isolde_doubt",
+        "npc_name": "Warden Isolde",
+        "text": "...The wind doesn't take a nose and leave the fingers. I know. I've been warden for twenty years. I've had a long time to look at them.\n\nThe record says what it says. You're welcome to read it. It also says not to look for the fragments, because there aren't any.",
+        "buttons": [
+          {
+            "name": "Where aren't they?",
+            "commands": [
+              "/scriptevent siege:lore_say isolde doubt 0"
+            ]
+          },
+          {
+            "name": "I'll read the record.",
+            "commands": [
+              "/scriptevent siege:lore_say isolde doubt 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_isolde_hub",
+        "npc_name": "Warden Isolde",
+        "text": "Water, shade, or statues?",
+        "buttons": [
+          {
+            "name": "Statues.",
+            "commands": [
+              "/scriptevent siege:lore_say isolde hub 0"
+            ]
+          },
+          {
+            "name": "Who rules Sunscar?",
+            "commands": [
+              "/scriptevent siege:lore_say isolde hub 1"
+            ]
+          },
+          {
+            "name": "Just passing through.",
+            "commands": [
+              "/scriptevent siege:lore_say isolde hub 2"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_isolde_hub2",
+        "npc_name": "Warden Isolde",
+        "text": "You again. You've got me looking at them on my rounds now. I hope you're pleased.",
+        "buttons": [
+          {
+            "name": "The fragments.",
+            "commands": [
+              "/scriptevent siege:lore_say isolde hub2 0"
+            ]
+          },
+          {
+            "name": "Who rules Sunscar?",
+            "commands": [
+              "/scriptevent siege:lore_say isolde hub2 1"
+            ]
+          },
+          {
+            "name": "The riddle on the vault.",
+            "commands": [
+              "/scriptevent siege:lore_say isolde hub2 2"
+            ]
+          },
+          {
+            "name": "Good day, Warden.",
+            "commands": [
+              "/scriptevent siege:lore_say isolde hub2 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_isolde_fragments",
+        "npc_name": "Warden Isolde",
+        "text": "My father was warden before me. He used to say a careful man scatters things where he can find them again.\n\nA brow under the old cistern. A jaw in the east tower. An eye where the caravans water. I don't know the rest, and I don't know that, either, officially.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say isolde fragments 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_isolde_seneschal",
+        "npc_name": "Warden Isolde",
+        "text": "The Seneschal. Lord Sorrel. He's been Seneschal as long as there's been a Sunscar, they say, which is just the kind of thing people say.\n\nNobody sees him. He keeps to the lower fortress. He wears a helm. Always has. My father never saw his face either.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say isolde seneschal 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_isolde_riddle",
+        "npc_name": "Warden Isolde",
+        "text": "There's a heraldry riddle on the vault door under the fortress. \"Grey eyes over a laughing mouth, the right hand raised.\" Children here skip rope to it.\n\nI always took it for a rhyme. It's a description, isn't it. It's instructions.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say isolde riddle 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_isolde_after",
+        "npc_name": "Warden Isolde",
+        "text": "He did it himself. With a mason's chisel. So the last hands on that face would be gentle ones.\n\nTwenty years I've told travelers it was the wind.\n\nI'm changing the town record. Let the Order come and argue with me. Thank you for making me look.",
+        "buttons": [
+          {
+            "name": "It was worth looking.",
+            "commands": [
+              "/scriptevent siege:lore_say isolde after 0"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

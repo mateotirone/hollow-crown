@@ -1,0 +1,35 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shapeless": {
+    "description": {
+      "identifier": "siege:saddle_royal_recipe"
+    },
+    "tags": [
+      "siege_workshop"
+    ],
+    "ingredients": [
+      {
+        "item": "siege:saddle_cavalry"
+      },
+      {
+        "item": "minecraft:diamond"
+      },
+      {
+        "item": "minecraft:diamond"
+      },
+      {
+        "item": "minecraft:gold_ingot"
+      },
+      {
+        "item": "minecraft:gold_ingot"
+      }
+    ],
+    "result": {
+      "item": "siege:saddle_royal",
+      "count": 1
+    },
+    "unlock": {
+      "context": "AlwaysUnlocked"
+    }
+  }
+}

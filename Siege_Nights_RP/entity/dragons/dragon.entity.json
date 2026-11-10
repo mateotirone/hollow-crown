@@ -1,0 +1,49 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:dragon",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "ember": "textures/entity/siege/dragons/dragon_ember",
+    "ash": "textures/entity/siege/dragons/dragon_ash",
+    "sand": "textures/entity/siege/dragons/dragon_sand",
+    "obsidian": "textures/entity/siege/dragons/dragon_obsidian"
+   },
+   "geometry": {
+    "default": "geometry.siege_dragon"
+   },
+   "animations": {
+    "look": "animation.siege_dragon.look",
+    "idle": "animation.siege_dragon.idle",
+    "walk": "animation.siege_dragon.walk",
+    "fold": "animation.siege_dragon.fold",
+    "fly": "animation.siege_dragon.fly",
+    "breath": "animation.siege_dragon.breath"
+   },
+   "scripts": {
+    "animate": [
+     "look",
+     "idle",
+     {
+      "walk": "!query.property('siege:flying')"
+     },
+     {
+      "fold": "!query.property('siege:flying')"
+     },
+     {
+      "fly": "query.property('siege:flying')"
+     },
+     {
+      "breath": "query.property('siege:breath')"
+     }
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_dragon"
+   ]
+  }
+ }
+}

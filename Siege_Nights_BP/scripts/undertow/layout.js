@@ -4,7 +4,7 @@
 export const UNDERTOW_ID = "siege:undertow"; // the dimension id. The name players see is in TEXT.name.
 
 export const TEXT = {
-  name: "the Undertow", // placeholder name: change it here and everything players read follows
+  name: "the Hollow", // Mateo's name for it (ids and folders still say "undertow")
   riftOpened: "§5The ground groans. Somewhere below, the Rift has opened.",
 };
 

@@ -1,0 +1,40 @@
+{
+ "format_version": "1.20.10",
+ "minecraft:recipe_shaped": {
+  "description": {
+   "identifier": "siege:dragon_roost_recipe"
+  },
+  "tags": [
+   "siege_workshop"
+  ],
+  "pattern": [
+   "BGB",
+   "HMH",
+   "SSS"
+  ],
+  "key": {
+   "B": {
+    "item": "minecraft:blaze_rod"
+   },
+   "G": {
+    "item": "minecraft:gold_block"
+   },
+   "H": {
+    "item": "minecraft:hay_block"
+   },
+   "M": {
+    "item": "minecraft:magma"
+   },
+   "S": {
+    "item": "minecraft:stone_bricks"
+   }
+  },
+  "result": {
+   "item": "siege:dragon_roost",
+   "count": 1
+  },
+  "unlock": {
+   "context": "AlwaysUnlocked"
+  }
+ }
+}

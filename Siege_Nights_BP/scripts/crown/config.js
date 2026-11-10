@@ -1,9 +1,19 @@
-// The Crown, the Citadel and usurping: every number Mateo might want to tweak.
+// The High Throne, the Citadel and usurping: every number and name Mateo might want to tweak.
 // Full design: the "Crown, Citadel and Usurpation" doc.
+//
+// Who is who (Mateo, 2026-11-10): the HOLLOW CROWN belongs to the ruler of the Hollow, a max-level
+// Sorcerer (the Undertow thread's code). This folder is the OTHER prize: whoever defeats the Hollow
+// brings back a relic, becomes the most powerful player in the overworld, and their settlement
+// becomes the Citadel. The folder and ids still say "crown" from the first design.
 
 export const CROWN = {
-  citadelName: "the Hollow Throne", // placeholder name for the Citadel
-  titles: ["King", "Queen", "Monarch", "Emperor", "Empress", "Warlord", "Lord", "Lady"],
+  // Names. Change them here and every message follows.
+  relic: "the Heart of the Hollow", // what the victor brings back from the Hollow (Mateo's pick, 2026-11-10)
+  relicName: "The Heart of the Hollow", // the same, as an item name
+  throne: "the High Throne", // the overworld rulership the relic gives
+  citadelName: "Aldspire", // the Citadel (placeholder)
+  shard: "Oath Shard", // the fallen shards that give a Claim
+  titles: ["Heartbearer", "High King", "High Queen", "Monarch", "Emperor", "Empress", "Warlord"],
 
   // The Citadel
   citadelRadius: 100, // Citadel land reaches this far from its Keep Banner (a Castle reaches 80)
@@ -11,7 +21,8 @@ export const CROWN = {
   keepMaxFromBanner: 40, // the Citadel Cornerstone must be placed this close to the Keep Banner
   buildTicks: 3600, // how long the Citadel takes to rise (3600 = 3 minutes)
   royalGuardBonus: 8, // extra guard slots for the ruler
-  citadelKeepHealth: 600, // the keep heart's health if raiders ever march on the Citadel (New Source)
+  guardCost: 5, // emeralds the Treasury gets for each guard paid off when a new ruler moves in
+  citadelKeepHealth: 400, // keep heart health if raiders ever march on the Citadel (400 is the most a keep heart can have)
 
   // Ruler powers
   decreeSiegeCost: 16, // emeralds
@@ -23,7 +34,11 @@ export const CROWN = {
   returnCooldown: 12000, // 10 minutes
   purifyCost: 32, purifyAmount: 15,
 
-  // The Hunger
+  // The Hunger: what the Heart quietly does to whoever carries it. Always hidden from players.
+  //   "full"     as designed: symptoms, then easier challenges, then the raiders turn on the ruler
+  //   "cosmetic" symptoms only (whispers, dying grass, the letter), no penalties
+  //   "off"      nothing happens
+  hunger: "full",
   hollowPerNight: 3, hollowPerDecree: 4, hollowPerDefense: 10, hollowShatter: 5,
   unrestPerDecree: 2,
 
@@ -47,8 +62,7 @@ export const CROWN = {
 };
 
 export const IDS = {
-  crown: "siege:hollow_crown",
-  scepter: "siege:royal_scepter",
+  scepter: "siege:heart_of_the_hollow", // the relic
   cornerstone: "siege:citadel_cornerstone",
   throne: "siege:throne",
   shardItem: "siege:crown_shard",

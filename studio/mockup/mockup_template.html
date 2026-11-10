@@ -1,0 +1,251 @@
+<title>The Hollow Mockup</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen&family=Work+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: one full-screen 3D stage; small glass panels float over it (title top-left, blocks top-right, views along the bottom). */
+:root {
+  color-scheme: dark;
+  --fog: #2a1a48; --ink: #f1eaff; --muted: #b9a9dc; --panel: rgba(22, 15, 27, 0.78); --line: rgba(169, 196, 237, 0.28);
+  --glow: #a9c4ed; --pink: #d895b4; --focus: #d4e6fa;
+  --display: "Silkscreen", "Courier New", monospace; --body: "Work Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+html, body { height: 100%; }
+body { background: var(--fog); color: var(--ink); font-family: var(--body); font-size: 14px; line-height: 1.45; overflow: hidden; }
+* { box-sizing: border-box; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+#stage { position: fixed; inset: 0; }
+#stage canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; }
+#stage canvas:active { cursor: grabbing; }
+.panel { position: fixed; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; backdrop-filter: blur(6px); }
+.title { top: calc(12px + env(safe-area-inset-top, 0px)); left: max(16px, env(safe-area-inset-left, 0px)); padding: 10px 14px; max-width: min(340px, calc(100vw - 32px)); }
+.title .eyebrow { font-family: var(--display); font-size: 10px; letter-spacing: 0.08em; color: var(--glow); }
+.title h1 { font-family: var(--display); font-weight: 400; font-size: 22px; margin: 2px 0 4px; text-wrap: balance; }
+.title p { margin: 0; color: var(--muted); font-size: 12.5px; }
+.legend { top: calc(12px + env(safe-area-inset-top, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); padding: 10px 12px; width: 216px; max-height: calc(100% - 120px); overflow-y: auto; }
+.legend h2 { font-family: var(--display); font-weight: 400; font-size: 11px; letter-spacing: 0.06em; color: var(--muted); margin: 0 0 6px; }
+.legend h2 + ul + h2 { margin-top: 10px; }
+.legend ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 5px; }
+.legend li { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 8px; align-items: center; font-size: 12.5px; }
+.legend canvas { width: 24px; height: 24px; image-rendering: pixelated; border-radius: 3px; background: #160f1b; }
+.bar { left: max(16px, env(safe-area-inset-left, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(12px + env(safe-area-inset-bottom, 0px)); padding: 8px 10px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.bar .views { display: flex; gap: 6px; flex-wrap: wrap; }
+.btn { border: 1px solid var(--line); background: rgba(169, 196, 237, 0.08); border-radius: 6px; padding: 6px 11px; cursor: pointer; }
+.btn:hover { background: rgba(169, 196, 237, 0.18); }
+.btn[aria-pressed="true"] { background: var(--glow); color: #160f1b; border-color: var(--glow); }
+.hint { color: var(--muted); font-size: 12px; margin-left: auto; }
+#loading { position: fixed; inset: 0; display: grid; place-items: center; font-family: var(--display); color: var(--glow); background: var(--fog); z-index: 5; text-align: center; padding: 0 24px; }
+#loading[hidden] { display: none; }
+#legendToggle { display: none; }
+@media (max-width: 760px) {
+  .legend { display: none; top: auto; bottom: calc(110px + env(safe-area-inset-bottom, 0px)); max-height: 46%; }
+  .legend.open { display: block; }
+  #legendToggle { display: inline-flex; }
+  .hint { display: none; }
+  .title h1 { font-size: 18px; }
+}
+</style>
+
+<div id="stage"><canvas id="c" aria-label="3D view of the Hollow. Drag to look around."></canvas></div>
+<div id="loading">Building the valley…</div>
+
+<div class="panel title">
+  <div class="eyebrow">MOCKUP · THE DROWNED SHALLOWS</div>
+  <h1>The Hollow</h1>
+  <p>A 176-block slice of the real valley, made by the same generator the add-on uses and lit only by its own glowing blocks.</p>
+</div>
+
+<aside class="panel legend" id="legend" aria-label="Blocks in this scene">
+  <h2>YOUR NEW BLOCKS</h2><ul id="mine"></ul>
+  <h2>VANILLA STAND-INS</h2><ul id="vanilla"></ul>
+</aside>
+
+<div class="panel bar">
+  <div class="views" role="group" aria-label="Views">
+    <button class="btn" type="button" id="v-grove">Lattice tree</button>
+    <button class="btn" type="button" id="v-river">Light river</button>
+    <button class="btn" type="button" id="v-ground">Ground level</button>
+    <button class="btn" type="button" id="v-over">Whole valley</button>
+    <button class="btn" type="button" id="spin" aria-pressed="true">Drift</button>
+    <button class="btn" type="button" id="legendToggle" aria-pressed="false">Blocks</button>
+  </div>
+  <span class="hint">Drag to look · scroll or pinch to zoom · right-drag or WASD to move</span>
+</div>
+
+<script type="application/json" id="world">__WORLD__</script>
+<script type="application/json" id="tex">__TEX__</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(async function () {
+const WORLD = JSON.parse(document.getElementById("world").textContent);
+const TEX = JSON.parse(document.getElementById("tex").textContent);
+const { W, D, H, blocks, rle } = WORLD;
+const N = W * D * H;
+
+// ---------- block table ----------
+const NAMES = { "siege:veinstone": "Veinstone", "siege:undertow_moss": "Hollow Moss", "siege:hollowwood_lattice": "Hollowwood Lattice", "siege:hollowwood_core": "Hollowwood Core",
+  "siege:veilcap": "Veilcap", "siege:glimbulb": "Glimbulb", "siege:glimmerflow": "Glimmerflow", "siege:veil_rock": "Veil Rock", "siege:court_seal": "Court Seal",
+  "minecraft:blackstone": "Blackstone", "minecraft:basalt": "Basalt", "minecraft:polished_basalt": "Polished basalt", "minecraft:tuff": "Tuff", "minecraft:water": "Water",
+  "minecraft:mossy_stone_bricks": "Mossy stone bricks", "minecraft:cracked_stone_bricks": "Cracked stone bricks", "minecraft:oxidized_copper": "Oxidized copper", "minecraft:tinted_glass": "Tinted glass" };
+const KIND = { "siege:hollowwood_lattice": "cutout", "siege:veilcap": "cross", "siege:glimbulb": "cross", "siege:glimmerflow": "trans", "minecraft:water": "trans", "minecraft:tinted_glass": "trans" };
+const EMIT = { "siege:hollowwood_core": 15, "siege:glimmerflow": 13, "siege:veilcap": 11, "siege:glimbulb": 10 };
+const kind = [null], emit = [0];
+blocks.forEach((b) => { kind.push(KIND[b] || "solid"); emit.push(EMIT[b] || 0); });
+
+// ---------- voxel grid ----------
+const G = new Uint8Array(N);
+{ let p = 0; for (let i = 0; i < rle.length; i += 2) { G.fill(rle[i], p, p + rle[i + 1]); p += rle[i + 1]; } }
+const used = new Set(G);
+const at = (x, y, z) => (x < 0 || y < 0 || z < 0 || x >= W || y >= H || z >= D) ? 0 : G[(y * D + z) * W + x];
+
+// ---------- atlas ----------
+const imgs = await Promise.all(blocks.map((b) => new Promise((res) => { const im = new Image(); im.onload = () => res(im); im.src = TEX[b]; })));
+const atlas = document.createElement("canvas"); atlas.width = 16 * blocks.length; atlas.height = 16;
+const actx = atlas.getContext("2d"); imgs.forEach((im, i) => actx.drawImage(im, i * 16, 0));
+blocks.forEach((b, i) => {
+  if (!used.has(i + 1)) return;
+  const li = document.createElement("li"), cv = document.createElement("canvas"); cv.width = cv.height = 16;
+  cv.getContext("2d").drawImage(imgs[i], 0, 0); li.append(cv, document.createTextNode(NAMES[b] || b));
+  document.getElementById(b.startsWith("siege:") ? "mine" : "vanilla").append(li);
+});
+
+// ---------- light: flood out from glowing blocks, one level lost per block, like the game ----------
+const Lt = new Uint8Array(N); const q = new Int32Array(N); let qh = 0, qt = 0;
+for (let i = 0; i < N; i++) { const e = emit[G[i]]; if (e) { Lt[i] = e; q[qt++] = i; } }
+const WD = W * D;
+while (qh < qt) {
+  const i = q[qh++], l = Lt[i] - 1; if (l <= 0) continue;
+  const x = i % W, z = ((i / W) | 0) % D, y = (i / WD) | 0;
+  const tryN = (j) => { const k = kind[G[j]]; if (k === "solid" && !emit[G[j]]) return; if (Lt[j] < l) { Lt[j] = l; q[qt++] = j; } };
+  if (x > 0) tryN(i - 1); if (x < W - 1) tryN(i + 1); if (z > 0) tryN(i - W); if (z < D - 1) tryN(i + W); if (y > 0) tryN(i - WD); if (y < H - 1) tryN(i + WD);
+}
+const lightAt = (x, y, z) => (x < 0 || y < 0 || z < 0 || x >= W || y >= H || z >= D) ? 0 : Lt[(y * D + z) * W + x];
+
+// ---------- meshing ----------
+const FACES = [
+  [1, 0, 0, [[1, 0, 1], [1, 0, 0], [1, 1, 0], [1, 1, 1]], 0.80], [-1, 0, 0, [[0, 0, 0], [0, 0, 1], [0, 1, 1], [0, 1, 0]], 0.80],
+  [0, 1, 0, [[0, 1, 1], [1, 1, 1], [1, 1, 0], [0, 1, 0]], 1.00], [0, -1, 0, [[0, 0, 0], [1, 0, 0], [1, 0, 1], [0, 0, 1]], 0.55],
+  [0, 0, 1, [[0, 0, 1], [1, 0, 1], [1, 1, 1], [0, 1, 1]], 0.68], [0, 0, -1, [[1, 0, 0], [0, 0, 0], [0, 1, 0], [1, 1, 0]], 0.68]];
+const UVS = [[0, 0], [1, 0], [1, 1], [0, 1]];
+const mk = () => ({ pos: [], uv: [], col: [], idx: [] });
+const M = { solid: mk(), cutout: mk(), trans: mk() };
+const AMB = [0.30, 0.24, 0.46], LIT = [1.0, 0.94, 0.98];
+const nb = blocks.length, EPS = 0.02 / (16 * nb);
+function quad(m, corners, x, y, z, t, r, g, b) {
+  const base = m.pos.length / 3;
+  for (let k = 0; k < 4; k++) {
+    const c = corners[k]; m.pos.push(x + c[0] - W / 2, y + c[1], z + c[2] - D / 2);
+    m.uv.push((t + UVS[k][0]) / nb + (UVS[k][0] ? -EPS : EPS), UVS[k][1] ? 0.999 : 0.001); m.col.push(r, g, b);
+  }
+  m.idx.push(base, base + 1, base + 2, base, base + 2, base + 3);
+}
+const CROSS = [[[0.1, 0, 0.1], [0.9, 0, 0.9], [0.9, 1, 0.9], [0.1, 1, 0.1]], [[0.1, 0, 0.9], [0.9, 0, 0.1], [0.9, 1, 0.1], [0.1, 1, 0.9]]];
+const trees = [], rivers = [], mossTops = [];
+for (let y = 0; y < H; y++) for (let z = 0; z < D; z++) for (let x = 0; x < W; x++) {
+  const id = G[(y * D + z) * W + x]; if (!id) continue;
+  const k = kind[id], t = id - 1, e = emit[id];
+  if (k === "cross") { for (const c of CROSS) quad(M.cutout, c, x, y, z, t, 1, 1, 1); continue; }
+  if (blocks[t] === "siege:hollowwood_core" && at(x, y - 1, z) !== id && y < H - 8 && at(x, y + 6, z) === id) trees.push([x, y, z]);
+  if (blocks[t] === "siege:glimmerflow" && (x * 7 + z * 13) % 97 === 0) rivers.push([x, y, z]);
+  if (blocks[t] === "siege:undertow_moss" && (x * 5 + z * 11) % 211 === 0 && !at(x, y + 1, z)) mossTops.push([x, y, z]);
+  for (const [dx, dy, dz, corners, shade] of FACES) {
+    const n = at(x + dx, y + dy, z + dz), nk = kind[n];
+    if (nk === "solid") continue;
+    if (n === id && k !== "solid") continue;                       // no inner faces between like see-through blocks
+    if (k === "trans" && nk === "trans") continue;
+    if ((x + dx < 0 || x + dx >= W || z + dz < 0 || z + dz >= D) && dy === 0 && k === "solid" && y < H) { if (at(x, y + 1, z) && kind[at(x, y + 1, z)] === "solid") continue; }
+    let r, g, b;
+    if (e) { const s = 0.9 + 0.1 * shade; r = g = b = s; }
+    else {
+      const l = Math.pow(lightAt(x + dx, y + dy, z + dz) / 15, 1.35);
+      r = (AMB[0] + LIT[0] * l) * shade; g = (AMB[1] + LIT[1] * l) * shade; b = (AMB[2] + LIT[2] * l) * shade;
+    }
+    quad(k === "solid" ? M.solid : k === "cutout" ? M.cutout : M.trans, corners, x, y, z, t, Math.min(r, 1.1), Math.min(g, 1.1), Math.min(b, 1.1));
+  }
+}
+
+// ---------- scene ----------
+const canvas = document.getElementById("c");
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+const FOG = 0x2a1a48;
+renderer.setClearColor(FOG);
+const scene = new THREE.Scene(); scene.fog = new THREE.FogExp2(FOG, 0.0105);
+const camera = new THREE.PerspectiveCamera(62, 1, 0.1, 600);
+const tex = new THREE.CanvasTexture(atlas); tex.magFilter = THREE.NearestFilter; tex.minFilter = THREE.NearestFilter; tex.generateMipmaps = false;
+function mesh(m, opts) {
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.Float32BufferAttribute(m.pos, 3)); geo.setAttribute("uv", new THREE.Float32BufferAttribute(m.uv, 2));
+  geo.setAttribute("color", new THREE.Float32BufferAttribute(m.col, 3)); geo.setIndex(m.idx);
+  const obj = new THREE.Mesh(geo, new THREE.MeshBasicMaterial(Object.assign({ map: tex, vertexColors: true, side: THREE.DoubleSide }, opts))); scene.add(obj); return obj;
+}
+mesh(M.solid, {}); mesh(M.cutout, { alphaTest: 0.5 }); mesh(M.trans, { transparent: true, depthWrite: false });
+
+// drifting motes of light
+const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const MOTES = 500, mp = new Float32Array(MOTES * 3), ms = [];
+for (let i = 0; i < MOTES; i++) { mp[i * 3] = (Math.random() - 0.5) * W; mp[i * 3 + 1] = Math.random() * 70 + 22; mp[i * 3 + 2] = (Math.random() - 0.5) * D; ms.push(Math.random() * 6.28); }
+const mgeo = new THREE.BufferGeometry(); mgeo.setAttribute("position", new THREE.BufferAttribute(mp, 3));
+scene.add(new THREE.Points(mgeo, new THREE.PointsMaterial({ color: 0xd4e6fa, size: 0.35, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending, depthWrite: false })));
+
+// ---------- camera: orbit around a target ----------
+const cam = { tx: 0, ty: 40, tz: 0, yaw: 0.6, pitch: 0.5, dist: 150 }; let goal = null, drift = !reduce;
+const wpos = (p) => [p[0] - W / 2 + 0.5, p[1], p[2] - D / 2 + 0.5];
+const mid = (list) => list.length ? list.reduce((a, b) => (Math.hypot(b[0] - W / 2, b[2] - D / 2) < Math.hypot(a[0] - W / 2, a[2] - D / 2) ? b : a)) : [W / 2, 30, D / 2];
+const tree = wpos(mid(trees)), river = wpos(mid(rivers)), moss = wpos(mid(mossTops));
+const VIEWS = {
+  "v-grove": { tx: tree[0], ty: tree[1] + 9, tz: tree[2], yaw: 0.9, pitch: 0.12, dist: 30 },
+  "v-river": { tx: river[0], ty: river[1] + 2, tz: river[2], yaw: 2.2, pitch: 0.42, dist: 30 },
+  "v-ground": { tx: moss[0], ty: moss[1] + 2.6, tz: moss[2], yaw: -0.6, pitch: 0.03, dist: 7 },
+  "v-over": { tx: 0, ty: moss[1] + 6, tz: 0, yaw: 0.6, pitch: 0.62, dist: 150 } };
+Object.assign(cam, VIEWS["v-grove"]);
+for (const id in VIEWS) document.getElementById(id).addEventListener("click", () => { goal = Object.assign({}, VIEWS[id]); });
+const spinBtn = document.getElementById("spin"); spinBtn.setAttribute("aria-pressed", String(drift));
+spinBtn.addEventListener("click", () => { drift = !drift; spinBtn.setAttribute("aria-pressed", String(drift)); });
+const lt = document.getElementById("legendToggle"), lg = document.getElementById("legend");
+lt.addEventListener("click", () => { const o = lg.classList.toggle("open"); lt.setAttribute("aria-pressed", String(o)); });
+
+const ptrs = new Map(); let pinch = 0;
+canvas.addEventListener("contextmenu", (e) => e.preventDefault());
+canvas.addEventListener("pointerdown", (e) => { canvas.setPointerCapture(e.pointerId); ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY, b: e.button, s: e.shiftKey }); goal = null; });
+canvas.addEventListener("pointerup", (e) => { ptrs.delete(e.pointerId); pinch = 0; });
+canvas.addEventListener("pointercancel", (e) => { ptrs.delete(e.pointerId); pinch = 0; });
+function pan(dx, dz, dy) { const s = Math.sin(cam.yaw), c = Math.cos(cam.yaw); cam.tx += dx * c + dz * s; cam.tz += -dx * s + dz * c; cam.ty += dy; }
+canvas.addEventListener("pointermove", (e) => {
+  const p = ptrs.get(e.pointerId); if (!p) return;
+  const dx = e.clientX - p.x, dy = e.clientY - p.y; p.x = e.clientX; p.y = e.clientY;
+  if (ptrs.size === 2) {
+    const [a, b] = [...ptrs.values()], d = Math.hypot(a.x - b.x, a.y - b.y);
+    if (pinch) cam.dist = Math.max(3, Math.min(260, cam.dist * pinch / d)); pinch = d;
+    pan(-dx * cam.dist * 0.0008, 0, dy * cam.dist * 0.0008); return;
+  }
+  if (p.b === 2 || p.s) pan(-dx * cam.dist * 0.0016, 0, dy * cam.dist * 0.0016);
+  else { cam.yaw -= dx * 0.005; cam.pitch = Math.max(-0.3, Math.min(1.45, cam.pitch + dy * 0.005)); }
+});
+canvas.addEventListener("wheel", (e) => { e.preventDefault(); goal = null; cam.dist = Math.max(3, Math.min(260, cam.dist * Math.exp(e.deltaY * 0.0012))); }, { passive: false });
+const keys = new Set();
+addEventListener("keydown", (e) => { keys.add(e.key.toLowerCase()); }); addEventListener("keyup", (e) => keys.delete(e.key.toLowerCase()));
+
+function resize() { const w = canvas.clientWidth, h = canvas.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
+addEventListener("resize", resize); resize();
+document.getElementById("loading").hidden = true;
+
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  if (goal) { let done = true; for (const k in goal) { const d = goal[k] - cam[k]; cam[k] += d * Math.min(1, dt * 3.2); if (Math.abs(d) > 0.01) done = false; } if (done) goal = null; }
+  else if (drift && ptrs.size === 0) cam.yaw += dt * 0.05;
+  const sp = cam.dist * 0.6 * dt;
+  if (keys.has("w") || keys.has("arrowup")) { pan(0, -sp, 0); goal = null; } if (keys.has("s") || keys.has("arrowdown")) { pan(0, sp, 0); goal = null; }
+  if (keys.has("a") || keys.has("arrowleft")) { pan(-sp, 0, 0); goal = null; } if (keys.has("d") || keys.has("arrowright")) { pan(sp, 0, 0); goal = null; }
+  const cp = Math.cos(cam.pitch);
+  camera.position.set(cam.tx + Math.sin(cam.yaw) * cp * cam.dist, cam.ty + Math.sin(cam.pitch) * cam.dist, cam.tz + Math.cos(cam.yaw) * cp * cam.dist);
+  camera.lookAt(cam.tx, cam.ty, cam.tz);
+  scene.fog.density = Math.min(0.0105, 0.62 / cam.dist);
+  if (!reduce) { const a = mgeo.attributes.position; for (let i = 0; i < MOTES; i++) { a.array[i * 3 + 1] += Math.sin(now / 1800 + ms[i]) * 0.004; a.array[i * 3] += Math.cos(now / 2600 + ms[i]) * 0.003; } a.needsUpdate = true; }
+  renderer.render(scene, camera); requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+window.__ready = true;
+})().catch((err) => { document.getElementById("loading").textContent = "The 3D view could not start in this browser (" + err.message + ")."; });
+</script>

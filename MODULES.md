@@ -117,6 +117,6 @@ Need another hook? Ask the "Prepare Siege Nights code for parallel work" thread 
 - `node tools/check.mjs` (from `siege-nights/`): parses every pack JSON, checks imports, finds undefined names,
   loads everything with a fake Minecraft, runs every loop task and all self-tests. Files main.js doesn't load
   yet only produce notes, so you can run it while your feature is half done.
-- `python3 tools/build.py`: runs the check, then builds `siege-nights.mcaddon` (only scripts main.js loads are packed).
+- `python3 tools/build.py`: runs the check, then builds `hollow-crown.mcaddon` (only scripts main.js loads are packed).
 - In game: `/scriptevent siege:selftest`. It also runs at world load and tells players if something failed.
 - `archive/main-before-split.js` is the original single file, for reference.

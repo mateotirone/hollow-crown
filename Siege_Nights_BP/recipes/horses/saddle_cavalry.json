@@ -1,0 +1,38 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shapeless": {
+    "description": {
+      "identifier": "siege:saddle_cavalry_recipe"
+    },
+    "tags": [
+      "siege_workshop"
+    ],
+    "ingredients": [
+      {
+        "item": "siege:saddlecloth_padded"
+      },
+      {
+        "item": "minecraft:leather"
+      },
+      {
+        "item": "minecraft:iron_ingot"
+      },
+      {
+        "item": "minecraft:iron_ingot"
+      },
+      {
+        "item": "minecraft:iron_ingot"
+      },
+      {
+        "item": "minecraft:iron_ingot"
+      }
+    ],
+    "result": {
+      "item": "siege:saddle_cavalry",
+      "count": 1
+    },
+    "unlock": {
+      "context": "AlwaysUnlocked"
+    }
+  }
+}

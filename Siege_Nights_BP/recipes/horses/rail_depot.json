@@ -1,0 +1,37 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "siege:rail_depot_recipe"
+    },
+    "tags": [
+      "siege_workshop"
+    ],
+    "pattern": [
+      "RCR",
+      "PIP",
+      "PPP"
+    ],
+    "key": {
+      "R": {
+        "item": "minecraft:rail"
+      },
+      "C": {
+        "item": "minecraft:minecart"
+      },
+      "I": {
+        "item": "minecraft:iron_ingot"
+      },
+      "P": {
+        "tag": "minecraft:planks"
+      }
+    },
+    "result": {
+      "item": "siege:rail_depot",
+      "count": 1
+    },
+    "unlock": {
+      "context": "AlwaysUnlocked"
+    }
+  }
+}

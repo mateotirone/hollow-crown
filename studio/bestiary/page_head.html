@@ -1,0 +1,37 @@
+<title>Hollow Crown Bestiary</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: a field guide. One column of boss plates (portrait left, notes right), then family grids of smaller specimen cards. Single night-time look by choice. */
+:root{color-scheme:dark;--night:#12151c;--plate:#1a1f29;--line:#2c3442;--bone:#dcd8cc;--dim:#98a0ad;--brass:#c9a557;--toll:#7fc3d8;
+--display:"IM Fell English",Georgia,serif;--body:Inter,system-ui,sans-serif}
+body{background:var(--night);color:var(--bone);font-family:var(--body);font-size:15px;line-height:1.55}
+main,header.top{max-width:980px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{padding-block:40px 8px}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(34px,6vw,54px);line-height:1.05;margin:0 0 10px;text-wrap:balance}
+h2{font-family:var(--display);font-weight:400;font-size:28px;margin:0 0 6px;color:var(--brass)}
+h3{font-family:var(--display);font-weight:400;font-size:22px;margin:0;line-height:1.2}
+p{margin:0}.lede{color:var(--dim);max-width:65ch;margin-bottom:18px}
+.tally{display:flex;flex-wrap:wrap;gap:8px 22px;color:var(--dim);margin-top:14px;font-variant-numeric:tabular-nums}.tally b{color:var(--bone);font-weight:600}
+.spoil{margin-top:16px;padding:10px 14px;border-left:2px solid var(--toll);color:var(--toll);max-width:65ch}
+section{padding-block:34px 6px;display:flex;flex-direction:column}
+.boss{display:grid;grid-template-columns:220px minmax(0,1fr);gap:8px 24px;padding:18px 0;border-top:1px solid var(--line);align-items:start}
+.boss img,.mob img{image-rendering:auto;background:radial-gradient(circle at 50% 60%,#232a37,transparent 70%)}
+.boss div,.mob div{display:flex;flex-direction:column;gap:7px;min-width:0}
+.eyebrow{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--toll)}
+.lore{font-family:var(--display);font-style:italic;font-size:17px;color:var(--bone);opacity:.85}
+ul,ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:5px}
+.loot b{color:var(--brass);font-weight:600;margin-right:6px}.stat{color:var(--dim);font-size:13px;font-variant-numeric:tabular-nums}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px}
+.mob{background:var(--plate);border:1px solid var(--line);border-radius:4px;padding:14px;display:grid;grid-template-columns:96px minmax(0,1fr);gap:12px;align-items:start}
+.mob img{width:96px;height:96px}.mob .lore{font-size:15px}
+.note{color:var(--dim);border-top:1px solid var(--line);padding-top:14px}
+.steps{max-width:70ch;margin-bottom:22px}code{font-size:13px;background:var(--plate);padding:1px 5px;border-radius:3px;overflow-wrap:anywhere}
+main{padding-bottom:60px}
+@media(max-width:560px){.boss{grid-template-columns:1fr}.boss img{width:160px;height:160px}}
+</style>
+<header class="top"><h1>The Hollow Crown Bestiary</h1>
+<p class="lede">Everything new that walks, crawls or tolls in the world, and the seven fights that guard its secrets. Pictures are the placeholder box models.</p>
+<p class="tally"><span><b>24</b> new mobs</span><span><b>7</b> boss fights</span><span><b>9</b> named relics</span><span><b>11</b> crafting materials</span><span><b>5</b> boss keys</span></p>
+<p class="spoil">Spoilers for how every fight works. Keep this page to yourself if you want your friends to figure the bosses out.</p></header>
+<main>

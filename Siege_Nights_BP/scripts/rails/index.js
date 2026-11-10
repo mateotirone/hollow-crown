@@ -4,7 +4,7 @@
 
 import { world, system } from "@minecraft/server";
 import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
-import { onTick, isReady, moduleStore, settlementAt, isAlly, keepOf, title } from "../siege/api.js";
+import { onTick, isReady, moduleStore, settlementAt, isAlly, keepOf, title, on } from "../siege/api.js";
 import { RAIL_SETTINGS as R, REGIONS, RAILS, nextId, nearestStation, networkLines, wayTo, expressAxis } from "./data.js";
 import { stallMenu } from "../horses/index.js";
 import { isBuilder, give } from "../horses/menus.js";
@@ -214,7 +214,14 @@ world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
     let station = stationAt(block);
     if (!station) {
       // a post that was placed by command or structure: adopt it
-      if (block.typeId !== STATION_POST) return say(player, "§7This depot isn't linked. Break it and place it again on your land.");
+      if (block.typeId !== STATION_POST) {
+        // a depot that was placed by command or structure: link it if its settlement has none
+        const owner = block.dimension.id === "minecraft:overworld" ? settlementAt(block.location) : undefined;
+        if (!owner || stations().some((s) => s.owner === owner)) return say(player, "§7This depot isn't linked. Break it and place it again on your land.");
+        station = addStation(block, `${keepOf(owner)?.name ?? "A"}'s Depot`, "Depots", owner);
+        discover(player, station, true);
+        return stationMenu(player, block, station);
+      }
       if (!isBuilder(player)) return say(player, "§7This station isn't open yet.");
       station = addStation(block, `Station ${nextId(stations())}`, REGIONS[0]);
       return nameStation(player, station);
@@ -297,3 +304,32 @@ function tidyTick() {
 onTick("rails_travel", 20, travelTick);
 onTick("rails_express", 4, expressTick);
 onTick("rails_tidy", 200, tidyTick);
+
+// ---------- The test world (/scriptevent siege:showcase): two stations joined by a short powered line ----------
+
+on("showcase", ({ player, dim, nextSpot, label }) => {
+  const first = nextSpot();
+  const second = nextSpot();
+  const y = first.y, z = first.z - 2; // the line runs just behind the exhibit row
+  try {
+    for (const old of stations().filter((s) => s.showcase)) stations().splice(stations().indexOf(old), 1); // from an earlier run
+    for (let x = Math.min(first.x, second.x) - 1; x <= Math.max(first.x, second.x) + 1; x++) {
+      const powered = (x - first.x) % 4 === 0;
+      dim.getBlock({ x, y: y - 1, z })?.setType(powered ? "minecraft:redstone_block" : "minecraft:stone_bricks");
+      dim.getBlock({ x, y, z })?.setType(powered ? "minecraft:golden_rail" : "minecraft:rail");
+    }
+    [[first, "Showcase Halt"], [second, "Far Platform"]].forEach(([at, name]) => {
+      const block = dim.getBlock(at);
+      if (!block) return;
+      block.setType(STATION_POST);
+      addStation(block, name, "Kingsrest").showcase = true;
+      label(at, `Station Post\n${name}\nclick it`);
+    });
+    const here = stationAt(dim.getBlock(first));
+    if (here) discover(player, here, true); // the other one is left for you to discover
+    store.save();
+  } catch (e) {
+    console.warn(`[Hollow Crown] showcase rails: ${e}`);
+  }
+  player.sendMessage("§6Rails: two Station Posts behind you with a powered line. Click one to call a cart, walk to the other to discover it, then set it as your destination.");
+});

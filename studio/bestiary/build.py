@@ -23,7 +23,7 @@ FAMILIES = {
     "boss_prop": ["inanimate", "siege_boss_prop"], "projectile": ["inanimate"],
 }
 # mobs whose abilities are run by scripts/bestiary/mobs.js
-SCRIPTED = {"bell_ringer", "torchbearer", "crow_mage", "lost_villager", "changeling", "wrongling", "echo_hound", "tolling_shade",
+SCRIPTED = {"bell_ringer", "torchbearer", "crow_mage", "lost_villager", "changeling", "wrongling", "stone_vigil", "echo_hound", "tolling_shade",
             "dune_wyrm", "bog_hag", "mire_toad", "inquisitor"}
 DROPS = {
     "hollow_footman": [("siege:hollow_ash", 0, 2, 1), ("minecraft:iron_nugget", 0, 3, 1)],
@@ -35,6 +35,7 @@ DROPS = {
     "lost_villager": [("siege:hollow_ash", 0, 1, 1), ("minecraft:emerald", 0, 1, 1)],
     "changeling": [("siege:changeling_ichor", 1, 1, 0.5), ("siege:hollow_ash", 0, 2, 1)],
     "wrongling": [("siege:hollow_ash", 2, 4, 1), ("minecraft:ender_pearl", 1, 1, 0.3)],
+    "stone_vigil": [("siege:hollow_ash", 2, 4, 1), ("minecraft:quartz", 1, 3, 1), ("minecraft:amethyst_shard", 1, 2, 0.4)],
     "echo_hound": [("minecraft:bone", 1, 2, 1), ("siege:hollow_ash", 0, 2, 1)],
     "mirror_knight": [("minecraft:iron_ingot", 1, 3, 1), ("minecraft:amethyst_shard", 1, 2, 1)],
     "tolling_shade": [("siege:hollow_ash", 2, 3, 1), ("minecraft:gold_nugget", 1, 4, 1)],
@@ -65,6 +66,9 @@ def sensor_for(m):
         t.append({"on_damage": {"filters": self_tag("siege_parry")}, "cause": "entity_attack", "deals_damage": "no"})
     if mid == "wrongling":
         t.append({"on_damage": {"filters": self_tag("siege_watched")}, "damage_multiplier": 0.25})
+    if mid == "stone_vigil":   # while it is being watched it is solid stone: only a pickaxe bites
+        picks = [{"test": "has_equipment", "subject": "other", "domain": "hand", "operator": "not", "value": f"minecraft:{k}_pickaxe"} for k in ("wooden", "stone", "copper", "iron", "golden", "diamond", "netherite")]
+        t.append({"on_damage": {"filters": {"all_of": [self_tag("siege_watched")] + picks}}, "deals_damage": "no"})
     if mid == "mirror_knight":
         t.append({"on_damage": {"filters": self_tag("siege_mirror_melee")}, "cause": "entity_attack", "damage_multiplier": 0.25})
         t.append({"on_damage": {"filters": self_tag("siege_mirror_ranged")}, "cause": "projectile", "damage_multiplier": 0.1})
@@ -97,7 +101,7 @@ def entity_bp(m):
     c = {
         "minecraft:type_family": {"family": families},
         "minecraft:health": {"value": m["hp"], "max": m["hp"]},
-        "minecraft:collision_box": {"width": round(w * sc, 2), "height": round(h * sc, 2)},
+        "minecraft:collision_box": {"width": w, "height": h},  # minecraft:scale grows the hitbox too
         "minecraft:nameable": {},
         "minecraft:physics": {},
         "minecraft:pushable": {"is_pushable": not m.get("static") and not m.get("boss"), "is_pushable_by_piston": not m.get("static")},
@@ -131,7 +135,9 @@ def entity_bp(m):
     # who it fights
     filt = None
     if fam in ("raider",) or m.get("raider"): filt = roster.RAIDER_TARGETS
-    elif fam in ("hollow", "summon", "wild_hostile", "undead", "boss", "boss_add"): filt = roster.any_of(roster.fam("player"), roster.fam("siege_guard"))
+    elif fam in ("hollow", "summon"):  # Hollow things leave the Hollow's ruler alone (player tag siege_hollow_ruler, set by whoever builds that feature)
+        filt = roster.any_of({"all_of": [roster.fam("player"), {"test": "has_tag", "subject": "other", "operator": "!=", "value": "siege_hollow_ruler"}]}, roster.fam("siege_guard"))
+    elif fam in ("wild_hostile", "undead", "boss", "boss_add"): filt = roster.any_of(roster.fam("player"), roster.fam("siege_guard"))
     elif fam == "order": filt = roster.any_of(roster.MARKED, {"all_of": [roster.fam("monster"), roster.fam("creeper", "!=")]})
     dist = 40 if m.get("boss") else 24
     if mid == "echo_hound": dist = 10
@@ -150,7 +156,7 @@ def entity_bp(m):
     elif mid == "lost_villager":
         c["minecraft:attack"] = {"damage": m["dmg"]}          # never attacks by itself: mobs.js moves and strikes while unseen
     elif mid == "changeling":
-        groups["siege:disguised"] = {"minecraft:variant": {"value": 0}, "minecraft:behavior.move_towards_dwelling_restriction": {"priority": 6}}
+        groups["siege:disguised"] = {"minecraft:variant": {"value": 0}}
         groups["siege:revealed"] = {"minecraft:variant": {"value": 1}, **tgt, **fight, "minecraft:movement": {"value": 0.34}}
         events["minecraft:entity_spawned"] = {"add": {"component_groups": ["siege:disguised"]}}
         events["siege:reveal"] = {"remove": {"component_groups": ["siege:disguised"]}, "add": {"component_groups": ["siege:revealed"]}}
@@ -161,6 +167,8 @@ def entity_bp(m):
     if m.get("lifetime"):
         c["minecraft:timer"] = {"time": m["lifetime"], "looping": False, "time_down_event": {"event": "siege:fade"}}
         groups["siege:gone"] = {"minecraft:instant_despawn": {}}; events["siege:fade"] = {"add": {"component_groups": ["siege:gone"]}}
+    if mid == "stone_vigil":   # mapmakers: /event entity @e[type=siege:stone_vigil,r=4] siege:place makes one stay for good
+        groups["siege:placed"] = {"minecraft:persistent": {}}; events["siege:place"] = {"add": {"component_groups": ["siege:placed"]}}
     if m.get("boss"):
         c["minecraft:boss"] = {"should_darken_sky": False, "hud_range": 48}; c["minecraft:persistent"] = {}
         c["minecraft:fire_immune"] = {}
@@ -224,6 +232,17 @@ def spawn_rule(m):
     if s["light"] is not None: cond["minecraft:brightness_filter"] = {"min": 0, "max": s["light"], "adjust_for_weather": True}
     if s["pop"] == "monster": cond["minecraft:difficulty_filter"] = {"min": "easy", "max": "hard"}
     return {"format_version": "1.8.0", "minecraft:spawn_rules": {"description": {"identifier": "siege:" + m["id"], "population_control": s["pop"]}, "conditions": [cond]}}
+
+# ---------- locked textures: never overwrite art someone has painted ----------
+import fnmatch
+def _locked():
+    f = os.path.join(os.path.dirname(os.path.abspath(__file__)), "locked.txt")
+    return [l.strip() for l in open(f) if l.strip() and not l.startswith("#")] if os.path.exists(f) else []
+LOCKED = _locked(); SKIPPED = []
+def save_tex(im, path):
+    rel = path[len(RP):]
+    if os.path.exists(path) and any(fnmatch.fnmatch(rel, pat) for pat in LOCKED): SKIPPED.append(rel); return
+    os.makedirs(os.path.dirname(path), exist_ok=True); im.save(path)
 
 # ---------- item icons ----------
 def icon(kind, col):
@@ -320,8 +339,8 @@ def main():
         model = Model(mid, m["pal"], seed=sum(map(ord, mid))); m["model"](model)
         write(RP + f"models/entity/bestiary/{mid}.geo.json", model.geometry(f"geometry.siege_b.{mid}"))
         os.makedirs(RP + "textures/entity/siege/bestiary", exist_ok=True)
-        model.texture().save(RP + f"textures/entity/siege/bestiary/{mid}.png")
-        if m.get("variants"): model.texture(m["pal_alt"]).save(RP + f"textures/entity/siege/bestiary/{mid}_alt.png")
+        save_tex(model.texture(), RP + f"textures/entity/siege/bestiary/{mid}.png")
+        if m.get("variants"): save_tex(model.texture(m["pal_alt"]), RP + f"textures/entity/siege/bestiary/{mid}_alt.png")
         anims[f"animation.siege_b.{mid}"] = anim_for(m, model)
         write(RP + f"entity/bestiary/{mid}.entity.json", client_entity(m))
         write(BP + f"entities/bestiary/{mid}.json", entity_bp(m))
@@ -343,13 +362,13 @@ def main():
     for iid, name, kind, col, st, lore_text in all_items:
         write(BP + f"items/bestiary/{iid}.json", item_json(iid, name, kind, st))
         os.makedirs(RP + "textures/items/bestiary", exist_ok=True)
-        icon(kind, col).save(RP + f"textures/items/bestiary/{iid}.png")
+        save_tex(icon(kind, col), RP + f"textures/items/bestiary/{iid}.png")
         tex["siege_b_" + iid] = {"textures": f"textures/items/bestiary/{iid}"}
         lang.append(f"item.siege:{iid}.name={name}")
         data_items["siege:" + iid] = {"name": name, "lore": lore_text}
         if kind in ("helmet", "chest"):
             write(RP + f"attachables/bestiary_{iid}.json", attachable(iid, kind))
-            armor_tex(col, 200 if kind == "helmet" else 255).save(RP + f"textures/models/armor/siege_b_{iid}.png")
+            save_tex(armor_tex(col, 200 if kind == "helmet" else 255), RP + f"textures/models/armor/siege_b_{iid}.png")
     # shared files: read again right before writing (other threads edit them too)
     it_path = RP + "textures/item_texture.json"; it = json.load(open(it_path)); it["texture_data"].update(tex); write(it_path, it)
     merge_lang(RP + "texts/en_US.lang", lang)

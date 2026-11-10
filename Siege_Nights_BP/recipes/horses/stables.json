@@ -1,0 +1,37 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "siege:stables_recipe"
+    },
+    "tags": [
+      "siege_workshop"
+    ],
+    "pattern": [
+      "HHH",
+      "FSF",
+      "PPP"
+    ],
+    "key": {
+      "H": {
+        "item": "minecraft:hay_block"
+      },
+      "F": {
+        "item": "minecraft:oak_fence"
+      },
+      "S": {
+        "item": "minecraft:saddle"
+      },
+      "P": {
+        "tag": "minecraft:planks"
+      }
+    },
+    "result": {
+      "item": "siege:stables",
+      "count": 1
+    },
+    "unlock": {
+      "context": "AlwaysUnlocked"
+    }
+  }
+}

@@ -6,6 +6,11 @@
 //   on("hallBuilt", ({ owner, level, style, marks, first }) => ...)     marks = world spots: tree, sage, throne ...
 //   on("pathChosen", ({ player, path }))   on("rankUp", ({ player, path, rank }))   on("emberFell", ...)
 //   player dynamic property "siege:townhall_hero": JSON { path, rank, level, skills, resonance, ... }
+//   on("hollowStep", (request) => ...)   a Marked player cast Hollow Step: move request.player into the Hollow (or back out)
+//                                        and set request.handled = true, or set request.refused = "why not"
+//   on("hollowClaimReady", ({ player }))  a player learned Voice of the Hollow (skills.arc_warden): they may rule the Hollow
+//   emit("offerRole", { player, role }) / emit("grantRole", { player, role })   story-driven roles ("knight", "marked");
+//                                        answered by "roleOffered", "roleChosen" or "roleRefused" ({ player, role, why })
 //   player tags: siege_resonant (Marked and loud, Resonance 70+), siege_echo_sight (Echo Sight is up)
 
 import { world, system } from "@minecraft/server";
@@ -20,6 +25,7 @@ import { openTree, choosePath, treeMenu, EMBER, BOUND_EMBER, OATH_BANNER } from 
 import { passiveTick, watchfireTick, dropEmber } from "./progress.js";
 import { knightTick, chargeTick } from "./knight.js";
 import { markedTick } from "./marked.js";
+import "./showcase.js";
 
 export { grantPoints, grantRenown, heroOf, hallOf };
 export { startBuild } from "./build.js"; // other features can raise their own templates with the same engine
@@ -147,12 +153,15 @@ api.addTests("townhall", {
     api.assertEqual(blockedReason(SKILL.way_horse, { ...hero, level: 4, skills: { way_fleet: 1 } }, 2), "Needs Renown 5");
     api.assertEqual(blockedReason(SKILL.keep_watchfire, { ...hero, skills: { keep_watchfire: 1 } }, 5), "Mastered");
     api.assert(!canBranch("arcana", "knight") && canBranch("keep", "none"));
+    api.assertEqual(blockedReason(SKILL.arc_step, { ...hero, path: "marked", level: 2, victor: true, skills: { arc_blink: 1 } }, 3), undefined);
+    api.assertEqual(blockedReason(SKILL.arc_step, { ...hero, path: "marked", level: 2, skills: { arc_blink: 1 } }, 3), "Needs Renown 12");
   },
   "ranks follow points sworn to the path": () => {
     api.assertEqual(rankOf("knight", {}).name, "Squire");
     api.assertEqual(rankOf("knight", { blade_bash: 3 }).name, "Man-at-Arms");
     api.assertEqual(rankOf("marked", { arc_bolt: 3, arc_ward: 3, arc_blink: 1 }).name, "Adept");
     api.assertEqual(rankOf("none", {}), undefined);
+    api.assertEqual(rankOf("marked", { arc_bolt: 3, arc_ward: 3, arc_quiet: 3, arc_blink: 3, arc_echo: 3, arc_bind: 3 }).name, "Sorcerer");
     api.assertEqual(spentIn({ keep_hearth: 2, arc_step: 1 }), 5);
   },
   "every hall draws in every style": () => {

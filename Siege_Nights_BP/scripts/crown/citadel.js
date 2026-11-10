@@ -1,15 +1,15 @@
 // The Citadel: raising it from the Cornerstone, its land, its border, and who sits in it.
 
-import { world, system, BlockPermutation, BlockVolume, MolangVariableMap, GameMode } from "@minecraft/server";
+import { world, system, ItemStack, BlockPermutation, BlockVolume, MolangVariableMap, GameMode } from "@minecraft/server";
 import { MessageFormData } from "@minecraft/server-ui";
 import {
-  isReady, getState, saveState, keepOf, keepBlock, overworld, title, onTick,
+  isReady, getState, saveState, keepOf, keepBlock, overworld, title, onTick, on,
   addLandClaim, addFoundingCheck, addKeepHealthHook, addGuardLimitHook,
-  guardTag, GUARD_TYPES, GUARD_COST, BALLISTA, TREBUCHET, KEEP_BANNER, COLORS, DYE_RGB,
+  guardTag, GUARD_TYPES, BALLISTA, TREBUCHET, KEEP_BANNER, COLORS, DYE_RGB,
 } from "../siege/api.js";
 import { CROWN, IDS } from "./config.js";
 import { citadelPlan, colorJobs, gateToward, thronePlace, outsideGate, GATE_NAMES, KEEP_HALF } from "./layout.js";
-import { crown, saveCrown, ruler, isRuler, rulerLabel, playerById, announce, giveItem, surfaceY } from "./state.js";
+import { crown, saveCrown, ruler, isRuler, rulerLabel, announce, giveItem, surfaceY } from "./state.js";
 
 export const citadel = () => crown().citadel;
 export const inCitadel = (loc) => {
@@ -26,7 +26,7 @@ addLandClaim((location) => {
 });
 
 addFoundingCheck((player) => (isRuler(player.id) && citadel()
-  ? `§cYour seat is ${CROWN.citadelName}. The Crown does not move house.` : undefined));
+  ? `§cYour seat is ${CROWN.citadelName}. The throne does not move house.` : undefined));
 
 addKeepHealthHook((owner, hp) => (isRuler(owner) && citadel() ? Math.max(hp, CROWN.citadelKeepHealth) : hp));
 addGuardLimitHook((owner, limit) => (isRuler(owner) ? limit + CROWN.royalGuardBonus : limit));
@@ -86,14 +86,14 @@ world.afterEvents.playerPlaceBlock.subscribe((event) => {
   const c = crown();
   const keep = keepOf(player.id);
   let problem;
-  if (!isRuler(player.id)) problem = "§cOnly the wearer of the Hollow Crown can lay the Citadel's Cornerstone.";
+  if (!isRuler(player.id)) problem = `§cOnly the bearer of ${CROWN.relic} can lay the Citadel's Cornerstone.`;
   else if (c.citadel) problem = `§c${CROWN.citadelName} already stands.`;
   else if (!keep) problem = "§cRaise a Keep Banner first. The Citadel grows around it.";
   else if (Math.hypot(block.location.x - keep.x, block.location.z - keep.z) > CROWN.keepMaxFromBanner) problem = `§cToo far out. Lay it within ${CROWN.keepMaxFromBanner} blocks of your Keep Banner.`;
   else if (block.location.y + 80 > block.dimension.heightRange.max) problem = "§cToo high up. The Great Keep is 76 blocks tall.";
   if (problem) {
     block.setType("minecraft:air");
-    if (player.getGameMode() !== GameMode.Creative) giveItem(player, new (requireItemStack())(IDS.cornerstone, 1));
+    if (player.getGameMode() !== GameMode.Creative) giveItem(player, new ItemStack(IDS.cornerstone, 1));
     return player.sendMessage(problem);
   }
   if (c.cornerstone) { // moved: take the old one away
@@ -104,10 +104,6 @@ world.afterEvents.playerPlaceBlock.subscribe((event) => {
   const gate = gateToward(keep, world.getDefaultSpawnLocation());
   player.sendMessage(`§6The Great Keep will stand here, 25 blocks square around this stone, and everything inside that square will be cleared. The gatehouse will face ${GATE_NAMES[gate]}. §7Break the stone to move it, or click it to raise ${CROWN.citadelName}.`);
 });
-
-// ItemStack is only needed for refunds; imported lazily to keep this file's import list short
-import { ItemStack } from "@minecraft/server";
-const requireItemStack = () => ItemStack;
 
 function outlineTick() {
   const c = crown();
@@ -159,7 +155,7 @@ function tickingAreas(c, on) {
   });
 }
 
-export function raiseCitadel(player, stone) {
+export function raiseCitadel(player, stone, { fast = false } = {}) {
   const c = crown();
   const keep = keepOf(player.id);
   c.citadel = {
@@ -167,6 +163,7 @@ export function raiseCitadel(player, stone) {
     gate: gateToward(keep, world.getDefaultSpawnLocation()), color: keep.color ?? 14,
     built: false, next: 0, retry: [],
   };
+  if (fast) c.citadel.fast = true; // test worlds: up in about 30 seconds
   c.cornerstone = null;
   saveCrown();
   tickingAreas(c.citadel, true);
@@ -178,7 +175,7 @@ function buildTick() {
   const c = citadel();
   if (!c || c.built) return;
   const jobs = jobsFor(c);
-  const perRun = Math.max(4, Math.ceil(jobs.length / (CROWN.buildTicks / 2)));
+  const perRun = Math.max(4, Math.ceil(jobs.length / (CROWN.buildTicks / 2))) * (c.fast ? 6 : 1);
   if (c.next < jobs.length) {
     const end = Math.min(jobs.length, c.next + perRun);
     for (; c.next < end; c.next++) if (!build(jobs[c.next], c)) c.retry.push(c.next);
@@ -319,7 +316,7 @@ export function moveIn(to, spot) {
 
   if (mine) { // give up the old plot: the banner falls, the guards there are paid off
     try { if (keepBlock(mine)) overworld().runCommand(`setblock ${mine.x} ${mine.y} ${mine.z} air destroy`); } catch { /* not loaded */ }
-    c.treasury += (st.guards[to.id] ?? 0) * GUARD_COST;
+    c.treasury += (st.guards[to.id] ?? 0) * CROWN.guardCost;
     c.strays.push({ id: to.id, x: mine.x, z: mine.z });
     c.strays = c.strays.slice(-6);
   }
@@ -360,7 +357,6 @@ function loyaltyTick() {
   if (!r || !spot || !c.formerRulers.length) return;
   const near = { location: { x: spot.x, y: spot.y, z: spot.z }, maxDistance: CROWN.citadelRadius + 60 };
   const color = keepOf(r.id)?.color ?? 14;
-  let roster = getState().guards[r.id] ?? 0;
   for (const old of c.formerRulers) {
     for (const type of Object.keys(GUARD_TYPES)) {
       for (const guard of dim.getEntities({ type, tags: [guardTag(old)], ...near })) {
@@ -376,11 +372,16 @@ function loyaltyTick() {
       }
     }
   }
-  void roster;
 }
+
+// Someone who settles again keeps their new guards
+on("keepFounded", ({ player }) => {
+  const c = crown();
+  if (!c.strays.some((s) => s.id === player.id)) return;
+  c.strays = c.strays.filter((s) => s.id !== player.id);
+  saveCrown();
+});
 
 onTick("crown citadel build", 2, buildTick);
 onTick("crown citadel border", 20, () => { borderTick(); outlineTick(); });
 onTick("crown citadel loyalty", 100, () => { loyaltyTick(); repaintTick(); });
-
-export { playerById };

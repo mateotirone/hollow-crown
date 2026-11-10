@@ -22,7 +22,7 @@ function start(task) {
       beforeEach();
       task.fn();
     } catch (e) {
-      console.warn(`[Siege Nights] ${task.name}: ${e}`);
+      console.warn(`[Hollow Crown] ${task.name}: ${e}`);
     }
   }, task.everyTicks);
 }

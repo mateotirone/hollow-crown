@@ -93,7 +93,7 @@ function posts(p, points, y0, y1) {
 
 // Gable roof with the ridge running along z. overhang 1 = eaves stick out one block.
 function gableRoof(p, x0, x1, z0, z1, y, overhang = 1) {
-  const pitch = p.style.pitch ?? 1;
+  const pitch = x1 - x0 >= 16 ? 1 : p.style.pitch ?? 1; // steep roofs only on the smaller halls, or they dwarf the towers
   const zs = z0 - overhang, ze = z1 + overhang;
   for (let i = 0; ; i++) {
     const xl = x0 - overhang + i, xr = x1 + overhang - i, yy = y + i * pitch;

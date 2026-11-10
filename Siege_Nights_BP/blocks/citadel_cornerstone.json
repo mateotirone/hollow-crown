@@ -1,0 +1,37 @@
+{
+  "format_version": "1.21.60",
+  "minecraft:block": {
+    "description": {
+      "identifier": "siege:citadel_cornerstone",
+      "menu_category": {
+        "category": "items"
+      }
+    },
+    "components": {
+      "minecraft:display_name": "tile.siege:citadel_cornerstone.name",
+      "minecraft:geometry": "minecraft:geometry.full_block",
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "siege_cornerstone_side",
+          "render_method": "opaque"
+        },
+        "up": {
+          "texture": "siege_cornerstone_top",
+          "render_method": "opaque"
+        },
+        "down": {
+          "texture": "siege_cornerstone_top",
+          "render_method": "opaque"
+        }
+      },
+      "minecraft:destructible_by_mining": {
+        "seconds_to_destroy": 1
+      },
+      "minecraft:destructible_by_explosion": {
+        "explosion_resistance": 1200
+      },
+      "minecraft:light_emission": 7,
+      "minecraft:map_color": "#c9a53a"
+    }
+  }
+}

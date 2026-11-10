@@ -100,7 +100,33 @@ Custom block shapes live in `models/blocks/` (battlement, arrow_slit, spire, bra
 
 | Asset | File | Status |
 |---|---|---|
-| Pack icon | `pack_icon.png` (same image in both packs) | Placeholder |
+| Pack icon: the Hollow Crown over a cracked castle wall at night | `pack_icon.png` (same image in both packs, `studio/art/build_pack_icon.py`) | **Final style, awaiting your review** |
+
+## The Crown and the Citadel
+
+Placeholders came from `studio/build_crown.py`; final art for the icons and blocks is by `studio/art/build_hc_items.py` and `build_hc_blocks.py`, so do not regenerate those PNGs. The Citadel itself is built from blocks that already exist (Castle Stone, Battlement, Arrow Slit, Portcullis, Spire Roof, Brazier, plus vanilla deepslate, quartz, gold and wool), so it needs no art of its own.
+
+| Asset | File | Status |
+|---|---|---|
+| The Hollow Crown, item icon (16×16). Now the Hollow ruler's crown, not the overworld ruler's | `textures/items/siege_hollow_crown.png` | **Final style, awaiting your review** |
+| The Hollow Crown, worn (64×32): gold band at 0,0, crown points at 0,12, gem at 8,12. Shape in `models/entity/hollow_crown.geo.json` (band with eight points, tallest at the front) | `textures/models/armor/siege_hollow_crown.png` | Placeholder |
+| The Heart of the Hollow (16×16 item): a still-beating ember-heart, dark rose with pale violet veins. Replaces the Royal Scepter, whose icon `siege_royal_scepter.png` is no longer used | `textures/items/siege_heart_of_the_hollow.png` | Placeholder |
+| Oath Shard (16×16 item, was "Crown Shard"), pale violet crystal | `textures/items/siege_crown_shard.png` | **Final style, awaiting your review** |
+| Gauntlet of Challenge (16×16 item) | `textures/items/siege_gauntlet_of_challenge.png` | **Final style, awaiting your review** |
+| Citadel Cornerstone (16×16 block): stone with a gold band, crown mark on top | `textures/blocks/siege_cornerstone_side.png`, `siege_cornerstone_top.png` | **Final style, awaiting your review** |
+| The Throne (16×16 block sheet: gold and red cushion patch at 0,0, finials at 12,0, stone plinth at 0,8). Shape in `models/blocks/throne.geo.json` | `textures/blocks/siege_throne.png` | **Final style, awaiting your review**, the shape deserves a proper model in the art pass |
+| Fallen Oath Shard (16×16 block), glowing crystal cluster. Shape in `models/blocks/fallen_shard.geo.json` | `textures/blocks/siege_fallen_shard.png` | **Final style, awaiting your review** |
+| Throne Seal (64×64 entity): a floating seal-stone in front of the throne during a Storm. Shape in `models/entity/throne_seal.geo.json` | `textures/entity/siege_throne_seal.png` | Placeholder |
+
+Wanted later for this feature: a boss-bar style look for the Throne Seal, a darker "hollowed" variant of the Crown for a ruler who has worn it too long, and Citadel-only banner hangings with an emblem instead of plain wool.
+
+## Town hall and Tree of Oaths (16×16 blocks, final art by `studio/art/build_hc_blocks.py`)
+
+| Asset | File | Status |
+|---|---|---|
+| Hall Cornerstone block (side, top) and item icon | `textures/blocks/siege_hall_cornerstone_side.png`, `siege_hall_cornerstone_top.png`, `textures/items/siege_hall_cornerstone.png` | **Final style, awaiting your review** |
+| Tree of Oaths bark (plain and Marked), crown (unsworn, Knight, Marked), plinth | `textures/blocks/siege_oath_tree_bark.png`, `_bark_marked.png`, `siege_oath_tree_crown.png`, `_crown_knight.png`, `_crown_marked.png`, `siege_oath_tree_plinth.png` | **Final style, awaiting your review** |
+| Oath Banner, Warden's Bell (16×16 icons) | `textures/items/siege_oath_banner.png`, `siege_wardens_bell.png` | **Final style, awaiting your review** |
 
 ## Planned, not built yet
 
@@ -117,7 +143,7 @@ Look comes from Mateo's Undertow concept art: purple twilight, dark basalt, holl
 | Asset | File | Status |
 |---|---|---|
 | Veinstone (dark rock with glowing purple veins, the main ground rock) | `textures/blocks/siege_veinstone.png` | **Final style, awaiting your review** |
-| Undertow Moss (purple web-like moss, ground cover) | `textures/blocks/siege_undertow_moss.png` | **Final style, awaiting your review**, wants separate top and side later |
+| Hollow Moss (`siege:undertow_moss`, purple web-like moss, ground cover) | `textures/blocks/siege_undertow_moss.png` | **Final style, awaiting your review**, wants separate top and side later |
 | Veil Rock (the ceiling, near black) | `textures/blocks/siege_veil_rock.png` | **Final style, awaiting your review** |
 | Hollowwood Lattice (see-through honeycomb wood of the giant trees, transparent holes) | `textures/blocks/siege_hollowwood_lattice.png` | **Final style, awaiting your review** |
 | Hollowwood Core (same lattice with glowing pink-orange filling the holes) | `textures/blocks/siege_hollowwood_core.png` | **Final style, awaiting your review** |
@@ -139,6 +165,152 @@ Look comes from Mateo's Undertow concept art: purple twilight, dark basalt, holl
 |---|---|---|
 | Plot Stone (claim marker: compass star on top, gold claim band on the sides) | `textures/blocks/siege_plot_stone_top.png`, `siege_plot_stone_side.png`, `siege_plot_stone_bottom.png` | **Final style, awaiting your review** (`studio/art/build_hollowcrown.py`) |
 
+## Horses and rail (icons and blocks: final art by `studio/art/build_hc_items.py` and `build_hc_blocks.py`; do not regenerate from `studio/build_horses.py`)
+
+Icons and blocks are painted. The horse coats further down are still to do. Keep file names and sizes.
+
+| Asset | File | Status |
+|---|---|---|
+| Halter, Horse Whistle, Riding Crop (16×16 icons, transparent) | `textures/items/horses/siege_halter.png`, `siege_horse_whistle.png`, `siege_riding_crop.png` | **Final style, awaiting your review** |
+| Horseshoes: iron, diamond, netherite (16×16 icons, transparent; a pair of U-shaped shoes in each metal) | `textures/items/horses/siege_horseshoes_iron.png`, `_diamond.png`, `_netherite.png` | **Final style, awaiting your review** |
+| Saddle kits: Padded Saddlecloth (plain quilted cloth), Cavalry (leather with steel fittings), Royal (crimson with gold trim) (16×16 icons, transparent) | `textures/items/horses/siege_saddlecloth_padded.png`, `siege_saddle_cavalry.png`, `siege_saddle_royal.png` | **Final style, awaiting your review** |
+| Caparison icon (16×16, transparent; folded heraldic horse cloth) | `textures/items/horses/siege_caparison.png` | **Final style, awaiting your review** |
+| Stables block (16×16 side and top: timber stall with hay) | `textures/blocks/travel/siege_stables_side.png`, `siege_stables_top.png` | **Final style, awaiting your review** |
+| Rail Depot block (16×16 side and top: timber and iron, rail motif on top) | `textures/blocks/travel/siege_rail_depot_side.png`, `siege_rail_depot_top.png` | **Final style, awaiting your review** |
+| Station Post block (16×16 side and top: stone post with a gold-framed name plate) | `textures/blocks/travel/siege_station_post_side.png`, `siege_station_post_top.png` | **Final style, awaiting your review** |
+| Breeder's Post block (16×16 side and top: timber post with a horse notice) | `textures/blocks/travel/siege_breeder_post_side.png`, `siege_breeder_post_top.png` | **Final style, awaiting your review** |
+
+**Still needed, no file yet (the steed uses vanilla horse art until then).** Each is a 64×64 horse texture in the vanilla `horse2` layout; add the path to `entity/steed.entity.json` when painted.
+
+| Asset | Suggested file | Status |
+|---|---|---|
+| Five breed coats: Vale Courser (bright chestnut, white blaze), Frostmarch Destrier (heavy white-grey, feathered legs), Saltreach Runner (dapple grey, sea-salt mane), Emberwaste Sandstrider (pale gold), Blackfen Mire-Pony (black-brown, shaggy) | `textures/entity/siege/steed_<breed>.png` | Needed (now: vanilla coat colors) |
+| Crossbred coat (piebald mix) | `textures/entity/siege/steed_crossbred.png` | Needed (now: a parent's vanilla coat) |
+| Knight Warhorse overlay (armored chamfron and crinet, heavier build) | `textures/entity/siege/steed_warhorse.png` | Needed (now: just 12% bigger) |
+| Marked Hollow Steed (spectral pale blue-white, hollow eyes, needs transparency) | `textures/entity/siege/steed_hollow.png` | Needed (now: a pale wash over the normal coat) |
+| Caparison worn layer (armor layer, white cloth so the banner color tints it) | `textures/entity/siege/steed_caparison.png` | Needed (now: tinted vanilla leather horse armor) |
+| Horseshoes and saddle kits on the horse (optional small overlays on hooves and saddle) | `textures/entity/siege/steed_gear_<kit>.png` | Optional |
+
+## Lore, tomes and library (final art by `studio/art/build_hc_items.py` and `build_hc_blocks.py`; run `studio/build_lore.py` only with `--no-art`)
+
+| Asset | File(s) | Status |
+|---|---|---|
+| Archive Shelf casing (sides, top and bottom) | `textures/blocks/siege_shelf_side.png`, `siege_shelf_top.png` | **Final style, awaiting your review** |
+| Archive Shelf front ×7 (empty, then 1 to 6 tomes: two rows of three slots, one book spine per shelved tome) | `textures/blocks/siege_shelf_front_0.png` to `siege_shelf_front_6.png` | **Final style, awaiting your review**. Could later get a regional variant per build style |
+| Dusty Tome (a closed book lying in the world; 32×16 box-UV for a 10×3×8 book, shape in `models/blocks/tome_cache.geo.json`) | `textures/blocks/hc_tome_cache.png` | **Final style, awaiting your review** |
+| Lore Tome item (old leather book, gilt bands) | `textures/items/siege_lore_tome.png` | **Final style, awaiting your review**. Nice to have later: one cover per collection (8) |
+| Ledger of Whispers item (green journal with a quill) | `textures/items/siege_ledger.png` | **Final style, awaiting your review** |
+| Cipher Wheel item (two brass letter rings) | `textures/items/siege_cipher_wheel.png` | **Final style, awaiting your review** |
+| Tide Glass item (pale sea-worn shard of glass; file keeps its old name) | `textures/items/siege_mirror_glass.png` | **Final style, awaiting your review** |
+| Story characters ×8 (Sister Wren, Sir Aldous Vane, Old Mag, the Lighthouse Keeper, Archivist Pell, Brother Cael, Sigrun Ashby, Warden Isolde) | none yet: they use the built-in NPC entity with its stock skins | Not started. Custom NPC skins need the vanilla `npc` entity's skin list overridden in the resource pack |
+
+## Bestiary: mobs and bosses (placeholders by `studio/bestiary/build.py`, in `textures/entity/siege/bestiary/`)
+
+Skins were repainted on 2026-11-10 by the mobs thread (`studio/bestiary/skin.py`) with the shared palette (`studio/art/palette.py`; `studio/art/skinlib.py` is a drop-in shader). Files in `studio/bestiary/locked.txt` are hand-finished and skipped by its build. The item icons below are final art by `studio/art/build_hc_items.py`.
+
+Every mob has a box model in `models/entity/bestiary/<id>.geo.json` and a generated house-style skin (looks come from `studio/bestiary/roster.py`). Re-running the build repaints them, so before hand-finishing a skin add its path to `studio/bestiary/locked.txt`. Ghost ones need their alpha kept. Tone: uneasy, not horror.
+
+| Asset | File | Size | Status |
+|---|---|---|---|
+| Hollow Footman (Mob) | `hollow_footman.png` | 128×128 | House style, generated |
+| Bell-Ringer (Mob) | `bell_ringer.png` | 64×64 | House style, generated |
+| Shieldwall Brute (Mob) | `shieldwall_brute.png` | 128×128 | House style, generated |
+| Torchbearer (Mob) | `torchbearer.png` | 64×64 | House style, generated |
+| Siege Ogre (Mob) | `siege_ogre.png` | 128×128 | House style, generated |
+| Crow-Mage (Mob) | `crow_mage.png` | 64×64 | House style, generated |
+| Hollow Crow (Mob) | `hollow_crow.png` | 64×32 | House style, generated |
+| Lost Villager (Mob) | `lost_villager.png` | 64×64 | House style, generated |
+| Changeling (Mob) | `changeling.png`, `changeling_alt.png` (revealed form) | 64×64 | House style, generated |
+| Wrongling (Mob) | `wrongling.png` | 64×64 | House style, generated |
+| Stone Vigil (Mob) | `stone_vigil.png` | 128×128 | House style, generated |
+| Echo Hound (Mob) | `echo_hound.png` | 64×64 | House style, generated |
+| Mirror Knight (Mob) | `mirror_knight.png` | 128×128 | House style, generated |
+| Tolling Shade (Mob, ghost (alpha)) | `tolling_shade.png` | 64×64 | House style, generated |
+| Frost Stag (Mob) | `frost_stag.png` | 64×64 | House style, generated |
+| Rimewolf (Mob) | `rimewolf.png` | 64×64 | House style, generated |
+| Brine Lurker (Mob) | `brine_lurker.png` | 128×128 | House style, generated |
+| Ash Scarab (Mob) | `ash_scarab.png` | 64×32 | House style, generated |
+| Dune Wyrm (Mob) | `dune_wyrm.png` | 128×128 | House style, generated |
+| Bog Hag (Mob) | `bog_hag.png` | 128×128 | House style, generated |
+| Mire Toad (Mob) | `mire_toad.png` | 64×32 | House style, generated |
+| Barrow Wight (Mob) | `barrow_wight.png` | 64×64 | House style, generated |
+| Ashen Squire (Mob) | `ashen_squire.png` | 64×64 | House style, generated |
+| Ashen Knight (Mob) | `ashen_knight.png` | 128×128 | House style, generated |
+| Inquisitor (Mob) | `inquisitor.png` | 128×128 | House style, generated |
+| The Clockwork Reeve (Boss) | `clockwork_reeve.png` | 128×128 | House style, generated |
+| Reeve's Cog (Boss helper) | `reeve_cog.png` | 128×128 | House style, generated |
+| The Pale Huntsman (Boss) | `pale_huntsman.png` | 64×64 | House style, generated |
+| The Drowned Bride (Boss, ghost (alpha)) | `drowned_bride.png` | 128×128 | House style, generated |
+| The Ash Seneschal (Boss) | `ash_seneschal.png` | 128×128 | House style, generated |
+| The Mother of Changelings (Boss) | `mother_of_changelings.png` | 128×128 | House style, generated |
+| The Mother of Changelings (Boss helper) | `mother_echo.png` | 128×128 | House style, generated |
+| The Warlord King (Boss) | `warlord_king.png` | 128×128 | House style, generated |
+| Oswin the Last (Boss) | `oswin_the_last.png` | 128×128 | House style, generated |
+| The King's Hollow (Boss helper, ghost (alpha)) | `oswin_reflection.png` | 128×128 | House style, generated |
+| Warlord (Mob) | `hollow_warlord.png` | 128×128 | House style, generated |
+| Rime Pillar (Fight prop, ghost (alpha)) | `rime_pillar.png` | 128×128 | House style, generated |
+| Chapel Bell (Fight prop) | `chapel_bell.png` | 64×64 | House style, generated |
+| Hollow Bolt (Projectile) | `hollow_bolt.png` | 64×32 | House style, generated |
+
+### Bestiary items (16×16, in `textures/items/bestiary/`)
+
+| Asset | File | Status |
+|---|---|---|
+| Hollow Ash (material) | `hollow_ash.png` | **Final style, awaiting your review** |
+| Pale Antler (material) | `pale_antler.png` | **Final style, awaiting your review** |
+| Rime Pelt (material) | `rime_pelt.png` | **Final style, awaiting your review** |
+| Brine Scale (material) | `brine_scale.png` | **Final style, awaiting your review** |
+| Ash Glass (material) | `ash_glass.png` | **Final style, awaiting your review** |
+| Wyrm Scale (material) | `wyrm_scale.png` | **Final style, awaiting your review** |
+| Toad Venom (material) | `toad_venom.png` | **Final style, awaiting your review** |
+| Wight Dust (material) | `wight_dust.png` | **Final style, awaiting your review** |
+| Clockwork Cog (material) | `clockwork_cog.png` | **Final style, awaiting your review** |
+| Drowned Pearl (material) | `drowned_pearl.png` | **Final style, awaiting your review** |
+| Changeling Ichor (material) | `changeling_ichor.png` | **Final style, awaiting your review** |
+| Stopped Clock Key (boss key) | `stopped_clock_key.png` | **Final style, awaiting your review** |
+| Pale Horn (boss key) | `pale_horn.png` | **Final style, awaiting your review** |
+| Drowned Wedding Ring (boss key) | `drowned_ring.png` | **Final style, awaiting your review** |
+| Faceless Seal (boss key) | `faceless_seal.png` | **Final style, awaiting your review** |
+| Mire Effigy (boss key) | `mire_effigy.png` | **Final style, awaiting your review** |
+| Minute Hand (boss relic, sword) | `minute_hand.png` | **Final style, awaiting your review** |
+| Rimefang Bow (boss relic, bow) | `rimefang_bow.png` | **Final style, awaiting your review** |
+| Widow's Veil (boss relic, helmet) | `widows_veil.png` | **Final style, awaiting your review** |
+| Seneschal's Greatshield (boss relic, shield) | `seneschal_greatshield.png` | **Final style, awaiting your review** |
+| Faceless Crown Shard (boss relic, shard) | `faceless_crown_shard.png` | **Final style, awaiting your review** |
+| Mire Heart (boss relic, charm) | `mire_heart.png` | **Final style, awaiting your review** |
+| The Warlord's Brand (boss relic, sword) | `warlords_brand.png` | **Final style, awaiting your review** |
+| Oath of Oswin (boss relic, sword) | `oath_of_oswin.png` | **Final style, awaiting your review** |
+| Crownless Mantle (boss relic, chest) | `crownless_mantle.png` | **Final style, awaiting your review** |
+
+### Bestiary worn relics (64×32, in `textures/models/armor/`)
+
+| Asset | File | Status |
+|---|---|---|
+| Widow's Veil, worn (see-through veil) | `siege_b_widows_veil.png` | House style, generated |
+| Crownless Mantle, worn | `siege_b_crownless_mantle.png` | House style, generated |
+
+Still to model (no art at all yet): held 3D models for the Seneschal's Greatshield and Rimefang Bow (flat icons in hand for now), and custom boss sounds (vanilla sounds are used).
+
 ## For threads adding new assets
 
 Add a row here with the file path, size, what it should look like, and whether it needs transparency. A flat placeholder PNG at the right path is fine. The textures thread paints the final art over it and keeps the file name, size and transparency, so your JSON keeps working. Once a row says "Final style", don't regenerate that PNG from a placeholder script.
+| The Hollow Choir, the Conductor (64×64 box-UV skin; tall faceless robe, ring crown, long spread arms, baton) | `textures/entity/siege/undertow/choir_conductor.png`, model `models/entity/undertow/choir_conductor.geo.json` | Placeholder (flat colour), model is a rough block-out |
+| Singer (64×64 box-UV skin; narrow pale robe, head tipped back, mouth a dark hollow) | `textures/entity/siege/undertow/choir_singer.png`, model `models/entity/undertow/choir_singer.geo.json` | Placeholder (flat colour), model is a rough block-out |
+| Choir Ore (Veinstone with humming violet crystals, glows faintly) | `textures/blocks/siege_choir_ore.png` | **Final style, awaiting your review** |
+| Raw Choir Ore (item, violet crystal lump) | `textures/items/siege_raw_choir_ore.png` | **Final style, awaiting your review** |
+| Choirsteel Ingot (item, pale violet metal bar) | `textures/items/siege_choirsteel_ingot.png` | **Final style, awaiting your review** |
+| Bell of the Hollow Crown (`siege:wardens_bell`, item, small dark violet hand bell) | `textures/items/siege_wardens_bell.png` | **Final style, awaiting your review** |
+
+### Dragons (placeholders by `studio/build_dragons.py`; it never overwrites a PNG that exists)
+
+| Asset | File | Status |
+|---|---|---|
+| Dragon skins ×4: Ember (dull red, tan belly), Ash (grey, orange eye), Sand (gold, teal eye), Obsidian (near-black violet, pink eye). 128×128 box-UV, model `models/entity/dragons/dragon.geo.json` (body, 2-part neck, head + jaw, 3-part tail, 4 legs, 2-part wings, saddle bone shown only when saddled). Should look old and watchful, not friendly; wing membranes can use alpha | `textures/entity/siege/dragons/dragon_ember.png`, `dragon_ash.png`, `dragon_sand.png`, `dragon_obsidian.png` | Placeholder, model is a rough block-out |
+| Dragon Egg (16×16 icon, transparent; dark red scaled egg, one side glowing warm) | `textures/items/dragons/siege_dragon_egg.png` | Placeholder |
+| Dragon Saddle (16×16 icon, transparent; heavy dark leather, chain girth) | `textures/items/dragons/siege_dragon_saddle.png` | Placeholder |
+| Dragon Horn (16×16 icon, transparent; curved bone horn, gold mouthpiece) | `textures/items/dragons/siege_dragon_horn.png` | Placeholder |
+| Dragon Roost (16×16 side + top; stone brick hearth with a gold band, top is scorched straw around an ember bed) | `textures/blocks/dragons/siege_dragon_roost_side.png`, `_top.png` | Placeholder |
+| Dragon Nest (16×16 side + top; wild nest of straw, bone and sandstone, top shows a dark red egg) | `textures/blocks/dragons/siege_dragon_nest_side.png`, `_top.png` | Placeholder |
+
+Still to do for dragons: real wing-fold and flap animation pass once seen in game, own sounds (ravager and ender dragon sounds are borrowed).
+| NPC ruler of the Hollow (64×64 box-UV skin; Sorcerer in a dark violet robe wearing the Hollow Crown) | `textures/entity/siege/undertow/hollow_regent.png`, model `models/entity/undertow/hollow_regent.geo.json` | Placeholder (flat colour), model is a rough block-out |

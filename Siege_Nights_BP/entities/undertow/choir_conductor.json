@@ -1,0 +1,92 @@
+{
+ "format_version": "1.21.60",
+ "minecraft:entity": {
+  "description": {
+   "identifier": "siege:choir_conductor",
+   "is_spawnable": false,
+   "is_summonable": true,
+   "is_experimental": false
+  },
+  "component_groups": {},
+  "components": {
+   "minecraft:type_family": {
+    "family": [
+     "monster",
+     "mob",
+     "hollow",
+     "siege_boss"
+    ]
+   },
+   "minecraft:health": {
+    "value": 600,
+    "max": 600
+   },
+   "minecraft:collision_box": {
+    "width": 1.4,
+    "height": 3.4
+   },
+   "minecraft:nameable": {},
+   "minecraft:physics": {
+    "has_gravity": false
+   },
+   "minecraft:pushable": {
+    "is_pushable": false,
+    "is_pushable_by_piston": false
+   },
+   "minecraft:knockback_resistance": {
+    "value": 1.0
+   },
+   "minecraft:movement": {
+    "value": 0
+   },
+   "minecraft:damage_sensor": {
+    "triggers": [
+     {
+      "on_damage": {
+       "filters": {
+        "test": "has_tag",
+        "subject": "self",
+        "value": "siege_boss_shielded"
+       }
+      },
+      "deals_damage": "no"
+     },
+     {
+      "cause": "fall",
+      "deals_damage": "no"
+     },
+     {
+      "cause": "suffocation",
+      "deals_damage": "no"
+     },
+     {
+      "cause": "drowning",
+      "deals_damage": "no"
+     },
+     {
+      "cause": "lightning",
+      "deals_damage": "no"
+     },
+     {
+      "cause": "void",
+      "deals_damage": "no"
+     }
+    ]
+   },
+   "minecraft:behavior.look_at_player": {
+    "priority": 8,
+    "look_distance": 32
+   },
+   "minecraft:persistent": {},
+   "minecraft:fire_immune": {},
+   "minecraft:experience_reward": {
+    "on_death": "query.last_hit_by_player ? 500 : 0"
+   },
+   "minecraft:boss": {
+    "should_darken_sky": false,
+    "hud_range": 64
+   }
+  },
+  "events": {}
+ }
+}

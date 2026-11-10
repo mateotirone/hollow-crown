@@ -1,0 +1,36 @@
+{
+  "format_version": "1.21.60",
+  "minecraft:block": {
+    "description": {
+      "identifier": "siege:rail_depot",
+      "menu_category": {
+        "category": "items"
+      }
+    },
+    "components": {
+      "minecraft:display_name": "tile.siege:rail_depot.name",
+      "minecraft:geometry": "minecraft:geometry.full_block",
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "siege_rail_depot_side",
+          "render_method": "opaque"
+        },
+        "up": {
+          "texture": "siege_rail_depot_top",
+          "render_method": "opaque"
+        },
+        "down": {
+          "texture": "siege_rail_depot_top",
+          "render_method": "opaque"
+        }
+      },
+      "minecraft:map_color": "#6b5a4a",
+      "minecraft:destructible_by_mining": {
+        "seconds_to_destroy": 2.5
+      },
+      "minecraft:destructible_by_explosion": {
+        "explosion_resistance": 6
+      }
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+ "entity_sounds": {
+  "entities": {
+   "siege:steed": {
+    "volume": 1.0,
+    "pitch": [
+     0.8,
+     1.2
+    ],
+    "events": {
+     "ambient": "mob.horse.idle",
+     "armor": "mob.horse.armor",
+     "breathe": "mob.horse.breathe",
+     "death": "mob.horse.death",
+     "eat": "mob.horse.eat",
+     "hurt": "mob.horse.hit",
+     "jump": "mob.horse.jump",
+     "land": "mob.horse.land",
+     "mad": "mob.horse.angry",
+     "saddle": "mob.horse.leather",
+     "step": "mob.horse.wood"
+    }
+   },
+   "siege:dragon": {
+    "volume": 1.0,
+    "pitch": [
+     0.6,
+     0.8
+    ],
+    "events": {
+     "ambient": "mob.ravager.ambient",
+     "hurt": "mob.ravager.hurt",
+     "death": "mob.ravager.death",
+     "step": "mob.ravager.step"
+    }
+   }
+  }
+ }
+}
