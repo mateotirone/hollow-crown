@@ -1,0 +1,36 @@
+{
+ "format_version": "1.20.10",
+ "minecraft:recipe_shaped": {
+  "description": {
+   "identifier": "siege:choirsteel_shovel_recipe"
+  },
+  "tags": [
+   "crafting_table"
+  ],
+  "pattern": [
+   " C ",
+   " N ",
+   " Q "
+  ],
+  "key": {
+   "C": {
+    "item": "siege:choirsteel_ingot"
+   },
+   "Q": {
+    "item": "siege:gloamquill"
+   },
+   "N": {
+    "item": "minecraft:netherite_shovel"
+   }
+  },
+  "result": {
+   "item": "siege:choirsteel_shovel",
+   "count": 1
+  },
+  "unlock": [
+   {
+    "item": "siege:choirsteel_ingot"
+   }
+  ]
+ }
+}

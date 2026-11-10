@@ -1,0 +1,32 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:pretender_seer",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/pretender_seer"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.pretender_seer"
+   },
+   "animations": {
+    "main": "animation.siege_b.pretender_seer"
+   },
+   "scripts": {
+    "animate": [
+     "main"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ],
+   "spawn_egg": {
+    "base_color": "#302446",
+    "overlay_color": "#78beff"
+   }
+  }
+ }
+}

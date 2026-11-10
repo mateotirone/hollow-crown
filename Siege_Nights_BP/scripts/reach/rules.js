@@ -210,8 +210,8 @@ export const WAVES = {
   flank: { name: "The Flank", weight: 0.9, line: "§7Seventeen past. From the other side." },
   breach: { name: "The Breach", weight: 1, line: "§7Seventeen past. They have brought tools." },
   dark: { name: "The Dark Hour", weight: 0.9, line: "§7Seventeen past. The torches go low." },
-  feint: { name: "The Feint", weight: 0.5, line: "§7Seventeen past. Noise at the far wall." },
-  ring: { name: "The Ring", weight: 0.8, line: "§7Seventeen past. From everywhere, thinly." },
+  feint: { kind: "mystery", name: "The Feint", weight: 0.5, line: "§7Seventeen past. Noise at the far wall." },
+  ring: { kind: "journey", name: "The Ring", weight: 0.8, line: "§7Seventeen past. From everywhere, thinly." },
   quiet: { name: "The Held Breath", weight: 0.05, line: "§7Seventeen past. Nothing comes. You would rather something did." },
   toll: { name: "The Toll", weight: 1.3, line: "§43:17" },
   tide: { name: "A Tide", weight: 0, line: "§7Daylight. They come anyway." },
@@ -225,14 +225,15 @@ const baseRoles = (waves) => {
 // Night shapes: the same number of waves, put together differently. No shape comes twice in a row,
 // so two sieges in a row never play out the same way. `from` is the first stage that uses the shape.
 const middle = (list, fn) => list.map((r, i) => (i === 0 || i === list.length - 1 ? r : fn(r, i)));
+// kind: how the night feels, in the Storyteller's words (fight, mystery, journey, quiet, social, build). Shape ids are saved; never rename one.
 export const SHAPES = {
-  old: { name: "The Old Count", from: 1, min: 1, about: "A knock, then the press, then the toll.", roles: (w) => baseRoles(w) },
-  feint: { name: "The Feint", from: 1, min: 3, about: "The first wave was noise at the wrong wall.", roles: (w) => ["feint", ...baseRoles(w).slice(1)] },
-  hammer: { name: "The Hammer", from: 1, min: 3, about: "They led with their strength and knocked afterwards.", roles: (w) => { const l = baseRoles(w); [l[0], l[1]] = [l[1], l[0]]; return l; } },
-  ring: { name: "The Ring", from: 1, min: 3, about: "Every wave came from every side.", roles: (w) => baseRoles(w).map((r) => (r === "toll" ? r : "ring")) },
-  breath: { name: "The Held Breath", from: 1, min: 3, about: "Hours of nothing, and then all of it at once.", roles: (w) => baseRoles(w).map((r, i) => (i < Math.ceil((w - 1) / 2) ? "quiet" : r === "knock" ? "press" : r)) },
-  sappers: { name: "The Sappers' Night", from: 2, min: 3, about: "They came for the wall and not for you.", roles: (w) => middle(baseRoles(w), () => "breach") },
-  blind: { name: "The Blind Night", from: 3, min: 4, about: "The torches kept going low.", roles: (w) => middle(baseRoles(w), (r, i) => (i % 2 ? "dark" : r)) },
+  old: { kind: "fight", name: "The Old Count", from: 1, min: 1, about: "A knock, then the press, then the toll.", roles: (w) => baseRoles(w) },
+  feint: { kind: "mystery", name: "The Feint", from: 1, min: 3, about: "The first wave was noise at the wrong wall.", roles: (w) => ["feint", ...baseRoles(w).slice(1)] },
+  hammer: { kind: "fight", name: "The Hammer", from: 1, min: 3, about: "They led with their strength and knocked afterwards.", roles: (w) => { const l = baseRoles(w); [l[0], l[1]] = [l[1], l[0]]; return l; } },
+  ring: { kind: "journey", name: "The Ring", from: 1, min: 3, about: "Every wave came from every side.", roles: (w) => baseRoles(w).map((r) => (r === "toll" ? r : "ring")) },
+  breath: { kind: "quiet", name: "The Held Breath", from: 1, min: 3, about: "Hours of nothing, and then all of it at once.", roles: (w) => baseRoles(w).map((r, i) => (i < Math.ceil((w - 1) / 2) ? "quiet" : r === "knock" ? "press" : r)) },
+  sappers: { kind: "build", name: "The Sappers' Night", from: 2, min: 3, about: "They came for the wall and not for you.", roles: (w) => middle(baseRoles(w), () => "breach") },
+  blind: { kind: "mystery", name: "The Blind Night", from: 3, min: 4, about: "The torches kept going low.", roles: (w) => middle(baseRoles(w), (r, i) => (i % 2 ? "dark" : r)) },
 };
 
 // Tonight's shape: one the stage has opened, that fits the wave count, and is not the one from last time
