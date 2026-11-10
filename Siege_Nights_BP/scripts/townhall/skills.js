@@ -88,7 +88,7 @@ export const SKILLS = [
   S("arc_resonant", "arcana", 3, "Resonant Soul", 2, 3, ["While Resonance is 70 or more, powers are 25% / 50% stronger."], { needs: "arc_quiet" }),
   S("arc_hollowborn", "arcana", 4, "Choirborn", 1, 6, ["Powers cost 25% less Resonance and cool down 30% faster. At 100 Resonance you enter a Crescendo: 10s of free casting, then you crash."], { needs: "arc_step" }),
   S("arc_hollowstep", "arcana", 4, "Veilstep", 1, 5, ["Power. Step out of the world and into the Hollow, wherever you stand. Cast it again there to step back to where you left. Resonance +40. Cooldown 60s."], { power: true, needs: "arc_step" }),
-  S("arc_warden", "arcana", 5, "The Last Art", 1, 8, ["The peak of the Marked. The Hollow answers to you now: you may claim its throne and rule it as its Warden."], { needs: "arc_hollowstep" }),
+  S("arc_warden", "arcana", 5, "The Last Art", 1, 8, ["The peak of the Marked. The Hollow answers to you now: you may claim its throne and rule it as its Warden.", "Asks three things of you: a Sovereign's Throne, which only a settlement that has won the Grand Siege can raise; Renown 30; and Veilstep."], { needs: "arc_hollowstep" }),
   S("arc_crownless", "arcana", 5, "Crownless", 1, 8, ["Ember Bolt arcs to 2 more enemies near the first."], { needs: "arc_hollowborn" }),
 
   // ---------------- WING (Dragon Rider, Emberwaste) ----------------
