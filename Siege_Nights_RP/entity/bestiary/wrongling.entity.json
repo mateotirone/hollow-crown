@@ -1,0 +1,32 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:wrongling",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/wrongling"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.wrongling"
+   },
+   "animations": {
+    "main": "animation.siege_b.wrongling"
+   },
+   "scripts": {
+    "animate": [
+     "main"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ],
+   "spawn_egg": {
+    "base_color": "#d6d2c8",
+    "overlay_color": "#0a080a"
+   }
+  }
+ }
+}

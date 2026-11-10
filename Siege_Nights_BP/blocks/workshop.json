@@ -1,0 +1,42 @@
+{
+  "format_version": "1.21.60",
+  "minecraft:block": {
+    "description": {
+      "identifier": "siege:workshop",
+      "menu_category": {
+        "category": "items"
+      }
+    },
+    "components": {
+      "minecraft:display_name": "tile.siege:workshop.name",
+      "minecraft:crafting_table": {
+        "crafting_tags": [
+          "siege_workshop"
+        ],
+        "table_name": "Siege Workshop"
+      },
+      "minecraft:geometry": "minecraft:geometry.full_block",
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "siege_workshop_side",
+          "render_method": "opaque"
+        },
+        "up": {
+          "texture": "siege_workshop_top",
+          "render_method": "opaque"
+        },
+        "down": {
+          "texture": "siege_desk_bottom",
+          "render_method": "opaque"
+        }
+      },
+      "minecraft:destructible_by_mining": {
+        "seconds_to_destroy": 2.5
+      },
+      "minecraft:destructible_by_explosion": {
+        "explosion_resistance": 6
+      },
+      "minecraft:map_color": "#6e6e6e"
+    }
+  }
+}

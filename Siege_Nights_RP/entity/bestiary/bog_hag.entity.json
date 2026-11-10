@@ -1,0 +1,32 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:bog_hag",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/bog_hag"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.bog_hag"
+   },
+   "animations": {
+    "main": "animation.siege_b.bog_hag"
+   },
+   "scripts": {
+    "animate": [
+     "main"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ],
+   "spawn_egg": {
+    "base_color": "#3c4028",
+    "overlay_color": "#ff8c28"
+   }
+  }
+ }
+}

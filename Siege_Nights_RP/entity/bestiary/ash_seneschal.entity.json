@@ -1,0 +1,32 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:ash_seneschal",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/ash_seneschal"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.ash_seneschal"
+   },
+   "animations": {
+    "main": "animation.siege_b.ash_seneschal"
+   },
+   "scripts": {
+    "animate": [
+     "main"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ],
+   "spawn_egg": {
+    "base_color": "#5a504c",
+    "overlay_color": "#963c1e"
+   }
+  }
+ }
+}

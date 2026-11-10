@@ -1,0 +1,32 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:echo_hound",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/echo_hound"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.echo_hound"
+   },
+   "animations": {
+    "main": "animation.siege_b.echo_hound"
+   },
+   "scripts": {
+    "animate": [
+     "main"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ],
+   "spawn_egg": {
+    "base_color": "#282c3c",
+    "overlay_color": "#78dcff"
+   }
+  }
+ }
+}

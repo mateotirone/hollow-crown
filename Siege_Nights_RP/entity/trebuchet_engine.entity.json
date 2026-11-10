@@ -1,0 +1,23 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "siege:trebuchet_engine",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "default": "textures/entity/siege_trebuchet"
+      },
+      "geometry": {
+        "default": "geometry.siege_trebuchet"
+      },
+      "animations": {
+        "fire": "animation.siege_trebuchet.fire"
+      },
+      "render_controllers": [
+        "controller.render.default"
+      ]
+    }
+  }
+}

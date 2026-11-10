@@ -1,0 +1,89 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.siege_ram.wheels": {
+      "loop": true,
+      "bones": {
+        "wheel_fl": {
+          "rotation": [
+            "query.modified_distance_moved * 60",
+            0,
+            0
+          ]
+        },
+        "wheel_fr": {
+          "rotation": [
+            "query.modified_distance_moved * 60",
+            0,
+            0
+          ]
+        },
+        "wheel_bl": {
+          "rotation": [
+            "query.modified_distance_moved * 60",
+            0,
+            0
+          ]
+        },
+        "wheel_br": {
+          "rotation": [
+            "query.modified_distance_moved * 60",
+            0,
+            0
+          ]
+        }
+      }
+    },
+    "animation.siege_ram.strike": {
+      "animation_length": 0.8,
+      "bones": {
+        "beam": {
+          "position": {
+            "0.0": [
+              0,
+              0,
+              0
+            ],
+            "0.4": [
+              0,
+              1,
+              7
+            ],
+            "0.55": [
+              0,
+              0,
+              -6
+            ],
+            "0.8": [
+              0,
+              0,
+              0
+            ]
+          },
+          "rotation": {
+            "0.0": [
+              0,
+              0,
+              0
+            ],
+            "0.4": [
+              -6,
+              0,
+              0
+            ],
+            "0.55": [
+              3,
+              0,
+              0
+            ],
+            "0.8": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    }
+  }
+}

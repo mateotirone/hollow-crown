@@ -1,0 +1,136 @@
+{
+ "format_version": "1.21.60",
+ "minecraft:entity": {
+  "description": {
+   "identifier": "siege:clockwork_reeve",
+   "is_spawnable": true,
+   "is_summonable": true,
+   "is_experimental": false
+  },
+  "component_groups": {},
+  "components": {
+   "minecraft:type_family": {
+    "family": [
+     "monster",
+     "mob",
+     "hollow",
+     "siege_boss"
+    ]
+   },
+   "minecraft:health": {
+    "value": 320,
+    "max": 320
+   },
+   "minecraft:collision_box": {
+    "width": 1.4,
+    "height": 2.9
+   },
+   "minecraft:nameable": {},
+   "minecraft:physics": {},
+   "minecraft:pushable": {
+    "is_pushable": false,
+    "is_pushable_by_piston": true
+   },
+   "minecraft:knockback_resistance": {
+    "value": 1.0
+   },
+   "minecraft:damage_sensor": {
+    "triggers": [
+     {
+      "on_damage": {
+       "filters": {
+        "test": "has_tag",
+        "subject": "self",
+        "value": "siege_boss_shielded"
+       }
+      },
+      "deals_damage": "no"
+     },
+     {
+      "cause": "fall",
+      "deals_damage": "no"
+     },
+     {
+      "cause": "suffocation",
+      "deals_damage": "no"
+     }
+    ]
+   },
+   "minecraft:movement": {
+    "value": 0.25
+   },
+   "minecraft:experience_reward": {
+    "on_death": "query.last_hit_by_player ? 150 : 0"
+   },
+   "minecraft:behavior.look_at_player": {
+    "priority": 8,
+    "look_distance": 8
+   },
+   "minecraft:behavior.random_look_around": {
+    "priority": 9
+   },
+   "minecraft:behavior.hurt_by_target": {
+    "priority": 1,
+    "alert_same_type": false
+   },
+   "minecraft:navigation.walk": {
+    "can_path_over_water": true,
+    "avoid_water": true,
+    "can_open_doors": false,
+    "can_pass_doors": true,
+    "avoid_damage_blocks": true
+   },
+   "minecraft:movement.basic": {},
+   "minecraft:jump.static": {},
+   "minecraft:behavior.float": {
+    "priority": 0
+   },
+   "minecraft:behavior.random_stroll": {
+    "priority": 7,
+    "speed_multiplier": 0.8
+   },
+   "minecraft:behavior.nearest_attackable_target": {
+    "priority": 2,
+    "must_see": false,
+    "reselect_targets": true,
+    "within_radius": 40,
+    "entity_types": [
+     {
+      "filters": {
+       "any_of": [
+        {
+         "test": "is_family",
+         "subject": "other",
+         "operator": "==",
+         "value": "player"
+        },
+        {
+         "test": "is_family",
+         "subject": "other",
+         "operator": "==",
+         "value": "siege_guard"
+        }
+       ]
+      },
+      "max_dist": 40
+     }
+    ]
+   },
+   "minecraft:attack": {
+    "damage": 9
+   },
+   "minecraft:behavior.melee_attack": {
+    "priority": 3,
+    "speed_multiplier": 1.25,
+    "track_target": true
+   },
+   "minecraft:boss": {
+    "should_darken_sky": false,
+    "hud_range": 48
+   },
+   "minecraft:persistent": {},
+   "minecraft:fire_immune": {}
+  },
+  "events": {}
+ }
+}

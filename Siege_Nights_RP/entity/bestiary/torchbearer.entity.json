@@ -1,0 +1,32 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:torchbearer",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/torchbearer"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.torchbearer"
+   },
+   "animations": {
+    "main": "animation.siege_b.torchbearer"
+   },
+   "scripts": {
+    "animate": [
+     "main"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ],
+   "spawn_egg": {
+    "base_color": "#5c3c24",
+    "overlay_color": "#ffaa28"
+   }
+  }
+ }
+}

@@ -1,0 +1,93 @@
+{
+  "format_version": "1.21.40",
+  "siege:castle_stone": {
+    "sound": "stone"
+  },
+  "siege:portcullis": {
+    "sound": "metal"
+  },
+  "siege:mossy_castle_stone": {
+    "sound": "stone"
+  },
+  "siege:cracked_castle_stone": {
+    "sound": "stone"
+  },
+  "siege:battlement": {
+    "sound": "stone"
+  },
+  "siege:arrow_slit": {
+    "sound": "stone"
+  },
+  "siege:spire_roof": {
+    "sound": "stone"
+  },
+  "siege:timber_frame": {
+    "sound": "wood"
+  },
+  "siege:timber_frame_cross": {
+    "sound": "wood"
+  },
+  "siege:brazier": {
+    "sound": "metal"
+  },
+  "siege:castle_gate": {
+    "sound": "wood"
+  },
+  "siege:keep_banner": {
+    "sound": "wood"
+  },
+  "siege:quartermaster_desk": {
+    "sound": "wood"
+  },
+  "siege:workshop": {
+    "sound": "stone"
+  },
+  "siege:breaching_charge": {
+    "sound": "wood"
+  },
+  "siege:barracks": {
+    "sound": "wood"
+  },
+  "siege:plot_stone": {
+    "sound": "stone"
+  },
+  "siege:veinstone": {
+    "sound": "deepslate"
+  },
+  "siege:undertow_moss": {
+    "sound": "moss_block"
+  },
+  "siege:veil_rock": {
+    "sound": "deepslate"
+  },
+  "siege:hollowwood_lattice": {
+    "sound": "nether_wood"
+  },
+  "siege:hollowwood_core": {
+    "sound": "nether_wood"
+  },
+  "siege:veilcap": {
+    "sound": "fungus"
+  },
+  "siege:glimbulb": {
+    "sound": "fungus"
+  },
+  "siege:glimmerflow": {
+    "sound": "powder_snow"
+  },
+  "siege:rift_seam": {
+    "sound": "deepslate"
+  },
+  "siege:rift_edge": {
+    "sound": "amethyst_block"
+  },
+  "siege:rift_veil": {
+    "sound": "amethyst_block"
+  },
+  "siege:waystone": {
+    "sound": "amethyst_block"
+  },
+  "siege:court_seal": {
+    "sound": "stone"
+  }
+}

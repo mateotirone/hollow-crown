@@ -1,0 +1,21 @@
+{
+  "format_version": "1.21.60",
+  "minecraft:item": {
+    "description": {
+      "identifier": "siege:man_at_arms_item",
+      "menu_category": {
+        "category": "equipment"
+      }
+    },
+    "components": {
+      "minecraft:icon": "siege_man_at_arms",
+      "minecraft:display_name": {
+        "value": "item.siege:man_at_arms_item.name"
+      },
+      "minecraft:max_stack_size": 1,
+      "minecraft:entity_placer": {
+        "entity": "siege:man_at_arms"
+      }
+    }
+  }
+}

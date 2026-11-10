@@ -1,0 +1,32 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:tolling_shade",
+   "materials": {
+    "default": "entity_alphablend"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/tolling_shade"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.tolling_shade"
+   },
+   "animations": {
+    "main": "animation.siege_b.tolling_shade"
+   },
+   "scripts": {
+    "animate": [
+     "main"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ],
+   "spawn_egg": {
+    "base_color": "#3c465a",
+    "overlay_color": "#8ce6ff"
+   }
+  }
+ }
+}

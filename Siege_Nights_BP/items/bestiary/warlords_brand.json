@@ -1,0 +1,34 @@
+{
+ "format_version": "1.21.60",
+ "minecraft:item": {
+  "description": {
+   "identifier": "siege:warlords_brand",
+   "menu_category": {
+    "category": "equipment"
+   }
+  },
+  "components": {
+   "minecraft:icon": "siege_b_warlords_brand",
+   "minecraft:display_name": {
+    "value": "item.siege:warlords_brand.name"
+   },
+   "minecraft:max_stack_size": 1,
+   "minecraft:glint": true,
+   "minecraft:durability": {
+    "max_durability": 1600
+   },
+   "minecraft:hand_equipped": true,
+   "minecraft:damage": 9,
+   "minecraft:can_destroy_in_creative": false,
+   "minecraft:enchantable": {
+    "slot": "sword",
+    "value": 18
+   },
+   "minecraft:tags": {
+    "tags": [
+     "minecraft:is_sword"
+    ]
+   }
+  }
+ }
+}

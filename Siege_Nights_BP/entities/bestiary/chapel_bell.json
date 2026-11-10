@@ -1,0 +1,73 @@
+{
+ "format_version": "1.21.60",
+ "minecraft:entity": {
+  "description": {
+   "identifier": "siege:chapel_bell",
+   "is_spawnable": true,
+   "is_summonable": true,
+   "is_experimental": false
+  },
+  "component_groups": {
+   "siege:ringing": {
+    "minecraft:is_charged": {}
+   }
+  },
+  "components": {
+   "minecraft:type_family": {
+    "family": [
+     "inanimate",
+     "siege_boss_prop"
+    ]
+   },
+   "minecraft:health": {
+    "value": 20,
+    "max": 20
+   },
+   "minecraft:collision_box": {
+    "width": 0.9,
+    "height": 2.0
+   },
+   "minecraft:nameable": {},
+   "minecraft:physics": {},
+   "minecraft:pushable": {
+    "is_pushable": false,
+    "is_pushable_by_piston": false
+   },
+   "minecraft:knockback_resistance": {
+    "value": 1
+   },
+   "minecraft:damage_sensor": {
+    "triggers": [
+     {
+      "cause": "all",
+      "deals_damage": "no"
+     },
+     {
+      "cause": "fall",
+      "deals_damage": "no"
+     }
+    ]
+   },
+   "minecraft:movement": {
+    "value": 0
+   },
+   "minecraft:persistent": {}
+  },
+  "events": {
+   "siege:ring": {
+    "add": {
+     "component_groups": [
+      "siege:ringing"
+     ]
+    }
+   },
+   "siege:quiet": {
+    "remove": {
+     "component_groups": [
+      "siege:ringing"
+     ]
+    }
+   }
+  }
+ }
+}

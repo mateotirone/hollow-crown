@@ -1,0 +1,45 @@
+{
+  "resource_pack_name": "siege_nights",
+  "texture_name": "atlas.items",
+  "texture_data": {
+    "siege_war_horn": {
+      "textures": "textures/items/siege_war_horn"
+    },
+    "siege_guard_helmet": {
+      "textures": "textures/items/siege_guard_helmet"
+    },
+    "siege_guard_chestplate": {
+      "textures": "textures/items/siege_guard_chestplate"
+    },
+    "siege_guard_leggings": {
+      "textures": "textures/items/siege_guard_leggings"
+    },
+    "siege_guard_boots": {
+      "textures": "textures/items/siege_guard_boots"
+    },
+    "siege_longsword": {
+      "textures": "textures/items/siege_longsword"
+    },
+    "siege_warhammer": {
+      "textures": "textures/items/siege_warhammer"
+    },
+    "siege_writ": {
+      "textures": "textures/items/siege_writ"
+    },
+    "siege_battering_ram": {
+      "textures": "textures/items/siege_battering_ram"
+    },
+    "siege_archer": {
+      "textures": "textures/items/siege_archer"
+    },
+    "siege_man_at_arms": {
+      "textures": "textures/items/siege_man_at_arms"
+    },
+    "siege_trebuchet": {
+      "textures": "textures/items/siege_trebuchet"
+    },
+    "siege_ballista": {
+      "textures": "textures/items/siege_ballista"
+    }
+  }
+}

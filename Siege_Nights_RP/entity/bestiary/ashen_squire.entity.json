@@ -1,0 +1,32 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:ashen_squire",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/ashen_squire"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.ashen_squire"
+   },
+   "animations": {
+    "main": "animation.siege_b.ashen_squire"
+   },
+   "scripts": {
+    "animate": [
+     "main"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ],
+   "spawn_egg": {
+    "base_color": "#c8c4be",
+    "overlay_color": "#5a5a64"
+   }
+  }
+ }
+}

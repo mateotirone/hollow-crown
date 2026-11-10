@@ -1,0 +1,32 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:dune_wyrm",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/dune_wyrm"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.dune_wyrm"
+   },
+   "animations": {
+    "main": "animation.siege_b.dune_wyrm"
+   },
+   "scripts": {
+    "animate": [
+     "main"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ],
+   "spawn_egg": {
+    "base_color": "#c4a064",
+    "overlay_color": "#a07846"
+   }
+  }
+ }
+}

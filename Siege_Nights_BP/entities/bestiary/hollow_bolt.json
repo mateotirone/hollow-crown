@@ -1,0 +1,59 @@
+{
+ "format_version": "1.21.60",
+ "minecraft:entity": {
+  "description": {
+   "identifier": "siege:hollow_bolt",
+   "is_spawnable": false,
+   "is_summonable": true,
+   "is_experimental": false
+  },
+  "components": {
+   "minecraft:collision_box": {
+    "width": 0.3,
+    "height": 0.3
+   },
+   "minecraft:projectile": {
+    "on_hit": {
+     "impact_damage": {
+      "damage": 4,
+      "knockback": true,
+      "destroy_on_hit": true
+     },
+     "mob_effect": {
+      "effect": "blindness",
+      "durationeasy": 60,
+      "durationnormal": 80,
+      "durationhard": 100,
+      "amplifier": 0
+     },
+     "remove_on_hit": {}
+    },
+    "power": 1.2,
+    "gravity": 0.0,
+    "inertia": 1,
+    "liquid_inertia": 1,
+    "uncertainty_base": 4,
+    "uncertainty_multiplier": 0,
+    "anchor": 1,
+    "offset": [
+     0,
+     -0.1,
+     0
+    ],
+    "reflect_on_hurt": false
+   },
+   "minecraft:physics": {},
+   "minecraft:pushable": {
+    "is_pushable": false,
+    "is_pushable_by_piston": false
+   },
+   "minecraft:conditional_bandwidth_optimization": {
+    "default_values": {
+     "max_optimized_distance": 80,
+     "max_dropped_ticks": 7,
+     "use_motion_prediction_hints": true
+    }
+   }
+  }
+ }
+}

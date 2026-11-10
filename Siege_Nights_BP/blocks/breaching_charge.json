@@ -1,0 +1,36 @@
+{
+  "format_version": "1.21.60",
+  "minecraft:block": {
+    "description": {
+      "identifier": "siege:breaching_charge",
+      "menu_category": {
+        "category": "items"
+      }
+    },
+    "components": {
+      "minecraft:display_name": "tile.siege:breaching_charge.name",
+      "minecraft:geometry": "minecraft:geometry.full_block",
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "siege_charge_side",
+          "render_method": "opaque"
+        },
+        "up": {
+          "texture": "siege_charge_top",
+          "render_method": "opaque"
+        },
+        "down": {
+          "texture": "siege_charge_top",
+          "render_method": "opaque"
+        }
+      },
+      "minecraft:destructible_by_mining": {
+        "seconds_to_destroy": 0.5
+      },
+      "minecraft:destructible_by_explosion": {
+        "explosion_resistance": 0
+      },
+      "minecraft:map_color": "#5a3a22"
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:hollow_crow",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/hollow_crow"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.hollow_crow"
+   },
+   "animations": {
+    "main": "animation.siege_b.hollow_crow"
+   },
+   "scripts": {
+    "animate": [
+     "main"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ],
+   "spawn_egg": {
+    "base_color": "#1a181e",
+    "overlay_color": "#c878ff"
+   }
+  }
+ }
+}

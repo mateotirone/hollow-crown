@@ -1,0 +1,32 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:lost_villager",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/lost_villager"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.lost_villager"
+   },
+   "animations": {
+    "main": "animation.siege_b.lost_villager"
+   },
+   "scripts": {
+    "animate": [
+     "main"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ],
+   "spawn_egg": {
+    "base_color": "#6e5c46",
+    "overlay_color": "#e6e6dc"
+   }
+  }
+ }
+}

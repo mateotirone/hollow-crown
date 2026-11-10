@@ -1,0 +1,13 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_furnace": {
+    "description": {
+      "identifier": "siege:cracked_castle_stone_recipe"
+    },
+    "tags": [
+      "furnace"
+    ],
+    "input": "siege:castle_stone",
+    "output": "siege:cracked_castle_stone"
+  }
+}

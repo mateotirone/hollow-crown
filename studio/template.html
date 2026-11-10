@@ -1,0 +1,798 @@
+<title>Siege Nights Texture Studio</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen&family=Work+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: asset list on the left, 3D stage in the middle, pixel workbench on the right. Stacks on narrow screens. */
+:root {
+  --bg: #eceef0; --panel: #f8f9fa; --ink: #1c1f23; --muted: #5b626b; --line: #d2d6db;
+  --accent: #9e2a22; --accent-ink: #ffffff; --gold: #a87d14; --ok: #2c7a47; --warn: #b05a14;
+  --stage: #d7dbe0; --chip: #e3e6ea; --focus: #2f6fd6;
+  --display: "Silkscreen", "Courier New", monospace;
+  --body: "Work Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #121417; --panel: #1a1d21; --ink: #e6e8eb; --muted: #9aa2ac; --line: #2c3137;
+  --accent: #cf4a3e; --accent-ink: #ffffff; --gold: #d8b03c; --ok: #4fb377; --warn: #e48b3d;
+  --stage: #0c0e11; --chip: #252a30; --focus: #6aa0ff; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #121417; --panel: #1a1d21; --ink: #e6e8eb; --muted: #9aa2ac; --line: #2c3137;
+  --accent: #cf4a3e; --accent-ink: #ffffff; --gold: #d8b03c; --ok: #4fb377; --warn: #e48b3d;
+  --stage: #0c0e11; --chip: #252a30; --focus: #6aa0ff; color-scheme: dark }
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 14px; line-height: 1.45; }
+* { box-sizing: border-box; }
+button, input, textarea, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.app { display: grid; grid-template-columns: 250px minmax(0, 1fr); height: 100%; }
+/* ---------- list ---------- */
+.list { border-right: 1px solid var(--line); background: var(--panel); display: flex; flex-direction: column; min-height: 0; }
+.brand { padding: 16px 16px 12px; border-bottom: 1px solid var(--line); display: grid; gap: 8px; }
+.brand h1 { font-family: var(--display); font-weight: 400; font-size: 17px; margin: 0; letter-spacing: 0.02em; text-wrap: balance; }
+.progress { display: grid; gap: 6px; font-size: 12px; color: var(--muted); }
+.bar { height: 6px; background: var(--chip); border-radius: 3px; overflow: hidden; display: flex; }
+.bar span { display: block; height: 100%; }
+.bar .a { background: var(--ok); } .bar .c { background: var(--warn); }
+.filters { display: flex; gap: 4px; flex-wrap: wrap; }
+.filters button { border: 1px solid var(--line); background: transparent; border-radius: 999px; padding: 2px 9px; font-size: 12px; cursor: pointer; }
+.filters button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.items { overflow-y: auto; flex: 1; padding: 6px 0 16px; }
+.cat { font-family: var(--display); font-size: 11px; color: var(--muted); padding: 12px 16px 4px; letter-spacing: 0.06em; }
+.row { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; gap: 10px; align-items: center; width: 100%; text-align: left; border: 0; background: transparent; padding: 6px 16px; cursor: pointer; }
+.row:hover { background: var(--chip); }
+.row[aria-current="true"] { background: var(--chip); box-shadow: inset 3px 0 0 var(--accent); }
+.row canvas { width: 32px; height: 32px; image-rendering: pixelated; border-radius: 3px; background: var(--stage); }
+.row .nm { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dot { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid var(--muted); }
+.dot.approved { background: var(--ok); border-color: var(--ok); }
+.dot.changes { background: var(--warn); border-color: var(--warn); }
+/* ---------- main ---------- */
+.main { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(330px, 1fr); min-height: 0; }
+.stagecol { display: flex; flex-direction: column; min-height: 0; border-right: 1px solid var(--line); }
+.head { padding: 16px 20px 12px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; align-items: start; }
+.eyebrow { font-family: var(--display); font-size: 11px; color: var(--muted); letter-spacing: 0.06em; }
+.head h2 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 26px; line-height: 1.15; text-wrap: balance; }
+.head p { margin: 4px 0 0; color: var(--muted); max-width: 60ch; grid-column: 1 / -1; }
+.nav { display: flex; gap: 6px; align-items: center; font-variant-numeric: tabular-nums; color: var(--muted); font-size: 12px; }
+.btn { border: 1px solid var(--line); background: var(--panel); border-radius: 6px; padding: 6px 11px; cursor: pointer; display: inline-flex; gap: 6px; align-items: center; }
+.btn:hover { border-color: var(--muted); }
+.btn.primary { background: var(--ok); border-color: var(--ok); color: #fff; }
+.btn.warn { background: transparent; border-color: var(--warn); color: var(--warn); }
+.btn.warn[aria-pressed="true"] { background: var(--warn); color: #fff; }
+.btn.primary[aria-pressed="true"] { box-shadow: 0 0 0 3px color-mix(in srgb, var(--ok) 30%, transparent); }
+.stage { position: relative; flex: 1; min-height: 300px; background: var(--stage); }
+.stage canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+.stagebar { position: absolute; left: 12px; right: 12px; bottom: 12px; display: flex; gap: 6px; justify-content: space-between; align-items: flex-end; pointer-events: none; flex-wrap: wrap; }
+.stagebar > * { pointer-events: auto; }
+.stagebar .btn { background: color-mix(in srgb, var(--panel) 88%, transparent); font-size: 12px; padding: 4px 9px; }
+.hint { font-size: 11px; color: var(--muted); background: color-mix(in srgb, var(--panel) 80%, transparent); padding: 3px 8px; border-radius: 4px; }
+.variants { display: flex; gap: 6px; padding: 10px 20px 14px; overflow-x: auto; border-top: 1px solid var(--line); background: var(--panel); }
+.variants button { flex: none; border: 1px solid var(--line); background: var(--bg); border-radius: 999px; padding: 4px 11px 4px 8px; font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.variants button[aria-pressed="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.sw { width: 12px; height: 12px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.25); }
+/* ---------- workbench ---------- */
+.bench { overflow-y: auto; padding: 16px 20px 24px; display: grid; gap: 18px; align-content: start; background: var(--panel); }
+.sect { display: grid; gap: 8px; }
+.sect h3 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 12px; letter-spacing: 0.06em; color: var(--muted); }
+.files { display: flex; gap: 6px; flex-wrap: wrap; }
+.files button { border: 1px solid var(--line); background: var(--bg); border-radius: 6px; padding: 4px 8px; font-family: var(--mono); font-size: 11px; cursor: pointer; display: inline-flex; gap: 6px; align-items: center; max-width: 100%; }
+.files button[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.files .ed { width: 7px; height: 7px; border-radius: 50%; background: var(--gold); }
+.canvasbox { display: grid; place-items: center; background: var(--stage); border-radius: 8px; padding: 12px; }
+#paint { image-rendering: pixelated; touch-action: none; cursor: crosshair; max-width: 100%; }
+.tools { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.tools button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.tools input[type=color] { width: 38px; height: 32px; padding: 0; border: 1px solid var(--line); border-radius: 6px; background: none; cursor: pointer; }
+.palette { display: flex; flex-wrap: wrap; gap: 3px; }
+.palette button { width: 20px; height: 20px; border: 1px solid var(--line); border-radius: 3px; padding: 0; cursor: pointer; }
+.fileinfo { font-family: var(--mono); font-size: 11px; color: var(--muted); overflow-wrap: anywhere; }
+.sliders { display: grid; grid-template-columns: 82px minmax(0, 1fr) 42px; gap: 6px 10px; align-items: center; font-size: 12px; }
+.sliders output { font-variant-numeric: tabular-nums; text-align: right; color: var(--muted); }
+.sliders input { width: 100%; accent-color: var(--accent); }
+.cloth { display: flex; gap: 8px; align-items: center; font-size: 12px; }
+textarea { width: 100%; min-height: 76px; resize: vertical; border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; background: var(--bg); }
+.review { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.saved { font-size: 12px; color: var(--muted); }
+.saved.bad { color: var(--warn); }
+.pill { font-size: 11px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+.pill.approved { border-color: var(--ok); color: var(--ok); }
+.pill.changes { border-color: var(--warn); color: var(--warn); }
+@media (max-width: 1100px) {
+  .main { grid-template-columns: minmax(0, 1fr); overflow-y: auto; }
+  .stagecol { border-right: 0; }
+  .stage { min-height: 360px; height: 52vh; flex: none; }
+}
+@media (max-width: 760px) {
+  html, body { height: auto; }
+  .app { grid-template-columns: minmax(0, 1fr); height: auto; }
+  .list { border-right: 0; border-bottom: 1px solid var(--line); }
+  .brand { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .items { display: flex; overflow-x: auto; overflow-y: hidden; padding: 8px max(16px, env(safe-area-inset-right, 0px)) 10px max(16px, env(safe-area-inset-left, 0px)); gap: 4px; }
+  .cat { display: none; }
+  .row { grid-template-columns: 32px; padding: 6px; width: auto; position: relative; border-radius: 6px; }
+  .row .nm { display: none; }
+  .row .dot { position: absolute; right: 2px; top: 2px; }
+  .row[aria-current="true"] { box-shadow: inset 0 -3px 0 var(--accent); }
+  .head, .variants, .bench { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .head h2 { font-size: 21px; }
+  .main { overflow: visible; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="app">
+  <aside class="list" aria-label="Textures">
+    <div class="brand">
+      <h1>Texture Studio</h1>
+      <div class="progress">
+        <div class="bar" aria-hidden="true"><span class="a" id="barA"></span><span class="c" id="barC"></span></div>
+        <span id="progressText">Loading textures…</span>
+      </div>
+      <div class="filters" role="group" aria-label="Show">
+        <button type="button" data-f="all" aria-pressed="true">All</button>
+        <button type="button" data-f="pending" aria-pressed="false">To review</button>
+        <button type="button" data-f="changes" aria-pressed="false">Changes</button>
+        <button type="button" data-f="approved" aria-pressed="false">Approved</button>
+      </div>
+    </div>
+    <nav class="items" id="items"></nav>
+  </aside>
+
+  <div class="main">
+    <section class="stagecol">
+      <div class="head">
+        <div>
+          <div class="eyebrow" id="eyebrow">Blocks</div>
+          <h2 id="title">Castle Stone</h2>
+        </div>
+        <div class="nav">
+          <button class="btn" type="button" id="prev" aria-label="Previous texture">←</button>
+          <span id="counter">1 / 29</span>
+          <button class="btn" type="button" id="next" aria-label="Next texture">→</button>
+        </div>
+        <p id="note"></p>
+      </div>
+      <div class="stage" id="stage">
+        <canvas id="three" aria-label="3D preview, drag to turn it"></canvas>
+        <div class="stagebar">
+          <span class="hint">Drag to turn · scroll or pinch to zoom</span>
+          <span style="display:flex;gap:6px">
+            <button class="btn" type="button" id="spin" aria-pressed="true">Spin</button>
+            <button class="btn" type="button" id="resetView">Reset view</button>
+          </span>
+        </div>
+      </div>
+      <div class="variants" id="variants" role="group" aria-label="Versions"></div>
+    </section>
+
+    <section class="bench" aria-label="Edit and review">
+      <div class="sect">
+        <h3>Textures in this view</h3>
+        <div class="files" id="files"></div>
+        <div class="fileinfo" id="fileinfo"></div>
+      </div>
+      <div class="sect">
+        <div class="canvasbox"><canvas id="paint" width="16" height="16" aria-label="Pixel editor"></canvas></div>
+        <div class="tools" role="group" aria-label="Tools">
+          <button class="btn" type="button" data-tool="pencil" aria-pressed="true" title="Pencil (B)">Pencil</button>
+          <button class="btn" type="button" data-tool="fill" aria-pressed="false" title="Fill (G)">Fill</button>
+          <button class="btn" type="button" data-tool="picker" aria-pressed="false" title="Pick color (I)">Pick</button>
+          <button class="btn" type="button" data-tool="eraser" aria-pressed="false" title="Eraser (E)">Erase</button>
+          <input type="color" id="color" value="#9e2a22" aria-label="Paint color">
+          <button class="btn" type="button" id="undo" title="Undo (Ctrl+Z)">Undo</button>
+          <button class="btn" type="button" id="revert">Back to original</button>
+        </div>
+        <label class="cloth" id="clothRow" hidden><input type="checkbox" id="cloth"> Paint as cloth (takes the banner color in game)</label>
+        <div class="palette" id="palette" aria-label="Colors in this texture"></div>
+      </div>
+      <div class="sect">
+        <h3>Adjust the whole texture</h3>
+        <div class="sliders">
+          <label for="hue">Hue</label><input type="range" id="hue" min="-180" max="180" value="0"><output id="hueOut">0</output>
+          <label for="sat">Saturation</label><input type="range" id="sat" min="-100" max="100" value="0"><output id="satOut">0</output>
+          <label for="bri">Brightness</label><input type="range" id="bri" min="-100" max="100" value="0"><output id="briOut">0</output>
+        </div>
+      </div>
+      <div class="sect">
+        <h3>Your call <span class="pill" id="statusPill">To review</span></h3>
+        <textarea id="comment" placeholder="What should change? For example: darker mortar lines, more moss at the bottom, make the cracks bigger."></textarea>
+        <div class="review">
+          <button class="btn primary" type="button" id="approve" aria-pressed="false">Approve</button>
+          <button class="btn warn" type="button" id="changes" aria-pressed="false">Needs changes</button>
+          <span class="saved" id="saved"></span>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script type="application/json" id="manifest">__MANIFEST__</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(() => {
+const M = JSON.parse(document.getElementById("manifest").textContent);
+const $ = (id) => document.getElementById(id);
+const groups = M.groups;
+const reviews = {}; // group id -> { status, note }
+let current = 0, variantIx = 0, filePath = null, filter = "all";
+
+// ---------- Working copies of every texture ----------
+const work = {}; // path -> { canvas, ctx, w, h, orig, undo, textures: [], listeners: [] }
+const ready = Promise.all(Object.entries(M.textures).map(([path, src]) => new Promise((res) => {
+  const img = new Image();
+  img.onload = () => {
+    const canvas = document.createElement("canvas");
+    canvas.width = img.width; canvas.height = img.height;
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+    ctx.drawImage(img, 0, 0);
+    const m = M.masks[path];
+    const mask = m ? Uint8Array.from(m, (ch) => ch === "1" ? 1 : 0) : null;
+    work[path] = { canvas, ctx, w: img.width, h: img.height, orig: ctx.getImageData(0, 0, img.width, img.height), mask, origMask: mask && mask.slice(), undo: [], listeners: [], savedPng: null };
+    res();
+  };
+  img.onerror = res;
+  img.src = src;
+})));
+
+function changed(path) {
+  const w = work[path];
+  for (const fn of w.listeners) fn();
+}
+function onChange(path, fn) { work[path].listeners.push(fn); }
+function isEdited(path) {
+  const w = work[path]; if (!w) return false;
+  const now = w.ctx.getImageData(0, 0, w.w, w.h).data, o = w.orig.data;
+  for (let i = 0; i < o.length; i++) if (now[i] !== o[i]) return true;
+  if (w.mask) for (let i = 0; i < w.mask.length; i++) if (w.mask[i] !== w.origMask[i]) return true;
+  return false;
+}
+
+// Leather-style armor: cloth pixels (from the mask) take the banner color, the rest keep their own color
+function tinted(path, tint) {
+  const src = work[path];
+  const c = document.createElement("canvas"); c.width = src.w; c.height = src.h;
+  const ctx = c.getContext("2d");
+  const redraw = () => {
+    const d = src.ctx.getImageData(0, 0, src.w, src.h);
+    const p = d.data;
+    for (let i = 0; i < p.length; i += 4) {
+      if (p[i + 3] === 0) continue;
+      if (src.mask[i / 4] && tint) { p[i] = p[i] * tint[0] / 255; p[i + 1] = p[i + 1] * tint[1] / 255; p[i + 2] = p[i + 2] * tint[2] / 255; }
+    }
+    ctx.putImageData(d, 0, 0);
+  };
+  redraw();
+  return { canvas: c, redraw };
+}
+const isArmor = (path) => path.includes("models/armor/");
+
+// ---------- 3D ----------
+const canvas3d = $("three");
+const renderer = new THREE.WebGLRenderer({ canvas: canvas3d, antialias: true, alpha: false });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(35, 1, 0.05, 200);
+const controls = new THREE.OrbitControls(camera, canvas3d);
+controls.enableDamping = true; controls.autoRotate = true; controls.autoRotateSpeed = 1.6;
+scene.add(new THREE.HemisphereLight(0xffffff, 0x8a8f99, 0.75));
+const sun = new THREE.DirectionalLight(0xffffff, 0.55); sun.position.set(3, 6, 4); scene.add(sun);
+const floor = new THREE.Mesh(new THREE.CircleGeometry(1, 48), new THREE.MeshLambertMaterial({ color: 0x888888, transparent: true, opacity: 0.18 }));
+floor.rotation.x = -Math.PI / 2; scene.add(floor);
+let model = null, liveTextures = [], modelCleanup = [];
+
+function cssVar(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+function applyStageColor() { renderer.setClearColor(new THREE.Color(cssVar("--stage") || "#d7dbe0")); }
+applyStageColor();
+matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", applyStageColor);
+new MutationObserver(applyStageColor).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+function texFromCanvas(c) {
+  const t = new THREE.CanvasTexture(c);
+  t.magFilter = THREE.NearestFilter; t.minFilter = THREE.NearestFilter; t.generateMipmaps = false;
+  return t;
+}
+// A material that follows edits to `path` live
+function liveMaterial(path, tint, extra) {
+  if (!work[path]) return new THREE.MeshLambertMaterial({ color: 0xff00ff });
+  let tex, redraw = null;
+  if (isArmor(path)) { const t = tinted(path, tint); tex = texFromCanvas(t.canvas); redraw = t.redraw; }
+  else tex = texFromCanvas(work[path].canvas);
+  const fn = () => { if (redraw) redraw(); tex.needsUpdate = true; };
+  onChange(path, fn);
+  modelCleanup.push(() => { const l = work[path].listeners; const i = l.indexOf(fn); if (i >= 0) l.splice(i, 1); tex.dispose(); });
+  return new THREE.MeshLambertMaterial({ map: tex, alphaTest: 0.1, side: THREE.DoubleSide, ...(extra || {}) });
+}
+
+const D = THREE.MathUtils.degToRad;
+// Faces: corners TL, TR, BL, BR as seen from outside (Blockbench convention, X mirrored from Bedrock)
+function faceCorners(f, x1, y1, z1, x2, y2, z2) {
+  switch (f) {
+    case "north": return [[x2, y2, z1], [x1, y2, z1], [x2, y1, z1], [x1, y1, z1]];
+    case "south": return [[x1, y2, z2], [x2, y2, z2], [x1, y1, z2], [x2, y1, z2]];
+    case "east": return [[x2, y2, z2], [x2, y2, z1], [x2, y1, z2], [x2, y1, z1]];
+    case "west": return [[x1, y2, z1], [x1, y2, z2], [x1, y1, z1], [x1, y1, z2]];
+    case "up": return [[x1, y2, z1], [x2, y2, z1], [x1, y2, z2], [x2, y2, z2]];
+    case "down": return [[x1, y1, z2], [x2, y1, z2], [x1, y1, z1], [x2, y1, z1]];
+  }
+}
+const FACES = ["north", "south", "east", "west", "up", "down"];
+function boxUV(c) {
+  const [u, v] = c.uv; const w = Math.floor(c.size[0]), h = Math.floor(c.size[1]), d = Math.floor(c.size[2]);
+  let r = {
+    east: [u, v + d, u + d, v + d + h], north: [u + d, v + d, u + d + w, v + d + h],
+    west: [u + d + w, v + d, u + 2 * d + w, v + d + h], south: [u + 2 * d + w, v + d, u + 2 * d + 2 * w, v + d + h],
+    up: [u + d, v, u + d + w, v + d], down: [u + d + w, v + d, u + d + 2 * w, v],
+  };
+  if (c.mirror) {
+    for (const k in r) r[k] = [r[k][2], r[k][1], r[k][0], r[k][3]];
+    [r.east, r.west] = [r.west, r.east];
+  }
+  const out = {}; for (const k in r) out[k] = { rect: r[k], mat: "*" }; return out;
+}
+function faceUV(c, rawFlip) {
+  const out = {};
+  for (const f of FACES) {
+    const fu = c.uv[f]; if (!fu) continue;
+    const [u, v] = fu.uv, [w, h] = fu.uv_size;
+    let rect = [u, v, u + w, v + h];
+    if (!rawFlip && (f === "up" || f === "down")) rect = [u + w, v + h, u, v];
+    out[f] = { rect, mat: fu.material_instance || c.matOverride?.[f] || "*" };
+  }
+  return out;
+}
+function buildCube(c, tw, th, getMat) {
+  const s = c.size, o = c.origin, inf = c.inflate || 0;
+  const x1 = -(o[0] + s[0]) - inf, x2 = -o[0] + inf, y1 = o[1] - inf, y2 = o[1] + s[1] + inf, z1 = o[2] - inf, z2 = o[2] + s[2] + inf;
+  const faces = Array.isArray(c.uv) ? boxUV(c) : faceUV(c, c.rawFlip);
+  const byMat = {};
+  for (const f of FACES) { if (faces[f]) (byMat[faces[f].mat] ??= []).push(f); }
+  const grp = new THREE.Group();
+  for (const [mat, list] of Object.entries(byMat)) {
+    const pos = [], uv = [], idx = [];
+    for (const f of list) {
+      const [tl, tr, bl, br] = faceCorners(f, x1, y1, z1, x2, y2, z2);
+      const [u1, v1, u2, v2] = faces[f].rect;
+      const b = pos.length / 3;
+      pos.push(...tl, ...tr, ...bl, ...br);
+      uv.push(u1 / tw, 1 - v1 / th, u2 / tw, 1 - v1 / th, u1 / tw, 1 - v2 / th, u2 / tw, 1 - v2 / th);
+      idx.push(b, b + 2, b + 1, b + 1, b + 2, b + 3);
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+    geo.setAttribute("uv", new THREE.Float32BufferAttribute(uv, 2));
+    geo.setIndex(idx); geo.computeVertexNormals();
+    grp.add(new THREE.Mesh(geo, getMat(mat)));
+  }
+  if (c.rotation) {
+    const p = c.pivot || [0, 0, 0];
+    const outer = new THREE.Group(); outer.position.set(-p[0], p[1], p[2]);
+    outer.rotation.set(D(c.rotation[0]), D(-c.rotation[1]), D(-c.rotation[2]), "ZYX");
+    grp.position.set(p[0], -p[1], -p[2]);
+    outer.add(grp); return outer;
+  }
+  return grp;
+}
+function buildGeo(geo, getMat) {
+  const root = new THREE.Group(), map = {}, P = {};
+  for (const b of geo.bones) { const p = b.pivot || [0, 0, 0]; P[b.name] = [-p[0], p[1], p[2]]; map[b.name] = new THREE.Group(); }
+  for (const b of geo.bones) {
+    const g = map[b.name], parent = b.parent && map[b.parent] ? b.parent : null;
+    const pp = parent ? P[parent] : [0, 0, 0], me = P[b.name];
+    g.position.set(me[0] - pp[0], me[1] - pp[1], me[2] - pp[2]);
+    let r = b.rotation || b.bind_pose_rotation || [0, 0, 0];
+    // Old-format models give each bone its total rotation, so take the parent's away
+    if (geo.legacy && parent) { const pr = geo.bones.find((x) => x.name === parent).rotation || [0, 0, 0]; r = r.map((v, k) => v - pr[k]); }
+    g.rotation.set(D(r[0]), D(-r[1]), D(-r[2]), "ZYX");
+    for (const c of b.cubes || []) {
+      const cube = buildCube(c, geo.tw, geo.th, getMat);
+      cube.position.x -= me[0]; cube.position.y -= me[1]; cube.position.z -= me[2];
+      g.add(cube);
+    }
+    (parent ? map[parent] : root).add(g);
+  }
+  root.scale.setScalar(1 / 16);
+  return root;
+}
+const FULL = { tw: 16, th: 16, bones: [{ name: "b", pivot: [0, 0, 0], cubes: [{ origin: [-8, 0, -8], size: [16, 16, 16], rawFlip: true,
+  uv: Object.fromEntries(FACES.map((f) => [f, { uv: [0, 0], uv_size: [16, 16], material_instance: f }])) }] }] };
+
+function solid(color) { return new THREE.MeshLambertMaterial({ color, side: THREE.DoubleSide }); }
+
+function buildVariant(v) {
+  const mat = (name) => { const path = v.mats[name] || v.mats["*"]; return liveMaterial(path, v.tint); };
+  const cache = {};
+  const getMat = (name) => (cache[name] ??= mat(name));
+  switch (v.model) {
+    case "cube": return buildGeo(FULL, getMat);
+    case "geo": case "entity": return buildGeo(M.geos[v.geo], getMat);
+    case "horse": {
+      const g = new THREE.Group();
+      g.add(buildGeo(M.geos[v.geo], () => solid(0x7a5532)));
+      const armor = buildGeo(M.geos[v.geo], getMat); armor.scale.multiplyScalar(1.015); g.add(armor);
+      return g;
+    }
+    case "armor": {
+      const g = new THREE.Group();
+      const skin = solid(0xb9bec6);
+      g.add(buildGeo({ ...M.geos["geometry.humanoid.custom"], bones: M.geos["geometry.humanoid.custom"].bones.map((b) => ({ ...b, cubes: b.cubes.filter((c) => !c.inflate) })) }, () => skin));
+      const l1 = liveMaterial(v.mats.layer1, v.tint), l2 = liveMaterial(v.mats.layer2, v.tint);
+      g.add(buildGeo(M.geos["geometry.armor2"], () => l2));
+      g.add(buildGeo(M.geos["geometry.armor1"], () => l1));
+      return g;
+    }
+    case "lineup": {
+      const g = new THREE.Group();
+      const cols = v.cols || v.items.length, gap = v.gap || 1.25, rows = Math.ceil(v.items.length / cols);
+      v.items.forEach((sub, i) => {
+        const m = buildVariant(sub);
+        m.position.x = -((i % cols) - (cols - 1) / 2) * gap; // the studio mirrors X, so this reads left to right
+        m.position.y = (rows - 1 - Math.floor(i / cols)) * gap;
+        g.add(m);
+      });
+      return g;
+    }
+    case "armor3d": {
+      const g = new THREE.Group();
+      if (v.skin) g.add(buildGeo(M.geos["geometry.humanoid.custom"], () => liveMaterial(v.skin)));
+      else {
+        const skin = solid(0xb9bec6);
+        g.add(buildGeo({ ...M.geos["geometry.humanoid.custom"], bones: M.geos["geometry.humanoid.custom"].bones.map((b) => ({ ...b, cubes: b.cubes.filter((c) => !c.inflate) })) }, () => skin));
+      }
+      for (const id of v.geos || []) g.add(buildGeo(M.geos[id], getMat));
+      return g;
+    }
+    case "item": case "flat": {
+      const path = v.mats["*"], w = work[path];
+      const g = new THREE.Group();
+      const m = liveMaterial(path);
+      const layers = v.model === "item" ? 8 : 1;
+      const plane = new THREE.PlaneGeometry(1, w.h / w.w);
+      for (let i = 0; i < layers; i++) {
+        const mesh = new THREE.Mesh(plane, m);
+        mesh.position.z = (i - (layers - 1) / 2) * (1 / 16) / (layers - 1 || 1);
+        g.add(mesh);
+      }
+      g.position.y = 0.5;
+      return g;
+    }
+  }
+}
+
+let fitDist = 3, fitTarget = new THREE.Vector3();
+function showVariant() {
+  if (model) { scene.remove(model); }
+  for (const fn of modelCleanup) fn();
+  modelCleanup = [];
+  const g = groups[current], v = g.variants[variantIx];
+  model = buildVariant(v);
+  scene.add(model);
+  model.updateMatrixWorld(true);
+  const box = new THREE.Box3().setFromObject(model);
+  const size = box.getSize(new THREE.Vector3()), center = box.getCenter(new THREE.Vector3());
+  const r = Math.max(size.x, size.y, size.z);
+  floor.scale.setScalar(Math.max(size.x, size.z) * 0.9 + 0.3);
+  floor.position.y = box.min.y - 0.001;
+  fitTarget.copy(center); fitDist = r * 2.6 + 0.4;
+  resetView();
+}
+function resetView() {
+  controls.target.copy(fitTarget);
+  const dir = new THREE.Vector3(1.1, 0.75, -1.6).normalize(); // models face north (-Z), so look at their front
+  camera.position.copy(fitTarget).addScaledVector(dir, fitDist);
+  controls.update();
+}
+function resize() {
+  const r = canvas3d.parentElement.getBoundingClientRect();
+  renderer.setSize(r.width, r.height, false);
+  camera.aspect = r.width / Math.max(1, r.height); camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe($("stage"));
+(function loop() { controls.update(); renderer.render(scene, camera); requestAnimationFrame(loop); })();
+$("spin").onclick = () => { controls.autoRotate = !controls.autoRotate; $("spin").setAttribute("aria-pressed", controls.autoRotate); };
+$("resetView").onclick = resetView;
+
+// ---------- Pixel editor ----------
+const paint = $("paint"), pctx = paint.getContext("2d");
+let tool = "pencil", zoom = 16, drawing = false, adjustBase = null;
+function filesOf(v) { return [...new Set(Object.values(v.mats))]; }
+function drawEditor() {
+  const w = work[filePath]; if (!w) return;
+  const box = paint.parentElement.getBoundingClientRect();
+  const maxW = Math.max(160, Math.min(box.width - 24, 420));
+  zoom = Math.max(1, Math.floor(maxW / Math.max(w.w, w.h)));
+  paint.width = w.w * zoom; paint.height = w.h * zoom;
+  pctx.imageSmoothingEnabled = false;
+  for (let y = 0; y < w.h; y++) for (let x = 0; x < w.w; x++) {
+    pctx.fillStyle = (x + y) % 2 ? "#c9cdd2" : "#e4e7ea";
+    pctx.fillRect(x * zoom, y * zoom, zoom, zoom);
+  }
+  let src = w.canvas;
+  if (isArmor(filePath)) { const v = groups[current].variants[variantIx]; src = tinted(filePath, v.tint).canvas; }
+  pctx.drawImage(src, 0, 0, w.w * zoom, w.h * zoom);
+  if (zoom >= 8) {
+    pctx.strokeStyle = "rgba(0,0,0,0.12)"; pctx.lineWidth = 1; pctx.beginPath();
+    for (let x = 0; x <= w.w; x++) { pctx.moveTo(x * zoom + 0.5, 0); pctx.lineTo(x * zoom + 0.5, w.h * zoom); }
+    for (let y = 0; y <= w.h; y++) { pctx.moveTo(0, y * zoom + 0.5); pctx.lineTo(w.w * zoom, y * zoom + 0.5); }
+    pctx.stroke();
+  }
+}
+function drawPalette() {
+  const w = work[filePath]; const p = w.ctx.getImageData(0, 0, w.w, w.h).data;
+  const count = new Map();
+  for (let i = 0; i < p.length; i += 4) { if (p[i + 3] === 0) continue; const k = (p[i] << 16) | (p[i + 1] << 8) | p[i + 2]; count.set(k, (count.get(k) || 0) + 1); }
+  const top = [...count.entries()].sort((a, b) => b[1] - a[1]).slice(0, 28);
+  const el = $("palette"); el.textContent = "";
+  for (const [k] of top) {
+    const hex = "#" + k.toString(16).padStart(6, "0");
+    const b = document.createElement("button"); b.type = "button"; b.style.background = hex; b.title = hex; b.setAttribute("aria-label", "Use " + hex);
+    b.onclick = () => { $("color").value = hex; setTool(tool === "eraser" || tool === "picker" ? "pencil" : tool); };
+    el.appendChild(b);
+  }
+}
+function setTool(t) { tool = t; document.querySelectorAll("[data-tool]").forEach((b) => b.setAttribute("aria-pressed", b.dataset.tool === t)); }
+document.querySelectorAll("[data-tool]").forEach((b) => b.onclick = () => setTool(b.dataset.tool));
+function pushUndo() { const w = work[filePath]; w.undo.push({ img: w.ctx.getImageData(0, 0, w.w, w.h), mask: w.mask && w.mask.slice() }); if (w.undo.length > 60) w.undo.shift(); }
+function paintColor() {
+  const hex = $("color").value;
+  const a = tool === "eraser" ? 0 : 255;
+  return [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16), a];
+}
+function pixelAt(e) {
+  const r = paint.getBoundingClientRect(), w = work[filePath];
+  return [Math.floor((e.clientX - r.left) / r.width * w.w), Math.floor((e.clientY - r.top) / r.height * w.h)];
+}
+function setPx(x, y, c) {
+  const w = work[filePath]; if (x < 0 || y < 0 || x >= w.w || y >= w.h) return;
+  const d = w.ctx.createImageData(1, 1); d.data.set(c); w.ctx.putImageData(d, x, y);
+  if (w.mask) w.mask[y * w.w + x] = c[3] && $("cloth").checked ? 1 : 0;
+}
+function flood(x, y, c) {
+  const w = work[filePath], img = w.ctx.getImageData(0, 0, w.w, w.h), p = img.data;
+  const at = (x, y) => (y * w.w + x) * 4, s = at(x, y), from = [p[s], p[s + 1], p[s + 2], p[s + 3]];
+  if (from.every((v, i) => v === c[i])) return;
+  const stack = [[x, y]];
+  while (stack.length) {
+    const [cx, cy] = stack.pop(); if (cx < 0 || cy < 0 || cx >= w.w || cy >= w.h) continue;
+    const i = at(cx, cy); if (p[i] !== from[0] || p[i + 1] !== from[1] || p[i + 2] !== from[2] || p[i + 3] !== from[3]) continue;
+    p.set(c, i); if (w.mask) w.mask[i / 4] = c[3] && $("cloth").checked ? 1 : 0; stack.push([cx + 1, cy], [cx - 1, cy], [cx, cy + 1], [cx, cy - 1]);
+  }
+  w.ctx.putImageData(img, 0, 0);
+}
+let lastPx = null;
+paint.addEventListener("pointerdown", (e) => {
+  if (!filePath) return;
+  const [x, y] = pixelAt(e);
+  if (tool === "picker") {
+    const d = work[filePath].ctx.getImageData(x, y, 1, 1).data;
+    $("color").value = "#" + [d[0], d[1], d[2]].map((n) => n.toString(16).padStart(2, "0")).join("");
+    if (work[filePath].mask) $("cloth").checked = !!work[filePath].mask[y * work[filePath].w + x];
+    setTool("pencil"); return;
+  }
+  pushUndo(); endAdjust();
+  if (tool === "fill") { flood(x, y, paintColor()); afterEdit(); return; }
+  drawing = true; paint.setPointerCapture(e.pointerId); lastPx = [x, y]; setPx(x, y, paintColor()); afterEdit(true);
+});
+paint.addEventListener("pointermove", (e) => {
+  if (!drawing) return;
+  const [x, y] = pixelAt(e);
+  if (lastPx && lastPx[0] === x && lastPx[1] === y) return;
+  // fill gaps between fast moves
+  const [x0, y0] = lastPx, n = Math.max(Math.abs(x - x0), Math.abs(y - y0));
+  for (let i = 1; i <= n; i++) setPx(Math.round(x0 + (x - x0) * i / n), Math.round(y0 + (y - y0) * i / n), paintColor());
+  lastPx = [x, y]; afterEdit(true);
+});
+const stop = () => { if (drawing) { drawing = false; afterEdit(); } };
+paint.addEventListener("pointerup", stop); paint.addEventListener("pointercancel", stop);
+
+function afterEdit(live) {
+  changed(filePath); drawEditor(); updateThumbs();
+  if (!live) { drawPalette(); renderFiles(); queueSaveEdit(filePath); }
+}
+$("undo").onclick = undo;
+function undo() { const w = work[filePath]; const prev = w.undo.pop(); if (!prev) return; endAdjust(); w.ctx.putImageData(prev.img, 0, 0); if (prev.mask) w.mask = prev.mask; afterEdit(); }
+$("revert").onclick = () => { const w = work[filePath]; if (!isEdited(filePath)) return; pushUndo(); endAdjust(); w.ctx.putImageData(w.orig, 0, 0); if (w.mask) w.mask = w.origMask.slice(); afterEdit(); };
+
+// Hue / saturation / brightness over the whole texture
+function rgb2hsl(r, g, b) { r /= 255; g /= 255; b /= 255; const mx = Math.max(r, g, b), mn = Math.min(r, g, b); let h = 0, s = 0; const l = (mx + mn) / 2;
+  if (mx !== mn) { const d = mx - mn; s = l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn); h = mx === r ? (g - b) / d + (g < b ? 6 : 0) : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h /= 6; } return [h, s, l]; }
+function hsl2rgb(h, s, l) { if (s === 0) return [l * 255, l * 255, l * 255]; const q = l < 0.5 ? l * (1 + s) : l + s - l * s, p = 2 * l - q;
+  const f = (t) => { t = (t + 1) % 1; return t < 1 / 6 ? p + (q - p) * 6 * t : t < 1 / 2 ? q : t < 2 / 3 ? p + (q - p) * (2 / 3 - t) * 6 : p; };
+  return [f(h + 1 / 3) * 255, f(h) * 255, f(h - 1 / 3) * 255]; }
+function applyAdjust() {
+  const w = work[filePath];
+  if (!adjustBase) { pushUndo(); adjustBase = w.undo[w.undo.length - 1].img; }
+  const hue = +$("hue").value / 360, sat = +$("sat").value / 100, bri = +$("bri").value / 100;
+  $("hueOut").textContent = $("hue").value; $("satOut").textContent = $("sat").value; $("briOut").textContent = $("bri").value;
+  const out = new ImageData(new Uint8ClampedArray(adjustBase.data), w.w, w.h), p = out.data;
+  for (let i = 0; i < p.length; i += 4) {
+    if (p[i + 3] === 0) continue;
+    let [h, s, l] = rgb2hsl(p[i], p[i + 1], p[i + 2]);
+    h = (h + hue + 1) % 1; s = Math.min(1, Math.max(0, s * (1 + sat))); l = Math.min(1, Math.max(0, bri >= 0 ? l + (1 - l) * bri : l * (1 + bri)));
+    const [r, g, b] = hsl2rgb(h, s, l); p[i] = r; p[i + 1] = g; p[i + 2] = b;
+  }
+  w.ctx.putImageData(out, 0, 0); afterEdit(true);
+}
+function endAdjust() { adjustBase = null; for (const id of ["hue", "sat", "bri"]) { $(id).value = 0; $(id + "Out").textContent = "0"; } }
+for (const id of ["hue", "sat", "bri"]) {
+  $(id).addEventListener("input", applyAdjust);
+  $(id).addEventListener("change", () => { drawPalette(); renderFiles(); queueSaveEdit(filePath); });
+}
+
+// ---------- Saving (shared store, so your choices reach Claude) ----------
+let db = null, saveTimers = {}, pending = new Set(), saveFailed = false;
+function setSaved(text, bad) { const el = $("saved"); el.textContent = text; el.classList.toggle("bad", !!bad); }
+const editDocId = (path) => path.replace(/[^a-zA-Z0-9_.-]/g, "~");
+function queueSaveEdit(path) {
+  pending.add(path); clearTimeout(saveTimers[path]);
+  saveTimers[path] = setTimeout(() => saveEdit(path), 700);
+  setSaved(db ? "Saving…" : "");
+}
+async function saveEdit(path) {
+  const w = work[path];
+  if (!db) { pending.delete(path); return noStore(); }
+  try {
+    setSaved("Saving…");
+    const ref = db.collection("edits").doc(editDocId(path));
+    if (isEdited(path)) {
+      const png = w.canvas.toDataURL("image/png"); w.savedPng = png;
+      await ref.set({ path, png, ...(w.mask ? { clothMask: Array.from(w.mask).join("") } : {}), updatedAt: Date.now() });
+    }
+    else { w.savedPng = null; await ref.delete(); }
+    setSaved("Saved");
+  } catch (e) { setSaved("Couldn't save. Try again in a moment.", true); }
+  pending.delete(path);
+}
+async function saveReview(gid) {
+  if (!db) return noStore();
+  try {
+    setSaved("Saving…");
+    const r = reviews[gid] || {};
+    await db.collection("reviews").doc(gid).set({ name: groups.find((g) => g.id === gid).name, status: r.status || "pending", note: r.note || "", updatedAt: Date.now() });
+    setSaved("Saved");
+  } catch (e) { setSaved("Couldn't save. Try again in a moment.", true); }
+}
+function noStore() { setSaved("Saving isn't available here, so changes only last until you close this page.", true); }
+let noteTimer;
+$("comment").addEventListener("input", () => {
+  const gid = groups[current].id; (reviews[gid] ??= {}).note = $("comment").value;
+  clearTimeout(noteTimer); noteTimer = setTimeout(() => saveReview(gid), 700); setSaved(db ? "Saving…" : "");
+});
+function setStatus(status) {
+  const gid = groups[current].id; const r = (reviews[gid] ??= {});
+  r.status = r.status === status ? "pending" : status; r.note = $("comment").value;
+  saveReview(gid); renderReview(); renderList();
+  if (r.status === "approved") setTimeout(() => goNextPending(), 450);
+}
+$("approve").onclick = () => setStatus("approved");
+$("changes").onclick = () => setStatus("changes");
+
+function loadPng(path, png, mask) {
+  return new Promise((res) => { const img = new Image(); img.onload = () => { const w = work[path]; w.ctx.clearRect(0, 0, w.w, w.h); w.ctx.drawImage(img, 0, 0); if (w.mask && mask) w.mask = Uint8Array.from(mask, (ch) => ch === "1" ? 1 : 0); w.savedPng = png; changed(path); res(); }; img.onerror = res; img.src = png; });
+}
+async function connect() {
+  try { db = window.claude?.use ? await window.claude.use("db") : null; } catch { db = null; }
+  if (!db) { setSaved("Saving isn't available here, so changes only last until you close this page.", true); return; }
+  db.collection("reviews").onSnapshot((snap) => {
+    for (const d of snap.docs) { const x = d.data() || {}; if (d.id === groups[current].id && document.activeElement === $("comment")) { reviews[d.id] = { ...reviews[d.id], status: x.status }; continue; } reviews[d.id] = { status: x.status, note: x.note }; }
+    renderList(); renderReview();
+  }, () => setSaved("Couldn't load saved reviews.", true));
+  db.collection("edits").onSnapshot(async (snap) => {
+    const seen = new Set();
+    for (const d of snap.docs) {
+      const x = d.data() || {}; if (!x.path || !work[x.path]) continue; seen.add(x.path);
+      if (pending.has(x.path) || work[x.path].savedPng === x.png) continue;
+      await loadPng(x.path, x.png, x.clothMask);
+    }
+    for (const [path, w] of Object.entries(work)) {
+      if (w.savedPng && !seen.has(path) && !pending.has(path)) { w.ctx.putImageData(w.orig, 0, 0); if (w.mask) w.mask = w.origMask.slice(); w.savedPng = null; changed(path); }
+    }
+    if (filePath) { drawEditor(); drawPalette(); renderFiles(); }
+    updateThumbs();
+  }, () => setSaved("Couldn't load saved edits.", true));
+}
+
+// ---------- Rendering the page ----------
+const status = (g) => reviews[g.id]?.status || "pending";
+const thumbs = [];
+function renderList() {
+  const nav = $("items"); nav.textContent = ""; thumbs.length = 0;
+  let cat = null;
+  groups.forEach((g, i) => {
+    if (filter !== "all" && status(g) !== filter) return;
+    if (g.cat !== cat) { cat = g.cat; const h = document.createElement("div"); h.className = "cat"; h.textContent = cat.toUpperCase(); nav.appendChild(h); }
+    const b = document.createElement("button"); b.type = "button"; b.className = "row"; b.setAttribute("aria-current", i === current);
+    const c = document.createElement("canvas"); c.width = 32; c.height = 32;
+    const nm = document.createElement("span"); nm.className = "nm"; nm.textContent = g.name;
+    const dot = document.createElement("span"); dot.className = "dot " + status(g); dot.title = { pending: "To review", approved: "Approved", changes: "Needs changes" }[status(g)];
+    b.append(c, nm, dot); b.onclick = () => select(i); b.title = g.name;
+    nav.appendChild(b); thumbs.push([c, g]);
+  });
+  updateThumbs();
+  const a = groups.filter((g) => status(g) === "approved").length, ch = groups.filter((g) => status(g) === "changes").length;
+  $("barA").style.width = (a / groups.length * 100) + "%"; $("barC").style.width = (ch / groups.length * 100) + "%";
+  $("progressText").textContent = `${a} of ${groups.length} approved${ch ? ` · ${ch} need changes` : ""}`;
+}
+function updateThumbs() {
+  for (const [c, g] of thumbs) {
+    const ctx = c.getContext("2d"); ctx.imageSmoothingEnabled = false; ctx.clearRect(0, 0, 32, 32);
+    const v = g.variants[0]; const path = v.mats["*"] || v.mats.cloth || v.mats.layer1;
+    const w = work[path]; if (!w) continue;
+    const s = Math.min(w.w, w.h, g.id === "pack_icon" ? 256 : 16);
+    if (isArmor(path)) ctx.drawImage(tinted(path, v.tint).canvas, 16, 16, 8, 8, 0, 0, 32, 32);
+    else if (v.model === "entity" || v.model === "horse") ctx.drawImage(w.canvas, 8, 8, 8, 8, 0, 0, 32, 32);
+    else ctx.drawImage(w.canvas, 0, 0, s, s, 0, 0, 32, 32);
+  }
+}
+function renderVariants() {
+  const g = groups[current], el = $("variants"); el.textContent = "";
+  el.hidden = g.variants.length < 2;
+  g.variants.forEach((v, i) => {
+    const b = document.createElement("button"); b.type = "button"; b.setAttribute("aria-pressed", i === variantIx);
+    if (v.swatch) { const s = document.createElement("span"); s.className = "sw"; s.style.background = `rgb(${v.swatch.join(",")})`; b.appendChild(s); }
+    b.append(v.label); b.onclick = () => { variantIx = i; renderVariants(); showVariant(); pickFile(); };
+    el.appendChild(b);
+  });
+}
+function renderFiles() {
+  const v = groups[current].variants[variantIx], el = $("files"); el.textContent = "";
+  for (const path of filesOf(v)) {
+    const b = document.createElement("button"); b.type = "button"; b.setAttribute("aria-pressed", path === filePath);
+    b.textContent = path.split("/").pop().replace(".png", "");
+    if (isEdited(path)) { const s = document.createElement("span"); s.className = "ed"; s.title = "Edited"; b.prepend(s); }
+    b.onclick = () => { filePath = path; endAdjust(); renderFiles(); openFile(); };
+    el.appendChild(b);
+  }
+}
+function openFile() {
+  const w = work[filePath];
+  $("fileinfo").textContent = `Siege_Nights_RP/${filePath} · ${w.w}×${w.h}${isEdited(filePath) ? " · edited" : ""}`;
+  $("clothRow").hidden = !isArmor(filePath);
+  drawEditor(); drawPalette();
+}
+function pickFile() {
+  const files = filesOf(groups[current].variants[variantIx]);
+  if (!files.includes(filePath)) filePath = files.find((p) => !p.includes("bottom")) || files[0];
+  renderFiles(); openFile();
+}
+function renderReview() {
+  const g = groups[current], r = reviews[g.id] || {}, s = r.status || "pending";
+  $("approve").setAttribute("aria-pressed", s === "approved"); $("changes").setAttribute("aria-pressed", s === "changes");
+  const pill = $("statusPill"); pill.className = "pill " + s; pill.textContent = { pending: "To review", approved: "Approved", changes: "Needs changes" }[s];
+  if (document.activeElement !== $("comment")) $("comment").value = r.note || "";
+}
+function select(i) {
+  current = (i + groups.length) % groups.length; variantIx = 0; filePath = null; endAdjust();
+  const g = groups[current];
+  $("eyebrow").textContent = g.cat.toUpperCase(); $("title").textContent = g.name;
+  $("note").textContent = g.note || ""; $("note").hidden = !g.note;
+  $("counter").textContent = `${current + 1} / ${groups.length}`;
+  renderList(); renderVariants(); showVariant(); pickFile(); renderReview();
+  try { localStorage.setItem("siegeStudio.current", g.id); } catch {}
+}
+function goNextPending() {
+  for (let k = 1; k <= groups.length; k++) { const i = (current + k) % groups.length; if (status(groups[i]) === "pending") return select(i); }
+}
+$("prev").onclick = () => select(current - 1);
+$("next").onclick = () => select(current + 1);
+document.querySelectorAll("[data-f]").forEach((b) => b.onclick = () => {
+  filter = b.dataset.f; document.querySelectorAll("[data-f]").forEach((x) => x.setAttribute("aria-pressed", x === b)); renderList();
+});
+document.addEventListener("keydown", (e) => {
+  if (e.target.closest("textarea, input")) return;
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") { e.preventDefault(); return undo(); }
+  if (e.key === "ArrowRight") select(current + 1);
+  else if (e.key === "ArrowLeft") select(current - 1);
+  else if (e.key === "b") setTool("pencil"); else if (e.key === "e") setTool("eraser");
+  else if (e.key === "i") setTool("picker"); else if (e.key === "g") setTool("fill");
+});
+new ResizeObserver(() => filePath && drawEditor()).observe(paint.parentElement);
+
+ready.then(() => {
+  let start = 0;
+  try { const id = localStorage.getItem("siegeStudio.current"); const i = groups.findIndex((g) => g.id === id); if (i >= 0) start = i; } catch {}
+  resize(); select(start); connect();
+});
+})();
+</script>

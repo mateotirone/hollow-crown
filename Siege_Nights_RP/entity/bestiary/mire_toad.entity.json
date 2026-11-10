@@ -1,0 +1,32 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:mire_toad",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/mire_toad"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.mire_toad"
+   },
+   "animations": {
+    "main": "animation.siege_b.mire_toad"
+   },
+   "scripts": {
+    "animate": [
+     "main"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ],
+   "spawn_egg": {
+    "base_color": "#5a6e32",
+    "overlay_color": "#fac828"
+   }
+  }
+ }
+}

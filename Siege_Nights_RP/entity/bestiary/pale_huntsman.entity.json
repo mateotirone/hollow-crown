@@ -1,0 +1,32 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:pale_huntsman",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/pale_huntsman"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.pale_huntsman"
+   },
+   "animations": {
+    "main": "animation.siege_b.pale_huntsman"
+   },
+   "scripts": {
+    "animate": [
+     "main"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ],
+   "spawn_egg": {
+    "base_color": "#e2e2dc",
+    "overlay_color": "#8ce6ff"
+   }
+  }
+ }
+}

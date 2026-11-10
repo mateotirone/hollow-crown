@@ -1,0 +1,37 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "siege:quartermaster",
+      "materials": {
+        "default": "villager"
+      },
+      "textures": {
+        "default": "textures/entity/siege_quartermaster"
+      },
+      "geometry": {
+        "default": "geometry.villager.v1.8"
+      },
+      "scripts": {
+        "scale": "0.9375",
+        "animate": [
+          "look_at_target",
+          {
+            "move": "query.modified_move_speed"
+          }
+        ]
+      },
+      "animations": {
+        "look_at_target": "animation.common.look_at_target",
+        "move": "animation.villager.move"
+      },
+      "render_controllers": [
+        "controller.render.default"
+      ],
+      "spawn_egg": {
+        "base_color": "#841e22",
+        "overlay_color": "#d6ac3a"
+      }
+    }
+  }
+}

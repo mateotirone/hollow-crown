@@ -1,0 +1,32 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:inquisitor",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/inquisitor"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.inquisitor"
+   },
+   "animations": {
+    "main": "animation.siege_b.inquisitor"
+   },
+   "scripts": {
+    "animate": [
+     "main"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ],
+   "spawn_egg": {
+    "base_color": "#282428",
+    "overlay_color": "#c83c28"
+   }
+  }
+ }
+}

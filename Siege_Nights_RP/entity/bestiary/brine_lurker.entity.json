@@ -1,0 +1,32 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:brine_lurker",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/brine_lurker"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.brine_lurker"
+   },
+   "animations": {
+    "main": "animation.siege_b.brine_lurker"
+   },
+   "scripts": {
+    "animate": [
+     "main"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ],
+   "spawn_egg": {
+    "base_color": "#325a54",
+    "overlay_color": "#f0fa78"
+   }
+  }
+ }
+}

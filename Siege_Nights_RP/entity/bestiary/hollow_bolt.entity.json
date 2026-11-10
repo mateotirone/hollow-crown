@@ -1,0 +1,28 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:hollow_bolt",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/hollow_bolt"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.hollow_bolt"
+   },
+   "animations": {
+    "main": "animation.siege_b.hollow_bolt"
+   },
+   "scripts": {
+    "animate": [
+     "main"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ]
+  }
+ }
+}

@@ -1,0 +1,126 @@
+{
+ "resource_pack_name": "siege_nights",
+ "texture_name": "atlas.items",
+ "texture_data": {
+  "siege_war_horn": {
+   "textures": "textures/items/siege_war_horn"
+  },
+  "siege_guard_helmet": {
+   "textures": "textures/items/siege_guard_helmet"
+  },
+  "siege_guard_chestplate": {
+   "textures": "textures/items/siege_guard_chestplate"
+  },
+  "siege_guard_leggings": {
+   "textures": "textures/items/siege_guard_leggings"
+  },
+  "siege_guard_boots": {
+   "textures": "textures/items/siege_guard_boots"
+  },
+  "siege_longsword": {
+   "textures": "textures/items/siege_longsword"
+  },
+  "siege_warhammer": {
+   "textures": "textures/items/siege_warhammer"
+  },
+  "siege_writ": {
+   "textures": "textures/items/siege_writ"
+  },
+  "siege_battering_ram": {
+   "textures": "textures/items/siege_battering_ram"
+  },
+  "siege_archer": {
+   "textures": "textures/items/siege_archer"
+  },
+  "siege_man_at_arms": {
+   "textures": "textures/items/siege_man_at_arms"
+  },
+  "siege_trebuchet": {
+   "textures": "textures/items/siege_trebuchet"
+  },
+  "siege_ballista": {
+   "textures": "textures/items/siege_ballista"
+  },
+  "siege_tuning_fork": {
+   "textures": "textures/items/siege_tuning_fork"
+  },
+  "siege_choir_shard": {
+   "textures": "textures/items/siege_choir_shard"
+  },
+  "siege_b_hollow_ash": {
+   "textures": "textures/items/bestiary/hollow_ash"
+  },
+  "siege_b_pale_antler": {
+   "textures": "textures/items/bestiary/pale_antler"
+  },
+  "siege_b_rime_pelt": {
+   "textures": "textures/items/bestiary/rime_pelt"
+  },
+  "siege_b_brine_scale": {
+   "textures": "textures/items/bestiary/brine_scale"
+  },
+  "siege_b_ash_glass": {
+   "textures": "textures/items/bestiary/ash_glass"
+  },
+  "siege_b_wyrm_scale": {
+   "textures": "textures/items/bestiary/wyrm_scale"
+  },
+  "siege_b_toad_venom": {
+   "textures": "textures/items/bestiary/toad_venom"
+  },
+  "siege_b_wight_dust": {
+   "textures": "textures/items/bestiary/wight_dust"
+  },
+  "siege_b_clockwork_cog": {
+   "textures": "textures/items/bestiary/clockwork_cog"
+  },
+  "siege_b_drowned_pearl": {
+   "textures": "textures/items/bestiary/drowned_pearl"
+  },
+  "siege_b_changeling_ichor": {
+   "textures": "textures/items/bestiary/changeling_ichor"
+  },
+  "siege_b_stopped_clock_key": {
+   "textures": "textures/items/bestiary/stopped_clock_key"
+  },
+  "siege_b_pale_horn": {
+   "textures": "textures/items/bestiary/pale_horn"
+  },
+  "siege_b_drowned_ring": {
+   "textures": "textures/items/bestiary/drowned_ring"
+  },
+  "siege_b_faceless_seal": {
+   "textures": "textures/items/bestiary/faceless_seal"
+  },
+  "siege_b_mire_effigy": {
+   "textures": "textures/items/bestiary/mire_effigy"
+  },
+  "siege_b_minute_hand": {
+   "textures": "textures/items/bestiary/minute_hand"
+  },
+  "siege_b_rimefang_bow": {
+   "textures": "textures/items/bestiary/rimefang_bow"
+  },
+  "siege_b_widows_veil": {
+   "textures": "textures/items/bestiary/widows_veil"
+  },
+  "siege_b_seneschal_greatshield": {
+   "textures": "textures/items/bestiary/seneschal_greatshield"
+  },
+  "siege_b_faceless_crown_shard": {
+   "textures": "textures/items/bestiary/faceless_crown_shard"
+  },
+  "siege_b_mire_heart": {
+   "textures": "textures/items/bestiary/mire_heart"
+  },
+  "siege_b_warlords_brand": {
+   "textures": "textures/items/bestiary/warlords_brand"
+  },
+  "siege_b_oath_of_oswin": {
+   "textures": "textures/items/bestiary/oath_of_oswin"
+  },
+  "siege_b_crownless_mantle": {
+   "textures": "textures/items/bestiary/crownless_mantle"
+  }
+ }
+}

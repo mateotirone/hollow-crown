@@ -1,0 +1,188 @@
+{
+ "format_version": "1.12.0",
+ "minecraft:geometry": [
+  {
+   "description": {
+    "identifier": "geometry.siege_b.drowned_bride",
+    "texture_width": 128,
+    "texture_height": 128,
+    "visible_bounds_width": 3.2,
+    "visible_bounds_height": 3.1,
+    "visible_bounds_offset": [
+     0,
+     1.0,
+     0
+    ]
+   },
+   "bones": [
+    {
+     "name": "root",
+     "pivot": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "cubes": []
+    },
+    {
+     "name": "body",
+     "pivot": [
+      0.0,
+      12.0,
+      0.0
+     ],
+     "parent": "root",
+     "cubes": [
+      {
+       "origin": [
+        -6.0,
+        0.0,
+        -5.0
+       ],
+       "size": [
+        12,
+        12,
+        10
+       ],
+       "uv": [
+        22,
+        0
+       ]
+      },
+      {
+       "origin": [
+        -4.0,
+        12.0,
+        -2.5
+       ],
+       "size": [
+        8,
+        12,
+        5
+       ],
+       "uv": [
+        102,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "head",
+     "pivot": [
+      0.0,
+      24.0,
+      0.0
+     ],
+     "parent": "body",
+     "cubes": [
+      {
+       "origin": [
+        -4.0,
+        24.0,
+        -4.0
+       ],
+       "size": [
+        8,
+        8,
+        8
+       ],
+       "uv": [
+        24,
+        25
+       ]
+      },
+      {
+       "origin": [
+        -4.5,
+        23.0,
+        -4.5
+       ],
+       "size": [
+        9,
+        10,
+        9
+       ],
+       "inflate": 0.3,
+       "uv": [
+        66,
+        0
+       ]
+      },
+      {
+       "origin": [
+        -5.0,
+        8.0,
+        3.5
+       ],
+       "size": [
+        10,
+        24,
+        1
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "arm_r",
+     "pivot": [
+      -5.0,
+      22.0,
+      0.0
+     ],
+     "parent": "body",
+     "cubes": [
+      {
+       "origin": [
+        -6.5,
+        8.0,
+        -1.5
+       ],
+       "size": [
+        3,
+        14,
+        3
+       ],
+       "uv": [
+        0,
+        25
+       ]
+      }
+     ]
+    },
+    {
+     "name": "arm_l",
+     "pivot": [
+      5.0,
+      22.0,
+      0.0
+     ],
+     "parent": "body",
+     "cubes": [
+      {
+       "origin": [
+        3.5,
+        8.0,
+        -1.5
+       ],
+       "size": [
+        3,
+        14,
+        3
+       ],
+       "mirror": true,
+       "uv": [
+        12,
+        25
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

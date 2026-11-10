@@ -1,0 +1,32 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:oswin_the_last",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/oswin_the_last"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.oswin_the_last"
+   },
+   "animations": {
+    "main": "animation.siege_b.oswin_the_last"
+   },
+   "scripts": {
+    "animate": [
+     "main"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ],
+   "spawn_egg": {
+    "base_color": "#3c5460",
+    "overlay_color": "#c8f0ff"
+   }
+  }
+ }
+}

@@ -1,0 +1,32 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:reeve_cog",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/reeve_cog"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.reeve_cog"
+   },
+   "animations": {
+    "main": "animation.siege_b.reeve_cog"
+   },
+   "scripts": {
+    "animate": [
+     "main"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ],
+   "spawn_egg": {
+    "base_color": "#b88c3c",
+    "overlay_color": "#46464f"
+   }
+  }
+ }
+}

@@ -1,0 +1,33 @@
+{
+  "format_version": "1.21.60",
+  "minecraft:block": {
+    "description": {
+      "identifier": "siege:plot_stone",
+      "menu_category": {
+        "category": "items"
+      }
+    },
+    "components": {
+      "minecraft:display_name": "tile.siege:plot_stone.name",
+      "minecraft:destructible_by_mining": false,
+      "minecraft:destructible_by_explosion": false,
+      "minecraft:light_emission": 4,
+      "minecraft:map_color": "#c9a74a",
+      "minecraft:geometry": "minecraft:geometry.full_block",
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "siege_plot_stone_side",
+          "render_method": "opaque"
+        },
+        "up": {
+          "texture": "siege_plot_stone_top",
+          "render_method": "opaque"
+        },
+        "down": {
+          "texture": "siege_plot_stone_bottom",
+          "render_method": "opaque"
+        }
+      }
+    }
+  }
+}

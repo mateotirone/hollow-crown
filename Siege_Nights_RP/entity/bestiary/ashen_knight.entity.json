@@ -1,0 +1,32 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:ashen_knight",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/ashen_knight"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.ashen_knight"
+   },
+   "animations": {
+    "main": "animation.siege_b.ashen_knight"
+   },
+   "scripts": {
+    "animate": [
+     "main"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ],
+   "spawn_egg": {
+    "base_color": "#b2b6be",
+    "overlay_color": "#a01e1e"
+   }
+  }
+ }
+}

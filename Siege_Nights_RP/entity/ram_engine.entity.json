@@ -1,0 +1,30 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "siege:ram_engine",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "default": "textures/entity/siege_battering_ram"
+      },
+      "geometry": {
+        "default": "geometry.siege_battering_ram"
+      },
+      "scripts": {
+        "animate": [
+          "wheels"
+        ],
+        "scale": "1.35"
+      },
+      "animations": {
+        "wheels": "animation.siege_ram.wheels",
+        "strike": "animation.siege_ram.strike"
+      },
+      "render_controllers": [
+        "controller.render.default"
+      ]
+    }
+  }
+}

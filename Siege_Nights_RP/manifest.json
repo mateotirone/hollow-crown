@@ -1,0 +1,39 @@
+{
+  "format_version": 2,
+  "header": {
+    "name": "Siege Nights (Resources)",
+    "description": "Textures and names for Siege Nights.",
+    "uuid": "449804cf-524b-40d9-b9db-81fee7c88df5",
+    "version": [
+      1,
+      0,
+      0
+    ],
+    "min_engine_version": [
+      1,
+      26,
+      30
+    ]
+  },
+  "modules": [
+    {
+      "type": "resources",
+      "uuid": "c86854c0-37cb-4f02-8a76-56056b1d3e50",
+      "version": [
+        1,
+        0,
+        0
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "uuid": "4009658f-d02c-499a-8280-80fb76713ee9",
+      "version": [
+        1,
+        0,
+        0
+      ]
+    }
+  ]
+}

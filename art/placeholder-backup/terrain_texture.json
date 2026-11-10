@@ -1,0 +1,186 @@
+{
+  "resource_pack_name": "siege_nights",
+  "texture_name": "atlas.terrain",
+  "texture_data": {
+    "siege_castle_stone": {
+      "textures": "textures/blocks/siege_castle_stone"
+    },
+    "siege_portcullis": {
+      "textures": "textures/blocks/siege_portcullis"
+    },
+    "siege_portcullis_open": {
+      "textures": "textures/blocks/siege_portcullis_open"
+    },
+    "siege_mossy_castle_stone": {
+      "textures": "textures/blocks/siege_mossy_castle_stone"
+    },
+    "siege_cracked_castle_stone": {
+      "textures": "textures/blocks/siege_cracked_castle_stone"
+    },
+    "siege_timber_frame": {
+      "textures": "textures/blocks/siege_timber_frame"
+    },
+    "siege_timber_frame_cross": {
+      "textures": "textures/blocks/siege_timber_frame_cross"
+    },
+    "siege_roof_shingles": {
+      "textures": "textures/blocks/siege_roof_shingles"
+    },
+    "siege_brazier_iron": {
+      "textures": "textures/blocks/siege_brazier_iron"
+    },
+    "siege_brazier_coals": {
+      "textures": "textures/blocks/siege_brazier_coals"
+    },
+    "siege_brazier_fire": {
+      "textures": "textures/blocks/siege_brazier_fire"
+    },
+    "siege_castle_gate": {
+      "textures": "textures/blocks/siege_castle_gate"
+    },
+    "siege_castle_gate_open": {
+      "textures": "textures/blocks/siege_castle_gate_open"
+    },
+    "siege_banner_pole": {
+      "textures": "textures/blocks/siege_banner_pole"
+    },
+    "siege_banner_white": {
+      "textures": "textures/blocks/siege_banner_white"
+    },
+    "siege_banner_orange": {
+      "textures": "textures/blocks/siege_banner_orange"
+    },
+    "siege_banner_magenta": {
+      "textures": "textures/blocks/siege_banner_magenta"
+    },
+    "siege_banner_light_blue": {
+      "textures": "textures/blocks/siege_banner_light_blue"
+    },
+    "siege_banner_yellow": {
+      "textures": "textures/blocks/siege_banner_yellow"
+    },
+    "siege_banner_lime": {
+      "textures": "textures/blocks/siege_banner_lime"
+    },
+    "siege_banner_pink": {
+      "textures": "textures/blocks/siege_banner_pink"
+    },
+    "siege_banner_gray": {
+      "textures": "textures/blocks/siege_banner_gray"
+    },
+    "siege_banner_light_gray": {
+      "textures": "textures/blocks/siege_banner_light_gray"
+    },
+    "siege_banner_cyan": {
+      "textures": "textures/blocks/siege_banner_cyan"
+    },
+    "siege_banner_purple": {
+      "textures": "textures/blocks/siege_banner_purple"
+    },
+    "siege_banner_blue": {
+      "textures": "textures/blocks/siege_banner_blue"
+    },
+    "siege_banner_brown": {
+      "textures": "textures/blocks/siege_banner_brown"
+    },
+    "siege_banner_green": {
+      "textures": "textures/blocks/siege_banner_green"
+    },
+    "siege_banner_red": {
+      "textures": "textures/blocks/siege_banner_red"
+    },
+    "siege_banner_black": {
+      "textures": "textures/blocks/siege_banner_black"
+    },
+    "siege_desk_side": {
+      "textures": "textures/blocks/siege_desk_side"
+    },
+    "siege_desk_top": {
+      "textures": "textures/blocks/siege_desk_top"
+    },
+    "siege_desk_bottom": {
+      "textures": "textures/blocks/siege_desk_bottom"
+    },
+    "siege_workshop_side": {
+      "textures": "textures/blocks/siege_workshop_side"
+    },
+    "siege_workshop_top": {
+      "textures": "textures/blocks/siege_workshop_top"
+    },
+    "siege_charge_side": {
+      "textures": "textures/blocks/siege_charge_side"
+    },
+    "siege_charge_top": {
+      "textures": "textures/blocks/siege_charge_top"
+    },
+    "siege_castle_stone_stone_0": {
+      "textures": "textures/blocks/siege_castle_stone_stone_0"
+    },
+    "siege_castle_stone_stone_1": {
+      "textures": "textures/blocks/siege_castle_stone_stone_1"
+    },
+    "siege_castle_stone_stone_2": {
+      "textures": "textures/blocks/siege_castle_stone_stone_2"
+    },
+    "siege_castle_stone_iron_0": {
+      "textures": "textures/blocks/siege_castle_stone_iron_0"
+    },
+    "siege_castle_stone_iron_1": {
+      "textures": "textures/blocks/siege_castle_stone_iron_1"
+    },
+    "siege_castle_stone_iron_2": {
+      "textures": "textures/blocks/siege_castle_stone_iron_2"
+    },
+    "siege_castle_stone_diamond_0": {
+      "textures": "textures/blocks/siege_castle_stone_diamond_0"
+    },
+    "siege_castle_stone_diamond_1": {
+      "textures": "textures/blocks/siege_castle_stone_diamond_1"
+    },
+    "siege_castle_stone_diamond_2": {
+      "textures": "textures/blocks/siege_castle_stone_diamond_2"
+    },
+    "siege_castle_stone_netherite_0": {
+      "textures": "textures/blocks/siege_castle_stone_netherite_0"
+    },
+    "siege_castle_stone_netherite_1": {
+      "textures": "textures/blocks/siege_castle_stone_netherite_1"
+    },
+    "siege_castle_stone_netherite_2": {
+      "textures": "textures/blocks/siege_castle_stone_netherite_2"
+    },
+    "siege_portcullis_iron": {
+      "textures": "textures/blocks/siege_portcullis_iron"
+    },
+    "siege_portcullis_diamond": {
+      "textures": "textures/blocks/siege_portcullis_diamond"
+    },
+    "siege_portcullis_netherite": {
+      "textures": "textures/blocks/siege_portcullis_netherite"
+    },
+    "siege_castle_gate_iron": {
+      "textures": "textures/blocks/siege_castle_gate_iron"
+    },
+    "siege_castle_gate_diamond": {
+      "textures": "textures/blocks/siege_castle_gate_diamond"
+    },
+    "siege_castle_gate_netherite": {
+      "textures": "textures/blocks/siege_castle_gate_netherite"
+    },
+    "siege_barracks_side": {
+      "textures": "textures/blocks/siege_barracks_side"
+    },
+    "siege_barracks_top": {
+      "textures": "textures/blocks/siege_barracks_top"
+    },
+    "siege_plot_stone_side": {
+      "textures": "textures/blocks/siege_plot_stone_side"
+    },
+    "siege_plot_stone_top": {
+      "textures": "textures/blocks/siege_plot_stone_top"
+    },
+    "siege_plot_stone_bottom": {
+      "textures": "textures/blocks/siege_plot_stone_bottom"
+    }
+  }
+}

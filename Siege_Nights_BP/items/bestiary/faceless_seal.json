@@ -1,0 +1,18 @@
+{
+ "format_version": "1.21.60",
+ "minecraft:item": {
+  "description": {
+   "identifier": "siege:faceless_seal",
+   "menu_category": {
+    "category": "items"
+   }
+  },
+  "components": {
+   "minecraft:icon": "siege_b_faceless_seal",
+   "minecraft:display_name": {
+    "value": "item.siege:faceless_seal.name"
+   },
+   "minecraft:max_stack_size": 1
+  }
+ }
+}

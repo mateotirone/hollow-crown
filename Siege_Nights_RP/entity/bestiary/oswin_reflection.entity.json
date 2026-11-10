@@ -1,0 +1,32 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:oswin_reflection",
+   "materials": {
+    "default": "entity_alphablend"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/oswin_reflection"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.oswin_reflection"
+   },
+   "animations": {
+    "main": "animation.siege_b.oswin_reflection"
+   },
+   "scripts": {
+    "animate": [
+     "main"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ],
+   "spawn_egg": {
+    "base_color": "#a0d2e6",
+    "overlay_color": "#ffffff"
+   }
+  }
+ }
+}

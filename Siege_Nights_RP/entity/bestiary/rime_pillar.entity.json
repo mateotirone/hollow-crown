@@ -1,0 +1,32 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:rime_pillar",
+   "materials": {
+    "default": "entity_alphablend"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/rime_pillar"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.rime_pillar"
+   },
+   "animations": {
+    "main": "animation.siege_b.rime_pillar"
+   },
+   "scripts": {
+    "animate": [
+     "main"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ],
+   "spawn_egg": {
+    "base_color": "#aadcfa",
+    "overlay_color": "#f0f6fa"
+   }
+  }
+ }
+}

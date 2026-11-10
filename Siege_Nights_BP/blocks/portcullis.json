@@ -1,0 +1,184 @@
+{
+  "format_version": "1.21.60",
+  "minecraft:block": {
+    "description": {
+      "identifier": "siege:portcullis",
+      "menu_category": {
+        "category": "construction"
+      },
+      "states": {
+        "siege:open": [
+          false,
+          true
+        ],
+        "siege:armor": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      "traits": {
+        "minecraft:placement_direction": {
+          "enabled_states": [
+            "minecraft:cardinal_direction"
+          ]
+        }
+      }
+    },
+    "components": {
+      "minecraft:display_name": "tile.siege:portcullis.name",
+      "minecraft:destructible_by_mining": {
+        "seconds_to_destroy": 4
+      },
+      "minecraft:destructible_by_explosion": {
+        "explosion_resistance": 60
+      },
+      "minecraft:geometry": "geometry.siege_gate_panel",
+      "minecraft:light_dampening": 0,
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "siege_portcullis",
+          "render_method": "alpha_test"
+        }
+      },
+      "minecraft:map_color": "#3a3a3a",
+      "minecraft:collision_box": {
+        "origin": [
+          -8,
+          0,
+          -1
+        ],
+        "size": [
+          16,
+          16,
+          2
+        ]
+      },
+      "minecraft:selection_box": {
+        "origin": [
+          -8,
+          0,
+          -1
+        ],
+        "size": [
+          16,
+          16,
+          2
+        ]
+      }
+    },
+    "permutations": [
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'north'",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'south'",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'east'",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              90,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'west'",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              90,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:armor') == 0",
+        "components": {
+          "minecraft:destructible_by_mining": {
+            "seconds_to_destroy": 4
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:armor') == 1",
+        "components": {
+          "minecraft:destructible_by_mining": {
+            "seconds_to_destroy": 7
+          },
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_portcullis_iron",
+              "render_method": "alpha_test"
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:armor') == 2",
+        "components": {
+          "minecraft:destructible_by_mining": {
+            "seconds_to_destroy": 11
+          },
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_portcullis_diamond",
+              "render_method": "alpha_test"
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:armor') == 3",
+        "components": {
+          "minecraft:destructible_by_mining": {
+            "seconds_to_destroy": 16
+          },
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_portcullis_netherite",
+              "render_method": "alpha_test"
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:open') == true",
+        "components": {
+          "minecraft:collision_box": false,
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_portcullis_open",
+              "render_method": "alpha_test"
+            }
+          }
+        }
+      }
+    ]
+  }
+}

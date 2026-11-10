@@ -1,0 +1,32 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:mother_of_changelings",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/mother_of_changelings"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.mother_of_changelings"
+   },
+   "animations": {
+    "main": "animation.siege_b.mother_of_changelings"
+   },
+   "scripts": {
+    "animate": [
+     "main"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ],
+   "spawn_egg": {
+    "base_color": "#3c502c",
+    "overlay_color": "#ffe650"
+   }
+  }
+ }
+}

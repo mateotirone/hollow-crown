@@ -1,0 +1,32 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:drowned_bride",
+   "materials": {
+    "default": "entity_alphablend"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/drowned_bride"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.drowned_bride"
+   },
+   "animations": {
+    "main": "animation.siege_b.drowned_bride"
+   },
+   "scripts": {
+    "animate": [
+     "main"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ],
+   "spawn_egg": {
+    "base_color": "#bed2d6",
+    "overlay_color": "#a0fae6"
+   }
+  }
+ }
+}

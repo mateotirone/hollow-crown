@@ -1,0 +1,122 @@
+# Siege Nights script layout (for everyone adding code)
+
+The old 89 KB `scripts/main.js` is split into small files. Siege Nights gameplay is unchanged.
+New Hollow Crown features each live in **their own folder** and only touch the rest through
+`scripts/siege/api.js`. That keeps parallel work from colliding.
+
+```
+Siege_Nights_BP/scripts/
+  main.js              entry: imports core, siege, then each feature folder, then starts the loop
+  core/                engine pieces any feature can use (no gameplay)
+    loop.js            onTick(): the shared main loop
+    events.js          on()/emit() events, and hooks
+    store.js           moduleStore(): a saved JSON blob per feature
+    tests.js           addTests(): self-tests, run at world load and by /scriptevent siege:selftest
+  siege/               the original Siege Nights, split by topic (keep, siege, warplan, walls ...)
+    settings.js        SETTINGS: the numbers Mateo tweaks
+    api.js             THE PUBLIC API. Import from here, not from the other siege/ files
+  bestiary/  lore/  undertow/  crown/  plots/  horses/  townhall/ ...   one folder per feature
+tools/check.mjs        offline check: loads every script in Node with a fake Minecraft, runs the tests
+```
+
+## Adding a feature
+
+1. Make `scripts/<feature>/index.js`. It may import its own files, `../core/*.js` and `../siege/api.js`.
+2. Add **one line** to `scripts/main.js` in the "Features" block: `import "./<feature>/index.js";`
+   Only add it once your index.js exists and loads: a missing or broken import stops the whole pack.
+3. Run `node tools/check.mjs` from the `siege-nights/` folder. It must say `ALL OK`.
+
+## Rules
+
+- **Namespaces:** blocks, items, entities `siege:` (or `hc:` if your thread already uses it). Tags
+  `siege_<feature>_*`. Dynamic properties `<ns>:<feature>_*`. Scriptevent ids `siege:<feature>_*`.
+- **Startup:** at load time only subscribe to events and register things. Do not call
+  `world.getDimension`, `world.getDynamicProperty` or `getState()` at the top level: the world isn't
+  ready yet. Do it inside an event handler, a tick, or `on("ready", ...)`.
+- **Ticks:** use `onTick(name, everyTicks, fn)` from `core/loop.js` instead of your own
+  `system.runInterval`. Each task gets its own error guard, so a crash in yours can't stop sieges.
+- **Your saved data:** use `moduleStore("<ns>:<feature>", () => defaults)` (or your own prefixed
+  dynamic properties). Do not add fields to the Siege Nights state blob. One dynamic property holds
+  about 32 KB, so split big data across keys.
+- **Siege Nights state:** `getState()` returns the live object. Mutate it and call `saveState()`.
+  Never keep a copy, or your write and Siege Nights' next save will overwrite each other.
+- **Event handlers:** `world.afterEvents.*.subscribe` directly, as usual. If the handler reads Siege
+  Nights state, start with `if (!isReady()) return;`.
+- **Tests:** add a few with `addTests("<feature>", { "name": () => { assert(...) } })`. Pure ones run
+  in Node and in game; pass `{ gameOnly: true }` for ones that need the real world.
+
+## `scripts/siege/api.js`
+
+```js
+import {
+  // state
+  isReady, getState, saveState,
+  // settlements
+  settlementAt,      // (location) -> owner player id or undefined. Overworld locations only.
+  keepOf,            // (ownerId) -> keep { x, y, z, name, color, wins, allies, sovereign, ... } or undefined
+  tierOf, TIERS,     // tierOf(keep) -> { name, wins, radius, keepHealth }
+  keepCenter, keepBlock, keepHealth, isOnline, isAlly, ownerTag, ownerOf, keepFallen, recordWin,
+  // sieges
+  spawnRaider,       // (dim, type, x, z, fallbackY, tags[], name?) -> entity or undefined
+  isNight, startSiege, endSiege, raidersLeft, nextSiegeDay, planSiege, FACTIONS, MODIFIERS,
+  RAIDER_TAG, RAM_TAG, SAPPER_TAG, WARLORD_TAG, KING_TAG,      // and every other id in siege/constants.js
+  // walls
+  hitWall, blastDamage, wallHp, lightCharge,
+  // guards
+  guardTag, guardOwner, guardCount, guardLimit, isGuard, markWanted, GUARD_TYPES, GUARD_ARMOR, armorTier, equipGuard,
+  // shared helpers
+  title, overworld, takeItems, countItem, consumeHeld, pick, SETTINGS,
+  // events and hooks
+  on, emit, addFilter,
+  addLandClaim, addFoundingCheck, addSiegeSkipHook, addPlanHook, addRaiderTypeHook,
+  addRewardHook, addGuardLimitHook, addKeepHealthHook, addKeepMenuButtons,
+  // core tools (same as importing from ../core/*.js)
+  onTick, moduleStore, addTests, assert, assertEqual,
+} from "../siege/api.js";
+```
+
+### Events: `on(name, (data) => ...)`
+
+| name | data | when |
+|---|---|---|
+| `ready` | `{}` | once, on the first tick after the world and saved state are loaded |
+| `siegeStart` | `{ provokedBy }` | a siege night begins (after plans are made) |
+| `siegeEnd` | `{ outcome, besieged }` | outcome is `"won"`, `"dawn"` or `"empty"` |
+| `siegeReward` | `{ player, emeralds, threat }` | a defender was just paid for holding their keep (after `addRewardHook`) |
+| `keepFounded` | `{ player, keep, moved }` | a Keep Banner founded (or moved) a settlement |
+| `keepFallen` | `{ owner, keep }` | a keep fell during a siege |
+| `tierUp` | `{ owner, before, after }` | Hamlet → Town → City → Castle |
+| `warlordSlain` | `{ owner, name, king }` | a warlord (or the Warlord King) died |
+| `raiderKilled` | `{ entity, killer, owner }` | any siege raider died during a siege |
+| `sovereignCrowned` | `{ owner }` | a Castle beat the Grand Siege |
+
+Listeners run inside a try/catch, so a broken listener only logs a warning.
+
+### Hooks (change Siege Nights behaviour; with none registered it behaves exactly as before)
+
+| hook | your function | effect |
+|---|---|---|
+| `addLandClaim` | `(location) => ownerId \| undefined` | Extra land. `settlementAt` asks these after the keeps, so protection, borders and building rights follow. The id **must own a keep**. |
+| `addFoundingCheck` | `(player, block, oldKeep) => message \| undefined` | Checked first when a Keep Banner is placed. A message refuses the banner and hands it back. |
+| `addSiegeSkipHook` | `(owner, keep) => true` | Leave that settlement out of the siege: no keep heart, no plan, no raiders. |
+| `addPlanHook` | `(plan, owner, keep) => void` | Edit the war plan right after it is made (`faction`, `budget`, `modifiers`, `warlord`, `sides`). |
+| `addRaiderTypeHook` | `(type, { tags, name }) => newType \| undefined` | Swap a raider's entity type as it spawns. Tags carry the role: `siege_ram`, `siege_sapper`, `siege_warlord`, `siege_warlord_king`, plus the owner tag. Tags, name and buffs are applied to your entity as usual. |
+| `addRewardHook` | `({ player, emeralds, threat }) => newEmeralds` | Change a defender's pay before it is handed out. |
+| `addGuardLimitHook` | `(owner, base) => number` | Change how many guards a settlement can keep. |
+| `addKeepHealthHook` | `(owner, base) => number` | Change keep heart health. The `siege:keep_heart` entity's max health (400 today) still caps it. |
+| `addKeepMenuButtons` | `({ player, keep, owner, mine }) => [{ label, icon?, action }]` | Extra buttons on the Keep Banner menu, above "Close". |
+
+Anything else: `addFilter(name, (value, context) => newValue)` is the general form these are built on.
+
+Not possible: Quartermaster prices. They are a fixed trade table (`trading/quartermaster_trades.json`), and scripts cannot change or observe villager trades.
+
+Need another hook? Ask the "Prepare Siege Nights code for parallel work" thread rather than editing `siege/` files yourself.
+
+## Checking and building
+
+- `node tools/check.mjs` (from `siege-nights/`): parses every pack JSON, checks imports, finds undefined names,
+  loads everything with a fake Minecraft, runs every loop task and all self-tests. Files main.js doesn't load
+  yet only produce notes, so you can run it while your feature is half done.
+- `python3 tools/build.py`: runs the check, then builds `siege-nights.mcaddon` (only scripts main.js loads are packed).
+- In game: `/scriptevent siege:selftest`. It also runs at world load and tells players if something failed.
+- `archive/main-before-split.js` is the original single file, for reference.

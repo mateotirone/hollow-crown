@@ -1,0 +1,23 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "siege:ballista_engine",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "default": "textures/entity/siege_ballista"
+      },
+      "geometry": {
+        "default": "geometry.siege_ballista"
+      },
+      "animations": {
+        "fire": "animation.siege_ballista.fire"
+      },
+      "render_controllers": [
+        "controller.render.default"
+      ]
+    }
+  }
+}

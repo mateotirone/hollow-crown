@@ -1,0 +1,188 @@
+{
+  "format_version": "1.21.60",
+  "minecraft:block": {
+    "description": {
+      "identifier": "siege:castle_gate",
+      "menu_category": {
+        "category": "construction"
+      },
+      "states": {
+        "siege:open": [
+          false,
+          true
+        ],
+        "siege:armor": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      "traits": {
+        "minecraft:placement_direction": {
+          "enabled_states": [
+            "minecraft:cardinal_direction"
+          ]
+        }
+      }
+    },
+    "components": {
+      "minecraft:display_name": "tile.siege:castle_gate.name",
+      "minecraft:destructible_by_mining": {
+        "seconds_to_destroy": 2
+      },
+      "minecraft:destructible_by_explosion": {
+        "explosion_resistance": 3
+      },
+      "minecraft:flammable": {
+        "catch_chance_modifier": 5,
+        "destroy_chance_modifier": 20
+      },
+      "minecraft:map_color": "#9a7a50",
+      "minecraft:geometry": "geometry.siege_gate_panel",
+      "minecraft:light_dampening": 0,
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "siege_castle_gate",
+          "render_method": "alpha_test"
+        }
+      },
+      "minecraft:collision_box": {
+        "origin": [
+          -8,
+          0,
+          -1
+        ],
+        "size": [
+          16,
+          16,
+          2
+        ]
+      },
+      "minecraft:selection_box": {
+        "origin": [
+          -8,
+          0,
+          -1
+        ],
+        "size": [
+          16,
+          16,
+          2
+        ]
+      }
+    },
+    "permutations": [
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'north'",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'south'",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'east'",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              90,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'west'",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              90,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:armor') == 0",
+        "components": {
+          "minecraft:destructible_by_mining": {
+            "seconds_to_destroy": 3
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:armor') == 1",
+        "components": {
+          "minecraft:destructible_by_mining": {
+            "seconds_to_destroy": 6
+          },
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_castle_gate_iron",
+              "render_method": "alpha_test"
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:armor') == 2",
+        "components": {
+          "minecraft:destructible_by_mining": {
+            "seconds_to_destroy": 10
+          },
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_castle_gate_diamond",
+              "render_method": "alpha_test"
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:armor') == 3",
+        "components": {
+          "minecraft:destructible_by_mining": {
+            "seconds_to_destroy": 15
+          },
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_castle_gate_netherite",
+              "render_method": "alpha_test"
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:open') == true",
+        "components": {
+          "minecraft:collision_box": false,
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_castle_gate_open",
+              "render_method": "alpha_test"
+            }
+          }
+        }
+      }
+    ]
+  }
+}

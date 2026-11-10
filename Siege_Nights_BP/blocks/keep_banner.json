@@ -1,0 +1,363 @@
+{
+  "format_version": "1.21.60",
+  "minecraft:block": {
+    "description": {
+      "identifier": "siege:keep_banner",
+      "menu_category": {
+        "category": "items"
+      },
+      "states": {
+        "siege:color": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ]
+      },
+      "traits": {
+        "minecraft:placement_direction": {
+          "enabled_states": [
+            "minecraft:cardinal_direction"
+          ]
+        }
+      }
+    },
+    "components": {
+      "minecraft:display_name": "tile.siege:keep_banner.name",
+      "minecraft:geometry": "geometry.siege_keep_banner",
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "siege_banner_pole",
+          "render_method": "opaque"
+        },
+        "cloth": {
+          "texture": "siege_banner_red",
+          "render_method": "alpha_test"
+        }
+      },
+      "minecraft:collision_box": false,
+      "minecraft:selection_box": {
+        "origin": [
+          -6,
+          0,
+          -3
+        ],
+        "size": [
+          12,
+          16,
+          4
+        ]
+      },
+      "minecraft:light_dampening": 0,
+      "minecraft:destructible_by_mining": {
+        "seconds_to_destroy": 1
+      },
+      "minecraft:destructible_by_explosion": {
+        "explosion_resistance": 1200
+      },
+      "minecraft:map_color": "#a12722"
+    },
+    "permutations": [
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'north'",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'east'",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              270,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'south'",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              180,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'west'",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              90,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:color') == 0",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_banner_pole",
+              "render_method": "opaque"
+            },
+            "cloth": {
+              "texture": "siege_banner_white",
+              "render_method": "alpha_test"
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:color') == 1",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_banner_pole",
+              "render_method": "opaque"
+            },
+            "cloth": {
+              "texture": "siege_banner_orange",
+              "render_method": "alpha_test"
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:color') == 2",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_banner_pole",
+              "render_method": "opaque"
+            },
+            "cloth": {
+              "texture": "siege_banner_magenta",
+              "render_method": "alpha_test"
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:color') == 3",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_banner_pole",
+              "render_method": "opaque"
+            },
+            "cloth": {
+              "texture": "siege_banner_light_blue",
+              "render_method": "alpha_test"
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:color') == 4",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_banner_pole",
+              "render_method": "opaque"
+            },
+            "cloth": {
+              "texture": "siege_banner_yellow",
+              "render_method": "alpha_test"
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:color') == 5",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_banner_pole",
+              "render_method": "opaque"
+            },
+            "cloth": {
+              "texture": "siege_banner_lime",
+              "render_method": "alpha_test"
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:color') == 6",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_banner_pole",
+              "render_method": "opaque"
+            },
+            "cloth": {
+              "texture": "siege_banner_pink",
+              "render_method": "alpha_test"
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:color') == 7",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_banner_pole",
+              "render_method": "opaque"
+            },
+            "cloth": {
+              "texture": "siege_banner_gray",
+              "render_method": "alpha_test"
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:color') == 8",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_banner_pole",
+              "render_method": "opaque"
+            },
+            "cloth": {
+              "texture": "siege_banner_light_gray",
+              "render_method": "alpha_test"
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:color') == 9",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_banner_pole",
+              "render_method": "opaque"
+            },
+            "cloth": {
+              "texture": "siege_banner_cyan",
+              "render_method": "alpha_test"
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:color') == 10",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_banner_pole",
+              "render_method": "opaque"
+            },
+            "cloth": {
+              "texture": "siege_banner_purple",
+              "render_method": "alpha_test"
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:color') == 11",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_banner_pole",
+              "render_method": "opaque"
+            },
+            "cloth": {
+              "texture": "siege_banner_blue",
+              "render_method": "alpha_test"
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:color') == 12",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_banner_pole",
+              "render_method": "opaque"
+            },
+            "cloth": {
+              "texture": "siege_banner_brown",
+              "render_method": "alpha_test"
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:color') == 13",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_banner_pole",
+              "render_method": "opaque"
+            },
+            "cloth": {
+              "texture": "siege_banner_green",
+              "render_method": "alpha_test"
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:color') == 14",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_banner_pole",
+              "render_method": "opaque"
+            },
+            "cloth": {
+              "texture": "siege_banner_red",
+              "render_method": "alpha_test"
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:color') == 15",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_banner_pole",
+              "render_method": "opaque"
+            },
+            "cloth": {
+              "texture": "siege_banner_black",
+              "render_method": "alpha_test"
+            }
+          }
+        }
+      }
+    ]
+  }
+}

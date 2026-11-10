@@ -1,0 +1,32 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:frost_stag",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/frost_stag"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.frost_stag"
+   },
+   "animations": {
+    "main": "animation.siege_b.frost_stag"
+   },
+   "scripts": {
+    "animate": [
+     "main"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ],
+   "spawn_egg": {
+    "base_color": "#d6dce2",
+    "overlay_color": "#bedcf0"
+   }
+  }
+ }
+}

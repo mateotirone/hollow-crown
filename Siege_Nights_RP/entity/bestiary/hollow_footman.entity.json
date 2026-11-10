@@ -1,0 +1,32 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:hollow_footman",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/hollow_footman"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.hollow_footman"
+   },
+   "animations": {
+    "main": "animation.siege_b.hollow_footman"
+   },
+   "scripts": {
+    "animate": [
+     "main"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ],
+   "spawn_egg": {
+    "base_color": "#3f3a48",
+    "overlay_color": "#b4e6ff"
+   }
+  }
+ }
+}

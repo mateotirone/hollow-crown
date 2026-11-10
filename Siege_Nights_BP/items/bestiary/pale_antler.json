@@ -1,0 +1,18 @@
+{
+ "format_version": "1.21.60",
+ "minecraft:item": {
+  "description": {
+   "identifier": "siege:pale_antler",
+   "menu_category": {
+    "category": "items"
+   }
+  },
+  "components": {
+   "minecraft:icon": "siege_b_pale_antler",
+   "minecraft:display_name": {
+    "value": "item.siege:pale_antler.name"
+   },
+   "minecraft:max_stack_size": 64
+  }
+ }
+}

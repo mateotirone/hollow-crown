@@ -1,0 +1,32 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:ash_scarab",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/ash_scarab"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.ash_scarab"
+   },
+   "animations": {
+    "main": "animation.siege_b.ash_scarab"
+   },
+   "scripts": {
+    "animate": [
+     "main"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ],
+   "spawn_egg": {
+    "base_color": "#3c281e",
+    "overlay_color": "#ff781e"
+   }
+  }
+ }
+}

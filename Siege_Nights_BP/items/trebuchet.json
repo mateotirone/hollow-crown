@@ -1,0 +1,21 @@
+{
+  "format_version": "1.21.60",
+  "minecraft:item": {
+    "description": {
+      "identifier": "siege:trebuchet",
+      "menu_category": {
+        "category": "equipment"
+      }
+    },
+    "components": {
+      "minecraft:icon": "siege_trebuchet",
+      "minecraft:display_name": {
+        "value": "item.siege:trebuchet.name"
+      },
+      "minecraft:max_stack_size": 1,
+      "minecraft:entity_placer": {
+        "entity": "siege:trebuchet_engine"
+      }
+    }
+  }
+}

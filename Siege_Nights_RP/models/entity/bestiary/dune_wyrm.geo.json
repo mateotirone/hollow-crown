@@ -1,0 +1,235 @@
+{
+ "format_version": "1.12.0",
+ "minecraft:geometry": [
+  {
+   "description": {
+    "identifier": "geometry.siege_b.dune_wyrm",
+    "texture_width": 128,
+    "texture_height": 128,
+    "visible_bounds_width": 3.2,
+    "visible_bounds_height": 1.8,
+    "visible_bounds_offset": [
+     0,
+     0.4,
+     0
+    ]
+   },
+   "bones": [
+    {
+     "name": "root",
+     "pivot": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "cubes": []
+    },
+    {
+     "name": "head",
+     "pivot": [
+      0.0,
+      6.0,
+      0.0
+     ],
+     "parent": "root",
+     "cubes": [
+      {
+       "origin": [
+        -6.0,
+        0.0,
+        -12.0
+       ],
+       "size": [
+        12,
+        12,
+        12
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      },
+      {
+       "origin": [
+        -5.0,
+        1.0,
+        -13.0
+       ],
+       "size": [
+        10,
+        3,
+        1
+       ],
+       "uv": [
+        74,
+        46
+       ]
+      }
+     ]
+    },
+    {
+     "name": "seg0",
+     "pivot": [
+      0.0,
+      6.0,
+      0.0
+     ],
+     "parent": "root",
+     "cubes": [
+      {
+       "origin": [
+        -5.5,
+        0.5,
+        0.0
+       ],
+       "size": [
+        11,
+        11,
+        12
+       ],
+       "uv": [
+        48,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "seg1",
+     "pivot": [
+      0.0,
+      6.0,
+      12.0
+     ],
+     "parent": "seg0",
+     "cubes": [
+      {
+       "origin": [
+        -5.0,
+        1.0,
+        12.0
+       ],
+       "size": [
+        10,
+        10,
+        12
+       ],
+       "uv": [
+        0,
+        24
+       ]
+      }
+     ]
+    },
+    {
+     "name": "seg2",
+     "pivot": [
+      0.0,
+      6.0,
+      24.0
+     ],
+     "parent": "seg1",
+     "cubes": [
+      {
+       "origin": [
+        -4.5,
+        1.5,
+        24.0
+       ],
+       "size": [
+        9,
+        9,
+        12
+       ],
+       "uv": [
+        44,
+        24
+       ]
+      }
+     ]
+    },
+    {
+     "name": "seg3",
+     "pivot": [
+      0.0,
+      6.0,
+      36.0
+     ],
+     "parent": "seg2",
+     "cubes": [
+      {
+       "origin": [
+        -4.0,
+        2.0,
+        36.0
+       ],
+       "size": [
+        8,
+        8,
+        12
+       ],
+       "uv": [
+        86,
+        24
+       ]
+      }
+     ]
+    },
+    {
+     "name": "seg4",
+     "pivot": [
+      0.0,
+      6.0,
+      48.0
+     ],
+     "parent": "seg3",
+     "cubes": [
+      {
+       "origin": [
+        -3.5,
+        2.5,
+        48.0
+       ],
+       "size": [
+        7,
+        7,
+        12
+       ],
+       "uv": [
+        0,
+        46
+       ]
+      }
+     ]
+    },
+    {
+     "name": "seg5",
+     "pivot": [
+      0.0,
+      6.0,
+      60.0
+     ],
+     "parent": "seg4",
+     "cubes": [
+      {
+       "origin": [
+        -3.0,
+        3.0,
+        60.0
+       ],
+       "size": [
+        6,
+        6,
+        12
+       ],
+       "uv": [
+        38,
+        46
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

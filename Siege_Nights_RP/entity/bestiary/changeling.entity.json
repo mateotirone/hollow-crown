@@ -1,0 +1,33 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:changeling",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/changeling",
+    "alt": "textures/entity/siege/bestiary/changeling_alt"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.changeling"
+   },
+   "animations": {
+    "main": "animation.siege_b.changeling"
+   },
+   "scripts": {
+    "animate": [
+     "main"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary_variant"
+   ],
+   "spawn_egg": {
+    "base_color": "#3c5a46",
+    "overlay_color": "#ffe650"
+   }
+  }
+ }
+}

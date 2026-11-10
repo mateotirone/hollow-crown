@@ -1,0 +1,32 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:hollow_warlord",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/hollow_warlord"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.hollow_warlord"
+   },
+   "animations": {
+    "main": "animation.siege_b.hollow_warlord"
+   },
+   "scripts": {
+    "animate": [
+     "main"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ],
+   "spawn_egg": {
+    "base_color": "#50463f",
+    "overlay_color": "#ff8c3c"
+   }
+  }
+ }
+}

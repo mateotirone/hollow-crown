@@ -1,0 +1,32 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:shieldwall_brute",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/shieldwall_brute"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.shieldwall_brute"
+   },
+   "animations": {
+    "main": "animation.siege_b.shieldwall_brute"
+   },
+   "scripts": {
+    "animate": [
+     "main"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ],
+   "spawn_egg": {
+    "base_color": "#46464f",
+    "overlay_color": "#ff783c"
+   }
+  }
+ }
+}

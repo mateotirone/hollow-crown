@@ -1,0 +1,32 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:rimewolf",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/rimewolf"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.rimewolf"
+   },
+   "animations": {
+    "main": "animation.siege_b.rimewolf"
+   },
+   "scripts": {
+    "animate": [
+     "main"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ],
+   "spawn_egg": {
+    "base_color": "#aabac8",
+    "overlay_color": "#d2f0ff"
+   }
+  }
+ }
+}

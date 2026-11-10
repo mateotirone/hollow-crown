@@ -1,0 +1,32 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:barrow_wight",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/barrow_wight"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.barrow_wight"
+   },
+   "animations": {
+    "main": "animation.siege_b.barrow_wight"
+   },
+   "scripts": {
+    "animate": [
+     "main"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ],
+   "spawn_egg": {
+    "base_color": "#c8c4b0",
+    "overlay_color": "#78ffb4"
+   }
+  }
+ }
+}

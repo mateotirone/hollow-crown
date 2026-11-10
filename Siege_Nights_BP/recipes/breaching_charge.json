@@ -1,0 +1,30 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "siege:breaching_charge_recipe"
+    },
+    "tags": [
+      "siege_workshop"
+    ],
+    "pattern": [
+      " T ",
+      "III"
+    ],
+    "key": {
+      "T": {
+        "item": "minecraft:tnt"
+      },
+      "I": {
+        "item": "minecraft:iron_ingot"
+      }
+    },
+    "result": {
+      "item": "siege:breaching_charge",
+      "count": 2
+    },
+    "unlock": {
+      "context": "AlwaysUnlocked"
+    }
+  }
+}

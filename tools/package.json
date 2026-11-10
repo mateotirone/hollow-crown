@@ -1,0 +1,8 @@
+{
+  "name": "siege-nights-tools",
+  "private": true,
+  "type": "module",
+  "description": "Offline checks for the Siege Nights add-on. `npm install` here once to enable the deep (undefined name) check.",
+  "scripts": { "check": "node check.mjs" },
+  "dependencies": { "acorn": "^8.14.0", "eslint-scope": "^8.2.0" }
+}

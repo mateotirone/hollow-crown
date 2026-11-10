@@ -1,0 +1,32 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:clockwork_reeve",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/clockwork_reeve"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.clockwork_reeve"
+   },
+   "animations": {
+    "main": "animation.siege_b.clockwork_reeve"
+   },
+   "scripts": {
+    "animate": [
+     "main"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ],
+   "spawn_egg": {
+    "base_color": "#dab046",
+    "overlay_color": "#46464f"
+   }
+  }
+ }
+}

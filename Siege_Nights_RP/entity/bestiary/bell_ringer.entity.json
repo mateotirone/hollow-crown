@@ -1,0 +1,32 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:bell_ringer",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/bell_ringer"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.bell_ringer"
+   },
+   "animations": {
+    "main": "animation.siege_b.bell_ringer"
+   },
+   "scripts": {
+    "animate": [
+     "main"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ],
+   "spawn_egg": {
+    "base_color": "#5a1e22",
+    "overlay_color": "#dab046"
+   }
+  }
+ }
+}
