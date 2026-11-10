@@ -29,6 +29,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 
 - The Tree of Oaths opens as a real skill tree screen: skills in rings with lines between them. A button on its first page switches back to plain lists.
 - Rumor Board jobs no longer repeat: the board never offers the kind of job you just did, and one job in three ends with a twist. Ten named keepsakes to collect.
+- First join now runs in order: look picker, then the welcome hall, then the journal. After you pick a plot the last line in chat is your next step.
 
 - The Old King's Journal now arrives after the look picker and the welcome hall instead of at the same moment: once you have read "How things stand" on the Waystone, or after about 20 seconds.
 
