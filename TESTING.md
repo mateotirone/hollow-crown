@@ -439,3 +439,10 @@ In the real game the first claimant comes 5 days after Morvane falls, then one e
 ### Village happenings (mining villages)
 
 Walk into a mining village in the Hollow: at most once every 8 minutes something is going on, and it should never be the same thing, or the same kind of thing, twice in a row. `/scriptevent hc:folk_happen` while standing in a village forces the next one. Check: the rich seam adds 6 ore to that Tally; the half price shows in the Tally menu for 5 minutes; the nest spawns three endermites by the mine mouth; an errand names a place, and walking to that place pays 4 raw Choir Ore once. Before Morvane falls only the three quiet, frightened ones and the errands appear.
+
+## Omen ravens (bestiary)
+
+- At dusk or night, `/scriptevent siege:raven_row 9` puts nine ravens in a row in front of you, all facing north, with one place left empty. `/scriptevent siege:raven_clear` removes them.
+- Walk up to them, hit them, push them: nothing happens and they do not turn. They make no sound.
+- Wait for morning, or start a siege: they are gone.
+

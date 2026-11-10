@@ -164,6 +164,9 @@
   "siege_caparison": {
    "textures": "textures/items/horses/siege_caparison"
   },
+  "siege_train_carriage": {
+   "textures": "textures/items/horses/siege_train_carriage"
+  },
   "siege_lore_tome": {
    "textures": "textures/items/siege_lore_tome"
   },
