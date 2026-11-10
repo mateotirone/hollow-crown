@@ -425,14 +425,14 @@ Painted by `studio/art/build_gates.py` and `studio/art/build_walls.py`. Final st
 ## Menu skin (proposal, 2026-11-10)
 Painted by `studio/art/build_ui.py`. Not wired: needs `ui/` JSON files in the resource pack and an in-game check.
 - `textures/ui/hc/panel.png`, `button.png`, `button_hover.png`, `slot.png`, `slot_hover.png`, `parchment.png`: first pass
-- `textures/ui/hc/coin.png`: stand-in until the currency is designed
+- `textures/ui/hc/coin.png`: the Regal at 8x8, painted (`studio/art/build_coins.py`)
 - Mock-up screens: `art/ui/mockup_mason.png`, `mockup_townhall.png`, `mockup_npc.png` (and `mockups.png`)
 
 ## Economy (2026-11-10)
 Written by `studio/build_economy.py` (never overwrites a PNG that exists).
 - `textures/items/siege_coin.png` (the Regal: iron-grey coin with the old king's crowned head): painted (`studio/art/build_coins.py`)
 - `textures/items/siege_gold_coin.png` (the Gold Regal, worth 64): painted
-- Job NPCs (Farmer, Woodcutter, Quarryman, Smith, Fisher, Hunter, Herbalist, Moneyer) use built-in NPC skins for now: own skins wanted
+- Job NPCs (Farmer, Woodcutter, Quarryman, Smith, Fisher, Hunter, Herbalist, Moneyer): painted skins `textures/entity/siege/npc/job_<name>.png`, worn by the `siege:job_npc` entity (wired 2026-11-10, not seen in game yet)
 
 ## Leader portraits (2026-11-10)
 Brief by the lore thread in `studio/art/PORTRAIT-BRIEF.md`; painted by `studio/art/build_portraits.py` (first pass, awaiting Mateo's review).

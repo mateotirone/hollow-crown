@@ -77,6 +77,8 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - The add-on is renamed from Siege Nights to The Hollow Crown. The install file is `hollow-crown.mcaddon`. Existing ids keep the `siege:` prefix.
 - Needs Bedrock 26.30 or newer.
 - Everything is now paid for and paid out in Regals instead of emeralds: siege winnings, warlord and boss drops, guards, the Quartermaster, town hall upgrades, Rumor Board jobs, horses, the Throne's decrees and Treasury, Rival Lord spoils, the Hollow's ore, boats and permits, and the elytra refund. One old emerald is 8 Regals. Emeralds are no longer taken anywhere; the Moneyer buys them for 4 Regals each.
+- The eight job NPCs (Farmer, Woodcutter, Quarryman, Smith, Fisher, Hunter, Herbalist, Moneyer) now wear their own painted clothes instead of a stock NPC look. Ones already placed in a world change over the first time someone clicks them.
+- Each region's Smith sells that region's Castle Guard armor set for Regals (helmet 50, chestplate 90, leggings 70, boots 50), a little over the plain set at the Quartermaster. The sets appear once the regional armor is in the pack.
 
 ### Fixed
 - Lanternbog's local mystery no longer asks you to type the name of the place below in the first chapter.
