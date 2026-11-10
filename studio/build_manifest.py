@@ -134,6 +134,7 @@ g("barracks","Barracks","Blocks",[sided("Block",'siege_barracks_side','siege_bar
 for n,name in [("veinstone","Veinstone"),("undertow_moss","Hollow Moss"),("veil_rock","Veil Rock"),("hollowwood_lattice","Hollowwood Lattice"),("hollowwood_core","Hollowwood Core"),
                ("glimmerflow","Glimmerflow"),("rift_seam","Strange Seam"),("rift_edge","Rift Edge"),("rift_veil","Rift Veil"),("waystone","Waystone"),("court_seal","Court Seal")]:
     g("ut_"+n,name,"The Hollow",[cube("Block",one('siege_'+n))])
+g("ut_choirsteel","Choirsteel gear","The Hollow",[{"label":n.title(),"model":"item","mats":{"*":I+'siege_choirsteel_%s.png'%n}} for n in ("sword","pickaxe","axe","shovel","hoe","helmet","chestplate","leggings","boots")]+[{"label":"Worn sheet %d"%k,"model":"item","mats":{"*":'textures/models/armor/choirsteel_layer_%d.png'%k}} for k in (1,2)],"Pale violet forged metal with a pale blue gem or band. Worn sheets are shown flat.")
 g("ut_plants","Veilcap and Glimbulb","The Hollow",[{"label":"Veilcap","model":"item","mats":{"*":B+'siege_veilcap.png'}},{"label":"Glimbulb","model":"item","mats":{"*":B+'siege_glimbulb.png'}}],"Cross-shaped plants in game. Shown flat here.")
 g("ut_items","Tuning Fork and Choir Shard","The Hollow",[{"label":"Tuning Fork","model":"item","mats":{"*":I+'siege_tuning_fork.png'}},{"label":"Choir Shard","model":"item","mats":{"*":I+'siege_choir_shard.png'}}])
 g("plot_stone","Plot Stone","Plots",[sided("Block",'siege_plot_stone_side','siege_plot_stone_top','siege_plot_stone_bottom')])

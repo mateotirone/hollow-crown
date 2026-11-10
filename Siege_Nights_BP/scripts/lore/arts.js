@@ -15,6 +15,7 @@ import { world, system, ItemStack } from "@minecraft/server";
 import { ActionFormData } from "@minecraft/server-ui";
 import { emit, on } from "../siege/api.js";
 import { ARTS_BOOK, POWERS } from "./data/powers.js";
+import { ROLE_LORE, ROLE_LINES } from "./data/roles.js";
 import { TOME } from "./logic.js";
 import { progressOf, saveProgress, giveItem, heroOf, learnLeads } from "./player.js";
 
@@ -27,7 +28,11 @@ export const GATED = {
   arc_choir: "Unknown. An army once crossed the ice for this sound. Ask in Rimehold, where their grandmothers stayed.",
   arc_hollowstep: "Unknown. Find the one real door that is left, and name it in your Library.",
 };
-const infoNow = () => emit("powerOriginInfo", { gated: GATED, lines: Object.fromEntries(ART_IDS.map((id) => [id, POWERS[id].tree])) });
+const infoNow = () => {
+  emit("powerOriginInfo", { gated: GATED, lines: { ...Object.fromEntries(ART_IDS.map((id) => [id, POWERS[id].tree])), ...ROLE_LINES } });
+  emit("roleLore", { roles: ROLE_LORE }); // why each region keeps its role, for the Tree of Oaths
+};
+on("roleLoreWanted", () => emit("roleLore", { roles: ROLE_LORE }));
 on("powerOriginsWanted", infoNow);
 system.run(infoNow);
 

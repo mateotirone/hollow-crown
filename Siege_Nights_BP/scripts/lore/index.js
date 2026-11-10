@@ -33,7 +33,8 @@ import { NPCS } from "./data/dialogue.js";
 import { JOURNAL, JOURNAL_CLUES } from "./data/journal.js";
 import { POWERS, ARTS_BOOK } from "./data/powers.js";
 import { CASES, TELLS } from "./data/returned.js";
-import { SKILLS } from "../townhall/skills.js";
+import { SKILLS, ROLES } from "../townhall/skills.js";
+import { ROLE_LORE, ROLE_LINES } from "./data/roles.js";
 import { RIVAL_LORDS, LORD_TEMPERS, REGENT_VOICE, RUMOR_PARTS } from "./data/lords.js";
 import "./player.js";
 import "./reader.js";
@@ -216,6 +217,16 @@ addTests("lore", {
       assertEqual(loadSaved("progress", JSON.stringify({ seen: ["a"] }), [(d) => ({ read: d.seen })]), { read: ["a"] });
       assertEqual(loadSaved("progress", JSON.stringify({ read: ["b"], _v: 2 }), [() => ({ read: ["wrong"] })]), { read: ["b"] }, "current saves are not upgraded again");
     } finally { SAVE_VERSION.progress = before; }
+  },
+  "regional roles: each has a past, a reason and a saying, and every origin line names a real skill of that role": () => {
+    const branch = { rider: "wing", forgemaster: "forge", captain: "helm", witch: "hex" };
+    for (const [role, lore] of Object.entries(ROLE_LORE)) {
+      for (const key of ["before", "why", "saying"]) assert(lore[key]?.length > 20, `${role}.${key}`);
+      assertEqual(ROLES[role].region, lore.region, role);
+      assert(Object.keys(ROLE_LINES).filter((id) => id.startsWith(`${branch[role]}_`)).length >= 4, `${role} has under four origin lines`);
+      assert(!/Hollow|Morvane|Oswin|magic/.test(lore.before + lore.why + lore.saying), `${role}: these roles are not the Hollow's`);
+    }
+    for (const id of Object.keys(ROLE_LINES)) assert(SKILLS.some((s) => s.id === id), `${id} is not a skill`);
   },
   "clues file under their mystery once": () => {
     const p = blankProgress();
