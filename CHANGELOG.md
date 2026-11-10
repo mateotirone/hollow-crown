@@ -49,6 +49,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - The four regional roles (Dragon Rider, Forgemaster, Captain, Witch) each have a history, and their top four powers show a line of it in the Tree of Oaths.
 
 - The morning after the first Hollow soldiers appear is now told settlement by settlement, to the people of the settlement that saw them, instead of to everyone in the world at once.
+- The water of the Blackfen is black: near-opaque on the surface and almost blind underwater. (It follows the mangrove swamp biome, which only the Blackfen uses on the map.)
 
 ### Changed
 - On the map a settlement's land is full size (60 blocks) from the day you arrive, and siege wins no longer grow it. Tiers still unlock wall levels, buildings and keep health. A Castle's keep now really has 600 health.
