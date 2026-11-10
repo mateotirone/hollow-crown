@@ -11,6 +11,9 @@ Everything merged to `main` since the last release goes here. Each pull request 
 ### Added
 - The Hollow Crown expansion on top of Siege Nights: plots, town hall and skill tree, horses and rails, lore tomes and dialogue, new mobs and bosses, the Undertow dimension, the Crown and Citadel. None of it has been played in a real game yet.
 
+- The Tree of Oaths opens as a real skill tree screen: skills in rings with lines between them. A button on its first page switches back to plain lists.
+- Rumor Board jobs no longer repeat: the board never offers the kind of job you just did, and one job in three ends with a twist. Ten named keepsakes to collect.
+
 ### Changed
 - The add-on is renamed from Siege Nights to The Hollow Crown. The install file is `hollow-crown.mcaddon`. Existing ids keep the `siege:` prefix.
 - Needs Bedrock 26.30 or newer.
