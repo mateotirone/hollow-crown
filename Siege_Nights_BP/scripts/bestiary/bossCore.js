@@ -18,7 +18,7 @@
 // Fights never edit blocks (except the vault chest), so they work in any arena the map gives them.
 
 import { world, system } from "@minecraft/server";
-import { onTick, moduleStore, addTests, assertEqual } from "../siege/api.js";
+import { onTick, moduleStore, addTests, assertEqual, note } from "../siege/api.js";
 import { chooseAttack, pickTemper, temperById, TEMPERS } from "./variety.js";
 import { MOBS } from "./data.js";
 import { activeDimensions, alive, announce, effect, flat, give, heal, healthOf, hurt, particle, ring, sound, makeItem, playerList, addToPlayerList } from "./util.js";
@@ -434,6 +434,7 @@ function finish(f, slayer) {
 
   for (const p of players) {
     const first = addToPlayerList(p, BEATEN_PROP, def.id);
+    try { note(p, "fight"); } catch { /* the Storyteller is optional to a fight */ }
     safely(f, () => {
       for (const stack of def.loot?.(f, p, first) ?? []) give(p, stack);
     });
