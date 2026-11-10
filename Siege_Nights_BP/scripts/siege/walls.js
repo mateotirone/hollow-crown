@@ -8,6 +8,7 @@ import { SETTINGS } from "./settings.js";
 import { isAlly, settlementAt } from "./territory.js";
 import { consumeHeld, isOnline } from "./util.js";
 import { applyFilter } from "../core/events.js";
+import { sfx } from "../core/sfx.js";
 
 // ---------- Wall strength: reinforcement, damage and repair ----------
 // Castle Stone and gates can be reinforced with iron, then diamond, then netherite.
@@ -128,7 +129,7 @@ export function workOnWall(block, player, item) {
     }
     block.setPermutation(block.permutation.withState("siege:armor", tier));
     consumeHeld(player);
-    block.dimension.playSound("random.anvil_use", block.location, { volume: 0.7 });
+    sfx(block.dimension, "random.anvil_use", block.location, { volume: 0.7 });
     player.onScreenDisplay.setActionBar(`§6Reinforced with ${TIER_NAMES[tier]}`);
     return true;
   }
@@ -142,7 +143,7 @@ export function workOnWall(block, player, item) {
     saveDamage();
     showCracks(block, map[key] ?? 0);
     consumeHeld(player);
-    block.dimension.playSound("dig.stone", block.location);
+    sfx(block.dimension, "dig.stone", block.location);
     player.onScreenDisplay.setActionBar(map[key] ? "§7Patched, but still damaged" : "§aWall fully repaired");
     return true;
   }
@@ -162,7 +163,7 @@ export function lightCharge(block, facing, blast = BLAST.charge) {
   const dim = block.dimension;
   const at = { ...block.location };
   const center = { x: at.x + 0.5, y: at.y + 0.5, z: at.z + 0.5 };
-  dim.playSound("random.fuse", center);
+  sfx(dim, "random.fuse", center);
   let ticks = 0;
   const fuse = system.runInterval(() => {
     ticks += 10;

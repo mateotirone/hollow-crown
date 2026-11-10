@@ -3,6 +3,7 @@
 import { world } from "@minecraft/server";
 import { moduleStore, getState, keepOf, isAlly, overworld } from "../siege/api.js";
 import { CROWN } from "./config.js";
+import { sfx } from "../core/sfx.js";
 
 const fresh = () => ({
   ruler: null, // { id, name, title, sinceDay, hollowing, restored }
@@ -77,7 +78,7 @@ export function addClaim(player, amount, why) {
 export function announce(text, sound) {
   for (const p of world.getPlayers()) {
     p.sendMessage(text);
-    if (sound) p.playSound(sound);
+    if (sound) sfx(p, sound);
   }
 }
 

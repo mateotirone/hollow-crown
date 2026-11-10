@@ -1,5 +1,5 @@
 import { addTests, assert, assertEqual } from "../core/tests.js";
-import { MAP, PLOT_PLAN, WARDS, WELCOME, REGION_BLOCK, SETTLEMENT, EXPANSION } from "./config.js";
+import { MAP, PLOT_PLAN, WARDS, WELCOME, REGION_BLOCK, SETTLEMENT, EXPANSION, REGION_BIOME } from "./config.js";
 import { pedestalLayout, arrivalSpot } from "./welcome.js";
 import { compass } from "./claims.js";
 import { outsideMap, wardAt } from "./travel.js";
@@ -132,5 +132,14 @@ addTests("plots", {
       for (const p of PLOT_PLAN) assert(Math.hypot(p.x - w.x, p.z - w.z) > MAP.plotRadius + w.r + 40, `${w.name} crowds ${p.name}`);
       for (const o of WARDS) if (o !== w) assert(Math.hypot(o.x - w.x, o.z - w.z) > o.r + w.r, `${w.name} overlaps ${o.name}`);
     }
+  },
+});
+
+addTests("plots", {
+  "every region has its own biome, so a restyle (black water) stays in one region": () => {
+    const biomes = Object.values(REGION_BIOME);
+    assertEqual(new Set(biomes).size, 5);
+    for (const p of PLOT_PLAN) assert(REGION_BIOME[p.region], `${p.name}: no biome for ${p.region}`);
+    assertEqual(REGION_BIOME.Blackfen, "minecraft:mangrove_swamp");
   },
 });
