@@ -49,6 +49,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - The four regional roles (Dragon Rider, Forgemaster, Captain, Witch) each have a history, and their top four powers show a line of it in the Tree of Oaths.
 
 - The morning after the first Hollow soldiers appear is now told settlement by settlement, to the people of the settlement that saw them, instead of to everyone in the world at once.
+- The Choir fight shows rings of violet light: at the feet of every Singer during the Hymn, around the Conductor as it winds up an attack, and with each Toll.
 
 ### Changed
 - On the map a settlement's land is full size (60 blocks) from the day you arrive, and siege wins no longer grow it. Tiers still unlock wall levels, buildings and keep health. A Castle's keep now really has 600 health.
