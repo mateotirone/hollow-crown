@@ -325,6 +325,18 @@
     },
     "siege_dragon_nest_top": {
       "textures": "textures/blocks/dragons/siege_dragon_nest_top"
+    },
+    "siege_mason_bench_side": {
+      "textures": "textures/blocks/siege_mason_bench_side"
+    },
+    "siege_mason_bench_top": {
+      "textures": "textures/blocks/siege_mason_bench_top"
+    },
+    "siege_foundation_stone_side": {
+      "textures": "textures/blocks/siege_foundation_stone_side"
+    },
+    "siege_foundation_stone_top": {
+      "textures": "textures/blocks/siege_foundation_stone_top"
     }
   }
 }

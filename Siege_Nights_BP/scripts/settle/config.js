@@ -9,6 +9,7 @@ export const SETTLE = {
   localBonus: 1.5, // your own region's materials: this many times more blocks per emerald
   maxSpend: 32, // most emeralds one purchase can spend
   maxBenches: 2, // Mason's Benches per settlement
+  stonePrice: 4, // emeralds for a Foundation Stone at the mason (it can also be crafted)
   riseTicks: 160, // about how long a pre-designed building takes to rise (160 = 8 seconds)
   firstBuildRenown: 40, // Renown the first time you raise each kind of building
   previewSeconds: 90, // how long the outline of a chosen building stays up
@@ -22,17 +23,6 @@ export const CAMP_KIT = [
 
 // The reserve around your hall takes nothing but these (they are lost or replaced when the hall grows).
 export const RESERVE_ALLOWED = [/^siege:hall_cornerstone$/, /^siege:archive_shelf$/, /torch$/, /^minecraft:lantern$/];
-
-// How far each style's biggest hall (the Sovereign's Throne) reaches from its cornerstone, in the
-// hall's own directions: `side` blocks left and right, `back` blocks behind the door line, `deep`
-// blocks ahead. A test checks these against the real templates.
-export const HALL_REACH = {
-  vale: { side: 15, back: 2, deep: 40 },
-  frostmarch: { side: 15, back: 2, deep: 40 },
-  saltreach: { side: 15, back: 2, deep: 40 },
-  emberwaste: { side: 15, back: 2, deep: 39 },
-  blackfen: { side: 15, back: 0, deep: 43 },
-};
 
 export const REGION_TO_STYLE = {
   "Aldmere Vale": "vale", Frostmarch: "frostmarch", Saltreach: "saltreach", Emberwaste: "emberwaste", Blackfen: "blackfen",

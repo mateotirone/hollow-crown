@@ -314,3 +314,12 @@ Add a row here with the file path, size, what it should look like, and whether i
 
 Still to do for dragons: real wing-fold and flap animation pass once seen in game, own sounds (ravager and ender dragon sounds are borrowed).
 | NPC ruler of the Hollow (64×64 box-UV skin; Sorcerer in a dark violet robe wearing the Hollow Crown) | `textures/entity/siege/undertow/hollow_regent.png`, model `models/entity/undertow/hollow_regent.geo.json` | Placeholder (flat colour), model is a rough block-out |
+
+### Settlement building (placeholders by `studio/build_settle.py`; it never overwrites a PNG that exists)
+
+| Asset | File | Status |
+|---|---|---|
+| Mason's Bench (16×16 side + top, opaque; heavy timber workbench, a dressed stone block under it, chisel hanging on the side; top shows a half-cut stone, mallet and iron square) | `textures/blocks/siege_mason_bench_side.png`, `siege_mason_bench_top.png` | Placeholder |
+| Foundation Stone (16×16 side + top, opaque; squared grey stone with a small house chalked on the side and a green marked-out square on top, so it reads as "a building goes here") | `textures/blocks/siege_foundation_stone_side.png`, `siege_foundation_stone_top.png` | Placeholder |
+
+No new entity art: the Mason and the Rival Lords use Bedrock's built-in NPC skins for now. If they should have their own look, that is a new 64×64 skin each (not started).

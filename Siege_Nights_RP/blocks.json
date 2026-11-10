@@ -131,5 +131,11 @@
   },
   "hc:dragon_nest": {
     "sound": "grass"
+  },
+  "siege:mason_bench": {
+    "sound": "wood"
+  },
+  "siege:foundation_stone": {
+    "sound": "stone"
   }
 }

@@ -159,3 +159,24 @@ Creative, cheats on. The showcase (`/scriptevent siege:showcase`) puts a Roost, 
 12. Shot down: with a second player's settlement that has a Ballista, fly over it. ✅ The ballista turns and fires, "ballista hits", the Flight bar drops by a quarter per bolt, and at empty you get "Shot down" and can't take off for 30 seconds. Over your own or an ally's settlement nothing shoots.
 
 Things I could not check without the game, so please look closely: the wings fold backward (step 1), flying actually steers by camera (step 3), flying speed feels right (faster than a horse's walk, not absurd), and the hatchling follows you.
+
+## Settlement building: zones, the Mason and pre-designed buildings (The Hollow Crown)
+
+The showcase (`/scriptevent siege:showcase`) puts a Mason's Bench with its mason and a Foundation Stone in the row behind you, and raises all eight pre-designed buildings in a line to the east, each in a different regional style. Switch to Survival for steps 1 to 4, because Creative ignores the build rules and pays nothing.
+
+1. **Build zones.** `/scriptevent siege:settle_zone` says which zone you stand in. On your land away from the hall you should be able to place anything. Hold any block and walk toward the town hall: a line of blue flame marks the ground kept clear for the hall to grow into, and placing a block inside it should be refused with a message.
+2. **The wilds.** In a test world with no Plot Stones, building outside your land is still allowed. `/scriptevent siege:settle_wilds on` turns the real rule on: outside your land you should only be able to place camp things (torch, bed, chest, crafting table, furnace, campfire, ladder, sapling). `off` and `map` switch back.
+3. **The Mason.** Click the mason. Buy a few blocks with emeralds (the Supplies chest has 64). The first shelf is your region's own materials at a better price. Check the slider, that the blocks arrive, and that the emeralds go.
+4. **A pre-designed building.** Take the Foundation Stone (or buy one from the mason for 4 emeralds), place it on open ground on your land while facing the way the building should run, click it and pick a building. A green outline shows where it will stand. Click the stone again to see the price (planks and building stone you carry, emeralds for what you lack) and raise it. The stone should come back to your pack when it is done. Try placing one so the outline crosses the hall reserve or your border: it should refuse.
+5. **Any building, free.** `/scriptevent siege:settle_build cottage frostmarch` raises one in front of you (cottage, smithy, stable, storehouse, watchtower, market, well, garden; vale, frostmarch, saltreach, emberwaste, blackfen). Tell me about stairs facing the wrong way, anything floating, and which designs look too plain.
+6. **A town mason.** `/scriptevent siege:settle_mason` puts a mason where you stand, with no bench (for Kingsrest and villages).
+
+## Rival Lords: NPC neighbours for single-player (The Hollow Crown)
+
+Rival Lords only settle on a map with Plot Stones. Place three or four Plot Stones in Creative at least 160 blocks apart (two are always left free for players).
+
+1. `/scriptevent siege:rivals all` then `/scriptevent siege:rivals settle` (repeat `settle` for each new lord; normally one arrives per day). `/scriptevent siege:rivals list` shows who holds what.
+2. Walk to a lord's Plot Stone. Their longhouse, a cottage and a well should rise near it, and the lord stands by the stone. In Survival you should not be able to break or place blocks on their land, or raise your own banner on their stone.
+3. `/scriptevent siege:rivals grow <id>` moves a lord up a tier (the id is in the list); more buildings rise. `/scriptevent siege:rivals night` plays one siege night for all of them.
+4. Click the lord and choose "Lay siege" (you need your own settlement). Kill every soldier within 10 minutes: the lord falls, you get emeralds, and the plot with its buildings is free to claim. Die or walk away and they hold.
+5. `/scriptevent siege:rivals none` removes them all.

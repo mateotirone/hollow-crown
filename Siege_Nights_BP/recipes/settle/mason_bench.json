@@ -1,0 +1,37 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "siege:mason_bench_recipe"
+    },
+    "tags": [
+      "siege_workshop"
+    ],
+    "pattern": [
+      "PPP",
+      "LEL",
+      "SSS"
+    ],
+    "key": {
+      "P": {
+        "tag": "minecraft:planks"
+      },
+      "L": {
+        "tag": "minecraft:logs"
+      },
+      "E": {
+        "item": "minecraft:emerald"
+      },
+      "S": {
+        "item": "minecraft:cobblestone"
+      }
+    },
+    "result": {
+      "item": "siege:mason_bench",
+      "count": 1
+    },
+    "unlock": {
+      "context": "AlwaysUnlocked"
+    }
+  }
+}
