@@ -37,6 +37,8 @@ Everything merged to `main` since the last release goes here. Each pull request 
 
 - Four regional roles, each with its own branch of nine skills and five ranks: Dragon Rider (Emberwaste), Forgemaster (Frostmarch), Captain (Saltreach) and Witch (Blackfen). Raise a Stone Hall in a region's style and its role is offered to you at the Tree of Oaths.
 - The Old King's Journal now arrives after the look picker and the welcome hall instead of at the same moment: once you have read "How things stand" on the Waystone, or after about 20 seconds.
+- Mining villages in the Hollow now have something different going on each time you walk in: a rich seam, a Foreman's half price, a seat by the fire, a nest broken open in the mine, or a miner asking you to go and look at a place for them. The game's Storyteller picks, so the same thing never comes up twice running. Miners no longer repeat the line they said last.
+
 
 - The four regional roles (Dragon Rider, Forgemaster, Captain, Witch) each have a history, and their top four powers show a line of it in the Tree of Oaths.
 
