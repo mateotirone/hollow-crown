@@ -448,6 +448,42 @@ In the real game the first claimant comes 5 days after Morvane falls, then one e
 
 Walk into a mining village in the Hollow: at most once every 8 minutes something is going on, and it should never be the same thing, or the same kind of thing, twice in a row. `/scriptevent hc:folk_happen` while standing in a village forces the next one. Check: the rich seam adds 6 ore to that Tally; the half price shows in the Tally menu for 5 minutes; the nest spawns three endermites by the mine mouth; an errand names a place, and walking to that place pays 4 raw Choir Ore once. Before Morvane falls only the three quiet, frightened ones and the errands appear.
 
+## Horses, horse upgrading and the Train Carriage (scripts/horses/, scripts/rails/)
+
+In game: Creative, cheats on. `/scriptevent siege:showcase` puts eight steeds in the extras row behind you that are already yours (one of each of the five breeds, **Valiant** the Knight Warhorse, **Whisper** the Glimstrider and **Sprout** the foal), a Breeder's Post, and two Station Posts with a short powered rail line and a Train Carriage on it. Your Stables counts as level 3 there, so every menu option is open, and in Creative nothing costs anything. Take a **Riding Crop** and a **Horse Whistle** from the item chests.
+
+**Looks and riding**
+1. Walk along the steeds. ✅ Eight horses with name tags and signs, the five breeds in different coats, the foal small. Valiant wears diamond horse armor and cloth in your banner color. Whisper looks unearthly (a glowing tint).
+2. Sneak + click any of them with an empty hand. ✅ Its sheet opens: breed, trait, level, Speed, Jump, Health and Stamina, and "Training points 5" on the breed horses.
+3. Climb on a breed horse and ride. ✅ It steers like a normal horse, with the jump bar. A stamina bar shows above your hotbar.
+4. Use the Riding Crop while riding. ✅ A gallop sound and it is clearly faster; the stamina bar drains. Use the crop again ✅ it slows back down. Gallop until the bar is empty ✅ it drops out of the gallop by itself, and using the crop straight away says it is winded.
+5. Try to climb on Sprout. ✅ You can't ride a foal.
+6. Ride Valiant at a gallop into `/summon zombie`. ✅ The zombie is knocked aside and hurt (Trample).
+
+**Upgrading**
+7. Click the **Stables** in the block row (or place `/give @s siege:stables` inside the settlement). ✅ A list of your horses, plus "Breed two horses".
+8. Pick a breed horse and train Speed. ✅ "Speed is now 3", one training point fewer, and it really is faster when you ride it. Train Jump ✅ it clears a higher wall. Train Health ✅ more hearts when you sit on it.
+9. On the same horse choose "Choose a perk". ✅ A list of perks with one line each; picking one says the horse learned it.
+10. Hold **Horseshoes** (`/give @s siege:horseshoes_iron`) and click your horse. ✅ They are fitted and its sheet shows the bonus. Same with a **Caparison** ✅ it wears cloth in your banner color.
+11. "Breed two horses", pick two grown horses. ✅ "A foal is born" with a name, a breed and traits, and a small foal stands by the Stables.
+12. On a horse choose "Put in the stalls". ✅ It disappears and the list shows it as stabled. "Bring out of the stalls" ✅ it is back, with its saddle and armor still on.
+13. Walk 40 blocks from your horses and use the Horse Whistle. ✅ A flute note, and the nearest one appears beside you ("comes running").
+14. Ride Whisper and use the Horse Whistle while riding. ✅ The Veilstep: you and the horse blink about 10 blocks ahead, even through a wall. Use it again at once ✅ "The Veil is still settling".
+15. Switch to Survival and kill one of your horses. ✅ "has fallen", and the Stables offers "Revive" for it.
+
+**Getting a horse the normal way**
+16. `/summon horse`, tame it, then use a **Halter** (`/give @s siege:halter`) on it. ✅ "is now your steed", it keeps its coat, and it shows up at the Stables.
+17. Click the Breeder's Post. ✅ It offers a Sandstrider foal for 192 Regals (free in Creative), and buying gives you a named foal.
+
+**Rails and the Train Carriage**
+18. Click the Train Carriage on the line to board, then push forward. ✅ You sit inside, it rolls along the rails faster than a minecart. With friends: up to four people can sit in it.
+19. Click the nearer Station Post (**Showcase Halt**). ✅ A Station menu: "Call a carriage", "Call a minecart", "Choose a destination", "Network map", "Horse stalls".
+20. "Call a carriage". ✅ A fresh carriage appears on the rail by the post. "Call a minecart" ✅ a plain minecart instead.
+21. Walk to the second post. ✅ Title "Far Platform, Station discovered · 2 of 2". Go back, "Choose a destination", pick Far Platform, and ride there. ✅ The bar shows the direction and distance while you ride, and "You have arrived" when you get there.
+22. `/give @s siege:train_carriage` and use it on any rail. ✅ Your own carriage. Sneak + click it with an empty hand ✅ it packs back into the item.
+23. Leave a called carriage empty for a minute or two. ✅ It tidies itself away.
+
+Things I could not check without the game, so please look closely: that the steeds look and ride like real horses (saddle, armor and jump bar all there), that the caparison color only tints the cloth, how the Glimstrider's glow looks, that four people really fit in the carriage and it faces the right way on the rail, and whether the carriage speed feels right.
 ## Sounds (scripts/sound/, SOUND-LIST.md)
 
 Nothing here has been heard in the game yet, so your ears are the test.
