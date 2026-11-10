@@ -14,6 +14,7 @@ import { startNode, sceneTag, holds, blankProgress, nextNode, nextNodes, greetCo
 import { NPCS } from "./data/dialogue.js";
 import { progressOf, saveProgress, contextOf, grantTome, learnClues, learnLeads, awardPoints, setFlag, giveItem, landOwnerAt } from "./player.js";
 import { libraryCount } from "./library.js";
+import { sfx } from "../core/sfx.js";
 
 export const NPC_TYPE = "minecraft:npc";
 const NPC = Object.fromEntries(NPCS.map((n) => [n.id, n]));
@@ -66,7 +67,7 @@ function blackout(player, id) {
   try {
     player.addEffect("blindness", 60, { showParticles: false });
     player.addEffect("nausea", 120, { showParticles: false });
-    player.playSound("block.bell.hit", { pitch: 0.5 });
+    sfx(player, "block.bell.hit", { pitch: 0.5 });
   } catch {}
   system.runTimeout(() => endSlip(player, id), 70);
 }

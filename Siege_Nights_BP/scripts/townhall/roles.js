@@ -11,6 +11,7 @@ import * as api from "../siege/api.js";
 import { heroOf, playerById } from "./hero.js";
 import { ROLES } from "./skills.js";
 import { guardsNear, inCombat } from "./progress.js";
+import { sfx } from "../core/sfx.js";
 
 const fx = (entity, effect, ticks, amplifier = 0) => {
   try { entity.addEffect(effect, ticks, { amplifier, showParticles: false }); } catch { /* gone this tick */ }
@@ -148,7 +149,7 @@ world.afterEvents.entityHurt.subscribe((event) => {
         for (const g of guardsNear(target, 24)) heal(g, 1000);
         fx(target, "absorption", 400, 3);
         target.sendMessage("§3The tide turns.§7 Your crew rallies.");
-        try { target.playSound("raid.horn", { volume: 0.6 }); } catch { /* fine */ }
+        try { sfx(target, "raid.horn", { volume: 0.6 }); } catch { /* fine */ }
       }
     }
   }
