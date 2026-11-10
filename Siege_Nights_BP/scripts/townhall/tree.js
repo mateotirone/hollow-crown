@@ -3,7 +3,7 @@
 import { world, GameMode, ItemStack } from "@minecraft/server";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
 import * as api from "../siege/api.js";
-import { SKILLS, SKILL, BRANCHES, RINGS, RANKS, ROLES, HALL_NAMES, LEVEL_UNLOCKS, canBranch, blockedReason, spentIn, rankOf, levelFromRenown, levelTitle, POWER_ORIGINS } from "./skills.js";
+import { SKILLS, SKILL, BRANCHES, RINGS, RANKS, ROLES, HALL_NAMES, LEVEL_UNLOCKS, canBranch, blockedReason, spentIn, rankOf, levelFromRenown, levelTitle, POWER_ORIGINS, ROLE_LORE } from "./skills.js";
 import { STYLES } from "./styles.js";
 import { treeCells, TREE_FLAG, BRANCH_FLAG, SPACER } from "./tree_layout.js";
 import { heroOf, saveHero, setPath, grantPoints } from "./hero.js";
@@ -231,10 +231,16 @@ function pathMenu(player, hallLevel) {
   }).catch(() => {});
 }
 
+function roleHistory(path) {
+  const lore = ROLE_LORE[path];
+  if (!lore) return "";
+  return (lore.saying ? `\n§7§o${lore.saying}§r` : "") + (lore.before ? `\n\n§8${lore.before}` : "") + (lore.why ? `\n§8${lore.why}` : "") + "§r";
+}
+
 export function confirmPath(player, path, back) {
   if (ROLES[path]?.region) {
     return void new MessageFormData().title(ROLES[path].name)
-      .body(`${ROLES[path].oath}\n\nYou become a ${ROLES[path].name} and the ${BRANCHES[ROLES[path].branch].name} branch of the Tree opens to you. You can hold only one role. §cThis cannot be undone.`)
+      .body(`${ROLES[path].oath}${roleHistory(path)}\n\nYou become a ${ROLES[path].name} and the ${BRANCHES[ROLES[path].branch].name} branch of the Tree opens to you. You can hold only one role. §cThis cannot be undone.`)
       .button1("I will").button2("Not yet")
       .show(player).then((r) => {
         if (r.canceled || r.selection !== 0) return back?.();
