@@ -10,6 +10,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 
 ### Added
 - The Rumor Board now takes its three daily jobs and its twists from the Storyteller, so jobs contrast with what you have been doing lately (quiet work after a fight, a mystery after a run of bounties) and twists turn up more evenly.
+- Choirsteel gear, made from the Hollow's ore: Helm, Cuirass, Greaves, Treads, Blade, Pick, Axe, Spade and Hoe. Each is crafted from its netherite piece, Choirsteel Ingots and a Gloamquill. Armour protects like netherite and lasts half again as long, and each piece does something of its own; the full set makes you Resonant (a fifth of all damage turned aside, four more hearts). The Blade's every fourth hit rings through nearby enemies. The Pick shows you the next ore, and can mine Choir Ore.
 - Bosses never use the same attack twice running while another is ready, and a boss you have already beaten comes back in one of five tempers (Hasty, Relentless, Unquiet, Attended, Wary), never the one it wore last time. Beating a temper for the first time gives a named keepsake.
 - The Clockwork Reeve (the minute runs backwards), the Pale Huntsman (snares under the snow) and the Mother of Changelings (a lullaby you must look away from) each have a new attack.
 - About one raider in seven is a named veteran with a trait (Fleet, Stubborn, Cruel, Leaping, Ashen). The Grey Warlord now drops loot. `/scriptevent siege:variety` shows what you have met most.
@@ -33,7 +34,10 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - Rumor Board jobs no longer repeat: the board never offers the kind of job you just did, and one job in three ends with a twist. Ten named keepsakes to collect.
 - First join now runs in order: look picker, then the welcome hall, then the journal. After you pick a plot the last line in chat is your next step.
 
+- Four regional roles, each with its own branch of nine skills and five ranks: Dragon Rider (Emberwaste), Forgemaster (Frostmarch), Captain (Saltreach) and Witch (Blackfen). Raise a Stone Hall in a region's style and its role is offered to you at the Tree of Oaths.
 - The Old King's Journal now arrives after the look picker and the welcome hall instead of at the same moment: once you have read "How things stand" on the Waystone, or after about 20 seconds.
+
+- The four regional roles (Dragon Rider, Forgemaster, Captain, Witch) each have a history, and their top four powers show a line of it in the Tree of Oaths.
 
 ### Changed
 - The High Throne no longer repeats itself: each whisper the Heart gives is heard once per reign, a rival lord brings a different and bigger army every time they come back, a ruling lord never sends the same host twice running, Oath Shard news is worded differently each time, and a ruler banished a second time walks a shorter road back.
