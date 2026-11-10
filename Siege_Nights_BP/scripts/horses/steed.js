@@ -77,6 +77,7 @@ export function applyRecord(entity, rec) {
 
   setProp(entity, "siege:coat", rec.coat);
   setProp(entity, "siege:mark", rec.mark);
+  setProp(entity, "siege:breed", rec.prop ?? 0); // which painted coat it wears (0 = a common horse's own coat)
   setProp(entity, "siege:special", rec.special === "warhorse" ? 1 : rec.special === "hollow" ? 2 : 0);
   setProp(entity, "siege:cap", rec.caparison > 0);
   if (rec.caparison > 0) {
@@ -208,6 +209,9 @@ export function scanSteeds(onGrown) {
         saveRecord(rec);
         onGrown?.(rec, entity);
       }
+      try {
+        if (entity.getProperty("siege:breed") !== (rec.prop ?? 0)) setProp(entity, "siege:breed", rec.prop ?? 0); // horses from before the painted coats
+      } catch { /* not loaded far enough yet */ }
       const state = damageState(rec);
       if (shield.get(uid) !== state) {
         fire(entity, `siege:ds_${state}`);
