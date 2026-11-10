@@ -8,7 +8,7 @@ from amulet.api.chunk import Chunk
 from amulet.level.formats.leveldb_world import LevelDBFormat
 from amulet_nbt import ByteTag, IntTag, StringTag, LongTag
 src,out,X0,Z0,SIZE=sys.argv[1],sys.argv[2],int(sys.argv[3]),int(sys.argv[4]),int(sys.argv[5])
-VER=(1,21,90); SEA=62; DIM="minecraft:overworld"
+VER=(26,30,0); SEA=62; DIM="minecraft:overworld"  # VER: the pack needs Bedrock 26.30, so worlds are stamped to match
 t=np.load(src); H=int(t['H']); N=int(t['N']); S=N/(2*H)
 def sample(arr,order_smooth=True):
     """Bilinear sample of a plan grid at every block of the slice -> [x,z] array"""

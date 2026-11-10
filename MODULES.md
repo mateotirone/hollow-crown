@@ -122,6 +122,8 @@ Add a line here when you publish one.
   (`plots/config.js` WARDS): in map mode Survival players can't break or place there. The welcome hall (`plots/welcome.js`)
   emits **`plotChosen` `{ player, plot }`** when a new player picks their starting plot, just before they are set down beside
   its Plot Stone: listen for it to raise their first building. `pickOf(plot)` is who a plot is being kept for.
+  `EXPANSION` lists the sealed zones kept for later updates; an update calls `openZone(id)` to let players past the map
+  edge into that zone's land. Zone ids are saved in worlds, so never rename or reuse one.
 
 - **looks** (`scripts/looks/index.js`): `lookOf(player)`, `setLook(player, look)`, `chooseLook(player)`, `looksFor(name)`. The add-on now ships
   `entities/player.json` (BP) and `entity/player.entity.json` (RP), both written by `studio/build_looks.mjs` from vanilla copies

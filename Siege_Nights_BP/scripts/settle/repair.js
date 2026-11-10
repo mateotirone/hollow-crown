@@ -12,20 +12,12 @@
 import { world, system } from "@minecraft/server";
 import { MessageFormData } from "@minecraft/server-ui";
 import { isReady, getState, onTick, on, emit, damageMap, saveDamage, hitWall } from "../siege/api.js";
-import { WALLS, WALL_LEVELS, wallColumns, columnKinds, repairCost } from "./walldata.js";
-import { wallOf, wallRising, palette } from "./walls.js";
+import { WALLS, WALL_LEVELS, wallColumns, columnKinds, repairCost, wallSeed } from "./walldata.js";
+import { wallOf, wallRising, palette, permFor } from "./walls.js";
 import { purse, charge, coins, lot } from "./wallet.js";
 
 const OVERWORLD = "minecraft:overworld";
 const jobs = new Map(); // owner -> { cells, index, fix, missing, cracked, P, onDone, waited }
-
-function permFor(P, w, kind) {
-  if (kind === "tooth") return P.tooth;
-  if (kind === "light") return P.light;
-  if (kind === "gate") return P.gate(w.gateDir);
-  if (kind === "port") return P.port(w.gateDir);
-  return P.kinds[kind];
-}
 
 // Start counting (fix false) or mending (fix true) a wall. onDone({ missing, cracked }) when finished.
 export function repairWall(owner, { fix = false, onDone } = {}) {
@@ -36,7 +28,7 @@ export function repairWall(owner, { fix = false, onDone } = {}) {
   const L = WALL_LEVELS[w.level];
   const cells = [];
   for (const col of wallColumns({ center: w, radius: w.radius, level: w.level, gateAngle: w.gate, smooth: w.ground })) {
-    for (const [y, kind] of columnKinds(L, col)) cells.push([col.x, y, col.z, kind]);
+    for (const [y, kind] of columnKinds(L, col, wallSeed(w))) cells.push([col.x, y, col.z, kind, col.a]);
   }
   jobs.set(owner, { cells, index: 0, fix, missing: 0, cracked: 0, P: palette(w.style, L), onDone, waited: 0 });
   return true;
@@ -49,7 +41,7 @@ function step(owner, job) {
   const map = damageMap();
   let changed = false;
   for (let budget = WALLS.repair.perTick; budget > 0 && job.index < job.cells.length; budget--) {
-    const [x, y, z, kind] = job.cells[job.index];
+    const [x, y, z, kind, a] = job.cells[job.index];
     const block = dim.getBlock({ x, y, z });
     if (!block) {
       // that stretch is not loaded. Wait a little for someone to come near, then leave it out.
@@ -58,7 +50,7 @@ function step(owner, job) {
       job.index++;
       continue;
     }
-    const want = permFor(job.P, w, kind);
+    const want = permFor(job.P, w, kind, { a });
     const key = `${x},${y},${z}`;
     if (want && block.typeId !== want.type.id) {
       job.missing++;
