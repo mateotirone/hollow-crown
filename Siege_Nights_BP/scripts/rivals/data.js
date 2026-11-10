@@ -14,7 +14,7 @@ export const RIVALS = {
   defenders: [6, 10, 14, 18], // soldiers who answer when a player lays siege, by tier
   siegeMinutes: 10, // a siege on a lord fails after this long
   siegeCooldownDays: 1, // a lord can't be besieged again for this long after holding
-  spoils: [12, 24, 40, 64], // old emerald prices, paid in coins (x8), for toppling a lord, by tier
+  spoils: [12, 24, 40, 64], // for toppling a lord, by tier (old unit: x8 coins, so 96 to 512 Regals)
   wallLevel: [2, 4, 7, 9], // the settlement wall a lord raises, by tier (walls: settle/walldata.js)
   buildRange: 96, // their buildings only rise while a player is this close (so chunks are loaded)
 };

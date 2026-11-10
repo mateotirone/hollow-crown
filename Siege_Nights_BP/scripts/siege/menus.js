@@ -11,6 +11,8 @@ import { nextSiegeDay } from "./siege.js";
 import { state } from "./state.js";
 import { TIERS, settlementAt, tierOf, landRadius } from "./territory.js";
 import { countItem, overworld } from "./util.js";
+import { funds } from "../economy/coins.js";
+import { coins, worth } from "../economy/rules.js";
 
 // ---------- Menus: the Keep, the Barracks ----------
 
@@ -59,15 +61,14 @@ export function keepMenu(block, player) {
 export function barracksMenu(block, player) {
   if (settlementAt(block.location) !== player.id) return player.onScreenDisplay.setActionBar("§cOnly the settlement's owner can use these Barracks.");
   const count = guardCount(player.id), limit = guardLimit(player.id);
-  const emeralds = countItem(player, "minecraft:emerald");
   const form = new ActionFormData().title("Barracks").body([
-    `Guards: ${count}/${limit}   Your emeralds: ${emeralds}`,
+    `Guards: ${count}/${limit}   You have ${coins(funds(player))}`,
     "",
-    `Recruiting costs ${GUARD_COST} emeralds and needs an unemployed villager standing next to the Barracks.`,
+    `Recruiting costs ${worth(GUARD_COST)} and needs an unemployed villager standing next to the Barracks.`,
     "Men-at-Arms wait here and charge out during sieges. Archers stay wherever you place them.",
   ].join("\n"));
-  form.button(`Recruit a Man-at-Arms\n§8${GUARD_COST} emeralds`, "textures/items/siege_man_at_arms");
-  form.button(`Recruit an Archer\n§8${GUARD_COST} emeralds`, "textures/items/siege_archer");
+  form.button(`Recruit a Man-at-Arms\n§8${worth(GUARD_COST)}`, "textures/items/siege_man_at_arms");
+  form.button(`Recruit an Archer\n§8${worth(GUARD_COST)}`, "textures/items/siege_archer");
   form.button(`Your guards (${count})`, "textures/items/iron_sword");
   form.button("Close");
   form.show(player).then((r) => {

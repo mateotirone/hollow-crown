@@ -109,7 +109,7 @@ import {
 | `ready` | `{}` | once, on the first tick after the world and saved state are loaded |
 | `siegeStart` | `{ provokedBy }` | a siege night begins (after plans are made) |
 | `siegeEnd` | `{ outcome, besieged }` | outcome is `"won"`, `"dawn"` or `"empty"` |
-| `siegeReward` | `{ player, emeralds, threat }` | a defender was just paid for holding their keep (after `addRewardHook`) |
+| `siegeReward` | `{ player, emeralds, threat }` | (`emeralds` is the old unit: 8 coins each) a defender was just paid for holding their keep (after `addRewardHook`) |
 | `keepFounded` | `{ player, keep, moved }` | a Keep Banner founded (or moved) a settlement |
 | `keepFallen` | `{ owner, keep }` | a keep fell during a siege |
 | `tierUp` | `{ owner, before, after }` | Hamlet → Town → City → Castle |
@@ -220,13 +220,16 @@ Add a line here when you publish one.
 
 - **economy** (`scripts/economy/api.js`): the world currency (iron-backed coin; item ids `siege:coin`, `siege:gold_coin` = 64).
   `funds(player)`, `charge(player, n, why?)` (false if short, free in Creative), `pay(player, n, why?)`, `coins(n)` for menu text,
-  `fromEmeralds(e)` (x8), `WALLET` for the Mason's `setWallet`, `spawnJobNpc(dim, loc, jobId, region?)`, `regionAt(loc)`.
+  `fromEmeralds(e)` (x8), `worth(e)` for text, `chargeE`/`payE`/`fundsE` for prices still written in the old unit, `dropCoins`, `coinStacks`, `WALLET` for the Mason's `setWallet`, `spawnJobNpc(dim, loc, jobId, region?)`, `regionAt(loc)`.
   Events `coinsPaid`, `coinsSpent`, `goodsSold`. **Pricing something? Charge with `charge()`, not emeralds**; an old emerald price is 8 coins.
 
 - **reach** (`scripts/reach/api.js`): how sieges escalate. One world number, the Reach (0-100), picks a stage 1-6 (`reach/rules.js` STAGES:
   Counted Nights, Leaning, Miscount, Uncounted Nights, Long Night, Quiet After). `reachStage()`, `reachValue()`, `stageInfo()`,
   `tonightKind()` ("counted" | "stolen" | "probe" | "long" | "muster" | undefined), `isSiegeNight()`, `hollowShareNow()`, `addReach(n, why)`,
-  `rectify()` (the source is dealt with), `LONG` = 5, `AFTER` = 6. Events `reachStage { stage, before, name }`, `reachChanged`, `firstGlimpse { owners }`.
+  `rectify()` (the source is dealt with), `LONG` = 5, `AFTER` = 6. Events `reachStage { stage, before, name }`, `reachChanged`,
+  `firstGlimpse { owners }` (now once per settlement, so it fires more than once per world; `owners` are the keeps having theirs tonight),
+  `lordRaid { lord, name, plot, owners }` (after the story a Rival Lord's army has come). The Long Night starts when the Rift opens
+  (script event `siege:undertow_rift_opened`), not when the Choir falls. Reach answers the `nextSiegeLine` filter with a hint at stage 3 and after the story.
   Filter `hollowSoldier` (type, { role, glimpse }) picks the soldier it adds. **Sieges are no longer simply every third night**: ask `isSiegeNight()`
   instead of doing `day % 3`. It also added hooks to `siege/siege.js` that anyone may use: filters `siegeDue`, `assaultCount`, `assaultDelay`,
   `assaultShare`, `dawnEndsSiege`, `nextSiegeDay`, and events `assaultIncoming` / `assaultSpawned` `{ assault, total }`.

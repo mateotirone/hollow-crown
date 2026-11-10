@@ -229,7 +229,7 @@ registerBoss({
   },
 
   loot: (f, player, first) => [stack("minecraft:netherite_ingot", first ? 4 : 1), stack("minecraft:diamond", first ? 16 : 4)],
-  hoard: () => [stack("minecraft:enchanted_golden_apple", 2), stack("minecraft:emerald_block", 16)],
+  hoard: () => [stack("minecraft:enchanted_golden_apple", 2), stack("siege:gold_coin", 18)],
 });
 
 // ---- starting the fight ------------------------------------------------------------------

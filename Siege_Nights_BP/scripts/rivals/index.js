@@ -25,6 +25,8 @@ import { world, system, GameMode } from "@minecraft/server";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
 import { isReady, getState, saveState, keepOf, onTick, moduleStore, on, emit, addFoundingCheck, pick, title } from "../siege/api.js";
 import { applyFilter } from "../core/events.js";
+import { pay } from "../economy/coins.js";
+import { coins, fromEmeralds } from "../economy/rules.js";
 import * as plotsApi from "../plots/claims.js"; // giveToNpc / releaseNpc mark a plot as a lord's in the Plot Atlas (where plots has them)
 import { allPlots, holderOf, mapMode } from "../plots/claims.js";
 import { startBuild, buildFor, worldCells } from "../townhall/build.js";
@@ -37,7 +39,6 @@ import { wallOf, wallRising, raiseWall, bearingFor, gateDirFor, adoptWall } from
 import { WALL_LEVELS } from "../settle/walldata.js";
 import { raiseFree } from "../settle/plans.js";
 import { RIVALS, TIER_NAMES, LINES, STAGES, makeLord, radiusOf, wanted, night, nextPiece, partKey, hallSpot, partSpot, estateOf, winsForEstate, takeEstate } from "./data.js";
-import { pay, coins, fromEmeralds } from "../economy/api.js";
 import "./tests.js";
 import "./court.js"; // what lords do: marches, feuds, trade, oaths
 
@@ -352,10 +353,10 @@ function endSiege(lord, won) {
   emit("rivalFallen", { lord, player });
   for (const p of world.getPlayers()) p.sendMessage(`§6${lord.name} has fallen. ${lord.plot} stands empty, hall and all.`);
   if (!player) return;
-  const spoils = fromEmeralds(RIVALS.spoils[lord.tier]);
-  pay(player, spoils, "toppled a lord");
+  const spoils = RIVALS.spoils[lord.tier];
+  pay(player, fromEmeralds(spoils), "rival lord");
   player.playSound("ui.toast.challenge_complete");
-  title(player, `§6${lord.plot} is taken`, `§7${coins(spoils)} in spoils. Claim it and it is yours as it stands.`);
+  title(player, `§6${lord.plot} is taken`, `§7${coins(fromEmeralds(spoils))} in spoils. Claim it and it is yours as it stands.`);
   emit("skillPoints", { player, amount: 1 + lord.tier, source: `toppled ${lord.name}`, renown: 80 * (lord.tier + 1) });
 }
 
