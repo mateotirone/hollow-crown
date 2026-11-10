@@ -6,7 +6,8 @@
 // the settlement templates, raised in stages while a player is near. Numbers: data.js.
 //
 // What other features can use:
-//   rivalLords()                      every living lord: { id, plot, region, x, y, z, name, role, temperament, tier, wins, held, relations }
+//   rivalLords()                      every living lord: { id, plot, region, x, y, z, name, role, temperament, tier, wins, held, relations, voice? }
+//                                     voice = id of the lore feature's written lord (lore/data/lords.js), when it has one
 //   rivalById(id)   rivalOnPlot(plotName)   rivalAt(location)   strongestRival(role?)
 //   relationOf(lord, playerId)        -100..100, 0 to start;  changeRelation(lord, playerId, by)
 //   on("rivalSettled", ({ lord, known }))   known = true when it is a reminder at world load, not a new arrival
@@ -57,6 +58,26 @@ export function changeRelation(lord, playerId, by) {
   save();
 }
 
+// ---------- written voices ----------
+// The lore feature writes the lords (lore/data/lords.js: name, seat, region, temper, lines) and sends
+// them as "rivalLordVoices". A new lord takes a written voice from their region when one is free;
+// without the lore feature they get a made-up name and the short lines in data.js.
+let voices = [];
+on("rivalLordVoices", ({ lords: written }) => { voices = written ?? []; });
+const voiceOf = (lord) => voices.find((v) => v.id === lord.voice);
+const say = (lord, kind, player) => voiceOf(lord)?.lines?.[kind]?.replace(/\{player\}/g, player?.name ?? "stranger");
+
+function giveVoice(lord) {
+  const used = new Set(lords().map((l) => l.voice));
+  const free = voices.filter((v) => !used.has(v.id) && !store.data.fallen.includes(v.name));
+  const voice = free.find((v) => v.region === lord.region) ?? free[0];
+  if (!voice) return;
+  lord.voice = voice.id;
+  lord.name = voice.name;
+  lord.temperament = voice.temper;
+  if (voice.temper === "devout") lord.role = "knight"; // the Order has no love for Sorcerers
+}
+
 // ---------- who settles where ----------
 
 function settleTick() {
@@ -78,6 +99,7 @@ function settleTick() {
   const plot = free.sort((a, b) => far(b) - far(a))[0];
   if (!plot) return;
   const lord = makeLord(plot, `${store.data.seed}|${store.data.fallen.length}`, [...lords().map((l) => l.name), ...store.data.fallen]);
+  giveVoice(lord);
   lords().push(lord);
   store.data.lastArrival = now;
   save();
@@ -284,8 +306,12 @@ function endSiege(lord, won) {
     save();
     emit("rivalHeld", { lord, player });
     player?.sendMessage(`§7${lord.name} held ${lord.plot}. They will not forget it.`);
+    const won = say(lord, "won", player);
+    if (won) player?.sendMessage(`§7${lord.name}: §f${won}`);
     return;
   }
+  const beaten = say(lord, "beaten", player);
+  if (beaten) player?.sendMessage(`§7${lord.name}: §f${beaten}`);
   store.data.fallen.push(lord.name);
   removeLord(lord);
   emit("rivalFallen", { lord, player });
@@ -333,8 +359,9 @@ function mood(lord, player) {
 
 async function talk(player, lord) {
   const buttons = applyFilter("rivalMenu", [], { lord, player });
+  const r = relationOf(lord, player.id);
   const body = [
-    `§o"${pick(LINES[lord.temperament])}"§r`, "",
+    `§o"${say(lord, r <= -40 ? "foe" : r >= 40 ? "friend" : "greet", player) ?? pick(LINES[lord.temperament] ?? LINES.steady)}"§r`, "",
     `§7${fullName(lord)}, ${lord.region}`,
     `§7Holds a ${TIER_NAMES[lord.tier]} · ${lord.wins} siege nights survived · ${mood(lord, player)}`,
   ];
@@ -348,7 +375,10 @@ async function talk(player, lord) {
   const sure = await new MessageFormData().title(`Lay siege to ${lord.plot}?`)
     .body(`${lord.name} will call out ${RIVALS.defenders[lord.tier]} soldiers. Cut them all down within ${RIVALS.siegeMinutes} minutes and ${lord.plot} is empty for the taking, buildings and all.\n\nDie, leave or run out of time, and they hold. They will not forgive it either way.`)
     .button1("Not today").button2("Lay siege").show(player);
-  if (sure.selection === 1) laySiege(player, lord);
+  if (sure.selection !== 1) return;
+  const war = say(lord, "war", player);
+  if (war) player.sendMessage(`§7${lord.name}: §f${war}`);
+  laySiege(player, lord);
 }
 
 world.beforeEvents.playerInteractWithEntity.subscribe((event) => {
@@ -366,6 +396,7 @@ world.beforeEvents.playerInteractWithEntity.subscribe((event) => {
 
 // Tell late listeners (and old saves) who is already settled
 on("ready", () => {
+  emit("rivalLordsWanted", {});
   for (const lord of lords()) emit("rivalSettled", { lord, known: true });
 });
 
