@@ -50,6 +50,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - The story now has one spine from any of the twelve plots: your plot's first book sends you to Sister Wren in Millbrook, your plot's mystery leads to your own region's boss, each regional boss leaves two leads in other regions, and the third one down points you at the Surveyor's Field Notes.
 - The four regional roles (Dragon Rider, Forgemaster, Captain, Witch) each have a history, and their top four powers show a line of it in the Tree of Oaths.
 
+- The ravens are on your wall for real: at dusk on a siege night they perch in a row on the stretch of wall nearest you, as many as the message counts, and leave when the siege starts.
 - The morning after the first Hollow soldiers appear is now told settlement by settlement, to the people of the settlement that saw them, instead of to everyone in the world at once.
 
 ### Changed
