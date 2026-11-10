@@ -43,6 +43,8 @@ export function blastDamage(dim, at, power, radius, intoWall, filter = () => tru
 }
 
 export let wallDamage; // "x,y,z" -> damage taken
+// The map's version is saved beside it. If its shape ever changes, raise this and convert old maps in damageMap().
+export const WALL_DAMAGE_VERSION = 1;
 
 export function damageMap() {
   wallDamage ??= JSON.parse(world.getDynamicProperty("siege:wall_damage") ?? "{}");
@@ -51,6 +53,7 @@ export function damageMap() {
 
 export function saveDamage() {
   world.setDynamicProperty("siege:wall_damage", JSON.stringify(wallDamage));
+  world.setDynamicProperty("siege:wall_damage_version", WALL_DAMAGE_VERSION);
 }
 
 export const blockKey = (b) => `${b.location.x},${b.location.y},${b.location.z}`;
