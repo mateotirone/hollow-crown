@@ -394,7 +394,13 @@ In game (cheats on, a settlement founded, or `/scriptevent siege:showcase` first
 7. `/scriptevent siege:reach_reset` puts it all back. `/scriptevent siege:reach_boss <reeve|huntsman|bride|seneschal|mother|warlord_king|choir>` and
    `/scriptevent siege:reach_set <0-100>` move the story by hand.
 
-Things I could not check offline: whether a dusk-to-midnight wait feels right, whether Hollow soldiers march on the keep heart like raiders do,
+10. Omens you can see and hear: stand inside a settlement with torches, a door left open, some water, a few farm animals and a dog nearby, then
+   `/scriptevent siege:reach_omen <name>` plays one at once (no name: a random one, and it lists them all). Names: pets_hide, stillness, humming,
+   torches_lean, far_bell, animals_face, gate_creak, ticking, voices, water_trembles, arrows, cellar, doors_shut, guards_quiet, small_thing,
+   light_changes, torches_gutter. On a real siege evening one happens each in-game hour from dusk, with its grey line, and never twice in an evening.
+   All of them point at the same wall for the night.
+
+Things I could not check offline (every omen is in this list: none of them can be seen in the simulator): whether a dusk-to-midnight wait feels right, whether Hollow soldiers march on the keep heart like raiders do,
 the darkness and knockback effects, the storms, and how the hurried evening looks in the sky.
 
 ## Choirsteel gear (bestiary)
@@ -452,3 +458,9 @@ Nothing here has been heard in the game yet, so your ears are the test.
 6. After installing a recording (see SOUND-LIST.md), rebuild, reload the world and run step 1 again. **Expect:** that sound says "recording" and plays your file.
 
 Tell me about: anything too loud, too quiet, silent, or that made you jump. Nothing should.
+## Omen ravens (bestiary)
+
+- At dusk or night, `/scriptevent siege:raven_row 9` puts nine ravens in a row in front of you, all facing north, with one place left empty. `/scriptevent siege:raven_clear` removes them.
+- Walk up to them, hit them, push them: nothing happens and they do not turn. They make no sound.
+- Wait for morning, or start a siege: they are gone.
+

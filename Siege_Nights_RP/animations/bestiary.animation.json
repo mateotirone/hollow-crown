@@ -274,6 +274,10 @@
     }
    }
   },
+  "animation.siege_b.omen_raven": {
+   "loop": true,
+   "bones": {}
+  },
   "animation.siege_b.lost_villager": {
    "loop": true,
    "bones": {
@@ -669,20 +673,6 @@
       "0"
      ]
     },
-    "leg_l2": {
-     "rotation": [
-      "0",
-      "math.sin(query.life_time*900+2000)*20*query.modified_move_speed",
-      "0"
-     ]
-    },
-    "leg_l1": {
-     "rotation": [
-      "0",
-      "math.sin(query.life_time*900+1960)*20*query.modified_move_speed",
-      "0"
-     ]
-    },
     "leg_l0": {
      "rotation": [
       "0",
@@ -701,6 +691,20 @@
      "rotation": [
       "0",
       "math.sin(query.life_time*900+1920)*20*query.modified_move_speed",
+      "0"
+     ]
+    },
+    "leg_l2": {
+     "rotation": [
+      "0",
+      "math.sin(query.life_time*900+2000)*20*query.modified_move_speed",
+      "0"
+     ]
+    },
+    "leg_l1": {
+     "rotation": [
+      "0",
+      "math.sin(query.life_time*900+1960)*20*query.modified_move_speed",
       "0"
      ]
     },
