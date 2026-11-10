@@ -649,7 +649,13 @@ boss(id="oswin_the_last", name="Morvane", region="The Hollow", model=m_oswin, pa
      hp=1000, speed=0.31, dmg=13, kb=1.0, collision=(1.2, 3.0), scale=1.05, bare_flag=True, anim_extra=[("hcrown", "scale", "query.is_charged ? 0 : 1")],
      swim=True, egg=("#3c5460", "#c8f0ff"),
      lore="He holds the Seat at the bottom of the Hollow, and he has been waiting a long time for someone to get this far.")
-mob(id="oswin_reflection", name="Standing Rank", family="boss_add", model=m_oswin, material="entity_alphablend",
+def m_rank(m):
+    """A Standing Rank: Morvane's armour with a blade for either hand. The empty suits show the right-hand one, the suit he is
+    really in shows the left (he is left-handed). Which one shows is the entity's charged flag (events siege:bare_on / siege:bare_off)."""
+    m_oswin(m)
+    hold(m, "greatsword", side="r", bone="blade_r", blade="steel", hilt="crown", long=24)
+mob(id="oswin_reflection", name="Standing Rank", family="boss_add", model=m_rank, material="entity_alphablend", bare_flag=True,
+    anim_extra=[("blade", "scale", "query.is_charged ? 1 : 0"), ("blade_r", "scale", "query.is_charged ? 0 : 1")],
     pal={**OSWIN_PAL, "plate": {"c": (170, 210, 230, 170), "style": "metal"}, "cape": {"c": (120, 160, 200, 150), "style": "cloth"}, "tabard": {"c": (150, 190, 210, 160), "style": "cloth"}, "skin": (190, 220, 230, 190)},
     hp=120, speed=0.33, dmg=9, kb=1.0, collision=(1.2, 3.0), scale=1.05, egg=("#a0d2e6", "#ffffff"), no_loot=True,
     lore="Empty armour in his shape, standing in ranks. One of them is not empty.")

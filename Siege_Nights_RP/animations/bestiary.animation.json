@@ -673,7 +673,14 @@
       "0"
      ]
     },
-    "leg_l0": {
+    "leg_r1": {
+     "rotation": [
+      "0",
+      "math.sin(query.life_time*900+1960)*20*query.modified_move_speed",
+      "0"
+     ]
+    },
+    "leg_r0": {
      "rotation": [
       "0",
       "math.sin(query.life_time*900+1920)*20*query.modified_move_speed",
@@ -687,7 +694,14 @@
       "0"
      ]
     },
-    "leg_r0": {
+    "leg_l1": {
+     "rotation": [
+      "0",
+      "math.sin(query.life_time*900+1960)*20*query.modified_move_speed",
+      "0"
+     ]
+    },
+    "leg_l0": {
      "rotation": [
       "0",
       "math.sin(query.life_time*900+1920)*20*query.modified_move_speed",
@@ -698,20 +712,6 @@
      "rotation": [
       "0",
       "math.sin(query.life_time*900+2000)*20*query.modified_move_speed",
-      "0"
-     ]
-    },
-    "leg_l1": {
-     "rotation": [
-      "0",
-      "math.sin(query.life_time*900+1960)*20*query.modified_move_speed",
-      "0"
-     ]
-    },
-    "leg_r1": {
-     "rotation": [
-      "0",
-      "math.sin(query.life_time*900+1960)*20*query.modified_move_speed",
       "0"
      ]
     }
@@ -1573,6 +1573,12 @@
       "0",
       "0"
      ]
+    },
+    "blade": {
+     "scale": "query.is_charged ? 1 : 0"
+    },
+    "blade_r": {
+     "scale": "query.is_charged ? 0 : 1"
     }
    }
   },

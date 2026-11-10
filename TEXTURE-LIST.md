@@ -279,7 +279,7 @@ Every mob has a box model in `models/entity/bestiary/<id>.geo.json` and a genera
 | The Mother of Changelings (Boss helper) | `mother_echo.png` | 128×128 | House style, generated |
 | The Warlord King (Boss) | `warlord_king.png` | 128×128 | House style, generated |
 | Oswin the Last (Boss) | `oswin_the_last.png` | 128×128 | House style, generated |
-| Standing Rank (empty armour in Morvane's shape, stage 2 of his fight; ghost (alpha)). **Wanted:** a second, left-handed version for the empty suits | `oswin_reflection.png` | 128×128 | House style, generated |
+| Standing Rank (empty armour in Morvane's shape, stage 2 of his fight; ghost (alpha)). One model with a blade for either hand: the empty suits show the right-hand blade, his own suit the left (no second skin needed; the skin's size changed with the second blade) | `oswin_reflection.png` | 128×128 | House style, generated |
 | Grey Host Shield-bearer (old conical helm with nasal, faded sea-grey surcoat, frost that never melted, spear and round shield) | `grey_spearman.png` | generated size | House style, generated |
 | Grey Host Axeman | `grey_axeman.png` | generated size | House style, generated |
 | Grey Host Bowman | `grey_bowman.png` | generated size | House style, generated |
@@ -442,5 +442,5 @@ Painted in final style, replacing the placeholders listed in earlier sections:
 - `studio/art/build_hollow_skins.py`: Choir Conductor and Singer, Hollow Regent, Latticewood Boat skin, Throne Seal, resting Heart of the Hollow
 - `studio/art/build_weapons3d.py`: 3D held models, textures and attachables for longsword, warhammer, minute_hand, oath_of_oswin, warlords_brand, rimefang_bow (`attachables/weapon_<id>.json`, `animations/siege_weapons.animation.json`: hold offsets UNTESTED in game)
 - `studio/art/build_coins.py`: iron and gold coin
-Still stand-ins: skins for the eight job NPCs, 49 skill icons, a left-handed Standing Rank, real models for the three reveal-scene actors.
+Still stand-ins: skins for the eight job NPCs, 49 skill icons, real models for the three reveal-scene actors.
 The Texture Studio now lists every PNG under `textures/` automatically (catch-all at the end of `studio/build_manifest.py`).
