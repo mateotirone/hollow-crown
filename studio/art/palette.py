@@ -68,7 +68,7 @@ REGIONS = {
                    'mortar': ramp('#57504a', 0.10, 0.50),
                    'wood': M['oak'], 'accent': M['blood_red'],
                    'foliage': ramp('#5d8a34', 0.12, 0.66)},
-    'frostmarch': {'name': 'Frostmarch (Hollowfast)', 'mood': 'cold, blue shadows, snow-dusted',
+    'frostmarch': {'name': 'Frostmarch (Rimehold)', 'mood': 'cold, blue shadows, snow-dusted',
                    'stone': ramp('#86919e', 0.14, 0.84, cool=0.20, warm=0.02, warm_hue=0.55),
                    'mortar': ramp('#4c5562', 0.10, 0.52),
                    'wood': M['spruce'], 'accent': ramp('#7cc0e0', 0.16, 0.88),

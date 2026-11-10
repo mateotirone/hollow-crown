@@ -10,6 +10,7 @@ import { CORVIN } from "./data/corvin.js";
 import { POWERS } from "./data/powers.js";
 import { heroOf, progressOf, setFlag } from "./player.js";
 import { isThirdNight } from "./singing.js";
+import { sfx } from "../core/sfx.js";
 
 const HOLLOW = "siege:undertow";
 const LOUD = 70;
@@ -20,7 +21,7 @@ export const nextLesson = (skills, flags) => Object.keys(CORVIN.lessons).find((i
 
 function sayFirst(player) {
   CORVIN.first.forEach((line, i) => system.runTimeout(() => { try { player.sendMessage(line); } catch {} }, i * 50));
-  try { player.playSound("siege.choir.hum", { volume: 0.5, pitch: 1.12 }); } catch {}
+  try { sfx(player, "siege.choir.hum", { volume: 0.5, pitch: 1.12 }); } catch {}
 }
 
 function tick() {

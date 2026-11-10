@@ -48,6 +48,10 @@ export const B = {
   deckCracked: "siege:cracked_veinstone_bricks",
   ash: "siege:pale_ash",
   glint: "siege:glint_cluster",
+  budding: "minecraft:budding_amethyst",
+  cap: "siege:veilcap_cap",
+  stem: "siege:veilcap_stem",
+  strands: "siege:veilmoss_strands",
   parapet: "minecraft:polished_blackstone_brick_wall",
 };
 
@@ -267,6 +271,35 @@ export function isRiver(x, z) {
 // How likely a blue crystal cluster is: sparse in the highlands, denser the nearer the Seat.
 const glintChance = (kind, z) => (kind === "high" ? 0.012 : 0) + (z > 1900 ? 0.03 * Math.min(1, (z - 1900) / 400) : 0);
 
+// Shard beds (Mateo, 2026-11-10: "add amethyst shards into the dimension as a naturally occurring
+// plant"). Vanilla amethyst growing out of the ground in patches: a budding amethyst block set into
+// the rock with a growth on top, at mixed stages. Because the root is real budding amethyst, a
+// harvested growth grows back by itself, and a full cluster drops vanilla amethyst shards.
+export const SHARD_STAGES = ["minecraft:small_amethyst_bud", "minecraft:medium_amethyst_bud", "minecraft:large_amethyst_bud", "minecraft:amethyst_cluster"];
+const SHARD_BED = { wood: 0.1, fen: 0.05, high: 0.16, waste: 0.08 }; // share of 8x8 patches that are beds
+// The growth stage (0 to 3) standing on this column, or -1 for none. Pure.
+export function shardAt(x, z, kind) {
+  const px = Math.floor(x / 8), pz = Math.floor(z / 8);
+  if (hash(px, pz, 311) >= (SHARD_BED[kind] ?? 0.08)) return -1;
+  if (hash(x, z, 312) >= 0.22) return -1;
+  return Math.min(3, Math.floor(hash(x, z, 313) * 4.6)); // a little more often full grown
+}
+
+// Giant Veilcaps (Mateo, 2026-11-10, from his picture of the Hollow): the pink mushrooms grown to
+// the size of trees, glowing caps on pale stems. Commonest in the fens, common in the groves.
+const GIANT_CAP = { wood: 0.0016, fen: 0.004, high: 0.0003, waste: 0.0002 };
+// The shape of the giant Veilcap rooted on this column, or undefined. Pure.
+export function giantCapAt(x, z, kind) {
+  if (hash(x, z, 321) >= (GIANT_CAP[kind] ?? 0.001)) return undefined;
+  return { tall: 4 + Math.floor(hash(x, z, 322) * 6), wide: hash(x, z, 323) < 0.4 ? 3 : 2 };
+}
+// Veilmoss hanging over a ledge: how many blocks of strands hang down this side, 0 for none. Pure.
+export function strandsAt(x, z, side, drop, kind) {
+  if (kind === "waste" || drop < 3) return 0;
+  if (hash(x, z, 331 + side) >= (kind === "high" ? 0.15 : 0.4)) return 0;
+  return 1 + Math.floor(hash(x, z, 341 + side) * Math.min(3, drop - 1));
+}
+
 const landmarkNearRoad = (cx, cz, col) => {
   for (let i = 0; i < 16; i += 3) for (let j = 0; j < 16; j += 3) if (col(i, j)?.road !== undefined && !inSpine(cx * 16 + i)) return true;
   return false;
@@ -354,6 +387,17 @@ function planLand(cx, cz) {
       if (hash(x, z, 301) < oreChance(z)) set(x, top - 1 - Math.floor(hash(x, z, 302) * 3), z, B.ore);
       // Blue crystal clusters on the ledges of the highlands, and thick on the climb to the Seat.
       if (c.road === undefined && !c.site && hash(x, z, 303) < glintChance(kind, z) * 2) set(x, top + 1, z, B.glint);
+      // Veilmoss spills over the ledge and hangs down the cliff face.
+      if (c.road === undefined && !c.site && top >= SEA) {
+        [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(([di, dj], side) => {
+          const n = h(i + di, j + dj);
+          if (n === null || i + di < 0 || i + di > 15 || j + dj < 0 || j + dj > 15) return; // stay inside the chunk
+          const len = strandsAt(x, z, side, top - n, kind);
+          if (!len) return;
+          set(x, top, z, B.moss);
+          fill(x + di, top - len + 1, z + dj, x + di, top, z + dj, B.strands);
+        });
+      }
     } else {
       const ashy = kind === "waste" && !c.paved && top >= SEA && !onWater;
       fill(x, start, z, x, ashy ? top - 2 : top - 1, z, B.rock);
@@ -389,6 +433,17 @@ function planLand(cx, cz) {
 
     // Plants and spires (never on the path, in the water, or on a river bank)
     if (top < SEA || drop >= 3 || wound || nearPath(x, z, 3) || c.river < RIVER_HALF_WIDTH + 3) continue;
+    const giant = i >= 3 && i <= 12 && j >= 3 && j <= 12 ? giantCapAt(x, z, kind) : undefined; // whole cap inside the chunk
+    if (giant) {
+      const y = top + giant.tall, w = giant.wide;
+      fill(x, top + 1, z, x, y, z, B.stem);
+      for (let a = -w; a <= w; a++) for (let b = -w; b <= w; b++) {
+        const d = Math.hypot(a, b);
+        if (d <= w - 0.6) set(x + a, y + 1, z + b, B.cap); // the crown of the cap
+        else if (d <= w + 0.3) set(x + a, y, z + b, B.cap); // the rim, one lower, so the cap domes
+      }
+      continue;
+    }
     const r = hash(x, z, 5);
     if (r < (spineCol ? (kind === "shallows" ? 0 : 0.006) : SPIRES[kind])) {
       const tall = 8 + Math.floor(hash(x, z, 6) * 22);
@@ -397,6 +452,12 @@ function planLand(cx, cz) {
       set(x, top + 1, z, hash(x, z, 7) < (kind === "fen" ? 0.3 : 0.6) ? B.veilcap : B.glimbulb);
     } else if (hash(x, z, 304) < glintChance(kind, z)) {
       set(x, top + 1, z, B.glint);
+    } else {
+      const stage = shardAt(x, z, kind);
+      if (stage >= 0) {
+        set(x, top, z, B.budding);
+        ops.push({ a: [x, top + 1, z], b: [x, top + 1, z], block: SHARD_STAGES[stage], states: { "minecraft:block_face": "up" } });
+      }
     }
   }
 

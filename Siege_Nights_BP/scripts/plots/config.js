@@ -22,7 +22,7 @@ export const PLOT_PLAN = [
   { name: "Oakmere", region: "Aldmere Vale", x: 260, z: -480, gate: 270, relic: { x: 332, z: -480 }, site: "oak forest between the two rivers" },
   { name: "Thistledown", region: "Aldmere Vale", x: 300, z: 130, gate: 0, relic: { x: 370, z: 111 }, site: "open downs south of the Greywater" },
   { name: "Wrenfield", region: "Aldmere Vale", x: -200, z: 220, gate: 90, relic: { x: -164, z: 282 }, site: "lakeside fields by Wren Water" },
-  { name: "Rimeholt", region: "Frostmarch", x: -520, z: -760, gate: 180, relic: { x: -479, z: -819 }, site: "a shelf in the western foothills" },
+  { name: "Frosthelm", region: "Frostmarch", x: -520, z: -760, gate: 180, relic: { x: -479, z: -819 }, site: "a shelf in the western foothills" },
   { name: "Wolfcairn", region: "Frostmarch", x: 520, z: -1010, gate: 270, relic: { x: 575, z: -1056 }, site: "high plateau north of the range" },
   { name: "Gullcliff", region: "Saltreach", x: -760, z: -560, gate: 90, relic: { x: -825, z: -530 }, site: "clifftop over the northern coast" },
   { name: "Tidewatch", region: "Saltreach", x: -560, z: 650, gate: 0, relic: { x: -596, z: 712 }, site: "dunes above the southern shore" },
@@ -49,7 +49,7 @@ export const DAY_TICKS = 24000;
 export const WARDS = [
   { name: "Kingsrest", x: -150, z: -150, r: 90 },
   { name: "Millbrook", x: -60, z: -470, r: 70 },
-  { name: "Hollowfast", x: -80, z: -1080, r: 70 },
+  { name: "Rimehold", x: -80, z: -1080, r: 70 },
   { name: "Gull's Rest", x: -800, z: 400, r: 70 },
   { name: "Sunscar", x: 850, z: 450, r: 80 },
   { name: "Mirelight", x: -60, z: 900, r: 70 },
@@ -80,6 +80,18 @@ export const WELCOME = {
   pedestalRadius: 11,
   pedestalGap: 24, // degrees kept between two pedestals
   bannerOnArrival: true, // hand a Keep Banner to someone who picks a plot and has none
+};
+
+// The built-in biome each region is generated as. The resource pack restyles some of them: the Blackfen's
+// (mangrove_swamp) has black water, in Siege_Nights_RP/biomes/ and fogs/blackfen_fog.json. Keep each biome to one
+// region, because a restyle follows the biome wherever it appears. Rivers and pools inside the Blackfen must be
+// written as mangrove_swamp too (not river), or their water stays blue.
+export const REGION_BIOME = {
+  "Aldmere Vale": "minecraft:plains",
+  Frostmarch: "minecraft:ice_plains",
+  Saltreach: "minecraft:stone_beach",
+  Emberwaste: "minecraft:desert",
+  Blackfen: "minecraft:mangrove_swamp",
 };
 
 // What each region's pedestal is made of

@@ -9,7 +9,7 @@ export const COIN = "siege:coin"; // the everyday coin
 export const GOLD = "siege:gold_coin"; // worth ECON.goldWorth coins
 
 export const ECON = {
-  // Display name only. Change it here and in the two lines of en_US.lang; nothing else depends on it.
+  // Display name only; Regal is confirmed by Mateo (2026-11-10). It also appears in some player texts and docs.
   one: "Regal", many: "Regals", gold: "Gold Regal",
   icon: "textures/items/siege_coin",
   goldWorth: 64,
@@ -33,42 +33,50 @@ const [V, F, S, E, B] = REGIONS;
 const m = (id) => `minecraft:${id}`;
 // A good: [item id, lot size, coins for the lot, extra]. Prices are for a whole lot.
 const g = (id, lot, price, extra = {}) => ({ id: id.includes(":") ? id : m(id), lot, price, ...extra });
+
+// Regional Castle Guard armor (textures thread, PR #69; Mateo chose regional looks 2026-11-10): each region's Smith sells
+// only that region's set, at a flat price (no regional markup: it is the local make). About a quarter over the plain
+// Castle Guard piece at the Quartermaster (40 / 72 / 56 / 40). `region` limits a good to NPCs of that region.
+export const GUARD_PRICES = { helmet: 50, chestplate: 90, leggings: 70, boots: 50 };
+const GUARD_KEY = { "Aldmere Vale": "vale", Frostmarch: "frostmarch", Saltreach: "saltreach", Emberwaste: "emberwaste", Blackfen: "blackfen" };
+const REGIONAL_GUARD = REGIONS.flatMap((region) => Object.entries(GUARD_PRICES).map(([piece, price]) =>
+  g(`siege:guard_${GUARD_KEY[region]}_${piece}`, 1, price, { region, flat: true })));
 const LOGS = ["oak_log", "spruce_log", "birch_log", "dark_oak_log", "acacia_log", "mangrove_log", "jungle_log", "cherry_log"];
 
 // buys: what the NPC pays you for. sells: what it charges you for.
 // home / scarce: regions where this trade's goods are plentiful / hard to come by.
 export const JOBS = {
   farmer: {
-    name: "Farmer", skin: 3, home: [V], scarce: [F, E],
+    name: "Farmer", home: [V], scarce: [F, E],
     buys: [g("wheat", 16, 6), g("carrot", 16, 5), g("potato", 16, 5), g("beetroot", 16, 6), g("melon_slice", 16, 3),
       g("pumpkin", 16, 8), g("egg", 16, 4), g("sugar_cane", 16, 4)],
     sells: [g("wheat", 16, 10), g("bread", 4, 4), g("wheat_seeds", 16, 2), g("hay_block", 4, 24)],
   },
   woodcutter: {
-    name: "Woodcutter", skin: 5, home: [V, B], scarce: [E],
+    name: "Woodcutter", home: [V, B], scarce: [E],
     buys: [...LOGS.map((id) => g(id, 16, 8)), g("oak_sapling", 16, 2), g("spruce_sapling", 16, 2), g("stick", 64, 2)],
     sells: [g("oak_planks", 32, 8), g("spruce_planks", 32, 8), g("charcoal", 16, 14)],
   },
   quarryman: {
-    name: "Quarryman", skin: 8, home: [F], scarce: [B, S],
+    name: "Quarryman", home: [F], scarce: [B, S],
     buys: [g("cobblestone", 64, 4), g("stone", 64, 6), g("cobbled_deepslate", 64, 5), g("sand", 64, 4), g("gravel", 64, 4),
       g("clay_ball", 16, 3), g("flint", 16, 4)],
     sells: [], // he supplies the Mason
   },
   smith: {
-    name: "Smith", skin: 9, home: [F], scarce: [B],
+    name: "Smith", home: [F], scarce: [B],
     buys: [g("coal", 16, 8), g("raw_copper", 16, 6), g("copper_ingot", 16, 8), g("raw_gold", 4, 16), g("gold_ingot", 1, 5, { want: 16, step: 8 }),
       g("redstone", 16, 6), g("lapis_lazuli", 16, 8)],
     sells: [g("coal", 16, 14), g("iron_pickaxe", 1, 34), g("iron_axe", 1, 34), g("iron_shovel", 1, 14), g("iron_sword", 1, 24),
-      g("shears", 1, 24), g("bucket", 1, 34), g("rail", 16, 64), g("anvil", 1, 320)],
+      g("shears", 1, 24), g("bucket", 1, 34), g("rail", 16, 64), g("anvil", 1, 320), ...REGIONAL_GUARD],
   },
   fisher: {
-    name: "Fisher", skin: 14, home: [S], scarce: [E, F],
+    name: "Fisher", home: [S], scarce: [E, F],
     buys: [g("cod", 16, 10), g("salmon", 16, 10), g("tropical_fish", 16, 12), g("kelp", 16, 2), g("ink_sac", 16, 6), g("nautilus_shell", 1, 12, { want: 4, step: 2 })],
     sells: [g("cooked_cod", 8, 8), g("fishing_rod", 1, 6), g("oak_boat", 1, 6)],
   },
   hunter: {
-    name: "Hunter", skin: 17, home: [], scarce: [],
+    name: "Hunter", home: [], scarce: [],
     buys: [g("leather", 8, 8), g("feather", 16, 4), g("string", 16, 6), g("bone", 16, 4), g("rotten_flesh", 32, 2), g("gunpowder", 16, 10),
       g("rabbit_hide", 16, 6),
       // trophies from the bestiary: a few a day, they are meant for crafting first
@@ -77,14 +85,14 @@ export const JOBS = {
     sells: [g("arrow", 16, 16), g("lead", 2, 8), g("cooked_beef", 8, 10)],
   },
   herbalist: {
-    name: "Herbalist", skin: 20, home: [B], scarce: [F, E],
+    name: "Herbalist", home: [B], scarce: [F, E],
     buys: [g("nether_wart", 16, 10), g("red_mushroom", 16, 5), g("brown_mushroom", 16, 5), g("spider_eye", 16, 6), g("poppy", 16, 2),
       g("dandelion", 16, 2), g("sweet_berries", 16, 3), g("glow_berries", 16, 5), g("honey_bottle", 4, 8)],
     sells: [g("glass_bottle", 8, 6), g("brewing_stand", 1, 40), g("glowstone_dust", 8, 16), g("sugar", 16, 6), g("nether_wart", 4, 8)],
   },
   // The Mint. Iron both ways at the fixed rate, with a daily limit; gems at a low fixed price. No regional prices.
   moneyer: {
-    name: "Moneyer", skin: 24, home: [], scarce: [], mint: true,
+    name: "Moneyer", home: [], scarce: [], mint: true,
     buys: [g("iron_ingot", 1, ECON.ironBuys, { want: ECON.mintDaily, step: 1, drop: 0.5, floor: 0.5 }),
       g("emerald", 1, 4, { want: 32, step: 8 }), g("diamond", 1, 64, { want: 8, step: 4 })],
     sells: [g("iron_ingot", 1, ECON.ironSells)],
