@@ -12,6 +12,7 @@ import { ActionFormData } from "@minecraft/server-ui";
 import { on, addKeepMenuButtons, addJoinStep } from "../siege/api.js";
 import { LOOKS } from "./data.js";
 import "./tests.js";
+import { sfx } from "../core/sfx.js";
 
 export const LOOKING_GLASS = "hc:looking_glass";
 const PROP = "hc:look";
@@ -67,7 +68,7 @@ export async function chooseLook(player) {
     return true;
   }
   player.sendMessage(look ? `§7You are §f${look.name}§7 here.` : "§7You look like yourself again.");
-  player.playSound("armor.equip_leather");
+  sfx(player, "armor.equip_leather");
   return true;
 }
 

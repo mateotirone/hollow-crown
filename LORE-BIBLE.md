@@ -106,7 +106,7 @@ None of the local books or portraits names or shows the last king as a man. Each
 
 ## Ravens
 
-The Ice Isles' birds. Every man of the Host fed one, and a raven carried his name home if he died abroad. When the Host cut down a bell it nailed up a raven in its place: a voice for a voice. When the Host was taken, six thousand birds were left with no names to carry, so they go where the Host is going next and wait. **Ravens on your wall at dusk mean a raid tonight**, and more come the longer your keep has stood. Sigrun explains it. (`scripts/lore/ravens.js`. A real raven bird is asked of the mobs thread; until then it is a line of text at dusk.)
+The Ice Isles' birds. Every man of the Host fed one, and a raven carried his name home if he died abroad. When the Host cut down a bell it nailed up a raven in its place: a voice for a voice. When the Host was taken, six thousand birds were left with no names to carry, so they go where the Host is going next and wait. **Ravens on your wall at dusk mean a raid tonight**, and more come the longer your keep has stood. Sigrun explains it. (`scripts/lore/ravens.js`. A real raven bird is asked of the mobs thread; until then it is a line of text at dusk.) The birds are real in the game: at dusk on a siege night they sit in a row along the stretch of wall nearest you, two blocks apart, all looking out the same way, and they are gone when the siege starts.
 
 ## Places now on the map
 
@@ -327,3 +327,7 @@ None of the four is the Hollow's; each is what a region already knew before the 
 | Forgemaster | Frostmarch | Hroda Deepforge, bellfounder; the Founding Bell was poured at her fire three generations later | The Order took the bell moulds but could not carry off the fire |
 | Captain | Saltreach | Merrin Holt, who burned forty Saltreach boats to stop the Host's second fleet | Every captain carries a share of Holt's Debt, which has never been marked paid |
 | Witch | Blackfen | Nobody; "Goody Sedge" has three graves | No books to burn: it is handed over in a cup |
+
+## Where the eight paintings hang
+
+Mateo's eight paintings are already in the game as hanging pictures (`siege:portrait`, textures `textures/entity/portrait/plate_1..8.png`). Seven hang openly: one in each settlement's Library (which one depends on the plot) and all seven in a row with `/scriptevent siege:portrait gallery` (meant for the Long Gallery at Crownhold). **The eighth, the Forty-Second Portrait, is a secrecy call and hangs only in the Burned Archive**, which a player reaches late through Brother Cael. Its caption never says whose portrait it is until Morvane has fallen; after that it reads "Oswin, son of Aldric, last King of Aldmere" and says he scraped the face off himself the night before they came for him (that last detail is the lore thread's, not Mateo's).

@@ -156,6 +156,21 @@ mob(id="hollow_crow", name="Bellcrow", family="summon", model=m_crow, plan="bird
     hp=4, speed=0.4, dmg=2, fly=0.35, lifetime=30, collision=(0.5, 0.5), egg=("#1a181e", "#c878ff"), no_loot=True,
     lore="Summoned by Crow-Mages. They come apart into ash after half a minute.")
 
+# The omen: ravens that settle on a settlement's wall at dusk before a raid (lore/ravens.js decides when; bestiary/ravens.js places them).
+# Perched, wings folded, perfectly still. They are not the Crow-Mages' Bellcrows: these are real birds, and silent.
+def m_raven(m):
+    m.bone("root", [0, 0, 0]); m.bone("body", [0, 3, 0], "root")
+    m.box("body", [-1.5, 2, -2], [3, 4, 4], "feather", rot=[-25, 0, 0], pivot=[0, 3, 0])                                  # body tipped upright, the way a perched bird sits
+    m.box("body", [-2, 2.5, -1.5], [1, 3, 4], "wing", rot=[-25, 0, 0], pivot=[0, 3, 0]); m.box("body", [1, 2.5, -1.5], [1, 3, 4], "wing", rot=[-25, 0, 0], pivot=[0, 3, 0])   # folded wings
+    m.box("body", [-1, 1, 2], [2, 1, 4], "wing", rot=[20, 0, 0], pivot=[0, 2, 2])                                          # tail, angled down behind the perch
+    m.bone("head", [0, 6, -1.5], "body"); m.box("head", [-1.5, 5.5, -3.5], [3, 3, 3], "feather", face="eyes")
+    m.box("head", [-0.5, 6, -5.5], [1, 1, 2], "beak"); m.box("head", [-0.5, 5.5, -4.5], [1, 1, 1], "beak", inflate=-0.1)       # a heavy beak
+    for sx in (-1, 0): m.box("root", [sx * 1 + 0, 0, -0.5], [1, 2, 1], "beak")                                                  # legs
+mob(id="omen_raven", name="Raven", family="omen", model=m_raven, plan="none",
+    pal=P(feather={"c": (20, 20, 26), "style": "fur"}, wing={"c": (14, 14, 20), "style": "fur"}, beak=(44, 42, 46), eye=(150, 152, 160)),
+    hp=4, static=True, unbreakable=True, collision=(0.4, 0.5), no_loot=True,
+    lore="They come to the wall at dusk and face the way the raid will come. They do not make a sound, and they do not move for you.")
+
 # ======================================================================================
 # Family 2: things from the Hollow
 # ======================================================================================

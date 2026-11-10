@@ -48,6 +48,15 @@
             "Texture.armor_diamond",
             "Texture.armor_copper",
             "Texture.armor_netherite"
+          ],
+          "Array.breed": [
+            "Texture.markings_none",
+            "Texture.coat_vale",
+            "Texture.coat_frostmarch",
+            "Texture.coat_saltreach",
+            "Texture.coat_emberwaste",
+            "Texture.coat_blackfen",
+            "Texture.coat_crossbred"
           ]
         }
       },
@@ -59,21 +68,46 @@
       ],
       "textures": [
         "Array.base[query.property('siege:coat')]",
-        "Array.markings[query.property('siege:mark')]",
-        "variable.armor_texture_slot ? Array.armor[variable.armor_texture_slot] : (query.property('siege:cap') ? Texture.caparison : Texture.armor_none)"
+        "query.property('siege:breed') > 0 ? Array.breed[query.property('siege:breed')] : Array.markings[query.property('siege:mark')]",
+        "variable.armor_texture_slot ? Array.armor[variable.armor_texture_slot] : (query.property('siege:cap') ? Texture.caparison : (query.property('siege:special') == 1 ? Texture.barding : Texture.armor_none))"
       ],
       "color": {
         "r": "variable.armor_texture_slot ? query.armor_color_slot(4, 0) : (query.property('siege:cap') ? query.property('siege:cap_r') : this)",
         "g": "variable.armor_texture_slot ? query.armor_color_slot(4, 1) : (query.property('siege:cap') ? query.property('siege:cap_g') : this)",
         "b": "variable.armor_texture_slot ? query.armor_color_slot(4, 2) : (query.property('siege:cap') ? query.property('siege:cap_b') : this)",
         "a": "variable.armor_texture_slot ? query.armor_color_slot(4, 3) : this"
-      },
-      "overlay_color": {
-        "r": "0.72",
-        "g": "0.95",
-        "b": "1.0",
-        "a": "query.property('siege:special') == 2 ? 0.55 : 0.0"
       }
+    },
+    "controller.render.siege_steed_glim": {
+      "part_visibility": [
+        {
+          "Saddle": false
+        },
+        {
+          "Bit*": false
+        },
+        {
+          "Bridle": false
+        },
+        {
+          "Reins*": false
+        },
+        {
+          "Bag*": false
+        },
+        {
+          "MuleEar*": false
+        }
+      ],
+      "geometry": "Geometry.default",
+      "materials": [
+        {
+          "*": "Material.ghost"
+        }
+      ],
+      "textures": [
+        "Texture.glimstrider"
+      ]
     }
   }
 }

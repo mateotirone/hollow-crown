@@ -19,6 +19,7 @@ import { lance } from "./bosses.js";
 import { setSeepSurge } from "./seeps.js";
 import { UNDERTOW_ID, HEART } from "../undertow/layout.js";
 import { alive, announce, effect, flat, give, heal, healthOf, hurt, makeItem, particle, ring, shove, sound } from "./util.js";
+import { sfx } from "../core/sfx.js";
 
 export const PRETENDERS = { firstAfterDays: 5, everyDaysMin: 6, everyDaysMax: 11, marchDays: 5, surgePerDay: 0.5, surgeMax: 3, wakeRange: 64, kitSize: 4 };
 
@@ -87,7 +88,7 @@ function rise(seed, at, dim) {
   store.save();
   const where = d.current.at ?? HEART.center;
   everyone(`§5A claimant has come to the empty Seat: §d${p.name}§5.§7 ${CLAIMS[p.claim].line} The seep will surge until someone puts them down.`);
-  for (const pl of world.getPlayers()) pl.playSound("mob.wither.spawn", { volume: 0.5, pitch: 0.6 });
+  for (const pl of world.getPlayers()) sfx(pl, "mob.wither.spawn", { volume: 0.5, pitch: 0.6 });
   announce("siege:pretender_risen", { n: d.n, name: p.name, body: p.body, claim: p.claim, x: where.x, y: where.y, z: where.z, dimension: d.current.dim ?? UNDERTOW_ID });
   return d.current;
 }

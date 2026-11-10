@@ -11,6 +11,7 @@ import { SKILL, SKILLS } from "./skills.js";
 import { heroOf, saveHero } from "./hero.js";
 import { BOUND_EMBER, EMBER, confirmPath } from "./tree.js";
 import { heldType } from "./progress.js";
+import { sfx } from "../core/sfx.js";
 
 export const RESONANT_TAG = "siege_resonant";
 export const ECHO_TAG = "siege_echo_sight";
@@ -101,7 +102,7 @@ const CAST = {
       if (wall) end = { x: wall.block.x + 0.5, y: wall.block.y + 0.5, z: wall.block.z + 0.5 };
     }
     line(dim, from, end, "minecraft:blue_flame_particle");
-    dim.playSound("mob.blaze.shoot", from, { pitch: 1.6, volume: 0.8 });
+    sfx(dim, "mob.blaze.shoot", from, { pitch: 1.6, volume: 0.8 });
     if (!target) return true;
     const dmg = [0, 5, 7, 10][lvl] * might(player);
     hurt(player, target, dmg);
@@ -124,7 +125,7 @@ const CAST = {
 
   arc_ward(player, lvl) {
     fx(player, "absorption", 400, Math.min(4, Math.round(lvl * might(player)) - 1));
-    player.dimension.playSound("beacon.activate", player.location, { pitch: 1.8, volume: 0.6 });
+    sfx(player.dimension, "beacon.activate", player.location, { pitch: 1.8, volume: 0.6 });
     return true;
   },
 
@@ -147,7 +148,7 @@ const CAST = {
       line(dim, eye(player), { x: to.x, y: to.y + 1, z: to.z }, "minecraft:portal_directional", 1);
       player.teleport(to, { keepVelocity: false, checkForBlocks: false });
       fx(player, "slow_falling", 30, 0);
-      dim.playSound("mob.endermen.portal", to, { pitch: 1.4, volume: 0.7 });
+      sfx(dim, "mob.endermen.portal", to, { pitch: 1.4, volume: 0.7 });
       return true;
     }
     player.onScreenDisplay.setActionBar("§7No room to step there.");
@@ -159,7 +160,7 @@ const CAST = {
     echo.set(player.id, { until: system.currentTick + ticks, range: [0, 24, 32, 40][lvl] });
     player.addTag(ECHO_TAG);
     fx(player, "night_vision", ticks + 200, 0);
-    player.dimension.playSound("block.bell.hit", player.location, { pitch: 0.5, volume: 0.5 });
+    sfx(player.dimension, "block.bell.hit", player.location, { pitch: 0.5, volume: 0.5 });
     return true;
   },
 
@@ -173,7 +174,7 @@ const CAST = {
     fx(target, "slowness", ticks, 255);
     fx(target, "weakness", ticks, 0);
     line(player.dimension, eye(player), { x: target.location.x, y: target.location.y + 1, z: target.location.z }, "minecraft:soul_particle");
-    player.dimension.playSound("block.chain.place", target.location, { pitch: 0.6, volume: 2 });
+    sfx(player.dimension, "block.chain.place", target.location, { pitch: 0.6, volume: 2 });
     return true;
   },
 
@@ -182,7 +183,7 @@ const CAST = {
     fx(player, "invisibility", ticks, 0);
     fx(player, "resistance", ticks, 4);
     fx(player, "speed", ticks, 2);
-    player.dimension.playSound("portal.travel", player.location, { volume: 0.15, pitch: 2 });
+    sfx(player.dimension, "portal.travel", player.location, { volume: 0.15, pitch: 2 });
     api.emit("undertowStep", { player, ticks });
     return true;
   },
@@ -193,7 +194,7 @@ const CAST = {
     const request = { player, handled: false, refused: undefined };
     api.emit("hollowStep", request);
     if (request.handled) {
-      player.dimension.playSound("portal.travel", player.location, { volume: 0.2, pitch: 0.6 });
+      sfx(player.dimension, "portal.travel", player.location, { volume: 0.2, pitch: 0.6 });
       return true;
     }
     player.onScreenDisplay.setActionBar(`§7${request.refused ?? "The Hollow does not open. Not yet."}`);
@@ -208,7 +209,7 @@ const CAST = {
       return false;
     }
     choirs.push({ owner: player.id, dim: player.dimension.id, at: { ...player.location }, radius, until: system.currentTick + Math.round([0, 120, 160, 200][lvl] * might(player)) });
-    player.dimension.playSound("block.bell.hit", player.location, { pitch: 0.4, volume: 6 });
+    sfx(player.dimension, "block.bell.hit", player.location, { pitch: 0.4, volume: 6 });
     api.title(player, "§5Choir's Call", "§7They hear the bell, and each other");
     return true;
   },
@@ -242,7 +243,7 @@ function overflow(player, hero, born) {
   if (born) {
     crescendo.set(player.id, now + 200);
     api.title(player, "§5Crescendo", "§7Ten seconds. Everything is free.");
-    player.dimension.playSound("block.bell.hit", player.location, { pitch: 1.6, volume: 4 });
+    sfx(player.dimension, "block.bell.hit", player.location, { pitch: 1.6, volume: 4 });
     system.runTimeout(() => {
       if (!player.isValid) return;
       hero.resonance = 0;
@@ -260,7 +261,7 @@ function overflow(player, hero, born) {
   fx(player, "darkness", 100, 0);
   fx(player, "wither", 60, 0);
   api.title(player, "§4Overwhelmed", "§7The Choir is too loud");
-  player.dimension.playSound("mob.warden.sonic_boom", player.location, { volume: 0.4 });
+  sfx(player.dimension, "mob.warden.sonic_boom", player.location, { volume: 0.4 });
   api.emit("resonanceOverflow", { player });
 }
 

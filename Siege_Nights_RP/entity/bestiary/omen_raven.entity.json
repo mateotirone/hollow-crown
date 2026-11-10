@@ -1,0 +1,28 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:omen_raven",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/omen_raven"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.omen_raven"
+   },
+   "animations": {
+    "main": "animation.siege_b.omen_raven"
+   },
+   "scripts": {
+    "animate": [
+     "main"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ]
+  }
+ }
+}

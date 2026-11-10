@@ -12,6 +12,7 @@ import { HALL_TIERS, drawHall } from "./halls.js";
 import { STYLES, STYLE_IDS, styleFromBiome, styleFromGround } from "./styles.js";
 import { startBuild, buildFor, worldCells, worldMarks, worldBox } from "./build.js";
 import { heroOf, grantPoints, grantRenown, playerById } from "./hero.js";
+import { sfx } from "../core/sfx.js";
 
 export const CORNERSTONE = "siege:hall_cornerstone";
 export const TREE = "siege:tree_of_oaths";
@@ -159,7 +160,7 @@ world.afterEvents.playerPlaceBlock.subscribe((event) => {
     };
     saveHalls();
     player.sendMessage(`§6Hall Cornerstone set.§7 The hall will rise in front of you, the way you are facing now, in the §f${STYLES[halls()[owner].style].name}§7 style. Click the cornerstone to begin.`);
-    player.playSound("random.anvil_use");
+    sfx(player, "random.anvil_use");
   });
 });
 
@@ -230,7 +231,7 @@ export function beginBuild(owner, level, style, resumeIndex = 0) {
       for (const p of world.getPlayers()) {
         if (p.id === owner) {
           api.title(p, `§6${HALL_TIERS[level].name} complete`, `§7${UNLOCKS[level]}`);
-          p.playSound("ui.toast.challenge_complete");
+          sfx(p, "ui.toast.challenge_complete");
         } else if (first) p.sendMessage(`§6${keep?.name ?? "A settlement"} has raised a ${HALL_TIERS[level].name}.`);
       }
       if (first && player) {
@@ -377,7 +378,7 @@ function confirmBuild(player, owner, level, style, cost, repair = false) {
       for (const c of cost) if (countMatching(player, c.match) < c.amount) return player.sendMessage("§cYou no longer have the materials.");
       for (const c of cost) takeMatching(player, c.match, c.amount);
       hall.paid = Math.max(hall.paid ?? 0, level);
-      if (beginBuild(owner, level, style)) player.playSound("random.anvil_use");
+      if (beginBuild(owner, level, style)) sfx(player, "random.anvil_use");
     })
     .catch(() => {});
 }

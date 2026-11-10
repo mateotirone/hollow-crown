@@ -17,6 +17,7 @@ import {
 } from "./state.js";
 import { citadel, throneSpots, exilePoint, moveIn } from "./citadel.js";
 import { crownPlayer, endReign, addHollowing } from "./reign.js";
+import { sfx } from "../core/sfx.js";
 
 // ---------- Earning a Claim ----------
 
@@ -60,7 +61,7 @@ on("siegeEnd", () => {
     player.sendMessage(exact
       ? `§5Your people send word: an ${CROWN.shard} has fallen at ${spot.x}, ${spot.z} (${where.text}). The others will know in a minute.`
       : SHARD_LINES[siegeNumber() % SHARD_LINES.length](where.text));
-    player.playSound("ambient.weather.thunder", { volume: 0.4 });
+    sfx(player, "ambient.weather.thunder", { volume: 0.4 });
   };
   const early = (p) => (c.exiles[p.id]?.stage ?? 0) >= 3;
   for (const p of world.getPlayers()) if (early(p)) tell(p, true);
@@ -107,10 +108,10 @@ function useShard(player) {
     c.treasury += CROWN.shardTreasury;
     saveCrown();
     addHollowing(-CROWN.hollowShatter);
-    player.playSound("random.glass");
+    sfx(player, "random.glass");
     return player.sendMessage(`§aThe shard shatters. One less Claim against you. §7+${worth(CROWN.shardTreasury)} to the Treasury.${c.ruler.hollowing >= 25 ? " §8§oFor a moment, everything is quiet." : ""}`);
   }
-  player.playSound("block.end_portal_frame.fill");
+  sfx(player, "block.end_portal_frame.fill");
   addClaim(player, CROWN.claimShard, `an ${CROWN.shard} bound`);
   emit("shardBound", { player });
   const need = claimNeeded(c.ruler.hollowing);
@@ -457,7 +458,7 @@ function castOut(player) {
   exile.pending = false;
   saveCrown();
   title(player, `§4Banished from ${citadelName()}`, "§7You were a ruler this morning");
-  player.playSound("mob.wither.death", { volume: 0.5 });
+  sfx(player, "mob.wither.death", { volume: 0.5 });
   giveItem(player, new ItemStack(KEEP_BANNER, 1));
   player.sendMessage(`§7You are cast out with what you carry. ${citadelName()} is closed to you for ${CROWN.banishNights} siege nights.`);
   player.sendMessage(`§5But you held it once, and the throne remembers: your Blood Claim starts at ${CROWN.claimExileStart}. §7${EXILE_STAGES[0].name}: ${EXILE_STAGES[0].goal}`);

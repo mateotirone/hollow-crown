@@ -20,6 +20,7 @@ import { SETTLE, REGION_TO_STYLE } from "./config.js";
 import { BUILDINGS, BUILDING, drawBuilding, styleFor } from "./buildings.js";
 import { footprint, corners, boxesTouch, bill, priceOf, MATERIALS } from "./rules.js";
 import { reservesOf, reserveAt, drawBox } from "./zones.js";
+import { sfx } from "../core/sfx.js";
 
 export const FOUNDATION = "siege:foundation_stone";
 const OVERWORLD = "minecraft:overworld";
@@ -137,7 +138,7 @@ export function raise(key, stone, buildingId, style, { quiet = false } = {}) {
       const yaws = Object.fromEntries(Object.entries(BUILDING[buildingId].faces ?? {}).map(([name, sign]) => [name, yawOf({ x: forward.x * sign, z: forward.z * sign })]));
       emit("settleBuilt", { ...yaws, owner: stone.owner, player: stone.placer, building: buildingId, style, origin, forward, box: footprint(origin, forward, plan.bounds()), marks: worldMarks(plan, origin, forward) });
       if (!player || quiet) return;
-      player.playSound("random.levelup");
+      sfx(player, "random.levelup");
       player.sendMessage(`§6Your ${BUILDING[buildingId].name} is built.§7 It is yours to change: knock out a wall, add a door, move in. The Foundation Stone is back in your pack.`);
       if (first && SETTLE.firstBuildRenown) emit("skillPoints", { player, amount: 0, source: `first ${BUILDING[buildingId].name}`, renown: SETTLE.firstBuildRenown });
     },
@@ -245,7 +246,7 @@ async function confirmBuilding(player, key, stone) {
     for (const [kind, mat] of Object.entries(MATERIALS)) takeMatching(player, mat.match, due.use[kind]);
   }
   if (!raise(key, stone, building.id, style)) return;
-  player.playSound("random.anvil_use");
+  sfx(player, "random.anvil_use");
   player.sendMessage(`§6The ${building.name} is going up.`);
 }
 

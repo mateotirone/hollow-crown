@@ -29,6 +29,7 @@ import { reachStage, AFTER } from "../reach/api.js";
 import { rivalLords, rivalById, relationOf, changeRelation, rivalData, saveRivals, lordSays, lordFullName } from "./index.js";
 import { DEEDS, MANNERS, WARES, COMMISSIONS, pickDeed, nextToAct, pickManner, marchHost, buyOffPrice, settleMarch, vassalsOf, pickFoe, settleFeud, pickWares, warePrice, pactsOpen, tributeOf } from "./deeds.js";
 import { TIER_NAMES, LINES } from "./data.js";
+import { sfx } from "../core/sfx.js";
 
 const OVERWORLD = "minecraft:overworld";
 const AID_TAG = "siege_rival_aid";
@@ -71,7 +72,7 @@ const DO = {
     title(player, `§4${lord.name} marches on you`, "§7They come with the next siege night");
     speak(player, lord, "war");
     player.sendMessage(`§c${lordFullName(lord)} has declared war on you. §7Their soldiers will come ${MANNERS[manner].name} at the next siege night. Ride to ${lord.plot} to buy them off (${coins(buyOffPrice(lord, oathsOf(player.id)))}), or be ready.`);
-    player.playSound("raid.horn");
+    sfx(player, "raid.horn");
     everyone(`§6${lordFullName(lord)} has declared war on ${player.name}.`, player.id);
     emit("rivalMarch", { lord, player, manner });
   },
@@ -434,7 +435,7 @@ function swear(player, lord, kind, { free = false } = {}) {
   if (lord.demands) delete lord.demands[player.id];
   if (lord.march?.target === player.id && lord.march.state === "declared") endMarch(lord, "called_off");
   changeRelation(lord, player.id, kind === "alliance" ? 10 : 5);
-  player.playSound("random.levelup");
+  sfx(player, "random.levelup");
   everyone(`§6${player.name} and ${lordFullName(lord)} have sworn ${kind === "alliance" ? "an alliance" : "a truce"}.`);
   emit("rivalPact", { lord, player, kind });
 }
