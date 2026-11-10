@@ -9,7 +9,7 @@ import { localStock, stoneStock, niceName } from "./mason.js";
 import { STONE_FAMILY, CASTLE_STONES, stoneId } from "../siege/api.js";
 import { MATERIALS } from "./rules.js";
 import { HALL, MASON, SLOTS, place, slotsFor } from "./layout.js";
-import { WALLS, WALL_LEVELS, MAX_WALL, smoothGround, groundProblem, wallColumns, onWallLine, bearingToAngle } from "./walldata.js";
+import { WALLS, WALL_LEVELS, MAX_WALL, smoothGround, groundProblem, wallColumns, onWallLine, bearingToAngle, columnKinds, repairCost, wallArmor } from "./walldata.js";
 
 const base = { creative: false, overworld: true, typeId: "minecraft:stone_bricks", land: "me", mine: true, reserve: undefined, wildsClosed: true, hasKeep: true };
 
@@ -176,3 +176,32 @@ addTests("settle", {
     for (const id of ["siege:mason_bench", "siege:foundation_stone", ...STONE_FAMILY]) assert(BlockTypes.get(id), `missing ${id}`);
   },
 }, { gameOnly: true });
+addTests("settle walls", {
+  "repair: every level lists what should stand, and the price follows the damage": () => {
+    const smooth = new Array(WALLS.stations).fill(64);
+    let last = 0;
+    for (let level = 1; level <= MAX_WALL; level++) {
+      const L = WALL_LEVELS[level];
+      let n = 0, gates = 0;
+      for (const col of wallColumns({ center: { x: 0, y: 64, z: 0 }, level, gateAngle: bearingToAngle(180), smooth })) {
+        for (const [y, kind] of columnKinds(L, col)) {
+          assert(y > 64 && typeof kind === "string", `level ${level}: bad cell`);
+          n++;
+          if (kind === "gate") gates++;
+        }
+      }
+      assert(n > last * 0.5 && n > 300, `level ${level} has ${n} blocks`);
+      assert(level === 1 ? gates === 0 : gates >= 6, `level ${level}: gate leaves ${gates}`);
+      last = n;
+    }
+    assertEqual(repairCost({ missing: 0, cracked: 0 }), 0);
+    assertEqual(repairCost({ missing: 1, cracked: 0 }), WALLS.repair.least);
+    assert(repairCost({ missing: 200, cracked: 100 }) > repairCost({ missing: 100, cracked: 100 }), "more holes cost more");
+    assert(repairCost({ missing: 40, cracked: 0 }) > repairCost({ missing: 0, cracked: 40 }), "a hole costs more than a crack");
+  },
+  "a higher wall is a stronger wall": () => {
+    assertEqual(wallArmor(1), 0);
+    assertEqual(wallArmor(10), 3);
+    for (let level = 2; level <= MAX_WALL; level++) assert(wallArmor(level) >= wallArmor(level - 1), `level ${level} is weaker than the one before`);
+  },
+});

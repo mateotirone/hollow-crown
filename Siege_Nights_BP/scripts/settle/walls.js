@@ -13,11 +13,11 @@
 // Test: /scriptevent siege:wall <1-10> [style]     raise that level round your keep (or where you stand)
 
 import { world, system, BlockPermutation } from "@minecraft/server";
-import { isReady, keepOf, tierOf, TIERS, onTick, moduleStore, on, emit, addFilter, addLandClaim, stoneId, STONE_KINDS, title } from "../siege/api.js";
+import { isReady, keepOf, tierOf, TIERS, onTick, moduleStore, on, emit, addFilter, addLandClaim, stoneId, STONE_KINDS, title, CASTLE_BLOCKS, WALL_HP } from "../siege/api.js";
 import { STYLES } from "../townhall/styles.js";
 import { PLOT_PLAN } from "../plots/config.js";
 import { plotAt } from "../plots/claims.js";
-import { WALLS, WALL_LEVELS, MAX_WALL, bearingToAngle, smoothGround, stationSpots, groundProblem, wallColumns, onWallLine, gateSpot, materialKind } from "./walldata.js";
+import { WALLS, WALL_LEVELS, MAX_WALL, bearingToAngle, smoothGround, stationSpots, groundProblem, wallColumns, onWallLine, gateSpot, materialKind, wallArmor } from "./walldata.js";
 import { styleOf } from "./plans.js";
 
 const OVERWORLD = "minecraft:overworld";
@@ -61,7 +61,7 @@ function perm(id, states) {
 }
 const first = (ids) => ids.map((id) => perm(id)).find(Boolean) ?? perm("minecraft:cobblestone");
 
-function palette(style, L) {
+export function palette(style, L) {
   const roles = (STYLES[style] ?? STYLES.vale).roles;
   const kinds = {
     log: first(roles.beam ?? ["minecraft:spruce_log"]),
@@ -103,6 +103,7 @@ function groundY(dim, x, z) {
 
 // ---------- raising ----------
 const jobs = new Map(); // id -> { cols, index, palette, L, level }
+export const wallRising = (id) => jobs.has(id);
 
 function setBlock(dim, x, y, z, p) {
   const block = dim.getBlock({ x, y, z });
@@ -277,6 +278,16 @@ addFilter("spawnDistance", (distance, { owner }) => {
   return w && w.level > 0 ? Math.max(distance, w.radius + WALLS.spawnBeyond) : distance;
 });
 
+// A settlement wall is as strong as its level: the whole Castle Stone family on the line of a
+// level 6+ wall takes hits like reinforced Castle Stone (iron, then diamond at 9, netherite at 10)
+addFilter("wallHp", (hp, { block }) => {
+  if (!CASTLE_BLOCKS.includes(block.typeId) || block.typeId === "siege:portcullis") return hp;
+  for (const w of Object.values(walls())) {
+    if (w.level > 0 && onWallLine(w, block.location, w.radius)) return Math.max(hp, WALL_HP.castle[wallArmor(w.level)]);
+  }
+  return hp;
+});
+
 // Nothing else may be built on the line of the wall
 addFilter("settleReservedAt", (found, { owner, location }) => {
   if (found) return found;
@@ -338,6 +349,7 @@ on("wallInfo", (q) => {
   q.name = WALL_LEVELS[q.level]?.name ?? "No wall";
   const next = q.level + 1;
   if (WALL_LEVELS[next]) q.next = { level: next, name: WALL_LEVELS[next].name, cost: wallCost(next), blocked: blockedReason(q.owner, next) };
+  q.repair = true; // emit "wallRepair" { owner, player } and repair.js surveys, prices, charges and mends
   q.handled = true;
 });
 

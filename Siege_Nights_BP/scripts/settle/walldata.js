@@ -16,7 +16,8 @@ export const WALLS = {
   perTick: 90, // blocks placed per tick while a wall rises
   auto: "map", // raise level 1 when a plot is claimed: "map" (only on a map with Plot Stones), "always", "off"
   gateWidth: 3, gateHeight: 4,
-  tierCap: [3, 5, 8, 10], // the highest wall level a Hamlet, Town, City and Castle may raise
+  tierCap: [3, 5, 8, 10],
+  repair: { perBlock: 0.25, perCrack: 0.1, least: 1, perTick: 600 }, // price of a repair in coins: per missing block, per cracked block, and the least it costs. perTick = blocks looked at per tick. // the highest wall level a Hamlet, Town, City and Castle may raise
 };
 
 const cost = (...rows) => rows; // [label, amount, kind]: kind is matched to items in walls.js
@@ -40,6 +41,33 @@ export const WALL_LEVELS = [
   { name: "Crown Wall", h: 13, thick: 4, body: "smooth", foot: "cobbled", footH: 3, bands: { 5: "bricks", 9: "tiles", 10: "bricks" }, battlements: true, towers: 12, r: 3, up: 6, gatehouse: true, gate: "castle_gate", gateArmor: 3, port: true, gateH: 5, cost: cost(["Smooth Castle Stone", 640, "smooth"], ["Castle Stone Tiles", 192, "tiles"], ["Castle Stone Bricks", 256, "bricks"], ["netherite scrap", 8, "netherite"]) },
 ];
 export const MAX_WALL = WALL_LEVELS.length - 1;
+
+// How strong a wall of this level is, as a Castle Stone armor tier (0 stone, 1 iron, 2 diamond, 3 netherite)
+export const wallArmor = (level) => WALL_LEVELS[level]?.gateArmor ?? 0;
+
+// Everything that stands above the ground in one column of wall: [[y, kind], ...] where kind is a
+// material ("log", "fence", "plank", a Castle Stone kind) or "tooth", "light", "gate", "port".
+export function columnKinds(L, col) {
+  const { x, z, base } = col, out = [];
+  let top = col.top;
+  if (col.role === "gap" || col.role === "gate" || col.role === "port") {
+    if (L.gate === "open") return out;
+    const gateH = Math.min(L.gateH ?? WALLS.gateHeight, Math.max(2, L.h - (L.h > 3 ? 1 : 0)));
+    for (let y = base + 1; y <= top; y++) {
+      if (y > base + gateH) out.push([y, materialKind(L, y - base, y === top)]);
+      else if (col.role !== "gap") out.push([y, col.role]);
+    }
+    return out;
+  }
+  const tower = col.role === "tower", walk = col.role === "walk";
+  if (!tower && !walk && L.body === "log") top += (x + z) & 1;
+  for (let y = base + 1; y <= top; y++) out.push([y, walk ? "plank" : materialKind(L, Math.max(1, y - base), y === top)]);
+  if (tower) {
+    if (col.tooth) out.push([top + 1, "tooth"]);
+    if (col.mid) out.push([top + 1, "light"]);
+  } else if (!walk && L.battlements && col.d === 0 && ((x + z) & 1) === 0) out.push([top + 1, "tooth"]);
+  return out;
+}
 
 // What a wall or tower column is made of at a height above its ground: "log", "fence" or a Castle Stone kind
 export function materialKind(L, rel, top) {
@@ -143,4 +171,11 @@ export function gateSpot(center, gateAngle, smooth, radius = WALLS.radius) {
     x: Math.round(center.x + Math.cos(gateAngle) * (radius - 1)), y, z: Math.round(center.z + Math.sin(gateAngle) * (radius - 1)),
     outside: { x: Math.round(center.x + Math.cos(gateAngle) * (radius + 8)), y, z: Math.round(center.z + Math.sin(gateAngle) * (radius + 8)) },
   };
+}
+
+// What a repair costs, in coins (wallet.js): nothing if nothing is wrong
+export function repairCost({ missing = 0, cracked = 0 }) {
+  if (missing + cracked === 0) return 0;
+  const R = WALLS.repair;
+  return Math.max(R.least, Math.ceil(missing * R.perBlock + cracked * R.perCrack));
 }

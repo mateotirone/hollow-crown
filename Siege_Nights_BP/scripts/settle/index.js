@@ -6,6 +6,7 @@
 //   plans.js      the Foundation Stone: place a pre-designed building, paid in planks and stone
 //   buildings.js  the building designs (drawn once, built in all five regional styles)
 //   walls.js      the ring wall round a claimed plot and its ten levels (walldata.js = the levels)
+//   repair.js     mending a damaged wall for a price (the Mason and the town hall both offer it)
 //   layout.js     the plot layout: where the hall, the mason and each building slot stand (arrival.js lays it out)
 //   wallet.js     what things are charged in (emeralds until the world currency arrives)
 //   config.js     every number, the camp kit, the mason's stock and lines
@@ -22,6 +23,7 @@ import "./zones.js";
 import "./plans.js";
 import "./mason.js";
 import "./walls.js";
+import "./repair.js";
 import "./arrival.js";
 import "./showcase.js";
 import "./tests.js";
@@ -31,6 +33,7 @@ export { BUILDINGS, BUILDING, drawBuilding, styleFor } from "./buildings.js";
 export { spawnMason, openShop } from "./mason.js";
 export { wallOf, wallRing, wallCost, raiseWall } from "./walls.js";
 export { WALLS, WALL_LEVELS, MAX_WALL } from "./walldata.js";
+export { repairWall, offerRepair } from "./repair.js";
 export { setWallet } from "./wallet.js";
 export { HALL, MASON, SLOTS, place, slotsFor } from "./layout.js";
 export { layOut } from "./arrival.js";

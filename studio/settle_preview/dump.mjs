@@ -7,7 +7,7 @@ const { drawHall, frameFor, toWorld, HALL_TIERS } = await import(S + "townhall/h
 const { STYLES } = await import(S + "townhall/styles.js");
 const { drawBuilding, styleFor, BUILDINGS } = await import(S + "settle/buildings.js");
 const { HALL, MASON, SLOTS, place } = await import(S + "settle/layout.js");
-const { WALLS, WALL_LEVELS, wallColumns, bearingToAngle, materialKind } = await import(S + "settle/walldata.js");
+const { WALLS, WALL_LEVELS, wallColumns, bearingToAngle, columnKinds } = await import(S + "settle/walldata.js");
 const { hallReach } = await import(S + "settle/rules.js");
 // same ids as stoneId() in siege/constants.js (that file needs the game to load)
 const STONE_KINDS = ["stone", "tiles", "bricks", "cobbled", "smooth"];
@@ -47,22 +47,7 @@ const smooth = new Array(WALLS.stations).fill(0);
 for (let level = 1; level < WALL_LEVELS.length; level++) {
   const L = WALL_LEVELS[level], cells = [];
   for (const col of wallColumns({ center, level, gateAngle: bearingToAngle(180), smooth })) {
-    const { x, z, base } = col; let top = col.top;
-    if (col.role === "gap" || col.role === "gate" || col.role === "port") {
-      const open = L.gate === "open";
-      const gateH = Math.min(L.gateH ?? WALLS.gateHeight, Math.max(2, L.h - (L.h > 3 ? 1 : 0)));
-      for (let y = base + 1; y <= top; y++) {
-        const inGate = y <= base + gateH;
-        if (inGate) { if (!open && col.role !== "gap") cells.push([x, y, z, col.role]); }
-        else if (!open) cells.push([x, y, z, materialKind(L, y - base, y === top)]);
-      }
-      continue;
-    }
-    const tower = col.role === "tower", walk = col.role === "walk";
-    if (!tower && !walk && L.body === "log") top += (x + z) & 1;
-    for (let y = base + 1; y <= top; y++) cells.push([x, y, z, walk ? "plank" : materialKind(L, Math.max(1, y - base), y === top)]);
-    if (tower) { if (col.tooth) cells.push([x, top + 1, z, "tooth"]); if (col.mid) cells.push([x, top + 1, z, "light"]); }
-    else if (!walk && L.battlements && col.d === 0 && ((x + z) & 1) === 0) cells.push([x, top + 1, z, "tooth"]);
+    for (const [y, kind] of columnKinds(L, col)) cells.push([col.x, y, col.z, kind]);
   }
   out.wallLevels.push({ ...L, level, blocks: cells.length, cells });
 }
