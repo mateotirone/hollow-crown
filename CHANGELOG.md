@@ -47,6 +47,8 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - The four regional roles (Dragon Rider, Forgemaster, Captain, Witch) each have a history, and their top four powers show a line of it in the Tree of Oaths.
 >>>>>>> 02891b391f7209218a372bb8f55ffa30f6fe418a
 
+- The morning after the first Hollow soldiers appear is now told settlement by settlement, to the people of the settlement that saw them, instead of to everyone in the world at once.
+
 ### Changed
 - Holding the Heart of the Hollow is now whispers only: the Heartbearer hears things and a few patches of grass die near the throne, but nothing ever harms them, changes them or makes them easier to unseat.
 - Each ruler names their own Citadel when they raise it or take it. Leave the name empty and it is Aldspire.
