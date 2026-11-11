@@ -133,6 +133,10 @@ def entity_bp(m):
     groups = {}; events = {}
     if m.get("static"):
         c["minecraft:movement"] = {"value": 0}; c["minecraft:persistent"] = {}
+        if m.get("drifts"): c["minecraft:physics"] = {"has_gravity": False, "has_collision": False}   # moved only by script: it never falls or bumps
+        if m.get("lifetime"):   # a script-thrown prop cleans itself up if the script that moves it stops (world closed mid-flight)
+            c["minecraft:timer"] = {"time": m["lifetime"], "looping": False, "time_down_event": {"event": "siege:fade"}}
+            groups["siege:gone"] = {"minecraft:instant_despawn": {}}; events["siege:fade"] = {"add": {"component_groups": ["siege:gone"]}}
         if not m.get("no_loot") and mid in DROPS: c["minecraft:loot"] = {"table": f"loot_tables/entities/bestiary/{mid}.json"}
         if mid == "chapel_bell":
             groups["siege:ringing"] = {"minecraft:is_charged": {}}
