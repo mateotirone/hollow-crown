@@ -1044,6 +1044,12 @@
     "siege_old_pale_oak_log_side": {
       "textures": "textures/blocks/pale_oak_log_side"
     },
+    "siege_old_polished_blackstone": {
+      "textures": "textures/blocks/polished_blackstone"
+    },
+    "siege_old_stone_diorite_smooth": {
+      "textures": "textures/blocks/stone_diorite_smooth"
+    },
     "siege_old_planks_spruce": {
       "textures": "textures/blocks/planks_spruce"
     },
@@ -1061,6 +1067,12 @@
     },
     "siege_old_stripped_jungle_log": {
       "textures": "textures/blocks/stripped_jungle_log"
+    },
+    "siege_old_stripped_pale_oak_log_top": {
+      "textures": "textures/blocks/stripped_pale_oak_log_top"
+    },
+    "siege_old_stripped_pale_oak_log_side": {
+      "textures": "textures/blocks/stripped_pale_oak_log_side"
     },
     "siege_old_tuff": {
       "textures": "textures/blocks/tuff"

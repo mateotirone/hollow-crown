@@ -16,7 +16,11 @@ DIR = {"n": 0, "e": 1, "s": 2, "w": 3}
 AXIS = {"y": 0, "x": 1, "z": 2}
 
 
+COPY = ("siege:hollowwood_core", "siege:hollowwood_lattice")   # the Hollow's own wood: copied as-is, made unbreakable
+
+
 def kind(name):
+    if name in COPY: return "copy"
     if name.endswith("_leaves") or name.startswith("azalea_leaves"): return "leaves"
     if name.endswith("_log") or name.endswith("_wood"): return "log"
     if name.endswith("_stairs"): return "stairs"
@@ -27,7 +31,7 @@ def kind(name):
     return None
 
 
-def tree_id(name): return "siege:old_" + name
+def tree_id(name): return "siege:old_" + name.split(":")[-1]
 
 
 def states(name, p):

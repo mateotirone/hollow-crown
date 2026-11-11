@@ -426,6 +426,21 @@
   "siege:old_pale_oak_wood": {
     "sound": "wood"
   },
+  "siege:old_polished_blackstone_stairs": {
+    "sound": "stone"
+  },
+  "siege:old_polished_blackstone_wall": {
+    "sound": "stone"
+  },
+  "siege:old_polished_diorite_stairs": {
+    "sound": "wood"
+  },
+  "siege:old_hollowwood_core": {
+    "sound": "wood"
+  },
+  "siege:old_hollowwood_lattice": {
+    "sound": "wood"
+  },
   "siege:old_spruce_fence": {
     "sound": "wood"
   },
@@ -445,6 +460,12 @@
     "sound": "wood"
   },
   "siege:old_stripped_jungle_wood": {
+    "sound": "wood"
+  },
+  "siege:old_stripped_pale_oak_log": {
+    "sound": "wood"
+  },
+  "siege:old_stripped_pale_oak_wood": {
     "sound": "wood"
   },
   "siege:old_tuff_stairs": {

@@ -56,6 +56,21 @@ def siege_tex(n):
         if f in t and "side" not in t and "*" not in t: d["side"] = t[f]
     return d
 
+_SGEO = {}
+def _siege_block(n):
+    if n not in _SGEO:
+        import glob
+        _SGEO[n] = {}
+        for f in glob.glob(os.path.join(_REPO, "Siege_Nights_BP/blocks/**/*.json"), recursive=True):
+            try: b = json.load(open(f))["minecraft:block"]
+            except Exception: continue
+            if b["description"]["identifier"] == n: _SGEO[n] = b.get("components", {}); break
+    return _SGEO[n]
+def siege_geo(n):
+    g = _siege_block(n).get("minecraft:geometry"); return g if isinstance(g, str) else (g or {}).get("identifier")
+def siege_cutout(n):
+    return any(isinstance(v, dict) and v.get("render_method") in ("alpha_test", "blend") for v in _siege_block(n).get("minecraft:material_instances", {}).values())
+
 def wood_of(n):
     for w in sorted(WOODS, key=len, reverse=True):
         if n.startswith(w + "_") or n.startswith("stripped_" + w): return w
@@ -76,7 +91,7 @@ MAT = {"stone_brick": "stonebrick", "stone_bricks": "stonebrick", "mossy_stone_b
        "cut_red_sandstone": "red_sandstone_smooth", "prismarine_bricks": "prismarine_bricks", "polished_tuff": "polished_tuff",
        "smooth_stone_slab": "stone_slab_top", "normal_stone": "stone", "stone_block": "stone",
        "quartz": "quartz_block_side", "quartz_block": "quartz_block_side", "smooth_quartz": "quartz_block_bottom", "quartz_bricks": "quartz_bricks",
-       "dark_prismarine": "prismarine_dark", "prismarine": "prismarine_rough", "gold_block": "gold_block", "snow_layer": "snow", "moss_block": "moss_block", "polished_blackstone_brick": "polished_blackstone_bricks",
+       "dark_prismarine": "prismarine_dark", "prismarine": "prismarine_rough", "gold_block": "gold_block", "snow_layer": "snow", "moss_block": "moss_block", "polished_blackstone_brick": "polished_blackstone_bricks", "polished_blackstone": "polished_blackstone", "blackstone": "blackstone",
        "blast_furnace": "blast_furnace_side", "cobbled_deepslate_wall": "deepslate/cobbled_deepslate"}
 for w, t in WOODS.items(): MAT[w] = "planks_" + t; MAT[w + "_planks"] = "planks_" + t
 
@@ -259,6 +274,8 @@ def model(n, p):
     if n == "siege:battlement":
         t = siege_tex(n); return [((0, 0, 0, 1, 1, 1), t, {})]
     if n in PLANTS: return [("cross", {"side": PLANTS[n]}, {"cut": 1})]
+    if n.startswith("siege:") and siege_geo(n) == "minecraft:geometry.cross": return [("cross", siege_tex(n), {"cut": 1, "glow": 1})]
+    if n.startswith("siege:") and siege_cutout(n): return [((0, 0, 0, 1, 1, 1), siege_tex(n), {"cut": 1})]
     if n == "vine":
         bits = p.get("raw", {}).get("vine_direction_bits", 0); out = []
         for bit, side in ((1, "s"), (2, "w"), (4, "n"), (8, "e")):

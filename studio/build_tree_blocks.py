@@ -92,8 +92,24 @@ def nameof(n):
     return "Old " + words
 
 
+def copy_json(name):
+    """The Hollow's own wood (Latticewood): the original block made unbreakable, hidden from the menu."""
+    import copy, glob
+    for f in glob.glob(os.path.join(BP, "blocks", "*.json")):
+        d = json.load(open(f, encoding="utf8"))
+        b = d.get("minecraft:block", {})
+        if b.get("description", {}).get("identifier") != name: continue
+        d = copy.deepcopy(d); b = d["minecraft:block"]
+        b["description"] = {"identifier": tree_id(name), "menu_category": {"category": "none"}}
+        c = b["components"]; c.pop("minecraft:flammable", None); c.pop("minecraft:loot", None)
+        c["minecraft:destructible_by_mining"] = False; c["minecraft:destructible_by_explosion"] = False
+        return d
+    raise SystemExit(f"{name}: source block not found")
+
+
 def block_json(name, tex):
     k = kind(name); bid = tree_id(name)
+    if k == "copy": return copy_json(name)
     leaves = k == "leaves"
     rm = "alpha_test" if (leaves or k == "trapdoor") else "opaque"
     def mi(spec):
@@ -168,13 +184,17 @@ def main():
                     if kind(n): used.add(n)
     os.makedirs(OUT_BLOCKS, exist_ok=True)
     for f in os.listdir(OUT_BLOCKS):           # drop blocks no tree uses any more
-        if f.endswith(".json") and f[:-5] not in used: os.remove(os.path.join(OUT_BLOCKS, f))
+        if f.endswith(".json") and f[:-5] not in {u.split(":")[-1] for u in used}: os.remove(os.path.join(OUT_BLOCKS, f))
     tt_path = os.path.join(RP, "textures", "terrain_texture.json"); tt = load_jsonc(tt_path)
     bj_path = os.path.join(RP, "blocks.json"); bj = load_jsonc(bj_path)
     for k in [k for k in tt["texture_data"] if k.startswith("siege_old_")]: del tt["texture_data"][k]
     for k in [k for k in bj if k.startswith("siege:old_")]: del bj[k]
     missing = []
     for n in sorted(used):
+        if kind(n) == "copy":       # keeps its own textures and sound entry
+            write_json(os.path.join(OUT_BLOCKS, n.split(":")[-1] + ".json"), copy_json(n))
+            bj[tree_id(n)] = {"sound": "wood"}
+            continue
         tex = tex_of(n)
         write_json(os.path.join(OUT_BLOCKS, n + ".json"), block_json(n, tex))
         for spec, _ in tex.values():
@@ -184,7 +204,7 @@ def main():
         bj[tree_id(n)] = {"sound": "grass" if k == "leaves" else ("stone" if any(s in n for s in ("tuff", "deepslate", "mud_brick", "cobble", "stone")) else "wood")}
     write_json(tt_path, tt); write_json(bj_path, bj)
     write_json(os.path.join(ROOT, "tools", "vanilla_block_textures.json"),
-               sorted({spec for n in used for spec, _ in tex_of(n).values()}))
+               sorted({spec for n in used if kind(n) != "copy" for spec, _ in tex_of(n).values()}))
     write_json(GEO_FILE, {"format_version": "1.12.0", "minecraft:geometry": [
         {"description": {"identifier": gid, "texture_width": 16, "texture_height": 16}, "bones": bones} for gid, bones in GEOS.items()]})
     print(len(used), "tree blocks:", ", ".join(sorted(used)))
