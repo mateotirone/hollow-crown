@@ -107,9 +107,10 @@ building-placement thread:
 - Ring lanes may sit on the old wall lines at r32 and r48 only (templates choose the arcs); they open the
   tier after the wall leaves them.
 - The ground every town hall level takes (drawHall bounds per region, from the Hall Cornerstone 5 ahead,
-  plus 2) is kept free of roads and slots from the start.
-- Slots are odd boxes (Small 7, Medium 11, Large 15, Great 21; long side up to +2) facing a road, with
-  floor height, walkway, tags (hall, square, road_front, wall, gate, corner, field_edge, water) and opensAt.
+  plus 2) is kept free of roads from the start, and of slots up to level 4; slots may sit on level 5's extra ground (tag hall5).
+- Slots are odd boxes, width along the door side x depth (Small 9x13, Medium 11x15, long Medium 13x15,
+  Large 15x15, Great 21x21; Large and Great up to 2 longer either way) facing a road, with
+  floor height, walkway, tags (library, hall, hall5 = on ground the level-5 hall takes back, square, road_front, wall, gate, corner, field_edge, water) and opensAt.
 - Fields are whole portions (about 10% of the land, at least one) whose crop area grows with the wall,
   watered level by level as in towns.
 

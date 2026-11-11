@@ -48,8 +48,44 @@ class TownPlots(Town):
         n = SIZES[size]; w, d = self.rng.choice([(n, n), (n + 2, n), (n, n + 2)])
         return slot_box(w, d, size)
 
+    SNAP = ("G", "K", "KIND", "TAKEN", "EAVES", "FIX", "DOORWALK")
     def place_square_buildings(self):
-        for k, size in enumerate(self.site.get("civic", [])):
+        """Civic plots claim their ground round the square before the streets are laid (so the
+        streets find their way round them), but are only levelled once the streets are down, so
+        their floors meet the paths beside them."""
+        self.civic_claims = []
+        snap = {k: getattr(self, k).copy() for k in self.SNAP}; works = dict(self.works); n_plan = len(self.plan); n_walks = len(self.walks)
+        self._civic_search()
+        for e in self.plan[n_plan:]:
+            self.civic_claims.append((e["size"], e["cells"], e["rotation"], tuple(e["door"])))
+        for k, v in snap.items(): setattr(self, k, v)
+        self.works = works; del self.plan[n_plan:]; del self.walks[n_walks:]
+        for _, cells, _, _ in self.civic_claims:
+            for x, z in cells:
+                for dx in (-1, 0, 1):
+                    for dz in (-1, 0, 1):
+                        if self.ok(x + dx, z + dz): self.TAKEN[self.ij(x + dx, z + dz)] = 2
+
+    def level_civic(self):
+        """Release the civic claims and place the civic plots for real, graded to the streets."""
+        for _, cells, _, _ in self.civic_claims:
+            for x, z in cells:
+                for dx in (-1, 0, 1):
+                    for dz in (-1, 0, 1):
+                        if self.ok(x + dx, z + dz) and self.K[self.ij(x + dx, z + dz)] < 0: self.TAKEN[self.ij(x + dx, z + dz)] = 0
+        todo = []
+        for size, _, deg, door in self.civic_claims:              # where it was claimed, if its floor meets the streets there
+            n = SIZES[size]; bp = slot_box(n, n + 2, size); bp.civic = True
+            e = self.try_place(bp, deg, door, "plot", gap=1, max_relief=6)
+            if e: e.update(size=size, civic=True)
+            else: todo.append(size)
+        unclaimed = list(self.site.get("civic", []))
+        for size, *_ in self.civic_claims: unclaimed.remove(size)
+        self._civic_search(todo + unclaimed, fallback=True)       # otherwise anywhere round the square, a size smaller if need be
+
+    def _civic_search(self, sizes=None, fallback=False):
+        for k, size0 in enumerate(self.site.get("civic", []) if sizes is None else sizes):
+          for size in ("GLM"[("GLM".index(size0) if size0 in "GLM" else 2):] if fallback else size0):
             n = SIZES[size]; bp = slot_box(n, n + 2, size); bp.civic = True
             done = None
             for t in range(72):
@@ -61,7 +97,8 @@ class TownPlots(Town):
                     done = self.try_place(bp, deg, (int(round(x)), int(round(z))), "plot", gap=1, max_relief=6)
                     if done: done.update(size=size, civic=True); break
                 if done: break
-            if not done: print("no room on the square for a", SIZE_NAME[size], "civic plot")
+            if done: break
+            print("no room on the square for a", SIZE_NAME[size], "civic plot")
 
     def try_place(self, bp, deg, door_xz, kind, **kw):
         if kind not in ("plot",) and getattr(bp, "kind", "") == "plot": kind = "plot"
@@ -111,6 +148,7 @@ class TownPlots(Town):
         self.square()
         self.place_square_buildings()        # civic plots first, straight off the square; streets then find their way round them
         self.streets(); self.relax(); self.grade_verges()
+        self.level_civic()
         self.portions()
         self.houses(); self.relax()
         self.field_paths(); self.fences(); self.fields()

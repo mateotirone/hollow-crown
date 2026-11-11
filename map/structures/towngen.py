@@ -111,6 +111,7 @@ class Town:
         self.K = np.full(self.G0.shape, -1, np.int32)           # path surface in half blocks (slab at (k-1)//2 when odd)
         self.KIND = np.zeros(self.G0.shape, np.int8)            # path kind (PRIO), 0 = none
         self.KMIN = np.where(self.WET, 2 * (self.WL + 1) + 1, -1)  # paths over water become a raised deck
+        self.DOORWALK = np.zeros(self.G0.shape, bool)           # door walkways (their steps are kept)
         self.TAKEN = np.zeros(self.G0.shape, np.int8)           # 1 margin, 2 building ground, 3 field, 4 dressing
         self.EAVES = np.zeros(self.G0.shape, bool)
         self.FIX = np.zeros(self.G0.shape, bool)                # ground set by a building, field or path: don't regrade
@@ -348,7 +349,7 @@ class Town:
     def relax(self, it=40):
         """Make sure no two touching path cells differ by more than half a block anywhere,
         including where streets cross and widen."""
-        M = self.K >= 0
+        M = (self.K >= 0) & ~self.DOORWALK          # door walkways keep their steps and never drag a street
         for _ in range(it):
             Kp = np.where(M, self.K, -10 ** 6); Km = np.where(M, self.K, 10 ** 6)
             hi = np.full(self.K.shape, 10 ** 6); lo = np.full(self.K.shape, -10 ** 6)
@@ -411,6 +412,7 @@ class Town:
             out.append((x, z)); x, z = x + f[0], z + f[1]
         return None
 
+    ROAD_FIT = 2         # half blocks: a plot's floor sits within a block of every path cell beside it
     def try_place(self, bp, deg, door_xz, kind, gap=1, max_relief=6, need_walk=True, extra=None):
         dx, dz = self.door_of(bp); rdx, rdz = rot_xz(dx, dz, deg)
         ox, oz = door_xz[0] - rdx, door_xz[1] - rdz
@@ -430,6 +432,20 @@ class Town:
                 if not self.inside(x + ox, z + oz, 2) or self.K[i, j] >= 0 or self.WET[i, j] or self.TAKEN[i, j]: return None
         hs = np.array([self.at(self.G, x, z) for x, z in G])
         if hs.max() - hs.min() > max_relief: return None
+        # paths first (Mateo 2026-11-11): the floor is graded to the paths round the plot, never left
+        # a block or more above or below them
+        gs = set(G); near_k = []
+        for x, z in G:
+            for ddx in range(-2, 3):
+                for ddz in range(-2, 3):
+                    c = (x + ddx, z + ddz)
+                    if c in gs or not self.ok(*c): continue
+                    i, j = self.ij(*c)
+                    if self.K[i, j] >= 0 and not self.DOORWALK[i, j]: near_k.append(int(self.K[i, j]))
+        near_k = np.array(sorted(set(near_k)), int)
+        y_lo, y_hi = int(hs.min()), int(hs.max())
+        if len(near_k):
+            y_lo = min(y_lo, int(near_k.min()) // 2 - 1); y_hi = max(y_hi, int(near_k.max()) // 2 + 1)
         wk = None
         if need_walk:
             f = ROT[deg]
@@ -442,7 +458,9 @@ class Town:
             k_road = self.k_at(*end)
         # floor height: balance digging in against building up, and keep the walkway walkable
         best = None
-        for yf in range(int(hs.min()), int(hs.max()) + 1):
+        for yf in range(y_lo, y_hi + 1):
+            if len(near_k) and np.abs(near_k - (2 * yf + 1)).max() > self.ROAD_FIT: continue
+            if yf < hs.min() - 2 or yf > hs.max() + 2: continue
             cost = float(np.abs(hs - yf).sum()) + 0.6 * float(np.maximum(0, yf - hs).sum())   # fill shows; cutting is tidier
             if need_walk:
                 n = len(cells); dk = abs(2 * yf + 1 - k_road)
@@ -515,7 +533,7 @@ class Town:
         ks[0] = k0 if abs(k_road - k0) <= n else ks[0]
         for (x, z), k in zip(cells, ks):
             i, j = self.ij(x, z)
-            self.K[i, j] = k; self.KIND[i, j] = PRIO["walk"]; self.TAKEN[i, j] = max(self.TAKEN[i, j], 1)
+            self.K[i, j] = k; self.KIND[i, j] = PRIO["walk"]; self.TAKEN[i, j] = max(self.TAKEN[i, j], 1); self.DOORWALK[i, j] = True
         self.walks.append((cells, ks, f))
 
     def place_along(self, rd, side, tier_fn, setbacks=(1, 2), gap_rng=(1, 3), spacing=None, kinds=None):
