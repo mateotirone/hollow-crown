@@ -612,18 +612,28 @@ tkind[fen_dry] = KLIST.index("dark_oak")
 # crown out of plot clearings, towns and story sites (towns and settlements plant their own trees) and every trunk
 # off water, roads, banks and steep ground. Without GW_TREES the simple trees above are used.
 TREEDB = os.environ.get("GW_TREES")
+_pal = {}
+def B_raw(name, states):
+    key = name + json.dumps(states, sort_keys=True)
+    if key not in _pal:
+        ns, n = name.split(":")
+        tags = {k: (ByteTag(int(v)) if isinstance(v, bool) else IntTag(v) if isinstance(v, int) else StringTag(str(v))) for k, v in states.items()}
+        _pal[key] = level.block_palette.get_add_block(ver.block.to_universal(Block(ns, n, tags))[0])
+    return _pal[key]
+# ---- baked town plans (map/bake_town.py): world blocks placed last, in order; air digs out, soft (leaves) only fills air
+STAMPED = []        # (x, y, z, id, soft) arrays per town
+STAMPED_TOWNS = set()
+for fn_ in filter(None, os.environ.get("GW_BLOCKS", "").split(":")):
+    d_ = json.load(open(fn_))
+    pid_ = np.array([B_raw(e["name"], e["states"]) if e["name"] != "minecraft:air" else -1 for e in d_["palette"]], np.int64)
+    sf_ = np.array([bool(e.get("soft")) for e in d_["palette"]])
+    b_ = np.array(d_["blocks"], np.int64)
+    STAMPED.append((b_[:, 0], b_[:, 1], b_[:, 2], pid_[b_[:, 3]], sf_[b_[:, 3]])); STAMPED_TOWNS.add(d_["town"])
+    log("town plan", d_["town"], len(b_), "blocks from", fn_)
 if TREEDB:
     sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "trees"))
     from place import fits, mark, SIZE_ORDER, SIZE_WEIGHT, _grow_mask
     tindex = json.load(open(os.path.join(TREEDB, "trees.json")))
-    _pal = {}
-    def B_raw(name, states):
-        key = name + json.dumps(states, sort_keys=True)
-        if key not in _pal:
-            ns, n = name.split(":")
-            tags = {k: (ByteTag(int(v)) if isinstance(v, bool) else IntTag(v) if isinstance(v, int) else StringTag(str(v))) for k, v in states.items()}
-            _pal[key] = level.block_palette.get_add_block(ver.block.to_universal(Block(ns, n, tags))[0])
-        return _pal[key]
     SOFTB = ("leaves", "vine", "hanging", "moss_carpet", "leaf_litter", "snow_layer", "veilmoss")
     PROF = {}
     for sid, sp in tindex["species"].items():
@@ -848,7 +858,7 @@ for tx0 in range(0, SIZE, TILE):
             if 0 <= x_ - X0 - a0 < W and 0 <= z_ - Z0 - b0 < D and KLIST[kk_] in KINDS and KLIST[kk_] != "cactus":
                 vol[x_ - X0 - a0, gy - 1 - YMIN, z_ - Z0 - b0] = ID["dirt"] if reg[x_ - X0, z_ - Z0] != FEN else ID["mud"]
         # town plazas and plot markers
-        for name, wx_, wz_, rad_, block_ in [(n, PLAZA[n][0], PLAZA[n][1], 9 if n == "Kingsrest" else 6, "stone_bricks") for n, x, z, r, _ in TOWNS] + [(n, x, z, 3, "stone_bricks") for n, x, z in PLOTS]:
+        for name, wx_, wz_, rad_, block_ in [(n, PLAZA[n][0], PLAZA[n][1], 9 if n == "Kingsrest" else 6, "stone_bricks") for n, x, z, r, _ in TOWNS if n not in STAMPED_TOWNS] + [(n, x, z, 3, "stone_bricks") for n, x, z in PLOTS]:
             x_, z_ = wx_ - X0 - a0, wz_ - Z0 - b0
             if not (-rad_ <= x_ < W + rad_ and -rad_ <= z_ < D + rad_): continue
             gx_, gz_ = wx_ - X0, wz_ - Z0
@@ -864,6 +874,15 @@ for tx0 in range(0, SIZE, TILE):
                     vol[i, min(Yt[i, k_], yb) - YMIN:yb - YMIN, k_] = ID["dirt"]
                     vol[i, yb - YMIN, k_] = ID[block_] if pr.random() < 0.8 else ID["mossy_cobblestone"]
             if 0 <= x_ < W and 0 <= z_ < D: vol[x_, yb + 1 - YMIN, z_] = ID["gold_block"]
+        # baked town plans (streets, levelled plots, fields, well, lamps, trees)
+        for sx_, sy_, sz_, sid_, ss_ in STAMPED:
+            i_ = sx_ - X0 - a0; k_ = sz_ - Z0 - b0; j_ = sy_ - YMIN
+            m_ = (i_ >= 0) & (i_ < W) & (k_ >= 0) & (k_ < D) & (j_ > 0) & (j_ < YR)
+            if not m_.any(): continue
+            i_, j_, k_, v_, s_ = i_[m_], j_[m_], k_[m_], sid_[m_], ss_[m_]
+            for q_ in range(len(i_)):                                     # in order: later blocks win
+                if s_[q_] and vol[i_[q_], j_[q_], k_[q_]] != AIR: continue
+                vol[i_[q_], j_[q_], k_[q_]] = AIR if v_[q_] < 0 else v_[q_]
         # snow over the north: on ground and leaves, not on water, ice or plants
         ft = snowcover[a0:a1, b0:b1]
         if ft.any():
@@ -874,7 +893,7 @@ for tx0 in range(0, SIZE, TILE):
             vol[ix[okb], topi[okb] + 1, iz[okb]] = ID["snow_layer"]
         if os.environ.get("GW_DUMP"):                                   # debugging: save this tile's blocks for the voxel viewer
             names_ = {int(v): k for k, v in ID.items()}; names_[int(AIR)] = "air"
-            if TREEDB: names_.update({int(i): k[:k.index("{")].split(":")[1] for k, i in _pal.items()})
+            names_.update({int(i): k[:k.index("{")].split(":")[1] for k, i in _pal.items()})
             np.savez_compressed(f"{os.environ['GW_DUMP']}-{tx0}-{tz0}.npz", vol=vol[tx0 - a0:tx0 - a0 + min(TILE, SIZE - tx0), :, tz0 - b0:tz0 - b0 + min(TILE, SIZE - tz0)],
                                 ymin=YMIN, x0=X0 + tx0, z0=Z0 + tz0, names=json.dumps(names_))
         # preview: top block of the inner tile
@@ -907,9 +926,11 @@ COL = {"grass_block": (96, 150, 70), "dirt": (134, 96, 67), "coarse_dirt": (119,
        "waterlily": (32, 128, 48), "seagrass": (40, 110, 60), "cactus": (88, 130, 44), "deadbush": (107, 79, 41),
        "muddy_mangrove_roots": (70, 58, 45), "red_sandstone": (186, 99, 29)}
 for n in ["oak_leaves", "birch_leaves", "spruce_leaves", "mangrove_leaves", "dark_oak_leaves", "acacia_leaves"]: COL[n] = {"oak_leaves": (60, 110, 40), "birch_leaves": (110, 140, 70), "spruce_leaves": (50, 80, 55), "mangrove_leaves": (70, 105, 40), "dark_oak_leaves": (45, 80, 30), "acacia_leaves": (110, 120, 40)}[n]
-lut = np.zeros((int(max(list(ID.values()) + (list(_pal.values()) if TREEDB else []))) + 2, 3), np.uint8) + np.array([150, 120, 110], np.uint8)
-if TREEDB:
-    for key, i in _pal.items(): lut[i] = (58, 104, 40) if "leaves" in key else (60, 110, 45) if ("vine" in key or "moss" in key) else (96, 78, 52)
+lut = np.zeros((int(max(list(ID.values()) + list(_pal.values()))) + 2, 3), np.uint8) + np.array([150, 120, 110], np.uint8)
+for key, i in _pal.items():
+    short_ = key[:key.index("{")].split(":")[1]
+    lut[i] = COL.get(short_) or COL.get(short_.replace("_slab", "").replace("_stairs", "")) or ((58, 104, 40) if "leaves" in key else (60, 110, 45) if ("vine" in key or "moss" in key)
+              else (130, 130, 128) if any(w in key for w in ("stone", "brick", "cobble", "andesite", "slab", "stairs", "wall")) else (96, 78, 52))
 for n, c in COL.items():
     if n in ID: lut[ID[n]] = c
 for n in TERRA: lut[n] = (170, 90, 60)
