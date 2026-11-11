@@ -474,3 +474,9 @@ Painted by `studio/art/build_regional_guard.py`. Same leather-dye trick as the C
 | Worn sheets x5 regions | `textures/models/armor/guard_<vale/frostmarch/saltreach/emberwaste/blackfen>_layer_1.png`, `_layer_2.png` | Final style, untested in game |
 | Icons x20 | `textures/items/siege_guard_<region>_<helmet/chestplate/leggings/boots>.png` | Final style |
 | Sheet | `art/regional-guard-armor.png` | |
+
+## Minimap (2026-11-11)
+Made by `tools/minimap_tiles.py` from the top-down render of the generated world (`map/genworld.py`'s preview) and `map/terrain.npz`. Run it again whenever the world map is regenerated; do not paint these by hand.
+- `textures/ui/hc/minimap/mXXZZ.png`: 1,600 map views, 72x72 (3 x 3 tiles of 64 blocks around tile XX,ZZ), slightly darkened, with plot and town markers: generated
+- `textures/ui/hc/minimap/mnone.png` (uncharted), `a0..a7.png` (player arrow, 12x12, eight directions), `frame.png` (80x80 border): first pass
+
