@@ -26,7 +26,7 @@ import { on, isNight } from "../siege/api.js";
 import { UNDERTOW_ID, UNDERTOW_LAYOUT as L, COURT, HEART, TEXT, stageAt, pathX } from "./layout.js";
 import { getSourceSite, getSites, markSite, openRift, riftExit, sourceSignsTick, SITE_NAMES, SOURCE_SITE_IDS } from "./source.js";
 import { VEIL, planCrack, tearBand, TEAR_STEPS, TEAR_CLIMB } from "./rift.js";
-import { buildTick, piecesTick, flush, pieces, openCourtGate, openRiverGate, rebuildHeart, waystoneSpot, WAYSTONE, isBuilt } from "./builder.js";
+import { buildTick, piecesTick, flush, pieces, openCourtGate, openRiverGate, rebuildHeart, waystoneSpot, WAYSTONE, isBuilt, siteOutdated, withClearing } from "./builder.js";
 import { heightAt, planChunk, isRiver, regionAt, columnAt } from "./terrain.js";
 import { RIVER_NODES, riverSegments, riverDistance } from "./rivers.js";
 import { SITES, roadLines } from "./roads.js";
@@ -523,6 +523,20 @@ addTests("undertow", {
     }
     const t = SITE_DESIGNS.truce_hall;
     assert(stampCells(t).some(([x, y, z, i]) => x === 0 && y === 1 && z === 12 && t.palette[i][0] === "minecraft:lectern"), "the tome's lectern moved");
+  },
+  "rebuilt sites stamp again over the old look, clearing only inside their site, and keep the Carter's spot clear": () => {
+    for (const [id, d] of Object.entries(SITE_DESIGNS)) {
+      if (!d.v) continue;
+      const s = SITES.find((x) => x.id === id);
+      assert(siteOutdated({ sites: [id] }, id) && !siteOutdated({ sites: [id], siteV: { [id]: d.v } }, id), `${id} version check`);
+      const full = withClearing(d), own = new Set(stampCells(d).map(([x, y, z]) => `${x},${y},${z}`));
+      for (const [x, y, z, i] of stampCells(full)) {
+        assert(Math.hypot(x, z) <= s.r + 4, `${id} clears outside its site`);
+        if (i === full.palette.length - 1 && d.clear.length) assert(y >= 1 && !own.has(`${x},${y},${z}`), `${id} clears a block it also builds`);
+      }
+    }
+    const dock = SITE_DESIGNS.wound_dock, at = (x, y, z) => stampCells(dock).find((c) => c[0] === x && c[1] === y && c[2] === z);
+    assert(at(0, 0, -4) && !at(0, 1, -4) && !at(0, 2, -4), "the Carter's place on the landing stage is blocked or has no deck");
   },
   "the drowned towers stand off the water and the roads, each a different design": () => {
     assert(new Set(DROWNED_SPOTS.map((t) => t.design)).size === DROWNED_SPOTS.length);
