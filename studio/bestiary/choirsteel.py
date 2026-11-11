@@ -63,12 +63,12 @@ def material_recipes():
     return {"tempered_choirsteel": tempered, "choirsteel_upgrade_template_copy": copy}
 
 def attachable(iid):
-    layer = 2 if iid == "leggings" else 1
+    # 3D since 2026-11-11: geometry and the 128x64 texture come from studio/art/build_choirsteel_3d.py
     var = {"helmet": "helmet", "chestplate": "chest", "leggings": "leg", "boots": "boot"}[iid]
     return {"format_version": "1.10.0", "minecraft:attachable": {"description": {"identifier": "siege:choirsteel_" + iid,
         "materials": {"default": "armor", "enchanted": "armor_enchanted"},
-        "textures": {"default": f"textures/models/armor/choirsteel_layer_{layer}", "enchanted": "textures/misc/enchanted_actor_glint"},
-        "geometry": {"default": f"geometry.humanoid.armor.{iid}"}, "scripts": {"parent_setup": f"variable.{var}_layer_visible = 0.0;"},
+        "textures": {"default": "textures/models/siege_armor/choirsteel", "enchanted": "textures/misc/enchanted_actor_glint"},
+        "geometry": {"default": f"geometry.siege_choirsteel_{iid}"}, "scripts": {"parent_setup": f"variable.{var}_layer_visible = 0.0;"},
         "render_controllers": ["controller.render.armor"]}}}
 
 # ---------- placeholder icons (the textures thread paints the real ones) ----------

@@ -8,11 +8,11 @@
     "enchanted": "armor_enchanted"
    },
    "textures": {
-    "default": "textures/models/armor/choirsteel_layer_1",
+    "default": "textures/models/siege_armor/choirsteel",
     "enchanted": "textures/misc/enchanted_actor_glint"
    },
    "geometry": {
-    "default": "geometry.humanoid.armor.helmet"
+    "default": "geometry.siege_choirsteel_helmet"
    },
    "scripts": {
     "parent_setup": "variable.helmet_layer_visible = 0.0;"
