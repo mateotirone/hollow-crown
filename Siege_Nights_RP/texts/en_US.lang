@@ -25,6 +25,7 @@ item.siege:longsword.name=Knight's Longsword
 item.siege:warhammer.name=Warhammer
 entity.siege:quartermaster.name=Quartermaster
 entity.siege:keep_heart.name=The Keep
+entity.siege:label.name=Label
 item.spawn_egg.entity.siege:quartermaster.name=Spawn Quartermaster
 item.horsearmoriron.name=Castle Guard Barding
 tile.siege:breaching_charge.name=Breaching Charge

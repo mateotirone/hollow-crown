@@ -514,3 +514,13 @@ Tell me about: anything too loud, too quiet, silent, or that made you jump. Noth
 1. `/scriptevent siege:townhall_renown 30`, learn Clue Sense in the Wayfarer branch, and carry the Ledger of Whispers.
 2. Walk toward a Dusty Tome you have not clicked (the showcase has some). ✅ Within 16 blocks a page turns softly and the action bar says "Your Ledger whispers: something written, N blocks <direction>". After you copy the tome it goes quiet.
 3. Drop a Lore Tome and walk away and back. ✅ It is sensed the same way. Without the Ledger in your pack nothing happens.
+
+## Menu labels (core/labels.js, scripts/labels/)
+
+1. `/scriptevent siege:showcase`, then walk around it. ✅ Within about 10 blocks, every menu block there (the full list is in scripts/labels/index.js: Keep Banner, Barracks, Hall Cornerstone, Tree of Oaths, Foundation Stone, Plot Stone, Stables, Breeder's Post, Station Post, Rail Depot, Looking Glass, Archive Shelf, Dragon Roost, Throne, Citadel Cornerstone) has a gold name with a grey "Click: ..." line floating just above it. Decorations, walls and gates have none.
+2. Stand by a Mason, a trader, a rival lord or a story NPC. ✅ A yellow "Click to trade" / "Click to talk" floats above the NPC's own name, not on top of it.
+3. Walk 20 blocks away. ✅ Within about 3 seconds the labels are gone (`/scriptevent siege:labels` says how many are showing).
+4. Break a labelled block. ✅ Its label disappears within a few seconds.
+5. `/scriptevent siege:labels off`. ✅ All labels vanish; `on` brings them back.
+
+Tell me about: a label sitting inside the block or too high above it, a label covering an NPC's name, or anything clickable with no label.
