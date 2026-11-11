@@ -4,6 +4,8 @@ import { BlockTypes, EntityTypes, ItemTypes } from "@minecraft/server";
 import { addTests, assert, assertEqual } from "../siege/api.js";
 import { SHAPES, layTrack, cursorOn, advance, back, pointAt, follow, KINDS, curvePoints } from "./track.js";
 import { stageFor, stationPlan, siteFor, lineBlocks, rightOf, STAGES, STATION } from "./stations.js";
+import { ROUTE, reachable, buyable, cannotBuy, priceOf, nearestStop, checkRoutes } from "./routes.js";
+import { ROUTES } from "./routes_data.js";
 import { TRACK, CARS, TRAIN, carPoses, trainLength, stepSpeed, moveTrain, limitAhead, shapesForLoop, showcaseLoop } from "./data.js";
 
 // A little fake world of track: lay(x, y, z, yaw) places a piece the way a player would
@@ -20,7 +22,42 @@ function yard() {
 }
 const links = (s) => [...s.links].sort((a, b) => a - b).join(",");
 
+// A little planned railway: A - B - C in a line, and a branch B - D
+function routeMap() {
+  const stop = (id, x) => ({ id, name: id, x, y: 64, z: 0, kind: "plot" });
+  const seg = (id, from, to, x0, x1) => ({ id, line: "main", from, to, blocks: Array.from({ length: x1 - x0 + 1 }, (_, i) => [x0 + i, 64, 0, 0, 2]), length: x1 - x0 + 1 });
+  return {
+    stops: [stop("A", 0), stop("B", 300), stop("C", 600), { ...stop("D", 300), z: 300 }],
+    segments: [seg("AB", "A", "B", 0, 300), seg("BC", "B", "C", 300, 600), { ...seg("BD", "B", "D", 0, 0), blocks: [[300, 64, 1, 0, 0]] }],
+  };
+}
+
 addTests("trains", {
+  "routes: you buy one stop at a time, outward from home": () => {
+    const data = routeMap();
+    const built = {};
+    assertEqual(checkRoutes(data).length, 0);
+    assertEqual(buyable(data, built, "A").map((o) => o.seg.id).join(), "AB", "only the stretch from home at first");
+    assert(cannotBuy(data, built, "A", "BC"), "no A to C without B");
+    built.AB = { by: "p1" };
+    assertEqual([...reachable(data, built, "A")].sort().join(), "A,B");
+    assertEqual(buyable(data, built, "A").map((o) => o.seg.id).sort().join(), "BC,BD");
+    assertEqual(cannotBuy(data, built, "A", "BC"), undefined);
+    assertEqual(buyable(data, built, "C").length, 1, "someone at C can build toward B");
+    assertEqual(buyable(data, built, "C")[0].from, "C");
+    assert(cannotBuy(data, built, undefined, "AB"), "no home, no buying");
+    assert(cannotBuy(data, built, "A", "AB"), "already laid");
+  },
+  "routes: prices, home stops and map checks": () => {
+    const data = routeMap();
+    assertEqual(priceOf(data.segments[0]), ROUTE.basePrice + 301 * ROUTE.perBlock);
+    assertEqual(nearestStop(data, 20, 30).id, "A");
+    assertEqual(nearestStop(data, 2000, 0), undefined);
+    const bad = { stops: data.stops, segments: [...data.segments, { id: "AB", from: "A", to: "Z", blocks: [] }] };
+    assert(checkRoutes(bad).length >= 3, "a doubled id, an unknown stop and no track are caught");
+    assertEqual(checkRoutes(ROUTES).length, 0, "the planned railway has no mistakes");
+  },
+
   "there are 20 track shapes and none repeats": () => {
     assertEqual(SHAPES.length, 20);
     assertEqual(new Set(SHAPES.map((s) => `${s.kind}:${s.dir}`)).size, 20);

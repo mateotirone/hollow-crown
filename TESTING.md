@@ -506,6 +506,7 @@ Things I could not check without the game, so please look closely: that the stee
 9. **Stations.** Stand on flat open ground, face where the building should go and type `/scriptevent siege:trains station halt` (then `station`, `junction`, `grand`, each somewhere new; add a region such as `frostmarch` to pick its look). The building should rise a few blocks at a time in front of you, with a line of Track through your feet along the platform. Is anything built on the track side, or does the platform sit at the wrong height?
 10. **Your own station.** In your settlement, place a Rail Depot a few blocks from a straight line of Track (or on open ground, facing where the building should go). A Halt should rise lined up with that track, and the depot should end up on its platform. Win sieges until the settlement becomes a Town: the Halt should come down and a Station rise in its place.
 11. A claim near a Station Post placed by the map builder (within about 140 blocks of the banner) should raise a Halt by that post.
+12. **Buying the line.** Once the world has its planned railway, `/scriptevent siege:trains routes` should list the stops and say which is your home stop. Click any Station Post: "Extend the line" should only offer stretches that start at a stop you can already reach (at first just the ones out of your home stop). Buy one: the Track should lay itself along the graded bed over a few seconds, and everyone should see "The line from ... to ... is laid". Stretches past it should now show up in the menu.
 
 ## Sounds (scripts/sound/, SOUND-LIST.md)
 

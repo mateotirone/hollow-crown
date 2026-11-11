@@ -304,7 +304,7 @@ onTick("trains_save", 200, () => {
 system.afterEvents.scriptEventReceive.subscribe(({ id, message, sourceEntity }) => {
   if (id !== "siege:trains") return;
   const [cmd, arg] = message.trim().split(/\s+/);
-  if (cmd === "station") return; // trains/station_sites.js
+  if (cmd === "station" || cmd === "routes" || cmd === "lay") return; // trains/station_sites.js, trains/route_game.js
   const reply = (text) => (sourceEntity?.typeId === "minecraft:player" ? sourceEntity.sendMessage(text) : console.warn(text));
   if (cmd === "mode" && (arg === "velocity" || arg === "teleport")) {
     TRAIN.drive = arg;

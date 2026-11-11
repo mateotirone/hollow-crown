@@ -31,6 +31,9 @@ export function moveStation(id, to) {
   store.save();
 }
 
+// Other features add buttons to the station menu: { label(player, station, again) -> text or falsy, action(player, station, again) }
+export const stationMenuExtras = [];
+
 const say = (player, text) => player.onScreenDisplay.setActionBar(text);
 const stationAt = (block) => stations().find((s) => s.x === block.location.x && s.y === block.location.y && s.z === block.location.z && s.dim === block.dimension.id);
 const byId = (id) => stations().find((s) => s.id === id);
@@ -207,6 +210,7 @@ async function stationMenu(player, block, station) {
       },
     },
     stallsOpen && { label: "Horse stalls\n§8stable or collect a horse", action: () => stallMenu(player, { dimension: block.dimension, location: { x: block.location.x + 0.5, y: block.location.y + 1, z: block.location.z + 0.5 } }, station.name, again) },
+    ...stationMenuExtras.map((x) => { const label = x.label(player, station, again); return label && { label, action: () => x.action(player, station, again) }; }),
     isBuilder(player) && !depot && { label: "§aRename (builder)", action: () => nameStation(player, station) },
   ].filter(Boolean);
   const form = new ActionFormData().title("Station").body(body);
