@@ -365,3 +365,32 @@ on("showcase", ({ player, dim, origin, label }) => {
   }
   player.sendMessage("§6Trains: a loop of Track 70 blocks west of the showcase with an Engine and a Coach on it. Climb into the engine, hold forward to go and back to brake. Lay your own Track from the Every item chest.");
 });
+
+// ---------- the rider's view ----------
+// From inside a car you can't see past the boiler or the coach walls, so riders are put in third person while
+// aboard and given their own view back when they get off. Only players this put in third person are cleared,
+// so it never cuts short a cutscene camera.
+const VIEW_TAG = "siege_train_view";
+onTick("trains_view", 5, () => {
+  if (!isReady()) return;
+  for (const p of world.getPlayers()) {
+    let aboard = false;
+    try {
+      aboard = !!p.getComponent("minecraft:riding")?.entityRidingOn?.typeId?.startsWith("siege:train_");
+    } catch {
+      // between dimensions
+    }
+    const set = p.hasTag(VIEW_TAG);
+    try {
+      if (aboard && !set) {
+        p.camera.setCamera("minecraft:third_person");
+        p.addTag(VIEW_TAG);
+      } else if (!aboard && set) {
+        p.camera.clear();
+        p.removeTag(VIEW_TAG);
+      }
+    } catch (e) {
+      console.warn(`[Hollow Crown] train view: ${e}`);
+    }
+  }
+});
