@@ -8,5 +8,9 @@ if errorlevel 1 (
   pause
   exit /b 1
 )
+rem keep the viewer itself up to date (only when nothing in the checkout is edited)
+for /f %%i in ('git status --porcelain --untracked-files=no 2^>nul') do goto :run
+git pull --ff-only --quiet 2>nul
+:run
 node serve.mjs %*
 pause

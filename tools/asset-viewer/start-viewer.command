@@ -10,5 +10,7 @@ if ! command -v node >/dev/null 2>&1; then
   read -r -p "Press Return to close." _
   exit 1
 fi
+# keep the viewer itself up to date (only when nothing in the checkout is edited)
+if [ -z "$(git status --porcelain --untracked-files=no 2>/dev/null)" ]; then git pull --ff-only --quiet 2>/dev/null || true; fi
 node serve.mjs "$@"
 read -r -p "The viewer stopped. Press Return to close." _

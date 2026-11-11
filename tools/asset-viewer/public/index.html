@@ -292,7 +292,7 @@ function entries() {
   if (tab === "blocks") return data.blocks.map((b) => ({ key: b.id, title: b.name, group: b.group || "blocks", sub: b.id, b }));
   if (tab === "armour") {
     const sets = new Map();
-    for (const a of data.attachables) { const s = sets.get(a.set) || { key: a.set, title: a.slot ? a.setName : a.name, group: a.group || "worn", parts: [] }; s.parts.push(a); sets.set(a.set, s); }
+    for (const a of data.attachables) { const s = sets.get(a.set) || { key: a.set, title: a.slot ? a.setName : a.name, group: a.group || (a.slot ? "armour" : "held and worn items"), parts: [] }; s.parts.push(a); sets.set(a.set, s); }
     return [...sets.values()].map((s) => ({ ...s, sub: s.parts.map((p) => p.slot || "worn").join(", ") }));
   }
   return [];
@@ -342,11 +342,14 @@ function draw(keepView) {
     $("info").innerHTML = `<h2>${esc(e.name)}</h2><p>${esc(e.id)} · ${branchInfo(e.ref)}</p>${g ? `<p>${esc(g.id)}${geo ? " · from " + (geo.from === "vanilla" ? "vanilla" : branchInfo(geo.from)) : ""}</p>` : ""}${notes.map((n) => `<p>${esc(n)}</p>`).join("")}`;
   } else if (x.parts) {
     const k = "a:" + x.key;
-    $("controls").innerHTML = control("Body", k + ":body", [{ v: "on", t: "Mannequin" }, { v: "off", t: "Armour only" }]);
+    // Held items (swords, tools) are bound to the hand bone in game and posed by animations; drawn on the
+    // mannequin without those they land at its feet, so they are shown on their own, upright.
+    const held = x.parts.every((p) => !p.slot || (geoOf(p.geometry[0]?.id)?.bones || []).some((b) => b.binding));
+    $("controls").innerHTML = held ? "" : control("Body", k + ":body", [{ v: "on", t: "Mannequin" }, { v: "off", t: "Armour only" }]);
     wireControls();
     const root = new THREE.Group();
     const body = geoOf("geometry.humanoid.custom");
-    if (body && choice[k + ":body"] !== "off") root.add(buildGeo(body, mannequin, (n) => !/hat|jacket|sleeve|pants|cape|elytra/i.test(n)));
+    if (body && !held && choice[k + ":body"] !== "off") root.add(buildGeo(body, mannequin, (n) => !/hat|jacket|sleeve|pants|cape|elytra/i.test(n)));
     const lines = [];
     for (const p of x.parts) {
       const t = p.textures.find((t) => t.key === "enchanted" ? false : true) || p.textures[0];
