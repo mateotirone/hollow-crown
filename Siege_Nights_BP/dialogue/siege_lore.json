@@ -7445,6 +7445,665 @@
             ]
           }
         ]
+      },
+      {
+        "scene_tag": "siege_lore_carter_first",
+        "npc_name": "The Carter",
+        "text": "You're dripping light. Everyone from the bright side does, for a while. It wears off.\n\nI saw the crack open from the cart road. I thought someone ought to come and look, and nobody else would, so here I am, sitting on a dock, talking to it.\n\nHave you come to take the cart's place? He said someone would, one day.",
+        "buttons": [
+          {
+            "name": "What cart?",
+            "commands": [
+              "/scriptevent siege:lore_say carter first 0"
+            ]
+          },
+          {
+            "name": "Who said?",
+            "commands": [
+              "/scriptevent siege:lore_say carter first 1"
+            ]
+          },
+          {
+            "name": "Who are you?",
+            "commands": [
+              "/scriptevent siege:lore_say carter first 2"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_carter_cart",
+        "npc_name": "The Carter",
+        "text": "The ore cart. I drive it. Every dawn, from the villages, down the long rail to the south end, to the Seat. I bring it back empty.\n\nWhat goes in it is Choir Ore. What it is for, you'd better see for yourself. Go to Glimwade, up the bank on the left. Watch them load it. I'll meet you there.",
+        "buttons": [
+          {
+            "name": "I'll go to Glimwade.",
+            "commands": [
+              "/scriptevent siege:lore_say carter cart 0"
+            ]
+          },
+          {
+            "name": "Who are you?",
+            "commands": [
+              "/scriptevent siege:lore_say carter cart 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_carter_he",
+        "npc_name": "The Carter",
+        "text": "Him in the Chair. Morvane.\n\nDon't look like that. Everyone up there knows the name, I'm told. You shout it at your walls on the third night.\n\nI've driven past him a hundred times. I have never once seen his face. You don't look up when you pass the Chair. That's the first thing you learn.",
+        "buttons": [
+          {
+            "name": "What cart?",
+            "commands": [
+              "/scriptevent siege:lore_say carter he 0"
+            ]
+          },
+          {
+            "name": "Who are you?",
+            "commands": [
+              "/scriptevent siege:lore_say carter he 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_carter_name",
+        "npc_name": "The Carter",
+        "text": "The Carter. That's what I do, so that's what I'm called.\n\nWe don't have names down here, not the way you do. A name is something you give to someone who has lost theirs. Nobody's ever lost mine. I never had one to lose.",
+        "buttons": [
+          {
+            "name": "That's sad.",
+            "commands": [
+              "/scriptevent siege:lore_say carter name 0"
+            ]
+          },
+          {
+            "name": "What cart?",
+            "commands": [
+              "/scriptevent siege:lore_say carter name 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_carter_name2",
+        "npc_name": "The Carter",
+        "text": "Is it? You lot have names and you still forget each other.\n\nGo to Glimwade. Up the bank on the left, where the lamps are. Watch the cart. Then come and find me.",
+        "buttons": [
+          {
+            "name": "I'll go.",
+            "commands": [
+              "/scriptevent siege:lore_say carter name2 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_carter_landing2",
+        "npc_name": "The Carter",
+        "text": "Glimwade. Up the bank on the left, where the lamps are. Watch them load the cart, and then we'll talk. I'll be there before you.",
+        "buttons": [
+          {
+            "name": "I'm going.",
+            "commands": [
+              "/scriptevent siege:lore_say carter landing2 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_carter_hub",
+        "npc_name": "The Carter",
+        "text": "Ask what you like. If I don't know, I'll say. If I do know and I'm frightened to say it, I'll say that too.",
+        "buttons": [
+          {
+            "name": "What is the ore for?",
+            "commands": [
+              "/scriptevent siege:lore_say carter hub 0"
+            ]
+          },
+          {
+            "name": "Who sits in the Chair?",
+            "commands": [
+              "/scriptevent siege:lore_say carter hub 1"
+            ]
+          },
+          {
+            "name": "Tell me about your brother.",
+            "commands": [
+              "/scriptevent siege:lore_say carter hub 2"
+            ]
+          },
+          {
+            "name": "I've been walking your country.",
+            "commands": [
+              "/scriptevent siege:lore_say carter hub 3"
+            ]
+          },
+          {
+            "name": "Where should I go?",
+            "commands": [
+              "/scriptevent siege:lore_say carter hub 4"
+            ]
+          },
+          {
+            "name": "I'll go.",
+            "commands": [
+              "/scriptevent siege:lore_say carter hub 5"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_carter_hub__1",
+        "npc_name": "The Carter",
+        "text": "You came back. People from the bright side mostly don't. Ask.",
+        "buttons": [
+          {
+            "name": "What is the ore for?",
+            "commands": [
+              "/scriptevent siege:lore_say carter hub 0"
+            ]
+          },
+          {
+            "name": "Who sits in the Chair?",
+            "commands": [
+              "/scriptevent siege:lore_say carter hub 1"
+            ]
+          },
+          {
+            "name": "Tell me about your brother.",
+            "commands": [
+              "/scriptevent siege:lore_say carter hub 2"
+            ]
+          },
+          {
+            "name": "I've been walking your country.",
+            "commands": [
+              "/scriptevent siege:lore_say carter hub 3"
+            ]
+          },
+          {
+            "name": "Where should I go?",
+            "commands": [
+              "/scriptevent siege:lore_say carter hub 4"
+            ]
+          },
+          {
+            "name": "I'll go.",
+            "commands": [
+              "/scriptevent siege:lore_say carter hub 5"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_carter_hub__2",
+        "npc_name": "The Carter",
+        "text": "Keep your voice down near the rails. They carry.",
+        "buttons": [
+          {
+            "name": "What is the ore for?",
+            "commands": [
+              "/scriptevent siege:lore_say carter hub 0"
+            ]
+          },
+          {
+            "name": "Who sits in the Chair?",
+            "commands": [
+              "/scriptevent siege:lore_say carter hub 1"
+            ]
+          },
+          {
+            "name": "Tell me about your brother.",
+            "commands": [
+              "/scriptevent siege:lore_say carter hub 2"
+            ]
+          },
+          {
+            "name": "I've been walking your country.",
+            "commands": [
+              "/scriptevent siege:lore_say carter hub 3"
+            ]
+          },
+          {
+            "name": "Where should I go?",
+            "commands": [
+              "/scriptevent siege:lore_say carter hub 4"
+            ]
+          },
+          {
+            "name": "I'll go.",
+            "commands": [
+              "/scriptevent siege:lore_say carter hub 5"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_carter_hub__3",
+        "npc_name": "The Carter",
+        "text": "The cart's out. I've got till it comes back. Ask me something.",
+        "buttons": [
+          {
+            "name": "What is the ore for?",
+            "commands": [
+              "/scriptevent siege:lore_say carter hub 0"
+            ]
+          },
+          {
+            "name": "Who sits in the Chair?",
+            "commands": [
+              "/scriptevent siege:lore_say carter hub 1"
+            ]
+          },
+          {
+            "name": "Tell me about your brother.",
+            "commands": [
+              "/scriptevent siege:lore_say carter hub 2"
+            ]
+          },
+          {
+            "name": "I've been walking your country.",
+            "commands": [
+              "/scriptevent siege:lore_say carter hub 3"
+            ]
+          },
+          {
+            "name": "Where should I go?",
+            "commands": [
+              "/scriptevent siege:lore_say carter hub 4"
+            ]
+          },
+          {
+            "name": "I'll go.",
+            "commands": [
+              "/scriptevent siege:lore_say carter hub 5"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_carter_ore",
+        "npc_name": "The Carter",
+        "text": "It sings. Hit it and it holds the note. That's the whole of it.\n\nEvery stone goes south to the Seat, and from the Seat to the Court, and the Singers in the Court hold it while they sing. They sing at the Door. The Door gets wider.\n\nEvery night your walls get knocked on, somebody down here dug for it.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say carter ore 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_carter_chair",
+        "npc_name": "The Carter",
+        "text": "Morvane. That's all I've got. He hums your songs sometimes, ones nobody down here knows. That's how we know he's one of yours.\n\nHe never looks at the river. Everyone looks at the river; it's the only light we have. He looks up. Like a man waiting for a bell.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say carter chair 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_carter_brother",
+        "npc_name": "The Carter",
+        "text": "Small. Loud. Cracked voice, like a gate. They took him from Highcut to sing in the Court because you could hear him three seams away.\n\nThat's what the Court is. Ours. Our little ones, mostly, the loud ones. Whatever you've been told up there, the Choir is just us, singing because we were told to.",
+        "buttons": [
+          {
+            "name": "I'll bring him back.",
+            "commands": [
+              "/scriptevent siege:lore_say carter brother 0"
+            ]
+          },
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say carter brother 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_carter_where",
+        "npc_name": "The Carter",
+        "text": "West of the Cross, the old hall where two kings sat down. East, past Cartmeet, the Standing Ranks. Far west, the Door. The stones east of the path that forgot to fall: climb to the top one. And the Seams, past Cartmeet, where the rail starts.\n\nSee three of them and come back. Then you'll know enough to see the Court.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say carter where 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_carter_r_truce",
+        "npc_name": "The Carter",
+        "text": "The table's still there? Both chairs?\n\nOne knocked over. Yes. Ours stayed sitting. My grandmother said the one who knocked his over was the one who ran, and the one who stayed was the one who meant it.\n\nShe never said which side was which. I always assumed.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say carter r_truce 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_carter_r_ranks",
+        "npc_name": "The Carter",
+        "text": "We were told they were a gift. An army, all of it, given to us to keep, because your king asked us to take it away.\n\nAn empty place at the front? That'll be the one who leads them. The one with the splinter in his head. We gave him back. Morvane wanted him.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say carter r_ranks 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_carter_r_door",
+        "npc_name": "The Carter",
+        "text": "It's the only door we had. Your side shut it with a bell, and the bell broke doing it, and the crack's the bell's.\n\nMy mother dug there. Her mother dug there. You wouldn't call it a war, what we're doing. It's knocking. For three hundred years. On our own front door.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say carter r_door 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_carter_r_drift",
+        "npc_name": "The Carter",
+        "text": "You saw him lift his hand? The left one?\n\nHe always does it with the left. The right one he keeps in his lap. My father said it was hurt a long time ago, before he came down, and it never healed, because nothing up there heals down here.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say carter r_drift 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_carter_r_seams_w",
+        "npc_name": "The Carter",
+        "text": "That was you? On the trestle?\n\nThe cart didn't come back this morning. I walked the rail and found it in the river, and I stood there and I laughed, and then I was sick, and then I laughed again.\n\nHe'll know someone did it. He won't know who. Neither will I, if anyone asks.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say carter r_seams_w 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_carter_r_seams_s",
+        "npc_name": "The Carter",
+        "text": "The Highcut lot told me. You wouldn't let them risk it.\n\nThey talk about you now. That's not nothing, down here. Nobody talks about anybody. Go to any Tally once he's gone and see if they don't treat you right.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say carter r_seams_s 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_carter_r_none",
+        "npc_name": "The Carter",
+        "text": "Not far yet. Go and look at something. I'll be here. I'm always here, or on the rail.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say carter r_none 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_carter_song",
+        "npc_name": "The Carter",
+        "text": "You've seen enough. I can tell. You've got the look we get after our first cart.\n\nThe Court gate opens to one note, for the cart, every dawn. I've hummed it a thousand times. Listen. Then do it back to me. Lower. Lower than that. There.",
+        "buttons": [
+          {
+            "name": "Hum it back.",
+            "commands": [
+              "/scriptevent siege:lore_say carter song 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_carter_song2",
+        "npc_name": "The Carter",
+        "text": "That's the Cartsong. The gate will take you for a cart. It won't know the difference till you're inside.\n\nThe singer with the cracked voice is my brother. When they fall quiet in there, they don't die. They just stop. Bring him out to me, if you can. I'll be at the Court door.",
+        "buttons": [
+          {
+            "name": "I will.",
+            "commands": [
+              "/scriptevent siege:lore_say carter song2 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_carter_door",
+        "npc_name": "The Carter",
+        "text": "Still here. I'll be here until it's done, one way or the other.\n\nYou hum it at the gate. Don't hurry it. If the Court hears a cart in a hurry, it knows.",
+        "buttons": [
+          {
+            "name": "Tell me about your brother.",
+            "commands": [
+              "/scriptevent siege:lore_say carter door 0"
+            ]
+          },
+          {
+            "name": "Who sits in the Chair?",
+            "commands": [
+              "/scriptevent siege:lore_say carter door 1"
+            ]
+          },
+          {
+            "name": "I'm going in.",
+            "commands": [
+              "/scriptevent siege:lore_say carter door 2"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_carter_after",
+        "npc_name": "The Carter",
+        "text": "They came out. All of them. Holding their throats, walking past me like they were going home from a shift.\n\nHe came out. Not a sound left in him. He knew me, though. He put his hand on my face like he used to.\n\nI'd like you to do something for me. Give me a name. That's what you do for someone who's lost theirs, and I think I've lost the Carter. There's no more cart.",
+        "buttons": [
+          {
+            "name": "Lark.",
+            "commands": [
+              "/scriptevent siege:lore_say carter after 0"
+            ]
+          },
+          {
+            "name": "Morrow.",
+            "commands": [
+              "/scriptevent siege:lore_say carter after 1"
+            ]
+          },
+          {
+            "name": "Dawn.",
+            "commands": [
+              "/scriptevent siege:lore_say carter after 2"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_carter_named_lark",
+        "npc_name": "The Carter",
+        "text": "Lark.\n\nThat's a bird, isn't it? One of yours, up in the light. Loud. Sings when it isn't told to.\n\nYes. I'll have that.",
+        "buttons": [
+          {
+            "name": "What now?",
+            "commands": [
+              "/scriptevent siege:lore_say carter named_lark 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_carter_named_morrow",
+        "npc_name": "The Carter",
+        "text": "Morrow.\n\nTomorrow. The day after the one you're in. We don't have those down here, not really. Every day is the cart.\n\nYes. I'll have that.",
+        "buttons": [
+          {
+            "name": "What now?",
+            "commands": [
+              "/scriptevent siege:lore_say carter named_morrow 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_carter_named_dawn",
+        "npc_name": "The Carter",
+        "text": "Dawn.\n\nThe cart went at dawn. Every day of my life. Now it's just going to be a time of day.\n\nYes. I'll have that.",
+        "buttons": [
+          {
+            "name": "What now?",
+            "commands": [
+              "/scriptevent siege:lore_say carter named_dawn 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_carter_named2",
+        "npc_name": "The Carter",
+        "text": "Now you go south. Up the long climb to the Seat.\n\nHe was given a name too, you know. The one in the Chair. Somebody down here gave it to him when he came, because he'd lost his own. Nobody alive remembers what it was before.\n\nHe's never once looked at the river. Go and see what he's looking up at.",
+        "buttons": [
+          {
+            "name": "I'll go.",
+            "commands": [
+              "/scriptevent siege:lore_say carter named2 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_carter_named",
+        "npc_name": "The Carter",
+        "text": "The Court's quiet. You can hear the river now. I never knew it made a noise.",
+        "buttons": [
+          {
+            "name": "Who sits in the Chair?",
+            "commands": [
+              "/scriptevent siege:lore_say carter named 0"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say carter named 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_carter_named__1",
+        "npc_name": "The Carter",
+        "text": "Say it again. My name. I like hearing it.",
+        "buttons": [
+          {
+            "name": "Who sits in the Chair?",
+            "commands": [
+              "/scriptevent siege:lore_say carter named 0"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say carter named 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_carter_named__2",
+        "npc_name": "The Carter",
+        "text": "The rail's quiet. I keep waking at dawn anyway.",
+        "buttons": [
+          {
+            "name": "Who sits in the Chair?",
+            "commands": [
+              "/scriptevent siege:lore_say carter named 0"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say carter named 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_carter_named__3",
+        "npc_name": "The Carter",
+        "text": "He sleeps a lot, my brother. Smiles in it. No sound.",
+        "buttons": [
+          {
+            "name": "Who sits in the Chair?",
+            "commands": [
+              "/scriptevent siege:lore_say carter named 0"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say carter named 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_carter_chair2",
+        "npc_name": "The Carter",
+        "text": "I don't know. I never looked.\n\nBut he hums your songs. He keeps his right hand in his lap. And he's waited three hundred years for a bell that nobody rings. Whoever he was up there, someone must have loved him once. Nobody waits that long for nothing.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say carter chair2 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_carter_last",
+        "npc_name": "The Carter",
+        "text": "It's gone quiet all the way down. Not the Court. All of it. The whole Hollow stopped humming for a breath, the way you do when someone leaves the room.\n\nWho was he?\n\n...No. Don't tell me yet. Tell me some other time, when I'm older. I'd like there to be something left to find out.",
+        "buttons": [
+          {
+            "name": "Some other time.",
+            "commands": [
+              "/scriptevent siege:lore_say carter last 0"
+            ]
+          }
+        ]
       }
     ]
   }

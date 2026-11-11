@@ -25,6 +25,7 @@ import { goDown, lose, tend, downedTick, isCorpse } from "./downed.js";
 import { store, dragonOf, save, valid, entityOf, recordOfEntity, ownerIdOf, canHarness, isBuilder, spawnDragon, roostDragon, refresh, scanDragons, isFlying } from "./dragon.js";
 import { flightTick, defenceTick, mountOf, breathe, takeOff, land, announceLevel, rideOf, onCrash } from "./flight.js";
 import "./tests.js";
+import "./nests.js";
 import "./showcase.js";
 import { sfx } from "../core/sfx.js";
 import { applyFilter } from "../core/events.js";

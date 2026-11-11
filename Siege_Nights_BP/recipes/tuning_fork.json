@@ -1,31 +1,31 @@
 {
-  "format_version": "1.20.10",
-  "minecraft:recipe_shaped": {
-    "description": {
-      "identifier": "siege:tuning_fork_recipe"
-    },
-    "tags": [
-      "siege_workshop"
-    ],
-    "pattern": [
-      "S S",
-      "SAS",
-      "SAS"
-    ],
-    "key": {
-      "S": {
-        "item": "siege:choir_shard"
-      },
-      "A": {
-        "item": "minecraft:amethyst_shard"
-      }
-    },
-    "result": {
-      "item": "siege:tuning_fork",
-      "count": 1
-    },
-    "unlock": {
-      "context": "AlwaysUnlocked"
-    }
+ "format_version": "1.20.10",
+ "minecraft:recipe_shaped": {
+  "description": {
+   "identifier": "siege:tuning_fork_recipe"
+  },
+  "tags": [
+   "siege_workshop"
+  ],
+  "pattern": [
+   "S S",
+   "SSS",
+   " A "
+  ],
+  "key": {
+   "S": {
+    "item": "siege:choir_shard"
+   },
+   "A": {
+    "item": "minecraft:amethyst_shard"
+   }
+  },
+  "result": {
+   "item": "siege:tuning_fork",
+   "count": 1
+  },
+  "unlock": {
+   "context": "AlwaysUnlocked"
   }
+ }
 }

@@ -38,6 +38,7 @@ export const RETURNED = {
   takeChance: 0.35,
   maxTaken: 2,
   walkBlocks: 64, // how far it walks before it is gone
+  gentle: false, // the truce holds (lore/truce.js, setReturnedGentle): a Returned walks home alone and takes nobody
   walkSeconds: 90,
   seedEveryTicks: 2400, // a village is looked at this often
   seedChance: 0.08, // chance per look that one more villager did not come back the same
@@ -62,9 +63,11 @@ export const shouldSeed = ({ awake, villagers, returnedNear, roll }) =>
   !!awake && villagers >= RETURNED.seedMinVillagers && returnedNear < RETURNED.seedMaxNear && roll < RETURNED.seedChance;
 // Which of the nearby villagers fall in behind it (rolls = one random number per villager)
 export function whoFollows(count, rolls) {
+  if (RETURNED.gentle) return Array.from({ length: count }, () => false);
   let taken = 0;
   return Array.from({ length: count }, (_, i) => rolls[i] < RETURNED.takeChance && taken < RETURNED.maxTaken && ++taken > 0);
 }
+export const setReturnedGentle = (on) => { RETURNED.gentle = !!on; };
 export const walkOver = (blocks, seconds) => blocks >= RETURNED.walkBlocks || seconds >= RETURNED.walkSeconds;
 
 // ---------- marking ----------
