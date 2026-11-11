@@ -20,6 +20,8 @@ P.update(
     pane="brown_stained_glass_pane",               # tinted to the house (palettes/vale.md: plaster houses)
     floor_field="spruce_slab", floor_border="dark_oak_slab", joist="stripped_dark_oak_log",
 )
+LEAVES = mix([("azalea_leaves", 70), ("azalea_leaves_flowered", 30)], 12)
+SIGN = "darkoak_wall_sign"
 W, D = 8, 10            # last x, last z of the ground storey
 YF = 2                  # ground floor walking surface
 Y_UP = 7                # upper floor layer (walking surface 8)
@@ -109,18 +111,32 @@ def walls(bp):
     infill(upper, Y_UP + 1, Y_PLATE - 1)
 
 # ---------------------------------------------------------------- stage 5: windows and doors
-def window(bp, cells, y, out, shutters=False, cap=False):
+def window(bp, cells, y, out, shutters=False, cap=False, box=True):
     """cells: wall cells of the glass (one row); y: bottom of a 2-tall window; out: outward direction.
-    Glass flush in the wall face; a sill stair (tall side to the wall) one block out, one wider each side;
-    a top-slab cap above, one wider each side, unless something already sits there (eaves)."""
+    Glass flush in the wall face. Under it a window box (Mateo, 2026-11-11): leaves one block out, as wide
+    as the glass, with wall signs round its front and ends. A top-slab cap only when asked (stone, or no
+    beam close above)."""
     dx, dz = {"n": (0, -1), "s": (0, 1), "e": (1, 0), "w": (-1, 0)}[out]
-    inward = {"n": "s", "s": "n", "e": "w", "w": "e"}[out]
     along = (1, 0) if out in "ns" else (0, 1)
+    left = {"s": "w", "n": "e", "e": "s", "w": "n"}[out]; right = {"s": "e", "n": "w", "e": "n", "w": "s"}[out]
     for (x, z) in cells:
         for j in range(2): bp.set(x, y + j, z, P["pane"])
     ends = [(cells[0][0] - along[0], cells[0][1] - along[1]), (cells[-1][0] + along[0], cells[-1][1] + along[1])]
+    if box:
+        free = lambda x, yy, z: bp.get(x, yy, z)[0] == "keep"
+        if all(free(x + dx, y - 1, z + dz) for (x, z) in cells):
+            for (x, z) in cells:
+                bp.set(x + dx, y - 1, z + dz, LEAVES(x, y, z)[0], persistent=True)
+                if free(x + 2 * dx, y - 1, z + 2 * dz): bp.set(x + 2 * dx, y - 1, z + 2 * dz, SIGN, facing=out)
+            # end signs face along the wall, away from the box (wall signs on the ends of the leaves)
+            first, last = cells[0], cells[-1]
+            order = sorted([first, last], key=lambda c: c[0] * along[0] + c[1] * along[1])
+            lo_c, hi_c = order[0], order[1]
+            lo_dir = "w" if along == (1, 0) else "n"; hi_dir = "e" if along == (1, 0) else "s"
+            for (cx, cz), d, (ax, az) in ((lo_c, lo_dir, (-along[0], -along[1])), (hi_c, hi_dir, along)):
+                sx, sz = cx + dx + ax, cz + dz + az
+                if free(sx, y - 1, sz): bp.set(sx, y - 1, sz, SIGN, facing=d)
     for (x, z) in [ends[0]] + list(cells) + [ends[1]]:
-        if bp.get(x + dx, y - 1, z + dz)[0] == "keep": bp.set(x + dx, y - 1, z + dz, P["trim"], facing=inward)
         if cap and bp.get(x + dx, y + 2, z + dz)[0] == "keep": bp.set(x + dx, y + 2, z + dz, P["trim_slab"], half="top")
     if shutters:
         for (x, z) in ends:
@@ -174,12 +190,6 @@ def detailing(bp):
     flowers = ["poppy", "cornflower", "dandelion", "azure_bluet", "oxeye_daisy"]
     for x in (0, 1, 2, 6, 7, 8):                                       # flower bed under the front windows
         bp.set(x, 0, D + 1, "grass_block"); bp.set(x, 1, D + 1, flowers[int(h3(x, 1, D, 5) * 5)])
-    # planter under the upper centre window: dirt and flowers behind trapdoor fronts, in place of the sill
-    for x in (3, 4, 5):
-        bp.set(x, Y_UP + 1, D + 2, "dirt"); bp.set(x, Y_UP + 2, D + 2, flowers[x % 5])
-        bp.set(x, Y_UP + 1, D + 3, P["shutter"], facing="s", open=True)
-    for z in (D + 2,):
-        bp.set(2, Y_UP + 1, z, P["shutter"], facing="w", open=True); bp.set(6, Y_UP + 1, z, P["shutter"], facing="e", open=True)
     bp.set(6, 1, D + 2, "barrel", facing="up")                          # one prop by the door
     for x, z in ((-1, -1), (W + 1, -1)):                                # bushes at the back corners
         bp.set(x, 1, z, "azalea_leaves", persistent=True)

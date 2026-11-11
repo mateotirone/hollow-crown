@@ -76,7 +76,20 @@ Windows start one block above the floor. Upper windows sit straight above lower 
   frame face; the frame around it is the surround, so skip shutters on these windows.
 - Glass never sticks out past the wall face.
 
-### Sills
+### Window boxes (default under house windows)
+
+Mateo, 2026-11-11, on the test house: replace the right-way-up stair sills with **leaves boxed in by
+signs**.
+
+- One block out from the wall, directly under the glass, a row of leaves as wide as the glass
+  (azalea leaves with about 30% flowering azalea in the Vale; the region's leaves elsewhere, persistent).
+- Wall signs in the trim wood on the front of every leaf block and on both ends of the row, so the leaves
+  sit in a thin wooden box. Signs blank.
+- On every house window where the cell is free. Where it is not (a bracket, the eaves, a step), leave the
+  window without one.
+- Stone and civic buildings keep the stair or slab sills below.
+
+### Sills (stone and civic buildings)
 
 - Default: a **right-way-up stair** under each glass cell, its tall side against the wall
   and its low step facing the street (in `bp.py`: `facing` = the side towards the wall, `half="bottom"`;
@@ -115,7 +128,7 @@ Windows start one block above the floor. Upper windows sit straight above lower 
 - Shutters only on windows 1 or 3 wide; never on stone hall windows, windows with bars, or windows set
   in a proud frame.
 
-### Planters
+### Planters (alternative)
 
 - A box of trapdoors (open, facing out, round the front and ends) one block in front of the wall, under
   the sill, with flowers or sweet berry bushes or leaves on dirt or a composter inside.
@@ -158,6 +171,6 @@ All arches follow `reference/shapes.md`. Quick versions:
 - [ ] Every door on a bay centre with jambs and lintel; no double doors; canopy or lantern, not clutter.
 - [ ] Every window the planned size, stacked over the openings below.
 - [ ] Glass tinted/textured to the house (stained in chapels), flush with the wall face.
-- [ ] Sills wider than the glass; heads capped; street windows have surrounds.
+- [ ] House windows have leaf boxes with signs; stone sills wider than the glass; heads capped where there is room.
 - [ ] Shutters on at most 30%, planters on about a quarter, in symmetric pairs on formal fronts.
 - [ ] Arches symmetric about the centre block.
