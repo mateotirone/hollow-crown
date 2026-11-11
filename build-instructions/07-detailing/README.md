@@ -68,7 +68,7 @@ flat frame, a shutter, a lip on a planter) and **walls / fences** where you want
 Layered, dense detail for halls, inns, towers and grand houses (keep cottages simpler, detail balances
 detail: `texturing/`).
 
-- **Chains**: lanterns hang on chains (1 to 4 links) from every verge tip, eave corner, jetty corner and
+- **Chains**: lanterns hang on chains (1 to 4 links) from the trim-wood corner block under every verge tip (`06-roof` step 5), eave corner, jetty corner and
   bracket end. Long chains from the highest corners, short under porches. Odd spacing, symmetric pairs.
 - **Fences as hangers and posts**: a fence post sticking down under a beam end or bracket, with a lantern
   under it; fence posts standing on parapets and balcony corners; never fences as structure (`02-frame`).

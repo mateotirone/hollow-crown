@@ -112,6 +112,10 @@ building (gable wall, barge boards, eave trim, ridge) were left standing inside 
 - **Eaves**: along the long walls, under the overhang, a row of upside-down trim stairs tucked under the
   roof edge (`kit.eaves`), or a top slab row on stone buildings. Big halls: a cornice of 2 rows.
 - At the eave corners, the barge board and eave rows meet with an outer-corner stair, no gaps.
+- **Corner block (Mateo, 2026-11-11), every roof**: under the lowest corner stair of every verge (where the
+  barge board and the eave row meet) put a full block of the trim wood, so the corner is never left
+  empty. Anything that hangs from the roof corner (a chain and lantern, a sign, a bell) hangs from that
+  block, never from thin air or from the underside of a single stair.
 
 ## Step 6: Gable walls
 
@@ -197,7 +201,7 @@ How to build one (span = inside width, odd):
 - [ ] Overhang 1 at eaves and verges; no gap between wall top and roof.
 - [ ] Valleys closed, wing ridges at least 2 lower, dormers on the window lines.
 - [ ] Every roof join clean from above: nothing of the lower roof poking through, one material along the join.
-- [ ] Barge boards under verges, eave row under the overhang, corners closed.
+- [ ] Barge boards under verges, eave row under the overhang, corners closed with a trim-wood block, hangers under it.
 - [ ] Gable walls filled with posts on the centre line.
 - [ ] Trusses in every open hall and open gable, lined up with the posts.
 - [ ] Chimneys 2 above the roof, capped.

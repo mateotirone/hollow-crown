@@ -223,7 +223,8 @@ def roof(bp, B):
     base = Y_PLATE                                          # lowest roof row
     for z in (-2, D + 2):
         for x in (-1, W + 1):                               # lanterns on chains at the verge tips
-            bp.set(x, base - 1, z, "iron_chain"); bp.set(x, base - 2, z, "lantern", hanging=True)
+            bp.set(x, base - 1, z, P["trim_block"])          # corner block under the verge foot (06-roof step 5)
+            bp.set(x, base - 2, z, "iron_chain"); bp.set(x, base - 3, z, "lantern", hanging=True)
     for z in (3, 7):                                        # trusses over the open upper rooms
         for x in range(1, W): log(bp, x, Y_PLATE, z, "x")
         for y in range(Y_PLATE + 1, B.H[(4, z)][0]): log(bp, 4, y, z)
