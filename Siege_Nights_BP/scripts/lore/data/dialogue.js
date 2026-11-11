@@ -1141,6 +1141,174 @@ export const NPCS = [
       },
     },
   },
+  // ------------------------------------------------------------------ The Carter, the Hollow
+  // The middle stretch's guide (Mateo approved 2026-11-11). Placed by script (undertow/story.js): at
+  // the Wound landing, then Glimwade, then the Court door. Those below have no names (Sigrun), so she
+  // has none until the player gives her one. Never says Oswin; never sees the face in the Chair.
+  {
+    id: "carter", name: "The Carter", where: "THE HOLLOW. Placed by script, never by hand: the Wound landing dock, then Glimwade, then the Court door once a player has the Cartsong. Drives the dawn ore cart. Young, quick, frightened of one thing only.",
+    start: [
+      [["flag:morvane_fallen", "flag:carter_named", "!flag:carter_last"], "last"],
+      [["flag:hb_choir_silenced", "!flag:carter_named"], "after"],
+      [["flag:carter_named"], "named"],
+      [["flag:cartsong"], "door"],
+      [["flag:hb_ready"], "song"],
+      [["flag:hb_glimwade"], "hub"],
+      [["flag:carter_met"], "landing2"],
+      [[], "first"],
+    ],
+    nodes: {
+      first: {
+        text: "You're dripping light. Everyone from the bright side does, for a while. It wears off.\n\nI saw the crack open from the cart road. I thought someone ought to come and look, and nobody else would, so here I am, sitting on a dock, talking to it.\n\nHave you come to take the cart's place? He said someone would, one day.",
+        opts: [
+          ["What cart?", "cart", ["flag:carter_met"]],
+          ["Who said?", "he", ["flag:carter_met"]],
+          ["Who are you?", "name", ["flag:carter_met"]],
+        ],
+      },
+      cart: {
+        text: "The ore cart. I drive it. Every dawn, from the villages, down the long rail to the south end, to the Seat. I bring it back empty.\n\nWhat goes in it is Choir Ore. What it is for, you'd better see for yourself. Go to Glimwade, up the bank on the left. Watch them load it. I'll meet you there.",
+        opts: [["I'll go to Glimwade.", "end"], ["Who are you?", "name"]],
+      },
+      he: {
+        text: "Him in the Chair. Morvane.\n\nDon't look like that. Everyone up there knows the name, I'm told. You shout it at your walls on the third night.\n\nI've driven past him a hundred times. I have never once seen his face. You don't look up when you pass the Chair. That's the first thing you learn.",
+        opts: [["What cart?", "cart"], ["Who are you?", "name"]],
+      },
+      name: {
+        text: "The Carter. That's what I do, so that's what I'm called.\n\nWe don't have names down here, not the way you do. A name is something you give to someone who has lost theirs. Nobody's ever lost mine. I never had one to lose.",
+        opts: [["That's sad.", "name2"], ["What cart?", "cart"]],
+      },
+      name2: {
+        text: "Is it? You lot have names and you still forget each other.\n\nGo to Glimwade. Up the bank on the left, where the lamps are. Watch the cart. Then come and find me.",
+        opts: [["I'll go.", "end"]],
+      },
+      landing2: {
+        text: "Glimwade. Up the bank on the left, where the lamps are. Watch them load the cart, and then we'll talk. I'll be there before you.",
+        opts: [["I'm going.", "end"]],
+      },
+      hub: {
+        greets: [
+          "You came back. People from the bright side mostly don't. Ask.",
+          "Keep your voice down near the rails. They carry.",
+          "The cart's out. I've got till it comes back. Ask me something.",
+        ],
+        text: "Ask what you like. If I don't know, I'll say. If I do know and I'm frightened to say it, I'll say that too.",
+        opts: [
+          ["What is the ore for?", "ore"],
+          ["Who sits in the Chair?", "chair"],
+          ["Tell me about your brother.", "brother"],
+          ["I've been walking your country.", [
+            [["flag:hb_truce_hall", "!flag:cr_truce"], "r_truce"],
+            [["flag:hb_standing_ranks", "!flag:cr_ranks"], "r_ranks"],
+            [["flag:hb_far_door", "!flag:cr_door"], "r_door"],
+            [["flag:hb_drift", "!flag:cr_drift"], "r_drift"],
+            [["flag:seams_wreck", "!flag:cr_seams"], "r_seams_w"],
+            [["flag:seams_spare", "!flag:cr_seams"], "r_seams_s"],
+            [[], "r_none"],
+          ]],
+          ["Where should I go?", "where"],
+          ["I'll go.", "end"],
+        ],
+      },
+      ore: {
+        text: "It sings. Hit it and it holds the note. That's the whole of it.\n\nEvery stone goes south to the Seat, and from the Seat to the Court, and the Singers in the Court hold it while they sing. They sing at the Door. The Door gets wider.\n\nEvery night your walls get knocked on, somebody down here dug for it.",
+        opts: [["Back.", "hub"]],
+      },
+      chair: {
+        text: "Morvane. That's all I've got. He hums your songs sometimes, ones nobody down here knows. That's how we know he's one of yours.\n\nHe never looks at the river. Everyone looks at the river; it's the only light we have. He looks up. Like a man waiting for a bell.",
+        opts: [["Back.", "hub"]],
+      },
+      brother: {
+        text: "Small. Loud. Cracked voice, like a gate. They took him from Highcut to sing in the Court because you could hear him three seams away.\n\nThat's what the Court is. Ours. Our little ones, mostly, the loud ones. Whatever you've been told up there, the Choir is just us, singing because we were told to.",
+        opts: [["I'll bring him back.", "hub", ["flag:carter_promise"]], ["Back.", "hub"]],
+      },
+      where: {
+        text: "West of the Cross, the old hall where two kings sat down. East, past Cartmeet, the Standing Ranks. Far west, the Door. The stones east of the path that forgot to fall: climb to the top one. And the Seams, past Cartmeet, where the rail starts.\n\nSee three of them and come back. Then you'll know enough to see the Court.",
+        opts: [["Back.", "hub"]],
+      },
+      r_truce: {
+        text: "The table's still there? Both chairs?\n\nOne knocked over. Yes. Ours stayed sitting. My grandmother said the one who knocked his over was the one who ran, and the one who stayed was the one who meant it.\n\nShe never said which side was which. I always assumed.",
+        opts: [["Back.", "hub", ["flag:cr_truce"]]],
+      },
+      r_ranks: {
+        text: "We were told they were a gift. An army, all of it, given to us to keep, because your king asked us to take it away.\n\nAn empty place at the front? That'll be the one who leads them. The one with the splinter in his head. We gave him back. Morvane wanted him.",
+        opts: [["Back.", "hub", ["flag:cr_ranks"]]],
+      },
+      r_door: {
+        text: "It's the only door we had. Your side shut it with a bell, and the bell broke doing it, and the crack's the bell's.\n\nMy mother dug there. Her mother dug there. You wouldn't call it a war, what we're doing. It's knocking. For three hundred years. On our own front door.",
+        opts: [["Back.", "hub", ["flag:cr_door"]]],
+      },
+      r_drift: {
+        text: "You saw him lift his hand? The left one?\n\nHe always does it with the left. The right one he keeps in his lap. My father said it was hurt a long time ago, before he came down, and it never healed, because nothing up there heals down here.",
+        opts: [["Back.", "hub", ["flag:cr_drift"]]],
+      },
+      r_seams_w: {
+        text: "That was you? On the trestle?\n\nThe cart didn't come back this morning. I walked the rail and found it in the river, and I stood there and I laughed, and then I was sick, and then I laughed again.\n\nHe'll know someone did it. He won't know who. Neither will I, if anyone asks.",
+        opts: [["Back.", "hub", ["flag:cr_seams"]]],
+      },
+      r_seams_s: {
+        text: "The Highcut lot told me. You wouldn't let them risk it.\n\nThey talk about you now. That's not nothing, down here. Nobody talks about anybody. Go to any Tally once he's gone and see if they don't treat you right.",
+        opts: [["Back.", "hub", ["flag:cr_seams"]]],
+      },
+      r_none: {
+        text: "Not far yet. Go and look at something. I'll be here. I'm always here, or on the rail.",
+        opts: [["Back.", "hub"]],
+      },
+      song: {
+        text: "You've seen enough. I can tell. You've got the look we get after our first cart.\n\nThe Court gate opens to one note, for the cart, every dawn. I've hummed it a thousand times. Listen. Then do it back to me. Lower. Lower than that. There.",
+        opts: [["Hum it back.", "song2", ["flag:cartsong", "sp:2"]]],
+      },
+      song2: {
+        text: "That's the Cartsong. The gate will take you for a cart. It won't know the difference till you're inside.\n\nThe singer with the cracked voice is my brother. When they fall quiet in there, they don't die. They just stop. Bring him out to me, if you can. I'll be at the Court door.",
+        opts: [["I will.", "end", ["flag:carter_promise"]]],
+      },
+      door: {
+        text: "Still here. I'll be here until it's done, one way or the other.\n\nYou hum it at the gate. Don't hurry it. If the Court hears a cart in a hurry, it knows.",
+        opts: [["Tell me about your brother.", "brother"], ["Who sits in the Chair?", "chair"], ["I'm going in.", "end"]],
+      },
+      after: {
+        text: "They came out. All of them. Holding their throats, walking past me like they were going home from a shift.\n\nHe came out. Not a sound left in him. He knew me, though. He put his hand on my face like he used to.\n\nI'd like you to do something for me. Give me a name. That's what you do for someone who's lost theirs, and I think I've lost the Carter. There's no more cart.",
+        opts: [
+          ["Lark.", "named_lark", ["flag:carter_lark", "flag:carter_named"]],
+          ["Morrow.", "named_morrow", ["flag:carter_morrow", "flag:carter_named"]],
+          ["Dawn.", "named_dawn", ["flag:carter_dawn", "flag:carter_named"]],
+        ],
+      },
+      named_lark: {
+        text: "Lark.\n\nThat's a bird, isn't it? One of yours, up in the light. Loud. Sings when it isn't told to.\n\nYes. I'll have that.",
+        opts: [["What now?", "named2"]],
+      },
+      named_morrow: {
+        text: "Morrow.\n\nTomorrow. The day after the one you're in. We don't have those down here, not really. Every day is the cart.\n\nYes. I'll have that.",
+        opts: [["What now?", "named2"]],
+      },
+      named_dawn: {
+        text: "Dawn.\n\nThe cart went at dawn. Every day of my life. Now it's just going to be a time of day.\n\nYes. I'll have that.",
+        opts: [["What now?", "named2"]],
+      },
+      named2: {
+        text: "Now you go south. Up the long climb to the Seat.\n\nHe was given a name too, you know. The one in the Chair. Somebody down here gave it to him when he came, because he'd lost his own. Nobody alive remembers what it was before.\n\nHe's never once looked at the river. Go and see what he's looking up at.",
+        opts: [["I'll go.", "end", ["sp:2"]]],
+      },
+      named: {
+        greets: [
+          "Say it again. My name. I like hearing it.",
+          "The rail's quiet. I keep waking at dawn anyway.",
+          "He sleeps a lot, my brother. Smiles in it. No sound.",
+        ],
+        text: "The Court's quiet. You can hear the river now. I never knew it made a noise.",
+        opts: [["Who sits in the Chair?", "chair2"], ["Goodbye.", "end"]],
+      },
+      chair2: {
+        text: "I don't know. I never looked.\n\nBut he hums your songs. He keeps his right hand in his lap. And he's waited three hundred years for a bell that nobody rings. Whoever he was up there, someone must have loved him once. Nobody waits that long for nothing.",
+        opts: [["Back.", "named"]],
+      },
+      last: {
+        text: "It's gone quiet all the way down. Not the Court. All of it. The whole Hollow stopped humming for a breath, the way you do when someone leaves the room.\n\nWho was he?\n\n...No. Don't tell me yet. Tell me some other time, when I'm older. I'd like there to be something left to find out.",
+        opts: [["Some other time.", "end", ["flag:carter_last", "sp:1"]]],
+      },
+    },
+  },
 ];
 
 // Quartermaster gossip (one line shown when you open his shop; the quartermaster thread can use it)
