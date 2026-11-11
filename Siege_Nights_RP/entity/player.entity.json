@@ -32,7 +32,8 @@
           "variable.is_holding_right = 0.0;",
           "variable.is_blinking = 0.0;",
           "variable.last_blink_time = 0.0;",
-          "variable.hand_bob = 0.0;"
+          "variable.hand_bob = 0.0;",
+          "variable.melee_spear_equipped = 0.0;"
         ],
         "pre_animation": [
           "variable.helmet_layer_visible = !query.has_head_gear;",
@@ -56,7 +57,8 @@
           "variable.fp_melee_spear_attack_attachable_rotation_z": "public",
           "variable.tp_melee_spear_attack_attachable_position_z": "public",
           "variable.attack_time": "public",
-          "variable.item_use_normalized": "public"
+          "variable.item_use_normalized": "public",
+          "variable.melee_spear_equipped": "public"
         },
         "should_update_effects_offscreen": "1.0"
       },

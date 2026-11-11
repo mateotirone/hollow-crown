@@ -118,7 +118,7 @@ Use `hollow-crown-full-map.mcworld`, not a flat test world. That file is saved i
 3. All twelve rim stones should be lit (free). Pick one: you land next to its Plot Stone with a Keep Banner, are told what stood there, and about 20 seconds later get the plot's first book. Its last page sends you to Sister Wren in Millbrook.
 4. Ride or walk to Millbrook (north-east of Kingsrest). Wren stands under a small porch on the north side of the square. Ask her "Why is it always night?", then "Which clock was first?": she is cut off and you Slip.
 5. With a second player, choose "Start in Kingsrest without a home" instead: about 30 seconds later a carter should point you to Wren and Millbrook is added to your Ledger.
-6. Builder check: `/scriptevent siege:opening status` should say `map` and 15 of 15 done.
+6. Builder check: `/scriptevent siege:opening status` should say `map` and 16 of 16 done.
 
 ## Town hall, skill tree and paths (The Hollow Crown)
 
@@ -625,3 +625,10 @@ Shortcuts: `/scriptevent siege:hollow_beat <id>` replays one scene, `siege:hollo
 5. `/scriptevent siege:labels off`. ✅ All labels vanish; `on` brings them back.
 
 Tell me about: a label sitting inside the block or too high above it, a label covering an NPC's name, or anything clickable with no label.
+
+### Town hall build animation
+1. Stand at your cornerstone with a Longhouse built and run `/scriptevent siege:townhall_build 3`.
+2. ✅ The title "The Keep rises" shows once, the camera circles, and the action bar shows only a bar with a percentage that climbs steadily.
+3. ✅ The old Longhouse is gone completely before the Keep goes up: no leftover walls, roof or posts in or beside it.
+4. ✅ It is finished in about 15 seconds, and the Hall Cornerstone now stands two or three blocks to the side of the path, not in the doorway. Clicking it still opens the Town Hall menu, and breaking it still puts the Tree to sleep.
+5. Run `/scriptevent siege:townhall_build 5` straight after. ✅ The cornerstone is never wiped, and is moved again only if the bigger hall needs the spot.

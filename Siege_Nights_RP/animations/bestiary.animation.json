@@ -1140,6 +1140,18 @@
     }
    }
   },
+  "animation.siege_b.spinning_cog": {
+   "loop": true,
+   "bones": {
+    "cog": {
+     "rotation": [
+      "-query.life_time*1080",
+      "0",
+      "0"
+     ]
+    }
+   }
+  },
   "animation.siege_b.pale_huntsman": {
    "loop": true,
    "bones": {

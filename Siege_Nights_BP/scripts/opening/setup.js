@@ -44,7 +44,7 @@ export const setupState = () => store.data.state;
 
 const MARKER = "minecraft:gold_block";
 const KINGSREST = WELCOME.kingsrest;
-const AT_ONCE = 4; // places worked on together (a world may have 10 ticking areas; the Hollow keeps two)
+const AT_ONCE = 6; // places worked on together (a world may have 10 ticking areas; the Hollow keeps two)
 const LOAD_TRIES = 30; // checks, 10 ticks apart, before a place is given up on for now
 const SOFT = /(air|water|grass|fern|flower|snow_layer|leaves|vine|bush|sapling|tallgrass|dandelion|poppy|mushroom|_log$|deadbush)/;
 
@@ -103,6 +103,13 @@ export const TASKS = [
     },
   },
   {
+    id: "hall", x: WELCOME.hall.x, z: WELCOME.hall.z, radius: 2,
+    run(dim, finish) {
+      if (hallBuilt()) return finish();
+      raiseHall({ ...WELCOME.hall }, finish);
+    },
+  },
+  {
     id: "kingsrest", x: KINGSREST.x, z: KINGSREST.z, radius: 0,
     run(dim, finish) {
       let floor = takeMarker(dim, KINGSREST.x, KINGSREST.z);
@@ -110,13 +117,6 @@ export const TASKS = [
       if (floor === undefined) return;
       setKingsrestArrival({ x: KINGSREST.x, y: floor + 1, z: KINGSREST.z });
       finish();
-    },
-  },
-  {
-    id: "hall", x: WELCOME.hall.x, z: WELCOME.hall.z, radius: 2,
-    run(dim, finish) {
-      if (hallBuilt()) return finish();
-      raiseHall({ ...WELCOME.hall }, finish);
     },
   },
   ...PLOT_PLAN.map((plan) => ({
@@ -145,13 +145,14 @@ export const TASKS = [
 
 const left = () => TASKS.filter((t) => !store.data.done.includes(t.id));
 // Ready for a newcomer: the hall stands and the plots are on the map (Millbrook can finish while they read)
-export const openingReady = () => store.data.state === "plain"
-  || (store.data.state === "map" && ["hall", ...PLOT_PLAN.map((p) => `plot:${p.name}`)].every((id) => store.data.done.includes(id)));
+// Ready for a newcomer once the hall stands: the rim stones light up one by one as their Plot Stones go down, while
+// the newcomer is still reading the Waystone
+export const openingReady = () => store.data.state === "plain" || (store.data.state === "map" && store.data.done.includes("hall"));
 
 // ---------- Working through it, a few places at a time ----------
 
 const active = new Map(); // task id -> { area, tries, running }
-const areaNames = ["hc_open_0", "hc_open_1", "hc_open_2", "hc_open_3"];
+const areaNames = ["hc_open_0", "hc_open_1", "hc_open_2", "hc_open_3", "hc_open_4", "hc_open_5"];
 const overworld = () => world.getDimension(OVERWORLD);
 
 function command(dim, text) {
@@ -173,6 +174,7 @@ function finished(id) {
   if (!store.data.done.includes(id)) store.data.done.push(id);
   store.save();
   release(id);
+  if (store.data.state === "plain") for (const other of [...active.keys()]) release(other); // not the map: let the hall's chunks go
   if (!left().length && store.data.state === "map") {
     console.warn("[Hollow Crown] opening: the map is set up for the story opening");
     emit("openingSetUp", {});
@@ -190,8 +192,9 @@ function loaded(dim, task) {
 function step() {
   if (store.data.state === "plain") return;
   const dim = overworld();
-  // Until we know which world this is, only the Kingsrest check runs
-  const queue = store.data.state === "map" ? left() : left().filter((t) => t.id === "detect");
+  // Until we know which world this is, only the check runs, but the hall's chunks start loading alongside it so
+  // the hall can go up the moment the answer is yes
+  const queue = store.data.state === "map" ? left() : left().filter((t) => t.id === "detect" || t.id === "hall");
   for (const task of queue) {
     if (active.size >= AT_ONCE) break;
     if (active.has(task.id)) continue;
@@ -201,7 +204,7 @@ function step() {
     active.set(task.id, { area, tries: 0, running: false });
   }
   for (const [id, job] of [...active]) {
-    if (job.running) continue;
+    if (job.running || (store.data.state !== "map" && id !== "detect")) continue;
     const task = TASKS.find((t) => t.id === id);
     if (!loaded(dim, task)) {
       if (++job.tries <= LOAD_TRIES) continue;
@@ -233,6 +236,7 @@ addJoinStep(15, "map setup", async (player, { wait }) => {
   for (let i = 0; i < 85 && !openingReady(); i++) {
     if (!player.isValid) return;
     if (store.data.state === "unchecked" && i > 30) return; // something is wrong: let the welcome step cope
+    if (i === 0) player.onScreenDisplay.setTitle("§6Aldmere", { subtitle: "§7The road is long. One moment...", fadeInDuration: 10, stayDuration: 200, fadeOutDuration: 20 });
     if (i % 2 === 0) player.onScreenDisplay.setActionBar("§7The road is long. One moment...");
     await wait(20);
   }

@@ -12,6 +12,7 @@ import { STYLES, STYLE_IDS } from "../townhall/styles.js";
 import { styleFor } from "./buildings.js";
 import { siteProblem, styleOf } from "./plans.js";
 import { footprint } from "./rules.js";
+import { levelSite, foundationColumns } from "./ground.js";
 import { BLOCK_BUILDS } from "./blockdesigns.js";
 
 const OVERWORLD = "minecraft:overworld";
@@ -31,11 +32,17 @@ const planFor = (type, style) => {
 function start(key, job) {
   if (buildFor(`raised:${key}`)) return;
   const plan = planFor(job.type, job.style);
+  const at = locOf(key);
+  const forward = { x: job.fx, z: job.fz };
+  // on the highest ground under it, never half buried (ground.js); measured once so a restart keeps the height.
+  // The block itself stays where it was placed and the building leaves it alone.
+  if (!Number.isFinite(job.lift)) { job.lift = levelSite(world.getDimension(OVERWORLD), plan, at, forward).lift; store.save(); }
   startBuild({
-    id: `raised:${key}`, dimensionId: OVERWORLD, origin: locOf(key), forward: { x: job.fx, z: job.fz },
+    id: `raised:${key}`, dimensionId: OVERWORLD, origin: { ...at, y: at.y + job.lift }, forward,
     plan, style: styleFor(job.style), perTick: Math.max(4, Math.ceil(plan.cells.size / 300)),
+    skip: (x, y, z) => x === at.x && y === at.y && z === at.z,
     onDone() { delete store.data.pending[key]; store.save(); },
-  });
+  }).columns.unshift(...foundationColumns(plan));
 }
 
 world.afterEvents.playerPlaceBlock.subscribe(({ block, player }) => {

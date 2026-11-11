@@ -9,7 +9,12 @@
       }
     },
     "components": {
-      "minecraft:icon": "siege_guard_emberwaste_leggings",
+      "minecraft:icon": {
+        "textures": {
+          "default": "siege_guard_emberwaste_leggings",
+          "dyed": "siege_guard_emberwaste_leggings_dyed"
+        }
+      },
       "minecraft:display_name": {
         "value": "item.siege:guard_emberwaste_leggings.name"
       },

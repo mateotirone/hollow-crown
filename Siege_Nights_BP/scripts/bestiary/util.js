@@ -1,6 +1,6 @@
 // Small helpers shared by the bestiary files. No gameplay here.
 
-import { world, system, ItemStack, EquipmentSlot } from "@minecraft/server";
+import { world, system, ItemStack, EquipmentSlot, GameMode } from "@minecraft/server";
 import { ITEMS } from "./data.js";
 import { sfx } from "../core/sfx.js";
 
@@ -63,6 +63,8 @@ export function effect(entity, name, ticks, amplifier = 0, showParticles = false
 
 export function hurt(entity, amount, cause = "magic", by) {
   try {
+    // Creative players can't be hurt, so playtesters at least see what would have landed
+    if (entity.typeId === "minecraft:player" && entity.getGameMode?.() === GameMode.Creative) entity.onScreenDisplay.setActionBar(`§7(Creative) That hit you for §c${amount}§7.`);
     entity.applyDamage(amount, by ? { cause, damagingEntity: by } : { cause });
   } catch {
     // entity gone

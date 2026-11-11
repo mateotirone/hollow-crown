@@ -3,6 +3,7 @@
 
 // Core (no gameplay)
 import "./core/selftest.js";
+import "./core/clickable.js";
 import "./core/firstjoin.js";
 import "./core/storyteller.js";
 

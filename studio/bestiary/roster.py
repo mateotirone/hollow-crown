@@ -480,6 +480,16 @@ mob(id="reeve_cog", name="Reeve's Cog", family="boss_add", model=m_reeve, pal=RE
     collision=(0.8, 1.6), egg=("#b88c3c", "#46464f"), no_loot=True, anim_extra=[("gear0", "rotation", ["0", "0", "query.life_time*200"])],
     lore="A third of the Reeve, ticking on its own.")
 
+# The cog the Reeve throws: a spinning saw-toothed gear the fight script flies from his chest to where you stood (bosses.js flingCog)
+def m_flying_cog(m):
+    m.bone("root", [0, 0, 0]); m.bone("cog", [0, 8, 0], "root")
+    m.box("cog", [-1, 2, -6], [2, 12, 12], "gear"); m.box("cog", [-0.9, 2, -6], [1.8, 12, 12], "gear", rot=[45, 0, 0], pivot=[0, 8, 0])   # two squares make the round plate
+    for i in range(8): m.box("cog", [-0.75, 14.5, -1.5], [1.5, 3, 3], "brass", rot=[i * 45 + 22.5, 0, 0], pivot=[0, 8, 0])                # eight teeth between the corners
+    m.box("cog", [-1.5, 6, -2], [3, 4, 4], "iron"); m.box("cog", [-1.5, 7, -4.5], [3, 2, 9], "iron"); m.box("cog", [-1.5, 3.5, -1], [3, 9, 2], "iron")   # hub and spokes
+mob(id="spinning_cog", name="Spinning Cog", family="projectile", model=m_flying_cog, plan="none", pal=REEVE_PAL, scale=1.4, hp=1,
+    static=True, unbreakable=True, drifts=True, lifetime=4, collision=(0.4, 0.4), egg=None, no_loot=True,
+    anim_extra=[("cog", "rotation", ["-query.life_time*1080", "0", "0"])], lore="")
+
 def m_huntsman(m):
     biped(m, L=16, B=14, bw=7, bd=4, head=(7, 8, 7), arm=(3, 16, 3), mats={"head": "skull", "body": "cloak", "arm": "pale", "leg": "leather", "belt": "leather", "bracer": "leather"}, face="blank", nose=False)
     # a stag's skull worn as a face: the muzzle narrows in two steps, dark sockets with a cold light deep inside
