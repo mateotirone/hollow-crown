@@ -595,7 +595,7 @@ export const BODIES = {
  },
  "siege:clockwork_reeve": {
   "kind": 23,
-  "size": 1
+  "size": 2.286
  },
  "siege:reeve_cog": {
   "kind": 24,
@@ -603,23 +603,23 @@ export const BODIES = {
  },
  "siege:pale_huntsman": {
   "kind": 25,
-  "size": 1
+  "size": 1.481
  },
  "siege:ash_seneschal": {
   "kind": 26,
-  "size": 1.1
+  "size": 1.2
  },
  "siege:mother_of_changelings": {
   "kind": 27,
-  "size": 1
+  "size": 0.906
  },
  "siege:mother_echo": {
   "kind": 28,
-  "size": 1
+  "size": 0.906
  },
  "siege:warlord_king": {
   "kind": 29,
-  "size": 1.05
+  "size": 1.455
  },
  "siege:pretender_blade": {
   "kind": 30,

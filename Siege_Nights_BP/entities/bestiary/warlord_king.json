@@ -24,7 +24,7 @@
    },
    "minecraft:collision_box": {
     "width": 1.2,
-    "height": 3.0
+    "height": 2.75
    },
    "minecraft:nameable": {},
    "minecraft:physics": {},
@@ -36,7 +36,7 @@
     "value": 1.0
    },
    "minecraft:scale": {
-    "value": 1.05
+    "value": 1.455
    },
    "minecraft:damage_sensor": {
     "triggers": [

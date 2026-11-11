@@ -23,7 +23,7 @@
    },
    "minecraft:collision_box": {
     "width": 1.0,
-    "height": 3.4
+    "height": 3.31
    },
    "minecraft:nameable": {},
    "minecraft:physics": {},
@@ -33,6 +33,9 @@
    },
    "minecraft:knockback_resistance": {
     "value": 0.8
+   },
+   "minecraft:scale": {
+    "value": 0.906
    },
    "minecraft:damage_sensor": {
     "triggers": [
