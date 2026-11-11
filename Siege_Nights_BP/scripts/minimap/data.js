@@ -11,7 +11,8 @@ export const TILE = 64;           // blocks per tile; a view shows 3 x 3 tiles a
 export const TILES = 40;          // tiles per side
 export const SPOTS = 4;           // the arrow moves in a 4 x 4 grid inside the middle tile
 export const NEAR = 110;          // name a settlement when this close, otherwise the region
-const LETTERS = "abcdefghijklmnop";
+const LETTERS = "abcdefghijklmnop";   // arrow spot
+const DIRS = "qrstuvwy";               // arrow direction, north then clockwise
 const REGION_NAMES = ["Aldmere Vale", "Frostmarch", "Saltreach", "Blackfen", "Emberwaste"];
 
 // Places worth a name on the map: the twelve plots and the towns. Caves and sinks stay unnamed (they
@@ -54,19 +55,18 @@ const pad2 = (n) => String(n).padStart(2, "0");
 
 // What the HUD should show for one player. charted: false for other dimensions.
 export function hudString({ x, z, yaw, charted = true, off = false }) {
-  if (off) return `${KEY}0zoff_|`;
+  if (off) return `${KEY}qzoff___|`;
   const tx = Math.floor((x - ORIGIN) / TILE), tz = Math.floor((z - ORIGIN) / TILE);
-  if (!charted || tx < 0 || tz < 0 || tx >= TILES || tz >= TILES) return `${KEY}0znone|${charted ? "Beyond the map" : "Uncharted"}`;
+  if (!charted || tx < 0 || tz < 0 || tx >= TILES || tz >= TILES) return `${KEY}qznone__|${charted ? "Beyond the map" : "Uncharted"}`;
   const step = TILE / SPOTS;
   const sx = Math.floor((x - ORIGIN - tx * TILE) / step), sz = Math.floor((z - ORIGIN - tz * TILE) / step);
-  return `${KEY}${arrowDir(yaw)}${LETTERS[sz * SPOTS + sx]}${pad2(tx)}${pad2(tz)}|${cleanLabel(placeName(x, z))}`;
+  return `${KEY}${DIRS[arrowDir(yaw)]}${LETTERS[sz * SPOTS + sx]}x${pad2(tx)}z${pad2(tz)}|${cleanLabel(placeName(x, z))}`;
 }
 
 // The same cutting the HUD does (tools/minimap_ui.py), so the tests can check the two agree.
 export function readHud(title) {
   const s = title.split(KEY).join("");
   const dp = s.slice(0, 2), d = dp.slice(0, 1), p = dp.split(d).join("");
-  const r = s.split(dp).join("");
-  const t = r.slice(0, 4);
-  return { dir: d, spot: p, tile: t, label: r.split(r.slice(0, 5)).join("") };
+  const t = s.split(dp).join("").slice(0, 6);
+  return { dir: d, spot: p, tile: t, label: s.split(s.slice(0, 9)).join("") };
 }
