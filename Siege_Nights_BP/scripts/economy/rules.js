@@ -19,6 +19,16 @@ export function appetite(good, before) {
   return Math.max(good.floor ?? ECON.floor, 1 - (good.drop ?? ECON.drop) * steps);
 }
 
+// Units of a good one player can sell to one trader in a day before it stops buying: past the point where the price
+// hits its floor, ECON.stopLots more lots (or the good's own `stop`). Keeps farms from printing coins forever.
+export function stopAt(good) {
+  if (good.stop) return good.stop;
+  const want = good.want ?? good.lot * ECON.wantLots;
+  const step = good.step ?? good.lot * ECON.stepLots;
+  const steps = Math.ceil((1 - (good.floor ?? ECON.floor)) / (good.drop ?? ECON.drop) - 1e-9);
+  return want + step * steps + good.lot * ECON.stopLots;
+}
+
 // Coins paid for selling `count` units when `before` were already sold today (whole coins, rounded down)
 export function payout(good, count, before = 0, pays = 1) {
   const unit = (good.price / good.lot) * pays;

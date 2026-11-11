@@ -131,7 +131,7 @@ write(BP + "entities/dragons/dragon.json", {"format_version": "1.26.30", "minecr
         "minecraft:is_tamed": {},
         "minecraft:tameable": {"probability": 0.0, "tame_items": []},
         "minecraft:knockback_resistance": {"value": 0.7},
-        "minecraft:pushable": {"is_pushable": True, "is_pushable_by_piston": True},
+        "minecraft:pushable_by_entity": {}, "minecraft:pushable_by_block": {},  # format 1.26.10+: "minecraft:pushable" is no longer parsed
         "minecraft:breathable": {"total_supply": 15, "suffocate_time": 0},
         "minecraft:follow_range": {"value": 32, "max": 32},
         "minecraft:conditional_bandwidth_optimization": {},

@@ -253,7 +253,8 @@ def anim_for(m, model):
         for i in range(6): rot(f"seg{i}", y=f"math.sin(query.life_time*200-{i*45})*9", x=f"math.cos(query.life_time*150-{i*45})*3")
     for bone, ch, val in m.get("anim_extra", []):
         if bone in names: b.setdefault(bone, {})[ch] = val
-    return {"loop": True, "bones": b}
+    # An empty "bones" object is a content-log error in game; a still model needs no bones entry
+    return {"loop": True, "bones": b} if b else {"loop": True, "animation_length": 1.0}
 
 def client_entity(m, tex_w=None):
     mid = m["id"]
@@ -271,7 +272,9 @@ def loot(drops):
     pools = []
     for name, lo, hi, chance in drops:
         p = {"rolls": 1, "entries": [{"type": "item", "name": name, "weight": 1, "functions": [{"function": "set_count", "count": {"min": lo, "max": hi}}]}]}
-        if chance < 1: p["conditions"] = [{"condition": "random_chance", "chance": chance}]
+        conds = [{"condition": "killed_by_player"}] if name in ("siege:coin", "siege:gold_coin") else []  # no coins from mob farms
+        if chance < 1: conds.append({"condition": "random_chance", "chance": chance})
+        if conds: p["conditions"] = conds
         pools.append(p)
     return {"pools": pools}
 

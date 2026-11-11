@@ -302,7 +302,11 @@ function standRanks(f, place) {
     const e = f.place(MORVANE.suit, spots[i]);
     if (!e) continue;
     try { e.nameTag = "§7Standing Rank"; } catch { /* cosmetic */ }
-    if (i === truth) { s.trueId = e.id; freeze(e, true); continue; }
+    if (i === truth) { // his suit holds the blade in its LEFT hand; the empty ones hold theirs in the right
+      s.trueId = e.id; freeze(e, true);
+      try { e.triggerEvent("siege:bare_on"); } catch { /* the light on the hand still gives him away */ }
+      continue;
+    }
     if (toWake > 0) { toWake--; s.awake.add(e.id); } else freeze(e, true);
   }
 }
@@ -372,7 +376,7 @@ const TICK = {
       return standRanks(f, place);
     }
     if (f.tick % 40) return;
-    // the tell: a cold light on the LEFT hand of his suit, on the right hand of the empty ones
+    // the tell: his suit holds its blade left-handed (model), and a cold light sits on that hand; on the right hand of the empty ones
     for (const e of f.adds(MORVANE.suit)) {
       try {
         const v = e.getViewDirection(), side = e.id === s.trueId ? 1 : -1; // +1 is the entity's left
@@ -533,6 +537,7 @@ function tollRing(f, damage) {
     f.after(step * 5, () => {
       const r = step * 2 + 3;
       ring(f.dim, { x: c.x, y: c.y + 0.3, z: c.z }, r, "minecraft:sonic_explosion", Math.max(6, r));
+      particle(f.dim, "siege:choir_ring", { x: c.x, y: c.y + 0.4, z: c.z });
       for (const p of f.players()) {
         if (Math.abs(flat(p.location, c) - r) > 1.6 || !p.isOnGround) continue;
         hurt(p, damage, "magic");
@@ -576,7 +581,9 @@ registerBoss({
         const t = c && f.players().find((p) => p.id === c.id);
         if (!t) return;
         const v = t.getViewDirection();
+        particle(f.dim, "siege:vein_spark", f.entity.getHeadLocation()); // where he was
         try { f.entity.teleport({ x: t.location.x - v.x * 1.6, y: t.location.y, z: t.location.z - v.z * 1.6 }, { facingLocation: t.location }); } catch { /* blocked */ }
+        particle(f.dim, "siege:vein_spark", f.entity.getHeadLocation()); // where he is
         if (flat(t.location, c.at) < 3) hurt(t, dmg(f, 10), "entityAttack", f.entity);
       } },
     { id: "tollmen", every: 600, windup: 20, warn: "The Crown tolls. Tollmen answer!", sound: "block.bell.hit",

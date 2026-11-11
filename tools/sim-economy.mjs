@@ -68,4 +68,9 @@ eq(coinsMod.charge(c, 50), true, "Creative pays nothing");
 c.give("minecraft:wheat", 32);
 eq(shops.sell(c, "farmer", undefined, wheat, 32), 12, "a Creative sale still pays");
 eq(c.cmds, ["clear @s minecraft:wheat -1 32"], "and clears the goods");
+// the daily stop: the Moneyer takes 128 ingots a day from one player, no more (64 were sold above, 100 in all)
+p.give("minecraft:iron_ingot", 50);
+eq(shops.sell(p, "moneyer", undefined, iron, 50), 28 * 4, "only 28 more ingots: the Moneyer stops at 128 a day");
+eq(p.count("minecraft:iron_ingot"), 22, "the rest stay in the pockets");
+eq(shops.sell(p, "moneyer", undefined, iron, 22), 0, "and he takes nothing more today");
 console.log(`\nALL ${step} STEPS OK`);

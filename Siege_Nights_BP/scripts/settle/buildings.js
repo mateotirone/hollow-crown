@@ -24,7 +24,10 @@ const EXTRA = {
 const cache = {};
 export function styleFor(id) {
   const base = STYLES[id] ?? STYLES.vale;
-  cache[id] ??= { ...base, id, roles: { ...EXTRA, ...base.roles } };
+  // flat roofs and snowy ridges are laid in the region's own Roof Shingles (there are no shingle stairs or slabs yet,
+  // so pitched roofs keep the style's own)
+  const shingles = `siege:roof_shingles${STYLES[id] && id !== "vale" ? `_${id}` : ""}`;
+  cache[id] ??= { ...base, id, roles: { ...EXTRA, ...base.roles, roofBlock: [shingles, ...(base.roles.roofBlock ?? [])] } };
   return cache[id];
 }
 

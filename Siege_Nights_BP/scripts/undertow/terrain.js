@@ -18,7 +18,7 @@ import { hash, fbm, smooth } from "./noise.js";
 import { riverDistance, RIVER_HALF_WIDTH } from "./rivers.js";
 import { siteAt, roadAt, SITE_SKIRT, ROAD_HALF_WIDTH, ROAD_SHOULDER } from "./roads.js";
 
-export { hash, fbm };
+export { hash, fbm } from "./noise.js";
 
 export const B = {
   floor: "minecraft:blackstone",

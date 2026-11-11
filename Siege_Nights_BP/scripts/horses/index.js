@@ -12,12 +12,12 @@ import {
 import { recordOf, horsesOf, saveRecord, newUid, meta, stablesLevelFor, rosterRoom } from "./store.js";
 import { STEED, uidOf, valid, entityOf, spawnSteed, applyRecord, readGear, refresh, scanSteeds, bannerColorOf } from "./steed.js";
 import { ridingTick, useCrop, undertowStep, mountOf } from "./riding.js";
-import { horseMenu, stablesMenu, stallMenu, buyFoal, give, pay, isBuilder, sheetText } from "./menus.js";
+import { horseMenu, stablesMenu, buyFoal, give, pay, isBuilder, sheetText } from "./menus.js";
 import "./tests.js";
 import "./showcase.js";
 import { sfx } from "../core/sfx.js";
 
-export { stallMenu }; // the rail stations use the same stalls
+export { stallMenu } from "./menus.js"; // the rail stations use the same stalls
 export { isGalloping } from "./riding.js";
 
 export const STABLES = "siege:stables";

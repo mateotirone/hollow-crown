@@ -185,10 +185,22 @@
     "siege_veinstone": {
       "textures": {
         "variations": [
-          { "path": "textures/blocks/siege_veinstone", "weight": 5 },
-          { "path": "textures/blocks/siege_veinstone_1", "weight": 2 },
-          { "path": "textures/blocks/siege_veinstone_2", "weight": 2 },
-          { "path": "textures/blocks/siege_veinstone_3", "weight": 1 }
+          {
+            "path": "textures/blocks/siege_veinstone",
+            "weight": 5
+          },
+          {
+            "path": "textures/blocks/siege_veinstone_1",
+            "weight": 2
+          },
+          {
+            "path": "textures/blocks/siege_veinstone_2",
+            "weight": 2
+          },
+          {
+            "path": "textures/blocks/siege_veinstone_3",
+            "weight": 1
+          }
         ]
       }
     },
@@ -758,6 +770,171 @@
     },
     "siege_glint_cluster": {
       "textures": "textures/blocks/siege_glint_cluster"
+    },
+    "siege_palisade_vale": {
+      "textures": "textures/blocks/regional/siege_palisade_vale"
+    },
+    "siege_wall_planks_vale": {
+      "textures": "textures/blocks/regional/siege_wall_planks_vale"
+    },
+    "siege_roof_shingles_vale": {
+      "textures": "textures/blocks/regional/siege_roof_shingles_vale"
+    },
+    "siege_palisade_frostmarch": {
+      "textures": "textures/blocks/regional/siege_palisade_frostmarch"
+    },
+    "siege_wall_planks_frostmarch": {
+      "textures": "textures/blocks/regional/siege_wall_planks_frostmarch"
+    },
+    "siege_roof_shingles_frostmarch": {
+      "textures": "textures/blocks/regional/siege_roof_shingles_frostmarch"
+    },
+    "siege_castle_gate_frostmarch": {
+      "textures": "textures/blocks/regional/siege_castle_gate_frostmarch"
+    },
+    "siege_castle_gate_frostmarch_open": {
+      "textures": "textures/blocks/regional/siege_castle_gate_frostmarch_open"
+    },
+    "siege_castle_gate_frostmarch_iron": {
+      "textures": "textures/blocks/regional/siege_castle_gate_frostmarch_iron"
+    },
+    "siege_castle_gate_frostmarch_diamond": {
+      "textures": "textures/blocks/regional/siege_castle_gate_frostmarch_diamond"
+    },
+    "siege_castle_gate_frostmarch_netherite": {
+      "textures": "textures/blocks/regional/siege_castle_gate_frostmarch_netherite"
+    },
+    "siege_portcullis_frostmarch": {
+      "textures": "textures/blocks/regional/siege_portcullis_frostmarch"
+    },
+    "siege_portcullis_frostmarch_open": {
+      "textures": "textures/blocks/regional/siege_portcullis_frostmarch_open"
+    },
+    "siege_portcullis_frostmarch_iron": {
+      "textures": "textures/blocks/regional/siege_portcullis_frostmarch_iron"
+    },
+    "siege_portcullis_frostmarch_diamond": {
+      "textures": "textures/blocks/regional/siege_portcullis_frostmarch_diamond"
+    },
+    "siege_portcullis_frostmarch_netherite": {
+      "textures": "textures/blocks/regional/siege_portcullis_frostmarch_netherite"
+    },
+    "siege_palisade_saltreach": {
+      "textures": "textures/blocks/regional/siege_palisade_saltreach"
+    },
+    "siege_wall_planks_saltreach": {
+      "textures": "textures/blocks/regional/siege_wall_planks_saltreach"
+    },
+    "siege_roof_shingles_saltreach": {
+      "textures": "textures/blocks/regional/siege_roof_shingles_saltreach"
+    },
+    "siege_castle_gate_saltreach": {
+      "textures": "textures/blocks/regional/siege_castle_gate_saltreach"
+    },
+    "siege_castle_gate_saltreach_open": {
+      "textures": "textures/blocks/regional/siege_castle_gate_saltreach_open"
+    },
+    "siege_castle_gate_saltreach_iron": {
+      "textures": "textures/blocks/regional/siege_castle_gate_saltreach_iron"
+    },
+    "siege_castle_gate_saltreach_diamond": {
+      "textures": "textures/blocks/regional/siege_castle_gate_saltreach_diamond"
+    },
+    "siege_castle_gate_saltreach_netherite": {
+      "textures": "textures/blocks/regional/siege_castle_gate_saltreach_netherite"
+    },
+    "siege_portcullis_saltreach": {
+      "textures": "textures/blocks/regional/siege_portcullis_saltreach"
+    },
+    "siege_portcullis_saltreach_open": {
+      "textures": "textures/blocks/regional/siege_portcullis_saltreach_open"
+    },
+    "siege_portcullis_saltreach_iron": {
+      "textures": "textures/blocks/regional/siege_portcullis_saltreach_iron"
+    },
+    "siege_portcullis_saltreach_diamond": {
+      "textures": "textures/blocks/regional/siege_portcullis_saltreach_diamond"
+    },
+    "siege_portcullis_saltreach_netherite": {
+      "textures": "textures/blocks/regional/siege_portcullis_saltreach_netherite"
+    },
+    "siege_palisade_emberwaste": {
+      "textures": "textures/blocks/regional/siege_palisade_emberwaste"
+    },
+    "siege_wall_planks_emberwaste": {
+      "textures": "textures/blocks/regional/siege_wall_planks_emberwaste"
+    },
+    "siege_roof_shingles_emberwaste": {
+      "textures": "textures/blocks/regional/siege_roof_shingles_emberwaste"
+    },
+    "siege_castle_gate_emberwaste": {
+      "textures": "textures/blocks/regional/siege_castle_gate_emberwaste"
+    },
+    "siege_castle_gate_emberwaste_open": {
+      "textures": "textures/blocks/regional/siege_castle_gate_emberwaste_open"
+    },
+    "siege_castle_gate_emberwaste_iron": {
+      "textures": "textures/blocks/regional/siege_castle_gate_emberwaste_iron"
+    },
+    "siege_castle_gate_emberwaste_diamond": {
+      "textures": "textures/blocks/regional/siege_castle_gate_emberwaste_diamond"
+    },
+    "siege_castle_gate_emberwaste_netherite": {
+      "textures": "textures/blocks/regional/siege_castle_gate_emberwaste_netherite"
+    },
+    "siege_portcullis_emberwaste": {
+      "textures": "textures/blocks/regional/siege_portcullis_emberwaste"
+    },
+    "siege_portcullis_emberwaste_open": {
+      "textures": "textures/blocks/regional/siege_portcullis_emberwaste_open"
+    },
+    "siege_portcullis_emberwaste_iron": {
+      "textures": "textures/blocks/regional/siege_portcullis_emberwaste_iron"
+    },
+    "siege_portcullis_emberwaste_diamond": {
+      "textures": "textures/blocks/regional/siege_portcullis_emberwaste_diamond"
+    },
+    "siege_portcullis_emberwaste_netherite": {
+      "textures": "textures/blocks/regional/siege_portcullis_emberwaste_netherite"
+    },
+    "siege_palisade_blackfen": {
+      "textures": "textures/blocks/regional/siege_palisade_blackfen"
+    },
+    "siege_wall_planks_blackfen": {
+      "textures": "textures/blocks/regional/siege_wall_planks_blackfen"
+    },
+    "siege_roof_shingles_blackfen": {
+      "textures": "textures/blocks/regional/siege_roof_shingles_blackfen"
+    },
+    "siege_castle_gate_blackfen": {
+      "textures": "textures/blocks/regional/siege_castle_gate_blackfen"
+    },
+    "siege_castle_gate_blackfen_open": {
+      "textures": "textures/blocks/regional/siege_castle_gate_blackfen_open"
+    },
+    "siege_castle_gate_blackfen_iron": {
+      "textures": "textures/blocks/regional/siege_castle_gate_blackfen_iron"
+    },
+    "siege_castle_gate_blackfen_diamond": {
+      "textures": "textures/blocks/regional/siege_castle_gate_blackfen_diamond"
+    },
+    "siege_castle_gate_blackfen_netherite": {
+      "textures": "textures/blocks/regional/siege_castle_gate_blackfen_netherite"
+    },
+    "siege_portcullis_blackfen": {
+      "textures": "textures/blocks/regional/siege_portcullis_blackfen"
+    },
+    "siege_portcullis_blackfen_open": {
+      "textures": "textures/blocks/regional/siege_portcullis_blackfen_open"
+    },
+    "siege_portcullis_blackfen_iron": {
+      "textures": "textures/blocks/regional/siege_portcullis_blackfen_iron"
+    },
+    "siege_portcullis_blackfen_diamond": {
+      "textures": "textures/blocks/regional/siege_portcullis_blackfen_diamond"
+    },
+    "siege_portcullis_blackfen_netherite": {
+      "textures": "textures/blocks/regional/siege_portcullis_blackfen_netherite"
     },
     "siege_veilcap_cap": {
       "textures": "textures/blocks/siege_veilcap_cap"

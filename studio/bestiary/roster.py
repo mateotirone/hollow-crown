@@ -442,6 +442,9 @@ mob(id="inquisitor", name="Inquisitor", family="order", model=m_inquisitor,
 # Bosses
 # ======================================================================================
 BOSSES = []
+# Boss heights in blocks are Mateo's picks (2026-11-11; a player is 1.8): Reeve 7, Huntsman 5, Bride 2.2, Seneschal 3, Mother 3,
+# Warlord King 4. collision height = the model's own height (top cube / 16) and scale = target / that, since minecraft:scale
+# grows the model and the hitbox together.
 def boss(**kw): kw["boss"] = True; BOSSES.append(kw); MOBS.append(kw); return kw
 
 def m_reeve(m, small=False):
@@ -468,7 +471,7 @@ def m_reeve(m, small=False):
         m.box(nm, [s * 4 - 3, 6, -3], [6, 2, 6], "gear", mirror=s > 0); m.box(nm, [s * 4 - 3.5, 0, -5], [7, 2, 9], "brass", mirror=s > 0)                      # knee collar, cast foot
 REEVE_PAL = P(brass=GOLD, iron=DARKIRON, wood=WOOD, gear={"c": (184, 140, 60), "style": "metal"})
 boss(id="clockwork_reeve", name="The Clockwork Reeve", region="Aldmere Vale", model=m_reeve, pal=REEVE_PAL,
-     hp=320, speed=0.25, dmg=9, kb=1.0, collision=(1.4, 2.9), egg=("#dab046", "#46464f"),
+     hp=320, speed=0.25, dmg=9, kb=1.0, collision=(1.4, 3.06), scale=2.286, egg=("#dab046", "#46464f"),
      anim_extra=[("gear0", "rotation", ["0", "0", "query.life_time*90"]), ("gear1", "rotation", ["0", "0", "-query.life_time*120"]),
                  ("gear2", "rotation", ["0", "0", "query.life_time*160"]), ("hand_minute", "rotation", ["0", "0", "-query.life_time*360"]),
                  ("hand_hour", "rotation", ["0", "0", "-query.life_time*30"]), ("pendulum", "rotation", ["0", "0", "math.sin(query.life_time*180)*25"])],
@@ -498,7 +501,7 @@ def m_huntsman(m):
     hold(m, "bow", side="l", haft="antler", long=26)
 BOSS_HUNT = P(skull={"c": (226, 226, 220), "style": "bone"}, jaw={"c": (186, 184, 172), "style": "bone"}, void=(14, 18, 26), cloak={"c": (190, 200, 210), "style": "fur"}, pale=(210, 214, 216), leather={"c": (90, 80, 76), "style": "cloth"}, antler={"c": (200, 226, 240), "style": "bone"}, eye=(140, 230, 255))
 boss(id="pale_huntsman", name="The Pale Huntsman", region="Frostmarch", model=m_huntsman, pal=BOSS_HUNT,
-     hp=360, speed=0.33, dmg=8, kb=0.7, collision=(0.9, 3.0), ranged_def=("minecraft:arrow", None), egg=("#e2e2dc", "#8ce6ff"),
+     hp=360, speed=0.33, dmg=8, kb=0.7, collision=(0.9, 3.38), scale=1.481, ranged_def=("minecraft:arrow", None), egg=("#e2e2dc", "#8ce6ff"),
      lore="He led Rimehold's hunters onto the frozen lake one night, and only he walked back off it.")
 
 def m_bride(m):
@@ -530,7 +533,7 @@ def m_seneschal(m):
     shield(m, size=(16, 26), shield="shield", trim="gold", kite=True)
 boss(id="ash_seneschal", name="The Ash Seneschal", region="Emberwaste", model=m_seneschal,
      pal=P(face={"c": (200, 190, 170), "style": "stone"}, plate={"c": (90, 80, 76), "style": "metal"}, tabard={"c": (150, 60, 30), "style": "cloth"}, gold=GOLD, shield={"c": (120, 100, 80), "style": "metal"}),
-     hp=420, speed=0.27, dmg=12, kb=1.0, collision=(1.2, 3.2), scale=1.1, resist=dict(fire=True), egg=("#5a504c", "#963c1e"),
+     hp=420, speed=0.27, dmg=12, kb=1.0, collision=(1.2, 2.5), scale=1.2, resist=dict(fire=True), egg=("#5a504c", "#963c1e"),
      lore="Sunscar chiseled a face off every statue. The Seneschal chiseled off his own.")
 
 def m_mother(m):
@@ -548,10 +551,10 @@ def m_mother(m):
     for y in (22, 25, 28): m.box("body", [-3, y, -3.2], [6, 1, 1], "root")
 MOTHER_PAL = P(skin=(130, 150, 110), moss={"c": (60, 80, 44), "style": "fur"}, root={"c": (80, 60, 40), "style": "wood"}, eye=(255, 230, 80))
 boss(id="mother_of_changelings", name="The Mother of Changelings", region="Blackfen", model=m_mother, pal=MOTHER_PAL,
-     hp=380, speed=0.3, dmg=9, kb=0.8, collision=(1.0, 3.4), egg=("#3c502c", "#ffe650"),
+     hp=380, speed=0.3, dmg=9, kb=0.8, collision=(1.0, 3.31), scale=0.906, egg=("#3c502c", "#ffe650"),
      lore="Every changeling in Mirelight is one of her children. She hides among them, and she has a true name she would kill to keep.")
 mob(id="mother_echo", name="The Mother of Changelings", family="boss_add", model=m_mother, pal=MOTHER_PAL, hp=10, speed=0.3, dmg=4,
-    collision=(1.0, 3.4), egg=("#3c502c", "#a0a050"), no_loot=True, lore="One of her masks.")
+    collision=(1.0, 3.31), scale=0.906, egg=("#3c502c", "#a0a050"), no_loot=True, lore="One of her masks.")
 
 def m_king(m):
     biped(m, L=14, B=16, bw=10, bd=6, head=(8, 9, 8), arm=(5, 16, 5), mats={"head": "skin", "body": "plate", "arm": "plate", "leg": "plate", "belt": "crown"}, face=None, nose=False)
@@ -567,7 +570,7 @@ def m_king(m):
     hold(m, "greatsword", bone="blade", blade="steel", hilt="crown")
 boss(id="warlord_king", name="The Warlord King", region="Grand Siege", model=m_king,
      pal=P(skin=SKIN, plate={"c": (56, 50, 54), "style": "metal"}, crown=GOLD, shard={"c": (200, 220, 255), "style": "glow"}, cape={"c": (110, 20, 24), "style": "cloth"}, steel=IRON, eye=(255, 60, 40)),
-     hp=300, speed=0.3, dmg=12, kb=1.0, collision=(1.2, 3.0), scale=1.05, raider=True, egg=("#383236", "#dab046"),
+     hp=300, speed=0.3, dmg=12, kb=1.0, collision=(1.2, 2.75), scale=1.455, raider=True, egg=("#383236", "#dab046"),
      lore="Something in his crown catches the light wrong. He has lost before. He keeps coming back.")
 
 def hollow_crown(m, top, bone="hcrown", parent="head"):
@@ -649,7 +652,13 @@ boss(id="oswin_the_last", name="Morvane", region="The Hollow", model=m_oswin, pa
      hp=1000, speed=0.31, dmg=13, kb=1.0, collision=(1.2, 3.0), scale=1.05, bare_flag=True, anim_extra=[("hcrown", "scale", "query.is_charged ? 0 : 1")],
      swim=True, egg=("#3c5460", "#c8f0ff"),
      lore="He holds the Seat at the bottom of the Hollow, and he has been waiting a long time for someone to get this far.")
-mob(id="oswin_reflection", name="Standing Rank", family="boss_add", model=m_oswin, material="entity_alphablend",
+def m_rank(m):
+    """A Standing Rank: Morvane's armour with a blade for either hand. The empty suits show the right-hand one, the suit he is
+    really in shows the left (he is left-handed). Which one shows is the entity's charged flag (events siege:bare_on / siege:bare_off)."""
+    m_oswin(m)
+    hold(m, "greatsword", side="r", bone="blade_r", blade="steel", hilt="crown", long=24)
+mob(id="oswin_reflection", name="Standing Rank", family="boss_add", model=m_rank, material="entity_alphablend", bare_flag=True,
+    anim_extra=[("blade", "scale", "query.is_charged ? 1 : 0"), ("blade_r", "scale", "query.is_charged ? 0 : 1")],
     pal={**OSWIN_PAL, "plate": {"c": (170, 210, 230, 170), "style": "metal"}, "cape": {"c": (120, 160, 200, 150), "style": "cloth"}, "tabard": {"c": (150, 190, 210, 160), "style": "cloth"}, "skin": (190, 220, 230, 190)},
     hp=120, speed=0.33, dmg=9, kb=1.0, collision=(1.2, 3.0), scale=1.05, egg=("#a0d2e6", "#ffffff"), no_loot=True,
     lore="Empty armour in his shape, standing in ranks. One of them is not empty.")
@@ -756,8 +765,9 @@ def m_at_desk(m, age):
         m.box("head", [-3.5, 19, -3.5], [7, 3, 7], "hair", inflate=0.2); m.box("head", [-3.5, 16, 2.5], [7, 4, 1], "hair", inflate=0.2)      # a mop of hair
     elif age == "king":
         biped(m, L=12, B=12, bw=8, bd=4, head=(8, 8, 8), arm=(4, 12, 4), mats={"head": "skin", "body": "robe", "arm": "robe", "leg": "robe", "belt": "trim", "shoulder": "trim"}, face="eyes")
-        m.box("head", [-4.5, 31, -4.5], [9, 2, 9], "crown"); 
-        for x in (-4.5, -0.5, 3.5): m.box("head", [x, 33, -4.5], [1, 2, 1], "crown")                                                           # a plain gold circlet
+        m.box("head", [-4, 31, -4], [8, 1, 8], "hair", inflate=0.2); m.box("head", [-4, 25, 2.5], [8, 6, 1.5], "hair", inflate=0.2)            # grey hair, cut short
+        for o, sz in (([-4.5, 31, -4.5], [9, 1.5, 1]), ([-4.5, 31, 3.5], [9, 1.5, 1]), ([-4.5, 31, -3.5], [1, 1.5, 7]), ([3.5, 31, -3.5], [1, 1.5, 7])): m.box("head", o, sz, "crown")   # a plain gold circlet: a ring, not a cap
+        for x in (-3.5, -0.5, 2.5): m.box("head", [x, 32.5, -4.6], [1, 1.5, 1], "crown")
         m.box("head", [-3, 22, -4.6], [6, 3, 1], "hair")                                                                                       # a beard going grey
         cloak(m, "robe", length=20, width=10)
     else:

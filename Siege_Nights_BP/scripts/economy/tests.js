@@ -1,12 +1,44 @@
 import { addTests, assert, assertEqual } from "../core/tests.js";
 import { ItemTypes } from "@minecraft/server";
-import { ECON, JOBS, JOB_IDS, LINES, REGIONS, COIN, GOLD } from "./config.js";
-import { regional, appetite, payout, cost, asCoins, coins, worth, fromEmeralds, loopholes } from "./rules.js";
+import { ECON, JOBS, JOB_IDS, LINES, REGIONS, COIN, GOLD, TOWNS, TOWN_RING } from "./config.js";
+import { WARDS } from "../plots/config.js";
+import { regional, appetite, payout, cost, asCoins, coins, worth, fromEmeralds, loopholes, stopAt } from "./rules.js";
 
 const iron = JOBS.moneyer.buys.find((g) => g.id === "minecraft:iron_ingot");
 const wheat = JOBS.farmer.buys.find((g) => g.id === "minecraft:wheat");
 
 addTests("economy", {
+  "farms can't print coins: every trader stops buying a good for the day": () => {
+    assertEqual(stopAt(iron), 128); // 64 at 8, 64 at 4
+    assertEqual(payout(iron, stopAt(iron)), 64 * 8 + 64 * 4);
+    for (const job of Object.values(JOBS)) for (const good of job.buys) {
+      const stop = stopAt(good);
+      assert(stop > (good.want ?? good.lot * ECON.wantLots), `${good.id}: the stop comes after the full-price share`);
+      assertEqual(appetite(good, stop - 1), good.floor ?? ECON.floor);
+    }
+  },
+  // the job's place in this list is its skin (siege:job on siege:job_npc, written by studio/build_economy.py): only add at the end
+  "each region's Smith sells its own Castle Guard set, a little over the plain one": () => {
+    for (const region of REGIONS) assertEqual(JOBS.smith.sells.filter((good) => good.region === region).length, 4);
+    const plain = { helmet: 40, chestplate: 72, leggings: 56, boots: 40 }; // Quartermaster, trading/quartermaster_trades.json
+    for (const good of JOBS.smith.sells.filter((g) => g.region)) {
+      const piece = good.id.split("_").pop();
+      assert(good.flat && good.price > plain[piece] && good.price <= plain[piece] * 1.5, good.id);
+    }
+  },
+  "every town of the map has traders, inside the town, and only Kingsrest has the Moneyer": () => {
+    for (const town of TOWNS) {
+      const ward = WARDS.find((w) => w.name === town.name);
+      assert(ward, `${town.name} is a town on the map`);
+      assert(REGIONS.includes(town.region), `${town.name} region`);
+      assert(town.jobs.length && town.jobs.every((j) => JOBS[j]), `${town.name} jobs`);
+      assertEqual(new Set(town.jobs).size, town.jobs.length);
+      assert(TOWN_RING + 2 < ward.r, `${town.name}: traders stand inside the protected town`);
+    }
+    assertEqual(TOWNS.filter((t) => t.jobs.includes("moneyer")).map((t) => t.name), ["Kingsrest"]);
+  },
+  "job order matches the painted skins": () =>
+    assertEqual(JOB_IDS.join(","), "farmer,woodcutter,quarryman,smith,fisher,hunter,herbalist,moneyer"),
   "the coin is backed by iron: 8 in, 10 out": () => {
     assertEqual(payout(iron, 1), 8);
     assertEqual(cost(JOBS.moneyer.sells[0], 1), 10);

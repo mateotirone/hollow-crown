@@ -17,12 +17,12 @@
    "bones": [
     {
      "name": "weapon",
+     "binding": "q.item_slot_to_bone_name(c.item_slot)",
      "pivot": [
       0,
-      0,
+      24,
       0
      ],
-     "binding": "q.item_slot_to_bone_name(c.item_slot)",
      "cubes": [
       {
        "origin": [

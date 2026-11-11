@@ -40,7 +40,7 @@
       "minecraft:material_instances": {
         "*": {
           "texture": "siege_banner_pole",
-          "render_method": "opaque"
+          "render_method": "alpha_test"
         },
         "cloth": {
           "texture": "siege_banner_red",
@@ -124,7 +124,7 @@
           "minecraft:material_instances": {
             "*": {
               "texture": "siege_banner_pole",
-              "render_method": "opaque"
+              "render_method": "alpha_test"
             },
             "cloth": {
               "texture": "siege_banner_white",
@@ -139,7 +139,7 @@
           "minecraft:material_instances": {
             "*": {
               "texture": "siege_banner_pole",
-              "render_method": "opaque"
+              "render_method": "alpha_test"
             },
             "cloth": {
               "texture": "siege_banner_orange",
@@ -154,7 +154,7 @@
           "minecraft:material_instances": {
             "*": {
               "texture": "siege_banner_pole",
-              "render_method": "opaque"
+              "render_method": "alpha_test"
             },
             "cloth": {
               "texture": "siege_banner_magenta",
@@ -169,7 +169,7 @@
           "minecraft:material_instances": {
             "*": {
               "texture": "siege_banner_pole",
-              "render_method": "opaque"
+              "render_method": "alpha_test"
             },
             "cloth": {
               "texture": "siege_banner_light_blue",
@@ -184,7 +184,7 @@
           "minecraft:material_instances": {
             "*": {
               "texture": "siege_banner_pole",
-              "render_method": "opaque"
+              "render_method": "alpha_test"
             },
             "cloth": {
               "texture": "siege_banner_yellow",
@@ -199,7 +199,7 @@
           "minecraft:material_instances": {
             "*": {
               "texture": "siege_banner_pole",
-              "render_method": "opaque"
+              "render_method": "alpha_test"
             },
             "cloth": {
               "texture": "siege_banner_lime",
@@ -214,7 +214,7 @@
           "minecraft:material_instances": {
             "*": {
               "texture": "siege_banner_pole",
-              "render_method": "opaque"
+              "render_method": "alpha_test"
             },
             "cloth": {
               "texture": "siege_banner_pink",
@@ -229,7 +229,7 @@
           "minecraft:material_instances": {
             "*": {
               "texture": "siege_banner_pole",
-              "render_method": "opaque"
+              "render_method": "alpha_test"
             },
             "cloth": {
               "texture": "siege_banner_gray",
@@ -244,7 +244,7 @@
           "minecraft:material_instances": {
             "*": {
               "texture": "siege_banner_pole",
-              "render_method": "opaque"
+              "render_method": "alpha_test"
             },
             "cloth": {
               "texture": "siege_banner_light_gray",
@@ -259,7 +259,7 @@
           "minecraft:material_instances": {
             "*": {
               "texture": "siege_banner_pole",
-              "render_method": "opaque"
+              "render_method": "alpha_test"
             },
             "cloth": {
               "texture": "siege_banner_cyan",
@@ -274,7 +274,7 @@
           "minecraft:material_instances": {
             "*": {
               "texture": "siege_banner_pole",
-              "render_method": "opaque"
+              "render_method": "alpha_test"
             },
             "cloth": {
               "texture": "siege_banner_purple",
@@ -289,7 +289,7 @@
           "minecraft:material_instances": {
             "*": {
               "texture": "siege_banner_pole",
-              "render_method": "opaque"
+              "render_method": "alpha_test"
             },
             "cloth": {
               "texture": "siege_banner_blue",
@@ -304,7 +304,7 @@
           "minecraft:material_instances": {
             "*": {
               "texture": "siege_banner_pole",
-              "render_method": "opaque"
+              "render_method": "alpha_test"
             },
             "cloth": {
               "texture": "siege_banner_brown",
@@ -319,7 +319,7 @@
           "minecraft:material_instances": {
             "*": {
               "texture": "siege_banner_pole",
-              "render_method": "opaque"
+              "render_method": "alpha_test"
             },
             "cloth": {
               "texture": "siege_banner_green",
@@ -334,7 +334,7 @@
           "minecraft:material_instances": {
             "*": {
               "texture": "siege_banner_pole",
-              "render_method": "opaque"
+              "render_method": "alpha_test"
             },
             "cloth": {
               "texture": "siege_banner_red",
@@ -349,7 +349,7 @@
           "minecraft:material_instances": {
             "*": {
               "texture": "siege_banner_pole",
-              "render_method": "opaque"
+              "render_method": "alpha_test"
             },
             "cloth": {
               "texture": "siege_banner_black",

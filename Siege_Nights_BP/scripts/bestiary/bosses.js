@@ -131,7 +131,7 @@ registerBoss({
 });
 
 // =====================================================================================
-// 2. The Pale Huntsman (Hollowfast, Frostmarch)
+// 2. The Pale Huntsman (Rimehold, Frostmarch)
 //    He vanishes into the blizzard: watch for his breath. "Marked" shots miss if you break line of
 //    sight. At 60% the Rimewolves come. At 25% he anchors himself in three Rime Pillars: break them.
 // =====================================================================================
@@ -405,7 +405,7 @@ registerBoss({
     if (f.tick % 40 === 0) particle(f.dim, "minecraft:villager_happy", { x: at.x, y: at.y + 0.3, z: at.z }); // the tell
     for (const p of players) {
       if (!canSeeTruth(p)) continue;
-      try { for (let y = 0; y < 4; y++) p.spawnParticle("minecraft:endrod", { x: at.x, y: at.y + y, z: at.z }); } catch { /* cosmetic */ }
+      try { for (let y = 0; y < 3; y++) p.spawnParticle("minecraft:endrod", { x: at.x, y: at.y + y, z: at.z }); } catch { /* cosmetic */ }
     }
   },
   loot: (f, p, first) => (first ? [stack("siege:mire_heart")] : []).concat(materials(["siege:changeling_ichor", first ? 4 : 2], ["siege:toad_venom", 3])),

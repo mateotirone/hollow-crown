@@ -4,7 +4,7 @@
 // /scriptevent siege:bestiary_summon <boss id>.
 
 import { on, addTests, assert } from "../siege/api.js";
-import { MOBS, SIGILS, ITEMS } from "./data.js";
+import { MOBS, SIGILS, ITEMS, BODIES } from "./data.js";
 import { bossDefs } from "./bossCore.js";
 import { effect } from "./util.js";
 
@@ -27,7 +27,10 @@ export function exhibits() {
 on("showcase", ({ player, dim, nextSpot, label }) => {
   let shown = 0;
   for (const { typeId, text } of exhibits()) {
+    const big = (BODIES[typeId]?.size ?? 1) > 1.6; // spots are 3 blocks apart: the 7-block Reeve gets the spots either side too
+    if (big) nextSpot();
     const at = nextSpot();
+    if (big) nextSpot();
     try {
       const statue = dim.spawnEntity(typeId, { x: at.x + 0.5, y: at.y, z: at.z + 0.5 });
       statue.addTag("siege_showcase");

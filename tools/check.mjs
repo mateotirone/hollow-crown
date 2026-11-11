@@ -143,6 +143,94 @@ step("Icons and textures");
   console.log(`${icons} item icons, ${checked} texture paths`);
 }
 
+// Mistakes the game reports in its content log when a world loads (first playtest, 2026-11-11).
+step("Content log rules");
+{
+  const readJson = (file) => {
+    try { return parseJson(readFileSync(file, "utf8").replace(/^﻿/, "")); } catch { return null; }
+  };
+  const verNum = (v) => (typeof v === "string" ? v.split(".").map(Number) : []);
+  const atLeast = (v, min) => {
+    const a = verNum(v), b = verNum(min);
+    for (let i = 0; i < b.length; i++) if ((a[i] ?? 0) !== b[i]) return (a[i] ?? 0) > b[i];
+    return true;
+  };
+  const vstr = (v) => (Array.isArray(v) ? v.join(".") : String(v));
+
+  // 1. Both packs carry one version, and each one's link to the other names that exact version.
+  const mans = {};
+  for (const [name, root] of [["behavior", BP], ["resource", RP]]) mans[name] = readJson(join(root, "manifest.json"));
+  const [bpm, rpm] = [mans.behavior, mans.resource];
+  if (bpm && rpm) {
+    if (vstr(bpm.header.version) !== vstr(rpm.header.version)) fail(`manifest versions differ: behavior ${vstr(bpm.header.version)}, resource ${vstr(rpm.header.version)} (docs/RELEASING.md: one version for both)`);
+    for (const [name, m, other] of [["behavior", bpm, rpm], ["resource", rpm, bpm]]) {
+      for (const mod of m.modules ?? []) if (vstr(mod.version) !== vstr(m.header.version)) fail(`${name} manifest: module ${mod.type} is ${vstr(mod.version)}, header is ${vstr(m.header.version)}`);
+      const dep = (m.dependencies ?? []).find((d) => d.uuid === other.header.uuid);
+      if (dep && vstr(dep.version) !== vstr(other.header.version)) fail(`${name} manifest depends on the other pack at ${vstr(dep.version)}, but it is ${vstr(other.header.version)}: the game cannot match them`);
+    }
+  }
+
+  // 2. Entity components the game no longer parses at the file's format version (the entity then fails to load).
+  const REMOVED = [["minecraft:pushable", "1.26.10", 'use "minecraft:pushable_by_entity": {} and/or "minecraft:pushable_by_block": {}']];
+  let entities = 0;
+  for (const file of walk(join(BP, "entities"), ".json")) {
+    const d = readJson(file);
+    const e = d?.["minecraft:entity"];
+    if (!e) continue;
+    entities++;
+    const groups = [e.components ?? {}, ...Object.values(e.component_groups ?? {})];
+    for (const [comp, since, fix] of REMOVED) {
+      if (atLeast(d.format_version, since) && groups.some((g) => comp in g)) fail(`${rel(file)}: "${comp}" is not parsed at format_version ${d.format_version}, so the entity fails to load (${fix})`);
+    }
+  }
+
+  // 3. Animations: an empty "bones" object is an error ("Required child not found").
+  let anims = 0;
+  for (const file of walk(join(RP, "animations"), ".json")) {
+    for (const [id, a] of Object.entries(readJson(file)?.animations ?? {})) {
+      anims++;
+      if (a && typeof a.bones === "object" && !Array.isArray(a.bones) && Object.keys(a.bones).length === 0) fail(`${rel(file)}: ${id} has an empty "bones" object (leave "bones" out instead)`);
+    }
+  }
+
+  // 4. Blocks: custom geometry must exist in the resource pack, and one block's materials can't mix opaque with see-through.
+  const geometries = new Set();
+  for (const file of walk(join(RP, "models"), ".json")) {
+    const d = readJson(file);
+    for (const g of d?.["minecraft:geometry"] ?? []) if (g?.description?.identifier) geometries.add(g.description.identifier);
+    for (const k of Object.keys(d ?? {})) if (k.startsWith("geometry.")) geometries.add(k.split(":")[0]);
+  }
+  let blocks = 0;
+  const mixedReported = new Set();
+  for (const file of walk(join(BP, "blocks"), ".json")) {
+    const b = readJson(file)?.["minecraft:block"];
+    if (!b) continue;
+    blocks++;
+    const sets = [b.components ?? {}, ...(b.permutations ?? []).map((p) => p.components ?? {})];
+    for (const c of sets) {
+      const geo = c["minecraft:geometry"];
+      const id = typeof geo === "string" ? geo : geo?.identifier;
+      if (id && !id.startsWith("minecraft:") && !geometries.has(id)) fail(`${rel(file)}: geometry "${id}" is not defined in ${rel(RP)}/models`);
+      const mi = c["minecraft:material_instances"];
+      if (mi) {
+        const methods = new Set(Object.values(mi).filter((v) => v && typeof v === "object").map((v) => v.render_method ?? "opaque"));
+        if (methods.size > 1 && !mixedReported.has(file) && mixedReported.add(file)) fail(`${rel(file)}: material_instances mix render methods (${[...methods].join(", ")}); the game needs one per block`);
+      }
+    }
+  }
+  // 5. Player render molang: the menu paper doll has no actor, so query.property needs a query.has_property guard.
+  const playerFiles = [join(RP, "entity/player.entity.json"), ...walk(join(RP, "render_controllers"), ".json")].filter(existsSync);
+  for (const file of playerFiles) {
+    const text = readFileSync(file, "utf8");
+    if (file.endsWith("player.entity.json") || /player|hc_looks/.test(file)) {
+      for (const m of text.matchAll(/"([^"\n]*query\.property\('([^']+)'\)[^"\n]*)"/g)) {
+        if (!m[1].includes(`query.has_property('${m[2]}')`)) fail(`${rel(file)}: query.property('${m[2]}') without query.has_property('${m[2]}') (errors on the menu paper doll)`);
+      }
+    }
+  }
+  console.log(`${entities} entities, ${anims} animations, ${blocks} blocks, ${geometries.size} geometries`);
+}
+
 const manifest = parseJson(readFileSync(join(BP, "manifest.json"), "utf8"));
 const scriptModule = manifest.modules.find((m) => m.type === "script");
 const entry = join(BP, scriptModule.entry);
@@ -273,13 +361,60 @@ async function deepCheck() {
     "parseFloat", "RegExp", "Reflect", "Proxy", "BigInt", "TypeError", "RangeError", "encodeURIComponent", "decodeURIComponent",
     "Uint8Array", "Uint16Array", "Uint32Array", "Int8Array", "Int16Array", "Int32Array", "Float32Array", "Float64Array", "ArrayBuffer", "WeakSet", "isFinite", "SyntaxError"]);
   let count = 0;
+  const asts = new Map();
   for (const file of scripts) {
-    const src = readFileSync(file, "utf8");
-    let ast;
-    try {
-      ast = acorn.parse(src, { ecmaVersion: "latest", sourceType: "module", locations: true, ranges: true });
-    } catch (e) {
-      failIn(file, `${rel(file)}: syntax error ${e.message}`);
+    try { asts.set(file, acorn.parse(readFileSync(file, "utf8"), { ecmaVersion: "latest", sourceType: "module", locations: true, ranges: true })); } catch { /* reported below */ }
+  }
+  // What each file exports (names), following `export * from` and `export { x } from`.
+  const exportCache = new Map();
+  const exportsOf = (file, seen = new Set()) => {
+    if (exportCache.has(file)) return exportCache.get(file);
+    if (seen.has(file)) return new Set();
+    seen.add(file);
+    const out = new Set();
+    for (const n of asts.get(file)?.body ?? []) {
+      if (n.type === "ExportNamedDeclaration") {
+        if (n.declaration?.id) out.add(n.declaration.id.name);
+        for (const d of n.declaration?.declarations ?? []) {
+          const names = (p) => (p.type === "Identifier" ? [p.name] : p.type === "ObjectPattern" ? p.properties.flatMap((q) => names(q.value ?? q.argument)) : p.type === "ArrayPattern" ? p.elements.filter(Boolean).flatMap(names) : p.type === "AssignmentPattern" ? names(p.left) : p.type === "RestElement" ? names(p.argument) : []);
+          names(d.id).forEach((x) => out.add(x));
+        }
+        for (const s of n.specifiers ?? []) out.add(s.exported.name ?? s.exported.value);
+      } else if (n.type === "ExportDefaultDeclaration") out.add("default");
+      else if (n.type === "ExportAllDeclaration") {
+        if (n.exported) out.add(n.exported.name);
+        else for (const x of exportsOf(resolve(dirname(file), n.source.value), seen)) if (x !== "default") out.add(x);
+      }
+    }
+    exportCache.set(file, out);
+    return out;
+  };
+  for (const [file, ast] of asts) {
+    const imported = new Set();
+    for (const n of ast.body) {
+      if ((n.type === "ImportDeclaration" || (n.type === "ExportNamedDeclaration" && n.source)) && n.source.value.startsWith(".")) {
+        const target = resolve(dirname(file), n.source.value);
+        if (!asts.has(target)) continue;
+        const have = exportsOf(target);
+        for (const s of n.specifiers) {
+          const name = n.type === "ImportDeclaration" ? (s.type === "ImportDefaultSpecifier" ? "default" : s.type === "ImportNamespaceSpecifier" ? null : s.imported.name) : s.local.name;
+          if (name && !have.has(name)) failIn(file, `${rel(file)}:${n.loc.start.line} imports "${name}" from "${n.source.value}", which does not export it (Minecraft stops loading every script: "Could not find export")`);
+        }
+      }
+      if (n.type === "ImportDeclaration") for (const s of n.specifiers) imported.add(s.local.name);
+    }
+    // Minecraft's script engine can fail to link `import { x } from "a"; export { x };` when modules import each other
+    // in a circle (first playtest: "Could not find export 'AFTER'"). Write it as `export { x } from "a";` instead.
+    for (const n of ast.body) {
+      if (n.type === "ExportNamedDeclaration" && !n.source && !n.declaration) {
+        for (const s of n.specifiers) if (imported.has(s.local.name)) failIn(file, `${rel(file)}:${n.loc.start.line} re-exports the imported "${s.local.name}" with a plain export list; write export { ${s.local.name} } from "..." instead`);
+      }
+    }
+  }
+  for (const file of scripts) {
+    const ast = asts.get(file);
+    if (!ast) {
+      try { acorn.parse(readFileSync(file, "utf8"), { ecmaVersion: "latest", sourceType: "module" }); } catch (e) { failIn(file, `${rel(file)}: syntax error ${e.message}`); }
       continue;
     }
     const manager = eslintScope.analyze(ast, { ecmaVersion: 2022, sourceType: "module" });
@@ -349,8 +484,20 @@ console.warn = realWarn;
 // ---------- 6. self-tests ----------
 if (loaded) {
   step("Self-tests");
-  const { runTests } = await import(pathToFileURL(join(SCRIPTS, "core/tests.js")).href);
-  const result = runTests({ inGame: false });
+  const { runTests, OFFLINE_ONLY, testNames } = await import(pathToFileURL(join(SCRIPTS, "core/tests.js")).href);
+  // A test that is slow here is many times slower inside Minecraft, where one long test makes the watchdog
+  // shut the world down. Slow tests must be listed in OFFLINE_ONLY (core/tests.js) so the game skips them.
+  const SLOW_MS = 15;
+  const timings = new Map();
+  let result = runTests({ inGame: false, slow: (name, ms) => timings.set(name, ms) });
+  const suspects = [...timings].filter(([name, ms]) => ms >= SLOW_MS && !OFFLINE_ONLY.has(name)).map(([name]) => name);
+  if (suspects.length) { // time them once more, so a one-off pause on this machine is not blamed on a test
+    const again = new Map();
+    result = runTests({ inGame: false, slow: (name, ms) => again.set(name, ms) });
+    for (const name of suspects) if (again.get(name) >= SLOW_MS) fail(`self-test "${name}" takes ${again.get(name)} ms here, too slow to run inside Minecraft: add it to OFFLINE_ONLY in core/tests.js (or make it lighter)`);
+  }
+  const known = new Set(testNames());
+  for (const name of OFFLINE_ONLY) if (!known.has(name)) fail(`core/tests.js OFFLINE_ONLY lists "${name}", but no test has that name`);
   console.log(`${result.passed} passed, ${result.failed.length} failed, ${result.skipped} in-game only (skipped here)`);
   for (const f of result.failed) fail(`test failed: ${f.group}: ${f.name} (${f.error})`);
 }

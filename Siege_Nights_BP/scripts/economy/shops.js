@@ -1,7 +1,9 @@
 // Job NPCs: the Farmer, Woodcutter, Quarryman, Smith, Fisher, Hunter, Herbalist and the Moneyer.
 //
-// Each is Bedrock's built-in NPC (minecraft:npc), so it works on a Realm and alone. They buy the raw goods
-// of their trade for coins and sell the finished ones. Goods and prices: config.js. Price rules: rules.js.
+// Each is our own siege:job_npc entity (villager shape, one painted skin per job, picked by the siege:job
+// property), so it works on a Realm and alone and never shares a look with a lore NPC. Job NPCs placed before
+// the skins existed were Bedrock's built-in NPC: those still trade, and turn into the new kind on the first click.
+// They buy the raw goods of their trade for coins and sell the finished ones. Goods and prices: config.js. Price rules: rules.js.
 //   Map builders: /scriptevent siege:economy_npc farmer      puts one where you stand
 //   The region (for regional prices) is taken from the nearest Plot Stone, or name it:
 //                 /scriptevent siege:economy_npc farmer Frostmarch
@@ -11,14 +13,16 @@ import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
 import { isReady, isNight, countItem, takeItems, pick, emit } from "../siege/api.js";
 import { allPlots } from "../plots/claims.js"; // same function plots/api.js re-exports; claims.js exists in every snapshot of the repo
 import { ECON, JOBS, JOB_IDS, LINES, REGIONS } from "./config.js";
-import { regional, appetite, payout, cost, coins, niceName } from "./rules.js";
+import { regional, appetite, payout, cost, coins, niceName, stopAt } from "./rules.js";
 import { funds, charge, pay, carried } from "./coins.js";
 import { sfx } from "../core/sfx.js";
 
 export const JOB_TAG = "siege_job";
 const jobTag = (id) => `siege_job_${id}`;
 const regionTag = (region) => `siege_region_${REGIONS.indexOf(region)}`;
-const NPC_TYPE = "minecraft:npc";
+const NPC_TYPE = "siege:job_npc";
+const OLD_NPC_TYPE = "minecraft:npc"; // job NPCs placed before the painted skins
+const JOB_PROP = "siege:job"; // which skin: the job's place in JOB_IDS
 const SOLD = "siege:economy_sold"; // per player: { day, n: { "<region>|<item>": units sold today } }
 
 const known = (id) => {
@@ -28,6 +32,9 @@ const known = (id) => {
     return false;
   }
 };
+
+// On sale here: the item exists in this pack, and a region-only good is sold only by that region's NPCs
+const forSale = (good, region) => known(good.id) && (!good.region || good.region === region);
 
 // The region a spot belongs to: that of the nearest Plot Stone (undefined on a world with no map)
 export function regionAt(location) {
@@ -55,13 +62,32 @@ export function spawnJobNpc(dim, location, jobId, region = regionAt(location)) {
   if (region && REGIONS.includes(region)) npc.addTag(regionTag(region));
   npc.nameTag = job.name;
   try {
-    const comp = npc.getComponent("minecraft:npc");
-    comp.name = job.name;
-    comp.skinIndex = job.skin;
+    npc.setProperty(JOB_PROP, JOB_IDS.indexOf(jobId));
   } catch {
     // looks are optional
   }
   return npc;
+}
+
+// A job NPC from before the painted skins: put the new kind in its place, same job, same region, same spot
+function renew(old) {
+  const jobId = jobOf(old);
+  if (!jobId) return old;
+  try {
+    const npc = spawnJobNpc(old.dimension, old.location, jobId, REGIONS.find((r) => old.hasTag(regionTag(r))) ?? null);
+    if (!npc) return old;
+    for (const tag of old.getTags()) if (!npc.hasTag(tag)) npc.addTag(tag);
+    try {
+      npc.setRotation(old.getRotation());
+    } catch {
+      // facing is optional
+    }
+    old.remove();
+    return npc;
+  } catch (e) {
+    console.warn(`[Hollow Crown] job NPC renew: ${e}`);
+    return old;
+  }
 }
 
 // ---------- today's sales ----------
@@ -94,11 +120,11 @@ function hand(player, typeId, count) {
 // Sells `count` of a good. Returns the coins paid (0 if nothing was sold).
 export function sell(player, jobId, region, good, count) {
   const job = JOBS[jobId];
-  count = Math.min(count, countItem(player, good.id));
-  if (count <= 0) return 0;
   const rec = soldToday(player);
   const key = soldKey(region, good.id);
   const before = rec.n[key] ?? 0;
+  count = Math.min(count, countItem(player, good.id), Math.max(0, stopAt(good) - before)); // the daily stop
+  if (count <= 0) return 0;
   const earned = payout(good, count, before, regional(job, region).pays);
   if (earned < 1) return 0;
   if (player.getGameMode() === GameMode.Creative) {
@@ -117,14 +143,17 @@ async function sellMenu(player, npc, jobId, region) {
   const rec = soldToday(player);
   const { pays } = regional(job, region);
   const offers = job.buys.filter((good) => known(good.id)).map((good) => {
-    const have = countItem(player, good.id), before = rec.n[soldKey(region, good.id)] ?? 0;
-    return { good, have, before, worth: payout(good, have, before, pays), share: appetite(good, before) };
+    const before = rec.n[soldKey(region, good.id)] ?? 0, room = Math.max(0, stopAt(good) - before);
+    const have = Math.min(countItem(player, good.id), room);
+    return { good, have, before, full: room === 0, worth: payout(good, have, before, pays), share: appetite(good, before) };
   });
   const mine = offers.filter((o) => o.have > 0);
   const form = new ActionFormData().title(`${job.name}: selling`);
-  const wants = offers.map(({ good, share }) => `${niceName(good.id)}: ${coins(Math.max(1, Math.round(good.price * pays * share)))} for ${good.lot}${share < 1 ? " §8(they have plenty today)§r" : ""}`).join("\n");
+  const wants = offers.map(({ good, share, full }) => full
+    ? `${niceName(good.id)}: §8no more today, come back tomorrow§r`
+    : `${niceName(good.id)}: ${coins(Math.max(1, Math.round(good.price * pays * share)))} for ${good.lot}${share < 1 ? " §8(they have plenty today)§r" : ""}`).join("\n");
   form.body(`${job.name} buys:\n${wants}\n\n${mine.length ? "Choose what to sell." : "§7You carry none of these."}`);
-  for (const o of mine) form.button(`${niceName(o.good.id)} x${o.have}\n§8${coins(o.worth)} for the lot`);
+  for (const o of mine) form.button(`${niceName(o.good.id)} x${o.have}\n§8${coins(o.worth)}${o.have < countItem(player, o.good.id) ? " (all they'll take today)" : " for the lot"}`);
   if (mine.length > 1) form.button(`Sell all of it\n§8${coins(mine.reduce((sum, o) => sum + o.worth, 0))}`);
   form.button("Back");
   const res = await form.show(player);
@@ -158,15 +187,16 @@ function done(player, text) {
 async function buyMenu(player, npc, jobId, region) {
   const job = JOBS[jobId];
   const { charges } = regional(job, region);
-  const stock = job.sells.filter((good) => known(good.id));
+  const stock = job.sells.filter((good) => forSale(good, region));
+  const charge_ = (good) => (good.flat ? 1 : charges); // a region's own make has no regional markup
   const form = new ActionFormData().title(`${job.name}: buying`).body(`You have ${coins(funds(player))}.`);
-  for (const good of stock) form.button(`${niceName(good.id)}${good.lot > 1 ? ` x${good.lot}` : ""}\n§8${coins(cost(good, 1, charges))}`);
+  for (const good of stock) form.button(`${niceName(good.id)}${good.lot > 1 ? ` x${good.lot}` : ""}\n§8${coins(cost(good, 1, charge_(good)))}`);
   form.button("Back");
   const res = await form.show(player);
   if (res.canceled) return;
   const good = stock[res.selection];
   if (!good) return openShop(player, npc);
-  const each = cost(good, 1, charges);
+  const each = cost(good, 1, charge_(good));
   const have = player.getGameMode() === GameMode.Creative ? each * ECON.maxLots : funds(player);
   const most = Math.min(ECON.maxLots, Math.floor(have / each));
   if (most < 1) {
@@ -181,7 +211,7 @@ async function buyMenu(player, npc, jobId, region) {
     if (res2.canceled) return buyMenu(player, npc, jobId, region);
     lots = Math.max(1, Math.min(most, Math.floor(res2.formValues[0])));
   }
-  const price = cost(good, lots, charges);
+  const price = cost(good, lots, charge_(good));
   if (!charge(player, price, jobId)) return;
   hand(player, good.id, lots * good.lot);
   done(player, `§6${lots * good.lot} ${niceName(good.id)}§7 for ${coins(price)}`);
@@ -225,7 +255,7 @@ export async function openShop(player, npc) {
   const form = new ActionFormData().title(job.name).body(`§o"${line}"§r\n\n${note ? note + "\n\n" : ""}You have ${coins(funds(player))}.`);
   const acts = [];
   form.button("Sell"); acts.push(() => sellMenu(player, npc, jobId, region));
-  if (job.sells.some((good) => known(good.id))) { form.button("Buy"); acts.push(() => buyMenu(player, npc, jobId, region)); }
+  if (job.sells.some((good) => forSale(good, region))) { form.button("Buy"); acts.push(() => buyMenu(player, npc, jobId, region)); }
   if (job.mint) { form.button("Change coins"); acts.push(() => changeMenu(player, npc)); }
   form.button("Leave");
   const res = await form.show(player);
@@ -234,11 +264,14 @@ export async function openShop(player, npc) {
 
 world.beforeEvents.playerInteractWithEntity.subscribe((event) => {
   const { player, target } = event;
-  if (target.typeId !== NPC_TYPE || !target.hasTag(JOB_TAG)) return;
-  if (player.isSneaking && player.getGameMode() === GameMode.Creative) return; // builder: the normal NPC editor
+  const old = target.typeId === OLD_NPC_TYPE;
+  if ((target.typeId !== NPC_TYPE && !old) || !target.hasTag(JOB_TAG)) return;
+  if (old && player.isSneaking && player.getGameMode() === GameMode.Creative) return; // builder: the normal NPC editor
   event.cancel = true;
   system.run(() => {
-    if (isReady()) openShop(player, target).catch((e) => console.warn(`[Hollow Crown] job shop: ${e}`));
+    if (!target.isValid) return;
+    const npc = old ? renew(target) : target;
+    if (isReady()) openShop(player, npc).catch((e) => console.warn(`[Hollow Crown] job shop: ${e}`));
   });
 });
 
@@ -251,5 +284,5 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
   const region = REGIONS.find((r) => r.toLowerCase() === named || r.toLowerCase().split(" ").includes(named)) ?? regionAt(player.location);
   if (!JOBS[jobId]) return player.sendMessage(`§cWhich job? One of: ${JOB_IDS.join(", ")}. Add a region name for regional prices.`);
   spawnJobNpc(player.dimension, player.location, jobId, region);
-  player.sendMessage(`§a${JOBS[jobId].name} placed${region ? ` (${region} prices)` : " (no region: plain prices)"}. Sneak + click in Creative to edit, or /kill @e[tag=${jobTag(jobId)},c=1] to remove.`);
+  player.sendMessage(`§a${JOBS[jobId].name} placed${region ? ` (${region} prices)` : " (no region: plain prices)"}. Remove with /kill @e[tag=${jobTag(jobId)},c=1] to remove.`);
 });

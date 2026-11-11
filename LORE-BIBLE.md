@@ -91,7 +91,7 @@ Mateo, 2026-11-10: every settlement needs its own lore and library, "so the game
 | Oakmere | King Aldric's hunting lodge, with a second cellar | The journal in every player's pack | The Cellar in the Oakwood (Aldric) | King Aldric, Rafe Aske, Giles Lorimer |
 | Thistledown | An empty bell frame on the down | Corvin Hale before the court | The Empty Frame (Corvin) | Tam Burdock, the Tenant of the Down, Alys Burdock |
 | Wrenfield | A royal summer house by the lake | Edda as a child | The Letter in the Apple Tree (Edda) | Mistress Thorpe, E. aged seven, Garth Appleyard |
-| Rimeholt | Queen Maelis's copper diggings | The casting of the Founding Bell | Forty Tons of Copper (the Founding Bell) | Queen Maelis, Brand Holt, Master Ysolt |
+| Frosthelm | Queen Maelis's copper diggings | The casting of the Founding Bell | Forty Tons of Copper (the Founding Bell) | Queen Maelis, Brand Holt, Master Ysolt |
 | Wolfcairn | The cairn of six thousand and four stones | The Calling that fetched the Host | Six Thousand and Four Stones (a bell under the ice) | The First Cairn-Wife, Vorlund before he sailed, Runa Ashby |
 | Gullcliff | A beacon station | Proof Corvin could not have called the Host | Sails Without Wind (two winters) | Ines Marrow, Piers Gannet, Brother-Clerk Aldhelm |
 | Tidewatch | A tide-readers' house | The first Returned | The Last Post (the Returned) | Prior Benet, Brother Caedmon, Wat Tolley after |
@@ -327,3 +327,7 @@ None of the four is the Hollow's; each is what a region already knew before the 
 | Forgemaster | Frostmarch | Hroda Deepforge, bellfounder; the Founding Bell was poured at her fire three generations later | The Order took the bell moulds but could not carry off the fire |
 | Captain | Saltreach | Merrin Holt, who burned forty Saltreach boats to stop the Host's second fleet | Every captain carries a share of Holt's Debt, which has never been marked paid |
 | Witch | Blackfen | Nobody; "Goody Sedge" has three graves | No books to burn: it is handed over in a cup |
+
+## Where the eight paintings hang
+
+Mateo's eight paintings are already in the game as hanging pictures (`siege:portrait`, textures `textures/entity/portrait/plate_1..8.png`). Seven hang openly: one in each settlement's Library (which one depends on the plot) and all seven in a row with `/scriptevent siege:portrait gallery` (meant for the Long Gallery at Crownhold). **The eighth, the Forty-Second Portrait, is a secrecy call and hangs only in the Burned Archive**, which a player reaches late through Brother Cael. Its caption never says whose portrait it is until Morvane has fallen; after that it reads "Oswin, son of Aldric, last King of Aldmere" and says he scraped the face off himself the night before they came for him (that last detail is the lore thread's, not Mateo's).
