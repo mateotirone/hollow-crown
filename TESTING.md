@@ -118,7 +118,7 @@ Use `hollow-crown-full-map.mcworld`, not a flat test world. That file is saved i
 3. All twelve rim stones should be lit (free). Pick one: you land next to its Plot Stone with a Keep Banner, are told what stood there, and about 20 seconds later get the plot's first book. Its last page sends you to Sister Wren in Millbrook.
 4. Ride or walk to Millbrook (north-east of Kingsrest). Wren stands under a small porch on the north side of the square. Ask her "Why is it always night?", then "Which clock was first?": she is cut off and you Slip.
 5. With a second player, choose "Start in Kingsrest without a home" instead: about 30 seconds later a carter should point you to Wren and Millbrook is added to your Ledger.
-6. Builder check: `/scriptevent siege:opening status` should say `map` and 15 of 15 done.
+6. Builder check: `/scriptevent siege:opening status` should say `map` and 16 of 16 done.
 
 ## Town hall, skill tree and paths (The Hollow Crown)
 
