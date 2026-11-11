@@ -14,11 +14,16 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from bp import solid_full, is_fence, is_wall, is_pane, is_stairs, is_slab, DIRS
 
 GRASS = (0x91, 0xBD, 0x59); FOLIAGE = (0x6A, 0x9E, 0x3A); SPRUCE = (0x61, 0x99, 0x61)
-WOODS = {"oak": "oak", "spruce": "spruce", "dark_oak": "big_oak", "birch": "birch", "jungle": "jungle", "acacia": "acacia", "mangrove": "mangrove", "warped": "warped"}
+WOODS = {"oak": "oak", "spruce": "spruce", "dark_oak": "big_oak", "birch": "birch", "jungle": "jungle", "acacia": "acacia", "mangrove": "mangrove",
+         "cherry": "cherry", "pale_oak": "pale_oak", "warped": "warped"}
 # Bedrock names some newer textures differently from the old pattern
 TEX_ALIAS = {"planks_mangrove": "mangrove_planks", "log_mangrove": "mangrove_log_side", "log_mangrove_top": "mangrove_log_top",
              "stripped_mangrove_log": "stripped_mangrove_log_side",
-             "door_mangrove_lower": "mangrove_door_bottom", "planks_warped": "huge_fungus/warped_planks", "door_warped_lower": "huge_fungus/warped_door_lower", "door_warped_upper": "huge_fungus/warped_door_top", "trapdoor_warped": "huge_fungus/warped_trapdoor", "warped_trapdoor": "huge_fungus/warped_trapdoor", "door_big_oak_lower": "door_dark_oak_lower", "door_big_oak_upper": "door_dark_oak_upper", "door_mangrove_upper": "mangrove_door_top"}
+             "door_mangrove_lower": "mangrove_door_bottom", "door_big_oak_lower": "door_dark_oak_lower", "door_big_oak_upper": "door_dark_oak_upper", "door_mangrove_upper": "mangrove_door_top",
+             "log_cherry": "cherry_log_side", "log_cherry_top": "cherry_log_top", "stripped_cherry_log": "stripped_cherry_log_side",
+             "log_pale_oak": "pale_oak_log_side", "log_pale_oak_top": "pale_oak_log_top", "stripped_pale_oak_log": "stripped_pale_oak_log_side",
+             "planks_cherry": "cherry_planks", "planks_pale_oak": "pale_oak_planks",
+             "planks_warped": "huge_fungus/warped_planks", "door_warped_lower": "huge_fungus/warped_door_lower", "door_warped_upper": "huge_fungus/warped_door_top", "trapdoor_warped": "huge_fungus/warped_trapdoor", "warped_trapdoor": "huge_fungus/warped_trapdoor"}
 
 # The add-on's own blocks (siege:*): texture from the behaviour pack's material instances and the
 # resource pack's terrain_texture.json, as absolute paths.
@@ -52,6 +57,21 @@ def siege_tex(n):
         if f in t and "side" not in t and "*" not in t: d["side"] = t[f]
     return d
 
+_SGEO = {}
+def _siege_block(n):
+    if n not in _SGEO:
+        import glob
+        _SGEO[n] = {}
+        for f in glob.glob(os.path.join(_REPO, "Siege_Nights_BP/blocks/**/*.json"), recursive=True):
+            try: b = json.load(open(f))["minecraft:block"]
+            except Exception: continue
+            if b["description"]["identifier"] == n: _SGEO[n] = b.get("components", {}); break
+    return _SGEO[n]
+def siege_geo(n):
+    g = _siege_block(n).get("minecraft:geometry"); return g if isinstance(g, str) else (g or {}).get("identifier")
+def siege_cutout(n):
+    return any(isinstance(v, dict) and v.get("render_method") in ("alpha_test", "blend") for v in _siege_block(n).get("minecraft:material_instances", {}).values())
+
 def wood_of(n):
     for w in sorted(WOODS, key=len, reverse=True):
         if n.startswith(w + "_") or n.startswith("stripped_" + w): return w
@@ -72,7 +92,7 @@ MAT = {"stone_brick": "stonebrick", "stone_bricks": "stonebrick", "mossy_stone_b
        "cut_red_sandstone": "red_sandstone_smooth", "prismarine_bricks": "prismarine_bricks", "polished_tuff": "polished_tuff",
        "smooth_stone_slab": "stone_slab_top", "normal_stone": "stone", "stone_block": "stone",
        "quartz": "quartz_block_side", "quartz_block": "quartz_block_side", "smooth_quartz": "quartz_block_bottom", "quartz_bricks": "quartz_bricks",
-       "dark_prismarine": "prismarine_dark", "prismarine": "prismarine_rough", "gold_block": "gold_block", "snow_layer": "snow", "moss_block": "moss_block", "polished_blackstone_brick": "polished_blackstone_bricks",
+       "dark_prismarine": "prismarine_dark", "prismarine": "prismarine_rough", "gold_block": "gold_block", "snow_layer": "snow", "moss_block": "moss_block", "polished_blackstone_brick": "polished_blackstone_bricks", "polished_blackstone": "polished_blackstone", "blackstone": "blackstone",
        "blast_furnace": "blast_furnace_side", "cobbled_deepslate_wall": "deepslate/cobbled_deepslate"}
 for w, t in WOODS.items(): MAT[w] = "planks_" + t; MAT[w + "_planks"] = "planks_" + t
 for _c in ("", "exposed_", "weathered_", "oxidized_"):          # copper roofs (waxed looks the same)
@@ -100,6 +120,8 @@ def cube_tex(n, p):
     w = wood_of(n)
     if n.endswith("_log") and n.startswith("stripped_"):
         return {"top": f"stripped_{w}_log_top", "side": f"stripped_{w}_log"}
+    if n.endswith("_wood"):   # bark on every face
+        return {"side": f"stripped_{w}_log" if n.startswith("stripped_") else f"log_{WOODS[w]}"}
     if n.endswith("_log") or n.endswith("_wood"):
         t = WOODS[w]; return {"top": f"log_{t}_top", "side": f"log_{t}" if not n.endswith("_wood") else f"log_{t}"}
     simple = {"pumpkin": {"top": "pumpkin_top", "side": "pumpkin_side"},
@@ -120,7 +142,12 @@ def cube_tex(n, p):
               "crafting_table": {"top": "crafting_table_top", "side": "crafting_table_side", "bottom": "planks_oak"},
               "oak_leaves": {"side": "leaves_oak.tga#foliage"}, "spruce_leaves": {"side": "leaves_spruce.tga#spruce"},
               "dark_oak_leaves": {"side": "leaves_big_oak.tga#foliage"}, "birch_leaves": {"side": "leaves_birch.tga#birch"},
-              "azalea_leaves": {"side": "azalea_leaves"}, "azalea_leaves_flowered": {"side": "azalea_leaves_flowers"},
+              "azalea_leaves": {"side": "azalea_leaves"}, "acacia_leaves": {"side": "leaves_acacia.tga#foliage"},
+              "jungle_leaves": {"side": "leaves_jungle.tga#foliage"}, "mangrove_leaves": {"side": "mangrove_leaves.tga#foliage"},
+              "cherry_leaves": {"side": "cherry_leaves.tga"}, "pale_oak_leaves": {"side": "pale_oak_leaves.tga"},
+              "mangrove_roots": {"side": "mangrove_roots_side", "top": "mangrove_roots_top"},
+              "muddy_mangrove_roots": {"side": "muddy_mangrove_roots_side", "top": "muddy_mangrove_roots_top"},
+              "dirt_with_roots": {"side": "dirt_with_roots"}, "mud": {"side": "mud"}, "snow": {"side": "snow"}, "azalea_leaves_flowered": {"side": "azalea_leaves_flowers"},
               "water": {"side": "water_still_grey#water"}, "glass": {"side": "glass"},
               "composter": {"top": "composter_top", "side": "composter_side", "bottom": "composter_bottom"},
               "smooth_stone": {"top": "stone_slab_top", "side": "stone_slab_side"},
@@ -234,7 +261,7 @@ def model(n, p):
     if n == "flower_pot":
         t = {"side": "flower_pot@5,10,11,16", "top": "dirt"}
         return [((5 / 16, 0, 5 / 16, 11 / 16, 6 / 16, 11 / 16), t, {})] + ([("cross", {"side": PLANTS[p["plant"]]}, {"cut": 1, "scale": 0.7, "y": 4 / 16})] if p.get("plant") else [])
-    if n.endswith("_carpet") and n != "moss_carpet":
+    if n.endswith("_carpet") and n not in ("moss_carpet", "pale_moss_carpet"):
         return [((0, 0, 0, 1, 1 / 16, 1), {"side": "wool_colored_" + n[:-7].replace("light_gray", "silver")}, {})]
     if n == "anvil":
         t = {"side": "anvil_base", "top": "anvil_top_damaged_0"}
@@ -267,6 +294,18 @@ def model(n, p):
     if n == "siege:battlement":
         t = siege_tex(n); return [((0, 0, 0, 1, 1, 1), t, {})]
     if n in PLANTS: return [("cross", {"side": PLANTS[n]}, {"cut": 1})]
+    if n.startswith("siege:") and siege_geo(n) == "minecraft:geometry.cross": return [("cross", siege_tex(n), {"cut": 1, "glow": 1})]
+    if n.startswith("siege:") and siege_cutout(n): return [((0, 0, 0, 1, 1, 1), siege_tex(n), {"cut": 1})]
+    if n == "vine":
+        bits = p.get("raw", {}).get("vine_direction_bits", 0); out = []
+        for bit, side in ((1, "s"), (2, "w"), (4, "n"), (8, "e")):
+            if bits & bit: out.append((thin_plate(side, 1 / 16), {"side": "vine#foliage"}, {"cut": 1}))
+        return out
+    if n == "pale_hanging_moss": return [("cross", {"side": "pale_hanging_moss_tip" if p.get("raw", {}).get("tip") else "pale_hanging_moss_middle"}, {"cut": 1})]
+    if n == "hanging_roots": return [("cross", {"side": "hanging_roots"}, {"cut": 1})]
+    if n in ("bush", "firefly_bush"): return [("cross", {"side": n + ("#grass" if n == "bush" else "")}, {"cut": 1})]
+    if n == "leaf_litter": return [((0, 0, 0, 1, 1 / 16, 1), {"side": "leaf_litter#litter"}, {"cut": 1})]
+    if n == "snow_layer": return [((0, 0, 0, 1, 2 / 16, 1), {"side": "snow"}, {})]
     if n == "water": return [((0, 0, 0, 1, 14 / 16, 1), cube_tex(n, p), {"water": 1})]
     if n == "campfire":
         t = {"side": "campfire_log"}
@@ -404,7 +443,7 @@ class Mesher:
     def textures(self, outdir):
         """Write every used texture as a 16x16 PNG (first animation frame, tinted)."""
         os.makedirs(outdir, exist_ok=True)
-        tints = {"grass": GRASS, "foliage": FOLIAGE, "spruce": SPRUCE, "birch": (0x80, 0xA7, 0x55), "water": (0x3F, 0x76, 0xE4)}
+        tints = {"grass": GRASS, "foliage": FOLIAGE, "spruce": SPRUCE, "birch": (0x80, 0xA7, 0x55), "water": (0x3F, 0x76, 0xE4), "litter": (0xB0, 0x8A, 0x55)}
         names = {}
         for key, spec in self.texfiles.items():
             tint = None

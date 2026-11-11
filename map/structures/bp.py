@@ -49,7 +49,9 @@ def is_stairs(n): return n.endswith("_stairs")
 def is_slab(n): return n.endswith("_slab")
 NONSOLID = ("air", "keep", "wheat", "carrots", "potatoes", "beetroot", "sweet_berry_bush", "lantern", "soul_lantern", "flower_pot", "torch", "short_grass", "tall_grass", "poppy", "dandelion",
             "cornflower", "oxeye_daisy", "azure_bluet", "allium", "red_tulip", "white_tulip", "orange_tulip", "pink_tulip",
-            "water", "carpet", "rail", "ladder", "lily_of_the_valley", "fern", "large_fern", "wheat", "sweet_berry_bush")
+            "water", "carpet", "rail", "ladder", "lily_of_the_valley", "fern", "large_fern", "wheat", "sweet_berry_bush",
+            "vine", "leaf_litter", "pale_hanging_moss", "hanging_roots", "bush", "firefly_bush", "mangrove_roots", "snow_layer",
+            "glow_lichen", "moss_carpet", "pale_moss_carpet", "deadbush", "short_dry_grass", "tall_dry_grass")
 
 def solid_full(name, p):
     """True for blocks that fill their whole cell (used for connections and render culling)."""
@@ -158,6 +160,7 @@ class Blueprint:
             for k, v in p.get("raw", {}).items(): st[k] = v
             return (name, st)
         if name.startswith("minecraft:"): name = name[10:]
+        name = {"oak_trapdoor": "trapdoor", "oak_door": "wooden_door"}.get(name, name)
         if name in BEDROCK_ALIAS:                    # Java-style names the builders use -> Bedrock's own ids
             name, extra = BEDROCK_ALIAS[name]; p = {**p, "raw": {**extra, **p.get("raw", {})}}
         if name not in BLOCKS: raise ValueError(f"{self.name}: '{name}' is not a Bedrock block")

@@ -76,6 +76,7 @@ item.siege:saddle_cavalry.name=Cavalry Saddle Kit
 item.siege:saddle_royal.name=Royal Saddle Kit
 item.siege:caparison.name=Caparison
 tile.siege:stables.name=Stables
+tile.siege:foresters_lodge.name=Forester's Lodge
 tile.siege:rail_depot.name=Rail Depot
 tile.hc:station_post.name=Station Post
 tile.hc:breeder_post.name=Breeder's Post
