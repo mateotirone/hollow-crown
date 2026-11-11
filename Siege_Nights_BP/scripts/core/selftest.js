@@ -3,7 +3,7 @@
 
 import { world, system } from "@minecraft/server";
 import { on } from "./events.js";
-import { runTests } from "./tests.js";
+import { runTestsJob } from "./tests.js";
 import { tickTasks } from "./loop.js";
 
 let lastResult;
@@ -20,11 +20,20 @@ function report(result, player) {
   if (result.failed.length > 12) say(`§7 ...and ${result.failed.length - 12} more (see the content log)`);
 }
 
+// Tests run as a job (a few per tick), never all at once: see runTestsJob.
+function runInBackground(then) {
+  system.runJob(runTestsJob({ inGame: true }, (result) => {
+    lastResult = result;
+    then(result);
+  }));
+}
+
 on("ready", () => {
   if (globalThis.__siegeOffline) return; // tools/check.mjs runs the tests itself
-  lastResult = runTests({ inGame: true });
-  report(lastResult); // to the content log
-  if (lastResult.failed.length) for (const p of world.getPlayers()) report(lastResult, p);
+  runInBackground((result) => {
+    report(result); // to the content log
+    if (result.failed.length) for (const p of world.getPlayers()) report(result, p);
+  });
 });
 
 world.afterEvents.playerSpawn.subscribe((event) => {
@@ -36,8 +45,10 @@ world.afterEvents.playerSpawn.subscribe((event) => {
 
 system.afterEvents.scriptEventReceive.subscribe((event) => {
   if (event.id !== "siege:selftest") return;
-  lastResult = runTests({ inGame: true });
   const player = event.sourceEntity?.typeId === "minecraft:player" ? event.sourceEntity : undefined;
-  report(lastResult, player);
-  if (!player) report(lastResult);
+  player?.sendMessage("§7[Hollow Crown] Running the self-test...");
+  runInBackground((result) => {
+    if (player?.isValid) report(result, player);
+    else report(result);
+  });
 });

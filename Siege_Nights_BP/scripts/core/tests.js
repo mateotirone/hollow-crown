@@ -48,3 +48,27 @@ export function runTests({ inGame = true } = {}) {
   }
   return result;
 }
+
+// The same tests as a generator for system.runJob: one test per step, so the game spreads them over
+// ticks. Run all at once in Minecraft's script engine they take far longer than in Node, long enough
+// for the watchdog to stop the scripts (or a Realm). Saving is off only while each single test runs.
+export function* runTestsJob({ inGame = true } = {}, done = () => {}) {
+  const result = { passed: 0, skipped: 0, failed: [] };
+  for (const t of tests) {
+    if (t.gameOnly && !inGame) {
+      result.skipped++;
+      continue;
+    }
+    testing = true;
+    try {
+      t.fn();
+      result.passed++;
+    } catch (e) {
+      result.failed.push({ group: t.group, name: t.name, error: String(e?.message ?? e) });
+    } finally {
+      testing = false;
+    }
+    yield;
+  }
+  done(result);
+}
