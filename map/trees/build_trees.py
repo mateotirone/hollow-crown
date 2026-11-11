@@ -11,6 +11,7 @@ from species import CARDS, SIZES
 from grow import grow
 from bp import Blueprint
 from lock import locked
+from profile import profile
 
 ap = argparse.ArgumentParser()
 ap.add_argument("out"); ap.add_argument("--variants", type=int, default=6); ap.add_argument("--only", default="")
@@ -37,7 +38,7 @@ for sid, card in CARDS.items():
             lk.fill_below = None
             lk.save_mcstructure(os.path.join(d, name + ".mcstructure")); lk.save_json(os.path.join(d, name + ".stamp.json"))
             lo, hi = t.bounds()
-            files.append({"file": f"{sid}/{name}", "size": [hi[0] - lo[0] + 1, hi[1] - lo[1] + 1, hi[2] - lo[2] + 1], "blocks": len(t.cells)})
+            files.append({"file": f"{sid}/{name}", "size": [hi[0] - lo[0] + 1, hi[1] - lo[1] + 1, hi[2] - lo[2] + 1], "blocks": len(t.cells), **profile(t)})
             if v == 0:
                 w = hi[0] - lo[0] + 1
                 lineup.paste(t, x - lo[0], 0, 0); x += w + 3

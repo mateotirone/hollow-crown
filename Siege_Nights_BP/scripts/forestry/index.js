@@ -37,6 +37,19 @@ const isWoodType = (t) => /_log$|_wood$|hollowwood/.test(t);
 
 // ---------- placing blocks ----------
 
+const boxesTouch = (a, b) => a.x0 <= b.x1 && b.x0 <= a.x1 && a.z0 <= b.z1 && b.z0 <= a.z1;
+// What nature puts on the ground; anything else in the yard (planks, bricks, glass, beds...) is someone's building
+const NATURAL = /air$|grass|dirt|podzol|mud|clay|sand|gravel|stone$|^minecraft:(deepslate|tuff|granite|diorite|andesite|calcite|snow|ice|packed_ice|water|lava)$|leaves|_log$|_wood$|flower|fern|bush|sapling|vine|tall_|short_|litter|moss|mushroom|sugar_cane|bamboo|kelp|seagrass|lily|pumpkin|melon|cactus|deadbush|roots|poppy|dandelion|tulip|daisy|orchid|allium|bluet|cornflower|lilac|peony|rose|azalea|snow_layer|pointed_dripstone|siege:old_/;
+
+function builtAt(dim, x, z, y0) {
+  for (let y = y0 - 2; y <= y0 + 4; y++) {
+    let b;
+    try { b = dim.getBlock({ x, y, z }); } catch { return undefined; }
+    if (b && !NATURAL.test(b.typeId)) return b.typeId.replace(/^\w+:/, "").replaceAll("_", " ");
+  }
+  return undefined;
+}
+
 function groundAt(dim, x, z, y0) {
   for (let y = y0 + 8; y >= y0 - 8; y--) {
     const b = dim.getBlock({ x, y, z });
@@ -304,11 +317,30 @@ world.afterEvents.playerPlaceBlock.subscribe(({ block, player }) => {
   const box = footprint(block.location, f, YARD);
   const problem = siteProblem(owner, box);
   if (problem) return player.sendMessage(`§7No room for a grove here: ${problem} §8It needs ${YARD.x1 - YARD.x0 + 1} by ${YARD.z1 - YARD.z0 + 1} blocks behind the Lodge.`);
+  const clash = Object.entries(lodges()).find(([k, l]) => boxesTouch(box, footprint(locOf(k), { x: l.fx, z: l.fz }, YARD)));
+  if (clash) return player.sendMessage("§7No room for a grove here: it would run into another grove.");
   const key = keyOf(block.location);
-  lodges()[key] = { owner, fx: f.x, fz: f.z, style, level: 1, plots: [] };
-  store.save();
-  raiseGrove(key, lodges()[key]);
-  player.sendMessage("§6A grove is going up behind the Lodge. Chop a grown tree at the bottom of its trunk to fell it; a sapling takes its place and is full grown again in three days.");
+  player.sendMessage("§7The forester walks the ground...");
+  // Finished buildings are not on record anywhere, so look at the ground itself, a few columns a tick
+  system.runJob((function* () {
+    const dim = block.dimension;
+    for (let x = YARD.x0; x <= YARD.x1; x += 2) {
+      for (let z = YARD.z0; z <= YARD.z1; z += 2) {
+        const at = toWorld(block.location, f, x, 0, z);
+        const built = builtAt(dim, at.x, at.z, block.location.y);
+        if (built) {
+          player.sendMessage(`§7No room for a grove here: there is ${built} in the way at ${at.x}, ${at.z}. §8It needs ${YARD.x1 - YARD.x0 + 1} by ${YARD.z1 - YARD.z0 + 1} blocks of open ground behind the Lodge.`);
+          return;
+        }
+        yield;
+      }
+    }
+    if (lodges()[key]) return;
+    lodges()[key] = { owner, fx: f.x, fz: f.z, style, level: 1, plots: [] };
+    store.save();
+    raiseGrove(key, lodges()[key]);
+    player.sendMessage("§6A grove is going up behind the Lodge. Chop a grown tree at the bottom of its trunk to fell it; a sapling takes its place and is full grown again in three days.");
+  })());
 });
 
 // ---------- test command ----------

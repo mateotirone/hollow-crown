@@ -44,3 +44,15 @@ mature; two variants) in plain vanilla wood, without `lock.py`, and writes them 
 changing those species. The game side is `scripts/forestry/`: the Lodge block raises a fenced 41 x 29 yard with
 2, 4 or 6 plots; chopping the bottom trunk block fells the tree (its logs drop at the stump, 12 to 48), and a
 sapling regrows to full size in three days. Test with `/scriptevent siege:forestry_grove [style]`.
+
+## Placing trees (size profiles)
+
+Every tree in `trees.json` carries a size profile (`profile.py`): `offset` (stamp corner from the trunk's ground
+cell), `height`, `trunk` (the cells its trunk, roots and knees stand on), `trunk_r`, `rings` (canopy reach at
+each height), `low_r` (reach up to 6 blocks) and `crown_r`. `place.py` scatters trees with them:
+`scatter(index, region, hard, soft, density, seed)` takes two masks of the area. **hard** (buildings, walls,
+towers, wells, stalls): the whole crown stays a block clear, so no branch hangs over a roof or through a wall.
+**soft** (roads, paths, rails, bridleways, fields): only the trunk stays off, with a block to spare, so crowns
+may shade a road. Big sizes are tried first, then smaller ones of the same species; crowns may touch at
+the edges but never another trunk. The map writer and the town generator are meant to call it with their own
+masks.
