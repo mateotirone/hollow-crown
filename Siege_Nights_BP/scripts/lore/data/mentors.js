@@ -15,6 +15,9 @@ export const MENTOR_NPCS = [
   {
     id: "kesh", name: "Kesh Cinder", where: "The Cinder Roost, a rider school cut into the cliff above Sunscar. Stands by an empty roost under the roll of the fallen. Forties, burn-scarred hands, no dragon.",
     start: [
+      [["path:rider", "flag:morvane_fallen", "!flag:kesh_after"], "after"],
+      [["path:rider", "flag:rank_rider_dragonlord", "!flag:kesh_stand"], "stand"],
+      [["path:rider", "flag:rank_rider_drake_captain", "!flag:kesh_turn"], "turn"],
       [["path:rider"], "sworn"],
       [["flag:trial_rider_ready"], "ready"],
       [["flag:trial_choosing"], "hatchwait"],
@@ -111,6 +114,7 @@ export const MENTOR_NPCS = [
           ["Tell me about Ysolt.", "ysolt"],
           ["Why won't they fly on the third night?", "third"],
           ["Teach me something.", "teach"],
+          ["Read me the roll.", "roll"],
           ["Goodbye.", "end"],
         ],
       },
@@ -134,6 +138,26 @@ export const MENTOR_NPCS = [
         text: "The first. A salt-carrier's daughter with a dead mule. She never said what she promised, only that the dragon set the terms.",
         opts: [["Goodbye.", "end"]],
       },
+      roll: {
+        text: "She takes the board down off its hooks and holds it so the light falls across it. She doesn't need to. She knows every name.\n\nShe reads them anyway, all of them, at the same pace, and doesn't skip her own dragon's.",
+        opts: [["Thank you for reading it.", "start"]],
+      },
+      turn: {
+        text: "Drake-Captain. Then sit, and I'll give you what I promised.\n\nThis is Ysolt's last page. The elders have a copy and say it was written in fever. It wasn't.\n\n\"The night the grey army went, every dragon in the Waste came down at once. Not at dusk. At seventeen past three. They folded their wings and put their heads under them like birds in a storm, and the sky over the north went the wrong colour, and something up there was eating an army. Nobody else looked up. I did. I will not fly on that night again, and neither will she.\"",
+        opts: [["Eating an army?", "turn2"]],
+      },
+      turn2: {
+        text: "That's the word she used. The songs say the grey army died of cold in a pass. Ysolt says it was taken, all of it, in one breath, by something that doesn't live under our sky.\n\nThe elders know. They've known for three hundred years. They teach cadets that dragons are lazy on a third night, because the truth is worse for recruiting.\n\nNow you know too. Don't tell the cadets. Tell them when they're you.",
+        opts: [["I won't.", "sworn", ["flag:kesh_turn", "sp:1"]]],
+      },
+      stand: {
+        text: "Dragonlord.\n\nYour name's going on the wall. The other wall, where Ysolt's is: the ones who lived long enough to matter. I carved it last night. It's crooked. I was crying, a bit, and you'll never prove it.\n\nWhen the bad night comes, and it's coming, you'll be in the air over the Rift with fire in your hands. That's what a Dragonlord is for. Not the sky. The ground under it.",
+        opts: [["I'll be there.", "sworn", ["flag:kesh_stand", "sp:2"]]],
+      },
+      after: {
+        text: "They're saying the knocking has stopped.\n\nI've a favour to ask, and I've never asked a rider for anything. Take me up. Just once. Behind you. I won't hold on, I'll just sit, and I won't say anything, and you won't look round.\n\n...Thank you. She'd have liked you.",
+        opts: [["Hold on anyway.", "sworn", ["flag:kesh_after", "sp:1"]]],
+      },
       hub: {
         greets: [
           "Back again. The view hasn't changed.",
@@ -145,6 +169,7 @@ export const MENTOR_NPCS = [
           ["What is this place?", "roost"],
           ["Who are all those names?", "board"],
           ["I want to ride.", "want"],
+          ["Read me the roll.", "roll"],
           ["Goodbye.", "end"],
         ],
       },
@@ -155,6 +180,9 @@ export const MENTOR_NPCS = [
   {
     id: "ulla", name: "Ulla Deepforge", where: "The Deepforge, a forge hall under the mountain above Rimehold. Huge, slow-speaking, soot to the elbows. Talks to the fire more than to people.",
     start: [
+      [["path:forgemaster", "flag:morvane_fallen", "!flag:ulla_after"], "after"],
+      [["path:forgemaster", "flag:rank_forgemaster_forgemaster", "!flag:ulla_tongue"], "stand"],
+      [["path:forgemaster", "flag:rank_forgemaster_master_smith", "!flag:ulla_turn"], "turn"],
       [["path:forgemaster"], "sworn"],
       [["flag:trial_forgemaster_ready"], "ready"],
       [["flag:trial_ring"], "huntwait"],
@@ -262,6 +290,22 @@ export const MENTOR_NPCS = [
         text: "You're sworn already. I can see it on you. She can too: look, she's gone quiet.\n\nOne road each. Warm your hands, though. Nobody's turned away from the fire.",
         opts: [["Thank you.", "end"]],
       },
+      turn: {
+        text: "Master Smith. Sit by her. She likes you now; you can tell by how she ticks.\n\nThe moulds. The grey brothers took every bell mould in the north and said it was to keep them safe. One of them was half of the biggest bell this land ever poured. Three generations after Hroda, right here, they cast a bell so big it took the whole mountain's fire for a week.\n\nThey rang it at Bellhollow, once, at the end of the war. It split. And whatever it rang out, it stayed out.",
+        opts: [["Rang what out?", "turn2"]],
+      },
+      turn2: {
+        text: "My grandmother said: the same thing the first bell rang out, when there was a queen and the country had another name. Bells don't keep out cold or wolves. They never did. Every bell in the north was made to keep something on the far side of a door.\n\nThat's why the grey army cut them. That's why the brothers hid the moulds instead of melting them. You don't melt a key you might need.",
+        opts: [["We'll need it.", "sworn", ["flag:ulla_turn", "lead:ashen_chapterhouse", "sp:1"]]],
+      },
+      stand: {
+        text: "Forgemaster. She knows your name. I heard her say it.\n\nI wrote to the chapterhouse. Brother Cael sent the mould back on a cart with no guard and a note: \"It was never ours to keep.\" Make of that what you like. I've made a tongue from it.\n\nOne stroke. That's all it has in it, each time. When the dead stand up in rows, ring it, and they'll remember they were never soldiers. Hroda would have been proud of it. It isn't a weapon.",
+        opts: [["I'll ring it.", "sworn", ["flag:ulla_tongue", "sp:2"]]],
+      },
+      after: {
+        text: "Shut the door.\n\n...No. Leave it open. Let her feel the air.\n\nFour hundred years she's burned without stopping, in case. I'm going to let her down to embers tonight and sleep in the chair. If she goes out, she goes out. I don't think she will. I think she's tired, the same as me.",
+        opts: [["Sleep, Ulla.", "sworn", ["flag:ulla_after", "sp:1"]]],
+      },
       hub: {
         greets: [
           "Door. Shut. Thank you.",
@@ -282,6 +326,9 @@ export const MENTOR_NPCS = [
   {
     id: "ottilie", name: "Harbourmistress Holt", where: "The harbour office on the quay at Gull's Rest. Brisk, fair, ink on her cuffs. Keeps the Debt Book on a chain.",
     start: [
+      [["path:captain", "flag:morvane_fallen", "!flag:ottilie_after"], "after"],
+      [["path:captain", "flag:rank_captain_admiral", "!flag:forty_sought"], "stand"],
+      [["path:captain", "flag:rank_captain_captain", "!flag:ottilie_turn"], "turn"],
       [["path:captain"], "sworn"],
       [["flag:trial_captain_ready"], "ready"],
       [["flag:trial_crew"], "bridewait"],
@@ -393,6 +440,26 @@ export const MENTOR_NPCS = [
         text: "Forty boats, burned in the harbour mouth by Merrin Holt, my ancestor, to stop a fleet. Three hundred years of paying for them, and the book still says unpaid.",
         opts: [["Goodbye.", "end"]],
       },
+      turn: {
+        text: "Captain in rank. Then come into the back room and shut the door.\n\nThe back of the book. The forty crews of the forty boats, every name, in Merrin's own hand. They went home after the burning. They lived. And then, over the years, on third nights, they started walking into the water. One here, a family there. Merrin wrote each one in as it happened.",
+        opts: [["Why the third nights?", "turn2"]],
+      },
+      turn2: {
+        text: "Nobody knows. The town calls those years the Lost Days and doesn't talk about them. But here's what I worked out, alone in this room, last winter.\n\nThe debt's never been marked paid because it isn't owed to the boat owners. It's owed to the crews. And you can't pay someone who's dead. You can only pay someone who isn't.",
+        opts: [["You think they're alive.", "turn3"]],
+      },
+      turn3: {
+        text: "I think they're somewhere. I think the lamp at the lighthouse hasn't gone out in three hundred years because somebody is still at sea.\n\nDon't repeat that in the Gull. They'll take my chain off.",
+        opts: [["I won't.", "sworn", ["flag:ottilie_turn", "sp:1"]]],
+      },
+      stand: {
+        text: "Admiral. Merrin never had that word.\n\nI want you to do something I can't. When you go under, wherever the bad road takes you, look for them. There's water under everything, the old songs say, and it runs. Forty crews of Saltreach are rowing somewhere, still owed.\n\nFind them. Settle with them. Tell them a Holt sent you, and that the book is open. If they'll take one more stroke for a captain, it'll be for you.",
+        opts: [["I'll find them.", "sworn", ["flag:forty_sought", "sp:2"]]],
+      },
+      after: {
+        text: "Sit. Watch.\n\nShe opens the Debt Book to the first page, dips the pen, and in a careful hand under Merrin Holt's name she writes one word. Then she blots it, and sits back, and looks at it for a long time.\n\n\"Paid.\" The first time anyone has. Out at the lighthouse, the lamp is going out.",
+        opts: [["It's done.", "sworn", ["flag:ottilie_after", "sp:1"]]],
+      },
       hub: {
         greets: [
           "Back. Still not in the book.",
@@ -413,6 +480,9 @@ export const MENTOR_NPCS = [
   {
     id: "nell", name: "Nell Sedge", where: "A raft-house moored in the reeds past Mirelight, past Old Mag's hut and further out. Small, cheerful, eyes like a heron. Always has a kettle on.",
     start: [
+      [["path:witch", "flag:morvane_fallen", "!flag:nell_after"], "after"],
+      [["path:witch", "flag:rank_witch_fen_mother", "!flag:nell_stand"], "stand"],
+      [["path:witch", "flag:rank_witch_crone", "!flag:nell_turn"], "turn"],
       [["path:witch"], "sworn"],
       [["flag:trial_witch_ready"], "ready"],
       [["flag:trial_graves"], "motherwait"],
@@ -528,6 +598,26 @@ export const MENTOR_NPCS = [
       other: {
         text: "Oh, you're sworn already. I can taste it on the air. The fen won't lend to someone who owes elsewhere. It's very particular about that.\n\nHave some tea anyway. Tea's free. Tea's the only thing that is.",
         opts: [["Thank you.", "end"]],
+      },
+      turn: {
+        text: "Crone. Come on, then. Bring the lantern. No, the other one.\n\nShe poles the raft out past where the reeds stop, to a patch of water so still it looks like a hole. The ground around it is wrong: half of it is fen, and half of it is something else, darker, like a stone that's been under water too long and forgot it was ever dry.\n\n\"This is the old water. This is where the fen does its lending from.\"",
+        opts: [["Lending for who?", "turn2"]],
+      },
+      turn2: {
+        text: "For something older than Aldmere. This land had another name once, when two kinds of ground lay together here and neither minded. The fen still calls the place by that name. I won't say it out in the open, and you shouldn't either, not until you have to.\n\nThat's who the fen lends for. Something that used to live here, and was put out, and has been knocking ever since. Goody Sedge knew. Now you do.",
+        opts: [["Why tell me?", "turn3"]],
+      },
+      turn3: {
+        text: "Because Magda borrows from it and won't say so, and the Order pretends it never was, and somebody ought to know the truth without being frightened of it.\n\nBe kind to it, when you meet it. It isn't wicked. It's owed.",
+        opts: [["I'll remember.", "sworn", ["flag:nell_turn", "sp:1"]]],
+      },
+      stand: {
+        text: "Fen Mother.\n\nGoody Sedge has a fourth grave now. I dug it myself, under the willow. It's got your name on, kept warm. That's the best compliment a Sedge can pay, so don't make that face.\n\nWhen the bad night comes, the fen will call in everything it's lent at once. You'll feel it. Let it through you. And when you're falling, it'll lend you one more moment. Take it.",
+        opts: [["I'll take it.", "sworn", ["flag:nell_stand", "sp:2"]]],
+      },
+      after: {
+        text: "She's already got her coat on.\n\n\"I'm going to Magda's. Don't look like that. Sixty years is long enough to be right about something.\"\n\nShe poles away into the reeds with two cups and the kettle, and you hear, a long while later and a long way off, two old women not saying anything to each other for an hour.",
+        opts: [["Good.", "sworn", ["flag:nell_after", "sp:1"]]],
       },
       hub: {
         greets: [

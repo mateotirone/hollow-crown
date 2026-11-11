@@ -840,6 +840,32 @@
         ]
       },
       {
+        "scene_tag": "siege_lore_aldous_commander",
+        "npc_name": "Sir Aldous Vane",
+        "text": "Knight-Commander. There were four of those when we were eleven hundred. Now there's you.\n\nThe Eleven are yours. Every one of us who's left. We'll hold whatever wall you put us on, and when the worst night comes, the one we were all sworn for and never told about, we'll be on it with you.\n\nWhatever you call us now. The name matters less than I thought it would.",
+        "buttons": [
+          {
+            "name": "Then hold the wall with me.",
+            "commands": [
+              "/scriptevent siege:lore_say aldous commander 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_aldous_after",
+        "npc_name": "Sir Aldous Vane",
+        "text": "I keep thinking about her. Edda. Saint Ashe.\n\nShe stood on a wall on a third night, just like the one we stood on, and did a terrible thing so the knocking would stop, and then lied for the rest of her life so no one would undo it.\n\nWould she have done it again, do you think? If she'd seen how it ended?\n\n...No. Don't answer. I don't think I want to know. I just wanted somebody else to wonder it too.",
+        "buttons": [
+          {
+            "name": "I'll wonder it with you.",
+            "commands": [
+              "/scriptevent siege:lore_say aldous after 0"
+            ]
+          }
+        ]
+      },
+      {
         "scene_tag": "siege_lore_aldous_wall",
         "npc_name": "Sir Aldous Vane",
         "text": "Squire. Good, you're here. I need to ask you something the Rule doesn't cover.\n\nThe Order watches the keeps. That's all we do now: watch. Eleven of us can't stand on forty walls. But you could stand on one that isn't yours.\n\nNext time another keep is besieged, go and hold it with them. Not for pay. Because the Rule says we stand between the people and the dark, and I'd like to see one of us actually do it.",
@@ -938,6 +964,19 @@
             "name": "Then let's finish it.",
             "commands": [
               "/scriptevent siege:lore_say aldous edda 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_mag_crownheld",
+        "npc_name": "Old Mag",
+        "text": "So. It's over, and you're the one who can hear all of it now.\n\nWill you let me hold it? The Crown. Not wear it. I'm not a fool, and I'm not you. Just hold it, once, in my two hands.\n\n...Heavier than I thought. Colder. He used to turn his ring when he was thinking. Did you know that? No. Of course you didn't.\n\nTake it back. Quickly, please.",
+        "buttons": [
+          {
+            "name": "I've got it, Mag.",
+            "commands": [
+              "/scriptevent siege:lore_say mag crownheld 0"
             ]
           }
         ]
@@ -4900,9 +4939,15 @@
             ]
           },
           {
-            "name": "Goodbye.",
+            "name": "Read me the roll.",
             "commands": [
               "/scriptevent siege:lore_say kesh sworn 3"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh sworn 4"
             ]
           }
         ]
@@ -4931,9 +4976,15 @@
             ]
           },
           {
-            "name": "Goodbye.",
+            "name": "Read me the roll.",
             "commands": [
               "/scriptevent siege:lore_say kesh sworn 3"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh sworn 4"
             ]
           }
         ]
@@ -4962,9 +5013,15 @@
             ]
           },
           {
-            "name": "Goodbye.",
+            "name": "Read me the roll.",
             "commands": [
               "/scriptevent siege:lore_say kesh sworn 3"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh sworn 4"
             ]
           }
         ]
@@ -4993,9 +5050,15 @@
             ]
           },
           {
-            "name": "Goodbye.",
+            "name": "Read me the roll.",
             "commands": [
               "/scriptevent siege:lore_say kesh sworn 3"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh sworn 4"
             ]
           }
         ]
@@ -5072,6 +5135,71 @@
         ]
       },
       {
+        "scene_tag": "siege_lore_kesh_roll",
+        "npc_name": "Kesh Cinder",
+        "text": "She takes the board down off its hooks and holds it so the light falls across it. She doesn't need to. She knows every name.\n\nShe reads them anyway, all of them, at the same pace, and doesn't skip her own dragon's.",
+        "buttons": [
+          {
+            "name": "Thank you for reading it.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh roll 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_kesh_turn",
+        "npc_name": "Kesh Cinder",
+        "text": "Drake-Captain. Then sit, and I'll give you what I promised.\n\nThis is Ysolt's last page. The elders have a copy and say it was written in fever. It wasn't.\n\n\"The night the grey army went, every dragon in the Waste came down at once. Not at dusk. At seventeen past three. They folded their wings and put their heads under them like birds in a storm, and the sky over the north went the wrong colour, and something up there was eating an army. Nobody else looked up. I did. I will not fly on that night again, and neither will she.\"",
+        "buttons": [
+          {
+            "name": "Eating an army?",
+            "commands": [
+              "/scriptevent siege:lore_say kesh turn 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_kesh_turn2",
+        "npc_name": "Kesh Cinder",
+        "text": "That's the word she used. The songs say the grey army died of cold in a pass. Ysolt says it was taken, all of it, in one breath, by something that doesn't live under our sky.\n\nThe elders know. They've known for three hundred years. They teach cadets that dragons are lazy on a third night, because the truth is worse for recruiting.\n\nNow you know too. Don't tell the cadets. Tell them when they're you.",
+        "buttons": [
+          {
+            "name": "I won't.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh turn2 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_kesh_stand",
+        "npc_name": "Kesh Cinder",
+        "text": "Dragonlord.\n\nYour name's going on the wall. The other wall, where Ysolt's is: the ones who lived long enough to matter. I carved it last night. It's crooked. I was crying, a bit, and you'll never prove it.\n\nWhen the bad night comes, and it's coming, you'll be in the air over the Rift with fire in your hands. That's what a Dragonlord is for. Not the sky. The ground under it.",
+        "buttons": [
+          {
+            "name": "I'll be there.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh stand 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_kesh_after",
+        "npc_name": "Kesh Cinder",
+        "text": "They're saying the knocking has stopped.\n\nI've a favour to ask, and I've never asked a rider for anything. Take me up. Just once. Behind you. I won't hold on, I'll just sit, and I won't say anything, and you won't look round.\n\n...Thank you. She'd have liked you.",
+        "buttons": [
+          {
+            "name": "Hold on anyway.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh after 0"
+            ]
+          }
+        ]
+      },
+      {
         "scene_tag": "siege_lore_kesh_hub",
         "npc_name": "Kesh Cinder",
         "text": "Something you wanted?",
@@ -5095,9 +5223,15 @@
             ]
           },
           {
-            "name": "Goodbye.",
+            "name": "Read me the roll.",
             "commands": [
               "/scriptevent siege:lore_say kesh hub 3"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh hub 4"
             ]
           }
         ]
@@ -5126,9 +5260,15 @@
             ]
           },
           {
-            "name": "Goodbye.",
+            "name": "Read me the roll.",
             "commands": [
               "/scriptevent siege:lore_say kesh hub 3"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh hub 4"
             ]
           }
         ]
@@ -5157,9 +5297,15 @@
             ]
           },
           {
-            "name": "Goodbye.",
+            "name": "Read me the roll.",
             "commands": [
               "/scriptevent siege:lore_say kesh hub 3"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh hub 4"
             ]
           }
         ]
@@ -5188,9 +5334,15 @@
             ]
           },
           {
-            "name": "Goodbye.",
+            "name": "Read me the roll.",
             "commands": [
               "/scriptevent siege:lore_say kesh hub 3"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh hub 4"
             ]
           }
         ]
@@ -5687,6 +5839,58 @@
             "name": "Thank you.",
             "commands": [
               "/scriptevent siege:lore_say ulla other 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ulla_turn",
+        "npc_name": "Ulla Deepforge",
+        "text": "Master Smith. Sit by her. She likes you now; you can tell by how she ticks.\n\nThe moulds. The grey brothers took every bell mould in the north and said it was to keep them safe. One of them was half of the biggest bell this land ever poured. Three generations after Hroda, right here, they cast a bell so big it took the whole mountain's fire for a week.\n\nThey rang it at Bellhollow, once, at the end of the war. It split. And whatever it rang out, it stayed out.",
+        "buttons": [
+          {
+            "name": "Rang what out?",
+            "commands": [
+              "/scriptevent siege:lore_say ulla turn 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ulla_turn2",
+        "npc_name": "Ulla Deepforge",
+        "text": "My grandmother said: the same thing the first bell rang out, when there was a queen and the country had another name. Bells don't keep out cold or wolves. They never did. Every bell in the north was made to keep something on the far side of a door.\n\nThat's why the grey army cut them. That's why the brothers hid the moulds instead of melting them. You don't melt a key you might need.",
+        "buttons": [
+          {
+            "name": "We'll need it.",
+            "commands": [
+              "/scriptevent siege:lore_say ulla turn2 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ulla_stand",
+        "npc_name": "Ulla Deepforge",
+        "text": "Forgemaster. She knows your name. I heard her say it.\n\nI wrote to the chapterhouse. Brother Cael sent the mould back on a cart with no guard and a note: \"It was never ours to keep.\" Make of that what you like. I've made a tongue from it.\n\nOne stroke. That's all it has in it, each time. When the dead stand up in rows, ring it, and they'll remember they were never soldiers. Hroda would have been proud of it. It isn't a weapon.",
+        "buttons": [
+          {
+            "name": "I'll ring it.",
+            "commands": [
+              "/scriptevent siege:lore_say ulla stand 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ulla_after",
+        "npc_name": "Ulla Deepforge",
+        "text": "Shut the door.\n\n...No. Leave it open. Let her feel the air.\n\nFour hundred years she's burned without stopping, in case. I'm going to let her down to embers tonight and sleep in the chair. If she goes out, she goes out. I don't think she will. I think she's tired, the same as me.",
+        "buttons": [
+          {
+            "name": "Sleep, Ulla.",
+            "commands": [
+              "/scriptevent siege:lore_say ulla after 0"
             ]
           }
         ]
@@ -6302,6 +6506,71 @@
             "name": "Goodbye.",
             "commands": [
               "/scriptevent siege:lore_say ottilie debt_other 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ottilie_turn",
+        "npc_name": "Harbourmistress Holt",
+        "text": "Captain in rank. Then come into the back room and shut the door.\n\nThe back of the book. The forty crews of the forty boats, every name, in Merrin's own hand. They went home after the burning. They lived. And then, over the years, on third nights, they started walking into the water. One here, a family there. Merrin wrote each one in as it happened.",
+        "buttons": [
+          {
+            "name": "Why the third nights?",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie turn 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ottilie_turn2",
+        "npc_name": "Harbourmistress Holt",
+        "text": "Nobody knows. The town calls those years the Lost Days and doesn't talk about them. But here's what I worked out, alone in this room, last winter.\n\nThe debt's never been marked paid because it isn't owed to the boat owners. It's owed to the crews. And you can't pay someone who's dead. You can only pay someone who isn't.",
+        "buttons": [
+          {
+            "name": "You think they're alive.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie turn2 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ottilie_turn3",
+        "npc_name": "Harbourmistress Holt",
+        "text": "I think they're somewhere. I think the lamp at the lighthouse hasn't gone out in three hundred years because somebody is still at sea.\n\nDon't repeat that in the Gull. They'll take my chain off.",
+        "buttons": [
+          {
+            "name": "I won't.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie turn3 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ottilie_stand",
+        "npc_name": "Harbourmistress Holt",
+        "text": "Admiral. Merrin never had that word.\n\nI want you to do something I can't. When you go under, wherever the bad road takes you, look for them. There's water under everything, the old songs say, and it runs. Forty crews of Saltreach are rowing somewhere, still owed.\n\nFind them. Settle with them. Tell them a Holt sent you, and that the book is open. If they'll take one more stroke for a captain, it'll be for you.",
+        "buttons": [
+          {
+            "name": "I'll find them.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie stand 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ottilie_after",
+        "npc_name": "Harbourmistress Holt",
+        "text": "Sit. Watch.\n\nShe opens the Debt Book to the first page, dips the pen, and in a careful hand under Merrin Holt's name she writes one word. Then she blots it, and sits back, and looks at it for a long time.\n\n\"Paid.\" The first time anyone has. Out at the lighthouse, the lamp is going out.",
+        "buttons": [
+          {
+            "name": "It's done.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie after 0"
             ]
           }
         ]
@@ -6984,6 +7253,71 @@
             "name": "Thank you.",
             "commands": [
               "/scriptevent siege:lore_say nell other 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nell_turn",
+        "npc_name": "Nell Sedge",
+        "text": "Crone. Come on, then. Bring the lantern. No, the other one.\n\nShe poles the raft out past where the reeds stop, to a patch of water so still it looks like a hole. The ground around it is wrong: half of it is fen, and half of it is something else, darker, like a stone that's been under water too long and forgot it was ever dry.\n\n\"This is the old water. This is where the fen does its lending from.\"",
+        "buttons": [
+          {
+            "name": "Lending for who?",
+            "commands": [
+              "/scriptevent siege:lore_say nell turn 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nell_turn2",
+        "npc_name": "Nell Sedge",
+        "text": "For something older than Aldmere. This land had another name once, when two kinds of ground lay together here and neither minded. The fen still calls the place by that name. I won't say it out in the open, and you shouldn't either, not until you have to.\n\nThat's who the fen lends for. Something that used to live here, and was put out, and has been knocking ever since. Goody Sedge knew. Now you do.",
+        "buttons": [
+          {
+            "name": "Why tell me?",
+            "commands": [
+              "/scriptevent siege:lore_say nell turn2 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nell_turn3",
+        "npc_name": "Nell Sedge",
+        "text": "Because Magda borrows from it and won't say so, and the Order pretends it never was, and somebody ought to know the truth without being frightened of it.\n\nBe kind to it, when you meet it. It isn't wicked. It's owed.",
+        "buttons": [
+          {
+            "name": "I'll remember.",
+            "commands": [
+              "/scriptevent siege:lore_say nell turn3 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nell_stand",
+        "npc_name": "Nell Sedge",
+        "text": "Fen Mother.\n\nGoody Sedge has a fourth grave now. I dug it myself, under the willow. It's got your name on, kept warm. That's the best compliment a Sedge can pay, so don't make that face.\n\nWhen the bad night comes, the fen will call in everything it's lent at once. You'll feel it. Let it through you. And when you're falling, it'll lend you one more moment. Take it.",
+        "buttons": [
+          {
+            "name": "I'll take it.",
+            "commands": [
+              "/scriptevent siege:lore_say nell stand 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nell_after",
+        "npc_name": "Nell Sedge",
+        "text": "She's already got her coat on.\n\n\"I'm going to Magda's. Don't look like that. Sixty years is long enough to be right about something.\"\n\nShe poles away into the reeds with two cups and the kettle, and you hear, a long while later and a long way off, two old women not saying anything to each other for an hour.",
+        "buttons": [
+          {
+            "name": "Good.",
+            "commands": [
+              "/scriptevent siege:lore_say nell after 0"
             ]
           }
         ]

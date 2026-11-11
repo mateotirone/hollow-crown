@@ -181,6 +181,8 @@ export const NPCS = [
     id: "aldous", name: "Sir Aldous Vane", where: "Rides to a player's keep the morning after their first siege win (spawned by the story engine), then waits at the Ashen Gate chapterhouse. Young, earnest, believes everything the Order told him.",
     start: [
       [["flag:morning_after", "flag:aldous_met", "!flag:aldous_saw"], "saw"],
+      [["path:knight", "flag:morvane_fallen", "!flag:aldous_after"], "after"],
+      [["path:knight", "flag:rank_knight_knight_commander", "!flag:aldous_commander"], "commander"],
       [["path:knight", "flag:aldous_met", "!flag:knight_wall_asked"], "wall"],
       [["path:knight", "flag:knight_wall", "!flag:knight_wall_thanked"], "wallthanks"],
       [["read:seal_10"], "edda"],
@@ -260,6 +262,14 @@ export const NPCS = [
         text: "I don't know. That is the truth and it shames me. We take the lights and we are never told what becomes of them.\n\nThere was a mage, once. The Order burned him. They say his students hid his notebooks all over Aldmere. If anyone wrote down what you are now, it was him.",
         opts: [["I'll find them.", "end", ["lead:corvins_tower"]]],
       },
+      commander: {
+        text: "Knight-Commander. There were four of those when we were eleven hundred. Now there's you.\n\nThe Eleven are yours. Every one of us who's left. We'll hold whatever wall you put us on, and when the worst night comes, the one we were all sworn for and never told about, we'll be on it with you.\n\nWhatever you call us now. The name matters less than I thought it would.",
+        opts: [["Then hold the wall with me.", "end", ["flag:aldous_commander", "sp:2"]]],
+      },
+      after: {
+        text: "I keep thinking about her. Edda. Saint Ashe.\n\nShe stood on a wall on a third night, just like the one we stood on, and did a terrible thing so the knocking would stop, and then lied for the rest of her life so no one would undo it.\n\nWould she have done it again, do you think? If she'd seen how it ended?\n\n...No. Don't answer. I don't think I want to know. I just wanted somebody else to wonder it too.",
+        opts: [["I'll wonder it with you.", "end", ["flag:aldous_after", "sp:1"]]],
+      },
       wall: {
         text: "Squire. Good, you're here. I need to ask you something the Rule doesn't cover.\n\nThe Order watches the keeps. That's all we do now: watch. Eleven of us can't stand on forty walls. But you could stand on one that isn't yours.\n\nNext time another keep is besieged, go and hold it with them. Not for pay. Because the Rule says we stand between the people and the dark, and I'd like to see one of us actually do it.",
         opts: [
@@ -303,6 +313,7 @@ export const NPCS = [
     start: [
       [["flag:morning_after", "flag:mag_believed", "!flag:mag_saw"], "saw"],
       [["flag:corvin_says_mag", "!flag:mag_heard_corvin"], "trowel"],
+      [["path:marked", "flag:morvane_fallen", "!flag:mag_after"], "crownheld"],
       [["path:marked", "flag:rank_marked_listener", "!flag:mag_listener"], "listener"],
       [["path:marked", "flag:rank_marked_adept", "!flag:mag_adept"], "adept"],
       [["path:marked", "flag:mag_believed", "!flag:mag_arts"], "arts"],
@@ -312,6 +323,10 @@ export const NPCS = [
       [[], "first"],
     ],
     nodes: {
+      crownheld: {
+        text: "So. It's over, and you're the one who can hear all of it now.\n\nWill you let me hold it? The Crown. Not wear it. I'm not a fool, and I'm not you. Just hold it, once, in my two hands.\n\n...Heavier than I thought. Colder. He used to turn his ring when he was thinking. Did you know that? No. Of course you didn't.\n\nTake it back. Quickly, please.",
+        opts: [["I've got it, Mag.", "hub", ["flag:mag_after", "sp:1"]]],
+      },
       listener: {
         text: "Sit. No, the other chair, that one's for the cat, and she's dead, but it's still hers.\n\nListener now. I could tell from the door. You keep tilting your head at the kettle.\n\nSo. What did it sound like, the first time? Not what it said. What it SOUNDED like. Everyone hears something different, and what you hear tells me what you'll be.",
         opts: [

@@ -36,6 +36,8 @@ import { MENTOR_NPCS } from "../lore/data/mentors.js";
 import { NPCS } from "../lore/data/dialogue.js";
 import { marks } from "./marks.js";
 import "./showcase.js";
+import "./stand.js";
+import "./roost.js";
 
 const PROP = "hc:role_trials";
 const HERO_PROP = "siege:townhall_hero"; // written by the town hall
