@@ -14,11 +14,11 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from bp import solid_full, is_fence, is_wall, is_pane, is_stairs, is_slab, DIRS
 
 GRASS = (0x91, 0xBD, 0x59); FOLIAGE = (0x6A, 0x9E, 0x3A); SPRUCE = (0x61, 0x99, 0x61)
-WOODS = {"oak": "oak", "spruce": "spruce", "dark_oak": "big_oak", "birch": "birch", "jungle": "jungle", "acacia": "acacia", "mangrove": "mangrove"}
+WOODS = {"oak": "oak", "spruce": "spruce", "dark_oak": "big_oak", "birch": "birch", "jungle": "jungle", "acacia": "acacia", "mangrove": "mangrove", "warped": "warped"}
 # Bedrock names some newer textures differently from the old pattern
 TEX_ALIAS = {"planks_mangrove": "mangrove_planks", "log_mangrove": "mangrove_log_side", "log_mangrove_top": "mangrove_log_top",
              "stripped_mangrove_log": "stripped_mangrove_log_side",
-             "door_mangrove_lower": "mangrove_door_bottom", "door_big_oak_lower": "door_dark_oak_lower", "door_big_oak_upper": "door_dark_oak_upper", "door_mangrove_upper": "mangrove_door_top"}
+             "door_mangrove_lower": "mangrove_door_bottom", "planks_warped": "huge_fungus/warped_planks", "door_warped_lower": "huge_fungus/warped_door_lower", "door_warped_upper": "huge_fungus/warped_door_top", "trapdoor_warped": "huge_fungus/warped_trapdoor", "warped_trapdoor": "huge_fungus/warped_trapdoor", "door_big_oak_lower": "door_dark_oak_lower", "door_big_oak_upper": "door_dark_oak_upper", "door_mangrove_upper": "mangrove_door_top"}
 
 # The add-on's own blocks (siege:*): texture from the behaviour pack's material instances and the
 # resource pack's terrain_texture.json, as absolute paths.
@@ -103,6 +103,8 @@ def cube_tex(n, p):
     simple = {"grass_block": {"top": "grass_top#grass", "bottom": "dirt", "side": "grass_side_carried"},
               "podzol": {"top": "dirt_podzol_top", "bottom": "dirt", "side": "dirt_podzol_side"},
               "ochre_froglight": {"top": "ochre_froglight_top", "bottom": "ochre_froglight_top", "side": "ochre_froglight_side"},
+              "verdant_froglight": {"top": "verdant_froglight_top", "bottom": "verdant_froglight_top", "side": "verdant_froglight_side"},
+              "mangrove_roots": {"top": "mangrove_roots_top", "side": "mangrove_roots_side"},
               "quartz_pillar": {"top": "quartz_block_lines_top", "bottom": "quartz_block_lines_top", "side": "quartz_block_lines"},
               "chiseled_quartz_block": {"top": "quartz_block_chiseled_top", "bottom": "quartz_block_chiseled_top", "side": "quartz_block_chiseled"},
               "smithing_table": {"top": "smithing_table_top", "bottom": "smithing_table_bottom", "side": "smithing_table_side", "front": "smithing_table_front"},
@@ -131,6 +133,9 @@ def cube_tex(n, p):
         c = n[:-11].replace("light_gray", "silver")
         return {"side": "hardened_clay_stained_" + c if c else "hardened_clay"}
     if n.endswith("_wool"): return {"side": "wool_colored_" + n[:-5].replace("light_gray", "silver")}
+    if n.endswith("_concrete"): return {"side": "concrete_" + n[:-9].replace("light_gray", "silver")}
+    if n == "decorated_pot": return {"side": "decorated_pot_side", "top": "decorated_pot_base"}
+    if n == "dried_kelp_block": return {"side": "dried_kelp_side_a", "top": "dried_kelp_top"}
     m = base_material(n)
     if m: return {"side": m}
     return {"side": n}
@@ -150,7 +155,7 @@ PLANTS = {"poppy": "flower_rose", "dandelion": "flower_dandelion", "cornflower":
           "azure_bluet": "flower_houstonia", "allium": "flower_allium", "red_tulip": "flower_tulip_red", "white_tulip": "flower_tulip_white",
           "pink_tulip": "flower_tulip_pink", "orange_tulip": "flower_tulip_orange", "lily_of_the_valley": "flower_lily_of_the_valley",
           "short_grass": "tallgrass#grass", "fern": "fern#grass", "sweet_berry_bush": "sweet_berry_bush_stage3",
-          "wheat": "wheat_stage_7", "carrots": "carrots_stage_3", "potatoes": "potatoes_stage_3"}
+          "wheat": "wheat_stage_7", "cactus": "cactus_side", "dead_bush": "deadbush", "carrots": "carrots_stage_3", "potatoes": "potatoes_stage_3"}
 
 FACES = {  # name: normal, 4 corners as functions of box
     "up": (0, 1, 0), "down": (0, -1, 0), "south": (0, 0, 1), "north": (0, 0, -1), "east": (1, 0, 0), "west": (-1, 0, 0)}
@@ -245,6 +250,7 @@ def model(n, p):
     if n == "ladder":
         return [((0, 0, 0, 1, 1, 1 / 16), {"side": "ladder"}, {"cut": 1})]
     if n == "moss_carpet": return [((0, 0, 0, 1, 1 / 16, 1), {"side": "moss_block"}, {})]
+    if n == "snow_layer": return [((0, 0, 0, 1, (2 * (int(p.get("height", 0)) + 1)) / 16, 1), {"side": "snow"}, {})]
     if n == "rail": return [((0, 0, 0, 1, 1 / 16, 1), {"side": "rail_normal"}, {"cut": 1})]
     if n in ("siege:portcullis", "siege:castle_gate"):
         t = siege_tex(n); ax = p.get("axis", "x")

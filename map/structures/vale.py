@@ -1,7 +1,7 @@
 """Aldmere Vale buildings: Norman stone ground floors, dark timber frames, slate roofs."""
 import random
 from bp import Blueprint, DIRS, OPP, RIGHT
-from kit import Building, VALE, mix, grow, h3, side_cells, DOCTRINE, finish_doctrine
+from kit import Building, VALE, mix, grow, h3, side_cells, DOCTRINE, finish_doctrine, VALE_STONE, STONE_FAMILY
 import furnish as F
 
 
@@ -236,6 +236,7 @@ def townhouse(seed, width=7, depth=9, storeys=2, ground="stone", jetty=True, inf
         bp.name += "_" + style
     P.update(DOCTRINE)
     P["pane"] = "gray_stained_glass_pane" if style == "stone" else "brown_stained_glass_pane" if style == "brick" or rnd.random() < 0.6 else "light_gray_stained_glass_pane"
+    if "pane" in STYLES.get(style, {}): P["pane"] = STYLES[style]["pane"]      # regional glass (build-instructions palettes)
     B = Building(bp, P, seed)
     w, d = width - 1, depth - 1
     rect = (0, 0, w, d)
@@ -275,5 +276,6 @@ def townhouse(seed, width=7, depth=9, storeys=2, ground="stone", jetty=True, inf
     # front step details
     if rnd.random() < 0.6: bp.set(w, 1, d + 1 + (1 if jetty else 0), "barrel")
     if rnd.random() < 0.5: bp.set(0, 1, d + 1 + (1 if jetty else 0), "flower_pot", plant=rnd.choice(["poppy", "dandelion", "cornflower"]))
-    finish_doctrine(bp)
+    bp.markers["door"] = (w // 2, 1, d + 1)
+    finish_doctrine(bp, P.get("ladder", VALE_STONE), P.get("family", STONE_FAMILY))
     return bp

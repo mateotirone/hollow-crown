@@ -57,7 +57,8 @@ def solid_full(name, p):
     if is_stairs(name) or is_slab(name) or is_fence(name) or is_wall(name) or is_pane(name): return False
     if name in ("bed", "chest", "cauldron", "lectern", "brewing_stand") or name.endswith("pressure_plate"): return False
     if name.endswith("trapdoor") or name.endswith("_door") or name.endswith("fence_gate") or name.endswith("_sign"): return False
-    if name in ("campfire", "bell", "chain", "iron_chain", "cauldron", "anvil", "grindstone", "lectern", "end_rod", "candle"): return False
+    if name in ("campfire", "bell", "chain", "iron_chain", "cauldron", "anvil", "grindstone", "lectern", "end_rod", "candle", "snow_layer",
+                "water_cauldron", "lightning_rod", "decorated_pot", "white_candle", "mangrove_roots", "iron_bars"): return False
     return True
 
 

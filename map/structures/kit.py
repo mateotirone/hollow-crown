@@ -34,20 +34,45 @@ def mix(table, seed=0, low_moss=None):
     return f
 
 # ---- texturing doctrine (build-instructions/texturing, PR #87): gradients, not speckle ----------------
-SLATE = ["cobbled_deepslate_stairs", "deepslate_brick_stairs", "deepslate_tile_stairs"]          # eaves -> ridge
+def _load_ladders():
+    """Every colour ladder (code -> blocks, bottom of the wall to the top) from the doctrine JSON: the repo copy
+    in build-instructions/texturing once PR #87 is in, else the copy kept next to this file."""
+    import json, os
+    here = os.path.dirname(os.path.abspath(__file__))
+    for p in (os.path.join(here, "..", "..", "build-instructions", "texturing", "doctrine.json"), os.path.join(here, "doctrine_ladders.json")):
+        if os.path.exists(p):
+            out = {}
+            for r in json.load(open(p))["regions"]:
+                for v in r.values():
+                    for c in (v if isinstance(v, list) else []):
+                        if isinstance(c, dict) and "code" in c: out[c["code"]] = list(c["blocks"])
+            return out
+    raise FileNotFoundError("doctrine.json")
+LADDERS = _load_ladders()
+
+def stairs_of(block):
+    """The stair block made of a full block (deepslate_tiles -> deepslate_tile_stairs)."""
+    special = {"deepslate_tiles": "deepslate_tile_stairs", "deepslate_bricks": "deepslate_brick_stairs", "stone_bricks": "stone_brick_stairs",
+               "mud_bricks": "mud_brick_stairs", "tuff_bricks": "tuff_brick_stairs", "prismarine_bricks": "prismarine_bricks_stairs",
+               "polished_blackstone_bricks": "polished_blackstone_brick_stairs", "brick_block": "brick_stairs", "quartz_bricks": "quartz_stairs"}
+    if block in special: return special[block]
+    if block.endswith("_planks"): return block[:-7] + "_stairs"
+    return block + "_stairs"
+
+SLATE = [stairs_of(b) for b in LADDERS["VAL-06"]]                                              # eaves -> ridge
 COPPER = ["waxed_cut_copper_stairs", "waxed_exposed_cut_copper_stairs", "waxed_weathered_cut_copper_stairs",
           "waxed_oxidized_cut_copper_stairs"]                                                    # eaves -> ridge
 COPPER_MATS = dict(roof=COPPER[0], roof_ladder=COPPER, roof_block="waxed_oxidized_cut_copper",
                    roof_slab="waxed_oxidized_cut_copper_slab")
-VALE_STONE = ["tuff_bricks", "cobblestone", "stone", "andesite"]                                 # VAL-01 (Mateo), bottom to top
+VALE_STONE = LADDERS["VAL-01"]                                                                  # Mateo's ladder, bottom to top
 STONE_FAMILY = {"stone_bricks", "cracked_stone_bricks", "mossy_stone_bricks", "cobblestone", "mossy_cobblestone",
-                "andesite", "tuff", "tuff_bricks", "stone"}
+                "andesite", "tuff", "tuff_bricks", "stone", "smooth_stone"}
 
 DOCTRINE = dict(dress=True, verge_lanterns=True, arched_jetty=True, panel_trapdoor="dark_oak_trapdoor")
 
-def finish_doctrine(bp, ladder=VALE_STONE):
+def finish_doctrine(bp, ladder=VALE_STONE, family=STONE_FAMILY):
     """Canvas first, paint last: repaint the stone walls by the doctrine, then finish the blueprint."""
-    paint_stone(bp, ladder)
+    paint_stone(bp, ladder, family)
     return bp.finish()
 
 def smooth_noise(a, b, seed, cell=4.0):

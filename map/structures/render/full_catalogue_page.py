@@ -77,10 +77,10 @@ hollow_html = (f'<p class="lede">{esc(hw["blurb"])}</p><div class="grid">' + "".
 
 # ---- Still to design
 TODO = [
-    ("Map towns", [("Rimehold", "Frostmarch town by Hallowmere. House design done (below in Map towns); street layout, snow and a signature hall next."),
-                   ("Gull's Rest", "Saltreach harbour town. House design done; harbour, lighthouse and layout to do."),
-                   ("Sunscar", "Emberwaste desert town. House design done; layout on sand to do."),
-                   ("Mirelight", "Blackfen stilt town. House design done; boardwalks and layout to do.")]),
+    ("Map towns", [("Rimehold", "Frostmarch town by Hallowmere. Buildings done (houses, longhouse hall, stave chapel, inn, smithy, store); street layout next."),
+                   ("Gull's Rest", "Saltreach harbour town. Buildings done (houses, inn, smithy, store, quay, lighthouse, boathouse); layout next."),
+                   ("Sunscar", "Emberwaste desert town. Buildings done (houses, domed market hall, caravanserai inn, smithy, store); layout on sand next."),
+                   ("Mirelight", "Blackfen stilt town. Buildings done (stilt houses, houses over the water, inn, smithy, store); boardwalks and layout next.")]),
     ("Story sites", [("Five boss arenas", "One per under-boss, built round each fight."),
                      ("Seven thin-place caves", "Where the Hollow seeps through."),
                      ("Crownhold", "The old royal seat."), ("Bellhollow", ""), ("The Ashen sites", ""), ("Ruins", "Scattered across the regions.")]),
