@@ -195,3 +195,34 @@ export const MARKET_KEEPER = {
     "Salt, needles, honey, reed, a song. Light, wood, ore, a mending note. A thing for a thing, as it was.",
   ],
 };
+
+// ---------- how it works, told plainly (Mateo 2026-11-11: every mechanic explained in game) ----------
+// Shown once to every player when the truce is made, broken, or made again (and on their next login if they were away).
+export const EXPLAIN = {
+  kept: {
+    title: "The Truce Holds",
+    body: [
+      "Someone said the land's old name at the empty Seat, and the Choir accepted. Here is what changes:",
+      "",
+      "§lGuest Nights.§r Every third night (the old siege nights), people of the Choir come up as guests. Two stand by every settlement's keep, and more stand at the Even Market, the ring of nine posts at Reedmoor.",
+      "",
+      "§lTrading.§r Click a guest to talk and trade. They take a thing for a thing, never coins: honey, iron nuggets, sugar cane or amethyst for Glimbulbs, Latticewood, raw Choir Ore, or mending the item in your hand. Each guest carries two of these, and the Market keeper carries all four. They leave at first light.",
+      "",
+      "§lSafer nights.§r Nobody is taken. A Returned found out by a bell walks home alone. In the Hollow, Gloamwings leave you alone. Rival lords can still march on your walls.",
+      "",
+      "§lHow it ends.§r Ringing any bell inside Bellhollow (the valley east of Kingsrest) breaks the truce for everyone. Then every third night the Hollow attacks again, harder than before.",
+    ].join("\n"),
+  },
+  broken: {
+    title: "The Truce Is Broken",
+    body: [
+      "Someone rang the bell at Bellhollow. Here is what changes:",
+      "",
+      "§lThird nights are sieges again.§r Every third night the Hollow attacks the settlements, as hard as the Uncounted Nights, with Hollow soldiers in the ranks. Rival lords still come as well.",
+      "",
+      "§lNo more guests.§r The guests and the Even Market are gone, Returned can take people again, and Gloamwings hunt in the Hollow again.",
+      "",
+      "§lMaking it again.§r After 9 days, a player who has solved every mystery in the Ledger can stand at the middle of the empty Seat in the Hollow and say the land's old name again.",
+    ].join("\n"),
+  },
+};

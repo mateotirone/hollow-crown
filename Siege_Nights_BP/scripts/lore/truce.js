@@ -14,6 +14,7 @@
 //   /scriptevent siege:truce_keep            keep it as if you had said the name at the Seat (plays the scene)
 //   /scriptevent siege:truce_break           break it as if you had rung the bell at Bellhollow
 //   /scriptevent siege:truce_guests          bring tonight's guests up now, round you (and at the Even Market)
+//   /scriptevent siege:truce_explain        show the "what changed" panel again
 //   /scriptevent siege:truce_reset           back to never made
 
 import { world, system, ItemStack } from "@minecraft/server";
@@ -29,7 +30,7 @@ import { load } from "../undertow/data.js";
 import { PLOT_PLAN, WARDS } from "../plots/config.js";
 import {
   TRUCE, STATES, nameIsSpoken, offerVerdict, isGuestNight, guestsFor, guestSpot, WARES, waresOf, freshPick,
-  SEAT_PROMPT, REPLIES, answerFor, KEPT_NEWS, BREAK_ASK, BROKEN_NEWS, DUSK_GUEST, DAWN_GUEST, GUESTS, MARKET_KEEPER,
+  SEAT_PROMPT, REPLIES, answerFor, KEPT_NEWS, BREAK_ASK, BROKEN_NEWS, DUSK_GUEST, DAWN_GUEST, GUESTS, MARKET_KEEPER, EXPLAIN,
 } from "./data/truce.js";
 
 const NPC_TYPE = "minecraft:npc";
@@ -37,6 +38,7 @@ const GUEST_NPC_TAG = "siege_truce_guest_npc"; // on the guests themselves
 const MARKET_TAG = "siege_truce_market";
 const PLAYER_TAG = "siege_truce_guest"; // on players in the Hollow while it holds (Gloamwings leave them be)
 const GUEST_PROP = "siege:truce_guest"; // which guest an NPC is
+const TOLD_PROP = "siege:truce_told"; // on players: which truce change they have had explained ("kept:2", "broken:2")
 
 const store = moduleStore("siege:truce", () => ({
   state: "none", times: 0, by: "", day: -1, brokenDay: -1, brokenBy: "",
@@ -80,6 +82,7 @@ export function keepTruce(player) {
   d.times += 1;
   d.by = player?.name ?? "";
   d.day = world.getDay();
+  d.sceneEnds = system.currentTick + 40 + lines.length * 60;
   store.save();
   if (player) {
     setFlag(player, "truce_kept");
@@ -257,6 +260,28 @@ onTick("lore:truce_guests", 100, () => {
   }
 });
 
+// ---------- telling everyone what changed, once each (and on their next login if they were away) ----------
+const explaining = new Set();
+function explainTo(p) {
+  const state = truceState(), info = EXPLAIN[state];
+  if (!info || explaining.has(p.id)) return;
+  const key = `${state}:${store.data.times}`;
+  if (p.getDynamicProperty(TOLD_PROP) === key) return;
+  explaining.add(p.id);
+  new ActionFormData().title(info.title).body(info.body).button("I understand").show(p).then((r) => {
+    explaining.delete(p.id);
+    if (r.canceled && r.cancelationReason === "UserBusy") return; // another menu was open: try again soon
+    p.setDynamicProperty(TOLD_PROP, key);
+  }).catch(() => explaining.delete(p.id));
+}
+onTick("lore:truce_explain", 100, () => {
+  const d = store.data;
+  if (truceState() === "none") return;
+  // after a change, let the Choir's scene play out before the explanation
+  if (system.currentTick < (d.sceneEnds ?? 0)) return;
+  for (const p of everyone()) explainTo(p);
+});
+
 // ---------- talking and trading with a guest ----------
 const count = (p, item) => {
   const inv = p.getComponent("inventory")?.container;
@@ -298,7 +323,8 @@ function audience(p, guest) {
   const line = freshPick(who.lines, shownLine.get(key), Math.random());
   shownLine.set(key, line);
   const wares = waresOf(index, world.getDay(), market).map((id) => WARES.find((w) => w.id === id));
-  const form = new ActionFormData().title(who.name).body(`"${line}"\n\n§7A thing for a thing. No coin.`);
+  const form = new ActionFormData().title(who.name)
+    .body(`"${line}"\n\n§7Guests trade a thing for a thing, never coins. Pick a trade: you hand over what it says and get the thing named. Guests leave at first light.`);
   for (const w of wares) form.button(`${w.name}\n§8for ${w.give.count} ${plain(w.give.item)}`);
   form.button("Leave");
   form.show(p).then((r) => {
@@ -306,7 +332,7 @@ function audience(p, guest) {
     const w = wares[r.selection];
     if (count(p, w.give.item) < w.give.count) return p.sendMessage(`§d${who.name}: §f"That is not enough. ${w.give.count} ${plain(w.give.item)}, and I will."`);
     if (w.mend) {
-      if (!mendHeld(p)) return p.sendMessage(`§d${who.name}: §f"Hold up the thing you want mended. It must be something that wears."`);
+      if (!mendHeld(p)) return p.sendMessage(`§d${who.name}: §f"Hold up the thing you want mended. It must be something that wears." §7(Hold a damaged tool, weapon or armour piece in your main hand.)`);
       take(p, w.give.item, w.give.count);
       sfx(p, "block.amethyst_block.chime", { volume: 1, pitch: 0.7 });
       return p.sendMessage(`§d${who.name} hums one low note at it. The cracks close along the old lines.`);
@@ -355,6 +381,9 @@ system.afterEvents.scriptEventReceive.subscribe((e) => {
       placeGuests(p?.location);
       say("§7Guests are up. They leave at the next dawn (or when the truce breaks).");
       break;
+    case "siege:truce_explain":
+      if (p) { p.setDynamicProperty(TOLD_PROP, undefined); explainTo(p); }
+      break;
     case "siege:truce_reset": {
       const before = d.state;
       Object.assign(d, { state: "none", times: 0, by: "", day: -1, brokenDay: -1, brokenBy: "" });
@@ -402,6 +431,7 @@ addTests("lore truce", {
     assert(freshPick(DUSK_GUEST, DUSK_GUEST[0], 0) !== DUSK_GUEST[0]);
     assert(answerFor(0) !== answerFor(1) && answerFor(1) !== answerFor(2) && answerFor(9) === answerFor(2));
     for (const g of GUESTS) assert(g.lines.length >= 2 && g.name.length > 0, g.name);
+    for (const s of ["kept", "broken"]) assert(EXPLAIN[s]?.title && EXPLAIN[s].body.length > 200, `explained: ${s}`);
     const spots = new Set([0, 1, 2].map((i) => JSON.stringify(guestSpot({ x: 0, z: 0 }, i, 3))));
     assertEqual(spots.size, 3, "guests stand apart");
   },
