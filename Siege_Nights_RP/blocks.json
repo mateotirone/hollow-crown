@@ -369,6 +369,9 @@
   "siege:old_mangrove_fence": {
     "sound": "wood"
   },
+  "siege:old_mangrove_leaves": {
+    "sound": "grass"
+  },
   "siege:old_mangrove_log": {
     "sound": "wood"
   },
@@ -427,6 +430,9 @@
     "sound": "grass"
   },
   "siege:old_spruce_log": {
+    "sound": "wood"
+  },
+  "siege:old_spruce_stairs": {
     "sound": "wood"
   },
   "siege:old_spruce_wood": {

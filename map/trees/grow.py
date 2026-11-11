@@ -215,6 +215,15 @@ class Grower:
                 self.leaf[(round(P[0]), round(P[1]) - 1, round(P[2]))] = self.pick_leaf(-0.8)
 
     # ------------------------------------------------------------------ detail stages
+    def knees(self):
+        k = self.s.get("knees", 0); W = self.c["wood"]
+        for _ in range(k):
+            a = self.r(0, 6.28); d = self.r(2.5, self.s.get("knee_r", 5.0))
+            x, z = round(math.cos(a) * d), round(math.sin(a) * d)
+            if (x, 1, z) in self.wood: continue
+            for y in range(1, 1 + int(self.rg.integers(1, 3))): self.put_wood((x, y, z), 3, "knee", "y")
+            self.deco.setdefault((x, 0, z), (self.c.get("root_ground", "dirt_with_roots"), {}))
+
     def bark(self):
         """Bark depth: the region's matching stone (walls and stairs) hugging the trunk, plus knots."""
         c, s = self.c, self.s; b = c.get("bark")
@@ -258,7 +267,8 @@ class Grower:
     def drape(self):
         c, s = self.c, self.s; D = c.get("drape")
         if not D: return
-        for (x, y, z) in list(self.leaf):
+        src = list(self.leaf) if self.leaf else [k for k, v in self.wood.items() if v[1] == "limb"]
+        for (x, y, z) in src:
             if (x, y - 1, z) in self.leaf or (x, y - 1, z) in self.wood: continue
             if self.rg.random() > D.get("p", 0.2): continue
             n = int(self.rg.integers(1, D.get("len", 3) + 1)); yy = y - 1; last = None
@@ -309,7 +319,7 @@ class Grower:
     def grow(self):
         self.trunk()
         (self.conifer if self.c["form"] == "conifer" else self.broadleaf)()
-        self.roots(); self.bark(); self.drape(); self.ground(); self.snow()
+        self.roots(); self.knees(); self.bark(); self.drape(); self.ground(); self.snow()
         return self.blueprint()
 
     def blueprint(self):
