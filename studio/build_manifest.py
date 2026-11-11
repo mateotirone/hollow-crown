@@ -269,6 +269,7 @@ for _k,_n in [("longsword","Longsword"),("warhammer","Warhammer"),("minute_hand"
     _ent("weapon_"+_k,_n,"Player weapons",f'models/entity/weapons/{_k}.geo.json',[(_n,f'textures/entity/siege/weapons/{_k}.png')],"3D model for review only. In game the weapon is held like a vanilla sword, showing its flat icon.")
 _ent("u_boat","Latticewood Boat","The Hollow",'models/entity/hollowfolk/lattice_boat.geo.json',[("Boat",'textures/entity/hollowfolk/lattice_boat.png')])
 _ent("u_heart","Heart of the Hollow, resting","Crown",'models/entity/resting_heart.geo.json',[("Resting",'textures/entity/siege_resting_heart.png')])
+_ent("u_crown_stand","Crown Stand","Crown",'models/entity/crown_stand.geo.json',[("Stand",'textures/entity/siege_crown_stand.png')],"Where a dropped Hollow Crown rests. In game the Crown sits on top (crown_stand_crown.geo.json, the Crown's own texture) and both bob slowly.")
 for k,n in [("choir_conductor","The Conductor"),("choir_singer","Singer"),("hollow_regent","Hollow Regent")]:
     _ent("u_"+k,n,"The Hollow Choir",f'models/entity/undertow/{k}.geo.json',[(n,f'textures/entity/siege/undertow/{k}.png')])
 for _k,_n in (("blade","Pretender, blade"),("seer","Pretender, seer"),("brute","Pretender, brute")):

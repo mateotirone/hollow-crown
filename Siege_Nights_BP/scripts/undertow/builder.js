@@ -240,7 +240,7 @@ export function piecesTick() {
   for (const id of STRUCTURE_IDS) {
     const built = (p.sites ?? []).includes(id), design = SITE_DESIGNS[id];
     if (built && !siteOutdated(p, id)) continue;
-    const s = SITES.find((x) => x.id === id), reach = s.r + 4;
+    const s = SITES.find((x) => x.id === id), reach = Math.max(s.r + 4, design?.reach ?? 0);
     if (!chunksBuilt(s.x - reach, s.z - reach, s.x + reach, s.z + reach)) continue;
     if (design) {
       stampOnce(d, `site:${id}`, built ? withClearing(design) : design, s, (q) => {

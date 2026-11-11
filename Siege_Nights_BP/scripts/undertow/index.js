@@ -28,7 +28,7 @@ import { getSourceSite, getSites, markSite, openRift, riftExit, sourceSignsTick,
 import { VEIL, planCrack, tearBand, TEAR_STEPS, TEAR_CLIMB } from "./rift.js";
 import { buildTick, piecesTick, flush, pieces, openCourtGate, openRiverGate, rebuildHeart, waystoneSpot, WAYSTONE, isBuilt, siteOutdated, withClearing } from "./builder.js";
 import { heightAt, planChunk, isRiver, regionAt, columnAt } from "./terrain.js";
-import { RIVER_NODES, riverSegments, riverDistance } from "./rivers.js";
+import { RIVER_NODES, riverSegments, riverDistance, RIVER_HALF_WIDTH } from "./rivers.js";
 import { SITES, roadLines } from "./roads.js";
 import { STRUCTURE_IDS, planStructure } from "./structures.js";
 import { SITE_DESIGNS, TOWER_DESIGNS } from "./sites_data.js";
@@ -41,6 +41,7 @@ import { load, save, say, runCmd, upgradeSteps, DATA_VERSION, FACING } from "./d
 import { choirTick, singerSpot, CHOIR } from "./choir.js";
 import { slipSeconds, slipLanding, isSlipping } from "./slips.js";
 import { shouldAlarm, oreOutcome, noteEntry, crownTick, crownVerdict, CLAIM_SECONDS, WARDEN } from "./warden.js";
+import { crownFate, needsRefresh, standHeight, KEEP } from "./crownkeep.js";
 import { oreChance, roofAt, ROOF, groundAt, GROUND, ambientLightAt, AMBIENT, pickTree, treeKind } from "./terrain.js";
 import { HOLLOW_TREES } from "./trees_data.js";
 import { clearOps } from "./builder.js";
@@ -52,6 +53,7 @@ import { canOpen, dullLeft, BOSSES_TO_OPEN, FORK_DULL_DAYS } from "./source.js";
 import { CRACK_HEIGHT } from "./rift.js";
 import "./story.js";
 import "./forge.js";
+import "./finds.js";
 
 const IN_TAG = "siege_undertow_in";
 const FOG_ID = "siege:undertow_fog";
@@ -286,10 +288,11 @@ on("crownVacant", () => {
   world.sendMessage("§5Far below, something takes its seat again.");
 });
 
-// The Hollow Crown falls from its wearer into a chest at the middle of the Seat. Once.
+// The Hollow Crown falls from its wearer into a chest at the middle of the Seat. Once, unless it is
+// lost (crownkeep.js): then it goes back into that chest.
 function leaveCrown() {
   const prog = progress();
-  if (prog.crownOut) return;
+  if (prog.crownOut && !prog.crownReturning) return;
   const d = undertow(), at = { x: HEART.center.x, y: HEART.center.y, z: HEART.center.z };
   try {
     const crown = new ItemStack("siege:hollow_crown", 1);
@@ -297,11 +300,25 @@ function leaveCrown() {
     d.setBlockType(at, "minecraft:chest");
     const box = d.getBlock(at)?.getComponent("inventory")?.container;
     if (box) box.setItem(13, crown); else d.spawnItem(crown, { x: at.x + 0.5, y: at.y + 1, z: at.z + 0.5 });
+    const back = prog.crownReturning;
     prog.crownOut = true;
+    prog.crownReturning = false;
     save(K_PROGRESS, prog);
+    if (back) world.sendMessage("§5Far below, the Hollow Crown is back in its chest at the Seat.");
   } catch { /* the Seat is not loaded: the tick below tries again when someone is there */ }
 }
-onTick("undertow:crownfall", 100, () => { const p = progress(); if (p.morvane && !p.crownOut) leaveCrown(); });
+onTick("undertow:crownfall", 100, () => { const p = progress(); if ((p.morvane && !p.crownOut) || p.crownReturning) leaveCrown(); });
+
+// The Crown was lying somewhere and is gone (lava, the void, an explosion) with nobody holding it.
+// There is only one, so it goes home. A creative test Crown lost before the real one is out changes nothing.
+on("crownLost", () => {
+  const prog = progress();
+  if (!prog.crownOut) return;
+  prog.crownReturning = true;
+  save(K_PROGRESS, prog);
+  world.sendMessage("§5The Hollow Crown is gone from where it lay. Something below calls it home.");
+  leaveCrown();
+});
 
 function sendEvent(id, message) {
   try { system.sendScriptEvent(id, message); } catch { runCmd(undertow(), `scriptevent ${id} ${message}`); }
@@ -526,7 +543,7 @@ addTests("undertow", {
     for (const [id, d] of Object.entries(SITE_DESIGNS)) {
       const s = SITES.find((x) => x.id === id);
       assert(s, `${id} has no site`);
-      for (const [x, , z] of stampCells(d)) assert(Math.hypot(x, z) <= s.r + 4, `${id} builds outside its site`);
+      for (const [x, , z] of stampCells(d)) assert(Math.hypot(x, z) <= Math.max(s.r + 4, d.reach ?? 0), `${id} builds outside its site`);
       for (const t of stateTries(d)) assert(JSON.stringify(t[t.length - 1]) === "{}");
     }
     const t = SITE_DESIGNS.truce_hall;
@@ -539,12 +556,17 @@ addTests("undertow", {
       assert(siteOutdated({ sites: [id] }, id) && !siteOutdated({ sites: [id], siteV: { [id]: d.v } }, id), `${id} version check`);
       const full = withClearing(d), own = new Set(stampCells(d).map(([x, y, z]) => `${x},${y},${z}`));
       for (const [x, y, z, i] of stampCells(full)) {
-        assert(Math.hypot(x, z) <= s.r + 4, `${id} clears outside its site`);
+        assert(Math.hypot(x, z) <= Math.max(s.r + 4, d.reach ?? 0), `${id} clears outside its site`);
         if (i === full.palette.length - 1 && d.clear.length) assert(y >= 1 && !own.has(`${x},${y},${z}`), `${id} clears a block it also builds`);
       }
     }
     const dock = SITE_DESIGNS.wound_dock, at = (x, y, z) => stampCells(dock).find((c) => c[0] === x && c[1] === y && c[2] === z);
     assert(at(0, 0, -4) && !at(0, 1, -4) && !at(0, 2, -4), "the Carter's place on the landing stage is blocked or has no deck");
+    // the landing stage sits one block above the river: its deck over water, so a boat can come alongside
+    const w = SITES.find((x) => x.id === "wound_dock");
+    const stage = stampCells(dock).filter(([x, y, z]) => y === -3 && z <= -19 && Math.abs(x) <= 2);
+    assert(stage.length > 0 && w.y - 3 === L.seaY + 1, "the landing stage is not one above the water");
+    assert(stage.some(([x, , z]) => riverDistance(w.x + x, w.z + z) <= RIVER_HALF_WIDTH), "the landing stage does not reach the river");
   },
   "the drowned towers stand off the water and the roads, each a different design": () => {
     assert(new Set(DROWNED_SPOTS.map((t) => t.design)).size === DROWNED_SPOTS.length);
@@ -594,6 +616,18 @@ addTests("undertow", {
     assert(crownVerdict(true, false, 0) === "claims" && crownVerdict(true, true, 99) === "rules");
     assert(CLAIM_SECONDS >= 10, "taking the Crown must be slow enough to contest");
     assert(crownVerdict(false, false, 0) === "warned" && crownVerdict(false, false, 4) === "warned" && crownVerdict(false, false, 5) === "dies");
+  },
+  "a dropped Hollow Crown rests on a stand where it fell, and goes home only when truly lost": () => {
+    assert(crownFate({ found: true, held: false, loaded: true, misses: 3 }) === "lying");
+    assert(crownFate({ found: false, held: true, loaded: true, misses: 0 }) === "held", "picked up is not lost");
+    assert(crownFate({ found: false, held: false, loaded: false, misses: 9 }) === "waiting", "out of sight is not lost");
+    assert(crownFate({ found: false, held: false, loaded: true, misses: 0 }) === "missing", "one miss is not enough");
+    assert(crownFate({ found: false, held: false, loaded: true, misses: KEEP.missesToLose - 1 }) === "lost");
+    assert(!needsRefresh(KEEP.refreshSeconds - KEEP.checkSeconds) && needsRefresh(KEEP.refreshSeconds));
+    assert(KEEP.refreshSeconds + KEEP.checkSeconds < 300, "swapped before Minecraft's 5 minute item clean-up");
+    assert(standHeight({ y: 64, typeId: "minecraft:grass_block" }) > 65, "the stand floats above the ground it fell on");
+    assert(standHeight({ y: 30, typeId: "minecraft:lava" }) === undefined, "over lava it goes home");
+    assert(standHeight(undefined) === undefined, "over the void it goes home");
   },
   "an NPC ruler rises when no player rules, and returns after being killed": () => {
     const none = { active: false, fellOn: undefined };

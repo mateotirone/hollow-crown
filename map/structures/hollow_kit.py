@@ -515,21 +515,46 @@ def wound_dock(seed=0):
         for z in range(-9, 0): bp.set(x, 0, z, deck)
     for z in range(-9, 0):
         for x in (-3, 3): bp.set(x, 0, z, "dark_oak_log", axis="z")
-    for x in range(-3, 4): bp.set(x, 0, -9, "dark_oak_log", axis="x")
+    for x in range(-3, 4):
+        if abs(x) > 1: bp.set(x, 0, -9, "dark_oak_log", axis="x")
     for (x, z) in ((-3, -9), (3, -9), (-3, -5), (3, -5), (-3, -1), (3, -1)):
         for y in range(-4, 1): bp.set(x, y, z, "dark_oak_log", axis="y")
         if z != -1: bp.set(x, 1, z, "dark_oak_log", axis="y")             # bollards on the piles
     for z in range(-8, -1):
         for x in (-3, 3):
             if z != -5: bp.set(x, 1, z, "dark_oak_fence")
+    for x in (-2, 2): bp.set(x, 1, -9, "dark_oak_fence")
     bp.set(3, 2, -9, "iron_chain"); bp.set(-3, 2, -5, "iron_chain")
     post_lamp(bp, -3, -9, arm="n", tall=4)
-    # the cargo crane at the deck's corner: a post, a jib over the water, a hanging chain and a barrel
-    for y in range(1, 7): bp.set(3, y, -7, "dark_oak_log", axis="y")
-    for z in range(-11, -6): bp.set(3, 6, z, "dark_oak_log", axis="z")
-    bp.set(3, 5, -8, "dark_oak_stairs", facing="s", half="top")
-    for y in (5, 4): bp.set(3, y, -11, "iron_chain")
-    bp.set(3, 3, -11, "barrel")
+    # the walkway down the bank to the river, three wide, a half step at a time (the bank falls three
+    # blocks from the site to the water), then the landing stage out on the water where boats tie up
+    steps = [(-10, 0, "block"), (-11, 0, "block"), (-12, 0, "slab"), (-13, -1, "block"), (-14, -1, "slab"), (-15, -2, "block"), (-16, -2, "slab")]
+    for z, y, kind in steps:
+        for x in (-1, 0, 1):
+            bp.set(x, y, z, deck if kind == "block" else "dark_oak_slab", half="bottom")
+            for k in range(y + 1, 3): bp.set(x, k, z, "air")
+        for x in (-2, 2):
+            bp.set(x, y, z, "dark_oak_log", axis="z")
+            bp.set(x, y + 1, z, "dark_oak_fence")
+    LY = -3
+    for x in range(-3, 4):
+        for z in range(-22, -16): bp.set(x, LY, z, deck)
+        for k in (LY + 1, LY + 2, LY + 3): bp.setif(x, k, -17, "air")
+    for z in range(-22, -16):
+        for x in (-3, 3): bp.set(x, LY, z, "dark_oak_log", axis="z")
+    for x in range(-3, 4): bp.set(x, LY, -22, "dark_oak_log", axis="x")
+    for (x, z) in ((-3, -17), (3, -17), (-3, -20), (3, -20), (-3, -22), (3, -22)):
+        for y in range(LY - 4, LY + 1): bp.set(x, y, z, "dark_oak_log", axis="y")
+        bp.set(x, LY + 1, z, "dark_oak_log", axis="y")                    # bollards; the west side is open for boats
+    for z in (-21, -19, -18): bp.set(3, LY + 1, z, "dark_oak_fence")
+    bp.set(-3, LY + 2, -20, "iron_chain"); bp.set(-3, LY + 2, -22, "iron_chain")
+    post_lamp(bp, 2, -22, arm="n", tall=4, y=LY + 1)
+    # the cargo crane on the landing stage: a post, a jib over the water, a hanging chain and a barrel
+    for y in range(LY + 1, LY + 7): bp.set(3, y, -18, "dark_oak_log", axis="y")
+    for z in range(-24, -17): bp.set(3, LY + 6, z, "dark_oak_log", axis="z")
+    bp.set(3, LY + 5, -19, "dark_oak_stairs", facing="s", half="top")
+    for y in (LY + 5, LY + 4): bp.set(3, y, -24, "iron_chain")
+    bp.set(3, LY + 3, -24, "barrel")
     for (x, y, z) in ((2, 1, -2), (2, 2, -2), (1, 1, -2)): bp.set(x, y, z, "barrel")
     # the boatwright's shed: 7 by 9, stone plinth storey, black-and-ash gable, big doors on the east
     B = Building(bp, P, seed + 4); rect = (-10, -3, -4, 3)
@@ -615,7 +640,24 @@ def the_seams(seed=0):
 
 # Sites rebuilt after their first version went into worlds (export_hollow.py writes the version; the game
 # re-stamps a site whose saved version is older, clearing what the old one left: hollow_sites_v1.json).
-SITE_VERSION = {"pilgrims_cross": 2, "cartmeet": 2, "lattice_gate": 2, "wound_dock": 2, "the_seams": 2}
+SITE_VERSION = {"pilgrims_cross": 3, "cartmeet": 3, "lattice_gate": 3, "wound_dock": 4, "the_seams": 3}
+
+# Sites whose build runs past r + 4 of the site's middle (the Wound landing's walkway goes down the bank to
+# the river): how far it reaches. The game waits for that much ground before stamping.
+SITE_REACH = {"wound_dock": 25}
+
+# Each rebuilt site keeps one find in a chest (undertow/finds.js hands it to each player once): offset, facing.
+SITE_FINDS = {"wound_dock": ((-9, 1, -2), "e"), "lattice_gate": ((-6, 1, -6), "s"), "pilgrims_cross": ((-10, 1, -3), "e"),
+              "cartmeet": ((-7, 1, -8), "s"), "the_seams": ((0, 1, -8), "s")}
+
+def _with_find(sid, fn):
+    def f(*a, **k):
+        bp = fn(*a, **k); (x, y, z), facing = SITE_FINDS[sid]
+        assert bp.get(x, y, z)[0] in ("keep", "air"), f"{sid}: the find's chest spot is taken"
+        bp.set(x, y, z, "chest", facing=facing)
+        return bp
+    f.__name__, f.__doc__ = fn.__name__, fn.__doc__
+    return f
 
 SITE_BUILDERS = {"pilgrims_cross": pilgrims_cross, "cartmeet": cartmeet, "truce_hall": truce_hall,
                  "far_door": far_door, "lattice_gate": lattice_gate, "the_seams": the_seams, "wound_dock": wound_dock}
@@ -626,7 +668,7 @@ def _finished(fn):
     def f(*a, **k): return finish_hollow(fn(*a, **k))
     f.__name__, f.__doc__ = fn.__name__, fn.__doc__
     return f
-SITE_BUILDERS = {k: _finished(v) for k, v in SITE_BUILDERS.items()}
+SITE_BUILDERS = {k: _finished(_with_find(k, v) if k in SITE_FINDS else v) for k, v in SITE_BUILDERS.items()}
 _village, _tower, _cottage = village, leaning_tower, cottage
 village = _finished(_village); leaning_tower = _finished(_tower)
 def cottage_finished(*a, **k): return finish_hollow(_cottage(*a, **k))
