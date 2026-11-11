@@ -514,3 +514,16 @@ Tell me about: anything too loud, too quiet, silent, or that made you jump. Noth
 1. `/scriptevent siege:townhall_renown 30`, learn Clue Sense in the Wayfarer branch, and carry the Ledger of Whispers.
 2. Walk toward a Dusty Tome you have not clicked (the showcase has some). ✅ Within 16 blocks a page turns softly and the action bar says "Your Ledger whispers: something written, N blocks <direction>". After you copy the tome it goes quiet.
 3. Drop a Lore Tome and walk away and back. ✅ It is sensed the same way. Without the Ledger in your pack nothing happens.
+
+## The Hollow's middle stretch (lore/hollow.js, undertow/story.js)
+
+Mateo approved the beats 2026-11-11 (doc "The Hollow's middle stretch: story beats"). Words: `lore/data/hollow_story.js` and the Carter in `lore/data/dialogue.js`. Places, the Carter's position, the Court door: `undertow/story.js`.
+
+1. Go to the Hollow (`/scriptevent hc:undertow_go`) and walk to the Wound landing dock. A scene plays and the Carter stands on the dock (`/scriptevent hc:carter_go` takes you to her). Talk to her.
+2. Walk to Glimwade: its scene plays, and the Carter moves to where the road comes into the village. Her hub has five buttons plus Goodbye; "I've been walking your country" reacts to the places you have seen, one at a time.
+3. Visit the Truce Hall (you get *The Name We Were*), the Standing Ranks, the Far Door, the top stone of the Drift (the scene must NOT play at the foot), and the Seams (a two-button choice appears; close it and walk out and back in to be asked again).
+4. After the third of those five, a line says the Carter will know. Talk to her: she teaches the Cartsong and moves to the Court's south door.
+5. In survival, walk into the Court without the Cartsong: you are pushed back out with a message, and the Choir does not wake. With it (or standing next to someone who has it) the fight starts. If you chose to wreck the cart, phantom raids come every 40 s instead of 20 s.
+6. After the Choir falls, everyone in the Hollow sees the "Court is quiet" scene, and the Carter asks to be named (Lark, Morrow or Dawn). If you let the cart go at the Seams, Tally ore costs you half once Morvane has fallen.
+
+Shortcuts: `/scriptevent siege:hollow_beat <id>` replays one scene, `siege:hollow_story` lists what you have heard, `siege:cartsong` gives you the Cartsong. Creative players are never pushed out of the Court.
