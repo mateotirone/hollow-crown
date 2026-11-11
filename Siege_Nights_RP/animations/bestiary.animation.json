@@ -276,7 +276,7 @@
   },
   "animation.siege_b.omen_raven": {
    "loop": true,
-   "bones": {}
+   "animation_length": 1.0
   },
   "animation.siege_b.lost_villager": {
    "loop": true,
@@ -400,7 +400,7 @@
   },
   "animation.siege_b.stone_vigil": {
    "loop": true,
-   "bones": {}
+   "animation_length": 1.0
   },
   "animation.siege_b.echo_hound": {
    "loop": true,
@@ -1897,15 +1897,15 @@
   },
   "animation.siege_b.reveal_boy": {
    "loop": true,
-   "bones": {}
+   "animation_length": 1.0
   },
   "animation.siege_b.reveal_king": {
    "loop": true,
-   "bones": {}
+   "animation_length": 1.0
   },
   "animation.siege_b.reveal_morvane": {
    "loop": true,
-   "bones": {}
+   "animation_length": 1.0
   },
   "animation.siege_b.hollow_warlord": {
    "loop": true,
@@ -1949,7 +1949,7 @@
   },
   "animation.siege_b.rime_pillar": {
    "loop": true,
-   "bones": {}
+   "animation_length": 1.0
   },
   "animation.siege_b.chapel_bell": {
    "loop": true,
@@ -2224,11 +2224,11 @@
   },
   "animation.siege_b.seep": {
    "loop": true,
-   "bones": {}
+   "animation_length": 1.0
   },
   "animation.siege_b.hollow_bolt": {
    "loop": true,
-   "bones": {}
+   "animation_length": 1.0
   }
  }
 }

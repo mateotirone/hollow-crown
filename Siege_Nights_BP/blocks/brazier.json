@@ -20,11 +20,11 @@
       "minecraft:material_instances": {
         "*": {
           "texture": "siege_brazier_iron",
-          "render_method": "opaque"
+          "render_method": "alpha_test"
         },
         "coals": {
           "texture": "siege_brazier_coals",
-          "render_method": "opaque"
+          "render_method": "alpha_test"
         },
         "fire": {
           "texture": "siege_brazier_fire",

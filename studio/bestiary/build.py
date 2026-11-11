@@ -253,7 +253,8 @@ def anim_for(m, model):
         for i in range(6): rot(f"seg{i}", y=f"math.sin(query.life_time*200-{i*45})*9", x=f"math.cos(query.life_time*150-{i*45})*3")
     for bone, ch, val in m.get("anim_extra", []):
         if bone in names: b.setdefault(bone, {})[ch] = val
-    return {"loop": True, "bones": b}
+    # An empty "bones" object is a content-log error in game; a still model needs no bones entry
+    return {"loop": True, "bones": b} if b else {"loop": True, "animation_length": 1.0}
 
 def client_entity(m, tex_w=None):
     mid = m["id"]
