@@ -103,6 +103,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - Lanternbog's local mystery no longer asks you to type the name of the place below in the first chapter.
 - Joining for the first time now happens in one ordered sequence (look picker, welcome hall, journal) instead of several things appearing at once. Each part moves onto it as its own change lands.
 - The install guide and README now say the right Minecraft version: Bedrock 26.30 or newer.
+- The self-test command no longer freezes or crashes the game: in a world it now only checks that the pack's blocks, items and entities loaded, and it says which build is running.
 - First playtest load errors: dragons load again, the Keep Banner and brazier no longer mix material types, and eight still models (Stone Vigil, Rime Pillar, Seep, Omen Raven, Hollow Bolt and the three reveal figures) no longer log animation errors.
 - The six 3D weapons (Longsword, Warhammer, Minute Hand, Oath of Oswin, Warlord's Brand, Rimefang Bow) sit in the hand like the vanilla trident instead of floating at the hip pointing backwards.
 - The self-test now runs a few checks per tick instead of all at once when the world loads, so it can't stall a world or a Realm on startup. `/scriptevent siege:selftest` says it is running, then reports.

@@ -45,6 +45,11 @@ def stamped_manifest(path):
             dep["version"] = stamp(dep["version"])
     return json.dumps(m, indent=2) + "\n"
 
+BUILD_JS = os.path.join(SCRIPTS, "core", "build.js")
+def shown_version():
+    v = json.load(open(os.path.join(ROOT, "Siege_Nights_BP", "manifest.json")))["header"]["version"]
+    return ".".join(map(str, v[:2] + [BUILD])) if BUILD is not None else ".".join(map(str, v))
+
 count = 0
 with zipfile.ZipFile(OUT, "w", zipfile.ZIP_DEFLATED) as z:
     for pack in ("Siege_Nights_BP", "Siege_Nights_RP"):
@@ -55,11 +60,12 @@ with zipfile.ZipFile(OUT, "w", zipfile.ZIP_DEFLATED) as z:
                     continue
                 rel = os.path.relpath(full, ROOT)
                 text = stamped_manifest(full) if f == "manifest.json" and folder == os.path.join(ROOT, pack) else None
+                if full == BUILD_JS:  # the self-test reports this, so a tester can see which build is loaded
+                    text = open(full, encoding="utf8").read().replace('"dev"', json.dumps(shown_version()))
                 if text is not None:
                     z.writestr(rel, text)
                 else:
                     z.write(full, rel)
                 count += 1
-version = json.load(open(os.path.join(ROOT, "Siege_Nights_BP", "manifest.json")))["header"]["version"]
-shown = ".".join(map(str, version[:2] + [BUILD])) if BUILD is not None else ".".join(map(str, version))
+shown = shown_version()
 print(f"Built {os.path.relpath(OUT, ROOT)}: {count} files ({len(reachable)} scripts), version {shown}")
