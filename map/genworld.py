@@ -127,6 +127,11 @@ plotzone = plotfade < 0.02
 townzone = disc_mask([(n, x, z, r) for n, x, z, r, _ in TOWNS])
 sitezone = disc_mask([(n, x, z, int(r * 0.6)) for n, x, z, r, _ in WARDS[6:]])
 keepclear = plotzone | townzone | sitezone
+# mountains get crags and steeper faces: ridged noise, only high up and never on plots, towns or roads
+mmask = np.clip((Yf - 128) / 45, 0, 1); mmask = mmask * mmask * (3 - 2 * mmask)
+mmask *= (box((plotzone | townzone).astype(np.float32), 20) < 0.01) & (box((isroad | istrail).astype(np.float32), 8) < 0.01)
+ridge = (1 - np.abs(2 * noise(34, 51) * 2)) * 16 + (1 - np.abs(2 * noise(13, 52) * 2)) * 7 + (1 - np.abs(2 * noise(6, 53) * 2)) * 2.5
+Yf = Yf + mmask * (ridge - 12)
 
 # roads sit on gently smoothed ground; river valleys are smoothed and lowered
 Ys = box(Yf, 6); near = box((isroad | istrail).astype(np.float32), 3)
@@ -168,6 +173,7 @@ wet = water_level > Y
 steep = np.maximum(np.abs(np.gradient(Yf, axis=0)), np.abs(np.gradient(Yf, axis=1))) > 1.6
 coast = (box((~land).astype(np.float32), 14) > 0.02) & land
 log("heights ready, max", int(Y.max()), "min", int(Y.min()))
+np.save(out.rstrip('/') + '-heights.npy', Y.astype(np.int16))   # final ground heights [x, z], for the 3D viewer
 
 # ---------------------------------------------------------------- world file
 if os.path.exists(out): shutil.rmtree(out)
@@ -218,7 +224,19 @@ R = [reg == i for i in range(5)]
 m = R[VALE] & (n_patch > 0.36) & (r2 < 0.7); surf[m] = ID["coarse_dirt"]
 # Frostmarch: grass under snow, bare stone and snow block on the heights, podzol in the woods
 m = R[FROST] & (forest > 0.05) & (n_patch2 > 0.1); surf[m] = ID["podzol"]
-m = R[FROST] & (Y > 135); surf[m] = ID["snow"]; sub[m] = ID["stone"]
+# mountains (Mateo 2026-11-11: they need texture): rock and scree on the slopes, snow only near the tops
+slope = np.maximum(np.abs(np.gradient(Yf, axis=0)), np.abs(np.gradient(Yf, axis=1)))
+snowline = 168 + noise(40, 41) * 30
+rocky = (Y > 100) & (slope > 0.6) & ~R[EMBER]
+m = rocky; pick_ = r1 + n_patch2 * 0.8
+surf[m] = np.select([pick_[m] < 0.45, pick_[m] < 0.65, pick_[m] < 0.8, pick_[m] < 0.9], [ID["stone"], ID["andesite"], ID["gravel"], ID["cobblestone"]], ID["tuff"]); sub[m] = ID["stone"]
+m = rocky & (Y > 130) & (r2 < 0.12) & R[FROST]; surf[m] = ID["calcite"]
+m = R[FROST] & (Y > snowline) & (slope < 0.9); surf[m] = np.where(r2[m] < 0.85, ID["snow"], ID["packed_ice"]); sub[m] = ID["stone"]
+m = R[FROST] & (Y > snowline + 22) & (slope < 1.4); surf[m] = ID["snow"]
+# tundra between the woods and the peaks: grass, podzol, coarse dirt and stony patches, snow lying only in drifts
+m = R[FROST] & ~rocky & (Y > 100) & (Y < snowline) & (surf == ID["grass_block"]); tp = n_patch * 1.4 + (r1 - 0.5) * 0.4
+surf[m] = np.select([tp[m] < -0.25, tp[m] < 0.0, tp[m] < 0.3], [ID["coarse_dirt"], ID["grass_block"], ID["podzol"]], ID["gravel"])
+snowcover = R[FROST] & ((Y + noise(30, 42) * 50 + (r1 - 0.5) * 8 > 128) | ((forest > 0.05) & (Y > 95))) & ~(rocky & (Y < snowline))
 # Saltreach: stony shore, gravel and coarse ground
 m = R[SALT] & coast & (r1 < 0.55); surf[m] = np.where(r2[m] < 0.5, ID["stone"], ID["gravel"])
 m = R[SALT] & ~coast & (n_patch > 0.22); surf[m] = np.where(r2[m] < 0.5, ID["coarse_dirt"], ID["stone"])
@@ -549,7 +567,7 @@ for tx0 in range(0, SIZE, TILE):
                     vol[i, yb - YMIN, k_] = ID[block_] if pr.random() < 0.8 else ID["mossy_cobblestone"]
             if 0 <= x_ < W and 0 <= z_ < D: vol[x_, yb + 1 - YMIN, z_] = ID["gold_block"]
         # snow over the north: on ground and leaves, not on water, ice or plants
-        ft = rt_ == FROST
+        ft = snowcover[a0:a1, b0:b1]
         if ft.any():
             nonair = vol != AIR
             topi = YR - 1 - np.argmax(nonair[:, ::-1, :], axis=1)
@@ -580,7 +598,7 @@ log("chunks", nchunks)
 # ---------------------------------------------------------------- preview picture
 COL = {"grass_block": (96, 150, 70), "dirt": (134, 96, 67), "coarse_dirt": (119, 85, 59), "podzol": (91, 63, 24), "stone": (125, 125, 125),
        "andesite": (136, 136, 137), "calcite": (223, 224, 220), "sand": (219, 207, 163), "red_sand": (190, 102, 33), "gravel": (131, 127, 126),
-       "water": (52, 92, 190), "ice": (160, 190, 250), "snow_layer": (248, 252, 252), "snow": (248, 252, 252), "mud": (60, 57, 60),
+       "water": (52, 92, 190), "ice": (160, 190, 250), "snow_layer": (240, 244, 246), "snow": (250, 252, 252), "tuff": (108, 109, 102), "packed_ice": (141, 180, 250), "granite": (149, 103, 85), "diorite": (188, 188, 188), "mud": (60, 57, 60),
        "moss_block": (89, 109, 45), "grass_path": (148, 122, 65), "cobblestone": (110, 110, 110), "mossy_cobblestone": (100, 118, 95),
        "sandstone": (216, 203, 155), "stone_bricks": (122, 121, 122), "gold_block": (246, 208, 61), "clay": (160, 166, 179),
        "waterlily": (32, 128, 48), "seagrass": (40, 110, 60), "cactus": (88, 130, 44), "deadbush": (107, 79, 41),

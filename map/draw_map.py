@@ -203,7 +203,22 @@ print('OK' if ok else 'FIX')
 
 # ================= ELEVATION (block heights) =================
 SEA=62
-shore=np.clip((0.5-seaf)/0.16,0,1)             # 0 at the waterline, 1 inland
+CELL=2*H/N                                     # blocks per plan cell
+def chamfer(src, cap):
+    """Distance in blocks to the nearest True cell of src (8-neighbour chamfer), capped."""
+    d=np.where(src,0.0,cap).astype(np.float32)
+    for _ in range(int(cap/CELL)+2):
+        p=np.pad(d,1,mode='edge')
+        n=np.minimum.reduce([p[1:-1,:-2]+CELL,p[1:-1,2:]+CELL,p[:-2,1:-1]+CELL,p[2:,1:-1]+CELL,
+                             p[:-2,:-2]+CELL*1.414,p[:-2,2:]+CELL*1.414,p[2:,:-2]+CELL*1.414,p[2:,2:]+CELL*1.414])
+        d=np.minimum(d,n)
+    return d
+dsea=chamfer(~land,160); dland=chamfer(land,240)
+def sstep(x): x=np.clip(x,0,1); return x*x*(3-2*x)
+# land rises gently from the shore (Mateo 2026-11-11: no harsh drop to the sea): beach first, full height ~140 blocks in;
+# only the Saltreach's northern coast keeps real cliffs (cliff term below rises over 30 blocks)
+shore=sstep((dsea-8)/140)
+cliffrise=sstep(dsea/30)
 fen=np.asarray(Image.fromarray(((reg==3)*255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(14)),dtype=np.float32)/255
 des=np.asarray(Image.fromarray(((reg==4)*255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(14)),dtype=np.float32)/255
 salt=np.asarray(Image.fromarray(((reg==2)*255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(14)),dtype=np.float32)/255
@@ -213,11 +228,11 @@ plateau=np.clip(north*1.15+n1*0.25,0,1)*np.clip(1-mtn*1.1,0,1)   # high cold pla
 rolling=(n1+0.5)*14+(n3+0.5)*7+(n2+0.5)*4
 mesa=des*np.clip(np.round(((n3+0.5)*3))*9,0,27)*0.8
 cliff=salt*np.clip((-wz-150)/500,0,1)*26                   # northern coast rises to cliffs
-Yf=SEA+1+shore*(3+rolling*(1-0.85*fen)+m*150+plateau*38+mesa+cliff)
+Yf=SEA+1+np.clip(dsea/12,0,1)*1.5+shore*(3+rolling*(1-0.85*fen)+m*150+plateau*38+mesa)+cliffrise*cliff
 # river valleys cut down
 rv=blurmask(lambda d:[d.line([px(*p) for p in spline(pts,22,22,i+7)],fill=255,width=5) for i,(n_,pts) in enumerate(rivers.items())],9)
 Yf=Yf-np.clip(rv*2.2,0,1)*np.minimum(Yf-SEA-1,10)*shore
-Yf[~land]=SEA-np.clip((seaf[~land]-0.5)/0.4,0,1)*30
+Yf[~land]=(SEA-1-sstep(dland/220)*29-np.clip(dland/40,0,1)*2)[~land]   # a shelf that deepens slowly offshore
 # plot terraces: every plot gets a level patch for its final settlement (hall, buildings, wall at r56),
 # eased back into the natural ground, so a generated wall can follow the ground all the way round.
 # The patch is not a circle (Mateo 2026-11-11): its edge wanders with the bearing, never closer than
