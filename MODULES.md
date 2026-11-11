@@ -79,6 +79,7 @@ addJoinStep(20, "welcome hall", async (player, { first, wait }) => {
 | order | step | owner | when |
 |---|---|---|---|
 | 10 | look picker (reserved looks just apply) | looks | first |
+| 15 | waits (up to 85 s, action-bar line) while a fresh Hollow Crown map sets itself up | opening | first |
 | 20 | welcome hall teleport, title and message (map mode only) | plots | first |
 | 30 | journal handed over (after "How things stand", or about 20 s; about 3 s after the picker with no hall) | lore | first |
 | 40+ | returning-player notices: unspent skill points and so on | town hall and others | returning |
@@ -231,6 +232,14 @@ Add a line here when you publish one.
   its Plot Stone: listen for it to raise their first building. `pickOf(plot)` is who a plot is being kept for.
   `EXPANSION` lists the sealed zones kept for later updates; an update calls `openZone(id)` to let players past the map
   edge into that zone's land. Zone ids are saved in worlds, so never rename or reuse one.
+  Also `registerPlot(planName, loc)` (record a Plot Stone placed by script), `raiseHall(o, then)` (build the welcome hall,
+  spread over ticks) and `setKingsrestArrival(spot)`; event **`startedHomeless` `{ player }`** when a newcomer starts in Kingsrest with no plot.
+
+- **opening** (`scripts/opening/`): the story opening with no builder commands. The first time the generated map loads
+  (`map/genworld.py` leaves a gold block on the Kingsrest square, each plot marker and each town square) it puts Plot Stones
+  on the twelve markers, builds the welcome hall and stands Sister Wren on a porch on the Millbrook square, a few places at a
+  time with ticking areas `hc_open_0..3`. Worlds without the Kingsrest gold block are left alone. Event `openingSetUp {}` when done.
+  Builder commands: `/scriptevent siege:opening status|setup`, and `/scriptevent siege:wren` moves Wren to where you stand.
 
 - **looks** (`scripts/looks/index.js`): `lookOf(player)`, `setLook(player, look)`, `chooseLook(player)`, `looksFor(name)`. The add-on now ships
   `entities/player.json` (BP) and `entity/player.entity.json` (RP), both written by `studio/build_looks.mjs` from vanilla copies
