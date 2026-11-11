@@ -41,14 +41,31 @@ second pair of stairs one row down in the outer cells.
 **7-wide arch**: top row `u< St . . . St u>`, second row `u< . . . . . u>`. Build any width as stair at the jambs, slabs stepping inward, centre open, one row
 lower each step out on tall openings.
 
-**Slab, stair, slab head** (Mateo's example), a cap above a 3-wide opening, in the wall plane or 1 proud:
+**Trapdoor, stair, trapdoor archway** (Mateo, 2026-11-11: "trapdoor stair trapdoor for archways"). The
+default archway. Each top corner of the opening turns the curve with three pieces: an open trapdoor
+standing against the jamb under the corner, an upside-down stair in the corner, and a closed top
+trapdoor on the ceiling next to it. The trapdoors are thin, so the curve runs smoothly from the jamb,
+round the stair, into the head.
+
+5-wide opening, 4 tall:
 
 ```
-St u St          top slab, upside-down stair (tall side out, the keystone), top slab
-.  .  .          the opening below
+#   #   #   #   #   #   #
+#   u<  Tt  .   Tt  u>  #      top row: stair in each corner, top trapdoor beside it, centre open
+#   To  .   .   .   To  #      open trapdoor against each jamb under the stair
+#   .   .   .   .   .   #
+#   .   .   .   .   .   #
 ```
 
-**Trapdoor, stair, trapdoor head**: the same with `Tt` at the ends, for a thinner edge on timber.
+3-wide opening: `u< . u>` on the top row with `To` under each stair (no room for the ceiling trapdoor),
+or for a 3-wide doorway in a thick wall, `Tt u Tt` across the head with `To` down both jambs.
+
+Wider openings repeat the step: `To` on the jamb, `u` in the corner, `Tt` beside it, then the next row up
+starts the next step inward. Always symmetric about the centre block. Trapdoors in the trim wood (or a
+colour-matched trapdoor) on timber and stone alike.
+
+**Slab, stair, slab head** (alternative): top slab, upside-down stair (tall side out, the keystone), top
+slab, as a cap above an opening.
 
 **Carriage arch** (through a range, `vale.coaching_inn`): 3 wide, 4 tall, upside-down stairs in the top
 corners, chiseled stone at the feet of the jambs, the passage paved.

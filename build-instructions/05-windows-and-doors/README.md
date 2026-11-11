@@ -129,9 +129,11 @@ All arches follow `reference/shapes.md`. Quick versions:
 - **5 wide**: row at the top of the opening = stair, top slab, open, top slab, stair. The stairs are
   upside down and face inward; the slabs are top slabs. The row below has nothing (open) except on tall
   openings where a second stair pair steps the curve down.
-- **Slab, stair, slab** (Mateo's example) on a 3-wide head: top slab, upside-down stair facing out (the
-  keystone), top slab, sitting above the opening as a cap.
-- **Trapdoor, stair, trapdoor**: the same with top trapdoors at the ends for a thinner edge.
+- **Trapdoor, stair, trapdoor** (Mateo's archway, the default): at each top corner an open trapdoor
+  against the jamb, an upside-down stair in the corner and a closed top trapdoor on the ceiling beside
+  it, so the curve runs smoothly. Diagrams in `reference/shapes.md`.
+- **Slab, stair, slab** (alternative cap): top slab, upside-down stair as a keystone, top slab, above
+  the opening.
 - Wider (7, 9): build the curve from both sides in steps of stair, slab, slab..., always symmetric about
   the centre block.
 
