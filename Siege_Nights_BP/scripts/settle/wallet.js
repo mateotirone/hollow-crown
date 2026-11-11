@@ -10,11 +10,13 @@ let wallet = {
   one: "emerald", many: "emeralds", icon: "textures/items/emerald",
   count: (player) => countItem(player, "minecraft:emerald"),
   take: (player, amount) => takeItems(player, "minecraft:emerald", amount), // free in Creative
+  give: (player, amount) => { try { player.runCommand(`give @s minecraft:emerald ${amount}`); } catch { /* full or gone */ } },
 };
 
 export const setWallet = (next) => { wallet = { ...wallet, ...next }; };
 export const purse = (player) => wallet.count(player);
 export const charge = (player, amount) => amount <= 0 || wallet.take(player, amount);
+export const refund = (player, amount) => { if (amount > 0) wallet.give?.(player, amount); };
 export const coins = (n) => `${n} ${n === 1 ? wallet.one : wallet.many}`;
 export const lot = () => wallet.lot ?? 1;
 export const coinName = () => wallet.many;

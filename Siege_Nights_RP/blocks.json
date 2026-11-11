@@ -494,5 +494,8 @@
  },
  "hc:nest_fill": {
   "sound": "gravel"
+ },
+ "siege:plot_marker": {
+  "sound": "wood"
  }
 }
