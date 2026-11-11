@@ -21,7 +21,9 @@ You need Minecraft Bedrock **26.30 or newer** (the pack will not load on anythin
 
 As soon as you're in the world, type `/scriptevent siege:selftest` in chat.
 
-✅ A green line starting "Self-test passed".
+✅ A grey line "Build 1.2.x. Running the self-test..." and then a green line starting "Self-test passed". The build number should match the one you were given.
+
+If all you see is Minecraft's own "Script event ... has been sent" line, the world is running an old copy of the pack: delete every Hollow Crown pack in Settings > Storage, import the new file and make a new world.
 
 If it's red, it lists what's wrong (for example a block the pack is missing). Send me that list and skip the rest. If nothing appears at all, the scripts didn't load: tell me your Minecraft version.
 

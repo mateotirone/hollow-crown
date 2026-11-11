@@ -75,13 +75,16 @@ export function runTests({ inGame = true, slow } = {}) {
   return result;
 }
 
-// The same tests as a generator for system.runJob: one test per step, so the game spreads them over
+// The in-game tests as a generator for system.runJob: one test per step, so the game spreads them over
 // ticks. Run all at once in Minecraft's script engine they take far longer than in Node, long enough
 // for the watchdog to stop the scripts (or a Realm). Saving is off only while each single test runs.
 export function* runTestsJob({ inGame = true } = {}, done = () => {}) {
   const result = { passed: 0, skipped: 0, failed: [] };
   for (const t of tests) {
-    if ((t.gameOnly && !inGame) || OFFLINE_ONLY.has(`${t.group}: ${t.name}`)) {
+    // In the game only the gameOnly tests run: they ask the real game whether the pack's blocks, items and
+    // entities loaded. Every other test checks rules and numbers, which tools/check.mjs already proves before
+    // a build; running hundreds of them inside Minecraft froze and crashed worlds in the first playtest.
+    if (inGame ? !t.gameOnly : t.gameOnly) {
       result.skipped++;
       continue;
     }
