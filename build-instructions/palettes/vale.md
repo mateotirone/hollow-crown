@@ -12,7 +12,7 @@ most houses, **Norman stone** for important buildings, **brick** for some. (`val
 | footing / plinth | dark grey, rough | `cobblestone` 50, `mossy_cobblestone` 30 (bottom course only), `andesite` 10, `stone_bricks` 10; or `siege:castle_cobbled` |
 | stone | mid grey | `stone_bricks` 50, `cobblestone` 14, `cracked_stone_bricks` 10, `andesite` 10, `mossy_stone_bricks` 8 (low), `tuff` 4; dressed: `siege:castle_smooth`, `polished_andesite`; courses `stone_brick_stairs`, `stone_brick_slab` |
 | quoin | light grey | `polished_andesite`, `siege:castle_stone` |
-| plaster / infill | warm white | `calcite` (default; diorite reads as grey patches), `white_concrete` for a cleaner white |
+| plaster / infill | warm white | `calcite` (default; diorite reads as grey patches), `white_concrete` for a cleaner white; half-timbered panels `siege:timber_frame`, `siege:timber_frame_cross` |
 | brick infill | warm red | `brick_block` 85, `mud_bricks` 15 |
 | frame | dark brown | `stripped_dark_oak_log`, `dark_oak_log`; brick style: `stripped_spruce_log` (pale frame) |
 | trim | dark brown | `dark_oak_stairs`, `dark_oak_slab`, `dark_oak_trapdoor`; brick style `spruce_*` |

@@ -21,4 +21,5 @@
 | `large-door-trapdoors.png` | A large-looking door: a spruce door in the middle of a 3-wide opening with spruce trapdoors closed on the outside round it |
 | `beamed-floor.png` | A beamed upper floor: oak log beams across the floor with slabs between, upright logs at the corners, over a stone ground floor with spruce steps |
 | `floor-band-arched-supports.png` | Stone ground floor under an oak upper storey: the floor band carried on slabs, stairs and trapdoors that read as shallow arches; dark oak panels, slim windows, spruce planters |
+| `close-studding.png` | Close studding: one block log, one block white, all along an oak upper storey over stone, stepped gables; the add-on's Timber Frame blocks give the same look |
 | `window-ideas-grid.png` | Sixteen window surrounds in wood, stone and brick: stair and trapdoor frames, crowns, sills, planters |

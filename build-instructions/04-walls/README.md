@@ -23,6 +23,23 @@ follows the roof line.
   `02-frame`). Never set infill back from the wall line: it renders as holes.
 - Stone regions: the wall is the face; frame stage gave it quoins and string courses.
 
+### Close studding (Mateo, 2026-11-11, `reference/pictures/close-studding.png`)
+
+The half-timbered look where the wall is **one block wood, one block white, one block wood** all the way
+along, between a beam at the floor line and the wall plate:
+
+- Upright logs (axis y) on every other cell, white infill (`calcite`) in the cells between, full storey
+  height. Start and end on a post, so the wall length must be odd (it always is).
+- Windows sit in a white column: the glass replaces the white for 2 or 3 cells, with white above and below.
+- The gable carries on the pattern: posts rise one block higher than the white beside them, so the gable
+  top steps like the picture, or the roof covers it.
+- Over a stone ground floor with a log floor band between, and the jetty supports from `02-frame`.
+- **The add-on blocks**: `siege:timber_frame` (a white panel with a dark frame and a centre post) and
+  `siege:timber_frame_cross` (the same with a cross brace) give the same look at one block. Use them as
+  infill on half-timbered walls, gables and upper storeys (Mateo, 2026-11-11: use them in builds), for
+  example `siege:timber_frame` as the field with `siege:timber_frame_cross` under windows and on the
+  gable, or as the infill between real log posts. Never more than these two in one wall.
+
 ## Step 2: Texture mixes
 
 Use a weighted mix only where the material really varies. Defaults:
