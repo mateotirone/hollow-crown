@@ -248,6 +248,19 @@ for _k,_n in (("blade","Pretender, blade"),("seer","Pretender, seer"),("brute","
 _ent("b_omen_raven_art","Raven (omen)","New mobs",'models/entity/bestiary/omen_raven.geo.json',[("Raven",'textures/entity/siege/bestiary/omen_raven.png')],"Perches on the wall at dusk, facing the way the raid will come.")
 _ent("carriage","Train Carriage","Horses and rail",'models/entity/carriage.geo.json',[("Carriage",'textures/entity/siege/carriage.png')],"Rides normal Minecraft rails. Four seats on two benches.")
 if os.path.exists(RP+I+'horses/siege_train_carriage.png'): g("carriage_icon","Train Carriage icon","Horses and rail",[item("Icon",'horses/siege_train_carriage')])
+# ---- Trains (scripts/trains/, studio/build_trains.py): five Track shapes, Engine and Coach in each region's colours
+if os.path.exists(RP+'models/blocks/track.geo.json'):
+    _tg={x['description']['identifier']:x for x in json.load(open(RP+'models/blocks/track.geo.json'))['minecraft:geometry']}
+    _rail,_sl=B+'trains/track_rail.png',B+'trains/track_sleeper.png'
+    _tv=[]
+    for _k,_n in [("0_0","Straight"),("0_1","Diagonal"),("1_0","Bend (45 degrees)"),("2_0","Corner (90 degrees)"),("3_0","Slope")]:
+        _gi='geometry.siege_track_'+_k; bgeos[_gi]={"tw":16,"th":16,"bones":_tg[_gi]['bones']}
+        _tv.append({"label":_n,"model":"entity","geo":_gi,"mats":{"*":_rail,"rail":_rail,"sleeper":_sl}})
+    g("trains_track","Track","Trains",_tv,"Lays itself like rails but in 8 directions. 20 pieces in game; these are the five kinds. Placeholder textures.")
+_TS=[("vale","Aldmere Vale"),("frostmarch","Frostmarch"),("saltreach","Saltreach"),("emberwaste","Emberwaste"),("blackfen","Blackfen")]
+_ent("trains_engine","Train Engine","Trains",'models/entity/train_engine.geo.json',[(_n,f'textures/entity/siege/trains/engine_{_k}.png') for _k,_n in _TS],"3 blocks wide, 7 long. Takes the colours of the region it is put on the track in. Placeholder model and colours.")
+_ent("trains_coach","Train Coach","Trains",'models/entity/train_coach.geo.json',[(_n,f'textures/entity/siege/trains/coach_{_k}.png') for _k,_n in _TS],"Seats six. Same regional colours as the engine. Placeholder model and colours.")
+if os.path.exists(RP+I+'trains/train_engine.png'): g("trains_icons","Train item icons","Trains",[item(_n,'trains/'+_k) for _k,_n in [("train_engine","Train Engine"),("train_coach","Train Coach"),("train_bogie","Train Bogie"),("train_boiler","Train Boiler")]])
 _ent("throne_seal","Throne Seal","Crown and Citadel",'models/entity/throne_seal.geo.json',[("Seal",'textures/entity/siege_throne_seal.png')],"Floats in front of the throne during a Storm.")
 _ent("crown_worn","The Hollow Crown (worn)","Crown and Citadel",'models/entity/hollow_crown.geo.json',[("Crown",'textures/models/armor/siege_hollow_crown.png')])
 
