@@ -223,9 +223,9 @@ def model(n, p):
         side = {"n": "s", "s": "n", "e": "w", "w": "e"}[p.get("facing", "s")]
         if p.get("open"): side = {"n": "e", "e": "s", "s": "w", "w": "n"}[side] if not p.get("hinge") else {"n": "w", "w": "s", "s": "e", "e": "n"}[side]
         return [(thin_plate(side), t, {"cut": 1})]
-    if n == "lantern":
+    if n in ("lantern", "soul_lantern"):
         y0 = 1 / 16 if p.get("hanging") else 0
-        t = {"side": "lantern@0,2,6,9", "top": "lantern@0,9,6,15", "bottom": "lantern@0,9,6,15"}
+        t = {"side": f"{n}@0,2,6,9", "top": f"{n}@0,9,6,15", "bottom": f"{n}@0,9,6,15"}
         return [((5 / 16, y0, 5 / 16, 11 / 16, y0 + 7 / 16, 11 / 16), t, {"cut": 1, "glow": 1}),
                 ((6 / 16, y0 + 7 / 16, 6 / 16, 10 / 16, y0 + 9 / 16, 10 / 16), t, {"cut": 1, "glow": 1})]
     if n == "flower_pot":

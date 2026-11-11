@@ -9,8 +9,15 @@ stay vanilla because the family has none. Interiors hold only what the hall need
 the Tree of Oaths, hearth, ledger lectern, cartographer's table, throne and vault (marks).
 """
 from bp import Blueprint, DIRS, OPP, RIGHT
-from kit import band_index, Building, VALE, mix, grow, h3
+from kit import band_index, Building, VALE, mix, grow, h3, DOCTRINE, finish_detail
 from vale import STYLES
+
+def detailed(P):
+    """Every settlement palette gets the detailing passes (build-instructions 05-07): dressed windows and doors,
+    chimney tops, verge and hip-corner lanterns, arched jetty supports, beamed floor bands."""
+    wood = P["trim"].replace("_stairs", "")
+    P.update(DOCTRINE, shelf=f"{wood}_slab")
+    return P
 
 def castle(region="vale"):
     suf = "" if region == "vale" else "_" + region
@@ -24,7 +31,7 @@ def vale_palette(seed=0):
              plinth=mix([(k("cobbled"), 70), (k("stone"), 30)], 62 + seed), found=k("cobbled"),
              quoin=k("stone"), quoin2=k("bricks"), chimney=mix([(k("bricks"), 80), (k("cobbled"), 20)], 63))
     P["infill"] = P["stone"]
-    return P
+    return detailed(P)
 
 def timber_palette(seed=0):
     k = castle("vale")
@@ -32,7 +39,7 @@ def timber_palette(seed=0):
     P.update(plinth=mix([(k("cobbled"), 70), (k("stone"), 30)], 64 + seed), found=k("cobbled"),
              stone=mix([(k("stone"), 80), (k("bricks"), 12), (k("cobbled"), 8)], 65 + seed),
              quoin=k("smooth"), quoin2=k("bricks"), chimney=mix([(k("bricks"), 80), (k("cobbled"), 20)], 66))
-    return P
+    return detailed(P)
 
 # ---------------------------------------------------------------- helpers
 def pyramid(bp, P, x0, z0, x1, z1, base, pitch=1, mat=None, block=None, finial="stone_brick_wall"):
@@ -58,7 +65,7 @@ def pyramid(bp, P, x0, z0, x1, z1, base, pitch=1, mat=None, block=None, finial="
             if r == 0 and P.get("verge_lanterns") and (x, z) in ((a0, b0), (a1, b0), (a0, b1), (a1, b1)) \
                     and all(bp.get(x, y - k, z)[0] in ("keep", "air") for k in (1, 2, 3, 4)) and y - 3 >= 2:
                 bp.set(x, y - 1, z, P.get("trim_block", "spruce_planks"))            # corner block under the hip corner (06-roof)
-                bp.set(x, y - 2, z, "iron_chain"); bp.set(x, y - 3, z, "lantern", hanging=True)
+                bp.set(x, y - 2, z, "iron_chain"); bp.set(x, y - 3, z, P.get("lantern", "lantern"), hanging=True)
         if last:
             if finial: bp.set((a0 + a1) // 2, y + pitch, (b0 + b1) // 2, finial)
             break
@@ -116,6 +123,7 @@ def oath_dais(bp, P, cx, cz, half=1, y=0, mat=None):
     bp.marks["tree"] = (cx, y + 2, cz)
 
 def new_hall(name, P, seed):
+    P.setdefault("spikes", 5)                 # town halls carry ridge spikes and gable finials (07-detailing)
     bp = Blueprint(name); B = Building(bp, P, seed); bp.marks = {}
     return bp, B
 
@@ -146,7 +154,7 @@ def vale_1(seed=1):
     hang(bp, [(-2, 4, -4), (2, 4, -4), (-2, 4, -10), (2, 4, -10)])
     B.chimney(-5, -9, 1) if False else None
     bp.markers["door"] = (0, 1, 0)
-    return bp.finish()
+    return finish_detail(bp, P)
 
 def vale_2(seed=2):
     """Stone Hall: a buttressed stone hall with a gabled porch, a bellcote and a raised dais. 13 x 21."""
@@ -201,7 +209,7 @@ def vale_2(seed=2):
     bp.set(-5, 1, -4, "campfire"); bp.marks["hearth"] = (-5, 1, -4)
     hang(bp, [(0, 5, -5), (0, 5, -10), (0, 5, -15)])
     bp.markers["door"] = (0, 1, 0)
-    return bp.finish()
+    return finish_detail(bp, P)
 
 def _keep_body(B, P, rect, H):
     bp = B.bp
@@ -255,7 +263,7 @@ def vale_3(seed=3):
     bp.set(-7, 1, -8, "lectern", facing="e"); bp.marks["ledger"] = (-7, 1, -8)
     hang(bp, [(-3, H - 2, -4), (3, H - 2, -4), (-3, H - 2, -8), (3, H - 2, -8), (0, 4, -19)])
     bp.markers["door"] = (0, 1, 0)
-    return bp.finish()
+    return finish_detail(bp, P)
 
 def _fortress(seed, sovereign):
     P = vale_palette(seed); bp, B = new_hall(f"hall_vale_{5 if sovereign else 4}", P, seed)
@@ -349,7 +357,7 @@ def _fortress(seed, sovereign):
             for y in range(8, 15): bp.set(cx, y, 4, "red_wool")
             bp.set(cx, 15, 4, "gold_block")
     bp.markers["door"] = (0, 1, 3)       # the gatehouse mouth: the Cornerstone stands just outside it
-    return bp.finish()
+    return finish_detail(bp, P)
 
 def vale_4(seed=4): return _fortress(seed, False)
 def vale_5(seed=5): return _fortress(seed, True)
@@ -427,7 +435,7 @@ def frost_palette(seed=0):
              roof="dark_oak_stairs", roof_block="dark_oak_planks", roof_slab="dark_oak_slab", trim="spruce_stairs", trim_block="spruce_planks",
              trim_slab="spruce_slab", gable="stripped_spruce_log", floor="spruce_planks", door="dark_oak_door", shutter="dark_oak_trapdoor", shutters=0.0,
              chimney=mix([(k("bricks"), 80), (k("cobbled"), 20)], 72), sill="stone_brick_stairs", fence="dark_oak_fence")
-    return P
+    return detailed(P)
 
 def frost_hall(level, seed=0):
     """Frostmarch: Norse mead halls growing into a stave-church fortress. Steep shingle roofs (two up per step),
@@ -503,7 +511,7 @@ def frost_hall(level, seed=0):
         bp.set(0, 2, -(d - 2) + 1, "quartz_stairs", facing="n"); bp.marks["throne"] = (0, 2, -(d - 2) + 1)
     for z in range(-4, -(d - 1), -4): hang(bp, [(0, 1 + h, z)])
     bp.markers["door"] = (0, 1, 0)
-    return bp.finish()
+    return finish_detail(bp, P)
 
 # ---------------------------------------------------------------- shared shapes for the southern / fen halls
 def dome(bp, cx, y0, cz, r, mat, finial=None):
@@ -561,7 +569,7 @@ def salt_palette(seed=0):
              trim="birch_stairs", trim_block="birch_planks", trim_slab="birch_slab", floor="birch_planks", door="birch_door",
              frame="stripped_birch_log", frame2="stripped_birch_log", sill="sandstone_stairs", shutter="birch_trapdoor", fence="birch_fence",
              chimney=mix([(k("bricks"), 100)], 82), roof_flat=k("tiles"))
-    return P
+    return detailed(P)
 
 def salt_hall(level, seed=0):
     """Saltreach: whitewashed-sand harbour halls with sea-green tile roofs, a front arcade, a dome over
@@ -629,7 +637,7 @@ def salt_hall(level, seed=0):
         bp.set(0, 2, rect[1] + 2 if level == 4 else rect[1] + 2, "quartz_stairs", facing="n"); bp.marks["throne"] = (0, 2, rect[1] + 2)
     for z in range(rect[3] - 3, rect[1], -4): hang(bp, [(0, h, z)])
     bp.markers["door"] = (0, 1, -2)
-    return bp.finish()
+    return finish_detail(bp, P)
 
 def ember_palette(seed=0):
     k = castle("emberwaste")
@@ -638,8 +646,8 @@ def ember_palette(seed=0):
              quoin=k("smooth"), quoin2=k("smooth"), roof="red_sandstone_stairs", roof_block="cut_red_sandstone", roof_slab="red_sandstone_slab",
              trim="acacia_stairs", trim_block="acacia_planks", trim_slab="acacia_slab", floor="acacia_planks", door="acacia_door",
              frame="stripped_acacia_log", sill="polished_granite_stairs", shutter="acacia_trapdoor", fence="acacia_fence",
-             chimney=mix([(k("bricks"), 100)], 92), roof_flat=k("tiles"))
-    return P
+             chimney=mix([(k("bricks"), 100)], 92), roof_flat=k("tiles"), planters=False)
+    return detailed(P)
 
 def kasbah_tower(B, cx, cz, half, h, k):
     """Tapering kasbah tower: wide base, steps in near the top, crenels of corner horns, slit windows, vigas."""
@@ -726,7 +734,7 @@ def ember_hall(level, seed=0):
     if level >= 4: bp.set(0, 2, -(d - 2) + 1, "quartz_stairs", facing="n"); bp.marks["throne"] = (0, 2, -(d - 2) + 1)
     for z in range(-4, -(d - 1), -4): hang(bp, [(0, h, z)])
     bp.markers["door"] = (0, 1, -1)
-    return bp.finish()
+    return finish_detail(bp, P)
 
 def fen_palette(seed=0):
     k = castle("blackfen")
@@ -736,7 +744,7 @@ def fen_palette(seed=0):
              roof="dark_oak_stairs", roof_block="dark_oak_planks", roof_slab="dark_oak_slab", trim="mangrove_stairs", trim_block="mangrove_planks",
              trim_slab="mangrove_slab", floor="dark_oak_planks", door="mangrove_door", shutter="mangrove_trapdoor", fence="mangrove_fence",
              gable="mangrove_planks", sill="mud_brick_stairs", chimney=mix([(k("bricks"), 100)], 103))
-    return P
+    return detailed(P)
 
 def thatch(bp, P, B, rect, y_moss=True):
     """Moss over the roof: carpets on the stair steps and moss blocks on the ridge, for the fen's turf roofs."""
@@ -813,6 +821,6 @@ def fen_hall(level, seed=0):
     for z in range(-4, -(d - 1), -4): hang(bp, [(0, lift + h, z)])
     bp.markers["door"] = (0, 1, 3)               # the Cornerstone stands on the ground at the foot of the deck stair
     bp.markers["entry"] = (0, lift + 1, 0)       # the hall's own door up on the deck
-    return bp.finish()
+    return finish_detail(bp, P)
 
 REGION_HALLS = {"vale": lambda l: VALE_HALLS[l](), "frostmarch": frost_hall, "saltreach": salt_hall, "emberwaste": ember_hall, "blackfen": fen_hall}

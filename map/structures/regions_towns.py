@@ -182,7 +182,7 @@ PALETTES = {"frost": frost_P, "salt": salt_P, "fen": fen_P, "ember": ember_P}
 def finish(bp, P, region, kind="house", snow=None):
     if region == "frost" and snow is not False: snow_cap(bp)
     if P.get("infill_ladder"): paint_infill(bp, P["infill_ladder"])
-    finish_doctrine(bp, P["ladder"], P["family"])
+    finish_doctrine(bp, P["ladder"], P["family"], planters=region != "ember", wood=P["trim"].replace("_stairs", ""))
     bp.kind = kind
     return bp
 
@@ -502,6 +502,7 @@ def _gable_hall(region, name, seed, w, d, storeys, civic=False, hip=False, roof=
     """A plain two-storey range for the regional inn and store: stone ground storey, timber or stone upper."""
     P = PALETTES[region](seed, civic)
     if roof: P.update(dict(zip(("roof", "roof_slab", "roof_block", "roof_ladder"), ROOF_SETS[region][roof])))
+    if name.endswith("_inn"): P["spikes"] = 5
     bp = Blueprint(name); B = Building(bp, P, seed)
     W, D = w - 1, d - 1; r = (0, 0, W, D)
     B.foundation(grow(r, "nsew"), 0); B.floor(r, 0)
@@ -608,6 +609,7 @@ def rimehold_hall(seed=31):
     gallery skirt roof round it, crossed dragon heads on both gables, a ridge lantern tower, light blue glass."""
     P = frost_P(seed, civic=True); P.update(roof=WEATHERED[0], roof_block="waxed_oxidized_cut_copper",
                                          roof_slab="waxed_oxidized_cut_copper_slab", roof_ladder=WEATHERED, frame="dark_oak_log")
+    P["spikes"] = 5
     bp = Blueprint("rimehold_hall"); B = Building(bp, P, seed)
     r = (-4, -14, 4, 0)
     B.foundation(grow(r, "nsew", 2), 0); B.floor(r, 0)
