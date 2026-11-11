@@ -405,6 +405,12 @@
   "siege:old_oak_wood": {
     "sound": "wood"
   },
+  "siege:old_pale_oak_log": {
+    "sound": "wood"
+  },
+  "siege:old_pale_oak_wood": {
+    "sound": "wood"
+  },
   "siege:old_spruce_fence": {
     "sound": "wood"
   },
@@ -415,6 +421,12 @@
     "sound": "wood"
   },
   "siege:old_spruce_wood": {
+    "sound": "wood"
+  },
+  "siege:old_stripped_jungle_log": {
+    "sound": "wood"
+  },
+  "siege:old_stripped_jungle_wood": {
     "sound": "wood"
   },
   "siege:old_tuff_stairs": {

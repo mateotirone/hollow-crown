@@ -63,6 +63,7 @@ class Grower:
                             if math.dist(c, P) <= rad + 0.1: self.put_wood(c, 4, part, ax if part != "trunk" else "y")
                 prev = (round(P[0]), round(P[1]), round(P[2])); continue
             rank = 3 if rad >= 0.45 else (2 if rad >= 0.28 else 1)
+            if part == "trunk": rank = 3                    # a trunk is always real log, however thin
             c = (round(P[0]), round(P[1]), round(P[2]))
             if prev is not None and c != prev:
                 # step one axis at a time (horizontal first) so there are no diagonal-only joins
@@ -136,6 +137,7 @@ class Grower:
 
     def clump(self, P, cr):
         s, c = self.s, self.c
+        if not c.get("leaves"): return            # dead trees and snags
         rx = cr; ry = max(1.0, cr * s.get("flat", 0.6)); cy = P[1] + ry * 0.35
         R = int(math.ceil(cr + 1)); jit = s.get("jitter", 0.35)
         for dx in range(-R, R + 1):
@@ -224,7 +226,7 @@ class Grower:
                 n = (x + dx, y, z + dz)
                 if n in self.wood or n in self.deco: continue
                 u = self.rg.random()
-                if u < s.get("bark_wall", 0.10) * (1.3 - y / max(top, 1)): self.deco[n] = (b["wall"], {})
+                if u < s.get("bark_wall", 0.10) * c.get("bark_wall_scale", 1.0) * (1.3 - y / max(top, 1)): self.deco[n] = (b["wall"], {})
                 elif u < s.get("bark_wall", 0.10) + s.get("bark_stair", 0.06) and "stairs" in b:
                     self.deco[n] = (b["stairs"], {"facing": OPP[f], "half": "top" if self.rg.random() < 0.5 else "bottom"})
 
@@ -298,7 +300,8 @@ class Grower:
     def snow(self):
         if not self.c.get("snow"): return
         tops = {}
-        for (x, y, z) in list(self.leaf):
+        cand = list(self.leaf) if self.leaf else [k for k, v in self.wood.items() if v[0] >= 3]
+        for (x, y, z) in cand:
             if (x, y + 1, z) not in self.leaf and (x, y + 1, z) not in self.wood:
                 if self.rg.random() < self.c["snow"]: self.deco.setdefault((x, y + 1, z), ("snow_layer", {}))
 
@@ -324,9 +327,13 @@ class Grower:
                 if part == "trunk":
                     above = self.wood.get((cell[0], cell[1] + 1, cell[2]))
                     open_top = not above or above[0] < 3
-                    name = W["log"] if self.rg.random() > c.get("knots", 0.12) and not open_top else W["wood"]
+                    upper = "log_upper" in W and cell[1] > self.ht * c.get("upper_from", 0.6)
+                    lg, wd = (W["log_upper"], W.get("wood_upper", W["log_upper"])) if upper else (W["log"], W["wood"])
+                    name = lg if self.rg.random() > c.get("knots", 0.12) and not open_top else wd
                     bp.set(*cell, name, axis="y")
-                else: bp.set(*cell, W["wood"] if part != "root" else W.get("root", W["wood"]), axis=ax)
+                else:
+                    wd = W.get("wood_upper", W["wood"]) if "log_upper" in W and part == "limb" else W["wood"]
+                    bp.set(*cell, wd if part != "root" else W.get("root", W["wood"]), axis=ax)
             elif rank == 2:
                 if ax != "y" and W.get("slab"):          # thin level limb: a run of slabs (top/bottom by height)
                     bp.set(*cell, W["slab"], half="top" if self.rg.random() < 0.5 else "bottom")
