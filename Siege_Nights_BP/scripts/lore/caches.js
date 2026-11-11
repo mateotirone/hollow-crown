@@ -11,7 +11,7 @@
 //   /scriptevent siege:lore_reset                                   wipe YOUR lore progress (for testing)
 // To bind a Dusty Tome: place it, then click it in creative while holding the Lore Tome.
 
-import { BOSS_LEADS, CONVERGE, fallenCount } from "./data/spine.js";
+import { BOSS_LEADS, CONVERGE, OPEN_AT, fallenCount } from "./data/spine.js";
 import { world, system, GameMode } from "@minecraft/server";
 import { on, moduleStore } from "../siege/api.js";
 import { TOME, TOMES, COLLECTION, tomesOf, blankProgress } from "./logic.js";
@@ -117,13 +117,20 @@ function bossLeads(player, boss) {
   if (!left || !setFlag(player, `fell_${boss}`)) return;
   player.sendMessage(`§7§o${left.scrap}`);
   learnLeads(player, left.leads);
-  if (fallenCount(progressOf(player).flags) >= CONVERGE.at && setFlag(player, CONVERGE.flag)) {
+  const fallen = fallenCount(progressOf(player).flags);
+  if (fallen >= CONVERGE.at && setFlag(player, CONVERGE.flag)) {
     system.runTimeout(() => {
       try {
         player.sendMessage(`§5${CONVERGE.line}`);
         grantTome(player, CONVERGE.tome);
+        learnLeads(player, CONVERGE.leads);
       } catch { /* left the game */ }
     }, 100);
+  }
+  if (fallen >= OPEN_AT.at && setFlag(player, OPEN_AT.flag)) {
+    system.runTimeout(() => {
+      try { player.sendMessage(`§5${OPEN_AT.line}`); } catch { /* left the game */ }
+    }, 260);
   }
 }
 

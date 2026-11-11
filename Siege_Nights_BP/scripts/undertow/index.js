@@ -8,7 +8,9 @@
 //
 // Needs Bedrock 26.30+ and @minecraft/server 2.8.0 (custom dimensions became stable there).
 // Commands (creative/op):
-//   /scriptevent hc:mark_source_site <id>   record a candidate shrine (look at the wall)
+//   /scriptevent hc:mark_source_site <id>   record a candidate shrine by hand (look at the wall)
+//   /scriptevent hc:thin_status             which of the seven thin-place caves are built (thinplaces.js)
+//   /scriptevent hc:thin_tp <id>            go to a thin place;  hc:thin_build <id>  build it now
 //   /scriptevent hc:open_rift               open the Rift at the picked site without a fork
 //   /scriptevent hc:reveal_source           tell only you which site was picked (spoils it!)
 //   /scriptevent hc:undertow_go             go to the Undertow now (testing)
@@ -39,6 +41,10 @@ import { shouldAlarm, oreOutcome, noteEntry, crownTick, crownVerdict, CLAIM_SECO
 import { oreChance } from "./terrain.js";
 import { shouldRise, regentOutcome, REGENT, TEMPERS, JOBS } from "./regent.js";
 import { sfx } from "../core/sfx.js";
+import { thinTick, thinCommand, planThinPlace, THIN_PLACES, CAMP_TOME, SHAPE } from "./thinplaces.js";
+import { SITE_FEATURES } from "../lore/data/world.js";
+import { canOpen, dullLeft, BOSSES_TO_OPEN, FORK_DULL_DAYS } from "./source.js";
+import { CRACK_HEIGHT } from "./rift.js";
 
 const IN_TAG = "siege_undertow_in";
 const FOG_ID = "siege:undertow_fog";
@@ -320,6 +326,11 @@ system.afterEvents.scriptEventReceive.subscribe((e) => {
       }
       break;
     }
+    case "hc:thin_status":
+    case "hc:thin_tp":
+    case "hc:thin_build":
+      if (player && isBuilder(player)) thinCommand(e.id, player, e.message);
+      break;
     case "hc:mark_source_site":
       if (player && isBuilder(player)) markSite(player, e.message.trim());
       break;
@@ -361,6 +372,8 @@ on("showcase", ({ player, dim, nextSpot, label }) => {
 
 // ---- signs at the real Source -----------------------------------------------------------
 onTick("undertow:source", 600, () => sourceSignsTick(isNight()));
+// ---- the seven thin-place caves build themselves when someone first comes near -------------
+onTick("undertow:thin", 40, () => thinTick());
 
 // ---- self-tests ---------------------------------------------------------------------------
 addTests("undertow", {
@@ -370,6 +383,54 @@ addTests("undertow", {
     assert(upgradeSteps(1).every((s) => s.to <= DATA_VERSION) && upgradeSteps(DATA_VERSION).length === 0);
   },
   "site ids match the lore list": () => assert(SOURCE_SITE_IDS.length === 7),
+  "thin places: all seven are on the map, one per lore site, each with its own Field Note": () => {
+    assert(THIN_PLACES.length === 7, `${THIN_PLACES.length} thin places`);
+    assert(new Set(THIN_PLACES.map((t) => t.id)).size === 7 && THIN_PLACES.every((t) => SOURCE_SITE_IDS.includes(t.id) && SITE_FEATURES[t.id]));
+    assert(new Set(Object.values(CAMP_TOME)).size === 7 && THIN_PLACES.every((t) => CAMP_TOME[t.id]));
+  },
+  "thin places: each cave shows exactly Fennick's features for it": () => {
+    for (const t of THIN_PLACES) {
+      const plan = planThinPlace(t.id, 0, 0, 64);
+      const has = (b) => plan.ops.some((o) => o.block === b);
+      const [water, bell, worked, cold, salt, roots] = SITE_FEATURES[t.id];
+      assert(has("minecraft:water") === water, `${t.id} water`);
+      assert(has("minecraft:bell") === bell, `${t.id} bell`);
+      assert(plan.ops.some((o) => /bricks|cut_|polished|chiseled/.test(o.block)) === worked, `${t.id} worked stone`);
+      assert((has("minecraft:packed_ice") || has("minecraft:snow_layer")) === cold, `${t.id} cold`);
+      assert(has("minecraft:calcite") === salt, `${t.id} salt`);
+      assert(has("minecraft:hanging_roots") === roots, `${t.id} roots`);
+    }
+  },
+  "thin places: the seam has room to tear open and the camp holds the Field Note": () => {
+    for (const t of THIN_PLACES) {
+      const plan = planThinPlace(t.id, 100, 200, 64);
+      const last = new Map();
+      for (const o of plan.ops) last.set(`${o.x},${o.y},${o.z}`, o.block);
+      const s = plan.seam;
+      assert(s.facing === "south" && last.get(`${s.x},${s.y},${s.z}`) === "siege:rift_seam", `${t.id} seam`);
+      for (let row = 0; row < CRACK_HEIGHT; row++) {
+        assert(last.get(`${s.x},${s.y + row},${s.z + 1}`) === "minecraft:air", `${t.id}: crack row ${row} opens onto the chamber`);
+        assert(last.get(`${s.x},${s.y + row},${s.z - 4}`) !== "minecraft:air" && last.has(`${s.x},${s.y + row},${s.z - 4}`), `${t.id}: rock behind the crack at row ${row}`);
+      }
+      assert(last.get(`${plan.tome.x},${plan.tome.y},${plan.tome.z}`) === "minecraft:air" && plan.tome.id, `${t.id} tent`);
+      assert(plan.ops.length < 30000, `${t.id}: ${plan.ops.length} blocks`);
+    }
+  },
+  "thin places: a dry cave is walkable from the mouth to the seam": () => {
+    for (const t of THIN_PLACES.filter((x) => !SITE_FEATURES[x.id][0])) {
+      const plan = planThinPlace(t.id, 0, 0, 64);
+      const last = new Map();
+      for (const o of plan.ops) last.set(`${o.x},${o.y},${o.z}`, o.block);
+      for (let z = SHAPE.tunnel.v1; z > SHAPE.wallV; z--) {
+        assert(last.get(`0,65,${z}`) === "minecraft:air" && last.get(`0,66,${z}`) === "minecraft:air", `${t.id}: blocked at z ${z}`);
+        assert(last.get(`0,64,${z}`) !== "minecraft:air", `${t.id}: hole in the floor at z ${z}`);
+      }
+    }
+  },
+  "the fork: five bosses open it, a dead seam dulls it for days": () => {
+    assert(BOSSES_TO_OPEN === 5 && !canOpen(3) && !canOpen(4) && canOpen(5));
+    assert(dullLeft(10 + FORK_DULL_DAYS, 10) === FORK_DULL_DAYS && dullLeft(12, 15) === 0 && dullLeft(undefined, 4) === 0);
+  },
   "terrain is deterministic": () => assert(JSON.stringify(planChunk(2, 5)) === JSON.stringify(planChunk(2, 5))),
   "arrival ledge is solid": () => assert(heightAt(0, 0) === L.woundLedgeY),
   "path is walkable (no step over 1)": () => {

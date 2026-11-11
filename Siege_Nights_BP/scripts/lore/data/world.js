@@ -81,13 +81,13 @@ export const PLACES = {
   faceless_vault: { name: "The Faceless Vault", region: "Emberwaste", charted: false, desc: "Under Sunscar. It opens for someone who can rebuild a king's face." },
   mirelight: { name: "Mirelight", region: "Blackfen", charted: true, desc: "Huts on stilts and hanging lanterns. Some of the villagers have lost days." },
   mags_hut: { name: "Old Mag's Hut", region: "Blackfen", charted: false, desc: "Past the last lantern of Mirelight, where the frogs stop singing." },
-  drowned_chapel: { name: "The Drowned Chapel", region: "Saltreach", charted: false, desc: "A thin place. The caves under the sunken chapel of Saint Brannoc." },
-  bellfounders_mine: { name: "The Bellfounders' Mine", region: "Frostmarch", charted: false, desc: "A thin place. Where Queen Maelis dug the bronze for the Founding Bell." },
-  kings_barrow: { name: "King's Barrow", region: "Aldmere Vale", charted: false, desc: "A thin place. The royal burial mound, with birches growing over it." },
-  saltglass_grotto: { name: "The Saltglass Grotto", region: "Emberwaste", charted: false, desc: "A thin place. A cave of fused salt out on the flats." },
-  frostvein_hollow: { name: "Frostvein Gap", region: "Frostmarch", charted: false, desc: "A thin place. An ice cave in the far north." },
-  sunken_quarry: { name: "The Sunken Quarry", region: "Aldmere Vale", charted: false, desc: "A thin place. The flooded pit west of Millbrook." },
-  witchroot_caves: { name: "The Witchroot Caves", region: "Blackfen", charted: false, desc: "A thin place. Caves under the swamp, hung with roots." },
+  drowned_chapel: { name: "The Drowned Chapel", region: "Saltreach", charted: false, desc: "A thin place. The caves under the sunken chapel of Saint Brannoc, on the north coast below the chalk cliffs, a long way west of Rimehold." },
+  bellfounders_mine: { name: "The Bellfounders' Mine", region: "Frostmarch", charted: false, desc: "A thin place. Where Queen Maelis dug the bronze for the Founding Bell, up where the Vale climbs into the snow, far east of Millbrook." },
+  kings_barrow: { name: "King's Barrow", region: "Blackfen", charted: false, desc: "A thin place. The royal burial mound, with birches growing over it, where the Vale gives way to the fen, south and a little east of Kingsrest." },
+  saltglass_grotto: { name: "The Saltglass Grotto", region: "Emberwaste", charted: false, desc: "A thin place. A cave of fused salt out on the flats, south-east of Sunscar." },
+  frostvein_hollow: { name: "Frostvein Gap", region: "Frostmarch", charted: false, desc: "A thin place. An ice cave in the far north, west of Rimehold." },
+  sunken_quarry: { name: "The Sunken Quarry", region: "Emberwaste", charted: false, desc: "A thin place. A flooded quarry pit in the badlands, far to the south of Sunscar." },
+  witchroot_caves: { name: "The Witchroot Caves", region: "Blackfen", charted: false, desc: "A thin place. Caves under the swamp, hung with roots, a short walk west of Mirelight." },
 };
 
 // ---------- The seven thin places ----------

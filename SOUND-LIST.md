@@ -360,7 +360,7 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 
 | Vanilla sound | Places | Used by |
 |---|---|---|
-| `block.amethyst_block.chime` | 5 | bestiary (4), undertow |
+| `block.amethyst_block.chime` | 6 | bestiary (4), undertow (2) |
 | `item.shield.block` | 4 | bestiary (3), townhall |
 | `armor.equip_leather` | 3 | dragons, horses, looks |
 | `random.eat` | 3 | dragons (2), bestiary |
