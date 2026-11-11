@@ -13,11 +13,21 @@
     "default": "geometry.siege_b.pale_huntsman"
    },
    "animations": {
-    "main": "animation.siege_b.pale_huntsman"
+    "base": "animation.siege_b.pale_huntsman",
+    "idle": "animation.siege_b.pale_huntsman.idle",
+    "walk": "animation.siege_b.pale_huntsman.walk",
+    "aim": "animation.siege_b.pale_huntsman.aim",
+    "ready": "controller.animation.siege_b.pale_huntsman.ready",
+    "hurt": "animation.siege_b.pale_huntsman.hurt",
+    "flinch": "controller.animation.siege_b.pale_huntsman.flinch"
    },
    "scripts": {
     "animate": [
-     "main"
+     "base",
+     "idle",
+     "walk",
+     "ready",
+     "flinch"
     ]
    },
    "render_controllers": [

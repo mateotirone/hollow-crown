@@ -1,7 +1,8 @@
 // The stable and breeder's yard designs (pure, runs in Node). Placing and upgrading them: barn.js.
 
 import { Plan } from "../townhall/halls.js";
-import { styleFor, pieces } from "../settle/buildings.js";
+import { styleFor, pieces, drawDesigned } from "../settle/buildings.js";
+import { BARN_DESIGNS } from "../settle/barn_data.js";
 
 export const BARN_STALLS = [0, 3, 5, 8];
 
@@ -11,7 +12,15 @@ const { floor, walls, hollow, roof, hang } = pieces;
 // Local frame as for every settlement building: the Stables block at (0, 1, 0) just outside the front door,
 // +z runs into the barn. A 3-wide aisle down the middle, 3 x 3 stalls either side between posts every 4 blocks.
 
+// Each region's own design (map/structures/settle_buildings.py, exported to settle/barn_data.js) when there is one,
+// the plain shared design below when not.
 export function drawBarn(level, styleId) {
+  const lv = Math.max(1, Math.min(3, level));
+  const style = styleFor(styleId), d = BARN_DESIGNS[style.id]?.[`stables_${lv}`];
+  return d ? drawDesigned(new Plan(style), d, `bn:${style.id}:stables_${lv}`) : plainBarn(lv, styleId);
+}
+
+export function plainBarn(level, styleId) {
   const p = new Plan(styleFor(styleId));
   const lv = Math.max(1, Math.min(3, level));
   const rows = [0, 2, 3, 4][lv]; // stall slots down each side
@@ -55,6 +64,11 @@ export function drawBarn(level, styleId) {
 
 // The breeder's yard: 11 x 11 paddock, the post at (0, 1, 0) in the gateway, a three-bay shelter at the back
 export function drawBreederYard(styleId) {
+  const style = styleFor(styleId), d = BARN_DESIGNS[style.id]?.breeder_yard;
+  return d ? drawDesigned(new Plan(style), d, `bn:${style.id}:breeder_yard`) : plainBreederYard(styleId);
+}
+
+export function plainBreederYard(styleId) {
   const p = new Plan(styleFor(styleId));
   const x0 = -5, x1 = 5, z0 = 1, z1 = 11, zs = 7, H = 3;
   p.fill(x0, 0, z0, x1, 0, zs - 1, "path");

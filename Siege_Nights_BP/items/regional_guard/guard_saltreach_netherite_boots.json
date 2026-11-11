@@ -9,7 +9,12 @@
       }
     },
     "components": {
-      "minecraft:icon": "siege_guard_saltreach_netherite_boots",
+      "minecraft:icon": {
+        "textures": {
+          "default": "siege_guard_saltreach_netherite_boots",
+          "dyed": "siege_guard_saltreach_netherite_boots_dyed"
+        }
+      },
       "minecraft:display_name": {
         "value": "item.siege:guard_saltreach_netherite_boots.name"
       },

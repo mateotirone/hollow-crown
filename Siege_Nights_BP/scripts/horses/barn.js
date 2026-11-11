@@ -17,7 +17,7 @@ import { onTick, isReady, settlementAt, moduleStore, on, addTests, assert, asser
 import { startBuild, buildFor } from "../townhall/build.js";
 import { STYLES, STYLE_IDS } from "../townhall/styles.js";
 import { styleFor } from "../settle/buildings.js";
-import { drawBarn, drawBreederYard, BARN_STALLS } from "./barndesign.js";
+import { drawBarn, drawBreederYard, plainBarn, BARN_STALLS } from "./barndesign.js";
 export { drawBarn, drawBreederYard, BARN_STALLS } from "./barndesign.js";
 import { siteProblem, styleOf } from "../settle/plans.js";
 import { footprint } from "../settle/rules.js";
@@ -155,8 +155,13 @@ addTests("horses", {
   },
   "every level has as many stalls as the Stables holds": () => {
     for (const lv of [1, 2, 3]) {
-      const hay = [...drawBarn(lv, "vale").cells.values()].filter((c) => c.role === "hay").length;
-      assertEqual(hay - (lv === 3 ? 2 : 0), BARN_STALLS[lv], `level ${lv} hay racks`);
+      for (const id of STYLE_IDS) {
+        const plan = drawBarn(lv, id);
+        const hay = [...plan.cells.values()].filter((c) => c.y === 1 && plan.style.roles[c.role]?.[0] === "minecraft:hay_block").length; // racks, not the loft
+        assertEqual(hay, BARN_STALLS[lv], `level ${lv} (${id}) hay racks`);
+      }
+      const plain = [...plainBarn(lv, "vale").cells.values()].filter((c) => c.role === "hay").length;
+      assertEqual(plain - (lv === 3 ? 2 : 0), BARN_STALLS[lv], `plain level ${lv} hay racks`);
     }
   },
 });

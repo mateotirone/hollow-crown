@@ -17,7 +17,7 @@ export const WALLS = {
   maxStep: 6, // the ground may differ this much between neighbouring points before the wall refuses to span it
   perTick: 90, // blocks placed per tick while a wall rises
   auto: "map", // raise level 1 when a plot is claimed: "map" (only on a map with Plot Stones), "always", "off"
-  gateWidth: 3, gateHeight: 4,
+  gateWidth: 3, gateHeight: 4, gateGreet: 4, // a friend this close to their own gate gets it opened by the guard
   tierCap: [3, 5, 8, 10],
   repair: { perBlock: 0.25, perCrack: 0.1, least: 1, perTick: 600 }, // price of a repair in lots (wallet.js): per missing block, per cracked block, and the least it costs. perTick = blocks looked at per tick. // the highest wall level a Hamlet, Town, City and Castle may raise
 };
@@ -80,6 +80,12 @@ export const WALL_STONES = {
 };
 export const WALL_STONE_IDS = Object.keys(WALL_STONES);
 export const WALL_TIMBER = ["vale", "frostmarch", "saltreach", "emberwaste", "blackfen"]; // palisade, walkway planks and gates: any region's
+// Log walls (Palisade, Braced Palisade) are always the stripped log of the chosen timber (Mateo, 2026-11-11:
+// "make all walls made of logs stripped"). Shared by the game (walls.js), the Mason and the 3D viewer.
+export const WALL_LOG = {
+  vale: "minecraft:stripped_spruce_log", frostmarch: "minecraft:stripped_dark_oak_log", saltreach: "minecraft:stripped_birch_log",
+  emberwaste: "minecraft:stripped_acacia_log", blackfen: "minecraft:stripped_mangrove_log",
+};
 
 export const VARIATION = { weather: 0.22, slitEvery: 9, lightEvery: 14, postEvery: 8, towerBump: 2 };
 

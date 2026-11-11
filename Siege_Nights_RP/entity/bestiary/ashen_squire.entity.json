@@ -13,11 +13,24 @@
     "default": "geometry.siege_b.ashen_squire"
    },
    "animations": {
-    "main": "animation.siege_b.ashen_squire"
+    "base": "animation.siege_b.ashen_squire",
+    "idle": "animation.siege_b.ashen_squire.idle",
+    "walk": "animation.siege_b.ashen_squire.walk",
+    "attack": "animation.siege_b.ashen_squire.attack",
+    "swing": "controller.animation.siege_b.ashen_squire.swing",
+    "aim": "animation.siege_b.ashen_squire.aim",
+    "ready": "controller.animation.siege_b.ashen_squire.ready",
+    "hurt": "animation.siege_b.ashen_squire.hurt",
+    "flinch": "controller.animation.siege_b.ashen_squire.flinch"
    },
    "scripts": {
     "animate": [
-     "main"
+     "base",
+     "idle",
+     "walk",
+     "swing",
+     "ready",
+     "flinch"
     ]
    },
    "render_controllers": [

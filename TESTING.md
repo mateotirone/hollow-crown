@@ -88,13 +88,14 @@ Type the commands in chat (`/` opens it).
 - Switch to Survival and try to mine the Plot Stone. ✅ It doesn't break.
 
 **Welcome hall and test area (in the sky)** Creative, after at least one Plot Stone is placed.
-- `/scriptevent siege:welcome build here` on flat ground (or `build` on the real map: it takes you to the hall's place high over Gull Bay). ✅ A round stone terrace with the Waystone in the middle and twelve pedestals round the rim, each with a sign.
-- Click the Waystone. ✅ A menu with "How things stand", "Where you start" and "Choosing a home".
-- Click a pedestal whose plot has a stone. ✅ The plot's region, land and style, and "Free". Pedestals for plots with no stone yet say "Not on this map yet".
-- Switch to Survival, click a free pedestal, choose "Start in ...", confirm. ✅ You land beside that Plot Stone holding a Keep Banner, and everyone is told.
-- `/scriptevent siege:welcome go` (Creative) and click the same pedestal. ✅ Its top has gone dark and it shows who chose it, their level and their settlement level.
-- With a friend (or second account) in Survival with no keep: they join. ✅ They arrive in the hall, can't walk off it, and the taken plot can't be picked.
+- `/scriptevent siege:welcome build here` on flat ground (or `build` on the real map: it takes you to the hall's place high over Gull Bay). ✅ After a few seconds, a 101 x 101 block miniature of the whole map (coast, mountains, rivers, towns, forests) with a stone rim. You stand on a quay out in its sea beside the Waystone, and twelve green glowing Map Stones stand on the plots' real spots, each with its name floating over it when you are close.
+- Click the Waystone with an empty hand. ✅ A menu with "How things stand", "Where you start" and "Choosing a home".
+- Walk over to a Map Stone and click it with an empty hand. ✅ The plot's region, land and style, and "Free". Stones for plots with no Plot Stone yet say "Not on this map yet".
+- Switch to Survival, click a free Map Stone, choose "Start in ...", confirm. ✅ You land beside that Plot Stone holding a Keep Banner, and everyone is told.
+- `/scriptevent siege:welcome go` (Creative) and click the same Map Stone. ✅ It has gone dark and it shows who chose it, their level and their settlement level.
+- With a friend (or second account) in Survival with no keep: they join. ✅ They arrive on the quay, can walk all over the miniature but can't walk off it, and the taken plot can't be picked.
 - `/scriptevent siege:welcome testarea`. ✅ A glass floor in the sky with the whole showcase laid out on it. Running it again just takes you back there.
+- On a world that already had the old round hall: load it. ✅ The miniature goes up in its place (a little lower in the sky), anyone waiting is moved to the quay, then the old terrace disappears.
 - `/scriptevent siege:welcome release <name>` frees someone's pick; `status` lists all twelve.
 
 ## What I most want to know
@@ -118,7 +119,7 @@ Use `hollow-crown-full-map.mcworld`, not a flat test world. That file is saved i
 3. All twelve rim stones should be lit (free). Pick one: you land next to its Plot Stone with a Keep Banner, are told what stood there, and about 20 seconds later get the plot's first book. Its last page sends you to Sister Wren in Millbrook.
 4. Ride or walk to Millbrook (north-east of Kingsrest). Wren stands under a small porch on the north side of the square. Ask her "Why is it always night?", then "Which clock was first?": she is cut off and you Slip.
 5. With a second player, choose "Start in Kingsrest without a home" instead: about 30 seconds later a carter should point you to Wren and Millbrook is added to your Ledger.
-6. Builder check: `/scriptevent siege:opening status` should say `map` and 15 of 15 done.
+6. Builder check: `/scriptevent siege:opening status` should say `map` and 16 of 16 done.
 
 ## Town hall, skill tree and paths (The Hollow Crown)
 
@@ -218,7 +219,7 @@ Run the showcase first (`/scriptevent siege:showcase`): the back row has four Ar
 
 Look first, without the game: the 3D viewer at https://claude.ai/artifact/D42qsWXjEcxWAbsYacsw4v shows all four species, every pose and every sound.
 
-In game: Creative, cheats on. `/scriptevent siege:showcase` puts a Roost, a Nest, nine display dragons (the four species, a hatchling, a fledgling, one asleep, one unconscious, one dead) and **Cinder**, a grown Cinderwing that is yours, in the extras row behind you. Take a **Dragon Horn** from the chests, and `/give @s beef 16` and `/give @s golden_apple 4`.
+In game: Creative, cheats on. `/scriptevent siege:showcase` puts a Roost, nine display dragons (the four species, a hatchling, a fledgling, one asleep, one unconscious, one dead) and **Cinder**, a grown Cinderwing that is yours, in the extras row behind you, and a whole 9x9 **Dragon Nest** west of that row. Take a **Dragon Horn** from the chests, and `/give @s beef 16` and `/give @s golden_apple 4`.
 
 **Looks and flying**
 1. Walk along the display dragons. ✅ Four clearly different animals (four-legged Cinderwing, two-legged Ashen Wyvern, squat armoured Dune Drake, long frilled Glass Wyrm). Wings tucked down along the flanks, the outer half folded over the inner (not sticking out sideways or lying flat). The sleeper breathes slowly, the unconscious one breathes fast and drips red, the dead one lies rolled over and does not move.
@@ -246,7 +247,9 @@ In game: Creative, cheats on. `/scriptevent siege:showcase` puts a Roost, a Nest
 19. Knock it down again and, as a second player who is not your ally, hit it five times. ✅ It dies: rolled over, jaw slack, no breathing, no name. The body stays about five minutes (longer during a siege), then crumbles to ash. The owner sees "Cinder is dead".
 20. Shot down: fly over a second player's settlement with a Ballista. ✅ Bolts knock the Flight bar down a quarter each; at empty you get "Shot down", it falls, and it hits the ground unconscious.
 
-**Raising one**: `/scriptevent siege:dragons_reset`, click the **Dragon Nest** ✅ an egg; click the Roost holding it ✅ "The egg settles"; `/scriptevent siege:dragons_grow` ✅ cracking sound, a tiny chirping hatchling of a random species that follows you. Run the grow command twice more ✅ Fledgling (walks with you on its back), then Adult (flies).
+**The nest**: walk to the 9x9 nest west of the extras row ✅ a round nest of woven branches sunk into the ground, rim two to three blocks high with twigs flaring off the top, a straw floor with a bone, ribs, scales or a skull here and there, and three big dark red eggs in the middle. Try to break any part of it in Survival ✅ nothing breaks; set off TNT next to it ✅ it stays. Place a **Dragon Nest** from the creative menu in Creative ✅ a whole nest grows round it; in Survival ✅ it vanishes ("only grow in the wild").
+
+**Raising one**: `/scriptevent siege:dragons_reset`, click the eggs in the **Dragon Nest** ✅ an egg, and the clutch turns to broken shell; click the Roost holding it ✅ "The egg settles"; `/scriptevent siege:dragons_grow` ✅ cracking sound, a tiny chirping hatchling of a random species that follows you. Run the grow command twice more ✅ Fledgling (walks with you on its back), then Adult (flies).
 
 Things I could not check without the game, so please look closely: flying actually steers by camera, flying speed feels right, the hatchling follows you, the sounds are any good in game, and the unconscious dragon really can't be killed by one more hit.
 
@@ -312,6 +315,8 @@ Rival Lords only settle on a map with Plot Stones. Place three or four Plot Ston
 - Kill it while it walks: Veil Ash drops and the followers stay. Let it go about 64 blocks: it and its followers vanish.
 - `/scriptevent siege:returned_reveal` puts a beam on every Returned near you if you lose track.
 - On their own, villages of five or more get one at night once the first boss is dead (slowly: a small chance every two minutes, one per village).
+
+**Boss Summons (creative menu).** In creative, open the Equipment tab and find the fold-out group "Hollow Crown: Boss Summons": nine sealed writs. Use the Reeve's on flat ground: the Reeve appears 6 blocks in front of you and its fight starts (name, intro line, boss sound), and the writ stays in your hand. Use it again while the fight runs: "already here". The Choir's writ takes you to the Court of the Hollow and wakes the Choir a few seconds later (or says the Court isn't built). The Pretender's rolls a new claimant. Also check the Construction tab has a "Hollow Crown: Locked World Trees" group and the Equipment tab a "Hollow Crown: Guard-only Armour" group, and that the Throne, Fallen Oath Shard, Tree of Oaths, Hollow Crown and Heart of the Hollow can be found with the creative search.
 
 **Morvane, the last fight (seven stages).** On flat open ground run `/scriptevent siege:bestiary_summon morvane`. Away from the Seat all seven stages play on the spot, which is the quick way to check the mechanics. `/scriptevent siege:morvane_skip 4` jumps a running fight to stage 4 (any number 1 to 7).
 
@@ -443,6 +448,12 @@ the darkness and knockback effects, the storms, and how the hurried evening look
 - Pick: break an ore next to other ore. A line of sparks points to the nearest one. It also mines Choir Ore whole.
 - The first time you wear or hold each piece, chat tells you what it does.
 
+## Mob and boss animations (bestiary)
+
+1. In the showcase world the statues stay in place but now breathe and fidget (the Reeve ticks, Hollow folk twitch). Then spawn a few live mobs with eggs (Tollman, Shieldwall Brute, Grey Host Bowman, Lost Villager, Rimewolf) in Survival. ✅ Each walks differently, leans in when it runs, and swings its own way when it hits you. The Bowman raises and draws its bow while it has you as a target. Every mob flinches when you hit it.
+2. Watch a Lost Villager standing still for 10 seconds. ✅ Its head hangs crooked and now and then snaps sideways.
+3. `/scriptevent siege:bestiary_summon reeve` in Survival. ✅ When a warning comes up he holds a wind-up pose (both arms raised for the time stop, arm drawn back for a cog) and swings through when it lands. At 60% health he rears back with his arms spread. Do the same for the Huntsman, Bride, Seneschal, Mother, Warlord King and Morvane. Anything that looks broken (a limb bending the wrong way, a pose that never lets go): note the boss and the attack name from the warning.
+
 ## Never the same fight twice (bestiary)
 
 - Beat any regional boss once, then summon it again (`/scriptevent siege:bestiary_summon reeve`): its name carries a temper (for example "The Clockwork Reeve, Unquiet") and the fight has one extra problem. Beat it again and you get a named echo shard for that temper. The next rematch wears a different temper.
@@ -567,6 +578,26 @@ Tell me about: anything too loud, too quiet, silent, or that made you jump. Noth
 2. Walk toward a Dusty Tome you have not clicked (the showcase has some). ✅ Within 16 blocks a page turns softly and the action bar says "Your Ledger whispers: something written, N blocks <direction>". After you copy the tome it goes quiet.
 3. Drop a Lore Tome and walk away and back. ✅ It is sensed the same way. Without the Ledger in your pack nothing happens.
 
+## The Settler's Almanac (scripts/guide/)
+
+Best on the real world map with a fresh player (or `/scriptevent siege:guide reset` first).
+
+1. Join for the first time. ✅ After the journal, chat says a clerk has given you the Settler's Almanac, and it is in your pack. Use it. ✅ A cover page, chapters with page counts, a "Tips in chat" switch. "First days" opens on "This book", "What to do first", "Land and protection" and more.
+2. Read a page, go back. ✅ The gold dot on it is gone and the chapter's "new" count drops.
+3. Raise your Keep Banner. ✅ A second or two later one gold "[Almanac]" line in chat (not on top of a menu), then another a few seconds after, never a burst.
+4. Pick up a Regal, place a Siege Workshop, click the Mason, click a Station Post, carry a Halter. ✅ One tip each, the first time only. Doing it again says nothing.
+5. Turn tips off on the first page and pick up something new. ✅ Silent, but its page still gets its gold dot.
+6. Click your Keep Banner. ✅ An "Almanac" button on the Keep menu. Type `/siege:guide` with cheats off. ✅ The book opens.
+7. Craft one at a normal crafting table: a book and a feather.
+8. Check the secrets stay secret: with a fresh player, no chapter called "Beyond the seam" or "The High Throne", and no page mentions the Hollow. `/scriptevent siege:guide all` shows them all (for proof-reading).
+9. `/scriptevent siege:guide tip <id>` repeats any page's tip.
+
+Tell me: any tip that came at a bad moment or said something wrong, any mechanic you had to ask about that the book doesn't cover, and whether the tips feel like too many or too few.
+### Settlement gates and stripped log walls
+1. `/scriptevent siege:wall 3 saltreach` round your keep. ✅ The stakes are stripped birch, not bark birch. Try `vale`, `frostmarch`, `emberwaste`, `blackfen`: always the stripped log.
+2. With a second player who is not your ally, have them click your gate or portcullis. ✅ It stays shut and the action bar says "The gate is barred. Only <name>'s people can open it." You (and an ally) can open it by clicking.
+3. Recruit a guard at the Barracks, shut the gate, walk up to it from outside. ✅ The gate (and portcullis from level 6) opens by itself; walk 7+ blocks away and it shuts.
+4. Leave the gate open and start a siege. ✅ It slams shut, and it does not open by itself until the siege ends.
 ## Role trials (scripts/roletrials/)
 
 Build the showcase (`/scriptevent siege:showcase`) in a flat Creative world, then switch to Survival. Kesh, Ulla, Holt and Nell stand with the other story characters. A short Span and three graves are 60 blocks behind the exhibit rows.
@@ -606,3 +637,10 @@ Shortcuts: `/scriptevent siege:hollow_beat <id>` replays one scene, `siege:hollo
 5. `/scriptevent siege:labels off`. ✅ All labels vanish; `on` brings them back.
 
 Tell me about: a label sitting inside the block or too high above it, a label covering an NPC's name, or anything clickable with no label.
+
+### Town hall build animation
+1. Stand at your cornerstone with a Longhouse built and run `/scriptevent siege:townhall_build 3`.
+2. ✅ The title "The Keep rises" shows once, the camera circles, and the action bar shows only a bar with a percentage that climbs steadily.
+3. ✅ The old Longhouse is gone completely before the Keep goes up: no leftover walls, roof or posts in or beside it.
+4. ✅ It is finished in about 15 seconds, and the Hall Cornerstone now stands two or three blocks to the side of the path, not in the doorway. Clicking it still opens the Town Hall menu, and breaking it still puts the Tree to sleep.
+5. Run `/scriptevent siege:townhall_build 5` straight after. ✅ The cornerstone is never wiped, and is moved again only if the bigger hall needs the spot.

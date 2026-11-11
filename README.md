@@ -113,7 +113,7 @@ Numbers to change: `MAP` in `scripts/plots/config.js`.
 
 ### The welcome hall and the test area
 
-Both float high above the map. New players (Survival, no settlement yet) arrive in the **welcome hall**, a stone terrace over Gull Bay. The Waystone in the middle tells the story so far and how starting works. Twelve pedestals stand round the rim, one per plot, each set in the direction its plot really lies. Click a free one to start there: you are set down beside its Plot Stone with a Keep Banner, and the plot is kept for you alone. A taken pedestal goes dark and shows who has it, their level and their settlement's level. You can also start in Kingsrest with no plot and join a friend. Nobody can leave the hall without choosing.
+Both float high above the map. New players (Survival, no settlement yet) arrive in the **welcome hall** over Gull Bay: the whole map in miniature, 1 block for every 25 x 25, built from the real world map (`tools/miniature.py`, re-run after regenerating the map). They land on a quay in the miniature's sea, where the Waystone tells the story so far and how starting works. Each plot has a glowing Map Stone on its real spot: green free, yellow run by a lord, dark taken. Click a free one to start there: you are set down beside its real Plot Stone with a Keep Banner, and the plot is kept for you alone. A taken one shows who has it, their level and their settlement's level. You can also start in Kingsrest with no plot and join a friend. Nobody can leave the hall without choosing.
 
 The **test area** is a glass floor in the sky holding the whole showcase (every block, item, machine and each feature's exhibit).
 
@@ -191,6 +191,15 @@ A real book of all of it, with eight old paintings and the journal: `lore-book/T
 
 Builder commands: `/scriptevent siege:lore_list [collection]`, `siege:lore_give <tome | collection | all>`, `siege:lore_npc <id | list>`, `siege:lore_mark_place <place>`, `siege:lore_reset`. To bind a Dusty Tome, click it in creative while holding the tome.
 
+## The Settler's Almanac (in-game guide)
+
+Every new player is handed **the Settler's Almanac** on their first join (after the journal). Use it to read how things work, chapter by chapter. The first time a player meets a mechanic (places a block, clicks an NPC, carries an item, sees a creature, lives through a siege night) they get one gold `[Almanac]` line in chat, at most one every few seconds, and that page wears a gold dot until read. Pages about things a newcomer shouldn't know yet stay hidden until met, and secrets (the Cold Forge, thin places, moon doors and the like) have no page at all.
+
+- `/siege:guide` opens it for anyone, cheats off. The Keep menu has an Almanac button. Craft another from a book and a feather at a crafting table.
+- Tips can be switched off on the book's first page.
+- Words: `scripts/guide/data.js`. Adding a mechanic? Add its entry there (see MODULES.md). What is covered and what isn't: `docs/GUIDE.md`.
+- Test commands: `/scriptevent siege:guide [give | reset | all | tip <id>]`.
+
 ## Install
 
 - **Windows / phone / tablet:** open `hollow-crown.mcaddon`. Minecraft imports both packs.
@@ -216,7 +225,7 @@ Code in `Siege_Nights_BP/scripts/bestiary/` (start with `index.js`), looks and s
 - **See everything:** `/scriptevent siege:showcase` lines up every mob and boss behind you as labelled statues (they can't move, fight or be hurt).
 - **Three kinds of siege troop** (`spawns.js`): Choir raiders (from a keep's 3rd siege), the Grey Host (five soldiers of the army the Hollow swallowed, default from the 6th) and soldiers of the Hollow itself (Veinsworn, Shardcaster, Gatebreaker, default from the 10th). For three sieges before those, one Veinsworn stands at the back and only watches. The raids feature sets the pacing with `setTroopPlan()`.
 - **Hidden Returned** (`returned.js`): ordinary villagers that are secretly Returned, caught only by their tells (faces the Hollow when unwatched, tamed wolves growl, a bell sends it walking back and it may take villagers with it).
-- **Try a boss:** spawn its egg in creative (the fight starts where it stands), use a boss key (Stopped Clock Key, Pale Horn, Drowned Wedding Ring, Faceless Seal, Mire Effigy), or `/scriptevent siege:bestiary_summon reeve` (ids: reeve, huntsman, bride, seneschal, mother, warlord_king, oswin).
+- **Try a boss:** take its Boss Summon from the creative menu (Equipment tab, "Hollow Crown: Boss Summons"; every boss including the Choir, Morvane and a Pretender), spawn its egg in creative (the fight starts where it stands), use a boss key (Stopped Clock Key, Pale Horn, Drowned Wedding Ring, Faceless Seal, Mire Effigy), or `/scriptevent siege:bestiary_summon reeve` (ids: reeve, huntsman, bride, seneschal, mother, warlord_king, morvane).
 - **Loot:** each player who fought gets the boss's named relic the first time they beat it (materials on repeat kills), plus skill points. A shared vault chest appears where the boss fell.
 - **Tweak:** boss numbers are at the top of each fight in `bosses.js`; spawn chances in `SPAWN_SETTINGS` in `spawns.js`; health, damage and speed in `roster.py`.
 

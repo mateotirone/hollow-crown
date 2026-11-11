@@ -262,11 +262,11 @@ def _ent(gid,name,cat,geofile,variants,note=None):
 for _k,_n in [("cinderwing","Cinderwing"),("wyvern","Wyvern"),("drake","Drake"),("wyrm","Wyrm")]:
     _ent("dragon_"+_k,_n,"Dragons",f'models/entity/dragons/{_k}.geo.json',[(_n,f'textures/entity/siege/dragons/{_k}.png')],"Adult shape. Hatchlings and fledglings are the same model, smaller.")
 if os.path.exists(RP+B+'dragons/siege_dragon_roost_side.png'):
-    g("dragon_blocks","Dragon Roost and Nest","Dragons",[sided("Roost",'dragons/siege_dragon_roost_side','dragons/siege_dragon_roost_top','dragons/siege_dragon_roost_side'),sided("Nest",'dragons/siege_dragon_nest_side','dragons/siege_dragon_nest_top','dragons/siege_dragon_nest_side')])
+    g("dragon_blocks","Dragon Roost","Dragons",[sided("Roost",'dragons/siege_dragon_roost_side','dragons/siege_dragon_roost_top','dragons/siege_dragon_roost_side')])
     g("dragon_items","Dragon item icons","Dragons",[item(n,'dragons/siege_dragon_'+k) for n,k in [("Egg","egg"),("Saddle","saddle"),("Horn","horn")]])
 # ---- 3D held weapons for players
 for _k,_n in [("longsword","Longsword"),("warhammer","Warhammer"),("minute_hand","Minute Hand"),("oath_of_oswin","The Kept Oath"),("warlords_brand","The Warlord's Brand"),("rimefang_bow","Rimefang Bow")]:
-    _ent("weapon_"+_k,_n,"Player weapons",f'models/entity/weapons/{_k}.geo.json',[(_n,f'textures/entity/siege/weapons/{_k}.png')],"How it looks in your hand. The inventory icon stays flat.")
+    _ent("weapon_"+_k,_n,"Player weapons",f'models/entity/weapons/{_k}.geo.json',[(_n,f'textures/entity/siege/weapons/{_k}.png')],"3D model for review only. In game the weapon is held like a vanilla sword, showing its flat icon.")
 _ent("u_boat","Latticewood Boat","The Hollow",'models/entity/hollowfolk/lattice_boat.geo.json',[("Boat",'textures/entity/hollowfolk/lattice_boat.png')])
 _ent("u_heart","Heart of the Hollow, resting","Crown",'models/entity/resting_heart.geo.json',[("Resting",'textures/entity/siege_resting_heart.png')])
 for k,n in [("choir_conductor","The Conductor"),("choir_singer","Singer"),("hollow_regent","Hollow Regent")]:
@@ -329,13 +329,13 @@ geos['geometry.armor2']={"tw":64,"th":32,"bones":[bone("body",[0,24,0],[c([-4,12
 geos.update(bgeos)
 import glob as _g
 g("skill_icons","Skill icons","Town hall",[{"label":os.path.basename(f)[:-4].replace('_',' ').title(),"model":"item","mats":{"*":'textures/ui/hc/skill/'+os.path.basename(f)}} for f in sorted(_g.glob(os.path.join(RP,'textures/ui/hc/skill/*.png')))],"One icon for every skill on the Tree of Oaths, coloured by branch. Painted, not shown in the menu yet.")
-# (the 1,600 minimap tiles textures/ui/hc/minimap/mXXZZ.png are left out: too many to list)
+# (the 1,600 minimap tiles textures/ui/hc/minimap/mxXXzZZ.png are left out: too many to list)
 # ---- catch-all: every PNG in the pack that no group above shows gets a place, so nothing can be missing from the Studio
 _seen=set(tex); _left={}
 for _d,_,_fs in os.walk(RP+'textures'):
     for _f in sorted(_fs):
         _p=os.path.relpath(os.path.join(_d,_f),RP)
-        if _f.endswith('.png') and _p not in _seen and 'invisible' not in _f and not ('/minimap/' in _p and _re.fullmatch(r'm\d{4}\.png', _f)): _left.setdefault(os.path.dirname(_p),[]).append(_p)
+        if _f.endswith('.png') and _p not in _seen and 'invisible' not in _f and not ('/minimap/' in _p and _re.fullmatch(r'mx\d\dz\d\d\.png', _f)): _left.setdefault(os.path.dirname(_p),[]).append(_p)
 _NAMES={'textures/blocks':'More blocks','textures/blocks/regional':'Regional blocks: reinforced tiers and open gates','textures/items':'More item icons','textures/models/armor':'Worn relic sheets','textures/ui/hc':'Menu pieces: skill tree sockets'}
 for _d,_ps in sorted(_left.items()):
     _kind='cube' if '/blocks' in _d else 'item' if '/items' in _d else 'flat'

@@ -1,0 +1,28 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:spinning_cog",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/spinning_cog"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.spinning_cog"
+   },
+   "animations": {
+    "base": "animation.siege_b.spinning_cog"
+   },
+   "scripts": {
+    "animate": [
+     "base"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ]
+  }
+ }
+}

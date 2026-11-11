@@ -1,0 +1,2718 @@
+{
+ "format_version": "1.10.0",
+ "animation_controllers": {
+  "controller.animation.siege_b.hollow_footman.swing": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "swinging": "variable.attack_time > 0"
+      }
+     ]
+    },
+    "swinging": {
+     "animations": [
+      "attack"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished"
+      }
+     ],
+     "blend_transition": 0.1
+    }
+   }
+  },
+  "controller.animation.siege_b.hollow_footman.ready": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "aiming": "query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    },
+    "aiming": {
+     "animations": [
+      "aim"
+     ],
+     "transitions": [
+      {
+       "default": "!query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    }
+   }
+  },
+  "controller.animation.siege_b.hollow_footman.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.bell_ringer.ready": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "aiming": "query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    },
+    "aiming": {
+     "animations": [
+      "aim"
+     ],
+     "transitions": [
+      {
+       "default": "!query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    }
+   }
+  },
+  "controller.animation.siege_b.bell_ringer.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.shieldwall_brute.swing": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "swinging": "variable.attack_time > 0"
+      }
+     ]
+    },
+    "swinging": {
+     "animations": [
+      "attack"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished"
+      }
+     ],
+     "blend_transition": 0.1
+    }
+   }
+  },
+  "controller.animation.siege_b.shieldwall_brute.ready": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "aiming": "query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    },
+    "aiming": {
+     "animations": [
+      "aim"
+     ],
+     "transitions": [
+      {
+       "default": "!query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    }
+   }
+  },
+  "controller.animation.siege_b.shieldwall_brute.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.torchbearer.swing": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "swinging": "variable.attack_time > 0"
+      }
+     ]
+    },
+    "swinging": {
+     "animations": [
+      "attack"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished"
+      }
+     ],
+     "blend_transition": 0.1
+    }
+   }
+  },
+  "controller.animation.siege_b.torchbearer.ready": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "aiming": "query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    },
+    "aiming": {
+     "animations": [
+      "aim"
+     ],
+     "transitions": [
+      {
+       "default": "!query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    }
+   }
+  },
+  "controller.animation.siege_b.torchbearer.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.siege_ogre.swing": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "swinging": "variable.attack_time > 0"
+      }
+     ]
+    },
+    "swinging": {
+     "animations": [
+      "attack"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished"
+      }
+     ],
+     "blend_transition": 0.1
+    }
+   }
+  },
+  "controller.animation.siege_b.siege_ogre.ready": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "aiming": "query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    },
+    "aiming": {
+     "animations": [
+      "aim"
+     ],
+     "transitions": [
+      {
+       "default": "!query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    }
+   }
+  },
+  "controller.animation.siege_b.siege_ogre.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.crow_mage.ready": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "aiming": "query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    },
+    "aiming": {
+     "animations": [
+      "aim"
+     ],
+     "transitions": [
+      {
+       "default": "!query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    }
+   }
+  },
+  "controller.animation.siege_b.crow_mage.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.hollow_crow.swing": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "swinging": "variable.attack_time > 0"
+      }
+     ]
+    },
+    "swinging": {
+     "animations": [
+      "attack"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished"
+      }
+     ],
+     "blend_transition": 0.1
+    }
+   }
+  },
+  "controller.animation.siege_b.hollow_crow.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.lost_villager.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.changeling.swing": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "swinging": "variable.attack_time > 0"
+      }
+     ]
+    },
+    "swinging": {
+     "animations": [
+      "attack"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished"
+      }
+     ],
+     "blend_transition": 0.1
+    }
+   }
+  },
+  "controller.animation.siege_b.changeling.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.wrongling.swing": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "swinging": "variable.attack_time > 0"
+      }
+     ]
+    },
+    "swinging": {
+     "animations": [
+      "attack"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished"
+      }
+     ],
+     "blend_transition": 0.1
+    }
+   }
+  },
+  "controller.animation.siege_b.wrongling.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.echo_hound.swing": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "swinging": "variable.attack_time > 0"
+      }
+     ]
+    },
+    "swinging": {
+     "animations": [
+      "attack"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished"
+      }
+     ],
+     "blend_transition": 0.1
+    }
+   }
+  },
+  "controller.animation.siege_b.echo_hound.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.mirror_knight.swing": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "swinging": "variable.attack_time > 0"
+      }
+     ]
+    },
+    "swinging": {
+     "animations": [
+      "attack"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished"
+      }
+     ],
+     "blend_transition": 0.1
+    }
+   }
+  },
+  "controller.animation.siege_b.mirror_knight.ready": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "aiming": "query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    },
+    "aiming": {
+     "animations": [
+      "aim"
+     ],
+     "transitions": [
+      {
+       "default": "!query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    }
+   }
+  },
+  "controller.animation.siege_b.mirror_knight.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.tolling_shade.swing": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "swinging": "variable.attack_time > 0"
+      }
+     ]
+    },
+    "swinging": {
+     "animations": [
+      "attack"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished"
+      }
+     ],
+     "blend_transition": 0.1
+    }
+   }
+  },
+  "controller.animation.siege_b.tolling_shade.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.frost_stag.swing": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "swinging": "variable.attack_time > 0"
+      }
+     ]
+    },
+    "swinging": {
+     "animations": [
+      "attack"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished"
+      }
+     ],
+     "blend_transition": 0.1
+    }
+   }
+  },
+  "controller.animation.siege_b.frost_stag.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.rimewolf.swing": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "swinging": "variable.attack_time > 0"
+      }
+     ]
+    },
+    "swinging": {
+     "animations": [
+      "attack"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished"
+      }
+     ],
+     "blend_transition": 0.1
+    }
+   }
+  },
+  "controller.animation.siege_b.rimewolf.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.brine_lurker.swing": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "swinging": "variable.attack_time > 0"
+      }
+     ]
+    },
+    "swinging": {
+     "animations": [
+      "attack"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished"
+      }
+     ],
+     "blend_transition": 0.1
+    }
+   }
+  },
+  "controller.animation.siege_b.brine_lurker.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.ash_scarab.swing": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "swinging": "variable.attack_time > 0"
+      }
+     ]
+    },
+    "swinging": {
+     "animations": [
+      "attack"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished"
+      }
+     ],
+     "blend_transition": 0.1
+    }
+   }
+  },
+  "controller.animation.siege_b.ash_scarab.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.dune_wyrm.swing": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "swinging": "variable.attack_time > 0"
+      }
+     ]
+    },
+    "swinging": {
+     "animations": [
+      "attack"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished"
+      }
+     ],
+     "blend_transition": 0.1
+    }
+   }
+  },
+  "controller.animation.siege_b.dune_wyrm.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.bog_hag.ready": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "aiming": "query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    },
+    "aiming": {
+     "animations": [
+      "aim"
+     ],
+     "transitions": [
+      {
+       "default": "!query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    }
+   }
+  },
+  "controller.animation.siege_b.bog_hag.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.mire_toad.swing": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "swinging": "variable.attack_time > 0"
+      }
+     ]
+    },
+    "swinging": {
+     "animations": [
+      "attack"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished"
+      }
+     ],
+     "blend_transition": 0.1
+    }
+   }
+  },
+  "controller.animation.siege_b.mire_toad.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.barrow_wight.swing": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "swinging": "variable.attack_time > 0"
+      }
+     ]
+    },
+    "swinging": {
+     "animations": [
+      "attack"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished"
+      }
+     ],
+     "blend_transition": 0.1
+    }
+   }
+  },
+  "controller.animation.siege_b.barrow_wight.ready": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "aiming": "query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    },
+    "aiming": {
+     "animations": [
+      "aim"
+     ],
+     "transitions": [
+      {
+       "default": "!query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    }
+   }
+  },
+  "controller.animation.siege_b.barrow_wight.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.ashen_squire.swing": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "swinging": "variable.attack_time > 0"
+      }
+     ]
+    },
+    "swinging": {
+     "animations": [
+      "attack"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished"
+      }
+     ],
+     "blend_transition": 0.1
+    }
+   }
+  },
+  "controller.animation.siege_b.ashen_squire.ready": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "aiming": "query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    },
+    "aiming": {
+     "animations": [
+      "aim"
+     ],
+     "transitions": [
+      {
+       "default": "!query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    }
+   }
+  },
+  "controller.animation.siege_b.ashen_squire.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.ashen_knight.swing": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "swinging": "variable.attack_time > 0"
+      }
+     ]
+    },
+    "swinging": {
+     "animations": [
+      "attack"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished"
+      }
+     ],
+     "blend_transition": 0.1
+    }
+   }
+  },
+  "controller.animation.siege_b.ashen_knight.ready": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "aiming": "query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    },
+    "aiming": {
+     "animations": [
+      "aim"
+     ],
+     "transitions": [
+      {
+       "default": "!query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    }
+   }
+  },
+  "controller.animation.siege_b.ashen_knight.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.inquisitor.ready": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "aiming": "query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    },
+    "aiming": {
+     "animations": [
+      "aim"
+     ],
+     "transitions": [
+      {
+       "default": "!query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    }
+   }
+  },
+  "controller.animation.siege_b.inquisitor.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.clockwork_reeve.swing": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "swinging": "variable.attack_time > 0"
+      }
+     ]
+    },
+    "swinging": {
+     "animations": [
+      "attack"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished"
+      }
+     ],
+     "blend_transition": 0.1
+    }
+   }
+  },
+  "controller.animation.siege_b.clockwork_reeve.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.reeve_cog.swing": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "swinging": "variable.attack_time > 0"
+      }
+     ]
+    },
+    "swinging": {
+     "animations": [
+      "attack"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished"
+      }
+     ],
+     "blend_transition": 0.1
+    }
+   }
+  },
+  "controller.animation.siege_b.reeve_cog.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.pale_huntsman.ready": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "aiming": "query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    },
+    "aiming": {
+     "animations": [
+      "aim"
+     ],
+     "transitions": [
+      {
+       "default": "!query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    }
+   }
+  },
+  "controller.animation.siege_b.pale_huntsman.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.drowned_bride.swing": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "swinging": "variable.attack_time > 0"
+      }
+     ]
+    },
+    "swinging": {
+     "animations": [
+      "attack"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished"
+      }
+     ],
+     "blend_transition": 0.1
+    }
+   }
+  },
+  "controller.animation.siege_b.drowned_bride.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.ash_seneschal.swing": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "swinging": "variable.attack_time > 0"
+      }
+     ]
+    },
+    "swinging": {
+     "animations": [
+      "attack"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished"
+      }
+     ],
+     "blend_transition": 0.1
+    }
+   }
+  },
+  "controller.animation.siege_b.ash_seneschal.ready": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "aiming": "query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    },
+    "aiming": {
+     "animations": [
+      "aim"
+     ],
+     "transitions": [
+      {
+       "default": "!query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    }
+   }
+  },
+  "controller.animation.siege_b.ash_seneschal.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.mother_of_changelings.swing": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "swinging": "variable.attack_time > 0"
+      }
+     ]
+    },
+    "swinging": {
+     "animations": [
+      "attack"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished"
+      }
+     ],
+     "blend_transition": 0.1
+    }
+   }
+  },
+  "controller.animation.siege_b.mother_of_changelings.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.mother_echo.swing": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "swinging": "variable.attack_time > 0"
+      }
+     ]
+    },
+    "swinging": {
+     "animations": [
+      "attack"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished"
+      }
+     ],
+     "blend_transition": 0.1
+    }
+   }
+  },
+  "controller.animation.siege_b.mother_echo.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.warlord_king.swing": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "swinging": "variable.attack_time > 0"
+      }
+     ]
+    },
+    "swinging": {
+     "animations": [
+      "attack"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished"
+      }
+     ],
+     "blend_transition": 0.1
+    }
+   }
+  },
+  "controller.animation.siege_b.warlord_king.ready": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "aiming": "query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    },
+    "aiming": {
+     "animations": [
+      "aim"
+     ],
+     "transitions": [
+      {
+       "default": "!query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    }
+   }
+  },
+  "controller.animation.siege_b.warlord_king.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.pretender_blade.swing": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "swinging": "variable.attack_time > 0"
+      }
+     ]
+    },
+    "swinging": {
+     "animations": [
+      "attack"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished"
+      }
+     ],
+     "blend_transition": 0.1
+    }
+   }
+  },
+  "controller.animation.siege_b.pretender_blade.ready": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "aiming": "query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    },
+    "aiming": {
+     "animations": [
+      "aim"
+     ],
+     "transitions": [
+      {
+       "default": "!query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    }
+   }
+  },
+  "controller.animation.siege_b.pretender_blade.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.pretender_seer.swing": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "swinging": "variable.attack_time > 0"
+      }
+     ]
+    },
+    "swinging": {
+     "animations": [
+      "attack"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished"
+      }
+     ],
+     "blend_transition": 0.1
+    }
+   }
+  },
+  "controller.animation.siege_b.pretender_seer.ready": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "aiming": "query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    },
+    "aiming": {
+     "animations": [
+      "aim"
+     ],
+     "transitions": [
+      {
+       "default": "!query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    }
+   }
+  },
+  "controller.animation.siege_b.pretender_seer.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.pretender_brute.swing": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "swinging": "variable.attack_time > 0"
+      }
+     ]
+    },
+    "swinging": {
+     "animations": [
+      "attack"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished"
+      }
+     ],
+     "blend_transition": 0.1
+    }
+   }
+  },
+  "controller.animation.siege_b.pretender_brute.ready": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "aiming": "query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    },
+    "aiming": {
+     "animations": [
+      "aim"
+     ],
+     "transitions": [
+      {
+       "default": "!query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    }
+   }
+  },
+  "controller.animation.siege_b.pretender_brute.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.oswin_the_last.swing": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "swinging": "variable.attack_time > 0"
+      }
+     ]
+    },
+    "swinging": {
+     "animations": [
+      "attack"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished"
+      }
+     ],
+     "blend_transition": 0.1
+    }
+   }
+  },
+  "controller.animation.siege_b.oswin_the_last.ready": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "aiming": "query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    },
+    "aiming": {
+     "animations": [
+      "aim"
+     ],
+     "transitions": [
+      {
+       "default": "!query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    }
+   }
+  },
+  "controller.animation.siege_b.oswin_the_last.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.oswin_reflection.swing": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "swinging": "variable.attack_time > 0"
+      }
+     ]
+    },
+    "swinging": {
+     "animations": [
+      "attack"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished"
+      }
+     ],
+     "blend_transition": 0.1
+    }
+   }
+  },
+  "controller.animation.siege_b.oswin_reflection.ready": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "aiming": "query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    },
+    "aiming": {
+     "animations": [
+      "aim"
+     ],
+     "transitions": [
+      {
+       "default": "!query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    }
+   }
+  },
+  "controller.animation.siege_b.oswin_reflection.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.grey_axeman.swing": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "swinging": "variable.attack_time > 0"
+      }
+     ]
+    },
+    "swinging": {
+     "animations": [
+      "attack"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished"
+      }
+     ],
+     "blend_transition": 0.1
+    }
+   }
+  },
+  "controller.animation.siege_b.grey_axeman.ready": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "aiming": "query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    },
+    "aiming": {
+     "animations": [
+      "aim"
+     ],
+     "transitions": [
+      {
+       "default": "!query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    }
+   }
+  },
+  "controller.animation.siege_b.grey_axeman.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.grey_bellcutter.swing": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "swinging": "variable.attack_time > 0"
+      }
+     ]
+    },
+    "swinging": {
+     "animations": [
+      "attack"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished"
+      }
+     ],
+     "blend_transition": 0.1
+    }
+   }
+  },
+  "controller.animation.siege_b.grey_bellcutter.ready": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "aiming": "query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    },
+    "aiming": {
+     "animations": [
+      "aim"
+     ],
+     "transitions": [
+      {
+       "default": "!query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    }
+   }
+  },
+  "controller.animation.siege_b.grey_bellcutter.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.grey_spearman.swing": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "swinging": "variable.attack_time > 0"
+      }
+     ]
+    },
+    "swinging": {
+     "animations": [
+      "attack"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished"
+      }
+     ],
+     "blend_transition": 0.1
+    }
+   }
+  },
+  "controller.animation.siege_b.grey_spearman.ready": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "aiming": "query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    },
+    "aiming": {
+     "animations": [
+      "aim"
+     ],
+     "transitions": [
+      {
+       "default": "!query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    }
+   }
+  },
+  "controller.animation.siege_b.grey_spearman.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.grey_bowman.ready": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "aiming": "query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    },
+    "aiming": {
+     "animations": [
+      "aim"
+     ],
+     "transitions": [
+      {
+       "default": "!query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    }
+   }
+  },
+  "controller.animation.siege_b.grey_bowman.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.grey_serjeant.swing": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "swinging": "variable.attack_time > 0"
+      }
+     ]
+    },
+    "swinging": {
+     "animations": [
+      "attack"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished"
+      }
+     ],
+     "blend_transition": 0.1
+    }
+   }
+  },
+  "controller.animation.siege_b.grey_serjeant.ready": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "aiming": "query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    },
+    "aiming": {
+     "animations": [
+      "aim"
+     ],
+     "transitions": [
+      {
+       "default": "!query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    }
+   }
+  },
+  "controller.animation.siege_b.grey_serjeant.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.veinsworn.swing": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "swinging": "variable.attack_time > 0"
+      }
+     ]
+    },
+    "swinging": {
+     "animations": [
+      "attack"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished"
+      }
+     ],
+     "blend_transition": 0.1
+    }
+   }
+  },
+  "controller.animation.siege_b.veinsworn.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.shardcaster.swing": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "swinging": "variable.attack_time > 0"
+      }
+     ]
+    },
+    "swinging": {
+     "animations": [
+      "attack"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished"
+      }
+     ],
+     "blend_transition": 0.1
+    }
+   }
+  },
+  "controller.animation.siege_b.shardcaster.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.gatebreaker.swing": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "swinging": "variable.attack_time > 0"
+      }
+     ]
+    },
+    "swinging": {
+     "animations": [
+      "attack"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished"
+      }
+     ],
+     "blend_transition": 0.1
+    }
+   }
+  },
+  "controller.animation.siege_b.gatebreaker.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.hollow_warlord.swing": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "swinging": "variable.attack_time > 0"
+      }
+     ]
+    },
+    "swinging": {
+     "animations": [
+      "attack"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished"
+      }
+     ],
+     "blend_transition": 0.1
+    }
+   }
+  },
+  "controller.animation.siege_b.hollow_warlord.ready": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "aiming": "query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    },
+    "aiming": {
+     "animations": [
+      "aim"
+     ],
+     "transitions": [
+      {
+       "default": "!query.has_target"
+      }
+     ],
+     "blend_transition": 0.25
+    }
+   }
+  },
+  "controller.animation.siege_b.hollow_warlord.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.champion_knight.swing": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "swinging": "variable.attack_time > 0"
+      }
+     ]
+    },
+    "swinging": {
+     "animations": [
+      "attack"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished"
+      }
+     ],
+     "blend_transition": 0.1
+    }
+   }
+  },
+  "controller.animation.siege_b.champion_knight.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.champion_sorcerer.swing": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "swinging": "variable.attack_time > 0"
+      }
+     ]
+    },
+    "swinging": {
+     "animations": [
+      "attack"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished"
+      }
+     ],
+     "blend_transition": 0.1
+    }
+   }
+  },
+  "controller.animation.siege_b.champion_sorcerer.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.champion_lord.swing": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "swinging": "variable.attack_time > 0"
+      }
+     ]
+    },
+    "swinging": {
+     "animations": [
+      "attack"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished"
+      }
+     ],
+     "blend_transition": 0.1
+    }
+   }
+  },
+  "controller.animation.siege_b.champion_lord.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  },
+  "controller.animation.siege_b.champion_retainer.swing": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "swinging": "variable.attack_time > 0"
+      }
+     ]
+    },
+    "swinging": {
+     "animations": [
+      "attack"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished"
+      }
+     ],
+     "blend_transition": 0.1
+    }
+   }
+  },
+  "controller.animation.siege_b.champion_retainer.flinch": {
+   "initial_state": "default",
+   "states": {
+    "default": {
+     "transitions": [
+      {
+       "flinching": "query.hurt_time > 0"
+      }
+     ]
+    },
+    "flinching": {
+     "animations": [
+      "hurt"
+     ],
+     "transitions": [
+      {
+       "default": "query.all_animations_finished && query.hurt_time <= 0"
+      }
+     ]
+    }
+   }
+  }
+ }
+}

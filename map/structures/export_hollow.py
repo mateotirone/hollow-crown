@@ -54,6 +54,19 @@ def main():
     print("wrote", os.path.normpath(dest), round(len(js) / 1e3), "KB")
     # the centre sites (with the air they dig: pits, doorways) and the drowned city's towers
     sites = {sid: export(make(), air=True) for sid, make in HK.SITE_BUILDERS.items()}
+    # Rebuilt sites carry a version and the cells their first version stood on that the new one leaves
+    # empty (hollow_sites_v1.json, frozen): a world that built the old look clears those and stamps again.
+    v1 = json.load(open(os.path.join(HERE, "hollow_sites_v1.json")))
+    for sid, ver in HK.SITE_VERSION.items():
+        d = sites[sid]; idx = {}
+        for y, z, x0, n, i in d["rows"]:
+            for x in range(x0, x0 + n): idx[(x, y, z)] = i
+        gone = sorted({(y, z, x) for x, y, z in v1.get(sid, []) if (x, y, z) not in idx})
+        rows = []
+        for y, z, x in gone:
+            if rows and rows[-1][0] == y and rows[-1][1] == z and rows[-1][2] + rows[-1][3] == x: rows[-1][3] += 1
+            else: rows.append([y, z, x, 1])
+        d["v"] = ver; d["clear"] = rows
     towers = [export(HK.leaning_tower(*t)) for t in HK.TOWERS]
     for sid, d in sites.items(): print(sid, "cells", sum(r[3] for r in d["rows"]), "box", d["box"])
     dest = os.path.join(HERE, "..", "..", "Siege_Nights_BP", "scripts", "undertow", "sites_data.js")

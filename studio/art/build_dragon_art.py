@@ -55,23 +55,7 @@ for y in range(16):
         elif d < 4.6: t.set(x, y, R(M['coal'], 2))
 for (x, y, k) in [(6, 6, 4), (8, 7, 5), (9, 9, 3), (6, 9, 2), (7, 8, 4), (9, 6, 2), (5, 8, 3), (8, 10, 4)]: t.set(x, y, R(M['ember'], k))
 t.save(RPT + 'blocks/dragons/siege_dragon_roost_top.png')
-# Nest: wild straw, bone and sandstone; top shows a dark red egg
-t = hay(83)
-for y in range(11, 16):
-    for x in range(16): t.set(x, y, R(SAND, (2 if y > 11 else 4) - ((x + y * 3) % 6 == 0) - (y == 15)))
-for (a, b) in [((1, 4), (6, 6)), ((9, 8), (14, 5))]:
-    for (x, y) in line(a, b): t.set(x, y, R(BONE, 4)); t.set(x, y + 1, R(BONE, 1))
-for (x, y) in [(1, 3), (0, 4), (14, 4), (15, 5)]: t.set(x, y, R(BONE, 5))
-t.save(RPT + 'blocks/dragons/siege_dragon_nest_side.png')
-t = hay(84)
-for y in range(16):
-    for x in range(16):
-        dx, dy = (x - 7.5) / 3.4, (y - 7.5) / 4.4; d = dx * dx + dy * dy
-        if d < 1: t.set(x, y, R(EGG, 3 - (dx > 0.3) - (dy > 0.3) + (dx < -0.3 and dy < -0.2) - ((x + y) % 3 == 0 and d > 0.2)))
-        elif d < 1.5: t.set(x, y, R(HAY, 0))
-for (a, b) in [((0, 2), (4, 0)), ((12, 15), (15, 12))]:
-    for (x, y) in line(a, b): t.set(x, y, R(BONE, 4))
-t.save(RPT + 'blocks/dragons/siege_dragon_nest_top.png')
+# The Dragon Nest is a 9x9 model now: studio/build_dragon_nest.py paints its textures
 print('dragon art done')
 
 # ---- Train Carriage (model by the rails thread): 64x64 atlas of 16x16 swatches + item icon

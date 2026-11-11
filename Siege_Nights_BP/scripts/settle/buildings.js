@@ -264,5 +264,12 @@ export function drawBuilding(id, styleId) {
   return plans.get(key);
 }
 
+// Lay a region's designed build (one entry of a *_data.js table) into a Plan; its blocks become roles on the plan's style
+export function drawDesigned(p, d, prefix) {
+  d.palette.forEach(([bid], i) => { p.style.roles[`${prefix}:${i}`] = [bid]; });
+  drawData(p, d, prefix);
+  return p;
+}
+
 // The drawing pieces, for other features that design their own buildings (horses/barn.js)
 export const pieces = { floor, walls, hollow, door, roof, hang, stair };

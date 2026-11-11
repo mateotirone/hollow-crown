@@ -1,0 +1,134 @@
+{
+  "format_version": "1.21.90",
+  "minecraft:block": {
+    "description": {
+      "identifier": "hc:nest_lining",
+      "menu_category": {
+        "category": "nature"
+      },
+      "states": {
+        "hc:v": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "hc:turn": [
+          0,
+          1,
+          2,
+          3
+        ]
+      }
+    },
+    "components": {
+      "minecraft:display_name": "tile.hc:nest_lining.name",
+      "minecraft:geometry": {
+        "identifier": "geometry.hc_nest_lining",
+        "bone_visibility": {
+          "deco_bone": "q.block_state('hc:v') == 1",
+          "deco_ribs": "q.block_state('hc:v') == 2",
+          "deco_skull": "q.block_state('hc:v') == 3",
+          "deco_scales": "q.block_state('hc:v') == 4"
+        }
+      },
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "hc_nest_branch",
+          "render_method": "opaque"
+        },
+        "straw": {
+          "texture": "hc_nest_straw",
+          "render_method": "opaque"
+        },
+        "bone": {
+          "texture": "hc_nest_bone",
+          "render_method": "opaque"
+        },
+        "char": {
+          "texture": "hc_nest_branch_char",
+          "render_method": "opaque"
+        },
+        "scale": {
+          "texture": "hc_nest_scale",
+          "render_method": "opaque"
+        },
+        "egg": {
+          "texture": "hc_nest_egg",
+          "render_method": "opaque"
+        }
+      },
+      "minecraft:collision_box": {
+        "origin": [
+          -8,
+          0,
+          -8
+        ],
+        "size": [
+          16,
+          2,
+          16
+        ]
+      },
+      "minecraft:selection_box": {
+        "origin": [
+          -8,
+          0,
+          -8
+        ],
+        "size": [
+          16,
+          16,
+          16
+        ]
+      },
+      "minecraft:map_color": "#b8944e",
+      "minecraft:destructible_by_mining": false,
+      "minecraft:destructible_by_explosion": false,
+      "minecraft:flammable": {
+        "catch_chance_modifier": 0,
+        "destroy_chance_modifier": 0
+      },
+      "minecraft:light_dampening": 0
+    },
+    "permutations": [
+      {
+        "condition": "q.block_state('hc:turn') == 1",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              90,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('hc:turn') == 2",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              180,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('hc:turn') == 3",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              270,
+              0
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

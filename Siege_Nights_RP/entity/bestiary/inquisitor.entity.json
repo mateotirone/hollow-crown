@@ -13,11 +13,21 @@
     "default": "geometry.siege_b.inquisitor"
    },
    "animations": {
-    "main": "animation.siege_b.inquisitor"
+    "base": "animation.siege_b.inquisitor",
+    "idle": "animation.siege_b.inquisitor.idle",
+    "walk": "animation.siege_b.inquisitor.walk",
+    "aim": "animation.siege_b.inquisitor.aim",
+    "ready": "controller.animation.siege_b.inquisitor.ready",
+    "hurt": "animation.siege_b.inquisitor.hurt",
+    "flinch": "controller.animation.siege_b.inquisitor.flinch"
    },
    "scripts": {
     "animate": [
-     "main"
+     "base",
+     "idle",
+     "walk",
+     "ready",
+     "flinch"
     ]
    },
    "render_controllers": [

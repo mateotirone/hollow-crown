@@ -9,7 +9,12 @@
       }
     },
     "components": {
-      "minecraft:icon": "siege_guard_saltreach_chestplate",
+      "minecraft:icon": {
+        "textures": {
+          "default": "siege_guard_saltreach_chestplate",
+          "dyed": "siege_guard_saltreach_chestplate_dyed"
+        }
+      },
       "minecraft:display_name": {
         "value": "item.siege:guard_saltreach_chestplate.name"
       },

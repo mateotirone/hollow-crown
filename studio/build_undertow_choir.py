@@ -30,18 +30,21 @@ def behavior(name, hp, w, h, families, boss):
         "minecraft:experience_reward": {"on_death": "query.last_hit_by_player ? %d : 0" % (500 if boss else 20)},
     }
     if boss:
-        comp["minecraft:boss"] = {"should_darken_sky": False, "hud_range": 64}
+        comp["minecraft:boss"] = {"name": "The Choir", "should_darken_sky": False, "hud_range": 64}  # "name" is the bar title (else "Unknown")
     return {"format_version": "1.21.60", "minecraft:entity": {
         "description": {"identifier": f"siege:{name}", "is_spawnable": False, "is_summonable": True, "is_experimental": False},
         "component_groups": {}, "components": comp, "events": {}}}
 
 def client(name):
-    return {"format_version": "1.10.0", "minecraft:client_entity": {"description": {
+    # animations (idle, the Conductor's attack poses) come from studio/bestiary/anims.py
+    import sys; sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "bestiary"))
+    import anims
+    return anims.choir_client(name, {"format_version": "1.10.0", "minecraft:client_entity": {"description": {
         "identifier": f"siege:{name}",
         "materials": {"default": "entity_alphatest"},
         "textures": {"default": f"textures/entity/siege/undertow/{name}"},
         "geometry": {"default": f"geometry.siege_u.{name}"},
-        "render_controllers": ["controller.render.siege_bestiary"]}}}
+        "render_controllers": ["controller.render.siege_bestiary"]}}})
 
 def cube(origin, size, uv, inflate=0):
     c = {"origin": origin, "size": size, "uv": uv}
@@ -106,7 +109,7 @@ if __name__ == "__main__":
     write_json(f"{RP}/models/entity/undertow/choir_singer.geo.json", geo("choir_singer", SINGER, 2, 3))
     # The NPC ruler of the Hollow: a Sorcerer in a dark robe wearing the Hollow Crown. Stands still; players talk to it.
     reg = behavior("hollow_regent", 300, 0.8, 2.4, ["npc", "mob", "hollow", "siege_hollow_regent"], False)
-    reg["minecraft:entity"]["components"]["minecraft:boss"] = {"should_darken_sky": False, "hud_range": 24}
+    reg["minecraft:entity"]["components"]["minecraft:boss"] = {"name": "The Hollow Crown", "should_darken_sky": False, "hud_range": 24}
     write_json(f"{BP}/entities/undertow/hollow_regent.json", reg)
     write_json(f"{RP}/entity/undertow/hollow_regent.entity.json", client("hollow_regent"))
     regent_bones = json.loads(json.dumps(SINGER))

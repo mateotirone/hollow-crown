@@ -9,7 +9,12 @@
       }
     },
     "components": {
-      "minecraft:icon": "siege_guard_frostmarch_boots",
+      "minecraft:icon": {
+        "textures": {
+          "default": "siege_guard_frostmarch_boots",
+          "dyed": "siege_guard_frostmarch_boots_dyed"
+        }
+      },
       "minecraft:display_name": {
         "value": "item.siege:guard_frostmarch_boots.name"
       },

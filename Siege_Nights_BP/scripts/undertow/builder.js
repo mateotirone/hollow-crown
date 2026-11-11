@@ -4,7 +4,7 @@
 
 import { world, BlockVolume, BlockPermutation } from "@minecraft/server";
 import { UNDERTOW_ID, UNDERTOW_LAYOUT as L, COURT, HEART, pathX } from "./layout.js";
-import { planChunk, chunkInRange, heightAt, B } from "./terrain.js";
+import { planChunk, chunkInRange, heightAt, B, ROOF } from "./terrain.js";
 import { planCrack, placeCells } from "./rift.js";
 import { SEAL_RIVER_X } from "./rivers.js";
 import { SITES } from "./roads.js";
@@ -16,8 +16,12 @@ import { stamp } from "./stamp.js";
 import { load, save } from "./data.js";
 import { sfx } from "../core/sfx.js";
 
-const K_BUILT = "hc:undertow_built2"; // hex bitset of finished chunks
-const K_PIECES = "hc:undertow_pieces"; // { wound, court, heart, waystones: [..] }
+const K_BUILT = "hc:undertow_built3"; // hex bitset of finished chunks
+// Chunks finished by an older generator (before the roof, the new trees and ground, 2026-11-11). They
+// are cleared from the ground up and built again the new way when someone comes near.
+const K_BUILT_OLD = "hc:undertow_built2";
+const K_PIECES = "hc:undertow_pieces2"; // { wound, court, heart, waystones: [..] }
+const K_PIECES_OLD = "hc:undertow_pieces"; // the armour stands of the Standing Ranks carry over (they are entities)
 const CX_MIN = -44, CX_MAX = 43, CZ_MIN = -3, CZ_MAX = 153;
 const ROW = CZ_MAX - CZ_MIN + 1;
 const OPS_PER_TICK = 250;
@@ -26,13 +30,34 @@ const RADIUS = 3; // chunks around each player (Realms only keep 4 loaded)
 export const WAYSTONE = "siege:waystone";
 export const SEAL = "siege:court_seal";
 
-let bits; // Uint8Array
+let bits, oldBits; // Uint8Array
 let dirty = false;
-function loadBits() {
+const readBits = (key) => {
   const n = Math.ceil(((CX_MAX - CX_MIN + 1) * ROW) / 8);
-  bits = new Uint8Array(n);
-  const hex = load(K_BUILT, "");
-  for (let i = 0; i < n && i * 2 < hex.length; i++) bits[i] = parseInt(hex.substr(i * 2, 2), 16) || 0;
+  const out = new Uint8Array(n);
+  const hex = load(key, "");
+  for (let i = 0; i < n && i * 2 < hex.length; i++) out[i] = parseInt(hex.substr(i * 2, 2), 16) || 0;
+  return out;
+};
+function loadBits() {
+  bits = readBits(K_BUILT);
+  oldBits = readBits(K_BUILT_OLD);
+}
+// True if this chunk still holds the old generator's land (so it must be cleared before building).
+function builtOld(cx, cz) {
+  if (!bits) loadBits();
+  if (cx < CX_MIN || cx > CX_MAX || cz < CZ_MIN || cz > CZ_MAX) return false;
+  const i = idx(cx, cz);
+  return (oldBits[i >> 3] >> (i & 7)) & 1;
+}
+// Clearing ops for an old chunk: air from its lowest ground up to the roof (two fills, each under the
+// game's 32,768-block limit). The new plan fills every column back from that height.
+export function clearOps(cx, cz, lowest) {
+  const X0 = cx * 16, Z0 = cz * 16, y0 = Math.max(L.floorY, lowest), y2 = ROOF.top, mid = Math.floor((y0 + y2) / 2);
+  return [
+    { a: [X0, y0, Z0], b: [X0 + 15, mid, Z0 + 15], block: "minecraft:air" },
+    { a: [X0, mid + 1, Z0], b: [X0 + 15, y2, Z0 + 15], block: "minecraft:air" },
+  ];
 }
 const idx = (cx, cz) => (cx - CX_MIN) * ROW + (cz - CZ_MIN);
 export function isBuilt(cx, cz) {
@@ -52,27 +77,47 @@ function flushBits() {
   dirty = false;
 }
 
-export const pieces = () => load(K_PIECES, { wound: false, court: false, heart: false, waystones: [] });
+export const pieces = () => load(K_PIECES, undefined) ?? { wound: false, court: false, heart: false, waystones: [], ranks: !!load(K_PIECES_OLD, {}).ranks };
 const savePieces = (p) => save(K_PIECES, p);
 
 const dim = () => world.getDimension(UNDERTOW_ID);
 
-// Apply one fill op. Returns false if its area isn't loaded (try again later).
+// Block states resolved once each (trees use a few dozen).
+const perms = new Map();
+function permOf(block, states) {
+  const key = block + JSON.stringify(states);
+  if (!perms.has(key)) {
+    let perm;
+    try { perm = BlockPermutation.resolve(block, states); } catch { perm = null; }
+    perms.set(key, perm);
+  }
+  return perms.get(key);
+}
+
+// Apply one fill op. Returns false if its area isn't loaded (try again later). An op marked optional
+// (a light block, a tree, an amethyst drip) never holds a chunk up: if it fails, it is skipped.
 function apply(d, op) {
+  const [x1, y1, z1] = op.a, [x2, y2, z2] = op.b;
+  if (op.optional) {
+    // Only skip a failure in a loaded area: an unloaded one is tried again later like any other op.
+    let at;
+    try { at = d.getBlock({ x: x1, y: y1, z: z1 }); } catch { return false; }
+    if (!at) return false;
+    if (op.ifAir && !at.isAir) return true; // a light never replaces something already built there
+  }
   try {
-    const [x1, y1, z1] = op.a, [x2, y2, z2] = op.b;
-    if (op.states) {
-      // A single block that must face a certain way (an amethyst growth pointing up). If the game
-      // does not know the state, place the plain block rather than stalling the chunk.
-      let perm;
-      try { perm = BlockPermutation.resolve(op.block, op.states); } catch { perm = undefined; }
-      if (perm) d.setBlockPermutation({ x: x1, y: y1, z: z1 }, perm);
-      else d.setBlockType({ x: x1, y: y1, z: z1 }, op.block);
-    } else if (x1 === x2 && y1 === y2 && z1 === z2) d.setBlockType({ x: x1, y: y1, z: z1 }, op.block);
+    const one = x1 === x2 && y1 === y2 && z1 === z2;
+    // Blocks with states (an amethyst growth pointing up, a tree's stairs). If the game does not know
+    // the state, place the plain block rather than stalling the chunk.
+    const perm = op.states ? permOf(op.block, op.states) : null;
+    if (perm) {
+      if (one) d.setBlockPermutation({ x: x1, y: y1, z: z1 }, perm);
+      else d.fillBlocks(new BlockVolume({ x: x1, y: y1, z: z1 }, { x: x2, y: y2, z: z2 }), perm);
+    } else if (one) d.setBlockType({ x: x1, y: y1, z: z1 }, op.block);
     else d.fillBlocks(new BlockVolume({ x: x1, y: y1, z: z1 }, { x: x2, y: y2, z: z2 }), op.block);
     return true;
   } catch {
-    return false;
+    return !!op.optional;
   }
 }
 
@@ -101,7 +146,11 @@ export function buildTick(players) {
   const d = dim();
   if (!job) {
     const next = nextChunk(players);
-    if (next) job = { cx: next[0], cz: next[1], ops: planChunk(next[0], next[1]), i: 0 };
+    if (next) {
+      const ops = planChunk(next[0], next[1]);
+      if (builtOld(next[0], next[1])) ops.unshift(...clearOps(next[0], next[1], lowestGround(next[0], next[1])));
+      job = { cx: next[0], cz: next[1], ops, i: 0 };
+    }
   }
   if (job) {
     let budget = OPS_PER_TICK;
@@ -117,6 +166,17 @@ export function buildTick(players) {
 }
 
 export function flush() { flushBits(); }
+
+// The lowest ground in a chunk (where clearing an old chunk starts).
+function lowestGround(cx, cz) {
+  let low = Infinity;
+  for (let i = 0; i < 16; i += 3) for (let j = 0; j < 16; j += 3) {
+    const h = heightAt(cx * 16 + i, cz * 16 + j);
+    if (h !== null) low = Math.min(low, h);
+  }
+  for (const [i, j] of [[15, 15], [15, 0], [0, 15]]) { const h = heightAt(cx * 16 + i, cz * 16 + j); if (h !== null) low = Math.min(low, h); }
+  return low === Infinity ? L.floorY : low - 1;
+}
 
 // ---- set pieces ---------------------------------------------------------------------------
 
@@ -176,11 +236,19 @@ export function piecesTick() {
   }
 
   // What stands at each hand-designed place, once its ground is built.
+  // A site whose design has a newer version than the one this world built is stamped again over the old look.
   for (const id of STRUCTURE_IDS) {
-    if ((p.sites ?? []).includes(id)) continue;
+    const built = (p.sites ?? []).includes(id), design = SITE_DESIGNS[id];
+    if (built && !siteOutdated(p, id)) continue;
     const s = SITES.find((x) => x.id === id), reach = s.r + 4;
     if (!chunksBuilt(s.x - reach, s.z - reach, s.x + reach, s.z + reach)) continue;
-    if (SITE_DESIGNS[id]) { stampOnce(d, `site:${id}`, SITE_DESIGNS[id], s, (q) => { q.sites = [...(q.sites ?? []), id]; }); continue; }
+    if (design) {
+      stampOnce(d, `site:${id}`, built ? withClearing(design) : design, s, (q) => {
+        q.sites = [...new Set([...(q.sites ?? []), id])];
+        if (design.v) q.siteV = { ...(q.siteV ?? {}), [id]: design.v };
+      });
+      continue;
+    }
     if (fillAll(d, planStructure(id))) { p.sites = [...(p.sites ?? []), id]; changed = true; }
   }
 
@@ -200,6 +268,19 @@ export function piecesTick() {
     if (buildHeart(d)) { p.heart = true; changed = true; }
   }
   if (changed) savePieces(p);
+}
+
+// True when this world built an older version of a site's design (no saved version means version 1).
+export function siteOutdated(p, id) {
+  const v = SITE_DESIGNS[id]?.v;
+  return !!v && (p.siteV?.[id] ?? 1) < v;
+}
+
+// A rebuilt design plus air on every cell its first version stood on that the new one leaves empty.
+export function withClearing(design) {
+  if (!design.clear?.length) return design;
+  const air = design.palette.length;
+  return { palette: [...design.palette, ["minecraft:air", {}]], rows: [...design.clear.map(([y, z, x0, n]) => [y, z, x0, n, air]), ...design.rows] };
 }
 
 // Designed buildings (map/structures/hollow_kit.py) go down a block a tick; each is marked done in the
@@ -261,14 +342,14 @@ function buildCourt(d) {
   return fillAll(d, ops);
 }
 
-export function openCourtGate() {
+export function openCourtGate(silent = false) {
   const { x: cx } = COURT.center, f = COURT.floorY;
   const d = dim();
   apply(d, { a: [cx - 3, f, COURT.gateZ], b: [cx + 3, f + 8, COURT.gateZ], block: "minecraft:air" });
   // The water gate where the light river runs through the wall (only if that part is built yet;
   // riverGateTick opens it later otherwise).
   openRiverGate();
-  try { sfx(d, "block.end_portal.spawn", { x: cx, y: f + 2, z: COURT.gateZ }, { volume: 2, pitch: 0.6 }); } catch {}
+  if (!silent) try { sfx(d, "block.end_portal.spawn", { x: cx, y: f + 2, z: COURT.gateZ }, { volume: 2, pitch: 0.6 }); } catch {}
 }
 
 // The river's way through the sealed wall. Safe to call again and again.
