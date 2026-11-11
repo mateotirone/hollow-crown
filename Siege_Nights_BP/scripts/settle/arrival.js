@@ -21,28 +21,14 @@ import { wallOf, raiseWall, bearingFor } from "./walls.js";
 const OVERWORLD = "minecraft:overworld";
 const SOFT = /(air|water|grass(?!_block|_path)|fern|flower|snow_layer|leaves|vine|bush|sapling|tallgrass|dandelion|poppy|mushroom|_log$|deadbush)/;
 
-const SIGN = /_sign$/; // minecraft:standing_sign, spruce_standing_sign ...
-
-// The y just above real ground. Our own signposts don't count as ground, or every new lay-out would
-// stand a fresh sign on top of the last one (the stacked signs of the 2026-11-11 playtest).
 function standY(dim, x, z) {
   try {
     let block = dim.getTopmostBlock({ x, z });
-    for (let i = 0; block && i < 60 && (SOFT.test(block.typeId) || SIGN.test(block.typeId)); i++) block = block.below();
+    for (let i = 0; block && i < 40 && SOFT.test(block.typeId); i++) block = block.below();
     return block ? block.location.y + 1 : undefined;
   } catch {
     return undefined;
   }
-}
-
-// Signs piled on top of the one at `at` (left by older versions) come down
-function clearStack(dim, at) {
-  for (let y = at.y + 1, i = 0; i < 40; y++, i++) {
-    const above = dim.getBlock({ x: at.x, y, z: at.z });
-    if (!above || !SIGN.test(above.typeId)) return i;
-    above.setType("minecraft:air");
-  }
-  return 40;
 }
 
 function signpost(dim, at, text) {
@@ -50,17 +36,29 @@ function signpost(dim, at, text) {
     const below = dim.getBlock({ x: at.x, y: at.y - 1, z: at.z });
     if (below?.typeId === "minecraft:standing_sign") return below.getComponent("minecraft:sign")?.setText(text); // laid out before
     const block = dim.getBlock(at);
-    if (!block) return;
-    if (SIGN.test(block.typeId)) clearStack(dim, at); // already signposted: keep the one, refresh its text
-    else if (SOFT.test(block.typeId)) block.setType("minecraft:standing_sign");
-    else return; // something already stands here
+    if (!block || !SOFT.test(block.typeId)) return; // something already stands here
+    block.setType("minecraft:standing_sign");
     block.getComponent("minecraft:sign")?.setText(text);
   } catch {
     // signs are a nicety
   }
 }
 
-// Take down stacked signposts round a settlement that was laid out before the fix (nothing else changes)
+// Worlds laid out before the fix in #116 have signposts stacked two or more high. Cut a stack down to its
+// bottom sign. `topY` is standY() at the spot (one above the top sign). Returns how many signs came down.
+const SIGN = /_sign$/;
+function unstack(dim, x, topY, z) {
+  let bottom = topY - 1;
+  while (bottom - 1 > topY - 60 && SIGN.test(dim.getBlock({ x, y: bottom - 1, z })?.typeId ?? "")) bottom--;
+  if (!SIGN.test(dim.getBlock({ x, y: bottom, z })?.typeId ?? "")) return 0;
+  let removed = 0;
+  for (let y = topY - 1; y > bottom; y--) {
+    dim.getBlock({ x, y, z })?.setType("minecraft:air");
+    removed++;
+  }
+  return removed;
+}
+
 export function tidySignposts(player, dim = world.getDimension(OVERWORLD)) {
   const wall = wallOf(player.id);
   if (!wall) return 0;
@@ -72,12 +70,27 @@ export function tidySignposts(player, dim = world.getDimension(OVERWORLD)) {
     const spot = place(center, wall.gateDir ?? "south", slot);
     const sy = standY(dim, spot.x, spot.z);
     if (sy === undefined) continue;
-    try {
-      if (SIGN.test(dim.getBlock({ x: spot.x, y: sy, z: spot.z })?.typeId ?? "")) removed += clearStack(dim, { x: spot.x, y: sy, z: spot.z });
-    } catch {}
+    try { removed += unstack(dim, spot.x, sy, spot.z); } catch {}
   }
   return removed;
 }
+
+// Once a session, when an owner is close enough for their settlement to be loaded
+const tidied = new Set();
+onTick("settle_tidy_signs", 200, () => {
+  if (!isReady()) return;
+  for (const player of world.getAllPlayers()) {
+    if (tidied.has(player.id)) continue;
+    const wall = wallOf(player.id);
+    if (!wall) { tidied.add(player.id); continue; }
+    const l = player.location;
+    if (player.dimension.id !== OVERWORLD || Math.abs(l.x - wall.x) > 48 || Math.abs(l.z - wall.z) > 48) continue;
+    const removed = tidySignposts(player);
+    if (removed < 0) continue;
+    tidied.add(player.id);
+    if (removed > 0) console.warn(`[Hollow Crown] took down ${removed} stacked signpost(s) at ${player.name}'s settlement`);
+  }
+});
 
 // at: lay out round this spot (a Plot Stone) for a player who has no Keep Banner up yet
 export function layOut(player, { force = false, at, style: wanted } = {}) {
@@ -184,23 +197,6 @@ on("keepFounded", ({ player }) => {
   }, 10);
 });
 
-// Once a session, when an owner is near enough for their settlement to be loaded, tidy its signposts
-const tidied = new Set();
-onTick("settle_tidy_signs", 200, () => {
-  if (!isReady()) return;
-  for (const player of world.getAllPlayers()) {
-    if (tidied.has(player.id)) continue;
-    const wall = wallOf(player.id);
-    if (!wall) { tidied.add(player.id); continue; }
-    const l = player.location;
-    if (player.dimension.id !== OVERWORLD || Math.abs(l.x - wall.x) > 48 || Math.abs(l.z - wall.z) > 48) continue;
-    const removed = tidySignposts(player);
-    if (removed < 0) continue;
-    tidied.add(player.id);
-    if (removed > 0) console.warn(`[Hollow Crown] took down ${removed} stacked signpost(s) at ${player.name}'s settlement`);
-  }
-});
-
 system.afterEvents.scriptEventReceive.subscribe((event) => {
   if (event.id !== "siege:settle_arrive") return;
   const player = event.sourceEntity;
@@ -209,7 +205,7 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
   player.sendMessage(result === true || result === "already" ? "§6Settlement laid out round your keep: palisade, Longhouse, mason and slot signposts." : `§c${result}`);
 });
 
-// A fake column of blocks for the sign tests: ground at y 63, then whatever is listed above it
+// A fake column of blocks for the sign test: stone at y 63, then whatever is listed above it
 function fakeColumn(above) {
   const col = new Map([[63, "minecraft:stone"]]);
   above.forEach((id, i) => col.set(64 + i, id));
@@ -218,26 +214,17 @@ function fakeColumn(above) {
     location: { x: 0, y, z: 0 },
     below: () => block(y - 1),
     setType: (id) => (id === "minecraft:air" ? col.delete(y) : col.set(y, id)),
-    getComponent: () => ({ setText() {} }),
   });
-  const top = () => Math.max(...col.keys());
-  return { col, dim: { getTopmostBlock: () => block(top()), getBlock: ({ y }) => block(y) } };
+  return { col, dim: { getTopmostBlock: () => block(Math.max(...col.keys())), getBlock: ({ y }) => block(y) } };
 }
 
 addTests("settle arrival", {
-  "a signpost lands on the ground, not on the last signpost": () => {
-    const { dim } = fakeColumn(["minecraft:standing_sign"]);
-    assertEqual(standY(dim, 0, 0), 64);
-  },
-  "signposting twice leaves one sign": () => {
-    const { col, dim } = fakeColumn([]);
-    for (let i = 0; i < 3; i++) signpost(dim, { x: 0, y: standY(dim, 0, 0), z: 0 }, "Smithy");
-    assertEqual([...col.values()].filter((id) => id === "minecraft:standing_sign").length, 1);
-  },
-  "an old stack of signposts comes down to one": () => {
-    const { col, dim } = fakeColumn(["minecraft:standing_sign", "minecraft:standing_sign", "minecraft:standing_sign"]);
-    signpost(dim, { x: 0, y: standY(dim, 0, 0), z: 0 }, "Smithy");
-    assertEqual(col.get(64), "minecraft:standing_sign");
-    assertEqual(col.has(65) || col.has(66), false);
+  "an old stack of signposts comes down to one, and a single sign is left alone": () => {
+    const s = "minecraft:standing_sign";
+    const { col, dim } = fakeColumn([s, s, s]);
+    assertEqual(unstack(dim, 0, standY(dim, 0, 0), 0), 2);
+    assertEqual([...col.entries()].filter(([, id]) => id === s).map(([y]) => y).join(), "64");
+    assertEqual(unstack(dim, 0, standY(dim, 0, 0), 0), 0);
+    assertEqual(unstack(fakeColumn([]).dim, 0, 64, 0), 0);
   },
 });

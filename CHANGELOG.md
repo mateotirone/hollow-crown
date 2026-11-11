@@ -137,7 +137,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - Farms can no longer print Regals forever. Each trader stops buying a good from you for the day once its price has bottomed out (the Moneyer at 128 iron ingots a day), and monsters drop coins only when a player kills them.
 
 ### Fixed
-- Building signposts in a new settlement ("Smithy / Opens: Town" and the rest) no longer pile up on top of each other each time the settlement is laid out again. Stacks already standing in a world come down to one sign the next time the owner walks home.
+- Building signposts already stacked two or more high in an existing world (from before the lay-out fix) come down to one sign the next time the settlement's owner walks home.
 - Clicking a menu block with an empty hand works: the Waystone, Plot Stones, Keep Banner, Mason's Bench, gates and every other menu block used to do nothing unless you held an item.
 - No more "unknown variable melee_spear_equipped" errors in the content log on every swing: the player model now sets the variable newer Minecraft's attack animations ask for.
 - Buildings raised from a Plot Marker, the Foundation Stone, the showcase, the Barracks and Quartermaster's blocks, and Rival Lords' towns stand on the highest ground under them, with the region's foundation stone filled in below. They are never half buried any more.
