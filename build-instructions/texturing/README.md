@@ -64,6 +64,23 @@ same page). What it adds to the recipe:
    then paint the gradient over it as a last pass and fix shape or cracks if the result is messy. This is
    why texturing is a pass over finished surfaces, not something chosen block by block while building.
 
+### Mateo's gradient examples (2026-11-11, `gradient-examples-ardacraft.png`)
+
+Three 5 x 11 panels, bottom to top. What they show, now the default for every wall:
+
+- **Bands bottom to top, 4 or 5 steps, dark to light**: bricks at the foot, then cobble, then a mid
+  stone, then the lightest, smoothest block at the top.
+- **Texture changes along the ladder** (bricks, then cobble, then smooth stone) while lightness climbs.
+  Cobble and stone bricks are the same lightness in vanilla, so they never sit side by side as variation
+  in one band.
+- **Edges interlock in columns** ("teeth"): each column's edge sits a row or two higher or lower than its
+  neighbour's, with a few lone blocks of the next step just ahead of the edge. Never a straight line,
+  never single-block speckle. `doctrine.py paint_teeth()` does this.
+- **Colour may shift** across a real change of material (grey stone at the foot to earth and sand
+  render above, the middle panel).
+- The panels use a custom texture pack; the vanilla matches by lightness are VAL-01 (left), VAL-11
+  (middle) and VAL-10 (right).
+
 ## The doctrine: region, colour, code (Mateo, 2026-11-11)
 
 Texturing is broken down by **region**, then by **colour** within the region. Every colour family has a

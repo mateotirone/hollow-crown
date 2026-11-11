@@ -9,7 +9,9 @@
     "ladder_order": "dark to light by value unless 'order' says otherwise",
     "no_skipped_steps": "neighbouring cells differ by at most one ladder step",
     "clusters": "low-frequency noise, cells of about 3 to 7 blocks, never single-block speckle",
-    "cracks": "corners, openings, where planes meet; darkest part of the gradient"
+    "cracks": "corners, openings, where planes meet; darkest part of the gradient",
+    "walls": "vertical surfaces use paint_teeth: bands bottom to top, edges interlocking in columns 1 to 2 rows deep, a few lone blocks ahead of each edge",
+    "texture_along_ladder": "texture may change along a ladder (bricks low, cobble, then smoother stone up top) as long as lightness climbs; colour may shift only across a real material change (stone to earth)"
   },
   "regions": [
     {
@@ -21,10 +23,11 @@
         {
           "code": "VAL-01",
           "name": "Stone grey",
-          "use": "walls of Norman stone, plinths, chimneys, path slabs",
-          "blocks": ["mossy_cobblestone", "stone_bricks", "cobblestone", "polished_andesite", "andesite"],
-          "status": "starter",
-          "screenshot": null
+          "use": "stone walls, plinths, chimneys (walls: paint_teeth)",
+          "blocks": ["tuff_bricks", "cobblestone", "stone", "andesite"],
+          "status": "mateo",
+          "screenshot": "gradient-examples-ardacraft.png (left column, matched to vanilla by lightness)",
+          "order": "bottom to top, dark to light"
         },
         {
           "code": "VAL-02",
@@ -91,6 +94,24 @@
           "order": "field, then accent under windows and on gables",
           "status": "mateo",
           "screenshot": "../reference/pictures/close-studding.png"
+        },
+        {
+          "code": "VAL-10",
+          "name": "Light stone",
+          "use": "civic and well-kept stone walls, light plinths",
+          "blocks": ["stone_bricks", "cobblestone", "stone", "andesite", "diorite"],
+          "order": "bottom to top, dark to light",
+          "status": "mateo",
+          "screenshot": "gradient-examples-ardacraft.png (right column, matched to vanilla by lightness)"
+        },
+        {
+          "code": "VAL-11",
+          "name": "Warm earth stone",
+          "use": "rural and old walls going from stone at the foot to earth and sand-coloured render above; farm buildings, the dry edge of the Vale",
+          "blocks": ["cobblestone", "granite", "packed_mud", "sandstone"],
+          "order": "bottom to top",
+          "status": "mateo",
+          "screenshot": "gradient-examples-ardacraft.png (middle column, matched to vanilla by lightness; the step from packed mud to sandstone is a big jump in vanilla)"
         }
       ]
     },

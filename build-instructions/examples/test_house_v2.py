@@ -21,7 +21,7 @@ HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 sys.path.insert(0, os.environ.get("DOCTRINE", "/home/user/hollow-crown/build-instructions/texturing"))
 from bp import Blueprint
 from kit import Building, VALE, mix, h3
-from doctrine import paint
+from doctrine import paint, paint_teeth, family
 
 P = dict(VALE)
 P.update(frame="spruce_log", infill="calcite", pane="brown_stained_glass_pane",
@@ -37,7 +37,7 @@ STAIR_X, STAIR_Z0, STAIR_Z1 = 7, 4, 9
 def log(bp, x, y, z, axis="y", wood=None): bp.set(x, y, z, wood or P["frame"], axis=axis)
 
 # ------------------------------------------------------------------ ground-floor stone, painted
-STONE_LADDER = ["mossy_cobblestone", "cobblestone", "stone_bricks", "stone_bricks", "stone_bricks", "stone_bricks"]
+STONE_LADDER = family("VAL-01")["blocks"]          # Mateo's grey stone gradient, bottom to top
 OPENINGS = set()          # (x, y, z) of glass and door cells, filled by openings plan below
 
 def faces():
@@ -60,7 +60,7 @@ OUT = {"s": (0, 1), "n": (0, -1), "e": (1, 0), "w": (-1, 0)}
 def stone_walls(bp):
     plan = ground_plan()
     for f, cells in faces().items():
-        grid = paint(len(cells), 6, STONE_LADDER, seed=ord(f))          # rows y 1..6
+        grid = paint_teeth(len(cells), 6, STONE_LADDER[:3], seed=ord(f))  # rows y 1..6; small wall: 3 steps
         roles = plan[f]
         for i, (x, z) in enumerate(cells):
             # role by coordinate along the face
@@ -69,7 +69,6 @@ def stone_walls(bp):
             for row, y in enumerate(range(1, 7)):
                 b = grid[row][i]
                 near = any(roles.get(k + d) in ("win", "door") for d in (-1, 1))
-                if b == "stone_bricks" and near and y >= 3 and h3(x, y, z, 31) < 0.35: b = "cracked_stone_bricks"
                 if role == "pier" and y >= 2: b = "polished_andesite"
                 bp.set(x, y, z, b)
 

@@ -53,6 +53,39 @@ def _noise(x, y, seed, cell=5.0):
     return (a + (b - a) * sx) + ((c + (d - c) * sx) - (a + (b - a) * sx)) * sy
 
 
+def paint_teeth(w, h, ladder, seed=1, depth=1, lone=0.08, top_first=False):
+    """Mateo's gradient examples (2026-11-11, gradient-examples-ardacraft.png): the ladder runs bottom to
+    top in bands; each band edge interlocks in columns (teeth), every column's edge shifted up or down by
+    up to `depth` rows, and a few lone blocks of the next step sit one row ahead of the edge. Returns
+    grid[y][x], y = 0 the bottom row."""
+    n = len(ladder)
+    if n == 1:
+        return [[ladder[0]] * w for _ in range(h)]
+    edges = [(k + 1) * h / n for k in range(n - 1)]
+    idx = [[0] * w for _ in range(h)]
+    for x in range(w):
+        cut = [e + round((_hash(x, k, seed) - 0.5) * (2 * depth + 0.99)) for k, e in enumerate(edges)]
+        for y in range(h):
+            i = sum(1 for c in cut if y >= c)
+            r = _hash(x, y, seed + 13)
+            if r < lone / 2 and i < n - 1 and y + 1 >= cut[i] - 1: i += 1          # lone block of the step above
+            elif r > 1 - lone / 2 and i > 0 and y <= cut[i - 1] + 1: i -= 1        # lone block of the step below
+            idx[h - 1 - y if top_first else y][x] = i
+    for _ in range(n):
+        changed = False
+        for y in range(h):
+            for x in range(w):
+                for dx, dy in ((1, 0), (0, 1)):
+                    X, Y = x + dx, y + dy
+                    if X < w and Y < h and abs(idx[y][x] - idx[Y][X]) > 1:
+                        if idx[y][x] > idx[Y][X]: idx[y][x] -= 1
+                        else: idx[Y][X] -= 1
+                        changed = True
+        if not changed:
+            break
+    return [[ladder[i] for i in row] for row in idx]
+
+
 def paint(w, h, ladder, seed=1, base=None, strength=0.6, cell=4.0, top_first=False):
     """Paint a w x h surface from a ladder (dark to light). Returns grid[y][x] of block ids.
 

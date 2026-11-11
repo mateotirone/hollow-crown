@@ -5,19 +5,20 @@ Generated from `../doctrine.json` by `../doctrine.py`: edit the JSON, not this p
 block's texture. Paint surfaces by the rules in `../README.md` (no skipped steps, clusters, cracks
 with a cause). The viewer `../doctrine.html` shows every ladder with the real textures.
 
-## VAL-01 Stone grey (#7D7F7A)
+## VAL-01 Stone grey (#797A78)
 
-Used for: walls of Norman stone, plinths, chimneys, path slabs. Status: Claude's starter, waiting for Mateo's blocks.
+Used for: stone walls, plinths, chimneys (walls: paint_teeth). Status: Mateo's blocks.
+
+Order: bottom to top, dark to light.
 
 | Step | Block | Hex |
 |---|---|---|
-| 1 | `mossy_cobblestone` | #6E765E |
-| 2 | `stone_bricks` | #7A797A |
-| 3 | `cobblestone` | #7F7F7F |
-| 4 | `polished_andesite` | #848685 |
-| 5 | `andesite` | #888888 |
+| 1 | `tuff_bricks` | #62665F |
+| 2 | `cobblestone` | #7F7F7F |
+| 3 | `stone` | #7D7D7D |
+| 4 | `andesite` | #888888 |
 
-Screenshot: _waiting_
+Screenshot: gradient-examples-ardacraft.png (left column, matched to vanilla by lightness)
 
 ## VAL-02 Plaster white (#D6D7D4)
 
@@ -120,3 +121,34 @@ Order: field, then accent under windows and on gables.
 | 2 | `siege:timber_frame_cross` | #846C54 |
 
 Screenshot: ../reference/pictures/close-studding.png
+
+## VAL-10 Light stone (#8B8B8B)
+
+Used for: civic and well-kept stone walls, light plinths. Status: Mateo's blocks.
+
+Order: bottom to top, dark to light.
+
+| Step | Block | Hex |
+|---|---|---|
+| 1 | `stone_bricks` | #7A797A |
+| 2 | `cobblestone` | #7F7F7F |
+| 3 | `stone` | #7D7D7D |
+| 4 | `andesite` | #888888 |
+| 5 | `diorite` | #BCBCBC |
+
+Screenshot: gradient-examples-ardacraft.png (right column, matched to vanilla by lightness)
+
+## VAL-11 Warm earth stone (#9E866F)
+
+Used for: rural and old walls going from stone at the foot to earth and sand-coloured render above; farm buildings, the dry edge of the Vale. Status: Mateo's blocks.
+
+Order: bottom to top.
+
+| Step | Block | Hex |
+|---|---|---|
+| 1 | `cobblestone` | #7F7F7F |
+| 2 | `granite` | #956755 |
+| 3 | `packed_mud` | #8E6A4F |
+| 4 | `sandstone` | #D8CB9B |
+
+Screenshot: gradient-examples-ardacraft.png (middle column, matched to vanilla by lightness; the step from packed mud to sandstone is a big jump in vanilla)
