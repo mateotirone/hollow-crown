@@ -496,7 +496,7 @@ class Settlement(Town):
                 for e in sl: e["opensAt"] = 3
         # the market (Town) and barracks (City) slots: the first big slots (Large, or a long Medium)
         # open as early as their ground allows, never deferred
-        bigs = sorted([e for e in self.slots if e["size"] == "L" or (e["size"] == "M" and e.get("long"))], key=lambda e: (e["geo"] == 0, e["geo"]))
+        bigs = sorted([e for e in self.slots if e["geo"] >= 1 and (e["size"] == "L" or (e["size"] == "M" and e.get("long")))], key=lambda e: e["geo"])
         for e in bigs[:2]: e["opensAt"] = max(e["geo"], 1)
         self.slots.sort(key=lambda e: (e["opensAt"], "GLMS".index(e["size"])))
 
