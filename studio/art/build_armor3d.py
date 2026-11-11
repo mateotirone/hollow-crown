@@ -187,9 +187,11 @@ def relic_parts(name, ramp):
         P['chestplate'] += [('body', [-5, 8, 3.4], [10, 16, 1], 'cloak', False),
                             ('body', [-4.5, 22.5, -3.5], [9, 3, 7], 'cloak', False),
                             ('rightArm', [-9.5, 21.5, -3.5], [5, 4, 7], 'cloak', False), ('leftArm', [4.5, 21.5, -3.5], [5, 4, 7], 'cloak', True)]
-    else:                                 # widow's veil: lace drapes down the back and both sides of the head
-        P['helmet'] += [('head', [-5.5, 19, 5], [11, 14, 1], 'cloak', False),
-                        ('head', [-6, 19, -4.5], [1, 13, 9.5], 'cloak', False), ('head', [5, 19, -4.5], [1, 13, 9.5], 'cloak', True)]
+    else:                                 # widow's veil: thin lace drapes down the back and both sides of the head
+        # Mateo 2026-11-11: "the veil is too thick". The veil hugs the head (VEIL_INFLATE) and the drapes are paper
+        # thin and sit right against it, so the whole thing is barely wider than a bare head.
+        P['helmet'] += [('head', [-4.4, 18, 4.4], [8.8, 14, 0.3], 'cloak', False),
+                        ('head', [-4.7, 18, -4.4], [0.3, 13, 8.8], 'cloak', False), ('head', [4.4, 18, -4.4], [0.3, 13, 8.8], 'cloak', True)]
     return P, S
 
 
@@ -255,6 +257,21 @@ def sheet(path):
     im = Image.open(path).convert('RGBA')
     return im.resize((64, 32), Image.NEAREST) if im.size != (64, 32) else im
 
+INFLATE = {'relic_widows_veil': 0.3}    # the veil is lace, not a helmet: it sits close to the head
+LACE = {'relic_widows_veil'}
+HEAD_FACES = [(8, 8, 8, 8, 2), (0, 8, 8, 8, 1), (16, 8, 8, 8, 1), (24, 8, 8, 8, 1)]   # front, sides, back: x, y, w, h, solid rows
+def lace(im, slots):
+    """Open lace: punch a regular pattern of holes in the head faces (below a solid band at the brow) and in the
+    drapes, so the veil reads as thin cloth you can see through. The armour material is alpha tested."""
+    px = im.load()
+    def holes(x0, y0, w, h, solid):
+        for yy in range(solid, h):
+            for xx in range(w):
+                if (xx + yy) % 2 == 0 and not (yy == h - 1): px[x0 + xx, y0 + yy] = (0, 0, 0, 0)
+    for x0, y0, w, h, solid in HEAD_FACES: holes(x0, y0, w, h, solid)
+    for patches in slots.values():
+        for f in ('W', 'D'): holes(*patches[f], 1)
+
 def build(name, parts, styles, l1, l2, pieces, attach, leather):
     for piece in pieces:
         layer = LAYER[piece]
@@ -272,8 +289,10 @@ def build(name, parts, styles, l1, l2, pieces, attach, leather):
         paint(im, slots, styles, leather, base)
         tex = f'textures/models/siege_armor/{name}_{piece}'
         os.makedirs(RP + 'textures/models/siege_armor', exist_ok=True)
-        im.save(RP + tex + '.png')
         bones = {k: [dict(c) for c in v] for k, v in BASE[piece].items()}
+        if name in INFLATE: bones['head'][0]['inflate'] = INFLATE[name]
+        if name in LACE: lace(im, slots)
+        im.save(RP + tex + '.png')
         for bone, o, s, key, mir in parts[piece]:
             bones.setdefault(bone, []).append({"origin": o, "size": s, "uv": face_uv(slots[(tuple(s), key)])})
         ident = f'geometry.siege_{name}_{piece}'

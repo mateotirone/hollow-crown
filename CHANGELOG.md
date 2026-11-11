@@ -9,6 +9,7 @@ How versions work is in [`docs/RELEASING.md`](docs/RELEASING.md).
 Everything merged to `main` since the last release goes here. Each pull request that changes what players see adds a line under one of these headings.
 
 ### Fixed
+- The Seneschal's Greatshield is now held like a real shield: it sits on your arm in your off hand like a vanilla shield, and raises when you sneak to brace. The Widow's Veil is thin lace that hugs your head instead of a thick block.
 - The Clockwork Reeve now really throws his cogs: a spinning gear flies from his chest to the marked spot, for both the cog attack and the rewind. Bosses now chase and swing at players in Creative too (Minecraft's own AI ignores Creative players, so they used to just wander), and each hit says how hard it would have landed.
 - Boss health bars show the boss's name instead of "Unknown", and each boss now has its own bar: its own colours, frame and title colour (the Clockwork Reeve in brass, the Drowned Bride in sea green, Morvane in purple and magenta, and so on). Other bosses keep the normal bar.
 - Track: diagonal pieces no longer lie across the line, bends turn the right way, and slopes climb toward the higher track instead of away from it. Track already laid fixes itself.
