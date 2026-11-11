@@ -79,6 +79,9 @@ for w, t in WOODS.items(): MAT[w] = "planks_" + t; MAT[w + "_planks"] = "planks_
 def base_material(n):
     for suf in ("_stairs", "_slab", "_wall", "_fence"):
         if n.endswith(suf): n = n[: -len(suf)]; break
+    if n.startswith("waxed_"): n = n[6:]
+    if n.endswith("copper") and "_" not in n.replace("_cut_copper", "").replace("_copper", "").replace("cut_copper", "x"):
+        return {"copper": "copper_block", "double_cut_copper": "cut_copper"}.get(n, n.replace("double_", ""))
     if n == "stone" : return "cobblestone"     # Bedrock: stone_stairs are cobblestone stairs
     if n == "normal_stone": return "stone"
     if n == "smooth_stone": return "stone_slab_top"
@@ -98,6 +101,8 @@ def cube_tex(n, p):
     simple = {"grass_block": {"top": "grass_top#grass", "bottom": "dirt", "side": "grass_side_carried"},
               "podzol": {"top": "dirt_podzol_top", "bottom": "dirt", "side": "dirt_podzol_side"},
               "ochre_froglight": {"top": "ochre_froglight_top", "bottom": "ochre_froglight_top", "side": "ochre_froglight_side"},
+              "quartz_pillar": {"top": "quartz_block_lines_top", "bottom": "quartz_block_lines_top", "side": "quartz_block_lines"},
+              "chiseled_quartz_block": {"top": "quartz_block_chiseled_top", "bottom": "quartz_block_chiseled_top", "side": "quartz_block_chiseled"},
               "basalt": {"top": "basalt_top", "bottom": "basalt_top", "side": "basalt_side"},
               "polished_basalt": {"top": "polished_basalt_top", "bottom": "polished_basalt_top", "side": "polished_basalt_side"},
               "grass_path": {"top": "grass_path_top", "bottom": "dirt", "side": "grass_path_side"},

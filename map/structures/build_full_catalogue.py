@@ -69,6 +69,7 @@ def main():
     ap = argparse.ArgumentParser(); ap.add_argument("dump"); ap.add_argument("out")
     ap.add_argument("--textures", required=True); ap.add_argument("--three", required=True); ap.add_argument("--only", default="")
     ap.add_argument("--mcstructure", default="", help="write every build as .mcstructure files into this folder instead of rendering")
+    ap.add_argument("--viewer3d", default="", help="write the 3D catalogue (index.html, data/, tex.json) into this folder instead of rendering")
     ap.add_argument("--procs", type=int, default=3, help="browsers shooting in parallel")
     a = ap.parse_args()
     D = json.load(open(a.dump)); img = os.path.join(a.out, "img"); work = os.path.join(a.out, "_work")
@@ -81,6 +82,8 @@ def main():
         if a.only and not key.startswith(a.only): return
         if a.mcstructure:
             structures.append((sec["title"], card, make())); return
+        if a.viewer3d:
+            structures.append((sec, card, make, ground, view)); return
         sc, size, n = card_scene(make(), ground, view=view)
         card["size"] = size; card["blocks"] = n
         jobs.append([page_for(sc, work, key, a.textures, title), os.path.join(work, key, "shot.png"), "card", 1400, 900])
@@ -149,6 +152,9 @@ def main():
                                    ("wound_dock", "The Wound landing", "The first dock a new arrival sees: a plank landing on log piles and a boatwright's shed with a boat half built.", -38)):
         add(sec, f"hollow-{sid}", title, "Hollow centre", blurb, hollow_kit.SITE_BUILDERS[sid], HG, view=(yaw, 32, 1.3))
 
+    if a.viewer3d:
+        from build_3d_catalogue import write_viewer
+        write_viewer(structures, a.viewer3d, a.textures); return
     if a.mcstructure:
         from export_structures import write_all
         write_all(structures, a.mcstructure); return
