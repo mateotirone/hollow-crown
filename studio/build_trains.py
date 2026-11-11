@@ -132,58 +132,175 @@ PALETTE = {
     "emberwaste": ((140, 52, 32), (210, 150, 60), (60, 44, 36), (54, 46, 44)),
     "blackfen":   ((54, 66, 44), (120, 128, 90), (40, 36, 30), (50, 52, 46)),
 }
-TILE = {"body": (0, 0), "trim": (16, 0), "roof": (32, 0), "metal": (48, 0), "wheel": (0, 16), "glass": (16, 16), "wood": (32, 16), "glow": (48, 16)}
+# The atlas is 128 x 64: 32 painted tiles of 16 x 16. Each face samples a tile; round parts (wheels, boiler front,
+# smokebox door, spectacle windows) are built as stepped discs whose faces each take their own slice of a round tile,
+# so the painting lines up across the steps.
+TW, TH = 128, 64
+TILES = ["body", "lined", "boiler", "smokebox", "metal", "brass", "beam", "wheel", "tread", "glass", "window", "wood",
+         "glow", "roof", "coal", "door", "spectacle", "smokedoor", "floor", "seat", "rod", "louvre", "panel", "dark"]
+TILE = {t: ((i % 8) * 16, (i // 8) * 16) for i, t in enumerate(TILES)}
+FACES = ("north", "south", "east", "west", "up", "down")
 
-def ecube(origin, size, tile):
-    u, v = TILE[tile]
-    f = {"uv": [u, v], "uv_size": [16, 16]}
-    return {"origin": origin, "size": size, "uv": {k: dict(f) for k in ("north", "south", "east", "west", "up", "down")}}
+def ecube(origin, size, tile, sub=None, faces=None, rot=None, pivot=None):
+    """sub: {face: (u0, v0, du, dv)} slices of the tile in 0..16 units for those faces. faces: per-face tile override."""
+    out = {}
+    for f in FACES:
+        t = (faces or {}).get(f, tile)
+        u, v = TILE[t]
+        su, sv, du, dv = (sub or {}).get(f, (0, 0, 16, 16))
+        out[f] = {"uv": [round(u + su, 3), round(v + sv, 3)], "uv_size": [round(du, 3), round(dv, 3)]}
+    c = {"origin": [round(o, 3) for o in origin], "size": [round(s, 3) for s in size], "uv": out}
+    if rot: c["rotation"] = rot; c["pivot"] = pivot
+    return c
 
-# Cars are 3 blocks wide and 7 long (48 x 112 px). The front is -z in the model (it faces where the train goes).
-W, L = 48, 112
-def bogies():
+def steps(r):
+    """A pixel circle of radius r as 3 overlapping bands: [(half_width, half_height)]"""
+    return [(r, r * 0.45), (r * 0.85, r * 0.8), (r * 0.45, r)]
+
+def disc_x(x0, w, cy, cz, r, face_tile, edge_tile):
+    """A disc facing east/west (a wheel): x from x0, thickness w, centre (cy, cz), radius r."""
     out = []
-    for z0 in (-44, 36):
-        out.append(ecube([-20, 2, z0], [40, 3, 8], "metal"))
-        for x in (-23, 19):
-            for dz in (-2, 6):
-                out.append(ecube([x, 0, z0 + dz - 2], [4, 8, 8], "wheel"))
+    for hw, hh in steps(r):
+        sl = ((cz - hw - (cz - r)) / (2 * r) * 16, (r - hh) / (2 * r) * 16, hw / r * 16, hh / r * 16)
+        out.append(ecube([x0, cy - hh, cz - hw], [w, 2 * hh, 2 * hw], edge_tile, sub={"east": sl, "west": sl},
+                         faces={"east": face_tile, "west": face_tile}))
     return out
 
-engine = bogies() + [
-    ecube([-22, 8, -56], [44, 3, 112], "metal"),           # frame
-    ecube([-15, 11, -54], [30, 22, 66], "body"),           # boiler
-    ecube([-16, 11, -55], [32, 2, 2], "trim"), ecube([-16, 31, -55], [32, 2, 2], "trim"),
-    ecube([-5, 33, -48], [10, 14, 10], "metal"),           # chimney
-    ecube([-7, 47, -50], [14, 3, 14], "trim"),
-    ecube([-4, 33, -24], [8, 6, 8], "trim"),               # dome
-    ecube([-22, 11, 12], [44, 30, 44], "body"),            # cab
-    ecube([-22, 41, 10], [44, 3, 48], "roof"),
-    ecube([-22.5, 26, 20], [1, 10, 26], "glass"), ecube([21.5, 26, 20], [1, 10, 26], "glass"),
-    ecube([-12, 26, 11.5], [24, 10, 1], "glass"),
-    ecube([-4, 14, -58], [8, 8, 2], "glow"),               # lamp
-    ecube([-24, 8, -58], [48, 4, 2], "trim"),              # buffer beam
-]
-coach = bogies() + [
-    ecube([-22, 8, -56], [44, 3, 112], "metal"),
-    ecube([-23, 11, -54], [46, 6, 108], "body"),            # lower sides
-    ecube([-23, 17, -54], [2, 18, 108], "wood"), ecube([21, 17, -54], [2, 18, 108], "wood"),
-    ecube([-21, 17, -54], [42, 18, 2], "wood"), ecube([-21, 17, 52], [42, 18, 2], "wood"),
-    ecube([-23.5, 22, -46], [1, 10, 92], "glass"), ecube([22.5, 22, -46], [1, 10, 92], "glass"),
-    ecube([-24, 35, -56], [48, 3, 112], "roof"),
-    ecube([-24, 16, -55], [48, 2, 110], "trim"),
-    ecube([-18, 11, -36], [36, 6, 8], "trim"), ecube([-18, 11, -4], [36, 6, 8], "trim"), ecube([-18, 11, 28], [36, 6, 8], "trim"),  # benches
-]
+def cyl_z(cx, cy, r, z0, length, tile, front=None):
+    """A cylinder along z (the boiler): front gets a round tile on its north face."""
+    out = []
+    for hw, hh in steps(r):
+        sl = ((r - hw) / (2 * r) * 16, (r - hh) / (2 * r) * 16, hw / r * 16, hh / r * 16)
+        out.append(ecube([cx - hw, cy - hh, z0], [2 * hw, 2 * hh, length], tile,
+                         sub={"north": sl} if front else None, faces={"north": front} if front else None))
+    return out
+
+def box(x0, y0, z0, x1, y1, z1, tile, **k):
+    return ecube([x0, y0, z0], [x1 - x0, y1 - y0, z1 - z0], tile, **k)
+
+def mirror(cubes_fn):
+    return cubes_fn(1) + cubes_fn(-1)
+
+def xs(s, a, b):
+    """x range a..b on side s (1 = +x, -1 = -x) as (x0, x1)"""
+    return (a, b) if s > 0 else (-b, -a)
+
+def buffers(z_face, out_dir):
+    out = []
+    for x in (-14, 14):
+        z0 = z_face if out_dir > 0 else z_face - 3
+        out.append(box(x - 1.5, 11.5, z0, x + 1.5, 14.5, z0 + 3, "metal"))
+        z1 = z_face + 3 if out_dir > 0 else z_face - 4
+        out.append(box(x - 3, 10, z1, x + 3, 16, z1 + 1, "metal"))
+    return out
+
+# Cars are 3 blocks wide and 7 long (48 x 112 px). The front is -z in the model (it faces where the train goes).
+# ---- the engine: a side-tank engine, three coupled driving wheels a side, the cab at the back with a coal bunker
+def engine_cubes():
+    c = []
+    # frames, footplate and valance
+    c.append(box(-16, 8, -56, 16, 18, 56, "dark"))
+    c.append(box(-23, 18, -56, 23, 20, 56, "metal"))
+    c += mirror(lambda s: [box(*xs(s, 21, 23)[:1], 15, -56, *xs(s, 21, 23)[1:], 18, 56, "beam")])
+    # buffer beams and buffers, front and back
+    c.append(box(-23, 10, -58, 23, 18, -56, "beam")); c.append(box(-23, 10, 56, 23, 18, 58, "beam"))
+    c += buffers(-58, -1) + buffers(58, 1)
+    # driving wheels (22 across) and the trailing wheel under the bunker
+    for zc in (-30, -6, 18):
+        c += mirror(lambda s: disc_x(18 if s > 0 else -21, 3, 11, zc, 11, "wheel", "tread"))
+    c += mirror(lambda s: disc_x(18 if s > 0 else -21, 3, 7, 43, 7, "wheel", "tread"))
+    # coupling rods and cylinders
+    c += mirror(lambda s: [box(*xs(s, 21, 22.5)[:1], 9, -32, *xs(s, 21, 22.5)[1:], 11, 20, "rod")])
+    c += mirror(lambda s: [box(*xs(s, 15, 22)[:1], 8, -54, *xs(s, 15, 22)[1:], 18, -42, "metal"),
+                           box(*xs(s, 21, 22.5)[:1], 11, -44, *xs(s, 21, 22.5)[1:], 13, -30, "rod")])
+    # boiler and smokebox, with brass bands
+    c += cyl_z(0, 34, 13, -42, 54, "boiler")
+    c += cyl_z(0, 34, 13.5, -55, 13, "smokebox", front="smokedoor")
+    for z in (-28, -12, 4):
+        c += cyl_z(0, 34, 13.6, z, 1.5, "brass")
+    c.append(box(-14, 20, -55, 14, 26, -42, "smokebox"))  # saddle under the smokebox
+    # chimney, dome, safety valve
+    c.append(box(-4, 47, -52, 4, 58, -44, "smokebox")); c.append(box(-6, 58, -54, 6, 61, -42, "smokebox"))
+    c.append(box(-5, 46, -53, 5, 49, -43, "smokebox"))
+    c.append(box(-5, 46, -22, 5, 51, -12, "brass")); c.append(box(-3.5, 51, -20.5, 3.5, 53, -13.5, "brass"))
+    c.append(box(-1.5, 46, 2, 1.5, 51, 5, "brass"))
+    # side tanks with lining, and the handrails along the boiler
+    c += mirror(lambda s: [box(*xs(s, 12, 23)[:1], 20, -36, *xs(s, 12, 23)[1:], 38, 12, "lined", faces={"up": "body"})])
+    c += mirror(lambda s: [box(*xs(s, 9, 10)[:1], 41, -52, *xs(s, 9, 10)[1:], 42, 12, "brass")])
+    # the cab: front wall with spectacle windows, sides open at the doorway, a rounded roof
+    c.append(box(-23, 20, 12, 23, 48, 14, "body"))
+    for x in (-13, 13):
+        c += [ecube([x - 4, 36, 11.8], [8, 8, 0.4], "body", faces={"north": "spectacle", "south": "spectacle"})]
+    c += mirror(lambda s: [box(*xs(s, 21, 23)[:1], 20, 14, *xs(s, 21, 23)[1:], 30, 40, "lined"),
+                           box(*xs(s, 21, 23)[:1], 30, 14, *xs(s, 21, 23)[1:], 48, 18, "body"),
+                           box(*xs(s, 21, 23)[:1], 30, 34, *xs(s, 21, 23)[1:], 48, 40, "body"),
+                           box(*xs(s, 21, 23)[:1], 44, 18, *xs(s, 21, 23)[1:], 48, 34, "body")])
+    c.append(box(-23, 20, 38, 23, 48, 40, "body", faces={"south": "lined"}))
+    c.append(box(-12, 36, 37.8, 12, 44, 38, "window"))
+    c.append(box(-25, 48, 10, 25, 50, 42, "roof")); c.append(box(-21, 50, 10, 21, 52, 42, "roof")); c.append(box(-14, 52, 11, 14, 53, 41, "roof"))
+    c.append(box(-21, 20, 14, 21, 21, 38, "floor"))
+    c.append(box(-12, 21, 14.5, 12, 30, 20, "smokebox", faces={"south": "smokedoor"}))  # firebox backhead
+    # coal bunker behind the cab
+    c.append(box(-23, 20, 40, 23, 36, 56, "lined", faces={"up": "coal"}))
+    c.append(box(-20, 36, 41, 20, 38, 54, "coal"))
+    # lamps
+    c.append(box(-2, 48, -56, 2, 53, -53, "glow", faces={"up": "metal", "down": "metal"}))
+    for x in (-15, 15): c.append(box(x - 2, 18, -59.5, x + 2, 22, -57, "glow", faces={"up": "metal", "down": "metal"}))
+    return c
+
+# ---- the coach: panelled sides with seven windows each side, doors at both ends, a rounded roof and two bogies
+def coach_cubes():
+    c = []
+    c.append(box(-20, 9, -55, 20, 14, 55, "dark"))
+    c.append(box(-23, 14, -55, 23, 15, 55, "metal"))
+    c.append(box(-23, 9, -57, 23, 15, -55, "beam")); c.append(box(-23, 9, 55, 23, 15, 57, "beam"))
+    c += buffers(-57, -1) + buffers(57, 1)
+    for zb in (-36, 36):
+        c.append(box(-19, 5, zb - 12, 19, 9, zb + 12, "dark"))
+        c += mirror(lambda s: [box(*xs(s, 19, 21)[:1], 7, zb - 13, *xs(s, 19, 21)[1:], 9, zb + 13, "metal")])
+        for dz in (-7, 7):
+            c += mirror(lambda s: disc_x(19.5 if s > 0 else -21.5, 2, 6, zb + dz, 6, "wheel", "tread"))
+    c += mirror(lambda s: [box(*xs(s, 20, 22)[:1], 11, -20, *xs(s, 20, 22)[1:], 13, 20, "dark")])  # battery boxes
+    # sides: lower panels, window band (pillars between windows), upper rail
+    c += mirror(lambda s: [box(*xs(s, 22, 23)[:1], 15, -54, *xs(s, 22, 23)[1:], 28, 54, "lined")])
+    c += mirror(lambda s: [box(*xs(s, 22, 23)[:1], 40, -54, *xs(s, 22, 23)[1:], 46, 54, "panel")])
+    c += mirror(lambda s: [box(*xs(s, 22.3, 22.6)[:1], 28, -44, *xs(s, 22.3, 22.6)[1:], 40, 44, "window")])
+    for z in range(-44, 45, 11):
+        c += mirror(lambda s: [box(*xs(s, 22, 23)[:1], 28, z - 1.5, *xs(s, 22, 23)[1:], 40, z + 1.5, "body")])
+    for zd in (-54, 44):  # end doors, with droplights
+        c += mirror(lambda s: [box(*xs(s, 22, 23.2)[:1], 15, zd, *xs(s, 22, 23.2)[1:], 40, zd + 10, "door")])
+    # ends: panel with a gangway door and windows
+    for z0 in (-55, 54):
+        c.append(box(-23, 15, z0, 23, 46, z0 + 1, "lined"))
+        c.append(box(-5, 15, z0 - 0.3, 5, 40, z0 + 1.3, "door"))
+        for x in (-16, 16): c.append(box(x - 4, 30, z0 - 0.2, x + 4, 38, z0 + 1.2, "window"))
+    # roof: three steps and a rain strip, with lamp tops
+    c.append(box(-24.5, 46, -56, 24.5, 47.5, 56, "roof", faces={"north": "panel", "south": "panel"}))
+    c.append(box(-21, 47.5, -56, 21, 49.5, 56, "roof")); c.append(box(-14, 49.5, -55.5, 14, 51, 55.5, "roof"))
+    for z in (-33, -11, 11, 33): c.append(box(-2, 51, z - 2, 2, 53, z + 2, "metal"))
+    # inside: floor and three pairs of benches
+    c.append(box(-22, 15, -54, 22, 16, 54, "floor"))
+    for z in (-32, 0, 32):
+        for zz in (z - 8, z + 4):
+            c.append(box(-20, 16, zz, 20, 21, zz + 4, "seat"))
+        c.append(box(-20, 21, z - 9, 20, 30, z - 8, "seat")); c.append(box(-20, 21, z + 8, 20, 30, z + 9, "seat"))
+    # the steps under each door
+    for zd in (-54, 44):
+        c += mirror(lambda s: [box(*xs(s, 23, 25)[:1], 10, zd, *xs(s, 23, 25)[1:], 11, zd + 10, "metal")])
+    return c
+
+engine = engine_cubes()
+coach = coach_cubes()
 for name, cubes in (("engine", engine), ("coach", coach)):
     write(RP + f"models/entity/train_{name}.geo.json", {"format_version": "1.12.0", "minecraft:geometry": [{
-        "description": {"identifier": f"geometry.siege_train_{name}", "texture_width": 64, "texture_height": 32,
-                        "visible_bounds_width": 10, "visible_bounds_height": 5, "visible_bounds_offset": [0, 1.5, 0]},
+        "description": {"identifier": f"geometry.siege_train_{name}", "texture_width": TW, "texture_height": TH,
+                        "visible_bounds_width": 10, "visible_bounds_height": 6, "visible_bounds_offset": [0, 2, 0]},
         "bones": [{"name": "body", "pivot": [0, 0, 0], "cubes": cubes}]}]})
 
 # Seats in entity space: +z is the front. Engine: driver and fireman in the cab. Coach: three rows of two.
 SEATS = {
-    "engine": [[0.6, 0.9, -1.8], [-0.6, 0.9, -1.8]],
-    "coach": [[0.55, 0.85, 2.0], [-0.55, 0.85, 2.0], [0.55, 0.85, 0.0], [-0.55, 0.85, 0.0], [0.55, 0.85, -2.0], [-0.55, 0.85, -2.0]],
+    "engine": [[0.7, 1.5, -1.625], [-0.7, 1.5, -1.625]],
+    "coach": [[0.6, 1.1, 1.625], [-0.6, 1.1, 1.625], [0.6, 1.1, -0.375], [-0.6, 1.1, -0.375], [0.6, 1.1, -2.375], [-0.6, 1.1, -2.375]],
 }
 for name, seats in SEATS.items():
     ident = f"siege:train_{name}"
@@ -218,29 +335,91 @@ write(RP + "render_controllers/siege_train.render_controllers.json", {"format_ve
         "geometry": "Geometry.default", "materials": [{"*": "Material.default"}],
         "textures": ["Array.styles[query.has_property('siege:style') ? query.property('siege:style') : 0]"]}}})
 
-# ---------------------------------------------------------------- placeholder textures
+# ---------------------------------------------------------------- placeholder textures (painted tiles, one atlas per style)
 def cl(c): return tuple(max(0, min(255, int(v))) for v in c)
 def noisy(c, a=6):
     n = rnd.randint(-a, a); return cl([v + n for v in c]) + (255,)
+def sh(c, k): return cl([v * k for v in c])
+BEAM = {"vale": (150, 40, 32), "frostmarch": (40, 52, 72), "saltreach": (176, 60, 40), "emberwaste": (60, 40, 30), "blackfen": (110, 36, 30)}
+
+def tiles_for(style):
+    body, trim, roof, metal = PALETTE[style]
+    beam = BEAM[style]
+    dark = sh(metal, 0.55)
+    def rd(x, y): return math.hypot(x - 7.5, y - 7.5)
+    def lined(x, y):
+        if x in (0, 15) or y in (0, 15): return sh(body, 0.7)
+        if x in (2, 13) and 2 <= y <= 13 or y in (2, 13) and 2 <= x <= 13: return trim
+        return body if y % 7 else sh(body, 0.94)
+    def boiler(x, y):
+        k = 1.15 - abs(y - 7.5) / 7.5 * 0.35  # light along the top of the barrel
+        return sh(body, k) if x % 8 else sh(body, k * 0.9)
+    def wheel(x, y):
+        r = rd(x, y)
+        if r > 8.1: return None
+        if r > 6.6: return sh(metal, 0.7)                  # tyre
+        if r < 1.6: return trim                            # hub
+        a = math.atan2(y - 7.5, x - 7.5)
+        if abs(math.sin(a * 5)) < 0.32: return body if r < 5.8 else sh(body, 0.8)  # spokes, painted like the body
+        if r > 5.8: return sh(body, 0.75)
+        return None                                        # see through between the spokes
+    def smokedoor(x, y):
+        r = rd(x, y)
+        if r > 7.9: return sh(dark, 0.8)
+        if r > 6.8: return sh(metal, 1.2)
+        if r < 1.4: return trim
+        if y == 7 and abs(x - 7.5) < 6: return sh(metal, 1.3)  # dart handle
+        return dark
+    def spectacle(x, y):
+        r = rd(x, y)
+        if r > 7.2: return body
+        if r > 5.8: return trim
+        return (150, 190, 210) if (x + y) % 9 else (210, 232, 240)
+    def window(x, y):
+        if x in (0, 15) or y in (0, 1, 15): return sh(trim, 0.85)
+        return (190, 220, 232) if x - y in (3, 4, 9) else (120, 160, 184)
+    def door(x, y):
+        if x in (0, 15) or y in (0, 15): return sh(body, 0.65)
+        if 3 <= x <= 12 and 2 <= y <= 6: return (120, 160, 184) if x - y != 1 else (190, 220, 232)
+        if x == 12 and 9 <= y <= 10: return trim
+        return lined(x, y)
+    paint = {
+        "body": lambda x, y: body if y % 7 else sh(body, 0.94),
+        "lined": lined,
+        "boiler": boiler,
+        "smokebox": lambda x, y: dark if (x * 5 + y * 3) % 11 else sh(dark, 1.2),
+        "metal": lambda x, y: sh(metal, 1.2) if (x * 3 + y) % 7 == 0 else metal,
+        "brass": lambda x, y: sh(trim, 1.15) if y < 5 else trim if y < 11 else sh(trim, 0.8),
+        "beam": lambda x, y: sh(beam, 0.75) if y in (0, 15) else beam,
+        "wheel": wheel,
+        "tread": lambda x, y: sh(metal, 0.7) if y % 3 else sh(metal, 0.9),
+        "glass": lambda x, y: (150, 190, 210),
+        "window": window,
+        "wood": lambda x, y: (100, 72, 44) if y % 4 == 3 else (140, 104, 62),
+        "glow": lambda x, y: (60, 56, 50) if x in (0, 15) or y in (0, 15) else (255, 222, 140) if rd(x, y) < 4 else (240, 190, 90),
+        "roof": lambda x, y: sh(roof, 0.85) if x % 5 == 0 else roof,
+        "coal": lambda x, y: (22, 22, 26) if (x * 7 + y * 5) % 5 else (58, 58, 66),
+        "door": door,
+        "spectacle": spectacle,
+        "smokedoor": smokedoor,
+        "floor": lambda x, y: (96, 70, 44) if y % 4 == 0 else (124, 92, 58),
+        "seat": lambda x, y: sh(BEAM[style], 1.1) if (x + y) % 4 else sh(BEAM[style], 0.85),
+        "rod": lambda x, y: (196, 198, 204) if y < 8 else (150, 152, 160),
+        "louvre": lambda x, y: sh(metal, 0.6) if y % 3 == 0 else metal,
+        "panel": lambda x, y: trim if y in (3, 12) else body,
+        "dark": lambda x, y: dark if (x + y) % 5 else sh(dark, 1.25),
+    }
+    atlas = Image.new("RGBA", (TW, TH), (0, 0, 0, 0))
+    for t, (u, v) in TILE.items():
+        for y in range(16):
+            for x in range(16):
+                c = paint[t](x, y)
+                if c is not None: atlas.putpixel((u + x, v + y), noisy(c, 4))
+    return atlas
+
 for name in ("engine", "coach"):
     for s in STYLES:
-        body, trim, roof, metal = PALETTE[s]
-        paint = {
-            "body": lambda x, y: cl([v * 0.85 for v in body]) if y % 8 == 7 else body,
-            "trim": lambda x, y: cl([v * 0.8 for v in trim]) if (x + y) % 6 == 0 else trim,
-            "roof": lambda x, y: cl([v * 0.8 for v in roof]) if x % 4 == 0 else roof,
-            "metal": lambda x, y: cl([v * 1.2 for v in metal]) if (x * 3 + y) % 7 == 0 else metal,
-            "wheel": lambda x, y: (40, 40, 44) if abs(x - 7.5) + abs(y - 7.5) > 9 or abs(x - 7.5) + abs(y - 7.5) < 2 else cl([v * 1.3 for v in metal]),
-            "glass": lambda x, y: (60, 70, 80) if x in (0, 15) or y in (0, 15) else (150, 190, 210),
-            "wood": lambda x, y: (100, 72, 44) if y % 4 == 3 else (140, 104, 62),
-            "glow": lambda x, y: (60, 56, 50) if x in (0, 15) or y in (0, 15) else (255, 214, 120),
-        }
-        atlas = Image.new("RGBA", (64, 32), (0, 0, 0, 0))
-        for tile, (u, v) in TILE.items():
-            for y in range(16):
-                for x in range(16):
-                    atlas.putpixel((u + x, v + y), noisy(paint[tile](x, y)))
-        save_png(RP + f"textures/entity/siege/trains/{name}_{s}.png", atlas)
+        save_png(RP + f"textures/entity/siege/trains/{name}_{s}.png", tiles_for(s))
 
 def icon(rows, col, path):
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
