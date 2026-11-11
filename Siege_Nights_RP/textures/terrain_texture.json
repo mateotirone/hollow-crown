@@ -954,6 +954,21 @@
     "siege_old_azalea_leaves": {
       "textures": "textures/blocks/azalea_leaves"
     },
+    "siege_old_azalea_leaves_flowers": {
+      "textures": "textures/blocks/azalea_leaves_flowers"
+    },
+    "siege_old_leaves_birch": {
+      "textures": "textures/blocks/leaves_birch"
+    },
+    "siege_old_log_birch_top": {
+      "textures": "textures/blocks/log_birch_top"
+    },
+    "siege_old_log_birch": {
+      "textures": "textures/blocks/log_birch"
+    },
+    "siege_old_cherry_leaves": {
+      "textures": "textures/blocks/cherry_leaves"
+    },
     "siege_old_deepslate_cobbled_deepslate": {
       "textures": "textures/blocks/deepslate/cobbled_deepslate"
     },
@@ -972,11 +987,41 @@
     "siege_old_dark_oak_trapdoor": {
       "textures": "textures/blocks/dark_oak_trapdoor"
     },
+    "siege_old_stone_diorite": {
+      "textures": "textures/blocks/stone_diorite"
+    },
+    "siege_old_leaves_jungle": {
+      "textures": "textures/blocks/leaves_jungle"
+    },
+    "siege_old_mangrove_planks": {
+      "textures": "textures/blocks/mangrove_planks"
+    },
+    "siege_old_mangrove_log_top": {
+      "textures": "textures/blocks/mangrove_log_top"
+    },
+    "siege_old_mangrove_log_side": {
+      "textures": "textures/blocks/mangrove_log_side"
+    },
+    "siege_old_mangrove_trapdoor": {
+      "textures": "textures/blocks/mangrove_trapdoor"
+    },
     "siege_old_mud_bricks": {
       "textures": "textures/blocks/mud_bricks"
     },
+    "siege_old_planks_oak": {
+      "textures": "textures/blocks/planks_oak"
+    },
     "siege_old_leaves_oak": {
       "textures": "textures/blocks/leaves_oak"
+    },
+    "siege_old_log_oak_top": {
+      "textures": "textures/blocks/log_oak_top"
+    },
+    "siege_old_log_oak": {
+      "textures": "textures/blocks/log_oak"
+    },
+    "siege_old_trapdoor": {
+      "textures": "textures/blocks/trapdoor"
     },
     "siege_old_planks_spruce": {
       "textures": "textures/blocks/planks_spruce"

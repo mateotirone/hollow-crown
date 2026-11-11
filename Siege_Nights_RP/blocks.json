@@ -312,6 +312,21 @@
   "siege:old_azalea_leaves": {
     "sound": "grass"
   },
+  "siege:old_azalea_leaves_flowered": {
+    "sound": "grass"
+  },
+  "siege:old_birch_leaves": {
+    "sound": "grass"
+  },
+  "siege:old_birch_log": {
+    "sound": "wood"
+  },
+  "siege:old_birch_wood": {
+    "sound": "wood"
+  },
+  "siege:old_cherry_leaves": {
+    "sound": "grass"
+  },
   "siege:old_cobbled_deepslate_wall": {
     "sound": "stone"
   },
@@ -336,11 +351,59 @@
   "siege:old_dark_oak_wood": {
     "sound": "wood"
   },
+  "siege:old_diorite_stairs": {
+    "sound": "wood"
+  },
+  "siege:old_diorite_wall": {
+    "sound": "wood"
+  },
+  "siege:old_jungle_leaves": {
+    "sound": "grass"
+  },
+  "siege:old_mangrove_fence": {
+    "sound": "wood"
+  },
+  "siege:old_mangrove_log": {
+    "sound": "wood"
+  },
+  "siege:old_mangrove_slab": {
+    "sound": "wood"
+  },
+  "siege:old_mangrove_stairs": {
+    "sound": "wood"
+  },
+  "siege:old_mangrove_trapdoor": {
+    "sound": "wood"
+  },
+  "siege:old_mangrove_wood": {
+    "sound": "wood"
+  },
+  "siege:old_mud_brick_stairs": {
+    "sound": "stone"
+  },
   "siege:old_mud_brick_wall": {
     "sound": "stone"
   },
+  "siege:old_oak_fence": {
+    "sound": "wood"
+  },
   "siege:old_oak_leaves": {
     "sound": "grass"
+  },
+  "siege:old_oak_log": {
+    "sound": "wood"
+  },
+  "siege:old_oak_slab": {
+    "sound": "wood"
+  },
+  "siege:old_oak_stairs": {
+    "sound": "wood"
+  },
+  "siege:old_oak_trapdoor": {
+    "sound": "wood"
+  },
+  "siege:old_oak_wood": {
+    "sound": "wood"
   },
   "siege:old_spruce_fence": {
     "sound": "wood"

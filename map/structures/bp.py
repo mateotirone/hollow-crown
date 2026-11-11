@@ -155,6 +155,7 @@ class Blueprint:
             for k, v in p.get("raw", {}).items(): st[k] = v
             return (name, st)
         if name.startswith("minecraft:"): name = name[10:]
+        name = {"oak_trapdoor": "trapdoor", "oak_door": "wooden_door"}.get(name, name)
         if name not in BLOCKS: raise ValueError(f"{self.name}: '{name}' is not a Bedrock block")
         st = {}
         for prop in BLOCKS[name]:

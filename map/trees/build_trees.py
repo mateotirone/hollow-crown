@@ -59,6 +59,6 @@ if a.render and everything.cells:
     pd = os.path.join(a.out, "preview", "all"); os.makedirs(pd, exist_ok=True); everything.save_logical(os.path.join(pd, "scene.json"))
     subprocess.run([sys.executable, os.path.join(HERE, "..", "structures", "render", "render.py"), os.path.join(pd, "scene.json"), pd,
                     "--title", "Hollow Crown Trees", "--blurb", "Rows: " + ", ".join(CARDS[k]["name"] for k in index["species"]) + ". Sizes left to right: sapling, young, mature, ancient.",
-                    "--textures", a.textures, "--three", a.three, "--shots", "front-left,high"], check=True)
+                    "--textures", a.textures, "--three", a.three, "--shots", "front-left,high" if a.shots else ""], check=True)
 json.dump(index, open(os.path.join(a.out, "trees.json"), "w"), indent=1)
 print("species", len(index["species"]))
