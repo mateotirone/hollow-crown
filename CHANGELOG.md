@@ -96,6 +96,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - The eight job NPCs (Farmer, Woodcutter, Quarryman, Smith, Fisher, Hunter, Herbalist, Moneyer) now wear their own painted clothes instead of a stock NPC look. Ones already placed in a world change over the first time someone clicks them.
 - Each region's Smith sells that region's Castle Guard armor set for Regals (helmet 50, chestplate 90, leggings 70, boots 50), a little over the plain set at the Quartermaster. The sets appear once the regional armor is in the pack.
 - On a mapped world, the job NPCs now stand ready in the map's six towns the first time a player comes near: all eight plus the Moneyer in Kingsrest, four to six in each regional town. Map builders can move them, and `/scriptevent siege:economy_towns` lists or resets them.
+- Farms can no longer print Regals forever. Each trader stops buying a good from you for the day once its price has bottomed out (the Moneyer at 128 iron ingots a day), and monsters drop coins only when a player kills them.
 
 ### Fixed
 - Lanternbog's local mystery no longer asks you to type the name of the place below in the first chapter.

@@ -271,7 +271,9 @@ def loot(drops):
     pools = []
     for name, lo, hi, chance in drops:
         p = {"rolls": 1, "entries": [{"type": "item", "name": name, "weight": 1, "functions": [{"function": "set_count", "count": {"min": lo, "max": hi}}]}]}
-        if chance < 1: p["conditions"] = [{"condition": "random_chance", "chance": chance}]
+        conds = [{"condition": "killed_by_player"}] if name in ("siege:coin", "siege:gold_coin") else []  # no coins from mob farms
+        if chance < 1: conds.append({"condition": "random_chance", "chance": chance})
+        if conds: p["conditions"] = conds
         pools.append(p)
     return {"pools": pools}
 
