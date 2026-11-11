@@ -25,7 +25,7 @@ import { addTests, assert } from "../core/tests.js";
 import { on, isNight } from "../siege/api.js";
 import { UNDERTOW_ID, UNDERTOW_LAYOUT as L, COURT, HEART, TEXT, stageAt, pathX } from "./layout.js";
 import { getSourceSite, getSites, markSite, openRift, riftExit, sourceSignsTick, SITE_NAMES, SOURCE_SITE_IDS } from "./source.js";
-import { VEIL, planCrack } from "./rift.js";
+import { VEIL, planCrack, tearBand, TEAR_STEPS, TEAR_CLIMB } from "./rift.js";
 import { buildTick, piecesTick, flush, pieces, openCourtGate, openRiverGate, rebuildHeart, waystoneSpot, WAYSTONE, isBuilt } from "./builder.js";
 import { heightAt, planChunk, isRiver, regionAt, columnAt } from "./terrain.js";
 import { RIVER_NODES, riverSegments, riverDistance } from "./rivers.js";
@@ -577,6 +577,13 @@ addTests("undertow", {
       const s = singerSpot(i), r = Math.hypot(s.x - 0.5 - COURT.center.x, s.z - 0.5 - COURT.center.z);
       assert(r > HEART.innerRadius + 4 && r < CHOIR.fallBands[1], `singer ${i} at radius ${r}`);
     }
+  },
+  "the rift tears from the floor up, then outward, in every burst": () => {
+    const cells = planCrack({ x: 0, y: 0, z: 0 }, "east");
+    const line = cells.filter((c) => !c.side);
+    for (const a of line) for (const b of line) if (a.row < b.row) assert(tearBand(a) <= tearBand(b), `row ${a.row} after row ${b.row}`);
+    assert(cells.filter((c) => c.side).every((c) => tearBand(c) >= TEAR_CLIMB), "it widens only after the split reaches the top");
+    for (let s = 0; s <= TEAR_STEPS; s++) assert(cells.some((c) => tearBand(c) === s), `burst ${s} is empty`);
   },
   "rift crack is 14 tall": () => {
     const ys = planCrack({ x: 0, y: 0, z: 0 }, "south").filter((c) => c.block === VEIL).map((c) => c.y);
