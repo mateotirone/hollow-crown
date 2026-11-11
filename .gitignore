@@ -17,3 +17,6 @@ Thumbs.db
 # Generated sound takes waiting to be installed (the converted .ogg in the pack is what is kept)
 sounds-inbox/*
 !sounds-inbox/README.md
+
+# Live asset viewer downloads and builds (node tools/asset-viewer/serve.mjs)
+.asset-viewer/

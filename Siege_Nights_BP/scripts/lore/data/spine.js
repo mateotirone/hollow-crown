@@ -7,6 +7,7 @@
 //   REGION_BOSS   where a plot's solved mystery points: its own region's boss, with the place added to the Ledger
 //   BOSS_LEADS    what each of the five regional bosses leaves besides its confession: two leads, in two OTHER regions
 //   CONVERGE      once this many of the five are down, every route turns to the Surveyor's Field Notes and the thin place
+//   OPEN_AT       once all five are down: how to make the Tuning Fork (the fork only opens the Rift for someone who has seen all five fall)
 //
 // Reveal layers stay intact: nothing here names the Hollow, the truce, Edda, or who leads.
 
@@ -62,7 +63,14 @@ export const BOSS_LEADS = {
 
 export const CONVERGE = {
   at: 3, tome: "surv_01", flag: "leads_converge",
-  line: "Three of them, in three provinces, and every one was guarding the same absence. They were not the cause. They were standing round it.\n§7A surveyor named Fennick once walked every place where the ground is thin and wrote down what he found at each. There are six of his Field Notes. Together they leave one place.",
+  // the seven thin places go into the Ledger as leads (their descriptions say roughly where; none says which)
+  leads: ["drowned_chapel", "bellfounders_mine", "kings_barrow", "saltglass_grotto", "frostvein_hollow", "sunken_quarry", "witchroot_caves"],
+  line: "Three of them, in three provinces, and every one was guarding the same absence. They were not the cause. They were standing round it.\n§7A surveyor named Fennick once walked every place where the ground is thin and wrote down what he found at each. There are six of his Field Notes. Together they leave one place.\n§8Whatever is behind it will not answer while any of the five still keeps watch.",
+};
+// Mateo, 2026-11-11: hint at three, open at five. When the fifth falls, say how the door is opened.
+export const OPEN_AT = {
+  at: 5, flag: "leads_fork",
+  line: "The last of the five is down, and the shards they kept ring faintly in your pack, all on the same note.\n§7Bellfounders tuned bronze with a fork. Five shards on an amethyst stem, made at a Workshop, would hold that note. Struck on the right stone, it might be answered. Struck on the wrong one, it goes dull for days.",
 };
 export const REGIONAL_BOSSES = Object.keys(BOSS_LEADS);
 export const fallenCount = (flags) => REGIONAL_BOSSES.filter((b) => flags.includes(`fell_${b}`)).length;
