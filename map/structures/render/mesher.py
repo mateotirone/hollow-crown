@@ -235,6 +235,12 @@ def model(n, p):
     if n == "grindstone":
         return [((4 / 16, 4 / 16, 2 / 16, 12 / 16, 1, 14 / 16), {"side": "grindstone_side.tga", "top": "grindstone_round.tga"}, {}),
                 ((2 / 16, 0, 6 / 16, 4 / 16, 10 / 16, 10 / 16), {"side": "planks_big_oak"}, {}), ((12 / 16, 0, 6 / 16, 14 / 16, 10 / 16, 10 / 16), {"side": "planks_big_oak"}, {})]
+    if n.endswith("_wall_sign"):        # a thin board on the face of the block behind it
+        w = wood_of(n); t = {"side": "planks_" + WOODS.get(w, "oak")}
+        f = p.get("facing", "s")
+        box = {"s": (0, 4 / 16, 0, 1, 12 / 16, 2 / 16), "n": (0, 4 / 16, 14 / 16, 1, 12 / 16, 1),
+               "e": (0, 4 / 16, 0, 2 / 16, 12 / 16, 1), "w": (14 / 16, 4 / 16, 0, 1, 12 / 16, 1)}[f]
+        return [(box, t, {"cut": 1})]
     if n in ("iron_chain", "chain"): return [("cross", {"side": "chain1"}, {"cut": 1, "scale": 0.4})]
     if n == "ladder":
         return [((0, 0, 0, 1, 1, 1 / 16), {"side": "ladder"}, {"cut": 1})]

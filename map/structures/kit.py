@@ -259,17 +259,31 @@ class Building:
                 if not c[0].endswith("_log"): bp.set(x + rx * i + ox, y - 1, z + rz * i + oz, P.get("wsill", P["trim"]), facing=OPP[side], half="bottom")
             asked = shutters is not None
             if shutters is None: shutters = h3(x, y, z, self.seed + 31) < self.P.get("shutters", 0.3)
-            if P.get("dress") and not asked and not shutters and w == 1:     # shutter dressing (05): a shelf with a lantern, or leaves
+            wood = P["trim"].replace("_stairs", "")
+            sign = f"{wood}_wall_sign"
+            if P.get("dress") and not asked and not shutters and w == 1:
+                # shutter dressing (05): one choice per window by position hash: shelf, shelf with a lantern (about
+                # one in three, never two side by side), leaves hung under a shelf, a leaf box with a sign, or plain
                 r = h3(x, y, z, self.seed + 57)
                 sx, sz = x + 2 * ox, z + 2 * oz
-                if bp.get(sx, y - 1, sz)[0] in ("keep", "air"):
-                    if r < 0.3:
-                        bp.set(sx, y - 1, sz, P.get("shelf", "spruce_slab"), half="top")
-                        if bp.get(sx, y, sz)[0] in ("keep", "air"): bp.set(sx, y, sz, "lantern")
-                    elif r < 0.55 and bp.get(sx, y - 2, sz)[0] in ("keep", "air"):     # leaves hanging under a slab shelf
-                        bp.set(sx, y - 1, sz, P.get("shelf", "spruce_slab"), half="top")
-                        bp.set(sx, y - 2, sz, "azalea_leaves_flowered" if r < 0.42 else "azalea_leaves", persistent=True)
-            for sx, sz in (((x - rx + 2 * ox, z - rz + 2 * oz), (x + rx * w + 2 * ox, z + rz * w + 2 * oz)) if shutters else ()):
+                free = lambda a, b, c: bp.get(a, b, c)[0] in ("keep", "air")
+                lit_near = any(bp.get(sx + rx * k, y, sz + rz * k)[0] == "lantern" for k in (-2, -1, 1, 2))
+                shelf = P.get("shelf", "spruce_slab")
+                if free(sx, y - 1, sz):
+                    if r < 0.33 and not lit_near:
+                        bp.set(sx, y - 1, sz, shelf, half="top")
+                        if free(sx, y, sz): bp.set(sx, y, sz, "lantern")
+                    elif r < 0.45:
+                        bp.set(sx, y - 1, sz, shelf, half="top")
+                    elif r < 0.6 and free(sx, y - 2, sz):
+                        bp.set(sx, y - 1, sz, shelf, half="top")
+                        bp.set(sx, y - 2, sz, "azalea_leaves_flowered" if r < 0.52 else "azalea_leaves", persistent=True)
+                    elif r < 0.72 and free(sx + ox, y - 1, sz + oz):
+                        bp.set(sx, y - 1, sz, "azalea_leaves_flowered" if r < 0.66 else "azalea_leaves", persistent=True)
+                        bp.set(sx + ox, y - 1, sz + oz, sign, facing=side)
+            sh = (((x - rx + 2 * ox, z - rz + 2 * oz), (x + rx * w + 2 * ox, z + rz * w + 2 * oz)) if shutters else ())
+            if P.get("dress") and sh: sh = sh[:1] if h3(x, y, z, self.seed + 3) < 0.5 else sh[1:]   # a single shutter
+            for sx, sz in sh:
                 if bp.get(sx, y, sz)[0] in ("keep", "air"):
                     for j in range(h): bp.set(sx, y + j, sz, P["shutter"], facing=side, open=True)
 
@@ -474,6 +488,9 @@ class Building:
                 bp.set(x + i, top + 1, z + j, P["chimney_cap"])
         if P.get("dress") and w == 1 and d == 1:       # chimney top (06-roof): campfire boxed by trapdoors, a pot on top
             bp.set(x, top + 1, z, "campfire")
+            wsign = P["trim"].replace("_stairs", "") + "_wall_sign"
+            for dd, (dx, _, dz) in DIRS.items():       # signs of the trim wood round the last stone block (06-roof step 9)
+                if bp.get(x + dx, top, z + dz)[0] in ("keep", "air"): bp.set(x + dx, top, z + dz, wsign, facing=dd)
             for dd, (dx, _, dz) in DIRS.items():
                 if bp.get(x + dx, top + 1, z + dz)[0] in ("keep", "air"): bp.set(x + dx, top + 1, z + dz, "spruce_trapdoor", facing=dd, open=True)
             bp.set(x, top + 2, z, "flower_pot")
