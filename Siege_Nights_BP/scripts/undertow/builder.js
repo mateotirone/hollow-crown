@@ -10,6 +10,9 @@ import { SEAL_RIVER_X } from "./rivers.js";
 import { SITES } from "./roads.js";
 import { hash } from "./noise.js";
 import { STRUCTURE_IDS, planStructure } from "./structures.js";
+import { SITE_DESIGNS, TOWER_DESIGNS } from "./sites_data.js";
+import { DROWNED_SPOTS } from "./drowned.js";
+import { stamp } from "./stamp.js";
 import { load, save } from "./data.js";
 import { sfx } from "../core/sfx.js";
 
@@ -177,8 +180,15 @@ export function piecesTick() {
     if ((p.sites ?? []).includes(id)) continue;
     const s = SITES.find((x) => x.id === id), reach = s.r + 4;
     if (!chunksBuilt(s.x - reach, s.z - reach, s.x + reach, s.z + reach)) continue;
+    if (SITE_DESIGNS[id]) { stampOnce(d, `site:${id}`, SITE_DESIGNS[id], s, (q) => { q.sites = [...(q.sites ?? []), id]; }); continue; }
     if (fillAll(d, planStructure(id))) { p.sites = [...(p.sites ?? []), id]; changed = true; }
   }
+
+  // Hallowmere's drowned city: leaning towers on the marsh banks by the Court landing.
+  DROWNED_SPOTS.forEach((t, i) => {
+    if ((p.drowned ?? []).includes(i) || !chunksBuilt(t.x - 8, t.z - 8, t.x + 8, t.z + 8)) return;
+    stampOnce(d, `tower:${i}`, TOWER_DESIGNS[t.design], t, (q) => { q.drowned = [...(q.drowned ?? []), i]; });
+  });
 
   // The Drowned Court and the sealed wall across the valley.
   if (!p.court && chunksBuilt(-COURT.radius - 2, COURT.center.z - COURT.radius - 2, COURT.radius + 2, COURT.gateZ + 14)) {
@@ -190,6 +200,21 @@ export function piecesTick() {
     if (buildHeart(d)) { p.heart = true; changed = true; }
   }
   if (changed) savePieces(p);
+}
+
+// Designed buildings (map/structures/hollow_kit.py) go down a block a tick; each is marked done in the
+// saved pieces only when its last block is placed, so an unloaded area is simply tried again later.
+const stamping = new Set();
+function stampOnce(d, key, design, at, mark) {
+  if (stamping.has(key)) return;
+  stamping.add(key);
+  stamp(d, design, { x: at.x, y: at.y, z: at.z }, (ok) => {
+    stamping.delete(key);
+    if (!ok) return;
+    const q = pieces();
+    mark(q);
+    savePieces(q);
+  });
 }
 
 function fillAll(d, ops) {

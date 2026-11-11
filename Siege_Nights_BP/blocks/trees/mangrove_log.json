@@ -1,0 +1,65 @@
+{
+  "format_version": "1.21.60",
+  "minecraft:block": {
+    "description": {
+      "identifier": "siege:old_mangrove_log",
+      "menu_category": {
+        "category": "none"
+      },
+      "states": {
+        "siege:axis": [
+          0,
+          1,
+          2
+        ]
+      }
+    },
+    "components": {
+      "minecraft:display_name": "Old Mangrove Log",
+      "minecraft:destructible_by_mining": false,
+      "minecraft:destructible_by_explosion": false,
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "siege_old_mangrove_log_side",
+          "render_method": "opaque"
+        },
+        "up": {
+          "texture": "siege_old_mangrove_log_top",
+          "render_method": "opaque"
+        },
+        "down": {
+          "texture": "siege_old_mangrove_log_top",
+          "render_method": "opaque"
+        }
+      },
+      "minecraft:map_color": "#5a4630",
+      "minecraft:geometry": "minecraft:geometry.full_block"
+    },
+    "permutations": [
+      {
+        "condition": "q.block_state('siege:axis') == 1",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              0,
+              90
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:axis') == 2",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              90,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

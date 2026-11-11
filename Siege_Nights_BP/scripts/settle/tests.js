@@ -6,10 +6,11 @@ import { SETTLE, CATALOG, MASON_LINES } from "./config.js";
 import { BUILDINGS, drawBuilding, styleFor } from "./buildings.js";
 import { hallReserve, hallReach, inBox, footprint, boxesTouch, placeVerdict, bill, priceOf, isCampKit } from "./rules.js";
 import { localStock, stoneStock, wallStock, niceName } from "./mason.js";
-import { STONE_FAMILY, CASTLE_STONES, stoneId, regionalId, GATES, PORTCULLISES, REINFORCEABLE, CASTLE_BLOCKS } from "../siege/api.js";
+import { STONE_FAMILY, STONE_KINDS, CASTLE_STONES, stoneId, regionalId, GATES, PORTCULLISES, REINFORCEABLE, CASTLE_BLOCKS } from "../siege/api.js";
 import { MATERIALS } from "./rules.js";
 import { HALL, MASON, SLOTS, place, slotsFor } from "./layout.js";
-import { WALLS, WALL_LEVELS, MAX_WALL, smoothGround, groundProblem, wallColumns, onWallLine, bearingToAngle, columnKinds, repairCost, wallArmor, wallSeed, VARIATION } from "./walldata.js";
+import { wallCost, nearGate } from "./walls.js";
+import { WALLS, WALL_LEVELS, MAX_WALL, smoothGround, groundProblem, wallColumns, onWallLine, bearingToAngle, columnKinds, repairCost, wallArmor, wallSeed, VARIATION, WALL_STONES, WALL_STONE_IDS, WALL_TIMBER, WALL_LOG } from "./walldata.js";
 
 const base = { creative: false, overworld: true, typeId: "minecraft:stone_bricks", land: "me", mine: true, reserve: undefined, wildsClosed: true, hasKeep: true };
 
@@ -93,6 +94,34 @@ addTests("settle", {
   },
 });
 addTests("settle walls", {
+  "the guard opens the gate for someone close, not someone on the wall above or far off": () => {
+    const g = { x: 0, y: 64, z: 0 };
+    assert(nearGate(g, { x: 3, y: 64, z: 1 }, WALLS.gateGreet));
+    assert(!nearGate(g, { x: 9, y: 64, z: 0 }, WALLS.gateGreet));
+    assert(!nearGate(g, { x: 0, y: 72, z: 0 }, WALLS.gateGreet));
+  },
+  "log walls are stripped logs in every timber": () => {
+    for (const t of WALL_TIMBER) assert(/^minecraft:stripped_\w+_log$/.test(WALL_LOG[t] ?? ""), `${t} log wall is ${WALL_LOG[t]}`);
+  },
+  "a wall is paid for in any stone, and the stone rows are added together": () => {
+    for (let level = 1; level <= MAX_WALL; level++) {
+      const rows = wallCost(level);
+      assert(rows.filter(([label]) => label.startsWith("stone")).length <= 1, `level ${level} checks stone twice`);
+      const raw = (WALL_LEVELS[level].cost ?? []).filter(([, , k]) => STONE_KINDS.includes(k)).reduce((n, [, a]) => n + a, 0);
+      assertEqual(rows.find(([label]) => label.startsWith("stone"))?.[1] ?? 0, raw, `level ${level}`);
+    }
+    const [, , anyStone] = wallCost(4).find(([label]) => label.startsWith("stone"));
+    for (const id of ["siege:castle_stone", "siege:castle_bricks_blackfen", "minecraft:cobblestone", "minecraft:deepslate_tiles", "minecraft:tuff_bricks",
+      "minecraft:cut_sandstone", "minecraft:white_concrete", "minecraft:orange_terracotta", "minecraft:quartz_bricks", "minecraft:mud_bricks", "minecraft:blackstone"]) assert(anyStone(id), id);
+    for (const id of ["minecraft:stone_sword", "minecraft:brick", "minecraft:redstone", "minecraft:stone_brick_stairs", "minecraft:oak_planks", "minecraft:glowstone"]) assert(!anyStone(id), id);
+  },
+  "every wall look names a block for every kind of stonework": () => {
+    for (const id of WALL_STONE_IDS) {
+      const look = WALL_STONES[id];
+      assert(look.name && (look.castle || STONE_KINDS.every((k) => look.kinds[k]?.length)), id);
+    }
+    assert(WALL_STONES.castle.castle === true, "the default is still the region's Castle Stone");
+  },
   "every region has its own gate, portcullis, palisade, planks and shingles": () => {
     assertEqual(regionalId("palisade"), "siege:palisade");
     assertEqual(regionalId("castle_gate", "blackfen"), "siege:castle_gate_blackfen");
@@ -101,7 +130,7 @@ addTests("settle walls", {
     for (const id of GATES) assert(REINFORCEABLE.includes(id), `${id} cannot be reinforced`);
     for (const id of PORTCULLISES) assert(CASTLE_BLOCKS.includes(id), `${id} has no wall health`);
     for (const style of STYLE_IDS) assert(styleFor(style).roles.roofBlock[0].startsWith("siege:roof_shingles"), style);
-    assertEqual(wallStock("saltreach", () => true).map(([id]) => id), ["siege:palisade_saltreach", "siege:wall_planks_saltreach", "siege:roof_shingles_saltreach", "siege:castle_gate_saltreach", "siege:portcullis_saltreach"]);
+    assertEqual(wallStock("saltreach", () => true).map(([id]) => id), ["minecraft:stripped_birch_log", "siege:wall_planks_saltreach", "siege:roof_shingles_saltreach", "siege:castle_gate_saltreach", "siege:portcullis_saltreach"]);
   },
   "ten levels, each at least as tall and thick as the last": () => {
     assertEqual(MAX_WALL, 10);

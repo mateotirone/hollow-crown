@@ -218,9 +218,12 @@ api.addTests("townhall", {
         const b = plan.bounds();
         api.assert(b.x1 - b.x0 < 40 && b.z1 - b.z0 < 50, `${id} ${level} fits in a Hamlet`);
         // the doorway behind the cornerstone is open
+        // (rebuilt halls mark their door: an open doorway or a real door block both count)
         const lift = STYLES[id].lift;
-        const door = plan.cells.get(`0,${1 + lift},${1 + lift}`);
-        api.assert(!door || door.role === "air", `${id} ${level} door is open (${door?.role})`);
+        const at = plan.marks.door ?? { x: 0, y: 1 + lift, z: 1 + lift };
+        const door = plan.cells.get(`${at.x},${at.y},${at.z}`);
+        const isDoor = door && (STYLES[id].roles[door.role] ?? [])[0]?.endsWith("_door");
+        api.assert(!door || door.role === "air" || isDoor, `${id} ${level} door is open (${door?.role})`);
         if (level > 1) api.assert(buildOrder(plan).length > buildOrder(drawHall(level - 1, STYLES[id])).length, `${id} ${level} is bigger than the last`);
       }
     }

@@ -1,0 +1,76 @@
+{
+  "format_version": "1.21.60",
+  "minecraft:block": {
+    "description": {
+      "identifier": "siege:old_dark_oak_fence",
+      "menu_category": {
+        "category": "none"
+      },
+      "states": {
+        "siege:n": [
+          0,
+          1
+        ],
+        "siege:e": [
+          0,
+          1
+        ],
+        "siege:s": [
+          0,
+          1
+        ],
+        "siege:w": [
+          0,
+          1
+        ]
+      }
+    },
+    "components": {
+      "minecraft:display_name": "Old Dark Oak Fence",
+      "minecraft:destructible_by_mining": false,
+      "minecraft:destructible_by_explosion": false,
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "siege_old_planks_big_oak",
+          "render_method": "opaque"
+        }
+      },
+      "minecraft:map_color": "#5a4630",
+      "minecraft:geometry": {
+        "identifier": "geometry.siege_old_fence",
+        "bone_visibility": {
+          "n": "q.block_state('siege:n') == 1",
+          "e": "q.block_state('siege:e') == 1",
+          "s": "q.block_state('siege:s') == 1",
+          "w": "q.block_state('siege:w') == 1",
+          "post": true
+        }
+      },
+      "minecraft:collision_box": {
+        "origin": [
+          -2,
+          0,
+          -2
+        ],
+        "size": [
+          4,
+          16,
+          4
+        ]
+      },
+      "minecraft:selection_box": {
+        "origin": [
+          -2,
+          0,
+          -2
+        ],
+        "size": [
+          4,
+          16,
+          4
+        ]
+      },
+      "minecraft:light_dampening": 0
+    }
+  }
+}

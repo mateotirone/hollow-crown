@@ -1,0 +1,37 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "siege:foresters_lodge_recipe"
+    },
+    "tags": [
+      "siege_workshop"
+    ],
+    "pattern": [
+      "LLL",
+      "ASA",
+      "PPP"
+    ],
+    "key": {
+      "L": {
+        "tag": "minecraft:logs"
+      },
+      "A": {
+        "item": "minecraft:iron_axe"
+      },
+      "S": {
+        "item": "minecraft:oak_sapling"
+      },
+      "P": {
+        "tag": "minecraft:planks"
+      }
+    },
+    "result": {
+      "item": "siege:foresters_lodge",
+      "count": 1
+    },
+    "unlock": {
+      "context": "AlwaysUnlocked"
+    }
+  }
+}

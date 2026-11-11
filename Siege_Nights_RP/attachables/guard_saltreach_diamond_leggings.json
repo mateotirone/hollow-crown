@@ -1,0 +1,25 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:attachable": {
+    "description": {
+      "identifier": "siege:guard_saltreach_diamond_leggings",
+      "materials": {
+        "default": "armor_leather",
+        "enchanted": "armor_leather_enchanted"
+      },
+      "textures": {
+        "default": "textures/models/siege_armor/guard_saltreach_diamond_leggings",
+        "enchanted": "textures/misc/enchanted_actor_glint"
+      },
+      "geometry": {
+        "default": "geometry.siege_guard_saltreach_diamond_leggings"
+      },
+      "scripts": {
+        "parent_setup": "variable.leg_layer_visible = 0.0;"
+      },
+      "render_controllers": [
+        "controller.render.armor"
+      ]
+    }
+  }
+}

@@ -13,11 +13,12 @@
 // Test: /scriptevent siege:wall <1-10> [style]     raise that level round your keep (or where you stand)
 
 import { world, system, BlockPermutation } from "@minecraft/server";
-import { isReady, keepOf, tierOf, TIERS, onTick, moduleStore, on, emit, addFilter, addLandClaim, stoneId, STONE_KINDS, title, CASTLE_BLOCKS, WALL_HP, PORTCULLISES, regionalId } from "../siege/api.js";
+import { ModalFormData } from "@minecraft/server-ui";
+import { isReady, keepOf, tierOf, TIERS, onTick, moduleStore, on, emit, addFilter, addLandClaim, stoneId, STONE_KINDS, title, CASTLE_BLOCKS, WALL_HP, PORTCULLISES, GATES, regionalId, getState, isAlly, guardCount, setGate } from "../siege/api.js";
 import { STYLES } from "../townhall/styles.js";
 import { PLOT_PLAN } from "../plots/config.js";
 import { plotAt, mapMode } from "../plots/claims.js";
-import { WALLS, WALL_LEVELS, MAX_WALL, bearingToAngle, smoothGround, stationSpots, groundProblem, wallColumns, onWallLine, gateSpot, materialKind, wallArmor, columnKinds, wallSeed } from "./walldata.js";
+import { WALLS, WALL_LEVELS, MAX_WALL, bearingToAngle, smoothGround, stationSpots, groundProblem, wallColumns, onWallLine, gateSpot, materialKind, wallArmor, columnKinds, wallSeed, WALL_STONES, WALL_TIMBER, WALL_STONE_IDS, WALL_LOG } from "./walldata.js";
 import { styleOf } from "./plans.js";
 import { sfx } from "../core/sfx.js";
 
@@ -34,13 +35,28 @@ export function wallRing(id) {
 }
 
 // ---------- cost (the town hall charges it) ----------
-const family = (kind) => (id) => new RegExp(`^siege:castle_${kind}(_|$)`).test(id);
+// Any stone pays for stonework (settlements are "everything free"): Castle Stone of any region, or any vanilla stone,
+// brick, deepslate, tuff, sandstone, quartz, blackstone, mud brick, terracotta or concrete block.
+const NOT_STONE = /(^minecraft:(nether_)?brick$|sword|pickaxe|_axe|shovel|_hoe|button|pressure_plate|redstone|glowstone|lodestone|grindstone|stonecutter|_wall$|_stairs$|_slab$|dust|_ore$)/;
+export const isStoneBlock = (id) => !NOT_STONE.test(id) && (/^siege:(castle_|mossy_castle_stone|cracked_castle_stone)/.test(id)
+  || /^minecraft:(.*stone.*|.*bricks?$|.*brick_block$|.*deepslate.*|.*tuff.*|andesite|diorite|granite|polished_.*|calcite|.*quartz.*|blackstone|basalt|smooth_basalt|.*terracotta|.*concrete|.*prismarine.*|packed_mud|mud_bricks|purpur_block|end_stone.*)$/.test(id));
 const KIND = {
-  log: (id) => /_log$|_stem$/.test(id), plank: (id) => id.endsWith("_planks") || id.endsWith(":planks"),
-  stone: family("stone"), cobbled: family("cobbled"), bricks: family("bricks"), tiles: family("tiles"), smooth: family("smooth"),
+  log: (id) => /_log$|_stem$|^siege:palisade/.test(id), plank: (id) => id.endsWith("_planks") || id.endsWith(":planks") || id.startsWith("siege:wall_planks"),
+  stone: isStoneBlock,
   iron: (id) => id === "minecraft:iron_ingot", diamond: (id) => id === "minecraft:diamond", netherite: (id) => id === "minecraft:netherite_scrap",
 };
-export const wallCost = (level) => (WALL_LEVELS[level]?.cost ?? []).map(([label, amount, kind]) => [label, amount, KIND[kind]]);
+const STONEWORK = new Set(STONE_KINDS);
+// The rows the town hall charges: stonework rows are joined into one "any stone" row (each row is checked on its own)
+export function wallCost(level) {
+  const rows = new Map();
+  for (const [label, amount, kind] of WALL_LEVELS[level]?.cost ?? []) {
+    const k = STONEWORK.has(kind) ? "stone" : kind;
+    const row = rows.get(k) ?? [STONEWORK.has(kind) ? "stone blocks (any kind)" : label, 0, KIND[k]];
+    row[1] += amount;
+    rows.set(k, row);
+  }
+  return [...rows.values()];
+}
 
 // ---------- blocks ----------
 const perms = new Map();
@@ -62,17 +78,23 @@ function perm(id, states) {
 }
 const first = (ids) => ids.map((id) => perm(id)).find(Boolean) ?? perm("minecraft:cobblestone");
 
-export function palette(style, L) {
-  const roles = (STYLES[style] ?? STYLES.vale).roles;
+// look = { stone, timber } from the wall record (the owner's choice); without one, the region's own Castle Stone and timber
+export function palette(style, L, look = {}) {
+  const timber = WALL_TIMBER.includes(look.timber) ? look.timber : style;
+  const roles = (STYLES[timber] ?? STYLES.vale).roles;
   const kinds = {
-    // the region's own palisade stakes and wall planks, with its timber behind them in case the block is missing
-    log: perm(regionalId("palisade", style)) ?? first(roles.beam ?? ["minecraft:spruce_log"]),
+    // log walls are the timber's stripped log (WALL_LOG); wall planks with that region's timber behind them in case the block is missing
+    log: first([WALL_LOG[timber] ?? WALL_LOG.vale, ...(roles.beam ?? []), "minecraft:spruce_log"]),
     fence: first(roles.rail ?? ["minecraft:spruce_fence"]),
-    plank: perm(regionalId("wall_planks", style)) ?? first(roles.floor ?? ["minecraft:spruce_planks"]),
+    plank: perm(regionalId("wall_planks", timber)) ?? first(roles.floor ?? ["minecraft:spruce_planks"]),
   };
+  const stone = WALL_STONES[look.stone] ?? WALL_STONES.castle;
+  const region = stone.castle === true ? style : stone.castle;
   for (const kind of STONE_KINDS) {
-    kinds[kind] = perm(stoneId(kind, style), kind === "stone" ? { "siege:armor": 0, "siege:cracks": 0 } : undefined) ?? perm("minecraft:stone_bricks");
+    kinds[kind] = (stone.kinds ? first([...stone.kinds[kind], "minecraft:stone_bricks"])
+      : perm(stoneId(kind, region), kind === "stone" ? { "siege:armor": 0, "siege:cracks": 0 } : undefined)) ?? perm("minecraft:stone_bricks");
   }
+  style = timber; // gates and portcullis match the timber
   const gateStates = (dir) => ({ "minecraft:cardinal_direction": dir, "siege:armor": L.gateArmor ?? 0 });
   return {
     kinds,
@@ -80,6 +102,12 @@ export function palette(style, L) {
     tooth: perm("siege:battlement") ?? kinds[L.body],
     light: perm("minecraft:lantern"),
     air: perm("minecraft:air"),
+    // a roofed tower (TOWER_ROOF) in the region's own roofing; the stair's high side faces the way it rises
+    roofb: first(roles.roofBlock ?? ["minecraft:dark_oak_planks"]),
+    roof: (dir) => {
+      const id = (roles.roofStair ?? ["minecraft:dark_oak_stairs"]).find((r) => perm(r)) ?? "minecraft:dark_oak_stairs";
+      return perm(id, { weirdo_direction: { e: 0, w: 1, s: 2, n: 3 }[dir], upside_down_bit: false });
+    },
     gate: (dir) => (L.gate === "open" ? undefined : perm(regionalId(L.gate, style), gateStates(dir)) ?? perm(`siege:${L.gate}`, gateStates(dir))),
     port: (dir) => perm(regionalId("portcullis", style), gateStates(dir)) ?? perm("siege:portcullis", gateStates(dir)),
     // an arrow slit looks out along the way its stretch of wall faces (angle 0 = east, a quarter turn = south)
@@ -123,6 +151,8 @@ export function permFor(P, w, kind, col) {
   if (kind === "gate") return P.gate(w.gateDir);
   if (kind === "port") return P.port(w.gateDir);
   if (kind === "slit") return P.slit(col?.a ?? 0);
+  if (kind === "roofb") return P.roofb;
+  if (kind.startsWith("roof:")) return P.roof(kind.slice(5));
   return P.kinds[kind];
 }
 
@@ -132,7 +162,7 @@ function placeColumn(dim, w, job, col) {
   const { x, z, base } = col;
   const ground = dim.getBlock({ x, y: base, z });
   if (!ground) return -1;
-  const cells = new Map(columnKinds(L, col, wallSeed(w)));
+  const cells = new Map(columnKinds(L, col, wallSeed(w), w.style));
   let n = 0;
   if (col.role === "gap" || col.role === "gate" || col.role === "port") {
     if (ground.isAir) setBlock(dim, x, base, z, P.kinds.cobbled); // something to walk on
@@ -244,7 +274,7 @@ export function raiseWall(id, level, { center, style, bearing } = {}) {
   } catch {
     // out of ticking areas: the wall rises as players come near
   }
-  jobs.set(id, { level, L, palette: palette(w.style, L), index: 0 });
+  jobs.set(id, { level, L, palette: palette(w.style, L, w.look), index: 0 });
   return true;
 }
 
@@ -266,6 +296,67 @@ on("ready", () => {
     const { level, index } = w.building;
     if (raiseWall(id, level) === true) walls()[id].building.index = index;
   }
+});
+
+// ---------- the gate: barred to outsiders, opened by the guard for friends ----------
+// Mateo, 2026-11-11: only the owner, their allies and their guards open a settlement's gates; gates
+// shut when a siege starts. Clicking is checked in siege/block_clicks.js (mayWorkGate). Here, when the
+// owner or an ally walks up to their own gate and the settlement keeps guards, the guard opens the gate
+// and portcullis, and shuts them again once nobody friendly is near. No guard opens anything mid-siege.
+const gateBlocks = new Map(); // `${id}|${level}` -> [{ x, y, z }] one block of each gate and portcullis
+const guardOpened = new Set(); // wall ids whose gate a guard opened
+function findGateBlocks(id, w) {
+  const key = `${id}|${w.level}`;
+  if (gateBlocks.has(key)) return gateBlocks.get(key);
+  const g = gateSpot(w, w.gate, w.ground, w.radius), dim = world.getDimension(OVERWORLD), found = [], kinds = new Set();
+  try {
+    for (let dy = 0; dy <= 6; dy++) for (let dx = -3; dx <= 3; dx++) for (let dz = -3; dz <= 3; dz++) {
+      const b = dim.getBlock({ x: g.x + dx, y: g.y + dy, z: g.z + dz });
+      if (b && (GATES.includes(b.typeId) || PORTCULLISES.includes(b.typeId)) && !kinds.has(b.typeId)) { kinds.add(b.typeId); found.push(b.location); }
+    }
+  } catch {
+    return []; // not loaded: look again next time
+  }
+  if (found.length) gateBlocks.set(key, found);
+  return found;
+}
+function setWallGate(id, w, open) {
+  const dim = world.getDimension(OVERWORLD);
+  let moved = false;
+  for (const loc of findGateBlocks(id, w)) {
+    try {
+      const b = dim.getBlock(loc);
+      if (b && setGate(b, open)) moved = true;
+    } catch {
+      // not loaded
+    }
+  }
+  return moved;
+}
+const friendOf = (owner, playerId) => playerId === owner || isAlly(owner, playerId);
+export const nearGate = (g, p, reach) => Math.hypot(p.x - (g.x + 0.5), p.z - (g.z + 0.5)) <= reach && Math.abs(p.y - g.y) <= 4;
+
+onTick("settle_gates", 10, () => {
+  if (!isReady() || getState().active) return;
+  const players = world.getDimension(OVERWORLD).getPlayers();
+  for (const [id, w] of Object.entries(walls())) {
+    if (!(w.level > 0) || w.building || WALL_LEVELS[w.level]?.gate === "open" || id.startsWith("npc:")) continue;
+    const g = gateSpot(w, w.gate, w.ground, w.radius);
+    const opened = guardOpened.has(id);
+    const friendNear = players.some((p) => friendOf(id, p.id) && nearGate(g, p.location, opened ? 6 : WALLS.gateGreet));
+    if (friendNear && !opened && guardCount(id) > 0) {
+      if (setWallGate(id, w, true)) guardOpened.add(id);
+    } else if (!friendNear && opened) {
+      setWallGate(id, w, false);
+      guardOpened.delete(id);
+    }
+  }
+});
+
+// A siege bars every gate: anything open slams shut (the owner and allies can still open it by hand to sally out)
+on("siegeStart", () => {
+  guardOpened.clear();
+  for (const [id, w] of Object.entries(walls())) if (w.level > 0 && WALL_LEVELS[w.level]?.gate !== "open") setWallGate(id, w, false);
 });
 
 // ---------- what a wall changes ----------
@@ -298,7 +389,8 @@ addFilter("spawnDistance", (distance, { owner }) => {
 // A settlement wall is as strong as its level: the whole Castle Stone family on the line of a
 // level 6+ wall takes hits like reinforced Castle Stone (iron, then diamond at 9, netherite at 10)
 addFilter("wallHp", (hp, { block }) => {
-  if (!CASTLE_BLOCKS.includes(block.typeId) || PORTCULLISES.includes(block.typeId)) return hp;
+  // any stonework on the line counts (the owner may build it in any stone); timber, gates and portcullis keep their own
+  if (PORTCULLISES.includes(block.typeId) || GATES.includes(block.typeId) || !(CASTLE_BLOCKS.includes(block.typeId) || isStoneBlock(block.typeId))) return hp;
   for (const w of Object.values(walls())) {
     if (w.level > 0 && onWallLine(w, block.location, w.radius)) return Math.max(hp, WALL_HP.castle[wallArmor(w.level)]);
   }
@@ -344,6 +436,12 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
   const player = event.sourceEntity;
   if (player?.typeId !== "minecraft:player" || !isReady()) return;
   const [n, style] = event.message.trim().split(/\s+/);
+  if (n === "look") { // /scriptevent siege:wall look   or   look <stone> [timber]
+    if (!style) return void chooseWallLook(player).catch(() => {});
+    const timber = event.message.trim().split(/\s+/)[2];
+    const done = setWallLook(player.id, { stone: style, timber });
+    return player.sendMessage(done === true ? `§6Wall look: ${WALL_STONES[style].name}${timber ? `, ${timber} timber` : ""}. §7Run /scriptevent siege:wall_repair free to re-face it now.` : `§c${done}§7 Stones: ${WALL_STONE_IDS.join(", ")}. Timber: ${WALL_TIMBER.join(", ")}.`);
+  }
   const level = Number(n);
   if (!WALL_LEVELS[level]) {
     return player.sendMessage(WALL_LEVELS.slice(1).map((L, i) => `§6${i + 1}§r ${L.name}`).join("\n") + `\n§7/scriptevent siege:wall <1-${MAX_WALL}> [style]`);
@@ -400,3 +498,38 @@ on("wallUpgrade", (q) => {
   q.seconds = Math.ceil(blocks / WALLS.perTick / 20) + 2;
   q.handled = true;
 });
+
+// ---------- the owner chooses what the wall is built in ----------
+// Settlements are "everything free" (Mateo, 2026-11-11): Castle Stone of any region, or plain stone, deepslate,
+// tuff, sandstone, white stone, brick, mud brick or blackstone; palisade and gates from any region's timber.
+// The choice is kept on the wall record (w.look) and used for every later raise and repair. Re-facing the
+// standing wall in the new look is free (the masons swap it over), but not while a siege is on.
+export function setWallLook(owner, { stone, timber } = {}) {
+  const w = walls()[owner];
+  if (!w) return "There is no wall here yet. Raise one from the town hall first.";
+  if (stone !== undefined && !WALL_STONES[stone]) return `There is no stone called ${stone}.`;
+  if (timber !== undefined && !WALL_TIMBER.includes(timber)) return `There is no timber called ${timber}.`;
+  w.look = { ...(w.look ?? {}), ...(stone !== undefined ? { stone } : {}), ...(timber !== undefined ? { timber } : {}) };
+  save();
+  emit("wallLookChanged", { owner, look: w.look });
+  return true;
+}
+
+export async function chooseWallLook(player, owner = player.id) {
+  const w = walls()[owner];
+  if (!w) return player.sendMessage("§7Mason: §fRaise a wall at the town hall first, then tell me what to build it in.");
+  const stones = WALL_STONE_IDS;
+  const look = w.look ?? {};
+  const form = new ModalFormData().title("What the wall is built in")
+    .dropdown("Stonework", stones.map((id) => WALL_STONES[id].name), { defaultValueIndex: Math.max(0, stones.indexOf(look.stone ?? "castle")) })
+    .dropdown("Palisade, walkway and gates", WALL_TIMBER.map((r) => `${r[0].toUpperCase()}${r.slice(1)} timber`), { defaultValueIndex: Math.max(0, WALL_TIMBER.indexOf(look.timber ?? w.style)) })
+    .toggle("Re-face the standing wall now (free)", { defaultValue: true });
+  const res = await form.show(player);
+  if (res.canceled || !res.formValues) return;
+  const [s, t, now] = res.formValues;
+  const done = setWallLook(owner, { stone: stones[s], timber: WALL_TIMBER[t] });
+  if (done !== true) return player.sendMessage(`§c${done}`);
+  if (!now || !w.level) return player.sendMessage("§6The masons will build in it from the next raise or repair.");
+  emit("wallReface", { owner, player });
+}
+

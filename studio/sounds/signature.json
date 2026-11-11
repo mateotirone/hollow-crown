@@ -186,6 +186,54 @@
    "category": "ambient",
    "where": "Once per world, at 3:17 on the night something walks up between the soldiers that is not one of them.",
    "prompt": "Night on a castle wall during a battle that suddenly goes quiet: the wind drops, the distant fighting fades to nothing, and in the silence come slow, even, unhurried footsteps on wet ground getting closer, with a very faint low choir note under them and one slow deep pulse like a heartbeat. It stops before anything happens. Quiet, tense, patient. No sting, no loud hit, no scream, no music."
+  },
+  {
+   "file": "bell_tongue",
+   "id": "siege.sig.bell_tongue",
+   "path": "sounds/siege/sig/bell_tongue",
+   "name": "The Forgemaster's bell-tongue",
+   "seconds": 6,
+   "kind": "one-shot",
+   "channels": 2,
+   "category": "player",
+   "where": "Morvane fight, stage 2: a Forgemaster's new bell rings once and the Standing Ranks break step.",
+   "prompt": "One clear, bright bronze hand-bell struck hard, close and present, with a pure ringing tone and a long shimmering tail that fills a stone hall. Under it, the clatter of many pieces of empty armour shifting at once, then stillness. No music, no voices. Ends in silence."
+  },
+  {
+   "file": "roll_drum",
+   "id": "siege.sig.roll_drum",
+   "path": "sounds/siege/sig/roll_drum",
+   "name": "The roll of the fallen",
+   "seconds": 4,
+   "kind": "one-shot",
+   "channels": 1,
+   "category": "neutral",
+   "where": "At the Cinder Roost, when Kesh reads a name from the roll of the fallen, or a rider's dragon dies.",
+   "prompt": "A single low, muffled skin drum struck once in a high open cliffside space with dry desert wind, a soft boom that rolls away into the distance. Solemn, not dramatic. No melody, no voices. Ends in silence."
+  },
+  {
+   "file": "forty_row",
+   "id": "siege.sig.forty_row",
+   "path": "sounds/siege/sig/forty_row",
+   "name": "The forty rowing",
+   "seconds": 10,
+   "kind": "one-shot",
+   "channels": 2,
+   "category": "ambient",
+   "where": "Morvane fight, stage 4: the drowned crews of Holt's Debt row the party down the light river.",
+   "prompt": "Many oars dipping together in slow unison on dark still water inside a vast cavern, wooden oarlocks creaking in time, water dripping, and a low wordless hum from many tired voices keeping the stroke. Distant, hollow echo. Uneasy but steady. No music. Ends in silence."
+  },
+  {
+   "file": "fen_debt",
+   "id": "siege.sig.fen_debt",
+   "path": "sounds/siege/sig/fen_debt",
+   "name": "The fen collects",
+   "seconds": 7,
+   "kind": "one-shot",
+   "channels": 2,
+   "category": "player",
+   "where": "When a Fen Mother's hexes all land at once, and at Morvane stage 6 when the fen lends the party a moment.",
+   "prompt": "A deep wet marsh sound: bubbles rising and bursting from thick mud, reeds rustling all at once as if a wind passed, and a slow low creak like an old wooden raft taking weight. A faint breathy whisper at the very end, no words. Uneasy, not frightening. Ends in silence."
   }
  ],
  "dragons": [

@@ -1,7 +1,7 @@
 // Dragons: saved records (one per player) and the living entity that matches a record.
 
 import { world, system, GameMode } from "@minecraft/server";
-import { moduleStore, isOnline, isAlly, keepOf } from "../siege/api.js";
+import { moduleStore, isOnline, isAlly, keepOf, emit } from "../siege/api.js";
 import { mapMode, plotOf, allPlots, holderOf } from "../plots/claims.js";
 import { DRAGON_SETTINGS as S, DRAGON, STAGES, earnedStage, groundStep, airStep, healthStep, newMind } from "./data.js";
 
@@ -154,6 +154,11 @@ export function roostDragon(rec, status = "roosted") {
 export function refresh(rec) {
   const entity = entityOf(rec);
   if (entity) applyRecord(entity, rec, { keepMode: true });
+  // Other features hear once when a bond fills (the role trials give the rider a gift for it)
+  if (rec.bond >= 100 && !rec.bondFullSent) {
+    rec.bondFullSent = true;
+    try { emit("dragonBondFull", { owner: rec.owner, name: rec.name }); } catch { /* nobody listening */ }
+  }
   save();
 }
 

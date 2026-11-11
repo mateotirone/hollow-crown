@@ -7,7 +7,7 @@ Every sound The Hollow Crown plays, and what each one is made of. **This file is
 Tone for all of it: uneasy, especially at night. Not horror, no jump scares, nothing sudden or loud for its own sake.
 There is no music in version 1.
 
-- **19 signature sounds** are meant to be real recordings made with an AI sound generator. 0 of 19 are installed; the rest play a stand-in built from vanilla sounds, so the game is never silent.
+- **23 signature sounds** are meant to be real recordings made with an AI sound generator. 0 of 23 are installed; the rest play a stand-in built from vanilla sounds, so the game is never silent.
 - **32 more dragon sounds** have synthesized stand-ins and can be replaced the same way.
 - **25 vanilla sounds** are reworked (lower, softer, layered) everywhere the scripts use them, and **3 named cues** are built from vanilla layers.
 - The remaining vanilla sounds are played as they are, because they should sound like what they are (a horse, a bow, a page).
@@ -44,10 +44,14 @@ No computer set up for this? Upload the files in the project chat and ask Claude
 | 13 | The Mother of Changelings | `boss_mother` | 10 s | one-shot, stereo | vanilla stand-in |
 | 14 | The Warlord King | `boss_warlord_king` | 10 s | one-shot, stereo | vanilla stand-in |
 | 15 | The first glimpse | `first_glimpse` | 12 s | one-shot, stereo | vanilla stand-in |
-| 16 | Cinderwing: roar | `cinderwing_roar` | 2.4 s | one-shot, mono | synthesized stand-in |
-| 17 | Ashen Wyvern: roar | `wyvern_roar` | 2.4 s | one-shot, mono | synthesized stand-in |
-| 18 | Dune Drake: roar | `drake_roar` | 2.4 s | one-shot, mono | synthesized stand-in |
-| 19 | Glass Wyrm: roar | `wyrm_roar` | 2.4 s | one-shot, mono | synthesized stand-in |
+| 16 | The Forgemaster's bell-tongue | `bell_tongue` | 6 s | one-shot, stereo | vanilla stand-in |
+| 17 | The roll of the fallen | `roll_drum` | 4 s | one-shot, mono | vanilla stand-in |
+| 18 | The forty rowing | `forty_row` | 10 s | one-shot, stereo | vanilla stand-in |
+| 19 | The fen collects | `fen_debt` | 7 s | one-shot, stereo | vanilla stand-in |
+| 20 | Cinderwing: roar | `cinderwing_roar` | 2.4 s | one-shot, mono | synthesized stand-in |
+| 21 | Ashen Wyvern: roar | `wyvern_roar` | 2.4 s | one-shot, mono | synthesized stand-in |
+| 22 | Dune Drake: roar | `drake_roar` | 2.4 s | one-shot, mono | synthesized stand-in |
+| 23 | Glass Wyrm: roar | `wyrm_roar` | 2.4 s | one-shot, mono | synthesized stand-in |
 
 ### 1. The 3:17 toll
 
@@ -229,7 +233,55 @@ Prompt:
 
 > Night on a castle wall during a battle that suddenly goes quiet: the wind drops, the distant fighting fades to nothing, and in the silence come slow, even, unhurried footsteps on wet ground getting closer, with a very faint low choir note under them and one slow deep pulse like a heartbeat. It stops before anything happens. Quiet, tense, patient. No sting, no loud hit, no scream, no music.
 
-### 16. Cinderwing: roar
+### 16. The Forgemaster's bell-tongue
+
+- **File name:** `bell_tongue` (installs as `sounds/siege/sig/bell_tongue.ogg`, sound id `siege.sig.bell_tongue`)
+- **Length:** about 6 seconds, one-shot, stereo
+- **When:** Morvane fight, stage 2: a Forgemaster's new bell rings once and the Standing Ranks break step.
+- **Stand-in until then:** `block.bell.hit` pitch 1.2 + `block.bell.hit` pitch 0.9 vol 0.5 after 0.15 s + `armor.equip_iron` pitch 0.6 vol 0.6 after 0.5 s + `armor.equip_iron` pitch 0.5 vol 0.5 after 0.7 s
+- **Test:** `/scriptevent siege:sound sig.bell_tongue`
+
+Prompt:
+
+> One clear, bright bronze hand-bell struck hard, close and present, with a pure ringing tone and a long shimmering tail that fills a stone hall. Under it, the clatter of many pieces of empty armour shifting at once, then stillness. No music, no voices. Ends in silence.
+
+### 17. The roll of the fallen
+
+- **File name:** `roll_drum` (installs as `sounds/siege/sig/roll_drum.ogg`, sound id `siege.sig.roll_drum`)
+- **Length:** about 4 seconds, one-shot, mono
+- **When:** At the Cinder Roost, when Kesh reads a name from the roll of the fallen, or a rider's dragon dies.
+- **Stand-in until then:** `note.bd` pitch 0.5 + `note.bd` pitch 0.45 vol 0.4 after 0.3 s
+- **Test:** `/scriptevent siege:sound sig.roll_drum`
+
+Prompt:
+
+> A single low, muffled skin drum struck once in a high open cliffside space with dry desert wind, a soft boom that rolls away into the distance. Solemn, not dramatic. No melody, no voices. Ends in silence.
+
+### 18. The forty rowing
+
+- **File name:** `forty_row` (installs as `sounds/siege/sig/forty_row.ogg`, sound id `siege.sig.forty_row`)
+- **Length:** about 10 seconds, one-shot, stereo
+- **When:** Morvane fight, stage 4: the drowned crews of Holt's Debt row the party down the light river.
+- **Stand-in until then:** `bucket.empty_water` pitch 0.6 vol 0.5 + `bucket.empty_water` pitch 0.6 vol 0.5 after 1.5 s + `ambient.cave` pitch 0.6 vol 0.3 after 0.5 s
+- **Test:** `/scriptevent siege:sound sig.forty_row`
+
+Prompt:
+
+> Many oars dipping together in slow unison on dark still water inside a vast cavern, wooden oarlocks creaking in time, water dripping, and a low wordless hum from many tired voices keeping the stroke. Distant, hollow echo. Uneasy but steady. No music. Ends in silence.
+
+### 19. The fen collects
+
+- **File name:** `fen_debt` (installs as `sounds/siege/sig/fen_debt.ogg`, sound id `siege.sig.fen_debt`)
+- **Length:** about 7 seconds, one-shot, stereo
+- **When:** When a Fen Mother's hexes all land at once, and at Morvane stage 6 when the fen lends the party a moment.
+- **Stand-in until then:** `bubble.pop` pitch 0.6 vol 0.8 + `mob.witch.ambient` pitch 0.6 vol 0.4 after 0.4 s + `bubble.pop` pitch 0.5 vol 0.6 after 0.8 s
+- **Test:** `/scriptevent siege:sound sig.fen_debt`
+
+Prompt:
+
+> A deep wet marsh sound: bubbles rising and bursting from thick mud, reeds rustling all at once as if a wind passed, and a slow low creak like an old wooden raft taking weight. A faint breathy whisper at the very end, no words. Uneasy, not frightening. Ends in silence.
+
+### 20. Cinderwing: roar
 
 - **File name:** `cinderwing_roar` (installs as `sounds/siege/dragon/cinderwing_roar.ogg`, sound id `siege.dragon.cinderwing.roar`)
 - **Length:** about 2.4 seconds, one-shot, mono
@@ -240,7 +292,7 @@ Prompt:
 
 > The voice of a large fire-breathing dragon with a deep chest and a throat like a furnace: warm, rumbling, with a crackle of embers in the breath. A full roar: starts fast, peaks, and trails off into breath. Powerful and proud, not a monster-movie scream. One animal, close and dry, no echo, no background, no music.
 
-### 17. Ashen Wyvern: roar
+### 21. Ashen Wyvern: roar
 
 - **File name:** `wyvern_roar` (installs as `sounds/siege/dragon/wyvern_roar.ogg`, sound id `siege.dragon.wyvern.roar`)
 - **Length:** about 2.4 seconds, one-shot, mono
@@ -251,7 +303,7 @@ Prompt:
 
 > The voice of a lean, light wyvern with a high, hoarse, hissing voice like wind through dry reeds, raspy and airy. A full roar: starts fast, peaks, and trails off into breath. Powerful and proud, not a monster-movie scream. One animal, close and dry, no echo, no background, no music.
 
-### 18. Dune Drake: roar
+### 22. Dune Drake: roar
 
 - **File name:** `drake_roar` (installs as `sounds/siege/dragon/drake_roar.ogg`, sound id `siege.dragon.drake.roar`)
 - **Length:** about 2.4 seconds, one-shot, mono
@@ -262,7 +314,7 @@ Prompt:
 
 > The voice of a heavy, broad desert drake with a very low, slow, gravelly voice like boulders shifting under sand. A full roar: starts fast, peaks, and trails off into breath. Powerful and proud, not a monster-movie scream. One animal, close and dry, no echo, no background, no music.
 
-### 19. Glass Wyrm: roar
+### 23. Glass Wyrm: roar
 
 - **File name:** `wyrm_roar` (installs as `sounds/siege/dragon/wyrm_roar.ogg`, sound id `siege.dragon.wyrm.roar`)
 - **Length:** about 2.4 seconds, one-shot, mono
@@ -330,26 +382,28 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 
 | Vanilla sound | What it means here | Made of | Places | Used by |
 |---|---|---|---|---|
-| `block.bell.hit` | Any bell | `block.bell.hit` + `block.bell.hit` pitch 0.5 vol 0.4 after 0.05 s + `block.bell.hit` pitch 1.03 vol 0.22 after 0.15 s | 39 | bestiary (15), undertow (14), lore (4), townhall (4), crown (2) |
-| `random.levelup` | Done, bought, learned | `random.levelup` pitch 0.8 vol 0.5 + `note.harp` pitch 0.6 vol 0.35 after 0.1 s | 23 | horses (6), siege (5), townhall (4), dragons (2), lore (2), crown, reach, rivals, settle |
+| `block.bell.hit` | Any bell | `block.bell.hit` + `block.bell.hit` pitch 0.5 vol 0.4 after 0.05 s + `block.bell.hit` pitch 1.03 vol 0.22 after 0.15 s | 46 | bestiary (15), undertow (15), after (5), lore (4), townhall (4), crown (2), roletrials |
+| `random.levelup` | Done, bought, learned | `random.levelup` pitch 0.8 vol 0.5 + `note.harp` pitch 0.6 vol 0.35 after 0.1 s | 26 | horses (7), siege (5), townhall (4), lore (3), dragons (2), crown, reach, rivals, roletrials, settle |
+| `random.anvil_land` | A heavy blow | `random.anvil_land` pitch 0.9 vol 0.8 + `dig.stone` pitch 0.5 vol 0.7 | 12 | undertow (3), bestiary (2), siege (2), trains (2), dragons, roletrials, townhall |
 | `raid.horn` | A horn | `raid.horn` pitch 0.85 + `raid.horn` pitch 0.64 vol 0.4 after 0.25 s | 11 | bestiary (5), townhall (3), crown, dragons, rivals |
 | `mob.endermen.portal` | A step between places | `mob.endermen.portal` pitch 0.85 vol 0.8 + `random.orb` pitch 0.4 vol 0.15 after 0.1 s | 11 | bestiary (6), townhall (2), crown, horses, undertow |
-| `random.anvil_land` | A heavy blow | `random.anvil_land` pitch 0.9 vol 0.8 + `dig.stone` pitch 0.5 vol 0.7 | 8 | bestiary (2), siege (2), undertow (2), dragons, townhall |
-| `ambient.cave` | Something is wrong | `ambient.cave` pitch 0.85 vol 0.8 | 8 | reach (3), undertow (3), bestiary (2) |
-| `random.orb` | A small yes | `random.orb` pitch 0.75 vol 0.55 | 7 | townhall (2), dragons, economy, rails, settle, undertow |
+| `random.orb` | A small yes | `random.orb` pitch 0.75 vol 0.55 | 9 | townhall (2), dragons, economy, lore, rails, roletrials, settle, undertow |
+| `ambient.cave` | Something is wrong | `ambient.cave` pitch 0.85 vol 0.8 | 9 | reach (3), undertow (3), bestiary (2), lore |
+| `random.anvil_use` | Building and mending | `random.anvil_use` pitch 0.8 vol 0.55 + `dig.stone` pitch 0.7 vol 0.5 after 0.1 s | 8 | townhall (3), settle (2), horses, roletrials, siege |
 | `ui.toast.challenge_complete` | Something earned | `ui.toast.challenge_complete` pitch 0.9 vol 0.7 + `block.bell.hit` pitch 0.6 vol 0.3 after 0.4 s | 7 | siege (2), bestiary, crown, rivals, settle, townhall |
 | `item.book.page_turn` | A page | `item.book.page_turn` pitch 0.9 | 7 | lore (5), bestiary, guide |
 | `random.anvil_use` | Building and mending | `random.anvil_use` pitch 0.8 vol 0.55 + `dig.stone` pitch 0.7 vol 0.5 after 0.1 s | 7 | townhall (3), settle (2), horses, siege |
+| `item.book.page_turn` | A page | `item.book.page_turn` pitch 0.9 | 6 | lore (5), bestiary |
 | `mob.wither.spawn` | Something old arrives | `mob.wither.spawn` pitch 0.85 vol 0.7 + `block.bell.hit` pitch 0.4 vol 0.4 after 0.4 s | 6 | undertow (3), bestiary (2), townhall |
 | `random.glass` | Something breaks that should not | `random.glass` pitch 0.9 vol 0.8 | 5 | bestiary (4), crown |
 | `random.totem` | A great change | `random.totem` pitch 0.8 vol 0.55 + `block.bell.hit` pitch 0.5 vol 0.4 after 0.2 s | 4 | townhall (2), crown, horses |
+| `mob.warden.heartbeat` | A heartbeat that is not yours | `mob.warden.heartbeat` pitch 0.9 | 4 | bestiary, crown, roletrials, undertow |
 | `mob.ravager.roar` | Something big | `mob.ravager.roar` pitch 0.9 vol 0.9 | 4 | bestiary (3), undertow |
 | `random.break` | Not allowed, or something gave way | `random.break` pitch 0.8 vol 0.7 | 3 | bestiary, plots, siege |
 | `dig.stone` | Stone moving | `dig.stone` pitch 0.9 | 3 | crown, siege, townhall |
 | `random.explode` | A blast | `random.explode` pitch 0.85 | 3 | bestiary, siege, undertow |
 | `ambient.weather.thunder` | Thunder with no sky | `ambient.weather.thunder` pitch 0.9 vol 0.9 | 3 | undertow (2), crown |
 | `mob.wither.ambient` | A breath from below | `mob.wither.ambient` pitch 0.9 vol 0.8 | 3 | bestiary (3) |
-| `mob.warden.heartbeat` | A heartbeat that is not yours | `mob.warden.heartbeat` pitch 0.9 | 3 | bestiary, crown, undertow |
 | `random.toast` | A note is added | `random.toast` pitch 0.8 vol 0.7 | 2 | lore (2) |
 | `random.click` | A catch or a lever | `random.click` pitch 0.85 vol 0.8 | 2 | rails, siege |
 | `mob.wither.death` | Something great ends | `mob.wither.death` pitch 0.9 vol 0.8 + `block.bell.hit` pitch 0.35 vol 0.5 after 0.6 s | 2 | crown, siege |
@@ -360,32 +414,44 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 
 | Vanilla sound | Places | Used by |
 |---|---|---|
-| `block.amethyst_block.chime` | 5 | bestiary (4), undertow |
+| `block.amethyst_block.chime` | 9 | bestiary (4), undertow (3), lore (2) |
 | `item.shield.block` | 4 | bestiary (3), townhall |
 | `armor.equip_leather` | 3 | dragons, horses, looks |
+| `mob.blaze.shoot` | 3 | roletrials (2), townhall |
+| `mob.horse.gallop` | 3 | horses, roletrials, townhall |
 | `random.eat` | 3 | dragons (2), bestiary |
+| `block.bell.resonate` | 2 | lore, undertow |
 | `crossbow.shoot` | 2 | dragons, siege |
 | `mob.elderguardian.curse` | 2 | bestiary, undertow |
-| `mob.horse.gallop` | 2 | horses, townhall |
 | `mob.villager.no` | 2 | bestiary (2) |
 | `mob.witch.celebrate` | 2 | bestiary (2) |
+| `note.bell` | 2 | rails, roletrials |
 | `note.flute` | 2 | bestiary, horses |
 | `random.bow` | 2 | bestiary (2) |
+| `random.drink` | 2 | bestiary, roletrials |
 | `armor.equip_iron` | 1 | horses |
 | `armor.equip_netherite` | 1 | siege |
 | `beacon.activate` | 1 | townhall |
 | `block.amethyst_block.resonate` | 1 | undertow |
-| `block.bell.resonate` | 1 | undertow |
+| `block.bell.use` | 1 | lore |
 | `block.campfire.crackle` | 1 | dragons |
 | `block.chain.place` | 1 | townhall |
 | `block.end_portal_frame.fill` | 1 | crown |
 | `block.end_portal.spawn` | 1 | undertow |
+| `bucket.fill_water` | 1 | roletrials |
+| `chime.amethyst_block` | 1 | roletrials |
+| `dig.grass` | 1 | roletrials |
+| `dig.gravel` | 1 | roletrials |
 | `dig.sand` | 1 | dragons |
 | `dye.use` | 1 | siege |
+| `elytra.loop` | 1 | roletrials |
 | `item.book.put` | 1 | lore |
-| `mob.blaze.shoot` | 1 | townhall |
+| `mob.allay.idle` | 1 | roletrials |
+| `mob.enderdragon.flap` | 1 | roletrials |
+| `mob.enderdragon.growl` | 1 | roletrials |
 | `mob.evocation_illager.cast_spell` | 1 | bestiary |
 | `mob.frog.tongue` | 1 | bestiary |
+| `mob.ghast.scream` | 1 | roletrials |
 | `mob.horse.angry` | 1 | horses |
 | `mob.horse.breathe` | 1 | horses |
 | `mob.horse.idle` | 1 | horses |
@@ -395,12 +461,12 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `mob.warden.nearby_close` | 1 | bestiary |
 | `mob.warden.roar` | 1 | undertow |
 | `mob.warden.sonic_boom` | 1 | townhall |
+| `mob.witch.ambient` | 1 | roletrials |
+| `mob.wither.hurt` | 1 | roletrials |
 | `mob.wither.shoot` | 1 | bestiary |
 | `mob.wolf.growl` | 1 | bestiary |
 | `note.bass` | 1 | dragons |
-| `note.bell` | 1 | rails |
 | `random.door_open` | 1 | siege |
-| `random.drink` | 1 | bestiary |
 | `random.fuse` | 1 | siege |
 | `step.stone` | 1 | bestiary |
 

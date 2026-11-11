@@ -83,6 +83,9 @@ step("Icons and textures");
   // Textures that ship with the base game, so this pack has no file for them. Anything else that
   // is missing is a mistake. Using another base-game texture on purpose? Add it here.
   const VANILLA_TEXTURES = ["textures/misc/", "textures/entity/horse2/", "textures/entity/steve", "textures/entity/cape_invisible"];
+  // vanilla block textures that the tree-only blocks point at (written by studio/build_tree_blocks.py, checked there against Mojang's textures)
+  const vanillaListFile = join(TOOLS, "vanilla_block_textures.json");
+  if (existsSync(vanillaListFile)) for (const t of readJson(vanillaListFile) ?? []) VANILLA_TEXTURES.push("textures/blocks/" + t);
   const isVanillaPath = (path) => VANILLA_TEXTURES.some((v) => (v.endsWith("/") ? path.startsWith(v) : path === v));
 
   // every texture path one atlas entry points at (string, list, or { path } objects, with variations)

@@ -110,6 +110,16 @@ Type the commands in chat (`/` opens it).
 - Did guards hold their posts and fight?
 - Was the siege too easy, too hard, or about right?
 
+## The story opening on the real map (scripts/opening/)
+
+Use `hollow-crown-full-map.mcworld`, not a flat test world. That file is saved in **Creative**, so switch the world (or the Realm) to **Survival** before anyone joins for the first time: Creative players count as builders and skip the hall. Time is stopped in the file; the setup starts the day/night cycle.
+1. Join a fresh copy of the map. You should stand on the Kingsrest square for a few seconds ("The road is long. One moment...") while the map sets itself up.
+2. You are lifted to the welcome hall. Click the Waystone, read "How things stand", and check the journal turns up in your pack.
+3. All twelve rim stones should be lit (free). Pick one: you land next to its Plot Stone with a Keep Banner, are told what stood there, and about 20 seconds later get the plot's first book. Its last page sends you to Sister Wren in Millbrook.
+4. Ride or walk to Millbrook (north-east of Kingsrest). Wren stands under a small porch on the north side of the square. Ask her "Why is it always night?", then "Which clock was first?": she is cut off and you Slip.
+5. With a second player, choose "Start in Kingsrest without a home" instead: about 30 seconds later a carter should point you to Wren and Millbrook is added to your Ledger.
+6. Builder check: `/scriptevent siege:opening status` should say `map` and 15 of 15 done.
+
 ## Town hall, skill tree and paths (The Hollow Crown)
 
 Needs a settlement first (place a Keep Banner). Cheats on for the `/scriptevent` lines.
@@ -199,6 +209,11 @@ Run the showcase first (`/scriptevent siege:showcase`): the back row has four Ar
 
 0m. **The story spine.** `/scriptevent siege:local_lore <plot>` and read the first book: its last page, in a newer hand, should send you to Millbrook and Sister Wren, and Millbrook should appear as a lead in the Ledger. Solve the plot's mystery in the Ledger: the answer ends with a paragraph about your own region's boss and adds its place as a lead. Kill a regional boss (`/scriptevent siege:bestiary_summon reeve`): besides its book you get a line about a scrap and two new leads in two other regions. After the third regional boss, a purple line about a surveyor appears and the first Field Note is in your pack.
 
+0n. **The hidden third ending (the truce).** In the Hollow, with Morvane beaten (`/scriptevent siege:reach_stage 6` makes the story count as over), run `/scriptevent siege:truce_know`, then walk to the middle of the Seat. **Expect:** a box: "The Seat is empty...", with a line to type in. Type something else: a grey line, nothing happens, and it asks again a minute later. Type `Hallowmere`: darkness, then six lines from the Choir one after another, then a purple line in chat for everyone, and a few seconds later a "The Truce Holds" panel explaining Guest Nights, trading and the bell (once per player; `/scriptevent siege:truce_explain` shows it again). A player who has solved only "The Name We Were" gets "Find the rest of it" instead. `/scriptevent siege:truce_status` says `kept`.
+   - Guest Night: `/scriptevent siege:truce_guests` (it turns the time to night). **Expect:** two guests by every keep, three at Reedmoor's Even Market (ring of posts), and two next to you. Click one: a line and two trades (honey, iron nuggets, sugar cane or amethyst for a Glimbulb, Latticewood, raw Choir Ore or a mend of the thing in your hand). The Market keeper has all four. At dawn they are gone, with a grey line. On a real third night they come by themselves at dusk.
+   - In the Hollow while it holds, Gloamwings should leave you alone. A Returned rung out by a bell walks home and takes nobody.
+   - Ring a bell inside Bellhollow (155, -100). **Expect:** a box asking whether to ring it. "Ring it": red lines for everyone, guests vanish, a "The Truce Is Broken" panel explains what changed, status says `broken`. The next third night is a full siege again with Hollow soldiers (`/scriptevent siege:reach_night oathbroken` to force one now). Trying the Seat again within 9 days gets "Not yet"; after that it works, and the Choir says something different the second time.
+
 ## Dragons (the Emberwaste's power)
 
 Look first, without the game: the 3D viewer at https://claude.ai/artifact/D42qsWXjEcxWAbsYacsw4v shows all four species, every pose and every sound.
@@ -250,6 +265,7 @@ The showcase (`/scriptevent siege:showcase`) puts a Mason's Bench with its mason
 
 - **Wall round your plot.** With a Keep Banner up, run `/scriptevent siege:wall 1`. A stake fence should rise in a ring 56 blocks out, with a gap facing the gate side. Try `/scriptevent siege:wall 5`, then `8`, then `10`, and tell me if each one follows hills cleanly, if the gate and portcullis hang straight, and how long level 10 takes to rise. Add a region to see its stone: `/scriptevent siege:wall 6 frostmarch`.
 - **Raiders outside the wall.** Start a siege with a wall up. Raiders should appear just outside the ring and walk in. If they stand still out there, tell me: that means they are too far for the Realm to move them.
+- **Build your wall in any stone.** Raise a level 3 or 4 wall from the town hall paying in plain cobblestone or sandstone: it should be accepted. Then click the Mason and choose "Choose what the wall is built in", pick Deepslate and Blackfen timber, leave "Re-face" on: the standing wall should change over without charging you. Raise the next level: it should come out in deepslate. Tell me if a raider still breaks a deepslate wall faster than a Castle Stone one.
 - **Regional wall blocks.** In `/scriptevent siege:showcase` there are five stacks, one per region: palisade, wall planks, roof shingles, a gate and a portcullis. Each should have its own look, and each gate and portcullis should open on a click and take iron, diamond and netherite like the Vale's. Then `/scriptevent siege:wall 1` in two different regions: the palisades should differ. Tell me if any block shows as pink and black, or a gate does not open.
 - **Arrival.** `/scriptevent siege:settle_arrive` lays out your settlement: the wall, a Longhouse rising behind the banner, a Mason at a bench, and a signpost on every spot where a building will go. On the real map this happens by itself when you pick a plot in the welcome hall.
 - **Castle Stone family.** Ask the Mason for Castle Stone, Tiles, Bricks, Cobbled and Smooth. In your own region you get your region's stone at the local price; the other regions' stone costs more.
@@ -325,6 +341,7 @@ A map of the generated world is in `docs-hollow/hollow-map.png`.
 - Choir ore shows in cliff faces and in veins inside the rock. It needs a diamond or netherite pickaxe.
 - `/scriptevent hc:slip` gives a Slip, `/scriptevent hc:give_crown` gives the Hollow Crown (putting it on warns the whole server), `/scriptevent hc:regent_now` raises the NPC ruler.
 - `/scriptevent hc:undertow_status` prints what has been built.
+- **The road to the Rift (thin places).** `/scriptevent hc:thin_status` lists the seven thin places. `/scriptevent hc:thin_tp kings_barrow` (or any id it lists) takes you to one; the cave builds itself a few seconds after you arrive. Check: a rock hill with a cave mouth facing south, a tall chamber, a purple seam in the back wall, Fennick's tent outside with a Dusty Tome inside (click it for the Field Note). The Drowned Chapel, the Sunken Quarry and the Witchroot Caves need a short swim; the Bellfounders' Mine and Frostvein Gap have ice and snow; the Saltglass Grotto and the Drowned Chapel have white salt crust; King's Barrow and the Witchroot Caves have hanging roots; the Bellfounders' Mine and the Drowned Chapel have a fallen bell. Then, in survival, hit the seam with a Tuning Fork: with fewer than five bosses down it should only hum; on a wrong seam it should go dull for three days and stay in your hand.
 
 ## The Hollow's mining villages, the Vault and the Latticewood Boat (scripts/hollowfolk/)
 
@@ -410,9 +427,14 @@ the darkness and knockback effects, the storms, and how the hurried evening look
 
 ## Choirsteel gear (bestiary)
 
-`/scriptevent siege:choirsteel_kit` gives the full set, the tools, 32 ingots and 8 Gloamquills.
+`/scriptevent siege:choirsteel_kit` gives the full set, the tools, 32 ingots, 8 Gloamquills, 2 templates and 4 Tempered Choirsteel.
 
-- Recipes: in a crafting table, each piece is its netherite piece plus Choirsteel Ingots plus one Gloamquill (two for the Blade). Enchantments on the netherite piece are not carried over.
+- Recipes: Tempered Choirsteel is 4 Choirsteel Ingots and a Gloamquill in a crafting table. At a smithing table, a Choirsteel Upgrade template + a netherite piece + Tempered Choirsteel gives the Choirsteel piece (all nine: four armour, five tools). Check the template and Tempered Choirsteel go into their slots at all (custom smithing items need their tags), and that enchantments and a renamed name carry over.
+- Copying: template in the top middle, Veinstone in the centre, 7 netherite ingots around them in a crafting table gives 2 templates.
+- The Cold Forge (the Hollow, x 592 z 1080, on the high terraces east of the Seams, no road): an open veinstone smithy with a tall chimney and soul fire on top. The chest at the back holds one template on your first visit. Take it: anvils ring and two Veinsworn and a Stone Vigil come out. Come back three in-game days later and there is a new one. `/scriptevent hc:forge_restock` refills it now.
+- Trims: put each Choirsteel armour piece in a smithing table with any armour trim template and any trim material. The trim should show in its colour, in the same place it sits on netherite, and the crystals, plume, pauldrons, knee cops and fins should stay plain.
+- The first time you carry a Choirsteel Ingot, chat tells you where the forge is.
+- The test world (`/scriptevent siege:showcase`) has a smithing table and a crafting table with chests of everything needed.
 - Helm: you see in the dark. Greaves: slowness never sticks. Treads: jump off something high, you drift down and take no fall damage.
 - Cuirass: let zombies hit you. About one hit in four rings and throws the attacker back.
 - Full set: a chime, then Resistance and four extra hearts. Take one piece off and both go.
@@ -446,6 +468,18 @@ In the real game the first claimant comes 5 days after Morvane falls, then one e
 - Fight it. Every warned attack should be one of the four listed powers, never the same twice running. The claim should hold: Unbled heals when nobody is within 6 blocks, Mirrored sends arrows back, Followed calls a shade at each fifth of its life, Hungering heals when it hits you, Twinned is unhurtable at half life until its twin dies.
 - Kill it: chat tells everyone, you get a "Seal of <its name>", and the next `siege:pretender_rise` gives a different body, claim and name.
 - Leave one alive for 5 in-game days: a message says the seep is everywhere, and Seeps open more often.
+
+## After Morvane: the Five Chairs and the Homecomings (scripts/after/)
+
+Nothing here happens until Morvane has fallen (`/scriptevent siege:bestiary_summon morvane` and win, or test the pieces with the commands; they work any time in creative).
+
+- `/scriptevent siege:chairs_envoy salt` puts an envoy of House Vesk beside you (also `bell`, `lamp`, `root`, `tide`). Click them: they ask for your backing. Back them, ask about the truce table, open the board, or send them away. Each house should sound different, and you should not hear the same pitch twice running.
+- `/scriptevent siege:chairs` shows the five standings and who holds the seat. `/scriptevent siege:chairs_stand lamp 10` moves one; the seat changes hands and everyone is told. If a Regent rules below (`hc:regent_now`), their title and prices change to the new house's temper.
+- Back the house that holds the seat, then talk to the Regent: it should say your house has its ear, and Choir ore mines with no alarm.
+- After Morvane, a Pretender's announcement names its house, and its name tag shows it. Kill it: its house loses ground and the house you back gains.
+- On a third night after dark one envoy comes to one player in the overworld; at dawn they leave. The keep menu has "The Five Chairs" board.
+- `/scriptevent siege:homecoming_now` puts a stranger beside you. Click them: who they were, how they went down, who they look for, what they want. Bring it and their story ends one of four ways. Use a number (`siege:homecoming_now 42`) to get the same stranger again. If they are a copy, ring a bell near them: they should turn and walk away.
+- `/scriptevent siege:homecoming` shows who is here and when the next comes.
 
 ### Village happenings (mining villages)
 
@@ -491,6 +525,23 @@ In game: Creative, cheats on. `/scriptevent siege:showcase` puts eight steeds in
 
 Things I could not check without the game, so please look closely: that the steeds look and ride like real horses (saddle, armor and jump bar all there), that the painted coats line up on the horse with no patches of a different color showing through, that the caparison color only tints the cloth, that the Glimstrider really is see-through, that four people really fit in the carriage and it faces the right way on the rail, and whether the carriage speed feels right.
 Things I could not check without the game, so please look closely: that the steeds look and ride like real horses (saddle, armor and jump bar all there), that the caparison color only tints the cloth, how the Glimstrider's glow looks, that four people really fit in the carriage and it faces the right way on the rail, and whether the carriage speed feels right.
+## Trains and Track (scripts/trains/), first test
+
+`/scriptevent siege:showcase`, then walk about 70 blocks west: a loop of Track with an Engine and a Coach on it.
+
+1. **Riding (the big question).** Climb into the engine (click it). Hold forward: does it pull away and speed up? Hold back: does it brake, stop and then reverse slowly? Is the ride smooth, or do you see the train or yourself jitter? Try it on the Realm too, with a friend in the coach.
+2. If it jitters, type `/scriptevent siege:trains mode teleport` and try again, then tell me which felt better. (`mode velocity` switches back.)
+3. If holding forward does nothing at all, tell me: the train then only drives itself at half speed.
+4. **Corners.** The loop has gentle bends. Does the train look right going round them, and do both cars stay on the track?
+5. **Laying track.** Take Track from the Every item chest. Lay a line, then turn it diagonally and back, make a sharp corner, and climb a slope one block up. Do the pieces join up the way you expect? **If diagonal pieces look mirrored (rails pointing the wrong way), tell me**, it's a one-line fix.
+6. Place an Engine on your own track (at least 8 blocks), then a Coach right behind it. Sneak and click a car with an empty hand to put the whole train away.
+7. Region looks: an engine put on track inside a Frostmarch (or other region) settlement should come out in that region's colours. The colours are placeholders.
+8. `/scriptevent siege:trains` lists every train.
+9. **Stations.** Stand on flat open ground, face where the building should go and type `/scriptevent siege:trains station halt` (then `station`, `junction`, `grand`, each somewhere new; add a region such as `frostmarch` to pick its look). The building should rise a few blocks at a time in front of you, with a line of Track through your feet along the platform. Is anything built on the track side, or does the platform sit at the wrong height?
+10. **Your own station.** In your settlement, place a Rail Depot a few blocks from a straight line of Track (or on open ground, facing where the building should go). A Halt should rise lined up with that track, and the depot should end up on its platform. Win sieges until the settlement becomes a Town: the Halt should come down and a Station rise in its place.
+11. A claim near a Station Post placed by the map builder (within about 140 blocks of the banner) should raise a Halt by that post.
+12. **Buying the line.** Once the world has its planned railway, `/scriptevent siege:trains routes` should list the stops and say which is your home stop. Click any Station Post: "Extend the line" should only offer stretches that start at a stop you can already reach (at first just the ones out of your home stop). Buy one: the Track should lay itself along the graded bed over a few seconds, and everyone should see "The line from ... to ... is laid". Stretches past it should now show up in the menu.
+
 ## Sounds (scripts/sound/, SOUND-LIST.md)
 
 Nothing here has been heard in the game yet, so your ears are the test.
@@ -530,3 +581,47 @@ Best on the real world map with a fresh player (or `/scriptevent siege:guide res
 9. `/scriptevent siege:guide tip <id>` repeats any page's tip.
 
 Tell me: any tip that came at a bad moment or said something wrong, any mechanic you had to ask about that the book doesn't cover, and whether the tips feel like too many or too few.
+### Settlement gates and stripped log walls
+1. `/scriptevent siege:wall 3 saltreach` round your keep. ✅ The stakes are stripped birch, not bark birch. Try `vale`, `frostmarch`, `emberwaste`, `blackfen`: always the stripped log.
+2. With a second player who is not your ally, have them click your gate or portcullis. ✅ It stays shut and the action bar says "The gate is barred. Only <name>'s people can open it." You (and an ally) can open it by clicking.
+3. Recruit a guard at the Barracks, shut the gate, walk up to it from outside. ✅ The gate (and portcullis from level 6) opens by itself; walk 7+ blocks away and it shuts.
+4. Leave the gate open and start a siege. ✅ It slams shut, and it does not open by itself until the siege ends.
+## Role trials (scripts/roletrials/)
+
+Build the showcase (`/scriptevent siege:showcase`) in a flat Creative world, then switch to Survival. Kesh, Ulla, Holt and Nell stand with the other story characters. A short Span and three graves are 60 blocks behind the exhibit rows.
+
+1. Open the Tree of Oaths with no role: "Choose your path" lists the four regional roles and their deeds. The Tree has a "Role trials" page naming each mentor and where they are.
+2. Talk to Kesh and choose "I want to ride", then "Sign me in". Walk the Span from the near pillar to the far one: cracked stones fall a second after you step on them and come back later, and wind pushes you sideways. Arrive and Kesh's line appears. Fall off and you are "Washed out" for 3 days (use `/time add 72000` to skip).
+3. Hold a sword and click a Dragon Nest: you are set on fire and get no egg until tomorrow. Empty-handed and walking: you get the egg and the Choosing is done. When the egg hatches, the Tree offers Dragon Rider.
+4. Talk to Ulla, choose "Do you need help?", "I'll haul for you". Talk to her again carrying 16 iron ingots and 16 coal: they are taken and you get "Hroda's Hand-bell". At night, place the bell on ice or snow: the Pale Huntsman rises. Kill it and the Tree offers Forgemaster.
+5. Talk to Holt, "Do you need captains?", "Give me the articles". Talk again with 32 Regals on you: they are taken. With three guards sworn to your keep, talk again: the crew step is done. `/scriptevent siege:bestiary_summon bride` and kill it: the Tree offers Captain.
+6. Talk to Nell, "What does a witch do?", "I'd like to learn", "Drink": darkness and slowness for about two minutes. Sneak at each of the three graves: the third gives you something. Kill the Mother of Changelings and the Tree offers Witch.
+7. Kill a regional boss before talking to its mentor: you get a message from the mentor, no offer. Start that trial and finish its steps: the offer comes as the last step lands.
+8. As a Knight (`/scriptevent siege:townhall_path knight`): talk to Sir Aldous, answer "I'll stand on their wall", then win a siege at a friend's keep (or your own, alone in the world). Aldous thanks you. Each siege or boss after that brings one of the Eleven.
+9. Rank up in any role (`/scriptevent siege:townhall_renown`, then spend points in your branch): the mentor's line appears a few seconds later. As a Sorcerer, Mag has a new scene at Listener and Adept.
+
+Shortcuts: `/scriptevent siege:role_trial <rider|forgemaster|captain|witch> [step]` starts a trial or finishes one step; `siege:role_trial reset` forgets them. On the real map, the map builder marks the Span (`/scriptevent siege:role_mark span_start` and `span_end`) and the graves (`siege:role_mark grave`).
+10. Turns and stands: reach rank 4 and rank 5 in a regional role (spend points in its branch) and talk to the mentor each time: a new scene each. A Knight reaching Knight-Commander gets a box to name the Order.
+11. The Morvane fight with roles: `/scriptevent siege:bestiary_summon morvane`, then `/scriptevent siege:morvane_skip N` for N = 2 to 7. Alone with no role, a named student is announced at stages 2 to 6 (knights spawn at 3, the river buffs at 4, burns every 16 s at 5, slow falling at 6). With a top-rank role, your name is announced instead.
+12. Ask Kesh "Read me the roll": three names to start, Bram Tallow's after the first hatching in the world, and every dragon that dies after that. Fill a dragon's bond (`/scriptevent siege:dragons_grow`): two Wing points arrive.
+## The Hollow's middle stretch (lore/hollow.js, undertow/story.js)
+
+Mateo approved the beats 2026-11-11 (doc "The Hollow's middle stretch: story beats"). Words: `lore/data/hollow_story.js` and the Carter in `lore/data/dialogue.js`. Places, the Carter's position, the Court door: `undertow/story.js`.
+
+1. Go to the Hollow (`/scriptevent hc:undertow_go`) and walk to the Wound landing dock. A scene plays and the Carter stands on the dock (`/scriptevent hc:carter_go` takes you to her). Talk to her.
+2. Walk to Glimwade: its scene plays, and the Carter moves to where the road comes into the village. Her hub has five buttons plus Goodbye; "I've been walking your country" reacts to the places you have seen, one at a time.
+3. Visit the Truce Hall (you get *The Name We Were*), the Standing Ranks, the Far Door, the top stone of the Drift (the scene must NOT play at the foot), and the Seams (a two-button choice appears; close it and walk out and back in to be asked again).
+4. After the third of those five, a line says the Carter will know. Talk to her: she teaches the Cartsong and moves to the Court's south door.
+5. In survival, walk into the Court without the Cartsong: you are pushed back out with a message, and the Choir does not wake. With it (or standing next to someone who has it) the fight starts. If you chose to wreck the cart, phantom raids come every 40 s instead of 20 s.
+6. After the Choir falls, everyone in the Hollow sees the "Court is quiet" scene, and the Carter asks to be named (Lark, Morrow or Dawn). If you let the cart go at the Seams, Tally ore costs you half once Morvane has fallen.
+
+Shortcuts: `/scriptevent siege:hollow_beat <id>` replays one scene, `siege:hollow_story` lists what you have heard, `siege:cartsong` gives you the Cartsong. Creative players are never pushed out of the Court.
+## Menu labels (core/labels.js, scripts/labels/)
+
+1. `/scriptevent siege:showcase`, then walk around it. ✅ Within about 10 blocks, every menu block there (the full list is in scripts/labels/index.js: Keep Banner, Barracks, Hall Cornerstone, Tree of Oaths, Foundation Stone, Plot Stone, Stables, Breeder's Post, Station Post, Rail Depot, Looking Glass, Archive Shelf, Dragon Roost, Throne, Citadel Cornerstone) has a gold name with a grey "Click: ..." line floating just above it. Decorations, walls and gates have none.
+2. Stand by a Mason, a trader, a rival lord or a story NPC. ✅ A yellow "Click to trade" / "Click to talk" floats above the NPC's own name, not on top of it.
+3. Walk 20 blocks away. ✅ Within about 3 seconds the labels are gone (`/scriptevent siege:labels` says how many are showing).
+4. Break a labelled block. ✅ Its label disappears within a few seconds.
+5. `/scriptevent siege:labels off`. ✅ All labels vanish; `on` brings them back.
+
+Tell me about: a label sitting inside the block or too high above it, a label covering an NPC's name, or anything clickable with no label.

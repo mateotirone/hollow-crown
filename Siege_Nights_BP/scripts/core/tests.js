@@ -14,11 +14,18 @@ const tests = [];
 // trips the watchdog, which shuts the world down (first playtest, 2026-11-11). They still run in
 // tools/check.mjs, which fails if a slow test is missing from this list. Written as "group: name".
 export const OFFLINE_ONLY = new Set([
+  "undertow: thin places: each cave shows exactly Fennick's features for it",
+  "undertow: thin places: the seam has room to tear open and the camp holds the Field Note",
+  "undertow: thin places: a dry cave is walkable from the mouth down to the seam",
+  "undertow: thin places: low, wide hills, never taller than they are wide",
+  "hollowfolk: giant Veilcaps stand in the fens and groves, rare elsewhere, and are tree sized",
   "undertow: ore is in the cliffs, more of it deeper in",
   "undertow: no fill is too big",
   "undertow: open country has all four kinds of land",
   "undertow: roads are dry and gentle, and cross rivers on bridges a boat fits under",
   "undertow: terrain is deterministic",
+  "hollowfolk: giant Veilcaps stand in the fens and groves, rare elsewhere, and are tree sized",
+  "undertow: the drowned towers stand off the water and the roads, each a different design",
   "undertow: light rivers are one boatable network",
   "townhall: every hall draws in every style",
   "settle walls: walls vary along their length and from one settlement to the next, the same way every time",

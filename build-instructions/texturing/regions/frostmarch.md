@@ -1,0 +1,91 @@
+# Texturing doctrine: Frostmarch (Rimehold, Frosthelm)
+
+Generated from `../doctrine.json` by `../doctrine.py`: edit the JSON, not this page. Blocks run
+**dark to light** by value unless a family says otherwise; the hex is the average colour of the
+block's texture. Paint surfaces by the rules in `../README.md` (no skipped steps, clusters, cracks
+with a cause). The viewer `../doctrine.html` shows every ladder with the real textures.
+
+## FRO-01 Dark stone (#616261)
+
+Used for: plinths, walls, chimneys, path slabs. Status: built by the gradient rules from Mateo's examples, waiting for his check.
+
+Order: bottom to top, dark to light.
+
+| Step | Block | Hex |
+|---|---|---|
+| 1 | `deepslate_bricks` | #464647 |
+| 2 | `cobbled_deepslate` | #4D4D50 |
+| 3 | `tuff` | #6C6D66 |
+| 4 | `andesite` | #888888 |
+
+Screenshot: _waiting_
+
+## FRO-02 Plank brown (#725530)
+
+Used for: plank infill in rows, gables. Status: built by the gradient rules from Mateo's examples, waiting for his check.
+
+Order: bottom to top, dark to light.
+
+| Step | Block | Hex |
+|---|---|---|
+| 1 | `dark_oak_planks` | #422B14 |
+| 2 | `spruce_planks` | #725430 |
+| 3 | `oak_planks` | #A2824E |
+
+Screenshot: _waiting_
+
+## FRO-03 Snow white (#D8DBDB)
+
+Used for: light infill, snow on tops. Status: built by the gradient rules from Mateo's examples, waiting for his check.
+
+Order: bottom to top, dark to light.
+
+| Step | Block | Hex |
+|---|---|---|
+| 1 | `diorite` | #BCBCBC |
+| 2 | `white_concrete` | #CFD5D6 |
+| 3 | `calcite` | #DFE0DC |
+| 4 | `snow` | #F9FEFE |
+
+Screenshot: _waiting_
+
+## FRO-04 Ice blue (#80ADFB)
+
+Used for: trim courses and finials only. Status: built by the gradient rules from Mateo's examples, waiting for his check.
+
+Order: bottom to top, dark to light.
+
+| Step | Block | Hex |
+|---|---|---|
+| 1 | `blue_ice` | #74A7FD |
+| 2 | `packed_ice` | #8DB4FA |
+
+Screenshot: _waiting_
+
+## FRO-05 Dark timber (#513B21)
+
+Used for: frame, trim, dark shingle roofs. Status: built by the gradient rules from Mateo's examples, waiting for his check.
+
+Order: bottom to top, dark to light.
+
+| Step | Block | Hex |
+|---|---|---|
+| 1 | `spruce_log` | #3A2510 |
+| 2 | `stripped_dark_oak_log` | #483824 |
+| 3 | `spruce_planks` | #725430 |
+
+Screenshot: _waiting_
+
+## FRO-06 Slate (#434344)
+
+Used for: slate roofs. Status: built by the gradient rules from Mateo's examples, waiting for his check.
+
+Order: bottom to top, dark to light.
+
+| Step | Block | Hex |
+|---|---|---|
+| 1 | `deepslate_tiles` | #363637 |
+| 2 | `deepslate_bricks` | #464647 |
+| 3 | `cobbled_deepslate` | #4D4D50 |
+
+Screenshot: _waiting_

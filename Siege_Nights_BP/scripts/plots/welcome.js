@@ -18,6 +18,9 @@
 // Other features: on("plotChosen", ({ player, plot }) => ...) fires the moment a player picks a plot, before
 // they arrive, so a first building can be raised for them. pickOf(plot) is in plots/api.js.
 // on("waystoneRead", ({ player }) => ...) fires each time a player closes the Waystone's "How things stand" page.
+// on("startedHomeless", ({ player }) => ...) fires when a player chooses to start in Kingsrest with no plot.
+// raiseHall(o, then) builds the hall (spread over ticks) and setKingsrestArrival(spot) moves the homeless arrival
+// spot; the opening feature (scripts/opening/) calls both when a fresh Hollow Crown map first loads.
 
 import { world, system, ItemStack, GameMode } from "@minecraft/server";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
@@ -170,9 +173,12 @@ function signText(plan, status) {
   return `${plan.name}\n${plan.region}\n§4${status.state === "kept" ? "Chosen by" : "Held by"}§r\n${status.name}`;
 }
 
-function buildHall(dim, o) {
+// The hall's blocks, one column per step, so system.runJob can spread the work over several ticks (about 7,000
+// blocks: done in one tick it can stall a Realm long enough for the watchdog to shut the world).
+function* hallBlocks(dim, o) {
   const R = WELCOME.hallRadius;
   for (let dx = -R - 1; dx <= R + 1; dx++) {
+    yield;
     for (let dz = -R - 1; dz <= R + 1; dz++) {
       const d = Math.hypot(dx, dz);
       if (d > R + 1.5) continue;
@@ -213,7 +219,34 @@ function buildHall(dim, o) {
     put(dim, o.x + p.dx, o.y + 1, o.z + p.dz, REGION_BLOCK[p.plan.region] ?? "minecraft:stone_bricks")
       ?? put(dim, o.x + p.dx, o.y + 1, o.z + p.dz, "minecraft:stone_bricks");
   }
-  refreshHall();
+}
+
+/** Build the hall at o (its chunks must be loaded), spread over ticks. It becomes the arrival point once it stands. */
+export function raiseHall(o, then) {
+  const dim = overworld();
+  system.runJob((function* () {
+    try {
+      yield* hallBlocks(dim, o);
+    } catch (e) {
+      console.warn(`[Hollow Crown] welcome: building the hall stopped: ${e}`);
+      return;
+    }
+    store.data.hall = { x: o.x, y: o.y, z: o.z };
+    store.save();
+    refreshHall();
+    try {
+      world.setDefaultSpawnLocation({ x: o.x, y: o.y + 1, z: o.z + 4 });
+    } catch {
+      // new players are brought here by script anyway
+    }
+    then?.();
+  })());
+}
+
+/** Where "start in Kingsrest without a home" sets a player down. */
+export function setKingsrestArrival(spot) {
+  store.data.kingsrest = { x: Math.floor(spot.x), y: Math.floor(spot.y), z: Math.floor(spot.z) };
+  store.save();
 }
 
 // Pedestal tops and signs follow who holds what
@@ -410,6 +443,7 @@ function startHomeless(player) {
       const k = store.data.kingsrest ?? WELCOME.kingsrest;
       arriveAt(player, { name: "Kingsrest" }, { x: k.x + 0.5, y: k.y, z: k.z + 0.5 });
       player.sendMessage("§6Kingsrest. Rails and roads run from here to every region. Click any Plot Stone to see which plots are free.");
+      emit("startedHomeless", { player });
     }).catch(() => {});
 }
 
@@ -566,19 +600,11 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
     if (verb === "build") {
       if (player.dimension.id !== OVERWORLD) return player.sendMessage("§cThe welcome hall belongs in the Overworld.");
       const o = rest[0] === "here" ? here : { ...WELCOME.hall };
-      const finish = () => {
-        buildHall(overworld(), o);
-        store.data.hall = o;
-        store.save();
-        refreshHall();
-        try {
-          world.setDefaultSpawnLocation({ x: o.x, y: o.y + 1, z: o.z + 4 });
-        } catch {
-          // new players are brought here by script anyway
-        }
+      const finish = () => raiseHall(o, () => {
+        if (!player.isValid) return;
         player.teleport({ x: o.x + 0.5, y: o.y + 1, z: o.z + 4.5 }, { dimension: overworld() });
         player.sendMessage(`§6Welcome hall built at ${o.x}, ${o.y}, ${o.z}. New players arrive here once the map has Plot Stones${mapMode() ? "" : " §e(none placed yet)"}§6.`);
-      };
+      });
       if (rest[0] === "here") finish();
       else whenThere(player, o, finish);
     } else if (verb === "go") {
