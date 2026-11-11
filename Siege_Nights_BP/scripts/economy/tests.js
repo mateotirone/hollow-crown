@@ -1,6 +1,7 @@
 import { addTests, assert, assertEqual } from "../core/tests.js";
 import { ItemTypes } from "@minecraft/server";
-import { ECON, JOBS, JOB_IDS, LINES, REGIONS, COIN, GOLD } from "./config.js";
+import { ECON, JOBS, JOB_IDS, LINES, REGIONS, COIN, GOLD, TOWNS, TOWN_RING } from "./config.js";
+import { WARDS } from "../plots/config.js";
 import { regional, appetite, payout, cost, asCoins, coins, worth, fromEmeralds, loopholes } from "./rules.js";
 
 const iron = JOBS.moneyer.buys.find((g) => g.id === "minecraft:iron_ingot");
@@ -15,6 +16,17 @@ addTests("economy", {
       const piece = good.id.split("_").pop();
       assert(good.flat && good.price > plain[piece] && good.price <= plain[piece] * 1.5, good.id);
     }
+  },
+  "every town of the map has traders, inside the town, and only Kingsrest has the Moneyer": () => {
+    for (const town of TOWNS) {
+      const ward = WARDS.find((w) => w.name === town.name);
+      assert(ward, `${town.name} is a town on the map`);
+      assert(REGIONS.includes(town.region), `${town.name} region`);
+      assert(town.jobs.length && town.jobs.every((j) => JOBS[j]), `${town.name} jobs`);
+      assertEqual(new Set(town.jobs).size, town.jobs.length);
+      assert(TOWN_RING + 2 < ward.r, `${town.name}: traders stand inside the protected town`);
+    }
+    assertEqual(TOWNS.filter((t) => t.jobs.includes("moneyer")).map((t) => t.name), ["Kingsrest"]);
   },
   "job order matches the painted skins": () =>
     assertEqual(JOB_IDS.join(","), "farmer,woodcutter,quarryman,smith,fisher,hunter,herbalist,moneyer"),

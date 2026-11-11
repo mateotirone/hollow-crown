@@ -4,6 +4,7 @@
 //   /scriptevent siege:economy_npc <job> [region]   place a job NPC (farmer, woodcutter, quarryman, smith, fisher, hunter, herbalist, moneyer)
 //   /scriptevent siege:economy_give <coins>         coins into your pockets (testing)
 //   /scriptevent siege:economy_stats                coins paid out and taken in so far, world-wide
+//   /scriptevent siege:economy_towns [reset <town|all>]   the traders placed in the map's towns (towns.js)
 
 import { world, system, GameMode } from "@minecraft/server";
 import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
@@ -12,6 +13,7 @@ import { ECON, COIN, GOLD } from "./config.js";
 import { coins } from "./rules.js";
 import { carried, banked, deposit, withdraw, giveCoins, totals } from "./coins.js";
 import "./shops.js";
+import "./towns.js";
 import "./showcase.js";
 import "./tests.js";
 
