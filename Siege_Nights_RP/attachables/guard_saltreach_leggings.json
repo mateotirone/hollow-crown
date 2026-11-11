@@ -8,11 +8,11 @@
         "enchanted": "armor_leather_enchanted"
       },
       "textures": {
-        "default": "textures/models/armor/guard_saltreach_layer_2",
+        "default": "textures/models/siege_armor/guard_saltreach",
         "enchanted": "textures/misc/enchanted_actor_glint"
       },
       "geometry": {
-        "default": "geometry.humanoid.armor.leggings"
+        "default": "geometry.siege_guard_saltreach_leggings"
       },
       "scripts": {
         "parent_setup": "variable.leg_layer_visible = 0.0;"

@@ -475,3 +475,13 @@ Painted by `studio/art/build_regional_guard.py`. Same leather-dye trick as the C
 | Icons x20 | `textures/items/siege_guard_<region>_<helmet/chestplate/leggings/boots>.png` | Final style |
 | Diamond and netherite tiers (2026-11-11): worn sheets x20, icons x40 | `textures/models/armor/guard_<region>_<diamond/netherite>_layer_1/2.png`, `textures/items/siege_guard_<region>_<tier>_<piece>.png` | Re-toned from each region's iron look by the same script, **awaiting your review** |
 | Sheet | `art/regional-guard-armor.png` | |
+
+## 3D worn armour for every custom set (2026-11-11, "Make every custom armor 3D" thread)
+Made by `studio/art/build_armor3d.py`, the same way `studio/build_varmor.py` does vanilla armour: one 128x64 texture per set (left half = the flat sheets above, pasted in unchanged; right half = the raised parts) and its own shape per piece. Guard sets keep the leather-dye trick, so the 3D tabard skirts and capes take the banner colour. Rerun the script whenever a flat sheet changes. Untested in game.
+| Set | Files | Status |
+|---|---|---|
+| Castle Guard: ridged helm, gold-edged pauldrons, tabard skirt front and back | `textures/models/siege_armor/guard.png`, `models/entity/armor/guard_<piece>.geo.json` | **awaiting your review** |
+| Regional iron x5: Vale kettle-hat brim, riveted pauldrons, toe caps; Frostmarch fur ruff, spike, fur pads and cuffs; Saltreach fin crest, sallet tail, scale pauldrons; Emberwaste ember spike ridge, spiked pauldrons; Blackfen hood, laced pauldrons, bone knee caps. All with the tabard skirt | `textures/models/siege_armor/guard_<region>.png` | **awaiting your review** |
+| Regional diamond x5 (adds knee guards and a second shoulder plate) and netherite x5 (also a banner-coloured cape) | `textures/models/siege_armor/guard_<region>_<diamond/netherite>.png` | **awaiting your review** |
+| Worn relics: Crownless Mantle (long cloak, high collar, shoulder drapes), Widow's Veil (drapes down the back and sides) | `textures/models/siege_armor/relic_crownless_mantle.png`, `relic_widows_veil.png` | **awaiting your review** |
+Choirsteel's 3D set is `studio/art/build_choirsteel_3d.py` (PR #83). The guard-only armour line was already 3D.

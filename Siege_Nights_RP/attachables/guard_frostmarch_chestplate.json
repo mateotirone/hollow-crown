@@ -8,11 +8,11 @@
         "enchanted": "armor_leather_enchanted"
       },
       "textures": {
-        "default": "textures/models/armor/guard_frostmarch_layer_1",
+        "default": "textures/models/siege_armor/guard_frostmarch",
         "enchanted": "textures/misc/enchanted_actor_glint"
       },
       "geometry": {
-        "default": "geometry.humanoid.armor.chestplate"
+        "default": "geometry.siege_guard_frostmarch_chestplate"
       },
       "scripts": {
         "parent_setup": "variable.chest_layer_visible = 0.0;"
