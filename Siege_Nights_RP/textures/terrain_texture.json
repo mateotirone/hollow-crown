@@ -993,6 +993,12 @@
     "siege_old_leaves_jungle": {
       "textures": "textures/blocks/leaves_jungle"
     },
+    "siege_old_log_jungle_top": {
+      "textures": "textures/blocks/log_jungle_top"
+    },
+    "siege_old_log_jungle": {
+      "textures": "textures/blocks/log_jungle"
+    },
     "siege_old_mangrove_planks": {
       "textures": "textures/blocks/mangrove_planks"
     },
@@ -1022,6 +1028,9 @@
     },
     "siege_old_trapdoor": {
       "textures": "textures/blocks/trapdoor"
+    },
+    "siege_old_pale_oak_leaves": {
+      "textures": "textures/blocks/pale_oak_leaves"
     },
     "siege_old_pale_oak_log_top": {
       "textures": "textures/blocks/pale_oak_log_top"

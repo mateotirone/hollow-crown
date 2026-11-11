@@ -360,6 +360,12 @@
   "siege:old_jungle_leaves": {
     "sound": "grass"
   },
+  "siege:old_jungle_log": {
+    "sound": "wood"
+  },
+  "siege:old_jungle_wood": {
+    "sound": "wood"
+  },
   "siege:old_mangrove_fence": {
     "sound": "wood"
   },
@@ -404,6 +410,9 @@
   },
   "siege:old_oak_wood": {
     "sound": "wood"
+  },
+  "siege:old_pale_oak_leaves": {
+    "sound": "grass"
   },
   "siege:old_pale_oak_log": {
     "sound": "wood"

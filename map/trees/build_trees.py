@@ -19,7 +19,8 @@ ap.add_argument("--shots", default="front-left"); ap.add_argument("--all-only", 
 a = ap.parse_args()
 only = [s for s in a.only.split(",") if s]
 index = {"format": "hollow-crown-trees/1", "species": {}}
-everything = Blueprint("all_trees"); row_z = 0
+REGION_NAME = {"vale": "Aldmere Vale", "frostmarch": "Frostmarch", "saltreach": "Saltreach", "blackfen": "Blackfen", "emberwaste": "Emberwaste", "hollow": "The Hollow"}
+regions = {}      # region -> [Blueprint of all its rows, next row z, species names]
 for sid, card in CARDS.items():
     if only and sid not in only: continue
     d = os.path.join(a.out, sid); os.makedirs(d, exist_ok=True)
@@ -42,7 +43,8 @@ for sid, card in CARDS.items():
                 lineup.paste(t, x - lo[0], 0, 0); x += w + 3
         ent["sizes"][size] = files
     index["species"][sid] = ent
-    lo_, hi_ = lineup.bounds(); everything.paste(lineup, 0, 0, row_z - lo_[2]); row_z += hi_[2] - lo_[2] + 5
+    R = regions.setdefault(card["region"], [Blueprint(card["region"] + "_trees"), 0, []])
+    lo_, hi_ = lineup.bounds(); R[0].paste(lineup, 0, 0, R[1] - lo_[2]); R[1] += hi_[2] - lo_[2] + 5; R[2].append(card["name"])
     if a.render and not a.all_only:
         lo, hi = lineup.bounds()
         for gx in range(lo[0] - 3, hi[0] + 4):
@@ -52,13 +54,15 @@ for sid, card in CARDS.items():
         lineup.save_logical(os.path.join(pd, "scene.json"))
         subprocess.run([sys.executable, os.path.join(HERE, "..", "structures", "render", "render.py"), os.path.join(pd, "scene.json"), pd,
                         "--title", card["name"], "--textures", a.textures, "--three", a.three, "--shots", a.shots], check=True)
-if a.render and everything.cells:
+for region, (everything, _, names) in regions.items():
+    if not a.render: break
     lo, hi = everything.bounds()
     for gx in range(lo[0] - 3, hi[0] + 4):
         for gz in range(lo[2] - 3, hi[2] + 4): everything.setif(gx, 0, gz, "grass_block")
-    pd = os.path.join(a.out, "preview", "all"); os.makedirs(pd, exist_ok=True); everything.save_logical(os.path.join(pd, "scene.json"))
+    pd = os.path.join(a.out, "preview", "region-" + region); os.makedirs(pd, exist_ok=True); everything.save_logical(os.path.join(pd, "scene.json"))
     subprocess.run([sys.executable, os.path.join(HERE, "..", "structures", "render", "render.py"), os.path.join(pd, "scene.json"), pd,
-                    "--title", "Hollow Crown Trees", "--blurb", "Rows: " + ", ".join(CARDS[k]["name"] for k in index["species"]) + ". Sizes left to right: sapling, young, mature, ancient.",
+                    "--title", REGION_NAME.get(region, region) + " Trees",
+                    "--blurb", "Rows, front to back: " + ", ".join(names) + ". Sizes left to right: sapling, young, mature, ancient.",
                     "--textures", a.textures, "--three", a.three, "--shots", "front-left,high" if a.shots else ""], check=True)
 json.dump(index, open(os.path.join(a.out, "trees.json"), "w"), indent=1)
 print("species", len(index["species"]))

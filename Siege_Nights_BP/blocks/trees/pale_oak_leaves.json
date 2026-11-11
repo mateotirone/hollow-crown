@@ -1,0 +1,26 @@
+{
+  "format_version": "1.21.60",
+  "minecraft:block": {
+    "description": {
+      "identifier": "siege:old_pale_oak_leaves",
+      "menu_category": {
+        "category": "none"
+      }
+    },
+    "components": {
+      "minecraft:display_name": "Old Pale Oak Leaves",
+      "minecraft:destructible_by_mining": false,
+      "minecraft:destructible_by_explosion": false,
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "siege_old_pale_oak_leaves",
+          "render_method": "alpha_test",
+          "ambient_occlusion": true
+        }
+      },
+      "minecraft:map_color": "#3d6b2a",
+      "minecraft:geometry": "minecraft:geometry.full_block",
+      "minecraft:light_dampening": 1
+    }
+  }
+}
