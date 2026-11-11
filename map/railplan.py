@@ -152,6 +152,63 @@ def profile(cells, ground, stop_idx=(), window=41, flat=PLATFORM, stop_y=None):
     return y
 
 
+def profile_dp(cells, ground, stop_idx=(), flat=PLATFORM, stop_y=None, smooth_w=0.3, window=41):
+    """Track heights that follow the land as closely as the climbing rules allow, looking ahead (Mateo 2026-11-11:
+    paths should climb the high ground, not cut ravines through it). Minimises the total |track - ground| (plus a
+    little pull toward the smoothed ground) under the same rules as profile(): at most 1 block up or down per 3
+    along, only on straight north/south/east/west steps, flat through every platform."""
+    g = np.asarray(ground, float) + 1
+    n = len(cells)
+    k = window // 2
+    t = np.convolve(np.pad(g, k, mode='edge'), np.ones(window) / window, mode='valid')
+    fixed = np.full(n, -10**6, int)
+    for j, s in enumerate(stop_idx):
+        lo, hi = max(0, s - flat), min(n, s + flat + 1)
+        fixed[lo:hi] = stop_y[j] if stop_y is not None else int(round(float(np.median(g[lo:hi]))))
+    ok = np.zeros(n, bool)                    # may the track change height arriving at cell i?
+    for i in range(1, n):
+        if fixed[i] > -10**6 or fixed[i - 1] > -10**6: continue
+        if not (cells[i][0] == cells[i - 1][0] or cells[i][1] == cells[i - 1][1]): continue
+        st = i + 1 >= n or _dir(cells[i - 1], cells[i]) == _dir(cells[i], cells[i + 1])
+        st &= i - 2 < 0 or _dir(cells[i - 2], cells[i - 1]) == _dir(cells[i - 1], cells[i])
+        ok[i] = st
+    lo_y = int(min(g.min(), fixed[fixed > -10**6].min() if (fixed > -10**6).any() else g.min())) - 30
+    hi_y = int(max(g.max(), fixed.max())) + 10
+    H = hi_y - lo_y + 1
+    INF = 1e18
+    def cell_cost(i):
+        ys = np.arange(lo_y, hi_y + 1)
+        c = np.abs(ys - g[i]) + smooth_w * np.abs(ys - t[i])
+        if fixed[i] > -10**6: c = 4.0 * np.abs(ys - fixed[i])     # platforms: flat, pulled hard toward the stop height
+        return c
+    # state: (height, since) with since = blocks since the last change, capped at 2 (2 means a change may come next)
+    cost = np.full((H, 3), INF); cost[:, 2] = cell_cost(0)
+    back = np.zeros((n, H, 3), np.int8)        # 0 same height, 1 came from below, 2 came from above; since packed in
+    prev_s = np.zeros((n, H, 3), np.int8)
+    for i in range(1, n):
+        cc = cell_cost(i)
+        new = np.full((H, 3), INF); bk = np.zeros((H, 3), np.int8); ps = np.zeros((H, 3), np.int8)
+        # no change: since grows (0->1, 1->2, 2->2)
+        for s_from, s_to in ((0, 1), (1, 2), (2, 2)):
+            v = cost[:, s_from]; better = v < new[:, s_to]
+            new[better, s_to] = v[better]; bk[better, s_to] = 0; ps[better, s_to] = s_from
+        if ok[i]:                              # a change arrives here from a state with since == 2
+            up = np.full(H, INF); up[1:] = cost[:-1, 2]
+            dn = np.full(H, INF); dn[:-1] = cost[1:, 2]
+            for v, code in ((up, 1), (dn, 2)):
+                better = v < new[:, 0]
+                new[better, 0] = v[better]; bk[better, 0] = code; ps[better, 0] = 2
+        cost = new + cc[:, None]; back[i] = bk; prev_s[i] = ps
+    y = np.zeros(n, int)
+    h, s_ = np.unravel_index(int(np.argmin(cost)), cost.shape)
+    for i in range(n - 1, -1, -1):
+        y[i] = h + lo_y
+        if i == 0: break
+        code = back[i, h, s_]; s_ = prev_s[i, h, s_]
+        h = h - 1 if code == 1 else h + 1 if code == 2 else h
+    return y
+
+
 if __name__ == "__main__":
     pts = [(0, 0), (60, 10), (120, 60), (200, 70), (260, 140)]
     cells, si = trace(pts, [(0, 0, None), (120, 60, None), (260, 140, None)])
@@ -165,4 +222,11 @@ if __name__ == "__main__":
     for i in range(1, len(ys)):
         if ys[i] != ys[i - 1]:
             assert abs(ys[i] - ys[i - 1]) == 1 and i - last >= 3; last = i
+    ys2 = profile_dp(cells, ground, si)
+    last = -9
+    for i in range(1, len(ys2)):
+        if ys2[i] != ys2[i - 1]:
+            assert abs(ys2[i] - ys2[i - 1]) == 1 and i - last >= 3; last = i
+    g1 = np.asarray(ground) + 1
+    assert np.abs(ys2 - g1).sum() < np.abs(ys - g1).sum(), (np.abs(ys2 - g1).sum(), np.abs(ys - g1).sum())
     print("railplan: ALL OK", len(cells), "cells")

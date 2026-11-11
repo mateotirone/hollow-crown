@@ -255,6 +255,18 @@ for n_,_,x_,z_,_ in plots:
     core=(dist<=46)&land
     T=float(np.median(Yf[core]))
     f=plot_shape(n_,th); rf=PLOT_FLAT*f; re_=rf+(PLOT_EASE-PLOT_FLAT)*(0.7+0.6*(plot_shape(n_+"e",th)-1))
+    # blend into the land (Mateo 2026-11-11): the easing band widens with the height it has to make up on each
+    # bearing, so the ground never rises or falls faster than about 1 in 2 on its way back to the natural land
+    bt=np.linspace(-np.pi,np.pi,181); need=np.zeros_like(bt); r0=PLOT_FLAT*plot_shape(n_,bt)
+    for j_,t_ in enumerate(bt):
+        need[j_]=170
+        for r_ in np.arange(r0[j_]+10,r0[j_]+171,4):        # first spot a 1-in-3 bank from the flat edge meets the land
+            c_,rw_=px(x_+r_*np.cos(t_),z_+r_*np.sin(t_))
+            if not (0<=int(rw_)<Yf.shape[0] and 0<=int(c_)<Yf.shape[1]): need[j_]=r_-r0[j_]; break
+            if abs(Yf[int(rw_),int(c_)]-T)<=(r_-r0[j_])/3: need[j_]=r_-r0[j_]; break
+    need=np.convolve(np.concatenate([need[-9:],need,need[:9]]),np.ones(19)/19,'valid')[:181]
+    span=np.clip(np.maximum(re_-rf,np.interp(th,bt,need)),0,170)
+    re_=rf+span
     w=np.clip((re_-dist)/(re_-rf),0,1); w=w*w*(3-2*w)
     Yf=np.where(land,Yf*(1-w)+(T+n3*1.6)*w,Yf)
 # story sites shaped into the land: Crownhold stands on a low rise, Bellhollow lies in a hollow

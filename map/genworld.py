@@ -276,16 +276,23 @@ for lname, pts in L["roads"].items():
         if sid not in stop_y:
             seg = ground[max(0, i - railplan.PLATFORM):i + railplan.PLATFORM + 1]
             stop_y[sid] = int(round(float(np.median(seg)))) + 1
-    ys = railplan.profile(cells, ground, si, stop_y=[stop_y[sid] for sid, _ in on])
+    ys = railplan.profile_dp(cells, ground, si, stop_y=[stop_y[sid] for sid, _ in on])
     RAILLINES[lname] = (cells, ys, [(sid, i) for (sid, _), i in zip(on, si)])
     for sid, _ in on: STOPS[sid].setdefault("lines", []).append(lname)
-    # per path cell: tunnel where the hill stands more than 10 over the bed, bridge where it crosses water
+    # per path cell: tunnel where the hill stands more than 10 over the bed (6 over a 4-high bore), bridge over water
     cx = np.array([c[0] for c in cells]) - X0; cz = np.array([c[1] for c in cells]) - Z0; ys_ = np.asarray(ys)
     okc = (cx >= 0) & (cx < SIZE) & (cz >= 0) & (cz < SIZE)
     gnd = np.where(okc, Y[np.clip(cx, 0, SIZE - 1), np.clip(cz, 0, SIZE - 1)], ys_)
     wt = np.where(okc, wet[np.clip(cx, 0, SIZE - 1), np.clip(cz, 0, SIZE - 1)], False)
     tun = (gnd - (ys_ - 1) > 10) & ~wt
     tun = np.convolve(tun.astype(float), np.ones(7) / 7, 'same') > 0.5
+    run0 = None                                                          # no tunnel shorter than 15 blocks: cut it open
+    for i_ in range(len(tun) + 1):
+        if i_ < len(tun) and tun[i_]:
+            run0 = i_ if run0 is None else run0
+        elif run0 is not None:
+            if i_ - run0 < 15: tun[run0:i_] = False
+            run0 = None
     wtd = np.convolve(wt.astype(float), np.ones(7), 'same') > 0          # a few blocks of approach either side
     # paint the corridor: nearest path cell's track height for every cell within RAIL_R blocks
     R = RAIL_R; off = np.array([(a, b) for a in range(-R, R + 1) for b in range(-R, R + 1)]); od = np.hypot(off[:, 0], off[:, 1])
@@ -309,16 +316,29 @@ for lname, pts in L["roads"].items():
 # beside it are laid first as one flat bench at track level; then banks slope back from the bench edge to the
 # natural ground, about 3 up for every 4 out with a little noise, as far out as they need (up to RAIL_R), for
 # cuttings and embankments alike. Banks are measured from the open bench, so over a tunnel the hill is left whole.
-corr = (rail_d <= RAIL_R) & land & ~wet & (tun_floor == -999) & (br_deck == -999)
+# Tunnels (see the line loop: at least 6 blocks of hill over a 4-high bore, 15+ blocks long) keep their hill whole:
+# nothing is cut over the bore or beside it, so the cutting ends at a portal face; everywhere else is open to the sky.
 bed = rail_y - 1
+bore = tun_floor > -999
+corr = (rail_d <= RAIL_R) & land & ~wet & ~bore & (br_deck == -999)
 flat_ = corr & ((rail_d <= 3.5) | (isroad & (rail_d <= ROADOFF + 5))) & ~rail_t   # over a tunnel the road keeps to the hill
 Y[flat_] = bed[flat_]
 dF = chamfer_b(flat_, RAIL_R)
 bank = np.floor(dF * 0.75 + (noise(7, 91) + 0.5) * 1.5).astype(np.int32)
 slope_ = corr & ~flat_
-# cuts reach over the tunnel mouths too, so a portal opens out of a sloped cutting; deeper in, the hill stays whole
-cut = (slope_ | ((rail_d <= RAIL_R) & land & ~wet & (tun_floor > -999))) & (Y > bed + bank); Y[cut] = (bed + bank)[cut]
+cut = slope_ & ~rail_t & (Y > bed + bank); Y[cut] = (bed + bank)[cut]
 fill = slope_ & (Y < bed - bank); Y[fill] = (bed - bank)[fill]
+# tunnel lining: stone brick walls and roof round the bore, which also make the portal faces
+tun_wall = np.zeros((SIZE, SIZE), bool); tun_wall_y = np.full((SIZE, SIZE), -999, np.int32)
+_tb = tun_floor > -999
+if _tb.any():
+    _nb = box(_tb.astype(np.float32), 1) > 0
+    tun_wall = _nb & ~_tb & (rail_d <= 4.5) & land & ~wet
+    _tf = tun_floor.copy()
+    for _ in range(2):                                         # walls take the floor level of the bore beside them
+        p_ = np.pad(_tf, 1, constant_values=-999)
+        _tf = np.where(_tf > -999, _tf, np.maximum.reduce([p_[:-2, 1:-1], p_[2:, 1:-1], p_[1:-1, :-2], p_[1:-1, 2:]]))
+    tun_wall_y = np.where(tun_wall, _tf, -999); tun_wall &= tun_wall_y > -999
 # baked town plans (GW_BLOCKS, map/bake_town.py): paths first, then the land graded to them (Mateo 2026-11-11).
 # Every groundwork column sits on ground exactly one block under its lowest block; the land beside it meets its top
 # ground block and may then rise or fall at most one block per two outwards, so no path stands proud or sinks in a trench.
@@ -869,6 +889,10 @@ for tx0 in range(0, SIZE, TILE):
         if tm_.any():
             for h_ in range(1, 5): vol[ix[tm_], tf[tm_] + h_ - YMIN, iz[tm_]] = AIR
             vol[ix[tm_], tf[tm_] - YMIN, iz[tm_]] = ID["gravel"]
+            rf_ = tm_ & (Yt >= tf + 5); vol[ix[rf_], tf[rf_] + 5 - YMIN, iz[rf_]] = ID["stone_bricks"]   # lined roof
+            tw_ = tun_wall[a0:a1, b0:b1]; twy = tun_wall_y[a0:a1, b0:b1]; tw_ = tw_ & (Yt >= twy + 1)
+            for h_ in range(0, 6):                                                # lined walls, which make the portal faces
+                m2_ = tw_ & (Yt >= twy + h_); vol[ix[m2_], twy[m2_] + h_ - YMIN, iz[m2_]] = ID["stone_bricks"]
         bd = br_deck[a0:a1, b0:b1]; bm_ = bd > -999
         if bm_.any():
             vol[ix[bm_], bd[bm_] - YMIN, iz[bm_]] = ID["stone_bricks"]
