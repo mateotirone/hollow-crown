@@ -191,6 +191,15 @@ A real book of all of it, with eight old paintings and the journal: `lore-book/T
 
 Builder commands: `/scriptevent siege:lore_list [collection]`, `siege:lore_give <tome | collection | all>`, `siege:lore_npc <id | list>`, `siege:lore_mark_place <place>`, `siege:lore_reset`. To bind a Dusty Tome, click it in creative while holding the tome.
 
+## The Settler's Almanac (in-game guide)
+
+Every new player is handed **the Settler's Almanac** on their first join (after the journal). Use it to read how things work, chapter by chapter. The first time a player meets a mechanic (places a block, clicks an NPC, carries an item, sees a creature, lives through a siege night) they get one gold `[Almanac]` line in chat, at most one every few seconds, and that page wears a gold dot until read. Pages about things a newcomer shouldn't know yet stay hidden until met, and secrets (the Cold Forge, thin places, moon doors and the like) have no page at all.
+
+- `/siege:guide` opens it for anyone, cheats off. The Keep menu has an Almanac button. Craft another from a book and a feather at a crafting table.
+- Tips can be switched off on the book's first page.
+- Words: `scripts/guide/data.js`. Adding a mechanic? Add its entry there (see MODULES.md). What is covered and what isn't: `docs/GUIDE.md`.
+- Test commands: `/scriptevent siege:guide [give | reset | all | tip <id>]`.
+
 ## Install
 
 - **Windows / phone / tablet:** open `hollow-crown.mcaddon`. Minecraft imports both packs.

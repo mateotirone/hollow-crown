@@ -566,6 +566,21 @@ Tell me about: anything too loud, too quiet, silent, or that made you jump. Noth
 2. Walk toward a Dusty Tome you have not clicked (the showcase has some). ✅ Within 16 blocks a page turns softly and the action bar says "Your Ledger whispers: something written, N blocks <direction>". After you copy the tome it goes quiet.
 3. Drop a Lore Tome and walk away and back. ✅ It is sensed the same way. Without the Ledger in your pack nothing happens.
 
+## The Settler's Almanac (scripts/guide/)
+
+Best on the real world map with a fresh player (or `/scriptevent siege:guide reset` first).
+
+1. Join for the first time. ✅ After the journal, chat says a clerk has given you the Settler's Almanac, and it is in your pack. Use it. ✅ A cover page, chapters with page counts, a "Tips in chat" switch. "First days" opens on "This book", "What to do first", "Land and protection" and more.
+2. Read a page, go back. ✅ The gold dot on it is gone and the chapter's "new" count drops.
+3. Raise your Keep Banner. ✅ A second or two later one gold "[Almanac]" line in chat (not on top of a menu), then another a few seconds after, never a burst.
+4. Pick up a Regal, place a Siege Workshop, click the Mason, click a Station Post, carry a Halter. ✅ One tip each, the first time only. Doing it again says nothing.
+5. Turn tips off on the first page and pick up something new. ✅ Silent, but its page still gets its gold dot.
+6. Click your Keep Banner. ✅ An "Almanac" button on the Keep menu. Type `/siege:guide` with cheats off. ✅ The book opens.
+7. Craft one at a normal crafting table: a book and a feather.
+8. Check the secrets stay secret: with a fresh player, no chapter called "Beyond the seam" or "The High Throne", and no page mentions the Hollow. `/scriptevent siege:guide all` shows them all (for proof-reading).
+9. `/scriptevent siege:guide tip <id>` repeats any page's tip.
+
+Tell me: any tip that came at a bad moment or said something wrong, any mechanic you had to ask about that the book doesn't cover, and whether the tips feel like too many or too few.
 ### Settlement gates and stripped log walls
 1. `/scriptevent siege:wall 3 saltreach` round your keep. ✅ The stakes are stripped birch, not bark birch. Try `vale`, `frostmarch`, `emberwaste`, `blackfen`: always the stripped log.
 2. With a second player who is not your ally, have them click your gate or portcullis. ✅ It stays shut and the action bar says "The gate is barred. Only <name>'s people can open it." You (and an ally) can open it by clicking.
