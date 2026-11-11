@@ -24,9 +24,9 @@ import { POWER_ORIGINS } from "./skills.js";
 import { SKILLS, SKILL, RINGS, BRANCHES, blockedReason, levelFromRenown, renownForNext, pointsForLevel, rankOf, spentIn, canBranch } from "./skills.js";
 import { STYLES, STYLE_IDS, styleFromBiome, styleFromGround } from "./styles.js";
 import { drawHall, frameFor, toWorld, statesFor, buildOrder } from "./halls.js";
-import { buildTick } from "./build.js";
+import { buildTick, clearBoxFor, worldCells, progressOf } from "./build.js";
 import { heroOf, saveHero, forgetHero, grantRenown, listenForGrants, blankHero } from "./hero.js";
-import { CORNERSTONE, TREE, hallMenu, hallOf, halls, saveHalls, resumeBuilds, beginBuild, setTreeLook, allowedLevel, HALL_COSTS, hallMenuExtras } from "./townhall.js";
+import { CORNERSTONE, TREE, hallMenu, hallOf, halls, saveHalls, resumeBuilds, beginBuild, setTreeLook, allowedLevel, HALL_COSTS, hallMenuExtras, stoneSpots } from "./townhall.js";
 import { openTree, choosePath, treeMenu, EMBER, BOUND_EMBER, OATH_BANNER } from "./tree.js";
 import { passiveTick, watchfireTick, dropEmber, nearestClue } from "./progress.js";
 import { knightTick, chargeTick } from "./knight.js";
@@ -293,6 +293,37 @@ api.addTests("tree screen", {
 api.addGuardLimitHook((owner, limit) => {
   const p = world.getAllPlayers().find((x) => x.id === owner);
   return limit + (p ? Math.min(3, heroOf(p).rumorDebts ?? 0) : 0);
+});
+
+api.addTests("hall build", {
+  "every hall has a spot for the cornerstone beside the path, never in it": () => {
+    for (const id of STYLE_IDS) for (let level = 1; level <= 5; level++) {
+      const spots = stoneSpots(drawHall(level, STYLES[id]));
+      api.assert(spots.length > 0, `${id} ${level} has a cornerstone spot`);
+      api.assert(spots.every(([x]) => Math.abs(x) >= 2), `${id} ${level}: spot clear of the door`);
+    }
+  },
+  "the clear box holds every block of the old hall above the ground": () => {
+    for (const id of STYLE_IDS) for (const forward of [{ x: 0, z: 1 }, { x: 1, z: 0 }, { x: 0, z: -1 }, { x: -1, z: 0 }]) {
+      const plan = drawHall(3, STYLES[id]), origin = { x: 100, y: 64, z: -40 };
+      const box = clearBoxFor(plan, origin, forward);
+      for (const c of worldCells(plan, origin, forward)) {
+        if (c.y < origin.y) continue;
+        api.assert(c.x >= box.min.x && c.x <= box.max.x && c.y <= box.max.y && c.z >= box.min.z && c.z <= box.max.z, `${id} ${JSON.stringify(forward)}: ${JSON.stringify(c)} inside`);
+      }
+    }
+  },
+  "build progress only ever goes up and ends at 100%": () => {
+    const job = { clearBox: { min: { y: 0 }, max: { y: 9 } }, columns: new Array(30), cells: new Array(500), stage: "clear", layer: 9, cursor: 0, index: 0 };
+    let last = -1;
+    const look = () => { const f = progressOf(job); api.assert(f >= last, "never goes back"); last = f; };
+    for (; job.layer >= 0; job.layer--) look();
+    job.stage = "columns";
+    for (; job.cursor <= 30; job.cursor++) look();
+    job.stage = "cells";
+    for (; job.index <= 500; job.index += 50) look();
+    api.assertEqual(progressOf(job), 1);
+  },
 });
 
 api.addTests("clue sense", {
