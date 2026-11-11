@@ -38,6 +38,8 @@ def timber_palette(seed=0):
 def pyramid(bp, P, x0, z0, x1, z1, base, pitch=1, mat=None, block=None, finial="stone_brick_wall"):
     """Hipped / pyramid roof over a rect: rings of stairs stepping in, `pitch` blocks up per ring."""
     stair = mat or P["roof"]; solid = block or P["roof_block"]
+    ladder = P.get("roof_ladder") if not mat and isinstance(stair, str) and stair in (P.get("roof_ladder") or ()) else None
+    rings = max(1, (min(x1 - x0, z1 - z0) + 2) // 2)
     r = 0; y = base
     while x0 + r <= x1 - r and z0 + r <= z1 - r:
         a0, b0, a1, b1 = x0 + r, z0 + r, x1 - r, z1 - r
@@ -49,7 +51,11 @@ def pyramid(bp, P, x0, z0, x1, z1, base, pitch=1, mat=None, block=None, finial="
             f = "s" if z == b0 else "n" if z == b1 else "e" if x == a0 else "w"
             if (x, z) in ((a0, b0), (a1, b0), (a0, b1), (a1, b1)):
                 f = "s" if z == b0 else "n"
-            bp.set(x, y + pitch - 1, z, stair, facing=f, half="bottom")
+            st = stair
+            if ladder:      # the doctrine's roof gradient: eaves -> ridge, softly dithered
+                t = r / rings + (h3(x, y, z, 77) - 0.5) * 0.14
+                st = ladder[min(len(ladder) - 1, max(0, int(t * len(ladder))))]
+            bp.set(x, y + pitch - 1, z, st, facing=f, half="bottom")
         if last:
             if finial: bp.set((a0 + a1) // 2, y + pitch, (b0 + b1) // 2, finial)
             break

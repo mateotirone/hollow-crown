@@ -93,6 +93,8 @@ def base_material(n):
 def cube_tex(n, p):
     """face -> texture key ('top','bottom','side' / per face)."""
     if n.startswith("siege:"): return siege_tex(n)
+    if n == "stone": return {"side": "stone"}          # plain stone, not cobblestone
+    if n == "tuff_bricks": return {"side": "tuff_bricks"}
     w = wood_of(n)
     if n.endswith("_log") and n.startswith("stripped_"):
         return {"top": f"stripped_{w}_log_top", "side": f"stripped_{w}_log"}

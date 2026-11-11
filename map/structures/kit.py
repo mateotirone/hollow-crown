@@ -33,6 +33,73 @@ def mix(table, seed=0, low_moss=None):
         return table[-1][0], {}
     return f
 
+# ---- texturing doctrine (build-instructions/texturing, PR #87): gradients, not speckle ----------------
+SLATE = ["cobbled_deepslate_stairs", "deepslate_brick_stairs", "deepslate_tile_stairs"]          # eaves -> ridge
+COPPER = ["waxed_cut_copper_stairs", "waxed_exposed_cut_copper_stairs", "waxed_weathered_cut_copper_stairs",
+          "waxed_oxidized_cut_copper_stairs"]                                                    # eaves -> ridge
+COPPER_MATS = dict(roof=COPPER[0], roof_ladder=COPPER, roof_block="waxed_oxidized_cut_copper",
+                   roof_slab="waxed_oxidized_cut_copper_slab")
+VALE_STONE = ["tuff_bricks", "cobblestone", "stone", "andesite"]                                 # VAL-01 (Mateo), bottom to top
+STONE_FAMILY = {"stone_bricks", "cracked_stone_bricks", "mossy_stone_bricks", "cobblestone", "mossy_cobblestone",
+                "andesite", "tuff", "tuff_bricks", "stone"}
+
+DOCTRINE = dict(dress=True, verge_lanterns=True, arched_jetty=True, panel_trapdoor="dark_oak_trapdoor")
+
+def finish_doctrine(bp, ladder=VALE_STONE):
+    """Canvas first, paint last: repaint the stone walls by the doctrine, then finish the blueprint."""
+    paint_stone(bp, ladder)
+    return bp.finish()
+
+def smooth_noise(a, b, seed, cell=4.0):
+    """Value noise in 0..1 that forms clusters about `cell` blocks across (never single-block speckle)."""
+    fa, fb = a / cell, b / cell
+    ia, ib = math.floor(fa), math.floor(fb)
+    ta, tb = fa - ia, fb - ib
+    ta, tb = ta * ta * (3 - 2 * ta), tb * tb * (3 - 2 * tb)
+    g = lambda i, j: h3(i, j, 0, seed)
+    top = g(ia, ib) * (1 - ta) + g(ia + 1, ib) * ta
+    bot = g(ia, ib + 1) * (1 - ta) + g(ia + 1, ib + 1) * ta
+    return top * (1 - tb) + bot * tb
+
+def paint_stone(bp, ladder=VALE_STONE, family=STONE_FAMILY, seed=5, depth=1, lone=0.08):
+    """The doctrine's last pass over finished stone walls (texturing/doctrine.py paint_teeth, Mateo's gradient
+    examples): every outside stone cell is repainted in bands from the foot of its wall to the top, dark to
+    light, the band edges interlocking column by column (each edge shifted up or down by up to `depth`) with a
+    few lone blocks one row ahead of each edge, then no skipped steps between neighbours. Small walls (under
+    9 rows) use 3 steps of the ladder, taller ones all of it."""
+    cells = {c for c, (n, p) in bp.cells.items() if n in family and c[1] >= 1}
+    air = lambda c: bp.cells.get(c, ("keep",))[0] in ("keep", "air")
+    outer = {c for c in cells if any(air((c[0] + dx, c[1], c[2] + dz)) for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)))}
+    if not outer: return
+    lo, hi = {}, {}
+    for (x, y, z) in outer:
+        lo[(x, z)] = min(lo.get((x, z), y), y); hi[(x, z)] = max(hi.get((x, z), y), y)
+    rows = max(hi[c] - lo[c] + 1 for c in lo)
+    lad = ladder if rows >= 9 else ladder[:3]
+    n = len(lad)
+    hsh = lambda a, b, s: h3(a, b, 0, s)
+    idx = {}
+    for (x, y, z) in outer:
+        h = rows; yy = y - lo[(x, z)]
+        col = x * 31 + z
+        cut = [(k + 1) * h / n + round((hsh(col, k, seed) - 0.5) * (2 * depth + 0.99)) for k in range(n - 1)]
+        i = sum(1 for c in cut if yy >= c)
+        r = hsh(col, yy, seed + 13)
+        if r < lone / 2 and i < n - 1 and yy + 1 >= cut[i] - 1: i += 1
+        elif r > 1 - lone / 2 and i > 0 and yy <= cut[i - 1] + 1: i -= 1
+        idx[(x, y, z)] = i
+    for _ in range(n):
+        changed = False
+        for c, i in list(idx.items()):
+            for d in ((1, 0, 0), (0, 1, 0), (0, 0, 1)):
+                o = (c[0] + d[0], c[1] + d[1], c[2] + d[2])
+                if o in idx and abs(idx[o] - idx[c]) > 1:
+                    if idx[c] > idx[o]: idx[c] -= 1
+                    else: idx[o] -= 1
+                    changed = True
+        if not changed: break
+    for c, i in idx.items(): bp.cells[c] = (lad[i], {})
+
 # ---- palettes -------------------------------------------------------------
 VALE = dict(
     stone=mix([("stone_bricks", 50), ("cracked_stone_bricks", 10), ("mossy_stone_bricks", 8), ("cobblestone", 14), ("andesite", 10), ("tuff", 4)], 3,
@@ -42,8 +109,8 @@ VALE = dict(
     frame="stripped_dark_oak_log", frame2="dark_oak_log",
     infill="calcite",
     floor="spruce_planks", gable=None,
-    roof=mix([("deepslate_tile_stairs", 88), ("deepslate_brick_stairs", 8), ("cobbled_deepslate_stairs", 4)], 21),
-    roof_block="deepslate_tiles", roof_slab="deepslate_tile_slab",
+    roof="deepslate_tile_stairs",   # painted as a gradient by roof_ladder (texturing doctrine), not a random mix
+    roof_block="deepslate_tiles", roof_slab="deepslate_tile_slab", roof_ladder=SLATE,
     trim="dark_oak_stairs", trim_block="dark_oak_planks", trim_slab="dark_oak_slab",
     bracket="dark_oak_stairs", sill="stone_brick_stairs", shutter="spruce_trapdoor", door="spruce_door",
     pane="glass_pane", chimney=mix([("stone_bricks", 60), ("cobblestone", 25), ("cracked_stone_bricks", 15)], 6),
@@ -162,9 +229,15 @@ class Building:
         bp, P = self.bp, self.P
         x0, z0, x1, z1 = rect_upper
         for side in sides:
-            for i, (x, z) in enumerate(side_cells(x0, z0, x1, z1, side)):
-                if bp.get(x, y + 1, z)[0] == P["frame"] and bp.get(x, y + 1, z)[1].get("axis") == "y" or i == 0:
-                    bp.set(x, y, z, P["bracket"], facing=OPP[side], half="top")
+            cells = side_cells(x0, z0, x1, z1, side)
+            posts = [i for i, (x, z) in enumerate(cells) if i in (0, len(cells) - 1) or
+                     (bp.get(x, y + 1, z)[0] == P["frame"] and bp.get(x, y + 1, z)[1].get("axis") == "y")]
+            for i, (x, z) in enumerate(cells):
+                if i in posts: bp.set(x, y, z, P["bracket"], facing=OPP[side], half="top")
+                elif P.get("arched_jetty"):      # arched supports between the posts: slab, trapdoor at mid-bay (02-frame)
+                    d = min(abs(i - p) for p in posts)
+                    if d == 1: bp.set(x, y, z, P["trim_slab"], half="top")
+                    else: bp.set(x, y, z, P.get("panel_trapdoor", P["shutter"]), facing=side, half="top")
 
     def window(self, x, y, z, side, w=1, h=2, kind="timber", shutters=None):
         """Window whose bottom-left (seen from outside) is at x,y,z in the wall plane given by side."""
@@ -184,7 +257,18 @@ class Building:
                     bp.set(x + rx * i + ox, y + j, z + rz * i + oz, P["pane"]); bp.set(x + rx * i, y + j, z + rz * i, "air")
                 c = bp.get(x + rx * i + ox, y - 1, z + rz * i + oz)
                 if not c[0].endswith("_log"): bp.set(x + rx * i + ox, y - 1, z + rz * i + oz, P.get("wsill", P["trim"]), facing=OPP[side], half="bottom")
+            asked = shutters is not None
             if shutters is None: shutters = h3(x, y, z, self.seed + 31) < self.P.get("shutters", 0.3)
+            if P.get("dress") and not asked and not shutters and w == 1:     # shutter dressing (05): a shelf with a lantern, or leaves
+                r = h3(x, y, z, self.seed + 57)
+                sx, sz = x + 2 * ox, z + 2 * oz
+                if bp.get(sx, y - 1, sz)[0] in ("keep", "air"):
+                    if r < 0.3:
+                        bp.set(sx, y - 1, sz, P.get("shelf", "spruce_slab"), half="top")
+                        if bp.get(sx, y, sz)[0] in ("keep", "air"): bp.set(sx, y, sz, "lantern")
+                    elif r < 0.55 and bp.get(sx, y - 2, sz)[0] in ("keep", "air"):     # leaves hanging under a slab shelf
+                        bp.set(sx, y - 1, sz, P.get("shelf", "spruce_slab"), half="top")
+                        bp.set(sx, y - 2, sz, "azalea_leaves_flowered" if r < 0.42 else "azalea_leaves", persistent=True)
             for sx, sz in (((x - rx + 2 * ox, z - rz + 2 * oz), (x + rx * w + 2 * ox, z + rz * w + 2 * oz)) if shutters else ()):
                 if bp.get(sx, y, sz)[0] in ("keep", "air"):
                     for j in range(h): bp.set(sx, y + j, sz, P["shutter"], facing=side, open=True)
@@ -313,6 +397,11 @@ class Building:
                 if o2 is not None and (nh is None or o2 > nh): nh = o2
                 if nh is not None and nh > h: higher.append((nh - h, d))
             stair, block, slab = m("roof"), m("roof_block"), m("roof_slab")
+            ladder = mats.get("roof_ladder", P.get("roof_ladder"))
+            if ladder and isinstance(stair, str) and stair in ladder:          # slate / copper: a gradient eaves -> ridge
+                top_h = base + ((r[3] - r[1]) // 2 if ridge == "x" else (r[2] - r[0]) // 2) * pitch
+                t = (h - base) / max(1, top_h - base) + (h3(x, h, z, 77) - 0.5) * (0.08 if len(ladder) > 3 else 0.14)
+                stair = ladder[min(len(ladder) - 1, max(0, int(t * len(ladder))))]
             if higher:
                 higher.sort(reverse=True)
                 bp.set(x, h, z, stair, facing=higher[0][1], half="bottom")
@@ -333,6 +422,8 @@ class Building:
                 if o is not None and o >= h: continue
                 if bp.get(x, h, z)[0].endswith("_stairs") and bp.get(x, h - 1, z)[0] in ("keep", "air"):
                     bp.set(x, h - 1, z, mats.get("trim_block", P.get("trim_block", "dark_oak_planks")))
+                    if P.get("verge_lanterns") and h - 3 >= 2 and all(bp.get(x, h - k, z)[0] in ("keep", "air") for k in (2, 3, 4)):
+                        bp.set(x, h - 2, z, "iron_chain"); bp.set(x, h - 3, z, "lantern", hanging=True)
         self.H = Hm
 
     def gable_walls(self, rect, ridge, y_from, style="timber"):
@@ -381,4 +472,9 @@ class Building:
             for j in range(d):
                 for y in range(y0, top + 1): bp.set(x + i, y, z + j, P["chimney"])
                 bp.set(x + i, top + 1, z + j, P["chimney_cap"])
+        if P.get("dress") and w == 1 and d == 1:       # chimney top (06-roof): campfire boxed by trapdoors, a pot on top
+            bp.set(x, top + 1, z, "campfire")
+            for dd, (dx, _, dz) in DIRS.items():
+                if bp.get(x + dx, top + 1, z + dz)[0] in ("keep", "air"): bp.set(x + dx, top + 1, z + dz, "spruce_trapdoor", facing=dd, open=True)
+            bp.set(x, top + 2, z, "flower_pot")
         return top
