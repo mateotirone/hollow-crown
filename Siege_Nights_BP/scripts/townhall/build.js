@@ -1,7 +1,7 @@
 // The build engine: raises a hall template block by block, in a regional style.
 // Other features can reuse it for their own templates: startBuild({ ... plan ... }).
 
-import { world, system, BlockPermutation } from "@minecraft/server";
+import { world, BlockPermutation } from "@minecraft/server";
 import { buildOrder, frameFor, toWorld, statesFor } from "./halls.js";
 import { sfx } from "../core/sfx.js";
 
@@ -167,4 +167,4 @@ export function worldBox(plan, origin, forward) {
   };
 }
 
-export { system };
+export { system } from "@minecraft/server";

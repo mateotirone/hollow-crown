@@ -12,7 +12,7 @@ import { SALT_HALLS } from "./halls_salt.js";
 import { EMBER_HALLS } from "./halls_ember.js";
 import { FEN_HALLS } from "./halls_fen.js";
 
-export { Plan };
+export { Plan } from "./hallparts.js";
 
 export const HALL_TIERS = [
   null,

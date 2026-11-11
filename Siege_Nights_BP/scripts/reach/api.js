@@ -13,10 +13,11 @@
 // "firstGlimpse" { owners }: the first Hollow soldiers have just walked out of the dark at these settlements.
 // Filter "hollowSoldier" (type, { role, glimpse }): answer with the entity the Reach should send as a Hollow soldier.
 
-import { reachData, tonightKind, addReach, rectify } from "./index.js";
-import { stage, isSiegeKind, hollowShare, LONG, AFTER, STAGES } from "./rules.js";
+import { reachData, tonightKind } from "./index.js";
+import { stage, isSiegeKind, hollowShare } from "./rules.js";
 
-export { tonightKind, addReach, rectify, LONG, AFTER, STAGES };
+export { tonightKind, addReach, rectify } from "./index.js";
+export { LONG, AFTER, STAGES } from "./rules.js";
 export const reachStage = () => reachData().stage;
 export const reachValue = () => reachData().reach;
 export const stageInfo = () => stage(reachData().stage);

@@ -104,7 +104,9 @@ player["minecraft:entity"].description.properties = { "hc:look": { type: "int", 
 writeJson(path.join(BP, "entities/player.json"), player);
 
 // ---------- resource pack: draw the look instead of the player's own skin while hc:look is above 0 ----------
-const WORN = "query.property('hc:look') >= 1", OWN = "query.property('hc:look') < 1";
+// has_property guard: the menu paper doll ("ToyGolem") has no actor, and a bare query.property logs an error there
+const LOOK = "(query.has_property('hc:look') ? query.property('hc:look') : 0)";
+const WORN = `${LOOK} >= 1`, OWN = `${LOOK} < 1`;
 const client = readJson(path.join(ROOT, "studio/looks/vanilla/player.entity.json"));
 const desc = client["minecraft:client_entity"].description;
 const slots = Math.max(...looks.map((l) => l.n));
@@ -127,7 +129,7 @@ for (const kind of SWAP) {
     ...vanillaRc[`controller.render.player.${kind}`],
     arrays: { textures: { "Array.hc_looks": Array.from({ length: slots }, (_, i) => `Texture.${texKey(i + 1)}`) } },
     geometry: "Geometry.hc_look",
-    textures: ["Array.hc_looks[query.property('hc:look') - 1]"],
+    textures: [`Array.hc_looks[${LOOK} - 1]`],
   };
 }
 writeJson(path.join(RP, "render_controllers/hc_looks.render_controllers.json"), rc);

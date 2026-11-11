@@ -31,7 +31,7 @@ export { SETTINGS } from "./settings.js";
 export { on, emit } from "../core/events.js";
 
 // ----- hooks (with none registered, Siege Nights behaves exactly as before) -----
-export { addFilter };
+export { addFilter } from "../core/events.js";
 
 // (location) => ownerId | undefined. Extra land; the id must own a keep.
 export const addLandClaim = (fn) => addFilter("landOwner", (owner, { location }) => owner ?? fn(location));

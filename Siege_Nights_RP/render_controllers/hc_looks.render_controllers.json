@@ -9,7 +9,7 @@
         }
       ],
       "textures": [
-        "Array.hc_looks[query.property('hc:look') - 1]"
+        "Array.hc_looks[(query.has_property('hc:look') ? query.property('hc:look') : 0) - 1]"
       ],
       "part_visibility": [
         {
@@ -51,7 +51,7 @@
         }
       ],
       "textures": [
-        "Array.hc_looks[query.property('hc:look') - 1]"
+        "Array.hc_looks[(query.has_property('hc:look') ? query.property('hc:look') : 0) - 1]"
       ],
       "part_visibility": [
         {
@@ -114,7 +114,7 @@
         }
       ],
       "textures": [
-        "Array.hc_looks[query.property('hc:look') - 1]"
+        "Array.hc_looks[(query.has_property('hc:look') ? query.property('hc:look') : 0) - 1]"
       ],
       "part_visibility": [
         {
