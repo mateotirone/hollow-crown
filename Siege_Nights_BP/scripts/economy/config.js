@@ -146,7 +146,7 @@ export const TOWN_RING = 9;
 export const TOWNS = [
   { name: "Kingsrest", region: V, jobs: ["moneyer", "farmer", "woodcutter", "quarryman", "smith", "fisher", "hunter", "herbalist"] },
   { name: "Millbrook", region: V, jobs: ["farmer", "woodcutter", "smith", "hunter"] },
-  { name: "Hollowfast", region: F, jobs: ["quarryman", "smith", "hunter", "farmer"] },
+  { name: "Rimehold", region: F, jobs: ["quarryman", "smith", "hunter", "farmer"] },
   { name: "Gull's Rest", region: S, jobs: ["fisher", "farmer", "smith", "woodcutter"] },
   { name: "Sunscar", region: E, jobs: ["quarryman", "smith", "hunter", "farmer"] },
   { name: "Mirelight", region: B, jobs: ["herbalist", "woodcutter", "fisher", "hunter", "farmer", "smith"] },
