@@ -84,12 +84,12 @@ TODO = [
     ("Story sites", [("Five boss arenas", "One per under-boss, built round each fight."),
                      ("Seven thin-place caves", "Where the Hollow seeps through."),
                      ("Crownhold", "The old royal seat."), ("Bellhollow", ""), ("The Ashen sites", ""), ("Ruins", "Scattered across the regions.")]),
-    ("Rails", [("Stations along every line", "Kingsrest station is done; halts and junctions for the other lines to do."),
-               ("Rail bridges and tunnels", "Road bridges in Kingsrest and Millbrook are done.")]),
+    ("Rails", [("Rail bridges and tunnels", "Stations at all four sizes are done in every region; road bridges in Kingsrest and Millbrook are done.")]),
     ("Elsewhere", [("Rival Lords' seats", "The rival lords play from their own plots but have no buildings or walls of their own yet."),
                    ]),
     ("The Hollow", [("The Seat and the Vault", "Morvane's ring over the fog and the ore vault under it. Both are fight and robbery spaces, so they change last, with the boss code."),
-                    ("The Drowned Court", "Oswin's flooded throne hall, built with the Court fight.")]),
+                    ("The Drowned Court", "Oswin's flooded throne hall, built with the Court fight."),
+                    ("The final-fight arenas", "The small pocket places for the last fight: they work in game as plain shapes and get restyled with the boss code.")]),
 ]
 todo_html = '<p class="lede">Everything still to design, so the catalogue shows the whole job.</p><div class="todo">' + "".join(
     f'<section><h2 class="sub">{esc(g)}</h2><ul>' + "".join(f'<li><b>{esc(n)}</b>{" <span>" + esc(d) + "</span>" if d else ""}</li>' for n, d in items) + "</ul></section>"
