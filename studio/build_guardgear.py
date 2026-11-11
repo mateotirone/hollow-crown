@@ -142,8 +142,8 @@ for t in range(1,5):
             "textures":{"default":f"textures/models/siege_guard_armor/tier{t}","enchanted":"textures/misc/enchanted_actor_glint"},
             "geometry":{"default":ident},"scripts":{"parent_setup":VIS[piece]},"render_controllers":["controller.render.armor"]}}},
             open(RP+f'attachables/guardgear_{t}_{piece}.json','w'),indent=2)
-        # guard-only: not in the creative menu, never sold or crafted
-        json.dump({"format_version":"1.21.60","minecraft:item":{"description":{"identifier":item,"menu_category":{"category":"none","is_hidden_in_commands":False}},
+        # guard-only: never sold or crafted; in the creative menu (own group, item_catalog/) for playtests
+        json.dump({"format_version":"1.21.60","minecraft:item":{"description":{"identifier":item,"menu_category":{"category":"equipment"}},
             "components":{"minecraft:icon":f"siege_guard_{piece}","minecraft:display_name":{"value":f"item.{item}.name"},"minecraft:max_stack_size":1,
             "minecraft:wearable":{"slot":SLOT[piece],"protection":PROT[t][piece]},"minecraft:tags":{"tags":["minecraft:is_armor"]}}}},
             open(BP+f'items/guardgear_{t}_{piece}.json','w'),indent=2)

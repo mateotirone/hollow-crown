@@ -93,14 +93,14 @@ def nameof(n):
 
 
 def copy_json(name):
-    """The Hollow's own wood (Latticewood): the original block made unbreakable, hidden from the menu."""
+    """The Hollow's own wood (Latticewood): the original block made unbreakable (in the creative menu under Locked World Trees)."""
     import copy, glob
     for f in glob.glob(os.path.join(BP, "blocks", "*.json")):
         d = json.load(open(f, encoding="utf8"))
         b = d.get("minecraft:block", {})
         if b.get("description", {}).get("identifier") != name: continue
         d = copy.deepcopy(d); b = d["minecraft:block"]
-        b["description"] = {"identifier": tree_id(name), "menu_category": {"category": "none"}}
+        b["description"] = {"identifier": tree_id(name), "menu_category": {"category": "construction"}}
         c = b["components"]; c.pop("minecraft:flammable", None); c.pop("minecraft:loot", None)
         c["minecraft:destructible_by_mining"] = False; c["minecraft:destructible_by_explosion"] = False
         return d
@@ -166,7 +166,7 @@ def block_json(name, tex):
         comp["minecraft:selection_box"] = {"origin": [-8, 0, -8], "size": [16, 3, 16]}
         perms += [{"condition": f"q.block_state('siege:dir') == {d}", "components": {"minecraft:transformation": {"rotation": [0, y, 0]}}} for d, y in YAW.items() if y]
     if not leaves and k != "log": comp["minecraft:light_dampening"] = 0
-    desc = {"identifier": bid, "menu_category": {"category": "none"}}
+    desc = {"identifier": bid, "menu_category": {"category": "construction"}}
     if states: desc["states"] = states
     d = {"format_version": "1.21.60", "minecraft:block": {"description": desc, "components": comp}}
     if perms: d["minecraft:block"]["permutations"] = perms

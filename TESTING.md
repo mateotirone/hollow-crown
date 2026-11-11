@@ -312,6 +312,8 @@ Rival Lords only settle on a map with Plot Stones. Place three or four Plot Ston
 - `/scriptevent siege:returned_reveal` puts a beam on every Returned near you if you lose track.
 - On their own, villages of five or more get one at night once the first boss is dead (slowly: a small chance every two minutes, one per village).
 
+**Boss Summons (creative menu).** In creative, open the Equipment tab and find the fold-out group "Hollow Crown: Boss Summons": nine sealed writs. Use the Reeve's on flat ground: the Reeve appears 6 blocks in front of you and its fight starts (name, intro line, boss sound), and the writ stays in your hand. Use it again while the fight runs: "already here". The Choir's writ takes you to the Court of the Hollow and wakes the Choir a few seconds later (or says the Court isn't built). The Pretender's rolls a new claimant. Also check the Construction tab has a "Hollow Crown: Locked World Trees" group and the Equipment tab a "Hollow Crown: Guard-only Armour" group, and that the Throne, Fallen Oath Shard, Tree of Oaths, Hollow Crown and Heart of the Hollow can be found with the creative search.
+
 **Morvane, the last fight (seven stages).** On flat open ground run `/scriptevent siege:bestiary_summon morvane`. Away from the Seat all seven stages play on the spot, which is the quick way to check the mechanics. `/scriptevent siege:morvane_skip 4` jumps a running fight to stage 4 (any number 1 to 7).
 
 - Stage 1: two warned blows then a Toll ring you jump; he appears behind whoever hit him last; Tollmen arrive.

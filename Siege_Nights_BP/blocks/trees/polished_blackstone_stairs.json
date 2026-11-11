@@ -4,7 +4,7 @@
     "description": {
       "identifier": "siege:old_polished_blackstone_stairs",
       "menu_category": {
-        "category": "none"
+        "category": "construction"
       },
       "states": {
         "siege:dir": [

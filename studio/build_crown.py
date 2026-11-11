@@ -50,7 +50,7 @@ block("throne", {
     "minecraft:collision_box": {"origin": [-7, 0, -7], "size": [14, 16, 14]},
     "minecraft:selection_box": {"origin": [-7, 0, -7], "size": [14, 16, 14]},
     "minecraft:loot": "loot_tables/blocks/siege_nothing.json",
-    "minecraft:map_color": "#c9a53a"}, category="none")
+    "minecraft:map_color": "#c9a53a"}, category="construction")
 
 block("fallen_shard", {
     "minecraft:geometry": "geometry.siege_fallen_shard",
@@ -62,7 +62,7 @@ block("fallen_shard", {
     "minecraft:collision_box": {"origin": [-4, 0, -4], "size": [8, 14, 8]},
     "minecraft:selection_box": {"origin": [-4, 0, -4], "size": [8, 14, 8]},
     "minecraft:loot": "loot_tables/blocks/siege_fallen_shard.json",
-    "minecraft:map_color": "#b9a6ff"}, category="none")
+    "minecraft:map_color": "#b9a6ff"}, category="construction")
 
 write(f"{BP}/loot_tables/blocks/siege_fallen_shard.json", {"pools": [{"rolls": 1, "entries": [
     {"type": "item", "name": "siege:crown_shard", "weight": 1}]}]})
@@ -78,9 +78,9 @@ item("hollow_crown", {
     "minecraft:max_stack_size": 1,
     "minecraft:wearable": {"slot": "slot.armor.head", "protection": 3},
     "minecraft:glint": True,
-    "minecraft:tags": {"tags": ["minecraft:is_armor"]}}, category="none")
+    "minecraft:tags": {"tags": ["minecraft:is_armor"]}}, category="equipment")
 # The victor's relic (Mateo's pick): a still-beating ember cut from the final boss
-item("heart_of_the_hollow", {"minecraft:max_stack_size": 1, "minecraft:glint": True}, category="none")
+item("heart_of_the_hollow", {"minecraft:max_stack_size": 1, "minecraft:glint": True}, category="items")
 item("crown_shard", {"minecraft:max_stack_size": 16, "minecraft:glint": True}, category="items")
 item("gauntlet_of_challenge", {"minecraft:max_stack_size": 1})
 
