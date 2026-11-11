@@ -90,4 +90,5 @@ def worn():
         dots('crystal', f, [(0, 0), (0, 1)], c(ICE, 5)); dots('crystal', f, [(1, 3)], c(ICE, 1))
     dots('cap', 'north', [(0, 1), (1, 0), (6, 0), (7, 1)], VEIN)
     im.save(RP + 'textures/models/armor/siege_hollow_crown.png')
-if __name__ == '__main__': icon(); geo(); worn(); print('crown done')
+# geo() and worn() are superseded by build_crown3d.py (2026-11-11); only the icon is still made here.
+if __name__ == '__main__': icon(); print('crown icon done')
