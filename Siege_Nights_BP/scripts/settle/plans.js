@@ -12,7 +12,8 @@ import { world, system, GameMode, ItemStack } from "@minecraft/server";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
 import { isReady, settlementAt, isAlly, keepOf, onTick, moduleStore, on, emit } from "../siege/api.js";
 import { purse, charge, coins, lot } from "./wallet.js";
-import { startBuild, buildFor, worldMarks } from "../townhall/build.js";
+import { startBuild, buildFor, worldMarks, resolveRole } from "../townhall/build.js";
+import { levelSite, foundationColumns } from "./ground.js";
 import { hallOf } from "../townhall/townhall.js";
 import { STYLES, STYLE_IDS, styleFromGround } from "../townhall/styles.js";
 import { plotAt } from "../plots/claims.js";
@@ -106,22 +107,29 @@ const yawOf = (d) => (d.z === 1 ? 0 : d.x === -1 ? 90 : d.z === -1 ? 180 : -90);
 export function raise(key, stone, buildingId, style, { quiet = false } = {}) {
   if (buildFor(jobId(key))) return false;
   const plan = drawBuilding(buildingId, style);
-  const origin = locOf(key);
+  const stoneAt = locOf(key);
   const forward = { x: stone.fx, z: stone.fz };
+  // on the highest ground under it, with foundation below (ground.js); the stone keeps its own spot
+  // a build picked up again after a restart keeps the height it started at
+  const { origin, lift } = stone.building === buildingId && Number.isFinite(stone.lift)
+    ? { origin: { ...stoneAt, y: stoneAt.y + stone.lift }, lift: stone.lift }
+    : levelSite(world.getDimension(OVERWORLD), plan, stoneAt, forward);
   stone.building = buildingId;
   stone.style = style;
+  stone.lift = lift;
   stone.pick = undefined;
   store.save();
-  startBuild({
+  const job = startBuild({
     id: jobId(key), dimensionId: OVERWORLD, origin, forward, plan, style: styleFor(style),
     perTick: Math.max(4, Math.ceil(plan.cells.size / SETTLE.riseTicks)),
     onDone() {
       const dim = world.getDimension(OVERWORLD);
       const player = world.getPlayers().find((p) => p.id === stone.placer);
       try {
-        const block = dim.getBlock(origin);
+        const block = dim.getBlock(stoneAt);
         if (block?.typeId === FOUNDATION) {
-          block.setType("minecraft:air");
+          if (lift > 0) block.setPermutation(resolveRole(job.style, job.frame, "foundation")); // it sat under the floor
+          else block.setType("minecraft:air");
           const back = new ItemStack(FOUNDATION, 1);
           const left = player && !isCreative(player) ? invOf(player).addItem(back) : player ? undefined : back;
           if (left) dim.spawnItem(left, { x: origin.x + 0.5, y: origin.y + 0.5, z: origin.z + 0.5 });
@@ -143,7 +151,8 @@ export function raise(key, stone, buildingId, style, { quiet = false } = {}) {
       if (first && SETTLE.firstBuildRenown) emit("skillPoints", { player, amount: 0, source: `first ${BUILDING[buildingId].name}`, renown: SETTLE.firstBuildRenown });
     },
   });
-  return true;
+  job.columns.unshift(...foundationColumns(plan));
+  return { origin, lift };
 }
 
 // ---------- the Foundation Stone ----------
