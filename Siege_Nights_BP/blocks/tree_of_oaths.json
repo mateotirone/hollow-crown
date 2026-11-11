@@ -4,7 +4,7 @@
     "description": {
       "identifier": "siege:tree_of_oaths",
       "menu_category": {
-        "category": "none"
+        "category": "construction"
       },
       "states": {
         "siege:look": [

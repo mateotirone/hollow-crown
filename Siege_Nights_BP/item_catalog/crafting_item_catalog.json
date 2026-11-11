@@ -1,0 +1,123 @@
+{
+ "format_version": "1.21.60",
+ "minecraft:crafting_items_catalog": {
+  "categories": [
+   {
+    "category_name": "equipment",
+    "groups": [
+     {
+      "group_identifier": {
+       "icon": "siege:summon_reeve",
+       "name": "siege:itemGroup.name.bossSummons"
+      },
+      "items": [
+       "siege:summon_reeve",
+       "siege:summon_huntsman",
+       "siege:summon_bride",
+       "siege:summon_seneschal",
+       "siege:summon_mother",
+       "siege:summon_warlord_king",
+       "siege:summon_choir",
+       "siege:summon_morvane",
+       "siege:summon_pretender"
+      ]
+     },
+     {
+      "group_identifier": {
+       "icon": "siege:guardgear_1_boots",
+       "name": "siege:itemGroup.name.guardGear"
+      },
+      "items": [
+       "siege:guardgear_1_boots",
+       "siege:guardgear_1_chestplate",
+       "siege:guardgear_1_helmet",
+       "siege:guardgear_1_leggings",
+       "siege:guardgear_2_boots",
+       "siege:guardgear_2_chestplate",
+       "siege:guardgear_2_helmet",
+       "siege:guardgear_2_leggings",
+       "siege:guardgear_3_boots",
+       "siege:guardgear_3_chestplate",
+       "siege:guardgear_3_helmet",
+       "siege:guardgear_3_leggings",
+       "siege:guardgear_4_boots",
+       "siege:guardgear_4_chestplate",
+       "siege:guardgear_4_helmet",
+       "siege:guardgear_4_leggings"
+      ]
+     }
+    ]
+   },
+   {
+    "category_name": "construction",
+    "groups": [
+     {
+      "group_identifier": {
+       "icon": "siege:old_oak_log",
+       "name": "siege:itemGroup.name.lockedTrees"
+      },
+      "items": [
+       "siege:old_acacia_leaves",
+       "siege:old_acacia_log",
+       "siege:old_acacia_wood",
+       "siege:old_azalea_leaves",
+       "siege:old_azalea_leaves_flowered",
+       "siege:old_birch_leaves",
+       "siege:old_birch_log",
+       "siege:old_birch_wood",
+       "siege:old_cherry_leaves",
+       "siege:old_cobbled_deepslate_wall",
+       "siege:old_dark_oak_fence",
+       "siege:old_dark_oak_leaves",
+       "siege:old_dark_oak_log",
+       "siege:old_dark_oak_slab",
+       "siege:old_dark_oak_stairs",
+       "siege:old_dark_oak_trapdoor",
+       "siege:old_dark_oak_wood",
+       "siege:old_diorite_stairs",
+       "siege:old_diorite_wall",
+       "siege:old_hollowwood_core",
+       "siege:old_hollowwood_lattice",
+       "siege:old_jungle_leaves",
+       "siege:old_jungle_log",
+       "siege:old_jungle_wood",
+       "siege:old_mangrove_fence",
+       "siege:old_mangrove_leaves",
+       "siege:old_mangrove_log",
+       "siege:old_mangrove_slab",
+       "siege:old_mangrove_stairs",
+       "siege:old_mangrove_trapdoor",
+       "siege:old_mangrove_wood",
+       "siege:old_mud_brick_stairs",
+       "siege:old_mud_brick_wall",
+       "siege:old_oak_fence",
+       "siege:old_oak_leaves",
+       "siege:old_oak_log",
+       "siege:old_oak_slab",
+       "siege:old_oak_stairs",
+       "siege:old_oak_trapdoor",
+       "siege:old_oak_wood",
+       "siege:old_pale_oak_leaves",
+       "siege:old_pale_oak_log",
+       "siege:old_pale_oak_wood",
+       "siege:old_polished_blackstone_stairs",
+       "siege:old_polished_blackstone_wall",
+       "siege:old_polished_diorite_stairs",
+       "siege:old_spruce_fence",
+       "siege:old_spruce_leaves",
+       "siege:old_spruce_log",
+       "siege:old_spruce_stairs",
+       "siege:old_spruce_wood",
+       "siege:old_stripped_jungle_log",
+       "siege:old_stripped_jungle_wood",
+       "siege:old_stripped_pale_oak_log",
+       "siege:old_stripped_pale_oak_wood",
+       "siege:old_tuff_stairs",
+       "siege:old_tuff_wall"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}
