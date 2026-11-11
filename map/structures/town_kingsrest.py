@@ -18,7 +18,7 @@ import numpy as np
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from bp import Blueprint
 from kit import h3, VALE
-import vale, dressing
+import vale, dressing, vale_civic
 
 ap = argparse.ArgumentParser(); ap.add_argument("slice"); ap.add_argument("lines"); ap.add_argument("out")
 ap.add_argument("--render", action="store_true"); ap.add_argument("--textures", default=""); ap.add_argument("--three", default="")
@@ -159,9 +159,10 @@ def box_bp(name, w, d):
     for x in range(w):
         for z in range(d): b.set(x, 0, z, "stone_bricks")
     return b
-RESERVED = [("Guildhall", "stone", 15, 13, (SQUARE[0], SQUARE[1] - SQUARE_R - 2), 0),
-            ("Station", "stone", 21, 11, (BRIDGE[1][0] + 8, BRIDGE[1][1] + 4), None),
-            ("Chapel", "stone", 11, 19, (SQUARE[0] + SQUARE_R + 2, SQUARE[1] - 4), None)]
+CIVIC = {"Guildhall": vale_civic.guildhall(), "Station": vale_civic.station(), "Chapel": vale_civic.chapel()}
+RESERVED = [("Guildhall", "stone", 0, 0, (SQUARE[0], SQUARE[1] - SQUARE_R - 3), None),
+            ("Station", "stone", 0, 0, (BRIDGE[1][0] + 8, BRIDGE[1][1] + 4), None),
+            ("Chapel", "stone", 0, 0, (SQUARE[0] + SQUARE_R + 3, SQUARE[1] - 4), None)]
 reserved = []
 for name, st, w, d, near, deg0 in RESERVED:
     best = None
@@ -171,11 +172,11 @@ for name, st, w, d, near, deg0 in RESERVED:
             fp = (near[0] + math.cos(t_) * r_, near[1] + math.sin(t_) * r_)
             vx, vz = (SQUARE[0] - fp[0], SQUARE[1] - fp[1]) if name != "Station" else (HIGH[2][0] - fp[0], HIGH[2][1] - fp[1])
             for deg in ([deg0] if deg0 is not None else [snap_rot(vx, vz)]):
-                best = try_place(name.lower(), box_bp(name.lower(), w, d), deg, fp, st, kind="reserved", gap=2, steep=4)
+                best = try_place(name.lower(), CIVIC[name], deg, fp, st, kind="civic", gap=2, steep=4)
                 if best: break
             if best: break
         if best: break
-    if best: best["name"] = name; reserved.append(best); CACHE[(name.lower(), st)] = box_bp(name.lower(), w, d)
+    if best: best["name"] = name; reserved.append(best); CACHE[(name.lower(), st)] = CIVIC[name]
     else: print("no site for", name)
 # ---- 3. the high street: square to the bridge
 line_houses(HIGH, setback=4.5)
@@ -223,11 +224,47 @@ for k in range(4000):
     plan.append({"stamp": tb.name, "design": tb.name, "style": "-", "kind": "tree", "x": x, "z": z, "ground_y": gy(x, z), "rotation": 0, "footprint": 1})
     if ntree >= 30: break
 
+# ---- 6. the stone bridge where all five lines meet: arches on piers, parapets, a lamp at each end
+def make_bridge():
+    bx, za, zb = BRIDGE[0][0], BRIDGE[0][1], BRIDGE[1][1]
+    deck = max(gy(bx, za), gy(bx, zb))
+    b = Blueprint("kingsrest_bridge")
+    wetz = [z for z in range(za, zb + 1) if wet(bx, z)]
+    w0, w1 = (min(wetz), max(wetz)) if wetz else (za, za)
+    piers = [z for z in range(w0 + 3, w1 - 1, 6)]
+    for z in range(za, zb + 1):
+        lz = z - za
+        for x in range(-3, 4):
+            b.set(x, 0, lz, mix_deck(x, z))
+            b.set(x, -1, lz, "stone_bricks") if abs(x) == 3 else None
+        for x in (-3, 3):
+            b.set(x, 1, lz, "stone_brick_wall")
+        bed = min(gy(bx + dx, z) for dx in (-2, 0, 2))
+        if z in piers:
+            for x in range(-2, 3):
+                for y in range(bed - deck, 0): b.set(x, y, lz, "stone_bricks")
+            for x in (-2, 0, 2): b.set(x, -1, lz, "chiseled_stone_bricks") if x == 0 else None
+        elif w0 <= z <= w1 and (z - 1 in piers or z + 1 in piers):
+            f = "s" if z - 1 in piers else "n"
+            for x in range(-2, 3): b.set(x, -1, lz, "stone_brick_stairs", facing=OPP_[f], half="top")
+        elif not (w0 <= z <= w1):
+            for x in range(-2, 3):
+                for y in range(gy(bx + x, z) - deck + 1, 0): b.set(x, y, lz, "stone_bricks")
+    for lz in (0, zb - za):
+        for x in (-3, 3): b.set(x, 2, lz, "dark_oak_fence"); b.set(x, 3, lz, "lantern")
+    return b.finish(), deck
+OPP_ = {"n": "s", "s": "n"}
+_dm = None
+def mix_deck(x, z):
+    return "stone_bricks" if h3(x, 0, z, 61) < 0.75 else ("cracked_stone_bricks" if h3(x, 1, z, 62) < 0.6 else "polished_andesite")
+bridge_bp, deck_y = make_bridge(); CACHE[(bridge_bp.name, "-")] = bridge_bp
+plan.append({"stamp": bridge_bp.name, "design": bridge_bp.name, "style": "-", "kind": "bridge", "x": BRIDGE[0][0], "z": BRIDGE[0][1], "ground_y": deck_y, "rotation": 0, "footprint": 7 * (BRIDGE[1][1] - BRIDGE[0][1] + 1)})
+
 import collections; print("placed", dict(collections.Counter(p["kind"] for p in plan)))
 json.dump({"town": "Kingsrest", "about": "Stamp origin = blueprint (0,0,0) at world x, ground_y, z after turning the stamp clockwise by rotation "
            "(0 = front faces south). Level the footprint to ground_y first; fill_below under it.",
-           "reserved": reserved,
-           "bridge": BRIDGE, "buildings": plan}, open(os.path.join(a.out, "kingsrest-plan.json"), "w"), indent=1)
+           "civic": [r["name"] for r in reserved],
+           "buildings": plan}, open(os.path.join(a.out, "kingsrest-plan.json"), "w"), indent=1)
 
 # ---- plan picture
 from PIL import Image, ImageDraw
@@ -246,9 +283,9 @@ for p in plan:
     bp = CACHE[(p["design"], p["style"])]
     fp_ = [(x + p["x"], z + p["z"]) for x, z in footprint(bp, p["rotation"])]
     for x, z in fp_:
-        q = P(x, z); fill = {"reserved": (235, 225, 160), "garden": (110, 150, 80), "tree": (40, 100, 40), "lamp": (30, 30, 30), "stall": (200, 60, 50)}.get(p["kind"]) or COL[p["style"]]
+        q = P(x, z); fill = {"civic": (120, 120, 125), "bridge": (130, 125, 115), "garden": (110, 150, 80), "tree": (40, 100, 40), "lamp": (30, 30, 30), "stall": (200, 60, 50)}.get(p["kind"]) or COL[p["style"]]
         dr.rectangle([q[0], q[1], q[0] + S - 1, q[1] + S - 1], fill=fill)
-    if p["kind"] == "reserved":
+    if p["kind"] == "civic":
         q = P(min(x for x, _ in fp_), min(z for _, z in fp_)); dr.text((q[0] + 3, q[1] + 3), p["name"], fill=(20, 20, 20))
 crop = (P(WARD_C[0] - WARD_R - 8, WARD_C[1] - WARD_R - 8), P(WARD_C[0] + WARD_R + 8, WARD_C[1] + WARD_R + 8))
 im.crop((*crop[0], *crop[1])).save(os.path.join(a.out, "kingsrest-plan.png"))
@@ -258,7 +295,7 @@ scene = Blueprint("kingsrest_town")
 R = WARD_R + 6
 level = {}
 for p in plan:
-    if p["kind"] in ("lamp", "tree", "stall", "reserved"): continue
+    if p["kind"] in ("lamp", "tree", "stall", "bridge"): continue
     bp = CACHE[(p["design"], p["style"])]
     for x, z in footprint(bp, p["rotation"]):
         for dx in (-1, 0, 1):
@@ -280,21 +317,11 @@ for x in range(WARD_C[0] - R, WARD_C[0] + R + 1):
             scene.set(x, h, z, "grass_block")
             r = h3(x, 1, z, 9)
             if (x, z) not in level and r < 0.05: scene.set(x, h + 1, z, "short_grass")
-# bridge: stone deck across the confluence
-bx = BRIDGE[0][0]
-for z in range(BRIDGE[0][1], BRIDGE[1][1] + 1):
-    deck = max(H(bx, BRIDGE[0][1]), H(bx, BRIDGE[1][1])) if wet(bx, z) else H(bx, z)
-    for x in range(bx - 3, bx + 4):
-        scene.set(x, deck, z, "stone_bricks")
-        if abs(x - bx) == 3: scene.set(x, deck + 1, z, "stone_brick_wall")
-    if wet(bx, z) and z % 6 == 0:
-        for y in range(deck - 8, deck): scene.set(bx - 2, y, z, "stone_bricks"); scene.set(bx + 2, y, z, "stone_bricks")
 for p in plan:
-    if p["kind"] == "reserved": continue
     bp = CACHE[(p["design"], p["style"])].rotated(p["rotation"])
     for (x, y, z), v in bp.cells.items():
         wx, wy, wz = x + p["x"], y + p["ground_y"], z + p["z"]
-        if y < 0 and scene.get(wx, wy, wz)[0] != "keep": continue
+        if y < 0 and p["kind"] != "bridge" and scene.get(wx, wy, wz)[0] != "keep": continue
         scene.cells[(wx, wy, wz)] = v
 scene.finish()
 cx, cz = SQUARE
