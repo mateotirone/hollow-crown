@@ -1,16 +1,13 @@
 # Texturing doctrine: Aldmere Vale (Kingsrest, Millbrook)
 
-Colour families for this region, each with a code. Blocks run **dark to light** (the hex is the
-average colour of the block's texture, measured from the vanilla and add-on textures). A surface takes
-at most 3 neighbouring steps of one ladder (`../README.md`), placed by cause: darkest low, by water,
-under overhangs; lightest high and in the sun. Banded gradients (copper roofs) may use the whole ladder.
-
-**Status: Claude's starter ladders, waiting for Mateo's block lists and screenshots.** When Mateo sends
-a family, his blocks replace the starter row and his screenshot goes in `../pictures/` under the code.
+Generated from `../doctrine.json` by `../doctrine.py`: edit the JSON, not this page. Blocks run
+**dark to light** by value unless a family says otherwise; the hex is the average colour of the
+block's texture. Paint surfaces by the rules in `../README.md` (no skipped steps, clusters, cracks
+with a cause). The viewer `../doctrine.html` shows every ladder with the real textures.
 
 ## VAL-01 Stone grey (#7D7F7A)
 
-Used for: walls of Norman stone, plinths, chimneys, path slabs.
+Used for: walls of Norman stone, plinths, chimneys, path slabs. Status: Claude's starter, waiting for Mateo's blocks.
 
 | Step | Block | Hex |
 |---|---|---|
@@ -20,11 +17,11 @@ Used for: walls of Norman stone, plinths, chimneys, path slabs.
 | 4 | `polished_andesite` | #848685 |
 | 5 | `andesite` | #888888 |
 
-Mateo's blocks: _waiting_. Screenshot: _waiting_.
+Screenshot: _waiting_
 
 ## VAL-02 Plaster white (#D6D7D4)
 
-Used for: infill between timber, limewashed roofs.
+Used for: infill between timber, limewashed roofs. Status: Claude's starter, waiting for Mateo's blocks.
 
 | Step | Block | Hex |
 |---|---|---|
@@ -33,11 +30,11 @@ Used for: infill between timber, limewashed roofs.
 | 3 | `calcite` | #DFE0DC |
 | 4 | `smooth_quartz` | #ECE6DF |
 
-Mateo's blocks: _waiting_. Screenshot: _waiting_.
+Screenshot: _waiting_
 
 ## VAL-03 Brick red (#976655)
 
-Used for: brick houses, chimneys, warm red roofs.
+Used for: brick houses, chimneys, warm red roofs. Status: Claude's starter, waiting for Mateo's blocks.
 
 | Step | Block | Hex |
 |---|---|---|
@@ -45,11 +42,11 @@ Used for: brick houses, chimneys, warm red roofs.
 | 2 | `granite` | #956755 |
 | 3 | `polished_granite` | #9A6A59 |
 
-Mateo's blocks: _waiting_. Screenshot: _waiting_.
+Screenshot: _waiting_
 
 ## VAL-04 Dark timber (#42301B)
 
-Used for: frame, trim, dark shingle roofs, floor borders.
+Used for: frame, trim, dark shingle roofs, floor borders. Status: Claude's starter, waiting for Mateo's blocks.
 
 | Step | Block | Hex |
 |---|---|---|
@@ -57,11 +54,11 @@ Used for: frame, trim, dark shingle roofs, floor borders.
 | 2 | `dark_oak_log` | #3C2E1A |
 | 3 | `stripped_dark_oak_log` | #483824 |
 
-Mateo's blocks: _waiting_. Screenshot: _waiting_.
+Screenshot: _waiting_
 
 ## VAL-05 Mid wood (#5F4626)
 
-Used for: floors, doors, shutters, mid shingle roofs, brick-style frame.
+Used for: floors, doors, shutters, mid shingle roofs, brick-style frame. Status: Claude's starter, waiting for Mateo's blocks.
 
 | Step | Block | Hex |
 |---|---|---|
@@ -69,11 +66,11 @@ Used for: floors, doors, shutters, mid shingle roofs, brick-style frame.
 | 2 | `spruce_planks` | #725430 |
 | 3 | `stripped_spruce_log` | #735934 |
 
-Mateo's blocks: _waiting_. Screenshot: _waiting_.
+Screenshot: _waiting_
 
 ## VAL-06 Slate (#444445)
 
-Used for: slate roofs, ridge caps.
+Used for: slate roofs, ridge caps. Status: Claude's starter, waiting for Mateo's blocks.
 
 | Step | Block | Hex |
 |---|---|---|
@@ -82,24 +79,26 @@ Used for: slate roofs, ridge caps.
 | 3 | `polished_deepslate` | #484849 |
 | 4 | `cobbled_deepslate` | #4D4D50 |
 
-Mateo's blocks: _waiting_. Screenshot: _waiting_.
+Screenshot: _waiting_
 
 ## VAL-07 Copper (#858367)
 
-Used for: civic roofs and domes (banded ridge to eaves).
+Used for: civic roofs and domes (banded ridge to eaves). Status: Claude's starter, waiting for Mateo's blocks.
+
+Order: ridge to eaves: oxidized at the top, bright cut copper at the eaves.
 
 | Step | Block | Hex |
 |---|---|---|
-| 1 | `waxed_cut_copper` | #BF6A50 |
-| 2 | `waxed_exposed_cut_copper` | #9A7965 |
-| 3 | `waxed_weathered_cut_copper` | #6D916B |
-| 4 | `waxed_oxidized_cut_copper` | #4F997E |
+| 1 | `waxed_oxidized_cut_copper` | #4F997E |
+| 2 | `waxed_weathered_cut_copper` | #6D916B |
+| 3 | `waxed_exposed_cut_copper` | #9A7965 |
+| 4 | `waxed_cut_copper` | #BF6A50 |
 
-Mateo's blocks: _waiting_. Screenshot: _waiting_.
+Screenshot: _waiting_
 
 ## VAL-08 Ground (#806853)
 
-Used for: verges, wear by doors, drip lines.
+Used for: verges, wear by doors, drip lines. Status: Claude's starter, waiting for Mateo's blocks.
 
 | Step | Block | Hex |
 |---|---|---|
@@ -107,4 +106,17 @@ Used for: verges, wear by doors, drip lines.
 | 2 | `grass_path` | #886542 |
 | 3 | `gravel` | #837F7E |
 
-Mateo's blocks: _waiting_. Screenshot: _waiting_.
+Screenshot: _waiting_
+
+## VAL-09 Half-timber panels (#877059)
+
+Used for: close studding and half-timbered infill (04-walls). Status: Mateo's blocks.
+
+Order: field, then accent under windows and on gables.
+
+| Step | Block | Hex |
+|---|---|---|
+| 1 | `siege:timber_frame` | #8B755F |
+| 2 | `siege:timber_frame_cross` | #846C54 |
+
+Screenshot: ../reference/pictures/close-studding.png

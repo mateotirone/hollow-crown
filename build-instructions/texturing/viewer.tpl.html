@@ -1,0 +1,190 @@
+<title>Texturing Doctrine</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: a mason's swatch book. Region tabs on top, one card per colour code: the ladder of real
+   block textures, then a test wall painted by the doctrine's rules. */
+:root {
+  --bg: #f3f2ef; --panel: #ffffff; --ink: #23211d; --muted: #6c675e; --line: #dcd8d0;
+  --accent: #5b3f22; --accent-ink: #ffffff; --chip: #ece7dd; --ok: #2f6b3a;
+  --display: "Space Grotesk", system-ui, sans-serif; --body: "Inter", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #1a1917; --panel: #24221f; --ink: #ece8e1; --muted: #a39d92; --line: #3a3732;
+  --accent: #c79a63; --accent-ink: #1a1917; --chip: #312e29; --ok: #7fc08b; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #1a1917; --panel: #24221f; --ink: #ece8e1; --muted: #a39d92; --line: #3a3732;
+  --accent: #c79a63; --accent-ink: #1a1917; --chip: #312e29; --ok: #7fc08b; color-scheme: dark }
+body { background: var(--bg); color: var(--ink); font: 15px/1.55 var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 24px 48px; }
+.wrap { max-width: 1120px; margin: 0 auto; display: grid; gap: 20px; }
+h1 { font: 700 30px/1.1 var(--display); margin: 0; text-wrap: balance; }
+h2 { font: 700 20px/1.2 var(--display); margin: 0; }
+.lede { color: var(--muted); max-width: 68ch; margin: 6px 0 0; }
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+.tabs a { text-decoration: none; color: var(--ink); background: var(--chip); padding: 6px 12px; border-radius: 4px; font: 600 13px var(--body); }
+.tabs a[aria-current="page"] { background: var(--accent); color: var(--accent-ink); }
+.tabs a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.rules { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; color: var(--muted); }
+.rules b { color: var(--ink); font-weight: 600; }
+.region-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; border-bottom: 1px solid var(--line); padding-bottom: 6px; }
+.region-head span { color: var(--muted); font-size: 13px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 520px), 1fr)); gap: 14px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 14px; display: grid; gap: 10px; min-width: 0; }
+.top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.code { font: 500 13px var(--mono); background: var(--chip); padding: 2px 7px; border-radius: 3px; letter-spacing: .02em; }
+.sw { width: 22px; height: 22px; border-radius: 3px; border: 1px solid var(--line); flex: none; }
+.name { font: 700 16px var(--display); }
+.hex { font: 500 12px var(--mono); color: var(--muted); }
+.status { margin-left: auto; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.status.mateo { color: var(--ok); font-weight: 600; }
+.use { color: var(--muted); font-size: 13px; margin: 0; }
+.ladder { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; }
+.step { display: grid; gap: 3px; justify-items: start; width: 84px; flex: none; }
+.step img { width: 64px; height: 64px; image-rendering: pixelated; border-radius: 2px; display: block; }
+.step .n { font: 500 11px var(--mono); color: var(--muted); }
+.step .b { font: 500 11px/1.3 var(--mono); word-break: break-word; }
+.arrow { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.wall { display: grid; gap: 4px; }
+.wall canvas { width: 100%; max-width: 480px; image-rendering: pixelated; border-radius: 2px; aspect-ratio: 15 / 7; }
+.note { font-size: 12px; color: var(--muted); margin: 0; }
+.pair { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 14px; display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+.pair .imgs { display: flex; gap: 4px; }
+.pair img { width: 40px; height: 40px; image-rendering: pixelated; }
+.pair div { min-width: 0; }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Texturing Doctrine</h1>
+    <p class="lede">Every colour family per region, with its code, its ladder of blocks from dark to light (copper runs ridge to eaves), and a test wall painted by the rules: darkest at the foot, clusters not speckle, no skipped steps. Source of truth: <code>build-instructions/texturing/doctrine.json</code>.</p>
+  </header>
+  <nav class="tabs" id="tabs" aria-label="Regions"></nav>
+  <div class="rules" id="rules"></div>
+  <main id="main"></main>
+</div>
+
+<script>
+const D = /*DATA*/null;
+const tex = b => D.tex[b] || { hex: "?", img: "" };
+
+function hash(x, y, s) {
+  let h = (Math.imul(x, 374761393) + Math.imul(y, 668265263) + Math.imul(s, 2147483647)) >>> 0;
+  h = Math.imul(h ^ (h >>> 13), 1274126177) >>> 0;
+  return ((h ^ (h >>> 16)) & 0xffff) / 65535;
+}
+function noise(x, y, s, cell) {
+  const gx = x / cell, gy = y / cell, x0 = Math.floor(gx), y0 = Math.floor(gy);
+  const fx = gx - x0, fy = gy - y0, sx = fx * fx * (3 - 2 * fx), sy = fy * fy * (3 - 2 * fy);
+  const a = hash(x0, y0, s), b = hash(x0 + 1, y0, s), c = hash(x0, y0 + 1, s), d = hash(x0 + 1, y0 + 1, s);
+  const top = a + (b - a) * sx, bot = c + (d - c) * sx;
+  return top + (bot - top) * sy;
+}
+// Same algorithm as doctrine.py paint(): gradient + clusters, snapped, then no skipped steps.
+function paint(w, h, n, seed, topFirst) {
+  const idx = [];
+  for (let y = 0; y < h; y++) {
+    idx.push([]);
+    let t = y / Math.max(1, h - 1); if (topFirst) t = 1 - t;
+    for (let x = 0; x < w; x++) {
+      const v = t + (noise(x, y, seed, 4) - 0.5) * 0.6;
+      idx[y].push(Math.min(n - 1, Math.max(0, Math.round(v * (n - 1)))));
+    }
+  }
+  for (let k = 0; k < n; k++) {
+    let changed = false;
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) for (const [dx, dy] of [[1, 0], [0, 1]]) {
+      const X = x + dx, Y = y + dy;
+      if (X < w && Y < h && Math.abs(idx[y][x] - idx[Y][X]) > 1) {
+        if (idx[y][x] > idx[Y][X]) idx[y][x]--; else idx[Y][X]--;
+        changed = true;
+      }
+    }
+    if (!changed) break;
+  }
+  return idx;
+}
+const imgCache = {};
+function loadImg(src) {
+  if (!imgCache[src]) imgCache[src] = new Promise(r => { const i = new Image(); i.onload = () => r(i); i.onerror = () => r(null); i.src = src; });
+  return imgCache[src];
+}
+async function drawWall(cv, f) {
+  const W = 15, H = 7, T = 16, n = f.blocks.length;
+  cv.width = W * T; cv.height = H * T;
+  const ctx = cv.getContext("2d"); ctx.imageSmoothingEnabled = false;
+  const imgs = await Promise.all(f.blocks.map(b => loadImg(tex(b).img)));
+  const seed = [...f.code].reduce((a, c) => a * 31 + c.charCodeAt(0), 7) & 0xffff;
+  const top = /ridge/.test(f.order || "");
+  const idx = paint(W, H, n, seed, top);
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const i = imgs[idx[y][x]], py = (H - 1 - y) * T;
+    if (i) ctx.drawImage(i, x * T, py, T, T);
+    else { ctx.fillStyle = tex(f.blocks[idx[y][x]]).hex; ctx.fillRect(x * T, py, T, T); }
+  }
+}
+function avgHex(blocks) {
+  const c = blocks.map(b => tex(b).hex).filter(h => h[0] === "#").map(h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)));
+  if (!c.length) return "#888888";
+  return "#" + [0, 1, 2].map(j => Math.round(c.reduce((a, v) => a + v[j], 0) / c.length).toString(16).padStart(2, "0")).join("").toUpperCase();
+}
+const el = (t, cls, txt) => { const e = document.createElement(t); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+
+function card(f) {
+  const c = el("article", "card");
+  const top = el("div", "top");
+  top.append(el("span", "code", f.code));
+  const avg = avgHex(f.blocks), sw = el("span", "sw"); sw.style.background = avg; top.append(sw);
+  top.append(el("span", "name", f.name), el("span", "hex", avg));
+  top.append(el("span", "status" + (f.status === "mateo" ? " mateo" : ""), f.status === "mateo" ? "Mateo's blocks" : "Starter, waiting for Mateo"));
+  c.append(top, el("p", "use", f.use));
+  c.append(el("div", "arrow", f.order ? f.order : "dark → light"));
+  const lad = el("div", "ladder");
+  f.blocks.forEach((b, i) => {
+    const s = el("div", "step"), im = el("img"); im.alt = b; im.src = tex(b).img; im.loading = "lazy";
+    s.append(im, el("span", "n", (i + 1) + " · " + tex(b).hex), el("span", "b", b)); lad.append(s);
+  });
+  c.append(lad);
+  if (f.blocks.length > 1) {
+    const w = el("div", "wall"), cv = el("canvas"); cv.setAttribute("aria-label", "Test wall painted with " + f.code);
+    w.append(cv, el("p", "note", "Test wall, 15 by 7: " + (f.order && /ridge/.test(f.order) ? "ridge at the top" : "darkest at the foot") + ", clusters about 4 blocks across, no skipped steps."));
+    c.append(w); drawWall(cv, f);
+  }
+  if (f.note) c.append(el("p", "note", f.note));
+  return c;
+}
+function render() {
+  const id = location.hash.slice(1) || D.regions[0].id;
+  const tabs = document.getElementById("tabs"); tabs.textContent = "";
+  for (const r of D.regions) {
+    const a = el("a", null, r.name); a.href = "#" + r.id;
+    if (r.id === id) a.setAttribute("aria-current", "page");
+    tabs.append(a);
+  }
+  const pa = el("a", null, "Pairings"); pa.href = "#pairings"; if (id === "pairings") pa.setAttribute("aria-current", "page"); tabs.append(pa);
+  const main = document.getElementById("main"); main.textContent = "";
+  if (id === "pairings") {
+    const g = el("div", "grid");
+    for (const p of D.pairings) {
+      const b = el("div", "pair"), imgs = el("div", "imgs");
+      p.blocks.forEach(x => { const i = el("img"); i.src = tex(x).img; i.alt = x; imgs.append(i); });
+      const t = el("div"); t.append(el("div", "name", p.name), el("p", "use", p.where), el("p", "note", p.source));
+      b.append(imgs, t); g.append(b);
+    }
+    main.append(g); return;
+  }
+  const r = D.regions.find(x => x.id === id) || D.regions[0];
+  const head = el("div", "region-head");
+  head.append(el("h2", null, r.name), el("span", null, r.towns.join(", ") + " · " + r.families.length + " colour codes"));
+  const g = el("div", "grid"); r.families.forEach(f => g.append(card(f)));
+  const wrap = el("div"); wrap.style.display = "grid"; wrap.style.gap = "14px"; wrap.append(head, g);
+  main.append(wrap);
+}
+const R = D.rules, rules = document.getElementById("rules");
+[["Per surface", R.max_blocks_per_surface + " blocks (" + R.max_blocks_big_surface + " on big walls)"], ["Base block", "at least " + Math.round(R.base_share_min * 100) + "%"],
+ ["Neighbours", R.no_skipped_steps], ["Variation", R.clusters], ["Cracks", R.cracks]].forEach(([k, v]) => {
+  const s = el("span"); s.append(el("b", null, k + ": "), document.createTextNode(v)); rules.append(s);
+});
+addEventListener("hashchange", render); render();
+</script>

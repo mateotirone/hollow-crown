@@ -1,16 +1,13 @@
-# Texturing doctrine: The Hollow (mining villages)
+# Texturing doctrine: The Hollow (Glimwade, Lowseam, Tollrest, Highcut)
 
-Colour families for this region, each with a code. Blocks run **dark to light** (the hex is the
-average colour of the block's texture, measured from the vanilla and add-on textures). A surface takes
-at most 3 neighbouring steps of one ladder (`../README.md`), placed by cause: darkest low, by water,
-under overhangs; lightest high and in the sun. Banded gradients (copper roofs) may use the whole ladder.
-
-**Status: Claude's starter ladders, waiting for Mateo's block lists and screenshots.** When Mateo sends
-a family, his blocks replace the starter row and his screenshot goes in `../pictures/` under the code.
+Generated from `../doctrine.json` by `../doctrine.py`: edit the JSON, not this page. Blocks run
+**dark to light** by value unless a family says otherwise; the hex is the average colour of the
+block's texture. Paint surfaces by the rules in `../README.md` (no skipped steps, clusters, cracks
+with a cause). The viewer `../doctrine.html` shows every ladder with the real textures.
 
 ## HOL-01 Black stone (#474547)
 
-Used for: plinths, quoins, chimneys, path slabs.
+Used for: plinths, quoins, chimneys, path slabs. Status: Claude's starter, waiting for Mateo's blocks.
 
 | Step | Block | Hex |
 |---|---|---|
@@ -19,11 +16,11 @@ Used for: plinths, quoins, chimneys, path slabs.
 | 3 | `cobbled_deepslate` | #4D4D50 |
 | 4 | `tuff` | #6C6D66 |
 
-Mateo's blocks: _waiting_. Screenshot: _waiting_.
+Screenshot: _waiting_
 
 ## HOL-02 Veinstone purple-grey (#2E1F38)
 
-Used for: walls.
+Used for: walls. Status: Claude's starter, waiting for Mateo's blocks.
 
 | Step | Block | Hex |
 |---|---|---|
@@ -31,32 +28,32 @@ Used for: walls.
 | 2 | `siege:veinstone_bricks` | #32223C |
 | 3 | `siege:cracked_veinstone_bricks` | #372748 |
 
-Mateo's blocks: _waiting_. Screenshot: _waiting_.
+Screenshot: _waiting_
 
 ## HOL-03 Ash pale (#938B9A)
 
-Used for: infill, ash on the ground.
+Used for: infill, ash on the ground. Status: Claude's starter, waiting for Mateo's blocks.
 
 | Step | Block | Hex |
 |---|---|---|
 | 1 | `siege:pale_ash` | #938B9A |
 
-Mateo's blocks: _waiting_. Screenshot: _waiting_.
+Screenshot: _waiting_
 
 ## HOL-04 Dark timber (#3F2C17)
 
-Used for: frame, trim, floors.
+Used for: frame, trim, floors. Status: Claude's starter, waiting for Mateo's blocks.
 
 | Step | Block | Hex |
 |---|---|---|
 | 1 | `dark_oak_planks` | #422B14 |
 | 2 | `dark_oak_log` | #3C2E1A |
 
-Mateo's blocks: _waiting_. Screenshot: _waiting_.
+Screenshot: _waiting_
 
 ## HOL-05 Slate (#3B393D)
 
-Used for: roofs.
+Used for: roofs. Status: Claude's starter, waiting for Mateo's blocks.
 
 | Step | Block | Hex |
 |---|---|---|
@@ -64,11 +61,13 @@ Used for: roofs.
 | 2 | `deepslate_tiles` | #363637 |
 | 3 | `cobbled_deepslate` | #4D4D50 |
 
-Mateo's blocks: _waiting_. Screenshot: _waiting_.
+Screenshot: _waiting_
 
 ## HOL-06 Crown accent (#6F4D8C)
 
-Used for: the Seat and Morvane's sites only, never a texture mix.
+Used for: the Seat and Morvane's sites only, never a texture mix. Status: Claude's starter, waiting for Mateo's blocks.
+
+Note: accent only, never a texture mix.
 
 | Step | Block | Hex |
 |---|---|---|
@@ -76,4 +75,4 @@ Used for: the Seat and Morvane's sites only, never a texture mix.
 | 2 | `amethyst_block` | #8561BF |
 | 3 | `purpur_block` | #A97DA9 |
 
-Mateo's blocks: _waiting_. Screenshot: _waiting_.
+Screenshot: _waiting_

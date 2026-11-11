@@ -30,8 +30,39 @@ For any surface:
 | 1. Base block | One block, at least 60% of the surface |
 | 2. Second block | Same colour, slightly lighter or darker, or rougher; 15 to 30% |
 | 3. Accent block | Optional, 5 to 10%, only where the cause is (moss low, cracks round openings) |
-| 4. Never | more than 3 blocks in one surface; a block of a different hue; two busy textures side by side |
-| 5. Placement | Weighted by position (height, distance from an edge or opening, facing), using a hashed position so it is stable and repeatable, never per-run random |
+| 4. Never | more than 3 blocks in one surface (up to 5 on big walls and civic buildings, see below); a block of a different hue; two busy textures side by side; skipping a step of the ladder |
+| 5. Placement | Weighted by position (height, distance from an edge or opening, facing) plus low-frequency noise for clusters, using a hashed position so it is stable and repeatable, never per-run random |
+
+## Gradient craft (from the ArdaCraft Gradient Guide, Mateo, 2026-11-11)
+
+Source: [ArdaCraft Gradient Guide](https://www.ardacraft.me/resources/gradient-guide) (the wiki copy is the
+same page). What it adds to the recipe:
+
+1. **Value first, then colour, then texture.** Order every ladder by value (light to dark). Blocks need not
+   match exactly: if value and colour or texture are close, they work. The hex in `doctrine.json` is there
+   to check value.
+2. **Never skip a step.** Two cells next to each other differ by at most one step of the ladder. A jump
+   from step 1 to step 3 makes hard blocky squares, the commonest mistake. Skip only between two blocks
+   so alike they read as one. Builders: after placing, check every pair of neighbours and put the missing
+   step between them.
+3. **Patterns are weathering, in clusters.** Variation forms blob-like clusters (patches, stains, drips),
+   never a random splatter of single blocks. Use smooth low-frequency noise (cells of about 3 to 7
+   blocks) on top of the position gradient, then snap to the ladder.
+4. **Squint test.** Look at the render small or blurred: the clusters should read as soft shapes. Reshape any
+   hard shape, especially a straight 45 degree diagonal run or a stripe.
+5. **Cracks with a cause.** Cracked and chipped blocks go at building corners, round windows and doors, and
+   where wall planes meet, never scattered. Cracked areas are the most damaged, so they sit in the darkest
+   part of the gradient. Add cracks and stains back and forth until it looks right, never overdo it.
+6. **Palette size suits the structure.** Small builds (huts, cottages): 2 or 3 steps. Big walls (more than
+   15 long or 9 tall) and civic buildings: up to 5 neighbouring steps, with a larger discoloured patch near
+   the middle of the wall so the big surface has a focus.
+7. **Detail balances detail.** A busy front (close studding, many windows, shutters) gets a simple
+   gradient; a plain wall gets a richer one.
+8. **Town before building.** Neighbouring buildings share families and strength of weathering; a street
+   reads as one place before any one house stands out.
+9. **Canvas first.** Build the shape in the base block only (stages 0 to 7), mark where cracks and wear go,
+   then paint the gradient over it as a last pass and fix shape or cracks if the result is messy. This is
+   why texturing is a pass over finished surfaces, not something chosen block by block while building.
 
 ## The doctrine: region, colour, code (Mateo, 2026-11-11)
 
@@ -47,6 +78,13 @@ code (`VAL-01` stone grey, `FRO-04` ice blue...) and a hex measured from the blo
 | Blackfen | [regions/blackfen.md](regions/blackfen.md) | BLK-01 to BLK-05 |
 | Emberwaste | [regions/emberwaste.md](regions/emberwaste.md) | EMB-01 to EMB-05 |
 | Hollow | [regions/hollow.md](regions/hollow.md) | HOL-01 to HOL-06 |
+
+**It is code.** `doctrine.json` is the source of truth (every region, code, ladder, the rules and the
+pairings). `doctrine.py` loads it for builders (`family("VAL-01")`, `paint(w, h, ladder, seed)` paints a
+surface by the rules below) and rebuilds the region pages and the viewer `doctrine.html` (real block
+textures, a test wall per code; published at https://claude.ai/artifact/TEMXFMWr9LrVPpsaH5LDRn). Edit the
+JSON, then run `python3 build-instructions/texturing/doctrine.py --textures <bedrock-samples blocks>
+--kit map/structures/render`.
 
 The ladders now are Claude's starters. Mateo is sending the exact blocks for each gradient with a
 screenshot per family; his lists replace the starters and the screenshots go in `pictures/` named by code
@@ -99,6 +137,8 @@ The blocks for every role are in `palettes/<region>.md`. The texturing feel per 
 
 ## Before you finish a surface
 
-- [ ] Base block at least 60%, at most 3 blocks, all one colour family.
+- [ ] Base block at least 60%, at most 3 blocks (5 on big walls), all one colour family.
+- [ ] No skipped steps between neighbours; variation in clusters, not speckle; squint test passed.
+- [ ] Cracks only at corners, openings and where planes meet, in the darkest part.
 - [ ] Every variation has a cause (base, openings, corners, sun, water, wear).
 - [ ] Looked at from the street and from a hill: one material, no noise, no blotches.
