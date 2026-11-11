@@ -21,6 +21,7 @@ import "./townhall/index.js";
 import "./horses/index.js";
 import "./rails/index.js";
 import "./trains/index.js";
+import "./trains/station_sites.js";
 import "./bestiary/index.js";
 import "./lore/index.js";
 import "./crown/index.js";

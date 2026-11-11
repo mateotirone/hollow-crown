@@ -32,7 +32,7 @@ function shapeAtBlock(block) {
 }
 
 // A fresh lookup for one tick: get(x, y, z) -> shape or undefined (unloaded ground counts as no track)
-function reader(dim) {
+export function reader(dim) {
   const cache = new Map();
   return (x, y, z) => {
     const k = `${x},${y},${z}`;
@@ -285,6 +285,7 @@ onTick("trains_save", 200, () => {
 system.afterEvents.scriptEventReceive.subscribe(({ id, message, sourceEntity }) => {
   if (id !== "siege:trains") return;
   const [cmd, arg] = message.trim().split(/\s+/);
+  if (cmd === "station") return; // trains/station_sites.js
   const reply = (text) => (sourceEntity?.typeId === "minecraft:player" ? sourceEntity.sendMessage(text) : console.warn(text));
   if (cmd === "mode" && (arg === "velocity" || arg === "teleport")) {
     TRAIN.drive = arg;

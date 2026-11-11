@@ -3,6 +3,7 @@
 import { BlockTypes, EntityTypes, ItemTypes } from "@minecraft/server";
 import { addTests, assert, assertEqual } from "../siege/api.js";
 import { SHAPES, layTrack, cursorOn, advance, back, pointAt, follow, KINDS } from "./track.js";
+import { stageFor, stationPlan, siteFor, lineBlocks, rightOf, STAGES, STATION } from "./stations.js";
 import { TRACK, CARS, TRAIN, carPoses, trainLength, stepSpeed, moveTrain, limitAhead, shapesForLoop, showcaseLoop } from "./data.js";
 
 // A little fake world of track: lay(x, y, z, yaw) places a piece the way a player would
@@ -98,6 +99,31 @@ addTests("trains", {
     assert(limitAhead(corner, 10, get) <= 1, "sees the turn ahead");
     const end = moveTrain(cursorOn({ x: 1, y: 0, z: 0 }, get(1, 0, 0), -90), [{ kind: "engine" }], 20, get);
     assertEqual(end.v, 0);
+  },
+  "stations: one per settlement size, the line through the platform, nothing built on the track side": () => {
+    assertEqual(["Hamlet", "Town", "City", "Castle", "?"].map(stageFor).join(), "halt,station,junction,grand,halt");
+    for (const stage of ["halt", "station"]) {
+      const p = stationPlan("frostmarch", stage);
+      assert(p.line.x1 - p.line.x0 + 1 >= 15 + 2 * STATION.runOn, `${stage} line covers the platform`);
+      assert(!p.get(0, 1, 0), "the track's own block is left for the track");
+      for (const c of p.cells.values()) if (c.z < 2 && c.y > 0) assertEqual(c.role, "air", `${stage}: only air beside the line, at ${c.x},${c.y},${c.z}`);
+      assert(p.marks.post && p.marks.post.z >= 2, "the post stands on the platform");
+    }
+    assert(stationPlan("nowhere", "grand") === stationPlan("vale", "grand"), "unknown regions build the Vale station");
+    assertEqual(STAGES.length, 4);
+  },
+  "stations: line up with straight track near the post, or put the line behind it": () => {
+    const { get, lay } = yard();
+    for (let x = -12; x <= 12; x++) lay(x, 64, 0, -90); // an east-west line
+    const s = siteFor({ x: 2, y: 64, z: 4 }, get, { x: 1, z: 0 });
+    assert(s.onTrack, "found the line");
+    assertEqual(JSON.stringify([s.origin, s.forward]), JSON.stringify([{ x: 2, y: 64, z: 0 }, { x: 0, z: 1 }]));
+    const along = lineBlocks(stationPlan("vale", "halt"), s.origin, s.forward);
+    assert(along.every((b) => b.z === 0 && b.y === 64 && b.dir === 2), "the new line runs along the old one");
+    const none = siteFor({ x: 0, y: 64, z: 40 }, get, { x: 0.2, z: -0.9 });
+    assert(!none.onTrack, "no track near");
+    assertEqual(JSON.stringify([none.origin, none.forward]), JSON.stringify([{ x: 0, y: 64, z: 40 + STATION.noTrackBack }, { x: 0, z: -1 }]));
+    assertEqual(JSON.stringify(rightOf({ x: 0, z: 1 })), JSON.stringify({ x: -1, z: 0 }));
   },
   "the pack has the track, the trains and their parts": () => {
     assert(BlockTypes.get(TRACK), TRACK);
