@@ -1,5 +1,5 @@
 {
-  "format_version": "1.21.60",
+  "format_version": "1.21.90",
   "minecraft:block": {
     "description": {
       "identifier": "siege:barracks",
@@ -30,7 +30,8 @@
       "minecraft:destructible_by_explosion": {
         "explosion_resistance": 6
       },
-      "minecraft:map_color": "#7a4a2a"
+      "minecraft:map_color": "#7a4a2a",
+      "siege:clickable": {}
     }
   }
 }
