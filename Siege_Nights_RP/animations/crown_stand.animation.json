@@ -1,0 +1,24 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.siege_crown_stand.float": {
+      "loop": true,
+      "bones": {
+        "float": {
+          "position": [
+            0,
+            "math.sin(query.life_time * 60) * 1.2",
+            0
+          ]
+        },
+        "spin": {
+          "rotation": [
+            0,
+            "query.life_time * 20",
+            0
+          ]
+        }
+      }
+    }
+  }
+}

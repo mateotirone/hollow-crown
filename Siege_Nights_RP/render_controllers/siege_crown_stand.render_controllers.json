@@ -1,0 +1,27 @@
+{
+  "format_version": "1.8.0",
+  "render_controllers": {
+    "controller.render.siege_crown_stand": {
+      "geometry": "Geometry.stand",
+      "materials": [
+        {
+          "*": "Material.default"
+        }
+      ],
+      "textures": [
+        "Texture.stand"
+      ]
+    },
+    "controller.render.siege_crown_stand_crown": {
+      "geometry": "Geometry.crown",
+      "materials": [
+        {
+          "*": "Material.default"
+        }
+      ],
+      "textures": [
+        "Texture.crown"
+      ]
+    }
+  }
+}
