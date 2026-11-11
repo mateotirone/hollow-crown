@@ -6,7 +6,8 @@
 // that gold block at Kingsrest (a flat test world) is left alone.
 //
 // What it does, a few places at a time, each kept loaded with a ticking area only while it is worked on:
-//   detect       find the Kingsrest gold block; it becomes the "start without a home" arrival spot
+//   detect       find the Kingsrest gold block; it becomes the "start without a home" arrival spot, and time
+//                starts moving (the map file is saved with the daylight cycle off)
 //   hall         build the welcome hall in the sky over Gull Bay (spread over ticks)
 //   plot:<name>  a Plot Stone on each plot's gold block (or on the ground at the planned spot)
 //   millbrook    Sister Wren's porch on the Millbrook square, with Wren standing in it (millbrook.js)
@@ -53,9 +54,16 @@ function groundY(dim, x, z) {
 }
 
 // The gold marker in the middle of a square: take it away and say where the floor is (y of the floor block)
+// (genworld snows over the Frostmarch, gold blocks included, so look under snow and plants)
 function takeMarker(dim, x, z) {
-  const top = topOf(dim, x, z);
+  let top = topOf(dim, x, z);
+  const cover = [];
+  for (let i = 0; top && i < 6 && top.typeId !== MARKER && (SOFT.test(top.typeId) || /snow/.test(top.typeId)); i++) {
+    cover.push(top);
+    top = top.below();
+  }
   if (top?.typeId !== MARKER) return undefined;
+  for (const block of cover) block.setType("minecraft:air");
   top.setType("minecraft:air");
   return top.location.y - 1;
 }
@@ -71,6 +79,8 @@ export const TASKS = [
       } else {
         store.data.state = "map";
         setKingsrestArrival({ x: KINGSREST.x, y: floor + 1, z: KINGSREST.z });
+        // The map is saved with time stopped (handy for walking it in Creative); the story needs its nights
+        command(dim, "gamerule dodaylightcycle true");
       }
       finish();
     },

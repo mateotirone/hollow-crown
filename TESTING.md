@@ -112,7 +112,7 @@ Type the commands in chat (`/` opens it).
 
 ## The story opening on the real map (scripts/opening/)
 
-Use the generated Hollow Crown world, not a flat test world, and play in **Survival** (Creative players are builders and skip the hall).
+Use `hollow-crown-full-map.mcworld`, not a flat test world. That file is saved in **Creative**, so switch the world (or the Realm) to **Survival** before anyone joins for the first time: Creative players count as builders and skip the hall. Time is stopped in the file; the setup starts the day/night cycle.
 1. Join a fresh copy of the map. You should stand on the Kingsrest square for a few seconds ("The road is long. One moment...") while the map sets itself up.
 2. You are lifted to the welcome hall. Click the Waystone, read "How things stand", and check the journal turns up in your pack.
 3. All twelve rim stones should be lit (free). Pick one: you land next to its Plot Stone with a Keep Banner, are told what stood there, and about 20 seconds later get the plot's first book. Its last page sends you to Sister Wren in Millbrook.
