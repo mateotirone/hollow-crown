@@ -59,6 +59,37 @@ def _smooth_turns(cells, keep=()):
     return cells
 
 
+def _climb_jogs(cells, keep=(), window=15):
+    """Track can only climb on straight north/south/east/west steps, and a slope needs a straight step either side,
+    so a line that wanders off the axes (diagonal, or diagonal with the odd straight step) could hardly ever change
+    height. Within every `window` steps that keep to one diagonal and its two neighbouring straights, reorder the
+    steps so the straights come in runs of three (turning a diagonal into its two straights if there are too few):
+    same end point, 45 degree turns, a sideways wobble of a block or two, and a place to climb in every window."""
+    keep = set(keep)
+    steps = [_dir(a, b) for a, b in zip(cells, cells[1:])]
+    out = []
+    for w0 in range(0, len(steps), window):
+        win = steps[w0:w0 + window]
+        if len(win) < window or any(c in keep for c in cells[w0:w0 + window + 1]):
+            out += win; continue
+        diags = {d for d in win if d % 2 == 1}
+        if len(diags) != 1: out += win; continue
+        d = diags.pop(); a, b = (d - 1) % 8, (d + 1) % 8
+        if not set(win) <= {a, b, d}: out += win; continue
+        na, nb, nd = win.count(a), win.count(b), win.count(d)
+        if nb > na: a, b, na, nb = b, a, nb, na
+        if na < 3:
+            k = 3 - na
+            if nd - k < 2: out += win; continue
+            nd -= k; na += k; nb += k
+        h1 = nd // 3; h2 = max(1, nd // 3) if nb else 0; h3 = nd - h1 - h2
+        if h3 < 0: out += win; continue
+        out += [d] * h1 + [a] * na + [d] * h2 + [b] * nb + [d] * h3
+    res = [cells[0]]
+    for d in out: res.append((res[-1][0] + DX[d], res[-1][1] + DZ[d]))
+    assert res[-1] == cells[-1]
+    return res
+
 def trace(points, stops=()):
     """points: the line's control points [(x, z), ...] (already smooth); stops: [(x, z, axis or None), ...] that the
     line passes through or starts/ends at. Returns (cells, stop_index) with a straight N/S/E/W run of PLATFORM
@@ -112,6 +143,7 @@ def trace(points, stops=()):
     keep = set()
     for _, a, s, b, _ in pieces: keep |= set(_raster([a, s, b]))
     cells = _smooth_turns(cells, keep)
+    cells = _climb_jogs(cells, keep)
     idx = {c: n for n, c in enumerate(cells)}
     found = [idx.get(c, int(np.argmin([math.dist(c, q) for q in cells]))) for c in stop_cells]
     res = [0] * len(ctrl)
@@ -152,6 +184,65 @@ def profile(cells, ground, stop_idx=(), window=41, flat=PLATFORM, stop_y=None):
     return y
 
 
+def profile_dp(cells, ground, stop_idx=(), flat=PLATFORM, stop_y=None, smooth_w=0.3, window=41, weight=None):
+    """Track heights that follow the land as closely as the climbing rules allow, looking ahead (Mateo 2026-11-11:
+    paths should climb the high ground, not cut ravines through it). Minimises the total |track - ground| (plus a
+    little pull toward the smoothed ground) under the same rules as profile(): at most 1 block up or down per 3
+    along, only on straight north/south/east/west steps, flat through every platform. weight[i] (default 1) scales
+    how hard cell i is held to the ground, e.g. inside towns whose streets were planned on it."""
+    g = np.asarray(ground, float) + 1
+    n = len(cells)
+    wt = np.ones(n) if weight is None else np.asarray(weight, float)
+    k = window // 2
+    t = np.convolve(np.pad(g, k, mode='edge'), np.ones(window) / window, mode='valid')
+    fixed = np.full(n, -10**6, int)
+    for j, s in enumerate(stop_idx):
+        lo, hi = max(0, s - flat), min(n, s + flat + 1)
+        fixed[lo:hi] = stop_y[j] if stop_y is not None else int(round(float(np.median(g[lo:hi]))))
+    ok = np.zeros(n, bool)                    # may the track change height arriving at cell i?
+    for i in range(1, n):
+        if fixed[i] > -10**6 or fixed[i - 1] > -10**6: continue
+        if not (cells[i][0] == cells[i - 1][0] or cells[i][1] == cells[i - 1][1]): continue
+        st = i + 1 >= n or _dir(cells[i - 1], cells[i]) == _dir(cells[i], cells[i + 1])
+        st &= i - 2 < 0 or _dir(cells[i - 2], cells[i - 1]) == _dir(cells[i - 1], cells[i])
+        ok[i] = st
+    lo_y = int(min(g.min(), fixed[fixed > -10**6].min() if (fixed > -10**6).any() else g.min())) - 30
+    hi_y = int(max(g.max(), fixed.max())) + 10
+    H = hi_y - lo_y + 1
+    INF = 1e18
+    def cell_cost(i):
+        ys = np.arange(lo_y, hi_y + 1)
+        c = wt[i] * np.abs(ys - g[i]) + smooth_w * np.abs(ys - t[i])
+        if fixed[i] > -10**6: c = 4.0 * np.abs(ys - fixed[i])     # platforms: flat, pulled hard toward the stop height
+        return c
+    # state: (height, since) with since = blocks since the last change, capped at 2 (2 means a change may come next)
+    cost = np.full((H, 3), INF); cost[:, 2] = cell_cost(0)
+    back = np.zeros((n, H, 3), np.int8)        # 0 same height, 1 came from below, 2 came from above; since packed in
+    prev_s = np.zeros((n, H, 3), np.int8)
+    for i in range(1, n):
+        cc = cell_cost(i)
+        new = np.full((H, 3), INF); bk = np.zeros((H, 3), np.int8); ps = np.zeros((H, 3), np.int8)
+        # no change: since grows (0->1, 1->2, 2->2)
+        for s_from, s_to in ((0, 1), (1, 2), (2, 2)):
+            v = cost[:, s_from]; better = v < new[:, s_to]
+            new[better, s_to] = v[better]; bk[better, s_to] = 0; ps[better, s_to] = s_from
+        if ok[i]:                              # a change arrives here from a state with since == 2
+            up = np.full(H, INF); up[1:] = cost[:-1, 2]
+            dn = np.full(H, INF); dn[:-1] = cost[1:, 2]
+            for v, code in ((up, 1), (dn, 2)):
+                better = v < new[:, 0]
+                new[better, 0] = v[better]; bk[better, 0] = code; ps[better, 0] = 2
+        cost = new + cc[:, None]; back[i] = bk; prev_s[i] = ps
+    y = np.zeros(n, int)
+    h, s_ = np.unravel_index(int(np.argmin(cost)), cost.shape)
+    for i in range(n - 1, -1, -1):
+        y[i] = h + lo_y
+        if i == 0: break
+        code = back[i, h, s_]; s_ = prev_s[i, h, s_]
+        h = h - 1 if code == 1 else h + 1 if code == 2 else h
+    return y
+
+
 if __name__ == "__main__":
     pts = [(0, 0), (60, 10), (120, 60), (200, 70), (260, 140)]
     cells, si = trace(pts, [(0, 0, None), (120, 60, None), (260, 140, None)])
@@ -165,4 +256,11 @@ if __name__ == "__main__":
     for i in range(1, len(ys)):
         if ys[i] != ys[i - 1]:
             assert abs(ys[i] - ys[i - 1]) == 1 and i - last >= 3; last = i
+    ys2 = profile_dp(cells, ground, si)
+    last = -9
+    for i in range(1, len(ys2)):
+        if ys2[i] != ys2[i - 1]:
+            assert abs(ys2[i] - ys2[i - 1]) == 1 and i - last >= 3; last = i
+    g1 = np.asarray(ground) + 1
+    assert np.abs(ys2 - g1).sum() < np.abs(ys - g1).sum(), (np.abs(ys2 - g1).sum(), np.abs(ys - g1).sum())
     print("railplan: ALL OK", len(cells), "cells")

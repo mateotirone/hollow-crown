@@ -13,11 +13,24 @@
     "default": "geometry.siege_b.mirror_knight"
    },
    "animations": {
-    "main": "animation.siege_b.mirror_knight"
+    "base": "animation.siege_b.mirror_knight",
+    "idle": "animation.siege_b.mirror_knight.idle",
+    "walk": "animation.siege_b.mirror_knight.walk",
+    "attack": "animation.siege_b.mirror_knight.attack",
+    "swing": "controller.animation.siege_b.mirror_knight.swing",
+    "aim": "animation.siege_b.mirror_knight.aim",
+    "ready": "controller.animation.siege_b.mirror_knight.ready",
+    "hurt": "animation.siege_b.mirror_knight.hurt",
+    "flinch": "controller.animation.siege_b.mirror_knight.flinch"
    },
    "scripts": {
     "animate": [
-     "main"
+     "base",
+     "idle",
+     "walk",
+     "swing",
+     "ready",
+     "flinch"
     ]
    },
    "render_controllers": [

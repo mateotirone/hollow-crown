@@ -13,11 +13,11 @@
     "default": "geometry.siege_b.reveal_morvane"
    },
    "animations": {
-    "main": "animation.siege_b.reveal_morvane"
+    "base": "animation.siege_b.reveal_morvane"
    },
    "scripts": {
     "animate": [
-     "main"
+     "base"
     ]
    },
    "render_controllers": [

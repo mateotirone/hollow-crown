@@ -13,6 +13,8 @@
 //   pretenders.js  generated claimants who rise in the Hollow after Morvane falls (events: siege:pretender_risen / _marching / _fallen)
 //   gloam.js     Gloamwings: flyers that build up the longer a visitor stays in the Hollow
 //   champions.js NPC stand-ins for players that fight like one (spawnChampion, setStance)
+//   anim.js      boss moves: wind-up pose while the warning is up, strike when the hit lands, rage at each phase
+//   moves.js     GENERATED list of boss move animations (from studio/bestiary/anims.py, which makes every mob's animations)
 //   bodies.js    the dead fall and lie on the field until the fight is over, then sink away
 //   showcase.js  our exhibits in the /scriptevent siege:showcase test world
 //

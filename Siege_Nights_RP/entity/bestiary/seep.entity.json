@@ -13,11 +13,11 @@
     "default": "geometry.siege_b.seep"
    },
    "animations": {
-    "main": "animation.siege_b.seep"
+    "base": "animation.siege_b.seep"
    },
    "scripts": {
     "animate": [
-     "main"
+     "base"
     ]
    },
    "render_controllers": [

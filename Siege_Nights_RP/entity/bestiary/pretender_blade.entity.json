@@ -13,11 +13,24 @@
     "default": "geometry.siege_b.pretender_blade"
    },
    "animations": {
-    "main": "animation.siege_b.pretender_blade"
+    "base": "animation.siege_b.pretender_blade",
+    "idle": "animation.siege_b.pretender_blade.idle",
+    "walk": "animation.siege_b.pretender_blade.walk",
+    "attack": "animation.siege_b.pretender_blade.attack",
+    "swing": "controller.animation.siege_b.pretender_blade.swing",
+    "aim": "animation.siege_b.pretender_blade.aim",
+    "ready": "controller.animation.siege_b.pretender_blade.ready",
+    "hurt": "animation.siege_b.pretender_blade.hurt",
+    "flinch": "controller.animation.siege_b.pretender_blade.flinch"
    },
    "scripts": {
     "animate": [
-     "main"
+     "base",
+     "idle",
+     "walk",
+     "swing",
+     "ready",
+     "flinch"
     ]
    },
    "render_controllers": [

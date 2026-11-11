@@ -13,11 +13,21 @@
     "default": "geometry.siege_b.brine_lurker"
    },
    "animations": {
-    "main": "animation.siege_b.brine_lurker"
+    "base": "animation.siege_b.brine_lurker",
+    "idle": "animation.siege_b.brine_lurker.idle",
+    "walk": "animation.siege_b.brine_lurker.walk",
+    "attack": "animation.siege_b.brine_lurker.attack",
+    "swing": "controller.animation.siege_b.brine_lurker.swing",
+    "hurt": "animation.siege_b.brine_lurker.hurt",
+    "flinch": "controller.animation.siege_b.brine_lurker.flinch"
    },
    "scripts": {
     "animate": [
-     "main"
+     "base",
+     "idle",
+     "walk",
+     "swing",
+     "flinch"
     ]
    },
    "render_controllers": [

@@ -52,7 +52,7 @@ export const ENTRIES = [
   {
     id: "first_days", ch: "start", title: "What to do first",
     tip: "",
-    page: "1. §fChoose a place.§r In the hall in the sky, click a free stone on the rim to take a plot. (No plot? Start in Kingsrest and claim a free Plot Stone you find on foot, or join a friend.)\n"
+    page: "1. §fChoose a place.§r In the hall in the sky (the whole map in miniature), click a green stone to take that plot. (No plot? Start in Kingsrest and claim a free Plot Stone you find on foot, or join a friend.)\n"
       + "2. §fRaise your Keep Banner§r on your Plot Stone. That founds your settlement and makes the land around it yours.\n"
       + "3. §fCraft a Siege Workshop§r at a crafting table and put it on your land. Nearly everything in this book is made there.\n"
       + "4. §fBuild walls and a shelter before your first siege night.§r Click your Keep Banner to see when it is due.\n"
