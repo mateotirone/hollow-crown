@@ -12,7 +12,7 @@ P_STONE = {**VALE, **STYLES["stone"]}
 # civic buildings are kept up: cleaner ashlar than the houses' weathered mix
 P_STONE["stone"] = mix([("stone_bricks", 82), ("cracked_stone_bricks", 10), ("mossy_stone_bricks", 8)], 77)
 P_STONE["infill"] = P_STONE["stone"]
-P_STONE.update(DOCTRINE, pane="gray_stained_glass_pane")      # build-instructions: doctrine texturing, tinted glass
+P_STONE.update(DOCTRINE, pane="gray_stained_glass_pane", spikes=3, finial="stone_brick_wall", finial_top="lightning_rod", spike="lightning_rod")      # build-instructions: doctrine texturing, tinted glass
 CHAPEL_GLASS = mix([("red_stained_glass_pane", 34), ("blue_stained_glass_pane", 33), ("yellow_stained_glass_pane", 33)], 19)
 
 def _belfry(bp, P, x, y, z, w=1):
@@ -20,12 +20,12 @@ def _belfry(bp, P, x, y, z, w=1):
     for dx in (-1, 1):
         for dz in (-1, 1):
             for h in range(3): bp.set(x + dx, y + h, z + dz, "stone_brick_wall")
-    for dx in (-1, 0, 1):
+    for dx in (-1, 0, 1):                      # base and cap in trim stone (not roof metal), stepped stair cap
         for dz in (-1, 0, 1):
-            bp.set(x + dx, y - 1, z + dz, P["roof_block"])
-            bp.set(x + dx, y + 3, z + dz, P["roof"], facing={(-1, 0): "e", (1, 0): "w", (0, -1): "s", (0, 1): "n"}.get((dx, dz), "n"), half="bottom") if (dx == 0) != (dz == 0) else \
-                bp.set(x + dx, y + 3, z + dz, P["roof_block"])
-    bp.set(x, y + 3, z, P["roof_block"]); bp.set(x, y + 4, z, "stone_brick_wall")
+            bp.set(x + dx, y - 1, z + dz, "polished_andesite")
+            bp.set(x + dx, y + 3, z + dz, "stone_brick_stairs", facing={(-1, 0): "e", (1, 0): "w", (0, -1): "s", (0, 1): "n"}.get((dx, dz), "n"), half="bottom") if (dx == 0) != (dz == 0) else \
+                bp.set(x + dx, y + 3, z + dz, "stone_brick_slab", half="bottom")
+    bp.set(x, y + 3, z, "polished_andesite"); bp.set(x, y + 4, z, "stone_brick_wall"); bp.set(x, y + 5, z, "lightning_rod")
     bp.set(x, y, z, "bell")
 
 

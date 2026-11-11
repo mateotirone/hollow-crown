@@ -70,9 +70,11 @@ STONE_FAMILY = {"stone_bricks", "cracked_stone_bricks", "mossy_stone_bricks", "c
 
 DOCTRINE = dict(dress=True, verge_lanterns=True, arched_jetty=True, panel_trapdoor="dark_oak_trapdoor")
 
-def finish_doctrine(bp, ladder=VALE_STONE, family=STONE_FAMILY):
-    """Canvas first, paint last: repaint the stone walls by the doctrine, then finish the blueprint."""
+def finish_doctrine(bp, ladder=VALE_STONE, family=STONE_FAMILY, planters=True, wood="spruce"):
+    """Canvas first, paint last: repaint the stone walls by the doctrine, dress the foot of the stone walls
+    (07-detailing: sign-boxed bushes and spruce lantern stands), then finish the blueprint."""
     paint_stone(bp, ladder, family)
+    if planters: ground_dressing(bp, set(ladder) | set(family), wood)
     return bp.finish()
 
 def smooth_noise(a, b, seed, cell=4.0):
@@ -86,6 +88,53 @@ def smooth_noise(a, b, seed, cell=4.0):
     bot = g(ia, ib + 1) * (1 - ta) + g(ia + 1, ib + 1) * ta
     return top * (1 - tb) + bot * tb
 
+def band_index(h, base, top, n, col, seed=77, depth=1):
+    """Which of n ladder steps a roof row h takes between base (eaves) and top (ridge): clean bands, each band
+    edge shifted up or down by up to `depth` rows per column `col` (interlocking teeth at the band edges only,
+    never islands inside a band)."""
+    span = max(1, top - base + 1)
+    if span / n < 3: depth = 0          # bands under 3 rows: teeth would break them into patches
+    i = 0
+    for k in range(n - 1):
+        edge = (k + 1) * span / n + round((h3(col, k, 0, seed) - 0.5) * (2 * depth + 0.99))
+        if h - base >= edge: i += 1
+    return min(n - 1, i)
+
+GROUND_LEAVES = ("azalea_leaves", "azalea_leaves_flowered")
+
+def ground_dressing(bp, stone, wood="spruce", seed=21):
+    """07-detailing at the foot of stone walls: here and there a bush held in by wall signs, or a slab
+    lantern stand, on the outside of a blank stretch of stone wall (never in front of a door or window)."""
+    sign = f"{wood}_wall_sign"
+    cells = [c for c, (n, p) in bp.cells.items() if c[1] == 1 and n in stone]
+    if not cells: return
+    taken = set()
+    free = lambda c: bp.get(*c)[0] in ("keep", "air")
+    blank = lambda c: bp.get(*c)[0] in stone
+    for (x, y, z) in sorted(cells):
+        for side, (dx, _, dz) in DIRS.items():
+            o = (x + dx, 1, z + dz)
+            if not free(o) or not free((o[0], 2, o[2])) or o in taken: continue
+            if not blank((x, 2, z)): continue                       # a window or door above: keep it clear
+            ax, az = (1, 0) if side in "ns" else (0, 1)
+            if any(not blank((x + ax * k, yy, z + az * k)) for k in (-1, 1) for yy in (1, 2)): continue
+            if bp.get(x - dx, 1, z - dz)[0] in ("keep", "air"): continue   # only on real walls with a room behind
+            r = h3(x, z, side == "s", seed)
+            if r < 0.16:                                             # a bush boxed in by signs
+                bp.set(*o, GROUND_LEAVES[int(h3(x, 3, z, seed) * 2)], persistent=True)
+                f2 = (o[0] + dx, 1, o[2] + dz)
+                if free(f2): bp.set(*f2, sign, facing=side)
+                for k, d in ((-1, LEFT_OF[side]), (1, RIGHT_OF[side])):
+                    f3 = (o[0] + ax * k, 1, o[2] + az * k)
+                    if free(f3): bp.set(*f3, sign, facing=d); taken.add(f3)
+                taken.update({o, f2})
+            elif r < 0.22:                                           # a spruce lantern stand
+                bp.set(*o, f"{wood}_slab", half="top"); taken.add(o)
+                if free((o[0], 2, o[2])): bp.set(o[0], 2, o[2], "lantern")
+
+LEFT_OF = {"s": "w", "n": "w", "e": "n", "w": "n"}
+RIGHT_OF = {"s": "e", "n": "e", "e": "s", "w": "s"}
+
 def paint_stone(bp, ladder=VALE_STONE, family=STONE_FAMILY, seed=5, depth=1, lone=0.08):
     """The doctrine's last pass over finished stone walls (texturing/doctrine.py paint_teeth, Mateo's gradient
     examples): every outside stone cell is repainted in bands from the foot of its wall to the top, dark to
@@ -96,10 +145,11 @@ def paint_stone(bp, ladder=VALE_STONE, family=STONE_FAMILY, seed=5, depth=1, lon
     air = lambda c: bp.cells.get(c, ("keep",))[0] in ("keep", "air")
     outer = {c for c in cells if any(air((c[0] + dx, c[1], c[2] + dz)) for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)))}
     if not outer: return
-    lo, hi = {}, {}
-    for (x, y, z) in outer:
-        lo[(x, z)] = min(lo.get((x, z), y), y); hi[(x, z)] = max(hi.get((x, z), y), y)
-    rows = max(hi[c] - lo[c] + 1 for c in lo)
+    # bands run level round the whole building from its foot (not from the foot of each column, which put
+    # blotches over arches and openings); the top of the tallest wall gets the lightest step
+    y_lo = min(c[1] for c in outer); y_hi = max(c[1] for c in outer)
+    lo = {(x, z): y_lo for (x, y, z) in outer}
+    rows = y_hi - y_lo + 1
     lad = ladder if rows >= 9 else ladder[:3]
     n = len(lad)
     hsh = lambda a, b, s: h3(a, b, 0, s)
@@ -227,6 +277,8 @@ class Building:
             for i, (x, z) in enumerate(cells):
                 for y in range(y0, yt + 1):
                     if i in posts: bp.set(x, y, z, P["frame"], axis="y")
+                    elif y == y0 and y0 > 1 and P.get("dress") and min(abs(i - p_) for p_ in posts) >= 1 and i % 2 == 0:
+                        bp.set(x, y, z, P["frame"], axis="z" if axis == "x" else "x")    # beam ends of the beamed floor show in the band (03)
                     elif y in (y0, yt): bp.set(x, y, z, P["frame"], axis=axis)
                     else:
                         bp.set(x, y, z, inf)
@@ -284,33 +336,50 @@ class Building:
                 if not c[0].endswith("_log"): bp.set(x + rx * i + ox, y - 1, z + rz * i + oz, P.get("wsill", P["trim"]), facing=OPP[side], half="bottom")
             asked = shutters is not None
             if shutters is None: shutters = h3(x, y, z, self.seed + 31) < self.P.get("shutters", 0.3)
-            wood = P["trim"].replace("_stairs", "")
-            sign = f"{wood}_wall_sign"
-            if P.get("dress") and not asked and not shutters and w == 1:
-                # shutter dressing (05): one choice per window by position hash: shelf, shelf with a lantern (about
-                # one in three, never two side by side), leaves hung under a shelf, a leaf box with a sign, or plain
-                r = h3(x, y, z, self.seed + 57)
-                sx, sz = x + 2 * ox, z + 2 * oz
-                free = lambda a, b, c: bp.get(a, b, c)[0] in ("keep", "air")
-                lit_near = any(bp.get(sx + rx * k, y, sz + rz * k)[0] == "lantern" for k in (-2, -1, 1, 2))
-                shelf = P.get("shelf", "spruce_slab")
-                if free(sx, y - 1, sz):
-                    if r < 0.33 and not lit_near:
-                        bp.set(sx, y - 1, sz, shelf, half="top")
-                        if free(sx, y, sz): bp.set(sx, y, sz, "lantern")
-                    elif r < 0.45:
-                        bp.set(sx, y - 1, sz, shelf, half="top")
-                    elif r < 0.6 and free(sx, y - 2, sz):
-                        bp.set(sx, y - 1, sz, shelf, half="top")
-                        bp.set(sx, y - 2, sz, "azalea_leaves_flowered" if r < 0.52 else "azalea_leaves", persistent=True)
-                    elif r < 0.72 and free(sx + ox, y - 1, sz + oz):
-                        bp.set(sx, y - 1, sz, "azalea_leaves_flowered" if r < 0.66 else "azalea_leaves", persistent=True)
-                        bp.set(sx + ox, y - 1, sz + oz, sign, facing=side)
+            if P.get("dress") and not asked:
+                self.dress_window(x, y, z, side, w, h)
+                return
             sh = (((x - rx + 2 * ox, z - rz + 2 * oz), (x + rx * w + 2 * ox, z + rz * w + 2 * oz)) if shutters else ())
-            if P.get("dress") and sh: sh = sh[:1] if h3(x, y, z, self.seed + 3) < 0.5 else sh[1:]   # a single shutter
             for sx, sz in sh:
                 if bp.get(sx, y, sz)[0] in ("keep", "air"):
                     for j in range(h): bp.set(sx, y + j, sz, P["shutter"], facing=side, open=True)
+        elif kind == "stone" and P.get("dress"):
+            # dark oak trapdoor panels either side of a stone window (05, the stone / spruce / dark oak pairing)
+            panel = P.get("panel_trapdoor", "dark_oak_trapdoor")
+            for sx, sz in ((x - rx + ox, z - rz + oz), (x + rx * w + ox, z + rz * w + oz)):
+                if all(bp.get(sx, y + j, sz)[0] in ("keep", "air") for j in range(h)) and bp.get(sx - ox, y, sz - oz)[0] not in ("keep", "air") \
+                        and not bp.get(sx - ox, y, sz - oz)[0].endswith(("_pane", "_door")):
+                    for j in range(h): bp.set(sx, y + j, sz, panel, facing=side, open=True)
+
+    def dress_window(self, x, y, z, side, w, h):
+        """Shutter dressing (05-windows-and-doors): trapdoor shutters both sides, a slab shelf under the window,
+        and by a seeded hash so neighbours differ: a lantern on the shelf (about one in three, never two side by
+        side), leaves hanging under the shelf, a leaf box held by a sign, or the shelf alone."""
+        bp, P = self.bp, self.P
+        rx, rz = DIRS[RIGHT[side]][0], DIRS[RIGHT[side]][2]
+        ox, oz = DIRS[side][0], DIRS[side][2]
+        free = lambda a, b, c: bp.get(a, b, c)[0] in ("keep", "air")
+        for sx, sz in ((x - rx + 2 * ox, z - rz + 2 * oz), (x + rx * w + 2 * ox, z + rz * w + 2 * oz)):
+            if all(free(sx, y + j, sz) for j in range(h)):
+                for j in range(h): bp.set(sx, y + j, sz, P["shutter"], facing=side, open=True)
+        shelf = P.get("shelf", "spruce_slab")
+        cells = [(x + rx * i + 2 * ox, z + rz * i + 2 * oz) for i in range(w)]
+        if not all(free(cx, y - 1, cz) for cx, cz in cells): return
+        r = h3(x, y, z, self.seed + 57)
+        mx, mz = cells[w // 2]
+        lit_near = any(bp.get(mx + rx * k, yy, mz + rz * k)[0] == "lantern" for k in (-3, -2, -1, 1, 2, 3) for yy in (y, y - 4, y + 4))
+        leaves = "azalea_leaves_flowered" if h3(x, y, z, self.seed + 5) < 0.5 else "azalea_leaves"
+        if 0.33 <= r < 0.47 and all(free(cx + ox, y - 1, cz + oz) for cx, cz in cells):     # leaf box with a sign in front
+            sign = P["trim"].replace("_stairs", "") + "_wall_sign"
+            for cx, cz in cells:
+                bp.set(cx, y - 1, cz, leaves, persistent=True); bp.set(cx + ox, y - 1, cz + oz, sign, facing=side)
+            return
+        for cx, cz in cells: bp.set(cx, y - 1, cz, shelf, half="top")
+        if r < 0.33 and not lit_near:
+            bp.set(mx, y, mz, "lantern")
+        elif r < 0.62 and all(free(cx, y - 2, cz) for cx, cz in cells):
+            for cx, cz in cells:
+                if h3(cx, y, cz, self.seed + 9) < 0.8: bp.set(cx, y - 2, cz, leaves, persistent=True)
 
     def flower_box(self, x, y, z, side, w, seed=0):
         """Trapdoor box with flowers under a window (x,y,z = first cell in front of the wall)."""
@@ -337,15 +406,48 @@ class Building:
             for j in range(2): bp.set(x + rx * s, y + j, z + rz * s, jamb, axis="y")
         bp.set(x, y + 2, z, P.get("lintel", P["frame"]), axis="x" if side in "ns" else "z")
         room = all(self.bp.get(x + rx * s + ox, y + 3, z + rz * s + oz)[0] in ("keep", "air") for s in (-1, 0, 1))
+        if P.get("dress"):            # a large-looking door: trapdoors framing it make the opening read 3 wide (05)
+            for s_ in (-1, 1):
+                if all(bp.get(x + rx * s_ + ox, y + j, z + rz * s_ + oz)[0] in ("keep", "air") for j in (0, 1)):
+                    for j in (0, 1): bp.set(x + rx * s_ + ox, y + j, z + rz * s_ + oz, P.get("panel_trapdoor", P["shutter"]), facing=side, open=True)
+            canopy_lanterns = False
+        else: canopy_lanterns = True
         if canopy and room:
             for s in (-1, 0, 1): bp.set(x + rx * s + ox, y + 2, z + rz * s + oz, P["trim"], facing=OPP[side], half="bottom")
-            if lanterns:
+            if lanterns and not canopy_lanterns:
+                for s in (-2, 2):
+                    if all(self.bp.get(x + rx * s + ox, y + k, z + rz * s + oz)[0] in ("keep", "air") for k in (1, 2)):
+                        bp.set(x + rx * s + ox, y + 2, z + rz * s + oz, P["trim"], facing=OPP[side], half="top")   # bracket
+                        bp.set(x + rx * s + ox, y + 1, z + rz * s + oz, "lantern", hanging=True)
+            elif lanterns:
                 for s in (-1, 1): bp.set(x + rx * s + ox, y + 1, z + rz * s + oz, "lantern", hanging=True)
         elif lanterns:
             for s in (-2, 2):
                 if self.bp.get(x + rx * s + ox, y + 2, z + rz * s + oz)[0] in ("keep", "air"):
                     bp.set(x + rx * s + ox, y + 2, z + rz * s + oz, P["trim"], facing=OPP[side], half="top")   # bracket
                     bp.set(x + rx * s + ox, y + 1, z + rz * s + oz, "lantern", hanging=True)
+
+    def big_door(self, x, y, z, side, frame=None):
+        """The six-block door for halls, barns and stores (05): a double door two wide with a row of slabs over
+        it, trapdoors framing the opening, jambs and a lintel, lanterns either side."""
+        bp, P = self.bp, self.P
+        rx, rz = DIRS[RIGHT[side]][0], DIRS[RIGHT[side]][2]
+        ox, oz = DIRS[side][0], DIRS[side][2]
+        for i in (0, 1):
+            cx, cz = x + rx * i, z + rz * i
+            bp.set(cx, y, cz, P["door"], facing=OPP[side], hinge=i == 1)
+            bp.set(cx, y + 1, cz, P["door"], facing=OPP[side], upper=True, hinge=i == 1)
+            bp.set(cx, y + 2, cz, P.get("trim_slab", "spruce_slab"), half="top")
+            for j in (0, 1, 2): bp.set(cx - ox, y + j, cz - oz, "air")
+        jamb = frame or P.get("jamb", P["frame"])
+        for cx, cz in ((x - rx, z - rz), (x + 2 * rx, z + 2 * rz)):
+            for j in (0, 1, 2): bp.set(cx, y + j, cz, jamb, axis="y")
+            if all(bp.get(cx + ox, y + j, cz + oz)[0] in ("keep", "air") for j in (0, 1)):
+                for j in (0, 1): bp.set(cx + ox, y + j, cz + oz, P.get("panel_trapdoor", P["shutter"]), facing=side, open=True)
+        for i in range(-1, 3): bp.set(x + rx * i, y + 3, z + rz * i, P.get("lintel", P["frame"]), axis="x" if side in "ns" else "z")
+        for cx, cz in ((x - 2 * rx + ox, z - 2 * rz + oz), (x + 3 * rx + ox, z + 3 * rz + oz)):
+            if bp.get(cx, y + 2, cz)[0] in ("keep", "air"):
+                bp.set(cx, y + 2, cz, P["trim"], facing=OPP[side], half="top"); bp.set(cx, y + 1, cz, "lantern", hanging=True)
 
     # ---- roofs
     def roof(self, rect, ridge, base, overhang=1, verge=1, pitch=1, mats=None):
@@ -420,6 +522,14 @@ class Building:
             if (x, z) not in OH: OH[(x, z)] = self._other_height(x, z)
             return OH[(x, z)]
         def solid(n): return n not in ("keep", "air")
+        ridge_cells = {}
+        ladder_span = {}
+        for (r_, ridge_, base_, pitch_, mats_, wall_) in self.roofs:
+            lad = mats_.get("roof_ladder", P.get("roof_ladder"))
+            if not lad: continue
+            top_ = base_ + ((r_[3] - r_[1]) // 2 if ridge_ == "x" else (r_[2] - r_[0]) // 2) * pitch_
+            b0, t0 = ladder_span.get(tuple(lad), (base_, top_))
+            ladder_span[tuple(lad)] = (min(b0, base_), max(t0, top_))
         for (x, z), (h, i) in Hm.items():
             o = other(x, z)
             if o is not None and o >= h: continue        # another roof is higher here: it wins
@@ -438,9 +548,10 @@ class Building:
             stair, block, slab = m("roof"), m("roof_block"), m("roof_slab")
             ladder = mats.get("roof_ladder", P.get("roof_ladder"))
             if ladder and isinstance(stair, str) and stair in ladder:          # slate / copper: a gradient eaves -> ridge
-                top_h = base + ((r[3] - r[1]) // 2 if ridge == "x" else (r[2] - r[0]) // 2) * pitch
-                t = (h - base) / max(1, top_h - base) + (h3(x, h, z, 77) - 0.5) * (0.08 if len(ladder) > 3 else 0.14)
-                stair = ladder[min(len(ladder) - 1, max(0, int(t * len(ladder))))]
+                # one gradient for every roof of the building: the same height takes the same step, so a wing
+                # roof meets the main roof in one colour at the valley (06-roof, connecting roofs)
+                lo_b, hi_t = ladder_span[tuple(ladder)]
+                stair = ladder[band_index(h, lo_b, hi_t - 1, len(ladder), x if ridge == "x" else z)]
             if higher:
                 higher.sort(reverse=True)
                 bp.set(x, h, z, stair, facing=higher[0][1], half="bottom")
@@ -451,6 +562,7 @@ class Building:
                     bp.set(x, h + higher[0][0] - 1, z, stair, facing=higher[0][1], half="bottom")
             else:
                 bp.set(x, h, z, block); bp.set(x, h + 1, z, slab, half="bottom")
+                ridge_cells.setdefault(i, []).append((x, h, z))
         # a full block of the trim wood under the lowest stair of every verge corner, where barge board meets
         # eave, so a roof corner is never empty and anything hung from it hangs from wood (06-roof step 5)
         for i, (r, ridge, base, pitch, mats, wall) in enumerate(self.roofs):
@@ -463,6 +575,18 @@ class Building:
                     bp.set(x, h - 1, z, mats.get("trim_block", P.get("trim_block", "dark_oak_planks")))
                     if P.get("verge_lanterns") and h - 3 >= 2 and all(bp.get(x, h - k, z)[0] in ("keep", "air") for k in (2, 3, 4)):
                         bp.set(x, h - 2, z, "iron_chain"); bp.set(x, h - 3, z, "lantern", hanging=True)
+        if P.get("spikes"):           # 07-detailing: ridge spikes every few blocks, finials at the gable peaks
+            for i, cells in ridge_cells.items():
+                ridge = self.roofs[i][1]
+                cells.sort(key=lambda c: c[0] if ridge == "x" else c[2])
+                if len(cells) < 3: continue
+                step = P["spikes"]
+                for k, (x, h, z) in enumerate(cells):
+                    end = k in (0, len(cells) - 1)
+                    if end:
+                        bp.set(x, h + 1, z, P.get("finial", P["fence"])); bp.set(x, h + 2, z, P.get("finial_top", P["fence"]))
+                    elif k % step == 0 and len(cells) - 1 - k >= 2:
+                        bp.set(x, h + 1, z, P.get("spike", P["fence"]))
         self.H = Hm
 
     def gable_walls(self, rect, ridge, y_from, style="timber"):

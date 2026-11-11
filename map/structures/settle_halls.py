@@ -9,7 +9,7 @@ stay vanilla because the family has none. Interiors hold only what the hall need
 the Tree of Oaths, hearth, ledger lectern, cartographer's table, throne and vault (marks).
 """
 from bp import Blueprint, DIRS, OPP, RIGHT
-from kit import Building, VALE, mix, grow, h3
+from kit import band_index, Building, VALE, mix, grow, h3
 from vale import STYLES
 
 def castle(region="vale"):
@@ -52,10 +52,13 @@ def pyramid(bp, P, x0, z0, x1, z1, base, pitch=1, mat=None, block=None, finial="
             if (x, z) in ((a0, b0), (a1, b0), (a0, b1), (a1, b1)):
                 f = "s" if z == b0 else "n"
             st = stair
-            if ladder:      # the doctrine's roof gradient: eaves -> ridge, softly dithered
-                t = r / rings + (h3(x, y, z, 77) - 0.5) * 0.14
-                st = ladder[min(len(ladder) - 1, max(0, int(t * len(ladder))))]
+            if ladder:      # the doctrine's roof gradient: eaves -> ridge in clean bands, teeth at the band edges
+                st = ladder[band_index(r, 0, rings - 1, len(ladder), x if z in (b0, b1) else z)]
             bp.set(x, y + pitch - 1, z, st, facing=f, half="bottom")
+            if r == 0 and P.get("verge_lanterns") and (x, z) in ((a0, b0), (a1, b0), (a0, b1), (a1, b1)) \
+                    and all(bp.get(x, y - k, z)[0] in ("keep", "air") for k in (1, 2, 3, 4)) and y - 3 >= 2:
+                bp.set(x, y - 1, z, P.get("trim_block", "spruce_planks"))            # corner block under the hip corner (06-roof)
+                bp.set(x, y - 2, z, "iron_chain"); bp.set(x, y - 3, z, "lantern", hanging=True)
         if last:
             if finial: bp.set((a0 + a1) // 2, y + pitch, (b0 + b1) // 2, finial)
             break

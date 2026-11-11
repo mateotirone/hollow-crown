@@ -22,7 +22,7 @@ an exact, shuffled list for n buildings.
 import math
 import random
 from bp import Blueprint, DIRS, OPP, RIGHT
-from kit import Building, VALE, mix, grow, h3, DOCTRINE, finish_doctrine, SLATE, LADDERS, paint_stone
+from kit import band_index, Building, VALE, mix, grow, h3, DOCTRINE, finish_doctrine, SLATE, LADDERS, paint_stone
 import vale
 import furnish as F
 from settle_halls import pyramid, skirt, dragon_heads, dome, drum, arcade
@@ -92,9 +92,7 @@ def recolour_roof(bp, region, colour, seed=0):
         x, y, z = k
         if n == "deepslate_tile_stairs":
             st = stair
-            if ladder:
-                t = (y - y0) / max(1, y1 - y0) + (h3(x, y, z, 77 + seed) - 0.5) * 0.14
-                st = ladder[min(len(ladder) - 1, max(0, int(t * len(ladder))))]
+            if ladder: st = ladder[band_index(y, y0, y1, len(ladder), x * 7 + z)]
             bp.cells[k] = (st, p)
         elif n == "deepslate_tile_slab": bp.cells[k] = (slab, p)
         elif n == "deepslate_tiles": bp.cells[k] = (block, p)

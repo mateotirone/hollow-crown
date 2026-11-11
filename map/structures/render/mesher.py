@@ -247,6 +247,8 @@ def model(n, p):
                "e": (0, 4 / 16, 0, 2 / 16, 12 / 16, 1), "w": (14 / 16, 4 / 16, 0, 1, 12 / 16, 1)}[f]
         return [(box, t, {"cut": 1})]
     if n in ("iron_chain", "chain"): return [("cross", {"side": "chain1"}, {"cut": 1, "scale": 0.4})]
+    if n == "lightning_rod": return [((7 / 16, 0, 7 / 16, 9 / 16, 12 / 16, 9 / 16), {"side": "oxidized_lightning_rod"}, {}),
+                                     ((6 / 16, 12 / 16, 6 / 16, 10 / 16, 1, 10 / 16), {"side": "oxidized_lightning_rod"}, {})]
     if n == "ladder":
         return [((0, 0, 0, 1, 1, 1 / 16), {"side": "ladder"}, {"cut": 1})]
     if n == "moss_carpet": return [((0, 0, 0, 1, 1 / 16, 1), {"side": "moss_block"}, {})]

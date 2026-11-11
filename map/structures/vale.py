@@ -24,7 +24,7 @@ def coaching_inn(seed=1, style="tudor"):
     a jettied cross wing whose tall gable faces the street, dormers and two chimneys.
     Front (street) faces south (+z). Ground floor at y=1."""
     bp = Blueprint("kingsrest_inn" + ("" if style == "tudor" else "_" + style))
-    P = {**VALE, **STYLES[style], **DOCTRINE, "pane": "brown_stained_glass_pane" if style != "stone" else "gray_stained_glass_pane"}
+    P = {**VALE, **STYLES[style], **DOCTRINE, "pane": "brown_stained_glass_pane" if style != "stone" else "gray_stained_glass_pane", "spikes": 3}
     B = Building(bp, P, seed)
     main = (0, 0, 22, 8)              # long range, ridge east-west
     wing = (13, 8, 21, 18)            # cross wing, gable to the street
