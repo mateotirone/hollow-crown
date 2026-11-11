@@ -75,7 +75,7 @@ export const WARDS = [
 export const WELCOME = {
   hall: { x: -725, y: 300, z: 25 }, // over open water, above the clouds, so it shades nothing
   testArea: { x: -925, y: 300, z: -150 },
-  kingsrest: { x: -118, y: 77, z: -118 }, // the plaza: where "start without a home" puts you (builders can re-set it)
+  kingsrest: { x: -100, y: 77, z: -124 }, // the plaza: where "start without a home" puts you (builders can re-set it)
   hallRadius: 15,
   pedestalRadius: 11,
   pedestalGap: 24, // degrees kept between two pedestals
