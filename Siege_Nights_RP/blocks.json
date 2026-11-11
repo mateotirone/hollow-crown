@@ -303,6 +303,9 @@
   "siege:veilmoss_strands": {
     "sound": "fungus"
   },
+  "siege:old_acacia_leaves": {
+    "sound": "grass"
+  },
   "siege:old_acacia_log": {
     "sound": "wood"
   },

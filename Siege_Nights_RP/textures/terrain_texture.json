@@ -945,6 +945,9 @@
     "siege_veilmoss_strands": {
       "textures": "textures/blocks/siege_veilmoss_strands"
     },
+    "siege_old_leaves_acacia": {
+      "textures": "textures/blocks/leaves_acacia"
+    },
     "siege_old_log_acacia_top": {
       "textures": "textures/blocks/log_acacia_top"
     },

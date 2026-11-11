@@ -214,6 +214,29 @@ class Grower:
             if t > 0.75 and self.rg.random() < 0.5:
                 self.leaf[(round(P[0]), round(P[1]) - 1, round(P[2]))] = self.pick_leaf(-0.8)
 
+    # ------------------------------------------------------------------ palm (bending trunk, crown of drooping fronds)
+    def palm(self):
+        s = self.s; P, rt = self.trunk_at(self.ht); top = [P[0], self.ht + 1, P[2]]
+        self.leaf[(round(top[0]), round(top[1]), round(top[2]))] = self.pick_leaf(1)
+        k = s.get("fronds", 7); a0 = self.r(0, 6.28); L = s["reach"]
+        for i in range(k):
+            az = a0 + i * 6.283 / k + self.r(-0.25, 0.25); up = self.r(0.5, 1.0); n = int(L * 3)
+            x, y, z = top; dx, dz = math.cos(az), math.sin(az); vy = up
+            drop = (up + s.get("sag", 1.6)) / max(n, 1)          # fronds rise, then arch over and hang
+            for j in range(n):
+                x += dx / 3; z += dz / 3; y += vy / 3; vy -= drop
+                c = (round(x), round(y), round(z))
+                if c[1] < 2: break
+                self.leaf[c] = self.pick_leaf(0.5 if j < n / 2 else -0.5)
+                if n * 0.2 < j < n * 0.7 and self.rg.random() < 0.6:     # leaflets either side, hanging one lower
+                    sx, sz = round(-dz), round(dx)
+                    self.leaf[(c[0] + sx, c[1] - (1 if self.rg.random() < 0.5 else 0), c[2] + sz)] = self.pick_leaf(-0.2)
+                    self.leaf[(c[0] - sx, c[1] - (1 if self.rg.random() < 0.5 else 0), c[2] - sz)] = self.pick_leaf(-0.2)
+        if s.get("dates"):
+            for _ in range(s["dates"]):
+                f, ddx, ddz = H4[int(self.rg.integers(0, 4))]
+                self.deco[(round(top[0]) + ddx, round(top[1]) - 1, round(top[2]) + ddz)] = (self.c.get("fruit", "beehive"), {})
+
     # ------------------------------------------------------------------ detail stages
     def knees(self):
         k = self.s.get("knees", 0); W = self.c["wood"]
@@ -318,7 +341,7 @@ class Grower:
     # ------------------------------------------------------------------ assemble
     def grow(self):
         self.trunk()
-        (self.conifer if self.c["form"] == "conifer" else self.broadleaf)()
+        {"conifer": self.conifer, "palm": self.palm}.get(self.c["form"], self.broadleaf)()
         self.roots(); self.knees(); self.bark(); self.drape(); self.ground(); self.snow()
         return self.blueprint()
 
