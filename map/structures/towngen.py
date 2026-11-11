@@ -54,8 +54,8 @@ SITES = {
     "Kingsrest": dict(centre=(-118, -118), radius=90, size="town", fixed_square=True, square_r=9, seed=7, inn=True,
                       roofs={"slate": 4, "dark shingle": 3, "warm red": 2, "white": 1}, accent="copper",
                       civic=[("guildhall", vale_civic.guildhall), ("chapel", vale_civic.chapel)]),
-    # a farming village on rolling Vale ground between Kingsrest and Millbrook (test site)
-    "Alder Combe": dict(centre=(-200, -330), radius=60, size="village", fixed_square=False, square_r=7, seed=23, civic=[],
+    # a farming village on rolling Vale ground west of Kingsrest, clear of plots, wards and rivers (test site)
+    "Alder Combe": dict(centre=(-380, -120), radius=60, size="village", fixed_square=False, square_r=7, seed=23, civic=[],
                         roofs={"dark shingle": 4, "slate": 3, "warm red": 2, "copper": 1}, accent="slate"),
 }
 
