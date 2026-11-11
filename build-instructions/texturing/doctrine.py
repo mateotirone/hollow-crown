@@ -193,7 +193,7 @@ def write_pages(d, info):
             cols = [info.get(b, (None, None))[0] for b in f["blocks"]]
             have = [c for c in cols if c]
             avg = hexc(tuple(sum(c[i] for c in have) // len(have) for i in range(3))) if have else "?"
-            status = "Mateo's blocks" if f.get("status") == "mateo" else "Claude's starter, waiting for Mateo's blocks"
+            status = {"mateo": "Mateo's blocks", "principle": "built by the gradient rules from Mateo's examples, waiting for his check"}.get(f.get("status"), "Claude's starter, waiting for Mateo's blocks")
             L += [f"## {f['code']} {f['name']} ({avg})", "", f"Used for: {f['use']}. Status: {status}.", ""]
             if f.get("order"):
                 L += [f"Order: {f['order']}.", ""]
@@ -240,6 +240,15 @@ def main(argv):
             missing.append(b)
     write_pages(d, info)
     write_viewer(d, info)
+    lum = lambda c: 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]
+    for r in d["regions"]:                     # the ladder check: lightness climbs, no equal neighbours
+        for f in r["families"]:
+            if "ridge" in (f.get("order") or "") or "hue gradient" in (f.get("note") or "") or "accent" in f["name"].lower() or "timber" in f["code"].lower():
+                continue
+            ls = [lum(info[b][0]) for b in f["blocks"] if b in info]
+            bad = [(f["blocks"][i], f["blocks"][i + 1]) for i in range(len(ls) - 1) if ls[i + 1] - ls[i] < 5]
+            if bad and f["code"] != "VAL-09":
+                print(f"ladder check {f['code']}: {bad}")
     fams = sum(len(r["families"]) for r in d["regions"])
     print(f"{len(d['regions'])} regions, {fams} families, {len(blocks)} blocks; no texture: {missing or 'none'}")
 

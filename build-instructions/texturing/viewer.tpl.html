@@ -58,7 +58,7 @@ h2 { font: 700 20px/1.2 var(--display); margin: 0; }
 <div class="wrap">
   <header>
     <h1>Texturing Doctrine</h1>
-    <p class="lede">Every colour family per region, with its code, its ladder of blocks from dark to light (copper runs ridge to eaves), and a test wall painted by the rules: darkest at the foot, clusters not speckle, no skipped steps. Source of truth: <code>build-instructions/texturing/doctrine.json</code>.</p>
+    <p class="lede">Every colour family per region, with its code, its ladder of blocks from dark to light (copper runs ridge to eaves), and a test wall painted by the rules: darkest at the foot, edges interlocking in columns as in Mateo's examples, no skipped steps. Source of truth: <code>build-instructions/texturing/doctrine.json</code>.</p>
   </header>
   <nav class="tabs" id="tabs" aria-label="Regions"></nav>
   <div class="rules" id="rules"></div>
@@ -105,6 +105,29 @@ function paint(w, h, n, seed, topFirst) {
   }
   return idx;
 }
+// doctrine.py paint_teeth(): bands bottom to top, edges interlocking in columns, a few lone blocks ahead.
+function paintTeeth(w, h, n, seed, topFirst) {
+  const edges = []; for (let k = 0; k < n - 1; k++) edges.push((k + 1) * h / n);
+  const idx = Array.from({ length: h }, () => new Array(w).fill(0));
+  for (let x = 0; x < w; x++) {
+    const cut = edges.map((e, k) => e + Math.round((hash(x, k, seed) - 0.5) * 2.99));
+    for (let y = 0; y < h; y++) {
+      let i = cut.filter(c => y >= c).length; const r = hash(x, y, seed + 13);
+      if (r < 0.04 && i < n - 1 && y + 1 >= cut[i] - 1) i++;
+      else if (r > 0.96 && i > 0 && y <= cut[i - 1] + 1) i--;
+      idx[topFirst ? h - 1 - y : y][x] = i;
+    }
+  }
+  for (let k = 0; k < n; k++) {
+    let changed = false;
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) for (const [dx, dy] of [[1, 0], [0, 1]]) {
+      const X = x + dx, Y = y + dy;
+      if (X < w && Y < h && Math.abs(idx[y][x] - idx[Y][X]) > 1) { if (idx[y][x] > idx[Y][X]) idx[y][x]--; else idx[Y][X]--; changed = true; }
+    }
+    if (!changed) break;
+  }
+  return idx;
+}
 const imgCache = {};
 function loadImg(src) {
   if (!imgCache[src]) imgCache[src] = new Promise(r => { const i = new Image(); i.onload = () => r(i); i.onerror = () => r(null); i.src = src; });
@@ -117,7 +140,7 @@ async function drawWall(cv, f) {
   const imgs = await Promise.all(f.blocks.map(b => loadImg(tex(b).img)));
   const seed = [...f.code].reduce((a, c) => a * 31 + c.charCodeAt(0), 7) & 0xffff;
   const top = /ridge/.test(f.order || "");
-  const idx = paint(W, H, n, seed, top);
+  const idx = top ? paint(W, H, n, seed, top) : paintTeeth(W, H, n, seed, false);
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
     const i = imgs[idx[y][x]], py = (H - 1 - y) * T;
     if (i) ctx.drawImage(i, x * T, py, T, T);
@@ -137,7 +160,7 @@ function card(f) {
   top.append(el("span", "code", f.code));
   const avg = avgHex(f.blocks), sw = el("span", "sw"); sw.style.background = avg; top.append(sw);
   top.append(el("span", "name", f.name), el("span", "hex", avg));
-  top.append(el("span", "status" + (f.status === "mateo" ? " mateo" : ""), f.status === "mateo" ? "Mateo's blocks" : "Starter, waiting for Mateo"));
+  top.append(el("span", "status" + (f.status === "mateo" ? " mateo" : ""), {mateo: "Mateo's blocks", principle: "By the gradient rules, check me"}[f.status] || "Starter, waiting for Mateo"));
   c.append(top, el("p", "use", f.use));
   c.append(el("div", "arrow", f.order ? f.order : "dark → light"));
   const lad = el("div", "ladder");
@@ -148,7 +171,7 @@ function card(f) {
   c.append(lad);
   if (f.blocks.length > 1) {
     const w = el("div", "wall"), cv = el("canvas"); cv.setAttribute("aria-label", "Test wall painted with " + f.code);
-    w.append(cv, el("p", "note", "Test wall, 15 by 7: " + (f.order && /ridge/.test(f.order) ? "ridge at the top" : "darkest at the foot") + ", clusters about 4 blocks across, no skipped steps."));
+    w.append(cv, el("p", "note", "Test wall, 15 by 7: " + (f.order && /ridge/.test(f.order) ? "ridge at the top" : "darkest at the foot") + ", edges interlocking in columns, no skipped steps."));
     c.append(w); drawWall(cv, f);
   }
   if (f.note) c.append(el("p", "note", f.note));
