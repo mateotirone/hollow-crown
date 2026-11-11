@@ -13,7 +13,7 @@
 // Test: /scriptevent siege:town [info | found <plot> [layout 0-2] | tier <0-3>]
 
 import { world, system, BlockPermutation } from "@minecraft/server";
-import { isReady, keepOf, on, emit, moduleStore, TIERS, tierOf } from "../siege/api.js";
+import { isReady, keepOf, on, emit, moduleStore, TIERS, tierOf, getState } from "../siege/api.js";
 import { CORNERSTONE, halls, saveHalls, beginBuild } from "../townhall/townhall.js";
 import { buildFor } from "../townhall/build.js";
 import { REGION_TO_STYLE } from "./config.js";
@@ -98,13 +98,13 @@ function* layOutJob(owner, tier, done) {
     const later = [];
     let n = 0;
     for (const [dx, dy, dz, p] of rows) {
+      if (++n % PER_TICK === 0) yield; // every row counts, set or not, so no tick does too many lookups
       const at = { x: town.x + dx, y: town.y + dy, z: town.z + dz };
       if (dx === 0 && dz === 0) continue; // the Plot Stone's column
       let block;
       try { block = dim.getBlock(at); } catch { block = undefined; }
       if (!block) { later.push([dx, dy, dz, p]); continue; }
       try { if (pal[p] && block.permutation !== pal[p]) block.setPermutation(pal[p]); } catch { /* protected block */ }
-      if (++n % PER_TICK === 0) yield;
     }
     rows = later;
     if (rows.length) for (let i = 0; i < 40; i++) yield; // ~2 s
@@ -256,12 +256,24 @@ export function growTown(owner, tier) {
   const tw = townFor(town.plot);
   tier = Math.max(0, Math.min(3, tier));
   if (tier <= town.tier) return "already";
+  if (getState().active) { // the wall never moves during a siege: it grows when the siege ends
+    town.pendingTier = Math.max(town.pendingTier ?? 0, tier);
+    save();
+    return "The town grows when the siege ends: the wall never moves during one.";
+  }
+  delete town.pendingTier;
   town.tier = tier;
   save();
   // the old ring comes down first, so the ring road laid where it stood isn't knocked out again
   moveWall(owner, wallRadius(tw, tier), () => { for (let t = 1; t <= tier; t++) layOutTier(owner, t); });
   return true;
 }
+
+on("siegeEnd", () => {
+  system.runTimeout(() => {
+    for (const [owner, town] of Object.entries(allTowns())) if (town.pendingTier) growTown(owner, town.pendingTier);
+  }, 100);
+});
 
 on("tierUp", ({ owner, after }) => {
   if (!townOf(owner)) return;

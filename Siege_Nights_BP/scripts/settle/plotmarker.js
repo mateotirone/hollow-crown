@@ -1,8 +1,8 @@
 // The Plot Marker: a post at the front of every open slot in a town laid out from its layout (founding.js).
 // Use it to see what can go on that slot: only the buildings that fit it and that the settlement's tier has
-// opened. Pick one and its outline shows on the slot; use the marker again to pay and raise it. Pay as with the
-// Foundation Stone: planks and building stone you carry, the rest in coins. Once a building stands, its marker
-// moves beside the door and offers to knock the building down (half the coins come back).
+// opened. Pick one and its outline shows on the slot; use the marker again to pay and raise it. Each building has
+// one price in Regals (SETTLE.plotPrices), paid from the purse. Once a building stands, its marker moves beside the
+// door and offers the owner to knock the building down (half the price comes back to the owner).
 //
 // Test: /scriptevent siege:town found dunehold   then walk to a marker and use it.
 
@@ -123,6 +123,7 @@ async function confirm(player, owner, slot, state) {
 
 async function builtMenu(player, owner, slot, state) {
   const name = BUILDING[state.building]?.name ?? "building";
+  if (player.id !== owner) return player.sendMessage(`§7This ${name} stands. Only the town's owner can knock it down.`);
   const back = Math.floor((state.paid ?? 0) / 2);
   const res = await new MessageFormData().title(name)
     .body(`This plot holds your ${name}.\n\nKnock it down to free the plot for something else. Everything above the floor is cleared${back ? `, and ${coins(back)} come back` : ""}.`)
@@ -141,13 +142,24 @@ export function demolish(owner, slot, state, player) {
   }
   for (const k of Object.keys(state)) delete state[k];
   saveTowns();
-  if (back && player) refund(player, back);
+  const payee = player?.id === owner ? player : world.getPlayers().find((p) => p.id === owner);
+  if (back && payee) refund(payee, back);
   system.runJob((function* clear() {
     const dim = world.getDimension(OVERWORLD);
+    let cells = [];
+    for (let y = origin.y; y <= origin.y + top + 1; y++) for (let x = box.x0; x <= box.x1; x++) for (let z = box.z0; z <= box.z1; z++) cells.push({ x, y, z });
     let n = 0;
-    for (let y = origin.y; y <= origin.y + top + 1; y++) for (let x = box.x0; x <= box.x1; x++) for (let z = box.z0; z <= box.z1; z++) {
-      try { const b = dim.getBlock({ x, y, z }); if (b && !b.isAir) b.setType("minecraft:air"); } catch { /* not loaded */ }
-      if (++n % 300 === 0) yield;
+    for (let pass = 0; pass < 60 && cells.length; pass++) { // unloaded chunks: try again a little later
+      const later = [];
+      for (const at of cells) {
+        if (++n % 300 === 0) yield;
+        let b;
+        try { b = dim.getBlock(at); } catch { b = undefined; }
+        if (!b) { later.push(at); continue; }
+        try { if (!b.isAir) b.setType("minecraft:air"); } catch { /* protected block */ }
+      }
+      cells = later;
+      if (cells.length) for (let i = 0; i < 40; i++) yield; // ~2 s
     }
     placeMarker(owner, slot);
     if (player?.isValid) player.sendMessage("§7The plot is clear.");
