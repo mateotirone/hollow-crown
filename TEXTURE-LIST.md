@@ -390,7 +390,7 @@ Add a row here with the file path, size, what it should look like, and whether i
 | Dragon Saddle (16×16 icon, transparent; heavy dark leather, chain girth) | `textures/items/dragons/siege_dragon_saddle.png` | **Final style, awaiting your review** |
 | Dragon Horn (16×16 icon, transparent; curved bone horn, gold mouthpiece) | `textures/items/dragons/siege_dragon_horn.png` | **Final style, awaiting your review** |
 | Dragon Roost (16×16 side + top; stone brick hearth with a gold band, top is scorched straw around an ember bed) | `textures/blocks/dragons/siege_dragon_roost_side.png`, `_top.png` | **Final style, awaiting your review** |
-| Dragon Nest (16×16 side + top; wild nest of straw, bone and sandstone, top shows a dark red egg) | `textures/blocks/dragons/siege_dragon_nest_side.png`, `_top.png` | **Final style, awaiting your review** |
+| Dragon Nest (a 9x9 wild nest built from five 3D pieces: woven rim, twig tops, straw floor with bones, ribcage, skull and shed scales, and a clutch of three dark red eggs). Eight 16×16 textures: weathered, bleached and scorched branch, straw, packed earth, bone, egg, scale. Models `models/blocks/dragon_nest.geo.json`, made by `studio/build_dragon_nest.py` | `textures/blocks/dragons/nest/*.png` | **New, awaiting your review** |
 | Dragon voices: 8 per species (idle, roar, hurt, purr, snarl, whimper, death, chirp) plus wingbeat, breath, slow breathing, egg crack. Synthesised, mono .ogg | `sounds/siege/dragon/*.ogg` (36 files) | First pass, not recorded audio |
 
 All four species share bone names (body, neck, neck2, head, jaw, tail, tail2, tail3, leg_*, wing_*, wing_*_tip, saddle; the wyrm adds wing2_*), so one animation file drives them: `animations/dragon.animation.json`.
