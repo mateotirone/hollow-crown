@@ -54,6 +54,9 @@
  "siege:veinstone": {
   "sound": "deepslate"
  },
+ "siege:undertow_moss_deep": {
+  "sound": "moss_block"
+ },
  "siege:undertow_moss": {
   "sound": "moss_block"
  },

@@ -100,6 +100,7 @@ item.siege:gauntlet_of_challenge.name=Gauntlet of Challenge
 entity.siege:throne_seal.name=Throne Seal
 tile.siege:veinstone.name=Veinstone
 tile.siege:undertow_moss.name=Veilmoss
+tile.siege:undertow_moss_deep.name=Deep Veilmoss
 tile.siege:veil_rock.name=Veil Rock
 tile.siege:hollowwood_lattice.name=Latticewood
 tile.siege:hollowwood_core.name=Latticewood Core
