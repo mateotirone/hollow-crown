@@ -251,3 +251,6 @@ export function drawBuilding(id, styleId) {
   }
   return plans.get(key);
 }
+
+// The drawing pieces, for other features that design their own buildings (horses/barn.js)
+export const pieces = { floor, walls, hollow, door, roof, hang, stair };
