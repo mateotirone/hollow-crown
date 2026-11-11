@@ -8,6 +8,7 @@
 import { world, system, GameMode, ItemStack, ItemTypes } from "@minecraft/server";
 import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
 import { chooseWallLook } from "./walls.js";
+import { WALL_LOG } from "./walldata.js";
 import { isReady, settlementAt, keepOf, isAlly, isNight, onTick, moduleStore, pick, emit, STONE_KINDS, stoneId, regionalId } from "../siege/api.js";
 import { STYLES } from "../townhall/styles.js";
 import { SETTLE, CATALOG, LOCAL_ROLES, LOCAL_RATE, STONE_RATE, MASON_LINES } from "./config.js";
@@ -60,9 +61,10 @@ export function stoneStock(styleId, local = true, isKnown = known) {
 }
 
 // A region's own wall and roof blocks: [id, per coin]
+// palisade = the region's stripped log, which is what log walls are built from (WALL_LOG)
 export const WALL_RATE = { palisade: 12, wall_planks: 32, roof_shingles: 12, castle_gate: 4, portcullis: 2 };
 export function wallStock(styleId, isKnown = known) {
-  return Object.entries(WALL_RATE).map(([name, rate]) => [regionalId(name, styleId), rate]).filter(([id]) => isKnown(id));
+  return Object.entries(WALL_RATE).map(([name, rate]) => [name === "palisade" ? (WALL_LOG[styleId] ?? WALL_LOG.vale) : regionalId(name, styleId), rate]).filter(([id]) => isKnown(id));
 }
 
 function shelves(styleId) {
