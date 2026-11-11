@@ -20,6 +20,8 @@ export const OFFLINE_ONLY = new Set([
   "undertow: open country has all four kinds of land",
   "undertow: roads are dry and gentle, and cross rivers on bridges a boat fits under",
   "undertow: terrain is deterministic",
+  "hollowfolk: giant Veilcaps stand in the fens and groves, rare elsewhere, and are tree sized",
+  "undertow: the drowned towers stand off the water and the roads, each a different design",
   "undertow: light rivers are one boatable network",
   "townhall: every hall draws in every style",
   "settle walls: walls vary along their length and from one settlement to the next, the same way every time",
