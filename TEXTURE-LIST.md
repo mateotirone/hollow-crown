@@ -325,6 +325,7 @@ Every mob has a box model in `models/entity/bestiary/<id>.geo.json` and a genera
 | Drowned Wedding Ring (boss key) | `drowned_ring.png` | **Final style, awaiting your review** |
 | Faceless Seal (boss key) | `faceless_seal.png` | **Final style, awaiting your review** |
 | Mire Effigy (boss key) | `mire_effigy.png` | **Final style, awaiting your review** |
+| Boss Summon ×9 (creative-only test item: a sealed writ, seal in the boss's colour) | `textures/items/creative/summon_<boss>.png`, made by `studio/build_creative.py` | Placeholder (only playtesters see it) |
 | Minute Hand (boss relic, sword) | `minute_hand.png` | **Final style, awaiting your review** |
 | Rimefang Bow (boss relic, bow) | `rimefang_bow.png` | **Final style, awaiting your review** |
 | Widow's Veil (boss relic, helmet) | `widows_veil.png` | **Final style, awaiting your review** |
