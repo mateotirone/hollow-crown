@@ -57,7 +57,12 @@ class Weapon:
                "animations": {"first": "animation.siege_weapon.first_person", "third": "animation.siege_weapon.third_person"},
                "scripts": {"animate": [{"first": "c.is_first_person"}, {"third": "!c.is_first_person"}]},
                "render_controllers": ["controller.render.item_default"]}}}
-        json.dump(att, open(RP + f'attachables/weapon_{s.id}.json', 'w'), indent=1)
+        if HELD_3D: json.dump(att, open(RP + f'attachables/weapon_{s.id}.json', 'w'), indent=1)
+
+# 2026-11-11: off. Two playtests showed the 3D held models in the wrong place (at the hip, then through the neck).
+# Mateo wants weapons held exactly like vanilla, so the items use their flat icon with hand_equipped and no attachable.
+# The models and textures are still written for the Texture Studio. Only turn this back on with an in-game test.
+HELD_3D = False
 
 def longsword():
     w = Weapon('longsword')
@@ -104,4 +109,5 @@ def animations():
 
 if __name__ == '__main__':
     for f in (longsword, warhammer, minute_hand, kept_oath, warlords_brand, rimefang_bow): f().build()
-    animations(); print('6 weapons')
+    if HELD_3D: animations()
+    print('6 weapons')
