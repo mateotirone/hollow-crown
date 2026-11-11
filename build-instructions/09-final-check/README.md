@@ -17,7 +17,9 @@ playing so it has to be perfect." Be harder on it than he would be.
   the walls.
 - Does it look like the real medieval buildings it is based on, and like Mateo's references
   (`reference/pictures/`)? Put the render next to the reference and name the differences.
-- Is there anything that looks like a hole, a cage, a blotch or a floating block?
+- Is there anything that looks like a hole, a cage, a blotch or a floating block? (Recessed panels and
+  recessed glass are the usual cause of holes; one-cell ribs and gradual shears the usual cause of
+  speckle and jaggedness.)
 
 ## Step 3: Checklist
 
@@ -36,7 +38,8 @@ playing so it has to be perfect." Be harder on it than he would be.
 
 - [ ] Three depth layers on every face over 5 long.
 - [ ] Wall mixes read as one material; no green patches high up.
-- [ ] Windows stacked; sills wider than the glass; heads capped; glass tinted to the house.
+- [ ] Windows stacked; glass flush with the face; sills wider than the glass; heads capped; glass tinted
+      to the house; shutters on at most 30%.
 - [ ] Doorway clean: jambs, lintel, canopy or lanterns, not both crowded.
 
 **Roof**

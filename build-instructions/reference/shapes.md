@@ -58,7 +58,7 @@ corners, chiseled stone at the feet of the jambs, the passage paved.
 Section (outside on the right) for a 1-wide window, sill one block out:
 
 ```
-#  G  .        glass in the wall plane (flush timber) or one block in (stone)
+#  G  .        glass flush with the wall face (never recessed)
 #  #  r<       right-way stair, tall side against the wall (in bp.py: facing towards the wall)
 #  #  .
 ```

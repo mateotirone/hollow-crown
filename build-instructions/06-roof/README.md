@@ -23,7 +23,13 @@ dormers, trusses, chimneys, colour.
 | Saltreach | hip, pitch 1 (low) | domes on civic, flat roof terraces on harbour houses |
 | Blackfen | gable, pitch 1, mossy/thatch look | low eaves almost to the platform, turf ridges |
 | Emberwaste | flat with parapet and crenels | domes, roof terraces with awnings |
-| Hollow | steep gable, sagging ridge | leaning, crooked; deepslate |
+
+**No flat roofs on houses** outside Emberwaste (and Saltreach harbour terraces on a lower wing). Flat
+roofs elsewhere look unfinished in renders.
+
+**Domes**: smooth courses, no one-cell-wide ribs (they speckle at a distance). If a dome has ribs, make
+them two cells wide and a different material.
+| Hollow | steep gable | the whole roof offset one block off true (never a gradual shear); deepslate |
 
 ## Step 2: Pitch, overhang, verge
 
@@ -130,8 +136,8 @@ How to build one (span = inside width, odd):
   - Copper: waxed copper so it never changes in game. From the ridge: waxed oxidized (teal) 2 rows,
     waxed weathered 1 to 2 rows, waxed exposed 1 row, waxed cut copper (orange) at the eaves. On short
     slopes compress to 3 bands.
-  - Band edges are not ruler straight: let 1 in 4 cells of a boundary row take the colour of the band
-    above or below (hash the position, not random per run), so the bands blend.
+  - Band edges are not ruler straight: dither each cell's band by a small hashed offset (about +/-0.04 of
+    the roof height, the value that renders well), so the bands blend without looking noisy.
   - Other gradients by colour: deepslate tiles to cobbled deepslate to stone at the eaves (old slate);
     dark oak to spruce (sun-faded shingles); mangrove to moss (Blackfen turf).
 - Weathering: on old buildings up to 10% of roof cells in a colour-close second block (deepslate bricks in

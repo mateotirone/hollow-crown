@@ -17,7 +17,8 @@ follows the roof line.
 ## Step 1: Infill
 
 - Every cell between posts and beams is the palette's wall main block (or the wall mix).
-- Timber regions: infill sits flush with the frame or one block back (see `02-frame`, "flush or proud").
+- Timber regions: infill sits on the wall line, flush with the frame or with the frame proud of it (see
+  `02-frame`). Never set infill back from the wall line: it renders as holes.
 - Stone regions: the wall is the face; frame stage gave it quoins and string courses.
 
 ## Step 2: Texture mixes
@@ -45,12 +46,12 @@ Rules:
 
 Pick at least three for every long face. Typical stacks:
 
-- **Timber house**: plinth (proud) / infill (face or set back) / frame (face or proud) / jetty (proud) /
+- **Timber house**: plinth (proud) / infill (face) / frame (face or proud) / jetty (proud) /
   sills and eaves (proud).
-- **Stone house**: plinth or batter (proud) / wall (face) / window reveals (set back: glass one block in)
-  / string course and sills (proud) / buttresses (proud).
+- **Stone house**: plinth or batter (proud) / wall and glass (face) / window surrounds, string course and
+  sills (proud) / buttresses (proud).
 - **Civic**: base storey (proud) / pilasters or piers between bays (proud by 1) / wall between (face) /
-  deep set windows (set back) / cornice under the eaves (proud).
+  framed windows (surrounds proud) / cornice under the eaves (proud).
 
 ## Step 4: Gables (below the roof line only)
 

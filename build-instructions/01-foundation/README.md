@@ -94,8 +94,8 @@ Steps are built now, while the floor height is fresh, so the door lands on them 
   quay wall.
 - **Blackfen**: stilts and platforms, not plinths; the platform is the floor.
 - **Emberwaste**: thick sandstone base flush with the wall; raised terraces in front of homes.
-- **Hollow**: cobbled deepslate plinth; everything above may lean (`hollow_kit.lean`), the plinth never
-  does.
+- **Hollow**: cobbled deepslate plinth; an upper storey or the roof may be offset one block
+  (see `02-frame`), the plinth never is.
 
 ## Before you move on
 

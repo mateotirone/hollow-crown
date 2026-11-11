@@ -13,7 +13,7 @@ them, domes and a lighthouse on civic buildings, painted shutters.
 | frame | pale | `stripped_birch_log`, `stripped_oak_log` |
 | trim | pale | `birch_stairs`, `birch_slab`, `birch_trapdoor`; `oak_*` |
 | floor | | field `birch_slab`, border `oak_slab`; stone `smooth_sandstone`, `white_terracotta` |
-| painted shutters | sea blue-green | `warped_trapdoor` (teal), `birch_trapdoor` (pale); shutters on 0.6 of windows |
+| painted shutters | sea blue-green | `warped_trapdoor` (teal), `birch_trapdoor` (pale); shutters on up to 0.3 of windows |
 | door / fence | | `birch_door`, `warped_door` on some / `birch_fence` |
 | light | | `lantern`, `sea_lantern` in the lighthouse |
 | chimney | | `brick_block`, `siege:castle_bricks_saltreach` |

@@ -43,9 +43,11 @@ Supporting folders:
    storeys and nothing else. Players fill them (Mateo, 2026-11-11).
 5. **Every overhang is carried.** Anything sticking out more than one block shows what holds it up
    (bracket, post, brace, corbel). See `02-frame` and `reference/shapes.md`.
-6. **Three depths on every face.** Any wall face longer than 5 blocks has at least three depth layers
-   (something set back, the face, something proud). Flat faces are the most common reason a build looks
-   cheap.
+6. **Three depths on every face.** Any wall face longer than 5 blocks has at least three depth layers:
+   the wall face, things one block proud (frame, sills, string courses, jetty), and things further out
+   (eaves, brackets, buttresses, planters). Depth always comes **outward**: never recess a wall panel or
+   the glass behind the face, because in real-texture renders a recess reads as a hole or a cage. Flat
+   faces are the most common reason a build looks cheap.
 7. **One stage at a time.** Finish and check a stage before starting the next. Each stage ends with a
    "Before you move on" checklist. Do not skip it.
 8. **Build it like a real building.** At every stage, look at what you made as if it were a real house

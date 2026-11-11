@@ -68,12 +68,10 @@ Windows start one block above the floor. Upper windows sit straight above lower 
 
 ### Glass position (depth)
 
-- **Stone walls**: the glass sits one block in from the face (a reveal). The sill sits in the reveal or
-  sticks out from the face.
-- **Timber walls, flush frame**: the glass is flush with the wall face, and the surround and sill bring the
-  depth (the first Kingsrest proof showed recessed glass in thin timber walls reads as holes).
-- **Timber walls, proud frame**: the glass is in the infill plane, the surround comes forward to the
-  frame plane.
+- **Glass is flush with the wall face, always.** Recessed glass renders as a black hole at most
+  distances (every render so far, stone and timber). Depth comes from the sill, surround and cap in front.
+- **Timber walls, proud frame**: the glass is flush with the infill (the wall line), one block behind the
+  frame face; the frame around it is the surround, so skip shutters on these windows.
 - Glass never sticks out past the wall face.
 
 ### Sills
@@ -109,9 +107,10 @@ Windows start one block above the floor. Upper windows sit straight above lower 
 
 - Open trapdoors in the trim wood, on both sides of the glass, each one block wide and as tall as the
   glass, against the wall just outside the surround.
-- On about a third of windows on a house (the kit's default is 0.3; Frostmarch none on halls), chosen in
-  symmetric pairs across a front, never on every window.
-- Shutters only on windows 1 or 3 wide; never on stone hall windows or windows with bars.
+- On **at most about 30%** of a building's windows (the kit's default is 0.3; Frostmarch none on halls),
+  chosen in symmetric pairs across a front. More than that and the facade looks busy, like a pattern.
+- Shutters only on windows 1 or 3 wide; never on stone hall windows, windows with bars, or windows set
+  in a proud frame.
 
 ### Planters
 
@@ -141,19 +140,19 @@ All arches follow `reference/shapes.md`. Quick versions:
 - **Vale**: dark oak surrounds and sills, spruce shutters on a third, flower planters; stone style uses
   stone brick stair heads; chapel stained glass.
 - **Frostmarch**: small windows (cold), heavy dark oak surrounds, no shutters on halls, light blue or
-  white tint; deep reveals in stone.
-- **Saltreach**: birch shutters on many windows (0.6), smooth sandstone sills, light tints; arcades of
+  white tint; thick stone surrounds instead of reveals.
+- **Saltreach**: painted shutters (the region's signature, still at most 30%), smooth sandstone sills, light tints; arcades of
   3-wide arches on the ground floor of civic buildings.
 - **Blackfen**: few, small windows high up; mangrove trapdoor shutters; dim tint (brown, green-grey).
 - **Emberwaste**: small deep windows, cut sandstone surrounds, wooden lattice (trapdoors) over glass, warm
   tint; arched doorways.
-- **Hollow**: froglight or soul-lit windows, crooked surrounds that follow the lean.
+- **Hollow**: froglight or soul-lit windows; on an offset storey the windows move with it.
 
 ## Before you move on
 
 - [ ] Every door on a bay centre with jambs and lintel; no double doors; canopy or lantern, not clutter.
 - [ ] Every window the planned size, stacked over the openings below.
-- [ ] Glass tinted/textured to the house (stained in chapels), position right for the wall type.
+- [ ] Glass tinted/textured to the house (stained in chapels), flush with the wall face.
 - [ ] Sills wider than the glass; heads capped; street windows have surrounds.
-- [ ] Shutters on about a third, planters on about a quarter, in symmetric pairs on formal fronts.
+- [ ] Shutters on at most 30%, planters on about a quarter, in symmetric pairs on formal fronts.
 - [ ] Arches symmetric about the centre block.

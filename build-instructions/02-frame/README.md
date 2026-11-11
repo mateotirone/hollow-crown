@@ -85,10 +85,10 @@ house"):
 
 - **Flush frame** (logs and infill in the same plane): neat town houses, Saltreach, brick-and-timber Vale
   style. Depth then comes from jetties, sills, eaves and plinth.
-- **Proud frame** (posts and beams 1 block out from the infill, or infill set 1 back): cottages, rustic
-  and Norse builds, big halls where the frame is the show. Keep the infill a light colour and add window
-  surrounds that come forward to the frame line, so the set-back infill reads as a wall, not as holes
-  (the lesson from the first Kingsrest proof).
+- **Proud frame** (posts and beams stick 1 block out; the infill stays on the wall line): cottages,
+  rustic and Norse builds, big halls where the frame is the show. Never get a proud frame by pushing the
+  infill back: set-back infill renders as holes or a cage (lesson from the first Kingsrest proof and every
+  render since).
 - Decide by looking at the building as a real house and at the references; write the choice in the plan.
 
 ## Region notes
@@ -101,8 +101,9 @@ house"):
 - **Blackfen**: mangrove log frame and stilts; mud brick infill; frame proud.
 - **Emberwaste**: no timber frame; corners and piers in cut sandstone, projecting log roof beams (vigas)
   at the roof line every other block.
-- **Hollow**: dark oak frame, pale ash infill; the frame above the plinth may lean one block every
-  3 storeys' worth of rows (`hollow_kit.lean`).
+- **Hollow**: dark oak frame, pale ash infill. Crookedness is a **single one-block offset** of a whole
+  upper storey (or of the roof) to one side, never a gradual shear: shearing a block every few rows
+  renders jagged. The posts of the offset storey still stand on the beam below.
 
 ## Before you move on
 

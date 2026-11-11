@@ -2,7 +2,7 @@
 
 A separate world seeping into ours, not a mirror. Its buildings are their own: dark veinstone and
 blackstone, black timber with pale ash between, steep deepslate roofs, warm lit windows in the miners'
-homes, soul light elsewhere. Nothing stands quite straight: upper floors lean and ridges sag, like the
+homes, soul light elsewhere. Nothing stands quite straight: an upper storey or the roof sits one block off true, like the
 drowned city of leaning towers (`map/structures/hollow_kit.py`). Uneasy, never horror.
 
 | Role | Colour | Blocks |
@@ -31,5 +31,7 @@ drowned city of leaning towers (`map/structures/hollow_kit.py`). Uneasy, never h
 
 ## Shapes
 
-Steep gables (pitch 2) with sagging ridges, upper storeys leaning one block per three rows
-(`hollow_kit.lean`), crooked surrounds. The lean starts above the plinth; posts still sit on something.
+Steep gables (pitch 2). Crookedness is a **single one-block offset** of a whole upper storey or of the
+roof, never a gradual shear (one block every few rows renders jagged). The plinth and ground storey stay
+true; the offset storey's posts still sit on the beam below. The drowned city's towers lean as whole
+towers on the same rule: few, clean steps, not a staircase of single-block shifts.

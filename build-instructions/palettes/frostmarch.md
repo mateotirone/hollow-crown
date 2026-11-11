@@ -16,7 +16,7 @@ the light colours.
 | floor | | field `spruce_slab`, border `dark_oak_slab`; stone `polished_deepslate` |
 | gable | | `stripped_spruce_log` (vertical), `spruce_planks` |
 | ice accent | pale blue | `packed_ice` (trim courses and finials only, never floors) |
-| door / shutter / fence | | `dark_oak_door` / `dark_oak_trapdoor` (none on halls, half on houses) / `dark_oak_fence` |
+| door / shutter / fence | | `dark_oak_door` / `dark_oak_trapdoor` (none on halls, up to 0.3 on houses) / `dark_oak_fence` |
 | light | | `lantern`, `campfire` in hearths |
 | chimney | | `deepslate_bricks` 80, `cobbled_deepslate` 20, cap `cobbled_deepslate_wall` |
 | path | | `gravel`, `cobbled_deepslate`, `snow_layer` beside paths |
