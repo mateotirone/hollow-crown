@@ -133,7 +133,8 @@ class Town:
     # =========================================================================== 2. paths
     def square(self):
         s = self.site; r = s["square_r"]
-        if s.get("fixed_square"): c = tuple(s["centre"])
+        if s.get("square_at"): c = tuple(s["square_at"])
+        elif s.get("fixed_square"): c = tuple(s["centre"])
         else:
             best = None
             for x in range(self.C[0] - self.R // 3, self.C[0] + self.R // 3 + 1, 2):
@@ -289,7 +290,7 @@ class Town:
         # into portions (inner blocks to build on, outer sectors for fields)
         self.ring_lane()
         # lanes cut across from street to street, splitting the bigger blocks
-        nl = self.rng.randint(5, 8) if self.big else self.rng.randint(2, 4)
+        nl = self.site.get("lanes") or (self.rng.randint(5, 8) if self.big else self.rng.randint(2, 4))
         mains = [r for r in self.roads if r["kind"] in ("main", "lane")]
         tries = 0
         while nl > 0 and tries < 60 and mains:
@@ -619,7 +620,7 @@ class Town:
         self.PORT = lab; self.port = {}
         ii, jj = np.meshgrid(np.arange(self.G.shape[0]) + self.X0, np.arange(self.G.shape[1]) + self.Z0, indexing="ij")
         dsq = np.hypot(ii - self.sq[0], jj - self.sq[1]) / self.R
-        build_u = 0.42 if self.big else 0.34
+        build_u = self.site.get("build_u", 0.42 if self.big else 0.34)
         for L in range(1, n + 1):
             m = lab == L; area = int(m.sum())
             u_mean = float(dsq[m].mean()); u_min = float(dsq[m].min())

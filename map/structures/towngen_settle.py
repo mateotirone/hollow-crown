@@ -374,10 +374,11 @@ class Settlement(Town):
         dmax = max(math.hypot(x - self.C[0] + (0.5 if x >= self.C[0] else -0.5), z - self.C[1] + (0.5 if z >= self.C[1] else -0.5)) for x, z in G)
         return tier_of_radius(dmax)
 
-    def try_slot(self, size, cand, max_tier=3):
+    def try_slot(self, size, cand, max_tier=3, long_only=False):
         door, deg, rid = cand
         n = SIZES[size]
         shapes = [(n, n), (n + 2, n), (n, n + 2)]; self.rng.shuffle(shapes)
+        if long_only: shapes = [q for q in shapes if q[0] != q[1]]
         for w, d in shapes:
             bp = self.slot_bp(w, d)
             dx, dz = self.door_of(bp); rdx, rdz = TG.rot_xz(dx, dz, deg)
@@ -393,15 +394,50 @@ class Settlement(Town):
             nw = len(self.walks)
             e = self.try_place(bp, deg, door, "slot", gap=1 if self.rng.random() < 0.8 else 2, max_relief=5)
             if not e: continue
-            e.update(size=size, geo=t, cells=G, deg=deg, walk=self.walks[-1] if len(self.walks) > nw else None, rid=rid)
+            e.update(size=size, geo=t, long=(w != d), dims=(w, d), cells=G, deg=deg, walk=self.walks[-1] if len(self.walks) > nw else None, rid=rid)
             self.slots.append(e)
             return e
         return None
+
+    def town_field(self):
+        """Every layout has a field by Town (the Farmhouse needs one): if no field portion has 80+
+        crop cells inside the Town wall, a 9 x 9 field plot (one watered cell's reach) is set aside
+        on level ground between the Hamlet and Town walls, by a road, before any slot is placed."""
+        town = self.D <= WALL_R[1] - CLEAR
+        if any(((self.PKIND == 2) & (self.PORT == L) & town & (self.K < 0)).sum() >= 90 for L in self.port if self.port[L]["kind"] == "field"):
+            return
+        free = (self.K < 0) & (self.TAKEN == 0) & ~self.WET & (self.PKIND == 1) & town
+        road = self._dilate(self.K >= 0, 2)
+        best = None
+        for i, j in np.argwhere(free):
+            win = (slice(i - 5, i + 6), slice(j - 5, j + 6))       # 11 x 11: neighbours' margins may take the outer ring
+            if i < 5 or j < 5 or not free[win].all(): continue
+            g = self.G[win]
+            if g.max() - g.min() > 2: continue
+            near = road[i - 6:i + 7, j - 6:j + 7].any()
+            sc = (0 if near else 50) + 2 * max(0.0, WALL_R[1] - CLEAR - 6 - float(self.D[i, j])) + self.rng.random()   # as far out as fits: Hamlet ground is precious
+            if best is None or sc < best[0]: best = (sc, i, j)
+        if best is None: print("no room for a Town field"); return
+        _, i, j = best; L = int(self.PORT.max()) + 1
+        self.PORT[i - 5:i + 6, j - 5:j + 6] = L; self.PKIND[i - 5:i + 6, j - 5:j + 6] = 2
+        self.port[L] = {"kind": "field", "area": 121, "u": 0, "plot": True}
 
     def place_slots(self):
         C = self.candidates()
         self.D53 = self.D > WALL_R[-1] - CLEAR
         self.TAKEN[self.D53 & (self.TAKEN == 0)] = 1
+        def big(max_tier, need):
+            """Large slots for the market (Town) and barracks (City); a long Medium where no Large fits."""
+            have = sum(1 for e in self.slots if e["geo"] <= max_tier and (e["size"] == "L" or (e["size"] == "M" and e.get("long"))))
+            if have >= need: return
+            have += pass_("L", max_tier, need - have, near_sq)
+            if have < need: pass_long(max_tier, need - have)
+        def pass_long(max_tier, count):
+            cs = C[:]; self.rng.shuffle(cs); cs.sort(key=near_sq); got = 0
+            for c in cs:
+                if got >= count: break
+                if self.try_slot("M", c, max_tier, long_only=True): got += 1
+            return got
         def pass_(size, max_tier, count, prefer=None):
             cs = C[:]; self.rng.shuffle(cs)
             if prefer: cs.sort(key=prefer)
@@ -415,11 +451,11 @@ class Settlement(Town):
         hamlet = lambda c: math.hypot(c[0][0] - self.sq[0], c[0][1] - self.sq[1]) + 3 * self.rng.random()
         # inner tiers first (their ground is smallest), biggest boxes first within each
         pass_("M", 0, 1, hamlet)
+        big(1, 1)                                      # the market's slot before the Hamlet fills the middle
         pass_("S", 0, 5, hamlet)
-        pass_("L", 1, 1, near_sq)
         pass_("M", 1, 3, near_sq)
         pass_("S", 1, 4, near_sq)
-        pass_("L", 2, 1, near_sq)                      # City gets its own batch
+        big(2, 2)                                      # City gets its own batch
         pass_("M", 2, 3, near_sq)
         pass_("S", 2, 3, near_sq)
         pass_("G", 3, 1, far)
@@ -456,18 +492,25 @@ class Settlement(Town):
                 e["opensAt"] = max(e["geo"], t_k)
             if s == "G":
                 for e in sl: e["opensAt"] = 3
+        # the market (Town) and barracks (City) slots: the first big slots (Large, or a long Medium)
+        # open as early as their ground allows, never deferred
+        bigs = sorted([e for e in self.slots if e["size"] == "L" or (e["size"] == "M" and e.get("long"))], key=lambda e: e["geo"])
+        for e in bigs[:2]: e["opensAt"] = max(e["geo"], 1)
         self.slots.sort(key=lambda e: (e["opensAt"], "GLMS".index(e["size"])))
 
     def counts(self):
         out = []
         for t in range(4):
             c = {s: sum(1 for e in self.slots if e["size"] == s and e["opensAt"] <= t) for s in "SMLG"}
+            c["M_long"] = sum(1 for e in self.slots if e["size"] == "M" and e.get("long") and e["opensAt"] <= t)
             c["field"] = sum(1 for f in self.field_out if f["area_by_tier"][t] >= 80)
             out.append(c)
         return out
 
     def meets(self):
-        cs = self.counts()
+        """Minimums, where a Large may be stood in for by a long Medium (13 x 11: the market and the
+        barracks may take one when no Large is free; placement thread 2026-11-11)."""
+        cs = [dict(c, L=c["L"] + min(c["M_long"], max(0, c["M"] - 1))) for c in self.counts()]
         return all(cs[t][k] >= MINIMUM[t][k] for t in range(4) for k in MINIMUM[t]), cs
 
     # ---- fields grow with the wall
@@ -713,6 +756,7 @@ class Settlement(Town):
         self.portions()
         self.subdivide(); self.back_paths(); self.grade_verges()
         self.rid_map(); self.road_tiers()
+        self.town_field()
         self.place_slots()
         self.road_tiers()
         self.windmills()
@@ -745,7 +789,7 @@ class Settlement(Town):
             walk = [[x - C[0], z - C[1], *k2(k)] for (x, z), k in zip(e["walk"][0], e["walk"][1])] if e["walk"] else []
             slots.append({"id": f"{e['size'].lower()}{n + 1}", "size": SIZE_NAME[e["size"]], "box": [box[0] - C[0], box[1] - C[1], box[2] - C[0], box[3] - C[1]],
                           "floor_y": int(e["ground_y"]), "door": {"side": side, "step": [e["door"][0] - C[0], e["door"][1] - C[1]], "walk": walk},
-                          "tags": tags, "opensAt": TIERS[e["opensAt"]]})
+                          "tags": tags, "long": bool(e.get("long")), "opensAt": TIERS[e["opensAt"]]})
         roads = []
         for i, j in np.argwhere(self.K >= 0):
             x, z = int(i) + self.X0, int(j) + self.Z0
@@ -756,10 +800,10 @@ class Settlement(Town):
             if key not in idx: idx[key] = len(pal); pal.append([nm, p])
             t = int(self.OT[self.ij(x, z)]) if self.ok(x, z) else 3
             rows.append([x - C[0], y, z - C[1], idx[key], min(t, 3)])
-        ok, cs = self.meets()
+        ok, _ = self.meets(); cs = self.counts()
         return {
             "template": self.template, "label": self.tpl["label"], "about": self.tpl["about"], "seed": self.seed, "meets_minimum": ok,
-            "counts_by_tier": {TIERS[t]: cs[t] for t in range(4)},
+            "counts_by_tier": {TIERS[t]: cs[t] for t in range(4)}, "meets_minimum_note": "a long Medium (13 x 11) may stand in for a Large",
             "square": {"centre": list(self.rel(*self.sq)), "y": int(self.sqY), "shape": self.tpl["square"]},
             "gates": self.gates,
             "hall": [{"level": lv, "box": [b[0] - C[0], b[1] - C[1], b[2] - C[0], b[3] - C[1]]} for lv, b in self.halls],
