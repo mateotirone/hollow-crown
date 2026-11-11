@@ -57,8 +57,13 @@ Jetties are the Vale's signature and work in Frostmarch too.
   houses). Never more than 1 per storey; a second jetty in a gable is allowed (the attic steps out again).
 - The joists show: under the jettied floor, an upside-down stair of the trim wood under **every post of the
   upper frame** and at each corner (`kit.jetty_brackets`), tall side against the wall below.
-- The upper storey's bay pattern is the lower one grown by 1 at each jettied side, so its posts still line
-  up with the lower posts plus one new corner post. Re-check the upper bay pattern is odd.
+- **Jetty in pairs** (found on the test house, 2026-11-11): a jetty on the front only makes the side walls
+  one longer, and odd + 1 is even. Jetty front and back together (the sides grow by 2 and stay odd), or both
+  sides together.
+- On the jettied wall itself the posts keep their x positions (the wall just moves out). On the walls the
+  jetty lengthens, the upper storey gets its own odd bay pattern (for example ground `P3P5P` = 11, upper
+  `P3P3P3P` = 13); those posts do not line up with the posts below, and that is right: they stand on the
+  sill beam, which rests on the joists.
 
 ## Step 6: Structural supports
 

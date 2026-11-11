@@ -17,6 +17,8 @@ follows the roof line.
 ## Step 1: Infill
 
 - Every cell between posts and beams is the palette's wall main block (or the wall mix).
+- Timber fronts should read as at least about half infill. If posts, jambs, sills and shutters cover most of
+  a face, drop the extras first (log jambs, caps, shutters), not the bay posts.
 - Timber regions: infill sits on the wall line, flush with the frame or with the frame proud of it (see
   `02-frame`). Never set infill back from the wall line: it renders as holes.
 - Stone regions: the wall is the face; frame stage gave it quoins and string courses.

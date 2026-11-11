@@ -20,7 +20,9 @@ References: `reference/pictures/window-ideas-four-styles.png` and `window-ideas-
 
 - The doorway sits where the plan put it: on a bay centre, never on a post, at least 2 from a corner.
 - **House doorway, 3 wide**: jamb, door, jamb. Jambs are upright logs (timber) or the quoin/dressed
-  stone (stone), 2 tall. A lintel on top across all 3 (log with axis along the wall, or a stone block,
+  stone (stone), 2 tall. On a narrow timber front where the door bay sits between posts (`P1P3P1P`),
+  the bay's own infill can be the jambs, with the lintel beam across all 3 above: log jambs there make the
+  whole ground front dark timber (test house, 2026-11-11). A lintel on top across all 3 (log with axis along the wall, or a stone block,
   or an upside-down stair at each end with a full block in the middle).
 - **Grand doorway, 5 wide**: jamb, 3-wide opening, jamb, under an arch (see below). The door block goes
   in the centre of the opening; the two cells beside it are filled to door height with the door's
@@ -88,8 +90,9 @@ Windows start one block above the floor. Upper windows sit straight above lower 
 
 ### Heads (tops)
 
-- Timber: the beam above the window is the head. Add a cap on top: a row of top slabs or upside-down
-  stairs 2 wider than the glass, facing out.
+- Timber: the beam above the window is the head. Add a cap (a row of top slabs 2 wider than the glass)
+  only if the next beam is more than 2 blocks above the window; otherwise the cap, the beam and the
+  jetty brackets stack into dark bands (test house, 2026-11-11).
 - Stone: an upside-down stair above each glass cell, facing out (`kit.window(kind="stone")`), or a lintel
   of a dressed block, or an arch for 3-wide and taller windows.
 - Crown (optional, larger windows): above the cap, a centred block or slab rising one more (a small

@@ -74,8 +74,9 @@ them two cells wide and a different material.
 ## Step 6: Gable walls
 
 - Fill the gable triangle after the roof surface exists (`kit.gable_walls`).
-- Timber: posts carried up (centre post under the ridge, bay posts up to the roof line), infill between;
-  a beam at the wall plate. Proud frame builds: gable steps forward 1 (a jettied gable) on the street side.
+- Timber: posts carried up (centre post under the ridge, bay posts up to the roof line), infill between.
+  The wall plate is the gable's bottom beam; do not lay a second beam on top of it (`kit.gable_walls` does,
+  remove it). Proud frame builds: gable steps forward 1 (a jettied gable) on the street side.
 - Stone: stone up to the roof line, a window on the centre line, coping of the stone's stairs along the
   top if the roof stops at the wall.
 - Gables can be weatherboarded: vertical stripped logs, plank rows, or trapdoors closed on the face.
