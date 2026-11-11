@@ -17,7 +17,7 @@
 // f.players(), f.say(), f.after(), f.zone(), f.shield(), f.summon(), f.adds(), f.hp().
 // Fights never edit blocks (except the vault chest), so they work in any arena the map gives them.
 
-import { world, system } from "@minecraft/server";
+import { world, system, GameMode } from "@minecraft/server";
 import { onTick, moduleStore, addTests, assertEqual, note } from "../siege/api.js";
 import { chooseAttack, pickTemper, temperById, TEMPERS } from "./variety.js";
 import { MOBS } from "./data.js";
@@ -321,9 +321,49 @@ function bossTick() {
         break;
       }
     }
+    safely(f, () => creativeChase(f, players));
     if (f.temper?.act && !f.paused && f.tick % f.temper.every < STEP) safely(f, () => temperAct(f, players));
     safely(f, () => f.def.tick?.(f, players));
   }
+}
+
+// Playtests in Creative: Minecraft's own mob AI never targets a Creative player, so a boss with only
+// Creative players near it would just wander. Then the script walks it at the nearest one and swings
+// (hurt() shows the would-be damage on the action bar). As soon as anyone in Survival or Adventure is
+// in the arena, this stops and the boss's normal AI takes over.
+const MELEE_REACH = 2.6;
+export const isCreative = (p) => { try { return p.getGameMode() === GameMode.Creative; } catch { return false; } };
+export function chaseStep(from, to, speed, keepAt, flying) {
+  const d = flat(from, to);
+  if (d <= keepAt) return undefined;
+  const step = Math.min(d - keepAt, speed * 2.5); // about the distance it walks in one framework step
+  const k = step / d;
+  const dy = flying ? Math.max(-step, Math.min(step, to.y + 1 - from.y)) : 0;
+  return { x: from.x + (to.x - from.x) * k, y: from.y + dy, z: from.z + (to.z - from.z) * k };
+}
+function creativeChase(f, players) {
+  if (f.paused || f.def.noChase || !players.length || !players.every(isCreative)) return;
+  const e = f.entity, loc = e.location;
+  if ((e.getEffect?.("slowness")?.amplifier ?? 0) >= 200 || e.getComponent("riding")) return; // stunned, or riding a mount
+  const p = players.reduce((a, b) => (flat(b.location, loc) < flat(a.location, loc) ? b : a));
+  const keepAt = f.def.standoff ?? MELEE_REACH - 0.6;
+  if (!f.def.standoff && flat(p.location, loc) <= MELEE_REACH && Math.abs(p.location.y - loc.y) < 3) {
+    if (f.tick % 20 < STEP) { hurt(p, f.def.meleeDamage ?? 8, "entityAttack", f.entity); sound(f.dim, "mob.irongolem.throw", loc, 0.8, 0.6); }
+    return;
+  }
+  const flying = !!e.getComponent("can_fly");
+  const speed = e.getComponent("movement")?.currentValue ?? 0.25;
+  if (speed <= 0) return; // props and stationary bosses stay put
+  let to = chaseStep(loc, p.location, speed, keepAt, flying);
+  if (!to) return;
+  if (!flying) { // step up one block or down a few, never into a wall
+    const open = (y) => { const b = f.dim.getBlock({ x: Math.floor(to.x), y: Math.floor(y), z: Math.floor(to.z) }); return !!b && (b.isAir || !b.isSolid); };
+    let y = to.y;
+    if (!open(y) || !open(y + 1)) { if (open(y + 1) && open(y + 2)) y += 1; else return; }
+    for (let i = 0; i < 4 && open(y - 1); i++) y -= 1;
+    to = { ...to, y };
+  }
+  e.teleport(to, { facingLocation: p.location });
 }
 
 // What a temper adds on top of the boss's own attacks
@@ -524,6 +564,12 @@ addTests("bestiary", {
     assertEqual(bossToughness(50), 5.5);
     assertEqual(hitGivenBack(10, 1), 0);
     assertEqual(hitGivenBack(10, 3), 5);
+  },
+  "a boss chases Creative playtesters: steps toward them and stops at arm's length": () => {
+    const step = chaseStep({ x: 0, y: 64, z: 0 }, { x: 10, y: 64, z: 0 }, 0.3, 2, false);
+    assertEqual(step.x, 0.75); assertEqual(step.y, 64);
+    assertEqual(chaseStep({ x: 9, y: 64, z: 0 }, { x: 10, y: 64, z: 0 }, 0.3, 2, false), undefined);
+    assertEqual(chaseStep({ x: 0, y: 64, z: 0 }, { x: 10, y: 70, z: 0 }, 0.3, 2, true).y, 64.75); // a flyer climbs toward you too
   },
   "boss phases follow health": () => {
     assertEqual(phaseFor(1, [0.6, 0.3]), 0);

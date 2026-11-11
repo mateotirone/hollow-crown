@@ -4,8 +4,7 @@
     "description": {
       "identifier": "siege:guardgear_1_chestplate",
       "menu_category": {
-        "category": "none",
-        "is_hidden_in_commands": false
+        "category": "equipment"
       }
     },
     "components": {

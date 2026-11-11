@@ -9,7 +9,12 @@
       }
     },
     "components": {
-      "minecraft:icon": "siege_guard_boots",
+      "minecraft:icon": {
+        "textures": {
+          "default": "siege_guard_boots",
+          "dyed": "siege_guard_boots_dyed"
+        }
+      },
       "minecraft:display_name": {
         "value": "item.siege:guard_boots.name"
       },

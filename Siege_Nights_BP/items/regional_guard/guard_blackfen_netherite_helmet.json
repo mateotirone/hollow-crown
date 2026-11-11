@@ -9,7 +9,12 @@
       }
     },
     "components": {
-      "minecraft:icon": "siege_guard_blackfen_netherite_helmet",
+      "minecraft:icon": {
+        "textures": {
+          "default": "siege_guard_blackfen_netherite_helmet",
+          "dyed": "siege_guard_blackfen_netherite_helmet_dyed"
+        }
+      },
       "minecraft:display_name": {
         "value": "item.siege:guard_blackfen_netherite_helmet.name"
       },

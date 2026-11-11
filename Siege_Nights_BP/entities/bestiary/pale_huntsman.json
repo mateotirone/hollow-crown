@@ -133,6 +133,7 @@
     "damage": 8
    },
    "minecraft:boss": {
+    "name": "The Pale Huntsman",
     "should_darken_sky": false,
     "hud_range": 48
    },

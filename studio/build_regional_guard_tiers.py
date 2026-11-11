@@ -35,7 +35,7 @@ for reg, rname in REG.items():
             iid = f'guard_{reg}_{tier}_{piece}'
             prot, dur = stats[tier]
             comps = {
-                'minecraft:icon': f'siege_{iid}',
+                'minecraft:icon': {'textures': {'default': f'siege_{iid}', 'dyed': f'siege_{iid}_dyed'}},   # dyed layer: studio/art/build_dyed_icons.py
                 'minecraft:display_name': {'value': f'item.siege:{iid}.name'},
                 'minecraft:max_stack_size': 1,
                 'minecraft:wearable': {'slot': slot, 'protection': prot},
@@ -65,6 +65,7 @@ for reg, rname in REG.items():
                 'result': {'item': f'siege:{iid}'}, 'unlock': {'context': 'AlwaysUnlocked'}}})
             lang.append(f'item.siege:{iid}.name={rname} {tname} Guard {pname}')
             icons[f'siege_{iid}'] = {'textures': f'textures/items/siege_{iid}'}
+            icons[f'siege_{iid}_dyed'] = {'textures': f'textures/items/siege_{iid}_dyed'}
 
 # shared files: add only what is missing, at the end
 p = RP + 'texts/en_US.lang'
@@ -76,4 +77,4 @@ p = RP + 'textures/item_texture.json'
 d = json.load(open(p))
 for k, v in icons.items(): d['texture_data'].setdefault(k, v)
 with open(p, 'w') as f: json.dump(d, f, indent=1, ensure_ascii=False); f.write('\n')
-print(f'{len(icons)} items')
+print(f'{len(icons) // 2} items; now run studio/art/build_dyed_icons.py for the dyed icon layers')
