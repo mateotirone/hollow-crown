@@ -140,6 +140,9 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - Building signposts in a new settlement ("Smithy / Opens: Town" and the rest) no longer pile up on top of each other each time the settlement is laid out again. Stacks already standing in a world come down to one sign the next time the owner walks home.
 - Clicking a menu block with an empty hand works: the Waystone, Plot Stones, Keep Banner, Mason's Bench, gates and every other menu block used to do nothing unless you held an item.
 - No more "unknown variable melee_spear_equipped" errors in the content log on every swing: the player model now sets the variable newer Minecraft's attack animations ask for.
+- Buildings raised from a Plot Marker, the Foundation Stone, the showcase, the Barracks and Quartermaster's blocks, and Rival Lords' towns stand on the highest ground under them, with the region's foundation stone filled in below. They are never half buried any more.
+- The settlement wall follows the real ground between its measuring points and no longer sinks a block into grass. Level 1 is now a Low Palisade (logs two high) instead of a stake fence.
+- A settlement no longer gets a second Mason's Bench and mason, or a second row of signposts, when it is laid out twice. Old duplicates are cleared. Masons keep their name and skin.
 - The Tuning Fork needs 5 Choir Shards, not 6, so the five regional bosses give enough to make one.
 - Regional Castle Guard armor now takes your banner colour and counts toward the Castle Guard set bonus in sieges, like the plain set. Pieces from different regions can be mixed.
 - The Train Carriage shows its name instead of a text code.
