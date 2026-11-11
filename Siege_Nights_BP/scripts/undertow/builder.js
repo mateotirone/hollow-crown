@@ -236,11 +236,19 @@ export function piecesTick() {
   }
 
   // What stands at each hand-designed place, once its ground is built.
+  // A site whose design has a newer version than the one this world built is stamped again over the old look.
   for (const id of STRUCTURE_IDS) {
-    if ((p.sites ?? []).includes(id)) continue;
+    const built = (p.sites ?? []).includes(id), design = SITE_DESIGNS[id];
+    if (built && !siteOutdated(p, id)) continue;
     const s = SITES.find((x) => x.id === id), reach = s.r + 4;
     if (!chunksBuilt(s.x - reach, s.z - reach, s.x + reach, s.z + reach)) continue;
-    if (SITE_DESIGNS[id]) { stampOnce(d, `site:${id}`, SITE_DESIGNS[id], s, (q) => { q.sites = [...(q.sites ?? []), id]; }); continue; }
+    if (design) {
+      stampOnce(d, `site:${id}`, built ? withClearing(design) : design, s, (q) => {
+        q.sites = [...new Set([...(q.sites ?? []), id])];
+        if (design.v) q.siteV = { ...(q.siteV ?? {}), [id]: design.v };
+      });
+      continue;
+    }
     if (fillAll(d, planStructure(id))) { p.sites = [...(p.sites ?? []), id]; changed = true; }
   }
 
@@ -260,6 +268,19 @@ export function piecesTick() {
     if (buildHeart(d)) { p.heart = true; changed = true; }
   }
   if (changed) savePieces(p);
+}
+
+// True when this world built an older version of a site's design (no saved version means version 1).
+export function siteOutdated(p, id) {
+  const v = SITE_DESIGNS[id]?.v;
+  return !!v && (p.siteV?.[id] ?? 1) < v;
+}
+
+// A rebuilt design plus air on every cell its first version stood on that the new one leaves empty.
+export function withClearing(design) {
+  if (!design.clear?.length) return design;
+  const air = design.palette.length;
+  return { palette: [...design.palette, ["minecraft:air", {}]], rows: [...design.clear.map(([y, z, x0, n]) => [y, z, x0, n, air]), ...design.rows] };
 }
 
 // Designed buildings (map/structures/hollow_kit.py) go down a block a tick; each is marked done in the

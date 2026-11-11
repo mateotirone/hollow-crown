@@ -212,11 +212,11 @@ def main():
         lambda: hollow_kit.finish_hollow(hollow_kit.drowned_city_preview()), HG, view=(-38, 26, 1.0), extra={"wide": True})
     for sid, title, blurb, yaw in (("truce_hall", "The Truce Hall", "Where two kings sat down. A long buttressed hall with tall lit windows, its roof fallen in at the far end. One table, two seats, one knocked over.", -38),
                                    ("far_door", "The Far Door", "The Hollow's side of the Gate: a sealed pointed arch in the rock face, scaffold towers with a beam and a hanging soul lantern, dig pits, braziers.", 142),
-                                   ("pilgrims_cross", "Pilgrim's Cross", "The west crossroads: a four-armed signpost on a stepped plinth and a roofed bench for travellers.", -38),
-                                   ("cartmeet", "Cartmeet", "Where the ore carts turn: a cart shelter over the rail, barrels, a signpost.", -38),
-                                   ("the_seams", "The Seams", "An open ore face with a timbered mouth and a winch house over the rail.", -38),
-                                   ("lattice_gate", "The Lattice Wood", "A woodcutter's shed where the lane meets the thick forest, cut lattice stacked to dry.", -38),
-                                   ("wound_dock", "The Wound landing", "The first dock a new arrival sees: a plank landing on log piles and a boatwright's shed with a boat half built.", -38)):
+                                   ("pilgrims_cross", "Pilgrim's Cross", "The west crossroads before the long track to the Far Door: a stepped signpost, a roofed wayside shrine with benches and an offering ledge of candles, a covered well.", -38),
+                                   ("cartmeet", "Cartmeet", "Where the ore carts turn for the Seams: a cart shed over the rail with a cart in it, buffer stops, the tally-house where loads are weighed, barrels, a signpost.", -38),
+                                   ("the_seams", "The Seams", "A ragged ore cliff with two slanting seams of Choir Ore, a stone-framed mine mouth, a two-storey winch house with its jib over the rail, ore bins, a spoil heap and a cart on the rail.", -38),
+                                   ("lattice_gate", "The Lattice Wood", "The woodcutters' camp where the lane meets the thick forest: a log lodge with a stone chimney, an open sawpit, covered racks of cut lattice drying, the log pile and chopping stumps.", -38),
+                                   ("wound_dock", "The Wound landing", "The first dock a new arrival sees, where the Carter waits: a landing stage on log piles with a cargo crane, the boatwright's shed with a boat half built beside it, the Carter's ore cart, a signpost.", -38)):
         add(sec, f"hollow-{sid}", title, "Hollow centre", blurb, hollow_kit.SITE_BUILDERS[sid], HG, view=(yaw, 32, 1.3))
 
     if a.viewer3d:
