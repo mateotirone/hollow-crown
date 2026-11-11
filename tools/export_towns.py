@@ -38,12 +38,12 @@ def bedrock(name, states):
 
 def pack_groundwork(rows, base):
     """Columns packed to a few characters each. A run of blocks stacked up one column starts with
-    "-" (the next column: same dx, dz + 1), "~" (the same column again, higher up) or "!" + dx, dz (two chars each),
+    "-" (the next column: same dx, dz + 1), "~" (the same column again, higher up) or "!" + dx, dz (two chars each, +2048),
     then dy0 (one char, +32) and the count (one char), then one palette char per block."""
-    enc2 = lambda v: CHARS[(v + 64) >> 6] + CHARS[(v + 64) & 63]
+    enc2 = lambda v: CHARS[(v + 2048) >> 6] + CHARS[(v + 2048) & 63]
     tiers = [{} for _ in range(4)]
     for dx, y, dz, pal, tier in rows:
-        assert -64 <= dx < 64 and -64 <= dz < 64 and -32 <= y - base < 32, (dx, dz, y - base)
+        assert -2048 <= dx < 2048 and -2048 <= dz < 2048 and -32 <= y - base < 32, (dx, dz, y - base)
         tiers[tier].setdefault((dx, dz), {})[y - base] = pal
     sections = []
     for cols in tiers:

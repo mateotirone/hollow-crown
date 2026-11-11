@@ -41,7 +41,7 @@ export function slotsOf(layout) {
 }
 
 const idx = (c) => TOWN_CHARS.indexOf(c);
-const num2 = (s, i) => ((idx(s[i]) << 6) | idx(s[i + 1])) - 64;
+const num2 = (s, i) => ((idx(s[i]) << 6) | idx(s[i + 1])) - 2048;
 
 // The groundwork rows of one tier, decoded (see tools/export_towns.py pack_groundwork)
 export function groundwork(layout, tier) {
