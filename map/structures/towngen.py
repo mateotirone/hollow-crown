@@ -944,9 +944,12 @@ class Town:
             t = min(len(rd["pts"]) - 2, 28); (x0, z0), (x1, z1) = rd["pts"][t - 1], rd["pts"][t + 1]
             px, pz = rd["pts"][t]; py = (self.k_at(int(round(px)), int(round(pz))) - 1) // 2
             street = [math.degrees(math.atan2(x1 - x0, z1 - z0)) + 35, 24, 42, px, py + 2, pz]
-        else: street = [-140, 20, 55, cx + 18, y + 2, cz + 10]
+            ang = math.degrees(math.atan2(x1 - x0, z1 - z0))
+            lane = [ang + 180 + 12, 13, 24, px, py + 1, pz]          # low, looking along the street
+        else: street = lane = [-140, 20, 55, cx + 18, y + 2, cz + 10]
         s.camera = {"views": {"town": [-35, 38, self.R * 2.3, self.C[0], y, self.C[1]], "aerial": [10, 72, self.R * 2.7, self.C[0], y, self.C[1]],
-                              "square": [25, 30, 48 if not self.big else 62, cx, y + 2, cz], "street": street}}
+                              "square": [25, 30, 48 if not self.big else 62, cx, y + 2, cz], "street": street, "lane": lane,
+                              "lane2": [lane[0] + 180, 13, 24] + lane[3:]}}
         s.save_logical(os.path.join(out, "scene.json"))
         return len(s.cells)
 
