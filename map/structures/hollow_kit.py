@@ -615,7 +615,20 @@ def the_seams(seed=0):
 
 # Sites rebuilt after their first version went into worlds (export_hollow.py writes the version; the game
 # re-stamps a site whose saved version is older, clearing what the old one left: hollow_sites_v1.json).
-SITE_VERSION = {"pilgrims_cross": 2, "cartmeet": 2, "lattice_gate": 2, "wound_dock": 2, "the_seams": 2}
+SITE_VERSION = {"pilgrims_cross": 3, "cartmeet": 3, "lattice_gate": 3, "wound_dock": 3, "the_seams": 3}
+
+# Each rebuilt site keeps one find in a chest (undertow/finds.js hands it to each player once): offset, facing.
+SITE_FINDS = {"wound_dock": ((-9, 1, -2), "e"), "lattice_gate": ((-6, 1, -6), "s"), "pilgrims_cross": ((-10, 1, -3), "e"),
+              "cartmeet": ((-7, 1, -8), "s"), "the_seams": ((0, 1, -8), "s")}
+
+def _with_find(sid, fn):
+    def f(*a, **k):
+        bp = fn(*a, **k); (x, y, z), facing = SITE_FINDS[sid]
+        assert bp.get(x, y, z)[0] in ("keep", "air"), f"{sid}: the find's chest spot is taken"
+        bp.set(x, y, z, "chest", facing=facing)
+        return bp
+    f.__name__, f.__doc__ = fn.__name__, fn.__doc__
+    return f
 
 SITE_BUILDERS = {"pilgrims_cross": pilgrims_cross, "cartmeet": cartmeet, "truce_hall": truce_hall,
                  "far_door": far_door, "lattice_gate": lattice_gate, "the_seams": the_seams, "wound_dock": wound_dock}
@@ -626,7 +639,7 @@ def _finished(fn):
     def f(*a, **k): return finish_hollow(fn(*a, **k))
     f.__name__, f.__doc__ = fn.__name__, fn.__doc__
     return f
-SITE_BUILDERS = {k: _finished(v) for k, v in SITE_BUILDERS.items()}
+SITE_BUILDERS = {k: _finished(_with_find(k, v) if k in SITE_FINDS else v) for k, v in SITE_BUILDERS.items()}
 _village, _tower, _cottage = village, leaning_tower, cottage
 village = _finished(_village); leaning_tower = _finished(_tower)
 def cottage_finished(*a, **k): return finish_hollow(_cottage(*a, **k))

@@ -359,6 +359,7 @@ Not yet played in a real game. In a creative test world:
 5. Robbing needs a second player: with the ruler online, "Rob the Tally" hands over ore and the ruler is brought to the village at once. With the ruler offline it is refused and only buying works.
 6. `/scriptevent hc:folk_go vault` takes you to the Vault Stair near the Seat. Stand on the copper pad and sneak to go down. Click the dark block in the middle: the ruler collects, anyone else can try to break it open (20 seconds beside it).
 7. Craft a Latticewood Boat from 5 Latticewood (boat shape) and put it on a light river. `/scriptevent hc:folk_status` prints every Tally and the Vault.
+8. Site finds: open the chest in the Wound landing's boat shed, the Lattice Wood lodge, Pilgrim's Cross shrine, the Cartmeet tally-house and the Seams winch house. Each hands you its find once (a boat, the Woodcutter's Axe, 12 Regals and a Pilgrim's Lantern, 8 raw Choir Ore, the Seamcutter pick); opening it again gives nothing. `/scriptevent hc:finds_reset` lets you collect them again.
 
 Things to look for: villages sitting badly on the bank or in the water, mine mouths hanging in the air, the boat's look and whether it paddles like a normal boat, and what it drops when broken.
 
