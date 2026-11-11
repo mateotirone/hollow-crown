@@ -456,7 +456,7 @@ for kname, fn in KINDS.items():
     TEMPL[kname] = []
     for _ in range(12):
         c = fn(); a = np.array([(dx, dy, dz) for dx, dy, dz, _ in c], np.int32); ids = np.array([ID[b] for *_, b in c], np.uint16)
-        isleaf = np.array(["leaves" in b for *_, b in c]); TEMPL[kname].append((a, ids, isleaf))
+        isleaf = np.array(["leaves" in b for *_, b in c]); TEMPL[kname].append((a, ids, isleaf, np.zeros(len(c), bool)))
 KLIST = list(KINDS)
 MIX = {  # (kind, weight) per region
     VALE: [("oak", 45), ("big_oak", 15), ("birch", 28), ("oak_bush", 12)],
@@ -493,6 +493,85 @@ for rid, mix in MIX.items():
     tkind[sel] = [KLIST.index(names[i]) for i in cr.choice(len(names), sel.size, p=wts)]
 fen_dry = (rg_ == FEN) & (tkind == KLIST.index("mangrove")) & (yy_ > SEA + 6)
 tkind[fen_dry] = KLIST.index("dark_oak")
+
+# ---- the custom block-built trees (map/trees, PR #94): set GW_TREES to a database written by map/trees/build_trees.py
+# (OUT/trees.json + stamps). Each region gets its own species, picked by habitat; map/trees/place.py keeps every
+# crown out of plot clearings, towns and story sites (towns and settlements plant their own trees) and every trunk
+# off water, roads, banks and steep ground. Without GW_TREES the simple trees above are used.
+TREEDB = os.environ.get("GW_TREES")
+if TREEDB:
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "trees"))
+    from place import fits, mark, SIZE_ORDER, SIZE_WEIGHT, _grow_mask
+    tindex = json.load(open(os.path.join(TREEDB, "trees.json")))
+    _pal = {}
+    def B_raw(name, states):
+        key = name + json.dumps(states, sort_keys=True)
+        if key not in _pal:
+            ns, n = name.split(":")
+            tags = {k: (ByteTag(int(v)) if isinstance(v, bool) else IntTag(v) if isinstance(v, int) else StringTag(str(v))) for k, v in states.items()}
+            _pal[key] = level.block_palette.get_add_block(ver.block.to_universal(Block(ns, n, tags))[0])
+        return _pal[key]
+    SOFTB = ("leaves", "vine", "hanging", "moss_carpet", "leaf_litter", "snow_layer", "veilmoss")
+    PROF = {}
+    for sid, sp in tindex["species"].items():
+        if sp["region"] == "hollow": continue
+        for size, files in sp["sizes"].items():
+            for f in files:
+                st = json.load(open(os.path.join(TREEDB, f["file"] + ".stamp.json")))
+                ox, oy, oz = st["origin"]; pal = [B_raw(e["name"], e["states"]) for e in st["palette"]]
+                soft_ = [any(k in e["name"] for k in SOFTB) for e in st["palette"]]
+                bl = np.array(st["blocks"], np.int32)
+                off = np.stack([bl[:, 0] + ox, bl[:, 1] - 1, bl[:, 2] + oz], 1).astype(np.int32)   # stamp y 0 = the ground block
+                ids = np.array([pal[i] for i in bl[:, 3]], np.uint16); isl = np.array([soft_[i] for i in bl[:, 3]]); isg = bl[:, 1] == 0
+                TEMPL[f["file"]] = [(off, ids, isl, isg)]; KLIST.append(f["file"]); PROF[f["file"]] = f
+    NATURAL_G = np.array([ID[n] for n in ["grass_block", "dirt", "coarse_dirt", "podzol", "sand", "red_sand", "mud", "moss_block", "gravel"]], np.uint16)
+    near_river = box(valley, 10) > 0.25
+    hab = {  # region -> list of (condition name, {species: weight})
+        VALE: [("river", {"vale_weeping_willow": 60, "vale_ash": 20, "vale_great_oak": 20}),
+               ("wood", {"vale_great_oak": 30, "vale_ash": 25, "vale_silver_birch": 22, "vale_yew": 5, "vale_hawthorn": 8}),
+               ("open", {"vale_hawthorn": 35, "vale_great_oak": 25, "vale_ash": 12, "vale_silver_birch": 14, "vale_apple": 10})],
+        FROST: [("high", {"frost_treeline_pine": 50, "frost_juniper": 30, "frost_snag": 20}),
+                ("wood", {"frost_tall_spruce": 42, "frost_grey_fir": 25, "frost_scots_pine": 20, "frost_snow_birch": 9, "frost_snag": 4}),
+                ("open", {"frost_juniper": 30, "frost_snow_birch": 25, "frost_scots_pine": 25, "frost_treeline_pine": 20})],
+        SALT: [("shore", {"salt_tamarisk": 40, "salt_sea_cypress": 45, "salt_olive": 15}),
+               ("wood", {"salt_umbrella_pine": 32, "salt_italian_cypress": 25, "salt_sea_cypress": 18, "salt_olive": 25}),
+               ("open", {"salt_olive": 40, "salt_italian_cypress": 25, "salt_umbrella_pine": 20, "salt_tamarisk": 15})],
+        FEN: [("wet", {"fen_bald_cypress": 55, "fen_drowned_snag": 20, "fen_black_alder": 25}),
+              ("open", {"fen_black_alder": 45, "fen_pollard_willow": 35, "fen_bald_cypress": 20})],
+        EMBER: [("open", {"ember_umbrella_acacia": 35, "ember_argan": 30, "ember_date_palm": 15, "ember_baobab": 10, "ember_dragon_blood": 10})],
+    }
+    hard_t = keepclear
+    soft_t = _grow_mask(~open_ | ~land, 1)
+    soft_w = _grow_mask((~open_ & ~fenpool & ~bank) | ~land, 1)        # bald cypress and snags may stand in fen water
+    taken = np.zeros((SIZE, SIZE), np.int8)
+    order = cr.permutation(tx.size)
+    nx, nz, nk = [], [], []
+    for i in order:
+        x_, z_ = int(tx[i] - X0), int(tz[i] - Z0); rid = int(rg_[i])
+        if rid == EMBER and tkind[i] == KLIST.index("cactus"):
+            nx.append(tx[i]); nz.append(tz[i]); nk.append(tkind[i]); continue
+        f_ = forest[x_, z_]; cond = "open"
+        if rid == VALE and near_river[x_, z_]: cond = "river"
+        elif rid == FROST and Y[x_, z_] > 125: cond = "high"
+        elif rid == SALT and coast[x_, z_]: cond = "shore"
+        elif rid == FEN and (Y[x_, z_] < SEA + 4 or fenpool[x_, z_]): cond = "wet"
+        elif f_ > (0.06 if rid == VALE else -0.06 if rid == FROST else 0.1): cond = "wood"
+        table = dict(hab[rid]); w_ = table.get(cond) or table["open"]
+        sids = [k for k in w_ if k in tindex["species"]]
+        if not sids: continue
+        sid = sids[int(cr.choice(len(sids), p=np.array([w_[k] for k in sids], float) / sum(w_[k] for k in sids)))]
+        first = SIZE_ORDER[int(cr.choice(4, p=np.array([SIZE_WEIGHT[k] for k in SIZE_ORDER]) / sum(SIZE_WEIGHT.values())))]
+        sv = soft_w if sid in ("fen_bald_cypress", "fen_drowned_snag") else soft_t
+        for size in SIZE_ORDER[SIZE_ORDER.index(first):]:
+            fl = tindex["species"][sid]["sizes"][size]; f = fl[int(cr.integers(len(fl)))]
+            if not fits(f, x_, z_, hard_t, sv, taken): continue
+            ty = [Y[x_ + a, z_ + b] for a, b in f["trunk"]]
+            if max(ty) - min(ty) > 1: continue                          # not on a slope its roots would float over
+            mark(f, x_, z_, taken); nx.append(tx[i]); nz.append(tz[i]); nk.append(KLIST.index(f["file"])); break
+    tx, tz, tkind = np.array(nx, np.int64), np.array(nz, np.int64), np.array(nk, np.int32); tvar = np.zeros(tx.size, np.int32)
+    import collections
+    log("custom trees from", TREEDB, dict(collections.Counter(KLIST[k].split("/")[0] for k in tkind).most_common()))
+TREEM = 18 if TREEDB else 6                           # how far outside a tile a tree's trunk may stand and still reach in
 log("trees placed", tx.size)
 
 # ---------------------------------------------------------------- caves: winding tunnels, sealed under the ground
@@ -621,17 +700,20 @@ for tx0 in range(0, SIZE, TILE):
         # plants
         p_ = plant[a0:a1, b0:b1]; pm = p_ > 0; vol[ix[pm], Yt[pm] + 1 - YMIN, iz[pm]] = p_[pm]
         # trees whose base is in this tile or its margin
-        tm = (tx >= X0 + a0 - 6) & (tx < X0 + a1 + 6) & (tz >= Z0 + b0 - 6) & (tz < Z0 + b1 + 6)
+        tm = (tx >= X0 + a0 - TREEM) & (tx < X0 + a1 + TREEM) & (tz >= Z0 + b0 - TREEM) & (tz < Z0 + b1 + TREEM)
         for x_, z_, kk_, vv_ in zip(tx[tm], tz[tm], tkind[tm], tvar[tm]):
-            off, ids, isleaf = TEMPL[KLIST[kk_]][vv_]
+            off, ids, isleaf, isg = TEMPL[KLIST[kk_]][vv_]
             gy = Y[x_ - X0, z_ - Z0] + 1
             px_ = x_ - X0 - a0 + off[:, 0]; py_ = gy - YMIN + off[:, 1]; pz_ = z_ - Z0 - b0 + off[:, 2]
             ok_ = (px_ >= 0) & (px_ < W) & (pz_ >= 0) & (pz_ < D) & (py_ > 0) & (py_ < YR)
+            if isg.any():                                                      # ground cells follow each column's own surface
+                g_ = ok_ & isg; py_[g_] = Yt[px_[g_], pz_[g_]] - YMIN
+                g2 = g_.copy(); g2[g_] = np.isin(vol[px_[g_], py_[g_], pz_[g_]], NATURAL_G); ok_ &= ~g_ | g2
             px_, py_, pz_, ids_, lf_ = px_[ok_], py_[ok_], pz_[ok_], ids[ok_], isleaf[ok_]
             cur = vol[px_, py_, pz_]
             put = ~lf_ | (cur == AIR)
             vol[px_[put], py_[put], pz_[put]] = ids_[put]
-            if 0 <= x_ - X0 - a0 < W and 0 <= z_ - Z0 - b0 < D and KLIST[kk_] != "cactus":
+            if 0 <= x_ - X0 - a0 < W and 0 <= z_ - Z0 - b0 < D and KLIST[kk_] in KINDS and KLIST[kk_] != "cactus":
                 vol[x_ - X0 - a0, gy - 1 - YMIN, z_ - Z0 - b0] = ID["dirt"] if reg[x_ - X0, z_ - Z0] != FEN else ID["mud"]
         # town plazas and plot markers
         for name, wx_, wz_, rad_, block_ in [(n, PLAZA[n][0], PLAZA[n][1], 9 if n == "Kingsrest" else 6, "stone_bricks") for n, x, z, r, _ in TOWNS] + [(n, x, z, 3, "stone_bricks") for n, x, z in PLOTS]:
@@ -660,6 +742,7 @@ for tx0 in range(0, SIZE, TILE):
             vol[ix[okb], topi[okb] + 1, iz[okb]] = ID["snow_layer"]
         if os.environ.get("GW_DUMP"):                                   # debugging: save this tile's blocks for the voxel viewer
             names_ = {int(v): k for k, v in ID.items()}; names_[int(AIR)] = "air"
+            if TREEDB: names_.update({int(i): k[:k.index("{")].split(":")[1] for k, i in _pal.items()})
             np.savez_compressed(f"{os.environ['GW_DUMP']}-{tx0}-{tz0}.npz", vol=vol[tx0 - a0:tx0 - a0 + min(TILE, SIZE - tx0), :, tz0 - b0:tz0 - b0 + min(TILE, SIZE - tz0)],
                                 ymin=YMIN, x0=X0 + tx0, z0=Z0 + tz0, names=json.dumps(names_))
         # preview: top block of the inner tile
@@ -692,7 +775,9 @@ COL = {"grass_block": (96, 150, 70), "dirt": (134, 96, 67), "coarse_dirt": (119,
        "waterlily": (32, 128, 48), "seagrass": (40, 110, 60), "cactus": (88, 130, 44), "deadbush": (107, 79, 41),
        "muddy_mangrove_roots": (70, 58, 45), "red_sandstone": (186, 99, 29)}
 for n in ["oak_leaves", "birch_leaves", "spruce_leaves", "mangrove_leaves", "dark_oak_leaves", "acacia_leaves"]: COL[n] = {"oak_leaves": (60, 110, 40), "birch_leaves": (110, 140, 70), "spruce_leaves": (50, 80, 55), "mangrove_leaves": (70, 105, 40), "dark_oak_leaves": (45, 80, 30), "acacia_leaves": (110, 120, 40)}[n]
-lut = np.zeros((int(max(ID.values())) + 2, 3), np.uint8) + np.array([150, 120, 110], np.uint8)
+lut = np.zeros((int(max(list(ID.values()) + (list(_pal.values()) if TREEDB else []))) + 2, 3), np.uint8) + np.array([150, 120, 110], np.uint8)
+if TREEDB:
+    for key, i in _pal.items(): lut[i] = (58, 104, 40) if "leaves" in key else (60, 110, 45) if ("vine" in key or "moss" in key) else (96, 78, 52)
 for n, c in COL.items():
     if n in ID: lut[ID[n]] = c
 for n in TERRA: lut[n] = (170, 90, 60)
