@@ -501,6 +501,6 @@ Choirsteel's 3D set is `studio/art/build_choirsteel_3d.py` (PR #83). The guard-o
 | Hollow Crown worn: new 57-part model and 64x64 texture after the reference | `models/entity/hollow_crown.geo.json`, `textures/models/armor/siege_hollow_crown.png` | `studio/art/build_crown3d.py` | **awaiting your review**, untested in game. The crowns the Morvane mobs wear are part of their own skins and are not changed |
 ## Minimap (2026-11-11)
 Made by `tools/minimap_tiles.py` from the top-down render of the generated world (`map/genworld.py`'s preview) and `map/terrain.npz`. Run it again whenever the world map is regenerated; do not paint these by hand.
-- `textures/ui/hc/minimap/mXXZZ.png`: 1,600 map views, 72x72 (3 x 3 tiles of 64 blocks around tile XX,ZZ), slightly darkened, with plot and town markers: generated
-- `textures/ui/hc/minimap/mnone.png` (uncharted), `a0..a7.png` (player arrow, 12x12, eight directions), `frame.png` (80x80 border): first pass
+- `textures/ui/hc/minimap/mxXXzZZ.png`: 1,600 map views, 72x72 RGBA (Bedrock showed palette PNGs black) (3 x 3 tiles of 64 blocks around tile XX,ZZ), slightly darkened, with plot and town markers: generated
+- `textures/ui/hc/minimap/mnone__.png` (uncharted), `aq..ay.png` (player arrow, 12x12, eight directions), `frame.png` (80x80 border): first pass
 
