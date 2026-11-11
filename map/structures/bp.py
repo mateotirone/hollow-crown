@@ -25,6 +25,23 @@ OPP = {"n": "s", "s": "n", "e": "w", "w": "e"}
 LEFT = {"n": "w", "w": "s", "s": "e", "e": "n"}    # turning left from a facing
 RIGHT = {v: k for k, v in LEFT.items()}
 
+def _pack_blocks():
+    """The add-on's own blocks (siege:..., hc:...): their states with the first value as default, and
+    whether they take a placement facing. Read from the behaviour pack beside this folder."""
+    import glob
+    out = {}
+    for f in glob.glob(os.path.join(HERE, "..", "..", "Siege_Nights_BP", "blocks", "**", "*.json"), recursive=True):
+        try: d = json.load(open(f))["minecraft:block"]["description"]
+        except Exception: continue
+        st = {k: v[0] if isinstance(v, list) else (v.get("values", [0])[0] if isinstance(v, dict) else v) for k, v in (d.get("states") or {}).items()}
+        for t in (d.get("traits") or {}).values():
+            for e in t.get("enabled_states", []): st[e] = {"minecraft:cardinal_direction": "south", "minecraft:facing_direction": "south",
+                                                          "minecraft:vertical_half": "bottom", "minecraft:block_face": "up"}.get(e, 0)
+        if "siege:armor" in st: st["siege:armor"] = max(d["states"]["siege:armor"])   # castle stone at full strength
+        out[d["identifier"]] = st
+    return out
+PACK = _pack_blocks()
+
 def is_fence(n): return n.endswith("_fence") and "gate" not in n
 def is_wall(n): return n.endswith("_wall") and n not in ("wall_banner",)
 def is_pane(n): return n.endswith("glass_pane") or n == "iron_bars"
@@ -128,6 +145,14 @@ class Blueprint:
     # ---- export
     def to_bedrock(self, name, p):
         if name == "keep": return ("minecraft:structure_void", {"structure_void_type": "void"})
+        if name in PACK:   # one of the add-on's own blocks: its own states, the facing if it takes one
+            st = dict(PACK[name])
+            f = p.get("facing")
+            if f and "minecraft:cardinal_direction" in st: st["minecraft:cardinal_direction"] = {"n": "north", "s": "south", "e": "east", "w": "west"}[f]
+            if "minecraft:vertical_half" in st and p.get("half"): st["minecraft:vertical_half"] = p["half"]
+            for k, v in p.get("raw", {}).items(): st[k] = v
+            return (name, st)
+        if name.startswith("minecraft:"): name = name[10:]
         if name not in BLOCKS: raise ValueError(f"{self.name}: '{name}' is not a Bedrock block")
         st = {}
         for prop in BLOCKS[name]:

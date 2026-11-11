@@ -243,7 +243,7 @@ def far_door(seed=0):
             if x != -12: bp.set(x, 11, zc - 1, "dark_oak_fence"); bp.set(x, 11, zc + 1, "dark_oak_fence")
     for x in range(-14, -9): bp.set(x, 10, 0, "dark_oak_log", axis="x")   # a beam between them with a hanging lantern
     for z in range(-8, 9): bp.set(-12, 12, z, "dark_oak_log", axis="z")
-    bp.set(-12, 11, 0, "chain"); bp.set(-12, 10, 0, "soul_lantern", hanging=True)
+    bp.set(-12, 11, 0, "iron_chain"); bp.set(-12, 10, 0, "soul_lantern", hanging=True)
     for (x0, z0, x1, z1, d) in ((-6, -6, -2, -2, 3), (2, 3, 5, 7, 2)):   # dig pits with a rim of spoil
         for x in range(x0, x1 + 1):
             for z in range(z0, z1 + 1):
@@ -367,7 +367,7 @@ def the_seams(seed=0):
     for x in range(-8, 12): bp.set(x, 0, 0, "cobbled_deepslate"); bp.set(x, 1, 0, "rail")
     shed(bp, P, (0, -2, 4, 2), "x", seed + 5, posts=4)   # the winch house straddling the rail
     for y in (5, 6): bp.set(2, y, 0, "dark_oak_log", axis="y")
-    bp.set(2, 4, 0, "chain")
+    bp.set(2, 4, 0, "iron_chain")
     lamp(bp, 6, 1, -4)
     bp.markers["door"] = (0, 1, 0)
     return bp

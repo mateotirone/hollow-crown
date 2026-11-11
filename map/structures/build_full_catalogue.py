@@ -68,16 +68,19 @@ def page_for(sc, work, key, textures, title):
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument("dump"); ap.add_argument("out")
     ap.add_argument("--textures", required=True); ap.add_argument("--three", required=True); ap.add_argument("--only", default="")
+    ap.add_argument("--mcstructure", default="", help="write every build as .mcstructure files into this folder instead of rendering")
     ap.add_argument("--procs", type=int, default=3, help="browsers shooting in parallel")
     a = ap.parse_args()
     D = json.load(open(a.dump)); img = os.path.join(a.out, "img"); work = os.path.join(a.out, "_work")
     os.makedirs(img, exist_ok=True)
-    sections, jobs = [], []
+    sections, jobs, structures = [], [], []
 
     def add(sec, key, title, sub, blurb, make, ground=("grass_block", "dirt"), view=None, status="new", extra=None):
         card = {"key": key, "title": title, "sub": sub, "blurb": blurb, "image": f"img/{key}.jpg", "status": status, **(extra or {})}
         sec["cards"].append(card)
         if a.only and not key.startswith(a.only): return
+        if a.mcstructure:
+            structures.append((sec["title"], card, make())); return
         sc, size, n = card_scene(make(), ground, view=view)
         card["size"] = size; card["blocks"] = n
         jobs.append([page_for(sc, work, key, a.textures, title), os.path.join(work, key, "shot.png"), "card", 1400, 900])
@@ -146,6 +149,9 @@ def main():
                                    ("wound_dock", "The Wound landing", "The first dock a new arrival sees: a plank landing on log piles and a boatwright's shed with a boat half built.", -38)):
         add(sec, f"hollow-{sid}", title, "Hollow centre", blurb, hollow_kit.SITE_BUILDERS[sid], HG, view=(yaw, 32, 1.3))
 
+    if a.mcstructure:
+        from export_structures import write_all
+        write_all(structures, a.mcstructure); return
     print("cards", sum(len(s["cards"]) for s in sections), "to shoot", len(jobs), flush=True)
     jf = os.path.join(work, "jobs.json"); json.dump(jobs, open(jf, "w"))
     n = a.procs
