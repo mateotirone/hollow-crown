@@ -479,5 +479,17 @@
  },
  "siege:track": {
   "sound": "metal"
+ },
+ "hc:nest_weave": {
+  "sound": "wood"
+ },
+ "hc:nest_twigs": {
+  "sound": "wood"
+ },
+ "hc:nest_lining": {
+  "sound": "grass"
+ },
+ "hc:nest_fill": {
+  "sound": "gravel"
  }
 }

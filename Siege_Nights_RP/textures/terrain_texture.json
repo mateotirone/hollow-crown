@@ -345,12 +345,6 @@
   "siege_dragon_roost_top": {
    "textures": "textures/blocks/dragons/siege_dragon_roost_top"
   },
-  "siege_dragon_nest_side": {
-   "textures": "textures/blocks/dragons/siege_dragon_nest_side"
-  },
-  "siege_dragon_nest_top": {
-   "textures": "textures/blocks/dragons/siege_dragon_nest_top"
-  },
   "siege_mason_bench_side": {
    "textures": "textures/blocks/siege_mason_bench_side"
   },
@@ -1088,6 +1082,30 @@
   },
   "siege_track_sleeper": {
    "textures": "textures/blocks/trains/track_sleeper"
+  },
+  "hc_nest_branch": {
+   "textures": "textures/blocks/dragons/nest/branch"
+  },
+  "hc_nest_branch_pale": {
+   "textures": "textures/blocks/dragons/nest/branch_pale"
+  },
+  "hc_nest_branch_char": {
+   "textures": "textures/blocks/dragons/nest/branch_char"
+  },
+  "hc_nest_straw": {
+   "textures": "textures/blocks/dragons/nest/straw"
+  },
+  "hc_nest_fill": {
+   "textures": "textures/blocks/dragons/nest/fill"
+  },
+  "hc_nest_bone": {
+   "textures": "textures/blocks/dragons/nest/bone"
+  },
+  "hc_nest_egg": {
+   "textures": "textures/blocks/dragons/nest/egg"
+  },
+  "hc_nest_scale": {
+   "textures": "textures/blocks/dragons/nest/scale"
   },
   "siege_map_marker_free": {
    "textures": "textures/blocks/verdant_froglight_side"

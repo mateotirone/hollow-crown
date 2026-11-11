@@ -1,0 +1,100 @@
+{
+  "format_version": "1.21.90",
+  "minecraft:block": {
+    "description": {
+      "identifier": "hc:nest_weave",
+      "menu_category": {
+        "category": "nature"
+      },
+      "states": {
+        "hc:turn": [
+          0,
+          1,
+          2,
+          3
+        ]
+      }
+    },
+    "components": {
+      "minecraft:display_name": "tile.hc:nest_weave.name",
+      "minecraft:geometry": "geometry.hc_nest_weave",
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "hc_nest_branch",
+          "render_method": "opaque"
+        },
+        "pale": {
+          "texture": "hc_nest_branch_pale",
+          "render_method": "opaque"
+        },
+        "char": {
+          "texture": "hc_nest_branch_char",
+          "render_method": "opaque"
+        },
+        "fill": {
+          "texture": "hc_nest_fill",
+          "render_method": "opaque"
+        }
+      },
+      "minecraft:collision_box": true,
+      "minecraft:selection_box": {
+        "origin": [
+          -8,
+          0,
+          -8
+        ],
+        "size": [
+          16,
+          16,
+          16
+        ]
+      },
+      "minecraft:map_color": "#5e4430",
+      "minecraft:destructible_by_mining": false,
+      "minecraft:destructible_by_explosion": false,
+      "minecraft:flammable": {
+        "catch_chance_modifier": 0,
+        "destroy_chance_modifier": 0
+      },
+      "minecraft:light_dampening": 0
+    },
+    "permutations": [
+      {
+        "condition": "q.block_state('hc:turn') == 1",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              90,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('hc:turn') == 2",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              180,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('hc:turn') == 3",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              270,
+              0
+            ]
+          }
+        }
+      }
+    ]
+  }
+}
