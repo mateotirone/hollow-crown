@@ -42,6 +42,7 @@ The rules, palette and regional variants are in `art/STYLE-GUIDE.md`. Generators
 | Knight's Longsword | `siege_longsword.png` | **Final style, awaiting your review** |
 | Warhammer | `siege_warhammer.png` | **Final style, awaiting your review** |
 | Writ of Alliance | `siege_writ.png` | **Final style, awaiting your review** |
+| The Settler's Almanac (squat green cloth book, gilt corners and a gilt compass rose, cream page edges) | `siege_almanac.png`, made by `studio/art/build_almanac.py` | **Placeholder**, needs your look. Every player starts with this one |
 | Battering Ram | `siege_battering_ram.png` | **Final style, awaiting your review** |
 | Trebuchet / Ballista | `siege_trebuchet.png`, `siege_ballista.png` | **Final style, awaiting your review** |
 | Archer / Man-at-Arms (picked-up guard) | `siege_archer.png`, `siege_man_at_arms.png` | **Final style, awaiting your review** |

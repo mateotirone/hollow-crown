@@ -270,3 +270,6 @@ until they have faded before it sends again. Never start a real title with `hcm:
 - `archive/main-before-split.js` is the original single file, for reference.
   Storyteller: reach reports the facts `bossesFallen`, `choirFallen`, `morvaneFallen` and owns the deck `siege_shapes` (seven night
   shapes, each with a kind; picked for subject `"world"`). It notes `quiet` for keep owners on the first night after a siege on which nothing came.
+## The Almanac (explaining mechanics to players)
+
+`scripts/guide/` is the in-game guide: the Settler's Almanac book (`/siege:guide` opens it too) and a one-line chat tip the first time a player meets each mechanic. **Every new player-facing mechanic adds an entry to `scripts/guide/data.js`**: a page, a tip, and `when` triggers such as `place:<block>`, `click:<block>`, `carry:<item>`, `talk:tag:<tag>`, `near:<entity>` or `event:<name>` (format notes at the top of the file). Use `hidden: true` for things a newcomer should not know about yet and `needs: "<id>"` while the feature's block or item is still on an unmerged branch. Never name the Hollow outside the `beyond` and `throne` chapters (the self-test fails). Things meant to be found get no entry. The audit of what is covered is `docs/GUIDE.md`.
