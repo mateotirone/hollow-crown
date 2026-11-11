@@ -82,13 +82,17 @@ def stn(name,toward):
 ST={"Harrowford":(-385,-345),"Oakmere":stn("Oakmere",V["Millbrook"]),"Thistledown":(225,25),"Wrenfield":(-110,190),
 "Frosthelm":stn("Frosthelm",(-640,-640)),"Wolfcairn":stn("Wolfcairn",V["Rimehold"]),"Gullcliff":(-655,-505),"Tidewatch":(-520,555),
 "Reedmoor":(-140,520),"Lanternbog":(180,900),"Redmesa":(640,150),"Dunehold":(865,805)}
-rails={"North Line":[V["Kingsrest"],(-130,-320),V["Millbrook"],(-20,-680),(-110,-900),V["Rimehold"],(200,-1120),ST["Wolfcairn"]],
+# Kingsrest station sits on dry land south-east of where the Alder and the Greywater meet, by the plaza (Mateo
+# 2026-11-11: lines can't converge on the middle of the river). Every line leaves its east-west platform and crosses
+# a river, where it has to, once and square on a bridge.
+KS=(-95,-100)
+rails={"North Line":[KS,(-60,-130),(-55,-200),(-22,-300),(-25,-410),V["Millbrook"],(-20,-680),(-110,-900),V["Rimehold"],(200,-1120),ST["Wolfcairn"]],
 "Oakmere Branch":[V["Millbrook"],(50,-500),ST["Oakmere"]],
-"Coast Line":[V["Kingsrest"],(-270,-230),ST["Harrowford"],(-540,-440),ST["Gullcliff"],(-640,-640),ST["Frosthelm"]],
-"Bay Line":[V["Kingsrest"],(-300,-10),(-440,120),(-500,280),(-680,330),V["Gull's Rest"]],
-"Fen Line":[V["Kingsrest"],(-130,20),ST["Wrenfield"],(-90,360),ST["Reedmoor"],(-150,740),V["Mirelight"],(60,900),ST["Lanternbog"]],
+"Coast Line":[KS,(-150,-98),(-180,-112),(-186,-180),(-262,-232),ST["Harrowford"],(-540,-440),ST["Gullcliff"],(-640,-640),ST["Frosthelm"]],
+"Bay Line":[KS,(-150,-90),(-200,-62),(-300,-10),(-440,120),(-500,280),(-680,330),V["Gull's Rest"]],
+"Fen Line":[KS,(-50,-90),(-70,-20),(-110,40),ST["Wrenfield"],(-90,360),ST["Reedmoor"],(-150,740),V["Mirelight"],(60,900),ST["Lanternbog"]],
 "Shore Branch":[ST["Reedmoor"],(-250,440),(-400,480),ST["Tidewatch"],(-680,480),V["Gull's Rest"]],
-"Sun Line":[V["Kingsrest"],(40,-60),ST["Thistledown"],(430,70),(560,170),ST["Redmesa"],(800,260),V["Sunscar"],(900,640),ST["Dunehold"],(800,1000),(520,1080),(330,1090),(150,1010),(130,930),ST["Lanternbog"]]}
+"Sun Line":[KS,(-40,-96),(40,-60),ST["Thistledown"],(430,70),(560,170),ST["Redmesa"],(800,260),V["Sunscar"],(900,640),ST["Dunehold"],(800,1000),(520,1080),(330,1090),(150,1010),(130,930),ST["Lanternbog"]]}
 railpts={k:spline(v,16,6 if len(v)>3 else 0,i+20) for i,(k,v) in enumerate(rails.items())}
 trails={"Greywater Road":[ST["Oakmere"],(190,-370),(330,-290),(420,-170),(380,-40),ST["Thistledown"]],
 "High Road":[ST["Frosthelm"],(-430,-610),(-250,-560),V["Millbrook"]],
@@ -198,7 +202,7 @@ for i,(t,c) in enumerate([("■ Plot Stone, ring = 80-block plot",(150,112,40)),
     d.text((lx+10,ly+8+i*16),t,font=fs,fill=c)
 sx=lx+10; sy=ly+156; d.line([sx,sy,sx+500*S,sy],fill=(0,0,0),width=3); d.text((sx+500*S+8,sy),"500 blocks",font=fs,fill=(0,0,0),anchor="lm")
 canvas.save('/mnt/project-files/siege-nights/map/hollow-crown-map.png')
-json.dump({"trails":{k:round(sum(math.dist(v[i],v[i+1]) for i in range(len(v)-1))) for k,v in trailpts.items()},"plots":plots,"stations":{k:[round(a),round(b)] for k,(a,b) in ST.items()},"rails":{k:round(sum(math.dist(v[i],v[i+1]) for i in range(len(v)-1))) for k,v in railpts.items()}},open('organic.json','w'),indent=1)
+json.dump({"trails":{k:round(sum(math.dist(v[i],v[i+1]) for i in range(len(v)-1))) for k,v in trailpts.items()},"plots":plots,"stations":{k:[round(a),round(b)] for k,(a,b) in ST.items()},"kingsrest_station":list(KS),"rails":{k:round(sum(math.dist(v[i],v[i+1]) for i in range(len(v)-1))) for k,v in railpts.items()}},open('organic.json','w'),indent=1)
 print('OK' if ok else 'FIX')
 
 # ================= ELEVATION (block heights) =================

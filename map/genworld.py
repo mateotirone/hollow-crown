@@ -91,7 +91,14 @@ rl = list(L["rivers"].values())
 isriver = raster(rl, lambda f: int(7 + 8 * f)) & land
 bank = raster(rl, lambda f: int(13 + 10 * f)) & land & ~isriver
 valley = raster(rl, lambda f: int(30 + 14 * f)).astype(np.float32)
-isroad = raster(list(L["roads"].values()), lambda f: 5) & land & ~isriver
+def offset_line(pts, d):
+    """The polyline moved d blocks to its right (the road runs beside the rail, not on it)."""
+    P = np.asarray(pts, float); T = np.gradient(P, axis=0); T /= np.maximum(np.hypot(T[:, 0], T[:, 1]), 1e-6)[:, None]
+    return [tuple(v) for v in P + np.stack([-T[:, 1], T[:, 0]], 1) * d]
+ROADOFF = 8
+roadlines = [offset_line(v, ROADOFF) for v in L["roads"].values()]
+isroad = raster(roadlines, lambda f: 5) & land & ~isriver
+roadbridge = raster(roadlines, lambda f: 5) & isriver
 istrail = raster(list(L["trails"].values()), lambda f: 3) & land & ~isroad & ~isriver
 log("rasters done")
 
@@ -227,6 +234,110 @@ water_level[isriver] = Y[isriver] + 2
 water_level[fenpool] = SEA
 water_level[islake] = lakelevel[islake]
 wet = water_level > Y
+
+# ---------------------------------------------------------------- rail lines, planned block by block in advance
+# (Mateo 2026-11-11: the track is laid out ahead of time and the game spawns it one stop at a time as routes are
+# bought). The world gets the graded bed: ballast, benches, cuttings and embankments, tunnels where a hill is too
+# deep to cut, bridges over water. No track blocks: map/rail-segments.json holds every segment's Track blocks
+# (map/tracklay.py) and its stops for the train scripts.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import railplan
+ORG = json.load(open(os.path.join(os.path.dirname(os.path.abspath(src)), 'organic.json')))
+KS = tuple(ORG.get("kingsrest_station", PLAZA.get("Kingsrest", (-118, -118))))
+STOPS = {}   # id -> dict
+def slug(n): return re.sub(r"[^a-z0-9]+", "_", n.lower()).strip("_")
+for n_, (sx_, sz_) in ORG["stations"].items(): STOPS[slug(n_)] = {"id": slug(n_), "name": n_, "x": sx_, "z": sz_, "kind": "plot", "plot": n_}
+for n_, x_, z_, r_, _ in TOWNS:
+    if n_ == "Kingsrest": x_, z_ = KS
+    STOPS[slug(n_)] = {"id": slug(n_), "name": n_, "x": x_, "z": z_, "kind": "village"}
+rail_y = np.full((SIZE, SIZE), -999, np.int32); rail_d = np.full((SIZE, SIZE), 99.0, np.float32)
+tun_floor = np.full((SIZE, SIZE), -999, np.int32); br_deck = np.full((SIZE, SIZE), -999, np.int32)
+br_wall = np.zeros((SIZE, SIZE), bool); br_pier = np.zeros((SIZE, SIZE), bool)
+RAILLINES = {}
+def inside(x, z): return 0 <= x - X0 < SIZE and 0 <= z - Z0 < SIZE
+def gy(x, z):
+    i, k = x - X0, z - Z0
+    if not (0 <= i < SIZE and 0 <= k < SIZE): return SEA + 4
+    return int(max(Y[i, k], water_level[i, k] + 3)) if wet[i, k] else int(Y[i, k])
+stop_y = {}
+for lname, pts in L["roads"].items():
+    P = np.asarray(pts, float)
+    on = []
+    for sid, st in STOPS.items():
+        dmin = np.min(np.hypot(P[:, 0] - st["x"], P[:, 1] - st["z"]))
+        if dmin < 30: on.append((sid, st))
+    stops_ = [(st["x"], st["z"], "x" if sid == "kingsrest" else None) for sid, st in on]
+    cells, si = railplan.trace(pts, stops_)
+    order = sorted(range(len(on)), key=lambda k: si[k]); on = [on[k] for k in order]; si = [si[k] for k in order]
+    ground = [gy(x, z) for x, z in cells]
+    for (sid, st), i in zip(on, si):
+        if sid not in stop_y:
+            seg = ground[max(0, i - railplan.PLATFORM):i + railplan.PLATFORM + 1]
+            stop_y[sid] = int(round(float(np.median(seg)))) + 1
+    ys = railplan.profile(cells, ground, si, stop_y=[stop_y[sid] for sid, _ in on])
+    RAILLINES[lname] = (cells, ys, [(sid, i) for (sid, _), i in zip(on, si)])
+    for sid, _ in on: STOPS[sid].setdefault("lines", []).append(lname)
+    # per path cell: tunnel where the hill stands more than 10 over the bed, bridge where it crosses water
+    cx = np.array([c[0] for c in cells]) - X0; cz = np.array([c[1] for c in cells]) - Z0; ys_ = np.asarray(ys)
+    okc = (cx >= 0) & (cx < SIZE) & (cz >= 0) & (cz < SIZE)
+    gnd = np.where(okc, Y[np.clip(cx, 0, SIZE - 1), np.clip(cz, 0, SIZE - 1)], ys_)
+    wt = np.where(okc, wet[np.clip(cx, 0, SIZE - 1), np.clip(cz, 0, SIZE - 1)], False)
+    tun = (gnd - (ys_ - 1) > 10) & ~wt
+    tun = np.convolve(tun.astype(float), np.ones(7) / 7, 'same') > 0.5
+    wtd = np.convolve(wt.astype(float), np.ones(7), 'same') > 0          # a few blocks of approach either side
+    # paint the corridor: nearest path cell's track height for every cell within 24 blocks
+    R = 24; off = np.array([(a, b) for a in range(-R, R + 1) for b in range(-R, R + 1)]); od = np.hypot(off[:, 0], off[:, 1])
+    keep_ = od <= R; off, od = off[keep_], od[keep_]
+    for c0 in range(0, len(cells), 300):
+        sl = slice(c0, c0 + 300)
+        X_ = (cx[sl, None] + off[None, :, 0]).ravel(); Z_ = (cz[sl, None] + off[None, :, 1]).ravel()
+        D_ = np.broadcast_to(od[None, :], (len(cx[sl]), len(od))).ravel(); Yv = np.broadcast_to(ys_[sl, None], (len(cx[sl]), len(od))).ravel()
+        T_ = np.broadcast_to(tun[sl, None], (len(cx[sl]), len(od))).ravel(); W_ = np.broadcast_to(wtd[sl, None], (len(cx[sl]), len(od))).ravel()
+        m = (X_ >= 0) & (X_ < SIZE) & (Z_ >= 0) & (Z_ < SIZE)
+        X_, Z_, D_, Yv, T_, W_ = X_[m], Z_[m], D_[m], Yv[m], T_[m], W_[m]
+        np.minimum.at(rail_d, (X_, Z_), D_.astype(np.float32))
+        win = D_ <= rail_d[X_, Z_] + 1e-4
+        rail_y[X_[win], Z_[win]] = Yv[win]
+        t2 = win & T_ & (D_ <= 2.5); tun_floor[X_[t2], Z_[t2]] = Yv[t2] - 1
+        b2 = win & W_ & (D_ <= 2.5); br_deck[X_[b2], Z_[b2]] = Yv[b2] - 1
+        br_wall[X_[b2 & (D_ > 1.5)], Z_[b2 & (D_ > 1.5)]] = True
+    for i in range(0, len(cells), 8):
+        if okc[i] and wt[i]: br_pier[cx[i], cz[i]] = True
+# earthworks on land: ballast and benches at the bed, 1:1 cuttings and embankments out to 24 blocks
+corr = (rail_d <= 24) & land & ~wet & (tun_floor == -999) & (br_deck == -999)
+bed = rail_y - 1
+flat_ = corr & (rail_d <= 3.5)
+Y[flat_] = bed[flat_]
+slope_ = corr & (rail_d > 3.5)
+cut = slope_ & (Y > bed + np.floor(rail_d - 3.5)); Y[cut] = (bed + np.floor(rail_d - 3.5)).astype(np.int32)[cut]
+fill = slope_ & (Y < bed - np.floor(rail_d - 3.5)); Y[fill] = (bed - np.floor(rail_d - 3.5)).astype(np.int32)[fill]
+railcore = (rail_d <= 1.5) & ~wet & (tun_floor == -999) & (br_deck == -999)
+railzone = rail_d <= 4.5
+log("rail lines", len(RAILLINES), "stops", len(STOPS), "tunnel cells", int((tun_floor > -999).sum()), "bridge cells", int((br_deck > -999).sum()))
+# the export: stops (the track block where trains stop, mid-platform) and segments between neighbouring stops,
+# sharing their end blocks
+try:
+    from tracklay import lay
+except ImportError:
+    lay = None
+segs = []
+for lname, (cells, ys, stops_on) in RAILLINES.items():
+    path = [(x, int(y), z) for (x, z), y in zip(cells, ys)]
+    blocks = None
+    if lay:
+        try: blocks = [[b[0], b[1], b[2], b[3]["siege:kind"], b[3]["siege:dir"]] for b in lay(path)]
+        except ValueError as e: log("tracklay refused", lname, e)
+    for (sa, ia), (sb, ib) in zip(stops_on, stops_on[1:]):
+        part = blocks[ia:ib + 1] if blocks else [[x, y, z] for x, y, z in path[ia:ib + 1]]
+        segs.append({"id": f"{sa}__{sb}", "line": lname, "from": sa, "to": sb, "length": ib - ia, "blocks": part})
+    for sid, i in stops_on:
+        x, y, z = path[i]; STOPS[sid].update({"x": x, "y": y, "z": z})
+used = {s for g in segs for s in (g["from"], g["to"])}
+for st in STOPS.values():
+    if st["kind"] == "village" and len(st.get("lines", [])) > 1: st["junction"] = True
+json.dump({"format": "hollow-crown-rail/1", "note": "Track is not in the world: the game lays a segment's blocks when its route is bought. blocks = [x, y, z, siege:kind, siege:dir]; y is the block the track sits in.",
+           "stops": [st for st in STOPS.values() if st["id"] in used], "segments": segs}, open(out.rstrip('/') + '-rail-segments.json', 'w'))
+log("rail segments", len(segs), "with track" if lay else "(paths only: map/tracklay.py not found)")
 steep = np.maximum(np.abs(np.gradient(Yf, axis=0)), np.abs(np.gradient(Yf, axis=1))) > 1.6
 coast = (box((~land).astype(np.float32), 14) > 0.02) & land
 log("heights ready, max", int(Y.max()), "min", int(Y.min()))
@@ -329,6 +440,8 @@ surf[istrail] = np.where(r1[istrail] < 0.7, ID["grass_path"], np.where(r1[istrai
 m = (isroad | istrail) & R[EMBER]; surf[m] = np.where(r1[m] < 0.6, ID["sandstone"], ID["gravel"])
 # grass_path cannot sit under snow cover nicely; northern roads are gravel and cobble
 m = (isroad | istrail) & R[FROST] & (surf == ID["grass_path"]); surf[m] = ID["gravel"]
+# rail bed: gravel ballast three wide over stone, ready for the track the game lays
+surf[railcore] = np.where(r1[railcore] < 0.85, ID["gravel"], ID["cobblestone"]); sub[railcore] = ID["stone"]; subd[railcore] = 2
 TERRA = [ID[n] for n in ["orange_terracotta", "hardened_clay", "red_terracotta", "yellow_terracotta", "brown_terracotta", "white_terracotta", "orange_terracotta", "light_gray_terracotta", "red_terracotta", "hardened_clay"]]
 
 biome = np.full((SIZE, SIZE), BIO["plains"], np.uint32)
@@ -339,7 +452,7 @@ biome[~land] = BIO["ocean"]; biome[~land & (reg == FROST)] = BIO["cold_ocean"]
 biome[beach & R[VALE]] = BIO["beach"]
 biome[~land & (reg == FEN)] = BIO["mangrove_swamp"]
 
-open_ = land & ~wet & ~isroad & ~istrail & ~bank & ~steep & (near < 0.01)
+open_ = land & ~wet & ~isroad & ~istrail & ~bank & ~steep & (near < 0.01) & ~railzone
 # ground plants
 pl = open_ & ~keepclear
 plant = np.zeros((SIZE, SIZE), np.uint16)
@@ -540,7 +653,7 @@ if TREEDB:
               ("open", {"fen_black_alder": 45, "fen_pollard_willow": 35, "fen_bald_cypress": 20})],
         EMBER: [("open", {"ember_umbrella_acacia": 35, "ember_argan": 30, "ember_date_palm": 15, "ember_baobab": 10, "ember_dragon_blood": 10})],
     }
-    hard_t = keepclear
+    hard_t = keepclear | railzone                    # crowns stay off the line (trains need the air above the bed)
     soft_t = _grow_mask(~open_ | ~land, 1)
     soft_w = _grow_mask((~open_ & ~fenpool & ~bank) | ~land, 1)        # bald cypress and snags may stand in fen water
     taken = np.zeros((SIZE, SIZE), np.int8)
@@ -690,6 +803,25 @@ for tx0 in range(0, SIZE, TILE):
         rt_ = reg[a0:a1, b0:b1]; wett = wet[a0:a1, b0:b1]
         icy = wett & (rt_ == FROST) & (wl > -999) & (land[a0:a1, b0:b1] | (box((land[a0:a1, b0:b1]).astype(np.float32), 10) > 0.3))
         vol[ix[icy], wl[icy] - YMIN, iz[icy]] = ID["ice"]
+        # rail tunnels (air 4 high over a gravel floor, the hill left above) and bridges (stone deck, low parapets,
+        # piers every 8 blocks); road bridges a block over the river
+        tf = tun_floor[a0:a1, b0:b1]; tm_ = tf > -999
+        if tm_.any():
+            for h_ in range(1, 5): vol[ix[tm_], tf[tm_] + h_ - YMIN, iz[tm_]] = AIR
+            vol[ix[tm_], tf[tm_] - YMIN, iz[tm_]] = ID["gravel"]
+        bd = br_deck[a0:a1, b0:b1]; bm_ = bd > -999
+        if bm_.any():
+            vol[ix[bm_], bd[bm_] - YMIN, iz[bm_]] = ID["stone_bricks"]
+            for h_ in range(1, 5): vol[ix[bm_], bd[bm_] + h_ - YMIN, iz[bm_]] = AIR
+            bw = bm_ & br_wall[a0:a1, b0:b1]; vol[ix[bw], bd[bw] + 1 - YMIN, iz[bw]] = ID["stone_bricks"]
+            bp = bm_ & br_pier[a0:a1, b0:b1]
+            for i_, k_ in zip(ix[bp], iz[bp]):
+                for dx_ in (-1, 0, 1):
+                    for dz_ in (-1, 0, 1):
+                        i2, k2 = i_ + dx_, k_ + dz_
+                        if 0 <= i2 < W and 0 <= k2 < D: vol[i2, Yt[i2, k2] - YMIN:bd[i_, k_] - YMIN, k2] = ID["stone_bricks"]
+        rb_ = roadbridge[a0:a1, b0:b1] & (wl > -999)
+        if rb_.any(): vol[ix[rb_], wl[rb_] + 1 - YMIN, iz[rb_]] = ID["stone_bricks"]
         # lily pads and seagrass
         lm = lily[a0:a1, b0:b1]; vol[ix[lm], wl[lm] + 1 - YMIN, iz[lm]] = ID["waterlily"]
         sg = seagr[a0:a1, b0:b1]; vol[ix[sg], Yt[sg] + 1 - YMIN, iz[sg]] = ID["seagrass"]
