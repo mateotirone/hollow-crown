@@ -13,11 +13,21 @@
     "default": "geometry.siege_b.echo_hound"
    },
    "animations": {
-    "main": "animation.siege_b.echo_hound"
+    "base": "animation.siege_b.echo_hound",
+    "idle": "animation.siege_b.echo_hound.idle",
+    "walk": "animation.siege_b.echo_hound.walk",
+    "attack": "animation.siege_b.echo_hound.attack",
+    "swing": "controller.animation.siege_b.echo_hound.swing",
+    "hurt": "animation.siege_b.echo_hound.hurt",
+    "flinch": "controller.animation.siege_b.echo_hound.flinch"
    },
    "scripts": {
     "animate": [
-     "main"
+     "base",
+     "idle",
+     "walk",
+     "swing",
+     "flinch"
     ]
    },
    "render_controllers": [

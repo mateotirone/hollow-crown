@@ -13,11 +13,21 @@
     "default": "geometry.siege_b.crow_mage"
    },
    "animations": {
-    "main": "animation.siege_b.crow_mage"
+    "base": "animation.siege_b.crow_mage",
+    "idle": "animation.siege_b.crow_mage.idle",
+    "walk": "animation.siege_b.crow_mage.walk",
+    "aim": "animation.siege_b.crow_mage.aim",
+    "ready": "controller.animation.siege_b.crow_mage.ready",
+    "hurt": "animation.siege_b.crow_mage.hurt",
+    "flinch": "controller.animation.siege_b.crow_mage.flinch"
    },
    "scripts": {
     "animate": [
-     "main"
+     "base",
+     "idle",
+     "walk",
+     "ready",
+     "flinch"
     ]
    },
    "render_controllers": [

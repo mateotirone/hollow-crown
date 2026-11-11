@@ -13,11 +13,11 @@
     "default": "geometry.siege_b.chapel_bell"
    },
    "animations": {
-    "main": "animation.siege_b.chapel_bell"
+    "base": "animation.siege_b.chapel_bell"
    },
    "scripts": {
     "animate": [
-     "main"
+     "base"
     ]
    },
    "render_controllers": [

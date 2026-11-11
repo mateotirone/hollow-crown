@@ -14,7 +14,15 @@
    },
    "render_controllers": [
     "controller.render.siege_bestiary"
-   ]
+   ],
+   "animations": {
+    "idle": "animation.siege_b.choir_singer.idle"
+   },
+   "scripts": {
+    "animate": [
+     "idle"
+    ]
+   }
   }
  }
 }

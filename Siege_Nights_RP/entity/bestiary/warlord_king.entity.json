@@ -13,11 +13,24 @@
     "default": "geometry.siege_b.warlord_king"
    },
    "animations": {
-    "main": "animation.siege_b.warlord_king"
+    "base": "animation.siege_b.warlord_king",
+    "idle": "animation.siege_b.warlord_king.idle",
+    "walk": "animation.siege_b.warlord_king.walk",
+    "attack": "animation.siege_b.warlord_king.attack",
+    "swing": "controller.animation.siege_b.warlord_king.swing",
+    "aim": "animation.siege_b.warlord_king.aim",
+    "ready": "controller.animation.siege_b.warlord_king.ready",
+    "hurt": "animation.siege_b.warlord_king.hurt",
+    "flinch": "controller.animation.siege_b.warlord_king.flinch"
    },
    "scripts": {
     "animate": [
-     "main"
+     "base",
+     "idle",
+     "walk",
+     "swing",
+     "ready",
+     "flinch"
     ]
    },
    "render_controllers": [

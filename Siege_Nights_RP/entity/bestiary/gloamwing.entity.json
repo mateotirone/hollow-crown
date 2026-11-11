@@ -13,11 +13,11 @@
     "default": "geometry.siege_b.gloamwing"
    },
    "animations": {
-    "main": "animation.siege_b.gloamwing"
+    "base": "animation.siege_b.gloamwing"
    },
    "scripts": {
     "animate": [
-     "main"
+     "base"
     ]
    },
    "render_controllers": [
