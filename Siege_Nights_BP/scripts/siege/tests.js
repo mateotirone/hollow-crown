@@ -27,6 +27,7 @@ addTests("siege", {
     assert(ids.isGuardPiece("siege:guard_helmet", head), "plain helmet");
     assert(ids.isGuardPiece("siege:guard_frostmarch_helmet", head), "regional helmet");
     assert(ids.isGuardPiece("siege:guard_blackfen_boots", feet), "regional boots");
+    assert(ids.isGuardPiece("siege:guard_saltreach_netherite_helmet", head), "netherite regional helmet");
     assert(!ids.isGuardPiece("siege:guard_frostmarch_boots", head), "boots are not a helmet");
     assert(!ids.isGuardPiece("siege:guardgear_2_helmet", head), "the guards' own armor is not players' armor");
     assert(!ids.isGuardPiece("minecraft:iron_helmet", head), "vanilla armor");

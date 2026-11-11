@@ -473,4 +473,5 @@ The Texture Studio now lists every PNG under `textures/` automatically (catch-al
 Painted by `studio/art/build_regional_guard.py`. Same leather-dye trick as the Castle Guard armor (alpha 255 grey = banner colour, alpha 1 = own colour). Items `siege:guard_<region>_<piece>`, same stats as `siege:guard_*`; shapeless workshop recipe = Castle Guard piece + that region's Castle Stone (Vale uses plain Castle Stone). Shop entries: economy thread.
 | Worn sheets x5 regions | `textures/models/armor/guard_<vale/frostmarch/saltreach/emberwaste/blackfen>_layer_1.png`, `_layer_2.png` | Final style, untested in game |
 | Icons x20 | `textures/items/siege_guard_<region>_<helmet/chestplate/leggings/boots>.png` | Final style |
+| Diamond and netherite tiers (2026-11-11): worn sheets x20, icons x40 | `textures/models/armor/guard_<region>_<diamond/netherite>_layer_1/2.png`, `textures/items/siege_guard_<region>_<tier>_<piece>.png` | Re-toned from each region's iron look by the same script, **awaiting your review** |
 | Sheet | `art/regional-guard-armor.png` | |

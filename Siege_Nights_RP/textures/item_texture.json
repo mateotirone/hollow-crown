@@ -316,6 +316,126 @@
   },
   "siege_guard_blackfen_boots": {
    "textures": "textures/items/siege_guard_blackfen_boots"
+  },
+  "siege_guard_vale_diamond_helmet": {
+   "textures": "textures/items/siege_guard_vale_diamond_helmet"
+  },
+  "siege_guard_vale_diamond_chestplate": {
+   "textures": "textures/items/siege_guard_vale_diamond_chestplate"
+  },
+  "siege_guard_vale_diamond_leggings": {
+   "textures": "textures/items/siege_guard_vale_diamond_leggings"
+  },
+  "siege_guard_vale_diamond_boots": {
+   "textures": "textures/items/siege_guard_vale_diamond_boots"
+  },
+  "siege_guard_vale_netherite_helmet": {
+   "textures": "textures/items/siege_guard_vale_netherite_helmet"
+  },
+  "siege_guard_vale_netherite_chestplate": {
+   "textures": "textures/items/siege_guard_vale_netherite_chestplate"
+  },
+  "siege_guard_vale_netherite_leggings": {
+   "textures": "textures/items/siege_guard_vale_netherite_leggings"
+  },
+  "siege_guard_vale_netherite_boots": {
+   "textures": "textures/items/siege_guard_vale_netherite_boots"
+  },
+  "siege_guard_frostmarch_diamond_helmet": {
+   "textures": "textures/items/siege_guard_frostmarch_diamond_helmet"
+  },
+  "siege_guard_frostmarch_diamond_chestplate": {
+   "textures": "textures/items/siege_guard_frostmarch_diamond_chestplate"
+  },
+  "siege_guard_frostmarch_diamond_leggings": {
+   "textures": "textures/items/siege_guard_frostmarch_diamond_leggings"
+  },
+  "siege_guard_frostmarch_diamond_boots": {
+   "textures": "textures/items/siege_guard_frostmarch_diamond_boots"
+  },
+  "siege_guard_frostmarch_netherite_helmet": {
+   "textures": "textures/items/siege_guard_frostmarch_netherite_helmet"
+  },
+  "siege_guard_frostmarch_netherite_chestplate": {
+   "textures": "textures/items/siege_guard_frostmarch_netherite_chestplate"
+  },
+  "siege_guard_frostmarch_netherite_leggings": {
+   "textures": "textures/items/siege_guard_frostmarch_netherite_leggings"
+  },
+  "siege_guard_frostmarch_netherite_boots": {
+   "textures": "textures/items/siege_guard_frostmarch_netherite_boots"
+  },
+  "siege_guard_saltreach_diamond_helmet": {
+   "textures": "textures/items/siege_guard_saltreach_diamond_helmet"
+  },
+  "siege_guard_saltreach_diamond_chestplate": {
+   "textures": "textures/items/siege_guard_saltreach_diamond_chestplate"
+  },
+  "siege_guard_saltreach_diamond_leggings": {
+   "textures": "textures/items/siege_guard_saltreach_diamond_leggings"
+  },
+  "siege_guard_saltreach_diamond_boots": {
+   "textures": "textures/items/siege_guard_saltreach_diamond_boots"
+  },
+  "siege_guard_saltreach_netherite_helmet": {
+   "textures": "textures/items/siege_guard_saltreach_netherite_helmet"
+  },
+  "siege_guard_saltreach_netherite_chestplate": {
+   "textures": "textures/items/siege_guard_saltreach_netherite_chestplate"
+  },
+  "siege_guard_saltreach_netherite_leggings": {
+   "textures": "textures/items/siege_guard_saltreach_netherite_leggings"
+  },
+  "siege_guard_saltreach_netherite_boots": {
+   "textures": "textures/items/siege_guard_saltreach_netherite_boots"
+  },
+  "siege_guard_emberwaste_diamond_helmet": {
+   "textures": "textures/items/siege_guard_emberwaste_diamond_helmet"
+  },
+  "siege_guard_emberwaste_diamond_chestplate": {
+   "textures": "textures/items/siege_guard_emberwaste_diamond_chestplate"
+  },
+  "siege_guard_emberwaste_diamond_leggings": {
+   "textures": "textures/items/siege_guard_emberwaste_diamond_leggings"
+  },
+  "siege_guard_emberwaste_diamond_boots": {
+   "textures": "textures/items/siege_guard_emberwaste_diamond_boots"
+  },
+  "siege_guard_emberwaste_netherite_helmet": {
+   "textures": "textures/items/siege_guard_emberwaste_netherite_helmet"
+  },
+  "siege_guard_emberwaste_netherite_chestplate": {
+   "textures": "textures/items/siege_guard_emberwaste_netherite_chestplate"
+  },
+  "siege_guard_emberwaste_netherite_leggings": {
+   "textures": "textures/items/siege_guard_emberwaste_netherite_leggings"
+  },
+  "siege_guard_emberwaste_netherite_boots": {
+   "textures": "textures/items/siege_guard_emberwaste_netherite_boots"
+  },
+  "siege_guard_blackfen_diamond_helmet": {
+   "textures": "textures/items/siege_guard_blackfen_diamond_helmet"
+  },
+  "siege_guard_blackfen_diamond_chestplate": {
+   "textures": "textures/items/siege_guard_blackfen_diamond_chestplate"
+  },
+  "siege_guard_blackfen_diamond_leggings": {
+   "textures": "textures/items/siege_guard_blackfen_diamond_leggings"
+  },
+  "siege_guard_blackfen_diamond_boots": {
+   "textures": "textures/items/siege_guard_blackfen_diamond_boots"
+  },
+  "siege_guard_blackfen_netherite_helmet": {
+   "textures": "textures/items/siege_guard_blackfen_netherite_helmet"
+  },
+  "siege_guard_blackfen_netherite_chestplate": {
+   "textures": "textures/items/siege_guard_blackfen_netherite_chestplate"
+  },
+  "siege_guard_blackfen_netherite_leggings": {
+   "textures": "textures/items/siege_guard_blackfen_netherite_leggings"
+  },
+  "siege_guard_blackfen_netherite_boots": {
+   "textures": "textures/items/siege_guard_blackfen_netherite_boots"
   }
  }
 }
