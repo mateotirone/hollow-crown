@@ -2,7 +2,7 @@
 
 import { world, ItemStack, GameMode } from "@minecraft/server";
 import { ActionFormData, MessageFormData, ModalFormData } from "@minecraft/server-ui";
-import { countItem, takeItems } from "../siege/api.js";
+import { countItem, takeItems, emit } from "../siege/api.js";
 import { funds, charge } from "../economy/coins.js";
 import {
   HORSE_SETTINGS as S, STATS, STAT_NAMES, SPEED_BPS, JUMP_BLOCKS, HEALTH_VALUES, gallopTicks, MAX_TRAINED, TRAIN_COST,
@@ -269,6 +269,7 @@ export async function stablesMenu(player, owner, at, ownerName) {
         meta.save();
         sfx(player, "random.anvil_use");
         player.sendMessage(`§6Your Stables is now level ${next.level}: ${next.unlocks}.`);
+        emit("stablesUpgraded", { owner, level: next.level, player }); // the stable building grows (barn.js)
         return again();
       },
     });

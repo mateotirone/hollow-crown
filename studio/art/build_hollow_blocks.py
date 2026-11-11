@@ -31,6 +31,7 @@ def basalt(ramp_, seed, lo=1, hi=2, cols=(3, 2, 4, 3, 2, 2), soft=False):
         x += w
     return t
 
+# ---- 1. Veinstone: NOTE superseded by build_veinstone.py (2026-11-11); re-running this file overwrites the new art.
 # ---- 1. Veinstone: quiet base, veins only on some variants and never corner to corner
 def vein(t, path, bright=()):
     for a, b in zip(path, path[1:]):

@@ -257,16 +257,51 @@ def icon(reg, piece, ramps):
 
 
 PIECES = ['helmet', 'chestplate', 'leggings', 'boots']
+
+# ---- tiers (Mateo 2026-11-11): every region's set comes in iron (the original ids), diamond and netherite.
+# A higher tier is the same regional look with its metal re-toned. Ids: siege:guard_<region>[_<tier>]_<piece>.
+DIAMOND = fixed('#0f3a3d', '#1b6b6e', '#2aa3a3', '#4fd3cf', '#8ef0e8', '#d4fffb')
+NETHERITE = fixed('#1c1719', '#2b2427', '#3d3437', '#4f4548', '#665a5c', '#7f7275')
+TIERS = {'': None, 'diamond': DIAMOND, 'netherite': NETHERITE}
+
+
+def retone(im, src, dst):
+    if dst is None: return im
+    look = {tuple(c): tuple(d) for c, d in zip(src, dst)}
+    out = im.copy(); px = out.load()
+    for y in range(out.size[1]):
+        for x in range(out.size[0]):
+            c = px[x, y]
+            if c[3] and c[:3] in look: px[x, y] = look[c[:3]] + (c[3],)
+    return out
+
+
+def tier_ramps(reg, ramps, tier):
+    met, trim, lea = ramps
+    new = TIERS[tier]
+    if new is None: return ramps
+    if tier == 'netherite' and reg == 'emberwaste': trim = M['gold']   # black on black needs a gold edge
+    return new, trim, lea
+
+
 os.makedirs(T + 'models/armor', exist_ok=True)
-sheet = Image.new('RGBA', (5 * 216 + 8, 300), (38, 34, 46, 255))
-for i, reg in enumerate(REG):
-    l1, l2, ramps = build(reg)
-    l1.save(T + f'models/armor/guard_{reg}_layer_1.png'); l2.save(T + f'models/armor/guard_{reg}_layer_2.png')
-    for n, im in enumerate((l1, l2)):
-        v = im.copy(); v.putalpha(im.getchannel('A').point(lambda a: 255 if a else 0))
-        sheet.alpha_composite(v.resize((192, 96), Image.NEAREST), (8 + i * 216, 8 + n * 104))
-    for j, pc in enumerate(PIECES):
-        ic = icon(reg, pc, ramps); ic.save(T + f'items/siege_guard_{reg}_{pc}.png')
-        sheet.alpha_composite(ic.resize((44, 44), Image.NEAREST), (8 + i * 216 + j * 48, 224))
+sheet = Image.new('RGBA', (5 * 216 + 8, 300 * len(TIERS)), (38, 34, 46, 255))
+for t, tier in enumerate(TIERS):
+    for i, reg in enumerate(REG):
+        l1, l2, ramps = build(reg)
+        met, trim, lea = ramps
+        nmet, ntrim, _ = tier_ramps(reg, ramps, tier)
+        if tier:
+            l1, l2 = (retone(retone(im, met, nmet), trim, ntrim) for im in (l1, l2))
+            if reg == 'frostmarch':   # mostly wool and fur: the quilting takes the tier's colour too
+                l1, l2 = (retone(im, WOOL, dim(nmet, 1)) for im in (l1, l2))
+        name = f'{reg}_{tier}' if tier else reg
+        l1.save(T + f'models/armor/guard_{name}_layer_1.png'); l2.save(T + f'models/armor/guard_{name}_layer_2.png')
+        for n, im in enumerate((l1, l2)):
+            v = im.copy(); v.putalpha(im.getchannel('A').point(lambda a: 255 if a else 0))
+            sheet.alpha_composite(v.resize((192, 96), Image.NEAREST), (8 + i * 216, 8 + n * 104 + t * 300))
+        for j, pc in enumerate(PIECES):
+            ic = icon(reg, pc, tier_ramps(reg, ramps, tier)); ic.save(T + f'items/siege_guard_{name}_{pc}.png')
+            sheet.alpha_composite(ic.resize((44, 44), Image.NEAREST), (8 + i * 216 + j * 48, 224 + t * 300))
 os.makedirs(ROOT + 'art', exist_ok=True)
 sheet.save(ROOT + 'art/regional-guard-armor.png'); print('ok')
