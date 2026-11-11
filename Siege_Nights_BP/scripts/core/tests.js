@@ -9,6 +9,30 @@
 // Keep them synchronous and harmless: while tests run, saving to the world is switched off.
 
 const tests = [];
+
+// Tests too heavy to run inside Minecraft: its script engine is far slower than Node, and one long test
+// trips the watchdog, which shuts the world down (first playtest, 2026-11-11). They still run in
+// tools/check.mjs, which fails if a slow test is missing from this list. Written as "group: name".
+export const OFFLINE_ONLY = new Set([
+  "undertow: ore is in the cliffs, more of it deeper in",
+  "undertow: no fill is too big",
+  "undertow: open country has all four kinds of land",
+  "undertow: roads are dry and gentle, and cross rivers on bridges a boat fits under",
+  "undertow: terrain is deterministic",
+  "undertow: light rivers are one boatable network",
+  "townhall: every hall draws in every style",
+  "settle walls: walls vary along their length and from one settlement to the next, the same way every time",
+  "settle walls: repair: every level lists what should stand, and the price follows the damage",
+  "settle: the reserve covers every hall tier in every style",
+  "crown: the gate is a real gate",
+  "crown: the throne and the Seal stand inside the Great Keep",
+  "crown: the Citadel plan is big, tall and always the same",
+  "crown: walls stay inside Citadel land",
+  "crown: the Citadel never builds over its Keep Banner",
+  "crown: hangings and carpet carry the ruler's color",
+  "rivals: stage buildings exist, miss each other and miss the hall, whichever way the gate faces",
+]);
+export const testNames = () => tests.map((t) => `${t.group}: ${t.name}`);
 let testing = false;
 
 export const isTesting = () => testing;
@@ -27,7 +51,7 @@ export function assertEqual(actual, expected, message = "") {
 }
 
 // inGame: false skips the gameOnly tests (used by the offline check)
-export function runTests({ inGame = true } = {}) {
+export function runTests({ inGame = true, slow } = {}) {
   const result = { passed: 0, skipped: 0, failed: [] };
   testing = true;
   try {
@@ -37,7 +61,9 @@ export function runTests({ inGame = true } = {}) {
         continue;
       }
       try {
+        const began = Date.now();
         t.fn();
+        slow?.(`${t.group}: ${t.name}`, Date.now() - began);
         result.passed++;
       } catch (e) {
         result.failed.push({ group: t.group, name: t.name, error: String(e?.message ?? e) });
@@ -55,7 +81,7 @@ export function runTests({ inGame = true } = {}) {
 export function* runTestsJob({ inGame = true } = {}, done = () => {}) {
   const result = { passed: 0, skipped: 0, failed: [] };
   for (const t of tests) {
-    if (t.gameOnly && !inGame) {
+    if ((t.gameOnly && !inGame) || OFFLINE_ONLY.has(`${t.group}: ${t.name}`)) {
       result.skipped++;
       continue;
     }
