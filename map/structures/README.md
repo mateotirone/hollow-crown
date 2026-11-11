@@ -68,11 +68,18 @@ fields and windmills around them:
    door step (half a block under the floor) to the path, with a stair only where it must climb
    a whole block. The floor height balances digging in against building up; the low side gets a
    stone foundation as deep as the slope needs and the ground is eased back round it.
-5. **Fields** fill the land between the paths in the outer ring: 9-wide strips (water channel
-   down the middle, every crop within 4 blocks), each levelled into its own terrace, hedged where
-   it meets a street. Wheat, carrots, potatoes, beetroot, some fallow.
-6. **Windmills** on the high ground among the fields with a footpath to the nearest street;
-   stalls, a well or market cross and lamps on the square; lamps and trees along the streets.
+5. **Land portions** (Mateo, 2026-11-11): every patch of land boxed in by paths (a back lane
+   rings the middle of town so the streets enclose land) is decided as a whole. Near the square
+   and small: a **build portion**, plots round its edge facing the paths, free ground in the
+   middle. Big and further out: a **field portion**.
+6. **Fields**: a crop on every block of a field portion, on the ground as it lies. Water goes
+   into the ground level by level: for each height, water blocks at that height are added (a
+   9-block lattice first, then wherever crops are still dry) until every crop on that level is
+   within 4 blocks of one. Water never sits beside a lower block (it would spill); a crop no
+   water can reach on its level becomes a grass headland. Field portions over 900 blocks get a
+   **windmill** near the centre; big fields get fenced tracks cut across them (placeholder
+   fence until the field fencing system is designed). Stalls, a well or market cross and lamps
+   on the square; lamps and trees along the streets.
 
 `towngen_build.py` has the buildings: cottages (front-gabled with optional jetty, side-gabled,
 L-shaped with a forward wing, hipped), barns, windmills, a well and a market cross, and the

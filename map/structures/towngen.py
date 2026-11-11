@@ -273,7 +273,7 @@ class Town:
         merged = []
         for g in gates:
             if all(math.hypot(g[0] - m[0], g[1] - m[1]) > 14 for m in merged): merged.append(g)
-        want = 3 if self.big else 2
+        want = 4 if self.big else 3
         ang0 = self.rng.random() * 360
         while len(merged) < want:                # no map road here: open lanes out to the country anyway
             a = math.radians(ang0 + 360 * len(merged) / want + self.rng.uniform(-25, 25))
@@ -285,8 +285,11 @@ class Town:
         for gx, gz, name, kind in merged:
             path = self.astar((gx, gz), ring, "main")
             if path: self.lay(path[::-1], "main" if kind == "road" else "lane", k_start=self.k_at(*path[-1]))
-        # lanes branch off the main streets, some looping back into another street
-        nl = self.rng.randint(8, 11) if self.big else self.rng.randint(4, 6)
+        # a back lane ringing the middle of town: with the streets running in, it boxes the land
+        # into portions (inner blocks to build on, outer sectors for fields)
+        self.ring_lane()
+        # lanes cut across from street to street, splitting the bigger blocks
+        nl = self.rng.randint(5, 8) if self.big else self.rng.randint(2, 4)
         mains = [r for r in self.roads if r["kind"] in ("main", "lane")]
         tries = 0
         while nl > 0 and tries < 60 and mains:
@@ -312,12 +315,34 @@ class Town:
             path = path[::-1]
             # carry on to the nearest other street if one is close: a loop instead of a dead end
             tail = self.astar(path[-1], [tuple(int(v) for v in (c[0] + self.X0, c[1] + self.Z0)) for c in np.argwhere(self.KIND >= PRIO["lane"])
-                                         if math.hypot(c[0] + self.X0 - path[-1][0], c[1] + self.Z0 - path[-1][1]) < 18
-                                         and math.hypot(c[0] + self.X0 - sx, c[1] + self.Z0 - sz) > 25], "lane", limit=60) if self.rng.random() < 0.5 else None
+                                         if math.hypot(c[0] + self.X0 - path[-1][0], c[1] + self.Z0 - path[-1][1]) < 26
+                                         and math.hypot(c[0] + self.X0 - sx, c[1] + self.Z0 - sz) > 22], "lane", limit=120)
             ke = None
-            if tail and len(tail) > 1: path = path + tail[1:]; ke = self.k_at(*tail[-1])
+            if not tail or len(tail) < 2: continue          # no dead ends: every lane joins two streets
+            path = path + tail[1:]; ke = self.k_at(*tail[-1])
             rd = self.lay(path, "lane", k_start=self.k_at(sx, sz), k_end=ke)
             if rd: mains.append(rd); nl -= 1
+
+    def ring_lane(self):
+        rr = self.R * (0.5 if self.big else 0.46)
+        a0 = self.rng.random() * 2 * math.pi; n = 9
+        way = []
+        for k in range(n):
+            a = a0 + 2 * math.pi * k / n
+            r = rr * self.rng.uniform(0.85, 1.12)
+            x, z = int(round(self.sq[0] + math.cos(a) * r)), int(round(self.sq[1] + math.sin(a) * r))
+            for _ in range(8):
+                if self.inside(x, z, 6) and not self.at(self.WET, x, z): break
+                r *= 0.92; x, z = int(round(self.sq[0] + math.cos(a) * r)), int(round(self.sq[1] + math.sin(a) * r))
+            else: continue
+            way.append((x, z))
+        for p0, p1 in zip(way, way[1:] + way[:1]):
+            path = self.astar(p1, [p0], "lane", limit=400)
+            if not path or len(path) < 2: continue
+            path = path[::-1]
+            ks = self.k_at(*path[0]) if self.at(self.K, *path[0]) >= 0 else None
+            ke = self.k_at(*path[-1]) if self.at(self.K, *path[-1]) >= 0 else None
+            self.lay(path, "lane", k_start=ks, k_end=ke)
 
     def relax(self, it=40):
         """Make sure no two touching path cells differ by more than half a block anywhere,
@@ -504,7 +529,8 @@ class Town:
             deg = snap_rot(-nx, -nz)
             f = ROT[deg]
             placed = None
-            tier = tier_fn(x, z)
+            probe = (int(round(x + nx * (hw + 2.5))), int(round(z + nz * (hw + 2.5))))
+            tier = tier_fn(*probe)
             if tier is None: t += 3; continue
             for sb in setbacks:
                 door = (int(round(x + nx * (hw + 0.5 + sb))), int(round(z + nz * (hw + 0.5 + sb))))
@@ -522,7 +548,7 @@ class Town:
 
     def pick_building(self, tier, kinds=None):
         sd = self.seed * 1000 + len(self.plan) * 7 + self.rng.randint(0, 999)
-        if tier == 3 or (kinds and "barn" in kinds and self.rng.random() < 0.35): return TB.barn(sd, 9, self.rng.choice([11, 13]))
+        if tier == 3: return TB.barn(sd, 9, self.rng.choice([11, 13]))
         if tier == 0 and self.site.get("region", "vale") == "vale" and self.rng.random() < 0.35:
             st = self.rng.choice(["tudor", "tudor", "stone", "brick"])
             w, d = self.rng.choice([(7, 9), (7, 11), (9, 11)])
@@ -552,6 +578,9 @@ class Town:
 
     def houses(self):
         def tier(x, z):
+            pk = self.at(self.PKIND, x, z) if self.ok(x, z) else 0
+            if pk == 2: return 3 if self.rng.random() < 0.12 else None      # field portions: only the odd barn on the edge
+            if pk == 0: return None
             u = self.u(x, z)
             if u < (0.32 if self.big else 0.28): return 0
             if u < (0.55 if self.big else 0.5): return 1
@@ -564,7 +593,7 @@ class Town:
         for rd in [r for r in self.roads if r["kind"] == "main"] + [r for r in self.roads if r["kind"] == "lane"]:
             for side in (1, -1):
                 self.place_along(rd, side, tier, setbacks=(1, 2, 3), gap_rng=(1, 2) if rd["kind"] == "main" else (1, 3),
-                                 kinds=("barn",) if True else None)
+                                 kinds=None)
 
     # =========================================================================== 5. windmills, fields
     def footpath(self, a, b):
@@ -572,119 +601,202 @@ class Town:
         if p and len(p) > 1:
             self.lay(p, "walk", k_end=self.k_at(*b) if self.at(self.K, *b) >= 0 else None)
 
-    def windmills(self):
-        n = 2 if self.big else 1
-        cand = []
-        for _ in range(2500):
-            a = self.rng.random() * 2 * math.pi; r = self.R * math.sqrt(self.rng.uniform(0.3, 0.85))
-            x, z = int(self.C[0] + math.cos(a) * r), int(self.C[1] + math.sin(a) * r)
-            if not self.inside(x, z, 8) or self.u(x, z) < 0.45: continue
-            i, j = self.ij(x, z)
-            if self.TAKEN[i - 6:i + 7, j - 6:j + 7].any() or (self.K[i - 6:i + 7, j - 6:j + 7] >= 0).any() or self.WET[i - 7:i + 8, j - 7:j + 8].any(): continue
-            win = self.G[i - 4:i + 5, j - 4:j + 5]
-            if win.max() - win.min() > 3: continue
-            cand.append((float(win.mean()) + self.rng.random(), x, z))
-        cand.sort(reverse=True); got = []
-        for h, x, z in cand:
-            if len(got) >= n: break
-            if any(math.hypot(x - a, z - b) < 30 for a, b in got): continue
-            # door toward the nearest street
-            pts = np.argwhere(self.KIND >= PRIO["lane"])
-            if not len(pts): break
-            dd = np.hypot(pts[:, 0] + self.X0 - x, pts[:, 1] + self.Z0 - z); q = pts[dd.argmin()]
-            qx, qz = int(q[0]) + self.X0, int(q[1]) + self.Z0
-            deg = snap_rot(qx - x, qz - z); f = ROT[deg]
-            bp = TB.windmill(self.seed * 31 + len(got))
-            e = self.try_place(bp, deg, (x + f[0] * 4, z + f[1] * 4), "windmill", gap=2, max_relief=4, need_walk=False)
-            if not e: continue
-            got.append((x, z))
-            self.footpath((x + f[0] * 4, z + f[1] * 4), (qx, qz))
-        self.relax()
-
-    def fields(self):
-        """Farmland strips between the paths in the outer ring, levelled into terraces."""
-        nearpath = self._dilate(self.K >= 0, 2)
-        free = self.IN & (self.D <= self.R - 2) & ~self.WET & (self.TAKEN == 0) & ~nearpath & ~self.FIX
-        ii, jj = np.meshgrid(np.arange(self.G.shape[0]) + self.X0, np.arange(self.G.shape[1]) + self.Z0, indexing="ij")
-        U = np.hypot(ii - self.sq[0], jj - self.sq[1]) / self.R
-        free &= U >= (0.42 if self.big else 0.3)
-        lab = np.zeros(self.G.shape, np.int32); nlab = 0
-        for i, j in np.argwhere(free):
+    # ---- land portions (Mateo, 2026-11-11): the land boxed in by paths, each decided as a whole
+    def portions(self):
+        """Label every patch of land enclosed by paths (or the town edge, or water) and decide
+        each one: a build portion (plots round its edge, free ground in the middle) or a field
+        portion (crops on every block). Near the square and small portions build; big ones
+        further out farm."""
+        land = self.IN & (self.D <= self.R - 4) & (self.K < 0) & ~self.WET      # streets end 3 in from the edge: the edge closes the portions
+        lab = np.zeros(self.G.shape, np.int32); n = 0
+        for i, j in np.argwhere(land):
             if lab[i, j]: continue
-            nlab += 1; st = [(i, j)]; lab[i, j] = nlab
+            n += 1; st = [(i, j)]; lab[i, j] = n
             while st:
                 a, b = st.pop()
                 for c in ((a + 1, b), (a - 1, b), (a, b + 1), (a, b - 1)):
-                    if 0 <= c[0] < lab.shape[0] and 0 <= c[1] < lab.shape[1] and free[c] and not lab[c]: lab[c] = nlab; st.append(c)
-        self.FIELD = np.zeros(self.G.shape, bool); nparcel = 0
-        for L in range(1, nlab + 1):
-            cells = np.argwhere(lab == L)
-            if len(cells) < 70: continue
-            i0, j0 = cells.min(0); i1, j1 = cells.max(0)
-            along_x = (i1 - i0) >= (j1 - j0)
-            S = 9; oA = self.rng.randint(0, 6); oB = self.rng.randint(0, 9)
-            comp = lab == L
-            # strips: 9 across, 11-21 along, a one-block grass balk between them
-            for c in range((j0 if along_x else i0) - oB, (j1 if along_x else i1) + 1, S + 1):
-                a = (i0 if along_x else j0)
-                end = (i1 if along_x else j1)
-                while a <= end:
-                    # the longest run of whole 9-wide columns from here, cut into strips of 7-21
-                    run = 0
-                    while a + run <= end:
-                        col = comp[a + run, max(0, c):c + S] if along_x else comp[max(0, c):c + S, a + run]
-                        if c < 0 or len(col) < S or not col.all(): break
-                        run += 1
-                    if run < 7: a += max(1, run + 1); continue
-                    while run >= 7:
-                        Ln = min(run, self.rng.choice([11, 13, 15, 17, 19, 21]))
-                        if Ln % 2 == 0: Ln -= 1
-                        if Ln < 7: break
-                        nparcel += self.parcel(comp, a, c, Ln, S, True) if along_x else self.parcel(comp, c, a, Ln, S, False)
-                        a += Ln + 1; run -= Ln + 1
-                    a += max(1, run + 1)
-        # hedges where the fields meet the streets, orchards and meadows in the left-over corners
-        F = self.FIELD
-        edge = self._dilate(F, 1) & ~F & ~(self.K >= 0) & (self.TAKEN == 0) & self.IN & ~self.WET
-        hedge = edge & self._dilate(self.K >= 0, 3)
-        for i, j in np.argwhere(hedge):
-            x, z = int(i) + self.X0, int(j) + self.Z0
-            if h3(x, 0, z, 77) < 0.12: continue                  # gaps to walk through
-            g = int(self.G[i, j])
-            self.works[(x, g + 1, z)] = ("oak_leaves" if h3(x, 1, z, 78) < 0.7 else "azalea_leaves", {})
-            self.TAKEN[i, j] = 4
-        self.nparcel = nparcel
+                    if 0 <= c[0] < lab.shape[0] and 0 <= c[1] < lab.shape[1] and land[c] and not lab[c]: lab[c] = n; st.append(c)
+        self.PORT = lab; self.port = {}
+        ii, jj = np.meshgrid(np.arange(self.G.shape[0]) + self.X0, np.arange(self.G.shape[1]) + self.Z0, indexing="ij")
+        dsq = np.hypot(ii - self.sq[0], jj - self.sq[1]) / self.R
+        build_u = 0.42 if self.big else 0.34
+        for L in range(1, n + 1):
+            m = lab == L; area = int(m.sum())
+            u_mean = float(dsq[m].mean()); u_min = float(dsq[m].min())
+            g = self.G[m]
+            kind = "build"
+            if area >= 160 and u_mean >= build_u and u_min > (self.sqR + 4) / self.R: kind = "field"
+            if kind == "field" and np.percentile(g, 95) - np.percentile(g, 5) > 12: kind = "build"   # too steep to farm
+            self.port[L] = {"kind": kind, "area": area, "u": round(u_mean, 2)}
+        if not any(p["kind"] == "field" for p in self.port.values()):            # always some farmland
+            big = max((L for L in self.port if self.port[L]["u"] > 0.3), key=lambda L: self.port[L]["area"], default=None)
+            if big: self.port[big]["kind"] = "field"
+        self.PKIND = np.zeros(self.G.shape, np.int8)                              # 1 build, 2 field
+        for L, p in self.port.items(): self.PKIND[lab == L] = 1 if p["kind"] == "build" else 2
 
-    def parcel(self, comp, a, b, Ln, S, along_x):
-        (ia, ib) = (Ln, S) if along_x else (S, Ln)
-        if a < 0 or b < 0 or a + ia > comp.shape[0] or b + ib > comp.shape[1]: return 0
-        if not comp[a:a + ia, b:b + ib].all(): return 0
-        win = self.G[a:a + ia, b:b + ib]
-        if win.max() - win.min() > 4: return 0
-        m = int(round(float(np.median(win))))
-        r = self.rng.random() * 100; crop = "wheat"; gr = (5, 7)
-        for c, w, g in CROPS:
-            r -= w
-            if r < 0: crop, gr = c, g; break
-        fallow = self.rng.random() < 0.08
-        for di in range(ia):
-            for dj in range(ib):
-                i, j = a + di, b + dj; x, z = i + self.X0, j + self.Z0
-                g0 = int(self.G[i, j])
-                for y in range(m + 1, max(g0, m) + 2): self.works[(x, y, z)] = ("air", {})
-                for y in range(g0 + 1, m): self.works[(x, y, z)] = ("dirt", {})
-                across = dj if along_x else di; alongk = di if along_x else dj
-                if across == S // 2 and 0 < alongk < (Ln - 1):
-                    self.works[(x, m, z)] = ("water", {}); self.works[(x, m - 1, z)] = ("dirt", {})
-                elif fallow:
-                    self.works[(x, m, z)] = ("coarse_dirt" if h3(x, 2, z, 5) < 0.5 else "grass_block", {})
-                    if h3(x, 3, z, 6) < 0.05: self.works[(x, m + 1, z)] = ("hay_block", {"axis": "y"})
-                else:
-                    self.works[(x, m, z)] = ("farmland", {"raw": {"moisturized_amount": 7}})
-                    gv = gr[0] + int(h3(x, 4, z, 7) * (gr[1] - gr[0] + 1))
-                    self.works[(x, m + 1, z)] = (crop, {"raw": {"growth": min(7, gv)}})
-                self.G[i, j] = m; self.FIX[i, j] = True; self.FIELD[i, j] = True; self.TAKEN[i, j] = 3
-        return 1
+    def footpath(self, a, b, fence=False):
+        p = self.astar(a, [b], "lane", limit=600)
+        if p and len(p) > 1:
+            rd = self.lay(p, "walk", k_end=self.k_at(*b) if self.at(self.K, *b) >= 0 else None)
+            if rd and fence: rd["fence"] = True
+            return rd
+
+    def nearest_street(self, x, z, cells=None):
+        pts = np.argwhere(self.KIND >= PRIO["lane"]) if cells is None else cells
+        if not len(pts): return None
+        dd = np.hypot(pts[:, 0] + self.X0 - x, pts[:, 1] + self.Z0 - z); q = pts[dd.argmin()]
+        return int(q[0]) + self.X0, int(q[1]) + self.Z0
+
+    WINDMILL_AREA = 900          # a field portion at least this big gets a windmill near its centre
+    def windmills(self):
+        for L, p in sorted(self.port.items(), key=lambda t: -t[1]["area"]):
+            if p["kind"] != "field" or p["area"] < self.WINDMILL_AREA: continue
+            m = (self.PORT == L) & (self.TAKEN == 0)
+            cells = np.argwhere(m)
+            if not len(cells): continue
+            ci, cj = cells.mean(0)
+            order = sorted(cells, key=lambda c: (c[0] - ci) ** 2 + (c[1] - cj) ** 2)
+            for c in order[:400]:
+                x, z = int(c[0]) + self.X0, int(c[1]) + self.Z0
+                i, j = int(c[0]), int(c[1])
+                win = self.PORT[i - 6:i + 7, j - 6:j + 7]
+                if win.shape != (13, 13) or (win != L).any(): continue
+                g = self.G[i - 4:i + 5, j - 4:j + 5]
+                if g.max() - g.min() > 4: continue
+                q = self.nearest_street(x, z)
+                if not q: break
+                deg = snap_rot(q[0] - x, q[1] - z); f = ROT[deg]
+                bp = TB.windmill(self.seed * 31 + L)
+                e = self.try_place(bp, deg, (x + f[0] * 4, z + f[1] * 4), "windmill", gap=2, max_relief=4, need_walk=False)
+                if not e: continue
+                p["windmill"] = [x, z]
+                rd = self.footpath((x + f[0] * 4, z + f[1] * 4), q, fence=True)
+                break
+        self.relax()
+
+    def field_paths(self):
+        """Paths cut through big fields so you can walk in: a straight track across each field
+        portion every ~31 blocks, joining street to street, fenced on both sides (placeholder
+        fence until the field fencing system is designed)."""
+        for L, p in self.port.items():
+            if p["kind"] != "field": continue
+            cells = np.argwhere((self.PORT == L) & (self.K < 0))
+            if len(cells) < 500: continue
+            (i0, j0), (i1, j1) = cells.min(0), cells.max(0)
+            along_x = (i1 - i0) < (j1 - j0)                 # cut across the long way
+            span = (i1 - i0) if along_x else (j1 - j0)
+            cuts = max(1, int(span // 31))
+            for c in range(1, cuts + 1):
+                t = (i0 if along_x else j0) + span * c // (cuts + 1)
+                line = cells[cells[:, 0] == t] if along_x else cells[cells[:, 1] == t]
+                if len(line) < 12: continue
+                lo, hi = line[:, 1 if along_x else 0].min(), line[:, 1 if along_x else 0].max()
+                a = (t + self.X0, lo + self.Z0) if along_x else (lo + self.X0, t + self.Z0)
+                b = (t + self.X0, hi + self.Z0) if along_x else (hi + self.X0, t + self.Z0)
+                sa, sb = self.nearest_street(*a), self.nearest_street(*b)
+                if not sa or not sb or sa == sb: continue
+                self.footpath(sa, sb, fence=True)
+        self.relax()
+
+    def fences(self):
+        """Placeholder field fencing: a spruce fence beside every fenced field path, with a gate
+        every 15 blocks. Replaced once the fencing system is designed."""
+        for rd in self.roads:
+            if not rd.get("fence"): continue
+            path = {(int(round(x)), int(round(z))) for x, z in rd["pts"]}
+            for x, z in path:
+                for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                    c = (x + dx, z + dz)
+                    if not self.ok(*c) or c in path: continue
+                    i, j = self.ij(*c)
+                    if self.K[i, j] >= 0 or self.TAKEN[i, j] >= 2 or self.WET[i, j] or self.PKIND[i, j] != 2: continue
+                    gate = (c[0] * 7 + c[1] * 13) % 15 == 0
+                    self.works[(c[0], int(self.G[i, j]) + 1, c[1])] = ("spruce_fence_gate", {"facing": "n" if dx else "e"}) if gate else ("spruce_fence", {})
+                    self.TAKEN[i, j] = 4
+
+    def fields(self):
+        """Crops on every free block of every field portion, on the ground as it lies (no
+        levelling). Water then goes into the ground one level at a time: for each height, water
+        blocks at that height are added until every crop at that height is within 4 blocks
+        (a 9 x 9 square) of one. Water never sits beside a lower block, where it would spill."""
+        self.FIELD = (self.PKIND == 2) & (self.D <= self.R - 4) & (self.K < 0) & (self.TAKEN == 0) & ~self.WET & self.IN
+        F = self.FIELD
+        # crop patches: a few seeds per portion, nearest seed decides the crop
+        crop_of = np.full(self.G.shape, -1, np.int8)
+        for L, p in self.port.items():
+            if p["kind"] != "field": continue
+            cells = np.argwhere(F & (self.PORT == L))
+            if not len(cells): continue
+            k = max(1, len(cells) // 260)
+            seeds = cells[[self.rng.randrange(len(cells)) for _ in range(k)]]
+            picks = []
+            for _ in range(k):
+                r = self.rng.random() * 100
+                for ci, (c, w, g) in enumerate(CROPS):
+                    r -= w
+                    if r < 0: picks.append(ci); break
+                else: picks.append(0)
+            d = np.stack([np.hypot(cells[:, 0] - s[0], cells[:, 1] - s[1]) + 3 * h3(int(s[0]), 0, int(s[1]), 9) for s in seeds])
+            near = d.argmin(0)
+            for (i, j), q in zip(cells, near): crop_of[i, j] = picks[q]
+        # water, level by level
+        water = np.zeros(self.G.shape, bool); dry = np.zeros(self.G.shape, bool); self.unwatered = 0; nwater = 0
+        Gt = np.where(self.K >= 0, (self.K - 1) // 2, self.G)         # the top of every neighbour (a path's slab counts)
+        H = self.G
+        for L, p in self.port.items():
+            if p["kind"] != "field": continue
+            M = F & (self.PORT == L)
+            for h in np.unique(H[M]):
+                S = M & (H == h)
+                # a cell can hold water if none of its four neighbours is lower (water would spill)
+                cand = S.copy()
+                for di, dj in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                    nb = np.roll(Gt, (-di, -dj), (0, 1))
+                    cand &= nb >= h
+                need = S.copy()
+                cov = np.zeros(S.shape, bool)
+                # first a 9-block lattice, then fill what is left greedily
+                ox, oz = self.rng.randrange(9), self.rng.randrange(9)
+                ii, jj = np.nonzero(cand)
+                order = [(a, b) for a, b in zip(ii, jj) if (a + ox) % 9 == 4 and (b + oz) % 9 == 4]
+                def put(a, b):
+                    water[a, b] = True; cov[max(0, a - 4):a + 5, max(0, b - 4):b + 5] = True
+                for a, b in order: put(a, b)
+                for _ in range(3000):
+                    left = need & ~cov & ~water
+                    if not left.any(): break
+                    li, lj = np.nonzero(left)
+                    ci_, cj_ = np.nonzero(cand & ~water)
+                    if not len(ci_): break
+                    # the candidate that waters the most dry crops
+                    best, bc = None, 0
+                    for a, b in zip(ci_, cj_):
+                        if abs(a - li[0]) > 4 or abs(b - lj[0]) > 4: continue    # must reach the first dry cell
+                        c = int(left[max(0, a - 4):a + 5, max(0, b - 4):b + 5].sum())
+                        if c > bc: best, bc = (a, b), c
+                    if best is None:                                   # nothing can reach it: no crop there
+                        need[li[0], lj[0]] = False; dry[li[0], lj[0]] = True; self.unwatered += 1; continue
+                    put(*best)
+                left = need & ~cov & ~water                            # anything still dry on this level: headland
+                dry |= left; self.unwatered += int(left.sum())
+                nwater += int((water & S).sum())
+        # blocks
+        for i, j in np.argwhere(F):
+            x, z = int(i) + self.X0, int(j) + self.Z0; g = int(self.G[i, j])
+            self.TAKEN[i, j] = 3
+            if water[i, j]:
+                self.works[(x, g, z)] = ("water", {})
+                continue
+            if dry[i, j]:                                      # no water can reach it on its level: a grass headland
+                self.works[(x, g, z)] = ("grass_block", {})
+                if h3(x, 5, z, 8) < 0.15: self.works[(x, g + 1, z)] = ("hay_block", {"axis": "y"})
+                continue
+            c, w, gr = CROPS[max(0, int(crop_of[i, j]))]
+            self.works[(x, g, z)] = ("farmland", {"raw": {"moisturized_amount": 7}})
+            gv = gr[0] + int(h3(x, 4, z, 7) * (gr[1] - gr[0] + 1))
+            self.works[(x, g + 1, z)] = (c, {"raw": {"growth": min(7, gv)}})
+            self.TAKEN[i, j] = 3
+        self.nparcel = sum(1 for p in self.port.values() if p["kind"] == "field"); self.nwater = nwater
 
     # =========================================================================== 6. dressing
     def dress(self):
@@ -850,9 +962,12 @@ class Town:
     def run(self):
         self.square()
         self.streets(); self.relax(); self.grade_verges()
+        self.portions()
         self.place_square_buildings()
         self.houses(); self.relax()
         self.windmills()
+        self.field_paths()
+        self.fences()
         self.fields()
         self.dress()
         self.roof_colours()
@@ -861,7 +976,7 @@ class Town:
         for e in self.plan:
             for k in ('x', 'z', 'ground_y', 'rotation', 'footprint'): e[k] = int(e[k])
         c = collections.Counter(p["kind"] for p in self.plan)
-        print(self.name, dict(c), "roofs", getattr(self, "roof_counts", {}), "fields", self.nparcel, "streets", collections.Counter(r["kind"] for r in self.roads), "groundwork", len(self.works))
+        print(self.name, dict(c), "portions", collections.Counter(p["kind"] for p in self.port.values()), "water", getattr(self, "nwater", 0), "dry", getattr(self, "unwatered", 0), "roofs", getattr(self, "roof_counts", {}), "fields", self.nparcel, "streets", collections.Counter(r["kind"] for r in self.roads), "groundwork", len(self.works))
 
     # =========================================================================== output
     def write(self, out):
