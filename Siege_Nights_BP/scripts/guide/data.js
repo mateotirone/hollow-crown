@@ -472,6 +472,16 @@ export const ENTRIES = [
     hidden: true,
   },
 
+  {
+    id: "hollow_crown", ch: "beyond", title: "The Hollow Crown",
+    tip: "You carry the Hollow Crown. If it is ever dropped, it rests on a floating stand: click the stand to take it.",
+    page: "There is only one §fHollow Crown§r. It suffers no one but a Sorcerer: anyone else who puts it on is warned, then it kills them. A Sorcerer who keeps it on long enough rules the Hollow, and a blow from another player while they take it knocks it off.\n\n"
+      + "Whenever the Crown is dropped, it comes to rest on a small §ffloating stand§r where it fell. The stand cannot be hurt or moved, and the Crown stays on it for as long as nobody takes it. §fClick the stand§r to take the Crown.\n\n"
+      + "Dropped over lava or into the void, it has nowhere to rest, and goes back to its chest at the Seat.",
+    when: ["carry:siege:hollow_crown"],
+    hidden: true,
+  },
+
   // ---------------- The High Throne (only once someone holds the Heart) ----------------
   {
     id: "throne", ch: "throne", title: "The Heart and the High Throne",

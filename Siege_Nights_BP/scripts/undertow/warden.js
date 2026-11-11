@@ -349,7 +349,7 @@ function knockOff(p, by) {
   } catch { /* gone */ }
   claiming.delete(p.id);
   wornFor.delete(p.id);
-  world.sendMessage(`§5The Hollow Crown is knocked from §d${p.name}§5's head${by ? ` by §d${by.name}§5` : ""}. It lies where it fell.`);
+  world.sendMessage(`§5The Hollow Crown is knocked from §d${p.name}§5's head${by ? ` by §d${by.name}§5` : ""}. It comes to rest where it fell.`);
   emit("crownKnockedOff", { player: p.id, by: by?.id });
 }
 
