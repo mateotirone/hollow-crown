@@ -138,6 +138,41 @@ Ys = box(Yf, 6); near = box((isroad | istrail).astype(np.float32), 3)
 Yf = np.where(near > 0.02, Yf * (1 - np.clip(near * 6, 0, 1)) + Ys * np.clip(near * 6, 0, 1), Yf)
 Yr = box(Yf, 16); rw = np.clip(box(valley, 6), 0, 1); Yf = Yf * (1 - rw) + (Yr - 1.5) * rw
 
+# white chalk cliffs on the Saltreach's northern coast (Mateo 2026-11-11: "Cliffs of Dover"): a narrow shingle
+# strip at the waterline, then a near-vertical white face 20-45 blocks high with grass running to the very edge.
+# The face wanders in and out (small bays), and breaks where a river valley reaches the sea.
+def chamfer_b(src, cap):
+    """Blocks to the nearest True cell of src (8-neighbour chamfer), capped."""
+    d = np.where(src, 0.0, cap).astype(np.float32)
+    for _ in range(int(cap) + 2):
+        p = np.pad(d, 1, mode='edge')
+        n_ = np.minimum.reduce([p[1:-1, :-2] + 1, p[1:-1, 2:] + 1, p[:-2, 1:-1] + 1, p[2:, 1:-1] + 1,
+                                p[:-2, :-2] + 1.414, p[:-2, 2:] + 1.414, p[2:, :-2] + 1.414, p[2:, 2:] + 1.414])
+        d = np.minimum(d, n_)
+    return d
+cz = np.clip(box((reg == SALT).astype(np.float32), 40) * 1.6 - 0.3, 0, 1)
+cz *= np.clip((-GZ - 150) / 250, 0, 1)                                                # northern coast only
+cz *= 1 - np.clip(box(valley, 24) * 4, 0, 1)                                            # gaps at river mouths
+cz *= box((keepclear | isroad | istrail).astype(np.float32), 24) < 0.01
+cz = box(cz, 8); cz = cz * cz * (3 - 2 * cz)
+chalk = np.zeros((SIZE, SIZE), bool); chalkfoot = np.zeros((SIZE, SIZE), bool)
+if (cz > 0.01).any():
+    xi, zi = np.nonzero(cz > 0.01); a0_, a1_ = max(0, xi.min() - 170), min(SIZE, xi.max() + 170); b0_, b1_ = max(0, zi.min() - 170), min(SIZE, zi.max() + 170)
+    dsb = np.full((SIZE, SIZE), 160.0, np.float32); dsb[a0_:a1_, b0_:b1_] = chamfer_b(~land[a0_:a1_, b0_:b1_], 160)
+    bite = np.clip((noise(70, 61) + noise(23, 62) * 0.6) * 30 + 4, 0, 18)                 # bays where the face is cut back
+    dse = dsb - bite
+    w0 = 3 + (noise(11, 63) + 0.5) * 3                                                  # shingle strip width
+    top = SEA + 30 + noise(90, 64) * 22 + noise(31, 65) * 8 + np.clip(dse - w0, 0, 90) * 0.06
+    face = np.clip((dse - w0) / 2.0, 0, 1)
+    Ycl = SEA + 1 + face * (top - SEA - 1)
+    k_ = np.clip((dsb - 90) / 110, 0, 1); k_ = k_ * k_ * (3 - 2 * k_)                       # back into the downs inland
+    Ycl = Ycl * (1 - k_) + Yf * k_
+    Ynew = np.where(dse < w0, np.minimum(Yf, SEA + 1), np.maximum(Yf, Ycl))
+    Yf = np.where(land, Yf * (1 - cz) + Ynew * cz, Yf)
+    chalk = land & (cz > 0.35) & (dse >= w0) & (dsb < 150)
+    chalkfoot = land & (cz > 0.35) & (dse < w0)
+    log("chalk cliffs", int(chalk.sum()), "columns")
+
 # lakes (drawn on the plan as shapes, carved here): water a block under the lowest rim
 LAKES = [("Wren Water", -60, 300, 70, 45), ("Hallowmere", 60, -1130, 60, 35)]
 islake = np.zeros((SIZE, SIZE), bool); lakelevel = np.zeros((SIZE, SIZE), np.int32)
@@ -250,11 +285,17 @@ surf[m] = np.where(red[m], ID["red_sand"], ID["sand"]); sub[m] = np.where(red[m]
 # steep ground shows rock (banded terracotta in the Emberwaste, calcite streaks in the north)
 m = steep & ~R[EMBER]; surf[m] = np.where(r1[m] < 0.5, ID["stone"], np.where(R[FROST][m] & (r2[m] < 0.15), ID["calcite"], ID["andesite"]))
 mesa = R[EMBER] & (steep | (Y > 112))
+# chalk cliffs: grass to the edge over a thin soil, white faces, shingle at the foot, chalk and flint on the sea bed
+m = chalk & ~steep & ~wet; surf[m] = ID["grass_block"]; subd[m] = 1
+m = chalk & steep; surf[m] = np.where(r1[m] < 0.9, ID["calcite"], ID["diorite"]); subd[m] = 0
+m = chalkfoot & ~wet; surf[m] = np.select([r1[m] < 0.7, r1[m] < 0.85], [ID["gravel"], ID["calcite"]], ID["diorite"])
+chalkbed = ~land & (box(chalk.astype(np.float32), 6) > 0.05)
 # shores and water beds
 beach = land & ~wet & coast & (Y <= SEA + 2) & ~R[SALT]
 surf[beach & ~R[FEN]] = ID["sand"]
 under = wet
 surf[under] = np.where(r1[under] < 0.6, ID["sand"], np.where(r1[under] < 0.85, ID["gravel"], ID["clay"]))
+m = under & chalkbed; surf[m] = np.where(r1[m] < 0.55, ID["gravel"], ID["calcite"])
 m = under & R[FEN]; surf[m] = np.where(r1[m] < 0.7, ID["mud"], ID["clay"])
 surf[bank] = np.where(r1[bank] < 0.5, ID["sand"], np.where(r1[bank] < 0.8, ID["coarse_dirt"], ID["grass_block"]))
 m = bank & R[FEN]; surf[m] = np.where(r1[m] < 0.6, ID["mud"], ID["muddy_mangrove_roots"])
@@ -506,6 +547,13 @@ for tx0 in range(0, SIZE, TILE):
         st = sub[a0:a1, b0:b1]; sd = subd[a0:a1, b0:b1]
         subm = solid & (yy > Ye - sd[:, None, :]) & ~(mz[:, None, :])
         vol[subm] = np.broadcast_to(st[:, None, :], vol.shape)[subm]
+        # chalk: the cliff body is calcite down to below the sea, with thin dark flint bands and diorite specks
+        ck = chalk[a0:a1, b0:b1]
+        if ck.any():
+            cm_ = ck[:, None, :] & solid & ~subm & (yy > SEA - 14) & (vol == ID["stone"])
+            rr_ = np.random.default_rng(7000 + tx0 * 17 + tz0).random(vol.shape, dtype=np.float32)
+            flint = ((yy + 400) % 7 == 0) & (rr_ < 0.45)
+            vol[cm_] = ID["calcite"]; vol[cm_ & flint] = ID["andesite"]; vol[cm_ & ~flint & (rr_ > 0.94)] = ID["diorite"]
         # caves
         cm = (caves[:, 0] >= X0 + a0 - 6) & (caves[:, 0] < X0 + a1 + 6) & (caves[:, 2] >= Z0 + b0 - 6) & (caves[:, 2] < Z0 + b1 + 6)
         for cx_, cy_, cz_, cr_ in caves[cm]:
