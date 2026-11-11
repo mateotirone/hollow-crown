@@ -47,7 +47,7 @@ class Weapon:
             TW *= 2; TH *= 2
         geo = {"format_version": "1.12.0", "minecraft:geometry": [{"description": {"identifier": f"geometry.siege_weapon_{s.id}", "texture_width": TW, "texture_height": TH,
                "visible_bounds_width": 3, "visible_bounds_height": 3, "visible_bounds_offset": [0, 1, 0]},
-               "bones": [{"name": "weapon", "pivot": [0, 0, 0], "binding": "q.item_slot_to_bone_name(c.item_slot)", "cubes": out}]}]}
+               "bones": [{"name": "weapon", "binding": "q.item_slot_to_bone_name(c.item_slot)", "pivot": [0, 24, 0], "cubes": out}]}]}
         json.dump(geo, open(RP + f'models/entity/weapons/{s.id}.geo.json', 'w'), indent=1)
         im.save(RP + f'textures/entity/siege/weapons/{s.id}.png')
         att = {"format_version": "1.10.0", "minecraft:attachable": {"description": {"identifier": "siege:" + s.id,
@@ -96,8 +96,10 @@ def rimefang_bow():
 
 def animations():
     a = {"format_version": "1.8.0", "animations": {
-        "animation.siege_weapon.first_person": {"loop": True, "bones": {"weapon": {"rotation": [95, -15, 190], "position": [0, 14, -6]}}},
-        "animation.siege_weapon.third_person": {"loop": True, "bones": {"weapon": {"rotation": [-90, 0, 0], "position": [0, 13.5, -1.5]}}}}}
+        # Bound to the hand slot like the vanilla trident (pivot 24, grip near y 0); same pose numbers as its wield animations.
+        # The first playtest showed the old unbound version floating at the hip, pointing backwards.
+        "animation.siege_weapon.first_person": {"loop": True, "bones": {"weapon": {"position": [-7, -3, -2], "rotation": [152, -9, 25]}}},
+        "animation.siege_weapon.third_person": {"loop": True, "bones": {"weapon": {"position": [1.5, -2.5, -10.5], "rotation": [97, -1.5, -49]}}}}}
     json.dump(a, open(RP + 'animations/siege_weapons.animation.json', 'w'), indent=1)
 
 if __name__ == '__main__':
