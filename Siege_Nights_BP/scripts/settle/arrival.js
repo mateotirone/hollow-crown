@@ -6,7 +6,7 @@
 //   /scriptevent siege:settle_arrive      lay your settlement out round your keep now
 
 import { world, system } from "@minecraft/server";
-import { isReady, keepOf, on, TIERS } from "../siege/api.js";
+import { isReady, keepOf, on, onTick, TIERS, addTests, assertEqual } from "../siege/api.js";
 import { buildFor } from "../townhall/build.js";
 import { CORNERSTONE, halls, saveHalls, beginBuild } from "../townhall/townhall.js";
 import { mapMode } from "../plots/claims.js";
@@ -43,6 +43,54 @@ function signpost(dim, at, text) {
     // signs are a nicety
   }
 }
+
+// Worlds laid out before the fix in #116 have signposts stacked two or more high. Cut a stack down to its
+// bottom sign. `topY` is standY() at the spot (one above the top sign). Returns how many signs came down.
+const SIGN = /_sign$/;
+function unstack(dim, x, topY, z) {
+  let bottom = topY - 1;
+  while (bottom - 1 > topY - 60 && SIGN.test(dim.getBlock({ x, y: bottom - 1, z })?.typeId ?? "")) bottom--;
+  if (!SIGN.test(dim.getBlock({ x, y: bottom, z })?.typeId ?? "")) return 0;
+  let removed = 0;
+  for (let y = topY - 1; y > bottom; y--) {
+    dim.getBlock({ x, y, z })?.setType("minecraft:air");
+    removed++;
+  }
+  return removed;
+}
+
+export function tidySignposts(player, dim = world.getDimension(OVERWORLD)) {
+  const wall = wallOf(player.id);
+  if (!wall) return 0;
+  const center = { x: wall.x, y: wall.y, z: wall.z };
+  if (!dim.getBlock(center)) return -1; // not loaded yet
+  let removed = 0;
+  for (const slot of SLOTS) {
+    if (slot.arrival) continue;
+    const spot = place(center, wall.gateDir ?? "south", slot);
+    const sy = standY(dim, spot.x, spot.z);
+    if (sy === undefined) continue;
+    try { removed += unstack(dim, spot.x, sy, spot.z); } catch {}
+  }
+  return removed;
+}
+
+// Once a session, when an owner is close enough for their settlement to be loaded
+const tidied = new Set();
+onTick("settle_tidy_signs", 200, () => {
+  if (!isReady()) return;
+  for (const player of world.getAllPlayers()) {
+    if (tidied.has(player.id)) continue;
+    const wall = wallOf(player.id);
+    if (!wall) { tidied.add(player.id); continue; }
+    const l = player.location;
+    if (player.dimension.id !== OVERWORLD || Math.abs(l.x - wall.x) > 48 || Math.abs(l.z - wall.z) > 48) continue;
+    const removed = tidySignposts(player);
+    if (removed < 0) continue;
+    tidied.add(player.id);
+    if (removed > 0) console.warn(`[Hollow Crown] took down ${removed} stacked signpost(s) at ${player.name}'s settlement`);
+  }
+});
 
 // at: lay out round this spot (a Plot Stone) for a player who has no Keep Banner up yet
 export function layOut(player, { force = false, at, style: wanted } = {}) {
@@ -155,4 +203,28 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
   if (player?.typeId !== "minecraft:player" || !isReady()) return;
   const result = layOut(player, { force: true });
   player.sendMessage(result === true || result === "already" ? "§6Settlement laid out round your keep: palisade, Longhouse, mason and slot signposts." : `§c${result}`);
+});
+
+// A fake column of blocks for the sign test: stone at y 63, then whatever is listed above it
+function fakeColumn(above) {
+  const col = new Map([[63, "minecraft:stone"]]);
+  above.forEach((id, i) => col.set(64 + i, id));
+  const block = (y) => ({
+    get typeId() { return col.get(y) ?? "minecraft:air"; },
+    location: { x: 0, y, z: 0 },
+    below: () => block(y - 1),
+    setType: (id) => (id === "minecraft:air" ? col.delete(y) : col.set(y, id)),
+  });
+  return { col, dim: { getTopmostBlock: () => block(Math.max(...col.keys())), getBlock: ({ y }) => block(y) } };
+}
+
+addTests("settle arrival", {
+  "an old stack of signposts comes down to one, and a single sign is left alone": () => {
+    const s = "minecraft:standing_sign";
+    const { col, dim } = fakeColumn([s, s, s]);
+    assertEqual(unstack(dim, 0, standY(dim, 0, 0), 0), 2);
+    assertEqual([...col.entries()].filter(([, id]) => id === s).map(([y]) => y).join(), "64");
+    assertEqual(unstack(dim, 0, standY(dim, 0, 0), 0), 0);
+    assertEqual(unstack(fakeColumn([]).dim, 0, 64, 0), 0);
+  },
 });

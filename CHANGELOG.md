@@ -9,6 +9,7 @@ How versions work is in [`docs/RELEASING.md`](docs/RELEASING.md).
 Everything merged to `main` since the last release goes here. Each pull request that changes what players see adds a line under one of these headings.
 
 ### Added
+- Riding a train puts you in third person so you can see the line ahead, and gives you your own view back when you get off.
 - The Settler's Almanac: every new player gets a small book that explains how things work in Aldmere, chapter by chapter (first days, siege nights, your settlement, coin, travel, growing stronger, books, the wild). The first time you meet something (raise your banner, pick up a Regal, click the Mason, carry a Halter, see a Seep...) you get one line about it in chat, and its page is marked with a gold dot until you read it. Pages about things you haven't come across yet stay hidden, and things meant to be found aren't in it. Type `/siege:guide` to open it without the book, craft another from a book and a feather, or turn the chat tips off on its first page.
 - Every role's story now runs to the end. At the fourth rank each mentor tells you what their tradition has always known and never said: Ysolt's last page about the night the grey army went, the bell moulds the Order hid, the back pages of the Debt Book, the old water in the fen. At the top rank each gives you your part in the last fight, and after Morvane falls each has a last scene. A new Knight-Commander names the Order, or keeps the old name.
 - Each top-rank role helps at one stage of the Morvane fight: the Forgemaster's bell breaks the Standing Ranks' step, a Knight-Commander's knights hold the wall in the Night It Ended, the Captain's forty row you down the River, a Dragonlord on the wing burns him at the Rift, the Fen Mother's fen slows your fall, and a Sorcerer's blows land harder at the Seat. Alone, the mentors' students stand in (all but the Sorcerer).
@@ -137,6 +138,8 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - Farms can no longer print Regals forever. Each trader stops buying a good from you for the day once its price has bottomed out (the Moneyer at 128 iron ingots a day), and monsters drop coins only when a player kills them.
 
 ### Fixed
+- Building signposts already stacked two or more high in an existing world (from before the lay-out fix) come down to one sign the next time the settlement's owner walks home.
+- Raising a bigger town hall now takes the old one down completely first instead of leaving pieces of it behind, builds in about 7 to 16 seconds instead of over a minute, names the hall once in a title and then shows only a progress bar, and moves the Hall Cornerstone beside the path so it never sits in the doorway.
 - Clicking a menu block with an empty hand works: the Waystone, Plot Stones, Keep Banner, Mason's Bench, gates and every other menu block used to do nothing unless you held an item.
 - No more "unknown variable melee_spear_equipped" errors in the content log on every swing: the player model now sets the variable newer Minecraft's attack animations ask for.
 - Buildings raised from a Plot Marker, the Foundation Stone, the showcase, the Barracks and Quartermaster's blocks, and Rival Lords' towns stand on the highest ground under them, with the region's foundation stone filled in below. They are never half buried any more.
