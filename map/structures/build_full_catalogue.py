@@ -11,7 +11,7 @@ import os, sys, json, base64, argparse, subprocess
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE); sys.path.insert(0, os.path.join(HERE, "render"))
 from bp import Blueprint
 from mesher import Mesher
-import vale_civic, settle_halls, settle_buildings, hollow_kit
+import vale_civic, settle_halls, settle_buildings, hollow_kit, capital
 from build_catalogue import DESIGNS, STYLE_NAMES
 
 REGION_GROUND = {"vale": ("grass_block", "dirt"), "frostmarch": ("snow", "dirt"), "saltreach": ("sand", "sandstone"),
@@ -69,6 +69,7 @@ def main():
     ap = argparse.ArgumentParser(); ap.add_argument("dump"); ap.add_argument("out")
     ap.add_argument("--textures", required=True); ap.add_argument("--three", required=True); ap.add_argument("--only", default="")
     ap.add_argument("--mcstructure", default="", help="write every build as .mcstructure files into this folder instead of rendering")
+    ap.add_argument("--viewer3d", default="", help="write the 3D catalogue (index.html, data/, tex.json) into this folder instead of rendering")
     ap.add_argument("--procs", type=int, default=3, help="browsers shooting in parallel")
     a = ap.parse_args()
     D = json.load(open(a.dump)); img = os.path.join(a.out, "img"); work = os.path.join(a.out, "_work")
@@ -81,6 +82,8 @@ def main():
         if a.only and not key.startswith(a.only): return
         if a.mcstructure:
             structures.append((sec["title"], card, make())); return
+        if a.viewer3d:
+            structures.append((sec, card, make, ground, view)); return
         sc, size, n = card_scene(make(), ground, view=view)
         card["size"] = size; card["blocks"] = n
         jobs.append([page_for(sc, work, key, a.textures, title), os.path.join(work, key, "shot.png"), "card", 1400, 900])
@@ -93,6 +96,8 @@ def main():
             g = REGION_GROUND[STYLE_GROUND.get(style, "vale")]
             add(sec, f"map-{d['key']}-{style}", d["title"], STYLE_NAMES[style], d["use"], (lambda d=d, s=style: d["make"](s)), g,
                 extra={"where": d["where"], "kind": d["kind"]})
+    add(sec, "map-kingsrest_capital", "Kingsrest capital hall", "Grand medieval", "The grandest building in the game: Norman stone and dark timber, a two-tier drum under a copper dome that weathers from green at the top to bright copper at the eaves, long wings with corner towers, and a walled garden forecourt.",
+        lambda: capital.medieval(), view=(20, 30, 1.3), extra={"where": "Kingsrest, the heart of the royal town", "kind": "Civic"})
     add(sec, "map-millbrook_clock_tower", "Millbrook clock tower", "Norman stone", "Three storeys and a belfry with clock faces and a stepped spire, in the middle of Millbrook's square.",
         lambda: vale_civic.clock_tower(), extra={"where": "Millbrook, the square", "kind": "Civic"})
     add(sec, "map-millbrook_watermill", "Millbrook watermill", "Stone and timber", "Stone ground floor on the river bank, timber above, with a working-looking wheel in the water.",
@@ -114,6 +119,15 @@ def main():
             make = (lambda f=NEWB, r=rid: f(r)) if NEWB else (lambda c=r["buildings"][b["id"]], k=f"{b['id']}_{rid}": from_cells(k, c))
             add(sec, f"bld-{rid}-{b['id']}", b["name"], r["name"], b["blurb"], make, g,
                 status="new" if NEWB else "old", extra={"group": "Plot buildings"})
+
+        if rid in settle_buildings.REGIONS:   # what placed blocks raise: the Stables, the Breeder's Yard, the guard
+            for bid, title, blurb in (("stables_1", "Stables, level 1", "Raised by the Stables block: three stalls either side of an aisle, hay and water in each."),
+                                      ("stables_2", "Stables, level 2", "Five stalls and a tack corner, with a cupola on the ridge. Builds over level 1."),
+                                      ("stables_3", "Stables, level 3", "Eight stalls, a tack room across the back and a hayloft above. Builds over level 2."),
+                                      ("breeder_yard", "Breeder's Yard", "Raised by the Breeder's Post: a fenced paddock with an open shelter, hay and troughs."),
+                                      ("barracks", "Barracks", "The guardhouse: a two-storey hall for the guard with a crenellated watch tower."),
+                                      ("quartermaster", "Quartermaster's armoury", "A small strong store with a serving hatch under an awning, smithing table and anvil inside.")):
+                add(sec, f"bld-{rid}-{bid}", title, r["name"], blurb, (lambda f=settle_buildings.BLOCK_BUILDERS[bid], r=rid: f(r)), g, extra={"group": "Plot buildings"})
 
     # ---- 3. Walls: ten levels, each region's stone ----
     sec = {"id": "walls", "title": "Settlement walls", "blurb": "The ring wall raised round every plot, upgraded at the town hall. Shown here: the stretch round the gate.", "cards": []}
@@ -149,6 +163,9 @@ def main():
                                    ("wound_dock", "The Wound landing", "The first dock a new arrival sees: a plank landing on log piles and a boatwright's shed with a boat half built.", -38)):
         add(sec, f"hollow-{sid}", title, "Hollow centre", blurb, hollow_kit.SITE_BUILDERS[sid], HG, view=(yaw, 32, 1.3))
 
+    if a.viewer3d:
+        from build_3d_catalogue import write_viewer
+        write_viewer(structures, a.viewer3d, a.textures); return
     if a.mcstructure:
         from export_structures import write_all
         write_all(structures, a.mcstructure); return
