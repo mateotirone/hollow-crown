@@ -251,6 +251,8 @@ for n_, x_, z_, r_, _ in TOWNS:
     if n_ == "Kingsrest": x_, z_ = KS
     STOPS[slug(n_)] = {"id": slug(n_), "name": n_, "x": x_, "z": z_, "kind": "village"}
 rail_y = np.full((SIZE, SIZE), -999, np.int32); rail_d = np.full((SIZE, SIZE), 99.0, np.float32)
+rail_t = np.zeros((SIZE, SIZE), bool)          # the nearest line cell runs in a tunnel
+RAIL_R = 48                                    # how far out the banks may reach
 tun_floor = np.full((SIZE, SIZE), -999, np.int32); br_deck = np.full((SIZE, SIZE), -999, np.int32)
 br_wall = np.zeros((SIZE, SIZE), bool); br_pier = np.zeros((SIZE, SIZE), bool)
 RAILLINES = {}
@@ -285,8 +287,8 @@ for lname, pts in L["roads"].items():
     tun = (gnd - (ys_ - 1) > 10) & ~wt
     tun = np.convolve(tun.astype(float), np.ones(7) / 7, 'same') > 0.5
     wtd = np.convolve(wt.astype(float), np.ones(7), 'same') > 0          # a few blocks of approach either side
-    # paint the corridor: nearest path cell's track height for every cell within 24 blocks
-    R = 24; off = np.array([(a, b) for a in range(-R, R + 1) for b in range(-R, R + 1)]); od = np.hypot(off[:, 0], off[:, 1])
+    # paint the corridor: nearest path cell's track height for every cell within RAIL_R blocks
+    R = RAIL_R; off = np.array([(a, b) for a in range(-R, R + 1) for b in range(-R, R + 1)]); od = np.hypot(off[:, 0], off[:, 1])
     keep_ = od <= R; off, od = off[keep_], od[keep_]
     for c0 in range(0, len(cells), 300):
         sl = slice(c0, c0 + 300)
@@ -297,20 +299,26 @@ for lname, pts in L["roads"].items():
         X_, Z_, D_, Yv, T_, W_ = X_[m], Z_[m], D_[m], Yv[m], T_[m], W_[m]
         np.minimum.at(rail_d, (X_, Z_), D_.astype(np.float32))
         win = D_ <= rail_d[X_, Z_] + 1e-4
-        rail_y[X_[win], Z_[win]] = Yv[win]
+        rail_y[X_[win], Z_[win]] = Yv[win]; rail_t[X_[win], Z_[win]] = T_[win]
         t2 = win & T_ & (D_ <= 2.5); tun_floor[X_[t2], Z_[t2]] = Yv[t2] - 1
         b2 = win & W_ & (D_ <= 2.5); br_deck[X_[b2], Z_[b2]] = Yv[b2] - 1
         br_wall[X_[b2 & (D_ > 1.5)], Z_[b2 & (D_ > 1.5)]] = True
     for i in range(0, len(cells), 8):
         if okc[i] and wt[i]: br_pier[cx[i], cz[i]] = True
-# earthworks on land: ballast and benches at the bed, 1:1 cuttings and embankments out to 24 blocks
-corr = (rail_d <= 24) & land & ~wet & (tun_floor == -999) & (br_deck == -999)
+# earthworks on land (Mateo 2026-11-11: grade the land round paths, no sheer trenches). The bed and the road
+# beside it are laid first as one flat bench at track level; then banks slope back from the bench edge to the
+# natural ground, about 3 up for every 4 out with a little noise, as far out as they need (up to RAIL_R), for
+# cuttings and embankments alike. Banks are measured from the open bench, so over a tunnel the hill is left whole.
+corr = (rail_d <= RAIL_R) & land & ~wet & (tun_floor == -999) & (br_deck == -999)
 bed = rail_y - 1
-flat_ = corr & (rail_d <= 3.5)
+flat_ = corr & ((rail_d <= 3.5) | (isroad & (rail_d <= ROADOFF + 5))) & ~rail_t   # over a tunnel the road keeps to the hill
 Y[flat_] = bed[flat_]
-slope_ = corr & (rail_d > 3.5)
-cut = slope_ & (Y > bed + np.floor(rail_d - 3.5)); Y[cut] = (bed + np.floor(rail_d - 3.5)).astype(np.int32)[cut]
-fill = slope_ & (Y < bed - np.floor(rail_d - 3.5)); Y[fill] = (bed - np.floor(rail_d - 3.5)).astype(np.int32)[fill]
+dF = chamfer_b(flat_, RAIL_R)
+bank = np.floor(dF * 0.75 + (noise(7, 91) + 0.5) * 1.5).astype(np.int32)
+slope_ = corr & ~flat_
+# cuts reach over the tunnel mouths too, so a portal opens out of a sloped cutting; deeper in, the hill stays whole
+cut = (slope_ | ((rail_d <= RAIL_R) & land & ~wet & (tun_floor > -999))) & (Y > bed + bank); Y[cut] = (bed + bank)[cut]
+fill = slope_ & (Y < bed - bank); Y[fill] = (bed - bank)[fill]
 # baked town plans (GW_BLOCKS, map/bake_town.py): paths first, then the land graded to them (Mateo 2026-11-11).
 # Every groundwork column sits on ground exactly one block under its lowest block; the land beside it meets its top
 # ground block and may then rise or fall at most one block per two outwards, so no path stands proud or sinks in a trench.
