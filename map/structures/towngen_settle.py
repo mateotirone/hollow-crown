@@ -943,7 +943,8 @@ def main():
             ok, cs = s.meets(); passes, cshort = s.charter()
             short = sum(max(0, MINIMUM[t][q] - cs[t][q]) for t in range(4) for q in MINIMUM[t])
             print(plot["name"], tpl, seed, "charter" if passes else f"charter short {cshort}", "| minimum", "ok" if ok else f"short {short}", cs[-1], flush=True)
-            if best is None or (cshort, short) < best[0]: best = ((cshort, short), s)
+            lib = any(e.get("library") for e in s.slots)            # a Hamlet library slot is a must
+            if best is None or (not lib, cshort, short) < best[0]: best = ((not lib, cshort, short), s)
             if passes: break
         s = best[1]
         s.picture_settle(os.path.join(a.out, f"{s.key}-{tpl}.png"))
