@@ -14,7 +14,7 @@
 
 import { world, system, BlockPermutation } from "@minecraft/server";
 import { ModalFormData } from "@minecraft/server-ui";
-import { isReady, keepOf, tierOf, TIERS, onTick, moduleStore, on, emit, addFilter, addLandClaim, stoneId, STONE_KINDS, title, CASTLE_BLOCKS, WALL_HP, PORTCULLISES, GATES, regionalId, getState, isAlly, guardCount, setGate } from "../siege/api.js";
+import { isReady, keepOf, tierOf, TIERS, onTick, moduleStore, on, emit, addFilter, addLandClaim, stoneId, STONE_KINDS, title, CASTLE_BLOCKS, WALL_HP, PORTCULLISES, GATES, regionalId, getState, isAlly, guardCount, setGate, openLeafAt } from "../siege/api.js";
 import { STYLES } from "../townhall/styles.js";
 import { PLOT_PLAN } from "../plots/config.js";
 import { plotAt, mapMode } from "../plots/claims.js";
@@ -274,6 +274,7 @@ export function raiseWall(id, level, { center, style, bearing, radius, shape } =
   if (!L) return `There is no wall level ${level}.`;
   if (jobs.has(id)) return "A wall is already rising.";
   let w = walls()[id];
+  if (w?.level > 0 && w.ground) setWallGate(id, w, false); // a swung-open gate shuts before the wall is rebuilt round it
   const moved = w && center && (w.x !== center.x || w.z !== center.z);
   if (!w || moved) {
     if (!center) return "There is no wall line here yet.";
@@ -312,6 +313,7 @@ export function moveWall(id, radius, down = () => {}) {
   if (w.radius === radius) { down(); return "already"; }
   if (jobs.has(id)) { system.runTimeout(() => moveWall(id, radius, down), 100); return "waiting"; }
   const level = Math.max(1, w.level || w.building?.level || 1);
+  if (w.level > 0 && w.ground) setWallGate(id, w, false); // shut the gate before its wall comes down
   const old = { ...w };
   const cols = old.ground && old.level > 0 ? wallColumns({ center: old, radius: old.radius, level: old.level, gateAngle: old.gate, smooth: old.ground }) : [];
   w.radius = radius;
@@ -377,11 +379,14 @@ function findGateBlocks(id, w) {
 }
 function setWallGate(id, w, open) {
   const dim = world.getDimension(OVERWORLD);
+  const awayFrom = gateSpot(w, w.gate, w.ground, w.radius).outside; // the gate swings in, away from the road
   let moved = false;
   for (const loc of findGateBlocks(id, w)) {
     try {
       const b = dim.getBlock(loc);
-      if (b && setGate(b, open)) moved = true;
+      // a remembered spot that is no gate and no gateway of a swung-open gate: look for the gate again next time
+      if (b && !GATES.includes(b.typeId) && !openLeafAt(dim, loc)) gateBlocks.delete(`${id}|${w.level}`);
+      if (b && setGate(b, open, { awayFrom })) moved = true;
     } catch {
       // not loaded
     }
