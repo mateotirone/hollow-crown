@@ -13,10 +13,9 @@ import { purse, charge, refund, coins, lot } from "./wallet.js";
 import { STYLES } from "../townhall/styles.js";
 import { SETTLE } from "./config.js";
 import { BUILDINGS, BUILDING, drawBuilding } from "./buildings.js";
-import { MATERIALS, priceOf } from "./rules.js";
 import { SLOTS } from "./layout.js";
 import { drawBox } from "./zones.js";
-import { costLines, takeMatching, raiseOnSlot, risingAt } from "./plans.js";
+import { raiseOnSlot, risingAt, jobOf } from "./plans.js";
 import { PLOT_MARKER, townOf, allTowns, layoutOf, markerAt, registerMarker, forgetMarker, placeMarker, clearMarker, slotState, saveTowns, tierName } from "./founding.js";
 import { slotsOf, seatOnSlot, seatedBox, SIZE_NAMES } from "./towns.js";
 import { sfx } from "../core/sfx.js";
@@ -79,8 +78,7 @@ async function openSlot(player, owner, slot) {
     .body(`${size} blocks, door to the road${slot.tags.length ? ` (${slot.tags.join(", ")})` : ""}.\nBuildings in the §f${STYLES[town.style]?.name ?? town.style}§r style that fit here:`);
   if (!choices.length) return player.sendMessage("§7Nothing we can raise fits this plot yet. You can build here by hand.");
   for (const c of choices) {
-    const need = priceOf(drawBuilding(c.id, town.style));
-    form.button(c.open ? `${c.name}\n§8${need.timber} planks, ${need.stone} stone` : `§8${c.name}\n${c.why}`);
+    form.button(c.open ? `${c.name}\n§8${coins(plotPrice(c.id))}` : `§8${c.name}\n${c.why}`);
   }
   const res = await form.show(player);
   if (res.canceled) return;
@@ -91,34 +89,33 @@ async function openSlot(player, owner, slot) {
   player.sendMessage(`§6${c.name} marked out.§7 Walk round the green outline, then use the marker again to raise it. ${BUILDING[c.id].blurb ?? ""}`);
 }
 
+// What a design costs on a plot, in coins (SETTLE.plotPrices is in lots)
+export const plotPrice = (buildingId) => Math.round((SETTLE.plotPrices[buildingId] ?? 8) * lot());
+
 async function confirm(player, owner, slot, state) {
   const town = townOf(owner);
   const building = BUILDING[state.pick];
   const seat = seatInWorld(owner, slot, building.id);
   if (!seat) { state.pick = undefined; saveTowns(); return player.sendMessage("§cThat building no longer fits here."); }
   const free = isCreative(player);
-  const need = priceOf(seat.plan);
-  const { due, lines } = costLines(player, need);
+  const price = free ? 0 : plotPrice(building.id);
   const have = purse(player);
-  due.emeralds *= lot();
-  const body = [`${building.blurb ?? ""}`, "", ...lines];
-  if (free) body.push("", "§aFree in Creative.");
-  else if (due.emeralds) body.push("", `${have >= due.emeralds ? "§a" : "§c"}The mason supplies the rest for ${coins(due.emeralds)}§7 (you carry ${coins(have)})`);
+  const body = [`${building.blurb ?? ""}`, "", free ? "§aFree in Creative." : `${have >= price ? "§a" : "§c"}${coins(price)}§7 from your purse (you have ${coins(have)}).`, "", "§7Builders raise it for you. It goes up a layer at a time."];
   const res = await new MessageFormData().title(`Raise the ${building.name}?`).body(body.join("\n"))
-    .button1("Pick something else").button2(free || have >= due.emeralds ? "Raise it" : "Not enough yet").show(player);
+    .button1("Pick something else").button2(free || have >= price ? "Raise it" : "Not enough yet").show(player);
   if (res.canceled) return;
   if (res.selection === 0) { state.pick = undefined; saveTowns(); return openSlot(player, owner, slot); }
   if (!free) {
-    if (have < due.emeralds) return player.sendMessage(`§7You are ${coins(due.emeralds - have)} short. Bring more planks or stone.`);
-    if (due.emeralds && !charge(player, due.emeralds)) return;
-    for (const [kind, mat] of Object.entries(MATERIALS)) takeMatching(player, mat.match, due.use[kind]);
+    if (have < price) return player.sendMessage(`§7You are ${coins(price - have)} short.`);
+    if (!charge(player, price)) return;
   }
   clearMarker(owner, slot);
   if (!raiseOnSlot(owner, player.id, seat.origin, seat.forward, building.id, town.style, slot.id)) {
     placeMarker(owner, slot);
+    if (price) refund(player, price);
     return player.sendMessage("§cSomething is already going up there.");
   }
-  Object.assign(state, { building: building.id, style: town.style, origin: seat.origin, forward: seat.forward, box: seat.box, top: seat.plan.bounds().y1, paid: free ? 0 : due.emeralds, pick: undefined });
+  Object.assign(state, { building: building.id, style: town.style, origin: seat.origin, forward: seat.forward, box: seat.box, top: seat.plan.bounds().y1, paid: price, by: player.id, pick: undefined });
   saveTowns();
   sfx(player, "random.anvil_use");
   player.sendMessage(`§6The ${building.name} is going up.`);
@@ -224,6 +221,21 @@ function outlines() {
     }
   }
 }
+// How far each building on a plot has got, on the action bar of whoever paid for it while they are near
+function progress() {
+  for (const [owner, town] of Object.entries(allTowns())) {
+    for (const state of Object.values(town.slots)) {
+      if (!state.building || !state.origin) continue;
+      const job = jobOf(state.origin);
+      if (!job?.cells?.length) continue;
+      const player = world.getPlayers().find((p) => p.id === (state.by ?? owner));
+      if (!player || Math.hypot(player.location.x - state.origin.x, player.location.z - state.origin.z) > 64) continue;
+      player.onScreenDisplay.setActionBar(`§6${BUILDING[state.building]?.name ?? "Building"} rising §f${Math.floor((job.index / job.cells.length) * 100)}%`);
+    }
+  }
+}
 onTick("settle_plot_outlines", 20, () => {
-  if (isReady()) outlines();
+  if (!isReady()) return;
+  outlines();
+  progress();
 });

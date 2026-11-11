@@ -189,7 +189,9 @@ export function radiusAt(center, radius, a) {
   const f = (turn(a) / TAU) * shape.length;
   const i = Math.floor(f) % shape.length, t = f - Math.floor(f);
   const g = shape[i] * (1 - t) + shape[(i + 1) % shape.length] * t;
-  return radius + (g > 0 ? g * WALLS.wobble.out * Math.min(1, radius / WALLS.radius) : g * WALLS.wobble.in);
+  // outward it stays 2 blocks inside the land (WALLS.radius + landBeyond), so the outer ring never meets the border
+  const out = Math.min(WALLS.wobble.out * Math.min(1, radius / WALLS.radius), WALLS.radius + WALLS.landBeyond - 2 - radius);
+  return radius + (g > 0 ? g * Math.max(0, out) : g * WALLS.wobble.in);
 }
 
 // Where the ground is measured: [{ x, z }] round the ring

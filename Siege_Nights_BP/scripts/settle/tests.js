@@ -276,11 +276,15 @@ addTests("settle towns", {
         for (let i = 0; i < 360; i++) { const R = radiusAt(center, r, (i / 360) * Math.PI * 2); lo = Math.min(lo, R - r); hi = Math.max(hi, R - r); }
         assert(lo >= -WALLS.wobble.in - 1e-9 && hi <= WALLS.wobble.out + 1e-9, `${name} r${r}: ${lo}..${hi}`);
         assert(hi - lo > 1.5, `${name} r${r}: barely wanders`);
+        assert(r + hi <= WALLS.radius + WALLS.landBeyond - 2 + 1e-9, `${name} r${r}: reaches ${r + hi}, past the land`);
       }
       const cols = wallColumns({ center, radius: 56, level: 1, gateAngle: 0, smooth: Array(48).fill(64) });
       for (const c of cols) assert(Math.hypot(c.x, c.z) <= 56 + WALLS.wobble.out + 1 && Math.hypot(c.x, c.z) >= 56 - WALLS.wobble.in - 4, `${c.x},${c.z}`);
     }
     assertEqual(radiusAt({ x: 0, z: 0 }, 40, 1), 40); // old walls without a shape stay round
+  },
+  "every building has a price on a town plot": () => {
+    for (const b of BUILDINGS) assert(SETTLE.plotPrices[b.id] > 0, b.id);
   },
   "every map plot has three town layouts, with walls at 32, 40, 48 and 56": () => {
     assertEqual(townNames().length, 12);

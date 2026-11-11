@@ -316,6 +316,7 @@ export function raiseOnSlot(owner, placerId, origin, forward, buildingId, style,
 
 // Is a building still going up at this spot?
 export const risingAt = (origin) => !!stones()[keyOf(origin)]?.building;
+export const jobOf = (origin) => buildFor(jobId(keyOf(origin)));
 
 // Raise one without a stone or a price (showcase and the test command)
 export function raiseFree(player, origin, forward, buildingId, style) {
