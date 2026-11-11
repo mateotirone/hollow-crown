@@ -341,6 +341,7 @@ A map of the generated world is in `docs-hollow/hollow-map.png`.
 - Choir ore shows in cliff faces and in veins inside the rock. It needs a diamond or netherite pickaxe.
 - `/scriptevent hc:slip` gives a Slip, `/scriptevent hc:give_crown` gives the Hollow Crown (putting it on warns the whole server), `/scriptevent hc:regent_now` raises the NPC ruler.
 - `/scriptevent hc:undertow_status` prints what has been built.
+- **The road to the Rift (thin places).** `/scriptevent hc:thin_status` lists the seven thin places. `/scriptevent hc:thin_tp kings_barrow` (or any id it lists) takes you to one; the cave builds itself a few seconds after you arrive. Check: a rock hill with a cave mouth facing south, a tall chamber, a purple seam in the back wall, Fennick's tent outside with a Dusty Tome inside (click it for the Field Note). The Drowned Chapel, the Sunken Quarry and the Witchroot Caves need a short swim; the Bellfounders' Mine and Frostvein Gap have ice and snow; the Saltglass Grotto and the Drowned Chapel have white salt crust; King's Barrow and the Witchroot Caves have hanging roots; the Bellfounders' Mine and the Drowned Chapel have a fallen bell. Then, in survival, hit the seam with a Tuning Fork: with fewer than five bosses down it should only hum; on a wrong seam it should go dull for three days and stay in your hand.
 
 ## The Hollow's mining villages, the Vault and the Latticewood Boat (scripts/hollowfolk/)
 

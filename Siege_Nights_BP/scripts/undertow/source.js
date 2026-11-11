@@ -14,6 +14,8 @@ import { load, save, loadPlain, savePlain, say, FACING } from "./data.js";
 import { planSeam, placeCells, tearOpen, standPoint, SEAM } from "./rift.js";
 import { TEXT } from "./layout.js";
 import { sfx } from "../core/sfx.js";
+import { progressOf } from "../lore/player.js";
+import { fallenCount, REGIONAL_BOSSES } from "../lore/data/spine.js";
 
 export const SOURCE_SITE_IDS = [
   "drowned_chapel",
@@ -51,6 +53,21 @@ export function getSourceSite() {
   return id;
 }
 export const getSites = () => load(K_SITES, {});
+// The thin-place builder (thinplaces.js) records each seam it builds, the same way a hand mark does.
+export function recordSite(id, spot) {
+  if (!SOURCE_SITE_IDS.includes(id)) return;
+  const sites = getSites();
+  sites[id] = { x: spot.x, y: spot.y, z: spot.z, facing: spot.facing };
+  save(K_SITES, sites);
+}
+
+// Mateo, 2026-11-11: three regional bosses down starts Fennick's trail; all five must fall before the Rift opens.
+// Shards can be re-earned in rematches, so the fork checks the striker's own record, not just the recipe.
+export const BOSSES_TO_OPEN = 5;
+export const FORK_DULL_DAYS = 3; // a fork struck on a dead seam goes quiet this long (it used to shatter)
+const K_DULL = "hc:fork_dull_until"; // player property: world day the fork sings again
+export const canOpen = (fallen) => fallen >= BOSSES_TO_OPEN;
+export const dullLeft = (until, today) => Math.max(0, (until ?? 0) - today);
 export const getRift = () => load(K_RIFT, null);
 
 function facingFromFace(face) {
@@ -135,16 +152,29 @@ function strike(player, loc) {
     say(player, real ? "§5The Rift is already open." : "§7Silence. Whatever lived here is long gone.");
     return;
   }
-  useUpFork(player);
+  const today = world.getDay?.() ?? 0;
+  const dull = dullLeft(player.getDynamicProperty(K_DULL), today);
+  if (dull > 0) {
+    say(player, `§7The fork is still dull from the dead stone. It will not ring for ${dull} more day${dull === 1 ? "" : "s"}.`);
+    return;
+  }
+  const fallen = fallenCount(progressOf(player).flags);
+  if (!canOpen(fallen) && player.getGameMode() !== GameMode.Creative) {
+    try { sfx(player.dimension, "block.amethyst_block.chime", at, { volume: 1, pitch: 0.6 }); } catch {}
+    say(player, `§7The fork hums against the stone, but the note will not hold. Something out there still keeps watch over this door. §8(${fallen} of ${REGIONAL_BOSSES.length} regional bosses defeated by you.)`);
+    return;
+  }
   if (!real) {
+    player.setDynamicProperty(K_DULL, today + FORK_DULL_DAYS);
     try {
       sfx(player.dimension, "random.anvil_land", at, { volume: 1, pitch: 0.5 });
       player.dimension.spawnParticle("minecraft:critical_hit_emitter", at);
     } catch {}
-    say(player, "§7The fork rings against dead stone and shatters. Nothing answers here.");
+    say(player, `§7The fork rings against dead stone and the note dies in it. Nothing answers here. §8(The fork is dull for ${FORK_DULL_DAYS} days.)`);
     try { system.sendScriptEvent("siege:undertow_fork_failed", JSON.stringify({ site, player: player.name })); } catch {}
     return;
   }
+  useUpFork(player);
   try { sfx(player.dimension, "block.bell.resonate", at, { volume: 2, pitch: 0.5 }); } catch {}
   say(player, "§dThe fork sings. Something on the other side of the stone sings back.");
   openRift(player);
