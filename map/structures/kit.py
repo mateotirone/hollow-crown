@@ -135,7 +135,7 @@ def ground_dressing(bp, stone, wood="spruce", seed=21):
 LEFT_OF = {"s": "w", "n": "w", "e": "n", "w": "n"}
 RIGHT_OF = {"s": "e", "n": "e", "e": "s", "w": "s"}
 
-def paint_stone(bp, ladder=VALE_STONE, family=STONE_FAMILY, seed=5, depth=1, lone=0.08):
+def paint_stone(bp, ladder=VALE_STONE, family=STONE_FAMILY, seed=5, depth=1, lone=0.03):
     """The doctrine's last pass over finished stone walls (texturing/doctrine.py paint_teeth, Mateo's gradient
     examples): every outside stone cell is repainted in bands from the foot of its wall to the top, dark to
     light, the band edges interlocking column by column (each edge shifted up or down by up to `depth`) with a
@@ -156,8 +156,8 @@ def paint_stone(bp, ladder=VALE_STONE, family=STONE_FAMILY, seed=5, depth=1, lon
     idx = {}
     for (x, y, z) in outer:
         h = rows; yy = y - lo[(x, z)]
-        col = x * 31 + z
-        cut = [(k + 1) * h / n + round((hsh(col, k, seed) - 0.5) * (2 * depth + 0.99)) for k in range(n - 1)]
+        col = x + z            # runs along either wall direction, so neighbouring columns share a tooth
+        cut = [(k + 1) * h / n + round((smooth_noise(col, k * 17, seed, 2.5) - 0.5) * (2 * depth + 0.99)) for k in range(n - 1)]
         i = sum(1 for c in cut if yy >= c)
         r = hsh(col, yy, seed + 13)
         if r < lone / 2 and i < n - 1 and yy + 1 >= cut[i] - 1: i += 1
@@ -571,10 +571,18 @@ class Building:
                 if who != i or h is None: continue
                 o = other(x, z)
                 if o is not None and o >= h: continue
+                tb = mats.get("trim_block", P.get("trim_block", "dark_oak_planks"))
                 if bp.get(x, h, z)[0].endswith("_stairs") and bp.get(x, h - 1, z)[0] in ("keep", "air"):
-                    bp.set(x, h - 1, z, mats.get("trim_block", P.get("trim_block", "dark_oak_planks")))
-                    if P.get("verge_lanterns") and h - 3 >= 2 and all(bp.get(x, h - k, z)[0] in ("keep", "air") for k in (2, 3, 4)):
-                        bp.set(x, h - 2, z, "iron_chain"); bp.set(x, h - 3, z, "lantern", hanging=True)
+                    bp.set(x, h - 1, z, tb)
+                if P.get("verge_lanterns"):
+                    # the lantern hangs at the eaves corner one out from the long wall, in line with the gable wall,
+                    # not out at the tip of the verge
+                    if ridge == "x": hx, hz = (wall[0] if x == r[0] else wall[2]), z
+                    else: hx, hz = x, (wall[1] if z == r[1] else wall[3])
+                    hh = Hm.get((hx, hz), (None, None))[0]
+                    if hh is not None and bp.get(hx, hh, hz)[0].endswith("_stairs") and hh - 3 >= 2 and \
+                            all(bp.get(hx, hh - k, hz)[0] in ("keep", "air") for k in (1, 2, 3, 4)):
+                        bp.set(hx, hh - 1, hz, tb); bp.set(hx, hh - 2, hz, "iron_chain"); bp.set(hx, hh - 3, hz, "lantern", hanging=True)
         if P.get("spikes"):           # 07-detailing: ridge spikes every few blocks, finials at the gable peaks
             for i, cells in ridge_cells.items():
                 ridge = self.roofs[i][1]
