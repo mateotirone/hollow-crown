@@ -9,6 +9,7 @@ How versions work is in [`docs/RELEASING.md`](docs/RELEASING.md).
 Everything merged to `main` since the last release goes here. Each pull request that changes what players see adds a line under one of these headings.
 
 ### Fixed
+- The Clockwork Reeve now really throws his cogs: a spinning gear flies from his chest to the marked spot, for both the cog attack and the rewind. In Creative, boss hits now say how hard they would have hit you.
 - Track: diagonal pieces no longer lie across the line, bends turn the right way, and slopes climb toward the higher track instead of away from it. Track already laid fixes itself.
 
 ### Added

@@ -280,6 +280,7 @@ Every mob has a box model in `models/entity/bestiary/<id>.geo.json` and a genera
 | Inquisitor (Mob) | `inquisitor.png` | 128×128 | House style, generated |
 | The Clockwork Reeve (Boss) | `clockwork_reeve.png` | 128×128 | House style, generated |
 | Reeve's Cog (Boss helper) | `reeve_cog.png` | 128×128 | House style, generated |
+| Spinning Cog (the Reeve's thrown cog) | `spinning_cog.png` | 64×64 | House style, generated |
 | The Pale Huntsman (Boss) | `pale_huntsman.png` | 64×64 | House style, generated |
 | The Drowned Bride (Boss, ghost (alpha)) | `drowned_bride.png` | 128×128 | House style, generated |
 | The Ash Seneschal (Boss) | `ash_seneschal.png` | 128×128 | House style, generated |
