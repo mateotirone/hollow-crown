@@ -248,6 +248,7 @@ The showcase (`/scriptevent siege:showcase`) puts a Mason's Bench with its mason
 
 - **Wall round your plot.** With a Keep Banner up, run `/scriptevent siege:wall 1`. A stake fence should rise in a ring 56 blocks out, with a gap facing the gate side. Try `/scriptevent siege:wall 5`, then `8`, then `10`, and tell me if each one follows hills cleanly, if the gate and portcullis hang straight, and how long level 10 takes to rise. Add a region to see its stone: `/scriptevent siege:wall 6 frostmarch`.
 - **Raiders outside the wall.** Start a siege with a wall up. Raiders should appear just outside the ring and walk in. If they stand still out there, tell me: that means they are too far for the Realm to move them.
+- **Regional wall blocks.** In `/scriptevent siege:showcase` there are five stacks, one per region: palisade, wall planks, roof shingles, a gate and a portcullis. Each should have its own look, and each gate and portcullis should open on a click and take iron, diamond and netherite like the Vale's. Then `/scriptevent siege:wall 1` in two different regions: the palisades should differ. Tell me if any block shows as pink and black, or a gate does not open.
 - **Arrival.** `/scriptevent siege:settle_arrive` lays out your settlement: the wall, a Longhouse rising behind the banner, a Mason at a bench, and a signpost on every spot where a building will go. On the real map this happens by itself when you pick a plot in the welcome hall.
 - **Castle Stone family.** Ask the Mason for Castle Stone, Tiles, Bricks, Cobbled and Smooth. In your own region you get your region's stone at the local price; the other regions' stone costs more.
 - **Wall damage and repair.** The generated wall takes damage like any Siege Nights wall: rams and blasts wear blocks down, the stone shows two stages of cracks, then breaks. From level 6 up the wall is as tough as iron-reinforced Castle Stone, level 9 as diamond, level 10 as netherite. Stand by your wall and run `/scriptevent siege:wall_repair break` to rough it up, then talk to the Mason and pick **Mend the wall**: he names a price that follows the damage and the wall is made whole. `/scriptevent siege:wall_repair free` mends without paying. The masons refuse during a siege; patching one block by hand with stone bricks still works then, now on Tiles, Bricks, Cobbled and Smooth too.
@@ -506,3 +507,8 @@ Tell me about: anything too loud, too quiet, silent, or that made you jump. Noth
 - Walk up to them, hit them, push them: nothing happens and they do not turn. They make no sound.
 - Wait for morning, or start a siege: they are gone.
 
+
+### Clue Sense
+1. `/scriptevent siege:townhall_renown 30`, learn Clue Sense in the Wayfarer branch, and carry the Ledger of Whispers.
+2. Walk toward a Dusty Tome you have not clicked (the showcase has some). ✅ Within 16 blocks a page turns softly and the action bar says "Your Ledger whispers: something written, N blocks <direction>". After you copy the tome it goes quiet.
+3. Drop a Lore Tome and walk away and back. ✅ It is sensed the same way. Without the Ledger in your pack nothing happens.

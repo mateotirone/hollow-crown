@@ -81,6 +81,9 @@ export function treeMenu(player, hallLevel) {
 // The graphical tree: the same choices as the list, laid out on a grid that the resource pack draws as a tree
 // (ui/server_form.json looks for TREE_FLAG in the title). Players can switch back to plain lists.
 const NODE = "textures/ui/hc/node_";
+// One painted 16x16 icon per skill, by id (textures thread, studio/art/build_skill_icons.py)
+export const skillIcon = (skill) => `textures/ui/hc/skill/${skill.id}`;
+
 function branchGrid(player, hallLevel, branchId) {
   const hero = heroOf(player);
   const branch = BRANCHES[branchId];
@@ -94,7 +97,9 @@ function branchGrid(player, hallLevel, branchId) {
     else {
       const have = hero.skills[c.id] ?? 0, why = blockedReason(c, hero, hallLevel);
       const unknown = !have && POWER_ORIGINS.gated[c.id] && !hero.origins?.[c.id];
-      form.button(c.name, NODE + (have >= c.max ? "full" : have ? "some" : unknown ? "unknown" : !why ? "open" : "locked"));
+      // a skill you hold or can swear now shows its own painted icon; the rest keep the state frame
+      const shown = have || (!why && !unknown);
+      form.button(`${have >= c.max ? "§6" : ""}${c.name}`, shown ? skillIcon(c) : NODE + (unknown ? "unknown" : "locked"));
     }
   }
   form.show(player).then((r) => {
@@ -116,7 +121,7 @@ function branchMenu(player, hallLevel, branchId) {
     const have = hero.skills[s.id] ?? 0;
     const why = blockedReason(s, hero, hallLevel);
     const color = have >= s.max ? "§6" : !why ? "§2" : have > 0 ? "" : "§8";
-    form.button(`${color}${ROMAN[s.ring]} · ${s.name} ${have}/${s.max}\n§8${why ?? `${s.cost} point${s.cost === 1 ? "" : "s"}`}`);
+    form.button(`${color}${ROMAN[s.ring]} · ${s.name} ${have}/${s.max}\n§8${why ?? `${s.cost} point${s.cost === 1 ? "" : "s"}`}`, skillIcon(s));
   }
   form.button("Back");
   form.show(player).then((r) => {

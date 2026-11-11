@@ -3,10 +3,10 @@ import { BlockTypes } from "@minecraft/server";
 import { drawHall } from "../townhall/halls.js";
 import { STYLES, STYLE_IDS } from "../townhall/styles.js";
 import { SETTLE, CATALOG, MASON_LINES } from "./config.js";
-import { BUILDINGS, drawBuilding } from "./buildings.js";
+import { BUILDINGS, drawBuilding, styleFor } from "./buildings.js";
 import { hallReserve, hallReach, inBox, footprint, boxesTouch, placeVerdict, bill, priceOf, isCampKit } from "./rules.js";
-import { localStock, stoneStock, niceName } from "./mason.js";
-import { STONE_FAMILY, CASTLE_STONES, stoneId } from "../siege/api.js";
+import { localStock, stoneStock, wallStock, niceName } from "./mason.js";
+import { STONE_FAMILY, CASTLE_STONES, stoneId, regionalId, GATES, PORTCULLISES, REINFORCEABLE, CASTLE_BLOCKS } from "../siege/api.js";
 import { MATERIALS } from "./rules.js";
 import { HALL, MASON, SLOTS, place, slotsFor } from "./layout.js";
 import { WALLS, WALL_LEVELS, MAX_WALL, smoothGround, groundProblem, wallColumns, onWallLine, bearingToAngle, columnKinds, repairCost, wallArmor, wallSeed, VARIATION } from "./walldata.js";
@@ -93,6 +93,16 @@ addTests("settle", {
   },
 });
 addTests("settle walls", {
+  "every region has its own gate, portcullis, palisade, planks and shingles": () => {
+    assertEqual(regionalId("palisade"), "siege:palisade");
+    assertEqual(regionalId("castle_gate", "blackfen"), "siege:castle_gate_blackfen");
+    assertEqual(GATES.length, 10);
+    assert(GATES.includes("siege:portcullis") && GATES.includes("siege:castle_gate"), "the Vale's gates keep their old ids");
+    for (const id of GATES) assert(REINFORCEABLE.includes(id), `${id} cannot be reinforced`);
+    for (const id of PORTCULLISES) assert(CASTLE_BLOCKS.includes(id), `${id} has no wall health`);
+    for (const style of STYLE_IDS) assert(styleFor(style).roles.roofBlock[0].startsWith("siege:roof_shingles"), style);
+    assertEqual(wallStock("saltreach", () => true).map(([id]) => id), ["siege:palisade_saltreach", "siege:wall_planks_saltreach", "siege:roof_shingles_saltreach", "siege:castle_gate_saltreach", "siege:portcullis_saltreach"]);
+  },
   "ten levels, each at least as tall and thick as the last": () => {
     assertEqual(MAX_WALL, 10);
     for (let n = 2; n <= MAX_WALL; n++) {
@@ -173,7 +183,7 @@ addTests("settle", {
 });
 addTests("settle", {
   "the new blocks are in the pack": () => {
-    for (const id of ["siege:mason_bench", "siege:foundation_stone", ...STONE_FAMILY]) assert(BlockTypes.get(id), `missing ${id}`);
+    for (const id of ["siege:mason_bench", "siege:foundation_stone", ...STONE_FAMILY, ...GATES, ...STYLE_IDS.flatMap((s) => wallStock(s, () => true).map(([id]) => id))]) assert(BlockTypes.get(id), `missing ${id}`);
   },
 }, { gameOnly: true });
 addTests("settle walls", {

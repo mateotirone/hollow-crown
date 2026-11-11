@@ -1,0 +1,27 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "siege:palisade_blackfen_recipe"
+    },
+    "tags": [
+      "siege_workshop"
+    ],
+    "pattern": [
+      "LL",
+      "LL"
+    ],
+    "key": {
+      "L": {
+        "item": "minecraft:mangrove_log"
+      }
+    },
+    "result": {
+      "item": "siege:palisade_blackfen",
+      "count": 4
+    },
+    "unlock": {
+      "context": "AlwaysUnlocked"
+    }
+  }
+}

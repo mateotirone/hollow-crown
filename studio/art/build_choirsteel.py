@@ -100,6 +100,9 @@ for y in range(6, 9):
 ar = faces(40, 16, 4, 12, 4)
 plate(p, ar['top'], tone=5)
 for k in ('front', 'back', 'right', 'left'): plate(p, ar[k], lambda x, y, w, h: y < 4 or (y == 4 and 0 < x < w - 1), band=3)
+for k in ('front', 'back', 'right', 'left'):                                    # vambrace and cuff below the pauldron
+    f = ar[k]; plate(p, (f[0], f[1] + 5, f[2], 7), tone=2, band=5)
+plate(p, ar['bottom'], tone=1)
 lg = faces(0, 16, 4, 12, 4)
 for k in ('front', 'back', 'right', 'left'):
     f = lg[k]; plate(p, (f[0], f[1] + 7, f[2], 5), band=0)

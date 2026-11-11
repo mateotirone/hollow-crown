@@ -1,0 +1,27 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "siege:palisade_recipe"
+    },
+    "tags": [
+      "siege_workshop"
+    ],
+    "pattern": [
+      "LL",
+      "LL"
+    ],
+    "key": {
+      "L": {
+        "item": "minecraft:spruce_log"
+      }
+    },
+    "result": {
+      "item": "siege:palisade",
+      "count": 4
+    },
+    "unlock": {
+      "context": "AlwaysUnlocked"
+    }
+  }
+}
