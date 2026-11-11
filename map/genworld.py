@@ -329,7 +329,7 @@ corr = (rail_d <= RAIL_R) & land & ~wet & ~bore & (br_deck == -999)
 flat_ = corr & ((rail_d <= 3.5) | (isroad & (rail_d <= ROADOFF + 5))) & ~rail_t   # over a tunnel the road keeps to the hill
 Y[flat_] = bed[flat_]
 dF = chamfer_b(flat_, RAIL_R)
-rbank = np.floor(dF * 0.75 + (noise(7, 91) + 0.5) * 1.5).astype(np.int32)
+rbank = np.floor(dF * 0.75 + np.maximum(dF - 20, 0) * 0.5 + (noise(7, 91) + 0.5) * 1.5).astype(np.int32)   # steeper, rockier far up
 slope_ = corr & ~flat_
 cut = slope_ & ~rail_t & (Y > bed + rbank); Y[cut] = (bed + rbank)[cut]
 fill = slope_ & (Y < bed - rbank); Y[fill] = (bed - rbank)[fill]
