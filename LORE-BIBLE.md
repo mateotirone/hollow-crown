@@ -259,6 +259,10 @@ A player shelves the six notes, reads them, visits the sites, and uses **Name th
 | `cael` | Brother Cael, the Order's archivist | Chapterhouse archive | The Burned Archive (only if Aldous sends you), then King's Barrow |
 | `sigrun` | Sigrun Ashby, Wren's northern cousin | Rimehold | The lake, the shrine, the hunter's lodge. Gives *Grandmother Ashby's Account* |
 | `isolde` | Warden Isolde | Sunscar | The statue fragments, the vault riddle ("grey eyes over a laughing mouth, the right hand raised") |
+| `kesh` | Kesh Cinder, Wingmistress of the Cinder Roost, last of Ysolt's line, grounded since her dragon was shot down | The Cinder Roost above Sunscar | The Dragon Rider trial: the Span, the Choosing, the Hatching. Knows why dragons won't fly on the third night and won't say until Drake-Captain |
+| `ulla` | Ulla Deepforge, keeper of Hroda's fire | The Deepforge above Rimehold | The Forgemaster trial: the side-hearth, Hroda's Hand-bell rung on the ice, the Huntsman. Knows the Order took the bell moulds |
+| `ottilie` | Harbourmistress Ottilie Holt, Merrin Holt's descendant, keeper of the Debt Book | Harbour office, Gull's Rest | The Captain trial: the articles, a crew, the Drowned Bride. The back of the Debt Book waits for Captain rank |
+| `nell` | Nell Sedge, of Goody Sedge's line; hasn't spoken to Old Mag in sixty years | Raft-house past Mirelight | The Witch trial: the cup, three graves, the Mother of Changelings |
 
 What a character says depends on what you've read, solved and done, and whether you are a Sorcerer.
 

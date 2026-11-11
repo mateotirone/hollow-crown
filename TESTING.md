@@ -566,6 +566,24 @@ Tell me about: anything too loud, too quiet, silent, or that made you jump. Noth
 2. Walk toward a Dusty Tome you have not clicked (the showcase has some). ✅ Within 16 blocks a page turns softly and the action bar says "Your Ledger whispers: something written, N blocks <direction>". After you copy the tome it goes quiet.
 3. Drop a Lore Tome and walk away and back. ✅ It is sensed the same way. Without the Ledger in your pack nothing happens.
 
+## Role trials (scripts/roletrials/)
+
+Build the showcase (`/scriptevent siege:showcase`) in a flat Creative world, then switch to Survival. Kesh, Ulla, Holt and Nell stand with the other story characters. A short Span and three graves are 60 blocks behind the exhibit rows.
+
+1. Open the Tree of Oaths with no role: "Choose your path" lists the four regional roles and their deeds. The Tree has a "Role trials" page naming each mentor and where they are.
+2. Talk to Kesh and choose "I want to ride", then "Sign me in". Walk the Span from the near pillar to the far one: cracked stones fall a second after you step on them and come back later, and wind pushes you sideways. Arrive and Kesh's line appears. Fall off and you are "Washed out" for 3 days (use `/time add 72000` to skip).
+3. Hold a sword and click a Dragon Nest: you are set on fire and get no egg until tomorrow. Empty-handed and walking: you get the egg and the Choosing is done. When the egg hatches, the Tree offers Dragon Rider.
+4. Talk to Ulla, choose "Do you need help?", "I'll haul for you". Talk to her again carrying 16 iron ingots and 16 coal: they are taken and you get "Hroda's Hand-bell". At night, place the bell on ice or snow: the Pale Huntsman rises. Kill it and the Tree offers Forgemaster.
+5. Talk to Holt, "Do you need captains?", "Give me the articles". Talk again with 32 Regals on you: they are taken. With three guards sworn to your keep, talk again: the crew step is done. `/scriptevent siege:bestiary_summon bride` and kill it: the Tree offers Captain.
+6. Talk to Nell, "What does a witch do?", "I'd like to learn", "Drink": darkness and slowness for about two minutes. Sneak at each of the three graves: the third gives you something. Kill the Mother of Changelings and the Tree offers Witch.
+7. Kill a regional boss before talking to its mentor: you get a message from the mentor, no offer. Start that trial and finish its steps: the offer comes as the last step lands.
+8. As a Knight (`/scriptevent siege:townhall_path knight`): talk to Sir Aldous, answer "I'll stand on their wall", then win a siege at a friend's keep (or your own, alone in the world). Aldous thanks you. Each siege or boss after that brings one of the Eleven.
+9. Rank up in any role (`/scriptevent siege:townhall_renown`, then spend points in your branch): the mentor's line appears a few seconds later. As a Sorcerer, Mag has a new scene at Listener and Adept.
+
+Shortcuts: `/scriptevent siege:role_trial <rider|forgemaster|captain|witch> [step]` starts a trial or finishes one step; `siege:role_trial reset` forgets them. On the real map, the map builder marks the Span (`/scriptevent siege:role_mark span_start` and `span_end`) and the graves (`siege:role_mark grave`).
+10. Turns and stands: reach rank 4 and rank 5 in a regional role (spend points in its branch) and talk to the mentor each time: a new scene each. A Knight reaching Knight-Commander gets a box to name the Order.
+11. The Morvane fight with roles: `/scriptevent siege:bestiary_summon morvane`, then `/scriptevent siege:morvane_skip N` for N = 2 to 7. Alone with no role, a named student is announced at stages 2 to 6 (knights spawn at 3, the river buffs at 4, burns every 16 s at 5, slow falling at 6). With a top-rank role, your name is announced instead.
+12. Ask Kesh "Read me the roll": three names to start, Bram Tallow's after the first hatching in the world, and every dragon that dies after that. Fill a dragon's bond (`/scriptevent siege:dragons_grow`): two Wing points arrive.
 ## The Hollow's middle stretch (lore/hollow.js, undertow/story.js)
 
 Mateo approved the beats 2026-11-11 (doc "The Hollow's middle stretch: story beats"). Words: `lore/data/hollow_story.js` and the Carter in `lore/data/dialogue.js`. Places, the Carter's position, the Court door: `undertow/story.js`.

@@ -35,6 +35,7 @@ import "./economy/index.js";
 import "./reach/index.js";
 import "./sound/index.js";
 import "./minimap/index.js";
+import "./roletrials/index.js";
 import "./after/index.js";
 import "./opening/index.js";
 import "./labels/index.js";

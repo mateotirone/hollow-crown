@@ -28,6 +28,7 @@ import "./tests.js";
 import "./nests.js";
 import "./showcase.js";
 import { sfx } from "../core/sfx.js";
+import { applyFilter } from "../core/events.js";
 
 const say = (player, text) => player.onScreenDisplay.setActionBar(text);
 const posKey = (loc) => `${loc.x},${loc.y},${loc.z}`;
@@ -54,6 +55,9 @@ function takeEgg(player, block) {
   const key = posKey(block.location);
   const wait = (store.data.nests[key] ?? 0) - now;
   if (wait > 0 && !rec) return say(player, `§7The nest is empty. Something will lay here again in ${days(wait)} day${plural(days(wait))}.`);
+  // Another feature may judge how you came at the nest (the Rider's Choosing, scripts/roletrials). A reason = no egg.
+  const refused = applyFilter("dragonNestTake", "", { player, block });
+  if (refused) return say(player, refused);
   if (!rec) {
     store.data.dragons[player.id] = newDragon(player.id, player.name, now);
     store.data.nests[key] = now + S.nestDays * DAY;

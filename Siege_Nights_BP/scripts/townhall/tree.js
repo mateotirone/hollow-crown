@@ -11,6 +11,8 @@ import { hallLevelAt, setTreeLook } from "./townhall.js";
 import { chargeE } from "../economy/coins.js";
 import { worth } from "../economy/rules.js";
 import { sfx } from "../core/sfx.js";
+import { applyFilter } from "../core/events.js";
+import { ROLE_DEEDS } from "./roles.js";
 
 export const EMBER = "siege:hollow_ember"; // the fallen shard, before you choose
 export const BOUND_EMBER = "siege:bound_ember"; // the Marked player's focus
@@ -71,6 +73,11 @@ export function treeMenu(player, hallLevel) {
   if (spentIn(hero.skills) > 0) {
     form.button("Unbind your oaths\n§8refund every point", "textures/items/shears");
     actions.push(() => respec(player, hallLevel));
+  }
+  // Other features add pages here (the role trials add "Your trial"): addFilter("treeButtons", (list, { player }) => [...list, { label, icon?, open(player, back) }])
+  for (const extra of applyFilter("treeButtons", [], { player }) ?? []) {
+    form.button(extra.label, extra.icon);
+    actions.push(() => extra.open(player, () => treeMenu(player, hallLevel)));
   }
   form.button("Recent deeds", "textures/items/book_normal");
   actions.push(() => new ActionFormData().title("Recent deeds").body(hero.log.length ? hero.log.join("\n") : "Nothing yet. Hold a siege, raise your hall, face something new.").button("Back").show(player).then((r) => { if (!r.canceled) treeMenu(player, hallLevel); }).catch(() => {}));
@@ -213,6 +220,9 @@ function pathMenu(player, hallLevel) {
     "§5The Marked.§r Take the Ember into your hand. It gives you powers no one living understands: bolts of pale fire, a step through the air, a call that turns armies on themselves. Every casting raises your Resonance, and loud Resonance is heard. Stages: " + RANKS.marked.map((r) => r.name).join(", ") + ".",
     "",
     holding ? "§7The Ember hums in your pack." : "§7You need the Ember to choose. It falls near your keep the night you first hold a siege.",
+    "",
+    "§fOther roads, earned later in the regions.§7 Choosing the Ember's road closes these, because a person holds one role. There is no hurry: keep the Ember and come back to the Tree whenever you like.",
+    ...Object.keys(ROLES).filter((id) => ROLES[id].region).map((id) => `${ROLES[id].color}${ROLES[id].name}§7: ${ROLE_DEEDS[id]?.deed ?? "a deed in " + STYLES[ROLES[id].region].name}.`),
   ].join("\n");
   const form = new ActionFormData().title("Choose your path").body(body);
   const choices = [];
@@ -256,8 +266,8 @@ export function confirmPath(player, path, back) {
   }
   new MessageFormData().title(path === "knight" ? "The Squire's Oath" : "The Ember")
     .body(path === "knight"
-      ? "\"I will hold the gate. I will keep the silence. I will not ask what lies beneath.\"\n\nIf you carry the Ember, it is taken from you and sealed. You become a Squire of the Ashen Gate. §cThis cannot be undone."
-      : "It is not warm. It is not cold. It fits the hollow of your palm as if it had been cut from it.\n\nThe Ember fuses to your hand and you become Marked. §cThis cannot be undone.")
+      ? "\"I will hold the gate. I will keep the silence. I will not ask what lies beneath.\"\n\nIf you carry the Ember, it is taken from you and sealed. You become a Squire of the Ashen Gate, and the regional roles close to you. §cThis cannot be undone."
+      : "It is not warm. It is not cold. It fits the hollow of your palm as if it had been cut from it.\n\nThe Ember fuses to your hand and you become Marked, and the regional roles close to you. §cThis cannot be undone.")
     .button1(path === "knight" ? "I swear it" : "Close your hand").button2("Not yet")
     .show(player).then((r) => {
       if (r.canceled || r.selection !== 0) return back?.();

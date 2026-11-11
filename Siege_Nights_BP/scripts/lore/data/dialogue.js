@@ -13,6 +13,8 @@
 // "next node" may also be a list like start, to send the player different ways: [[conditions, node], ...]
 // Every effect only ever happens once per player.
 
+import { MENTOR_NPCS } from "./mentors.js"; // the four regional role mentors
+
 export const NPCS = [
   // ------------------------------------------------------------------ Sister Wren, Millbrook
   {
@@ -179,6 +181,10 @@ export const NPCS = [
     id: "aldous", name: "Sir Aldous Vane", where: "Rides to a player's keep the morning after their first siege win (spawned by the story engine), then waits at the Ashen Gate chapterhouse. Young, earnest, believes everything the Order told him.",
     start: [
       [["flag:morning_after", "flag:aldous_met", "!flag:aldous_saw"], "saw"],
+      [["path:knight", "flag:morvane_fallen", "!flag:aldous_after"], "after"],
+      [["path:knight", "flag:rank_knight_knight_commander", "!flag:aldous_commander"], "commander"],
+      [["path:knight", "flag:aldous_met", "!flag:knight_wall_asked"], "wall"],
+      [["path:knight", "flag:knight_wall", "!flag:knight_wall_thanked"], "wallthanks"],
       [["read:seal_10"], "edda"],
       [["read:seal_09"], "confront"],
       [["path:marked"], "marked"],
@@ -256,6 +262,33 @@ export const NPCS = [
         text: "I don't know. That is the truth and it shames me. We take the lights and we are never told what becomes of them.\n\nThere was a mage, once. The Order burned him. They say his students hid his notebooks all over Aldmere. If anyone wrote down what you are now, it was him.",
         opts: [["I'll find them.", "end", ["lead:corvins_tower"]]],
       },
+      commander: {
+        text: "Knight-Commander. There were four of those when we were eleven hundred. Now there's you.\n\nThe Eleven are yours. Every one of us who's left. We'll hold whatever wall you put us on, and when the worst night comes, the one we were all sworn for and never told about, we'll be on it with you.\n\nWhatever you call us now. The name matters less than I thought it would.",
+        opts: [["Then hold the wall with me.", "end", ["flag:aldous_commander", "sp:2"]]],
+      },
+      after: {
+        text: "I keep thinking about her. Edda. Saint Ashe.\n\nShe stood on a wall on a third night, just like the one we stood on, and did a terrible thing so the knocking would stop, and then lied for the rest of her life so no one would undo it.\n\nWould she have done it again, do you think? If she'd seen how it ended?\n\n...No. Don't answer. I don't think I want to know. I just wanted somebody else to wonder it too.",
+        opts: [["I'll wonder it with you.", "end", ["flag:aldous_after", "sp:1"]]],
+      },
+      wall: {
+        text: "Squire. Good, you're here. I need to ask you something the Rule doesn't cover.\n\nThe Order watches the keeps. That's all we do now: watch. Eleven of us can't stand on forty walls. But you could stand on one that isn't yours.\n\nNext time another keep is besieged, go and hold it with them. Not for pay. Because the Rule says we stand between the people and the dark, and I'd like to see one of us actually do it.",
+        opts: [
+          ["I'll stand on their wall.", "wall2", ["flag:knight_wall_asked"]],
+          ["And if there's no other keep near me?", "wallsolo", ["flag:knight_wall_asked"]],
+        ],
+      },
+      wall2: {
+        text: "Thank you. When you have, I'll write to the others. All ten of them. Some of them will come and see for themselves.\n\nThat's how the Order starts again, I think. Not with a council. With somebody seen on the wrong wall.",
+        opts: [["Good day, Aldous.", "end"]],
+      },
+      wallsolo: {
+        text: "Then hold your own as if it were somebody else's. As if the people behind you weren't yours to lose, and you were there anyway.\n\nI'll know the difference. So will the others.",
+        opts: [["I will.", "end"]],
+      },
+      wallthanks: {
+        text: "I heard. A knight of the Gate on a wall, on a third night, holding.\n\nI've written to the others. Dame Orla wrote back in an hour, which she has never once done for the Grandmaster. They'll come to you, one by one, as they hear what you do. Let them see you do it.",
+        opts: [["Let them come.", "end", ["flag:knight_wall_thanked", "sp:1"]]],
+      },
       confront: {
         text: "You've read it. The Grandmaster's own hand. \"Let them think it is bandits.\"\n\nI have told forty keeps it was bandits. I told YOU it was bandits. I believed it.\n\nGive me a little time. A man cannot put down his whole life in one afternoon.",
         opts: [
@@ -280,6 +313,9 @@ export const NPCS = [
     start: [
       [["flag:morning_after", "flag:mag_believed", "!flag:mag_saw"], "saw"],
       [["flag:corvin_says_mag", "!flag:mag_heard_corvin"], "trowel"],
+      [["path:marked", "flag:morvane_fallen", "!flag:mag_after"], "crownheld"],
+      [["path:marked", "flag:rank_marked_listener", "!flag:mag_listener"], "listener"],
+      [["path:marked", "flag:rank_marked_adept", "!flag:mag_adept"], "adept"],
       [["path:marked", "flag:mag_believed", "!flag:mag_arts"], "arts"],
       [["col:corvin", "flag:mag_believed"], "allbooks"],
       [["flag:mag_believed"], "hub"],
@@ -287,6 +323,34 @@ export const NPCS = [
       [[], "first"],
     ],
     nodes: {
+      crownheld: {
+        text: "So. It's over, and you're the one who can hear all of it now.\n\nWill you let me hold it? The Crown. Not wear it. I'm not a fool, and I'm not you. Just hold it, once, in my two hands.\n\n...Heavier than I thought. Colder. He used to turn his ring when he was thinking. Did you know that? No. Of course you didn't.\n\nTake it back. Quickly, please.",
+        opts: [["I've got it, Mag.", "hub", ["flag:mag_after", "sp:1"]]],
+      },
+      listener: {
+        text: "Sit. No, the other chair, that one's for the cat, and she's dead, but it's still hers.\n\nListener now. I could tell from the door. You keep tilting your head at the kettle.\n\nSo. What did it sound like, the first time? Not what it said. What it SOUNDED like. Everyone hears something different, and what you hear tells me what you'll be.",
+        opts: [
+          ["Like a bell under water.", "listener2"],
+          ["Like a lot of people humming one note.", "listener2"],
+          ["Like someone saying my name from the next room.", "listener2"],
+        ],
+      },
+      listener2: {
+        text: "Hm. That's a good one. That's not the worst one.\n\nHere's the first thing he taught me, and the only thing that matters this year: it doesn't know you're listening. Not yet. Keep it that way as long as you can. Cast quiet. Rest between.\n\nThe day it notices you back is a different lesson.",
+        opts: [["Thank you, Mag.", "hub", ["flag:mag_listener", "sp:1"]]],
+      },
+      adept: {
+        text: "You went loud.\n\nDon't argue, I felt it from here, like a draught under a door. Past seventy, weren't you? You felt it look round.\n\nThat's what Adept means. Not that you're good. That you're loud enough to be noticed, and still standing.",
+        opts: [["What do I do now?", "adept2"], ["It was worth it.", "adept3"]],
+      },
+      adept2: {
+        text: "Now you learn to be loud on purpose and quiet the rest of the time, like a man who only shouts in a fire.\n\nAnd you start carrying something to hold on to after. He used to keep a pebble from the river at home. Pick something. You'll know why the first time you need it.",
+        opts: [["I'll pick something.", "hub", ["flag:mag_adept", "sp:1"]]],
+      },
+      adept3: {
+        text: "It always is, the first time. That's the trap.\n\nGo and be loud when it matters, and quiet all the rest. And carry something from home in your pocket. You'll know why.",
+        opts: [["I'll remember.", "hub", ["flag:mag_adept", "sp:1"]]],
+      },
       saw: {
         text: "Don't tell me. I can smell it on your coat. Cold stone and the inside of a bell.\n\nSo they've come up the long way and walked to your wall on their own feet. Well. I wondered if I'd live to see that again, and it turns out I live to see everything.\n\nSit. You'll want to know what it was, and I'm not going to tell you, and you'll want to know why not.",
         opts: [["Why not?", "saw2"]],
@@ -791,11 +855,16 @@ export const NPCS = [
           ["I'll read the record.", "end", ["flag:isolde_doubt", "lead:sunscar"]],
         ],
       },
+      roost: {
+        text: "The Roost. Yes, that's ours too, in the way a hawk on the roof is yours.\n\nThey train riders up there. The Cinder woman runs it now, the one with no dragon. If you want to ride, she's who you ask. If you want my advice, don't. I've read that wall of theirs. It's longer every year.",
+        opts: [["Back.", "start"]],
+      },
       hub: {
         greets: ["Sunscar thanks you for your visit. I am required to say so. What do you want?", "Mind the statues on your way out. They were here first.", "I have a petition about a goat and then I have you. Go on."],
         text: "Water, shade, or statues?",
         opts: [
           ["Statues.", "doubt"],
+          ["The cliff above town.", "roost", ["lead:cinder_roost"]],
           ["Who rules Sunscar?", "seneschal"],
           ["Just passing through.", "end"],
         ],
@@ -804,6 +873,7 @@ export const NPCS = [
         text: "You again. You've got me looking at them on my rounds now. I hope you're pleased.",
         opts: [
           ["The fragments.", "fragments"],
+          ["The cliff above town.", "roost", ["lead:cinder_roost"]],
           ["Who rules Sunscar?", "seneschal"],
           ["The riddle on the vault.", "riddle"],
           ["Good day, Warden.", "end"],
@@ -1141,6 +1211,8 @@ export const NPCS = [
       },
     },
   },
+  // ------------------------------------------------------------------ the four regional mentors (mentors.js)
+  ...MENTOR_NPCS,
   // ------------------------------------------------------------------ The Carter, the Hollow
   // The middle stretch's guide (Mateo approved 2026-11-11). Placed by script (undertow/story.js): at
   // the Wound landing, then Glimwade, then the Court door. Those below have no names (Sigrun), so she

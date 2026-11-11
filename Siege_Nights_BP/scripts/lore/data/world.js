@@ -88,6 +88,10 @@ export const PLACES = {
   frostvein_hollow: { name: "Frostvein Gap", region: "Frostmarch", charted: false, desc: "A thin place. An ice cave in the far north, west of Rimehold." },
   sunken_quarry: { name: "The Sunken Quarry", region: "Emberwaste", charted: false, desc: "A thin place. A flooded quarry pit in the badlands, far to the south of Sunscar." },
   witchroot_caves: { name: "The Witchroot Caves", region: "Blackfen", charted: false, desc: "A thin place. Caves under the swamp, hung with roots, a short walk west of Mirelight." },
+  cinder_roost: { name: "The Cinder Roost", region: "Emberwaste", charted: true, desc: "A rider school cut into the cliff above Sunscar. Its gate is past the Span, and the names of the fallen are on its wall." },
+  deepforge: { name: "The Deepforge", region: "Frostmarch", charted: true, desc: "A forge under the mountain above Rimehold. Its fire has burned for four hundred years." },
+  harbour_office: { name: "The Harbour Office", region: "Saltreach", charted: true, desc: "On the quay at Gull's Rest. The Debt Book is chained to the desk." },
+  nell_raft: { name: "Nell Sedge's Raft-house", region: "Blackfen", charted: false, desc: "Moored in the reeds past Mirelight, further out than anyone else lives." },
 };
 
 // ---------- The seven thin places ----------
