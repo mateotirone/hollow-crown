@@ -66,6 +66,45 @@ them two cells wide and a different material.
   (chapels, the capital's crossing).
 - Ridge caps can be a different block (darker wood slabs, or walls on stone roofs) to draw the line.
 
+### Connecting roofs (Mateo, 2026-11-11)
+
+Where two roofs join, the join must read as one roof surface folded, never as two roofs crashing into
+each other. `reference/pictures/broken-valley-example.png` shows what goes wrong: light stone blocks,
+wood stairs and odd light stairs poking up along the join line, because parts of the lower roof's
+building (gable wall, barge boards, eave trim, ridge) were left standing inside the higher roof.
+
+**Kinds of join and how to build each:**
+
+| Join | Where | How |
+|---|---|---|
+| **Valley** (inside corner) | wing meets main block at right angles (L, T, + plans), dormer meets roof | build both slopes to the meeting line; on the line, each cell takes the **inner-corner stair** turned to both uphill directions, so the line reads as a groove; never two straight stairs back to back with a gap |
+| **Hip** (outside corner) | hipped roofs, the outer corner of an L | the line is **outer-corner stairs** stepping up to the ridge; the ridge of the hip ends in a full block with the ridge slab |
+| **Wing ridge into main slope** | a lower wing roof running into the side of a higher roof | the wing ridge (block + slab) stops where it meets the main slope; the last ridge cell is a stair of the main slope, not a slab sticking out; the wing ridge is at least 2 below the main ridge |
+| **Equal ridges** (crossing) | symmetric cross plans only | the two ridges meet in one full block with the slab on top; the four valleys run down from it to the four inside corners |
+| **Lean-to into a wall** | mono-pitch against a taller wall | the top row is a row of full blocks or upside-down stairs tight against the wall (flashing); no gap of sky between roof and wall |
+| **Step down** (two ridges at different heights along one line) | a terrace of houses, a lower extension on the end | the lower roof's ridge runs under the higher roof's verge: the higher building's gable wall carries on down to meet the lower roof, with a verge and barge board on the higher roof only |
+
+**Rules for every join:**
+
+1. **Higher roof wins.** Every cell where two roofs overlap belongs to the higher roof surface. Build the
+   higher roof last, or delete everything of the lower roof (and its building) that sits inside or above
+   the higher surface.
+2. **Nothing pokes through.** Inside or above a roof surface there is no gable wall block, no barge board,
+   no eave trim, no ridge slab, no frame post, no window of the other roof. Gable walls, barge boards and
+   eave rows exist only on edges that are open to the sky.
+3. **One material, one gradient.** Both roofs that join use the same roof block and the same gradient
+   (`texturing/`), lined up by height, so the join line does not show a band of different stairs. Never
+   mix stair kinds along the valley (no light stairs in a dark roof).
+4. **Stairs face uphill on both sides.** Along the valley each stair's tall side points up its own slope;
+   the corner cell uses the inner-corner shape. A stair facing the wrong way shows as a light lip.
+5. **Walls under the join are closed.** The wall where the wing meets the main block stops at the main
+   roof's underside inside the attic; no sky shows through a gap under the valley from inside.
+6. **Chimneys and dormers keep a block clear of a valley.** Never put a chimney or a dormer on the valley
+   line; it breaks the groove and leaves wrong stairs round it.
+7. **Check from above and from the rails.** After the roof stage, look straight down on every join: the
+   line must be one clean groove (valley) or one clean edge (hip). Any lighter block, wood block or flat
+   top along it is a leftover and gets removed.
+
 ## Step 5: Verges, barge boards, eaves
 
 - **Verge**: the gable edge stairs. Under each verge stair, a barge board: an upside-down stair of the trim
@@ -157,6 +196,7 @@ How to build one (span = inside width, odd):
 - [ ] Shape and pitch match the region and the plan; ridge along the long side of each module.
 - [ ] Overhang 1 at eaves and verges; no gap between wall top and roof.
 - [ ] Valleys closed, wing ridges at least 2 lower, dormers on the window lines.
+- [ ] Every roof join clean from above: nothing of the lower roof poking through, one material along the join.
 - [ ] Barge boards under verges, eave row under the overhang, corners closed.
 - [ ] Gable walls filled with posts on the centre line.
 - [ ] Trusses in every open hall and open gable, lined up with the posts.

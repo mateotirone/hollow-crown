@@ -28,4 +28,5 @@
 | `roof-gambrel-aframe-curved.png` | Gambrel, A-frame and curved gable ends side by side, with hanging lanterns at the peak |
 | `detailed-hall-hanging-chains.png` | A dense, detailed hall: lanterns on chains from every roof tip, ridge spikes, layered beams and stairs, a teal accent band, a stepped stone stair |
 | `chimney-signs-trapdoors-pot.png` | Chimney top: stone column, signs round the last stone block, trapdoors round a campfire, a flower pot on top |
+| `broken-valley-example.png` | What not to do: a valley where a wing roof meets a main roof with gable blocks, barge boards and light stairs poking through (from the builds viewer) |
 | `window-ideas-grid.png` | Sixteen window surrounds in wood, stone and brick: stair and trapdoor frames, crowns, sills, planters |
