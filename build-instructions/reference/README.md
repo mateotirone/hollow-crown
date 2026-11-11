@@ -16,4 +16,7 @@
 | `stone-alley-arches.png` | A cobbled alley between stone and timber houses, stone arches overhead with hanging lanterns, vines and flowers everywhere, warm night light |
 | `market-town-roofs.png` | A market town from above: terracotta, dark oak and slate roofs mixed, white walls, a chapel, a square of stalls |
 | `window-ideas-four-styles.png` | Four window designs: framed surrounds, slab sills wider than the glass, stepped caps, trapdoor shutters, planter boxes with berries, a barred stone castle window |
+| `stone-ground-floor-trapdoors.png` | A stone ground floor: slim windows between dark oak trapdoor panels, spruce planters and a lantern stand at the foot, a bush boxed in by signs. The stone, spruce, dark oak pairing |
+| `stone-window-stair-heads.png` | Upside-down stone stairs as the heads over slim stone windows, dark oak panels between |
+| `large-door-trapdoors.png` | A large-looking door: a spruce door in the middle of a 3-wide opening with spruce trapdoors closed on the outside round it |
 | `window-ideas-grid.png` | Sixteen window surrounds in wood, stone and brick: stair and trapdoor frames, crowns, sills, planters |

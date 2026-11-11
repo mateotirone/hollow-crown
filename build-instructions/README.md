@@ -25,6 +25,8 @@ It meticulously goes through every step, making sure everything is in the right 
 Supporting folders:
 
 - [palettes](palettes/README.md): every region's block palette, chosen by colour, plus the roof colour mix for every town.
+- [texturing](texturing/README.md): how to mix blocks on any surface, the per-region colour doctrine with codes (`texturing/regions/`), and pairings such as stone, spruce, dark oak.
+- [paths](paths/README.md): strict rules for every path, street and square (sunken half slab, odd widths, slope, surfaces per region).
 - [reference](reference/README.md): block states (which way a stair faces), the shape library (arches, sills, brackets, trusses) and Mateo's reference pictures.
 
 ## Rules that hold at every stage

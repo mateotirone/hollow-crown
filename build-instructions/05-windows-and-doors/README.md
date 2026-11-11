@@ -27,7 +27,13 @@ References: `reference/pictures/window-ideas-four-styles.png` and `window-ideas-
 - **Grand doorway, 5 wide**: jamb, 3-wide opening, jamb, under an arch (see below). The door block goes
   in the centre of the opening; the two cells beside it are filled to door height with the door's
   surround (iron bars, fence gates, a trapdoor pair, or dark planks) or left open as a side light with
-  glass above. Never two doors side by side.
+  glass above. Never two doors side by side, except the six-block door below.
+- **Large-looking door (Mateo, 2026-11-11, `reference/pictures/large-door-trapdoors.png`)**: a 3-wide,
+  3-tall opening with the door in the middle of the bottom row and trapdoors of the same wood closed
+  flat on the outside face in every other cell of the opening, so the whole opening reads as one big
+  plank door. The **six-block door**: a double door (two doors side by side) with a top slab of the same
+  wood in each cell above them, so 2 wide by 3 tall reads as one tall door. Use on barns, stores,
+  halls and inn yards; a house keeps the plain 3-wide doorway.
 - **Door block**: the palette's door, facing out, hinge on the side away from the stair inside.
 
 ### Around the door
@@ -87,7 +93,29 @@ signs**.
   sit in a thin wooden box. Signs blank.
 - On every house window where the cell is free. Where it is not (a bracket, the eaves, a step), leave the
   window without one.
-- Stone and civic buildings keep the stair or slab sills below.
+- Stone and civic buildings keep the stair or slab sills below, but a stone house may stand a leaf box
+  on the ground in front of the wall instead (next section).
+
+### Stone ground floors: stone, dark oak, spruce (Mateo, 2026-11-11)
+
+From `reference/pictures/stone-ground-floor-trapdoors.png` and `stone-window-stair-heads.png`. Mateo:
+the dark brown of the dark oak trapdoors goes really well with spruce and stone; this is the doctrine for
+**anything that uses stone** (see `texturing/README.md`, Pairings).
+
+- **Three tones**: the stone is the light field, spruce is the middle brown, dark oak is the darkest note.
+  Never all three woods the same.
+- **Windows**: tall and narrow (1 wide, 2 or 3 tall), glass panes flush with the wall face.
+- **Heads**: an upside-down stair of the wall stone above every window, facing out
+  (`stone-window-stair-heads.png`). This is the default head on stone walls.
+- **Dark oak trapdoors**: closed flat against the wall face beside the windows, filling the wall between
+  them as tall as the glass, so the front reads as stone piers, dark wood panels and slim windows.
+  Lighter dressed stone (polished andesite, smooth stone) for the piers next to the glass.
+- **Spruce at the foot of the wall**: planter boxes of spruce trapdoors or slabs with flowers, a spruce
+  slab stand with a lantern on it, set one block out on the ground.
+- **The sign-boxed bush**: a leaf block (or two) on the ground in front of the wall with wall signs on
+  every open side, so the signs look like they are holding the bush in (Mateo loves this). Spruce or dark
+  oak signs. Use it between windows or in the middle of a front, with the spruce planters either side.
+- Vines and a few flowers growing up the piers, lower on the shady side.
 
 ### Sills (stone and civic buildings)
 
