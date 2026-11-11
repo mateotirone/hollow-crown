@@ -205,7 +205,26 @@
    }
   },
   "siege_undertow_moss": {
-   "textures": "textures/blocks/siege_undertow_moss"
+   "textures": {
+    "variations": [
+     {
+      "path": "textures/blocks/siege_undertow_moss",
+      "weight": 5
+     },
+     {
+      "path": "textures/blocks/siege_undertow_moss_1",
+      "weight": 3
+     },
+     {
+      "path": "textures/blocks/siege_undertow_moss_2",
+      "weight": 3
+     },
+     {
+      "path": "textures/blocks/siege_undertow_moss_3",
+      "weight": 1
+     }
+    ]
+   }
   },
   "siege_veil_rock": {
    "textures": "textures/blocks/siege_veil_rock"
@@ -1118,6 +1137,24 @@
   },
   "siege_hall_waystone_top": {
    "textures": "textures/blocks/lodestone_top"
+  },
+  "siege_undertow_moss_deep": {
+   "textures": {
+    "variations": [
+     {
+      "path": "textures/blocks/siege_undertow_moss_deep",
+      "weight": 4
+     },
+     {
+      "path": "textures/blocks/siege_undertow_moss_deep_1",
+      "weight": 3
+     },
+     {
+      "path": "textures/blocks/siege_undertow_moss_deep_2",
+      "weight": 1
+     }
+    ]
+   }
   }
  }
 }

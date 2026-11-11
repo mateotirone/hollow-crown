@@ -56,3 +56,9 @@ towers, wells, stalls): the whole crown stays a block clear, so no branch hangs 
 may shade a road. Big sizes are tried first, then smaller ones of the same species; crowns may touch at
 the edges but never another trunk. The map writer and the town generator are meant to call it with their own
 masks.
+
+## In the Hollow
+
+The Hollow's terrain generator grows the three Hollow species (Latticewood, Veilmoss Tree, Ashen Deadwood) from
+`Siege_Nights_BP/scripts/undertow/trees_data.js`, written by `python3 tools/hollow_trees.py`. Rerun it after changing
+those species.
