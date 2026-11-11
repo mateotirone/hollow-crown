@@ -120,7 +120,10 @@ function materialAt(L, P, rel, top) {
   return P.kinds[materialKind(L, rel, top)];
 }
 
-const SOFT = /(air|water|grass|fern|flower|snow_layer|leaves|vine|bush|sapling|tallgrass|seagrass|dandelion|poppy|mushroom|_log$|deadbush)/;
+const SOFT = /(air|water|grass(?!_block|_path)|fern|flower|snow_layer|leaves|vine|bush|sapling|tallgrass|seagrass|dandelion|poppy|mushroom|_log$|deadbush)/;
+
+// Natural ground (never wall or building blocks), for finding where the real ground runs above the measured line
+const NATURAL = /^minecraft:(dirt|coarse_dirt|rooted_dirt|grass_block|podzol|mycelium|mud|clay|gravel|sand|red_sand|sandstone|red_sandstone|stone|granite|diorite|andesite|deepslate|tuff|calcite|dripstone_block|moss_block|snow|packed_ice|ice|terracotta|\w+_terracotta|grass_path|dirt_path|farmland)$/;
 
 // The y of the top solid block of real ground at a spot (trees and plants don't count), or undefined if not loaded
 function groundY(dim, x, z) {
@@ -172,8 +175,19 @@ function placeColumn(dim, w, job, col) {
     }
     return n;
   }
+  // The ground is measured at stations round the ring and filled in between, so it can run a block or two above
+  // that line here: stand the column on the real ground instead of burying its foot.
+  // Measured once per column and kept on the wall record (w.lifts), so later levels, repairs and taking the ring
+  // down all use the same height.
+  const lk = `${x},${z}`;
+  let lift = w.lifts?.[lk];
+  if (lift === undefined) {
+    lift = 0;
+    while (lift < 4 && NATURAL.test(dim.getBlock({ x, y: base + 1 + lift, z })?.typeId ?? "")) lift++;
+    if (lift) { (w.lifts ??= {})[lk] = lift; job.liftsChanged = true; }
+  }
   for (const [y, kind] of cells) {
-    if (!setBlock(dim, x, y, z, permFor(P, w, kind, col))) return -1;
+    if (!setBlock(dim, x, y + lift, z, permFor(P, w, kind, col))) return -1;
     n++;
   }
   // down to solid ground (the measured ground can sit a little above a dip)
@@ -302,6 +316,7 @@ export function moveWall(id, radius, down = () => {}) {
   const cols = old.ground && old.level > 0 ? wallColumns({ center: old, radius: old.radius, level: old.level, gateAngle: old.gate, smooth: old.ground }) : [];
   w.radius = radius;
   w.ground = undefined;
+  w.lifts = undefined; // a new line measures its own ground
   w.building = undefined;
   w.moving = true; // if the world closes before the new ring starts, it starts on the next load (the old one may stay)
   save();
@@ -315,8 +330,9 @@ export function moveWall(id, radius, down = () => {}) {
         if (dim.getBlock({ x: col.x, y: col.base, z: col.z })) break;
         for (let i = 0; i < 20; i++) yield; // not loaded: wait a second
       }
+      const lift = old.lifts?.[`${col.x},${col.z}`] ?? 0;
       for (const [y] of columnKinds(L, col, wallSeed(old))) {
-        try { setBlock(dim, col.x, y, col.z, air); } catch { /* not loaded */ }
+        try { setBlock(dim, col.x, y + lift, col.z, air); } catch { /* not loaded */ }
         if (++n % 300 === 0) yield;
       }
     }

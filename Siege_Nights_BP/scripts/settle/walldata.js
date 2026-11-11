@@ -36,7 +36,7 @@ const cost = (...rows) => rows; // [label, amount, kind]: kind is matched to ite
 //   towers = how many, r = half-width, up = how far they rise above the wall. gateArmor = reinforce state of the gate.
 export const WALL_LEVELS = [
   null,
-  { name: "Stake Fence", h: 1, thick: 1, body: "fence", gate: "open", cost: cost() },
+  { name: "Low Palisade", h: 2, thick: 1, body: "log", gate: "open", cost: cost() }, // Mateo 2026-11-11: a low wall like level 2, not a fence
   { name: "Palisade", h: 3, thick: 1, body: "log", gate: "castle_gate", gateH: 3, cost: cost(["logs", 128, "log"]) },
   { name: "Braced Palisade", h: 4, thick: 1, walk: 2, body: "log", foot: "cobbled", gate: "castle_gate", gateH: 3, cost: cost(["logs", 96, "log"], ["planks", 128, "plank"], ["stone blocks", 96, "cobbled"]) },
   { name: "Fieldstone Wall", h: 4, thick: 1, body: "cobbled", cap: "stone", gate: "castle_gate", gateH: 3, cost: cost(["stone blocks", 320, "cobbled"], ["stone blocks", 96, "stone"]) },

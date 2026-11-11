@@ -156,18 +156,28 @@ world.beforeEvents.playerInteractWithEntity.subscribe((event) => {
 
 // ---------- masons and their benches ----------
 
+const MASON_SKIN = 12;
+// Name and skin. A freshly spawned NPC can reset these as it finishes spawning, so they are set again a moment
+// later, and the bench check puts them back on any mason that lost them.
+export function dressMason(mason) {
+  try {
+    if (!mason?.isValid) return;
+    if (mason.nameTag !== "Mason") mason.nameTag = "Mason";
+    const npc = mason.getComponent("minecraft:npc");
+    if (!npc) return;
+    if (npc.name !== "Mason") npc.name = "Mason";
+    if (npc.skinIndex !== MASON_SKIN) npc.skinIndex = MASON_SKIN;
+  } catch (e) {
+    console.warn(`[Hollow Crown] mason looks: ${e}`);
+  }
+}
+
 export function spawnMason(dim, location, bench) {
   const mason = dim.spawnEntity(NPC_TYPE, location);
   mason.addTag(MASON_TAG);
   if (bench) mason.addTag(benchTag(bench));
-  mason.nameTag = "Mason";
-  try {
-    const npc = mason.getComponent("minecraft:npc");
-    npc.name = "Mason";
-    npc.skinIndex = 12;
-  } catch {
-    // looks are optional
-  }
+  dressMason(mason);
+  system.runTimeout(() => dressMason(mason), 10);
   return mason;
 }
 
@@ -199,7 +209,11 @@ world.afterEvents.playerPlaceBlock.subscribe(({ block, player }) => {
   });
 });
 
-// A bench that is gone takes its mason with it; a mason that is gone comes back
+// A bench that is gone takes its mason with it; a mason that is gone comes back. Bedrock loads a chunk's blocks
+// before its entities, so a bench can look mason-less for a few seconds after its chunk loads: only respawn after
+// the mason has been missing on several checks in a row, and if two ever stand at one bench, keep one.
+const missing = new Map(); // bench tag -> checks in a row with no mason
+const MISSING_CHECKS = 4; // x 5 s
 function benchTick() {
   const dim = world.getDimension(OVERWORLD);
   let changed = false;
@@ -217,7 +231,22 @@ function benchTick() {
       changed = true;
       return false;
     }
-    if (!here.length) spawnMason(dim, { x: bench.x + 0.5, y: bench.y + 1, z: bench.z + 0.5 }, bench);
+    // an older layout stacked a second bench (and mason) on the first: take the top one away
+    if (benches().some((b) => b.x === bench.x && b.z === bench.z && b.y === bench.y - 1) && block.below()?.typeId === BENCH) {
+      for (const mason of here) mason.remove();
+      try { block.setType("minecraft:air"); } catch { /* protected */ }
+      changed = true;
+      return false;
+    }
+    const tag = benchTag(bench);
+    for (const extra of here.slice(1)) extra.remove();
+    if (here[0]) dressMason(here[0]);
+    if (here.length) missing.delete(tag);
+    else {
+      const n = (missing.get(tag) ?? 0) + 1;
+      missing.set(tag, n);
+      if (n >= MISSING_CHECKS) { missing.delete(tag); spawnMason(dim, { x: bench.x + 0.5, y: bench.y + 1, z: bench.z + 0.5 }, bench); }
+    }
     return true;
   });
   if (changed) store.save();

@@ -110,12 +110,13 @@ async function confirm(player, owner, slot, state) {
     if (!charge(player, price)) return;
   }
   clearMarker(owner, slot);
-  if (!raiseOnSlot(owner, player.id, seat.origin, seat.forward, building.id, town.style, slot.id)) {
+  const built = raiseOnSlot(owner, player.id, seat.origin, seat.forward, building.id, town.style, slot.id);
+  if (!built) {
     placeMarker(owner, slot);
     if (price) refund(player, price);
     return player.sendMessage("§cSomething is already going up there.");
   }
-  Object.assign(state, { building: building.id, style: town.style, origin: seat.origin, forward: seat.forward, box: seat.box, top: seat.plan.bounds().y1, paid: price, by: player.id, pick: undefined });
+  Object.assign(state, { building: building.id, style: town.style, origin: seat.origin, forward: seat.forward, box: seat.box, top: seat.plan.bounds().y1 + Math.max(0, built.lift ?? 0), paid: price, by: player.id, pick: undefined });
   saveTowns();
   sfx(player, "random.anvil_use");
   player.sendMessage(`§6The ${building.name} is going up.`);
@@ -214,8 +215,9 @@ on("townLaidOut", ({ owner, tier }) => {
   if (!slot) return;
   const seat = seatInWorld(owner, slot, "library");
   clearMarker(owner, slot);
-  if (!raiseOnSlot(owner, owner, seat.origin, seat.forward, "library", town.style, slot.id, { quiet: true })) return placeMarker(owner, slot);
-  Object.assign(slotState(owner, slot.id), { building: "library", style: town.style, origin: seat.origin, forward: seat.forward, box: seat.box, top: seat.plan.bounds().y1, paid: 0 });
+  const built = raiseOnSlot(owner, owner, seat.origin, seat.forward, "library", town.style, slot.id, { quiet: true });
+  if (!built) return placeMarker(owner, slot);
+  Object.assign(slotState(owner, slot.id), { building: "library", style: town.style, origin: seat.origin, forward: seat.forward, box: seat.box, top: seat.plan.bounds().y1 + Math.max(0, built.lift ?? 0), paid: 0 });
   saveTowns();
 });
 

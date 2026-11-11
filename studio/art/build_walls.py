@@ -13,7 +13,7 @@ TB = '/mnt/project-files/siege-nights/Siege_Nights_RP/textures/blocks/'
 WALL_REGIONS = ('vale', 'frostmarch', 'saltreach', 'emberwaste', 'blackfen')
 
 LEVELS = [
- dict(n=1, name='Stake Fence', kind='fence', walk=0, height=1, thick=1, body='log', gate='open', note='Marks the claim. Keeps animals out, nothing else.'),
+ dict(n=1, name='Low Palisade', kind='palisade', walk=0, height=2, thick=1, body='log', gate='open', note='Logs two high round the claim with an open gateway. Keeps animals out, nothing else.'),
  dict(n=2, name='Palisade', kind='palisade', walk=0, height=3, thick=1, body='log', gate='wood', note='Sharpened logs three high and a plank gate.'),
  dict(n=3, name='Braced Palisade', kind='palisade', walk=2, height=4, thick=1, body='log', foot='cobbled', gate='wood', platform=True, note='Cobbled footing, a plank walkway behind and a lookout platform.'),
  dict(n=4, name='Fieldstone Wall', kind='stone', walk=0, height=4, thick=1, body='cobbled', cap='stone', gate='gate', gate_h=3, note='The first stone: cobbled, four high, with a real Castle Gate.'),

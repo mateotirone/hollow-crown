@@ -370,3 +370,33 @@ addTests("settle towns", {
     }
   },
 });
+
+import { levelSite, foundationColumns, MAX_LIFT } from "./ground.js";
+
+addTests("settle ground", {
+  "a building's floor goes on the highest ground under it, and every footprint column gets foundation": () => {
+    // ground at y 64, with a hump to 67 in one corner of where the cottage goes, and a tree trunk that doesn't count
+    const ground = (x, z) => (x >= 3 && z >= 3 ? 67 : 64);
+    const fake = {
+      getBlock: ({ x, y, z }) => {
+        const top = ground(x, z);
+        const typeId = y <= top ? "minecraft:dirt" : x === 0 && z === 2 && y <= 75 ? "minecraft:oak_log" : "minecraft:air";
+        return { typeId, location: { x, y, z }, below() { return fake.getBlock({ x, y: y - 1, z }); } };
+      },
+      getTopmostBlock: ({ x, z }) => fake.getBlock({ x, y: 75, z }),
+    };
+    const plan = drawBuilding("cottage", "vale");
+    const { origin, lift } = levelSite(fake, plan, { x: 0, y: 65, z: 0 }, { x: 0, z: 1 });
+    assertEqual(origin.y, 68);
+    assertEqual(lift, 3);
+    const flat = levelSite({ ...fake, getBlock: ({ x, y, z }) => fake.getBlock({ x: -99, y, z }) }, plan, { x: 0, y: 65, z: 0 }, { x: 0, z: 1 });
+    assertEqual(flat.lift, 0);
+    const b = plan.bounds();
+    assertEqual(foundationColumns(plan).length, (b.x1 - b.x0 + 1) * (b.z1 - b.z0 + 1));
+    assert(MAX_LIFT >= 4);
+  },
+  "the level 1 wall is a low log palisade, not a fence": () => {
+    assertEqual(WALL_LEVELS[1].body, "log");
+    assert(WALL_LEVELS[1].h >= 2);
+  },
+});
