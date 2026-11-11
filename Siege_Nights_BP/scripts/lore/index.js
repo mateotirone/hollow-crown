@@ -16,6 +16,8 @@
 //   loreSourceNamed  { player, owner, site }              named the real thin place in a Library
 //   loreSourceMisnamed { player, guess }
 //   loreFlag         { player, flag }                     e.g. journal_read, true_name, lamp_out, aldous_ally, loremaster
+// What it listens for:
+//   loreSetFlag      { player, flag }                     another feature sets a story flag (the role trials do)
 //   loreTalk         { player, npc, node, choice, next }
 //   rivalLordVoices  { lords, tempers }                   names, temperaments and lines for the NPC lords (data/lords.js)
 //   slip             { player, id, npc, returnTo, dimension, handled }   a Slip into the Hollow should happen now.

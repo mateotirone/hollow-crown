@@ -840,6 +840,64 @@
         ]
       },
       {
+        "scene_tag": "siege_lore_aldous_wall",
+        "npc_name": "Sir Aldous Vane",
+        "text": "Squire. Good, you're here. I need to ask you something the Rule doesn't cover.\n\nThe Order watches the keeps. That's all we do now: watch. Eleven of us can't stand on forty walls. But you could stand on one that isn't yours.\n\nNext time another keep is besieged, go and hold it with them. Not for pay. Because the Rule says we stand between the people and the dark, and I'd like to see one of us actually do it.",
+        "buttons": [
+          {
+            "name": "I'll stand on their wall.",
+            "commands": [
+              "/scriptevent siege:lore_say aldous wall 0"
+            ]
+          },
+          {
+            "name": "And if there's no other keep near me?",
+            "commands": [
+              "/scriptevent siege:lore_say aldous wall 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_aldous_wall2",
+        "npc_name": "Sir Aldous Vane",
+        "text": "Thank you. When you have, I'll write to the others. All ten of them. Some of them will come and see for themselves.\n\nThat's how the Order starts again, I think. Not with a council. With somebody seen on the wrong wall.",
+        "buttons": [
+          {
+            "name": "Good day, Aldous.",
+            "commands": [
+              "/scriptevent siege:lore_say aldous wall2 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_aldous_wallsolo",
+        "npc_name": "Sir Aldous Vane",
+        "text": "Then hold your own as if it were somebody else's. As if the people behind you weren't yours to lose, and you were there anyway.\n\nI'll know the difference. So will the others.",
+        "buttons": [
+          {
+            "name": "I will.",
+            "commands": [
+              "/scriptevent siege:lore_say aldous wallsolo 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_aldous_wallthanks",
+        "npc_name": "Sir Aldous Vane",
+        "text": "I heard. A knight of the Gate on a wall, on a third night, holding.\n\nI've written to the others. Dame Orla wrote back in an hour, which she has never once done for the Grandmaster. They'll come to you, one by one, as they hear what you do. Let them see you do it.",
+        "buttons": [
+          {
+            "name": "Let them come.",
+            "commands": [
+              "/scriptevent siege:lore_say aldous wallthanks 0"
+            ]
+          }
+        ]
+      },
+      {
         "scene_tag": "siege_lore_aldous_confront",
         "npc_name": "Sir Aldous Vane",
         "text": "You've read it. The Grandmaster's own hand. \"Let them think it is bandits.\"\n\nI have told forty keeps it was bandits. I told YOU it was bandits. I believed it.\n\nGive me a little time. A man cannot put down his whole life in one afternoon.",
@@ -880,6 +938,89 @@
             "name": "Then let's finish it.",
             "commands": [
               "/scriptevent siege:lore_say aldous edda 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_mag_listener",
+        "npc_name": "Old Mag",
+        "text": "Sit. No, the other chair, that one's for the cat, and she's dead, but it's still hers.\n\nListener now. I could tell from the door. You keep tilting your head at the kettle.\n\nSo. What did it sound like, the first time? Not what it said. What it SOUNDED like. Everyone hears something different, and what you hear tells me what you'll be.",
+        "buttons": [
+          {
+            "name": "Like a bell under water.",
+            "commands": [
+              "/scriptevent siege:lore_say mag listener 0"
+            ]
+          },
+          {
+            "name": "Like a lot of people humming one note.",
+            "commands": [
+              "/scriptevent siege:lore_say mag listener 1"
+            ]
+          },
+          {
+            "name": "Like someone saying my name from the next room.",
+            "commands": [
+              "/scriptevent siege:lore_say mag listener 2"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_mag_listener2",
+        "npc_name": "Old Mag",
+        "text": "Hm. That's a good one. That's not the worst one.\n\nHere's the first thing he taught me, and the only thing that matters this year: it doesn't know you're listening. Not yet. Keep it that way as long as you can. Cast quiet. Rest between.\n\nThe day it notices you back is a different lesson.",
+        "buttons": [
+          {
+            "name": "Thank you, Mag.",
+            "commands": [
+              "/scriptevent siege:lore_say mag listener2 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_mag_adept",
+        "npc_name": "Old Mag",
+        "text": "You went loud.\n\nDon't argue, I felt it from here, like a draught under a door. Past seventy, weren't you? You felt it look round.\n\nThat's what Adept means. Not that you're good. That you're loud enough to be noticed, and still standing.",
+        "buttons": [
+          {
+            "name": "What do I do now?",
+            "commands": [
+              "/scriptevent siege:lore_say mag adept 0"
+            ]
+          },
+          {
+            "name": "It was worth it.",
+            "commands": [
+              "/scriptevent siege:lore_say mag adept 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_mag_adept2",
+        "npc_name": "Old Mag",
+        "text": "Now you learn to be loud on purpose and quiet the rest of the time, like a man who only shouts in a fire.\n\nAnd you start carrying something to hold on to after. He used to keep a pebble from the river at home. Pick something. You'll know why the first time you need it.",
+        "buttons": [
+          {
+            "name": "I'll pick something.",
+            "commands": [
+              "/scriptevent siege:lore_say mag adept2 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_mag_adept3",
+        "npc_name": "Old Mag",
+        "text": "It always is, the first time. That's the trap.\n\nGo and be loud when it matters, and quiet all the rest. And carry something from home in your pocket. You'll know why.",
+        "buttons": [
+          {
+            "name": "I'll remember.",
+            "commands": [
+              "/scriptevent siege:lore_say mag adept3 0"
             ]
           }
         ]
@@ -2880,6 +3021,19 @@
         ]
       },
       {
+        "scene_tag": "siege_lore_isolde_roost",
+        "npc_name": "Warden Isolde",
+        "text": "The Roost. Yes, that's ours too, in the way a hawk on the roof is yours.\n\nThey train riders up there. The Cinder woman runs it now, the one with no dragon. If you want to ride, she's who you ask. If you want my advice, don't. I've read that wall of theirs. It's longer every year.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say isolde roost 0"
+            ]
+          }
+        ]
+      },
+      {
         "scene_tag": "siege_lore_isolde_hub",
         "npc_name": "Warden Isolde",
         "text": "Water, shade, or statues?",
@@ -2891,15 +3045,21 @@
             ]
           },
           {
-            "name": "Who rules Sunscar?",
+            "name": "The cliff above town.",
             "commands": [
               "/scriptevent siege:lore_say isolde hub 1"
             ]
           },
           {
-            "name": "Just passing through.",
+            "name": "Who rules Sunscar?",
             "commands": [
               "/scriptevent siege:lore_say isolde hub 2"
+            ]
+          },
+          {
+            "name": "Just passing through.",
+            "commands": [
+              "/scriptevent siege:lore_say isolde hub 3"
             ]
           }
         ]
@@ -2916,15 +3076,21 @@
             ]
           },
           {
-            "name": "Who rules Sunscar?",
+            "name": "The cliff above town.",
             "commands": [
               "/scriptevent siege:lore_say isolde hub 1"
             ]
           },
           {
-            "name": "Just passing through.",
+            "name": "Who rules Sunscar?",
             "commands": [
               "/scriptevent siege:lore_say isolde hub 2"
+            ]
+          },
+          {
+            "name": "Just passing through.",
+            "commands": [
+              "/scriptevent siege:lore_say isolde hub 3"
             ]
           }
         ]
@@ -2941,15 +3107,21 @@
             ]
           },
           {
-            "name": "Who rules Sunscar?",
+            "name": "The cliff above town.",
             "commands": [
               "/scriptevent siege:lore_say isolde hub 1"
             ]
           },
           {
-            "name": "Just passing through.",
+            "name": "Who rules Sunscar?",
             "commands": [
               "/scriptevent siege:lore_say isolde hub 2"
+            ]
+          },
+          {
+            "name": "Just passing through.",
+            "commands": [
+              "/scriptevent siege:lore_say isolde hub 3"
             ]
           }
         ]
@@ -2966,15 +3138,21 @@
             ]
           },
           {
-            "name": "Who rules Sunscar?",
+            "name": "The cliff above town.",
             "commands": [
               "/scriptevent siege:lore_say isolde hub 1"
             ]
           },
           {
-            "name": "Just passing through.",
+            "name": "Who rules Sunscar?",
             "commands": [
               "/scriptevent siege:lore_say isolde hub 2"
+            ]
+          },
+          {
+            "name": "Just passing through.",
+            "commands": [
+              "/scriptevent siege:lore_say isolde hub 3"
             ]
           }
         ]
@@ -2991,21 +3169,27 @@
             ]
           },
           {
-            "name": "Who rules Sunscar?",
+            "name": "The cliff above town.",
             "commands": [
               "/scriptevent siege:lore_say isolde hub2 1"
             ]
           },
           {
-            "name": "The riddle on the vault.",
+            "name": "Who rules Sunscar?",
             "commands": [
               "/scriptevent siege:lore_say isolde hub2 2"
             ]
           },
           {
-            "name": "Good day, Warden.",
+            "name": "The riddle on the vault.",
             "commands": [
               "/scriptevent siege:lore_say isolde hub2 3"
+            ]
+          },
+          {
+            "name": "Good day, Warden.",
+            "commands": [
+              "/scriptevent siege:lore_say isolde hub2 4"
             ]
           }
         ]
@@ -4320,6 +4504,2610 @@
             "name": "I'll remember him too.",
             "commands": [
               "/scriptevent siege:lore_say corvin after2 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_kesh_first",
+        "npc_name": "Kesh Cinder",
+        "text": "Mind the edge. People come up the cliff stair looking at the view and go down it a lot faster.\n\nKesh Cinder. Wingmistress, which means I teach. I don't fly. Mine was shot down two summers ago over the Saltglass, and they don't get up from that.\n\nYou're reading the wall. Everyone does.",
+        "buttons": [
+          {
+            "name": "What is this place?",
+            "commands": [
+              "/scriptevent siege:lore_say kesh first 0"
+            ]
+          },
+          {
+            "name": "Who are all those names?",
+            "commands": [
+              "/scriptevent siege:lore_say kesh first 1"
+            ]
+          },
+          {
+            "name": "I want to ride.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh first 2"
+            ]
+          },
+          {
+            "name": "I'll leave you to it.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh first 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_kesh_roost",
+        "npc_name": "Kesh Cinder",
+        "text": "The Cinder Roost. Ysolt Cinder cut the first ledge with a borrowed pick. She walked into the Saltglass with a dead mule and came out a year later on something with wings. She never said what she promised.\n\nWhen the grey army came down from the north, this was the one province it never held. Nothing that marches in step crosses open sand under dragons. We've kept riders since, the way other places keep walls.",
+        "buttons": [
+          {
+            "name": "And the names?",
+            "commands": [
+              "/scriptevent siege:lore_say kesh roost 0"
+            ]
+          },
+          {
+            "name": "How do I become one?",
+            "commands": [
+              "/scriptevent siege:lore_say kesh roost 1"
+            ]
+          },
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh roost 2"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_kesh_board",
+        "npc_name": "Kesh Cinder",
+        "text": "The roll. Every rider the Roost has lost, and their dragon beside them, because they go together more often than not.\n\nI read it out loud on the first morning of every season. All of it. It takes most of an hour. The cadets fidget for the first half and stop fidgeting for the second.\n\nMine is on there. Her name, not mine. I'm still down here being useful.",
+        "buttons": [
+          {
+            "name": "I'm sorry.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh board 0"
+            ]
+          },
+          {
+            "name": "How do I become a rider?",
+            "commands": [
+              "/scriptevent siege:lore_say kesh board 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_kesh_board2",
+        "npc_name": "Kesh Cinder",
+        "text": "Don't be. Be careful. It's more use to me.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh board2 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_kesh_want",
+        "npc_name": "Kesh Cinder",
+        "text": "Everyone wants to ride. Half of them want to be seen riding, which is different and gets you killed faster.\n\nThree things. You cross the Span: a stone bridge over the gorge, one block wide, older than the town, and it doesn't hold together everywhere. Then the Choosing: you walk into the nesting field and the dragons decide what they think of you. Then you keep an egg warm until it hatches, and if it hatches for you, you're theirs.\n\nFall off the Span and you wait for next season. Walk into the field like a fool and you'll be burned for it.",
+        "buttons": [
+          {
+            "name": "Sign me in.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh want 0"
+            ]
+          },
+          {
+            "name": "What happens if I die?",
+            "commands": [
+              "/scriptevent siege:lore_say kesh want 1"
+            ]
+          },
+          {
+            "name": "Not yet.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh want 2"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_kesh_die",
+        "npc_name": "Kesh Cinder",
+        "text": "Then I read your name out next season with the others, and somebody fidgets through it.\n\nThat's not me being hard. That's the Roost. Nobody here was ever told it was safe, so nobody here was ever lied to.",
+        "buttons": [
+          {
+            "name": "Sign me in.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh die 0"
+            ]
+          },
+          {
+            "name": "Not yet.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh die 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_kesh_signed",
+        "npc_name": "Kesh Cinder",
+        "text": "Then you're a cadet. Congratulations. It means nothing yet.\n\nThe Span is past the gate. Walk it end to end. Don't stop in the middle to admire anything. Some of the stones crumble when you stand on them, and the wind comes up the gorge in gusts. Lean into it.\n\nCome back when you're across. Or don't, and I'll know which.",
+        "buttons": [
+          {
+            "name": "I'll be back.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh signed 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_kesh_spanwait",
+        "npc_name": "Kesh Cinder",
+        "text": "Cadet. You haven't crossed yet.",
+        "buttons": [
+          {
+            "name": "Any advice?",
+            "commands": [
+              "/scriptevent siege:lore_say kesh spanwait 0"
+            ]
+          },
+          {
+            "name": "Going.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh spanwait 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_kesh_spanwait__1",
+        "npc_name": "Kesh Cinder",
+        "text": "Still on this side of the gorge, I see. The Span hasn't moved.",
+        "buttons": [
+          {
+            "name": "Any advice?",
+            "commands": [
+              "/scriptevent siege:lore_say kesh spanwait 0"
+            ]
+          },
+          {
+            "name": "Going.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh spanwait 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_kesh_spanwait__2",
+        "npc_name": "Kesh Cinder",
+        "text": "The wind's from the east today. Lean left.",
+        "buttons": [
+          {
+            "name": "Any advice?",
+            "commands": [
+              "/scriptevent siege:lore_say kesh spanwait 0"
+            ]
+          },
+          {
+            "name": "Going.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh spanwait 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_kesh_spanwait__3",
+        "npc_name": "Kesh Cinder",
+        "text": "You're welcome to stand here. The Span isn't going to cross itself.",
+        "buttons": [
+          {
+            "name": "Any advice?",
+            "commands": [
+              "/scriptevent siege:lore_say kesh spanwait 0"
+            ]
+          },
+          {
+            "name": "Going.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh spanwait 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_kesh_spanhelp",
+        "npc_name": "Kesh Cinder",
+        "text": "Don't look down, everyone says. Wrong. Look down a little, at your feet, at the next stone. Look at the gate when you're nearly there.\n\nAnd if one goes under you, don't stop. Stopping is what kills people. The next one's usually fine.",
+        "buttons": [
+          {
+            "name": "Usually.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh spanhelp 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_kesh_nests",
+        "npc_name": "Kesh Cinder",
+        "text": "Across. Good. You looked at the gate, I saw.\n\nNow the nesting field. Here is the whole of my advice, and I'm only going to say it once. Put your weapon away. Don't run. Walk up to a nest slowly, with your hands empty, and let it look at you.\n\nThey can smell fear and they can smell a blade, and they don't like either. Do it right and one of them will let you take an egg.",
+        "buttons": [
+          {
+            "name": "And if they don't like me?",
+            "commands": [
+              "/scriptevent siege:lore_say kesh nests 0"
+            ]
+          },
+          {
+            "name": "I'll go now.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh nests 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_kesh_nests2",
+        "npc_name": "Kesh Cinder",
+        "text": "Then you'll be on fire, and they won't look at you again until tomorrow.\n\nPeople have tried sneaking in with a sword behind their back. A dragon doesn't care which hand it's in.",
+        "buttons": [
+          {
+            "name": "Understood.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh nests2 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_kesh_hatchwait",
+        "npc_name": "Kesh Cinder",
+        "text": "It let you take one. Now set it on a Roost in your own keep and wait.",
+        "buttons": [
+          {
+            "name": "Anything I should know?",
+            "commands": [
+              "/scriptevent siege:lore_say kesh hatchwait 0"
+            ]
+          },
+          {
+            "name": "Waiting.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh hatchwait 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_kesh_hatchwait__1",
+        "npc_name": "Kesh Cinder",
+        "text": "Is it warm? Keep it warm.",
+        "buttons": [
+          {
+            "name": "Anything I should know?",
+            "commands": [
+              "/scriptevent siege:lore_say kesh hatchwait 0"
+            ]
+          },
+          {
+            "name": "Waiting.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh hatchwait 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_kesh_hatchwait__2",
+        "npc_name": "Kesh Cinder",
+        "text": "Don't hover over it. Eggs know when they're being watched.",
+        "buttons": [
+          {
+            "name": "Anything I should know?",
+            "commands": [
+              "/scriptevent siege:lore_say kesh hatchwait 0"
+            ]
+          },
+          {
+            "name": "Waiting.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh hatchwait 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_kesh_hatchwait__3",
+        "npc_name": "Kesh Cinder",
+        "text": "You keep looking at the sky. It won't hatch faster for that.",
+        "buttons": [
+          {
+            "name": "Anything I should know?",
+            "commands": [
+              "/scriptevent siege:lore_say kesh hatchwait 0"
+            ]
+          },
+          {
+            "name": "Waiting.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh hatchwait 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_kesh_hatchwait2",
+        "npc_name": "Kesh Cinder",
+        "text": "One thing. On the third night, at seventeen past three, it will go cold and quiet as a stone, and you'll think it's dead.\n\nIt isn't. They all do it. Every dragon in the Waste does something at that hour. Stay with it. Don't leave it alone that night.\n\nNo, I won't tell you why. Ask me again when you've earned it.",
+        "buttons": [
+          {
+            "name": "I'll stay with it.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh hatchwait2 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_kesh_ready",
+        "npc_name": "Kesh Cinder",
+        "text": "It hatched for you. I heard.\n\nThen it's done. The dragon's half and yours. Go to a Tree of Oaths and swear it. Say it out loud. They like that.\n\nAnd come back. I teach riders too, not only cadets.",
+        "buttons": [
+          {
+            "name": "Thank you, Kesh.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh ready 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_kesh_sworn",
+        "npc_name": "Kesh Cinder",
+        "text": "Rider. What do you need?",
+        "buttons": [
+          {
+            "name": "Tell me about Ysolt.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh sworn 0"
+            ]
+          },
+          {
+            "name": "Why won't they fly on the third night?",
+            "commands": [
+              "/scriptevent siege:lore_say kesh sworn 1"
+            ]
+          },
+          {
+            "name": "Teach me something.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh sworn 2"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh sworn 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_kesh_sworn__1",
+        "npc_name": "Kesh Cinder",
+        "text": "Rider. Your name's still off the roll. Let's keep it that way.",
+        "buttons": [
+          {
+            "name": "Tell me about Ysolt.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh sworn 0"
+            ]
+          },
+          {
+            "name": "Why won't they fly on the third night?",
+            "commands": [
+              "/scriptevent siege:lore_say kesh sworn 1"
+            ]
+          },
+          {
+            "name": "Teach me something.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh sworn 2"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh sworn 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_kesh_sworn__2",
+        "npc_name": "Kesh Cinder",
+        "text": "There's sand in your hair. Good. You've been up.",
+        "buttons": [
+          {
+            "name": "Tell me about Ysolt.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh sworn 0"
+            ]
+          },
+          {
+            "name": "Why won't they fly on the third night?",
+            "commands": [
+              "/scriptevent siege:lore_say kesh sworn 1"
+            ]
+          },
+          {
+            "name": "Teach me something.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh sworn 2"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh sworn 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_kesh_sworn__3",
+        "npc_name": "Kesh Cinder",
+        "text": "She's watching us from the ledge, you know. Wave.",
+        "buttons": [
+          {
+            "name": "Tell me about Ysolt.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh sworn 0"
+            ]
+          },
+          {
+            "name": "Why won't they fly on the third night?",
+            "commands": [
+              "/scriptevent siege:lore_say kesh sworn 1"
+            ]
+          },
+          {
+            "name": "Teach me something.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh sworn 2"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh sworn 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_kesh_ysolt",
+        "npc_name": "Kesh Cinder",
+        "text": "Salt-carrier's daughter. Nobody special, which she'd want you to know. Her mule died a day into the Saltglass and she kept walking, because going back was further.\n\nShe used to say you don't tame one, you're introduced. She never said who did the introducing.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh ysolt 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_kesh_third",
+        "npc_name": "Kesh Cinder",
+        "text": "That's an elder's question, and the elders will tell you it's the moon, or the heat, or that dragons are lazy on a third night like everyone else.\n\nThey're lying. I'll tell you that much for free.\n\nThe rest, when you're a Drake-Captain. Not before. It's not a thing you carry easily.",
+        "buttons": [
+          {
+            "name": "I'll hold you to that.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh third 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_kesh_teach",
+        "npc_name": "Kesh Cinder",
+        "text": "Fly high when you're looking and low when you're running. Raider camps show from above: smoke in the day, fires at night, and a trampled ring where they drill.\n\nAnd land before she's tired, not when. She'll fly till her heart breaks if you let her. Don't let her.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh teach 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_kesh_other",
+        "npc_name": "Kesh Cinder",
+        "text": "You're sworn to something already. I can see it on you.\n\nThe Roost doesn't take halves. One road each, that's the rule everywhere I know of, and the dragons keep it stricter than we do.\n\nYou can still look at the wall, if you want. Everyone does.",
+        "buttons": [
+          {
+            "name": "Tell me about Ysolt.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh other 0"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh other 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_kesh_ysolt_other",
+        "npc_name": "Kesh Cinder",
+        "text": "The first. A salt-carrier's daughter with a dead mule. She never said what she promised, only that the dragon set the terms.",
+        "buttons": [
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh ysolt_other 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_kesh_hub",
+        "npc_name": "Kesh Cinder",
+        "text": "Something you wanted?",
+        "buttons": [
+          {
+            "name": "What is this place?",
+            "commands": [
+              "/scriptevent siege:lore_say kesh hub 0"
+            ]
+          },
+          {
+            "name": "Who are all those names?",
+            "commands": [
+              "/scriptevent siege:lore_say kesh hub 1"
+            ]
+          },
+          {
+            "name": "I want to ride.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh hub 2"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh hub 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_kesh_hub__1",
+        "npc_name": "Kesh Cinder",
+        "text": "Back again. The view hasn't changed.",
+        "buttons": [
+          {
+            "name": "What is this place?",
+            "commands": [
+              "/scriptevent siege:lore_say kesh hub 0"
+            ]
+          },
+          {
+            "name": "Who are all those names?",
+            "commands": [
+              "/scriptevent siege:lore_say kesh hub 1"
+            ]
+          },
+          {
+            "name": "I want to ride.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh hub 2"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh hub 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_kesh_hub__2",
+        "npc_name": "Kesh Cinder",
+        "text": "You're the one who reads the wall. Hello.",
+        "buttons": [
+          {
+            "name": "What is this place?",
+            "commands": [
+              "/scriptevent siege:lore_say kesh hub 0"
+            ]
+          },
+          {
+            "name": "Who are all those names?",
+            "commands": [
+              "/scriptevent siege:lore_say kesh hub 1"
+            ]
+          },
+          {
+            "name": "I want to ride.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh hub 2"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh hub 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_kesh_hub__3",
+        "npc_name": "Kesh Cinder",
+        "text": "Mind the edge. I said that last time too.",
+        "buttons": [
+          {
+            "name": "What is this place?",
+            "commands": [
+              "/scriptevent siege:lore_say kesh hub 0"
+            ]
+          },
+          {
+            "name": "Who are all those names?",
+            "commands": [
+              "/scriptevent siege:lore_say kesh hub 1"
+            ]
+          },
+          {
+            "name": "I want to ride.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh hub 2"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say kesh hub 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ulla_first",
+        "npc_name": "Ulla Deepforge",
+        "text": "Shut the door. You're letting the cold at her.\n\n...There. You can hear her settle. Four hundred years she's been burning, and she still sulks at a draught.\n\nUlla. I keep the fire. You'll want to warm your hands. Everybody does. Go on.",
+        "buttons": [
+          {
+            "name": "Who lit it?",
+            "commands": [
+              "/scriptevent siege:lore_say ulla first 0"
+            ]
+          },
+          {
+            "name": "Do you need help?",
+            "commands": [
+              "/scriptevent siege:lore_say ulla first 1"
+            ]
+          },
+          {
+            "name": "Just warming my hands.",
+            "commands": [
+              "/scriptevent siege:lore_say ulla first 2"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ulla_hroda",
+        "npc_name": "Ulla Deepforge",
+        "text": "Hroda Deepforge. Bellfounder. She lit it under the mountain and swore it would outlast her, and she wasn't a woman who swore lightly.\n\nWhen the grey army came down and cut the bells off every tower in the north, every new bell was poured here. Forty nights at Rimehold taught us that a wall is only as good as what it's bound with.",
+        "buttons": [
+          {
+            "name": "What happened to the bells?",
+            "commands": [
+              "/scriptevent siege:lore_say ulla hroda 0"
+            ]
+          },
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say ulla hroda 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ulla_bells",
+        "npc_name": "Ulla Deepforge",
+        "text": "They were rung. Some of them were rung till they cracked.\n\nAfterwards the grey brothers came north, very polite, and took the moulds away for safekeeping. I've never known what they were keeping them safe from.\n\nThey couldn't carry off the fire, though. They tried. Ask me about the three brothers who tried, one day, when I've had a drink.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say ulla bells 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ulla_help",
+        "npc_name": "Ulla Deepforge",
+        "text": "Help. Hm.\n\nThere's a side-hearth gone cold this thirty years, since my brother's hands went. I could light it, if somebody hauled for it. Sixteen iron and sixteen coal, and not the rubbish from the surface seams.\n\nIf you mean it, haul. If you don't, there's the door. Shut it behind you.",
+        "buttons": [
+          {
+            "name": "I'll haul for you.",
+            "commands": [
+              "/scriptevent siege:lore_say ulla help 0"
+            ]
+          },
+          {
+            "name": "What's in it for me?",
+            "commands": [
+              "/scriptevent siege:lore_say ulla help 1"
+            ]
+          },
+          {
+            "name": "Not today.",
+            "commands": [
+              "/scriptevent siege:lore_say ulla help 2"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ulla_informe",
+        "npc_name": "Ulla Deepforge",
+        "text": "Honest question. Honest answer: probably nothing. Most who haul for me go home with sore arms and a story.\n\nNow and then the fire takes to somebody. Then it's something else. I don't decide that. She does.",
+        "buttons": [
+          {
+            "name": "I'll haul.",
+            "commands": [
+              "/scriptevent siege:lore_say ulla informe 0"
+            ]
+          },
+          {
+            "name": "Not today.",
+            "commands": [
+              "/scriptevent siege:lore_say ulla informe 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ulla_haul",
+        "npc_name": "Ulla Deepforge",
+        "text": "Good. Sixteen iron ingots, sixteen coal. Bring them here and I'll take them off you when you're standing in front of me.\n\nI don't take promises. I take iron.",
+        "buttons": [
+          {
+            "name": "I'll be back with it.",
+            "commands": [
+              "/scriptevent siege:lore_say ulla haul 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ulla_haulwait",
+        "npc_name": "Ulla Deepforge",
+        "text": "Sixteen iron ingots and sixteen coal. I'll take them when you have them on you.",
+        "buttons": [
+          {
+            "name": "I'm working on it.",
+            "commands": [
+              "/scriptevent siege:lore_say ulla haulwait 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ulla_haulwait__1",
+        "npc_name": "Ulla Deepforge",
+        "text": "Iron? Coal? No? Then why are you letting the cold in?",
+        "buttons": [
+          {
+            "name": "I'm working on it.",
+            "commands": [
+              "/scriptevent siege:lore_say ulla haulwait 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ulla_haulwait__2",
+        "npc_name": "Ulla Deepforge",
+        "text": "Sixteen and sixteen. I'm not going to forget the number.",
+        "buttons": [
+          {
+            "name": "I'm working on it.",
+            "commands": [
+              "/scriptevent siege:lore_say ulla haulwait 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ulla_haulwait__3",
+        "npc_name": "Ulla Deepforge",
+        "text": "She's sulking. She knows the side-hearth's waiting.",
+        "buttons": [
+          {
+            "name": "I'm working on it.",
+            "commands": [
+              "/scriptevent siege:lore_say ulla haulwait 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ulla_ringwait",
+        "npc_name": "Ulla Deepforge",
+        "text": "That's Hroda's hand-bell pattern. First one poured in thirty years, and it came out sweet.\n\nTake it to the lake at Rimehold. Set it down on the ice at night and ring it. Something out there still answers bells.",
+        "buttons": [
+          {
+            "name": "What answers?",
+            "commands": [
+              "/scriptevent siege:lore_say ulla ringwait 0"
+            ]
+          },
+          {
+            "name": "I'll go.",
+            "commands": [
+              "/scriptevent siege:lore_say ulla ringwait 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ulla_ringwait__1",
+        "npc_name": "Ulla Deepforge",
+        "text": "You've still got the bell. I can hear it in your pack, humming.",
+        "buttons": [
+          {
+            "name": "What answers?",
+            "commands": [
+              "/scriptevent siege:lore_say ulla ringwait 0"
+            ]
+          },
+          {
+            "name": "I'll go.",
+            "commands": [
+              "/scriptevent siege:lore_say ulla ringwait 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ulla_ringwait__2",
+        "npc_name": "Ulla Deepforge",
+        "text": "The lake. At night. On the ice. I said all three.",
+        "buttons": [
+          {
+            "name": "What answers?",
+            "commands": [
+              "/scriptevent siege:lore_say ulla ringwait 0"
+            ]
+          },
+          {
+            "name": "I'll go.",
+            "commands": [
+              "/scriptevent siege:lore_say ulla ringwait 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ulla_ringwait__3",
+        "npc_name": "Ulla Deepforge",
+        "text": "Don't ring it in here. She'll never forgive either of us.",
+        "buttons": [
+          {
+            "name": "What answers?",
+            "commands": [
+              "/scriptevent siege:lore_say ulla ringwait 0"
+            ]
+          },
+          {
+            "name": "I'll go.",
+            "commands": [
+              "/scriptevent siege:lore_say ulla ringwait 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ulla_ringwhat",
+        "npc_name": "Ulla Deepforge",
+        "text": "The Rimehold folk call it the Huntsman. It wears a knight's cloak and runs hounds across the ice, and it went under after somebody a long time ago.\n\nIt comes up for bells. All the old things do. That's why the grey army cut them.\n\nBring it down, and come back.",
+        "buttons": [
+          {
+            "name": "I will.",
+            "commands": [
+              "/scriptevent siege:lore_say ulla ringwhat 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ulla_huntwait",
+        "npc_name": "Ulla Deepforge",
+        "text": "He's up. Now he has to go back down.",
+        "buttons": [
+          {
+            "name": "I'm going.",
+            "commands": [
+              "/scriptevent siege:lore_say ulla huntwait 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ulla_huntwait__1",
+        "npc_name": "Ulla Deepforge",
+        "text": "You rang it. I felt the lake take the note, all the way up here.",
+        "buttons": [
+          {
+            "name": "I'm going.",
+            "commands": [
+              "/scriptevent siege:lore_say ulla huntwait 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ulla_huntwait__2",
+        "npc_name": "Ulla Deepforge",
+        "text": "He's up, then. Go and put him down.",
+        "buttons": [
+          {
+            "name": "I'm going.",
+            "commands": [
+              "/scriptevent siege:lore_say ulla huntwait 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ulla_huntwait__3",
+        "npc_name": "Ulla Deepforge",
+        "text": "There's frost on you. Lake frost. You've been close.",
+        "buttons": [
+          {
+            "name": "I'm going.",
+            "commands": [
+              "/scriptevent siege:lore_say ulla huntwait 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ulla_ready",
+        "npc_name": "Ulla Deepforge",
+        "text": "So he's down.\n\nHroda used to say a smith never made a weapon she was proud of, or a bell she was ashamed of. You took a bell out to the ice and did with it what a bell's for. That's smith's work.\n\nThe fire's taken to you. I can see it. Go to a Tree of Oaths and swear. Then come back, and I'll start teaching you properly.",
+        "buttons": [
+          {
+            "name": "Thank you, Ulla.",
+            "commands": [
+              "/scriptevent siege:lore_say ulla ready 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ulla_sworn",
+        "npc_name": "Ulla Deepforge",
+        "text": "What do you need?",
+        "buttons": [
+          {
+            "name": "Teach me something.",
+            "commands": [
+              "/scriptevent siege:lore_say ulla sworn 0"
+            ]
+          },
+          {
+            "name": "Where did the moulds go?",
+            "commands": [
+              "/scriptevent siege:lore_say ulla sworn 1"
+            ]
+          },
+          {
+            "name": "Tell me about Hroda.",
+            "commands": [
+              "/scriptevent siege:lore_say ulla sworn 2"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say ulla sworn 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ulla_sworn__1",
+        "npc_name": "Ulla Deepforge",
+        "text": "Smith. Shut the door. Good. You're learning.",
+        "buttons": [
+          {
+            "name": "Teach me something.",
+            "commands": [
+              "/scriptevent siege:lore_say ulla sworn 0"
+            ]
+          },
+          {
+            "name": "Where did the moulds go?",
+            "commands": [
+              "/scriptevent siege:lore_say ulla sworn 1"
+            ]
+          },
+          {
+            "name": "Tell me about Hroda.",
+            "commands": [
+              "/scriptevent siege:lore_say ulla sworn 2"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say ulla sworn 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ulla_sworn__2",
+        "npc_name": "Ulla Deepforge",
+        "text": "She brightened when you came in. Don't let it go to your head.",
+        "buttons": [
+          {
+            "name": "Teach me something.",
+            "commands": [
+              "/scriptevent siege:lore_say ulla sworn 0"
+            ]
+          },
+          {
+            "name": "Where did the moulds go?",
+            "commands": [
+              "/scriptevent siege:lore_say ulla sworn 1"
+            ]
+          },
+          {
+            "name": "Tell me about Hroda.",
+            "commands": [
+              "/scriptevent siege:lore_say ulla sworn 2"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say ulla sworn 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ulla_sworn__3",
+        "npc_name": "Ulla Deepforge",
+        "text": "Your hands have changed. They hold a hammer like it belongs to them now.",
+        "buttons": [
+          {
+            "name": "Teach me something.",
+            "commands": [
+              "/scriptevent siege:lore_say ulla sworn 0"
+            ]
+          },
+          {
+            "name": "Where did the moulds go?",
+            "commands": [
+              "/scriptevent siege:lore_say ulla sworn 1"
+            ]
+          },
+          {
+            "name": "Tell me about Hroda.",
+            "commands": [
+              "/scriptevent siege:lore_say ulla sworn 2"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say ulla sworn 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ulla_teach",
+        "npc_name": "Ulla Deepforge",
+        "text": "Steel remembers. Quench it angry and it stays angry. Quench it in a hurry and it never quite settles.\n\nWhen you gear your guards, do it slow, and do it yourself. They stand straighter in steel that was made for them, and they know.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say ulla teach 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ulla_moulds",
+        "npc_name": "Ulla Deepforge",
+        "text": "South. The grey brothers' chapterhouse, I'd guess, in a cellar with a lock on it.\n\nOne of those moulds is half of something that matters. That's all I'll say until you're a Master Smith. A thing like that, you don't go after on your first winter.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say ulla moulds 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ulla_hroda_sworn",
+        "npc_name": "Ulla Deepforge",
+        "text": "She had arms like a bridge and a voice like one too. Her apprentices were all afraid of her, and all of them named a daughter after her.\n\nThree generations after her, the biggest bell this land ever had was poured right where you're standing. She'd have hated how it was used. She'd have loved how it rang.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say ulla hroda_sworn 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ulla_other",
+        "npc_name": "Ulla Deepforge",
+        "text": "You're sworn already. I can see it on you. She can too: look, she's gone quiet.\n\nOne road each. Warm your hands, though. Nobody's turned away from the fire.",
+        "buttons": [
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say ulla other 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ulla_hub",
+        "npc_name": "Ulla Deepforge",
+        "text": "Well?",
+        "buttons": [
+          {
+            "name": "Who lit the fire?",
+            "commands": [
+              "/scriptevent siege:lore_say ulla hub 0"
+            ]
+          },
+          {
+            "name": "Do you need help?",
+            "commands": [
+              "/scriptevent siege:lore_say ulla hub 1"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say ulla hub 2"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ulla_hub__1",
+        "npc_name": "Ulla Deepforge",
+        "text": "Door. Shut. Thank you.",
+        "buttons": [
+          {
+            "name": "Who lit the fire?",
+            "commands": [
+              "/scriptevent siege:lore_say ulla hub 0"
+            ]
+          },
+          {
+            "name": "Do you need help?",
+            "commands": [
+              "/scriptevent siege:lore_say ulla hub 1"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say ulla hub 2"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ulla_hub__2",
+        "npc_name": "Ulla Deepforge",
+        "text": "Back for the warmth? Everyone comes back for the warmth.",
+        "buttons": [
+          {
+            "name": "Who lit the fire?",
+            "commands": [
+              "/scriptevent siege:lore_say ulla hub 0"
+            ]
+          },
+          {
+            "name": "Do you need help?",
+            "commands": [
+              "/scriptevent siege:lore_say ulla hub 1"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say ulla hub 2"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ulla_hub__3",
+        "npc_name": "Ulla Deepforge",
+        "text": "She's in a good mood today. Must be the coal.",
+        "buttons": [
+          {
+            "name": "Who lit the fire?",
+            "commands": [
+              "/scriptevent siege:lore_say ulla hub 0"
+            ]
+          },
+          {
+            "name": "Do you need help?",
+            "commands": [
+              "/scriptevent siege:lore_say ulla hub 1"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say ulla hub 2"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ottilie_first",
+        "npc_name": "Harbourmistress Holt",
+        "text": "Name? No, don't tell me yet. Let me look first.\n\n...No. You're not in it. Good, or a pity, depending.\n\nOttilie Holt, harbourmistress. This is the Debt Book. Everybody who's ever captained out of Gull's Rest is in it, and what they owe, and who to.",
+        "buttons": [
+          {
+            "name": "What debt?",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie first 0"
+            ]
+          },
+          {
+            "name": "Do you need captains?",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie first 1"
+            ]
+          },
+          {
+            "name": "Just looking.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie first 2"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ottilie_debt",
+        "npc_name": "Harbourmistress Holt",
+        "text": "Holt's Debt. Merrin Holt, my ancestor, burned forty Saltreach boats in the harbour mouth so the grey army's second fleet couldn't land. The crews agreed. The owners weren't asked.\n\nWe've been paying for those boats ever since. Every captain signs the articles and takes a share. That's why a Saltreach crew obeys: they know exactly what their captain owes, and to whom.",
+        "buttons": [
+          {
+            "name": "Has it ever been paid?",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie debt 0"
+            ]
+          },
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie debt 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ottilie_paid",
+        "npc_name": "Harbourmistress Holt",
+        "text": "Never once marked paid. Three hundred years of money in, and the book still says what it said.\n\nI used to think that was greed. Some clerk's trick. I've stopped thinking that. I don't know what I think now.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie paid 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ottilie_captains",
+        "npc_name": "Harbourmistress Holt",
+        "text": "Always. The sea takes them faster than the town makes them.\n\nThree things. You sign the articles and pay your first share of the debt. You raise a crew, three hands at least, sworn to your keep. And you do one thing that tells the sea who you are.\n\nThere's a woman in a wedding dress at the sunken chapel. She's been waiting at that altar since before the book was opened. Somebody needs to lay her to rest.",
+        "buttons": [
+          {
+            "name": "Give me the articles.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie captains 0"
+            ]
+          },
+          {
+            "name": "Why does the sea need telling?",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie captains 1"
+            ]
+          },
+          {
+            "name": "Not yet.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie captains 2"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ottilie_sea",
+        "npc_name": "Harbourmistress Holt",
+        "text": "Because a captain is somebody the sea has agreed to blame. It wants to know your name before it starts.",
+        "buttons": [
+          {
+            "name": "Give me the articles.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie sea 0"
+            ]
+          },
+          {
+            "name": "Not yet.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie sea 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ottilie_articles",
+        "npc_name": "Harbourmistress Holt",
+        "text": "Read them later. Everybody does, and everybody wishes they'd read them first.\n\nYour share is thirty-two Regals. Pay it to me when you've got it on you, and your name goes in the book below mine.",
+        "buttons": [
+          {
+            "name": "I'll bring it.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie articles 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ottilie_articleswait",
+        "npc_name": "Harbourmistress Holt",
+        "text": "Thirty-two Regals for your share. I'll take it when you have it on you.",
+        "buttons": [
+          {
+            "name": "Soon.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie articleswait 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ottilie_articleswait__1",
+        "npc_name": "Harbourmistress Holt",
+        "text": "Thirty-two Regals. The book's open. The pen's wet.",
+        "buttons": [
+          {
+            "name": "Soon.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie articleswait 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ottilie_articleswait__2",
+        "npc_name": "Harbourmistress Holt",
+        "text": "Your line in the book is still blank. It's waiting.",
+        "buttons": [
+          {
+            "name": "Soon.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie articleswait 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ottilie_articleswait__3",
+        "npc_name": "Harbourmistress Holt",
+        "text": "Debt doesn't go away for being ignored. I'd know.",
+        "buttons": [
+          {
+            "name": "Soon.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie articleswait 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ottilie_crewwait",
+        "npc_name": "Harbourmistress Holt",
+        "text": "You're in the book. Now raise a crew: three guards sworn to your keep, and tell me when you have them.",
+        "buttons": [
+          {
+            "name": "I'll find them.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie crewwait 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ottilie_crewwait__1",
+        "npc_name": "Harbourmistress Holt",
+        "text": "No crew yet? A captain alone is a passenger with opinions.",
+        "buttons": [
+          {
+            "name": "I'll find them.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie crewwait 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ottilie_crewwait__2",
+        "npc_name": "Harbourmistress Holt",
+        "text": "Three hands, sworn to your keep. Then come and tell me.",
+        "buttons": [
+          {
+            "name": "I'll find them.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie crewwait 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ottilie_crewwait__3",
+        "npc_name": "Harbourmistress Holt",
+        "text": "You'll want ones who can swim. Not everyone thinks to ask.",
+        "buttons": [
+          {
+            "name": "I'll find them.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie crewwait 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ottilie_bridewait",
+        "npc_name": "Harbourmistress Holt",
+        "text": "You have a crew. Now take them to the sunken chapel. The Bride is waiting.",
+        "buttons": [
+          {
+            "name": "What do I tell her?",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie bridewait 0"
+            ]
+          },
+          {
+            "name": "We'll go.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie bridewait 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ottilie_bridewait__1",
+        "npc_name": "Harbourmistress Holt",
+        "text": "Three hands. It's a crew if you say it loudly enough.",
+        "buttons": [
+          {
+            "name": "What do I tell her?",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie bridewait 0"
+            ]
+          },
+          {
+            "name": "We'll go.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie bridewait 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ottilie_bridewait__2",
+        "npc_name": "Harbourmistress Holt",
+        "text": "The chapel tower shows above the water when the moon's dark. That's your night.",
+        "buttons": [
+          {
+            "name": "What do I tell her?",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie bridewait 0"
+            ]
+          },
+          {
+            "name": "We'll go.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie bridewait 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ottilie_bridewait__3",
+        "npc_name": "Harbourmistress Holt",
+        "text": "She's still waiting. Somebody ought to stop her.",
+        "buttons": [
+          {
+            "name": "What do I tell her?",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie bridewait 0"
+            ]
+          },
+          {
+            "name": "We'll go.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie bridewait 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ottilie_bride",
+        "npc_name": "Harbourmistress Holt",
+        "text": "Nothing she'll want to hear. She's been waiting for a groom who isn't coming, and part of her knows.\n\nBe quick and be kind. Those aren't always different things.",
+        "buttons": [
+          {
+            "name": "We'll go.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie bride 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ottilie_ready",
+        "npc_name": "Harbourmistress Holt",
+        "text": "You laid her down. I heard it from the lighthouse: the lamp flickered, first time in my life.\n\nThen you're a captain in all but the oath. Go to a Tree of Oaths and swear it. Your share of the debt goes up, and so does what they'll do for you.",
+        "buttons": [
+          {
+            "name": "Thank you, Harbourmistress.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie ready 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ottilie_sworn",
+        "npc_name": "Harbourmistress Holt",
+        "text": "What do you need, Captain?",
+        "buttons": [
+          {
+            "name": "Tell me about Merrin Holt.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie sworn 0"
+            ]
+          },
+          {
+            "name": "Can I read the whole book?",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie sworn 1"
+            ]
+          },
+          {
+            "name": "Teach me something.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie sworn 2"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie sworn 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ottilie_sworn__1",
+        "npc_name": "Harbourmistress Holt",
+        "text": "Captain. Your share's paid up this season. Mine isn't. Don't tell anyone.",
+        "buttons": [
+          {
+            "name": "Tell me about Merrin Holt.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie sworn 0"
+            ]
+          },
+          {
+            "name": "Can I read the whole book?",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie sworn 1"
+            ]
+          },
+          {
+            "name": "Teach me something.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie sworn 2"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie sworn 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ottilie_sworn__2",
+        "npc_name": "Harbourmistress Holt",
+        "text": "Your crew drink in the Gull. They speak well of you. Mostly.",
+        "buttons": [
+          {
+            "name": "Tell me about Merrin Holt.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie sworn 0"
+            ]
+          },
+          {
+            "name": "Can I read the whole book?",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie sworn 1"
+            ]
+          },
+          {
+            "name": "Teach me something.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie sworn 2"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie sworn 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ottilie_sworn__3",
+        "npc_name": "Harbourmistress Holt",
+        "text": "The book's open. It's always open. Sit.",
+        "buttons": [
+          {
+            "name": "Tell me about Merrin Holt.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie sworn 0"
+            ]
+          },
+          {
+            "name": "Can I read the whole book?",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie sworn 1"
+            ]
+          },
+          {
+            "name": "Teach me something.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie sworn 2"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie sworn 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ottilie_merrin",
+        "npc_name": "Harbourmistress Holt",
+        "text": "She lit the first boat herself. Then she stood on the quay all night and watched the other thirty-nine catch. She didn't sleep for three days after.\n\nThe crews went home. That's the part nobody tells. They agreed to it, and they went home, and then later... well. Later is in the book.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie merrin 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ottilie_book",
+        "npc_name": "Harbourmistress Holt",
+        "text": "Not yet. When you're Captain in rank as well as name.\n\nThere are names in the back that I have to read to people myself, in a quiet room. You'll understand why.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie book 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ottilie_teach",
+        "npc_name": "Harbourmistress Holt",
+        "text": "Your crew fight for the share of the debt you carry so they don't have to. Carry it well.\n\nAnd never let one of them drown before you. No Saltreach crew ever has. It would leave them holding the debt.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie teach 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ottilie_other",
+        "npc_name": "Harbourmistress Holt",
+        "text": "You're sworn already. I can see it. The book can't take you twice and neither can the sea.\n\nYou can still read the front pages, if you like. They're the pretty ones.",
+        "buttons": [
+          {
+            "name": "What debt?",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie other 0"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie other 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ottilie_debt_other",
+        "npc_name": "Harbourmistress Holt",
+        "text": "Forty boats, burned in the harbour mouth by Merrin Holt, my ancestor, to stop a fleet. Three hundred years of paying for them, and the book still says unpaid.",
+        "buttons": [
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie debt_other 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ottilie_hub",
+        "npc_name": "Harbourmistress Holt",
+        "text": "What can I do for you?",
+        "buttons": [
+          {
+            "name": "What debt?",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie hub 0"
+            ]
+          },
+          {
+            "name": "Do you need captains?",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie hub 1"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie hub 2"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ottilie_hub__1",
+        "npc_name": "Harbourmistress Holt",
+        "text": "Back. Still not in the book.",
+        "buttons": [
+          {
+            "name": "What debt?",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie hub 0"
+            ]
+          },
+          {
+            "name": "Do you need captains?",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie hub 1"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie hub 2"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ottilie_hub__2",
+        "npc_name": "Harbourmistress Holt",
+        "text": "The tide's on the turn. You've got a minute.",
+        "buttons": [
+          {
+            "name": "What debt?",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie hub 0"
+            ]
+          },
+          {
+            "name": "Do you need captains?",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie hub 1"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie hub 2"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_ottilie_hub__3",
+        "npc_name": "Harbourmistress Holt",
+        "text": "Ink, rope or gossip? I've got all three.",
+        "buttons": [
+          {
+            "name": "What debt?",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie hub 0"
+            ]
+          },
+          {
+            "name": "Do you need captains?",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie hub 1"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say ottilie hub 2"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nell_first",
+        "npc_name": "Nell Sedge",
+        "text": "Mind the plank, it's thinking about sinking. Come in, come in. Kettle's on. Kettle's always on.\n\nNell Sedge. You'll have heard of Goody Sedge. Everyone in the fen has. She's my great-great-something, and three villages each show you her grave, and one of them is keeping a spot warm for me.\n\nSit. Tea first. Then you can ask.",
+        "buttons": [
+          {
+            "name": "Thank you. What is this place?",
+            "commands": [
+              "/scriptevent siege:lore_say nell first 0"
+            ]
+          },
+          {
+            "name": "Do you know Old Mag?",
+            "commands": [
+              "/scriptevent siege:lore_say nell first 1"
+            ]
+          },
+          {
+            "name": "What does a witch do?",
+            "commands": [
+              "/scriptevent siege:lore_say nell first 2"
+            ]
+          },
+          {
+            "name": "I can't stay.",
+            "commands": [
+              "/scriptevent siege:lore_say nell first 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nell_raft",
+        "npc_name": "Nell Sedge",
+        "text": "Home. It floats, mostly. When the water's high I'm further out and when it's low I'm in the mud with the eels, and either way nobody from the Order wants to walk to me. Which is the point.\n\nThey came once, years before my time, to burn books. There weren't any. There never are. What a witch knows is handed over in a cup.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say nell raft 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nell_mag",
+        "npc_name": "Nell Sedge",
+        "text": "Magda. Yes. We haven't spoken in sixty years, and I'm sure she'd tell you whose fault that is.\n\nShe borrows from something old and won't say what. The fen lends too, mind you. It just tells you the interest up front. That's the difference, and it's the whole difference.",
+        "buttons": [
+          {
+            "name": "What does the fen lend?",
+            "commands": [
+              "/scriptevent siege:lore_say nell mag 0"
+            ]
+          },
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say nell mag 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nell_witch",
+        "npc_name": "Nell Sedge",
+        "text": "Keeps children alive through a wet summer, mostly. Finds lost things. Tells you which of your neighbours is standing a little wrong. Puts down what needs putting down.\n\nIt isn't a gift. The fen doesn't give. It lends. And when it wants paying, it wants it all at once.\n\nWould you like to learn? I'm not asking lightly.",
+        "buttons": [
+          {
+            "name": "I'd like to learn.",
+            "commands": [
+              "/scriptevent siege:lore_say nell witch 0"
+            ]
+          },
+          {
+            "name": "What does it cost?",
+            "commands": [
+              "/scriptevent siege:lore_say nell witch 1"
+            ]
+          },
+          {
+            "name": "Not yet.",
+            "commands": [
+              "/scriptevent siege:lore_say nell witch 2"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nell_cost",
+        "npc_name": "Nell Sedge",
+        "text": "A night, to start. You drink, and the fen takes a little something to know you by. You'll feel heavy and you won't see well, and in the morning you'll be fine.\n\nAfter that, it asks when it asks. I've never been asked for anything I couldn't pay. I know people who have.",
+        "buttons": [
+          {
+            "name": "I'd like to learn.",
+            "commands": [
+              "/scriptevent siege:lore_say nell cost 0"
+            ]
+          },
+          {
+            "name": "Not yet.",
+            "commands": [
+              "/scriptevent siege:lore_say nell cost 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nell_learn",
+        "npc_name": "Nell Sedge",
+        "text": "Then here's the cup. No, don't look in it. Nobody ever looks in it.\n\nYou can drink it now, or go away and think and drink it later. The tea will keep. It's very patient tea.",
+        "buttons": [
+          {
+            "name": "Drink.",
+            "commands": [
+              "/scriptevent siege:lore_say nell learn 0"
+            ]
+          },
+          {
+            "name": "Later.",
+            "commands": [
+              "/scriptevent siege:lore_say nell learn 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nell_cup",
+        "npc_name": "Nell Sedge",
+        "text": "Your cup's waiting.",
+        "buttons": [
+          {
+            "name": "Drink.",
+            "commands": [
+              "/scriptevent siege:lore_say nell cup 0"
+            ]
+          },
+          {
+            "name": "Not yet.",
+            "commands": [
+              "/scriptevent siege:lore_say nell cup 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nell_cup__1",
+        "npc_name": "Nell Sedge",
+        "text": "The cup's still here. So are you. One of you is going to have to make a move.",
+        "buttons": [
+          {
+            "name": "Drink.",
+            "commands": [
+              "/scriptevent siege:lore_say nell cup 0"
+            ]
+          },
+          {
+            "name": "Not yet.",
+            "commands": [
+              "/scriptevent siege:lore_say nell cup 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nell_cup__2",
+        "npc_name": "Nell Sedge",
+        "text": "Come back for your tea? It's kept. I said it would.",
+        "buttons": [
+          {
+            "name": "Drink.",
+            "commands": [
+              "/scriptevent siege:lore_say nell cup 0"
+            ]
+          },
+          {
+            "name": "Not yet.",
+            "commands": [
+              "/scriptevent siege:lore_say nell cup 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nell_cup__3",
+        "npc_name": "Nell Sedge",
+        "text": "Sit. The cup's on the side. Whenever you like.",
+        "buttons": [
+          {
+            "name": "Drink.",
+            "commands": [
+              "/scriptevent siege:lore_say nell cup 0"
+            ]
+          },
+          {
+            "name": "Not yet.",
+            "commands": [
+              "/scriptevent siege:lore_say nell cup 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nell_drunk",
+        "npc_name": "Nell Sedge",
+        "text": "There. That's the first payment.\n\nYou'll feel it in a moment. Sit down before you do. The fen's having a look at you. Let it.\n\nWhen you can stand again, go and find Goody Sedge's graves. All three. Kneel at each, and leave her something. One of them will give you something back, and then you'll know she's had a look at you too.",
+        "buttons": [
+          {
+            "name": "...",
+            "commands": [
+              "/scriptevent siege:lore_say nell drunk 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nell_graveswait",
+        "npc_name": "Nell Sedge",
+        "text": "Have you knelt at all three?",
+        "buttons": [
+          {
+            "name": "Where are they?",
+            "commands": [
+              "/scriptevent siege:lore_say nell graveswait 0"
+            ]
+          },
+          {
+            "name": "Still looking.",
+            "commands": [
+              "/scriptevent siege:lore_say nell graveswait 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nell_graveswait__1",
+        "npc_name": "Nell Sedge",
+        "text": "Three graves. Three villages. She got about, Goody.",
+        "buttons": [
+          {
+            "name": "Where are they?",
+            "commands": [
+              "/scriptevent siege:lore_say nell graveswait 0"
+            ]
+          },
+          {
+            "name": "Still looking.",
+            "commands": [
+              "/scriptevent siege:lore_say nell graveswait 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nell_graveswait__2",
+        "npc_name": "Nell Sedge",
+        "text": "Kneel. Leave something. Don't be fussy about what.",
+        "buttons": [
+          {
+            "name": "Where are they?",
+            "commands": [
+              "/scriptevent siege:lore_say nell graveswait 0"
+            ]
+          },
+          {
+            "name": "Still looking.",
+            "commands": [
+              "/scriptevent siege:lore_say nell graveswait 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nell_graveswait__3",
+        "npc_name": "Nell Sedge",
+        "text": "Feeling better? It passes. Mostly.",
+        "buttons": [
+          {
+            "name": "Where are they?",
+            "commands": [
+              "/scriptevent siege:lore_say nell graveswait 0"
+            ]
+          },
+          {
+            "name": "Still looking.",
+            "commands": [
+              "/scriptevent siege:lore_say nell graveswait 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nell_graves",
+        "npc_name": "Nell Sedge",
+        "text": "In three villages of the fen, and each one swears theirs is the real one. Look in the oldest corner of the burying ground, under the willow, where the stone's gone soft.\n\nThey're all real. That's the joke nobody gets.",
+        "buttons": [
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say nell graves 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nell_motherwait",
+        "npc_name": "Nell Sedge",
+        "text": "Goody Sedge has had her look. Now the fen wants one thing done.",
+        "buttons": [
+          {
+            "name": "What thing?",
+            "commands": [
+              "/scriptevent siege:lore_say nell motherwait 0"
+            ]
+          },
+          {
+            "name": "I know. I'm going.",
+            "commands": [
+              "/scriptevent siege:lore_say nell motherwait 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nell_motherwait__1",
+        "npc_name": "Nell Sedge",
+        "text": "She gave you something back. I knew she would. She always liked the polite ones.",
+        "buttons": [
+          {
+            "name": "What thing?",
+            "commands": [
+              "/scriptevent siege:lore_say nell motherwait 0"
+            ]
+          },
+          {
+            "name": "I know. I'm going.",
+            "commands": [
+              "/scriptevent siege:lore_say nell motherwait 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nell_motherwait__2",
+        "npc_name": "Nell Sedge",
+        "text": "The Mother of Changelings. Have you been to see her yet?",
+        "buttons": [
+          {
+            "name": "What thing?",
+            "commands": [
+              "/scriptevent siege:lore_say nell motherwait 0"
+            ]
+          },
+          {
+            "name": "I know. I'm going.",
+            "commands": [
+              "/scriptevent siege:lore_say nell motherwait 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nell_motherwait__3",
+        "npc_name": "Nell Sedge",
+        "text": "The fen's waiting on you. It isn't patient like the tea.",
+        "buttons": [
+          {
+            "name": "What thing?",
+            "commands": [
+              "/scriptevent siege:lore_say nell motherwait 0"
+            ]
+          },
+          {
+            "name": "I know. I'm going.",
+            "commands": [
+              "/scriptevent siege:lore_say nell motherwait 1"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nell_mother",
+        "npc_name": "Nell Sedge",
+        "text": "There's a thing in the fen that takes children and leaves something else in the cot. The Mother of Changelings, they call her, and she's older than any of my grandmothers.\n\nThe fen has been owed her for a very long time. End her, and come back for tea.",
+        "buttons": [
+          {
+            "name": "I will.",
+            "commands": [
+              "/scriptevent siege:lore_say nell mother 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nell_ready",
+        "npc_name": "Nell Sedge",
+        "text": "She's gone. I felt it in the water, like a stone settling.\n\nThen the fen knows you, and Goody knows you, and I suppose I know you too. Go to a Tree of Oaths and swear it. Say it nicely.\n\nAnd come back. There's more in the cup than a first lesson.",
+        "buttons": [
+          {
+            "name": "Thank you, Nell.",
+            "commands": [
+              "/scriptevent siege:lore_say nell ready 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nell_sworn",
+        "npc_name": "Nell Sedge",
+        "text": "What do you need?",
+        "buttons": [
+          {
+            "name": "Teach me something.",
+            "commands": [
+              "/scriptevent siege:lore_say nell sworn 0"
+            ]
+          },
+          {
+            "name": "Tell me about Goody Sedge.",
+            "commands": [
+              "/scriptevent siege:lore_say nell sworn 1"
+            ]
+          },
+          {
+            "name": "How do I see who's wrong?",
+            "commands": [
+              "/scriptevent siege:lore_say nell sworn 2"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say nell sworn 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nell_sworn__1",
+        "npc_name": "Nell Sedge",
+        "text": "Witch. Sit, the kettle's on. It's always on.",
+        "buttons": [
+          {
+            "name": "Teach me something.",
+            "commands": [
+              "/scriptevent siege:lore_say nell sworn 0"
+            ]
+          },
+          {
+            "name": "Tell me about Goody Sedge.",
+            "commands": [
+              "/scriptevent siege:lore_say nell sworn 1"
+            ]
+          },
+          {
+            "name": "How do I see who's wrong?",
+            "commands": [
+              "/scriptevent siege:lore_say nell sworn 2"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say nell sworn 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nell_sworn__2",
+        "npc_name": "Nell Sedge",
+        "text": "You've got that look. The fen's been talking to you. Tell me.",
+        "buttons": [
+          {
+            "name": "Teach me something.",
+            "commands": [
+              "/scriptevent siege:lore_say nell sworn 0"
+            ]
+          },
+          {
+            "name": "Tell me about Goody Sedge.",
+            "commands": [
+              "/scriptevent siege:lore_say nell sworn 1"
+            ]
+          },
+          {
+            "name": "How do I see who's wrong?",
+            "commands": [
+              "/scriptevent siege:lore_say nell sworn 2"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say nell sworn 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nell_sworn__3",
+        "npc_name": "Nell Sedge",
+        "text": "Mind the plank. Oh, you did. Good.",
+        "buttons": [
+          {
+            "name": "Teach me something.",
+            "commands": [
+              "/scriptevent siege:lore_say nell sworn 0"
+            ]
+          },
+          {
+            "name": "Tell me about Goody Sedge.",
+            "commands": [
+              "/scriptevent siege:lore_say nell sworn 1"
+            ]
+          },
+          {
+            "name": "How do I see who's wrong?",
+            "commands": [
+              "/scriptevent siege:lore_say nell sworn 2"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say nell sworn 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nell_teach",
+        "npc_name": "Nell Sedge",
+        "text": "The fen never takes one of anything. If you hurt one, hurt the one in the middle, and let it spread.\n\nAnd always leave something when you take something. A ribbon, a crust, a song. It isn't superstition. It's book-keeping.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say nell teach 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nell_goody",
+        "npc_name": "Nell Sedge",
+        "text": "Nobody knows when she lived. Before Aldmere had a name, I'd say, and before anyone thought to disapprove of her.\n\nShe kept a list of everyone the fen lent to, and what they paid. It was never written down. It was handed over in a cup, like everything else. I've got it. One day you will.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say nell goody 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nell_eye",
+        "npc_name": "Nell Sedge",
+        "text": "Watch the ones who face the wrong way when nobody's looking, and the dogs who won't go near them.\n\nWhen you're further along, the fen will show you plainer. Be kind about what you see. Most of them never asked to come back the way they did.",
+        "buttons": [
+          {
+            "name": "Back.",
+            "commands": [
+              "/scriptevent siege:lore_say nell eye 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nell_other",
+        "npc_name": "Nell Sedge",
+        "text": "Oh, you're sworn already. I can taste it on the air. The fen won't lend to someone who owes elsewhere. It's very particular about that.\n\nHave some tea anyway. Tea's free. Tea's the only thing that is.",
+        "buttons": [
+          {
+            "name": "Thank you.",
+            "commands": [
+              "/scriptevent siege:lore_say nell other 0"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nell_hub",
+        "npc_name": "Nell Sedge",
+        "text": "What can I do for you?",
+        "buttons": [
+          {
+            "name": "What is this place?",
+            "commands": [
+              "/scriptevent siege:lore_say nell hub 0"
+            ]
+          },
+          {
+            "name": "Do you know Old Mag?",
+            "commands": [
+              "/scriptevent siege:lore_say nell hub 1"
+            ]
+          },
+          {
+            "name": "What does a witch do?",
+            "commands": [
+              "/scriptevent siege:lore_say nell hub 2"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say nell hub 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nell_hub__1",
+        "npc_name": "Nell Sedge",
+        "text": "Back! Sit. Kettle's on.",
+        "buttons": [
+          {
+            "name": "What is this place?",
+            "commands": [
+              "/scriptevent siege:lore_say nell hub 0"
+            ]
+          },
+          {
+            "name": "Do you know Old Mag?",
+            "commands": [
+              "/scriptevent siege:lore_say nell hub 1"
+            ]
+          },
+          {
+            "name": "What does a witch do?",
+            "commands": [
+              "/scriptevent siege:lore_say nell hub 2"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say nell hub 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nell_hub__2",
+        "npc_name": "Nell Sedge",
+        "text": "The plank held. It's fond of you.",
+        "buttons": [
+          {
+            "name": "What is this place?",
+            "commands": [
+              "/scriptevent siege:lore_say nell hub 0"
+            ]
+          },
+          {
+            "name": "Do you know Old Mag?",
+            "commands": [
+              "/scriptevent siege:lore_say nell hub 1"
+            ]
+          },
+          {
+            "name": "What does a witch do?",
+            "commands": [
+              "/scriptevent siege:lore_say nell hub 2"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say nell hub 3"
+            ]
+          }
+        ]
+      },
+      {
+        "scene_tag": "siege_lore_nell_hub__3",
+        "npc_name": "Nell Sedge",
+        "text": "You again. Good. I was running out of people to talk to who aren't eels.",
+        "buttons": [
+          {
+            "name": "What is this place?",
+            "commands": [
+              "/scriptevent siege:lore_say nell hub 0"
+            ]
+          },
+          {
+            "name": "Do you know Old Mag?",
+            "commands": [
+              "/scriptevent siege:lore_say nell hub 1"
+            ]
+          },
+          {
+            "name": "What does a witch do?",
+            "commands": [
+              "/scriptevent siege:lore_say nell hub 2"
+            ]
+          },
+          {
+            "name": "Goodbye.",
+            "commands": [
+              "/scriptevent siege:lore_say nell hub 3"
             ]
           }
         ]

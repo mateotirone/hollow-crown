@@ -1,7 +1,7 @@
 // Each player's lore progress (the Ledger of Whispers), saved on the player.
 
 import { world, system, ItemStack } from "@minecraft/server";
-import { emit, settlementAt, isReady, isNight } from "../siege/api.js";
+import { emit, on, settlementAt, isReady, isNight } from "../siege/api.js";
 import { isTesting } from "../core/tests.js";
 import { blankProgress, addClues, TOME, COLLECTION, loadSaved, stampSaved } /* saves carry a version: SAVE_VERSION in logic.js */ from "./logic.js";
 import { SITE_IDS, PLACES } from "./data/world.js";
@@ -146,6 +146,12 @@ export function setFlag(player, flag) {
   emit("loreFlag", { player, flag });
   return true;
 }
+
+// Other features set story flags too, so a character can answer what you did elsewhere (the role trials):
+//   emit("loreSetFlag", { player, flag })
+on("loreSetFlag", ({ player, flag }) => {
+  if (player && typeof flag === "string" && flag) setFlag(player, flag);
+});
 
 // Context for dialogue conditions
 export function contextOf(player, shelved = 0) {

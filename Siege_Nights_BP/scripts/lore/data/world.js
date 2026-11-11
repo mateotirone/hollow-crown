@@ -87,6 +87,10 @@ export const PLACES = {
   saltglass_grotto: { name: "The Saltglass Grotto", region: "Emberwaste", charted: false, desc: "A thin place. A cave of fused salt out on the flats." },
   frostvein_hollow: { name: "Frostvein Gap", region: "Frostmarch", charted: false, desc: "A thin place. An ice cave in the far north." },
   sunken_quarry: { name: "The Sunken Quarry", region: "Aldmere Vale", charted: false, desc: "A thin place. The flooded pit west of Millbrook." },
+  cinder_roost: { name: "The Cinder Roost", region: "Emberwaste", charted: true, desc: "A rider school cut into the cliff above Sunscar. Its gate is past the Span, and the names of the fallen are on its wall." },
+  deepforge: { name: "The Deepforge", region: "Frostmarch", charted: true, desc: "A forge under the mountain above Rimehold. Its fire has burned for four hundred years." },
+  harbour_office: { name: "The Harbour Office", region: "Saltreach", charted: true, desc: "On the quay at Gull's Rest. The Debt Book is chained to the desk." },
+  nell_raft: { name: "Nell Sedge's Raft-house", region: "Blackfen", charted: false, desc: "Moored in the reeds past Mirelight, further out than anyone else lives." },
   witchroot_caves: { name: "The Witchroot Caves", region: "Blackfen", charted: false, desc: "A thin place. Caves under the swamp, hung with roots." },
 };
 
