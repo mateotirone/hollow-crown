@@ -22,6 +22,6 @@ api.on("showcase", ({ player, dim, origin, label }) => {
     grantRenown(player, 10000, "showcase", true);
     grantPoints(player, 30, "showcase");
   }
-  player.sendMessage("§6Town hall:§7 a Keep is rising south of the castle wall (about a minute). Walk in and click the Tree of Oaths. You are Renown 30 with points to spend.");
+  player.sendMessage("§6Town hall:§7 a Keep is rising south of the castle wall (about 15 seconds). Walk in and click the Tree of Oaths. You are Renown 30 with points to spend.");
   player.sendMessage("§7Other halls: §f/scriptevent siege:townhall_build 5 blackfen§7 (tier 1-5; vale, frostmarch, saltreach, emberwaste, blackfen). Paths: §f/scriptevent siege:townhall_path knight§7 or §fmarked§7.");
 });
