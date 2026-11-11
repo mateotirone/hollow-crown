@@ -411,9 +411,14 @@ the darkness and knockback effects, the storms, and how the hurried evening look
 
 ## Choirsteel gear (bestiary)
 
-`/scriptevent siege:choirsteel_kit` gives the full set, the tools, 32 ingots and 8 Gloamquills.
+`/scriptevent siege:choirsteel_kit` gives the full set, the tools, 32 ingots, 8 Gloamquills, 2 templates and 4 Tempered Choirsteel.
 
-- Recipes: in a crafting table, each piece is its netherite piece plus Choirsteel Ingots plus one Gloamquill (two for the Blade). Enchantments on the netherite piece are not carried over.
+- Recipes: Tempered Choirsteel is 4 Choirsteel Ingots and a Gloamquill in a crafting table. At a smithing table, a Choirsteel Upgrade template + a netherite piece + Tempered Choirsteel gives the Choirsteel piece (all nine: four armour, five tools). Check the template and Tempered Choirsteel go into their slots at all (custom smithing items need their tags), and that enchantments and a renamed name carry over.
+- Copying: template in the top middle, Veinstone in the centre, 7 netherite ingots around them in a crafting table gives 2 templates.
+- The Cold Forge (the Hollow, x 592 z 1080, on the high terraces east of the Seams, no road): an open veinstone smithy with a tall chimney and soul fire on top. The chest at the back holds one template on your first visit. Take it: anvils ring and two Veinsworn and a Stone Vigil come out. Come back three in-game days later and there is a new one. `/scriptevent hc:forge_restock` refills it now.
+- Trims: put each Choirsteel armour piece in a smithing table with any armour trim template and any trim material. The trim should show in its colour, in the same place it sits on netherite, and the crystals, plume, pauldrons, knee cops and fins should stay plain.
+- The first time you carry a Choirsteel Ingot, chat tells you where the forge is.
+- The test world (`/scriptevent siege:showcase`) has a smithing table and a crafting table with chests of everything needed.
 - Helm: you see in the dark. Greaves: slowness never sticks. Treads: jump off something high, you drift down and take no fall damage.
 - Cuirass: let zombies hit you. About one hit in four rings and throws the attacker back.
 - Full set: a chime, then Resistance and four extra hearts. Take one piece off and both go.

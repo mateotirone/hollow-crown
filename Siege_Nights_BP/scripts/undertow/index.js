@@ -39,6 +39,7 @@ import { shouldAlarm, oreOutcome, noteEntry, crownTick, crownVerdict, CLAIM_SECO
 import { oreChance } from "./terrain.js";
 import { shouldRise, regentOutcome, REGENT, TEMPERS, JOBS } from "./regent.js";
 import { sfx } from "../core/sfx.js";
+import "./forge.js";
 
 const IN_TAG = "siege_undertow_in";
 const FOG_ID = "siege:undertow_fog";
