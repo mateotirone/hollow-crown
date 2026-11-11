@@ -10,6 +10,7 @@ import { STONE_FAMILY, STONE_KINDS, CASTLE_STONES, stoneId, regionalId, GATES, P
 import { MATERIALS } from "./rules.js";
 import { HALL, MASON, SLOTS, place, slotsFor } from "./layout.js";
 import { wallCost } from "./walls.js";
+import { wallShape, radiusAt } from "./walldata.js";
 import { WALLS, WALL_LEVELS, MAX_WALL, smoothGround, groundProblem, wallColumns, onWallLine, bearingToAngle, columnKinds, repairCost, wallArmor, wallSeed, VARIATION, WALL_STONES, WALL_STONE_IDS } from "./walldata.js";
 
 const base = { creative: false, overworld: true, typeId: "minecraft:stone_bricks", land: "me", mine: true, reserve: undefined, wildsClosed: true, hasKeep: true };
@@ -263,6 +264,24 @@ import { TOWNS } from "./towns_data.js";
 import { townFor, townNames, pickLayout, slotsOf, groundwork, fixturesOf, wallRadius, seatOnSlot, seatedBox, hallBox } from "./towns.js";
 
 addTests("settle towns", {
+  "the wall line wanders but stays clear of the plots and inside the land": () => {
+    for (const name of ["Dunehold", "Frosthelm", "x:1,2"]) {
+      const shape = wallShape(name);
+      assertEqual(shape.length, 72);
+      assertEqual(JSON.stringify(shape), JSON.stringify(wallShape(name)));
+      assert(Math.max(...shape) - Math.min(...shape) > 0.8, `${name}: too round`);
+      const center = { x: 0, y: 64, z: 0, shape };
+      for (const r of [32, 40, 48, 56]) {
+        let lo = 99, hi = 0;
+        for (let i = 0; i < 360; i++) { const R = radiusAt(center, r, (i / 360) * Math.PI * 2); lo = Math.min(lo, R - r); hi = Math.max(hi, R - r); }
+        assert(lo >= -WALLS.wobble.in - 1e-9 && hi <= WALLS.wobble.out + 1e-9, `${name} r${r}: ${lo}..${hi}`);
+        assert(hi - lo > 1.5, `${name} r${r}: barely wanders`);
+      }
+      const cols = wallColumns({ center, radius: 56, level: 1, gateAngle: 0, smooth: Array(48).fill(64) });
+      for (const c of cols) assert(Math.hypot(c.x, c.z) <= 56 + WALLS.wobble.out + 1 && Math.hypot(c.x, c.z) >= 56 - WALLS.wobble.in - 4, `${c.x},${c.z}`);
+    }
+    assertEqual(radiusAt({ x: 0, z: 0 }, 40, 1), 40); // old walls without a shape stay round
+  },
   "every map plot has three town layouts, with walls at 32, 40, 48 and 56": () => {
     assertEqual(townNames().length, 12);
     for (const [key, town] of Object.entries(TOWNS)) {

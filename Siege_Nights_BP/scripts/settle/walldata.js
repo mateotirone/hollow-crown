@@ -1,6 +1,6 @@
 // Settlement walls: the levels and the ring geometry, as pure data and math (runs in Node too).
 //
-// The wall is a ring around the Plot Stone. It follows the ground: each stretch of wall stands on
+// The wall is a ring around the Plot Stone whose line wanders in and out (wallShape). It follows the ground: each stretch of wall stands on
 // the ground under it and the wall-walk steps up and down a block at a time.
 //
 // Mateo approved these ten levels on 2026-11-10 (drawn by the textures thread). If they change,
@@ -11,6 +11,8 @@ export const WALLS = {
   landBeyond: 4, // your land reaches this far past the wall from the day it is raised
   spawnBeyond: 5, // raiders appear this far outside the wall
   reserve: 4, // nothing may be built this close to the line of the wall (either side)
+  wobble: { out: 4, in: 2 }, // the wall line wanders: up to this many blocks out (at radius 56, less on smaller rings) and in
+  // (in stays under the town layouts' 3-block clearance, so it never cuts a plot)
   stations: 48, // how many points round the ring the ground is measured at
   maxStep: 6, // the ground may differ this much between neighbouring points before the wall refuses to span it
   perTick: 90, // blocks placed per tick while a wall rises
@@ -168,11 +170,34 @@ export function groundAt(smooth, angle) {
   return Math.round(smooth[i] * (1 - t) + smooth[(i + 1) % n] * t);
 }
 
+// The wall is not a perfect circle (Mateo, 2026-11-11): its line wanders in and out with a few slow waves,
+// different for every settlement and the same every time. shape = 72 numbers from -1 to 1, one every 5 degrees.
+export function wallShape(seedText) {
+  let a = 2166136261;
+  for (const c of String(seedText)) a = Math.imul(a ^ c.charCodeAt(0), 16777619);
+  const rnd = () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  const waves = [2, 3, 5, 7].map((k) => ({ k, amp: (0.05 + rnd() * 0.17) / (1 + 0.15 * k), ph: rnd() * TAU }));
+  const raw = Array.from({ length: 72 }, (_, i) => waves.reduce((f, w) => f + w.amp * Math.cos(w.k * (i / 72) * TAU + w.ph), 0));
+  const top = Math.max(...raw.map(Math.abs)) || 1;
+  return raw.map((v) => Math.round((v / top) * 100) / 100);
+}
+
+// How far out the wall stands at angle a (radians): its ring radius, wandered by center.shape (if it has one)
+export function radiusAt(center, radius, a) {
+  const shape = center?.shape;
+  if (!shape?.length) return radius;
+  const f = (turn(a) / TAU) * shape.length;
+  const i = Math.floor(f) % shape.length, t = f - Math.floor(f);
+  const g = shape[i] * (1 - t) + shape[(i + 1) % shape.length] * t;
+  return radius + (g > 0 ? g * WALLS.wobble.out * Math.min(1, radius / WALLS.radius) : g * WALLS.wobble.in);
+}
+
 // Where the ground is measured: [{ x, z }] round the ring
 export function stationSpots(center, radius = WALLS.radius, count = WALLS.stations) {
   return Array.from({ length: count }, (_, i) => {
     const a = (i / count) * TAU;
-    return { x: Math.round(center.x + Math.cos(a) * (radius - 1)), z: Math.round(center.z + Math.sin(a) * (radius - 1)) };
+    const r = radiusAt(center, radius, a);
+    return { x: Math.round(center.x + Math.cos(a) * (r - 1)), z: Math.round(center.z + Math.sin(a) * (r - 1)) };
   });
 }
 
@@ -197,7 +222,7 @@ export function wallColumns({ center, radius = WALLS.radius, level, gateAngle, s
     if (!old || rank[col.role] > rank[old.role] || (col.role === old.role && col.d < old.d)) cols.set(k, { x, z, ...col });
   };
   const half = WALLS.gateWidth / 2;
-  const steps = Math.ceil(TAU * radius * 1.6);
+  const steps = Math.ceil(TAU * (radius + WALLS.wobble.out) * 1.6);
   const deep = L.thick + (L.walk ? 1 : 0); // a thin wall with a walkway has a column of planks behind it
   const gateD = Math.min(L.thick - 1, 1); // the gate hangs one block in from the face where the wall is thick enough
   for (let s = 0; s < steps; s++) {
@@ -205,8 +230,9 @@ export function wallColumns({ center, radius = WALLS.radius, level, gateAngle, s
     const g = groundAt(smooth, a);
     let off = turn(a - gateAngle); if (off > Math.PI) off -= TAU;
     const along = off * radius; // blocks along the wall from the middle of the gate
+    const r = radiusAt(center, radius, a);
     for (let d = 0; d < deep; d++) {
-      const x = Math.round(center.x + Math.cos(a) * (radius - d)), z = Math.round(center.z + Math.sin(a) * (radius - d));
+      const x = Math.round(center.x + Math.cos(a) * (r - d)), z = Math.round(center.z + Math.sin(a) * (r - d));
       if (Math.abs(along) <= half) {
         const gg = groundAt(smooth, gateAngle);
         if (L.gate === "open") put(x, z, { role: "gap", base: gg, top: gg + L.h, d, a });
@@ -222,27 +248,31 @@ export function wallColumns({ center, radius = WALLS.radius, level, gateAngle, s
   for (let k = 0; k < (L.towers ?? 0); k++) towers.push([gateAngle + ((k + 0.5) / L.towers) * TAU, Math.floor(hash3(k, 7, 0, seed) * (VARIATION.towerBump + 1))]);
   if (L.gatehouse) for (const side of [-1, 1]) towers.push([gateAngle + (side * (half + L.r + 1)) / radius, 1]);
   for (const [a, bump] of towers) {
-    const cx = Math.round(center.x + Math.cos(a) * (radius - 1)), cz = Math.round(center.z + Math.sin(a) * (radius - 1));
+    const r = radiusAt(center, radius, a);
+    const cx = Math.round(center.x + Math.cos(a) * (r - 1)), cz = Math.round(center.z + Math.sin(a) * (r - 1));
     const g = groundAt(smooth, a);
     for (let dx = -L.r; dx <= L.r; dx++) for (let dz = -L.r; dz <= L.r; dz++) {
       const edge = Math.abs(dx) === L.r || Math.abs(dz) === L.r;
       put(cx + dx, cz + dz, { role: "tower", base: g, top: g + L.h + L.up + bump, d: edge ? 0 : 1, a, mid: dx === 0 && dz === 0, tooth: edge && (dx + dz) % 2 === 0, face: edge && (dx === 0 || dz === 0) });
     }
   }
-  const order = (c) => { let o = turn(c.a - gateAngle); return o; };
+  const order = (c) => turn(c.a - gateAngle);
   return [...cols.values()].sort((p, q) => order(p) - order(q) || p.d - q.d);
 }
 
 // Is a spot on the line of the wall (within `reach` blocks of it)?
-export const onWallLine = (center, location, radius = WALLS.radius, reach = WALLS.reserve) =>
-  Math.abs(Math.hypot(location.x - (center.x + 0.5), location.z - (center.z + 0.5)) - (radius - 1)) <= reach;
+export function onWallLine(center, location, radius = WALLS.radius, reach = WALLS.reserve) {
+  const dx = location.x - (center.x + 0.5), dz = location.z - (center.z + 0.5);
+  return Math.abs(Math.hypot(dx, dz) - (radiusAt(center, radius, Math.atan2(dz, dx)) - 1)) <= reach;
+}
 
 // Where the gate stands (ground level, middle of the opening) and a spot just outside it
 export function gateSpot(center, gateAngle, smooth, radius = WALLS.radius) {
   const y = groundAt(smooth, gateAngle);
+  const r = radiusAt(center, radius, gateAngle);
   return {
-    x: Math.round(center.x + Math.cos(gateAngle) * (radius - 1)), y, z: Math.round(center.z + Math.sin(gateAngle) * (radius - 1)),
-    outside: { x: Math.round(center.x + Math.cos(gateAngle) * (radius + 8)), y, z: Math.round(center.z + Math.sin(gateAngle) * (radius + 8)) },
+    x: Math.round(center.x + Math.cos(gateAngle) * (r - 1)), y, z: Math.round(center.z + Math.sin(gateAngle) * (r - 1)),
+    outside: { x: Math.round(center.x + Math.cos(gateAngle) * (r + 8)), y, z: Math.round(center.z + Math.sin(gateAngle) * (r + 8)) },
   };
 }
 

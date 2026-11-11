@@ -20,6 +20,7 @@ import { REGION_TO_STYLE } from "./config.js";
 import { BENCH, registerBench } from "./mason.js";
 import { styleOf } from "./plans.js";
 import { wallOf, raiseWall, moveWall } from "./walls.js";
+import { wallShape } from "./walldata.js";
 import { townFor, pickLayout, slotsOf, groundwork, fixturesOf, wallRadius, seatOnSlot, TIER_NAMES } from "./towns.js";
 
 export const PLOT_MARKER = "siege:plot_marker";
@@ -242,7 +243,7 @@ export function foundTown(owner, plot, at, { style, layout } = {}) {
   save();
   const town = townOf(owner);
   if (!wallOf(owner) || wallOf(owner).x !== at.x || wallOf(owner).z !== at.z) {
-    raiseWall(owner, 1, { center: { x: at.x, y: at.y, z: at.z }, style: town.style, bearing: tw.gate, radius: wallRadius(tw, 0) });
+    raiseWall(owner, 1, { center: { x: at.x, y: at.y, z: at.z }, style: town.style, bearing: tw.gate, radius: wallRadius(tw, 0), shape: wallShape(tw.name) });
   }
   layOutTier(owner, 0);
   return true;
