@@ -222,8 +222,6 @@ def roof(bp, B):
     # curled verges: at the foot of each verge an upside-down stair one up and one out
     base = Y_PLATE                                          # lowest roof row
     for z in (-2, D + 2):
-        bp.set(-2, base, z, P["trim"], facing="e", half="top")
-        bp.set(W + 2, base, z, P["trim"], facing="w", half="top")
         for x in (-1, W + 1):                               # lanterns on chains at the verge tips
             bp.set(x, base - 1, z, "iron_chain"); bp.set(x, base - 2, z, "lantern", hanging=True)
     for z in (3, 7):                                        # trusses over the open upper rooms
@@ -231,7 +229,13 @@ def roof(bp, B):
         for y in range(Y_PLATE + 1, B.H[(4, z)][0]): log(bp, 4, y, z)
         bp.set(3, Y_PLATE + 1, z, P["trim"], facing="e", half="top"); bp.set(5, Y_PLATE + 1, z, P["trim"], facing="w", half="top")
     for y in range(YF, Y_UP + 1): bp.set(4, y, 1, P["chimney"])
-    B.chimney(4, 1, Y_UP + 1)
+    top = B.chimney(4, 1, Y_UP + 1)
+    # chimney top (06-roof): signs round the last stone block, trapdoors round the campfire, a pot on top
+    bp.set(4, top + 1, 1, "campfire")
+    for d, (dx, dz) in {"s": (0, 1), "n": (0, -1), "e": (1, 0), "w": (-1, 0)}.items():
+        bp.set(4 + dx, top, 1 + dz, SIGN, facing=d)
+        bp.set(4 + dx, top + 1, 1 + dz, "spruce_trapdoor", facing=d, open=True)
+    bp.set(4, top + 2, 1, "flower_pot")
 
 # ------------------------------------------------------------------ stage 7: detailing
 def detailing(bp):
@@ -266,7 +270,7 @@ if __name__ == "__main__":
         house = build(n); sc = scene_of(house)
         sc.camera = {"views": {"front": [0, 8, 40, 4, 9, 5], "front-left": [-35, 20, 46, 4, 7, 5], "front-right": [35, 20, 46, 4, 7, 5],
                                "high": [25, 50, 54, 4, 6, 5], "street": [-18, 4, 30, 4, 7, 8], "back": [155, 20, 46, 4, 7, 5],
-                               "close": [-20, 10, 24, 4, 6, 9]}}
+                               "close": [-20, 10, 24, 4, 6, 9], "chim": [-30, 25, 22, 4, 18, 1]}}
         sub = os.path.join(a.out, STAGES[n - 1][0]); os.makedirs(sub, exist_ok=True)
         sc.save_logical(os.path.join(sub, "scene.json"))
         shots = a.shots if n == len(STAGES) else "front-left"

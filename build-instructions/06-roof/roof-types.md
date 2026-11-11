@@ -76,9 +76,9 @@ edge row (barge board) to define the roof, as the chart says.
 
 ## Dressing any roof (from `roof-dormers-curled-verges.png` and `detailed-hall-hanging-chains.png`)
 
-- **Curled verges**: at the foot of each verge, the last barge-board stairs turn up and out (a stair, then
-  an upside-down stair one higher and one further out) so the gable edge ends in a small curl. Vale and
-  Blackfen cottages, inns; not on stone civic roofs.
+- **Curled verges**: the gable edge ends in a small upturned curl (`roof-dormers-curled-verges.png`).
+  Shape not settled: the first try (an upside-down stair one out beside the verge foot) read as a block
+  floating off the roof corner, so it is off until Mateo shows how he builds the curl tip.
 - **Dormers** with their own little gable and curled verge, on the bay lines (README step 7).
 - **Ridge spikes**: on halls and grand houses, a short spike every 3 or 5 blocks along the ridge (odd,
   centred on the ridge's centre block): an end rod or a wall block with a lightning rod or a fence post on

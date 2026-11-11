@@ -125,6 +125,11 @@ How to build one (span = inside width, odd):
   low edge of a slope.
 - Rises at least 2 above where it leaves the roof (`kit.chimney` puts the top at the highest roof cell + 2),
   capped with a wall block or a slab on walls, maybe a campfire (smoke) hidden in the top.
+- **Chimney top (Mateo, 2026-11-11, `reference/pictures/chimney-signs-trapdoors-pot.png`)**, the default on
+  houses and cottages: a column of stone (light stone bricks or the region's chimney stone) up through the
+  roof; wall signs of the trim wood on all four sides of the last stone block; above it the fireplace
+  block, a campfire (smoke), with open trapdoors of the trim wood round all four sides; a flower pot on
+  top as the chimney pot. Wood against brick or tile roofs (spruce or oak) reads warm; dark oak on slate.
 - 1 x 1 on cottages, 1 x 3 or 3 x 1 on inns and halls (odd), wider at the base where it is an outside
   breast.
 
