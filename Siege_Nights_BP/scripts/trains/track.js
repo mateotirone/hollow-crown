@@ -63,12 +63,48 @@ export function follow(pos, shape, d, get) {
 export const blockLength = (c) => half(c.from) + half(c.to);
 export const flip = (c) => ({ ...c, from: c.to, to: c.from, t: blockLength(c) - c.t });
 
+// The middle of the track through a bend or corner, from link a's edge to link b's edge, in blocks from the block
+// centre: a circular arc (plus a short straight into a diagonal corner). Same maths as centreline() in
+// studio/build_trains.py, which draws the rails, so the wheels stay on them.
+const curves = new Map();
+export function curvePoints(a, b, n = 12) {
+  const k = `${a},${b}`;
+  if (curves.has(k)) return curves.get(k);
+  const na = Math.hypot(DX[a], DZ[a]), nb = Math.hypot(DX[b], DZ[b]);
+  const ua = [DX[a] / na, DZ[a] / na], ub = [DX[b] / nb, DZ[b] / nb];
+  const A = [DX[a] * 0.5, DZ[a] * 0.5], B = [DX[b] * 0.5, DZ[b] * 0.5];
+  const turn = Math.PI - Math.acos(Math.max(-1, Math.min(1, ua[0] * ub[0] + ua[1] * ub[1])));
+  const L = 0.5, r = L / Math.tan(turn / 2);
+  const bl = Math.hypot(ua[0] + ub[0], ua[1] + ub[1]), dist = Math.hypot(L, r);
+  const C = [((ua[0] + ub[0]) / bl) * dist, ((ua[1] + ub[1]) / bl) * dist];
+  const a0 = Math.atan2(ua[1] * L - C[1], ua[0] * L - C[0]), a1 = Math.atan2(ub[1] * L - C[1], ub[0] * L - C[0]);
+  const da = ((a1 - a0 + 3 * Math.PI) % (2 * Math.PI)) - Math.PI;
+  const pts = isDiag(a) ? [A] : [];
+  for (let i = 0; i <= n; i++) pts.push([C[0] + r * Math.cos(a0 + (da * i) / n), C[1] + r * Math.sin(a0 + (da * i) / n)]);
+  if (isDiag(b)) pts.push(B);
+  const cum = [0];
+  for (let i = 1; i < pts.length; i++) cum.push(cum[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
+  const out = { pts, cum, total: cum[cum.length - 1] };
+  curves.set(k, out);
+  return out;
+}
+
 // The world position of a cursor (wheels on the rail tops)
 export function pointAt(c, shape) {
   const cx = c.x + 0.5, cz = c.z + 0.5;
   const hf = half(c.from), ht = half(c.to);
-  let x, z, s; // s = 0 at the entry edge, 1 at the exit edge
-  if (c.t <= hf) {
+  let x, z; // s = 0 at the entry edge, 1 at the exit edge
+  const s = Math.max(0, Math.min(1, c.t / (hf + ht)));
+  if (shape && (shape.kind === 1 || shape.kind === 2)) {
+    const curve = curvePoints(c.from, c.to);
+    const want = s * curve.total;
+    let i = 1;
+    while (i < curve.pts.length - 1 && curve.cum[i] < want) i++;
+    const seg = curve.cum[i] - curve.cum[i - 1] || 1, k = (want - curve.cum[i - 1]) / seg;
+    const p0 = curve.pts[i - 1], p1 = curve.pts[i];
+    x = cx + p0[0] + (p1[0] - p0[0]) * k;
+    z = cz + p0[1] + (p1[1] - p0[1]) * k;
+  } else if (c.t <= hf) {
     const k = 1 - c.t / hf; // 1 at the entry edge, 0 at the centre
     x = cx + DX[c.from] * 0.5 * k;
     z = cz + DZ[c.from] * 0.5 * k;
@@ -77,7 +113,6 @@ export function pointAt(c, shape) {
     x = cx + DX[c.to] * 0.5 * k;
     z = cz + DZ[c.to] * 0.5 * k;
   }
-  s = c.t / (hf + ht);
   let y = c.y + RAIL_TOP;
   if (shape?.kind === 3) y += shape.up === c.to ? s : 1 - s;
   return { x, y, z };

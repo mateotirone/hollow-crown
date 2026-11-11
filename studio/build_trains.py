@@ -44,48 +44,146 @@ def cube(x, y, z, sx, sy, sz, mat):
     # (x, z) is the centre of the cube's footprint, y its bottom, all in pixels from the block centre
     return {"origin": [round(GX * x - sx / 2, 3), round(y, 3), round(z - sz / 2, 3)], "size": [sx, sy, sz], "uv": face(mat)}
 
-def half_segment(d, rise=None):
-    """Rails and sleepers from the block centre out to the edge (or corner) on side d.
-    rise: None for flat, else (y at centre, y at edge) in pixels."""
-    ux, uz = DX[d], DZ[d]
-    diag = d % 2 == 1
-    length = 8 * math.sqrt(2) if diag else 8
-    n = math.hypot(ux, uz); ux, uz = ux / n, uz / n
-    px, pz = -uz, ux  # across the track
-    y_at = (lambda s: 0) if rise is None else (lambda s: rise[0] + (rise[1] - rise[0]) * s / length)
+LIM = 15.5  # Bedrock keeps block models within about 15 pixels of the centre
+
+def rcube(p0, p1, w, h, y0, mat, y1=None, depth=0):
+    """A bar, split in two until every part (turned or not) stays inside the block model's limits."""
+    out = [_bar(p0, p1, w, h, y0, mat, y1)]
+    c = out[0]
+    if depth > 4 or all(-LIM <= c["origin"][k] and c["origin"][k] + c["size"][k] <= LIM for k in (0, 2)):
+        return out
+    y1_ = y0 if y1 is None else y1
+    m = ((p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2); ym = (y0 + y1_) / 2
+    return rcube(p0, m, w, h, y0, mat, ym, depth + 1) + rcube(m, p1, w, h, ym, mat, y1_, depth + 1)
+
+def _bar(p0, p1, w, h, y0, mat, y1=None):
+    """A bar of width w and height h from p0 to p1 ((x, z) in pixels from the block centre), turned to lie along
+    that line: one smooth piece instead of steps. y1: the far end's height, for a bar that climbs (slopes).
+    Each bar turns about one axis only (y for diagonals and curves, x or z for slopes), so the order Bedrock
+    applies rotations in never matters."""
+    (x0, z0), (x1, z1) = p0, p1
+    y1 = y0 if y1 is None else y1
+    dx, dz, dy = x1 - x0, z1 - z0, y1 - y0
+    mx, mz, my = (x0 + x1) / 2, (z0 + z1) / 2, (y0 + y1) / 2
+    pv = [round(GX * mx, 3), round(my, 3), round(mz, 3)]
+    box = lambda sx, sz: [round(GX * mx - sx / 2, 3), round(my - h / 2, 3), round(mz - sz / 2, 3)]
+    if abs(dx) < 1e-6 or abs(dz) < 1e-6:  # along z or along x
+        along_z = abs(dx) < 1e-6
+        flat = abs(dz) if along_z else abs(dx)
+        length = math.hypot(flat, dy)
+        sx, sz = (w, length) if along_z else (length, w)
+        c = {"origin": box(sx, sz), "size": [round(sx, 3), h, round(sz, 3)], "uv": face(mat)}
+        if abs(dy) > 1e-6:
+            if along_z:  # rotating about x by a: +z tips toward -y (right hand), so climbing toward +z is a negative angle
+                c["pivot"] = pv; c["rotation"] = [round(-math.degrees(math.atan2(dy * (1 if dz > 0 else -1), flat)), 3), 0, 0]
+            else:  # rotating about z by a: +x tips toward +y; mirrored with x
+                c["pivot"] = pv; c["rotation"] = [0, 0, round(GX * math.degrees(math.atan2(dy * (1 if dx > 0 else -1), flat)), 3)]
+        return c
+    assert abs(dy) < 1e-6, "only straight north/south/east/west bars may climb"
+    length = math.hypot(dx, dz)
+    yaw = math.degrees(math.atan2(dx, dz))  # turn about y so the bar's length (+z) points from p0 to p1
+    return {"origin": box(w, length), "size": [w, h, round(length, 3)], "uv": face(mat), "pivot": pv, "rotation": [0, round(GX * yaw, 3), 0]}
+
+def centreline(a, b, n=12):
+    """The middle of the track through a piece, from link a's edge to link b's edge, in pixels: a straight line, or for
+    a bend or corner a true circular arc (plus a short straight into a diagonal corner). Must match curvePoints() in
+    scripts/trains/track.js, which the trains follow."""
+    ua = (DX[a], DZ[a]); ub = (DX[b], DZ[b])
+    A = (8 * ua[0], 8 * ua[1]); B = (8 * ub[0], 8 * ub[1])
+    if (a + 4) % 8 == b:
+        return [A, B]
+    na, nb = math.hypot(*ua), math.hypot(*ub)
+    ua = (ua[0] / na, ua[1] / na); ub = (ub[0] / nb, ub[1] / nb)
+    between = math.acos(max(-1, min(1, ua[0] * ub[0] + ua[1] * ub[1])))
+    turn = math.pi - between
+    L = 8.0
+    r = L / math.tan(turn / 2)
+    bis = (ua[0] + ub[0], ua[1] + ub[1]); nb_ = math.hypot(*bis); bis = (bis[0] / nb_, bis[1] / nb_)
+    d = math.hypot(L, r)
+    C = (bis[0] * d, bis[1] * d)
+    Ta = (ua[0] * L, ua[1] * L); Tb = (ub[0] * L, ub[1] * L)
+    a0 = math.atan2(Ta[1] - C[1], Ta[0] - C[0]); a1 = math.atan2(Tb[1] - C[1], Tb[0] - C[0])
+    da = (a1 - a0 + math.pi) % (2 * math.pi) - math.pi
+    pts = [A] if A != Ta else []
+    pts += [(C[0] + r * math.cos(a0 + da * k / n), C[1] + r * math.sin(a0 + da * k / n)) for k in range(n + 1)]
+    if B != Tb:
+        pts.append(B)
+    return pts, r
+
+def offset(pts, side):
+    out = []
+    for i, p in enumerate(pts):
+        q0, q1 = pts[max(0, i - 1)], pts[min(len(pts) - 1, i + 1)]
+        tx, tz = q1[0] - q0[0], q1[1] - q0[1]; n = math.hypot(tx, tz)
+        out.append((p[0] - tz / n * side, p[1] + tx / n * side))
+    return out
+
+def along(pts, step, start):
+    """Points every `step` pixels along a polyline, with their direction: [((x, z), (tx, tz))]"""
+    seg = [math.hypot(pts[i + 1][0] - pts[i][0], pts[i + 1][1] - pts[i][1]) for i in range(len(pts) - 1)]
+    total = sum(seg); out = []; s = start
+    while s < total - 0.5:
+        k, acc = 0, 0
+        while acc + seg[k] < s: acc += seg[k]; k += 1
+        t = (s - acc) / seg[k]
+        (x0, z0), (x1, z1) = pts[k], pts[k + 1]
+        out.append(((x0 + (x1 - x0) * t, z0 + (z1 - z0) * t), ((x1 - x0) / seg[k], (z1 - z0) / seg[k])))
+        s += step
+    return out, total
+
+def piece(a, b, kind):
+    """Rails and sleepers for a flat piece joining links a and b."""
+    got = centreline(a, b)
+    pts, r = (got, None) if isinstance(got, list) else got
     cubes = []
-    # sleepers
-    for s in ((2.5, 7.0) if diag else (2.0, 6.0)):
-        reach = 11 if diag else 12
-        if diag:
-            steps = 9
-            for k in range(steps):
-                a = -reach + 2 * reach * k / (steps - 1)
-                cubes.append(cube(s * ux + a * px, y_at(s), s * uz + a * pz, 3, 2, 3, "sleeper"))
-        else:
-            sx, sz = (2 * reach, 3) if uz else (3, 2 * reach)
-            cubes.append(cube(s * ux, y_at(s), s * uz, sx, 2, sz, "sleeper"))
-    # rails
+    marks, total = along(pts, 5.0 if kind else (5.66 if a % 2 else 4.0), 2.5 if kind else (2.83 if a % 2 else 2.0))
+    for (x, z), (tx, tz) in marks:
+        nx, nz = -tz, tx
+        inner = outer = 11 if a % 2 and not kind else 12
+        if r is not None:
+            # which side is the inside of the turn: keep the sleepers from crossing over there
+            cx = sum(p[0] for p in pts) / len(pts); cz = sum(p[1] for p in pts) / len(pts)
+            inside = 1 if (cx - x) * nx + (cz - z) * nz < 0 else -1
+            if inside > 0: outer = min(outer, r - 0.5)
+            else: inner = min(inner, r - 0.5)
+        ok = lambda q: abs(q[0]) <= LIM - 1.5 and abs(q[1]) <= LIM - 1.5
+        while not ok((x - nx * inner, z - nz * inner)): inner -= 0.5
+        while not ok((x + nx * outer, z + nz * outer)): outer -= 0.5
+        cubes.extend(rcube((x - nx * inner, z - nz * inner), (x + nx * outer, z + nz * outer), 3, 2, 1, "sleeper"))
     for side in (-GAUGE, GAUGE):
-        if diag or rise is not None:
-            step = 1.5 if diag else 2.0
-            k = 0
-            while k * step < length + 0.01:
-                s = min(k * step + step / 2, length - step / 2)
-                cubes.append(cube(s * ux + side * px, RAIL_Y + y_at(s), s * uz + side * pz, 2, 2, 2, "rail"))
-                k += 1
-        else:
-            sx, sz = (2, length) if uz else (length, 2)
-            cubes.append(cube(length / 2 * ux + side * px, RAIL_Y, length / 2 * uz + side * pz, sx, 2, sz, "rail"))
+        rail = offset(pts, side)
+        for i in range(len(rail) - 1):
+            p0, p1 = rail[i], rail[i + 1]
+            ext = 0.25  # a little overlap so the joints don't show gaps
+            dx, dz = p1[0] - p0[0], p1[1] - p0[1]; n = math.hypot(dx, dz)
+            if n < 0.05: continue
+            ex, ez = dx / n * ext, dz / n * ext
+            cubes.extend(rcube((p0[0] - ex, p0[1] - ez), (p1[0] + ex, p1[1] + ez), 2, 2, RAIL_Y + 1, "rail"))
+    return cubes
+
+def slope(low, high):
+    """A slope: from link `low` at the floor to link `high` at the top of the block, one straight climb."""
+    A = (8 * DX[low], 8 * DZ[low]); B = (8 * DX[high], 8 * DZ[high])
+    ux, uz = (B[0] - A[0]) / 16, (B[1] - A[1]) / 16
+    nx, nz = -uz, ux
+    cubes = []
+    for s in (2, 6, 10, 14):
+        x, z = A[0] + ux * s, A[1] + uz * s
+        cubes.extend(rcube((x - nx * 12, z - nz * 12), (x + nx * 12, z + nz * 12), 3, 2, s + 1, "sleeper"))
+    for side in (-GAUGE, GAUGE):
+        p0 = (A[0] + nx * side, A[1] + nz * side); p1 = (B[0] + nx * side, B[1] + nz * side)
+        cubes.extend(rcube(p0, p1, 2, 2, RAIL_Y + 1, "rail", y1=RAIL_Y + 17))
     return cubes
 
 geos = []
 for kind, dirn, (a, b), up in SHAPES:
     cubes = []
     if kind == 3:  # slope: a = low end (floor), b = high end (top of the block)
-        cubes += half_segment(a, rise=(8, 0)) + half_segment(b, rise=(8, 16))
+        cubes += slope(a, b)
     else:
-        cubes += half_segment(a) + half_segment(b)
+        cubes += piece(a, b, kind)
+    for c in cubes:  # every part's own box stays inside the limits (rcube splits long bars)
+        assert all(-LIM - 0.01 <= c["origin"][k] and c["origin"][k] + c["size"][k] <= LIM + 0.01 for k in (0, 2)), (kind, dirn, c)
     geos.append({"description": {"identifier": f"geometry.siege_track_{kind}_{dirn}", "texture_width": 16, "texture_height": 16},
                  "bones": [{"name": "track", "pivot": [0, 0, 0], "cubes": cubes}]})
 with open(RP + "models/blocks/track.geo.json", "w") as f:  # one line per shape: 20 shapes of many small cubes

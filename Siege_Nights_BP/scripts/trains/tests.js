@@ -2,7 +2,7 @@
 
 import { BlockTypes, EntityTypes, ItemTypes } from "@minecraft/server";
 import { addTests, assert, assertEqual } from "../siege/api.js";
-import { SHAPES, layTrack, cursorOn, advance, back, pointAt, follow, KINDS } from "./track.js";
+import { SHAPES, layTrack, cursorOn, advance, back, pointAt, follow, KINDS, curvePoints } from "./track.js";
 import { stageFor, stationPlan, siteFor, lineBlocks, rightOf, STAGES, STATION } from "./stations.js";
 import { TRACK, CARS, TRAIN, carPoses, trainLength, stepSpeed, moveTrain, limitAhead, shapesForLoop, showcaseLoop } from "./data.js";
 
@@ -124,6 +124,17 @@ addTests("trains", {
     assert(!none.onTrack, "no track near");
     assertEqual(JSON.stringify([none.origin, none.forward]), JSON.stringify([{ x: 0, y: 64, z: 40 + STATION.noTrackBack }, { x: 0, z: -1 }]));
     assertEqual(JSON.stringify(rightOf({ x: 0, z: 1 })), JSON.stringify({ x: -1, z: 0 }));
+  },
+  "corners and bends are curves: the wheels follow an arc from edge to edge": () => {
+    const near = (a, b) => Math.abs(a - b) < 1e-6;
+    const c = curvePoints(0, 2); // north edge round to east edge
+    assert(near(c.pts[0][0], 0) && near(c.pts[0][1], -0.5) && near(c.pts.at(-1)[0], 0.5), "starts and ends on the edges");
+    for (const [x, z] of c.pts) assert(Math.abs(Math.hypot(x - 0.5, z + 0.5) - 0.5) < 1e-6, "round the inside corner");
+    const corner = SHAPES.find((s) => s.kind === 2 && s.links.includes(0) && s.links.includes(2));
+    const mid = pointAt({ x: 0, y: 0, z: 0, from: 0, to: 2, t: 0.5 }, corner);
+    assert(Math.hypot(mid.x - 0.5, mid.z - 0.5) > 0.1, "cuts the corner instead of passing the block centre");
+    const bend = curvePoints(0, 3);
+    assert(near(bend.pts.at(-1)[0], 0.5) && near(bend.pts.at(-1)[1], 0.5), "a bend ends in the diagonal corner");
   },
   "the pack has the track, the trains and their parts": () => {
     assert(BlockTypes.get(TRACK), TRACK);
