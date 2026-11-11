@@ -87,12 +87,12 @@ def variant(v):
     pal = v["groundwork"]["palette"]
     assert len(pal) <= len(CHARS), "palette too long"
     return {
-        "template": v["template"], "label": v["label"],
+        "template": v["template"], "label": v["label"], "charter": v.get("passes_charter", True),
         "square": v["square"]["centre"],
         "hall": [h["box"] for h in v["hall"]],
         "rings": [[r["radius"], TIER[r["opensAt"]]] for r in v["rings"]],
         "slots": [[s["id"], SIZE[s["size"]], *s["box"], s["floor_y"] - base, s["door"]["side"], s["door"]["step"],
-                   [[w[0], w[1], w[2] - base] for w in s["door"]["walk"]], TIER[s["opensAt"]], s["tags"]] for s in v["slots"]],
+                   [[w[0], w[1], w[2] - base] for w in s["door"]["walk"]], TIER[s["opensAt"]], s["tags"], bool(s.get("long"))] for s in v["slots"]],
         "fields": [[*f["centre"], TIER[f["opensAt"]], f["area_by_tier"]] for f in v["fields"]],
         "fix": [fixture(f, base) for f in v["fixtures"]],
         "pal": [bedrock(n, s) for n, s in pal],

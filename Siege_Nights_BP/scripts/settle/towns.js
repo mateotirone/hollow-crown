@@ -6,7 +6,7 @@
 //
 //   townFor(plotName) -> the plot's entry, or undefined (the twelve map plots have one)
 //   pickLayout(town, seed) -> layout index
-//   slotsOf(layout) -> [{ id, size, box: {x0, z0, x1, z1}, dy, side, door: {x, z}, step, walk, tier, tags }]
+//   slotsOf(layout) -> [{ id, size, box: {x0, z0, x1, z1}, dy, side, door: {x, z}, step, walk, tier, tags, long }]
 //   groundwork(layout, tier) -> [[dx, dy, dz, paletteIndex], ...] for that tier only
 //   seatOnSlot(slot, bounds) -> { origin: {dx, dy, dz}, forward } | undefined   where a design fits on a slot
 
@@ -19,21 +19,24 @@ const DOOR = { n: { x: 0, z: -1 }, s: { x: 0, z: 1 }, e: { x: 1, z: 0 }, w: { x:
 export const townFor = (plotName) => (plotName ? TOWNS[String(plotName).toLowerCase()] : undefined);
 export const townNames = () => Object.keys(TOWNS);
 
-// A settlement keeps the layout it was given, so the pick only has to be spread out, not secret
+// A settlement keeps the layout it was given, so the pick only has to be spread out, not secret. Only layouts that
+// pass the tier charters are picked (any layout when none do).
 export function pickLayout(town, seed) {
-  const n = town?.variants?.length ?? 0;
-  if (!n) return -1;
+  const all = (town?.variants ?? []).map((v, i) => i);
+  if (!all.length) return -1;
+  const ok = all.filter((i) => town.variants[i].charter !== false);
+  const from = ok.length ? ok : all;
   let h = 2166136261;
   for (const c of String(seed)) h = Math.imul(h ^ c.charCodeAt(0), 16777619);
-  return (h >>> 0) % n;
+  return from[(h >>> 0) % from.length];
 }
 
 export const wallRadius = (town, tier) => town?.walls?.[Math.max(0, Math.min(3, tier))] ?? 56;
 
 export function slotsOf(layout) {
-  return (layout?.slots ?? []).map(([id, size, x0, z0, x1, z1, dy, side, step, walk, tier, tags]) => ({
+  return (layout?.slots ?? []).map(([id, size, x0, z0, x1, z1, dy, side, step, walk, tier, tags, long]) => ({
     id, size, box: { x0, z0, x1, z1 }, dy, side, door: DOOR[side], step: { x: step[0], z: step[1] },
-    walk: walk.map(([x, z, wy]) => ({ x, z, dy: wy })), tier, tags,
+    walk: walk.map(([x, z, wy]) => ({ x, z, dy: wy })), tier, tags, long: !!long,
   }));
 }
 

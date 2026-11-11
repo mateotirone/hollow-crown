@@ -205,12 +205,12 @@ on("settleBuilt", ({ owner, slotId }) => {
   }
 });
 
-// Every town starts with its library (the lore feature stocks it from settleBuilt): on the square if it fits there
+// Every town starts with its library (the lore feature stocks it from settleBuilt): on the slot tagged for it, else the square
 on("townLaidOut", ({ owner, tier }) => {
   const town = townOf(owner);
   if (tier !== 0 || !town || !BUILDING.library || Object.values(town.slots).some((s) => s.building === "library")) return;
   const slots = slotsOf(layoutOf(town)).filter((s) => s.tier === 0 && !town.slots[s.id]?.building && seatInWorld(owner, s, "library"));
-  const slot = slots.find((s) => s.tags.includes("square")) ?? slots[0];
+  const slot = slots.find((s) => s.tags.includes("library")) ?? slots.find((s) => s.tags.includes("square")) ?? slots[0];
   if (!slot) return;
   const seat = seatInWorld(owner, slot, "library");
   clearMarker(owner, slot);

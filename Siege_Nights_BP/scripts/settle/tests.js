@@ -296,13 +296,18 @@ addTests("settle towns", {
       assert(townFor(town.name) === town, key);
     }
   },
-  "a settlement keeps its layout pick, and picks are spread over all three": () => {
+  "a settlement keeps its layout pick, and picks are spread over the layouts that pass the charters": () => {
     const town = townFor("Dunehold");
     assertEqual(pickLayout(town, "player-1:Dunehold"), pickLayout(town, "player-1:Dunehold"));
+    const passing = town.variants.filter((v) => v.charter !== false).length || town.variants.length;
     const seen = new Set();
     for (let i = 0; i < 60; i++) seen.add(pickLayout(town, `p${i}:Dunehold`));
-    assertEqual(seen.size, 3);
+    assertEqual(seen.size, passing);
     assertEqual(pickLayout(undefined, "x"), -1);
+    const fake = { variants: [{ charter: false }, { charter: true }, { charter: false }] };
+    for (let i = 0; i < 20; i++) assertEqual(pickLayout(fake, `p${i}`), 1);
+    const none = { variants: [{ charter: false }, { charter: false }] };
+    assert([0, 1].includes(pickLayout(none, "x")));
   },
   "groundwork decodes into rows near the plot, in each tier": () => {
     for (const [key, town] of Object.entries(TOWNS)) {
