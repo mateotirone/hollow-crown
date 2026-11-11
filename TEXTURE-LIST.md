@@ -353,7 +353,7 @@ Add a row here with the file path, size, what it should look like, and whether i
 | Pretender, seer body (hooded robe, shards hanging round the head, staff) | `textures/entity/siege/bestiary/pretender_seer.png` | **Final style, awaiting your review** (`studio/art/build_pretenders.py`) |
 | Pretender, brute body (huge, horned, stone on the shoulders, axe) | `textures/entity/siege/bestiary/pretender_brute.png` | **Final style, awaiting your review** (`studio/art/build_pretenders.py`) |
 | Claimant's Seal (item: a wax seal pressed with a crooked crown, violet) | `textures/items/bestiary/pretender_seal.png` | **Final style, awaiting your review** (`studio/art/build_pretenders.py`) |
-| Choirsteel Helm (item icon: open-faced helm, pale violet metal, one blue gem on the brow) | `textures/items/siege_choirsteel_helmet.png` | **Final style, awaiting your review** (`studio/art/build_choirsteel.py`) |
+| Choirsteel Helm (item icon: open-faced helm, dark purple metal since 2026-11-11 via `studio/art/darken_choirsteel.py`, one blue gem on the brow) | `textures/items/siege_choirsteel_helmet.png` | **Final style, awaiting your review** (`studio/art/build_choirsteel.py`) |
 | Choirsteel Cuirass (item icon: breastplate with a blue gem at the heart) | `textures/items/siege_choirsteel_chestplate.png` | **Final style, awaiting your review** (`studio/art/build_choirsteel.py`) |
 | Choirsteel Greaves (item icon: leg plates) | `textures/items/siege_choirsteel_leggings.png` | **Final style, awaiting your review** (`studio/art/build_choirsteel.py`) |
 | Choirsteel Treads (item icon: boots with a quill-blue band) | `textures/items/siege_choirsteel_boots.png` | **Final style, awaiting your review** (`studio/art/build_choirsteel.py`) |
