@@ -4,8 +4,8 @@
   {
    "description": {
     "identifier": "geometry.siege_choirsteel_chestplate",
-    "texture_width": 128,
-    "texture_height": 64,
+    "texture_width": 64,
+    "texture_height": 32,
     "visible_bounds_width": 3,
     "visible_bounds_height": 3,
     "visible_bounds_offset": [
@@ -79,8 +79,8 @@
         7
        ],
        "uv": [
-        64,
-        16
+        32,
+        0
        ]
       },
       {
@@ -95,8 +95,8 @@
         1
        ],
        "uv": [
-        92,
-        16
+        36,
+        10
        ]
       }
      ]
@@ -139,8 +139,8 @@
         7
        ],
        "uv": [
-        64,
-        16
+        32,
+        0
        ],
        "mirror": true
       },
@@ -156,8 +156,8 @@
         1
        ],
        "uv": [
-        92,
-        16
+        36,
+        10
        ],
        "mirror": true
       }
