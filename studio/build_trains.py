@@ -23,9 +23,10 @@ def save_png(path, img):
         img.save(path)
 
 # ================================================================ the Track
-# Directions 0 N .. 7 NW. Minecraft north is -z, east is +x. Block geometry uses the same axes here
-# (GX = 1). If diagonal pieces look mirrored in game, set GX = -1 and run again.
-GX = 1
+# Directions 0 N .. 7 NW. Minecraft north is -z, east is +x. Block geometry's x runs the other way (east is -x
+# in the model), so every x is written as GX * x. Playtest 2026-11-11: with GX = 1 diagonals lay across the line,
+# bends turned the wrong way and slopes climbed backwards.
+GX = -1
 DX = [0, 1, 1, 1, 0, -1, -1, -1]; DZ = [-1, -1, 0, 1, 1, 1, 0, -1]
 SHAPES = []
 for d in range(4): SHAPES.append((0, d, (d, d + 4), None))
@@ -74,10 +75,13 @@ def _bar(p0, p1, w, h, y0, mat, y1=None):
         sx, sz = (w, length) if along_z else (length, w)
         c = {"origin": box(sx, sz), "size": [round(sx, 3), h, round(sz, 3)], "uv": face(mat)}
         if abs(dy) > 1e-6:
-            if along_z:  # rotating about x by a: +z tips toward -y (right hand), so climbing toward +z is a negative angle
-                c["pivot"] = pv; c["rotation"] = [round(-math.degrees(math.atan2(dy * (1 if dz > 0 else -1), flat)), 3), 0, 0]
-            else:  # rotating about z by a: +x tips toward +y; mirrored with x
-                c["pivot"] = pv; c["rotation"] = [0, 0, round(GX * math.degrees(math.atan2(dy * (1 if dx > 0 else -1), flat)), 3)]
+            # Bedrock turns the opposite way to the right-hand rule about x and z (Blockbench shows a Bedrock rotation
+            # (rx, ry, rz) as (-rx, -ry, rz) with x mirrored), and the same way about y. Playtest 2026-11-11: with the
+            # right-hand signs the slope rails climbed the wrong way.
+            if along_z:  # Bedrock rotation about x by a: +z tips toward +y, so climbing toward +z is a positive angle
+                c["pivot"] = pv; c["rotation"] = [round(math.degrees(math.atan2(dy * (1 if dz > 0 else -1), flat)), 3), 0, 0]
+            else:  # Bedrock rotation about z by a: +x tips toward -y, so climbing toward +x is a negative angle
+                c["pivot"] = pv; c["rotation"] = [0, 0, round(-GX * math.degrees(math.atan2(dy * (1 if dx > 0 else -1), flat)), 3)]
         return c
     assert abs(dy) < 1e-6, "only straight north/south/east/west bars may climb"
     length = math.hypot(dx, dz)
