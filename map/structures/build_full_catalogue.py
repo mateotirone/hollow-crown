@@ -11,7 +11,7 @@ import os, sys, json, base64, argparse, subprocess
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE); sys.path.insert(0, os.path.join(HERE, "render"))
 from bp import Blueprint
 from mesher import Mesher
-import vale_civic, settle_halls, settle_buildings, hollow_kit, capital
+import vale_civic, settle_halls, settle_buildings, hollow_kit, capital, stations
 from build_catalogue import DESIGNS, STYLE_NAMES
 
 REGION_GROUND = {"vale": ("grass_block", "dirt"), "frostmarch": ("snow", "dirt"), "saltreach": ("sand", "sandstone"),
@@ -128,6 +128,19 @@ def main():
                                       ("barracks", "Barracks", "The guardhouse: a two-storey hall for the guard with a crenellated watch tower."),
                                       ("quartermaster", "Quartermaster's armoury", "A small strong store with a serving hatch under an awning, smithing table and anvil inside.")):
                 add(sec, f"bld-{rid}-{bid}", title, r["name"], blurb, (lambda f=settle_buildings.BLOCK_BUILDERS[bid], r=rid: f(r)), g, extra={"group": "Plot buildings"})
+
+        if rid in stations.REGIONS:   # the railway station on the plot (or the Rail Depot), at each settlement tier
+            for st, title, blurb in (("halt", "Halt (Hamlet)", "A waiting shelter with its gable to the line, a ticket counter, a bench and a hitching rail."),
+                                     ("station", "Station (Town)", "A booking hall along the platform with a centre gable, a long canopy, a parcels corner and stalls."),
+                                     ("junction", "Junction (City)", "A two-storey hall with a clock tower on the platform, a stable wing and a parcels wing."),
+                                     ("grand", "Grand Station (Castle)", "An arched glass train shed over both lines, a tall centre pavilion and twin clock towers.")):
+                add(sec, f"stn-{rid}-{st}", title, r["name"], blurb, (lambda f=stations.STAGE_BUILDERS[st], r=rid: f(r)), g, extra={"group": "Railway station"})
+            for st in ("halt", "junction"):
+                add(sec, f"stn-{rid}-trade_{st}", f"Trade House ({'small' if st == 'halt' else 'two storeys'})", r["name"],
+                    "The goods wing added behind the station: a counter under a striped awning on the street side.",
+                    (lambda r=rid, st=st: stations.trade_house(r, st)), g, extra={"group": "Railway station"})
+            add(sec, f"stn-{rid}-engine_shed", "Engine shed", r["name"], "Beside the line at a Junction: open ends, room for an engine and a coach, smoke stacks on the ridge.",
+                (lambda r=rid: stations.engine_shed(r)), g, extra={"group": "Railway station"})
 
     # ---- 3. Walls: ten levels, each region's stone ----
     sec = {"id": "walls", "title": "Settlement walls", "blurb": "The ring wall raised round every plot, upgraded at the town hall. Shown here: the stretch round the gate.", "cards": []}

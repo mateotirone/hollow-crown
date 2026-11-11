@@ -7,7 +7,7 @@ command per build) and builds.json. Builds wider than 64 blocks are cut into 64 
 its own command, so they also load through a structure block.
 Loading: stand on the ground where the build's middle (or its door) should be and paste the command.
 """
-import os, re, json, uuid
+import time, os, re, json, uuid
 from bp import Blueprint
 
 TILE = 64
@@ -46,9 +46,10 @@ def write_all(structures, out):
         rows.append(f"- **{card['title']}** ({card.get('sub', '')}), {hi[0] - lo[0] + 1} x {hi[2] - lo[2] + 1}, {hi[1] - lo[1] + 1} tall\n" +
                     "".join(f"  `{c}`\n" for c in cmds))
         print("wrote", name, len(cmds), "file(s)", flush=True)
+    ver = [1, len(structures), int(time.time() // 600) % 100000]   # every export gets its own version, so worlds pick up the new pack
     man = {"format_version": 2, "header": {"name": "Hollow Crown builds", "description": "Every building from the catalogue, as structures to load with /structure load hcb:<name>.",
-           "uuid": str(uuid.uuid5(uuid.NAMESPACE_URL, "hollow-crown-builds-pack")), "version": [1, 0, 0], "min_engine_version": [1, 21, 0]},
-           "modules": [{"type": "data", "uuid": str(uuid.uuid5(uuid.NAMESPACE_URL, "hollow-crown-builds-data")), "version": [1, 0, 0]}]}
+           "uuid": str(uuid.uuid5(uuid.NAMESPACE_URL, "hollow-crown-builds-pack")), "version": ver, "min_engine_version": [1, 21, 0]},
+           "modules": [{"type": "data", "uuid": str(uuid.uuid5(uuid.NAMESPACE_URL, "hollow-crown-builds-data")), "version": ver}]}
     json.dump(man, open(os.path.join(out, "pack", "manifest.json"), "w"), indent=1)
     json.dump(index, open(os.path.join(out, "builds.json"), "w"), indent=1)
     open(os.path.join(out, "BUILDS.md"), "w").write(
