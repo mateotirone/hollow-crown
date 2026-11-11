@@ -112,6 +112,11 @@ const desc = client["minecraft:client_entity"].description;
 const slots = Math.max(...looks.map((l) => l.n));
 const texKey = (n) => `hc_look_${n}`;
 for (let n = 1; n <= slots; n++) desc.textures[texKey(n)] = `textures/entity/looks/${(looks.find((l) => l.n === n) ?? looks[0]).id}`;
+// Newer vanilla player animation controllers read variable.melee_spear_equipped (spears). Our copied player entity
+// doesn't set it, which logs "unknown variable" errors on every swing; start it at 0 so the controllers resolve.
+const init = (client["minecraft:client_entity"].description.scripts.initialize ??= []);
+if (!init.some((l) => l.includes("melee_spear_equipped"))) init.push("variable.melee_spear_equipped = 0.0;");
+desc.scripts.variables["variable.melee_spear_equipped"] = "public";
 desc.geometry.hc_look = "geometry.humanoid.custom"; // the plain wide-arm player model, whatever the player's own skin uses
 const SWAP = ["first_person", "third_person", "map"];
 desc.render_controllers = desc.render_controllers.flatMap((entry) => {
