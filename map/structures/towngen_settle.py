@@ -20,8 +20,8 @@ a growing settlement adds (worked out with the building-placement thread, 2026-1
   * Slots are odd boxes: Small 7, Medium 11, Large 15, Great 21 (the long side may be 2 more),
     each with an absolute floor height, door side, walkway down to the road, tags and the tier
     that opens it. Fields are whole portions with no slots; they grow with the wall.
-  * Minimum slots, cumulative: Hamlet 4 S 1 M; Town 8 S 4 M 1 L and a field; City 12 S 7 M 2 L;
-    Castle 16 S 9 M 3 L 1 Great. A seed that misses them is thrown away and the next one tried.
+  * Minimum slots, cumulative: Hamlet 4 S 1 M; Town 7 S 3 M 1 L and a field; City 10 S 6 M 2 L;
+    Castle 13 S 8 M 3 L (a Great is a bonus). A seed that misses them is thrown away and the next one tried.
 
 Templates are data (TEMPLATES below): which ring arcs become roads, the radial streets, the shape
 of the square, how much land is farmed. Everything else is read off the ground.
@@ -42,8 +42,8 @@ WALL_R = [32, 40, 48, 56]                       # wall ring (outer face) per tie
 CLEAR = 3                                       # a slot's far corner stays this far inside the wall line
 SIZES = {"S": 7, "M": 11, "L": 15, "G": 21}
 SIZE_NAME = {"S": "Small", "M": "Medium", "L": "Large", "G": "Great"}
-MINIMUM = [dict(S=4, M=1, L=0, G=0, field=0), dict(S=8, M=4, L=1, G=0, field=1),
-           dict(S=12, M=7, L=2, G=0, field=1), dict(S=16, M=9, L=3, G=1, field=1)]
+MINIMUM = [dict(S=4, M=1, L=0, G=0, field=0), dict(S=7, M=3, L=1, G=0, field=1),      # agreed with the placement
+           dict(S=10, M=6, L=2, G=0, field=1), dict(S=13, M=8, L=3, G=0, field=1)]     # thread 2026-11-11; Great optional
 HALL_AT = {"Hamlet": 1, "Town": 2, "City": 3, "Castle": 4}   # hall level per tier (5 = Sovereign, reserved anyway)
 CORNERSTONE_AHEAD = 5
 MASON = (6, -5)                                  # (right, ahead) of the Mason's Bench
@@ -66,19 +66,19 @@ HALL_CLEAR = 2
 TEMPLATES = {
     "crossroads": dict(label="Crossroads",
                        about="A cross street through the square out to the wall, a ring lane on the old Hamlet wall line round the front, side streets beyond it.",
-                       rings=[(32, -140, 140)],
+                       rings=[(32, -75, 75)],
                        radials=[(90, 8, 54), (-90, 8, 54), (40, 8, 32), (-40, 8, 32), (40, 32, 54), (-40, 32, 54), (135, 32, 54), (-135, 32, 54)],
-                       square="round", field_share=0.2),
+                       square="round", field_share=0.1),
     "twin_rings": dict(label="Twin Rings",
                        about="Both old wall lines (r32, r48) become ring lanes; streets from the square out to the first ring, staggered cross streets between the rings.",
                        rings=[(32, -175, 175), (48, -115, 115)],
                        radials=[(60, 8, 32), (-60, 8, 32), (120, 8, 32), (-120, 8, 32), (30, 32, 48), (-30, 32, 48), (95, 32, 48), (-95, 32, 48), (150, 32, 54), (-150, 32, 54)],
-                       square="round", field_share=0.22),
+                       square="round", field_share=0.1),
     "market_street": dict(label="Market Street",
                           about="A long market runs from the square toward the gate; diagonal streets fan out from it to the outer ring.",
                           rings=[(48, -150, 150)],
-                          radials=[(50, 8, 48), (-50, 8, 48), (115, 8, 48), (-115, 8, 48), (20, 20, 48), (-20, 20, 48), (85, 30, 48), (-85, 30, 48)],
-                          square="long", field_share=0.22),
+                          radials=[(50, 8, 48), (-50, 8, 48), (115, 8, 54), (-115, 8, 54), (20, 20, 54), (-20, 20, 54), (85, 30, 48), (-85, 30, 48), (160, 40, 54), (-160, 40, 54)],
+                          square="long", field_share=0.1),
 }
 
 
@@ -210,7 +210,7 @@ class Settlement(Town):
                             self.RID[self.ij(cx, cz)] = n
 
 
-    def subdivide(self, max_area=900, min_width=32):
+    def subdivide(self, max_area=900, min_width=42):
         """Build portions too big to fill from their edges get a lane through the middle, across
         their long axis, from road to road (or to the wall). Repeats until none is too big."""
         tried = set()
@@ -258,6 +258,45 @@ class Settlement(Town):
             self.port_area = None
             if not done: break
 
+    BACK = 10                    # a back footpath runs this far in from a deep portion's edge
+    def back_paths(self):
+        """Second rows (agreed with the placement thread): in a build portion deep enough to hold a
+        row facing the street, a 1-wide footpath, a second row facing that, and still an open middle
+        at least 5 blocks across, a footpath loops round inside the first row and is joined to the
+        street. Shallower portions keep one row and an open middle."""
+        need = self.BACK + 1 + SIZES["S"] + 1 + 3
+        for L, p in list(self.port.items()):
+            if p["kind"] != "build": continue
+            m = self.PORT == L
+            d = np.zeros(m.shape, np.int16); cur = m.copy(); k = 0
+            while cur.any():
+                k += 1; d[cur] = k
+                nxt = cur.copy()
+                for sh in ((1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)): nxt &= np.roll(cur, sh, (0, 1))
+                cur = nxt
+            if d.max() < need: continue
+            ring = np.argwhere(m & (d == self.BACK) & (self.TAKEN < 2))
+            if len(ring) < 20: continue
+            c = ring.mean(0)
+            order = sorted(ring.tolist(), key=lambda q: math.atan2(q[1] - c[1], q[0] - c[0]))
+            segs = [[order[0]]]
+            for q in order[1:]:
+                if max(abs(q[0] - segs[-1][-1][0]), abs(q[1] - segs[-1][-1][1])) > 2: segs.append([q])
+                else: segs[-1].append(q)
+            if len(segs) > 1 and max(abs(segs[0][0][0] - segs[-1][-1][0]), abs(segs[0][0][1] - segs[-1][-1][1])) <= 2:
+                segs[0] = segs.pop() + segs[0]
+            for sg in segs:
+                if len(sg) < 12: continue
+                loop = len(segs) == 1
+                pts = [(a + self.X0, b + self.Z0) for a, b in sg] + ([(sg[0][0] + self.X0, sg[0][1] + self.Z0)] if loop else [])
+                rd = self.lay(pts, "walk")
+                if not rd: continue
+                rd["back"] = True
+                for a in (pts[len(pts) // 4], pts[3 * len(pts) // 4]) if loop else (pts[len(pts) // 2],):
+                    q = self.nearest_street(*a)
+                    if q: self.footpath(a, q)
+        self.relax()
+
     def road_tiers(self):
         """The tier each path cell opens: the approach through the gates is there from the start,
         a ring lane opens once the wall has moved off its line, anything else once it is inside the wall."""
@@ -279,9 +318,11 @@ class Settlement(Town):
         hall_near = self._dilate(self.HALL, 4)
         land = sum(p["area"] for p in self.port.values())
         for p in self.port.values(): p["kind"] = "build"
-        cand = []
+        cand = []; spare = []
         for L, p in self.port.items():
             m = self.PORT == L
+            if p["area"] >= 200 and (m & (self.D <= WALL_R[0] - CLEAR)).sum() <= 0.25 * p["area"]:
+                spare.append((int((m & (self.D <= WALL_R[1] - CLEAR)).sum()) - 4 * int((m & hall_near).sum()), p["area"], L))
             if p["area"] < 220 or (m & hall_near).any(): continue
             if (m & (self.D <= WALL_R[0] - CLEAR)).sum() > 0.25 * p["area"]: continue   # Hamlet ground is for building
             g = self.G[m]
@@ -296,6 +337,9 @@ class Settlement(Town):
         for town, area, L in cand:
             if got >= self.tpl["field_share"] * land: break
             self.port[L]["kind"] = "field"; got += area
+        if not got and spare:                                   # every layout gets a field (the Farmhouse needs one)
+            L = min(spare, key=lambda t: abs(t[1] - self.tpl["field_share"] * land) - 2 * min(t[0], 120))[2]
+            self.port[L]["kind"] = "field"
         self.PKIND = np.zeros(self.G.shape, np.int8)
         for L, p in self.port.items(): self.PKIND[self.PORT == L] = 1 if p["kind"] == "build" else 2
 
@@ -369,14 +413,18 @@ class Settlement(Town):
         far = lambda c: -math.hypot(c[0][0] - self.C[0], c[0][1] - self.C[1]) + 6 * self.rng.random()
         near_sq = lambda c: math.hypot(c[0][0] - self.sq[0], c[0][1] - self.sq[1]) + 4 * self.rng.random()
         hamlet = lambda c: math.hypot(c[0][0] - self.sq[0], c[0][1] - self.sq[1]) + 3 * self.rng.random()
-        pass_("M", 0, 1, hamlet)                       # Hamlet first: its ground is the smallest
+        # inner tiers first (their ground is smallest), biggest boxes first within each
+        pass_("M", 0, 1, hamlet)
         pass_("S", 0, 5, hamlet)
-        pass_("G", 3, 1, far)                          # the biggest boxes next, while the land is open
         pass_("L", 1, 1, near_sq)
-        pass_("L", 3, 2 + (self.rng.random() < 0.4), far)
-        pass_("M", 1, 3, near_sq)                      # Town
+        pass_("M", 1, 3, near_sq)
         pass_("S", 1, 4, near_sq)
-        pass_("M", 3, 5 + self.rng.randint(0, 2))
+        pass_("L", 2, 1, near_sq)                      # City gets its own batch
+        pass_("M", 2, 3, near_sq)
+        pass_("S", 2, 3, near_sq)
+        pass_("G", 3, 1, far)
+        pass_("L", 3, 2, far)
+        pass_("M", 3, 3 + self.rng.randint(0, 2))
         # then rows of Smalls (and the odd Medium) along every road, leaving the middles of portions free
         for n, rd in enumerate(self.roads):
             pts = rd["pts"]; hw = WIDTH[rd["kind"]] / 2.0
@@ -389,7 +437,7 @@ class Settlement(Town):
                     e = None
                     for sb in (1, 2, 3, 4):
                         door = (int(round(x + nx * (hw + 0.5 + sb))), int(round(z + nz * (hw + 0.5 + sb))))
-                        e = self.try_slot("M" if self.rng.random() < 0.15 else "S", (door, deg, n)) or self.try_slot("S", (door, deg, n))
+                        e = self.try_slot("M" if self.rng.random() < 0.3 else "S", (door, deg, n)) or self.try_slot("S", (door, deg, n))
                         if e: break
                     t += (SIZES[e["size"]] + 1) if e else 1
         self.relax()
@@ -494,6 +542,123 @@ class Settlement(Town):
         for e in [e for e in self.plan if e["kind"] == "windmill"]:
             self.fixtures.append({"name": "windmill", "stamp": e["stamp"], "at": [e["x"] - self.C[0], e["z"] - self.C[1]], "ground_y": e["ground_y"], "rotation": e["rotation"], "tier": None})
 
+    # ---- trees (agreed with the placement thread and Mateo, 2026-11-11)
+    # Species ids are map/trees/species.py cards; stamps are build_trees.py's "<id>/<id>_<size>_<n>".
+    TREES = {   # region arch -> role -> species
+        "vale":  {"avenue": ["vale_ash", "vale_great_oak"], "clump": ["vale_great_oak", "vale_silver_birch", "vale_ash"], "water": ["vale_weeping_willow"], "edge": ["vale_hawthorn", "vale_apple"]},
+        "frost": {"avenue": ["frost_tall_spruce"], "clump": ["frost_tall_spruce", "frost_scots_pine", "frost_snow_birch"], "water": ["frost_snow_birch"], "edge": ["frost_juniper"]},
+        "salt":  {"avenue": ["salt_italian_cypress"], "clump": ["salt_umbrella_pine", "salt_olive", "salt_sea_cypress"], "water": ["salt_tamarisk"], "edge": ["salt_olive"]},
+        "fen":   {"avenue": ["fen_black_alder"], "clump": ["fen_black_alder", "fen_pollard_willow"], "water": ["fen_bald_cypress"], "edge": ["fen_pollard_willow"]},
+        "ember": {"avenue": ["ember_date_palm"], "clump": ["ember_umbrella_acacia", "ember_argan"], "water": ["ember_date_palm"], "edge": ["ember_argan"]},
+    }
+    CROWN = [("ancient", 11), ("mature", 7), ("young", 4), ("sapling", 2)]    # crown radius each size needs clear
+    TREE_VARIANTS = 4
+
+    tree_index = None            # trees.json from map/trees/build_trees.py (PR #94); None = built-in sizes
+
+    def trees_db(self, never, rd1, nearw):
+        """The tree database placer (map/trees/place.py scatter): crowns clear of anything built (hard),
+        trunks off roads, fields and fixtures (soft), one call per role with the rest of the ground
+        made soft so only that role's zone gets trunks."""
+        if self.tree_src and self.tree_src not in sys.path: sys.path.insert(0, self.tree_src)
+        import place as TP
+        idx = self.tree_index; tab = self.TREES.get(self.arch, self.TREES["vale"])
+        hard = never.copy()
+        base_soft = (self.K >= 0) | (self.TAKEN == 3) | (self.TAKEN == 4) | (self.TAKEN == 1) | self.WET
+        crop = self.TAKEN == 3
+        av = np.zeros(self.G0.shape, bool)
+        m = self.KIND == PRIO["main"]
+        av = self._dilate(m, 4) & ~self._dilate(m, 1)
+        zones = {"avenue": (av, 0.0004), "water": (nearw, 0.0004), "edge": (self._dilate(crop, 2) & ~crop, 0.0005),
+                 "clump": (self.PKIND == 1, 0.0007)}
+        for role, (zone, dens) in zones.items():
+            sp = {k: 1.0 for k in tab[role] if k in idx["species"]}
+            if not sp or not zone.any(): continue
+            soft = base_soft | ~zone
+            for i, j, f, prof in TP.scatter(idx, sp, hard, soft, density=dens, seed=self.seed * 7 + len(role), tries=30000):
+                x, z = int(i) + self.X0, int(j) + self.Z0
+                tt = tier_of_radius(float(self.D[i, j]) + prof["crown_r"] + 1)
+                if tt is None: continue
+                c = max(1, prof["crown_r"] - 2); hard[max(0, i - c):i + c + 1, max(0, j - c):j + c + 1] = True
+                base_soft[max(0, i - 1):i + 2, max(0, j - 1):j + 2] = True
+                sid, size = f.split("/")[0], f.split("/")[1].split("_")[-2]
+                self.fixtures.append({"name": "tree", "role": role, "species": sid, "size": size, "stamp": f, "crown_r": prof["crown_r"],
+                                      "at": [x - self.C[0], z - self.C[1]], "ground_y": int(self.G[i, j]), "rotation": 0, "tier": tt})
+                self.TAKEN[i, j] = 4
+
+    def trees(self, fixed=()):
+        """Trees only where no slot at any tier, no walkway, road, wall line (+2) or hall level will
+        ever be: world trees are unbreakable, so they must never block a later plot. Size is picked
+        by the clear radius round the trunk. An avenue along the main street, small clumps in the
+        open middles of build portions, water trees by water, hedge trees on field edges.
+        `fixed` = existing (ancient) map trees as (x, z, radius): kept, and nothing grows over them."""
+        never = self.HALL | (self.TAKEN == 2) | self.EAVES | self.D53     # a crown inside the wall line of its tier also clears every later wall
+        road = self.K >= 0
+        # clear radius (chebyshev-ish, by dilation) from anything a tree may not overhang
+        far = np.full(self.G0.shape, 99, np.int16); cur = never.copy()
+        for r in range(0, 13):
+            far[cur & (far == 99)] = r
+            cur = self._dilate(cur, 1)
+        rd1 = self._dilate(road, 1)
+        if self.tree_index is not None:
+            for x, z, r in fixed:
+                i, j = self.ij(x, z); never[max(0, i - r):i + r + 1, max(0, j - r):j + r + 1] = True
+            return self.trees_db(never, rd1, self._dilate(self.WET, 3) & ~self.WET)
+        trunk_ok = ~never & ~road & (self.TAKEN == 0) & ~self.WET & (self.D <= self.LAND_R)
+        taken = np.zeros(self.G0.shape, bool)
+        tab = self.TREES.get(self.arch, self.TREES["vale"])
+        def put(x, z, role, max_size=None):
+            if not self.ok(x, z): return False
+            i, j = self.ij(x, z)
+            if not trunk_ok[i, j] or taken[i, j] or (role != "avenue" and rd1[i, j]): return False
+            r = int(far[i, j]) - 1
+            sizes = [c for c in self.CROWN if c[1] <= r and (max_size is None or c[1] <= max_size)]
+            if not sizes: return False
+            size, cr = sizes[0]
+            tt = tier_of_radius(float(self.D[i, j]) + cr)        # the whole crown inside the wall (with 2 clear) of its tier
+            if tt is None:
+                sizes = [c for c in sizes if tier_of_radius(float(self.D[i, j]) + c[1]) is not None]
+                if not sizes: return False
+                size, cr = sizes[0]; tt = tier_of_radius(float(self.D[i, j]) + cr)
+            sp = self.rng.choice(tab[role]); v = self.rng.randrange(self.TREE_VARIANTS)
+            self.fixtures.append({"name": "tree", "role": role, "species": sp, "size": size, "stamp": f"{sp}/{sp}_{size}_{v}",
+                                  "at": [x - self.C[0], z - self.C[1]], "ground_y": int(self.G[i, j]), "rotation": 0, "tier": tt})
+            k = max(2, cr // 2 + 1)
+            taken[max(0, i - k):i + k + 1, max(0, j - k):j + k + 1] = True
+            self.TAKEN[i, j] = 4
+            return True
+        for x, z, r in fixed:
+            i, j = self.ij(x, z); taken[max(0, i - r):i + r + 1, max(0, j - r):j + r + 1] = True
+        # avenue along the main street, alternating sides every 9 blocks
+        rd = self.main_rd; hw = WIDTH["main"] / 2.0
+        for t in range(4, len(rd["pts"]) - 2, 9):
+            (x0, z0), (x1, z1) = rd["pts"][t - 1], rd["pts"][t + 1]; x, z = rd["pts"][t]
+            d = math.hypot(x1 - x0, z1 - z0) or 1
+            for s in (1, -1):
+                for off in (1.5, 2.5, 3.5):
+                    if put(int(round(x - (z1 - z0) / d * (hw + off) * s)), int(round(z + (x1 - x0) / d * (hw + off) * s)), "avenue", 7): break
+        # water trees
+        nearw = self._dilate(self.WET, 3) & ~self.WET
+        for i, j in np.argwhere(nearw & trunk_ok)[::5]: put(int(i) + self.X0, int(j) + self.Z0, "water")
+        # field edges: a hedge tree every few blocks along the edge of the crops
+        crop = self.TAKEN == 3
+        edge = self._dilate(crop, 2) & ~crop
+        for n, (i, j) in enumerate(np.argwhere(edge & trunk_ok)):
+            if n % 7 == 0: put(int(i) + self.X0, int(j) + self.Z0, "edge", 4)
+        # clumps in the open middles of build portions
+        mids = np.argwhere(trunk_ok & (self.PKIND == 1) & (far >= 5))
+        self.rng.shuffle(mids := [tuple(m) for m in mids])
+        clumps = 0
+        for i, j in mids:
+            if clumps >= 4 + int(self.LAND_R // 12): break
+            if taken[i, j]: continue
+            x, z = int(i) + self.X0, int(j) + self.Z0
+            if not put(x, z, "clump"): continue
+            clumps += 1
+            for _ in range(self.rng.randint(1, 3)):
+                a = self.rng.random() * 6.283; r = self.rng.uniform(3, 5)
+                put(int(round(x + math.cos(a) * r)), int(round(z + math.sin(a) * r)), "clump", 4)
+
     def dress(self):
         mid = TG.TB.well(self.seed); self.stamp(mid, self.sq[0], self.sq[1], self.sqY, 0, "square")
         self.fixtures.append({"name": "well", "stamp": mid.name, "at": list(self.rel(*self.sq)), "ground_y": self.sqY, "rotation": 0, "tier": 0})
@@ -546,7 +711,7 @@ class Settlement(Town):
         self.square()
         self.streets(); self.relax(); self.grade_verges()
         self.portions()
-        self.subdivide(); self.grade_verges()
+        self.subdivide(); self.back_paths(); self.grade_verges()
         self.rid_map(); self.road_tiers()
         self.place_slots()
         self.road_tiers()
@@ -566,6 +731,7 @@ class Settlement(Town):
                 f["tier"] = fo["opensAt"] if fo else 3
                 if fo: fo["windmill"] = f["at"]
         self.dress()
+        self.trees()
         self.path_blocks(); self.ground_blocks(); self.banks()
         self.works = {(int(x), int(y), int(z)): v for (x, y, z), v in self.works.items()}
 
@@ -611,6 +777,7 @@ class Settlement(Town):
         img = Image.new("RGB", (n * S, n * S + 40), (32, 32, 32)); dr = ImageDraw.Draw(img)
         gmin, gmax = int(self.G[self.IN].min()), int(self.G[self.IN].max())
         TC = [(240, 236, 220), (200, 225, 245), (245, 215, 175), (225, 190, 235)]
+        self.tree_at = {tuple(f["at"]) for f in self.fixtures if f["name"] == "tree"}
         owner = {}
         for e in self.slots:
             for c in e["cells"]: owner[c] = e
@@ -627,6 +794,7 @@ class Settlement(Town):
                 if self.TAKEN[i, j] == 3: col = (214, 190, 90) if (x, int(self.G[i, j]), z) not in self.works or self.works[(x, int(self.G[i, j]), z)][0] != "water" else (60, 110, 210)
                 if self.K[i, j] >= 0: col = {4: (175, 170, 160), 3: (150, 140, 125), 2: (170, 155, 130), 1: (190, 180, 160)}[int(self.KIND[i, j])]
                 if (x, z) in owner: col = TC[owner[(x, z)]["opensAt"]]
+                if (x - self.C[0], z - self.C[1]) in self.tree_at: col = (30, 80, 30)
                 if self.D[i, j] > WALL_R[-1]: col = tuple(int(c * 0.5) for c in col)
                 dr.rectangle([a * S, b * S, a * S + S - 1, b * S + S - 1], fill=col)
         cx, cz = (self.C[0] - x0) * S + S // 2, (self.C[1] - z0) * S + S // 2
@@ -638,6 +806,11 @@ class Settlement(Town):
             xs, zs = zip(*e["cells"])
             dr.rectangle([(min(xs) - x0) * S, (min(zs) - z0) * S, (max(xs) - x0 + 1) * S - 1, (max(zs) - z0 + 1) * S - 1], outline=(60, 45, 30), width=1)
             dr.text((((min(xs) + max(xs)) / 2 - x0) * S - 3, ((min(zs) + max(zs)) / 2 - z0) * S - 6), e["size"], fill=(40, 30, 20))
+        CR = dict(self.CROWN)
+        for f in self.fixtures:
+            if f["name"] != "tree": continue
+            tx, tz = (f["at"][0] + self.C[0] - x0) * S + S // 2, (f["at"][1] + self.C[1] - z0) * S + S // 2; r = f.get("crown_r", CR.get(f["size"], 3)) * S
+            dr.ellipse([tx - r, tz - r, tx + r, tz + r], outline=(25, 70, 25), width=2)
         y = n * S + 8; x = 8
         for t in range(4):
             dr.rectangle([x, y, x + 14, y + 14], fill=TC[t]); dr.text((x + 20, y + 2), TIERS[t], fill=(230, 230, 230)); x += 110
@@ -658,8 +831,12 @@ def main():
     ap = argparse.ArgumentParser(); ap.add_argument("plot"); ap.add_argument("slice"); ap.add_argument("lines"); ap.add_argument("out")
     ap.add_argument("--config", default=os.path.join(HERE, "..", "..", "Siege_Nights_BP", "scripts", "plots", "config.js"))
     ap.add_argument("--templates", default=",".join(TEMPLATES)); ap.add_argument("--seed", type=int, default=1); ap.add_argument("--tries", type=int, default=8)
+    ap.add_argument("--trees", default="", help="trees.json from map/trees/build_trees.py; uses map/trees/place.py to scatter them")
+    ap.add_argument("--trees-src", default=os.path.join(HERE, "..", "trees"))
     a = ap.parse_args()
     plot = load_plots(a.config)[a.plot]
+    if a.trees:
+        Settlement.tree_src = os.path.abspath(a.trees_src); Settlement.tree_index = json.load(open(a.trees))
     T = np.load(a.slice); L = json.load(open(a.lines))
     os.makedirs(a.out, exist_ok=True)
     variants = []

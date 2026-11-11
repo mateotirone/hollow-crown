@@ -827,6 +827,8 @@ class Town:
                 if self.K[i, j] >= 0 or self.TAKEN[i, j] or self.WET[i, j]: continue
                 self.stamp(lamp, lx, lz, int(self.G[i, j]), 0, "lamp"); self.TAKEN[i, j] = 4
         nt = 0; want = int(26 * (self.R / 70) ** 2)
+        if self.tree_index is not None:                # the tree database (map/trees, PR #94) instead of dressing.tree
+            self.db_trees(); want = 0
         for k in range(5000):
             if nt >= want: break
             a = self.rng.random() * 2 * math.pi; r = self.R * math.sqrt(self.rng.random())
@@ -843,6 +845,40 @@ class Town:
             r = h3(x, 9, z, self.seed)
             if r < 0.06: self.works.setdefault((x, int(self.G[i, j]) + 1, z), ("short_grass", {}))
             elif r < 0.075: self.works.setdefault((x, int(self.G[i, j]) + 1, z), (dressing.FLOWERS[int(h3(x, 1, z, 3) * len(dressing.FLOWERS))], {}))
+
+    tree_index = None; tree_dir = None; tree_src = None
+    TOWN_TREES = {"vale": {"vale_great_oak": 2, "vale_ash": 2, "vale_silver_birch": 1, "vale_apple": 1, "vale_hawthorn": 1},
+                  "frost": {"frost_tall_spruce": 3, "frost_scots_pine": 2, "frost_snow_birch": 1},
+                  "salt": {"salt_umbrella_pine": 2, "salt_olive": 2, "salt_italian_cypress": 2},
+                  "fen": {"fen_black_alder": 2, "fen_pollard_willow": 2, "fen_bald_cypress": 1},
+                  "ember": {"ember_date_palm": 3, "ember_umbrella_acacia": 1, "ember_argan": 1}}
+
+    def db_trees(self):
+        """Scatter database trees (map/trees/place.py): crowns a block clear of every building and
+        fixture, trunks off streets, fields and water; outside the town circle nothing."""
+        if self.tree_src and self.tree_src not in sys.path: sys.path.insert(0, self.tree_src)
+        import place as TP
+        hard = self.EAVES | (self.TAKEN == 2) | ~self.IN
+        soft = (self.K >= 0) | (self.TAKEN >= 3) | self.WET | (self.D > self.R - 4)
+        sp = {k: w for k, w in self.TOWN_TREES.get(self.site.get("region", "vale"), self.TOWN_TREES["vale"]).items() if k in self.tree_index["species"]}
+        dens = 26 * (self.R / 70) ** 2 / soft.size
+        for i, j, f, prof in TP.scatter(self.tree_index, sp, hard, soft, density=dens, seed=self.seed, tries=40000):
+            x, z = int(i) + self.X0, int(j) + self.Z0
+            name = f.replace("/", "__")
+            if name not in self.designs:
+                bp = self.load_stamp(os.path.join(self.tree_dir, f + ".stamp.json"), name)
+                self.designs[name] = bp
+            self.plan.append({"stamp": name, "db_stamp": f, "kind": "tree", "x": x, "z": z, "ground_y": int(self.G[i, j]), "rotation": 0, "footprint": 0})
+            self.TAKEN[max(0, i - 1):i + 2, max(0, j - 1):j + 2] = 4
+
+    @staticmethod
+    def load_stamp(path, name):
+        d = json.load(open(path)); bp = Blueprint(name); o = d["origin"]; pal = d["palette"]
+        for x, y, z, k in d["blocks"]:
+            nm = pal[k]["name"].replace("siege:old_", "")
+            bp.cells[(x + o[0], y + o[1], z + o[2])] = (nm, pal[k].get("states") or {})
+        bp.markers = d.get("markers", {}); bp.rotations = d.get("rotations", [0])
+        return bp
 
     def roof_colours(self):
         """Roof colours by the town's mix (build-instructions/palettes/towns.md): exact counts from
@@ -981,7 +1017,9 @@ class Town:
     # =========================================================================== output
     def write(self, out):
         os.makedirs(os.path.join(out, "stamps"), exist_ok=True)
-        for name, bp in self.designs.items(): bp.save_json(os.path.join(out, "stamps", name + ".json"))
+        db = {e["stamp"] for e in self.plan if e.get("db_stamp")}            # tree database stamps live in map/trees' output
+        for name, bp in self.designs.items():
+            if name not in db: bp.save_json(os.path.join(out, "stamps", name + ".json"))
         json.dump({"town": self.name, "centre": list(self.C), "radius": self.R, "square": {"centre": list(self.sq), "y": self.sqY, "radius": self.sqR},
                    "about": "Stamp origin = blueprint (0,0,0) at world x, ground_y, z after turning clockwise by rotation (0 = front faces south). "
                             "Apply the groundwork file first (it already levels every plot and builds the foundations), then the stamps. "
@@ -1072,6 +1110,8 @@ class Town:
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument("site"); ap.add_argument("slice"); ap.add_argument("lines"); ap.add_argument("out")
     ap.add_argument("--seed", type=int, default=None); ap.add_argument("--render", action="store_true")
+    ap.add_argument("--trees", default="", help="trees.json from map/trees/build_trees.py (stamps beside it); scatter with map/trees/place.py")
+    ap.add_argument("--trees-src", default=os.path.join(HERE, "..", "trees"))
     ap.add_argument("--textures", default=""); ap.add_argument("--three", default=""); ap.add_argument("--shots", default="town,square,street")
     a = ap.parse_args()
     if a.site in SITES: site = dict(SITES[a.site]); name = a.site
@@ -1080,6 +1120,8 @@ def main():
                                                      square_r=7 if size == "town" else 5, seed=5, civic=[]); name = f"Town {x} {z}"
     seed = a.seed if a.seed is not None else site.get("seed", 1)
     T = np.load(a.slice); L = json.load(open(a.lines))
+    if a.trees:
+        Town.tree_index = json.load(open(a.trees)); Town.tree_dir = os.path.dirname(os.path.abspath(a.trees)); Town.tree_src = os.path.abspath(a.trees_src)
     t = Town(name, site, T, L, seed); t.run()
     os.makedirs(a.out, exist_ok=True); t.write(a.out); t.picture(a.out)
     print("scene blocks", t.scene(a.out))

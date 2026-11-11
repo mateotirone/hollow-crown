@@ -94,3 +94,26 @@ Sites live in `SITES` (or pass `x,z,radius,town|village`). Outputs: `<site>-plan
 with rotation, same convention as `town.py`), `<site>-groundwork.json` (every non-building block
 the town changes, world coordinates; apply before the stamps), `stamps/*.json`, a plan picture
 and a preview scene.
+
+### Settlement layouts (towngen_settle.py)
+
+`python3 towngen_settle.py PLOT slice.npz lines.json OUT [--templates crossroads,twin_rings,market_street] [--tries 3]`
+lays out a player settlement on one of the 12 map plots (slice: `terrain_slice.py` of the 161-wide square
+centred on the Plot Stone). It is the town pipeline plus the settlement rules agreed with the
+building-placement thread:
+
+- The wall grows: Hamlet r32, Town r40, City r48, Castle r56. A slot opens once its whole box is within
+  wall - 3, and never before the road its walkway reaches.
+- Ring lanes may sit on the old wall lines at r32 and r48 only (templates choose the arcs); they open the
+  tier after the wall leaves them.
+- The ground every town hall level takes (drawHall bounds per region, from the Hall Cornerstone 5 ahead,
+  plus 2) is kept free of roads and slots from the start.
+- Slots are odd boxes (Small 7, Medium 11, Large 15, Great 21; long side up to +2) facing a road, with
+  floor height, walkway, tags (hall, square, road_front, wall, gate, corner, field_edge, water) and opensAt.
+- Fields are whole portions (about 10% of the land, at least one) whose crop area grows with the wall,
+  watered level by level as in towns.
+
+Output `<plot>.json` (format `hollow-crown-settlement/1`): per variant `slots`, `fields`, `hall` boxes per
+level, `rings`, `gates` per tier, `fixtures`, `roads` rows `[dx, dz, y, slab|full, kind, tier]` and
+`groundwork` rows `[dx, y, dz, palette, tier]` (place a tier's rows when it opens), all relative to the
+Plot Stone on world axes, y absolute. Plus `<plot>-<template>.png` plans coloured by opening tier.
