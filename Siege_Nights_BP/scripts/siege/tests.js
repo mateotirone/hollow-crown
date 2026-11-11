@@ -22,6 +22,15 @@ const fakeState = (keeps = {}) => ({ active: false, lastSiegeDay: -1, keeps, gua
 const fakeBlock = (typeId, armor = 0) => ({ typeId, permutation: { getState: () => armor } });
 
 addTests("siege", {
+  "regional Castle Guard armor counts as Castle Guard armor": () => {
+    const [head, , , feet] = Object.keys(ids.GUARD_SET);
+    assert(ids.isGuardPiece("siege:guard_helmet", head), "plain helmet");
+    assert(ids.isGuardPiece("siege:guard_frostmarch_helmet", head), "regional helmet");
+    assert(ids.isGuardPiece("siege:guard_blackfen_boots", feet), "regional boots");
+    assert(!ids.isGuardPiece("siege:guard_frostmarch_boots", head), "boots are not a helmet");
+    assert(!ids.isGuardPiece("siege:guardgear_2_helmet", head), "the guards' own armor is not players' armor");
+    assert(!ids.isGuardPiece("minecraft:iron_helmet", head), "vanilla armor");
+  },
   "settings are sensible numbers": () => {
     for (const [k, v] of Object.entries(SETTINGS)) assert(typeof v === "number" && v > 0, `${k} = ${v}`);
     assert(SETTINGS.firstSiegeDay >= SETTINGS.siegeEveryNNights, "first siege day before the first siege night");

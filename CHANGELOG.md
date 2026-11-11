@@ -9,6 +9,8 @@ How versions work is in [`docs/RELEASING.md`](docs/RELEASING.md).
 Everything merged to `main` since the last release goes here. Each pull request that changes what players see adds a line under one of these headings.
 
 ### Added
+- The five regional boss keys can be crafted at the Siege Workshop from that region's trophies and Veil Ash: Stopped Clock Key (Wight Dust and a clock), Pale Horn (Pale Antlers and a Rime Pelt), Drowned Wedding Ring (Brine Scales and gold), Faceless Seal (Wyrm Scales and Ash Glass), Mire Effigy (Toad Venom, sticks and string). Before this, there was no way to get them and so no way to fight those bosses.
+- Wild Dragon Nests turn up by themselves out in the Emberwaste as players explore it (up to six at a time, never on anyone's land), so Dragon Eggs can be found on a real world.
 - Every region has its own Castle Gate, Portcullis, Palisade, Wall Planks and Roof Shingles, craftable at the Siege Workshop. Settlement walls are built from them: a Blackfen palisade no longer looks like a Vale one, and each region's gate and portcullis match its wall. Flat roofs and snowy ridges on settlement buildings use the region's shingles.
 - Clue Sense works: while you carry the Ledger of Whispers, it whispers on the action bar (with a soft page turn) when a Dusty Tome you have not copied, or a Lore Tome lying on the ground, is within 16 blocks, and says which way.
 - Every skill on the Tree of Oaths shows its own painted icon: on the tree screen for skills you hold or can swear now, and on every row of the plain lists.
@@ -100,6 +102,9 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - Farms can no longer print Regals forever. Each trader stops buying a good from you for the day once its price has bottomed out (the Moneyer at 128 iron ingots a day), and monsters drop coins only when a player kills them.
 
 ### Fixed
+- The Tuning Fork needs 5 Choir Shards, not 6, so the five regional bosses give enough to make one.
+- Regional Castle Guard armor now takes your banner colour and counts toward the Castle Guard set bonus in sieges, like the plain set. Pieces from different regions can be mixed.
+- The Train Carriage shows its name instead of a text code.
 - Lanternbog's local mystery no longer asks you to type the name of the place below in the first chapter.
 - Joining for the first time now happens in one ordered sequence (look picker, welcome hall, journal) instead of several things appearing at once. Each part moves onto it as its own change lands.
 - The install guide and README now say the right Minecraft version: Bedrock 26.30 or newer.
