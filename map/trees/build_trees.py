@@ -10,6 +10,7 @@ HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from species import CARDS, SIZES
 from grow import grow
 from bp import Blueprint
+from lock import locked
 
 ap = argparse.ArgumentParser()
 ap.add_argument("out"); ap.add_argument("--variants", type=int, default=6); ap.add_argument("--only", default="")
@@ -31,7 +32,9 @@ for sid, card in CARDS.items():
             seed = sum(map(ord, sid)) * 1000 + SIZES.index(size) * 100 + v
             t = grow(card, size, seed)
             name = f"{sid}_{size}_{v}"
-            t.save_mcstructure(os.path.join(d, name + ".mcstructure")); t.save_json(os.path.join(d, name + ".stamp.json"))
+            lk = locked(t); lk.rotations = [0]          # tree-only block states don't turn with a stamp rotation; variants give the variety
+            lk.fill_below = None
+            lk.save_mcstructure(os.path.join(d, name + ".mcstructure")); lk.save_json(os.path.join(d, name + ".stamp.json"))
             lo, hi = t.bounds()
             files.append({"file": f"{sid}/{name}", "size": [hi[0] - lo[0] + 1, hi[1] - lo[1] + 1, hi[2] - lo[2] + 1], "blocks": len(t.cells)})
             if v == 0:

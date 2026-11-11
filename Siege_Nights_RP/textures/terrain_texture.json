@@ -944,6 +944,54 @@
     },
     "siege_veilmoss_strands": {
       "textures": "textures/blocks/siege_veilmoss_strands"
+    },
+    "siege_old_log_acacia_top": {
+      "textures": "textures/blocks/log_acacia_top"
+    },
+    "siege_old_log_acacia": {
+      "textures": "textures/blocks/log_acacia"
+    },
+    "siege_old_azalea_leaves": {
+      "textures": "textures/blocks/azalea_leaves"
+    },
+    "siege_old_deepslate_cobbled_deepslate": {
+      "textures": "textures/blocks/deepslate/cobbled_deepslate"
+    },
+    "siege_old_planks_big_oak": {
+      "textures": "textures/blocks/planks_big_oak"
+    },
+    "siege_old_leaves_big_oak": {
+      "textures": "textures/blocks/leaves_big_oak"
+    },
+    "siege_old_log_big_oak_top": {
+      "textures": "textures/blocks/log_big_oak_top"
+    },
+    "siege_old_log_big_oak": {
+      "textures": "textures/blocks/log_big_oak"
+    },
+    "siege_old_dark_oak_trapdoor": {
+      "textures": "textures/blocks/dark_oak_trapdoor"
+    },
+    "siege_old_mud_bricks": {
+      "textures": "textures/blocks/mud_bricks"
+    },
+    "siege_old_leaves_oak": {
+      "textures": "textures/blocks/leaves_oak"
+    },
+    "siege_old_planks_spruce": {
+      "textures": "textures/blocks/planks_spruce"
+    },
+    "siege_old_leaves_spruce": {
+      "textures": "textures/blocks/leaves_spruce"
+    },
+    "siege_old_log_spruce_top": {
+      "textures": "textures/blocks/log_spruce_top"
+    },
+    "siege_old_log_spruce": {
+      "textures": "textures/blocks/log_spruce"
+    },
+    "siege_old_tuff": {
+      "textures": "textures/blocks/tuff"
     }
   }
 }

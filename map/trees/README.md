@@ -24,3 +24,14 @@ Build and preview (textures and three.js as in `map/structures/README.md`):
 - Limbs step down: logs (bark on all sides) -> walls or slabs -> fences at the tips; trapdoors cling to thin upright limbs.
 - Canopy is many clumps at the limb tips with gaps, light leaves on top, dark below, a scattered accent.
 - Tree assets placed in the world are unbreakable (for now); settlements get a tree farm for wood.
+
+## Unbreakable tree blocks
+
+`lock.py` swaps every log, bark block, leaf, wall, fence, stair, slab and trapdoor in a finished tree for a
+tree-only copy, `siege:old_<vanilla name>` (same vanilla texture; can't be mined or blown up, doesn't burn or
+decay). `studio/build_tree_blocks.py` writes those blocks from whatever the species use; rerun it after adding
+a species. Previews use the vanilla names; the database (`.mcstructure`, stamps) uses the tree-only ones, so
+stamps carry `rotations: [0]` (variants give the variety). `LOCK = False` in `lock.py` goes back to vanilla.
+
+Needs an in-game check: the stair/trapdoor turn direction (`YAW` in build_tree_blocks.py), leaf tint, and that
+wall/fence arms show by block state (`bone_visibility` with block-state queries).
