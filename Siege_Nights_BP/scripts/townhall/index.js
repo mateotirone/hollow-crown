@@ -25,7 +25,7 @@ import { SKILLS, SKILL, RINGS, BRANCHES, blockedReason, levelFromRenown, renownF
 import { STYLES, STYLE_IDS, styleFromBiome, styleFromGround } from "./styles.js";
 import { drawHall, frameFor, toWorld, statesFor, buildOrder } from "./halls.js";
 import { buildTick } from "./build.js";
-import { heroOf, saveHero, forgetHero, grantPoints, grantRenown, listenForGrants, blankHero } from "./hero.js";
+import { heroOf, saveHero, forgetHero, grantRenown, listenForGrants, blankHero } from "./hero.js";
 import { CORNERSTONE, TREE, hallMenu, hallOf, halls, saveHalls, resumeBuilds, beginBuild, setTreeLook, allowedLevel, HALL_COSTS, hallMenuExtras } from "./townhall.js";
 import { openTree, choosePath, treeMenu, EMBER, BOUND_EMBER, OATH_BANNER } from "./tree.js";
 import { passiveTick, watchfireTick, dropEmber, nearestClue } from "./progress.js";
@@ -36,11 +36,12 @@ import { rosterMenu } from "./roster.js";
 import { rolesTick, roleForStyle, roleForBoss, ROLE_DEEDS } from "./roles.js";
 import { ROLES, RANKS, ROLE_LORE } from "./skills.js";
 import { treeCells, treeLayout, COLS, ROWS } from "./tree_layout.js";
-import { wallMenu, flyby } from "./flyby.js";
-export { flyby };
+import { wallMenu } from "./flyby.js";
+export { flyby } from "./flyby.js";
 import { rumorMenu, rumorTick, rumorsFor, describe, jobTier, remember, KEEPSAKES, JOB_KIND } from "./rumors.js";
 
-export { grantPoints, grantRenown, heroOf, hallOf };
+export { grantPoints, grantRenown, heroOf } from "./hero.js";
+export { hallOf } from "./townhall.js";
 export { startBuild } from "./build.js"; // other features can raise their own templates with the same engine
 
 listenForGrants();

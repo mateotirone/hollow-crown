@@ -104,6 +104,8 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - Joining for the first time now happens in one ordered sequence (look picker, welcome hall, journal) instead of several things appearing at once. Each part moves onto it as its own change lands.
 - The install guide and README now say the right Minecraft version: Bedrock 26.30 or newer.
 - First playtest load errors: dragons load again, the Keep Banner and brazier no longer mix material types, and eight still models (Stone Vigil, Rime Pillar, Seep, Omen Raven, Hollow Bolt and the three reveal figures) no longer log animation errors.
+- Scripts load again on Minecraft: one module re-exported names it had imported, which Minecraft's script engine could not link ("Could not find export 'AFTER'"), so no script ran at all.
+- The character look no longer logs errors on the menu paper doll.
 - Both packs are now version 1.2 and point at each other's real version, and every install file carries its own build number, so re-importing a new build replaces the old one instead of being skipped.
 
 ### Known issues

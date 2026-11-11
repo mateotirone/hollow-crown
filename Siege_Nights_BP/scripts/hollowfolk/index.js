@@ -38,7 +38,7 @@ import { ECON } from "../economy/config.js";
 
 export { setFolkVoice } from "./rules.js";
 import { setHollowAir } from "./ambience.js";
-export { setHollowAir };
+export { setHollowAir } from "./ambience.js";
 
 const RAW = "siege:raw_choir_ore";
 const BOAT = "siege:lattice_boat";

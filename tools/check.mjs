@@ -218,6 +218,16 @@ step("Content log rules");
       }
     }
   }
+  // 5. Player render molang: the menu paper doll has no actor, so query.property needs a query.has_property guard.
+  const playerFiles = [join(RP, "entity/player.entity.json"), ...walk(join(RP, "render_controllers"), ".json")].filter(existsSync);
+  for (const file of playerFiles) {
+    const text = readFileSync(file, "utf8");
+    if (file.endsWith("player.entity.json") || /player|hc_looks/.test(file)) {
+      for (const m of text.matchAll(/"([^"\n]*query\.property\('([^']+)'\)[^"\n]*)"/g)) {
+        if (!m[1].includes(`query.has_property('${m[2]}')`)) fail(`${rel(file)}: query.property('${m[2]}') without query.has_property('${m[2]}') (errors on the menu paper doll)`);
+      }
+    }
+  }
   console.log(`${entities} entities, ${anims} animations, ${blocks} blocks, ${geometries.size} geometries`);
 }
 
@@ -351,13 +361,60 @@ async function deepCheck() {
     "parseFloat", "RegExp", "Reflect", "Proxy", "BigInt", "TypeError", "RangeError", "encodeURIComponent", "decodeURIComponent",
     "Uint8Array", "Uint16Array", "Uint32Array", "Int8Array", "Int16Array", "Int32Array", "Float32Array", "Float64Array", "ArrayBuffer", "WeakSet", "isFinite", "SyntaxError"]);
   let count = 0;
+  const asts = new Map();
   for (const file of scripts) {
-    const src = readFileSync(file, "utf8");
-    let ast;
-    try {
-      ast = acorn.parse(src, { ecmaVersion: "latest", sourceType: "module", locations: true, ranges: true });
-    } catch (e) {
-      failIn(file, `${rel(file)}: syntax error ${e.message}`);
+    try { asts.set(file, acorn.parse(readFileSync(file, "utf8"), { ecmaVersion: "latest", sourceType: "module", locations: true, ranges: true })); } catch { /* reported below */ }
+  }
+  // What each file exports (names), following `export * from` and `export { x } from`.
+  const exportCache = new Map();
+  const exportsOf = (file, seen = new Set()) => {
+    if (exportCache.has(file)) return exportCache.get(file);
+    if (seen.has(file)) return new Set();
+    seen.add(file);
+    const out = new Set();
+    for (const n of asts.get(file)?.body ?? []) {
+      if (n.type === "ExportNamedDeclaration") {
+        if (n.declaration?.id) out.add(n.declaration.id.name);
+        for (const d of n.declaration?.declarations ?? []) {
+          const names = (p) => (p.type === "Identifier" ? [p.name] : p.type === "ObjectPattern" ? p.properties.flatMap((q) => names(q.value ?? q.argument)) : p.type === "ArrayPattern" ? p.elements.filter(Boolean).flatMap(names) : p.type === "AssignmentPattern" ? names(p.left) : p.type === "RestElement" ? names(p.argument) : []);
+          names(d.id).forEach((x) => out.add(x));
+        }
+        for (const s of n.specifiers ?? []) out.add(s.exported.name ?? s.exported.value);
+      } else if (n.type === "ExportDefaultDeclaration") out.add("default");
+      else if (n.type === "ExportAllDeclaration") {
+        if (n.exported) out.add(n.exported.name);
+        else for (const x of exportsOf(resolve(dirname(file), n.source.value), seen)) if (x !== "default") out.add(x);
+      }
+    }
+    exportCache.set(file, out);
+    return out;
+  };
+  for (const [file, ast] of asts) {
+    const imported = new Set();
+    for (const n of ast.body) {
+      if ((n.type === "ImportDeclaration" || (n.type === "ExportNamedDeclaration" && n.source)) && n.source.value.startsWith(".")) {
+        const target = resolve(dirname(file), n.source.value);
+        if (!asts.has(target)) continue;
+        const have = exportsOf(target);
+        for (const s of n.specifiers) {
+          const name = n.type === "ImportDeclaration" ? (s.type === "ImportDefaultSpecifier" ? "default" : s.type === "ImportNamespaceSpecifier" ? null : s.imported.name) : s.local.name;
+          if (name && !have.has(name)) failIn(file, `${rel(file)}:${n.loc.start.line} imports "${name}" from "${n.source.value}", which does not export it (Minecraft stops loading every script: "Could not find export")`);
+        }
+      }
+      if (n.type === "ImportDeclaration") for (const s of n.specifiers) imported.add(s.local.name);
+    }
+    // Minecraft's script engine can fail to link `import { x } from "a"; export { x };` when modules import each other
+    // in a circle (first playtest: "Could not find export 'AFTER'"). Write it as `export { x } from "a";` instead.
+    for (const n of ast.body) {
+      if (n.type === "ExportNamedDeclaration" && !n.source && !n.declaration) {
+        for (const s of n.specifiers) if (imported.has(s.local.name)) failIn(file, `${rel(file)}:${n.loc.start.line} re-exports the imported "${s.local.name}" with a plain export list; write export { ${s.local.name} } from "..." instead`);
+      }
+    }
+  }
+  for (const file of scripts) {
+    const ast = asts.get(file);
+    if (!ast) {
+      try { acorn.parse(readFileSync(file, "utf8"), { ecmaVersion: "latest", sourceType: "module" }); } catch (e) { failIn(file, `${rel(file)}: syntax error ${e.message}`); }
       continue;
     }
     const manager = eslintScope.analyze(ast, { ecmaVersion: 2022, sourceType: "module" });
