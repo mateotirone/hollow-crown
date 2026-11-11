@@ -264,6 +264,12 @@
     "siege_oath_tree_crown_marked": {
       "textures": "textures/blocks/siege_oath_tree_crown_marked"
     },
+    "siege_foresters_lodge_side": {
+      "textures": "textures/blocks/forestry/siege_foresters_lodge_side"
+    },
+    "siege_foresters_lodge_top": {
+      "textures": "textures/blocks/forestry/siege_foresters_lodge_top"
+    },
     "siege_stables_side": {
       "textures": "textures/blocks/travel/siege_stables_side"
     },

@@ -99,6 +99,9 @@
   "siege:stables": {
     "sound": "wood"
   },
+  "siege:foresters_lodge": {
+    "sound": "wood"
+  },
   "siege:rail_depot": {
     "sound": "wood"
   },

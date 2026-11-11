@@ -35,3 +35,12 @@ stamps carry `rotations: [0]` (variants give the variety). `LOCK = False` in `lo
 
 Needs an in-game check: the stair/trapdoor turn direction (`YAW` in build_tree_blocks.py), leaf tint, and that
 wall/fence arms show by block state (`bone_visibility` with block-state queries).
+
+## The settlement grove (Forester's Lodge)
+
+The one place trees can be chopped. `build_grove.py` grows three species per settlement style (sapling, young,
+mature; two variants) in plain vanilla wood, without `lock.py`, and writes them as
+`Siege_Nights_BP/structures/siege_grove/*.mcstructure` plus `scripts/forestry/grove_data.js`. Rerun it after
+changing those species. The game side is `scripts/forestry/`: the Lodge block raises a fenced 41 x 29 yard with
+2, 4 or 6 plots; chopping the bottom trunk block fells the tree (its logs drop at the stump, 12 to 48), and a
+sapling regrows to full size in three days. Test with `/scriptevent siege:forestry_grove [style]`.
