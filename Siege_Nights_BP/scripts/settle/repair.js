@@ -21,6 +21,13 @@ const OVERWORLD = "minecraft:overworld";
 const jobs = new Map(); // owner -> { cells, index, fix, missing, cracked, P, onDone, waited }
 
 // Start counting (fix false) or mending (fix true) a wall. onDone({ missing, cracked }) when finished.
+// The owner picked a new look for the wall (walls.js chooseWallLook): swap the standing wall over, free
+on("wallReface", ({ owner, player }) => {
+  if (getState().active) return player?.sendMessage("§7The masons will not touch the wall during a siege. Ask again after it.");
+  const r = repairWall(owner, { fix: true, onDone: ({ missing }) => player?.sendMessage(`§6The wall is re-faced: ${missing} blocks swapped over.`) });
+  player?.sendMessage(r === true ? "§6The masons are re-facing the wall." : `§7${r}`);
+});
+
 export function repairWall(owner, { fix = false, onDone } = {}) {
   const w = wallOf(owner);
   if (!w || !w.level || !w.ground) return "There is no wall here to mend.";
@@ -29,9 +36,9 @@ export function repairWall(owner, { fix = false, onDone } = {}) {
   const L = WALL_LEVELS[w.level];
   const cells = [];
   for (const col of wallColumns({ center: w, radius: w.radius, level: w.level, gateAngle: w.gate, smooth: w.ground })) {
-    for (const [y, kind] of columnKinds(L, col, wallSeed(w))) cells.push([col.x, y, col.z, kind, col.a]);
+    for (const [y, kind] of columnKinds(L, col, wallSeed(w), w.style)) cells.push([col.x, y, col.z, kind, col.a]);
   }
-  jobs.set(owner, { cells, index: 0, fix, missing: 0, cracked: 0, P: palette(w.style, L), onDone, waited: 0 });
+  jobs.set(owner, { cells, index: 0, fix, missing: 0, cracked: 0, P: palette(w.style, L, w.look), onDone, waited: 0 });
   return true;
 }
 

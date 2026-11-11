@@ -1,36 +1,15 @@
 {
  "format_version": "1.20.10",
- "minecraft:recipe_shaped": {
+ "minecraft:recipe_smithing_transform": {
   "description": {
    "identifier": "siege:choirsteel_pickaxe_recipe"
   },
   "tags": [
-   "crafting_table"
+   "smithing_table"
   ],
-  "pattern": [
-   "CCC",
-   " N ",
-   " Q "
-  ],
-  "key": {
-   "C": {
-    "item": "siege:choirsteel_ingot"
-   },
-   "Q": {
-    "item": "siege:gloamquill"
-   },
-   "N": {
-    "item": "minecraft:netherite_pickaxe"
-   }
-  },
-  "result": {
-   "item": "siege:choirsteel_pickaxe",
-   "count": 1
-  },
-  "unlock": [
-   {
-    "item": "siege:choirsteel_ingot"
-   }
-  ]
+  "template": "siege:choirsteel_upgrade_template",
+  "base": "minecraft:netherite_pickaxe",
+  "addition": "siege:tempered_choirsteel",
+  "result": "siege:choirsteel_pickaxe"
  }
 }

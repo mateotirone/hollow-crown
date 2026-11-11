@@ -1,0 +1,25 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:attachable": {
+    "description": {
+      "identifier": "siege:guard_emberwaste_diamond_chestplate",
+      "materials": {
+        "default": "armor_leather",
+        "enchanted": "armor_leather_enchanted"
+      },
+      "textures": {
+        "default": "textures/models/siege_armor/guard_emberwaste_diamond_chestplate",
+        "enchanted": "textures/misc/enchanted_actor_glint"
+      },
+      "geometry": {
+        "default": "geometry.siege_guard_emberwaste_diamond_chestplate"
+      },
+      "scripts": {
+        "parent_setup": "variable.chest_layer_visible = 0.0;"
+      },
+      "render_controllers": [
+        "controller.render.armor"
+      ]
+    }
+  }
+}

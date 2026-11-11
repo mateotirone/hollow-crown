@@ -14,6 +14,7 @@ This repo is the home of The Hollow Crown, a Bedrock add-on that grew out of Sie
 | `map/`, `lab/` | Map image and the wall-damage lab page |
 | `archive/` | The original single-file `main.js` from before the module split |
 | `docs/` | Links to the design docs, the update backlog, how releases work |
+| `build-instructions/` | Stage-by-stage rules every building follows (planning to final check), regional palettes and town roof mixes |
 | `wiki/`, `lore-book/`, `design/`, `character-creator/` | Player wiki pages, the lore book, layout data and the character creator |
 
 ## Check and build

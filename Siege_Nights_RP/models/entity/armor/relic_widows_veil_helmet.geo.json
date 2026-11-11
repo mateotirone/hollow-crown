@@ -1,0 +1,270 @@
+{
+  "format_version": "1.12.0",
+  "minecraft:geometry": [
+    {
+      "description": {
+        "identifier": "geometry.siege_relic_widows_veil_helmet",
+        "texture_width": 64,
+        "texture_height": 32,
+        "visible_bounds_width": 3,
+        "visible_bounds_height": 3.5,
+        "visible_bounds_offset": [
+          0,
+          1.5,
+          0
+        ]
+      },
+      "bones": [
+        {
+          "name": "head",
+          "pivot": [
+            0,
+            24,
+            0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -4,
+                24,
+                -4
+              ],
+              "size": [
+                8,
+                8,
+                8
+              ],
+              "uv": [
+                0,
+                0
+              ],
+              "inflate": 1
+            },
+            {
+              "origin": [
+                -5.5,
+                19,
+                5
+              ],
+              "size": [
+                11,
+                14,
+                1
+              ],
+              "uv": {
+                "north": {
+                  "uv": [
+                    32,
+                    0
+                  ],
+                  "uv_size": [
+                    11,
+                    14
+                  ]
+                },
+                "south": {
+                  "uv": [
+                    32,
+                    0
+                  ],
+                  "uv_size": [
+                    11,
+                    14
+                  ]
+                },
+                "east": {
+                  "uv": [
+                    43,
+                    0
+                  ],
+                  "uv_size": [
+                    1,
+                    14
+                  ]
+                },
+                "west": {
+                  "uv": [
+                    43,
+                    0
+                  ],
+                  "uv_size": [
+                    1,
+                    14
+                  ]
+                },
+                "up": {
+                  "uv": [
+                    44,
+                    13
+                  ],
+                  "uv_size": [
+                    11,
+                    1
+                  ]
+                },
+                "down": {
+                  "uv": [
+                    44,
+                    13
+                  ],
+                  "uv_size": [
+                    11,
+                    1
+                  ]
+                }
+              }
+            },
+            {
+              "origin": [
+                -6,
+                19,
+                -4.5
+              ],
+              "size": [
+                1,
+                13,
+                9.5
+              ],
+              "uv": {
+                "north": {
+                  "uv": [
+                    54,
+                    0
+                  ],
+                  "uv_size": [
+                    1,
+                    13
+                  ]
+                },
+                "south": {
+                  "uv": [
+                    54,
+                    0
+                  ],
+                  "uv_size": [
+                    1,
+                    13
+                  ]
+                },
+                "east": {
+                  "uv": [
+                    44,
+                    0
+                  ],
+                  "uv_size": [
+                    10,
+                    13
+                  ]
+                },
+                "west": {
+                  "uv": [
+                    44,
+                    0
+                  ],
+                  "uv_size": [
+                    10,
+                    13
+                  ]
+                },
+                "up": {
+                  "uv": [
+                    55,
+                    0
+                  ],
+                  "uv_size": [
+                    1,
+                    10
+                  ]
+                },
+                "down": {
+                  "uv": [
+                    55,
+                    0
+                  ],
+                  "uv_size": [
+                    1,
+                    10
+                  ]
+                }
+              }
+            },
+            {
+              "origin": [
+                5,
+                19,
+                -4.5
+              ],
+              "size": [
+                1,
+                13,
+                9.5
+              ],
+              "uv": {
+                "north": {
+                  "uv": [
+                    54,
+                    0
+                  ],
+                  "uv_size": [
+                    1,
+                    13
+                  ]
+                },
+                "south": {
+                  "uv": [
+                    54,
+                    0
+                  ],
+                  "uv_size": [
+                    1,
+                    13
+                  ]
+                },
+                "east": {
+                  "uv": [
+                    44,
+                    0
+                  ],
+                  "uv_size": [
+                    10,
+                    13
+                  ]
+                },
+                "west": {
+                  "uv": [
+                    44,
+                    0
+                  ],
+                  "uv_size": [
+                    10,
+                    13
+                  ]
+                },
+                "up": {
+                  "uv": [
+                    55,
+                    0
+                  ],
+                  "uv_size": [
+                    1,
+                    10
+                  ]
+                },
+                "down": {
+                  "uv": [
+                    55,
+                    0
+                  ],
+                  "uv_size": [
+                    1,
+                    10
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
