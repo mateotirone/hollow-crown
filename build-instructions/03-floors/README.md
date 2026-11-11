@@ -51,6 +51,19 @@ stone or packed paving from the palette (polished stone, bricks, tiles), not woo
 - Joists are part of the frame look outside too: their ends may show in the wall at the floor line as log
   ends (axis out of the wall) in proud-frame builds.
 
+### Alternative: the beamed floor (Mateo, 2026-11-11, `reference/pictures/beamed-floor.png`)
+
+- The joists come **up into the floor**: full logs (axis across the short span) every 3 or 5 blocks, lined
+  up with the wall posts, their tops flush with the walking surface, and **top slabs** of the floor wood
+  in the rows between them.
+- From above it reads as a plank floor striped with beams; from the room below, the logs hang half a
+  block lower than the slab ceiling between them, like trusses, which gives the ceiling depth.
+- The beams run right through to the outside face, and logs stand upright at the corners, so the floor
+  line shows as a band of beam ends and corner posts on top of a stone ground floor.
+- Logs a shade darker than the slabs (the frame wood under a field of floor wood), or the same wood when
+  the picture calls for it. Use it on stone ground floors with a timber or plank upper, and on any room
+  whose ceiling people look at (inns, halls, shops).
+
 ## Step 5: Stair wells and openings
 
 - Cut the stair well (O on the plan) through the upper floor: as long as the flight, at least 1 wide
