@@ -12,7 +12,8 @@
 //   loreShelved      { player, owner, tome, total }
 //   loreReward       { player, owner, kind: "col" | "mile", id }
 //   loreThreadSolved { player, thread }
-//   loreAllSolved    { player }                           every mystery solved (hidden third ending)
+//   loreAllSolved    { player }                           every mystery solved (hidden third ending: truce.js)
+//   truceChanged     { state, before, by, cause, times }  the truce made at the Seat or rung broken at Bellhollow (truce.js)
 //   loreSourceNamed  { player, owner, site }              named the real thin place in a Library
 //   loreSourceMisnamed { player, guess }
 //   loreFlag         { player, flag }                     e.g. journal_read, true_name, lamp_out, aldous_ally, loremaster
@@ -54,6 +55,7 @@ import { PLOT_REGION, REGION_BOSS, BOSS_LEADS, REGIONAL_BOSSES, CONVERGE, fallen
 import { PLOT_PLAN } from "../plots/config.js";
 import "./cases.js";
 import "./singing.js";
+import "./truce.js"; // the hidden third ending: the truce renewed at the empty Seat
 import { REVEAL } from "./data/reveal.js";
 import { ART_IDS, GATED } from "./arts.js";
 import { BOSS_TOMES, MOB_TOMES } from "./caches.js";

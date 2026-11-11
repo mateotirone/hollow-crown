@@ -7,13 +7,14 @@
 //   isSiegeNight()    true if a full siege comes tonight (the hum, shut shops, worried villagers ...)
 //   hollowShareNow()  0-1: how much of an ordinary siege army should be Hollow rather than men right now
 //   addReach(n, why)  push the Reach up or down
-//   rectify()         the source is dealt with: the Hollow's sieges stop for good
+//   rectify()         the source is dealt with: the Hollow's sieges stop for good (unless the truce is rung broken, lore/truce.js)
+//   storyOver()       true once Morvane has fallen (the source is rectified)
 //
 // Events (on(...) from siege/api.js): "reachStage" { stage, before, name }, "reachChanged" { reach, before, why },
 // "firstGlimpse" { owners }: the first Hollow soldiers have just walked out of the dark at these settlements.
 // Filter "hollowSoldier" (type, { role, glimpse }): answer with the entity the Reach should send as a Hollow soldier.
 
-import { reachData, tonightKind } from "./index.js";
+import { reachData, tonightKind, nightStage } from "./index.js";
 import { stage, isSiegeKind, hollowShare } from "./rules.js";
 
 export { tonightKind, addReach, rectify } from "./index.js";
@@ -22,4 +23,5 @@ export const reachStage = () => reachData().stage;
 export const reachValue = () => reachData().reach;
 export const stageInfo = () => stage(reachData().stage);
 export const isSiegeNight = () => isSiegeKind(tonightKind());
-export const hollowShareNow = () => (reachData().glimpsed ? hollowShare(reachData().stage) : 0);
+export const hollowShareNow = () => (reachData().glimpsed ? hollowShare(nightStage()) : 0);
+export const storyOver = () => !!reachData().source;
