@@ -4,8 +4,8 @@
     {
       "description": {
         "identifier": "geometry.siege_guard_blackfen_diamond_helmet",
-        "texture_width": 128,
-        "texture_height": 64,
+        "texture_width": 64,
+        "texture_height": 32,
         "visible_bounds_width": 3,
         "visible_bounds_height": 3.5,
         "visible_bounds_offset": [
@@ -51,10 +51,68 @@
                 11,
                 1
               ],
-              "uv": [
-                64,
-                0
-              ]
+              "uv": {
+                "north": {
+                  "uv": [
+                    32,
+                    0
+                  ],
+                  "uv_size": [
+                    9,
+                    11
+                  ]
+                },
+                "south": {
+                  "uv": [
+                    32,
+                    0
+                  ],
+                  "uv_size": [
+                    9,
+                    11
+                  ]
+                },
+                "east": {
+                  "uv": [
+                    41,
+                    0
+                  ],
+                  "uv_size": [
+                    1,
+                    11
+                  ]
+                },
+                "west": {
+                  "uv": [
+                    41,
+                    0
+                  ],
+                  "uv_size": [
+                    1,
+                    11
+                  ]
+                },
+                "up": {
+                  "uv": [
+                    42,
+                    0
+                  ],
+                  "uv_size": [
+                    9,
+                    1
+                  ]
+                },
+                "down": {
+                  "uv": [
+                    42,
+                    0
+                  ],
+                  "uv_size": [
+                    9,
+                    1
+                  ]
+                }
+              }
             }
           ]
         }

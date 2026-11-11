@@ -8,7 +8,7 @@
         "enchanted": "armor_enchanted"
       },
       "textures": {
-        "default": "textures/models/siege_armor/relic_crownless_mantle",
+        "default": "textures/models/siege_armor/relic_crownless_mantle_chestplate",
         "enchanted": "textures/misc/enchanted_actor_glint"
       },
       "geometry": {

@@ -4,8 +4,8 @@
     {
       "description": {
         "identifier": "geometry.siege_guard_frostmarch_netherite_boots",
-        "texture_width": 128,
-        "texture_height": 64,
+        "texture_width": 64,
+        "texture_height": 32,
         "visible_bounds_width": 3,
         "visible_bounds_height": 3.5,
         "visible_bounds_offset": [
@@ -51,10 +51,68 @@
                 2,
                 7
               ],
-              "uv": [
-                64,
-                46
-              ]
+              "uv": {
+                "north": {
+                  "uv": [
+                    39,
+                    0
+                  ],
+                  "uv_size": [
+                    7,
+                    2
+                  ]
+                },
+                "south": {
+                  "uv": [
+                    39,
+                    0
+                  ],
+                  "uv_size": [
+                    7,
+                    2
+                  ]
+                },
+                "east": {
+                  "uv": [
+                    46,
+                    0
+                  ],
+                  "uv_size": [
+                    7,
+                    2
+                  ]
+                },
+                "west": {
+                  "uv": [
+                    46,
+                    0
+                  ],
+                  "uv_size": [
+                    7,
+                    2
+                  ]
+                },
+                "up": {
+                  "uv": [
+                    32,
+                    0
+                  ],
+                  "uv_size": [
+                    7,
+                    7
+                  ]
+                },
+                "down": {
+                  "uv": [
+                    32,
+                    0
+                  ],
+                  "uv_size": [
+                    7,
+                    7
+                  ]
+                }
+              }
             }
           ]
         },
@@ -95,11 +153,68 @@
                 2,
                 7
               ],
-              "uv": [
-                64,
-                46
-              ],
-              "mirror": true
+              "uv": {
+                "north": {
+                  "uv": [
+                    39,
+                    0
+                  ],
+                  "uv_size": [
+                    7,
+                    2
+                  ]
+                },
+                "south": {
+                  "uv": [
+                    39,
+                    0
+                  ],
+                  "uv_size": [
+                    7,
+                    2
+                  ]
+                },
+                "east": {
+                  "uv": [
+                    46,
+                    0
+                  ],
+                  "uv_size": [
+                    7,
+                    2
+                  ]
+                },
+                "west": {
+                  "uv": [
+                    46,
+                    0
+                  ],
+                  "uv_size": [
+                    7,
+                    2
+                  ]
+                },
+                "up": {
+                  "uv": [
+                    32,
+                    0
+                  ],
+                  "uv_size": [
+                    7,
+                    7
+                  ]
+                },
+                "down": {
+                  "uv": [
+                    32,
+                    0
+                  ],
+                  "uv_size": [
+                    7,
+                    7
+                  ]
+                }
+              }
             }
           ]
         }

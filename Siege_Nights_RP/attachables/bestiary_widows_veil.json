@@ -8,7 +8,7 @@
         "enchanted": "armor_enchanted"
       },
       "textures": {
-        "default": "textures/models/siege_armor/relic_widows_veil",
+        "default": "textures/models/siege_armor/relic_widows_veil_helmet",
         "enchanted": "textures/misc/enchanted_actor_glint"
       },
       "geometry": {

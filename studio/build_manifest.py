@@ -39,9 +39,9 @@ def T(p):
 groups=[]
 def g(id,name,cat,variants,note=None):
     for v in variants:
-        for k,p in v.get('mats',{}).items(): T(p)
+        for k,p in list(v.get('mats',{}).items())+list(v.get('geoMats',{}).items()): T(p)
         for it in v.get('items',[]):
-            for k,p in it.get('mats',{}).items(): T(p)
+            for k,p in list(it.get('mats',{}).items())+list(it.get('geoMats',{}).items()): T(p)
     groups.append({"id":id,"name":name,"cat":cat,"variants":variants,**({"note":note} if note else {})})
 cube=lambda label,mats:{"label":label,"model":"cube","mats":mats}
 one=lambda p:{"*":B+p+'.png'}
@@ -145,8 +145,12 @@ g("ut_pale_ash","Pale Ash","The Hollow",[cube("Block",one('siege_pale_ash'))],"N
 g("ut_glow_crystal","Glint Cluster","The Hollow",[{"label":"Cluster","model":"item","mats":{"*":B+'siege_glint_cluster.png'}}],"New block. Cross-shaped in game, gives light. Shown flat here.")
 def _choir_worn():
     # 3D once studio/art/build_choirsteel_3d.py has run (PR #83), the flat sheets before that
-    if os.path.exists(RP+'textures/models/siege_armor/choirsteel.png') and os.path.exists(RP+'models/entity/armor/choirsteel_helmet.geo.json'):
-        return [{"label":"Worn (full set, 3D)","model":"armor3d","geos":[f"geometry.siege_choirsteel_{p}" for p in ["leggings","boots","chestplate","helmet"]],"mats":{"*":'textures/models/siege_armor/choirsteel.png'}}]
+    if os.path.exists(RP+'models/entity/armor/choirsteel_helmet.geo.json'):
+        gm={}
+        for p in ["leggings","boots","chestplate","helmet"]:
+            d=json.load(open(RP+f'attachables/choirsteel_{p}.json'))['minecraft:attachable']['description']
+            gm[d['geometry']['default']]=d['textures']['default']+'.png'
+        return [{"label":"Worn (full set, 3D)","model":"armor3d","geos":list(gm),"geoMats":gm,"mats":{"*":list(gm.values())[-1]}}]
     return [{"label":"Worn (full set)","model":"armor","mats":{"layer1":'textures/models/armor/choirsteel_layer_1.png',"layer2":'textures/models/armor/choirsteel_layer_2.png'}}]
 g("ut_choirsteel","Choirsteel gear","The Hollow",[{"label":n.title(),"model":"item","mats":{"*":I+'siege_choirsteel_%s.png'%n}} for n in ("sword","pickaxe","axe","shovel","hoe","helmet","chestplate","leggings","boots")]+_choir_worn(),"Dark violet forged metal with a pale blue gem or band. All nine pieces, plus the full set as worn.")
 g("ut_veilcap_giant","Giant Veilcap","The Hollow",[cube("Cap",one('siege_veilcap_cap')),cube("Stem",one('siege_veilcap_stem'))],"The giant pink mushroom trees. The cap gives a soft glow.")
@@ -168,7 +172,10 @@ g("guard_tokens","Guard icons","Items",[item("Archer","siege_archer"),item("Man-
 A='textures/models/armor/'
 VA='textures/models/siege_armor/'
 PCS=["leggings","boots","chestplate","helmet"]
-def a3(label,name,tint="red",**k): return {"label":label,"model":"armor3d","swatch":DYE[tint],"tint":DYE[tint],"geos":[f"geometry.siege_{name}_{p}" for p in PCS],"mats":{"*":VA+name+'.png'},**k}
+def a3(label,name,tint="red",pieces=PCS,**k):
+    # one sheet per piece (vanilla 64x32 layout), see studio/art/build_armor3d.py
+    gm={f"geometry.siege_{name}_{p}":VA+f"{name}_{p}.png" for p in pieces}
+    return {"label":label,"model":"armor3d","swatch":DYE[tint],"tint":DYE[tint],"geos":list(gm),"geoMats":gm,"mats":{"*":VA+f"{name}_{pieces[-1]}.png",**{p:VA+f"{name}_{p}.png" for p in pieces}},**k}
 g("armor","Castle Guard armor (worn)","Armor",[a3(nice(c),"guard",c) for c in ['red']+[c for c in COLORS if c!='red']],
   "3D: ridged helm, gold-edged pauldrons, a tabard skirt front and back. Grey cloth takes your banner color in game (the tabard skirt too). Pick a color to preview it.")
 _RN={"vale":"ridged kettle hat brim, riveted leather pauldrons, steel toe caps","frostmarch":"fur ruff and spike on the helm, fur shoulder pads, fur boot cuffs",
@@ -182,8 +189,7 @@ for r in ("vale","frostmarch","saltreach","emberwaste","blackfen"):
 _all=[a3("Castle Guard","guard")]+[a3(f"{r.title()} {t.title() if t else 'Iron'}",f"guard_{r}"+(f"_{t}" if t else "")) for r in ("vale","frostmarch","saltreach","emberwaste","blackfen") for t in ("","diamond","netherite")]
 g("all_armor","Every guard armor set side by side","Armor",[{"label":"All 16 sets","model":"lineup","cols":8,"gap":1.25,"rowGap":2.6,"items":_all,"mats":_all[0]["mats"],"tint":DYE["red"]}],
   "Castle Guard first, then each region in iron, diamond and netherite (Vale, Frostmarch, Saltreach, Emberwaste, Blackfen). Drag to turn, scroll to zoom. Open a region below for one set at a time.")
-g("relics_worn","Worn relics","Armor",[{"label":"Crownless Mantle","model":"armor3d","geos":["geometry.siege_relic_crownless_mantle_chestplate"],"mats":{"*":VA+'relic_crownless_mantle.png'}},
-  {"label":"Widow's Veil","model":"armor3d","geos":["geometry.siege_relic_widows_veil_helmet"],"mats":{"*":VA+'relic_widows_veil.png'}}],"Boss relics you can wear. 3D: the Mantle is a long cloak with a high collar; the Veil hangs down the back and sides of the head.")
+g("relics_worn","Worn relics","Armor",[{**a3("Crownless Mantle","relic_crownless_mantle",pieces=["chestplate"]),"tint":None,"swatch":None},{**a3("Widow's Veil","relic_widows_veil",pieces=["helmet"]),"tint":None,"swatch":None}],"Boss relics you can wear. 3D: the Mantle is a long cloak with a high collar; the Veil hangs down the back and sides of the head.")
 for m,name,note in [("chainmail","Chainmail armor: mail and gambeson","Replaces vanilla chainmail armor. 3D extra: a mail mantle over the shoulders."),("iron","Iron armor: chainmail and surcoat","Replaces vanilla iron armor. 3D extras: kettle hat brim, surcoat flaps front and back."),
                     ("diamond","Diamond armor: knight's plate","Replaces vanilla diamond armor. 3D extras: closed great helm with a red plume, shoulder plates, knee guards."),
                     ("netherite","Netherite armor: dark royal plate","Replaces vanilla netherite armor. 3D extras: gold crown, big shoulder plates, royal cape, knee guards.")]:
@@ -285,7 +291,7 @@ for f in ['trebuchet','ballista']:
     geos['geometry.siege_'+f]={"tw":64,"th":64,"bones":d['bones']}
 for f in sorted(os.listdir(RP+'models/entity/armor'))+['../guard_armor/'+g for g in sorted(os.listdir(RP+'models/entity/guard_armor'))]:
     x=json.load(open(RP+'models/entity/armor/'+f))['minecraft:geometry'][0]
-    geos[x['description']['identifier']]={"tw":128,"th":64,"bones":x['bones']}
+    geos[x['description']['identifier']]={"tw":x['description'].get('texture_width',128),"th":x['description'].get('texture_height',64),"bones":x['bones']}
 v=json.load(open(V+'geo_villager.json'))['geometry.villager.v1.8']
 geos['geometry.villager.v1.8']={"legacy":True,"tw":v.get('texturewidth',64),"th":v.get('textureheight',64),"bones":v['bones']}
 h=json.load(open(V+'geo_horse_v2.json'))['geometry.horse.v2']

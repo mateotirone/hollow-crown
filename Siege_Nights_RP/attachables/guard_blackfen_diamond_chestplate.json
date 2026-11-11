@@ -8,7 +8,7 @@
         "enchanted": "armor_leather_enchanted"
       },
       "textures": {
-        "default": "textures/models/siege_armor/guard_blackfen_diamond",
+        "default": "textures/models/siege_armor/guard_blackfen_diamond_chestplate",
         "enchanted": "textures/misc/enchanted_actor_glint"
       },
       "geometry": {

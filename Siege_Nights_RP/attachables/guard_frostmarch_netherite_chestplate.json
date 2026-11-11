@@ -8,7 +8,7 @@
         "enchanted": "armor_leather_enchanted"
       },
       "textures": {
-        "default": "textures/models/siege_armor/guard_frostmarch_netherite",
+        "default": "textures/models/siege_armor/guard_frostmarch_netherite_chestplate",
         "enchanted": "textures/misc/enchanted_actor_glint"
       },
       "geometry": {

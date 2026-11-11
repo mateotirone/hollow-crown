@@ -4,8 +4,8 @@
     {
       "description": {
         "identifier": "geometry.siege_guard_vale_boots",
-        "texture_width": 128,
-        "texture_height": 64,
+        "texture_width": 64,
+        "texture_height": 32,
         "visible_bounds_width": 3,
         "visible_bounds_height": 3.5,
         "visible_bounds_offset": [
@@ -51,10 +51,68 @@
                 2,
                 1
               ],
-              "uv": [
-                102,
-                14
-              ]
+              "uv": {
+                "north": {
+                  "uv": [
+                    32,
+                    0
+                  ],
+                  "uv_size": [
+                    4,
+                    2
+                  ]
+                },
+                "south": {
+                  "uv": [
+                    32,
+                    0
+                  ],
+                  "uv_size": [
+                    4,
+                    2
+                  ]
+                },
+                "east": {
+                  "uv": [
+                    36,
+                    0
+                  ],
+                  "uv_size": [
+                    1,
+                    2
+                  ]
+                },
+                "west": {
+                  "uv": [
+                    36,
+                    0
+                  ],
+                  "uv_size": [
+                    1,
+                    2
+                  ]
+                },
+                "up": {
+                  "uv": [
+                    37,
+                    0
+                  ],
+                  "uv_size": [
+                    4,
+                    1
+                  ]
+                },
+                "down": {
+                  "uv": [
+                    37,
+                    0
+                  ],
+                  "uv_size": [
+                    4,
+                    1
+                  ]
+                }
+              }
             }
           ]
         },
@@ -95,11 +153,68 @@
                 2,
                 1
               ],
-              "uv": [
-                102,
-                14
-              ],
-              "mirror": true
+              "uv": {
+                "north": {
+                  "uv": [
+                    32,
+                    0
+                  ],
+                  "uv_size": [
+                    4,
+                    2
+                  ]
+                },
+                "south": {
+                  "uv": [
+                    32,
+                    0
+                  ],
+                  "uv_size": [
+                    4,
+                    2
+                  ]
+                },
+                "east": {
+                  "uv": [
+                    36,
+                    0
+                  ],
+                  "uv_size": [
+                    1,
+                    2
+                  ]
+                },
+                "west": {
+                  "uv": [
+                    36,
+                    0
+                  ],
+                  "uv_size": [
+                    1,
+                    2
+                  ]
+                },
+                "up": {
+                  "uv": [
+                    37,
+                    0
+                  ],
+                  "uv_size": [
+                    4,
+                    1
+                  ]
+                },
+                "down": {
+                  "uv": [
+                    37,
+                    0
+                  ],
+                  "uv_size": [
+                    4,
+                    1
+                  ]
+                }
+              }
             }
           ]
         }

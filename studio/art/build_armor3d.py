@@ -2,9 +2,9 @@
 
 Same idea as studio/build_varmor.py does for vanilla iron, diamond, netherite and chainmail: each set gets its own
 geometry per piece (the normal armour boxes plus raised parts: brims, crests, pauldrons, tabard flaps, capes, fur,
-knee guards) and one 128x64 texture. The left half of the texture is the set's existing flat sheets pasted in
-(layer 1 on top, layer 2 below), so the painted look stays exactly as it is; the 3D parts are painted on the right
-half from the same colour ramps.
+knee guards) and one texture per piece. Each piece has its own 64x32 sheet in the exact vanilla
+armour layout: the set's flat sheet unchanged (so the painted look stays as it is, and armour trims still line up),
+with the 3D parts painted only in the corners vanilla armour and trims leave empty.
 
 Sets: the Castle Guard armour, the five regional Castle Guard sets in iron, diamond and netherite, and the two worn
 relics (Crownless Mantle, Widow's Veil). Choirsteel is built by studio/art/build_choirsteel_3d.py (PR #83); the
@@ -15,7 +15,7 @@ alpha 1 = keeps its own colour. So the 3D tabard flaps and capes take the banner
 
     python3 studio/art/build_armor3d.py [repo root]
 
-Writes textures/models/siege_armor/<set>.png, models/entity/armor/<set>_<piece>.geo.json and repoints
+Writes textures/models/siege_armor/<set>_<piece>.png, models/entity/armor/<set>_<piece>.geo.json and repoints
 attachables/<set>_<piece>.json (relics: attachables/bestiary_<relic>.json). Rerun after the flat sheets change.
 """
 import json, os, random, sys
@@ -60,12 +60,12 @@ BASE = {
     "helmet": {"head": [cube([-4, 24, -4], [8, 8, 8], [0, 0], 1)]},
     "chestplate": {"body": [cube([-4, 12, -2], [8, 12, 4], [16, 16], 1.01)],
                    "rightArm": [cube([-8, 12, -2], [4, 12, 4], [40, 16], 1)], "leftArm": [cube([4, 12, -2], [4, 12, 4], [40, 16], 1, True)]},
-    "leggings": {"body": [cube([-4, 12, -2], [8, 12, 4], [16, 48], 0.5)],
-                 "rightLeg": [cube([-3.9, 0, -2], [4, 12, 4], [0, 48], 0.5)], "leftLeg": [cube([-0.1, 0, -2], [4, 12, 4], [0, 48], 0.5, True)]},
+    "leggings": {"body": [cube([-4, 12, -2], [8, 12, 4], [16, 16], 0.5)],      # leggings read the layer 2 sheet
+                 "rightLeg": [cube([-3.9, 0, -2], [4, 12, 4], [0, 16], 0.5)], "leftLeg": [cube([-0.1, 0, -2], [4, 12, 4], [0, 16], 0.5, True)]},
     "boots": {"rightLeg": [cube([-3.9, 0, -2], [4, 12, 4], [0, 16], 1)], "leftLeg": [cube([-0.1, 0, -2], [4, 12, 4], [0, 16], 1, True)]},
 }
 def geo(ident, bones):
-    return {"format_version": "1.12.0", "minecraft:geometry": [{"description": {"identifier": ident, "texture_width": 128, "texture_height": 64,
+    return {"format_version": "1.12.0", "minecraft:geometry": [{"description": {"identifier": ident, "texture_width": 64, "texture_height": 32,
             "visible_bounds_width": 3, "visible_bounds_height": 3.5, "visible_bounds_offset": [0, 1.5, 0]},
             "bones": [{"name": n, "pivot": PIV[n], "cubes": cs} for n, cs in bones.items()]}]}
 
@@ -125,7 +125,7 @@ def guard_parts(reg, tier):
     S['plate'] = Style(met, p_plate)
     S['plate_trim'] = Style(met, p_plate, trim=(trim, rim))
     S['flap'] = Style(CLOTH, p_cloth, cloth=True, trim=(trim, hem))
-    S['cape'] = Style(CLOTH, p_cloth, cloth=True, trim=(trim, lambda f, x, y, w, h: f == 'south' and (x in (0, w - 1) or y == h - 1)))
+    S['cape'] = Style(CLOTH, p_cloth, cloth=True, trim=(trim, lambda f, x, y, w, h: f in ('north', 'south') and (x in (0, w - 1) or y == h - 1)))
     S['knee'] = Style(met, p_plate, dots=[(trim, lambda f, x, y, w, h: f == 'north' and (x, y) == (w // 2, 1), 4)])
     S['lame'] = Style(met, p_plate, trim=(trim, edge_side))
     P = {'helmet': [], 'chestplate': [], 'leggings': [], 'boots': []}
@@ -177,14 +177,14 @@ def guard_parts(reg, tier):
         low = {'guard': 21.5, 'vale': 22, 'frostmarch': 22, 'saltreach': 21.5, 'emberwaste': 21.5, 'blackfen': 20.5}[reg]
         add('chestplate', 'rightArm', [-9.5, low - 2, -3.25], [5, 2, 6.5], 'lame', 'leftArm', [4.5, low - 2, -3.25])
     if tier == 'netherite':                # a cape in the banner colour, edged in the region's trim
-        add('chestplate', 'body', [-5, 3, 3.4], [10, 21, 1], 'cape')
+        add('chestplate', 'body', [-5, 8, 3.4], [10, 16, 1], 'cape')
     return P, S
 
 def relic_parts(name, ramp):
     S = {'cloak': Style(ramp, lambda f, x, y, w, h: 2 + (1 if x % 3 == 1 else 0) + (1 if y == 0 else 0) - (1 if y == h - 1 else 0))}
     P = {'helmet': [], 'chestplate': [], 'leggings': [], 'boots': []}
     if name == 'crownless_mantle':        # a long cloak with a high collar and draped shoulders
-        P['chestplate'] += [('body', [-5, 1, 3.4], [10, 23, 1], 'cloak', False),
+        P['chestplate'] += [('body', [-5, 8, 3.4], [10, 16, 1], 'cloak', False),
                             ('body', [-4.5, 22.5, -3.5], [9, 3, 7], 'cloak', False),
                             ('rightArm', [-9.5, 21.5, -3.5], [5, 4, 7], 'cloak', False), ('leftArm', [4.5, 21.5, -3.5], [5, 4, 7], 'cloak', True)]
     else:                                 # widow's veil: lace drapes down the back and both sides of the head
@@ -193,39 +193,56 @@ def relic_parts(name, ramp):
     return P, S
 
 
-# ---- texture: flat sheets on the left, 3D parts packed on the right
-def pack(parts):
-    """Give every distinct (size, style) part a box-UV slot in x 64..127. Returns {(size, key): (u, v)}."""
-    slots, x, y, row = {}, 64, 0, 0
+# ---- texture: one 64x32 sheet per piece in the exact vanilla armour layout (so armour trims, which the game lays
+# over the model by UV in that layout, still land on the right pixels). The 3D parts are painted only where vanilla
+# armour and trims leave the sheet empty, and each face pair (front/back, left/right, top/bottom) shares one patch.
+SAFE = {1: [(32, 0, 32, 16), (56, 16, 8, 16)],     # layer 1: the hat area and the strip beside the arms
+        2: [(0, 0, 64, 16), (40, 16, 24, 16)]}     # layer 2: everything above the legs and body
+LAYER = {'helmet': 1, 'chestplate': 1, 'leggings': 2, 'boots': 1}
+
+def isz(v): return max(1, int(v + 0.5))
+
+def pack(parts, layer):
+    """Patches for each distinct (size, style) part: {'W': front/back w x h, 'D': sides d x h, 'T': top/bottom w x d}."""
+    zones = SAFE[layer]
+    used = [[False] * 64 for _ in range(32)]
     need = []
-    for piece in parts.values():
-        for bone, o, s, key, mir in piece:
-            k = (tuple(s), key)
-            if k not in slots and k not in [n[0] for n in need]: need.append((k, s))
-    for k, s in sorted(need, key=lambda n: -(n[1][2] + n[1][1])):
-        w, h, d = (max(1, int(round(v))) for v in s)
-        bw, bh = 2 * (w + d), d + h
-        if x + bw > 128: x, y, row = 64, y + row, 0
-        if y + bh > 64: raise SystemExit(f'texture full: {k}')
-        slots[k] = (x, y); x += bw; row = max(row, bh)
-    return slots
+    for bone, o, s, key, mir in parts:
+        k = (tuple(s), key)
+        if k not in [n[0] for n in need]: need.append((k, s))
+    rects = []
+    for k, s in need:
+        w, h, d = (isz(v) for v in s)
+        rects += [(k, 'W', w, h), (k, 'D', d, h), (k, 'T', w, d)]
+    out = {}
+    for k, f, w, h in sorted(rects, key=lambda r: (-r[3], -r[2])):
+        spot = None
+        for zx, zy, zw, zh in zones:
+            for y in range(zy, zy + zh - h + 1):
+                for x in range(zx, zx + zw - w + 1):
+                    if all(not used[y + j][x + i] for j in range(h) for i in range(w)): spot = (x, y); break
+                if spot: break
+            if spot: break
+        if not spot: raise SystemExit(f'no room on the layer {layer} sheet for {k} {f} {w}x{h}')
+        for j in range(h):
+            for i in range(w): used[spot[1] + j][spot[0] + i] = True
+        out.setdefault(k, {})[f] = (spot[0], spot[1], w, h)
+    return out
 
-def paint(im, slots, styles, cloth_alpha):
-    px = im.load()
-    for (s, key), (u, v) in slots.items():
-        w, h, d = (max(1, int(round(t))) for t in s)
-        for f, (x0, y0, fw, fh) in faces(u, v, w, h, d).items():
-            for yy in range(fh):
-                for xx in range(fw):
-                    px[x0 + xx, y0 + yy] = styles[key].px(f, xx, yy, fw, fh, cloth_alpha)
+FACE_OF = {'W': 'north', 'D': 'east', 'T': 'up'}
+def paint(im, slots, styles, cloth_alpha, base):
+    px = im.load(); bp = base.load()
+    for (s, key), patches in slots.items():
+        for f, (x0, y0, w, h) in patches.items():
+            for yy in range(h):
+                for xx in range(w):
+                    assert bp[x0 + xx, y0 + yy][3] == 0, 'a 3D part would paint over the armour'
+                    px[x0 + xx, y0 + yy] = styles[key].px(FACE_OF[f], xx, yy, w, h, cloth_alpha)
 
-def flat_sheet(l1, l2, alpha_fix=None):
-    im = Image.new('RGBA', (128, 64), (0, 0, 0, 0))
-    a = Image.open(l1).convert('RGBA'); b = Image.open(l2).convert('RGBA')
-    if a.size != (64, 32):   # relic sheets: one flat noise picture at another size
-        a = a.resize((64, 32), Image.NEAREST); b = b.resize((64, 32), Image.NEAREST)
-    im.paste(a, (0, 0)); im.paste(b, (0, 32))
-    return im
+def face_uv(patches):
+    W, D, T = patches['W'], patches['D'], patches['T']
+    r = lambda p: {"uv": [p[0], p[1]], "uv_size": [p[2], p[3]]}
+    return {"north": r(W), "south": r(W), "east": r(D), "west": r(D), "up": r(T), "down": r(T)}
 
 VIS = {"helmet": "variable.helmet_layer_visible = 0.0;", "chestplate": "variable.chest_layer_visible = 0.0;",
        "leggings": "variable.leg_layer_visible = 0.0;", "boots": "variable.boot_layer_visible = 0.0;"}
@@ -234,22 +251,37 @@ def write(path, data):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, 'w') as f: json.dump(data, f, indent=2); f.write('\n')
 
+def sheet(path):
+    im = Image.open(path).convert('RGBA')
+    return im.resize((64, 32), Image.NEAREST) if im.size != (64, 32) else im
+
 def build(name, parts, styles, l1, l2, pieces, attach, leather):
-    im = flat_sheet(l1, l2)
-    slots = pack(parts)
-    paint(im, slots, styles, leather)
-    os.makedirs(RP + 'textures/models/siege_armor', exist_ok=True)
-    im.save(RP + f'textures/models/siege_armor/{name}.png')
     for piece in pieces:
+        layer = LAYER[piece]
+        base = sheet(l1 if layer == 1 else l2)
+        if not leather:   # relic sheets are one noise picture over the whole sheet: keep only the armour areas
+            keep = Image.new('RGBA', (64, 32), (0, 0, 0, 0)); kp = keep.load(); bp = base.load()
+            for zx, zy, zw, zh in SAFE[layer]:
+                for y in range(zy, zy + zh):
+                    for x in range(zx, zx + zw): kp[x, y] = (0, 0, 0, 255)
+            for y in range(32):
+                for x in range(64):
+                    if kp[x, y][3]: bp[x, y] = (0, 0, 0, 0)
+        im = base.copy()
+        slots = pack(parts[piece], layer)
+        paint(im, slots, styles, leather, base)
+        tex = f'textures/models/siege_armor/{name}_{piece}'
+        os.makedirs(RP + 'textures/models/siege_armor', exist_ok=True)
+        im.save(RP + tex + '.png')
         bones = {k: [dict(c) for c in v] for k, v in BASE[piece].items()}
         for bone, o, s, key, mir in parts[piece]:
-            bones.setdefault(bone, []).append(cube(o, s, list(slots[(tuple(s), key)]), 0, mir))
+            bones.setdefault(bone, []).append({"origin": o, "size": s, "uv": face_uv(slots[(tuple(s), key)])})
         ident = f'geometry.siege_{name}_{piece}'
         write(RP + f'models/entity/armor/{name}_{piece}.geo.json', geo(ident, bones))
         path = RP + f'attachables/{attach(piece)}.json'
         att = json.load(open(path))
         d = att['minecraft:attachable']['description']
-        d['textures']['default'] = f'textures/models/siege_armor/{name}'
+        d['textures']['default'] = tex
         d['geometry'] = {'default': ident}
         d['scripts'] = {'parent_setup': VIS[piece]}
         write(path, att)
@@ -266,7 +298,8 @@ for reg in ['guard', 'vale', 'frostmarch', 'saltreach', 'emberwaste', 'blackfen'
 
 for relic, piece, img in (('crownless_mantle', 'chestplate', 'siege_b_crownless_mantle'), ('widows_veil', 'helmet', 'siege_b_widows_veil')):
     src = Image.open(FLAT + img + '.png').convert('RGB')
-    avg = [sum(c[i] for c in src.getdata()) // (src.width * src.height) for i in range(3)]
+    cols = [src.getpixel((x, y)) for y in range(src.height) for x in range(src.width)]
+    avg = [sum(c[i] for c in cols) // len(cols) for i in range(3)]
     ramp = [tuple(max(0, min(255, int(v * k))) for v in avg) for k in (0.55, 0.72, 0.88, 1.0, 1.12, 1.25)]
     parts, styles = relic_parts(relic, ramp)
     build(f'relic_{relic}', parts, styles, FLAT + img + '.png', FLAT + img + '.png', [piece], lambda p, r=relic: f'bestiary_{r}', False)

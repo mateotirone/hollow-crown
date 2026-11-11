@@ -473,7 +473,8 @@ function buildVariant(v) {
         const skin = solid(0xb9bec6);
         g.add(buildGeo({ ...M.geos["geometry.humanoid.custom"], bones: M.geos["geometry.humanoid.custom"].bones.map((b) => ({ ...b, cubes: b.cubes.filter((c) => !c.inflate) })) }, () => skin));
       }
-      for (const id of v.geos || []) g.add(buildGeo(M.geos[id], getMat));
+      // geoMats: one texture per piece (the 3D armour sets keep each piece on its own vanilla-layout sheet)
+      for (const id of v.geos || []) g.add(buildGeo(M.geos[id], v.geoMats ? () => (cache["g:" + id] ??= liveMaterial(v.geoMats[id], v.tint)) : getMat));
       return g;
     }
     case "item": case "flat": {

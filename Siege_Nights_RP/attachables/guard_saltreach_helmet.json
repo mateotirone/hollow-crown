@@ -8,7 +8,7 @@
         "enchanted": "armor_leather_enchanted"
       },
       "textures": {
-        "default": "textures/models/siege_armor/guard_saltreach",
+        "default": "textures/models/siege_armor/guard_saltreach_helmet",
         "enchanted": "textures/misc/enchanted_actor_glint"
       },
       "geometry": {

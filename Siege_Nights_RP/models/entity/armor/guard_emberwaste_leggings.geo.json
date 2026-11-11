@@ -4,8 +4,8 @@
     {
       "description": {
         "identifier": "geometry.siege_guard_emberwaste_leggings",
-        "texture_width": 128,
-        "texture_height": 64,
+        "texture_width": 64,
+        "texture_height": 32,
         "visible_bounds_width": 3,
         "visible_bounds_height": 3.5,
         "visible_bounds_offset": [
@@ -36,7 +36,7 @@
               ],
               "uv": [
                 16,
-                48
+                16
               ],
               "inflate": 0.5
             }
@@ -63,7 +63,7 @@
               ],
               "uv": [
                 0,
-                48
+                16
               ],
               "inflate": 0.5
             }
@@ -90,7 +90,7 @@
               ],
               "uv": [
                 0,
-                48
+                16
               ],
               "inflate": 0.5,
               "mirror": true

@@ -4,8 +4,8 @@
     {
       "description": {
         "identifier": "geometry.siege_guard_frostmarch_helmet",
-        "texture_width": 128,
-        "texture_height": 64,
+        "texture_width": 64,
+        "texture_height": 32,
         "visible_bounds_width": 3,
         "visible_bounds_height": 3.5,
         "visible_bounds_offset": [
@@ -51,10 +51,68 @@
                 2,
                 11
               ],
-              "uv": [
-                64,
-                0
-              ]
+              "uv": {
+                "north": {
+                  "uv": [
+                    43,
+                    0
+                  ],
+                  "uv_size": [
+                    11,
+                    2
+                  ]
+                },
+                "south": {
+                  "uv": [
+                    43,
+                    0
+                  ],
+                  "uv_size": [
+                    11,
+                    2
+                  ]
+                },
+                "east": {
+                  "uv": [
+                    43,
+                    2
+                  ],
+                  "uv_size": [
+                    11,
+                    2
+                  ]
+                },
+                "west": {
+                  "uv": [
+                    43,
+                    2
+                  ],
+                  "uv_size": [
+                    11,
+                    2
+                  ]
+                },
+                "up": {
+                  "uv": [
+                    32,
+                    0
+                  ],
+                  "uv_size": [
+                    11,
+                    11
+                  ]
+                },
+                "down": {
+                  "uv": [
+                    32,
+                    0
+                  ],
+                  "uv_size": [
+                    11,
+                    11
+                  ]
+                }
+              }
             },
             {
               "origin": [
@@ -67,10 +125,68 @@
                 2,
                 1
               ],
-              "uv": [
-                92,
-                24
-              ]
+              "uv": {
+                "north": {
+                  "uv": [
+                    54,
+                    0
+                  ],
+                  "uv_size": [
+                    1,
+                    2
+                  ]
+                },
+                "south": {
+                  "uv": [
+                    54,
+                    0
+                  ],
+                  "uv_size": [
+                    1,
+                    2
+                  ]
+                },
+                "east": {
+                  "uv": [
+                    55,
+                    0
+                  ],
+                  "uv_size": [
+                    1,
+                    2
+                  ]
+                },
+                "west": {
+                  "uv": [
+                    55,
+                    0
+                  ],
+                  "uv_size": [
+                    1,
+                    2
+                  ]
+                },
+                "up": {
+                  "uv": [
+                    56,
+                    0
+                  ],
+                  "uv_size": [
+                    1,
+                    1
+                  ]
+                },
+                "down": {
+                  "uv": [
+                    56,
+                    0
+                  ],
+                  "uv_size": [
+                    1,
+                    1
+                  ]
+                }
+              }
             }
           ]
         }

@@ -8,7 +8,7 @@
         "enchanted": "armor_leather_enchanted"
       },
       "textures": {
-        "default": "textures/models/siege_armor/guard_vale",
+        "default": "textures/models/siege_armor/guard_vale_leggings",
         "enchanted": "textures/misc/enchanted_actor_glint"
       },
       "geometry": {
