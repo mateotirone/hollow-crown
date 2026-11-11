@@ -177,6 +177,12 @@ export const MOBS = {
   "hp": 60,
   "lore": "A third of the Reeve, ticking on its own."
  },
+ "siege:spinning_cog": {
+  "name": "Spinning Cog",
+  "family": "projectile",
+  "hp": 1,
+  "lore": ""
+ },
  "siege:pale_huntsman": {
   "name": "The Pale Huntsman",
   "family": "boss",

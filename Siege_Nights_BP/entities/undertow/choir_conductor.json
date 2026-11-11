@@ -83,6 +83,7 @@
     "on_death": "query.last_hit_by_player ? 500 : 0"
    },
    "minecraft:boss": {
+    "name": "The Choir",
     "should_darken_sky": false,
     "hud_range": 64
    }

@@ -280,6 +280,7 @@ Every mob has a box model in `models/entity/bestiary/<id>.geo.json` and a genera
 | Inquisitor (Mob) | `inquisitor.png` | 128×128 | House style, generated |
 | The Clockwork Reeve (Boss) | `clockwork_reeve.png` | 128×128 | House style, generated |
 | Reeve's Cog (Boss helper) | `reeve_cog.png` | 128×128 | House style, generated |
+| Spinning Cog (the Reeve's thrown cog) | `spinning_cog.png` | 64×64 | House style, generated |
 | The Pale Huntsman (Boss) | `pale_huntsman.png` | 64×64 | House style, generated |
 | The Drowned Bride (Boss, ghost (alpha)) | `drowned_bride.png` | 128×128 | House style, generated |
 | The Ash Seneschal (Boss) | `ash_seneschal.png` | 128×128 | House style, generated |
@@ -504,6 +505,10 @@ Choirsteel's 3D set is `studio/art/build_choirsteel_3d.py` (PR #83). The guard-o
 Made by `tools/minimap_tiles.py` from the top-down render of the generated world (`map/genworld.py`'s preview) and `map/terrain.npz`. Run it again whenever the world map is regenerated; do not paint these by hand.
 - `textures/ui/hc/minimap/mxXXzZZ.png`: 1,600 map views, 72x72 RGBA (Bedrock showed palette PNGs black) (3 x 3 tiles of 64 blocks around tile XX,ZZ), slightly darkened, with plot and town markers: generated
 - `textures/ui/hc/minimap/mnone__.png` (uncharted), `aq..ay.png` (player arrow, 12x12, eight directions), `frame.png` (80x80 border): first pass
+
+## Boss health bars (2026-11-11)
+Made by `tools/bossbar_ui.py` (which also wires them into `ui/hud_screen.json`). One look per boss: Clockwork Reeve (brass, clock ticks), Pale Huntsman (bone), Drowned Bride (sea green), Ash Seneschal (embers), Mother of Changelings (moss on violet), Warlord King (blood and iron), the Pretender (tarnished silver), the Choir (pale violet), the Hollow Crown regent and Morvane (dark purple, magenta veins, blue glints).
+- `textures/ui/hc/bossbar/<boss>_frame.png` (196x13, frame with end caps and the empty strip) and `<boss>_fill.png` (182x5, the health): first pass, **awaiting your review**, untested in game
 
 ## Dyed icon layers (2026-11-11, textures thread)
 Every dyeable item (Castle Guard armour and the regional sets, 64 pieces) uses `minecraft:icon` with `default` and `dyed` textures. `textures/items/<icon>_dyed.png` holds only the tabard cloth in light grey so the game tints it with the dye. Made by `studio/art/build_dyed_icons.py` (re-run after repainting a guard icon or adding a dyeable item). Without the dyed layer the icons showed blank in game.

@@ -133,6 +133,10 @@ def entity_bp(m):
     groups = {}; events = {}
     if m.get("static"):
         c["minecraft:movement"] = {"value": 0}; c["minecraft:persistent"] = {}
+        if m.get("drifts"): c["minecraft:physics"] = {"has_gravity": False, "has_collision": False}   # moved only by script: it never falls or bumps
+        if m.get("lifetime"):   # a script-thrown prop cleans itself up if the script that moves it stops (world closed mid-flight)
+            c["minecraft:timer"] = {"time": m["lifetime"], "looping": False, "time_down_event": {"event": "siege:fade"}}
+            groups["siege:gone"] = {"minecraft:instant_despawn": {}}; events["siege:fade"] = {"add": {"component_groups": ["siege:gone"]}}
         if not m.get("no_loot") and mid in DROPS: c["minecraft:loot"] = {"table": f"loot_tables/entities/bestiary/{mid}.json"}
         if mid == "chapel_bell":
             groups["siege:ringing"] = {"minecraft:is_charged": {}}
@@ -209,7 +213,7 @@ def entity_bp(m):
             events[f"siege:{flag}_on"] = {"add": {"component_groups": [f"siege:{flag}"]}}; events[f"siege:{flag}_off"] = {"remove": {"component_groups": [f"siege:{flag}"]}}
         c["minecraft:persistent"] = {}; c.pop("minecraft:despawn", None)
     if m.get("boss"):
-        c["minecraft:boss"] = {"should_darken_sky": False, "hud_range": 48}; c["minecraft:persistent"] = {}
+        c["minecraft:boss"] = {"name": m["name"], "should_darken_sky": False, "hud_range": 48}  # "name" is the bar title; without it the bar says "Unknown"; c["minecraft:persistent"] = {}
         c["minecraft:fire_immune"] = {}
     elif fam in ("boss_add", "raider"): c["minecraft:persistent"] = {}
     elif fam != "champion": c["minecraft:despawn"] = {"despawn_from_distance": {}}

@@ -34,6 +34,37 @@ function tiles(count, onMiss, missText) {
   };
 }
 
+// The Reeve's cog: a real spinning gear (siege:spinning_cog) flies from his chest to `to`, landing in `ticks`,
+// just as the marked zone there goes off. It's only the picture: the zone does the damage, so dodging works.
+export function flingCog(f, to, ticks) {
+  const at = f.entity.location;
+  const from = { x: at.x, y: at.y + 4, z: at.z };
+  const end = { x: to.x, y: to.y + 0.7, z: to.z };
+  const d = Math.hypot(end.x - from.x, end.z - from.z) || 1;
+  const facing = { x: end.x + (end.x - from.x) / d * 4, y: end.y, z: end.z + (end.z - from.z) / d * 4 };
+  const cog = f.place("siege:spinning_cog", from);
+  if (!cog) return undefined;
+  sound(f.dim, "mob.irongolem.throw", from, 0.6, 1);
+  let t = 0;
+  const run = system.runInterval(() => {
+    t++;
+    if (!cog.isValid) return system.clearRun(run);
+    const k = Math.min(1, t / Math.max(1, ticks));
+    try {
+      cog.teleport(cogPath(from, end, k), { facingLocation: facing });
+      if (t % 4 === 0) particle(f.dim, "minecraft:basic_crit_particle", cog.location);
+      if (k >= 1) { sound(f.dim, "random.anvil_land", end, 1.6, 0.5); cog.remove(); }
+    } catch { /* chunk unloaded: the prop's own timer clears it */ }
+    if (k >= 1) system.clearRun(run);
+  }, 1);
+  return cog;
+}
+
+// Where the thrown cog is, k of the way there (0 to 1): straight at you with a little lift in the middle
+export function cogPath(from, end, k) {
+  return { x: from.x + (end.x - from.x) * k, y: from.y + (end.y - from.y) * k + Math.sin(k * Math.PI) * 1.5, z: from.z + (end.z - from.z) * k };
+}
+
 // Shared: a straight line from the boss toward where a player was standing. Dodge sideways.
 export function lance(length, damage, after) {
   return {
@@ -89,7 +120,11 @@ registerBoss({
       }, "§bTime stops around you.") },
     { id: "cog", every: 110, windup: 25, warn: "A cog comes spinning at you!",
       start: (f) => {
-        for (const p of f.players()) f.zone(floorOf(f, p.location), 2.5, 25, (q) => hurt(q, 7, "entityAttack", f.entity), "minecraft:basic_crit_particle");
+        for (const p of f.players()) {
+          const spot = floorOf(f, p.location);
+          f.zone(spot, 2.5, 25, (q) => hurt(q, 7, "entityAttack", f.entity), "minecraft:basic_crit_particle");
+          flingCog(f, spot, 25);
+        }
       } },
     // The minute runs backwards: everyone is put back where they stood when the hands began to turn, and a cog is already on its way there
     { id: "rewind", every: 260, windup: 40, warn: "The hands turn back. Remember where you are standing!", sound: "block.bell.hit",
@@ -101,6 +136,7 @@ registerBoss({
           try { m.p.teleport(m.at); } catch { continue; }
           m.p.onScreenDisplay.setActionBar("§bThe minute runs backwards. Move!");
           f.zone(floorOf(f, m.at), 2.5, 20, (q) => hurt(q, 8, "entityAttack", f.entity), "minecraft:basic_crit_particle");
+          flingCog(f, floorOf(f, m.at), 20);
         }
       } },
   ],
@@ -136,7 +172,7 @@ registerBoss({
 //    sight. At 60% the Rimewolves come. At 25% he anchors himself in three Rime Pillars: break them.
 // =====================================================================================
 registerBoss({
-  id: "huntsman", type: "siege:pale_huntsman", name: "The Pale Huntsman", radius: 28, phases: [0.6, 0.25],
+  id: "huntsman", type: "siege:pale_huntsman", name: "The Pale Huntsman", radius: 28, phases: [0.6, 0.25], standoff: 10,
   intro: "is already watching you.",
   phaseNames: ["", "The pack answers", "Anchored in ice"],
   attacks: [
@@ -491,6 +527,13 @@ export function warlordBody(type, tags) {
 }
 
 addTests("bestiary", {
+  "the Reeve's thrown cog starts at his chest and lands on the marked spot": () => {
+    const from = { x: 0, y: 70, z: 0 }, end = { x: 6, y: 66, z: -8 };
+    assertEqual(cogPath(from, end, 0), from);
+    assertEqual(cogPath(from, end, 1).x, 6); assertEqual(Math.round(cogPath(from, end, 1).y * 1000) / 1000, 66); assertEqual(cogPath(from, end, 1).z, -8);
+    assert(cogPath(from, end, 0.5).y > 68, "the cog lifts a little mid-flight");
+    assert(MOBS["siege:spinning_cog"], "the spinning cog is in the bestiary data");
+  },
   "every boss has a body, a name and loot that exists": () => {
     for (const id of ["reeve", "huntsman", "bride", "seneschal", "mother", "warlord_king"]) assert(bossDefs().some((d) => d.id === id), `boss ${id} is not registered`);
     for (const def of bossDefs()) {

@@ -204,6 +204,7 @@ entity.siege:clockwork_reeve.name=The Clockwork Reeve
 item.spawn_egg.entity.siege:clockwork_reeve.name=The Clockwork Reeve Spawn Egg
 entity.siege:reeve_cog.name=Reeve's Cog
 item.spawn_egg.entity.siege:reeve_cog.name=Reeve's Cog Spawn Egg
+entity.siege:spinning_cog.name=Spinning Cog
 entity.siege:pale_huntsman.name=The Pale Huntsman
 item.spawn_egg.entity.siege:pale_huntsman.name=The Pale Huntsman Spawn Egg
 entity.siege:drowned_bride.name=The Drowned Bride
