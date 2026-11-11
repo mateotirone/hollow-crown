@@ -1,0 +1,31 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "siege:crown_stand",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "stand": "textures/entity/siege_crown_stand",
+        "crown": "textures/models/armor/siege_hollow_crown"
+      },
+      "geometry": {
+        "stand": "geometry.siege_crown_stand",
+        "crown": "geometry.siege_crown_stand_crown"
+      },
+      "animations": {
+        "float": "animation.siege_crown_stand.float"
+      },
+      "scripts": {
+        "animate": [
+          "float"
+        ]
+      },
+      "render_controllers": [
+        "controller.render.siege_crown_stand",
+        "controller.render.siege_crown_stand_crown"
+      ]
+    }
+  }
+}

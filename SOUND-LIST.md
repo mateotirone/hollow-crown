@@ -412,7 +412,7 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 
 | Vanilla sound | Places | Used by |
 |---|---|---|
-| `block.amethyst_block.chime` | 9 | bestiary (4), undertow (3), lore (2) |
+| `block.amethyst_block.chime` | 10 | bestiary (4), undertow (4), lore (2) |
 | `item.shield.block` | 4 | bestiary (3), townhall |
 | `armor.equip_leather` | 3 | dragons, horses, looks |
 | `mob.blaze.shoot` | 3 | roletrials (2), townhall |
@@ -431,6 +431,7 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `armor.equip_iron` | 1 | horses |
 | `armor.equip_netherite` | 1 | siege |
 | `beacon.activate` | 1 | townhall |
+| `block.amethyst_block.break` | 1 | undertow |
 | `block.amethyst_block.resonate` | 1 | undertow |
 | `block.bell.use` | 1 | lore |
 | `block.campfire.crackle` | 1 | dragons |

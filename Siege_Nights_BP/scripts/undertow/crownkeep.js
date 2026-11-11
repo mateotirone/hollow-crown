@@ -1,23 +1,27 @@
 // Keeping the Hollow Crown in the world. There is only one Crown (leaveCrown in index.js puts it in
 // the Seat's chest once), so it must never be lost for good.
 //
-// Whenever the Crown lies on the ground as an item (knocked off a head, dropped when the unworthy
-// die, thrown, spilled on death, or given by hc:give_crown), this file keeps track of it:
-//   - it stays where it fell: Minecraft clears dropped items after 5 minutes, so every 4 minutes
-//     the item is quietly swapped for a fresh one in the same spot.
-//   - if it is gone (burnt in lava or fire, fallen into the void, blown up, cleared by a command)
-//     and nobody picked it up, the "crownLost" event is sent and index.js puts it back in its
-//     chest at the Seat.
+// The Crown Stand (Mateo's idea): whenever the Crown is dropped (knocked off a head, dropped when
+// the unworthy die, thrown, spilled on death, or given by hc:give_crown), it does not lie on the
+// ground as an item. It comes to rest on a small floating stone stand where it fell. The stand
+// cannot be hurt, burnt, pushed or cleared away; clicking it takes the Crown.
+//   - dropped over lava, or over nothing (the void), there is nowhere to rest: the Crown goes home,
+//     back into its chest at the Seat (the "crownLost" event; index.js does the putting back).
+//   - if a stand cannot be made, the Crown stays an item and is still looked after: it is swapped
+//     for a fresh item every 4 minutes so Minecraft's 5 minute clean-up never takes it, and if it is
+//     destroyed while nobody holds it, it goes home.
 //   - while its spot is unloaded, nothing happens: it waits there until someone comes back.
 //
 // All of this is a handful of lookups every 5 seconds, and only while a Crown is lying somewhere.
 
 import { world, system, ItemStack, EquipmentSlot } from "@minecraft/server";
-import { emit } from "../siege/api.js";
+import { emit, addMenuLabel } from "../siege/api.js";
 import { onTick } from "../core/loop.js";
 import { load, save } from "./data.js";
+import { sfx } from "../core/sfx.js";
 
 export const CROWN_ITEM = "siege:hollow_crown";
+export const CROWN_STAND = "siege:crown_stand"; // built by studio/build_crown_stand.py
 export const KEEP = {
   checkSeconds: 5, // how often a lying Crown is looked at
   refreshSeconds: 240, // swap it for a fresh item before Minecraft's 5 minute clean-up
@@ -36,6 +40,14 @@ export function crownFate({ found, held, loaded, misses }) {
   if (held) return "held";
   if (!loaded) return "waiting";
   return misses + 1 >= KEEP.missesToLose ? "lost" : "missing";
+}
+// Where a dropped Crown comes to rest, from the first solid block under it (undefined: nothing
+// under it at all). Pure, so the self-test can check it. Returns the stand's height, or undefined
+// for "nowhere to rest, send it home".
+export function standHeight(ground) {
+  if (!ground) return undefined;
+  if (/lava/.test(ground.typeId ?? "")) return undefined;
+  return ground.y + 1.25;
 }
 // Seconds the item has been lying loaded -> time to swap it for a fresh one?
 export const needsRefresh = (age) => age >= KEEP.refreshSeconds;
@@ -57,21 +69,90 @@ function track(entity) {
   store();
 }
 
+// The Crown has nowhere to be: unless another Crown is still about, it goes home.
+function goHome(d) {
+  drops = list().filter((x) => x !== d);
+  if (!list().length) emit("crownLost", { dim: d.dim, x: d.x, y: d.y, z: d.z });
+}
+
+// The first block under a spot that a Crown could rest on (through air, water and plants), or
+// lava, or undefined over the void. Throws if the column is not loaded.
+function groundUnder(dim, at) {
+  const min = dim.heightRange?.min ?? -64;
+  const x = Math.floor(at.x), z = Math.floor(at.z);
+  for (let y = Math.min(Math.floor(at.y), (dim.heightRange?.max ?? 320) - 1); y >= Math.max(min, Math.floor(at.y) - 96); y--) {
+    const b = dim.getBlock({ x, y, z });
+    if (!b) throw new Error("not loaded");
+    if (b.isAir || b.typeId === "minecraft:water" || b.typeId === "minecraft:flowing_water") continue;
+    if (b.isLiquid || /lava/.test(b.typeId) || b.isSolid) return { y, typeId: b.typeId };
+  }
+  return undefined;
+}
+
+// Put a dropped Crown item onto a stand where it fell. False if no stand could be made.
+function toStand(item) {
+  const dim = item.dimension, at = item.location, stack = stackOf(item);
+  const y = standHeight(groundUnder(dim, at));
+  if (y === undefined) {
+    swapping.add(item.id);
+    item.remove();
+    goHome({ dim: dim.id, x: at.x, y: at.y, z: at.z });
+    store();
+    return true;
+  }
+  const spot = { x: Math.floor(at.x) + 0.5, y, z: Math.floor(at.z) + 0.5 };
+  const stand = dim.spawnEntity(CROWN_STAND, spot);
+  try { stand.setDynamicProperty("hc:crown_lore", JSON.stringify(stack?.getLore() ?? [])); } catch { /* plain crown */ }
+  swapping.add(item.id);
+  item.remove();
+  track(stand);
+  try { sfx(dim, "block.amethyst_block.chime", spot, { volume: 1, pitch: 0.6 }); } catch { /* quiet */ }
+  return true;
+}
+
 // Every Crown that turns into an item on the ground, however it got there.
 world.afterEvents.entitySpawn.subscribe((e) => {
   const ent = e.entity;
   try {
     if (ent?.typeId !== "minecraft:item" || !isCrown(stackOf(ent))) return;
-    track(ent);
+    let placed = false;
+    try { placed = toStand(ent); } catch { /* not loaded enough: keep it as an item */ }
+    if (!placed && ent.isValid) track(ent);
   } catch { /* gone again already */ }
 });
+
+// Clicking the stand takes the Crown, straight into your inventory.
+world.beforeEvents.playerInteractWithEntity.subscribe((e) => {
+  if (e.target.typeId !== CROWN_STAND) return;
+  e.cancel = true;
+  const p = e.player, stand = e.target;
+  system.run(() => takeFromStand(p, stand));
+});
+
+function takeFromStand(p, stand) {
+  if (!stand.isValid) return;
+  const crown = new ItemStack(CROWN_ITEM, 1);
+  try { const lore = JSON.parse(stand.getDynamicProperty("hc:crown_lore") ?? "[]"); if (lore.length) crown.setLore(lore); } catch { /* plain crown */ }
+  const inv = p.getComponent("inventory")?.container;
+  if (!inv || inv.emptySlotsCount === 0) return void p.onScreenDisplay.setActionBar("§5Your hands are full. Make room to take the Hollow Crown.");
+  inv.addItem(crown);
+  drops = list().filter((x) => x.id !== stand.id);
+  store();
+  swapping.add(stand.id);
+  const at = stand.location;
+  stand.remove();
+  try { sfx(p.dimension, "block.amethyst_block.break", at, { volume: 1, pitch: 0.5 }); } catch { /* quiet */ }
+  p.onScreenDisplay.setActionBar("§dYou take the Hollow Crown.");
+}
+
+addMenuLabel({ entity: CROWN_STAND, hint: "Click: take the Hollow Crown" });
 
 // Picked up, burnt, unloaded...: look two ticks later, when a pickup has landed in an inventory.
 world.afterEvents.entityRemove.subscribe((e) => {
   if (swapping.delete(e.removedEntityId)) return;
   const d = list().find((x) => x.id === e.removedEntityId);
   if (d) system.runTimeout(() => { if (list().includes(d)) check(d, 0); }, 2);
-}, { entityTypes: ["minecraft:item"] });
+}, { entityTypes: ["minecraft:item", CROWN_STAND] });
 
 function hasCrown(container) {
   if (!container) return false;
@@ -118,8 +199,9 @@ function spotLoaded(dim, d) {
 function findNear(dim, d) {
   try {
     const taken = new Set(list().map((x) => x.id));
-    return dim.getEntities({ type: "minecraft:item", location: { x: d.x, y: d.y, z: d.z }, maxDistance: KEEP.searchRadius })
-      .find((e) => !taken.has(e.id) && isCrown(stackOf(e)));
+    const near = { location: { x: d.x, y: d.y, z: d.z }, maxDistance: KEEP.searchRadius };
+    return dim.getEntities({ ...near, type: CROWN_STAND }).find((e) => !taken.has(e.id))
+      ?? dim.getEntities({ ...near, type: "minecraft:item" }).find((e) => !taken.has(e.id) && isCrown(stackOf(e)));
   } catch {
     return undefined;
   }
@@ -156,15 +238,13 @@ function check(d, seconds) {
     const l = ent.location;
     Object.assign(d, { x: l.x, y: l.y, z: l.z, misses: 0 });
     d.age += seconds;
-    if (needsRefresh(d.age)) { try { refresh(ent, d); } catch { /* try again next time */ } }
+    if (ent.typeId === "minecraft:item" && needsRefresh(d.age)) { try { refresh(ent, d); } catch { /* try again next time */ } }
   } else if (fate === "held") {
     drops = list().filter((x) => x !== d);
   } else if (fate === "missing") {
     d.misses++;
   } else if (fate === "lost") {
-    drops = list().filter((x) => x !== d);
-    // Another Crown still lying about (a creative test copy, say) means the Crown is not lost.
-    if (!list().length) emit("crownLost", { dim: d.dim, x: d.x, y: d.y, z: d.z });
+    goHome(d); // another Crown still lying about (a creative test copy, say) means the Crown is not lost
   }
   store();
 }

@@ -41,7 +41,7 @@ import { load, save, say, runCmd, upgradeSteps, DATA_VERSION, FACING } from "./d
 import { choirTick, singerSpot, CHOIR } from "./choir.js";
 import { slipSeconds, slipLanding, isSlipping } from "./slips.js";
 import { shouldAlarm, oreOutcome, noteEntry, crownTick, crownVerdict, CLAIM_SECONDS, WARDEN } from "./warden.js";
-import { crownFate, needsRefresh, KEEP } from "./crownkeep.js";
+import { crownFate, needsRefresh, standHeight, KEEP } from "./crownkeep.js";
 import { oreChance, roofAt, ROOF, groundAt, GROUND, ambientLightAt, AMBIENT, pickTree, treeKind } from "./terrain.js";
 import { HOLLOW_TREES } from "./trees_data.js";
 import { clearOps } from "./builder.js";
@@ -611,7 +611,7 @@ addTests("undertow", {
     assert(CLAIM_SECONDS >= 10, "taking the Crown must be slow enough to contest");
     assert(crownVerdict(false, false, 0) === "warned" && crownVerdict(false, false, 4) === "warned" && crownVerdict(false, false, 5) === "dies");
   },
-  "a dropped Hollow Crown stays where it fell, and goes home only when truly lost": () => {
+  "a dropped Hollow Crown rests on a stand where it fell, and goes home only when truly lost": () => {
     assert(crownFate({ found: true, held: false, loaded: true, misses: 3 }) === "lying");
     assert(crownFate({ found: false, held: true, loaded: true, misses: 0 }) === "held", "picked up is not lost");
     assert(crownFate({ found: false, held: false, loaded: false, misses: 9 }) === "waiting", "out of sight is not lost");
@@ -619,6 +619,9 @@ addTests("undertow", {
     assert(crownFate({ found: false, held: false, loaded: true, misses: KEEP.missesToLose - 1 }) === "lost");
     assert(!needsRefresh(KEEP.refreshSeconds - KEEP.checkSeconds) && needsRefresh(KEEP.refreshSeconds));
     assert(KEEP.refreshSeconds + KEEP.checkSeconds < 300, "swapped before Minecraft's 5 minute item clean-up");
+    assert(standHeight({ y: 64, typeId: "minecraft:grass_block" }) > 65, "the stand floats above the ground it fell on");
+    assert(standHeight({ y: 30, typeId: "minecraft:lava" }) === undefined, "over lava it goes home");
+    assert(standHeight(undefined) === undefined, "over the void it goes home");
   },
   "an NPC ruler rises when no player rules, and returns after being killed": () => {
     const none = { active: false, fellOn: undefined };
