@@ -581,6 +581,9 @@ def m_king(m):
 boss(id="warlord_king", name="The Warlord King", region="Grand Siege", model=m_king,
      pal=P(skin=SKIN, plate={"c": (56, 50, 54), "style": "metal"}, crown=GOLD, shard={"c": (200, 220, 255), "style": "glow"}, cape={"c": (110, 20, 24), "style": "cloth"}, steel=IRON, eye=(255, 60, 40)),
      hp=300, speed=0.3, dmg=12, kb=1.0, collision=(1.2, 2.75), scale=1.455, raider=True, egg=("#383236", "#dab046"),
+     anim_extra=[("leg_r", "rotation", ["query.is_riding ? -40 : math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*45", "query.is_riding ? 20 : 0", "0"]),   # astride the ogre's shoulders
+                 ("leg_l", "rotation", ["query.is_riding ? -40 : -math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed*45", "query.is_riding ? -20 : 0", "0"]),
+                 ("blade", "scale", ["0.65", "0.65", "0.65"])],   # the greatsword at his scale was taller than a player
      lore="Something in his crown catches the light wrong. He has lost before. He keeps coming back.")
 
 def hollow_crown(m, top, bone="hcrown", parent="head"):
