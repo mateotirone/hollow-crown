@@ -49,7 +49,7 @@ def sample(arr, smooth=True, dx=0, dz=0):
 
 def noise(scale, seed):
     """Smooth value noise over the written square, by world position (same for any slice)."""
-    r = np.random.default_rng(seed); n = int(2 * H / scale) + 4
+    r = np.random.default_rng(seed); n = max(int(2 * H / scale) + 4, int((max(xs_w.max(), zs_w.max()) + H) / scale) + 3)   # fine scales need a bigger grid at the edge
     g = r.random((n, n)).astype(np.float32)
     fxw = (xs_w + H) / scale; fzw = (zs_w + H) / scale
     ix = fxw.astype(int); iz = fzw.astype(int); fx = fxw - ix; fz = fzw - iz
