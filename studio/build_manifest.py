@@ -316,12 +316,13 @@ geos['geometry.armor2']={"tw":64,"th":32,"bones":[bone("body",[0,24,0],[c([-4,12
 geos.update(bgeos)
 import glob as _g
 g("skill_icons","Skill icons","Town hall",[{"label":os.path.basename(f)[:-4].replace('_',' ').title(),"model":"item","mats":{"*":'textures/ui/hc/skill/'+os.path.basename(f)}} for f in sorted(_g.glob(os.path.join(RP,'textures/ui/hc/skill/*.png')))],"One icon for every skill on the Tree of Oaths, coloured by branch. Painted, not shown in the menu yet.")
+# (the 1,600 minimap tiles textures/ui/hc/minimap/mXXZZ.png are left out: too many to list)
 # ---- catch-all: every PNG in the pack that no group above shows gets a place, so nothing can be missing from the Studio
 _seen=set(tex); _left={}
 for _d,_,_fs in os.walk(RP+'textures'):
     for _f in sorted(_fs):
         _p=os.path.relpath(os.path.join(_d,_f),RP)
-        if _f.endswith('.png') and _p not in _seen and 'invisible' not in _f: _left.setdefault(os.path.dirname(_p),[]).append(_p)
+        if _f.endswith('.png') and _p not in _seen and 'invisible' not in _f and not ('/minimap/' in _p and _re.fullmatch(r'm\d{4}\.png', _f)): _left.setdefault(os.path.dirname(_p),[]).append(_p)
 _NAMES={'textures/blocks':'More blocks','textures/blocks/regional':'Regional blocks: reinforced tiers and open gates','textures/items':'More item icons','textures/models/armor':'Worn relic sheets','textures/ui/hc':'Menu pieces: skill tree sockets'}
 for _d,_ps in sorted(_left.items()):
     _kind='cube' if '/blocks' in _d else 'item' if '/items' in _d else 'flat'

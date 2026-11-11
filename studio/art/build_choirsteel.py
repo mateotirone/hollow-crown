@@ -9,7 +9,7 @@ from PIL import Image
 from palette import REGIONS, fixed
 from texlib import *
 ROOT = '/mnt/project-files/siege-nights/'; T = ROOT + 'Siege_Nights_RP/textures/'
-CHOIR = fixed('#241640', '#42287a', '#6a44b0', '#9a74dc', '#c4a8f4', '#ece0ff')
+CHOIR = fixed('#120a22', '#22123f', '#3a1f6a', '#552f94', '#7446b8', '#9a72d6')  # darker since 2026-11-11 (Mateo)
 BLUE = REGIONS['undertow']['accent']
 GRIP = fixed('#0c080f', '#1a1222', '#2a1e36', '#3c2c4c', '#524066', '#6c5a82')
 

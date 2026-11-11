@@ -21,24 +21,28 @@ export const WALLS = {
 };
 
 const cost = (...rows) => rows; // [label, amount, kind]: kind is matched to items in walls.js
+// Settlements are "everything free, no exceptions" (Mateo, 2026-11-11): a wall's stonework can be paid in any
+// stone and built in any stone. The cost rows still name a kind ("stone", "bricks"...) because that is the wall's
+// shape, but wallCost() accepts any stone block for all of them and adds the rows together.
 // The ten levels follow the textures thread's design table (studio/art/build_walls.py, LEVELS), which is what
 // Mateo sees in the Texture Studio. Keep the two in step. Not built from that table yet: sloped footings,
 // overhanging battlements, tower roofs, gate arches and banners.
 //   h = wall height above the ground. walk = height of a plank walkway behind a one-block wall (0 = none).
-//   body / foot / cap / bands: "log", "fence" or a Castle Stone family kind; bands = { height: kind }.
+//   body / foot / cap / bands: "log", "fence" or a stonework kind (stone, tiles, bricks, cobbled, smooth); bands = { height: kind }.
+//   Which real blocks those kinds are is the owner's choice: WALL_STONES and WALL_TIMBER below.
 //   towers = how many, r = half-width, up = how far they rise above the wall. gateArmor = reinforce state of the gate.
 export const WALL_LEVELS = [
   null,
   { name: "Stake Fence", h: 1, thick: 1, body: "fence", gate: "open", cost: cost() },
   { name: "Palisade", h: 3, thick: 1, body: "log", gate: "castle_gate", gateH: 3, cost: cost(["logs", 128, "log"]) },
-  { name: "Braced Palisade", h: 4, thick: 1, walk: 2, body: "log", foot: "cobbled", gate: "castle_gate", gateH: 3, cost: cost(["logs", 96, "log"], ["planks", 128, "plank"], ["Cobbled Castle Stone", 96, "cobbled"]) },
-  { name: "Fieldstone Wall", h: 4, thick: 1, body: "cobbled", cap: "stone", gate: "castle_gate", gateH: 3, cost: cost(["Cobbled Castle Stone", 320, "cobbled"], ["Castle Stone", 96, "stone"]) },
-  { name: "Stone Wall", h: 5, thick: 1, walk: 3, body: "stone", foot: "cobbled", battlements: true, gate: "castle_gate", gateH: 4, cost: cost(["Castle Stone", 384, "stone"], ["planks", 128, "plank"], ["iron ingots", 8, "iron"]) },
-  { name: "Battlement Wall", h: 6, thick: 2, body: "stone", foot: "cobbled", bands: { 4: "bricks" }, battlements: true, gate: "castle_gate", gateArmor: 1, port: true, gateH: 4, cost: cost(["Castle Stone", 384, "stone"], ["Castle Stone Bricks", 128, "bricks"], ["iron ingots", 24, "iron"]) },
-  { name: "Watch Wall", h: 7, thick: 2, body: "stone", foot: "cobbled", bands: { 5: "bricks" }, battlements: true, towers: 4, r: 2, up: 3, gate: "castle_gate", gateArmor: 1, port: true, gateH: 4, cost: cost(["Castle Stone", 384, "stone"], ["Castle Stone Bricks", 192, "bricks"], ["iron ingots", 32, "iron"]) },
-  { name: "Curtain Wall", h: 9, thick: 3, body: "smooth", foot: "cobbled", footH: 2, bands: { 4: "bricks", 7: "bricks" }, battlements: true, towers: 8, r: 3, up: 4, gatehouse: true, gate: "castle_gate", gateArmor: 1, port: true, gateH: 5, cost: cost(["Smooth Castle Stone", 512, "smooth"], ["Castle Stone Bricks", 256, "bricks"], ["iron ingots", 64, "iron"]) },
-  { name: "Great Curtain Wall", h: 11, thick: 3, body: "smooth", foot: "cobbled", footH: 2, bands: { 4: "bricks", 8: "bricks" }, battlements: true, towers: 8, r: 3, up: 5, gatehouse: true, gate: "castle_gate", gateArmor: 2, port: true, gateH: 5, cost: cost(["Smooth Castle Stone", 512, "smooth"], ["Castle Stone Bricks", 256, "bricks"], ["diamonds", 24, "diamond"]) },
-  { name: "Crown Wall", h: 13, thick: 4, body: "smooth", foot: "cobbled", footH: 3, bands: { 5: "bricks", 9: "tiles", 10: "bricks" }, battlements: true, towers: 12, r: 3, up: 6, gatehouse: true, gate: "castle_gate", gateArmor: 3, port: true, gateH: 5, cost: cost(["Smooth Castle Stone", 640, "smooth"], ["Castle Stone Tiles", 192, "tiles"], ["Castle Stone Bricks", 256, "bricks"], ["netherite scrap", 8, "netherite"]) },
+  { name: "Braced Palisade", h: 4, thick: 1, walk: 2, body: "log", foot: "cobbled", gate: "castle_gate", gateH: 3, cost: cost(["logs", 96, "log"], ["planks", 128, "plank"], ["stone blocks", 96, "cobbled"]) },
+  { name: "Fieldstone Wall", h: 4, thick: 1, body: "cobbled", cap: "stone", gate: "castle_gate", gateH: 3, cost: cost(["stone blocks", 320, "cobbled"], ["stone blocks", 96, "stone"]) },
+  { name: "Stone Wall", h: 5, thick: 1, walk: 3, body: "stone", foot: "cobbled", battlements: true, gate: "castle_gate", gateH: 4, cost: cost(["stone blocks", 384, "stone"], ["planks", 128, "plank"], ["iron ingots", 8, "iron"]) },
+  { name: "Battlement Wall", h: 6, thick: 2, body: "stone", foot: "cobbled", bands: { 4: "bricks" }, battlements: true, gate: "castle_gate", gateArmor: 1, port: true, gateH: 4, cost: cost(["stone blocks", 384, "stone"], ["stone blocks", 128, "bricks"], ["iron ingots", 24, "iron"]) },
+  { name: "Watch Wall", h: 7, thick: 2, body: "stone", foot: "cobbled", bands: { 5: "bricks" }, battlements: true, towers: 4, r: 2, up: 3, gate: "castle_gate", gateArmor: 1, port: true, gateH: 4, cost: cost(["stone blocks", 384, "stone"], ["stone blocks", 192, "bricks"], ["iron ingots", 32, "iron"]) },
+  { name: "Curtain Wall", h: 9, thick: 3, body: "smooth", foot: "cobbled", footH: 2, bands: { 4: "bricks", 7: "bricks" }, battlements: true, towers: 8, r: 3, up: 4, gatehouse: true, gate: "castle_gate", gateArmor: 1, port: true, gateH: 5, cost: cost(["stone blocks", 512, "smooth"], ["stone blocks", 256, "bricks"], ["iron ingots", 64, "iron"]) },
+  { name: "Great Curtain Wall", h: 11, thick: 3, body: "smooth", foot: "cobbled", footH: 2, bands: { 4: "bricks", 8: "bricks" }, battlements: true, towers: 8, r: 3, up: 5, gatehouse: true, gate: "castle_gate", gateArmor: 2, port: true, gateH: 5, cost: cost(["stone blocks", 512, "smooth"], ["stone blocks", 256, "bricks"], ["diamonds", 24, "diamond"]) },
+  { name: "Crown Wall", h: 13, thick: 4, body: "smooth", foot: "cobbled", footH: 3, bands: { 5: "bricks", 9: "tiles", 10: "bricks" }, battlements: true, towers: 12, r: 3, up: 6, gatehouse: true, gate: "castle_gate", gateArmor: 3, port: true, gateH: 5, cost: cost(["stone blocks", 640, "smooth"], ["stone blocks", 192, "tiles"], ["stone blocks", 256, "bricks"], ["netherite scrap", 8, "netherite"]) },
 ];
 export const MAX_WALL = WALL_LEVELS.length - 1;
 
@@ -50,6 +54,30 @@ export const wallArmor = (level) => WALL_LEVELS[level]?.gateArmor ?? 0;
 // in patches, towers stand at slightly different heights, arrow slits and lanterns break up the long
 // runs, and a palisade's stakes are uneven. It is all worked out from the position (and the wall's
 // centre), never at random, so a wall rebuilt or repaired comes out exactly as it was.
+// ---------- what a wall is built in: the owner's choice ----------
+// Castle Stone is one colour option per region, not a requirement (Mateo, 2026-11-11, "everything free").
+// Each stone look names the block for every stonework kind, with fallbacks for older game versions.
+// "castle" means the settlement's own region's Castle Stone; castle_<region> picks another region's.
+const mc = (...ids) => ids.map((id) => (id.includes(":") ? id : `minecraft:${id}`));
+const castleLook = (region) => ({
+  name: region ? `${region[0].toUpperCase()}${region.slice(1)} Castle Stone` : "Castle Stone of your region", castle: region ?? true,
+});
+export const WALL_STONES = {
+  castle: castleLook(),
+  castle_vale: castleLook("vale"), castle_frostmarch: castleLook("frostmarch"), castle_saltreach: castleLook("saltreach"),
+  castle_emberwaste: castleLook("emberwaste"), castle_blackfen: castleLook("blackfen"),
+  grey: { name: "Grey stone brick", kinds: { stone: mc("stone_bricks"), tiles: mc("chiseled_stone_bricks", "stone_bricks"), bricks: mc("polished_andesite"), cobbled: mc("cobblestone"), smooth: mc("smooth_stone", "stone") } },
+  deepslate: { name: "Deepslate", kinds: { stone: mc("deepslate_bricks"), tiles: mc("deepslate_tiles"), bricks: mc("polished_deepslate"), cobbled: mc("cobbled_deepslate"), smooth: mc("polished_deepslate") } },
+  tuff: { name: "Tuff", kinds: { stone: mc("tuff_bricks", "stone_bricks"), tiles: mc("chiseled_tuff_bricks", "chiseled_tuff", "stone_bricks"), bricks: mc("polished_tuff", "andesite"), cobbled: mc("tuff"), smooth: mc("polished_tuff", "smooth_stone") } },
+  sandstone: { name: "Sandstone", kinds: { stone: mc("cut_sandstone"), tiles: mc("chiseled_sandstone"), bricks: mc("cut_red_sandstone"), cobbled: mc("sandstone"), smooth: mc("smooth_sandstone") } },
+  white: { name: "White stone", kinds: { stone: mc("calcite"), tiles: mc("quartz_bricks"), bricks: mc("polished_diorite"), cobbled: mc("diorite"), smooth: mc("smooth_quartz") } },
+  red_brick: { name: "Red brick", kinds: { stone: mc("brick_block"), tiles: mc("mud_bricks"), bricks: mc("polished_granite"), cobbled: mc("cobblestone"), smooth: mc("brick_block") } },
+  mud: { name: "Mud brick", kinds: { stone: mc("mud_bricks"), tiles: mc("packed_mud"), bricks: mc("brick_block"), cobbled: mc("mossy_cobblestone"), smooth: mc("packed_mud") } },
+  blackstone: { name: "Blackstone", kinds: { stone: mc("polished_blackstone_bricks"), tiles: mc("chiseled_polished_blackstone"), bricks: mc("gilded_blackstone", "polished_blackstone"), cobbled: mc("blackstone"), smooth: mc("polished_blackstone") } },
+};
+export const WALL_STONE_IDS = Object.keys(WALL_STONES);
+export const WALL_TIMBER = ["vale", "frostmarch", "saltreach", "emberwaste", "blackfen"]; // palisade, walkway planks and gates: any region's
+
 export const VARIATION = { weather: 0.22, slitEvery: 9, lightEvery: 14, postEvery: 8, towerBump: 2 };
 
 // A repeatable number 0..1 for a block position
