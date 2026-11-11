@@ -9,6 +9,7 @@ How versions work is in [`docs/RELEASING.md`](docs/RELEASING.md).
 Everything merged to `main` since the last release goes here. Each pull request that changes what players see adds a line under one of these headings.
 
 ### Added
+- Choirsteel gear is now made like netherite gear: at a smithing table, put a netherite piece with a Choirsteel Upgrade template and Tempered Choirsteel (4 Choirsteel Ingots and a Gloamquill). Enchantments carry over. The template is found only at the Cold Forge, a ruined smithy high on the Hollow's eastern terraces past the Seams; taking it wakes the forge's guards, and a new one appears three days later. Copy a template at a crafting table with 7 netherite ingots and a block of Veinstone (you get two). The old crafting-table recipes are gone.
 - Every region has its own Castle Gate, Portcullis, Palisade, Wall Planks and Roof Shingles, craftable at the Siege Workshop. Settlement walls are built from them: a Blackfen palisade no longer looks like a Vale one, and each region's gate and portcullis match its wall. Flat roofs and snowy ridges on settlement buildings use the region's shingles.
 - Clue Sense works: while you carry the Ledger of Whispers, it whispers on the action bar (with a soft page turn) when a Dusty Tome you have not copied, or a Lore Tome lying on the ground, is within 16 blocks, and says which way.
 - Every skill on the Tree of Oaths shows its own painted icon: on the tree screen for skills you hold or can swear now, and on every row of the plain lists.

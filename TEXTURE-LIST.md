@@ -364,6 +364,8 @@ Add a row here with the file path, size, what it should look like, and whether i
 | Choirsteel Hoe (item icon: hoe) | `textures/items/siege_choirsteel_hoe.png` | **Final style, awaiting your review** (`studio/art/build_choirsteel.py`) |
 | Choirsteel armour, worn (helm, cuirass, treads; vanilla armour layout 64x32) | `textures/models/armor/choirsteel_layer_1.png` | **Final style, awaiting your review** (`studio/art/build_choirsteel.py`) |
 | Choirsteel armour, worn (greaves; vanilla armour layout 64x32) | `textures/models/armor/choirsteel_layer_2.png` | **Final style, awaiting your review** (`studio/art/build_choirsteel.py`) |
+| Choirsteel Upgrade (item icon: a smithing template like vanilla's, a dark slate tablet with a violet cuirass cut into it and one blue gem; 16x16, transparent background) | `textures/items/siege_choirsteel_upgrade_template.png` | Placeholder (`studio/bestiary/choirsteel.py`) |
+| Tempered Choirsteel (item icon: a folded violet plate, brighter than the ingot, a blue fleck of Gloamquill in it; 16x16, transparent background) | `textures/items/siege_choirsteel_tempered.png` | Placeholder (`studio/bestiary/choirsteel.py`) |
 | The Deep Bell (`siege:wardens_bell`, item, small dark violet hand bell) | `textures/items/siege_wardens_bell.png` | **Final style, awaiting your review** |
 
 ### Dragons (art by `studio/art/geoskin.py` and `build_dragon_art.py`; `studio/build_dragons.py` never overwrites a PNG or sound that exists)
