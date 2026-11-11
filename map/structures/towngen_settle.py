@@ -452,10 +452,9 @@ class Settlement(Town):
         hamlet = lambda c: math.hypot(c[0][0] - self.sq[0], c[0][1] - self.sq[1]) + 3 * self.rng.random()
         # inner tiers first (their ground is smallest), biggest boxes first within each
         pass_("M", 0, 1, hamlet)                       # Hamlet first: its ground is the smallest
-        pass_("S", 0, 4, hamlet)
-        big(1, 1)                                      # then the market's slot
-        pass_("S", 0, 1, hamlet)
-        pass_("M", 1, 3, near_sq)
+        big(1, 1)                                      # then the Town charter: the market's slot and two Mediums
+        pass_("M", 1, 3, near_sq)                      # (Farmhouse, Mint), before Smalls fill the inner ground
+        pass_("S", 0, 5, hamlet)
         pass_("S", 1, 4, near_sq)
         big(2, 2)                                      # City gets its own batch
         pass_("M", 2, 3, near_sq)
@@ -508,6 +507,17 @@ class Settlement(Town):
             c["field"] = sum(1 for f in self.field_out if f["area_by_tier"][t] >= 80)
             out.append(c)
         return out
+
+    def charter(self):
+        """The tier charters (placement thread, 2026-11-11), cumulative. Town: 3 S, 2 M (Farmhouse,
+        Mint), a big slot for the market (Large or long Medium) and a field. City: 6 S, 4 Medium-or-
+        bigger in all with at least 1 big (the barracks may take a plain Medium). Returns (passes, shortfall)."""
+        c = {t: self.counts()[n] for n, t in enumerate(TIERS)}
+        T, Ci = c["Town"], c["City"]
+        need = [(T["S"], 3), (T["M"] + T["L"], 3), (T["L"] + T["M_long"], 1), (T["field"], 1),
+                (Ci["S"], 6), (Ci["M"] + Ci["L"], 4), (Ci["L"] + Ci["M_long"], 1)]
+        short = sum(max(0, b - a) for a, b in need)
+        return short == 0, short
 
     def meets(self):
         """Minimums, where a Large may be stood in for by a long Medium (13 x 11: the market and the
@@ -805,6 +815,7 @@ class Settlement(Town):
         ok, _ = self.meets(); cs = self.counts()
         return {
             "template": self.template, "label": self.tpl["label"], "about": self.tpl["about"], "seed": self.seed, "meets_minimum": ok,
+            "passes_charter": self.charter()[0],
             "counts_by_tier": {TIERS[t]: cs[t] for t in range(4)}, "meets_minimum_note": "a long Medium (13 x 11) may stand in for a Large",
             "square": {"centre": list(self.rel(*self.sq)), "y": int(self.sqY), "shape": self.tpl["square"]},
             "gates": self.gates,
@@ -891,11 +902,11 @@ def main():
         for k in range(a.tries):
             seed = a.seed * 1000 + n * 97 + k * 13 + sum(map(ord, plot["name"]))
             s = Settlement(plot, tpl, T, L, seed); s.run()
-            ok, cs = s.meets()
+            ok, cs = s.meets(); passes, cshort = s.charter()
             short = sum(max(0, MINIMUM[t][q] - cs[t][q]) for t in range(4) for q in MINIMUM[t])
-            print(plot["name"], tpl, seed, "ok" if ok else f"short {short}", cs[-1], "fields", len(s.field_out), "dry", s.unwatered)
-            if best is None or short < best[0]: best = (short, s)
-            if ok: break
+            print(plot["name"], tpl, seed, "charter" if passes else f"charter short {cshort}", "| minimum", "ok" if ok else f"short {short}", cs[-1], flush=True)
+            if best is None or (cshort, short) < best[0]: best = ((cshort, short), s)
+            if passes: break
         s = best[1]
         s.picture_settle(os.path.join(a.out, f"{s.key}-{tpl}.png"))
         variants.append(s.export())
