@@ -26,6 +26,9 @@
   "siege_writ": {
    "textures": "textures/items/siege_writ"
   },
+  "siege_almanac": {
+   "textures": "textures/items/siege_almanac"
+  },
   "siege_battering_ram": {
    "textures": "textures/items/siege_battering_ram"
   },

@@ -9,8 +9,8 @@ import { localStock, stoneStock, wallStock, niceName } from "./mason.js";
 import { STONE_FAMILY, STONE_KINDS, CASTLE_STONES, stoneId, regionalId, GATES, PORTCULLISES, REINFORCEABLE, CASTLE_BLOCKS } from "../siege/api.js";
 import { MATERIALS } from "./rules.js";
 import { HALL, MASON, SLOTS, place, slotsFor } from "./layout.js";
-import { wallCost } from "./walls.js";
-import { WALLS, WALL_LEVELS, MAX_WALL, smoothGround, groundProblem, wallColumns, onWallLine, bearingToAngle, columnKinds, repairCost, wallArmor, wallSeed, VARIATION, WALL_STONES, WALL_STONE_IDS } from "./walldata.js";
+import { wallCost, nearGate } from "./walls.js";
+import { WALLS, WALL_LEVELS, MAX_WALL, smoothGround, groundProblem, wallColumns, onWallLine, bearingToAngle, columnKinds, repairCost, wallArmor, wallSeed, VARIATION, WALL_STONES, WALL_STONE_IDS, WALL_TIMBER, WALL_LOG } from "./walldata.js";
 
 const base = { creative: false, overworld: true, typeId: "minecraft:stone_bricks", land: "me", mine: true, reserve: undefined, wildsClosed: true, hasKeep: true };
 
@@ -94,6 +94,15 @@ addTests("settle", {
   },
 });
 addTests("settle walls", {
+  "the guard opens the gate for someone close, not someone on the wall above or far off": () => {
+    const g = { x: 0, y: 64, z: 0 };
+    assert(nearGate(g, { x: 3, y: 64, z: 1 }, WALLS.gateGreet));
+    assert(!nearGate(g, { x: 9, y: 64, z: 0 }, WALLS.gateGreet));
+    assert(!nearGate(g, { x: 0, y: 72, z: 0 }, WALLS.gateGreet));
+  },
+  "log walls are stripped logs in every timber": () => {
+    for (const t of WALL_TIMBER) assert(/^minecraft:stripped_\w+_log$/.test(WALL_LOG[t] ?? ""), `${t} log wall is ${WALL_LOG[t]}`);
+  },
   "a wall is paid for in any stone, and the stone rows are added together": () => {
     for (let level = 1; level <= MAX_WALL; level++) {
       const rows = wallCost(level);
@@ -121,7 +130,7 @@ addTests("settle walls", {
     for (const id of GATES) assert(REINFORCEABLE.includes(id), `${id} cannot be reinforced`);
     for (const id of PORTCULLISES) assert(CASTLE_BLOCKS.includes(id), `${id} has no wall health`);
     for (const style of STYLE_IDS) assert(styleFor(style).roles.roofBlock[0].startsWith("siege:roof_shingles"), style);
-    assertEqual(wallStock("saltreach", () => true).map(([id]) => id), ["siege:palisade_saltreach", "siege:wall_planks_saltreach", "siege:roof_shingles_saltreach", "siege:castle_gate_saltreach", "siege:portcullis_saltreach"]);
+    assertEqual(wallStock("saltreach", () => true).map(([id]) => id), ["minecraft:stripped_birch_log", "siege:wall_planks_saltreach", "siege:roof_shingles_saltreach", "siege:castle_gate_saltreach", "siege:portcullis_saltreach"]);
   },
   "ten levels, each at least as tall and thick as the last": () => {
     assertEqual(MAX_WALL, 10);
@@ -255,5 +264,34 @@ addTests("settle walls", {
     assert(kinds(8).has("slit") && kinds(8).has("light") && kinds(8).has("stone") && kinds(8).has("smooth"), "a Curtain Wall has slits, lanterns and weathered stone");
     const weathered = wall(here, 8).filter((c) => c.endsWith(",stone")).length / wall(here, 8).length;
     assert(weathered > 0.03 && weathered < VARIATION.weather, `weathering should be a little, got ${weathered}`);
+  },
+});
+import { levelSite, foundationColumns, MAX_LIFT } from "./ground.js";
+
+addTests("settle ground", {
+  "a building's floor goes on the highest ground under it, and every footprint column gets foundation": () => {
+    // ground at y 64, with a hump to 67 in one corner of where the cottage goes, and a tree trunk that doesn't count
+    const ground = (x, z) => (x >= 3 && z >= 3 ? 67 : 64);
+    const fake = {
+      getBlock: ({ x, y, z }) => {
+        const top = ground(x, z);
+        const typeId = y <= top ? "minecraft:dirt" : x === 0 && z === 2 && y <= 75 ? "minecraft:oak_log" : "minecraft:air";
+        return { typeId, location: { x, y, z }, below() { return fake.getBlock({ x, y: y - 1, z }); } };
+      },
+      getTopmostBlock: ({ x, z }) => fake.getBlock({ x, y: 75, z }),
+    };
+    const plan = drawBuilding("cottage", "vale");
+    const { origin, lift } = levelSite(fake, plan, { x: 0, y: 65, z: 0 }, { x: 0, z: 1 });
+    assertEqual(origin.y, 68);
+    assertEqual(lift, 3);
+    const flat = levelSite({ ...fake, getBlock: ({ x, y, z }) => fake.getBlock({ x: -99, y, z }) }, plan, { x: 0, y: 65, z: 0 }, { x: 0, z: 1 });
+    assertEqual(flat.lift, 0);
+    const b = plan.bounds();
+    assertEqual(foundationColumns(plan).length, (b.x1 - b.x0 + 1) * (b.z1 - b.z0 + 1));
+    assert(MAX_LIFT >= 4);
+  },
+  "the level 1 wall is a low log palisade, not a fence": () => {
+    assertEqual(WALL_LEVELS[1].body, "log");
+    assert(WALL_LEVELS[1].h >= 2);
   },
 });

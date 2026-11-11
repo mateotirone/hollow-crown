@@ -3,6 +3,7 @@
 
 // Core (no gameplay)
 import "./core/selftest.js";
+import "./core/clickable.js";
 import "./core/firstjoin.js";
 import "./core/storyteller.js";
 
@@ -35,6 +36,7 @@ import "./economy/index.js";
 import "./reach/index.js";
 import "./sound/index.js";
 import "./minimap/index.js";
+import "./guide/index.js";
 import "./roletrials/index.js";
 import "./after/index.js";
 import "./opening/index.js";

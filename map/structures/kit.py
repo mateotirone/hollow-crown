@@ -35,19 +35,15 @@ def mix(table, seed=0, low_moss=None):
 
 # ---- texturing doctrine (build-instructions/texturing, PR #87): gradients, not speckle ----------------
 def _load_ladders():
-    """Every colour ladder (code -> blocks, bottom of the wall to the top) from the doctrine JSON: the repo copy
-    in build-instructions/texturing once PR #87 is in, else the copy kept next to this file."""
+    """Every colour ladder (code -> blocks, bottom of the wall to the top) from build-instructions/texturing/doctrine.json."""
     import json, os
-    here = os.path.dirname(os.path.abspath(__file__))
-    for p in (os.path.join(here, "..", "..", "build-instructions", "texturing", "doctrine.json"), os.path.join(here, "doctrine_ladders.json")):
-        if os.path.exists(p):
-            out = {}
-            for r in json.load(open(p))["regions"]:
-                for v in r.values():
-                    for c in (v if isinstance(v, list) else []):
-                        if isinstance(c, dict) and "code" in c: out[c["code"]] = list(c["blocks"])
-            return out
-    raise FileNotFoundError("doctrine.json")
+    p = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "build-instructions", "texturing", "doctrine.json")
+    out = {}
+    for r in json.load(open(p))["regions"]:
+        for v in r.values():
+            for c in (v if isinstance(v, list) else []):
+                if isinstance(c, dict) and "code" in c: out[c["code"]] = list(c["blocks"])
+    return out
 LADDERS = _load_ladders()
 
 def stairs_of(block):

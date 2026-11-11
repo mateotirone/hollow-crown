@@ -1,37 +1,38 @@
 {
- "format_version": "1.21.60",
- "minecraft:block": {
-  "description": {
-   "identifier": "siege:dragon_roost",
-   "menu_category": {
-    "category": "items"
-   }
-  },
-  "components": {
-   "minecraft:display_name": "tile.siege:dragon_roost.name",
-   "minecraft:geometry": "minecraft:geometry.full_block",
-   "minecraft:material_instances": {
-    "*": {
-     "texture": "siege_dragon_roost_side",
-     "render_method": "opaque"
+  "format_version": "1.21.90",
+  "minecraft:block": {
+    "description": {
+      "identifier": "siege:dragon_roost",
+      "menu_category": {
+        "category": "items"
+      }
     },
-    "up": {
-     "texture": "siege_dragon_roost_top",
-     "render_method": "opaque"
-    },
-    "down": {
-     "texture": "siege_dragon_roost_side",
-     "render_method": "opaque"
+    "components": {
+      "minecraft:display_name": "tile.siege:dragon_roost.name",
+      "minecraft:geometry": "minecraft:geometry.full_block",
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "siege_dragon_roost_side",
+          "render_method": "opaque"
+        },
+        "up": {
+          "texture": "siege_dragon_roost_top",
+          "render_method": "opaque"
+        },
+        "down": {
+          "texture": "siege_dragon_roost_side",
+          "render_method": "opaque"
+        }
+      },
+      "minecraft:map_color": "#7a4a34",
+      "minecraft:light_emission": 7,
+      "minecraft:destructible_by_mining": {
+        "seconds_to_destroy": 3.0
+      },
+      "minecraft:destructible_by_explosion": {
+        "explosion_resistance": 30
+      },
+      "siege:clickable": {}
     }
-   },
-   "minecraft:map_color": "#7a4a34",
-   "minecraft:light_emission": 7,
-   "minecraft:destructible_by_mining": {
-    "seconds_to_destroy": 3.0
-   },
-   "minecraft:destructible_by_explosion": {
-    "explosion_resistance": 30
-   }
   }
- }
 }

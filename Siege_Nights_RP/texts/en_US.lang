@@ -32,6 +32,7 @@ tile.siege:breaching_charge.name=Breaching Charge
 item.siege:trebuchet.name=Trebuchet
 entity.siege:trebuchet_engine.name=Trebuchet
 item.siege:writ_of_alliance.name=Writ of Alliance
+item.siege:almanac.name=The Settler's Almanac
 item.siege:battering_ram.name=Battering Ram
 entity.siege:ram_engine.name=Battering Ram
 action.hint.siege.ram=Punch the wall ahead to ram it

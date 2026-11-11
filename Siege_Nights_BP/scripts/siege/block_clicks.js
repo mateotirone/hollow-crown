@@ -7,7 +7,7 @@ import { recruitGuard } from "./guards.js";
 import { barracksMenu, keepMenu } from "./menus.js";
 import { SETTINGS } from "./settings.js";
 import { saveState, state } from "./state.js";
-import { colorTaken } from "./territory.js";
+import { colorTaken, foreignSettlement } from "./territory.js";
 import { workOnWall } from "./walls.js";
 import { sfx } from "../core/sfx.js";
 
@@ -32,7 +32,10 @@ world.afterEvents.playerInteractWithBlock.subscribe((event) => {
   lastClick.set(player.id, now);
 
   if (workOnWall(block, player, event.itemStack)) return;
-  if (GATE_SOUNDS[block.typeId]) toggleGate(block);
+  if (GATE_SOUNDS[block.typeId]) {
+    if (mayWorkGate(player, block)) toggleGate(block);
+    else player.onScreenDisplay.setActionBar(`§cThe gate is barred. Only ${state.keeps[foreignSettlement(player, block.location, block.dimension.id)]?.name ?? "the owner"}'s people can open it.`);
+  }
   else if (block.typeId === KEEP_BANNER) {
     if (DYES[event.itemStack?.typeId] !== undefined) dyeBanner(block, player, event.itemStack);
     else keepMenu(block, player);
@@ -42,9 +45,21 @@ world.afterEvents.playerInteractWithBlock.subscribe((event) => {
   }
 });
 
+// A settlement's gates and portcullises answer only to its owner and their allies (Mateo, 2026-11-11);
+// the owner's guards open them for friends (settle/walls.js). Anyone may work a gate out in the wild.
+export function mayWorkGate(player, block) {
+  if (player.getGameMode() === GameMode.Creative) return true;
+  return !foreignSettlement(player, block.location, block.dimension.id);
+}
+
 export function toggleGate(block) {
+  return setGate(block, !block.permutation.getState("siege:open"));
+}
+
+// Opens or shuts a whole gate (every touching block of the same kind). Returns false if it was already that way.
+export function setGate(block, open) {
   const gateType = block.typeId;
-  const open = !block.permutation.getState("siege:open");
+  if (!GATE_SOUNDS[gateType] || block.permutation.getState("siege:open") === open) return false;
   // Find every gate block of the same kind touching this one, so a big gate moves as one piece
   const dim = block.dimension;
   const seen = new Set();
@@ -65,6 +80,7 @@ export function toggleGate(block) {
   for (const b of gate) b.setPermutation(b.permutation.withState("siege:open", open));
   const sounds = GATE_SOUNDS[gateType];
   sfx(dim, open ? sounds.open : sounds.close, block.location, { volume: 0.6 });
+  return true;
 }
 
 export function dyeBanner(block, player, item) {
