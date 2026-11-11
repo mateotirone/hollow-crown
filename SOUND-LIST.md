@@ -421,6 +421,7 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `block.bell.resonate` | 2 | lore, undertow |
 | `crossbow.shoot` | 2 | dragons, siege |
 | `mob.elderguardian.curse` | 2 | bestiary, undertow |
+| `mob.irongolem.throw` | 2 | bestiary (2) |
 | `mob.villager.no` | 2 | bestiary (2) |
 | `mob.witch.celebrate` | 2 | bestiary (2) |
 | `note.bell` | 2 | rails, roletrials |
@@ -453,7 +454,6 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `mob.horse.angry` | 1 | horses |
 | `mob.horse.breathe` | 1 | horses |
 | `mob.horse.idle` | 1 | horses |
-| `mob.irongolem.throw` | 1 | bestiary |
 | `mob.phantom.swoop` | 1 | bestiary |
 | `mob.ravager.attack` | 1 | siege |
 | `mob.villager.death` | 1 | bestiary |

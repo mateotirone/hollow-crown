@@ -172,7 +172,7 @@ registerBoss({
 //    sight. At 60% the Rimewolves come. At 25% he anchors himself in three Rime Pillars: break them.
 // =====================================================================================
 registerBoss({
-  id: "huntsman", type: "siege:pale_huntsman", name: "The Pale Huntsman", radius: 28, phases: [0.6, 0.25],
+  id: "huntsman", type: "siege:pale_huntsman", name: "The Pale Huntsman", radius: 28, phases: [0.6, 0.25], standoff: 10,
   intro: "is already watching you.",
   phaseNames: ["", "The pack answers", "Anchored in ice"],
   attacks: [
