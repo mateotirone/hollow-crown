@@ -71,6 +71,10 @@ for s in regions:
     strong_html += "".join(card({**c, "sub": s["title"].replace(" settlement", "")}) for c in s["cards"] if c.get("tier") in (4, 5))
 strong_html += "</div>"
 
+# ---- The Hollow
+hw = by.get("hollow")
+hollow_html = (f'<p class="lede">{esc(hw["blurb"])}</p><div class="grid">' + "".join(card(c, wide=c.get("wide", False)) for c in hw["cards"]) + "</div>") if hw else ""
+
 # ---- Still to design
 TODO = [
     ("Map towns", [("Rimehold", "Frostmarch town by Hallowmere. House design done (below in Map towns); street layout, snow and a signature hall next."),
@@ -84,10 +88,8 @@ TODO = [
                ("Rail bridges and tunnels", "Road bridges in Kingsrest and Millbrook are done.")]),
     ("Elsewhere", [("Rival Lords' seats", "The rival lords play from their own plots but have no buildings or walls of their own yet."),
                    ]),
-    ("The Hollow", [("Four mining villages", "Glimwade, Lowseam, Tollrest and Highcut, to be rebuilt in the Hollow's own kit."),
-                    ("The centre sites", "Pilgrim's Cross, Cartmeet, the Truce Hall, the Far Door, the Lattice Gate, the Drift Foot, the Seams and the Wound Dock."),
-                    ("The Seat and the Vault", "Morvane's stronghold over the ore vault."),
-                    ("The drowned city", "The leaning towers the story's travellers saw.")]),
+    ("The Hollow", [("The Seat and the Vault", "Morvane's ring over the fog and the ore vault under it. Both are fight and robbery spaces, so they change last, with the boss code."),
+                    ("The Drowned Court", "Oswin's flooded throne hall, built with the Court fight.")]),
 ]
 todo_html = '<p class="lede">Everything still to design, so the catalogue shows the whole job.</p><div class="todo">' + "".join(
     f'<section><h2 class="sub">{esc(g)}</h2><ul>' + "".join(f'<li><b>{esc(n)}</b>{" <span>" + esc(d) + "</span>" if d else ""}</li>' for n, d in items) + "</ul></section>"
@@ -100,6 +102,6 @@ counts = {"pictures": n_cards, "regions": len(regions), "hall levels": 5 * len(r
 tpl = open(os.path.join(HERE, "full_catalogue.tpl.html")).read()
 out = (tpl.replace("__COUNTS__", "".join(f"<div><b>{v}</b><span>{k}</span></div>" for k, v in counts.items()))
           .replace("__MAP__", map_html).replace("__SETTLE__", settle_html).replace("__WALLS__", walls_html)
-          .replace("__STRONG__", strong_html).replace("__TODO__", todo_html))
+          .replace("__STRONG__", strong_html).replace("__HOLLOW__", hollow_html).replace("__TODO__", todo_html))
 open(os.path.join(a.out, "index.html"), "w").write(out)
 print("page", os.path.join(a.out, "index.html"), round(len(out) / 1e3), "KB,", n_cards, "pictures")

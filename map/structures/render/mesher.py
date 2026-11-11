@@ -98,6 +98,8 @@ def cube_tex(n, p):
     simple = {"grass_block": {"top": "grass_top#grass", "bottom": "dirt", "side": "grass_side_carried"},
               "podzol": {"top": "dirt_podzol_top", "bottom": "dirt", "side": "dirt_podzol_side"},
               "ochre_froglight": {"top": "ochre_froglight_top", "bottom": "ochre_froglight_top", "side": "ochre_froglight_side"},
+              "basalt": {"top": "basalt_top", "bottom": "basalt_top", "side": "basalt_side"},
+              "polished_basalt": {"top": "polished_basalt_top", "bottom": "polished_basalt_top", "side": "polished_basalt_side"},
               "grass_path": {"top": "grass_path_top", "bottom": "dirt", "side": "grass_path_side"},
               "hay_block": {"top": "hay_block_top", "side": "hay_block_side"},
               "farmland": {"top": "farmland_wet", "side": "dirt", "bottom": "dirt"},
@@ -229,6 +231,7 @@ def model(n, p):
     if n == "ladder":
         return [((0, 0, 0, 1, 1, 1 / 16), {"side": "ladder"}, {"cut": 1})]
     if n == "moss_carpet": return [((0, 0, 0, 1, 1 / 16, 1), {"side": "moss_block"}, {})]
+    if n == "rail": return [((0, 0, 0, 1, 1 / 16, 1), {"side": "rail_normal"}, {"cut": 1})]
     if n in ("siege:portcullis", "siege:castle_gate"):
         t = siege_tex(n); ax = p.get("axis", "x")
         return [(((0, 0, 7 / 16, 1, 1, 9 / 16) if ax == "x" else (7 / 16, 0, 0, 9 / 16, 1, 1)), t, {"cut": 1})]

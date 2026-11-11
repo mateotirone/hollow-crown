@@ -11,7 +11,7 @@ import os, sys, json, base64, argparse, subprocess
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE); sys.path.insert(0, os.path.join(HERE, "render"))
 from bp import Blueprint
 from mesher import Mesher
-import vale_civic, settle_halls, settle_buildings
+import vale_civic, settle_halls, settle_buildings, hollow_kit
 from build_catalogue import DESIGNS, STYLE_NAMES
 
 REGION_GROUND = {"vale": ("grass_block", "dirt"), "frostmarch": ("snow", "dirt"), "saltreach": ("sand", "sandstone"),
@@ -126,6 +126,25 @@ def main():
     sections.append(sec)
     add(sec, "stronghold-citadel", "The Citadel", "Raised by the ruler", "Curtain wall with eight round towers, a gatehouse and the 25 by 25 Great Keep. Built from the Citadel Cornerstone once someone holds the Heart.",
         lambda: from_cells("citadel", [c[:4] for c in D["citadel"]], CITADEL), view=(-35, 32, 1.05), status="new")
+
+    # ---- 5. The Hollow: its own kit, its own world ----
+    sec = {"id": "hollow", "title": "The Hollow", "blurb": "The Hollow is its own world, so its buildings are its own: dark veinstone and blackstone, black timber with pale ash, steep deepslate roofs, warm windows where the miners live and soul light everywhere else. Nothing stands quite straight.", "cards": []}
+    sections.append(sec)
+    HG = ("siege:undertow_moss", "cobbled_deepslate")
+    add(sec, "hollow-village", "A mining village", "Glimwade, Lowseam, Tollrest, Highcut", "Foreman's house and two cottages round the yard, the smithy with its smoking chimney, the ore-sorting shed by the rails from the mine mouths, the Tally under its purple awning, soul lamps and fences. Each village turns its houses a little differently.",
+        lambda: hollow_kit.village("glimwade", 0), HG, view=(-38, 34, 1.3), extra={"wide": True})
+    add(sec, "hollow-cottage", "Miner's cottage", "Two storeys", "Veinstone below, a black-and-ash upper floor that juts out and sits a block out of true, a steep deepslate roof.",
+        lambda: hollow_kit.cottage(5, 7, 7, "s", 2, 1), HG, view=(-38, 30, 1.4))
+    add(sec, "hollow-drowned_city", "The drowned city", "By the Court landing", "Hallowmere's own country: seven leaning towers on the marsh banks where the light river ends, seen from the path to the Court. Every one is out of true; two have lost their tops; a few windows are still lit.",
+        lambda: hollow_kit.drowned_city_preview(), HG, view=(-38, 26, 1.0), extra={"wide": True})
+    for sid, title, blurb, yaw in (("truce_hall", "The Truce Hall", "Where two kings sat down. A long buttressed hall with tall lit windows, its roof fallen in at the far end. One table, two seats, one knocked over.", -38),
+                                   ("far_door", "The Far Door", "The Hollow's side of the Gate: a sealed pointed arch in the rock face, scaffold towers with a beam and a hanging soul lantern, dig pits, braziers.", 142),
+                                   ("pilgrims_cross", "Pilgrim's Cross", "The west crossroads: a four-armed signpost on a stepped plinth and a roofed bench for travellers.", -38),
+                                   ("cartmeet", "Cartmeet", "Where the ore carts turn: a cart shelter over the rail, barrels, a signpost.", -38),
+                                   ("the_seams", "The Seams", "An open ore face with a timbered mouth and a winch house over the rail.", -38),
+                                   ("lattice_gate", "The Lattice Wood", "A woodcutter's shed where the lane meets the thick forest, cut lattice stacked to dry.", -38),
+                                   ("wound_dock", "The Wound landing", "The first dock a new arrival sees: a plank landing on log piles and a boatwright's shed with a boat half built.", -38)):
+        add(sec, f"hollow-{sid}", title, "Hollow centre", blurb, hollow_kit.SITE_BUILDERS[sid], HG, view=(yaw, 32, 1.3))
 
     print("cards", sum(len(s["cards"]) for s in sections), "to shoot", len(jobs), flush=True)
     jf = os.path.join(work, "jobs.json"); json.dump(jobs, open(jf, "w"))
