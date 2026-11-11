@@ -80,6 +80,20 @@ Every overhang shows what holds it. Use this table:
 | Towers on a wall corner (corbelled turret) | a ring of upside-down stairs, then a ring of top slabs or a second stair ring under the turret floor |
 | Stone walls taller than 9 or longer than 15 | buttresses every 5 to 7 blocks: 1 block out, stepping back with a stair at mid height and at the top |
 
+### Arched supports under a floor band (Mateo, 2026-11-11, `reference/pictures/floor-band-arched-supports.png`)
+
+Where an upper storey or its floor band sits proud of a stone ground floor, the underside is not one
+flat row. Mix **slabs, stairs and trapdoors** under it, in the trim wood, so the line between two
+supports reads as a shallow arch and the row has variance:
+
+- Under each upper post or beam end: an upside-down stair, tall side to the wall (the springing).
+- Next to it, stepping towards the middle of the bay: a top slab, then an open trapdoor tucked flat
+  under the band (or nothing) at the centre, so the underside rises from the posts to mid-bay.
+- The same sequence mirrored from the other post, so every bay is symmetric. Odd bays put the
+  highest cell on the centre line.
+- It is the round angle (`reference/shapes.md`) stretched along a wall. Use it on stone ground floors
+  under a timber or plank upper, under jetties, and under deep eaves.
+
 Fences are posts for light things only (awnings, signs, lanterns, slab roofs over a stall, balcony rails).
 Anything with a roof of stairs or a floor on it gets logs or walls as posts.
 

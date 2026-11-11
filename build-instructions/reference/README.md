@@ -20,4 +20,5 @@
 | `stone-window-stair-heads.png` | Upside-down stone stairs as the heads over slim stone windows, dark oak panels between |
 | `large-door-trapdoors.png` | A large-looking door: a spruce door in the middle of a 3-wide opening with spruce trapdoors closed on the outside round it |
 | `beamed-floor.png` | A beamed upper floor: oak log beams across the floor with slabs between, upright logs at the corners, over a stone ground floor with spruce steps |
+| `floor-band-arched-supports.png` | Stone ground floor under an oak upper storey: the floor band carried on slabs, stairs and trapdoors that read as shallow arches; dark oak panels, slim windows, spruce planters |
 | `window-ideas-grid.png` | Sixteen window surrounds in wood, stone and brick: stair and trapdoor frames, crowns, sills, planters |
