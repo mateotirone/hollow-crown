@@ -4,6 +4,7 @@ import { advance, back, pointAt, yawOf, flatShapeFor, slopeShapeFor, DX, DZ, SPE
 
 export const TRACK = "siege:track";
 export const TRAIN_STYLES = ["vale", "frostmarch", "saltreach", "emberwaste", "blackfen"]; // must match STYLES in studio/build_trains.py
+export const NO_COLOR = 16; // siege:color for a train with no settlement: the region's own body colour (0-15 = Keep Banner dyes)
 
 // Speeds are in blocks per tick (20 ticks a second). A vanilla minecart tops out at 0.4.
 export const TRAIN = {

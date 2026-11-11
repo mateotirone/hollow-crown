@@ -8,10 +8,10 @@
 // /scriptevent siege:trains (report), /scriptevent siege:trains mode velocity|teleport.
 
 import { world, system, GameMode } from "@minecraft/server";
-import { onTick, isReady, moduleStore, settlementAt, keepOf, on } from "../siege/api.js";
+import { onTick, isReady, moduleStore, settlementAt, keepOf, on, COLORS } from "../siege/api.js";
 import { styleOf } from "../settle/plans.js";
 import { shapeOf, layTrack, cursorOn, advance, back, pointAt } from "./track.js";
-import { TRACK, TRAIN, CARS, TRAIN_STYLES, carPoses, trainLength, stepSpeed, moveTrain, limitAhead, shapesForLoop, showcaseLoop } from "./data.js";
+import { TRACK, TRAIN, CARS, TRAIN_STYLES, NO_COLOR, carPoses, trainLength, stepSpeed, moveTrain, limitAhead, shapesForLoop, showcaseLoop } from "./data.js";
 import { give } from "../horses/menus.js";
 import { sfx } from "../core/sfx.js";
 import "./tests.js";
@@ -66,29 +66,46 @@ world.afterEvents.playerPlaceBlock.subscribe(({ block, player }) => {
 
 // ---------- putting trains on the track ----------
 
-const styleIndexFor = (player, block) => {
+// Whose train this is: the settlement whose land it is put on, else the player's own settlement
+const ownerFor = (player, block) => {
   try {
-    const owner = settlementAt(block.location) ?? (keepOf(player.id) ? player.id : undefined);
-    const style = owner ? styleOf(owner, block) : "vale";
-    return Math.max(0, TRAIN_STYLES.indexOf(style));
+    return settlementAt(block.location) ?? (keepOf(player.id) ? player.id : undefined);
+  } catch {
+    return undefined;
+  }
+};
+const styleIndexFor = (owner, block) => {
+  try {
+    return Math.max(0, TRAIN_STYLES.indexOf(owner ? styleOf(owner, block) : "vale"));
   } catch {
     return 0;
   }
 };
+// The body is painted in the owner's Keep Banner colour (0-15); NO_COLOR = no settlement, the region's own paint
+const colorOf = (owner) => {
+  const c = owner ? keepOf(owner)?.color : undefined;
+  return Number.isInteger(c) && c >= 0 && c < NO_COLOR ? c : NO_COLOR;
+};
 
-function spawnCar(dim, kind, pose, style, trainId) {
+function paint(e, train) {
+  try {
+    e.setProperty("siege:style", train.style);
+    e.setProperty("siege:color", train.color ?? NO_COLOR);
+  } catch {
+    // pack without the properties: plain look
+  }
+}
+
+function spawnCar(dim, kind, pose, train) {
   const e = dim.spawnEntity(CARS[kind].entity, { x: pose.x, y: pose.y, z: pose.z });
   e.setRotation({ x: 0, y: pose.yaw });
-  try {
-    e.setProperty("siege:style", style);
-  } catch {
-    // pack without the property: plain look
-  }
+  paint(e, train);
+  const trainId = train.id;
   e.setDynamicProperty("siege:train", trainId);
   return e;
 }
 
-export function placeEngine(dim, pos, yaw, style, quietPlayer) {
+export function placeEngine(dim, pos, yaw, style, quietPlayer, owner) {
   const get = reader(dim);
   const shape = get(pos.x, pos.y, pos.z);
   if (!shape) return undefined;
@@ -102,9 +119,9 @@ export function placeEngine(dim, pos, yaw, style, quietPlayer) {
     }
     head = r.cursor;
   }
-  const train = { id: store.data.next++, dim: dim.id, head, v: 0, style, cars };
+  const train = { id: store.data.next++, dim: dim.id, head, v: 0, style, owner, color: colorOf(owner), cars };
   const [pose] = carPoses(head, cars, get);
-  cars[0].eid = spawnCar(dim, "engine", pose, style, train.id).id;
+  cars[0].eid = spawnCar(dim, "engine", pose, train).id;
   trains().push(train);
   store.save();
   return train;
@@ -116,7 +133,7 @@ export function addCoach(train, dim) {
   const cars = [...train.cars, { kind: "coach" }];
   if (back(train.head, trainLength(cars), get).blocked) return "§cThere isn't enough track behind the train for another coach.";
   const poses = carPoses(train.head, cars, get);
-  cars[cars.length - 1].eid = spawnCar(dim, "coach", poses[poses.length - 1], train.style, train.id).id;
+  cars[cars.length - 1].eid = spawnCar(dim, "coach", poses[poses.length - 1], train).id;
   train.cars = cars;
   store.save();
   return undefined;
@@ -147,9 +164,11 @@ world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
     if (!isReady() || !block.isValid) return;
     const dim = block.dimension;
     if (kind === "engine") {
-      const train = placeEngine(dim, block.location, player.getRotation().y, styleIndexFor(player, block), player);
+      const owner = ownerFor(player, block);
+      const train = placeEngine(dim, block.location, player.getRotation().y, styleIndexFor(owner, block), player, owner);
       if (!train) return;
-      say(player, `§6Engine on the line (${TRAIN_STYLES[train.style]} style). Climb in and hold forward to go, back to brake.`);
+      const look = train.color === NO_COLOR ? `${TRAIN_STYLES[train.style]} style` : `${TRAIN_STYLES[train.style]} style, in ${COLORS[train.color].replace("_", " ")}`;
+      say(player, `§6Engine on the line (${look}). Climb in and hold forward to go, back to brake.`);
     } else {
       const train = trainBehind(dim, block.location);
       if (!train) return say(player, "§7Place a coach on the track right behind an engine or its last coach.");
@@ -294,6 +313,22 @@ system.afterEvents.scriptEventReceive.subscribe(({ id, message, sourceEntity }) 
   reply(`§6Trains: ${trains().length}, moving by ${TRAIN.drive}.`);
   for (const t of trains()) reply(`§7#${t.id} ${t.cars.map((c) => c.kind).join(" + ")} at ${t.head.x} ${t.head.y} ${t.head.z}, ${Math.round(t.v * 20)} blocks/s, ${TRAIN_STYLES[t.style]}`);
 });
+
+// ---------- a re-dyed Keep Banner repaints that settlement's trains ----------
+
+function repaintTick() {
+  for (const t of trains()) {
+    if (!t.owner) continue;
+    const c = colorOf(t.owner);
+    if (c === t.color) continue;
+    const ents = t.cars.map((car) => world.getEntity(car.eid));
+    if (ents.some((e) => !e?.isValid)) continue; // not all loaded: try again later
+    t.color = c;
+    for (const e of ents) paint(e, t);
+    store.save();
+  }
+}
+onTick("trains_repaint", 100, repaintTick);
 
 // ---------- the test world (/scriptevent siege:showcase): a loop of track with an engine and a coach ----------
 

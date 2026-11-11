@@ -222,6 +222,13 @@ write(BP + "recipes/trains/track.json", {"format_version": "1.20.10", "minecraft
 
 # ================================================================ the trains
 STYLES = ["vale", "frostmarch", "saltreach", "emberwaste", "blackfen"]  # must match TRAIN_STYLES in trains/data.js
+# The body is painted in the owning settlement's Keep Banner colour (the 16 dyes, in COLORS order from
+# scripts/siege/constants.js); colour 16 = no settlement, the region's own body colour. Trim, roof and metal stay regional.
+DYES = [(233, 236, 236), (240, 118, 19), (189, 68, 179), (58, 175, 217), (248, 197, 39), (112, 185, 25), (237, 141, 172), (62, 68, 71),
+        (142, 142, 134), (21, 137, 145), (121, 42, 172), (53, 57, 157), (114, 71, 40), (84, 109, 27), (161, 39, 34), (29, 29, 33)]
+NCOL = len(DYES) + 1
+def tex_name(name, s, c):
+    return f"textures/entity/siege/trains/{name}_{s}" + ("" if c == len(DYES) else f"_{c}")
 # body, trim, roof, metal: one colour set per region (placeholders until the art pass)
 PALETTE = {
     "vale":       ((48, 92, 60), (196, 160, 72), (70, 52, 38), (60, 60, 66)),
@@ -404,7 +411,8 @@ for name, seats in SEATS.items():
     ident = f"siege:train_{name}"
     write(BP + f"entities/trains/train_{name}.json", {"format_version": "1.21.60", "minecraft:entity": {
         "description": {"identifier": ident, "is_spawnable": False, "is_summonable": True,
-                        "properties": {"siege:style": {"type": "int", "range": [0, len(STYLES) - 1], "default": 0, "client_sync": True}}},
+                        "properties": {"siege:style": {"type": "int", "range": [0, len(STYLES) - 1], "default": 0, "client_sync": True},
+                                       "siege:color": {"type": "int", "range": [0, NCOL - 1], "default": NCOL - 1, "client_sync": True}}},
         "components": {
             "minecraft:type_family": {"family": ["siege_train", f"siege_train_{name}", "inanimate"]},
             "minecraft:collision_box": {"width": 2.6, "height": 2.4},
@@ -423,15 +431,15 @@ for name, seats in SEATS.items():
         }}})
     write(RP + f"entity/train_{name}.entity.json", {"format_version": "1.10.0", "minecraft:client_entity": {"description": {
         "identifier": ident, "materials": {"default": "entity_alphatest"},
-        "textures": {s: f"textures/entity/siege/trains/{name}_{s}" for s in STYLES},
+        "textures": {f"{s}_{c}": tex_name(name, s, c) for s in STYLES for c in range(NCOL)},
         "geometry": {"default": f"geometry.siege_train_{name}"},
         "scripts": {"should_update_bones_and_effects_offscreen": "1.0"},
         "render_controllers": ["controller.render.siege_train"]}}})
 write(RP + "render_controllers/siege_train.render_controllers.json", {"format_version": "1.8.0", "render_controllers": {
     "controller.render.siege_train": {
-        "arrays": {"textures": {"Array.styles": [f"Texture.{s}" for s in STYLES]}},
+        "arrays": {"textures": {"Array.looks": [f"Texture.{s}_{c}" for s in STYLES for c in range(NCOL)]}},
         "geometry": "Geometry.default", "materials": [{"*": "Material.default"}],
-        "textures": ["Array.styles[query.has_property('siege:style') ? query.property('siege:style') : 0]"]}}})
+        "textures": [f"Array.looks[(query.has_property('siege:style') ? query.property('siege:style') : 0) * {NCOL} + (query.has_property('siege:color') ? query.property('siege:color') : {NCOL - 1})]"]}}})
 
 # ---------------------------------------------------------------- placeholder textures (painted tiles, one atlas per style)
 def cl(c): return tuple(max(0, min(255, int(v))) for v in c)
@@ -440,8 +448,10 @@ def noisy(c, a=6):
 def sh(c, k): return cl([v * k for v in c])
 BEAM = {"vale": (150, 40, 32), "frostmarch": (40, 52, 72), "saltreach": (176, 60, 40), "emberwaste": (60, 40, 30), "blackfen": (110, 36, 30)}
 
-def tiles_for(style):
+def tiles_for(style, color=None):
     body, trim, roof, metal = PALETTE[style]
+    if color is not None:  # banner colour, toned a little toward the region's own so it reads as paint
+        body = cl([d * 0.82 + b * 0.18 for d, b in zip(DYES[color], body)])
     beam = BEAM[style]
     dark = sh(metal, 0.55)
     def rd(x, y): return math.hypot(x - 7.5, y - 7.5)
@@ -517,7 +527,8 @@ def tiles_for(style):
 
 for name in ("engine", "coach"):
     for s in STYLES:
-        save_png(RP + f"textures/entity/siege/trains/{name}_{s}.png", tiles_for(s))
+        for c in range(NCOL):
+            save_png(RP + tex_name(name, s, c) + ".png", tiles_for(s, None if c == len(DYES) else c))
 
 def icon(rows, col, path):
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
