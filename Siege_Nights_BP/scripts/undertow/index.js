@@ -28,7 +28,7 @@ import { getSourceSite, getSites, markSite, openRift, riftExit, sourceSignsTick,
 import { VEIL, planCrack, tearBand, TEAR_STEPS, TEAR_CLIMB } from "./rift.js";
 import { buildTick, piecesTick, flush, pieces, openCourtGate, openRiverGate, rebuildHeart, waystoneSpot, WAYSTONE, isBuilt, siteOutdated, withClearing } from "./builder.js";
 import { heightAt, planChunk, isRiver, regionAt, columnAt } from "./terrain.js";
-import { RIVER_NODES, riverSegments, riverDistance } from "./rivers.js";
+import { RIVER_NODES, riverSegments, riverDistance, RIVER_HALF_WIDTH } from "./rivers.js";
 import { SITES, roadLines } from "./roads.js";
 import { STRUCTURE_IDS, planStructure } from "./structures.js";
 import { SITE_DESIGNS, TOWER_DESIGNS } from "./sites_data.js";
@@ -527,7 +527,7 @@ addTests("undertow", {
     for (const [id, d] of Object.entries(SITE_DESIGNS)) {
       const s = SITES.find((x) => x.id === id);
       assert(s, `${id} has no site`);
-      for (const [x, , z] of stampCells(d)) assert(Math.hypot(x, z) <= s.r + 4, `${id} builds outside its site`);
+      for (const [x, , z] of stampCells(d)) assert(Math.hypot(x, z) <= Math.max(s.r + 4, d.reach ?? 0), `${id} builds outside its site`);
       for (const t of stateTries(d)) assert(JSON.stringify(t[t.length - 1]) === "{}");
     }
     const t = SITE_DESIGNS.truce_hall;
@@ -540,12 +540,17 @@ addTests("undertow", {
       assert(siteOutdated({ sites: [id] }, id) && !siteOutdated({ sites: [id], siteV: { [id]: d.v } }, id), `${id} version check`);
       const full = withClearing(d), own = new Set(stampCells(d).map(([x, y, z]) => `${x},${y},${z}`));
       for (const [x, y, z, i] of stampCells(full)) {
-        assert(Math.hypot(x, z) <= s.r + 4, `${id} clears outside its site`);
+        assert(Math.hypot(x, z) <= Math.max(s.r + 4, d.reach ?? 0), `${id} clears outside its site`);
         if (i === full.palette.length - 1 && d.clear.length) assert(y >= 1 && !own.has(`${x},${y},${z}`), `${id} clears a block it also builds`);
       }
     }
     const dock = SITE_DESIGNS.wound_dock, at = (x, y, z) => stampCells(dock).find((c) => c[0] === x && c[1] === y && c[2] === z);
     assert(at(0, 0, -4) && !at(0, 1, -4) && !at(0, 2, -4), "the Carter's place on the landing stage is blocked or has no deck");
+    // the landing stage sits one block above the river: its deck over water, so a boat can come alongside
+    const w = SITES.find((x) => x.id === "wound_dock");
+    const stage = stampCells(dock).filter(([x, y, z]) => y === -3 && z <= -19 && Math.abs(x) <= 2);
+    assert(stage.length > 0 && w.y - 3 === L.seaY + 1, "the landing stage is not one above the water");
+    assert(stage.some(([x, , z]) => riverDistance(w.x + x, w.z + z) <= RIVER_HALF_WIDTH), "the landing stage does not reach the river");
   },
   "the drowned towers stand off the water and the roads, each a different design": () => {
     assert(new Set(DROWNED_SPOTS.map((t) => t.design)).size === DROWNED_SPOTS.length);

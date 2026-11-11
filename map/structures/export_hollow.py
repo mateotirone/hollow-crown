@@ -67,6 +67,7 @@ def main():
             if rows and rows[-1][0] == y and rows[-1][1] == z and rows[-1][2] + rows[-1][3] == x: rows[-1][3] += 1
             else: rows.append([y, z, x, 1])
         d["v"] = ver; d["clear"] = rows
+    for sid, reach in HK.SITE_REACH.items(): sites[sid]["reach"] = reach
     towers = [export(HK.leaning_tower(*t)) for t in HK.TOWERS]
     for sid, d in sites.items(): print(sid, "cells", sum(r[3] for r in d["rows"]), "box", d["box"])
     dest = os.path.join(HERE, "..", "..", "Siege_Nights_BP", "scripts", "undertow", "sites_data.js")
