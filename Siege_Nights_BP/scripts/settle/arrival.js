@@ -19,7 +19,7 @@ import { WALLS } from "./walldata.js";
 import { wallOf, raiseWall, bearingFor } from "./walls.js";
 
 const OVERWORLD = "minecraft:overworld";
-const SOFT = /(air|water|grass|fern|flower|snow_layer|leaves|vine|bush|sapling|tallgrass|dandelion|poppy|mushroom|_log$|deadbush)/;
+const SOFT = /(air|water|grass(?!_block|_path)|fern|flower|snow_layer|leaves|vine|bush|sapling|tallgrass|dandelion|poppy|mushroom|_log$|deadbush)/;
 
 function standY(dim, x, z) {
   try {
@@ -33,6 +33,8 @@ function standY(dim, x, z) {
 
 function signpost(dim, at, text) {
   try {
+    const below = dim.getBlock({ x: at.x, y: at.y - 1, z: at.z });
+    if (below?.typeId === "minecraft:standing_sign") return below.getComponent("minecraft:sign")?.setText(text); // laid out before
     const block = dim.getBlock(at);
     if (!block || !SOFT.test(block.typeId)) return; // something already stands here
     block.setType("minecraft:standing_sign");
@@ -74,10 +76,15 @@ export function layOut(player, { force = false, at, style: wanted } = {}) {
     beginBuild(player.id, 1, halls()[player.id].style);
   }
 
+  // Laying out again (the welcome hall and the Keep Banner both ask) only checks the wall and the Longhouse:
+  // the bench and the signposts are already there, and placing them again stacked a second bench and mason
+  // on the first and a second row of signs on top of the first.
+  if (!fresh && !force) return "already";
+
   // 3. the mason, from day one
   const benchAt = place(center, gateDir, MASON);
   const by = standY(dim, benchAt.x, benchAt.z);
-  if (by !== undefined) {
+  if (by !== undefined && dim.getBlock({ x: benchAt.x, y: by - 1, z: benchAt.z })?.typeId !== BENCH) {
     const block = dim.getBlock({ x: benchAt.x, y: by, z: benchAt.z });
     if (block && block.typeId !== BENCH && SOFT.test(block.typeId)) {
       block.setType(BENCH);
