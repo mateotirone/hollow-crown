@@ -69,7 +69,7 @@ plots=[("Harrowford","Aldmere Vale",-470,-300,"river meadow above the lower Alde
 ("Reedmoor","Blackfen",-230,560,"the firm northern edge of the fen"),("Lanternbog","Blackfen",260,980,"a dry island deep in the fen"),
 ("Redmesa","Emberwaste",700,60,"mesa top at the desert's edge"),("Dunehold","Emberwaste",760,860,"an oasis among the dunes")]
 villages={"Kingsrest":(-150,-150),"Millbrook":(-60,-470),"Rimehold":(-80,-1080),"Gull's Rest":(-800,400),"Sunscar":(850,450),"Mirelight":(-60,900)}
-sources=[("Kingsbarrow Hollow",120,520),("Greywater Sink",560,-420),("Rimecut Caves",-650,-1080),("Drowned Grotto",-870,-860),("Fenmouth Deeps",-250,860),("Scorched Throat",1050,720),("Witchroot Sink",520,1160)]
+sources=[("King's Barrow",120,520),("Bellfounders' Mine",560,-420),("Frostvein Gap",-650,-1080),("Drowned Chapel",-870,-860),("Witchroot Caves",-250,860),("Saltglass Grotto",1050,720),("Sunken Quarry",520,1160)]
 order=[("Ashen Gate Chapterhouse",420,-170),("Ashen Watch",480,560),("Crownhold (ruin)",-235,-345),("Bellhollow",155,-100)]
 camps=[(1050,-800),(-820,-1150),(1100,1150),(-120,1190)]
 rivers={"River Alder":[(140,-830),(40,-640),(-70,-470),(-90,-300),(-150,-150),(-330,-60),(-540,40)],

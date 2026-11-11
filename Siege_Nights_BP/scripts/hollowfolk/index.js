@@ -30,6 +30,7 @@ import { isBuilt } from "../undertow/builder.js";
 import { wardenData, wardenOnline, hollowStep } from "../undertow/warden.js";
 import { regentRules } from "../undertow/regent.js";
 import { say, runCmd } from "../undertow/data.js";
+import { sparedCart } from "../undertow/story.js";
 import { stamp, stampCells, stateTries } from "../undertow/stamp.js";
 import { VILLAGE_DESIGNS } from "./village_data.js";
 import { FOLK, LINES, moodOf, robVerdict, dig, cart, priceOf, vaultLoot, HAPPENINGS, HAPPENING_GAP_SECONDS, ERRAND_ORE, ERRAND_ASKS, happeningsFor, freshLine } from "./rules.js";
@@ -326,7 +327,8 @@ const lastHappening = new Map(); // player id -> tick of their last one
 const deals = new Map(); // player id -> { village, until } : the Foreman's half price
 const lastLine = new Map(); // player id -> index of the miner line they heard last
 const dealFor = (player, v) => { const d = deals.get(player.id); return !!d && d.village === v.id && system.currentTick < d.until; };
-const priceFor = (player, v, m) => { const p = priceOf(m, store.data.price); return dealFor(player, v) ? Math.max(1, Math.floor(p / 2)) : p; };
+// Half price: the Foreman's deal, or the Highcut miners remembering who let the dawn cart go (undertow/story.js)
+const priceFor = (player, v, m) => { const p = priceOf(m, store.data.price); return dealFor(player, v) || sparedCart(player.id) ? Math.max(1, Math.floor(p / 2)) : p; };
 function minerLine(player, m) {
   const [line, i] = freshLine(LINES[m], lastLine.get(player.id) ?? -1);
   lastLine.set(player.id, i);

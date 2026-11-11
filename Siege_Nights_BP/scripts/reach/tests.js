@@ -5,7 +5,7 @@ import {
   REACH, STAGES, LONG, AFTER, stageFor, capReach, nightKind, isSiegeKind, profile, openTime, waveTime, waveRole, waveShare,
   hollowCount, hollowShare, tideLull, pressureMult, clock, nextSiege, duskLine, troopMix, SHAPES, pickShape, WAVES, hourLine, HONOURS,
   HOUR_LINES, HOUR_ACTS, DUSK_ACT, hourOmen, omenSide,
-  musterGap, omenWait, duskSpeed, watchHint, watchBand, WATCH_HINTS,
+  musterGap, omenWait, duskSpeed, watchHint, watchBand, WATCH_HINTS, fightStage, OATH_STAGE,
 } from "./rules.js";
 import { ACTS } from "./omens.js";
 
@@ -49,6 +49,19 @@ addTests("reach", {
     assertEqual(count(AFTER, ["muster", "counted", "stolen", "long", "probe"]), 0, "after the story nothing comes by the count");
     assertEqual(nightKind(40, AFTER, { musterDay: 40 }), "muster");
     assertEqual(nightKind(41, AFTER, { musterDay: 40 }), undefined);
+  },
+  "a broken truce gives the third night back to the Hollow": () => {
+    assertEqual(nightKind(42, AFTER, { oathbroken: true }), "oathbroken");
+    assertEqual(nightKind(43, AFTER, { oathbroken: true }), undefined);
+    assertEqual(nightKind(42, AFTER, { oathbroken: true, musterDay: 42 }), "muster", "a rival who chose the night keeps it");
+    assertEqual(nightKind(42, AFTER), undefined, "kept or never broken: the third night stays quiet");
+    assertEqual(nightKind(42, 2, { oathbroken: true }), "counted", "before the story the flag changes nothing");
+    assertEqual(fightStage("oathbroken", AFTER), OATH_STAGE);
+    assertEqual(fightStage("muster", AFTER), AFTER);
+    assert(profile("oathbroken", AFTER).mult > profile("counted", 1).mult, "harder than the old counted nights");
+    assert(isSiegeKind("oathbroken"));
+    assert(duskLine("oathbroken", AFTER, 3).length > 0);
+    assert(troopMix(fightStage("oathbroken", AFTER), true).hollow > 0, "the Hollow is back in the ranks");
   },
   "the stolen night moves about": () => {
     const offsets = new Set();

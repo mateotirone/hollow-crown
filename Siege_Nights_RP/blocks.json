@@ -1,306 +1,483 @@
 {
-  "format_version": "1.21.40",
-  "siege:castle_stone": {
-    "sound": "stone"
-  },
-  "siege:portcullis": {
-    "sound": "metal"
-  },
-  "siege:mossy_castle_stone": {
-    "sound": "stone"
-  },
-  "siege:cracked_castle_stone": {
-    "sound": "stone"
-  },
-  "siege:battlement": {
-    "sound": "stone"
-  },
-  "siege:arrow_slit": {
-    "sound": "stone"
-  },
-  "siege:spire_roof": {
-    "sound": "stone"
-  },
-  "siege:timber_frame": {
-    "sound": "wood"
-  },
-  "siege:timber_frame_cross": {
-    "sound": "wood"
-  },
-  "siege:brazier": {
-    "sound": "metal"
-  },
-  "siege:castle_gate": {
-    "sound": "wood"
-  },
-  "siege:keep_banner": {
-    "sound": "wood"
-  },
-  "siege:quartermaster_desk": {
-    "sound": "wood"
-  },
-  "siege:workshop": {
-    "sound": "stone"
-  },
-  "siege:breaching_charge": {
-    "sound": "wood"
-  },
-  "siege:barracks": {
-    "sound": "wood"
-  },
-  "siege:plot_stone": {
-    "sound": "stone"
-  },
-  "siege:veinstone": {
-    "sound": "deepslate"
-  },
-  "siege:undertow_moss": {
-    "sound": "moss_block"
-  },
-  "siege:veil_rock": {
-    "sound": "deepslate"
-  },
-  "siege:hollowwood_lattice": {
-    "sound": "nether_wood"
-  },
-  "siege:hollowwood_core": {
-    "sound": "nether_wood"
-  },
-  "siege:veilcap": {
-    "sound": "fungus"
-  },
-  "siege:glimbulb": {
-    "sound": "fungus"
-  },
-  "siege:glimmerflow": {
-    "sound": "powder_snow"
-  },
-  "siege:rift_seam": {
-    "sound": "deepslate"
-  },
-  "siege:rift_edge": {
-    "sound": "amethyst_block"
-  },
-  "siege:rift_veil": {
-    "sound": "amethyst_block"
-  },
-  "siege:waystone": {
-    "sound": "amethyst_block"
-  },
-  "siege:court_seal": {
-    "sound": "stone"
-  },
-  "siege:hall_cornerstone": {
-    "sound": "stone"
-  },
-  "siege:tree_of_oaths": {
-    "sound": "wood"
-  },
-  "siege:stables": {
-    "sound": "wood"
-  },
-  "siege:rail_depot": {
-    "sound": "wood"
-  },
-  "hc:station_post": {
-    "sound": "stone"
-  },
-  "hc:breeder_post": {
-    "sound": "wood"
-  },
-  "siege:archive_shelf": {
-    "sound": "wood"
-  },
-  "hc:tome_cache": {
-    "sound": "wood"
-  },
-  "siege:citadel_cornerstone": {
-    "sound": "stone"
-  },
-  "siege:throne": {
-    "sound": "stone"
-  },
-  "siege:fallen_shard": {
-    "sound": "amethyst_block"
-  },
-  "siege:choir_ore": {
-    "sound": "amethyst_block"
-  },
-  "siege:dragon_roost": {
-    "sound": "stone"
-  },
-  "hc:dragon_nest": {
-    "sound": "grass"
-  },
-  "siege:mason_bench": {
-    "sound": "wood"
-  },
-  "siege:foundation_stone": {
-    "sound": "stone"
-  },
-  "hc:looking_glass": {
-    "sound": "glass"
-  },
-  "siege:castle_tiles": {
-    "sound": "stone"
-  },
-  "siege:castle_bricks": {
-    "sound": "stone"
-  },
-  "siege:castle_cobbled": {
-    "sound": "stone"
-  },
-  "siege:castle_smooth": {
-    "sound": "stone"
-  },
-  "siege:castle_stone_frostmarch": {
-    "sound": "stone"
-  },
-  "siege:castle_tiles_frostmarch": {
-    "sound": "stone"
-  },
-  "siege:castle_bricks_frostmarch": {
-    "sound": "stone"
-  },
-  "siege:castle_cobbled_frostmarch": {
-    "sound": "stone"
-  },
-  "siege:castle_smooth_frostmarch": {
-    "sound": "stone"
-  },
-  "siege:castle_stone_saltreach": {
-    "sound": "stone"
-  },
-  "siege:castle_tiles_saltreach": {
-    "sound": "stone"
-  },
-  "siege:castle_bricks_saltreach": {
-    "sound": "stone"
-  },
-  "siege:castle_cobbled_saltreach": {
-    "sound": "stone"
-  },
-  "siege:castle_smooth_saltreach": {
-    "sound": "stone"
-  },
-  "siege:castle_stone_emberwaste": {
-    "sound": "stone"
-  },
-  "siege:castle_tiles_emberwaste": {
-    "sound": "stone"
-  },
-  "siege:castle_bricks_emberwaste": {
-    "sound": "stone"
-  },
-  "siege:castle_cobbled_emberwaste": {
-    "sound": "stone"
-  },
-  "siege:castle_smooth_emberwaste": {
-    "sound": "stone"
-  },
-  "siege:castle_stone_blackfen": {
-    "sound": "stone"
-  },
-  "siege:castle_tiles_blackfen": {
-    "sound": "stone"
-  },
-  "siege:castle_bricks_blackfen": {
-    "sound": "stone"
-  },
-  "siege:castle_cobbled_blackfen": {
-    "sound": "stone"
-  },
-  "siege:castle_smooth_blackfen": {
-    "sound": "stone"
-  },
-  "siege:veinstone_bricks": {
-    "sound": "deepslate_bricks"
-  },
-  "siege:cracked_veinstone_bricks": {
-    "sound": "deepslate_bricks"
-  },
-  "siege:pale_ash": {
-    "sound": "sand"
-  },
-  "siege:glint_cluster": {
-    "sound": "amethyst_cluster"
-  },
-  "siege:palisade": {
-    "sound": "wood"
-  },
-  "siege:wall_planks": {
-    "sound": "wood"
-  },
-  "siege:roof_shingles": {
-    "sound": "stone"
-  },
-  "siege:palisade_frostmarch": {
-    "sound": "wood"
-  },
-  "siege:wall_planks_frostmarch": {
-    "sound": "wood"
-  },
-  "siege:roof_shingles_frostmarch": {
-    "sound": "stone"
-  },
-  "siege:castle_gate_frostmarch": {
-    "sound": "wood"
-  },
-  "siege:portcullis_frostmarch": {
-    "sound": "metal"
-  },
-  "siege:palisade_saltreach": {
-    "sound": "wood"
-  },
-  "siege:wall_planks_saltreach": {
-    "sound": "wood"
-  },
-  "siege:roof_shingles_saltreach": {
-    "sound": "stone"
-  },
-  "siege:castle_gate_saltreach": {
-    "sound": "wood"
-  },
-  "siege:portcullis_saltreach": {
-    "sound": "metal"
-  },
-  "siege:palisade_emberwaste": {
-    "sound": "wood"
-  },
-  "siege:wall_planks_emberwaste": {
-    "sound": "wood"
-  },
-  "siege:roof_shingles_emberwaste": {
-    "sound": "stone"
-  },
-  "siege:castle_gate_emberwaste": {
-    "sound": "wood"
-  },
-  "siege:portcullis_emberwaste": {
-    "sound": "metal"
-  },
-  "siege:palisade_blackfen": {
-    "sound": "wood"
-  },
-  "siege:wall_planks_blackfen": {
-    "sound": "wood"
-  },
-  "siege:roof_shingles_blackfen": {
-    "sound": "stone"
-  },
-  "siege:castle_gate_blackfen": {
-    "sound": "wood"
-  },
-  "siege:portcullis_blackfen": {
-    "sound": "metal"
-  },
-  "siege:veilcap_cap": {
-    "sound": "fungus"
-  },
-  "siege:veilcap_stem": {
-    "sound": "fungus"
-  },
-  "siege:veilmoss_strands": {
-    "sound": "fungus"
-  }
+ "format_version": "1.21.40",
+ "siege:castle_stone": {
+  "sound": "stone"
+ },
+ "siege:portcullis": {
+  "sound": "metal"
+ },
+ "siege:mossy_castle_stone": {
+  "sound": "stone"
+ },
+ "siege:cracked_castle_stone": {
+  "sound": "stone"
+ },
+ "siege:battlement": {
+  "sound": "stone"
+ },
+ "siege:arrow_slit": {
+  "sound": "stone"
+ },
+ "siege:spire_roof": {
+  "sound": "stone"
+ },
+ "siege:timber_frame": {
+  "sound": "wood"
+ },
+ "siege:timber_frame_cross": {
+  "sound": "wood"
+ },
+ "siege:brazier": {
+  "sound": "metal"
+ },
+ "siege:castle_gate": {
+  "sound": "wood"
+ },
+ "siege:keep_banner": {
+  "sound": "wood"
+ },
+ "siege:quartermaster_desk": {
+  "sound": "wood"
+ },
+ "siege:workshop": {
+  "sound": "stone"
+ },
+ "siege:breaching_charge": {
+  "sound": "wood"
+ },
+ "siege:barracks": {
+  "sound": "wood"
+ },
+ "siege:plot_stone": {
+  "sound": "stone"
+ },
+ "siege:veinstone": {
+  "sound": "deepslate"
+ },
+ "siege:undertow_moss": {
+  "sound": "moss_block"
+ },
+ "siege:veil_rock": {
+  "sound": "deepslate"
+ },
+ "siege:hollowwood_lattice": {
+  "sound": "nether_wood"
+ },
+ "siege:hollowwood_core": {
+  "sound": "nether_wood"
+ },
+ "siege:veilcap": {
+  "sound": "fungus"
+ },
+ "siege:glimbulb": {
+  "sound": "fungus"
+ },
+ "siege:glimmerflow": {
+  "sound": "powder_snow"
+ },
+ "siege:rift_seam": {
+  "sound": "deepslate"
+ },
+ "siege:rift_edge": {
+  "sound": "amethyst_block"
+ },
+ "siege:rift_veil": {
+  "sound": "amethyst_block"
+ },
+ "siege:waystone": {
+  "sound": "amethyst_block"
+ },
+ "siege:court_seal": {
+  "sound": "stone"
+ },
+ "siege:hall_cornerstone": {
+  "sound": "stone"
+ },
+ "siege:tree_of_oaths": {
+  "sound": "wood"
+ },
+ "siege:stables": {
+  "sound": "wood"
+ },
+ "siege:foresters_lodge": {
+  "sound": "wood"
+ },
+ "siege:rail_depot": {
+  "sound": "wood"
+ },
+ "hc:station_post": {
+  "sound": "stone"
+ },
+ "hc:breeder_post": {
+  "sound": "wood"
+ },
+ "siege:archive_shelf": {
+  "sound": "wood"
+ },
+ "hc:tome_cache": {
+  "sound": "wood"
+ },
+ "siege:citadel_cornerstone": {
+  "sound": "stone"
+ },
+ "siege:throne": {
+  "sound": "stone"
+ },
+ "siege:fallen_shard": {
+  "sound": "amethyst_block"
+ },
+ "siege:choir_ore": {
+  "sound": "amethyst_block"
+ },
+ "siege:dragon_roost": {
+  "sound": "stone"
+ },
+ "hc:dragon_nest": {
+  "sound": "grass"
+ },
+ "siege:mason_bench": {
+  "sound": "wood"
+ },
+ "siege:foundation_stone": {
+  "sound": "stone"
+ },
+ "hc:looking_glass": {
+  "sound": "glass"
+ },
+ "siege:castle_tiles": {
+  "sound": "stone"
+ },
+ "siege:castle_bricks": {
+  "sound": "stone"
+ },
+ "siege:castle_cobbled": {
+  "sound": "stone"
+ },
+ "siege:castle_smooth": {
+  "sound": "stone"
+ },
+ "siege:castle_stone_frostmarch": {
+  "sound": "stone"
+ },
+ "siege:castle_tiles_frostmarch": {
+  "sound": "stone"
+ },
+ "siege:castle_bricks_frostmarch": {
+  "sound": "stone"
+ },
+ "siege:castle_cobbled_frostmarch": {
+  "sound": "stone"
+ },
+ "siege:castle_smooth_frostmarch": {
+  "sound": "stone"
+ },
+ "siege:castle_stone_saltreach": {
+  "sound": "stone"
+ },
+ "siege:castle_tiles_saltreach": {
+  "sound": "stone"
+ },
+ "siege:castle_bricks_saltreach": {
+  "sound": "stone"
+ },
+ "siege:castle_cobbled_saltreach": {
+  "sound": "stone"
+ },
+ "siege:castle_smooth_saltreach": {
+  "sound": "stone"
+ },
+ "siege:castle_stone_emberwaste": {
+  "sound": "stone"
+ },
+ "siege:castle_tiles_emberwaste": {
+  "sound": "stone"
+ },
+ "siege:castle_bricks_emberwaste": {
+  "sound": "stone"
+ },
+ "siege:castle_cobbled_emberwaste": {
+  "sound": "stone"
+ },
+ "siege:castle_smooth_emberwaste": {
+  "sound": "stone"
+ },
+ "siege:castle_stone_blackfen": {
+  "sound": "stone"
+ },
+ "siege:castle_tiles_blackfen": {
+  "sound": "stone"
+ },
+ "siege:castle_bricks_blackfen": {
+  "sound": "stone"
+ },
+ "siege:castle_cobbled_blackfen": {
+  "sound": "stone"
+ },
+ "siege:castle_smooth_blackfen": {
+  "sound": "stone"
+ },
+ "siege:veinstone_bricks": {
+  "sound": "deepslate_bricks"
+ },
+ "siege:cracked_veinstone_bricks": {
+  "sound": "deepslate_bricks"
+ },
+ "siege:pale_ash": {
+  "sound": "sand"
+ },
+ "siege:glint_cluster": {
+  "sound": "amethyst_cluster"
+ },
+ "siege:palisade": {
+  "sound": "wood"
+ },
+ "siege:wall_planks": {
+  "sound": "wood"
+ },
+ "siege:roof_shingles": {
+  "sound": "stone"
+ },
+ "siege:palisade_frostmarch": {
+  "sound": "wood"
+ },
+ "siege:wall_planks_frostmarch": {
+  "sound": "wood"
+ },
+ "siege:roof_shingles_frostmarch": {
+  "sound": "stone"
+ },
+ "siege:castle_gate_frostmarch": {
+  "sound": "wood"
+ },
+ "siege:portcullis_frostmarch": {
+  "sound": "metal"
+ },
+ "siege:palisade_saltreach": {
+  "sound": "wood"
+ },
+ "siege:wall_planks_saltreach": {
+  "sound": "wood"
+ },
+ "siege:roof_shingles_saltreach": {
+  "sound": "stone"
+ },
+ "siege:castle_gate_saltreach": {
+  "sound": "wood"
+ },
+ "siege:portcullis_saltreach": {
+  "sound": "metal"
+ },
+ "siege:palisade_emberwaste": {
+  "sound": "wood"
+ },
+ "siege:wall_planks_emberwaste": {
+  "sound": "wood"
+ },
+ "siege:roof_shingles_emberwaste": {
+  "sound": "stone"
+ },
+ "siege:castle_gate_emberwaste": {
+  "sound": "wood"
+ },
+ "siege:portcullis_emberwaste": {
+  "sound": "metal"
+ },
+ "siege:palisade_blackfen": {
+  "sound": "wood"
+ },
+ "siege:wall_planks_blackfen": {
+  "sound": "wood"
+ },
+ "siege:roof_shingles_blackfen": {
+  "sound": "stone"
+ },
+ "siege:castle_gate_blackfen": {
+  "sound": "wood"
+ },
+ "siege:portcullis_blackfen": {
+  "sound": "metal"
+ },
+ "siege:veilcap_cap": {
+  "sound": "fungus"
+ },
+ "siege:veilcap_stem": {
+  "sound": "fungus"
+ },
+ "siege:veilmoss_strands": {
+  "sound": "fungus"
+ },
+ "siege:old_acacia_leaves": {
+  "sound": "grass"
+ },
+ "siege:old_acacia_log": {
+  "sound": "wood"
+ },
+ "siege:old_acacia_wood": {
+  "sound": "wood"
+ },
+ "siege:old_azalea_leaves": {
+  "sound": "grass"
+ },
+ "siege:old_azalea_leaves_flowered": {
+  "sound": "grass"
+ },
+ "siege:old_birch_leaves": {
+  "sound": "grass"
+ },
+ "siege:old_birch_log": {
+  "sound": "wood"
+ },
+ "siege:old_birch_wood": {
+  "sound": "wood"
+ },
+ "siege:old_cherry_leaves": {
+  "sound": "grass"
+ },
+ "siege:old_cobbled_deepslate_wall": {
+  "sound": "stone"
+ },
+ "siege:old_dark_oak_fence": {
+  "sound": "wood"
+ },
+ "siege:old_dark_oak_leaves": {
+  "sound": "grass"
+ },
+ "siege:old_dark_oak_log": {
+  "sound": "wood"
+ },
+ "siege:old_dark_oak_slab": {
+  "sound": "wood"
+ },
+ "siege:old_dark_oak_stairs": {
+  "sound": "wood"
+ },
+ "siege:old_dark_oak_trapdoor": {
+  "sound": "wood"
+ },
+ "siege:old_dark_oak_wood": {
+  "sound": "wood"
+ },
+ "siege:old_diorite_stairs": {
+  "sound": "wood"
+ },
+ "siege:old_diorite_wall": {
+  "sound": "wood"
+ },
+ "siege:old_jungle_leaves": {
+  "sound": "grass"
+ },
+ "siege:old_jungle_log": {
+  "sound": "wood"
+ },
+ "siege:old_jungle_wood": {
+  "sound": "wood"
+ },
+ "siege:old_mangrove_fence": {
+  "sound": "wood"
+ },
+ "siege:old_mangrove_leaves": {
+  "sound": "grass"
+ },
+ "siege:old_mangrove_log": {
+  "sound": "wood"
+ },
+ "siege:old_mangrove_slab": {
+  "sound": "wood"
+ },
+ "siege:old_mangrove_stairs": {
+  "sound": "wood"
+ },
+ "siege:old_mangrove_trapdoor": {
+  "sound": "wood"
+ },
+ "siege:old_mangrove_wood": {
+  "sound": "wood"
+ },
+ "siege:old_mud_brick_stairs": {
+  "sound": "stone"
+ },
+ "siege:old_mud_brick_wall": {
+  "sound": "stone"
+ },
+ "siege:old_oak_fence": {
+  "sound": "wood"
+ },
+ "siege:old_oak_leaves": {
+  "sound": "grass"
+ },
+ "siege:old_oak_log": {
+  "sound": "wood"
+ },
+ "siege:old_oak_slab": {
+  "sound": "wood"
+ },
+ "siege:old_oak_stairs": {
+  "sound": "wood"
+ },
+ "siege:old_oak_trapdoor": {
+  "sound": "wood"
+ },
+ "siege:old_oak_wood": {
+  "sound": "wood"
+ },
+ "siege:old_pale_oak_leaves": {
+  "sound": "grass"
+ },
+ "siege:old_pale_oak_log": {
+  "sound": "wood"
+ },
+ "siege:old_pale_oak_wood": {
+  "sound": "wood"
+ },
+ "siege:old_polished_blackstone_stairs": {
+  "sound": "stone"
+ },
+ "siege:old_polished_blackstone_wall": {
+  "sound": "stone"
+ },
+ "siege:old_polished_diorite_stairs": {
+  "sound": "wood"
+ },
+ "siege:old_hollowwood_core": {
+  "sound": "wood"
+ },
+ "siege:old_hollowwood_lattice": {
+  "sound": "wood"
+ },
+ "siege:old_spruce_fence": {
+  "sound": "wood"
+ },
+ "siege:old_spruce_leaves": {
+  "sound": "grass"
+ },
+ "siege:old_spruce_log": {
+  "sound": "wood"
+ },
+ "siege:old_spruce_stairs": {
+  "sound": "wood"
+ },
+ "siege:old_spruce_wood": {
+  "sound": "wood"
+ },
+ "siege:old_stripped_jungle_log": {
+  "sound": "wood"
+ },
+ "siege:old_stripped_jungle_wood": {
+  "sound": "wood"
+ },
+ "siege:old_stripped_pale_oak_log": {
+  "sound": "wood"
+ },
+ "siege:old_stripped_pale_oak_wood": {
+  "sound": "wood"
+ },
+ "siege:old_tuff_stairs": {
+  "sound": "stone"
+ },
+ "siege:old_tuff_wall": {
+  "sound": "stone"
+ },
+ "siege:track": {
+  "sound": "metal"
+ }
 }

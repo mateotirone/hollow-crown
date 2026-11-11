@@ -4,7 +4,7 @@
 // A dead dragon stays where it fell, not breathing, until the fighting is over, then crumbles to ash.
 
 import { world, system } from "@minecraft/server";
-import { getState, isAlly, isOnline, consumeHeld } from "../siege/api.js";
+import { getState, isAlly, isOnline, consumeHeld, emit } from "../siege/api.js";
 import { DRAGON_SETTINGS as S, DRAGON, DAY, RESERVE } from "./data.js";
 import { store, dragonOf, ownerIdOf, valid, save, entityOf, applyRecord, roostDragon, fire, setProp } from "./dragon.js";
 import { speak, noise } from "./voice.js";
@@ -64,6 +64,7 @@ export function lose(rec, how) {
   const now = world.getAbsoluteTime();
   const owner = ownerOf(rec);
   if (S.permadeath) {
+    try { emit("dragonDied", { owner: rec.owner, ownerName: rec.ownerName, name: rec.name, how }); } catch { /* nobody listening */ }
     delete store.data.dragons[rec.owner];
     store.data.mourning[rec.owner] = now + S.mournDays * DAY;
     save();

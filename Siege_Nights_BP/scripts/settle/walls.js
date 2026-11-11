@@ -14,11 +14,11 @@
 
 import { world, system, BlockPermutation } from "@minecraft/server";
 import { ModalFormData } from "@minecraft/server-ui";
-import { isReady, keepOf, tierOf, TIERS, onTick, moduleStore, on, emit, addFilter, addLandClaim, stoneId, STONE_KINDS, title, CASTLE_BLOCKS, WALL_HP, PORTCULLISES, GATES, regionalId } from "../siege/api.js";
+import { isReady, keepOf, tierOf, TIERS, onTick, moduleStore, on, emit, addFilter, addLandClaim, stoneId, STONE_KINDS, title, CASTLE_BLOCKS, WALL_HP, PORTCULLISES, GATES, regionalId, getState, isAlly, guardCount, setGate } from "../siege/api.js";
 import { STYLES } from "../townhall/styles.js";
 import { PLOT_PLAN } from "../plots/config.js";
 import { plotAt, mapMode } from "../plots/claims.js";
-import { WALLS, WALL_LEVELS, MAX_WALL, bearingToAngle, smoothGround, stationSpots, groundProblem, wallColumns, onWallLine, gateSpot, materialKind, wallArmor, columnKinds, wallSeed, WALL_STONES, WALL_TIMBER, WALL_STONE_IDS } from "./walldata.js";
+import { WALLS, WALL_LEVELS, MAX_WALL, bearingToAngle, smoothGround, stationSpots, groundProblem, wallColumns, onWallLine, gateSpot, materialKind, wallArmor, columnKinds, wallSeed, WALL_STONES, WALL_TIMBER, WALL_STONE_IDS, WALL_LOG } from "./walldata.js";
 import { styleOf } from "./plans.js";
 import { sfx } from "../core/sfx.js";
 
@@ -83,8 +83,8 @@ export function palette(style, L, look = {}) {
   const timber = WALL_TIMBER.includes(look.timber) ? look.timber : style;
   const roles = (STYLES[timber] ?? STYLES.vale).roles;
   const kinds = {
-    // the palisade stakes and wall planks, with that region's timber behind them in case the block is missing
-    log: perm(regionalId("palisade", timber)) ?? first(roles.beam ?? ["minecraft:spruce_log"]),
+    // log walls are the timber's stripped log (WALL_LOG); wall planks with that region's timber behind them in case the block is missing
+    log: first([WALL_LOG[timber] ?? WALL_LOG.vale, ...(roles.beam ?? []), "minecraft:spruce_log"]),
     fence: first(roles.rail ?? ["minecraft:spruce_fence"]),
     plank: perm(regionalId("wall_planks", timber)) ?? first(roles.floor ?? ["minecraft:spruce_planks"]),
   };
@@ -296,6 +296,67 @@ on("ready", () => {
     const { level, index } = w.building;
     if (raiseWall(id, level) === true) walls()[id].building.index = index;
   }
+});
+
+// ---------- the gate: barred to outsiders, opened by the guard for friends ----------
+// Mateo, 2026-11-11: only the owner, their allies and their guards open a settlement's gates; gates
+// shut when a siege starts. Clicking is checked in siege/block_clicks.js (mayWorkGate). Here, when the
+// owner or an ally walks up to their own gate and the settlement keeps guards, the guard opens the gate
+// and portcullis, and shuts them again once nobody friendly is near. No guard opens anything mid-siege.
+const gateBlocks = new Map(); // `${id}|${level}` -> [{ x, y, z }] one block of each gate and portcullis
+const guardOpened = new Set(); // wall ids whose gate a guard opened
+function findGateBlocks(id, w) {
+  const key = `${id}|${w.level}`;
+  if (gateBlocks.has(key)) return gateBlocks.get(key);
+  const g = gateSpot(w, w.gate, w.ground, w.radius), dim = world.getDimension(OVERWORLD), found = [], kinds = new Set();
+  try {
+    for (let dy = 0; dy <= 6; dy++) for (let dx = -3; dx <= 3; dx++) for (let dz = -3; dz <= 3; dz++) {
+      const b = dim.getBlock({ x: g.x + dx, y: g.y + dy, z: g.z + dz });
+      if (b && (GATES.includes(b.typeId) || PORTCULLISES.includes(b.typeId)) && !kinds.has(b.typeId)) { kinds.add(b.typeId); found.push(b.location); }
+    }
+  } catch {
+    return []; // not loaded: look again next time
+  }
+  if (found.length) gateBlocks.set(key, found);
+  return found;
+}
+function setWallGate(id, w, open) {
+  const dim = world.getDimension(OVERWORLD);
+  let moved = false;
+  for (const loc of findGateBlocks(id, w)) {
+    try {
+      const b = dim.getBlock(loc);
+      if (b && setGate(b, open)) moved = true;
+    } catch {
+      // not loaded
+    }
+  }
+  return moved;
+}
+const friendOf = (owner, playerId) => playerId === owner || isAlly(owner, playerId);
+export const nearGate = (g, p, reach) => Math.hypot(p.x - (g.x + 0.5), p.z - (g.z + 0.5)) <= reach && Math.abs(p.y - g.y) <= 4;
+
+onTick("settle_gates", 10, () => {
+  if (!isReady() || getState().active) return;
+  const players = world.getDimension(OVERWORLD).getPlayers();
+  for (const [id, w] of Object.entries(walls())) {
+    if (!(w.level > 0) || w.building || WALL_LEVELS[w.level]?.gate === "open" || id.startsWith("npc:")) continue;
+    const g = gateSpot(w, w.gate, w.ground, w.radius);
+    const opened = guardOpened.has(id);
+    const friendNear = players.some((p) => friendOf(id, p.id) && nearGate(g, p.location, opened ? 6 : WALLS.gateGreet));
+    if (friendNear && !opened && guardCount(id) > 0) {
+      if (setWallGate(id, w, true)) guardOpened.add(id);
+    } else if (!friendNear && opened) {
+      setWallGate(id, w, false);
+      guardOpened.delete(id);
+    }
+  }
+});
+
+// A siege bars every gate: anything open slams shut (the owner and allies can still open it by hand to sally out)
+on("siegeStart", () => {
+  guardOpened.clear();
+  for (const [id, w] of Object.entries(walls())) if (w.level > 0 && WALL_LEVELS[w.level]?.gate !== "open") setWallGate(id, w, false);
 });
 
 // ---------- what a wall changes ----------

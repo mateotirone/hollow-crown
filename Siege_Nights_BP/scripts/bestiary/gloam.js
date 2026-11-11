@@ -22,6 +22,7 @@ export const GLOAM_SETTINGS = {
 const STEP_SECONDS = 10;
 const GLOAM = "siege:gloamwing";
 const RULER_TAG = "siege_hollow_ruler", SAFE_TAG = "siege_hollowfolk_safe";
+const GUEST_TAG = "siege_truce_guest"; // the truce holds (lore/truce.js): players are guests below, nothing hunts them
 const stays = new Map(); // player id -> { seconds in the Hollow this visit, nextAt }
 const huntTag = (player) => `siege_gloam_${player.id}`.replace(/[^\w-]/g, "_");
 
@@ -56,7 +57,7 @@ function gloamTick() {
       stays.set(p.id, stay);
       stay.seconds += STEP_SECONDS;
       const ruler = p.hasTag(RULER_TAG);
-      if (ruler) { callOff(hollow, stay.tag); continue; }
+      if (ruler || p.hasTag(GUEST_TAG)) { callOff(hollow, stay.tag); continue; }
       const alive = hollow.getEntities({ type: GLOAM, tags: [stay.tag] }).length;
       const due = gloamDue({ seconds: stay.seconds, nextAt: stay.nextAt, alive, safe: p.hasTag(SAFE_TAG), ruler });
       stay.nextAt = due.nextAt;

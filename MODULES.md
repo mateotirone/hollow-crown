@@ -79,6 +79,7 @@ addJoinStep(20, "welcome hall", async (player, { first, wait }) => {
 | order | step | owner | when |
 |---|---|---|---|
 | 10 | look picker (reserved looks just apply) | looks | first |
+| 15 | waits (up to 85 s, action-bar line) while a fresh Hollow Crown map sets itself up | opening | first |
 | 20 | welcome hall teleport, title and message (map mode only) | plots | first |
 | 30 | journal handed over (after "How things stand", or about 20 s; about 3 s after the picker with no hall) | lore | first |
 | 40+ | returning-player notices: unspent skill points and so on | town hall and others | returning |
@@ -231,6 +232,14 @@ Add a line here when you publish one.
   its Plot Stone: listen for it to raise their first building. `pickOf(plot)` is who a plot is being kept for.
   `EXPANSION` lists the sealed zones kept for later updates; an update calls `openZone(id)` to let players past the map
   edge into that zone's land. Zone ids are saved in worlds, so never rename or reuse one.
+  Also `registerPlot(planName, loc)` (record a Plot Stone placed by script), `raiseHall(o, then)` (build the welcome hall,
+  spread over ticks) and `setKingsrestArrival(spot)`; event **`startedHomeless` `{ player }`** when a newcomer starts in Kingsrest with no plot.
+
+- **opening** (`scripts/opening/`): the story opening with no builder commands. The first time the generated map loads
+  (`map/genworld.py` leaves a gold block on the Kingsrest square, each plot marker and each town square) it puts Plot Stones
+  on the twelve markers, builds the welcome hall and stands Sister Wren on a porch on the Millbrook square, a few places at a
+  time with ticking areas `hc_open_0..3`. Worlds without the Kingsrest gold block are left alone. Event `openingSetUp {}` when done.
+  Builder commands: `/scriptevent siege:opening status|setup`, and `/scriptevent siege:wren` moves Wren to where you stand.
 
 - **looks** (`scripts/looks/index.js`): `lookOf(player)`, `setLook(player, look)`, `chooseLook(player)`, `looksFor(name)`. The add-on now ships
   `entities/player.json` (BP) and `entity/player.entity.json` (RP), both written by `studio/build_looks.mjs` from vanilla copies
@@ -260,6 +269,24 @@ Add a line here when you publish one.
 until they have faded before it sends again. Never start a real title with `hcm:`. Map pictures:
 `python3 tools/minimap_tiles.py` after the world map changes; HUD layout: `python3 tools/minimap_ui.py`.
 
+## Menu labels: `addMenuLabel`
+
+Anything that opens a menu when clicked gets a floating label so players know it is clickable
+(`core/labels.js`; the table of existing assets is `scripts/labels/index.js`). **When you add a block or NPC
+that opens a menu, register it**, either with one line in that table or from your own folder:
+
+```js
+import { addMenuLabel } from "../siege/api.js";
+addMenuLabel({ block: "hc:station_post", name: "Station Post", hint: "Click: trains" });   // gold name over a grey hint
+addMenuLabel({ entity: "minecraft:npc", tag: "siege_mason", hint: "Click: buy blocks" });  // hint above the NPC's own name
+addMenuLabel({ entity: "minecraft:npc", match: (e) => ..., hint: "Click to talk" });       // any test you like
+```
+
+Optional: `lift` (label height over the block's bottom or the entity's feet; defaults in `LABEL`), `where(block)` for a
+block id that only sometimes opens a menu, `name` on an entity with no nameTag. Labels appear within 10 blocks of a
+player and vanish a few seconds after everyone walks away; nothing is saved. Don't label things meant to be found
+(Dusty Tomes, hidden doors). `/scriptevent siege:labels` lists what is labelled; `off` / `on` switch them all.
+
 ## Checking and building
 
 - `node tools/check.mjs` (from `siege-nights/`): parses every pack JSON, checks item icons and texture files exist, checks imports, finds undefined names,
@@ -270,3 +297,14 @@ until they have faded before it sends again. Never start a real title with `hcm:
 - `archive/main-before-split.js` is the original single file, for reference.
   Storyteller: reach reports the facts `bossesFallen`, `choirFallen`, `morvaneFallen` and owns the deck `siege_shapes` (seven night
   shapes, each with a kind; picked for subject `"world"`). It notes `quiet` for keep owners on the first night after a siege on which nothing came.
+## The Almanac (explaining mechanics to players)
+
+`scripts/guide/` is the in-game guide: the Settler's Almanac book (`/siege:guide` opens it too) and a one-line chat tip the first time a player meets each mechanic. **Every new player-facing mechanic adds an entry to `scripts/guide/data.js`**: a page, a tip, and `when` triggers such as `place:<block>`, `click:<block>`, `carry:<item>`, `talk:tag:<tag>`, `near:<entity>` or `event:<name>` (format notes at the top of the file). Use `hidden: true` for things a newcomer should not know about yet and `needs: "<id>"` while the feature's block or item is still on an unmerged branch. Never name the Hollow outside the `beyond` and `throne` chapters (the self-test fails). Things meant to be found get no entry. The audit of what is covered is `docs/GUIDE.md`.
+
+## Role trials
+
+`scripts/roletrials/` gives the four regional roles their mentors' trials (words in `lore/data/mentors.js`), sends each mentor's line on every rank-up, and runs the Knight's Stand the Wall and the Eleven. It hooks in through filters, so other features keep working without it:
+`addFilter("roleOffer", (allowed, { player, role }) => ...)` (town hall asks before offering a role; false holds it),
+`addFilter("dragonNestTake", (refusal, { player, block }) => ...)` (dragons: a returned string refuses the egg and is shown),
+`addFilter("treeButtons", (list, { player }) => [...list, { label, icon, open(player, back) }])` (extra pages at the Tree of Oaths), and
+`emit("loreSetFlag", { player, flag })` (lore: set a story flag from another feature).

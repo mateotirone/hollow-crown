@@ -20,6 +20,9 @@ import "./plots/index.js";
 import "./townhall/index.js";
 import "./horses/index.js";
 import "./rails/index.js";
+import "./trains/index.js";
+import "./trains/station_sites.js";
+import "./trains/route_game.js";
 import "./bestiary/index.js";
 import "./lore/index.js";
 import "./crown/index.js";
@@ -32,6 +35,12 @@ import "./economy/index.js";
 import "./reach/index.js";
 import "./sound/index.js";
 import "./minimap/index.js";
+import "./guide/index.js";
+import "./roletrials/index.js";
+import "./after/index.js";
+import "./opening/index.js";
+import "./labels/index.js";
+import "./forestry/index.js";
 
 // Start the shared loop last, once every file has registered its work
 import { startLoop } from "./core/loop.js";

@@ -142,7 +142,7 @@ export const TOMES_B = [
   {
     id: "surv_01", col: "survey", n: 1, survey: 0,
     title: "Field Notes I: Water", author: "Brother Ide Fennick, Surveyor of the Gate",
-    where: "Sunken Quarry rim, in a surveyor's camp (tent, cold fire, tripod).",
+    where: "In Fennick's camp outside the Sunken Quarry (tent, dead fire, lantern on a post).",
     hint: "A surveyor's notebook. Surveyors leave camps behind, near the places they measured.",
     pages: [
       "The Grandmaster has sent me to find where the Gate has wandered. I have found it. I will not write where. If these notes fall into the wrong hands I will not hand them the door. Instead I write in six books one thing I saw there, so a patient reader can follow, and an impatient one cannot.",
@@ -155,7 +155,7 @@ export const TOMES_B = [
   {
     id: "surv_02", col: "survey", n: 2, survey: 1,
     title: "Field Notes II: Bells", author: "Brother Ide Fennick",
-    where: "Bellfounders' Mine entrance (Frostmarch), in an abandoned cart.",
+    where: "In Fennick's camp outside the Bellfounders' Mine.",
     hint: "Second of six. Fennick camped at every thin place, true or not.",
     pages: [
       "The second thing I saw. Remember, Brother, that I visited all seven places, and wrote about one.",
@@ -168,7 +168,7 @@ export const TOMES_B = [
   {
     id: "surv_03", col: "survey", n: 3, survey: 2,
     title: "Field Notes III: Hands", author: "Brother Ide Fennick",
-    where: "King's Barrow, the outer tunnel, in a niche.",
+    where: "In Fennick's camp outside King's Barrow.",
     hint: "Third of six. Look in the tunnels of the place where kings are buried.",
     pages: [
       "Third. I have started to hear something when I sleep. Not words. A tune.",
@@ -181,7 +181,7 @@ export const TOMES_B = [
   {
     id: "surv_04", col: "survey", n: 4, survey: 3,
     title: "Field Notes IV: Cold", author: "Brother Ide Fennick",
-    where: "Frostvein Gap, frozen into the ice near the entrance (break the ice to get it).",
+    where: "In Fennick's camp outside Frostvein Gap.",
     hint: "Fourth of six. Fennick's ink froze somewhere in the north.",
     pages: [
       "Fourth. The tune is louder. I have been humming it without meaning to.",
@@ -194,7 +194,7 @@ export const TOMES_B = [
   {
     id: "surv_05", col: "survey", n: 5, survey: 4,
     title: "Field Notes V: Salt", author: "Brother Ide Fennick",
-    where: "Saltglass Grotto (Emberwaste), at the mouth, under salt crust.",
+    where: "In Fennick's camp outside the Saltglass Grotto.",
     hint: "Fifth of six. Buried under salt, at one of the places it describes, or doesn't.",
     pages: [
       "Fifth. I dreamed I was in a village where everyone faced the walls. I woke up facing the wall of my tent.",
@@ -207,7 +207,7 @@ export const TOMES_B = [
   {
     id: "surv_06", col: "survey", n: 6, survey: 5,
     title: "Field Notes VI: Roots", author: "Brother Ide Fennick",
-    where: "Witchroot Caves (Blackfen), hanging in the roots at the entrance.",
+    where: "In Fennick's camp outside the Witchroot Caves.",
     hint: "The last of the six. Tangled in roots, at a place that may or may not have them.",
     pages: [
       "Sixth and last. My left hand writes better than my right now. I do not remember learning that.",
@@ -220,7 +220,7 @@ export const TOMES_B = [
   {
     id: "surv_07", col: "survey", n: 7,
     title: "Fennick's Last Report", author: "Brother Ide Fennick (written with the wrong hand)",
-    where: "Drowned Chapel approach, on the cliff path above it. Also dropped by Tolling Shades.",
+    where: "In Fennick's camp outside the Drowned Chapel. Also dropped by Tolling Shades.",
     hint: "Fennick's last words. They wandered a long way after he did.",
     pages: [
       "Grandmaster. I have sent you six notebooks by six roads. I hope at least one arrived. I am going back to the door. I need to hear the end of the tune.",
