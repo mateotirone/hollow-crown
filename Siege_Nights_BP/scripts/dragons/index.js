@@ -25,7 +25,7 @@ import { goDown, lose, tend, downedTick, isCorpse } from "./downed.js";
 import { store, dragonOf, save, valid, entityOf, recordOfEntity, ownerIdOf, canHarness, isBuilder, spawnDragon, roostDragon, refresh, scanDragons, isFlying } from "./dragon.js";
 import { flightTick, defenceTick, mountOf, breathe, takeOff, land, announceLevel, rideOf, onCrash } from "./flight.js";
 import "./tests.js";
-import "./nests.js";
+import { buildNest, setLaid } from "./nests.js";
 import "./showcase.js";
 import { sfx } from "../core/sfx.js";
 import { applyFilter } from "../core/events.js";
@@ -61,6 +61,7 @@ function takeEgg(player, block) {
   if (!rec) {
     store.data.dragons[player.id] = newDragon(player.id, player.name, now);
     store.data.nests[key] = now + S.nestDays * DAY;
+    setLaid(block, false); // broken shell until the nest lays again
   }
   save();
   give(player, EGG);
@@ -221,9 +222,14 @@ world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
 
 world.afterEvents.playerPlaceBlock.subscribe(({ block, player }) => {
   if (!isReady()) return;
-  if (block.typeId === NEST && !isBuilder(player)) {
-    block.setType("minecraft:air");
-    return say(player, "§cDragon Nests are placed by the map builder in Creative.");
+  if (block.typeId === NEST) {
+    if (!isBuilder(player)) {
+      block.setType("minecraft:air");
+      return say(player, "§cDragon Nests only grow in the wild Emberwaste.");
+    }
+    // Creative test copy: the whole 9x9 nest grows round the clutch you placed
+    buildNest(block.dimension, block.location);
+    return say(player, "§7A whole Dragon Nest grows round the clutch (9x9). Wild ones sit a block lower, sunk into the ground.");
   }
   if (block.typeId === ROOST) player.sendMessage(`§7Dragon Roost built. Set a Dragon Egg on it to hatch it. Eggs come from the wild nests of the ${S.homeRegion}.`);
 });

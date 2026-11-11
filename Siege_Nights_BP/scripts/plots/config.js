@@ -78,7 +78,7 @@ export const WARDS = [
 export const WELCOME = {
   hall: { x: -725, y: 280, z: 25 }, // over open water, above the clouds; the miniature map (plots/miniature.js) is built round it
   testArea: { x: -925, y: 300, z: -150 },
-  kingsrest: { x: -100, y: 77, z: -124 }, // the plaza: where "start without a home" puts you (builders can re-set it)
+  kingsrest: { x: -100, y: 78, z: -124 }, // the plaza: where "start without a home" puts you (builders can re-set it)
   hallRadius: 15, // the old round hall (before the miniature), only to recognise and clear it
   bannerOnArrival: true, // hand a Keep Banner to someone who picks a plot and has none
 };

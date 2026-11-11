@@ -4,34 +4,72 @@
     "description": {
       "identifier": "hc:dragon_nest",
       "menu_category": {
-        "category": "items"
+        "category": "nature"
+      },
+      "states": {
+        "hc:laid": [
+          true,
+          false
+        ]
       }
     },
     "components": {
       "minecraft:display_name": "tile.hc:dragon_nest.name",
-      "minecraft:geometry": "minecraft:geometry.full_block",
-      "minecraft:material_instances": {
-        "*": {
-          "texture": "siege_dragon_nest_side",
-          "render_method": "opaque"
-        },
-        "up": {
-          "texture": "siege_dragon_nest_top",
-          "render_method": "opaque"
-        },
-        "down": {
-          "texture": "siege_dragon_nest_side",
-          "render_method": "opaque"
+      "minecraft:geometry": {
+        "identifier": "geometry.hc_dragon_nest",
+        "bone_visibility": {
+          "eggs": "q.block_state('hc:laid')",
+          "shells": "!q.block_state('hc:laid')"
         }
       },
-      "minecraft:map_color": "#b08a54",
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "hc_nest_branch",
+          "render_method": "opaque"
+        },
+        "straw": {
+          "texture": "hc_nest_straw",
+          "render_method": "opaque"
+        },
+        "egg": {
+          "texture": "hc_nest_egg",
+          "render_method": "opaque",
+          "face_dimming": false
+        }
+      },
+      "minecraft:collision_box": {
+        "origin": [
+          -8,
+          0,
+          -8
+        ],
+        "size": [
+          16,
+          4,
+          16
+        ]
+      },
+      "minecraft:selection_box": {
+        "origin": [
+          -8,
+          0,
+          -8
+        ],
+        "size": [
+          16,
+          16,
+          16
+        ]
+      },
+      "minecraft:map_color": "#7a1e1a",
+      "minecraft:destructible_by_mining": false,
+      "minecraft:destructible_by_explosion": false,
+      "minecraft:flammable": {
+        "catch_chance_modifier": 0,
+        "destroy_chance_modifier": 0
+      },
+      "minecraft:light_dampening": 0,
       "minecraft:light_emission": 4,
-      "minecraft:destructible_by_mining": {
-        "seconds_to_destroy": 3.0
-      },
-      "minecraft:destructible_by_explosion": {
-        "explosion_resistance": 30
-      },
       "siege:clickable": {}
     }
   }

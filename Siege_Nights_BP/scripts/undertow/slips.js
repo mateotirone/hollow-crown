@@ -34,6 +34,7 @@ export const SLIPS = {
 };
 
 const FOG_ID = "siege:undertow_fog";
+const FLICKER_FOG = "siege:hollow_flicker_fog";
 const FOG_LAYER = "hc_slip";
 const P_ORIGIN = "hc:slip_origin"; // on the player while slipping: where to put them back
 const P_COUNT = "hc:slips"; // on the player: how many Slips they have had
@@ -200,7 +201,7 @@ export function flicker(playerOrId, seconds = 3) {
   const p = resolvePlayer(playerOrId);
   if (!p || canSlip(p)) return false;
   const ticks = Math.round(Math.max(2, Math.min(5, seconds)) * 20);
-  runCmd(p, `fog @s push ${FOG_ID} hc_flicker`);
+  runCmd(p, `fog @s push ${FLICKER_FOG} hc_flicker`); // the old thick Hollow fog: a Flicker is only a glimpse
   try {
     p.addEffect("darkness", ticks, { amplifier: 0, showParticles: false });
     sfx(p, "block.bell.hit", { volume: 0.5, pitch: 0.3 });

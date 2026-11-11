@@ -156,6 +156,8 @@ Look comes from Mateo's Undertow concept art: purple twilight, dark basalt, holl
 |---|---|---|
 | Veinstone (dark rock, the main ground rock). Repainted 2026-11-10: quiet base, and four variants mixed at random (plain, and three with one short vein each) so hillsides no longer stripe | `textures/blocks/siege_veinstone.png`, `siege_veinstone_1.png` to `_3.png` (weights 5, 2, 2, 1 in `terrain_texture.json`) | **Final style, awaiting your review.** Random mixing not yet checked in game |
 | Veilmoss (`siege:undertow_moss`, purple moss in soft large clumps, ground cover). Repainted 2026-11-10, the checker web is gone | `textures/blocks/siege_undertow_moss.png` | **Final style, awaiting your review**, wants separate top and side later |
+| Veilmoss variants (`siege_undertow_moss_1..3`: turned, mirrored, darker with blue spores; picked at random per block so the ground does not tile) | `textures/blocks/siege_undertow_moss_1.png` to `_3.png` | Made from the Veilmoss texture 2026-11-11, awaiting your review |
+| Deep Veilmoss (`siege:undertow_moss_deep`, darker indigo moss for patches in the Hollow, three variants) | `textures/blocks/siege_undertow_moss_deep.png`, `_1.png`, `_2.png` | Made from the Veilmoss texture 2026-11-11, awaiting your review |
 | Veil Rock (the ceiling, near black) | `textures/blocks/siege_veil_rock.png` | **Final style, awaiting your review** |
 | Latticewood (see-through wood of the giant trees). Repainted 2026-11-10 as an organic honeycomb with uneven cells instead of four square holes | `textures/blocks/siege_hollowwood_lattice.png` | **Final style, awaiting your review** |
 | Latticewood Core (same honeycomb with glowing pink-orange filling the cells) | `textures/blocks/siege_hollowwood_core.png` | **Final style, awaiting your review** |
@@ -391,7 +393,7 @@ Add a row here with the file path, size, what it should look like, and whether i
 | Dragon Saddle (16×16 icon, transparent; heavy dark leather, chain girth) | `textures/items/dragons/siege_dragon_saddle.png` | **Final style, awaiting your review** |
 | Dragon Horn (16×16 icon, transparent; curved bone horn, gold mouthpiece) | `textures/items/dragons/siege_dragon_horn.png` | **Final style, awaiting your review** |
 | Dragon Roost (16×16 side + top; stone brick hearth with a gold band, top is scorched straw around an ember bed) | `textures/blocks/dragons/siege_dragon_roost_side.png`, `_top.png` | **Final style, awaiting your review** |
-| Dragon Nest (16×16 side + top; wild nest of straw, bone and sandstone, top shows a dark red egg) | `textures/blocks/dragons/siege_dragon_nest_side.png`, `_top.png` | **Final style, awaiting your review** |
+| Dragon Nest (a 9x9 wild nest built from five 3D pieces: woven rim, twig tops, straw floor with bones, ribcage, skull and shed scales, and a clutch of three dark red eggs). Eight 16×16 textures: weathered, bleached and scorched branch, straw, packed earth, bone, egg, scale. Models `models/blocks/dragon_nest.geo.json`, made by `studio/build_dragon_nest.py` | `textures/blocks/dragons/nest/*.png` | **New, awaiting your review** |
 | Dragon voices: 8 per species (idle, roar, hurt, purr, snarl, whimper, death, chirp) plus wingbeat, breath, slow breathing, egg crack. Synthesised, mono .ogg | `sounds/siege/dragon/*.ogg` (36 files) | First pass, not recorded audio |
 
 All four species share bone names (body, neck, neck2, head, jaw, tail, tail2, tail3, leg_*, wing_*, wing_*_tip, saddle; the wyrm adds wing2_*), so one animation file drives them: `animations/dragon.animation.json`.
