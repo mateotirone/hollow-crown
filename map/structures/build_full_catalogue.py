@@ -17,7 +17,7 @@ from build_catalogue import DESIGNS, STYLE_NAMES
 REGION_GROUND = {"vale": ("grass_block", "dirt"), "frostmarch": ("snow", "dirt"), "saltreach": ("sand", "sandstone"),
                  "emberwaste": ("red_sand", "red_sandstone"), "blackfen": ("mud", "mud")}
 STYLE_GROUND = {"frost": "frostmarch", "salt": "saltreach", "ember": "emberwaste", "fen": "blackfen"}
-CITADEL = {"stone": "siege:castle_stone", "tile": "deepslate_tiles", "floor": "polished_deepslate", "quartz": "quartz_block", "gold": "gold_block",
+CITADEL = {"stone": "siege:castle_stone", "smooth": "siege:castle_smooth", "band": "siege:castle_bricks", "plinth": "siege:castle_cobbled", "tile": "deepslate_tiles", "floor": "polished_deepslate", "quartz": "quartz_block", "gold": "gold_block",
            "battlement": "siege:battlement", "slit": "siege:arrow_slit", "spire": "siege:spire_roof", "brazier": "siege:brazier", "port": "siege:portcullis",
            "throne": "gold_block", "wool": "red_wool", "carpet": "red_carpet", "ladder": "ladder"}
 

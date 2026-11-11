@@ -45,10 +45,16 @@ addGuardLimitHook((owner, limit) => (isRuler(owner) ? limit + CROWN.royalGuardBo
 
 // ---------- Blocks ----------
 
+// The rest of the Castle Stone family, at the Citadel's armor where the block has that state
+function dressedStone(id) {
+  try { return BlockPermutation.resolve(id, { "siege:armor": 3, "siege:cracks": 0 }); } catch { return id; }
+}
+
 let palette;
 function blockFor(name, c) {
   palette ??= {
     stone: BlockPermutation.resolve("siege:castle_stone", { "siege:armor": 3, "siege:cracks": 0 }),
+    smooth: dressedStone("siege:castle_smooth"), band: dressedStone("siege:castle_bricks"), plinth: dressedStone("siege:castle_cobbled"),
     port: BlockPermutation.resolve("siege:portcullis", { "siege:armor": 3, "siege:open": false }),
     battlement: "siege:battlement", slit: "siege:arrow_slit", spire: "siege:spire_roof", brazier: "siege:brazier",
     throne: IDS.throne, air: "minecraft:air", tile: "minecraft:deepslate_tiles", floor: "minecraft:polished_deepslate",

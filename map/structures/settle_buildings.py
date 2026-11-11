@@ -73,8 +73,7 @@ def side_windows(B, L, rect, y0, sides="ew", h=2):
             for x in range(x0 + 2, x1 - 1, 4): B.window(x, y0 + 1, z, side, 1, h, kind="stone")
 
 def dress(bp, k, L, rect, y0, top, region):
-    """Break up tall plain ashlar: a brick band at the upper floor line and, in Emberwaste, beam ends (vigas)
-    under the parapet. Only plain wall blocks change, never windows or doors."""
+    """Break up tall plain ashlar with a brick band at the upper floor line. Only plain wall blocks change."""
     if L["wall"] != "stone": return
     x0, z0, x1, z1 = rect
     ring = [(x, z) for x in range(x0, x1 + 1) for z in (z0, z1)] + [(x, z) for z in range(z0 + 1, z1) for x in (x0, x1)]
@@ -82,11 +81,6 @@ def dress(bp, k, L, rect, y0, top, region):
     if top - y0 >= 7:
         for (x, z) in ring:
             if plain(bp.get(x, y0 + 4, z)[0]): bp.set(x, y0 + 4, z, k("bricks"))
-    if region == "emberwaste":
-        for x in range(x0 + 1, x1, 2):
-            for z, s in ((z1 + 1, 1), (z0 - 1, -1)): bp.set(x, top - 1, z, "stripped_spruce_log", axis="z")
-        for z in range(z0 + 1, z1, 2):
-            for x in (x0 - 1, x1 + 1): bp.set(x, top - 1, z, "stripped_spruce_log", axis="x")
 
 def step_up(bp, lift):
     """A step up to a door on piles; the Foundation Stone then sits one block further out."""
@@ -204,13 +198,15 @@ def market(region):
     hang(bp, [(0, 3, -1)])
     return finish(bp, (0, 1, 1))
 
+GARDEN_GROUND = {"frostmarch": "podzol", "saltreach": "coarse_dirt", "emberwaste": "coarse_dirt"}
+
 def garden(region):
     """A kitchen garden: fenced beds either side of a water channel, a gate, a composter. 9 x 9."""
     bp, B, P, k, L = new("garden", region)
     for x in range(-4, 5):
         for z in range(-8, 1):
             edge = abs(x) == 4 or z in (-8, 0)
-            bp.set(x, 0, z, "grass_block")
+            bp.set(x, 0, z, GARDEN_GROUND.get(region, "grass_block"))
             if edge: bp.set(x, 1, z, P["fence"])
             elif x == 0: bp.set(x, 0, z, "water")
             elif abs(x) == 1: bp.set(x, 0, z, "grass_path")
