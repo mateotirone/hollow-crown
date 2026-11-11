@@ -11,7 +11,7 @@ import os, sys, json, base64, argparse, subprocess
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE); sys.path.insert(0, os.path.join(HERE, "render"))
 from bp import Blueprint
 from mesher import Mesher
-import vale_civic, settle_halls
+import vale_civic, settle_halls, settle_buildings
 from build_catalogue import DESIGNS, STYLE_NAMES
 
 REGION_GROUND = {"vale": ("grass_block", "dirt"), "frostmarch": ("snow", "dirt"), "saltreach": ("sand", "sandstone"),
@@ -102,8 +102,10 @@ def main():
             add(sec, f"hall-{rid}-{i + 1}", f"Town hall {i + 1}: {t['name']}", f"{t['settlement']} tier", f"The hall at level {i + 1}, when the settlement becomes a {t['settlement']}.",
                 make, g, status="new" if NEW else "old", extra={"group": "Town hall upgrades", "tier": i + 1})
         for b in D["buildings"]:
-            add(sec, f"bld-{rid}-{b['id']}", b["name"], r["name"], b["blurb"], (lambda c=r["buildings"][b["id"]], k=f"{b['id']}_{rid}": from_cells(k, c)), g,
-                status="old", extra={"group": "Plot buildings"})
+            NEWB = settle_buildings.BUILDERS.get(b["id"]) if rid in settle_buildings.REGIONS else None
+            make = (lambda f=NEWB, r=rid: f(r)) if NEWB else (lambda c=r["buildings"][b["id"]], k=f"{b['id']}_{rid}": from_cells(k, c))
+            add(sec, f"bld-{rid}-{b['id']}", b["name"], r["name"], b["blurb"], make, g,
+                status="new" if NEWB else "old", extra={"group": "Plot buildings"})
 
     # ---- 3. Walls: ten levels, each region's stone ----
     sec = {"id": "walls", "title": "Settlement walls", "blurb": "The ring wall raised round every plot, upgraded at the town hall. Shown here: the stretch round the gate.", "cards": []}
@@ -129,7 +131,14 @@ def main():
     for page, shot, *_ in jobs:
         key = os.path.basename(os.path.dirname(shot))
         Image.open(shot).convert("RGB").resize((980, 630), Image.LANCZOS).save(os.path.join(img, key + ".jpg"), quality=84)
-    json.dump(sections, open(os.path.join(a.out, "full-catalogue.json"), "w"), indent=1)
+    dest = os.path.join(a.out, "full-catalogue.json")
+    if a.only and os.path.exists(dest):   # cards not re-shot this time keep their measured size
+        before = {c["key"]: c for s in json.load(open(dest)) for c in s["cards"]}
+        for s in sections:
+            for c in s["cards"]:
+                for f in ("size", "blocks"):
+                    if f not in c and f in before.get(c["key"], {}): c[f] = before[c["key"]][f]
+    json.dump(sections, open(dest, "w"), indent=1)
 
 if __name__ == "__main__":
     main()

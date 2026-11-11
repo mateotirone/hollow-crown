@@ -6,6 +6,8 @@
 
 import { Plan } from "../townhall/halls.js";
 import { STYLES } from "../townhall/styles.js";
+import { drawData } from "../townhall/designs.js";
+import { BUILDING_DESIGNS } from "./designs_data.js";
 
 const W = (...ids) => ids.map((id) => `minecraft:${id}`);
 
@@ -242,8 +244,18 @@ const plans = new Map();
 export function drawBuilding(id, styleId) {
   const key = `${id}|${styleId}`;
   if (!plans.has(key)) {
-    const p = new Plan(styleFor(styleId));
-    BUILDING[id].draw(p);
+    const style = styleFor(styleId);
+    const p = new Plan(style);
+    const d = BUILDING_DESIGNS[style.id]?.[id];
+    if (d) {
+      // the region's own design (map/structures/settle_buildings.py); its blocks become roles on this style
+      const prefix = `bd:${style.id}:${id}`;
+      d.palette.forEach(([bid], i) => { style.roles[`${prefix}:${i}`] = [bid]; });
+      drawData(p, d, prefix);
+      // priced as the plain design it replaces, so the new look doesn't change what a building costs
+      p.priceAs = new Plan(style);
+      BUILDING[id].draw(p.priceAs);
+    } else BUILDING[id].draw(p);
     plans.set(key, p);
   }
   return plans.get(key);

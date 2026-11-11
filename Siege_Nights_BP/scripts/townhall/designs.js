@@ -40,14 +40,13 @@ function register(arch, level) {
 
 export const hasDesign = (arch, level) => !!HALL_DESIGNS[arch]?.[level];
 
-// Fill a Plan with the designed hall. Returns the box the old builders returned.
-export function drawDesign(p, arch, level) {
-  register(arch, level);
-  const d = HALL_DESIGNS[arch][level];
+// Lay a design's blocks into a Plan as roles "<prefix>:<palette index>" (the caller registers those roles
+// on the style): cells, foundation columns under stone and wood that reach the ground, and the marks.
+export function drawData(p, d, prefix) {
   const opts = d.palette.map(([id, props]) => optionsFor(id, props));
   const lowest = new Map(); // "x,z" -> [y, palette index] of the lowest block, for foundation columns
   for (const [y, z, x0, n, i] of d.rows) {
-    const role = `hd:${arch}:${level}:${i}`;
+    const role = `${prefix}:${i}`;
     const air = d.palette[i][0] === "minecraft:air";
     for (let x = x0; x < x0 + n; x++) {
       p.set(x, y, z, air ? "air" : role, opts[i]);
@@ -60,9 +59,16 @@ export function drawDesign(p, arch, level) {
   for (const [k, [y, i]] of lowest) {
     if (y > 0) continue;
     const [x, z] = k.split(",").map(Number);
-    p.columns.set(k, { x, z, top: y - 1, role: `hd:${arch}:${level}:${i}` });
+    p.columns.set(k, { x, z, top: y - 1, role: `${prefix}:${i}` });
   }
   for (const [name, [x, y, z]] of Object.entries(d.marks)) p.marks[name] = { x, y, z };
+}
+
+// Fill a Plan with the designed hall. Returns the box the old builders returned.
+export function drawDesign(p, arch, level) {
+  register(arch, level);
+  const d = HALL_DESIGNS[arch][level];
+  drawData(p, d, `hd:${arch}:${level}`);
   // the Tree of Oaths keeps its own role: other code finds it by role at the "tree" mark
   const t = p.marks.tree;
   if (t) p.set(t.x, t.y, t.z, "tree");
