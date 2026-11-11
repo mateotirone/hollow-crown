@@ -184,13 +184,15 @@ def profile(cells, ground, stop_idx=(), window=41, flat=PLATFORM, stop_y=None):
     return y
 
 
-def profile_dp(cells, ground, stop_idx=(), flat=PLATFORM, stop_y=None, smooth_w=0.3, window=41):
+def profile_dp(cells, ground, stop_idx=(), flat=PLATFORM, stop_y=None, smooth_w=0.3, window=41, weight=None):
     """Track heights that follow the land as closely as the climbing rules allow, looking ahead (Mateo 2026-11-11:
     paths should climb the high ground, not cut ravines through it). Minimises the total |track - ground| (plus a
     little pull toward the smoothed ground) under the same rules as profile(): at most 1 block up or down per 3
-    along, only on straight north/south/east/west steps, flat through every platform."""
+    along, only on straight north/south/east/west steps, flat through every platform. weight[i] (default 1) scales
+    how hard cell i is held to the ground, e.g. inside towns whose streets were planned on it."""
     g = np.asarray(ground, float) + 1
     n = len(cells)
+    wt = np.ones(n) if weight is None else np.asarray(weight, float)
     k = window // 2
     t = np.convolve(np.pad(g, k, mode='edge'), np.ones(window) / window, mode='valid')
     fixed = np.full(n, -10**6, int)
@@ -210,7 +212,7 @@ def profile_dp(cells, ground, stop_idx=(), flat=PLATFORM, stop_y=None, smooth_w=
     INF = 1e18
     def cell_cost(i):
         ys = np.arange(lo_y, hi_y + 1)
-        c = np.abs(ys - g[i]) + smooth_w * np.abs(ys - t[i])
+        c = wt[i] * np.abs(ys - g[i]) + smooth_w * np.abs(ys - t[i])
         if fixed[i] > -10**6: c = 4.0 * np.abs(ys - fixed[i])     # platforms: flat, pulled hard toward the stop height
         return c
     # state: (height, since) with since = blocks since the last change, capped at 2 (2 means a change may come next)

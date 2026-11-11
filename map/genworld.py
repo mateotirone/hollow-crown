@@ -276,7 +276,12 @@ for lname, pts in L["roads"].items():
         if sid not in stop_y:
             seg = ground[max(0, i - railplan.PLATFORM):i + railplan.PLATFORM + 1]
             stop_y[sid] = int(round(float(np.median(seg)))) + 1
-    ys = railplan.profile_dp(cells, ground, si, stop_y=[stop_y[sid] for sid, _ in on])
+    # inside towns (and just outside) the track hugs the ground the streets were planned on
+    hold = np.ones(len(cells))
+    for tn_, tx_, tz_, tr_, _ in TOWNS:
+        dd_ = np.hypot(np.array([c[0] for c in cells]) - tx_, np.array([c[1] for c in cells]) - tz_)
+        hold = np.maximum(hold, np.where(dd_ < tr_ + 30, 6.0, 1.0))
+    ys = railplan.profile_dp(cells, ground, si, stop_y=[stop_y[sid] for sid, _ in on], weight=hold)
     RAILLINES[lname] = (cells, ys, [(sid, i) for (sid, _), i in zip(on, si)])
     for sid, _ in on: STOPS[sid].setdefault("lines", []).append(lname)
     # per path cell: tunnel where the hill stands more than 10 over the bed (6 over a 4-high bore), bridge over water
@@ -342,6 +347,8 @@ if _tb.any():
 # baked town plans (GW_BLOCKS, map/bake_town.py): paths first, then the land graded to them (Mateo 2026-11-11).
 # Every groundwork column sits on ground exactly one block under its lowest block; the land beside it meets its top
 # ground block and may then rise or fall at most one block per two outwards, so no path stands proud or sinks in a trench.
+# the ground as it stands before any town plan is laid (rails, roads and their banks done): town generators plan on this
+np.save(out.rstrip('/') + '-heights-pretown.npy', Y.astype(np.int16))
 GW_FILES = [json.load(open(fn_)) for fn_ in filter(None, os.environ.get("GW_BLOCKS", "").split(":"))]
 for d_ in GW_FILES:
     b_ = np.array(d_["blocks"][:d_.get("groundwork_blocks", len(d_["blocks"]))], np.int64)
