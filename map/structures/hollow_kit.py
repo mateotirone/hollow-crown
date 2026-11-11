@@ -9,7 +9,7 @@ of leaning towers the story's travellers see.
 Frame as everywhere in map/structures: y = 0 is the ground's top layer, floors at y = 1.
 """
 from bp import Blueprint
-from kit import Building, mix, grow, h3
+from kit import Building, mix, grow, h3, DOCTRINE, LADDERS, stairs_of, paint_stone, ground_dressing
 from settle_halls import pyramid, hang
 
 def hollow_palette(seed=0):
@@ -19,14 +19,29 @@ def hollow_palette(seed=0):
         quoin="polished_blackstone", quoin2="polished_blackstone_bricks",
         frame="dark_oak_log", frame2="dark_oak_log", infill="siege:pale_ash",
         floor="dark_oak_planks", gable=None,
-        roof=mix([("deepslate_tile_stairs", 84), ("cobbled_deepslate_stairs", 16)], 302 + seed),
+        roof=HOL_ROOF[0], roof_ladder=HOL_ROOF,              # HOL-05 gradient, eaves -> ridge
         roof_block="deepslate_tiles", roof_slab="deepslate_tile_slab",
         trim="dark_oak_stairs", trim_block="dark_oak_planks", trim_slab="dark_oak_slab",
         bracket="dark_oak_stairs", sill="polished_blackstone_brick_stairs", shutter="dark_oak_trapdoor", shutters=0.25,
         door="dark_oak_door", pane="ochre_froglight", fence="dark_oak_fence",
         chimney=mix([("polished_blackstone_bricks", 70), ("cobbled_deepslate", 30)], 303), chimney_cap="cobbled_deepslate_wall",
         path=mix([("coarse_dirt", 60), ("cobbled_deepslate", 25), ("siege:pale_ash", 15)], 304),
+        # the detailing passes (build-instructions 05-07) in the Hollow's own things: dark oak shelves and
+        # signs, soul lanterns, dark leaves, blackstone spikes on the ridges
+        **DOCTRINE, shelf="dark_oak_slab", lantern="soul_lantern", leaves=HOL_LEAVES,
+        spike="polished_blackstone_wall", finial="polished_blackstone_wall", finial_top="soul_lantern",
     )
+
+HOL_ROOF = [stairs_of(b) for b in LADDERS["HOL-05"]]
+HOL_WALL = LADDERS["HOL-02"]
+HOL_LEAVES = ("dark_oak_leaves", "dark_oak_leaves")
+
+def finish_hollow(bp):
+    """The Hollow's last pass: veinstone walls painted by HOL-02 in interlocking bands, and dark bushes boxed by
+    signs or soul lantern stands at the foot of blank walls."""
+    paint_stone(bp, HOL_WALL, set(HOL_WALL))
+    ground_dressing(bp, set(HOL_WALL) | {"polished_blackstone_bricks", "cobbled_deepslate"}, "dark_oak", leaves=HOL_LEAVES, lamp="soul_lantern")
+    return bp
 
 def lean(bp, y_from, dx=1, every=3, xs=None):
     """Shear everything at or above y_from sideways: one block per `every` rows. The Hollow's crookedness."""
@@ -69,7 +84,7 @@ def cottage(seed, w=7, d=7, door="s", storeys=2, crooked=1):
         for side in "nsew":
             ux0, uz0, ux1, uz1 = up
             x, z = {"s": (0, uz1 - 1), "n": (0, uz0 + 1), "e": (ux1 - 1, 0), "w": (ux0 + 1, 0)}[side]
-            B.window(x, 5, z, side, 1, 1, kind="timber", shutters=False)   # one in from the face, so the pane sits in the wall
+            B.window(x, 5, z, side, 1, 1, kind="timber")   # one in from the face, so the pane sits in the wall; dressed (05)
     B.chimney(x1 if door != "e" else x0, (z0 + z1) // 2 + 1, 1)
     if crooked: lean(bp, 4 if storeys > 1 else 4, dx=crooked, every=99)   # the whole upper floor and roof sit a block out of true
     bp.markers["door"] = (door_at[0], 1, door_at[1])
@@ -260,7 +275,7 @@ def drowned_city_preview():
     """Only for the catalogue: the tower set stood in black water as the game scatters them."""
     bp = Blueprint("hollow_drowned_city")
     spots = [(-30, -6), (-14, 10), (-2, -12), (12, 6), (26, -8), (34, 14), (2, 22)]
-    for (sx, sz), t in zip(spots, TOWERS): bp.paste(leaning_tower(*t), sx, 0, sz)
+    for (sx, sz), t in zip(spots, TOWERS): bp.paste(_tower(*t), sx, 0, sz)
     for x in range(-40, 44):
         for z in range(-22, 32):
             if (x, 0, z) not in bp.cells: bp.set(x, 0, z, "water")
@@ -374,3 +389,14 @@ def the_seams(seed=0):
 
 SITE_BUILDERS = {"pilgrims_cross": pilgrims_cross, "cartmeet": cartmeet, "truce_hall": truce_hall,
                  "far_door": far_door, "lattice_gate": lattice_gate, "the_seams": the_seams, "wound_dock": wound_dock}
+
+# every Hollow build that leaves this module gets the Hollow's last pass once (the village's cottages are
+# pasted into it, so the village is finished whole, not cottage by cottage)
+def _finished(fn):
+    def f(*a, **k): return finish_hollow(fn(*a, **k))
+    f.__name__, f.__doc__ = fn.__name__, fn.__doc__
+    return f
+SITE_BUILDERS = {k: _finished(v) for k, v in SITE_BUILDERS.items()}
+_village, _tower, _cottage = village, leaning_tower, cottage
+village = _finished(_village); leaning_tower = _finished(_tower)
+def cottage_finished(*a, **k): return finish_hollow(_cottage(*a, **k))

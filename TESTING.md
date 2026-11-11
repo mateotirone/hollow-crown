@@ -250,6 +250,7 @@ The showcase (`/scriptevent siege:showcase`) puts a Mason's Bench with its mason
 
 - **Wall round your plot.** With a Keep Banner up, run `/scriptevent siege:wall 1`. A stake fence should rise in a ring 56 blocks out, with a gap facing the gate side. Try `/scriptevent siege:wall 5`, then `8`, then `10`, and tell me if each one follows hills cleanly, if the gate and portcullis hang straight, and how long level 10 takes to rise. Add a region to see its stone: `/scriptevent siege:wall 6 frostmarch`.
 - **Raiders outside the wall.** Start a siege with a wall up. Raiders should appear just outside the ring and walk in. If they stand still out there, tell me: that means they are too far for the Realm to move them.
+- **Build your wall in any stone.** Raise a level 3 or 4 wall from the town hall paying in plain cobblestone or sandstone: it should be accepted. Then click the Mason and choose "Choose what the wall is built in", pick Deepslate and Blackfen timber, leave "Re-face" on: the standing wall should change over without charging you. Raise the next level: it should come out in deepslate. Tell me if a raider still breaks a deepslate wall faster than a Castle Stone one.
 - **Regional wall blocks.** In `/scriptevent siege:showcase` there are five stacks, one per region: palisade, wall planks, roof shingles, a gate and a portcullis. Each should have its own look, and each gate and portcullis should open on a click and take iron, diamond and netherite like the Vale's. Then `/scriptevent siege:wall 1` in two different regions: the palisades should differ. Tell me if any block shows as pink and black, or a gate does not open.
 - **Arrival.** `/scriptevent siege:settle_arrive` lays out your settlement: the wall, a Longhouse rising behind the banner, a Mason at a bench, and a signpost on every spot where a building will go. On the real map this happens by itself when you pick a plot in the welcome hall.
 - **Castle Stone family.** Ask the Mason for Castle Stone, Tiles, Bricks, Cobbled and Smooth. In your own region you get your region's stone at the local price; the other regions' stone costs more.
@@ -410,9 +411,14 @@ the darkness and knockback effects, the storms, and how the hurried evening look
 
 ## Choirsteel gear (bestiary)
 
-`/scriptevent siege:choirsteel_kit` gives the full set, the tools, 32 ingots and 8 Gloamquills.
+`/scriptevent siege:choirsteel_kit` gives the full set, the tools, 32 ingots, 8 Gloamquills, 2 templates and 4 Tempered Choirsteel.
 
-- Recipes: in a crafting table, each piece is its netherite piece plus Choirsteel Ingots plus one Gloamquill (two for the Blade). Enchantments on the netherite piece are not carried over.
+- Recipes: Tempered Choirsteel is 4 Choirsteel Ingots and a Gloamquill in a crafting table. At a smithing table, a Choirsteel Upgrade template + a netherite piece + Tempered Choirsteel gives the Choirsteel piece (all nine: four armour, five tools). Check the template and Tempered Choirsteel go into their slots at all (custom smithing items need their tags), and that enchantments and a renamed name carry over.
+- Copying: template in the top middle, Veinstone in the centre, 7 netherite ingots around them in a crafting table gives 2 templates.
+- The Cold Forge (the Hollow, x 592 z 1080, on the high terraces east of the Seams, no road): an open veinstone smithy with a tall chimney and soul fire on top. The chest at the back holds one template on your first visit. Take it: anvils ring and two Veinsworn and a Stone Vigil come out. Come back three in-game days later and there is a new one. `/scriptevent hc:forge_restock` refills it now.
+- Trims: put each Choirsteel armour piece in a smithing table with any armour trim template and any trim material. The trim should show in its colour, in the same place it sits on netherite, and the crystals, plume, pauldrons, knee cops and fins should stay plain.
+- The first time you carry a Choirsteel Ingot, chat tells you where the forge is.
+- The test world (`/scriptevent siege:showcase`) has a smithing table and a crafting table with chests of everything needed.
 - Helm: you see in the dark. Greaves: slowness never sticks. Treads: jump off something high, you drift down and take no fall damage.
 - Cuirass: let zombies hit you. About one hit in four rings and throws the attacker back.
 - Full set: a chime, then Resistance and four extra hearts. Take one piece off and both go.

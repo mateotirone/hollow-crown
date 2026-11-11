@@ -47,7 +47,7 @@ def is_wall(n): return n.endswith("_wall") and n not in ("wall_banner",)
 def is_pane(n): return n.endswith("glass_pane") or n == "iron_bars"
 def is_stairs(n): return n.endswith("_stairs")
 def is_slab(n): return n.endswith("_slab")
-NONSOLID = ("air", "keep", "wheat", "carrots", "potatoes", "beetroot", "sweet_berry_bush", "lantern", "flower_pot", "torch", "short_grass", "tall_grass", "poppy", "dandelion",
+NONSOLID = ("air", "keep", "wheat", "carrots", "potatoes", "beetroot", "sweet_berry_bush", "lantern", "soul_lantern", "flower_pot", "torch", "short_grass", "tall_grass", "poppy", "dandelion",
             "cornflower", "oxeye_daisy", "azure_bluet", "allium", "red_tulip", "white_tulip", "orange_tulip", "pink_tulip",
             "water", "carpet", "rail", "ladder", "lily_of_the_valley", "fern", "large_fern", "wheat", "sweet_berry_bush")
 
@@ -57,9 +57,14 @@ def solid_full(name, p):
     if is_stairs(name) or is_slab(name) or is_fence(name) or is_wall(name) or is_pane(name): return False
     if name in ("bed", "chest", "cauldron", "lectern", "brewing_stand") or name.endswith("pressure_plate"): return False
     if name.endswith("trapdoor") or name.endswith("_door") or name.endswith("fence_gate") or name.endswith("_sign"): return False
-    if name in ("campfire", "bell", "chain", "iron_chain", "cauldron", "anvil", "grindstone", "lectern", "end_rod", "candle"): return False
+    if name in ("campfire", "bell", "chain", "iron_chain", "cauldron", "anvil", "grindstone", "lectern", "end_rod", "candle", "snow_layer",
+                "water_cauldron", "lightning_rod", "decorated_pot", "white_candle", "mangrove_roots", "iron_bars"): return False
     return True
 
+
+BEDROCK_ALIAS = {"dark_oak_wall_sign": ("darkoak_wall_sign", {}), "oak_wall_sign": ("wall_sign", {}),
+                 "dark_oak_standing_sign": ("darkoak_standing_sign", {}), "oak_sign": ("standing_sign", {}),
+                 "water_cauldron": ("cauldron", {"fill_level": 6, "cauldron_liquid": "water"})}
 
 class Blueprint:
     def __init__(self, name):
@@ -153,6 +158,8 @@ class Blueprint:
             for k, v in p.get("raw", {}).items(): st[k] = v
             return (name, st)
         if name.startswith("minecraft:"): name = name[10:]
+        if name in BEDROCK_ALIAS:                    # Java-style names the builders use -> Bedrock's own ids
+            name, extra = BEDROCK_ALIAS[name]; p = {**p, "raw": {**extra, **p.get("raw", {})}}
         if name not in BLOCKS: raise ValueError(f"{self.name}: '{name}' is not a Bedrock block")
         st = {}
         for prop in BLOCKS[name]:
@@ -181,6 +188,8 @@ class Blueprint:
         if "persistent_bit" in st: st["persistent_bit"] = True
         if "extinguished" in st: st["extinguished"] = bool(p.get("out", False))
         if "facing_direction" in st and name in ("barrel",): st["facing_direction"] = 1
+        if "facing_direction" in st and (name.endswith("wall_sign") or name == "ladder") and f:
+            st["facing_direction"] = {"n": 2, "s": 3, "w": 4, "e": 5}[f]     # the way the sign or ladder faces
         c = p.get("conn")
         if c and is_fence(name):
             for d, w in (("n", "north"), ("s", "south"), ("e", "east"), ("w", "west")): st["minecraft:connection_" + w] = c[d]

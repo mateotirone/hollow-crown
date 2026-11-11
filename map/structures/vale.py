@@ -1,7 +1,7 @@
 """Aldmere Vale buildings: Norman stone ground floors, dark timber frames, slate roofs."""
 import random
 from bp import Blueprint, DIRS, OPP, RIGHT
-from kit import Building, VALE, mix, grow, h3, side_cells
+from kit import Building, VALE, mix, grow, h3, side_cells, DOCTRINE, finish_doctrine, VALE_STONE, STONE_FAMILY
 import furnish as F
 
 
@@ -24,7 +24,7 @@ def coaching_inn(seed=1, style="tudor"):
     a jettied cross wing whose tall gable faces the street, dormers and two chimneys.
     Front (street) faces south (+z). Ground floor at y=1."""
     bp = Blueprint("kingsrest_inn" + ("" if style == "tudor" else "_" + style))
-    P = {**VALE, **STYLES[style]}
+    P = {**VALE, **STYLES[style], **DOCTRINE, "pane": "brown_stained_glass_pane" if style != "stone" else "gray_stained_glass_pane", "spikes": 5}
     B = Building(bp, P, seed)
     main = (0, 0, 22, 8)              # long range, ridge east-west
     wing = (13, 8, 21, 18)            # cross wing, gable to the street
@@ -157,7 +157,7 @@ def coaching_inn(seed=1, style="tudor"):
     for (x, z) in ((1, -3), (2, -3), (1, -2), (2, -2)): bp.set(x, 1, z, "spruce_slab", half="top")
     bp.set(1, 2, -3, "hay_block"); bp.set(2, 2, -2, "hay_block"); bp.set(0, 1, -3, "spruce_trapdoor", facing="e", open=True)
     bp.markers["door"] = (9, 1, 9); bp.markers["innkeeper"] = (10, 1, 4)
-    bp.finish()
+    finish_doctrine(bp)
     return bp
 
 
@@ -234,6 +234,9 @@ def townhouse(seed, width=7, depth=9, storeys=2, ground="stone", jetty=True, inf
         P.update(STYLES[style])
         if style == "stone" and rnd.random() < 0.5: P["infill"] = VALE["infill"]   # some plastered upper floors
         bp.name += "_" + style
+    P.update(DOCTRINE)
+    P["pane"] = "gray_stained_glass_pane" if style == "stone" else "brown_stained_glass_pane" if style == "brick" or rnd.random() < 0.6 else "light_gray_stained_glass_pane"
+    if "pane" in STYLES.get(style, {}): P["pane"] = STYLES[style]["pane"]      # regional glass (build-instructions palettes)
     B = Building(bp, P, seed)
     w, d = width - 1, depth - 1
     rect = (0, 0, w, d)
@@ -273,5 +276,6 @@ def townhouse(seed, width=7, depth=9, storeys=2, ground="stone", jetty=True, inf
     # front step details
     if rnd.random() < 0.6: bp.set(w, 1, d + 1 + (1 if jetty else 0), "barrel")
     if rnd.random() < 0.5: bp.set(0, 1, d + 1 + (1 if jetty else 0), "flower_pot", plant=rnd.choice(["poppy", "dandelion", "cornflower"]))
-    bp.finish()
+    bp.markers["door"] = (w // 2, 1, d + 1)
+    finish_doctrine(bp, P.get("ladder", VALE_STONE), P.get("family", STONE_FAMILY))
     return bp

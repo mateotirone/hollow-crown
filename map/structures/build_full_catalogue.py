@@ -11,7 +11,8 @@ import os, sys, json, base64, argparse, subprocess
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE); sys.path.insert(0, os.path.join(HERE, "render"))
 from bp import Blueprint
 from mesher import Mesher
-import vale_civic, settle_halls, settle_buildings, hollow_kit, capital, stations
+import random
+import vale_civic, settle_halls, settle_buildings, hollow_kit, capital, stations, regions_towns as RT
 from build_catalogue import DESIGNS, STYLE_NAMES
 
 REGION_GROUND = {"vale": ("grass_block", "dirt"), "frostmarch": ("snow", "dirt"), "saltreach": ("sand", "sandstone"),
@@ -20,6 +21,30 @@ STYLE_GROUND = {"frost": "frostmarch", "salt": "saltreach", "ember": "emberwaste
 CITADEL = {"stone": "siege:castle_stone", "smooth": "siege:castle_smooth", "band": "siege:castle_bricks", "plinth": "siege:castle_cobbled", "tile": "deepslate_tiles", "floor": "polished_deepslate", "quartz": "quartz_block", "gold": "gold_block",
            "battlement": "siege:battlement", "slit": "siege:arrow_slit", "spire": "siege:spire_roof", "brazier": "siege:brazier", "port": "siege:portcullis",
            "throne": "gold_block", "wool": "red_wool", "carpet": "red_carpet", "ladder": "ladder"}
+
+TOWNS = (("rimehold", "Rimehold", "frostmarch", "frost", "The Frostmarch town: dark log frames, plank walls in rows, dark stone bases and steep snow-capped roofs, a longhouse hall and a stave chapel under weathered copper."),
+         ("gulls_rest", "Gull's Rest", "saltreach", "salt", "The Saltreach harbour: pale stone ground floors, whitewash between birch posts, low hipped roofs in sea green, white and orange, a quay, a lighthouse and a boathouse."),
+         ("sunscar", "Sunscar", "emberwaste", "ember", "The Emberwaste town: thick sandstone walls, flat roofs behind parapets, lattice windows, striped awnings and a domed market hall."),
+         ("mirelight", "Mirelight", "blackfen", "fen", "The Blackfen town: mud brick between mangrove posts, houses up on stilts over the black water, mossy roofs and froglights by the doors."))
+HOUSE_BLURB = {"frost": ["Two storeys, a dark stone ground floor or plank rows to the ground, dragon heads on the gable.", "One or two storeys of plank rows in a spruce frame, a steep roof that sheds snow.",
+                         "A small cottage: low walls, a roof nearly to the ground, snow on the ridge.", "A byre: a dark stone base, plank rows and a very steep roof over the cart door."],
+               "salt": ["Stone below, whitewash above, a balcony or a flat roof terrace, painted shutters.", "A stone ground floor against the sea wind, a low hipped roof.",
+                        "A one-storey stone cottage with a hipped roof.", "A net store: stone below, white boards above, a hoist beam over the loft door."],
+               "ember": ["Two storeys of painted sandstone, a roof terrace behind the parapet, lattice windows, roof beams.", "A sandstone house with a striped awning over the door; some carry a red roof or dome.",
+                         "A small flat-roofed house with a roof hatch.", "A granary with a walled yard and hay under an awning."],
+               "fen": ["Mud brick between mangrove posts, two storeys up on short stilts, a froglight by the stair.", "A stilt house with a stair down to the boardwalk.",
+                       "A small stilt cottage.", "A thatched barn on short stilts."]}
+CIVIC_TITLE = {"hall": "Longhouse hall", "stave_chapel": "Stave chapel", "inn": "Inn", "smithy": "Smithy", "store": "General store", "market_hall": "Market hall",
+               "quay": "Harbour quay", "lighthouse": "Lighthouse", "boathouse": "Boathouse", "stilt_house": "Stilt house on the water", "stilt_house_big": "Big stilt house on the water"}
+TOWN_BLURB = {("gulls_rest", "quay"): "The quay wall with bollards, a jetty on piles, a cargo crane, barrels and kelp, and the harbourmaster's hut.",
+              ("gulls_rest", "lighthouse"): "A white tower banded in sea green with a gallery, a glass lamp room of sea lanterns and a copper cap, and the keeper's cottage.",
+              ("gulls_rest", "boathouse"): "A stone shed straddling the shore, open at the back over a water slip, a net loft above.",
+              ("mirelight", "stilt_house"): "Tall stilts down into the mire, the back half over the water, a mooring platform behind.",
+              ("mirelight", "stilt_house_big"): "Two storeys on tall stilts over the water.",
+              ("rimehold", "inn"): "Two storeys of dark stone and plank rows, a tap room with a bar and hearth, bedrooms upstairs. The only furnished building.",
+              ("gulls_rest", "inn"): "A stone and whitewash inn under an orange hipped roof, a tap room and bedrooms upstairs. The only furnished building.",
+              ("mirelight", "inn"): "Mud brick and mangrove under a mossy roof, a tap room and bedrooms upstairs. The only furnished building.",
+              ("sunscar", "inn"): "A caravanserai round a courtyard with a palm and a well, a corner tower and a striped gate awning."}
 
 def from_cells(name, cells, kinds=None):
     b = Blueprint(name)
@@ -103,6 +128,24 @@ def main():
     add(sec, "map-millbrook_watermill", "Millbrook watermill", "Stone and timber", "Stone ground floor on the river bank, timber above, with a working-looking wheel in the water.",
         lambda: vale_civic.watermill(), extra={"where": "Millbrook, on the river", "kind": "Civic"})
 
+    # ---- 1b. The four regional map towns (laid out by the town generator) ----
+    for tid, tname, rid, reg, blurb in TOWNS:
+        sec = {"id": "town-" + tid, "title": tname, "blurb": blurb, "cards": []}
+        sections.append(sec)
+        g = REGION_GROUND[rid]
+        roofs = RT.assign_roofs(tid, 7)
+        for k, (tier, title) in enumerate(((0, "Tall house by the square"), (0, "Tall house by the square"), (1, "Street house"), (1, "Street house"),
+                                           (2, "Outer cottage"), (2, "Outer cottage"), (3, "Farm building"))):
+            seed = 300 + k * 7
+            add(sec, f"town-{tid}-house{k}", title, f"{tname}, {roofs[k]} roof" if roofs[k] != "flat" else tname, HOUSE_BLURB[reg][min(tier, 3)],
+                (lambda f=RT.HOUSES[reg], s=seed, t=tier, r=roofs[k]: f(s, random.Random(s), t, r)), g, extra={"group": "Houses", "kind": "House"})
+        for name, mk in RT.CIVIC[tid]:
+            add(sec, f"town-{tid}-{name}", CIVIC_TITLE[name], tname, (TOWN_BLURB.get((tid, name)) or (mk.__doc__ or "").split(". ")[0] + "."),
+                mk, g, extra={"group": "On the square", "kind": "Civic"})
+        for name, mk in RT.SHORE.get(tid, []):
+            add(sec, f"town-{tid}-{name}", CIVIC_TITLE[name], tname, TOWN_BLURB.get((tid, name), ""), mk, g,
+                view=(150, 30, 1.5), extra={"group": "On the water", "kind": "Harbour"})
+
     # ---- 2. Settlements: what grows on a player's plot ----
     for rid, r in D["regions"].items():
         g = REGION_GROUND.get(rid, ("grass_block", "dirt"))
@@ -164,9 +207,9 @@ def main():
     add(sec, "hollow-village", "A mining village", "Glimwade, Lowseam, Tollrest, Highcut", "Foreman's house and two cottages round the yard, the smithy with its smoking chimney, the ore-sorting shed by the rails from the mine mouths, the Tally under its purple awning, soul lamps and fences. Each village turns its houses a little differently.",
         lambda: hollow_kit.village("glimwade", 0), HG, view=(-38, 34, 1.3), extra={"wide": True})
     add(sec, "hollow-cottage", "Miner's cottage", "Two storeys", "Veinstone below, a black-and-ash upper floor that juts out and sits a block out of true, a steep deepslate roof.",
-        lambda: hollow_kit.cottage(5, 7, 7, "s", 2, 1), HG, view=(-38, 30, 1.4))
+        lambda: hollow_kit.cottage_finished(5, 7, 7, "s", 2, 1), HG, view=(-38, 30, 1.4))
     add(sec, "hollow-drowned_city", "The drowned city", "By the Court landing", "Hallowmere's own country: seven leaning towers on the marsh banks where the light river ends, seen from the path to the Court. Every one is out of true; two have lost their tops; a few windows are still lit.",
-        lambda: hollow_kit.drowned_city_preview(), HG, view=(-38, 26, 1.0), extra={"wide": True})
+        lambda: hollow_kit.finish_hollow(hollow_kit.drowned_city_preview()), HG, view=(-38, 26, 1.0), extra={"wide": True})
     for sid, title, blurb, yaw in (("truce_hall", "The Truce Hall", "Where two kings sat down. A long buttressed hall with tall lit windows, its roof fallen in at the far end. One table, two seats, one knocked over.", -38),
                                    ("far_door", "The Far Door", "The Hollow's side of the Gate: a sealed pointed arch in the rock face, scaffold towers with a beam and a hanging soul lantern, dig pits, braziers.", 142),
                                    ("pilgrims_cross", "Pilgrim's Cross", "The west crossroads: a four-armed signpost on a stepped plinth and a roofed bench for travellers.", -38),

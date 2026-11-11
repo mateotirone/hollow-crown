@@ -1,0 +1,29 @@
+{
+ "format_version": "1.20.10",
+ "minecraft:recipe_shapeless": {
+  "description": {
+   "identifier": "siege:tempered_choirsteel_recipe"
+  },
+  "tags": [
+   "crafting_table"
+  ],
+  "ingredients": [
+   {
+    "item": "siege:choirsteel_ingot",
+    "count": 4
+   },
+   {
+    "item": "siege:gloamquill"
+   }
+  ],
+  "result": {
+   "item": "siege:tempered_choirsteel",
+   "count": 1
+  },
+  "unlock": [
+   {
+    "item": "siege:choirsteel_ingot"
+   }
+  ]
+ }
+}

@@ -9,7 +9,7 @@ Two takes for Mateo to compare (both front south, +z, ground floor y = 1):
 """
 import math
 from bp import Blueprint, DIRS, OPP
-from kit import Building, VALE, mix, h3
+from kit import Building, VALE, mix, h3, DOCTRINE, finish_doctrine
 from settle_halls import pyramid, hang
 from vale import STYLES
 
@@ -133,10 +133,14 @@ def capital(take="medieval", seed=7):
     roman = take == "roman"
     P = {**VALE, **STYLES["stone"]} if roman else dict(VALE)
     if roman: P.update(quoin="smooth_stone", quoin2="stone_bricks")
+    P.update(DOCTRINE, spikes=5)          # detailing passes (05-07) and ridge spikes on the capital
     bp = Blueprint(f"kingsrest_capital_{take}"); bp.marks = {}
     # ---- the wings and their corner towers
     WB = Building(bp, P, seed)
     for rect in ((-33, -6, -11, 6), (11, -6, 33, 6)): wing(WB, P, rect, "x", seed, timber=not roman, arcade=roman)
+    # the wing roofs run on into the centre block until its hipped roof is higher, so they meet it in clean
+    # valleys instead of ending in open gables and barge boards standing on its slope
+    WB.roofs = [((min(r[0], 6) if r[0] > 0 else r[0], r[1], max(r[2], -6) if r[2] < 0 else r[2], r[3]),) + tuple(rest) for (r, *rest) in WB.roofs]
     WB.build_roofs()
     for rect in ((-33, -6, -11, 6), (11, -6, 33, 6)): WB.eaves(rect, "x", 10)
     for cx in (-37, 37): corner_tower(bp, P, cx, 0, 16, seed + 1)
@@ -195,7 +199,9 @@ def capital(take="medieval", seed=7):
         FB = Building(bp, P, seed + 3)
         FB.foundation(F, 0); FB.floor(F, 0); FB.stone_storey(F, 1, 6)
         FB.floor(F, 6); FB.timber_storey(F, 7, 5, bay=4); FB.bay_windows(F, 7, "sew")
-        FB.roof(F, "z", 12, overhang=1, verge=1, pitch=1); FB.build_roofs(); FB.gable_walls(F, "z", 12, style="timber")
+        # the pavilion roof runs back into the hall's roof (to the drum) so it dies into the slope as a valley;
+        # its back gable stays under its own roof instead of standing up out of the hall roof
+        FB.roof((-8, 7, 8, 15), "z", 12, overhang=1, verge=0, pitch=1); FB.build_roofs(); FB.gable_walls(F, "z", 12, style="timber")
         FB.window(-1, 14, 15, "s", 3, 2, kind="timber", shutters=False)   # a big window high in the gable
         for x in (-1, 0, 1):
             for y in range(1, 5): bp.set(x, y, 15, "air")
@@ -212,7 +218,7 @@ def capital(take="medieval", seed=7):
         for y in range(1, 4): bp.set(x, y, 12, "dark_oak_fence")
         bp.set(x, 4, 12, "lantern")
     bp.markers["door"] = (0, 1, 16)
-    return bp
+    return finish_doctrine(bp)
 
 def medieval(seed=7): return capital("medieval", seed)
 def roman(seed=7): return capital("roman", seed)

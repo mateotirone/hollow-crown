@@ -102,7 +102,7 @@ function relicTick() {
 onTick("bestiary_relics", 20, relicTick);
 
 // ---------- Boss keys: use one to call its boss where you stand ----------
-// The regional puzzles hand these out. Until the map's arenas exist, the fight starts right here.
+// Crafted at a Siege Workshop from that region's trophies and Veil Ash (recipes/keys/). Until the map's arenas exist, the fight starts right here.
 world.afterEvents.itemUse.subscribe((event) => {
   const type = SIGILS[event.itemStack?.typeId];
   const player = event.source;

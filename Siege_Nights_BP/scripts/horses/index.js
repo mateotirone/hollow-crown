@@ -15,12 +15,14 @@ import { ridingTick, useCrop, undertowStep, mountOf } from "./riding.js";
 import { horseMenu, stablesMenu, buyFoal, give, pay, isBuilder, sheetText } from "./menus.js";
 import "./tests.js";
 import "./showcase.js";
+import { useStablesLevel } from "./barn.js";
 import { sfx } from "../core/sfx.js";
 
 export { stallMenu } from "./menus.js"; // the rail stations use the same stalls
 export { isGalloping } from "./riding.js";
 
 export const STABLES = "siege:stables";
+useStablesLevel((owner) => meta.data.stables[owner] ?? 1);
 export const BREEDER_POST = "hc:breeder_post";
 
 const say = (player, text) => player.onScreenDisplay.setActionBar(text);

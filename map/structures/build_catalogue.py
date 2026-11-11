@@ -40,18 +40,6 @@ DESIGNS = [
     dict(key="vale_house_14", title="Wide merchant's house", kind="House", where="Vale towns, main streets",
          make=lambda s: vale.townhouse(14, width=9, depth=9, storeys=2, ground="stone", chimney_side="e", style=s),
          use="The biggest house: wide front for a shop or a well-off family.", inside="Left empty for players to fill."),
-    dict(key="frost_house", title="Frostmarch house", kind="House", where="Rimehold", only="frost",
-         make=lambda s: regions.frost_house(21, width=7, depth=9, storeys=2), use="Spruce frame on a dark plinth under a steep roof that sheds snow.",
-         inside="Left empty for players to fill."),
-    dict(key="salt_house", title="Saltreach house", kind="House", where="Gull's Rest", only="salt",
-         make=lambda s: regions.salt_house(21, width=7, depth=9, storeys=2), use="Stone ground floor against the sea wind, whitewashed upper floor, pale shutters.",
-         inside="Left empty for players to fill."),
-    dict(key="fen_house", title="Blackfen stilt house", kind="House", where="Mirelight", only="fen",
-         make=lambda s: regions.fen_house(21, width=7, depth=9, storeys=2), use="Mud brick and mangrove, raised on stilts above the wet ground, with a stair up to the door.",
-         inside="Left empty for players to fill."),
-    dict(key="ember_house", title="Emberwaste house", kind="House", where="Sunscar", only="ember",
-         make=lambda s: regions.ember_house(21, width=7, depth=9, storeys=2), use="Flat-roofed sandstone with a parapet roof terrace, roof beams and a striped awning.",
-         inside="Left empty for players to fill."),
 ]
 
 if __name__ == "__main__":

@@ -8,9 +8,9 @@
       "siege_workshop"
     ],
     "pattern": [
-      "S S",
+      "SSS",
       "SAS",
-      "SAS"
+      " A "
     ],
     "key": {
       "S": {

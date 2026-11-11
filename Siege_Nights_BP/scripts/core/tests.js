@@ -34,6 +34,7 @@ export const OFFLINE_ONLY = new Set([
   "crown: the Citadel never builds over its Keep Banner",
   "crown: hangings and carpet carry the ruler's color",
   "rivals: stage buildings exist, miss each other and miss the hall, whichever way the gate faces",
+  "hollowfolk: giant Veilcaps stand in the fens and groves, rare elsewhere, and are tree sized",
 ]);
 export const testNames = () => tests.map((t) => `${t.group}: ${t.name}`);
 let testing = false;
