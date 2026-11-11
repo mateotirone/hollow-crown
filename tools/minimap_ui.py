@@ -1,4 +1,4 @@
-"""Write Siege_Nights_RP/ui/hud_screen.json: the minimap on the HUD.
+"""Write Siege_Nights_RP/ui/hud_screen.json: the minimap on the HUD (and the boss bars from tools/bossbar_ui.py).
 
     python3 tools/minimap_ui.py
 
@@ -101,6 +101,12 @@ ui = {
          "source_property_name": f"((#hud_title_text_string - '{KEY}') = #hud_title_text_string)"},
     ]},
 }
+
+# the boss health bars live in this file too (tools/bossbar_ui.py draws them and says how they work)
+import sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import bossbar_ui
+ui.update(bossbar_ui.entries())
 
 with open(OUT, "w") as f:
     f.write(json.dumps(ui, indent=2) + "\n")

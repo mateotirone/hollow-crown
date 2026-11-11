@@ -9,6 +9,7 @@ How versions work is in [`docs/RELEASING.md`](docs/RELEASING.md).
 Everything merged to `main` since the last release goes here. Each pull request that changes what players see adds a line under one of these headings.
 
 ### Fixed
+- Boss health bars show the boss's name instead of "Unknown", and each boss now has its own bar: its own colours, frame and title colour (the Clockwork Reeve in brass, the Drowned Bride in sea green, Morvane in purple and magenta, and so on). Other bosses keep the normal bar.
 - Track: diagonal pieces no longer lie across the line, bends turn the right way, and slopes climb toward the higher track instead of away from it. Track already laid fixes itself.
 
 ### Added

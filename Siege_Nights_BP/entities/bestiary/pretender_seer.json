@@ -125,6 +125,7 @@
     "track_target": true
    },
    "minecraft:boss": {
+    "name": "The Pretender",
     "should_darken_sky": false,
     "hud_range": 48
    },

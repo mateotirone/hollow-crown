@@ -162,6 +162,7 @@
     "track_target": true
    },
    "minecraft:boss": {
+    "name": "The Ash Seneschal",
     "should_darken_sky": false,
     "hud_range": 48
    },
