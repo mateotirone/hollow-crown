@@ -3,7 +3,7 @@
 Run from the siege-nights folder:   python3 tools/build.py
 It runs the offline check first and refuses to build if that fails.
 Only scripts that main.js actually loads are packed, so half-finished feature folders stay out."""
-import os, re, subprocess, sys, zipfile
+import json, os, re, subprocess, sys, zipfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, sys.argv[1] if len(sys.argv) > 1 else "hollow-crown.mcaddon")
@@ -21,6 +21,30 @@ def visit(path):
         visit(os.path.normpath(os.path.join(os.path.dirname(path), spec)))
 visit(os.path.join(SCRIPTS, "main.js"))
 
+# Every build gets its own patch number (the commit count), stamped into both packed manifests and their
+# links to each other. Minecraft refuses to re-import a pack whose uuid and version it already has and
+# silently keeps the old copy, so without this a tester keeps playing an old build. The repo manifests
+# keep MAJOR.MINOR (docs/RELEASING.md); only the packed copies get the patch.
+try:
+    BUILD = int(subprocess.run(["git", "rev-list", "--count", "HEAD"], cwd=ROOT, capture_output=True, text=True, check=True).stdout.strip())
+except Exception:
+    BUILD = None
+PACK_UUIDS = {json.load(open(os.path.join(ROOT, p, "manifest.json")))["header"]["uuid"] for p in ("Siege_Nights_BP", "Siege_Nights_RP")}
+
+def stamped_manifest(path):
+    m = json.load(open(path, encoding="utf8"))
+    if BUILD is None:
+        return None
+    def stamp(v):
+        return [v[0], v[1], BUILD] if isinstance(v, list) and len(v) == 3 else v
+    m["header"]["version"] = stamp(m["header"]["version"])
+    for mod in m.get("modules", []):
+        mod["version"] = stamp(mod["version"])
+    for dep in m.get("dependencies", []):
+        if dep.get("uuid") in PACK_UUIDS:
+            dep["version"] = stamp(dep["version"])
+    return json.dumps(m, indent=2) + "\n"
+
 count = 0
 with zipfile.ZipFile(OUT, "w", zipfile.ZIP_DEFLATED) as z:
     for pack in ("Siege_Nights_BP", "Siege_Nights_RP"):
@@ -29,6 +53,13 @@ with zipfile.ZipFile(OUT, "w", zipfile.ZIP_DEFLATED) as z:
                 full = os.path.join(folder, f)
                 if full.startswith(SCRIPTS) and full not in reachable:
                     continue
-                z.write(full, os.path.relpath(full, ROOT))
+                rel = os.path.relpath(full, ROOT)
+                text = stamped_manifest(full) if f == "manifest.json" and folder == os.path.join(ROOT, pack) else None
+                if text is not None:
+                    z.writestr(rel, text)
+                else:
+                    z.write(full, rel)
                 count += 1
-print(f"Built {os.path.relpath(OUT, ROOT)}: {count} files ({len(reachable)} scripts)")
+version = json.load(open(os.path.join(ROOT, "Siege_Nights_BP", "manifest.json")))["header"]["version"]
+shown = ".".join(map(str, version[:2] + [BUILD])) if BUILD is not None else ".".join(map(str, version))
+print(f"Built {os.path.relpath(OUT, ROOT)}: {count} files ({len(reachable)} scripts), version {shown}")

@@ -12,7 +12,7 @@ The Hollow Crown uses one version number, `MAJOR.MINOR.PATCH`, shared by both pa
 
 The number lives in three places that must match: `header.version` in `Siege_Nights_BP/manifest.json`, `header.version` in `Siege_Nights_RP/manifest.json`, and the behavior pack's dependency on the resource pack. Bedrock only swaps in a new pack on a Realm when the version goes up, so every release must raise it.
 
-Right now the two packs disagree (behavior 1.1.0, resource 1.0.0). The first release brings both to the same number.
+Both packs are at 1.2 (aligned 2026-11-11; `node tools/check.mjs` now fails if they or their links to each other disagree). `tools/build.py` stamps the commit count as the patch number into the packed manifests, so every build has its own version: Minecraft silently keeps an already imported pack when the uuid and version are the same, so without this a tester keeps playing an old build.
 
 ## Safe on an existing world
 

@@ -143,6 +143,84 @@ step("Icons and textures");
   console.log(`${icons} item icons, ${checked} texture paths`);
 }
 
+// Mistakes the game reports in its content log when a world loads (first playtest, 2026-11-11).
+step("Content log rules");
+{
+  const readJson = (file) => {
+    try { return parseJson(readFileSync(file, "utf8").replace(/^﻿/, "")); } catch { return null; }
+  };
+  const verNum = (v) => (typeof v === "string" ? v.split(".").map(Number) : []);
+  const atLeast = (v, min) => {
+    const a = verNum(v), b = verNum(min);
+    for (let i = 0; i < b.length; i++) if ((a[i] ?? 0) !== b[i]) return (a[i] ?? 0) > b[i];
+    return true;
+  };
+  const vstr = (v) => (Array.isArray(v) ? v.join(".") : String(v));
+
+  // 1. Both packs carry one version, and each one's link to the other names that exact version.
+  const mans = {};
+  for (const [name, root] of [["behavior", BP], ["resource", RP]]) mans[name] = readJson(join(root, "manifest.json"));
+  const [bpm, rpm] = [mans.behavior, mans.resource];
+  if (bpm && rpm) {
+    if (vstr(bpm.header.version) !== vstr(rpm.header.version)) fail(`manifest versions differ: behavior ${vstr(bpm.header.version)}, resource ${vstr(rpm.header.version)} (docs/RELEASING.md: one version for both)`);
+    for (const [name, m, other] of [["behavior", bpm, rpm], ["resource", rpm, bpm]]) {
+      for (const mod of m.modules ?? []) if (vstr(mod.version) !== vstr(m.header.version)) fail(`${name} manifest: module ${mod.type} is ${vstr(mod.version)}, header is ${vstr(m.header.version)}`);
+      const dep = (m.dependencies ?? []).find((d) => d.uuid === other.header.uuid);
+      if (dep && vstr(dep.version) !== vstr(other.header.version)) fail(`${name} manifest depends on the other pack at ${vstr(dep.version)}, but it is ${vstr(other.header.version)}: the game cannot match them`);
+    }
+  }
+
+  // 2. Entity components the game no longer parses at the file's format version (the entity then fails to load).
+  const REMOVED = [["minecraft:pushable", "1.26.10", 'use "minecraft:pushable_by_entity": {} and/or "minecraft:pushable_by_block": {}']];
+  let entities = 0;
+  for (const file of walk(join(BP, "entities"), ".json")) {
+    const d = readJson(file);
+    const e = d?.["minecraft:entity"];
+    if (!e) continue;
+    entities++;
+    const groups = [e.components ?? {}, ...Object.values(e.component_groups ?? {})];
+    for (const [comp, since, fix] of REMOVED) {
+      if (atLeast(d.format_version, since) && groups.some((g) => comp in g)) fail(`${rel(file)}: "${comp}" is not parsed at format_version ${d.format_version}, so the entity fails to load (${fix})`);
+    }
+  }
+
+  // 3. Animations: an empty "bones" object is an error ("Required child not found").
+  let anims = 0;
+  for (const file of walk(join(RP, "animations"), ".json")) {
+    for (const [id, a] of Object.entries(readJson(file)?.animations ?? {})) {
+      anims++;
+      if (a && typeof a.bones === "object" && !Array.isArray(a.bones) && Object.keys(a.bones).length === 0) fail(`${rel(file)}: ${id} has an empty "bones" object (leave "bones" out instead)`);
+    }
+  }
+
+  // 4. Blocks: custom geometry must exist in the resource pack, and one block's materials can't mix opaque with see-through.
+  const geometries = new Set();
+  for (const file of walk(join(RP, "models"), ".json")) {
+    const d = readJson(file);
+    for (const g of d?.["minecraft:geometry"] ?? []) if (g?.description?.identifier) geometries.add(g.description.identifier);
+    for (const k of Object.keys(d ?? {})) if (k.startsWith("geometry.")) geometries.add(k.split(":")[0]);
+  }
+  let blocks = 0;
+  const mixedReported = new Set();
+  for (const file of walk(join(BP, "blocks"), ".json")) {
+    const b = readJson(file)?.["minecraft:block"];
+    if (!b) continue;
+    blocks++;
+    const sets = [b.components ?? {}, ...(b.permutations ?? []).map((p) => p.components ?? {})];
+    for (const c of sets) {
+      const geo = c["minecraft:geometry"];
+      const id = typeof geo === "string" ? geo : geo?.identifier;
+      if (id && !id.startsWith("minecraft:") && !geometries.has(id)) fail(`${rel(file)}: geometry "${id}" is not defined in ${rel(RP)}/models`);
+      const mi = c["minecraft:material_instances"];
+      if (mi) {
+        const methods = new Set(Object.values(mi).filter((v) => v && typeof v === "object").map((v) => v.render_method ?? "opaque"));
+        if (methods.size > 1 && !mixedReported.has(file) && mixedReported.add(file)) fail(`${rel(file)}: material_instances mix render methods (${[...methods].join(", ")}); the game needs one per block`);
+      }
+    }
+  }
+  console.log(`${entities} entities, ${anims} animations, ${blocks} blocks, ${geometries.size} geometries`);
+}
+
 const manifest = parseJson(readFileSync(join(BP, "manifest.json"), "utf8"));
 const scriptModule = manifest.modules.find((m) => m.type === "script");
 const entry = join(BP, scriptModule.entry);

@@ -589,10 +589,8 @@
    "minecraft:knockback_resistance": {
     "value": 0.7
    },
-   "minecraft:pushable": {
-    "is_pushable": true,
-    "is_pushable_by_piston": true
-   },
+   "minecraft:pushable_by_entity": {},
+   "minecraft:pushable_by_block": {},
    "minecraft:breathable": {
     "total_supply": 15,
     "suffocate_time": 0
