@@ -13,11 +13,11 @@
     "default": "geometry.siege_b.reveal_boy"
    },
    "animations": {
-    "main": "animation.siege_b.reveal_boy"
+    "base": "animation.siege_b.reveal_boy"
    },
    "scripts": {
     "animate": [
-     "main"
+     "base"
     ]
    },
    "render_controllers": [

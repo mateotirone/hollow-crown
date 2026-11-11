@@ -13,11 +13,24 @@
     "default": "geometry.siege_b.hollow_footman"
    },
    "animations": {
-    "main": "animation.siege_b.hollow_footman"
+    "base": "animation.siege_b.hollow_footman",
+    "idle": "animation.siege_b.hollow_footman.idle",
+    "walk": "animation.siege_b.hollow_footman.walk",
+    "attack": "animation.siege_b.hollow_footman.attack",
+    "swing": "controller.animation.siege_b.hollow_footman.swing",
+    "aim": "animation.siege_b.hollow_footman.aim",
+    "ready": "controller.animation.siege_b.hollow_footman.ready",
+    "hurt": "animation.siege_b.hollow_footman.hurt",
+    "flinch": "controller.animation.siege_b.hollow_footman.flinch"
    },
    "scripts": {
     "animate": [
-     "main"
+     "base",
+     "idle",
+     "walk",
+     "swing",
+     "ready",
+     "flinch"
     ]
    },
    "render_controllers": [

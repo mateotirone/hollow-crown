@@ -196,6 +196,30 @@ step("Content log rules");
     }
   }
 
+  // 3b. Every animation and controller a client entity names exists, and every animation a controller state plays
+  //     is one of that entity's own short names (else the game logs an error and the mob stands frozen).
+  const animIds = new Set(), ctrlDefs = new Map();
+  for (const file of walk(join(RP, "animations"), ".json")) for (const id of Object.keys(readJson(file)?.animations ?? {})) animIds.add(id);
+  for (const file of walk(join(RP, "animation_controllers"), ".json")) for (const [id, c] of Object.entries(readJson(file)?.animation_controllers ?? {})) ctrlDefs.set(id, c);
+  for (const file of walk(join(RP, "entity"), ".json")) {
+    const desc = readJson(file)?.["minecraft:client_entity"]?.description;
+    if (!desc?.animations) continue;
+    for (const [short, id] of Object.entries(desc.animations)) {
+      if (id.startsWith("controller.animation.")) {
+        const c = ctrlDefs.get(id);
+        if (!c) { if (id.startsWith("controller.animation.siege")) fail(`${rel(file)}: "${short}" names controller ${id}, which is not defined`); continue; } // vanilla ones live in the game
+        for (const st of Object.values(c.states ?? {})) for (const a of st.animations ?? []) {
+          const name = typeof a === "string" ? a : Object.keys(a)[0];
+          if (!(name in desc.animations)) fail(`${rel(file)}: controller ${id} plays "${name}", which the entity does not list in its animations`);
+        }
+      } else if (id.startsWith("animation.siege") && !animIds.has(id)) fail(`${rel(file)}: "${short}" names ${id}, which is not defined`);
+    }
+    for (const a of desc.scripts?.animate ?? []) {
+      const name = typeof a === "string" ? a : Object.keys(a)[0];
+      if (!(name in desc.animations)) fail(`${rel(file)}: animate lists "${name}", which is not in its animations`);
+    }
+  }
+
   // 4. Blocks: custom geometry must exist in the resource pack, and one block's materials can't mix opaque with see-through.
   const geometries = new Set();
   for (const file of walk(join(RP, "models"), ".json")) {

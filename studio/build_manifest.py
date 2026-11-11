@@ -262,7 +262,7 @@ def _ent(gid,name,cat,geofile,variants,note=None):
 for _k,_n in [("cinderwing","Cinderwing"),("wyvern","Wyvern"),("drake","Drake"),("wyrm","Wyrm")]:
     _ent("dragon_"+_k,_n,"Dragons",f'models/entity/dragons/{_k}.geo.json',[(_n,f'textures/entity/siege/dragons/{_k}.png')],"Adult shape. Hatchlings and fledglings are the same model, smaller.")
 if os.path.exists(RP+B+'dragons/siege_dragon_roost_side.png'):
-    g("dragon_blocks","Dragon Roost and Nest","Dragons",[sided("Roost",'dragons/siege_dragon_roost_side','dragons/siege_dragon_roost_top','dragons/siege_dragon_roost_side'),sided("Nest",'dragons/siege_dragon_nest_side','dragons/siege_dragon_nest_top','dragons/siege_dragon_nest_side')])
+    g("dragon_blocks","Dragon Roost","Dragons",[sided("Roost",'dragons/siege_dragon_roost_side','dragons/siege_dragon_roost_top','dragons/siege_dragon_roost_side')])
     g("dragon_items","Dragon item icons","Dragons",[item(n,'dragons/siege_dragon_'+k) for n,k in [("Egg","egg"),("Saddle","saddle"),("Horn","horn")]])
 # ---- 3D held weapons for players
 for _k,_n in [("longsword","Longsword"),("warhammer","Warhammer"),("minute_hand","Minute Hand"),("oath_of_oswin","The Kept Oath"),("warlords_brand","The Warlord's Brand"),("rimefang_bow","Rimefang Bow")]:

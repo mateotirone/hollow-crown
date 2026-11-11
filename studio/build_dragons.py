@@ -366,7 +366,7 @@ for key, (name, stack) in ITEMS.items():
 
 BLOCKS = {  # id: (name, texture key, map color, light)
     "siege:dragon_roost": ("Dragon Roost", "siege_dragon_roost", "#7a4a34", 7),
-    "hc:dragon_nest": ("Dragon Nest", "siege_dragon_nest", "#b08a54", 4),
+    # hc:dragon_nest (the wild 9x9 nest) is built by studio/build_dragon_nest.py
 }
 for ident, (name, tex, color, light) in BLOCKS.items():
     write(BP + f"blocks/dragons/{ident.split(':')[1]}.json", {"format_version": "1.21.60", "minecraft:block": {
@@ -435,8 +435,6 @@ STONE, SD, EMB, GOLD, HAY, HD = (112, 104, 100), (70, 62, 60), (226, 110, 40), (
 brick = lambda x, y: SD if y % 4 == 3 or (x + (y // 4) * 4) % 8 == 0 else STONE
 block_tex("siege_dragon_roost_side", lambda x, y: GOLD if y == 1 and 1 < x < 14 else EMB if 6 < y < 11 and 5 < x < 10 and (x + y) % 2 else brick(x, y))
 block_tex("siege_dragon_roost_top", lambda x, y: SD if x in (0, 15) or y in (0, 15) else EMB if abs(x - 7.5) + abs(y - 7.5) < 3 else HD if (x * 3 + y) % 4 == 0 else HAY)
-block_tex("siege_dragon_nest_side", lambda x, y: HD if (x + y * 2) % 5 == 0 or y > 12 else (150, 96, 60) if (x * 2 + y) % 7 == 0 else HAY)
-block_tex("siege_dragon_nest_top", lambda x, y: HD if x in (0, 1, 14, 15) or y in (0, 1, 14, 15) else (122, 44, 34) if (x - 7.5) ** 2 + (y - 7.5) ** 2 < 9 else (96, 70, 44) if (x + y) % 3 == 0 else HAY)
 
 # ---------------------------------------------------------------- merge into the shared files (read again right before writing)
 def merge_json(path, change, default):
@@ -456,7 +454,6 @@ merge_json(RP + "textures/item_texture.json", item_tex, {"resource_pack_name": "
 
 def block_sounds(d):
     d["siege:dragon_roost"] = {"sound": "stone"}
-    d["hc:dragon_nest"] = {"sound": "grass"}
 merge_json(RP + "blocks.json", block_sounds, {"format_version": "1.21.40"})
 
 # ---------------------------------------------------------------- voices (synthesised here, so they are ours)
@@ -561,7 +558,7 @@ viewer = {"species": [{"key": k, "name": SPECIES[k][0], "geo": MODELS[k][1]["min
                        "texture": b64(RP + f"textures/entity/siege/dragons/{k}.png")} for k in SPECIES],
           "animations": ANIMATIONS, "stages": STAGES,
           "blocks": {name: {"side": b64(RP + f"textures/blocks/dragons/{tex}_side.png"), "top": b64(RP + f"textures/blocks/dragons/{tex}_top.png")}
-                     for name, tex in (("Dragon Roost", "siege_dragon_roost"), ("Dragon Nest", "siege_dragon_nest"))},
+                     for name, tex in (("Dragon Roost", "siege_dragon_roost"),)},
           "items": {ITEMS[k][0]: b64(RP + f"textures/items/dragons/siege_{k}.png") for k in ITEMS}}
 os.makedirs("studio/dragon_viewer", exist_ok=True)
 json.dump(viewer, open("studio/dragon_viewer/data.json", "w"))

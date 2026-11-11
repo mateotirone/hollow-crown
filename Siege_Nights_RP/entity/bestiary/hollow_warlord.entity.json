@@ -13,11 +13,24 @@
     "default": "geometry.siege_b.hollow_warlord"
    },
    "animations": {
-    "main": "animation.siege_b.hollow_warlord"
+    "base": "animation.siege_b.hollow_warlord",
+    "idle": "animation.siege_b.hollow_warlord.idle",
+    "walk": "animation.siege_b.hollow_warlord.walk",
+    "attack": "animation.siege_b.hollow_warlord.attack",
+    "swing": "controller.animation.siege_b.hollow_warlord.swing",
+    "aim": "animation.siege_b.hollow_warlord.aim",
+    "ready": "controller.animation.siege_b.hollow_warlord.ready",
+    "hurt": "animation.siege_b.hollow_warlord.hurt",
+    "flinch": "controller.animation.siege_b.hollow_warlord.flinch"
    },
    "scripts": {
     "animate": [
-     "main"
+     "base",
+     "idle",
+     "walk",
+     "swing",
+     "ready",
+     "flinch"
     ]
    },
    "render_controllers": [

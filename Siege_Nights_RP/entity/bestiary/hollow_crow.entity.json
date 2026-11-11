@@ -13,11 +13,19 @@
     "default": "geometry.siege_b.hollow_crow"
    },
    "animations": {
-    "main": "animation.siege_b.hollow_crow"
+    "base": "animation.siege_b.hollow_crow",
+    "idle": "animation.siege_b.hollow_crow.idle",
+    "attack": "animation.siege_b.hollow_crow.attack",
+    "swing": "controller.animation.siege_b.hollow_crow.swing",
+    "hurt": "animation.siege_b.hollow_crow.hurt",
+    "flinch": "controller.animation.siege_b.hollow_crow.flinch"
    },
    "scripts": {
     "animate": [
-     "main"
+     "base",
+     "idle",
+     "swing",
+     "flinch"
     ]
    },
    "render_controllers": [

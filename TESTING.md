@@ -219,7 +219,7 @@ Run the showcase first (`/scriptevent siege:showcase`): the back row has four Ar
 
 Look first, without the game: the 3D viewer at https://claude.ai/artifact/D42qsWXjEcxWAbsYacsw4v shows all four species, every pose and every sound.
 
-In game: Creative, cheats on. `/scriptevent siege:showcase` puts a Roost, a Nest, nine display dragons (the four species, a hatchling, a fledgling, one asleep, one unconscious, one dead) and **Cinder**, a grown Cinderwing that is yours, in the extras row behind you. Take a **Dragon Horn** from the chests, and `/give @s beef 16` and `/give @s golden_apple 4`.
+In game: Creative, cheats on. `/scriptevent siege:showcase` puts a Roost, nine display dragons (the four species, a hatchling, a fledgling, one asleep, one unconscious, one dead) and **Cinder**, a grown Cinderwing that is yours, in the extras row behind you, and a whole 9x9 **Dragon Nest** west of that row. Take a **Dragon Horn** from the chests, and `/give @s beef 16` and `/give @s golden_apple 4`.
 
 **Looks and flying**
 1. Walk along the display dragons. ✅ Four clearly different animals (four-legged Cinderwing, two-legged Ashen Wyvern, squat armoured Dune Drake, long frilled Glass Wyrm). Wings tucked down along the flanks, the outer half folded over the inner (not sticking out sideways or lying flat). The sleeper breathes slowly, the unconscious one breathes fast and drips red, the dead one lies rolled over and does not move.
@@ -247,7 +247,9 @@ In game: Creative, cheats on. `/scriptevent siege:showcase` puts a Roost, a Nest
 19. Knock it down again and, as a second player who is not your ally, hit it five times. ✅ It dies: rolled over, jaw slack, no breathing, no name. The body stays about five minutes (longer during a siege), then crumbles to ash. The owner sees "Cinder is dead".
 20. Shot down: fly over a second player's settlement with a Ballista. ✅ Bolts knock the Flight bar down a quarter each; at empty you get "Shot down", it falls, and it hits the ground unconscious.
 
-**Raising one**: `/scriptevent siege:dragons_reset`, click the **Dragon Nest** ✅ an egg; click the Roost holding it ✅ "The egg settles"; `/scriptevent siege:dragons_grow` ✅ cracking sound, a tiny chirping hatchling of a random species that follows you. Run the grow command twice more ✅ Fledgling (walks with you on its back), then Adult (flies).
+**The nest**: walk to the 9x9 nest west of the extras row ✅ a round nest of woven branches sunk into the ground, rim two to three blocks high with twigs flaring off the top, a straw floor with a bone, ribs, scales or a skull here and there, and three big dark red eggs in the middle. Try to break any part of it in Survival ✅ nothing breaks; set off TNT next to it ✅ it stays. Place a **Dragon Nest** from the creative menu in Creative ✅ a whole nest grows round it; in Survival ✅ it vanishes ("only grow in the wild").
+
+**Raising one**: `/scriptevent siege:dragons_reset`, click the eggs in the **Dragon Nest** ✅ an egg, and the clutch turns to broken shell; click the Roost holding it ✅ "The egg settles"; `/scriptevent siege:dragons_grow` ✅ cracking sound, a tiny chirping hatchling of a random species that follows you. Run the grow command twice more ✅ Fledgling (walks with you on its back), then Adult (flies).
 
 Things I could not check without the game, so please look closely: flying actually steers by camera, flying speed feels right, the hatchling follows you, the sounds are any good in game, and the unconscious dragon really can't be killed by one more hit.
 
@@ -444,6 +446,12 @@ the darkness and knockback effects, the storms, and how the hurried evening look
 - Blade: hit one mob in a crowd four times. The fourth hit rings and hurts the others near it.
 - Pick: break an ore next to other ore. A line of sparks points to the nearest one. It also mines Choir Ore whole.
 - The first time you wear or hold each piece, chat tells you what it does.
+
+## Mob and boss animations (bestiary)
+
+1. In the showcase world the statues stay in place but now breathe and fidget (the Reeve ticks, Hollow folk twitch). Then spawn a few live mobs with eggs (Tollman, Shieldwall Brute, Grey Host Bowman, Lost Villager, Rimewolf) in Survival. ✅ Each walks differently, leans in when it runs, and swings its own way when it hits you. The Bowman raises and draws its bow while it has you as a target. Every mob flinches when you hit it.
+2. Watch a Lost Villager standing still for 10 seconds. ✅ Its head hangs crooked and now and then snaps sideways.
+3. `/scriptevent siege:bestiary_summon reeve` in Survival. ✅ When a warning comes up he holds a wind-up pose (both arms raised for the time stop, arm drawn back for a cog) and swings through when it lands. At 60% health he rears back with his arms spread. Do the same for the Huntsman, Bride, Seneschal, Mother, Warlord King and Morvane. Anything that looks broken (a limb bending the wrong way, a pose that never lets go): note the boss and the attack name from the warning.
 
 ## Never the same fight twice (bestiary)
 

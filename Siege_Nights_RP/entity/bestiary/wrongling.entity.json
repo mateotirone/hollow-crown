@@ -13,11 +13,21 @@
     "default": "geometry.siege_b.wrongling"
    },
    "animations": {
-    "main": "animation.siege_b.wrongling"
+    "base": "animation.siege_b.wrongling",
+    "idle": "animation.siege_b.wrongling.idle",
+    "walk": "animation.siege_b.wrongling.walk",
+    "attack": "animation.siege_b.wrongling.attack",
+    "swing": "controller.animation.siege_b.wrongling.swing",
+    "hurt": "animation.siege_b.wrongling.hurt",
+    "flinch": "controller.animation.siege_b.wrongling.flinch"
    },
    "scripts": {
     "animate": [
-     "main"
+     "base",
+     "idle",
+     "walk",
+     "swing",
+     "flinch"
     ]
    },
    "render_controllers": [
