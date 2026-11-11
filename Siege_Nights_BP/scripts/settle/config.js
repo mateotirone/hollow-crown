@@ -14,6 +14,8 @@ export const SETTLE = {
   riseTicks: 160, // about how long a pre-designed building takes to rise (160 = 8 seconds)
   firstBuildRenown: 40, // Renown the first time you raise each kind of building
   previewSeconds: 90, // how long the outline of a chosen building stays up
+  // What a building costs on a town plot (Plot Marker), in lots, paid from the purse. The library comes free on arrival.
+  plotPrices: { cottage: 6, well: 3, garden: 5, market: 10, library: 8, watchtower: 8, storehouse: 9, smithy: 12, stable: 14 },
 };
 
 // Out in the wilds you can still make camp. Anything matching one of these can be placed anywhere.

@@ -12,7 +12,7 @@
 import { world, system } from "@minecraft/server";
 import { MessageFormData } from "@minecraft/server-ui";
 import { isReady, getState, onTick, on, emit, damageMap, saveDamage, hitWall } from "../siege/api.js";
-import { WALLS, WALL_LEVELS, wallColumns, columnKinds, repairCost, wallSeed } from "./walldata.js";
+import { WALLS, WALL_LEVELS, wallColumns, columnKinds, repairCost, wallSeed, onWallLine } from "./walldata.js";
 import { wallOf, wallRising, palette, permFor } from "./walls.js";
 import { purse, charge, coins, lot } from "./wallet.js";
 import { sfx } from "../core/sfx.js";
@@ -150,7 +150,7 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
       const block = dim.getBlock({ x: Math.floor(at.x + (Math.random() - 0.5) * 16), y: Math.floor(at.y + Math.random() * 8), z: Math.floor(at.z + (Math.random() - 0.5) * 16) });
       if (!block || block.isAir || !wallOf(player.id)) continue;
       const w = wallOf(player.id);
-      if (Math.abs(Math.hypot(block.location.x - w.x, block.location.z - w.z) - (w.radius - 1)) > 4) continue;
+      if (!onWallLine(w, block.location, w.radius, 4)) continue;
       hitWall(block, Math.random() < 0.5 ? 3 : 99);
       hits++;
     }

@@ -411,3 +411,6 @@ tile.hc:nest_twigs.name=Nest Twigs
 tile.hc:nest_lining.name=Nest Lining
 tile.hc:nest_fill.name=Packed Nest Earth
 entity.siege:crown_stand.name=The Hollow Crown
+tile.siege:mason_bench.name=Mason's Bench
+tile.siege:foundation_stone.name=Foundation Stone
+tile.siege:plot_marker.name=Plot Marker

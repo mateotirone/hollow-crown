@@ -53,6 +53,7 @@ import { canOpen, dullLeft, BOSSES_TO_OPEN, FORK_DULL_DAYS } from "./source.js";
 import { CRACK_HEIGHT } from "./rift.js";
 import "./story.js";
 import "./forge.js";
+import "./finds.js";
 
 const IN_TAG = "siege_undertow_in";
 const FOG_ID = "siege:undertow_fog";

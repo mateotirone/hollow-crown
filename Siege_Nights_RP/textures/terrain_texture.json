@@ -1155,6 +1155,9 @@
      }
     ]
    }
+  },
+  "siege_plot_marker": {
+   "textures": "textures/blocks/siege_plot_marker"
   }
  }
 }
