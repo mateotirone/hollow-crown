@@ -9,6 +9,7 @@ How versions work is in [`docs/RELEASING.md`](docs/RELEASING.md).
 Everything merged to `main` since the last release goes here. Each pull request that changes what players see adds a line under one of these headings.
 
 ### Added
+- The Hollow's mining villages, the sites at its centre and the drowned city are rebuilt in the Hollow's own crooked style: leaning timber houses, a fallen Truce Hall, and seven leaning towers on the marsh banks by the Court landing. They build a block at a time, so the world never stalls. Worlds that already built them keep the old look.
 - Every region has its own Castle Gate, Portcullis, Palisade, Wall Planks and Roof Shingles, craftable at the Siege Workshop. Settlement walls are built from them: a Blackfen palisade no longer looks like a Vale one, and each region's gate and portcullis match its wall. Flat roofs and snowy ridges on settlement buildings use the region's shingles.
 - Clue Sense works: while you carry the Ledger of Whispers, it whispers on the action bar (with a soft page turn) when a Dusty Tome you have not copied, or a Lore Tome lying on the ground, is within 16 blocks, and says which way.
 - Every skill on the Tree of Oaths shows its own painted icon: on the tree screen for skills you hold or can swear now, and on every row of the plain lists.
