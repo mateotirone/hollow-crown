@@ -484,8 +484,20 @@ console.warn = realWarn;
 // ---------- 6. self-tests ----------
 if (loaded) {
   step("Self-tests");
-  const { runTests } = await import(pathToFileURL(join(SCRIPTS, "core/tests.js")).href);
-  const result = runTests({ inGame: false });
+  const { runTests, OFFLINE_ONLY, testNames } = await import(pathToFileURL(join(SCRIPTS, "core/tests.js")).href);
+  // A test that is slow here is many times slower inside Minecraft, where one long test makes the watchdog
+  // shut the world down. Slow tests must be listed in OFFLINE_ONLY (core/tests.js) so the game skips them.
+  const SLOW_MS = 15;
+  const timings = new Map();
+  let result = runTests({ inGame: false, slow: (name, ms) => timings.set(name, ms) });
+  const suspects = [...timings].filter(([name, ms]) => ms >= SLOW_MS && !OFFLINE_ONLY.has(name)).map(([name]) => name);
+  if (suspects.length) { // time them once more, so a one-off pause on this machine is not blamed on a test
+    const again = new Map();
+    result = runTests({ inGame: false, slow: (name, ms) => again.set(name, ms) });
+    for (const name of suspects) if (again.get(name) >= SLOW_MS) fail(`self-test "${name}" takes ${again.get(name)} ms here, too slow to run inside Minecraft: add it to OFFLINE_ONLY in core/tests.js (or make it lighter)`);
+  }
+  const known = new Set(testNames());
+  for (const name of OFFLINE_ONLY) if (!known.has(name)) fail(`core/tests.js OFFLINE_ONLY lists "${name}", but no test has that name`);
   console.log(`${result.passed} passed, ${result.failed.length} failed, ${result.skipped} in-game only (skipped here)`);
   for (const f of result.failed) fail(`test failed: ${f.group}: ${f.name} (${f.error})`);
 }

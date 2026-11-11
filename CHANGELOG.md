@@ -106,6 +106,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - First playtest load errors: dragons load again, the Keep Banner and brazier no longer mix material types, and eight still models (Stone Vigil, Rime Pillar, Seep, Omen Raven, Hollow Bolt and the three reveal figures) no longer log animation errors.
 - The six 3D weapons (Longsword, Warhammer, Minute Hand, Oath of Oswin, Warlord's Brand, Rimefang Bow) sit in the hand like the vanilla trident instead of floating at the hip pointing backwards.
 - The self-test now runs a few checks per tick instead of all at once when the world loads, so it can't stall a world or a Realm on startup. `/scriptevent siege:selftest` says it is running, then reports.
+- The world no longer shuts down a few seconds after loading ("Multiplayer Connection Failed"): the 17 heaviest self-tests, which froze the game long enough for its watchdog to close the world, now run only in the offline check.
 - Scripts load again on Minecraft: one module re-exported names it had imported, which Minecraft's script engine could not link ("Could not find export 'AFTER'"), so no script ran at all.
 - The character look no longer logs errors on the menu paper doll.
 - Both packs are now version 1.2 and point at each other's real version, and every install file carries its own build number, so re-importing a new build replaces the old one instead of being skipped.
