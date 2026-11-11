@@ -515,3 +515,9 @@ Tell me about: anything too loud, too quiet, silent, or that made you jump. Noth
 1. `/scriptevent siege:townhall_renown 30`, learn Clue Sense in the Wayfarer branch, and carry the Ledger of Whispers.
 2. Walk toward a Dusty Tome you have not clicked (the showcase has some). ✅ Within 16 blocks a page turns softly and the action bar says "Your Ledger whispers: something written, N blocks <direction>". After you copy the tome it goes quiet.
 3. Drop a Lore Tome and walk away and back. ✅ It is sensed the same way. Without the Ledger in your pack nothing happens.
+
+### Settlement gates and stripped log walls
+1. `/scriptevent siege:wall 3 saltreach` round your keep. ✅ The stakes are stripped birch, not bark birch. Try `vale`, `frostmarch`, `emberwaste`, `blackfen`: always the stripped log.
+2. With a second player who is not your ally, have them click your gate or portcullis. ✅ It stays shut and the action bar says "The gate is barred. Only <name>'s people can open it." You (and an ally) can open it by clicking.
+3. Recruit a guard at the Barracks, shut the gate, walk up to it from outside. ✅ The gate (and portcullis from level 6) opens by itself; walk 7+ blocks away and it shuts.
+4. Leave the gate open and start a siege. ✅ It slams shut, and it does not open by itself until the siege ends.
