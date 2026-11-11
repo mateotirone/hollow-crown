@@ -22,4 +22,5 @@
 | `beamed-floor.png` | A beamed upper floor: oak log beams across the floor with slabs between, upright logs at the corners, over a stone ground floor with spruce steps |
 | `floor-band-arched-supports.png` | Stone ground floor under an oak upper storey: the floor band carried on slabs, stairs and trapdoors that read as shallow arches; dark oak panels, slim windows, spruce planters |
 | `close-studding.png` | Close studding: one block log, one block white, all along an oak upper storey over stone, stepped gables; the add-on's Timber Frame blocks give the same look |
+| `shutter-shelf-lantern.png` | Shuttered windows in close studding: a single open shutter, a slab shelf with a lantern under the glass, flowering leaves spilling down, vines on the white panels |
 | `window-ideas-grid.png` | Sixteen window surrounds in wood, stone and brick: stair and trapdoor frames, crowns, sills, planters |

@@ -156,6 +156,20 @@ the dark brown of the dark oak trapdoors goes really well with spruce and stone;
 - Shutters only on windows 1 or 3 wide; never on stone hall windows, windows with bars, or windows set
   in a proud frame.
 
+### Shutter dressing (Mateo, 2026-11-11, `reference/pictures/shutter-shelf-lantern.png`)
+
+What goes with a shuttered window, so no two windows on a front look the same:
+
+- **Shelf**: a slab of the trim wood one block out under the glass, a little shelf. Every so often (about
+  one shuttered window in three, never two side by side) a lantern stands on it.
+- **Single shutter**: a window may have one open trapdoor on one side only instead of a pair, with the
+  shelf or the leaves taking the other side's weight.
+- **Leaves**: flowering azalea (or the region's leaves) hanging out under the shelf or a window, spilling
+  down the wall a block or two.
+- **Vines**: on the infill panels beside the windows, a few blocks, more on shady walls.
+- Mix these per window from the same short list: shelf, shelf with a lantern, leaves, leaf box with signs,
+  plain. Hash the choice by position so it repeats the same every build.
+
 ### Planters (alternative)
 
 - A box of trapdoors (open, facing out, round the front and ends) one block in front of the wall, under
