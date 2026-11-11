@@ -218,14 +218,25 @@ Yf=SEA+1+shore*(3+rolling*(1-0.85*fen)+m*150+plateau*38+mesa+cliff)
 rv=blurmask(lambda d:[d.line([px(*p) for p in spline(pts,22,22,i+7)],fill=255,width=5) for i,(n_,pts) in enumerate(rivers.items())],9)
 Yf=Yf-np.clip(rv*2.2,0,1)*np.minimum(Yf-SEA-1,10)*shore
 Yf[~land]=SEA-np.clip((seaf[~land]-0.5)/0.4,0,1)*30
-# plot terraces: every plot gets a near-flat disc for its final settlement (hall, buildings, wall at r52),
-# eased back into the natural ground by r115, so a generated wall can follow the ground all the way round
+# plot terraces: every plot gets a level patch for its final settlement (hall, buildings, wall at r56),
+# eased back into the natural ground, so a generated wall can follow the ground all the way round.
+# The patch is not a circle (Mateo 2026-11-11): its edge wanders with the bearing, never closer than
+# r64 (raiders gather out to r64) and reaching out to about r100 in places; the easing band wanders too.
 PLOT_FLAT,PLOT_EASE=64,115
+def plot_shape(name, theta):
+    """Wandering edge factor (>= 1) by bearing; same numbers as genworld.py's clearing."""
+    r_=np.random.default_rng(sum(map(ord,name))*7919)
+    f=np.ones_like(theta)
+    for k in (2,3,5,7):
+        a=r_.uniform(0.05,0.22)/(1+0.15*k); ph=r_.uniform(0,6.283)
+        f=f+a*(1+np.cos(k*theta+ph))
+    return f
 for n_,_,x_,z_,_ in plots:
-    dist=np.hypot(X-x_,Z-z_)
+    dist=np.hypot(X-x_,Z-z_); th=np.arctan2(Z-z_,X-x_)
     core=(dist<=46)&land
     T=float(np.median(Yf[core]))
-    w=np.clip((PLOT_EASE-dist)/(PLOT_EASE-PLOT_FLAT),0,1); w=w*w*(3-2*w)
+    f=plot_shape(n_,th); rf=PLOT_FLAT*f; re_=rf+(PLOT_EASE-PLOT_FLAT)*(0.7+0.6*(plot_shape(n_+"e",th)-1))
+    w=np.clip((re_-dist)/(re_-rf),0,1); w=w*w*(3-2*w)
     Yf=np.where(land,Yf*(1-w)+(T+n3*1.6)*w,Yf)
 # story sites shaped into the land: Crownhold stands on a low rise, Bellhollow lies in a hollow
 for (x_,z_,amp,rad) in [(-235,-345,9,120),(155,-100,-13,80)]:

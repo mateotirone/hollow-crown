@@ -104,7 +104,26 @@ def disc_mask(points, extra=0):
         sx, sz = np.meshgrid(np.arange(x0, x1) + X0, np.arange(z0, z1) + Z0, indexing='ij')
         m[x0:x1, z0:z1] |= (sx - x) ** 2 + (sz - z) ** 2 <= (r + extra) ** 2
     return m
-plotzone = disc_mask([(n, x, z, 68) for n, x, z in PLOTS])
+def plot_shape(name, theta):
+    """Wandering edge factor (>= 1) by bearing; same numbers as draw_map.py's terraces."""
+    r_ = np.random.default_rng(sum(map(ord, name)) * 7919)
+    f = np.ones_like(theta)
+    for k in (2, 3, 5, 7):
+        a = r_.uniform(0.05, 0.22) / (1 + 0.15 * k); ph = r_.uniform(0, 6.283)
+        f = f + a * (1 + np.cos(k * theta + ph))
+    return f
+# each plot's clearing: no trees inside its wandering edge (never closer than r62, past the r60 land),
+# then woodland thickens back over a wandering band instead of stopping at a hard ring
+plotfade = np.ones((SIZE, SIZE), np.float32)       # 0 = clear, 1 = natural density
+for n, x, z in PLOTS:
+    x0, x1 = max(0, x - 200 - X0), min(SIZE, x + 200 - X0); z0, z1 = max(0, z - 200 - Z0), min(SIZE, z + 200 - Z0)
+    if x0 >= x1 or z0 >= z1: continue
+    dx_ = GX[x0:x1, z0:z1] - x; dz_ = GZ[x0:x1, z0:z1] - z
+    th = np.arctan2(dz_, dx_); d = np.hypot(dx_, dz_)
+    rc = 62 * plot_shape(n, th); band = 25 + 45 * (plot_shape(n + "e", th) - 1)
+    fade = np.clip((d - rc) / band, 0, 1)
+    plotfade[x0:x1, z0:z1] = np.minimum(plotfade[x0:x1, z0:z1], fade * fade)
+plotzone = plotfade < 0.02
 townzone = disc_mask([(n, x, z, r) for n, x, z, r, _ in TOWNS])
 sitezone = disc_mask([(n, x, z, int(r * 0.6)) for n, x, z, r, _ in WARDS[6:]])
 keepclear = plotzone | townzone | sitezone
@@ -247,7 +266,7 @@ m = pl & R[FROST] & (Y < 135) & (r2 > 0.93); plant[m] = np.where(k[m] < 0.6, ID[
 m = pl & R[SALT] & (surf == ID["grass_block"]) & (r2 > 0.85); plant[m] = ID["short_grass"]
 m = pl & R[FEN] & ((surf == ID["grass_block"]) | (surf == ID["moss_block"])) & (r2 > 0.75); plant[m] = np.where(k[m] < 0.6, ID["short_grass"], ID["fern"])
 m = pl & R[EMBER] & (r2 > 0.992); plant[m] = ID["deadbush"]
-plant[plotzone & (plant != 0) & (r2 < 0.85)] = 0
+plant[(plant != 0) & (r2 < 0.85 * (1 - plotfade))] = 0
 lily = fenpool & (r2 > 0.9) & (water_level - Y <= 3)
 seagr = wet & ~R[FROST] & (water_level - Y >= 2) & (r2 > 0.8) & ~R[FEN]
 log("surface chosen")
@@ -378,6 +397,7 @@ dens[rg_ == FROST] = np.where(yy_[rg_ == FROST] > 150, 0.0, np.where(fo[rg_ == F
 dens[rg_ == SALT] = np.where(fo[rg_ == SALT] > 0.1, 0.18, 0.035)
 dens[rg_ == FEN] = np.where(fo[rg_ == FEN] > 0.0, 0.42, 0.16)
 dens[rg_ == EMBER] = 0.03
+dens *= plotfade[lx, lz]
 keep = (cr.random(tx.size) < dens) & open_[lx, lz] & ~keepclear[lx, lz]
 # mangroves want wet ground; elsewhere in the fen the drier kinds
 tx, tz, rg_, yy_ = tx[keep], tz[keep], rg_[keep], yy_[keep]
