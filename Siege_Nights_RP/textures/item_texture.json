@@ -436,6 +436,12 @@
   },
   "siege_guard_blackfen_netherite_boots": {
    "textures": "textures/items/siege_guard_blackfen_netherite_boots"
+  },
+  "siege_choirsteel_upgrade_template": {
+   "textures": "textures/items/siege_choirsteel_upgrade_template"
+  },
+  "siege_choirsteel_tempered": {
+   "textures": "textures/items/siege_choirsteel_tempered"
   }
  }
 }

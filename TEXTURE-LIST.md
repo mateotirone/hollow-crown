@@ -353,7 +353,7 @@ Add a row here with the file path, size, what it should look like, and whether i
 | Pretender, seer body (hooded robe, shards hanging round the head, staff) | `textures/entity/siege/bestiary/pretender_seer.png` | **Final style, awaiting your review** (`studio/art/build_pretenders.py`) |
 | Pretender, brute body (huge, horned, stone on the shoulders, axe) | `textures/entity/siege/bestiary/pretender_brute.png` | **Final style, awaiting your review** (`studio/art/build_pretenders.py`) |
 | Claimant's Seal (item: a wax seal pressed with a crooked crown, violet) | `textures/items/bestiary/pretender_seal.png` | **Final style, awaiting your review** (`studio/art/build_pretenders.py`) |
-| Choirsteel Helm (item icon: open-faced helm, pale violet metal, one blue gem on the brow) | `textures/items/siege_choirsteel_helmet.png` | **Final style, awaiting your review** (`studio/art/build_choirsteel.py`) |
+| Choirsteel Helm (item icon: open-faced helm, dark purple metal since 2026-11-11 via `studio/art/darken_choirsteel.py`, one blue gem on the brow) | `textures/items/siege_choirsteel_helmet.png` | **Final style, awaiting your review** (`studio/art/build_choirsteel.py`) |
 | Choirsteel Cuirass (item icon: breastplate with a blue gem at the heart) | `textures/items/siege_choirsteel_chestplate.png` | **Final style, awaiting your review** (`studio/art/build_choirsteel.py`) |
 | Choirsteel Greaves (item icon: leg plates) | `textures/items/siege_choirsteel_leggings.png` | **Final style, awaiting your review** (`studio/art/build_choirsteel.py`) |
 | Choirsteel Treads (item icon: boots with a quill-blue band) | `textures/items/siege_choirsteel_boots.png` | **Final style, awaiting your review** (`studio/art/build_choirsteel.py`) |
@@ -364,6 +364,9 @@ Add a row here with the file path, size, what it should look like, and whether i
 | Choirsteel Hoe (item icon: hoe) | `textures/items/siege_choirsteel_hoe.png` | **Final style, awaiting your review** (`studio/art/build_choirsteel.py`) |
 | Choirsteel armour, worn (helm, cuirass, treads; vanilla armour layout 64x32) | `textures/models/armor/choirsteel_layer_1.png` | **Final style, awaiting your review** (`studio/art/build_choirsteel.py`) |
 | Choirsteel armour, worn (greaves; vanilla armour layout 64x32) | `textures/models/armor/choirsteel_layer_2.png` | **Final style, awaiting your review** (`studio/art/build_choirsteel.py`) |
+| Choirsteel armour, 3D (two 64x32 sheets in the vanilla armour layout so trims line up; crystal crest, Gloamquill plume, pauldrons with shards and heel fins in the empty hat corner and beside the arms of sheet 1, knee cops in sheet 2's hat corner) | `textures/models/siege_armor/choirsteel_1.png`, `choirsteel_2.png`, geos `models/entity/armor/choirsteel_*.geo.json` | First pass, awaiting your review (`studio/art/build_choirsteel_3d.py`; re-run after repainting the layers) |
+| Choirsteel Upgrade (item icon: a smithing template like vanilla's, a dark slate tablet with a violet cuirass cut into it and one blue gem; 16x16, transparent background) | `textures/items/siege_choirsteel_upgrade_template.png` | Placeholder (`studio/bestiary/choirsteel.py`) |
+| Tempered Choirsteel (item icon: a folded violet plate, brighter than the ingot, a blue fleck of Gloamquill in it; 16x16, transparent background) | `textures/items/siege_choirsteel_tempered.png` | Placeholder (`studio/bestiary/choirsteel.py`) |
 | The Deep Bell (`siege:wardens_bell`, item, small dark violet hand bell) | `textures/items/siege_wardens_bell.png` | **Final style, awaiting your review** |
 
 ### Dragons (art by `studio/art/geoskin.py` and `build_dragon_art.py`; `studio/build_dragons.py` never overwrites a PNG or sound that exists)
@@ -475,3 +478,9 @@ Painted by `studio/art/build_regional_guard.py`. Same leather-dye trick as the C
 | Icons x20 | `textures/items/siege_guard_<region>_<helmet/chestplate/leggings/boots>.png` | Final style |
 | Diamond and netherite tiers (2026-11-11): worn sheets x20, icons x40 | `textures/models/armor/guard_<region>_<diamond/netherite>_layer_1/2.png`, `textures/items/siege_guard_<region>_<tier>_<piece>.png` | Re-toned from each region's iron look by the same script, **awaiting your review** |
 | Sheet | `art/regional-guard-armor.png` | |
+
+## Minimap (2026-11-11)
+Made by `tools/minimap_tiles.py` from the top-down render of the generated world (`map/genworld.py`'s preview) and `map/terrain.npz`. Run it again whenever the world map is regenerated; do not paint these by hand.
+- `textures/ui/hc/minimap/mXXZZ.png`: 1,600 map views, 72x72 (3 x 3 tiles of 64 blocks around tile XX,ZZ), slightly darkened, with plot and town markers: generated
+- `textures/ui/hc/minimap/mnone.png` (uncharted), `a0..a7.png` (player arrow, 12x12, eight directions), `frame.png` (80x80 border): first pass
+
