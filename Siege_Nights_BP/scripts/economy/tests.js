@@ -2,12 +2,21 @@ import { addTests, assert, assertEqual } from "../core/tests.js";
 import { ItemTypes } from "@minecraft/server";
 import { ECON, JOBS, JOB_IDS, LINES, REGIONS, COIN, GOLD, TOWNS, TOWN_RING } from "./config.js";
 import { WARDS } from "../plots/config.js";
-import { regional, appetite, payout, cost, asCoins, coins, worth, fromEmeralds, loopholes } from "./rules.js";
+import { regional, appetite, payout, cost, asCoins, coins, worth, fromEmeralds, loopholes, stopAt } from "./rules.js";
 
 const iron = JOBS.moneyer.buys.find((g) => g.id === "minecraft:iron_ingot");
 const wheat = JOBS.farmer.buys.find((g) => g.id === "minecraft:wheat");
 
 addTests("economy", {
+  "farms can't print coins: every trader stops buying a good for the day": () => {
+    assertEqual(stopAt(iron), 128); // 64 at 8, 64 at 4
+    assertEqual(payout(iron, stopAt(iron)), 64 * 8 + 64 * 4);
+    for (const job of Object.values(JOBS)) for (const good of job.buys) {
+      const stop = stopAt(good);
+      assert(stop > (good.want ?? good.lot * ECON.wantLots), `${good.id}: the stop comes after the full-price share`);
+      assertEqual(appetite(good, stop - 1), good.floor ?? ECON.floor);
+    }
+  },
   // the job's place in this list is its skin (siege:job on siege:job_npc, written by studio/build_economy.py): only add at the end
   "each region's Smith sells its own Castle Guard set, a little over the plain one": () => {
     for (const region of REGIONS) assertEqual(JOBS.smith.sells.filter((good) => good.region === region).length, 4);

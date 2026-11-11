@@ -13,7 +13,7 @@ import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
 import { isReady, isNight, countItem, takeItems, pick, emit } from "../siege/api.js";
 import { allPlots } from "../plots/claims.js"; // same function plots/api.js re-exports; claims.js exists in every snapshot of the repo
 import { ECON, JOBS, JOB_IDS, LINES, REGIONS } from "./config.js";
-import { regional, appetite, payout, cost, coins, niceName } from "./rules.js";
+import { regional, appetite, payout, cost, coins, niceName, stopAt } from "./rules.js";
 import { funds, charge, pay, carried } from "./coins.js";
 import { sfx } from "../core/sfx.js";
 
@@ -120,11 +120,11 @@ function hand(player, typeId, count) {
 // Sells `count` of a good. Returns the coins paid (0 if nothing was sold).
 export function sell(player, jobId, region, good, count) {
   const job = JOBS[jobId];
-  count = Math.min(count, countItem(player, good.id));
-  if (count <= 0) return 0;
   const rec = soldToday(player);
   const key = soldKey(region, good.id);
   const before = rec.n[key] ?? 0;
+  count = Math.min(count, countItem(player, good.id), Math.max(0, stopAt(good) - before)); // the daily stop
+  if (count <= 0) return 0;
   const earned = payout(good, count, before, regional(job, region).pays);
   if (earned < 1) return 0;
   if (player.getGameMode() === GameMode.Creative) {
@@ -143,14 +143,17 @@ async function sellMenu(player, npc, jobId, region) {
   const rec = soldToday(player);
   const { pays } = regional(job, region);
   const offers = job.buys.filter((good) => known(good.id)).map((good) => {
-    const have = countItem(player, good.id), before = rec.n[soldKey(region, good.id)] ?? 0;
-    return { good, have, before, worth: payout(good, have, before, pays), share: appetite(good, before) };
+    const before = rec.n[soldKey(region, good.id)] ?? 0, room = Math.max(0, stopAt(good) - before);
+    const have = Math.min(countItem(player, good.id), room);
+    return { good, have, before, full: room === 0, worth: payout(good, have, before, pays), share: appetite(good, before) };
   });
   const mine = offers.filter((o) => o.have > 0);
   const form = new ActionFormData().title(`${job.name}: selling`);
-  const wants = offers.map(({ good, share }) => `${niceName(good.id)}: ${coins(Math.max(1, Math.round(good.price * pays * share)))} for ${good.lot}${share < 1 ? " §8(they have plenty today)§r" : ""}`).join("\n");
+  const wants = offers.map(({ good, share, full }) => full
+    ? `${niceName(good.id)}: §8no more today, come back tomorrow§r`
+    : `${niceName(good.id)}: ${coins(Math.max(1, Math.round(good.price * pays * share)))} for ${good.lot}${share < 1 ? " §8(they have plenty today)§r" : ""}`).join("\n");
   form.body(`${job.name} buys:\n${wants}\n\n${mine.length ? "Choose what to sell." : "§7You carry none of these."}`);
-  for (const o of mine) form.button(`${niceName(o.good.id)} x${o.have}\n§8${coins(o.worth)} for the lot`);
+  for (const o of mine) form.button(`${niceName(o.good.id)} x${o.have}\n§8${coins(o.worth)}${o.have < countItem(player, o.good.id) ? " (all they'll take today)" : " for the lot"}`);
   if (mine.length > 1) form.button(`Sell all of it\n§8${coins(mine.reduce((sum, o) => sum + o.worth, 0))}`);
   form.button("Back");
   const res = await form.show(player);

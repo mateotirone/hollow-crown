@@ -25,6 +25,10 @@ export const ECON = {
   // Regional prices: in a region that makes a good, NPCs pay and charge less; where it is scarce, more.
   homePays: 0.75, homeCharges: 0.85, scarcePays: 1.5, scarceCharges: 1.5,
   maxLots: 32, // most lots one purchase can buy
+  // Hard daily stop (anti-farm): once a trader's price has hit its floor, it buys this many more lots from you that
+  // day and then no more. Counted per player, per region, per good, reset each dawn. A good's own `stop` (units) wins.
+  stopLots: 4,
+  mintStop: 128, // iron ingots per player per day the Moneyer takes at all (64 full price, then 64 at half)
 };
 
 export const REGIONS = ["Aldmere Vale", "Frostmarch", "Saltreach", "Emberwaste", "Blackfen"];
@@ -93,7 +97,7 @@ export const JOBS = {
   // The Mint. Iron both ways at the fixed rate, with a daily limit; gems at a low fixed price. No regional prices.
   moneyer: {
     name: "Moneyer", home: [], scarce: [], mint: true,
-    buys: [g("iron_ingot", 1, ECON.ironBuys, { want: ECON.mintDaily, step: 1, drop: 0.5, floor: 0.5 }),
+    buys: [g("iron_ingot", 1, ECON.ironBuys, { want: ECON.mintDaily, step: 1, drop: 0.5, floor: 0.5, stop: ECON.mintStop }),
       g("emerald", 1, 4, { want: 32, step: 8 }), g("diamond", 1, 64, { want: 8, step: 4 })],
     sells: [g("iron_ingot", 1, ECON.ironSells)],
   },
