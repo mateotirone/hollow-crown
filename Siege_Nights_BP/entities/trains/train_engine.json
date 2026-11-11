@@ -1,0 +1,95 @@
+{
+  "format_version": "1.21.60",
+  "minecraft:entity": {
+    "description": {
+      "identifier": "siege:train_engine",
+      "is_spawnable": false,
+      "is_summonable": true,
+      "properties": {
+        "siege:style": {
+          "type": "int",
+          "range": [
+            0,
+            4
+          ],
+          "default": 0,
+          "client_sync": true
+        }
+      }
+    },
+    "components": {
+      "minecraft:type_family": {
+        "family": [
+          "siege_train",
+          "siege_train_engine",
+          "inanimate"
+        ]
+      },
+      "minecraft:collision_box": {
+        "width": 2.6,
+        "height": 2.4
+      },
+      "minecraft:health": {
+        "value": 100,
+        "max": 100
+      },
+      "minecraft:physics": {
+        "has_gravity": false,
+        "has_collision": false
+      },
+      "minecraft:pushable": {
+        "is_pushable": false,
+        "is_pushable_by_piston": false
+      },
+      "minecraft:knockback_resistance": {
+        "value": 1
+      },
+      "minecraft:fire_immune": true,
+      "minecraft:damage_sensor": {
+        "triggers": [
+          {
+            "cause": "all",
+            "deals_damage": "no"
+          }
+        ]
+      },
+      "minecraft:persistent": {},
+      "minecraft:conditional_bandwidth_optimization": {
+        "default_values": {
+          "max_optimized_distance": 0,
+          "max_dropped_ticks": 0,
+          "use_motion_prediction_hints": true
+        }
+      },
+      "minecraft:rideable": {
+        "seat_count": 2,
+        "crouching_skip_interact": true,
+        "pull_in_entities": false,
+        "family_types": [
+          "player"
+        ],
+        "interact_text": "action.interact.ride.minecart",
+        "seats": [
+          {
+            "position": [
+              0.6,
+              0.9,
+              -1.8
+            ],
+            "min_rider_count": 0,
+            "max_rider_count": 2
+          },
+          {
+            "position": [
+              -0.6,
+              0.9,
+              -1.8
+            ],
+            "min_rider_count": 0,
+            "max_rider_count": 2
+          }
+        ]
+      }
+    }
+  }
+}

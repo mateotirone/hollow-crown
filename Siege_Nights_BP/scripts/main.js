@@ -20,6 +20,7 @@ import "./plots/index.js";
 import "./townhall/index.js";
 import "./horses/index.js";
 import "./rails/index.js";
+import "./trains/index.js";
 import "./bestiary/index.js";
 import "./lore/index.js";
 import "./crown/index.js";

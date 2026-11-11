@@ -1,0 +1,27 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "siege:train_coach",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "vale": "textures/entity/siege/trains/coach_vale",
+        "frostmarch": "textures/entity/siege/trains/coach_frostmarch",
+        "saltreach": "textures/entity/siege/trains/coach_saltreach",
+        "emberwaste": "textures/entity/siege/trains/coach_emberwaste",
+        "blackfen": "textures/entity/siege/trains/coach_blackfen"
+      },
+      "geometry": {
+        "default": "geometry.siege_train_coach"
+      },
+      "scripts": {
+        "should_update_bones_and_effects_offscreen": "1.0"
+      },
+      "render_controllers": [
+        "controller.render.siege_train"
+      ]
+    }
+  }
+}

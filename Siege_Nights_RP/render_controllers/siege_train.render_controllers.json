@@ -1,0 +1,27 @@
+{
+  "format_version": "1.8.0",
+  "render_controllers": {
+    "controller.render.siege_train": {
+      "arrays": {
+        "textures": {
+          "Array.styles": [
+            "Texture.vale",
+            "Texture.frostmarch",
+            "Texture.saltreach",
+            "Texture.emberwaste",
+            "Texture.blackfen"
+          ]
+        }
+      },
+      "geometry": "Geometry.default",
+      "materials": [
+        {
+          "*": "Material.default"
+        }
+      ],
+      "textures": [
+        "Array.styles[query.has_property('siege:style') ? query.property('siege:style') : 0]"
+      ]
+    }
+  }
+}

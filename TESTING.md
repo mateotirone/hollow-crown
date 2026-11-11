@@ -491,6 +491,19 @@ In game: Creative, cheats on. `/scriptevent siege:showcase` puts eight steeds in
 
 Things I could not check without the game, so please look closely: that the steeds look and ride like real horses (saddle, armor and jump bar all there), that the painted coats line up on the horse with no patches of a different color showing through, that the caparison color only tints the cloth, that the Glimstrider really is see-through, that four people really fit in the carriage and it faces the right way on the rail, and whether the carriage speed feels right.
 Things I could not check without the game, so please look closely: that the steeds look and ride like real horses (saddle, armor and jump bar all there), that the caparison color only tints the cloth, how the Glimstrider's glow looks, that four people really fit in the carriage and it faces the right way on the rail, and whether the carriage speed feels right.
+## Trains and Track (scripts/trains/), first test
+
+`/scriptevent siege:showcase`, then walk about 70 blocks west: a loop of Track with an Engine and a Coach on it.
+
+1. **Riding (the big question).** Climb into the engine (click it). Hold forward: does it pull away and speed up? Hold back: does it brake, stop and then reverse slowly? Is the ride smooth, or do you see the train or yourself jitter? Try it on the Realm too, with a friend in the coach.
+2. If it jitters, type `/scriptevent siege:trains mode teleport` and try again, then tell me which felt better. (`mode velocity` switches back.)
+3. If holding forward does nothing at all, tell me: the train then only drives itself at half speed.
+4. **Corners.** The loop has gentle bends. Does the train look right going round them, and do both cars stay on the track?
+5. **Laying track.** Take Track from the Every item chest. Lay a line, then turn it diagonally and back, make a sharp corner, and climb a slope one block up. Do the pieces join up the way you expect? **If diagonal pieces look mirrored (rails pointing the wrong way), tell me**, it's a one-line fix.
+6. Place an Engine on your own track (at least 8 blocks), then a Coach right behind it. Sneak and click a car with an empty hand to put the whole train away.
+7. Region looks: an engine put on track inside a Frostmarch (or other region) settlement should come out in that region's colours. The colours are placeholders.
+8. `/scriptevent siege:trains` lists every train.
+
 ## Sounds (scripts/sound/, SOUND-LIST.md)
 
 Nothing here has been heard in the game yet, so your ears are the test.

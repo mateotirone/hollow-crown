@@ -1,0 +1,27 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "siege:train_engine",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "vale": "textures/entity/siege/trains/engine_vale",
+        "frostmarch": "textures/entity/siege/trains/engine_frostmarch",
+        "saltreach": "textures/entity/siege/trains/engine_saltreach",
+        "emberwaste": "textures/entity/siege/trains/engine_emberwaste",
+        "blackfen": "textures/entity/siege/trains/engine_blackfen"
+      },
+      "geometry": {
+        "default": "geometry.siege_train_engine"
+      },
+      "scripts": {
+        "should_update_bones_and_effects_offscreen": "1.0"
+      },
+      "render_controllers": [
+        "controller.render.siege_train"
+      ]
+    }
+  }
+}
