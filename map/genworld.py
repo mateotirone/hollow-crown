@@ -138,9 +138,11 @@ Ys = box(Yf, 6); near = box((isroad | istrail).astype(np.float32), 3)
 Yf = np.where(near > 0.02, Yf * (1 - np.clip(near * 6, 0, 1)) + Ys * np.clip(near * 6, 0, 1), Yf)
 Yr = box(Yf, 16); rw = np.clip(box(valley, 6), 0, 1); Yf = Yf * (1 - rw) + (Yr - 1.5) * rw
 
-# white chalk cliffs on the Saltreach's northern coast (Mateo 2026-11-11: "Cliffs of Dover"): a narrow shingle
-# strip at the waterline, then a near-vertical white face 20-45 blocks high with grass running to the very edge.
-# The face wanders in and out (small bays), and breaks where a river valley reaches the sea.
+# white chalk cliffs on the Saltreach's northern coast (Mateo 2026-11-11: "Cliffs of Dover"; first try looked like a flat
+# white wall). Modelled on the Seven Sisters / Dover: rolling chalk downs cut off by the sea, so the cliff top rises and
+# dips with the hills (dry valleys bring it down to ~12 blocks, crests reach ~55); a rounded grassy shoulder at the edge;
+# a sheer face with buttresses, flutes and the odd ledge; fallen chalk blocks and flint shingle at the foot; a pale
+# wave-cut platform just under the water. Breaks where a river valley reaches the sea; never near plots, towns or roads.
 def chamfer_b(src, cap):
     """Blocks to the nearest True cell of src (8-neighbour chamfer), capped."""
     d = np.where(src, 0.0, cap).astype(np.float32)
@@ -155,22 +157,41 @@ cz *= np.clip((-GZ - 150) / 250, 0, 1)                                          
 cz *= 1 - np.clip(box(valley, 24) * 4, 0, 1)                                            # gaps at river mouths
 cz *= box((keepclear | isroad | istrail).astype(np.float32), 24) < 0.01
 cz = box(cz, 8); cz = cz * cz * (3 - 2 * cz)
-chalk = np.zeros((SIZE, SIZE), bool); chalkfoot = np.zeros((SIZE, SIZE), bool)
+chalk = np.zeros((SIZE, SIZE), bool); chalkfoot = np.zeros((SIZE, SIZE), bool); chalkface = np.zeros((SIZE, SIZE), bool)
+chalkdown = np.zeros((SIZE, SIZE), np.float32); chalktop = np.zeros((SIZE, SIZE), np.float32); chalkshelf = np.zeros((SIZE, SIZE), bool); boulder = np.zeros((SIZE, SIZE), bool)
 if (cz > 0.01).any():
-    xi, zi = np.nonzero(cz > 0.01); a0_, a1_ = max(0, xi.min() - 170), min(SIZE, xi.max() + 170); b0_, b1_ = max(0, zi.min() - 170), min(SIZE, zi.max() + 170)
-    dsb = np.full((SIZE, SIZE), 160.0, np.float32); dsb[a0_:a1_, b0_:b1_] = chamfer_b(~land[a0_:a1_, b0_:b1_], 160)
-    bite = np.clip((noise(70, 61) + noise(23, 62) * 0.6) * 30 + 4, 0, 18)                 # bays where the face is cut back
+    xi, zi = np.nonzero(cz > 0.01); a0_, a1_ = max(0, xi.min() - 230), min(SIZE, xi.max() + 230); b0_, b1_ = max(0, zi.min() - 230), min(SIZE, zi.max() + 230)
+    dsb = np.full((SIZE, SIZE), 220.0, np.float32); dsb[a0_:a1_, b0_:b1_] = chamfer_b(~land[a0_:a1_, b0_:b1_], 220)
+    dlb = np.full((SIZE, SIZE), 40.0, np.float32); dlb[a0_:a1_, b0_:b1_] = chamfer_b(land[a0_:a1_, b0_:b1_], 40)
+    # the face line: broad bays and headlands, then buttresses and flutes a few blocks deep
+    bite = np.clip((noise(70, 61) + noise(23, 62) * 0.6) * 26 + 6, 0, 16) + (noise(7, 66) + 0.5) * 4 + (noise(3, 67) + 0.5) * 1.6
     dse = dsb - bite
-    w0 = 3 + (noise(11, 63) + 0.5) * 3                                                  # shingle strip width
-    top = SEA + 30 + noise(90, 64) * 22 + noise(31, 65) * 8 + np.clip(dse - w0, 0, 90) * 0.06
-    face = np.clip((dse - w0) / 2.0, 0, 1)
-    Ycl = SEA + 1 + face * (top - SEA - 1)
-    k_ = np.clip((dsb - 90) / 110, 0, 1); k_ = k_ * k_ * (3 - 2 * k_)                       # back into the downs inland
+    w0 = 2 + (noise(11, 63) + 0.5) * 4                                                  # shingle strip width
+    # the downs: rounded hills and dry valleys running inland
+    roll = noise(95, 64) + noise(41, 65) * 0.45
+    top = np.maximum(SEA + 32 + roll * 38, SEA + 12) + np.clip(dse - w0, 0, 140) * 0.07
+    p_ = dse - w0
+    apr = (noise(13, 68) + 0.5) * 3                                                     # small rubble apron at the foot
+    shoulder = (2 + (noise(19, 70) + 0.5) * 3) * (1 - np.clip((p_ - apr) / 7, 0, 1)) ** 2   # rounded grass edge
+    Ycl = np.where(p_ < apr, SEA + 1 + np.clip(p_, 0, None) * 1.3, top - shoulder)
+    batter = (p_ >= apr) & (p_ < apr + 3) & (noise(21, 76) > -0.15)                      # face steps back a little as it rises
+    Ycl = np.where(batter, np.minimum(Ycl, SEA + 1 + (top - SEA - 1) * (0.5 + 0.5 * (p_ - apr) / 3) + (noise(4, 77) * 6)), Ycl)
+    ledge = (noise(17, 69) > 0.28) & (p_ >= apr) & (p_ < apr + 1 + (noise(5, 71) + 0.5) * 2.5)
+    Ycl = np.where(ledge, SEA + 1 + (top - SEA - 1) * (0.38 + (noise(29, 72) + 0.5) * 0.25), Ycl)   # a fallen step part-way down
+    k_ = np.clip((dsb - 120) / 100, 0, 1); k_ = k_ * k_ * (3 - 2 * k_)                      # back into the land inland
     Ycl = Ycl * (1 - k_) + Yf * k_
-    Ynew = np.where(dse < w0, np.minimum(Yf, SEA + 1), np.maximum(Yf, Ycl))
+    rb = rng.random((SIZE, SIZE))
+    boulder = land & (cz > 0.35) & (p_ < 0) & (p_ > -4) & (box((rb < 0.05).astype(np.float32), 1) > 0.15)
+    Ynew = np.where(p_ < 0, SEA + 1 + boulder * (1 + (rb > 0.5)), np.maximum(Ycl, Yf))
     Yf = np.where(land, Yf * (1 - cz) + Ynew * cz, Yf)
-    chalk = land & (cz > 0.35) & (dse >= w0) & (dsb < 150)
-    chalkfoot = land & (cz > 0.35) & (dse < w0)
+    # wave-cut platform: a pale shelf just under the surface reaching ~20 blocks out from the foot
+    shelfw = 14 + (noise(31, 73) + 0.5) * 14
+    chalkshelf = ~land & (cz > 0.35) & (dlb < shelfw)
+    Yf = np.where(chalkshelf, np.maximum(Yf, SEA - 2 - (dlb > shelfw * 0.7) - (noise(6, 74) > 0.2)), Yf)
+    chalk = land & (cz > 0.35) & (p_ >= 0) & (dsb < 200)
+    chalkfoot = land & (cz > 0.35) & (p_ < 0)
+    chalktop = top - shoulder
+    chalkdown = cz * (1 - np.clip((dsb - 60) / 150, 0, 1))
     log("chalk cliffs", int(chalk.sum()), "columns")
 
 # lakes (drawn on the plan as shapes, carved here): water a block under the lowest rim
@@ -198,6 +219,7 @@ Yf = np.where(fenpool, np.minimum(Yf, SEA - 1 - (pn - 0.16) * 8), Yf)
 
 Y = np.round(Yf).astype(np.int32)
 Y[land & ~fenpool & ~islake] = np.maximum(Y[land & ~fenpool & ~islake], SEA + 1)
+Y[~land] = np.minimum(Y[~land], SEA - 1)            # the sea bed stays under water (no grass specks at sea level)
 Y[isriver] -= 3; Y[bank] -= 1
 water_level = np.full((SIZE, SIZE), -999, np.int32)
 water_level[~land] = SEA
@@ -238,7 +260,7 @@ NAMES = ["stone", "grass_block", "dirt", "water", "sand", "gravel", "bedrock", "
          "coal_ore", "iron_ore", "copper_ore", "gold_ore", "redstone_ore", "lapis_ore", "diamond_ore", "emerald_ore",
          "deepslate_coal_ore", "deepslate_iron_ore", "deepslate_copper_ore", "deepslate_gold_ore", "deepslate_redstone_ore",
          "deepslate_lapis_ore", "deepslate_diamond_ore", "deepslate_emerald_ore", "sweet_berry_bush", "seagrass",
-         "orange_terracotta", "red_terracotta", "yellow_terracotta", "white_terracotta", "brown_terracotta", "light_gray_terracotta"]
+         "orange_terracotta", "red_terracotta", "yellow_terracotta", "white_terracotta", "brown_terracotta", "light_gray_terracotta", "bone_block"]
 ID = {n: B(n) for n in NAMES}
 for lf in ["oak", "birch", "spruce", "mangrove", "dark_oak", "acacia"]: ID[lf + "_leaves"] = B(lf + "_leaves", LEAF)
 ID["snow_layer"] = B("snow_layer", {"height": IntTag(0), "covered_bit": ByteTag(0)})
@@ -262,7 +284,7 @@ m = R[FROST] & (forest > 0.05) & (n_patch2 > 0.1); surf[m] = ID["podzol"]
 # mountains (Mateo 2026-11-11: they need texture): rock and scree on the slopes, snow only near the tops
 slope = np.maximum(np.abs(np.gradient(Yf, axis=0)), np.abs(np.gradient(Yf, axis=1)))
 snowline = 168 + noise(40, 41) * 30
-rocky = (Y > 100) & (slope > 0.6) & ~R[EMBER]
+rocky = (Y > 100) & (slope > 0.6) & ~R[EMBER] & ~chalk
 m = rocky; pick_ = r1 + n_patch2 * 0.8
 surf[m] = np.select([pick_[m] < 0.45, pick_[m] < 0.65, pick_[m] < 0.8, pick_[m] < 0.9], [ID["stone"], ID["andesite"], ID["gravel"], ID["cobblestone"]], ID["tuff"]); sub[m] = ID["stone"]
 m = rocky & (Y > 130) & (r2 < 0.12) & R[FROST]; surf[m] = ID["calcite"]
@@ -285,17 +307,19 @@ surf[m] = np.where(red[m], ID["red_sand"], ID["sand"]); sub[m] = np.where(red[m]
 # steep ground shows rock (banded terracotta in the Emberwaste, calcite streaks in the north)
 m = steep & ~R[EMBER]; surf[m] = np.where(r1[m] < 0.5, ID["stone"], np.where(R[FROST][m] & (r2[m] < 0.15), ID["calcite"], ID["andesite"]))
 mesa = R[EMBER] & (steep | (Y > 112))
-# chalk cliffs: grass to the edge over a thin soil, white faces, shingle at the foot, chalk and flint on the sea bed
-m = chalk & ~steep & ~wet; surf[m] = ID["grass_block"]; subd[m] = 1
-m = chalk & steep; surf[m] = np.where(r1[m] < 0.9, ID["calcite"], ID["diorite"]); subd[m] = 0
-m = chalkfoot & ~wet; surf[m] = np.select([r1[m] < 0.7, r1[m] < 0.85], [ID["gravel"], ID["calcite"]], ID["diorite"])
-chalkbed = ~land & (box(chalk.astype(np.float32), 6) > 0.05)
+# chalk cliffs: grass right to the edge over a thin soil, white where a column stands below its neighbours (faces,
+# ledges), flint shingle with fallen chalk blocks at the foot, and a pale platform of chalk, weed and gravel under the water
+pY = np.pad(Y, 1, mode='edge'); nbmax = np.maximum.reduce([pY[:-2, 1:-1], pY[2:, 1:-1], pY[1:-1, :-2], pY[1:-1, 2:]])
+m = chalk & ~wet; surf[m] = np.where((Y[m] >= nbmax[m] - 1) & (Y[m] >= chalktop[m] - 3), ID["grass_block"], np.where(r1[m] < 0.8, ID["calcite"], ID["gravel"])); subd[m] = 1
+m = chalkfoot & ~wet; surf[m] = np.select([r1[m] < 0.65, r1[m] < 0.75, r1[m] < 0.85, r1[m] < 0.95], [ID["gravel"], ID["cobblestone"], ID["andesite"], ID["calcite"]], ID["diorite"])
+m = boulder & ~wet; surf[m] = np.where(r2[m] < 0.75, ID["calcite"], ID["diorite"]); sub[m] = ID["calcite"]
+chalkbed = chalkshelf | (~land & (box(chalk.astype(np.float32), 6) > 0.05))
 # shores and water beds
 beach = land & ~wet & coast & (Y <= SEA + 2) & ~R[SALT]
 surf[beach & ~R[FEN]] = ID["sand"]
 under = wet
 surf[under] = np.where(r1[under] < 0.6, ID["sand"], np.where(r1[under] < 0.85, ID["gravel"], ID["clay"]))
-m = under & chalkbed; surf[m] = np.where(r1[m] < 0.55, ID["gravel"], ID["calcite"])
+m = under & chalkbed; cb_ = r1[m] + n_patch2[m] * 0.6; surf[m] = np.select([cb_ < 0.35, cb_ < 0.5, cb_ < 0.62, cb_ < 0.8], [ID["calcite"], ID["diorite"], ID["gravel"], ID["moss_block"]], ID["calcite"])
 m = under & R[FEN]; surf[m] = np.where(r1[m] < 0.7, ID["mud"], ID["clay"])
 surf[bank] = np.where(r1[bank] < 0.5, ID["sand"], np.where(r1[bank] < 0.8, ID["coarse_dirt"], ID["grass_block"]))
 m = bank & R[FEN]; surf[m] = np.where(r1[m] < 0.6, ID["mud"], ID["muddy_mangrove_roots"])
@@ -457,6 +481,7 @@ dens[rg_ == SALT] = np.where(fo[rg_ == SALT] > 0.1, 0.18, 0.035)
 dens[rg_ == FEN] = np.where(fo[rg_ == FEN] > 0.0, 0.42, 0.16)
 dens[rg_ == EMBER] = 0.03
 dens *= plotfade[lx, lz]
+dens *= 1 - chalkdown[lx, lz]                     # open grass on the chalk downs near the cliff edge
 keep = (cr.random(tx.size) < dens) & open_[lx, lz] & ~keepclear[lx, lz]
 # mangroves want wet ground; elsewhere in the fen the drier kinds
 tx, tz, rg_, yy_ = tx[keep], tz[keep], rg_[keep], yy_[keep]
@@ -547,13 +572,24 @@ for tx0 in range(0, SIZE, TILE):
         st = sub[a0:a1, b0:b1]; sd = subd[a0:a1, b0:b1]
         subm = solid & (yy > Ye - sd[:, None, :]) & ~(mz[:, None, :])
         vol[subm] = np.broadcast_to(st[:, None, :], vol.shape)[subm]
-        # chalk: the cliff body is calcite down to below the sea, with thin dark flint bands and diorite specks
+        # chalk: the cliff body is calcite down to below the sea. Streaks run down the face (bone block and diorite chosen
+        # per column, broken now and then), flint lies in thin level bands, the top rows are soil-stained and the bottom
+        # rows, in the splash zone, are grey and weedy
         ck = chalk[a0:a1, b0:b1]
         if ck.any():
             cm_ = ck[:, None, :] & solid & ~subm & (yy > SEA - 14) & (vol == ID["stone"])
-            rr_ = np.random.default_rng(7000 + tx0 * 17 + tz0).random(vol.shape, dtype=np.float32)
-            flint = ((yy + 400) % 7 == 0) & (rr_ < 0.45)
-            vol[cm_] = ID["calcite"]; vol[cm_ & flint] = ID["andesite"]; vol[cm_ & ~flint & (rr_ > 0.94)] = ID["diorite"]
+            crg = np.random.default_rng(7000 + tx0 * 17 + tz0)
+            rr_ = crg.random(vol.shape, dtype=np.float32); rc_ = crg.random((W, 1, D), dtype=np.float32)
+            run_ = ((yy + rc_ * 400).astype(np.int32) % 19) < 12
+            streak_b = (rc_ < 0.16) & run_; streak_d = (rc_ >= 0.16) & (rc_ < 0.22) & run_
+            flint = ((yy + 400) % 8 == 0) & (rr_ < 0.25)
+            splash = yy <= SEA + 3
+            vol[cm_] = ID["calcite"]
+            vol[cm_ & streak_b] = ID["bone_block"]; vol[cm_ & streak_d] = ID["diorite"]
+            vol[cm_ & ~streak_b & ~streak_d & (rr_ > 0.985)] = ID["diorite"]
+            vol[cm_ & flint] = ID["andesite"]
+            sp_ = cm_ & splash; pick_s = crg.random(vol.shape, dtype=np.float32)
+            vol[sp_ & (pick_s < 0.25)] = ID["mossy_cobblestone"]; vol[sp_ & (pick_s >= 0.25) & (pick_s < 0.4)] = ID["andesite"]; vol[sp_ & (pick_s >= 0.4) & (pick_s < 0.5)] = ID["stone"]
         # caves
         cm = (caves[:, 0] >= X0 + a0 - 6) & (caves[:, 0] < X0 + a1 + 6) & (caves[:, 2] >= Z0 + b0 - 6) & (caves[:, 2] < Z0 + b1 + 6)
         for cx_, cy_, cz_, cr_ in caves[cm]:
@@ -622,6 +658,10 @@ for tx0 in range(0, SIZE, TILE):
             topb = vol[ix, topi, iz]
             okb = ft & ~np.isin(topb, [ID["water"], ID["ice"], ID["fern"], ID["short_grass"], ID["sweet_berry_bush"], ID["cactus"], ID["lava"], ID["snow"]]) & (topi + 1 < YR)
             vol[ix[okb], topi[okb] + 1, iz[okb]] = ID["snow_layer"]
+        if os.environ.get("GW_DUMP"):                                   # debugging: save this tile's blocks for the voxel viewer
+            names_ = {int(v): k for k, v in ID.items()}; names_[int(AIR)] = "air"
+            np.savez_compressed(f"{os.environ['GW_DUMP']}-{tx0}-{tz0}.npz", vol=vol[tx0 - a0:tx0 - a0 + min(TILE, SIZE - tx0), :, tz0 - b0:tz0 - b0 + min(TILE, SIZE - tz0)],
+                                ymin=YMIN, x0=X0 + tx0, z0=Z0 + tz0, names=json.dumps(names_))
         # preview: top block of the inner tile
         ia0, ia1 = tx0 - a0, tx0 - a0 + min(TILE, SIZE - tx0); ib0, ib1 = tz0 - b0, tz0 - b0 + min(TILE, SIZE - tz0)
         inner = vol[ia0:ia1, :, ib0:ib1]
