@@ -25,9 +25,11 @@ main, then every unmerged branch from the last 30 days on top, newest change win
 thread pushes, the Models tabs reload within a minute, and the Builds tab rebuilds that branch (about
 20 s) and reloads. "Check now" fetches straight away.
 
-New asset kinds show up by themselves as long as they live in the packs. A new 3D builder (trees, for
-example) shows in Builds once it is part of the catalogue; to give it a tab of its own, add it in
-`serve.mjs` next to `CATALOGUE`.
+New asset kinds show up by themselves as long as they live in the packs. Builds also takes in other 3D
+builders: `EXTRAS` in `serve.mjs` runs a script on a catalogue branch (the trees, `map/trees/build_trees.py`),
+and `IMPORTS` copies scripts from a branch without the kit into the newest catalogue branch and runs them
+there (the build-instruction test houses). Every `scene.json` a builder leaves becomes a build; their
+render and screenshot calls are skipped (`run_scenes.py`), and `mesh_scenes.py` meshes the scenes.
 
 ## What it needs
 

@@ -256,12 +256,14 @@ async function runBuilds() {
     state.builds.sources = sources.map((b) => b.ref);
     if (!sources.length) { setBuilds("none", "No branch has the building catalogue yet."); return; }
     if (!py || !state.deps.textures) { setBuilds("blocked", state.deps.message || "Waiting for downloads"); return; }
+    const newest = sources[sources.length - 1], imp = importsFingerprint();
     for (const b of [...sources].reverse()) {          // newest first, so the freshest builds show soonest
       const s = slug(b.ref), prev = built.get(s);
-      if (prev && prev.sha === b.sha) continue;
+      const fp = b === newest ? "imports:" + imp : "";   // the newest catalogue branch also runs the imported builders
+      if (prev && prev.sha === b.sha && (prev.fp || "") === fp) continue;
       setBuilds("building", `Building ${b.ref.replace("origin/", "")} (${b.subject.slice(0, 70)})`);
-      const res = await buildBranch(b, py);
-      built.set(s, { ...b, ...res });
+      const res = await buildBranch(b, py, b === newest);
+      built.set(s, { ...b, ...res, fp });
       if (!res.ok) log("build failed on", b.ref, res.error);
       publishBuilds(sources);
     }
@@ -275,7 +277,7 @@ async function runBuilds() {
 }
 function setBuilds(status, message) { state.builds.status = status; state.builds.message = message; broadcast("state", publicState()); }
 
-async function buildBranch(b, py) {
+async function buildBranch(b, py, withImports) {
   const s = slug(b.ref), wt = path.join(WT, s), out = path.join(BOUT, s);
   fs.mkdirSync(WT, { recursive: true });
   if (!fs.existsSync(path.join(wt, ".git"))) {
@@ -299,9 +301,9 @@ async function buildBranch(b, py) {
   const html = fs.readFileSync(path.join(out, "v3d", "index.html"), "utf8");
   const [a, z] = tpl.split("__INDEX__");
   const index = JSON.parse(html.slice(a.length, html.length - z.length));
-  await buildExtras(wt, out, py, pyArgs, index);
+  await buildExtras(wt, out, py, pyArgs, index, withImports);
   log(`built ${index.length} builds from ${b.ref} in ${Math.round((Date.now() - t0) / 1000)} s`);
-  fs.writeFileSync(path.join(out, "meta.json"), JSON.stringify({ sha: b.sha, ref: b.ref, index, tpl }));
+  fs.writeFileSync(path.join(out, "meta.json"), JSON.stringify({ sha: b.sha, ref: b.ref, index, tpl, fp: withImports ? "imports:" + importsFingerprint() : "" }));
   return { ok: true, index, tpl };
 }
 
@@ -313,36 +315,77 @@ for (const s of fs.existsSync(BOUT) ? fs.readdirSync(BOUT) : []) {
 // Other 3D builders whose preview scenes join the catalogue as their own section. Each runs in the branch's
 // worktree; every OUT/**/scene.json it leaves (Blueprint.save_logical) becomes a build in the viewer.
 const EXTRAS = [
-  { id: "trees", title: "Trees", marker: "map/trees/build_trees.py", cwd: "map/trees",
-    args: (out) => ["build_trees.py", out, "--variants", "1", "--render", "--shots", "", "--textures", TEXTURES, "--three", THREE],
+  { id: "trees", title: "Trees", marker: "map/trees/build_trees.py",
+    args: (out) => [out, "--variants", "1", "--render", "--shots", "", "--textures", TEXTURES, "--three", THREE],
     names: (out) => { try { const t = JSON.parse(fs.readFileSync(path.join(out, "trees.json"), "utf8")).species; return Object.fromEntries(Object.entries(t).map(([k, v]) => [k, v.name])); } catch { return {}; } },
     label: { all: "Every tree, side by side" } },
 ];
+// Builder scripts that live on a branch without the kit: copied from the newest branch that has them into
+// the newest catalogue branch's map/structures and run there.
+const IMPORTS = [
+  { id: "houses", title: "Build-instruction test houses", dir: "build-instructions/examples", match: /^test_house.*\.py$/,
+    support: ["build-instructions/texturing/doctrine.py", "build-instructions/texturing/doctrine.json"],
+    args: (out) => [out, "--textures", TEXTURES, "--three", THREE],
+    title1: (script, stage) => `Test house ${script === "test_house" ? "v1" : script.replace("test_house_", "")} · stage ${stage.replace(/-/g, " ")}` },
+];
+function importSource(x) {
+  const bs = state.mode === "main" ? state.branches.slice(0, 1) : state.branches;
+  for (const b of [...bs].reverse()) {
+    let names = [];
+    try { names = git("ls-tree", "--name-only", b.sha, x.dir + "/").split("\n").map((f) => f.split("/").pop()).filter((f) => x.match.test(f)); } catch { /* not there */ }
+    if (names.length) return { ref: b.ref, sha: b.sha, files: names };
+  }
+  return null;
+}
+const importsFingerprint = () => IMPORTS.map((x) => importSource(x)?.sha || "-").join(",");
+
 const sceneFiles = (dir) => !fs.existsSync(dir) ? [] : fs.readdirSync(dir, { withFileTypes: true })
-  .flatMap((e) => e.isDirectory() ? sceneFiles(path.join(dir, e.name)) : e.name === "scene.json" ? [path.join(dir, e.name)] : []);
+  .flatMap((e) => e.isDirectory() ? sceneFiles(path.join(dir, e.name)) : e.name === "scene.json" ? [path.join(dir, e.name)] : []).sort();
 const nice = (s) => s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
-async function buildExtras(wt, out, py, pyArgs, index) {
-  const v3d = path.join(out, "v3d");
+// one section: run the scripts (render and screenshot calls skipped), mesh every scene they leave, add it
+async function addSection(wt, out, py, pyArgs, index, id, title, jobs, titleOf) {
+  const v3d = path.join(out, "v3d"), xo = path.join(out, "extra-" + id);
+  fs.rmSync(xo, { recursive: true, force: true });
+  const list = [];
+  for (const j of jobs) {
+    const jo = path.join(xo, j.name);
+    const r = await run(py, [...pyArgs, path.join(HERE, "run_scenes.py"), j.script, ...j.args(jo)], path.dirname(j.script));
+    const scenes = sceneFiles(jo);
+    if (!scenes.length) { log(`${title} (${j.name}): no scenes`, r.out.trim().split("\n").slice(-2).join(" ")); continue; }
+    for (const f of scenes) { const k = path.basename(path.dirname(f)); list.push({ key: `${id}-${j.name}-${k}`, title: titleOf(j, k, jo), group: j.group || "", scene: f }); }
+  }
+  if (!list.length) return;
+  fs.writeFileSync(path.join(xo, "scenes.json"), JSON.stringify(list));
+  const m = await run(py, [...pyArgs, path.join(HERE, "mesh_scenes.py"), path.join(wt, "map", "structures"), TEXTURES, path.join(xo, "mesh"), "x-" + id, title, path.join(xo, "scenes.json")], wt);
+  if (m.code !== 0) { log(`${title}: could not mesh`, m.out.trim().split("\n").slice(-2).join(" ")); return; }
+  fs.copyFileSync(path.join(xo, "mesh", "data", "x-" + id + ".txt"), path.join(v3d, "data", "x-" + id + ".txt"));
+  const tex = JSON.parse(fs.readFileSync(path.join(v3d, "tex.json"), "utf8"));
+  Object.assign(tex, JSON.parse(fs.readFileSync(path.join(xo, "mesh", "tex.json"), "utf8")));
+  fs.writeFileSync(path.join(v3d, "tex.json"), JSON.stringify(tex));
+  const add = JSON.parse(fs.readFileSync(path.join(xo, "mesh", "index.json"), "utf8"));
+  index.push(...add);
+  log(`${title}: ${add.length} added`);
+}
+
+async function buildExtras(wt, out, py, pyArgs, index, withImports) {
   for (const x of EXTRAS) {
     if (!fs.existsSync(path.join(wt, x.marker))) continue;
-    const xo = path.join(out, "extra-" + x.id);
-    fs.rmSync(xo, { recursive: true, force: true });
-    const r = await run(py, [...pyArgs, ...x.args(xo)], path.join(wt, x.cwd));
-    const scenes = sceneFiles(xo);
-    if (!scenes.length) { log(`${x.title}: no scenes`, r.out.trim().split("\n").slice(-2).join(" ")); continue; }
-    const names = x.names ? x.names(xo) : {};
-    const list = scenes.map((f) => { const k = path.basename(path.dirname(f)); return { key: x.id + "-" + k, title: names[k] || x.label?.[k] || nice(k), scene: f }; });
-    fs.writeFileSync(path.join(xo, "scenes.json"), JSON.stringify(list));
-    const m = await run(py, [...pyArgs, path.join(HERE, "mesh_scenes.py"), path.join(wt, "map", "structures"), TEXTURES, path.join(xo, "mesh"), "x-" + x.id, x.title, path.join(xo, "scenes.json")], wt);
-    if (m.code !== 0) { log(`${x.title}: could not mesh`, m.out.trim().split("\n").slice(-2).join(" ")); continue; }
-    fs.copyFileSync(path.join(xo, "mesh", "data", "x-" + x.id + ".txt"), path.join(v3d, "data", "x-" + x.id + ".txt"));
-    const tex = JSON.parse(fs.readFileSync(path.join(v3d, "tex.json"), "utf8"));
-    Object.assign(tex, JSON.parse(fs.readFileSync(path.join(xo, "mesh", "tex.json"), "utf8")));
-    fs.writeFileSync(path.join(v3d, "tex.json"), JSON.stringify(tex));
-    const add = JSON.parse(fs.readFileSync(path.join(xo, "mesh", "index.json"), "utf8"));
-    index.push(...add);
-    log(`${x.title}: ${add.length} added`);
+    const job = { name: "all", script: path.join(wt, x.marker), args: x.args };
+    await addSection(wt, out, py, pyArgs, index, x.id, x.title, [job], (j, k, jo) => (x.names?.(jo) || {})[k] || x.label?.[k] || nice(k));
+  }
+  if (!withImports) return;
+  for (const x of IMPORTS) {
+    const src = importSource(x);
+    if (!src) continue;
+    const kit = path.join(wt, "map", "structures"), jobs = [];
+    for (const f of x.support || []) { try { fs.writeFileSync(path.join(kit, f.split("/").pop()), git("show", `${src.sha}:${f}`)); } catch { /* not on that branch */ } }
+    for (const f of src.files) {
+      fs.writeFileSync(path.join(kit, f), git("show", `${src.sha}:${x.dir}/${f}`));
+      const name = f.replace(/\.py$/, "");
+      jobs.push({ name, script: path.join(kit, f), args: x.args, group: name });
+    }
+    await addSection(wt, out, py, pyArgs, index, x.id, x.title, jobs, (j, k) => x.title1(j.name, k));
   }
 }
 
