@@ -32,3 +32,15 @@ function per stage, and renders each stage with real Bedrock textures. It uses t
 - On narrow timber fronts the door bay's infill can be the jambs; timber fronts read as at least half
   infill (`04-walls`, `05-windows-and-doors`).
 - The wall plate is the gable's bottom beam, no second beam on it (`06-roof`).
+
+## Test house v2 (2026-11-11)
+
+The same 9 x 11 Vale house rebuilt after Mateo's reference pictures, with every new rule:
+stone ground floor in the stone / spruce / dark oak pairing (slim windows with stair heads, dark oak
+trapdoor panels, dressed piers by the door, spruce lantern stand, a bush held in by signs), wall texture
+painted by `texturing/doctrine.py`, beamed upper floor, arched supports under the jettied band, close
+studding on the fronts and the Timber Frame blocks on the sides, shutter dressing, and a gable chosen
+from `06-roof/roof-types.md` (span 9, run 13, side street) with a slate gradient, curled verges and
+lanterns on chains. `test_house_v2.py` runs with the map/structures kit (set `DOCTRINE` to this repo's
+`build-instructions/texturing`). Renders: `test-house-v2-*.png`; 3D viewer
+https://claude.ai/artifact/2MmFNZYTmKd1r31anDhMZS.
