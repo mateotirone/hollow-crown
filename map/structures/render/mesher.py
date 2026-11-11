@@ -14,7 +14,43 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from bp import solid_full, is_fence, is_wall, is_pane, is_stairs, is_slab, DIRS
 
 GRASS = (0x91, 0xBD, 0x59); FOLIAGE = (0x6A, 0x9E, 0x3A); SPRUCE = (0x61, 0x99, 0x61)
-WOODS = {"oak": "oak", "spruce": "spruce", "dark_oak": "big_oak", "birch": "birch", "jungle": "jungle", "acacia": "acacia"}
+WOODS = {"oak": "oak", "spruce": "spruce", "dark_oak": "big_oak", "birch": "birch", "jungle": "jungle", "acacia": "acacia", "mangrove": "mangrove"}
+# Bedrock names some newer textures differently from the old pattern
+TEX_ALIAS = {"planks_mangrove": "mangrove_planks", "log_mangrove": "mangrove_log_side", "log_mangrove_top": "mangrove_log_top",
+             "stripped_mangrove_log": "stripped_mangrove_log_side",
+             "door_mangrove_lower": "mangrove_door_bottom", "door_big_oak_lower": "door_dark_oak_lower", "door_big_oak_upper": "door_dark_oak_upper", "door_mangrove_upper": "mangrove_door_top"}
+
+# The add-on's own blocks (siege:*): texture from the behaviour pack's material instances and the
+# resource pack's terrain_texture.json, as absolute paths.
+_REPO = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", ".."))
+_SIEGE = None
+def siege_tex(n):
+    global _SIEGE
+    if _SIEGE is None:
+        import glob, re
+        _SIEGE = {}
+        try:
+            raw = open(os.path.join(_REPO, "Siege_Nights_RP/textures/terrain_texture.json")).read()
+            td = json.loads(re.sub(r"(?m)^\s*//.*$", "", raw))["texture_data"]
+            for f in glob.glob(os.path.join(_REPO, "Siege_Nights_BP/blocks/**/*.json"), recursive=True):
+                try: b = json.load(open(f))["minecraft:block"]
+                except Exception: continue
+                mi = b.get("components", {}).get("minecraft:material_instances", {})
+                out = {}
+                for face, v in mi.items():
+                    if not isinstance(v, dict) or v.get("texture") not in td: continue
+                    t = td[v["texture"]]["textures"]; t = t[0] if isinstance(t, list) else t
+                    if isinstance(t, dict): t = t.get("path") or t["variations"][0]["path"]
+                    out[face] = os.path.join(_REPO, "Siege_Nights_RP", t)
+                if out: _SIEGE[b["description"]["identifier"]] = out
+        except Exception as e: print("siege textures:", e)
+    t = _SIEGE.get(n, {})
+    d = {"side": t.get("*") or t.get("side") or next(iter(t.values()), "stone")}
+    for f in ("up", "down"):
+        if f in t: d["top" if f == "up" else "bottom"] = t[f]
+    for f in ("north", "south", "east", "west"):
+        if f in t and "side" not in t and "*" not in t: d["side"] = t[f]
+    return d
 
 def wood_of(n):
     for w in sorted(WOODS, key=len, reverse=True):
@@ -31,7 +67,13 @@ MAT = {"stone_brick": "stonebrick", "stone_bricks": "stonebrick", "mossy_stone_b
        "calcite": "calcite", "tuff": "tuff", "tuff_brick": "tuff_bricks", "tuff_bricks": "tuff_bricks", "smooth_stone": "stone_slab_top",
        "gravel": "gravel", "dirt": "dirt", "coarse_dirt": "coarse_dirt", "glass": "glass", "sandstone": "sandstone_normal", "smooth_sandstone": "sandstone_top",
        "diorite": "stone_diorite", "polished_diorite": "stone_diorite_smooth", "granite": "stone_granite", "polished_granite": "stone_granite_smooth", "mud": "mud", "clay": "clay", "snow": "snow",
-       "smooth_stone_slab": "stone_slab_top", "normal_stone": "stone", "stone_block": "stone"}
+       "cut_sandstone": "sandstone_smooth", "chiseled_sandstone": "sandstone_carved", "sand": "sand", "red_sand": "red_sand",
+       "hardened_clay": "hardened_clay", "packed_ice": "ice_packed", "red_sandstone": "red_sandstone_normal", "smooth_red_sandstone": "red_sandstone_top",
+       "cut_red_sandstone": "red_sandstone_smooth", "prismarine_bricks": "prismarine_bricks", "polished_tuff": "polished_tuff",
+       "smooth_stone_slab": "stone_slab_top", "normal_stone": "stone", "stone_block": "stone",
+       "quartz": "quartz_block_side", "quartz_block": "quartz_block_side", "smooth_quartz": "quartz_block_bottom", "quartz_bricks": "quartz_bricks",
+       "dark_prismarine": "prismarine_dark", "prismarine": "prismarine_rough", "gold_block": "gold_block", "snow_layer": "snow", "moss_block": "moss_block",
+       "blast_furnace": "blast_furnace_side", "cobbled_deepslate_wall": "deepslate/cobbled_deepslate"}
 for w, t in WOODS.items(): MAT[w] = "planks_" + t; MAT[w + "_planks"] = "planks_" + t
 
 def base_material(n):
@@ -47,6 +89,7 @@ def base_material(n):
 
 def cube_tex(n, p):
     """face -> texture key ('top','bottom','side' / per face)."""
+    if n.startswith("siege:"): return siege_tex(n)
     w = wood_of(n)
     if n.endswith("_log") and n.startswith("stripped_"):
         return {"top": f"stripped_{w}_log_top", "side": f"stripped_{w}_log"}
@@ -70,6 +113,8 @@ def cube_tex(n, p):
               "loom": {"top": "loom_top", "side": "loom_side", "front": "loom_front"},
               "cartography_table": {"top": "cartography_table_top", "side": "cartography_table_side1"}}
     if n in simple: return simple[n]
+    if n.endswith("_glazed_terracotta"): return {"side": "glazed_terracotta_" + n[:-18].replace("light_gray", "silver")}
+    if n == "scaffolding": return {"side": "scaffolding_side", "top": "scaffolding_top", "bottom": "scaffolding_bottom"}
     if n.endswith("_terracotta") and not n.startswith("glazed"):
         c = n[:-11].replace("light_gray", "silver")
         return {"side": "hardened_clay_stained_" + c if c else "hardened_clay"}
@@ -169,8 +214,28 @@ def model(n, p):
     if n == "flower_pot":
         t = {"side": "flower_pot@5,10,11,16", "top": "dirt"}
         return [((5 / 16, 0, 5 / 16, 11 / 16, 6 / 16, 11 / 16), t, {})] + ([("cross", {"side": PLANTS[p["plant"]]}, {"cut": 1, "scale": 0.7, "y": 4 / 16})] if p.get("plant") else [])
-    if n.endswith("_carpet"):
+    if n.endswith("_carpet") and n != "moss_carpet":
         return [((0, 0, 0, 1, 1 / 16, 1), {"side": "wool_colored_" + n[:-7].replace("light_gray", "silver")}, {})]
+    if n == "anvil":
+        t = {"side": "anvil_base", "top": "anvil_top_damaged_0"}
+        return [((2 / 16, 0, 2 / 16, 14 / 16, 4 / 16, 14 / 16), t, {}), ((5 / 16, 4 / 16, 4 / 16, 11 / 16, 10 / 16, 12 / 16), t, {}),
+                ((3 / 16, 10 / 16, 0, 13 / 16, 1, 1), t, {})]
+    if n == "grindstone":
+        return [((4 / 16, 4 / 16, 2 / 16, 12 / 16, 1, 14 / 16), {"side": "grindstone_side.tga", "top": "grindstone_round.tga"}, {}),
+                ((2 / 16, 0, 6 / 16, 4 / 16, 10 / 16, 10 / 16), {"side": "planks_big_oak"}, {}), ((12 / 16, 0, 6 / 16, 14 / 16, 10 / 16, 10 / 16), {"side": "planks_big_oak"}, {})]
+    if n in ("iron_chain", "chain"): return [("cross", {"side": "chain1"}, {"cut": 1, "scale": 0.4})]
+    if n == "ladder":
+        return [((0, 0, 0, 1, 1, 1 / 16), {"side": "ladder"}, {"cut": 1})]
+    if n == "moss_carpet": return [((0, 0, 0, 1, 1 / 16, 1), {"side": "moss_block"}, {})]
+    if n in ("siege:portcullis", "siege:castle_gate"):
+        t = siege_tex(n); ax = p.get("axis", "x")
+        return [(((0, 0, 7 / 16, 1, 1, 9 / 16) if ax == "x" else (7 / 16, 0, 0, 9 / 16, 1, 1)), t, {"cut": 1})]
+    if n == "siege:spire_roof":
+        t = siege_tex(n); return [((a / 16, a / 8 * 1, a / 16, 1 - a / 16, (a + 2) / 8 * 1, 1 - a / 16), t, {}) for a in range(0, 8, 2)]
+    if n == "siege:brazier":
+        t = siege_tex(n); return [((3 / 16, 0, 3 / 16, 13 / 16, 10 / 16, 13 / 16), t, {"glow": 1})]
+    if n == "siege:battlement":
+        t = siege_tex(n); return [((0, 0, 0, 1, 1, 1), t, {})]
     if n in PLANTS: return [("cross", {"side": PLANTS[n]}, {"cut": 1})]
     if n == "water": return [((0, 0, 0, 1, 14 / 16, 1), cube_tex(n, p), {"water": 1})]
     if n == "campfire":
@@ -283,6 +348,7 @@ class Mesher:
         if f in endf:
             if f == endf[0] and "top" in tex: return tex["top"]
             if f == endf[1]: return tex.get("bottom", tex.get("top", tex["side"]))
+        if tex.get("side") is None: print("no texture for a face; using stone"); return "stone"
         return tex["side"]
 
     def rect_uv(self, verts, f, b, u0, v0, u1, v1):
@@ -313,6 +379,7 @@ class Mesher:
         for key, spec in self.texfiles.items():
             tint = None
             if "#" in spec: spec, tint = spec.split("#")
+            spec = TEX_ALIAS.get(spec, spec)
             src = None
             for ext in ("", ".png", ".tga"):
                 f = os.path.join(self.texdir, spec + ext) if not spec.endswith(".tga") or ext == "" else None

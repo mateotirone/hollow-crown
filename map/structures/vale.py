@@ -263,7 +263,7 @@ def townhouse(seed, width=7, depth=9, storeys=2, ground="stone", jetty=True, inf
             B.bay_windows(up, y, "sew")
         y += 5
     levels.append(y)
-    B.roof(up, "z", y, overhang=1, verge=1)
+    B.roof(up, "z", y, overhang=1, verge=1, pitch=P.get("pitch", 1))
     B.build_roofs()
     B.gable_walls(up, "z", y)
     B.window((up[0] + up[2]) // 2, y + 1, up[3] - 1, "s", 1, 2 if width > 5 else 1, shutters=False)   # a narrow gable only has room for one pane

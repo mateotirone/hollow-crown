@@ -113,7 +113,7 @@ class Building:
         if quoins:
             for (x, z) in ((x0, z0), (x1, z0), (x0, z1), (x1, z1)):
                 for y in range(y0 + 1, y0 + h):
-                    bp.set(x, y, z, P["quoin"] if (y - y0) % 2 else "stone_bricks")
+                    bp.set(x, y, z, P["quoin"] if (y - y0) % 2 else P.get("quoin2", "stone_bricks"))
         self.clear(rect, y0, y0 + h - 1)
 
     def timber_storey(self, rect, y0, h, bay=4, infill=None):

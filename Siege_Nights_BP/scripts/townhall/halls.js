@@ -11,6 +11,7 @@ import { FROST_HALLS } from "./halls_frost.js";
 import { SALT_HALLS } from "./halls_salt.js";
 import { EMBER_HALLS } from "./halls_ember.js";
 import { FEN_HALLS } from "./halls_fen.js";
+import { hasDesign, drawDesign } from "./designs.js";
 
 export { Plan };
 
@@ -239,6 +240,12 @@ const ARCH = { vale: BUILDERS, frost: FROST_HALLS, salt: SALT_HALLS, ember: EMBE
 
 // Draw the hall for a tier (1-5) in a style. Returns the Plan (cells, columns, marks).
 export function drawHall(level, style) {
+  if (hasDesign(style.arch, level)) {
+    // the halls rebuilt in the map kit's style (designs.js); the hand-coded builders below stay as the fallback
+    const p = new Plan(style);
+    drawDesign(p, style.arch, level);
+    return p;
+  }
   const p = new Plan(style);
   const L = lift(p);
   p.off = { x: 0, y: L, z: L };
@@ -292,6 +299,11 @@ export function statesFor(frame, role, o = {}) {
   } else if (o.hanging) {
     out.push({ hanging: true });
   }
+  if (o.trap && o.dir) {
+    // trapdoors spell their facing as a number (0 east, 1 west, 2 south, 3 north)
+    out.unshift({ direction: WEIRDO[worldDir(frame, o.dir)], upside_down_bit: o.half === "top" });
+  }
+  if (o.st) for (const s of out) Object.assign(s, o.st);
   out.push({});
   return out;
 }
