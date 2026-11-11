@@ -113,7 +113,7 @@ Numbers to change: `MAP` in `scripts/plots/config.js`.
 
 ### The welcome hall and the test area
 
-Both float high above the map. New players (Survival, no settlement yet) arrive in the **welcome hall**, a stone terrace over Gull Bay. The Waystone in the middle tells the story so far and how starting works. Twelve pedestals stand round the rim, one per plot, each set in the direction its plot really lies. Click a free one to start there: you are set down beside its Plot Stone with a Keep Banner, and the plot is kept for you alone. A taken pedestal goes dark and shows who has it, their level and their settlement's level. You can also start in Kingsrest with no plot and join a friend. Nobody can leave the hall without choosing.
+Both float high above the map. New players (Survival, no settlement yet) arrive in the **welcome hall** over Gull Bay: the whole map in miniature, 1 block for every 25 x 25, built from the real world map (`tools/miniature.py`, re-run after regenerating the map). They land on a quay in the miniature's sea, where the Waystone tells the story so far and how starting works. Each plot has a glowing Map Stone on its real spot: green free, yellow run by a lord, dark taken. Click a free one to start there: you are set down beside its real Plot Stone with a Keep Banner, and the plot is kept for you alone. A taken one shows who has it, their level and their settlement's level. You can also start in Kingsrest with no plot and join a friend. Nobody can leave the hall without choosing.
 
 The **test area** is a glass floor in the sky holding the whole showcase (every block, item, machine and each feature's exhibit).
 
