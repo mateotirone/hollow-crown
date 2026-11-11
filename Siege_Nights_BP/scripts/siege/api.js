@@ -22,6 +22,7 @@ export { hitWall, blastDamage, wallHp, armorOf, lightCharge, offlineSafe, damage
 // ----- guards -----
 export { guardTag, guardOwner, guardCount, guardLimit, isGuard, markWanted, GUARD_ARMOR, armorTier, equipGuard } from "./guards.js";
 export { setGate, mayWorkGate } from "./block_clicks.js";
+export { openLeafAt } from "./gates.js";
 
 // ----- shared helpers and ids -----
 export { title, overworld, ownerTag, ownerOf, isOnline, pick, countItem, takeItems, consumeHeld } from "./util.js";

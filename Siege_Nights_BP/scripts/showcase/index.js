@@ -144,6 +144,14 @@ function buildShowcase(player) {
     if (dx % 2 === 0) setBlock(dim, at(dx, 22, 4), "siege:battlement");
   }
   label(dim, at(3, 22), "Castle wall\nClick the gate\nRam or blast it");
+  // ...and a stretch with a Castle Gate: one 3x3 leaf that swings open like a door
+  for (let dx = 7; dx <= 13; dx++) {
+    for (let dy = 0; dy < 4; dy++) {
+      const gate = dx >= 9 && dx <= 11 && dy < 3;
+      setBlock(dim, at(dx, 22, dy), gate ? "siege:castle_gate" : "siege:castle_stone", gate ? { "minecraft:cardinal_direction": "north" } : undefined);
+    }
+  }
+  label(dim, at(14, 21), "Castle Gate\nSwings like a door");
 
   // 4. Machines (yours, so they can be packed up with sneak + click)
   for (const [typeId, dx, dz, text] of [

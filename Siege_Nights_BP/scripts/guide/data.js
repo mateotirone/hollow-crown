@@ -127,7 +127,7 @@ export const ENTRIES = [
       + "  Castle Stone takes 6 blows, then 10, 16 and 26. A gate takes 2, then 4, 7 and 12.\n\n"
       + "§fRepair:§r click a cracked block with §fstone bricks§r to patch it.\n\n"
       + "§fAfter a bad night§r the Mason, or the Settlement wall page in your town hall, will survey the whole wall and mend every hole and crack for a price.\n\n"
-      + "Gates and portcullises open and shut the whole gate with one click.",
+      + "§fGates:§r one click opens or shuts the whole gate, whatever you hold (it never places a block). A Castle Gate swings open like a door, all its joined blocks as one leaf, away from you; a Portcullis rises until only its top piece shows.",
     when: ["place:siege:castle_stone*", "place:siege:portcullis*", "place:siege:castle_gate*", "carry:siege:castle_stone*"],
   },
   {
