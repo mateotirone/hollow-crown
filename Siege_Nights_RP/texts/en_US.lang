@@ -336,3 +336,6 @@ item.siege:guard_blackfen_helmet.name=Blackfen Guard Helmet
 item.siege:guard_blackfen_chestplate.name=Blackfen Guard Chestplate
 item.siege:guard_blackfen_leggings.name=Blackfen Guard Leggings
 item.siege:guard_blackfen_boots.name=Blackfen Guard Boots
+tile.siege:mason_bench.name=Mason's Bench
+tile.siege:foundation_stone.name=Foundation Stone
+tile.siege:plot_marker.name=Plot Marker

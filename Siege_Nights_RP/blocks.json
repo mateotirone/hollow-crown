@@ -302,5 +302,8 @@
   },
   "siege:veilmoss_strands": {
     "sound": "fungus"
+  },
+  "siege:plot_marker": {
+    "sound": "wood"
   }
 }

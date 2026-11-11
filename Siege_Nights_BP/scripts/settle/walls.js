@@ -246,7 +246,8 @@ const areaName = (id) => `siege_wall_${String(id).replace(/[^a-zA-Z0-9]/g, "").s
 const CARDINALS = [[0, "north"], [90, "east"], [180, "south"], [270, "west"]];
 
 // Raise (or upgrade to) a wall level. center/style/bearing are only needed for the first wall.
-export function raiseWall(id, level, { center, style, bearing } = {}) {
+// radius: where a new wall line goes (default WALLS.radius); a town layout starts it at its Hamlet radius.
+export function raiseWall(id, level, { center, style, bearing, radius } = {}) {
   const L = WALL_LEVELS[level];
   if (!L) return `There is no wall level ${level}.`;
   if (jobs.has(id)) return "A wall is already rising.";
@@ -256,7 +257,7 @@ export function raiseWall(id, level, { center, style, bearing } = {}) {
     if (!center) return "There is no wall line here yet.";
     // gates face one of the four winds so the gate blocks hang straight
     const [deg, dir] = CARDINALS.reduce((best, c) => (Math.abs(((bearing ?? 180) - c[0] + 540) % 360 - 180) < Math.abs(((bearing ?? 180) - best[0] + 540) % 360 - 180) ? c : best));
-    w = walls()[id] = { x: center.x, y: center.y, z: center.z, radius: WALLS.radius, level: 0, best: 0, style: style ?? "vale", gate: bearingToAngle(deg), gateDir: dir };
+    w = walls()[id] = { x: center.x, y: center.y, z: center.z, radius: radius ?? WALLS.radius, level: 0, best: 0, style: style ?? "vale", gate: bearingToAngle(deg), gateDir: dir };
   }
   if (style) w.style = style;
   w.building = { level, index: 0 };
@@ -281,9 +282,47 @@ onTick("settle_walls", 1, () => {
   }
 });
 
+// Move a wall line out (a town growing a tier): the old ring comes down a stretch at a time, then the same level
+// rises on the new line. down() runs once the old ring is gone. Free: the town paid for the level already.
+export function moveWall(id, radius, down = () => {}) {
+  const w = walls()[id];
+  if (!w) { down(); return "There is no wall to move."; }
+  if (w.radius === radius) { down(); return "already"; }
+  if (jobs.has(id)) { system.runTimeout(() => moveWall(id, radius, down), 100); return "waiting"; }
+  const level = Math.max(1, w.level || w.building?.level || 1);
+  const old = { ...w };
+  const cols = old.ground && old.level > 0 ? wallColumns({ center: old, radius: old.radius, level: old.level, gateAngle: old.gate, smooth: old.ground }) : [];
+  w.radius = radius;
+  w.ground = undefined;
+  w.building = undefined;
+  w.moving = true; // if the world closes before the new ring starts, it starts on the next load (the old one may stay)
+  save();
+  const L = WALL_LEVELS[old.level] ?? WALL_LEVELS[level];
+  const air = perm("minecraft:air");
+  system.runJob((function* takeDown() {
+    const dim = world.getDimension(OVERWORLD);
+    let n = 0;
+    for (const col of cols) {
+      for (let tries = 0; tries < 30; tries++) {
+        if (dim.getBlock({ x: col.x, y: col.base, z: col.z })) break;
+        for (let i = 0; i < 20; i++) yield; // not loaded: wait a second
+      }
+      for (const [y] of columnKinds(L, col, wallSeed(old))) {
+        try { setBlock(dim, col.x, y, col.z, air); } catch { /* not loaded */ }
+        if (++n % 300 === 0) yield;
+      }
+    }
+    down();
+    delete walls()[id]?.moving;
+    raiseWall(id, level);
+  })());
+  return true;
+}
+
 // Walls that were rising when the world closed carry on
 on("ready", () => {
   for (const [id, w] of Object.entries(walls())) {
+    if (w.moving && !jobs.has(id)) { delete w.moving; raiseWall(id, Math.max(1, w.level || 1)); continue; }
     if (!w.building || jobs.has(id)) continue;
     const { level, index } = w.building;
     if (raiseWall(id, level) === true) walls()[id].building.index = index;

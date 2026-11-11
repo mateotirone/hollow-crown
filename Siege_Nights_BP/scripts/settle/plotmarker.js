@@ -1,0 +1,229 @@
+// The Plot Marker: a post at the front of every open slot in a town laid out from its layout (founding.js).
+// Use it to see what can go on that slot: only the buildings that fit it and that the settlement's tier has
+// opened. Pick one and its outline shows on the slot; use the marker again to pay and raise it. Pay as with the
+// Foundation Stone: planks and building stone you carry, the rest in coins. Once a building stands, its marker
+// moves beside the door and offers to knock the building down (half the coins come back).
+//
+// Test: /scriptevent siege:town found dunehold   then walk to a marker and use it.
+
+import { world, system, GameMode } from "@minecraft/server";
+import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
+import { isReady, isAlly, on, onTick } from "../siege/api.js";
+import { purse, charge, refund, coins, lot } from "./wallet.js";
+import { STYLES } from "../townhall/styles.js";
+import { SETTLE } from "./config.js";
+import { BUILDINGS, BUILDING, drawBuilding } from "./buildings.js";
+import { MATERIALS, priceOf } from "./rules.js";
+import { SLOTS } from "./layout.js";
+import { drawBox } from "./zones.js";
+import { costLines, takeMatching, raiseOnSlot, risingAt } from "./plans.js";
+import { PLOT_MARKER, townOf, allTowns, layoutOf, markerAt, registerMarker, forgetMarker, placeMarker, clearMarker, slotState, saveTowns, tierName } from "./founding.js";
+import { slotsOf, seatOnSlot, seatedBox, SIZE_NAMES } from "./towns.js";
+import { sfx } from "../core/sfx.js";
+
+const OVERWORLD = "minecraft:overworld";
+const isCreative = (player) => player.getGameMode() === GameMode.Creative;
+
+// The tier that opens each building: the earliest slot it had in the old fixed layout
+export const OPENS_AT = Object.fromEntries(BUILDINGS.map((b) => [b.id, Math.min(...SLOTS.filter((s) => s.building === b.id).map((s) => s.tier), 3)]));
+
+const slotById = (owner, id) => slotsOf(layoutOf(townOf(owner))).find((s) => s.id === id);
+
+// Where a design stands on a slot, in the world, or undefined if it doesn't fit
+export function seatInWorld(owner, slot, buildingId) {
+  const town = townOf(owner);
+  const plan = drawBuilding(buildingId, town.style);
+  const seat = seatOnSlot(slot, plan.bounds());
+  if (!seat) return undefined;
+  const origin = { x: town.x + seat.origin.dx, y: town.y + seat.origin.dy, z: town.z + seat.origin.dz };
+  const box = seatedBox(seat, plan.bounds());
+  return { origin, forward: seat.forward, box: { x0: town.x + box.x0, z0: town.z + box.z0, x1: town.x + box.x1, z1: town.z + box.z1 }, plan };
+}
+
+// What a player could put on a slot: [{ id, name, fits, open, why }]
+export function choicesFor(owner, slot) {
+  const tier = townOf(owner)?.tier ?? 0;
+  return BUILDINGS.map((b) => {
+    const fits = !!seatInWorld(owner, slot, b.id);
+    const open = OPENS_AT[b.id] <= tier;
+    return { id: b.id, name: b.name, fits, open, why: !fits ? "too big for this plot" : !open ? `opens at ${tierName(OPENS_AT[b.id])}` : "" };
+  }).filter((c) => c.fits);
+}
+
+// Where the marker goes once a building stands: just outside the plot, two blocks to the side of the door
+function besideDoor(owner, slot) {
+  const town = townOf(owner);
+  const R = { x: -slot.door.z, z: slot.door.x };
+  const x = town.x + slot.step.x + 2 * R.x, z = town.z + slot.step.z + 2 * R.z;
+  const dim = world.getDimension(OVERWORLD);
+  try {
+    let block = dim.getTopmostBlock({ x, z });
+    for (let i = 0; block && i < 12 && /(air|grass$|short_grass|flower|fern|snow_layer|lantern|fence)/.test(block.typeId); i++) block = block.below();
+    return block ? { x, y: block.location.y + 1, z } : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+// ---------- the menus ----------
+
+async function openSlot(player, owner, slot) {
+  const state = slotState(owner, slot.id);
+  const town = townOf(owner);
+  if (state.building && risingAt(state.origin)) return player.onScreenDisplay.setActionBar(`§7The ${BUILDING[state.building].name} is still going up.`);
+  if (state.building) return builtMenu(player, owner, slot, state);
+  if (state.pick && system.currentTick - (state.pickedAt ?? 0) <= SETTLE.previewSeconds * 20 && state.by === player.id) return confirm(player, owner, slot, state);
+  const size = `${slot.box.x1 - slot.box.x0 + 1} x ${slot.box.z1 - slot.box.z0 + 1}`;
+  const choices = choicesFor(owner, slot);
+  const form = new ActionFormData().title(`${SIZE_NAMES[slot.size]} plot`)
+    .body(`${size} blocks, door to the road${slot.tags.length ? ` (${slot.tags.join(", ")})` : ""}.\nBuildings in the §f${STYLES[town.style]?.name ?? town.style}§r style that fit here:`);
+  if (!choices.length) return player.sendMessage("§7Nothing we can raise fits this plot yet. You can build here by hand.");
+  for (const c of choices) {
+    const need = priceOf(drawBuilding(c.id, town.style));
+    form.button(c.open ? `${c.name}\n§8${need.timber} planks, ${need.stone} stone` : `§8${c.name}\n${c.why}`);
+  }
+  const res = await form.show(player);
+  if (res.canceled) return;
+  const c = choices[res.selection];
+  if (!c.open) return player.sendMessage(`§7The ${c.name} ${c.why}. Win more sieges to grow the settlement.`);
+  Object.assign(state, { pick: c.id, pickedAt: system.currentTick, by: player.id });
+  saveTowns();
+  player.sendMessage(`§6${c.name} marked out.§7 Walk round the green outline, then use the marker again to raise it. ${BUILDING[c.id].blurb ?? ""}`);
+}
+
+async function confirm(player, owner, slot, state) {
+  const town = townOf(owner);
+  const building = BUILDING[state.pick];
+  const seat = seatInWorld(owner, slot, building.id);
+  if (!seat) { state.pick = undefined; saveTowns(); return player.sendMessage("§cThat building no longer fits here."); }
+  const free = isCreative(player);
+  const need = priceOf(seat.plan);
+  const { due, lines } = costLines(player, need);
+  const have = purse(player);
+  due.emeralds *= lot();
+  const body = [`${building.blurb ?? ""}`, "", ...lines];
+  if (free) body.push("", "§aFree in Creative.");
+  else if (due.emeralds) body.push("", `${have >= due.emeralds ? "§a" : "§c"}The mason supplies the rest for ${coins(due.emeralds)}§7 (you carry ${coins(have)})`);
+  const res = await new MessageFormData().title(`Raise the ${building.name}?`).body(body.join("\n"))
+    .button1("Pick something else").button2(free || have >= due.emeralds ? "Raise it" : "Not enough yet").show(player);
+  if (res.canceled) return;
+  if (res.selection === 0) { state.pick = undefined; saveTowns(); return openSlot(player, owner, slot); }
+  if (!free) {
+    if (have < due.emeralds) return player.sendMessage(`§7You are ${coins(due.emeralds - have)} short. Bring more planks or stone.`);
+    if (due.emeralds && !charge(player, due.emeralds)) return;
+    for (const [kind, mat] of Object.entries(MATERIALS)) takeMatching(player, mat.match, due.use[kind]);
+  }
+  clearMarker(owner, slot);
+  if (!raiseOnSlot(owner, player.id, seat.origin, seat.forward, building.id, town.style, slot.id)) {
+    placeMarker(owner, slot);
+    return player.sendMessage("§cSomething is already going up there.");
+  }
+  Object.assign(state, { building: building.id, style: town.style, origin: seat.origin, forward: seat.forward, box: seat.box, top: seat.plan.bounds().y1, paid: free ? 0 : due.emeralds, pick: undefined });
+  saveTowns();
+  sfx(player, "random.anvil_use");
+  player.sendMessage(`§6The ${building.name} is going up.`);
+}
+
+async function builtMenu(player, owner, slot, state) {
+  const name = BUILDING[state.building]?.name ?? "building";
+  const back = Math.floor((state.paid ?? 0) / 2);
+  const res = await new MessageFormData().title(name)
+    .body(`This plot holds your ${name}.\n\nKnock it down to free the plot for something else. Everything above the floor is cleared${back ? `, and ${coins(back)} come back` : ""}.`)
+    .button1("Leave it").button2("Knock it down").show(player);
+  if (res.canceled || res.selection !== 1) return;
+  demolish(owner, slot, state, player);
+}
+
+export function demolish(owner, slot, state, player) {
+  const back = Math.floor((state.paid ?? 0) / 2);
+  const { box, origin, top = 12 } = state;
+  const spot = state.marker;
+  if (spot) {
+    forgetMarker(spot);
+    try { const b = world.getDimension(OVERWORLD).getBlock(spot); if (b?.typeId === PLOT_MARKER) b.setType("minecraft:air"); } catch { /* not loaded */ }
+  }
+  for (const k of Object.keys(state)) delete state[k];
+  saveTowns();
+  if (back && player) refund(player, back);
+  system.runJob((function* clear() {
+    const dim = world.getDimension(OVERWORLD);
+    let n = 0;
+    for (let y = origin.y; y <= origin.y + top + 1; y++) for (let x = box.x0; x <= box.x1; x++) for (let z = box.z0; z <= box.z1; z++) {
+      try { const b = dim.getBlock({ x, y, z }); if (b && !b.isAir) b.setType("minecraft:air"); } catch { /* not loaded */ }
+      if (++n % 300 === 0) yield;
+    }
+    placeMarker(owner, slot);
+    if (player?.isValid) player.sendMessage("§7The plot is clear.");
+  })());
+}
+
+// ---------- the block ----------
+
+const lastClick = new Map();
+world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
+  const { block, player } = event;
+  if (block.typeId !== PLOT_MARKER || event.isFirstEvent === false) return;
+  if (system.currentTick - (lastClick.get(player.id) ?? -100) < 8) return;
+  lastClick.set(player.id, system.currentTick);
+  event.cancel = true;
+  const at = { ...block.location };
+  system.run(() => {
+    if (!isReady()) return;
+    const mark = markerAt(at);
+    if (!mark) return player.sendMessage("§7This marker belongs to no town.");
+    if (mark.owner !== player.id && !isAlly(mark.owner, player.id)) return player.sendMessage("§7This is not your town to build in.");
+    const slot = slotById(mark.owner, mark.slot);
+    if (!slot) return;
+    openSlot(player, mark.owner, slot).catch((e) => console.warn(`[Hollow Crown] plot marker: ${e}`));
+  });
+});
+
+// When a building on a slot is finished, its marker goes up beside the door
+on("settleBuilt", ({ owner, slotId }) => {
+  if (!slotId || !townOf(owner)) return;
+  const slot = slotById(owner, slotId);
+  const state = slotState(owner, slotId);
+  if (!slot || !state.building) return;
+  const spot = besideDoor(owner, slot);
+  if (!spot) return;
+  try {
+    world.getDimension(OVERWORLD).getBlock(spot)?.setType(PLOT_MARKER);
+    registerMarker(spot, owner, slotId);
+    state.marker = spot;
+    saveTowns();
+  } catch {
+    // not loaded: the plot can still be managed from the town hall later
+  }
+});
+
+// Every town starts with its library (the lore feature stocks it from settleBuilt): on the square if it fits there
+on("townLaidOut", ({ owner, tier }) => {
+  const town = townOf(owner);
+  if (tier !== 0 || !town || !BUILDING.library || Object.values(town.slots).some((s) => s.building === "library")) return;
+  const slots = slotsOf(layoutOf(town)).filter((s) => s.tier === 0 && !town.slots[s.id]?.building && seatInWorld(owner, s, "library"));
+  const slot = slots.find((s) => s.tags.includes("square")) ?? slots[0];
+  if (!slot) return;
+  const seat = seatInWorld(owner, slot, "library");
+  clearMarker(owner, slot);
+  if (!raiseOnSlot(owner, owner, seat.origin, seat.forward, "library", town.style, slot.id, { quiet: true })) return placeMarker(owner, slot);
+  Object.assign(slotState(owner, slot.id), { building: "library", style: town.style, origin: seat.origin, forward: seat.forward, box: seat.box, top: seat.plan.bounds().y1, paid: 0 });
+  saveTowns();
+});
+
+// The outline of a picked building, for the player who picked it
+function outlines() {
+  const now = system.currentTick;
+  for (const [owner, town] of Object.entries(allTowns())) {
+    for (const [id, state] of Object.entries(town.slots)) {
+      if (!state.pick || state.building) continue;
+      if (now - (state.pickedAt ?? now) > SETTLE.previewSeconds * 20 || now < (state.pickedAt ?? 0)) { state.pick = undefined; continue; }
+      const player = world.getPlayers().find((p) => p.id === state.by);
+      const slot = player && slotById(owner, id);
+      const seat = slot && seatInWorld(owner, slot, state.pick);
+      if (seat && player.dimension.id === OVERWORLD) drawBox(player, seat.box, "minecraft:villager_happy", 40);
+    }
+  }
+}
+onTick("settle_plot_outlines", 20, () => {
+  if (isReady()) outlines();
+});

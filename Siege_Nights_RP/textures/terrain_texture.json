@@ -944,6 +944,9 @@
     },
     "siege_veilmoss_strands": {
       "textures": "textures/blocks/siege_veilmoss_strands"
+    },
+    "siege_plot_marker": {
+      "textures": "textures/blocks/siege_plot_marker"
     }
   }
 }

@@ -57,7 +57,7 @@ export function styleOf(owner, block) {
   return styleFromGround(counts);
 }
 
-function countMatching(player, match) {
+export function countMatching(player, match) {
   const inv = invOf(player);
   let n = 0;
   for (let i = 0; i < inv.size; i++) {
@@ -67,7 +67,7 @@ function countMatching(player, match) {
   return n;
 }
 
-function takeMatching(player, match, amount) {
+export function takeMatching(player, match, amount) {
   const inv = invOf(player);
   for (let i = 0; i < inv.size && amount > 0; i++) {
     const item = inv.getItem(i);
@@ -103,7 +103,8 @@ export function siteProblem(owner, box, exceptKey) {
 
 const yawOf = (d) => (d.z === 1 ? 0 : d.x === -1 ? 90 : d.z === -1 ? 180 : -90);
 
-export function raise(key, stone, buildingId, style, { quiet = false } = {}) {
+// slot: { owner, id } when the building goes on a town slot (plotmarker.js); then onDone(stone) also runs
+export function raise(key, stone, buildingId, style, { quiet = false, onDone: after } = {}) {
   if (buildFor(jobId(key))) return false;
   const plan = drawBuilding(buildingId, style);
   const origin = locOf(key);
@@ -136,10 +137,11 @@ export function raise(key, stone, buildingId, style, { quiet = false } = {}) {
       if (first) done.push(buildingId);
       store.save();
       const yaws = Object.fromEntries(Object.entries(BUILDING[buildingId].faces ?? {}).map(([name, sign]) => [name, yawOf({ x: forward.x * sign, z: forward.z * sign })]));
-      emit("settleBuilt", { ...yaws, owner: stone.owner, player: stone.placer, building: buildingId, style, origin, forward, box: footprint(origin, forward, plan.bounds()), marks: worldMarks(plan, origin, forward) });
+      emit("settleBuilt", { ...yaws, owner: stone.owner, player: stone.placer, building: buildingId, style, origin, forward, box: footprint(origin, forward, plan.bounds()), marks: worldMarks(plan, origin, forward), slotId: stone.slot });
+      try { after?.(stone); } catch (e) { console.warn(`[Hollow Crown] settle build: ${e}`); }
       if (!player || quiet) return;
       sfx(player, "random.levelup");
-      player.sendMessage(`§6Your ${BUILDING[buildingId].name} is built.§7 It is yours to change: knock out a wall, add a door, move in. The Foundation Stone is back in your pack.`);
+      player.sendMessage(`§6Your ${BUILDING[buildingId].name} is built.§7 It is yours to change: knock out a wall, add a door, move in.${stone.slot ? "" : " The Foundation Stone is back in your pack."}`);
       if (first && SETTLE.firstBuildRenown) emit("skillPoints", { player, amount: 0, source: `first ${BUILDING[buildingId].name}`, renown: SETTLE.firstBuildRenown });
     },
   });
@@ -175,7 +177,7 @@ world.afterEvents.playerBreakBlock.subscribe((event) => {
   store.save();
 });
 
-function costLines(player, need) {
+export function costLines(player, need) {
   const have = Object.fromEntries(Object.entries(MATERIALS).map(([kind, mat]) => [kind, countMatching(player, mat.match)]));
   const due = bill(need, have);
   const lines = Object.entries(MATERIALS).map(([kind, mat]) =>
@@ -303,6 +305,17 @@ on("ready", () => {
     raise(key, stone, building, style ?? "vale");
   }
 });
+
+// Raise a building on a town slot (plotmarker.js has charged for it). It shows in settleBuilt as slotId.
+export function raiseOnSlot(owner, placerId, origin, forward, buildingId, style, slotId, { quiet = false } = {}) {
+  const key = keyOf(origin);
+  if (stones()[key]?.building) return false;
+  const stone = stones()[key] = { owner, placer: placerId, fx: forward.x, fz: forward.z, slot: slotId };
+  return raise(key, stone, buildingId, style, { quiet });
+}
+
+// Is a building still going up at this spot?
+export const risingAt = (origin) => !!stones()[keyOf(origin)]?.building;
 
 // Raise one without a stone or a price (showcase and the test command)
 export function raiseFree(player, origin, forward, buildingId, style) {

@@ -257,3 +257,88 @@ addTests("settle walls", {
     assert(weathered > 0.03 && weathered < VARIATION.weather, `weathering should be a little, got ${weathered}`);
   },
 });
+
+// ---------- town layouts (towns.js) ----------
+import { TOWNS } from "./towns_data.js";
+import { townFor, townNames, pickLayout, slotsOf, groundwork, fixturesOf, wallRadius, seatOnSlot, seatedBox, hallBox } from "./towns.js";
+
+addTests("settle towns", {
+  "every map plot has three town layouts, with walls at 32, 40, 48 and 56": () => {
+    assertEqual(townNames().length, 12);
+    for (const [key, town] of Object.entries(TOWNS)) {
+      assertEqual(town.variants.length, 3, key);
+      assertEqual(town.walls.join(","), "32,40,48,56", key);
+      assertEqual(wallRadius(town, 0), 32);
+      assertEqual(wallRadius(town, 9), 56);
+      assert(townFor(town.name) === town, key);
+    }
+  },
+  "a settlement keeps its layout pick, and picks are spread over all three": () => {
+    const town = townFor("Dunehold");
+    assertEqual(pickLayout(town, "player-1:Dunehold"), pickLayout(town, "player-1:Dunehold"));
+    const seen = new Set();
+    for (let i = 0; i < 60; i++) seen.add(pickLayout(town, `p${i}:Dunehold`));
+    assertEqual(seen.size, 3);
+    assertEqual(pickLayout(undefined, "x"), -1);
+  },
+  "groundwork decodes into rows near the plot, in each tier": () => {
+    for (const [key, town] of Object.entries(TOWNS)) {
+      for (const layout of town.variants) {
+        let rows = 0;
+        for (let t = 0; t < 4; t++) {
+          for (const [dx, dy, dz, p] of groundwork(layout, t)) {
+            assert(Math.abs(dx) <= 60 && Math.abs(dz) <= 60 && Math.abs(dy) < 32, `${key}: ${dx},${dy},${dz}`);
+            assert(p >= 0 && p < layout.pal.length, `${key}: palette ${p}`);
+            rows++;
+          }
+        }
+        assert(rows > 1000, `${key} ${layout.label}: only ${rows} rows`);
+      }
+    }
+  },
+  "slots open by tier, have a door side and stand inside the Castle wall": () => {
+    for (const [key, town] of Object.entries(TOWNS)) {
+      for (const layout of town.variants) {
+        const slots = slotsOf(layout);
+        assert(slots.some((s) => s.tier === 0), `${key} ${layout.label}: no Hamlet slots`);
+        for (const s of slots) {
+          assert(s.tier >= 0 && s.tier <= 3 && s.door, `${key} ${s.id}`);
+          for (const [x, z] of [[s.box.x0, s.box.z0], [s.box.x1, s.box.z1], [s.box.x0, s.box.z1], [s.box.x1, s.box.z0]]) {
+            assert(Math.hypot(x, z) < wallRadius(town, s.tier), `${key} ${layout.label} ${s.id} reaches past its tier's wall`);
+          }
+        }
+      }
+    }
+  },
+  "a building seated on a slot stays inside it, front on the door side": () => {
+    const layout = townFor("Dunehold").variants[0];
+    let seated = 0;
+    for (const slot of slotsOf(layout)) {
+      for (const b of BUILDINGS) {
+        const bounds = drawBuilding(b.id, "vale").bounds();
+        const seat = seatOnSlot(slot, bounds);
+        if (!seat) continue;
+        seated++;
+        const box = seatedBox(seat, bounds);
+        assert(box.x0 >= slot.box.x0 && box.x1 <= slot.box.x1 && box.z0 >= slot.box.z0 && box.z1 <= slot.box.z1, `${slot.id} ${b.id}`);
+        const front = { n: box.z0 === slot.box.z0, s: box.z1 === slot.box.z1, e: box.x1 === slot.box.x1, w: box.x0 === slot.box.x0 }[slot.side];
+        assert(front, `${slot.id} ${b.id}: not against the door side`);
+        assertEqual(seat.forward.x, -slot.door.x);
+        assertEqual(seat.forward.z, -slot.door.z);
+      }
+    }
+    assert(seated > 20, `only ${seated} fits`);
+    assertEqual(seatOnSlot({ ...slotsOf(layout)[0], box: { x0: 0, z0: 0, x1: 2, z1: 2 } }, drawBuilding("cottage", "vale").bounds()), undefined);
+  },
+  "every layout has a Hamlet slot the library fits, and its hall box grows": () => {
+    const lib = drawBuilding("library", "vale").bounds();
+    for (const [key, town] of Object.entries(TOWNS)) {
+      for (const layout of town.variants) {
+        assert(slotsOf(layout).some((s) => s.tier === 0 && seatOnSlot(s, lib)), `${key} ${layout.label}`);
+        const a = hallBox(layout, 1), b = hallBox(layout, 5);
+        assert((b.x1 - b.x0) * (b.z1 - b.z0) > (a.x1 - a.x0) * (a.z1 - a.z0), key);
+        assert(fixturesOf(layout, 0).some((f) => f.kind === "hall_cornerstone") && fixturesOf(layout, 0).some((f) => f.kind === "mason_bench"), key);
+      }
+    }
+  },
+});
