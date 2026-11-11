@@ -156,6 +156,7 @@
     "track_target": true
    },
    "minecraft:boss": {
+    "name": "Morvane",
     "should_darken_sky": false,
     "hud_range": 48
    },

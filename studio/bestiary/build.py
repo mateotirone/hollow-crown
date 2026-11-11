@@ -209,7 +209,7 @@ def entity_bp(m):
             events[f"siege:{flag}_on"] = {"add": {"component_groups": [f"siege:{flag}"]}}; events[f"siege:{flag}_off"] = {"remove": {"component_groups": [f"siege:{flag}"]}}
         c["minecraft:persistent"] = {}; c.pop("minecraft:despawn", None)
     if m.get("boss"):
-        c["minecraft:boss"] = {"should_darken_sky": False, "hud_range": 48}; c["minecraft:persistent"] = {}
+        c["minecraft:boss"] = {"name": m["name"], "should_darken_sky": False, "hud_range": 48}  # "name" is the bar title; without it the bar says "Unknown"; c["minecraft:persistent"] = {}
         c["minecraft:fire_immune"] = {}
     elif fam in ("boss_add", "raider"): c["minecraft:persistent"] = {}
     elif fam != "champion": c["minecraft:despawn"] = {"despawn_from_distance": {}}
