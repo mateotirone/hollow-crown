@@ -269,6 +269,24 @@ Add a line here when you publish one.
 until they have faded before it sends again. Never start a real title with `hcm:`. Map pictures:
 `python3 tools/minimap_tiles.py` after the world map changes; HUD layout: `python3 tools/minimap_ui.py`.
 
+## Menu labels: `addMenuLabel`
+
+Anything that opens a menu when clicked gets a floating label so players know it is clickable
+(`core/labels.js`; the table of existing assets is `scripts/labels/index.js`). **When you add a block or NPC
+that opens a menu, register it**, either with one line in that table or from your own folder:
+
+```js
+import { addMenuLabel } from "../siege/api.js";
+addMenuLabel({ block: "hc:station_post", name: "Station Post", hint: "Click: trains" });   // gold name over a grey hint
+addMenuLabel({ entity: "minecraft:npc", tag: "siege_mason", hint: "Click: buy blocks" });  // hint above the NPC's own name
+addMenuLabel({ entity: "minecraft:npc", match: (e) => ..., hint: "Click to talk" });       // any test you like
+```
+
+Optional: `lift` (label height over the block's bottom or the entity's feet; defaults in `LABEL`), `where(block)` for a
+block id that only sometimes opens a menu, `name` on an entity with no nameTag. Labels appear within 10 blocks of a
+player and vanish a few seconds after everyone walks away; nothing is saved. Don't label things meant to be found
+(Dusty Tomes, hidden doors). `/scriptevent siege:labels` lists what is labelled; `off` / `on` switch them all.
+
 ## Checking and building
 
 - `node tools/check.mjs` (from `siege-nights/`): parses every pack JSON, checks item icons and texture files exist, checks imports, finds undefined names,
