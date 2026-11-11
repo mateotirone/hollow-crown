@@ -13,11 +13,21 @@
     "default": "geometry.siege_b.gatebreaker"
    },
    "animations": {
-    "main": "animation.siege_b.gatebreaker"
+    "base": "animation.siege_b.gatebreaker",
+    "idle": "animation.siege_b.gatebreaker.idle",
+    "walk": "animation.siege_b.gatebreaker.walk",
+    "attack": "animation.siege_b.gatebreaker.attack",
+    "swing": "controller.animation.siege_b.gatebreaker.swing",
+    "hurt": "animation.siege_b.gatebreaker.hurt",
+    "flinch": "controller.animation.siege_b.gatebreaker.flinch"
    },
    "scripts": {
     "animate": [
-     "main"
+     "base",
+     "idle",
+     "walk",
+     "swing",
+     "flinch"
     ]
    },
    "render_controllers": [

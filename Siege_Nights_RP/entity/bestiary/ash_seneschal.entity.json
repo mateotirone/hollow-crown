@@ -13,11 +13,24 @@
     "default": "geometry.siege_b.ash_seneschal"
    },
    "animations": {
-    "main": "animation.siege_b.ash_seneschal"
+    "base": "animation.siege_b.ash_seneschal",
+    "idle": "animation.siege_b.ash_seneschal.idle",
+    "walk": "animation.siege_b.ash_seneschal.walk",
+    "attack": "animation.siege_b.ash_seneschal.attack",
+    "swing": "controller.animation.siege_b.ash_seneschal.swing",
+    "aim": "animation.siege_b.ash_seneschal.aim",
+    "ready": "controller.animation.siege_b.ash_seneschal.ready",
+    "hurt": "animation.siege_b.ash_seneschal.hurt",
+    "flinch": "controller.animation.siege_b.ash_seneschal.flinch"
    },
    "scripts": {
     "animate": [
-     "main"
+     "base",
+     "idle",
+     "walk",
+     "swing",
+     "ready",
+     "flinch"
     ]
    },
    "render_controllers": [

@@ -13,11 +13,21 @@
     "default": "geometry.siege_b.veinsworn"
    },
    "animations": {
-    "main": "animation.siege_b.veinsworn"
+    "base": "animation.siege_b.veinsworn",
+    "idle": "animation.siege_b.veinsworn.idle",
+    "walk": "animation.siege_b.veinsworn.walk",
+    "attack": "animation.siege_b.veinsworn.attack",
+    "swing": "controller.animation.siege_b.veinsworn.swing",
+    "hurt": "animation.siege_b.veinsworn.hurt",
+    "flinch": "controller.animation.siege_b.veinsworn.flinch"
    },
    "scripts": {
     "animate": [
-     "main"
+     "base",
+     "idle",
+     "walk",
+     "swing",
+     "flinch"
     ]
    },
    "render_controllers": [

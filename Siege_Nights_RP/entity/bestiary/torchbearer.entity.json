@@ -13,11 +13,24 @@
     "default": "geometry.siege_b.torchbearer"
    },
    "animations": {
-    "main": "animation.siege_b.torchbearer"
+    "base": "animation.siege_b.torchbearer",
+    "idle": "animation.siege_b.torchbearer.idle",
+    "walk": "animation.siege_b.torchbearer.walk",
+    "attack": "animation.siege_b.torchbearer.attack",
+    "swing": "controller.animation.siege_b.torchbearer.swing",
+    "aim": "animation.siege_b.torchbearer.aim",
+    "ready": "controller.animation.siege_b.torchbearer.ready",
+    "hurt": "animation.siege_b.torchbearer.hurt",
+    "flinch": "controller.animation.siege_b.torchbearer.flinch"
    },
    "scripts": {
     "animate": [
-     "main"
+     "base",
+     "idle",
+     "walk",
+     "swing",
+     "ready",
+     "flinch"
     ]
    },
    "render_controllers": [

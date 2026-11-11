@@ -36,12 +36,15 @@ def behavior(name, hp, w, h, families, boss):
         "component_groups": {}, "components": comp, "events": {}}}
 
 def client(name):
-    return {"format_version": "1.10.0", "minecraft:client_entity": {"description": {
+    # animations (idle, the Conductor's attack poses) come from studio/bestiary/anims.py
+    import sys; sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "bestiary"))
+    import anims
+    return anims.choir_client(name, {"format_version": "1.10.0", "minecraft:client_entity": {"description": {
         "identifier": f"siege:{name}",
         "materials": {"default": "entity_alphatest"},
         "textures": {"default": f"textures/entity/siege/undertow/{name}"},
         "geometry": {"default": f"geometry.siege_u.{name}"},
-        "render_controllers": ["controller.render.siege_bestiary"]}}}
+        "render_controllers": ["controller.render.siege_bestiary"]}}})
 
 def cube(origin, size, uv, inflate=0):
     c = {"origin": origin, "size": size, "uv": uv}

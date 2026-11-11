@@ -445,6 +445,12 @@ the darkness and knockback effects, the storms, and how the hurried evening look
 - Pick: break an ore next to other ore. A line of sparks points to the nearest one. It also mines Choir Ore whole.
 - The first time you wear or hold each piece, chat tells you what it does.
 
+## Mob and boss animations (bestiary)
+
+1. In the showcase world the statues stay in place but now breathe and fidget (the Reeve ticks, Hollow folk twitch). Then spawn a few live mobs with eggs (Tollman, Shieldwall Brute, Grey Host Bowman, Lost Villager, Rimewolf) in Survival. ✅ Each walks differently, leans in when it runs, and swings its own way when it hits you. The Bowman raises and draws its bow while it has you as a target. Every mob flinches when you hit it.
+2. Watch a Lost Villager standing still for 10 seconds. ✅ Its head hangs crooked and now and then snaps sideways.
+3. `/scriptevent siege:bestiary_summon reeve` in Survival. ✅ When a warning comes up he holds a wind-up pose (both arms raised for the time stop, arm drawn back for a cog) and swings through when it lands. At 60% health he rears back with his arms spread. Do the same for the Huntsman, Bride, Seneschal, Mother, Warlord King and Morvane. Anything that looks broken (a limb bending the wrong way, a pose that never lets go): note the boss and the attack name from the warning.
+
 ## Never the same fight twice (bestiary)
 
 - Beat any regional boss once, then summon it again (`/scriptevent siege:bestiary_summon reeve`): its name carries a temper (for example "The Clockwork Reeve, Unquiet") and the fight has one extra problem. Beat it again and you get a named echo shard for that temper. The next rematch wears a different temper.

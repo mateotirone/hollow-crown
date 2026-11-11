@@ -18,11 +18,13 @@
 // Fights never edit blocks (except the vault chest), so they work in any arena the map gives them.
 
 import { world, system, GameMode } from "@minecraft/server";
-import { onTick, moduleStore, addTests, assertEqual, note } from "../siege/api.js";
+import { onTick, moduleStore, addTests, assert, assertEqual, note } from "../siege/api.js";
 import { chooseAttack, pickTemper, temperById, TEMPERS } from "./variety.js";
 import { MOBS } from "./data.js";
 import { activeDimensions, alive, announce, effect, flat, give, heal, healthOf, hurt, particle, ring, sound, makeItem, playerList, addToPlayerList } from "./util.js";
 import { sfx, hasCue } from "../core/sfx.js";
+import { bossMove } from "./anim.js";
+import { MOVES } from "./moves.js";
 
 const STEP = 5; // the framework ticks every 5 game ticks
 export const SHIELD_TAG = "siege_boss_shielded";
@@ -273,6 +275,7 @@ function bossTick() {
     if (phase > f.phase && !f.paused) {
       f.phase = phase;
       effect(f.entity, "resistance", 40, 4);
+      bossMove(f.entity, "rage", "strike");
       for (const p of players) {
         p.onScreenDisplay.setTitle(`§c${f.def.name}`, { subtitle: `§7${f.def.phaseNames?.[phase] ?? `Phase ${phase + 1}`}`, fadeInDuration: 5, stayDuration: 40, fadeOutDuration: 10 });
         sound(f.dim, "mob.wither.ambient", p.location, 0.6, 0.7);
@@ -313,10 +316,11 @@ function bossTick() {
           else sfx(p, "boss.warn");
         }
         let ctx;
+        bossMove(f.entity, a.id, "wind", a.windup ?? 0); // the boss winds up while the warning is up (anim.js)
         safely(f, () => (ctx = a.start?.(f)));
         const windup = a.windup ?? 0;
         if (a.show) for (let t = STEP; t < windup; t += STEP) f.after(t, () => a.show(f, ctx));
-        f.after(windup, () => a.hit?.(f, ctx));
+        f.after(windup, () => { bossMove(f.entity, a.id, "strike"); a.hit?.(f, ctx); });
         f.busyUntil = f.tick + windup + Math.round((a.rest ?? 20) * (f.temper?.rest ?? 1));
         break;
       }
@@ -570,6 +574,13 @@ addTests("bestiary", {
     assertEqual(step.x, 0.75); assertEqual(step.y, 64);
     assertEqual(chaseStep({ x: 9, y: 64, z: 0 }, { x: 10, y: 64, z: 0 }, 0.3, 2, false), undefined);
     assertEqual(chaseStep({ x: 0, y: 64, z: 0 }, { x: 10, y: 70, z: 0 }, 0.3, 2, true).y, 64.75); // a flyer climbs toward you too
+  },
+  "every boss attack has a wind-up and strike animation": () => {
+    // a new attack needs a line in studio/bestiary/anims.py BOSS_MOVES (then run anims.py)
+    for (const def of bossDefs()) {
+      for (const a of def.attacks ?? []) assert(MOVES[def.type]?.includes(a.id), `${def.type} has no animation for its "${a.id}" attack`);
+      assert(MOVES[def.type]?.includes("rage"), `${def.type} has no rage animation`);
+    }
   },
   "boss phases follow health": () => {
     assertEqual(phaseFor(1, [0.6, 0.3]), 0);

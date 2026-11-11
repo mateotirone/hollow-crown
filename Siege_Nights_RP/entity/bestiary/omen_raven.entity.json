@@ -13,11 +13,13 @@
     "default": "geometry.siege_b.omen_raven"
    },
    "animations": {
-    "main": "animation.siege_b.omen_raven"
+    "base": "animation.siege_b.omen_raven",
+    "idle": "animation.siege_b.omen_raven.idle"
    },
    "scripts": {
     "animate": [
-     "main"
+     "base",
+     "idle"
     ]
    },
    "render_controllers": [
