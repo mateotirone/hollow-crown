@@ -1,35 +1,15 @@
 {
  "format_version": "1.20.10",
- "minecraft:recipe_shaped": {
+ "minecraft:recipe_smithing_transform": {
   "description": {
    "identifier": "siege:choirsteel_boots_recipe"
   },
   "tags": [
-   "crafting_table"
+   "smithing_table"
   ],
-  "pattern": [
-   "CNC",
-   "CQC"
-  ],
-  "key": {
-   "C": {
-    "item": "siege:choirsteel_ingot"
-   },
-   "Q": {
-    "item": "siege:gloamquill"
-   },
-   "N": {
-    "item": "minecraft:netherite_boots"
-   }
-  },
-  "result": {
-   "item": "siege:choirsteel_boots",
-   "count": 1
-  },
-  "unlock": [
-   {
-    "item": "siege:choirsteel_ingot"
-   }
-  ]
+  "template": "siege:choirsteel_upgrade_template",
+  "base": "minecraft:netherite_boots",
+  "addition": "siege:tempered_choirsteel",
+  "result": "siege:choirsteel_boots"
  }
 }

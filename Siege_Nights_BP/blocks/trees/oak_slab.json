@@ -1,0 +1,92 @@
+{
+  "format_version": "1.21.60",
+  "minecraft:block": {
+    "description": {
+      "identifier": "siege:old_oak_slab",
+      "menu_category": {
+        "category": "none"
+      },
+      "states": {
+        "siege:top": [
+          0,
+          1
+        ]
+      }
+    },
+    "components": {
+      "minecraft:display_name": "Old Oak Slab",
+      "minecraft:destructible_by_mining": false,
+      "minecraft:destructible_by_explosion": false,
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "siege_old_planks_oak",
+          "render_method": "opaque"
+        }
+      },
+      "minecraft:map_color": "#5a4630",
+      "minecraft:geometry": {
+        "identifier": "geometry.siege_old_slab",
+        "bone_visibility": {
+          "lower": "q.block_state('siege:top') == 0",
+          "upper": "q.block_state('siege:top') == 1"
+        }
+      },
+      "minecraft:collision_box": {
+        "origin": [
+          -8,
+          0,
+          -8
+        ],
+        "size": [
+          16,
+          8,
+          16
+        ]
+      },
+      "minecraft:selection_box": {
+        "origin": [
+          -8,
+          0,
+          -8
+        ],
+        "size": [
+          16,
+          8,
+          16
+        ]
+      },
+      "minecraft:light_dampening": 0
+    },
+    "permutations": [
+      {
+        "condition": "q.block_state('siege:top') == 1",
+        "components": {
+          "minecraft:collision_box": {
+            "origin": [
+              -8,
+              8,
+              -8
+            ],
+            "size": [
+              16,
+              8,
+              16
+            ]
+          },
+          "minecraft:selection_box": {
+            "origin": [
+              -8,
+              8,
+              -8
+            ],
+            "size": [
+              16,
+              8,
+              16
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

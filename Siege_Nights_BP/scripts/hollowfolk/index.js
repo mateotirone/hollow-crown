@@ -30,6 +30,8 @@ import { isBuilt } from "../undertow/builder.js";
 import { wardenData, wardenOnline, hollowStep } from "../undertow/warden.js";
 import { regentRules } from "../undertow/regent.js";
 import { say, runCmd } from "../undertow/data.js";
+import { stamp, stampCells, stateTries } from "../undertow/stamp.js";
+import { VILLAGE_DESIGNS } from "./village_data.js";
 import { FOLK, LINES, moodOf, robVerdict, dig, cart, priceOf, vaultLoot, HAPPENINGS, HAPPENING_GAP_SECONDS, ERRAND_ORE, ERRAND_ASKS, happeningsFor, freshLine } from "./rules.js";
 // Prices and the Vault's takings (vault.emeralds, saved) are counted in the old unit: one is 8 coins.
 import { funds, chargeE, giveCoins } from "../economy/coins.js";
@@ -125,50 +127,21 @@ const areaBuilt = (x, z, r) => {
   return true;
 };
 
-// The look follows Mateo's mining village picture: stone and timber cottages with lit windows and
+// The ground works that follow the land (terrace, yard, mine mouths, rails, the walk to the landing).
+// The buildings come from map/structures/hollow_kit.py (village_data.js). The look follows Mateo's
+// mining village picture: stone and timber cottages with lit windows and
 // dark tiled roofs, timbered mine mouths cut into the hillside with cart rails running out, an
 // ore-sorting shed, a smithy with a smoking chimney, a fire in the middle, lantern posts and fences.
 // Offsets are from the village centre; nothing lines up on purpose.
 const V = {
-  stone: "minecraft:polished_blackstone_bricks",
   stone2: "minecraft:cobbled_deepslate",
   beam: "minecraft:dark_oak_log",
   plank: "minecraft:dark_oak_planks",
-  roof: "minecraft:deepslate_tiles",
-  window: "minecraft:ochre_froglight",
   fence: "minecraft:dark_oak_fence",
   lantern: "minecraft:lantern",
   yard: "minecraft:coarse_dirt",
   air: "minecraft:air",
 };
-const COTTAGES = [
-  { dx: -9, dz: -6, w: 7, d: 5, door: "south" },
-  { dx: 0, dz: -9, w: 5, d: 5, door: "south" },
-  { dx: 8, dz: -4, w: 5, d: 7, door: "west" },
-  { dx: -8, dz: 7, w: 7, d: 5, door: "north" },
-];
-
-// One cottage: w blocks along x, d along z, centred on (x, z). Stone walls, timber corners, a lit
-// window in each wall, a stepped gable roof with a one-block overhang.
-function cottage(dim, x, y, z, w, d, door) {
-  const x1 = x - (w >> 1), x2 = x + (w >> 1), z1 = z - (d >> 1), z2 = z + (d >> 1);
-  fill(dim, x1, y - 1, z1, x2, y - 1, z2, V.stone2);
-  fill(dim, x1, y, z1, x2, y + 2, z2, V.stone);
-  fill(dim, x1 + 1, y, z1 + 1, x2 - 1, y + 2, z2 - 1, V.air);
-  for (const [cx, cz] of [[x1, z1], [x1, z2], [x2, z1], [x2, z2]]) fill(dim, cx, y, cz, cx, y + 2, cz, V.beam);
-  for (const [wx, wz] of [[x, z1], [x, z2], [x1, z], [x2, z]]) fill(dim, wx, y + 1, wz, wx, y + 1, wz, V.window);
-  const [ox, oz] = { east: [x2, z], west: [x1, z], south: [x, z2], north: [x, z1] }[door];
-  fill(dim, ox, y, oz, ox, y + 1, oz, V.air);
-  const alongX = w >= d; // the ridge runs along the longer side
-  const half = (alongX ? d : w) >> 1;
-  for (let i = 0; i <= half + 1; i++) {
-    const inset = i - 1; // -1 = the overhang
-    if (alongX) fill(dim, x1 - 1, y + 3 + i, z1 + inset, x2 + 1, y + 3 + i, z2 - inset, V.roof);
-    else fill(dim, x1 + inset, y + 3 + i, z1 - 1, x2 - inset, y + 3 + i, z2 + 1, V.roof);
-  }
-  fill(dim, x1 + 1, y + 3, z1 + 1, x2 - 1, y + 3, z2 - 1, V.plank); // ceiling, so the roof is not hollow from inside
-}
-
 function lampPost(dim, x, y, z) {
   fill(dim, x, y, z, x, y + 2, z, V.fence);
   fill(dim, x, y + 3, z, x, y + 3, z, V.lantern);
@@ -183,26 +156,11 @@ function buildVillage(v) {
   fill(dim, x - 14, y - 1, z - 13, x + 14, y - 1, z + 13, V.stone2);
   fill(dim, x - 9, y - 1, z - 3, x + 9, y - 1, z + 4, V.yard);
   fill(dim, x - 2, y - 1, z - 12, x + 2, y - 1, z + 12, V.yard);
-  fill(dim, x - 14, y, z - 13, x + 14, y + 9, z + 13, V.air);
+  fill(dim, x - 16, y, z - 13, x + 14, y + 11, z + 13, V.air);
 
-  for (const h of COTTAGES) cottage(dim, x + h.dx, y, z + h.dz, h.w, h.d, h.door);
-
-  // the fire in the middle, with the Tally beside it: a copper counting block and a barrel under an awning
-  fill(dim, x - 3, y, z + 1, x - 3, y, z + 1, "minecraft:campfire");
+  // the Tally's copper counting block; everything else built (cottages, smithy, sorting shed, lamps,
+  // fences) is the village design from map/structures/hollow_kit.py, stamped over the next few ticks
   fill(dim, x, y, z, x, y, z, B.copper);
-  fill(dim, x + 1, y, z, x + 1, y, z, "minecraft:barrel");
-  for (const [px, pz] of [[-1, -1], [2, -1], [-1, 1], [2, 1]]) fill(dim, x + px, y, z + pz, x + px, y + 2, z + pz, V.fence);
-  fill(dim, x - 1, y + 3, z - 1, x + 2, y + 3, z + 1, "minecraft:purple_wool");
-
-  // the smithy: open-fronted, a blast furnace and anvil, and a chimney that smokes
-  fill(dim, x + 7, y, z + 6, x + 12, y + 2, z + 11, V.stone);
-  fill(dim, x + 8, y, z + 6, x + 11, y + 2, z + 10, V.air);
-  fill(dim, x + 6, y + 3, z + 5, x + 13, y + 3, z + 12, V.roof);
-  fill(dim, x + 11, y, z + 10, x + 11, y, z + 10, "minecraft:blast_furnace");
-  fill(dim, x + 9, y, z + 9, x + 9, y, z + 9, "minecraft:anvil");
-  fill(dim, x + 12, y, z + 11, x + 12, y + 5, z + 11, V.stone2);
-  fill(dim, x + 12, y + 6, z + 11, x + 12, y + 6, z + 11, "minecraft:campfire");
-
   // two timbered mine mouths in the west face, ore showing inside, cart rails running out to a sorting shed
   for (const mz of [z - 2, z + 4]) {
     fill(dim, x - 18, y, mz - 1, x - 15, y + 2, mz + 1, V.air);
@@ -213,17 +171,6 @@ function buildVillage(v) {
     fill(dim, x - 16, y + 2, mz, x - 16, y + 2, mz, V.lantern);
     fill(dim, x - 18, y, mz, x - 11, y, mz, "minecraft:rail");
   }
-  fill(dim, x - 13, y, z + 9, x - 9, y, z + 12, V.air);
-  for (const [px, pz] of [[-13, 9], [-9, 9], [-13, 12], [-9, 12]]) fill(dim, x + px, y, z + pz, x + px, y + 2, z + pz, V.fence);
-  fill(dim, x - 14, y + 3, z + 8, x - 8, y + 3, z + 13, V.plank);
-  fill(dim, x - 12, y, z + 10, x - 10, y, z + 11, B.ore);
-
-  // lantern posts and a low fence along the open edges
-  for (const [px, pz] of [[-4, -3], [4, 3], [-11, 2], [6, -9], [0, 11]]) lampPost(dim, x + px, y, z + pz);
-  fill(dim, x - 14, y, z - 13, x + 14, y, z - 13, V.fence);
-  fill(dim, x + 14, y, z - 13, x + 14, y, z + 13, V.fence);
-  fill(dim, x - 1, y, z - 13, x + 1, y, z - 13, V.air); // gates
-  fill(dim, x + 14, y, z - 1, x + 14, y, z + 1, V.air);
 
   // a plank walk from the yard down to the landing, ending in a short dock with a lantern
   const n = landingOf(v.id);
@@ -242,11 +189,18 @@ function buildVillage(v) {
     lampPost(dim, ex, L.seaY + 1, ez);
   }
 
-  store.data.built[v.id] = true;
-  store.data.stock[v.id] ??= 0;
-  store.save();
+  building.add(v.id);
+  const design = VILLAGE_DESIGNS[v.id] ?? VILLAGE_DESIGNS.glimwade;
+  stamp(dim, design, { x, y: y - 1, z }, (ok) => {
+    building.delete(v.id);
+    if (!ok) return; // the area unloaded: the next pass builds the whole village again
+    store.data.built[v.id] = true;
+    store.data.stock[v.id] ??= 0;
+    store.save();
+  });
   return true;
 }
+const building = new Set(); // villages being stamped right now
 
 const FOLK_SPOTS = [{ dx: 0, dz: 2, foreman: true }, { dx: -5, dz: 1 }, { dx: 4, dz: -1 }, { dx: -11, dz: 9 }];
 function staffVillage(v) {
@@ -315,6 +269,7 @@ onTick("hollowfolk:build", 60, () => {
     if (!c) continue;
     const near = players.some((p) => Math.abs(p.location.x - c.x) < 64 && Math.abs(p.location.z - c.z) < 64);
     if (!near) continue;
+    if (building.has(v.id)) continue;
     if (!store.data.built[v.id]) {
       if (!areaBuilt(c.x, c.z, 40)) continue; // wait for the ground and the river themselves
       if (!buildVillage(v)) continue;
@@ -727,6 +682,17 @@ addTests("hollowfolk", {
     }
     assert(stages.size === 4, `only ${stages.size} of 4 growth stages appear`);
     assert(grown / total > 0.005 && grown / total < 0.06, `amethyst covers ${(100 * grown / total).toFixed(1)}% of the ground`);
+  },
+  "the village designs keep the miners' spots, the Tally and the gates clear, and stay on the terrace": () => {
+    for (const v of FOLK.villages) {
+      const d = VILLAGE_DESIGNS[v.id];
+      assert(d, `${v.id} has no design`);
+      const at = new Set(stampCells(d).map(([x, y, z]) => `${x},${y},${z}`));
+      for (const s of FOLK_SPOTS) for (const y of [1, 2]) assert(!at.has(`${s.dx},${y},${s.dz}`), `${v.id}: a block stands on a miner's spot`);
+      assert(!at.has("0,1,0") && !at.has("0,1,-13") && !at.has("14,1,0"), `${v.id}: the Tally or a gate is blocked`);
+      assert(d.box.x0 >= -16 && d.box.x1 <= 14 && d.box.z0 >= -13 && d.box.z1 <= 13 && d.box.y1 <= 11, `${v.id} spills off the terrace`);
+      for (const t of stateTries(d)) assertEqual(JSON.stringify(t[t.length - 1]), "{}");
+    }
   },
   "every errand leads to a real place, and has its ask written": () => {
     for (const h of HAPPENINGS.filter((x) => x.site)) {
