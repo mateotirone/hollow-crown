@@ -83,7 +83,11 @@ TODO = [
     ("Rails", [("Stations along every line", "Kingsrest station is done; halts and junctions for the other lines to do."),
                ("Rail bridges and tunnels", "Road bridges in Kingsrest and Millbrook are done.")]),
     ("Elsewhere", [("Rival Lords' seats", "The rival lords play from their own plots but have no buildings or walls of their own yet."),
-                   ("The Hollow's mining villages", "Glimwade, Lowseam, Tollrest and Highcut are built in code by the Hollow work; pictures not in this catalogue yet.")]),
+                   ]),
+    ("The Hollow", [("Four mining villages", "Glimwade, Lowseam, Tollrest and Highcut, to be rebuilt in the Hollow's own kit."),
+                    ("The centre sites", "Pilgrim's Cross, Cartmeet, the Truce Hall, the Far Door, the Lattice Gate, the Drift Foot, the Seams and the Wound Dock."),
+                    ("The Seat and the Vault", "Morvane's stronghold over the ore vault."),
+                    ("The drowned city", "The leaning towers the story's travellers saw.")]),
 ]
 todo_html = '<p class="lede">Everything still to design, so the catalogue shows the whole job.</p><div class="todo">' + "".join(
     f'<section><h2 class="sub">{esc(g)}</h2><ul>' + "".join(f'<li><b>{esc(n)}</b>{" <span>" + esc(d) + "</span>" if d else ""}</li>' for n, d in items) + "</ul></section>"

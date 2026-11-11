@@ -118,14 +118,14 @@ def main():
     for w in D["wallLevels"]:
         for rid, r in D["regions"].items():
             add(sec, f"wall-{w['level']:02d}-{rid}", f"Wall {w['level']}: {w['name']}", r["name"], "",
-                (lambda c=w["cellsBy"][rid], k=r["kinds"], n=f"wall_{w['level']}_{rid}": from_cells(n, [roof_cell(x, k) for x in c], k)), REGION_GROUND.get(rid), view=(-28, 20, 0.95), status="old",
+                (lambda c=w["cellsBy"][rid], k=r["kinds"], n=f"wall_{w['level']}_{rid}": from_cells(n, [roof_cell(x, k) for x in c], k)), REGION_GROUND.get(rid), view=(-28, 20, 0.95), status="new",
                 extra={"level": w["level"], "region": rid})
 
     # ---- 4. Strongholds ----
     sec = {"id": "strongholds", "title": "Strongholds", "blurb": "The biggest builds: the ruler's Citadel. Town hall levels 4 and 5 (Fortress, Sovereign's Throne) are in each settlement section.", "cards": []}
     sections.append(sec)
     add(sec, "stronghold-citadel", "The Citadel", "Raised by the ruler", "Curtain wall with eight round towers, a gatehouse and the 25 by 25 Great Keep. Built from the Citadel Cornerstone once someone holds the Heart.",
-        lambda: from_cells("citadel", [c[:4] for c in D["citadel"]], CITADEL), view=(-35, 32, 1.05), status="old")
+        lambda: from_cells("citadel", [c[:4] for c in D["citadel"]], CITADEL), view=(-35, 32, 1.05), status="new")
 
     print("cards", sum(len(s["cards"]) for s in sections), "to shoot", len(jobs), flush=True)
     jf = os.path.join(work, "jobs.json"); json.dump(jobs, open(jf, "w"))
