@@ -199,12 +199,14 @@ def inn_interior(bp):
 def free(bp, x, y, z): return bp.get(x, y, z)[0] in ("air", "keep")
 
 
-def house_interior(bp, w, d, levels, front_d):
-    """Hearth and table downstairs, a stair up the east side, bedrooms above."""
+def house_interior(bp, w, d, levels, front_d, furnished=False):
+    """A stair up the east side to every floor. Rooms are left empty for players to fill
+    (Mateo, 2026-11-11); furnished=True adds a hearth, table and bedrooms for show builds."""
     sx = w - 1
     for k in range(len(levels) - 2):          # the last level is the roof base: no stair up into the roof
         L0, L1 = levels[k], levels[k + 1]
         F.stair_flight(bp, sx, d - 2, L0 + 1, L1 - L0, "n")
+    if not furnished: return
     L = levels[0]
     F.hearth(bp, w // 2, L + 1, 1, "s")
     F.table(bp, w // 2 - 1 if w > 5 else 1, L + 1, d // 2 + 1, chairs="ew" if w > 5 else "s")
@@ -241,7 +243,8 @@ def townhouse(seed, width=7, depth=9, storeys=2, ground="stone", jetty=True, inf
     levels = [0]
     if ground == "stone":
         B.stone_storey(rect, 1, 4); y = 5
-        B.window(w // 2 - 2, 2, d, "s", 1, 2, kind="stone"); B.window(w // 2 + 2, 2, d, "s", 1, 2, kind="stone")
+        for wx in (w // 2 - 2, w // 2 + 2):
+            if 0 < wx < w: B.window(wx, 2, d, "s", 1, 2, kind="stone")     # never on a corner
         P["jamb"] = "stone_bricks"; P["lintel"] = "stone_bricks"
         B.door(w // 2, 1, d, "s", canopy=not jetty, lanterns=True)
     up = grow(rect, "s") if jetty else rect
@@ -250,9 +253,14 @@ def townhouse(seed, width=7, depth=9, storeys=2, ground="stone", jetty=True, inf
         B.timber_storey(up, y, 5, bay=3 if width <= 7 else 4)
         if jetty and k == 0 and ground == "stone": B.jetty_brackets(up, "s", y - 1)
         # street windows
-        B.bay_windows(up, y, "sew")
         if ground != "stone" and k == 0:
-            B.door((up[0] + up[2]) // 2, y + 1 if y == 1 else y, up[3], "s", canopy=True, lanterns=True)
+            B.bay_windows(up, y, "ew")                       # the street side gets the door and two flanking windows
+            dx_ = (up[0] + up[2]) // 2
+            for wx in (dx_ - 2, dx_ + 2):
+                if up[0] < wx < up[2]: B.window(wx, y + 1, up[3] - 1, "s", 1, 2, shutters=False)
+            B.door(dx_, y + 1 if y == 1 else y, up[3], "s", canopy=True, lanterns=True)
+        else:
+            B.bay_windows(up, y, "sew")
         y += 5
     levels.append(y)
     B.roof(up, "z", y, overhang=1, verge=1)

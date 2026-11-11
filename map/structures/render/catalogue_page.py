@@ -6,7 +6,7 @@ import sys, os, json, base64, io, html
 from PIL import Image
 cat_dir, out = sys.argv[1], sys.argv[2]
 idx = json.load(open(os.path.join(cat_dir, "catalogue.json")))
-STOREYS = {"kingsrest_inn": "2 + attic", "vale_house_11": "2", "vale_house_12": "3", "vale_house_13": "2", "vale_house_14": "2"}
+STOREYS = {"kingsrest_guildhall": "2", "kingsrest_chapel": "1", "kingsrest_station": "1", "kingsrest_inn": "2 + attic", "vale_house_11": "2", "vale_house_12": "3", "vale_house_13": "2", "vale_house_14": "2"}
 def img(p):
     im = Image.open(os.path.join(cat_dir, p)).convert("RGB")
     w, h = im.size; im = im.crop((int(w * .12), int(h * .04), int(w * .88), int(h * .96))).resize((720, 552), Image.LANCZOS)
@@ -14,9 +14,11 @@ def img(p):
 cards = []
 for e in idx:
     sx, sy, sz = e["size"]
-    styles = "".join(f'<button type="button" class="sw" data-style="{k}" aria-pressed="{str(k == "tudor").lower()}">{html.escape(v["name"])}</button>' for k, v in e["styles"].items())
-    pics = "".join(f'<img data-style="{k}" src="{img(v["image"])}" alt="{html.escape(e["title"])}, {html.escape(v["name"])}" {"" if k == "tudor" else "hidden"} loading="lazy">' for k, v in e["styles"].items())
-    blocks = e["styles"]["tudor"]["blocks"]
+    first = next(iter(e["styles"]))
+    styles = "".join(f'<button type="button" class="sw" data-style="{k}" aria-pressed="{str(k == first).lower()}">{html.escape(v["name"])}</button>' for k, v in e["styles"].items())
+    if len(e["styles"]) == 1: styles = f'<span class="only">{html.escape(e["styles"][first]["name"])} only</span>'
+    pics = "".join(f'<img data-style="{k}" src="{img(v["image"])}" alt="{html.escape(e["title"])}, {html.escape(v["name"])}" {"" if k == first else "hidden"} loading="lazy">' for k, v in e["styles"].items())
+    blocks = e["styles"][first]["blocks"]
     cards.append(f'''<article class="card" id="{e["key"]}">
   <div class="pic">{pics}</div>
   <div class="body">
@@ -37,5 +39,5 @@ for e in idx:
 </article>''')
 n = len(idx)
 page = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "catalogue.tpl.html")).read()
-page = page.replace("__CARDS__", "\n".join(cards)).replace("__N__", str(n)).replace("__V__", str(n * 3))
+page = page.replace("__CARDS__", "\n".join(cards)).replace("__N__", str(n)).replace("__V__", str(sum(len(e["styles"]) for e in idx)))
 open(out, "w").write(page); print(out, round(len(page) / 1e6, 2), "MB")

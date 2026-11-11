@@ -148,8 +148,11 @@ class Building:
                 if gap < 1 or b in skip: continue
                 w = 3 if gap >= wide else 1
                 start = p0 + 1 + (gap - w) // 2
-                x, z = cells[start]
-                if any(not callable(self.bp.get(*c[:1], y0 + 1, c[1])) and self.bp.get(c[0], y0 + 1, c[1])[0] in ("air", "keep") for c in cells[start:start + w]): continue
+                span = cells[start:start + w]
+                if any(self.bp.get(c[0], y0 + 1, c[1])[0] in ("air", "keep") for c in span): continue
+                # window() grows toward RIGHT[side] seen from outside; start from the cell that makes it cover exactly this span
+                rx, rz = DIRS[RIGHT[side]][0], DIRS[RIGHT[side]][2]
+                x, z = next(c for c in span if (c[0] + rx * (w - 1), c[1] + rz * (w - 1)) in span)
                 self.window(x + ix, y0 + 1, z + iz, side, w, min(2, h - 2))
 
     def jetty_brackets(self, rect_upper, sides, y):

@@ -55,6 +55,7 @@ def cube_tex(n, p):
     simple = {"grass_block": {"top": "grass_top#grass", "bottom": "dirt", "side": "grass_side_carried"},
               "grass_path": {"top": "grass_path_top", "bottom": "dirt", "side": "grass_path_side"},
               "hay_block": {"top": "hay_block_top", "side": "hay_block_side"},
+              "farmland": {"top": "farmland_wet", "side": "dirt", "bottom": "dirt"},
               "barrel": {"top": "barrel_top", "bottom": "barrel_bottom", "side": "barrel_side"},
               "crafting_table": {"top": "crafting_table_top", "side": "crafting_table_side", "bottom": "planks_oak"},
               "oak_leaves": {"side": "leaves_oak.tga#foliage"}, "spruce_leaves": {"side": "leaves_spruce.tga#spruce"},
@@ -91,7 +92,8 @@ def cull_group(n):
 PLANTS = {"poppy": "flower_rose", "dandelion": "flower_dandelion", "cornflower": "flower_cornflower", "oxeye_daisy": "flower_oxeye_daisy",
           "azure_bluet": "flower_houstonia", "allium": "flower_allium", "red_tulip": "flower_tulip_red", "white_tulip": "flower_tulip_white",
           "pink_tulip": "flower_tulip_pink", "orange_tulip": "flower_tulip_orange", "lily_of_the_valley": "flower_lily_of_the_valley",
-          "short_grass": "tallgrass#grass", "fern": "fern#grass", "sweet_berry_bush": "sweet_berry_bush_stage3"}
+          "short_grass": "tallgrass#grass", "fern": "fern#grass", "sweet_berry_bush": "sweet_berry_bush_stage3",
+          "wheat": "wheat_stage_7", "carrots": "carrots_stage_3", "potatoes": "potatoes_stage_3"}
 
 FACES = {  # name: normal, 4 corners as functions of box
     "up": (0, 1, 0), "down": (0, -1, 0), "south": (0, 0, 1), "north": (0, 0, -1), "east": (1, 0, 0), "west": (-1, 0, 0)}

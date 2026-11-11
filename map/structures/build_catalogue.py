@@ -9,7 +9,7 @@ The catalogue page is made from catalogue.json and the pictures.
 import os, sys, json, argparse, subprocess, shutil
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from bp import Blueprint
-import vale
+import vale, vale_civic
 
 STYLE_NAMES = {"tudor": "Plaster and timber", "stone": "Norman stone", "brick": "Brick and spruce"}
 
@@ -18,18 +18,27 @@ DESIGNS = [
     dict(key="kingsrest_inn", title="Kingsrest coaching inn", kind="Inn", where="Kingsrest, on the square",
          make=lambda s: vale.coaching_inn(style=s), use="Rooms for travellers, tap room, stable yard through the carriage arch. The innkeeper NPC stands at the bar.",
          inside="Tap room with bar, four tables and a hearth; three bedrooms; the innkeeper's hall with a long table and bookshelves."),
+    dict(key="kingsrest_guildhall", title="Kingsrest guildhall", kind="Civic", where="Kingsrest, north side of the square", only="stone",
+         make=lambda s: vale_civic.guildhall(), use="Market arcade below, council hall above, bell turret on the ridge. The town reeve works here.",
+         inside="Left empty for players to fill."),
+    dict(key="kingsrest_chapel", title="Kingsrest chapel", kind="Civic", where="Kingsrest, east of the square", only="stone",
+         make=lambda s: vale_civic.chapel(), use="Buttressed stone nave with lancet windows, a rose window over the door and a bellcote.",
+         inside="Left empty for players to fill."),
+    dict(key="kingsrest_station", title="Kingsrest station", kind="Civic", where="Kingsrest, by the bridge where all five lines meet", only="stone",
+         make=lambda s: vale_civic.station(), use="Booking hall facing the town, platform canopy and benches on the rail side.",
+         inside="Left empty for players to fill."),
     dict(key="vale_house_11", title="Two-storey house", kind="House", where="Vale towns, any street plot",
          make=lambda s: vale.townhouse(11, width=7, depth=9, storeys=2, ground="stone", roof="slate", chimney_side="w", style=s),
-         use="The everyday Vale house: stone ground floor, jettied timber upper floor.", inside="Hearth, table and stairs; bedroom upstairs."),
+         use="The everyday Vale house: stone ground floor, jettied timber upper floor.", inside="Left empty for players to fill."),
     dict(key="vale_house_12", title="Narrow three-storey house", kind="House", where="Vale towns, tight plots near a square",
          make=lambda s: vale.townhouse(12, width=5, depth=9, storeys=3, ground="stone", roof="wood", chimney_side="e", style=s),
-         use="Tall and thin, for busy streets where plots are narrow.", inside="Hearth and table; two upper floors with a bed each."),
+         use="Tall and thin, for busy streets where plots are narrow.", inside="Left empty for players to fill."),
     dict(key="vale_house_13", title="Deep timber house", kind="House", where="Vale towns, edge of town",
          make=lambda s: vale.townhouse(13, width=7, depth=11, storeys=2, ground="timber", jetty=False, chimney_side="w", style=s),
-         use="Timber from the ground up, no jetty: a plainer house for the outskirts.", inside="Hearth, table and stairs; bedroom upstairs."),
+         use="Timber from the ground up, no jetty: a plainer house for the outskirts.", inside="Left empty for players to fill."),
     dict(key="vale_house_14", title="Wide merchant's house", kind="House", where="Vale towns, main streets",
          make=lambda s: vale.townhouse(14, width=9, depth=9, storeys=2, ground="stone", chimney_side="e", style=s),
-         use="The biggest house: wide front for a shop or a well-off family.", inside="Hearth, table and stairs; bedroom upstairs."),
+         use="The biggest house: wide front for a shop or a well-off family.", inside="Left empty for players to fill."),
 ]
 
 ap = argparse.ArgumentParser(); ap.add_argument("out"); ap.add_argument("--textures", required=True); ap.add_argument("--three", required=True)
@@ -38,7 +47,7 @@ a = ap.parse_args(); os.makedirs(a.out, exist_ok=True); work = os.path.join(a.ou
 index = []
 for d in DESIGNS:
     entry = {k: v for k, v in d.items() if k != "make"}; entry["styles"] = {}
-    for style in STYLE_NAMES:
+    for style in ([d["only"]] if d.get("only") else STYLE_NAMES):
         b = d["make"](style); lo, hi = b.bounds()
         size = [hi[0] - lo[0] + 1, hi[1] - max(lo[1], 0), hi[2] - lo[2] + 1]
         n = sum(1 for c in b.cells.values() if c[0] not in ("air", "keep", "structure_void"))

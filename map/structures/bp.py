@@ -30,7 +30,7 @@ def is_wall(n): return n.endswith("_wall") and n not in ("wall_banner",)
 def is_pane(n): return n.endswith("glass_pane") or n == "iron_bars"
 def is_stairs(n): return n.endswith("_stairs")
 def is_slab(n): return n.endswith("_slab")
-NONSOLID = ("air", "keep", "lantern", "flower_pot", "torch", "short_grass", "tall_grass", "poppy", "dandelion",
+NONSOLID = ("air", "keep", "wheat", "carrots", "potatoes", "beetroot", "sweet_berry_bush", "lantern", "flower_pot", "torch", "short_grass", "tall_grass", "poppy", "dandelion",
             "cornflower", "oxeye_daisy", "azure_bluet", "allium", "red_tulip", "white_tulip", "orange_tulip", "pink_tulip",
             "water", "carpet", "rail", "ladder", "lily_of_the_valley", "fern", "large_fern", "wheat", "sweet_berry_bush")
 
@@ -79,6 +79,26 @@ class Blueprint:
     def paste(self, other, ox, oy, oz):
         for (x, y, z), v in other.cells.items(): self.cells[(x + ox, y + oy, z + oz)] = v
         for k, (x, y, z) in other.markers.items(): self.markers[k] = (x + ox, y + oy, z + oz)
+
+    def rotated(self, deg):
+        """A copy turned clockwise (seen from above) by 0/90/180/270 degrees about the origin.
+        A building whose front faces south faces west after 90. Facings and axes turn with it."""
+        k = (deg // 90) % 4; out = Blueprint(self.name); out.notes = list(self.notes)
+        def rp(x, z):
+            for _ in range(k): x, z = -z, x
+            return x, z
+        def rf(f):
+            for _ in range(k): f = RIGHT[f]
+            return f
+        for (x, y, z), (n, p) in self.cells.items():
+            q = dict(p)
+            if "facing" in q and q["facing"] in DIRS: q["facing"] = rf(q["facing"])
+            if k % 2 and q.get("axis") in ("x", "z"): q["axis"] = "z" if q["axis"] == "x" else "x"
+            q.pop("conn", None); q.pop("post", None)
+            nx, nz = rp(x, z); out.cells[(nx, y, nz)] = (n, q)
+        for m, (x, y, z) in self.markers.items():
+            nx, nz = rp(x, z); out.markers[m] = (nx, y, nz)
+        return out.finish()
 
     def bounds(self):
         xs, ys, zs = zip(*self.cells)
