@@ -8,6 +8,9 @@ How versions work is in [`docs/RELEASING.md`](docs/RELEASING.md).
 
 Everything merged to `main` since the last release goes here. Each pull request that changes what players see adds a line under one of these headings.
 
+### Fixed
+- Track: diagonal pieces no longer lie across the line, bends turn the right way, and slopes climb toward the higher track instead of away from it. Track already laid fixes itself.
+
 ### Added
 - Riding a train puts you in third person so you can see the line ahead, and gives you your own view back when you get off.
 - The Settler's Almanac: every new player gets a small book that explains how things work in Aldmere, chapter by chapter (first days, siege nights, your settlement, coin, travel, growing stronger, books, the wild). The first time you meet something (raise your banner, pick up a Regal, click the Mason, carry a Halter, see a Seep...) you get one line about it in chat, and its page is marked with a gold dot until you read it. Pages about things you haven't come across yet stay hidden, and things meant to be found aren't in it. Type `/siege:guide` to open it without the book, craft another from a book and a feather, or turn the chat tips off on its first page.
