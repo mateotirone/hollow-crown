@@ -161,9 +161,10 @@ def main():
     if a.trees:
         Town.tree_index = json.load(open(a.trees)); Town.tree_dir = os.path.dirname(os.path.abspath(a.trees)); Town.tree_src = os.path.abspath(a.trees_src)
     t = TownPlots(a.site, site, T, L, a.seed if a.seed is not None else site.get("seed", 1))
+    t.RES = np.zeros(t.G0.shape, bool)
     if a.reserve:
         for x, z in json.load(open(a.reserve)):
-            if t.ok(x, z): t.TAKEN[t.ij(x, z)] = max(int(t.TAKEN[t.ij(x, z)]), 1)
+            if t.ok(x, z): t.TAKEN[t.ij(x, z)] = max(int(t.TAKEN[t.ij(x, z)]), 1); t.RES[t.ij(x, z)] = True
     t.run(); t.write_plots(a.out); t.picture(a.out)
     for e in t.plan:                               # the scene shows a plot as its outline only
         if e["kind"] == "plot": t.designs[e["stamp"]] = Blueprint("empty_plot"); t.designs["empty_plot"] = t.designs[e["stamp"]]

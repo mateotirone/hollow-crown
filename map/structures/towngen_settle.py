@@ -374,11 +374,12 @@ class Settlement(Town):
         dmax = max(math.hypot(x - self.C[0] + (0.5 if x >= self.C[0] else -0.5), z - self.C[1] + (0.5 if z >= self.C[1] else -0.5)) for x, z in G)
         return tier_of_radius(dmax)
 
-    def try_slot(self, size, cand, max_tier=3, long_only=False):
+    def try_slot(self, size, cand, max_tier=3, long_only=False, square_only=False):
         door, deg, rid = cand
         n = SIZES[size]
         shapes = [(n, n), (n + 2, n), (n, n + 2)]; self.rng.shuffle(shapes)
         if long_only: shapes = [q for q in shapes if q[0] != q[1]]
+        if square_only: shapes = [(n, n)]
         for w, d in shapes:
             bp = self.slot_bp(w, d)
             dx, dz = self.door_of(bp); rdx, rdz = TG.rot_xz(dx, dz, deg)
@@ -404,7 +405,7 @@ class Settlement(Town):
         crop cells inside the Town wall, a 9 x 9 field plot (one watered cell's reach) is set aside
         on level ground between the Hamlet and Town walls, by a road, before any slot is placed."""
         town = self.D <= WALL_R[1] - CLEAR
-        if any(((self.PKIND == 2) & (self.PORT == L) & town & (self.K < 0)).sum() >= 90 for L in self.port if self.port[L]["kind"] == "field"):
+        if any(((self.PKIND == 2) & (self.PORT == L) & town & (self.K < 0)).sum() >= 100 for L in self.port if self.port[L]["kind"] == "field"):
             return
         free = (self.K < 0) & (self.TAKEN == 0) & ~self.WET & (self.PKIND == 1) & town
         road = self._dilate(self.K >= 0, 2)
@@ -450,9 +451,10 @@ class Settlement(Town):
         near_sq = lambda c: math.hypot(c[0][0] - self.sq[0], c[0][1] - self.sq[1]) + 4 * self.rng.random()
         hamlet = lambda c: math.hypot(c[0][0] - self.sq[0], c[0][1] - self.sq[1]) + 3 * self.rng.random()
         # inner tiers first (their ground is smallest), biggest boxes first within each
-        pass_("M", 0, 1, hamlet)
-        big(1, 1)                                      # the market's slot before the Hamlet fills the middle
-        pass_("S", 0, 5, hamlet)
+        pass_("M", 0, 1, hamlet)                       # Hamlet first: its ground is the smallest
+        pass_("S", 0, 4, hamlet)
+        big(1, 1)                                      # then the market's slot
+        pass_("S", 0, 1, hamlet)
         pass_("M", 1, 3, near_sq)
         pass_("S", 1, 4, near_sq)
         big(2, 2)                                      # City gets its own batch
@@ -494,7 +496,7 @@ class Settlement(Town):
                 for e in sl: e["opensAt"] = 3
         # the market (Town) and barracks (City) slots: the first big slots (Large, or a long Medium)
         # open as early as their ground allows, never deferred
-        bigs = sorted([e for e in self.slots if e["size"] == "L" or (e["size"] == "M" and e.get("long"))], key=lambda e: e["geo"])
+        bigs = sorted([e for e in self.slots if e["size"] == "L" or (e["size"] == "M" and e.get("long"))], key=lambda e: (e["geo"] == 0, e["geo"]))
         for e in bigs[:2]: e["opensAt"] = max(e["geo"], 1)
         self.slots.sort(key=lambda e: (e["opensAt"], "GLMS".index(e["size"])))
 

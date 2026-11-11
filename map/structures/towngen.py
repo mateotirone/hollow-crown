@@ -860,6 +860,7 @@ class Town:
         if self.tree_src and self.tree_src not in sys.path: sys.path.insert(0, self.tree_src)
         import place as TP
         hard = self.EAVES | (self.TAKEN == 2) | ~self.IN
+        if getattr(self, "RES", None) is not None: hard = hard | self.RES        # reserved corridors (rail): no crowns over them
         soft = (self.K >= 0) | (self.TAKEN >= 3) | self.WET | (self.D > self.R - 4)
         sp = {k: w for k, w in self.TOWN_TREES.get(self.site.get("region", "vale"), self.TOWN_TREES["vale"]).items() if k in self.tree_index["species"]}
         dens = 26 * (self.R / 70) ** 2 / soft.size
