@@ -35,6 +35,7 @@ import "./economy/index.js";
 import "./reach/index.js";
 import "./sound/index.js";
 import "./minimap/index.js";
+import "./labels/index.js";
 import "./forestry/index.js";
 
 // Start the shared loop last, once every file has registered its work
