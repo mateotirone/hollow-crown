@@ -780,6 +780,7 @@ class Settlement(Town):
         ek = int(self.at(self.KIND, *end)) if self.ok(*end) else 0
         if e.get("library"): tags.append("library")
         if near(self.HALL, 3): tags.append("hall")
+        if e.get("foundation", 0) >= 4: tags.append("tall_foundation")
         if near(self.HALL & ~self.HALL4, 0): tags.append("hall5")
         if ek == PRIO["square"] or near(self.KIND == PRIO["square"], 2): tags.append("square")
         if ek == PRIO["main"]: tags.append("road_front")
@@ -836,7 +837,7 @@ class Settlement(Town):
             walk = [[x - C[0], z - C[1], *k2(k)] for (x, z), k in zip(e["walk"][0], e["walk"][1])] if e["walk"] else []
             slots.append({"id": f"{e['size'].lower()}{n + 1}", "size": SIZE_NAME[e["size"]], "box": [box[0] - C[0], box[1] - C[1], box[2] - C[0], box[3] - C[1]],
                           "floor_y": int(e["ground_y"]), "door": {"side": side, "step": [e["door"][0] - C[0], e["door"][1] - C[1]], "walk": walk},
-                          "tags": tags, "long": bool(e.get("long")), "opensAt": TIERS[e["opensAt"]]})
+                          "tags": tags, "long": bool(e.get("long")), "foundation": int(e.get("foundation", 0)), "opensAt": TIERS[e["opensAt"]]})
         roads = []
         for i, j in np.argwhere(self.K >= 0):
             x, z = int(i) + self.X0, int(j) + self.Z0

@@ -110,7 +110,8 @@ building-placement thread:
   plus 2) is kept free of roads from the start, and of slots up to level 4; slots may sit on level 5's extra ground (tag hall5).
 - Slots are odd boxes, width along the door side x depth (Small 9x13, Medium 11x15, long Medium 13x15,
   Large 15x15, Great 21x21; Large and Great up to 2 longer either way) facing a road, with
-  floor height, walkway, tags (library, hall, hall5 = on ground the level-5 hall takes back, square, road_front, wall, gate, corner, field_edge, water) and opensAt.
+  floor height (the highest ground block in the box; stone foundation below, never cut in, so
+  "foundation" is its tallest column; within a block of every path beside it), walkway, tags (library, hall, hall5 = on ground the level-5 hall takes back, tall_foundation = 4+ blocks of foundation, square, road_front, wall, gate, corner, field_edge, water) and opensAt.
 - Fields are whole portions (about 10% of the land, at least one) whose crop area grows with the wall,
   watered level by level as in towns.
 

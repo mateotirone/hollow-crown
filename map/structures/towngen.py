@@ -412,7 +412,9 @@ class Town:
             out.append((x, z)); x, z = x + f[0], z + f[1]
         return None
 
-    ROAD_FIT = 2         # half blocks: a plot's floor sits within a block of every path cell beside it
+    FLOOR_HIGHEST = True
+    ROAD_FIT = 2         # half blocks: no path beside a plot is more than a block above its floor,
+    ROAD_DROP = 4        # nor more than two below it (the walkway climbs to the door with a stair)
     def try_place(self, bp, deg, door_xz, kind, gap=1, max_relief=6, need_walk=True, extra=None):
         dx, dz = self.door_of(bp); rdx, rdz = rot_xz(dx, dz, deg)
         ox, oz = door_xz[0] - rdx, door_xz[1] - rdz
@@ -458,8 +460,10 @@ class Town:
             k_road = self.k_at(*end)
         # floor height: balance digging in against building up, and keep the walkway walkable
         best = None
-        for yf in range(y_lo, y_hi + 1):
-            if len(near_k) and np.abs(near_k - (2 * yf + 1)).max() > self.ROAD_FIT: continue
+        # Mateo 2026-11-11: a building stands on the highest ground block it covers; everything below
+        # is stone foundation (never cut in, so no side is buried)
+        for yf in ([int(hs.max())] if self.FLOOR_HIGHEST else range(y_lo, y_hi + 1)):
+            if len(near_k) and ((near_k - (2 * yf + 1)).max() > self.ROAD_FIT or ((2 * yf + 1) - near_k).max() > self.ROAD_DROP): continue
             if yf < hs.min() - 2 or yf > hs.max() + 2: continue
             cost = float(np.abs(hs - yf).sum()) + 0.6 * float(np.maximum(0, yf - hs).sum())   # fill shows; cutting is tidier
             if need_walk:
@@ -483,7 +487,7 @@ class Town:
         if extra:
             for x, z in extra:
                 i, j = self.ij(x + ox, z + oz); self.TAKEN[i, j] = 2
-        e = {"stamp": bp.name, "kind": kind, "x": ox, "z": oz, "ground_y": yf, "rotation": deg, "footprint": len(G),
+        e = {"stamp": bp.name, "kind": kind, "x": ox, "z": oz, "ground_y": yf, "rotation": deg, "footprint": len(G), "foundation": int(yf - hs.min()),
              "door": [door_xz[0], door_xz[1]]}
         self.plan.append(e); self.designs[bp.name] = bp
         self.foundation(G, yf, extra=[(x + ox, z + oz) for x, z in extra] if extra else None)

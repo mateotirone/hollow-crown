@@ -164,7 +164,7 @@ class TownPlots(Town):
         for n, e in enumerate(e for e in self.plan if e["kind"] == "plot"):
             xs, zs = zip(*e["cells"]); f = ROT[e["rotation"]]
             plots.append({"id": f"plot{n + 1}", "size": SIZE_NAME[e["size"]], "civic": bool(e.get("civic")),
-                          "box": [min(xs), min(zs), max(xs), max(zs)], "floor_y": int(e["ground_y"]),
+                          "box": [min(xs), min(zs), max(xs), max(zs)], "floor_y": int(e["ground_y"]), "foundation": int(e.get("foundation", 0)),
                           "door": {"side": {(0, 1): "s", (-1, 0): "w", (0, -1): "n", (1, 0): "e"}[f], "step": e["door"]}})
         fixtures = [{"name": e["kind"], "stamp": e.get("db_stamp", e["stamp"]), "at": [e["x"], e["z"]], "ground_y": e["ground_y"], "rotation": e["rotation"]}
                     for e in self.plan if e["kind"] in ("square", "lamp", "tree")]
