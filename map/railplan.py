@@ -59,6 +59,37 @@ def _smooth_turns(cells, keep=()):
     return cells
 
 
+def _climb_jogs(cells, keep=(), window=15):
+    """Track can only climb on straight north/south/east/west steps, and a slope needs a straight step either side,
+    so a line that wanders off the axes (diagonal, or diagonal with the odd straight step) could hardly ever change
+    height. Within every `window` steps that keep to one diagonal and its two neighbouring straights, reorder the
+    steps so the straights come in runs of three (turning a diagonal into its two straights if there are too few):
+    same end point, 45 degree turns, a sideways wobble of a block or two, and a place to climb in every window."""
+    keep = set(keep)
+    steps = [_dir(a, b) for a, b in zip(cells, cells[1:])]
+    out = []
+    for w0 in range(0, len(steps), window):
+        win = steps[w0:w0 + window]
+        if len(win) < window or any(c in keep for c in cells[w0:w0 + window + 1]):
+            out += win; continue
+        diags = {d for d in win if d % 2 == 1}
+        if len(diags) != 1: out += win; continue
+        d = diags.pop(); a, b = (d - 1) % 8, (d + 1) % 8
+        if not set(win) <= {a, b, d}: out += win; continue
+        na, nb, nd = win.count(a), win.count(b), win.count(d)
+        if nb > na: a, b, na, nb = b, a, nb, na
+        if na < 3:
+            k = 3 - na
+            if nd - k < 2: out += win; continue
+            nd -= k; na += k; nb += k
+        h1 = nd // 3; h2 = max(1, nd // 3) if nb else 0; h3 = nd - h1 - h2
+        if h3 < 0: out += win; continue
+        out += [d] * h1 + [a] * na + [d] * h2 + [b] * nb + [d] * h3
+    res = [cells[0]]
+    for d in out: res.append((res[-1][0] + DX[d], res[-1][1] + DZ[d]))
+    assert res[-1] == cells[-1]
+    return res
+
 def trace(points, stops=()):
     """points: the line's control points [(x, z), ...] (already smooth); stops: [(x, z, axis or None), ...] that the
     line passes through or starts/ends at. Returns (cells, stop_index) with a straight N/S/E/W run of PLATFORM
@@ -112,6 +143,7 @@ def trace(points, stops=()):
     keep = set()
     for _, a, s, b, _ in pieces: keep |= set(_raster([a, s, b]))
     cells = _smooth_turns(cells, keep)
+    cells = _climb_jogs(cells, keep)
     idx = {c: n for n, c in enumerate(cells)}
     found = [idx.get(c, int(np.argmin([math.dist(c, q) for q in cells]))) for c in stop_cells]
     res = [0] * len(ctrl)

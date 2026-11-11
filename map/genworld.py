@@ -324,10 +324,10 @@ corr = (rail_d <= RAIL_R) & land & ~wet & ~bore & (br_deck == -999)
 flat_ = corr & ((rail_d <= 3.5) | (isroad & (rail_d <= ROADOFF + 5))) & ~rail_t   # over a tunnel the road keeps to the hill
 Y[flat_] = bed[flat_]
 dF = chamfer_b(flat_, RAIL_R)
-bank = np.floor(dF * 0.75 + (noise(7, 91) + 0.5) * 1.5).astype(np.int32)
+rbank = np.floor(dF * 0.75 + (noise(7, 91) + 0.5) * 1.5).astype(np.int32)
 slope_ = corr & ~flat_
-cut = slope_ & ~rail_t & (Y > bed + bank); Y[cut] = (bed + bank)[cut]
-fill = slope_ & (Y < bed - bank); Y[fill] = (bed - bank)[fill]
+cut = slope_ & ~rail_t & (Y > bed + rbank); Y[cut] = (bed + rbank)[cut]
+fill = slope_ & (Y < bed - rbank); Y[fill] = (bed - rbank)[fill]
 # tunnel lining: stone brick walls and roof round the bore, which also make the portal faces
 tun_wall = np.zeros((SIZE, SIZE), bool); tun_wall_y = np.full((SIZE, SIZE), -999, np.int32)
 _tb = tun_floor > -999
