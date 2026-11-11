@@ -1,3 +1,4 @@
 * text=auto eol=lf
 *.png binary
 *.mcaddon binary
+tools/asset-viewer/*.bat -text

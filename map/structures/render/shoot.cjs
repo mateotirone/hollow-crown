@@ -19,7 +19,7 @@ for (const v of views.split(",")) {
   await page.goto("file://" + path.resolve(page_) + "#shot=1&view=" + v + "&light=" + light);
   await page.waitForFunction(() => window.__ready, null, { timeout: 120000 });
   await page.waitForTimeout(1500);
-  await page.screenshot({ path: `${out}-${v}${light === "dusk" ? "-dusk" : ""}.png` });
+  await page.screenshot({ path: `${out}-${v}${light === "dusk" ? "-dusk" : ""}.png`, timeout: 240000 });
   console.log("shot", v);
 }
 await browser.close();

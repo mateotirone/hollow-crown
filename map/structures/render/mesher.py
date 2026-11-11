@@ -15,14 +15,15 @@ from bp import solid_full, is_fence, is_wall, is_pane, is_stairs, is_slab, DIRS
 
 GRASS = (0x91, 0xBD, 0x59); FOLIAGE = (0x6A, 0x9E, 0x3A); SPRUCE = (0x61, 0x99, 0x61)
 WOODS = {"oak": "oak", "spruce": "spruce", "dark_oak": "big_oak", "birch": "birch", "jungle": "jungle", "acacia": "acacia", "mangrove": "mangrove",
-         "cherry": "cherry", "pale_oak": "pale_oak"}
+         "cherry": "cherry", "pale_oak": "pale_oak", "warped": "warped"}
 # Bedrock names some newer textures differently from the old pattern
 TEX_ALIAS = {"planks_mangrove": "mangrove_planks", "log_mangrove": "mangrove_log_side", "log_mangrove_top": "mangrove_log_top",
              "stripped_mangrove_log": "stripped_mangrove_log_side",
              "door_mangrove_lower": "mangrove_door_bottom", "door_big_oak_lower": "door_dark_oak_lower", "door_big_oak_upper": "door_dark_oak_upper", "door_mangrove_upper": "mangrove_door_top",
              "log_cherry": "cherry_log_side", "log_cherry_top": "cherry_log_top", "stripped_cherry_log": "stripped_cherry_log_side",
              "log_pale_oak": "pale_oak_log_side", "log_pale_oak_top": "pale_oak_log_top", "stripped_pale_oak_log": "stripped_pale_oak_log_side",
-             "planks_cherry": "cherry_planks", "planks_pale_oak": "pale_oak_planks"}
+             "planks_cherry": "cherry_planks", "planks_pale_oak": "pale_oak_planks",
+             "planks_warped": "huge_fungus/warped_planks", "door_warped_lower": "huge_fungus/warped_door_lower", "door_warped_upper": "huge_fungus/warped_door_top", "trapdoor_warped": "huge_fungus/warped_trapdoor", "warped_trapdoor": "huge_fungus/warped_trapdoor"}
 
 # The add-on's own blocks (siege:*): texture from the behaviour pack's material instances and the
 # resource pack's terrain_texture.json, as absolute paths.
@@ -94,6 +95,8 @@ MAT = {"stone_brick": "stonebrick", "stone_bricks": "stonebrick", "mossy_stone_b
        "dark_prismarine": "prismarine_dark", "prismarine": "prismarine_rough", "gold_block": "gold_block", "snow_layer": "snow", "moss_block": "moss_block", "polished_blackstone_brick": "polished_blackstone_bricks", "polished_blackstone": "polished_blackstone", "blackstone": "blackstone",
        "blast_furnace": "blast_furnace_side", "cobbled_deepslate_wall": "deepslate/cobbled_deepslate"}
 for w, t in WOODS.items(): MAT[w] = "planks_" + t; MAT[w + "_planks"] = "planks_" + t
+for _c in ("", "exposed_", "weathered_", "oxidized_"):          # copper roofs (waxed looks the same)
+    MAT[_c + "cut_copper"] = MAT["waxed_" + _c + "cut_copper"] = _c + "cut_copper"
 
 def base_material(n):
     for suf in ("_stairs", "_slab", "_wall", "_fence"):
@@ -112,6 +115,8 @@ def base_material(n):
 def cube_tex(n, p):
     """face -> texture key ('top','bottom','side' / per face)."""
     if n.startswith("siege:"): return siege_tex(n)
+    if n == "stone": return {"side": "stone"}          # plain stone, not cobblestone
+    if n == "tuff_bricks": return {"side": "tuff_bricks"}
     w = wood_of(n)
     if n.endswith("_log") and n.startswith("stripped_"):
         return {"top": f"stripped_{w}_log_top", "side": f"stripped_{w}_log"}
@@ -119,9 +124,12 @@ def cube_tex(n, p):
         return {"side": f"stripped_{w}_log" if n.startswith("stripped_") else f"log_{WOODS[w]}"}
     if n.endswith("_log") or n.endswith("_wood"):
         t = WOODS[w]; return {"top": f"log_{t}_top", "side": f"log_{t}" if not n.endswith("_wood") else f"log_{t}"}
-    simple = {"grass_block": {"top": "grass_top#grass", "bottom": "dirt", "side": "grass_side_carried"},
+    simple = {"pumpkin": {"top": "pumpkin_top", "side": "pumpkin_side"},
+              "grass_block": {"top": "grass_top#grass", "bottom": "dirt", "side": "grass_side_carried"},
               "podzol": {"top": "dirt_podzol_top", "bottom": "dirt", "side": "dirt_podzol_side"},
               "ochre_froglight": {"top": "ochre_froglight_top", "bottom": "ochre_froglight_top", "side": "ochre_froglight_side"},
+              "verdant_froglight": {"top": "verdant_froglight_top", "bottom": "verdant_froglight_top", "side": "verdant_froglight_side"},
+              "mangrove_roots": {"top": "mangrove_roots_top", "side": "mangrove_roots_side"},
               "quartz_pillar": {"top": "quartz_block_lines_top", "bottom": "quartz_block_lines_top", "side": "quartz_block_lines"},
               "chiseled_quartz_block": {"top": "quartz_block_chiseled_top", "bottom": "quartz_block_chiseled_top", "side": "quartz_block_chiseled"},
               "smithing_table": {"top": "smithing_table_top", "bottom": "smithing_table_bottom", "side": "smithing_table_side", "front": "smithing_table_front"},
@@ -155,6 +163,9 @@ def cube_tex(n, p):
         c = n[:-11].replace("light_gray", "silver")
         return {"side": "hardened_clay_stained_" + c if c else "hardened_clay"}
     if n.endswith("_wool"): return {"side": "wool_colored_" + n[:-5].replace("light_gray", "silver")}
+    if n.endswith("_concrete"): return {"side": "concrete_" + n[:-9].replace("light_gray", "silver")}
+    if n == "decorated_pot": return {"side": "decorated_pot_side", "top": "decorated_pot_base"}
+    if n == "dried_kelp_block": return {"side": "dried_kelp_side_a", "top": "dried_kelp_top"}
     m = base_material(n)
     if m: return {"side": m}
     return {"side": n}
@@ -174,7 +185,7 @@ PLANTS = {"poppy": "flower_rose", "dandelion": "flower_dandelion", "cornflower":
           "azure_bluet": "flower_houstonia", "allium": "flower_allium", "red_tulip": "flower_tulip_red", "white_tulip": "flower_tulip_white",
           "pink_tulip": "flower_tulip_pink", "orange_tulip": "flower_tulip_orange", "lily_of_the_valley": "flower_lily_of_the_valley",
           "short_grass": "tallgrass#grass", "fern": "fern#grass", "sweet_berry_bush": "sweet_berry_bush_stage3",
-          "wheat": "wheat_stage_7", "carrots": "carrots_stage_3", "potatoes": "potatoes_stage_3"}
+          "wheat": "wheat_stage_7", "cactus": "cactus_side", "dead_bush": "deadbush", "carrots": "carrots_stage_3", "potatoes": "potatoes_stage_3", "beetroot": "beetroots_stage_3"}
 
 FACES = {  # name: normal, 4 corners as functions of box
     "up": (0, 1, 0), "down": (0, -1, 0), "south": (0, 0, 1), "north": (0, 0, -1), "east": (1, 0, 0), "west": (-1, 0, 0)}
@@ -242,9 +253,9 @@ def model(n, p):
         side = {"n": "s", "s": "n", "e": "w", "w": "e"}[p.get("facing", "s")]
         if p.get("open"): side = {"n": "e", "e": "s", "s": "w", "w": "n"}[side] if not p.get("hinge") else {"n": "w", "w": "s", "s": "e", "e": "n"}[side]
         return [(thin_plate(side), t, {"cut": 1})]
-    if n == "lantern":
+    if n in ("lantern", "soul_lantern"):
         y0 = 1 / 16 if p.get("hanging") else 0
-        t = {"side": "lantern@0,2,6,9", "top": "lantern@0,9,6,15", "bottom": "lantern@0,9,6,15"}
+        t = {"side": f"{n}@0,2,6,9", "top": f"{n}@0,9,6,15", "bottom": f"{n}@0,9,6,15"}
         return [((5 / 16, y0, 5 / 16, 11 / 16, y0 + 7 / 16, 11 / 16), t, {"cut": 1, "glow": 1}),
                 ((6 / 16, y0 + 7 / 16, 6 / 16, 10 / 16, y0 + 9 / 16, 10 / 16), t, {"cut": 1, "glow": 1})]
     if n == "flower_pot":
@@ -259,10 +270,19 @@ def model(n, p):
     if n == "grindstone":
         return [((4 / 16, 4 / 16, 2 / 16, 12 / 16, 1, 14 / 16), {"side": "grindstone_side.tga", "top": "grindstone_round.tga"}, {}),
                 ((2 / 16, 0, 6 / 16, 4 / 16, 10 / 16, 10 / 16), {"side": "planks_big_oak"}, {}), ((12 / 16, 0, 6 / 16, 14 / 16, 10 / 16, 10 / 16), {"side": "planks_big_oak"}, {})]
+    if n.endswith("_wall_sign"):        # a thin board on the face of the block behind it
+        w = wood_of(n); t = {"side": "planks_" + WOODS.get(w, "oak")}
+        f = p.get("facing", "s")
+        box = {"s": (0, 4 / 16, 0, 1, 12 / 16, 2 / 16), "n": (0, 4 / 16, 14 / 16, 1, 12 / 16, 1),
+               "e": (0, 4 / 16, 0, 2 / 16, 12 / 16, 1), "w": (14 / 16, 4 / 16, 0, 1, 12 / 16, 1)}[f]
+        return [(box, t, {"cut": 1})]
     if n in ("iron_chain", "chain"): return [("cross", {"side": "chain1"}, {"cut": 1, "scale": 0.4})]
+    if n == "lightning_rod": return [((7 / 16, 0, 7 / 16, 9 / 16, 12 / 16, 9 / 16), {"side": "oxidized_lightning_rod"}, {}),
+                                     ((6 / 16, 12 / 16, 6 / 16, 10 / 16, 1, 10 / 16), {"side": "oxidized_lightning_rod"}, {})]
     if n == "ladder":
         return [((0, 0, 0, 1, 1, 1 / 16), {"side": "ladder"}, {"cut": 1})]
     if n == "moss_carpet": return [((0, 0, 0, 1, 1 / 16, 1), {"side": "moss_block"}, {})]
+    if n == "snow_layer": return [((0, 0, 0, 1, (2 * (int(p.get("height", 0)) + 1)) / 16, 1), {"side": "snow"}, {})]
     if n == "rail": return [((0, 0, 0, 1, 1 / 16, 1), {"side": "rail_normal"}, {"cut": 1})]
     if n in ("siege:portcullis", "siege:castle_gate"):
         t = siege_tex(n); ax = p.get("axis", "x")

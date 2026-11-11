@@ -14,6 +14,7 @@ const tests = [];
 // trips the watchdog, which shuts the world down (first playtest, 2026-11-11). They still run in
 // tools/check.mjs, which fails if a slow test is missing from this list. Written as "group: name".
 export const OFFLINE_ONLY = new Set([
+  "hollowfolk: giant Veilcaps stand in the fens and groves, rare elsewhere, and are tree sized",
   "undertow: ore is in the cliffs, more of it deeper in",
   "undertow: no fill is too big",
   "undertow: open country has all four kinds of land",

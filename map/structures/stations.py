@@ -20,7 +20,7 @@ mark: a one-block step at z = 0, its front wall at z = 1, and the building behin
 Interiors stay empty apart from a booking counter.
 """
 import math
-from kit import Building, h3
+from kit import Building, h3, finish_detail
 from bp import DIRS, OPP
 import settle_halls as SH
 from settle_halls import pyramid, flat_roof, hang, tower, thatch, dragon_heads
@@ -153,7 +153,7 @@ def end(bp, stage, post, stalls, join):
     mark(bp, "stalls", *stalls)
     mark(bp, "trade_join", *join)
     bp.markers["door"] = (0, 0, -1)
-    return bp.finish()
+    return finish_detail(bp, {"planters": False})
 
 # ---------------------------------------------------------------- the four stages
 
@@ -378,7 +378,7 @@ def trade_house(region, stage):
     hang(bp, [(0, 3, -(d + 1))])
     mark(bp, "door", 0, 1, 1)
     bp.markers["door"] = (0, 0, -1)
-    return bp.finish()
+    return finish_detail(bp, dict(P, planters=False))
 
 # ---------------------------------------------------------------- the Junction's engine shed
 
@@ -409,4 +409,4 @@ def engine_shed(region):
     hang(bp, [(-4, 5, 0), (4, 5, 0)])
     mark(bp, "track_centre", 0, 0, 0)
     bp.markers["door"] = (0, 0, -1)
-    return bp.finish()
+    return finish_detail(bp, dict(P, planters=False))

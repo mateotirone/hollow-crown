@@ -9,7 +9,7 @@ Two takes for Mateo to compare (both front south, +z, ground floor y = 1):
 """
 import math
 from bp import Blueprint, DIRS, OPP
-from kit import Building, VALE, mix, h3
+from kit import Building, VALE, mix, h3, DOCTRINE, finish_doctrine
 from settle_halls import pyramid, hang
 from vale import STYLES
 
@@ -133,6 +133,7 @@ def capital(take="medieval", seed=7):
     roman = take == "roman"
     P = {**VALE, **STYLES["stone"]} if roman else dict(VALE)
     if roman: P.update(quoin="smooth_stone", quoin2="stone_bricks")
+    P.update(DOCTRINE, spikes=5)          # detailing passes (05-07) and ridge spikes on the capital
     bp = Blueprint(f"kingsrest_capital_{take}"); bp.marks = {}
     # ---- the wings and their corner towers
     WB = Building(bp, P, seed)
@@ -217,7 +218,7 @@ def capital(take="medieval", seed=7):
         for y in range(1, 4): bp.set(x, y, 12, "dark_oak_fence")
         bp.set(x, 4, 12, "lantern")
     bp.markers["door"] = (0, 1, 16)
-    return bp
+    return finish_doctrine(bp)
 
 def medieval(seed=7): return capital("medieval", seed)
 def roman(seed=7): return capital("roman", seed)

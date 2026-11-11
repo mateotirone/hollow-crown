@@ -12,7 +12,7 @@ here = sys.argv[1]; X0, Z0, SIZE, OUT = int(sys.argv[2]), int(sys.argv[3]), int(
 src_lines = open(os.path.join(here, "genworld.py")).read().split("\n")
 a = next(i for i, l in enumerate(src_lines) if l.startswith("# ---------------------------------------------------------------- plan data"))
 b = next(i for i, l in enumerate(src_lines) if 'log("heights ready' in l)
-g = dict(np=np, re=re, os=os, math=math, json=json, time=time, Image=Image, ImageDraw=ImageDraw, X0=X0, Z0=Z0, SIZE=SIZE,
+g = dict(np=np, re=re, os=os, sys=sys, out=os.path.dirname(os.path.abspath(OUT)), __file__=os.path.join(here, 'genworld.py'), math=math, json=json, time=time, Image=Image, ImageDraw=ImageDraw, X0=X0, Z0=Z0, SIZE=SIZE,
          src=os.path.join(here, "terrain.npz"), CONFIG=os.path.join(here, "config.js"), SEA=62, VALE=0, FROST=1, SALT=2, FEN=3, EMBER=4,
          T0=time.time(), log=lambda *x: None)
 exec(compile("\n".join(src_lines[a:b + 1]), "genworld-slice", "exec"), g)

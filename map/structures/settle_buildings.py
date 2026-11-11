@@ -7,7 +7,7 @@ Same frame as settle_halls.py: front faces south (+z), the door's outside face o
 family. Only the working pieces each building is for go inside (forge, stalls, shelves...).
 """
 from bp import Blueprint, DIRS, OPP, RIGHT
-from kit import Building, mix, grow, h3
+from kit import Building, mix, grow, h3, finish_detail
 import settle_halls as SH
 from settle_halls import castle, pyramid, flat_roof, hang, tower, skirt, thatch, dragon_heads
 
@@ -88,9 +88,9 @@ def step_up(bp, lift):
     bp.set(0, 1, 1, "dark_oak_stairs", facing="n")
     return (0, 1, 1)
 
-def finish(bp, door=(0, 1, 0)):
+def finish(bp, door=(0, 1, 0), P=None):
     bp.markers["door"] = door
-    return bp.finish()
+    return finish_detail(bp, P)
 
 def stilts(bp, P, rect, lift, region):
     """Blackfen buildings stand a little up on mangrove piles with a step up to the door."""
@@ -122,7 +122,7 @@ def cottage(region):
     if L["roof"] == "gable": B.chimney(-4, -5, 1)
     bp.set(2, lift + 1, -7, "chest", facing="s"); bp.set(1, lift + 1, -7, "crafting_table")
     bp.set(-2, lift + 1, -7, "furnace", facing="s")
-    return finish(bp, step_up(bp, lift))
+    return finish(bp, step_up(bp, lift), P=P)
 
 def well(region):
     """A roofed well: a stone ring with water, four posts and a little roof, a bucket on a chain. 5 x 5."""
@@ -151,7 +151,7 @@ def well(region):
             bp.set(x, 5, -2, P["roof_slab"], half="bottom")
         for x in (-2, 2): bp.set(x, 4, -2, P["frame"] if L["wall"] == "timber" else k("stone"), axis="y")
     bp.set(0, 3, -2, "iron_chain"); bp.set(0, 2, -2, "iron_chain")
-    return finish(bp, (0, 1, 0))
+    return finish(bp, (0, 1, 0), P=P)
 
 def library(region):
     """Two storeys of books: eight Archive Shelves for the town's own lore, a lectern, portraits. 11 x 11."""
@@ -180,7 +180,7 @@ def library(region):
     for i, x in enumerate((-2, 0, 2)): bp.marks[f"portrait{i}"] = (x, lift + 4, zb)
     bp.marks["painting0"] = (0, lift + 3, -1)
     for z in range(-8, -1): bp.set(-4, lift + 1, z, "bookshelf"); bp.set(4, lift + 1, z, "bookshelf")
-    return finish(bp, step_up(bp, lift))
+    return finish(bp, step_up(bp, lift), P=P)
 
 def market(region):
     """A market stall: a counter under a striped awning on posts. 5 x 3."""
@@ -196,7 +196,7 @@ def market(region):
     for x in range(-1, 2): bp.set(x, 1, 0, P["trim"], facing="s", half="top")
     bp.set(-1, 1, -2, "barrel", facing="u"); bp.set(1, 1, -2, "barrel"); bp.set(0, 1, -2, "chest", facing="s")
     hang(bp, [(0, 3, -1)])
-    return finish(bp, (0, 1, 1))
+    return finish(bp, (0, 1, 1), P=P)
 
 GARDEN_GROUND = {"frostmarch": "podzol", "saltreach": "coarse_dirt", "emberwaste": "coarse_dirt"}
 
@@ -214,7 +214,7 @@ def garden(region):
     bp.set(0, 1, 0, P["fence"].replace("_fence", "_fence_gate"), facing="s"); bp.set(0, 0, 0, "grass_path")
     for z in (-1, -7): bp.set(0, 0, z, k("bricks"))
     bp.set(-3, 1, -1, "composter"); bp.set(3, 1, -1, "barrel")
-    return finish(bp, (0, 1, 0))
+    return finish(bp, (0, 1, 0), P=P)
 
 def smithy(region):
     """Stone workshop with an open forge porch out front: anvil, grindstone, furnaces, a big chimney. 9 x 11."""
@@ -245,7 +245,7 @@ def smithy(region):
     B.chimney(2, -3, 4, top=None if L["roof"] == "gable" else rt + 1, w=2, d=1)
     bp.set(-1, 1, -1, "anvil"); bp.set(-3, 1, -1, "grindstone"); bp.set(1, 1, -1, "cauldron")
     hang(bp, [(0, 3, -2)])
-    return finish(bp, (0, 1, 1))
+    return finish(bp, (0, 1, 1), P=P)
 
 def stable(region):
     """Three open stalls under one roof with hay and a trough. 11 x 7."""
@@ -271,7 +271,7 @@ def stable(region):
     for x in (-4, -1, 3): bp.set(x, 1, -5, "hay_block", axis="y")
     for x in (-3, 0, 4): bp.set(x, 1, -5, "cauldron")
     hang(bp, [(-3, 3, -1), (0, 3, -1), (3, 3, -1)])
-    return finish(bp, (0, 1, 1))
+    return finish(bp, (0, 1, 1), P=P)
 
 def storehouse(region):
     """A tall barn with a 3-wide cart door, a hay loft door above, barrels and chests. 11 x 11."""
@@ -296,7 +296,7 @@ def storehouse(region):
     for x in range(-4, 5): bp.set(x, 6, -9, "hay_block", axis="y")
     for y in range(1, 6): bp.set(4, y, -2, "ladder", facing="w")
     hang(bp, [(0, 4, -5)])
-    return finish(bp, (0, 1, 1))
+    return finish(bp, (0, 1, 1), P=P)
 
 def watchtower(region):
     """A lookout over your land: a stone shaft, a lookout platform with a parapet or rail, a brazier, a roof. 5 x 5."""
@@ -326,7 +326,7 @@ def watchtower(region):
         for (x, z) in ((-3, 1), (3, 1), (-3, -5), (3, -5)):
             for y in (10, 11, 12): bp.set(x, y, z, P["fence"] if L["wall"] == "timber" else k("stone"))
         pyramid(bp, P, -4, -6, 4, 2, 13, pitch=1, finial="lantern")
-    return finish(bp, (0, 1, 1))
+    return finish(bp, (0, 1, 1), P=P)
 
 BUILDERS = {"cottage": cottage, "well": well, "library": library, "market": market, "garden": garden,
             "smithy": smithy, "stable": stable, "storehouse": storehouse, "watchtower": watchtower}
@@ -399,7 +399,7 @@ def stables(region, level=1):
                 bp.set(x, h, z, P["trim_block"]); bp.set(x, h + 1, z, P["fence"] if (x, z) != (0, cz) else "air")
                 bp.set(x, h + 2, z, P["roof_slab"], half="bottom")
         bp.set(0, h + 2, cz, P["roof_block"]); bp.set(0, h + 3, cz, P["fence"]); bp.set(0, h + 4, cz, "lightning_rod")
-    return finish(bp, (0, 1, 0))
+    return finish(bp, (0, 1, 0), P=P)
 
 def breeder_yard(region):
     """The Breeder's Yard: a fenced paddock 13 x 15 with an open-fronted shelter at the back, hay, a trough and
@@ -432,7 +432,7 @@ def breeder_yard(region):
     for (x, z) in ((-4, -4), (4, -6), (-2, -7), (3, -3), (-5, -10), (5, -11)):
         bp.set(x, 1, z, ["poppy", "dandelion", "cornflower", "oxeye_daisy"][(x * 7 + z) % 4] if region in ("vale", "blackfen") else "short_grass")
     bp.set(3, 1, -5, "cauldron")
-    return finish(bp, (0, 1, 0))
+    return finish(bp, (0, 1, 0), P=P)
 
 def barracks(region):
     """The Barracks guardhouse: a two-storey hall for the guard, 11 x 13, with a stout square watch tower at
@@ -462,7 +462,7 @@ def barracks(region):
     bp.set(5, 16, -12, P["fence"]); bp.set(5, 17, -12, "lantern")
     for x in (2, 3): bp.set(x, 1, -1, "grindstone") if x == 3 else bp.set(x, 1, -1, "smithing_table")
     for x in range(1, 4): bp.set(x, 1, -11, "barrel")
-    return finish(bp, (0, 1, 1))
+    return finish(bp, (0, 1, 1), P=P)
 
 def quartermaster(region):
     """The Quartermaster's armoury: a small strong store, 9 x 9, with a serving hatch under a striped awning,
@@ -484,7 +484,7 @@ def quartermaster(region):
     for z in (-6, -4, -2): bp.set(3, 1, z, "barrel"); bp.set(3, 2, z, "barrel")
     for z in (-5, -3): bp.set(-3, 1, z, "chest", facing="e")
     hang(bp, [(2, 3, 1)])
-    return finish(bp, (-2, 1, 1))
+    return finish(bp, (-2, 1, 1), P=P)
 
 HORSE_BUILDERS = {"stables_1": lambda r: stables(r, 1), "stables_2": lambda r: stables(r, 2), "stables_3": lambda r: stables(r, 3), "breeder_yard": breeder_yard,
                   "barracks": barracks, "quartermaster": quartermaster}
