@@ -9,7 +9,12 @@
       }
     },
     "components": {
-      "minecraft:icon": "siege_guard_blackfen_diamond_helmet",
+      "minecraft:icon": {
+        "textures": {
+          "default": "siege_guard_blackfen_diamond_helmet",
+          "dyed": "siege_guard_blackfen_diamond_helmet_dyed"
+        }
+      },
       "minecraft:display_name": {
         "value": "item.siege:guard_blackfen_diamond_helmet.name"
       },

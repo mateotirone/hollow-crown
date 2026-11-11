@@ -9,7 +9,12 @@
       }
     },
     "components": {
-      "minecraft:icon": "siege_guard_emberwaste_boots",
+      "minecraft:icon": {
+        "textures": {
+          "default": "siege_guard_emberwaste_boots",
+          "dyed": "siege_guard_emberwaste_boots_dyed"
+        }
+      },
       "minecraft:display_name": {
         "value": "item.siege:guard_emberwaste_boots.name"
       },
