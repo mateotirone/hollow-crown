@@ -13,11 +13,24 @@
     "default": "geometry.siege_b.shieldwall_brute"
    },
    "animations": {
-    "main": "animation.siege_b.shieldwall_brute"
+    "base": "animation.siege_b.shieldwall_brute",
+    "idle": "animation.siege_b.shieldwall_brute.idle",
+    "walk": "animation.siege_b.shieldwall_brute.walk",
+    "attack": "animation.siege_b.shieldwall_brute.attack",
+    "swing": "controller.animation.siege_b.shieldwall_brute.swing",
+    "aim": "animation.siege_b.shieldwall_brute.aim",
+    "ready": "controller.animation.siege_b.shieldwall_brute.ready",
+    "hurt": "animation.siege_b.shieldwall_brute.hurt",
+    "flinch": "controller.animation.siege_b.shieldwall_brute.flinch"
    },
    "scripts": {
     "animate": [
-     "main"
+     "base",
+     "idle",
+     "walk",
+     "swing",
+     "ready",
+     "flinch"
     ]
    },
    "render_controllers": [

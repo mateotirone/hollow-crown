@@ -649,6 +649,33 @@
   },
   "siege_guard_vale_netherite_leggings_dyed": {
    "textures": "textures/items/siege_guard_vale_netherite_leggings_dyed"
+  },
+  "siege_summon_reeve": {
+   "textures": "textures/items/creative/summon_reeve"
+  },
+  "siege_summon_huntsman": {
+   "textures": "textures/items/creative/summon_huntsman"
+  },
+  "siege_summon_bride": {
+   "textures": "textures/items/creative/summon_bride"
+  },
+  "siege_summon_seneschal": {
+   "textures": "textures/items/creative/summon_seneschal"
+  },
+  "siege_summon_mother": {
+   "textures": "textures/items/creative/summon_mother"
+  },
+  "siege_summon_warlord_king": {
+   "textures": "textures/items/creative/summon_warlord_king"
+  },
+  "siege_summon_choir": {
+   "textures": "textures/items/creative/summon_choir"
+  },
+  "siege_summon_morvane": {
+   "textures": "textures/items/creative/summon_morvane"
+  },
+  "siege_summon_pretender": {
+   "textures": "textures/items/creative/summon_pretender"
   }
  }
 }

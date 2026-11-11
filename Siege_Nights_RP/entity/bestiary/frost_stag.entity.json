@@ -13,11 +13,21 @@
     "default": "geometry.siege_b.frost_stag"
    },
    "animations": {
-    "main": "animation.siege_b.frost_stag"
+    "base": "animation.siege_b.frost_stag",
+    "idle": "animation.siege_b.frost_stag.idle",
+    "walk": "animation.siege_b.frost_stag.walk",
+    "attack": "animation.siege_b.frost_stag.attack",
+    "swing": "controller.animation.siege_b.frost_stag.swing",
+    "hurt": "animation.siege_b.frost_stag.hurt",
+    "flinch": "controller.animation.siege_b.frost_stag.flinch"
    },
    "scripts": {
     "animate": [
-     "main"
+     "base",
+     "idle",
+     "walk",
+     "swing",
+     "flinch"
     ]
    },
    "render_controllers": [

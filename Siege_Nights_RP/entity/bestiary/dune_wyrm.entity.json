@@ -13,11 +13,19 @@
     "default": "geometry.siege_b.dune_wyrm"
    },
    "animations": {
-    "main": "animation.siege_b.dune_wyrm"
+    "base": "animation.siege_b.dune_wyrm",
+    "idle": "animation.siege_b.dune_wyrm.idle",
+    "attack": "animation.siege_b.dune_wyrm.attack",
+    "swing": "controller.animation.siege_b.dune_wyrm.swing",
+    "hurt": "animation.siege_b.dune_wyrm.hurt",
+    "flinch": "controller.animation.siege_b.dune_wyrm.flinch"
    },
    "scripts": {
     "animate": [
-     "main"
+     "base",
+     "idle",
+     "swing",
+     "flinch"
     ]
    },
    "render_controllers": [

@@ -14,7 +14,15 @@
    },
    "render_controllers": [
     "controller.render.siege_bestiary"
-   ]
+   ],
+   "animations": {
+    "idle": "animation.siege_b.hollow_regent.idle"
+   },
+   "scripts": {
+    "animate": [
+     "idle"
+    ]
+   }
   }
  }
 }

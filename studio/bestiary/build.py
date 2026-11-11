@@ -189,7 +189,7 @@ def entity_bp(m):
     else:
         c.update(tgt); c.update(fight)
     if m.get("burns"): c["minecraft:burns_in_daylight"] = {}
-    if m.get("rideable"): c["minecraft:rideable"] = {"seat_count": 1, "family_types": ["siege_boss"], "seats": {"position": [0, 2.7, 0.3]}}
+    if m.get("rideable"): c["minecraft:rideable"] = {"seat_count": 1, "family_types": ["siege_boss"], "seats": {"position": [0, 0.67, 0]}}   # the rider's feet go here: the Warlord King's hips (1.455 blocks up) land on the ogre's shoulders (2.1)
     if m.get("lifetime"):
         c["minecraft:timer"] = {"time": m["lifetime"], "looping": False, "time_down_event": {"event": "siege:fade"}}
         groups["siege:gone"] = {"minecraft:instant_despawn": {}}; events["siege:fade"] = {"add": {"component_groups": ["siege:gone"]}}
@@ -231,41 +231,16 @@ def entity_bp(m):
         c.pop("minecraft:despawn", None)
     return {"format_version": "1.21.60", "minecraft:entity": {"description": desc, "component_groups": groups, "components": c, "events": events}}
 
-# ---------- animations ----------
-WALK = "math.cos(query.modified_distance_moved*38.17)*query.modified_move_speed"
-def anim_for(m, model):
-    names = {b["name"] for b in model.bones}; plan = m.get("plan", "biped"); b = {}
-    def rot(bone, x="0", y="0", z="0"):
-        if bone in names: b.setdefault(bone, {})["rotation"] = [x, y, z]
-    if plan != "none" and "head" in names: rot("head", "query.target_x_rotation", "query.target_y_rotation")
-    if plan in ("biped", "float"):
-        k = 45 if plan == "biped" else 8
-        rot("leg_r", f"{WALK}*{k}"); rot("leg_l", f"-{WALK}*{k}")
-        idle = "math.sin(query.life_time*90)*3"
-        raised = "-80+" if m["id"] in ("lost_villager", "wrongling", "drowned_bride", "tolling_shade", "mother_echo", "mother_of_changelings") and m["id"] not in ("wrongling", "lost_villager") else ""
-        rot("arm_r", f"{raised}-{WALK}*35 - math.sin(variable.attack_time*180)*95 + {idle}"); rot("arm_l", f"{raised}{WALK}*35 - {idle}")
-    if plan == "float" and "body" in names: b.setdefault("body", {})["position"] = ["0", "math.sin(query.life_time*120)*1.5", "0"]
-    if plan == "quad":
-        for n, s in (("leg_fr", ""), ("leg_bl", ""), ("leg_fl", "-"), ("leg_br", "-")): rot(n, f"{s}{WALK}*40")
-        rot("tail", "0", "math.sin(query.life_time*300)*12")
-    if plan == "bird":
-        rot("wing_r", z="math.sin(query.life_time*1400)*45"); rot("wing_l", z="-math.sin(query.life_time*1400)*45")
-    if plan == "bug":
-        for bn in names:
-            if bn.startswith("leg_"): rot(bn, y=f"math.sin(query.life_time*900+{ord(bn[-1])*40})*20*query.modified_move_speed")
-    if plan == "wyrm":
-        for i in range(6): rot(f"seg{i}", y=f"math.sin(query.life_time*200-{i*45})*9", x=f"math.cos(query.life_time*150-{i*45})*3")
-    for bone, ch, val in m.get("anim_extra", []):
-        if bone in names: b.setdefault(bone, {})[ch] = val
-    # An empty "bones" object is a content-log error in game; a still model needs no bones entry
-    return {"loop": True, "bones": b} if b else {"loop": True, "animation_length": 1.0}
+# ---------- animations: see anims.py (idle, gait, swing, aim, flinch, boss moves) ----------
+import anims
 
-def client_entity(m, tex_w=None):
+def client_entity(m, motion=None):
     mid = m["id"]
+    amap, animate = motion or ({"base": f"animation.siege_b.{mid}"}, ["base"])
     d = {"identifier": "siege:" + mid, "materials": {"default": m.get("material", "entity_alphatest")},
          "textures": {"default": f"textures/entity/siege/bestiary/{mid}"},
          "geometry": {"default": f"geometry.siege_b.{m.get('geo', mid)}"},
-         "animations": {"main": f"animation.siege_b.{mid}"}, "scripts": {"animate": ["main"]},
+         "animations": dict(amap), "scripts": {"animate": list(animate)},
          "render_controllers": ["controller.render.siege_bestiary"]}
     if m.get("variants"):
         d["textures"]["alt"] = f"textures/entity/siege/bestiary/{mid}_alt"; d["render_controllers"] = ["controller.render.siege_bestiary_variant"]
@@ -441,7 +416,7 @@ def write_bodies(built):
     return {"siege:" + k: {"kind": i, "size": built[k][0].get("scale", 1)} for i, k in enumerate(kinds)}
 
 def main():
-    lang = []; anims = {}; data_mobs = {}; built = {}
+    lang = []; data_mobs = {}; built = {}
     for m in roster.MOBS:
         mid = m["id"]
         model = Model(mid, m["pal"], seed=sum(map(ord, mid))); m["model"](model)
@@ -449,8 +424,6 @@ def main():
         os.makedirs(RP + "textures/entity/siege/bestiary", exist_ok=True)
         save_tex(model.texture(), RP + f"textures/entity/siege/bestiary/{mid}.png")
         if m.get("variants"): save_tex(model.texture(m["pal_alt"]), RP + f"textures/entity/siege/bestiary/{mid}_alt.png")
-        anims[f"animation.siege_b.{mid}"] = anim_for(m, model)
-        write(RP + f"entity/bestiary/{mid}.entity.json", client_entity(m))
         write(BP + f"entities/bestiary/{mid}.json", entity_bp(m))
         if not m.get("no_loot") and mid in DROPS: write(BP + f"loot_tables/entities/bestiary/{mid}.json", loot(DROPS[mid]))
         if m.get("spawn"): write(BP + f"spawn_rules/bestiary_{mid}.json", spawn_rule(m))
@@ -459,7 +432,7 @@ def main():
         fam = "boss" if m.get("boss") else m["family"]
         data_mobs["siege:" + mid] = {"name": m["name"], "family": fam, "hp": m["hp"], "lore": m["lore"], **({"region": m["region"]} if m.get("region") else {})}
         built[mid] = (m, model)
-    write(RP + "animations/bestiary.animation.json", {"format_version": "1.8.0", "animations": anims})
+    anims.write_all(RP, BP, [built[k] for k in built], entity_bp, client_entity, write)   # animations, controllers, client entities, moves.js
     write(RP + "render_controllers/siege_bestiary.render_controllers.json", {"format_version": "1.8.0", "render_controllers": {
         "controller.render.siege_bestiary": {"geometry": "Geometry.default", "materials": [{"*": "Material.default"}], "textures": ["Texture.default"]},
         "controller.render.siege_bestiary_variant": {"arrays": {"textures": {"Array.skins": ["Texture.default", "Texture.alt"]}},

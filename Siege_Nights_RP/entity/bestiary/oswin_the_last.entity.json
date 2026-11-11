@@ -13,11 +13,24 @@
     "default": "geometry.siege_b.oswin_the_last"
    },
    "animations": {
-    "main": "animation.siege_b.oswin_the_last"
+    "base": "animation.siege_b.oswin_the_last",
+    "idle": "animation.siege_b.oswin_the_last.idle",
+    "walk": "animation.siege_b.oswin_the_last.walk",
+    "attack": "animation.siege_b.oswin_the_last.attack",
+    "swing": "controller.animation.siege_b.oswin_the_last.swing",
+    "aim": "animation.siege_b.oswin_the_last.aim",
+    "ready": "controller.animation.siege_b.oswin_the_last.ready",
+    "hurt": "animation.siege_b.oswin_the_last.hurt",
+    "flinch": "controller.animation.siege_b.oswin_the_last.flinch"
    },
    "scripts": {
     "animate": [
-     "main"
+     "base",
+     "idle",
+     "walk",
+     "swing",
+     "ready",
+     "flinch"
     ]
    },
    "render_controllers": [

@@ -13,11 +13,24 @@
     "default": "geometry.siege_b.grey_spearman"
    },
    "animations": {
-    "main": "animation.siege_b.grey_spearman"
+    "base": "animation.siege_b.grey_spearman",
+    "idle": "animation.siege_b.grey_spearman.idle",
+    "walk": "animation.siege_b.grey_spearman.walk",
+    "attack": "animation.siege_b.grey_spearman.attack",
+    "swing": "controller.animation.siege_b.grey_spearman.swing",
+    "aim": "animation.siege_b.grey_spearman.aim",
+    "ready": "controller.animation.siege_b.grey_spearman.ready",
+    "hurt": "animation.siege_b.grey_spearman.hurt",
+    "flinch": "controller.animation.siege_b.grey_spearman.flinch"
    },
    "scripts": {
     "animate": [
-     "main"
+     "base",
+     "idle",
+     "walk",
+     "swing",
+     "ready",
+     "flinch"
     ]
    },
    "render_controllers": [

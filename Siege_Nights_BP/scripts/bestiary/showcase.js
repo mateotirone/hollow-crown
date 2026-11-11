@@ -44,7 +44,7 @@ on("showcase", ({ player, dim, nextSpot, label }) => {
       console.warn(`[Hollow Crown] bestiary showcase could not spawn ${typeId}: ${e}`);
     }
   }
-  player.sendMessage(`§6Bestiary:§7 ${shown} mobs and bosses are standing behind you as statues. To fight a boss, use its key from the "Every item" chest, or §f/scriptevent siege:bestiary_summon reeve§7 (also huntsman, bride, seneschal, mother, warlord_king, morvane; a Pretender: /scriptevent siege:pretender_rise).`);
+  player.sendMessage(`§6Bestiary:§7 ${shown} mobs and bosses are standing behind you as statues. To fight a boss, use its Boss Summon (creative menu, Equipment tab) or its key from the "Every item" chest, or §f/scriptevent siege:bestiary_summon reeve§7 (also huntsman, bride, seneschal, mother, warlord_king, morvane; a Pretender: /scriptevent siege:pretender_rise).`);
 });
 
 addTests("bestiary", {

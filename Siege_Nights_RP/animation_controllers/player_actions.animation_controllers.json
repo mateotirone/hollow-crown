@@ -1,0 +1,98 @@
+{
+  "format_version": "1.10.0",
+  "animation_controllers": {
+    "controller.animation.hc.player.attack": {
+      "initial_state": "default",
+      "states": {
+        "default": {
+          "animations": [
+            {
+              "hc_attack_vanilla": "variable.hc_kind == 0"
+            },
+            {
+              "hc_attack_blade_forehand": "variable.hc_kind == 1 && variable.hc_combo == 0"
+            },
+            {
+              "hc_attack_blade_backhand": "variable.hc_kind == 1 && variable.hc_combo == 1"
+            },
+            {
+              "hc_attack_blade_thrust": "variable.hc_kind == 1 && variable.hc_combo == 2"
+            },
+            {
+              "hc_attack_heavy_chop": "variable.hc_kind == 2 && variable.hc_combo != 1"
+            },
+            {
+              "hc_attack_heavy_sweep": "variable.hc_kind == 2 && variable.hc_combo == 1"
+            },
+            {
+              "hc_attack_fist_jab": "variable.hc_kind == 3 && variable.hc_combo != 2"
+            },
+            {
+              "hc_attack_fist_hook": "variable.hc_kind == 3 && variable.hc_combo == 2"
+            }
+          ]
+        }
+      }
+    },
+    "controller.animation.hc.player.fp_attack": {
+      "initial_state": "default",
+      "states": {
+        "default": {
+          "animations": [
+            {
+              "hc_fp_attack_vanilla": "variable.hc_kind == 0"
+            },
+            {
+              "hc_fp_blade_forehand": "variable.hc_kind == 1 && variable.hc_combo == 0"
+            },
+            {
+              "hc_fp_blade_backhand": "variable.hc_kind == 1 && variable.hc_combo == 1"
+            },
+            {
+              "hc_fp_blade_thrust": "variable.hc_kind == 1 && variable.hc_combo == 2"
+            },
+            {
+              "hc_fp_heavy_chop": "variable.hc_kind == 2 && variable.hc_combo != 1"
+            },
+            {
+              "hc_fp_heavy_sweep": "variable.hc_kind == 2 && variable.hc_combo == 1"
+            },
+            {
+              "hc_fp_fist_jab": "variable.hc_kind == 3 && variable.hc_combo != 2"
+            },
+            {
+              "hc_fp_fist_hook": "variable.hc_kind == 3 && variable.hc_combo == 2"
+            }
+          ]
+        }
+      }
+    },
+    "controller.animation.hc.player.actions": {
+      "initial_state": "default",
+      "states": {
+        "default": {
+          "animations": [
+            {
+              "hc_locomotion": "!variable.is_first_person && !variable.is_paperdoll && !variable.map_face_icon && variable.hc_live"
+            },
+            {
+              "hc_bow_pose": "!variable.is_first_person && !variable.is_paperdoll && !variable.map_face_icon && variable.hc_drawing && variable.hc_rimefang"
+            },
+            {
+              "hc_bow_draw": "!variable.is_first_person && !variable.is_paperdoll && !variable.map_face_icon && variable.hc_drawing"
+            },
+            {
+              "hc_bow_release": "!variable.is_first_person && !variable.is_paperdoll && !variable.map_face_icon && variable.hc_release > 0.0"
+            },
+            {
+              "hc_fp_motion": "variable.is_first_person && !variable.is_paperdoll"
+            },
+            {
+              "hc_fp_bow": "variable.is_first_person && !variable.is_paperdoll && variable.hc_drawing"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

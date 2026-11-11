@@ -13,11 +13,11 @@
     "default": "geometry.siege_b.hollow_bolt"
    },
    "animations": {
-    "main": "animation.siege_b.hollow_bolt"
+    "base": "animation.siege_b.hollow_bolt"
    },
    "scripts": {
     "animate": [
-     "main"
+     "base"
     ]
    },
    "render_controllers": [

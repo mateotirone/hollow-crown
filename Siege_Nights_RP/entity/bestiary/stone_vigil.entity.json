@@ -13,11 +13,11 @@
     "default": "geometry.siege_b.stone_vigil"
    },
    "animations": {
-    "main": "animation.siege_b.stone_vigil"
+    "base": "animation.siege_b.stone_vigil"
    },
    "scripts": {
     "animate": [
-     "main"
+     "base"
     ]
    },
    "render_controllers": [
