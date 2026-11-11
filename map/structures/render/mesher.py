@@ -72,7 +72,7 @@ MAT = {"stone_brick": "stonebrick", "stone_bricks": "stonebrick", "mossy_stone_b
        "cut_red_sandstone": "red_sandstone_smooth", "prismarine_bricks": "prismarine_bricks", "polished_tuff": "polished_tuff",
        "smooth_stone_slab": "stone_slab_top", "normal_stone": "stone", "stone_block": "stone",
        "quartz": "quartz_block_side", "quartz_block": "quartz_block_side", "smooth_quartz": "quartz_block_bottom", "quartz_bricks": "quartz_bricks",
-       "dark_prismarine": "prismarine_dark", "prismarine": "prismarine_rough", "gold_block": "gold_block", "snow_layer": "snow", "moss_block": "moss_block",
+       "dark_prismarine": "prismarine_dark", "prismarine": "prismarine_rough", "gold_block": "gold_block", "snow_layer": "snow", "moss_block": "moss_block", "polished_blackstone_brick": "polished_blackstone_bricks",
        "blast_furnace": "blast_furnace_side", "cobbled_deepslate_wall": "deepslate/cobbled_deepslate"}
 for w, t in WOODS.items(): MAT[w] = "planks_" + t; MAT[w + "_planks"] = "planks_" + t
 
@@ -97,6 +97,7 @@ def cube_tex(n, p):
         t = WOODS[w]; return {"top": f"log_{t}_top", "side": f"log_{t}" if not n.endswith("_wood") else f"log_{t}"}
     simple = {"grass_block": {"top": "grass_top#grass", "bottom": "dirt", "side": "grass_side_carried"},
               "podzol": {"top": "dirt_podzol_top", "bottom": "dirt", "side": "dirt_podzol_side"},
+              "ochre_froglight": {"top": "ochre_froglight_top", "bottom": "ochre_froglight_top", "side": "ochre_froglight_side"},
               "grass_path": {"top": "grass_path_top", "bottom": "dirt", "side": "grass_path_side"},
               "hay_block": {"top": "hay_block_top", "side": "hay_block_side"},
               "farmland": {"top": "farmland_wet", "side": "dirt", "bottom": "dirt"},
@@ -324,7 +325,7 @@ class Mesher:
                         if opaque_cube(nb): continue
                         if full and nb and cull_group(nb[0]) and cull_group(nb[0]) == cull_group(n): continue
                     if fl.get("water") and f != "up" and self.cells.get((x + nrm[0], y + nrm[1], z + nrm[2]), ("", {}))[0] == "water": continue
-                    spec = self.face_tex(tex, f, fl)
+                    spec = self.face_tex(tex, f, fl) or tex.get("side") or "stone"
                     key, rect = self.texkey(spec)
                     verts = face_quad(f, b)
                     rot = fl.get("axis") and self.rotated(fl["axis"], f)

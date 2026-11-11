@@ -12,7 +12,7 @@ import { STYLES } from "./styles.js";
 // design facing (the design's front faces the player, so its "n" is into the hall) -> local direction
 const DIR = { n: "+z", s: "-z", e: "+x", w: "-x" };
 
-function optionsFor(name, p) {
+export function optionsFor(name, p) {
   const o = {};
   if (p.facing) o.dir = DIR[p.facing];
   if (p.axis) o.axis = p.axis;
