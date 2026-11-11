@@ -41,7 +41,7 @@ import { shouldAlarm, oreOutcome, noteEntry, crownTick, crownVerdict, CLAIM_SECO
 import { oreChance } from "./terrain.js";
 import { shouldRise, regentOutcome, REGENT, TEMPERS, JOBS } from "./regent.js";
 import { sfx } from "../core/sfx.js";
-import { thinTick, thinCommand, planThinPlace, THIN_PLACES, CAMP_TOME, SHAPE } from "./thinplaces.js";
+import { thinTick, thinCommand, planThinPlace, hillHeight, floorAt, THIN_PLACES, CAMP_TOME, SHAPE } from "./thinplaces.js";
 import { SITE_FEATURES } from "../lore/data/world.js";
 import { canOpen, dullLeft, BOSSES_TO_OPEN, FORK_DULL_DAYS } from "./source.js";
 import { CRACK_HEIGHT } from "./rift.js";
@@ -416,15 +416,26 @@ addTests("undertow", {
       assert(plan.ops.length < 30000, `${t.id}: ${plan.ops.length} blocks`);
     }
   },
-  "thin places: a dry cave is walkable from the mouth to the seam": () => {
+  "thin places: a dry cave is walkable from the mouth down to the seam": () => {
     for (const t of THIN_PLACES.filter((x) => !SITE_FEATURES[x.id][0])) {
       const plan = planThinPlace(t.id, 0, 0, 64);
       const last = new Map();
       for (const o of plan.ops) last.set(`${o.x},${o.y},${o.z}`, o.block);
+      let prev;
       for (let z = SHAPE.tunnel.v1; z > SHAPE.wallV; z--) {
-        assert(last.get(`0,65,${z}`) === "minecraft:air" && last.get(`0,66,${z}`) === "minecraft:air", `${t.id}: blocked at z ${z}`);
-        assert(last.get(`0,64,${z}`) !== "minecraft:air", `${t.id}: hole in the floor at z ${z}`);
+        const fy = 64 + (z < SHAPE.chamber.v1 + 1 ? 1 - SHAPE.depth : floorAt(z));
+        assert(last.get(`0,${fy},${z}`) === "minecraft:air" && last.get(`0,${fy + 1},${z}`) === "minecraft:air", `${t.id}: blocked at z ${z}`);
+        assert(last.get(`0,${fy - 1},${z}`) !== "minecraft:air", `${t.id}: hole in the floor at z ${z}`);
+        assert(prev === undefined || Math.abs(prev - fy) <= 1, `${t.id}: step too high at z ${z}`);
+        prev = fy;
       }
+    }
+  },
+  "thin places: low, wide hills, never taller than they are wide": () => {
+    for (const t of THIN_PLACES) {
+      let top = 0, w = 0;
+      for (let u = -40; u <= 40; u++) for (let v = -50; v <= 30; v++) { const h = hillHeight(t.id, u, v); if (h > 0) { top = Math.max(top, h); w = Math.max(w, Math.abs(u)); } }
+      assert(top <= 26 && top * 1.6 < w * 2, `${t.id}: ${top} tall, ${w * 2} wide`);
     }
   },
   "the fork: five bosses open it, a dead seam dulls it for days": () => {

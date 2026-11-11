@@ -1,7 +1,8 @@
 // The seven thin places, built by script so the road to the Rift works on a freshly generated map.
 //
-// Each thin place (plots/config.js WARDS with thin: true and a lore `site` id) gets a rock outcrop with a cave
-// mouth facing south, a tall chamber, and a Rift seam in the chamber's back wall. The cave is built to match
+// Each thin place (plots/config.js WARDS with thin: true and a lore `site` id) gets a low, wide hill of its own
+// shape with a cave mouth facing south; the way in steps down into the ground to a tall chamber below ground
+// level, with a Rift seam in the chamber's back wall. The cave is built to match
 // Brother Fennick's six features for that site (lore/data/world.js SITE_FEATURES), so his Field Notes really do
 // single out one cave in the world:
 //   water   the way in dips under water and you swim a few blocks      (else: dry all the way)
@@ -27,7 +28,7 @@ import { WARDS } from "../plots/config.js";
 import { SITE_FEATURES } from "../lore/data/world.js";
 import { placeCache } from "../lore/caches.js";
 import { markPlace } from "../lore/ledger.js";
-import { hash } from "./noise.js";
+import { hash, fbm } from "./noise.js";
 import { load, save, say } from "./data.js";
 import { getSites, recordSite } from "./source.js";
 import { SEAM, CRACK_HEIGHT } from "./rift.js";
@@ -61,23 +62,56 @@ const LOOK = {
   witchroot_caves: { raw: ["tuff", "packed_mud", "mossy_cobblestone", "tuff"], cut: ["mud_bricks"], floor: "packed_mud", top: "moss_block", pillar: "mud_bricks" },
 };
 
-// Fixed shape, in local coordinates: u = east, v = south (the mouth faces south), y above the ground block G.
+// Fixed layout, in local coordinates: u = east, v = south (the mouth faces south), y above the ground block G.
+// The cave goes DOWN into the ground under a low, wide hill: a sloping cut leads in from the south, steps drop
+// DEPTH blocks, and the chamber sits below ground level so the hill only has to cover its roof.
 export const SHAPE = {
-  mound: { cv: -12, rx: 15, rz: 16, peak: 28 },
-  tunnel: { u: 2, v0: -7, v1: 4, h: 5 },
+  depth: 6, // chamber floor (first air layer) is at y = 1 - depth
+  tunnel: { u: 2, v0: -7, v1: 6, h: 5, stepFrom: 3 }, // floor y 1 at v >= stepFrom, one lower per block north
   chamber: { u: 6, v0: -18, v1: -8, h: 17 },
-  wallV: -19, // the back wall's face: the seam stands here and the crack eats 4 deeper (v -19 .. -22)
+  wallV: -19, // the back wall's face: the seam stands here and the crack eats 4 deeper (v -19 .. -23)
   camp: { u: 10, v: 13 },
+};
+// Each hill has its own silhouette. rx: half width; rzN / rzS: reach north / south of cv; peak: height;
+// round: <1 flattens the top (barrow, mesa), >1 sharpens it; rough: surface noise; wobble: outline noise; terrace: bench height.
+export const HILL = {
+  kings_barrow: { cv: -10, rx: 19, rzN: 24, rzS: 13, peak: 16, round: 0.45, rough: 0.04, wobble: 0.08, terrace: 0 },
+  bellfounders_mine: { cv: -10, rx: 23, rzN: 23, rzS: 10, peak: 20, round: 0.85, rough: 0.32, wobble: 0.25, terrace: 0 },
+  frostvein_hollow: { cv: -11, rx: 25, rzN: 24, rzS: 9, peak: 22, round: 0.95, rough: 0.38, wobble: 0.3, terrace: 0 },
+  drowned_chapel: { cv: -10, rx: 21, rzN: 22, rzS: 11, peak: 17, round: 0.7, rough: 0.22, wobble: 0.2, terrace: 0 },
+  witchroot_caves: { cv: -10, rx: 23, rzN: 22, rzS: 13, peak: 15, round: 0.55, rough: 0.14, wobble: 0.32, terrace: 0 },
+  saltglass_grotto: { cv: -10, rx: 25, rzN: 22, rzS: 10, peak: 16, round: 0.3, rough: 0.08, wobble: 0.22, terrace: 3 },
+  sunken_quarry: { cv: -10, rx: 23, rzN: 22, rzS: 9, peak: 16, round: 0.3, rough: 0.05, wobble: 0.15, terrace: 4 },
 };
 
 const pick = (list, a, b, c) => list[Math.floor(hash(a * 7 + c, b * 13 - c, 911) * list.length) % list.length];
+
+// The hill's height over the ground at (u, v), 0 where there is no hill. Pure; exported for the self-test.
+export function hillHeight(id, u, v) {
+  const H = HILL[id], { tunnel: T, chamber: C, depth } = SHAPE;
+  const F = 1 - depth;
+  const salt = id.length * 37;
+  const rz = v > H.cv ? H.rzS : H.rzN;
+  const wob = 1 + H.wobble * (fbm(u * 0.09, v * 0.09, salt) - 0.5) * 2;
+  const d2 = ((u / H.rx) ** 2 + ((v - H.cv) / rz) ** 2) / wob;
+  let h = d2 >= 1 ? 0 : H.peak * Math.pow(1 - d2, H.round);
+  if (h > 0) h *= 1 + H.rough * (fbm(u * 0.21, v * 0.21, salt + 5) - 0.5) * 2;
+  if (H.terrace && h > 0) h = Math.max(1, Math.round(h / H.terrace) * H.terrace);
+  // enough rock over the cave: the chamber roof, the wall the crack eats into, the covered part of the way in
+  if (Math.abs(u) <= C.u + 1 && v >= C.v0 - 1 && v <= C.v1 + 1) h = Math.max(h, F + C.h + 2);
+  if (Math.abs(u) <= 5 && v >= SHAPE.wallV - 5 && v < C.v0) h = Math.max(h, F + CRACK_HEIGHT + 2);
+  if (Math.abs(u) <= T.u + 1 && v >= T.v0 && v <= 0) h = Math.max(h, floorAt(v) + T.h + 1);
+  return Math.round(h);
+}
+// First air layer of the way in at v (a step of one block per block north, down to the chamber floor).
+export const floorAt = (v) => Math.max(1 - SHAPE.depth, Math.min(1, 1 - (SHAPE.tunnel.stepFrom - v)));
 
 // Pure: every block for one site, given ground height G (the top solid block at the centre).
 // Returns { ops: [{ x, y, z, block, states? }], seam: { x, y, z, facing }, tome: { x, y, z, id }, mouth: { x, y, z } }.
 export function planThinPlace(id, cx, cz, G) {
   const f = SITE_FEATURES[id];
   const look = LOOK[id];
-  if (!f || !look) throw new Error(`planThinPlace: unknown site ${id}`);
+  if (!f || !look || !HILL[id]) throw new Error(`planThinPlace: unknown site ${id}`);
   const [water, bell, worked, cold, salt, roots] = f;
   const cells = new Map(); // "u,y,v" -> { block, states, layer }
   const key = (u, y, v) => `${u},${y},${v}`;
@@ -85,80 +119,82 @@ export function planThinPlace(id, cx, cz, G) {
   const at = (u, y, v) => cells.get(key(u, y, v));
   const raw = (u, y, v) => pick(look.raw, u + y * 3, v - y, 1);
   const cut = (u, y, v) => pick(look.cut, u + y, v + y * 5, 2);
+  const { tunnel: T, chamber: C, depth } = SHAPE;
+  const F = 1 - depth;
+  const H = HILL[id];
 
-  const { mound: M, tunnel: T, chamber: C } = SHAPE;
+  // 1. the hill
   const heightOf = new Map();
-  // 1. the outcrop
-  for (let u = -M.rx; u <= M.rx; u++) {
-    for (let v = M.cv - M.rz; v <= M.cv + M.rz; v++) {
-      const d2 = (u / M.rx) ** 2 + ((v - M.cv) / M.rz) ** 2;
-      if (d2 >= 1) continue;
-      const h = Math.round(M.peak * Math.sqrt(1 - d2) * (0.88 + 0.24 * hash(u, v, 913)));
+  for (let u = -H.rx - 6; u <= H.rx + 6; u++) {
+    for (let v = H.cv - H.rzN - 6; v <= H.cv + H.rzS + 6; v++) {
+      const h = hillHeight(id, u, v);
       if (h < 1) continue;
       heightOf.set(`${u},${v}`, h);
-      for (let y = -2; y <= h; y++) put(u, y, v, y === h ? look.top : raw(u, y, v));
+      for (let y = 1; y <= h; y++) put(u, y, v, y === h ? look.top : raw(u, y, v));
     }
   }
-  // a solid footing under the tunnel, so a flooded passage has walls and a bed
-  if (water) for (let u = -T.u - 2; u <= T.u + 2; u++) for (let v = T.v0 - 2; v <= T.v1 - 1; v++) for (let y = -6; y <= 0; y++) put(u, y, v, raw(u, y, v));
+  const hillAt = (u, v) => heightOf.get(`${u},${v}`) ?? 0;
 
-  // 2. carve the tunnel and the chamber
+  // 2. carve the way in (a cut, then steps down) and the chamber
   const carved = new Set();
   const carve = (u, y, v) => { put(u, y, v, "air"); carved.add(key(u, y, v)); };
-  for (let u = -T.u; u <= T.u; u++) for (let v = T.v0; v <= T.v1; v++) for (let y = 1; y <= T.h; y++) carve(u, y, v);
-  const chamberTop = (u, v) => C.h - Math.round(3 * (u / C.u) ** 2) - Math.round(2 * ((v - (C.v0 + C.v1) / 2) / 5) ** 2);
+  for (let v = T.v0; v <= T.v1; v++) for (let u = -T.u; u <= T.u; u++) for (let y = floorAt(v); y < floorAt(v) + T.h; y++) carve(u, y, v);
+  const chamberTop = (u, v) => F + C.h - 1 - Math.round(3 * (u / C.u) ** 2) - Math.round(2 * ((v - (C.v0 + C.v1) / 2) / 5) ** 2);
   for (let u = -C.u; u <= C.u; u++) {
     for (let v = C.v0; v <= C.v1; v++) {
       if (Math.abs(u) === C.u && (v === C.v0 || v === C.v1)) continue; // round the corners
-      for (let y = 1; y <= chamberTop(u, v); y++) carve(u, y, v);
+      for (let y = F; y <= chamberTop(u, v); y++) carve(u, y, v);
     }
   }
 
-  // 3. water: a pool to dive into, a drowned passage, a shaft up into the chamber
+  // 3. water: at the foot of the steps the way dips into a sump you swim through
+  const sump = { a: -4, b: -7 }; // open shafts; between them a fully drowned passage
   if (water) {
     for (let u = -T.u; u <= T.u; u++) {
-      for (const v of [0, 1, -6, -7]) for (let y = -4; y <= 0; y++) { put(u, y, v, "water", 1); carved.add(key(u, y, v)); }
-      for (let v = -5; v <= -1; v++) {
-        for (let y = -4; y <= -1; y++) { put(u, y, v, "water", 1); carved.add(key(u, y, v)); }
-        for (let y = 0; y <= T.h; y++) { put(u, y, v, raw(u, y, v)); carved.delete(key(u, y, v)); }
+      for (const v of [sump.a, sump.b]) for (let y = F - 5; y <= F - 1; y++) { put(u, y, v, "water", 1); carved.add(key(u, y, v)); }
+      for (let v = sump.b + 1; v < sump.a; v++) {
+        for (let y = F - 5; y <= F - 2; y++) { put(u, y, v, "water", 1); carved.add(key(u, y, v)); }
+        for (let y = F - 1; y < F + T.h; y++) { put(u, y, v, raw(u, y, v)); carved.delete(key(u, y, v)); }
       }
     }
   }
 
-  // 4. lining: the rock touching the cave
-  const lining = [];
+  // 4. lining: every block touching the cave (underground, or inside the hill) is set, so the cave is sealed
+  const inRock = (u, y, v) => y <= 0 || y <= hillAt(u, v);
+  const lining = new Map();
   for (const k of carved) {
     const [u, y, v] = k.split(",").map(Number);
     for (const [du, dy, dv] of [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]]) {
       const n = key(u + du, y + dy, v + dv);
+      if (carved.has(n) || !inRock(u + du, y + dy, v + dv)) continue;
       const c = cells.get(n);
-      if (c && !carved.has(n) && c.layer === 0 && c.block !== "air") lining.push([u + du, y + dy, v + dv, dy === -1]);
+      if (c && c.layer !== 0) continue;
+      lining.set(n, [u + du, y + dy, v + dv, dy === -1]);
     }
   }
-  for (const [u, y, v, isFloor] of lining) {
+  for (const [, [u, y, v, isFloor]] of lining) {
     let block = worked ? (isFloor ? look.floor : cut(u, y, v)) : raw(u, y, v);
     if (salt && hash(u * 3 + y, v * 5 - y, 917) < (isFloor ? 0.6 : 0.45)) block = "calcite";
-    if (roots && !isFloor && hash(u + y, v, 919) < 0.35 && !at(u, y - 1, v)?.layer && carved.has(key(u, y - 1, v))) block = "rooted_dirt";
-    if (!worked && !salt && block === "calcite") block = "stone"; // raw rock never looks like salt unless the site has salt
+    if (roots && !isFloor && carved.has(key(u, y - 1, v)) && hash(u + y, v, 919) < 0.35 && at(u, y - 1, v)?.block === "air") block = "rooted_dirt";
+    if (!salt && block === "calcite") block = "stone"; // raw rock never looks like salt unless the site has salt
+    if (y > 0 && y === hillAt(u, v)) block = look.top; // the hill's skin stays its skin
     put(u, y, v, block);
   }
-  // the floor of the dry way in and the chamber
-  for (let u = -C.u; u <= C.u; u++) for (let v = C.v0; v <= C.v1; v++) if (carved.has(key(u, 1, v))) put(u, 0, v, worked ? look.floor : salt ? "calcite" : raw(u, 0, v));
 
-  // 5. worked: a framed mouth and four pillars
+  // 5. worked: a framed mouth where the way in meets the hill, and four pillars in the chamber
   if (worked) {
-    const mv = T.v1 - 1;
-    for (let y = 0; y <= T.h + 1; y++) for (const u of [-T.u - 1, T.u + 1]) put(u, y, mv, look.pillar);
-    for (let u = -T.u - 1; u <= T.u + 1; u++) put(u, T.h + 1, mv, look.pillar);
-    for (const u of [-C.u + 1, C.u - 1]) for (const v of [C.v0 + 1, C.v1 - 1]) for (let y = 1; y <= 8; y++) put(u, y, v, look.pillar);
+    const mv = 1, fy = floorAt(mv);
+    for (let y = fy - 1; y <= fy + T.h; y++) for (const u of [-T.u - 1, T.u + 1]) put(u, y, mv, look.pillar);
+    for (let u = -T.u - 1; u <= T.u + 1; u++) put(u, fy + T.h, mv, look.pillar);
+    for (const u of [-C.u + 1, C.u - 1]) for (const v of [C.v0 + 1, C.v1 - 1]) for (let y = F; y <= F + 8; y++) put(u, y, v, look.pillar);
   }
 
-  // 6. cold: ice at the mouth, snow outside
+  // 6. cold: ice where the way in starts, snow outside and on the hill
   if (cold) {
-    for (let u = -T.u; u <= T.u; u++) for (let v = 0; v <= T.v1; v++) put(u, 0, v, "packed_ice");
-    for (const u of [-T.u - 1, T.u + 1]) for (let y = 1; y <= 3; y++) put(u, y, T.v1 - 1, "ice");
-    for (let u = -12; u <= 12; u++) {
-      for (let v = T.v1 + 1; v <= T.v1 + 14; v++) if (!at(u, 1, v) && hash(u, v, 921) < 0.85) put(u, 1, v, "snow_layer", 2);
+    for (let u = -T.u; u <= T.u; u++) for (let v = 0; v <= T.v1; v++) put(u, floorAt(v) - 1, v, "packed_ice");
+    for (const u of [-T.u - 1, T.u + 1]) for (let v = 1; v <= 3; v++) if (inRock(u, floorAt(v), v)) put(u, floorAt(v), v, "ice");
+    for (let u = -14; u <= 14; u++) {
+      for (let v = 0; v <= T.v1 + 14; v++) if (!at(u, 1, v) && !hillAt(u, v) && hash(u, v, 921) < 0.85) put(u, 1, v, "snow_layer", 2);
     }
     for (const [k, h] of heightOf) {
       const [u, v] = k.split(",").map(Number);
@@ -168,14 +204,15 @@ export function planThinPlace(id, cx, cz, G) {
 
   // 7. roots hang from every rooted ceiling block
   if (roots) {
-    for (const c of [...cells.values()]) if (c.block === "rooted_dirt" && carved.has(key(c.u, c.y - 1, c.v)) && at(c.u, c.y - 1, c.v)?.block === "air") put(c.u, c.y - 1, c.v, "hanging_roots", 2);
+    for (const c of [...cells.values()]) if (c.block === "rooted_dirt" && at(c.u, c.y - 1, c.v)?.block === "air") put(c.u, c.y - 1, c.v, "hanging_roots", 2);
   }
 
-  // 8. bell: green, cracked, fallen near the mouth
+  // 8. bell: green, cracked, fallen just inside the mouth
   if (bell) {
-    put(T.u, 1, T.v1 - 1, "bell", 2, { attachment: "standing" });
-    put(T.u - 1, 1, T.v1 - 1, "oxidized_cut_copper_slab", 2);
-    put(T.u, 1, T.v1 - 2, "oxidized_cut_copper_slab", 2);
+    const bv = 2;
+    put(T.u, floorAt(bv), bv, "bell", 2, { attachment: "standing" });
+    put(T.u - 1, floorAt(bv), bv, "oxidized_cut_copper_slab", 2);
+    put(T.u, floorAt(bv + 1), bv + 1, "oxidized_cut_copper_slab", 2);
   }
 
   // 9. every thin place hums: a few amethyst clusters on the chamber floor
@@ -183,14 +220,14 @@ export function planThinPlace(id, cx, cz, G) {
     const u = Math.round((hash(i, 3, 923) - 0.5) * (C.u * 2 - 2));
     const v = C.v0 + 2 + Math.floor(hash(i, 7, 925) * (C.v1 - C.v0 - 3));
     if (Math.abs(u) <= 1 && v <= C.v0 + 3) continue; // keep the seam clear
-    if (at(u, 1, v)?.block === "air") put(u, 1, v, "amethyst_cluster", 2);
+    if (at(u, F, v)?.block === "air") put(u, F, v, "amethyst_cluster", 2);
   }
 
   // 10. the seam (4 tall) in the back wall, with solid rock behind and around for the crack
-  for (let u = -4; u <= 4; u++) for (let v = SHAPE.wallV - 4; v <= SHAPE.wallV; v++) for (let y = 0; y <= CRACK_HEIGHT + 1; y++) {
-    if (!carved.has(key(u, y, v))) put(u, y, v, worked ? cut(u, y, v) : raw(u, y, v));
+  for (let u = -4; u <= 4; u++) for (let v = SHAPE.wallV - 4; v <= SHAPE.wallV; v++) for (let y = F - 1; y <= F + CRACK_HEIGHT + 1; y++) {
+    if (!carved.has(key(u, y, v))) put(u, y, v, y > 0 && y === hillAt(u, v) ? look.top : worked ? cut(u, y, v) : raw(u, y, v));
   }
-  for (let y = 1; y <= 4; y++) put(0, y, SHAPE.wallV, SEAM);
+  for (let y = F; y < F + 4; y++) put(0, y, SHAPE.wallV, SEAM);
 
   // 11. Fennick's camp
   const { u: cu, v: cv } = SHAPE.camp;
@@ -204,7 +241,7 @@ export function planThinPlace(id, cx, cz, G) {
     .map((c) => ({ x: cx + c.u, y: G + c.y, z: cz + c.v, block: c.block.includes(":") ? c.block : `minecraft:${c.block}`, ...(c.states ? { states: c.states } : {}) }));
   return {
     ops,
-    seam: { x: cx, y: G + 1, z: cz + SHAPE.wallV, facing: "south" },
+    seam: { x: cx, y: G + F, z: cz + SHAPE.wallV, facing: "south" },
     tome: { x: cx + cu, y: G + 1, z: cz + cv, id: CAMP_TOME[id] },
     mouth: { x: cx, y: G + 1, z: cz + T.v1 },
     camp: { x: cx + cu, y: G + 1, z: cz + cv - 3 },
@@ -229,7 +266,7 @@ function groundY(dim, x, z) {
 }
 
 function loaded(dim, site) {
-  for (const [du, dv] of [[-17, -30], [17, -30], [-17, 18], [17, 18], [0, 0]]) {
+  for (const [du, dv] of [[-31, -40], [31, -40], [-31, 20], [31, 20], [0, 0]]) {
     try { if (!dim.getBlock({ x: site.x + du, y: 64, z: site.z + dv })) return false; } catch { return false; }
   }
   return true;

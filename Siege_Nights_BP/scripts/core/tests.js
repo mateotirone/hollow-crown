@@ -16,7 +16,8 @@ const tests = [];
 export const OFFLINE_ONLY = new Set([
   "undertow: thin places: each cave shows exactly Fennick's features for it",
   "undertow: thin places: the seam has room to tear open and the camp holds the Field Note",
-  "undertow: thin places: a dry cave is walkable from the mouth to the seam",
+  "undertow: thin places: a dry cave is walkable from the mouth down to the seam",
+  "undertow: thin places: low, wide hills, never taller than they are wide",
   "undertow: ore is in the cliffs, more of it deeper in",
   "undertow: no fill is too big",
   "undertow: open country has all four kinds of land",
