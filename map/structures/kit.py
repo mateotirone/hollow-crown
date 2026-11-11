@@ -268,7 +268,7 @@ class Building:
             r, ridge, base, pitch, mats, wall = A
             r = list(r)
             for B in everyone:
-                if B is A or B[1] == ridge or self._ridge_h(B) <= self._ridge_h(A): continue
+                if B is A or B[1] == ridge or self._ridge_h(B) < self._ridge_h(A): continue
                 bw = B[5]
                 if ridge == "x":
                     cz = (wall[1] + wall[3]) // 2
@@ -323,6 +323,16 @@ class Building:
                     bp.set(x, h + higher[0][0] - 1, z, stair, facing=higher[0][1], half="bottom")
             else:
                 bp.set(x, h, z, block); bp.set(x, h + 1, z, slab, half="bottom")
+        # a full block of the trim wood under the lowest stair of every verge corner, where barge board meets
+        # eave, so a roof corner is never empty and anything hung from it hangs from wood (06-roof step 5)
+        for i, (r, ridge, base, pitch, mats, wall) in enumerate(self.roofs):
+            for (x, z) in ((r[0], r[1]), (r[2], r[1]), (r[0], r[3]), (r[2], r[3])):
+                h, who = Hm.get((x, z), (None, None))
+                if who != i or h is None: continue
+                o = other(x, z)
+                if o is not None and o >= h: continue
+                if bp.get(x, h, z)[0].endswith("_stairs") and bp.get(x, h - 1, z)[0] in ("keep", "air"):
+                    bp.set(x, h - 1, z, mats.get("trim_block", P.get("trim_block", "dark_oak_planks")))
         self.H = Hm
 
     def gable_walls(self, rect, ridge, y_from, style="timber"):
