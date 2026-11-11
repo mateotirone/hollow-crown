@@ -38,6 +38,7 @@ import { drawBuilding, styleFor, BUILDING } from "../settle/buildings.js";
 import { wallOf, wallRising, raiseWall, bearingFor, gateDirFor, adoptWall } from "../settle/walls.js";
 import { WALL_LEVELS } from "../settle/walldata.js";
 import { raiseFree } from "../settle/plans.js";
+import { levelSite, foundationColumns } from "../settle/ground.js";
 import { RIVALS, TIER_NAMES, LINES, STAGES, makeLord, radiusOf, wanted, night, nextPiece, partKey, hallSpot, partSpot, estateOf, winsForEstate, takeEstate } from "./data.js";
 import "./tests.js";
 import { sfx } from "../core/sfx.js";
@@ -183,7 +184,7 @@ function buildTick() {
         const spot = hallSpot(lord, lord.gateDir);
         const y = surface(dim, spot.x, spot.z, lord.y + 1);
         if (y === undefined) continue;
-        lord.hallAt = { x: spot.x, y, z: spot.z };
+        lord.hallAt = levelSite(dim, drawHall(piece.hall, STYLES[style]), { x: spot.x, y, z: spot.z }, spot.forward).origin; // never half buried
         lord.hallF = spot.forward;
       }
       const plan = drawHall(piece.hall, STYLES[style]);
@@ -197,17 +198,23 @@ function buildTick() {
         id, dimensionId: OVERWORLD, origin: lord.hallAt, forward: lord.hallF, plan, style: STYLES[style], remove,
         perTick: Math.max(8, Math.ceil(plan.cells.size / 1200)),
         onDone() { lord.built.hall = piece.hall; save(); },
-      });
+      }).columns.unshift(...foundationColumns(plan));
     } else {
       const spot = partSpot(lord, lord.gateDir, piece.part);
-      const y = surface(dim, spot.x, spot.z, lord.y + 1);
-      if (y === undefined) continue;
       const plan = drawBuilding(piece.part.building, style);
+      const pk = partKey(piece.tier, piece.i);
+      lord.partY ??= {};
+      if (lord.partY[pk] === undefined) { // measured once, so a build picked up again keeps its height
+        const y = surface(dim, spot.x, spot.z, lord.y + 1);
+        if (y === undefined) continue;
+        lord.partY[pk] = levelSite(dim, plan, { x: spot.x, y, z: spot.z }, spot.forward).origin.y; // never half buried
+        save();
+      }
       startBuild({
-        id, dimensionId: OVERWORLD, origin: { x: spot.x, y, z: spot.z }, forward: spot.forward, plan, style: styleFor(style),
+        id, dimensionId: OVERWORLD, origin: { x: spot.x, y: lord.partY[pk], z: spot.z }, forward: spot.forward, plan, style: styleFor(style),
         perTick: Math.max(4, Math.ceil(plan.cells.size / 200)),
-        onDone() { lord.built.parts.push(partKey(piece.tier, piece.i)); save(); },
-      });
+        onDone() { lord.built.parts.push(pk); delete lord.partY[pk]; save(); },
+      }).columns.unshift(...foundationColumns(plan));
     }
   }
 }

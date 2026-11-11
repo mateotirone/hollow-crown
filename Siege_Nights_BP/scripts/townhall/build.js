@@ -51,6 +51,7 @@ export const buildsRunning = () => jobs.length;
 function setCell(dim, job, x, y, z, role, o) {
   const at = toWorld(job.frame, job.origin, x, y, z);
   if (at.x === job.origin.x && at.y === job.origin.y && at.z === job.origin.z) return true; // never the cornerstone
+  if (job.skip?.(at.x, at.y, at.z)) return true;
   const block = dim.getBlock(at);
   if (!block) return false; // chunk not loaded: wait
   const perm = resolveRole(job.style, job.frame, role, o);
@@ -58,7 +59,7 @@ function setCell(dim, job, x, y, z, role, o) {
   return true;
 }
 
-const SOFT = /(air|water|lava|grass|fern|flower|snow_layer|leaves|vine|bush|sapling|tallgrass|seagrass|kelp|dandelion|poppy|mushroom|lily)/;
+const SOFT = /(air|water|lava|grass(?!_block|_path)|fern|flower|snow_layer|leaves|vine|bush|sapling|tallgrass|seagrass|kelp|dandelion|poppy|mushroom|lily)/;
 
 function fillColumn(dim, job, col) {
   const top = toWorld(job.frame, job.origin, col.x, col.top, col.z);
