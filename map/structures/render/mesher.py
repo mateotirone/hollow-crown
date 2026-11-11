@@ -103,6 +103,7 @@ def cube_tex(n, p):
               "ochre_froglight": {"top": "ochre_froglight_top", "bottom": "ochre_froglight_top", "side": "ochre_froglight_side"},
               "quartz_pillar": {"top": "quartz_block_lines_top", "bottom": "quartz_block_lines_top", "side": "quartz_block_lines"},
               "chiseled_quartz_block": {"top": "quartz_block_chiseled_top", "bottom": "quartz_block_chiseled_top", "side": "quartz_block_chiseled"},
+              "smithing_table": {"top": "smithing_table_top", "bottom": "smithing_table_bottom", "side": "smithing_table_side", "front": "smithing_table_front"},
               "basalt": {"top": "basalt_top", "bottom": "basalt_top", "side": "basalt_side"},
               "polished_basalt": {"top": "polished_basalt_top", "bottom": "polished_basalt_top", "side": "polished_basalt_side"},
               "grass_path": {"top": "grass_path_top", "bottom": "dirt", "side": "grass_path_side"},
