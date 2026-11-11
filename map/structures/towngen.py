@@ -607,7 +607,7 @@ class Town:
         each one: a build portion (plots round its edge, free ground in the middle) or a field
         portion (crops on every block). Near the square and small portions build; big ones
         further out farm."""
-        land = self.IN & (self.D <= self.R - 4) & (self.K < 0) & ~self.WET      # streets end 3 in from the edge: the edge closes the portions
+        land = self.IN & (self.D <= getattr(self, 'LAND_R', self.R - 4)) & (self.K < 0) & ~self.WET & (self.TAKEN < 2)      # streets end 3 in from the edge: the edge closes the portions
         lab = np.zeros(self.G.shape, np.int32); n = 0
         for i, j in np.argwhere(land):
             if lab[i, j]: continue
@@ -719,7 +719,7 @@ class Town:
         levelling). Water then goes into the ground one level at a time: for each height, water
         blocks at that height are added until every crop at that height is within 4 blocks
         (a 9 x 9 square) of one. Water never sits beside a lower block, where it would spill."""
-        self.FIELD = (self.PKIND == 2) & (self.D <= self.R - 4) & (self.K < 0) & (self.TAKEN == 0) & ~self.WET & self.IN
+        self.FIELD = (self.PKIND == 2) & (self.D <= getattr(self, 'LAND_R', self.R - 4)) & (self.K < 0) & (self.TAKEN == 0) & ~self.WET & self.IN
         F = self.FIELD
         # crop patches: a few seeds per portion, nearest seed decides the crop
         crop_of = np.full(self.G.shape, -1, np.int8)
