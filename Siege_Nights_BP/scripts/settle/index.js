@@ -26,6 +26,7 @@
 
 import "./zones.js";
 import "./plans.js";
+import "./raised.js";
 import "./mason.js";
 import "./coins.js"; // world currency
 import "./walls.js";

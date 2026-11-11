@@ -67,3 +67,14 @@ export const GUARD_SET = {
   [EquipmentSlot.Legs]: "siege:guard_leggings",
   [EquipmentSlot.Feet]: "siege:guard_boots",
 };
+
+// Castle Guard armor of any region and tier (siege:guard_vale_helmet, siege:guard_frostmarch_diamond_boots ...)
+// counts the same as the plain set: banner-coloured, and part of the siege set bonus. Never the guards' own guardgear_.
+const GUARD_PIECE = /^siege:guard_(?:[a-z]+_){0,2}(helmet|chestplate|leggings|boots)$/;
+export const GUARD_PIECE_FOR = {
+  [EquipmentSlot.Head]: "helmet", [EquipmentSlot.Chest]: "chestplate", [EquipmentSlot.Legs]: "leggings", [EquipmentSlot.Feet]: "boots",
+};
+export function isGuardPiece(typeId, slot) {
+  const m = GUARD_PIECE.exec(typeId ?? "");
+  return !!m && (slot === undefined || m[1] === GUARD_PIECE_FOR[slot]);
+}

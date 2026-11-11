@@ -1,0 +1,36 @@
+{
+  "format_version": "1.21.60",
+  "minecraft:block": {
+    "description": {
+      "identifier": "siege:foresters_lodge",
+      "menu_category": {
+        "category": "items"
+      }
+    },
+    "components": {
+      "minecraft:display_name": "tile.siege:foresters_lodge.name",
+      "minecraft:geometry": "minecraft:geometry.full_block",
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "siege_foresters_lodge_side",
+          "render_method": "opaque"
+        },
+        "up": {
+          "texture": "siege_foresters_lodge_top",
+          "render_method": "opaque"
+        },
+        "down": {
+          "texture": "siege_foresters_lodge_top",
+          "render_method": "opaque"
+        }
+      },
+      "minecraft:map_color": "#6a4a2a",
+      "minecraft:destructible_by_mining": {
+        "seconds_to_destroy": 2.5
+      },
+      "minecraft:destructible_by_explosion": {
+        "explosion_resistance": 6
+      }
+    }
+  }
+}

@@ -9,6 +9,8 @@
 //                  siege:pretender_fallen   {"n","name","players":[ids],"killer"?}
 //   test           /scriptevent siege:pretender_rise [seed]   one rises now and stands where you are
 //                  /scriptevent siege:pretender_status
+// Houses: filter "pretenderHouse" (undefined, { pretender }) -> { house, title, line } lets the Five Chairs
+// (after/chairs.js) say which house of the Hollow a claimant rises for. The events then carry "house".
 //
 // Sized for one player, like every boss here (bossCore toughens it for a party).
 
@@ -20,6 +22,7 @@ import { setSeepSurge } from "./seeps.js";
 import { UNDERTOW_ID, HEART } from "../undertow/layout.js";
 import { alive, announce, effect, flat, give, heal, healthOf, hurt, makeItem, particle, ring, shove, sound } from "./util.js";
 import { sfx } from "../core/sfx.js";
+import { applyFilter } from "../core/events.js";
 
 export const PRETENDERS = { firstAfterDays: 5, everyDaysMin: 6, everyDaysMax: 11, marchDays: 5, surgePerDay: 0.5, surgeMax: 3, wakeRange: 64, kitSize: 4 };
 
@@ -84,12 +87,14 @@ function rise(seed, at, dim) {
   const d = store.data;
   const p = makePretender(seed ?? Math.floor(Math.random() * 2 ** 31), d.last);
   d.n += 1;
-  d.current = { ...p, n: d.n, day: today(), spawned: false, marched: false, ...(at ? { at: { x: at.x, y: at.y, z: at.z }, dim: dim.id } : {}) };
+  const house = applyFilter("pretenderHouse", undefined, { pretender: p });
+  d.current = { ...p, n: d.n, day: today(), spawned: false, marched: false, ...(at ? { at: { x: at.x, y: at.y, z: at.z }, dim: dim.id } : {}),
+    ...(house?.house ? { house: house.house, houseTitle: house.title } : {}) };
   store.save();
   const where = d.current.at ?? HEART.center;
-  everyone(`§5A claimant has come to the empty Seat: §d${p.name}§5.§7 ${CLAIMS[p.claim].line} The seep will surge until someone puts them down.`);
+  everyone(`§5A claimant has come to the empty Seat: §d${p.name}§5${house?.line ? `, who ${house.line}` : "."}§7 ${CLAIMS[p.claim].line} The seep will surge until someone puts them down.`);
   for (const pl of world.getPlayers()) sfx(pl, "mob.wither.spawn", { volume: 0.5, pitch: 0.6 });
-  announce("siege:pretender_risen", { n: d.n, name: p.name, body: p.body, claim: p.claim, x: where.x, y: where.y, z: where.z, dimension: d.current.dim ?? UNDERTOW_ID });
+  announce("siege:pretender_risen", { n: d.n, name: p.name, body: p.body, claim: p.claim, ...(d.current.house ? { house: d.current.house } : {}), x: where.x, y: where.y, z: where.z, dimension: d.current.dim ?? UNDERTOW_ID });
   return d.current;
 }
 
@@ -105,7 +110,7 @@ function pretenderTick() {
   if (!c.marched && day - c.day >= PRETENDERS.marchDays) {
     c.marched = true; store.save();
     everyone(`§5${c.name} has sat on the Seat for ${day - c.day} days. The seep is everywhere now.`);
-    announce("siege:pretender_marching", { n: c.n, name: c.name, days: day - c.day });
+    announce("siege:pretender_marching", { n: c.n, name: c.name, days: day - c.day, ...(c.house ? { house: c.house } : {}) });
   }
   // It stands at the Seat (or where it was called). It takes shape when someone comes near.
   if (c.spawned && (fightOf(`pretender_${c.body}`) || world.getDimension(c.dim ?? UNDERTOW_ID).getEntities({ type: typeOf(c) }).length)) return;
@@ -181,7 +186,7 @@ function describe(f, fresh) {
   f.data.p = c && typeOf(c) === f.def.type ? c : makePretender(Math.floor(Math.random() * 2 ** 31));
   if (!f.data.p.body) f.data.p.body = f.def.type.slice("siege:pretender_".length);
   const p = f.data.p, claim = CLAIMS[p.claim];
-  try { f.entity.nameTag = `§5${p.name}${f.temper ? `§7, ${f.temper.name}` : ""}`; } catch { /* cosmetic */ }
+  try { f.entity.nameTag = `§5${p.name}${f.temper ? `§7, ${f.temper.name}` : ""}${p.houseTitle ? `\n§7${p.houseTitle}` : ""}`; } catch { /* cosmetic */ }
   f.data.fifths = 4; f.data.twin = false;
   if (fresh) f.say(`§5${p.name}§7 stands at the Seat. §d${claim.name}.§7 ${claim.line} §8(${claim.hint})`);
 }
@@ -228,7 +233,7 @@ function pretenderDef(body) {
       const who = f.data.p, seal = makeItem("siege:pretender_seal", 1);
       if (seal) {
         seal.nameTag = `§dSeal of ${who.name}`;
-        seal.setLore([`§7Claimant ${who.n ? `number ${who.n}` : "unnumbered"}. ${CLAIMS[who.claim].name}.`, "§8They meant to rule the Hollow. You disagreed."]);
+        seal.setLore([`§7Claimant ${who.n ? `number ${who.n}` : "unnumbered"}. ${CLAIMS[who.claim].name}.`, ...(who.houseTitle ? [`§7${who.houseTitle[0].toUpperCase()}${who.houseTitle.slice(1)}.`] : []), "§8They meant to rule the Hollow. You disagreed."]);
       }
       return [seal, stack("siege:choirsteel_ingot", 3), stack("siege:hollow_ash", 8)];
     },
@@ -241,7 +246,7 @@ function pretenderDef(body) {
         d.current = undefined; d.nextDay = nextRise(today(), Math.random());
         store.save();
         everyone(`§d${who.name}§5 is put down by ${players.map((p) => p.name).join(", ") || "someone"}. The Seat is empty again, and the seep draws back.`);
-        announce("siege:pretender_fallen", { n: who.n, name: who.name, players: players.map((p) => p.id), ...(f.lastHitter ? { killer: f.lastHitter } : {}) });
+        announce("siege:pretender_fallen", { n: who.n, name: who.name, players: players.map((p) => p.id), ...(who.house ? { house: who.house } : {}), ...(f.lastHitter ? { killer: f.lastHitter } : {}) });
       }
     },
   };

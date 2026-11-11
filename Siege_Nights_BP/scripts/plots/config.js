@@ -57,13 +57,16 @@ export const WARDS = [
   { name: "the Ashen Watch", x: 480, z: 560, r: 35 },
   // The seven thin places: caves where the Rift may stand (one is real in each world). Each keeps a clearing in
   // front of it, big enough for the overworld stage of the last fight, so nobody may build or dig there.
-  { name: "Kingsbarrow Hollow", x: 120, z: 520, r: 45, thin: true },
-  { name: "the Greywater Sink", x: 560, z: -420, r: 45, thin: true },
-  { name: "the Rimecut Caves", x: -650, z: -1080, r: 45, thin: true },
-  { name: "the Drowned Grotto", x: -870, z: -860, r: 45, thin: true },
-  { name: "the Fenmouth Deeps", x: -250, z: 860, r: 45, thin: true },
-  { name: "the Scorched Throat", x: 1050, z: 720, r: 45, thin: true },
-  { name: "the Witchroot Sink", x: 520, z: 1160, r: 45, thin: true },
+  // `site` is the lore id (lore/data/world.js SITE_FEATURES); undertow/thinplaces.js builds the cave to match.
+  // `face` (which way the cave mouth opens) and `off` (build centre offset) were picked against the generated map
+  // (map/draw_map.py terrain): downhill, off the roads and trails, back from cliff edges.
+  { name: "King's Barrow", x: 120, z: 520, r: 45, thin: true, site: "kings_barrow", face: "east", off: [-5, -10] },
+  { name: "the Bellfounders' Mine", x: 560, z: -420, r: 45, thin: true, site: "bellfounders_mine", face: "west" },
+  { name: "Frostvein Gap", x: -650, z: -1080, r: 45, thin: true, site: "frostvein_hollow", face: "north", off: [-5, 0] },
+  { name: "the Drowned Chapel", x: -870, z: -860, r: 45, thin: true, site: "drowned_chapel", face: "west" },
+  { name: "the Witchroot Caves", x: -250, z: 860, r: 45, thin: true, site: "witchroot_caves", face: "north", off: [-5, 10] },
+  { name: "the Saltglass Grotto", x: 1050, z: 720, r: 45, thin: true, site: "saltglass_grotto", face: "north" },
+  { name: "the Sunken Quarry", x: 520, z: 1160, r: 45, thin: true, site: "sunken_quarry", face: "east" },
   { name: "the Shut Pass", x: 1225, z: -190, r: 30 }, // sealed way out, kept for a later update (see EXPANSION)
   { name: "Bellhollow", x: 155, z: -100, r: 60 }, // the valley with the broken bell frame, the shrine and the sealed Crack in the Deep
   { name: "Crownhold", x: -235, z: -345, r: 65 }, // the ruined capital and its Hall of Bells, on the rise north-west of Kingsrest
@@ -75,7 +78,7 @@ export const WARDS = [
 export const WELCOME = {
   hall: { x: -725, y: 300, z: 25 }, // over open water, above the clouds, so it shades nothing
   testArea: { x: -925, y: 300, z: -150 },
-  kingsrest: { x: -118, y: 77, z: -118 }, // the plaza: where "start without a home" puts you (builders can re-set it)
+  kingsrest: { x: -100, y: 77, z: -124 }, // the plaza: where "start without a home" puts you (builders can re-set it)
   hallRadius: 15,
   pedestalRadius: 11,
   pedestalGap: 24, // degrees kept between two pedestals

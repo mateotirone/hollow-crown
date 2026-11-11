@@ -4,7 +4,7 @@
 
 import { world, system } from "@minecraft/server";
 import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
-import { onTick, isReady, moduleStore, settlementAt, isAlly, keepOf, title, on } from "../siege/api.js";
+import { onTick, isReady, moduleStore, settlementAt, isAlly, keepOf, title, on, emit } from "../siege/api.js";
 import { RAIL_SETTINGS as R, REGIONS, RAILS, RIDES, CARRIAGE, CARRIAGE_ITEM, nextId, nearestStation, networkLines, wayTo, expressAxis } from "./data.js";
 import { stallMenu } from "../horses/index.js";
 import { isBuilder, give } from "../horses/menus.js";
@@ -21,6 +21,18 @@ const DEST = "siege:rails_dest";
 const store = moduleStore("siege:rails_stations", () => ({ stations: [] }));
 const stations = () => store.data.stations;
 export const allStations = () => stations();
+export const stationById = (id) => stations().find((s) => s.id === id);
+
+// The station building (trains/station_sites.js) moves the post or depot block onto its platform once it is built
+export function moveStation(id, to) {
+  const s = stationById(id);
+  if (!s) return;
+  s.x = to.x; s.y = to.y; s.z = to.z;
+  store.save();
+}
+
+// Other features add buttons to the station menu: { label(player, station, again) -> text or falsy, action(player, station, again) }
+export const stationMenuExtras = [];
 
 const say = (player, text) => player.onScreenDisplay.setActionBar(text);
 const stationAt = (block) => stations().find((s) => s.x === block.location.x && s.y === block.location.y && s.z === block.location.z && s.dim === block.dimension.id);
@@ -104,7 +116,8 @@ world.afterEvents.playerPlaceBlock.subscribe(({ block, player }) => {
   }
   const station = addStation(block, `${keepOf(owner)?.name ?? player.name}'s Depot`, "Depots", owner);
   discover(player, station, true);
-  player.sendMessage(`§6${station.name} has joined the rail network. Lay rails from here to the nearest line, then click the depot to call a cart, pick a destination or stable a horse.`);
+  player.sendMessage(`§6${station.name} has joined the rail network. A station is rising around it, lined up with any straight Track close by (or with its line behind the depot, the building in front of you). Lay Track from it to the nearest line, then click the depot to pick a destination or stable a horse.`);
+  emit("stationAdded", { station, block, player });
 });
 
 world.afterEvents.playerBreakBlock.subscribe((event) => {
@@ -197,6 +210,7 @@ async function stationMenu(player, block, station) {
       },
     },
     stallsOpen && { label: "Horse stalls\n§8stable or collect a horse", action: () => stallMenu(player, { dimension: block.dimension, location: { x: block.location.x + 0.5, y: block.location.y + 1, z: block.location.z + 0.5 } }, station.name, again) },
+    ...stationMenuExtras.map((x) => { const label = x.label(player, station, again); return label && { label, action: () => x.action(player, station, again) }; }),
     isBuilder(player) && !depot && { label: "§aRename (builder)", action: () => nameStation(player, station) },
   ].filter(Boolean);
   const form = new ActionFormData().title("Station").body(body);
