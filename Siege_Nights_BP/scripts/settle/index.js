@@ -7,7 +7,10 @@
 //   buildings.js  the building designs (drawn once, built in all five regional styles)
 //   walls.js      the ring wall round a claimed plot and its ten levels (walldata.js = the levels)
 //   repair.js     mending a damaged wall for a price (the Mason and the town hall both offer it)
-//   layout.js     the plot layout: where the hall, the mason and each building slot stand (arrival.js lays it out)
+//   layout.js     the old fixed plot layout (worlds without town layouts still use it; arrival.js lays it out)
+//   towns.js      the twelve map plots' town layouts (towns_data.js, from tools/export_towns.py): slots, groundwork
+//   founding.js   laying a town out from its layout, a tier at a time, and moving the wall out as it grows
+//   plotmarker.js the Plot Marker on every open slot: pick a building that fits, see its outline, pay, raise it
 //   wallet.js     what things are charged in (emeralds until the world currency arrives)
 //   config.js     every number, the camp kit, the mason's stock and lines
 //
@@ -16,7 +19,9 @@
 //   reservesOf(owner) -> [{ x0, z0, x1, z1, label }]
 //   addFilter("settleReserves", (boxes, { owner }) => [...boxes, { x0, z0, x1, z1, label }])   reserve more ground
 //   drawBuilding(id, style), BUILDINGS, styleFor(style)   the designs, for the town hall build engine
-//   on("settleBuilt", ({ owner, player, building, style, origin, forward, box }))
+//   on("settleBuilt", ({ owner, player, building, style, origin, forward, box, slotId }))   slotId: the town slot, if any
+//   townOf(owner), townSlots(owner), growTown(owner, tier)   a town laid out from its layout
+//   on("townLaidOut", ({ owner, tier })), on("settleFixture", ({ owner, kind, species, size, rotation, at }))
 //   spawnMason(dimension, location)
 
 import "./zones.js";
@@ -26,6 +31,8 @@ import "./mason.js";
 import "./coins.js"; // world currency
 import "./walls.js";
 import "./repair.js";
+import "./founding.js";
+import "./plotmarker.js";
 import "./arrival.js";
 import "./showcase.js";
 import "./tests.js";
@@ -39,4 +46,7 @@ export { repairWall, offerRepair } from "./repair.js";
 export { setWallet } from "./wallet.js";
 export { HALL, MASON, SLOTS, place, slotsFor } from "./layout.js";
 export { layOut } from "./arrival.js";
+export { townOf, townSlots, growTown, foundTown, settlementTier, PLOT_MARKER } from "./founding.js";
+export { townFor, slotsOf, seatOnSlot } from "./towns.js";
+export { choicesFor, OPENS_AT } from "./plotmarker.js";
 export { raiseFree, styleOf, siteProblem } from "./plans.js";

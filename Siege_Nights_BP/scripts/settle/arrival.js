@@ -17,6 +17,8 @@ import { BENCH, registerBench } from "./mason.js";
 import { styleOf, raiseFree } from "./plans.js";
 import { WALLS } from "./walldata.js";
 import { wallOf, raiseWall, bearingFor } from "./walls.js";
+import { townFor } from "./towns.js";
+import { townOf, foundTown } from "./founding.js";
 
 const OVERWORLD = "minecraft:overworld";
 const SOFT = /(air|water|grass(?!_block|_path)|fern|flower|snow_layer|leaves|vine|bush|sapling|tallgrass|dandelion|poppy|mushroom|_log$|deadbush)/;
@@ -92,8 +94,10 @@ onTick("settle_tidy_signs", 200, () => {
   }
 });
 
-// at: lay out round this spot (a Plot Stone) for a player who has no Keep Banner up yet
+// at: lay out round this spot (a Plot Stone) for a player who has no Keep Banner up yet.
+// A town with a layout (the twelve map plots, founding.js) is laid out from it instead.
 export function layOut(player, { force = false, at, style: wanted } = {}) {
+  if (townOf(player.id)) return "already";
   const keep = keepOf(player.id) ?? at;
   if (!keep) return "Raise a Keep Banner first.";
   const dim = world.getDimension(OVERWORLD);
@@ -155,7 +159,7 @@ export function layOut(player, { force = false, at, style: wanted } = {}) {
   return fresh ? true : "already";
 }
 
-const LAID_OUT = "§6Your settlement is laid out.§7 A Longhouse is rising behind the Plot Stone, the town's library is going up near the gate, a mason has set up beside it, and signposts mark where each building will stand.";
+const LAID_OUT = "§6Your settlement is laid out.§7 Roads run to the gate, a Longhouse is rising behind the Plot Stone, the town's library is going up on the square, a mason has set up beside it, and a Plot Marker stands on every plot you can build on. Use one to see what fits there.";
 const LAID = `${LAID_OUT} Put a Foundation Stone on a signpost to raise that building.`;
 const ARRIVAL_SAY_AT = 110; // ticks after the plot is picked: after the plot's past (3 s), before "raise your Keep Banner" (8 s)
 
@@ -169,7 +173,9 @@ on("plotChosen", ({ player, plot }) => {
   const attempt = () => {
     let result;
     try {
-      result = player.isValid ? layOut(player, { at, style: REGION_TO_STYLE[plot.region] }) : "gone";
+      if (!player.isValid) result = "gone";
+      else if (townFor(plot.name)) result = foundTown(player.id, plot, at, { style: REGION_TO_STYLE[plot.region] });
+      else result = layOut(player, { at, style: REGION_TO_STYLE[plot.region] });
     } catch (e) {
       console.warn(`[Hollow Crown] arrival: ${e}`);
       return;

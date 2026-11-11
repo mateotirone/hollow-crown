@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Settlement building assets: Mason's Bench and Foundation Stone (blocks, recipes, names, placeholder textures).
+"""Settlement building assets: Mason's Bench, Foundation Stone and Plot Marker (blocks, recipes, names, placeholder textures).
 Run from the siege-nights folder:  python3 studio/build_settle.py
 Safe to run again. Shared files (terrain_texture.json, blocks.json, en_US.lang) are merged, not replaced,
 and a PNG that already exists is never overwritten (the textures thread paints over the placeholders)."""
@@ -132,4 +132,77 @@ for name, spec in BLOCKS.items():
     if line not in text:
         text = text.rstrip("\n") + "\n" + line + "\n"
 open(lang, "w", encoding="utf8").write(text)
+
+# ---------- the Plot Marker: a post with a sign at the front of every town slot ----------
+# Texture 32x32: stone foot (0,0)-(15,15), timber post (16,0)-(23,15), sign board (0,16)-(31,31)
+
+def marker_tex():
+    full = os.path.join(RP, "textures", "blocks", "siege_plot_marker.png")
+    if os.path.exists(full):
+        return
+    im = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+    px, rnd = im.load(), random.Random("plot_marker")
+    for x in range(16):
+        for y in range(16):
+            d = rnd.randint(-10, 10); px[x, y] = (STONE[0] + d, STONE[1] + d, STONE[2] + d, 255)
+    for x in range(16, 24):
+        for y in range(16):
+            d = rnd.randint(-8, 8); c = WOODD if x in (16, 23) else WOOD; px[x, y] = (c[0] + d, c[1] + d, c[2] + d, 255)
+    for x in range(32):
+        for y in range(16, 32):
+            d = rnd.randint(-7, 7); c = WOODD if y in (16, 31) or x in (0, 31) or (y - 16) % 5 == 0 else WOOD
+            px[x, y] = (c[0] + d, c[1] + d, c[2] + d, 255)
+    for x in range(8, 24):            # a chalked plot outline with a little roof: "build here"
+        px[x, 28] = PALE + (255,); px[x, 21] = PALE + (255,)
+    for y in range(21, 29):
+        px[8, y] = PALE + (255,); px[23, y] = PALE + (255,)
+    for i in range(6):
+        px[15 - i, 19 - i // 2] = GREEN + (255,); px[16 + i, 19 - i // 2] = GREEN + (255,)
+    im.save(full)
+
+def box(origin, size, u, v, w, h):
+    faces = {f: {"uv": [u, v], "uv_size": [w, h]} for f in ("north", "south", "east", "west", "up", "down")}
+    return {"origin": origin, "size": size, "uv": faces}
+
+marker_tex()
+write_json(os.path.join(RP, "models", "blocks", "plot_marker.geo.json"), {
+    "format_version": "1.12.0",
+    "minecraft:geometry": [{
+        "description": {"identifier": "geometry.siege_plot_marker", "texture_width": 32, "texture_height": 32,
+                        "visible_bounds_width": 2, "visible_bounds_height": 2, "visible_bounds_offset": [0, 0.5, 0]},
+        "bones": [{"name": "block", "pivot": [0, 0, 0], "cubes": [
+            box([-4, 0, -4], [8, 3, 8], 0, 0, 16, 16),       # stone foot
+            box([-1, 3, -1], [2, 13, 2], 16, 0, 8, 16),      # post
+            box([-6, 8, -1.5], [12, 7, 1], 0, 16, 32, 16),   # sign board across the post
+        ]}],
+    }],
+})
+write_json(os.path.join(BP, "blocks", "settle", "plot_marker.json"), {
+    "format_version": "1.21.60",
+    "minecraft:block": {
+        "description": {"identifier": "siege:plot_marker", "menu_category": {"category": "none"},
+                        "traits": {"minecraft:placement_direction": {"enabled_states": ["minecraft:cardinal_direction"]}}},
+        "components": {
+            "minecraft:display_name": "tile.siege:plot_marker.name",
+            "minecraft:geometry": "geometry.siege_plot_marker",
+            "minecraft:material_instances": {"*": {"texture": "siege_plot_marker", "render_method": "alpha_test"}},
+            "minecraft:collision_box": {"origin": [-4, 0, -4], "size": [8, 16, 8]},
+            "minecraft:selection_box": {"origin": [-6, 0, -4], "size": [12, 16, 8]},
+            "minecraft:destructible_by_mining": False,
+            "minecraft:destructible_by_explosion": False,
+            "minecraft:light_dampening": 0,
+            "minecraft:map_color": "#7a5a38",
+        },
+    },
+})
+def marker_terrain(data):
+    data["texture_data"]["siege_plot_marker"] = {"textures": "textures/blocks/siege_plot_marker"}
+merge_json(os.path.join(RP, "textures", "terrain_texture.json"), marker_terrain)
+def marker_sound(data):
+    data["siege:plot_marker"] = {"sound": "wood"}
+merge_json(os.path.join(RP, "blocks.json"), marker_sound)
+text = open(lang, encoding="utf8").read()
+if "tile.siege:plot_marker.name=" not in text:
+    open(lang, "w", encoding="utf8").write(text.rstrip("\n") + "\ntile.siege:plot_marker.name=Plot Marker\n")
+
 print("Settlement building assets written.")

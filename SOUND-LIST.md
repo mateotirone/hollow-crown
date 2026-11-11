@@ -388,8 +388,8 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `raid.horn` | A horn | `raid.horn` pitch 0.85 + `raid.horn` pitch 0.64 vol 0.4 after 0.25 s | 11 | bestiary (5), townhall (3), crown, dragons, rivals |
 | `mob.endermen.portal` | A step between places | `mob.endermen.portal` pitch 0.85 vol 0.8 + `random.orb` pitch 0.4 vol 0.15 after 0.1 s | 11 | bestiary (6), townhall (2), crown, horses, undertow |
 | `random.orb` | A small yes | `random.orb` pitch 0.75 vol 0.55 | 9 | townhall (2), dragons, economy, lore, rails, roletrials, settle, undertow |
+| `random.anvil_use` | Building and mending | `random.anvil_use` pitch 0.8 vol 0.55 + `dig.stone` pitch 0.7 vol 0.5 after 0.1 s | 9 | settle (3), townhall (3), horses, roletrials, siege |
 | `ambient.cave` | Something is wrong | `ambient.cave` pitch 0.85 vol 0.8 | 9 | reach (3), undertow (3), bestiary (2), lore |
-| `random.anvil_use` | Building and mending | `random.anvil_use` pitch 0.8 vol 0.55 + `dig.stone` pitch 0.7 vol 0.5 after 0.1 s | 8 | townhall (3), settle (2), horses, roletrials, siege |
 | `ui.toast.challenge_complete` | Something earned | `ui.toast.challenge_complete` pitch 0.9 vol 0.7 + `block.bell.hit` pitch 0.6 vol 0.3 after 0.4 s | 7 | siege (2), bestiary, crown, rivals, settle, townhall |
 | `item.book.page_turn` | A page | `item.book.page_turn` pitch 0.9 | 7 | lore (5), bestiary, guide |
 | `mob.wither.spawn` | Something old arrives | `mob.wither.spawn` pitch 0.85 vol 0.7 + `block.bell.hit` pitch 0.4 vol 0.4 after 0.4 s | 6 | undertow (3), bestiary (2), townhall |
