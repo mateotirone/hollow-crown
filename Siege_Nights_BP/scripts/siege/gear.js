@@ -2,7 +2,7 @@
 // Split from the original main.js; the code is unchanged apart from the event/hook calls.
 
 import { world, EquipmentSlot, GameMode } from "@minecraft/server";
-import { COLORS, DYE_RGB, GUARD_SET, WEAPONS } from "./constants.js";
+import { COLORS, DYE_RGB, GUARD_SET, WEAPONS, isGuardPiece } from "./constants.js";
 import { state } from "./state.js";
 import { sfx } from "../core/sfx.js";
 
@@ -43,7 +43,8 @@ export function guardArmorTick() {
   for (const player of world.getPlayers()) {
     const gear = player.getComponent("minecraft:equippable");
     if (!gear) continue;
-    const fullSet = Object.entries(GUARD_SET).every(([slot, id]) => gear.getEquipment(slot)?.typeId === id);
+    // any mix of plain and regional Castle Guard pieces makes a full set
+    const fullSet = Object.keys(GUARD_SET).every((slot) => isGuardPiece(gear.getEquipment(slot)?.typeId, slot));
     if (fullSet) player.addEffect("resistance", 60, { amplifier: 0, showParticles: false });
   }
 }
@@ -56,9 +57,9 @@ export function guardColorTick() {
     const want = { red: r / 255, green: g / 255, blue: b / 255 };
     const gear = player.getComponent("minecraft:equippable");
     if (!gear) continue;
-    for (const [slot, id] of Object.entries(GUARD_SET)) {
+    for (const slot of Object.keys(GUARD_SET)) {
       const item = gear.getEquipment(slot);
-      if (item?.typeId !== id) continue;
+      if (!isGuardPiece(item?.typeId, slot)) continue;
       try {
         const dye = item.getComponent("minecraft:dyeable");
         const c = dye?.color;

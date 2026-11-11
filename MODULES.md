@@ -252,6 +252,14 @@ Add a line here when you publish one.
   instead of doing `day % 3`. It also added hooks to `siege/siege.js` that anyone may use: filters `siegeDue`, `assaultCount`, `assaultDelay`,
   `assaultShare`, `dawnEndsSiege`, `nextSiegeDay`, and events `assaultIncoming` / `assaultSpawned` `{ assault, total }`.
 
+## The minimap and titles
+
+`scripts/minimap/` draws a HUD minimap by sending each player hidden titles that start with `hcm:`
+(`Siege_Nights_RP/ui/hud_screen.json` hides those from the normal title box). Keep using
+`player.onScreenDisplay.setTitle` (or `title()` from api.js) as usual: the minimap notices real titles and waits
+until they have faded before it sends again. Never start a real title with `hcm:`. Map pictures:
+`python3 tools/minimap_tiles.py` after the world map changes; HUD layout: `python3 tools/minimap_ui.py`.
+
 ## Checking and building
 
 - `node tools/check.mjs` (from `siege-nights/`): parses every pack JSON, checks item icons and texture files exist, checks imports, finds undefined names,

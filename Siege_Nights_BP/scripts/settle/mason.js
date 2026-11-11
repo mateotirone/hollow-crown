@@ -7,6 +7,7 @@
 
 import { world, system, GameMode, ItemStack, ItemTypes } from "@minecraft/server";
 import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
+import { chooseWallLook } from "./walls.js";
 import { isReady, settlementAt, keepOf, isAlly, isNight, onTick, moduleStore, pick, emit, STONE_KINDS, stoneId, regionalId } from "../siege/api.js";
 import { STYLES } from "../townhall/styles.js";
 import { SETTLE, CATALOG, LOCAL_ROLES, LOCAL_RATE, STONE_RATE, MASON_LINES } from "./config.js";
@@ -131,10 +132,12 @@ export async function openShop(player, mason) {
   for (const shelf of all) form.button(shelf.name, shelf.icon);
   form.button(`Foundation Stone\n§8Places a pre-designed building. ${coins(SETTLE.stonePrice * lot())}`);
   if (home) form.button("Mend the wall\n§8The masons survey it and name a price");
+  if (home) form.button("Choose what the wall is built in\n§8Any stone, any region's timber. Free");
   const res = await form.show(player);
   if (res.canceled) return;
   if (res.selection < all.length) return openShelf(player, all[res.selection], mason);
   if (res.selection === all.length + 1) return emit("wallRepair", { owner: home, player }); // repair.js
+  if (res.selection === all.length + 2) return chooseWallLook(player, home); // walls.js
   const stonePrice = SETTLE.stonePrice * lot();
   if (purse(player) < stonePrice && player.getGameMode() !== GameMode.Creative || !charge(player, stonePrice)) return player.sendMessage(`§7Mason: §fA Foundation Stone is ${coins(stonePrice)}.`);
   hand(player, FOUNDATION, 1);
