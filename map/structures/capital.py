@@ -30,15 +30,17 @@ def disc(r):
     n = int(r) + 1
     return [(x, z) for x in range(-n, n + 1) for z in range(-n, n + 1) if x * x + z * z <= r * r]
 
-def dome(bp, cx, cz, base, r, rise=1.3, seed=0, finial=True):
+def dome(bp, cx, cz, base, r, rise=1.3, seed=0, finial=True, ribs=False):
     """A copper dome: shell of radius r, stretched up by `rise`, gradient by height, a lantern and rod on top."""
     top = base + int(r * rise)
     for (x, z) in disc(r + 0.5):
         d = math.hypot(x, z)
         h = base + int(round(math.sqrt(max(0.0, (r + 0.5) ** 2 - d * d)) * rise))
         inner = base + int(round(math.sqrt(max(0.0, (r - 0.7) ** 2 - d * d)) * rise)) if d < r - 0.7 else base - 1
+        a = math.degrees(math.atan2(z, x)) % 45
+        rib = ribs and d > 1.5 and (a < 6 or a > 39)
         for y in range(max(base, inner + 1), h + 1):
-            bp.set(cx + x, y, cz + z, copper_at((y - base) / max(1, top - base), x, z, seed))
+            bp.set(cx + x, y, cz + z, "stripped_dark_oak_log" if rib and y == h else copper_at((y - base) / max(1, top - base), x, z, seed), axis="y")
     if finial:
         bp.set(cx, top + 1, cz, "waxed_oxidized_cut_copper")
         for y in range(top + 2, top + 5): bp.set(cx, y, cz, "dark_oak_fence")
@@ -94,6 +96,38 @@ def corner_tower(bp, P, cx, cz, h, seed):
         for side, (x, z) in (("s", (cx, cz + 3)), ("n", (cx, cz - 3)), ("e", (cx + 3, cz)), ("w", (cx - 3, cz))): B.window(x, y, z, side, 1, 2, kind="stone")
     pyramid(bp, P, cx - 4, cz - 4, cx + 4, cz + 4, h + 1, pitch=2, finial="stone_brick_wall")
     bp.set(cx, h + 12, cz, "lightning_rod")
+
+def gardens(bp, seed):
+    """The forecourt: a gravel walk to the door between clipped hedges and flower beds, a low stone wall
+    with gate piers along the front, two flowering trees and lanterns on posts."""
+    flowers = ["poppy", "cornflower", "oxeye_daisy", "allium", "red_tulip", "azure_bluet", "lily_of_the_valley"]
+    for x in range(-33, 34):
+        for z in range(10 if abs(x) > 8 else 17, 26):
+            if abs(x) <= 2: bp.set(x, 0, z, "gravel" if h3(x, 0, z, seed) < 0.7 else "cobblestone"); continue
+            edge = z in (10, 25) or abs(x) == 33
+            bed = 12 <= z <= 23 and (abs(x) - 4) % 9 < 6
+            if edge and not (z == 25 and abs(x) <= 3):
+                bp.set(x, 1, z, "stone_brick_wall" if z == 25 or abs(x) == 33 else "azalea_leaves", persistent=True)
+            elif bed:
+                hedge = (abs(x) - 4) % 9 in (0, 5) or z in (12, 23)
+                if hedge: bp.set(x, 1, z, "azalea_leaves" if h3(x, 1, z, seed) < 0.7 else "azalea_leaves_flowered", persistent=True)
+                else:
+                    bp.set(x, 0, z, "grass_block")
+                    if h3(x, 2, z, seed) < 0.6: bp.set(x, 1, z, flowers[int(h3(x, 3, z, seed) * len(flowers))])
+            else: bp.set(x, 0, z, "grass_path" if (z - 10) % 15 == 0 else "grass_block")
+    for x in (-4, 4):   # gate piers with lanterns
+        for y in (1, 2): bp.set(x, y, 25, "stone_bricks")
+        bp.set(x, 3, 25, "lantern")
+    for (tx, tz) in ((-20, 18), (20, 18)):   # two flowering trees in the lawns
+        for y in range(1, 6): bp.set(tx, y, tz, "oak_log", axis="y")
+        for dx in range(-2, 3):
+            for dz in range(-2, 3):
+                for y in (5, 6, 7):
+                    if abs(dx) + abs(dz) + (y == 7) * 2 <= 3 and (dx, dz, y) != (0, 0, 5):
+                        bp.set(tx + dx, y, tz + dz, "azalea_leaves_flowered" if h3(dx, y, dz, tx) < 0.5 else "azalea_leaves", persistent=True)
+    for x in (-27, -14, 14, 27):
+        for y in (1, 2, 3): bp.set(x, y, 24, "dark_oak_fence")
+        bp.set(x, 4, 24, "lantern")
 
 def capital(take="medieval", seed=7):
     roman = take == "roman"
@@ -157,26 +191,27 @@ def capital(take="medieval", seed=7):
         bp.set(-1, 1, 9, "spruce_door", facing="n", hinge=True); bp.set(-1, 2, 9, "spruce_door", facing="n", upper=True, hinge=True)
     else:
         # an entrance pavilion with a tall timber gable to the square
-        F = (-6, 9, 6, 14)
+        F = (-8, 9, 8, 15)
         FB = Building(bp, P, seed + 3)
         FB.foundation(F, 0); FB.floor(F, 0); FB.stone_storey(F, 1, 6)
-        FB.floor(F, 6); FB.timber_storey(F, 7, 4, bay=3); FB.bay_windows(F, 7, "sew")
-        FB.roof(F, "z", 11, overhang=1, verge=1, pitch=1); FB.build_roofs(); FB.gable_walls(F, "z", 11, style="timber")
+        FB.floor(F, 6); FB.timber_storey(F, 7, 5, bay=4); FB.bay_windows(F, 7, "sew")
+        FB.roof(F, "z", 12, overhang=1, verge=1, pitch=1); FB.build_roofs(); FB.gable_walls(F, "z", 12, style="timber")
+        FB.window(-1, 14, 15, "s", 3, 2, kind="timber", shutters=False)   # a big window high in the gable
         for x in (-1, 0, 1):
-            for y in range(1, 5): bp.set(x, y, 14, "air")
-            for z in range(10, 14):
+            for y in range(1, 5): bp.set(x, y, 15, "air")
+            for z in range(10, 15):
                 for y in range(1, 5): bp.set(x, y, z, "air")
-        bp.set(-2, 4, 14, "stone_brick_stairs", facing="e", half="top"); bp.set(2, 4, 14, "stone_brick_stairs", facing="w", half="top")
+        bp.set(-2, 4, 15, "stone_brick_stairs", facing="e", half="top"); bp.set(2, 4, 15, "stone_brick_stairs", facing="w", half="top")
         bp.set(0, 1, 10, "spruce_door", facing="n"); bp.set(0, 2, 10, "spruce_door", facing="n", upper=True)
-        for x in (-4, 4): FB.window(x, 2, 14, "s", 1, 3, kind="stone")
-        hang(bp, [(-3, 4, 15), (3, 4, 15)])
-        for x in range(-6, 7):   # steps
-            bp.set(x, 1, 15, "stone_brick_stairs", facing="n") if abs(x) <= 3 else None
+        for x in (-5, 5): FB.window(x, 2, 15, "s", 1, 3, kind="stone")
+        hang(bp, [(-3, 4, 16), (3, 4, 16)])
+        for x in range(-3, 4): bp.set(x, 1, 16, "stone_brick_stairs", facing="n")   # steps
+    if not roman: gardens(bp, seed)
     # banners of the crown either side of the door, lamp posts along the front
     for x in (-12, 12):
         for y in range(1, 4): bp.set(x, y, 12, "dark_oak_fence")
         bp.set(x, 4, 12, "lantern")
-    bp.markers["door"] = (0, 1, 15)
+    bp.markers["door"] = (0, 1, 16)
     return bp
 
 def medieval(seed=7): return capital("medieval", seed)
