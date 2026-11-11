@@ -138,6 +138,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - Farms can no longer print Regals forever. Each trader stops buying a good from you for the day once its price has bottomed out (the Moneyer at 128 iron ingots a day), and monsters drop coins only when a player kills them.
 
 ### Fixed
+- Building signposts already stacked two or more high in an existing world (from before the lay-out fix) come down to one sign the next time the settlement's owner walks home.
 - Raising a bigger town hall now takes the old one down completely first instead of leaving pieces of it behind, builds in about 7 to 16 seconds instead of over a minute, names the hall once in a title and then shows only a progress bar, and moves the Hall Cornerstone beside the path so it never sits in the doorway.
 - Clicking a menu block with an empty hand works: the Waystone, Plot Stones, Keep Banner, Mason's Bench, gates and every other menu block used to do nothing unless you held an item.
 - No more "unknown variable melee_spear_equipped" errors in the content log on every swing: the player model now sets the variable newer Minecraft's attack animations ask for.
