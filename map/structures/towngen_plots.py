@@ -28,7 +28,7 @@ SIZE_NAME = {"S": "Small", "M": "Medium", "L": "Large", "G": "Great"}
 EDGE = [("cobblestone", 5), ("stone_bricks", 3), ("mossy_cobblestone", 2)]
 PLOT_SITES = {
     # Kingsrest: town circle from plots/config.js TOWNS (-150, -150, r90), square on the plaza WELCOME.kingsrest
-    "Kingsrest": dict(centre=(-150, -150), radius=90, size="town", square_at=(-118, -118), square_r=9, seed=7,
+    "Kingsrest": dict(centre=(-150, -150), radius=90, size="town", square_at=(-100, -128), square_r=9, seed=7,   # moved off the rail corridor (map thread, 2026-11-11)
                       civic=["G", "L", "L", "L"], build_u=0.8, lanes=12),     # the capital: built up to the edge, a few fields
 }
 
@@ -109,9 +109,9 @@ class TownPlots(Town):
 
     def run(self):
         self.square()
+        self.place_square_buildings()        # civic plots first, straight off the square; streets then find their way round them
         self.streets(); self.relax(); self.grade_verges()
         self.portions()
-        self.place_square_buildings()
         self.houses(); self.relax()
         self.field_paths(); self.fences(); self.fields()
         self.dress()
