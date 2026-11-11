@@ -311,6 +311,49 @@ Y[flat_] = bed[flat_]
 slope_ = corr & (rail_d > 3.5)
 cut = slope_ & (Y > bed + np.floor(rail_d - 3.5)); Y[cut] = (bed + np.floor(rail_d - 3.5)).astype(np.int32)[cut]
 fill = slope_ & (Y < bed - np.floor(rail_d - 3.5)); Y[fill] = (bed - np.floor(rail_d - 3.5)).astype(np.int32)[fill]
+# baked town plans (GW_BLOCKS, map/bake_town.py): paths first, then the land graded to them (Mateo 2026-11-11).
+# Every groundwork column sits on ground exactly one block under its lowest block; the land beside it meets its top
+# ground block and may then rise or fall at most one block per two outwards, so no path stands proud or sinks in a trench.
+GW_FILES = [json.load(open(fn_)) for fn_ in filter(None, os.environ.get("GW_BLOCKS", "").split(":"))]
+for d_ in GW_FILES:
+    b_ = np.array(d_["blocks"][:d_.get("groundwork_blocks", len(d_["blocks"]))], np.int64)
+    air_ = np.array([e["name"] == "minecraft:air" for e in d_["palette"]])[b_[:, 3]]
+    gx_, gz_ = b_[:, 0] - X0, b_[:, 2] - Z0
+    ok_ = (gx_ >= 0) & (gx_ < SIZE) & (gz_ >= 0) & (gz_ < SIZE)
+    if not ok_.any(): continue
+    T_ = np.full((SIZE, SIZE), 9999, np.int32)
+    np.minimum.at(T_, (gx_[ok_ & ~air_], gz_[ok_ & ~air_]), b_[ok_ & ~air_, 1].astype(np.int32) - 1)
+    Ta = np.full((SIZE, SIZE), 9999, np.int32)
+    np.minimum.at(Ta, (gx_[ok_ & air_], gz_[ok_ & air_]), b_[ok_ & air_, 1].astype(np.int32) - 1)
+    T_ = np.where(T_ == 9999, Ta, T_)
+    # the level the land beside each column meets: its top ground block (a sunken path slab, a field's farmland,
+    # a plot's floor), not crops, fences or the air dug out above it
+    over_ = np.array([any(w in e["name"] for w in ("wheat", "carrots", "potatoes", "beetroot", "fence", "_wall", "hay_block", "air"))
+                      for e in d_["palette"]])[b_[:, 3]]
+    Tt = np.full((SIZE, SIZE), -9999, np.int32)
+    np.maximum.at(Tt, (gx_[ok_ & ~over_], gz_[ok_ & ~over_]), b_[ok_ & ~over_, 1].astype(np.int32))
+    Tt = np.where(Tt == -9999, T_, Tt)
+    foot = (T_ < 9999) & ~wet
+    Y[foot] = T_[foot]
+    xs_, zs_ = np.nonzero(foot); M_ = 70
+    a0_, a1_ = max(0, xs_.min() - M_), min(SIZE, xs_.max() + M_ + 1); c0_, c1_ = max(0, zs_.min() - M_), min(SIZE, zs_.max() + M_ + 1)
+    f_ = foot[a0_:a1_, c0_:c1_]
+    Dn = np.where(f_, 0.0, np.inf); Vn = Tt[a0_:a1_, c0_:c1_].astype(np.int32).copy()
+    for _ in range(M_):                                       # distance to, and level of, the nearest groundwork column
+        for dx_, dz_, w_ in ((1, 0, 1), (-1, 0, 1), (0, 1, 1), (0, -1, 1), (1, 1, 1.5), (1, -1, 1.5), (-1, 1, 1.5), (-1, -1, 1.5)):
+            cand = np.roll(np.roll(Dn, dx_, 0), dz_, 1) + w_
+            b2_ = cand < Dn
+            if b2_.any(): Dn[b2_] = cand[b2_]; Vn[b2_] = np.roll(np.roll(Vn, dx_, 0), dz_, 1)[b2_]
+    Yw = Y[a0_:a1_, c0_:c1_]
+    free = ~f_ & ~wet[a0_:a1_, c0_:c1_] & land[a0_:a1_, c0_:c1_] & (rail_d[a0_:a1_, c0_:c1_] > 4.5) & np.isfinite(Dn)
+    slack = np.floor(np.where(np.isfinite(Dn), Dn, 0) / 2).astype(np.int32)      # one block up or down per two out
+    Yw[free] = np.clip(Yw[free], (Vn - slack)[free], (Vn + slack)[free]); Y[a0_:a1_, c0_:c1_] = Yw
+    for sx_, sz_, sy_ in d_.get("tree_seats", []):            # the town's own trees stand on the ground they were planned on
+        i_, k_ = sx_ - X0, sz_ - Z0
+        if 1 <= i_ < SIZE - 1 and 1 <= k_ < SIZE - 1:
+            w_ = (slice(i_ - 1, i_ + 2), slice(k_ - 1, k_ + 2)); m_ = ~foot[w_] & ~wet[w_]
+            Y[w_][m_] = sy_
+    log("graded the land to", d_["town"], "groundwork:", int(foot.sum()), "columns")
 railcore = (rail_d <= 1.5) & ~wet & (tun_floor == -999) & (br_deck == -999)
 railzone = rail_d <= 4.5
 log("rail lines", len(RAILLINES), "stops", len(STOPS), "tunnel cells", int((tun_floor > -999).sum()), "bridge cells", int((br_deck > -999).sum()))
@@ -623,13 +666,12 @@ def B_raw(name, states):
 # ---- baked town plans (map/bake_town.py): world blocks placed last, in order; air digs out, soft (leaves) only fills air
 STAMPED = []        # (x, y, z, id, soft) arrays per town
 STAMPED_TOWNS = set()
-for fn_ in filter(None, os.environ.get("GW_BLOCKS", "").split(":")):
-    d_ = json.load(open(fn_))
+for d_ in GW_FILES:
     pid_ = np.array([B_raw(e["name"], e["states"]) if e["name"] != "minecraft:air" else -1 for e in d_["palette"]], np.int64)
     sf_ = np.array([bool(e.get("soft")) for e in d_["palette"]])
     b_ = np.array(d_["blocks"], np.int64)
     STAMPED.append((b_[:, 0], b_[:, 1], b_[:, 2], pid_[b_[:, 3]], sf_[b_[:, 3]])); STAMPED_TOWNS.add(d_["town"])
-    log("town plan", d_["town"], len(b_), "blocks from", fn_)
+    log("town plan", d_["town"], len(b_), "blocks")
 if TREEDB:
     sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "trees"))
     from place import fits, mark, SIZE_ORDER, SIZE_WEIGHT, _grow_mask

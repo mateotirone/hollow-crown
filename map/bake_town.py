@@ -37,11 +37,13 @@ def bake(plan_path, structures, treedb):
     ground.finish()
     for (x, y, z), (n, p) in sorted(ground.cells.items(), key=lambda c: (c[0][1], c[0][0], c[0][2])):
         out.append([x, y, z, pid(*ground.to_bedrock(n, p))])
+    n_ground = len(out)
     made = {}
+    seats = []                                                  # trunk spots: the map keeps their ground at ground_y
     for f in plan["fixtures"]:
         s, (ax, az), gy, rot = f["stamp"], f["at"], f["ground_y"], f.get("rotation", 0)
         if "/" in s:                                            # a tree from the tree database
-            st = json.load(open(os.path.join(treedb, s + ".stamp.json")))
+            st = json.load(open(os.path.join(treedb, s + ".stamp.json"))); seats.append([ax, az, gy])
             ox, _oy, oz = st["origin"]
             for x, y, z, i in st["blocks"]:
                 e = st["palette"][i]
@@ -56,7 +58,8 @@ def bake(plan_path, structures, treedb):
             if n == "keep": continue
             out.append([ax + x, gy + y, az + z, pid(*bp.to_bedrock(n, p))])
     return {"format": "hollow-crown-worldblocks/1", "town": plan["town"],
-            "note": "world coordinates, placed in order; soft entries only fill air", "palette": pal, "blocks": out}
+            "note": "world coordinates, placed in order; soft entries only fill air; the first groundwork_blocks are the "
+            "groundwork (streets, plots, fields), which the map grades the land to", "groundwork_blocks": n_ground, "tree_seats": seats, "palette": pal, "blocks": out}
 
 
 if __name__ == "__main__":
