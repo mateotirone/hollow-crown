@@ -102,6 +102,12 @@ export function palette(style, L, look = {}) {
     tooth: perm("siege:battlement") ?? kinds[L.body],
     light: perm("minecraft:lantern"),
     air: perm("minecraft:air"),
+    // a roofed tower (TOWER_ROOF) in the region's own roofing; the stair's high side faces the way it rises
+    roofb: first(roles.roofBlock ?? ["minecraft:dark_oak_planks"]),
+    roof: (dir) => {
+      const id = (roles.roofStair ?? ["minecraft:dark_oak_stairs"]).find((r) => perm(r)) ?? "minecraft:dark_oak_stairs";
+      return perm(id, { weirdo_direction: { e: 0, w: 1, s: 2, n: 3 }[dir], upside_down_bit: false });
+    },
     gate: (dir) => (L.gate === "open" ? undefined : perm(regionalId(L.gate, style), gateStates(dir)) ?? perm(`siege:${L.gate}`, gateStates(dir))),
     port: (dir) => perm(regionalId("portcullis", style), gateStates(dir)) ?? perm("siege:portcullis", gateStates(dir)),
     // an arrow slit looks out along the way its stretch of wall faces (angle 0 = east, a quarter turn = south)
@@ -145,6 +151,8 @@ export function permFor(P, w, kind, col) {
   if (kind === "gate") return P.gate(w.gateDir);
   if (kind === "port") return P.port(w.gateDir);
   if (kind === "slit") return P.slit(col?.a ?? 0);
+  if (kind === "roofb") return P.roofb;
+  if (kind.startsWith("roof:")) return P.roof(kind.slice(5));
   return P.kinds[kind];
 }
 
@@ -154,7 +162,7 @@ function placeColumn(dim, w, job, col) {
   const { x, z, base } = col;
   const ground = dim.getBlock({ x, y: base, z });
   if (!ground) return -1;
-  const cells = new Map(columnKinds(L, col, wallSeed(w)));
+  const cells = new Map(columnKinds(L, col, wallSeed(w), w.style));
   let n = 0;
   if (col.role === "gap" || col.role === "gate" || col.role === "port") {
     if (ground.isAir) setBlock(dim, x, base, z, P.kinds.cobbled); // something to walk on

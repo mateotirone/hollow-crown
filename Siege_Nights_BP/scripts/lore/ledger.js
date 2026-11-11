@@ -114,7 +114,7 @@ export function solveThread(player, thread) {
   emit("loreThreadSolved", { player, thread: thread.id });
   if (thread.bossLead) learnLeads(player, [thread.bossLead]); // your plot's mystery leads to your region's boss
   if (THREADS.every((t) => p.solved.includes(t.id)) && setFlag(player, "all_mysteries")) {
-    player.sendMessage("§5Every thread is tied off. You know the whole truth of Aldmere. Remember the name when you stand at the throne.");
+    player.sendMessage("§5Every thread is tied off. You know the whole truth of Aldmere. Once Morvane has fallen, stand at the middle of the empty Seat in the Hollow and say the land's old name.");
     emit("loreAllSolved", { player });
   }
 }

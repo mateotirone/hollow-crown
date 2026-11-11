@@ -225,6 +225,7 @@ def fire():
 save(fire(), 'siege_brazier_fire')
 
 # ---------------- keep banner ----------------
+# NOTE superseded by build_keep_banner.py (2026-11-11, tall 16x32 banner); re-running this part breaks the new model.
 def pole():
     t = Tex(seed=10); planks(t, M['dark_oak'], True, (4, 4, 4, 4), seed=10, nails=False); return t
 save(pole(), 'siege_banner_pole')

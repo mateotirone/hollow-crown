@@ -16,17 +16,19 @@
 // announces siege:boss_defeated {boss:"choir"}; the last handoff now belongs to boss "morvane".
 // Numbers to tweak are in CHOIR below.
 
-import { world, system } from "@minecraft/server";
+import { world, system, GameMode } from "@minecraft/server";
 import { registerBoss, fightOf, stack } from "../bestiary/bossCore.js";
 import { effect, flat, heal, hurt, ring, shove, sound, particle } from "../bestiary/util.js";
 import { UNDERTOW_ID, COURT } from "./layout.js";
 import { SOURCE_SITE_IDS, SITE_NAMES, getSourceSite } from "./source.js";
 import { pieces } from "./builder.js";
 import { load } from "./data.js";
+import { courtOpenFor, cartWrecked, cartsongHolders } from "./story.js";
 
 export const CHOIR = {
   singersToSilence: 6, // of 7; the last one is bound to the Source
   raidEvery: 400, // ticks between phantom raids while verses still sing (20 s)
+  wreckedRaidFactor: 2, // the dawn cart was wrecked at the Seams (middle stretch): raids come half as often
   maxPhantoms: 10,
   tollDamage: 9,
   echoTicks: 80,
@@ -199,7 +201,7 @@ registerBoss({
         return;
       }
       if (f.tick >= f.data.nextRaid) {
-        f.data.nextRaid = f.tick + CHOIR.raidEvery;
+        f.data.nextRaid = f.tick + CHOIR.raidEvery * (cartWrecked() ? CHOIR.wreckedRaidFactor : 1);
         raid(f);
       }
       // A thread of light from each living Singer to the Conductor shows what is shielding it.
@@ -251,6 +253,8 @@ export function choirTick() {
   const c = centre();
   const near = dim.getPlayers({ location: c, maxDistance: HEART.outerRadius - 2 });
   if (!near.length) return;
+  // The Court lets nobody in without the Cartsong (undertow/story.js pushes them back out)
+  if (!courtOpenFor(near.map((p) => p.id), cartsongHolders(), false) && !near.some((p) => p.getGameMode() === GameMode.Creative)) return;
   try {
     if (dim.getEntities({ type: CONDUCTOR, location: c, maxDistance: 64 }).length) return; // already there, the framework will pick it up
     dim.spawnEntity(CONDUCTOR, c);

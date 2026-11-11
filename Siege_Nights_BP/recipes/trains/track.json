@@ -1,0 +1,31 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "siege:track_recipe"
+    },
+    "tags": [
+      "crafting_table"
+    ],
+    "pattern": [
+      "I I",
+      "LIL",
+      "I I"
+    ],
+    "key": {
+      "I": {
+        "item": "minecraft:iron_ingot"
+      },
+      "L": {
+        "tag": "minecraft:logs"
+      }
+    },
+    "result": {
+      "item": "siege:track",
+      "count": 8
+    },
+    "unlock": {
+      "context": "AlwaysUnlocked"
+    }
+  }
+}

@@ -38,7 +38,7 @@ import * as riftSite from "../undertow/source.js";
 import {
   REACH, STAGES, LONG, AFTER, stage, stageFor, capReach, nightKind, isSiegeKind, profile, openTime, waveTime, waveRole, waveShare,
   hollowCount, tideLull, pressureMult, clock, nextSiege, duskLine, dayRoll, clamp, troopMix, WATCHER_FROM_REACH,
-  musterGap, duskSpeed, watchHint, hourOmen, omenSide, DUSK_ACT,
+  musterGap, duskSpeed, watchHint, hourOmen, omenSide, DUSK_ACT, fightStage,
   WAVES, SHAPES, pickShape, HONOURS, NEMESIS, NEW_MODIFIERS, HOLLOW_TWISTS_FROM, CAPTAIN_NAMES, CAPTAIN_TITLES,
 } from "./rules.js";
 import { performOmen, ACTS } from "./omens.js";
@@ -94,7 +94,7 @@ function honour(player, key) {
 const HARD_TAG = "siege_reach_hard";
 const RISEN_TAG = "siege_reach_risen";
 const PICKET_TAG = "siege_reach_picket";
-const FULL_NIGHTS = ["counted", "stolen", "long", "muster"];
+const FULL_NIGHTS = ["counted", "stolen", "long", "muster", "oathbroken"];
 
 // ---------- the Storyteller: story facts the Reach owns, and the night shapes as a deck ----------
 const saved = () => { try { return reachData(); } catch { return undefined; } };
@@ -118,7 +118,7 @@ function chooseShape(day, d, stageId, waves) {
 const storyNote = (player, kind) => { try { note(player, kind); } catch { /* not ready */ } };
 
 const facts = () => ({ bosses: Object.keys(store.data.bosses).length, choir: store.data.choir, rift: store.data.rift, source: store.data.source });
-const opts = () => ({ firstDay: SETTINGS.firstSiegeDay, every: SETTINGS.siegeEveryNNights, salt: store.data.salt, musterDay: store.data.musterDay });
+const opts = () => ({ firstDay: SETTINGS.firstSiegeDay, every: SETTINGS.siegeEveryNNights, salt: store.data.salt, musterDay: store.data.musterDay, oathbroken: !!store.data.oathbroken });
 const everyone = () => world.getPlayers();
 const tell = (text) => { for (const p of everyone()) p.sendMessage(text); };
 const sound = (player, id, options) => { try { sfx(player, id, options); } catch { /* cosmetic */ } };
@@ -248,6 +248,12 @@ on("ready", () => {
   if (d.stage === AFTER && d.musterDay < world.getDay()) scheduleMuster(world.getDay());
 });
 on("siege:boss_defeated", (data) => bossFell(data?.boss));
+// The truce (lore/truce.js): rung broken at Bellhollow, every third night after the story is the Hollow's again
+on("truceChanged", ({ state } = {}) => {
+  const d = store.data;
+  d.oathbroken = state === "broken";
+  store.save();
+});
 on("keepFallen", () => addReach(REACH.gain.keepFallen, "keep fallen"));
 
 // ---------- Tonight's siege ----------
@@ -280,7 +286,8 @@ addFilter("assaultCount", (count, { provokedBy }) => {
   const d = store.data;
   if (provokedBy && d.remembered?.by === provokedBy) return beginNight("counted", d.remembered.stage).waves;
   d.remembered = null;
-  return beginNight(provokedBy ? "horn" : tonightKind() ?? "horn", d.stage).waves;
+  const kind = provokedBy ? "horn" : tonightKind() ?? "horn";
+  return beginNight(kind, fightStage(kind, d.stage)).waves;
 });
 
 // How much room is left on the field: 1 when it is empty, down to almost nothing at the cap
@@ -454,7 +461,9 @@ const soldierType = (role, glimpse) =>
   applyFilter("hollowSoldier", glimpse || Math.random() < 0.7 ? "siege:veinsworn" : "siege:shardcaster", { role, glimpse });
 
 // Who the ordinary army is made of follows the stage (the bestiary swaps the raiders; we tell it the mix)
-troops.setTroopPlan?.(({ owner } = {}) => troopMix(store.data.stage, owner ? hasGlimpsed(owner) : store.data.glimpsed));
+// (an oathbroken night fights at its own stage, so the Hollow is back in the ranks)
+export const nightStage = () => (getState().active && store.data.night ? fightStage(store.data.night.kind, store.data.stage) : store.data.stage);
+troops.setTroopPlan?.(({ owner } = {}) => troopMix(nightStage(), owner ? hasGlimpsed(owner) : store.data.glimpsed));
 // The bestiary's Watcher (one Hollow soldier at the back who only watches) belongs to the nights just before the
 // first glimpse. It follows this once the bestiary has a setWatcherPlan(); until then it keeps its own timing.
 export const watcherDueNow = (owner) => {
@@ -791,6 +800,7 @@ const KIND_WORDS = {
   stolen: "Tonight is not the third night. They will come anyway.",
   long: "They will come tonight. They come every night.",
   muster: "The watch has seen smoke on the road. Expect an army tonight.",
+  oathbroken: "Tonight is the third night, and the truce is broken. They will come.",
 };
 
 function watchMenu(player, mine) {
@@ -806,7 +816,7 @@ function watchMenu(player, mine) {
     `§l${s.name}§r`,
     s.about,
     "",
-    d.stage === AFTER ? `Sieges: ${s.rhythm.toLowerCase()}. ${s.waves} waves, at whatever hour suits them.`
+    d.stage === AFTER ? `Sieges: ${s.rhythm.toLowerCase()}. ${s.waves} waves, at whatever hour suits them.${d.oathbroken ? " §4And every third night, since the bell at Bellhollow, the Hollow.§r" : ""}`
       : `Sieges: ${s.rhythm.toLowerCase()}. ${s.waves} waves on a full night, one an hour, the last at ${clock(REACH.tollTime)}.`,
     getState().active ? "§cA siege is under way." : hinting() ? watchHint(coming, day) : KIND_WORDS[kind] ?? (next === undefined ? "The watch expects a quiet night." : `The watch expects a quiet night. The next siege they are sure of is in ${next - day} day${next - day === 1 ? "" : "s"}.`),
     d.stage === 2 ? "§7Not every night that is quiet at dusk stays quiet." : "",
@@ -893,7 +903,7 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
       break;
     }
     case "siege:reach_night": {
-      const kind = ["counted", "stolen", "probe", "long", "muster"].includes(word) ? word : tonightKind() ?? (d.stage === LONG ? "long" : d.stage === AFTER ? "muster" : "counted");
+      const kind = ["counted", "stolen", "probe", "long", "muster", "oathbroken"].includes(word) ? word : tonightKind() ?? (d.stage === LONG ? "long" : d.stage === AFTER ? "muster" : "counted");
       d.forced = { day: world.getDay(), kind };
       getState().lastSiegeDay = -1;
       const open = openTime(kind, profile(kind, d.stage, d.pressure).waves, world.getDay(), d.salt);

@@ -9,6 +9,7 @@ import { ROLES } from "./skills.js";
 import { dropCoins } from "../economy/coins.js";
 import { fromEmeralds } from "../economy/rules.js";
 import { sfx } from "../core/sfx.js";
+import { applyFilter } from "../core/events.js";
 
 const rank = (player, id) => heroOf(player).skills[id] ?? 0;
 const fx = (entity, effect, ticks, amplifier = 0) => {
@@ -132,7 +133,13 @@ api.on("offerRole", ({ player, role }) => {
   if (!p) return;
   const hero = heroOf(p);
   if (!ROLES[role]) return api.emit("roleRefused", { player: p, role, why: "unknown role" });
-  if (hero.path !== "none") return api.emit("roleRefused", { player: p, role, why: "already has a role" });
+  if (hero.path !== "none") {
+    if (ROLES[role].region && hero.path !== role) p.sendMessage(`§7The ${ROLES[role].noun} would have taken you. You are sworn as ${ROLES[hero.path]?.name ?? hero.path} already, and a person holds one role.`);
+    return api.emit("roleRefused", { player: p, role, why: "already has a role" });
+  }
+  // A regional role's mentor may want their trial finished first (scripts/roletrials). The deed is kept, and
+  // the role is offered again once the trial is done.
+  if (!applyFilter("roleOffer", true, { player: p, role })) return api.emit("roleRefused", { player: p, role, why: "trial unfinished" });
   if (!hero.offers.includes(role)) hero.offers.push(role);
   saveHero(p);
   p.sendMessage(`§6A path has opened to you: ${ROLES[role].name}.§7 Swear it at the Tree of Oaths in a town hall, if you choose.`);

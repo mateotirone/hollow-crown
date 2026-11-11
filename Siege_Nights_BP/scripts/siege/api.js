@@ -67,6 +67,7 @@ export { onTick } from "../core/loop.js";
 export { moduleStore } from "../core/store.js";
 export { addTests, assert, assertEqual } from "../core/tests.js";
 export { addJoinStep, wait } from "../core/firstjoin.js";
+export { addMenuLabel } from "../core/labels.js"; // floating "click me" label over a menu block or NPC
 
 // ----- the Storyteller (pacing director) and the story chapter. See MODULES.md -----
 // `pick` is exported as `storyPick` here, because api.js already has a `pick` (random array element).

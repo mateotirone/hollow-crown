@@ -1,0 +1,428 @@
+{
+  "version": 1,
+  "about": "The texturing doctrine (Mateo, 2026-11-11): region > colour family with a code > a ladder of blocks. Edit this file, then run build_doctrine.py to rebuild the region pages and the viewer.",
+  "rules": {
+    "max_blocks_per_surface": 3,
+    "max_blocks_big_surface": 5,
+    "big_surface": "walls longer than 15 or taller than 9, and civic buildings",
+    "base_share_min": 0.6,
+    "ladder_order": "dark to light by value unless 'order' says otherwise",
+    "no_skipped_steps": "neighbouring cells differ by at most one ladder step",
+    "clusters": "walls: edges interlocking in columns (paint_teeth, Mateo's examples); roofs and ground: soft clusters; never single-block speckle",
+    "cracks": "corners, openings, where planes meet; darkest part of the gradient",
+    "walls": "vertical surfaces use paint_teeth: bands bottom to top, edges interlocking in columns 1 to 2 rows deep, a few lone blocks ahead of each edge",
+    "texture_along_ladder": "texture may change along a ladder (bricks low, cobble, then smoother stone up top) as long as lightness climbs; colour may shift only across a real material change (stone to earth)",
+    "ladder_check": "every ladder climbs in lightness with no two neighbours within about 5 of each other (equal-lightness pairs read as noise, not gradient); rough textures low, smooth high"
+  },
+  "regions": [
+    {
+      "id": "vale",
+      "prefix": "VAL",
+      "name": "Aldmere Vale",
+      "towns": ["Kingsrest", "Millbrook"],
+      "families": [
+        {
+          "code": "VAL-01",
+          "name": "Stone grey",
+          "use": "stone walls, plinths, chimneys (walls: paint_teeth)",
+          "blocks": ["tuff_bricks", "cobblestone", "andesite", "smooth_stone"],
+          "status": "mateo",
+          "screenshot": "gradient-examples-ardacraft.png (left column, matched to vanilla by lightness)",
+          "order": "bottom to top, dark to light"
+        },
+        {
+          "code": "VAL-02",
+          "name": "Plaster white",
+          "use": "infill between timber, limewashed roofs",
+          "blocks": ["diorite", "white_concrete", "calcite"],
+          "status": "principle",
+          "screenshot": null,
+          "order": "bottom to top, dark to light"
+        },
+        {
+          "code": "VAL-03",
+          "name": "Brick red",
+          "use": "brick houses, chimneys, warm red roofs",
+          "blocks": ["red_terracotta", "brick_block", "polished_granite"],
+          "status": "principle",
+          "screenshot": null,
+          "order": "bottom to top, dark to light"
+        },
+        {
+          "code": "VAL-04",
+          "name": "Dark timber",
+          "use": "frame, trim, dark shingle roofs, floor borders",
+          "blocks": ["dark_oak_planks", "stripped_dark_oak_log", "spruce_planks"],
+          "status": "principle",
+          "screenshot": null,
+          "order": "bottom to top, dark to light"
+        },
+        {
+          "code": "VAL-05",
+          "name": "Mid wood",
+          "use": "floors, doors, shutters, mid shingle roofs, brick-style frame",
+          "blocks": ["spruce_planks", "jungle_planks", "oak_planks", "stripped_oak_log"],
+          "status": "principle",
+          "screenshot": null,
+          "order": "bottom to top, dark to light"
+        },
+        {
+          "code": "VAL-06",
+          "name": "Slate",
+          "use": "slate roofs, ridge caps",
+          "blocks": ["deepslate_tiles", "deepslate_bricks", "cobbled_deepslate"],
+          "status": "principle",
+          "screenshot": null,
+          "order": "bottom to top, dark to light"
+        },
+        {
+          "code": "VAL-07",
+          "name": "Copper",
+          "use": "civic roofs and domes (banded ridge to eaves)",
+          "order": "ridge to eaves: oxidized at the top, bright cut copper at the eaves",
+          "blocks": ["waxed_oxidized_cut_copper", "waxed_weathered_cut_copper", "waxed_exposed_cut_copper", "waxed_cut_copper"],
+          "status": "starter",
+          "screenshot": null,
+          "note": "hue gradient, the one exception: the four copper stages are the same lightness, so the bands read by colour (Mateo's copper roof reference)"
+        },
+        {
+          "code": "VAL-08",
+          "name": "Ground",
+          "use": "verges, wear by doors, drip lines",
+          "blocks": ["coarse_dirt", "grass_path", "gravel"],
+          "status": "principle",
+          "screenshot": null,
+          "order": "bottom to top, dark to light"
+        },
+        {
+          "code": "VAL-09",
+          "name": "Half-timber panels",
+          "use": "close studding and half-timbered infill (04-walls)",
+          "blocks": ["siege:timber_frame", "siege:timber_frame_cross"],
+          "order": "field, then accent under windows and on gables",
+          "status": "mateo",
+          "screenshot": "../reference/pictures/close-studding.png"
+        },
+        {
+          "code": "VAL-10",
+          "name": "Light stone",
+          "use": "civic and well-kept stone walls, light plinths",
+          "blocks": ["stone_bricks", "andesite", "smooth_stone", "polished_diorite"],
+          "order": "bottom to top, dark to light",
+          "status": "mateo",
+          "screenshot": "gradient-examples-ardacraft.png (right column, matched to vanilla by lightness)"
+        },
+        {
+          "code": "VAL-11",
+          "name": "Warm earth stone",
+          "use": "rural and old walls going from stone at the foot to earth and sand-coloured render above; farm buildings, the dry edge of the Vale",
+          "blocks": ["cobbled_deepslate", "granite", "white_terracotta", "sandstone"],
+          "order": "bottom to top",
+          "status": "mateo",
+          "screenshot": "gradient-examples-ardacraft.png (middle column, matched to vanilla by lightness; the step from packed mud to sandstone is a big jump in vanilla)"
+        }
+      ]
+    },
+    {
+      "id": "frostmarch",
+      "prefix": "FRO",
+      "name": "Frostmarch",
+      "towns": ["Rimehold", "Frosthelm"],
+      "families": [
+        {
+          "code": "FRO-01",
+          "name": "Dark stone",
+          "use": "plinths, walls, chimneys, path slabs",
+          "blocks": ["deepslate_bricks", "cobbled_deepslate", "tuff", "andesite"],
+          "status": "principle",
+          "screenshot": null,
+          "order": "bottom to top, dark to light"
+        },
+        {
+          "code": "FRO-02",
+          "name": "Plank brown",
+          "use": "plank infill in rows, gables",
+          "blocks": ["dark_oak_planks", "spruce_planks", "oak_planks"],
+          "status": "principle",
+          "screenshot": null,
+          "order": "bottom to top, dark to light"
+        },
+        {
+          "code": "FRO-03",
+          "name": "Snow white",
+          "use": "light infill, snow on tops",
+          "blocks": ["diorite", "white_concrete", "calcite", "snow"],
+          "status": "principle",
+          "screenshot": null,
+          "order": "bottom to top, dark to light"
+        },
+        {
+          "code": "FRO-04",
+          "name": "Ice blue",
+          "use": "trim courses and finials only",
+          "blocks": ["blue_ice", "packed_ice"],
+          "status": "principle",
+          "screenshot": null,
+          "order": "bottom to top, dark to light"
+        },
+        {
+          "code": "FRO-05",
+          "name": "Dark timber",
+          "use": "frame, trim, dark shingle roofs",
+          "blocks": ["spruce_log", "stripped_dark_oak_log", "spruce_planks"],
+          "status": "principle",
+          "screenshot": null,
+          "order": "bottom to top, dark to light"
+        },
+        {
+          "code": "FRO-06",
+          "name": "Slate",
+          "use": "slate roofs",
+          "blocks": ["deepslate_tiles", "deepslate_bricks", "cobbled_deepslate"],
+          "status": "principle",
+          "screenshot": null,
+          "order": "bottom to top, dark to light"
+        }
+      ]
+    },
+    {
+      "id": "saltreach",
+      "prefix": "SAL",
+      "name": "Saltreach",
+      "towns": ["Gull's Rest"],
+      "families": [
+        {
+          "code": "SAL-01",
+          "name": "Sand stone",
+          "use": "walls, quoins, path slabs",
+          "blocks": ["white_terracotta", "sandstone", "smooth_sandstone", "smooth_quartz"],
+          "status": "principle",
+          "screenshot": null,
+          "order": "bottom to top, dark to light"
+        },
+        {
+          "code": "SAL-02",
+          "name": "Bright white",
+          "use": "plaster, white roofs, civic",
+          "blocks": ["polished_diorite", "white_concrete", "calcite", "smooth_quartz"],
+          "status": "principle",
+          "screenshot": null,
+          "order": "bottom to top, dark to light"
+        },
+        {
+          "code": "SAL-03",
+          "name": "Pale wood",
+          "use": "frame, trim, floors",
+          "blocks": ["oak_planks", "stripped_oak_log", "birch_planks"],
+          "status": "principle",
+          "screenshot": null,
+          "order": "bottom to top, dark to light"
+        },
+        {
+          "code": "SAL-04",
+          "name": "Sea green",
+          "use": "roofs, painted shutters and doors",
+          "blocks": ["dark_prismarine", "waxed_oxidized_cut_copper", "prismarine", "prismarine_bricks"],
+          "status": "principle",
+          "screenshot": null,
+          "order": "bottom to top, dark to light"
+        },
+        {
+          "code": "SAL-05",
+          "name": "Warm grey",
+          "use": "footings and plinths",
+          "blocks": ["tuff", "cobblestone", "andesite"],
+          "status": "principle",
+          "screenshot": null,
+          "order": "bottom to top, dark to light"
+        },
+        {
+          "code": "SAL-06",
+          "name": "Orange tile",
+          "use": "orange roofs",
+          "blocks": ["orange_terracotta", "acacia_planks", "waxed_cut_copper"],
+          "status": "principle",
+          "screenshot": null,
+          "order": "bottom to top, dark to light"
+        }
+      ]
+    },
+    {
+      "id": "blackfen",
+      "prefix": "BLK",
+      "name": "Blackfen",
+      "towns": ["Mirelight"],
+      "families": [
+        {
+          "code": "BLK-01",
+          "name": "Mud brown",
+          "use": "infill (darker low, near the water), mud tile roofs, paths",
+          "blocks": ["brown_terracotta", "coarse_dirt", "mud_bricks"],
+          "status": "principle",
+          "screenshot": null,
+          "order": "bottom to top, dark to light"
+        },
+        {
+          "code": "BLK-02",
+          "name": "Mangrove red",
+          "use": "stilts, frame, platforms, mangrove roofs",
+          "blocks": ["dark_oak_planks", "mangrove_planks", "acacia_planks"],
+          "status": "principle",
+          "screenshot": null,
+          "order": "bottom to top, dark to light"
+        },
+        {
+          "code": "BLK-03",
+          "name": "Grey-brown stone",
+          "use": "footings, stone buildings",
+          "blocks": ["cobbled_deepslate", "tuff_bricks", "dripstone_block"],
+          "status": "principle",
+          "screenshot": null,
+          "order": "bottom to top, dark to light"
+        },
+        {
+          "code": "BLK-04",
+          "name": "Moss green",
+          "use": "moss on roofs and low walls",
+          "blocks": ["green_terracotta", "moss_block", "mossy_cobblestone"],
+          "status": "principle",
+          "screenshot": null,
+          "order": "bottom to top, dark to light"
+        },
+        {
+          "code": "BLK-05",
+          "name": "Dark shingle",
+          "use": "mossy dark shingle roofs, floors",
+          "blocks": ["dark_oak_planks", "stripped_dark_oak_log", "spruce_planks"],
+          "status": "principle",
+          "screenshot": null,
+          "order": "bottom to top, dark to light"
+        }
+      ]
+    },
+    {
+      "id": "emberwaste",
+      "prefix": "EMB",
+      "name": "Emberwaste",
+      "towns": ["Sunscar"],
+      "families": [
+        {
+          "code": "EMB-01",
+          "name": "Pale sand",
+          "use": "walls, flat roofs, parapets, path slabs",
+          "blocks": ["white_terracotta", "sandstone", "smooth_sandstone"],
+          "status": "principle",
+          "screenshot": null,
+          "order": "bottom to top, dark to light"
+        },
+        {
+          "code": "EMB-02",
+          "name": "Rust red",
+          "use": "red stone walls, red domes and roofs",
+          "blocks": ["red_terracotta", "orange_terracotta", "smooth_red_sandstone", "yellow_terracotta"],
+          "status": "principle",
+          "screenshot": null,
+          "order": "bottom to top, dark to light"
+        },
+        {
+          "code": "EMB-03",
+          "name": "Clay orange",
+          "use": "clay accents, bands",
+          "blocks": ["brown_terracotta", "orange_terracotta", "yellow_terracotta", "white_terracotta"],
+          "status": "principle",
+          "screenshot": null,
+          "order": "bottom to top, dark to light"
+        },
+        {
+          "code": "EMB-04",
+          "name": "Acacia orange",
+          "use": "beams, trim, lattice, floors",
+          "blocks": ["spruce_planks", "acacia_planks", "jungle_planks"],
+          "status": "principle",
+          "screenshot": null,
+          "order": "bottom to top, dark to light"
+        },
+        {
+          "code": "EMB-05",
+          "name": "Dome teal",
+          "use": "civic domes",
+          "blocks": ["dark_prismarine", "waxed_oxidized_cut_copper", "prismarine_bricks"],
+          "status": "principle",
+          "screenshot": null,
+          "order": "bottom to top, dark to light"
+        }
+      ]
+    },
+    {
+      "id": "hollow",
+      "prefix": "HOL",
+      "name": "The Hollow",
+      "towns": ["Glimwade", "Lowseam", "Tollrest", "Highcut"],
+      "families": [
+        {
+          "code": "HOL-01",
+          "name": "Black stone",
+          "use": "plinths, quoins, chimneys, path slabs",
+          "blocks": ["blackstone", "polished_blackstone_bricks", "deepslate_tiles", "deepslate_bricks"],
+          "status": "principle",
+          "screenshot": null,
+          "order": "bottom to top, dark to light"
+        },
+        {
+          "code": "HOL-02",
+          "name": "Veinstone purple-grey",
+          "use": "walls",
+          "blocks": ["siege:veinstone", "siege:veinstone_bricks", "siege:cracked_veinstone_bricks"],
+          "status": "principle",
+          "screenshot": null,
+          "order": "bottom to top, dark to light"
+        },
+        {
+          "code": "HOL-03",
+          "name": "Ash pale",
+          "use": "infill, ash on the ground",
+          "blocks": ["cobbled_deepslate", "tuff", "siege:pale_ash"],
+          "status": "principle",
+          "screenshot": null,
+          "order": "bottom to top, dark to light"
+        },
+        {
+          "code": "HOL-04",
+          "name": "Dark timber",
+          "use": "frame, trim, floors",
+          "blocks": ["dark_oak_planks", "stripped_dark_oak_log"],
+          "status": "principle",
+          "screenshot": null,
+          "order": "bottom to top, dark to light"
+        },
+        {
+          "code": "HOL-05",
+          "name": "Slate",
+          "use": "roofs",
+          "blocks": ["polished_blackstone_bricks", "deepslate_tiles", "cobbled_deepslate"],
+          "status": "principle",
+          "screenshot": null,
+          "order": "bottom to top, dark to light"
+        },
+        {
+          "code": "HOL-06",
+          "name": "Crown accent",
+          "use": "the Seat and Morvane's sites only, never a texture mix",
+          "blocks": ["crying_obsidian", "amethyst_block", "purpur_block"],
+          "status": "principle",
+          "screenshot": null,
+          "note": "accent only, never a texture mix",
+          "order": "bottom to top, dark to light"
+        }
+      ]
+    }
+  ],
+  "pairings": [
+    {
+      "name": "Stone, spruce, dark oak",
+      "blocks": ["stone_bricks", "spruce_planks", "dark_oak_trapdoor"],
+      "where": "anything that uses stone: stone is the light field, spruce the middle, dark oak the darkest note",
+      "source": "Mateo 2026-11-11, reference/pictures/stone-ground-floor-trapdoors.png"
+    }
+  ]
+}

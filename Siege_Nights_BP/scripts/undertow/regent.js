@@ -24,6 +24,7 @@ import { world, system, GameMode } from "@minecraft/server";
 import { ActionFormData } from "@minecraft/server-ui";
 import { onTick } from "../core/loop.js";
 import { emit, countItem, takeItems } from "../siege/api.js";
+import { applyFilter } from "../core/events.js";
 import { UNDERTOW_ID, HEART, TEXT } from "./layout.js";
 import { load, save, say } from "./data.js";
 import { chargeE } from "../economy/coins.js";
@@ -43,6 +44,9 @@ export const TEMPERS = {
   greedy: { title: "the Grasping", price: 48, tithe: 50, sells: true },
   fair: { title: "the Even-Handed", price: 16, tithe: 25, sells: true },
   zealot: { title: "the Devout", price: 0, tithe: 10, sells: false }, // will not sell: work for it
+  // Two more for the Five Chairs (after/chairs.js): the house that holds the seat sets the Regent's temper.
+  patient: { title: "the Patient", price: 24, tithe: 15, sells: true },
+  unbending: { title: "the Unbending", price: 32, tithe: 35, sells: true },
 };
 
 // What a Regent may ask for in return for a permit: [item, amount, how they ask]
@@ -57,7 +61,8 @@ export const JOBS = [
 let VOICE = {
   names: ["Maren", "Ysolde", "Corvin", "Aldreth", "Brannoch", "Sefa"],
   lines: {
-    greet: { greedy: "Everything here has a price. Yours is higher than most.", fair: "You may take from the Hollow what you pay for. No more.", zealot: "The ore is not for sale. It is sung for. What will you give the song?" },
+    greet: { greedy: "Everything here has a price. Yours is higher than most.", fair: "You may take from the Hollow what you pay for. No more.", zealot: "The ore is not for sale. It is sung for. What will you give the song?",
+      patient: "There is no hurry. There is never any hurry. Take a little, and come back.", unbending: "You will pay, and you will dig where I say, and you will not argue." },
     permitSold: "Then mine, and be quick about it. The Hollow keeps count.",
     jobDone: "It will do. Mine while my patience lasts.",
     noCoin: "Come back when you can pay.",
@@ -65,6 +70,8 @@ let VOICE = {
     dying: "It will find another head. It always does.",
   },
 };
+const EXTRA_GREET = { patient: VOICE.lines.greet.patient, unbending: VOICE.lines.greet.unbending }; // kept if the lore's voice has none
+const greetFor = (temper) => VOICE.lines.greet?.[temper] ?? EXTRA_GREET[temper] ?? VOICE.lines.greet?.fair ?? "";
 export function setRegentVoice(voice) {
   VOICE = { names: voice.names ?? VOICE.names, lines: { ...VOICE.lines, ...(voice.lines ?? {}) } };
 }
@@ -76,7 +83,10 @@ const K_WARDEN = "hc:hollow_warden";
 const blank = () => ({ active: false, name: undefined, temper: "fair", since: undefined, fellOn: undefined, permits: {}, job: 0 });
 export const regentData = () => ({ ...blank(), ...load(K, {}) });
 export const regentRules = () => regentData().active;
-export const regentPermit = (playerId, day = today()) => (regentData().permits[playerId] ?? -1) >= day;
+export const boughtPermit = (playerId, day = today()) => (regentData().permits[playerId] ?? -1) >= day;
+// A player may also mine freely by favour (filter "regentFreePermit": the Five Chairs lets backers of the seat house in).
+export const freePermit = (playerId) => !!applyFilter("regentFreePermit", false, { playerId });
+export const regentPermit = (playerId, day = today()) => boughtPermit(playerId, day) || freePermit(playerId);
 const today = () => { try { return world.getDay(); } catch { return 0; } };
 
 // Should a Regent rise today? Pure, so it can be tested.
@@ -88,7 +98,9 @@ export function shouldRise({ choirDead, choirFellOn, playerRules, regent, day })
 
 export function raiseRegent(temper) {
   const r = { ...blank(), ...regentData(), active: true, permits: {} };
-  r.temper = TEMPERS[temper] ? temper : Object.keys(TEMPERS)[Math.floor(Math.random() * 3)];
+  // Who rules below may choose the temper (filter "regentTemper": the Five Chairs' seat house); else a roll of the first three.
+  const wanted = TEMPERS[temper] ? temper : applyFilter("regentTemper", Object.keys(TEMPERS)[Math.floor(Math.random() * 3)]);
+  r.temper = TEMPERS[wanted] ? wanted : "fair";
   r.name = VOICE.names[Math.floor(Math.random() * VOICE.names.length)];
   r.job = Math.floor(Math.random() * JOBS.length);
   r.since = today();
@@ -96,6 +108,20 @@ export function raiseRegent(temper) {
   world.sendMessage(`§5Word comes up through the Rift: someone has put on the Hollow Crown. §d${r.name} ${TEMPERS[r.temper].title}§5 rules ${TEXT.name} now.`);
   emit("regentChanged", { active: true, name: r.name, temper: r.temper });
   return r;
+}
+
+// The power behind the Regent changed: same Regent, new temper (price and tithe follow at once).
+export function setRegentTemper(temper, why) {
+  const r = regentData();
+  if (!r.active || !TEMPERS[temper] || r.temper === temper) return false;
+  r.temper = temper;
+  save(K, r);
+  world.sendMessage(`§5${r.name} is ${TEMPERS[temper].title} now.${why ? ` §7${why}` : ""}`);
+  try {
+    for (const e of world.getDimension(UNDERTOW_ID).getEntities({ type: ENTITY })) e.nameTag = `§d${r.name} ${TEMPERS[temper].title}`;
+  } catch { /* not loaded */ }
+  emit("regentChanged", { active: true, name: r.name, temper });
+  return true;
 }
 
 function endRegent(killed) {
@@ -144,9 +170,9 @@ function audience(p) {
   const r = regentData(), t = TEMPERS[r.temper], day = today();
   if (!r.active) return;
   const job = JOBS[r.job % JOBS.length];
-  const held = regentPermit(p.id, day);
+  const held = regentPermit(p.id, day), free = !boughtPermit(p.id, day) && freePermit(p.id);
   const form = new ActionFormData().title(`${r.name} ${t.title}`)
-    .body(`"${VOICE.lines.greet[r.temper]}"\n\nPermit: ${t.sells ? worth(t.price) : "not for sale"} for ${REGENT.permitDays} days\nTithe: ${t.tithe}% of what you dig\n` + (held ? `\n§2You hold a permit until day ${r.permits[p.id]}.` : "\n§7You hold no permit."));
+    .body(`"${greetFor(r.temper)}"\n\nPermit: ${t.sells ? worth(t.price) : "not for sale"} for ${REGENT.permitDays} days\nTithe: ${t.tithe}% of what you dig\n` + (free ? "\n§2Your house has my ear. Mine as you please." : held ? `\n§2You hold a permit until day ${r.permits[p.id]}.` : "\n§7You hold no permit."));
   const acts = [];
   if (t.sells) { form.button(`Buy a permit\n${worth(t.price)}`); acts.push(() => buy(p)); }
   form.button(`Earn a permit\n${job[1]} × ${job[0].replace("minecraft:", "").replace(/_/g, " ")}`); acts.push(() => work(p));

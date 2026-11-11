@@ -25,7 +25,7 @@ Decided by Mateo, 2026-11-10. The one who controls the Hollow is **Morvane**. Th
 - **The Hollow Crown is the crown of the Hollow's ruler** (Mateo, 2026-11-10). Its seat stood empty from the war until the Hollow set it on Morvane, which only worked because it took the king out of him first. It kills anyone who puts it on **except a max-level Sorcerer**, who can hear the whole Hollow at once and not break. The game says this plainly.
 - **Defeat the leader** and you win something great to carry back up (a separate relic and title; the Crown thread is naming it) and your settlement transforms. You do not rule the Hollow.
 - **After Morvane falls the seat can stay empty**, open for any max-level Sorcerer to claim later. In a solo world an NPC takes it (the Undertow feature's "Regent"; names and lines in `lore/data/lords.js`), and a new one rises whenever the last is killed.
-- **Hidden third ending:** solve every mystery, learn the land's old name, and say **Hallowmere** at the throne to offer the truce again.
+- **Hidden third ending (Mateo picked it 2026-11-11, built in `lore/truce.js`):** solve every mystery, learn the land's old name, and once Morvane has fallen say **Hallowmere** at the empty Seat to offer the truce again. The Choir answers. Every third night becomes a Guest Night: Choir guests walk up and trade a thing for a thing (as the Reeve's Roll says), the Even Market at Reedmoor opens, nobody is taken, a Returned rung out walks home alone, and nothing below hunts the players. Ringing a bell at Bellhollow, as Edda did, breaks it: every third night is an "oathbroken" siege at Uncounted Nights strength. After 9 days it can be offered again, and the Choir's answer changes each time.
 - The old idea that the wearer slowly becomes the next monster is **gone**.
 
 ## The Old King's Journal
@@ -259,6 +259,10 @@ A player shelves the six notes, reads them, visits the sites, and uses **Name th
 | `cael` | Brother Cael, the Order's archivist | Chapterhouse archive | The Burned Archive (only if Aldous sends you), then King's Barrow |
 | `sigrun` | Sigrun Ashby, Wren's northern cousin | Rimehold | The lake, the shrine, the hunter's lodge. Gives *Grandmother Ashby's Account* |
 | `isolde` | Warden Isolde | Sunscar | The statue fragments, the vault riddle ("grey eyes over a laughing mouth, the right hand raised") |
+| `kesh` | Kesh Cinder, Wingmistress of the Cinder Roost, last of Ysolt's line, grounded since her dragon was shot down | The Cinder Roost above Sunscar | The Dragon Rider trial: the Span, the Choosing, the Hatching. Knows why dragons won't fly on the third night and won't say until Drake-Captain |
+| `ulla` | Ulla Deepforge, keeper of Hroda's fire | The Deepforge above Rimehold | The Forgemaster trial: the side-hearth, Hroda's Hand-bell rung on the ice, the Huntsman. Knows the Order took the bell moulds |
+| `ottilie` | Harbourmistress Ottilie Holt, Merrin Holt's descendant, keeper of the Debt Book | Harbour office, Gull's Rest | The Captain trial: the articles, a crew, the Drowned Bride. The back of the Debt Book waits for Captain rank |
+| `nell` | Nell Sedge, of Goody Sedge's line; hasn't spoken to Old Mag in sixty years | Raft-house past Mirelight | The Witch trial: the cup, three graves, the Mother of Changelings |
 
 What a character says depends on what you've read, solved and done, and whether you are a Sorcerer.
 
@@ -331,3 +335,17 @@ None of the four is the Hollow's; each is what a region already knew before the 
 ## Where the eight paintings hang
 
 Mateo's eight paintings are already in the game as hanging pictures (`siege:portrait`, textures `textures/entity/portrait/plate_1..8.png`). Seven hang openly: one in each settlement's Library (which one depends on the plot) and all seven in a row with `/scriptevent siege:portrait gallery` (meant for the Long Gallery at Crownhold). **The eighth, the Forty-Second Portrait, is a secrecy call and hangs only in the Burned Archive**, which a player reaches late through Brother Cael. Its caption never says whose portrait it is until Morvane has fallen; after that it reads "Oswin, son of Aldric, last King of Aldmere" and says he scraped the face off himself the night before they came for him (that last detail is the lore thread's, not Mateo's).
+
+## The Hollow's middle stretch (Mateo approved 2026-11-11)
+
+Between the Rift and the Choir. The guide is **the Carter**, who drives the dawn ore cart from the villages to the Seat. She has no name, because those below have none; the Hollow names only people who have lost their own. Her younger brother was taken from Highcut to sing in the Court. She has passed the Chair a hundred times and never looked up at the face.
+
+- **The ore.** Choir Ore holds a note. Every stone goes to the Seat, then to the Court, where the Singers hold it while they sing at the Door. Every siege above is paid for by a miner here.
+- **The Truce Hall.** One chair is still standing (the Hollow's) and one is knocked over (ours). The hum replays "Then it is sworn." *The Name We Were* lies on the lectern.
+- **The Standing Ranks.** The whole Grey Host, taken as promised. The one empty place at the head of the front row is Vorlund's.
+- **The Far Door.** The crack across the seal is the Founding Bell's stroke. Choir Ore picks are worn to the handle. They are digging home.
+- **The Drift.** From the top stone the player sees a figure in the Chair, far off, lift its LEFT hand, and the whole Hollow changes key.
+- **The Seams.** Wreck the dawn cart (the Choir has less to sing with, so fewer phantom raids) or let it go (the miners remember: half price at every Tally).
+- **The Choir is the miners' own children.** A silenced Singer does not die. Afterwards they get up and walk home with no voice. The player names the Carter (Lark, Morrow or Dawn). She points out that the one in the Chair was given his name the same way, and has never once looked at the river.
+
+Nothing in it says Oswin.

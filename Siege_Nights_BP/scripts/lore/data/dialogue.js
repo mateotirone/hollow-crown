@@ -13,6 +13,8 @@
 // "next node" may also be a list like start, to send the player different ways: [[conditions, node], ...]
 // Every effect only ever happens once per player.
 
+import { MENTOR_NPCS } from "./mentors.js"; // the four regional role mentors
+
 export const NPCS = [
   // ------------------------------------------------------------------ Sister Wren, Millbrook
   {
@@ -179,6 +181,10 @@ export const NPCS = [
     id: "aldous", name: "Sir Aldous Vane", where: "Rides to a player's keep the morning after their first siege win (spawned by the story engine), then waits at the Ashen Gate chapterhouse. Young, earnest, believes everything the Order told him.",
     start: [
       [["flag:morning_after", "flag:aldous_met", "!flag:aldous_saw"], "saw"],
+      [["path:knight", "flag:morvane_fallen", "!flag:aldous_after"], "after"],
+      [["path:knight", "flag:rank_knight_knight_commander", "!flag:aldous_commander"], "commander"],
+      [["path:knight", "flag:aldous_met", "!flag:knight_wall_asked"], "wall"],
+      [["path:knight", "flag:knight_wall", "!flag:knight_wall_thanked"], "wallthanks"],
       [["read:seal_10"], "edda"],
       [["read:seal_09"], "confront"],
       [["path:marked"], "marked"],
@@ -256,6 +262,33 @@ export const NPCS = [
         text: "I don't know. That is the truth and it shames me. We take the lights and we are never told what becomes of them.\n\nThere was a mage, once. The Order burned him. They say his students hid his notebooks all over Aldmere. If anyone wrote down what you are now, it was him.",
         opts: [["I'll find them.", "end", ["lead:corvins_tower"]]],
       },
+      commander: {
+        text: "Knight-Commander. There were four of those when we were eleven hundred. Now there's you.\n\nThe Eleven are yours. Every one of us who's left. We'll hold whatever wall you put us on, and when the worst night comes, the one we were all sworn for and never told about, we'll be on it with you.\n\nWhatever you call us now. The name matters less than I thought it would.",
+        opts: [["Then hold the wall with me.", "end", ["flag:aldous_commander", "sp:2"]]],
+      },
+      after: {
+        text: "I keep thinking about her. Edda. Saint Ashe.\n\nShe stood on a wall on a third night, just like the one we stood on, and did a terrible thing so the knocking would stop, and then lied for the rest of her life so no one would undo it.\n\nWould she have done it again, do you think? If she'd seen how it ended?\n\n...No. Don't answer. I don't think I want to know. I just wanted somebody else to wonder it too.",
+        opts: [["I'll wonder it with you.", "end", ["flag:aldous_after", "sp:1"]]],
+      },
+      wall: {
+        text: "Squire. Good, you're here. I need to ask you something the Rule doesn't cover.\n\nThe Order watches the keeps. That's all we do now: watch. Eleven of us can't stand on forty walls. But you could stand on one that isn't yours.\n\nNext time another keep is besieged, go and hold it with them. Not for pay. Because the Rule says we stand between the people and the dark, and I'd like to see one of us actually do it.",
+        opts: [
+          ["I'll stand on their wall.", "wall2", ["flag:knight_wall_asked"]],
+          ["And if there's no other keep near me?", "wallsolo", ["flag:knight_wall_asked"]],
+        ],
+      },
+      wall2: {
+        text: "Thank you. When you have, I'll write to the others. All ten of them. Some of them will come and see for themselves.\n\nThat's how the Order starts again, I think. Not with a council. With somebody seen on the wrong wall.",
+        opts: [["Good day, Aldous.", "end"]],
+      },
+      wallsolo: {
+        text: "Then hold your own as if it were somebody else's. As if the people behind you weren't yours to lose, and you were there anyway.\n\nI'll know the difference. So will the others.",
+        opts: [["I will.", "end"]],
+      },
+      wallthanks: {
+        text: "I heard. A knight of the Gate on a wall, on a third night, holding.\n\nI've written to the others. Dame Orla wrote back in an hour, which she has never once done for the Grandmaster. They'll come to you, one by one, as they hear what you do. Let them see you do it.",
+        opts: [["Let them come.", "end", ["flag:knight_wall_thanked", "sp:1"]]],
+      },
       confront: {
         text: "You've read it. The Grandmaster's own hand. \"Let them think it is bandits.\"\n\nI have told forty keeps it was bandits. I told YOU it was bandits. I believed it.\n\nGive me a little time. A man cannot put down his whole life in one afternoon.",
         opts: [
@@ -280,6 +313,9 @@ export const NPCS = [
     start: [
       [["flag:morning_after", "flag:mag_believed", "!flag:mag_saw"], "saw"],
       [["flag:corvin_says_mag", "!flag:mag_heard_corvin"], "trowel"],
+      [["path:marked", "flag:morvane_fallen", "!flag:mag_after"], "crownheld"],
+      [["path:marked", "flag:rank_marked_listener", "!flag:mag_listener"], "listener"],
+      [["path:marked", "flag:rank_marked_adept", "!flag:mag_adept"], "adept"],
       [["path:marked", "flag:mag_believed", "!flag:mag_arts"], "arts"],
       [["col:corvin", "flag:mag_believed"], "allbooks"],
       [["flag:mag_believed"], "hub"],
@@ -287,6 +323,34 @@ export const NPCS = [
       [[], "first"],
     ],
     nodes: {
+      crownheld: {
+        text: "So. It's over, and you're the one who can hear all of it now.\n\nWill you let me hold it? The Crown. Not wear it. I'm not a fool, and I'm not you. Just hold it, once, in my two hands.\n\n...Heavier than I thought. Colder. He used to turn his ring when he was thinking. Did you know that? No. Of course you didn't.\n\nTake it back. Quickly, please.",
+        opts: [["I've got it, Mag.", "hub", ["flag:mag_after", "sp:1"]]],
+      },
+      listener: {
+        text: "Sit. No, the other chair, that one's for the cat, and she's dead, but it's still hers.\n\nListener now. I could tell from the door. You keep tilting your head at the kettle.\n\nSo. What did it sound like, the first time? Not what it said. What it SOUNDED like. Everyone hears something different, and what you hear tells me what you'll be.",
+        opts: [
+          ["Like a bell under water.", "listener2"],
+          ["Like a lot of people humming one note.", "listener2"],
+          ["Like someone saying my name from the next room.", "listener2"],
+        ],
+      },
+      listener2: {
+        text: "Hm. That's a good one. That's not the worst one.\n\nHere's the first thing he taught me, and the only thing that matters this year: it doesn't know you're listening. Not yet. Keep it that way as long as you can. Cast quiet. Rest between.\n\nThe day it notices you back is a different lesson.",
+        opts: [["Thank you, Mag.", "hub", ["flag:mag_listener", "sp:1"]]],
+      },
+      adept: {
+        text: "You went loud.\n\nDon't argue, I felt it from here, like a draught under a door. Past seventy, weren't you? You felt it look round.\n\nThat's what Adept means. Not that you're good. That you're loud enough to be noticed, and still standing.",
+        opts: [["What do I do now?", "adept2"], ["It was worth it.", "adept3"]],
+      },
+      adept2: {
+        text: "Now you learn to be loud on purpose and quiet the rest of the time, like a man who only shouts in a fire.\n\nAnd you start carrying something to hold on to after. He used to keep a pebble from the river at home. Pick something. You'll know why the first time you need it.",
+        opts: [["I'll pick something.", "hub", ["flag:mag_adept", "sp:1"]]],
+      },
+      adept3: {
+        text: "It always is, the first time. That's the trap.\n\nGo and be loud when it matters, and quiet all the rest. And carry something from home in your pocket. You'll know why.",
+        opts: [["I'll remember.", "hub", ["flag:mag_adept", "sp:1"]]],
+      },
       saw: {
         text: "Don't tell me. I can smell it on your coat. Cold stone and the inside of a bell.\n\nSo they've come up the long way and walked to your wall on their own feet. Well. I wondered if I'd live to see that again, and it turns out I live to see everything.\n\nSit. You'll want to know what it was, and I'm not going to tell you, and you'll want to know why not.",
         opts: [["Why not?", "saw2"]],
@@ -791,11 +855,16 @@ export const NPCS = [
           ["I'll read the record.", "end", ["flag:isolde_doubt", "lead:sunscar"]],
         ],
       },
+      roost: {
+        text: "The Roost. Yes, that's ours too, in the way a hawk on the roof is yours.\n\nThey train riders up there. The Cinder woman runs it now, the one with no dragon. If you want to ride, she's who you ask. If you want my advice, don't. I've read that wall of theirs. It's longer every year.",
+        opts: [["Back.", "start"]],
+      },
       hub: {
         greets: ["Sunscar thanks you for your visit. I am required to say so. What do you want?", "Mind the statues on your way out. They were here first.", "I have a petition about a goat and then I have you. Go on."],
         text: "Water, shade, or statues?",
         opts: [
           ["Statues.", "doubt"],
+          ["The cliff above town.", "roost", ["lead:cinder_roost"]],
           ["Who rules Sunscar?", "seneschal"],
           ["Just passing through.", "end"],
         ],
@@ -804,6 +873,7 @@ export const NPCS = [
         text: "You again. You've got me looking at them on my rounds now. I hope you're pleased.",
         opts: [
           ["The fragments.", "fragments"],
+          ["The cliff above town.", "roost", ["lead:cinder_roost"]],
           ["Who rules Sunscar?", "seneschal"],
           ["The riddle on the vault.", "riddle"],
           ["Good day, Warden.", "end"],
@@ -1138,6 +1208,176 @@ export const NPCS = [
       after2: {
         text: "Of course he did. The red one. He used to read it on the walls on the third nights, when he thought no one could see.\n\nThe chair's empty now, and it wants someone who can hear all of this at once and not break. If that's to be you, then listen to an old flat voice: keep the truce. It was a good one. It was only ever kept by one man.",
         opts: [["I'll remember him too.", "hub", ["sp:2"]]],
+      },
+    },
+  },
+  // ------------------------------------------------------------------ the four regional mentors (mentors.js)
+  ...MENTOR_NPCS,
+  // ------------------------------------------------------------------ The Carter, the Hollow
+  // The middle stretch's guide (Mateo approved 2026-11-11). Placed by script (undertow/story.js): at
+  // the Wound landing, then Glimwade, then the Court door. Those below have no names (Sigrun), so she
+  // has none until the player gives her one. Never says Oswin; never sees the face in the Chair.
+  {
+    id: "carter", name: "The Carter", where: "THE HOLLOW. Placed by script, never by hand: the Wound landing dock, then Glimwade, then the Court door once a player has the Cartsong. Drives the dawn ore cart. Young, quick, frightened of one thing only.",
+    start: [
+      [["flag:morvane_fallen", "flag:carter_named", "!flag:carter_last"], "last"],
+      [["flag:hb_choir_silenced", "!flag:carter_named"], "after"],
+      [["flag:carter_named"], "named"],
+      [["flag:cartsong"], "door"],
+      [["flag:hb_ready"], "song"],
+      [["flag:hb_glimwade"], "hub"],
+      [["flag:carter_met"], "landing2"],
+      [[], "first"],
+    ],
+    nodes: {
+      first: {
+        text: "You're dripping light. Everyone from the bright side does, for a while. It wears off.\n\nI saw the crack open from the cart road. I thought someone ought to come and look, and nobody else would, so here I am, sitting on a dock, talking to it.\n\nHave you come to take the cart's place? He said someone would, one day.",
+        opts: [
+          ["What cart?", "cart", ["flag:carter_met"]],
+          ["Who said?", "he", ["flag:carter_met"]],
+          ["Who are you?", "name", ["flag:carter_met"]],
+        ],
+      },
+      cart: {
+        text: "The ore cart. I drive it. Every dawn, from the villages, down the long rail to the south end, to the Seat. I bring it back empty.\n\nWhat goes in it is Choir Ore. What it is for, you'd better see for yourself. Go to Glimwade, up the bank on the left. Watch them load it. I'll meet you there.",
+        opts: [["I'll go to Glimwade.", "end"], ["Who are you?", "name"]],
+      },
+      he: {
+        text: "Him in the Chair. Morvane.\n\nDon't look like that. Everyone up there knows the name, I'm told. You shout it at your walls on the third night.\n\nI've driven past him a hundred times. I have never once seen his face. You don't look up when you pass the Chair. That's the first thing you learn.",
+        opts: [["What cart?", "cart"], ["Who are you?", "name"]],
+      },
+      name: {
+        text: "The Carter. That's what I do, so that's what I'm called.\n\nWe don't have names down here, not the way you do. A name is something you give to someone who has lost theirs. Nobody's ever lost mine. I never had one to lose.",
+        opts: [["That's sad.", "name2"], ["What cart?", "cart"]],
+      },
+      name2: {
+        text: "Is it? You lot have names and you still forget each other.\n\nGo to Glimwade. Up the bank on the left, where the lamps are. Watch the cart. Then come and find me.",
+        opts: [["I'll go.", "end"]],
+      },
+      landing2: {
+        text: "Glimwade. Up the bank on the left, where the lamps are. Watch them load the cart, and then we'll talk. I'll be there before you.",
+        opts: [["I'm going.", "end"]],
+      },
+      hub: {
+        greets: [
+          "You came back. People from the bright side mostly don't. Ask.",
+          "Keep your voice down near the rails. They carry.",
+          "The cart's out. I've got till it comes back. Ask me something.",
+        ],
+        text: "Ask what you like. If I don't know, I'll say. If I do know and I'm frightened to say it, I'll say that too.",
+        opts: [
+          ["What is the ore for?", "ore"],
+          ["Who sits in the Chair?", "chair"],
+          ["Tell me about your brother.", "brother"],
+          ["I've been walking your country.", [
+            [["flag:hb_truce_hall", "!flag:cr_truce"], "r_truce"],
+            [["flag:hb_standing_ranks", "!flag:cr_ranks"], "r_ranks"],
+            [["flag:hb_far_door", "!flag:cr_door"], "r_door"],
+            [["flag:hb_drift", "!flag:cr_drift"], "r_drift"],
+            [["flag:seams_wreck", "!flag:cr_seams"], "r_seams_w"],
+            [["flag:seams_spare", "!flag:cr_seams"], "r_seams_s"],
+            [[], "r_none"],
+          ]],
+          ["Where should I go?", "where"],
+          ["I'll go.", "end"],
+        ],
+      },
+      ore: {
+        text: "It sings. Hit it and it holds the note. That's the whole of it.\n\nEvery stone goes south to the Seat, and from the Seat to the Court, and the Singers in the Court hold it while they sing. They sing at the Door. The Door gets wider.\n\nEvery night your walls get knocked on, somebody down here dug for it.",
+        opts: [["Back.", "hub"]],
+      },
+      chair: {
+        text: "Morvane. That's all I've got. He hums your songs sometimes, ones nobody down here knows. That's how we know he's one of yours.\n\nHe never looks at the river. Everyone looks at the river; it's the only light we have. He looks up. Like a man waiting for a bell.",
+        opts: [["Back.", "hub"]],
+      },
+      brother: {
+        text: "Small. Loud. Cracked voice, like a gate. They took him from Highcut to sing in the Court because you could hear him three seams away.\n\nThat's what the Court is. Ours. Our little ones, mostly, the loud ones. Whatever you've been told up there, the Choir is just us, singing because we were told to.",
+        opts: [["I'll bring him back.", "hub", ["flag:carter_promise"]], ["Back.", "hub"]],
+      },
+      where: {
+        text: "West of the Cross, the old hall where two kings sat down. East, past Cartmeet, the Standing Ranks. Far west, the Door. The stones east of the path that forgot to fall: climb to the top one. And the Seams, past Cartmeet, where the rail starts.\n\nSee three of them and come back. Then you'll know enough to see the Court.",
+        opts: [["Back.", "hub"]],
+      },
+      r_truce: {
+        text: "The table's still there? Both chairs?\n\nOne knocked over. Yes. Ours stayed sitting. My grandmother said the one who knocked his over was the one who ran, and the one who stayed was the one who meant it.\n\nShe never said which side was which. I always assumed.",
+        opts: [["Back.", "hub", ["flag:cr_truce"]]],
+      },
+      r_ranks: {
+        text: "We were told they were a gift. An army, all of it, given to us to keep, because your king asked us to take it away.\n\nAn empty place at the front? That'll be the one who leads them. The one with the splinter in his head. We gave him back. Morvane wanted him.",
+        opts: [["Back.", "hub", ["flag:cr_ranks"]]],
+      },
+      r_door: {
+        text: "It's the only door we had. Your side shut it with a bell, and the bell broke doing it, and the crack's the bell's.\n\nMy mother dug there. Her mother dug there. You wouldn't call it a war, what we're doing. It's knocking. For three hundred years. On our own front door.",
+        opts: [["Back.", "hub", ["flag:cr_door"]]],
+      },
+      r_drift: {
+        text: "You saw him lift his hand? The left one?\n\nHe always does it with the left. The right one he keeps in his lap. My father said it was hurt a long time ago, before he came down, and it never healed, because nothing up there heals down here.",
+        opts: [["Back.", "hub", ["flag:cr_drift"]]],
+      },
+      r_seams_w: {
+        text: "That was you? On the trestle?\n\nThe cart didn't come back this morning. I walked the rail and found it in the river, and I stood there and I laughed, and then I was sick, and then I laughed again.\n\nHe'll know someone did it. He won't know who. Neither will I, if anyone asks.",
+        opts: [["Back.", "hub", ["flag:cr_seams"]]],
+      },
+      r_seams_s: {
+        text: "The Highcut lot told me. You wouldn't let them risk it.\n\nThey talk about you now. That's not nothing, down here. Nobody talks about anybody. Go to any Tally once he's gone and see if they don't treat you right.",
+        opts: [["Back.", "hub", ["flag:cr_seams"]]],
+      },
+      r_none: {
+        text: "Not far yet. Go and look at something. I'll be here. I'm always here, or on the rail.",
+        opts: [["Back.", "hub"]],
+      },
+      song: {
+        text: "You've seen enough. I can tell. You've got the look we get after our first cart.\n\nThe Court gate opens to one note, for the cart, every dawn. I've hummed it a thousand times. Listen. Then do it back to me. Lower. Lower than that. There.",
+        opts: [["Hum it back.", "song2", ["flag:cartsong", "sp:2"]]],
+      },
+      song2: {
+        text: "That's the Cartsong. The gate will take you for a cart. It won't know the difference till you're inside.\n\nThe singer with the cracked voice is my brother. When they fall quiet in there, they don't die. They just stop. Bring him out to me, if you can. I'll be at the Court door.",
+        opts: [["I will.", "end", ["flag:carter_promise"]]],
+      },
+      door: {
+        text: "Still here. I'll be here until it's done, one way or the other.\n\nYou hum it at the gate. Don't hurry it. If the Court hears a cart in a hurry, it knows.",
+        opts: [["Tell me about your brother.", "brother"], ["Who sits in the Chair?", "chair"], ["I'm going in.", "end"]],
+      },
+      after: {
+        text: "They came out. All of them. Holding their throats, walking past me like they were going home from a shift.\n\nHe came out. Not a sound left in him. He knew me, though. He put his hand on my face like he used to.\n\nI'd like you to do something for me. Give me a name. That's what you do for someone who's lost theirs, and I think I've lost the Carter. There's no more cart.",
+        opts: [
+          ["Lark.", "named_lark", ["flag:carter_lark", "flag:carter_named"]],
+          ["Morrow.", "named_morrow", ["flag:carter_morrow", "flag:carter_named"]],
+          ["Dawn.", "named_dawn", ["flag:carter_dawn", "flag:carter_named"]],
+        ],
+      },
+      named_lark: {
+        text: "Lark.\n\nThat's a bird, isn't it? One of yours, up in the light. Loud. Sings when it isn't told to.\n\nYes. I'll have that.",
+        opts: [["What now?", "named2"]],
+      },
+      named_morrow: {
+        text: "Morrow.\n\nTomorrow. The day after the one you're in. We don't have those down here, not really. Every day is the cart.\n\nYes. I'll have that.",
+        opts: [["What now?", "named2"]],
+      },
+      named_dawn: {
+        text: "Dawn.\n\nThe cart went at dawn. Every day of my life. Now it's just going to be a time of day.\n\nYes. I'll have that.",
+        opts: [["What now?", "named2"]],
+      },
+      named2: {
+        text: "Now you go south. Up the long climb to the Seat.\n\nHe was given a name too, you know. The one in the Chair. Somebody down here gave it to him when he came, because he'd lost his own. Nobody alive remembers what it was before.\n\nHe's never once looked at the river. Go and see what he's looking up at.",
+        opts: [["I'll go.", "end", ["sp:2"]]],
+      },
+      named: {
+        greets: [
+          "Say it again. My name. I like hearing it.",
+          "The rail's quiet. I keep waking at dawn anyway.",
+          "He sleeps a lot, my brother. Smiles in it. No sound.",
+        ],
+        text: "The Court's quiet. You can hear the river now. I never knew it made a noise.",
+        opts: [["Who sits in the Chair?", "chair2"], ["Goodbye.", "end"]],
+      },
+      chair2: {
+        text: "I don't know. I never looked.\n\nBut he hums your songs. He keeps his right hand in his lap. And he's waited three hundred years for a bell that nobody rings. Whoever he was up there, someone must have loved him once. Nobody waits that long for nothing.",
+        opts: [["Back.", "named"]],
+      },
+      last: {
+        text: "It's gone quiet all the way down. Not the Court. All of it. The whole Hollow stopped humming for a breath, the way you do when someone leaves the room.\n\nWho was he?\n\n...No. Don't tell me yet. Tell me some other time, when I'm older. I'd like there to be something left to find out.",
+        opts: [["Some other time.", "end", ["flag:carter_last", "sp:1"]]],
       },
     },
   },

@@ -1,7 +1,10 @@
 import json, base64, os
-RP='/mnt/project-files/siege-nights/Siege_Nights_RP/'
-V='/mnt/project-files/siege-nights/studio/vmobs/'
-OUT='/tmp/claude-0/-home-user/dad346a5-3f9c-51a2-8a96-cd3b660cbcce/scratchpad/studio/manifest.json'
+# python3 studio/build_manifest.py [out manifest.json] [repo root]   (default: the repo this file is in)
+import sys
+_ROOT=(sys.argv[2].rstrip('/')+'/') if len(sys.argv)>2 else os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/'
+RP=_ROOT+'Siege_Nights_RP/'
+V=_ROOT+'studio/vmobs/'
+OUT=sys.argv[1] if len(sys.argv)>1 else 'manifest.json'
 COLORS=["white","orange","magenta","light_blue","yellow","lime","pink","gray","light_gray","cyan","purple","blue","brown","green","red","black"]
 DYE={"white":(233,236,236),"orange":(240,118,19),"magenta":(189,68,179),"light_blue":(58,175,217),"yellow":(248,197,39),"lime":(112,185,25),"pink":(237,141,172),"gray":(62,68,71),"light_gray":(142,142,134),"cyan":(21,137,145),"purple":(121,42,172),"blue":(53,57,157),"brown":(114,71,40),"green":(84,109,27),"red":(161,39,34),"black":(29,29,33)}
 nice=lambda c:c.replace('_',' ').capitalize()
@@ -10,7 +13,7 @@ tex={}
 masks={}
 def T(p):
     if p in tex: return p
-    if 'models/armor/' in p:
+    if 'models/armor/' in p or 'models/siege_armor/guard' in p:
         # Leather-style armor: alpha 255 = cloth, 1-254 = keep own color. Browsers lose color at low alpha,
         # so send the colors fully opaque plus a separate cloth mask.
         from PIL import Image
@@ -36,9 +39,9 @@ def T(p):
 groups=[]
 def g(id,name,cat,variants,note=None):
     for v in variants:
-        for k,p in v.get('mats',{}).items(): T(p)
+        for k,p in list(v.get('mats',{}).items())+list(v.get('geoMats',{}).items()): T(p)
         for it in v.get('items',[]):
-            for k,p in it.get('mats',{}).items(): T(p)
+            for k,p in list(it.get('mats',{}).items())+list(it.get('geoMats',{}).items()): T(p)
     groups.append({"id":id,"name":name,"cat":cat,"variants":variants,**({"note":note} if note else {})})
 cube=lambda label,mats:{"label":label,"model":"cube","mats":mats}
 one=lambda p:{"*":B+p+'.png'}
@@ -77,7 +80,7 @@ for kd,kn in FK[1:]:
     vs.append({"label":kn+" damage","model":"lineup","cols":3,"gap":1.2,"items":items,"mats":one(fam(kd,''))})
 g("stone_family","Castle Stone family","Regional styles",vs,"The five building blocks every settlement uses from the first hut to the top tier: Castle Stone, Tiles, Bricks, Cobbled and Smooth. Same shapes in every region, only the colours change. Each one cracks in three stages like the walls.")
 # ---- settlement wall levels: a sample section of every level in every region's blocks
-import sys as _sys; _sys.path.insert(0,'/mnt/project-files/siege-nights/studio/art')
+import sys as _sys; _sys.path.insert(0,_ROOT+'studio/art')
 import build_walls as _bw
 builds={}
 for _L in _bw.LEVELS: builds[f"wall_{_L['n']}"]=_bw.section(_L)
@@ -110,7 +113,7 @@ g("ui_parts","Menu pieces","Menus (proposal)",[{"label":n,"model":"flat","mats":
 g("coins","Coins","Economy",[{"label":"Iron coin","model":"item","mats":{"*":I+"siege_coin.png"}},{"label":"Gold coin","model":"item","mats":{"*":I+"siege_gold_coin.png"}}],"The everyday iron coin and the gold coin worth 64, both struck with the old king's crowned head.")
 # ---- portraits of each settlement's prior leaders (lore thread's brief, studio/art/PORTRAIT-BRIEF.md)
 import re as _re
-_rows=[_re.split(r'\s*\|\s*',l.strip().strip('|')) for l in open('/mnt/project-files/siege-nights/studio/art/PORTRAIT-BRIEF.md') if l.startswith('| `')]
+_rows=[_re.split(r'\s*\|\s*',l.strip().strip('|')) for l in open(_ROOT+'studio/art/PORTRAIT-BRIEF.md') if l.startswith('| `')]
 _pl={}
 for r_ in _rows: _pl.setdefault(r_[1],[]).append(r_)
 for pl,rs in _pl.items():
@@ -140,7 +143,16 @@ for n,name in [("veinstone","Veinstone"),("undertow_moss","Veilmoss"),("veil_roc
 g("ut_hollow_brick","Veinstone Bricks","The Hollow",[cube("Brick",one('siege_veinstone_bricks')),cube("Cracked",one('siege_cracked_veinstone_bricks'))],"New block. Dark violet stone bricks with magenta root veins; the cracked kind has glowing violet cracks.")
 g("ut_pale_ash","Pale Ash","The Hollow",[cube("Block",one('siege_pale_ash'))],"New block. Soft grey-lilac dust for the wastes.")
 g("ut_glow_crystal","Glint Cluster","The Hollow",[{"label":"Cluster","model":"item","mats":{"*":B+'siege_glint_cluster.png'}}],"New block. Cross-shaped in game, gives light. Shown flat here.")
-g("ut_choirsteel","Choirsteel gear","The Hollow",[{"label":n.title(),"model":"item","mats":{"*":I+'siege_choirsteel_%s.png'%n}} for n in ("sword","pickaxe","axe","shovel","hoe","helmet","chestplate","leggings","boots")]+[{"label":"Worn (full set)","model":"armor","mats":{"layer1":'textures/models/armor/choirsteel_layer_1.png',"layer2":'textures/models/armor/choirsteel_layer_2.png'}}]+[{"label":"Worn sheet %d"%k,"model":"item","mats":{"*":'textures/models/armor/choirsteel_layer_%d.png'%k}} for k in (1,2)],"Pale violet forged metal with a pale blue gem or band. All nine pieces, plus the full set as worn.")
+def _choir_worn():
+    # 3D once studio/art/build_choirsteel_3d.py has run (PR #83), the flat sheets before that
+    if os.path.exists(RP+'models/entity/armor/choirsteel_helmet.geo.json'):
+        gm={}
+        for p in ["leggings","boots","chestplate","helmet"]:
+            d=json.load(open(RP+f'attachables/choirsteel_{p}.json'))['minecraft:attachable']['description']
+            gm[d['geometry']['default']]=d['textures']['default']+'.png'
+        return [{"label":"Worn (full set, 3D)","model":"armor3d","geos":list(gm),"geoMats":gm,"mats":{"*":list(gm.values())[-1]}}]
+    return [{"label":"Worn (full set)","model":"armor","mats":{"layer1":'textures/models/armor/choirsteel_layer_1.png',"layer2":'textures/models/armor/choirsteel_layer_2.png'}}]
+g("ut_choirsteel","Choirsteel gear","The Hollow",[{"label":n.title(),"model":"item","mats":{"*":I+'siege_choirsteel_%s.png'%n}} for n in ("sword","pickaxe","axe","shovel","hoe","helmet","chestplate","leggings","boots")]+_choir_worn(),"Dark violet forged metal with a pale blue gem or band. All nine pieces, plus the full set as worn.")
 g("ut_veilcap_giant","Giant Veilcap","The Hollow",[cube("Cap",one('siege_veilcap_cap')),cube("Stem",one('siege_veilcap_stem'))],"The giant pink mushroom trees. The cap gives a soft glow.")
 g("ut_veilmoss_strands","Veilmoss Strands","The Hollow",[{"label":"Strands","model":"item","mats":{"*":B+'siege_veilmoss_strands.png'}}],"Hangs down cliff edges, one to three blocks long. Cross-shaped in game, shown flat here.")
 g("ut_plants","Veilcap and Glimbulb","The Hollow",[{"label":"Veilcap","model":"item","mats":{"*":B+'siege_veilcap.png'}},{"label":"Glimbulb","model":"item","mats":{"*":B+'siege_glimbulb.png'}}],"Cross-shaped plants in game. Shown flat here.")
@@ -158,10 +170,26 @@ g("machine_icons","Trebuchet and Ballista icons","Items",[item("Trebuchet","sieg
 g("guard_tokens","Guard icons","Items",[item("Archer","siege_archer"),item("Man-at-Arms","siege_man_at_arms")],"What a picked-up guard looks like in your inventory.")
 # ---- worn armor
 A='textures/models/armor/'
-g("armor","Castle Guard armor (worn)","Armor",[{"label":nice(c),"model":"armor","swatch":DYE[c],"tint":DYE[c],"mats":{"layer1":A+'guard_layer_1.png',"layer2":A+'guard_layer_2.png'}} for c in ['red']+[c for c in COLORS if c!='red']],
-  "Grey cloth pixels take your banner color in game. Pick a color to preview it. Everything that isn't cloth keeps its own color.")
-g("regional_guard","Castle Guard armor, regional sets","Armor",[{"label":r.title()+" (worn)","model":"armor","swatch":DYE["red"],"tint":DYE["red"],"mats":{"layer1":A+'guard_%s_layer_1.png'%r,"layer2":A+'guard_%s_layer_2.png'%r}} for r in ("vale","frostmarch","saltreach","emberwaste","blackfen")]+[{"label":r.title()+" icons","model":"item","mats":{"*":'textures/items/siege_guard_%s_chestplate.png'%r}} for r in ("vale","frostmarch","saltreach","emberwaste","blackfen")],"Same stats as the Castle Guard armor, one look per region. Grey cloth takes your banner color (shown in red).")
 VA='textures/models/siege_armor/'
+PCS=["leggings","boots","chestplate","helmet"]
+def a3(label,name,tint="red",pieces=PCS,**k):
+    # one sheet per piece (vanilla 64x32 layout), see studio/art/build_armor3d.py
+    gm={f"geometry.siege_{name}_{p}":VA+f"{name}_{p}.png" for p in pieces}
+    return {"label":label,"model":"armor3d","swatch":DYE[tint],"tint":DYE[tint],"geos":list(gm),"geoMats":gm,"mats":{"*":VA+f"{name}_{pieces[-1]}.png",**{p:VA+f"{name}_{p}.png" for p in pieces}},**k}
+g("armor","Castle Guard armor (worn)","Armor",[a3(nice(c),"guard",c) for c in ['red']+[c for c in COLORS if c!='red']],
+  "3D: ridged helm, gold-edged pauldrons, a tabard skirt front and back. Grey cloth takes your banner color in game (the tabard skirt too). Pick a color to preview it.")
+_RN={"vale":"ridged kettle hat brim, riveted leather pauldrons, steel toe caps","frostmarch":"fur ruff and spike on the helm, fur shoulder pads, fur boot cuffs",
+     "saltreach":"sea-green fin crest and sallet tail, scale pauldrons","emberwaste":"a ridge of ember spikes on the helm, spiked blackened pauldrons, a narrow tabard",
+     "blackfen":"leather hood down the back, wide laced pauldrons, bone knee caps"}
+for r in ("vale","frostmarch","saltreach","emberwaste","blackfen"):
+    sets=[a3(f"{r.title()} {t.title() if t else 'Iron'}",f"guard_{r}"+(f"_{t}" if t else "")) for t in ("","diamond","netherite")]
+    g("regional_guard_"+r,f"Castle Guard armor, {r.title()}","Armor",[{"label":"All three tiers","model":"lineup","gap":1.45,"items":sets,"mats":sets[0]["mats"],"tint":DYE["red"]}]+sets
+      +[{"label":f"{r.title()} {t or 'iron'} icons","model":"item","mats":{"*":f'textures/items/siege_guard_{r}{"_"+t if t else ""}_chestplate.png'}} for t in ("","diamond","netherite")],
+      f"3D extras: {_RN[r]}. Diamond adds knee guards and a second shoulder plate; netherite also adds a cape. Grey cloth takes your banner color (shown in red).")
+_all=[a3("Castle Guard","guard")]+[a3(f"{r.title()} {t.title() if t else 'Iron'}",f"guard_{r}"+(f"_{t}" if t else "")) for r in ("vale","frostmarch","saltreach","emberwaste","blackfen") for t in ("","diamond","netherite")]
+g("all_armor","Every guard armor set side by side","Armor",[{"label":"All 16 sets","model":"lineup","cols":8,"gap":1.25,"rowGap":2.6,"items":_all,"mats":_all[0]["mats"],"tint":DYE["red"]}],
+  "Castle Guard first, then each region in iron, diamond and netherite (Vale, Frostmarch, Saltreach, Emberwaste, Blackfen). Drag to turn, scroll to zoom. Open a region below for one set at a time.")
+g("relics_worn","Worn relics","Armor",[{**a3("Crownless Mantle","relic_crownless_mantle",pieces=["chestplate"]),"tint":None,"swatch":None},{**a3("Widow's Veil","relic_widows_veil",pieces=["helmet"]),"tint":None,"swatch":None}],"Boss relics you can wear. 3D: the Mantle is a long cloak with a high collar; the Veil hangs down the back and sides of the head.")
 for m,name,note in [("chainmail","Chainmail armor: mail and gambeson","Replaces vanilla chainmail armor. 3D extra: a mail mantle over the shoulders."),("iron","Iron armor: chainmail and surcoat","Replaces vanilla iron armor. 3D extras: kettle hat brim, surcoat flaps front and back."),
                     ("diamond","Diamond armor: knight's plate","Replaces vanilla diamond armor. 3D extras: closed great helm with a red plume, shoulder plates, knee guards."),
                     ("netherite","Netherite armor: dark royal plate","Replaces vanilla netherite armor. 3D extras: gold crown, big shoulder plates, royal cape, knee guards.")]:
@@ -248,6 +276,19 @@ for _k,_n in (("blade","Pretender, blade"),("seer","Pretender, seer"),("brute","
 _ent("b_omen_raven_art","Raven (omen)","New mobs",'models/entity/bestiary/omen_raven.geo.json',[("Raven",'textures/entity/siege/bestiary/omen_raven.png')],"Perches on the wall at dusk, facing the way the raid will come.")
 _ent("carriage","Train Carriage","Horses and rail",'models/entity/carriage.geo.json',[("Carriage",'textures/entity/siege/carriage.png')],"Rides normal Minecraft rails. Four seats on two benches.")
 if os.path.exists(RP+I+'horses/siege_train_carriage.png'): g("carriage_icon","Train Carriage icon","Horses and rail",[item("Icon",'horses/siege_train_carriage')])
+# ---- Trains (scripts/trains/, studio/build_trains.py): five Track shapes, Engine and Coach in each region's colours
+if os.path.exists(RP+'models/blocks/track.geo.json'):
+    _tg={x['description']['identifier']:x for x in json.load(open(RP+'models/blocks/track.geo.json'))['minecraft:geometry']}
+    _rail,_sl=B+'trains/track_rail.png',B+'trains/track_sleeper.png'
+    _tv=[]
+    for _k,_n in [("0_0","Straight"),("0_1","Diagonal"),("1_0","Bend (45 degrees)"),("2_0","Corner (90 degrees)"),("3_0","Slope")]:
+        _gi='geometry.siege_track_'+_k; bgeos[_gi]={"tw":16,"th":16,"bones":_tg[_gi]['bones']}
+        _tv.append({"label":_n,"model":"entity","geo":_gi,"mats":{"*":_rail,"rail":_rail,"sleeper":_sl}})
+    g("trains_track","Track","Trains",_tv,"Lays itself like rails but in 8 directions. 20 pieces in game; these are the five kinds. Placeholder textures.")
+_TS=[("vale","Aldmere Vale"),("frostmarch","Frostmarch"),("saltreach","Saltreach"),("emberwaste","Emberwaste"),("blackfen","Blackfen")]
+_ent("trains_engine","Train Engine","Trains",'models/entity/train_engine.geo.json',[(_n,f'textures/entity/siege/trains/engine_{_k}.png') for _k,_n in _TS],"3 blocks wide, 7 long. Takes the colours of the region it is put on the track in. Placeholder model and colours.")
+_ent("trains_coach","Train Coach","Trains",'models/entity/train_coach.geo.json',[(_n,f'textures/entity/siege/trains/coach_{_k}.png') for _k,_n in _TS],"Seats six. Same regional colours as the engine. Placeholder model and colours.")
+if os.path.exists(RP+I+'trains/train_engine.png'): g("trains_icons","Train item icons","Trains",[item(_n,'trains/'+_k) for _k,_n in [("train_engine","Train Engine"),("train_coach","Train Coach"),("train_bogie","Train Bogie"),("train_boiler","Train Boiler")]])
 _ent("throne_seal","Throne Seal","Crown and Citadel",'models/entity/throne_seal.geo.json',[("Seal",'textures/entity/siege_throne_seal.png')],"Floats in front of the throne during a Storm.")
 _ent("crown_worn","The Hollow Crown (worn)","Crown and Citadel",'models/entity/hollow_crown.geo.json',[("Crown",'textures/models/armor/siege_hollow_crown.png')])
 
@@ -263,7 +304,7 @@ for f in ['trebuchet','ballista']:
     geos['geometry.siege_'+f]={"tw":64,"th":64,"bones":d['bones']}
 for f in sorted(os.listdir(RP+'models/entity/armor'))+['../guard_armor/'+g for g in sorted(os.listdir(RP+'models/entity/guard_armor'))]:
     x=json.load(open(RP+'models/entity/armor/'+f))['minecraft:geometry'][0]
-    geos[x['description']['identifier']]={"tw":128,"th":64,"bones":x['bones']}
+    geos[x['description']['identifier']]={"tw":x['description'].get('texture_width',128),"th":x['description'].get('texture_height',64),"bones":x['bones']}
 v=json.load(open(V+'geo_villager.json'))['geometry.villager.v1.8']
 geos['geometry.villager.v1.8']={"legacy":True,"tw":v.get('texturewidth',64),"th":v.get('textureheight',64),"bones":v['bones']}
 h=json.load(open(V+'geo_horse_v2.json'))['geometry.horse.v2']
@@ -288,12 +329,13 @@ geos['geometry.armor2']={"tw":64,"th":32,"bones":[bone("body",[0,24,0],[c([-4,12
 geos.update(bgeos)
 import glob as _g
 g("skill_icons","Skill icons","Town hall",[{"label":os.path.basename(f)[:-4].replace('_',' ').title(),"model":"item","mats":{"*":'textures/ui/hc/skill/'+os.path.basename(f)}} for f in sorted(_g.glob(os.path.join(RP,'textures/ui/hc/skill/*.png')))],"One icon for every skill on the Tree of Oaths, coloured by branch. Painted, not shown in the menu yet.")
+# (the 1,600 minimap tiles textures/ui/hc/minimap/mXXZZ.png are left out: too many to list)
 # ---- catch-all: every PNG in the pack that no group above shows gets a place, so nothing can be missing from the Studio
 _seen=set(tex); _left={}
 for _d,_,_fs in os.walk(RP+'textures'):
     for _f in sorted(_fs):
         _p=os.path.relpath(os.path.join(_d,_f),RP)
-        if _f.endswith('.png') and _p not in _seen and 'invisible' not in _f: _left.setdefault(os.path.dirname(_p),[]).append(_p)
+        if _f.endswith('.png') and _p not in _seen and 'invisible' not in _f and not ('/minimap/' in _p and _re.fullmatch(r'm\d{4}\.png', _f)): _left.setdefault(os.path.dirname(_p),[]).append(_p)
 _NAMES={'textures/blocks':'More blocks','textures/blocks/regional':'Regional blocks: reinforced tiers and open gates','textures/items':'More item icons','textures/models/armor':'Worn relic sheets','textures/ui/hc':'Menu pieces: skill tree sockets'}
 for _d,_ps in sorted(_left.items()):
     _kind='cube' if '/blocks' in _d else 'item' if '/items' in _d else 'flat'

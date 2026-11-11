@@ -5,7 +5,9 @@
 //   { k: "found", x, z, base }                   fill the ground under a wall down to solid rock
 //   { k: "fill", x, z, y1, y2, block, base }     one column piece. y is counted up from the Keep Banner's
 //                                                level (base "banner": the walls) or the Cornerstone's (base "keep")
-// `block` is a name from the palette in citadel.js ("stone", "air", "wool" ...).
+// `block` is a name from the palette in citadel.js ("stone", "air", "wool" ...). Walls are dressed the way
+// the town halls are: smooth Castle Stone faces on a cobbled plinth, brick string courses at the floor lines,
+// Castle Stone at the corners and along the tops ("smooth", "plinth", "band", "stone").
 //
 // banner: { x, z } the Keep Banner.  keep: { x, z } the Citadel Cornerstone (middle of the Great Keep).
 // gate: 0..3 = which way the gatehouse faces (+x, +z, -x, -z).
@@ -18,7 +20,7 @@ export const GATE_NAMES = ["east", "south", "west", "north"];
 const Y_MIN = -1; // one below the banner's level: floors replace the ground
 const Y_MAX = 80;
 const RISE = 4; // walls go up this many blocks at a time
-const SOLID = new Set(["stone", "tile", "floor", "quartz", "gold"]);
+const SOLID = new Set(["stone", "smooth", "band", "plinth", "tile", "floor", "quartz", "gold"]);
 
 export const KEEP_HALF = 12; // the Great Keep is 25 x 25
 export const KEEP_TOP = 43;
@@ -63,6 +65,14 @@ export function citadelPlan({ banner, keep, gate }) {
   };
   const found = (x, z) => founded.set(`${x},${z}`, base);
   const merlon = (x, z) => ((x + z) & 1) === 0;
+  // a dressed wall column from 0 to top: plinth, smooth face, bands at the given heights, a Castle Stone top course
+  const dressed = (x, z, top, bands = [], quoin = false) => {
+    put(x, z, 0, top, quoin ? "stone" : "smooth");
+    if (quoin) for (let y = 3; y < top; y += 2) put(x, z, y, y, "smooth");
+    put(x, z, 0, 1, "plinth");
+    for (const b of bands) if (b < top) put(x, z, b, b, "band");
+    put(x, z, top, top, "stone");
+  };
 
   // ---- Curtain wall: a ring 3 thick, 16 high with its battlements ----
   const R = CROWN.wallRadius;
@@ -73,10 +83,10 @@ export function citadelPlan({ banner, keep, gate }) {
       const x = banner.x + dx, z = banner.z + dz;
       found(x, z);
       if (d >= R + 0.5) { // outer face carries the parapet
-        put(x, z, 0, 14, "stone");
+        dressed(x, z, 14, [12]);
         if (merlon(x, z)) put(x, z, 15, 15, "battlement");
       } else {
-        put(x, z, 0, 12, "stone"); // the wall walk
+        put(x, z, 0, 12, "smooth"); // the wall walk
       }
     }
   }
@@ -93,7 +103,7 @@ export function citadelPlan({ banner, keep, gate }) {
         if (r <= 6.5) {
           found(x, z);
           if (r > 4.5) {
-            put(x, z, 0, 25, "stone");
+            dressed(x, z, 25, [12, 20]);
             if (d >= R - 1.5 && d < R + 0.5) put(x, z, 13, 15, "air"); // doorways where the wall walk passes through
             else if (r > 5.5 && d >= R + 1.5 && (x + z) % 3 === 0) put(x, z, 17, 17, "slit");
           } else {
@@ -118,7 +128,8 @@ export function citadelPlan({ banner, keep, gate }) {
       cells.delete(`${x},${z}`); // replaces whatever the ring put here
       founded.delete(`${x},${z}`);
       put(x, z, 0, 8, a === R ? "port" : "air");
-      put(x, z, 9, 15, "stone");
+      put(x, z, 9, 15, "smooth");
+      put(x, z, 9, 9, "band"); put(x, z, 15, 15, "stone");
       if ((a === R - 2 || a === R + 2) && merlon(x, z)) put(x, z, 16, 16, "battlement");
     }
   }
@@ -130,7 +141,7 @@ export function citadelPlan({ banner, keep, gate }) {
         found(x, z);
         const edge = s === 4 || s === 12 || a === R - 4 || a === R + 4;
         if (edge) {
-          put(x, z, 0, 21, "stone");
+          dressed(x, z, 21, [12], (s === 4 || s === 12) && (a === R - 4 || a === R + 4));
           if (merlon(x, z)) put(x, z, 22, 22, "battlement");
           if (a === R + 4 && s % 4 === 0 && s !== 4 && s !== 12) put(x, z, 14, 14, "slit");
         } else {
@@ -159,7 +170,7 @@ export function citadelPlan({ banner, keep, gate }) {
       cells.delete(`${x},${z}`);
       if (ring >= H - 1) {
         found(x, z);
-        put(x, z, 0, TOP, "stone");
+        dressed(x, z, TOP, ring === H ? FLOORS : [], Math.abs(a) >= H - 1 && Math.abs(s) >= H - 1);
         if (ring === H) {
           put(x, z, TOP + 1, TOP + 1, "stone");
           if (merlon(x, z)) put(x, z, TOP + 2, TOP + 2, "battlement");
@@ -206,7 +217,7 @@ export function citadelPlan({ banner, keep, gate }) {
         for (let os = -5; os <= 5; os++) {
           const r = Math.hypot(oa, os);
           const { x, z } = at(keep, ca + oa, cs + os);
-          if (r <= 3.5) { found(x, z); put(x, z, 0, 55, "stone"); }
+          if (r <= 3.5) { found(x, z); dressed(x, z, 55, [...FLOORS, 45]); }
           for (let i = 0; i <= 4; i++) if (r <= 4.5 - i) put(x, z, 56 + i, 56 + i, "tile");
           if (oa === 0 && os === 0) put(x, z, 61, 61, "spire");
         }
@@ -219,7 +230,7 @@ export function citadelPlan({ banner, keep, gate }) {
       const { x, z } = at(keep, a, s);
       const ring = Math.max(Math.abs(a), Math.abs(s));
       const r = Math.hypot(a, s);
-      if (ring === 4) put(x, z, TOP + 1, 59, "stone");
+      if (ring === 4) { put(x, z, TOP + 1, 59, Math.abs(a) === 4 && Math.abs(s) === 4 ? "stone" : "smooth"); put(x, z, 59, 59, "stone"); }
       else if (ring < 4) put(x, z, TOP + 1, 59, "air");
       if (ring === 4 && (a === 0 || s === 0)) put(x, z, 52, 53, "slit");
       for (let i = 0; i <= 8; i++) if (r <= 6.5 - i * 0.7) put(x, z, 60 + i, 60 + i, "tile");

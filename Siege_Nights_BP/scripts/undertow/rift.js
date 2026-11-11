@@ -19,10 +19,10 @@ export function planCrack(bottom, facing) {
   const [fx, fz] = FACING[facing] ?? FACING.south;
   const ux = -fz, uz = fx; // sideways along the wall
   const cells = [];
-  const at = (u, row, depth, block) => {
+  const at = (u, row, depth, block, side = 0) => {
     const x = bottom.x + ux * u - fx * depth;
     const z = bottom.z + uz * u - fz * depth;
-    cells.push({ x, y: bottom.y + row, z, block, row });
+    cells.push({ x, y: bottom.y + row, z, block, row, side });
   };
   const salt = bottom.x * 31 + bottom.z * 17;
   for (let row = -1; row <= CRACK_HEIGHT; row++) {
@@ -35,12 +35,13 @@ export function planCrack(bottom, facing) {
     const half = Math.max(0, Math.round(swell * 2.4) - (row % 3 === 0 ? 0 : jag));
     const shift = Math.round(Math.sin(row * 0.9 + salt) * 1.2);
     for (let u = shift - half; u <= shift + half; u++) {
-      at(u, row, 0, "minecraft:air");
-      at(u, row, 1, VEIL);
-      at(u, row, 2, VEIL);
-      at(u, row, 3, EDGE);
+      const side = Math.abs(u - shift);
+      at(u, row, 0, "minecraft:air", side);
+      at(u, row, 1, VEIL, side);
+      at(u, row, 2, VEIL, side);
+      at(u, row, 3, EDGE, side);
     }
-    for (const u of [shift - half - 1, shift + half + 1]) for (let depth = 0; depth <= 3; depth++) at(u, row, depth, EDGE);
+    for (const u of [shift - half - 1, shift + half + 1]) for (let depth = 0; depth <= 3; depth++) at(u, row, depth, EDGE, half + 1);
   }
   return cells;
 }
@@ -67,27 +68,37 @@ export function placeCells(dim, cells) {
   return ok;
 }
 
-// Tear the crack open over about 5 seconds, from the middle rows outward, with sound and shake.
+// The order the crack opens in (Mateo, 2026-11-11): a thin split runs UP from the seam at the floor to the top,
+// then it pulls apart sideways. Returns the burst (0 .. TEAR_STEPS) a cell from planCrack appears in.
+export const TEAR_CLIMB = 6; // bursts for the split to climb
+export const TEAR_STEPS = TEAR_CLIMB + 2; // last burst index (at most 2 open blocks either side of the line, then the rim)
+export function tearBand(c) {
+  if (!c.side) return Math.min(TEAR_CLIMB - 1, Math.floor(((c.row + 1) * TEAR_CLIMB) / (CRACK_HEIGHT + 2)));
+  return Math.min(TEAR_STEPS, TEAR_CLIMB - 1 + c.side);
+}
+
+// Tear the crack open over about 6 seconds, bottom to top and then outward, with sound and shake.
 export function tearOpen(dim, bottom, facing, onDone) {
   const cells = planCrack(bottom, facing);
   const mid = CRACK_HEIGHT / 2;
-  const steps = 8;
   const center = { x: bottom.x + 0.5, y: bottom.y + mid, z: bottom.z + 0.5 };
-  // one recording for the whole tear once it is installed; until then each band cracks on its own
+  // one recording for the whole tear once it is installed; until then each burst cracks on its own
   const recorded = sfx(dim, "sig.rift_open", center, { volume: 4 });
-  for (let s = 0; s <= steps; s++) {
+  for (let s = 0; s <= TEAR_STEPS; s++) {
+    const climbing = s < TEAR_CLIMB;
     system.runTimeout(() => {
-      const band = cells.filter((c) => Math.min(steps, Math.floor(Math.abs(c.row - mid) * (steps / (mid + 1)))) === s);
+      const band = cells.filter((c) => tearBand(c) === s);
       placeCells(dim, band);
+      const where = climbing ? { x: center.x, y: bottom.y + ((s + 0.5) * (CRACK_HEIGHT + 1)) / TEAR_CLIMB, z: center.z } : center;
       try {
-        if (!recorded) sfx(dim, s % 2 ? "random.explode" : "block.bell.hit", center, { volume: 1.5, pitch: 0.4 + s * 0.05 });
-        dim.spawnParticle("minecraft:huge_explosion_emitter", center);
+        if (!recorded) sfx(dim, climbing ? "block.bell.hit" : "random.explode", where, { volume: 1.5, pitch: climbing ? 0.4 + s * 0.06 : 0.5 });
+        dim.spawnParticle(climbing ? "minecraft:critical_hit_emitter" : "minecraft:huge_explosion_emitter", where);
       } catch {}
       try {
-        dim.runCommand(`camerashake add @a[x=${center.x},y=${center.y},z=${center.z},r=48] 0.4 1.2 positional`);
+        dim.runCommand(`camerashake add @a[x=${center.x},y=${center.y},z=${center.z},r=48] ${climbing ? 0.25 : 0.5} 1.0 positional`);
       } catch {}
-      if (s === steps && onDone) onDone();
-    }, 10 + s * 12);
+      if (s === TEAR_STEPS && onDone) onDone();
+    }, 10 + s * (climbing ? 10 : 16));
   }
 }
 

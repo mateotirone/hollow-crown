@@ -28,8 +28,8 @@ export const UNDERTOW_LAYOUT = {
   // The route, in order. Waystones sit on the path at these z values.
   stages: [
     { id: "wound", name: "The Wound", z0: -48, z1: 40 },
-    { id: "shallows", name: "The Drowned Shallows", z0: 40, z1: 500 },
-    { id: "mirror", name: "The Mirror Halls", z0: 500, z1: 1000 },
+    { id: "shallows", name: "The Landing Reach", z0: 40, z1: 500 },
+    { id: "mirror", name: "The Truce Country", z0: 500, z1: 1000 },
     { id: "bells", name: "The Bell Wastes", z0: 1000, z1: 1540 },
     { id: "court", name: "The Drowned Court", z0: 1540, z1: 1660 },
     { id: "climb", name: "The Long Climb", z0: 1660, z1: 2330 },
