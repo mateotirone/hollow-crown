@@ -8,11 +8,11 @@
     "enchanted": "armor_enchanted"
    },
    "textures": {
-    "default": "textures/models/armor/choirsteel_layer_2",
+    "default": "textures/models/siege_armor/choirsteel_2",
     "enchanted": "textures/misc/enchanted_actor_glint"
    },
    "geometry": {
-    "default": "geometry.humanoid.armor.leggings"
+    "default": "geometry.siege_choirsteel_leggings"
    },
    "scripts": {
     "parent_setup": "variable.leg_layer_visible = 0.0;"

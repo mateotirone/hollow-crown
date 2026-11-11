@@ -102,6 +102,10 @@ export const STAGES = [
 ];
 
 export const LONG = 5, AFTER = 6;
+// A broken truce brings the Hollow back as hard as the Uncounted Nights: harder than any counted night was
+export const OATH_STAGE = 4;
+// The stage a night is fought at: an oathbroken night fights like OATH_STAGE, everything else like the world's stage
+export const fightStage = (kind, stageId) => (kind === "oathbroken" ? OATH_STAGE : stageId);
 export const stage = (id) => STAGES[Math.max(1, Math.min(STAGES.length, id)) - 1];
 export const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
 
@@ -155,11 +159,12 @@ export function dayRoll(day, salt = 0, k = 0) {
 //   "probe"    a knock: one small wave at some hour
 //   "long"     the Long Night
 //   "muster"   after the story: a rival town's army, on the night index.js rolled (musterDay)
+//   "oathbroken" after the story, once someone has rung the truce broken at Bellhollow: every third night the Hollow comes again
 //   undefined  a quiet night
-export function nightKind(day, stageId, { firstDay = 5, every = 3, salt = 0, musterDay } = {}) {
+export function nightKind(day, stageId, { firstDay = 5, every = 3, salt = 0, musterDay, oathbroken = false } = {}) {
   if (day < firstDay) return undefined;
   const s = stage(stageId);
-  if (stageId === AFTER) return day === musterDay ? "muster" : undefined;
+  if (stageId === AFTER) return day === musterDay ? "muster" : oathbroken && day % every === 0 ? "oathbroken" : undefined;
   if (stageId === LONG) return "long";
   if (day % every === 0) return "counted";
   if (stageId === 4) return "stolen";
@@ -195,6 +200,7 @@ export function profile(kind, stageId, pressure = 0) {
     case "stolen": return { waves: Math.max(3, s.waves - 1), mult: s.stolenMult || s.mult, clock: true, warlord: true };
     case "long": return { waves: s.waves, mult: pressureMult(pressure), clock: true, warlord: true };
     case "muster": return { waves: s.waves, mult: s.mult, clock: false, warlord: true }; // people keep no clock
+    case "oathbroken": { const o = stage(OATH_STAGE); return { waves: o.waves, mult: o.mult, clock: true, warlord: true }; }
     case "probe": return { waves: REACH.probe.waves, mult: REACH.probe.mult, clock: false, warlord: false };
     default: return { waves: 3, mult: s.mult, clock: false, warlord: true }; // "horn": someone called them early
   }
@@ -351,6 +357,12 @@ export const DUSK_LINES = {
     "§7Cookfires, out past the fields, where nobody lives. They will come tonight.",
     "§7A stranger was counting your towers this afternoon. Tonight, then.",
   ],
+  oathbroken: [
+    "§8The bell at Bellhollow is still ringing. Nobody is pulling the rope. It is the third night again.",
+    "§8No guests came up the road this evening. Something else will. It is the third night.",
+    "§8The fen people have pulled the posts of the Even Market out of the ground. It is the third night.",
+    "§8You had stopped counting. You start again tonight. It is the third night.",
+  ],
 };
 export const HOUR_LINES = [
   "§8The dogs have gone under the porches.",
@@ -401,7 +413,7 @@ export function hourOmen(day, salt, hour) {
 }
 
 export function duskLine(kind, stageId, day = 0) {
-  const key = kind === "long" ? "long" : kind === "muster" ? "muster" : stageId >= 4 ? "uncounted" : kind === "stolen" ? "stolen" : "counted";
+  const key = kind === "long" ? "long" : kind === "muster" ? "muster" : kind === "oathbroken" ? "oathbroken" : stageId >= 4 ? "uncounted" : kind === "stolen" ? "stolen" : "counted";
   const lines = DUSK_LINES[key];
   return lines[day % lines.length]; // four lines and sieges at most three days apart: never the same line two sieges running
 }

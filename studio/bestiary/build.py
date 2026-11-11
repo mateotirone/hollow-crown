@@ -50,7 +50,7 @@ DROPS = {
     "champion_sorcerer": [("siege:gold_coin", 1, 1, 1), ("siege:coin", 0, 32, 1), ("siege:hollow_ash", 4, 8, 1), ("minecraft:amethyst_shard", 2, 5, 1), ("minecraft:golden_apple", 1, 1, 0.5)],
     "champion_lord": [("siege:gold_coin", 1, 3, 1), ("minecraft:gold_ingot", 3, 6, 1), ("minecraft:golden_apple", 1, 2, 1), ("minecraft:diamond", 1, 2, 0.5)],
     "champion_retainer": [("siege:coin", 0, 16, 1), ("minecraft:iron_nugget", 2, 6, 1), ("minecraft:arrow", 0, 4, 1)],
-    "gloamwing": [("siege:gloamquill", 1, 1, 1), ("siege:hollow_ash", 0, 1, 1)],
+    "gloamwing": [("siege:gloamquill", 1, 1, 0.25), ("siege:hollow_ash", 0, 1, 1)],
     "echo_hound": [("minecraft:bone", 1, 2, 1), ("siege:hollow_ash", 0, 2, 1)],
     "mirror_knight": [("minecraft:iron_ingot", 1, 3, 1), ("minecraft:amethyst_shard", 1, 2, 1)],
     "tolling_shade": [("siege:hollow_ash", 2, 3, 1), ("minecraft:gold_nugget", 1, 4, 1)],

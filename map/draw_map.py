@@ -82,13 +82,17 @@ def stn(name,toward):
 ST={"Harrowford":(-385,-345),"Oakmere":stn("Oakmere",V["Millbrook"]),"Thistledown":(225,25),"Wrenfield":(-110,190),
 "Frosthelm":stn("Frosthelm",(-640,-640)),"Wolfcairn":stn("Wolfcairn",V["Rimehold"]),"Gullcliff":(-655,-505),"Tidewatch":(-520,555),
 "Reedmoor":(-140,520),"Lanternbog":(180,900),"Redmesa":(640,150),"Dunehold":(865,805)}
-rails={"North Line":[V["Kingsrest"],(-130,-320),V["Millbrook"],(-20,-680),(-110,-900),V["Rimehold"],(200,-1120),ST["Wolfcairn"]],
+# Kingsrest station sits on dry land south-east of where the Alder and the Greywater meet, by the plaza (Mateo
+# 2026-11-11: lines can't converge on the middle of the river). Every line leaves its east-west platform and crosses
+# a river, where it has to, once and square on a bridge.
+KS=(-95,-100)
+rails={"North Line":[KS,(-60,-130),(-55,-200),(-22,-300),(-25,-410),V["Millbrook"],(-20,-680),(-110,-900),V["Rimehold"],(200,-1120),ST["Wolfcairn"]],
 "Oakmere Branch":[V["Millbrook"],(50,-500),ST["Oakmere"]],
-"Coast Line":[V["Kingsrest"],(-270,-230),ST["Harrowford"],(-540,-440),ST["Gullcliff"],(-640,-640),ST["Frosthelm"]],
-"Bay Line":[V["Kingsrest"],(-300,-10),(-440,120),(-500,280),(-680,330),V["Gull's Rest"]],
-"Fen Line":[V["Kingsrest"],(-130,20),ST["Wrenfield"],(-90,360),ST["Reedmoor"],(-150,740),V["Mirelight"],(60,900),ST["Lanternbog"]],
+"Coast Line":[KS,(-150,-98),(-180,-112),(-186,-180),(-262,-232),ST["Harrowford"],(-540,-440),ST["Gullcliff"],(-640,-640),ST["Frosthelm"]],
+"Bay Line":[KS,(-150,-90),(-200,-62),(-300,-10),(-440,120),(-500,280),(-680,330),V["Gull's Rest"]],
+"Fen Line":[KS,(-50,-90),(-70,-20),(-110,40),ST["Wrenfield"],(-90,360),ST["Reedmoor"],(-150,740),V["Mirelight"],(60,900),ST["Lanternbog"]],
 "Shore Branch":[ST["Reedmoor"],(-250,440),(-400,480),ST["Tidewatch"],(-680,480),V["Gull's Rest"]],
-"Sun Line":[V["Kingsrest"],(40,-60),ST["Thistledown"],(430,70),(560,170),ST["Redmesa"],(800,260),V["Sunscar"],(900,640),ST["Dunehold"],(800,1000),(520,1080),(330,1090),(150,1010),(130,930),ST["Lanternbog"]]}
+"Sun Line":[KS,(-40,-96),(40,-60),ST["Thistledown"],(430,70),(560,170),ST["Redmesa"],(800,260),V["Sunscar"],(900,640),ST["Dunehold"],(800,1000),(520,1080),(330,1090),(150,1010),(130,930),ST["Lanternbog"]]}
 railpts={k:spline(v,16,6 if len(v)>3 else 0,i+20) for i,(k,v) in enumerate(rails.items())}
 trails={"Greywater Road":[ST["Oakmere"],(190,-370),(330,-290),(420,-170),(380,-40),ST["Thistledown"]],
 "High Road":[ST["Frosthelm"],(-430,-610),(-250,-560),V["Millbrook"]],
@@ -198,12 +202,27 @@ for i,(t,c) in enumerate([("■ Plot Stone, ring = 80-block plot",(150,112,40)),
     d.text((lx+10,ly+8+i*16),t,font=fs,fill=c)
 sx=lx+10; sy=ly+156; d.line([sx,sy,sx+500*S,sy],fill=(0,0,0),width=3); d.text((sx+500*S+8,sy),"500 blocks",font=fs,fill=(0,0,0),anchor="lm")
 canvas.save('/mnt/project-files/siege-nights/map/hollow-crown-map.png')
-json.dump({"trails":{k:round(sum(math.dist(v[i],v[i+1]) for i in range(len(v)-1))) for k,v in trailpts.items()},"plots":plots,"stations":{k:[round(a),round(b)] for k,(a,b) in ST.items()},"rails":{k:round(sum(math.dist(v[i],v[i+1]) for i in range(len(v)-1))) for k,v in railpts.items()}},open('organic.json','w'),indent=1)
+json.dump({"trails":{k:round(sum(math.dist(v[i],v[i+1]) for i in range(len(v)-1))) for k,v in trailpts.items()},"plots":plots,"stations":{k:[round(a),round(b)] for k,(a,b) in ST.items()},"kingsrest_station":list(KS),"rails":{k:round(sum(math.dist(v[i],v[i+1]) for i in range(len(v)-1))) for k,v in railpts.items()}},open('organic.json','w'),indent=1)
 print('OK' if ok else 'FIX')
 
 # ================= ELEVATION (block heights) =================
 SEA=62
-shore=np.clip((0.5-seaf)/0.16,0,1)             # 0 at the waterline, 1 inland
+CELL=2*H/N                                     # blocks per plan cell
+def chamfer(src, cap):
+    """Distance in blocks to the nearest True cell of src (8-neighbour chamfer), capped."""
+    d=np.where(src,0.0,cap).astype(np.float32)
+    for _ in range(int(cap/CELL)+2):
+        p=np.pad(d,1,mode='edge')
+        n=np.minimum.reduce([p[1:-1,:-2]+CELL,p[1:-1,2:]+CELL,p[:-2,1:-1]+CELL,p[2:,1:-1]+CELL,
+                             p[:-2,:-2]+CELL*1.414,p[:-2,2:]+CELL*1.414,p[2:,:-2]+CELL*1.414,p[2:,2:]+CELL*1.414])
+        d=np.minimum(d,n)
+    return d
+dsea=chamfer(~land,160); dland=chamfer(land,240)
+def sstep(x): x=np.clip(x,0,1); return x*x*(3-2*x)
+# land rises gently from the shore (Mateo 2026-11-11: no harsh drop to the sea): beach first, full height ~140 blocks in;
+# only the Saltreach's northern coast keeps real cliffs (cliff term below rises over 30 blocks)
+shore=sstep((dsea-8)/140)
+cliffrise=sstep(dsea/30)
 fen=np.asarray(Image.fromarray(((reg==3)*255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(14)),dtype=np.float32)/255
 des=np.asarray(Image.fromarray(((reg==4)*255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(14)),dtype=np.float32)/255
 salt=np.asarray(Image.fromarray(((reg==2)*255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(14)),dtype=np.float32)/255
@@ -213,19 +232,30 @@ plateau=np.clip(north*1.15+n1*0.25,0,1)*np.clip(1-mtn*1.1,0,1)   # high cold pla
 rolling=(n1+0.5)*14+(n3+0.5)*7+(n2+0.5)*4
 mesa=des*np.clip(np.round(((n3+0.5)*3))*9,0,27)*0.8
 cliff=salt*np.clip((-wz-150)/500,0,1)*26                   # northern coast rises to cliffs
-Yf=SEA+1+shore*(3+rolling*(1-0.85*fen)+m*150+plateau*38+mesa+cliff)
+Yf=SEA+1+np.clip(dsea/12,0,1)*1.5+shore*(3+rolling*(1-0.85*fen)+m*150+plateau*38+mesa)+cliffrise*cliff
 # river valleys cut down
 rv=blurmask(lambda d:[d.line([px(*p) for p in spline(pts,22,22,i+7)],fill=255,width=5) for i,(n_,pts) in enumerate(rivers.items())],9)
 Yf=Yf-np.clip(rv*2.2,0,1)*np.minimum(Yf-SEA-1,10)*shore
-Yf[~land]=SEA-np.clip((seaf[~land]-0.5)/0.4,0,1)*30
-# plot terraces: every plot gets a near-flat disc for its final settlement (hall, buildings, wall at r52),
-# eased back into the natural ground by r115, so a generated wall can follow the ground all the way round
+Yf[~land]=(SEA-1-sstep(dland/220)*29-np.clip(dland/40,0,1)*2)[~land]   # a shelf that deepens slowly offshore
+# plot terraces: every plot gets a level patch for its final settlement (hall, buildings, wall at r56),
+# eased back into the natural ground, so a generated wall can follow the ground all the way round.
+# The patch is not a circle (Mateo 2026-11-11): its edge wanders with the bearing, never closer than
+# r64 (raiders gather out to r64) and reaching out to about r100 in places; the easing band wanders too.
 PLOT_FLAT,PLOT_EASE=64,115
+def plot_shape(name, theta):
+    """Wandering edge factor (>= 1) by bearing; same numbers as genworld.py's clearing."""
+    r_=np.random.default_rng(sum(map(ord,name))*7919)
+    f=np.ones_like(theta)
+    for k in (2,3,5,7):
+        a=r_.uniform(0.05,0.22)/(1+0.15*k); ph=r_.uniform(0,6.283)
+        f=f+a*(1+np.cos(k*theta+ph))
+    return f
 for n_,_,x_,z_,_ in plots:
-    dist=np.hypot(X-x_,Z-z_)
+    dist=np.hypot(X-x_,Z-z_); th=np.arctan2(Z-z_,X-x_)
     core=(dist<=46)&land
     T=float(np.median(Yf[core]))
-    w=np.clip((PLOT_EASE-dist)/(PLOT_EASE-PLOT_FLAT),0,1); w=w*w*(3-2*w)
+    f=plot_shape(n_,th); rf=PLOT_FLAT*f; re_=rf+(PLOT_EASE-PLOT_FLAT)*(0.7+0.6*(plot_shape(n_+"e",th)-1))
+    w=np.clip((re_-dist)/(re_-rf),0,1); w=w*w*(3-2*w)
     Yf=np.where(land,Yf*(1-w)+(T+n3*1.6)*w,Yf)
 # story sites shaped into the land: Crownhold stands on a low rise, Bellhollow lies in a hollow
 for (x_,z_,amp,rad) in [(-235,-345,9,120),(155,-100,-13,80)]:
