@@ -189,7 +189,7 @@ def entity_bp(m):
     else:
         c.update(tgt); c.update(fight)
     if m.get("burns"): c["minecraft:burns_in_daylight"] = {}
-    if m.get("rideable"): c["minecraft:rideable"] = {"seat_count": 1, "family_types": ["siege_boss"], "seats": {"position": [0, 2.7, 0.3]}}
+    if m.get("rideable"): c["minecraft:rideable"] = {"seat_count": 1, "family_types": ["siege_boss"], "seats": {"position": [0, 0.67, 0]}}   # the rider's feet go here: the Warlord King's hips (1.455 blocks up) land on the ogre's shoulders (2.1)
     if m.get("lifetime"):
         c["minecraft:timer"] = {"time": m["lifetime"], "looping": False, "time_down_event": {"event": "siege:fade"}}
         groups["siege:gone"] = {"minecraft:instant_despawn": {}}; events["siege:fade"] = {"add": {"component_groups": ["siege:gone"]}}
