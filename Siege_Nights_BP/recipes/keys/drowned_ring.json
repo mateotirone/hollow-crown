@@ -1,0 +1,34 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "siege:drowned_ring_recipe"
+    },
+    "tags": [
+      "siege_workshop"
+    ],
+    "pattern": [
+      "ABA",
+      "BGB",
+      "ABA"
+    ],
+    "key": {
+      "A": {
+        "item": "siege:hollow_ash"
+      },
+      "B": {
+        "item": "siege:brine_scale"
+      },
+      "G": {
+        "item": "minecraft:gold_ingot"
+      }
+    },
+    "result": {
+      "item": "siege:drowned_ring",
+      "count": 1
+    },
+    "unlock": {
+      "context": "AlwaysUnlocked"
+    }
+  }
+}

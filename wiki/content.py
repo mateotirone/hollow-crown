@@ -284,7 +284,7 @@ e(key="gloamwing", group="night", mob="gloamwing",
   prop=True,
   where="The Hollow only. They never come while you are inside a mining village, and never hunt whoever rules the Hollow. They also harry you in stage 4 of the Morvane fight.",
   does=["You are left alone for the first 5 minutes of a visit.", "Then one finds you, and another every 2 minutes, up to six.", "They swoop, hit lightly (3) and wheel away.", "Leaving the Hollow resets the clock."],
-  drops="A Gloamquill, Veil Ash (0 to 1).",
+  drops="A Gloamquill (one time in four), Veil Ash (0 to 1).",
   tip="Hunt them for quills, shelter in a village, or leave.")
 
 e(key="seep", group="night", mob="seep",
