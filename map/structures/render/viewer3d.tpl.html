@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hollow Crown in 3D</title>
+<style>
+  :root { --bg: #c9dcef; --ink: #1d232b; --muted: #55606c; --panel: rgba(255,255,255,.9); --line: rgba(0,0,0,.12); --accent: #3b5fa8; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #1b2430; --ink: #e8edf3; --muted: #9aa6b2; --panel: rgba(20,26,34,.9); --line: rgba(255,255,255,.14); --accent: #8fb0ee; } }
+  :root[data-theme="dark"] { --bg: #1b2430; --ink: #e8edf3; --muted: #9aa6b2; --panel: rgba(20,26,34,.9); --line: rgba(255,255,255,.14); --accent: #8fb0ee; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); font: 14px/1.4 system-ui, -apple-system, Segoe UI, sans-serif; overflow: hidden; }
+  #stage { position: fixed; inset: 0; }
+  canvas { display: block; touch-action: none; }
+  #ui { position: fixed; left: 16px; top: 16px; width: min(380px, calc(100vw - 32px)); background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; backdrop-filter: blur(8px); box-sizing: border-box; }
+  #ui h1 { font-size: 16px; margin: 0 0 2px; }
+  #ui .kind { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+  #ui p { margin: 6px 0; }
+  #ui .meta { color: var(--muted); font-size: 12px; }
+  select { width: 100%; font: inherit; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--line); background: transparent; color: inherit; margin-bottom: 8px; }
+  select option, select optgroup { color: #1d232b; }
+  .row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  button { font: inherit; padding: 5px 10px; border-radius: 8px; border: 1px solid var(--line); background: transparent; color: inherit; cursor: pointer; }
+  button:hover { border-color: var(--accent); }
+  button.on { background: color-mix(in srgb, var(--accent) 22%, transparent); }
+  #blurb { max-height: 6.5em; overflow: auto; }
+  #status { position: fixed; right: 16px; bottom: 16px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; font-size: 12px; }
+  #status:empty { display: none; }
+  #help { position: fixed; left: 16px; bottom: 16px; color: var(--muted); font-size: 12px; background: var(--panel); border-radius: 8px; padding: 4px 8px; }
+  #toggle { display: none; }
+  @media (max-width: 640px) { #ui.small #more { display: none; } #toggle { display: inline-block; } #help { display: none; } }
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
+</head>
+<body>
+<div id="stage"></div>
+<div id="ui">
+  <select id="pick" aria-label="Build"></select>
+  <div class="row"><button id="prev" aria-label="Previous build">‹ Prev</button><button id="next" aria-label="Next build">Next ›</button>
+    <button id="dusk" aria-pressed="false">Dusk</button><button id="toggle">Details</button></div>
+  <div id="more">
+    <span class="kind" id="kind"></span>
+    <h1 id="title"></h1>
+    <p id="blurb"></p>
+    <p class="meta" id="meta"></p>
+  </div>
+</div>
+<div id="help">Drag to turn · scroll or pinch to zoom · right-drag or two fingers to move</div>
+<div id="status"></div>
+<script id="index" type="application/json">__INDEX__</script>
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+const INDEX = JSON.parse(document.getElementById("index").textContent);
+const $ = (id) => document.getElementById(id);
+const status = (t) => { $("status").textContent = t; };
+
+// ---- the picker: one list grouped by section
+const pick = $("pick"); let og = null, last = "";
+INDEX.forEach((b, i) => {
+  const label = b.section + (b.group ? " · " + b.group : "");
+  if (label !== last) { og = document.createElement("optgroup"); og.label = label; pick.appendChild(og); last = label; }
+  const o = document.createElement("option"); o.value = i; o.textContent = b.title + (b.sub && !label.includes(b.sub) ? " (" + b.sub + ")" : ""); og.appendChild(o);
+});
+
+// ---- the scene
+const stage = $("stage");
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
+stage.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+function sky(dusk) {
+  const c = document.createElement("canvas"); c.width = 2; c.height = 256; const g = c.getContext("2d");
+  const gr = g.createLinearGradient(0, 0, 0, 256);
+  if (dusk) { gr.addColorStop(0, "#1c2440"); gr.addColorStop(0.6, "#7a5a6e"); gr.addColorStop(1, "#e6a070"); }
+  else { gr.addColorStop(0, "#6f9fd8"); gr.addColorStop(0.7, "#bcd6ee"); gr.addColorStop(1, "#e4eef6"); }
+  g.fillStyle = gr; g.fillRect(0, 0, 2, 256);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+}
+const hemi = new THREE.HemisphereLight(0xdfeaff, 0x6b5a45, 1.15); scene.add(hemi);
+const sun = new THREE.DirectionalLight(0xfff1dc, 2.6); sun.castShadow = true; sun.shadow.mapSize.set(4096, 4096); sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.02;
+scene.add(sun, sun.target);
+const cam = new THREE.PerspectiveCamera(32, innerWidth / innerHeight, 0.5, 2000);
+const controls = new OrbitControls(cam, renderer.domElement); controls.enableDamping = true;
+
+const loader = new THREE.TextureLoader();
+const bundles = {};
+const bundle = (name) => bundles[name] ??= fetch("data/" + name + ".txt").then((r) => { if (!r.ok) { delete bundles[name]; throw new Error(r.status); } return r.text(); }).then((t) => bytes(t.trim()));
+let TEX = null; const texCache = {};
+const texFor = (k) => texCache[k] ??= (() => { const t = loader.load(TEX[k]); t.magFilter = THREE.NearestFilter; t.minFilter = THREE.NearestMipmapLinearFilter; t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t; })();
+const bytes = (b64) => Uint8Array.from(atob(b64), (ch) => ch.charCodeAt(0)).buffer;
+function unpack(m) {   // see build_3d_catalogue.py _pack
+  const f = (a, k) => Float32Array.from(a, (x) => x / k);
+  return { ...m, p: f(new Int16Array(bytes(m.p)), 64), uv: f(new Int16Array(bytes(m.uv)), 64), n: f(new Int8Array(bytes(m.n)), 100), c: f(new Uint8Array(bytes(m.c)), 255) };
+}
+let group = null, lights = [], current = null, dusk = false, bounds = null;
+
+function light() {
+  scene.background = sky(dusk);
+  const [x0, y0, z0, x1, y1, z1] = bounds; const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, size = Math.max(x1 - x0, z1 - z0, 8);
+  const fogS = Math.max(size, (y1 - y0) * 1.6); scene.fog = new THREE.Fog(dusk ? 0x6a5a70 : 0xd3e3f1, fogS * 1.6, fogS * 5);
+  hemi.color.set(dusk ? 0x8090c0 : 0xdfeaff); hemi.groundColor.set(dusk ? 0x403028 : 0x6b5a45); hemi.intensity = dusk ? 0.55 : 1.15;
+  sun.color.set(dusk ? 0xffb070 : 0xfff1dc); sun.intensity = dusk ? 1.2 : 2.6;
+  const d = dusk ? new THREE.Vector3(-0.8, 0.35, 0.5) : new THREE.Vector3(-0.55, 0.85, 0.45);
+  sun.position.set(cx + d.x * size * 2, y0 + d.y * size * 2, cz + d.z * size * 2); sun.target.position.set(cx, y0, cz);
+  const sc = sun.shadow.camera; sc.left = -size; sc.right = size; sc.top = size; sc.bottom = -size; sc.near = 1; sc.far = size * 5; sc.updateProjectionMatrix();
+  for (const L of lights) scene.remove(L); lights = [];
+  group?.traverse((o) => { if (o.isMesh && o.userData.glow) { o.material.emissive.set(dusk ? 0xffc070 : 0x000000); o.material.emissiveIntensity = dusk ? 1.4 : 0; } });
+  if (dusk && current) for (const m of Object.values(current.meshes)) if (m.glow) {
+    const seen = new Set();
+    for (let i = 0; i < m.p.length; i += 12 * 6) { const k = [Math.floor(m.p[i]), Math.floor(m.p[i + 1]), Math.floor(m.p[i + 2])].join(); if (seen.has(k) || lights.length > 24) continue; seen.add(k);
+      const L = new THREE.PointLight(0xffb060, 6, 9, 1.6); L.position.set(m.p[i] + 0.3, m.p[i + 1], m.p[i + 2] + 0.3); scene.add(L); lights.push(L); }
+  }
+}
+
+function frame(D) {
+  const [x0, y0, z0, x1, y1, z1] = D.bounds; const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, size = Math.max(x1 - x0, z1 - z0);
+  const v = D.camera?.views?.card || [-38, 26, size * 1.3];
+  const [az, el, dist, tx, ty_, tz] = v; const a = az * Math.PI / 180, e = el * Math.PI / 180;
+  const ty = ty_ ?? y0 + (y1 - y0) * 0.32, X = tx ?? cx, Z = tz ?? cz;
+  cam.position.set(X + Math.sin(a) * Math.cos(e) * dist, ty + Math.sin(e) * dist, Z + Math.cos(a) * Math.cos(e) * dist);
+  controls.target.set(X, ty, Z); controls.maxDistance = dist * 4; controls.update();
+}
+
+async function show(i) {
+  i = (i + INDEX.length) % INDEX.length; pick.value = i;
+  const b = INDEX[i];
+  $("kind").textContent = b.section + (b.sub ? " · " + b.sub : ""); $("title").textContent = b.title; $("blurb").textContent = b.blurb || "";
+  $("meta").textContent = `${b.size[0]} × ${b.size[2]} footprint, ${b.size[1]} tall · ${b.blocks.toLocaleString()} blocks`;
+  try { history.replaceState(null, "", "#" + b.key); } catch {}
+  status("Loading…");
+  try {
+    if (!TEX) TEX = await (await fetch("tex.json")).json();
+    const buf = await bundle(b.bundle);
+    const slice = new Blob([buf.slice(b.at[0], b.at[0] + b.at[1])]);
+    const D = await new Response(slice.stream().pipeThrough(new DecompressionStream("gzip"))).json();
+    for (const k in D.meshes) D.meshes[k] = unpack(D.meshes[k]);
+    if (pick.value != i) return; // picked something else meanwhile
+    if (group) { scene.remove(group); group.traverse((o) => { if (o.isMesh) { o.geometry.dispose(); o.material.dispose(); } }); }
+    group = new THREE.Group();
+    for (const [key, m] of Object.entries(D.meshes)) {
+      const g = new THREE.BufferGeometry(); const nq = m.c.length / 4;
+      g.setAttribute("position", new THREE.BufferAttribute(m.p, 3));
+      g.setAttribute("normal", new THREE.BufferAttribute(m.n, 3));
+      g.setAttribute("uv", new THREE.BufferAttribute(m.uv, 2));
+      const col = new Float32Array(m.c.length * 3); m.c.forEach((a, k) => { col[k * 3] = col[k * 3 + 1] = col[k * 3 + 2] = a; });
+      g.setAttribute("color", new THREE.BufferAttribute(col, 3));
+      const idx = new Uint32Array(nq * 6); for (let q = 0; q < nq; q++) { const s = q * 4; idx.set([s, s + 1, s + 2, s, s + 2, s + 3], q * 6); }
+      g.setIndex(new THREE.BufferAttribute(idx, 1));
+      const t = texFor(key);
+      const mat = new THREE.MeshLambertMaterial({ map: t, vertexColors: true, alphaTest: m.cut ? 0.5 : 0, transparent: !!m.water, opacity: m.water ? 0.82 : 1 });
+      if (m.glow) mat.emissiveMap = t;
+      const mesh = new THREE.Mesh(g, mat); mesh.castShadow = !m.water; mesh.receiveShadow = true; mesh.userData.glow = !!m.glow; group.add(mesh);
+    }
+    scene.add(group); current = D; bounds = D.bounds; light(); frame(D); status("");
+  } catch (e) { status("Could not load this build. Try again."); }
+}
+
+pick.onchange = () => show(Number(pick.value));
+$("prev").onclick = () => show(Number(pick.value) - 1);
+$("next").onclick = () => show(Number(pick.value) + 1);
+$("dusk").onclick = (e) => { dusk = !dusk; e.target.classList.toggle("on", dusk); e.target.setAttribute("aria-pressed", dusk); if (bounds) light(); };
+$("toggle").onclick = () => $("ui").classList.toggle("small");
+if (innerWidth <= 640) $("ui").classList.add("small");
+addEventListener("keydown", (e) => { if (e.target === pick) return; if (e.key === "ArrowRight") show(Number(pick.value) + 1); if (e.key === "ArrowLeft") show(Number(pick.value) - 1); });
+addEventListener("resize", () => { cam.aspect = innerWidth / innerHeight; cam.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+addEventListener("hashchange", () => { const i = INDEX.findIndex((b) => b.key === decodeURIComponent(location.hash.slice(1))); if (i >= 0 && i != pick.value) show(i); });
+const start = INDEX.findIndex((b) => b.key === decodeURIComponent(location.hash.slice(1)));
+show(start >= 0 ? start : 0);
+(function loop() { controls.update(); renderer.render(scene, cam); requestAnimationFrame(loop); })();
+</script>
+</body>
+</html>

@@ -27,6 +27,9 @@ export const SITES = [
   { id: "drift_foot", name: "The Drift", x: 100, z: 836, y: 85, r: 10 },
   { id: "the_seams", name: "The Seams", x: 528, z: 904, y: 65, r: 16 },
   { id: "wound_dock", name: "The Wound landing", x: -58, z: 153, y: 66, r: 8 },
+  // The Cold Forge: where Morvane's smiths sang the Choir's armour. High on the eastern terraces past
+  // the Seams, with no road up. The only place a Choirsteel Upgrade template can be found (forge.js).
+  { id: "cold_forge", name: "The Cold Forge", x: 592, z: 1080, y: 119, r: 14 },
   { id: "vault_stair", name: "Vault Stair", x: pathX(2312) + 5, z: 2312, r: 4 },
 ];
 export const SITE_SKIRT = 14; // blocks over which a flattened site eases back into the land

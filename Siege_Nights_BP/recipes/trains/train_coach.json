@@ -1,0 +1,37 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "siege:train_coach_recipe"
+    },
+    "tags": [
+      "siege_workshop"
+    ],
+    "pattern": [
+      "GGG",
+      "WPW",
+      "Q Q"
+    ],
+    "key": {
+      "G": {
+        "item": "minecraft:glass_pane"
+      },
+      "W": {
+        "tag": "minecraft:wool"
+      },
+      "P": {
+        "tag": "minecraft:planks"
+      },
+      "Q": {
+        "item": "siege:train_bogie"
+      }
+    },
+    "result": {
+      "item": "siege:train_coach",
+      "count": 1
+    },
+    "unlock": {
+      "context": "AlwaysUnlocked"
+    }
+  }
+}

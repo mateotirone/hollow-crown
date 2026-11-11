@@ -6,10 +6,11 @@ import { SETTLE, CATALOG, MASON_LINES } from "./config.js";
 import { BUILDINGS, drawBuilding, styleFor } from "./buildings.js";
 import { hallReserve, hallReach, inBox, footprint, boxesTouch, placeVerdict, bill, priceOf, isCampKit } from "./rules.js";
 import { localStock, stoneStock, wallStock, niceName } from "./mason.js";
-import { STONE_FAMILY, CASTLE_STONES, stoneId, regionalId, GATES, PORTCULLISES, REINFORCEABLE, CASTLE_BLOCKS } from "../siege/api.js";
+import { STONE_FAMILY, STONE_KINDS, CASTLE_STONES, stoneId, regionalId, GATES, PORTCULLISES, REINFORCEABLE, CASTLE_BLOCKS } from "../siege/api.js";
 import { MATERIALS } from "./rules.js";
 import { HALL, MASON, SLOTS, place, slotsFor } from "./layout.js";
-import { WALLS, WALL_LEVELS, MAX_WALL, smoothGround, groundProblem, wallColumns, onWallLine, bearingToAngle, columnKinds, repairCost, wallArmor, wallSeed, VARIATION } from "./walldata.js";
+import { wallCost } from "./walls.js";
+import { WALLS, WALL_LEVELS, MAX_WALL, smoothGround, groundProblem, wallColumns, onWallLine, bearingToAngle, columnKinds, repairCost, wallArmor, wallSeed, VARIATION, WALL_STONES, WALL_STONE_IDS } from "./walldata.js";
 
 const base = { creative: false, overworld: true, typeId: "minecraft:stone_bricks", land: "me", mine: true, reserve: undefined, wildsClosed: true, hasKeep: true };
 
@@ -93,6 +94,25 @@ addTests("settle", {
   },
 });
 addTests("settle walls", {
+  "a wall is paid for in any stone, and the stone rows are added together": () => {
+    for (let level = 1; level <= MAX_WALL; level++) {
+      const rows = wallCost(level);
+      assert(rows.filter(([label]) => label.startsWith("stone")).length <= 1, `level ${level} checks stone twice`);
+      const raw = (WALL_LEVELS[level].cost ?? []).filter(([, , k]) => STONE_KINDS.includes(k)).reduce((n, [, a]) => n + a, 0);
+      assertEqual(rows.find(([label]) => label.startsWith("stone"))?.[1] ?? 0, raw, `level ${level}`);
+    }
+    const [, , anyStone] = wallCost(4).find(([label]) => label.startsWith("stone"));
+    for (const id of ["siege:castle_stone", "siege:castle_bricks_blackfen", "minecraft:cobblestone", "minecraft:deepslate_tiles", "minecraft:tuff_bricks",
+      "minecraft:cut_sandstone", "minecraft:white_concrete", "minecraft:orange_terracotta", "minecraft:quartz_bricks", "minecraft:mud_bricks", "minecraft:blackstone"]) assert(anyStone(id), id);
+    for (const id of ["minecraft:stone_sword", "minecraft:brick", "minecraft:redstone", "minecraft:stone_brick_stairs", "minecraft:oak_planks", "minecraft:glowstone"]) assert(!anyStone(id), id);
+  },
+  "every wall look names a block for every kind of stonework": () => {
+    for (const id of WALL_STONE_IDS) {
+      const look = WALL_STONES[id];
+      assert(look.name && (look.castle || STONE_KINDS.every((k) => look.kinds[k]?.length)), id);
+    }
+    assert(WALL_STONES.castle.castle === true, "the default is still the region's Castle Stone");
+  },
   "every region has its own gate, portcullis, palisade, planks and shingles": () => {
     assertEqual(regionalId("palisade"), "siege:palisade");
     assertEqual(regionalId("castle_gate", "blackfen"), "siege:castle_gate_blackfen");

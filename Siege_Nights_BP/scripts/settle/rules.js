@@ -107,6 +107,7 @@ const TIMBER_ROLES = new Set(["floor", "wallUpper", "pillar", "beam", "seat", "t
 const STONE_ROLES = new Set(["foundation", "wall", "wallLow", "crenel", "dais", "daisStair", "cobble"]);
 
 export function priceOf(plan) {
+  if (plan.priceAs) plan = plan.priceAs;
   let timber = 0, stone = plan.columns.size;
   for (const c of plan.cells.values()) {
     if (TIMBER_ROLES.has(c.role)) timber++;
