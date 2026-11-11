@@ -137,6 +137,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - Farms can no longer print Regals forever. Each trader stops buying a good from you for the day once its price has bottomed out (the Moneyer at 128 iron ingots a day), and monsters drop coins only when a player kills them.
 
 ### Fixed
+- Clicking a menu block with an empty hand works: the Waystone, Plot Stones, Keep Banner, Mason's Bench, gates and every other menu block used to do nothing unless you held an item.
 - No more "unknown variable melee_spear_equipped" errors in the content log on every swing: the player model now sets the variable newer Minecraft's attack animations ask for.
 - The Tuning Fork needs 5 Choir Shards, not 6, so the five regional bosses give enough to make one.
 - Regional Castle Guard armor now takes your banner colour and counts toward the Castle Guard set bonus in sieges, like the plain set. Pieces from different regions can be mixed.

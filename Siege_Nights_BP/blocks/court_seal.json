@@ -1,5 +1,5 @@
 {
-  "format_version": "1.21.60",
+  "format_version": "1.21.90",
   "minecraft:block": {
     "description": {
       "identifier": "siege:court_seal",
@@ -18,7 +18,8 @@
         }
       },
       "minecraft:destructible_by_mining": false,
-      "minecraft:destructible_by_explosion": false
+      "minecraft:destructible_by_explosion": false,
+      "siege:clickable": {}
     }
   }
 }
