@@ -1,7 +1,6 @@
 # Roof colour mix per town
 
-**(proposed, 2026-11-11)** Mateo asked for proposals to adjust ("You propose them, I'll adjust"). The
-numbers are counts out of 10 buildings in the town (houses, shops and civic together). The block for each
+Confirmed by Mateo 2026-11-11 ("i trust you") as proposed. The numbers are counts out of 10 buildings in the town (houses, shops and civic together). The block for each
 colour is in the region file.
 
 | Town | Region | Mix (out of 10) | Accent (civic only) |
