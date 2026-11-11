@@ -26,6 +26,7 @@ const cost = (...rows) => rows; // [label, amount, kind]: kind is matched to ite
 // overhanging battlements, tower roofs, gate arches and banners.
 //   h = wall height above the ground. walk = height of a plank walkway behind a one-block wall (0 = none).
 //   body / foot / cap / bands: "log", "fence" or a Castle Stone family kind; bands = { height: kind }.
+//   quoin = the kind of a tower's corner stones (dressed walls only).
 //   towers = how many, r = half-width, up = how far they rise above the wall. gateArmor = reinforce state of the gate.
 export const WALL_LEVELS = [
   null,
@@ -33,12 +34,12 @@ export const WALL_LEVELS = [
   { name: "Palisade", h: 3, thick: 1, body: "log", gate: "castle_gate", gateH: 3, cost: cost(["logs", 128, "log"]) },
   { name: "Braced Palisade", h: 4, thick: 1, walk: 2, body: "log", foot: "cobbled", gate: "castle_gate", gateH: 3, cost: cost(["logs", 96, "log"], ["planks", 128, "plank"], ["Cobbled Castle Stone", 96, "cobbled"]) },
   { name: "Fieldstone Wall", h: 4, thick: 1, body: "cobbled", cap: "stone", gate: "castle_gate", gateH: 3, cost: cost(["Cobbled Castle Stone", 320, "cobbled"], ["Castle Stone", 96, "stone"]) },
-  { name: "Stone Wall", h: 5, thick: 1, walk: 3, body: "stone", foot: "cobbled", battlements: true, gate: "castle_gate", gateH: 4, cost: cost(["Castle Stone", 384, "stone"], ["planks", 128, "plank"], ["iron ingots", 8, "iron"]) },
-  { name: "Battlement Wall", h: 6, thick: 2, body: "stone", foot: "cobbled", bands: { 4: "bricks" }, battlements: true, gate: "castle_gate", gateArmor: 1, port: true, gateH: 4, cost: cost(["Castle Stone", 384, "stone"], ["Castle Stone Bricks", 128, "bricks"], ["iron ingots", 24, "iron"]) },
-  { name: "Watch Wall", h: 7, thick: 2, body: "stone", foot: "cobbled", bands: { 5: "bricks" }, battlements: true, towers: 4, r: 2, up: 3, gate: "castle_gate", gateArmor: 1, port: true, gateH: 4, cost: cost(["Castle Stone", 384, "stone"], ["Castle Stone Bricks", 192, "bricks"], ["iron ingots", 32, "iron"]) },
-  { name: "Curtain Wall", h: 9, thick: 3, body: "smooth", foot: "cobbled", footH: 2, bands: { 4: "bricks", 7: "bricks" }, battlements: true, towers: 8, r: 3, up: 4, gatehouse: true, gate: "castle_gate", gateArmor: 1, port: true, gateH: 5, cost: cost(["Smooth Castle Stone", 512, "smooth"], ["Castle Stone Bricks", 256, "bricks"], ["iron ingots", 64, "iron"]) },
-  { name: "Great Curtain Wall", h: 11, thick: 3, body: "smooth", foot: "cobbled", footH: 2, bands: { 4: "bricks", 8: "bricks" }, battlements: true, towers: 8, r: 3, up: 5, gatehouse: true, gate: "castle_gate", gateArmor: 2, port: true, gateH: 5, cost: cost(["Smooth Castle Stone", 512, "smooth"], ["Castle Stone Bricks", 256, "bricks"], ["diamonds", 24, "diamond"]) },
-  { name: "Crown Wall", h: 13, thick: 4, body: "smooth", foot: "cobbled", footH: 3, bands: { 5: "bricks", 9: "tiles", 10: "bricks" }, battlements: true, towers: 12, r: 3, up: 6, gatehouse: true, gate: "castle_gate", gateArmor: 3, port: true, gateH: 5, cost: cost(["Smooth Castle Stone", 640, "smooth"], ["Castle Stone Tiles", 192, "tiles"], ["Castle Stone Bricks", 256, "bricks"], ["netherite scrap", 8, "netherite"]) },
+  { name: "Stone Wall", h: 5, thick: 1, walk: 3, body: "smooth", quoin: "stone", foot: "cobbled", battlements: true, gate: "castle_gate", gateH: 4, cost: cost(["Smooth Castle Stone", 384, "smooth"], ["planks", 128, "plank"], ["iron ingots", 8, "iron"]) },
+  { name: "Battlement Wall", h: 6, thick: 2, body: "smooth", quoin: "stone", foot: "cobbled", bands: { 4: "bricks" }, battlements: true, gate: "castle_gate", gateArmor: 1, port: true, gateH: 4, cost: cost(["Smooth Castle Stone", 384, "smooth"], ["Castle Stone Bricks", 128, "bricks"], ["iron ingots", 24, "iron"]) },
+  { name: "Watch Wall", h: 7, thick: 2, body: "smooth", quoin: "stone", foot: "cobbled", bands: { 5: "bricks" }, battlements: true, towers: 4, r: 2, up: 3, gate: "castle_gate", gateArmor: 1, port: true, gateH: 4, cost: cost(["Smooth Castle Stone", 384, "smooth"], ["Castle Stone Bricks", 192, "bricks"], ["iron ingots", 32, "iron"]) },
+  { name: "Curtain Wall", h: 9, thick: 3, body: "smooth", quoin: "stone", foot: "cobbled", footH: 2, bands: { 4: "bricks", 7: "bricks" }, battlements: true, towers: 8, r: 3, up: 4, gatehouse: true, gate: "castle_gate", gateArmor: 1, port: true, gateH: 5, cost: cost(["Smooth Castle Stone", 512, "smooth"], ["Castle Stone Bricks", 256, "bricks"], ["iron ingots", 64, "iron"]) },
+  { name: "Great Curtain Wall", h: 11, thick: 3, body: "smooth", quoin: "stone", foot: "cobbled", footH: 2, bands: { 4: "bricks", 8: "bricks" }, battlements: true, towers: 8, r: 3, up: 5, gatehouse: true, gate: "castle_gate", gateArmor: 2, port: true, gateH: 5, cost: cost(["Smooth Castle Stone", 512, "smooth"], ["Castle Stone Bricks", 256, "bricks"], ["diamonds", 24, "diamond"]) },
+  { name: "Crown Wall", h: 13, thick: 4, body: "smooth", quoin: "stone", foot: "cobbled", footH: 3, bands: { 5: "bricks", 9: "tiles", 10: "bricks" }, battlements: true, towers: 12, r: 3, up: 6, gatehouse: true, gate: "castle_gate", gateArmor: 3, port: true, gateH: 5, cost: cost(["Smooth Castle Stone", 640, "smooth"], ["Castle Stone Tiles", 192, "tiles"], ["Castle Stone Bricks", 256, "bricks"], ["netherite scrap", 8, "netherite"]) },
 ];
 export const MAX_WALL = WALL_LEVELS.length - 1;
 
@@ -60,8 +61,9 @@ export function hash3(x, y, z, seed = 0) {
 }
 export const wallSeed = (center) => (Math.imul(center.x | 0, 73856093) ^ Math.imul(center.z | 0, 19349663)) >>> 0;
 
-const WEATHERED = { smooth: "stone", stone: "cobbled", cobbled: "stone" };
-// Stone weathers in patches a few blocks across; bands of brick and tile stay crisp
+// Rough walls weather in patches a few blocks across; dressed (smooth) stone and bands of brick and tile stay
+// crisp, because patches of the darker Castle Stone on smooth walls read as camouflage, not age.
+const WEATHERED = { cobbled: "stone" };
 function weather(kind, x, y, z, seed) {
   if (!WEATHERED[kind]) return kind;
   const patch = hash3(Math.floor(x / 3), Math.floor(y / 2), Math.floor(z / 3), seed) < VARIATION.weather;
@@ -69,9 +71,14 @@ function weather(kind, x, y, z, seed) {
 }
 const every = (along, n, at) => ((Math.round(along) % n) + n) % n === at;
 
+// Regions whose towers wear a pitched roof in their own roofing (like their town halls) instead of battlements
+export const TOWER_ROOF = { vale: true, frostmarch: true, blackfen: true };
+
 // Everything that stands above the ground in one column of wall: [[y, kind], ...] where kind is a
-// material ("log", "fence", "plank", a Castle Stone kind) or "tooth", "light", "slit", "gate", "port".
-export function columnKinds(L, col, seed = 0) {
+// material ("log", "fence", "plank", a Castle Stone kind) or "tooth", "light", "slit", "gate", "port",
+// or on a roofed tower "roofb" (roof block) and "roof:<e|w|n|s>" (a roof stair rising that way).
+// style = the region's style id; it only decides the towers' roofs.
+export function columnKinds(L, col, seed = 0, style) {
   const { x, z, base } = col, out = [];
   let top = col.top;
   if (col.role === "gap" || col.role === "gate" || col.role === "port") {
@@ -96,11 +103,21 @@ export function columnKinds(L, col, seed = 0) {
     const rel = Math.max(1, y - base);
     let kind = materialKind(L, rel, y === top);
     if (!wood && !L.bands?.[rel]) kind = weather(kind, x, y, z, seed);
+    if (tower && col.corner && L.quoin && !L.bands?.[rel] && rel > (L.footH ?? (L.foot ? 1 : 0))) kind = L.quoin;
     // arrow slits: along the upper wall, and on each face of a tower
     if (!wood && col.d === 0 && L.h >= 5 && ((!tower && rel === L.h - 1 && every(along, VARIATION.slitEvery, 4)) || (tower && col.face && (rel === L.h + 1 || rel === 3)))) kind = "slit";
     out.push([y, kind]);
   }
   if (walk) return out;
+  if (tower && TOWER_ROOF[style] && col.dx !== undefined) {
+    // a pyramid roof: each ring in from the edge one block higher, stairs rising toward the middle
+    const k = L.r - Math.max(Math.abs(col.dx), Math.abs(col.dz));
+    for (let j = 1; j <= k; j++) out.push([top + j, "roofb"]);
+    if (k === L.r) { out.push([top + k + 1, "roofb"]); out.push([top + k + 2, "light"]); return out; }
+    const dir = Math.abs(col.dx) >= Math.abs(col.dz) ? (col.dx > 0 ? "w" : "e") : (col.dz > 0 ? "n" : "s");
+    out.push([top + k + 1, `roof:${dir}`]);
+    return out;
+  }
   if (tower) {
     if (col.tooth) out.push([top + 1, "tooth"]);
     if (col.mid) out.push([top + 1, "light"]);
@@ -198,7 +215,7 @@ export function wallColumns({ center, radius = WALLS.radius, level, gateAngle, s
     const g = groundAt(smooth, a);
     for (let dx = -L.r; dx <= L.r; dx++) for (let dz = -L.r; dz <= L.r; dz++) {
       const edge = Math.abs(dx) === L.r || Math.abs(dz) === L.r;
-      put(cx + dx, cz + dz, { role: "tower", base: g, top: g + L.h + L.up + bump, d: edge ? 0 : 1, a, mid: dx === 0 && dz === 0, tooth: edge && (dx + dz) % 2 === 0, face: edge && (dx === 0 || dz === 0) });
+      put(cx + dx, cz + dz, { role: "tower", base: g, top: g + L.h + L.up + bump, d: edge ? 0 : 1, a, mid: dx === 0 && dz === 0, tooth: edge && (dx + dz) % 2 === 0, face: edge && (dx === 0 || dz === 0), corner: Math.abs(dx) === L.r && Math.abs(dz) === L.r, dx, dz });
     }
   }
   const order = (c) => { let o = turn(c.a - gateAngle); return o; };

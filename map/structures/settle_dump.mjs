@@ -49,6 +49,7 @@ for (const id of Object.keys(STYLES)) {
   for (const b of BUILDINGS) r.buildings[b.id] = cellsOf(drawBuilding(b.id, id), st);
   const first = (list, fallback) => short((list ?? [fallback])[0]);
   r.kinds = { log: first(st.roles.beam, "spruce_log"), fence: first(st.roles.rail, "spruce_fence"), plank: first(st.roles.floor, "spruce_planks"),
+    roofb: first(st.roles.roofBlock, "dark_oak_planks"), roofStair: first(st.roles.roofStair, "dark_oak_stairs"),
     tooth: "siege:battlement", light: "lantern", gate: "siege:castle_gate", port: "siege:portcullis", slit: "siege:arrow_slit" };
   for (const k of STONE_KINDS) r.kinds[k] = stoneId(k, id);
 }
@@ -56,12 +57,15 @@ for (const id of Object.keys(STYLES)) {
 // Walls: the stretch either side of the south gate, moved so the gate sits at x = 0, z = 0.
 const smooth = new Array(WALLS.stations).fill(0);
 for (let level = 1; level < WALL_LEVELS.length; level++) {
-  const L = WALL_LEVELS[level], cells = [];
-  for (const col of wallColumns({ center: { x: 0, y: 0, z: 0 }, level, gateAngle: bearingToAngle(180), smooth })) {
-    if (col.z < WALLS.radius - 16 || Math.abs(col.x) > 26) continue;
-    for (const [y, kind] of columnKinds(L, col)) cells.push([col.x, y, col.z - WALLS.radius, kind]);
+  const L = WALL_LEVELS[level], cellsBy = {};
+  for (const id of Object.keys(STYLES)) {
+    const cells = (cellsBy[id] = []);
+    for (const col of wallColumns({ center: { x: 0, y: 0, z: 0 }, level, gateAngle: bearingToAngle(180), smooth })) {
+      if (col.z < WALLS.radius - 16 || Math.abs(col.x) > 26) continue;
+      for (const [y, kind] of columnKinds(L, col, 0, id)) cells.push([col.x, y, col.z - WALLS.radius, kind]);
+    }
   }
-  out.wallLevels.push({ level, name: L.name, h: L.h, body: L.body, cells });
+  out.wallLevels.push({ level, name: L.name, h: L.h, body: L.body, cellsBy });
 }
 
 // The Citadel: banner at the origin, gate facing south (+z), keep behind it.
@@ -74,4 +78,4 @@ for (const j of jobs) if (j.k === "fill") for (let y = j.y1; y <= j.y2; y++) {
 const cit = [...grid.values()];
 out.citadel = cit;
 fs.writeFileSync(process.argv[2] ?? "settle_dump.json", JSON.stringify(out));
-console.log("regions", Object.keys(out.regions).join(" "), "walls", out.wallLevels.map((w) => w.cells.length).join(" "), "citadel", cit.length, "keep half", KEEP_HALF);
+console.log("regions", Object.keys(out.regions).join(" "), "walls", out.wallLevels.map((w) => w.cellsBy.vale.length).join(" "), "citadel", cit.length, "keep half", KEEP_HALF);

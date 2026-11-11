@@ -30,6 +30,11 @@ def from_cells(name, cells, kinds=None):
         b.set(x, y, z, n, **p)
     return b
 
+def roof_cell(c, kinds):
+    """A wall tower's roof stair "roof:<dir>" becomes the region's roof stair rising that way."""
+    if isinstance(c[3], str) and c[3].startswith("roof:"): return [c[0], c[1], c[2], kinds["roofStair"], {"facing": c[3][5:]}]
+    return c
+
 def card_scene(b, ground=("grass_block", "dirt"), margin=3, view=None):
     b.finish(); lo, hi = b.bounds()
     sc = Blueprint(b.name + "_card"); sc.paste(b, 0, 0, 0)
@@ -113,7 +118,7 @@ def main():
     for w in D["wallLevels"]:
         for rid, r in D["regions"].items():
             add(sec, f"wall-{w['level']:02d}-{rid}", f"Wall {w['level']}: {w['name']}", r["name"], "",
-                (lambda c=w["cells"], k=r["kinds"], n=f"wall_{w['level']}_{rid}": from_cells(n, c, k)), REGION_GROUND.get(rid), view=(-28, 20, 0.95), status="old",
+                (lambda c=w["cellsBy"][rid], k=r["kinds"], n=f"wall_{w['level']}_{rid}": from_cells(n, [roof_cell(x, k) for x in c], k)), REGION_GROUND.get(rid), view=(-28, 20, 0.95), status="old",
                 extra={"level": w["level"], "region": rid})
 
     # ---- 4. Strongholds ----

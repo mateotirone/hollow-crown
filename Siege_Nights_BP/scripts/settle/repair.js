@@ -29,7 +29,7 @@ export function repairWall(owner, { fix = false, onDone } = {}) {
   const L = WALL_LEVELS[w.level];
   const cells = [];
   for (const col of wallColumns({ center: w, radius: w.radius, level: w.level, gateAngle: w.gate, smooth: w.ground })) {
-    for (const [y, kind] of columnKinds(L, col, wallSeed(w))) cells.push([col.x, y, col.z, kind, col.a]);
+    for (const [y, kind] of columnKinds(L, col, wallSeed(w), w.style)) cells.push([col.x, y, col.z, kind, col.a]);
   }
   jobs.set(owner, { cells, index: 0, fix, missing: 0, cracked: 0, P: palette(w.style, L), onDone, waited: 0 });
   return true;
