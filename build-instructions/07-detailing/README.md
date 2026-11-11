@@ -63,6 +63,27 @@ flat frame, a shutter, a lip on a planter) and **walls / fences** where you want
 - The night should feel uneasy, not black: warm lights on the human scale, no floodlit faces.
 - Hide light blocks for interiors under carpets or behind trapdoors in empty buildings.
 
+## Hanging and spiked details (Mateo, 2026-11-11, `reference/pictures/detailed-hall-hanging-chains.png`)
+
+Layered, dense detail for halls, inns, towers and grand houses (keep cottages simpler, detail balances
+detail: `texturing/`).
+
+- **Chains**: lanterns hang on chains (1 to 4 links) from every verge tip, eave corner, jetty corner and
+  bracket end. Long chains from the highest corners, short under porches. Odd spacing, symmetric pairs.
+- **Fences as hangers and posts**: a fence post sticking down under a beam end or bracket, with a lantern
+  under it; fence posts standing on parapets and balcony corners; never fences as structure (`02-frame`).
+- **Ridge spikes and finials**: a spike every 3 or 5 along the ridge (end rods, or a wall block or fence post
+  with a lightning rod on top), taller finials at the gable peaks and tower tops (`06-roof/roof-types.md`).
+- **Layers**: every horizontal line gets two or three layers stacked: beam, then a row of upside-down
+  stairs, then trapdoors or slabs under it. Every post gets a base and a capital of stairs or trapdoors.
+- **Pillars with trapdoors**: logs and stone posts dressed with trapdoors open against their faces, so a
+  1x1 post reads thicker and carved.
+- **Greenery hanging**: leaves and vines hanging off balconies and floor bands, between the lanterns.
+- **Accent band**: one thin band of an accent colour (oxidised copper, prismarine) along a floor line or
+  balcony rail on grand buildings, the same accent as the town's civic roofs.
+- Look at the picture closely: it reads as rich because every edge has a second and third layer, and
+  lights hang everywhere at the same small scale, not because it uses many different blocks.
+
 ## Greenery
 
 Mateo's cottage sheet and alley picture are full of green; it is what makes them warm.

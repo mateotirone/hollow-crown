@@ -23,4 +23,8 @@
 | `floor-band-arched-supports.png` | Stone ground floor under an oak upper storey: the floor band carried on slabs, stairs and trapdoors that read as shallow arches; dark oak panels, slim windows, spruce planters |
 | `close-studding.png` | Close studding: one block log, one block white, all along an oak upper storey over stone, stepped gables; the add-on's Timber Frame blocks give the same look |
 | `shutter-shelf-lantern.png` | Shuttered windows in close studding: a single open shutter, a slab shelf with a lantern under the glass, flowering leaves spilling down, vines on the white panels |
+| `roof-profiles.png` | Roof profile chart (pixelandpoly): A-frame, gable, gambrel, clerestory, mono-pitch, curved, mansard, saltbox, M-shaped, low gable, butterfly; edge vs middle rows. Used in `06-roof/roof-types.md` |
+| `roof-dormers-curled-verges.png` | A cottage roof in steps: slate field, dark wood verges that curl up at the ends, gabled dormers, chimney |
+| `roof-gambrel-aframe-curved.png` | Gambrel, A-frame and curved gable ends side by side, with hanging lanterns at the peak |
+| `detailed-hall-hanging-chains.png` | A dense, detailed hall: lanterns on chains from every roof tip, ridge spikes, layered beams and stairs, a teal accent band, a stepped stone stair |
 | `window-ideas-grid.png` | Sixteen window surrounds in wood, stone and brick: stair and trapdoor frames, crowns, sills, planters |

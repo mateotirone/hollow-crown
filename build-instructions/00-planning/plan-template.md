@@ -65,7 +65,8 @@ Door at (x, y, z), doorway width 3 / 5, steps: number, width, direction, landing
 
 ## 7. Roof
 
-Shape, pitch, overhang (eaves) .., verge (gables) .., colour (from `palettes/towns.md`: town mix and
+Roof type per module from `06-roof/roof-types.md` with the reason in one line (span, run, place in town,
+neighbours' roof types). Shape, pitch, overhang (eaves) .., verge (gables) .., colour (from `palettes/towns.md`: town mix and
 the neighbours' colours), gradient rows if any, trusses visible yes/no, chimneys at.
 
 ## 8. Palette sheet (blocks for this building only)

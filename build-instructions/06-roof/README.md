@@ -16,6 +16,9 @@ dormers, trusses, chimneys, colour.
 
 ## Step 1: Shape (by region and building)
 
+Choose the roof type from the footprint with **[roof-types.md](roof-types.md)** (every roof type, the
+spans and footprints it fits, where it goes in town and why). The table below is the region default.
+
 | Region | Default | Also |
 |---|---|---|
 | Vale | gable, pitch 1 | cross gables, jettied gables to the street, hipped on civic, spires on chapels, domes on the capital |
