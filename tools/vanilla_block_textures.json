@@ -10,6 +10,8 @@
   "leaves_jungle",
   "leaves_oak",
   "leaves_spruce",
+  "lodestone_side",
+  "lodestone_top",
   "log_acacia",
   "log_acacia_top",
   "log_big_oak",
@@ -28,6 +30,7 @@
   "mangrove_planks",
   "mangrove_trapdoor",
   "mud_bricks",
+  "ochre_froglight_side",
   "pale_oak_leaves",
   "pale_oak_log_side",
   "pale_oak_log_top",
@@ -42,5 +45,6 @@
   "stripped_pale_oak_log_side",
   "stripped_pale_oak_log_top",
   "trapdoor",
-  "tuff"
+  "tuff",
+  "verdant_froglight_side"
 ]

@@ -88,13 +88,14 @@ Type the commands in chat (`/` opens it).
 - Switch to Survival and try to mine the Plot Stone. ✅ It doesn't break.
 
 **Welcome hall and test area (in the sky)** Creative, after at least one Plot Stone is placed.
-- `/scriptevent siege:welcome build here` on flat ground (or `build` on the real map: it takes you to the hall's place high over Gull Bay). ✅ A round stone terrace with the Waystone in the middle and twelve pedestals round the rim, each with a sign.
-- Click the Waystone. ✅ A menu with "How things stand", "Where you start" and "Choosing a home".
-- Click a pedestal whose plot has a stone. ✅ The plot's region, land and style, and "Free". Pedestals for plots with no stone yet say "Not on this map yet".
-- Switch to Survival, click a free pedestal, choose "Start in ...", confirm. ✅ You land beside that Plot Stone holding a Keep Banner, and everyone is told.
-- `/scriptevent siege:welcome go` (Creative) and click the same pedestal. ✅ Its top has gone dark and it shows who chose it, their level and their settlement level.
-- With a friend (or second account) in Survival with no keep: they join. ✅ They arrive in the hall, can't walk off it, and the taken plot can't be picked.
+- `/scriptevent siege:welcome build here` on flat ground (or `build` on the real map: it takes you to the hall's place high over Gull Bay). ✅ After a few seconds, a 101 x 101 block miniature of the whole map (coast, mountains, rivers, towns, forests) with a stone rim. You stand on a quay out in its sea beside the Waystone, and twelve green glowing Map Stones stand on the plots' real spots, each with its name floating over it when you are close.
+- Click the Waystone with an empty hand. ✅ A menu with "How things stand", "Where you start" and "Choosing a home".
+- Walk over to a Map Stone and click it with an empty hand. ✅ The plot's region, land and style, and "Free". Stones for plots with no Plot Stone yet say "Not on this map yet".
+- Switch to Survival, click a free Map Stone, choose "Start in ...", confirm. ✅ You land beside that Plot Stone holding a Keep Banner, and everyone is told.
+- `/scriptevent siege:welcome go` (Creative) and click the same Map Stone. ✅ It has gone dark and it shows who chose it, their level and their settlement level.
+- With a friend (or second account) in Survival with no keep: they join. ✅ They arrive on the quay, can walk all over the miniature but can't walk off it, and the taken plot can't be picked.
 - `/scriptevent siege:welcome testarea`. ✅ A glass floor in the sky with the whole showcase laid out on it. Running it again just takes you back there.
+- On a world that already had the old round hall: load it. ✅ The miniature goes up in its place (a little lower in the sky), anyone waiting is moved to the quay, then the old terrace disappears.
 - `/scriptevent siege:welcome release <name>` frees someone's pick; `status` lists all twelve.
 
 ## What I most want to know
@@ -311,6 +312,8 @@ Rival Lords only settle on a map with Plot Stones. Place three or four Plot Ston
 - Kill it while it walks: Veil Ash drops and the followers stay. Let it go about 64 blocks: it and its followers vanish.
 - `/scriptevent siege:returned_reveal` puts a beam on every Returned near you if you lose track.
 - On their own, villages of five or more get one at night once the first boss is dead (slowly: a small chance every two minutes, one per village).
+
+**Boss Summons (creative menu).** In creative, open the Equipment tab and find the fold-out group "Hollow Crown: Boss Summons": nine sealed writs. Use the Reeve's on flat ground: the Reeve appears 6 blocks in front of you and its fight starts (name, intro line, boss sound), and the writ stays in your hand. Use it again while the fight runs: "already here". The Choir's writ takes you to the Court of the Hollow and wakes the Choir a few seconds later (or says the Court isn't built). The Pretender's rolls a new claimant. Also check the Construction tab has a "Hollow Crown: Locked World Trees" group and the Equipment tab a "Hollow Crown: Guard-only Armour" group, and that the Throne, Fallen Oath Shard, Tree of Oaths, Hollow Crown and Heart of the Hollow can be found with the creative search.
 
 **Morvane, the last fight (seven stages).** On flat open ground run `/scriptevent siege:bestiary_summon morvane`. Away from the Seat all seven stages play on the spot, which is the quick way to check the mechanics. `/scriptevent siege:morvane_skip 4` jumps a running fight to stage 4 (any number 1 to 7).
 

@@ -735,5 +735,1038 @@
         "source_property_name": "((#hud_title_text_string - 'hcm:') = #hud_title_text_string)"
       }
     ]
+  },
+  "boss_health_panel": {
+    "type": "panel",
+    "size": [
+      196,
+      24
+    ],
+    "anchor_from": "top_middle",
+    "anchor_to": "top_middle",
+    "$progress_bar_collection": "boss_bars",
+    "controls": [
+      {
+        "hc_boss_reeve": {
+          "type": "panel",
+          "size": [
+            196,
+            22
+          ],
+          "anchor_from": "top_middle",
+          "anchor_to": "top_middle",
+          "bindings": [
+            {
+              "binding_type": "collection",
+              "binding_collection_name": "boss_bars",
+              "binding_name": "#bossName"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#bossName - 'Clockwork') = #bossName))",
+              "target_property_name": "#visible"
+            }
+          ],
+          "controls": [
+            {
+              "title": {
+                "type": "label",
+                "text": "#text",
+                "color": [
+                  0.91,
+                  0.761,
+                  0.353
+                ],
+                "shadow": true,
+                "enable_profanity_filter": true,
+                "anchor_from": "top_middle",
+                "anchor_to": "top_middle",
+                "layer": 3,
+                "bindings": [
+                  {
+                    "binding_type": "collection",
+                    "binding_collection_name": "boss_bars",
+                    "binding_name": "#bossName"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_property_name": "((#bossName - '\u00a7c') - '\u00a77')",
+                    "target_property_name": "#text"
+                  }
+                ]
+              }
+            },
+            {
+              "frame": {
+                "type": "image",
+                "texture": "textures/ui/hc/bossbar/reeve_frame",
+                "size": [
+                  196,
+                  13
+                ],
+                "layer": 1,
+                "anchor_from": "top_middle",
+                "anchor_to": "top_middle",
+                "offset": [
+                  0,
+                  9
+                ]
+              }
+            },
+            {
+              "fill": {
+                "type": "image",
+                "texture": "textures/ui/hc/bossbar/reeve_fill",
+                "size": [
+                  182,
+                  5
+                ],
+                "layer": 2,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  7,
+                  13
+                ],
+                "clip_direction": "left",
+                "clip_pixelperfect": false,
+                "bindings": [
+                  {
+                    "binding_type": "collection",
+                    "binding_collection_name": "boss_bars",
+                    "binding_name": "#progress_percentage",
+                    "binding_name_override": "#clip_ratio"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "hc_boss_huntsman": {
+          "type": "panel",
+          "size": [
+            196,
+            22
+          ],
+          "anchor_from": "top_middle",
+          "anchor_to": "top_middle",
+          "bindings": [
+            {
+              "binding_type": "collection",
+              "binding_collection_name": "boss_bars",
+              "binding_name": "#bossName"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#bossName - 'Huntsman') = #bossName))",
+              "target_property_name": "#visible"
+            }
+          ],
+          "controls": [
+            {
+              "title": {
+                "type": "label",
+                "text": "#text",
+                "color": [
+                  0.875,
+                  0.902,
+                  0.839
+                ],
+                "shadow": true,
+                "enable_profanity_filter": true,
+                "anchor_from": "top_middle",
+                "anchor_to": "top_middle",
+                "layer": 3,
+                "bindings": [
+                  {
+                    "binding_type": "collection",
+                    "binding_collection_name": "boss_bars",
+                    "binding_name": "#bossName"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_property_name": "((#bossName - '\u00a7c') - '\u00a77')",
+                    "target_property_name": "#text"
+                  }
+                ]
+              }
+            },
+            {
+              "frame": {
+                "type": "image",
+                "texture": "textures/ui/hc/bossbar/huntsman_frame",
+                "size": [
+                  196,
+                  13
+                ],
+                "layer": 1,
+                "anchor_from": "top_middle",
+                "anchor_to": "top_middle",
+                "offset": [
+                  0,
+                  9
+                ]
+              }
+            },
+            {
+              "fill": {
+                "type": "image",
+                "texture": "textures/ui/hc/bossbar/huntsman_fill",
+                "size": [
+                  182,
+                  5
+                ],
+                "layer": 2,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  7,
+                  13
+                ],
+                "clip_direction": "left",
+                "clip_pixelperfect": false,
+                "bindings": [
+                  {
+                    "binding_type": "collection",
+                    "binding_collection_name": "boss_bars",
+                    "binding_name": "#progress_percentage",
+                    "binding_name_override": "#clip_ratio"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "hc_boss_bride": {
+          "type": "panel",
+          "size": [
+            196,
+            22
+          ],
+          "anchor_from": "top_middle",
+          "anchor_to": "top_middle",
+          "bindings": [
+            {
+              "binding_type": "collection",
+              "binding_collection_name": "boss_bars",
+              "binding_name": "#bossName"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#bossName - 'Bride') = #bossName))",
+              "target_property_name": "#visible"
+            }
+          ],
+          "controls": [
+            {
+              "title": {
+                "type": "label",
+                "text": "#text",
+                "color": [
+                  0.561,
+                  0.839,
+                  0.812
+                ],
+                "shadow": true,
+                "enable_profanity_filter": true,
+                "anchor_from": "top_middle",
+                "anchor_to": "top_middle",
+                "layer": 3,
+                "bindings": [
+                  {
+                    "binding_type": "collection",
+                    "binding_collection_name": "boss_bars",
+                    "binding_name": "#bossName"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_property_name": "((#bossName - '\u00a7c') - '\u00a77')",
+                    "target_property_name": "#text"
+                  }
+                ]
+              }
+            },
+            {
+              "frame": {
+                "type": "image",
+                "texture": "textures/ui/hc/bossbar/bride_frame",
+                "size": [
+                  196,
+                  13
+                ],
+                "layer": 1,
+                "anchor_from": "top_middle",
+                "anchor_to": "top_middle",
+                "offset": [
+                  0,
+                  9
+                ]
+              }
+            },
+            {
+              "fill": {
+                "type": "image",
+                "texture": "textures/ui/hc/bossbar/bride_fill",
+                "size": [
+                  182,
+                  5
+                ],
+                "layer": 2,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  7,
+                  13
+                ],
+                "clip_direction": "left",
+                "clip_pixelperfect": false,
+                "bindings": [
+                  {
+                    "binding_type": "collection",
+                    "binding_collection_name": "boss_bars",
+                    "binding_name": "#progress_percentage",
+                    "binding_name_override": "#clip_ratio"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "hc_boss_seneschal": {
+          "type": "panel",
+          "size": [
+            196,
+            22
+          ],
+          "anchor_from": "top_middle",
+          "anchor_to": "top_middle",
+          "bindings": [
+            {
+              "binding_type": "collection",
+              "binding_collection_name": "boss_bars",
+              "binding_name": "#bossName"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#bossName - 'Seneschal') = #bossName))",
+              "target_property_name": "#visible"
+            }
+          ],
+          "controls": [
+            {
+              "title": {
+                "type": "label",
+                "text": "#text",
+                "color": [
+                  0.953,
+                  0.604,
+                  0.29
+                ],
+                "shadow": true,
+                "enable_profanity_filter": true,
+                "anchor_from": "top_middle",
+                "anchor_to": "top_middle",
+                "layer": 3,
+                "bindings": [
+                  {
+                    "binding_type": "collection",
+                    "binding_collection_name": "boss_bars",
+                    "binding_name": "#bossName"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_property_name": "((#bossName - '\u00a7c') - '\u00a77')",
+                    "target_property_name": "#text"
+                  }
+                ]
+              }
+            },
+            {
+              "frame": {
+                "type": "image",
+                "texture": "textures/ui/hc/bossbar/seneschal_frame",
+                "size": [
+                  196,
+                  13
+                ],
+                "layer": 1,
+                "anchor_from": "top_middle",
+                "anchor_to": "top_middle",
+                "offset": [
+                  0,
+                  9
+                ]
+              }
+            },
+            {
+              "fill": {
+                "type": "image",
+                "texture": "textures/ui/hc/bossbar/seneschal_fill",
+                "size": [
+                  182,
+                  5
+                ],
+                "layer": 2,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  7,
+                  13
+                ],
+                "clip_direction": "left",
+                "clip_pixelperfect": false,
+                "bindings": [
+                  {
+                    "binding_type": "collection",
+                    "binding_collection_name": "boss_bars",
+                    "binding_name": "#progress_percentage",
+                    "binding_name_override": "#clip_ratio"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "hc_boss_mother": {
+          "type": "panel",
+          "size": [
+            196,
+            22
+          ],
+          "anchor_from": "top_middle",
+          "anchor_to": "top_middle",
+          "bindings": [
+            {
+              "binding_type": "collection",
+              "binding_collection_name": "boss_bars",
+              "binding_name": "#bossName"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#bossName - 'Changelings') = #bossName))",
+              "target_property_name": "#visible"
+            }
+          ],
+          "controls": [
+            {
+              "title": {
+                "type": "label",
+                "text": "#text",
+                "color": [
+                  0.718,
+                  0.831,
+                  0.478
+                ],
+                "shadow": true,
+                "enable_profanity_filter": true,
+                "anchor_from": "top_middle",
+                "anchor_to": "top_middle",
+                "layer": 3,
+                "bindings": [
+                  {
+                    "binding_type": "collection",
+                    "binding_collection_name": "boss_bars",
+                    "binding_name": "#bossName"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_property_name": "((#bossName - '\u00a7c') - '\u00a77')",
+                    "target_property_name": "#text"
+                  }
+                ]
+              }
+            },
+            {
+              "frame": {
+                "type": "image",
+                "texture": "textures/ui/hc/bossbar/mother_frame",
+                "size": [
+                  196,
+                  13
+                ],
+                "layer": 1,
+                "anchor_from": "top_middle",
+                "anchor_to": "top_middle",
+                "offset": [
+                  0,
+                  9
+                ]
+              }
+            },
+            {
+              "fill": {
+                "type": "image",
+                "texture": "textures/ui/hc/bossbar/mother_fill",
+                "size": [
+                  182,
+                  5
+                ],
+                "layer": 2,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  7,
+                  13
+                ],
+                "clip_direction": "left",
+                "clip_pixelperfect": false,
+                "bindings": [
+                  {
+                    "binding_type": "collection",
+                    "binding_collection_name": "boss_bars",
+                    "binding_name": "#progress_percentage",
+                    "binding_name_override": "#clip_ratio"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "hc_boss_warlord": {
+          "type": "panel",
+          "size": [
+            196,
+            22
+          ],
+          "anchor_from": "top_middle",
+          "anchor_to": "top_middle",
+          "bindings": [
+            {
+              "binding_type": "collection",
+              "binding_collection_name": "boss_bars",
+              "binding_name": "#bossName"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#bossName - 'Warlord') = #bossName))",
+              "target_property_name": "#visible"
+            }
+          ],
+          "controls": [
+            {
+              "title": {
+                "type": "label",
+                "text": "#text",
+                "color": [
+                  0.878,
+                  0.353,
+                  0.29
+                ],
+                "shadow": true,
+                "enable_profanity_filter": true,
+                "anchor_from": "top_middle",
+                "anchor_to": "top_middle",
+                "layer": 3,
+                "bindings": [
+                  {
+                    "binding_type": "collection",
+                    "binding_collection_name": "boss_bars",
+                    "binding_name": "#bossName"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_property_name": "((#bossName - '\u00a7c') - '\u00a77')",
+                    "target_property_name": "#text"
+                  }
+                ]
+              }
+            },
+            {
+              "frame": {
+                "type": "image",
+                "texture": "textures/ui/hc/bossbar/warlord_frame",
+                "size": [
+                  196,
+                  13
+                ],
+                "layer": 1,
+                "anchor_from": "top_middle",
+                "anchor_to": "top_middle",
+                "offset": [
+                  0,
+                  9
+                ]
+              }
+            },
+            {
+              "fill": {
+                "type": "image",
+                "texture": "textures/ui/hc/bossbar/warlord_fill",
+                "size": [
+                  182,
+                  5
+                ],
+                "layer": 2,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  7,
+                  13
+                ],
+                "clip_direction": "left",
+                "clip_pixelperfect": false,
+                "bindings": [
+                  {
+                    "binding_type": "collection",
+                    "binding_collection_name": "boss_bars",
+                    "binding_name": "#progress_percentage",
+                    "binding_name_override": "#clip_ratio"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "hc_boss_pretender": {
+          "type": "panel",
+          "size": [
+            196,
+            22
+          ],
+          "anchor_from": "top_middle",
+          "anchor_to": "top_middle",
+          "bindings": [
+            {
+              "binding_type": "collection",
+              "binding_collection_name": "boss_bars",
+              "binding_name": "#bossName"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#bossName - 'Pretender') = #bossName))",
+              "target_property_name": "#visible"
+            }
+          ],
+          "controls": [
+            {
+              "title": {
+                "type": "label",
+                "text": "#text",
+                "color": [
+                  0.824,
+                  0.839,
+                  0.871
+                ],
+                "shadow": true,
+                "enable_profanity_filter": true,
+                "anchor_from": "top_middle",
+                "anchor_to": "top_middle",
+                "layer": 3,
+                "bindings": [
+                  {
+                    "binding_type": "collection",
+                    "binding_collection_name": "boss_bars",
+                    "binding_name": "#bossName"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_property_name": "((#bossName - '\u00a7c') - '\u00a77')",
+                    "target_property_name": "#text"
+                  }
+                ]
+              }
+            },
+            {
+              "frame": {
+                "type": "image",
+                "texture": "textures/ui/hc/bossbar/pretender_frame",
+                "size": [
+                  196,
+                  13
+                ],
+                "layer": 1,
+                "anchor_from": "top_middle",
+                "anchor_to": "top_middle",
+                "offset": [
+                  0,
+                  9
+                ]
+              }
+            },
+            {
+              "fill": {
+                "type": "image",
+                "texture": "textures/ui/hc/bossbar/pretender_fill",
+                "size": [
+                  182,
+                  5
+                ],
+                "layer": 2,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  7,
+                  13
+                ],
+                "clip_direction": "left",
+                "clip_pixelperfect": false,
+                "bindings": [
+                  {
+                    "binding_type": "collection",
+                    "binding_collection_name": "boss_bars",
+                    "binding_name": "#progress_percentage",
+                    "binding_name_override": "#clip_ratio"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "hc_boss_choir": {
+          "type": "panel",
+          "size": [
+            196,
+            22
+          ],
+          "anchor_from": "top_middle",
+          "anchor_to": "top_middle",
+          "bindings": [
+            {
+              "binding_type": "collection",
+              "binding_collection_name": "boss_bars",
+              "binding_name": "#bossName"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#bossName - 'Choir') = #bossName))",
+              "target_property_name": "#visible"
+            }
+          ],
+          "controls": [
+            {
+              "title": {
+                "type": "label",
+                "text": "#text",
+                "color": [
+                  0.839,
+                  0.769,
+                  1.0
+                ],
+                "shadow": true,
+                "enable_profanity_filter": true,
+                "anchor_from": "top_middle",
+                "anchor_to": "top_middle",
+                "layer": 3,
+                "bindings": [
+                  {
+                    "binding_type": "collection",
+                    "binding_collection_name": "boss_bars",
+                    "binding_name": "#bossName"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_property_name": "((#bossName - '\u00a7c') - '\u00a77')",
+                    "target_property_name": "#text"
+                  }
+                ]
+              }
+            },
+            {
+              "frame": {
+                "type": "image",
+                "texture": "textures/ui/hc/bossbar/choir_frame",
+                "size": [
+                  196,
+                  13
+                ],
+                "layer": 1,
+                "anchor_from": "top_middle",
+                "anchor_to": "top_middle",
+                "offset": [
+                  0,
+                  9
+                ]
+              }
+            },
+            {
+              "fill": {
+                "type": "image",
+                "texture": "textures/ui/hc/bossbar/choir_fill",
+                "size": [
+                  182,
+                  5
+                ],
+                "layer": 2,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  7,
+                  13
+                ],
+                "clip_direction": "left",
+                "clip_pixelperfect": false,
+                "bindings": [
+                  {
+                    "binding_type": "collection",
+                    "binding_collection_name": "boss_bars",
+                    "binding_name": "#progress_percentage",
+                    "binding_name_override": "#clip_ratio"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "hc_boss_regent": {
+          "type": "panel",
+          "size": [
+            196,
+            22
+          ],
+          "anchor_from": "top_middle",
+          "anchor_to": "top_middle",
+          "bindings": [
+            {
+              "binding_type": "collection",
+              "binding_collection_name": "boss_bars",
+              "binding_name": "#bossName"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#bossName - 'Hollow Crown') = #bossName))",
+              "target_property_name": "#visible"
+            }
+          ],
+          "controls": [
+            {
+              "title": {
+                "type": "label",
+                "text": "#text",
+                "color": [
+                  0.753,
+                  0.549,
+                  1.0
+                ],
+                "shadow": true,
+                "enable_profanity_filter": true,
+                "anchor_from": "top_middle",
+                "anchor_to": "top_middle",
+                "layer": 3,
+                "bindings": [
+                  {
+                    "binding_type": "collection",
+                    "binding_collection_name": "boss_bars",
+                    "binding_name": "#bossName"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_property_name": "((#bossName - '\u00a7c') - '\u00a77')",
+                    "target_property_name": "#text"
+                  }
+                ]
+              }
+            },
+            {
+              "frame": {
+                "type": "image",
+                "texture": "textures/ui/hc/bossbar/regent_frame",
+                "size": [
+                  196,
+                  13
+                ],
+                "layer": 1,
+                "anchor_from": "top_middle",
+                "anchor_to": "top_middle",
+                "offset": [
+                  0,
+                  9
+                ]
+              }
+            },
+            {
+              "fill": {
+                "type": "image",
+                "texture": "textures/ui/hc/bossbar/regent_fill",
+                "size": [
+                  182,
+                  5
+                ],
+                "layer": 2,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  7,
+                  13
+                ],
+                "clip_direction": "left",
+                "clip_pixelperfect": false,
+                "bindings": [
+                  {
+                    "binding_type": "collection",
+                    "binding_collection_name": "boss_bars",
+                    "binding_name": "#progress_percentage",
+                    "binding_name_override": "#clip_ratio"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "hc_boss_morvane": {
+          "type": "panel",
+          "size": [
+            196,
+            22
+          ],
+          "anchor_from": "top_middle",
+          "anchor_to": "top_middle",
+          "bindings": [
+            {
+              "binding_type": "collection",
+              "binding_collection_name": "boss_bars",
+              "binding_name": "#bossName"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(not ((#bossName - 'Morvane') = #bossName))",
+              "target_property_name": "#visible"
+            }
+          ],
+          "controls": [
+            {
+              "title": {
+                "type": "label",
+                "text": "#text",
+                "color": [
+                  1.0,
+                  0.353,
+                  0.847
+                ],
+                "shadow": true,
+                "enable_profanity_filter": true,
+                "anchor_from": "top_middle",
+                "anchor_to": "top_middle",
+                "layer": 3,
+                "bindings": [
+                  {
+                    "binding_type": "collection",
+                    "binding_collection_name": "boss_bars",
+                    "binding_name": "#bossName"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_property_name": "((#bossName - '\u00a7c') - '\u00a77')",
+                    "target_property_name": "#text"
+                  }
+                ]
+              }
+            },
+            {
+              "frame": {
+                "type": "image",
+                "texture": "textures/ui/hc/bossbar/morvane_frame",
+                "size": [
+                  196,
+                  13
+                ],
+                "layer": 1,
+                "anchor_from": "top_middle",
+                "anchor_to": "top_middle",
+                "offset": [
+                  0,
+                  9
+                ]
+              }
+            },
+            {
+              "fill": {
+                "type": "image",
+                "texture": "textures/ui/hc/bossbar/morvane_fill",
+                "size": [
+                  182,
+                  5
+                ],
+                "layer": 2,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  7,
+                  13
+                ],
+                "clip_direction": "left",
+                "clip_pixelperfect": false,
+                "bindings": [
+                  {
+                    "binding_type": "collection",
+                    "binding_collection_name": "boss_bars",
+                    "binding_name": "#progress_percentage",
+                    "binding_name_override": "#clip_ratio"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "hc_boss_vanilla": {
+          "type": "panel",
+          "size": [
+            182,
+            20
+          ],
+          "anchor_from": "top_middle",
+          "anchor_to": "top_middle",
+          "$progress_bar_collection": "boss_bars",
+          "bindings": [
+            {
+              "binding_type": "collection",
+              "binding_collection_name": "boss_bars",
+              "binding_name": "#bossName"
+            },
+            {
+              "binding_type": "view",
+              "source_property_name": "(((#bossName - 'Clockwork') = #bossName) and ((#bossName - 'Huntsman') = #bossName) and ((#bossName - 'Bride') = #bossName) and ((#bossName - 'Seneschal') = #bossName) and ((#bossName - 'Changelings') = #bossName) and ((#bossName - 'Warlord') = #bossName) and ((#bossName - 'Pretender') = #bossName) and ((#bossName - 'Choir') = #bossName) and ((#bossName - 'Hollow Crown') = #bossName) and ((#bossName - 'Morvane') = #bossName))",
+              "target_property_name": "#visible"
+            }
+          ],
+          "controls": [
+            {
+              "boss_name@hud.boss_name_panel": {}
+            },
+            {
+              "progress_bar_for_collections@common.progress_bar_for_collections": {
+                "offset": [
+                  0,
+                  10
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "bindings": [
+      {
+        "binding_type": "collection",
+        "binding_collection_name": "boss_bars",
+        "binding_name": "#bar_visible",
+        "binding_name_override": "#visible"
+      }
+    ]
+  },
+  "boss_health_grid": {
+    "size": [
+      196,
+      "30%"
+    ]
   }
 }

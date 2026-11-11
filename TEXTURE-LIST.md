@@ -186,6 +186,7 @@ Look comes from Mateo's Undertow concept art: purple twilight, dark basalt, holl
 | Asset | File | Status |
 |---|---|---|
 | Plot Stone (claim marker: compass star on top, gold claim band on the sides) | `textures/blocks/siege_plot_stone_top.png`, `siege_plot_stone_side.png`, `siege_plot_stone_bottom.png` | **Final style, awaiting your review** (`studio/art/build_hollowcrown.py`) |
+| Map Stone (plot marker on the welcome hall miniature: green = free, yellow = run by a lord, dark = taken) and the hall Waystone | none of our own: they use the vanilla verdant/ochre froglight, polished blackstone and lodestone textures (terrain_texture.json `siege_map_marker_*`, `siege_hall_waystone_*`) | **Vanilla textures, no art needed** |
 
 ## Horses and rail (icons and blocks: final art by `studio/art/build_hc_items.py` and `build_hc_blocks.py`; do not regenerate from `studio/build_horses.py`)
 
@@ -280,6 +281,7 @@ Every mob has a box model in `models/entity/bestiary/<id>.geo.json` and a genera
 | Inquisitor (Mob) | `inquisitor.png` | 128×128 | House style, generated |
 | The Clockwork Reeve (Boss) | `clockwork_reeve.png` | 128×128 | House style, generated |
 | Reeve's Cog (Boss helper) | `reeve_cog.png` | 128×128 | House style, generated |
+| Spinning Cog (the Reeve's thrown cog) | `spinning_cog.png` | 64×64 | House style, generated |
 | The Pale Huntsman (Boss) | `pale_huntsman.png` | 64×64 | House style, generated |
 | The Drowned Bride (Boss, ghost (alpha)) | `drowned_bride.png` | 128×128 | House style, generated |
 | The Ash Seneschal (Boss) | `ash_seneschal.png` | 128×128 | House style, generated |
@@ -324,6 +326,7 @@ Every mob has a box model in `models/entity/bestiary/<id>.geo.json` and a genera
 | Drowned Wedding Ring (boss key) | `drowned_ring.png` | **Final style, awaiting your review** |
 | Faceless Seal (boss key) | `faceless_seal.png` | **Final style, awaiting your review** |
 | Mire Effigy (boss key) | `mire_effigy.png` | **Final style, awaiting your review** |
+| Boss Summon ×9 (creative-only test item: a sealed writ, seal in the boss's colour) | `textures/items/creative/summon_<boss>.png`, made by `studio/build_creative.py` | Placeholder (only playtesters see it) |
 | Minute Hand (boss relic, sword) | `minute_hand.png` | **Final style, awaiting your review** |
 | Rimefang Bow (boss relic, bow) | `rimefang_bow.png` | **Final style, awaiting your review** |
 | Widow's Veil (boss relic, helmet) | `widows_veil.png` | **Final style, awaiting your review** |
@@ -503,6 +506,10 @@ Choirsteel's 3D set is `studio/art/build_choirsteel_3d.py` (PR #83). The guard-o
 Made by `tools/minimap_tiles.py` from the top-down render of the generated world (`map/genworld.py`'s preview) and `map/terrain.npz`. Run it again whenever the world map is regenerated; do not paint these by hand.
 - `textures/ui/hc/minimap/mxXXzZZ.png`: 1,600 map views, 72x72 RGBA (Bedrock showed palette PNGs black) (3 x 3 tiles of 64 blocks around tile XX,ZZ), slightly darkened, with plot and town markers: generated
 - `textures/ui/hc/minimap/mnone__.png` (uncharted), `aq..ay.png` (player arrow, 12x12, eight directions), `frame.png` (80x80 border): first pass
+
+## Boss health bars (2026-11-11)
+Made by `tools/bossbar_ui.py` (which also wires them into `ui/hud_screen.json`). One look per boss: Clockwork Reeve (brass, clock ticks), Pale Huntsman (bone), Drowned Bride (sea green), Ash Seneschal (embers), Mother of Changelings (moss on violet), Warlord King (blood and iron), the Pretender (tarnished silver), the Choir (pale violet), the Hollow Crown regent and Morvane (dark purple, magenta veins, blue glints).
+- `textures/ui/hc/bossbar/<boss>_frame.png` (196x13, frame with end caps and the empty strip) and `<boss>_fill.png` (182x5, the health): first pass, **awaiting your review**, untested in game
 
 ## Dyed icon layers (2026-11-11, textures thread)
 Every dyeable item (Castle Guard armour and the regional sets, 64 pieces) uses `minecraft:icon` with `default` and `dyed` textures. `textures/items/<icon>_dyed.png` holds only the tabard cloth in light grey so the game tints it with the dye. Made by `studio/art/build_dyed_icons.py` (re-run after repainting a guard icon or adding a dyeable item). Without the dyed layer the icons showed blank in game.
