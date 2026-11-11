@@ -137,6 +137,9 @@ def capital(take="medieval", seed=7):
     # ---- the wings and their corner towers
     WB = Building(bp, P, seed)
     for rect in ((-33, -6, -11, 6), (11, -6, 33, 6)): wing(WB, P, rect, "x", seed, timber=not roman, arcade=roman)
+    # the wing roofs run on into the centre block until its hipped roof is higher, so they meet it in clean
+    # valleys instead of ending in open gables and barge boards standing on its slope
+    WB.roofs = [((min(r[0], 6) if r[0] > 0 else r[0], r[1], max(r[2], -6) if r[2] < 0 else r[2], r[3]),) + tuple(rest) for (r, *rest) in WB.roofs]
     WB.build_roofs()
     for rect in ((-33, -6, -11, 6), (11, -6, 33, 6)): WB.eaves(rect, "x", 10)
     for cx in (-37, 37): corner_tower(bp, P, cx, 0, 16, seed + 1)
@@ -195,7 +198,9 @@ def capital(take="medieval", seed=7):
         FB = Building(bp, P, seed + 3)
         FB.foundation(F, 0); FB.floor(F, 0); FB.stone_storey(F, 1, 6)
         FB.floor(F, 6); FB.timber_storey(F, 7, 5, bay=4); FB.bay_windows(F, 7, "sew")
-        FB.roof(F, "z", 12, overhang=1, verge=1, pitch=1); FB.build_roofs(); FB.gable_walls(F, "z", 12, style="timber")
+        # the pavilion roof runs back into the hall's roof (to the drum) so it dies into the slope as a valley;
+        # its back gable stays under its own roof instead of standing up out of the hall roof
+        FB.roof((-8, 7, 8, 15), "z", 12, overhang=1, verge=0, pitch=1); FB.build_roofs(); FB.gable_walls(F, "z", 12, style="timber")
         FB.window(-1, 14, 15, "s", 3, 2, kind="timber", shutters=False)   # a big window high in the gable
         for x in (-1, 0, 1):
             for y in range(1, 5): bp.set(x, y, 15, "air")

@@ -83,6 +83,8 @@ class Building:
     """A building made of masses (boxes with storeys) and a combined roof height field."""
     def __init__(self, bp, pal, seed=0):
         self.bp, self.P, self.seed = bp, pal, seed
+        if not hasattr(bp, "_builders"): bp._builders = []
+        bp._builders.append(self)   # every Building on a blueprint shares one roofscape: the higher roof wins (06-roof "Connecting roofs")
         self.roofs = []          # (rect incl. overhang, ridge axis, base y, pitch, material set)
         self.footprints = []     # (rect, y_top) interior volumes for clearing
         self.walls_plane = {}    # (x,z) -> outermost wall rect info, for gables
@@ -241,21 +243,75 @@ class Building:
             if best is None or h > best: best, who = h, i
         return best, who
 
+    def _others(self):
+        return [r for b in getattr(self.bp, "_builders", []) if b is not self for r in b.roofs]
+
+    def _other_height(self, x, z):
+        best = None
+        for (r, ridge, base, pitch, mats, wall) in self._others():
+            if not (r[0] <= x <= r[2] and r[1] <= z <= r[3]): continue
+            lo, hi, c = (r[1], r[3], z) if ridge == "x" else (r[0], r[2], x)
+            h = base + min(c - lo, hi - c) * pitch
+            if best is None or h > best: best = h
+        return best
+
+    @staticmethod
+    def _ridge_h(roof):
+        r, ridge, base, pitch = roof[:4]
+        return base + ((r[3] - r[1]) // 2 if ridge == "x" else (r[2] - r[0]) // 2) * pitch
+
+    def _extend_into(self):
+        """A roof whose gable end stops inside a higher, crossing roof runs on to that roof's ridge, so it
+        dies into the slope as a valley instead of leaving its gable and barge boards standing in the roof."""
+        everyone = [r for b in getattr(self.bp, "_builders", [self]) for r in b.roofs]
+        for i, A in enumerate(self.roofs):
+            r, ridge, base, pitch, mats, wall = A
+            r = list(r)
+            for B in everyone:
+                if B is A or B[1] == ridge or self._ridge_h(B) <= self._ridge_h(A): continue
+                bw = B[5]
+                if ridge == "x":
+                    cz = (wall[1] + wall[3]) // 2
+                    if not (bw[1] <= cz <= bw[3]): continue
+                    mid = (bw[0] + bw[2]) // 2
+                    if bw[0] <= wall[0] <= bw[2] and wall[0] > mid: r[0] = min(r[0], mid)
+                    if bw[0] <= wall[2] <= bw[2] and wall[2] < mid: r[2] = max(r[2], mid)
+                else:
+                    cx = (wall[0] + wall[2]) // 2
+                    if not (bw[0] <= cx <= bw[2]): continue
+                    mid = (bw[1] + bw[3]) // 2
+                    if bw[1] <= wall[1] <= bw[3] and wall[1] > mid: r[1] = min(r[1], mid)
+                    if bw[1] <= wall[3] <= bw[3] and wall[3] < mid: r[3] = max(r[3], mid)
+            self.roofs[i] = (tuple(r), ridge, base, pitch, mats, wall)
+
     def build_roofs(self):
         bp, P = self.bp, self.P
+        self._extend_into()
         cells = set()
         for r, *_ in self.roofs:
             for x in range(r[0], r[2] + 1):
                 for z in range(r[1], r[3] + 1): cells.add((x, z))
         Hm = {c: self.height(*c) for c in cells}
+        OH = {}
+        def other(x, z):
+            if (x, z) not in OH: OH[(x, z)] = self._other_height(x, z)
+            return OH[(x, z)]
+        def solid(n): return n not in ("keep", "air")
         for (x, z), (h, i) in Hm.items():
+            o = other(x, z)
+            if o is not None and o >= h: continue        # another roof is higher here: it wins
+            here, above = bp.get(x, h, z)[0], bp.get(x, h + 1, z)[0]
+            if solid(here) and solid(above) and not (here.endswith(("_stairs", "_slab")) or here == P["roof_block"]):
+                continue                                  # a wall carries on up through this cell: the wall wins
             r, ridge, base, pitch, mats, wall = self.roofs[i]
             m = lambda k: mats.get(k, P[k])
             verge_cell = (ridge == "x" and x in (r[0], r[2])) or (ridge == "z" and z in (r[1], r[3]))
             higher = []
             for d, (dx, _, dz) in DIRS.items():
-                n = Hm.get((x + dx, z + dz))
-                if n and n[0] > h: higher.append((n[0] - h, d))
+                n = Hm.get((x + dx, z + dz)); nh = n[0] if n else None
+                o2 = other(x + dx, z + dz)
+                if o2 is not None and (nh is None or o2 > nh): nh = o2
+                if nh is not None and nh > h: higher.append((nh - h, d))
             stair, block, slab = m("roof"), m("roof_block"), m("roof_slab")
             if higher:
                 higher.sort(reverse=True)
