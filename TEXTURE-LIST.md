@@ -186,6 +186,7 @@ Look comes from Mateo's Undertow concept art: purple twilight, dark basalt, holl
 | Asset | File | Status |
 |---|---|---|
 | Plot Stone (claim marker: compass star on top, gold claim band on the sides) | `textures/blocks/siege_plot_stone_top.png`, `siege_plot_stone_side.png`, `siege_plot_stone_bottom.png` | **Final style, awaiting your review** (`studio/art/build_hollowcrown.py`) |
+| Map Stone (plot marker on the welcome hall miniature: green = free, yellow = run by a lord, dark = taken) and the hall Waystone | none of our own: they use the vanilla verdant/ochre froglight, polished blackstone and lodestone textures (terrain_texture.json `siege_map_marker_*`, `siege_hall_waystone_*`) | **Vanilla textures, no art needed** |
 
 ## Horses and rail (icons and blocks: final art by `studio/art/build_hc_items.py` and `build_hc_blocks.py`; do not regenerate from `studio/build_horses.py`)
 
@@ -325,6 +326,7 @@ Every mob has a box model in `models/entity/bestiary/<id>.geo.json` and a genera
 | Drowned Wedding Ring (boss key) | `drowned_ring.png` | **Final style, awaiting your review** |
 | Faceless Seal (boss key) | `faceless_seal.png` | **Final style, awaiting your review** |
 | Mire Effigy (boss key) | `mire_effigy.png` | **Final style, awaiting your review** |
+| Boss Summon ×9 (creative-only test item: a sealed writ, seal in the boss's colour) | `textures/items/creative/summon_<boss>.png`, made by `studio/build_creative.py` | Placeholder (only playtesters see it) |
 | Minute Hand (boss relic, sword) | `minute_hand.png` | **Final style, awaiting your review** |
 | Rimefang Bow (boss relic, bow) | `rimefang_bow.png` | **Final style, awaiting your review** |
 | Widow's Veil (boss relic, helmet) | `widows_veil.png` | **Final style, awaiting your review** |

@@ -4,7 +4,7 @@
     "description": {
       "identifier": "siege:old_dark_oak_wood",
       "menu_category": {
-        "category": "none"
+        "category": "construction"
       },
       "states": {
         "siege:axis": [

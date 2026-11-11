@@ -1,0 +1,34 @@
+{
+  "format_version": "1.21.90",
+  "minecraft:block": {
+    "description": {
+      "identifier": "siege:hall_waystone",
+      "menu_category": {
+        "category": "none"
+      }
+    },
+    "components": {
+      "minecraft:display_name": "tile.siege:hall_waystone.name",
+      "minecraft:destructible_by_mining": false,
+      "minecraft:destructible_by_explosion": false,
+      "minecraft:geometry": "minecraft:geometry.full_block",
+      "minecraft:light_emission": 6,
+      "minecraft:map_color": "#8f8f96",
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "siege_hall_waystone_side",
+          "render_method": "opaque"
+        },
+        "up": {
+          "texture": "siege_hall_waystone_top",
+          "render_method": "opaque"
+        },
+        "down": {
+          "texture": "siege_hall_waystone_top",
+          "render_method": "opaque"
+        }
+      },
+      "siege:clickable": {}
+    }
+  }
+}
