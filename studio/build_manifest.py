@@ -266,7 +266,7 @@ if os.path.exists(RP+B+'dragons/siege_dragon_roost_side.png'):
     g("dragon_items","Dragon item icons","Dragons",[item(n,'dragons/siege_dragon_'+k) for n,k in [("Egg","egg"),("Saddle","saddle"),("Horn","horn")]])
 # ---- 3D held weapons for players
 for _k,_n in [("longsword","Longsword"),("warhammer","Warhammer"),("minute_hand","Minute Hand"),("oath_of_oswin","The Kept Oath"),("warlords_brand","The Warlord's Brand"),("rimefang_bow","Rimefang Bow")]:
-    _ent("weapon_"+_k,_n,"Player weapons",f'models/entity/weapons/{_k}.geo.json',[(_n,f'textures/entity/siege/weapons/{_k}.png')],"How it looks in your hand. The inventory icon stays flat.")
+    _ent("weapon_"+_k,_n,"Player weapons",f'models/entity/weapons/{_k}.geo.json',[(_n,f'textures/entity/siege/weapons/{_k}.png')],"3D model for review only. In game the weapon is held like a vanilla sword, showing its flat icon.")
 _ent("u_boat","Latticewood Boat","The Hollow",'models/entity/hollowfolk/lattice_boat.geo.json',[("Boat",'textures/entity/hollowfolk/lattice_boat.png')])
 _ent("u_heart","Heart of the Hollow, resting","Crown",'models/entity/resting_heart.geo.json',[("Resting",'textures/entity/siege_resting_heart.png')])
 for k,n in [("choir_conductor","The Conductor"),("choir_singer","Singer"),("hollow_regent","Hollow Regent")]:
