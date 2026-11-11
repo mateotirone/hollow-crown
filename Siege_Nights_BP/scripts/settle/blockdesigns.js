@@ -5,11 +5,21 @@
 // The Stables barn and the Breeder's yard live with the horses (horses/barndesign.js).
 
 import { Plan } from "../townhall/halls.js";
-import { styleFor, pieces } from "./buildings.js";
+import { styleFor, pieces, drawDesigned } from "./buildings.js";
+import { BARN_DESIGNS } from "./barn_data.js";
 
 const { floor, walls, hollow, roof, hang, stair } = pieces;
 
-export function drawGuardhouse(styleId) {
+// Each region's own design (settle/barn_data.js) when there is one, the plain shared design when not
+function designed(key, styleId, plain) {
+  const style = styleFor(styleId), d = BARN_DESIGNS[style.id]?.[key];
+  return d ? drawDesigned(new Plan(style), d, `bn:${style.id}:${key}`) : plain(styleId);
+}
+
+export const drawGuardhouse = (styleId) => designed("barracks", styleId, plainGuardhouse);
+export const drawArmoury = (styleId) => designed("quartermaster", styleId, plainArmoury);
+
+export function plainGuardhouse(styleId) {
   const p = new Plan(styleFor(styleId));
   const x0 = -4, x1 = 4, z0 = 1, z1 = 9, H = 4;
   floor(p, x0, x1, z0, z1);
@@ -27,7 +37,7 @@ export function drawGuardhouse(styleId) {
   return p;
 }
 
-export function drawArmoury(styleId) {
+export function plainArmoury(styleId) {
   const p = new Plan(styleFor(styleId));
   const x0 = -3, x1 = 3, z0 = 1, z1 = 7, H = 3;
   floor(p, x0, x1, z0, z1);
