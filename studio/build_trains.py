@@ -88,7 +88,8 @@ for kind, dirn, (a, b), up in SHAPES:
         cubes += half_segment(a) + half_segment(b)
     geos.append({"description": {"identifier": f"geometry.siege_track_{kind}_{dirn}", "texture_width": 16, "texture_height": 16},
                  "bones": [{"name": "track", "pivot": [0, 0, 0], "cubes": cubes}]})
-write(RP + "models/blocks/track.geo.json", {"format_version": "1.12.0", "minecraft:geometry": geos})
+with open(RP + "models/blocks/track.geo.json", "w") as f:  # one line per shape: 20 shapes of many small cubes
+    f.write('{"format_version": "1.12.0", "minecraft:geometry": [\n' + ",\n".join(json.dumps(g, separators=(",", ":")) for g in geos) + "\n]}\n")
 
 perms = []
 for kind, dirn, _, _ in SHAPES:
