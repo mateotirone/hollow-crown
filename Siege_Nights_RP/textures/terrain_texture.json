@@ -944,6 +944,12 @@
     },
     "siege_veilmoss_strands": {
       "textures": "textures/blocks/siege_veilmoss_strands"
+    },
+    "siege_track_rail": {
+      "textures": "textures/blocks/trains/track_rail"
+    },
+    "siege_track_sleeper": {
+      "textures": "textures/blocks/trains/track_sleeper"
     }
   }
 }

@@ -317,6 +317,18 @@
   "siege_guard_blackfen_boots": {
    "textures": "textures/items/siege_guard_blackfen_boots"
   },
+  "siege_train_engine": {
+   "textures": "textures/items/trains/train_engine"
+  },
+  "siege_train_coach": {
+   "textures": "textures/items/trains/train_coach"
+  },
+  "siege_train_bogie": {
+   "textures": "textures/items/trains/train_bogie"
+  },
+  "siege_train_boiler": {
+   "textures": "textures/items/trains/train_boiler"
+  },
   "siege_guard_vale_diamond_helmet": {
    "textures": "textures/items/siege_guard_vale_diamond_helmet"
   },

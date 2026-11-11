@@ -302,5 +302,8 @@
   },
   "siege:veilmoss_strands": {
     "sound": "fungus"
+  },
+  "siege:track": {
+    "sound": "metal"
   }
 }
