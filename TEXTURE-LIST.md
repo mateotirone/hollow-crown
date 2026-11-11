@@ -485,3 +485,10 @@ Made by `studio/art/build_armor3d.py`, following `studio/build_varmor.py`: every
 | Regional diamond x5 (adds knee guards and a second shoulder plate) and netherite x5 (also a banner-coloured cape) | `textures/models/siege_armor/guard_<region>_<diamond/netherite>_<piece>.png` | **awaiting your review** |
 | Worn relics: Crownless Mantle (long cloak, high collar, shoulder drapes), Widow's Veil (drapes down the back and sides) | `textures/models/siege_armor/relic_crownless_mantle_chestplate.png`, `relic_widows_veil_helmet.png` | **awaiting your review** |
 Choirsteel's 3D set is `studio/art/build_choirsteel_3d.py` (PR #83). The guard-only armour line was already 3D.
+## Depth pass from the Studio review (2026-11-11, Mateo)
+| What | Files | Made by | Status |
+|---|---|---|---|
+| Veinstone x4 ("really flat"): columnar blocks, lit edges, deep joints, chips, a little rust, recessed glowing veins; same average brightness on every variant | `textures/blocks/siege_veinstone.png`, `_1..3.png` | `studio/art/build_veinstone.py` (sheet `art/veinstone.png`, before/after) | **awaiting your review** |
+| Keep Banner ("needs to be taller"): nearly two blocks, swallowtail cloth, 16 colours at 16x32, pole 16x32 | `textures/blocks/siege_banner_<colour>.png`, `siege_banner_pole.png`, `models/blocks/keep_banner.geo.json` | `studio/art/build_keep_banner.py` | **awaiting your review**, untested in game |
+| Hollow Crown worn: new 57-part model and 64x64 texture after the reference | `models/entity/hollow_crown.geo.json`, `textures/models/armor/siege_hollow_crown.png` | `studio/art/build_crown3d.py` | **awaiting your review**, untested in game. The crowns the Morvane mobs wear are part of their own skins and are not changed |
+
