@@ -46,3 +46,44 @@ Needs Mojang's textures (not in this repo) and three.js 0.170.0:
     python3 render/catalogue_page.py OUT catalogue.html
 
 One picture per design per style plus catalogue.json (size, floors, blocks, map spot). Add every new design to DESIGNS in build_catalogue.py.
+
+## Generated towns and villages (`towngen.py`)
+
+Towns that fit the ground instead of a fixed layout. Given the circle a town owns, the generator
+reads the real heights (from `terrain_slice.py`), lays the paths first, then drops buildings,
+fields and windmills around them:
+
+1. **Square** on the flattest ground near the middle (or where the map already put it), lumpy
+   rather than round.
+2. **Streets**: the map's roads become main streets (5 wide) running in to the square; lanes
+   (3 wide) branch off and sometimes loop back into another street. Every route comes from a
+   slope-aware path search, so streets wind along the contours. Over water a street becomes a
+   raised stone deck on piers.
+3. **Sunken paths**: the walking surface is a bottom slab where the ground's top block would be,
+   so every building (on a full block) and every verge is half a block up. Path heights change
+   at most half a block per block walked (slab, block, slab...), so nobody jumps. Every paving
+   block has a slab (cobble, mossy cobble, stone brick, andesite, tuff brick, mud brick).
+4. **Buildings** by size: tall town houses and civic buildings round the square, cottages
+   further out, barns at the edge. Each turns its door to the street; a walkway runs from the
+   door step (half a block under the floor) to the path, with a stair only where it must climb
+   a whole block. The floor height balances digging in against building up; the low side gets a
+   stone foundation as deep as the slope needs and the ground is eased back round it.
+5. **Fields** fill the land between the paths in the outer ring: 9-wide strips (water channel
+   down the middle, every crop within 4 blocks), each levelled into its own terrace, hedged where
+   it meets a street. Wheat, carrots, potatoes, beetroot, some fallow.
+6. **Windmills** on the high ground among the fields with a footpath to the nearest street;
+   stalls, a well or market cross and lamps on the square; lamps and trees along the streets.
+
+`towngen_build.py` has the buildings: cottages (front-gabled with optional jetty, side-gabled,
+L-shaped with a forward wing, hipped), barns, windmills, a well and a market cross, and the
+roof palettes (slate, dark oak, spruce, red mangrove, brick, and Mateo's waxed copper gradient:
+oxidized green at the ridge through weathered and exposed to bright copper at the eaves).
+
+    python3 terrain_slice.py MAP_DIR x0 z0 size slice.npz
+    python3 towngen.py "Alder Combe" slice.npz MAP_DIR/lines.json OUT --render \
+        --textures bedrock-samples/resource_pack/textures/blocks --three node_modules/three
+
+Sites live in `SITES` (or pass `x,z,radius,town|village`). Outputs: `<site>-plan.json` (stamps
+with rotation, same convention as `town.py`), `<site>-groundwork.json` (every non-building block
+the town changes, world coordinates; apply before the stamps), `stamps/*.json`, a plan picture
+and a preview scene.

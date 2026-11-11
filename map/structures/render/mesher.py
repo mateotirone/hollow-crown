@@ -75,6 +75,8 @@ MAT = {"stone_brick": "stonebrick", "stone_bricks": "stonebrick", "mossy_stone_b
        "dark_prismarine": "prismarine_dark", "prismarine": "prismarine_rough", "gold_block": "gold_block", "snow_layer": "snow", "moss_block": "moss_block", "polished_blackstone_brick": "polished_blackstone_bricks",
        "blast_furnace": "blast_furnace_side", "cobbled_deepslate_wall": "deepslate/cobbled_deepslate"}
 for w, t in WOODS.items(): MAT[w] = "planks_" + t; MAT[w + "_planks"] = "planks_" + t
+for _c in ("", "exposed_", "weathered_", "oxidized_"):          # copper roofs (waxed looks the same)
+    MAT[_c + "cut_copper"] = MAT["waxed_" + _c + "cut_copper"] = _c + "cut_copper"
 
 def base_material(n):
     for suf in ("_stairs", "_slab", "_wall", "_fence"):
@@ -95,7 +97,8 @@ def cube_tex(n, p):
         return {"top": f"stripped_{w}_log_top", "side": f"stripped_{w}_log"}
     if n.endswith("_log") or n.endswith("_wood"):
         t = WOODS[w]; return {"top": f"log_{t}_top", "side": f"log_{t}" if not n.endswith("_wood") else f"log_{t}"}
-    simple = {"grass_block": {"top": "grass_top#grass", "bottom": "dirt", "side": "grass_side_carried"},
+    simple = {"pumpkin": {"top": "pumpkin_top", "side": "pumpkin_side"},
+              "grass_block": {"top": "grass_top#grass", "bottom": "dirt", "side": "grass_side_carried"},
               "podzol": {"top": "dirt_podzol_top", "bottom": "dirt", "side": "dirt_podzol_side"},
               "ochre_froglight": {"top": "ochre_froglight_top", "bottom": "ochre_froglight_top", "side": "ochre_froglight_side"},
               "basalt": {"top": "basalt_top", "bottom": "basalt_top", "side": "basalt_side"},
@@ -142,7 +145,7 @@ PLANTS = {"poppy": "flower_rose", "dandelion": "flower_dandelion", "cornflower":
           "azure_bluet": "flower_houstonia", "allium": "flower_allium", "red_tulip": "flower_tulip_red", "white_tulip": "flower_tulip_white",
           "pink_tulip": "flower_tulip_pink", "orange_tulip": "flower_tulip_orange", "lily_of_the_valley": "flower_lily_of_the_valley",
           "short_grass": "tallgrass#grass", "fern": "fern#grass", "sweet_berry_bush": "sweet_berry_bush_stage3",
-          "wheat": "wheat_stage_7", "carrots": "carrots_stage_3", "potatoes": "potatoes_stage_3"}
+          "wheat": "wheat_stage_7", "carrots": "carrots_stage_3", "potatoes": "potatoes_stage_3", "beetroot": "beetroots_stage_3"}
 
 FACES = {  # name: normal, 4 corners as functions of box
     "up": (0, 1, 0), "down": (0, -1, 0), "south": (0, 0, 1), "north": (0, 0, -1), "east": (1, 0, 0), "west": (-1, 0, 0)}
