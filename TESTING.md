@@ -447,6 +447,18 @@ In the real game the first claimant comes 5 days after Morvane falls, then one e
 - Kill it: chat tells everyone, you get a "Seal of <its name>", and the next `siege:pretender_rise` gives a different body, claim and name.
 - Leave one alive for 5 in-game days: a message says the seep is everywhere, and Seeps open more often.
 
+## After Morvane: the Five Chairs and the Homecomings (scripts/after/)
+
+Nothing here happens until Morvane has fallen (`/scriptevent siege:bestiary_summon morvane` and win, or test the pieces with the commands; they work any time in creative).
+
+- `/scriptevent siege:chairs_envoy salt` puts an envoy of House Vesk beside you (also `bell`, `lamp`, `root`, `tide`). Click them: they ask for your backing. Back them, ask about the truce table, open the board, or send them away. Each house should sound different, and you should not hear the same pitch twice running.
+- `/scriptevent siege:chairs` shows the five standings and who holds the seat. `/scriptevent siege:chairs_stand lamp 10` moves one; the seat changes hands and everyone is told. If a Regent rules below (`hc:regent_now`), their title and prices change to the new house's temper.
+- Back the house that holds the seat, then talk to the Regent: it should say your house has its ear, and Choir ore mines with no alarm.
+- After Morvane, a Pretender's announcement names its house, and its name tag shows it. Kill it: its house loses ground and the house you back gains.
+- On a third night after dark one envoy comes to one player in the overworld; at dawn they leave. The keep menu has "The Five Chairs" board.
+- `/scriptevent siege:homecoming_now` puts a stranger beside you. Click them: who they were, how they went down, who they look for, what they want. Bring it and their story ends one of four ways. Use a number (`siege:homecoming_now 42`) to get the same stranger again. If they are a copy, ring a bell near them: they should turn and walk away.
+- `/scriptevent siege:homecoming` shows who is here and when the next comes.
+
 ### Village happenings (mining villages)
 
 Walk into a mining village in the Hollow: at most once every 8 minutes something is going on, and it should never be the same thing, or the same kind of thing, twice in a row. `/scriptevent hc:folk_happen` while standing in a village forces the next one. Check: the rich seam adds 6 ore to that Tally; the half price shows in the Tally menu for 5 minutes; the nest spawns three endermites by the mine mouth; an errand names a place, and walking to that place pays 4 raw Choir Ore once. Before Morvane falls only the three quiet, frightened ones and the errands appear.

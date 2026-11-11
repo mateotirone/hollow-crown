@@ -330,7 +330,7 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 
 | Vanilla sound | What it means here | Made of | Places | Used by |
 |---|---|---|---|---|
-| `block.bell.hit` | Any bell | `block.bell.hit` + `block.bell.hit` pitch 0.5 vol 0.4 after 0.05 s + `block.bell.hit` pitch 1.03 vol 0.22 after 0.15 s | 39 | bestiary (15), undertow (14), lore (4), townhall (4), crown (2) |
+| `block.bell.hit` | Any bell | `block.bell.hit` + `block.bell.hit` pitch 0.5 vol 0.4 after 0.05 s + `block.bell.hit` pitch 1.03 vol 0.22 after 0.15 s | 44 | bestiary (15), undertow (14), after (5), lore (4), townhall (4), crown (2) |
 | `random.levelup` | Done, bought, learned | `random.levelup` pitch 0.8 vol 0.5 + `note.harp` pitch 0.6 vol 0.35 after 0.1 s | 23 | horses (6), siege (5), townhall (4), dragons (2), lore (2), crown, reach, rivals, settle |
 | `raid.horn` | A horn | `raid.horn` pitch 0.85 + `raid.horn` pitch 0.64 vol 0.4 after 0.25 s | 11 | bestiary (5), townhall (3), crown, dragons, rivals |
 | `mob.endermen.portal` | A step between places | `mob.endermen.portal` pitch 0.85 vol 0.8 + `random.orb` pitch 0.4 vol 0.15 after 0.1 s | 11 | bestiary (6), townhall (2), crown, horses, undertow |
