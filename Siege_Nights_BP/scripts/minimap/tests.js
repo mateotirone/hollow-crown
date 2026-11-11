@@ -16,8 +16,9 @@ addTests("minimap", {
       const s = hudString({ x, z, yaw });
       const r = readHud(s);
       const tx = Math.floor((x - ORIGIN) / TILE), tz = Math.floor((z - ORIGIN) / TILE);
-      assertEqual(r.tile, String(tx).padStart(2, "0") + String(tz).padStart(2, "0"), `tile at ${x},${z}`);
-      assertEqual(r.dir, String(arrowDir(yaw)), `dir at ${x},${z}`);
+      assertEqual(r.tile, "x" + String(tx).padStart(2, "0") + "z" + String(tz).padStart(2, "0"), `tile at ${x},${z}`);
+      assertEqual(r.dir, "qrstuvwy"[arrowDir(yaw)], `dir at ${x},${z}`);
+      assert(!/^[0-9.]+$/.test(r.dir) && !/^[0-9.]+$/.test(r.tile), "no piece the HUD cuts out may look like a number");
       assert("abcdefghijklmnop".includes(r.spot) && r.spot.length === 1, `spot at ${x},${z}: ${r.spot}`);
       assertEqual(r.label, cleanLabel(placeName(x, z)), `label at ${x},${z}`);
     }
@@ -30,10 +31,10 @@ addTests("minimap", {
     assertEqual(readHud(hudString({ x: x0 + 63, z: z0 + 63, yaw: 0 })).spot, "p");
   },
   "off the map, other dimensions and hidden": () => {
-    assertEqual(readHud(hudString({ x: 5000, z: 0, yaw: 0 })).tile, "none");
+    assertEqual(readHud(hudString({ x: 5000, z: 0, yaw: 0 })).tile, "none__");
     const other = readHud(hudString({ x: 0, z: 0, yaw: 0, charted: false }));
-    assertEqual([other.tile, other.label], ["none", "Uncharted"]);
-    assertEqual(readHud(hudString({ x: 0, z: 0, yaw: 0, off: true })).tile, "off_");
+    assertEqual([other.tile, other.label], ["none__", "Uncharted"]);
+    assertEqual(readHud(hudString({ x: 0, z: 0, yaw: 0, off: true })).tile, "off___");
   },
   "settlements are named, and the land between by region": () => {
     assertEqual(placeName(-150, -150), "Kingsrest");
