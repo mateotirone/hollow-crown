@@ -49,7 +49,9 @@ def is_stairs(n): return n.endswith("_stairs")
 def is_slab(n): return n.endswith("_slab")
 NONSOLID = ("air", "keep", "wheat", "carrots", "potatoes", "beetroot", "sweet_berry_bush", "lantern", "flower_pot", "torch", "short_grass", "tall_grass", "poppy", "dandelion",
             "cornflower", "oxeye_daisy", "azure_bluet", "allium", "red_tulip", "white_tulip", "orange_tulip", "pink_tulip",
-            "water", "carpet", "rail", "ladder", "lily_of_the_valley", "fern", "large_fern", "wheat", "sweet_berry_bush")
+            "water", "carpet", "rail", "ladder", "lily_of_the_valley", "fern", "large_fern", "wheat", "sweet_berry_bush",
+            "vine", "leaf_litter", "pale_hanging_moss", "hanging_roots", "bush", "firefly_bush", "mangrove_roots", "snow_layer",
+            "glow_lichen", "moss_carpet", "pale_moss_carpet", "deadbush", "short_dry_grass", "tall_dry_grass")
 
 def solid_full(name, p):
     """True for blocks that fill their whole cell (used for connections and render culling)."""
