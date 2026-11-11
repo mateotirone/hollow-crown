@@ -2,12 +2,12 @@
 // nobody has to type a builder command before the first player can arrive, choose a plot and find Sister Wren.
 //
 // How it knows it is the Hollow Crown map: map/genworld.py leaves a gold block in the middle of the Kingsrest
-// square (the world spawn), and one on each of the twelve plot markers and each town square. A world without
-// that gold block at Kingsrest (a flat test world) is left alone.
+// square (the world spawn), and one on each of the twelve plot markers and each town square. Town builds cover
+// the town ones, so it looks at the first plot's. A world without that gold block (a flat test world) is left alone.
 //
 // What it does, a few places at a time, each kept loaded with a ticking area only while it is worked on:
-//   detect       find the Kingsrest gold block; it becomes the "start without a home" arrival spot, and time
-//                starts moving (the map file is saved with the daylight cycle off)
+//   detect       find the first plot's gold block (Harrowford); time starts moving (the file is saved with it off)
+//   kingsrest    the Kingsrest square (its gold block, or the ground there) becomes the "start without a home" spot
 //   hall         build the welcome hall in the sky over Gull Bay (spread over ticks)
 //   plot:<name>  a Plot Stone on each plot's gold block (or on the ground at the planned spot)
 //   millbrook    Sister Wren's porch on the Millbrook square, with Wren standing in it (millbrook.js)
@@ -27,7 +27,19 @@ import { hallBuilt, raiseHall, setKingsrestArrival } from "../plots/welcome.js";
 import { buildMillbrook, MILLBROOK } from "./millbrook.js";
 
 // state: "unchecked" (not looked yet) | "map" (the Hollow Crown map: set it up) | "plain" (some other world)
-const store = moduleStore("siege:opening", () => ({ state: "unchecked", done: [], misses: 0 }));
+const store = moduleStore("siege:opening", () => ({ state: "unchecked", done: [], misses: 0 }), {
+  version: 2,
+  // Version 1 looked for the Kingsrest gold block, which the town builds now cover, so it wrongly decided the real
+  // map was some other world. Look again, the new way.
+  upgrade(data, from) {
+    if (from < 2 && data.state === "plain") {
+      data.state = "unchecked";
+      data.misses = 0;
+      data.done = (data.done ?? []).filter((id) => id !== "detect");
+    }
+    return data;
+  },
+});
 export const setupState = () => store.data.state;
 
 const MARKER = "minecraft:gold_block";
@@ -68,20 +80,35 @@ function takeMarker(dim, x, z) {
   return top.location.y - 1;
 }
 
+function hasMarker(dim, x, z) {
+  let top = topOf(dim, x, z);
+  for (let i = 0; top && i < 6 && top.typeId !== MARKER && (SOFT.test(top.typeId) || /snow/.test(top.typeId)); i++) top = top.below();
+  return top?.typeId === MARKER;
+}
+
 export const TASKS = [
   {
-    id: "detect", x: KINGSREST.x, z: KINGSREST.z, radius: 0,
+    // The first plot's marker: plots are left untouched until this setup (town builds may cover the Kingsrest one)
+    id: "detect", x: PLOT_PLAN[0].x, z: PLOT_PLAN[0].z, radius: 0,
     run(dim, finish) {
-      const floor = takeMarker(dim, KINGSREST.x, KINGSREST.z);
-      if (floor === undefined) {
+      if (!hasMarker(dim, PLOT_PLAN[0].x, PLOT_PLAN[0].z)) {
         // Looked at, and it isn't the Hollow Crown map (or a builder already set this world up by hand)
         if (store.data.state === "unchecked") store.data.state = "plain";
       } else {
         store.data.state = "map";
-        setKingsrestArrival({ x: KINGSREST.x, y: floor + 1, z: KINGSREST.z });
         // The map is saved with time stopped (handy for walking it in Creative); the story needs its nights
         command(dim, "gamerule dodaylightcycle true");
       }
+      finish();
+    },
+  },
+  {
+    id: "kingsrest", x: KINGSREST.x, z: KINGSREST.z, radius: 0,
+    run(dim, finish) {
+      let floor = takeMarker(dim, KINGSREST.x, KINGSREST.z);
+      if (floor === undefined) floor = groundY(dim, KINGSREST.x, KINGSREST.z);
+      if (floor === undefined) return;
+      setKingsrestArrival({ x: KINGSREST.x, y: floor + 1, z: KINGSREST.z });
       finish();
     },
   },
@@ -232,7 +259,7 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
 
 addTests("opening", {
   "setup covers the Kingsrest check, the hall, every plot and Millbrook, once each": () => {
-    assertEqual(TASKS.length, PLOT_PLAN.length + 3);
+    assertEqual(TASKS.length, PLOT_PLAN.length + 4);
     assertEqual(new Set(TASKS.map((t) => t.id)).size, TASKS.length);
     assertEqual(TASKS[0].id, "detect");
     for (const t of TASKS) assert(t.radius >= 0 && t.radius <= 4, `${t.id}: a ticking area holds 0 to 4 chunks`);
