@@ -27,6 +27,7 @@ Where to add, all one block proud of the face unless said otherwise:
 | Corbels / brackets | under jetties, balconies, oriels, bay windows, turrets, eave overhangs of 2 | upside-down stairs, tall side to the wall |
 | Window caps and sills | every window (stage 5) | |
 | Beam ends | proud-frame timber builds at the floor lines | log ends (axis out of the wall) between posts, every other block or under each post |
+| Round angles | any inside corner that should read as a curve: opening tops, under jetties and eaves, coved ceilings | trapdoor, stair, trapdoor (`reference/shapes.md`, "Round angle") |
 | Ledges under gables | gable bottom on stone buildings | a row of top slabs |
 
 Half-block rule: use **slabs** where you want a thin line (half a block of depth, a thin cap), **stairs**

@@ -9,6 +9,34 @@ bottom), `r` stair right way up, `u` stair upside down, `T` trapdoor (`Tt` close
 `To` open), `F` fence, `W` wall block. Arrows after a stair show its tall side: `u<` = upside-down stair
 with the tall side to the west.
 
+## Round angle: trapdoor, stair, trapdoor
+
+Mateo, 2026-11-11: "trapdoor stair trapdoor ... not even archways but for a round angle". This is the
+general way to round **any 90-degree inside corner** where two surfaces meet, so it reads as a curve
+instead of a sharp step:
+
+```
+section through the corner (wall on the left, ceiling/overhang on top):
+
+#  #  #
+#  u  Tt        upside-down stair in the corner, closed trapdoor (top half) along the top surface
+#  To .         open trapdoor standing against the side surface
+#  .  .
+```
+
+The trapdoor on each side is thin, the stair fills the corner, so the eye follows one smooth curve from
+one surface to the other. Use it:
+
+- at the top corners of doorways, windows and arches (the archway below),
+- where an overhang meets the wall: under jetties, eaves, balconies, the underside of a canopy,
+- where a ceiling meets the walls inside halls and custom interiors (a coved ceiling),
+- at the foot of a wall meeting the ground or a plinth (upside down: right-way stair with trapdoors
+  open against the wall and closed in the bottom half on the ground),
+- round the inside corners of dome drums, tower bases, buttress steps and roof valleys seen from below.
+
+Turn it to face the corner it rounds; the stair's tall side always points into the corner. Trapdoors in
+the trim wood, or a colour-matched trapdoor, on timber and stone alike.
+
 ## Arches
 
 **3-wide round arch** (doorways, arcades, alleys). Opening 3 wide; the top row has stairs in the corners.
@@ -41,7 +69,7 @@ second pair of stairs one row down in the outer cells.
 **7-wide arch**: top row `u< St . . . St u>`, second row `u< . . . . . u>`. Build any width as stair at the jambs, slabs stepping inward, centre open, one row
 lower each step out on tall openings.
 
-**Trapdoor, stair, trapdoor archway** (Mateo, 2026-11-11: "trapdoor stair trapdoor for archways"). The
+**Trapdoor, stair, trapdoor archway**: the round angle (below) used at the top corners of an opening. The
 default archway. Each top corner of the opening turns the curve with three pieces: an open trapdoor
 standing against the jamb under the corner, an upside-down stair in the corner, and a closed top
 trapdoor on the ceiling next to it. The trapdoors are thin, so the curve runs smoothly from the jamb,
