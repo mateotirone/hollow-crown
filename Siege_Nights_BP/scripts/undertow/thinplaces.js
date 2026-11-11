@@ -29,16 +29,17 @@ import { SITE_FEATURES } from "../lore/data/world.js";
 import { placeCache } from "../lore/caches.js";
 import { markPlace } from "../lore/ledger.js";
 import { hash, fbm } from "./noise.js";
-import { load, save, say } from "./data.js";
+import { load, save, say, runCmd, FACING } from "./data.js";
 import { getSites, recordSite } from "./source.js";
 import { SEAM, CRACK_HEIGHT } from "./rift.js";
 
 const OVERWORLD = "minecraft:overworld";
 const K_BUILT = "hc:thin_built"; // { siteId: true }
-const BUILD_NEAR = 40;
+const BUILD_NEAR = 72;
 const PER_STEP = 48; // blocks placed per runJob step
 
-export const THIN_PLACES = WARDS.filter((w) => w.thin && w.site).map((w) => ({ id: w.site, name: w.name, x: w.x, z: w.z, r: w.r }));
+// face / off come from the ward (picked against the generated map: downhill, off the paths, back from cliff edges).
+export const THIN_PLACES = WARDS.filter((w) => w.thin && w.site).map((w) => ({ id: w.site, name: w.name, x: w.x + (w.off?.[0] ?? 0), z: w.z + (w.off?.[1] ?? 0), r: w.r, facing: w.face ?? "south" }));
 
 // Which Field Note lies in each camp. Notes I to VI each state one feature; VII is Fennick's last report.
 export const CAMP_TOME = {
@@ -106,9 +107,21 @@ export function hillHeight(id, u, v) {
 // First air layer of the way in at v (a step of one block per block north, down to the chamber floor).
 export const floorAt = (v) => Math.max(1 - SHAPE.depth, Math.min(1, 1 - (SHAPE.tunnel.stepFrom - v)));
 
-// Pure: every block for one site, given ground height G (the top solid block at the centre).
-// Returns { ops: [{ x, y, z, block, states? }], seam: { x, y, z, facing }, tome: { x, y, z, id }, mouth: { x, y, z } }.
-export function planThinPlace(id, cx, cz, G) {
+// Local (u along the mouth's right, v out of the mouth) to world offsets, for a mouth facing `facing`.
+export function toWorld(u, v, facing = "south") {
+  const [ox, oz] = FACING[facing] ?? FACING.south;
+  return [u * oz + v * ox, -u * ox + v * oz];
+}
+
+// Pure: every block for one site, given ground height G (the top solid block at the build centre).
+// opts.facing: which way the mouth opens. opts.ground(dx, dz): the real ground's top block at that world offset,
+// relative to G (flat 0 when left out), so the hill sits on slopes and the way in meets the real ground.
+// Returns { ops: [{ x, y, z, block, states? }], seam: { x, y, z, facing }, tome: { x, y, z, id }, mouth, camp }.
+export function planThinPlace(id, cx, cz, G, opts = {}) {
+  const facing = opts.facing ?? "south";
+  const groundW = opts.ground ?? (() => 0);
+  const gAt = new Map();
+  const ground = (u, v) => { const k = `${u},${v}`; if (!gAt.has(k)) gAt.set(k, Math.round(groundW(...toWorld(u, v, facing)) ?? 0)); return gAt.get(k); };
   const f = SITE_FEATURES[id];
   const look = LOOK[id];
   if (!f || !look || !HILL[id]) throw new Error(`planThinPlace: unknown site ${id}`);
@@ -129,8 +142,10 @@ export function planThinPlace(id, cx, cz, G) {
     for (let v = H.cv - H.rzN - 6; v <= H.cv + H.rzS + 6; v++) {
       const h = hillHeight(id, u, v);
       if (h < 1) continue;
+      const g = ground(u, v);
+      if (h <= g) continue; // the real slope is already higher here
       heightOf.set(`${u},${v}`, h);
-      for (let y = 1; y <= h; y++) put(u, y, v, y === h ? look.top : raw(u, y, v));
+      for (let y = Math.min(g + 1, 1); y <= h; y++) put(u, y, v, y === h ? look.top : raw(u, y, v));
     }
   }
   const hillAt = (u, v) => heightOf.get(`${u},${v}`) ?? 0;
@@ -139,6 +154,17 @@ export function planThinPlace(id, cx, cz, G) {
   const carved = new Set();
   const carve = (u, y, v) => { put(u, y, v, "air"); carved.add(key(u, y, v)); };
   for (let v = T.v0; v <= T.v1; v++) for (let u = -T.u; u <= T.u; u++) for (let y = floorAt(v); y < floorAt(v) + T.h; y++) carve(u, y, v);
+  // the way in reaches the real ground: an open trench where the ground outside is higher, a footing where lower
+  for (let v = T.v1 + 1; v <= T.v1 + 24; v++) {
+    let high = false;
+    for (let u = -T.u; u <= T.u; u++) { const g = ground(u, v); if (g >= 1) { high = true; for (let y = 1; y <= g + 1; y++) carve(u, y, v); } }
+    if (!high) break;
+  }
+  for (let v = T.v0; v <= T.v1 + 24; v++) for (let u = -T.u - 1; u <= T.u + 1; u++) {
+    const fl = v <= T.v1 ? floorAt(v) : 1;
+    if (v > T.v1 && !carved.has(key(0, 1, v))) continue;
+    for (let y = ground(u, v) + 1; y < fl; y++) if (!carved.has(key(u, y, v))) put(u, y, v, raw(u, y, v));
+  }
   const chamberTop = (u, v) => F + C.h - 1 - Math.round(3 * (u / C.u) ** 2) - Math.round(2 * ((v - (C.v0 + C.v1) / 2) / 5) ** 2);
   for (let u = -C.u; u <= C.u; u++) {
     for (let v = C.v0; v <= C.v1; v++) {
@@ -160,7 +186,7 @@ export function planThinPlace(id, cx, cz, G) {
   }
 
   // 4. lining: every block touching the cave (underground, or inside the hill) is set, so the cave is sealed
-  const inRock = (u, y, v) => y <= 0 || y <= hillAt(u, v);
+  const inRock = (u, y, v) => y <= ground(u, v) || y <= hillAt(u, v);
   const lining = new Map();
   for (const k of carved) {
     const [u, y, v] = k.split(",").map(Number);
@@ -194,7 +220,7 @@ export function planThinPlace(id, cx, cz, G) {
     for (let u = -T.u; u <= T.u; u++) for (let v = 0; v <= T.v1; v++) put(u, floorAt(v) - 1, v, "packed_ice");
     for (const u of [-T.u - 1, T.u + 1]) for (let v = 1; v <= 3; v++) if (inRock(u, floorAt(v), v)) put(u, floorAt(v), v, "ice");
     for (let u = -14; u <= 14; u++) {
-      for (let v = 0; v <= T.v1 + 14; v++) if (!at(u, 1, v) && !hillAt(u, v) && hash(u, v, 921) < 0.85) put(u, 1, v, "snow_layer", 2);
+      for (let v = 0; v <= T.v1 + 14; v++) { const g = ground(u, v) + 1; if (!at(u, g, v) && !hillAt(u, v) && !carved.has(key(u, g, v)) && hash(u, v, 921) < 0.85) put(u, g, v, "snow_layer", 2); }
     }
     for (const [k, h] of heightOf) {
       const [u, v] = k.split(",").map(Number);
@@ -231,20 +257,28 @@ export function planThinPlace(id, cx, cz, G) {
 
   // 11. Fennick's camp
   const { u: cu, v: cv } = SHAPE.camp;
-  for (let u = cu - 3; u <= cu + 4; u++) for (let v = cv - 4; v <= cv + 3; v++) for (let y = 1; y <= 3; y++) put(u, y, v, "air");
-  for (let v = cv - 2; v <= cv + 2; v++) { put(cu - 1, 1, v, "white_wool"); put(cu + 1, 1, v, "white_wool"); put(cu, 2, v, "white_wool"); }
-  put(cu, 1, cv - 4, "campfire", 2, { extinguished: true });
-  put(cu + 3, 1, cv - 3, "spruce_fence"); put(cu + 3, 2, cv - 3, "spruce_fence"); put(cu + 3, 3, cv - 3, "lantern", 2);
+  let cg = -99; // the camp stands on a small level pad at its highest corner's height
+  for (let u = cu - 3; u <= cu + 4; u++) for (let v = cv - 4; v <= cv + 3; v++) cg = Math.max(cg, ground(u, v));
+  for (let u = cu - 3; u <= cu + 4; u++) for (let v = cv - 4; v <= cv + 3; v++) {
+    for (let y = ground(u, v) + 1; y <= cg; y++) put(u, y, v, y === cg ? look.top : raw(u, y, v));
+    for (let y = cg + 1; y <= cg + 3; y++) put(u, y, v, "air");
+  }
+  const c1 = cg + 1;
+  for (let v = cv - 2; v <= cv + 2; v++) { put(cu - 1, c1, v, "white_wool"); put(cu + 1, c1, v, "white_wool"); put(cu, c1 + 1, v, "white_wool"); }
+  put(cu, c1, cv - 4, "campfire", 2, { extinguished: true });
+  put(cu + 3, c1, cv - 3, "spruce_fence"); put(cu + 3, c1 + 1, cv - 3, "spruce_fence"); put(cu + 3, c1 + 2, cv - 3, "lantern", 2);
 
+  const W = (u, y, v) => { const [dx, dz] = toWorld(u, v, facing); return { x: cx + dx, y: G + y, z: cz + dz }; };
   const ops = [...cells.values()]
     .sort((a, b) => a.layer - b.layer)
-    .map((c) => ({ x: cx + c.u, y: G + c.y, z: cz + c.v, block: c.block.includes(":") ? c.block : `minecraft:${c.block}`, ...(c.states ? { states: c.states } : {}) }));
+    .map((c) => ({ ...W(c.u, c.y, c.v), block: c.block.includes(":") ? c.block : `minecraft:${c.block}`, ...(c.states ? { states: c.states } : {}) }));
   return {
     ops,
-    seam: { x: cx, y: G + F, z: cz + SHAPE.wallV, facing: "south" },
-    tome: { x: cx + cu, y: G + 1, z: cz + cv, id: CAMP_TOME[id] },
-    mouth: { x: cx, y: G + 1, z: cz + T.v1 },
-    camp: { x: cx + cu, y: G + 1, z: cz + cv - 3 },
+    facing,
+    seam: { ...W(0, F, SHAPE.wallV), facing },
+    tome: { ...W(cu, c1, cv), id: CAMP_TOME[id] },
+    mouth: W(0, 1, T.v1),
+    camp: W(cu, c1, cv - 3),
   };
 }
 
@@ -266,7 +300,7 @@ function groundY(dim, x, z) {
 }
 
 function loaded(dim, site) {
-  for (const [du, dv] of [[-31, -40], [31, -40], [-31, 20], [31, 20], [0, 0]]) {
+  for (const [du, dv] of [[-REACH, -REACH], [REACH, -REACH], [-REACH, REACH], [REACH, REACH], [0, 0]]) {
     try { if (!dim.getBlock({ x: site.x + du, y: 64, z: site.z + dv })) return false; } catch { return false; }
   }
   return true;
@@ -286,16 +320,30 @@ function perm(op) {
 let busy = false;
 const builtMap = () => load(K_BUILT, {});
 
+export const REACH = 46; // how far from the build centre a thin place can reach, any facing
+
 export function buildSite(site, by) {
   if (busy) return { ok: false, why: "another thin place is still being built" };
   const dim = world.getDimension(OVERWORLD);
   if (!loaded(dim, site)) return { ok: false, why: "not loaded yet (stand closer)" };
   const G = groundY(dim, site.x, site.z);
   if (G === undefined) return { ok: false, why: "could not find the ground" };
-  const plan = planThinPlace(site.id, site.x, site.z, G);
   busy = true;
   let failed = 0;
   system.runJob((function* () {
+    // 1. read the real ground around it, a row at a time
+    const heights = new Map();
+    for (let dx = -REACH; dx <= REACH; dx++) {
+      for (let dz = -REACH; dz <= REACH; dz++) {
+        const y = groundY(dim, site.x + dx, site.z + dz);
+        if (y !== undefined) heights.set(dx * 1000 + dz, y - G);
+      }
+      yield;
+    }
+    // 2. plan against it (falls back to the centre's height where a column could not be read)
+    const plan = planThinPlace(site.id, site.x, site.z, G, { facing: site.facing, ground: (dx, dz) => heights.get(dx * 1000 + dz) ?? 0 });
+    yield;
+    // 3. place it
     let n = 0;
     for (const op of plan.ops) {
       try {
@@ -313,18 +361,22 @@ export function buildSite(site, by) {
       const built = builtMap();
       built[site.id] = true;
       save(K_BUILT, built);
-      if (by) say(by, `§d${site.name} built (${plan.ops.length} blocks). Seam at ${plan.seam.x} ${plan.seam.y} ${plan.seam.z}.`);
+      if (by) say(by, `§d${site.name} built (${plan.ops.length} blocks), mouth facing ${plan.facing}. Seam at ${plan.seam.x} ${plan.seam.y} ${plan.seam.z}.`);
     } catch {
       if (by) say(by, `§c${site.name}: part of it was not loaded (${failed} blocks missed). It will try again when someone comes near.`);
     }
     busy = false;
   })());
-  return { ok: true, plan };
+  return { ok: true };
 }
 
-// Every few seconds: build the first unbuilt site someone is standing near.
+// Every few seconds: when someone is near an unbuilt site, hold its ground loaded with a ticking area, then build.
+const AREA = "hc_thin_site";
+let holding; // site id with a ticking area up
 export function thinTick() {
   if (busy) return;
+  const dim = world.getDimension(OVERWORLD);
+  if (holding && builtMap()[holding]) { runCmd(dim, `tickingarea remove ${AREA}`); holding = undefined; }
   const players = world.getAllPlayers().filter((p) => p.dimension.id === OVERWORLD);
   if (!players.length) return;
   const built = builtMap();
@@ -332,7 +384,12 @@ export function thinTick() {
   for (const site of THIN_PLACES) {
     if (built[site.id] || marked[site.id]) continue;
     if (!players.some((p) => Math.hypot(p.location.x - site.x, p.location.z - site.z) < BUILD_NEAR)) continue;
-    buildSite(site);
+    if (holding !== site.id) {
+      runCmd(dim, `tickingarea remove ${AREA}`);
+      runCmd(dim, `tickingarea add ${site.x - REACH} 0 ${site.z - REACH} ${site.x + REACH} 0 ${site.z + REACH} ${AREA} true`);
+      holding = site.id;
+    }
+    buildSite(site); // waits quietly until the area has loaded
     return;
   }
 }
@@ -348,8 +405,9 @@ export function thinCommand(id, player, message) {
   if (!site) return say(player, `§cUse one of: ${THIN_PLACES.map((s) => s.id).join(", ")}`);
   if (id === "hc:thin_tp") {
     const dim = world.getDimension(OVERWORLD);
-    const G = groundY(dim, site.x, site.z + SHAPE.camp.v) ?? 100;
-    player.teleport({ x: site.x + 0.5, y: G + 2, z: site.z + SHAPE.camp.v + 6.5 }, { dimension: dim, facingLocation: { x: site.x, y: G + 4, z: site.z } });
+    const [dx, dz] = toWorld(0, SHAPE.tunnel.v1 + 14, site.facing);
+    const G = groundY(dim, site.x + dx, site.z + dz) ?? 100;
+    player.teleport({ x: site.x + dx + 0.5, y: G + 2, z: site.z + dz + 0.5 }, { dimension: dim, facingLocation: { x: site.x, y: G + 4, z: site.z } });
     return say(player, `§d${site.name}. ${builtMap()[site.id] ? "" : "It builds itself in a moment."}`);
   }
   if (id === "hc:thin_build") {

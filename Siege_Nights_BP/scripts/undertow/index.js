@@ -34,14 +34,14 @@ import { STRUCTURE_IDS, planStructure } from "./structures.js";
 import { POCKETS, planPocket, pocketTick, requestPockets, REVEAL_LOOKS, ROOM_LOOKS } from "./pockets.js";
 import { overworldStage } from "./finale.js";
 import { ItemStack } from "@minecraft/server";
-import { load, save, say, runCmd, upgradeSteps, DATA_VERSION } from "./data.js";
+import { load, save, say, runCmd, upgradeSteps, DATA_VERSION, FACING } from "./data.js";
 import { choirTick, singerSpot, CHOIR } from "./choir.js";
 import { slipSeconds, slipLanding, isSlipping } from "./slips.js";
 import { shouldAlarm, oreOutcome, noteEntry, crownTick, crownVerdict, CLAIM_SECONDS, WARDEN } from "./warden.js";
 import { oreChance } from "./terrain.js";
 import { shouldRise, regentOutcome, REGENT, TEMPERS, JOBS } from "./regent.js";
 import { sfx } from "../core/sfx.js";
-import { thinTick, thinCommand, planThinPlace, hillHeight, floorAt, THIN_PLACES, CAMP_TOME, SHAPE } from "./thinplaces.js";
+import { thinTick, thinCommand, planThinPlace, hillHeight, floorAt, toWorld, THIN_PLACES, CAMP_TOME, SHAPE } from "./thinplaces.js";
 import { SITE_FEATURES } from "../lore/data/world.js";
 import { canOpen, dullLeft, BOSSES_TO_OPEN, FORK_DULL_DAYS } from "./source.js";
 import { CRACK_HEIGHT } from "./rift.js";
@@ -403,14 +403,15 @@ addTests("undertow", {
   },
   "thin places: the seam has room to tear open and the camp holds the Field Note": () => {
     for (const t of THIN_PLACES) {
-      const plan = planThinPlace(t.id, 100, 200, 64);
+      const plan = planThinPlace(t.id, 100, 200, 64, { facing: t.facing, ground: (dx, dz) => Math.round((dx + dz) / 8) });
       const last = new Map();
       for (const o of plan.ops) last.set(`${o.x},${o.y},${o.z}`, o.block);
-      const s = plan.seam;
-      assert(s.facing === "south" && last.get(`${s.x},${s.y},${s.z}`) === "siege:rift_seam", `${t.id} seam`);
+      const s = plan.seam, [fx, fz] = FACING[t.facing];
+      assert(s.facing === t.facing && last.get(`${s.x},${s.y},${s.z}`) === "siege:rift_seam", `${t.id} seam`);
       for (let row = 0; row < CRACK_HEIGHT; row++) {
-        assert(last.get(`${s.x},${s.y + row},${s.z + 1}`) === "minecraft:air", `${t.id}: crack row ${row} opens onto the chamber`);
-        assert(last.get(`${s.x},${s.y + row},${s.z - 4}`) !== "minecraft:air" && last.has(`${s.x},${s.y + row},${s.z - 4}`), `${t.id}: rock behind the crack at row ${row}`);
+        assert(last.get(`${s.x + fx},${s.y + row},${s.z + fz}`) === "minecraft:air", `${t.id}: crack row ${row} opens onto the chamber`);
+        const back = `${s.x - fx * 4},${s.y + row},${s.z - fz * 4}`;
+        assert(last.get(back) !== "minecraft:air" && last.has(back), `${t.id}: rock behind the crack at row ${row}`);
       }
       assert(last.get(`${plan.tome.x},${plan.tome.y},${plan.tome.z}`) === "minecraft:air" && plan.tome.id, `${t.id} tent`);
       assert(plan.ops.length < 30000, `${t.id}: ${plan.ops.length} blocks`);
@@ -437,6 +438,13 @@ addTests("undertow", {
       for (let u = -40; u <= 40; u++) for (let v = -50; v <= 30; v++) { const h = hillHeight(t.id, u, v); if (h > 0) { top = Math.max(top, h); w = Math.max(w, Math.abs(u)); } }
       assert(top <= 26 && top * 1.6 < w * 2, `${t.id}: ${top} tall, ${w * 2} wide`);
     }
+  },
+  "thin places: every facing is a proper turn, and each site faces the way the map picked": () => {
+    for (const f of ["south", "north", "east", "west"]) {
+      const [ax, az] = toWorld(1, 0, f), [bx, bz] = toWorld(0, 1, f);
+      assert(ax * bz - az * bx === 1 && bx === FACING[f][0] && bz === FACING[f][1], f);
+    }
+    assert(THIN_PLACES.every((t) => FACING[t.facing]));
   },
   "the fork: five bosses open it, a dead seam dulls it for days": () => {
     assert(BOSSES_TO_OPEN === 5 && !canOpen(3) && !canOpen(4) && canOpen(5));
