@@ -71,10 +71,10 @@ def guildhall(seed=3):
     return bp.finish()
 
 
-def chapel(seed=5):
+def chapel(seed=5, name="kingsrest_chapel"):
     """Stone chapel: a buttressed nave with lancet windows, a rose window over the door and a
     bellcote on the front gable. 11 x 19 (plus buttresses)."""
-    bp = Blueprint("kingsrest_chapel"); P = dict(P_STONE); B = Building(bp, P, seed)
+    bp = Blueprint(name); P = dict(P_STONE); B = Building(bp, P, seed)
     rect = (0, 0, 10, 18)
     B.foundation(grow(rect, "nsew", 2), 0); B.floor(rect, 0, mat="polished_andesite")
     B.stone_storey(rect, 1, 7)
@@ -135,4 +135,83 @@ def station(seed=9):
     # inside left empty (Mateo, 2026-11-11)
     bp.markers["door"] = (10, 1, 9); bp.markers["stationmaster"] = (10, 1, 2)
     bp.rotations = [0, 90, 180, 270]
+    return bp.finish()
+
+
+def clock_tower(seed=13, name="millbrook_clock_tower"):
+    """Millbrook's clock tower on the square (the Clockwork Reeve's arena is at its foot): a 7 x 7
+    stone shaft, clock faces on all four sides, an open belfry and a slate spire."""
+    bp = Blueprint(name); P = dict(P_STONE); B = Building(bp, P, seed)
+    rect = (0, 0, 6, 6)
+    B.foundation(grow(rect, "nsew"), 0); B.floor(rect, 0)
+    for y0 in (1, 6, 11):
+        B.stone_storey(rect, y0, 5, plinth=(y0 == 1))
+    B.stone_storey(rect, 16, 1, plinth=False)
+    for y in (6, 11, 16):                                   # string courses
+        for x in range(-1, 8):
+            for z in (-1, 7): bp.set(x, y, z, "stone_brick_slab", half="top")
+        for z in range(0, 7):
+            for x in (-1, 7): bp.set(x, y, z, "stone_brick_slab", half="top")
+    B.door(3, 1, 6, "s", canopy=False, lanterns=True, frame="chiseled_stone_bricks")
+    for y in (7, 12):                                        # slit windows
+        B.window(3, y, 6, "s", 1, 2, kind="stone"); B.window(3, y, 0, "n", 1, 2, kind="stone")
+        B.window(6, y, 3, "e", 1, 2, kind="stone"); B.window(0, y, 3, "w", 1, 2, kind="stone")
+    faces = {"s": lambda i, j: (2 + i, 13 + j, 6), "n": lambda i, j: (2 + i, 13 + j, 0), "e": lambda i, j: (6, 13 + j, 2 + i), "w": lambda i, j: (0, 13 + j, 2 + i)}
+    for side, f in faces.items():                            # 3 x 3 clock faces with a dark hub
+        for i in range(3):
+            for j in range(3): bp.set(*f(i, j), "calcite")
+        bp.set(*f(1, 1), "dark_oak_log", axis="z" if side in "ns" else "x")
+        bp.set(*f(1, 2), "polished_blackstone") ; bp.set(*f(2, 1), "polished_blackstone")   # the hands at a quarter past
+    for y in range(17, 20):                                  # open belfry: corner piers, 3-wide arches
+        for x in range(0, 7):
+            for z in range(0, 7):
+                edge = x in (0, 6) or z in (0, 6)
+                corner = (x in (0, 1, 5, 6)) and (z in (0, 1, 5, 6))
+                if edge: bp.set(x, y, z, "stone_bricks" if (corner or y == 19) else "air")
+    for side, (dx, dz) in {"s": (0, 6), "n": (0, 0)}.items():
+        bp.set(2, 18, dz, "stone_brick_stairs", facing="w", half="top"); bp.set(4, 18, dz, "stone_brick_stairs", facing="e", half="top")
+    for x in (0, 6):
+        bp.set(x, 18, 2, "stone_brick_stairs", facing="n", half="top"); bp.set(x, 18, 4, "stone_brick_stairs", facing="s", half="top")
+    B.floor(rect, 16)
+    bp.set(3, 17, 3, "bell")
+    for k, y in enumerate(range(20, 24)):                    # spire: stepped slate pyramid
+        lo, hi = -1 + k, 7 - k
+        for x in range(lo, hi + 1):
+            for z in range(lo, hi + 1):
+                if x in (lo, hi) or z in (lo, hi):
+                    f = "s" if z == lo else "n" if z == hi else "e" if x == lo else "w"
+                    bp.set(x, y, z, P["roof"], facing=f, half="bottom")
+                else: bp.set(x, y, z, P["roof_block"])
+    bp.set(3, 24, 3, P["roof_block"]); bp.set(3, 25, 3, "stone_brick_wall"); bp.set(3, 26, 3, "lightning_rod")
+    for y in range(1, 17): bp.set(3, y, 1, "ladder", facing="s")
+    bp.markers["door"] = (3, 1, 5); bp.markers["arena"] = (3, 0, 12)
+    return bp.finish()
+
+
+def watermill(seed=17, name="millbrook_watermill"):
+    """Watermill: stone ground floor, timber upper floor under slate, and a 7-block paddle wheel
+    on the west side that stands in the brook. The stamp's wet_ok cells must land in water."""
+    bp = Blueprint(name); P = {**VALE}; B = Building(bp, P, seed)
+    rect = (0, 0, 8, 8)
+    B.foundation(grow(rect, "nsew"), 0); B.floor(rect, 0)
+    B.stone_storey(rect, 1, 4)
+    B.door(4, 1, 8, "s", canopy=False, lanterns=True)
+    B.window(4, 2, 0, "n", 1, 2, kind="stone"); B.window(8, 2, 4, "e", 1, 2, kind="stone")
+    B.floor(rect, 5); B.timber_storey(rect, 5, 5, bay=4)
+    B.bay_windows(rect, 5, "nse")
+    B.roof(rect, "z", 10, overhang=1, verge=1); B.build_roofs(); B.gable_walls(rect, "z", 10)
+    B.chimney(9, 2, 1)
+    # the wheel: plane x = -2, centre y 2, z 4, radius 3; axle through the west wall
+    cy, cz = 2, 4
+    for y in range(cy - 3, cy + 4):
+        for z in range(cz - 3, cz + 4):
+            d2 = (y - cy) ** 2 + (z - cz) ** 2
+            if 6 <= d2 <= 10: bp.set(-2, y, z, "spruce_planks")
+            elif (y == cy or z == cz) and d2 < 6: bp.set(-2, y, z, "spruce_fence")
+    for x in (-2, -1, 0): bp.set(x, cy, cz, "dark_oak_log", axis="x")
+    for y in range(-1, 1):
+        for z in (cz - 4, cz + 4): bp.set(-1, y, z, "stone_bricks")        # wheel pit walls
+    bp.wet_ok = [(-2, z) for z in range(cz - 3, cz + 4)]
+    bp.wet_soft = [(-1, z) for z in range(-1, 10)] + [(-2, z) for z in (-1, 0, 8, 9)]   # the bank strip may be wet; the stamp fills under it
+    bp.markers["door"] = (4, 1, 7); bp.markers["miller"] = (4, 1, 4)
     return bp.finish()

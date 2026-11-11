@@ -82,7 +82,7 @@ def stall(seed):
     for x in range(-1, 4):
         for z in range(0, 3): s.set(x, 4, z, f"{colour}_wool" if (x + 1) % 2 == 0 else "white_wool")
     s.set(1, 1, 2, "barrel"); s.set(0, 1, 1, rnd.choice(["hay_block", "barrel", "composter"]), axis="y")
-    s.set(2, 1, 1, rnd.choice(["barrel", "pumpkin", "melon_block"]))
+    s.set(2, 1, 1, rnd.choice(["barrel", "pumpkin", "hay_block"]))
     return s.finish()
 
 def lamp():
