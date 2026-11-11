@@ -29,6 +29,9 @@ import { heightAt, planChunk, isRiver, regionAt, columnAt } from "./terrain.js";
 import { RIVER_NODES, riverSegments, riverDistance } from "./rivers.js";
 import { SITES, roadLines } from "./roads.js";
 import { STRUCTURE_IDS, planStructure } from "./structures.js";
+import { SITE_DESIGNS, TOWER_DESIGNS } from "./sites_data.js";
+import { DROWNED_SPOTS, spotGround } from "./drowned.js";
+import { stampCells, stateTries } from "./stamp.js";
 import { POCKETS, planPocket, pocketTick, requestPockets, REVEAL_LOOKS, ROOM_LOOKS } from "./pockets.js";
 import { overworldStage } from "./finale.js";
 import { ItemStack } from "@minecraft/server";
@@ -39,6 +42,8 @@ import { shouldAlarm, oreOutcome, noteEntry, crownTick, crownVerdict, CLAIM_SECO
 import { oreChance } from "./terrain.js";
 import { shouldRise, regentOutcome, REGENT, TEMPERS, JOBS } from "./regent.js";
 import { sfx } from "../core/sfx.js";
+import "./story.js";
+import "./forge.js";
 
 const IN_TAG = "siege_undertow_in";
 const FOG_ID = "siege:undertow_fog";
@@ -427,6 +432,23 @@ addTests("undertow", {
       const s = SITES.find((x) => x.id === id), ops = planStructure(id);
       assert(s && ops.length > 0, `${id} has no site or no plan`);
       for (const op of ops) for (const c of [op.a, op.b]) assert(Math.hypot(c[0] - s.x, c[2] - s.z) <= s.r + 4, `${id} builds outside its site`);
+    }
+  },
+  "every designed site stays on its site, the Truce Hall keeps its lectern, and the stamp knows every block": () => {
+    for (const [id, d] of Object.entries(SITE_DESIGNS)) {
+      const s = SITES.find((x) => x.id === id);
+      assert(s, `${id} has no site`);
+      for (const [x, , z] of stampCells(d)) assert(Math.hypot(x, z) <= s.r + 4, `${id} builds outside its site`);
+      for (const t of stateTries(d)) assert(JSON.stringify(t[t.length - 1]) === "{}");
+    }
+    const t = SITE_DESIGNS.truce_hall;
+    assert(stampCells(t).some(([x, y, z, i]) => x === 0 && y === 1 && z === 12 && t.palette[i][0] === "minecraft:lectern"), "the tome's lectern moved");
+  },
+  "the drowned towers stand off the water and the roads, each a different design": () => {
+    assert(new Set(DROWNED_SPOTS.map((t) => t.design)).size === DROWNED_SPOTS.length);
+    for (const t of DROWNED_SPOTS) {
+      assert(TOWER_DESIGNS[t.design], `no tower design ${t.design}`);
+      assert(spotGround(t.x, t.z) === t.y, `the tower at ${t.x},${t.z} no longer fits its spot`);
     }
   },
   "village sites are flat": () => {

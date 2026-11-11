@@ -1,5 +1,7 @@
 // Choirsteel gear: what the Hollow's metal does once it is armour, a blade or a pick.
-// The items and recipes are data (studio/bestiary/choirsteel.py). Protection is the same as netherite,
+// The items and recipes are data (studio/bestiary/choirsteel.py): each piece is a netherite piece
+// upgraded at a smithing table with a Choirsteel Upgrade template (found at the Cold Forge in the
+// Hollow, undertow/forge.js) and Tempered Choirsteel. Protection is the same as netherite,
 // because Minecraft stops counting armour there; what puts Choirsteel above it is here.
 //
 //   Helm      you see in the dark
@@ -146,6 +148,7 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
     try { give(p, new ItemStack(ID(piece), 1)); } catch { /* item missing */ }
   }
   try { give(p, new ItemStack("siege:choirsteel_ingot", 32)); give(p, new ItemStack("siege:gloamquill", 8)); } catch { /* item missing */ }
+  try { give(p, new ItemStack("siege:choirsteel_upgrade_template", 2)); give(p, new ItemStack("siege:tempered_choirsteel", 4)); } catch { /* item missing */ }
 });
 
 addTests("bestiary", {

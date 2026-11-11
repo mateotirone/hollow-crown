@@ -51,6 +51,12 @@ export const CATALOG = [
     [m("oak_stairs"), 16], [m("oak_slab"), 32], [m("spruce_stairs"), 16], [m("spruce_slab"), 32], [m("dark_oak_stairs"), 16],
     [m("dark_oak_slab"), 32], [m("birch_stairs"), 16], [m("birch_slab"), 32], [m("sandstone_stairs"), 12], [m("sandstone_slab"), 24],
   ] },
+  { name: "More stone", icon: "textures/blocks/stonebrick", stock: [ // every stone a wall can be built in (WALL_STONES)
+    [m("smooth_stone"), 16], [m("chiseled_stone_bricks"), 12], [m("tuff"), 24], [m("tuff_bricks"), 16],
+    [m("polished_tuff"), 16], [m("cut_sandstone"), 16], [m("chiseled_sandstone"), 12], [m("cut_red_sandstone"), 16], 
+    [m("diorite"), 24], [m("polished_diorite"), 16], [m("polished_granite"), 16], [m("quartz_bricks"), 8], [m("smooth_quartz"), 8],
+    [m("packed_mud"), 16], [m("mossy_cobblestone"), 16], [m("blackstone"), 16], [m("polished_blackstone"), 12], [m("polished_blackstone_bricks"), 12],
+  ] },
   { name: "Roofing", icon: "textures/blocks/deepslate/deepslate_tiles", stock: [
     [m("deepslate_tiles"), 12], [m("deepslate_tile_stairs"), 8], [m("deepslate_tile_slab"), 16], [m("dark_prismarine"), 8],
     [m("dark_prismarine_stairs"), 6], [m("orange_terracotta"), 12], [m("white_terracotta"), 12], [m("moss_block"), 16],

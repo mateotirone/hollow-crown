@@ -87,6 +87,34 @@ const PLANS = {
     m.box(-8, 0, 0, 8, 0, 0, COBBLE); m.box(-8, 1, 0, 8, 1, 0, "minecraft:rail"); // the cart rail toward Cartmeet
     m.lamp(6, -4);
   },
+  // The Cold Forge: an open-sided smithy of veinstone, 9 by 13, with a dead hearth and a tall chimney
+  // whose soul fire can be seen from the Seams. Anvils, a quench trough, racks where armour hung,
+  // and the Coffer at the back where forge.js leaves a Choirsteel Upgrade template.
+  cold_forge: (m, s) => {
+    m.box(-6, 0, -8, 6, 0, 8, STONE); // the floor, a little wider than the hall
+    for (const [x, z] of [[-4, -6], [4, -6], [-4, 0], [4, 0], [-4, 6], [4, 6]]) m.box(x, 1, z, x, 5, z, "minecraft:polished_blackstone_bricks"); // pillars
+    m.box(-4, 6, -6, 4, 6, 6, "minecraft:polished_blackstone_brick_slab"); // the roof
+    for (let x = -4; x <= 4; x++) for (let z = -6; z <= 6; z++) if (hash(s.x + x, s.z + z, 921) < 0.12) m.put(x, 6, z, "minecraft:air"); // holes in it
+    m.box(-4, 1, 6, 4, 3, 6, CRACKED); // the back wall, behind the Coffer
+    // The hearth: a 3 by 3 blackstone forge, cold, and the chimney above it (5 wide at the base, 3 above).
+    m.box(-3, 1, 2, -1, 2, 4, "minecraft:polished_blackstone");
+    m.box(-2, 2, 3, -2, 2, 3, "minecraft:soul_soil"); // where the fire was
+    m.box(-3, 3, 2, -1, 12, 4, "minecraft:polished_blackstone_bricks");
+    m.box(-2, 3, 3, -2, 12, 3, "minecraft:air");
+    m.put(-2, 13, 3, "minecraft:soul_soil"); m.put(-2, 14, 3, "minecraft:soul_fire"); // seen from far off
+    m.put(0, 1, 3, "minecraft:blast_furnace");
+    // Anvils, one whole, two worn, and a grindstone.
+    m.put(2, 1, -2, "minecraft:anvil"); m.put(-2, 1, -3, "minecraft:damaged_anvil"); m.put(3, 1, 3, "minecraft:chipped_anvil");
+    m.put(2, 1, -4, "minecraft:grindstone");
+    // The quench trough: three cauldrons by the west pillars.
+    m.box(-3, 1, -1, -3, 1, 1, "minecraft:cauldron");
+    // Racks where the armour hung: fences along the east side, with chains.
+    for (const z of [-3, -1, 1]) { m.box(4, 1, z, 4, 3, z, "minecraft:polished_blackstone_wall"); m.put(4, 4, z, "minecraft:chain"); }
+    // The Coffer, on a step, against the back wall.
+    m.box(1, 1, 5, 3, 1, 5, "minecraft:polished_blackstone_brick_slab");
+    m.put(2, 2, 5, "minecraft:chest");
+    m.lamp(-6, -8); m.lamp(6, 8);
+  },
   // The first dock a new arrival sees: a plank landing, a lamp, a signpost, a boat frame on the bank.
   wound_dock: (m) => {
     m.box(-3, 0, -5, 3, 0, 1, PLANK);
@@ -102,4 +130,10 @@ export function planStructure(id) {
   const m = maker(s);
   PLANS[id](m, s);
   return m.ops;
+}
+
+// Where the Cold Forge's Coffer stands (forge.js fills it).
+export function coldForgeCoffer() {
+  const s = SITES.find((x) => x.id === "cold_forge");
+  return { x: s.x + 2, y: s.y + 2, z: s.z + 5 };
 }

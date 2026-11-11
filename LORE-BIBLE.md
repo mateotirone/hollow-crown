@@ -331,3 +331,17 @@ None of the four is the Hollow's; each is what a region already knew before the 
 ## Where the eight paintings hang
 
 Mateo's eight paintings are already in the game as hanging pictures (`siege:portrait`, textures `textures/entity/portrait/plate_1..8.png`). Seven hang openly: one in each settlement's Library (which one depends on the plot) and all seven in a row with `/scriptevent siege:portrait gallery` (meant for the Long Gallery at Crownhold). **The eighth, the Forty-Second Portrait, is a secrecy call and hangs only in the Burned Archive**, which a player reaches late through Brother Cael. Its caption never says whose portrait it is until Morvane has fallen; after that it reads "Oswin, son of Aldric, last King of Aldmere" and says he scraped the face off himself the night before they came for him (that last detail is the lore thread's, not Mateo's).
+
+## The Hollow's middle stretch (Mateo approved 2026-11-11)
+
+Between the Rift and the Choir. The guide is **the Carter**, who drives the dawn ore cart from the villages to the Seat. She has no name, because those below have none; the Hollow names only people who have lost their own. Her younger brother was taken from Highcut to sing in the Court. She has passed the Chair a hundred times and never looked up at the face.
+
+- **The ore.** Choir Ore holds a note. Every stone goes to the Seat, then to the Court, where the Singers hold it while they sing at the Door. Every siege above is paid for by a miner here.
+- **The Truce Hall.** One chair is still standing (the Hollow's) and one is knocked over (ours). The hum replays "Then it is sworn." *The Name We Were* lies on the lectern.
+- **The Standing Ranks.** The whole Grey Host, taken as promised. The one empty place at the head of the front row is Vorlund's.
+- **The Far Door.** The crack across the seal is the Founding Bell's stroke. Choir Ore picks are worn to the handle. They are digging home.
+- **The Drift.** From the top stone the player sees a figure in the Chair, far off, lift its LEFT hand, and the whole Hollow changes key.
+- **The Seams.** Wreck the dawn cart (the Choir has less to sing with, so fewer phantom raids) or let it go (the miners remember: half price at every Tally).
+- **The Choir is the miners' own children.** A silenced Singer does not die. Afterwards they get up and walk home with no voice. The player names the Carter (Lark, Morrow or Dawn). She points out that the one in the Chair was given his name the same way, and has never once looked at the river.
+
+Nothing in it says Oswin.

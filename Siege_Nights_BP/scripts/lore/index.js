@@ -50,6 +50,7 @@ import "./ravens.js";
 import "./moondoors.js";
 import "./corvin.js";
 import "./glimpse.js";
+import "./hollow.js";
 import { PLOT_LORE, LOCAL_TOMES, LOCAL_THREADS } from "./data/plots.js";
 import { PLOT_REGION, REGION_BOSS, BOSS_LEADS, REGIONAL_BOSSES, CONVERGE, fallenCount } from "./data/spine.js";
 import { PLOT_PLAN } from "../plots/config.js";

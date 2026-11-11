@@ -36,6 +36,19 @@ function savePlots() {
 }
 
 export const mapMode = () => allPlots().length > 0;
+
+/** Map setup: record a Plot Stone already standing at loc as the planned plot planName. Returns the plot, or
+ *  undefined if there is no such planned plot, it is already on the map, or another stone is too close. */
+export function registerPlot(planName, loc) {
+  const plan = PLOT_PLAN.find((n) => n.name === planName);
+  const list = allPlots();
+  if (!plan || list.some((p) => p.name === planName)) return undefined;
+  if (list.some((p) => Math.hypot(p.x - loc.x, p.z - loc.z) < MAP.minPlotSpacing)) return undefined;
+  const plot = { name: plan.name, region: plan.region, x: Math.floor(loc.x), y: Math.floor(loc.y), z: Math.floor(loc.z) };
+  list.push(plot);
+  savePlots();
+  return plot;
+}
 const plotAtStone = (loc) => allPlots().find((p) => p.x === loc.x && p.y === loc.y && p.z === loc.z);
 
 export function plotAt(loc) {
