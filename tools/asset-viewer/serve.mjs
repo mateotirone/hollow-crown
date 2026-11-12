@@ -333,6 +333,9 @@ const EXTRAS = [
   { id: "wonders", title: "Wonders", marker: "map/structures/wonder_scenes.py",
     args: (out) => [out],
     names: (out) => { try { return JSON.parse(fs.readFileSync(path.join(out, "names.json"), "utf8")); } catch { return {}; } } },
+  { id: "ironworks", title: "Ironworks", marker: "map/structures/ironworks_builds.py",
+    args: (out) => [out],
+    label: { ironworks_1: "Ironworks 1: Ore Pit", ironworks_2: "Ironworks 2: Bloomery", ironworks_3: "Ironworks 3: Trip-Hammer Forge" } },
 ];
 // Builder scripts that live on a branch without the kit: copied from the newest branch that has them into
 // the newest catalogue branch's map/structures and run there.

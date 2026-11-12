@@ -93,6 +93,7 @@ Guards' own armor line, which players can't get (items `siege:guardgear_<tier>_<
 | Archer ×16 colors (64×64 player skin layout) | `textures/entity/siege/archer_<color>.png`, hood and mantle in the banner color, green jerkin, quiver | **Final style, awaiting your review** |
 | Man-at-Arms ×16 colors (64×64 player skin layout) | `textures/entity/siege/man_at_arms_<color>.png`, padded gambeson, tabard in the banner color with the gold tower | **Final style, awaiting your review** |
 | Keep heart | `textures/entity/siege_invisible.png` | Stays invisible, no art needed |
+| Townsfolk ×40 (64×64 player skin layout, 8 per region: tunic, apron/vest/fur/stripes/sash, hood/cap/kerchief/headwrap, skirt or breeches, varied skin and hair) | `textures/entity/siege/townsfolk/tf_<region>_<0-7>.png` (by `studio/art/build_townsfolk.py`), worn by `siege:townsfolk` | Placeholder in house palette, awaiting your review |
 
 ## 3D shapes
 
