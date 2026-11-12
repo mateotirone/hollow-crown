@@ -9,7 +9,7 @@ import { localStock, stoneStock, wallStock, niceName } from "./mason.js";
 import { STONE_FAMILY, STONE_KINDS, CASTLE_STONES, stoneId, regionalId, GATES, PORTCULLISES, REINFORCEABLE, CASTLE_BLOCKS, isStructural } from "../siege/api.js";
 import { MATERIALS } from "./rules.js";
 import { HALL, MASON, SLOTS, place, slotsFor } from "./layout.js";
-import { wallCost, nearGate } from "./walls.js";
+import { wallCost, nearGate, gateGuardStep } from "./walls.js";
 import { wallShape, radiusAt } from "./walldata.js";
 import { WALLS, WALL_LEVELS, MAX_WALL, smoothGround, groundProblem, wallColumns, onWallLine, bearingToAngle, columnKinds, repairCost, wallArmor, wallSeed, VARIATION, WALL_STONES, WALL_STONE_IDS, WALL_TIMBER, WALL_LOG } from "./walldata.js";
 
@@ -100,6 +100,13 @@ addTests("settle walls", {
     assert(nearGate(g, { x: 3, y: 64, z: 1 }, WALLS.gateGreet));
     assert(!nearGate(g, { x: 9, y: 64, z: 0 }, WALLS.gateGreet));
     assert(!nearGate(g, { x: 0, y: 72, z: 0 }, WALLS.gateGreet));
+  },
+  "the guard opens the gate once as you arrive, and a gate you shut by hand stays shut": () => {
+    assertEqual(gateGuardStep({ friendNear: true, greeted: false, opened: false, guards: 2 }), "open");
+    assertEqual(gateGuardStep({ friendNear: true, greeted: true, opened: false, guards: 2 }), "wait", "you shut it yourself: he leaves it");
+    assertEqual(gateGuardStep({ friendNear: true, greeted: true, opened: true, guards: 2 }), "wait");
+    assertEqual(gateGuardStep({ friendNear: false, greeted: true, opened: true, guards: 2 }), "shut");
+    assertEqual(gateGuardStep({ friendNear: true, greeted: false, opened: false, guards: 0 }), "wait", "no guard, no doorman");
   },
   "log walls are stripped logs in every timber": () => {
     for (const t of WALL_TIMBER) assert(/^minecraft:stripped_\w+_log$/.test(WALL_LOG[t] ?? ""), `${t} log wall is ${WALL_LOG[t]}`);
