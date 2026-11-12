@@ -148,7 +148,13 @@ def main():
     sec = {"id": "skill-pass", "title": "Reviewed on the building skill", "blurb": "The run-through pass: each building rebuilt from the current build instructions on the one building engine, checked in 3D, then Mateo's notes.", "cards": []}
     sections.append(sec)
     def from_spec(f):
-        spec = json.load(open(f)); b = Blueprint(spec["name"]); engine.into_blueprint(b, spec); return b.finish()
+        spec = json.load(open(f)); b = Blueprint(spec["name"]); engine.into_blueprint(b, spec)
+        if spec.get("after"):          # a furnished build: the review module's interior stage runs on the skill's shell
+            import importlib; mod, fn = spec["after"].split(":"); m = importlib.import_module(mod)
+            tmp = Blueprint("after"); getattr(m, fn)(tmp, m.Building(tmp, m.P, 3)); dy = spec.get("after_dy", 0)
+            for (x, y, z), v in tmp.cells.items():
+                if v[0] not in ("keep",): b.cells[(x, y + dy, z)] = v
+        return b.finish()
     for f in sorted(glob.glob(os.path.join(HERE, "review", "specs", "*.json"))):
         meta = json.load(open(f)).get("card", {})
         key = os.path.splitext(os.path.basename(f))[0]
