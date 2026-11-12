@@ -38,6 +38,7 @@ import "./sound/index.js";
 import "./minimap/index.js";
 import "./guide/index.js";
 import "./roletrials/index.js";
+import "./landmarks/index.js";
 import "./after/index.js";
 import "./opening/index.js";
 import "./unlocks/index.js";

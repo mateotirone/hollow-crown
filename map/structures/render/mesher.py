@@ -163,7 +163,8 @@ MAT = {"stone_brick": "stonebrick", "stone_bricks": "stonebrick", "mossy_stone_b
        "smooth_stone_slab": "stone_slab_top", "normal_stone": "stone", "stone_block": "stone",
        "quartz": "quartz_block_side", "quartz_block": "quartz_block_side", "smooth_quartz": "quartz_block_bottom", "quartz_bricks": "quartz_bricks",
        "dark_prismarine": "prismarine_dark", "prismarine": "prismarine_rough", "gold_block": "gold_block", "snow_layer": "snow", "moss_block": "moss_block", "polished_blackstone_brick": "polished_blackstone_bricks", "polished_blackstone": "polished_blackstone", "blackstone": "blackstone",
-       "blast_furnace": "blast_furnace_side", "cobbled_deepslate_wall": "deepslate/cobbled_deepslate"}
+       "blast_furnace": "blast_furnace_side", "cobbled_deepslate_wall": "deepslate/cobbled_deepslate",
+       "chiseled_red_sandstone": "red_sandstone_carved", "chiseled_deepslate": "deepslate/chiseled_deepslate", "cracked_deepslate_bricks": "deepslate/cracked_deepslate_bricks"}
 for w, t in WOODS.items(): MAT[w] = "planks_" + t; MAT[w + "_planks"] = "planks_" + t
 for _c in ("", "exposed_", "weathered_", "oxidized_"):          # copper roofs (waxed looks the same)
     MAT[_c + "cut_copper"] = MAT["waxed_" + _c + "cut_copper"] = _c + "cut_copper"
@@ -340,6 +341,11 @@ def model(n, p):
     if n == "grindstone":
         return [((4 / 16, 4 / 16, 2 / 16, 12 / 16, 1, 14 / 16), {"side": "grindstone_side.tga", "top": "grindstone_round.tga"}, {}),
                 ((2 / 16, 0, 6 / 16, 4 / 16, 10 / 16, 10 / 16), {"side": "planks_big_oak"}, {}), ((12 / 16, 0, 6 / 16, 14 / 16, 10 / 16, 10 / 16), {"side": "planks_big_oak"}, {})]
+    if n.endswith("_hanging_sign"):     # a board hanging on two short chains under the block above
+        w = wood_of(n); t = {"side": "planks_" + WOODS.get(w, "oak")}
+        fd = (p.get("bs") or {}).get("facing_direction", 2)
+        board = (1 / 16, 0, 7 / 16, 15 / 16, 10 / 16, 9 / 16) if fd in (2, 3) else (7 / 16, 0, 1 / 16, 9 / 16, 10 / 16, 15 / 16)
+        return [(board, t, {}), ("cross", {"side": "chain1"}, {"cut": 1, "scale": 0.3, "y": 10 / 16})]
     if n.endswith("_wall_sign"):        # a thin board on the face of the block behind it
         w = wood_of(n); t = {"side": "planks_" + WOODS.get(w, "oak")}
         f = p.get("facing", "s")
