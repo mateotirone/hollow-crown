@@ -586,7 +586,8 @@
       "minecraft:navigation.walk": {
         "can_open_doors": true,
         "avoid_damage_blocks": true,
-        "can_path_over_water": false
+        "can_path_over_water": false,
+        "avoid_water": true
       },
       "minecraft:jump.static": {},
       "minecraft:can_climb": {},
@@ -643,6 +644,118 @@
                   "test": "has_tag",
                   "subject": "other",
                   "value": "siege_wanted"
+                },
+                {
+                  "all_of": [
+                    {
+                      "test": "has_tag",
+                      "subject": "self",
+                      "value": "siege_w0_a"
+                    },
+                    {
+                      "test": "has_tag",
+                      "subject": "other",
+                      "value": "siege_w0_b"
+                    }
+                  ]
+                },
+                {
+                  "all_of": [
+                    {
+                      "test": "has_tag",
+                      "subject": "self",
+                      "value": "siege_w0_b"
+                    },
+                    {
+                      "test": "has_tag",
+                      "subject": "other",
+                      "value": "siege_w0_a"
+                    }
+                  ]
+                },
+                {
+                  "all_of": [
+                    {
+                      "test": "has_tag",
+                      "subject": "self",
+                      "value": "siege_w1_a"
+                    },
+                    {
+                      "test": "has_tag",
+                      "subject": "other",
+                      "value": "siege_w1_b"
+                    }
+                  ]
+                },
+                {
+                  "all_of": [
+                    {
+                      "test": "has_tag",
+                      "subject": "self",
+                      "value": "siege_w1_b"
+                    },
+                    {
+                      "test": "has_tag",
+                      "subject": "other",
+                      "value": "siege_w1_a"
+                    }
+                  ]
+                },
+                {
+                  "all_of": [
+                    {
+                      "test": "has_tag",
+                      "subject": "self",
+                      "value": "siege_w2_a"
+                    },
+                    {
+                      "test": "has_tag",
+                      "subject": "other",
+                      "value": "siege_w2_b"
+                    }
+                  ]
+                },
+                {
+                  "all_of": [
+                    {
+                      "test": "has_tag",
+                      "subject": "self",
+                      "value": "siege_w2_b"
+                    },
+                    {
+                      "test": "has_tag",
+                      "subject": "other",
+                      "value": "siege_w2_a"
+                    }
+                  ]
+                },
+                {
+                  "all_of": [
+                    {
+                      "test": "has_tag",
+                      "subject": "self",
+                      "value": "siege_w3_a"
+                    },
+                    {
+                      "test": "has_tag",
+                      "subject": "other",
+                      "value": "siege_w3_b"
+                    }
+                  ]
+                },
+                {
+                  "all_of": [
+                    {
+                      "test": "has_tag",
+                      "subject": "self",
+                      "value": "siege_w3_b"
+                    },
+                    {
+                      "test": "has_tag",
+                      "subject": "other",
+                      "value": "siege_w3_a"
+                    }
+                  ]
                 }
               ]
             },
