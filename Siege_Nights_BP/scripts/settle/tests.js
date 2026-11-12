@@ -410,3 +410,60 @@ addTests("settle ground", {
     assert(WALL_LEVELS[1].h >= 2);
   },
 });
+
+// ---------- plot rules and charters (charters.js, config.js) ----------
+import { plotFit, charterCheck, slotClass, opensAt } from "./charters.js";
+import { PLOT_SIZE as PSIZE, CHARTERS as CHARTER_LIST } from "./config.js";
+import { townNames as allTownNames, townFor as townByName, slotsOf as slotsOfLayout } from "./towns.js";
+import { BLOCK_BUILDS as BLOCK_BUILD_LIST } from "./blockdesigns.js";
+
+addTests("settle charters", {
+  "every plot building has a size class and an opening tier"() {
+    for (const b of BUILDINGS) {
+      assert(["S", "M", "ML", "L", "G"].includes(PSIZE[b.id]), `${b.id} has no PLOT_SIZE`);
+      assert(opensAt(b.id) >= 0 && opensAt(b.id) <= 3, `${b.id} opens at ${opensAt(b.id)}`);
+    }
+  },
+  "buildings go on plots of their own size, with the market and barracks exceptions"() {
+    const S = { size: "S", tags: [] }, M = { size: "M", tags: [] }, ML = { size: "M", long: true, tags: [] }, L = { size: "L", tags: [] };
+    assertEqual(slotClass(ML), "ML");
+    assert(plotFit("cottage", S).ok && !plotFit("cottage", M).ok, "cottage takes Small only");
+    assert(plotFit("market", L).ok && plotFit("market", ML).ok && !plotFit("market", M).ok, "market: Large or long Medium");
+    assert(!plotFit("barracks", M, new Set(["L"])).ok, "barracks waits for the free Large");
+    assert(plotFit("barracks", M, new Set(["M", "S"])).ok, "barracks takes a plain Medium when no Large or long Medium is free");
+    assert(plotFit("library", ML).ok, "library on the long Medium");
+  },
+  "location tags: the watchtower needs the wall, good spots are marked"() {
+    const bare = plotFit("watchtower", { size: "S", tags: ["square"] });
+    assert(!bare.ok && bare.tagged && /wall/.test(bare.why), `watchtower off the wall: ${JSON.stringify(bare)}`);
+    assert(plotFit("watchtower", { size: "S", tags: ["wall"] }).ok, "watchtower by the wall");
+    assert(plotFit("well", { size: "S", tags: ["square"] }).tagged, "well on the square is a good spot");
+  },
+  "charters: Hamlet free, Town needs homes and a market, missing designs are skipped"() {
+    const known = new Set(["cottage", "market", "barracks", "smithy"]);
+    assert(charterCheck(0, {}, known).met, "Hamlet charter is empty");
+    const short = charterCheck(1, { cottage: 2, market: 1 }, known);
+    assert(!short.met, "two homes are not enough");
+    assert(short.lines.find((l) => l.what === "Mint").skipped, "the Mint is skipped until it exists");
+    assert(charterCheck(1, { cottage: 3, market: 1 }, known).met, "three homes and a market");
+    const city = charterCheck(2, { cottage: 6, market: 1, barracks: 1 }, known);
+    assert(!city.met, "City needs one more work building");
+    assertEqual(city.lines.find((l) => l.more).need, 3);
+    assert(charterCheck(2, { cottage: 6, market: 1, barracks: 1, smithy: 1 }, known).met, "one more work building of any size");
+    assertEqual(CHARTER_LIST.length, 4);
+  },
+  "every building has a plot it may take in every charter-passing layout"() {
+    const known = new Set([...BUILDINGS.map((b) => b.id), ...Object.keys(BLOCK_BUILD_LIST).map((t) => t.replace(/^siege:/, ""))]);
+    for (const name of allTownNames()) {
+      const town = townByName(name);
+      for (const [i, v] of town.variants.entries()) {
+        if (v.charter === false) continue;
+        const slots = slotsOfLayout(v);
+        for (const b of BUILDINGS) {
+          if (!known.has(b.id)) continue;
+          assert(slots.some((s) => plotFit(b.id, s, new Set()).ok || plotFit(b.id, s, new Set(["none"])).ok), `${name} layout ${i}: nowhere for the ${b.id}`);
+        }
+      }
+    }
+  },
+});
