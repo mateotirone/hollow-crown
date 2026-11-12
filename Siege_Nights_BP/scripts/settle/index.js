@@ -35,6 +35,7 @@ import "./founding.js";
 import "./plotmarker.js";
 import "./register.js";
 import "./settlers.js";
+import "./lordfolk.js";
 import "./hallmove.js";
 import "./arrival.js";
 import "./showcase.js";

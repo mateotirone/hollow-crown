@@ -522,6 +522,56 @@ addTests("settle census", {
   },
 });
 
+// ---------- a lord's crew furnishes the homes it finishes (census.js bedPlaces) ----------
+import { bedPlaces } from "./census.js";
+addTests("settle census", {
+  "a lord's crew fits beds that count, clear of the door and of each other"() {
+    const door = [{ x: 3, y: 1, z: 0, id: "minecraft:spruce_door" }, { x: 3, y: 2, z: 0, id: "minecraft:spruce_door", upper: true }];
+    const cells = hut(door);
+    const cap = bedCap(tally(cells));
+    const beds = bedPlaces(cells, cap);
+    assertEqual(beds.length, cap);
+    const placed = beds.flatMap((b) => [{ ...b.head, id: "minecraft:bed", head: true }, { ...b.foot, id: "minecraft:bed" }]);
+    assertEqual(bedsCounted(tally([...cells, ...placed])), cap, "every bed it places counts");
+    const STEP = [[0, 1], [-1, 0], [0, -1], [1, 0]];
+    for (const b of beds) {
+      assertEqual(b.head.x - b.foot.x, STEP[b.dir][0]); assertEqual(b.head.z - b.foot.z, STEP[b.dir][1]);
+      for (const p of [b.foot, b.head]) assert(Math.abs(p.x - 3) > 2 || Math.abs(p.z) > 2, "clear of the door");
+    }
+    const cellsOf = beds.flatMap((b) => [b.foot, b.head]);
+    for (let i = 0; i < beds.length; i++) for (let j = i + 1; j < beds.length; j++)
+      for (const p of [beds[i].foot, beds[i].head]) for (const q of [beds[j].foot, beds[j].head]) assert(Math.abs(p.x - q.x) + Math.abs(p.z - q.z) > 1, "beds don't touch");
+    assertEqual(new Set(cellsOf.map((p) => `${p.x},${p.z}`)).size, cellsOf.length);
+  },
+  "no roof or no room, no beds"() {
+    assertEqual(bedPlaces(hut([], { roof: false }), 2).length, 0);
+    assertEqual(bedPlaces(hut(), 0).length, 0);
+  },
+});
+
+// ---------- townsfolk in Rival Lords' towns (folk.js, census.js lordArrivals) ----------
+import { lineFor } from "./folk.js";
+import { lordArrivals } from "./census.js";
+import { SETTLER_LINES, SETTLERS as FOLK } from "./config.js";
+addTests("settle settlers", {
+  "a lord's townsfolk talk the lord's way, and every temper has lines"() {
+    for (const t of ["proud", "grasping", "devout", "wary", "bold", "kind", "steady"]) assert(SETTLER_LINES.lord[t]?.length >= 2, t);
+    const proud = new Set(Array.from({ length: 9 }, (_, d) => lineFor({ n: 1 }, { day: d, temper: "proud" })));
+    assert([...proud].some((l) => SETTLER_LINES.lord.proud.includes(l)), "proud lines heard");
+    assert(SETTLER_LINES.lord.steady.includes(lineFor({ n: 1 }, { day: 1, temper: "who knows" })) || SETTLER_LINES.day.includes(lineFor({ n: 1 }, { day: 1, temper: "who knows" })));
+    assert(SETTLER_LINES.wary.includes(lineFor({ n: 2 }, { day: 3, temper: "kind", wary: true })), "wary after a takeover");
+    assertEqual(lineFor({ n: 2, idle: true }, { temper: "kind" }), SETTLER_LINES.idle);
+    assert(SETTLER_LINES.night.includes(lineFor({ n: 4 }, { night: true, temper: "bold" })), "night is night everywhere");
+  },
+  "a lord's town takes one newcomer a dawn it missed, up to the catch-up cap"() {
+    assertEqual(lordArrivals(undefined, 10), 1);
+    assertEqual(lordArrivals(9, 10), 1);
+    assertEqual(lordArrivals(8, 10), 2);
+    assertEqual(lordArrivals(0, 40), FOLK.lordCatchUp);
+    assertEqual(lordArrivals(10, 10), 1);
+  },
+});
+
 // ---------- the level-5 hall takes its plots (hallmove.js) ----------
 import { HALL_TAKES_AT } from "./hallmove.js";
 addTests("settle charters", {
