@@ -24,7 +24,7 @@
 // raiseHall(o, then) builds the hall (spread over ticks) and setKingsrestArrival(spot) moves the homeless arrival
 // spot; the opening feature (scripts/opening/) calls both when a fresh Hollow Crown map first loads.
 
-import { world, system, ItemStack, GameMode } from "@minecraft/server";
+import { world, system, ItemStack, GameMode, MolangVariableMap } from "@minecraft/server";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
 import { isReady, keepOf, tierOf, on, emit, addFoundingCheck, addJoinStep } from "../siege/api.js";
 import { onTick } from "../core/loop.js";
@@ -258,11 +258,16 @@ export function setKingsrestArrival(spot) {
 
 // The Map Stones follow who holds what: green free, yellow run by a lord, dark taken
 export const markerState = (state) => (state === "free" ? 0 : state === "lord" ? 1 : 2);
+// Each stone's last known state, kept by refreshHall so the beams don't ask every plot ten times a second
+let stoneStates = [];
+
 function refreshHall() {
   const o = store.data.hall;
   if (!o?.mini) return;
   const dim = overworld();
+  stoneStates = [];
   for (const p of pedestalLayout()) {
+    stoneStates.push({ p, state: statusOf(p.plan).state });
     let top;
     try {
       top = dim.getBlock({ x: o.x + p.dx, y: o.y + p.dy, z: o.z + p.dz });
@@ -270,7 +275,7 @@ function refreshHall() {
       top = undefined;
     }
     if (!top) continue; // that corner of the miniature isn't loaded (nobody near it)
-    const want = markerState(statusOf(p.plan).state);
+    const want = markerState(stoneStates[stoneStates.length - 1].state);
     try {
       if (top.typeId !== MAP_MARKER) top.setType(MAP_MARKER);
       if (top.permutation.getState(MARKER_STATE) !== want) top.setPermutation(top.permutation.withState(MARKER_STATE, want));
@@ -562,6 +567,32 @@ onTick("plots_welcome_signs", 100, () => {
   if (!hallBuilt()) return;
   if ((store.data.hall.mini ?? 0) < MINI_VERSION) return swapOldHall();
   refreshHall();
+});
+
+// A faint coloured beam over each stone a newcomer can still choose (green free, amber run by a lord), so they are
+// easy to spot across the miniature. Only while someone is in the hall; a few dust motes per stone, climbing.
+const BEAM = { free: { red: 0.35, green: 0.95, blue: 0.4 }, lord: { red: 1, green: 0.72, blue: 0.2 } };
+const BEAM_HEIGHT = 7;
+let beamStep = 0;
+onTick("plots_welcome_beams", 10, () => {
+  const o = store.data.hall;
+  if (!o?.mini || !stoneStates.length) return;
+  if (!world.getPlayers().some((pl) => pl.dimension.id === OVERWORLD && inHall(pl.location))) return;
+  const dim = overworld();
+  beamStep = (beamStep + 1) % BEAM_HEIGHT;
+  for (const { p, state } of stoneStates) {
+    const color = BEAM[state];
+    if (!color) continue;
+    const vars = new MolangVariableMap();
+    vars.setColorRGB("variable.color", color);
+    for (const h of [beamStep, (beamStep + 3) % BEAM_HEIGHT]) {
+      try {
+        dim.spawnParticle("minecraft:redstone_wire_dust_particle", { x: o.x + p.dx + 0.5, y: o.y + p.dy + 1.2 + h, z: o.z + p.dz + 0.5 }, vars);
+      } catch {
+        // that part of the hall isn't loaded: skip it
+      }
+    }
+  }
 });
 
 // A world that built the old round hall (or the first, square miniature) gets the cloud miniature in its place:
