@@ -13,6 +13,7 @@ import { ECON, COIN, GOLD } from "./config.js";
 import { coins } from "./rules.js";
 import { carried, banked, deposit, withdraw, giveCoins, totals } from "./coins.js";
 import "./shops.js";
+import "./golems.js";
 import "./towns.js";
 import "./showcase.js";
 import "./tests.js";

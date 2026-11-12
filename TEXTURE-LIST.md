@@ -406,6 +406,7 @@ Still to do for dragons: proper modelled 3D shapes (these are block-outs), a wou
 |---|---|---|
 | Mason's Bench (16×16 side + top, opaque; heavy timber workbench, a dressed stone block under it, chisel hanging on the side; top shows a half-cut stone, mallet and iron square) | `textures/blocks/siege_mason_bench_side.png`, `siege_mason_bench_top.png` | Placeholder |
 | Foundation Stone (16×16 side + top, opaque; squared grey stone with a small house chalked on the side and a green marked-out square on top, so it reads as "a building goes here") | `textures/blocks/siege_foundation_stone_side.png`, `siege_foundation_stone_top.png` | Placeholder |
+| Ironworks (16×16 side, top, bottom, opaque; stone bricks with an iron band and a glowing furnace mouth on the side, an anvil from above on top, planks below). The Ore Pit, Bloomery and Trip-Hammer Forge buildings are vanilla blocks in the region's style. | `textures/blocks/settle/siege_ironworks_side.png`, `_top.png`, `_bottom.png` (by `studio/build_ironworks.py`, never overwrites) | Painted in house style, awaiting your review |
 
 No new entity art: the Mason and the Rival Lords use Bedrock's built-in NPC skins for now. If they should have their own look, that is a new 64×64 skin each (not started).
 
@@ -447,6 +448,8 @@ Written by `studio/build_economy.py` (never overwrites a PNG that exists).
 - `textures/items/siege_coin.png` (the Regal: iron-grey coin with the old king's crowned head): painted (`studio/art/build_coins.py`)
 - `textures/items/siege_gold_coin.png` (the Gold Regal, worth 64): painted
 - Job NPCs (Farmer, Woodcutter, Quarryman, Smith, Fisher, Hunter, Herbalist, Moneyer): painted skins `textures/entity/siege/npc/job_<name>.png`, worn by the `siege:job_npc` entity (wired 2026-11-10, not seen in game yet)
+
+| Guild Factor skin (64×64 villager shape: burgundy coat, gold trim, a ledger and quill) | `textures/entity/siege/npc/job_factor.png` (by `studio/art/build_job_npcs.py`) | Painted in house style, awaiting your review |
 
 ## Leader portraits (2026-11-10)
 Brief by the lore thread in `studio/art/PORTRAIT-BRIEF.md`; painted by `studio/art/build_portraits.py` (first pass, awaiting Mateo's review).

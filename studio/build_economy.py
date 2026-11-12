@@ -73,7 +73,7 @@ if added:
 
 # ---------- the job NPC: one entity, eight painted skins (textures/entity/siege/npc/job_<id>.png, studio/art/build_job_npcs.py) ----------
 # The order is the value of the siege:job property and must match JOB_IDS in scripts/economy/config.js. Only ever add at the end.
-JOB_SKINS = ["farmer", "woodcutter", "quarryman", "smith", "fisher", "hunter", "herbalist", "moneyer"]
+JOB_SKINS = ["farmer", "woodcutter", "quarryman", "smith", "fisher", "hunter", "herbalist", "moneyer", "factor"]
 
 job_entity = {"format_version": "1.21.60", "minecraft:entity": {
     "description": {"identifier": "siege:job_npc", "is_spawnable": False, "is_summonable": True, "is_experimental": False,
