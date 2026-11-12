@@ -8,8 +8,10 @@
 //   Cuirass   the Answer: one hit in four that lands on you rings back at whoever struck
 //   Greaves   nothing slows you, and you run faster (Speed I)
 //   Treads    you fall like a quill (Gloamquill in the soles): no fall damage, and you jump higher (Jump Boost I)
-//   Full set  Resonant: Speed II, Jump Boost II, Strength I, a fifth of all damage turned aside, six more hearts
-//             (Mateo, 2026-11-12: the hardest tier "should be the most rewarding... you should be insane")
+//   Full set  Resonant: Speed II, Jump Boost II, a fifth of all damage turned aside, six more hearts
+//             (Mateo, 2026-11-12: the hardest tier "should be the most rewarding... you should be insane", but
+//             someone with "a shit ton of Netherite" must still be able to challenge them. About 1.9x a netherite
+//             player's staying power and no extra damage, so one wins a duel and two in netherite make it even.)
 //   Blade     the Chord: every fourth hit rings through every enemy near the one you struck; bites deeper into Hollow things
 //   Pick      Sounding: break an ore and it shows you the nearest ore still in the rock
 //
@@ -26,7 +28,7 @@ const SET_TAG = "siege_choirsteel_set";
 const KNOWN_PROP = "siege:choirsteel_known";
 const FOREVER = 20000000;
 // Full-set and per-piece boosts (amplifiers: 0 = I, 1 = II). Health Boost 2 = six extra hearts.
-export const RESONANT = { speed: 1, jump_boost: 1, strength: 0, resistance: 0, health_boost: 2 };
+export const RESONANT = { speed: 1, jump_boost: 1, resistance: 0, health_boost: 2 }; // no Strength: netherite must stay a fair challenge
 const STRIDE = { leggings: ["speed", 0], boots: ["jump_boost", 0] };
 const REFRESH = 40; // refreshed every 10 ticks, so the boost fades within 2 s of taking a piece off
 export const CHOIRSTEEL = { answerChance: 0.25, answerDamage: 4, chordEvery: 4, chordDamage: 5, chordReach: 3.5, hollowBonus: 3, soundingReach: 6 };
@@ -36,7 +38,7 @@ const TOLD = {
   chestplate: "§dChoirsteel Cuirass§7: sometimes a blow that lands on you rings back at whoever struck it.",
   leggings: "§dChoirsteel Greaves§7: nothing slows you, and your stride is longer.",
   boots: "§dChoirsteel Treads§7: you fall like a quill, and leap like one.",
-  set: "§dThe whole set hums together.§7 Resonant: faster, higher, stronger; blows land softer, and you have far more life in you.",
+  set: "§dThe whole set hums together.§7 Resonant: faster and higher; blows land softer, and you have far more life in you.",
   sword: "§dChoirsteel Blade§7: every fourth hit, the Chord rings through everything near what you struck.",
   pickaxe: "§dChoirsteel Pick§7: break an ore and listen. It shows you the next one.",
 };
@@ -77,12 +79,12 @@ function gearTick() {
       for (const [name, amp] of strideBoosts(pieces, full)) effect(p, name, REFRESH, amp);
       if (full && !had) {
         p.addTag(SET_TAG);
-        effect(p, "resistance", FOREVER, RESONANT.resistance); effect(p, "health_boost", FOREVER, RESONANT.health_boost); effect(p, "strength", FOREVER, RESONANT.strength);
+        effect(p, "resistance", FOREVER, RESONANT.resistance); effect(p, "health_boost", FOREVER, RESONANT.health_boost);
         sound(p.dimension, "block.amethyst_block.chime", p.location, 0.6, 1);
         tell(p, "set");
       } else if (!full && had) {
         p.removeTag(SET_TAG);
-        p.removeEffect("resistance"); p.removeEffect("health_boost"); p.removeEffect("strength");
+        p.removeEffect("resistance"); p.removeEffect("health_boost");
       }
       const hand = held(p);
       if (hand === ID("sword")) tell(p, "sword");

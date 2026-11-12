@@ -445,7 +445,7 @@ the darkness and knockback effects, the storms, and how the hurried evening look
 - The test world (`/scriptevent siege:showcase`) has a smithing table and a crafting table with chests of everything needed.
 - Helm: you see in the dark. Greaves: slowness never sticks. Treads: jump off something high, you drift down and take no fall damage.
 - Cuirass: let zombies hit you. About one hit in four rings and throws the attacker back.
-- Full set: a chime, then Speed II, Jump Boost II, Strength I, Resistance and six extra hearts. Take one piece off and they all go (speed and jump within 2 seconds).
+- Full set: a chime, then Speed II, Jump Boost II, Resistance and six extra hearts. Take one piece off and they all go (speed and jump within 2 seconds).
 - Greaves alone: Speed I. Treads alone: Jump Boost I.
 - Blade: hit one mob in a crowd four times. The fourth hit rings and hurts the others near it.
 - Pick: break an ore next to other ore. A line of sparks points to the nearest one. It also mines Choir Ore whole.
