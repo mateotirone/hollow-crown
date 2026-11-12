@@ -8,6 +8,7 @@ template, the Heart of the Hollow, the Hollow Crown), and what an attacker bring
                                Upgrading swaps the blocks for the next tier (script side, not written yet).
   The strongroom itself (the room these go in) is map/structures/vault_rooms.py.
   siege:vault_stone            Strongroom Stone: the iron-banded walls of the vault room.
+  siege:regal_safe             Regal Safe: 2 wide, 3 high (siege:part 0-5), the owner's Regals. Only the vault builds it.
   siege:relic_coffer           Relic Coffer: the chest inside the vault the relics sit in. Glows when full.
   siege:vault_breaker_<tier>   Vault Breaker: the attacker's auger, set against a vault door. iron, diamond,
                                netherite (better breakers cut the time).
@@ -195,7 +196,93 @@ def build_textures():
     for i, (tier, b) in enumerate(BREAKERS.items()):
         names[f"breaker_{tier}"] = tex(f"breaker_{tier}", plate(b["metal"], b["metal"], True), 40 + i)
         names[f"bit_{tier}"] = tex(f"bit_{tier}", trim(b["bit"]), 50 + i)
+    names.update(safe_textures())
     return names
+
+
+# ---------------------------------------------------------------- the Regal Safe (2x2, only built in the vault)
+SAFE = M["blacksteel"]
+GOLD = M["gold"]
+
+
+def safe_front_image():
+    """The safe's whole 32x48 front (2 blocks wide, 3 tall), cut into six 16x16 tiles.
+    Blackened steel, a gold-bevelled frame, a recessed door with three heavy gold hinges on the left, rivet rows,
+    a dark ring for the dial (the dial itself is raised in the model) and a small crowned-coin plate above it."""
+    r = random.Random(77)
+    W, H = 32, 48
+    img = Image.new("RGBA", (W, H))
+    for y in range(H):
+        for x in range(W):
+            edge = min(x, y, W - 1 - x, H - 1 - y)
+            d = math.hypot(x - 15.5, y - 23.5)
+            if edge == 0:
+                c = SAFE[0]
+            elif edge == 1:
+                c = GOLD[3] if (x + y) % 2 else GOLD[2]               # gold bevel round the front
+            elif edge == 2:
+                c = SAFE[1]
+            elif edge == 3 or edge == 4 and (x in (4, W - 5) or y in (4, H - 5)):
+                c = SAFE[4] if x < 16 and y < 24 else SAFE[2]         # door edge: lit top-left, shadowed bottom-right
+            elif x in (5, 6) and any(h <= y <= h + 3 for h in (8, 22, 36)):
+                c = GOLD[4] if x == 5 else GOLD[2]                     # hinges
+            elif (edge == 6) and (x + y) % 4 == 0:
+                c = GOLD[4]                                            # rivet row inside the door edge
+            elif 6.5 <= d <= 8:
+                c = SAFE[0]                                            # recess ring under the dial
+            elif 11 <= x <= 20 and 9 <= y <= 12:
+                c = GOLD[3] if (x, y) not in ((11, 9), (20, 9), (11, 12), (20, 12)) else SAFE[1]   # name plate
+            else:
+                c = SAFE[3] if (x * 5 + y * 3) % 17 == 0 else SAFE[2] if r.random() < 0.82 else SAFE[1]
+            if 13 <= x <= 18 and 10 <= y <= 11:
+                c = GOLD[5] if (x + y) % 2 else GOLD[1]                # the crowned coin on the plate
+            img.putpixel((x, y), tuple(c[:3]) + (255,))
+    return img
+
+
+# part numbers, as seen from the front: 0/1 bottom left/right, 2/3 middle, 4/5 top
+SAFE_PARTS = range(6)
+
+
+def safe_textures():
+    names = {}
+    front = safe_front_image()
+    for part in SAFE_PARTS:
+        ox, oy = 16 * (part % 2), 32 - 16 * (part // 2)
+        tile = front.crop((ox, oy, ox + 16, oy + 16))
+        path = os.path.join(RP, TEX + f"safe_front_{part}.png")
+        tile.save(path)
+        names[f"safe_front_{part}"] = f"siege_vault_safe_front_{part}"
+    names["safe_side"] = tex("safe_side", plate(SAFE, GOLD, True), 60)
+    names["safe_gold"] = tex("safe_gold", trim(GOLD), 61)
+    return names
+
+
+def regal_safe():
+    """Six blocks make one safe, 2 wide and 3 tall. Each block shows its own sixth (bone part<N>, chosen by the
+    siege:part state); the dial sits across the two middle blocks, the handle reaches out to the right."""
+    s = Shape("regal_safe")
+    for part in SAFE_PARTS:
+        b = f"part{part}"
+        left = part % 2 == 0
+        s.cube([-8, 0, -8], [16, 16, 16], "*", b)
+        s.cube([-8, 0, -8.1], [16, 16, 0.1], f"front_{part}", b)
+        if part in (2, 3):
+            # half the dial on each middle block. Facing the safe, your left is the model's +x, so the left block's
+            # inner edge is on its -x side
+            cx, sx = (-8, 1) if left else (8, -1)
+            for w, h, depth in ((6, 3, 1.5), (5, 5, 1.5), (3, 6, 1.5), (2, 2, 2.6)):   # stepped dial, knob on top
+                x0 = cx if sx > 0 else cx - w
+                s.cube([x0, 8 - h, -8.1 - depth], [w, 2 * h, depth], "gold", b)
+        if part == 3:                                                 # the handle: a spoke out to your right and a grip
+            s.cube([-4, 7.4, -10.3], [10, 1.2, 1.2], "gold", b)
+            s.cube([-5.6, 5.5, -11.3], [1.6, 5, 1.6], "gold", b)
+        if part in (0, 1):                                            # gold feet
+            fx = 4 if part == 0 else -7
+            s.cube([fx, 0, -7], [3, 1, 14], "gold", b)
+        s.cube([-6, 3, -8.13], [12, 10, 0.01], "cracks_1", f"cracks_1_{part}")
+        s.cube([-6, 3, -8.14], [12, 10, 0.01], "cracks_2", f"cracks_2_{part}")
+    return s
 
 
 # ---------------------------------------------------------------- model helper
@@ -323,7 +410,7 @@ def breaker():
     return s
 
 
-SHAPES = {"lock": lock(), "door": door("wheel"), "door_wood": door("lock"), "plate": door("plate"), "coffer": coffer(), "breaker": breaker()}
+SHAPES = {"safe": regal_safe(), "lock": lock(), "door": door("wheel"), "door_wood": door("lock"), "plate": door("plate"), "coffer": coffer(), "breaker": breaker()}
 
 
 # ---------------------------------------------------------------- blocks
@@ -408,6 +495,20 @@ def build_blocks(t):
     data["minecraft:block"]["permutations"].append({"condition": "q.block_state('siege:filled')", "components": {"minecraft:light_emission": 7}})
     write_json(path, data)
     NAMES["siege:relic_coffer"], SOUNDS["siege:relic_coffer"] = "Relic Coffer", "wood"
+
+    # the Regal Safe: holds the strongbox's Regals. Only the vault builds it; it can't be mined, moved or blown up
+    vis = {}
+    for part in SAFE_PARTS:
+        vis[f"part{part}"] = f"q.block_state('siege:part') == {part}"
+        vis[f"cracks_1_{part}"] = f"q.block_state('siege:part') == {part} && q.block_state('siege:cracks') == 1"
+        vis[f"cracks_2_{part}"] = f"q.block_state('siege:part') == {part} && q.block_state('siege:cracks') == 2"
+    block("siege:regal_safe", {"identifier": "geometry.siege_regal_safe", "bone_visibility": vis},
+          {"*": mat(t["safe_side"], "alpha_test"), "gold": mat(t["safe_gold"], "alpha_test"),
+           **{f"front_{p}": mat(t[f"safe_front_{p}"], "alpha_test") for p in SAFE_PARTS},
+           "cracks_1": mat(t["cracks_1"], "alpha_test"), "cracks_2": mat(t["cracks_2"], "alpha_test")},
+          states={"siege:part": list(SAFE_PARTS), "siege:cracks": [0, 1, 2]}, color="#2a2a30",
+          extra=dict(SOLID, **{"siege:clickable": {}}))
+    NAMES["siege:regal_safe"], SOUNDS["siege:regal_safe"] = "Regal Safe", "metal"
 
     for tier, info in BREAKERS.items():
         ident = f"siege:vault_breaker_{tier}"

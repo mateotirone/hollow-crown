@@ -4,10 +4,10 @@
 
 import { world, BlockVolume, BlockPermutation } from "@minecraft/server";
 import { UNDERTOW_ID, UNDERTOW_LAYOUT as L, COURT, HEART, pathX } from "./layout.js";
-import { planChunk, chunkInRange, heightAt, B, ROOF } from "./terrain.js";
+import { planChunk, chunkInRange, heightAt, columnAt, B, ROOF } from "./terrain.js";
 import { planCrack, placeCells } from "./rift.js";
 import { SEAL_RIVER_X } from "./rivers.js";
-import { SITES } from "./roads.js";
+import { SITES, signposts } from "./roads.js";
 import { hash } from "./noise.js";
 import { STRUCTURE_IDS, planStructure } from "./structures.js";
 import { SITE_DESIGNS, TOWER_DESIGNS } from "./sites_data.js";
@@ -227,6 +227,12 @@ export function piecesTick() {
     if (ok) { p.waystones.push(i); changed = true; }
   });
 
+  // Signposts at both ends of every road, each once its ground is built.
+  signposts().forEach((s, i) => {
+    if ((p.signs ?? []).includes(i) || !chunksBuilt(s.x, s.z, s.x, s.z)) return;
+    if (placeSignpost(d, s)) { p.signs = [...(p.signs ?? []), i]; changed = true; }
+  });
+
   // The Standing Ranks: rows of empty armour, each a little out of line, all facing the Seat.
   const ranks = SITES.find((s) => s.id === "standing_ranks");
   if (!p.ranks && chunksBuilt(ranks.x - ranks.r, ranks.z - ranks.r, ranks.x + ranks.r, ranks.z + ranks.r)) {
@@ -296,6 +302,28 @@ function stampOnce(d, key, design, at, mark) {
     mark(q);
     savePieces(q);
   });
+}
+
+// A dark oak post with a standing sign on top. Returns true once done (or if there is no ground for it:
+// such a post is simply left out), false if the area is not loaded yet.
+export function signpostOps(s, c) {
+  if (!c || c.paved || c.river <= 5 || c.under !== undefined) return null;
+  const y = c.h + 1;
+  return [
+    { a: [s.x, y, s.z], b: [s.x, y + 1, s.z], block: "minecraft:air" },
+    { a: [s.x, y, s.z], b: [s.x, y, s.z], block: "minecraft:dark_oak_fence" },
+    { a: [s.x, y + 1, s.z], b: [s.x, y + 1, s.z], block: "minecraft:darkoak_standing_sign", states: { ground_sign_direction: s.rot } },
+  ];
+}
+function placeSignpost(d, s) {
+  const ops = signpostOps(s, columnAt(s.x, s.z));
+  if (!ops) return true;
+  if (!fillAll(d, ops)) return false;
+  try {
+    const sign = d.getBlock({ x: s.x, y: ops[2].a[1], z: s.z })?.getComponent("minecraft:sign");
+    if (sign) { sign.setText(s.text); sign.setWaxed(true); }
+  } catch { /* a sign without words is still a post */ }
+  return true;
 }
 
 function fillAll(d, ops) {

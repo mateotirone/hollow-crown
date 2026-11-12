@@ -28,9 +28,9 @@ import { UNDERTOW_ID, UNDERTOW_LAYOUT as L, COURT, HEART, TEXT, stageAt, pathX }
 import { getSourceSite, getSites, markSite, openRift, riftExit, sourceSignsTick, SITE_NAMES, SOURCE_SITE_IDS } from "./source.js";
 import { VEIL, planCrack, tearBand, TEAR_STEPS, TEAR_CLIMB } from "./rift.js";
 import { buildTick, piecesTick, flush, pieces, openCourtGate, openRiverGate, rebuildHeart, waystoneSpot, WAYSTONE, isBuilt, siteOutdated, withClearing } from "./builder.js";
-import { heightAt, planChunk, isRiver, regionAt, columnAt } from "./terrain.js";
+import { heightAt, planChunk, isRiver, regionAt, columnAt, cartRail } from "./terrain.js";
 import { RIVER_NODES, riverSegments, riverDistance, RIVER_HALF_WIDTH } from "./rivers.js";
-import { SITES, roadLines } from "./roads.js";
+import { SITES, ROADS, roadLines, signposts, signRot } from "./roads.js";
 import { STRUCTURE_IDS, planStructure } from "./structures.js";
 import { SITE_DESIGNS, TOWER_DESIGNS } from "./sites_data.js";
 import { DROWNED_SPOTS, spotGround } from "./drowned.js";
@@ -532,6 +532,30 @@ addTests("undertow", {
       }
     }
     assert(bridges >= 5, `only ${bridges} road bridges`);
+  },
+  "every road has a signpost at both ends, turned and lettered": () => {
+    const posts = signposts();
+    assert(posts.length === ROADS.length * 2, `${posts.length} signposts for ${ROADS.length} roads`);
+    for (const r of ROADS) assert(posts.filter((p) => p.road === r.id).length === 2, `${r.id} lacks a signpost`);
+    for (const p of posts) assert(Number.isInteger(p.rot) && p.rot >= 0 && p.rot < 16 && p.text.length > 0 && p.text.length < 60, `bad signpost on ${p.road}`);
+    assert(signRot(0, 1) === 0 && signRot(-1, 0) === 4 && signRot(0, -1) === 8 && signRot(1, 0) === 12);
+  },
+  "the Seams cart rail is joined, climbs only on straights and clears the river": () => {
+    const rail = cartRail();
+    assert(rail.length > 100, `cart rail only ${rail.length} long`);
+    for (let i = 1; i < rail.length; i++) {
+      const a = rail[i - 1], b = rail[i];
+      assert(Math.abs(a.x - b.x) + Math.abs(a.z - b.z) === 1, `cart rail breaks at ${b.x},${b.z}`);
+      assert(Math.abs(a.y - b.y) <= 1, `cart rail steps ${a.y - b.y} at ${b.x},${b.z}`);
+    }
+    for (const c of rail) {
+      assert(c.dir >= 0 && c.dir <= 9, `bad rail direction at ${c.x},${c.z}`);
+      if (c.wet) assert(c.y - 1 - L.seaY >= 3, `cart rail too low over the river at ${c.x},${c.z}`);
+    }
+    for (let i = 1; i < rail.length - 1; i++) if (rail[i].dir >= 2 && rail[i].dir <= 5) {
+      const p = rail[i - 1], n = rail[i + 1];
+      assert(p.x - rail[i].x === rail[i].x - n.x && p.z - rail[i].z === rail[i].z - n.z, `cart rail climbs on a bend at ${rail[i].x},${rail[i].z}`);
+    }
   },
   "every centre structure stays on its site": () => {
     for (const id of STRUCTURE_IDS) {
