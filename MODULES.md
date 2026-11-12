@@ -126,6 +126,7 @@ import {
 |---|---|---|
 | `ready` | `{}` | once, on the first tick after the world and saved state are loaded |
 | `siegeStart` | `{ provokedBy }` | a siege night begins (after plans are made) |
+| `discordAlert` | `{ kind, text, ping?, hollow? }` | emit it to post a line to the group's Discord through the relay (docs/DISCORD.md); `hollow: true` holds it back until someone has entered the Hollow |
 | `siegeEnd` | `{ outcome, besieged }` | outcome is `"won"`, `"dawn"` or `"empty"` |
 | `siegeReward` | `{ player, emeralds, threat }` | (`emeralds` is the old unit: 8 coins each) a defender was just paid for holding their keep (after `addRewardHook`) |
 | `keepFounded` | `{ player, keep, moved }` | a Keep Banner founded (or moved) a settlement |
