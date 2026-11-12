@@ -324,7 +324,7 @@ on("settleBuilt", ({ owner, slotId }) => {
   state.done = true; // counts toward the town's charter now (founding.js)
   saveTowns();
   emit("settleCharter", { owner });
-  markerBesideDoor(owner, slot, state);
+  if (!state.fixed) markerBesideDoor(owner, slot, state); // the Mason's Yard stays (basebuilds.js)
 });
 
 function markerBesideDoor(owner, slot, state) {
