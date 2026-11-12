@@ -155,9 +155,9 @@ async function show(i) {
       const idx = new Uint32Array(nq * 6); for (let q = 0; q < nq; q++) { const s = q * 4; idx.set([s, s + 1, s + 2, s, s + 2, s + 3], q * 6); }
       g.setIndex(new THREE.BufferAttribute(idx, 1));
       const t = texFor(key);
-      const mat = new THREE.MeshLambertMaterial({ map: t, vertexColors: true, alphaTest: m.cut ? 0.5 : 0, transparent: !!m.water, opacity: m.water ? 0.82 : 1, clippingPlanes: [clip], side: THREE.DoubleSide, shadowSide: THREE.FrontSide });
+      const mat = new THREE.MeshLambertMaterial({ map: t, vertexColors: true, alphaTest: m.cut ? 0.5 : 0, transparent: !!m.water, opacity: m.water ? 0.82 : 1, clippingPlanes: [clip] });
       if (m.glow) mat.emissiveMap = t;
-      const mesh = new THREE.Mesh(g, mat); mesh.castShadow = !m.water; mesh.receiveShadow = true; mesh.userData.glow = !!m.glow; group.add(mesh);
+      const mesh = new THREE.Mesh(g, mat); mesh.castShadow = !m.water; mesh.receiveShadow = true; mesh.userData.glow = !!m.glow; mesh.userData.water = !!m.water; group.add(mesh);
     }
     scene.add(group); current = D; bounds = D.bounds; light(); frame(D); cuts(b, D); status("");
   } catch (e) { status("Could not load this build. Try again."); }
@@ -168,6 +168,7 @@ function setCut(y) {
   const top = bounds ? bounds[4] : 999;
   clip.constant = y >= top ? 1e4 : y; $("cut").value = Math.min(y, top);
   $("cutv").textContent = y >= top ? "whole" : "y " + y;
+  group?.traverse((o) => { if (o.isMesh) o.castShadow = y >= top && !o.userData.water; });   // cut open: no wall shadows over the rooms
   for (const el of $("cuts").children) el.classList.toggle("on", Number(el.dataset.y) === y || (el.dataset.y === "top" && y >= top));
 }
 function look(D, y) {   // a steeper, closer view down into the cut floor

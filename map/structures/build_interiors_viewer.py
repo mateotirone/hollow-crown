@@ -74,6 +74,8 @@ def main():
         for card, f, ground in cards:
             items.append((sec, card, (lambda f=f: from_spec(f)), ground, None))
     write_viewer(items, a.out, a.textures)
+    f = os.path.join(a.out, "index.html"); h = open(f).read()
+    open(f, "w").write(h.replace("<title>Hollow Crown in 3D</title>", "<title>Hollow Crown Interiors</title>"))
 
 
 if __name__ == "__main__":
