@@ -88,3 +88,40 @@ addTests("warwrit-route", {
     assertEqual(pickMarchers(army, 100).length, 4);
   },
 });
+
+import { CREW, nextBreach, breachBlock, setupSpot, nearGate, aimFor, velocityOf } from "./crewplan.js";
+import { stepFlight, TREBUCHET as THROW } from "../siege/structure.js";
+
+addTests("warwrit-crews", {
+  "the hole widens beside, then above, and is done at 3 wide and 2 high": () => {
+    const gone = new Set();
+    const order = [];
+    for (let n = 0; n < 10; n++) { const i = nextBreach((k) => !gone.has(k)); if (i === undefined) break; order.push(CREW.breach[i].join(",")); gone.add(i); }
+    assertEqual(order.join(" "), "0,0 1,0 -1,0 0,1 1,1 -1,1");
+    const b = breachBlock({ x: 10, y: 64, z: 5 }, { x: 0, z: 1 }, 4);
+    assertEqual(JSON.stringify(b), JSON.stringify({ x: 10, y: 65, z: 6 }));
+  },
+  "the trebuchet sets up 40 blocks outside the wall, turning aside when the line is blocked": () => {
+    const s = setupSpot({ x: 0, z: 0 }, 30, { x: 0, z: 100 });
+    assert(Math.abs(Math.hypot(s.x, s.z) - 70) < 0.01, "70 from the centre = 40 outside a 30 wall");
+    let first = true;
+    const t = setupSpot({ x: 0, z: 0 }, 30, { x: 0, z: 100 }, () => { const ok = !first; first = false; return ok; });
+    assert(t && Math.abs(t.angle) > 0.05, "moved round the wall");
+  },
+  "never aims by the gate": () => {
+    assert(nearGate({ x: 10, z: 10 }, { x: 11, z: 12 }));
+    assert(!nearGate({ x: 10, z: 10 }, { x: 20, z: 10 }));
+  },
+});
+addTests("warwrit-aim", {
+  "a crew's boulder lands on the block it aims at, 40 blocks off": () => {
+    const start = { x: 0, y: 70, z: 0 }, target = { x: 3, y: 65.5, z: -40 };
+    const aim = aimFor(start, target);
+    assert(aim, "an aim is found");
+    const pos = { ...start }, vel = velocityOf(aim);
+    const dt = 1 / 20 / THROW.substeps;
+    let best = Infinity;
+    for (let n = 0; n < 2000; n++) { stepFlight(pos, vel, dt); best = Math.min(best, Math.hypot(pos.x - target.x, pos.y - target.y, pos.z - target.z)); }
+    assert(best < 1, `passes within a block (${best.toFixed(2)})`);
+  },
+});

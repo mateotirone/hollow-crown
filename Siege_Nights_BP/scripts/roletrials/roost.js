@@ -3,14 +3,19 @@
 //   the roll of the fallen   every rider whose dragon died, read out by Kesh ("Read me the roll")
 //   the cadets               three cadets who train beside you: Bram Tallow, Senna Vey, Pim Ashgrove. They are
 //                            people in Kesh's world, told in short beats as your trial goes; one doesn't come back.
-//                            (NPC riders on their own dragons are a later piece.) Senna stands in for you, alone,
-//                            at the Rift stage of the Morvane fight.
+//                            The two who live fly their own dragons: when you are the only Dragon Rider about and
+//                            take to the air on a siege night, Senna flies at your wing (and Pim too, from
+//                            Wing-Sworn), burning raiders near you. Senna also stands in, alone, at the Rift stage.
 //   the bond gift            when your dragon's bond fills, she picks a Wing skill for you: two free skill points
 //   the Knight-Commander     names the Order: keep "the Ashen Gate" or found it again under a name they choose
 
 import { world, system } from "@minecraft/server";
 import { ModalFormData } from "@minecraft/server-ui";
-import { on, emit, moduleStore, addTests, assert, assertEqual } from "../siege/api.js";
+import { on, emit, onTick, isReady, moduleStore, addTests, assert, assertEqual } from "../siege/api.js";
+import { isSiegeNight } from "../reach/api.js";
+import { RANKS, rankOf } from "../townhall/skills.js";
+import { inTollWindow } from "./logic.js";
+import { heroOf } from "./saves.js";
 import { sfx } from "../core/sfx.js";
 
 // Seeded with what Kesh has already lost. Entries: { rider, dragon, how }
@@ -65,6 +70,38 @@ on("dragonBondFull", ({ owner, name }) => {
   sfx(player, "mob.enderdragon.growl", { pitch: 1.4, volume: 0.4 });
 });
 
+// ---------- the cadets at your wing ----------
+// Who flies with a lone rider: Senna always, Pim from the given rank on. Bram is on the roll.
+export const WINGMEN = [
+  { id: "senna", name: "Senna Vey on Wrenna", species: "cinderwing", from: 0, radius: 7, height: 2 },
+  { id: "pim", name: "Pim Ashgrove on Moss", species: "wyvern", from: 2, radius: 10, height: 4 },
+];
+export const wingmenFor = (rankIndex) => WINGMEN.filter((w) => rankIndex >= w.from);
+
+const onDragonWing = (p) => {
+  try {
+    const mount = p.getComponent("minecraft:riding")?.entityRidingOn;
+    return mount?.typeId === "siege:dragon" && !!mount.getProperty("siege:flying");
+  } catch { return false; }
+};
+
+onTick("roletrials_wingmen", 40, () => {
+  if (!isReady()) return;
+  let siege = false;
+  try { siege = isSiegeNight(); } catch { return; }
+  if (!siege || inTollWindow(world.getTimeOfDay())) return; // they won't fly through the toll either
+  const riders = world.getPlayers().filter((p) => heroOf(p).path === "rider");
+  if (riders.length !== 1) return; // a stand-in, for when you're the only one
+  const [player] = riders;
+  if (!onDragonWing(player)) return;
+  const hero = heroOf(player);
+  const rank = rankOf("rider", hero.skills ?? {});
+  const index = Math.max(0, RANKS.rider.findIndex((r) => r.name === rank?.name));
+  for (const w of wingmenFor(index)) {
+    emit("npcDragonFly", { key: `cadet_${w.id}_${player.id}`, name: w.name, species: w.species, follow: player, radius: w.radius, height: w.height, every: 70, damage: 6, ttl: 80 });
+  }
+});
+
 // ---------- the Knight-Commander names the Order ----------
 on("rankUp", ({ player, path, rank }) => {
   if (path !== "knight" || rank !== "Knight-Commander" || !player) return;
@@ -95,6 +132,10 @@ addTests("roletrials", {
     const names = rollNames([{ rider: "Ada", dragon: "Ember", how: "fell" }]);
     assertEqual(names.length, 4);
     assert(names[0].includes("Sable"));
+  },
+  "the cadets at your wing: Senna from the start, Pim from Wing-Sworn": () => {
+    assertEqual(wingmenFor(0).map((w) => w.id), ["senna"]);
+    assertEqual(wingmenFor(2).map((w) => w.id), ["senna", "pim"]);
   },
   "an order's name is cleaned, and short names keep the old one": () => {
     assertEqual(cleanOrderName("  §6The  Grey   Watch!! "), "The Grey Watch");

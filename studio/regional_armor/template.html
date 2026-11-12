@@ -1,0 +1,192 @@
+<title>Regional Player Armour</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600&display=swap">
+<style>
+:root {
+  --bg: #ece8e1; --panel: #f6f3ee; --ink: #24212a; --muted: #6c6672; --line: #d5cfc6; --accent: #7a2a26; --stage: #cfc8bd; --stage2: #b9b1a5;
+  --display: "Cinzel", Georgia, serif; --body: "Inter", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #17151b; --panel: #201d25; --ink: #ebe6ee; --muted: #9d96a3; --line: #34303b; --accent: #d5776e; --stage: #2a2630; --stage2: #1d1a22; color-scheme: dark } }
+:root[data-theme="dark"] { --bg: #17151b; --panel: #201d25; --ink: #ebe6ee; --muted: #9d96a3; --line: #34303b; --accent: #d5776e; --stage: #2a2630; --stage2: #1d1a22; color-scheme: dark }
+html, body { height: 100%; margin: 0; }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); }
+.wrap { display: grid; grid-template-columns: minmax(260px, 340px) 1fr; gap: 16px; height: 100%; box-sizing: border-box;
+  padding-block: 16px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+aside { display: flex; flex-direction: column; gap: 14px; overflow-y: auto; min-width: 0; }
+h1 { font-family: var(--display); font-size: 1.45rem; margin: 0; letter-spacing: .02em; text-wrap: balance; }
+.sub { color: var(--muted); margin: 0; line-height: 1.45; }
+.lab { font-size: .7rem; text-transform: uppercase; letter-spacing: .09em; color: var(--muted); margin-bottom: 6px; font-weight: 600; }
+.row { display: flex; flex-wrap: wrap; gap: 6px; }
+button { font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; cursor: pointer; }
+button[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); color: var(--accent); font-weight: 600; }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.info { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; line-height: 1.45; }
+.info b { font-family: var(--display); font-size: 1rem; }
+.info p { margin: 4px 0 0; color: var(--muted); }
+.icons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.icons figure { margin: 0; text-align: center; font-size: .72rem; color: var(--muted); }
+.icons img { width: 48px; height: 48px; image-rendering: pixelated; display: block; margin: 0 auto 2px; }
+main { position: relative; min-width: 0; min-height: 360px; border-radius: 10px; overflow: hidden; background: linear-gradient(var(--stage), var(--stage2)); }
+canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+.hint { position: absolute; left: 12px; bottom: 10px; font-size: .75rem; color: var(--muted); }
+.names { position: absolute; left: 0; right: 0; top: 10px; display: flex; justify-content: space-around; font-family: var(--display); font-size: .85rem; pointer-events: none; }
+@media (max-width: 760px) { .wrap { grid-template-columns: 1fr; height: auto; } main { height: 70vh; } aside { overflow: visible; } }
+</style>
+<div class="wrap">
+  <aside>
+    <div>
+      <h1>Regional Player Armour</h1>
+      <p class="sub">Every player armour in each region's look: iron, chainmail, diamond, netherite and Choirsteel. Same protection as the plain piece. Drag to turn, scroll to zoom.</p>
+    </div>
+    <div><div class="lab">Material</div><div class="row" id="mats"></div></div>
+    <div><div class="lab">Show</div><div class="row" id="views"></div></div>
+    <div id="regWrap"><div class="lab">Region</div><div class="row" id="regs"></div></div>
+    <div class="info" id="info"></div>
+    <div><div class="lab">Item icons</div><div class="icons" id="icons"></div></div>
+    <div class="info"><b>How players get it</b><p>Any region's Smith reforges a piece in that region's style for a few Regals, and keeps its enchantments, wear and name. Or at the Workshop: the piece plus that region's Castle Stone. Upgrading diamond to netherite, or netherite to Choirsteel, at a smithing table keeps the region.</p></div>
+  </aside>
+  <main><canvas id="c"></canvas><div class="names" id="names"></div><div class="hint">Drag to turn · scroll or pinch to zoom</div></main>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const DATA = __DATA__;
+const $ = (id) => document.getElementById(id);
+const D2R = Math.PI / 180;
+const texCache = {};
+function tex(uri) {
+  if (texCache[uri]) return texCache[uri];
+  const t = new THREE.TextureLoader().load(uri, () => render());
+  t.magFilter = THREE.NearestFilter; t.minFilter = THREE.NearestFilter; t.flipY = false;
+  return (texCache[uri] = t);
+}
+function cubeMesh(c, tw, th, mat) {
+  const inf = c.inflate || 0;
+  const [sx, sy, sz] = c.size, [ox, oy, oz] = c.origin;
+  const x0 = -(ox + sx) - inf, x1 = -ox + inf, y0 = oy - inf, y1 = oy + sy + inf, z0 = oz - inf, z1 = oz + sz + inf;
+  const [u, v] = Array.isArray(c.uv) ? c.uv : [0, 0], w = sx, h = sy, d = sz;
+  const fl = (a) => Math.floor(a);
+  const W = fl(w) === w ? w : Math.ceil(w), H = Math.ceil(h), Dd = Math.ceil(d);
+  // faces as [corners tl,tr,br,bl], uv rect [u0,v0,u1,v1] (viewed from outside)
+  let F = {
+    north: [[x1, y1, z0], [x0, y1, z0], [x0, y0, z0], [x1, y0, z0]], uvN: [u + Dd, v + Dd, u + Dd + W, v + Dd + H],
+    south: [[x0, y1, z1], [x1, y1, z1], [x1, y0, z1], [x0, y0, z1]], uvS: [u + 2 * Dd + W, v + Dd, u + 2 * Dd + 2 * W, v + Dd + H],
+    east: [[x1, y1, z1], [x1, y1, z0], [x1, y0, z0], [x1, y0, z1]], uvE: [u, v + Dd, u + Dd, v + Dd + H],
+    west: [[x0, y1, z0], [x0, y1, z1], [x0, y0, z1], [x0, y0, z0]], uvW: [u + Dd + W, v + Dd, u + 2 * Dd + W, v + Dd + H],
+    up: [[x1, y1, z1], [x0, y1, z1], [x0, y1, z0], [x1, y1, z0]], uvU: [u + Dd, v, u + Dd + W, v + Dd],
+    down: [[x1, y0, z0], [x0, y0, z0], [x0, y0, z1], [x1, y0, z1]], uvD: [u + Dd + W, v, u + Dd + 2 * W, v + Dd],
+  };
+  if (!Array.isArray(c.uv)) { // per-face uv
+    const pf = (k) => { const e = c.uv[k]; return e ? [e.uv[0], e.uv[1], e.uv[0] + e.uv_size[0], e.uv[1] + e.uv_size[1]] : [0, 0, 0, 0]; };
+    F.uvN = pf("north"); F.uvS = pf("south"); F.uvE = pf("east"); F.uvW = pf("west"); F.uvU = pf("up"); F.uvD = pf("down");
+  }
+  if (c.mirror) { const t = F.uvE; F.uvE = F.uvW; F.uvW = t; for (const k of ["uvN", "uvS", "uvE", "uvW", "uvU", "uvD"]) F[k] = [F[k][2], F[k][1], F[k][0], F[k][3]]; }
+  const pos = [], uvs = [], idx = [];
+  for (const [f, k] of [["north", "uvN"], ["south", "uvS"], ["east", "uvE"], ["west", "uvW"], ["up", "uvU"], ["down", "uvD"]]) {
+    const q = F[f], r = F[k], b = pos.length / 3;
+    if (r[0] === r[2] || r[1] === r[3]) continue;
+    q.forEach((p) => pos.push(...p));
+    uvs.push(r[0] / tw, r[1] / th, r[2] / tw, r[1] / th, r[2] / tw, r[3] / th, r[0] / tw, r[3] / th);
+    idx.push(b, b + 2, b + 1, b, b + 3, b + 2);
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute("uv", new THREE.Float32BufferAttribute(uvs, 2)); g.setIndex(idx); g.computeVertexNormals();
+  const m = new THREE.Mesh(g, mat);
+  if (c.rotation) { // cube rotation around its own pivot
+    const p = c.pivot || [0, 0, 0], grp = new THREE.Group();
+    grp.position.set(-p[0], p[1], p[2]); grp.rotation.order = "ZYX";
+    grp.rotation.set(-c.rotation[0] * D2R, -c.rotation[1] * D2R, c.rotation[2] * D2R);
+    m.position.set(p[0], -p[1], -p[2]); grp.add(m); return grp;
+  }
+  return m;
+}
+const PROXY = { "64,60": 0x6b4a2c, "72,60": 0x8a8d94, "80,60": 0xc9ccd2 };
+function proxyMat(uv) { return new THREE.MeshLambertMaterial({ color: PROXY[uv.join(",")] || 0x999999 }); }
+function buildGeo(geo, texUri, bonesOut, skip) {
+  const tw = geo.description ? geo.description.texture_width : geo.texturewidth || 64, th = geo.description ? geo.description.texture_height : geo.textureheight || 64;
+  const mat = new THREE.MeshLambertMaterial({ map: tex(texUri), alphaTest: 0.5, side: THREE.DoubleSide });
+  const root = new THREE.Group(), map = {};
+  for (const b of geo.bones) {
+    const g = new THREE.Group(); const p = b.pivot || [0, 0, 0];
+    g.userData = { pivot: [-p[0], p[1], p[2]], rest: (b.rotation || [0, 0, 0]).slice() };
+    g.rotation.order = "ZYX";
+    if (!(skip && skip(b))) for (const c of b.cubes || []) { const m = cubeMesh(c, tw, th, c.proxy ? proxyMat(c.proxy) : mat); m.position.x -= -p[0]; m.position.y -= p[1]; m.position.z -= p[2]; g.add(m); }
+    map[b.name] = g;
+  }
+  for (const b of geo.bones) {
+    const g = map[b.name], par = b.parent && map[b.parent];
+    const pp = par ? par.userData.pivot : [0, 0, 0];
+    g.position.set(g.userData.pivot[0] - pp[0], g.userData.pivot[1] - pp[1], g.userData.pivot[2] - pp[2]);
+    (par || root).add(g);
+    if (bonesOut) (bonesOut[b.name] = bonesOut[b.name] || []).push(g);
+  }
+  return root;
+}
+
+// ---------- scene ----------
+const canvas = $("c");
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+const scene = new THREE.Scene();
+const cam = new THREE.PerspectiveCamera(30, 1, 1, 2000);
+scene.add(new THREE.AmbientLight(0xffffff, 0.62));
+const sun = new THREE.DirectionalLight(0xffffff, 0.62); sun.position.set(-30, 60, -50); scene.add(sun);
+const fill = new THREE.DirectionalLight(0xffffff, 0.3); fill.position.set(40, 20, 40); scene.add(fill);
+const world = new THREE.Group(); scene.add(world);
+const PIECES = ["helmet", "chestplate", "leggings", "boots"];
+const st = { mat: "iron", view: "all", reg: "frostmarch", yaw: 0.0, pitch: 0.1, dist: 150 };
+
+function figure(mat, reg) {
+  const g = new THREE.Group();
+  g.add(buildGeo(DATA.body, DATA.skin, null, (b) => b.name === "cape"));
+  for (const p of PIECES) {
+    const k = `${mat}_${reg}_${p}`;
+    if (DATA.sets[k]) g.add(buildGeo(DATA.sets[k].geo, DATA.sets[k].tex));
+  }
+  return g;
+}
+function rebuild() {
+  while (world.children.length) world.remove(world.children[0]);
+  const regs = st.view === "all" ? DATA.regions : [st.reg];
+  const gap = 22;
+  regs.forEach((r, i) => { const f = figure(st.mat, r); f.position.x = -(i - (regs.length - 1) / 2) * gap; world.add(f); });
+  st.dist = st.view === "all" ? 190 : 100;
+  $("names").innerHTML = st.view === "all" ? DATA.regions.map((r) => `<span>${DATA.regionNames[r]}</span>`).join("") : "";
+  $("regWrap").style.display = st.view === "all" ? "none" : "";
+  $("info").innerHTML = `<b>${DATA.matNames[st.mat]}</b><p>${DATA.matNotes[st.mat]}</p>` + (st.view === "one" ? `<p><b style="font-size:.9rem">${DATA.regionNames[st.reg]}</b>: ${DATA.regionNotes[st.reg]}</p>` : "");
+  $("icons").innerHTML = (st.view === "all" ? DATA.regions : [st.reg]).map((r) => PIECES.map((p) => {
+    const k = `${st.mat}_${r}_${p}`; return `<figure><img alt="${DATA.names[k]}" title="${DATA.names[k]}" src="${DATA.icons[k]}">${st.view === "all" && p === "helmet" ? DATA.regionNames[r] : ""}</figure>`;
+  }).join("")).join("");
+  render();
+}
+function btns(el, items, isOn, onClick) {
+  el.innerHTML = "";
+  for (const [k, label] of items) {
+    const b = document.createElement("button"); b.textContent = label; b.setAttribute("aria-pressed", isOn(k));
+    b.onclick = () => { onClick(k); renderUi(); rebuild(); }; el.appendChild(b);
+  }
+}
+function renderUi() {
+  btns($("mats"), Object.entries(DATA.matNames), (k) => st.mat === k, (k) => (st.mat = k));
+  btns($("views"), [["all", "All five regions"], ["one", "One region, close"]], (k) => st.view === k, (k) => (st.view = k));
+  btns($("regs"), DATA.regions.map((r) => [r, DATA.regionNames[r]]), (k) => st.reg === k, (k) => (st.reg = k));
+}
+function render() {
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  if (canvas.width !== Math.floor(w * renderer.getPixelRatio()) || canvas.height !== Math.floor(h * renderer.getPixelRatio())) renderer.setSize(w, h, false);
+  cam.aspect = w / Math.max(1, h); cam.updateProjectionMatrix();
+  const t = new THREE.Vector3(0, 17, 0);
+  cam.position.set(t.x + Math.sin(st.yaw) * Math.cos(st.pitch) * st.dist * -1, t.y + Math.sin(st.pitch) * st.dist, t.z - Math.cos(st.yaw) * Math.cos(st.pitch) * st.dist);
+  cam.lookAt(t);
+  const names = $("names");   // seen from behind, the line-up reads the other way round
+  if (names.children.length) names.style.flexDirection = Math.cos(st.yaw) < 0 ? "row-reverse" : "row";
+  renderer.render(scene, cam);
+}
+let drag = null;
+canvas.addEventListener("pointerdown", (e) => { drag = [e.clientX, e.clientY]; canvas.setPointerCapture(e.pointerId); });
+canvas.addEventListener("pointermove", (e) => { if (!drag) return; st.yaw += (e.clientX - drag[0]) * 0.01; st.pitch = Math.max(-0.6, Math.min(1.2, st.pitch + (e.clientY - drag[1]) * 0.01)); drag = [e.clientX, e.clientY]; render(); });
+canvas.addEventListener("pointerup", () => (drag = null));
+canvas.addEventListener("wheel", (e) => { e.preventDefault(); st.dist = Math.max(30, Math.min(300, st.dist * (1 + e.deltaY * 0.001))); render(); }, { passive: false });
+window.addEventListener("resize", render);
+renderUi(); rebuild();
+</script>

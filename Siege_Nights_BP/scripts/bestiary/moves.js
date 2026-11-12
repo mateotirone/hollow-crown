@@ -86,6 +86,13 @@ export const MOVES = {
   "overhead",
   "rage"
  ],
+ "siege:bell_wife": [
+  "toll",
+  "tongue",
+  "muster",
+  "hush",
+  "rage"
+ ],
  "siege:choir_conductor": [
   "toll",
   "undertow",

@@ -528,7 +528,7 @@ In the real game the first claimant comes 5 days after Morvane falls, then one e
 - Kill it: chat tells everyone, you get a "Seal of <its name>", and the next `siege:pretender_rise` gives a different body, claim and name.
 - Leave one alive for 5 in-game days: a message says the seep is everywhere, and Seeps open more often.
 
-## After Morvane: the Five Chairs and the Homecomings (scripts/after/)
+## After Morvane: the Five Chairs, the Homecomings and the Deep (scripts/after/)
 
 Nothing here happens until Morvane has fallen (`/scriptevent siege:bestiary_summon morvane` and win, or test the pieces with the commands; they work any time in creative).
 
@@ -539,6 +539,15 @@ Nothing here happens until Morvane has fallen (`/scriptevent siege:bestiary_summ
 - On a third night after dark one envoy comes to one player in the overworld; at dawn they leave. The keep menu has "The Five Chairs" board.
 - `/scriptevent siege:homecoming_now` puts a stranger beside you. Click them: who they were, how they went down, who they look for, what they want. Bring it and their story ends one of four ways. Use a number (`siege:homecoming_now 42`) to get the same stranger again. If they are a copy, ring a bell near them: they should turn and walk away.
 - `/scriptevent siege:homecoming` shows who is here and when the next comes.
+
+### The Deep (scripts/after/deep.js)
+
+The Deep Door in the Vault opens only after Morvane has fallen. In creative, `/scriptevent siege:deep_go` takes you down any time (the first time it builds the halls; give it a few seconds).
+- You land on a small landing with a bell on a post. Ringing it takes you back up to the Vault, in front of the Deep Door. Using the Deep Door again takes you straight down.
+- Walk the long hall down three flights to the round Bell Room. A great bronze bell hangs over it. Step onto its floor: Ulfa, the Bell-Wife wakes (Boss Summon in the creative menu also calls her). She should warn before each move: the bell tolls (rings of marked floor with gaps), her breath (a frozen line toward you), from two thirds of her life she calls Grey Host spearmen, from a third she goes quiet and hurts anyone more than 6 blocks from her.
+- Before she falls, the grey seal at the far end of the Bell Room says who is behind it and does not open. When she falls it breaks, and she drops Ulfa's Bell. She comes back, ranked up, from the next day.
+- Beyond it, the Ranks: five companies of the Grey Host standing still on five tiers, facing a flat stone floor with a cracked bell-shaped hollow (kept for Everwake's Hollow Note trial). Click the serjeant in the middle of a company. Before Ulfa falls they only talk. After, choose: lead them out (your keep can hold 2 more guards; check the barracks guard limit), lay them to rest (16 Veil Ash and a named keepsake), or leave them. Either choice removes that company for everyone, and everyone is told.
+- `/scriptevent siege:deep` shows the state, `siege:deep_open` opens the seal without the fight, `siege:deep_reset` puts every company back and shuts the seal.
 
 ### Village happenings (mining villages)
 
@@ -603,6 +612,7 @@ Things I could not check without the game, so please look closely: that the stee
 13. **Station on claim.** On the real map, found a settlement on a plot. ✅ "A Halt is rising at …" and a Halt builds on the plot's stop by the graded rail bed, the post ending on its platform. The station menu shows "Extend the line" and "Buy an engine", but no carriage yet. Buy the first stretch. ✅ "Call the carriage" appears: it puts one coach on the platform facing the next stop, slow (about 4 blocks a second). Leave it empty for a minute ✅ it goes away. Buy an engine, place it, then pick it up and drop it in lava. ✅ The station menu now says "Take an engine (free)".
 14. **Switches.** Buy two stretches that leave a station the same way (west out of Kingsrest: toward Harrowford and toward Gull's Rest). Where they part, sneak + click the track with an empty hand. ✅ "Switch set: …" and the piece turns to the other line. Drive an engine out: it follows the way the switch is set. Drive back in along the other line ✅ the switch flips itself and the train runs through onto the shared track.
 15. **Rail gates.** Lay a straight run of Track and build a wall of iron bars (or any blocks) across it, 3 wide and 5 high. Walk up to it ✅ it stays shut. Put an engine on the track, drive at the wall ✅ the bars vanish a few blocks before the engine reaches them and come back once the train is about 9 blocks past.
+16. **Line trains.** Lay a stretch of a line (`/scriptevent siege:trains lay <stretch>`), wait for the track to finish, then stand at one of its stations. Within a few seconds a train with two coaches should be there or roll in by itself. It should stand about 20 seconds, show the stop's name, then leave for the next stop and come back. Get in a coach and ride: does it slow smoothly into the platform, and does it stop beside it? Walk far away and return: is there still exactly one train? `/scriptevent siege:trains lines` says where each line's train is. Park your own train at the platform: the line train should take the passing loop.
 
 ## Sounds (scripts/sound/, SOUND-LIST.md)
 
@@ -664,9 +674,10 @@ Build the showcase (`/scriptevent siege:showcase`) in a flat Creative world, the
 
 Shortcuts: `/scriptevent siege:role_trial <rider|forgemaster|captain|witch> [step]` starts a trial or finishes one step; `siege:role_trial reset` forgets them. On the real map, the map builder marks the Span (`/scriptevent siege:role_mark span_start` and `span_end`) and the graves (`siege:role_mark grave`).
 10. Turns and stands: reach rank 4 and rank 5 in a regional role (spend points in its branch) and talk to the mentor each time: a new scene each. A Knight reaching Knight-Commander gets a box to name the Order.
-11. The Morvane fight with roles: `/scriptevent siege:bestiary_summon morvane`, then `/scriptevent siege:morvane_skip N` for N = 2 to 7. Alone with no role, a named student is announced at stages 2 to 6 (knights spawn at 3, the river buffs at 4, burns every 16 s at 5, slow falling at 6). With a top-rank role, your name is announced instead.
+11. The Morvane fight with roles: `/scriptevent siege:bestiary_summon morvane`, then `/scriptevent siege:morvane_skip N` for N = 2 to 7. Alone with no role, a named student is announced at stages 2 to 6 and fights beside you: Hrafn (man-at-arms) at 2, Dame Orla and Sir Benedict (knights) at 3, Jory Holt (crossbowman) and the river buffs at 4, Senna Vey on a dragon circling high and breathing fire on Morvane every 8 s at 5, slow falling at 6. Each leaves when the stage changes; Senna climbs away. With a top-rank role, your name is announced instead.
 12. Ask Kesh "Read me the roll": three names to start, Bram Tallow's after the first hatching in the world, and every dragon that dies after that. Fill a dragon's bond (`/scriptevent siege:dragons_grow`): two Wing points arrive.
 13. The 3:17 toll: `/scriptevent siege:reach_night counted`, then `/time set 20900`, fly a grown dragon. ✅ At 03:00 (21000) she glides down with a "won't fly" line and won't take off until 03:30 (`/time set 21500`). On a normal night she flies. As a Dragonlord (top Wing rank), fly into or take off in the window: ✅ "The Unflown Night" title, the toll, raiders within 256 blocks glow; she keeps flying, with no second title that night, and the same happens on the next siege night.
+14. Cadets at your wing: as the only Dragon Rider online, `/scriptevent siege:reach_night counted`, then fly. ✅ Senna Vey on Wrenna circles close beside you and breathes fire at raiders and monsters near you every few seconds; with 8+ Wing points (Wing-Sworn) Pim Ashgrove on Moss circles wider too. Land and they climb away within about 5 s. On a quiet night, or with a second Dragon Rider online, nobody comes. At 03:00 to 03:30 they leave like any dragon.
 ## The Hollow's middle stretch (lore/hollow.js, undertow/story.js)
 
 Mateo approved the beats 2026-11-11 (doc "The Hollow's middle stretch: story beats"). Words: `lore/data/hollow_story.js` and the Carter in `lore/data/dialogue.js`. Places, the Carter's position, the Court door: `undertow/story.js`.

@@ -6,7 +6,7 @@
 // Returned) does not know it. "the dark", "below", "down there" are how they speak of the Hollow.
 
 export const FIRST = ["Wenna", "Pell", "Odo", "Mags", "Tibby", "Hale", "Bryony", "Cobb", "Elsa", "Jory", "Nim", "Rowan", "Sabine", "Tam",
-  "Una", "Wat", "Isolde", "Kit", "Lettice", "Abel", "Merry", "Noll", "Prue", "Ansel"];
+  "Una", "Wat", "Isolde", "Kit", "Lettice", "Abel", "Merry", "Noll", "Prue", "Joss"];
 export const FAMILY = ["Fenwick", "Ashby", "Coombe", "Dunmore", "Harrow", "Kettle", "Larch", "Mossop", "Nethers", "Pike", "Reedy", "Sallow",
   "Thorne", "Underhill", "Waddle", "Yarrow", "Bellweather", "Cresset", "Drury", "Gale"];
 

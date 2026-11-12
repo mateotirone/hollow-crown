@@ -25,7 +25,7 @@ export const seneschalSite = defineSite({
   name: "The Faceless Vault",
   boss: "seneschal",
   key: SEAL,
-  anchor: { x: 850, z: 516 }, // the south edge of Sunscar (its ward is 80 round 850, 450)
+  anchor: { x: 850, z: 590 }, // open desert just south of Sunscar (its houses reach z 531), the gate facing the town
   reach: 40,
   emptyText: "§7A round seal set into the wall, worn perfectly smooth. Something is meant to be pressed into it.",
   *plan(dim, anchor) {

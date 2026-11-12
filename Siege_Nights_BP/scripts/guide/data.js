@@ -292,8 +292,19 @@ export const ENTRIES = [
     tip: "Traders buy what their trade needs. Each has only so much appetite a day, and pays less once they've had plenty.",
     page: "Every town has traders: a farmer, woodcutter, quarryman, smith, fisher, hunter, herbalist and the Moneyer, and a Guild Factor with orders. Click one to sell to them or buy from them.\n\n"
       + "Prices differ from region to region. Each trader only wants so much a day: past that they pay less, and in the end they stop buying until tomorrow.\n\n"
-      + "§fThe Moneyer§r buys iron ingots and emeralds. He takes every iron ingot you bring at full price, with no daily limit (iron golems never appear, so iron only comes from mining). He also trades metal up one step: 4 iron for a gold ingot, 8 gold for a diamond, 6 diamonds for a netherite scrap. It is dear, but anything can always be bought. Each region's Smith sells that region's Castle Guard armour.",
+      + "§fThe Moneyer§r buys iron ingots and emeralds. He takes every iron ingot you bring at full price, with no daily limit (iron golems never appear, so iron only comes from mining). He also trades metal up one step: 4 iron for a gold ingot, 8 gold for a diamond, 6 diamonds for a netherite scrap. It is dear, but anything can always be bought. Each region's Smith sells that region's Castle Guard armour, and reforges any armour you bring in that region's style.",
     when: ["talk:tag:siege_job"],
+  },
+
+  {
+    id: "regional_armour", ch: "coin", title: "Regional armour",
+    tip: "This armour is cut in a region's style. Any Smith can reforge your armour in his own region's look.",
+    page: "Every region dresses its armour its own way: plain bright iron and a red surcoat in the Vale, blued steel and fur in Frostmarch, salt-bleached steel and sea-glass in Saltreach, smoke-dark steel and a face veil in the Emberwaste, blackened lamellar and a hood in Blackfen.\n\n"
+      + "Iron, chainmail, diamond and netherite all come in every region's look. A regional piece protects exactly as much as the plain one: only the look changes.\n\n"
+      + "§fAt a Smith:§r choose Reforge armour, and he reforges any piece you wear or carry in his region's style for a few Regals. It keeps its enchantments, its wear and its name. Armour trims come off in the forge.\n\n"
+      + "§fAt a Workshop:§r the plain piece and that region's Castle Stone make a new regional piece (the Vale uses plain Castle Stone).\n\n"
+      + "Upgrading regional diamond to netherite at a smithing table keeps the region.",
+    when: ["iron", "chainmail", "diamond", "netherite", "choirsteel"].flatMap((m) => ["vale", "frostmarch", "saltreach", "emberwaste", "blackfen"].map((r) => `carry:siege:${m}_${r}_*`)),
   },
 
   // ---------------- Roads, rails and horses ----------------
@@ -567,7 +578,7 @@ export const ENTRIES = [
     tip: "Click another settlement's Keep Banner to declare war on it, or send a demand.",
     page: "To besiege another player, click their §fKeep Banner§r and choose §fDeclare war§r. Grounds: they hold a relic, attacked your settlement in the last few days, refused your demand, or are an §fOathbreaker§r. A War Writ costs 320 Regals and the whole server is told.\n\n"
       + "§fNo grounds?§r You can still declare, but it is an unjust war: it costs three times as much, their defences are twice as strong, and you are an Oathbreaker for three days, whom anyone may declare war on.\n\n"
-      + "§fYour army:§r when you declare, a slider picks how much of your army rides with you (none, a quarter, half, three quarters or all); the rest guard home. They follow you on horseback until the siege ends, round water by the nearest bridge, get off their horses near the enemy and gather at their gate.\n"
+      + "§fYour army:§r when you declare, a slider picks how much of your army rides with you (none, a quarter, half, three quarters or all); the rest guard home. They follow you on horseback until the siege ends, round water by the nearest bridge, get off their horses near the enemy and gather at their gate. Siege crews bring their own engines: trebuchets widen one hole by their vault, rams take the gate, Sappers plant charges.\n"
       + "§fMuster:§r their gates shut at once. The assault comes at the next nightfall, at least three minutes away.\n"
       + "§fAssault:§r one night, to dawn, whether or not they are online. Their walls, vault and Regal Safe can be broken, and their guards go for you. Their Keep Banner can't be taken.\n"
       + "§fWinning:§r crack their vault before dawn and you win; the vault stays open to you until dawn. If dawn comes first, they win. Either way the win counts towards growing your settlement, and there is peace between you for three days.\n\n"

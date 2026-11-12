@@ -167,9 +167,17 @@ def segment_works(cells, ys, ground, water, region, log=print):
                     elif top < lo:
                         for y in range(top + 1, lo): W.put(cx, y, cz, "dirt", over=False)
                         W.put(cx, lo, cz, "grass_block", over=False)
-    # the track's own cells and the 3 above stay open: the trains lay track only into air, on the deck below
+    # the train's body stays open: the track cell and one cell each side, 4 high (an engine is 3.1 wide, 3.8 tall).
+    # This trims bridge-end parapets and abutments where the line curves off the bridge axis, and a portal arch's
+    # shoulders, back to a clear 3 x 4 opening; decks (y - 1) and tunnel linings (y + 4, ring 2) are untouched.
     for (x, z), y in zip(cells, ys):
         for k in range(4): W.put(x, y + k, z, "air")
+    for (x, z), y in zip(cells, ys):                 # the sides only where the works built something (no extra columns)
+        for dx in (-1, 0, 1):
+            for dz in (-1, 0, 1):
+                for k in range(4):
+                    b = W.blocks.get((x + dx, y + k, z + dz))
+                    if b and b[0] not in ("air", "minecraft:air"): W.put(x + dx, y + k, z + dz, "air")
     cols, pal = W.columns()
     return cols, pal, sorted(custom)
 
@@ -190,7 +198,8 @@ def _selftest():
     air = {(x, y, z) for x, z, y0, y1, i in cols if i == 0 for y in range(y0, y1 + 1)}
     assert all((130, y, 0) in air for y in range(71, 75))
     solid = {(x, y, z) for x, z, y0, y1, i in cols if i != 0 for y in range(y0, y1 + 1)}
-    assert not any((x, y, z) in solid for (x, z), y in zip(cells, ys))   # track cells stay air
+    assert not any((x + dx, y + k, z + dz) in solid for (x, z), y in zip(cells, ys)
+                   for dx in (-1, 0, 1) for dz in (-1, 0, 1) for k in range(4))   # the train's body stays air
     print("railworks: ALL OK", len(cols), "columns", len(pal), "palette")
 
 

@@ -388,6 +388,16 @@ step("Sounds");
   console.log(`${Object.keys(defs).length} custom sounds defined, ${installed} recordings installed, ${direct} direct playSound calls`);
 }
 
+// ---------- 2d. build catalog ----------
+// Every build, designed or not, is listed in builds/catalog.json (tools/build-catalog.mjs).
+step("Build catalog");
+{
+  const r = spawnSync(process.execPath, [join(TOOLS, "build-catalog.mjs"), "--check"], { encoding: "utf8" });
+  for (const line of (r.stdout || "").split("\n").filter(Boolean)) fail(line);
+  if (r.status !== 0 && !(r.stdout || "").trim()) fail("tools/build-catalog.mjs --check failed: " + (r.stderr || "").trim().split("\n").pop());
+  if (r.status === 0) console.log(`${JSON.parse(readFileSync(join(ROOT, "builds/catalog.json"), "utf8")).builds.length} builds listed, CATALOG.md up to date`);
+}
+
 // ---------- 3. deep check (optional) ----------
 step("Undefined names and unused imports");
 await deepCheck();

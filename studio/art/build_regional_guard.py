@@ -284,24 +284,29 @@ def tier_ramps(reg, ramps, tier):
     return new, trim, lea
 
 
-os.makedirs(T + 'models/armor', exist_ok=True)
-sheet = Image.new('RGBA', (5 * 216 + 8, 300 * len(TIERS)), (38, 34, 46, 255))
-for t, tier in enumerate(TIERS):
-    for i, reg in enumerate(REG):
-        l1, l2, ramps = build(reg)
-        met, trim, lea = ramps
-        nmet, ntrim, _ = tier_ramps(reg, ramps, tier)
-        if tier:
-            l1, l2 = (retone(retone(im, met, nmet), trim, ntrim) for im in (l1, l2))
-            if reg == 'frostmarch':   # mostly wool and fur: the quilting takes the tier's colour too
-                l1, l2 = (retone(im, WOOL, dim(nmet, 1)) for im in (l1, l2))
-        name = f'{reg}_{tier}' if tier else reg
-        l1.save(T + f'models/armor/guard_{name}_layer_1.png'); l2.save(T + f'models/armor/guard_{name}_layer_2.png')
-        for n, im in enumerate((l1, l2)):
-            v = im.copy(); v.putalpha(im.getchannel('A').point(lambda a: 255 if a else 0))
-            sheet.alpha_composite(v.resize((192, 96), Image.NEAREST), (8 + i * 216, 8 + n * 104 + t * 300))
-        for j, pc in enumerate(PIECES):
-            ic = icon(reg, pc, tier_ramps(reg, ramps, tier)); ic.save(T + f'items/siege_guard_{name}_{pc}.png')
-            sheet.alpha_composite(ic.resize((44, 44), Image.NEAREST), (8 + i * 216 + j * 48, 224 + t * 300))
-os.makedirs(ROOT + 'art', exist_ok=True)
-sheet.save(ROOT + 'art/regional-guard-armor.png'); print('ok')
+def main():
+    os.makedirs(T + 'models/armor', exist_ok=True)
+    sheet = Image.new('RGBA', (5 * 216 + 8, 300 * len(TIERS)), (38, 34, 46, 255))
+    for t, tier in enumerate(TIERS):
+        for i, reg in enumerate(REG):
+            l1, l2, ramps = build(reg)
+            met, trim, lea = ramps
+            nmet, ntrim, _ = tier_ramps(reg, ramps, tier)
+            if tier:
+                l1, l2 = (retone(retone(im, met, nmet), trim, ntrim) for im in (l1, l2))
+                if reg == 'frostmarch':   # mostly wool and fur: the quilting takes the tier's colour too
+                    l1, l2 = (retone(im, WOOL, dim(nmet, 1)) for im in (l1, l2))
+            name = f'{reg}_{tier}' if tier else reg
+            l1.save(T + f'models/armor/guard_{name}_layer_1.png'); l2.save(T + f'models/armor/guard_{name}_layer_2.png')
+            for n, im in enumerate((l1, l2)):
+                v = im.copy(); v.putalpha(im.getchannel('A').point(lambda a: 255 if a else 0))
+                sheet.alpha_composite(v.resize((192, 96), Image.NEAREST), (8 + i * 216, 8 + n * 104 + t * 300))
+            for j, pc in enumerate(PIECES):
+                ic = icon(reg, pc, tier_ramps(reg, ramps, tier)); ic.save(T + f'items/siege_guard_{name}_{pc}.png')
+                sheet.alpha_composite(ic.resize((44, 44), Image.NEAREST), (8 + i * 216 + j * 48, 224 + t * 300))
+    os.makedirs(ROOT + 'art', exist_ok=True)
+    sheet.save(ROOT + 'art/regional-guard-armor.png'); print('ok')
+
+
+if __name__ == '__main__':
+    main()

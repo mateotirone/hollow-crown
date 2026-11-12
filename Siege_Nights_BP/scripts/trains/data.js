@@ -8,6 +8,7 @@ export const NO_COLOR = 16; // siege:color for a train with no settlement: the r
 
 // Speeds are in blocks per tick (20 ticks a second). A vanilla minecart tops out at 0.4.
 export const TRAIN = {
+  keepApart: 3, // a train stops this many blocks short of another train on its track
   maxSpeed: 1.6, // 32 blocks a second flat out: four times a minecart (Mateo, 2026-11-12)
   reverseSpeed: 0.15,
   accel: 0.012, // per tick while the driver holds forward
@@ -68,6 +69,36 @@ export function limitAhead(head, dist, get) {
   }
   return limit;
 }
+
+// The track blocks a train stands on ("x,y,z" keys), from its head back along its length
+export function blocksUnder(head, cars, get) {
+  const out = new Set(), len = trainLength(cars);
+  for (let d = 0; d <= len + 0.5; d += 0.5) {
+    const c = back(head, Math.min(d, len), get).cursor;
+    out.add(`${c.x},${c.y},${c.z}`);
+  }
+  return out;
+}
+
+// How far ahead of `lead` (the cursor at the end of the train that's leading) the first block in `taken` is, looking
+// `dist` blocks ahead. Infinity when the way is clear.
+export function clearAhead(lead, dist, get, taken) {
+  let c = { ...lead }, walked = -c.t;
+  for (let guard = 0; guard < 128 && walked <= dist; guard++) {
+    const shape = get(c.x, c.y, c.z);
+    if (!shape) break;
+    if (guard > 0 && taken.has(`${c.x},${c.y},${c.z}`)) return Math.max(0, walked);
+    walked += blockLength(c);
+    const next = follow(c, shape, c.to, get);
+    if (!next) break;
+    const from = (c.to + 4) % 8;
+    c = { x: next.x, y: next.y, z: next.z, from, to: next.shape.links[0] === from ? next.shape.links[1] : next.shape.links[0], t: 0 };
+  }
+  return Infinity;
+}
+
+// The fastest a train may go with another train `gap` blocks ahead: it brakes to a stand `keep` blocks short of it
+export const speedForGap = (gap, keep = TRAIN.keepApart) => (gap === Infinity ? Infinity : Math.sqrt(2 * TRAIN.brake * Math.max(0, gap - keep)) * 0.9);
 
 // One tick of speed. throttle: 1 forward, -1 back/brake, 0 coast. Returns the new speed.
 export function stepSpeed(v, throttle, { downhill = 0, limit = Infinity } = {}) {

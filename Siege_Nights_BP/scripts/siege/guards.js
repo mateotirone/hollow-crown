@@ -335,6 +335,7 @@ export function guardTick() {
 
         if (guard.getDynamicProperty("siege:walking")) continue; // walking to its post or the Barracks (guardposts/walk.js)
         if (guard.hasTag(MARCHING_TAG)) continue; // marching to war with its owner (warwrit/army.js)
+        if (guard.getDynamicProperty("siege:brace")) continue; // bracing a gate or breach in a War Writ (warwrit/army.js)
         if (guard.getDynamicProperty("siege:idle") && !underAttack(owner)) continue; // strolling or going to bed (army/idle.js)
         const post = JSON.parse(guard.getDynamicProperty("siege:post") ?? "null");
         if (!post) continue;
