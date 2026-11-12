@@ -10,6 +10,8 @@
 //   on("settleFixture", ({ owner, kind, species, size, rotation, at, tier }))   trees and windmills, for the tree
 //     and windmill builders (a tree is not planted here; world trees come from the tree thread)
 //   on("townLaidOut", ({ owner, tier }))   a tier's groundwork is down
+//   lordTownAt(x, z), adoptTown(from, to)   Rival Lords build on the same layouts; a player can take one over
+//   on("townAdopted", ({ from, owner }))
 //   charterOf(owner) -> charterCheck result for the tier the town is at (charters.js)
 // Charters: siege wins decide the tier, but a town only grows past a tier once that tier's charter
 // (config.js CHARTERS) stands. Until then it waits, and grows by itself when the last building is finished.
@@ -19,10 +21,10 @@ import { world, system, BlockPermutation } from "@minecraft/server";
 import { isReady, keepOf, on, emit, moduleStore, TIERS, tierOf, getState } from "../siege/api.js";
 import { CORNERSTONE, halls, saveHalls, beginBuild } from "../townhall/townhall.js";
 import { buildFor } from "../townhall/build.js";
-import { REGION_TO_STYLE } from "./config.js";
+import { REGION_TO_STYLE, CONTENTS } from "./config.js";
 import { BENCH, registerBench } from "./mason.js";
 import { styleOf } from "./plans.js";
-import { wallOf, raiseWall, moveWall } from "./walls.js";
+import { wallOf, raiseWall, moveWall, adoptWall } from "./walls.js";
 import { wallShape } from "./walldata.js";
 import { charterCheck, charterText } from "./charters.js";
 import { BUILDINGS } from "./buildings.js";
@@ -149,23 +151,31 @@ function placeFixture(owner, town, f) {
     for (const [dx, dz] of [[-1, -1], [1, 1]]) for (let h = 1; h <= 2; h++) setAt(dim, { x: x + dx, y: y + h, z: z + dz }, "minecraft:spruce_fence");
     for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) setAt(dim, { x: x + dx, y: y + 3, z: z + dz }, "minecraft:spruce_slab", { "minecraft:vertical_half": "bottom" });
   } else if (f.kind === "mason_bench") {
+    if (town.lord) return; // a lord's town has no mason for players
     const block = dim.getBlock({ x, y, z });
     if (block && block.typeId !== BENCH) { block.setType(BENCH); registerBench(block, owner); }
   } else if (f.kind === "hall_cornerstone") {
-    foundHall(owner, town, { x, y, z });
+    if (town.lord) town.hallSeat = { x, y, z, ...hallFacing(town, { x, z }) }; // the lord raises it (rivals/index.js)
+    else foundHall(owner, town, { x, y, z });
   } else if (f.kind === "tree" || f.kind === "windmill") {
     emit("settleFixture", { owner, kind: f.kind, species: f.species, size: f.size, rotation: f.rotation ?? 0, stamp: f.stamp, at: { x, y, z }, tier: f.tier });
   }
+}
+
+// Which way the hall grows from its cornerstone: into the layout's hall ground
+function hallFacing(town, at) {
+  const box = layoutOf(town).hall[0];
+  const cx = town.x + (box[0] + box[2]) / 2, cz = town.z + (box[1] + box[3]) / 2;
+  const fx = Math.abs(cx - at.x) >= Math.abs(cz - at.z) ? Math.sign(cx - at.x) : 0;
+  const fz = fx ? 0 : Math.sign(cz - at.z) || 1;
+  return { fx, fz };
 }
 
 // The Longhouse, already paid for, growing away from the gate
 function foundHall(owner, town, at) {
   const old = halls()[owner];
   if ((old && !old.lost) || buildFor(owner)) return;
-  const box = layoutOf(town).hall[0];
-  const cx = town.x + (box[0] + box[2]) / 2, cz = town.z + (box[1] + box[3]) / 2;
-  const fx = Math.abs(cx - at.x) >= Math.abs(cz - at.z) ? Math.sign(cx - at.x) : 0;
-  const fz = fx ? 0 : Math.sign(cz - at.z) || 1;
+  const { fx, fz } = hallFacing(town, at);
   world.getDimension(OVERWORLD).getBlock(at)?.setType(CORNERSTONE);
   halls()[owner] = { x: at.x, y: at.y, z: at.z, fx, fz, level: 0, paid: Math.max(1, old?.paid ?? 0), best: old?.best ?? 0, style: old?.style ?? town.style, building: null, marks: {} };
   saveHalls();
@@ -178,8 +188,16 @@ export function markerSpot(town, slot) {
   return { x: town.x + seat.origin.dx, y: town.y + slot.dy + 1, z: town.z + seat.origin.dz };
 }
 
+// A plot that is gone for good: the level-5 town hall took its ground (hallmove.js)
+export function slotClosed(owner, slot) {
+  const town = townOf(owner);
+  if (town?.slots[slot.id]?.closed) return true;
+  return (slot.tags ?? []).includes("hall5") && (halls()[owner]?.level ?? 0) >= 5;
+}
+
 export function placeMarker(owner, slot) {
   const town = townOf(owner);
+  if (slotClosed(owner, slot)) return false;
   const at = markerSpot(town, slot);
   try {
     const block = world.getDimension(OVERWORLD).getBlock(at);
@@ -208,6 +226,7 @@ export function clearMarker(owner, slot) {
 
 function placeMarkers(owner, tier) {
   const town = townOf(owner);
+  if (town.lord) return; // nobody buys plots in a lord's town
   for (const slot of slotsOf(layoutOf(town))) {
     if (slot.tier !== tier || town.slots[slot.id]?.building) continue;
     placeMarker(owner, slot);
@@ -233,9 +252,16 @@ export function layOutTier(owner, tier, done = () => {}) {
 // ---------- founding and growing ----------
 
 // A town for owner round the Plot Stone at `at`, on map plot `plot` (its config entry). Returns a reason or true.
-export function foundTown(owner, plot, at, { style, layout } = {}) {
+// lord: true for a Rival Lord's town (owner is the lord's key, "npc:<plot id>"): no plot markers, no mason, and
+// the hall is left to the lord. A player founding on a plot where a lord's town stands takes that town over.
+export function foundTown(owner, plot, at, { style, layout, lord = false } = {}) {
   const tw = townFor(plot?.name);
   if (!tw) return "This plot has no town layout.";
+  if (!lord) {
+    const left = lordTownAt(at.x, at.z);
+    if (left) return adoptTown(left, owner) ? true : "That settlement already has a holder.";
+    if (townOf(owner)?.from && townOf(owner).x === at.x && townOf(owner).z === at.z) return true; // already taken over
+  }
   const dim = world.getDimension(OVERWORLD);
   if (!dim.getBlock(at)) return "That ground is not loaded yet.";
   const old = townOf(owner);
@@ -244,7 +270,7 @@ export function foundTown(owner, plot, at, { style, layout } = {}) {
   if (y === undefined) return "That ground is not loaded yet.";
   const pick = layout ?? pickLayout(tw, `${owner}:${plot.name}`);
   store.data.towns[owner] = {
-    plot: plot.name.toLowerCase(), layout: pick, x: at.x, y, z: at.z, tier: 0, laid: [false, false, false, false], slots: {},
+    plot: plot.name.toLowerCase(), layout: pick, x: at.x, y, z: at.z, tier: 0, laid: [false, false, false, false], slots: {}, ...(lord ? { lord: true } : {}),
     style: style ?? REGION_TO_STYLE[plot.region] ?? styleOf(owner, dim.getBlock(at)),
   };
   save();
@@ -256,18 +282,51 @@ export function foundTown(owner, plot, at, { style, layout } = {}) {
   return true;
 }
 
+// ---------- a lord's town changes hands ----------
+
+// The key of a Rival Lord's town standing round this Plot Stone, if any
+export function lordTownAt(x, z) {
+  return Object.keys(store.data.towns).find((k) => store.data.towns[k].lord && store.data.towns[k].x === x && store.data.towns[k].z === z);
+}
+
+// A player takes over a lord's town as it stands: layout, roads, every building on its plot, the tier its
+// buildings and wall reached. Its empty open plots get markers. The wall is handed over by rivals/index.js
+// (adoptWall). Returns false if there was nothing to take, or the player already has a town elsewhere.
+export function adoptTown(from, to) {
+  const town = store.data.towns[from];
+  if (!town || from === to) return false;
+  const mine = store.data.towns[to];
+  if (mine && !(mine.x === town.x && mine.z === town.z)) return false; // they keep the town they already have
+  delete store.data.towns[from];
+  delete town.lord;
+  delete town.hallSeat;
+  delete town.heldTier;
+  delete town.pendingTier;
+  town.from = from;
+  store.data.towns[to] = town;
+  for (const m of Object.values(store.data.markers)) if (m.owner === from) m.owner = to;
+  adoptWall(from, to); // the lord's wall (rivals/index.js does it too; whichever runs first wins)
+  save();
+  for (let t = 0; t <= town.tier; t++) if (town.laid[t]) placeMarkers(to, t);
+  emit("townAdopted", { from, owner: to });
+  return true;
+}
+
 // ---------- charters ----------
 
 // Every building the game can raise (plot designs and block buildings), for skipping charter lines not built yet
-const KNOWN = new Set([...BUILDINGS.map((b) => b.id), ...Object.keys(BLOCK_BUILDS).map((t) => t.replace(/^siege:/, ""))]);
+// (designs, block buildings, and anything that can be built by hand and registered: config.js CONTENTS)
+const KNOWN = new Set([...BUILDINGS.map((b) => b.id), ...Object.keys(BLOCK_BUILDS).map((t) => t.replace(/^siege:/, "")), ...CONTENTS.map((c) => c.id)]);
 
 // What stands in a town: finished plot buildings plus finished block buildings on its land
 export function builtCounts(owner) {
   const counts = { ...raisedCounts(owner) };
-  for (const st of Object.values(townOf(owner)?.slots ?? {})) if (st.building && st.done !== false) counts[st.building] = (counts[st.building] ?? 0) + 1;
+  for (const st of Object.values(townOf(owner)?.slots ?? {})) if (st.building && st.done !== false && !st.broken) counts[st.building] = (counts[st.building] ?? 0) + 1;
   return counts;
 }
-export const charterOf = (owner, tier = townOf(owner)?.tier ?? 0) => charterCheck(tier, builtCounts(owner), KNOWN);
+// A Rival Lord can only raise ready-made designs, so their charter skips what has none yet
+const DESIGNED = new Set(BUILDINGS.map((b) => b.id));
+export const charterOf = (owner, tier = townOf(owner)?.tier ?? 0) => charterCheck(tier, builtCounts(owner), townOf(owner)?.lord ? DESIGNED : KNOWN);
 
 // The highest tier the town may reach towards `tier`: it stops at the first tier whose charter isn't met
 function charterCap(owner, from, tier) {

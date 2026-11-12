@@ -24,20 +24,22 @@
 import { world, system, MolangVariableMap } from "@minecraft/server";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
 import { isReady, onTick, moduleStore, on, emit, addFilter, keepOf, guardOwner, guardTag, GUARD_TYPES, GUARD_ARMOR, armorTier,
-  upgradeGuard, barracksOf, nearestBarracks, setPost, countItem, settlementAt, addTests, assert, assertEqual } from "../siege/api.js";
+  upgradeGuard, barracksOf, nearestBarracks, setPost, countItem, settlementAt, underAttack, addTests, assert, assertEqual } from "../siege/api.js";
 import { applyFilter } from "../core/events.js";
 import { townOf, layoutOf } from "../settle/founding.js";
 import { slotsOf } from "../settle/towns.js";
 import { seatInWorld } from "../settle/plotmarker.js";
 import { BUILDING } from "../settle/buildings.js";
 import { wallOf } from "../settle/walls.js";
-import { WALLS, WALL_LEVELS, radiusAt } from "../settle/walldata.js";
+import { WALLS, WALL_LEVELS, radiusAt, wallColumns, wallShape, standHeight } from "../settle/walldata.js";
 import { raisedBuildings } from "../settle/raised.js";
 import { hallOf } from "../townhall/townhall.js";
 import { drawHall, HALL_TIERS } from "../townhall/halls.js";
 import { worldBox } from "../townhall/build.js";
 import { STYLES } from "../townhall/styles.js";
 import { sfx } from "../core/sfx.js";
+import { standY } from "./ground.js";
+import { walkTo, cancelWalk, isWalking, sweepMarkers, leadPoint, WALK } from "./walk.js";
 import { POSTS, wallPosts, buildingPosts, frontOf, numberPosts, skyCamera, yawOf, wallStand, compassOf } from "./posts.js";
 
 const OVERWORLD = "minecraft:overworld";
@@ -139,30 +141,6 @@ export function sitesFor(owner, fresh = false) {
 const allPosts = (sites) => sites.flatMap((s) => s.posts.map((p) => ({ ...p, site: s })));
 const postByKey = (owner, key) => allPosts(sitesFor(owner)).find((p) => p.key === key);
 
-// The block a guard stands in at a post: looking down from p.from for ground with two free blocks over it.
-// undefined while that ground isn't loaded.
-const OPEN = /(air|grass$|short_grass|tall_grass|fern|flower|snow_layer|tallgrass|dandelion|poppy|sapling|torch|carpet|button|pressure_plate|rail|vine|bush|deadbush)/;
-const standCache = new Map(); // "x,z,from" -> { y, tick }
-function standY(x, z, from) {
-  const key = `${x},${z},${from}`;
-  const hit = standCache.get(key);
-  if (hit && system.currentTick - hit.tick < 200) return hit.y;
-  let y;
-  try {
-    let freeAbove = 0;
-    for (let at = from + 2; at >= from - 24; at--) {
-      const block = dim().getBlock({ x, y: at, z });
-      if (!block) return undefined;
-      const open = block.isAir || OPEN.test(block.typeId);
-      if (!open && !block.isLiquid && freeAbove >= 2) { y = at + 1; break; }
-      freeAbove = open ? freeAbove + 1 : 0;
-    }
-  } catch {
-    return undefined;
-  }
-  standCache.set(key, { y, tick: system.currentTick });
-  return y;
-}
 const standOf = (p) => { const y = standY(p.x, p.z, p.from); return y === undefined ? undefined : { x: p.x, y, z: p.z }; };
 
 // Where the settlement is, for the camera: { x, y, z, radius }
@@ -176,24 +154,71 @@ function baseOf(owner) {
 
 // ---------- stationing ----------
 
-function placeOn(guard, owner, post) {
+// Where a guard stands at a post: the middle of the block, feet height, facing out
+function postDest(post) {
   const stand = standOf(post);
-  if (!stand) return false;
-  const at = { x: stand.x + 0.5, y: stand.y, z: stand.z + 0.5 };
-  const yaw = yawOf(post.out);
-  setPost(guard, { ...at, stand: true, yaw });
-  guard.setDynamicProperty(STATION, post.key);
-  mannedOf(owner)[post.key] = guard.id;
-  try { guard.teleport(at, { rotation: { x: 0, y: yaw } }); } catch { /* the tick brings it */ }
-  try { guard.playAnimation("animation.hc.guard.salute", { blendOutTime: 0.3 }); } catch { /* older engine: no salute */ }
+  return stand ? { x: stand.x + 0.5, y: stand.y, z: stand.z + 0.5, yaw: yawOf(post.out) } : undefined;
+}
+
+// Where a stationed guard waits while its watch is off: beside the nearest Barracks (its own spot of eight round it)
+const REST = [[2, 0], [-2, 0], [0, 2], [0, -2], [2, 2], [-2, 2], [2, -2], [-2, -2]];
+function restDest(guard, owner, near) {
+  const b = nearestBarracks(owner, dim(), near);
+  if (!b) return undefined;
+  let h = 0;
+  for (const c of String(guard.id)) h = (h * 31 + c.charCodeAt(0)) | 0;
+  for (let i = 0; i < REST.length; i++) {
+    const [dx, dz] = REST[(Math.abs(h) + i) % REST.length];
+    const y = standY(b.x + dx, b.z + dz, b.y + 3);
+    if (y !== undefined) return { x: b.x + dx + 0.5, y, z: b.z + dz + 0.5, yaw: yawOf({ x: -dx, z: -dz }) };
+  }
+  return undefined;
+}
+
+// The watch (POSTS.watch): is this stationed guard meant to be at its post right now?
+const isNight = () => { const t = world.getTimeOfDay(); return t >= POSTS.dusk && t < POSTS.dawn; };
+const period = () => `${world.getDay()}:${isNight() ? 1 : 0}`;
+export function onDuty(guard, owner) {
+  if (underAttack(owner)) return true; // a siege or a Wanted player on your land: everyone to their post
+  try { if (guard.getDynamicProperty("siege:hold") === period()) return true; } catch { /* fine */ } // just stationed: holds until the watch changes
+  if (POSTS.watch === "always") return true;
+  if (POSTS.watch === "shifts") {
+    let h = 0;
+    for (const c of String(guard.id)) h = (h * 31 + c.charCodeAt(0)) | 0;
+    return (Math.abs(h) % 2 === 0) !== isNight();
+  }
+  return isNight(); // "dusk": on the wall from dusk till dawn
+}
+
+const near = (a, b) => a && b && Math.abs(a.x - b.x) < 1 && Math.abs(a.z - b.z) < 1 && Math.abs(a.y - b.y) < 1.5;
+const postOf = (guard) => { try { return JSON.parse(guard.getDynamicProperty("siege:post") ?? "null"); } catch { return null; } };
+
+// Send a stationed guard where its watch says (its post, or the Barracks), walking. Returns false if not loaded.
+function sendOff(guard, owner, post, { salute = false } = {}) {
+  const atPost = postDest(post);
+  if (!atPost) return false;
+  const dest = onDuty(guard, owner) ? atPost : restDest(guard, owner, atPost) ?? atPost;
+  const current = postOf(guard);
+  if (near(current, dest) && (isWalking(guard) || !guard.getDynamicProperty("siege:walking"))) return true;
+  setPost(guard, { ...dest, stand: true });
+  walkTo(guard, owner, dest, { salute: salute || dest === atPost });
   return true;
+}
+
+function placeOn(guard, owner, post) {
+  if (!postDest(post)) return false;
+  guard.setDynamicProperty(STATION, post.key);
+  guard.setDynamicProperty("siege:hold", period());
+  mannedOf(owner)[post.key] = guard.id;
+  return sendOff(guard, owner, post, { salute: true });
 }
 
 export function unstation(guard, owner) {
   const key = stationOf(guard);
   const manned = mannedOf(owner);
   if (key && manned[key] === guard.id) delete manned[key];
-  try { guard.setDynamicProperty(STATION, undefined); } catch { /* gone */ }
+  try { guard.setDynamicProperty(STATION, undefined); guard.setDynamicProperty("siege:hold", undefined); } catch { /* gone */ }
+  cancelWalk(guard.id);
   const loc = guard.location;
   const home = guard.typeId === "siege:archer" ? undefined : nearestBarracks(owner, guard.dimension, loc);
   setPost(guard, home ? { x: home.x, y: home.y, z: home.z } : { x: loc.x, y: loc.y, z: loc.z });
@@ -231,11 +256,12 @@ on("guardRemoved", ({ id, owner }) => {
   let changed = false;
   for (const [k, v] of Object.entries(manned)) if (v === id) { delete manned[k]; changed = true; }
   if (changed) save();
+  cancelWalk(id);
 });
 
 // Every 5 seconds: posts whose building or wall is gone send their guard off duty; guards that are gone free their
 // post; and a guard whose post moved (the wall moved out with the town) walks to where it is now.
-onTick("guard_posts", 100, () => {
+function keepWatch() {
   if (!isReady()) return;
   for (const [owner, manned] of Object.entries(store.data.manned)) {
     if (!playerById(owner) || !Object.keys(manned).length) continue;
@@ -253,14 +279,22 @@ onTick("guard_posts", 100, () => {
       }
       if (stationOf(guard) !== key) { delete manned[key]; changed = true; continue; }
       if (!post) { unstation(guard, owner); changed = true; continue; }
-      const stand = standOf(post);
-      let p;
-      try { p = JSON.parse(guard.getDynamicProperty("siege:post") ?? "null"); } catch { p = null; }
-      if (stand && p && (Math.floor(p.x) !== stand.x || Math.floor(p.z) !== stand.z || p.y !== stand.y)) placeOn(guard, owner, post);
+      sendOff(guard, owner, post); // the watch changed, the wall moved out, or a walk was cut short by a restart
     }
     if (changed) save();
   }
-});
+  // archers from before guards could walk need their bow put back in their hands once
+  try {
+    for (const a of dim().getEntities({ type: "siege:archer" })) {
+      if (a.getDynamicProperty("siege:fightv") === 1 || a.getDynamicProperty("siege:walking")) continue;
+      a.triggerEvent("siege:fight");
+      a.setDynamicProperty("siege:fightv", 1);
+    }
+  } catch { /* fine */ }
+}
+onTick("guard_posts", 100, keepWatch);
+on("siegeStart", () => system.runTimeout(keepWatch, 2)); // the moment a siege starts, everyone heads for their post
+on("ready", () => system.runTimeout(sweepMarkers, 100));
 
 // ---------- the sky view and its markers ----------
 
@@ -531,6 +565,28 @@ addTests("guard posts", {
     assertEqual(door.out.x, 1);
     assertEqual(Math.round(yawOf({ x: 0, z: 1 })), 0);
     assertEqual(Math.round(yawOf({ x: 1, z: 0 })), -90);
+  },
+  "the walk marker leads the guard toward its post and stops on it": () => {
+    const p = leadPoint({ x: 0, z: 0 }, { x: 100, z: 0 });
+    assertEqual(Math.round(p.x), WALK.lead);
+    assert(!p.last, "still on the way");
+    const q = leadPoint({ x: 95, z: 0 }, { x: 100.5, z: 0.5 });
+    assert(q.last && q.x === 100.5 && q.z === 0.5, "on the post at the end");
+  },
+  "every wall a guard can stand on has its flights of steps, each top step beside the walk": () => {
+    for (const radius of [36, 46, 56, 66]) for (let level = 1; level <= 10; level++) {
+      const L = WALL_LEVELS[level];
+      const cols = wallColumns({ center: { x: 0, z: 0, shape: wallShape(`t${radius}`) }, radius, level, gateAngle: 1, smooth: new Array(WALLS.stations).fill(64) });
+      const steps = cols.filter((c) => c.role === "stair");
+      assertEqual(steps.length, WALLS.stairs * standHeight(L), `r${radius} level ${level}`);
+      const at = new Map(cols.map((c) => [`${c.x},${c.z}`, c]));
+      let off = 0;
+      for (const t of steps.filter((c) => c.last)) {
+        const ok = [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dz]) => ["walk", "wall", "landing"].includes(at.get(`${t.x + dx},${t.z + dz}`)?.role));
+        if (!ok) off++;
+      }
+      assert(off <= 1, `r${radius} level ${level}: ${off} flights end away from the walk`);
+    }
   },
   "posts are numbered 1..n across the wall and the buildings": () => {
     const sites = numberPosts([{ posts: [{ key: "a" }, { key: "b" }] }, { posts: [{ key: "c" }] }]);

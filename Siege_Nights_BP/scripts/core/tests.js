@@ -14,6 +14,8 @@ const tests = [];
 // trips the watchdog, which shuts the world down (first playtest, 2026-11-11). They still run in
 // tools/check.mjs, which fails if a slow test is missing from this list. Written as "group: name".
 export const OFFLINE_ONLY = new Set([
+  "hall build: every hall has a Town Board just inside, off the aisle, before the Tree",
+  "guard posts: every wall a guard can stand on has its flights of steps, each top step beside the walk",
   "settle walls: the ring has no holes, one gate, and follows the ground",
   "undertow: rebuilt sites stamp again over the old look, clearing only inside their site, and keep the Carter's spot clear",
   "settle: every building draws in every style with known roles",
@@ -32,6 +34,7 @@ export const OFFLINE_ONLY = new Set([
   "undertow: open country has all four kinds of land",
   "undertow: roads are dry and gentle, and cross rivers on bridges a boat fits under",
   "undertow: terrain is deterministic",
+  "undertow: path is walkable (no step over 1)",
   "undertow: the roof covers the land everywhere, 30 or more blocks up, under its unbreakable shell",
   "undertow: the roof is never flat: domes, sags and mixed rock",
   "undertow: the ground mixes several blocks in every kind of land",

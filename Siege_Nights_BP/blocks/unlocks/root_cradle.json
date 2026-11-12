@@ -1,0 +1,61 @@
+{
+  "format_version": "1.21.90",
+  "minecraft:block": {
+    "description": {
+      "identifier": "siege:root_cradle",
+      "menu_category": {
+        "category": "items"
+      },
+      "states": {
+        "siege:laid": [
+          0,
+          1
+        ]
+      }
+    },
+    "components": {
+      "minecraft:display_name": "tile.siege:root_cradle.name",
+      "minecraft:geometry": "minecraft:geometry.full_block",
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "siege_root_cradle_side",
+          "render_method": "opaque"
+        },
+        "up": {
+          "texture": "siege_root_cradle_top",
+          "render_method": "opaque"
+        },
+        "down": {
+          "texture": "siege_root_cradle_side",
+          "render_method": "opaque"
+        }
+      },
+      "minecraft:destructible_by_mining": false,
+      "minecraft:destructible_by_explosion": false,
+      "minecraft:map_color": "#6b4a2a",
+      "siege:clickable": {}
+    },
+    "permutations": [
+      {
+        "condition": "q.block_state('siege:laid') == 1",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_root_cradle_side",
+              "render_method": "opaque"
+            },
+            "up": {
+              "texture": "siege_root_cradle_top_laid",
+              "render_method": "opaque"
+            },
+            "down": {
+              "texture": "siege_root_cradle_side",
+              "render_method": "opaque"
+            }
+          },
+          "minecraft:light_emission": 3
+        }
+      }
+    ]
+  }
+}

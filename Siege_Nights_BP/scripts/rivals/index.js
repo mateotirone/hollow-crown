@@ -2,8 +2,11 @@
 // neighbours, rivals and someone to besiege even in single-player. Nothing here needs a second player.
 //
 // Each lord has a name, region, role ("knight" or "marked"), temperament, and a settlement that
-// climbs the same tiers players do. Their growth is simulated on siege nights; their buildings are
-// the settlement templates, raised in stages while a player is near. Numbers: data.js.
+// climbs the same tiers players do. Their growth is simulated on siege nights. Their town is laid out from
+// the same town layouts players get (settle/founding.js: roads, wall rings, plots), their hall rises on its
+// cornerstone, and their plots fill by the same plot and charter rules (settle/charters.js lordPick), raised
+// while a player is near. A player who takes the plot takes the town as it stands. Lords from older worlds
+// that already built on the old fixed layout carry on with it. Numbers: data.js.
 //
 // What other features can use:
 //   rivalLords()                      every living lord: { id, plot, region, x, y, z, name, role, temperament, tier, wins, held, relations, voice? }
@@ -38,6 +41,10 @@ import { drawBuilding, styleFor, BUILDING } from "../settle/buildings.js";
 import { wallOf, wallRising, raiseWall, bearingFor, gateDirFor, adoptWall } from "../settle/walls.js";
 import { WALL_LEVELS } from "../settle/walldata.js";
 import { raiseFree } from "../settle/plans.js";
+import { foundTown, townOf, layoutOf, growTown, slotClosed, builtCounts, saveTowns, adoptTown } from "../settle/founding.js";
+import { townFor, slotsOf, seatOnSlot, seatedBox } from "../settle/towns.js";
+import { lordPick } from "../settle/charters.js";
+import { BUILDINGS } from "../settle/buildings.js";
 import { levelSite, foundationColumns } from "../settle/ground.js";
 import { RIVALS, TIER_NAMES, LINES, STAGES, makeLord, radiusOf, wanted, night, nextPiece, partKey, hallSpot, partSpot, estateOf, winsForEstate, takeEstate } from "./data.js";
 import "./tests.js";
@@ -58,6 +65,14 @@ const save = () => store.save();
 const lordTag = (lord) => `siege_rival_${lord.id}`;
 const styleOfLord = (lord) => REGION_TO_STYLE[lord.region] ?? "vale";
 const fullName = (lord) => `${lord.name} of ${lord.plot}`;
+
+// A lord builds on the same town layouts and plots players do (settle/towns.js, founding.js, charters.js).
+// Lords from older worlds that already built on the old fixed layout carry on with it.
+const DESIGNS = new Set(BUILDINGS.map((b) => b.id));
+function usesTown(lord) {
+  if (lord.town === undefined) lord.town = lord.built.hall === 0 && lord.built.parts.length === 0 && !!townFor(lord.plot);
+  return lord.town;
+}
 
 export const rivalMode = () => store.data.mode ?? RIVALS.mode;
 export const rivalLords = () => lords();
@@ -151,6 +166,7 @@ on("siegeEnd", () => {
   const n = getState().siegeNumber ?? 0;
   for (const lord of lords()) {
     if (!night(lord, n)) continue;
+    if (lord.town && townOf(wallId(lord))) growTown(wallId(lord), lord.tier); // held back by the charter like anyone's
     emit("rivalRose", { lord, tier: lord.tier });
     for (const p of world.getPlayers()) p.sendMessage(`§6${fullName(lord)} now rules a ${TIER_NAMES[lord.tier]}.`);
   }
@@ -175,6 +191,7 @@ function buildTick() {
     keepLordHome(dim, lord);
     const id = `rival:${lord.id}`;
     if (buildFor(id) || sieges.has(lord.id)) continue;
+    if (usesTown(lord)) { townTick(dim, lord, id); continue; }
     const piece = nextPiece(lord);
     if (!piece) continue;
     const style = styleOfLord(lord);
@@ -217,6 +234,74 @@ function buildTick() {
       }).columns.unshift(...foundationColumns(plan));
     }
   }
+}
+
+// A lord on a town layout: found it, raise the hall on its cornerstone, then fill the plots by the charter rules
+function townTick(dim, lord, id) {
+  const key = wallId(lord);
+  const style = styleOfLord(lord);
+  let town = townOf(key);
+  if (!town) {
+    const plot = allPlots().find((p) => p.name === lord.plot) ?? { name: lord.plot, region: lord.region };
+    foundTown(key, plot, { x: lord.x, y: lord.y, z: lord.z }, { lord: true, style });
+    return;
+  }
+  if (lord.built.hall < town.tier + 1) {
+    if (!town.hallSeat) return; // the roads are still going down
+    const level = lord.built.hall + 1;
+    const plan = drawHall(level, STYLES[style]);
+    if (!lord.hallAt) {
+      lord.hallF = { x: town.hallSeat.fx, z: town.hallSeat.fz };
+      lord.hallAt = levelSite(dim, plan, town.hallSeat, lord.hallF).origin; // never half buried
+    }
+    let remove;
+    if (lord.built.hall > 0) {
+      const keepCells = new Set(worldCells(plan, lord.hallAt, lord.hallF).map((c) => `${c.x},${c.y},${c.z}`));
+      remove = worldCells(drawHall(lord.built.hall, STYLES[style]), lord.hallAt, lord.hallF)
+        .filter((c) => !keepCells.has(`${c.x},${c.y},${c.z}`)).sort((a, b) => b.y - a.y);
+    }
+    startBuild({
+      id, dimensionId: OVERWORLD, origin: lord.hallAt, forward: lord.hallF, plan, style: STYLES[style], remove,
+      perTick: Math.max(8, Math.ceil(plan.cells.size / 1200)),
+      onDone() { lord.built.hall = level; save(); },
+    }).columns.unshift(...foundationColumns(plan));
+    return;
+  }
+  // the next plot: picked once and remembered, so a build picked up again goes on the same plot at the same height
+  let job = lord.plotJob;
+  const slots = slotsOf(layoutOf(town));
+  if (!job) {
+    const open = slots.filter((s) => s.tier <= town.tier && town.laid[s.tier] && !town.slots[s.id]?.building && !slotClosed(key, s));
+    const fits = (bid, s) => !!seatOnSlot(s, drawBuilding(bid, style).bounds());
+    const pick = lordPick(open, town.tier, builtCounts(key), DESIGNS, fits, lord.id);
+    if (!pick) return;
+    job = lord.plotJob = { slot: pick.slot.id, building: pick.id };
+    save();
+  }
+  const slot = slots.find((s) => s.id === job.slot);
+  const plan = drawBuilding(job.building, style);
+  const seat = slot && seatOnSlot(slot, plan.bounds());
+  if (!seat) { delete lord.plotJob; save(); return; }
+  const at = { x: town.x + seat.origin.dx, y: town.y + seat.origin.dy, z: town.z + seat.origin.dz };
+  if (!Number.isFinite(job.lift)) { job.lift = Math.max(0, levelSite(dim, plan, at, seat.forward).lift); save(); }
+  const origin = { ...at, y: at.y + job.lift };
+  startBuild({
+    id, dimensionId: OVERWORLD, origin, forward: seat.forward, plan, style: styleFor(style),
+    perTick: Math.max(4, Math.ceil(plan.cells.size / 200)),
+    onDone() {
+      const box = seatedBox(seat, plan.bounds());
+      const t = townOf(key);
+      if (t) {
+        t.slots[job.slot] = { building: job.building, style, origin: at, forward: seat.forward, lift: job.lift, top: plan.bounds().y1 + job.lift, paid: 0, done: true,
+          box: { x0: t.x + box.x0, z0: t.z + box.z0, x1: t.x + box.x1, z1: t.z + box.z1 } };
+        saveTowns();
+        emit("settleCharter", { owner: key }); // a lord's town grows past a tier on the same charter
+      }
+      lord.built.parts.push(`plot:${job.slot}`);
+      delete lord.plotJob;
+      save();
+    },
+  }).columns.unshift(...foundationColumns(plan));
 }
 
 // A lord's wall keeps pace with their tier
@@ -356,7 +441,7 @@ function endSiege(lord, won) {
   const beaten = say(lord, "beaten", player);
   if (beaten) player?.sendMessage(`§7${lord.name}: §f${beaten}`);
   store.data.fallen.push(lord.name);
-  estates()[lord.plot] = { ...estateOf(lord), wall: wallId(lord) }; // whoever claims the plot starts from what stands there
+  estates()[lord.plot] = { ...estateOf(lord), wall: wallId(lord), town: !!lord.town }; // whoever claims the plot starts from what stands there
   removeLord(lord);
   emit("rivalFallen", { lord, player });
   for (const p of world.getPlayers()) p.sendMessage(`§6${lord.name} has fallen. ${lord.plot} stands empty, hall and all.`);
@@ -460,9 +545,13 @@ onTick("rivals_siege", 20, () => { if (isReady()) siegeTick(); });
 // The buildings and the wall change hands (can happen before the player has a keep)
 function adopt(player, estate) {
   if (estate.adopted) return;
+  const mine = townOf(player.id); // a player who already has a town elsewhere keeps theirs
+  if (estate.town && mine && !(mine.x === estate.x && mine.z === estate.z)) return;
   estate.adopted = player.id;
   const dim = world.getDimension(OVERWORLD);
   const style = REGION_TO_STYLE[allPlots().find((p) => p.name === estate.plot)?.region] ?? "vale";
+  // the town record, plots and all (founding.js); a player who already has a town elsewhere keeps theirs
+  if (estate.town) adoptTown(estate.wall, player.id); // false when founding already took it over: fine
   adoptWall(estate.wall, player.id);
   const old = halls()[player.id];
   if (estate.hall > 0 && estate.hallAt && (!old || old.lost)) {
@@ -478,8 +567,9 @@ function adopt(player, estate) {
     saveHalls();
     beginBuild(player.id, estate.hall, style); // the same hall on the same spot: this wakes its Tree of Oaths and rooms for the new owner
   }
-  // a town always has its library, even if the lord never got to it
-  STAGES.forEach((stage, tier) => stage.forEach((slot, i) => {
+  // a town always has its library, even if the lord never got to it (a town layout's library plot is the
+  // player's to raise; the old fixed layout gets it now)
+  if (!estate.town) STAGES.forEach((stage, tier) => stage.forEach((slot, i) => {
     if (!slot.arrival || estate.parts.includes(partKey(tier, i)) || !estate.gateDir) return;
     const spot = partSpot(estate, estate.gateDir, slot);
     const y = surface(dim, spot.x, spot.z, undefined);
@@ -495,7 +585,7 @@ on("plotChosen", ({ player, plot }) => {
   const lord = plot && rivalOnPlot(plot.name);
   if (lord) {
     if (sieges.has(lord.id)) endSiege(lord, false);
-    estates()[lord.plot] = { ...estateOf(lord), wall: wallId(lord), heir: player.id };
+    estates()[lord.plot] = { ...estateOf(lord), wall: wallId(lord), town: !!lord.town, heir: player.id };
     removeLord(lord);
     emit("rivalStoodDown", { lord, player });
     for (const p of world.getPlayers()) p.sendMessage(`§6${lord.name} has handed ${lord.plot} to ${player.name}.`);
@@ -538,7 +628,7 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
   }
   if (cmd === "settle") { store.data.lastArrival = 0; settleTick(); }
   if (cmd === "night") emit("siegeEnd", { outcome: "test", besieged: [] });
-  if (cmd === "grow" && rivalById(arg)) { const l = rivalById(arg); l.tier = Math.min(3, l.tier + 1); l.wins = RIVALS.tierWins[l.tier]; save(); }
+  if (cmd === "grow" && rivalById(arg)) { const l = rivalById(arg); l.tier = Math.min(3, l.tier + 1); l.wins = RIVALS.tierWins[l.tier]; save(); if (l.town && townOf(wallId(l))) growTown(wallId(l), l.tier); }
   if (cmd === "clear") for (const lord of [...lords()]) removeLord(lord);
   player.sendMessage(lords().length
     ? lords().map((l) => `§6${l.id}§r ${fullName(l)}: ${TIER_NAMES[l.tier]}, ${l.role}, ${l.temperament}, at ${l.x} ${l.z}`).join("\n")

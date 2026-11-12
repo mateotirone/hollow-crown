@@ -244,6 +244,7 @@ export function drawHall(level, style) {
     // the halls rebuilt in the map kit's style (designs.js); the hand-coded builders below stay as the fallback
     const p = new Plan(style);
     drawDesign(p, style.arch, level);
+    placeBoard(p);
     return p;
   }
   const p = new Plan(style);
@@ -253,7 +254,45 @@ export function drawHall(level, style) {
   p.off = { x: 0, y: 0, z: 0 };
   entranceSteps(p);
   mossAndSnow(p, box);
+  placeBoard(p);
   return p;
+}
+
+// The Town Board: a big notice board inside every hall that opens the Town Hall menu (Mateo, 2026-11-12:
+// "a big bulletin board-style thing that's inside the Town Hall"). It stands on the floor just inside the
+// front door, off the centre aisle, under the roof, facing the way in. Its wide frame may tuck into a wall.
+export function boardSpot(p) {
+  const tree = p.marks.tree;
+  if (!tree) return undefined;
+  const at = (x, y, z) => p.cells.get(`${x},${y},${z}`);
+  const free = (x, y, z) => !at(x, y, z) || at(x, y, z).role === "air";
+  const isDoor = (c) => c && /_door$|^door$/.test(c.role === "door" ? "door" : p.style?.roles?.[c.role]?.[0] ?? "");
+  // the front door: the furthest-in door block on the aisle (halls with a porch have more than one)
+  let doorZ = 1;
+  for (const c of p.cells.values()) if (Math.abs(c.x) <= 1 && c.z < tree.z && isDoor(c)) doorZ = Math.max(doorZ, c.z);
+  const top = Math.max(...[...p.cells.values()].map((c) => c.y));
+  // the floor may sit lower than the Tree, which stands on a dais
+  const standAt = (x, z) => {
+    for (let y = tree.y - 2; y <= tree.y + 1; y++) if (!free(x, y - 1, z) && free(x, y, z) && free(x, y + 1, z)) return y;
+    return undefined;
+  };
+  for (let z = doorZ + 1; z <= tree.z + 2; z++)
+    for (const side of [2, 3, 4, 5, 6])
+      for (const x of [side, -side]) {
+        const y = standAt(x, z);
+        if (y === undefined || !free(x, y, z - 1)) continue; // its face needs room to be read
+        let roofed = false;
+        for (let ry = y + 2; ry <= top && !roofed; ry++) roofed = !free(x, ry, z);
+        if (roofed) return { x, y, z };
+      }
+  return undefined;
+}
+
+function placeBoard(p) {
+  const s = boardSpot(p);
+  if (!s) return;
+  p.set(s.x, s.y, s.z, "board", { dir: "-z" });
+  p.mark("board", s.x, s.y, s.z);
 }
 
 // ---------- placing a plan in the world (still pure math) ----------

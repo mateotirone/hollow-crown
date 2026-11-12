@@ -129,6 +129,7 @@ Wanted later for this feature: a boss-bar style look for the Throne Seal, a dark
 |---|---|---|
 | Hall Cornerstone block (side, top) and item icon | `textures/blocks/siege_hall_cornerstone_side.png`, `siege_hall_cornerstone_top.png`, `textures/items/siege_hall_cornerstone.png` | **Final style, awaiting your review** |
 | Tree of Oaths bark (plain and Marked), crown (unsworn, Knight, Marked), plinth | `textures/blocks/siege_oath_tree_bark.png`, `_bark_marked.png`, `siege_oath_tree_crown.png`, `_crown_knight.png`, `_crown_marked.png`, `siege_oath_tree_plinth.png` | **Final style, awaiting your review** |
+| Town Board (wide notice board inside every hall; model `models/blocks/hall_board.geo.json`, 30 px wide, board face 24×18 at uv 4,7) | `textures/blocks/siege_hall_board_wood.png` (32×32 frame and posts), `siege_hall_board_notes.png` (32×32, pinned papers) | **Placeholder by the town hall thread, needs real art** |
 | Oath Banner, Warden's Bell (16×16 icons) | `textures/items/siege_oath_banner.png`, `siege_wardens_bell.png` | **Final style, awaiting your review** |
 
 ## Castle Stone family (16×16, final art by `studio/art/build_stone_family.py`; Mateo's rule 2026-11-10)
@@ -521,12 +522,52 @@ Made by `tools/minimap_tiles.py` from the top-down render of the generated world
 - `textures/ui/hc/minimap/mxXXzZZ.png`: 1,600 map views, 72x72 RGBA (Bedrock showed palette PNGs black) (3 x 3 tiles of 64 blocks around tile XX,ZZ), slightly darkened, with plot and town markers: generated
 - `textures/ui/hc/minimap/mnone__.png` (uncharted), `aq..ay.png` (player arrow, 12x12, eight directions), `frame.png` (80x80 border): first pass
 
+## Hall Map (2026-11-12)
+Made by `studio/build_hallmap.py` from the same world render as the minimap. Run it again whenever the world map is regenerated.
+- `textures/ui/hc/map/realm.png`: the 2,500 x 2,500 playable map at 384x384, parchment-toned: generated
+- `textures/ui/hc/map/fog.png`, `clear.png`, `hover.png`, and the 24x24 marks `y_<dye>` (your banner, gold ring), `b_<dye>` (another settlement), `npc`, `town`, `place`, `plot`, each also on fog (`_f`): first pass, drawn by the script
+
 ## Boss health bars (2026-11-11)
 Made by `tools/bossbar_ui.py` (which also wires them into `ui/hud_screen.json`). One look per boss: Clockwork Reeve (brass, clock ticks), Pale Huntsman (bone), Drowned Bride (sea green), Ash Seneschal (embers), Mother of Changelings (moss on violet), Warlord King (blood and iron), the Pretender (tarnished silver), the Choir (pale violet), the Hollow Crown regent and Morvane (dark purple, magenta veins, blue glints).
 - `textures/ui/hc/bossbar/<boss>_frame.png` (196x13, frame with end caps and the empty strip) and `<boss>_fill.png` (182x5, the health): first pass, **awaiting your review**, untested in game
 
 ## Dyed icon layers (2026-11-11, textures thread)
 Every dyeable item (Castle Guard armour and the regional sets, 64 pieces) uses `minecraft:icon` with `default` and `dyed` textures. `textures/items/<icon>_dyed.png` holds only the tabard cloth in light grey so the game tints it with the dye. Made by `studio/art/build_dyed_icons.py` (re-run after repainting a guard icon or adding a dyeable item). Without the dyed layer the icons showed blank in game.
+
+## Boss unlocks (placeholders by `studio/build_unlocks.py`, 16×16 opaque, in `textures/blocks/unlocks/`; it never overwrites a PNG that exists)
+
+| Asset | File | Status |
+|---|---|---|
+| Stopped Clock, case (dark spruce boards, brass corners) | `siege_stopped_clock_case.png` | Placeholder |
+| Stopped Clock, face at 3:17 (cream dial in a brass rim, hands at seventeen past three) | `siege_stopped_clock_317.png` | Placeholder |
+| Stopped Clock, face at 3:18 after the Reeve is woken (same dial, a little brighter, hands one minute on, a hairline crack in the glass) | `siege_stopped_clock_318.png` | Placeholder |
+| Well Crank, sides (old timber with iron bands) | `siege_well_crank_side.png` | Placeholder |
+| Well Crank, front with an empty keyhole in a brass plate | `siege_well_crank_keyhole.png` | Placeholder |
+| Well Crank, front with the key wound in, glowing | `siege_well_crank_wound.png` | Placeholder |
+| Carved Cairn Stone, sides with a hare carved in | `siege_hunt_cairn_hare.png` | Placeholder |
+| Carved Cairn Stone, sides with a fox | `siege_hunt_cairn_fox.png` | Placeholder |
+| Carved Cairn Stone, sides with a stag | `siege_hunt_cairn_stag.png` | Placeholder |
+| Carved Cairn Stone, sides with a wolf | `siege_hunt_cairn_wolf.png` | Placeholder |
+| Cairn stone, top and bottom (frosted grey stone) | `siege_cairn_stone.png` | Placeholder |
+| Hunter's Cairn, top with an empty horn-shaped notch | `siege_hunters_cairn_top.png` | Placeholder |
+| Hunter's Cairn, top with the pale horn lying in it | `siege_hunters_cairn_top_horn.png` | Placeholder |
+| Carved Floor Stone, a gull | `siege_carved_floor_gull.png` | Placeholder |
+| Carved Floor Stone, an anchor | `siege_carved_floor_anchor.png` | Placeholder |
+| Carved Floor Stone, a fish | `siege_carved_floor_fish.png` | Placeholder |
+| Carved Floor Stone, a star | `siege_carved_floor_star.png` | Placeholder |
+| Carved Floor Stone, lifted (a dark hollow) | `siege_carved_floor_lifted.png` | Placeholder |
+| Chapel stone (sea-worn green-grey) | `siege_chapel_stone.png` | Placeholder |
+| Drowned Altar, sides | `siege_drowned_altar_side.png` | Placeholder |
+| Drowned Altar, top with a ring-shaped mark | `siege_drowned_altar_top.png` | Placeholder |
+| Drowned Altar, top with the ring laid in it | `siege_drowned_altar_top_ring.png` | Placeholder |
+| Faceless Statue, sides | `siege_faceless_bust_side.png` | Placeholder |
+| Faceless Statue, front with the face chiselled away | `siege_faceless_bust_face.png` | Placeholder |
+| Vault sandstone (around the seal) | `siege_vault_sandstone.png` | Placeholder |
+| Vault Seal, blank round seal | `siege_vault_seal_blank.png` | Placeholder |
+| Vault Seal, with the Faceless Seal pressed in | `siege_vault_seal_pressed.png` | Placeholder |
+| Root Cradle, sides (woven roots) | `siege_root_cradle_side.png` | Placeholder |
+| Root Cradle, top (moss lining, empty) | `siege_root_cradle_top.png` | Placeholder |
+| Root Cradle, top with the effigy laid in it | `siege_root_cradle_top_laid.png` | Placeholder |
 
 ## Sorcerer cast effects (2026-11-12, `tools/build_sorcerer_fx.py`)
 | Asset | File | Status |
