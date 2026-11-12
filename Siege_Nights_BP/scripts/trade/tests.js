@@ -3,7 +3,7 @@ import { REGIONS } from "../economy/config.js";
 import { TRADE, GOODS, GOOD_IDS, COIN, GOLD_COIN, DAY, REGION_RATES_DEFAULT } from "./data.js";
 import {
   valueTo, fairness, offerProblem, pathLength, travelTicks, freightOf, takeMoney, moneyIn, depart, afterTry, finished,
-  npcMake, npcAnswer, capitalAnswer, capitalPrice, npcOffer, needsOf, supplyTake, crateDelta, cargoOf, loadText,
+  npcMake, npcAnswer, capitalAnswer, capitalPrice, npcOffer, needsOf, supplyTake, crateDelta, cargoOf, loadText, regalWorth, balanceText,
 } from "./rules.js";
 
 const offer = (give, get, extra = {}) => ({ from: "p:a", to: "l:b", give, get, every: "day", runs: 0, round: 0, ...extra });
@@ -121,6 +121,12 @@ addTests("trade", {
     assertEqual(supplyTake({ [IRON]: 50 }, needs, IRON, 100), 40);
     assertEqual(supplyTake({ [IRON]: 95 }, needs, IRON, 100), 0);
     assertEqual(supplyTake({}, needs, GOLD, 10), 0);
+  },
+  "the Regal worth of each side, and who the deal favours": () => {
+    assertEqual(regalWorth({ id: IRON, n: 30 }), 240);
+    assertEqual(regalWorth({ id: GOLD, n: 8 }), 256);
+    const t = balanceText(offer({ id: IRON, n: 30 }, { id: GOLD, n: 8 })).replace(/§./g, "");
+    assert(t.includes("240") && t.includes("256") && t.includes("16 Regals in your favour") && t.includes("fair"), t);
   },
   "loads read naturally": () => {
     assertEqual(loadText({ id: IRON, n: 8 }), "8 iron ingots");

@@ -9,7 +9,7 @@ import { sfx } from "../core/sfx.js";
 import { stationMenuExtras } from "../rails/index.js";
 import { hasUnlocked } from "../trains/index.js";
 import { TRADE, GOODS, COIN } from "./data.js";
-import { fairnessText, loadText, niceGood, offerProblem, travelTicks, freightOf, capitalPrice, routesAllowed, moneyIn } from "./rules.js";
+import { balanceText, regalWorth, loadText, niceGood, offerProblem, travelTicks, freightOf, capitalPrice, routesAllowed, moneyIn } from "./rules.js";
 import {
   TRADE_BOARD, CAPITAL, S_ACCESS, outpostOf, partyName, partyRegion, partyStage, partnersOf, routesOf, waitingFor, noticesOf, clearNotices,
   sendOffer, counterOffer, rejectOffer, acceptOffer, cancelRoute, resumeRoute, whyText, cargoFor, sameRoute, roomFor, isNpc,
@@ -132,10 +132,10 @@ async function review(player, party, o) {
   const body = [
     `${o.round ? "A counteroffer" : "A trade request"} from ${partyName(other)} (${partyRegion(other) ?? "?"}).`,
     "",
-    `§fYou send:§r ${loadText(send)} ${TRADE.everyNames[o.every]}  §7(you have ${ex[send.id] ?? 0} in Exports)`,
-    `§fYou get:§r ${loadText(back)}`,
+    `§fYou send:§r ${loadText(send)} §7(worth ${regalWorth(send)} Regals)§r ${TRADE.everyNames[o.every]}  §7(you have ${ex[send.id] ?? 0} in Exports)`,
+    `§fYou get:§r ${loadText(back)} §7(worth ${regalWorth(back)} Regals)`,
     o.runs ? `For ${o.runs} runs.` : "Until either side ends it.",
-    `By the Moneyer's ladder this is ${fairnessText(mine)}§r.`,
+    balanceText(mine),
     Number.isFinite(length) ? `§7Each trip takes about ${minutes(travelTicks(length))}.${o.from !== party ? ` Freight (${coins(freightOf(length))} a run) is theirs to pay.` : ` Freight is ${coins(freightOf(length))} a run, from your Exports.`}` : "§cNo laid track joins you right now.",
   ].join("\n");
   const res = await new ActionFormData().title("Review the trade").body(body)
@@ -192,10 +192,10 @@ async function propose(player, party) {
   const ok = await new ActionFormData().title("Send this offer?").body([
     `To ${partyName(pick.party)}:`,
     "",
-    `§fYou send:§r ${loadText(terms.give)} ${TRADE.everyNames[terms.every]}`,
-    `§fYou get:§r ${loadText(terms.get)}`,
+    `§fYou send:§r ${loadText(terms.give)} §7(worth ${regalWorth(terms.give)} Regals)§r ${TRADE.everyNames[terms.every]}`,
+    `§fYou get:§r ${loadText(terms.get)} §7(worth ${regalWorth(terms.get)} Regals)`,
     terms.runs ? `For ${terms.runs} runs.` : "Until either side ends it.",
-    `By the Moneyer's ladder this is ${fairnessText(terms)}§r.`,
+    balanceText(terms),
     `§7Freight: ${coins(freightOf(length))} a run, from Regals in your Exports. Each trip about ${minutes(travelTicks(length))}.`,
     isNpc(pick.party) ? "§7They will answer in a few hours." : "§7They'll see it over their Trade Board.",
   ].join("\n")).button("§aSend").button("Back").show(player);

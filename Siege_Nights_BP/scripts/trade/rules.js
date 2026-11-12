@@ -26,6 +26,14 @@ export function fairness(offer) {
   const give = worthOf(offer.give), get = worthOf(offer.get);
   return give > 0 ? get / give : Infinity;
 }
+// What a load is worth in Regals by the Moneyer's ladder (1 iron ingot = 8 Regals)
+export const regalWorth = (load) => Math.round(worthOf(load) * 8);
+// "You send 240 Regals' worth, get 256: 16 Regals in your favour (fair)."
+export function balanceText(offer) {
+  const out = regalWorth(offer.give), back = regalWorth(offer.get), d = back - out;
+  const lean = d === 0 ? "dead even" : `${Math.abs(d)} Regal${Math.abs(d) === 1 ? "" : "s"} in ${d > 0 ? "your" : "their"} favour`;
+  return `By the Moneyer's ladder you send ${out} Regals' worth and get ${back}: ${lean} (${fairnessText(offer)}§r).`;
+}
 export function fairnessText(offer) {
   const f = fairness(offer);
   if (f > 1.6) return "§cvery much in your favour";
