@@ -320,3 +320,4 @@ tile.siege:vault_seal.name=Vault Seal
 tile.siege:root_cradle.name=Root Cradle
 entity.siege:townsfolk.name=Townsperson
 action.interact.siege.talk=Talk
+item.siege:everwake_wings.name=Everwake Wings

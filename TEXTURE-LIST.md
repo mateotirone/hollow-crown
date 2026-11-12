@@ -591,3 +591,10 @@ Every dyeable item (Castle Guard armour and the regional sets, 64 pieces) uses `
 | Arcana particle sheet (64×16, four white 16×16 sprites tinted in code: glow, spark, ring, shard) | `textures/particle/hc_arcana.png` | Drawn in code, untested in game |
 | Twelve cast particles `siege:arc_trail`, `arc_burst`, `arc_ward`, `arc_tear`, `arc_ring`, `arc_mark`, `arc_link`, `arc_snare`, `arc_peel`, `arc_rift`, `arc_smoulder`, `arc_halo` (Choirsteel purple, magenta, Crown blue) | `particles/arc_*.particle.json` | Written, untested in game |
 | Spell icons x8 for the magic hotbar | reuse `textures/ui/hc/skill/arc_<power>.png` | Reused from the skill tree |
+
+## Everwake Wings (thread "Everwake", generator `studio/wings/`, installed by `tools/build_everwake_wings.py`)
+
+| Asset | File | Status |
+|---|---|---|
+| Wing model texture (64×64, feathers white with gold tips, cloth-wrapped bones, brass mount) | `textures/entity/everwake_wings.png` (model `models/entity/everwake_wings.geo.json`) | Drawn in code, model and animations approved by Mateo 2026-11-12, untested in game |
+| Everwake Wings item icon (16×16) | `textures/items/everwake_wings.png` | Placeholder drawn in code |
