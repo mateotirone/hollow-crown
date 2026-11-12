@@ -92,6 +92,16 @@ export const ENTRIES = [
     when: [],
   },
 
+  {
+    id: "graves", ch: "start", title: "Dying and your grave",
+    tip: "When you die, your things go into a gravestone where you fell. Click the headstone to get them back.",
+    page: "When you die, everything you drop goes into a §fgravestone§r where you fell (or on the nearest dry ground). Chat tells you where it is. Walk back and click the headstone to gather your things: armour goes straight back on, the rest into your pack. Anything that doesn't fit stays in the grave until you make room.\n\n"
+      + "§fSealed for 10 minutes.§r Only you can open your own grave at first. While the candle beside it burns, it is sealed; when the candle goes out, anyone can open it, so don't dawdle.\n\n"
+      + "§fKilled by another player?§r Then your grave is open to anyone at once, and your killer is told where it is.\n\n"
+      + "Graves can't be broken or blown up. Once emptied, a grave settles back into the earth. Anything lost to lava or the void is gone before it can reach a grave.",
+    when: ["event:graveDug", "click:siege:gravestone"],
+  },
+
   // ---------------- Siege nights ----------------
   {
     id: "siege_nights", ch: "siege", title: "How siege nights work",

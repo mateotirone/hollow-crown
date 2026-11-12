@@ -336,6 +336,9 @@ const EXTRAS = [
   { id: "trade_outpost", title: "Trade Outposts", marker: "map/structures/trade_outpost.py",
     args: (out) => [out],
     names: (out) => { try { return JSON.parse(fs.readFileSync(path.join(out, "names.json"), "utf8")); } catch { return {}; } } },
+  { id: "graves", title: "Gravestone", marker: "map/structures/gravestone_build.py",
+    args: (out) => [out],
+    label: { gravestone: "Gravestone (where a player fell; candle lit while sealed)" } },
 ];
 // Builder scripts that live on a branch without the kit: copied from the newest branch that has them into
 // the newest catalogue branch's map/structures and run there.
