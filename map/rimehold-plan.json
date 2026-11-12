@@ -1,0 +1,720 @@
+{
+ "town": "Rimehold",
+ "centre": [
+  -80,
+  -1080
+ ],
+ "radius": 70,
+ "square": {
+  "centre": [
+   -80,
+   -1080
+  ],
+  "y": 112,
+  "radius": 6
+ },
+ "about": "Stamp origin = blueprint (0,0,0) at world x, ground_y, z after turning clockwise by rotation (0 = front faces south). Apply the groundwork file first (it already levels every plot and builds the foundations), then the stamps. Inside the circle, skip the map's own trees and road paint: the groundwork re-lays the streets.",
+ "groundwork": "rimehold-groundwork.json",
+ "gates": [
+  [
+   -116,
+   -1028,
+   "North Line",
+   "road"
+  ],
+  [
+   -20,
+   -1104,
+   "North Line",
+   "road"
+  ],
+  [
+   -143,
+   -1062,
+   "country lane",
+   "lane"
+  ],
+  [
+   -81,
+   -1145,
+   "country lane",
+   "lane"
+  ]
+ ],
+ "buildings": [
+  {
+   "stamp": "hall_frostmarch_5",
+   "kind": "civic",
+   "x": -70,
+   "z": -1080,
+   "ground_y": 113,
+   "rotation": 90,
+   "footprint": 991,
+   "foundation": 2,
+   "door": [
+    -70,
+    -1080
+   ],
+   "name": "town hall"
+  },
+  {
+   "stamp": "rimehold_hall",
+   "kind": "civic",
+   "x": -101,
+   "z": -1079,
+   "ground_y": 113,
+   "rotation": 0,
+   "footprint": 247,
+   "foundation": 1,
+   "door": [
+    -101,
+    -1078
+   ],
+   "name": "hall"
+  },
+  {
+   "stamp": "rimehold_inn",
+   "kind": "civic",
+   "x": -83,
+   "z": -1063,
+   "ground_y": 114,
+   "rotation": 0,
+   "footprint": 187,
+   "foundation": 2,
+   "door": [
+    -76,
+    -1054
+   ],
+   "name": "inn"
+  },
+  {
+   "stamp": "rimehold_stave_chapel",
+   "kind": "civic",
+   "x": -58,
+   "z": -1103,
+   "ground_y": 113,
+   "rotation": 0,
+   "footprint": 201,
+   "foundation": 1,
+   "door": [
+    -58,
+    -1102
+   ],
+   "name": "stave_chapel"
+  },
+  {
+   "stamp": "rimehold_store",
+   "kind": "civic",
+   "x": -90,
+   "z": -1099,
+   "ground_y": 113,
+   "rotation": 0,
+   "footprint": 148,
+   "foundation": 2,
+   "door": [
+    -86,
+    -1088
+   ],
+   "name": "store"
+  },
+  {
+   "stamp": "rimehold_smithy",
+   "kind": "civic",
+   "x": -48,
+   "z": -1055,
+   "ground_y": 113,
+   "rotation": 90,
+   "footprint": 166,
+   "foundation": 0,
+   "door": [
+    -57,
+    -1052
+   ],
+   "name": "smithy"
+  },
+  {
+   "stamp": "rimehold_net_sheds",
+   "kind": "civic",
+   "x": -19,
+   "z": -1090,
+   "ground_y": 113,
+   "rotation": 180,
+   "footprint": 199,
+   "foundation": 1,
+   "door": [
+    -19,
+    -1097
+   ],
+   "name": "net sheds"
+  },
+  {
+   "stamp": "rimehold_house_31204_t2_dark",
+   "kind": "house",
+   "x": -88,
+   "z": -1045,
+   "ground_y": 115,
+   "rotation": 90,
+   "footprint": 81,
+   "foundation": 1,
+   "door": [
+    -95,
+    -1042
+   ],
+   "roof": "dark"
+  },
+  {
+   "stamp": "rimehold_house_32052_t1",
+   "kind": "house",
+   "x": -95,
+   "z": -1111,
+   "ground_y": 114,
+   "rotation": 270,
+   "footprint": 81,
+   "foundation": 1,
+   "door": [
+    -88,
+    -1114
+   ],
+   "roof": "slate"
+  },
+  {
+   "stamp": "rimehold_house_31552_t1_dark",
+   "kind": "house",
+   "x": -61,
+   "z": -1034,
+   "ground_y": 114,
+   "rotation": 180,
+   "footprint": 120,
+   "foundation": 1,
+   "door": [
+    -64,
+    -1045
+   ],
+   "roof": "dark"
+  },
+  {
+   "stamp": "rimehold_house_31625_t2_dark",
+   "kind": "house",
+   "x": -72,
+   "z": -1032,
+   "ground_y": 115,
+   "rotation": 180,
+   "footprint": 84,
+   "foundation": 1,
+   "door": [
+    -75,
+    -1039
+   ],
+   "roof": "dark"
+  },
+  {
+   "stamp": "rimehold_barn_31282",
+   "kind": "barn",
+   "x": -109,
+   "z": -1124,
+   "ground_y": 114,
+   "rotation": 270,
+   "footprint": 197,
+   "foundation": 1,
+   "door": [
+    -96,
+    -1129
+   ]
+  },
+  {
+   "stamp": "rimehold_house_31914_t2_mid",
+   "kind": "house",
+   "x": -125,
+   "z": -1036,
+   "ground_y": 114,
+   "rotation": 270,
+   "footprint": 84,
+   "foundation": 1,
+   "door": [
+    -118,
+    -1039
+   ],
+   "roof": "mid"
+  },
+  {
+   "stamp": "rimehold_house_31540_t2_dark",
+   "kind": "house",
+   "x": -145,
+   "z": -1067,
+   "ground_y": 114,
+   "rotation": 270,
+   "footprint": 99,
+   "foundation": 1,
+   "door": [
+    -136,
+    -1070
+   ],
+   "roof": "dark"
+  },
+  {
+   "stamp": "rimehold_house_31452_t2_mid",
+   "kind": "house",
+   "x": -118,
+   "z": -1078,
+   "ground_y": 115,
+   "rotation": 90,
+   "footprint": 81,
+   "foundation": 2,
+   "door": [
+    -125,
+    -1075
+   ],
+   "roof": "mid"
+  },
+  {
+   "stamp": "tg_windmill_962",
+   "kind": "windmill",
+   "x": -124,
+   "z": -1107,
+   "ground_y": 113,
+   "rotation": 270,
+   "footprint": 77,
+   "foundation": 1,
+   "door": [
+    -120,
+    -1107
+   ]
+  },
+  {
+   "stamp": "tg_windmill_972",
+   "kind": "windmill",
+   "x": -55,
+   "z": -1127,
+   "ground_y": 112,
+   "rotation": 0,
+   "footprint": 77,
+   "foundation": 1,
+   "door": [
+    -55,
+    -1123
+   ]
+  },
+  {
+   "stamp": "tg_cross_31",
+   "kind": "square",
+   "x": -80,
+   "z": -1080,
+   "ground_y": 112,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "market_stall_31",
+   "kind": "stall",
+   "x": -81,
+   "z": -1085,
+   "ground_y": 112,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "market_stall_32",
+   "kind": "stall",
+   "x": -75,
+   "z": -1082,
+   "ground_y": 112,
+   "rotation": 90,
+   "footprint": 0
+  },
+  {
+   "stamp": "market_stall_33",
+   "kind": "stall",
+   "x": -77,
+   "z": -1075,
+   "ground_y": 112,
+   "rotation": 180,
+   "footprint": 0
+  },
+  {
+   "stamp": "market_stall_34",
+   "kind": "stall",
+   "x": -81,
+   "z": -1075,
+   "ground_y": 112,
+   "rotation": 180,
+   "footprint": 0
+  },
+  {
+   "stamp": "market_stall_35",
+   "kind": "stall",
+   "x": -85,
+   "z": -1080,
+   "ground_y": 112,
+   "rotation": 270,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post",
+   "kind": "lamp",
+   "x": -82,
+   "z": -1069,
+   "ground_y": 112,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post",
+   "kind": "lamp",
+   "x": -95,
+   "z": -1062,
+   "ground_y": 112,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post",
+   "kind": "lamp",
+   "x": -98,
+   "z": -1048,
+   "ground_y": 113,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post",
+   "kind": "lamp",
+   "x": -108,
+   "z": -1041,
+   "ground_y": 113,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post",
+   "kind": "lamp",
+   "x": -92,
+   "z": -1072,
+   "ground_y": 111,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post",
+   "kind": "lamp",
+   "x": -84,
+   "z": -1045,
+   "ground_y": 114,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post",
+   "kind": "lamp",
+   "x": -102,
+   "z": -1073,
+   "ground_y": 112,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post",
+   "kind": "lamp",
+   "x": -82,
+   "z": -1117,
+   "ground_y": 112,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post",
+   "kind": "lamp",
+   "x": -87,
+   "z": -1129,
+   "ground_y": 113,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post",
+   "kind": "lamp",
+   "x": -85,
+   "z": -1120,
+   "ground_y": 113,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post",
+   "kind": "lamp",
+   "x": -104,
+   "z": -1051,
+   "ground_y": 113,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "lamp_post",
+   "kind": "lamp",
+   "x": -104,
+   "z": -1031,
+   "ground_y": 115,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "frost_scots_pine__frost_scots_pine_mature_1",
+   "db_stamp": "frost_scots_pine/frost_scots_pine_mature_1",
+   "kind": "tree",
+   "x": -35,
+   "z": -1058,
+   "ground_y": 114,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "frost_tall_spruce__frost_tall_spruce_young_1",
+   "db_stamp": "frost_tall_spruce/frost_tall_spruce_young_1",
+   "kind": "tree",
+   "x": -109,
+   "z": -1028,
+   "ground_y": 114,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "frost_snow_birch__frost_snow_birch_mature_0",
+   "db_stamp": "frost_snow_birch/frost_snow_birch_mature_0",
+   "kind": "tree",
+   "x": -85,
+   "z": -1032,
+   "ground_y": 115,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "frost_scots_pine__frost_scots_pine_young_0",
+   "db_stamp": "frost_scots_pine/frost_scots_pine_young_0",
+   "kind": "tree",
+   "x": -82,
+   "z": -1136,
+   "ground_y": 112,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "frost_scots_pine__frost_scots_pine_mature_0",
+   "db_stamp": "frost_scots_pine/frost_scots_pine_mature_0",
+   "kind": "tree",
+   "x": -45,
+   "z": -1030,
+   "ground_y": 115,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "frost_tall_spruce__frost_tall_spruce_sapling_1",
+   "db_stamp": "frost_tall_spruce/frost_tall_spruce_sapling_1",
+   "kind": "tree",
+   "x": -56,
+   "z": -1028,
+   "ground_y": 115,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "frost_tall_spruce__frost_tall_spruce_mature_0",
+   "db_stamp": "frost_tall_spruce/frost_tall_spruce_mature_0",
+   "kind": "tree",
+   "x": -32,
+   "z": -1043,
+   "ground_y": 114,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "frost_scots_pine__frost_scots_pine_young_0",
+   "db_stamp": "frost_scots_pine/frost_scots_pine_young_0",
+   "kind": "tree",
+   "x": -24,
+   "z": -1045,
+   "ground_y": 114,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "frost_scots_pine__frost_scots_pine_sapling_1",
+   "db_stamp": "frost_scots_pine/frost_scots_pine_sapling_1",
+   "kind": "tree",
+   "x": -42,
+   "z": -1056,
+   "ground_y": 114,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "frost_tall_spruce__frost_tall_spruce_sapling_1",
+   "db_stamp": "frost_tall_spruce/frost_tall_spruce_sapling_1",
+   "kind": "tree",
+   "x": -30,
+   "z": -1059,
+   "ground_y": 114,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "frost_scots_pine__frost_scots_pine_mature_1",
+   "db_stamp": "frost_scots_pine/frost_scots_pine_mature_1",
+   "kind": "tree",
+   "x": -16,
+   "z": -1069,
+   "ground_y": 113,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "frost_scots_pine__frost_scots_pine_sapling_1",
+   "db_stamp": "frost_scots_pine/frost_scots_pine_sapling_1",
+   "kind": "tree",
+   "x": -46,
+   "z": -1038,
+   "ground_y": 114,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "frost_snow_birch__frost_snow_birch_mature_0",
+   "db_stamp": "frost_snow_birch/frost_snow_birch_mature_0",
+   "kind": "tree",
+   "x": -109,
+   "z": -1049,
+   "ground_y": 113,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "frost_tall_spruce__frost_tall_spruce_mature_0",
+   "db_stamp": "frost_tall_spruce/frost_tall_spruce_mature_0",
+   "kind": "tree",
+   "x": -25,
+   "z": -1053,
+   "ground_y": 115,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "frost_scots_pine__frost_scots_pine_sapling_0",
+   "db_stamp": "frost_scots_pine/frost_scots_pine_sapling_0",
+   "kind": "tree",
+   "x": -44,
+   "z": -1024,
+   "ground_y": 115,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "frost_scots_pine__frost_scots_pine_sapling_1",
+   "db_stamp": "frost_scots_pine/frost_scots_pine_sapling_1",
+   "kind": "tree",
+   "x": -112,
+   "z": -1050,
+   "ground_y": 113,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "frost_scots_pine__frost_scots_pine_sapling_1",
+   "db_stamp": "frost_scots_pine/frost_scots_pine_sapling_1",
+   "kind": "tree",
+   "x": -50,
+   "z": -1024,
+   "ground_y": 115,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "frost_scots_pine__frost_scots_pine_young_0",
+   "db_stamp": "frost_scots_pine/frost_scots_pine_young_0",
+   "kind": "tree",
+   "x": -26,
+   "z": -1041,
+   "ground_y": 114,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "frost_snow_birch__frost_snow_birch_mature_1",
+   "db_stamp": "frost_snow_birch/frost_snow_birch_mature_1",
+   "kind": "tree",
+   "x": -83,
+   "z": -1019,
+   "ground_y": 115,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "frost_tall_spruce__frost_tall_spruce_sapling_0",
+   "db_stamp": "frost_tall_spruce/frost_tall_spruce_sapling_0",
+   "kind": "tree",
+   "x": -75,
+   "z": -1027,
+   "ground_y": 115,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "frost_snow_birch__frost_snow_birch_mature_1",
+   "db_stamp": "frost_snow_birch/frost_snow_birch_mature_1",
+   "kind": "tree",
+   "x": -36,
+   "z": -1031,
+   "ground_y": 114,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "frost_snow_birch__frost_snow_birch_mature_0",
+   "db_stamp": "frost_snow_birch/frost_snow_birch_mature_0",
+   "kind": "tree",
+   "x": -34,
+   "z": -1051,
+   "ground_y": 114,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "frost_tall_spruce__frost_tall_spruce_sapling_0",
+   "db_stamp": "frost_tall_spruce/frost_tall_spruce_sapling_0",
+   "kind": "tree",
+   "x": -31,
+   "z": -1048,
+   "ground_y": 114,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "frost_tall_spruce__frost_tall_spruce_sapling_1",
+   "db_stamp": "frost_tall_spruce/frost_tall_spruce_sapling_1",
+   "kind": "tree",
+   "x": -31,
+   "z": -1053,
+   "ground_y": 115,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "frost_scots_pine__frost_scots_pine_young_0",
+   "db_stamp": "frost_scots_pine/frost_scots_pine_young_0",
+   "kind": "tree",
+   "x": -36,
+   "z": -1035,
+   "ground_y": 114,
+   "rotation": 0,
+   "footprint": 0
+  },
+  {
+   "stamp": "frost_tall_spruce__frost_tall_spruce_sapling_0",
+   "db_stamp": "frost_tall_spruce/frost_tall_spruce_sapling_0",
+   "kind": "tree",
+   "x": -37,
+   "z": -1040,
+   "ground_y": 114,
+   "rotation": 0,
+   "footprint": 0
+  }
+ ]
+}
