@@ -1,0 +1,61 @@
+{
+  "format_version": "1.21.90",
+  "minecraft:block": {
+    "description": {
+      "identifier": "siege:hunters_cairn",
+      "menu_category": {
+        "category": "items"
+      },
+      "states": {
+        "siege:horned": [
+          0,
+          1
+        ]
+      }
+    },
+    "components": {
+      "minecraft:display_name": "tile.siege:hunters_cairn.name",
+      "minecraft:geometry": "minecraft:geometry.full_block",
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "siege_cairn_stone",
+          "render_method": "opaque"
+        },
+        "up": {
+          "texture": "siege_hunters_cairn_top",
+          "render_method": "opaque"
+        },
+        "down": {
+          "texture": "siege_cairn_stone",
+          "render_method": "opaque"
+        }
+      },
+      "minecraft:destructible_by_mining": false,
+      "minecraft:destructible_by_explosion": false,
+      "minecraft:map_color": "#9aa3ad",
+      "siege:clickable": {}
+    },
+    "permutations": [
+      {
+        "condition": "q.block_state('siege:horned') == 1",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_cairn_stone",
+              "render_method": "opaque"
+            },
+            "up": {
+              "texture": "siege_hunters_cairn_top_horn",
+              "render_method": "opaque"
+            },
+            "down": {
+              "texture": "siege_cairn_stone",
+              "render_method": "opaque"
+            }
+          },
+          "minecraft:light_emission": 6
+        }
+      }
+    ]
+  }
+}
