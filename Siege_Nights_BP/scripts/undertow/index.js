@@ -99,7 +99,7 @@ function enter(player) {
   noteEntry(player, "rift");
   system.runTimeout(() => {
     player.onScreenDisplay.setTitle("§5" + cap(TEXT.name), { subtitle: "§7The Wound", fadeInDuration: 20, stayDuration: 60, fadeOutDuration: 30 });
-    sfx(player, "ambient.cave", { volume: 1, pitch: 0.5 });
+    sfx(player, "sig.rift_cross");
   }, 20);
 }
 
@@ -123,7 +123,7 @@ function refuse(player) {
   refusedTimes.set(player.id, n + 1);
   const r = getRift(), [fx, fz] = FACING[r?.facing] ?? [0, 0];
   try { player.applyKnockback({ x: fx * 1.2, z: fz * 1.2 }, 0.25); } catch { try { player.applyKnockback(fx, fz, 1.2, 0.25); } catch {} }
-  try { sfx(player, "block.amethyst_block.resonate", { volume: 1.2, pitch: 0.4 }); } catch {}
+  try { sfx(player, "sig.rift_refuse"); } catch {}
   say(player, refusalLine(n, fallenCount(progressOf(player).flags), REGIONAL_BOSSES.length));
 }
 

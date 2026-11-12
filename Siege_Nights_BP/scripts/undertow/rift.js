@@ -143,15 +143,15 @@ export function tearOpen(dim, bottom, facing, onDone, opts = {}) {
     for (let s = 0; s <= TEAR_STEPS; s++) at(0.5 + s * 0.6, () => { placeCells(dim, cells.filter((c) => tearBand(c, H) === s)); if (s === TEAR_STEPS && onDone) onDone(); });
     return;
   }
-  at(OPENING.answer, () => { sfx(dim, "block.bell.resonate", center, { volume: 2, pitch: 0.35 }); puff("minecraft:portal_reverse_particle", front(1, 1.5)); });
+  at(OPENING.answer, () => { sfx(dim, "sig.rift_answer", center); puff("minecraft:portal_reverse_particle", front(1, 1.5)); });
   for (let t = OPENING.stir, i = 0; t < OPENING.hush; t += 2, i++) {
     at(t, () => {
       shake(0.06 + i * 0.03, 1.2);
-      sfx(dim, "block.amethyst_block.chime", center, { volume: 1 + i * 0.2, pitch: 0.5 + i * 0.05 });
-      if (i >= 2) sfx(dim, "block.bell.hit", center, { volume: 1, pitch: 0.3 });
+      sfx(dim, "sig.rift_stir", center, { volume: 1 + i * 0.2 });
       for (let k = 0; k < 3; k++) puff("minecraft:falling_dust_gravel_particle", front(1 + Math.random() * 6, H - 0.5));
     });
   }
+  at(OPENING.hush, () => sfx(dim, "sig.rift_hush", center));
   let recorded = false;
   at(OPENING.tear, () => { recorded = sfx(dim, "sig.rift_open", center, { volume: 4 }); });
   for (let s = 0; s <= TEAR_STEPS; s++) {
@@ -166,7 +166,7 @@ export function tearOpen(dim, bottom, facing, onDone, opts = {}) {
     });
   }
   for (let t = OPENING.breath; t < OPENING.look; t += 0.5) {
-    at(t, () => { for (let k = 0; k < 4; k++) puff("minecraft:portal_reverse_particle", front(1 + k, 1 + Math.random() * (H - 2))); if (t === OPENING.breath) sfx(dim, "ambient.cave", center, { volume: 2, pitch: 0.6 }); });
+    at(t, () => { for (let k = 0; k < 4; k++) puff("minecraft:portal_reverse_particle", front(1 + k, 1 + Math.random() * (H - 2))); if (t === OPENING.breath) sfx(dim, "sig.rift_breath", center); });
   }
   at(OPENING.done, () => { if (onDone) onDone(); });
 }
