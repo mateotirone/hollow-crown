@@ -249,7 +249,8 @@ export function defineSite(def) {
     }
     if (!nearby(def.anchor, 56).length) return;
     if (!area) {
-      const r = def.reach ?? 24, a = def.anchor;
+      const L = LANDMARKS[def.id], half = L?.size ? Math.ceil(Math.max(L.size[0], L.size[2]) / 2) + 2 : 0;
+      const r = Math.max(def.reach ?? 24, half), a = def.anchor; // hold the landmark loaded too
       try { dim.runCommand(`tickingarea add ${a.x - r} 0 ${a.z - r} ${a.x + r} 0 ${a.z + r} ${AREA} true`); } catch { /* full */ }
       area = true;
     }

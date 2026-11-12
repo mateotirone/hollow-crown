@@ -6,7 +6,9 @@
 //
 //   e.g. a module landmarks/mother.js exporting the stamp, then LANDMARKS = { mother: thatStamp }
 
-export const LANDMARKS = {};
+import { STAMPS } from "./landmark_stamps.js";
+
+export const LANDMARKS = STAMPS;
 
 /** A stamp as plan ops ({ dx, dy, dz, block, states }), with air last so it carves after it builds. */
 export function stampOps(stamp) {

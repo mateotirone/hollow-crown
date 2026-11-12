@@ -307,17 +307,7 @@ export function* cradlePlan(probe, anchor) {
       for (let y = -k; y <= 2; y++) ops.push(op(x, y, z, side && y <= 0 ? "minecraft:mud_bricks" : "minecraft:air"));
     }
   }
-  // the dead tree over it all
-  for (let y = 1; y <= 16; y++) for (let dx = -2; dx <= 2; dx++) for (let dz = -2; dz <= 2; dz++) {
-    if (Math.abs(dx) === 2 && Math.abs(dz) === 2 && y > 3) continue;
-    if (Math.max(Math.abs(dx), Math.abs(dz)) < 2 && y < 15) continue; // it is hollow
-    ops.push(op(dx, y, dz, "minecraft:mangrove_log", { pillar_axis: "y" }));
-  }
-  for (const [ux, uz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
-    for (let k = 3; k <= 8; k++) ops.push(op(ux * k, 14 + Math.floor(k / 3), uz * k, "minecraft:mangrove_log", { pillar_axis: ux ? "x" : "z" }));
-    ops.push(op(ux * 8, 15, uz * 8, "minecraft:hanging_roots"));
-  }
-  for (const [dx, dz] of [[-3, 0], [3, 0], [0, -3], [0, 3], [-3, 2], [2, -3]]) ops.push(op(dx, 1, dz, "minecraft:mangrove_roots"));
+  // the Cradle Tree itself stands over the cave as the site's landmark (landmark_stamps.js, map/structures/boss_landmarks.py)
   return { center, ops, info: {} };
 }
 export const inCradle = (c, l) => Math.hypot(l.x - (c.x + 0.5), l.z - (c.z + 0.5)) <= CRADLE.r && l.y > c.y + CRADLE.floor && l.y < c.y + CRADLE.floor + CRADLE.h + 1;
