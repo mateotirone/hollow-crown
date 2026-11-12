@@ -129,6 +129,7 @@ Wanted later for this feature: a boss-bar style look for the Throne Seal, a dark
 |---|---|---|
 | Hall Cornerstone block (side, top) and item icon | `textures/blocks/siege_hall_cornerstone_side.png`, `siege_hall_cornerstone_top.png`, `textures/items/siege_hall_cornerstone.png` | **Final style, awaiting your review** |
 | Tree of Oaths bark (plain and Marked), crown (unsworn, Knight, Marked), plinth | `textures/blocks/siege_oath_tree_bark.png`, `_bark_marked.png`, `siege_oath_tree_crown.png`, `_crown_knight.png`, `_crown_marked.png`, `siege_oath_tree_plinth.png` | **Final style, awaiting your review** |
+| Town Board (wide notice board inside every hall; model `models/blocks/hall_board.geo.json`, 30 px wide, board face 24×18 at uv 4,7) | `textures/blocks/siege_hall_board_wood.png` (32×32 frame and posts), `siege_hall_board_notes.png` (32×32, pinned papers) | **Placeholder by the town hall thread, needs real art** |
 | Oath Banner, Warden's Bell (16×16 icons) | `textures/items/siege_oath_banner.png`, `siege_wardens_bell.png` | **Final style, awaiting your review** |
 
 ## Castle Stone family (16×16, final art by `studio/art/build_stone_family.py`; Mateo's rule 2026-11-10)
@@ -351,6 +352,14 @@ Still to model (no art at all yet): held 3D models for the Seneschal's Greatshie
 
 All models were rebuilt in detail on 2026-11-10 (weapons in the hand, cloaks, horns, shields), so every skin in this section changed size and layout; none had been hand-painted. Morvane wears the Hollow Crown itself (helper `hollow_crown()` in `studio/bestiary/roster.py`, same shape and colours as the wearable `siege_hollow_crown`: violet cracked stone, magenta veins, pale blue gems, amethyst shard, floating crystal), on its own bone so the fight can knock it off. He fights left-handed. Morvane (`oswin_the_last.png`) now has grey eyes, not glowing ones: the story tells players to watch for grey eyes and the right hand. The three reveal figures must keep one identical pose so the scene can swap them in a single shot. New item icon needing art: `textures/items/bestiary/gloamquill.png` (16×16, placeholder; a dark purple flight quill with a magenta vein).
 
+## Guard posts (by `tools/build_guardposts_art.py`, placeholders)
+
+| Asset | File(s) | Status |
+|---|---|---|
+| Post ring (tinted red/green in game) | `textures/particle/hc_post_ring.png` 16×16 | Placeholder |
+| Post numbers 0-9 | `textures/particle/hc_post_digits.png` 160×16 | Placeholder |
+| Menu icons: empty post, manned post, wall | `textures/ui/hc/post_empty.png`, `post_manned.png`, `post_wall.png` 16×16 | Placeholder |
+
 ## For threads adding new assets
 
 Add a row here with the file path, size, what it should look like, and whether it needs transparency. A flat placeholder PNG at the right path is fine. The textures thread paints the final art over it and keeps the file name, size and transparency, so your JSON keeps working. Once a row says "Final style", don't regenerate that PNG from a placeholder script.
@@ -512,6 +521,11 @@ Choirsteel's 3D set is `studio/art/build_choirsteel_3d.py` (PR #83). The guard-o
 Made by `tools/minimap_tiles.py` from the top-down render of the generated world (`map/genworld.py`'s preview) and `map/terrain.npz`. Run it again whenever the world map is regenerated; do not paint these by hand.
 - `textures/ui/hc/minimap/mxXXzZZ.png`: 1,600 map views, 72x72 RGBA (Bedrock showed palette PNGs black) (3 x 3 tiles of 64 blocks around tile XX,ZZ), slightly darkened, with plot and town markers: generated
 - `textures/ui/hc/minimap/mnone__.png` (uncharted), `aq..ay.png` (player arrow, 12x12, eight directions), `frame.png` (80x80 border): first pass
+
+## Hall Map (2026-11-12)
+Made by `studio/build_hallmap.py` from the same world render as the minimap. Run it again whenever the world map is regenerated.
+- `textures/ui/hc/map/realm.png`: the 2,500 x 2,500 playable map at 384x384, parchment-toned: generated
+- `textures/ui/hc/map/fog.png`, `clear.png`, `hover.png`, and the 24x24 marks `y_<dye>` (your banner, gold ring), `b_<dye>` (another settlement), `npc`, `town`, `place`, `plot`, each also on fog (`_f`): first pass, drawn by the script
 
 ## Boss health bars (2026-11-11)
 Made by `tools/bossbar_ui.py` (which also wires them into `ui/hud_screen.json`). One look per boss: Clockwork Reeve (brass, clock ticks), Pale Huntsman (bone), Drowned Bride (sea green), Ash Seneschal (embers), Mother of Changelings (moss on violet), Warlord King (blood and iron), the Pretender (tarnished silver), the Choir (pale violet), the Hollow Crown regent and Morvane (dark purple, magenta veins, blue glints).

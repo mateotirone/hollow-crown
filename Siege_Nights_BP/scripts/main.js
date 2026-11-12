@@ -42,6 +42,7 @@ import "./landmarks/index.js";
 import "./after/index.js";
 import "./opening/index.js";
 import "./labels/index.js";
+import "./guardposts/index.js";
 import "./forestry/index.js";
 import "./workings/index.js";
 import "./ironworks/index.js";

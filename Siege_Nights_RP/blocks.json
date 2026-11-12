@@ -96,6 +96,9 @@
  "siege:hall_cornerstone": {
   "sound": "stone"
  },
+ "siege:hall_board": {
+  "sound": "wood"
+ },
  "siege:tree_of_oaths": {
   "sound": "wood"
  },

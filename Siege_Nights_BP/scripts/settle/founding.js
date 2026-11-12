@@ -19,7 +19,7 @@ import { world, system, BlockPermutation } from "@minecraft/server";
 import { isReady, keepOf, on, emit, moduleStore, TIERS, tierOf, getState } from "../siege/api.js";
 import { CORNERSTONE, halls, saveHalls, beginBuild } from "../townhall/townhall.js";
 import { buildFor } from "../townhall/build.js";
-import { REGION_TO_STYLE } from "./config.js";
+import { REGION_TO_STYLE, CONTENTS } from "./config.js";
 import { BENCH, registerBench } from "./mason.js";
 import { styleOf } from "./plans.js";
 import { wallOf, raiseWall, moveWall } from "./walls.js";
@@ -178,8 +178,16 @@ export function markerSpot(town, slot) {
   return { x: town.x + seat.origin.dx, y: town.y + slot.dy + 1, z: town.z + seat.origin.dz };
 }
 
+// A plot that is gone for good: the level-5 town hall took its ground (hallmove.js)
+export function slotClosed(owner, slot) {
+  const town = townOf(owner);
+  if (town?.slots[slot.id]?.closed) return true;
+  return (slot.tags ?? []).includes("hall5") && (halls()[owner]?.level ?? 0) >= 5;
+}
+
 export function placeMarker(owner, slot) {
   const town = townOf(owner);
+  if (slotClosed(owner, slot)) return false;
   const at = markerSpot(town, slot);
   try {
     const block = world.getDimension(OVERWORLD).getBlock(at);
@@ -259,12 +267,13 @@ export function foundTown(owner, plot, at, { style, layout } = {}) {
 // ---------- charters ----------
 
 // Every building the game can raise (plot designs and block buildings), for skipping charter lines not built yet
-const KNOWN = new Set([...BUILDINGS.map((b) => b.id), ...Object.keys(BLOCK_BUILDS).map((t) => t.replace(/^siege:/, ""))]);
+// (designs, block buildings, and anything that can be built by hand and registered: config.js CONTENTS)
+const KNOWN = new Set([...BUILDINGS.map((b) => b.id), ...Object.keys(BLOCK_BUILDS).map((t) => t.replace(/^siege:/, "")), ...CONTENTS.map((c) => c.id)]);
 
 // What stands in a town: finished plot buildings plus finished block buildings on its land
 export function builtCounts(owner) {
   const counts = { ...raisedCounts(owner) };
-  for (const st of Object.values(townOf(owner)?.slots ?? {})) if (st.building && st.done !== false) counts[st.building] = (counts[st.building] ?? 0) + 1;
+  for (const st of Object.values(townOf(owner)?.slots ?? {})) if (st.building && st.done !== false && !st.broken) counts[st.building] = (counts[st.building] ?? 0) + 1;
   return counts;
 }
 export const charterOf = (owner, tier = townOf(owner)?.tier ?? 0) => charterCheck(tier, builtCounts(owner), KNOWN);

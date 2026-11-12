@@ -2,7 +2,7 @@
 // Split from the original main.js; the code is unchanged apart from the event/hook calls.
 
 import { world, system, ItemStack, GameMode } from "@minecraft/server";
-import { applyFilter } from "../core/events.js";
+import { applyFilter, emit } from "../core/events.js";
 import { BARRACKS, GUARD_GEAR, GUARD_TYPES, WANTED_TAG } from "./constants.js";
 import { saveState, state, tracked } from "./state.js";
 import { isAlly, settlementAt, tierOf } from "./territory.js";
@@ -45,6 +45,17 @@ export function nearestBarracks(owner, dim, loc) {
     }
   }
   return best;
+}
+
+// The Barracks blocks of a settlement: [{ dim, x, y, z }]
+export const barracksOf = (owner) => tracked[BARRACKS].filter((t) => t.dim === "minecraft:overworld" && settlementAt(t) === owner);
+
+// A stationed guard's post (guardposts/): { x, y, z, stand: true, yaw? } where x/z are the middle of the block it
+// stands on and y its feet. Stationed Men-at-Arms keep to their post instead of the Barracks and chase at most this
+// far from it in a fight.
+export const STATION_LEASH = 10;
+export function setPost(guard, post) {
+  guard.setDynamicProperty("siege:post", JSON.stringify(post));
 }
 
 // Give a guard its owner, colors and post
@@ -95,8 +106,16 @@ export function recruitGuard(block, player, item, chosenType) {
 world.afterEvents.playerInteractWithEntity.subscribe((event) => {
   const { player, target } = event;
   if (!state || !isGuard(target)) return;
-  if (!player.isSneaking) return upgradeGuard(target, player, event.beforeItemStack ?? event.itemStack);
+  if (!player.isSneaking) {
+    // clicking with the next upgrade's material upgrades; any other click opens the guard's menu (guardposts/)
+    const held = event.beforeItemStack ?? event.itemStack;
+    const next = GUARD_ARMOR[armorTier(target) + 1];
+    if (next && held?.typeId === next.item) return upgradeGuard(target, player, held);
+    if (guardOwner(target) === player.id && applyFilter("guardMenu", false, { guard: target, player })) return;
+    return upgradeGuard(target, player, held);
+  }
   if (guardOwner(target) !== player.id) return player.onScreenDisplay.setActionBar("§cThat guard doesn't serve you.");
+  emit("guardRemoved", { id: target.id, owner: guardOwner(target) });
   const item = new ItemStack(GUARD_TYPES[target.typeId], 1);
   if (target.nameTag) item.nameTag = target.nameTag;
   const tier = armorTier(target);
@@ -148,6 +167,7 @@ world.afterEvents.entityDie.subscribe((event) => {
       if (drop.getComponent("minecraft:item")?.itemStack.typeId.startsWith(GUARD_GEAR)) drop.remove();
     }
   }, 2);
+  emit("guardRemoved", { id: dead.id, owner });
   state.guards[owner] = Math.max(0, guardCount(owner) - 1);
   saveState();
   world.getPlayers().find((p) => p.id === owner)?.sendMessage("§cOne of your guards has fallen.");
@@ -246,12 +266,15 @@ export function guardTick() {
         if (keep?.sovereign) guard.addEffect("strength", 60, { amplifier: 0, showParticles: false }); // royal guard
         if (keep && guard.getComponent("minecraft:variant")?.value !== keep.color) guard.triggerEvent(`siege:color_${keep.color ?? 14}`);
 
+        if (guard.getDynamicProperty("siege:walking")) continue; // walking to its post or the Barracks (guardposts/walk.js)
         const post = JSON.parse(guard.getDynamicProperty("siege:post") ?? "null");
         if (!post) continue;
         const loc = guard.location;
-        const away = Math.hypot(loc.x - (post.x + 0.5), loc.z - (post.z + 0.5));
+        const away = post.stand ? Math.hypot(loc.x - post.x, loc.z - post.z) : Math.hypot(loc.x - (post.x + 0.5), loc.z - (post.z + 0.5));
         if (guard.typeId === "siege:archer") {
           if (away > 1.5) guard.teleport({ x: post.x, y: post.y, z: post.z }); // archers hold their spot
+        } else if (post.stand) { // a stationed Man-at-Arms keeps to the post, and chases only so far from it in a fight
+          if (away > (underAttack(owner) ? STATION_LEASH : 2.5)) guard.teleport({ x: post.x, y: post.y, z: post.z });
         } else if (!underAttack(owner) ? away > 5 : !keep || settlementAt(loc) !== owner) {
           guard.teleport({ x: post.x + 0.5, y: post.y + 1, z: post.z + 0.5 }); // back to the Barracks
         }
