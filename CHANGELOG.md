@@ -9,6 +9,7 @@ How versions work is in [`docs/RELEASING.md`](docs/RELEASING.md).
 Everything merged to `main` since the last release goes here. Each pull request that changes what players see adds a line under one of these headings.
 
 ### Added
+- The way to the Seat is built out. The Long Climb ends in a ragged, crumbling cliff with the path running out on its own spur to the Last Step, a broken gate. From there you walk (no jumping) across five floating rocks joined by hollowwood roots, curving down to the Seat, with broken rock, giant Veilcaps and soul lanterns adrift in the fog round you. The six stepping stones are gone.
 - Playing alone, the mentors' students now turn up and fight beside you in the last fight: Hrafn at the Standing Ranks, Dame Orla and a knight of the Eleven on the Night It Ended, Jory Holt with a crossbow at the River, and Senna Vey on her own dragon, circling the Rift and burning Morvane. And when you are the only Dragon Rider about and take to the air on a siege night, Kesh's cadets fly at your wing on their own dragons and burn raiders near you: Senna from the start, Pim Ashgrove too once you are Wing-Sworn.
 - Trains keep apart: a train that comes up behind another on the same track slows and stops a few blocks short of it instead of running through it, and the driver is told a train is on the line ahead.
 - The Changeling Glade: on the way down to the Mother of Changelings' cave, the sunken glade south of the Cradle Tree sends a wave of changelings at whoever walks through it (more for a bigger party), then rests for five minutes.

@@ -21,6 +21,8 @@ export const OFFLINE_ONLY = new Set([
   "hollow arenas: the Court's floor is whole and open to the fight's outer ring, with the Singers' spots clear",
   "hollow arenas: the Court never writes the gate's cells (the seal and openCourtGate own them)",
   "hollow arenas: the Seat: disc and ring floors, Morvane's spot clear, everything that falls inside the dropped band",
+  "hollow arenas: the cliff before the Seat is ragged, and the story path still reaches its edge",
+  "hollow arenas: the way to the Seat can be walked from the cliff to the ring without a jump, and none of it falls or sits in the land",
   "landmarks: on flat ground a rigid design stands whole at the ground height, clear of trees",
   "landmarks: a rigid design on a slope is filled under and cut into, never floating",
   "hall build: every hall has a Town Board just inside, off the aisle, before the Tree",

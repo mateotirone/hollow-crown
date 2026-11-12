@@ -1,6 +1,8 @@
 // What the boss fights need from the Drowned Court and the Seat (map/structures/hollow_arenas.py).
 import { addTests, assert } from "../core/tests.js";
-import { COURT_DESIGN, SEAT_DESIGN } from "./arenas_data.js";
+import { COURT_DESIGN, SEAT_DESIGN, APPROACH_DESIGN } from "./arenas_data.js";
+import { heightAt, heartEdge, HEART_EDGE_Z } from "./terrain.js";
+import { edgeCarveOps } from "./builder.js";
 import { stampCells } from "./stamp.js";
 import { COURT, HEART } from "./layout.js";
 import { singerSpot, CHOIR } from "./choir.js";
@@ -37,6 +39,44 @@ addTests("hollow arenas", {
     for (const [k] of s) {
       const [x, y, z] = k.split(",").map(Number);
       if (Math.hypot(x, z) >= HEART.innerRadius) assert(y >= -8 && y <= 34, `${k} would not fall with its ring`);
+    }
+  },
+  "the cliff before the Seat is ragged, and the story path still reaches its edge": () => {
+    const zs = []; for (let x = -150; x <= 150; x++) zs.push(heartEdge(x));
+    assert(Math.max(...zs) === HEART_EDGE_Z && Math.min(...zs) <= HEART_EDGE_Z - 20, "no bays");
+    let turns = 0; for (let i = 2; i < zs.length; i++) if ((zs[i] - zs[i - 1]) * (zs[i - 1] - zs[i - 2]) < 0) turns++;
+    assert(turns > 40, `only ${turns} jags`);
+    for (let x = -3; x <= 3; x++) assert(heightAt(x, HEART_EDGE_Z - 1) !== null && heightAt(x, HEART_EDGE_Z) === null, `path spur at ${x}`);
+    const ops = edgeCarveOps(40);
+    assert(ops.length && ops.every((o) => o.a[2] >= heartEdge(40) && o.b[2] < HEART_EDGE_Z && (o.b[1] - o.a[1] + 1) * (o.b[2] - o.a[2] + 1) < 32768), "carving an old world's edge");
+    assert(edgeCarveOps(0).length === 0, "the spur is never dug");
+  },
+  "the way to the Seat can be walked from the cliff to the ring without a jump, and none of it falls or sits in the land": () => {
+    const s = solidAt(APPROACH_DESIGN), seat = solidAt(SEAT_DESIGN), way = APPROACH_DESIGN.way;
+    const cy = HEART.center.y, cz = HEART.center.z;
+    const floor = (x, y, z) => {
+      const n = s.get(`${x},${y},${z}`) ?? seat.get(`${x},${y},${z}`);
+      return !!n && !/strands|glimbulb|cluster|lantern|chain|_wall$/.test(n);
+    };
+    // where feet stand on a column of the way: on its half step if it has one, else on the block
+    const feet = ([x, y, z]) => (/_slab$/.test(s.get(`${x},${y + 1},${z}`) ?? "") ? y + 1.5 : y + 1);
+    assert(way[0][2] === HEART_EDGE_Z - cz && heightAt(way[0][0], HEART_EDGE_Z - 1) === way[0][1] + cy, "the way starts level with the cliff's edge");
+    way.forEach((c, i) => {
+      const [x, y, z] = c;
+      assert(floor(x, y, z), `no floor at step ${i} (${c})`);
+      for (let h = 2; h <= 3; h++) assert(!blocks(s, `${x},${y + h},${z}`), `no headroom at step ${i}`);
+      if (i) {
+        const [px, , pz] = way[i - 1];
+        assert(Math.abs(x - px) + Math.abs(z - pz) === 1, `step ${i} is not beside the last`);
+        assert(Math.abs(feet(c) - feet(way[i - 1])) <= 0.5, `a full block's step at ${i}`);
+      }
+    });
+    const [lx, ly, lz] = way[way.length - 1];
+    assert(floor(lx, ly, lz + 1) && seat.has(`${lx},${ly},${lz + 1}`) && ly === -1, "the way ends on the Seat's landing");
+    for (const [k] of s) {
+      const [x, , z] = k.split(",").map(Number);
+      assert(Math.hypot(x, z) >= HEART.outerRadius + 2, `${k} is inside the ring that falls`);
+      assert(heightAt(x, z + cz) === null, `${k} is inside the land`);
     }
   },
 });
