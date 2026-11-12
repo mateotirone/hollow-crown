@@ -52,11 +52,21 @@ export const NEWS = {
   // a special offer posted or filled at a Trade Outpost (scripts/trade/, the trade routes thread)
   tradeSpecialOffer: ({ name, itemName, count, price, normal }) => (name && itemName ? `§6${name} wants ${count} ${itemName} and will pay ${price} Regals${normal ? ` §7(about ${normal} at the usual rate)` : ""}§6. §7Find the offer at their Trade Outpost.` : null),
   tradeSpecialFilled: ({ name, itemName, count, by }) => (name && itemName ? `§7${by ? `${by} has filled` : "Someone has filled"} ${name}'s offer for ${count} ${itemName}.` : null),
+  // siege-night streaks, after dawn (news/index.js turns siegeEnd into one siegeStreak per settlement that changed)
+  siegeStreak: ({ settlement, streak, lost }) => {
+    if (!settlement) return null;
+    if (lost) return `§7${settlement}'s settlement has lost its streak after ${lost} nights held in a row.`;
+    return streakMilestone(streak) ? `§6${settlement}'s settlement has held ${streak} siege nights in a row.` : null;
+  },
   loreAllSolved: ({ player }) => `§d${player.name} has solved every mystery in their Ledger.`,
   loreThreadSolved: ({ player }) => `§d${player.name} has pieced a mystery together.`,
 };
 
 // Words the news must never print, checked by the tests on every line
+// Streaks worth crying: 3, 5, 10, then every 5. A lost streak is cried from STREAK_LOSS nights up.
+export const streakMilestone = (n) => n === 3 || (n >= 5 && n % 5 === 0);
+export const STREAK_LOSS = 3;
+
 // A killer's name for the news: its name tag without colours or rank, or its kind ("siege:pale_huntsman" -> "Pale Huntsman")
 export function killerName(nameTag, typeId) {
   const tag = String(nameTag ?? "").replace(/§./g, "").split("\n")[0].replace(/\(.*?\)/g, "").trim();

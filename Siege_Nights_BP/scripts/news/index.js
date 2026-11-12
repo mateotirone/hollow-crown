@@ -5,7 +5,7 @@
 import { world, system } from "@minecraft/server";
 import { on, emit } from "../core/events.js";
 import { placeName } from "../minimap/data.js";
-import { NEWS, PREFIX, killerName } from "./rules.js";
+import { NEWS, PREFIX, killerName, STREAK_LOSS } from "./rules.js";
 import { moduleStore } from "../core/store.js";
 import { settlementAt, keepOf } from "../siege/api.js";
 
@@ -45,6 +45,20 @@ for (const [event, words] of Object.entries(NEWS)) {
   }, 1));
 }
 
+// Siege-night streaks: after dawn, each besieged settlement whose streak hit a milestone or was broken
+on("siegeEnd", ({ besieged = [] }) => system.runTimeout(() => {
+  const was = (store.data.streaks ??= {});
+  for (const owner of besieged) {
+    const keep = keepOf(owner);
+    if (!keep) continue;
+    const now = keep.streak ?? 0, before = was[owner] ?? 0;
+    was[owner] = now;
+    const line = NEWS.siegeStreak({ settlement: keep.name, streak: now, lost: now === 0 && before >= STREAK_LOSS ? before : 0 }, ctx);
+    cry(line);
+  }
+  store.save();
+}, 2));
+
 // Notable deaths: to a boss, a creature of this add-on, or another player. Vanilla chat already reports the rest.
 world.afterEvents.entityDie.subscribe(({ deadEntity, damageSource }) => {
   if (deadEntity?.typeId !== "minecraft:player") return;
@@ -68,7 +82,7 @@ system.afterEvents.scriptEventReceive.subscribe((e) => {
   const sample = { player: p, owner: p.id, ownerName: p.name, name: "The Pale Huntsman", first: true, handled: true, level: 3,
     dim: OVERWORLD, x: p.location.x, z: p.location.z, players: [p.name], plot: { name: "Thornfield" }, station: { name: "Kingsrest Station" },
     lord: { name: "Lord Aldric", plot: "Thornfield" }, winner: { name: "Lord Aldric" }, loser: { name: "Lady Wren" },
-    firstFor: p.name, itemName: "gold ingots", count: 32, price: 600, normal: 300, by: p.name, victim: p.name, killer: "The Pale Huntsman", kind: "boss" };
+    settlement: p.name, streak: 10, firstFor: p.name, itemName: "gold ingots", count: 32, price: 600, normal: 300, by: p.name, victim: p.name, killer: "The Pale Huntsman", kind: "boss" };
   for (const [event, words] of Object.entries(NEWS)) {
     const line = words(sample, ctx);
     if (line) p.sendMessage(`${PREFIX}${line} §8(${event})`);
