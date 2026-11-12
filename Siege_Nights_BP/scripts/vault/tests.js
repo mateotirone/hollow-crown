@@ -1,5 +1,6 @@
 import { addTests, assert, assertEqual } from "../core/tests.js";
 import { VAULT_ROOMS } from "./rooms_data.js";
+import { windowsOn, awayState, WINDOW } from "./data.js";
 import { TIERS, LAYOUT, COSTS, worldOf, groundBox, LOCK_HP, BREAKER_POWER, MEND, REBUILD, breakSeconds } from "./data.js";
 
 addTests("vault", {
@@ -35,6 +36,20 @@ addTests("vault", {
     assert(breakSeconds("choirsteel", "siege:vault_breaker_netherite") < breakSeconds("choirsteel", "siege:vault_breaker_diamond"), "netherite is fastest");
     for (const t of TIERS) assert(Object.keys(MEND[t]).length && REBUILD[t].length, `${t} repair`);
     assert(Object.keys(BREAKER_POWER).length === 3, "three breakers");
+  },
+  "an away keeper's vault opens in two short random windows a real day, the same on every check": () => {
+    const day = 20400;
+    const w = windowsOn("p1", day);
+    assertEqual(w.length, WINDOW.perDay);
+    for (const x of w) assert(x.end - x.start === WINDOW.minutes * 60000 && x.start >= day * 86400000 && x.end <= (day + 1) * 86400000, "inside the day");
+    assert(w[0].end <= w[1].start, "not overlapping");
+    assertEqual(windowsOn("p1", day), w, "same answer each time");
+    assert(JSON.stringify(windowsOn("p2", day)) !== JSON.stringify(w), "other keepers, other times");
+    const left = day * 86400000 - 30 * 3600000; // left 30 h before the day began
+    assertEqual(awayState("p1", left, w[0].start + 60000).window?.start, w[0].start, "open inside a window");
+    assert(!awayState("p1", left, w[0].end + 60000).window, "shut after it");
+    assert(!awayState("p1", w[0].start - 3600000, w[0].start + 60000).away, "an hour away is not away");
+    assert(!awayState("p1", undefined, w[0].start).away, "online is not away");
   },
   "a layout and a cost for every tier": () => {
     for (const tier of TIERS) { assert(VAULT_ROOMS[tier][LAYOUT[tier]], `${tier} layout`); assert(COSTS[tier]?.length, `${tier} cost`); }

@@ -14,7 +14,10 @@
 // only while the keeper is online or the vault lies open. When the lock breaks the door falls with it; the owner
 // rebuilds both from the Vault menu. Cracked locks and doors mend with the tier's material, like walls.
 //
-// Still to come: the offline open windows.
+// Away keepers: after a full real day offline (DISPATCH.vaultOpenHours) a vault holding a relic can be broken into
+// without them, but only in two random 30-minute windows a real day (data.js WINDOW); each window is announced in
+// game and on Discord. While away, the settlement's walls, vault and Keep take twice the damage to break and its
+// guards fight harder. Any login starts the day again; a break-in already under way carries on.
 //
 // What other features can use:
 //   vaultOf(ownerId)  -> { x, y, z, fx, fz, tier, layout, built, lock: {x,y,z} } or undefined
@@ -36,6 +39,10 @@ import { siteProblem } from "../settle/plans.js";
 import { hallMenuExtras, countMatching, takeMatching } from "../townhall/townhall.js";
 import { sfx } from "../core/sfx.js";
 import { VAULT_ROOMS } from "./rooms_data.js";
+import { WINDOW, awayState } from "./data.js";
+import { DISPATCH } from "../dispatch/config.js";
+import { addFilter } from "../core/events.js";
+import { guardTag } from "../siege/guards.js";
 import { VAULT_KEY, TIERS, TIER_NAME, LAYOUT, COSTS, UPGRADE_ITEM, nextTier, worldOf, groundBox, LOCK_HP, DOOR_HP, BREAKER_POWER, MEND, REBUILD } from "./data.js";
 import { registerDamageable, hitWall, workOnWall } from "../siege/walls.js";
 import { isOnline } from "../siege/util.js";
@@ -432,6 +439,81 @@ onTick("vault-locks", 40, () => {
       const b = dim.getBlock(worldOf(v, ...roomOf(v.built, v.layout).marks.lock));
       if (b && !isLock(b.typeId)) breach(owner, v);
     } catch { /* unloaded */ }
+  }
+});
+
+// ---------- a keeper away a full real day: the vault lies open in short random windows ----------
+
+const awayOf = (owner, v) => awayState(owner, v.leftAt, Date.now(), DISPATCH.vaultOpenHours);
+// Is this settlement's keeper away long enough that its defences stand twice as strong? (Mateo: an AFK village
+// is twice as hard to attack)
+export function keeperAway(owner) {
+  const v = vaults()[owner];
+  return !!v?.leftAt && awayOf(owner, v).away;
+}
+
+world.beforeEvents.playerLeave.subscribe(({ player }) => {
+  try {
+    const id = player.id;
+    if (!vaults()[id]) return;
+    // a relic carried away counts as one kept (the template holder's tag, or a relic in their bags)
+    let carried = player.hasTag(DISPATCH.holderTag);
+    try {
+      const inv = player.getComponent("minecraft:inventory").container;
+      for (let i = 0; i < inv.size && !carried; i++) carried = !!KIND_OF_ITEM[inv.getItem(i)?.typeId];
+    } catch { /* fine */ }
+    system.run(() => { const v = vaults()[id]; if (v) { v.leftAt = Date.now(); v.carried = carried; store.save(); } });
+  } catch { /* leaving */ }
+});
+
+// Any login, even for a second, starts the day again. Breakers already drilling keep going (no escaping a siege).
+world.afterEvents.playerSpawn.subscribe(({ player, initialSpawn }) => {
+  if (!initialSpawn) return;
+  const v = vaults()[player.id];
+  if (!v?.leftAt) return;
+  v.leftAt = undefined;
+  v.openWindow = false;
+  store.save();
+});
+
+onTick("vault-away", 1200, () => {
+  if (!isReady()) return;
+  const now = Date.now();
+  let changed = false;
+  for (const [owner, v] of Object.entries(vaults())) {
+    if (!v.built || !v.leftAt) continue;
+    const st = awayOf(owner, v);
+    const relic = Object.values(v.stands ?? {}).some(Boolean) || v.carried;
+    const open = !!(st.away && st.window && relic);
+    if (open !== !!v.openWindow) {
+      v.openWindow = open;
+      changed = true;
+      const name = keepOf(owner)?.name ?? "A settlement";
+      if (open && v.announced !== st.window.start) {
+        v.announced = st.window.start;
+        emit("vaultWindow", { owner, open: true, until: st.window.end });
+        emit("discordAlert", { kind: "vaultWindow", text: `${name}'s vault is open for the next ${WINDOW.minutes} minutes. Its keeper has been away a full day.`, ping: [], hollow: false });
+        for (const p of world.getPlayers()) if (p.id !== owner && !isAlly(owner, p.id)) say(p, `§6${name}'s vault lies open for the next ${WINDOW.minutes} minutes. Its keeper is away, and its defences stand twice as strong.`);
+      } else if (!open) emit("vaultWindow", { owner, open: false });
+    }
+  }
+  if (changed) store.save();
+});
+
+// Twice as strong while the keeper is away: walls, gates, the vault door and lock take twice the blows,
+// the Keep twice the damage, and the settlement's guards fight harder.
+addFilter("wallHp", (hp, { block }) => {
+  try { const owner = settlementAt(block.location); return owner && keeperAway(owner) ? hp * 2 : hp; } catch { return hp; }
+});
+addFilter("keepHealth", (hp, { owner }) => (keeperAway(owner) ? hp * 2 : hp));
+onTick("vault-away-guards", 200, () => {
+  if (!isReady()) return;
+  const dim = world.getDimension(OVERWORLD);
+  for (const owner of Object.keys(vaults())) {
+    if (!keeperAway(owner)) continue;
+    for (const g of dim.getEntities({ tags: [guardTag(owner)] })) {
+      try { g.addEffect("resistance", 260, { amplifier: 1, showParticles: false }); g.addEffect("strength", 260, { amplifier: 1, showParticles: false }); } catch { /* gone */ }
+    }
   }
 });
 

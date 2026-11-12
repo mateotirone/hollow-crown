@@ -62,3 +62,39 @@ export const REBUILD = {
   choirsteel: [["Choirsteel ingot", 1, (id) => id === "siege:choirsteel_ingot"]],
 };
 export const breakSeconds = (tier, breaker) => Math.ceil(LOCK_HP[tier] / BREAKER_POWER[breaker]);
+
+// ---------- a keeper away too long (Mateo, 2026-11-12) ----------
+// After a full real day away (DISPATCH.vaultOpenHours, the same number the Discord alerts use), a vault holding
+// a relic lies open: it can be broken into without its keeper, but only during short windows that open at a
+// random time of each real day, so attackers have to catch them. Any login, even a second, starts the day again.
+export const WINDOW = { perDay: 2, minutes: 30 };
+const DAY_MS = 86400000;
+
+// A small fixed-seed random number in [0, 1) for this owner and day, so every check agrees on the windows
+function rand(seed, n) {
+  let h = 2166136261;
+  for (const c of `${seed}:${n}`) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); }
+  h ^= h >>> 13; h = Math.imul(h, 0x5bd1e995); h ^= h >>> 15;
+  return (h >>> 0) / 4294967296;
+}
+
+// The windows of one real day (UTC day number): [{ start, end }] in ms, not overlapping, inside the day
+export function windowsOn(seed, day, { perDay = WINDOW.perDay, minutes = WINDOW.minutes } = {}) {
+  const len = minutes * 60000, slot = DAY_MS / perDay;
+  const out = [];
+  for (let i = 0; i < perDay; i++) {
+    const start = day * DAY_MS + i * slot + Math.floor(rand(seed, day * 10 + i) * (slot - len));
+    out.push({ start, end: start + len });
+  }
+  return out;
+}
+
+// Where an away keeper's vault stands now: { away: open for break-ins in windows, window: the one open now, next }
+export function awayState(seed, leftAt, now, openHours = 24) {
+  if (!leftAt || now - leftAt < openHours * 3600000) return { away: false };
+  const from = leftAt + openHours * 3600000, day = Math.floor(now / DAY_MS);
+  const all = [...windowsOn(seed, day), ...windowsOn(seed, day + 1)].filter((w) => w.end > from);
+  const window = all.find((w) => w.start <= now && now < w.end && w.start >= from - WINDOW.minutes * 60000);
+  const next = all.find((w) => w.start > now);
+  return { away: true, window, next };
+}
