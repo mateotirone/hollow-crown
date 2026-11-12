@@ -19,6 +19,7 @@ import { charge } from "../economy/coins.js";
 import { coins } from "../economy/rules.js";
 import { SOLDIERS, SOLDIER, unlocked, priceOf, retrainOf, trainTicks, upgradeCost, bill, BARRACKS } from "./roster.js";
 import "./idle.js";
+import { armouryMenu, dressForType } from "./armoury.js";
 import "./tests.js";
 
 const store = moduleStore("siege:army", () => ({ barracks: {}, queue: {} }));
@@ -100,6 +101,7 @@ async function upgradeMenu(player) {
 addFilter("barracksButtons", (buttons, { player }) => [
   { label: `Train soldiers\n§8${guardCount(player.id)}/${guardLimit(player.id)}`, icon: "textures/items/siege_man_at_arms", run: (p, block) => trainMenu(p, block).catch((e) => console.warn(`[Hollow Crown] train: ${e}`)) },
   { label: `Upgrade the Barracks\n§8level ${barracksLevel(player.id)}`, icon: "textures/items/iron_sword", run: (p) => upgradeMenu(p).catch(() => {}) },
+  { label: "Armoury\n§8upgrade a whole type", icon: "textures/items/iron_chestplate", run: (p) => armouryMenu(p).catch((e) => console.warn(`[Hollow Crown] armoury: ${e}`)) },
   ...buttons,
 ]);
 
@@ -118,6 +120,7 @@ onTick("army-train", 20, () => {
         const guard = world.getDimension(OVERWORLD).spawnEntity(order.type, { x: at.x + 0.5, y: at.y + 1, z: at.z + 0.5 });
         enlist(guard, owner, at);
         guard.setDynamicProperty("siege:barracks", JSON.stringify(at));
+        dressForType(guard, owner);
         state.guards[owner] = guardCount(owner) + 1;
         saveState();
         q.shift();

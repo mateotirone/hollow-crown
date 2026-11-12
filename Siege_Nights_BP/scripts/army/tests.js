@@ -53,3 +53,15 @@ addTests("army-idle", {
     assert(!asleepTime(23500));
   },
 });
+
+import { armouryCost } from "./armoury.js";
+
+addTests("army-armoury", {
+  "upgrading a type costs the tier's price per soldier, at least one": () => {
+    const c = armouryCost(0, 5);
+    assertEqual(c.tier, 1);
+    assertEqual(c.amount, 30, "6 iron ingots for each of 5");
+    assertEqual(armouryCost(2, 0).amount, 4, "4 diamonds even with none trained yet");
+    assertEqual(armouryCost(4, 3), undefined, "nothing beyond Royal Guard Plate");
+  },
+});
