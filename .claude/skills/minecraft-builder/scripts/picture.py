@@ -13,7 +13,7 @@
       the picture and your render side by side at the same height, for the look-and-fix loop
 
 Shading: a screenshot face is darker than its texture (sides, shadow, evening light). Every match tries the
-block at brightness 0.3 to 1.15 and keeps the best, so a shaded wall still finds the right block; hue and
+block at brightness 0.3 to 1.6 (renders with bloom run bright) and keeps the best, so a shaded wall still finds the right block; hue and
 chroma decide, lightness only within that range. `--any` also allows blocks without slab/stair forms.
 Colour cast (fog, the Hollow's purple haze, sunset, shaders): `--calibrate x0 y0 x1 y1 BLOCK` names one box
 you know the block of (or a plain white/grey block); every colour is corrected by the same per-channel gain
@@ -44,7 +44,7 @@ def oklab_to_linear(lab):
 
 class Matcher:
     """Nearest blocks to a picture colour, allowing for the face being lit darker or brighter."""
-    GAINS = np.linspace(0.3, 1.15, 18)
+    GAINS = np.linspace(0.3, 1.6, 27)
 
     def __init__(self, pal, any_form=False):
         self.pal = pal

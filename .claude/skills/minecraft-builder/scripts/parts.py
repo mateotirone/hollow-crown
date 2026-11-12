@@ -530,12 +530,17 @@ def _body(ctx, s, st):
     return {"floors": floors, "rects": rects, "plate": plate, "fk": fk, "y": y, "plinth": plinth, "storeys": storeys}
 
 
-def _roof_of(ctx, s, st, B):
-    """The roof field of one block of a building (06-roof)."""
+def _roof_of(ctx, s, st, B, k=0):
+    """The roof field of one block of a building (06-roof). Wings get their own copy of the roof material,
+    so a colour ladder runs eave to ridge on each roof, not over the main roof's heights."""
     rs = s.get("roof", {})
     kind = rs.get("type", "gable"); pitch = rs.get("pitch", 1)
     top = B["rects"][-1]; plate = B["plate"]
     rmat = ctx.mat(st, "roof")
+    if k:
+        raw = st["roof"]; raw = ctx.spec["materials"].get(raw, raw) if isinstance(raw, str) else raw
+        if isinstance(raw, dict): raw = {a: b for a, b in raw.items() if a not in ("from", "to")}   # the main roof's range
+        rmat = f"{st['_name']}.roof{k}"; ctx.spec["materials"][rmat] = raw
     F, ridge = roof_field(top, kind, rs.get("ridge"), rs.get("overhang", 1), rs.get("verge", 1), pitch, plate)
     r = {"rect": top, "ridge": ridge, "base": plate, "kind": kind, "pitch": pitch, "mat": rmat, "cap": rs.get("cap", rmat)}
     ctx.spec["materials"][rmat] = _with_range(ctx.spec["materials"][rmat], plate, max(v[0] for v in F.values()))
@@ -689,7 +694,7 @@ def house(ctx, s):
     if len(blocks) > 1: _join(ctx, blocks)
     for b in s.get("balconies", []): _balcony(ctx, b, st, B)
     # ---- 6 roof: every block's roof in one height field, so valleys close (06 connecting roofs)
-    roofs = [(*_roof_of(ctx, bs, bst, bB), bst, bB) for bs, bst, bB in blocks]
+    roofs = [(*_roof_of(ctx, bs, bst, bB, k), bst, bB) for k, (bs, bst, bB) in enumerate(blocks)]
     Fmain, rmain = roofs[0][0], roofs[0][1]
     extra = []
     for d in s.get("dormers", []):
