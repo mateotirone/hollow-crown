@@ -74,6 +74,7 @@ def connect(blocks):
 
 def bedrock_state(n, p):
     """logical -> (bedrock id, {state: value})"""
+    if ":" in n and not n.startswith("minecraft:"): return n, {}      # the add-on's own blocks (siege:spire_roof)
     st = {}
     f = p.get("facing")
     if is_stairs(n):
@@ -126,6 +127,7 @@ def bedrock_state(n, p):
 
 
 def java_state(n, p, java_id):
+    if ":" in n and not n.startswith("minecraft:"): return n, {}
     f = p.get("facing"); st = {}
     n = java_id or n
     if is_stairs(n):

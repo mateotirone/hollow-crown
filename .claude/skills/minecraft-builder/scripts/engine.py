@@ -97,8 +97,28 @@ def compute(spec, edition=None, pal=None):
     cells, stage_of, log = cells_of(spec)
     mats = Materials(spec.get("materials"), pal, log)
     blocks = resolve(cells, mats, pal, log)
+    seat_spire_tops(blocks, pal, log)
     emit.connect(blocks)
     return blocks, stage_of, log
+
+
+SPIRE_TOPS = ("siege:spire_roof",)
+
+
+def seat_spire_tops(blocks, pal, log=None):
+    """Mateo 2026-11-12: a custom spire top block never sits on a slab (it reads as floating). A slab or
+    nothing under one becomes the full block of that material."""
+    for (x, y, z), (n, q) in list(blocks.items()):
+        if n not in SPIRE_TOPS: continue
+        below = blocks.get((x, y - 1, z))
+        if below is None:
+            if log is not None: log.append(f"{n} at {x},{y},{z} has nothing under it")
+            continue
+        bn = below[0]
+        if bn.endswith("_slab") or bn == "slab" or "_slab" in bn:
+            full = pal.base_of(bn) or bn.replace("_slab", "")
+            blocks[(x, y - 1, z)] = (full, {})
+            if log is not None: log.append(f"{n} at {x},{y},{z} sat on {bn}: made it {full}")
 
 
 def to_bp(n, q):

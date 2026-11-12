@@ -1052,6 +1052,8 @@ def _ring(ctx, X0, Z0, X1, Z1, y, mat, stage="roof", fill=True, corners="stairs"
 def _finial(ctx, x, y, z, kind, post_mat, cap_mat, stage="details"):
     """Spire top: a post of wall blocks, a cap block and a lightning rod (06: finials)."""
     if kind in (None, "none", False): return y
+    if kind == "spire_block":       # the add-on's spire top on the full top block, never on a slab (Mateo 2026-11-12)
+        ctx.set(x, y, z, stage, raw="siege:spire_roof"); return y + 1
     n = 2 if kind == "rod" else 3 if kind == "tall" else 1
     for k in range(n): ctx.set(x, y + k, z, stage, "post", post_mat)
     ctx.set(x, y + n, z, stage, "full", cap_mat)
@@ -1065,7 +1067,8 @@ def spire(ctx, s):
     the slope reads steep and tiled), then a finial. kind "stepped" (default) or "broach" (the corners of the
     upper rings are left off, so the spire turns octagonal above square broaches). Keys: rect (the tower),
     y (default "top": on the tower's walls, replacing its roof), rows (3), overhang (1), roof, trim, finial
-    ("rod" / "tall" / "short" / "none")."""
+    ("spire_block", the default: the add-on's siege:spire_roof on the full top block, never on a slab;
+    "rod" / "tall" / "short" / "none")."""
     rect = list(s["rect"]); x0, z0, x1, z1 = rect
     y = _base_y(ctx, s, rect)
     ov = s.get("overhang", 1); rows = s.get("rows", 3); kind = s.get("kind", "stepped")
@@ -1100,7 +1103,7 @@ def spire(ctx, s):
         if X0 == X1 or Z0 == Z1: break
         k += 1
     cx, cz = (x0 + x1) // 2, (z0 + z1) // 2
-    if x1 - x0 == z1 - z0: _finial(ctx, cx, y, cz, s.get("finial", "rod"), tm, rm)
+    if x1 - x0 == z1 - z0: _finial(ctx, cx, y, cz, s.get("finial", "spire_block"), tm, rm)
     return y
 
 
@@ -1158,7 +1161,7 @@ def belfry(ctx, s):
     if cap == "none": return beam
     return spire(ctx, {"rect": rect, "y": beam + 1, "rows": 1 if cap == "hip" else s.get("rows", 3), "overhang": s.get("overhang", 1),
                        "roof": s.get("roof", {"block": "deepslate_tiles"}), "trim": s.get("cap_trim", st["pier"]),
-                       "finial": s.get("finial", "short" if cap == "hip" else "rod"), "kind": s.get("kind", "stepped"),
+                       "finial": s.get("finial", "spire_block"), "kind": s.get("kind", "stepped"),
                        "name": st["_name"] + ".cap", "part": "spire"})
 
 
