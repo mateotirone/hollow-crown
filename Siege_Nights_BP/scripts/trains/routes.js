@@ -11,7 +11,13 @@ export const ROUTE = {
   basePrice: 160, // Regals for any stretch
   perBlock: 1, // and this much per block of it
   homeRange: 140, // a settlement's home stop is the nearest stop this close to its banner
-  layPerTick: 64, // track blocks laid per tick while a stretch goes down
+  layPerTick: 12, // track pieces (each grading its own bed) laid every other tick while a stretch goes down
+  missedLooks: 2000, // pieces checked every two seconds for ground that has loaded since
+  clearUp: 4, // air cleared above the track, 3 wide
+  fillDepth: 6, // ground further down than this (or water) gets a bridge deck instead of an embankment
+  pierEvery: 4, // a bridge pier under every 4th piece
+  pierDepth: 48,
+  worksPerTick: 40, // earthwork columns (from the map's works list) set every other tick
 };
 
 export const priceOf = (seg) => ROUTE.basePrice + Math.ceil(ROUTE.perBlock * (seg.length ?? seg.blocks.length));
@@ -95,7 +101,7 @@ export function cannotBuy(data, built, home, segId) {
 }
 
 // The track pieces of a stretch as { x, y, z, kind, dir }, in laying order
-export const pieces = (seg) => seg.blocks.map(([x, y, z, kind, dir]) => ({ x, y, z, kind, dir }));
+export const pieces = (seg) => seg.blocks.map(([x, y, z, kind, dir]) => ({ x, y, z, kind, dir, works: !!seg.works }));
 
 // Check a route map for mistakes: returns a list of problems (empty when it's fine)
 export function checkRoutes(data) {
@@ -113,6 +119,9 @@ export function checkRoutes(data) {
     if (!ids.has(seg.to)) problems.push(`segment ${seg.id} ends at unknown stop ${seg.to}`);
     if (seg.from === seg.to) problems.push(`segment ${seg.id} goes nowhere`);
     if (!seg.blocks?.length) problems.push(`segment ${seg.id} has no track`);
+    for (const w of seg.works ?? []) {
+      if (w.length !== 5 || w[2] > w[3] || !seg.works_palette?.[w[4]]) { problems.push(`segment ${seg.id} has a bad work ${JSON.stringify(w)}`); break; }
+    }
     for (const b of seg.blocks ?? []) {
       if (b.length !== 5 || b[3] < 0 || b[3] > 3 || b[4] < 0 || b[4] > 7) { problems.push(`segment ${seg.id} has a bad block ${JSON.stringify(b)}`); break; }
     }
