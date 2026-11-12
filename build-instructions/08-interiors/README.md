@@ -18,8 +18,11 @@ An empty interior still has:
 
 ## Custom builds and the inn
 
-Custom builds (the inn, story sites, the capital's main rooms, anything the plan marks custom) get a
-full interior. Plan it in stage 0 with the level plans, then build it here.
+Custom builds (the inn, the Barracks, story sites, the capital's main rooms, anything the plan marks custom) get a
+full interior. The Barracks (2026-11-12, `map/structures/barracks_skill.py`): a mess with a long table, grindstone
+and smithing table on the hall's ground floor, bunks (beds and chests) above, barrels and a fletching table in the
+keep, and in the walled yard a campfire with benches, a trough, straw targets and a clear middle where off-duty
+soldiers wait (marks `yard_a`, `yard_b`, `muster`). Plan it in stage 0 with the level plans, then build it here.
 
 ### Step 1: Rooms and circulation
 

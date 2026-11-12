@@ -196,6 +196,30 @@ onion / tall, `material` (default waxed copper from weathered to oxidized, green
 "glass"}`, `finial` `short` / `gold` (one gold block, Emberwaste civic) / `spire_block` / `none`. Cyan
 terracotta has no stairs, so its curve uses dark prismarine; the copper default reads better in game.
 
+## Castle parts: `keep` and `curtain` (towers/README castle row; the Barracks, 2026-11-12)
+
+```json
+{"part": "keep", "at": [4, -10], "r": 2.5, "y": 0, "h": 20, "floors": [5, 10, 15], "material": "wall", "trim": "stone_bricks",
+ "slits": {"sides": "ns"}, "doors": [{"side": "w", "floor": 0}, {"side": "s", "floor": 1}], "ladder": "e",
+ "flags": [{"at": [1, -1], "dir": "w"}], "flag": "white_wool"}
+{"part": "curtain", "path": [[-7, -7], [-7, 0], [7, 0], [7, -9]], "y": 0, "h": 4, "material": "wall", "cap": "stone_bricks",
+ "turrets": [{"at": [-6, -1], "size": 3, "h": 7}], "gate": {"at": [0, 0], "face": "s", "w": 3, "h": 3, "crown": 4, "banner": "white_wool"}}
+```
+
+- **`keep`**: a round castle tower. Plinth 2 courses, a shaft 1 thick (r 2.5 = 5 wide, 3.5 = 7), a floor at each
+  row in `floors` (relative to `y`) with a ladder up the `ladder` side to a hatch in the deck, a string course of
+  upside-down stairs one out at every floor line, 1x2 slits on `slits.sides` (never on the ladder side), doors on
+  any floor (`floor` 0 = ground), then machicolated battlements: a ring of upside-down stairs one out (corbels),
+  the deck on them at `y + h`, a parapet and merlons on every other block. `flags`: poles on the deck with a
+  tapering pennant of `flag` hung from the top. It empties its own column first (`clear`, default true), so put
+  it **after** a house whose gable it stands in: the hall's roof and wall make way for it (towers/README section 3
+  step 7: a roof runs into the tower). Height: one full stage clear of the ridge beside it (towers/README section 2).
+- **`curtain`**: a yard or bailey wall along axis-aligned `path` points: plinth course, `h` rows of wall, a cap
+  course, merlons on every other block (ends and corners always carry one). `turrets`: odd square towers rising
+  above it, hollow, corner merlons, a lantern on top. `gate`: a `w` x `h` opening with a round-angle arch head, the
+  wall raised `crown` rows over it, and optionally a `banner` hung one out on the outer face under a log pole
+  (layout info `banner` gives its middle, so a script can recolour it to the settlement's banner colour).
+
 ## Chimney (06 step 9, Mateo's default)
 
 A stone column from the ground floor up to 2 above the highest roof cell around it; wall signs of the trim
