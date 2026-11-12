@@ -1,0 +1,168 @@
+{
+ "name": "kingsrest_capital",
+ "card": {
+  "title": "Kingsrest capital hall",
+  "sub": "Grand medieval",
+  "region": "vale",
+  "where": "Kingsrest, the heart of the royal town",
+  "kind": "Civic",
+  "blurb": "Stone below, stripped-spruce timber above, a two-tier drum under a copper dome rising out of a hipped centre block, an entrance pavilion to the square, long wings ending in spired corner towers, and a walled garden forecourt. Built on the skill."
+ },
+ "after": "capital_parts:drum_dome",
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "vale_timber",
+    "frame": "stripped_spruce_log"
+   },
+   "rect": [
+    -10,
+    -9,
+    10,
+    9
+   ],
+   "y": 0,
+   "plinth": 2,
+   "storeys": [
+    5,
+    6
+   ],
+   "storey_style": [
+    {
+     "frame_kind": "stone",
+     "frame": "stone_bricks",
+     "infill": {
+      "ladder": "VAL-01",
+      "axis": "y"
+     }
+    },
+    {}
+   ],
+   "door": {
+    "side": "n",
+    "kind": "house",
+    "steps": 2
+   },
+   "roof": {
+    "type": "hip",
+    "pitch": 1
+   },
+   "chimney": false,
+   "wings": [
+    {
+     "rect": [
+      -8,
+      10,
+      8,
+      16
+     ],
+     "storeys": [
+      5,
+      6
+     ],
+     "roof": {
+      "ridge": "z"
+     },
+     "door": {
+      "side": "s",
+      "kind": "grand",
+      "steps": 2
+     }
+    },
+    {
+     "rect": [
+      -33,
+      -6,
+      -11,
+      6
+     ],
+     "storeys": [
+      5,
+      6
+     ],
+     "roof": {
+      "ridge": "x"
+     }
+    },
+    {
+     "rect": [
+      11,
+      -6,
+      33,
+      6
+     ],
+     "storeys": [
+      5,
+      6
+     ],
+     "roof": {
+      "ridge": "x"
+     }
+    }
+   ],
+   "vines": 0.03,
+   "dormers": []
+  },
+  {
+   "part": "house",
+   "style": "vale_stone",
+   "rect": [
+    -40,
+    -3,
+    -34,
+    3
+   ],
+   "y": 0,
+   "plinth": 2,
+   "storeys": [
+    5,
+    5,
+    5,
+    5,
+    5
+   ],
+   "door": {
+    "side": "s",
+    "kind": "house",
+    "steps": 2
+   },
+   "roof": {
+    "type": "hip",
+    "pitch": 2
+   },
+   "chimney": false,
+   "vines": 0.05
+  },
+  {
+   "part": "house",
+   "style": "vale_stone",
+   "rect": [
+    34,
+    -3,
+    40,
+    3
+   ],
+   "y": 0,
+   "plinth": 2,
+   "storeys": [
+    5,
+    5,
+    5,
+    5,
+    5
+   ],
+   "door": {
+    "side": "s",
+    "kind": "house",
+    "steps": 2
+   },
+   "roof": {
+    "type": "hip",
+    "pitch": 2
+   },
+   "chimney": false,
+   "vines": 0.05
+  }
+ ]
+}

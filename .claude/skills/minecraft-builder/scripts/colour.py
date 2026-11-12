@@ -66,6 +66,10 @@ def bayer(x, y, z):
 
 ROUGH_ORDER = {"smooth": 0, "medium": 1, "rough": 2}
 
+# Partial forms for blocks that have none, picked by eye where the nearest colour reads wrong:
+# calcite -> smooth quartz (plain like calcite; quartz block shows lines, diorite reads as grey patches).
+PREFERRED_SUB = {"calcite": "smooth_quartz", "white_terracotta": "smooth_sandstone", "cyan_terracotta": "dark_prismarine"}
+
 
 class Palette:
     """The block palette (data/palette.json) with OKLab lookups."""
@@ -133,6 +137,9 @@ class Palette:
         b = self.blocks[block]
         if need in b["variants"] and (self.edition != "java" or b["variants"][need].get("java")):
             cache[key] = block; return block
+        pref = PREFERRED_SUB.get(block)      # hand-picked where colour alone picks a block that reads wrong
+        if pref and pref in self.blocks and need in self.blocks[pref]["variants"]:
+            cache[key] = pref; return pref
         cands = self.candidates(need=need, tags_no=("pattern",))
         if not cands: cache[key] = None; return None
         idx = [self.ids.index(c) for c in cands]

@@ -54,6 +54,8 @@ def block_mask(n, p, q):
     if n == "campfire": return Y < q * 7 // 16
     if n == "flower_pot": return (X >= q * 5 // 16) & (X < q * 11 // 16) & (Z >= q * 5 // 16) & (Z < q * 11 // 16) & (Y < q * 6 // 16)
     if n == "vine": return edge[f] if f else Y < 1
+    if n.endswith("_carpet"): return Y < max(1, q // 16)
+    if n == "snow_layer": return Y < max(1, q * 2 * (int(p.get("height", 0)) + 1) // 16)
     return np.ones((q, q, q), bool)
 
 
@@ -70,7 +72,17 @@ def _colours(name, palette):
     for key in (k, k.replace("_pane", ""), "glass" if "glass" in k else "", "oak_door" if k.endswith("_door") else ""):
         if key in palette.extras:
             th = palette.extras[key]["thumb"]; return th, th
+    if k in ADDON:                    # the add-on's own blocks: the nearest vanilla look, for previews only
+        return _colours(ADDON[k], palette)
+    if k.endswith("_button") and (k[: -len("_button")]) in palette.blocks:
+        th = palette.blocks[k[: -len("_button")]]["thumb"]; return th["side"], th["top"]
     return ["#ff00ff"] * 16, ["#ff00ff"] * 16
+
+
+ADDON = {"siege:pale_ash": "light_gray_concrete", "siege:veinstone": "blackstone", "siege:veinstone_bricks": "polished_blackstone_bricks",
+         "siege:cracked_veinstone_bricks": "cracked_polished_blackstone_bricks", "siege:spire_roof": "deepslate_tiles",
+         "siege:glimbulb": "orange_concrete", "iron_bars": "iron_block",
+         "gold_block": "yellow_concrete", "snow_layer": "white_concrete", "snow": "white_concrete", "moss_carpet": "moss_block"}
 
 
 def _stamp(face, a):
