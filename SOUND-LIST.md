@@ -7,7 +7,7 @@ Every sound The Hollow Crown plays, and what each one is made of. **This file is
 Tone for all of it: uneasy, especially at night. Not horror, no jump scares, nothing sudden or loud for its own sake.
 There is no music in version 1.
 
-- **23 signature sounds** are meant to be real recordings made with an AI sound generator. 0 of 23 are installed; the rest play a stand-in built from vanilla sounds, so the game is never silent.
+- **32 signature sounds** are meant to be real recordings made with an AI sound generator. 0 of 32 are installed; the rest play a stand-in built from vanilla sounds, so the game is never silent.
 - **32 more dragon sounds** have synthesized stand-ins and can be replaced the same way.
 - **25 vanilla sounds** are reworked (lower, softer, layered) everywhere the scripts use them, and **16 named cues** are built from vanilla layers.
 - The remaining vanilla sounds are played as they are, because they should sound like what they are (a horse, a bow, a page).
@@ -32,26 +32,35 @@ No computer set up for this? Upload the files in the project chat and ask Claude
 | 1 | The 3:17 toll | `toll_317` | 14 s | one-shot, stereo | vanilla stand-in |
 | 2 | The siege horn | `siege_horn` | 9 s | one-shot, stereo | vanilla stand-in |
 | 3 | The choir hum (the singing) | `choir_hum` | 15 s | loop, mono | placeholder made in code |
-| 4 | The Rift opening | `rift_open` | 8 s | one-shot, mono | vanilla stand-in |
-| 5 | The Hollow's ambience | `hollow_ambience` | 30 s | loop, stereo | vanilla stand-in |
-| 6 | A storm tide of the endless siege | `storm_tide` | 15 s | one-shot, stereo | vanilla stand-in |
-| 7 | Morvane | `boss_morvane` | 12 s | one-shot, stereo | vanilla stand-in |
-| 8 | The Choir | `boss_choir` | 12 s | one-shot, stereo | vanilla stand-in |
-| 9 | The Clockwork Reeve | `boss_reeve` | 8 s | one-shot, stereo | vanilla stand-in |
-| 10 | The Pale Huntsman | `boss_huntsman` | 10 s | one-shot, stereo | vanilla stand-in |
-| 11 | The Drowned Bride | `boss_bride` | 10 s | one-shot, stereo | vanilla stand-in |
-| 12 | The Ash Seneschal | `boss_seneschal` | 9 s | one-shot, stereo | vanilla stand-in |
-| 13 | The Mother of Changelings | `boss_mother` | 10 s | one-shot, stereo | vanilla stand-in |
-| 14 | The Warlord King | `boss_warlord_king` | 10 s | one-shot, stereo | vanilla stand-in |
-| 15 | The first glimpse | `first_glimpse` | 12 s | one-shot, stereo | vanilla stand-in |
-| 16 | The Forgemaster's bell-tongue | `bell_tongue` | 6 s | one-shot, stereo | vanilla stand-in |
-| 17 | The roll of the fallen | `roll_drum` | 4 s | one-shot, mono | vanilla stand-in |
-| 18 | The forty rowing | `forty_row` | 10 s | one-shot, stereo | vanilla stand-in |
-| 19 | The fen collects | `fen_debt` | 7 s | one-shot, stereo | vanilla stand-in |
-| 20 | Cinderwing: roar | `cinderwing_roar` | 2.4 s | one-shot, mono | synthesized stand-in |
-| 21 | Ashen Wyvern: roar | `wyvern_roar` | 2.4 s | one-shot, mono | synthesized stand-in |
-| 22 | Dune Drake: roar | `drake_roar` | 2.4 s | one-shot, mono | synthesized stand-in |
-| 23 | Glass Wyrm: roar | `wyrm_roar` | 2.4 s | one-shot, mono | synthesized stand-in |
+| 4 | The Rift opening | `rift_open` | 10 s | one-shot, mono | vanilla stand-in |
+| 5 | The Rift answers | `rift_answer` | 5 s | one-shot, mono | vanilla stand-in |
+| 6 | The rock stirs | `rift_stir` | 3 s | one-shot, mono | vanilla stand-in |
+| 7 | The hush | `rift_hush` | 2 s | one-shot, mono | vanilla stand-in |
+| 8 | The Rift breathes | `rift_breath` | 4 s | one-shot, mono | vanilla stand-in |
+| 9 | The open Rift | `rift_loop` | 15 s | loop, mono | vanilla stand-in |
+| 10 | The veil refuses | `rift_refuse` | 2 s | one-shot, mono | vanilla stand-in |
+| 11 | Crossing the Rift | `rift_cross` | 3 s | one-shot, stereo | vanilla stand-in |
+| 12 | The seep creeps | `seep_creep` | 2 s | one-shot, mono | vanilla stand-in |
+| 13 | Thin place draught | `thin_draught` | 4 s | one-shot, mono | vanilla stand-in |
+| 14 | The Hollow's ambience | `hollow_ambience` | 30 s | loop, stereo | vanilla stand-in |
+| 15 | A storm tide of the endless siege | `storm_tide` | 15 s | one-shot, stereo | vanilla stand-in |
+| 16 | Morvane | `boss_morvane` | 12 s | one-shot, stereo | vanilla stand-in |
+| 17 | The Choir | `boss_choir` | 12 s | one-shot, stereo | vanilla stand-in |
+| 18 | The Clockwork Reeve | `boss_reeve` | 8 s | one-shot, stereo | vanilla stand-in |
+| 19 | The Pale Huntsman | `boss_huntsman` | 10 s | one-shot, stereo | vanilla stand-in |
+| 20 | The Drowned Bride | `boss_bride` | 10 s | one-shot, stereo | vanilla stand-in |
+| 21 | The Ash Seneschal | `boss_seneschal` | 9 s | one-shot, stereo | vanilla stand-in |
+| 22 | The Mother of Changelings | `boss_mother` | 10 s | one-shot, stereo | vanilla stand-in |
+| 23 | The Warlord King | `boss_warlord_king` | 10 s | one-shot, stereo | vanilla stand-in |
+| 24 | The first glimpse | `first_glimpse` | 12 s | one-shot, stereo | vanilla stand-in |
+| 25 | The Forgemaster's bell-tongue | `bell_tongue` | 6 s | one-shot, stereo | vanilla stand-in |
+| 26 | The roll of the fallen | `roll_drum` | 4 s | one-shot, mono | vanilla stand-in |
+| 27 | The forty rowing | `forty_row` | 10 s | one-shot, stereo | vanilla stand-in |
+| 28 | The fen collects | `fen_debt` | 7 s | one-shot, stereo | vanilla stand-in |
+| 29 | Cinderwing: roar | `cinderwing_roar` | 2.4 s | one-shot, mono | synthesized stand-in |
+| 30 | Ashen Wyvern: roar | `wyvern_roar` | 2.4 s | one-shot, mono | synthesized stand-in |
+| 31 | Dune Drake: roar | `drake_roar` | 2.4 s | one-shot, mono | synthesized stand-in |
+| 32 | Glass Wyrm: roar | `wyrm_roar` | 2.4 s | one-shot, mono | synthesized stand-in |
 
 ### 1. The 3:17 toll
 
@@ -92,16 +101,118 @@ Prompt:
 ### 4. The Rift opening
 
 - **File name:** `rift_open` (installs as `sounds/siege/sig/rift_open.ogg`, sound id `siege.sig.rift_open`)
-- **Length:** about 8 seconds, one-shot, mono
-- **When:** When the crack in the cave tears open (it takes about 5 seconds). Heard by everyone nearby, from the Rift itself.
+- **Length:** about 10 seconds, one-shot, mono
+- **When:** The tear of the 40-second Rift opening (undertow/rift.js, at 20 s): rock splitting floor to ceiling, then widening. Played from the crack.
 - **Stand-in until then:** nothing extra (the game's existing sounds for this moment carry on)
 - **Test:** `/scriptevent siege:sound sig.rift_open`
 
 Prompt:
 
-> Solid rock slowly splitting open from the middle outward over five seconds: deep grinding and cracking stone and a rising low rumble, then a hollow rush of air being drawn inward like a held breath let go, with one faint low bell tone inside the rush. Ends with a few falling pebbles. Heavy, close, physical. No explosion, no scream, no music.
+> Solid rock tearing open from the floor of a cave up to its ceiling over seven seconds: a chain of sharp stone cracks climbing upward, each one a little higher in pitch than the last, with grit and small stones trickling down. Then three seconds of the split grinding wider and one heavy, low, muffled boom deep in the rock. No wind or air rush, no voices, no music. Close and dry, ends in silence.
 
-### 5. The Hollow's ambience
+### 5. The Rift answers
+
+- **File name:** `rift_answer` (installs as `sounds/siege/sig/rift_answer.ogg`, sound id `siege.sig.rift_answer`)
+- **Length:** about 5 seconds, one-shot, mono
+- **When:** Rift opening, 2 s: after the Tuning Fork is struck, the note comes back from inside the rock.
+- **Test:** `/scriptevent siege:sound siege.sig.rift_answer`
+
+Prompt:
+
+> One clear struck metal tuning note answered from deep inside solid rock: the same note comes back a moment late, lower in pitch and muffled, like a bronze bell rung behind a thick stone wall, ringing softly and fading slowly. Quiet, eerie, calm. No voices, no music, ends in silence.
+
+### 6. The rock stirs
+
+- **File name:** `rift_stir` (installs as `sounds/siege/sig/rift_stir.ogg`, sound id `siege.sig.rift_stir`)
+- **Length:** about 3 seconds, one-shot, mono
+- **When:** Rift opening, 7 to 18 s: played every 2 seconds, getting louder. Three variants.
+- **Variants:** 3, named `rift_stir_1` to `rift_stir_3`. The game picks one at random each time
+- **Test:** `/scriptevent siege:sound siege.sig.rift_stir`
+
+Prompt:
+
+> Cave stone groaning and ticking under heavy strain, small cracks popping, fine grit and pebbles falling onto rock, and one faint glassy ring as if crystal inside the stone were humming. Close, dry, uneasy. No voices, no music.
+
+### 7. The hush
+
+- **File name:** `rift_hush` (installs as `sounds/siege/sig/rift_hush.ogg`, sound id `siege.sig.rift_hush`)
+- **Length:** about 2 seconds, one-shot, mono
+- **When:** Rift opening, 18 s: just before the tear, all sound is sucked away.
+- **Test:** `/scriptevent siege:sound siege.sig.rift_hush`
+
+Prompt:
+
+> All the sound in a cave suddenly drawn away into silence: a soft low pressure drop like ears popping on a mountain, a muffled inward hush, then complete silence. Subtle, not loud. No voices, no music.
+
+### 8. The Rift breathes
+
+- **File name:** `rift_breath` (installs as `sounds/siege/sig/rift_breath.ogg`, sound id `siege.sig.rift_breath`)
+- **Length:** about 4 seconds, one-shot, mono
+- **When:** Rift opening, 30 s: the new crack draws its first breath.
+- **Test:** `/scriptevent siege:sound siege.sig.rift_breath`
+
+Prompt:
+
+> One long, slow draw of cold air inward through a narrow crack in rock, like a huge calm breath being taken in, with one faint low bell tone hidden inside the rush of air. Soft, cold, uneasy. No voices, no music, ends in silence.
+
+### 9. The open Rift
+
+- **File name:** `rift_loop` (installs as `sounds/siege/sig/rift_loop.ogg`, sound id `siege.sig.rift_loop`)
+- **Length:** ask for 15 seconds or more; the game uses exactly 7, loop, mono. The installer fades 1.5 s at each end and the game overlaps the fades, so it never has a gap
+- **When:** The open Rift at rest, looped for as long as it stays open. Replayed so the fades overlap, like the choir hum.
+- **Note:** Ask for 15 seconds or more; the installer cuts the steadiest 7 seconds from the middle and fades both ends.
+- **Test:** `/scriptevent siege:sound siege.sig.rift_loop`
+
+Prompt:
+
+> A low, steady breathing draught of cold air moving through a deep crack in a cave wall, slow and even, with a very faint detuned hum underneath that never changes. Calm, constant, the same volume throughout. No voices, no music, no sudden sounds.
+
+### 10. The veil refuses
+
+- **File name:** `rift_refuse` (installs as `sounds/siege/sig/rift_refuse.ogg`, sound id `siege.sig.rift_refuse`)
+- **Length:** about 2 seconds, one-shot, mono
+- **When:** When the veil pushes back a player who has not beaten all five bosses. Played to that player.
+- **Test:** `/scriptevent siege:sound siege.sig.rift_refuse`
+
+Prompt:
+
+> A dull, soft thud of displaced air, like a heavy curtain of pressure pushing someone back, followed by a short low hum that falls in pitch and fades. Soft, not violent. No voices, no music.
+
+### 11. Crossing the Rift
+
+- **File name:** `rift_cross` (installs as `sounds/siege/sig/rift_cross.ogg`, sound id `siege.sig.rift_cross`)
+- **Length:** about 3 seconds, one-shot, stereo
+- **When:** Stepping through the open Rift into the Hollow. Played to the player.
+- **Test:** `/scriptevent siege:sound siege.sig.rift_cross`
+
+Prompt:
+
+> The sound of a cave smearing and slowing down as it drops in pitch, like hearing the world through water, then a held breath and complete silence. Smooth and dreamlike, uneasy, not scary. No voices, no music.
+
+### 12. The seep creeps
+
+- **File name:** `seep_creep` (installs as `sounds/siege/sig/seep_creep.ogg`, sound id `siege.sig.seep_creep`)
+- **Length:** about 2 seconds, one-shot, mono
+- **When:** Where a seep vein grows across the ground while the Rift is open. Quiet. Three variants.
+- **Variants:** 3, named `seep_creep_1` to `seep_creep_3`. The game picks one at random each time
+- **Test:** `/scriptevent siege:sound siege.sig.seep_creep`
+
+Prompt:
+
+> Ground slowly turning to something else: a quiet wet crackle of stone and soil, like frost spreading through damp rock, with one faint glassy tick. Very quiet and close. No voices, no music.
+
+### 13. Thin place draught
+
+- **File name:** `thin_draught` (installs as `sounds/siege/sig/thin_draught.ogg`, sound id `siege.sig.thin_draught`)
+- **Length:** about 4 seconds, one-shot, mono
+- **When:** A tell at any thin place before the Rift opens there.
+- **Test:** `/scriptevent siege:sound siege.sig.thin_draught`
+
+Prompt:
+
+> A slight cold draught whistling very softly through a hairline crack in rock, with a barely audible low hum underneath. Very quiet, subtle, eerie but calm. No voices, no music.
+
+### 14. The Hollow's ambience
 
 - **File name:** `hollow_ambience` (installs as `sounds/siege/sig/hollow_ambience.ogg`, sound id `siege.sig.hollow_ambience`)
 - **Length:** about 30 seconds, loop, stereo. The installer fades 3 s at each end and the game overlaps the fades, so it never has a gap
@@ -113,7 +224,7 @@ Prompt:
 
 > Seamless looping ambience of a vast underground world with no sky: a very low, steady, airy drone like wind moving through an enormous cavern, slow distant water, an occasional faint glassy chime far away, and a barely audible wordless choir note that comes and goes. Calm, wide, lonely and slightly wrong, never frightening. No thunder, no footsteps, no creatures, no melody. Constant level, no sudden sounds.
 
-### 6. A storm tide of the endless siege
+### 15. A storm tide of the endless siege
 
 - **File name:** `storm_tide` (installs as `sounds/siege/sig/storm_tide.ogg`, sound id `siege.sig.storm_tide`)
 - **Length:** about 15 seconds, one-shot, stereo
@@ -125,7 +236,7 @@ Prompt:
 
 > A storm front arriving in daylight: a long roll of distant thunder that grows, a surge of wind, and underneath it the muffled sound of a great many feet marching closer and one far-off low war horn. Builds for ten seconds, then settles into steady wind. Ominous and tired rather than violent. No rain, no voices, no music.
 
-### 7. Morvane
+### 16. Morvane
 
 - **File name:** `boss_morvane` (installs as `sounds/siege/sig/boss_morvane.ogg`, sound id `siege.sig.boss.morvane`)
 - **Length:** about 12 seconds, one-shot, stereo
@@ -137,7 +248,7 @@ Prompt:
 
 > An old king rising slowly from a stone throne in an enormous silent hall: the scrape of heavy cloth on stone, one long weary exhale from a deep male voice, then a single very low bell tone that seems to come from inside the room and hangs in the air, with a faint high crystalline ringing above it. Sad, patient and immense, not monstrous. No words, no growl, no music.
 
-### 8. The Choir
+### 17. The Choir
 
 - **File name:** `boss_choir` (installs as `sounds/siege/sig/boss_choir.ogg`, sound id `siege.sig.boss.choir`)
 - **Length:** about 12 seconds, one-shot, stereo
@@ -149,7 +260,7 @@ Prompt:
 
 > Seven singers, men and women, entering one after another on the same low sustained note with no words, each voice very slightly out of tune with the last so the sound beats and shimmers. Cold stone-hall reverb. It swells to a full unison and then stops dead, all at once, mid-breath. Beautiful and unsettling. No melody, no instruments.
 
-### 9. The Clockwork Reeve
+### 18. The Clockwork Reeve
 
 - **File name:** `boss_reeve` (installs as `sounds/siege/sig/boss_reeve.ogg`, sound id `siege.sig.boss.reeve`)
 - **Length:** about 8 seconds, one-shot, stereo
@@ -161,7 +272,7 @@ Prompt:
 
 > A large brass clockwork mechanism being wound: slow heavy ratchet clicks, a spring tightening, gears engaging, then a tower-clock tick that stumbles and repeats the same tick three times as if stuck, and one dull clock chime cut short. Dry, metallic, precise. No music, no voices.
 
-### 10. The Pale Huntsman
+### 19. The Pale Huntsman
 
 - **File name:** `boss_huntsman` (installs as `sounds/siege/sig/boss_huntsman.ogg`, sound id `siege.sig.boss.huntsman`)
 - **Length:** about 10 seconds, one-shot, stereo
@@ -173,7 +284,7 @@ Prompt:
 
 > A thin, pale hunting horn sounding once far away across a frozen forest, muffled by falling snow. Then silence, the creak of a bowstring being drawn very close by, and a single low wolf growl. Cold, still, patient. Light wind. No music, no voices, no howling pack.
 
-### 11. The Drowned Bride
+### 20. The Drowned Bride
 
 - **File name:** `boss_bride` (installs as `sounds/siege/sig/boss_bride.ogg`, sound id `siege.sig.boss.bride`)
 - **Length:** about 10 seconds, one-shot, stereo
@@ -185,7 +296,7 @@ Prompt:
 
 > Something rising slowly out of deep still water: a long swell and pouring of water, the drip of heavy soaked fabric, a woman's soft wordless sigh, and two small chapel bells ringing underwater, muffled and bent out of tune. Mournful and slow, sad rather than scary. No scream, no music.
 
-### 12. The Ash Seneschal
+### 21. The Ash Seneschal
 
 - **File name:** `boss_seneschal` (installs as `sounds/siege/sig/boss_seneschal.ogg`, sound id `siege.sig.boss.seneschal`)
 - **Length:** about 9 seconds, one-shot, stereo
@@ -197,7 +308,7 @@ Prompt:
 
 > A heavy armoured knight turning to face you in a dry desert ruin: sand and ash hissing off metal plates, the slow grind of old armour joints, a huge iron shield set down on stone with one deep ringing thud, then a long hollow breath through an empty helmet. Dry, hot, weighty. No voice, no music.
 
-### 13. The Mother of Changelings
+### 22. The Mother of Changelings
 
 - **File name:** `boss_mother` (installs as `sounds/siege/sig/boss_mother.ogg`, sound id `siege.sig.boss.mother`)
 - **Length:** about 10 seconds, one-shot, stereo
@@ -209,7 +320,7 @@ Prompt:
 
 > A woman humming three slow notes of a lullaby, gentle and warm, in a quiet wet marsh at night. On the last note a second, identical voice joins a fraction too late and slightly off pitch. Soft frogs and dripping water far in the background, roots creaking. Tender and wrong. No words, no laughter, no music.
 
-### 14. The Warlord King
+### 23. The Warlord King
 
 - **File name:** `boss_warlord_king` (installs as `sounds/siege/sig/boss_warlord_king.ogg`, sound id `siege.sig.boss.warlord_king`)
 - **Length:** about 10 seconds, one-shot, stereo
@@ -221,7 +332,7 @@ Prompt:
 
 > A warlord arriving on a battlefield at night riding a huge beast: three very heavy, slow footfalls that shake the ground, the rattle of chains and armour, a deep animal snort, then a brutal brass war horn blast answered by a distant crowd of soldiers beating weapons on shields twice. Massive, confident, martial. No music, no words.
 
-### 15. The first glimpse
+### 24. The first glimpse
 
 - **File name:** `first_glimpse` (installs as `sounds/siege/sig/first_glimpse.ogg`, sound id `siege.sig.first_glimpse`)
 - **Length:** about 12 seconds, one-shot, stereo
@@ -233,7 +344,7 @@ Prompt:
 
 > Night on a castle wall during a battle that suddenly goes quiet: the wind drops, the distant fighting fades to nothing, and in the silence come slow, even, unhurried footsteps on wet ground getting closer, with a very faint low choir note under them and one slow deep pulse like a heartbeat. It stops before anything happens. Quiet, tense, patient. No sting, no loud hit, no scream, no music.
 
-### 16. The Forgemaster's bell-tongue
+### 25. The Forgemaster's bell-tongue
 
 - **File name:** `bell_tongue` (installs as `sounds/siege/sig/bell_tongue.ogg`, sound id `siege.sig.bell_tongue`)
 - **Length:** about 6 seconds, one-shot, stereo
@@ -245,7 +356,7 @@ Prompt:
 
 > One clear, bright bronze hand-bell struck hard, close and present, with a pure ringing tone and a long shimmering tail that fills a stone hall. Under it, the clatter of many pieces of empty armour shifting at once, then stillness. No music, no voices. Ends in silence.
 
-### 17. The roll of the fallen
+### 26. The roll of the fallen
 
 - **File name:** `roll_drum` (installs as `sounds/siege/sig/roll_drum.ogg`, sound id `siege.sig.roll_drum`)
 - **Length:** about 4 seconds, one-shot, mono
@@ -257,7 +368,7 @@ Prompt:
 
 > A single low, muffled skin drum struck once in a high open cliffside space with dry desert wind, a soft boom that rolls away into the distance. Solemn, not dramatic. No melody, no voices. Ends in silence.
 
-### 18. The forty rowing
+### 27. The forty rowing
 
 - **File name:** `forty_row` (installs as `sounds/siege/sig/forty_row.ogg`, sound id `siege.sig.forty_row`)
 - **Length:** about 10 seconds, one-shot, stereo
@@ -269,7 +380,7 @@ Prompt:
 
 > Many oars dipping together in slow unison on dark still water inside a vast cavern, wooden oarlocks creaking in time, water dripping, and a low wordless hum from many tired voices keeping the stroke. Distant, hollow echo. Uneasy but steady. No music. Ends in silence.
 
-### 19. The fen collects
+### 28. The fen collects
 
 - **File name:** `fen_debt` (installs as `sounds/siege/sig/fen_debt.ogg`, sound id `siege.sig.fen_debt`)
 - **Length:** about 7 seconds, one-shot, stereo
@@ -281,7 +392,7 @@ Prompt:
 
 > A deep wet marsh sound: bubbles rising and bursting from thick mud, reeds rustling all at once as if a wind passed, and a slow low creak like an old wooden raft taking weight. A faint breathy whisper at the very end, no words. Uneasy, not frightening. Ends in silence.
 
-### 20. Cinderwing: roar
+### 29. Cinderwing: roar
 
 - **File name:** `cinderwing_roar` (installs as `sounds/siege/dragon/cinderwing_roar.ogg`, sound id `siege.dragon.cinderwing.roar`)
 - **Length:** about 2.4 seconds, one-shot, mono
@@ -292,7 +403,7 @@ Prompt:
 
 > The voice of a large fire-breathing dragon with a deep chest and a throat like a furnace: warm, rumbling, with a crackle of embers in the breath. A full roar: starts fast, peaks, and trails off into breath. Powerful and proud, not a monster-movie scream. One animal, close and dry, no echo, no background, no music.
 
-### 21. Ashen Wyvern: roar
+### 30. Ashen Wyvern: roar
 
 - **File name:** `wyvern_roar` (installs as `sounds/siege/dragon/wyvern_roar.ogg`, sound id `siege.dragon.wyvern.roar`)
 - **Length:** about 2.4 seconds, one-shot, mono
@@ -303,7 +414,7 @@ Prompt:
 
 > The voice of a lean, light wyvern with a high, hoarse, hissing voice like wind through dry reeds, raspy and airy. A full roar: starts fast, peaks, and trails off into breath. Powerful and proud, not a monster-movie scream. One animal, close and dry, no echo, no background, no music.
 
-### 22. Dune Drake: roar
+### 31. Dune Drake: roar
 
 - **File name:** `drake_roar` (installs as `sounds/siege/dragon/drake_roar.ogg`, sound id `siege.dragon.drake.roar`)
 - **Length:** about 2.4 seconds, one-shot, mono
@@ -314,7 +425,7 @@ Prompt:
 
 > The voice of a heavy, broad desert drake with a very low, slow, gravelly voice like boulders shifting under sand. A full roar: starts fast, peaks, and trails off into breath. Powerful and proud, not a monster-movie scream. One animal, close and dry, no echo, no background, no music.
 
-### 23. Glass Wyrm: roar
+### 32. Glass Wyrm: roar
 
 - **File name:** `wyrm_roar` (installs as `sounds/siege/dragon/wyrm_roar.ogg`, sound id `siege.dragon.wyrm.roar`)
 - **Length:** about 2.4 seconds, one-shot, mono

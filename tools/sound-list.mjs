@@ -37,7 +37,7 @@ const recipe = (layers) => layers.length
   ? layers.map(([id, p = 1, v = 1, d = 0]) => `\`${id}\`${p !== 1 ? ` pitch ${p}` : ""}${v !== 1 ? ` vol ${v}` : ""}${d ? ` after ${(d / 20).toFixed(2).replace(/\.?0+$/, "")} s` : ""}`).join(" + ")
   : "nothing extra";
 const shape = (e) => `${e.kind === "loop" ? "loop" : "one-shot"}, ${e.channels === 1 ? "mono" : "stereo"}`;
-const state = (e) => (record[e.file] ? `recording (${record[e.file].seconds} s)` : e.file === "choir_hum" ? "placeholder made in code" : e.id.startsWith("siege.dragon.") ? "synthesized stand-in" : "vanilla stand-in");
+const state = (e) => (record[e.file] ? `recording (${record[e.file].seconds} s${record[e.file].variants ? `, ${record[e.file].variants.length} of ${e.variants} variants` : ""})` : e.file === "choir_hum" ? "placeholder made in code" : e.id.startsWith("siege.dragon.") ? "synthesized stand-in" : "vanilla stand-in");
 const cueOf = (e) => SIGNATURE_CUES.find((n) => CUES[n].custom === e.id);
 
 const sig = manifest.signature, dragons = manifest.dragons;
@@ -85,6 +85,7 @@ signature.forEach((e, i) => {
   md += `- **File name:** \`${e.file}\` (installs as \`${e.path}.ogg\`, sound id \`${e.id}\`)\n`;
   md += `- **Length:** ${e.ask_seconds ? `ask for ${e.ask_seconds} seconds or more; the game uses exactly ${e.seconds}` : `about ${e.seconds} seconds`}, ${shape(e)}${e.kind === "loop" ? `. The installer fades ${e.fade} s at each end and the game overlaps the fades, so it never has a gap` : ""}\n`;
   md += `- **When:** ${e.where}\n`;
+  if (e.variants) md += `- **Variants:** ${e.variants}, named \`${e.file}_1\` to \`${e.file}_${e.variants}\`. The game picks one at random each time\n`;
   if (cue) md += `- **Stand-in until then:** ${recipe(CUES[cue].layers)}${CUES[cue].layers.length ? "" : " (the game's existing sounds for this moment carry on)"}\n`;
   if (e.note) md += `- **Note:** ${e.note}\n`;
   md += `- **Test:** \`/scriptevent siege:sound ${cue ?? e.id}\`\n\n`;
