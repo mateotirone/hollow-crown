@@ -490,7 +490,7 @@ class Starter:
         # the square: well in the middle, benches facing in, lamps at the corners
         for (r, a) in ((-5, -12), (5, -12), (-5, -4), (5, -4)): self.lamp(r, a)
         for r in (-3, -2, 2, 3):
-            x, y, z = self.at(r, -13); self.put(x, y + 1, z, f"{W}_stairs", {"facing": "in"})
+            x, y, z = self.at(r, -13); self.put(x, y + 1, z, f"{W}_stairs", {"facing": {(1, 0): "e", (-1, 0): "w", (0, 1): "s", (0, -1): "n"}[self.F]})
         self.buildings.append({"design": "well", "label": "Well", "origin": [*(lambda p: [p[0] - self.C[0], self.sqY + 1, p[1] - self.C[1]])(self.world(0, -10))], "forward": list(self.F), "built": True})
         # lamps down the main lane and the back lanes
         for a in range(-16, -(WALL_BASE + 2), -6):

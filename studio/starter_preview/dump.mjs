@@ -36,7 +36,7 @@ for (const [x, y, z, n, p] of P.blocks) set(x, y, z, n, p);
 function props(st) {
   const p = {};
   if (!st) return p;
-  if (st["minecraft:cardinal_direction"]) p.facing = st["minecraft:cardinal_direction"];
+  if (st["minecraft:cardinal_direction"]) p.facing = String(st["minecraft:cardinal_direction"])[0]; // n/s/e/w, as the mesher wants
   if (st.weirdo_direction !== undefined) p.weirdo = st.weirdo_direction;
   if (st.upside_down_bit) p.half = "top";
   if (st.pillar_axis) p.axis = st.pillar_axis;
