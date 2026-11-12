@@ -643,3 +643,59 @@ addTests("settle plans", {
     assert(whereFrom("cottage").short.length <= 14, "card hints are short");
   },
 });
+
+import { buildOrder, ATTACHED, blockOf } from "../townhall/halls.js";
+import { pickBaseSlot, bedSpot, gateDir, roadEnd, roadLine, gradeLine } from "./basedata.js";
+import { MASON_DESIGNS } from "./mason_data.js";
+
+
+addTests("settle base", {
+  "attached blocks go in after every solid block, and door halves go in together"() {
+    const plan = drawBuilding("cottage", "vale");
+    const order = buildOrder(plan);
+    const kinds = order.map((c) => ATTACHED.test(String(blockOf(plan, c))));
+    const firstAttached = kinds.indexOf(true);
+    assert(firstAttached > 0, "the cottage has a door or a lantern");
+    assert(!kinds.slice(firstAttached).includes(false), "no solid block is placed after an attached one");
+    for (let i = 0; i < order.length; i++) if (order[i].pair) {
+      const a = order[i], b = order[i + 1];
+      assert(b && b.x === a.x && b.z === a.z && b.y === a.y + 1, "a door's upper half follows its lower half");
+    }
+  },
+  "every region has a 9 x 9 Mason's Yard with a bench in its front yard"() {
+    for (const region of ["vale", "frostmarch", "saltreach", "emberwaste", "blackfen"]) {
+      const b = MASON_DESIGNS[region].box;
+      assert(b.x1 - b.x0 + 1 === 9 && b.z1 - b.z0 + 1 === 9 && b.z0 === 1, `${region} Mason's Yard is 9 x 9 behind its front row (${JSON.stringify(b)})`);
+      assert(drawBuilding("mason_yard", region).bounds().y1 > 4, `${region} Mason's Yard draws its design`);
+      assert(MASON_DESIGNS[region]?.marks?.bench, `${region} Mason's Yard marks the bench`);
+      assert(!BUILDINGS.some((x) => x.id === "mason_yard"), "the Mason's Yard is never offered on a plot");
+    }
+  },
+  "the founder's cottage has room for a bed indoors"() {
+    for (const region of ["vale", "frostmarch", "saltreach", "emberwaste", "blackfen"]) {
+      const at = bedSpot(drawBuilding("cottage", region));
+      assert(at && at.z >= 2, `${region} cottage has a bed spot away from the door`);
+    }
+  },
+  "the base buildings take the nearest free Small plot, never the library's"() {
+    const slots = [
+      { id: "a", size: "S", tier: 0, tags: ["library"], box: { x0: 0, z0: 0, x1: 8, z1: 8 } },
+      { id: "b", size: "S", tier: 0, tags: [], box: { x0: 20, z0: 0, x1: 28, z1: 8 } },
+      { id: "c", size: "S", tier: 0, tags: [], box: { x0: 40, z0: 0, x1: 48, z1: 8 } },
+      { id: "d", size: "S", tier: 1, tags: [], box: { x0: 2, z0: 0, x1: 10, z1: 8 } },
+    ];
+    assertEqual(pickBaseSlot(slots, new Set(), { x: 0, z: 0 })?.id, "b");
+    assertEqual(pickBaseSlot(slots, new Set(["b"]), { x: 0, z: 0 })?.id, "c");
+  },
+  "the road out to the map's roads: the way out, the end, a joined line, an even grade"() {
+    assertEqual(JSON.stringify(gateDir(0)), JSON.stringify({ x: 0, z: -1 }));
+    assertEqual(gateDir(90).x, 1);
+    assertEqual(roadEnd([{ x: 3, z: 0 }, { x: 30, z: 1 }, { x: 30, z: 9 }], { x: 1, z: 0 }).z, 1);
+    const line = roadLine({ x: 0, z: 0 }, { x: 7, z: -4 });
+    assertEqual(line.length, 12);
+    for (let i = 1; i < line.length; i++) assertEqual(Math.abs(line[i].x - line[i - 1].x) + Math.abs(line[i].z - line[i - 1].z), 1, "each step joins along a side");
+    const h = gradeLine(70, 64, 11);
+    for (let i = 1; i < h.length; i++) assert(Math.abs(h[i] - h[i - 1]) <= 1, "never more than 1 a block");
+    assertEqual(h[0], 70); assertEqual(h[11], 64);
+  },
+});
