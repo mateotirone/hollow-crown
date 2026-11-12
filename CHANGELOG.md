@@ -24,6 +24,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - Track: diagonal pieces no longer lie across the line, bends turn the right way, and slopes climb toward the higher track instead of away from it. Track already laid fixes itself.
 
 ### Added
+- Dragons now keep the old fear the Cinder Roost talks about: on a siege night no dragon will fly from 03:00 to 03:30, around the 3:17 toll. One that is up glides down, and none will take off. A Dragonlord's (top-rank Dragon Rider's) dragon flies through it anyway, every siege night. That is the Unflown Night, and the first time each night, every raider in the siege host glows for 30 seconds. Kesh tells you about it when you reach Dragonlord.
 - Guild Factors in every town: three orders a day for goods from other regions, paid in iron, gold and sometimes diamonds.
 - The Ironworks: a settlement iron farm in three stages. The Ore Pit digs raw iron, the Bloomery (Town) smelts it while you feed it charcoal, and the Trip-Hammer Forge (City, beside water) makes about 100 ingots a day. Raiders can loot its storeroom.
 - Old Workings: old mines just outside five settlements whose ore grows back (iron at Frosthelm and Gullcliff, gold at Redmesa and Dunehold, diamond in the Wolfcairn Deeps). One runs rich each week, and the deeper ones draw claim jumpers.
