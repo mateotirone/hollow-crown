@@ -362,6 +362,10 @@ def model(n, p):
         t = {"side": f"{n}@0,2,6,9", "top": f"{n}@0,9,6,15", "bottom": f"{n}@0,9,6,15"}
         return [((5 / 16, y0, 5 / 16, 11 / 16, y0 + 7 / 16, 11 / 16), t, {"cut": 1, "glow": 1}),
                 ((6 / 16, y0 + 7 / 16, 6 / 16, 10 / 16, y0 + 9 / 16, 10 / 16), t, {"cut": 1, "glow": 1})]
+    if n == "candle" or n.endswith("_candle"):     # one to four little wax sticks (interiors: altars, tables)
+        t = {"side": "candles/" + (n if n != "candle" else "candle") + "_lit@0,8,2,14", "top": "candles/" + (n if n != "candle" else "candle") + "_lit@0,6,2,8"}
+        spots = [(7, 7), (5, 8), (9, 6), (8, 10)][: int(p.get("candles", 1))]
+        return [(((sx) / 16, 0, (sz) / 16, (sx + 2) / 16, 6 / 16, (sz + 2) / 16), t, {"glow": 1}) for sx, sz in spots]
     if n == "flower_pot":
         t = {"side": "flower_pot@5,10,11,16", "top": "dirt"}
         return [((5 / 16, 0, 5 / 16, 11 / 16, 6 / 16, 11 / 16), t, {})] + ([("cross", {"side": PLANTS[p["plant"]]}, {"cut": 1, "scale": 0.7, "y": 4 / 16})] if p.get("plant") else [])

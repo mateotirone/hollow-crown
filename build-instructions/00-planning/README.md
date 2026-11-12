@@ -21,8 +21,8 @@ Write down before anything else:
 - **Front**: which side faces the street or square. In the plan the front is always south (+z).
 - **Ground**: the ground heights under the footprint (from the town plan or terrain slice). Note the
   lowest and highest point; the foundation stage needs both.
-- **Custom or standard**: custom builds get a furnished interior (`08-interiors`); everything else
-  except the inn stays empty.
+- **Use**: what the building is for (home, inn, shop, chapel...), which names its rooms storey by storey
+  (`08-interiors`); every building is furnished. Say whether the attic is a room.
 
 ## Step 2: Pick the size
 
@@ -236,4 +236,4 @@ fence, light, greenery. Every later stage takes blocks only from this sheet.
 - [ ] Big builds: every module has a row in the module table; no face over 15 blocks is unbroken.
 - [ ] Roof plan drawn; colour chosen against the town mix and the neighbours.
 - [ ] Palette sheet filled in.
-- [ ] Interior: empty (default) or custom/inn (then `08-interiors` gets planned now as well).
+- [ ] Interior: the use and the room on each storey, where the stair goes, attic or not (`08-interiors`).

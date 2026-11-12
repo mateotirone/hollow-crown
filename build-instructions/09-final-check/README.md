@@ -58,7 +58,7 @@ playing so it has to be perfect." Be harder on it than he would be.
 **Detail and interior**
 
 - [ ] Every detail has a reason; 1 to 3 props per door.
-- [ ] Interior empty (standard) or fully laid out (inn, custom).
+- [ ] Interior furnished by use, every storey reached, a one-block walkway to every room, bed and chest (`08-interiors`).
 
 **Technical**
 

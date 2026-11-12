@@ -122,7 +122,11 @@
      }
     }
    ],
-   "vines": 0.04
+   "vines": 0.04,
+   "interior": {
+    "use": "inn",
+    "furnish": false
+   }
   },
   {
    "part": "arch",
