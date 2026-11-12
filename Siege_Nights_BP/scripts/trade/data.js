@@ -106,10 +106,3 @@ export const REGION_RATES_DEFAULT = {
   Blackfen: { iron: 1, gold: 1, diamond: 1 },
 };
 
-// The trade wing's insides, in the Trade House design's own frame (its door at local (0, 1, 1), the back wall at
-// z = box.z1): the Trade Board in the middle of the back, the crates either side of it.
-export const WING_SPOTS = {
-  board: (box) => ({ x: 0, y: 1, z: box.z1 - 1 }),
-  exports: (box) => ({ x: -2, y: 1, z: box.z1 - 1 }),
-  imports: (box) => ({ x: 2, y: 1, z: box.z1 - 1 }),
-};

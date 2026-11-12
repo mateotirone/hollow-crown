@@ -1,5 +1,7 @@
 import { addTests, assert, assertEqual } from "../core/tests.js";
 import { REGIONS } from "../economy/config.js";
+import { TRADE_OUTPOST_DESIGNS } from "./outpost_data.js";
+import { wingPlan } from "./wing.js";
 import { TRADE, GOODS, GOOD_IDS, COIN, GOLD_COIN, DAY, REGION_RATES_DEFAULT } from "./data.js";
 import {
   valueTo, fairness, offerProblem, pathLength, travelTicks, takeMoney, moneyIn, depart, afterTry, finished,
@@ -157,5 +159,16 @@ addTests("trade", {
     assertEqual(npcFill({ region: "Saltreach", temperament: "grasping" }, cheap, { [GOLD]: 50 }, {}), 0);
     assertEqual(npcFill(npc, cheap, { [GOLD]: 4 }, {}), 4);
     assertEqual(npcFill(npc, { ...cheap, left: 3 }, { [GOLD]: 50 }, {}), 3);
+  },
+  "the Outpost building: every region and stage, marks inside, nothing in front of the step": () => {
+    for (const region of ["vale", "frostmarch", "saltreach", "emberwaste", "blackfen"]) {
+      for (const stage of ["halt", "station", "junction", "grand"]) {
+        const d = TRADE_OUTPOST_DESIGNS[region]?.[stage];
+        assert(d, `${region} ${stage}`);
+        assert(d.box.z0 >= 0, `${region} ${stage} reaches toward the station`);
+        const p = wingPlan(region, stage);
+        for (const k of ["board", "exports", "imports"]) assert(p.marks[k], `${region} ${stage} ${k}`);
+      }
+    }
   },
 });
