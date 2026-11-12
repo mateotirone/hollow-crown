@@ -23,6 +23,7 @@ export const OFFLINE_ONLY = new Set([
   "warwrit-route: with no bridge in reach they swim after all",
   "warwrit-route: walls are never climbed: they go through the gate",
   "hollow arenas: the Court's floor is whole and open to the fight's outer ring, with the Singers' spots clear",
+  "hollow arenas: the Court's water stays in its channels: every water block is closed on four sides and below (it once ran over the floor)",
   "hollow arenas: the Court never writes the gate's cells (the seal and openCourtGate own them)",
   "hollow arenas: the Seat: disc and ring floors, Morvane's spot clear, everything that falls inside the dropped band",
   "hollow arenas: the cliff before the Seat is ragged, and the story path still reaches its edge",

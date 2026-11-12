@@ -49,6 +49,9 @@ Build for the dark. Light is the material here: warm froglight windows mean peop
 everything else. The storm never rains or snows, so there are no drip lines or snow caps. Damp and age show as
 cracked veinstone and moss.
 
+Drowned and flooded places (the Drowned Court, the drowned city) show their water as channels and pools sunk a row
+into the floor, walled and floored all round; never water standing on the floor players walk, which floods the room.
+
 ## Towns and paths
 
 **Villages:**
