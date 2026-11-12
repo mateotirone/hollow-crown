@@ -2,9 +2,11 @@
 """Builds the vault blocks (Mateo, 2026-11-12): where a settlement keeps its relics (the Choirsteel
 template, the Heart of the Hollow, the Hollow Crown), and what an attacker brings to break in.
 
-  siege:vault_door_<tier>      Strongroom Door. Five tiers, each its own block so every tier shows in the
-                               creative menu and the asset viewer: wood, iron, diamond, netherite, choirsteel.
-                               Upgrading swaps the block for the next tier (script side, not written yet).
+  siege:vault_door_<tier>      Strongroom Door: the centre of the 3x3 vault door (wheel, or the wooden door's lock).
+  siege:vault_door_plate_<tier> the eight plates round it. Five tiers, each its own block so every tier shows in
+                               the creative menu and the asset viewer: wood, iron, diamond, netherite, choirsteel.
+                               Upgrading swaps the blocks for the next tier (script side, not written yet).
+  The strongroom itself (the room these go in) is map/structures/vault_rooms.py.
   siege:vault_stone            Strongroom Stone: the iron-banded walls of the vault room.
   siege:relic_coffer           Relic Coffer: the chest inside the vault the relics sit in. Glows when full.
   siege:vault_breaker_<tier>   Vault Breaker: the attacker's auger, set against a vault door. iron, diamond,
@@ -227,38 +229,39 @@ class Shape:
                 "bones": [{"name": b, "pivot": [0, 0, 0], "cubes": c} for b, c in self.cubes.items()]}
 
 
-def door(wheel):
-    s = Shape("vault_door" if wheel else "vault_door_wood")
-    # stone frame all round, full depth, so the door sits in the wall like a real strongroom
-    s.cube([-8, 0, -8], [2, 16, 16], "frame", "frame")
-    s.cube([6, 0, -8], [2, 16, 16], "frame", "frame")
-    s.cube([-6, 14, -8], [12, 2, 16], "frame", "frame")
-    s.cube([-6, 0, -8], [12, 1, 16], "frame", "frame")
-    # the door slab, set a pixel back from the frame face
-    s.cube([-6, 1, -7], [12, 13, 15], "*", "slab")
-    # hinges on the left, two locking bars across
-    for y in (2.5, 10.5):
-        s.cube([-6.5, y, -7.8], [2, 2, 0.8], "trim", "slab")
-    for y in (2, 12):
-        s.cube([-4, y, -7.4], [9.5, 1, 0.4], "trim", "slab")
-    # crack overlays just in front of the slab, shown by the door's siege:cracks state (drilled, not yet repaired)
-    s.cube([-6, 1, -7.05], [12, 13, 0.01], "cracks_1", "cracks_1")
-    s.cube([-6, 1, -7.1], [12, 13, 0.01], "cracks_2", "cracks_2")
-    if not wheel:
-        # a big iron lock plate with a keyhole slot and a hasp
-        s.cube([-2, 5.5, -8.2], [4, 5, 1.2], "trim", "lock")
-        s.cube([-0.5, 6.5, -8.4], [1, 2, 0.3], "frame", "lock")
-        s.cube([2, 7.5, -8.6], [2.5, 1, 1.6], "trim", "lock")
+def door(kind):
+    """The vault door is three blocks wide and three tall, set into the strongroom's front wall.
+    kind: "wheel" = the centre block with the locking wheel (iron and up), "lock" = the wooden door's centre
+    with its iron lock plate, "plate" = the eight plates around the centre."""
+    s = Shape({"wheel": "vault_door", "lock": "vault_door_wood", "plate": "vault_door_plate"}[kind])
+    # the slab: a whole block, its face set two pixels back from the wall face so the door reads as recessed
+    s.cube([-8, 0, -6], [16, 16, 14], "*", "slab")
+    # a locking bar runs across the middle of every block, so the bars line up across the door
+    s.cube([-8, 7, -6.6], [16, 2, 0.6], "trim", "slab")
+    # rivets at the corners of each plate
+    for x in (-6.5, 5.5):
+        for y in (1.5, 13.5):
+            s.cube([x, y, -6.5], [1, 1, 0.5], "trim", "slab")
+    # crack overlays just in front of the slab, shown by siege:cracks (drilled, not yet repaired)
+    s.cube([-8, 0, -6.05], [16, 16, 0.01], "cracks_1", "cracks_1")
+    s.cube([-8, 0, -6.1], [16, 16, 0.01], "cracks_2", "cracks_2")
+    if kind == "plate":
         return s
-    # the locking wheel: a flat pixel ring, a cross of spokes and a hub, kept shallow so it reads as one piece
-    cx, cy, z = 0, 7.5, -8
-    s.cube([cx - 1, cy - 1, z - 0.6], [2, 2, 1.6], "trim", "wheel")
-    for x0, y0, w, h in ((-2, 3, 4, 1), (-2, -4, 4, 1), (3, -2, 1, 4), (-4, -2, 1, 4),
-                         (2, 2, 1, 1), (-3, 2, 1, 1), (2, -3, 1, 1), (-3, -3, 1, 1)):
-        s.cube([cx + x0, cy + y0, z], [w, h, 0.8], "trim", "wheel")
-    s.cube([cx - 3, cy - 0.35, z + 0.2], [6, 0.7, 0.6], "trim", "wheel")
-    s.cube([cx - 0.35, cy - 3, z + 0.2], [0.7, 6, 0.6], "trim", "wheel")
-    s.cube([cx - 0.5, cy - 0.5, z - 0.8], [1, 1, 0.3], "gem", "gem")
+    if kind == "lock":
+        # a big iron lock plate with a keyhole slot and a hasp
+        s.cube([-3, 4, -7.4], [6, 8, 1.4], "trim", "lock")
+        s.cube([-0.5, 6, -7.6], [1, 3, 0.3], "frame", "lock")
+        s.cube([3, 7.5, -7.8], [3, 1, 1.8], "trim", "lock")
+        return s
+    # the locking wheel: a flat pixel ring, a cross of spokes and a hub, as wide as the block allows
+    cx, cy, z = 0, 8, -7.4
+    s.cube([cx - 1.5, cy - 1.5, z - 0.8], [3, 3, 2.2], "trim", "wheel")
+    for x0, y0, w, h in ((-3, 5, 6, 1.5), (-3, -6.5, 6, 1.5), (5, -3, 1.5, 6), (-6.5, -3, 1.5, 6),
+                         (3, 3, 2, 2), (-5, 3, 2, 2), (3, -5, 2, 2), (-5, -5, 2, 2)):
+        s.cube([cx + x0, cy + y0, z], [w, h, 1], "trim", "wheel")
+    s.cube([cx - 5, cy - 0.5, z + 0.3], [10, 1, 0.7], "trim", "wheel")
+    s.cube([cx - 0.5, cy - 5, z + 0.3], [1, 10, 0.7], "trim", "wheel")
+    s.cube([cx - 0.75, cy - 0.75, z - 1.1], [1.5, 1.5, 0.3], "gem", "gem")
     return s
 
 
@@ -298,7 +301,7 @@ def breaker():
     return s
 
 
-SHAPES = {"door": door(True), "door_wood": door(False), "coffer": coffer(), "breaker": breaker()}
+SHAPES = {"door": door("wheel"), "door_wood": door("lock"), "plate": door("plate"), "coffer": coffer(), "breaker": breaker()}
 
 
 # ---------------------------------------------------------------- blocks
@@ -336,7 +339,6 @@ NAMES, SOUNDS, RECIPES = {}, {}, {}
 
 def build_blocks(t):
     for tier, info in TIERS.items():
-        ident = f"siege:vault_door_{tier}"
         # one render method per block (the game's rule): alpha_test throughout, so the crack overlays can be see-through
         mats = {"*": mat(t[f"door_{tier}"], "alpha_test"), "trim": mat(t[f"trim_{tier}"], "alpha_test"), "frame": mat(t["stone_plain"], "alpha_test"),
                 "cracks_1": mat(t["cracks_1"], "alpha_test"), "cracks_2": mat(t["cracks_2"], "alpha_test")}
@@ -346,12 +348,19 @@ def build_blocks(t):
             extra["minecraft:light_emission"] = 6
         elif tier != "wood":
             mats["gem"] = mat(t[f"trim_{tier}"], "alpha_test")
-        geo = {"identifier": "geometry.siege_vault_door" if tier != "wood" else "geometry.siege_vault_door_wood",
-               "bone_visibility": {"cracks_1": "q.block_state('siege:cracks') == 1", "cracks_2": "q.block_state('siege:cracks') == 2"}}
-        block(ident, geo, mats, states={"siege:cracks": [0, 1, 2]},
-              color={"wood": "#5c3e26", "iron": "#b4b6ba", "diamond": "#4fd8d0", "netherite": "#3d353c", "choirsteel": "#6a44b0"}[tier],
-              extra=extra)
+        cracks = {"cracks_1": "q.block_state('siege:cracks') == 1", "cracks_2": "q.block_state('siege:cracks') == 2"}
+        color = {"wood": "#5c3e26", "iron": "#b4b6ba", "diamond": "#4fd8d0", "netherite": "#3d353c", "choirsteel": "#6a44b0"}[tier]
+        # centre block (the one you place and click)
+        ident = f"siege:vault_door_{tier}"
+        block(ident, {"identifier": "geometry.siege_vault_door" if tier != "wood" else "geometry.siege_vault_door_wood", "bone_visibility": cracks},
+              mats, states={"siege:cracks": [0, 1, 2]}, color=color, extra=extra)
         NAMES[ident] = info["name"]
+        SOUNDS[ident] = "wood" if tier == "wood" else "metal"
+        # the eight plates round it
+        ident = f"siege:vault_door_plate_{tier}"
+        block(ident, {"identifier": "geometry.siege_vault_door_plate", "bone_visibility": cracks},
+              {k: v for k, v in mats.items() if k != "gem"}, states={"siege:cracks": [0, 1, 2]}, color=color, extra=dict(SOLID))
+        NAMES[ident] = info["name"].replace("Door", "Door Plate")
         SOUNDS[ident] = "wood" if tier == "wood" else "metal"
 
     block("siege:vault_stone", "minecraft:geometry.full_block", {"*": mat(t["stone"])}, turn=False, extra=SOLID)

@@ -527,5 +527,20 @@
  },
  "siege:vault_breaker_netherite": {
   "sound": "metal"
+ },
+ "siege:vault_door_plate_wood": {
+  "sound": "wood"
+ },
+ "siege:vault_door_plate_iron": {
+  "sound": "metal"
+ },
+ "siege:vault_door_plate_diamond": {
+  "sound": "metal"
+ },
+ "siege:vault_door_plate_netherite": {
+  "sound": "metal"
+ },
+ "siege:vault_door_plate_choirsteel": {
+  "sound": "metal"
  }
 }
