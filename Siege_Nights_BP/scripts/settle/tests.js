@@ -6,7 +6,7 @@ import { SETTLE, CATALOG, MASON_LINES } from "./config.js";
 import { BUILDINGS, drawBuilding, styleFor } from "./buildings.js";
 import { hallReserve, hallReach, inBox, footprint, boxesTouch, placeVerdict, bill, priceOf, isCampKit } from "./rules.js";
 import { localStock, stoneStock, wallStock, niceName } from "./mason.js";
-import { STONE_FAMILY, STONE_KINDS, CASTLE_STONES, stoneId, regionalId, GATES, PORTCULLISES, REINFORCEABLE, CASTLE_BLOCKS } from "../siege/api.js";
+import { STONE_FAMILY, STONE_KINDS, CASTLE_STONES, stoneId, regionalId, GATES, PORTCULLISES, REINFORCEABLE, CASTLE_BLOCKS, isStructural } from "../siege/api.js";
 import { MATERIALS } from "./rules.js";
 import { HALL, MASON, SLOTS, place, slotsFor } from "./layout.js";
 import { wallCost, nearGate } from "./walls.js";
@@ -465,5 +465,22 @@ addTests("settle charters", {
         }
       }
     }
+  },
+});
+
+addTests("settle walls", {
+  // Siege collapse (siege/collapse.js) only moves blocks it knows are wall: every wall level, look and timber must count
+  "every block a wall can be built from counts as wall for collapse": () => {
+    const ids = new Set(Object.values(WALL_LOG));
+    for (const look of Object.values(WALL_STONES)) for (const list of Object.values(look.kinds ?? {})) list.forEach((id) => ids.add(id));
+    for (const style of STYLE_IDS) {
+      ids.add(regionalId("wall_planks", style));
+      for (const role of ["beam", "rail", "floor"]) (STYLES[style]?.roles?.[role] ?? []).forEach((id) => ids.add(id));
+      for (const kind of STONE_KINDS) ids.add(stoneId(kind, style));
+      ids.add(regionalId("castle_gate", style)); ids.add(regionalId("portcullis", style));
+    }
+    for (const id of ["minecraft:stone_bricks", "minecraft:spruce_log", "minecraft:spruce_fence", "minecraft:spruce_planks", "siege:battlement", "siege:arrow_slit"]) ids.add(id);
+    const missing = [...ids].filter((id) => !isStructural(id, true));
+    assertEqual(missing.join(", "), "");
   },
 });

@@ -126,6 +126,7 @@ export const ENTRIES = [
     page: "§fReinforce:§r click Castle Stone, a Portcullis or a Castle Gate on your land with an §firon ingot§r, then a §fdiamond§r, then §fnetherite scrap§r (one each, in that order). Each tier shows on the block.\n"
       + "  Castle Stone takes 6 blows, then 10, 16 and 26. A gate takes 2, then 4, 7 and 12.\n\n"
       + "§fRepair:§r click a cracked block with §fstone bricks§r to patch it.\n\n"
+      + "§fWeight:§r walls carry their own weight. Knock a hole in one and the stone above falls away in a stepped arch; knock out too much and whole sections come down, tipping toward the open side, and leave rubble that slides into a slope. Cracked blocks with a lot of wall on top of them can crush. Reinforced walls reach further over a gap and carry more. Nothing falls in a settlement whose owner is away.\n\n"
       + "§fAfter a bad night§r the Mason, or the Settlement wall page in your town hall, will survey the whole wall and mend every hole and crack for a price.\n\n"
       + "§fGates:§r one click opens or shuts the whole gate, whatever you hold (it never places a block). A Castle Gate swings open like a door, all its joined blocks as one leaf, away from you; a Portcullis rises until only its top piece shows.",
     when: ["place:siege:castle_stone*", "place:siege:portcullis*", "place:siege:castle_gate*", "carry:siege:castle_stone*"],
@@ -134,9 +135,9 @@ export const ENTRIES = [
     id: "machines", ch: "siege", title: "Siege machines",
     tip: "Siege machines: sneak and click one with an empty hand to pack it back up.",
     page: "§fBallista§r: place it on your own land. It turns to face monsters within 16 blocks and shoots them, even through Arrow Slits.\n\n"
-      + "§fTrebuchet§r: can stand anywhere. Stand by it, look where you want to fire and click it with §fcobblestone§r: it hurls a boulder (10 s to reload). Sneak + click with cobblestone to change the range (20, 30 or 40 blocks).\n\n"
-      + "§fBattering Ram§r: click it to climb on, steer with the movement keys and punch the wall in front to swing the beam. Sneak to get off; break it to pick it up.\n\n"
-      + "Sneak + click a ballista or trebuchet with an empty hand to pack it up. Raiders aim at the side of your settlement with the fewest ballistas and archers.",
+      + "§fTrebuchet§r: can stand anywhere. Stand by it, look where you want to fire and click it with §fcobblestone§r: it swings round and hurls a boulder (10 s to reload). Look higher to lob it high, level for a flat fast throw. Sneak + click to change the counterweight (Light, Medium, Heavy): heavier throws further. Boulders hit harder the faster they land, and only you and your allies can fire your trebuchet.\n\n"
+      + "§fBattering Ram§r: click it to climb on, steer with the movement keys and punch the wall in front to swing the beam. Sneak to get off.\n\n"
+      + "Sneak + click a ballista, trebuchet or Battering Ram with an empty hand to pack it up. Raiders aim at the side of your settlement with the fewest ballistas and archers.",
     when: ["carry:siege:ballista", "carry:siege:trebuchet", "carry:siege:battering_ram"],
   },
   {

@@ -78,69 +78,128 @@
   th { font-family: var(--font-display); font-weight: 500; color: var(--ash); }
   .kw { color: var(--ember); }
   @media (prefers-reduced-motion: reduce) { .toast { transition: none; } }
+  .tools { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .seg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; }
+  .seg button { font-family: var(--font-body); font-size: 12px; background: var(--night); color: var(--moon); border: 2px solid var(--mortar); padding: 5px 2px; cursor: pointer; }
+  .seg button[aria-pressed="true"] { border-color: var(--ember); color: var(--ember); }
+  details.panel-sec > summary { cursor: pointer; font-family: var(--font-display); font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ash); }
+  details.panel-sec[open] > summary { margin-bottom: 8px; }
+  details.panel-sec .group { gap: 6px; }
+  .legend { display: flex; gap: 4px; align-items: center; font-size: 11px; color: var(--ash); }
+  .legend i { display: inline-block; width: 14px; height: 10px; }
+  .stats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 </style>
 
 <div class="page">
   <header>
     <h1>Siege <span>Wall Lab</span></h1>
-    <p class="lede">A test wall for Siege Nights. Pick a siege weapon, click the wall, and watch blocks crack, break and collapse. Drag to orbit, scroll or pinch to zoom. The collapse rule and damage numbers are the same ones the add-on uses.</p>
+    <p class="lede">A test wall for The Hollow Crown, now with weight. Blocks carry the blocks above them, holes get a stepped arch on top, cracked blocks crush under load, loose sections topple as whole chunks, and rubble slides into slopes. The trebuchet is real physics: turn it, set the elevation and counterweight, and fire. Drag to orbit, scroll or pinch to zoom.</p>
   </header>
 
   <section class="lab">
     <div class="stage" id="stage">
       <div class="hud">
         <div class="tag">Tool: <span class="tool-name" id="hudTool">Battering Ram</span></div>
-        <div class="tag" id="hudHint">Click a block to hit it</div>
+        <div class="tag" id="hudHint">Click a block to ram it</div>
       </div>
       <div class="toast" id="toast" style="opacity:0"></div>
     </div>
 
     <aside class="panel" aria-label="Siege tools">
       <div class="group">
-        <div class="label">Siege weapon</div>
+        <div class="label">Tool</div>
         <div class="tools" id="tools">
           <button class="tool" data-tool="ram" aria-pressed="true">Ram<small>1 dmg</small></button>
-          <button class="tool" data-tool="boulder" aria-pressed="false">Boulder<small>crater</small></button>
+          <button class="tool" data-tool="trebuchet" aria-pressed="false">Boulder<small>auto-aim</small></button>
           <button class="tool" data-tool="sapper" aria-pressed="false">Sapper<small>blast</small></button>
           <button class="tool" data-tool="charge" aria-pressed="false">Charge<small>big blast</small></button>
+          <button class="tool" data-tool="pick" aria-pressed="false">Pick<small>mine out</small></button>
           <button class="tool" data-tool="reinforce" aria-pressed="false">Reinforce<small>+1 tier</small></button>
           <button class="tool" data-tool="repair" aria-pressed="false">Repair<small>−3 dmg</small></button>
+          <button class="tool" data-tool="inspect" aria-pressed="false">Inspect<small>load</small></button>
         </div>
       </div>
 
-      <div class="group">
-        <label class="label" for="wallTier">Whole wall tier</label>
-        <select id="wallTier">
-          <option value="0">Stone (6 hits, gate 2)</option>
-          <option value="1">Iron (10 hits, gate 4)</option>
-          <option value="2">Diamond (16 hits, gate 7)</option>
-          <option value="3">Netherite (26 hits, gate 12)</option>
-        </select>
-      </div>
+      <details class="panel-sec" open>
+        <summary>Trebuchet</summary>
+        <div class="group">
+          <div class="row"><label for="tDist">Distance from wall</label><output id="tDistOut"></output></div>
+          <input type="range" id="tDist" min="14" max="50" step="1" value="30">
+          <div class="row"><label for="tYaw">Turn</label><output id="tYawOut"></output></div>
+          <input type="range" id="tYaw" min="-30" max="30" step="0.5" value="0">
+          <div class="row"><label for="tPitch">Release angle</label><output id="tPitchOut"></output></div>
+          <input type="range" id="tPitch" min="15" max="75" step="0.5" value="25">
+          <div class="label" style="font-size:11px">Counterweight</div>
+          <div class="seg" id="tWeight">
+            <button data-w="0" aria-pressed="false">Light</button>
+            <button data-w="1" aria-pressed="true">Medium</button>
+            <button data-w="2" aria-pressed="false">Heavy</button>
+          </div>
+          <label class="check" for="tGuide"><input type="checkbox" id="tGuide" checked> Show the flight path</label>
+          <div class="btns"><button class="btn" id="tFire">Fire</button><button class="btn ghost" id="tView">Watch from behind</button></div>
+          <p class="hint" id="tInfo"></p>
+        </div>
+      </details>
 
-      <div class="group">
-        <div class="label">Collapse</div>
-        <label class="check" for="collapseOn"><input type="checkbox" id="collapseOn" checked> Unsupported blocks fall</label>
-        <div class="row"><label for="span">Bridge strength</label><output id="spanOut">2</output></div>
-        <input type="range" id="span" min="0" max="6" step="1" value="2">
-        <p class="hint">How many blocks a wall can reach sideways over a hole before it gives way. 0 means every block needs something directly under it.</p>
-        <div class="row"><label for="speed">Crumble speed</label><output id="speedOut">1.0×</output></div>
-        <input type="range" id="speed" min="0.25" max="3" step="0.25" value="1">
-        <div class="row"><label for="debris">Debris</label><output id="debrisOut">8</output></div>
-        <input type="range" id="debris" min="0" max="20" step="1" value="8">
-        <label class="check" for="rubbleOn"><input type="checkbox" id="rubbleOn" checked> Leave rubble piles</label>
-        <label class="check" for="crushOn"><input type="checkbox" id="crushOn" checked> Falling blocks damage what they land on</label>
-        <label class="check" for="soundOn"><input type="checkbox" id="soundOn" checked> Sound</label>
-      </div>
+      <details class="panel-sec" open>
+        <summary>Masonry</summary>
+        <div class="group">
+          <label class="label" for="wallTier" style="font-size:11px">Whole wall tier</label>
+          <select id="wallTier">
+            <option value="0">Stone (6 hits, gate 2)</option>
+            <option value="1">Iron (10 hits, gate 4)</option>
+            <option value="2">Diamond (16 hits, gate 7)</option>
+            <option value="3">Netherite (26 hits, gate 12)</option>
+          </select>
+          <div class="label" style="font-size:11px">Physics</div>
+          <div class="seg" id="model" style="grid-template-columns:1fr 1fr">
+            <button data-m="real" aria-pressed="true">Realistic</button>
+            <button data-m="classic" aria-pressed="false">Old rule</button>
+          </div>
+          <div class="row"><label for="reach">Mortar reach</label><output id="reachOut"></output></div>
+          <input type="range" id="reach" min="-1" max="3" step="1" value="0">
+          <p class="hint" id="reachHint">How far a course can stick out sideways past its last support, added to the tier's own reach.</p>
+          <div class="row"><label for="strength">Load strength</label><output id="strengthOut"></output></div>
+          <input type="range" id="strength" min="0.25" max="3" step="0.05" value="1">
+          <p class="hint">How much weight a block takes before it crushes. Cracked blocks take far less.</p>
+          <div class="row"><label for="hang">Side hold</label><output id="hangOut"></output></div>
+          <input type="range" id="hang" min="0.05" max="0.5" step="0.01" value="0.15">
+          <p class="hint">Mortar is weak in tension. A block held out by mortar alone (not sitting on a shoulder) tears away once the weight on it passes this share of its strength.</p>
+          <div class="row"><label for="shock">Crack spread</label><output id="shockOut"></output></div>
+          <input type="range" id="shock" min="0" max="0.6" step="0.05" value="0.2">
+          <p class="hint">Share of a ram hit that shakes into the blocks around it.</p>
+          <label class="check" for="stressOn"><input type="checkbox" id="stressOn"> Show load on every block</label>
+          <div class="legend"><i style="background:#9ad18a"></i>light <i style="background:#e8d36a"></i> <i style="background:#ef9a4a"></i> <i style="background:#e5483d"></i>about to crush</div>
+        </div>
+      </details>
+
+      <details class="panel-sec">
+        <summary>Collapse and rubble</summary>
+        <div class="group">
+          <label class="check" for="collapseOn"><input type="checkbox" id="collapseOn" checked> Collapse is on</label>
+          <div class="row"><label for="speed">Collapse speed</label><output id="speedOut"></output></div>
+          <input type="range" id="speed" min="0.25" max="3" step="0.25" value="1">
+          <div class="row"><label for="keep">Rubble kept</label><output id="keepOut"></output></div>
+          <input type="range" id="keep" min="0" max="1" step="0.05" value="0.6">
+          <div class="row"><label for="debris">Debris</label><output id="debrisOut"></output></div>
+          <input type="range" id="debris" min="0" max="20" step="1" value="8">
+          <label class="check" for="crushOn"><input type="checkbox" id="crushOn" checked> Falling stone damages what it lands on</label>
+          <label class="check" for="soundOn"><input type="checkbox" id="soundOn" checked> Sound</label>
+          <div class="row" id="spanRow" hidden><label for="span">Bridge strength (old rule)</label><output id="spanOut"></output></div>
+          <input type="range" id="span" min="0" max="6" step="1" value="2" hidden>
+        </div>
+      </details>
 
       <div class="group">
         <div class="stats">
           <div class="stat"><b id="statBroken">0</b><span>broken</span></div>
-          <div class="stat"><b id="statFallen">0</b><span>collapsed</span></div>
+          <div class="stat"><b id="statCrushed">0</b><span>crushed</span></div>
+          <div class="stat"><b id="statFallen">0</b><span>fell</span></div>
           <div class="stat"><b id="statRubble">0</b><span>rubble</span></div>
         </div>
         <div class="btns">
           <button class="btn" id="reset">Rebuild wall</button>
+          <button class="btn ghost" id="undermine">Undermine a tower</button>
           <button class="btn ghost" id="camReset">Reset view</button>
         </div>
       </div>
@@ -149,36 +208,44 @@
 
   <section class="code-wrap">
     <div class="code-card">
-      <h2>The collapse and blast rules</h2>
-      <p class="hint">This is the exact function running the wall above. A block is safe if it sits on the ground, sits on a safe block, or is held up sideways by a safe block within the bridge strength. Anything left over falls. Blasts are strongest where they hit, fade with distance, punch deeper in the direction they travel, and every block has its own toughness, so craters come out ragged.</p>
+      <h2>How the wall stands up</h2>
+      <p class="hint">This is the exact function running the wall above, and the one the add-on will use. It works course by course from the ground up, then passes the weight back down.</p>
+      <ul class="notes">
+        <li><b>Resting:</b> a block on the ground, or on a block that is itself held, is safe.</li>
+        <li><b>Shoulder:</b> a block next to a resting block sits on its shoulder. Each course over a hole closes in by one block, so the stone above a breach falls away in a stepped triangle and the rest arches over it, the way real masonry fails.</li>
+        <li><b>Reach:</b> mortar holds a block or two further out (more with diamond and netherite).</li>
+        <li><b>Side hold:</b> a block held out by mortar alone can't take much weight. Too much on it and it tears away, so long overhangs break off instead of hanging in the air.</li>
+        <li><b>Weight:</b> every block passes its own weight plus everything above it down to whatever holds it. If that is more than the block's strength it crushes, and the weight moves on to its neighbours. Undermine a tower and it holds for a while, then the last cracked blocks give way and it comes down.</li>
+        <li>Gates hold up the stone over the gateway while they stand. Blow the gate and that stone has to hold itself.</li>
+        <li>Whatever is left with no support falls as connected chunks that tip toward the open side, then shatter where they land.</li>
+      </ul>
       <pre id="codeView"></pre>
     </div>
     <div class="code-card">
-      <h2>Damage table</h2>
+      <h2>Numbers</h2>
       <table>
-        <thead><tr><th>Tier</th><th>Castle Stone</th><th>Gate</th></tr></thead>
-        <tbody>
-          <tr><td>Stone</td><td>6</td><td>2</td></tr>
-          <tr><td>Iron</td><td>10</td><td>4</td></tr>
-          <tr><td>Diamond</td><td>16</td><td>7</td></tr>
-          <tr><td>Netherite</td><td>26</td><td>12</td></tr>
-        </tbody>
+        <thead><tr><th>Tier</th><th>Stone hits</th><th>Gate hits</th><th>Reach</th><th>Strength</th></tr></thead>
+        <tbody id="tierTable"></tbody>
       </table>
       <table>
         <thead><tr><th>Weapon</th><th>Center damage</th><th>Reach</th></tr></thead>
         <tbody>
-          <tr><td>Ram</td><td>1</td><td>one block</td></tr>
-          <tr><td>Boulder</td><td>6.5</td><td>1.6 blocks</td></tr>
+          <tr><td>Ram</td><td>1 (+ crack spread)</td><td>one block</td></tr>
+          <tr><td>Boulder</td><td>6.5 at medium speed, more the faster it lands</td><td>1.6 blocks</td></tr>
           <tr><td>Sapper</td><td>7</td><td>2 blocks</td></tr>
           <tr><td>Breaching Charge</td><td>10</td><td>2.3 blocks</td></tr>
         </tbody>
       </table>
+      <table>
+        <thead><tr><th>Counterweight</th><th>Launch speed</th><th>Longest throw</th></tr></thead>
+        <tbody id="weightTable"></tbody>
+      </table>
       <h2>In Minecraft</h2>
       <ul class="notes">
-        <li>Cracks, tiers, damage numbers and the collapse rule carry over exactly.</li>
-        <li>Bedrock blocks can't tumble smoothly on their own. In game, a collapsing block becomes a small "falling chunk" entity that drops with gravity and shatters into dust, which looks close to this.</li>
-        <li>Fragments become a short burst of block-break particles, and rubble becomes a real Rubble block you have to clear.</li>
-        <li>Collapse still follows land rules: nothing falls in a settlement whose owner is offline.</li>
+        <li>Cracks, tiers, damage, the support and weight rules carry over exactly. The check only looks at the stretch of wall around a hit and is spread over several ticks, so a Realm never stalls.</li>
+        <li>Collapsing chunks become falling stone entities that drop and tip, then shatter into dust. Rubble becomes real cobblestone and gravel that slides into slopes and makes a ramp into the breach.</li>
+        <li>Trebuchet: your turn comes from where you look, the release angle from how high you look, and sneak + click sets the counterweight. The boulder flies with real gravity and hits harder the faster it lands.</li>
+        <li>Nothing falls in a settlement whose owner is offline.</li>
       </ul>
     </div>
   </section>
@@ -188,65 +255,174 @@
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script>
 (() => {
+  const $ = (id) => document.getElementById(id);
+
   // ---------------- Rules (shared with the add-on) ----------------
   const WALL_HP = { castle: [6, 10, 16, 26], gate: [2, 4, 7, 12] };
   const DAMAGE = { ram: 1 };
   // power = damage at the center of the blast, radius = how far it reaches (blocks)
   const BLAST = { boulder: { power: 6.5, radius: 1.6 }, sapper: { power: 7, radius: 2 }, charge: { power: 10, radius: 2.3 } };
   const TIER_NAMES = ["Stone", "Iron", "Diamond", "Netherite"];
+  // How masonry stands up, per tier (Stone, Iron, Diamond, Netherite)
+  const MASONRY = {
+    reach: [1, 1, 2, 2],         // blocks a course can stick out sideways past its last support
+    strength: [48, 64, 80, 104], // weight (in blocks) one undamaged block can carry
+    crackedShare: 0.15,          // a block on its last hit keeps only this share of its strength
+    hangShare: 0.15,             // a block held from the side tears away above this share of its strength
+  };
+  // Blocks per second. Gravity matches Minecraft's falling blocks closely enough to feel the same.
+  const TREBUCHET = { gravity: 20, speeds: [22, 27, 31], refSpeed: 27, releaseHeight: 7 };
+  const WEIGHT_NAMES = ["Light", "Medium", "Heavy"];
 
-  // Which blocks have nothing holding them up?
-  // blocks: Map of "x,y,z" -> block. span: how far a wall can reach sideways.
+  // Which blocks are held up, how much weight each carries, and which ones crush.
+  // cells: Map "x,y,z" -> { x, y, z, gate, weight? }. restsOnGround(x, y, z): is there solid ground under this spot?
+  // rules: { reach(cell), strength(cell) }
+  function settle(cells, rules, restsOnGround) {
+    const at = (x, y, z) => cells.get(`${x},${y},${z}`);
+    const SIDES = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+    const rows = new Map();
+    for (const c of cells.values()) {
+      if (!rows.has(c.y)) rows.set(c.y, []);
+      rows.get(c.y).push(c);
+    }
+    const ys = [...rows.keys()].sort((a, b) => a - b);
+    const torn = new Set(); // blocks that hung from the side with too much on them
+    let held, load;
+    const rests = (c) => { const h = held.get(c); return !!h && (h.by === "ground" || h.by === "below"); };
+
+    for (let pass = 0; pass < 12; pass++) {
+    held = new Map(); // cell -> { by, to: cells it leans on, d: how far out it reaches }
+    for (const y of ys) {
+      const row = rows.get(y);
+      // 1. Resting on the ground, or on a block that is itself held
+      for (const c of row) {
+        if (torn.has(c)) continue;
+        const below = at(c.x, y - 1, c.z);
+        if (!below) { if (restsOnGround(c.x, y, c.z)) held.set(c, { by: "ground", to: [], d: 0 }); }
+        else if (held.has(below)) held.set(c, { by: "below", to: [below], d: 0 });
+      }
+      // 2. Shoulder: next to a resting block. Each course over a hole closes in by one,
+      //    so the stone over a breach falls away in a stepped triangle and the rest arches over.
+      for (const c of row) {
+        if (held.has(c) || torn.has(c) || c.gate) continue;
+        const to = [];
+        for (const [dx, dz] of SIDES) { const n = at(c.x + dx, y, c.z + dz); if (n && rests(n)) to.push(n); }
+        if (to.length) held.set(c, { by: "shoulder", to, d: 0 });
+      }
+      // 3. Reach: mortar holds a block or two further out
+      const queue = row.filter((c) => held.has(c));
+      for (let i = 0; i < queue.length; i++) {
+        const c = queue[i], d = held.get(c).d;
+        for (const [dx, dz] of SIDES) {
+          const n = at(c.x + dx, y, c.z + dz);
+          if (!n || n.gate || held.has(n) || torn.has(n) || d + 1 > rules.reach(n)) continue;
+          held.set(n, { by: "reach", to: [c], d: d + 1 });
+          queue.push(n);
+        }
+      }
+    }
+
+    // Weight: from the top down, each block passes its load to whatever holds it
+    load = new Map();
+    for (const c of held.keys()) load.set(c, c.weight ?? 1);
+    const order = (h) => (h.by === "reach" ? 2 + h.d : h.by === "shoulder" ? 1 : 0);
+    for (let i = ys.length - 1; i >= 0; i--) {
+      const row = rows.get(ys[i]).filter((c) => held.has(c)).sort((a, b) => order(held.get(b)) - order(held.get(a)));
+      for (const c of row) {
+        const h = held.get(c);
+        const share = load.get(c) / (h.to.length || 1);
+        for (const t of h.to) load.set(t, load.get(t) + share);
+      }
+    }
+    // Mortar is weak in tension: a block held out by mortar alone (not sitting on a shoulder) tears away
+    // when too much hangs on it, and everything it was holding has to find another way down
+    let tore = false;
+    for (const [c, h] of held) {
+      if (h.by === "reach" && load.get(c) > rules.strength(c) * rules.hang) { torn.add(c); tore = true; }
+    }
+    if (!tore) break;
+    }
+
+    const loose = [], crushed = [];
+    for (const row of rows.values()) for (const c of row) {
+      if (c.gate) continue; // a gate hangs in its frame: it can hold the stone above it, but never falls or crushes
+      if (!held.has(c)) loose.push(c);
+      else if (load.get(c) > rules.strength(c)) crushed.push(c);
+    }
+    return { loose, crushed, load, held };
+  }
+
+  // The old rule, kept for comparison: safe if on the ground, on a safe block, or within `span` sideways of one
   function findUnsupported(blocks, span) {
-    const strength = new Map(); // how much sideways reach a safe block has left
+    const strength = new Map();
     const buckets = Array.from({ length: span + 1 }, () => []);
     const at = (x, y, z) => blocks.get(`${x},${y},${z}`);
-
-    // Anything on the ground is safe at full strength
-    for (const b of blocks.values()) {
-      if (b.y === 0) { strength.set(b, span); buckets[span].push(b); }
-    }
-    // Spread safety: straight up keeps its strength, sideways loses 1 per block
+    for (const b of blocks.values()) if (b.y === 0 && !b.gate) { strength.set(b, span); buckets[span].push(b); }
     for (let s = span; s >= 0; s--) {
       for (const b of buckets[s]) {
         if (strength.get(b) !== s) continue;
         const up = at(b.x, b.y + 1, b.z);
-        if (up && (strength.get(up) ?? -1) < s) { strength.set(up, s); buckets[s].push(up); }
+        if (up && !up.gate && (strength.get(up) ?? -1) < s) { strength.set(up, s); buckets[s].push(up); }
         if (s === 0) continue;
         for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
           const side = at(b.x + dx, b.y, b.z + dz);
-          if (side && (strength.get(side) ?? -1) < s - 1) { strength.set(side, s - 1); buckets[s - 1].push(side); }
+          if (side && !side.gate && (strength.get(side) ?? -1) < s - 1) { strength.set(side, s - 1); buckets[s - 1].push(side); }
         }
       }
     }
-    return [...blocks.values()].filter((b) => !strength.has(b));
+    return [...blocks.values()].filter((b) => !b.gate && !strength.has(b));
   }
-  document.getElementById("codeView").innerHTML = highlight(findUnsupported.toString() + "\n\n" + blastHit.toString());
 
+  // Blasts and impacts: strongest where they hit, fading with distance, reaching deeper in the direction
+  // the hit was travelling. Every block has its own toughness, so no two craters come out the same.
+  function blastHit(at, power, radius, intoWall) {
+    const hits = [];
+    const cx = Math.round(at.x), cy = Math.round(at.y), cz = Math.round(at.z);
+    for (let dx = -3; dx <= 3; dx++) for (let dy = -3; dy <= 3; dy++) for (let dz = -3; dz <= 3; dz++) {
+      const b = blocks.get(keyOf(cx + dx, cy + dy, cz + dz));
+      if (!b || b.doomed) continue;
+      const ox = b.x - at.x, oy = b.y - at.y, oz = b.z - at.z;
+      const dist = Math.hypot(ox, oy, oz);
+      const along = ox * intoWall.x + oy * intoWall.y + oz * intoWall.z; // > 0 means deeper into the wall
+      const reach = radius + Math.max(0, along) * 0.6;
+      if (dist > reach) continue;
+      const damage = (power * (1 - dist / (reach + 0.6)) * (0.55 + Math.random() * 0.9)) / b.toughness;
+      if (damage >= 0.5) hits.push([b, damage]);
+    }
+    for (const [b, damage] of hits) {
+      const out = b.mesh.position.clone().sub(worldPos(at.x, at.y, at.z)).normalize().multiplyScalar(3)
+        .addScaledVector(new THREE.Vector3(intoWall.x, intoWall.y, intoWall.z), 3);
+      hit(b, damage, out);
+    }
+  }
+
+  $("codeView").innerHTML = highlight(settle.toString());
   function highlight(src) {
     const esc = src.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     return esc
       .replace(/(\/\/[^\n]*)/g, '<span style="color:#7d8797">$1</span>')
-      .replace(/\b(function|const|let|for|of|if|continue|return|new)\b/g, '<span class="kw">$1</span>');
+      .replace(/\b(function|const|let|for|of|if|else|continue|return|new)\b/g, '<span class="kw">$1</span>');
   }
+  $("tierTable").innerHTML = TIER_NAMES.map((n, i) => `<tr><td>${n}</td><td>${WALL_HP.castle[i]}</td><td>${WALL_HP.gate[i]}</td><td>${MASONRY.reach[i]}</td><td>${MASONRY.strength[i]}</td></tr>`).join("");
+  $("weightTable").innerHTML = WEIGHT_NAMES.map((n, i) => `<tr><td>${n}</td><td>${TREBUCHET.speeds[i]} blocks/s</td><td>about ${Math.round(TREBUCHET.speeds[i] ** 2 / TREBUCHET.gravity)} blocks</td></tr>`).join("");
 
   // ---------------- Scene ----------------
-  const stage = document.getElementById("stage");
+  const stage = $("stage");
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   stage.prepend(renderer.domElement);
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x0a0d14);
-  scene.fog = new THREE.Fog(0x0a0d14, 45, 110);
+  scene.fog = new THREE.Fog(0x0a0d14, 55, 130);
   const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 300);
   const controls = new THREE.OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
   controls.maxPolarAngle = Math.PI * 0.49;
-  controls.minDistance = 8;
-  controls.maxDistance = 80;
+  controls.minDistance = 6;
+  controls.maxDistance = 95;
   function resetCamera() {
-    camera.position.set(-10, 11, 34);
-    controls.target.set(0, 5, 0);
+    camera.position.set(-24, 13, 36);
+    controls.target.set(0, 5, 6);
     controls.update();
   }
   resetCamera();
@@ -265,7 +441,7 @@
   const flash = new THREE.PointLight(0xffd090, 0, 30, 2);
   scene.add(flash);
 
-  const ground = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshLambertMaterial({ map: grassTexture() }));
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(240, 240), new THREE.MeshLambertMaterial({ map: grassTexture() }));
   ground.rotation.x = -Math.PI / 2;
   scene.add(ground);
 
@@ -350,6 +526,14 @@
     return matCache.get(k);
   }
   const rubbleMat = new THREE.MeshLambertMaterial({ map: canvasTex((g) => { const r = rng(3); for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) px(g, x, y, jit(r, r() > 0.7 ? [70, 70, 74] : [104, 102, 100], 14)); }) });
+  const gravelMat = new THREE.MeshLambertMaterial({ map: canvasTex((g) => { const r = rng(11); for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) px(g, x, y, jit(r, r() > 0.6 ? [120, 112, 108] : [88, 84, 82], 16)); }) });
+  const STRESS_TINT = [null, 0x9ad18a, 0xe8d36a, 0xef9a4a, 0xe5483d];
+  function tinted(base, s) {
+    if (!s) return base;
+    const k = base.uuid + s;
+    if (!matCache.has(k)) { const m = base.clone(); m.color.setHex(STRESS_TINT[s]); matCache.set(k, m); }
+    return matCache.get(k);
+  }
 
   // ---------------- The wall ----------------
   const W = 28, OFF = W / 2 - 0.5;
@@ -358,17 +542,31 @@
   const wallGroup = new THREE.Group();
   scene.add(wallGroup);
   let wallTier = 0;
-  const stats = { broken: 0, fallen: 0, rubble: 0 };
-  const rubble = new Map(); // "x,z" -> { h, mesh }
-
+  const stats = { broken: 0, crushed: 0, fallen: 0, rubble: 0 };
   const keyOf = (x, y, z) => `${x},${y},${z}`;
-  function hpOf(b) { return (b.type === "gate" ? WALL_HP.gate : WALL_HP.castle)[b.armor]; }
+  const N6 = [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]];
+  const SIDES = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+
+  function hpOf(b) { return (b.gate ? WALL_HP.gate : WALL_HP.castle)[b.armor]; }
   function crackLevel(b) { const f = b.damage / hpOf(b); return f >= 0.66 ? 2 : f >= 0.33 ? 1 : 0; }
-  function refreshLook(b) { b.mesh.material = b.type === "gate" ? gateMat(b.armor, crackLevel(b)) : stoneMat(b.armor, crackLevel(b)); }
+  function stressLevel(b) {
+    if (!$("stressOn").checked || b.gate || b.stress === undefined) return 0;
+    return b.stress < 0.25 ? 1 : b.stress < 0.5 ? 2 : b.stress < 0.8 ? 3 : 4;
+  }
+  function refreshLook(b) {
+    const base = b.gate ? gateMat(b.armor, crackLevel(b)) : stoneMat(b.armor, crackLevel(b));
+    b.mesh.material = tinted(base, stressLevel(b));
+  }
   function worldPos(x, y, z) { return new THREE.Vector3(x - OFF, y + 0.5, z); }
 
+  const rules = {
+    reach: (c) => Math.max(0, MASONRY.reach[c.armor] + +$("reach").value),
+    get hang() { return +$("hang").value; },
+    strength: (c) => MASONRY.strength[c.armor] * +$("strength").value * (1 - (1 - MASONRY.crackedShare) * Math.min(1, c.damage / hpOf(c))),
+  };
+
   function addBlock(x, y, z, type) {
-    const b = { x, y, z, type, armor: wallTier, damage: 0, shake: 0, toughness: 0.75 + Math.random() * 0.5 };
+    const b = { x, y, z, type, gate: type === "gate", armor: wallTier, damage: 0, shake: 0, toughness: 0.75 + Math.random() * 0.5 };
     b.mesh = new THREE.Mesh(box, null);
     b.mesh.position.copy(worldPos(x, y, z));
     b.mesh.userData.block = b;
@@ -377,14 +575,22 @@
     blocks.set(keyOf(x, y, z), b);
   }
 
-  function buildWall() {
+  function clearScene() {
     for (const b of blocks.values()) wallGroup.remove(b.mesh);
     blocks.clear();
-    for (const r of rubble.values()) scene.remove(r.mesh);
+    for (const r of rubble.values()) for (const m of r.meshes) scene.remove(m);
     rubble.clear();
     for (const f of falling) scene.remove(f.mesh);
     falling.length = 0;
-    stats.broken = stats.fallen = stats.rubble = 0;
+    for (const c of chunks) scene.remove(c.group);
+    chunks.length = 0;
+    pendingFalls.forEach(clearTimeout); pendingFalls.length = 0;
+    stats.broken = stats.crushed = stats.fallen = stats.rubble = 0;
+    generation++;
+  }
+
+  function buildWall() {
+    clearScene();
     for (let x = 0; x < W; x++) {
       const tower = x <= 3 || x >= W - 4;
       if (tower) {
@@ -405,12 +611,12 @@
       }
     }
     updateStats();
+    queueCollapse(null);
   }
 
   // ---------------- Effects: fragments, dust, sound ----------------
-  const FRAG_MAX = 900;
-  const fragGeo = new THREE.BoxGeometry(1, 1, 1);
-  const fragMesh = new THREE.InstancedMesh(fragGeo, new THREE.MeshLambertMaterial({ color: 0xffffff }), FRAG_MAX);
+  const FRAG_MAX = 1200;
+  const fragMesh = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshLambertMaterial({ color: 0xffffff }), FRAG_MAX);
   fragMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
   scene.add(fragMesh);
   const frags = [];
@@ -434,14 +640,15 @@
 
   const dustTex = canvasTex((g, n) => {
     const grad = g.createRadialGradient(n / 2, n / 2, 0, n / 2, n / 2, n / 2);
-    grad.addColorStop(0, "rgba(200,196,188,0.9)");
-    grad.addColorStop(1, "rgba(200,196,188,0)");
+    grad.addColorStop(0, "rgba(150,146,140,0.85)");
+    grad.addColorStop(1, "rgba(150,146,140,0)");
     g.fillStyle = grad; g.fillRect(0, 0, n, n);
   }, 64);
   dustTex.magFilter = THREE.LinearFilter; dustTex.minFilter = THREE.LinearFilter;
   const dust = [];
   function spawnDust(pos, count, size = 1.5) {
     for (let i = 0; i < count; i++) {
+      if (dust.length > 400) break;
       const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: dustTex, transparent: true, depthWrite: false, opacity: 0.55 }));
       s.position.copy(pos).add(new THREE.Vector3((Math.random() - 0.5) * 1.2, Math.random() * 0.6, (Math.random() - 0.5) * 1.2));
       s.scale.setScalar(size * (0.6 + Math.random() * 0.6));
@@ -451,17 +658,26 @@
   }
 
   let audio;
+  const lastSound = {};
   function sound(kind, volume = 1) {
-    if (!document.getElementById("soundOn").checked) return;
+    if (!$("soundOn").checked) return;
+    const now = performance.now();
+    if (now - (lastSound[kind] ?? 0) < 35) return; // a collapse can make hundreds at once
+    lastSound[kind] = now;
     try {
       audio ??= new (window.AudioContext || window.webkitAudioContext)();
-      const dur = kind === "boom" ? 1.1 : kind === "thud" ? 0.35 : 0.5;
+      const dur = kind === "boom" ? 1.1 : kind === "thud" ? 0.35 : kind === "creak" ? 0.6 : kind === "whoosh" ? 0.8 : 0.5;
       const buf = audio.createBuffer(1, Math.floor(audio.sampleRate * dur), audio.sampleRate);
       const d = buf.getChannelData(0);
-      for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, kind === "boom" ? 2 : 3);
+      for (let i = 0; i < d.length; i++) {
+        const t = i / d.length;
+        const env = kind === "whoosh" ? Math.sin(Math.PI * t) : Math.pow(1 - t, kind === "boom" ? 2 : 3);
+        d[i] = (Math.random() * 2 - 1) * env * (kind === "creak" ? 0.5 + 0.5 * Math.sin(i / 40) : 1);
+      }
       const src = audio.createBufferSource(); src.buffer = buf;
-      const filter = audio.createBiquadFilter(); filter.type = "lowpass";
-      filter.frequency.value = kind === "boom" ? 500 : kind === "thud" ? 260 : 900;
+      const filter = audio.createBiquadFilter();
+      filter.type = kind === "whoosh" ? "bandpass" : "lowpass";
+      filter.frequency.value = { boom: 500, thud: 260, creak: 180, whoosh: 700 }[kind] ?? 900;
       const gain = audio.createGain(); gain.gain.value = Math.min(1, 0.6 * volume);
       src.connect(filter).connect(gain).connect(audio.destination);
       src.start();
@@ -470,34 +686,44 @@
 
   let shake = 0;
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  function bump(amount) { if (!reduceMotion) shake = Math.min(0.6, shake + amount); }
+  function bump(amount) { if (!reduceMotion) shake = Math.min(0.7, shake + amount); }
 
   // ---------------- Damage, breaking, collapse ----------------
-  function hit(b, amount, push = new THREE.Vector3()) {
-    if (!blocks.has(keyOf(b.x, b.y, b.z))) return;
+  function hit(b, amount, push = new THREE.Vector3(), spread = 0) {
+    if (blocks.get(keyOf(b.x, b.y, b.z)) !== b || b.doomed) return;
     b.damage += amount;
     b.shake = 0.12;
     if (b.damage >= hpOf(b)) { breakBlock(b, push); return; }
     refreshLook(b);
     spawnFragments(b.mesh.position, 2, push);
+    if (spread > 0) {
+      for (const [dx, dy, dz] of N6) {
+        const n = blocks.get(keyOf(b.x + dx, b.y + dy, b.z + dz));
+        if (n) hit(n, amount * spread * (0.5 + Math.random()), push.clone().multiplyScalar(0.3));
+      }
+    }
+    queueCollapse(b); // cracked blocks are weaker, so the weight may now be too much
   }
 
-  function breakBlock(b, push) {
+  function breakBlock(b, push, how = "broken") {
     blocks.delete(keyOf(b.x, b.y, b.z));
     wallGroup.remove(b.mesh);
-    stats.broken++;
-    const n = +document.getElementById("debris").value;
-    spawnFragments(b.mesh.position, n, push, b.type === "gate" ? 0x55555c : 0x8a8a90);
+    stats[how]++;
+    const n = +$("debris").value;
+    spawnFragments(b.mesh.position, n, push, b.gate ? 0x55555c : 0x8a8a90);
     spawnDust(b.mesh.position, Math.ceil(n / 3));
     sound("crumble", 0.7);
+    if (how === "crushed" && Math.random() < +$("keep").value) addRubble(b.x, b.z);
     queueCollapse(b);
     updateStats();
   }
 
   let collapseTimer = null;
   const collapseOrigins = [];
+  let generation = 0;
+  const pendingFalls = [];
   function queueCollapse(origin) {
-    collapseOrigins.push(origin);
+    if (origin) collapseOrigins.push(origin);
     if (collapseTimer) return;
     collapseTimer = setTimeout(runCollapse, 60); // batch blasts that break many blocks at once
   }
@@ -505,45 +731,167 @@
   function runCollapse() {
     collapseTimer = null;
     const origins = collapseOrigins.splice(0);
-    if (!document.getElementById("collapseOn").checked) return;
-    const span = +document.getElementById("span").value;
-    const speed = +document.getElementById("speed").value;
-    const loose = findUnsupported(blocks, span).filter((b) => !b.doomed);
-    for (const b of loose) {
-      b.doomed = true;
-      const dist = Math.min(...origins.map((o) => Math.hypot(b.x - o.x, b.y - o.y, b.z - o.z)));
-      // Blocks near the breach go first, then the collapse ripples outward and upward
-      const delay = (dist * 70 + b.y * 25 + Math.random() * 160) / speed;
-      setTimeout(() => startFall(b), delay);
+    const speed = +$("speed").value;
+    const live = new Map([...blocks].filter(([, b]) => !b.doomed));
+    let loose = [], crushed = [];
+    if ($("model").dataset.value === "classic") {
+      for (const b of live.values()) b.stress = undefined;
+      if ($("collapseOn").checked) loose = findUnsupported(live, +$("span").value);
+    } else {
+      const res = settle(live, rules, (x, y) => y === 0);
+      for (const b of live.values()) b.stress = res.load.has(b) ? res.load.get(b) / rules.strength(b) : undefined;
+      if ($("collapseOn").checked) { loose = res.loose; crushed = res.crushed; }
+    }
+    for (const b of live.values()) refreshLook(b);
+    dropChunks(loose, origins);
+    if (crushed.length) {
+      // the weakest give first: crush the worst few, then look again
+      crushed.sort((a, b) => b.stress - a.stress);
+      const now = crushed.slice(0, Math.max(1, Math.ceil(crushed.length / 3)));
+      sound("creak", 0.8);
+      const gen = generation;
+      for (const b of now) b.shake = 0.4;
+      pendingFalls.push(setTimeout(() => {
+        if (gen !== generation) return;
+        for (const b of now) if (blocks.get(keyOf(b.x, b.y, b.z)) === b && !b.doomed) breakBlock(b, new THREE.Vector3(0, -1, 0), "crushed");
+        bump(0.05 * now.length);
+      }, 220 / speed));
     }
   }
 
-  const falling = [];
-  function startFall(b) {
-    if (!blocks.has(keyOf(b.x, b.y, b.z))) return;
-    blocks.delete(keyOf(b.x, b.y, b.z));
-    wallGroup.remove(b.mesh);
-    scene.add(b.mesh);
-    stats.fallen++;
-    falling.push({
-      b, mesh: b.mesh,
-      v: new THREE.Vector3((Math.random() - 0.5) * 1.2, Math.random() * 0.6, (Math.random() - 0.3) * 1.6),
-      w: new THREE.Vector3((Math.random() - 0.5) * 4, (Math.random() - 0.5) * 2, (Math.random() - 0.5) * 4),
+  // Loose blocks fall as connected chunks
+  function dropChunks(loose, origins) {
+    if (!loose.length) return;
+    const speed = +$("speed").value;
+    const set = new Set(loose);
+    for (const b of loose) b.doomed = true;
+    const seen = new Set();
+    const gen = generation;
+    for (const start of loose) {
+      if (seen.has(start)) continue;
+      const group = [start];
+      seen.add(start);
+      for (let i = 0; i < group.length; i++) {
+        const c = group[i];
+        for (const [dx, dy, dz] of N6) {
+          const n = blocks.get(keyOf(c.x + dx, c.y + dy, c.z + dz));
+          if (n && set.has(n) && !seen.has(n)) { seen.add(n); group.push(n); }
+        }
+      }
+      let dist = 0;
+      if (origins.length) {
+        dist = Infinity;
+        for (const c of group) for (const o of origins) dist = Math.min(dist, Math.hypot(c.x - o.x, c.y - o.y, c.z - o.z));
+      }
+      // a short hang first: big sections groan before they go
+      const delay = (dist * 45 + Math.min(500, group.length * 6) + Math.random() * 120) / speed;
+      for (const c of group) c.shake = 0.25;
+      pendingFalls.push(setTimeout(() => { if (gen === generation) startChunk(group); }, delay));
+    }
+  }
+
+  const chunks = [];
+  function startChunk(group) {
+    group = group.filter((c) => blocks.get(keyOf(c.x, c.y, c.z)) === c);
+    if (!group.length) return;
+    let minY = Infinity, maxY = -Infinity, minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
+    for (const c of group) {
+      minY = Math.min(minY, c.y); maxY = Math.max(maxY, c.y);
+      minX = Math.min(minX, c.x); maxX = Math.max(maxX, c.x);
+      minZ = Math.min(minZ, c.z); maxZ = Math.max(maxZ, c.z);
+    }
+    // Tip toward the side with least underneath it
+    const score = SIDES.map(([dx, dz]) => {
+      let s = Math.random() * 0.5;
+      for (const c of group) {
+        if (c.y !== minY) continue;
+        const under = blocks.get(keyOf(c.x + dx, c.y - 1, c.z + dz));
+        if (!under || under.doomed) s += 1;
+      }
+      return s + (dz === 1 ? 0.4 : 0); // a little lean out toward the attackers
     });
-    spawnDust(b.mesh.position, 1, 1.1);
+    const [dx, dz] = SIDES[score.indexOf(Math.max(...score))];
+    const dir = new THREE.Vector3(dx, 0, dz);
+    const axis = new THREE.Vector3(dz, 0, -dx); // turning about this tips the top toward dir
+    const h = maxY - minY + 1, width = Math.max(maxX - minX, maxZ - minZ) + 1;
+    const edgeX = dx > 0 ? maxX + 0.5 : dx < 0 ? minX - 0.5 : (minX + maxX) / 2;
+    const edgeZ = dz > 0 ? maxZ + 0.5 : dz < 0 ? minZ - 0.5 : (minZ + maxZ) / 2;
+    const pivot = new THREE.Vector3(edgeX - OFF, minY, edgeZ);
+
+    const g = new THREE.Group();
+    g.position.copy(pivot);
+    scene.add(g);
+    for (const c of group) {
+      blocks.delete(keyOf(c.x, c.y, c.z));
+      wallGroup.remove(c.mesh);
+      c.mesh.position.sub(pivot);
+      c.shake = 0;
+      g.add(c.mesh);
+    }
+    stats.fallen += group.length;
+    chunks.push({
+      group: g, cells: group, axis, dir,
+      v: new THREE.Vector3(dx * 0.4, 0, dz * 0.4),
+      w: 0.15, alpha: Math.min(3.2, 1.2 + (2.2 * h) / (h + width)) * (0.8 + Math.random() * 0.4),
+    });
+    sound("creak", Math.min(1, group.length / 30));
+    if (group.length > 6) spawnDust(pivot.clone().add(new THREE.Vector3(0, 0.5, 0)), Math.min(8, group.length / 6), 2);
     updateStats();
   }
 
-  function rubbleTop(ix, iz) { return rubble.get(`${ix},${iz}`)?.h ?? 0; }
+  const tmpV = new THREE.Vector3(), tmpQ = new THREE.Quaternion();
+  function stepChunk(ch, dt) {
+    ch.v.y -= TREBUCHET.gravity * dt;
+    ch.group.position.addScaledVector(ch.v, dt);
+    ch.w += ch.alpha * dt;
+    ch.group.rotateOnWorldAxis(ch.axis, ch.w * dt);
+    ch.group.updateMatrixWorld();
+    for (const m of ch.group.children) {
+      m.getWorldPosition(tmpV);
+      const info = floorBelow(tmpV);
+      if (tmpV.y - 0.5 <= info.top) return info;
+    }
+    return null;
+  }
 
-  // Height of whatever a falling block at (x, z) would land on below height y
+  function shatterChunk(ch, info) {
+    const impact = ch.v.length() + ch.w * 3;
+    const centre = new THREE.Vector3();
+    const pivot = ch.group.position.clone();
+    for (const m of [...ch.group.children]) {
+      m.getWorldPosition(tmpV); m.getWorldQuaternion(tmpQ);
+      ch.group.remove(m);
+      m.position.copy(tmpV); m.quaternion.copy(tmpQ);
+      scene.add(m);
+      centre.add(tmpV);
+      const r = tmpV.clone().sub(pivot);
+      const spin = ch.axis.clone().cross(r).multiplyScalar(ch.w * 0.8);
+      falling.push({
+        mesh: m,
+        v: ch.v.clone().add(spin).add(new THREE.Vector3((Math.random() - 0.5) * 2.5, Math.random() * 2, (Math.random() - 0.5) * 2.5)),
+        w: new THREE.Vector3((Math.random() - 0.5) * 6, (Math.random() - 0.5) * 3, (Math.random() - 0.5) * 6),
+      });
+    }
+    scene.remove(ch.group);
+    centre.divideScalar(Math.max(1, ch.cells.length));
+    const mass = ch.cells.length;
+    spawnDust(new THREE.Vector3(centre.x, Math.max(0.5, info.top + 0.5), centre.z), Math.min(14, 3 + mass / 4), 2.6);
+    sound(mass > 12 ? "boom" : "thud", Math.min(1, 0.3 + mass / 40));
+    bump(Math.min(0.5, mass / 80 + impact / 60));
+  }
+
+  const falling = [];
+  const rubble = new Map(); // "x,z" -> { h, meshes }
+  function rubbleTop(ix, iz) { return rubble.get(`${ix},${iz}`)?.h ?? 0; }
+  function standing(ix, y, iz) { const b = blocks.get(keyOf(ix, y, iz)); return b && !b.doomed ? b : null; }
+
+  // Height of whatever something at p would land on
   function floorBelow(p) {
     const ix = Math.round(p.x + OFF), iz = Math.round(p.z);
-    let top = rubbleTop(ix, iz);
-    let hitBlock = null;
-    for (let y = Math.floor(p.y - 0.5); y >= 0; y--) {
-      const b = blocks.get(keyOf(ix, y, iz));
-      if (b && !b.doomed) { if (y + 1 > top) { top = y + 1; hitBlock = b; } break; }
+    let top = rubbleTop(ix, iz), hitBlock = null;
+    for (let y = Math.floor(p.y - 0.5); y >= top; y--) {
+      const b = standing(ix, y, iz);
+      if (b) { top = y + 1; hitBlock = b; break; }
     }
     return { top, hitBlock, ix, iz };
   }
@@ -552,28 +900,45 @@
     scene.remove(f.mesh);
     const speed = f.v.length();
     const at = f.mesh.position.clone();
-    const n = Math.max(2, Math.round(+document.getElementById("debris").value * 0.7));
+    const n = Math.max(2, Math.round(+$("debris").value * 0.6));
     spawnFragments(at, n, new THREE.Vector3(f.v.x * 0.3, 0, f.v.z * 0.3));
-    spawnDust(at, 2, 1.8);
-    sound("thud", Math.min(1, speed / 12));
-    bump(Math.min(0.15, speed / 120));
-    if (info.hitBlock && document.getElementById("crushOn").checked && speed > 7) hit(info.hitBlock, 1);
-    if (document.getElementById("rubbleOn").checked && !info.hitBlock && Math.random() < 0.55) addRubble(info.ix, info.iz);
+    if (Math.random() < 0.4) spawnDust(at, 1, 1.6);
+    sound("thud", Math.min(1, speed / 14));
+    if (info.hitBlock) {
+      if ($("crushOn").checked && speed > 6) hit(info.hitBlock, speed / 9, new THREE.Vector3(f.v.x * 0.2, -1, f.v.z * 0.2));
+      // it bounces off whatever it hit and the stone ends up on the ground beside it
+      if (Math.random() < +$("keep").value * 0.5) addRubble(info.ix + Math.sign(f.v.x || 0), info.iz + Math.sign(f.v.z || 1));
+    } else if (Math.random() < +$("keep").value) addRubble(info.ix, info.iz);
   }
 
+  // Rubble piles up and slides downhill: no step in a pile is more than one block
   function addRubble(ix, iz) {
-    const k = `${ix},${iz}`;
-    let r = rubble.get(k);
-    if (!r) {
-      r = { h: 0, mesh: new THREE.Mesh(box, rubbleMat) };
-      r.mesh.position.set(ix - OFF, 0, iz);
-      scene.add(r.mesh);
-      rubble.set(k, r);
-      stats.rubble++;
+    let x = ix, z = iz;
+    for (let step = 0; step < 16; step++) {
+      const h = rubbleTop(x, z);
+      const lower = [];
+      for (const [dx, dz] of SIDES) {
+        const nh = rubbleTop(x + dx, z + dz);
+        if (nh <= h - 1 && !standing(x + dx, nh, z + dz)) lower.push([x + dx, z + dz, nh]);
+      }
+      if (!lower.length) break;
+      const lowest = Math.min(...lower.map((l) => l[2]));
+      const pick = lower.filter((l) => l[2] === lowest);
+      [x, z] = pick[Math.floor(Math.random() * pick.length)];
     }
-    r.h = Math.min(2, r.h + 0.35);
-    r.mesh.scale.set(0.9 + Math.random() * 0.2, r.h, 0.9 + Math.random() * 0.2);
-    r.mesh.position.y = r.h / 2;
+    const h = rubbleTop(x, z);
+    if (standing(x, h, z) || stats.rubble >= 700) return;
+    const k = `${x},${z}`;
+    if (!rubble.has(k)) rubble.set(k, { h: 0, meshes: [] });
+    const r = rubble.get(k);
+    const m = new THREE.Mesh(box, Math.random() < 0.6 ? rubbleMat : gravelMat);
+    m.position.set(x - OFF + (Math.random() - 0.5) * 0.08, h + 0.5, z + (Math.random() - 0.5) * 0.08);
+    m.rotation.y = (Math.random() - 0.5) * 0.25;
+    m.scale.set(0.96, 1, 0.96);
+    scene.add(m);
+    r.meshes.push(m);
+    r.h = h + 1;
+    stats.rubble++;
     updateStats();
   }
 
@@ -581,13 +946,13 @@
   const props = [];
   function addProp(mesh, life, update, done) { scene.add(mesh); props.push({ mesh, t: 0, life, update, done }); }
 
-  const logGeo = new THREE.CylinderGeometry(0.45, 0.45, 5, 10);
-  const logMat = new THREE.MeshLambertMaterial({ color: 0x6b4a2b });
+  const woodMat = new THREE.MeshLambertMaterial({ color: 0x6b4a2b });
+  const darkWoodMat = new THREE.MeshLambertMaterial({ color: 0x4a321d });
   const ironMat = new THREE.MeshLambertMaterial({ color: 0x55555c });
 
   function useRam(b, normal) {
     const ram = new THREE.Group();
-    const log = new THREE.Mesh(logGeo, logMat);
+    const log = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.45, 5, 10), woodMat);
     log.rotation.x = Math.PI / 2;
     const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.52, 0.52, 0.5, 10), ironMat);
     cap.rotation.x = Math.PI / 2; cap.position.z = -2.4;
@@ -603,33 +968,9 @@
         struck = true;
         sound("thud", 1);
         bump(0.12);
-        hit(b, DAMAGE.ram, dir.clone().multiplyScalar(-3));
+        hit(b, DAMAGE.ram, dir.clone().multiplyScalar(-3), +$("shock").value);
       }
     });
-  }
-
-  // Blasts and impacts: strongest where they hit, fading with distance, and reaching deeper
-  // in the direction the hit was travelling. Every block has its own toughness (some mortar
-  // is weaker than others), so no two craters come out the same shape.
-  function blastHit(at, power, radius, intoWall) {
-    const hits = [];
-    const cx = Math.round(at.x), cy = Math.round(at.y), cz = Math.round(at.z);
-    for (let dx = -3; dx <= 3; dx++) for (let dy = -3; dy <= 3; dy++) for (let dz = -3; dz <= 3; dz++) {
-      const b = blocks.get(keyOf(cx + dx, cy + dy, cz + dz));
-      if (!b) continue;
-      const ox = b.x - at.x, oy = b.y - at.y, oz = b.z - at.z;
-      const dist = Math.hypot(ox, oy, oz);
-      const along = ox * intoWall.x + oy * intoWall.y + oz * intoWall.z; // > 0 means deeper into the wall
-      const reach = radius + Math.max(0, along) * 0.6;
-      if (dist > reach) continue;
-      const damage = (power * (1 - dist / (reach + 0.6)) * (0.55 + Math.random() * 0.9)) / b.toughness;
-      if (damage >= 0.5) hits.push([b, damage]);
-    }
-    for (const [b, damage] of hits) {
-      const out = b.mesh.position.clone().sub(worldPos(at.x, at.y, at.z)).normalize().multiplyScalar(3)
-        .addScaledVector(intoWall, 3);
-      hit(b, damage, out);
-    }
   }
 
   function explode(pos, power) {
@@ -638,22 +979,6 @@
     spawnFragments(pos, 10, new THREE.Vector3());
     sound("boom", 1);
     bump(0.35 * power);
-  }
-
-  function useBoulder(b, normal, point) {
-    const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(0.7), rubbleMat);
-    const end = worldPos(point.x, point.y, point.z);
-    const start = end.clone().addScaledVector(normal, 30).add(new THREE.Vector3((Math.random() - 0.5) * 6, 0, 0));
-    start.y = 2;
-    addProp(rock, 1.0, (t) => {
-      const f = t / 1.0;
-      rock.position.lerpVectors(start, end, f);
-      rock.position.y += Math.sin(f * Math.PI) * 12;
-      rock.rotation.x += 0.2; rock.rotation.z += 0.13;
-    }, () => {
-      explode(end, 0.6);
-      blastHit(point, BLAST.boulder.power, BLAST.boulder.radius, normal.clone().negate());
-    });
   }
 
   function useBlast(b, normal, kind, point) {
@@ -672,25 +997,175 @@
     }, () => {
       explode(pos, isSapper ? 0.8 : 1);
       const blast = isSapper ? BLAST.sapper : BLAST.charge;
-      blastHit(point, blast.power, blast.radius, normal.clone().negate());
+      const into = normal.clone().negate();
+      blastHit(point, blast.power, blast.radius, into);
     });
     sound("crumble", 0.25);
   }
 
+  // ---------------- The trebuchet ----------------
+  const treb = { group: new THREE.Group(), arm: new THREE.Group(), weight: 1, firing: 0, reloadUntil: 0 };
+  (() => {
+    const g = treb.group;
+    const part = (w, h, d, x, y, z, mat = woodMat, parent = g) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); m.position.set(x, y, z); parent.add(m); return m; };
+    for (const x of [-1.6, 1.6]) { part(0.4, 0.4, 7, x, 0.4, 0); part(0.4, 5.6, 0.4, x, 3.2, -0.8, darkWoodMat); part(0.3, 5.4, 0.3, x, 3, 0.9).rotation.x = -0.35; part(0.3, 5.4, 0.3, x, 3, -2.4).rotation.x = 0.35; }
+    for (const z of [-3.2, 3.2]) part(3.6, 0.4, 0.4, 0, 0.4, z);
+    for (const [x, z] of [[-1.6, -3], [1.6, -3], [-1.6, 3], [1.6, 3]]) { const wh = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.7, 0.3, 12), darkWoodMat); wh.rotation.z = Math.PI / 2; wh.position.set(x * 1.15, 0.7, z); g.add(wh); }
+    part(3.6, 0.3, 0.3, 0, 5.9, -0.8, ironMat); // axle
+    treb.arm.position.set(0, 5.9, -0.8);
+    g.add(treb.arm);
+    // long throwing end points along +z (behind) at rest; the box counterweight hangs on the short end
+    part(0.35, 0.35, 9, 0, 0, 2.5, woodMat, treb.arm);
+    treb.counter = part(1.6, 1.6, 1.6, 0, -0.6, -2.4, ironMat, treb.arm);
+    treb.stone = new THREE.Mesh(new THREE.DodecahedronGeometry(0.55), rubbleMat);
+    treb.stone.position.set(0, 0, 7);
+    treb.arm.add(treb.stone);
+    scene.add(g);
+  })();
+  // At rest the long arm lies down behind the machine with the boulder in the sling near the ground and the
+  // counterweight raised in front. Firing drops the weight, whipping the long arm up over the top toward the wall.
+  const ARM_REST = 0.7, ARM_RELEASE = -2.0, ARM_END = -2.6;
+  const hangWeight = () => { treb.counter.rotation.x = -treb.arm.rotation.x; }; // the box hangs straight down
+
+  function trebAim() {
+    return { yaw: (+$("tYaw").value * Math.PI) / 180, pitch: (+$("tPitch").value * Math.PI) / 180, speed: TREBUCHET.speeds[treb.weight], dist: +$("tDist").value };
+  }
+  function placeTrebuchet() {
+    const a = trebAim();
+    treb.group.position.set(0, 0, a.dist);
+    treb.group.rotation.y = -a.yaw;
+    if (!treb.firing) { treb.arm.rotation.x = ARM_REST; hangWeight(); }
+    updateGuide();
+  }
+  function launchState() {
+    const a = trebAim();
+    const dir = new THREE.Vector3(Math.sin(a.yaw), 0, -Math.cos(a.yaw));
+    const pos = new THREE.Vector3(0, TREBUCHET.releaseHeight, a.dist).addScaledVector(dir, 1.2);
+    const v = dir.clone().multiplyScalar(a.speed * Math.cos(a.pitch)).setY(a.speed * Math.sin(a.pitch));
+    return { pos, v };
+  }
+
+  // Step a boulder forward: returns what it hit, if anything
+  function stepBoulder(s, dt) {
+    s.v.y -= TREBUCHET.gravity * dt;
+    s.pos.addScaledVector(s.v, dt);
+    const ix = Math.round(s.pos.x + OFF), iy = Math.floor(s.pos.y), iz = Math.round(s.pos.z);
+    const b = standing(ix, iy, iz);
+    if (b) return { block: b };
+    if (s.pos.y <= rubbleTop(ix, iz) + 0.3) return { ground: true };
+    return null;
+  }
+
+  const guideMat = new THREE.LineDashedMaterial({ color: 0xf0a04b, dashSize: 0.6, gapSize: 0.4, transparent: true, opacity: 0.85 });
+  const guide = new THREE.Line(new THREE.BufferGeometry(), guideMat);
+  const marker = new THREE.Mesh(new THREE.RingGeometry(0.6, 0.9, 24), new THREE.MeshBasicMaterial({ color: 0xf0a04b, side: THREE.DoubleSide, transparent: true, opacity: 0.8 }));
+  scene.add(guide, marker);
+  function updateGuide() {
+    const a = trebAim();
+    const s = launchState();
+    const pts = [s.pos.clone()];
+    let res = null, t = 0;
+    while (t < 6 && !res) { res = stepBoulder(s, 1 / 60); t += 1 / 60; if (Math.round(t * 60) % 3 === 0) pts.push(s.pos.clone()); }
+    pts.push(s.pos.clone());
+    guide.geometry.dispose();
+    guide.geometry = new THREE.BufferGeometry().setFromPoints(pts);
+    guide.computeLineDistances();
+    const on = $("tGuide").checked;
+    guide.visible = marker.visible = on;
+    marker.position.copy(s.pos);
+    if (res?.block) { marker.rotation.set(0, 0, 0); marker.position.z += 0.3; } else { marker.rotation.set(-Math.PI / 2, 0, 0); marker.position.y = rubbleTop(Math.round(s.pos.x + OFF), Math.round(s.pos.z)) + 0.05; }
+    const off = Math.abs(s.pos.z - 1.5).toFixed(0);
+    const land = res?.block ? `hits the wall ${Math.max(0, s.pos.y - 0.5).toFixed(0)} blocks up` : res ? (s.pos.z < 1.5 ? `clears the wall and lands ${off} blocks behind it` : `falls ${off} blocks short of the wall`) : "flies off";
+    const speed = s.v.length();
+    $("tInfo").textContent = `${WEIGHT_NAMES[treb.weight]} counterweight, ${a.speed} blocks/s at ${$("tPitch").value}°. Flight ${t.toFixed(1)} s, ${land}, landing at ${speed.toFixed(0)} blocks/s (${Math.round(impactPower(speed) / BLAST.boulder.power * 100)}% power).`;
+  }
+
+  // Faster landing, harder hit: damage grows with the boulder's energy
+  function impactPower(speed) {
+    const f = (speed / TREBUCHET.refSpeed) ** 2;
+    return BLAST.boulder.power * Math.min(1.8, Math.max(0.35, f));
+  }
+
+  const boulders = [];
+  function fireTrebuchet() {
+    const now = performance.now();
+    if (treb.firing || now < treb.reloadUntil) return toast("The trebuchet is still winding back...");
+    treb.firing = 0.0001;
+    treb.released = false;
+    treb.stone.visible = true;
+    sound("creak", 0.6);
+  }
+  function releaseBoulder() {
+    treb.stone.visible = false;
+    const s = launchState();
+    const mesh = new THREE.Mesh(new THREE.DodecahedronGeometry(0.6), rubbleMat);
+    mesh.position.copy(s.pos);
+    scene.add(mesh);
+    boulders.push({ ...s, mesh, t: 0 });
+    sound("whoosh", 0.7);
+  }
+  function boulderImpact(bo, res) {
+    scene.remove(bo.mesh);
+    const speed = bo.v.length();
+    const dir = bo.v.clone().normalize();
+    const p = bo.pos;
+    const gridAt = { x: p.x + OFF, y: p.y - 0.5, z: p.z };
+    const power = impactPower(speed) * (res.ground ? 0.6 : 1);
+    explode(p.clone(), 0.5 + power / 15);
+    blastHit(gridAt, power, BLAST.boulder.radius, dir);
+    if (res.ground) spawnFragments(p.clone(), 8, new THREE.Vector3(0, 3, 0), 0x4a5a3a);
+    if (Math.random() < 0.7) addRubble(Math.round(p.x + OFF), Math.round(p.z));
+  }
+
+  // Auto-aim at a clicked spot: turn toward it, then pick the flatter of the two angles that reach it
+  function aimAt(point) {
+    const a = trebAim();
+    const target = worldPos(point.x, point.y, point.z);
+    const from = new THREE.Vector3(0, TREBUCHET.releaseHeight, a.dist);
+    const dx = target.x - from.x, dz = target.z - from.z;
+    const yaw = Math.atan2(dx, -dz);
+    if (Math.abs(yaw) > (30 * Math.PI) / 180) { toast("Too far to the side: turn limit is 30°"); return false; }
+    const R = Math.hypot(dx, dz) - 1.2, Y = target.y - from.y;
+    let best = null;
+    for (let w = treb.weight; w < 3 && !best; w++) {
+      const v = TREBUCHET.speeds[w], g = TREBUCHET.gravity;
+      const disc = v ** 4 - g * (g * R * R + 2 * Y * v * v);
+      if (disc < 0) continue;
+      const th = Math.atan((v * v - Math.sqrt(disc)) / (g * R));
+      const thHigh = Math.atan((v * v + Math.sqrt(disc)) / (g * R));
+      const pick = th * 180 / Math.PI >= 15 ? th : thHigh;
+      if (pick * 180 / Math.PI <= 75) best = { w, th: pick };
+    }
+    if (!best) { toast("Out of reach: move the trebuchet closer"); return false; }
+    if (best.w !== treb.weight) { setWeight(best.w); toast(`Needed a ${WEIGHT_NAMES[best.w]} counterweight`); }
+    $("tYaw").value = ((yaw * 180) / Math.PI).toFixed(1);
+    $("tPitch").value = ((best.th * 180) / Math.PI).toFixed(1);
+    syncOutputs();
+    placeTrebuchet();
+    return true;
+  }
+  function setWeight(w) {
+    treb.weight = w;
+    for (const b of $("tWeight").children) b.setAttribute("aria-pressed", String(+b.dataset.w === w));
+    treb.counter.scale.setScalar([0.75, 1, 1.25][w]);
+    updateGuide();
+  }
+
   // ---------------- Input ----------------
   let tool = "ram";
-  const toolNames = { ram: "Battering Ram", boulder: "Trebuchet Boulder", sapper: "Sapper", charge: "Breaching Charge", reinforce: "Reinforce", repair: "Repair" };
+  const toolNames = { ram: "Battering Ram", trebuchet: "Trebuchet", sapper: "Sapper", charge: "Breaching Charge", pick: "Pickaxe", reinforce: "Reinforce", repair: "Repair", inspect: "Inspect" };
   const toolHints = {
-    ram: "Click a block to ram it", boulder: "Click where the boulder lands", sapper: "Click a wall to send a sapper",
-    charge: "Click a wall to plant a charge", reinforce: "Click a block to upgrade it", repair: "Click a cracked block to patch it",
+    ram: "Click a block to ram it", trebuchet: "Click a spot: the trebuchet aims and fires", sapper: "Click a wall to send a sapper",
+    charge: "Click a wall to plant a charge", pick: "Click a block to mine it out", reinforce: "Click a block to upgrade it",
+    repair: "Click a cracked block to patch it", inspect: "Click a block to see its load",
   };
-  document.getElementById("tools").addEventListener("click", (e) => {
+  $("tools").addEventListener("click", (e) => {
     const btn = e.target.closest(".tool");
     if (!btn) return;
     tool = btn.dataset.tool;
     for (const b of document.querySelectorAll(".tool")) b.setAttribute("aria-pressed", String(b === btn));
-    document.getElementById("hudTool").textContent = toolNames[tool];
-    document.getElementById("hudHint").textContent = toolHints[tool];
+    $("hudTool").textContent = toolNames[tool];
+    $("hudHint").textContent = toolHints[tool];
   });
 
   const ray = new THREE.Raycaster();
@@ -704,7 +1179,13 @@
     mouse.set(((e.clientX - rect.left) / rect.width) * 2 - 1, -((e.clientY - rect.top) / rect.height) * 2 + 1);
     ray.setFromCamera(mouse, camera);
     const hitInfo = ray.intersectObjects(wallGroup.children, false)[0];
-    if (!hitInfo) return;
+    if (!hitInfo) {
+      if (tool === "trebuchet") {
+        const g = ray.intersectObject(ground, false)[0];
+        if (g && aimAt({ x: g.point.x + OFF, y: -0.5, z: g.point.z })) fireTrebuchet();
+      }
+      return;
+    }
     const b = hitInfo.object.userData.block;
     const normal = hitInfo.face.normal.clone().round();
     const p = hitInfo.point;
@@ -712,50 +1193,100 @@
   });
 
   function act(b, normal, point) {
+    if (b.doomed) return;
     if (tool === "ram") useRam(b, normal);
-    else if (tool === "boulder") useBoulder(b, normal, point);
+    else if (tool === "trebuchet") { if (aimAt(point)) fireTrebuchet(); }
     else if (tool === "sapper" || tool === "charge") useBlast(b, normal, tool, point);
+    else if (tool === "pick") { sound("thud", 0.4); breakBlock(b, normal.clone().multiplyScalar(1.5)); }
     else if (tool === "reinforce") {
       if (b.armor >= 3) return toast("Already Netherite");
       b.armor++;
       refreshLook(b);
       sound("thud", 0.3);
       toast(`Reinforced with ${TIER_NAMES[b.armor]} (${hpOf(b)} hits)`);
+      queueCollapse(null);
     } else if (tool === "repair") {
       if (b.damage < 0.5) return toast("This block isn't damaged");
       b.damage = Math.max(0, b.damage - 3);
       refreshLook(b);
       toast(b.damage ? `Patched, ${Math.round(hpOf(b) - b.damage)} of ${hpOf(b)} left` : "Fully repaired");
+      queueCollapse(null);
+    } else if (tool === "inspect") {
+      const hp = `${(hpOf(b) - b.damage).toFixed(1)} of ${hpOf(b)} hits left`;
+      if (b.gate) return toast(`${TIER_NAMES[b.armor]} gate, ${hp}`);
+      const carry = b.stress === undefined ? "" : `, carrying ${Math.round(b.stress * rules.strength(b))} of ${Math.round(rules.strength(b))}`;
+      toast(`${TIER_NAMES[b.armor]}, ${hp}${carry}`);
     }
   }
 
   let toastTimer;
   function toast(msg) {
-    const t = document.getElementById("toast");
+    const t = $("toast");
     t.textContent = msg; t.style.opacity = 1;
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => (t.style.opacity = 0), 1600);
+    toastTimer = setTimeout(() => (t.style.opacity = 0), 2200);
   }
 
-  for (const [id, out, fmt] of [["span", "spanOut", (v) => v], ["speed", "speedOut", (v) => `${(+v).toFixed(2).replace(/0$/, "")}×`], ["debris", "debrisOut", (v) => v]]) {
-    const input = document.getElementById(id);
-    const sync = () => (document.getElementById(out).textContent = fmt(input.value));
-    input.addEventListener("input", sync);
-    sync();
-  }
-  document.getElementById("span").addEventListener("change", () => queueCollapse({ x: 14, y: 4, z: 0 }));
-  document.getElementById("wallTier").addEventListener("change", (e) => {
+  const OUTPUTS = [
+    ["tDist", "tDistOut", (v) => `${v} blocks`], ["tYaw", "tYawOut", (v) => `${(+v).toFixed(1)}°`], ["tPitch", "tPitchOut", (v) => `${(+v).toFixed(1)}°`],
+    ["reach", "reachOut", (v) => (+v > 0 ? `+${v}` : v)], ["hang", "hangOut", (v) => `${Math.round(v * 100)}%`], ["strength", "strengthOut", (v) => `${(+v).toFixed(2)}×`], ["shock", "shockOut", (v) => `${Math.round(v * 100)}%`],
+    ["speed", "speedOut", (v) => `${(+v).toFixed(2).replace(/0$/, "")}×`], ["keep", "keepOut", (v) => `${Math.round(v * 100)}%`], ["debris", "debrisOut", (v) => v], ["span", "spanOut", (v) => v],
+  ];
+  function syncOutputs() { for (const [id, out, fmt] of OUTPUTS) $(out).textContent = fmt($(id).value); }
+  for (const [id] of OUTPUTS) $(id).addEventListener("input", syncOutputs);
+  syncOutputs();
+  for (const id of ["tDist", "tYaw", "tPitch"]) $(id).addEventListener("input", placeTrebuchet);
+  $("tGuide").addEventListener("change", updateGuide);
+  $("tWeight").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) setWeight(+b.dataset.w); });
+  $("tFire").addEventListener("click", fireTrebuchet);
+  $("tView").addEventListener("click", () => {
+    const a = trebAim();
+    camera.position.set(Math.sin(a.yaw) * -14 + 3, 11, a.dist + Math.cos(a.yaw) * 14);
+    controls.target.set(0, 5, 0);
+    controls.update();
+  });
+  for (const id of ["reach", "strength", "hang", "span"]) $(id).addEventListener("change", () => queueCollapse({ x: 14, y: 4, z: 0 }));
+  $("stressOn").addEventListener("change", () => { for (const b of blocks.values()) refreshLook(b); });
+  $("model").dataset.value = "real";
+  $("model").addEventListener("click", (e) => {
+    const btn = e.target.closest("button");
+    if (!btn) return;
+    $("model").dataset.value = btn.dataset.m;
+    for (const b of $("model").children) b.setAttribute("aria-pressed", String(b === btn));
+    const classic = btn.dataset.m === "classic";
+    $("spanRow").hidden = $("span").hidden = !classic;
+    for (const id of ["reach", "strength", "hang"]) $(id).disabled = classic;
+    if (classic) $("collapseOn").closest("details").open = true;
+    toast(classic ? "Old rule: no weight, no arches, single blocks fall" : "Realistic: weight, arches, crushing, chunks");
+    queueCollapse({ x: 14, y: 4, z: 0 });
+  });
+  $("wallTier").addEventListener("change", (e) => {
     wallTier = +e.target.value;
     for (const b of blocks.values()) { b.armor = wallTier; b.damage = 0; refreshLook(b); }
     toast(`Whole wall set to ${TIER_NAMES[wallTier]}`);
+    queueCollapse(null);
   });
-  document.getElementById("reset").addEventListener("click", () => { buildWall(); toast("Wall rebuilt"); });
-  document.getElementById("camReset").addEventListener("click", resetCamera);
+  $("reset").addEventListener("click", () => { buildWall(); toast("Wall rebuilt"); });
+  $("camReset").addEventListener("click", resetCamera);
+  $("undermine").addEventListener("click", () => {
+    // Sappers dig out the base of the right-hand tower from the outside, one block at a time
+    const gen = generation;
+    const targets = [];
+    for (let z = 2; z >= 0; z--) for (let y = 0; y <= 1; y++) for (let x = W - 4; x < W; x++) targets.push([x, y, z]);
+    camera.position.set(30, 9, 26); controls.target.set(OFF - 2, 5, 0); controls.update();
+    toast("Sappers are digging under the tower...");
+    targets.forEach(([x, y, z], i) => pendingFalls.push(setTimeout(() => {
+      if (gen !== generation) return;
+      const b = standing(x, y, z);
+      if (b) { sound("thud", 0.3); breakBlock(b, new THREE.Vector3(0, 0, 2)); }
+    }, 300 + i * 160)));
+  });
 
   function updateStats() {
-    document.getElementById("statBroken").textContent = stats.broken;
-    document.getElementById("statFallen").textContent = stats.fallen;
-    document.getElementById("statRubble").textContent = stats.rubble;
+    $("statBroken").textContent = stats.broken;
+    $("statCrushed").textContent = stats.crushed;
+    $("statFallen").textContent = stats.fallen;
+    $("statRubble").textContent = stats.rubble;
   }
 
   // ---------------- Loop ----------------
@@ -774,10 +1305,42 @@
     const dt = Math.min(0.05, clock.getDelta());
     const now = clock.elapsedTime;
 
-    // falling blocks
+    // trebuchet swing: slow wind-up, fast whip, release near the top
+    if (treb.firing) {
+      treb.firing += dt;
+      const t = treb.firing;
+      const swing = Math.min(1, t / 0.75);
+      const ease = swing * swing * (3 - 2 * swing);
+      treb.arm.rotation.x = ARM_REST + (ARM_END - ARM_REST) * ease;
+      if (!treb.released && treb.arm.rotation.x <= ARM_RELEASE) { treb.released = true; releaseBoulder(); }
+      if (t > 0.75) {
+        treb.arm.rotation.x = ARM_END - (ARM_END - ARM_REST) * Math.min(1, (t - 0.75) / 1.2);
+        if (t > 1.95) { treb.firing = 0; treb.arm.rotation.x = ARM_REST; treb.reloadUntil = performance.now() + 300; treb.stone.visible = true; }
+      }
+      hangWeight();
+    }
+
+    // boulders in flight
+    for (let i = boulders.length - 1; i >= 0; i--) {
+      const bo = boulders[i];
+      let res = null;
+      for (let s = 0; s < 4 && !res; s++) res = stepBoulder(bo, dt / 4);
+      bo.t += dt;
+      bo.mesh.position.copy(bo.pos);
+      bo.mesh.rotation.x += 6 * dt; bo.mesh.rotation.z += 4 * dt;
+      if (res || bo.t > 8) { boulders.splice(i, 1); if (res) boulderImpact(bo, res); else scene.remove(bo.mesh); }
+    }
+
+    // toppling chunks
+    for (let i = chunks.length - 1; i >= 0; i--) {
+      const info = stepChunk(chunks[i], dt);
+      if (info) { const ch = chunks.splice(i, 1)[0]; shatterChunk(ch, info); }
+    }
+
+    // single falling blocks
     for (let i = falling.length - 1; i >= 0; i--) {
       const f = falling[i];
-      f.v.y -= 24 * dt;
+      f.v.y -= TREBUCHET.gravity * dt;
       f.mesh.position.addScaledVector(f.v, dt);
       f.mesh.rotation.x += f.w.x * dt; f.mesh.rotation.y += f.w.y * dt; f.mesh.rotation.z += f.w.z * dt;
       const info = floorBelow(f.mesh.position);
@@ -815,10 +1378,10 @@
       d.s.position.addScaledVector(d.v, dt);
       d.v.multiplyScalar(0.97);
       d.s.scale.multiplyScalar(1 + d.grow * dt * 0.5);
-      d.s.material.opacity = 0.55 * (d.life / d.max);
+      d.s.material.opacity = 0.38 * (d.life / d.max);
     }
 
-    // props (rams, boulders, charges)
+    // props (rams, charges)
     for (let i = props.length - 1; i >= 0; i--) {
       const p = props[i];
       p.t += dt;
@@ -826,12 +1389,13 @@
       if (p.t >= p.life) { scene.remove(p.mesh); props.splice(i, 1); p.done?.(); }
     }
 
-    // hit wobble
+    // hit wobble and groaning sections
     for (const b of blocks.values()) {
       if (b.shake > 0) {
         b.shake = Math.max(0, b.shake - dt);
         const base = worldPos(b.x, b.y, b.z);
-        b.mesh.position.set(base.x + (Math.random() - 0.5) * b.shake, base.y, base.z + (Math.random() - 0.5) * b.shake);
+        const s = Math.min(0.12, b.shake);
+        b.mesh.position.set(base.x + (Math.random() - 0.5) * s, base.y + (b.doomed ? -0.02 : 0), base.z + (Math.random() - 0.5) * s);
         if (b.shake === 0) b.mesh.position.copy(base);
       }
     }
@@ -849,6 +1413,9 @@
   }
 
   buildWall();
+  setWeight(1);
+  placeTrebuchet();
   tick();
+  window.__lab = { blocks, settle, rules, act, aimAt, fireTrebuchet, stats, chunks, falling, boulders, standing, $ };
 })();
 </script>
