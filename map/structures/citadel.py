@@ -44,7 +44,7 @@ FARM_TO = 100        # farmland runs from the foot of the outer wall out over th
 DIAG = 2 * OUTER - CHAMFER   # |x| + |z| <= DIAG on the diagonal faces
 
 BASE = dict(   # what every style shares unless it says otherwise
-    cone_k=1.6, tower_roof="cone", keep_roof="cone", keep_roof_mat=None, roof_off=0, finial="siege:spire_roof",
+    cone_k=1.6, cone_pad=1.5, tower_roof="cone", keep_roof="cone", keep_roof_mat=None, roof_off=0, finial="siege:spire_roof",
     snow=False, moss=False, ground="grass_block", under="dirt", cover=["short_grass", "short_grass", "fern"],
     farm_hedge="oak_leaves", field_soil="farmland", field_water=True, light="lantern", lamp_top=None,
     cloth="red", dais=("gold_block", "quartz_block"), range_flat=False, gravel="gravel",
@@ -155,7 +155,7 @@ STYLES = {
         smooth="siege:veinstone_bricks", stone="polished_blackstone_bricks", band="siege:cracked_veinstone_bricks",
         plinth="cobbled_deepslate", tiles="deepslate_tiles", corbel="polished_blackstone_brick_stairs",
         slab="polished_blackstone_brick_slab", wallcap="polished_blackstone_wall",
-        roof={"ladder": ["deepslate_tiles", "cobbled_deepslate"], "axis": "y", "texture": True}, cone_k=2.6, roof_off=1,
+        roof={"ladder": ["deepslate_tiles", "cobbled_deepslate"], "axis": "y", "texture": True}, cone_k=2.4, cone_pad=0.5, roof_off=1,
         pane="iron_bars", wood="dark_oak", dark="dark_oak",
         street=[("cobbled_deepslate", 55), ("polished_blackstone_bricks", 25), ("tuff", 15), ("coarse_dirt", 5)],
         lane=[("coarse_dirt", 35), ("siege:pale_ash", 25), ("cobbled_deepslate", 25), ("tuff", 15)],
@@ -225,6 +225,7 @@ class Citadel:
         self.bp = Blueprint(f"citadel_{style}")
         self.plots, self.towers, self.gates, self.fields = [], [], [], []
         self.cone_cache = {}
+        self.dout, self.din, self.reach = d_outer, d_inner, OUTER   # the plan's shape (the Hollow stronghold swaps these)
 
     # ---- helpers -------------------------------------------------------------------------------------
     def set(self, x, y, z, n, **p): self.bp.set(x, y, z, n, **p)
@@ -312,7 +313,8 @@ class Citadel:
         elif roof:
             off = S["roof_off"]                               # the Hollow: the roof sits one block off true
             ox, oz = ((off, 0), (-off, 0), (0, off), (0, -off))[int(h3(cx, h, cz, 61) * 4)] if off else (0, 0)
-            self.cone(cx + ox, h + 1, cz + oz, r + 1.5, int(round((r + 1.5) * S["cone_k"])))
+            pad = S["cone_pad"]
+            self.cone(cx + ox, h + 1, cz + oz, r + pad, int(round((r + pad) * S["cone_k"])))
         self.towers.append({"name": name, "x": cx, "z": cz, "r": r, "h": h})
 
     def flat_top(self, cx, cz, r, h):
@@ -680,8 +682,8 @@ class Citadel:
         """True if a plot rectangle hits a wall, a tower, the keep, a street or another plot."""
         for x in range(x0 - margin, x1 + margin + 1):
             for z in range(z0 - margin, z1 + margin + 1):
-                if d_outer(x, z) < WALL_T + 1: return True
-                if d_inner(x, z) >= -1: return True
+                if self.dout(x, z) < WALL_T + 1: return True
+                if self.din(x, z) >= -1: return True
                 if (x, z) in self.street or (x, z) in self.taken: return True
         for t in self.towers:
             cx, cz = min(max(t["x"], x0), x1), min(max(t["z"], z0), z1)
@@ -773,8 +775,8 @@ class Citadel:
         Nothing inside the Citadel is left as bare lawn."""
         S = self.S
         self.trees = []
-        cells = [(x, z) for x in range(-OUTER, OUTER + 1) for z in range(-OUTER, OUTER + 1)
-                 if d_outer(x, z) >= WALL_T and not (0 <= d_inner(x, z) < WALL_T)
+        cells = [(x, z) for x in range(-self.reach, self.reach + 1) for z in range(-self.reach, self.reach + 1)
+                 if self.dout(x, z) >= WALL_T and not (0 <= self.din(x, z) < WALL_T)
                  and not any(math.hypot(x - t["x"], z - t["z"]) <= t["r"] + 0.5 for t in self.towers)
                  and self.free(x, z)]
         free = set(cells)
