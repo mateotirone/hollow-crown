@@ -485,6 +485,13 @@ export const ENTRIES = [
     hidden: true,
   },
   {
+    id: "landmarks", ch: "lore", title: "Old things on the land",
+    tip: "Something old stands here. Your settlement's local papers say what happened at it.",
+    page: "Every plot has something old standing on it, out past where the settlement will grow: a cairn, a ring of posts, an empty bell frame, a ruined hall. They were here long before you, and each one is part of a mystery.\n\n"
+      + "Your plot's §flocal papers§r tell its story. They turn up as your settlement grows: shelve them in your Library, then come back and look at the place again. The Ledger keeps the clues.",
+    when: ["event:landmarkFound"],
+  },
+  {
     id: "people", ch: "lore", title: "People and portraits",
     tip: "People here remember what you have read and done. Come back later and they may say more.",
     page: "The people you meet in the towns speak for themselves, and what they say changes with what you have read, solved and become. Many will point you somewhere. Come back to them.\n\n"

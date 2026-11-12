@@ -19,6 +19,7 @@ import { riverDistance, RIVER_HALF_WIDTH } from "./rivers.js";
 import { SITES, ROADS, siteAt, roadAt, roadLines, SITE_SKIRT, ROAD_HALF_WIDTH, ROAD_SHOULDER } from "./roads.js";
 import { SITE_DESIGNS, TOWER_DESIGNS } from "./sites_data.js";
 import { HOLLOW_TREES } from "./trees_data.js";
+import { HOLLOW_BRIDGES } from "./bridges_data.js";
 
 export { hash, fbm } from "./noise.js";
 
@@ -64,6 +65,8 @@ const clamp01 = (t) => Math.max(0, Math.min(1, t));
 const inCourt = (x, z) => z >= 1540 && z < 1660;
 const inHeart = (z) => z >= 2330;
 const inSpine = (x) => Math.abs(x) <= L.halfWidth;
+// No spires or pillars crowding the Drowned Court or the Seat's landing: they are meant to be seen from far off.
+const arenaView = (x, z) => Math.hypot(x - COURT.center.x, z - COURT.center.z) < 70 || Math.hypot(x - HEART.center.x, z - HEART.center.z) < 110;
 const nearPath = (x, z, d) => inSpine(x) && Math.abs(x - pathX(z)) <= d;
 
 // ---- open country ----------------------------------------------------------------------
@@ -308,6 +311,28 @@ const landmarkNearRoad = (cx, cz, col) => {
   return false;
 };
 
+// ---- bridges -----------------------------------------------------------------------------------
+// Where a road or the story path crosses a light river, a lake or a valley, a real bridge from the one
+// bridge generator (minecraft-builder skill; tools/hollow_bridges.py writes bridges_data.js): black pointed
+// arches on piers with cutwaters, veinstone, a humped deck in cobbled deepslate, parapets and soul lanterns,
+// at whatever angle the road crosses. Its columns are listed as covered so the old flat deck is left out.
+let BRIDGED;
+export function bridged(x, z) {
+  if (!BRIDGED) {
+    BRIDGED = new Set();
+    for (const list of Object.values(HOLLOW_BRIDGES.covered)) for (let k = 0; k < list.length; k += 2) BRIDGED.add(list[k] * 4096 + list[k + 1]);
+  }
+  return BRIDGED.has(x * 4096 + z);
+}
+function planBridges(ops, cx, cz) {
+  const runs = HOLLOW_BRIDGES.chunks[`${cx},${cz}`];
+  if (!runs) return;
+  for (const [x, z, y0, y1, i] of runs) {
+    const [block, states] = HOLLOW_BRIDGES.palette[i];
+    ops.push(Object.keys(states).length ? { a: [x, y0, z], b: [x, y1, z], block, states } : { a: [x, y0, z], b: [x, y1, z], block });
+  }
+}
+
 // ---- the plan for one chunk ------------------------------------------------------------
 const PLANTS = { wood: 0.08, fen: 0.1, high: 0.02, waste: 0.012 };
 const SPIRES = { wood: 0.002, fen: 0.002, high: 0.012, waste: 0.004 };
@@ -315,7 +340,8 @@ const SPIRES = { wood: 0.002, fen: 0.002, high: 0.012, waste: 0.004 };
 export function planChunk(cx, cz) {
   const ops = planLand(cx, cz);
   const X0 = cx * 16, Z0 = cz * 16;
-  planCartRail(ops, X0, Z0);
+  planBridges(ops, cx, cz);
+  planCartRail(ops, X0, Z0); // after the bridges, so where the rail passes a bridge's end the rail wins
   // The sealed wall across the whole Hollow behind the Court (its gates open when the Court's boss dies).
   // Added last, so nothing in the chunk overwrites it.
   if (COURT.gateZ >= Z0 && COURT.gateZ <= Z0 + 15 && X0 + 15 >= -L.reach && X0 <= L.reach) {
@@ -407,6 +433,8 @@ function planLand(cx, cz) {
     }
     // Everything below the water line is under water: one level across the whole Hollow, so nothing spills.
     if (top < SEA) fill(x, top + 1, z, x, SEA, z, B.water);
+    // A real bridge stands here (planBridges): the land beneath stays as it is, under the bridge.
+    if (c.under !== undefined && bridged(x, z)) continue;
     // Where the story path crosses a river: a stone deck with the river running beneath.
     if (c.under !== undefined) {
       // The underside is an arch: thin over the water, thickening to solid stone at the banks,
@@ -447,7 +475,7 @@ function planLand(cx, cz) {
       continue;
     }
     const r = hash(x, z, 5);
-    if (r < (spineCol ? (kind === "shallows" ? 0 : 0.006) : SPIRES[kind])) {
+    if (r < (arenaView(x, z) ? 0 : spineCol ? (kind === "shallows" ? 0 : 0.006) : SPIRES[kind])) {
       const tall = 8 + Math.floor(hash(x, z, 6) * 22);
       fill(x, top + 1, z, x, top + tall, z, kind === "mirror" ? B.glass : B.basalt);
     } else if (r < (spineCol ? 0.06 : PLANTS[kind])) {
@@ -658,7 +686,8 @@ function planRoof(ops, cx, cz, col) {
   const pi = 4 + Math.floor(hash(cx, cz, 631) * 8), pj = 4 + Math.floor(hash(cx, cz, 632) * 8);
   const c = col(pi, pj), px = X0 + pi, pz = Z0 + pj;
   if (hash(cx, cz, 633) < 0.05 && c && c.h >= SEA && c.road === undefined && !c.site && c.river > RIVER_HALF_WIDTH + 6
-    && !siteAt(px, pz) && !(inSpine(px) && (pz < 60 || inCourt(px, pz) || nearPath(px, pz, 10)))) {
+    && !siteAt(px, pz) && !(inSpine(px) && (pz < 60 || inCourt(px, pz) || nearPath(px, pz, 10)))
+    && !arenaView(px, pz)) { // keep the arenas' views clear
     const roofY = roofAt(px, pz).bottom;
     for (let a = -2; a <= 2; a++) for (let b = -2; b <= 2; b++) {
       const d = a * a + b * b;
