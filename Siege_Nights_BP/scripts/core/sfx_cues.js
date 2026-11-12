@@ -58,6 +58,15 @@ const SIGNATURE = {
     layers: [["note.flute", 0.6, 0.8], ["note.flute", 0.71, 0.7, 8], ["note.flute", 0.56, 0.7, 18], ["mob.witch.celebrate", 0.5, 0.35, 26]] },
   "sig.boss.warlord_king": { custom: "siege.sig.boss.warlord_king", what: "The Warlord King",
     layers: [["raid.horn", 0.6, 1], ["mob.ravager.roar", 0.6, 0.6, 10], [BELL, 0.45, 0.6, 22], ["raid.horn", 0.45, 0.5, 26]] },
+  // gates and portcullises (Mateo, 2026-11-12: "custom sounds for the gate and portcullis, opening and closing")
+  "sig.gate_open": { custom: "siege.sig.gate_open", what: "The castle gate opens",
+    layers: [["random.door_open", 0.5, 1], ["hit.wood", 0.5, 0.6, 2], ["random.wood_click", 0.5, 0.5, 12]] },
+  "sig.gate_close": { custom: "siege.sig.gate_close", what: "The castle gate shuts",
+    layers: [["random.door_close", 0.5, 1], ["hit.wood", 0.45, 0.7, 2], ["random.anvil_land", 0.6, 0.25, 2]] },
+  "sig.portcullis_open": { custom: "siege.sig.portcullis_open", what: "The portcullis rises",
+    layers: [["hit.chain", 0.6, 0.8], ["step.chain", 0.5, 0.8, 4], ["hit.chain", 0.55, 0.8, 8], ["step.chain", 0.5, 0.8, 12], ["random.click", 0.5, 0.6, 20]] },
+  "sig.portcullis_close": { custom: "siege.sig.portcullis_close", what: "The portcullis drops",
+    layers: [["hit.chain", 0.8, 0.8], ["step.chain", 0.7, 0.8, 2], ["random.anvil_land", 0.5, 0.6, 8], ["dig.stone", 0.5, 0.8, 8]] },
 };
 
 // ---------- Named cues that are not recordings ----------
