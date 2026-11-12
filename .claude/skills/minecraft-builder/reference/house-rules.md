@@ -58,6 +58,8 @@ never to do. Index: `regions/README.md`.
 
 - [ ] Every dimension odd; door and windows on bay centres; ridge centred.
 - [ ] Nothing floats: no open row between a roof and its beam or wall, every lantern hung from something.
+- [ ] Looked at from where a player stands, not only from above: no flat wall of one block, nothing pasted on a
+      bare face, and no edge that shows the void or the sky behind it (regions/hollow.md, the Wound).
 - [ ] No stair facing the wrong way on roofs (light lips), no holes at valleys, chimney 2 above the roof.
 - [ ] Barge boards, eave row, corner blocks present; gable triangles filled.
 - [ ] Sills wider than glass; heads where there is room; shutters few and paired.

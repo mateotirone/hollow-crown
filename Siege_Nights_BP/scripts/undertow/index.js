@@ -44,7 +44,8 @@ import { choirTick, singerSpot, CHOIR } from "./choir.js";
 import { slipSeconds, slipLanding, isSlipping } from "./slips.js";
 import { shouldAlarm, oreOutcome, noteEntry, crownTick, crownVerdict, CLAIM_SECONDS, WARDEN } from "./warden.js";
 import { crownFate, needsRefresh, standHeight, KEEP } from "./crownkeep.js";
-import { oreChance, roofAt, ROOF, groundAt, GROUND, ambientLightAt, AMBIENT, pickTree, treeKind } from "./terrain.js";
+import { oreChance, roofAt, ROOF, groundAt, GROUND, ambientLightAt, AMBIENT, pickTree, treeKind, BACK, backFace, backRock, B } from "./terrain.js";
+import { planWound, woundAir, WOUND } from "./wound.js";
 import { HOLLOW_TREES } from "./trees_data.js";
 import { clearOps } from "./builder.js";
 import { shouldRise, regentOutcome, REGENT, TEMPERS, JOBS } from "./regent.js";
@@ -589,6 +590,57 @@ addTests("undertow", {
   },
   "terrain is deterministic": () => assert(JSON.stringify(planChunk(2, 5)) === JSON.stringify(planChunk(2, 5))),
   "arrival ledge is solid": () => assert(heightAt(0, 0) === L.woundLedgeY),
+  // Mateo 2026-11-12, of the first Wound: "This definitely needs a lot of work" (a crack on a flat slab, the void round it)
+  "the Wound: the cliff behind it runs right across the valley, never lower than the first wall, and is built up into the roof": () => {
+    for (let x = -BACK.reach; x <= BACK.reach; x += 3) for (const z of [-47, -44, -30, -18]) {
+      const h = heightAt(x, z);
+      assert(h !== null && h > L.woundLedgeY + 10, `no cliff at ${x},${z}`);
+      if (Math.abs(x) <= 24) assert(h >= 126, `the cliff is lower than the first wall at ${x},${z}`);
+    }
+    const ops = planChunk(0, -3).filter((o) => !o.optional && o.block !== "minecraft:air");
+    const sealed = (x, z) => { for (let y = heightAt(x, z) + 1; y < ROOF.shell; y++) if (!ops.some((o) => o.a[0] <= x && o.b[0] >= x && o.a[2] <= z && o.b[2] >= z && o.a[1] <= y && o.b[1] >= y)) return false; return true; };
+    assert(sealed(3, -46) && sealed(12, -44), "the last rows of the cliff do not reach the roof");
+    assert(L.returnCrack.z === WOUND.wallZ, "the return crack is not at the cave's back wall");
+  },
+  "the Wound: the cave is sealed in rock, you can walk from the ledge to the tear, and the tear runs from the floor to the roof": () => {
+    const cells = new Map(), F = L.woundLedgeY + 1;
+    for (const o of planWound()) for (let y = o.a[1]; y <= o.b[1]; y++) cells.set(`${o.a[0]},${y},${o.a[2]}`, o.block);
+    const open = (b) => b === "minecraft:air" || b === VEIL || b === B.strands || b === B.glint;
+    const solid = (x, y, z) => { const b = cells.get(`${x},${y},${z}`); return b !== undefined ? !open(b) : y <= (heightAt(x, z) ?? -999); };
+    let air = 0;
+    for (const [k, b] of cells) {
+      if (b !== "minecraft:air") continue;
+      const [x, y, z] = k.split(",").map(Number); air++;
+      for (const [dx, dy, dz] of [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, -1]]) assert(cells.has(`${x + dx},${y + dy},${z + dz}`) || solid(x + dx, y + dy, z + dz), `the cave is open to nothing at ${x + dx},${y + dy},${z + dz}`);
+    }
+    assert(air > 1500, `only ${air} blocks of air`);
+    // the walk: two clear blocks over a floor, from where you arrive to the foot of the tear
+    const seen = new Set(["0,0"]), q = [[0, 0]]; let reached = false;
+    while (q.length) {
+      const [x, z] = q.shift();
+      if (z === WOUND.wallZ + 1 && Math.abs(x) <= 1) { reached = true; break; }
+      for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const nx = x + dx, nz = z + dz, k = `${nx},${nz}`;
+        if (seen.has(k) || Math.abs(nx) > 14 || nz > 2 || nz < WOUND.wallZ || !solid(nx, F - 1, nz) || solid(nx, F, nz) || solid(nx, F + 1, nz)) continue;
+        seen.add(k); q.push([nx, nz]);
+      }
+    }
+    assert(reached, "no way on foot from the ledge to the tear");
+    const veil = [...cells].filter(([, b]) => b === VEIL).map(([k]) => +k.split(",")[1]);
+    assert(Math.min(...veil) === F && Math.max(...veil) >= F + WOUND.h - 2, "the tear does not run from the floor to the roof");
+    for (let y = F; y < F + WOUND.h; y++) assert(woundAir(0, y, WOUND.wallZ + 1) || woundAir(1, y, WOUND.wallZ + 1) || woundAir(-1, y, WOUND.wallZ + 1), `rock in front of the tear at y ${y}`);
+  },
+  "the Wound: the cliff the mouth opens in is never one flat wall, and its rock is laid in beds": () => {
+    const cells = new Set();
+    for (const o of planWound()) if (o.block !== "minecraft:air") for (let y = o.a[1]; y <= o.b[1]; y++) cells.add(`${o.a[0]},${y},${o.a[2]}`);
+    for (const y of [L.woundLedgeY + 4, L.woundLedgeY + 12, L.woundLedgeY + 20]) {
+      let out = 0, n = 0;
+      for (let x = -36; x <= 36; x++) { if (Math.abs(x) <= 6) continue; n++; if (cells.has(`${x},${y},${backFace(x)}`)) out++; }
+      assert(out >= n * 0.2 && out <= n * 0.9, `row ${y}: ${out} of ${n} columns stand out from the face`);
+    }
+    const kinds = new Set(); for (let y = 100; y < 130; y++) kinds.add(backRock(20, y, -11));
+    assert(kinds.size >= 4, `only ${kinds.size} kinds of rock up the face`);
+  },
   "path is walkable (no step over 1)": () => {
     for (let z = 41; z < 2328; z++) {
       const a = heightAt(pathX(z), z), b = heightAt(pathX(z + 1), z + 1);
@@ -846,7 +898,7 @@ addTests("undertow", {
     for (let x = -680; x <= 680; x += 85) for (let z = -40; z <= 2440; z += 155) {
       const h = heightAt(x, z), r = roofAt(x, z);
       assert(r.bottom <= ROOF.maxBottom && r.bottom < ROOF.shell, `roof at ${x},${z} reaches the shell`);
-      if (h !== null) assert(r.bottom - h >= 28, `roof only ${r.bottom - h} over the land at ${x},${z}`);
+      if (h !== null && z >= BACK.z) assert(r.bottom - h >= 28, `roof only ${r.bottom - h} over the land at ${x},${z}`); // the back cliff runs up into the roof on purpose
     }
     assert(roofAt(0, 2400).bottom >= HEART.center.y + 25, "room over the Choir's Heart");
   },

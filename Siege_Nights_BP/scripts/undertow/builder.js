@@ -4,8 +4,9 @@
 
 import { world, BlockVolume, BlockPermutation } from "@minecraft/server";
 import { UNDERTOW_ID, UNDERTOW_LAYOUT as L, COURT, HEART, pathX } from "./layout.js";
-import { planChunk, chunkInRange, heightAt, columnAt, roofAt, heartEdge, HEART_EDGE_Z, B, ROOF } from "./terrain.js";
-import { planCrack, placeCells } from "./rift.js";
+import { planChunk, chunkInRange, heightAt, columnAt, roofAt, heartEdge, HEART_EDGE_Z, B, ROOF, BACK } from "./terrain.js";
+import { placeCells } from "./rift.js";
+import { planWound, WOUND } from "./wound.js";
 import { SEAL_RIVER_X } from "./rivers.js";
 import { SITES, signposts } from "./roads.js";
 import { hash } from "./noise.js";
@@ -122,7 +123,19 @@ function apply(d, op) {
   }
 }
 
-let job; // { cx, cz, ops, i }
+let job; // { cx, cz, ops, i } for a chunk, or { ops, i, done, fail } for a set piece
+const extra = []; // set pieces waiting their turn
+let woundQueued = false;
+// Chunks built before a change to the land that only ADDS rock are simply planned again over what stands there.
+function planAgain(x1, z1, x2, z2) {
+  if (!bits) loadBits();
+  for (let cx = Math.floor(x1 / 16); cx <= Math.floor(x2 / 16); cx++) for (let cz = Math.floor(z1 / 16); cz <= Math.floor(z2 / 16); cz++) {
+    if (cx < CX_MIN || cx > CX_MAX || cz < CZ_MIN || cz > CZ_MAX) continue;
+    const i = idx(cx, cz);
+    bits[i >> 3] &= ~(1 << (i & 7));
+  }
+  dirty = true;
+}
 
 function nextChunk(players) {
   // Nearest unbuilt chunk to any player in the Undertow, Wound chunks first.
@@ -145,6 +158,7 @@ let waitUntil = 0, tickNo = 0;
 export function buildTick(players) {
   if (++tickNo < waitUntil) return;
   const d = dim();
+  if (!job && extra.length) job = extra.shift(); // a set piece too big for one tick (the Wound's cave)
   if (!job) {
     const next = nextChunk(players);
     if (next) {
@@ -156,11 +170,11 @@ export function buildTick(players) {
   if (job) {
     let budget = OPS_PER_TICK;
     while (budget-- > 0 && job.i < job.ops.length) {
-      if (!apply(d, job.ops[job.i])) { job = undefined; waitUntil = tickNo + 40; return; } // not loaded yet: retry in 2 s
+      if (!apply(d, job.ops[job.i])) { job.fail?.(); job = undefined; waitUntil = tickNo + 40; return; } // not loaded yet: retry in 2 s
       job.i++;
     }
     if (job.i >= job.ops.length) {
-      markBuilt(job.cx, job.cz);
+      if (job.done) job.done(); else markBuilt(job.cx, job.cz);
       job = undefined;
     }
   }
@@ -210,10 +224,16 @@ export function piecesTick() {
   const p = pieces();
   let changed = false;
 
-  // The Wound: return crack in the back wall, waystone 0 on the ledge.
-  if (!p.wound && chunksBuilt(-24, -48, 24, 40)) {
-    const rc = L.returnCrack;
-    if (placeCells(d, planCrack(rc, rc.facing))) { p.wound = true; changed = true; }
+  // The Wound: the cave behind the arrival ledge with the tear at the back of it (wound.js). A world that built the
+  // first one (a crack on a flat wall, before 2026-11-12) has the back cliff planned again, which only adds rock,
+  // and the cave cut into it.
+  const woundV = p.woundV ?? (p.wound ? 1 : 0);
+  if (woundV < WOUND.v) {
+    if (woundV === 1 && !p.woundRedo) { planAgain(-BACK.reach, L.zStart, BACK.reach, BACK.z); p.woundRedo = true; changed = true; }
+    else if (!woundQueued && chunksBuilt(...WOUND.box)) {
+      woundQueued = true;
+      extra.push({ ops: planWound(), i: 0, fail: () => { woundQueued = false; }, done: () => { const q = pieces(); q.wound = true; q.woundV = WOUND.v; savePieces(q); woundQueued = false; } });
+    }
   }
 
   // Waystones, each once its chunk is built.

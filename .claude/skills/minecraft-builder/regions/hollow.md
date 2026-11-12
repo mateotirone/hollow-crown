@@ -103,6 +103,26 @@ cracked veinstone and moss.
   match), five rocks curving to the ring's landing, broken rock adrift round it. Nothing of it stands inside
   the ring that falls in the fight (r 32 from the Seat's middle).
 
+## The Wound and any wall that closes the world (Mateo, 2026-11-12)
+
+Mateo, of a screenshot of the first Wound: "This definitely needs a lot of work." It was a crack pasted on a flat
+slab of one block, 49 wide, with the void either side and above it, so the sky showed round it under a roof that
+looked like a floating slab. The rules that came out of it (`terrain.js` `backWall`, `wound.js`, self-tests
+"the Wound: ..."):
+
+- **A set piece is never pasted on a bare face.** A tear, a gate or a door sits in a place made for it: a mouth,
+  a throat, a chamber, a back wall. The Rift's tear is always at the back of a cave, runs from the floor to the
+  roof, and opens on the black void (`planCrack` with `deep`), in the Hollow the same as on land.
+- **A wall that ends the world runs right across everything a player can see and up into the roof.** Nothing a
+  player can look at from a place they can stand ends in the void or the sky. Check it with rays from the
+  standing places, not by eye.
+- **No face is a plane and no face is one block.** The foot wanders, the top steps back in ledges, ribs of rock
+  stand one to three blocks out of it, and the rock is laid in beds of mixed stone (`backRock`).
+- **Look at it from where the player stands** (the arrival point, the ledge, the valley floor) before showing it,
+  not only from above.
+- **A change to land already built only adds rock,** so an old world can plan the chunks again over what stands
+  there (`builder.js` `planAgain`), and the roof is still hung over the first land so it never moves.
+
 ## Roofs
 
 **Shapes:**

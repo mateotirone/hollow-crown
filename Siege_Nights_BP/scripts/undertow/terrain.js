@@ -151,12 +151,12 @@ function rimWall(x, z) {
   if (z < 60 || (z > 1500 && z < 1700) || margin(side * (L.halfWidth + 45), z) < 0) return 1;
   return smooth(clamp01((fbm(z / 70, side * 3.3, 61) - 0.4) / 0.14));
 }
-function spine(x, z) {
+function spine(x, z, first = false) {
   if (z < L.zStart || z >= L.zEnd || inHeart(x, z)) return null; // the final arena floats in the fog; built separately
 
   // The Wound: a ledge at y 100 with a wall behind it and a ramp down along the path.
   if (z < 40) {
-    if (z < -10) return Math.abs(x) <= 24 ? 126 - Math.floor(fbm(x / 9, z / 9, 5) * 6) : null;
+    if (z < -10 && first) return Math.abs(x) <= 24 ? 126 - Math.floor(fbm(x / 9, z / 9, 5) * 6) : null; // the first back wall: a slab, the void either side
     if (Math.abs(x) <= 14 && z <= 10) return L.woundLedgeY;
     if (Math.abs(x) <= 3 && z > 10) {
       const foot = spine(pathX(40), 40); // ramp lands exactly on the valley floor
@@ -190,19 +190,48 @@ function spine(x, z) {
   return Math.max(L.floorY + 4, Math.min(L.ceilingY - 30, h));
 }
 
-// The land before the rivers cut into it: { h, region } or null for void.
-function natural(x, z) {
+// The cliff at the Hollow's near end, behind the Wound (Mateo 2026-11-12, of a screenshot of the first one: "This
+// definitely needs a lot of work"). It was a flat slab 49 wide with the void on both sides and above it, so the sky
+// showed round it. Now it is a cliff right across the valley and out past both rims: its foot wanders, its top
+// steps back in broken ledges, it is laid in beds of mixed rock (backRock), and its last rows are built up into
+// the roof so nothing shows behind it. The Wound's cave is cut into it (wound.js).
+export const BACK = { z: -10, reach: L.halfWidth + 45, seal: -44 };
+export const backFace = (x) => { const ax = Math.abs(x); return ax <= 26 ? BACK.z : BACK.z - Math.round(fbm(x / 21, 0.5, 171) * 9 * smooth(clamp01((ax - 26) / 12))); };
+function backWall(x, z) {
+  if (z >= BACK.z || z < L.zStart || Math.abs(x) > BACK.reach) return null;
+  const d = backFace(x) - z; // blocks in behind the face
+  if (d <= 0) return null; // in front of it: the valley's own ground
+  let h = 136 + fbm(x / 23, z / 23, 5) * 26 + Math.min(d, 30) * 0.7 - 14 * Math.max(0, 1 - d / 5) * fbm(x / 9, 3.3, 172);
+  h = Math.max(h, natural(x, z, true)?.h ?? 0); // never lower than the land that stood here first, so an old world only gains rock
+  return Math.round(Math.min(L.ceilingY - 30, h));
+}
+const BACK_ROCK = ["minecraft:blackstone", "minecraft:deepslate", "siege:veinstone", "minecraft:deepslate", "minecraft:basalt", "minecraft:tuff", "minecraft:cobbled_deepslate", "minecraft:blackstone"];
+// The rock of the back cliff at a cell: beds three blocks thick that rise and dip along the face. Pure.
+export function backRock(x, y, z) {
+  const r = hash(x + y * 7, z - y * 3, 175);
+  if (r < 0.012) return "minecraft:crying_obsidian";
+  if (r < 0.07) return "siege:veinstone";
+  return BACK_ROCK[Math.floor((y + fbm(x / 17, z / 17, 173) * 12) / 3 + 400 + hash(Math.floor(x / 4), Math.floor(z / 4), 174) * 1.4) % BACK_ROCK.length];
+}
+// The land the roof is hung over. Behind the Wound it is still the first wall, so the roof stays exactly where
+// every world already built it.
+const roofLand = (x, z) => natural(x, z, true)?.h ?? null;
+
+// The land before the rivers cut into it: { h, region } or null for void. first: as it was before the back cliff.
+function natural(x, z, first = false) {
   if (z < L.zStart || z >= L.zEnd) return null;
+  const back = first ? null : backWall(x, z);
+  if (back !== null) return { h: back, region: "wound" };
   const ax = Math.abs(x);
   const rimX = ax <= L.halfWidth + 45 ? rimAt(x, z) : L.halfWidth;
   if (ax <= rimX) {
-    const h = spine(x, z);
+    const h = spine(x, z, first);
     return h === null ? null : { h, region: stageAt(z)?.id ?? "wound" };
   }
   const w = wild(x, z);
   if (w === null) return null;
   if (ax < rimX + 40) { // the outer foot of the rim eases into the open country
-    const rim = spine(x < 0 ? -rimX : rimX, z);
+    const rim = spine(x < 0 ? -rimX : rimX, z, first);
     if (rim !== null) w.h = rim + (w.h - rim) * smooth((ax - rimX) / 40);
   }
   w.h = Math.max(L.floorY + 4, Math.min(L.ceilingY - 30, w.h));
@@ -417,6 +446,18 @@ function planLand(cx, cz) {
     // A faint glow over the land (invisible light blocks), so under the roof it is dark but never
     // pitch black. Pushed first in the column so anything built here later takes its place.
     if (top + 2 > SEA && ambientLightAt(x, z)) ops.push({ a: [x, top + 2, z], b: [x, top + 2, z], block: AMBIENT.block, optional: true, ifAir: true });
+    const backCol = kind === "wound" && z < BACK.z && Math.abs(x) <= BACK.reach && top > L.woundLedgeY;
+    if (backCol) {
+      // the back cliff: beds of mixed rock wherever the face shows, plain rock inside
+      const from = drop >= 3 ? Math.max(start, top - Math.min(drop, 110) - 2) : top - 1;
+      fill(x, start, z, x, from - 1, z, B.rock);
+      const upTo = z <= BACK.seal ? ROOF.shell - 1 : top; // the last rows are built up into the roof: nothing shows behind the cliff
+      for (let y = from, y0 = from, b0 = backRock(x, from, z); y <= upTo + 1; y++) {
+        const b = y <= upTo ? backRock(x, y, z) : null;
+        if (b !== b0) { fill(x, y0, z, x, y - 1, z, b0); y0 = y; b0 = b; }
+      }
+      continue;
+    }
     if (drop >= 3 && !wound && !onWater) {
       fill(x, start, z, x, top, z, kind === "mirror" || kind === "high" ? B.polished : B.basalt);
       // Choir ore shows in the cliff faces, richer the deeper into the Hollow you go.
@@ -635,8 +676,8 @@ function roofNode(gx, gz) {
   const x0 = gx * ROOF.cell, z0 = gz * ROOF.cell, W = ROOF.window;
   let m = -Infinity;
   for (let dx = -W; dx <= W; dx += ROOF.step) for (let dz = -W; dz <= W; dz += ROOF.step) {
-    const n = natural(x0 + dx, z0 + dz);
-    if (n !== null) m = Math.max(m, n.h);
+    const n = roofLand(x0 + dx, z0 + dz);
+    if (n !== null) m = Math.max(m, n);
   }
   if (z0 + W >= HEART.center.z - HEART.outerRadius - 40) m = Math.max(m, ROOF.heartFloor);
   for (const t of tallThings()) if (Math.hypot(x0 - t.x, z0 - t.z) <= t.r + W) m = Math.max(m, t.y - 20);

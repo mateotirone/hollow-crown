@@ -14,6 +14,9 @@ const tests = [];
 // trips the watchdog, which shuts the world down (first playtest, 2026-11-11). They still run in
 // tools/check.mjs, which fails if a slow test is missing from this list. Written as "group: name".
 export const OFFLINE_ONLY = new Set([
+  "undertow: the Wound: the cliff behind it runs right across the valley, never lower than the first wall, and is built up into the roof",
+  "undertow: the Wound: the cave is sealed in rock, you can walk from the ledge to the tear, and the tear runs from the floor to the roof",
+  "undertow: the Wound: the cliff the mouth opens in is never one flat wall, and its rock is laid in beds",
   "settle plans: the Plan Book card pictures match the buildings as they are designed now",
   "after: Deep: the halls are open where players and the Host stand, with floor under them",
   "trains: routes: the planned railway has no mistakes, and no works stand in a train's way",
