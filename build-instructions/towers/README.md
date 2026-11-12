@@ -94,7 +94,7 @@ The skill's `clock_face` does all of this with `size: 5` (or 7), `frame: "stairs
 | **Saltreach** | Round or square, whitewash and sandstone, few windows | Open arches or a lantern room with a gallery | A low sea-green hip or dome cap, or flat with a lantern. No needle spires. |
 | **Emberwaste** | Square sandstone, battered base, small deep windows | An open lantern with pointed arches (a minaret top) | A flat parapet with crenels, vigas out through the walls, a small dome or gold finial. Never a pitched spire. |
 | **Blackfen** | Mud brick on mangrove piles, mangrove frame above | A hooded timber stage | A dark shingle hood roof with moss, a lantern hung under the hood |
-| **Castle / Citadel** | Round or square castle stone, arrow slits | Machicolated battlements | A conical cap (optional) with a flag or rod |
+| **Castle / Citadel** | Round or square castle stone, arrow slits | Machicolated battlements | A conical cap (optional) with a flag or rod. Round keeps: the skill's `keep` part (corbels, deck, parapet, merlons, flags); yard walls with turrets and a gate: `curtain` (Barracks, 2026-11-12) |
 | **Hollow** | Blackstone and veinstone | Offset one block, once (`offset`), never sheared | A steep deepslate spire, soul lanterns |
 
 ## 6. Before you move on
