@@ -336,6 +336,9 @@ const EXTRAS = [
   { id: "goldsluice", title: "Gold Sluice", marker: "map/structures/goldsluice_builds.py",
     args: (out) => [out],
     label: { goldsluice_1: "Gold Sluice 1: Panning Sluice", goldsluice_2: "Gold Sluice 2: Washing Mill", goldsluice_3: "Gold Sluice 3: Assay House" } },
+  { id: "deepshaft", title: "Deep Shaft", marker: "map/structures/deepshaft_builds.py",
+    args: (out) => [out],
+    label: { deepshaft_1: "Deep Shaft 1: Prospect Shaft", deepshaft_2: "Deep Shaft 2: Winding House", deepshaft_3: "Deep Shaft 3: Deep Shaft" } },
 ];
 // Builder scripts that live on a branch without the kit: copied from the newest branch that has them into
 // the newest catalogue branch's map/structures and run there.
