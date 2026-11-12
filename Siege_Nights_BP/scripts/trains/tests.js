@@ -203,7 +203,7 @@ addTests("trains", {
     assert(along.every((b) => b.z === 0 && b.y === 64 && b.dir === 2), "the new line runs along the old one");
     const none = siteFor({ x: 0, y: 64, z: 40 }, get, { x: 0.2, z: -0.9 });
     assert(!none.onTrack, "no track near");
-    assertEqual(JSON.stringify([none.origin, none.forward]), JSON.stringify([{ x: 0, y: 64, z: 40 + STATION.noTrackBack }, { x: 0, z: -1 }]));
+    assertEqual(JSON.stringify([none.origin, none.forward]), JSON.stringify([{ x: 0, y: 64 + STATION.noTrackLift, z: 40 + STATION.noTrackBack }, { x: 0, z: -1 }]));
     assertEqual(JSON.stringify(rightOf({ x: 0, z: 1 })), JSON.stringify({ x: -1, z: 0 }));
   },
   "corners and bends are curves: the wheels follow an arc from edge to edge": () => {
