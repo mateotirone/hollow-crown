@@ -56,7 +56,8 @@ async function board(player, party) {
   const news = noticesOf(party).slice(-4).map((n) => `§7- ${n.text}`).join("\n");
   const lines = routes.map((r) => `${r.state === "live" ? "§a●" : r.state === "dormant" ? "§8●" : "§c●"}§r ${partyName(r.a === party ? r.b : r.a)}: ${routeTerms(r, party)}${r.state !== "live" ? `\n   §c${r.state === "dormant" ? "Dormant" : "Paused"}: ${whyText(r, party)}` : r.onLine ? "\n   §7Goods on the line" : ""}`);
   const body = [
-    `Routes: ${routes.length} of ${routesAllowed(partyStage(party))} · Cargo a run: ${cargoFor(party)} of a thing each way`,
+    `Routes: ${routes.length} of ${routesAllowed(partyStage(party))}`,
+    `Train size: up to ${cargoFor(party)} items (${cargoFor(party) / 64} stacks) each way per trip`,
     `Exports hold ${moneyIn(o.ex ?? {})} Regals for freight.`,
     lines.length ? `\n${lines.join("\n")}` : "\n§7No routes yet. Propose one, or wait for an offer.",
     news ? `\n§fLatest:\n${news}` : "",
