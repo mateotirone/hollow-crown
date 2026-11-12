@@ -67,9 +67,11 @@ When a fact changes, change it at its source, then here.
 These turned up while the pages were written. Mateo decides; until then the pages follow the default
 given here.
 
-- **Weather is the world's normal biome weather.** The Vale and Saltreach get rain, Frostmarch gets snow,
-  the Emberwaste never rains, and Blackfen has its own dark fog under water only. There is no custom
-  weather such as fen mist in the air, sea wind or sandstorms. The Hollow has no weather.
+- **Region weather** (PR #193, not merged yet): on top of the biome weather, Blackfen gets fen mist and
+  marsh lights, Saltreach sea wind and sea fret, the Emberwaste dust wind and sandstorms, Frostmarch
+  flurries and blizzards, the Vale morning mist; the Hollow has none. Each page's weather table has the
+  details. For builders: deep eaves, porches, covered walkways and wind-breaks matter in the Emberwaste and
+  Frostmarch; lanterns that show through fog matter in Blackfen and Saltreach.
 - **Gull's Rest, the harbour town, has no water inside its town area**, so its quay, lighthouse and
   boathouse are not placed (towns thread).
 - **Saltreach has two looks**: the Mediterranean and Atlantic harbour town, and the English chalk cliffs
@@ -79,10 +81,7 @@ given here.
   mix of 7 flat and 3 red pitched or domed roofs.
 - **Flat roofs**: the house rule "no flat roofs on houses" does not apply to the Emberwaste (flat is its
   default) or to Saltreach terraces on a lower wing.
-- **Still missing from the skill**, so it is built by hand (`place`) for now:
-  - the Hollow's one-block storey offset;
-  - Blackfen stilts and boardwalks;
-  - Frostmarch snow caps and dragon heads;
-  - domes on drums;
-  - mossy and thatch roofs.
+- **Now in the skill** (2026-11-12): the Hollow's one-block offset (`offset`), Blackfen stilts and piles,
+  Frostmarch snow caps (`snow`) and dragon heads (`gable_horns`), domes on drums (`dome`), mossy and thatch
+  roofs (`moss`, `thatch`). Still by hand: Blackfen boardwalks, Hollow leaning towers, curved roofs.
 

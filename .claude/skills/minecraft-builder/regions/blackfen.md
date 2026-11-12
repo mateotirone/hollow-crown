@@ -31,12 +31,13 @@ most uneasy region at night, and still never horror.
 |---|---|
 | Ground | grass, mud, moss and podzol in patches; shallow black-water pools in the low fen (never on plots, towns or roads); mangrove roots; the sea edge is mangrove swamp too |
 | Biome | `mangrove_swamp`: the world's normal rain, murky water, and the region's own dark water fog (`siege:blackfen_fog`, black-green #07090b, thick under water) |
+| Region weather | **fen mist**: a thick grey-green fog (#55604f), down to 28 blocks at its worst, drifting mist banks, croaks and splashes out on the water; most at dusk, at night and in rain. **Marsh lights**, at night only: a faint mist with small green lights drifting (region weather, PR #193: spells of 3 to 16 minutes with 6 to 22 minutes of plain sky between; under a roof it thins to a grey light; never in caves) |
 | Light | dim, green-grey by day; froglights (verdant and ochre) and lanterns at night |
 | Feel | wet, still and close; moss on everything low; things half-seen across the water |
 
 Build for wet ground. Houses never touch the ground: they sit on mangrove stilts under every corner and
 bay, with the platform as the floor. Moss climbs from below and damp darkens the lower walls (more packed
-mud low down). Roofs carry moss.
+mud low down). Roofs carry moss. Lanterns that show through fog matter here: light every landing, boardwalk end and door so a house reads in fen mist.
 
 ## Towns and paths
 
@@ -154,21 +155,19 @@ get dark oak stairs and fences for bark, never mud brick.
 - **Preset:** `fen_timber`: mud brick in a proud mangrove frame, spruce trim, brown glass, a dark oak roof.
 - **Roof:** `"roof": {"type": "gable"}`, with the house set on stilts by giving it `"y"` 3 or 4 above the
   ground.
-- **Stilts:** build the stilts with `place` (mangrove logs, axis y) under every corner and frame post, down to
-  the ground.
+- **Stilts:** `"stilts": {"ground": 0}` with `"y"` at the platform: mangrove log stilts under every corner,
+  post and second edge block, a plank platform, a landing and a stair down.
+- **Plot buildings on the ground:** `"piles": true` (mangrove log piles and roots in the plinth course).
+- **Mossy roofs:** `"roof": {"type": "gable", "moss": true}`; barns and stores can take `"thatch": true`.
 - **Parts that fit:** `porch` (a landing), `lean_to`, `woodpile`, `vines`.
 
 ```json
-{"part": "house", "style": "fen_timber", "rect": [0, 0, 8, 6], "y": 4, "plinth": 1, "storeys": [5],
- "door": {"side": "s"}, "roof": {"type": "gable", "ridge": "x"}, "vines": 0.2}
+{"part": "house", "style": "fen_timber", "rect": [0, 0, 8, 6], "y": 4, "stilts": {"ground": 0}, "storeys": [5],
+ "door": {"side": "s"}, "roof": {"type": "gable", "ridge": "x", "moss": true}, "vines": 0.2}
 ```
 
 **Not in the skill yet:**
-- a stilts part (posts down to the ground, the stair to the landing) and the plot piles (mangrove log piles
-  and roots in place of the plinth course);
-- the moss on the roof (add it with `place`, or ask for a `moss` roof option);
 - boardwalks;
-- thatch roofs;
 - froglight cages.
 
 ## Never

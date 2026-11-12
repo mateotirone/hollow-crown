@@ -810,7 +810,7 @@ def _balcony(ctx, b, st, B):
 def house(ctx, s):
     """A building by the stages: foundation, frame, floors, walls, openings, roof, details.
     Optional: wings (joined blocks with joined roofs), dormers, porch, balconies."""
-    st = _style(ctx, s)
+    st = _style(ctx, s); ctx.last_style = st
     B = _body(ctx, s, st)
     blocks = [(s, st, B)]
     for k, wg in enumerate(s.get("wings", [])):
@@ -883,6 +883,14 @@ def house(ctx, s):
         fin = bs.get("finials", s.get("finials", "spikes"))
         if fin: finials(ctx, r, Hf, fin, {c for c, _, _ in chs}, bst)
     if s.get("vines"): vines(ctx, blocks, s["vines"])
+    for (F, r, bst, bB), (bs, _, _) in zip(roofs, blocks):     # roof dressings (regions/*.md)
+        rs = bs.get("roof", {})
+        if rs.get("thatch"): _thatch(ctx, F, r, Hf)
+        if rs.get("moss"): _moss(ctx, F, r, Hf, rs["moss"])
+    if s.get("stilts"): _stilts(ctx, s, st, B, s["stilts"])
+    if s.get("piles"): _piles(ctx, s, B, s["piles"])
+    if s.get("offset"): _offset(ctx, s, st, B, s["offset"], {c for c, _, _ in chs})
+    if s.get("snow") or s.get("roof", {}).get("snow"): _snow(ctx, blocks, s.get("snow") or s["roof"]["snow"])
     for bs, bst, bB in blocks:
         ctx.info["houses"].append({"name": bst["_name"], "rect": list(bs["rect"]), "plate": bB["plate"],
                                    "storeys": [{"floor_y": fl, "stand_y": fl + 1, "height": h, "rect": list(rr)}
@@ -1352,7 +1360,209 @@ def _arcade(ctx, s, st, B, a):
                 for yy in range(fl + 1, fl + hgt + 1): ctx.set(px, yy, pz, "frame", "full", a["pier"])
 
 
-PARTS = {"house": house, "lean_to": lean_to, "woodpile": woodpile, "spire": spire, "belfry": belfry, "clock_face": clock_face, "wheel": wheel, "arch": arch, "string_course": string_course, "buttress": buttress, "hanging_lantern": hanging_lantern}
+# ------------------------------------------------------------------ regional dressings (regions/*.md)
+def _roof_cells(ctx, F, r, H):
+    """(x, z, row, d) of this roof's own surface cells (not covered by a higher roof)."""
+    own = r.get("_F", F)
+    return [(x, z, H[(x, z)], v[1]) for (x, z), v in own.items() if H.get((x, z)) == v[0]]
+
+
+def _moss(ctx, F, r, H, share=0.13):
+    """Blackfen mossy shingle (palettes/blackfen.md, settle_halls.thatch): moss blocks on the ridge, moss on
+    about 13% of the slope (more on the north, shady side), moss carpet in place of the ridge cap."""
+    share = 0.13 if share is True else share
+    for x, z, row, d in _roof_cells(ctx, F, r, H):
+        v = ctx.get(x, row, z)
+        if not v or ctx.stage_of.get((x, row, z)) != "roof": continue
+        shade = 1.5 if v.get("props", {}).get("facing") == "s" else 1.0      # a north-facing slope faces s-up
+        if v.get("kind") == "full":
+            ctx.set(x, row, z, "roof", raw="moss_block")
+            cap = ctx.get(x, row + 1, z)
+            if cap and ctx.stage_of.get((x, row + 1, z)) == "roof": ctx.set(x, row + 1, z, "roof", raw="moss_carpet")
+        elif v.get("kind") == "stairs" and h3(x, row, z, 71) < share * shade:
+            ctx.set(x, row, z, "roof", raw="mossy_cobblestone_stairs", **v.get("props", {}))   # moss in the stair's shape
+
+
+def _thatch(ctx, F, r, H):
+    """Thatch on barns and stores (regions_towns.thatch_roof): hay blocks on the slopes, the roof's stairs
+    kept along the eaves and verges, a moss ridge."""
+    x0, z0, x1, z1 = r["rect"]
+    for x, z, row, d in _roof_cells(ctx, F, r, H):
+        v = ctx.get(x, row, z)
+        if not v or ctx.stage_of.get((x, row, z)) != "roof": continue
+        edge = d == 0 or not (x0 <= x <= x1 and z0 <= z <= z1)
+        if v.get("kind") == "full":
+            ctx.set(x, row, z, "roof", raw="moss_block")
+            if ctx.get(x, row + 1, z) and ctx.stage_of.get((x, row + 1, z)) == "roof": ctx.set(x, row + 1, z, "roof", raw="moss_carpet")
+        elif v.get("kind") == "stairs" and not edge:
+            ctx.set(x, row, z, "roof", raw="hay_block", axis="y")
+
+
+def _snow(ctx, blocks, how=True):
+    """Frostmarch snow (palettes/frostmarch.md, regions_towns.snow_cap): a snow layer on every ridge in place
+    of the ridge cap, and on chimney tops, corner blocks and other full blocks open to the sky. Snow layers
+    only go on full blocks, so slopes of stairs stay bare (they would not hold a layer)."""
+    xs = [c for bs, bst, bB in blocks for rr in bB["rects"] for c in (rr[0] - 3, rr[2] + 3)]
+    zs = [c for bs, bst, bB in blocks for rr in bB["rects"] for c in (rr[1] - 3, rr[3] + 3)]
+    tops = {}
+    for (x, y, z) in ctx.cells:
+        if min(xs) <= x <= max(xs) and min(zs) <= z <= max(zs): tops[(x, z)] = max(tops.get((x, z), y), y)
+    for (x, z), y in tops.items():
+        v = ctx.get(x, y, z)
+        if v.get("kind") == "stairs" and ctx.stage_of.get((x, y, z)) == "roof":
+            below = ctx.get(x, y - 1, z)
+            if below and below.get("kind") == "full" and ctx.stage_of.get((x, y - 1, z)) == "roof":   # the ridge cap
+                ctx.set(x, y, z, "roof", raw="snow_layer", height=1)
+        elif v.get("kind") == "full" or (v.get("kind") == "raw" and v.get("name") in ("stone_bricks", "deepslate_bricks")):
+            ctx.setif(x, y + 1, z, "details", raw="snow_layer", height=0)
+
+
+def _stilts(ctx, s, st, B, o):
+    """Blackfen stilt house (01-foundation, regions/blackfen.md): set the house's "y" to the platform height
+    and give "stilts": {"ground": 0}. Mangrove log stilts under every corner and frame post down to the
+    ground, the plinth course becomes a plank platform, and a stair runs down from a 3 x 1 landing at the
+    door. Keys: ground, log, platform, stair (true), side (the door's side)."""
+    o = {} if o is True else o
+    g = o.get("ground", 0); log = o.get("log", "mangrove_log"); plat = o.get("platform", "mangrove_planks")
+    y = B["y"]; x0, z0, x1, z1 = B["rects"][0]
+    for yy in range(y, y + B["plinth"]):
+        for x in range(x0, x1 + 1):
+            for z in range(z0, z1 + 1):
+                if x in (x0, x1) or z in (z0, z1): ctx.set(x, yy, z, "foundation", raw=plat)
+    stilt = set((x, z) for x in (x0, x1) for z in (z0, z1))
+    for sd in "nsew":
+        L = side_len(B["rects"][0], sd)
+        for t_ in B["posts_of"][(0, sd)]: stilt.add(wall_cell(B["rects"][0], sd, t_))
+        for t_ in range(-(L // 2), L // 2 + 1, 2): stilt.add(wall_cell(B["rects"][0], sd, t_))
+    for (x, z) in stilt:
+        for yy in range(g, y): ctx.set(x, yy, z, "foundation", raw=log, axis="y")
+    if not o.get("stair", True) or not s.get("door"): return
+    sd = s["door"].get("side", "s"); at = s["door"].get("at", 0)
+    ox, oz = DIRS[sd]; rx, rz = RIGHT_OF[sd]
+    fl = y + B["plinth"] - 1
+    dx, dz = wall_cell(B["rects"][0], sd, at)
+    for k in (-1, 0, 1):                                     # the landing, level with the floor
+        lx, lz = dx + ox + rx * k, dz + oz + rz * k
+        ctx.set(lx, fl, lz, "foundation", raw=plat)
+        if k != 0:
+            for yy in range(g, fl): ctx.set(lx, yy, lz, "foundation", raw=log, axis="y")
+    for i in range(1, fl - g + 1):                           # the stair down, away from the door
+        sx, sz, sy = dx + ox * (1 + i), dz + oz * (1 + i), fl - i + 1
+        ctx.clear(sx, sy + 1, sz)
+        ctx.set(sx, sy, sz, "foundation", raw=plat.replace("_planks", "_stairs"), facing=OPP[sd], half="bottom")
+        for yy in range(g, sy): ctx.setif(sx, yy, sz, "foundation", raw=plat.replace("_planks", "_fence"))
+
+
+def _piles(ctx, s, B, o):
+    """Blackfen on a plot (refinement thread 2026-11-12, regions/blackfen.md): the footprint and door step
+    stay; the plinth course becomes mangrove log piles at the corners and every other edge block, driven
+    two below the ground, with mangrove roots between them."""
+    o = {} if o is True else o
+    log = o.get("log", "mangrove_log"); roots = o.get("roots", "mangrove_roots"); depth = o.get("depth", 2)
+    x0, z0, x1, z1 = B["rects"][0]; y = B["y"]
+    for x in range(x0, x1 + 1):
+        for z in range(z0, z1 + 1):
+            if not (x in (x0, x1) or z in (z0, z1)): continue
+            corner = x in (x0, x1) and z in (z0, z1)
+            if corner or (x - x0 + z - z0) % 2 == 0:
+                for yy in range(y - depth, y + B["plinth"] - 1 + 1 if B["plinth"] > 1 else y + 1):
+                    ctx.set(x, yy, z, "foundation", raw=log, axis="y")
+            else:
+                ctx.set(x, y, z, "foundation", raw=roots)
+
+
+def _offset(ctx, s, st, B, o, chimneys=()):
+    """The Hollow's crookedness (palettes/hollow.md): a single one-block offset of a whole upper storey and
+    everything above it ({"storey": 1, "dir": "e"}), or of the roof only ({"roof": true, "dir": "e"}).
+    Never a gradual shear. The plinth and ground storey stay true; the shifted storey overhangs one side
+    like a jetty, so it gets brackets under its posts there. Chimneys stay put. Not for houses with wings."""
+    sd = o.get("dir", "e"); dx, dz = DIRS[sd]
+    if o.get("roof"): y_from = B["plate"] + 1
+    else: y_from = B["floors"][max(1, o.get("storey", 1))] if len(B["floors"]) > 1 else B["plate"] + 1
+    x0, z0, x1, z1 = B["rects"][-1]
+    box = (x0 - 4, z0 - 4, x1 + 4, z1 + 4)
+    moving = [c for c in ctx.cells if box[0] <= c[0] <= box[2] and box[1] <= c[2] <= box[3] and c[1] >= y_from
+              and (c[0], c[2]) not in chimneys]
+    saved = {c: (ctx.cells[c], ctx.stage_of.get(c)) for c in moving}
+    for c in moving: ctx.clear(*c)
+    for (x, y, z), (v, stg) in saved.items():
+        ctx.cells[(x + dx, y, z + dz)] = v; ctx.stage_of[(x + dx, y, z + dz)] = stg
+    if not o.get("roof"):            # brackets under the overhanging side (07: every overhang carried)
+        i = max(1, o.get("storey", 1)); rr = B["rects"][i] if i < len(B["rects"]) else B["rects"][-1]
+        posts = B["posts_of"].get((i, sd), [])
+        L = side_len(rr, sd)
+        for t_ in [-(L // 2), L // 2] + list(posts):
+            wx, wz = wall_cell(rr, sd, t_)
+            ctx.setif(wx + dx, y_from - 1, wz + dz, "frame", "stairs", ctx.mat(st, "trim"), facing=OPP[sd], half="top")
+
+
+def dome(ctx, s):
+    """A dome on an optional drum (06 roof-types 17: courses stepping in as a circle, smooth, no one-cell
+    ribs; the capital hall, Saltreach and Emberwaste civic accents). at = [x, y, z] or [x, z] with "y": the
+    centre block at the foot of the drum (or of the dome); y may be "top" (default) to sit on what is built
+    under it. r = radius (end in .5
+    for an odd width), shape hemisphere / onion / tall, material (default the waxed copper gradient, greener
+    at the top), drum {"h": 4, "r": r, "material" (default the walls of the house under it), "windows": 4 or
+    8, "glass"}, finial ("short" / "gold" /
+    "spire_block" / "none")."""
+    from fit import voxelize
+    at = s["at"]
+    if len(at) == 2: (cx, cz), y = at, s.get("y", "top")
+    else: cx, y, cz = at
+    r = s.get("r", 3.5)
+    R = int(r + 1)
+    if not isinstance(y, (int, float)):        # sit on the deck under the centre (a flat roof stays as the floor)
+        ys = [c[1] for c in ctx.cells if abs(c[0] - cx) <= 1 and abs(c[2] - cz) <= 1]
+        if ys: y = max(ys) + 1
+        else: y = 0; ctx.log.append(f"dome: nothing built under {cx},{cz}; put it on the ground (y 0) or give y")
+    COP = {"ladder": ["waxed_weathered_cut_copper", "waxed_oxidized_cut_copper", "waxed_oxidized_cut_copper"], "axis": "y"}
+    under = getattr(ctx, "last_style", None) or {}
+    drum_mat = under.get("infill", "smooth_stone")            # the drum is built of the walls it stands on
+    st = {"_name": s.get("name", f"dome{ctx.n}"), "dome": s.get("material", COP),
+          "drum": (s.get("drum") or {}).get("material", drum_mat) if isinstance(s.get("drum"), dict) else drum_mat}
+    ctx.n += 1
+    dm = ctx.mat(st, "dome"); drm = ctx.mat(st, "drum")
+    X, Z = cx + 0.5, cz + 0.5                     # the centre of the centre block
+    ops, y0 = [], y
+    drum = s.get("drum")
+    if drum:
+        drum = {} if drum is True else drum
+        dr, dh = drum.get("r", r), drum.get("h", 4)
+        dcells = voxelize([{"shape": "cylinder", "at": [X, y, Z], "r": dr, "h": dh, "material": drm}], q=4, thin=False, hollow=1, log=ctx.log)
+        for c, v in dcells.items(): ctx.set(*c, "walls", v["kind"], v.get("mat"), **v.get("props", {}))
+        n = drum.get("windows", 4); glass = drum.get("glass", "light_blue_stained_glass_pane")
+        import math
+        for k in range(n):
+            a = 2 * math.pi * k / n; ux, uz = math.sin(a), -math.cos(a)
+            wx, wz = cx + round(ux * (dr - 0.5)), cz + round(uz * (dr - 0.5))
+            for yy in (y + 1, y + 2):
+                if (wx, yy, wz) in ctx.cells: ctx.set(wx, yy, wz, "openings", raw=glass)
+        y0 = y + dh
+    shape = s.get("shape", "hemisphere")
+    if shape == "onion":
+        prof = [[0, r], [r * 0.5, r * 1.12], [r * 1.0, r * 0.95], [r * 1.5, r * 0.5], [r * 1.9, 0.6], [r * 2.1, 0.0]]
+        ops.append({"shape": "lathe", "at": [X, y0, Z], "profile": prof, "material": dm})
+        top = y0 + r * 2.1
+    elif shape == "tall":
+        ops.append({"shape": "ellipsoid", "at": [X, y0, Z], "r": [r, r * 1.4, r], "material": dm})
+        top = y0 + r * 1.4
+    else:
+        ops.append({"shape": "sphere", "at": [X, y0, Z], "r": r, "material": dm})
+        top = y0 + r
+    ops.append({"op": "intersect", "shape": "box", "min": [cx - R - 1, y0, cz - R - 1], "max": [cx + R + 1, int(top) + 2, cz + R + 1]})
+    ctx.spec["materials"][dm] = _with_range(ctx.spec["materials"][dm], y0, int(top))
+    cells = voxelize(ops, q=4, thin=True, hollow=1, log=ctx.log)
+    for c, v in cells.items(): ctx.set(*c, "roof", v["kind"], v.get("mat"), **v.get("props", {}))
+    col = [c for c in cells if c[0] == cx and c[2] == cz]
+    ytop = max(c[1] for c in col) if col else int(top)
+    ctx.set(cx, ytop, cz, "roof", "full", dm)
+    fin = s.get("finial", "short")
+    if fin == "gold": ctx.set(cx, ytop + 1, cz, "details", raw="gold_block")
+    elif fin != "none": _finial(ctx, cx, ytop + 1, cz, fin, drm, dm)
+    return ytop
+
+
+PARTS = {"house": house, "dome": dome, "lean_to": lean_to, "woodpile": woodpile, "spire": spire, "belfry": belfry, "clock_face": clock_face, "wheel": wheel, "arch": arch, "string_course": string_course, "buttress": buttress, "hanging_lantern": hanging_lantern}
 
 
 def run(ctx, pt):

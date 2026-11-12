@@ -154,8 +154,41 @@ forms. Copper is the exception and keeps its weathering gradient. `"texture": fa
 turns it off; `{"share": 0.4, "with": {"bricks": "mud_bricks"}}` picks your own. Domes and cones built from
 shapes take the same option on their material (`"texture": true`).
 
+**Roof finishes** (on the house's `roof`):
+- `"snow": true` (Frostmarch): a snow layer replaces the back-to-back ridge cap, and a thin layer sits on every
+  full block open to the sky (steps of a pitch 2 roof, chimney tops). Slopes of stairs stay bare.
+- `"moss": true` or a share (default 0.13) (Blackfen): moss blocks along the ridge with moss carpet on top,
+  and mossy cobblestone stairs in the stairs' shape on about 13% of the slope, half as many again on the
+  shady north side.
+- `"thatch": true` (barns and stores): hay blocks on the slopes, the roof's own stairs kept along the eaves
+  and verges, a moss ridge.
+
 Several roofs passed to `build_roofs` together combine by height (higher roof wins), which closes valleys;
 the `house` part builds one roof per building today, so L and T plans are two houses side by side for now.
+
+## Stilts, piles and the Hollow offset (keys on `house`)
+
+- `"stilts": {"ground": 0}` (Blackfen): give the house `"y"` at the platform (3 or 4 above `ground`). The
+  plinth edge becomes a mangrove plank platform, mangrove log stilts stand under the corners, the frame
+  posts and every second edge block down to the ground, and a stair runs from a 3 x 1 landing at the door
+  to the ground with fences under it. Keys `log`, `platform`, `stair` (false for none), `side`.
+- `"piles": true` (Blackfen plot buildings on the ground): the plinth course's corners and every other
+  edge block become mangrove logs going two below the ground, with mangrove roots between. Keys `log`,
+  `roots`, `depth`.
+- `"offset": {"storey": 1, "dir": "e"}` or `{"roof": true, "dir": "e"}` (the Hollow): everything from that
+  storey (or the roof) up moves one block, as one piece, never a shear. The plinth and ground storey stay
+  true, chimneys stay put, and upside-down trim brackets carry the overhanging side. Not for houses with
+  wings.
+
+## `dome`
+
+`{"part": "dome", "at": [x, z], "r": 4, "drum": {"h": 3, "windows": 4}, "finial": "gold"}`: a dome on a
+drum, sitting on whatever is built under its centre (a flat roof stays as its floor; give `"y"` or
+`"at": [x, y, z]` to place it yourself). `r` the radius (end in .5 for an even width), `shape` hemisphere /
+onion / tall, `material` (default waxed copper from weathered to oxidized, greener at the top), `drum`
+`{"h", "r" (default r), "material" (default the walls of the house built before it), "windows" (4 or 8),
+"glass"}`, `finial` `short` / `gold` (one gold block, Emberwaste civic) / `spire_block` / `none`. Cyan
+terracotta has no stairs, so its curve uses dark prismarine; the copper default reads better in game.
 
 ## Chimney (06 step 9, Mateo's default)
 

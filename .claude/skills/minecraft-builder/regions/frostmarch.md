@@ -33,11 +33,12 @@ the passes. At night it should feel lonely, not frightening.
 |---|---|
 | Ground | grass under snow in the valleys, bare stone, scree and snow blocks on the heights, podzol in the woods; crags and steep faces on the mountains, with rock texture on the slopes and snow only near the tops; calcite streaks on steep northern ground |
 | Biome | `ice_plains`, so **it snows instead of raining**; frozen rivers, cold ocean on the coast |
+| Region weather | **flurries**: snow blowing down off the peaks from the north. **Blizzards**: a white fog (#e3e9ef) down to 16 blocks with driving snow; they close the passes and come more often while vanilla snow falls (region weather, PR #193: spells of 3 to 16 minutes with 6 to 22 minutes of plain sky between; under a roof it thins to a grey light; never in caves) |
 | Light | low, cold and blue-white by day; warm orange windows and hearth light at night |
 | Feel | snow on everything, dark timber against white, wind on the passes |
 
 Build for snow. Roofs are steep (pitch 2) so snow slides off. Ridges, chimney caps and flat tops carry
-snow layers. Plinths are often 2 courses high to stay above the drifts. Snow layers lie beside the steps.
+snow layers. Plinths are often 2 courses high to stay above the drifts. Snow layers lie beside the steps. Shelter matters here: deep eaves, porches, covered walkways and wind-breaks on the north side.
 
 ## Towns and paths
 
@@ -157,17 +158,17 @@ spruces (tall spruce, grey fir).
 - **Presets:**
   - `frost_timber`: plank rows in a dark log frame, white frosted glass;
   - `frost_stone`: dark deepslate, for towers and halls' ground storeys.
-- **Roof:** always set `"roof": {"type": "gable", "pitch": 2, "gable_horns": true}`.
+- **Roof:** always set `"roof": {"type": "gable", "pitch": 2, "gable_horns": true, "snow": true}` (snow on the
+  ridge and on every step open to the sky).
 - **Parts that fit:** `woodpile`, `lean_to`, `spire` (stave chapel top), `belfry`, `porch`.
 
 ```json
 {"part": "house", "style": "frost_timber", "rect": [0, 0, 8, 10], "plinth": 2, "storeys": [5, 4],
- "door": {"side": "s"}, "roof": {"type": "gable", "pitch": 2, "ridge": "z", "gable_horns": true},
+ "door": {"side": "s"}, "roof": {"type": "gable", "pitch": 2, "ridge": "z", "gable_horns": true, "snow": true},
  "storey_style": [{"frame_kind": "stone", "infill": "FRO-01"}, {}]}
 ```
 
 **Not in the skill yet:**
-- **Snow:** snow layers on the ridge and top rows (add them with `place`, or ask for a `snow` roof option).
 - **Roof forms:** skirt roofs and tiered stave roofs; build the tiers as stacked houses with lean-tos.
 
 ## Never

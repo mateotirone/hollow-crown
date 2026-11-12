@@ -41,6 +41,7 @@ The fantasy shows only in scale and finish: the capital hall's copper domes, spi
 |---|---|
 | Ground | grass with coarse dirt patches; oak forest in the wetter parts (biome `forest`), open `plains` elsewhere; rivers and sandy beaches |
 | Weather | the world's normal weather: sun, rain and thunderstorms. Sieges bring a thunderstorm on the Long Night |
+| Region weather | vanilla rain stays; **morning mist** lies in the low ground at dawn (region weather, PR #193: spells of 3 to 16 minutes with 6 to 22 minutes of plain sky between; under a roof it thins to a grey light; never in caves) |
 | Light | warm daylight; lanterns at doors and on posts; warm windows at night |
 | Feel | green, soft, old; the road is busy by day and empty at night |
 
@@ -198,7 +199,6 @@ built on:
 ```
 
 **Not in the skill yet:**
-- domes on drums (the capital hall still uses `capital.py`);
 - bell-cast eaves;
 - jerkinhead roofs;
 - carriage arches through a range (use `arch` cut into the wall).
