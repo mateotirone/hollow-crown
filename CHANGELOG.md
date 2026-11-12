@@ -9,6 +9,7 @@ How versions work is in [`docs/RELEASING.md`](docs/RELEASING.md).
 Everything merged to `main` since the last release goes here. Each pull request that changes what players see adds a line under one of these headings.
 
 ### Added
+- Trains go four times as fast as a minecart (32 blocks a second flat out), and the free station carriage now runs at minecart speed.
 - The world map now has Rimehold, Gull's Rest, Sunscar, Mirelight and Millbrook built: streets, houses, fields, wells, lamps and trees, with the land graded to the streets. The minimap shows them.
 - Every settlement gets its station when it claims its land: a Halt rises on its plot's stop on the planned railway, with no line yet. Buy the first stretch to start travelling. Once a stretch is laid, the station calls a free, slow carriage that drives itself along the line. Engines and coaches can also be bought at any station, and once you've owned one (built or bought) any station gives you a new one free.
 - The Looking Glass characters now bend at the elbows and knees (and their armour bends with them): knees bend when you run, jump, land and sneak, elbows bend when you sprint and through every swing, and the drawing hand folds back on a bow. Everyone also picks up new small moves: standing still a while makes you look around, shift your weight or stretch (or check your blade), torches and lanterns are held up ahead, books are held open to read, hands go to the reins when riding, and you flinch when hit. Players on their own skin get all the moves, with straight limbs.
