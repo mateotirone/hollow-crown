@@ -9,7 +9,7 @@ How versions work is in [`docs/RELEASING.md`](docs/RELEASING.md).
 Everything merged to `main` since the last release goes here. Each pull request that changes what players see adds a line under one of these headings.
 
 ### Added
-- Vault blocks (in the Creative menu and at the Siege Workshop; what they do in a siege comes next): the Strongroom Door in five tiers (wooden, iron, diamond, netherite and a glowing Choirsteel door) with crack stages for a half-drilled door, iron-banded Strongroom Stone for the vault walls, the Relic Coffer that holds your relics and glows when full, and the attacker's Vault Breaker auger in iron, diamond and netherite.
+- Vault blocks (in the Creative menu; how a vault is added, opened, upgraded and broken into comes next): the Strongroom, a vault room in five tiers that grows with each one (wooden 7x7 inside, iron 9x9, diamond 11x11, netherite 13x13, Choirsteel 15x15), each styled in its material, with a staircase down, a 3x3 door with a locking wheel, the Vault Lock in the wall beside it, Relic Coffers along the walls and floating stands for the Crown, the Heart of the Hollow and the Choirsteel template. Also the Vault Key, iron-banded Strongroom Stone, and the attacker's Vault Breaker auger in iron, diamond and netherite (crafted at the Siege Workshop).
 
 ### Fixed
 - Gates and portcullises: clicking one always opens or shuts it, whatever you are holding, and never places a block against it. A Castle Gate now swings open like a door: all its joined blocks turn together as one leaf on a hinge at one end, away from you (or the other way if something is in the way), and swing back when shut. An open Portcullis rises out of sight so only its top piece shows, and you can walk under it.
