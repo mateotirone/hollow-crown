@@ -14,7 +14,11 @@
 //   lordDue(start, day)                   stages a Rival Lord's crew has finished by `day`
 //   challengeProblem(w, { by, tier, day, holderHere, ally })   why `by` can't challenge now, or null
 //   defendersFor(built)                   soldiers who answer a challenge
-//   inGuard(site, loc)                    inside the ground nobody digs up
+//   reachOf(design)                       blocks the wonder reaches from its centre (any facing)
+//   guardOf(w, design)                    the guarded half width: the wonder, its graded ring and a margin
+//   inGuard(site, loc, r)                 inside the ground nobody digs up (half width r)
+//   levelOf(heights)                      the ground level a wonder is graded to: the median of the ground under it
+//   gradeTarget(G, r, out, w?)            where a column's ground goes: G under the wonder, eased back to r round it
 
 import { WONDER, WONDER_BY_ID } from "./data.js";
 
@@ -85,4 +89,20 @@ export function challengeProblem(w, { by, tier = 0, day = 0, holderHere = false,
 
 export const defendersFor = (built) => WONDER.defenders[Math.max(0, Math.min(WONDER.defenders.length, built) - 1)];
 
-export const inGuard = (site, loc) => Math.abs(loc.x - site.x) <= WONDER.guard && Math.abs(loc.z - site.z) <= WONDER.guard;
+export const reachOf = (d) => Math.max(-d.box.x0, d.box.x1, -d.box.z0, d.box.z1);
+export const guardOf = (w, d) => reachOf(d) + (w.ground === "water" ? 0 : WONDER.ease) + WONDER.guardMargin;
+export const inGuard = (site, loc, r) => Math.abs(loc.x - site.x) <= r && Math.abs(loc.z - site.z) <= r;
+
+export function levelOf(heights) {
+  const s = heights.filter(Number.isFinite).sort((a, b) => a - b);
+  return s.length ? s[Math.floor(s.length / 2)] : undefined;
+}
+
+// out = blocks outside the wonder's rectangle (0 inside). Inside, the ground is cut or filled to G; round it the
+// ground eases back to its own height r over WONDER.ease blocks, never filled up more than WONDER.easeFill there.
+export function gradeTarget(G, r, out) {
+  if (out <= 0) return G;
+  if (out > WONDER.ease) return r;
+  const t = Math.round(G + (r - G) * (out / (WONDER.ease + 1)));
+  return t > r ? Math.min(t, r + WONDER.easeFill) : t;
+}

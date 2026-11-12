@@ -16,7 +16,9 @@ import { applyFilter } from "../core/events.js";
 import { charge, coins, JOBS } from "../economy/api.js";
 import { startBuild, buildFor, clearBoxFor } from "../townhall/build.js";
 import { wonderPlan } from "./plans.js";
-import { levelSite, groundTop } from "../settle/ground.js";
+import { groundTop } from "../settle/ground.js";
+import { frameFor, toWorld } from "../townhall/halls.js";
+import { BlockPermutation } from "@minecraft/server";
 import { settlementTier } from "../settle/founding.js";
 import { mapMode } from "../plots/api.js";
 import { rivalLords, rivalById, lordFullName } from "../rivals/index.js";
@@ -24,7 +26,7 @@ import { WONDER_DESIGNS } from "./designs_data.js";
 import { WONDER, WONDERS, WONDER_BY_ID, WONDER_LINES } from "./data.js";
 import {
   forwardOf, stageBlocks, perTickFor, claimProblem, payProblem, standing, rising, heldBy, adjustCharge, adjustPay,
-  extraArrivals, keepBonus, lordDue, challengeProblem, defendersFor, inGuard,
+  extraArrivals, keepBonus, lordDue, challengeProblem, defendersFor, inGuard, reachOf, guardOf, levelOf, gradeTarget,
 } from "./rules.js";
 import "./tests.js";
 
@@ -58,6 +60,83 @@ function keeperSpot(w) {
 
 const jobId = (id) => `wonder:${id}`;
 
+// The wonder's rectangle on the ground, in world blocks (its design box turned to face its way)
+function siteRect(w) {
+  const b = WONDER_DESIGNS[w.id].box, frame = frameFor(forwardOf(w.face));
+  const xs = [], zs = [];
+  for (const x of [b.x0, b.x1]) for (const z of [b.z0, b.z1]) {
+    const p = toWorld(frame, { x: w.site.x, y: 1, z: w.site.z }, x, 0, z);
+    xs.push(p.x); zs.push(p.z);
+  }
+  return { x0: Math.min(...xs), x1: Math.max(...xs), z0: Math.min(...zs), z1: Math.max(...zs) };
+}
+
+// The first time: pick the level. On land, the median ground under the wonder, graded flat under it and eased back
+// into the land round it before stage 1 (gradeStep). In the fen (ground "water"), on the water's surface, no grading.
+function chooseOrigin(w, s, dim) {
+  const r = siteRect(w);
+  s.forward = forwardOf(w.face);
+  if (w.ground === "water") {
+    const top = dim.getTopmostBlock({ x: w.site.x, z: w.site.z });
+    if (!top) return false;
+    s.origin = { x: w.site.x, y: top.location.y + 1, z: w.site.z };
+    return true;
+  }
+  const hs = [];
+  for (let x = r.x0; x <= r.x1; x += 3) for (let z = r.z0; z <= r.z1; z += 3) {
+    const h = groundTop(dim, x, z);
+    if (h === undefined) return false; // not all loaded yet
+    hs.push(h);
+  }
+  const G = levelOf(hs);
+  if (G === undefined) return false;
+  s.origin = { x: w.site.x, y: G + 1, z: w.site.z };
+  s.grade = { ...r, G, i: 0 };
+  return true;
+}
+
+const WET = /water|lava/;
+const PLANT = /(_log|_wood|leaves|vine|grass$|short_grass|tall_grass|fern|flower|bush|sapling|snow_layer|mushroom)/;
+// Grade one column: cut it down or fill it up to its target, keeping its own top block (grass, sand, snow...) on top
+function gradeColumn(dim, x, z, out, G) {
+  const r = groundTop(dim, x, z);
+  if (r === undefined) return false;
+  const topBlock = dim.getBlock({ x, y: r, z });
+  if (!topBlock) return false;
+  const above = dim.getBlock({ x, y: r + 1, z });
+  if (above && WET.test(above.typeId) && out > 0) return true; // never grade the sea or a pond round it
+  const t = gradeTarget(G, r, out);
+  const top = topBlock.permutation;
+  const under = dim.getBlock({ x, y: r - 1, z })?.permutation ?? top;
+  if (t > r) {
+    for (let y = r; y < t; y++) dim.getBlock({ x, y, z })?.setPermutation(under);
+    dim.getBlock({ x, y: t, z })?.setPermutation(top);
+  } else if (t < r) {
+    for (let y = t + 1; y <= r; y++) dim.getBlock({ x, y, z })?.setPermutation(AIR());
+    dim.getBlock({ x, y: t, z })?.setPermutation(top);
+  }
+  if (t !== r) for (let y = Math.max(t, r) + 1; y <= Math.max(t, r) + 14; y++) { // trees and plants on cut ground go too
+    const b = dim.getBlock({ x, y, z });
+    if (!b || b.typeId === "minecraft:air") break;
+    if (PLANT.test(b.typeId)) b.setPermutation(AIR());
+  }
+  return true;
+}
+let airPerm;
+const AIR = () => (airPerm ??= BlockPermutation.resolve("minecraft:air"));
+
+function gradeStep(w, s) {
+  const g = s.grade, E = WONDER.ease, dim = world.getDimension(OVERWORLD);
+  const W = g.x1 - g.x0 + 1 + 2 * E, D = g.z1 - g.z0 + 1 + 2 * E;
+  for (let n = 0; n < WONDER.gradePerTick && g.i < W * D; n++) {
+    const x = g.x0 - E + (g.i % W), z = g.z0 - E + Math.floor(g.i / W);
+    const out = Math.max(g.x0 - x, x - g.x1, g.z0 - z, z - g.z1, 0);
+    if (!gradeColumn(dim, x, z, out, g.G)) return; // not loaded: carry on next tick
+    g.i++;
+  }
+  if (g.i >= W * D) { delete s.grade; save(); }
+}
+
 function startStage(w) {
   const s = stateOf(w.id);
   const stage = s.built + 1;
@@ -65,12 +144,10 @@ function startStage(w) {
   const plan = wonderPlan(w.id, stage);
   let clearBox;
   if (!s.origin) {
-    const top = groundTop(dim, w.site.x, w.site.z);
-    if (top === undefined) return false; // not loaded yet
-    s.forward = forwardOf(w.face);
-    s.origin = levelSite(dim, wonderPlan(w.id, 1), { x: w.site.x, y: top + 1, z: w.site.z }, s.forward).origin;
+    if (!chooseOrigin(w, s, dim)) return false; // not loaded yet
     save();
   }
+  if (s.grade) return false; // the ground is still being graded (wonders_grade)
   if (stage === 1) clearBox = clearBoxFor(wonderPlan(w.id, 0), s.origin, s.forward, 1); // trees and humps inside go first
   startBuild({
     id: jobId(w.id), dimensionId: OVERWORLD, origin: s.origin, forward: s.forward, plan, style: plan.wonderStyle, clearBox,
@@ -98,6 +175,15 @@ onTick("wonders_build", 40, () => {
     if (!s || s.built >= s.paid || buildFor(jobId(w.id))) continue;
     if (!near(w.site, WONDER.buildRange).length) continue; // its chunks aren't loaded: the crew waits
     try { startStage(w); } catch (e) { console.warn(`[Wonders] ${w.id}: ${e}`); }
+  }
+});
+
+onTick("wonders_grade", 2, () => {
+  if (!mapMode()) return;
+  for (const w of WONDERS) {
+    const s = store.data.w[w.id];
+    if (!s?.grade || !near(w.site, WONDER.buildRange).length) continue;
+    try { gradeStep(w, s); } catch (e) { console.warn(`[Wonders] grading ${w.id}: ${e}`); }
   }
 });
 
@@ -206,7 +292,8 @@ function spawnDefenders(w, s) {
   let spawned = 0;
   for (let i = 0; i < count; i++) {
     const a = (i / count) * Math.PI * 2;
-    const x = w.site.x + Math.round(Math.cos(a) * (WONDER.guard - 4)), z = w.site.z + Math.round(Math.sin(a) * (WONDER.guard - 4));
+    const ring = reachOf(WONDER_DESIGNS[w.id]) + 4; // out on the open ground round it, never on a roof
+    const x = w.site.x + Math.round(Math.cos(a) * ring), z = w.site.z + Math.round(Math.sin(a) * ring);
     const top = groundTop(dim, x, z);
     if (top === undefined) continue;
     const at = { x: x + 0.5, y: top + 1, z: z + 0.5 };
@@ -362,7 +449,8 @@ addKeepHealthHook((owner, hp) => keepBonus(hp, heldFor(owner)));
 
 // ---------- nobody digs up a wonder's ground ----------
 
-const guarded = (loc) => WONDERS.find((w) => inGuard(w.site, loc));
+const GUARD = Object.fromEntries(WONDERS.map((w) => [w.id, guardOf(w, WONDER_DESIGNS[w.id])]));
+const guarded = (loc) => WONDERS.find((w) => inGuard(w.site, loc, GUARD[w.id]));
 
 function guard(event, block, player) {
   if (!mapMode() || block.dimension.id !== OVERWORLD || player.getGameMode() === GameMode.Creative) return;

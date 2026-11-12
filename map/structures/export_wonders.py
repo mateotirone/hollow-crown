@@ -3,7 +3,9 @@
     python3 export_wonders.py        -> ../../Siege_Nights_BP/scripts/wonders/designs_data.js
                                         + wonders/<id>/scene.json (for the 3D asset viewer)
 
-Each wonder is a minecraft-builder spec in wonders/<id>.json (the one building engine). Same data shape as
+Each wonder is a minecraft-builder spec in wonders/<id>.json (the one building engine), written by the wonder's
+generator: make_arena.py (the Great Horse Fair), make_sungate.py, make_rimeforge.py, make_tall_towers.py (the Great
+Lighthouse and the High Watch) and make_lantern_spire.py. Run those first after changing a design. Same data shape as
 export_halls.py: palette [id, logical props], rows [y, z, x0, count, palette index], local frame with the
 front (the spec's south, +z) toward the origin side (local z flipped), lowest layer at y 0. Each wonder is
 cut into six stages of about equal block count from the ground up (stages = first y of stages 2 to 6).
@@ -17,6 +19,7 @@ IDS = ["great_lighthouse", "high_watch", "rimeforge_hall", "sun_gate", "lantern_
 SPEC = {"great_horse_fair": "horse_fair"}
 KEEP = {"facing", "half", "axis", "hanging", "upper", "hinge", "open"}
 STAGES = 6
+LIMIT = 56              # half width a wonder may reach from its keeper's centre (the arena is the widest)
 
 def export(scene):
     ys = [b[1] for b in scene["blocks"]]; y0 = min(ys)
@@ -58,7 +61,7 @@ def main():
         if r.returncode: sys.exit(f"{wid}: {r.stderr[-400:]}")
         d = export(json.load(open(os.path.join(od, "scene.json"))))
         b = d["box"]
-        assert all(abs(v) <= 17 for v in (b["x0"], b["x1"], b["z0"], b["z1"])), f"{wid} is wider than 35: {b}"
+        assert all(abs(v) <= LIMIT for v in (b["x0"], b["x1"], b["z0"], b["z1"])), f"{wid} reaches past {LIMIT} from its centre: {b}"
         out[wid] = d
         print(wid, d["blocks"], "blocks, box", b, "stages from y", d["stages"])
     with open(OUT_JS, "w") as f:

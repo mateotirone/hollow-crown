@@ -4,7 +4,7 @@ import { WONDER, WONDERS } from "./data.js";
 import { wonderPlan } from "./plans.js";
 import {
   forwardOf, stageRows, stageBlocks, perTickFor, claimProblem, payProblem, heldBy, adjustCharge, adjustPay, extraArrivals,
-  keepBonus, lordDue, challengeProblem, defendersFor, inGuard,
+  keepBonus, lordDue, challengeProblem, defendersFor, inGuard, reachOf, guardOf, levelOf, gradeTarget,
 } from "./rules.js";
 
 addTests("wonders", {
@@ -86,12 +86,27 @@ addTests("wonders", {
     assertEqual(challengeProblem({ holder: "A", built: 0 }, { by: "B", tier: 2 }), "nothingToTake");
     assert(defendersFor(6) > defendersFor(1), "more guards on a bigger wonder");
   },
-  "the guarded ground covers each wonder": () => {
+  "the guarded ground covers each wonder and the ring graded round it": () => {
     for (const w of WONDERS) {
-      const b = WONDER_DESIGNS[w.id].box;
-      const reach = Math.max(-b.x0, b.x1, -b.z0, b.z1);
-      assert(reach + 2 <= WONDER.guard, `${w.id} reaches ${reach}`);
-      assert(inGuard(w.site, { x: w.site.x + reach, z: w.site.z - reach }), w.id);
+      const d = WONDER_DESIGNS[w.id], reach = reachOf(d), g = guardOf(w, d);
+      assert(reach + 2 <= g, `${w.id} reaches ${reach}`);
+      if (w.ground !== "water") assert(reach + WONDER.ease <= g, `${w.id}: its graded ring is guarded too`);
+      assert(inGuard(w.site, { x: w.site.x + reach, z: w.site.z - reach }, g), w.id);
+      assert(!inGuard(w.site, { x: w.site.x + g + 1, z: w.site.z }, g), `${w.id}: not past its guard`);
     }
+  },
+  "the ground is graded flat under a wonder and eased back into the land round it": () => {
+    assertEqual(levelOf([70, 75, 72, 90, 71]), 72);
+    assertEqual(gradeTarget(80, 70, 0), 80, "filled up to the level under it");
+    assertEqual(gradeTarget(80, 95, 0), 80, "cut down to the level under it");
+    assertEqual(gradeTarget(80, 70, WONDER.ease + 1), 70, "untouched past the ring");
+    const mid = gradeTarget(80, 90, Math.round(WONDER.ease / 2));
+    assert(mid > 80 && mid < 90, `half way out it's half way back (${mid})`);
+    let last = 80;
+    for (let out = 1; out <= WONDER.ease; out++) {
+      const t = gradeTarget(80, 92, out);
+      assert(t >= last, "a cut eases back steadily"); last = t;
+    }
+    assert(gradeTarget(100, 60, 1) <= 60 + WONDER.easeFill, "a cliff edge is never built out more than easeFill");
   },
 });

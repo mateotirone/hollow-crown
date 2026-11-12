@@ -15,7 +15,10 @@ export const WONDER = {
   stageSeconds: 150, // a stage rises in about this long once paid (the crew works while someone is near)
   buildRange: 96, // a stage only rises with a player this close (its chunks have to be loaded)
   keeperRange: 64, // the keeper stands at the site while a player is this close
-  guard: 22, // blocks from the site centre that nobody (outside Creative) can break or build in
+  ease: 12, // the ground is graded from the wonder's level back into the land over this many blocks round it
+  easeFill: 6, // in that ring, never build the ground up more than this (a cliff edge stays a cliff)
+  guardMargin: 2, // the guarded ground reaches this far past the graded ring (nobody outside Creative breaks or builds in it)
+  gradePerTick: 40, // ground columns graded per tick before the first stage goes up
   lordFromDay: 12, // Rival Lords start racing for wonders from this day
   lordChance: 0.25, // each day, the chance a City lord without a wonder lays claim to a free one
   lordDaysPerStage: 2, // a lord's crew finishes one stage every this many days
@@ -56,7 +59,7 @@ export const WONDERS = [
   },
   {
     id: "lantern_spire", name: "Lantern Spire", region: "Blackfen", style: "blackfen",
-    site: { x: 310, z: 570 }, face: "n", keeper: "Lamplighter Orrin",
+    site: { x: 310, z: 570 }, face: "n", keeper: "Lamplighter Orrin", ground: "water", // stands on piles in the fen: no grading
     effect: { kind: "arrivals", add: 1 },
     says: "One more newcomer comes to your town at each dawn.",
     blurb: "A thin spire of lamps over the fen pools. Lost travellers follow it in.",
