@@ -327,6 +327,9 @@ const EXTRAS = [
   { id: "vault", title: "Vault strongrooms", marker: "map/structures/vault_rooms.py",
     args: (out) => [out],
     names: (out) => { try { return JSON.parse(fs.readFileSync(path.join(out, "names.json"), "utf8")); } catch { return {}; } } },
+  { id: "miniature", title: "Welcome hall miniature", marker: "map/structures/miniature_scene.py",
+    args: (out) => [out],
+    label: { miniature: "The whole map in miniature, on its cloud (welcome hall)" } },
 ];
 // Builder scripts that live on a branch without the kit: copied from the newest branch that has them into
 // the newest catalogue branch's map/structures and run there.
