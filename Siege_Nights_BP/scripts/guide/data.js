@@ -328,6 +328,17 @@ export const ENTRIES = [
     needs: "siege:track",
   },
 
+  {
+    id: "trade_routes", ch: "travel", title: "Trade Outposts and routes",
+    tip: "Click the Trade Board to propose a standing trade. Keep your Exports barrel stocked and collect from Imports.",
+    page: "Once your station is on the line and you own a Train Engine, you can build a §fTrade Outpost§r from the station menu. Inside are the §fTrade Board§r, an §fExports§r barrel and an §fImports§r barrel.\n\n"
+      + "At the board, propose a §fstanding trade§r to any station your laid track reaches: what you send, what you get back, and how often (\"20 iron for 4 gold, every day\"). Both sides must accept the same terms; either can send a counteroffer. A new request shows above the Trade Board in the other settlement's colour.\n\n"
+      + "Your train runs the route while you're away. Each run takes both loads out of both Exports at once and, after the trip, drops each in the other side's Imports. If either side is short, nothing leaves and the route pauses until it's refilled. After 3 days paused it goes dormant: refill it and press Resume.\n\n"
+      + "Whoever proposed a route pays a few Regals of §ffreight§r a run, from Regals in their Exports. Regions are strong in one thing and weak in another, so trading is how you get what your land is short of. Rival Lords and the towns trade too, and §fKingsrest§r buys any trade good for Regals at a set price. Your station grows with your settlement, and so do the routes it runs and what each run carries; §fGoods Wagons§r carry more.",
+    when: ["click:siege:trade_board"],
+    needs: "siege:trade_board",
+  },
+
   // ---------------- Growing stronger ----------------
   {
     id: "skill_points", ch: "growth", title: "Renown and skill points",

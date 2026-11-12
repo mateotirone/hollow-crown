@@ -205,6 +205,7 @@ Icons and blocks are painted. The horse coats further down are still to do. Keep
 | Stables block (16×16 side and top: timber stall with hay) | `textures/blocks/travel/siege_stables_side.png`, `siege_stables_top.png` | **Final style, awaiting your review** |
 | Rail Depot block (16×16 side and top: timber and iron, rail motif on top) | `textures/blocks/travel/siege_rail_depot_side.png`, `siege_rail_depot_top.png` | **Final style, awaiting your review** |
 | Station Post block (16×16 side and top: stone post with a gold-framed name plate) | `textures/blocks/travel/siege_station_post_side.png`, `siege_station_post_top.png` | **Final style, awaiting your review** |
+| Trade Board block (16×16 side and top: oak board with a pinned trade ledger and gold trim) | `textures/blocks/trade/siege_trade_board_side.png`, `siege_trade_board_top.png` | **Placeholder, awaiting the art pass** |
 | Breeder's Post block (16×16 side and top: timber post with a horse notice) | `textures/blocks/travel/siege_breeder_post_side.png`, `siege_breeder_post_top.png` | **Final style, awaiting your review** |
 | Forester's Lodge block (16×16 side and top: timber bay with a hung axe, a sapling and a log stack; stump top) | `textures/blocks/forestry/siege_foresters_lodge_side.png`, `siege_foresters_lodge_top.png` | **First pass, awaiting your review** |
 

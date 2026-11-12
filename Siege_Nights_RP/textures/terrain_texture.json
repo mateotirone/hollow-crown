@@ -313,6 +313,12 @@
   "siege_station_post_top": {
    "textures": "textures/blocks/travel/siege_station_post_top"
   },
+  "siege_trade_board_side": {
+   "textures": "textures/blocks/trade/siege_trade_board_side"
+  },
+  "siege_trade_board_top": {
+   "textures": "textures/blocks/trade/siege_trade_board_top"
+  },
   "siege_breeder_post_side": {
    "textures": "textures/blocks/travel/siege_breeder_post_side"
   },
