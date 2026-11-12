@@ -37,3 +37,28 @@ export function groundBox(v, box) {
 // Click the Vault Lock holding one of these to reinforce the vault to that tier (one tier at a time)
 export const UPGRADE_ITEM = { iron: "minecraft:iron_ingot", diamond: "minecraft:diamond", netherite: "minecraft:netherite_ingot", choirsteel: "siege:choirsteel_ingot" };
 export const nextTier = (tier) => TIERS[TIERS.indexOf(tier) + 1];
+
+// ---------- breaking in ----------
+// The Vault Lock's strength in blows; a Vault Breaker placed against it strikes once a second for its power.
+// Placeholder numbers: an Iron Breaker takes 30 s on a wooden lock and 4 min on a Choirsteel one.
+export const LOCK_HP = { wood: 30, iron: 60, diamond: 120, netherite: 180, choirsteel: 240 };
+export const BREAKER_POWER = { "siege:vault_breaker_iron": 1, "siege:vault_breaker_diamond": 1.5, "siege:vault_breaker_netherite": 2 };
+// The door itself only cracks under siege engines and blasts; it is the lock a thief works on
+export const DOOR_HP = { wood: 40, iron: 80, diamond: 160, netherite: 240, choirsteel: 320 };
+const PLANKS = ["oak", "spruce", "birch", "jungle", "acacia", "dark_oak", "mangrove", "cherry", "pale_oak", "bamboo", "crimson", "warped"].map((w) => `minecraft:${w}_planks`);
+// What mends a cracked lock or door (item -> blows mended per click), and what rebuilds a broken door
+export const MEND = {
+  wood: Object.fromEntries(PLANKS.map((id) => [id, 3])),
+  iron: { "minecraft:iron_ingot": 6 },
+  diamond: { "minecraft:diamond": 15 },
+  netherite: { "minecraft:netherite_ingot": 45 },
+  choirsteel: { "siege:choirsteel_ingot": 60 },
+};
+export const REBUILD = {
+  wood: [["planks (any wood)", 16, (id) => id.endsWith("_planks")]],
+  iron: [["iron ingots", 8, (id) => id === "minecraft:iron_ingot"]],
+  diamond: [["diamonds", 4, (id) => id === "minecraft:diamond"]],
+  netherite: [["netherite ingot", 1, (id) => id === "minecraft:netherite_ingot"]],
+  choirsteel: [["Choirsteel ingot", 1, (id) => id === "siege:choirsteel_ingot"]],
+};
+export const breakSeconds = (tier, breaker) => Math.ceil(LOCK_HP[tier] / BREAKER_POWER[breaker]);

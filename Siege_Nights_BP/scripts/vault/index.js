@@ -10,13 +10,17 @@
 // Reinforcing: click the lock with the next tier's material (iron ingot, diamond, netherite ingot, Choirsteel ingot),
 // confirm the cost, and the room is rebuilt bigger round it while the lock sparks.
 //
-// Still to come: Vault Breakers on
-// the lock, repair, and the offline open windows.
+// Breaking in: set a Vault Breaker against the lock and it strikes once a second (data.js LOCK_HP, BREAKER_POWER);
+// only while the keeper is online or the vault lies open. When the lock breaks the door falls with it; the owner
+// rebuilds both from the Vault menu. Cracked locks and doors mend with the tier's material, like walls.
+//
+// Still to come: the offline open windows.
 //
 // What other features can use:
 //   vaultOf(ownerId)  -> { x, y, z, fx, fz, tier, layout, built, lock: {x,y,z} } or undefined
 //   on("vaultBuilt", ({ owner, tier, lock, from }))   from: the tier it was reinforced from (undefined when new)
 //   on("relicTaken", ({ owner, by, kind }))   someone outside the settlement took a relic off a vault stand
+//   on("vaultDrilled", ({ owner, by })) / on("vaultBreached", ({ owner, by }))   a break-in started / the door fell
 //   on("vaultOpened", ({ owner, by }))   someone outside the settlement opened it with a key cut for it
 //
 // Test: /scriptevent siege:vault_build [tier] [layout]   raise one where you stand, facing the way you look (creative)
@@ -32,7 +36,9 @@ import { siteProblem } from "../settle/plans.js";
 import { hallMenuExtras, countMatching, takeMatching } from "../townhall/townhall.js";
 import { sfx } from "../core/sfx.js";
 import { VAULT_ROOMS } from "./rooms_data.js";
-import { VAULT_KEY, TIERS, TIER_NAME, LAYOUT, COSTS, UPGRADE_ITEM, nextTier, worldOf, groundBox } from "./data.js";
+import { VAULT_KEY, TIERS, TIER_NAME, LAYOUT, COSTS, UPGRADE_ITEM, nextTier, worldOf, groundBox, LOCK_HP, DOOR_HP, BREAKER_POWER, MEND, REBUILD } from "./data.js";
+import { registerDamageable, hitWall, workOnWall } from "../siege/walls.js";
+import { isOnline } from "../siege/util.js";
 import "./tests.js";
 
 const OVERWORLD = "minecraft:overworld";
@@ -115,6 +121,7 @@ function start(owner, v, tier) {
     },
     onDone() {
       v.built = tier;
+      v.broken = false; // a rebuild hangs a whole new door and lock
       v.pending = undefined;
       store.save();
       const lock = worldOf(v, ...roomOf(tier, v.layout).marks.lock);
@@ -148,6 +155,17 @@ function vaultMenu(player, owner) {
   if (v?.built || v?.pending) {
     const tier = v.built ?? v.pending;
     lines.push(`§l${TIER_NAME[tier]}§r`, v.pending ? "§6It is being dug out right now." : `§7Down the stairs at ${v.x}, ${v.z}. Use the Vault Key on the lock to open the door.`);
+    if (v.broken) {
+      lines.push("", "§cThe vault door has been broken in. Anyone can walk in until you rebuild it.");
+      const cost = REBUILD[v.built].map(([label, amount, match]) => ({ label, amount, match, have: countMatching(player, match) }));
+      const free = creative(player);
+      for (const c of cost) lines.push(`${free || c.have >= c.amount ? "§a" : "§c"}${c.amount} ${c.label}§7 (you have ${c.have})`);
+      if (mine || isAlly(owner, player.id)) {
+        const canPay = free || cost.every((c) => c.have >= c.amount);
+        form.button(canPay ? "§2Rebuild the vault door\n§8and its lock" : "§8Rebuild the vault door\n(missing materials)", "textures/items/iron_pickaxe");
+        actions.push(() => (canPay ? rebuildDoor(player, owner, v, free ? [] : cost) : say(player, "§cYou don't have the materials yet.")));
+      }
+    }
     if (mine && !v.pending) {
       form.button("A spare Vault Key\n§8for you or a trusted ally", "textures/items/vault/vault_key");
       actions.push(() => { giveKey(player, owner); say(player, "§7Here is a spare Vault Key, cut for your vault. Anyone holding it can open the door."); });
@@ -285,6 +303,8 @@ function swingDoor(player, owner, v) {
 function useLock(player, block, stack) {
   const [owner, v] = vaultAtLock(block);
   if (!owner) return player.onScreenDisplay.setActionBar("§7This lock belongs to no vault.");
+  if (v.broken) return player.onScreenDisplay.setActionBar("§7The vault door is broken. Rebuild it from the Vault menu at the town hall.");
+  if (stack && stack.typeId !== VAULT_KEY && workOnWall(block, player, stack)) return; // mending a cracked lock
   if (stack && stack.typeId !== VAULT_KEY && Object.values(UPGRADE_ITEM).includes(stack.typeId)) return reinforce(player, owner, v, stack);
   if (!stack || stack.typeId !== VAULT_KEY) return player.onScreenDisplay.setActionBar("§7Locked. It takes this vault's key.");
   if (!keyOpens(player, stack, owner)) return player.onScreenDisplay.setActionBar("§7This key was cut for another vault.");
@@ -296,6 +316,123 @@ world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
   if (event.isFirstEvent === false || !isReady() || !isLock(block.typeId)) return;
   event.cancel = true;
   system.run(() => useLock(player, block, itemStack));
+});
+
+// ---------- breaking in: Vault Breakers on the lock; a broken lock takes the door with it ----------
+
+const DIR_NAME = { "0,-1": "north", "0,1": "south", "1,0": "east", "-1,0": "west" };
+const doorFacing = (v) => DIR_NAME[`${-v.fx},${-v.fz}`]; // the door and lock face back up the stairs
+
+for (const t of TIERS) {
+  registerDamageable(`siege:vault_lock_${t}`, { hp: LOCK_HP[t], repair: MEND[t] });
+  registerDamageable(`siege:vault_door_${t}`, { hp: DOOR_HP[t], repair: MEND[t] });
+  registerDamageable(`siege:vault_door_plate_${t}`, { hp: DOOR_HP[t], repair: MEND[t] });
+}
+
+// Every vault whose lock is gone is breached: the door falls with it (Mateo: destroying the lock destroys only the door)
+function breach(owner, v, by) {
+  if (v.broken) return;
+  const dim = world.getDimension(OVERWORLD);
+  const spots = v.open ? v.open.map(([, , , tx, ty, tz]) => ({ x: tx, y: ty, z: tz })) : doorCells(v);
+  for (const at of spots) {
+    try {
+      const b = dim.getBlock(at);
+      if (b && DOOR.test(b.typeId)) { b.setType("minecraft:air"); dim.spawnParticle("minecraft:large_explosion", { x: at.x + 0.5, y: at.y + 0.5, z: at.z + 0.5 }); }
+    } catch { /* unloaded */ }
+  }
+  v.broken = true;
+  v.open = undefined;
+  store.save();
+  const name = keepOf(owner)?.name ?? "A settlement";
+  const thief = by && world.getPlayers().find((p) => p.id === by)?.name;
+  emit("vaultBreached", { owner, by });
+  emit("discordAlert", { kind: "vaultBreached", text: `${name}'s vault has been broken into${thief ? ` by ${thief}` : ""}.`, ping: [], hollow: false });
+  const host = world.getPlayers().find((p) => p.id === owner);
+  say(host, "§c§lYour vault door has been broken in!§r §7Rebuild it from the Vault menu at the town hall.");
+  try { sfx(dim, "random.explode", doorCells(v)[4], { volume: 1, pitch: 0.6 }); } catch { /* quiet */ }
+}
+
+function rebuildDoor(player, owner, v, cost) {
+  if (!v.broken) return;
+  for (const c of cost) if (countMatching(player, c.match) < c.amount) return say(player, "§cYou don't have the materials any more.");
+  const dim = world.getDimension(OVERWORLD);
+  const facing = doorFacing(v);
+  const cells = doorCells(v);
+  if (cells.some((at) => { try { const b = dim.getBlock(at); return !b || !(b.isAir || SWEPT.has(b.typeId)); } catch { return true; } })) {
+    return say(player, "§7Something is in the doorway. Clear it and try again.");
+  }
+  for (const c of cost) takeMatching(player, c.match, c.amount);
+  const tier = v.built;
+  cells.forEach((at, i) => {
+    const id = i === 4 ? `siege:vault_door_${tier}` : `siege:vault_door_plate_${tier}`;
+    dim.getBlock(at).setPermutation(BlockPermutation.resolve(id, { "minecraft:cardinal_direction": facing }));
+  });
+  const lock = worldOf(v, ...roomOf(tier, v.layout).marks.lock);
+  try { dim.getBlock(lock).setPermutation(BlockPermutation.resolve(`siege:vault_lock_${tier}`, { "minecraft:cardinal_direction": facing })); } catch { /* unloaded */ }
+  v.broken = false;
+  v.facing = facing;
+  store.save();
+  sfx(player, "random.anvil_use", { volume: 0.8 });
+  say(player, "§6The vault door and its lock are back in place.");
+}
+
+// Running drills: { "x,y,z" of the breaker: { lock: {x,y,z}, owner, by } } (not saved: a reload stops them)
+const drills = new Map();
+
+function lockNextTo(block) {
+  for (const [dx, dy, dz] of [[1, 0, 0], [-1, 0, 0], [0, 0, 1], [0, 0, -1], [0, 1, 0], [0, -1, 0]]) {
+    const at = { x: block.location.x + dx, y: block.location.y + dy, z: block.location.z + dz };
+    const b = block.dimension.getBlock(at);
+    if (b && isLock(b.typeId)) return b;
+  }
+  return undefined;
+}
+
+world.afterEvents.playerPlaceBlock.subscribe(({ block, player }) => {
+  if (!isReady() || !BREAKER_POWER[block.typeId]) return;
+  const lock = lockNextTo(block);
+  if (!lock) return player.onScreenDisplay.setActionBar("§7A Vault Breaker works only set right against a Vault Lock.");
+  const [owner, v] = vaultAtLock(lock);
+  if (!owner) return player.onScreenDisplay.setActionBar("§7This lock belongs to no vault.");
+  if (player.id === owner || isAlly(owner, player.id)) return player.onScreenDisplay.setActionBar("§7That's your own vault. Use the key.");
+  if (!isOnline(owner) && !v.openWindow) return player.onScreenDisplay.setActionBar("§7The vault's keeper is away. It can only be broken into while they are here, or while it lies open.");
+  drills.set(`${block.location.x},${block.location.y},${block.location.z}`, { at: { ...block.location }, lock: { ...lock.location }, owner, by: player.id });
+  emit("vaultDrilled", { owner, by: player.id });
+  const host = world.getPlayers().find((p) => p.id === owner);
+  say(host, "§c§lSomeone is drilling at your vault lock!");
+  player.onScreenDisplay.setActionBar("§6The breaker bites into the lock...");
+});
+
+onTick("vault-drills", 20, () => {
+  if (!drills.size) return;
+  const dim = world.getDimension(OVERWORLD);
+  for (const [k, d] of drills) {
+    try {
+      const breaker = dim.getBlock(d.at), lock = dim.getBlock(d.lock);
+      if (!breaker || !lock) continue; // unloaded: wait
+      if (!BREAKER_POWER[breaker.typeId] || !isLock(lock.typeId)) { drills.delete(k); continue; }
+      sfx(dim, "random.anvil_land", d.lock, { volume: 0.5, pitch: 1.4 });
+      if (hitWall(lock, BREAKER_POWER[breaker.typeId])) {
+        drills.delete(k);
+        breaker.setType("minecraft:air"); // the breaker is spent
+        const v = vaults()[d.owner];
+        if (v) breach(d.owner, v, d.by);
+      }
+    } catch { drills.delete(k); }
+  }
+});
+
+// A lock lost any other way (a blast, a trebuchet) breaches the vault too
+onTick("vault-locks", 40, () => {
+  if (!isReady()) return;
+  const dim = world.getDimension(OVERWORLD);
+  for (const [owner, v] of Object.entries(vaults())) {
+    if (!v.built || v.broken || v.pending) continue;
+    try {
+      const b = dim.getBlock(worldOf(v, ...roomOf(v.built, v.layout).marks.lock));
+      if (b && !isLock(b.typeId)) breach(owner, v);
+    } catch { /* unloaded */ }
+  }
 });
 
 // ---------- reinforcing: click the lock with the next tier's material ----------
@@ -320,6 +457,7 @@ function reinforce(player, owner, v, stack) {
     return player.onScreenDisplay.setActionBar(want ? `§7Reinforce it one step at a time: next is ${TIER_NAME[next]}.` : "§7Locked. It takes this vault's key.");
   }
   if (player.id !== owner) return player.onScreenDisplay.setActionBar("§7Only the vault's owner can reinforce it.");
+  if (v.broken) return player.onScreenDisplay.setActionBar("§7Rebuild the broken door first, from the Vault menu.");
   if (buildFor(jobId(owner))) return player.onScreenDisplay.setActionBar("§7The vault is already being worked on.");
   const free = creative(player);
   const cost = costLines(player, next);

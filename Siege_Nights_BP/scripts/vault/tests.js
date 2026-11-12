@@ -1,6 +1,6 @@
 import { addTests, assert, assertEqual } from "../core/tests.js";
 import { VAULT_ROOMS } from "./rooms_data.js";
-import { TIERS, LAYOUT, COSTS, worldOf, groundBox } from "./data.js";
+import { TIERS, LAYOUT, COSTS, worldOf, groundBox, LOCK_HP, BREAKER_POWER, MEND, REBUILD, breakSeconds } from "./data.js";
 
 addTests("vault", {
   "every tier has every layout, with the lock, the three stands and the entrance": () => {
@@ -27,6 +27,14 @@ addTests("vault", {
         assert(/^siege:vault_door_/.test(id ?? ""), `${tier} ${layout} door at ${dx},${dy}: ${id}`);
       }
     }
+  },
+  "a better lock takes longer to break, a better breaker less; every tier can be mended and rebuilt": () => {
+    for (let i = 1; i < TIERS.length; i++) assert(LOCK_HP[TIERS[i]] > LOCK_HP[TIERS[i - 1]], TIERS[i]);
+    assertEqual(breakSeconds("wood", "siege:vault_breaker_iron"), 30);
+    assertEqual(breakSeconds("choirsteel", "siege:vault_breaker_iron"), 240);
+    assert(breakSeconds("choirsteel", "siege:vault_breaker_netherite") < breakSeconds("choirsteel", "siege:vault_breaker_diamond"), "netherite is fastest");
+    for (const t of TIERS) assert(Object.keys(MEND[t]).length && REBUILD[t].length, `${t} repair`);
+    assert(Object.keys(BREAKER_POWER).length === 3, "three breakers");
   },
   "a layout and a cost for every tier": () => {
     for (const tier of TIERS) { assert(VAULT_ROOMS[tier][LAYOUT[tier]], `${tier} layout`); assert(COSTS[tier]?.length, `${tier} cost`); }
