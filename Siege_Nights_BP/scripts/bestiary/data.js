@@ -383,6 +383,13 @@ export const MOBS = {
   "family": "projectile",
   "hp": 1,
   "lore": ""
+ },
+ "siege:bell_wife": {
+  "name": "Ulfa, the Bell-Wife",
+  "family": "boss",
+  "hp": 480,
+  "lore": "She rang the bell under the ice that called the Host south. Three hundred years later she has not stopped, and they have not stopped standing.",
+  "region": "The Deep, after the story"
  }
 };
 
@@ -698,5 +705,9 @@ export const BODIES = {
  "siege:gloamwing": {
   "kind": 47,
   "size": 1
+ },
+ "siege:bell_wife": {
+  "kind": 48,
+  "size": 1.25
  }
 };

@@ -1057,6 +1057,9 @@
   },
   "siege_guardgear_4_boots": {
    "textures": "textures/items/siege_guardgear_4_boots"
+  },
+  "siege_summon_bell_wife": {
+   "textures": "textures/items/creative/summon_bell_wife"
   }
  }
 }
