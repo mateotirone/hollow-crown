@@ -84,7 +84,7 @@ STYLES = {
         # harbour boardwalk on piles / pale sandstone segmental arches / sandstone viaduct (Glenfinnan's curve, in stone)
         "foot": dict(under="trestle", post="stripped_oak_log", beam="stripped_birch_log", deck="birch_planks", brace="oak_planks",
                      coping="oak_planks", parapet="fence", light="lantern", footing="cobblestone", bracing=False),
-        "road": dict(under="segmental", wall={"ladder": ["smooth_sandstone", "sandstone", "stone_bricks"], "axis": "noise", "scale": 3},
+        "road": dict(under="segmental", wall={"ladder": ["sandstone", "smooth_sandstone"], "axis": "noise", "scale": 3},
                      ring="cut_sandstone", key="chiseled_sandstone", deck="smooth_sandstone", coping="smooth_sandstone",
                      parapet="solid", light="lantern", footing="stone_bricks"),
         "rail": dict(under="arch", wall={"ladder": ["sandstone", "smooth_sandstone"], "axis": "noise", "scale": 4}, ring="cut_sandstone",
@@ -628,11 +628,7 @@ def _parapets(ctx, P, M, cells):
                 ctx.set(x, ytop, z, "details", "full", M["post"], axis="y")
                 ctx.set(x, ytop + 1, z, "details", "post", M["brace"])
                 y0 = ytop + 2
-            if light.endswith("froglight"):
-                ctx.set(x, y0, z, "details", raw="iron_chain", axis="y")
-                ctx.set(x, y0 + 1, z, "details", raw=light)
-            else:
-                ctx.set(x, y0, z, "details", raw=light)
+            ctx.set(x, y0, z, "details", raw=light)
 
 
 def _abutment_ends(ctx, P, M):

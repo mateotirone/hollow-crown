@@ -92,7 +92,7 @@ def build_case(name, case, out):
     emit.save_logical(blocks, sp)
     # views square to the bridge: side-on to read the arches, and a three-quarter view from above
     sc = json.load(open(sp)); a = math.degrees(math.atan2(nx, nz)); dd = sc["camera"]["views"]["front"][2]
-    sc["camera"]["views"].update({"side": [round(a), 6, dd], "three-quarter": [round(a + 35), 26, dd], "deck": [round(a + 70), 30, dd * 0.8]})
+    sc["camera"]["views"].update({"side": [round(a), 6, dd * 1.35], "three-quarter": [round(a + 35), 26, dd], "deck": [round(a + 70), 30, dd * 0.8]})
     json.dump(sc, open(sp, "w"), separators=(",", ":"))
     return {"name": name, "span": round(L, 1), "tier": P["tier"], "under": P["under"], "openings": len(P["spans"]),
             "kind": P["kind"], "region": P["region"], "deck": [P["Wq"](0), P["Wq"](L / 2), P["Wq"](L)], "warnings": P["warnings"]}
