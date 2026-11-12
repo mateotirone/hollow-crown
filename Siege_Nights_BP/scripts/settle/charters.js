@@ -1,13 +1,13 @@
 // Plot rules and tier charters, as plain functions (no game imports, so Node tests them).
 // The numbers and lists are in config.js (OPENS_AT, PLOT_SIZE, PLOT_ALSO, PLOT_FALLBACK, PLOT_TAGS, CHARTERS).
 //
-//   slotClass(slot) -> "S" | "M" | "ML" | "L" | "G"
+//   slotClass(slot) -> "S" | "M" | "ML" | "L" | "G" | "W" (a Works plot: the machines, buildings.js WORKS)
 //   plotFit(id, slot, freeClasses) -> { ok, tagged, why }   may this building go on this plot?
 //   charterCheck(tier, counts, known) -> { met, lines: [{ what, have, need, skipped }] }
 
 import { OPENS_AT, PLOT_SIZE, PLOT_ALSO, PLOT_FALLBACK, PLOT_TAGS, TAG_WORDS, CHARTERS, WORK } from "./config.js";
 
-export const CLASS_NAMES = { S: "Small", M: "Medium", ML: "long Medium", L: "Large", G: "Great" };
+export const CLASS_NAMES = { S: "Small", M: "Medium", ML: "long Medium", L: "Large", G: "Great", W: "Works" };
 
 export const slotClass = (slot) => (slot.size === "M" && slot.long ? "ML" : slot.size);
 

@@ -13,7 +13,7 @@
 import { TOWNS, TOWN_CHARS } from "./towns_data.js";
 
 export const TIER_NAMES = ["Hamlet", "Town", "City", "Castle"];
-export const SIZE_NAMES = { S: "Small", M: "Medium", L: "Large", G: "Great" };
+export const SIZE_NAMES = { S: "Small", M: "Medium", L: "Large", G: "Great", W: "Works" };
 const DOOR = { n: { x: 0, z: -1 }, s: { x: 0, z: 1 }, e: { x: 1, z: 0 }, w: { x: -1, z: 0 } };
 
 export const townFor = (plotName) => (plotName ? TOWNS[String(plotName).toLowerCase()] : undefined);

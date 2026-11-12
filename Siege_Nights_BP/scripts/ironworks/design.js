@@ -1,9 +1,38 @@
-// The Ironworks buildings, one per level, each drawn over the last (pure, runs in Node). Placing them: index.js.
-// Local frame as for every settlement building: the Ironworks block at (0, 1, 0) in front, +z runs in.
-// Odd sizes (Mateo's rule): the yard is 9 wide, the Forge adds the wheel on the left (11 wide in all).
+// The Ironworks buildings (pure, runs in Node). Raising them: index.js.
+//
+// drawWorks(level, styleId): the Ironworks on a town's Works plot, drawn with the building skill in every region's
+// look (designs_data.js, written by map/structures/export_machines.py). Stage 1 is the whole 27 x 17 plot: the
+// fenced yard with the Ore Pit and the storeroom, and trees and bushes on the ground the later stages take.
+// Stages 2 and 3 hold only what changes, so an upgrade adds to what stands. Frame: the plot's front row is z = 0 (clear),
+// x = 0 its middle, y = 0 its ground; the Ironworks block stands in the yard at the mark "works".
+//
+// drawIronworks(level, styleId): the old yard that rose behind a hand-placed Ironworks block. Only towns laid
+// out before Works plots existed still use it. The Ironworks block at (0, 1, 0) in front, +z runs in.
 
 import { Plan } from "../townhall/halls.js";
-import { styleFor, pieces } from "../settle/buildings.js";
+import { drawData } from "../townhall/designs.js";
+import { styleFor, pieces, spellings } from "../settle/buildings.js";
+import { WORKS_DESIGNS } from "./designs_data.js";
+
+export const WORKS_PLOT = { wide: 27, deep: 17 };
+const designOf = (styleId) => WORKS_DESIGNS[styleFor(styleId).id] ?? WORKS_DESIGNS.vale;
+// { top, dig, box } of the works as it stands at a level (the whole build, not just that stage's changes)
+export const worksShape = (level, styleId) => designOf(styleId).stages[level - 1];
+
+const worksPlans = new Map();
+export function drawWorks(level, styleId) {
+  const style = styleFor(styleId);
+  const key = `${level}|${style.id}`;
+  if (!worksPlans.has(key)) {
+    const d = designOf(styleId);
+    const prefix = `iw:${style.id}`;
+    d.palette.forEach(([id], i) => { style.roles[`${prefix}:${i}`] = spellings(id); });
+    const p = new Plan(style);
+    drawData(p, { palette: d.palette, rows: d.stages[level - 1].rows, marks: d.stages[level - 1].marks }, prefix);
+    worksPlans.set(key, p);
+  }
+  return worksPlans.get(key);
+}
 
 const { floor, hang, stair } = pieces;
 
