@@ -359,8 +359,6 @@ function breach(owner, v, by) {
   const thief = by && world.getPlayers().find((p) => p.id === by)?.name;
   emit("vaultBreached", { owner, by });
   emit("discordAlert", { kind: "vaultBreached", text: `${name}'s vault has been broken into${thief ? ` by ${thief}` : ""}.`, ping: [], hollow: false });
-  const host = world.getPlayers().find((p) => p.id === owner);
-  say(host, "§c§lYour vault door has been broken in!§r §7Rebuild it from the Vault menu at the town hall.");
   try { sfx(dim, "random.explode", doorCells(v)[4], { volume: 1, pitch: 0.6 }); } catch { /* quiet */ }
 }
 
@@ -410,8 +408,6 @@ world.afterEvents.playerPlaceBlock.subscribe(({ block, player }) => {
   if (!isOnline(owner) && !v.openWindow) return player.onScreenDisplay.setActionBar("§7The vault's keeper is away. It can only be broken into while they are here, or while it lies open.");
   drills.set(`${block.location.x},${block.location.y},${block.location.z}`, { at: { ...block.location }, lock: { ...lock.location }, owner, by: player.id });
   emit("vaultDrilled", { owner, by: player.id });
-  const host = world.getPlayers().find((p) => p.id === owner);
-  say(host, "§c§lSomeone is drilling at your vault lock!");
   player.onScreenDisplay.setActionBar("§6The breaker bites into the lock...");
 });
 
@@ -576,11 +572,11 @@ world.afterEvents.entityHitBlock.subscribe(({ damagingEntity: player, hitBlock: 
     const name = keepOf(owner)?.name ?? "A settlement";
     emit("safeBroken", { owner, by: player.id, took });
     emit("discordAlert", { kind: "safeBroken", text: `${player.name} broke open ${name}'s Regal Safe and took ${took} Regals.`, ping: [], hollow: false });
-    say(world.getPlayers().find((p) => p.id === owner), `§c§l${player.name} broke open your Regal Safe and took ${coins(took)}!`);
+    emit("baseAttacked", { owner, kind: "vault", text: `${player.name} broke open the Regal Safe of ${name}.`, by: player.id });
   } else {
     showSafeCracks(cells, v.safe.hits / SAFE[v.built].hits);
     player.onScreenDisplay.setActionBar(`§6+${coins(took)}§7  (blow ${v.safe.hits} of ${SAFE[v.built].hits})`);
-    if (v.safe.hits === 1) say(world.getPlayers().find((p) => p.id === owner), `§c§lSomeone is breaking into your Regal Safe!`);
+    if (v.safe.hits === 1) emit("baseAttacked", { owner, kind: "vault", text: `Someone is robbing the Regal Safe of ${keepOf(owner)?.name ?? "your settlement"}.`, by: player.id });
   }
   store.save();
 });
