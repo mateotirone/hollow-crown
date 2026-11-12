@@ -94,10 +94,6 @@
    "minecraft:behavior.float": {
     "priority": 0
    },
-   "minecraft:behavior.random_stroll": {
-    "priority": 7,
-    "speed_multiplier": 0.8
-   },
    "minecraft:behavior.nearest_attackable_target": {
     "priority": 2,
     "must_see": false,
