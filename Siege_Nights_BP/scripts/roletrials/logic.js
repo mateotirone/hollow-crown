@@ -122,10 +122,10 @@ export function nextKnight(t) {
 export const TOLL_WINDOW = [21000, 21500];
 export const inTollWindow = (timeOfDay) => timeOfDay >= TOLL_WINDOW[0] && timeOfDay < TOLL_WINDOW[1];
 
-// May this rider's dragon fly now? "fly" | "unflown" (the Dragonlord's one night, starting now) | "grounded"
-export function tollRule({ siegeNight, timeOfDay, dragonlord, unflownDay, today, takingOff }) {
+// May this rider's dragon fly now? "fly" | "unflown" (a Dragonlord's Unflown Night, starting now) | "grounded"
+// A Dragonlord's dragon flies through every toll (Mateo, 2026-11-12); the reveal happens once each siege night.
+export function tollRule({ siegeNight, timeOfDay, dragonlord, unflownDay, today }) {
   if (!siegeNight || !inTollWindow(timeOfDay)) return "fly";
-  if (unflownDay === today) return "fly"; // the Unflown Night already begun tonight
-  if (dragonlord && unflownDay < 0 && takingOff) return "unflown";
-  return "grounded";
+  if (!dragonlord) return "grounded";
+  return unflownDay === today ? "fly" : "unflown";
 }

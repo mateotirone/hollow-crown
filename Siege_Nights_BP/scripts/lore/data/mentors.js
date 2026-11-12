@@ -151,7 +151,7 @@ export const MENTOR_NPCS = [
         opts: [["I won't.", "sworn", ["flag:kesh_turn", "sp:1"]]],
       },
       stand: {
-        text: "Dragonlord.\n\nYour name's going on the wall. The other wall, where Ysolt's is: the ones who lived long enough to matter. I carved it last night. It's crooked. I was crying, a bit, and you'll never prove it.\n\nWhen the bad night comes, and it's coming, you'll be in the air over the Rift with fire in your hands. That's what a Dragonlord is for. Not the sky. The ground under it.\n\nAnd one more thing, since you've earned it. You know they won't fly at seventeen past three on a siege night. The elders say \"never\". It isn't never. Once in a Dragonlord's life, she'll fly through it for you, if you ask her at that hour. Once. Ysolt did. She said you can see the whole host from up there, waiting in the dark.",
+        text: "Dragonlord.\n\nYour name's going on the wall. The other wall, where Ysolt's is: the ones who lived long enough to matter. I carved it last night. It's crooked. I was crying, a bit, and you'll never prove it.\n\nWhen the bad night comes, and it's coming, you'll be in the air over the Rift with fire in your hands. That's what a Dragonlord is for. Not the sky. The ground under it.\n\nAnd one more thing, since you've earned it. You know they won't fly at seventeen past three on a siege night. The elders say \"never\". It isn't never. For a Dragonlord she'll fly through it. Every time, if you ask her. Ysolt did. She said you can see the whole host from up there, waiting in the dark.",
         opts: [["I'll be there.", "sworn", ["flag:kesh_stand", "sp:2"]]],
       },
       after: {
