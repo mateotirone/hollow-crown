@@ -7,7 +7,7 @@ import { SKILLS, SKILL, BRANCHES, RINGS, RANKS, ROLES, HALL_NAMES, LEVEL_UNLOCKS
 import { STYLES } from "./styles.js";
 import { treeCells, TREE_FLAG, BRANCH_FLAG, SPACER } from "./tree_layout.js";
 import { heroOf, saveHero, setPath, grantPoints } from "./hero.js";
-import { hallLevelAt, setTreeLook } from "./townhall.js";
+import { hallLevelAt, setTreeLook, hallMenu } from "./townhall.js";
 import { chargeE } from "../economy/coins.js";
 import { worth } from "../economy/rules.js";
 import { sfx } from "../core/sfx.js";
@@ -47,6 +47,12 @@ export function treeMenu(player, hallLevel) {
   if (hero.path === "marked") lines.push(`Resonance: ${bar(hero.resonance / 100, 20).replace("§a", "§d")} ${Math.round(hero.resonance)}`);
   const form = new ActionFormData().title("Tree of Oaths").body(lines.filter(Boolean).join("\n"));
   const actions = [];
+  // the town hall's own menu lives here now that the cornerstone is gone once a hall stands
+  const owner = player.dimension.id === "minecraft:overworld" ? api.settlementAt(player.location) : undefined;
+  if (owner && api.keepOf(owner)) {
+    form.button("Town Hall\n§8raise the hall, the wall, rumors, who's online", "textures/items/siege_hall_cornerstone");
+    actions.push(() => hallMenu(player, owner));
+  }
   for (const [id, branch] of Object.entries(BRANCHES)) {
     const open = canBranch(id, hero.path);
     if (branch.regional && !open) continue;
@@ -364,6 +370,6 @@ export function acceptVictor(player) {
 // Used by the Tree block and by the Keep Banner button
 export function openTree(player, block) {
   const level = hallLevelAt(block.location, block.dimension.id);
-  if (level < 1) return player.sendMessage("§7The Tree is quiet. It only wakes inside a settlement whose town hall stands on its cornerstone.");
+  if (level < 1) return player.sendMessage("§7The Tree is quiet. It only wakes inside a settlement whose town hall stands.");
   treeMenu(player, level);
 }
