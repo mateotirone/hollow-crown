@@ -27,9 +27,11 @@ export function route({ online, atHome, hasMessenger }) {
 }
 
 // Is this kind of news still cooling down for this keeper? last = { kind: tick sent }
-export function cooling(last, kind, now) {
+// key defaults to the kind; news with its own words is keyed by those words, so two different events of one
+// kind (a safe struck, then broken open) both get through while repeats of the same one wait
+export function cooling(last, kind, now, key = kind) {
   const wait = MESSENGER.cooldown[kind] ?? MESSENGER.cooldown.other;
-  return wait > 0 && last?.[kind] !== undefined && now - last[kind] < wait;
+  return wait > 0 && last?.[key] !== undefined && now - last[key] < wait;
 }
 
 // Eight-point compass heading from one spot to another (x east, z south, as in Minecraft)

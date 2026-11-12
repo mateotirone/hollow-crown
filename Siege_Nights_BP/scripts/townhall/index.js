@@ -403,6 +403,8 @@ api.addTests("messenger", {
     api.assert(cooling({ player: 100 }, "player", 200));
     api.assert(!cooling({ player: 100 }, "player", 100 + MESSENGER.cooldown.player));
     api.assert(!cooling({ raid: 100 }, "raid", 100));
+    api.assert(!cooling({ "vault:a": 100 }, "vault", 150, "vault:b"), "different words get through");
+    api.assert(cooling({ "vault:a": 100 }, "vault", 150, "vault:a"));
     api.assertEqual(bucket("drill"), "vault");
     api.assertEqual(bucket("nonsense"), "other");
   },

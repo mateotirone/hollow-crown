@@ -58,9 +58,10 @@ export function report(owner, kind, words = {}, text) {
   if (!owner || !api.keepOf(owner)) return;
   const now = system.currentTick;
   const b = bucket(kind);
+  const key = text ? `${b}:${text}` : b;
   const last = sent.get(owner) ?? {};
-  if (cooling(last, b, now)) return;
-  last[b] = now;
+  if (cooling(last, b, now, key)) return;
+  last[key] = now;
   sent.set(owner, last);
   const line = text ?? newsText(kind, { name: api.keepOf(owner).name, ...words });
   const player = online(owner);
