@@ -4,7 +4,7 @@
 
 Every build in The Hollow Crown, designed or not. Add an entry the moment a build is asked for, even with no design yet, and move its status on as it progresses. Run  node tools/build-catalog.mjs  after editing to rewrite builds/CATALOG.md (check.mjs fails if it is stale).
 
-**99 builds:** 6 not started, 22 designed, 12 in viewer, 59 in game.
+**99 builds:** 1 not started, 27 designed, 12 in viewer, 59 in game.
 
 Statuses:
 
@@ -36,8 +36,8 @@ A ★ marks builds that no earlier list had (added in the 2026-11-12 audit).
 | Sunscar market hall | Emberwaste | in viewer | town-sunscar | Procedurally generate terrain-aware towns | `map/structures/regions_towns.py` | Waiting in PR #163. |
 | Gull's Rest quay, lighthouse and boathouse (3) | Saltreach | in viewer | town-gulls_rest | Procedurally generate terrain-aware towns | `map/structures/regions_towns.py` | Gull's Rest has no water in its ward, so these are not placed yet. |
 | Mirelight stilt houses (2) | Blackfen | in viewer | town-mirelight | Procedurally generate terrain-aware towns | `map/structures/regions_towns.py` |  |
-| Field windmills | One version per overworld region | in game |  | Finish the remaining world builds | `map/structures/towngen_build.py` | All towns use the Vale look today; regional windmills being built by the remaining world builds thread. |
-| ★ Regional wells and field fencing | One version per overworld region | not started |  | Finish the remaining world builds |  | Mateo approved 2026-11-12 ("lets do them all"). Being built by the remaining world builds thread. |
+| Field windmills | One version per overworld region | in game |  | Finish the remaining world builds | `map/structures/towngen_build.py` | Today towns use the Vale windmill; regional windmills for the five overworld regions are designed in world_props.py (viewer world_props, PR #164). |
+| ★ Regional wells and field fencing | One version per overworld region | designed | world_props | Finish the remaining world builds | `map/structures/world_props.py` | Waiting in PR #164. Wells and field fencing for all six regions. |
 
 ## Settlements
 
@@ -65,7 +65,7 @@ A ★ marks builds that no earlier list had (added in the 2026-11-12 audit).
 | Settlement walls, levels 1-10 (50) | One version per overworld region | in game | walls | Build settlement building and mason shop | `Siege_Nights_BP/scripts/settle/walldata.js` | Wall steps and tower ladders PR #161; physics PR #162. |
 | Gates and portcullis (swinging) | One version per overworld region | in game |  | Build settlement building and mason shop | `Siege_Nights_BP/blocks/castle_gate.json` |  |
 | Plot marker (post, sign, lantern, pennant) | Anywhere / region-neutral | in game |  | Design the settlement building placement mechanic | `Siege_Nights_BP/scripts/settle/plotmarker.js` | 3D mock-up https://claude.ai/artifact/7C2eyCUPG5dSEUTE9pWq87 ; in game as a block, the full mock-up look is not built. |
-| ★ Construction site stages (scaffold, staged rise) | Anywhere / region-neutral | not started |  | Finish the remaining world builds |  | Mateo approved 2026-11-12 ("lets do them all"). Being built by the remaining world builds thread. |
+| ★ Construction site stages (scaffold, staged rise) (3) | Anywhere / region-neutral | designed | world_props | Finish the remaining world builds | `map/structures/world_props.py` | Waiting in PR #164. Construction-site scaffolds in three stages. |
 | Railway station: Halt, Station, Junction, Grand Station (20) | One version per overworld region | in game | settle-* | Design the train system | `map/structures/stations.py` | Waiting in PR #168. Detailed backs in PR #168. |
 | Trade House wing (small, two storeys) (10) | One version per overworld region | in game | settle-* | Design the train system | `map/structures/stations.py` | To be replaced by the Trade Outpost if Mateo approves that design. |
 | Engine shed (5) | One version per overworld region | in game | settle-* | Design the train system | `map/structures/stations.py` |  |
@@ -107,7 +107,7 @@ A ★ marks builds that no earlier list had (added in the 2026-11-12 audit).
 | Plot relic landmarks (12) (12) | One version per overworld region | designed | landmarks | Finish the remaining world builds |  | Waiting in PR #164. Self-build near players; viewer section 'landmarks' comes with PR #164. |
 | Story places: Crownhold, Bellhollow, Ashen Gate chapterhouse, Ashen Watch, Corvin's Tower, Old Mag's hut, Nell Sedge's raft-house, the Deepforge, the Cinder Roost (9) | One version per overworld region | designed | landmarks | Finish the remaining world builds |  | Waiting in PR #164. |
 | Seven thin-place caves with Fennick's camps (7) | One version per overworld region | in game |  | Settle the road to the Rift | `Siege_Nights_BP/scripts/undertow/thinplaces.js` | Script-built and plain; hosted 3D https://claude.ai/artifact/QFoys3C5GaHFXe415EkJjo . Not in the local viewer or on the building skill. |
-| ★ Sealed ways out: the Shut Pass, the Far Shore, the Horizon Isles (3) | Anywhere / region-neutral | not started |  | Finish the remaining world builds |  | Mateo approved 2026-11-12 ("lets do them all"). Being built by the remaining world builds thread. |
+| ★ Sealed ways out: the Shut Pass, the Far Shore, the Horizon Isles (3) | Anywhere / region-neutral | designed | landmarks | Finish the remaining world builds | `map/structures/world_doors.py` | Waiting in PR #164. shut_pass_gate (the Shut Pass gate), westwatch (Far Shore coast landmark), southmost_light (Horizon Isles coast landmark); place themselves via landmarks/sites.js. |
 | Gravestone (left where a player dies) | Anywhere / region-neutral | in game | graves | Add gravestones when players die | `map/structures/gravestone_build.py` | 3x3 footprint: clickable headstone, pale moss mound, a candle lit while the grave is sealed, dry grass. The game places it when a player dies. |
 | Dragon nest (9x9, natural, unbreakable) | Anywhere / region-neutral | in game |  | Redesign the dragon nest | `Siege_Nights_BP/scripts/dragons/nestplan.js` |  |
 | Custom trees (31 species, six regions) (31) | One version per overworld region | in game | trees | Build custom tree assets | `map/trees/build_trees.py` |  |
@@ -123,7 +123,7 @@ A ★ marks builds that no earlier list had (added in the 2026-11-12 audit).
 | Boss site: Gull Bay chapel and altar | Saltreach | in game |  | Design how regional bosses unlock | `Siege_Nights_BP/scripts/unlocks/bride.js` | Script-built, not in the viewer. |
 | Boss site: Sunscar vault with five faceless statues | Emberwaste | in game |  | Design how regional bosses unlock | `Siege_Nights_BP/scripts/unlocks/seneschal.js` | Script-built, not in the viewer. |
 | Boss site: the Cradle Tree and root cradle (Mirelight) | Blackfen | in game |  | Design how regional bosses unlock | `Siege_Nights_BP/scripts/unlocks/mother.js` | Script-built, not in the viewer. |
-| ★ Boss site: Warlord King's ground | Anywhere / region-neutral | not started |  | Finish the remaining world builds |  | Mateo said yes 2026-11-12; the remaining world builds thread is building it (large landmark, in the viewer). |
+| ★ Boss site: Vorlund's Muster (Warlord King's ground) | Anywhere / region-neutral | designed | landmarks | Finish the remaining world builds | `map/structures/world_doors.py` | Waiting in PR #164. At (1030, -990); places itself via landmarks/sites.js. |
 
 ## Travel
 
@@ -133,7 +133,7 @@ A ★ marks builds that no earlier list had (added in the 2026-11-12 audit).
 | Rail tunnel portals | One version per overworld region | designed |  | Build the plots and world map |  | Waiting in PR #164. portal.py on the skill (PR #164); map thread calls it inside rail works. |
 | Rail beds, cuttings and embankments (built on purchase) | Anywhere / region-neutral | in game |  | Design the train system | `Siege_Nights_BP/scripts/trains/route_game.js` |  |
 | Custom 3D track, switches and crossings | Anywhere / region-neutral | in game |  | Design the train system | `Siege_Nights_BP/scripts/trains` |  |
-| ★ Bridleway signposts | One version per overworld region | not started |  | Finish the remaining world builds |  | Mateo approved 2026-11-12 ("lets do them all"). Being built by the remaining world builds thread. |
+| ★ Bridleway signposts | One version per overworld region | designed | world_props | Finish the remaining world builds | `map/structures/world_props.py` | Waiting in PR #164. Vale, Frostmarch, Saltreach, Blackfen, Emberwaste signposts (the Hollow one is in hollow_kit.py). |
 
 ## The Hollow
 
