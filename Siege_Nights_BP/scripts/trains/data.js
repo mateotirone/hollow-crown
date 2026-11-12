@@ -8,17 +8,17 @@ export const NO_COLOR = 16; // siege:color for a train with no settlement: the r
 
 // Speeds are in blocks per tick (20 ticks a second). A vanilla minecart tops out at 0.4.
 export const TRAIN = {
-  maxSpeed: 0.8, // 16 blocks a second flat out
+  maxSpeed: 1.6, // 32 blocks a second flat out: four times a minecart (Mateo, 2026-11-12)
   reverseSpeed: 0.15,
-  accel: 0.006, // per tick while the driver holds forward
-  brake: 0.02, // per tick while the driver holds back
+  accel: 0.012, // per tick while the driver holds forward
+  brake: 0.04, // per tick while the driver holds back
   coast: 0.0008, // rolling drag with nobody on the throttle
   slope: 0.004, // gravity on a slope
   autoSpeed: 0.4, // cruising speed if the game can't read the driver's keys
   drive: "velocity", // how cars are moved: "velocity" (smooth) or "teleport" (exact). /scriptevent siege:trains mode <name>
   snapDistance: 2, // a car further than this from where it should be is teleported back
   maxCars: 6,
-  carriageSpeed: 0.2, // the free station carriage: 4 blocks a second
+  carriageSpeed: 0.4, // the free station carriage: minecart speed, 8 blocks a second (Mateo, 2026-11-12)
   price: { engine: 2000, coach: 900 }, // Regals to buy one at a station (building one takes ~24 / ~10 iron blocks)
   carriageIdle: 1200, // ticks an empty station carriage waits before it's put away
   saveEvery: 100, // ticks
@@ -56,7 +56,7 @@ export function carPoses(head, cars, get) {
 // The slowest any track ahead allows (corners), looking `dist` blocks ahead
 export function limitAhead(head, dist, get) {
   let limit = Infinity, c = { ...head }, walked = -c.t;
-  for (let guard = 0; guard < 64 && walked <= dist; guard++) {
+  for (let guard = 0; guard < 128 && walked <= dist; guard++) {
     const shape = get(c.x, c.y, c.z);
     if (!shape) break;
     limit = Math.min(limit, SPEED_LIMIT[shape.kind] ?? Infinity);

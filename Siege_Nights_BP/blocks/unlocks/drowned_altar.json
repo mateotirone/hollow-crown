@@ -1,0 +1,61 @@
+{
+  "format_version": "1.21.90",
+  "minecraft:block": {
+    "description": {
+      "identifier": "siege:drowned_altar",
+      "menu_category": {
+        "category": "items"
+      },
+      "states": {
+        "siege:ringed": [
+          0,
+          1
+        ]
+      }
+    },
+    "components": {
+      "minecraft:display_name": "tile.siege:drowned_altar.name",
+      "minecraft:geometry": "minecraft:geometry.full_block",
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "siege_drowned_altar_side",
+          "render_method": "opaque"
+        },
+        "up": {
+          "texture": "siege_drowned_altar_top",
+          "render_method": "opaque"
+        },
+        "down": {
+          "texture": "siege_chapel_stone",
+          "render_method": "opaque"
+        }
+      },
+      "minecraft:destructible_by_mining": false,
+      "minecraft:destructible_by_explosion": false,
+      "minecraft:map_color": "#2c5058",
+      "siege:clickable": {}
+    },
+    "permutations": [
+      {
+        "condition": "q.block_state('siege:ringed') == 1",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_drowned_altar_side",
+              "render_method": "opaque"
+            },
+            "up": {
+              "texture": "siege_drowned_altar_top_ring",
+              "render_method": "opaque"
+            },
+            "down": {
+              "texture": "siege_chapel_stone",
+              "render_method": "opaque"
+            }
+          },
+          "minecraft:light_emission": 5
+        }
+      }
+    ]
+  }
+}

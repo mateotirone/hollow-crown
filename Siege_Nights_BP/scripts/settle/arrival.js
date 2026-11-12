@@ -18,7 +18,7 @@ import { styleOf, raiseFree } from "./plans.js";
 import { WALLS } from "./walldata.js";
 import { wallOf, raiseWall, bearingFor } from "./walls.js";
 import { townFor } from "./towns.js";
-import { townOf, foundTown } from "./founding.js";
+import { townOf, foundTown, lordTownAt, adoptTown } from "./founding.js";
 
 const OVERWORLD = "minecraft:overworld";
 const SOFT = /(air|water|grass(?!_block|_path)|fern|flower|snow_layer|leaves|vine|bush|sapling|tallgrass|dandelion|poppy|mushroom|_log$|deadbush)/;
@@ -100,6 +100,8 @@ export function layOut(player, { force = false, at, style: wanted } = {}) {
   if (townOf(player.id)) return "already";
   const keep = keepOf(player.id) ?? at;
   if (!keep) return "Raise a Keep Banner first.";
+  const lordTown = lordTownAt(keep.x, keep.z); // a Rival Lord's town stands here: it is yours as it is
+  if (lordTown) { adoptTown(lordTown, player.id); return "already"; }
   const dim = world.getDimension(OVERWORLD);
   const center = { x: keep.x, y: keep.y, z: keep.z };
   if (!dim.getBlock(center)) return "That ground is not loaded yet.";

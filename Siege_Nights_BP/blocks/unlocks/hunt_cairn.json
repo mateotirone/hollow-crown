@@ -1,0 +1,129 @@
+{
+  "format_version": "1.21.90",
+  "minecraft:block": {
+    "description": {
+      "identifier": "siege:hunt_cairn",
+      "menu_category": {
+        "category": "items"
+      },
+      "states": {
+        "siege:beast": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "siege:lit": [
+          0,
+          1
+        ]
+      }
+    },
+    "components": {
+      "minecraft:display_name": "tile.siege:hunt_cairn.name",
+      "minecraft:geometry": "minecraft:geometry.full_block",
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "siege_hunt_cairn_hare",
+          "render_method": "opaque"
+        },
+        "up": {
+          "texture": "siege_cairn_stone",
+          "render_method": "opaque"
+        },
+        "down": {
+          "texture": "siege_cairn_stone",
+          "render_method": "opaque"
+        }
+      },
+      "minecraft:destructible_by_mining": false,
+      "minecraft:destructible_by_explosion": false,
+      "minecraft:map_color": "#9aa3ad",
+      "siege:clickable": {}
+    },
+    "permutations": [
+      {
+        "condition": "q.block_state('siege:beast') == 0",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_hunt_cairn_hare",
+              "render_method": "opaque"
+            },
+            "up": {
+              "texture": "siege_cairn_stone",
+              "render_method": "opaque"
+            },
+            "down": {
+              "texture": "siege_cairn_stone",
+              "render_method": "opaque"
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:beast') == 1",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_hunt_cairn_fox",
+              "render_method": "opaque"
+            },
+            "up": {
+              "texture": "siege_cairn_stone",
+              "render_method": "opaque"
+            },
+            "down": {
+              "texture": "siege_cairn_stone",
+              "render_method": "opaque"
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:beast') == 2",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_hunt_cairn_stag",
+              "render_method": "opaque"
+            },
+            "up": {
+              "texture": "siege_cairn_stone",
+              "render_method": "opaque"
+            },
+            "down": {
+              "texture": "siege_cairn_stone",
+              "render_method": "opaque"
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:beast') == 3",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_hunt_cairn_wolf",
+              "render_method": "opaque"
+            },
+            "up": {
+              "texture": "siege_cairn_stone",
+              "render_method": "opaque"
+            },
+            "down": {
+              "texture": "siege_cairn_stone",
+              "render_method": "opaque"
+            }
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:lit') == 1",
+        "components": {
+          "minecraft:light_emission": 11
+        }
+      }
+    ]
+  }
+}

@@ -469,6 +469,74 @@ addTests("settle charters", {
   },
 });
 
+// ---------- your own builds and beds (census.js) ----------
+import { tally, matches, bedCap, bedsCounted } from "./census.js";
+
+// A hand-built hut: floor 7x7 at y 0, walls to y 3, a roof at y 4, with what's passed in inside
+function hut(extra = [], { roof = true } = {}) {
+  const cells = [];
+  for (let x = 0; x < 7; x++) for (let z = 0; z < 7; z++) {
+    cells.push({ x, y: 0, z, id: "minecraft:spruce_planks" });
+    if (roof) cells.push({ x, y: 4, z, id: "minecraft:spruce_slab" });
+    if (x === 0 || z === 0 || x === 6 || z === 6) for (let y = 1; y <= 3; y++) cells.push({ x, y, z, id: "minecraft:cobblestone" });
+  }
+  return [...cells, ...extra];
+}
+
+addTests("settle census", {
+  "a hut with a bed and a door counts as a home"() {
+    const t = tally(hut([
+      { x: 2, y: 1, z: 2, id: "minecraft:bed", head: true }, { x: 2, y: 1, z: 3, id: "minecraft:bed" },
+      { x: 3, y: 1, z: 0, id: "minecraft:spruce_door" }, { x: 3, y: 2, z: 0, id: "minecraft:spruce_door", upper: true },
+      { x: 4, y: 1, z: 4, id: "minecraft:spruce_trapdoor" },
+    ]));
+    assertEqual(t.groups.bed, 1);
+    assertEqual(t.groups.door, 1);
+    assert(matches(t).find((m) => m.id === "cottage").ok, "home");
+    assertEqual(bedCap(t), 2); // 25 covered floor inside the walls / 12
+    assertEqual(bedsCounted(t), 1);
+  },
+  "no roof, no home; and it says what's missing"() {
+    const t = tally(hut([{ x: 2, y: 1, z: 2, id: "minecraft:bed", head: true }, { x: 3, y: 1, z: 0, id: "minecraft:wooden_door" }], { roof: false }));
+    const m = matches(t).find((x) => x.id === "cottage");
+    assert(!m.ok && m.missing.includes("more roof"), JSON.stringify(m));
+    assertEqual(bedsCounted(t), 0);
+  },
+  "bookshelves make a library, an anvil and furnace a smithy"() {
+    const books = Array.from({ length: 8 }, (_, i) => ({ x: 1 + (i % 5), y: 1 + Math.floor(i / 5), z: 1, id: "minecraft:bookshelf" }));
+    assert(matches(tally(hut(books))).find((m) => m.id === "library").ok, "library");
+    const forge = [{ x: 2, y: 1, z: 2, id: "minecraft:anvil" }, { x: 3, y: 1, z: 2, id: "minecraft:furnace" }];
+    assert(matches(tally(hut(forge))).find((m) => m.id === "smithy").ok, "smithy");
+    assert(!matches(tally(hut())).some((m) => m.ok && m.id !== "well"), "an empty hut is nothing");
+  },
+});
+
+addTests("settle census", {
+  "an inn, a farmhouse and a mint can be built by hand"() {
+    const beds = [0, 2, 4].map((x) => ({ x: 1 + x, y: 1, z: 2, id: "minecraft:bed", head: true }));
+    const chests = [{ x: 2, y: 1, z: 5, id: "minecraft:chest" }, { x: 3, y: 1, z: 5, id: "minecraft:barrel" }];
+    assert(matches(tally(hut([...beds, ...chests]))).find((m) => m.id === "inn").ok, "inn");
+    const farm = [{ x: 1, y: 1, z: 1, id: "minecraft:composter" }, ...Array.from({ length: 9 }, (_, i) => ({ x: 1 + (i % 5), y: 0.5, z: 3 + Math.floor(i / 5), id: "minecraft:farmland" }))];
+    assert(matches(tally(hut(farm))).find((m) => m.id === "farmhouse").ok, "farmhouse");
+    assert(matches(tally(hut([...chests, { x: 4, y: 1, z: 4, id: "minecraft:anvil" }]))).find((m) => m.id === "mint").ok, "mint");
+  },
+});
+
+// ---------- the level-5 hall takes its plots (hallmove.js) ----------
+import { HALL_TAKES_AT } from "./hallmove.js";
+addTests("settle charters", {
+  "some layouts have hall5 plots, and the hall takes them at level 5"() {
+    assertEqual(HALL_TAKES_AT, 5);
+    let total = 0;
+    for (const name of allTownNames()) for (const v of townByName(name).variants) {
+      if (v.charter === false) continue;
+      const n = slotsOfLayout(v).filter((s) => (s.tags ?? []).includes("hall5")).length;
+      total += n;
+    }
+    assert(total > 0, "some layouts have hall5 plots");
+  },
+});
+
 addTests("settle walls", {
   // Siege collapse (siege/collapse.js) only moves blocks it knows are wall: every wall level, look and timber must count
   "every block a wall can be built from counts as wall for collapse": () => {
@@ -483,5 +551,30 @@ addTests("settle walls", {
     for (const id of ["minecraft:stone_bricks", "minecraft:spruce_log", "minecraft:spruce_fence", "minecraft:spruce_planks", "siege:battlement", "siege:arrow_slit"]) ids.add(id);
     const missing = [...ids].filter((id) => !isStructural(id, true));
     assertEqual(missing.join(", "), "");
+  },
+});
+
+// ---------- Rival Lords on the same plots (charters.js lordPick) ----------
+import { lordPick } from "./charters.js";
+addTests("settle charters", {
+  "a lord fills every layout's plots and meets each charter with the designs there are"() {
+    const designs = new Set(BUILDINGS.map((b) => b.id));
+    for (const name of allTownNames()) for (const v of townByName(name).variants) {
+      if (v.charter === false) continue;
+      const slots = slotsOfLayout(v);
+      const counts = {};
+      const taken = new Set();
+      for (let tier = 0; tier <= 3; tier++) {
+        for (let n = 0; n < 80; n++) {
+          const open = slots.filter((s) => s.tier <= tier && !taken.has(s.id));
+          const pick = lordPick(open, tier, counts, designs, () => true, name);
+          if (!pick) break;
+          taken.add(pick.slot.id);
+          counts[pick.id] = (counts[pick.id] ?? 0) + 1;
+        }
+        if (tier < 3) assert(charterCheck(tier, counts, designs).met, `${name} ${v.label}: lord stuck at ${tier} with ${JSON.stringify(counts)}`);
+      }
+      assert((counts.cottage ?? 0) >= 3, `${name}: a lord's town has homes`);
+    }
   },
 });

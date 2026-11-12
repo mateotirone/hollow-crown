@@ -174,10 +174,18 @@ export const ENTRIES = [
   {
     id: "town_hall", ch: "keep", title: "The town hall",
     tip: "Place the Hall Cornerstone on your land and click it: your town hall rises and grows with your settlement.",
-    page: "Craft a §fHall Cornerstone§r at the Siege Workshop and place it on your land. Click it to raise your first hall. Once the hall stands the stone is gone: open the town hall menu from the Tree of Oaths inside, or from your Keep menu.\n\n"
+    page: "Craft a §fHall Cornerstone§r at the Siege Workshop and place it on your land. Click it to raise your first hall. Once the hall stands the stone is gone: open the town hall menu from the §fTown Board§r just inside the door, or from your Keep menu.\n\n"
       + "The hall is built in your region's own style and is rebuilt bigger as your settlement grows. It holds the §fTree of Oaths§r, where you spend skill points.\n\n"
       + "From the hall menu you can also raise your §fsettlement wall§r level by level (and watch it go up), see who is online, and read the §fRumor Board§r for jobs.",
     when: ["carry:siege:hall_cornerstone", "click:siege:hall_cornerstone"],
+  },
+  {
+    id: "hall_map", ch: "keep", title: "The Hall Map",
+    tip: "Click the Cartographer's Table in your hall to see every settlement and the places your people have found.",
+    page: "Every town hall keeps a §fHall Map§r. Click the hall's Cartographer's Table, or choose \"Hall map\" in the Town Hall menu.\n\n"
+      + "It shows every settlement in its banner colour and who holds it, rival lords, free plots and the towns. Places your settlement has found appear as you find them, and land nobody from your settlement has walked stays under fog. Allies' travels count too. Players themselves never show on it.\n\n"
+      + "Tap a mark to read about it. Mysteries are never marked: you have to work those out yourself. Sneak-click the table to use it as an ordinary cartography table.",
+    when: ["click:minecraft:cartography_table"],
   },
   {
     id: "wall_levels", ch: "keep", title: "The settlement wall",
@@ -198,8 +206,15 @@ export const ENTRIES = [
     id: "town_plots", ch: "keep", title: "Town plots and charters",
     tip: "Use a Plot Marker to raise a building on a town plot. Each plot only takes buildings of its size.",
     page: "Every open plot in your town has a §fPlot Marker§r. Use it to see what can go there: only buildings of the plot's size are listed, and some want a certain spot (a watchtower stands by the wall). Good spots are marked. Pick one, walk round the outline, then use the marker again and pay to raise it.\n\n"
-      + "§fCharters:§r siege wins grow your settlement, but it only grows past each tier once that tier's charter stands. A Town needs 3 homes and a market (and a Farmhouse and Mint once they are built); a City needs 6 homes, a barracks and another work building. When the last one is finished, the town grows by itself.",
+      + "§fCharters:§r siege wins grow your settlement, but it only grows past each tier once that tier's charter stands. A Town needs 3 homes, a Farmhouse, a Mint and a market; a City needs 6 homes, an inn, a barracks and another work building. Buildings with no ready-made design yet (Farmhouse, Mint, Inn) can be built by hand and registered. When the last one is finished, the town grows by itself.",
     when: ["click:siege:plot_marker", "event:tierUp"],
+  },
+  {
+    id: "settlers", ch: "keep", title: "Your own buildings, beds and settlers",
+    tip: "Built something yourself on a plot? Use its Plot Marker and pick \"I built here myself\" to have it counted.",
+    page: "§fYour own buildings:§r build by hand on an empty plot, then use its Plot Marker and pick §fI built here myself§r. It counts as a building if it has what that building needs: a home needs a bed and a door under a roof, a smithy an anvil and a furnace, a library 8 bookshelves, a stable hay and stalls, a storehouse 6 chests or barrels, a farmhouse a composter and 9 farmland, a mint 2 chests and an anvil, an inn 3 beds and 2 chests. Take those away and it stops counting until you put them back.\n\n"
+      + "§fSettlers:§r every settler needs a bed in a home, one bed for every 12 blocks of covered floor. At dawn, if a home has a free bed, someone moves in: a worker for each finished work building first, then settlers for the homes. They go to bed at dusk. A worker whose building is knocked down stays, idle, until it is back.",
+    when: ["event:settlerArrived", "click:siege:plot_marker"],
   },
   {
     id: "guards", ch: "keep", title: "Guards and the Barracks",
@@ -432,10 +447,10 @@ export const ENTRIES = [
   },
   {
     id: "bosses", ch: "wild", title: "Calling a boss",
-    tip: "This calls something to where you stand when you use it. Be ready, and stand somewhere open.",
-    page: "Each region has something old in it, and each has a token that calls it. Use the token somewhere open and the fight starts where you stand.\n\n"
+    tip: "This belongs somewhere. Something old in this region is waiting for it to be put back.",
+    page: "Each region has something old in it, asleep in a place of its own, and a token that wakes it. The token is earned in that region, from the people and the stones there, and it goes back where it belongs: a lock, an altar, a cairn. Then whatever sleeps there comes out.\n\n"
       + "A boss gets half again as tough for each extra player in the fight, so it is fair alone and fair with friends. Watch for its warnings: every attack is shown before it lands.\n\n"
-      + "Everyone who fought gets the boss's own relic the first time it falls (materials after that), skill points, and a share of the chest it leaves. A boss you have beaten comes back in a different temper each time, and a rank stronger (up to rank V): more health, harder hits, and from rank III two tempers at once. Calling it back costs diamonds as well as the key (2 at rank I, up to 6 at rank V), and every rematch leaves netherite scrap: 1 at ranks I and II, 2 at III and IV, 3 at V. There is no Nether here, so this is where netherite comes from.",
+      + "Everyone who fought gets the boss's own relic the first time it falls (materials after that), skill points, and a share of the chest it leaves. The token stays where you put it. Once a siege night has passed after a boss falls, touch it again and the boss comes back, in a different temper each time and a rank stronger (up to rank V): more health, harder hits, and from rank III two tempers at once. Every rematch leaves netherite scrap: 1 at ranks I and II, 2 at III and IV, 3 at V. There is no Nether here, so this is where netherite comes from.",
     when: ["carry:siege:stopped_clock_key", "carry:siege:pale_horn", "carry:siege:drowned_ring", "carry:siege:faceless_seal", "carry:siege:mire_effigy"],
     hidden: true,
   },

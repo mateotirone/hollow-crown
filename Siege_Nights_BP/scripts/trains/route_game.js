@@ -13,10 +13,11 @@ import { allSites } from "./station_sites.js";
 import { ROUTE, buyable, nearestStop, reachable, cannotBuy, priceOf, pieces, otherEnd } from "./routes.js";
 import { ROUTES } from "./routes_data.js";
 import { TRACK, TRAIN, CARS, TRAIN_STYLES } from "./data.js";
+import { addSwitch } from "./switches.js";
 
 // built: { [segmentId]: { by, at } }; laying: [{ seg, i }] (a stretch going down, next piece i);
 // missed: { [segmentId]: [piece index, ...] } (pieces whose ground wasn't loaded, tried again later)
-const store = moduleStore("siege:routes", () => ({ built: {}, laying: [], missed: {} }));
+const store = moduleStore("siege:routes", () => ({ built: {}, laying: [], missed: {}, missedWorks: {} }));
 const built = () => store.data.built;
 const segById = (id) => ROUTES.segments.find((s) => s.id === id);
 const stopById = (id) => ROUTES.stops.find((s) => s.id === id);
@@ -34,12 +35,77 @@ export function homeStop(owner) {
 export const isBuilt = (segId) => !!built()[segId];
 export const reachableFrom = (owner) => reachable(ROUTES, built(), homeStop(owner));
 
-// Put one piece down. true when it's there (or was already), false when its ground isn't loaded.
-function layPiece(dim, p) {
+// ---------- the bed ----------
+// The world has no rail beds (Mateo, 2026-11-12): each piece grades its own as it goes down. A corridor 3 wide is
+// cleared to 4 above the track (a cutting, or a tunnel through a hill); under it goes gravel ballast on a fill of
+// dirt down to the ground, or, where the ground is too far down or under water, a stone brick deck with a pier every
+// few blocks.
+const AIR = BlockPermutation.resolve("minecraft:air");
+const BALLAST = BlockPermutation.resolve("minecraft:gravel");
+const FILL = BlockPermutation.resolve("minecraft:dirt");
+const DECK = BlockPermutation.resolve("minecraft:stone_bricks");
+const SOFT = /leaves|grass$|tall_grass|fern|flower|sapling|bush|vine|snow_layer|dandelion|poppy|tulip|orchid|allium|bluet|daisy|cornflower|lily|azure|kelp|seagrass|mushroom|torch/;
+const firm = (b) => !!b && !b.isAir && !b.isLiquid && !SOFT.test(b.typeId);
+const isTrack = (b) => b?.typeId === TRACK;
+
+// How far below `y` the ground is at (x, z): 0 when (x, y, z) itself is firm, up to `max`, or Infinity
+function dropAt(dim, x, y, z, max) {
+  for (let d = 0; d <= max; d++) if (firm(dim.getBlock({ x, y: y - d, z }))) return d;
+  return Infinity;
+}
+
+function layBed(dim, p, i) {
+  if (!dim.getBlock(p)) return false; // not loaded
+  // clear the corridor, keeping other track and the ballast under it
+  for (let dx = -1; dx <= 1; dx++) {
+    for (let dz = -1; dz <= 1; dz++) {
+      const centre = !dx && !dz;
+      for (let y = p.y + (centre ? 1 : 0); y <= p.y + ROUTE.clearUp; y++) {
+        const b = dim.getBlock({ x: p.x + dx, y, z: p.z + dz });
+        if (!b || b.isAir || isTrack(b)) continue;
+        if (y === p.y && isTrack(dim.getBlock({ x: p.x + dx, y: y + 1, z: p.z + dz }))) continue;
+        b.setPermutation(AIR);
+      }
+    }
+  }
+  // the ground under the middle decides: an embankment or a bridge
+  const drop = dropAt(dim, p.x, p.y - 1, p.z, ROUTE.fillDepth);
+  const bridge = drop === Infinity;
+  for (let dx = -1; dx <= 1; dx++) {
+    for (let dz = -1; dz <= 1; dz++) {
+      const x = p.x + dx, z = p.z + dz, top = { x, y: p.y - 1, z };
+      if (isTrack(dim.getBlock({ x, y: p.y, z: z })) && (dx || dz)) continue; // another line's track beside us
+      if (bridge) { dim.getBlock(top)?.setPermutation(DECK); continue; }
+      const d = dropAt(dim, x, p.y - 1, z, ROUTE.fillDepth);
+      for (let k = Math.min(d, ROUTE.fillDepth); k >= 1; k--) {
+        const b = dim.getBlock({ x, y: p.y - 1 - k, z });
+        if (b && !firm(b)) b.setPermutation(FILL);
+      }
+      dim.getBlock(top)?.setPermutation(BALLAST);
+    }
+  }
+  if (bridge && i % ROUTE.pierEvery === 0) {
+    for (let y = p.y - 2, n = 0; n < ROUTE.pierDepth; y--, n++) {
+      const b = dim.getBlock({ x: p.x, y, z: p.z });
+      if (!b || firm(b)) break;
+      b.setPermutation(DECK);
+    }
+  }
+  return true;
+}
+
+// Put one piece down, bed first. true when it's there (or was already), false when its ground isn't loaded.
+function layPiece(dim, p, i = 0) {
   try {
     const block = dim.getBlock(p);
     if (!block) return false;
+    if (block.typeId !== TRACK && !p.works && !layBed(dim, p, i)) return false;
     if (block.typeId !== TRACK) block.setPermutation(BlockPermutation.resolve(TRACK, { "siege:kind": p.kind, "siege:dir": p.dir }));
+    else {
+      // another line already lies here: where the two part, this block becomes a switch holding both shapes
+      const kind = block.permutation.getState("siege:kind"), dir = block.permutation.getState("siege:dir");
+      if (kind !== p.kind || dir !== p.dir) addSwitch(dim.id, p, { kind, dir }, { kind: p.kind, dir: p.dir });
+    }
     return true;
   } catch {
     return false;
@@ -47,8 +113,28 @@ function layPiece(dim, p) {
 }
 
 function startLaying(seg) {
-  store.data.laying.push({ seg: seg.id, i: 0 });
+  store.data.laying.push({ seg: seg.id, i: 0, w: 0 });
   store.save();
+}
+
+// The map's own earthworks for a stretch (cuttings, embankments, viaducts, tunnels), if it has them:
+// works [[x, z, y0, y1, palette index], ...] applied in order before the track. Without them each piece grades a
+// plain bed (layBed).
+const worksPalette = (seg) => (seg._perms ??= (seg.works_palette ?? []).map((e, i) => (i === 0 ? AIR : BlockPermutation.resolve(e.name, e.states ?? {}))));
+function applyWork(dim, seg, w) {
+  const [x, z, y0, y1, i] = seg.works[w];
+  const perm = worksPalette(seg)[i];
+  if (!perm) return true;
+  try {
+    if (!dim.getBlock({ x, y: y0, z })) return false;
+    for (let y = y0; y <= y1; y++) {
+      const b = dim.getBlock({ x, y, z });
+      if (b && !isTrack(b)) b.setPermutation(perm);
+    }
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 // Every other tick: lay the next pieces of whatever stretch is going down
@@ -58,10 +144,17 @@ function layTick() {
   const job = store.data.laying[0];
   const seg = segById(job.seg);
   if (!seg) { store.data.laying.shift(); store.save(); return; }
+  if (seg.works && (job.w ?? 0) < seg.works.length) {
+    job.w ??= 0;
+    const stop = Math.min(seg.works.length, job.w + ROUTE.worksPerTick);
+    for (; job.w < stop; job.w++) if (!applyWork(dim, seg, job.w)) (store.data.missedWorks[seg.id] ??= []).push(job.w);
+    store.save();
+    return;
+  }
   const all = pieces(seg);
   const end = Math.min(all.length, job.i + ROUTE.layPerTick);
   for (; job.i < end; job.i++) {
-    if (!layPiece(dim, all[job.i])) (store.data.missed[seg.id] ??= []).push(job.i);
+    if (!layPiece(dim, all[job.i], job.i)) (store.data.missed[seg.id] ??= []).push(job.i);
   }
   if (job.i >= all.length) {
     store.data.laying.shift();
@@ -75,16 +168,30 @@ onTick("route_lay", 2, layTick);
 function missedTick() {
   if (!isReady()) return;
   const dim = world.getDimension("minecraft:overworld");
-  let budget = ROUTE.layPerTick, changed = false;
+  // laying costs budget; looking at unloaded ground is cheap, so a long unloaded stretch can't starve the rest
+  let budget = ROUTE.layPerTick, looks = ROUTE.missedLooks, changed = false;
+  store.data.missedWorks ??= {};
+  // earthworks first: a piece of track whose works haven't gone in yet waits for them
+  const waiting = new Set();
+  for (const [id, list] of Object.entries(store.data.missedWorks)) {
+    const seg = segById(id);
+    if (!seg?.works) { delete store.data.missedWorks[id]; changed = true; continue; }
+    for (let k = list.length - 1; k >= 0 && looks > 0; k--, looks--) {
+      if (applyWork(dim, seg, list[k])) { list.splice(k, 1); changed = true; }
+    }
+    if (list.length) waiting.add(id);
+    else delete store.data.missedWorks[id];
+  }
   for (const [id, list] of Object.entries(store.data.missed)) {
     const seg = segById(id);
     if (!seg) { delete store.data.missed[id]; changed = true; continue; }
+    if (waiting.has(id)) continue;
     const all = pieces(seg);
-    for (let k = list.length - 1; k >= 0 && budget > 0; k--, budget--) {
-      if (layPiece(dim, all[list[k]])) { list.splice(k, 1); changed = true; }
+    for (let k = list.length - 1; k >= 0 && budget > 0 && looks > 0; k--, looks--) {
+      if (layPiece(dim, all[list[k]], list[k])) { list.splice(k, 1); budget--; changed = true; }
     }
     if (!list.length) delete store.data.missed[id];
-    if (budget <= 0) break;
+    if (budget <= 0 || looks <= 0) break;
   }
   if (changed) store.save();
 }
