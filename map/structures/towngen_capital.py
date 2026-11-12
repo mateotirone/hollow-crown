@@ -189,19 +189,20 @@ class Capital(TG.Town):
         near_road = np.zeros_like(band)
         for di in range(-4, 5):
             for dj in range(-4, 5): near_road |= np.roll(np.roll(road, di, 0), dj, 1)
-        STONE = [("stone_bricks", 6), ("mossy_stone_bricks", 2), ("cracked_stone_bricks", 1), ("andesite", 1)]
+        self.wall_region = "vale"                          # Mateo 2026-11-12: the wall is built like the Grand Station
+        kit = self.wall_kit(); STONE = kit["stone"]; cap = kit["cap"]
         def stone(x, y, z):
-            r = TG.h3(x, y, z, 41) * 10
+            r = TG.h3(x, y, z, 41) * sum(w for _, w in STONE)
             for m, w in STONE:
                 r -= w
                 if r < 0: return (m, {})
-            return ("stone_bricks", {})
-        ii, jj = np.nonzero(band)
+            return (STONE[0][0], {})
+        ii, jj = np.nonzero(band); line = []
         ang = np.degrees(np.arctan2(jj + self.Z0 - self.C[1], ii + self.X0 - self.C[0])) % 360
         for i, j, a in zip(ii, jj, ang):
             x, z = int(i) + self.X0, int(j) + self.Z0
             g = int(self.G[i, j]); H = 6
-            tower = (a % 16) < 2.2                                  # a tower every ~22 blocks round a 90 ring
+            tower = False                                           # towers: the station's own (wall_towers)
             if gap[i, j] and (x, z) in rail_y:                     # the railway arch: tall enough for a train, and
                 ry = rail_y[(x, z)]; base = ry + 6                   # a rail gate that lifts for trains only (shown shut)
                 for y in range(base, base + 3): self.works[(x, y, z)] = stone(x, y, z)
@@ -217,15 +218,15 @@ class Capital(TG.Town):
                 for y in range(base, base + 3): self.works[(x, y, z)] = stone(x, y, z)
                 if (x + z) % 2 == 0: self.works[(x, base + 3, z)] = stone(x, base + 3, z)
                 continue
-            top = g + (H + 4 if (tower or near_road[i, j]) else H)
+            top = g + H
             for y in range(g + 1, top + 1): self.works[(x, y, z)] = stone(x, y, z)
-            if (x * 3 + z) % 2 == 0: self.works[(x, top + 1, z)] = ("stone_brick_wall", {})
-            if (tower or near_road[i, j]) and (x + z) % 7 == 0: self.works[(x, top, z)] = ("lantern", {})
-            self.TAKEN[i, j] = 2
+            if (x * 3 + z) % 2 == 0: self.works[(x, top + 1, z)] = (cap, {})
+            self.TAKEN[i, j] = 2; line.append((x, z))
+        self.wall_towers(line, H)
 
     def rails_in_view(self):
         """Track for the preview scene (genworld lays the real track): every Kingsrest line inside the slice."""
-        return [(x, y, z) for x, y, z in self.rail_blocks if self.ok(x, z) and self.E[self.ij(x, z)] <= self.R + 7]
+        return [(x, y, z) for x, y, z in self.rail_blocks if self.ok(x, z)]
 
     def run(self):
         self.square(); self.station(); self.claim()
@@ -244,7 +245,7 @@ T = np.load(a.slice); L = json.load(open(a.lines))
 if a.trees:
     TG.Town.tree_index = json.load(open(a.trees)); TG.Town.tree_dir = os.path.dirname(os.path.abspath(a.trees)); TG.Town.tree_src = os.path.abspath(a.trees_src)
 t = Capital("Kingsrest", site, T, L, seed)
-t.rail_shape = {(x, Capital.STOP[1], RAIL_Z): (0, 2) for x in range(RAIL_X[0], RAIL_X[1] + 1)}   # preview: the straight through the station
+t.rail_shape = {(x, Capital.STOP[1], RAIL_Z): (0, 2) for x in range(t.X0, t.X0 + t.G0.shape[0])}   # preview: the straight through the station, out to both edges (Mateo: show the line arriving)
 t.rail_blocks = sorted(t.rail_shape)
 t.rail_cells = {(x, z) for x, _, z in t.rail_blocks}
 t.XCOST = np.zeros(t.G0.shape, np.float32)                 # streets cross the line, they never run along it

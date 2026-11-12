@@ -16,8 +16,9 @@ a growing settlement adds (worked out with the building-placement thread, 2026-1
     The r46 and r66 lines just become build land once the wall moves past them.
   * The town hall grows too: the ground each hall level takes (drawHall(level) bounds, levels 1-5,
     from the Hall Cornerstone 5 ahead of the Plot Stone, plus 2 clear) is kept free of roads and
-    slots for good up to level 4 (the Castle's hall); level 5's extra ground stays free of roads,
-    fields and trees but may hold slots (tagged hall5), which the Sovereign hall takes back.
+    slots for good up to level 3 (the City's hall); the extra ground of levels 4 and 5 stays free of
+    roads, fields and trees but may hold slots (tagged hall4 / hall5), which the hall takes back when
+    it reaches that level (a hall4 slot does not count toward the Castle's charter).
   * Slots are odd boxes (width along the door side x depth): Small 9x13, Medium 11x15 (long Medium
     13x15), Large 15x15, Great 21x21 (Large and Great may be 2 longer); each Hamlet has one long
     Medium or Large for the library (13 x 14),
@@ -150,10 +151,13 @@ class Settlement(Town):
         i0, j0 = self.ij(x0, z0); i1, j1 = self.ij(x1, z1)
         self.HALL[i0:i1 + 1, j0:j1 + 1] = True
         self.TAKEN[self.HALL] = 2
-        _, (x0, z0, x1, z1) = self.halls[-2]                  # the Castle's hall (level 4) is kept for good; level 5's
-        self.HALL4 = np.zeros(self.G0.shape, bool)             # extra ground stays clear of roads, fields and trees but
-        i0, j0 = self.ij(x0, z0); i1, j1 = self.ij(x1, z1)     # may hold slots, taken back when the hall reaches level 5
-        self.HALL4[i0:i1 + 1, j0:j1 + 1] = True
+        # the City's hall (level 3) is kept for good; the extra ground of levels 4 and 5 stays clear of roads,
+        # fields and trees but may hold slots, taken back when the hall reaches that level (2026-11-12: with
+        # the 36/46/56/66 walls, keeping level 4's ground from the Hamlet on left the Town ring a slot short)
+        for lv, attr in ((-2, "HALL4"), (-3, "HALL3")):
+            _, (x0, z0, x1, z1) = self.halls[lv]
+            m = np.zeros(self.G0.shape, bool); i0, j0 = self.ij(x0, z0); i1, j1 = self.ij(x1, z1)
+            m[i0:i1 + 1, j0:j1 + 1] = True; setattr(self, attr, m)
         for name, (r, a) in (("plot_stone", (0, 0)), ("mason_bench", MASON), ("hall_cornerstone", (0, CORNERSTONE_AHEAD))):
             x, z = self.world(r, a); self.fixtures.append({"name": name, "at": [x - self.C[0], z - self.C[1]], "tier": 0})
 
@@ -411,13 +415,14 @@ class Settlement(Town):
             g, _ = self.footprint(bp, deg); G = [(x + ox, z + oz) for x, z in g]
             t = self.box_tier(G)
             if t is None or t > max_tier: continue
-            if any(not self.ok(x, z) or self.at(self.PKIND, x, z) == 2 for x, z in G): continue
+            if any(not self.ok(x, z) or (self.at(self.PKIND, x, z) == 2 and not getattr(self, "in_field", False)) for x, z in G): continue
             wk = self.walk_cells(door, ROT[deg])
             if wk is None: continue
             t = max(t, int(self.at(self.OT, *wk[1])))                # never before the road it opens onto
             if t > max_tier: continue
             nw = len(self.walks)
-            e = self.try_place(bp, deg, door, "slot", gap=1 if self.rng.random() < 0.8 else 2, max_relief=5)
+            tight = getattr(self, "tight", False)
+            e = self.try_place(bp, deg, door, "slot", gap=1 if tight or self.rng.random() < 0.8 else 2, max_relief=7 if tight else 5)
             if not e: continue
             e.update(size=size, geo=t, long=((w, d) != plain), dims=(w, d), cells=G, deg=deg, walk=self.walks[-1] if len(self.walks) > nw else None, rid=rid)
             self.slots.append(e)
@@ -450,7 +455,7 @@ class Settlement(Town):
     def place_slots(self):
         C = self.candidates()
         self.D53 = self.D > WALL_R[-1] - CLEAR
-        self.TAKEN[self.HALL & ~self.HALL4 & (self.K < 0) & (self.TAKEN == 2)] = 0
+        self.TAKEN[self.HALL & ~self.HALL3 & (self.K < 0) & (self.TAKEN == 2)] = 0
         self.TAKEN[self.D53 & (self.TAKEN == 0)] = 1
         def big(max_tier, need):
             """Large slots for the market (Town) and barracks (City); a long Medium where no Large fits."""
@@ -480,7 +485,19 @@ class Settlement(Town):
         if not pass_long(0, 1, hamlet):                # Hamlet first: its ground is the smallest; its Medium is
             pass_("M", 0, 1, hamlet)                   # a long one (13 x 15) for the library where it fits
         big(1, 2)                                      # then the Town charter: the market's slot (the library counts
-        pass_("M", 1, 2, near_sq)                      # as one big), the Farmhouse and the Mint (plain Mediums), then homes
+        fm = (self.PKIND == 2) & ~self.HALL & (self.K < 0)             # field ground that will carry crops by Town
+        fc = np.argwhere(fm & (self.D <= WALL_R[1] - CLEAR)) if (fm & (self.D <= WALL_R[1] - CLEAR)).any() else np.argwhere(fm)
+        fc = fc + np.array([self.X0, self.Z0])
+        near_field = (lambda c: float(np.min(np.abs(fc[:, 0] - c[0][0]) + np.abs(fc[:, 1] - c[0][1]))) + 2 * self.rng.random()) if len(fc) else near_sq
+        self.in_field = True                           # the Farmhouse's box may stand in the field's corner
+        got = 0
+        if len(fc):                                    # as one big), the Farmhouse (a plain Medium by the fields: the
+            for c in sorted(C, key=near_field):        # settlement thread's charter), then the Mint, then homes
+                if near_field(c) > 12: break
+                if self.try_slot("M", c, 1, square_only=True): got = 1; break
+        self.in_field = False
+        if not got: pass_("M", 1, 1, near_sq)
+        pass_("M", 1, 1, near_sq)
         pass_("S", 1, 3, hamlet)
         pass_("L", 2, 1, near_sq)                      # City: the inn needs a true Large; the barracks, one more work
         pass_("M", 2, 2, near_sq)                      # building and three more homes
@@ -506,6 +523,11 @@ class Settlement(Town):
                         e = self.try_slot("M" if self.rng.random() < 0.3 else "S", (door, deg, n)) or self.try_slot("S", (door, deg, n))
                         if e: break
                     t += (e["dims"][0] + 1) if e else 1
+        # a last, tighter pass for the inner charters (2026-11-12: the Town ring is the tightest ground; one box
+        # short there fails the charter): plain boxes a block apart on slightly steeper ground
+        self.tight = True
+        pass_("S", 1, 3, near_sq); pass_("M", 1, 2, near_sq); pass_("L", 2, 1, near_sq); pass_("M", 2, 2, near_sq)
+        self.tight = False
         self.relax()
 
     def balance(self):
@@ -541,13 +563,14 @@ class Settlement(Town):
 
     # The charters as the game checks them (settle/config.js CHARTERS + PLOT_SIZE/PLOT_ALSO/PLOT_FALLBACK, PR #168),
     # cumulative: each tier's buildings must all have a slot of a class they may take, open by that tier.
-    # Classes: S, M (plain Medium), ML (long Medium), L, G. Homes are cottages (S) or houses (M).
+    # Classes: S, M (plain Medium), MF (plain Medium by the fields: the Farmhouse's), ML (long Medium), L, G.
+    # Homes are cottages (S) or houses (M). A hall4 slot is gone by the Castle, so it is not counted there.
     HOME = ("S", "M"); ANY = ("S", "M", "ML", "L", "G")
     CHARTER_NEEDS = [
         [("library", ("ML", "L"))],
-        [("home", HOME)] * 3 + [("farmhouse", ("M",)), ("mint", ("M",)), ("market", ("L", "ML"))],
-        [("home", HOME)] * 3 + [("inn", ("L",)), ("barracks", ("L", "ML", "M")), ("work", ANY)],
-        [("home", HOME)] * 4,
+        [("home", HOME + ("MF",))] * 3 + [("farmhouse", ("MF",)), ("mint", ("M", "MF")), ("market", ("L", "ML"))],
+        [("home", HOME + ("MF",))] * 3 + [("inn", ("L",)), ("barracks", ("L", "ML", "M", "MF")), ("work", ANY + ("MF",))],
+        [("home", HOME + ("MF",))] * 4,
     ]
     def charter(self):
         """Do the slots open by each tier hold every building that tier's charter (and the ones before) needs?
@@ -556,7 +579,10 @@ class Settlement(Town):
         for t in range(4):
             sup = collections.Counter()
             for e in self.slots:
-                if e["opensAt"] <= t: sup["ML" if e["size"] == "M" and e.get("long") else e["size"]] += 1
+                if e["opensAt"] > t or (t >= 3 and "hall4" in self.tag(e)[0]): continue
+                c = "ML" if e["size"] == "M" and e.get("long") else e["size"]
+                if c == "M" and "field_edge" in self.tag(e)[0]: c = "MF"
+                sup[c] += 1
             needs = [n for tt in range(t + 1) for n in self.CHARTER_NEEDS[tt]]
             needs.sort(key=lambda n: len(n[1]))                # strictest first, each into its smallest class
             for name, classes in needs:
@@ -795,7 +821,8 @@ class Settlement(Town):
         if e.get("library"): tags.append("library")
         if near(self.HALL, 3): tags.append("hall")
         if e.get("foundation", 0) >= 4: tags.append("tall_foundation")
-        if near(self.HALL & ~self.HALL4, 0): tags.append("hall5")
+        if near(self.HALL4 & ~self.HALL3, 0): tags.append("hall4")
+        elif near(self.HALL & ~self.HALL4, 0): tags.append("hall5")
         if ek == PRIO["square"] or near(self.KIND == PRIO["square"], 2): tags.append("square")
         if ek == PRIO["main"]: tags.append("road_front")
         t = e["opensAt"]; w = WALL_R[t]

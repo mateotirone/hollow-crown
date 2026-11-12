@@ -232,7 +232,7 @@ class Town:
         if math.hypot(out[-1][0] - pts[-1][0], out[-1][1] - pts[-1][1]) > 0.3: out.append(tuple(pts[-1]))
         return out
 
-    def lay(self, cells, kind, k_start=None, k_end=None):
+    def lay(self, cells, kind, k_start=None, k_end=None, beyond=0):
         """Turn a cell route into a street: smooth it, give it half-block heights that never change
         by more than half a block per block, and paint it `WIDTH[kind]` wide."""
         if len(cells) < 2: return None
@@ -256,7 +256,7 @@ class Town:
             for dx in range(-int(r) - 1, int(r) + 2):
                 for dz in range(-int(r) - 1, int(r) + 2):
                     cx, cz = int(round(x)) + dx, int(round(z)) + dz
-                    if (cx + 0.0 - x) ** 2 + (cz + 0.0 - z) ** 2 > r * r + 0.15 or not self.inside(cx, cz): continue
+                    if (cx + 0.0 - x) ** 2 + (cz + 0.0 - z) ** 2 > r * r + 0.15 or not self.inside(cx, cz, -beyond): continue
                     i, j = self.ij(cx, cz)
                     if self.KIND[i, j] >= p: continue
                     if self.TAKEN[i, j] >= 2: continue
@@ -280,14 +280,20 @@ class Town:
         sqcells = [(int(i) + self.X0, int(j) + self.Z0) for i, j in self.square_cells]
         ring = [c for c in sqcells if any(self.at(self.KIND, c[0] + dx, c[1] + dz) == 0 for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)))]
         # gates: where the map's roads leave the circle
-        gates = []
+        gates = []; self.gate_out = {}
         for name, pts in list(self.L["roads"].items()) + list(self.L["trails"].items()):
             pts = self.resample(pts, 1.0)
             ins = [self.inside(int(round(x)), int(round(z)), 3) for x, z in pts]
             for t in range(1, len(pts)):
                 if ins[t] != ins[t - 1]:
                     x, z = pts[t] if ins[t] else pts[t - 1]
-                    gates.append((int(round(x)), int(round(z)), name, "trail" if name in self.L["trails"] else "road"))
+                    g = (int(round(x)), int(round(z)), name, "trail" if name in self.L["trails"] else "road")
+                    gates.append(g)
+                    # the map road on out past the edge (Mateo 2026-11-12: paths run to the plot's edge, and
+                    # through the wall, where the gate goes)
+                    run = pts[t:] if ins[t - 1] else pts[t - 1::-1]
+                    out = [(int(round(a)), int(round(b))) for a, b in run[:40]]
+                    self.gate_out[g[:2]] = [c for k, c in enumerate(out) if k == 0 or c != out[k - 1]]
         merged = []
         for g in gates:
             if all(math.hypot(g[0] - m[0], g[1] - m[1]) > 14 for m in merged): merged.append(g)
@@ -299,10 +305,14 @@ class Town:
             if not self.at(self.WET, x, z) and all(math.hypot(x - m[0], z - m[1]) > 20 for m in merged): merged.append((x, z, "country lane", "lane"))
             else: ang0 += 17
         self.gates = merged
-        # main streets: each gate in to the square
+        # main streets: each gate in to the square, and on out through the edge
         for gx, gz, name, kind in merged:
             path = self.astar((gx, gz), ring, "main")
-            if path: self.lay(path[::-1], "main" if kind == "road" else "lane", k_start=self.k_at(*path[-1]))
+            if not path: print("no street from gate", (gx, gz), name); continue
+            rk = "main" if kind == "road" else "lane"
+            rd = self.lay(path[::-1], rk, k_start=self.k_at(*path[-1]))
+            self.street_out((gx, gz), rk)
+
         # a back lane ringing the middle of town: with the streets running in, it boxes the land
         # into portions (inner blocks to build on, outer sectors for fields)
         self.ring_lane()
@@ -340,6 +350,26 @@ class Town:
             path = path + tail[1:]; ke = self.k_at(*tail[-1])
             rd = self.lay(path, "lane", k_start=self.k_at(sx, sz), k_end=ke)
             if rd: mains.append(rd); nl -= 1
+
+
+    def street_out(self, gate, kind):
+        """Carry a street from its gate (3 inside the edge) out past the edge, along the map road where there is
+        one, else straight out from the centre, so it crosses the wall line (an arch) and meets the country."""
+        gx, gz = gate
+        out = self.gate_out.get((gx, gz)) if hasattr(self, "gate_out") else None
+        if not out:
+            dx, dz = gx - self.C[0], gz - self.C[1]; d = math.hypot(dx, dz) or 1
+            out = [(int(round(gx + dx / d * t)), int(round(gz + dz / d * t))) for t in range(0, 16)]
+        cells = [(gx, gz)]
+        for c in out:
+            if c == (gx, gz): continue
+            if not self.ok(*c) or self.at(self.WET, *c): break
+            cells.append(c)
+            if not self.inside(c[0], c[1], -4): break
+        if len(cells) < 3 or self.inside(cells[-1][0], cells[-1][1], -2): print("no way out from gate", gate, len(cells)); return None
+        k0 = int(self.at(self.K, gx, gz)) if self.at(self.K, gx, gz) >= 0 else None
+        rd = self.lay(cells, kind, k_start=k0, beyond=6)
+        return rd
 
     def ring_lane(self):
         rr = self.R * (0.5 if self.big else 0.46)
@@ -1275,6 +1305,7 @@ class Town:
                     if self.ok(cx + dx, cz + dz): self.TAKEN[self.ij(cx + dx, cz + dz)] = 2
         (bx0, _, bz0), _ = bp.bounds(); fx, fz = rot_xz(0, bz0 - 1, deg); f = rot_xz(0, -1, deg)
         self.station_front = ((x + fx, z + fz), f, y)
+        self.station_axis = (x, z, deg); self.wall_region = region
         self.add_levels("station", e, [(st.capitalize(), bp if st == "grand" else getattr(stations, st)(region)) for st in stations.STAGES], align="origin")
         return e
 
@@ -1301,6 +1332,16 @@ class Town:
         a taller tower every ~22 blocks, an arch wherever a street crosses, open over water, and the station
         standing in the line as its own gatehouse."""
         band = (self.E > self.R - 1.0) & (self.E <= self.R + 1.0) & ~self.WET
+        if getattr(self, "station_axis", None):
+            # the railway runs along the station's back (local z -6..1 kept clear for the passing loop): the
+            # wall never runs beside the track; it turns in and runs straight along the town side of it, meeting
+            # the station as its gatehouse, the way Kingsrest's does (map thread 2026-11-12)
+            sx, sz, sdeg = self.station_axis
+            nx, nz = rot_xz(0, 1, sdeg)
+            ii0, jj0 = np.indices(band.shape)
+            lz = (ii0 + self.X0 - sx) * nx + (jj0 + self.Z0 - sz) * nz
+            band &= ~((lz >= -9) & (lz <= 12))
+            band |= (lz >= -11) & (lz < -9) & (self.E <= self.R + 1.0) & ~self.WET & (self.TAKEN < 2) & (self.K < 0)
         for cx, cz in self.footprint_cells("station"):
             for dx in range(-2, 3):
                 for dz in range(-2, 3):
@@ -1309,15 +1350,20 @@ class Town:
         near = np.zeros_like(band)
         for di in range(-3, 4):
             for dj in range(-3, 4): near |= np.roll(np.roll(road, di, 0), dj, 1)
+        kit = self.wall_kit()
+        WS = kit["stone"] if kit else self.WALL_STONE
+        cap = kit["cap"] if kit else "stone_brick_wall"
         def stone(x, y, z):
-            r = h3(x, y, z, 41) * sum(w for _, w in self.WALL_STONE)
-            for m, w in self.WALL_STONE:
+            r = h3(x, y, z, 41) * sum(w for _, w in WS)
+            for m, w in WS:
                 r -= w
                 if r < 0: return (m, {})
-            return (self.WALL_STONE[0][0], {})
+            return (WS[0][0], {})
+        if kit: step = 1e9                                      # towers are the station's own (wall_towers)
         ii, jj = np.nonzero(band)
         ang = np.degrees(np.arctan2(jj + self.Z0 - self.C[1], ii + self.X0 - self.C[0])) % 360
-        step = 22 / (2 * math.pi * self.R) * 360
+        step = 22 / (2 * math.pi * self.R) * 360 if not kit else 1e9
+        line = []
         for i, j, a in zip(ii, jj, ang):
             x, z = int(i) + self.X0, int(j) + self.Z0
             g = int(self.G[i, j])
@@ -1327,11 +1373,65 @@ class Town:
                 if (x + z) % 2 == 0: self.works[(x, base + 3, z)] = stone(x, base + 3, z)
                 continue
             tower = (a % step) < step * 0.12
-            top = g + (H + 3 if (tower or near[i, j]) else H)
+            top = g + (H + 3 if (tower or near[i, j]) and not kit else H)
             for y in range(g + 1, top + 1): self.works[(x, y, z)] = stone(x, y, z)
-            if (x * 3 + z) % 2 == 0: self.works[(x, top + 1, z)] = ("stone_brick_wall", {})
-            if (tower or near[i, j]) and (x + z) % 7 == 0: self.works[(x, top, z)] = ("lantern", {})
-            self.TAKEN[i, j] = 2
+            if (x * 3 + z) % 2 == 0: self.works[(x, top + 1, z)] = (cap, {})
+            if (tower or near[i, j]) and (x + z) % 7 == 0 and not kit: self.works[(x, top, z)] = ("lantern", {})
+            self.TAKEN[i, j] = 2; line.append((x, z))
+        self.wall_towers(line, H)
+
+    # Mateo 2026-11-12: "a castle-style train station, but not a castle-style wall": a town whose station
+    # stands in its wall builds the wall in the station's own stone, capped like it, and its towers are the
+    # station's towers (stations.py / settle_halls.tower): spires in the region's roof, flanking every gate
+    def wall_kit(self):
+        region = getattr(self, "wall_region", None)
+        if not region: return None
+        import stations
+        _, _, P, k, _ = stations.start(region, "grand")
+        return {"stone": [(k("stone"), 7), (P.get("quoin2", k("stone")), 2), (k("cobbled"), 1)],
+                "cap": P.get("chimney_cap", "stone_brick_wall")}
+
+    def wall_tower_bp(self, h):
+        import settle_buildings as SB, settle_halls as SH
+        bp, B, P, k, L = SB.new(f"wall_tower_{h}", self.wall_region)
+        SH.tower(B, 0, 0, 2, 1, h, top="spire" if L["roof"] != "flat" else "crenel")
+        bp.kind = "civic"; bp.markers["door"] = (0, 0, 3)
+        return bp
+
+    def wall_towers(self, line, H, gap=22):
+        """Towers on the wall line: one each side of every gate (a gatehouse), then one every ~gap blocks.
+        A tower's 5 x 5 never sits on a street, water or another building."""
+        if not getattr(self, "wall_region", None) or not line: return
+        lineset = set(line)
+        road = [(int(i) + self.X0, int(j) + self.Z0) for i, j in np.argwhere(self.K >= 0)]
+        roadset = set(road)
+        def fits(x, z):
+            for dx in range(-2, 3):
+                for dz in range(-2, 3):
+                    c = (x + dx, z + dz)
+                    if not self.ok(*c) or c in roadset or self.at(self.WET, *c): return False
+                    if self.at(self.TAKEN, *c) >= 2 and c not in lineset: return False
+            return True
+        gates = [c for c in roadset if any((c[0] + dx, c[1] + dz) in lineset for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)))]
+        chosen = []
+        def far(c, d): return all(math.hypot(c[0] - q[0], c[1] - q[1]) >= d for q in chosen)
+        if gates:
+            gx = np.array(gates)
+            for c in sorted(line, key=lambda c: (h3(c[0], 0, c[1], 7))):
+                dmin = float(np.min(np.hypot(gx[:, 0] - c[0], gx[:, 1] - c[1])))
+                if 4.0 <= dmin <= 6.5 and far(c, 9) and fits(*c): chosen.append(c)
+        for c in sorted(line, key=lambda c: math.atan2(c[1] - self.C[1], c[0] - self.C[0])):
+            if far(c, gap) and fits(*c): chosen.append(c)
+        h = H + 7
+        bp = self.wall_tower_bp(h)
+        for x, z in chosen:
+            cells = [(x + dx, z + dz) for dx in range(-2, 3) for dz in range(-2, 3)]
+            y = int(max(self.at(self.G, *c) for c in cells))
+            for cx, cz in cells:
+                for yy in range(y + 1, y + h + 12): self.works.pop((cx, yy, cz), None)
+            self.foundation(cells, y)
+            self.stamp(bp, x, z, y, 0, "civic"); self.plan[-1]["name"] = "wall tower"
+            for c in cells: self.TAKEN[self.ij(*c)] = 2
 
     def footprint_cells(self, kind):
         out = []

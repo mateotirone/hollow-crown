@@ -738,6 +738,12 @@ def gulls_rest_quay(seed=41):
     bp.set(-4, 1, 7, "lectern", facing="s"); bp.set(0, 1, 7, "chest", facing="w"); bp.set(0, 1, 11, "barrel")
     for x in range(2, 8):
         for z in range(7, 13): bp.set(x, 0, z, "smooth_sandstone" if (x * 3 + z) % 4 else "cobblestone")
+    # the harbour water under the jetty and the crane, out to the footprint's seaward edge (Mateo 2026-11-12:
+    # water inside a build runs to its edge, so it joins the sea next to it)
+    for x in range(-7, 8):
+        for z in range(-10, 0):
+            bp.setif(x, -4, z, "sand")
+            for y in range(-3, 0): bp.setif(x, y, z, "water")
     bp.markers["water_edge"] = (0, 0, -1); bp.markers["harbourmaster"] = (-2, 1, 9)
     door_marker(bp, -2, 1, 13)
     return finish(bp, P, "salt", "quay")
@@ -788,6 +794,11 @@ def gulls_rest_lighthouse(seed=43):
     B.door(0, 1, 9, "s", canopy=True, lanterns=True)
     B.roof(hut, "x", 5, overhang=1, verge=1, pitch=1); B.build_roofs(); B.gable_walls(hut, "x", 5, style="stone")
     bp.set(-3, 1, 4, "barrel"); bp.set(3, 1, 4, "chest", facing="w"); bp.set(3, 1, 8, "barrel")
+    for x in range(-4, 5):                                         # the sea round the base, out to the edge
+        for z in range(cz - 4, cz + 1):
+            if (x, z - cz) in octagon(4): continue
+            bp.setif(x, -4, z, "sand")
+            for y in range(-3, 0): bp.setif(x, y, z, "water")
     bp.markers["water_edge"] = (0, 0, cz - 4); bp.markers["keeper"] = (0, 1, 6)
     door_marker(bp, 0, 1, 10)
     return finish(bp, P, "salt", "lighthouse")
