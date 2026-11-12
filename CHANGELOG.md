@@ -9,6 +9,7 @@ How versions work is in [`docs/RELEASING.md`](docs/RELEASING.md).
 Everything merged to `main` since the last release goes here. Each pull request that changes what players see adds a line under one of these headings.
 
 ### Fixed
+- Boss bars show the boss's name again. The new custom bars left the title blank.
 - Gates and portcullises: clicking one always opens or shuts it, whatever you are holding, and never places a block against it. A Castle Gate now swings open like a door: all its joined blocks turn together as one leaf on a hinge at one end, away from you (or the other way if something is in the way), and swing back when shut. An open Portcullis rises out of sight so only its top piece shows, and you can walk under it.
 - The Wound landing's dock now reaches the river: a walkway steps down the bank to a landing stage on the water, so you can bring a boat alongside. The crane and a lamp stand out at the end of the stage.
 - A dropped Hollow Crown no longer vanishes. Knocked off a head, dropped by someone it killed, or thrown down, it now comes to rest on a small floating stone stand where it fell, slowly turning. The stand can't be hurt, burnt or moved, and the Crown stays there until someone clicks the stand to take it. Dropped over lava or into the void, it goes back to its chest at the Seat instead, so the one Crown can never be lost for good. The Almanac has a page on it.
