@@ -43,7 +43,7 @@ import { lance } from "./bosses.js";
 import { playReveal } from "./reveal.js";
 import { REVEAL } from "../lore/data/reveal.js";
 import { spawnChampion } from "./champions.js";
-import { announce, effect, flat, heal, healthOf, heroOf, hurt, particle, ring, shove, sound } from "./util.js";
+import { announce, blockKind, effect, flat, footingNear, heal, healthOf, heroOf, hurt, particle, ring, shove, sound } from "./util.js";
 import { sfx } from "../core/sfx.js";
 
 export const MORVANE = {
@@ -160,22 +160,10 @@ function placeFor(f, stage) {
 
 // ---------- small helpers ----------
 
-// Where he can land near a spot: the first place at or below it (2 up to 8 down) with floor under it and two
-// blocks of air for him, so he is never put inside the floor or dropped into the rock under the Seat. Mateo 2026-11-12: "Morvane is getting stuck in the void. He's lunging at me and falling through
-// the cracks": he used to land exactly where you stood, so a player in the air or at the edge sent him into
-// the drop. Pure: kindAt(x, y, z) is "solid", "open" or undefined (not loaded).
-export function footingNear(at, kindAt) {
-  const x = Math.floor(at.x), z = Math.floor(at.z), y0 = Math.floor(at.y);
-  for (let y = y0 + 2; y >= y0 - 8; y--) {
-    if (kindAt(x, y - 1, z) === "solid" && kindAt(x, y, z) === "open" && kindAt(x, y + 1, z) === "open") return { x: at.x, y, z: at.z };
-  }
-  return undefined;
-}
-const blockKind = (dim) => (x, y, z) => {
-  // Anything that is not air or liquid counts as floor (slabs, lattice, glass and amethyst are not "isSolid",
-  // and treating them as open let him land inside them). Only air is room to stand in.
-  try { const bl = dim.getBlock({ x, y, z }); return bl ? (bl.isAir ? "open" : bl.isLiquid ? "liquid" : "solid") : undefined; } catch { return undefined; }
-};
+// Where he can land near a spot (util.js footingNear): the first place from 2 up to 8 down with floor under it and two
+// blocks of air for him, so he is never put inside the floor or dropped into the rock under the Seat. Mateo 2026-11-12:
+// "Morvane is getting stuck in the void. He's lunging at me and falling through the cracks": he used to land exactly
+// where you stood, so a player in the air or at the edge sent him into the drop.
 // Move him to the nearest footing by a spot; if there is none (over the void) he stays where he is.
 function moveTo(f, at, options) {
   const to = footingNear(at, blockKind(f.dim));
