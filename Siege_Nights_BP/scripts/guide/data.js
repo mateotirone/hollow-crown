@@ -219,7 +219,7 @@ export const ENTRIES = [
   {
     id: "plan_book", ch: "keep", title: "The Plan Book and Plan Scrolls",
     tip: "Your Plan Book lists the buildings you can raise. Find more plans as Plan Scrolls.",
-    page: "A Plot Marker only offers buildings whose plan you know. Your §fPlan Book§r lists them (every new town's founder gets one; craft another from a book and a paper). The Hamlet's cottage, well and library are known from the start, and your town hall teaches more as it grows: the market and garden at level 2, the smithy and stable at 3, the storehouse and watchtower at 4.\n\n"
+    page: "A Plot Marker only offers buildings whose plan you know. Your §fPlan Book§r shows them as cards: open it from your pack or from the §fPlan Book§r button in your Town Hall menu. Found plans are bright, missing ones are grey with where to find them, and clicking a card shows its plot size, price, the worker it brings and the charter it counts toward. Every new town's founder gets a book; craft another from a book and a paper. The Hamlet's cottage, well and library are known from the start, and your town hall teaches more as it grows: the market and garden at level 2, the smithy and stable at 3, the storehouse and watchtower at 4.\n\n"
       + "Everything else comes as §fPlan Scrolls§r: a toppled Rival Lord leaves plans of their town, every boss leaves one for each player at the kill, and a Rumor job sometimes pays one. Use a scroll to learn its plan for good. A plan from another region is in that region's style, and raising it costs half as much again.\n\n"
       + "To trade a plan, copy it onto a scroll from your Plan Book for a few coins and a paper.",
     when: ["carry:siege:plan_book", "carry:siege:plan_scroll", "event:planLearned"],

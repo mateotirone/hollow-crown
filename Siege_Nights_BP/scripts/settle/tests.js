@@ -580,7 +580,7 @@ addTests("settle charters", {
 });
 
 // ---------- the Plan Book (plandata.js) ----------
-import { knownPlans, planChoices, unknownOf, planKey, parsePlan } from "./plandata.js";
+import { knownPlans, planChoices, unknownOf, planKey, parsePlan, planCards, whereFrom } from "./plandata.js";
 import { PLANS as PLAN_RULES } from "./config.js";
 addTests("settle plans", {
   "the Hamlet's basics are known, the hall teaches more, Creative knows everything"() {
@@ -601,5 +601,18 @@ addTests("settle plans", {
     assert(!offers.some((o) => o.id === "smithy" && !o.foreign), "no home-style smithy without its plan");
     assertEqual(parsePlan("smithy@frostmarch").style, "frostmarch");
     assertEqual(unknownOf(known, [{ id: "cottage", style: "vale" }, { id: "stable", style: "vale" }], "vale").map((p) => p.id).join(), "stable");
+  },
+  "the Plan Book cards: bright when found, greyed with a hint when not"() {
+    const designs = BUILDINGS.map((b) => b.id);
+    const styles = ["vale", "frostmarch", "saltreach", "emberwaste", "blackfen"];
+    const known = knownPlans({ stored: [planKey("smithy", "frostmarch")], hallLevel: 1 });
+    const cards = planCards(known, "saltreach", designs, styles);
+    assertEqual(cards.length, designs.length);
+    const by = Object.fromEntries(cards.map((c) => [c.id, c]));
+    assert(by.cottage.home && by.cottage.texture.endsWith("cottage_saltreach"), "a basic shows bright in the town's style");
+    assert(!by.smithy.home && by.smithy.known && by.smithy.texture.endsWith("smithy_frostmarch"), "a foreign-only plan shows in its own style");
+    assert(!by.stable.known && by.stable.texture.endsWith("stable_saltreach_dim"), "an unfound plan is greyed");
+    assertEqual(whereFrom("stable").short, "Hall level 3");
+    assert(whereFrom("cottage").short.length <= 14, "card hints are short");
   },
 });

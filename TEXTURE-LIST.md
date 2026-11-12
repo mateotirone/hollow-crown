@@ -45,6 +45,7 @@ The rules, palette and regional variants are in `art/STYLE-GUIDE.md`. Generators
 | Writ of Alliance | `siege_writ.png` | **Final style, awaiting your review** |
 | Plan Book (leather book, gold house on the cover) | `siege_plan_book.png` | **Placeholder by the settlement thread (studio/build_plans.py), awaiting your review** |
 | Plan Scroll (rolled blue-ink plan, red cord) | `siege_plan_scroll.png` | **Placeholder by the settlement thread (studio/build_plans.py), awaiting your review** |
+| Plan Book screen cards (isometric picture of each building in each regional style on a paper card; greyed copies for plans not found; copy card; gold hover frame) | `textures/ui/hc/plans/<building>_<style>.png`, `_dim.png`, `copy.png`, `hover.png` | **Generated from the real designs by studio/build_plans.py, redrawn when designs change** |
 | The Settler's Almanac (squat green cloth book, gilt corners and a gilt compass rose, cream page edges) | `siege_almanac.png`, made by `studio/art/build_almanac.py` | **Placeholder**, needs your look. Every player starts with this one |
 | Battering Ram | `siege_battering_ram.png` | **Final style, awaiting your review** |
 | Trebuchet / Ballista | `siege_trebuchet.png`, `siege_ballista.png` | **Final style, awaiting your review** |

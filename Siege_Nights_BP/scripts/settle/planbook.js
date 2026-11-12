@@ -16,13 +16,15 @@
 import { world, system, ItemStack, GameMode } from "@minecraft/server";
 import { ActionFormData } from "@minecraft/server-ui";
 import { isReady, on, emit, moduleStore } from "../siege/api.js";
-import { hallOf } from "../townhall/townhall.js";
+import { hallOf, hallMenuExtras } from "../townhall/townhall.js";
 import { STYLES } from "../townhall/styles.js";
-import { PLANS, REGION_TO_STYLE } from "./config.js";
+import { PLANS, REGION_TO_STYLE, PLOT_SIZE, PLOT_TAGS, TAG_WORDS, SETTLERS, CHARTERS, HOMES, HAND_NAMES } from "./config.js";
+import { CLASS_NAMES, opensAt } from "./charters.js";
+import { plotPrice } from "./plotmarker.js";
 import { BUILDINGS, BUILDING } from "./buildings.js";
-import { knownPlans, planKey, parsePlan, unknownOf } from "./plandata.js";
+import { knownPlans, planKey, parsePlan, unknownOf, planCards, whereFrom } from "./plandata.js";
 import { purse, charge, coins, lot } from "./wallet.js";
-import { townOf } from "./founding.js";
+import { townOf, tierName } from "./founding.js";
 import { sfx } from "../core/sfx.js";
 
 export const PLAN_BOOK = "siege:plan_book";
@@ -94,7 +96,7 @@ export function randomPlanScroll(player, from = DESIGNS.map((id) => ({ id, style
 world.afterEvents.itemUse.subscribe(({ source: player, itemStack }) => {
   if (player?.typeId !== "minecraft:player" || !isReady() || !itemStack) return;
   if (itemStack.typeId === PLAN_SCROLL) return readScroll(player, itemStack);
-  if (itemStack.typeId === PLAN_BOOK) system.run(() => openBook(player).catch((e) => console.warn(`[Hollow Crown] plan book: ${e}`)));
+  if (itemStack.typeId === PLAN_BOOK) system.run(() => openPlanScreen(player).catch((e) => console.warn(`[Hollow Crown] plan book: ${e}`)));
 });
 
 function readScroll(player, item) {
@@ -112,20 +114,83 @@ function readScroll(player, item) {
   } catch { /* it stays */ }
 }
 
-async function openBook(player) {
-  const known = [...knownBy(player)].map(parsePlan).filter((p) => BUILDING[p.id]);
-  const lines = known.map((p) => `§f${planName(p.id, p.style)}`);
-  const unknown = DESIGNS.filter((id) => !known.some((p) => p.id === id)).map((id) => BUILDING[id].name);
-  const price = Math.round(PLANS.scrollLots * lot());
-  const res = await new ActionFormData().title("Plan Book")
-    .body(`§7Plans you know:\n${lines.join("\n")}${unknown.length ? `\n\n§7Not found yet: §8${unknown.join(", ")}` : ""}\n\n§7Your town hall teaches more as it grows. Other plans come as Plan Scrolls.`)
-    .button(`Copy a plan to a scroll\n§8${coins(price)} and a paper`).button("Close").show(player);
-  if (res.canceled || res.selection !== 0) return;
-  const form = new ActionFormData().title("Copy which plan?");
-  for (const p of known) form.button(planName(p.id, p.style));
+// ---------- the Plan Book screen ----------
+// The town hall's "Plan Book" button and the Plan Book item open it: a grid of building cards (ui/server_form.json,
+// studio/build_tree_ui.py draws it for forms whose title carries PLAN_FLAG). A found plan is bright, one not found
+// yet is greyed with where to look. Click a card for the details. Without the resource pack it is a plain list.
+export const PLAN_FLAG = "§h§p";
+export const PLAN_COLS = 5; // studio/build_tree_ui.py PLAN_COLS
+const HAND = Object.keys(HAND_NAMES).map((id) => HAND_NAMES[id]);
+const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
+const styleOfTown = (owner) => townOf(owner)?.style ?? hallOf(owner)?.style ?? "vale";
+
+export async function openPlanScreen(player, owner = player.id) {
+  const creative = player.getGameMode?.() === GameMode.Creative;
+  const known = plansFor([...new Set([owner, player.id])], creative);
+  const townStyle = styleOfTown(owner);
+  const cards = planCards(known, townStyle, DESIGNS, REGION_STYLES);
+  const form = new ActionFormData().title(`${PLAN_FLAG}Plan Book`)
+    .body(`§7${cards.filter((c) => c.known).length} of ${cards.length} plans found. ${HAND.join(", ")}: build those by hand and register them at the plot.`);
+  for (const c of cards) {
+    const b = BUILDING[c.id];
+    const line = c.home ? `§7${cap(CLASS_NAMES[PLOT_SIZE[c.id]] ?? "")} plot` : c.known ? `§7${styleName(c.foreign[0])} style` : `§8${whereFrom(c.id).short}`;
+    form.button(`${c.known ? "§f" : "§7"}${b.name}\n${line}`, c.texture);
+  }
+  form.button("§fCopy a plan\n§7to a scroll", "textures/ui/hc/plans/copy");
+  const cells = Math.ceil((cards.length + 1) / PLAN_COLS) * PLAN_COLS;
+  for (let i = cards.length + 1; i < cells; i++) form.button("-");
+  const res = await form.show(player);
+  if (res.canceled) return;
+  if (res.selection === cards.length) return copyMenu(player, owner, known);
+  const c = cards[res.selection];
+  if (c) return planDetails(player, owner, c, townStyle);
+}
+
+async function planDetails(player, owner, c, townStyle) {
+  const b = BUILDING[c.id];
+  const tags = PLOT_TAGS[c.id];
+  const where = tags?.needs ? ` It must stand ${tags.needs.map((t) => TAG_WORDS[t]).join(" or ")}.` : tags?.prefer ? ` Best ${tags.prefer.map((t) => TAG_WORDS[t]).join(" or ")}.` : "";
+  const worker = SETTLERS.workers[c.id];
+  const charters = CHARTERS.flatMap((lines, t) => lines.filter((l) => l.ids.includes(c.id) && t < CHARTERS.length - 1).map((l) => `§7Counts toward the §f${tierName(t)}§7 charter (to become a ${tierName(t + 1)}): ${l.count ? `${l.count} ` : ""}${l.what}.`));
+  const others = REGION_STYLES.filter((s) => s !== townStyle);
+  const body = [
+    `§7${b.blurb ?? ""}`,
+    "",
+    `§7Plot: §f${CLASS_NAMES[PLOT_SIZE[c.id]] ?? "any"}§7.${where}${opensAt(c.id) > 0 ? ` Opens once you are a ${tierName(opensAt(c.id))}.` : ""}`,
+    worker ? `§7Brings a §f${worker}§7 to live and work there.` : HOMES.includes(c.id) ? "§7A home: its beds take in settlers." : "",
+    ...charters,
+    "",
+    c.home ? `§aYou know it in your own style (${styleName(townStyle)}): ${coins(plotPrice(c.id))}.` : `§8Not found in your own style (${styleName(townStyle)}).`,
+    ...others.map((s) => (c.foreign.includes(s) ? `§a${styleName(s)} style known: ${coins(plotPrice(c.id, true))}.` : `§8${styleName(s)} style: ${coins(plotPrice(c.id, true))} if you find it.`)),
+    "§8A style that isn't your town's costs half as much again.",
+    ...(c.known ? [] : ["", `§7Where to look: ${whereFrom(c.id).long}`]),
+  ].filter((l, i, a) => l !== "" || (a[i - 1] !== "" && i > 0));
+  const form = new ActionFormData().title(b.name).body(body.join("\n")).button("Back to the Plan Book");
+  const copyable = [...(c.home ? [undefined] : []), ...c.foreign];
+  for (const s of copyable) form.button(`Copy to a scroll${s ? ` (${styleName(s)})` : ""}\n§8${coins(copyPrice())} and a paper`);
+  const res = await form.show(player);
+  if (res.canceled) return;
+  if (res.selection === 0) return openPlanScreen(player, owner);
+  const s = copyable[res.selection - 1];
+  return copyPlan(player, { id: c.id, style: s });
+}
+
+const copyPrice = () => Math.round(PLANS.scrollLots * lot());
+
+async function copyMenu(player, owner, known) {
+  const plans = [...known].map(parsePlan).filter((p) => BUILDING[p.id]);
+  const form = new ActionFormData().title("Copy which plan?").body(`§7A copy costs ${coins(copyPrice())} and a paper. Trade it, or give it to a friend.`);
+  for (const p of plans) form.button(planName(p.id, p.style));
+  form.button("Back to the Plan Book");
   const pick = await form.show(player);
   if (pick.canceled) return;
-  const p = known[pick.selection];
+  if (pick.selection === plans.length) return openPlanScreen(player, owner);
+  return copyPlan(player, plans[pick.selection]);
+}
+
+function copyPlan(player, p) {
+  const price = copyPrice();
   const creative = player.getGameMode() === GameMode.Creative;
   if (!creative) {
     const inv = player.getComponent("minecraft:inventory").container;
@@ -139,6 +204,8 @@ async function openBook(player) {
   }
   givePlanScroll(player, p.id, p.style ?? townStyleOf(player));
 }
+
+hallMenuExtras.push({ label: "Plan Book\n§8buildings you can raise, and where to find more", icon: "textures/items/siege_plan_book", action: (player, owner) => openPlanScreen(player, owner) });
 
 // Every new town's owner gets a Plan Book once
 on("townLaidOut", ({ owner, tier }) => {
