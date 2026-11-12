@@ -1,19 +1,22 @@
 """The Hollow's stronghold: the Citadel's way of building, the Hollow's own character (Mateo, 2026-11-12).
 
-It is raised the same way as the Citadel (curtains, round towers with spiral stairs, gatehouses, a ring
-street with settlement plots, gardens from the tree database, a ruler's seat with a throne), from the
-same Citadel class, but it is not a re-skin. Everything that makes the Citadel a Citadel is changed:
+Raised the same way as the Citadel (curtains, towers with spiral stairs, gatehouses, a ring street with
+settlement plots, gardens from the tree database, a ruler's keep with a throne), from the same Citadel
+class, but it is the crooked city's stronghold, not a re-skin. Mateo (18:15): keep the round plan; make it
+"stupid tall, with angles and sharp points", spooky, and NOT symmetrical.
 
-  * a ROUND plan instead of an octagon and a square: a round outer curtain and a round inner ring,
-  * towers spaced unevenly and every one LEANING in clean steps: the upper storey one block off true and
-    the roof one block further (the Hollow's crookedness rule: whole storeys, never a shear),
-  * a MOAT of the light river (siege:glimmerflow) round the walls, crossed by one bridge,
-  * no farmland: Veilcap beds and giant glowing Veilcap mushrooms out to the edge,
-  * in place of the square Great Keep, the DRUM: a round keep whose upper storey sits one block off true,
-    a crown of points on its parapet (the Crown's colours, allowed only at the ruler's seat), a slim
-    spire, four leaning buttress turrets, and its own ring of light river with four bridges,
-  * LOW, because the Hollow has a stone sky 30 to 50 blocks up: the walls stop at 13 and 17, the top of
-    the spire is under 50.
+  * ROUND: a round outer curtain and a round inner ring, a light-river moat (siege:glimmerflow) round it.
+  * NEEDLES, not round towers: every tower is angular (diamond, octagon or square plan, chosen per tower),
+    each a different height, each LEANING the way the drowned city's towers lean: whole storeys stepped one
+    block over every dozen or so blocks, never a shear. Each ends in a corbelled parapet with spiked corner
+    pinnacles and a steep faceted pyramid spire of deepslate, tipped with the spire top.
+  * NOTHING MATCHES: towers spaced unevenly round the rings, heights and sizes all different, jagged
+    merlons of uneven height, and the keep a lopsided cluster.
+  * THE SPIRE: in place of a keep, a cluster of four needles of different plans and heights round the
+    throne hall, the tallest climbing in three leaning steps to about 150 (the cave roof over the Seat is
+    166 up). Amethyst points (the Crown's colours, the ruler's seat only) at its parapet.
+  * Soul light behind iron bars, soul fire on the parapets, Veilmoss strands down walls and towers,
+    giant glowing Veilcaps and Veilcap beds outside.
 
 Coordinates as in citadel.py: x east, y up, z south, y = 0 the ground, origin the ruler's banner,
 gate to the south.
@@ -27,162 +30,208 @@ import furnish as F
 from citadel import Citadel, h3, pick, outward, OPP, WALL_T
 
 R_OUT = 73          # outer curtain's outer face (a circle with the area of the Citadel's octagon)
-WALK = 13           # outer wall walk: low, under the stone sky
+WALK = 17           # outer wall walk
 R_IN = 37           # inner ring's outer face
-IN_WALK = 17
+IN_WALK = 23
 RING = 43           # ring street's middle radius
 RING_W = 5
 AVENUE_W = 7
-DRUM = (0, -2)      # the Drum: a round drum
-DRUM_R = 15.5       # 31 across
-DRUM_TOP = 28
-DRUM_FLOORS = [12, 20]
-OFF_Y = 20          # from here up the Drum's storey sits one block off true
+KEEP = (0, -2)      # the Spire: the throne hall at the foot of the tallest needle
+KEEP_REACH = 20     # the cluster stays inside this radius; the lane and the river ring go round it
 MOAT = (R_OUT + 3, R_OUT + 9)
 FIELDS_TO = 100
 
-OUT_TOWERS = [62, 118, 24, -14, -52, -91, -128, -163, 157]   # degrees, 0 east, 90 south (the gate): uneven on purpose
-IN_TOWERS = [42, 138, -28, -93, -151]
+# (angle in degrees: 0 east, 90 south = the gate side; size; height): uneven on purpose
+OUT_TOWERS = [(61, 7.5, 52), (121, 6.5, 40), (24, 5.5, 34), (-11, 8.5, 63), (-49, 6.5, 44), (-93, 7.5, 58),
+              (-124, 5.5, 37), (-166, 8.5, 49), (154, 6.5, 66)]
+IN_TOWERS = [(44, 6.5, 74), (141, 7.5, 61), (-31, 5.5, 88), (-97, 6.5, 57), (-148, 7.5, 80)]
+# the Spire's needles: (dx, dz from KEEP, size, height, plan, lean steps every)
+SPIRE = [(-12, 4, 6.5, 84, "oct", 14), (11, -9, 5.5, 68, "round", 13), (8, 10, 4.5, 52, "diamond", 11),
+         (0, 0, 10.5, 108, "diamond", 32)]
+SHAPES = ("diamond", "oct", "square", "oct")
 
 
 def d_out(x, z): return R_OUT - math.hypot(x, z)
 def d_in(x, z): return R_IN - math.hypot(x, z)
 
 
+def metric(shape, dx, dz):
+    """Distance from a tower's axis in its plan's own measure: round, diamond, octagon or square."""
+    ax, az = abs(dx), abs(dz)
+    if shape == "diamond": return (ax + az) * 0.78
+    if shape == "square": return max(ax, az)
+    if shape == "oct": return max(ax, az, (ax + az) * 0.76)
+    return math.hypot(dx, dz)
+
+
 class HollowStronghold(Citadel):
     def __init__(self):
         super().__init__("hollow")
-        self.S = dict(self.S, roof_off=0)            # the lean carries the roof's offset here
+        self.S = dict(self.S, roof_off=0)
         self.bp = Blueprint("hollow_stronghold")
         self.dout, self.din, self.reach = d_out, d_in, R_OUT
 
-    # ---- crookedness: whole storeys one block off true ----------------------------------------------
-    def shifted(self, steps, fn, *a, **k):
-        """Builds fn into a scratch blueprint, then copies it back with everything at or above each step's
-        height moved one block that way. Steps sit on floors, so each storey stays square on its beam."""
-        real, tmp = self.bp, Blueprint("tmp")
-        self.bp = tmp
-        try: fn(*a, **k)
-        finally: self.bp = real
-        for (x, y, z), v in tmp.cells.items():
-            ox = oz = 0
-            for ys, dx, dz in steps:
-                if y >= ys: ox += dx; oz += dz
-            real.cells[(x + ox, y, z + oz)] = v
-
+    # ---- needles ------------------------------------------------------------------------------------
     def tower(self, cx, cz, r, h, walks=(), door=None, roof=True, name="tower"):
-        """Every tower leans: straight up to its first floor above the wall walk, one block over from there,
-        and its roof one block further, the same way. The way it leans is the tower's own."""
-        dx, dz = ((1, 0), (-1, 0), (0, 1), (0, -1))[int(h3(cx, 7, cz, 3) * 4)]
-        floors = sorted({h} | set(walks) | {f for f in range(9, h - 2, 8) if all(abs(f - w) > 3 for w in walks)})
-        low = max(list(walks) + [8]) + 4
-        step = next((f for f in floors if f >= low and f < h), h - 4)
-        self.shifted([(step, dx, dz), (h + 1, dx, dz)], Citadel.tower, self, cx, cz, r, h, walks, door, roof, name)
+        """Every tower in the stronghold is a needle: the Citadel's tower calls (gatehouses too) land here.
+        Its plan, extra height and lean come from where it stands, so no two match."""
+        shape = SHAPES[int(h3(cx, 5, cz, 17) * len(SHAPES))]
+        self.needle(cx, cz, r, int(h * (1.25 + h3(cx, 6, cz, 19) * 0.6)), shape, walks=walks, door=door, name=name)
 
-    # ---- the Drum ------------------------------------------------------------------------------------
-    def drum(self):
-        kx, kz = DRUM
-        self.shifted([(OFF_Y, 1, 0)], self.drum_body)
-        for k in range(4):                               # four buttress turrets on the diagonals, leaning
-            a = math.radians(45 + 90 * k)
-            self.tower(kx + round(math.cos(a) * (DRUM_R + 1)), kz + round(math.sin(a) * (DRUM_R + 1)), 3.5, DRUM_TOP + 6, name="Drum turret")
-        self.spire(kx + 1, kz)                           # on the offset storey
-        self.keep_box = (kx - 17, kz - 17, kx + 17, kz + 17)
-
-    def drum_body(self):
+    def needle(self, cx, cz, r, h, shape, walks=(), door=None, name="needle", every=None, crown=False):
+        """An angular leaning tower. Shell 2 thick, floors every 8 (and at wall walks), a spiral stair up each
+        straight run, barred slits lit with soul lanterns, a corbelled parapet with jagged merlons and spiked
+        corner pinnacles, then a steep faceted pyramid spire with the spire top."""
         S = self.S
-        kx, kz = DRUM
-        R, TOP = DRUM_R, DRUM_TOP
-        Ri = int(R)
-        for dx in range(-Ri, Ri + 1):
-            for dz in range(-Ri, Ri + 1):
-                d = math.hypot(dx, dz)
-                if d > R: continue
-                x, z = kx + dx, kz + dz
-                self.found(x, z)
-                if d > R - 3:
-                    self.dressed(x, z, TOP, bands=(DRUM_FLOORS[0], DRUM_FLOORS[1], OFF_Y - 1))
-                    if d > R - 1:
-                        self.set(x, TOP + 1, z, S["smooth"])
-                        if (dx + dz) % 2 == 0: self.set(x, TOP + 2, z, S["stone"])
-                        ang = (math.degrees(math.atan2(dz, dx)) + 360) % 360
-                        if min(ang % 30, 30 - ang % 30) < 1.6 and not (75 < ang < 105):   # barred windows, the door side kept clear
-                            for f in (0, DRUM_FLOORS[0], DRUM_FLOORS[1]):
-                                for y in range(f + 4, f + 7): self.set(x, y, z, "iron_bars")
+        R = int(r) + 1
+        ldx, ldz = ((1, 0), (-1, 0), (0, 1), (0, -1))[int(h3(cx, 7, cz, 3) * 4)]
+        every = every or (11 + int(h3(cx, 8, cz, 5) * 6))
+        low = max(list(walks) + [6]) + 4
+        floors = sorted({0} | set(walks) | set(range(9, h - 3, 8)) | {h})
+        steps = [f for f in floors if f >= low and f < h - 4]
+        steps = [f for i, f in enumerate(steps) if i == 0 or f - max([s for s in steps[:i]]) >= every][:4]
+        steps = sorted(set(steps))
+        def off(y):
+            n = sum(1 for s in steps if y >= s)
+            return ldx * n, ldz * n
+        cells = [(dx, dz, metric(shape, dx, dz)) for dx in range(-R - 1, R + 2) for dz in range(-R - 1, R + 2)]
+        cells = [(dx, dz, m) for dx, dz, m in cells if m <= r + 1.01]
+        for dx, dz, m in cells:
+            if m <= r: self.found(cx + dx, cz + dz)
+        for y in range(1, h + 1):
+            ox, oz = off(y)
+            band = y % 9 == 0
+            for dx, dz, m in cells:
+                if m > r: continue
+                x, z = cx + dx + ox, cz + dz + oz
+                if m > r - 2:
+                    n = S["band"] if band else (S["stone"] if (m > r - 1 and h3(x, y, z, 2) < 0.12) else S["smooth"])
+                    if y <= 2: n = S["plinth"]
+                    self.set(x, y, z, n)
                 else:
-                    self.set(x, 0, z, S["court"] if (dx + dz) % 2 else S["tiles"])
-                    self.col(x, z, 1, TOP - 1, "air")
-                    for f in DRUM_FLOORS + [TOP]: self.set(x, f, z, S["tiles"])
-        # the crown: eight points on the parapet, amethyst-tipped (the Crown's colours, at the ruler's seat only)
-        for k in range(8):
-            a = math.radians(22.5 + 45 * k)
-            x, z = kx + round(math.cos(a) * (R - 0.5)), kz + round(math.sin(a) * (R - 0.5))
-            self.col(x, z, TOP + 1, TOP + 4, S["stone"]); self.set(x, TOP + 5, z, "amethyst_block")
-        # the door: 5 wide, pointed, on the south
-        for z in range(kz + Ri - 3, kz + Ri + 1):
-            for dx in range(-2, 3):
-                self.col(kx + dx, z, 1, {2: 6, 1: 7, 0: 8}[abs(dx)], "air")
-        self.set(kx, 8, kz + Ri - 3, self.S["light"], hanging=True)
-        self.drum_interior(kx, kz)
+                    self.set(x, y, z, S["tiles"] if y in floors else "air")
+        for f in floors[1:-1]:                              # barred slits on the four faces, soul light behind
+            ox, oz = off(f + 4)
+            for dx, dz, m in cells:
+                if m <= r and m > r - 1 and (dx == 0 or dz == 0):
+                    for y in range(f + 3, f + 6): self.set(cx + dx + ox, y, cz + dz + oz, "iron_bars")
+            self.set(cx + ox + (1 if r > 4 else 0), f + 5, cz + oz, S["light"], hanging=True)
+        for w in walks:                                     # wall-walk doorways on every side
+            ox, oz = off(w + 1)
+            for dx, dz, m in cells:
+                if r - 2 < m <= r and (abs(dx) <= 1 or abs(dz) <= 1):
+                    self.col(cx + dx + ox, cz + dz + oz, w + 1, w + 3, "air")
+        if door:
+            ox, oz = {"n": (0, -1), "s": (0, 1), "e": (1, 0), "w": (-1, 0)}[door]
+            for k in range(R - 3, R + 1):
+                for s in (-1, 0, 1):
+                    self.col(cx + ox * k + (s if oz else 0), cz + oz * k + (s if ox else 0), 1, 4, "air")
+        # spiral stairs: one per straight run, each landing on the floor where the tower steps over
+        runs = [1] + steps + [h]
+        for a, b in zip(runs, runs[1:]):
+            ox, oz = off(a)
+            if r >= 4: self.spiral(cx + ox, cz + oz, a if a == 1 else a + 1, b)
+            else: self.col(cx + ox, cz + oz - (int(r) - 2), a, b - 1, "ladder", facing="s")
+        # the top: corbels, a parapet of jagged merlons, spiked pinnacles at the corners
+        ox, oz = off(h + 1)
+        top = h + 1
+        ring = [(dx, dz, m) for dx, dz, m in cells if r < m <= r + 1.01]
+        for dx, dz, m in ring:
+            x, z = cx + dx + ox, cz + dz + oz
+            self.set(x, h, z, S["corbel"], facing=OPP[outward(dx, dz)], half="top")
+            self.set(x, top, z, S["smooth"])
+            hgt = int(h3(x, top, z, 29) * 3)
+            for y in range(top + 1, top + 1 + hgt): self.set(x, y, z, S["stone"])
+        corners = {}
+        for dx, dz, m in ring:
+            q = (dx > 0, dz > 0) if shape in ("square", "oct", "round") else ((abs(dx) > abs(dz)), dx + dz > 0)
+            sc = abs(dx) + abs(dz) if shape != "diamond" else max(abs(dx), abs(dz))
+            if sc > corners.get(q, (-1,))[0]: corners[q] = (sc, dx, dz)
+        for _, dx, dz in corners.values():
+            x, z = cx + dx + ox, cz + dz + oz
+            self.col(x, z, top, top + 5, S["stone"]); self.set(x, top + 6, z, S["wallcap"]); self.set(x, top + 7, z, S["wallcap"])
+            self.set(x, top + 8, z, "amethyst_block" if crown else S["finial"])
+        for k, (dx, dz, m) in enumerate(ring):              # soul fire here and there on the parapet walk
+            if h3(cx + dx, 3, cz + dz, 41) < 0.04: self.set(cx + dx + ox, top + 1, cz + dz + oz, "soul_campfire")
+        # the spire: a faceted pyramid in the tower's own plan, very steep, hollow inside
+        H = int(round((r + 1) * (3.2 + h3(cx, 9, cz, 7) * 1.4)))
+        y0 = top + 1
+        for k in range(H + 1):
+            rk = (r + 0.2) * (1 - k / (H + 1))
+            sx, sz = ox + (ldx if k > H * 0.55 else 0), oz + (ldz if k > H * 0.55 else 0)   # the tip bends over too
+            for dx, dz, m in cells:
+                if m <= rk and m > rk - 1.6 or (m <= rk and k == H):
+                    x, z = cx + dx + sx, cz + dz + sz
+                    self.set(x, y0 + k, z, pick([("deepslate_tiles", 70), ("cobbled_deepslate", 18), ("polished_blackstone_bricks", 12)], x, z + k, 5))
+        tipx, tipz = cx + ox + ldx, cz + oz + ldz
+        t = max(y for (x, y, z) in self.bp.cells if x == tipx and z == tipz and y >= y0 and self.bp.cells[(x, y, z)][0] not in ("air", "keep"))
+        self.set(tipx, t + 1, tipz, S["finial"])
+        # Veilmoss strands down two faces from under the corbels
+        for dx, dz, m in ring:
+            if h3(cx + dx, 4, cz + dz, 47) < 0.18:
+                for y in range(h - 1, h - 4 - int(h3(cx + dx, 5, cz + dz, 47) * 9), -1):
+                    x, z = cx + dx + ox, cz + dz + oz
+                    if self.bp.get(x, y, z)[0] in ("keep", "air"): self.set(x, y, z, "siege:veilmoss_strands")
+        self.towers.append({"name": name, "x": cx, "z": cz, "r": r + 1, "h": h, "shape": shape, "top": t + 1})
 
-    def drum_interior(self, kx, kz):
-        """The throne hall on the ground floor (a ring of columns, the carpet, the dais and the throne), the
-        ruler's chambers above it, the council room on the offset storey, a spiral stair through all of it."""
+    # ---- curtains with jagged merlons ---------------------------------------------------------------
+    def curtain(self, dist, reach, walk, slit_y):
+        Citadel.curtain(self, dist, reach, walk, slit_y)
+        S = self.S
+        for x in range(-reach, reach + 1):
+            for z in range(-reach, reach + 1):
+                d = dist(x, z)
+                if 0 <= d < 1 and (x + z) % 2 == 0:          # merlons of uneven height, some sharpened
+                    r = h3(x, walk, z, 13)
+                    if r < 0.35: self.set(x, walk + 4, z, S["stone"])
+                    if r < 0.12: self.set(x, walk + 5, z, S["wallcap"])
+
+    # ---- the Spire ----------------------------------------------------------------------------------
+    def spire_keep(self):
+        kx, kz = KEEP
+        for dx, dz, r, h, shape, every in SPIRE:
+            main = dx == 0 and dz == 0
+            self.needle(kx + dx, kz + dz, r, h, shape, every=every, crown=main, name="the Spire" if main else "Spire needle")
+        # the main needle's hall: a 5-wide pointed door on the south, the throne at the north
+        r = SPIRE[-1][2]
+        for dz in range(int(r * 1.28) - 3, int(r * 1.28) + 3):
+            for dx in range(-2, 3):
+                self.col(kx + dx, kz + dz, 1, {2: 6, 1: 7, 0: 8}[abs(dx)], "air")
+        # doorways from the hall into the three lesser needles
+        for dx, dz, r2, h, shape, every in SPIRE[:-1]:
+            n = max(abs(dx), abs(dz))
+            for k in range(n + 1):
+                x, z = kx + round(dx * k / n), kz + round(dz * k / n)
+                for s in (-1, 0, 1):
+                    xx, zz = (x + s, z) if abs(dz) > abs(dx) else (x, z + s)
+                    self.col(xx, zz, 1, 4, "air")
+        self.spire_interior(kx, kz)
+        self.keep_box = (kx - KEEP_REACH, kz - KEEP_REACH, kx + KEEP_REACH, kz + KEEP_REACH)
+
+    def spire_interior(self, kx, kz):
+        """The throne hall at the foot of the Spire: the carpet, the dais and the throne, soul fire; the
+        ruler's chambers and the council room on the two floors above."""
         S = self.S
         bp = self.bp
-        cloth = f"{S['cloth']}_carpet"
+        inside = lambda dx, dz: metric("diamond", dx, dz) <= 7.6
         def put(x, y, z, n, **p):
             if bp.get(x, y, z)[0] in ("air", "keep"): self.set(x, y, z, n, **p)
-        for k in range(8):                               # columns
-            a = math.radians(22.5 + 45 * k)
-            x, z = kx + round(math.cos(a) * 9), kz + round(math.sin(a) * 9)
-            self.col(x, z, 1, 11, S["stone"]); self.set(x, 11, z, S["band"])
-        for z in range(kz - 9, kz + 13):
-            for dx in (-1, 0, 1): put(kx + dx, 1, z, cloth)
-        for dx in range(-4, 5):                          # the dais, the throne, soul fire either side
-            for dz in range(-12, -9):
-                if math.hypot(dx, dz) <= 12.4: self.set(kx + dx, 1, kz + dz, S["dais"][0] if abs(dx) == 4 or dz == -10 else S["dais"][1])
-        self.set(kx, 2, kz - 11, "siege:throne")
-        for dx in (-3, 3): self.set(kx + dx, 2, kz - 11, "soul_campfire")
-        for y in (11,):
-            for dx, dz in ((-5, 0), (5, 0), (0, 5), (0, -5)): put(kx + dx, y, kz + dz, S["light"], hanging=True)
-        sx, sz = kx - 7, kz + 7                          # the spiral, between two columns
-        self.spiral(sx, sz, 1, DRUM_TOP)
-        # floor one: the ruler's chambers, a bed in an alcove, chests, bookshelves round the wall
-        y = DRUM_FLOORS[0] + 1
-        F.bed(bp, kx + 2, y, kz - 10, "n"); F.bed(bp, kx - 2, y, kz - 10, "n")
-        for k in range(24):
-            a = math.radians(k * 15)
-            x, z = kx + round(math.cos(a) * 11.5), kz + round(math.sin(a) * 11.5)
-            if math.hypot(x - sx, z - sz) < 3: continue
-            put(x, y, z, "bookshelf" if k % 3 else "chest", facing=OPP[outward(x - kx, z - kz)])
-            if k % 3: put(x, y + 1, z, "bookshelf")
-        F.table(bp, kx, y, kz + 2, chairs="ew", mat="dark_oak")
-        put(kx + 5, y, kz + 3, "lectern", facing="w"); put(kx - 5, y, kz - 3, "barrel")
-        for dx, dz in ((-6, 0), (6, 0), (0, 6), (0, -6)): put(kx + dx, DRUM_FLOORS[1] - 1, kz + dz, S["light"], hanging=True)
-        # floor two (the offset storey): the council room round a long table
-        y = DRUM_FLOORS[1] + 1
-        F.long_table(bp, kx - 5, kx + 5, y, kz, mat="dark_oak")
-        put(kx, y, kz - 4, "cartography_table"); put(kx - 3, y, kz + 5, "lectern", facing="n"); put(kx + 3, y, kz + 5, "lectern", facing="n")
-        for dx, dz in ((-6, 0), (6, 0), (0, 6), (0, -6)): put(kx + dx, DRUM_TOP - 1, kz + dz, S["light"], hanging=True)
-
-    def spire(self, cx, cz):
-        """The slim spire on the Drum's roof: a 9-wide round tower to 38, a tall deepslate cone, the spire top."""
-        S = self.S
-        y0, y1, r = DRUM_TOP + 1, DRUM_TOP + 10, 4.5
-        for dx in range(-5, 6):
-            for dz in range(-5, 6):
-                d = math.hypot(dx, dz)
-                if d > r: continue
-                x, z = cx + dx, cz + dz
-                if d > r - 1.5:
-                    for y in range(y0, y1 + 1): self.set(x, y, z, S["band"] if y in (y0 + 4, y1) else S["smooth"])
-                    if d > r - 1 and (dx == 0 or dz == 0): self.set(x, y0 + 6, z, "iron_bars"); self.set(x, y0 + 7, z, "iron_bars")
-                else:
-                    self.col(x, z, y0, y1 - 1, "air"); self.set(x, y1, z, S["tiles"])
-        for y in range(y0, y0 + 3): self.set(cx, y, cz + 4, "air")
-        self.col(cx, cz - 3, y0, y1 - 1, "ladder", facing="s")
-        self.cone(cx, y1 + 1, cz, r + 1.5, 12)
+        cloth = f"{S['cloth']}_carpet"
+        for dz in range(-6, 13):
+            for dx in (-1, 0, 1):
+                if inside(dx, dz) or dz > 0: put(kx + dx, 1, kz + dz, cloth)
+        for dx in range(-3, 4):
+            for dz in range(-8, -5):
+                if inside(dx, dz): self.set(kx + dx, 1, kz + dz, S["dais"][0] if abs(dx) == 3 or dz == -6 else S["dais"][1])
+        self.set(kx, 2, kz - 7, "siege:throne")
+        for dx in (-2, 2): self.set(kx + dx, 2, kz - 7, "soul_campfire")
+        y = 10
+        F.bed(bp, kx + 2, y, kz - 4, "n")
+        for dx, dz, n in ((-4, -2, "chest"), (4, -2, "chest"), (-5, 1, "bookshelf"), (5, 1, "bookshelf"), (-4, 3, "barrel"), (3, 3, "lectern")):
+            put(kx + dx, y, kz + dz, n)
+        y = 18
+        F.long_table(bp, kx - 3, kx + 3, y, kz + 1, mat="dark_oak")
+        put(kx, y, kz - 3, "cartography_table")
 
     # ---- streets, the ward, plots, the moat, the beds ------------------------------------------------
     def ground(self):
@@ -207,29 +256,29 @@ class HollowStronghold(Citadel):
         """Inside the inner ring: a paved way round the Drum, its own ring of light river with four bridges,
         a processional way from the Crown gate, and a grove of giant Veilcaps."""
         S = self.S
-        kx, kz = DRUM
-        for x in range(kx - 24, kx + 25):
-            for z in range(kz - 24, kz + 25):
+        kx, kz = KEEP
+        for x in range(kx - 27, kx + 28):
+            for z in range(kz - 27, kz + 28):
                 d = math.hypot(x - kx, z - kz)
-                if d <= DRUM_R or d_in(x, z) < WALL_T + 1 or self.bp.get(x, 1, z)[0] != "keep": continue
+                if d_in(x, z) < WALL_T + 1 or self.bp.get(x, 1, z)[0] != "keep": continue
                 bridge = abs(x - kx) <= 1 or abs(z - kz) <= 1
-                if DRUM_R < d <= 19.5:
+                if d <= 22.5:
                     self.set(x, 0, z, pick(S["street"], x, z, 31)); self.street.add((x, z))
-                elif 19.5 < d <= 22.5:
+                elif 22.5 < d <= 25.5:
                     if bridge:
                         self.set(x, 0, z, S["court"]); self.street.add((x, z))
                     else:
                         self.col(x, z, -1, 0, "siege:glimmerflow"); self.taken.add((x, z))
-                    if d > 22: self.street.add((x, z))
-        for z in range(kz + 17, R_IN - 10):              # the processional way to the Crown gate
+                    if d > 25: self.street.add((x, z))
+        for z in range(kz + 20, R_IN - 10):              # the processional way to the Crown gate
             for x in range(-3, 4):
                 if self.bp.get(x, 1, z)[0] == "keep": self.set(x, 0, z, S["court"] if (x + z) % 2 else S["court2"]); self.street.add((x, z))
-        for k in range(8):                               # soul lanterns round the Drum's way
-            a = math.radians(k * 45)
-            self.lamp(kx + round(math.cos(a) * 18), kz + round(math.sin(a) * 18))
+        for k in range(7):                               # soul lanterns round the Spire's way, unevenly
+            a = math.radians(k * 51 + 13)
+            self.lamp(kx + round(math.cos(a) * 21), kz + round(math.sin(a) * 21))
         # the grove between the river ring and the inner wall
         spots = sorted(((x, z) for x in range(-31, 32) for z in range(-31, 32)
-                        if 24 <= math.hypot(x - kx, z - kz) and d_in(x, z) >= WALL_T + 3), key=lambda c: h3(c[0], 4, c[1], 71))
+                        if 27 <= math.hypot(x - kx, z - kz) and d_in(x, z) >= WALL_T + 3), key=lambda c: h3(c[0], 4, c[1], 71))
         done = []
         for x, z in spots:
             if any(math.hypot(x - a, z - b) < 8 for a, b in done): continue
@@ -314,24 +363,23 @@ class HollowStronghold(Citadel):
         for x in range(-R_OUT - 1, R_OUT + 2):
             for z in range(-R_OUT - 1, R_OUT + 2):
                 if not (-1 <= d_out(x, z) < 0) or h3(x, 0, z, 33) > 0.12: continue
-                for y in range(WALK + 1, WALK - 2 - int(h3(x, 1, z, 33) * 4), -1):
+                for y in range(WALK + 1, WALK - 3 - int(h3(x, 1, z, 33) * 7), -1):
                     if self.bp.get(x, y, z)[0] == "keep": self.set(x, y, z, "siege:veilmoss_strands")
 
     def build(self):
         self.curtain(d_out, R_OUT + 2, WALK, 10)
-        for i, ang in enumerate(OUT_TOWERS):
+        for ang, r, h in OUT_TOWERS:
             a = math.radians(ang)
-            big = i % 3 != 1
-            self.tower(round(math.cos(a) * (R_OUT - 1)), round(math.sin(a) * (R_OUT - 1)), 7.5 if big else 6.5, 24 if big else 22,
-                       walks=(WALK,), name="outer tower")
-        self.gatehouse(R_OUT + 5, R_OUT - 9, 9, 22, 6.5, 26, WALK, "Hollow Gate")
+            self.needle(round(math.cos(a) * (R_OUT - 1)), round(math.sin(a) * (R_OUT - 1)), r, h,
+                        SHAPES[int(h3(ang, 1, int(r * 2), 3) * len(SHAPES))], walks=(WALK,), name="outer needle")
+        self.gatehouse(R_OUT + 5, R_OUT - 9, 9, 28, 6.5, 40, WALK, "Hollow Gate")
         self.curtain(d_in, R_IN + 2, IN_WALK, 12)
-        for i, ang in enumerate(IN_TOWERS):
+        for ang, r, h in IN_TOWERS:
             a = math.radians(ang)
-            self.tower(round(math.cos(a) * (R_IN - 2)), round(math.sin(a) * (R_IN - 2)), 6.5 if i % 2 == 0 else 5.5, 28,
-                       walks=(IN_WALK,), name="inner tower")
-        self.gatehouse(R_IN + 1, R_IN - 11, 9, 25, 5.5, 29, IN_WALK, "Crown Gate", tower_back=5)
-        self.drum()
+            self.needle(round(math.cos(a) * (R_IN - 2)), round(math.sin(a) * (R_IN - 2)), r, h,
+                        SHAPES[int(h3(ang, 2, int(r * 2), 3) * len(SHAPES))], walks=(IN_WALK,), name="inner needle")
+        self.gatehouse(R_IN + 1, R_IN - 11, 9, 31, 5.5, 46, IN_WALK, "Crown Gate", tower_back=5)
+        self.spire_keep()
         self.ground()
         self.taken = set()
         self.ward()
