@@ -26,6 +26,9 @@ STORE = [-7, -15, -3, -11]                # storeroom 5 x 5, back left
 BLOOM = [1, -15, 7, -9]                   # bloomery 7 x 7, back right
 MILL = [-13, -13, -9, -3]                 # trip-hammer mill 5 x 11, outside the west fence
 WHEEL_X = -15
+PLOT = (-17, -15, 7, -1)                  # the whole plot, fenced from day one (25 x 15): the works grow into it
+MEADOW = (-16, -14, -8, -2)               # west of the yard: the mill's ground, green until level 3
+BLOOM_SITE = (1, -15, 7, -9)              # the bloomery's ground, green until level 2
 TRACK = [(0, -1, -3, 1), (-5, -10, -6, 0), (4, -8, -3, 0)]  # (x, z from, z to, half width): gate to pit, storeroom door, bloomery door
 
 def yard_surface(place, skip):
@@ -52,7 +55,7 @@ def perimeter(place, open_west=False):
     """Fence round the yard: log posts 2 high at corners and gate jambs (runs of 5 and 3 between, odd),
     spruce fence between, a 3 wide gate in the front with lanterns on its posts. Buildings close the back."""
     posts = {(X0, Z1), (-2, Z1), (2, Z1), (X1, Z1), (X0, -5), (X1, -5), (X1, -9), (X0, -9)}
-    if open_west: posts |= {(X0, -3), (X0, -7)}
+    if open_west: posts = (posts - {(X0, -9), (X0, -5)}) | {(X0, -10), (X0, -6)}
     fence = set()
     for x in range(X0, X1 + 1):
         if abs(x) > 1: fence.add((x, Z1))
@@ -60,8 +63,7 @@ def perimeter(place, open_west=False):
         fence.add((X0, z)); fence.add((X1, z))
     for x in range(-2, 1): fence.add((x, Z0))   # the alley between storeroom and bloomery
     if open_west:
-        for z in (-6, -5, -4): fence.discard((X0, z))
-        posts.discard((X0, -5))
+        for z in (-9, -8, -7): fence.discard((X0, z))
     for (x, z) in sorted(fence - posts): place.append([x, 1, z, "spruce_fence"])
     for (x, z) in sorted(posts): place += [log(x, 1, z), log(x, 2, z)]
     place += [[-2, 3, Z1, "lantern"], [2, 3, Z1, "lantern"]]
@@ -91,6 +93,61 @@ def ore_pit(R, place):
     place += [[x0 + 1, 4, zc, "spruce_stairs", {"facing": "w", "half": "top"}], [x1 - 1, 4, zc, "spruce_stairs", {"facing": "e", "half": "top"}]]
     place += [[0, 4, zc, "iron_chain"], [0, 3, zc, "iron_chain"], [0, 2, zc, "cauldron"]]
     place += [[x1 + 1, 4, zc, "spruce_fence"], [x0 - 1, 4, zc, "lantern", {"hanging": True}]]
+
+def tree(place, x, z, h, kind="oak"):
+    """A small broadleaf: trunk h tall, two wide leaf layers, a narrow cap. Placeholder greenery on ground
+    the works will build over (Mateo 2026-11-12: no empty box before the full size is done)."""
+    lg, lv = f"{kind}_log", f"{kind}_leaves"
+    for y in range(1, h + 1): place.append([x, y, z, lg])
+    for y, r in ((h - 1, 2), (h, 2), (h + 1, 1), (h + 2, 0)):
+        for dx in range(-r, r + 1):
+            for dz in range(-r, r + 1):
+                if (dx, dz) == (0, 0) and y <= h: continue
+                if r == 2 and abs(dx) == 2 and abs(dz) == 2: continue   # round the corners
+                place.append([x + dx, y, z + dz, lv])
+
+def greenery(place, box, seed, trees=()):
+    """Grass with bushes, berry bushes, ferns and flowers in clumps, and the given trees"""
+    x0, z0, x1, z1 = box
+    for x in range(x0, x1 + 1):
+        for z in range(z0, z1 + 1):
+            place.append([x, 0, z, "grass_block"])
+            n, k = noise(x, z, seed, 2.5), _hash(x, z, seed + 1)
+            if any(abs(x - tx) <= 1 and abs(z - tz) <= 1 for tx, tz, *_ in trees): continue
+            if n > 0.72: place.append([x, 1, z, "azalea_leaves_flowered" if k < 0.3 else "azalea_leaves"])
+            elif n > 0.62 and k < 0.35: place.append([x, 1, z, "sweet_berry_bush", {"raw": {"growth": 3}}] if False else [x, 1, z, "fern"])
+            elif k < 0.22: place.append([x, 1, z, "short_grass"])
+            elif k < 0.30: place.append([x, 1, z, ["poppy", "dandelion", "cornflower", "oxeye_daisy"][int(k * 100) % 4]])
+    for t in trees: tree(place, *t)
+
+def outer_fence(place):
+    """The plot's own fence beyond the yard: west meadow (and the bloomery ground until it is built)"""
+    px0, pz0, px1, pz1 = PLOT
+    posts = {(px0, pz1), (px0, pz0), (px0, -8), (-12, pz1), (-12, pz0)}
+    fence = {(x, pz1) for x in range(px0, X0)} | {(x, pz0) for x in range(px0, X0)} | {(px0, z) for z in range(pz0, pz1 + 1)}
+    for (x, z) in sorted(fence - posts): place.append([x, 1, z, "spruce_fence"])
+    for (x, z) in sorted(posts): place += [log(x, 1, z), log(x, 2, z)]
+
+def site_fence(place):
+    """Until the bloomery stands, a fence closes the yard round its ground"""
+    x0, z0, x1, z1 = BLOOM_SITE
+    for x in range(x0, x1 + 1): place.append([x, 1, z0, "spruce_fence"])
+    for z in range(z0, -9): place.append([x1, 1, z, "spruce_fence"])
+    place += [log(x1, 1, z0), log(x1, 2, z0)]
+
+def landscape(lv):
+    """Greenery and fences for the ground this level has not built on yet"""
+    soft = []
+    outer_fence(soft)
+    if lv < 3: greenery(soft, MEADOW, 11, trees=[(-13, -11, 5, "oak"), (-10, -5, 4, "birch"), (-15, -4, 4, "oak")])
+    else:
+        for z in range(MEADOW[1], MEADOW[3] + 1):   # the strip between mill and yard fence stays green
+            soft.append([-8, 0, z, "grass_block"])
+            if _hash(-8, z, 3) < 0.3: soft.append([-8, 1, z, "azalea_leaves"])
+    if lv < 2:
+        greenery(soft, BLOOM_SITE, 21, trees=[(4, -12, 5, "oak")])
+        site_fence(soft)
+    return soft
 
 def level1(R):
     place, parts, shapes = [], [], []
@@ -139,6 +196,7 @@ def wheel(place, cx, cy, cz, R_out=3.5):
 
 def level3(R):
     place, parts, shapes = level2(R)
+    for z in range(-10, Z1 + 1): place += [[X0, 1, z, "air"], [X0, 2, z, "air"]]   # level 1's west fence, redrawn with the gate
     perimeter(place, open_west=True)
     parts.append({"part": "house", "style": "vale_timber", "rect": MILL, "y": 0, "plinth": 1, "storeys": [5, 4],
                   "door": {"side": "e", "kind": "large"}, "roof": {"type": "gable", "ridge": "z"}, "chimney": False, "shutters": 0.3,
@@ -146,8 +204,7 @@ def level3(R):
                               "n": [{"at": 0, "storey": 1, "w": 1, "h": 2}],
                               "e": [{"at": -4, "storey": 1, "w": 1, "h": 2}, {"at": 4, "storey": 1, "w": 1, "h": 2}]}})
     # a gravel walk from the mill door to the yard gate in the fence
-    for z in (-6, -5, -4): place += [[X0, 1, z, "air"], [X0, 2, z, "air"]]
-    for x in (-8, -7): place.append([x, 0, -5, "gravel"])
+    for z in (-9, -8, -7): place.append([-8, 0, z, "gravel"])
     # the race: a stone channel of water along the west wall, the wheel turning in it
     for z in range(MILL[1] - 1, MILL[3] + 2):
         for x in (WHEEL_X - 1, WHEEL_X + 1):
@@ -169,8 +226,8 @@ def specs(ground=False):
             a, b, c, d = p["rect"]
             skip |= {(x, z) for x in range(a, c + 1) for z in range(b, d + 1)}
         surf = []
-        yard_surface(surf, skip)
-        place = surf + place
+        yard_surface(surf, skip | ({(x, z) for x in range(BLOOM_SITE[0], BLOOM_SITE[2] + 1) for z in range(BLOOM_SITE[1], BLOOM_SITE[3] + 1)} if lv < 2 else set()))
+        place = surf + landscape(lv) + place
         if ground:
             xs = [p[0] for p in place]; zs = [p[2] for p in place]
             ground_plate(shapes, min(xs), min(zs), max(xs), max(zs))
