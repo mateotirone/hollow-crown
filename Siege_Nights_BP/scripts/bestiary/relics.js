@@ -105,9 +105,9 @@ function relicTick() {
 onTick("bestiary_relics", 20, relicTick);
 
 // ---------- Boss keys: use one to call its boss where you stand ----------
-// Crafted at a Siege Workshop from that region's trophies and Veil Ash (recipes/keys/). Until the map's arenas exist, the fight starts right here.
-// A key whose boss has its own lock (scripts/unlocks/: the Reeve's goes into the Millbrook well's crank and is
-// earned from the clock keepers, not crafted) is marked "socketed" and does nothing in the open.
+// No key is crafted any more: each regional boss's key is earned from its region's puzzle and goes into that boss's
+// own lock (scripts/unlocks/: the Reeve's well crank, the Hunter's Cairn, the drowned altar, the vault seal, the root
+// cradle). Those keys are marked "socketed" and do nothing in the open. A key with no lock still calls its boss here.
 const socketed = new Set();
 export const markSocketed = (itemId) => socketed.add(itemId);
 export const isSocketed = (itemId) => socketed.has(itemId);

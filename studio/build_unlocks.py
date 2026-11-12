@@ -1,4 +1,5 @@
-"""Placeholder art for the boss unlocks (scripts/unlocks/): Millbrook's stopped clocks and the well crank.
+"""Placeholder art for the boss unlocks (scripts/unlocks/): Millbrook's clocks and well crank, the Hallowmere cairns,
+the drowned chapel's stones and altar, the Faceless Vault's statues and seal, and the root cradle.
 
     python3 studio/build_unlocks.py            writes the PNGs (never overwrites one that exists)
     python3 studio/build_unlocks.py --force    repaint them all
@@ -124,3 +125,142 @@ save(clock_face(3, 18, True), "siege_stopped_clock_318")
 save(crank(False, False), "siege_well_crank_side")
 save(crank(True, False), "siege_well_crank_keyhole")
 save(crank(True, True), "siege_well_crank_wound")
+
+
+# ---------------------------------------------------------------- the other four bosses
+STONE, SAND, MOSS, ROOTS, SEA = M["iron"], M["parchment"], [(40, 58, 34), (58, 82, 44), (84, 112, 58), (112, 140, 72), (150, 172, 96), (190, 205, 140)], WOOD, [(20, 40, 52), (30, 64, 76), (44, 98, 104), (70, 132, 130), (110, 170, 160), (170, 214, 200)]
+
+
+def noise_fill(ramp, lo=1, hi=3, seed=1):
+    img = blank(ramp[2])
+    px = img.load()
+    for y in range(16):
+        for x in range(16):
+            v = ((x * 73 + y * 151 + seed * 37) ^ (x * y + seed)) % 7
+            px[x, y] = ramp[lo + v % (hi - lo + 1)] + (255,)
+    return img
+
+
+def stamp(img, pts, color):
+    px = img.load()
+    for x, y in pts:
+        if 0 <= x < 16 and 0 <= y < 16:
+            px[x, y] = color + (255,)
+    return img
+
+
+def outline_shape(img, rows, color, ox=0, oy=0):
+    """rows: list of strings, '#' marks a pixel."""
+    pts = [(ox + x, oy + y) for y, r in enumerate(rows) for x, ch in enumerate(r) if ch == "#"]
+    return stamp(img, pts, color)
+
+
+BEAST_ART = {
+    "hare": ["..#..#....", "..#..#....", "..#..#....", "..####....", ".######...", "#######...", ".######.#.", "..#####.#.", "..#...#..."],
+    "fox": ["#.....#...", "##...##...", "#######...", ".#####....", "..###.....", "..####....", ".######...", "#######.##", ".#.#.#####"],
+    "stag": ["#.#...#.#.", "#.#...#.#.", ".###.###..", "...###....", "...###....", "..#####...", ".#######..", ".#.#.#.#..", ".#.....#.."],
+    "wolf": ["..#...#...", ".###.###..", ".#######..", "..#####...", "...###....", "..#####...", ".#######..", "########.#", ".#.#.#.###"],
+}
+
+
+def cairn_face(beast):
+    img = noise_fill(STONE, 1, 3, seed=len(beast))
+    return outline_shape(img, BEAST_ART[beast], STONE[5], 3, 4)
+
+
+def cairn_top(horn):
+    img = noise_fill(STONE, 1, 3, seed=9)
+    stamp(img, [(x, 8) for x in range(4, 12)] + [(x, 7) for x in range(5, 11)], STONE[0])
+    if horn:
+        stamp(img, [(4, 9), (5, 8), (6, 8), (7, 7), (8, 7), (9, 7), (10, 6), (11, 5), (11, 4)], (236, 232, 214))
+        stamp(img, [(5, 9), (6, 9), (7, 8), (8, 8), (9, 8), (10, 7)], (200, 194, 172))
+    return img
+
+
+CARVING_ART = {
+    "gull": ["..........", "##......##", ".##....##.", "..##..##..", "...####...", "....##...."],
+    "anchor": ["....##....", "...#..#...", "....##....", "....##....", "#...##...#", ".#..##..#.", "..######.."],
+    "fish": ["..........", "...####..#", ".########.", "##.######.", ".########.", "...####..#"],
+    "star": ["....#.....", "....#.....", "#########.", "..#####...", ".##...##..", "#.......#."],
+}
+
+
+def floor_stone(carving):
+    img = noise_fill(SEA, 1, 3, seed=len(carving or "") + 3)
+    if carving is None:
+        img = blank(SEA[0])
+        stamp(img, [(x, y) for x in range(3, 13) for y in range(3, 13)], (10, 18, 24))
+        return img
+    return outline_shape(img, CARVING_ART[carving], SEA[5], 3, 5)
+
+
+def altar(top, ring):
+    img = noise_fill(SEA, 1, 3, seed=21)
+    if top:
+        stamp(img, [(x, 1) for x in range(16)] + [(x, 14) for x in range(16)], SEA[4])
+        if ring:
+            stamp(img, [(7, 6), (8, 6), (6, 7), (9, 7), (6, 8), (9, 8), (7, 9), (8, 9)], GOLD[4])
+            stamp(img, [(8, 5)], (220, 236, 255))
+    else:
+        stamp(img, [(x, 3) for x in range(16)] + [(x, 12) for x in range(16)], SEA[0])
+    return img
+
+
+def bust(face):
+    img = noise_fill(SAND, 2, 4, seed=5)
+    if face:  # a face chiselled flat: rough scar where the features were
+        stamp(img, [(x, y) for x in range(4, 12) for y in range(4, 13) if (x * 3 + y) % 4 == 0], SAND[1])
+        stamp(img, [(x, 3) for x in range(4, 12)], SAND[5])
+    return img
+
+
+def vault_seal(pressed):
+    img = noise_fill(SAND, 2, 4, seed=8)
+    for y in range(16):
+        for x in range(16):
+            d = math.hypot(x - 7.5, y - 7.5)
+            if 4.5 <= d <= 6:
+                img.putpixel((x, y), GOLD[2] + (255,))
+            elif d < 4.5:
+                img.putpixel((x, y), (GOLD[1] if pressed else SAND[5]) + (255,))
+    if pressed:  # a steward's crown, no face under it
+        stamp(img, [(5, 6), (7, 5), (9, 6), (5, 7), (6, 7), (7, 7), (8, 7), (9, 7), (10, 6), (10, 7)], GOLD[4])
+    return img
+
+
+def cradle(top, laid):
+    img = noise_fill(ROOTS, 0, 2, seed=11)
+    px = img.load()
+    for y in range(16):
+        for x in range(16):
+            if (x + y * 2) % 5 == 0:
+                px[x, y] = ROOTS[3] + (255,)
+    if top:
+        stamp(img, [(x, y) for x in range(4, 12) for y in range(4, 12)], MOSS[2])
+        if laid:  # the doll of sticks and hair
+            stamp(img, [(7, 5), (8, 5), (7, 6), (8, 6)], (150, 120, 80))
+            stamp(img, [(x, 7) for x in range(5, 11)] + [(7, y) for y in range(7, 11)] + [(8, y) for y in range(7, 11)], (110, 82, 50))
+            stamp(img, [(6, 11), (9, 11)], (110, 82, 50))
+    return img
+
+
+for b in BEAST_ART:
+    save(cairn_face(b), f"siege_hunt_cairn_{b}")
+save(noise_fill(STONE, 1, 3, seed=4), "siege_cairn_stone")
+save(cairn_top(False), "siege_hunters_cairn_top")
+save(cairn_top(True), "siege_hunters_cairn_top_horn")
+for c in CARVING_ART:
+    save(floor_stone(c), f"siege_carved_floor_{c}")
+save(floor_stone(None), "siege_carved_floor_lifted")
+save(noise_fill(SEA, 1, 3, seed=2), "siege_chapel_stone")
+save(altar(False, False), "siege_drowned_altar_side")
+save(altar(True, False), "siege_drowned_altar_top")
+save(altar(True, True), "siege_drowned_altar_top_ring")
+save(bust(False), "siege_faceless_bust_side")
+save(bust(True), "siege_faceless_bust_face")
+save(noise_fill(SAND, 2, 4, seed=6), "siege_vault_sandstone")
+save(vault_seal(False), "siege_vault_seal_blank")
+save(vault_seal(True), "siege_vault_seal_pressed")
+save(cradle(False, False), "siege_root_cradle_side")
+save(cradle(True, False), "siege_root_cradle_top")
+save(cradle(True, True), "siege_root_cradle_top_laid")

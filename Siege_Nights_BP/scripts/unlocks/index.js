@@ -7,3 +7,8 @@
 
 import "./reeve.js";
 import "./tests.js";
+import "./huntsman.js";
+import "./bride.js";
+import "./seneschal.js";
+import "./mother.js";
+import "./site_tests.js";

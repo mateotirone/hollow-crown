@@ -140,6 +140,16 @@ On the real map the Millbrook well builds itself the first time someone comes ne
 
 Also: `/scriptevent siege:reeve_unlock build` rebuilds and resets it at Millbrook, `tp` takes you there, `key` gives you a key.
 
+## Waking the other four regional bosses (scripts/unlocks/)
+
+Each site builds itself the first time someone comes near it on the real map. In a flat Creative test world use `/scriptevent siege:unlock <site> here` to build one where you stand (give it ten seconds). Sites: `huntsman`, `bride`, `seneschal`, `mirelight` (the five villagers) and `mother` (the Cradle Tree). Every site also takes `status` (the answer and the state), `build` (rebuild and reset it at its map spot), `tp` and `item` (gives its key). Switch to Survival to play each one.
+
+1. **Huntsman.** Talk to Old Sigga in the lodge and read the rhyme. In daylight a cairn should say it doesn't wake. After dark (`/time set night`), click a wrong cairn: all go dark, two rimewolves, five minutes' rest. Then click the four in order: each lights, the fourth gives the Pale Horn. Click the Hunter's Cairn in the middle of the ice with the horn on a normal night: "only listens on a siege night". On a siege night: the horn, the answer, hounds, the ice cracking into a ring of water, then the fight. After a win the ice should freeze back.
+2. **Bride.** The chapel is full of water at first. `/scriptevent siege:unlock bride dry` drains it for five minutes (a dark-moon night does it for real). Climb down the tower ladder. Lift a wrong stone: two drowned. Lift the gull at the third pew from the altar: the ring. Lay it on the altar: bells, souls on the pews, she stands up. Does the sea wait until you have left before it comes back?
+3. **Seneschal.** Walk down the stair, read the five inscriptions, turn the statues youngest first. A wrong one resets them all and lets out three ash scarabs. The fifth opens a niche with the Faceless Seal. Press it into the blank seal by the door: the statues turn to face you one by one, the door opens from the top, he is at his desk.
+4. **Mother.** Build `mirelight` and talk to all five villagers. Can you spot the one with all three tells (wrong hand, faces the wall, fears the bell)? Accuse a wrong one: two changelings. Accuse the right one: they vanish and you get the Mire Effigy. Build `mother`, walk down the ramp into the cave and lay the effigy in the cradle: the lullaby, the roots unwinding middle-out, then the fight. After a win the roots grow back.
+5. For each: click the lock again right after a win (it should refuse until a siege night has passed: a real one, or `/scriptevent siege:rivals night`), then the short rematch scene. Using any of the four keys in the open should say "It wants a lock, not a pocket."
+
 ## Town hall, skill tree and paths (The Hollow Crown)
 
 Needs a settlement first (place a Keep Banner). Cheats on for the `/scriptevent` lines.

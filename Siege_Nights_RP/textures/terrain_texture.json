@@ -1242,10 +1242,69 @@
   },
   "siege_ironworks_bottom": {
    "textures": "textures/blocks/settle/siege_ironworks_bottom"
-  }
- },
-  "siege_stopped_clock_case": {
-   "textures": "textures/blocks/unlocks/siege_stopped_clock_case"
+  },
+  "siege_cairn_stone": {
+   "textures": "textures/blocks/unlocks/siege_cairn_stone"
+  },
+  "siege_carved_floor_anchor": {
+   "textures": "textures/blocks/unlocks/siege_carved_floor_anchor"
+  },
+  "siege_carved_floor_fish": {
+   "textures": "textures/blocks/unlocks/siege_carved_floor_fish"
+  },
+  "siege_carved_floor_gull": {
+   "textures": "textures/blocks/unlocks/siege_carved_floor_gull"
+  },
+  "siege_carved_floor_lifted": {
+   "textures": "textures/blocks/unlocks/siege_carved_floor_lifted"
+  },
+  "siege_carved_floor_star": {
+   "textures": "textures/blocks/unlocks/siege_carved_floor_star"
+  },
+  "siege_chapel_stone": {
+   "textures": "textures/blocks/unlocks/siege_chapel_stone"
+  },
+  "siege_drowned_altar_side": {
+   "textures": "textures/blocks/unlocks/siege_drowned_altar_side"
+  },
+  "siege_drowned_altar_top": {
+   "textures": "textures/blocks/unlocks/siege_drowned_altar_top"
+  },
+  "siege_drowned_altar_top_ring": {
+   "textures": "textures/blocks/unlocks/siege_drowned_altar_top_ring"
+  },
+  "siege_faceless_bust_face": {
+   "textures": "textures/blocks/unlocks/siege_faceless_bust_face"
+  },
+  "siege_faceless_bust_side": {
+   "textures": "textures/blocks/unlocks/siege_faceless_bust_side"
+  },
+  "siege_hunt_cairn_fox": {
+   "textures": "textures/blocks/unlocks/siege_hunt_cairn_fox"
+  },
+  "siege_hunt_cairn_hare": {
+   "textures": "textures/blocks/unlocks/siege_hunt_cairn_hare"
+  },
+  "siege_hunt_cairn_stag": {
+   "textures": "textures/blocks/unlocks/siege_hunt_cairn_stag"
+  },
+  "siege_hunt_cairn_wolf": {
+   "textures": "textures/blocks/unlocks/siege_hunt_cairn_wolf"
+  },
+  "siege_hunters_cairn_top": {
+   "textures": "textures/blocks/unlocks/siege_hunters_cairn_top"
+  },
+  "siege_hunters_cairn_top_horn": {
+   "textures": "textures/blocks/unlocks/siege_hunters_cairn_top_horn"
+  },
+  "siege_root_cradle_side": {
+   "textures": "textures/blocks/unlocks/siege_root_cradle_side"
+  },
+  "siege_root_cradle_top": {
+   "textures": "textures/blocks/unlocks/siege_root_cradle_top"
+  },
+  "siege_root_cradle_top_laid": {
+   "textures": "textures/blocks/unlocks/siege_root_cradle_top_laid"
   },
   "siege_stopped_clock_317": {
    "textures": "textures/blocks/unlocks/siege_stopped_clock_317"
@@ -1253,13 +1312,44 @@
   "siege_stopped_clock_318": {
    "textures": "textures/blocks/unlocks/siege_stopped_clock_318"
   },
-  "siege_well_crank_side": {
-   "textures": "textures/blocks/unlocks/siege_well_crank_side"
+  "siege_stopped_clock_case": {
+   "textures": "textures/blocks/unlocks/siege_stopped_clock_case"
+  },
+  "siege_vault_sandstone": {
+   "textures": "textures/blocks/unlocks/siege_vault_sandstone"
+  },
+  "siege_vault_seal_blank": {
+   "textures": "textures/blocks/unlocks/siege_vault_seal_blank"
+  },
+  "siege_vault_seal_pressed": {
+   "textures": "textures/blocks/unlocks/siege_vault_seal_pressed"
   },
   "siege_well_crank_keyhole": {
    "textures": "textures/blocks/unlocks/siege_well_crank_keyhole"
   },
+  "siege_well_crank_side": {
+   "textures": "textures/blocks/unlocks/siege_well_crank_side"
+  },
   "siege_well_crank_wound": {
    "textures": "textures/blocks/unlocks/siege_well_crank_wound"
   }
+ },
+ "siege_stopped_clock_case": {
+  "textures": "textures/blocks/unlocks/siege_stopped_clock_case"
+ },
+ "siege_stopped_clock_317": {
+  "textures": "textures/blocks/unlocks/siege_stopped_clock_317"
+ },
+ "siege_stopped_clock_318": {
+  "textures": "textures/blocks/unlocks/siege_stopped_clock_318"
+ },
+ "siege_well_crank_side": {
+  "textures": "textures/blocks/unlocks/siege_well_crank_side"
+ },
+ "siege_well_crank_keyhole": {
+  "textures": "textures/blocks/unlocks/siege_well_crank_keyhole"
+ },
+ "siege_well_crank_wound": {
+  "textures": "textures/blocks/unlocks/siege_well_crank_wound"
+ }
 }
