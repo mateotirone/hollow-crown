@@ -38,3 +38,15 @@ state is checked against Mojang's list (`map/structures/bedrock_states.json`) so
   left and right in `emit.bedrock_state`.
 - Trapdoor `direction` numbers (0 east, 1 west, 2 south, 3 north) are the repo's existing mapping, also
   flagged in `map/structures/README.md`.
+
+## From Python (map builders)
+
+`scripts/engine.py` is the engine behind `build.py`. The map's builders use it directly:
+
+    sys.path.insert(0, ".claude/skills/minecraft-builder/scripts"); import engine
+    engine.into_blueprint(bp, spec, offset=(x, y, z))       # whole build into a map/structures bp.Blueprint
+    engine.into_blueprint(bp, spec, upto="walls")           # foundation .. walls (stage-by-stage review renders)
+    engine.into_blueprint(bp, spec, only="roof")            # one stage, inside a fn(bp, B) stage function
+    blocks, stage_of, warnings = engine.compute(spec)        # raw result
+
+The Blueprint then exports as before (`finish()`, `save_mcstructure`, stamps for genworld).

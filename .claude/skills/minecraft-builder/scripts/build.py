@@ -13,41 +13,7 @@ from colour import Palette  # noqa: E402
 from fit import voxelize  # noqa: E402
 from materials import Materials  # noqa: E402
 import emit, parts  # noqa: E402
-
-STAGES = ["shapes", "foundation", "frame", "floors", "walls", "openings", "roof", "details", "place"]
-
-
-def resolve(cells, mats, pal, log):
-    """Logical cells {kind, props, mat|name} -> {(x,y,z): (block id, props)}"""
-    for c, v in cells.items():
-        if v.get("mat"): mats.note_cell(v["mat"], *c)
-    out, warned = {}, set()
-    for (x, y, z), v in cells.items():
-        k, p = v["kind"], dict(v.get("props", {}))
-        if k == "air": continue
-        if k == "raw":
-            out[(x, y, z)] = (v["name"], p); continue
-        if not v.get("mat"):
-            if ("nomat", k) not in warned: log.append(f"{k} cell at {x},{y},{z} has no material"); warned.add(("nomat", k))
-            continue
-        b, raw = mats.block(v["mat"], x, y, z)
-        if raw:
-            out[(x, y, z)] = (b, p); continue
-        if k == "full":
-            if "axis" not in pal.blocks[b]["tags"]: p.pop("axis", None)
-            out[(x, y, z)] = (b, p); continue
-        if k == "post":
-            k = "wall" if "wall" in pal.blocks[b]["variants"] else "fence" if "fence" in pal.blocks[b]["variants"] else \
-                ("wall" if pal.substitute(b, "wall") else "fence")
-        sub = pal.substitute(b, k)
-        if sub is None:
-            if (k, b) not in warned: log.append(f"no {k} form near {b}; used a full block"); warned.add((k, b))
-            out[(x, y, z)] = (b, {}); continue
-        if sub != b and (k, b) not in warned:
-            log.append(f"{b} has no {k} form: those cells use {sub}"); warned.add((k, b))
-        p.pop("axis", None)
-        out[(x, y, z)] = (pal.variant(sub, k), p)
-    return out
+from engine import STAGES, resolve, cells_of  # noqa: E402  (engine.py is the one engine; this is its CLI)
 
 
 def build(spec, out_dir, edition=None, stages=False, preview=True, mcstructure=False):
@@ -57,16 +23,7 @@ def build(spec, out_dir, edition=None, stages=False, preview=True, mcstructure=F
     pal = Palette(edition=edition)
     log = []
     name = spec.get("name", "build").replace(" ", "_")
-    cells, stage_of = {}, {}
-    if spec.get("shapes"):
-        sc = voxelize(spec["shapes"], q=spec.get("quality", 4), thin=spec.get("thin", False), hollow=spec.get("hollow", 1), log=log)
-        for c, v in sc.items(): cells[c] = v; stage_of[c] = "shapes"
-    ctx = parts.Context(cells, stage_of, log, spec)
-    for pt in spec.get("parts", []):
-        parts.run(ctx, pt)
-    for e in spec.get("place", []):
-        x, y, z, b = e[:4]; p = e[4] if len(e) > 4 else {}
-        ctx.set(x, y, z, "place", raw=b.replace("minecraft:", ""), **p)
+    cells, stage_of, log = cells_of(spec, log)
     mats = Materials(spec.get("materials"), pal, log)
     blocks = resolve(cells, mats, pal, log)
     emit.connect(blocks)
