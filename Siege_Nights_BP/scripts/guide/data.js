@@ -198,8 +198,15 @@ export const ENTRIES = [
     id: "town_plots", ch: "keep", title: "Town plots and charters",
     tip: "Use a Plot Marker to raise a building on a town plot. Each plot only takes buildings of its size.",
     page: "Every open plot in your town has a §fPlot Marker§r. Use it to see what can go there: only buildings of the plot's size are listed, and some want a certain spot (a watchtower stands by the wall). Good spots are marked. Pick one, walk round the outline, then use the marker again and pay to raise it.\n\n"
-      + "§fCharters:§r siege wins grow your settlement, but it only grows past each tier once that tier's charter stands. A Town needs 3 homes and a market (and a Farmhouse and Mint once they are built); a City needs 6 homes, a barracks and another work building. When the last one is finished, the town grows by itself.",
+      + "§fCharters:§r siege wins grow your settlement, but it only grows past each tier once that tier's charter stands. A Town needs 3 homes, a Farmhouse, a Mint and a market; a City needs 6 homes, an inn, a barracks and another work building. Buildings with no ready-made design yet (Farmhouse, Mint, Inn) can be built by hand and registered. When the last one is finished, the town grows by itself.",
     when: ["click:siege:plot_marker", "event:tierUp"],
+  },
+  {
+    id: "settlers", ch: "keep", title: "Your own buildings, beds and settlers",
+    tip: "Built something yourself on a plot? Use its Plot Marker and pick \"I built here myself\" to have it counted.",
+    page: "§fYour own buildings:§r build by hand on an empty plot, then use its Plot Marker and pick §fI built here myself§r. It counts as a building if it has what that building needs: a home needs a bed and a door under a roof, a smithy an anvil and a furnace, a library 8 bookshelves, a stable hay and stalls, a storehouse 6 chests or barrels, a farmhouse a composter and 9 farmland, a mint 2 chests and an anvil, an inn 3 beds and 2 chests. Take those away and it stops counting until you put them back.\n\n"
+      + "§fSettlers:§r every settler needs a bed in a home, one bed for every 12 blocks of covered floor. At dawn, if a home has a free bed, someone moves in: a worker for each finished work building first, then settlers for the homes. They go to bed at dusk. A worker whose building is knocked down stays, idle, until it is back.",
+    when: ["event:settlerArrived", "click:siege:plot_marker"],
   },
   {
     id: "guards", ch: "keep", title: "Guards and the Barracks",
