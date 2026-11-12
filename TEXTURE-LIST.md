@@ -32,6 +32,7 @@ The rules, palette and regional variants are in `art/STYLE-GUIDE.md`. Generators
 | Siege Workshop | `siege_workshop_side.png`, `siege_workshop_top.png` | **Final style, awaiting your review** |
 | Quartermaster's Desk | `siege_desk_side.png`, `siege_desk_top.png`, `siege_desk_bottom.png` | **Final style, awaiting your review** |
 | Breaching Charge | `siege_charge_side.png`, `siege_charge_top.png` | **Final style, awaiting your review** |
+| Vault blocks (Strongroom Doors ×5, Strongroom Stone, Relic Coffer, Vault Breakers ×3) | `textures/blocks/vault/`: `door_<tier>.png` + `trim_<tier>.png` for wood/iron/diamond/netherite/choirsteel, `stone.png`, `stone_plain.png`, `coffer.png`, `glow.png`, `frame_wood.png`, `cracks_1.png`, `cracks_2.png` (transparent overlays), `breaker_<tier>.png` + `bit_<tier>.png` for iron/diamond/netherite. Shapes in `models/blocks/vault.geo.json`. Made by `studio/build_vault.py` | Placeholder |
 
 ## Items (16×16, in `textures/items/`)
 
