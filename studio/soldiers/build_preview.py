@@ -20,16 +20,14 @@ skins = {k: [uri(RP + f'textures/entity/soldiers/{k}/{rg}_{c}.png') for rg in da
 anims = {}
 for f in ('guards.animation.json', 'soldiers.animation.json'):
     anims.update(json.load(open(RP + 'animations/' + f))['animations'])
-armor = {t: [json.load(open(RP + f'models/entity/guard_armor/tier{t}_{p}.geo.json'))['minecraft:geometry'][0]
-             for p in ('leggings', 'boots', 'chestplate', 'helmet')] for t in range(1, 5)}
-armor_tex = {t: uri(RP + f'textures/models/siege_guard_armor/tier{t}.png') for t in range(1, 5)}
+armor_skins = {k: [uri(RP + f'textures/entity/soldiers/{k}/armor/{rg}_t{t}.png') for rg in data['regions'] for t in range(1, 5)] for k in data['types']}
 horse = json.load(open(ROOT + 'studio/vmobs/geo_horse_v2.json'))['geometry.horse.v2']
 horse['texturewidth'] = horse['textureheight'] = 64
 horse_tex = [uri(RP + f'textures/entity/siege/steed_{rg}.png') for rg in data['regions']]
 ent = {k: json.load(open(RP + f'entity/{k}.entity.json'))['minecraft:client_entity']['description'] for k in data['types']}
 payload = {
     "types": data['types'], "colors": data['colors'], "regions": data['regions'], "skins": skins, "anims": anims,
-    "armor": armor, "armorTex": armor_tex, "horse": {"geo": horse, "tex": horse_tex},
+    "armorSkins": armor_skins, "horse": {"geo": horse, "tex": horse_tex},
     "pre": ent['pikeman']['scripts']['pre_animation'],
     "animate": {k: e['scripts']['animate'] for k, e in ent.items()},
     "common": {k: v for k, v in ent['pikeman']['animations'].items() if k.startswith('hc_') or k.startswith('humanoid') or k in ('holding', 'look_at_target_default')},

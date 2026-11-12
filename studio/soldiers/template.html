@@ -170,21 +170,13 @@ let yaw = 0.55, pitch = 0.12, dist = 92, target = new THREE.Vector3(0, 17, 0);
 const world = new THREE.Group(); scene.add(world);
 let actors = [];
 
-const ARMOR_GEOS = DATA.armor; // tier -> [geo,...]
 function makeActor(type, region, color, tier, x) {
   const T = DATA.types[type]; const bones = {};
   const grp = new THREE.Group();
   const body = buildGeo(T.geo, DATA.skins[type][region * 16 + color], bones);
   grp.add(body);
-  if (tier > 0) for (const g of ARMOR_GEOS[tier]) {
-    // attachable bones follow the wearer's bones of the same name
-    const tmp = {}; const r = buildGeo(g, DATA.armorTex[tier], tmp);
-    for (const [name, gs] of Object.entries(tmp)) {
-      const host = bones[name] && bones[name][0];
-      if (!host) continue;
-      for (const gg of gs) { if (gg.parent && gg.parent !== r) continue; gg.position.set(0, 0, 0); host.add(gg); }
-    }
-  }
+  // armour: the soldier's own armour model for this type and tier, animated with the same bones
+  if (tier > 0) body.add(buildGeo(T.armor[tier], DATA.armorSkins[type][region * 4 + tier - 1], bones));
   let horse = null;
   if (type === "knight" && S.mounted) {
     const hb = {}; horse = buildGeo(DATA.horse.geo, DATA.horse.tex[region], hb);

@@ -190,6 +190,7 @@ export const armorTier = (guard) => guard.getDynamicProperty("siege:armor") ?? 0
 
 export function equipGuard(guard, tier) {
   guard.setDynamicProperty("siege:armor", tier);
+  try { guard.triggerEvent(`siege:tier_${tier}`); } catch { /* an entity without the soldier armour look */ }   // soldiers draw their own armour
   if (!tier) return;
   for (const [slot, piece] of Object.entries(ARMOR_SLOTS)) guard.runCommand(`replaceitem entity @s ${slot} 0 ${GUARD_GEAR}${tier}_${piece}`);
 }

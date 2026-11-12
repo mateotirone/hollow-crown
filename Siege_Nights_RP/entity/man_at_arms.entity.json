@@ -102,10 +102,38 @@
         "r5c12": "textures/entity/soldiers/man_at_arms/hollow_brown",
         "r5c13": "textures/entity/soldiers/man_at_arms/hollow_green",
         "r5c14": "textures/entity/soldiers/man_at_arms/hollow_red",
-        "r5c15": "textures/entity/soldiers/man_at_arms/hollow_black"
+        "r5c15": "textures/entity/soldiers/man_at_arms/hollow_black",
+        "a0t1": "textures/entity/soldiers/man_at_arms/armor/vale_t1",
+        "a0t2": "textures/entity/soldiers/man_at_arms/armor/vale_t2",
+        "a0t3": "textures/entity/soldiers/man_at_arms/armor/vale_t3",
+        "a0t4": "textures/entity/soldiers/man_at_arms/armor/vale_t4",
+        "a1t1": "textures/entity/soldiers/man_at_arms/armor/frostmarch_t1",
+        "a1t2": "textures/entity/soldiers/man_at_arms/armor/frostmarch_t2",
+        "a1t3": "textures/entity/soldiers/man_at_arms/armor/frostmarch_t3",
+        "a1t4": "textures/entity/soldiers/man_at_arms/armor/frostmarch_t4",
+        "a2t1": "textures/entity/soldiers/man_at_arms/armor/saltreach_t1",
+        "a2t2": "textures/entity/soldiers/man_at_arms/armor/saltreach_t2",
+        "a2t3": "textures/entity/soldiers/man_at_arms/armor/saltreach_t3",
+        "a2t4": "textures/entity/soldiers/man_at_arms/armor/saltreach_t4",
+        "a3t1": "textures/entity/soldiers/man_at_arms/armor/emberwaste_t1",
+        "a3t2": "textures/entity/soldiers/man_at_arms/armor/emberwaste_t2",
+        "a3t3": "textures/entity/soldiers/man_at_arms/armor/emberwaste_t3",
+        "a3t4": "textures/entity/soldiers/man_at_arms/armor/emberwaste_t4",
+        "a4t1": "textures/entity/soldiers/man_at_arms/armor/blackfen_t1",
+        "a4t2": "textures/entity/soldiers/man_at_arms/armor/blackfen_t2",
+        "a4t3": "textures/entity/soldiers/man_at_arms/armor/blackfen_t3",
+        "a4t4": "textures/entity/soldiers/man_at_arms/armor/blackfen_t4",
+        "a5t1": "textures/entity/soldiers/man_at_arms/armor/hollow_t1",
+        "a5t2": "textures/entity/soldiers/man_at_arms/armor/hollow_t2",
+        "a5t3": "textures/entity/soldiers/man_at_arms/armor/hollow_t3",
+        "a5t4": "textures/entity/soldiers/man_at_arms/armor/hollow_t4"
       },
       "geometry": {
-        "default": "geometry.hc.soldier.man_at_arms"
+        "default": "geometry.hc.soldier.man_at_arms",
+        "armor_t1": "geometry.hc.soldier_armor.man_at_arms.t1",
+        "armor_t2": "geometry.hc.soldier_armor.man_at_arms.t2",
+        "armor_t3": "geometry.hc.soldier_armor.man_at_arms.t3",
+        "armor_t4": "geometry.hc.soldier_armor.man_at_arms.t4"
       },
       "scripts": {
         "pre_animation": [
@@ -143,7 +171,10 @@
         "hc_slash": "animation.hc.guard.slash"
       },
       "render_controllers": [
-        "controller.render.hc_soldier"
+        "controller.render.hc_soldier",
+        {
+          "controller.render.hc_soldier_armor": "query.property('siege:tier') > 0"
+        }
       ],
       "enable_attachables": true
     }

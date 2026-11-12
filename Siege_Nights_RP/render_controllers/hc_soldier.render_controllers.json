@@ -113,6 +113,55 @@
       "textures": [
         "Array.skins[math.clamp(query.property('siege:region'), 0, 5) * 16 + math.clamp(query.variant, 0, 15)]"
       ]
+    },
+    "controller.render.hc_soldier_armor": {
+      "arrays": {
+        "textures": {
+          "Array.armor": [
+            "Texture.a0t1",
+            "Texture.a0t2",
+            "Texture.a0t3",
+            "Texture.a0t4",
+            "Texture.a1t1",
+            "Texture.a1t2",
+            "Texture.a1t3",
+            "Texture.a1t4",
+            "Texture.a2t1",
+            "Texture.a2t2",
+            "Texture.a2t3",
+            "Texture.a2t4",
+            "Texture.a3t1",
+            "Texture.a3t2",
+            "Texture.a3t3",
+            "Texture.a3t4",
+            "Texture.a4t1",
+            "Texture.a4t2",
+            "Texture.a4t3",
+            "Texture.a4t4",
+            "Texture.a5t1",
+            "Texture.a5t2",
+            "Texture.a5t3",
+            "Texture.a5t4"
+          ]
+        },
+        "geometries": {
+          "Array.geos": [
+            "Geometry.armor_t1",
+            "Geometry.armor_t2",
+            "Geometry.armor_t3",
+            "Geometry.armor_t4"
+          ]
+        }
+      },
+      "geometry": "Array.geos[math.clamp(query.property('siege:tier'), 1, 4) - 1]",
+      "materials": [
+        {
+          "*": "Material.default"
+        }
+      ],
+      "textures": [
+        "Array.armor[math.clamp(query.property('siege:region'), 0, 5) * 4 + math.clamp(query.property('siege:tier'), 1, 4) - 1]"
+      ]
     }
   }
 }
