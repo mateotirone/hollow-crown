@@ -16,6 +16,7 @@ import { ECON, JOBS, JOB_IDS, LINES, REGIONS, EXCHANGE } from "./config.js";
 import { regional, appetite, payout, cost, coins, niceName, stopAt } from "./rules.js";
 import { funds, charge, pay, carried } from "./coins.js";
 import { sfx } from "../core/sfx.js";
+import { guildMenu } from "../guild/index.js";
 
 export const JOB_TAG = "siege_job";
 const jobTag = (id) => `siege_job_${id}`;
@@ -281,6 +282,7 @@ export async function openShop(player, npc) {
   const job = JOBS[jobId];
   if (!job) return;
   const region = regionOf(npc);
+  if (job.guild) return guildMenu(player, npc, region);
   const mood = regional(job, region);
   const line = pick(isNight() ? LINES[jobId].night : LINES[jobId].day);
   const note = job.mint

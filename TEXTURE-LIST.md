@@ -449,6 +449,8 @@ Written by `studio/build_economy.py` (never overwrites a PNG that exists).
 - `textures/items/siege_gold_coin.png` (the Gold Regal, worth 64): painted
 - Job NPCs (Farmer, Woodcutter, Quarryman, Smith, Fisher, Hunter, Herbalist, Moneyer): painted skins `textures/entity/siege/npc/job_<name>.png`, worn by the `siege:job_npc` entity (wired 2026-11-10, not seen in game yet)
 
+| Guild Factor skin (64×64 villager shape: burgundy coat, gold trim, a ledger and quill) | `textures/entity/siege/npc/job_factor.png` (by `studio/art/build_job_npcs.py`) | Painted in house style, awaiting your review |
+
 ## Leader portraits (2026-11-10)
 Brief by the lore thread in `studio/art/PORTRAIT-BRIEF.md`; painted by `studio/art/build_portraits.py` (first pass, awaiting Mateo's review).
 - `textures/entity/portrait/<plot>_<1-3>.png`, 36 files, 32x64: painted, first pass

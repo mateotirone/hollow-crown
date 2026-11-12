@@ -20,6 +20,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - Track: diagonal pieces no longer lie across the line, bends turn the right way, and slopes climb toward the higher track instead of away from it. Track already laid fixes itself.
 
 ### Added
+- Guild Factors in every town: three orders a day for goods from other regions, paid in iron, gold and sometimes diamonds.
 - The Ironworks: a settlement iron farm in three stages. The Ore Pit digs raw iron, the Bloomery (Town) smelts it while you feed it charcoal, and the Trip-Hammer Forge (City, beside water) makes about 100 ingots a day. Raiders can loot its storeroom.
 - Old Workings: old mines just outside five settlements whose ore grows back (iron at Frosthelm and Gullcliff, gold at Redmesa and Dunehold, diamond in the Wolfcairn Deeps). One runs rich each week, and the deeper ones draw claim jumpers.
 - The Moneyer trades metal up a step: 4 iron for a gold ingot, 8 gold for a diamond, 6 diamonds for a netherite scrap.

@@ -49,7 +49,7 @@ addTests("economy", {
     }
   },
   "job order matches the painted skins": () =>
-    assertEqual(JOB_IDS.join(","), "farmer,woodcutter,quarryman,smith,fisher,hunter,herbalist,moneyer"),
+    assertEqual(JOB_IDS.join(","), "farmer,woodcutter,quarryman,smith,fisher,hunter,herbalist,moneyer,factor"),
   "the coin is backed by iron: 8 in, 10 out": () => {
     assertEqual(payout(iron, 1), 8);
     assertEqual(cost(JOBS.moneyer.sells[0], 1), 10);
@@ -85,7 +85,7 @@ addTests("economy", {
   "every job has goods, prices and lines": () => {
     for (const id of JOB_IDS) {
       const job = JOBS[id];
-      assert(job.buys.length > 0, `${id} buys nothing`);
+      assert(job.guild || job.buys.length > 0, `${id} buys nothing`);
       for (const good of [...job.buys, ...job.sells]) assert(good.lot >= 1 && good.price >= 1 && /^[a-z]+:[a-z_]+$/.test(good.id), `${id}: ${JSON.stringify(good)}`);
       for (const region of [...job.home, ...job.scarce]) assert(REGIONS.includes(region), `${id}: ${region}`);
       assert(LINES[id]?.day.length && LINES[id]?.night.length, `${id} has nothing to say`);
