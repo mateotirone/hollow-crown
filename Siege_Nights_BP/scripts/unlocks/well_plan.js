@@ -143,9 +143,17 @@ export function postSpot(post) {
 
 /**
  * One clock post: a stone-brick column with the clock on top (its face glows a little) and a slab cap, its name on a sign in
- * front. The Tower clock gets a squat 3 by 3 tower instead. Returns { ops, clock, sign, keeper, face }.
+ * front. The Tower clock gets a squat 3 by 3 tower instead, or, with `clocktower` (the Millbrook area stamp is in
+ * landmarks.js and the Tower clock is pinned to TOWER_POST), sits high in the gate clocktower that stamp builds over
+ * the east street, as the hub of its west face. Returns { ops, clock, sign, keeper, face }.
  */
-export function postOps(post, tower, signText) {
+export const CLOCKTOWER = { post: 1, clock: { dx: 8, dy: 28, dz: 0 }, face: "west", sign: { dx: 7, dy: 1, dz: 0 }, keeper: { dx: 7, dy: 1, dz: -1 } };
+export function postOps(post, tower, signText, { clocktower = false } = {}) {
+  if (tower && clocktower && post === CLOCKTOWER.post) {
+    const { clock, face, sign, keeper } = CLOCKTOWER;
+    const ops = [op(clock.dx, clock.dy, clock.dz, "siege:stopped_clock", { "minecraft:cardinal_direction": face, "siege:struck": 0 })];
+    return { ops, clock, sign: { ...sign, text: signText }, keeper, face, faceIndex: FACES.indexOf(face) };
+  }
   const { dx, dz } = postSpot(post);
   const face = faceToCenter(dx, dz);
   const [fx, fz] = STEP[face];

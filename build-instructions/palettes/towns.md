@@ -9,7 +9,7 @@ colour is in the region file.
 | Millbrook | Vale (village) | dark shingle 5, slate 3, warm red 2 | slate spire on the chapel |
 | Rimehold | Frostmarch | dark shingle 5, mid shingle 3, slate 2 (all snow-capped) | weathered copper on the hall and stave chapel |
 | Frosthelm | Frostmarch (plot) | dark shingle 6, mid shingle 4 | none |
-| Gull's Rest | Saltreach | sea green 4, white 3, orange tile 2, slate 1 | oxidized copper domes, lighthouse cap |
+| Gull's Rest | Saltreach | sea green 3, teal 3, white 3, orange tile 1 (no dark slate: Atlantean, 2026-11-12) | teal prismarine and copper domes on domed houses, lighthouse cap |
 | Mirelight | Blackfen | mossy dark shingle 5, mangrove 3, mud tile 2 | thatch on barns and stores (counts as a store's roof, not civic) |
 | Sunscar | Emberwaste | flat sand roof 7, red dome or pitched 3 | blue-green domes with a gold finial |
 | Hollow villages (Glimwade, Lowseam, Tollrest, Highcut) | Hollow | deepslate 8, blackstone 2 | none |

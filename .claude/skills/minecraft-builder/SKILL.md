@@ -78,6 +78,12 @@ A 50,000-block castle costs about the same tokens as a hut.
   `quality` (samples per block axis, 4), `hollow` (shell thickness in blocks, 1; 0 = solid),
   `thin` (allow trapdoor/wall edges in shapes, false).
 - `parts` run after shapes, in order, and overwrite. `place` runs last.
+- **Interiors** (Mateo 2026-11-12: every building has one): each `house` part ends with the interior stage
+  (`scripts/interiors.py`): stairs between storeys, rooms by `"interior"` use (home, townhouse, farmhouse,
+  inn, shop, mint, smithy, guildhall, hall, chapel, tower, mill, barracks, library, storage), a one-block
+  walkway kept everywhere, lanterns, region flavour. `"attic": true` floors the roof space as a room.
+  Rules and the use table: `build-instructions/08-interiors`. Check them cut open with
+  `map/structures/build_interiors_viewer.py` (Roof off / per-floor buttons).
 - Optional: `offset` [x, y, z] added to every command, `clear` true to air the bounding box first.
 
 ## One engine for every build

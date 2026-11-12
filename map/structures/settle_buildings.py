@@ -432,36 +432,6 @@ def breeder_yard(region):
     bp.set(3, 1, -5, "cauldron")
     return finish(bp, (0, 1, 0), P=P)
 
-def barracks(region):
-    """The Barracks guardhouse: a two-storey hall for the guard, 11 x 13, with a stout square watch tower at
-    the back corner, its top crenellated in the region's castle stone, a weapon rack and a lantern by the door."""
-    bp, B, P, k, L = new("barracks", region)
-    rect = (-5, -12, 5, 0)
-    B.foundation(rect, 0); B.floor(rect, 0)
-    top = body(B, P, L, rect, 8)
-    side_windows(B, L, rect, 1); side_windows(B, L, rect, 5)
-    front_door(B, P, k, L)
-    B.floor(rect, 5)
-    for x in (-4, -3):
-        for z in (-3, -2): bp.set(x, 5, z, "air")
-    for i, z in enumerate(range(-3, -11, -1)): bp.set(-4, 1 + min(i, 4), z, P["trim"], facing="n") if i < 5 else None   # stair up
-    roof(bp, B, P, L, rect, top + 1 if L["roof"] != "flat" else top, ridge="z", region=region)
-    dress(bp, k, L, rect, 1, top, region)
-    T = (3, -14, 7, -10)   # the tower, rising past the roof
-    TB = Building(bp, P, 31)
-    TB.foundation(T, 0); TB.floor(T, 0); TB.stone_storey(T, 1, 14, quoins=True)
-    for y in (4, 8, 12):
-        for side, (x, z) in (("e", (7, -12)), ("n", (5, -14))): TB.window(x, y, z, side, 1, 2, kind="stone")
-    for x in range(3, 8):
-        for z in range(-14, -9):
-            edge = x in (3, 7) or z in (-14, -10)
-            bp.set(x, 15, z, k("stone") if edge else k("tiles"))
-            if edge and (x + z) % 2 == 0: bp.set(x, 16, z, k("bricks"))
-    bp.set(5, 16, -12, P["fence"]); bp.set(5, 17, -12, "lantern")
-    for x in (2, 3): bp.set(x, 1, -1, "grindstone") if x == 3 else bp.set(x, 1, -1, "smithing_table")
-    for x in range(1, 4): bp.set(x, 1, -11, "barrel")
-    return finish(bp, (0, 1, 1), P=P)
-
 def quartermaster(region):
     """The Quartermaster's armoury: a small strong store, 9 x 9, with a serving hatch under a striped awning,
     a smithing table, anvil, grindstone and racks of barrels and chests inside."""
@@ -484,5 +454,7 @@ def quartermaster(region):
     return finish(bp, (-2, 1, 1), P=P)
 
 HORSE_BUILDERS = {"stables_1": lambda r: stables(r, 1), "stables_2": lambda r: stables(r, 2), "stables_3": lambda r: stables(r, 3), "breeder_yard": breeder_yard,
-                  "barracks": barracks, "quartermaster": quartermaster}
+                  "quartermaster": quartermaster}
+import barracks_skill   # the Barracks on the building skill: timber hall, round keep, walled yard (Mateo's reference, 2026-11-12)
+HORSE_BUILDERS["barracks"] = barracks_skill.build
 BLOCK_BUILDERS = HORSE_BUILDERS   # everything a placed block raises (horses/barn.js and the guard blocks)

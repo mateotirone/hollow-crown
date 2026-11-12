@@ -63,6 +63,11 @@ done.
 7. **Joining.** Where a roof meets the tower wall, its top row tucks tight against the wall (flashing: full
    blocks or upside-down stairs) with no sky between them. A wing's roof runs **into** the tower or a drum.
    It never stops short of it in the air (Mateo, 2026-11-12, capital hall).
+   A round tower joined into a house is the skill's `keep` with `"cap": "cone"`, built after the house so
+   it clears its own shaft and the house roof tucks against it.
+8. **Leaning towers** (the Hollow only): the whole shaft leans in two or three clean one-block steps
+   (`"lean": {"dir": "e", "steps": 2}`), each step carried on brackets. Never a staircase of single-block
+   shifts.
 
 ## 4. The clock (Mateo, 2026-11-12: "there are much better ways that clocks are made")
 
@@ -94,7 +99,7 @@ The skill's `clock_face` does all of this with `size: 5` (or 7), `frame: "stairs
 | **Saltreach** | Round or square, whitewash and sandstone, few windows | Open arches or a lantern room with a gallery | A low sea-green hip or dome cap, or flat with a lantern. No needle spires. |
 | **Emberwaste** | Square sandstone, battered base, small deep windows | An open lantern with pointed arches (a minaret top) | A flat parapet with crenels, vigas out through the walls, a small dome or gold finial. Never a pitched spire. |
 | **Blackfen** | Mud brick on mangrove piles, mangrove frame above | A hooded timber stage | A dark shingle hood roof with moss, a lantern hung under the hood |
-| **Castle / Citadel** | Round or square castle stone, arrow slits | Machicolated battlements | A conical cap (optional) with a flag or rod |
+| **Castle / Citadel** | Round or square castle stone, arrow slits | Machicolated battlements | A conical cap (optional) with a flag or rod. Round keeps: the skill's `keep` part (corbels, deck, parapet, merlons, flags); yard walls with turrets and a gate: `curtain` (Barracks, 2026-11-12) |
 | **Hollow** | Blackstone and veinstone | Offset one block, once (`offset`), never sheared | A steep deepslate spire, soul lanterns |
 
 ## 6. Before you move on

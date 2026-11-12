@@ -171,8 +171,9 @@ strip round the house (the skill's `bushes`, on by default).
  "door": {"side": "s"}, "roof": {"type": "gable", "ridge": "x", "moss": true}, "vines": 0.2}
 ```
 
+**Boardwalks:** the `boardwalk` part (mangrove slab deck, log stilts, fence rails, lanterns at the ends and every 8).
+
 **Not in the skill yet:**
-- boardwalks;
 - froglight cages.
 
 ## Never
