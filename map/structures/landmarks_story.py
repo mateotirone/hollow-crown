@@ -450,7 +450,8 @@ def cinder_roost():
     """The Cinder Roost: a rider school on the cliff above Sunscar. A gatehouse on the edge, the Span running out
     over the drop to the old perch tower, and the names of the fallen on the gate wall.
     Front (-z) is the drop."""
-    d = D("cinder_roost", "rigid", seed=281, fill=None, top="keep", ease=0, clearTo=14)
+    d = D("cinder_roost", "rigid", seed=281, fill="red_sandstone", top="keep", ease=3, clearTo=14,
+          fillRects=[[-9, 0, 9, 14]])   # the yard and gatehouse stand on built-up rock; the Span stays open
     RS = [("red_sandstone", 3), ("cut_red_sandstone", 2), ("smooth_red_sandstone", 2), ("chiseled_red_sandstone", 1)]
     # the yard on the cliff top
     for x in range(-9, 10):

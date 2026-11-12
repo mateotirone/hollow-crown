@@ -69,8 +69,9 @@ export function planPiece(d, ox, oz, height, water = () => undefined) {
         const ownsTop = col.some((c) => c[1] <= 0);
         const lowest = col.length ? Math.min(...col.map((c) => c[1])) : 1;
         // fill up from the real ground to the target (stopping under the design's own lowest block)
+        const fills = d.fill != null && (!d.fillRects || d.fillRects.some(([x0, z0, x1, z1]) => x >= x0 && x <= x1 && z >= z0 && z <= z1));
         for (let y = r + 1; y <= t; y++) {
-          if (y - G >= lowest || d.fill == null) break;
+          if (y - G >= lowest || !fills) break;
           put(fill, x, y, z, y === t && !ownsTop ? d.top : d.fill);
         }
         // cut down to the target: air above it, its top block becomes the ground top

@@ -127,6 +127,9 @@ def export(d, q=0):
 
     for k in ("signs", "spawns", "npcs"): m[k] = [tp(v) for v in m.get(k, [])]
     if "mark" in m: m["mark"] = tp(m["mark"])
+    if "fillRects" in m:   # [x0, z0, x1, z1] columns that may be filled under (the rest are left open)
+        m["fillRects"] = [[min(a[0], b[0]), min(a[1], b[1]), max(a[0], b[0]), max(a[1], b[1])]
+                          for a, b in ((turn_cell(r[0], r[1], q), turn_cell(r[2], r[3], q)) for r in m["fillRects"])]
     for k in ("fill", "top"):
         if k in m: m[k] = None if m[k] is None else -2 if m[k] == "keep" else index(m[k], {})
     if "piles" in m: m["piles"] = [index(b, {"axis": "y"}) for b in m["piles"]]
