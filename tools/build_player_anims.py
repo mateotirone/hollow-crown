@@ -27,11 +27,11 @@ def anim(bones):
 A = {}
 
 # ---------- third person: running, jumping, landing, breathing ----------
-LEAN = "variable.hc_sprint * 9.0 + variable.hc_airb * 4.0 + variable.hc_land * 10.0"
+LEAN = "variable.hc_sprint * 9.0 - variable.hc_rise * 6.0 + variable.hc_tuck * 8.0 + variable.hc_land * 10.0"
 TWIST = "-variable.tcos0 * 0.1"
 ARMX = "variable.tcos0 * 0.35 * variable.hc_sprint"
-AIRUP = "variable.hc_airb * (12.0 + variable.hc_fall * 20.0)"
-AIROUT = "variable.hc_sprint * 5.0 + variable.hc_airb * (14.0 + variable.hc_fall * 25.0 + math.sin(query.life_time * 500.0) * variable.hc_fall * 6.0) + variable.hc_land * 8.0"
+AIRUP = "variable.hc_rise * 35.0 + variable.hc_tuck * 10.0 + variable.hc_airb * variable.hc_fall * 30.0"
+AIROUT = "variable.hc_sprint * 5.0 + variable.hc_rise * 6.0 + variable.hc_tuck * 22.0 + variable.hc_airb * variable.hc_fall * (35.0 + math.sin(query.life_time * 500.0) * 6.0) + variable.hc_land * 8.0"
 MOVING = "math.min(query.modified_move_speed * 4.0, 1.0)"
 ELBOW = f"6.0 + {MOVING} * 10.0 + variable.hc_sprint * 65.0 + variable.hc_airb * 18.0 + variable.hc_land * 15.0"
 KNEE = f"{MOVING} * 8.0 + variable.hc_land * 50.0"
@@ -41,13 +41,13 @@ A["animation.hc.player.locomotion"] = anim({
     "body": {"position": r(0, "-variable.hc_sprint * math.abs(math.sin(query.modified_distance_moved * 38.17)) * 0.6 - variable.hc_land * 1.5 - (math.sin(query.life_time * 100.0) + 1.0) * 0.06 * (1.0 - math.min(query.modified_move_speed * 4.0, 1.0))", 0)},
     "rightarm": {"rotation": r(f"(-{ARMX} - {AIRUP}) * variable.hc_free", 0, f"({AIROUT}) * variable.hc_free")},
     "leftarm": {"rotation": r(f"({ARMX} - {AIRUP}) * variable.hc_free", 0, f"-({AIROUT}) * variable.hc_free")},
-    "rightleg": {"rotation": r("variable.tcos0 * 0.3 * variable.hc_sprint - variable.hc_airb * 20.0 * (1.0 - variable.hc_fall * 0.5) - variable.hc_land * 25.0", 0, "variable.hc_airb * variable.hc_fall * 6.0")},
-    "leftleg": {"rotation": r("-variable.tcos0 * 0.3 * variable.hc_sprint + variable.hc_airb * 12.0 - variable.hc_land * 25.0", 0, "-variable.hc_airb * variable.hc_fall * 6.0")},
+    "rightleg": {"rotation": r("variable.tcos0 * 0.3 * variable.hc_sprint + variable.hc_rise * 10.0 - variable.hc_tuck * 50.0 - variable.hc_airb * variable.hc_fall * 10.0 - variable.hc_land * 25.0", 0, "variable.hc_airb * variable.hc_fall * 6.0")},
+    "leftleg": {"rotation": r("-variable.tcos0 * 0.3 * variable.hc_sprint - variable.hc_rise * 12.0 - variable.hc_tuck * 40.0 + variable.hc_airb * variable.hc_fall * 12.0 - variable.hc_land * 25.0", 0, "-variable.hc_airb * variable.hc_fall * 6.0")},
     # elbows and knees (only bodies with joints have these bones; others ignore them)
     "rightforearm": {"rotation": r(f"-({ELBOW}) * variable.hc_free", 0, 0)},
     "leftforearm": {"rotation": r(f"-({ELBOW}) * variable.hc_freel", 0, 0)},
-    "rightshin": {"rotation": r(f"math.max(0.0, variable.tcos0) * (0.9 + variable.hc_sprint * 0.8) + {KNEE} + variable.hc_airb * 35.0", 0, 0)},
-    "leftshin": {"rotation": r(f"math.max(0.0, -variable.tcos0) * (0.9 + variable.hc_sprint * 0.8) + {KNEE} + variable.hc_airb * 18.0", 0, 0)},
+    "rightshin": {"rotation": r(f"math.max(0.0, variable.tcos0) * (0.9 + variable.hc_sprint * 0.8) + {KNEE} + variable.hc_rise * 25.0 + variable.hc_tuck * 75.0 + variable.hc_airb * variable.hc_fall * 30.0", 0, 0)},
+    "leftshin": {"rotation": r(f"math.max(0.0, -variable.tcos0) * (0.9 + variable.hc_sprint * 0.8) + {KNEE} + variable.hc_rise * 5.0 + variable.hc_tuck * 65.0 + variable.hc_airb * variable.hc_fall * 15.0", 0, 0)},
 })
 # sneaking: knees bend and the hands come up a little, ready
 A["animation.hc.player.sneak"] = anim({
@@ -322,8 +322,12 @@ PRE = [
     "variable.hc_land = variable.hc_land_pow * math.clamp(1.0 - (query.life_time - variable.hc_land_at) / 0.3, 0.0, 1.0);",
     "variable.hc_k = math.min(1.0, query.delta_time * 8.0);",
     "variable.hc_sprint = variable.hc_sprint + ((query.is_sprinting && query.is_on_ground && !query.is_riding) - variable.hc_sprint) * variable.hc_k;",
-    "variable.hc_airb = variable.hc_airb + ((variable.hc_in_air && query.life_time - variable.hc_air_start > 0.15) - variable.hc_airb) * variable.hc_k;",
-    "variable.hc_fall = math.clamp(-query.vertical_speed / 20.0, 0.0, 1.0);",
+    # a real jump shows at once (going up fast); stepping off a ledge waits 0.15 s so stairs don't twitch
+    "variable.hc_airb = variable.hc_airb + ((variable.hc_in_air && (query.vertical_speed > 3.0 || query.life_time - variable.hc_air_start > 0.15)) - variable.hc_airb) * math.min(1.0, query.delta_time * 14.0);",
+    "variable.hc_fall = math.clamp((-query.vertical_speed - 4.0) / 16.0, 0.0, 1.0);",
+    # jump: spring up with arms swinging high, tuck the knees at the top, then reach down for the ground
+    "variable.hc_rise = variable.hc_airb * math.clamp(query.vertical_speed / 6.0, 0.0, 1.0);",
+    "variable.hc_tuck = variable.hc_airb * math.clamp(1.0 - math.abs(query.vertical_speed) / 6.0, 0.0, 1.0) * (1.0 - variable.hc_fall);",
     "variable.hc_freeb = variable.hc_freeb + ((variable.attack_time <= 0.0 && !variable.hc_drawing && !query.blocking && variable.hc_release <= 0.0) - variable.hc_freeb) * math.min(1.0, query.delta_time * 12.0);",
     "variable.hc_free = variable.hc_freeb;",
     "variable.hc_live = !query.is_sleeping && !query.is_emoting && !query.is_riding && !query.is_crawling && variable.swim_amount <= 0.0;",

@@ -10,6 +10,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 
 ### Added
 - The Town Board: a big notice board just inside the door of every town hall. Click it to open the Town Hall menu (raise the hall, the wall, the Rumor Board, who's online). Halls that already stand get one too.
+- Jumping looks like a jump now: you spring up with your arms swinging high, tuck your knees at the top and reach down for the ground, and the pose starts the moment you leave the ground. How high you jump is unchanged.
 - Switches: where two bought lines share track and then part, the track there becomes a switch. A train coming off a branch sets it for itself; sneak + click it with an empty hand to choose which way a train heading out will go.
 - Trains go four times as fast as a minecart (32 blocks a second flat out), and the free station carriage now runs at minecart speed.
 - The world map now has Rimehold, Gull's Rest, Sunscar, Mirelight and Millbrook built: streets, houses, fields, wells, lamps and trees, with the land graded to the streets. The minimap shows them.
