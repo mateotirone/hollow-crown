@@ -66,6 +66,7 @@ tile.siege:map_marker.name=Map Stone
 tile.siege:hall_waystone.name=Waystone
 tile.siege:hall_cornerstone.name=Hall Cornerstone
 tile.siege:tree_of_oaths.name=Tree of Oaths
+tile.siege:hall_board.name=Town Board
 item.siege:hollow_ember.name=The Ember
 item.siege:bound_ember.name=Bound Ember
 item.siege:oath_banner.name=Oath Banner

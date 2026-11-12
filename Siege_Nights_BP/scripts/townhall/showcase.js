@@ -15,7 +15,7 @@ api.on("showcase", ({ player, dim, origin, label }) => {
     saveHalls();
     beginBuild(player.id, 3, halls()[player.id].style);
   }
-  label(at, "Town Hall\nThe Tree of Oaths is inside");
+  label(at, "Town Hall\nTown Board and Tree inside");
 
   const hero = heroOf(player);
   if (hero.level < 30) {

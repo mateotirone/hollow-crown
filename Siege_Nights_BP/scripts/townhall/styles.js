@@ -18,6 +18,7 @@ const COMMON = {
   royalBlock: W("red_wool", "wool"),
   gilt: W("yellow_glazed_terracotta"),
   tree: W("siege:tree_of_oaths"),
+  board: W("siege:hall_board", "lectern"),
   brazier: W("siege:brazier", "campfire"),
   air: W("air"),
   rail: W("spruce_fence", "fence"),
