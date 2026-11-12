@@ -21,6 +21,7 @@ import { world, system, EquipmentSlot, ItemStack } from "@minecraft/server";
 import { onTick, addTests, assert, assertEqual } from "../siege/api.js";
 import { MOBS } from "./data.js";
 import { addToPlayerList, effect, give, held, hurt, line, particle, ring, shove, sound } from "./util.js";
+import { plainArmour } from "../economy/regional_armor.js"; // a regional Choirsteel piece (any region's look) is Choirsteel
 
 const ID = (piece) => `siege:choirsteel_${piece}`;
 const SLOTS = [["helmet", EquipmentSlot.Head], ["chestplate", EquipmentSlot.Chest], ["leggings", EquipmentSlot.Legs], ["boots", EquipmentSlot.Feet]];
@@ -45,7 +46,7 @@ const TOLD = {
 const tell = (p, key) => { if (addToPlayerList(p, KNOWN_PROP, key)) p.sendMessage(TOLD[key]); };
 
 // Pure: which pieces count, and when the Chord and the Answer go off
-export const wornPieces = (worn) => SLOTS.map(([piece]) => piece).filter((piece, i) => worn[i] === ID(piece));
+export const wornPieces = (worn) => SLOTS.map(([piece]) => piece).filter((piece, i) => plainArmour(worn[i]) === ID(piece));
 export const isFullSet = (worn) => wornPieces(worn).length === SLOTS.length;
 export const chordDue = (hits, every = CHOIRSTEEL.chordEvery) => hits > 0 && hits % every === 0;
 export const answers = (roll, chance = CHOIRSTEEL.answerChance) => roll < chance;
@@ -117,7 +118,7 @@ world.afterEvents.entityHurt.subscribe((event) => {
       }
     }
     // the Cuirass
-    if (victim.typeId === "minecraft:player" && held(victim, EquipmentSlot.Chest) === ID("chestplate") && answers(Math.random())) {
+    if (victim.typeId === "minecraft:player" && plainArmour(held(victim, EquipmentSlot.Chest)) === ID("chestplate") && answers(Math.random())) {
       ring(victim.dimension, victim.location, 2, "minecraft:sonic_explosion", 4);
       particle(victim.dimension, "siege:choir_ring", { x: victim.location.x, y: victim.location.y + 0.4, z: victim.location.z });
       sound(victim.dimension, "block.amethyst_block.chime", victim.location, 0.8, 1);
@@ -172,6 +173,7 @@ addTests("bestiary", {
     assert(!isFullSet([all[0], all[1], all[2], "minecraft:netherite_boots"]));
     assertEqual(wornPieces([undefined, all[1], undefined, all[3]]), ["chestplate", "boots"]);
     assertEqual(wornPieces([all[1], all[0], undefined, undefined]), [], "a piece only counts in its own slot");
+    assert(isFullSet(["siege:choirsteel_frostmarch_helmet", all[1], "siege:choirsteel_vale_leggings", all[3]]), "regional Choirsteel counts");
   },
   "Choirsteel: Greaves run, Treads jump, the full set does both at II": () => {
     assertEqual(strideBoosts(["leggings"]), [["speed", 0]]);

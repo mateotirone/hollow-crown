@@ -519,6 +519,14 @@ Made by `studio/art/build_armor3d.py`, following `studio/build_varmor.py`: every
 | Regional diamond x5 (adds knee guards and a second shoulder plate) and netherite x5 (also a banner-coloured cape) | `textures/models/siege_armor/guard_<region>_<diamond/netherite>_<piece>.png` | **awaiting your review** |
 | Worn relics: Crownless Mantle (long cloak, high collar, shoulder drapes), Widow's Veil (drapes down the back and sides) | `textures/models/siege_armor/relic_crownless_mantle_chestplate.png`, `relic_widows_veil_helmet.png` | **awaiting your review** |
 Choirsteel's 3D set is `studio/art/build_choirsteel_3d.py` (PR #83). The guard-only armour line was already 3D.
+## Regional player armour (2026-11-12, Mateo: "custom armor textures per region for each type of armor")
+Made by `studio/art/build_regional_armor.py` (then `tools/build_player_joints.py`). Iron, chainmail, diamond, netherite and Choirsteel x the five regions, items `siege:<material>_<region>_<piece>` with the plain piece's stats. Each region's cut and 3D parts are the regional Castle Guard set's; the metal finish and trim are the soldiers' (PR #210); the surcoat is the region's own colour (no banner dye, material `armor`, every pixel opaque). Diamond, netherite and Choirsteel keep their own metal; chainmail is fine one-pixel mail. 64x32 vanilla-layout sheets, so trims line up. 3D preview: `studio/regional_armor/build_preview.py`. Untested in game.
+| Asset | Files | Status |
+|---|---|---|
+| Worn 3D armour x100 (texture + geometry per piece) | `textures/models/siege_armor/<material>_<region>_<piece>.png`, `models/entity/armor/<material>_<region>_<piece>.geo.json` | **awaiting your review** |
+| Icons x100 (regional guard shapes in each material, region surcoat) | `textures/items/siege_<material>_<region>_<piece>.png` | **awaiting your review** |
+| Sheet | `art/regional-player-armor.png` | |
+
 ## Depth pass from the Studio review (2026-11-11, Mateo)
 | What | Files | Made by | Status |
 |---|---|---|---|

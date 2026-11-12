@@ -176,9 +176,9 @@ strands over cliffs.
  "offset": {"storey": 1, "dir": "e"}}
 ```
 
-**Not in the skill yet:**
-- **Leaning towers:** whole towers in a few clean steps.
-- **Curved roofs.**
+- **Leaning towers:** `"lean": {"dir": "e", "steps": 2}` on a `keep` (round, `"cap": "cone"`) or a `house`:
+  the whole tower leans in two or three clean one-block steps, with brackets under each step.
+- **Curved roofs** on halls: `"roof": {"type": "curved"}`.
 
 ## Never
 

@@ -24,6 +24,7 @@ import "./rails/index.js";
 import "./trains/index.js";
 import "./trains/station_sites.js";
 import "./trains/route_game.js";
+import "./trains/line_trains.js";
 import "./bestiary/index.js";
 import "./lore/index.js";
 import "./crown/index.js";

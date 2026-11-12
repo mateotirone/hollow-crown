@@ -27,6 +27,7 @@ import { flightTick, defenceTick, mountOf, breathe, takeOff, land, announceLevel
 import "./tests.js";
 import { buildNest, setLaid } from "./nests.js";
 import "./showcase.js";
+import "./wingmen.js";
 import { sfx } from "../core/sfx.js";
 import { applyFilter } from "../core/events.js";
 
