@@ -411,6 +411,14 @@ export const ENTRIES = [
     hidden: true,
   },
   {
+    id: "workings", ch: "wild", title: "Old Workings",
+    tip: "An Old Working: dig the ore out of its walls. It grows back in a few days.",
+    page: "Five settlements have one of the old king's mines just outside their land, and it is their strength: §firon§r at Frosthelm and Gullcliff, §fgold§r at Redmesa and Dunehold, §fdiamond§r in the Wolfcairn Deeps. Follow the timbered stair down to the stone chamber and dig the ore out of its walls.\n\n"
+      + "The ore grows back: iron every day, gold every two days, diamond every three, as long as nobody is down there. Each week one Working runs rich, with more ore and more of the best kind; word of it goes round at dawn.\n\n"
+      + "The deeper ones draw §cclaim jumpers§r: a band comes down the stair while you dig. Beat them and they hand over what they took. The deeper the Working, the further down and the more often they come.",
+    when: ["event:workingEntered"],
+  },
+  {
     id: "seeps", ch: "wild", title: "Seeps",
     tip: "A Seep. Kill what guards it, then break it, or it will widen.",
     page: "Now and then a §fSeep§r opens in the ground near someone. Things climb out of it and guard it. Kill them, then break the Seep to close it.\n\n"

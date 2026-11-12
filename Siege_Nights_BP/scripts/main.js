@@ -42,6 +42,7 @@ import "./after/index.js";
 import "./opening/index.js";
 import "./labels/index.js";
 import "./forestry/index.js";
+import "./workings/index.js";
 import "./creative/index.js";
 
 // Start the shared loop last, once every file has registered its work

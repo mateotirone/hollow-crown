@@ -20,6 +20,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - Track: diagonal pieces no longer lie across the line, bends turn the right way, and slopes climb toward the higher track instead of away from it. Track already laid fixes itself.
 
 ### Added
+- Old Workings: old mines just outside five settlements whose ore grows back (iron at Frosthelm and Gullcliff, gold at Redmesa and Dunehold, diamond in the Wolfcairn Deeps). One runs rich each week, and the deeper ones draw claim jumpers.
 - The Moneyer trades metal up a step: 4 iron for a gold ingot, 8 gold for a diamond, 6 diamonds for a netherite scrap.
 - Each of the five rebuilt Hollow sites now has something to find, once for every player: a boat never launched at the Wound landing, the Woodcutter's Axe in the Lattice Wood lodge, pilgrims' coins and a lantern at Pilgrim's Cross, an unchalked load of Choir Ore in the Cartmeet tally-house, and the Seamcutter pick in the Seams winch house.
 - Five places in the Hollow have been rebuilt properly. The Wound landing, where the Carter waits, now has a timber landing stage with a crane and a boatwright's shed with a boat half built. The Lattice Wood is a woodcutters' camp with a log lodge, a sawpit and drying racks. Pilgrim's Cross has a candlelit wayside shrine and a well. Cartmeet has a cart shed and a tally-house. The Seams is a ragged ore cliff with a framed mine mouth and a winch house. Worlds that already built the old versions rebuild them when you next go near.
