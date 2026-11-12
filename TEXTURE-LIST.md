@@ -406,6 +406,7 @@ Still to do for dragons: proper modelled 3D shapes (these are block-outs), a wou
 |---|---|---|
 | Mason's Bench (16×16 side + top, opaque; heavy timber workbench, a dressed stone block under it, chisel hanging on the side; top shows a half-cut stone, mallet and iron square) | `textures/blocks/siege_mason_bench_side.png`, `siege_mason_bench_top.png` | Placeholder |
 | Foundation Stone (16×16 side + top, opaque; squared grey stone with a small house chalked on the side and a green marked-out square on top, so it reads as "a building goes here") | `textures/blocks/siege_foundation_stone_side.png`, `siege_foundation_stone_top.png` | Placeholder |
+| Ironworks (16×16 side, top, bottom, opaque; stone bricks with an iron band and a glowing furnace mouth on the side, an anvil from above on top, planks below). The Ore Pit, Bloomery and Trip-Hammer Forge buildings are vanilla blocks in the region's style. | `textures/blocks/settle/siege_ironworks_side.png`, `_top.png`, `_bottom.png` (by `studio/build_ironworks.py`, never overwrites) | Painted in house style, awaiting your review |
 
 No new entity art: the Mason and the Rival Lords use Bedrock's built-in NPC skins for now. If they should have their own look, that is a new 64×64 skin each (not started).
 

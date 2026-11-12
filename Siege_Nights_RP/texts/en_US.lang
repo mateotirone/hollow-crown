@@ -414,3 +414,4 @@ entity.siege:crown_stand.name=The Hollow Crown
 tile.siege:mason_bench.name=Mason's Bench
 tile.siege:foundation_stone.name=Foundation Stone
 tile.siege:plot_marker.name=Plot Marker
+tile.siege:ironworks.name=Ironworks

@@ -20,6 +20,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - Track: diagonal pieces no longer lie across the line, bends turn the right way, and slopes climb toward the higher track instead of away from it. Track already laid fixes itself.
 
 ### Added
+- The Ironworks: a settlement iron farm in three stages. The Ore Pit digs raw iron, the Bloomery (Town) smelts it while you feed it charcoal, and the Trip-Hammer Forge (City, beside water) makes about 100 ingots a day. Raiders can loot its storeroom.
 - Old Workings: old mines just outside five settlements whose ore grows back (iron at Frosthelm and Gullcliff, gold at Redmesa and Dunehold, diamond in the Wolfcairn Deeps). One runs rich each week, and the deeper ones draw claim jumpers.
 - The Moneyer trades metal up a step: 4 iron for a gold ingot, 8 gold for a diamond, 6 diamonds for a netherite scrap.
 - Each of the five rebuilt Hollow sites now has something to find, once for every player: a boat never launched at the Wound landing, the Woodcutter's Axe in the Lattice Wood lodge, pilgrims' coins and a lantern at Pilgrim's Cross, an unchalked load of Choir Ore in the Cartmeet tally-house, and the Seamcutter pick in the Seams winch house.
