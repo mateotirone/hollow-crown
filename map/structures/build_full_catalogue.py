@@ -155,7 +155,7 @@ def main():
             for (x, y, z), v in tmp.cells.items():
                 if v[0] not in ("keep",): b.cells[(x, y + dy, z)] = v
         return b.finish()
-    for f in sorted(glob.glob(os.path.join(HERE, "review", "specs", "*.json"))):
+    for f in sorted(g for g in glob.glob(os.path.join(HERE, "review", "specs", "*.json")) if not g.endswith(".base.json")):
         meta = json.load(open(f)).get("card", {})
         key = os.path.splitext(os.path.basename(f))[0]
         add(sec, "skill-" + key, meta.get("title", key.replace("_", " ").capitalize()), meta.get("sub", ""), meta.get("blurb", ""),
