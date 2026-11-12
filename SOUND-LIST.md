@@ -581,7 +581,6 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `mob.enderdragon.flap` | 1 | roletrials |
 | `mob.enderdragon.growl` | 1 | roletrials |
 | `mob.evocation_illager.cast_spell` | 1 | bestiary |
-| `mob.frog.tongue` | 1 | bestiary |
 | `mob.ghast.scream` | 1 | roletrials |
 | `mob.horse.angry` | 1 | horses |
 | `mob.horse.breathe` | 1 | horses |
