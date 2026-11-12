@@ -333,6 +333,9 @@ const EXTRAS = [
   { id: "ironworks", title: "Ironworks", marker: "map/structures/ironworks_builds.py",
     args: (out) => [out],
     label: { ironworks_1: "Ironworks 1: Ore Pit", ironworks_2: "Ironworks 2: Bloomery", ironworks_3: "Ironworks 3: Trip-Hammer Forge" } },
+  { id: "goldsluice", title: "Gold Sluice", marker: "map/structures/goldsluice_builds.py",
+    args: (out) => [out],
+    label: { goldsluice_1: "Gold Sluice 1: Panning Sluice", goldsluice_2: "Gold Sluice 2: Washing Mill", goldsluice_3: "Gold Sluice 3: Assay House" } },
 ];
 // Builder scripts that live on a branch without the kit: copied from the newest branch that has them into
 // the newest catalogue branch's map/structures and run there.
