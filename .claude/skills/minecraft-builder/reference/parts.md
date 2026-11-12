@@ -37,7 +37,7 @@ is the offset from the wall's centre block, positive to the right as seen from o
 | `wings` | [] | joined blocks for L, T, U and cross plans: `[{"rect": [...], "storeys": [5, 4], "roof": {"ridge": "z"}}]`. Each wing takes the house's style unless it names its own, gets no door or chimney unless given. Walls, windows and sills between blocks are opened up; all roofs share one height field so valleys close (06 connecting roofs). Make wings narrower or lower than the main block so their roof sits below the main ridge. A wing whose ridge would stay below the main eave has its top storey raised until the roofs meet (`"join": "none"` on the wing to keep it low) |
 | `dormers` | [] | `[{"side": "s", "at": 0, "w": 3, "h": 3}]` on an eave side (along the ridge): front wall on the wall line with posts and a window, cheeks down to the main roof, its own bare gable roof running back into the main roof; its roof stairs face down the main slope like the rest of the roof, and a bracket under each front corner of its roof frames the window (style `bracket`: `stairs` default, `fence`, or a block id; `fen_timber` uses `mud_brick_wall`) (Mateo 2026-11-12). A dormer taller than the main roof stops at the ridge with a warning |
 | `bushes` | true | foundation planting: clumps of the style's `bush` leaves (default its `leaves`; none for `ember_sandstone` and `hollow_timber`) on the ground under the ground-floor windows and at about half the corners, gaps between, now and then 2 high below the sill; door and steps clear; off on stilts. `false` turns it off, `{"share": 0.6}` thins it (07, Mateo 2026-11-12) |
-| `porch` | none | `{"side": "s", "at": 0, "w": 5, "d": 3, "h": 3}`: plinth-stone floor, log posts on the outer corners, a tie beam, a small gable roof with barge boards that stops at the wall. Best on a ground floor that is not jettied |
+| `porch` | none | `{"side": "s", "at": 0, "w": 5, "d": 3, "h": 3}`: plinth-stone floor, log posts on the outer corners, a tie beam, a small gable roof with barge boards that stops at the wall. Best on a ground floor that is not jettied. `"post": "quartz_pillar"` swaps the posts for columns, `"every": 2` adds one every 2 along the front (a colonnade); as wide as a gable-fronted house it reads as a temple front with a pediment (Saltreach) |
 | `balconies` | [] | `[{"side": "e", "storey": 1, "at": 0, "w": 3, "d": 1}]`: a door out, a trim floor on upside-down stair brackets, a fence rail (`rail` to change it); the window there is left out |
 | `arcade` | none | `true` or `{"sides": "esw", "storey": 0, "height", "style": "round_angle", "material", "trim", "lanterns": true, "pier"}`: every bay between the frame posts of that storey becomes an arch (round angle), so the storey stands open as a market hall; default sides are all but the door's; window dressing in the bays goes; a lantern hangs in each crown. Bays must be odd (`bay` 3 gives 3-wide arches) |
 | (windows) | | a window is left out, with its shutters and sill, when another block's roof is in front of it or above its sill, when a porch roof crosses the glass, when its wall faces another block, or when the storey is too short for it under its own roof; the summary says which when you placed it by hand |
@@ -75,6 +75,15 @@ is the offset from the wall's centre block, positive to the right as seen from o
 | glass | brown stained pane | gray stained pane | brown stained pane |
 | sill | leaf box with dark oak signs | stone stair sill | leaf box with spruce signs |
 | other | spruce door and shutters, azalea leaves, stone brick chimney, polished andesite quoins |
+
+Other presets: `salt_atlantean` (Gull's Rest: pale stone in a diorite-to-quartz ladder, `quartz_pillar` corners,
+prismarine plinth and trim, sea-glass, no window panels), and the region presets named in `regions/`.
+Style key `panel`: the trapdoor stood either side of stone windows (default `dark_oak_trapdoor`; `null` for none).
+
+**A material can name its own partial blocks** with `forms` when its block has none or the nearest one is
+wrong: `{"block": "prismarine_bricks", "forms": {"trapdoor": "warped_trapdoor", "wall": "prismarine_wall"}}`,
+`{"block": "quartz_pillar", "forms": {"wall": "diorite_wall", "slab": "smooth_quartz_slab"}}`. Use it whenever
+the summary says a material "has no X form" and the substitute is off-colour (or unwaxed copper).
 
 These come from `map/structures/kit.py` (VALE) and `vale.py` (STYLES). For other regions copy a preset and
 take the blocks from `build-instructions/palettes/<region>.md` and the colour codes from
@@ -126,7 +135,9 @@ For a curved arch in a solid mass (bridges, gateways, arcades) use the `arch` sh
 
 ## Roofs (06-roof)
 
-`roof` in a house: `type` gable / hip / flat, `gable_horns` (Frostmarch dragon heads: crossed barge boards in a V past the ridge at each gable end), `ridge` x / z (default the long way), `pitch` 1 (45°) or 2 (steep:
+`roof` in a house: `type` gable / hip / flat, `profile` (a list of per-row pitches from the eave up, the last
+repeating: `[2, 1]` a mansard, `[1, 1, 2]` a bell roof that swells toward the top; Saltreach Atlantean houses,
+Mateo 2026-11-12; every steep step, hip lines included, gets full roof blocks under its stair so no corner is open), `gable_horns` (Frostmarch dragon heads: crossed barge boards in a V past the ridge at each gable end), `ridge` x / z (default the long way), `pitch` 1 (45°) or 2 (steep:
 stair on a full block), `overhang` 1, `verge` 1, `cap` (ridge slab material).
 
 How it is built: a height field over the footprint plus overhang; every cell takes a stair facing uphill;
