@@ -9,7 +9,7 @@ of leaning towers the story's travellers see.
 Frame as everywhere in map/structures: y = 0 is the ground's top layer, floors at y = 1.
 """
 from bp import Blueprint, DIRS
-from kit import Building, mix, grow, h3, DOCTRINE, LADDERS, stairs_of, paint_stone, ground_dressing
+from kit import texture_roofs, Building, mix, grow, h3, DOCTRINE, LADDERS, stairs_of, paint_stone, ground_dressing
 from settle_halls import pyramid, hang
 
 def hollow_palette(seed=0):
@@ -41,6 +41,7 @@ def finish_hollow(bp):
     signs or soul lantern stands at the foot of blank walls."""
     paint_stone(bp, HOL_WALL, set(HOL_WALL))
     ground_dressing(bp, set(HOL_WALL) | {"polished_blackstone_bricks", "cobbled_deepslate"}, "dark_oak", leaves=HOL_LEAVES, lamp="soul_lantern")
+    texture_roofs(bp)
     return bp
 
 def lean(bp, y_from, dx=1, every=3, xs=None):

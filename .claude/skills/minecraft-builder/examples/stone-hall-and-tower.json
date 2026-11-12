@@ -1,0 +1,130 @@
+{
+ "name": "hall_and_tower",
+ "materials": {
+  "tower_stone": {
+   "ladder": [
+    "cobblestone",
+    "andesite",
+    "stone_bricks"
+   ],
+   "axis": "y",
+   "noise": 0.12
+  },
+  "copper": {
+   "ladder": [
+    "waxed_cut_copper",
+    "waxed_exposed_cut_copper",
+    "waxed_weathered_cut_copper",
+    "waxed_oxidized_cut_copper"
+   ],
+   "axis": "y",
+   "jitter": 0.04
+  }
+ },
+ "shapes": [
+  {
+   "shape": "cylinder",
+   "at": [
+    12,
+    0,
+    0
+   ],
+   "r": 3.5,
+   "h": 15,
+   "material": "tower_stone"
+  },
+  {
+   "shape": "cylinder",
+   "at": [
+    12,
+    14,
+    0
+   ],
+   "r": 4.5,
+   "h": 1,
+   "material": "tower_stone"
+  },
+  {
+   "shape": "cone",
+   "at": [
+    12,
+    15,
+    0
+   ],
+   "r": 5.5,
+   "h": 9,
+   "material": "copper"
+  },
+  {
+   "op": "sub",
+   "shape": "arch",
+   "at": [
+    12,
+    8,
+    3
+   ],
+   "width": 1,
+   "height": 3,
+   "depth": 3,
+   "axis": "x"
+  },
+  {
+   "op": "sub",
+   "shape": "arch",
+   "at": [
+    15,
+    8,
+    0
+   ],
+   "width": 1,
+   "height": 3,
+   "depth": 3,
+   "axis": "z"
+  }
+ ],
+ "parts": [
+  {
+   "part": "house",
+   "style": "vale_stone",
+   "rect": [
+    -6,
+    -4,
+    6,
+    4
+   ],
+   "plinth": 2,
+   "storeys": [
+    5,
+    5
+   ],
+   "door": {
+    "side": "s",
+    "kind": "grand"
+   },
+   "roof": {
+    "type": "hip"
+   },
+   "chimney": [
+    [
+     -3,
+     0
+    ]
+   ]
+  },
+  {
+   "part": "arch",
+   "at": [
+    12,
+    0,
+    3
+   ],
+   "axis": "x",
+   "width": 3,
+   "height": 4,
+   "depth": 1,
+   "style": "round_angle",
+   "material": "stone_bricks",
+   "trim": "dark_oak_planks"
+  }
+ ]
+}

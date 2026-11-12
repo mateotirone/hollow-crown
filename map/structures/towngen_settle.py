@@ -9,11 +9,11 @@ Same pipeline as the towns (paths first, half-sunk paths, land portions decided 
 field, slope-aware floor heights and foundations, fields watered level by level), with the rules
 a growing settlement adds (worked out with the building-placement thread, 2026-11-11):
 
-  * The wall grows: Hamlet r32, Town r40, City r48, Castle r56 (outer face, blocks from the Plot
+  * The wall grows: Hamlet r36, Town r46, City r56, Castle r66 (outer face, blocks from the Plot
     Stone). The gate keeps its bearing. A slot may only open once the whole box is inside the wall
     with 2 blocks clear (radius <= wall - 3); a slot straddling an old wall line opens later.
-  * Old wall lines at r32 and r48 can become ring roads (templates choose which, and which arc).
-    The r40 and r56 lines just become build land once the wall moves past them.
+  * Old wall lines at r36 and r56 can become ring roads (templates choose which, and which arc).
+    The r46 and r66 lines just become build land once the wall moves past them.
   * The town hall grows too: the ground each hall level takes (drawHall(level) bounds, levels 1-5,
     from the Hall Cornerstone 5 ahead of the Plot Stone, plus 2 clear) is kept free of roads and
     slots for good up to level 4 (the Castle's hall); level 5's extra ground stays free of roads,
@@ -41,7 +41,7 @@ from towngen import Town, ROT, PRIO, WIDTH
 import dressing
 
 TIERS = ["Hamlet", "Town", "City", "Castle"]
-WALL_R = [32, 40, 48, 56]                       # wall ring (outer face) per tier
+WALL_R = [36, 46, 56, 66]                       # wall ring (outer face) per tier (Mateo 2026-11-12; was 32/40/48/56)
 CLEAR = 3                                       # a slot's far corner stays this far inside the wall line
 # (width along the door side, depth into the plot); the first shape is the size's plain box, the
 # others its long variants. Grown to fit the region designs of PR #89 with a block to spare
@@ -74,18 +74,18 @@ HALL_CLEAR = 2
 TEMPLATES = {
     "crossroads": dict(label="Crossroads",
                        about="A cross street through the square out to the wall, a ring lane on the old Hamlet wall line round the front, side streets beyond it.",
-                       rings=[(32, -75, 75)],
-                       radials=[(90, 8, 54), (-90, 8, 54), (40, 8, 32), (-40, 8, 32), (40, 32, 54), (-40, 32, 54), (135, 32, 54), (-135, 32, 54)],
+                       rings=[(36, -75, 75)],
+                       radials=[(90, 8, 64), (-90, 8, 64), (40, 8, 36), (-40, 8, 36), (40, 36, 64), (-40, 36, 64), (135, 36, 64), (-135, 36, 64)],
                        square="round", field_share=0.1),
     "twin_rings": dict(label="Twin Rings",
-                       about="Both old wall lines (r32, r48) become ring lanes; streets from the square out to the first ring, staggered cross streets between the rings.",
-                       rings=[(32, -175, 175), (48, -115, 115)],
-                       radials=[(60, 8, 32), (-60, 8, 32), (120, 8, 32), (-120, 8, 32), (30, 32, 48), (-30, 32, 48), (95, 32, 48), (-95, 32, 48), (150, 32, 54), (-150, 32, 54)],
+                       about="The Hamlet and City wall lines (r36, r56) become ring lanes; streets from the square out to the first ring, staggered cross streets between the rings.",
+                       rings=[(36, -175, 175), (56, -115, 115)],
+                       radials=[(60, 8, 36), (-60, 8, 36), (120, 8, 36), (-120, 8, 36), (30, 36, 56), (-30, 36, 56), (95, 36, 56), (-95, 36, 56), (150, 36, 64), (-150, 36, 64)],
                        square="round", field_share=0.1),
     "market_street": dict(label="Market Street",
                           about="A long market runs from the square toward the gate; diagonal streets fan out from it to the outer ring.",
-                          rings=[(48, -150, 150)],
-                          radials=[(50, 8, 48), (-50, 8, 48), (115, 8, 54), (-115, 8, 54), (20, 20, 54), (-20, 20, 54), (85, 30, 48), (-85, 30, 48), (160, 40, 54), (-160, 40, 54)],
+                          rings=[(56, -150, 150)],
+                          radials=[(50, 8, 56), (-50, 8, 56), (115, 8, 64), (-115, 8, 64), (20, 22, 64), (-20, 22, 64), (85, 34, 56), (-85, 34, 56), (160, 46, 64), (-160, 46, 64)],
                           square="long", field_share=0.1),
 }
 
@@ -926,7 +926,7 @@ def main():
     ap.add_argument("--templates", default=",".join(TEMPLATES)); ap.add_argument("--seed", type=int, default=1); ap.add_argument("--tries", type=int, default=8)
     ap.add_argument("--trees", default="", help="trees.json from map/trees/build_trees.py; uses map/trees/place.py to scatter them")
     ap.add_argument("--trees-src", default=os.path.join(HERE, "..", "trees"))
-    ap.add_argument("--walls", default="", help="try other wall rings, e.g. 36,46,56,66: template radii are stretched to match")
+    ap.add_argument("--walls", default="", help="try other wall rings, e.g. 32,40,48,56: template radii are stretched to match")
     a = ap.parse_args()
     if a.walls: set_walls([int(v) for v in a.walls.split(",")])
     plot = load_plots(a.config)[a.plot]
