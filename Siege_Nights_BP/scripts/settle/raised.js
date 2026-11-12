@@ -9,8 +9,8 @@
 // Test: /scriptevent siege:block_build guardhouse|armoury [style]   raise one where you stand
 
 import { world, system } from "@minecraft/server";
-import { onTick, isReady, settlementAt, moduleStore, addTests, assert, emit } from "../siege/api.js";
-import { startBuild, buildFor } from "../townhall/build.js";
+import { onTick, isReady, settlementAt, moduleStore, addTests, assert, emit, addFilter } from "../siege/api.js";
+import { startBuild, buildFor, worldMarks } from "../townhall/build.js";
 import { STYLES, STYLE_IDS } from "../townhall/styles.js";
 import { styleFor } from "./buildings.js";
 import { siteProblem, styleOf } from "./plans.js";
@@ -123,6 +123,18 @@ world.afterEvents.playerPlaceBlock.subscribe(({ block, player }) => {
   start(key, store.data.pending[key]);
   player.sendMessage(`§6A ${build.name} is going up behind it.`);
 });
+
+// The Barracks yard in world coordinates, for the army's off-duty soldiers (army/idle.js applies "barracksYard"):
+// the design's yard_a and yard_b marks turned the way this Barracks was raised. barracks = the block's position.
+export function yardOf(barracks) {
+  const b = store.data.built?.[keyOf(barracks)] ?? store.data.pending?.[keyOf(barracks)];
+  if (!b || !BLOCK_BUILDS[b.type]) return undefined;
+  const plan = planFor(b.type, b.style);
+  if (!plan.marks.yard_a || !plan.marks.yard_b) return undefined;
+  const m = worldMarks(plan, { ...barracks, y: barracks.y + (b.lift ?? 0) }, { x: b.fx, z: b.fz });
+  return { a: { x: m.yard_a.x, z: m.yard_a.z }, b: { x: m.yard_b.x, z: m.yard_b.z }, muster: m.muster };
+}
+addFilter("barracksYard", (yard, { barracks } = {}) => (barracks && yardOf(barracks)) || yard);
 
 // Breaking the block takes the building off the charter count (the walls stay, it is only a house then)
 world.afterEvents.playerBreakBlock.subscribe(({ block, brokenBlockPermutation }) => {
