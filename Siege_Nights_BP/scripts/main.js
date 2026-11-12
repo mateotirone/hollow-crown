@@ -46,6 +46,7 @@ import "./guardposts/index.js";
 import "./forestry/index.js";
 import "./workings/index.js";
 import "./ironworks/index.js";
+import "./vault/index.js";
 import "./creative/index.js";
 import "./dispatch/index.js";
 import "./townsfolk/index.js";
