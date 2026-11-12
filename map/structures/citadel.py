@@ -540,6 +540,55 @@ class Citadel:
         return {"plots": dict(c), "plot_count": len(self.plots), "fields": len(self.fields), "towers": len(self.towers),
                 "bounds": [lo, hi], "blocks": sum(1 for v in self.bp.cells.values() if v[0] not in ("air", "keep"))}
 
+    # ---- a preview with every plot built on (what a finished Citadel looks like) ---------------------
+    def fill(self, region="vale"):
+        """Raises a settlement building of this region on every plot, turned to face its street. Only for
+        previews: in game the players choose and raise the buildings themselves."""
+        import settle_buildings as SB
+        makers = {**SB.BUILDERS, **SB.BLOCK_BUILDERS}
+        cache = {}
+        def get(bid, deg):
+            if (bid, deg) not in cache:
+                b = makers[bid](region).rotated(deg) if deg else makers[bid](region).finish()
+                cache[(bid, deg)] = (b, b.bounds())
+            return cache[(bid, deg)]
+        CHOICE = {   # what goes on each size of plot, in turn
+            "S": ["cottage", "cottage", "watchtower", "cottage", "cottage", "garden", "cottage", "well", "cottage"],
+            "M": ["smithy", "cottage", "quartermaster", "cottage", "stable", "cottage"],
+            "L": ["stables_2", "storehouse", "library", "breeder_yard", "smithy", "storehouse"],
+            "G": ["barracks", "library"],
+            "inner L": ["storehouse", "quartermaster"],
+        }
+        turn = {"s": 0, "w": 90, "n": 180, "e": 270}
+        count = {}
+        self.filled = []
+        for pl in self.plots:
+            key = ("inner " + pl["size"]) if pl["where"] == "inner ward" and pl["size"] == "L" else pl["size"]
+            if pl["where"] == "s outer" and abs((pl["x0"] + pl["x1"]) // 2) < 40: key = "market"
+            seq = CHOICE.get(key, ["market", "smithy", "market", "cottage"])
+            i = count.get(key, 0); count[key] = i + 1
+            deg = turn[pl["door"]]
+            for k in range(len(seq)):
+                bid = seq[(i + k) % len(seq)]
+                b, (lo, hi) = get(bid, deg)
+                if hi[0] - lo[0] <= pl["x1"] - pl["x0"] and hi[2] - lo[2] <= pl["z1"] - pl["z0"]: break
+            else:
+                continue
+            # centred across the plot, front edge one block in from the plot's street side
+            w, d = hi[0] - lo[0], hi[2] - lo[2]
+            cx = (pl["x0"] + pl["x1"]) // 2 - (lo[0] + w // 2)
+            cz = (pl["z0"] + pl["z1"]) // 2 - (lo[2] + d // 2)
+            if pl["door"] == "s": cz = pl["z1"] - hi[2]
+            if pl["door"] == "n": cz = pl["z0"] - lo[2]
+            if pl["door"] == "e": cx = pl["x1"] - hi[0]
+            if pl["door"] == "w": cx = pl["x0"] - lo[0]
+            for (x, y, z), v in b.cells.items():
+                if v[0] == "keep": continue
+                self.bp.cells[(x + cx, y, z + cz)] = v
+            self.filled.append(bid)
+        self.bp.finish()
+        return self.filled
+
 
 def build(style="vale"):
     c = Citadel(style); c.build(); return c
