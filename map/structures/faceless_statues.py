@@ -5,6 +5,11 @@ minecraft-builder engine from a shape spec, so the robe, hood and sleeves come o
     spec(variant)                              the engine spec of one standing figure, facing +z (south)
     cells(variant, facing, fallen=False)       {(x, y, z): (block, props)} about the plinth's centre, y 0 = ground
     put(d, cells, x, y, z)                     into a landmarks.D design at (x, y, z)
+    avenue_cells(points, n=32)                 Sunscar's avenue of King Oswin's statues (towns bake, map/bake_town)
+
+The forty statues (lore/data: Lord Sorrel, Warden Isolde) are one man at every age, boy to old king: 32 line Sunscar's
+avenue from the square to the Faceless Gate, the Gate's own 8 make forty. spec_age() draws them smaller (5x5 plinth),
+crowned from the young king on, each with the same pale quartz hands ("You can tell from the hands").
 
 Variants: "staff" (a tall staff in the right hand), "folded" (hands folded on the chest), "bowl" (a bowl held out),
 "broken" (the hood snapped off at the neck). Every figure is faceless: the hood's opening is a smooth, blank
@@ -71,6 +76,52 @@ def spec(variant="folded", seed=1):
             "shapes": shapes, "place": place}
 
 
+AGES = {   # scale of the figure, and how it stands: the same man from a boy to an old king (lore: the forty statues)
+    "boy": 0.46, "youth": 0.6, "young_king": 0.7, "king": 0.74, "old_king": 0.68,
+}
+
+
+def spec_age(age="king", variant="folded", seed=1):
+    """One of the forty statues of King Oswin on Sunscar's avenue: a 5x5 plinth, the figure at his age, faceless,
+    and the same pale hands on every one ("You can tell from the hands": Warden Isolde)."""
+    k = AGES[age]; y0 = PLINTH_H
+    R = lambda v: round(v * k, 2)
+    stoop = 0.6 if age == "old_king" else 0.0
+    H = 14.6 * k                                                    # hem to the top of the robe
+    shapes = [
+        {"shape": "box", "min": [-2, 0, -2], "max": [2, 0, 2], "material": "plinth"},
+        {"shape": "box", "min": [-2, 1, -2], "max": [2, 1, 2], "material": "plinth"},
+        {"shape": "lathe", "at": [0, y0, 0], "profile": [[0, R(3.0)], [R(5), R(2.3)], [R(8), R(2.1)], [R(11), R(2.4)], [R(13), R(2.6)], [R(14), R(1.9)], [R(14.6), 0]], "material": "robe"},
+        {"shape": "ellipsoid", "at": [0, y0 + R(13), stoop * 0.5], "r": [R(3.6), R(1.6), R(2.2)], "material": "robe"},
+        {"shape": "egg", "at": [0, y0 + R(16.3), R(-0.2) + stoop], "R": R(2.3), "H": R(3.2), "k": -0.12, "material": "robe"},
+    ]
+    if age in ("king", "young_king", "old_king"):        # a crown ring on the hood
+        shapes.append({"op": "paint", "shape": "torus", "at": [0, y0 + R(17.2), R(-0.2) + stoop], "R": R(2.0), "r": 0.55, "axis": "y", "material": "crown"})
+    fy = y0 + round(R(16.3)); fz = max(1, round(R(2.3) - 0.6 + stoop))
+    shapes.append({"op": "sub", "shape": "box", "min": [-1 if k > 0.55 else 0, fy - 1, fz], "max": [1 if k > 0.55 else 0, fy, fz + 3]})
+    place = [[x, fy + j, fz - 1, "smooth_quartz"] for x in ((-1, 0, 1) if k > 0.55 else (0,)) for j in (-1, 0)]   # the blank face
+    hy = y0 + round(R(8.5)); hz = round(R(2.3))                      # the hands, pale, in front of the chest
+    if variant == "staff":
+        place += [[1, hy, hz, "smooth_quartz"]] + [[1, y, hz, "sandstone_wall"] for y in range(y0, hy)] + [[1, y, hz, "sandstone_wall"] for y in range(hy + 1, hy + round(R(9)))]
+    elif variant == "sword":
+        place += [[0, hy, hz, "smooth_quartz"]] + [[0, y, hz, "sandstone_wall"] for y in range(y0, hy)] + [[-1, hy, hz, "smooth_sandstone_slab", {"half": "top"}], [1, hy, hz, "smooth_sandstone_slab", {"half": "top"}]]
+    elif variant == "bowl":
+        place += [[x, hy, hz, "smooth_quartz"] for x in (-1, 1)] + [[0, hy, hz, "cut_red_sandstone_slab", {"half": "top"}]]
+    else:
+        place += [[x, hy, hz, "smooth_quartz"] for x in ((-1, 0, 1) if k > 0.5 else (0,))]
+    if variant == "headless":
+        shapes.append({"op": "sub", "shape": "plane", "at": [0, y0 + R(14.4), 0], "normal": [0.3, -1, 0.2]})
+        place = [p for p in place if p[1] < y0 + R(14.4)]
+    if variant == "armless":
+        place = [p for p in place if p[3] != "smooth_quartz" or p[1] > hy]
+        shapes.append({"op": "sub", "shape": "box", "min": [1, y0 + round(R(7)), 0], "max": [3, y0 + round(R(12)), 3]})
+    for j in range(3):
+        a = _h(seed, j, 5) * math.tau
+        shapes.append({"op": "sub", "shape": "sphere", "at": [round(math.cos(a) * R(3.2), 1), y0 + round(_h(seed, j, 6) * R(14), 1), round(math.sin(a) * R(3.2), 1)], "r": 0.7})
+    return {"name": f"oswin_{age}_{variant}", "edition": "bedrock",
+            "materials": {"plinth": STONE, "robe": ROBE, "crown": "cut_red_sandstone"}, "shapes": shapes, "place": place}
+
+
 _ROT = {"s": 0, "w": 1, "n": 2, "e": 3}
 _DIR = ["s", "w", "n", "e"]
 
@@ -80,9 +131,9 @@ def _turn(x, z, q):
     return -z, x, q
 
 
-def cells(variant="folded", facing="s", fallen=False, seed=1):
+def cells(variant="folded", facing="s", fallen=False, seed=1, age=None):
     import engine
-    blocks, _, _ = engine.compute(spec(variant, seed))
+    blocks, _, _ = engine.compute(spec_age(age, variant, seed) if age else spec(variant, seed))
     out = {}
     for (x, y, z), (n, q) in blocks.items():
         q = dict(q)
@@ -128,6 +179,44 @@ def avenue(d, ground=lambda x, z: 0):
                 if hz <= -16: put(d, {(hx, hy, hz): (n, {})}, x + (3 if x < 0 else -3) - hx * 0, ground(x, z), z + 22)
     for k, (v, x, z) in enumerate(FALLEN):
         put(d, cells(v, "s", fallen=True, seed=31 + k), x, ground(x, z), z)
+
+
+ORDER = ["boy"] * 6 + ["youth"] * 8 + ["young_king"] * 9 + ["king"] * 9 + ["old_king"] * 8     # forty, square to gate
+HOLDS = ["folded", "staff", "bowl", "sword"]
+
+
+def avenue_cells(points, n=32, seed=7, width=9):
+    """Sunscar's avenue: n statues of Oswin in pairs along a street centreline (32 here and the Gate's 8 make the
+    forty; the plinths stand 5 to 9 out from the centre, so a 9-wide walk stays clear (world [x, z] points, from the square
+    to the Faceless Gate), boy to old king, facing the street, about a third broken: hood gone, an arm gone, or
+    broken off at the stump. Every cell stands 5 to 9 out from the centreline. -> {(x, y, z): (block, props)} with y 0 = the street (a drape stamp)."""
+    seg, L = [], 0.0
+    for a, b in zip(points, points[1:]):
+        l = math.hypot(b[0] - a[0], b[1] - a[1]); seg.append((a, b, l, L)); L += l
+    order = [ORDER[round(i * (len(ORDER) - 1) / max(1, n - 1))] for i in range(n)]
+    out = {}
+    pairs = (n + 1) // 2
+    for i in range(n):
+        t = (i // 2 + 0.5) / pairs * L; side = 1 if i % 2 == 0 else -1
+        a, b, l, l0 = next(s_ for s_ in seg if s_[3] + s_[2] >= t)
+        u = (t - l0) / l; px, pz = a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u
+        dx, dz = (b[0] - a[0]) / l, (b[1] - a[1]) / l
+        nx, nz = -dz * side, dx * side                                   # out to this statue's side
+        off = width // 2 + 3                                              # the plinth 5 wide just outside the walk
+        cx, cz = round(px + nx * off), round(pz + nz * off)
+        face = ("e" if -nx > 0 else "w") if abs(nx) >= abs(nz) else ("s" if -nz > 0 else "n")   # toward the street
+        r_ = _h(seed, i, 9); age = order[i]
+        hold = HOLDS[int(_h(seed, i, 10) * len(HOLDS))]
+        if r_ < 0.12:     # broken off: only the stump of the robe on its plinth, and the pieces round its foot
+            for (x, y, z), v in cells(hold, face, seed=seed + i, age=age).items():
+                if y <= PLINTH_H + 2 + int(_h(seed, i, 11) * 3): out[(cx + x, y, cz + z)] = v
+            for j in range(4):
+                x, z = (-2, -2, 2, 2)[j], (-2, 2, -2, 2)[j]
+                if _h(seed, i, 12 + j) < 0.6: out[(cx + x, PLINTH_H, cz + z)] = ("sandstone" if j % 2 else "smooth_sandstone_slab", {} if j % 2 else {"half": "bottom"})
+            continue
+        var = "headless" if r_ < 0.24 else "armless" if r_ < 0.33 else hold
+        for (x, y, z), v in cells(var, face, seed=seed + i, age=age).items(): out[(cx + x, y, cz + z)] = v
+    return out
 
 
 def put(d, cs, x0, y0, z0):
