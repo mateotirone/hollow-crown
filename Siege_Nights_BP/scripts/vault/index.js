@@ -39,7 +39,11 @@ import { siteProblem } from "../settle/plans.js";
 import { hallMenuExtras, countMatching, takeMatching } from "../townhall/townhall.js";
 import { sfx } from "../core/sfx.js";
 import { VAULT_ROOMS } from "./rooms_data.js";
-import { WINDOW, awayState } from "./data.js";
+import { WINDOW, awayState, SAFE, safeBlow, safeCells } from "./data.js";
+import { robBank, giveCoins, banked } from "../economy/coins.js";
+import { strongbox } from "../economy/index.js";
+import { coins } from "../economy/rules.js";
+import { attackable } from "../siege/util.js";
 import { DISPATCH } from "../dispatch/config.js";
 import { addFilter } from "../core/events.js";
 import { guardTag } from "../siege/guards.js";
@@ -128,6 +132,7 @@ function start(owner, v, tier) {
     },
     onDone() {
       v.built = tier;
+      v.safe = undefined; // a new safe comes with the new room
       v.broken = false; // a rebuild hangs a whole new door and lock
       v.pending = undefined;
       store.save();
@@ -520,6 +525,86 @@ onTick("vault-away-guards", 200, () => {
   }
 });
 
+// ---------- the Regal Safe: the strongbox's Regals, robbed a blow at a time ----------
+
+const SAFE_BLOCK = "siege:regal_safe";
+const lastBlow = new Map(); // player id -> tick of their last blow (one blow counts every 8 ticks)
+
+function safeAt(block) {
+  const l = block.location;
+  for (const [owner, v] of Object.entries(vaults())) {
+    if (!v.built) continue;
+    const m = roomOf(v.built, v.layout).marks.safe;
+    if (!m) continue;
+    const cells = safeCells(m).map((c) => worldOf(v, ...c));
+    if (cells.some((c) => c.x === l.x && c.y === l.y && c.z === l.z)) return { owner, v, cells };
+  }
+  return undefined;
+}
+
+function showSafeCracks(cells, frac) {
+  const dim = world.getDimension(OVERWORLD);
+  const cracks = frac >= 1 ? 2 : frac >= 0.66 ? 2 : frac >= 0.33 ? 1 : 0;
+  for (const at of cells) {
+    try { const b = dim.getBlock(at); if (b?.typeId === SAFE_BLOCK && b.permutation.getState("siege:cracks") !== cracks) b.setPermutation(b.permutation.withState("siege:cracks", cracks)); } catch { /* unloaded */ }
+  }
+}
+
+world.afterEvents.entityHitBlock.subscribe(({ damagingEntity: player, hitBlock: block }) => {
+  if (player?.typeId !== "minecraft:player" || block?.typeId !== SAFE_BLOCK || !isReady()) return;
+  const found = safeAt(block);
+  if (!found) return;
+  const { owner, v, cells } = found;
+  if (player.id === owner || isAlly(owner, player.id)) return player.onScreenDisplay.setActionBar("§7Your Regal Safe. Click it to put coins in or take them out.");
+  if (!attackable(owner)) return player.onScreenDisplay.setActionBar("§7The safe's keeper is away. It can't be touched until they return or the vault lies open.");
+  const now = system.currentTick;
+  if (now - (lastBlow.get(player.id) ?? -100) < 8) return;
+  lastBlow.set(player.id, now);
+  v.safe ??= { hits: 0, broken: false };
+  if (v.safe.broken) return player.onScreenDisplay.setActionBar("§7The safe hangs open. Nothing is left in it.");
+  const inside = banked(owner);
+  const blow = safeBlow(v.built, inside, v.safe.hits);
+  const took = robBank(owner, blow.take);
+  if (took) giveCoins(player, took);
+  v.safe.hits += 1;
+  const dim = block.dimension;
+  try { sfx(dim, "random.anvil_land", block.location, { volume: 0.7, pitch: 1.2 }); } catch { /* quiet */ }
+  if (blow.broken) {
+    v.safe.broken = true;
+    showSafeCracks(cells, 1);
+    player.onScreenDisplay.setActionBar(`§6The safe bursts open! +${coins(took)}`);
+    const name = keepOf(owner)?.name ?? "A settlement";
+    emit("safeBroken", { owner, by: player.id, took });
+    emit("discordAlert", { kind: "safeBroken", text: `${player.name} broke open ${name}'s Regal Safe and took ${took} Regals.`, ping: [], hollow: false });
+    say(world.getPlayers().find((p) => p.id === owner), `§c§l${player.name} broke open your Regal Safe and took ${coins(took)}!`);
+  } else {
+    showSafeCracks(cells, v.safe.hits / SAFE[v.built].hits);
+    player.onScreenDisplay.setActionBar(`§6+${coins(took)}§7  (blow ${v.safe.hits} of ${SAFE[v.built].hits})`);
+    if (v.safe.hits === 1) say(world.getPlayers().find((p) => p.id === owner), `§c§lSomeone is breaking into your Regal Safe!`);
+  }
+  store.save();
+});
+
+// The owner (or an ally) clicks it: the strongbox; a broken safe is shut and locked again first
+world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
+  const { block, player } = event;
+  if (event.isFirstEvent === false || !isReady() || block.typeId !== SAFE_BLOCK) return;
+  event.cancel = true;
+  system.run(() => {
+    const found = safeAt(block);
+    if (!found) return;
+    const { owner, v, cells } = found;
+    if (player.id !== owner && !isAlly(owner, player.id)) return player.onScreenDisplay.setActionBar("§7Locked. Break it open, a blow at a time.");
+    if (v.safe?.hits) {
+      v.safe = { hits: 0, broken: false };
+      store.save();
+      showSafeCracks(cells, 0);
+      say(player, "§7You hammer the safe straight and lock it again.");
+    }
+    if (player.id === owner) strongbox(player).catch(() => {});
+  });
+});
+
 // ---------- reinforcing: click the lock with the next tier's material ----------
 
 // Relic stands keep their relic and move to the bigger room's plinths
@@ -575,6 +660,7 @@ const RELICS = {
   heart: { item: "siege:heart_of_the_hollow", stand: "siege:heart_stand", name: "the Heart" },
   template: { item: "siege:choirsteel_upgrade_template", stand: "siege:template_stand", name: "the Choirsteel template" },
 };
+addMenuLabel({ block: "siege:regal_safe", name: "Regal Safe", hint: "Click: your strongbox" });
 addMenuLabel({ entity: RELICS.heart.stand, hint: "Click: take the Heart" });
 addMenuLabel({ entity: RELICS.template.stand, hint: "Click: take the Choirsteel template" });
 for (const t of TIERS) addMenuLabel({ block: `siege:vault_lock_${t}`, name: "Vault Lock", hint: "Click with the Vault Key: open or shut" });

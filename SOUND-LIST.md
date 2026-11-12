@@ -397,7 +397,7 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 |---|---|---|---|---|
 | `block.bell.hit` | Any bell | `block.bell.hit` + `block.bell.hit` pitch 0.5 vol 0.4 after 0.05 s + `block.bell.hit` pitch 1.03 vol 0.22 after 0.15 s | 47 | bestiary (15), undertow (15), after (5), lore (4), unlocks (4), crown (2), roletrials, townhall |
 | `random.levelup` | Done, bought, learned | `random.levelup` pitch 0.8 vol 0.5 + `note.harp` pitch 0.6 vol 0.35 after 0.1 s | 30 | horses (7), siege (5), townhall (4), lore (3), dragons (2), settle (2), crown, ironworks, reach, rivals, roletrials, undertow, vault |
-| `random.anvil_land` | A heavy blow | `random.anvil_land` pitch 0.9 vol 0.8 + `dig.stone` pitch 0.5 vol 0.7 | 16 | bestiary (3), undertow (3), siege (2), trains (2), unlocks (2), dragons, roletrials, townhall, vault |
+| `random.anvil_land` | A heavy blow | `random.anvil_land` pitch 0.9 vol 0.8 + `dig.stone` pitch 0.5 vol 0.7 | 17 | bestiary (3), undertow (3), siege (2), trains (2), unlocks (2), vault (2), dragons, roletrials, townhall |
 | `random.orb` | A small yes | `random.orb` pitch 0.75 vol 0.55 | 15 | economy (2), townhall (2), unlocks (2), dragons, guild, ironworks, lore, rails, roletrials, settle, undertow, vault |
 | `random.anvil_use` | Building and mending | `random.anvil_use` pitch 0.8 vol 0.55 + `dig.stone` pitch 0.7 vol 0.5 after 0.1 s | 15 | settle (3), townhall (3), vault (3), siege (2), unlocks (2), horses, roletrials |
 | `raid.horn` | A horn | `raid.horn` pitch 0.85 + `raid.horn` pitch 0.64 vol 0.4 after 0.25 s | 14 | bestiary (5), townhall (3), unlocks (3), crown, dragons, rivals |

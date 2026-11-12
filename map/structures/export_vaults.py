@@ -45,7 +45,7 @@ def room(tier, layout):
     pal, idx, cells = [], {}, {}
     for (x, y, z), (n, p) in b.cells.items():
         if n == "keep": continue
-        q = {k: v for k, v in p.items() if k in KEEP}
+        q = {k: v for k, v in p.items() if k in KEEP or k == "raw"}   # raw: add-on block states (the safe's part)
         if n == "air": q = {}
         key = json.dumps([n, q], sort_keys=True)
         if key not in idx: idx[key] = len(pal); pal.append([n if ":" in n else "minecraft:" + n, q])

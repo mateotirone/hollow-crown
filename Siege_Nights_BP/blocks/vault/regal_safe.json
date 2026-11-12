@@ -1,0 +1,168 @@
+{
+  "format_version": "1.21.90",
+  "minecraft:block": {
+    "description": {
+      "identifier": "siege:regal_safe",
+      "menu_category": {
+        "category": "construction"
+      },
+      "states": {
+        "siege:part": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "siege:cracks": [
+          0,
+          1,
+          2
+        ]
+      },
+      "traits": {
+        "minecraft:placement_direction": {
+          "enabled_states": [
+            "minecraft:cardinal_direction"
+          ]
+        }
+      }
+    },
+    "components": {
+      "minecraft:display_name": "tile.siege:regal_safe.name",
+      "minecraft:geometry": {
+        "identifier": "geometry.siege_regal_safe",
+        "bone_visibility": {
+          "part0": "q.block_state('siege:part') == 0",
+          "cracks_1_0": "q.block_state('siege:part') == 0 && q.block_state('siege:cracks') == 1",
+          "cracks_2_0": "q.block_state('siege:part') == 0 && q.block_state('siege:cracks') == 2",
+          "part1": "q.block_state('siege:part') == 1",
+          "cracks_1_1": "q.block_state('siege:part') == 1 && q.block_state('siege:cracks') == 1",
+          "cracks_2_1": "q.block_state('siege:part') == 1 && q.block_state('siege:cracks') == 2",
+          "part2": "q.block_state('siege:part') == 2",
+          "cracks_1_2": "q.block_state('siege:part') == 2 && q.block_state('siege:cracks') == 1",
+          "cracks_2_2": "q.block_state('siege:part') == 2 && q.block_state('siege:cracks') == 2",
+          "part3": "q.block_state('siege:part') == 3",
+          "cracks_1_3": "q.block_state('siege:part') == 3 && q.block_state('siege:cracks') == 1",
+          "cracks_2_3": "q.block_state('siege:part') == 3 && q.block_state('siege:cracks') == 2"
+        }
+      },
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "siege_vault_safe_side",
+          "render_method": "alpha_test"
+        },
+        "gold": {
+          "texture": "siege_vault_safe_gold",
+          "render_method": "alpha_test"
+        },
+        "front_0": {
+          "texture": "siege_vault_safe_front_0",
+          "render_method": "alpha_test"
+        },
+        "front_1": {
+          "texture": "siege_vault_safe_front_1",
+          "render_method": "alpha_test"
+        },
+        "front_2": {
+          "texture": "siege_vault_safe_front_2",
+          "render_method": "alpha_test"
+        },
+        "front_3": {
+          "texture": "siege_vault_safe_front_3",
+          "render_method": "alpha_test"
+        },
+        "cracks_1": {
+          "texture": "siege_vault_cracks_1",
+          "render_method": "alpha_test"
+        },
+        "cracks_2": {
+          "texture": "siege_vault_cracks_2",
+          "render_method": "alpha_test"
+        }
+      },
+      "minecraft:collision_box": {
+        "origin": [
+          -8,
+          0,
+          -8
+        ],
+        "size": [
+          16,
+          16,
+          16
+        ]
+      },
+      "minecraft:selection_box": {
+        "origin": [
+          -8,
+          0,
+          -8
+        ],
+        "size": [
+          16,
+          16,
+          16
+        ]
+      },
+      "minecraft:map_color": "#2a2a30",
+      "minecraft:light_dampening": 0,
+      "minecraft:destructible_by_mining": false,
+      "minecraft:destructible_by_explosion": false,
+      "minecraft:flammable": {
+        "catch_chance_modifier": 0,
+        "destroy_chance_modifier": 0
+      },
+      "siege:clickable": {}
+    },
+    "permutations": [
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'north'",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'west'",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              90,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'south'",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              180,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'east'",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              -90,
+              0
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

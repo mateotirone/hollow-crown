@@ -1,6 +1,6 @@
 import { addTests, assert, assertEqual } from "../core/tests.js";
 import { VAULT_ROOMS } from "./rooms_data.js";
-import { windowsOn, awayState, WINDOW } from "./data.js";
+import { windowsOn, awayState, WINDOW, SAFE, safeBlow, safeCells } from "./data.js";
 import { TIERS, LAYOUT, COSTS, worldOf, groundBox, LOCK_HP, BREAKER_POWER, MEND, REBUILD, breakSeconds } from "./data.js";
 
 addTests("vault", {
@@ -50,6 +50,23 @@ addTests("vault", {
     assert(!awayState("p1", left, w[0].end + 60000).window, "shut after it");
     assert(!awayState("p1", w[0].start - 3600000, w[0].start + 60000).away, "an hour away is not away");
     assert(!awayState("p1", undefined, w[0].start).away, "online is not away");
+  },
+  "every room has its 2x2 Regal Safe, and a better vault's safe takes more blows and pays less each": () => {
+    for (const tier of TIERS) for (const layout of ["treasury", "hall", "crypt"]) {
+      const d = VAULT_ROOMS[tier][layout];
+      const at = new Map();
+      for (const [y, z, x0, n, i] of d.rows) for (let x = x0; x < x0 + n; x++) at.set(`${x},${y},${z}`, d.palette[i]);
+      safeCells(d.marks.safe).forEach(([x, y, z], part) => {
+        const [id, p] = at.get(`${x},${y},${z}`) ?? [];
+        assert(id === "siege:regal_safe" && p.raw?.["siege:part"] === part, `${tier} ${layout} safe part ${part}: ${id}`);
+      });
+    }
+    for (let i = 1; i < TIERS.length; i++) {
+      assert(SAFE[TIERS[i]].hits > SAFE[TIERS[i - 1]].hits && SAFE[TIERS[i]].share < SAFE[TIERS[i - 1]].share, TIERS[i]);
+    }
+    assertEqual(safeBlow("wood", 1000, 0), { take: 80, broken: false });
+    assertEqual(safeBlow("wood", 1000, SAFE.wood.hits - 1), { take: 1000, broken: true }, "the last blow takes the rest");
+    assertEqual(safeBlow("iron", 0, 0).take, 0, "nothing from an empty safe");
   },
   "a layout and a cost for every tier": () => {
     for (const tier of TIERS) { assert(VAULT_ROOMS[tier][LAYOUT[tier]], `${tier} layout`); assert(COSTS[tier]?.length, `${tier} cost`); }

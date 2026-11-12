@@ -489,6 +489,14 @@ export const ENTRIES = [
     when: ["carry:siege:vault_breaker_iron", "carry:siege:vault_breaker_diamond", "carry:siege:vault_breaker_netherite", "event:vaultDrilled", "event:vaultWindow"],
   },
   {
+    id: "vault_safe", ch: "growth", title: "The Regal Safe",
+    tip: "The Regal Safe. Its keeper clicks it for their strongbox; a thief breaks it open a blow at a time.",
+    page: "Every vault has a §fRegal Safe§r just inside the door. It holds your strongbox: click it to put coins in or take them out (the Keep Banner's Strongbox button reaches the same coins).\n\n"
+      + "A thief who gets into your vault can hit it. Every blow knocks loose a share of what is inside and shows how much; the last blow breaks it open and they take the rest. A wooden vault's safe gives in after 10 blows, a Choirsteel vault's after 70, and each blow takes a smaller share the better the vault. You are told the moment someone starts.\n\n"
+      + "Click a broken safe to hammer it straight and lock it again.",
+    when: ["click:siege:regal_safe", "event:safeBroken"],
+  },
+  {
     id: "workings", ch: "wild", title: "Old Workings",
     tip: "An Old Working: dig the ore out of its walls. It grows back in a few days.",
     page: "Five settlements have one of the old king's mines just outside their land, and it is their strength: §firon§r at Frosthelm and Gullcliff, §fgold§r at Redmesa and Dunehold, §fdiamond§r in the Wolfcairn Deeps. Follow the timbered stair down to the stone chamber and dig the ore out of its walls.\n\n"

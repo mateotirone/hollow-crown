@@ -20,8 +20,31 @@ const creative = (player) => player.getGameMode() === GameMode.Creative;
 // Coins carried, counted in Regals
 export const carried = (player) => countItem(player, COIN) + ECON.goldWorth * countItem(player, GOLD);
 
-export const banked = (player) => Number(player.getDynamicProperty(BANK) ?? 0);
-const setBank = (player, amount) => player.setDynamicProperty(BANK, Math.max(0, Math.floor(amount)));
+// The strongbox lives in the world, not on the player, so it can be reached while they are away (it sits in their
+// vault, vault/index.js, where a thief can rob it). Old worlds kept it on the player: moved over on first look.
+const banks = moduleStore("siege:economy_banks", () => ({ of: {} }));
+const idOf = (who) => (typeof who === "string" ? who : who.id);
+export function banked(who) {
+  const id = idOf(who), of = banks.data.of;
+  if (of[id] === undefined && typeof who !== "string") {
+    let old = 0;
+    try { old = Number(who.getDynamicProperty(BANK) ?? 0); who.setDynamicProperty(BANK, undefined); } catch { /* fine */ }
+    of[id] = old;
+    banks.save();
+  }
+  return of[id] ?? 0;
+}
+function setBank(who, amount) {
+  banks.data.of[idOf(who)] = Math.max(0, Math.floor(amount));
+  banks.save();
+}
+// Take up to amount out of someone's strongbox (online or not). Returns what came out.
+export function robBank(id, amount) {
+  const have = banks.data.of[id] ?? 0;
+  const take = Math.max(0, Math.min(have, Math.floor(amount)));
+  if (take) setBank(id, have - take);
+  return take;
+}
 
 // On your own land the strongbox is within reach
 export function atHome(player) {

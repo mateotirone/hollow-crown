@@ -6,7 +6,7 @@ import { applyFilter, emit } from "../core/events.js";
 import { BARRACKS, GUARD_GEAR, GUARD_TYPES, WANTED_TAG } from "./constants.js";
 import { saveState, state, tracked } from "./state.js";
 import { isAlly, settlementAt, tierOf } from "./territory.js";
-import { isOnline, overworld, takeItems, attackable } from "./util.js";
+import { overworld, takeItems, attackable } from "./util.js";
 import { fundsE, chargeE } from "../economy/coins.js";
 import { worth } from "../economy/rules.js";
 import { sfx } from "../core/sfx.js";

@@ -8,7 +8,7 @@ import { keepCenter } from "./keep.js";
 import { SETTINGS } from "./settings.js";
 import { state } from "./state.js";
 import { settlementAt } from "./territory.js";
-import { isOnline, ownerOf, attackable } from "./util.js";
+import { ownerOf, attackable } from "./util.js";
 import { BLAST, DAMAGE, hitWall, lightCharge } from "./walls.js";
 import { sfx } from "../core/sfx.js";
 

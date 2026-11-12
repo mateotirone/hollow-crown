@@ -20,10 +20,10 @@ import "./tests.js";
 
 // ---------- the strongbox, on the Keep Banner menu ----------
 
-async function strongbox(player) {
+export async function strongbox(player) {
   const inBox = banked(player), inHand = carried(player);
   const res = await new ActionFormData().title("Strongbox")
-    .body(`Coins kept here are safe: they can't be dropped, lost or taken. Shops on your own land draw on them.\n\nIn the strongbox: ${coins(inBox)}\nIn your pockets: ${coins(inHand)}`)
+    .body(`Coins kept here can't be dropped or lost, and shops on your own land draw on them. The strongbox stands in your vault: a thief who gets in can rob it.\n\nIn the strongbox: ${coins(inBox)}\nIn your pockets: ${coins(inHand)}`)
     .button("Put coins in").button("Take coins out").button("Close").show(player);
   if (res.canceled || res.selection === 2) return;
   const putting = res.selection === 0;
@@ -41,6 +41,10 @@ async function strongbox(player) {
   }
   strongbox(player);
 }
+
+// Strongboxes moved from the player to the world (so a vault can be robbed while its keeper is away): move each
+// player's over as soon as they are here
+world.afterEvents.playerSpawn.subscribe(({ player, initialSpawn }) => { if (initialSpawn) try { banked(player); } catch { /* fine */ } });
 
 addKeepMenuButtons(({ player, mine }) => (mine ? [{
   label: "Strongbox", icon: ECON.icon,

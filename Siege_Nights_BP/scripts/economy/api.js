@@ -20,7 +20,7 @@ import { funds, charge } from "./coins.js";
 
 export { ECON, COIN, GOLD, JOBS, JOB_IDS, REGIONS } from "./config.js";
 export { coins, worth, fromEmeralds, payout, cost, regional } from "./rules.js";
-export { funds, charge, pay, fundsE, chargeE, payE, dropCoins, coinStacks, carried, banked, giveCoins, takeCoins, deposit, withdraw, atHome, totals } from "./coins.js";
+export { funds, charge, pay, fundsE, chargeE, payE, dropCoins, coinStacks, carried, banked, robBank, giveCoins, takeCoins, deposit, withdraw, atHome, totals } from "./coins.js";
 export { spawnJobNpc, regionAt, JOB_TAG } from "./shops.js";
 
 export const WALLET = { one: ECON.one, many: ECON.many, icon: ECON.icon, count: funds, take: (player, amount) => charge(player, amount, "mason") };
