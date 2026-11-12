@@ -7,13 +7,15 @@
 // Keys are cut for one vault: owner and allies open with any key, anyone else only with a key cut for it.
 //
 // Relics: holding one, click a plinth in your vault and it floats there on its stand; click the stand to take it.
+// Reinforcing: click the lock with the next tier's material (iron ingot, diamond, netherite ingot, Choirsteel ingot),
+// confirm the cost, and the room is rebuilt bigger round it while the lock sparks.
 //
-// Still to come: reinforcing to the next tier, Vault Breakers on
+// Still to come: Vault Breakers on
 // the lock, repair, and the offline open windows.
 //
 // What other features can use:
 //   vaultOf(ownerId)  -> { x, y, z, fx, fz, tier, layout, built, lock: {x,y,z} } or undefined
-//   on("vaultBuilt", ({ owner, tier, lock }))
+//   on("vaultBuilt", ({ owner, tier, lock, from }))   from: the tier it was reinforced from (undefined when new)
 //   on("relicTaken", ({ owner, by, kind }))   someone outside the settlement took a relic off a vault stand
 //   on("vaultOpened", ({ owner, by }))   someone outside the settlement opened it with a key cut for it
 //
@@ -30,7 +32,7 @@ import { siteProblem } from "../settle/plans.js";
 import { hallMenuExtras, countMatching, takeMatching } from "../townhall/townhall.js";
 import { sfx } from "../core/sfx.js";
 import { VAULT_ROOMS } from "./rooms_data.js";
-import { VAULT_KEY, TIERS, TIER_NAME, LAYOUT, COSTS, worldOf, groundBox } from "./data.js";
+import { VAULT_KEY, TIERS, TIER_NAME, LAYOUT, COSTS, UPGRADE_ITEM, nextTier, worldOf, groundBox } from "./data.js";
 import "./tests.js";
 
 const OVERWORLD = "minecraft:overworld";
@@ -78,23 +80,49 @@ function planFor(tier, layout) {
 
 // ---------- raising ----------
 
+// Blocks of one room the next room does not cover (a deeper tier moves the stairs and entrance hall down)
+function leftOver(from, to, layout) {
+  const keys = (d, solid) => {
+    const out = new Set();
+    for (const [y, z, x0, n, i] of d.rows) {
+      if (solid && d.palette[i][0] === "minecraft:air") continue;
+      for (let x = x0; x < x0 + n; x++) out.add(`${x},${y},${z}`);
+    }
+    return out;
+  };
+  const now = keys(roomOf(to, layout), false);
+  return [...keys(roomOf(from, layout), true)].filter((k) => !now.has(k)).map((k) => k.split(",").map(Number));
+}
+
 function start(owner, v, tier) {
   if (buildFor(jobId(owner))) return;
   const plan = planFor(tier, v.layout);
+  const from = v.built && v.built !== tier ? v.built : undefined;
   v.pending = tier;
   store.save();
   startBuild({
     id: jobId(owner), dimensionId: OVERWORLD, origin: { x: v.x, y: v.y, z: v.z }, forward: { x: v.fx, z: v.fz },
     plan, style: plan.style, perTick: Math.max(6, Math.ceil(plan.cells.size / 200)),
+    remove: from ? leftOver(from, tier, v.layout).map(([x, y, z]) => worldOf(v, x, y, z)) : undefined,
+    onProgress(fraction) {
+      if (!v.built) return;
+      // reinforcing: the lock hums and sparks while the room grows round it
+      try {
+        const dim = world.getDimension(OVERWORLD), at = worldOf(v, ...roomOf(tier, v.layout).marks.lock);
+        dim.spawnParticle("minecraft:basic_crit_particle", { x: at.x + 0.5, y: at.y + 0.5, z: at.z + 0.5 });
+        if (Math.random() < 0.05) sfx(dim, "random.anvil_use", at, { volume: 0.4, pitch: 0.6 + fraction * 0.6 });
+      } catch { /* unloaded */ }
+    },
     onDone() {
       v.built = tier;
       v.pending = undefined;
       store.save();
       const lock = worldOf(v, ...roomOf(tier, v.layout).marks.lock);
-      emit("vaultBuilt", { owner, tier, lock });
+      if (from) moveStands(v, from, tier);
+      emit("vaultBuilt", { owner, tier, lock, from });
       const player = world.getPlayers().find((p) => p.id === owner);
       if (player) {
-        say(player, `§6Your ${TIER_NAME[tier]} is finished. Go down the stairs; the Vault Lock is in the wall beside the door.`);
+        say(player, from ? `§6Your vault is reinforced: it is a ${TIER_NAME[tier]} now.` : `§6Your ${TIER_NAME[tier]} is finished. Go down the stairs; the Vault Lock is in the wall beside the door.`);
         sfx(player, "random.levelup", { volume: 0.5 });
       }
     },
@@ -257,6 +285,7 @@ function swingDoor(player, owner, v) {
 function useLock(player, block, stack) {
   const [owner, v] = vaultAtLock(block);
   if (!owner) return player.onScreenDisplay.setActionBar("§7This lock belongs to no vault.");
+  if (stack && stack.typeId !== VAULT_KEY && Object.values(UPGRADE_ITEM).includes(stack.typeId)) return reinforce(player, owner, v, stack);
   if (!stack || stack.typeId !== VAULT_KEY) return player.onScreenDisplay.setActionBar("§7Locked. It takes this vault's key.");
   if (!keyOpens(player, stack, owner)) return player.onScreenDisplay.setActionBar("§7This key was cut for another vault.");
   swingDoor(player, owner, v);
@@ -268,6 +297,50 @@ world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
   event.cancel = true;
   system.run(() => useLock(player, block, itemStack));
 });
+
+// ---------- reinforcing: click the lock with the next tier's material ----------
+
+// Relic stands keep their relic and move to the bigger room's plinths
+function moveStands(v, from, to) {
+  const dim = world.getDimension(OVERWORLD);
+  const old = roomOf(from, v.layout).marks, now = roomOf(to, v.layout).marks;
+  for (const kind of Object.keys(RELICS)) {
+    if (!old[`stand_${kind}`] || !now[`stand_${kind}`]) continue;
+    const a = worldOf(v, ...old[`stand_${kind}`]), b = worldOf(v, ...now[`stand_${kind}`]);
+    const stand = standOn(dim, a);
+    try { stand?.teleport({ x: b.x + 0.5, y: b.y + 0.25, z: b.z + 0.5 }); } catch { /* unloaded */ }
+  }
+}
+
+function reinforce(player, owner, v, stack) {
+  const next = nextTier(v.built);
+  if (!next) return player.onScreenDisplay.setActionBar("§7This vault is as strong as a vault can be.");
+  if (stack.typeId !== UPGRADE_ITEM[next]) {
+    const want = Object.entries(UPGRADE_ITEM).find(([, id]) => id === stack.typeId)?.[0];
+    return player.onScreenDisplay.setActionBar(want ? `§7Reinforce it one step at a time: next is ${TIER_NAME[next]}.` : "§7Locked. It takes this vault's key.");
+  }
+  if (player.id !== owner) return player.onScreenDisplay.setActionBar("§7Only the vault's owner can reinforce it.");
+  if (buildFor(jobId(owner))) return player.onScreenDisplay.setActionBar("§7The vault is already being worked on.");
+  const free = creative(player);
+  const cost = costLines(player, next);
+  const lines = [`Reinforce your vault into a §l${TIER_NAME[next]}§r? The room is rebuilt bigger, the door and lock stronger.`, "", "§lCosts:§r"];
+  for (const c of cost) lines.push(`${free || c.have >= c.amount ? "§a" : "§c"}${c.amount} ${c.label}§7 (you have ${c.have})`);
+  lines.push("", "§7Barrels are rebuilt empty, so take your things out first. Relics on their stands move with the room.");
+  const canPay = free || cost.every((c) => c.have >= c.amount);
+  new MessageFormData().title("Reinforce the vault").body(lines.join("\n"))
+    .button1(canPay ? "Reinforce it" : "Not enough yet").button2("Not now")
+    .show(player).then((r) => {
+      if (r.canceled || r.selection !== 0 || !canPay) return;
+      if (!free) {
+        for (const c of cost) if (countMatching(player, c.match) < c.amount) return say(player, "§cYou don't have the materials any more.");
+        for (const c of cost) takeMatching(player, c.match, c.amount);
+      }
+      if (v.open) v.open = undefined; // the rebuild hangs a new door, shut
+      start(owner, v, next);
+      sfx(player, "random.anvil_use", { volume: 0.8, pitch: 0.7 });
+      say(player, `§6Masons are reinforcing your vault into a ${TIER_NAME[next]}. Stand clear of the works.`);
+    }).catch(() => {});
+}
 
 // ---------- relic stands ----------
 // Holding a relic, click a plinth in your vault: the relic comes to rest floating over it, the way a dropped

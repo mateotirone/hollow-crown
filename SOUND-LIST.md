@@ -400,7 +400,7 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `random.orb` | A small yes | `random.orb` pitch 0.75 vol 0.55 | 15 | economy (2), townhall (2), unlocks (2), dragons, guild, ironworks, lore, rails, roletrials, settle, undertow, vault |
 | `random.anvil_land` | A heavy blow | `random.anvil_land` pitch 0.9 vol 0.8 + `dig.stone` pitch 0.5 vol 0.7 | 15 | bestiary (3), undertow (3), siege (2), trains (2), unlocks (2), dragons, roletrials, townhall |
 | `raid.horn` | A horn | `raid.horn` pitch 0.85 + `raid.horn` pitch 0.64 vol 0.4 after 0.25 s | 14 | bestiary (5), townhall (3), unlocks (3), crown, dragons, rivals |
-| `random.anvil_use` | Building and mending | `random.anvil_use` pitch 0.8 vol 0.55 + `dig.stone` pitch 0.7 vol 0.5 after 0.1 s | 12 | settle (3), townhall (3), siege (2), unlocks (2), horses, roletrials |
+| `random.anvil_use` | Building and mending | `random.anvil_use` pitch 0.8 vol 0.55 + `dig.stone` pitch 0.7 vol 0.5 after 0.1 s | 14 | settle (3), townhall (3), siege (2), unlocks (2), vault (2), horses, roletrials |
 | `mob.endermen.portal` | A step between places | `mob.endermen.portal` pitch 0.85 vol 0.8 + `random.orb` pitch 0.4 vol 0.15 after 0.1 s | 10 | bestiary (6), crown, horses, townhall, undertow |
 | `ambient.cave` | Something is wrong | `ambient.cave` pitch 0.85 vol 0.8 | 9 | reach (3), undertow (3), bestiary (2), lore |
 | `ui.toast.challenge_complete` | Something earned | `ui.toast.challenge_complete` pitch 0.9 vol 0.7 + `block.bell.hit` pitch 0.6 vol 0.3 after 0.4 s | 7 | siege (2), bestiary, crown, rivals, settle, townhall |

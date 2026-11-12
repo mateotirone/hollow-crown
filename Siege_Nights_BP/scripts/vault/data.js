@@ -33,3 +33,7 @@ export function groundBox(v, box) {
   const a = worldOf(v, box.x0, 0, box.z0), b = worldOf(v, box.x1, 0, box.z1);
   return { x0: Math.min(a.x, b.x), x1: Math.max(a.x, b.x), z0: Math.min(a.z, b.z), z1: Math.max(a.z, b.z) };
 }
+
+// Click the Vault Lock holding one of these to reinforce the vault to that tier (one tier at a time)
+export const UPGRADE_ITEM = { iron: "minecraft:iron_ingot", diamond: "minecraft:diamond", netherite: "minecraft:netherite_ingot", choirsteel: "siege:choirsteel_ingot" };
+export const nextTier = (tier) => TIERS[TIERS.indexOf(tier) + 1];

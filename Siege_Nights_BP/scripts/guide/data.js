@@ -477,7 +477,8 @@ export const ENTRIES = [
     page: "Your relics are safest in a §fvault§r. Open the Town Hall menu and choose §fVault§r, then §fAdd Vault§r: it costs 64 planks and 32 cobbled deepslate and gives you the §fVault Key§r.\n\n"
       + "Walk to where the stairs should start on your own land, face the way they should go down, and use the key on the ground. Stairs are carved down to an entrance hall and a §fWooden Strongroom§r with a 3x3 vault door. The §fVault Lock§r is in the wall beside the door.\n\n"
       + "Click the lock with the key and the door swings open; click it again to shut it. You and your allies open it with any Vault Key, but a key is cut for one vault, and anyone holding a key cut for yours can open it too. Keep yours safe. Spare keys come from the same menu.\n\n"
-      + "Inside, hold a relic and click one of the plinths at the back: it comes to rest floating over it. Click it to take it again. Whoever gets into your vault can take it too.",
+      + "Inside, hold a relic and click one of the plinths at the back: it comes to rest floating over it. Click it to take it again. Whoever gets into your vault can take it too.\n\n"
+      + "To make it stronger, click the lock with the next material: an iron ingot (Iron Strongroom), then a diamond, a netherite ingot and a Choirsteel ingot. Confirm the cost and the room is rebuilt bigger around you, with a tougher door. Take your things out of the barrels first; relics on their stands move with the room.",
     when: ["carry:siege:vault_key", "event:vaultBuilt"],
   },
   {
