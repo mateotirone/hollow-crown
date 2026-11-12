@@ -6,6 +6,7 @@ import { planPiece, seekSpot, cellsOf, AIR, KEEP_TOP } from "./plan.js";
 import { PLOT_PLAN } from "../plots/config.js";
 import { PLACES } from "../lore/data/world.js";
 import { NPCS } from "../lore/data/dialogue.js";
+import { TOME } from "../lore/logic.js";
 
 const idsOf = (piece) => (piece.turns ? (piece.face ? [piece.face] : ["n", "e", "s", "w"]).map((f) => `${piece.d}@${f}`) : [piece.d]);
 
@@ -24,6 +25,21 @@ addTests("landmarks", {
         assert(Math.hypot(spot.x - s.x, spot.z - s.z) <= (p.seek.max ?? 60) + 2, `${s.id} piece ${k} strays too far`);
       });
     }
+  },
+  "tomes laid in designs are real tomes, each laid once, each on something solid": () => {
+    const seen = new Set();
+    for (const [id, d] of Object.entries(DESIGNS)) {
+      if (!d.tomes?.length) continue;
+      const solid = new Set();
+      for (const [y, z, x0, n, pi] of d.rows) if (d.palette[pi][0] !== "minecraft:air") for (let x = x0; x < x0 + n; x++) solid.add(`${x},${y},${z}`);
+      for (const [x, y, z, t] of d.tomes) {
+        assert(TOME[t], `${id}: no tome ${t}`);
+        assert(!seen.has(t) || id.includes("@"), `${t} laid twice`);
+        seen.add(t);
+        assert(solid.has(`${x},${y - 1},${z}`), `${id}: ${t} at ${x},${y},${z} has nothing under it`);
+      }
+    }
+    assert(seen.has("chron_09") && seen.has("corv_08") && seen.has("seal_09"), "the story rooms' tomes are laid");
   },
   "story sites point the Ledger at real places, and their people are real lore characters": () => {
     for (const s of LANDMARKS) if (s.place) assert(PLACES[s.place], `${s.id}: no place ${s.place}`);

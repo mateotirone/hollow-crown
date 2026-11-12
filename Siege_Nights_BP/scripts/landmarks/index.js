@@ -16,6 +16,7 @@ import { world, system, BlockPermutation } from "@minecraft/server";
 import { mapMode } from "../plots/api.js";
 import { markPlace } from "../lore/ledger.js";
 import { spawnNpc } from "../lore/npcs.js";
+import { placeCache } from "../lore/caches.js";
 import { onTick } from "../core/loop.js";
 import { emit } from "../core/events.js";
 import { load, save, say, runCmd } from "../undertow/data.js";
@@ -163,6 +164,10 @@ export function buildSite(site, by) {
         try {
           if (!dim.getEntities({ tags: [`siege_lore_npc_${id}`], location: at, maxDistance: 64 }).length) spawnNpc(dim, at, id);
         } catch { /* unloaded */ }
+      }
+      // Dusty Tomes lying where their books say they lie (lore/data/tomes_*.js "where"), bound to their tome
+      for (const [dx, dy, dz, id] of p.d.tomes ?? []) {
+        try { placeCache(dim.getBlock({ x: p.x + dx, y: yAt(dx, dy, dz), z: p.z + dz }), id); } catch { /* unloaded */ }
       }
       if (p.d.mark && site.place) {
         const [dx, dy, dz] = p.d.mark;

@@ -1,6 +1,6 @@
 """The story's places out in the land (lore/data/world.js PLACES): Crownhold, Bellhollow, the Ashen Gate chapterhouse
 and its Burned Archive, the Ashen Watch, Corvin's Tower, Old Mag's hut, Nell Sedge's raft-house, the Deepforge and
-the Cinder Roost. Same design format as landmarks.py (minecraft-builder skill specs + placing keys), plus
+the Cinder Roost. Same design format as landmarks.py (minecraft-builder skill specs + placing keys, tomes included), plus
     npcs  [[x, y, z, lore npc id]]  story characters the game stands there once, when it is built
 """
 import math
@@ -117,8 +117,72 @@ def crownhold_hall():
         d.put(x, -6, z, "tinted_glass" if d.r(x, -6, z) < 0.5 else "crying_obsidian")
     for y in range(-5, -1): d.put(round(1.5 * math.sin((-L + 2) * 0.9)), y, -L + 1, "crying_obsidian" if y % 2 else "tinted_glass")
     d.put(-3, -5, -L + 8, "lantern", hanging=False); d.put(-3, -5, -L + 9, "dark_oak_stairs", facing="w")   # where he sat with his lamp
+    royal_wing(d, W, L)
     d.meta["mark"] = [0, 1, 0]
     return d
+
+
+def royal_wing(d, W, L):
+    """The royal wing off the Hall's east wall, as roofless as the rest: the King's bedchamber (a four-poster bed
+    gone to rags, a cold hearth, the chair by it where he sat the nights out) and beyond it the nursery where the
+    royal children slept (three cradles, two little beds, a rocking chair). Tomes: chron_09 by the King's bed,
+    chron_03 in a cradle."""
+    X0, X1, Z0, ZM, Z1 = W + 2, W + 10, -L + 2, -L + 10, -L + 16   # x 11..19; bedchamber z -15..-7, nursery -7..-1
+    floor = [("dark_oak_planks", 4), ("spruce_planks", 1), ("moss_block", 1), ("coarse_dirt", 1), ("stone_bricks", 1)]
+    for x in range(X0, X1 + 1):
+        for z in range(Z0, Z1 + 1):
+            d.put(x, 0, z, d.pick(x, 0, z, floor, 11))
+            if x in (X0, X1) or z in (Z0, ZM, Z1):
+                top = ruin_height(d, x, z, 8, 5, 12)
+                for y in range(1, top + 1): d.put(x, y, z, d.pick(x, y, z, STONE_RUIN, 12))
+            else:
+                for y in range(1, 9): d.air(x, y, z)
+    # the way in from the Hall, past a buttress: a door through both walls, and one between the two rooms
+    for x in range(W, X0 + 1):
+        for y in (1, 2, 3): d.air(x, y, -11)
+    d.put(W, 4, -11, "stone_brick_slab", half="top"); d.put(X0, 4, -11, "stone_brick_slab", half="top")
+    for y in (1, 2, 3): d.air(15, y, ZM)
+    for y in (2, 3, 4):                                   # slit windows on the east side
+        for z in (-13, -10, -4): d.air(X1, y, z)
+    # the King's bedchamber (inside x 12..18, z -14..-8)
+    for (x, z), tall in (((16, -12), 4), ((16, -10), 2), ((18, -12), 4), ((18, -10), 4)):   # one foot post broken off
+        for y in range(1, tall + 1): d.put(x, y, z, "stripped_dark_oak_log", axis="y")
+    for x in (16, 17, 18):
+        for z in (-12, -11, -10):
+            if d.get(x, 1, z) != "stripped_dark_oak_log": d.put(x, 1, z, "red_wool" if x < 18 else "white_wool")
+    for x in (16, 17, 18):                                # what is left of the canopy, a red rag hanging off it
+        for z in (-12, -11, -10):
+            if (x, z) in ((16, -10), (17, -10)): continue
+            if (x, z) in ((16, -12), (18, -12), (18, -10)): continue
+            d.put(x, 4, z, "dark_oak_slab", half="top")
+    d.put(17, 4, -12, "red_wool"); d.put(18, 4, -11, "dark_oak_slab", half="top")
+    d.put(18, 1, -13, "stripped_dark_oak_wood")           # the table by his bed
+    d.put(18, 1, -9, "chest", facing="w")
+    for x in (13, 15):                                    # the cold hearth in the north wall
+        for y in (1, 2, 3): d.put(x, y, -14, "stone_bricks")
+    d.put(14, 3, -14, "stone_brick_slab", half="top"); d.air(14, 1, -14); d.air(14, 2, -14)
+    for x in (13, 14, 15): d.put(x, 4, -14, "stone_brick_stairs", facing="s", half="top")
+    d.put(14, 1, -15, "campfire", bs={"extinguished": True}); d.put(14, 2, -15, "air")
+    for y in range(3, 10): d.put(14, y, -15, "stone_bricks")
+    d.put(14, 1, -12, "dark_oak_stairs", facing="s")      # the chair by the hearth: where he slept, or tried to
+    d.put(13, 1, -12, "dark_oak_trapdoor", facing="w", open=True); d.put(15, 1, -12, "dark_oak_trapdoor", facing="e", open=True)
+    for x in range(12, 16):                               # a moth-eaten rug
+        for z in range(-11, -8):
+            if d.r(x, 1, z, 13) < 0.7: d.put(x, 1, z, "red_carpet")
+    d.put(12, 1, -14, "barrel", facing="u"); d.put(12, 2, -14, "flower_pot")
+    # the nursery (inside x 12..18, z -6..-2)
+    for x in (13, 15, 17):                                # three cradles along the north wall, white linen in each
+        d.put(x, 1, -6, "dark_oak_slab", half="top")
+        d.put(x, 2, -6, "white_carpet")
+    for z in (-3, -2):                                    # two little beds against the east wall
+        d.put(18, 1, z, "light_blue_wool" if z == -3 else "white_wool")
+    d.put(18, 1, -4, "spruce_trapdoor", facing="w", half="top")
+    d.put(12, 1, -2, "spruce_stairs", facing="e")         # the nurse's rocking chair
+    d.put(12, 1, -4, "barrel", facing="u"); d.put(12, 2, -4, "white_candle")
+    for x in range(14, 17):
+        for z in (-3, -2):
+            if d.r(x, 2, z, 14) < 0.6: d.put(x, 1, z, "light_blue_carpet")
+    d.meta.setdefault("tomes", []).extend([[18, 2, -13, "chron_09"], [15, 2, -6, "chron_03"]])
 
 
 def crownhold_walls():
@@ -140,7 +204,8 @@ def crownhold_walls():
     for z in range(18, R + 2):
         for x in range(-2, 3):
             if d.r(x, 0, z) < 0.8: d.put(x, 0, z, d.pick(x, 0, z, [("cobblestone", 3), ("mossy_cobblestone", 2), ("gravel", 1)], 4))
-    for k, (hx, hz) in enumerate(((-12, 22), (10, 24), (-20, 8), (19, 6), (-18, -14), (17, -16), (-8, -28), (9, -27))):
+    # (no footing at (17, -16) any more: the Hall's royal wing stands there)
+    for k, (hx, hz) in enumerate(((-12, 22), (10, 24), (-20, 8), (19, 6), (-18, -14), (-8, -28), (9, -27))):
         w, l = 3 + int(d.r(k, 5, 5) * 2), 2 + int(d.r(k, 6, 6) * 2)
         for x in range(hx - w, hx + w + 1):
             for z in range(hz - l, hz + l + 1):
@@ -226,22 +291,49 @@ def ashen_chapterhouse():
     d.parts = [{"part": "house", "style": {"base": "vale_stone", "infill": "VAL-01"}, "rect": [-10, -7, 10, 7], "y": 0,
                 "storeys": [5, 5], "frame": "stone", "bay": 3, "door": {"side": "s", "kind": "grand"},
                 "roof": {"type": "gable", "ridge": "x", "pitch": 1}, "materials": {"roof": "VAL-06"}, "chimney": [[-7, 0], [7, 0]],
-                "shutters": 0}]
+                "shutters": 0, "interior": {"rooms": ["open", "office"], "region": "vale"}},
+               # the chapel, east of the archive (its altar to the east): Ashe's little book, the founder's life
+               {"part": "house", "style": {"base": "vale_stone", "infill": "VAL-01"}, "rect": [10, -4, 24, 4], "y": 0,
+                "storeys": [7], "frame": "stone", "bay": 3, "door": {"side": "s"},
+                "roof": {"type": "gable", "ridge": "x", "pitch": 1}, "materials": {"roof": "VAL-06"}, "shutters": 0,
+                "interior": {"use": "chapel", "rooms": ["nave"], "region": "vale"}}]
     # grey hangings either side of the door: the Order's banners, gone threadbare
     for x in (-4, 4):
         for y in range(4, 9): d.put(x, y, 8, "gray_wool" if y > 4 else "light_gray_wool")
         d.put(x, 9, 8, "dark_oak_slab", half="top")
-    # the archive inside: shelves along the walls, a long reading table, the cold hearths at each end
+    # version 1 stood its furniture a block too high: clear those cells when it is built again over the old one
+    for x in range(-8, 9):
+        for z in (-5, 5): d.air(x, 3, z)
+    for x in range(-5, 6): d.air(x, 2, 0)
+    for x, z in ((-8, 0), (8, 0), (-8, -1), (-8, 1), (8, -1), (8, 1), (0, -3)): d.air(x, 2, z)
+    d.air(0, 1, -4)
+    # the archive inside (the reading room, the floor at y 0): shelves along the walls, a long reading table, the
+    # cold hearths at each end in front of the chimney breasts
     for x in range(-8, 9):
         for z in (-5, 5):
             if abs(x) > 1 or z == -5:
-                for y in (2, 3): d.put(x, y, z, "bookshelf" if d.r(x, y, z) < 0.8 else "chiseled_bookshelf")
-    for x in range(-4, 5): d.put(x, 2, 0, "dark_oak_slab", half="top")
-    for x in (-5, 5): d.put(x, 2, 0, "lectern", bs={"minecraft:cardinal_direction": "south"})
-    for x in (-8, 8):
-        d.put(x, 2, 0, "campfire", bs={"extinguished": True}); d.put(x, 2, -1, "cobblestone_wall"); d.put(x, 2, 1, "cobblestone_wall")
-    d.put(0, 1, -4, "dark_oak_trapdoor", facing="s", half="top")   # behind the lectern: the way down
-    d.put(0, 2, -3, "lectern", bs={"minecraft:cardinal_direction": "south"})
+                for y in (1, 2): d.put(x, y, z, "bookshelf" if d.r(x, y, z) < 0.8 else "chiseled_bookshelf")
+    for x in range(-3, 4): d.put(x, 1, 0, "dark_oak_slab", half="top")
+    for x in (-4, 4): d.put(x, 1, 0, "lectern", bs={"minecraft:cardinal_direction": "south"})
+    for x in (-6, 6):
+        d.put(x, 1, 0, "campfire", bs={"extinguished": True}); d.put(x, 1, -1, "cobblestone_wall"); d.put(x, 1, 1, "cobblestone_wall")
+    d.put(0, 0, -4, "dark_oak_trapdoor", facing="s", half="top")   # behind the lectern: the way down
+    d.put(0, 1, -3, "lectern", bs={"minecraft:cardinal_direction": "south"})
+    d.put(2, 1, 6, "stripped_dark_oak_wood")                         # a stand inside the door
+    # the Grandmaster's study upstairs (floor y 5): his books along the north wall, his desk by the east chimney
+    for x in range(-9, 2):
+        for y in (6, 7): d.put(x, y, -6, "bookshelf" if d.r(x, y, -6, 21) < 0.75 else "chiseled_bookshelf")
+    for x in (4, 5, 6): d.put(x, 6, 3, "dark_oak_slab", half="top")
+    d.put(4, 6, 2, "dark_oak_trapdoor", facing="n", open=True); d.put(6, 6, 2, "dark_oak_trapdoor", facing="n", open=True)
+    d.put(5, 6, 4, "dark_oak_stairs", facing="s")                     # his chair, its back to the room
+    d.put(4, 7, 3, "candle"); d.put(6, 7, 3, "flower_pot")
+    # the way through to the chapel, at the east end of the archive
+    for y in (1, 2, 3):
+        for x in (10, 11): d.air(x, y, 2)
+    for z in range(-3, 4): d.air(9, 1, z)                             # the chapel's plinth step, inside the archive
+    # the chapel's east window: grey glass over the altar
+    for z in (-1, 0, 1):
+        for y in (3, 4, 5): d.put(24, y, z, "light_gray_stained_glass")
     # the Burned Archive below: charred shelves, a locked cell
     for x in range(-6, 7):
         for z in range(-6, 1):
@@ -250,16 +342,16 @@ def ashen_chapterhouse():
                 if y == 0 and not edge: continue
                 if edge or y == 0: d.put(x, y, z, d.pick(x, y, z, [("deepslate_bricks", 3), ("cracked_deepslate_bricks", 2), ("blackstone", 1)]))
                 else: d.air(x, y, z)
-    d.air(0, 0, -4)
-    for y in range(-4, 0): d.put(0, y, -3, "ladder", bs={"facing_direction": 2})
-    d.put(0, -1, -3, "air")
     for x in range(-5, 6):
         for z in (-5,):
             for y in (-4, -3, -2): d.put(x, y, z, d.pick(x, y, z, [("coal_block", 2), ("bookshelf", 1), ("blackstone", 1), ("air", 1)], 6))
+    for y in range(-4, 0):                                            # the ladder down, against the north shelves
+        d.put(0, y, -5, "deepslate_bricks"); d.put(0, y, -4, "ladder", bs={"facing_direction": 3})
     d.put(-4, -4, -2, "campfire", bs={"extinguished": True}); d.put(3, -4, -3, "soul_lantern", hanging=False)
     # the cell, locked from the outside
     d.put(5, -4, -1, "iron_bars"); d.put(5, -3, -1, "iron_bars"); d.put(4, -4, -1, "iron_bars"); d.put(4, -3, -1, "iron_bars")
-    d.meta["npcs"] = [[2, 2, 2, "cael"]]
+    d.meta["npcs"] = [[2, 1, 2, "cael"]]
+    d.meta["tomes"] = [[1, 2, 0, "chron_10"], [2, 2, 6, "seal_01"], [5, 7, 3, "seal_09"]]   # reading room, door, study desk
     d.meta["mark"] = [0, 1, 8]
     return d
 
@@ -318,7 +410,9 @@ def corvins_tower():
     d.put(0, 4, 5, "stone_brick_stairs", facing="s", half="top")
     for y, (x, z) in ((6, (5, 0)), (9, (-5, 0)), (12, (0, -5)), (12, (4, 3))):
         if d.get(x, y, z): d.air(x, y, z); d.air(x, y + 1, z)
-    for y in range(1, 15): d.put(0, y, -3, "ladder", bs={"facing_direction": 3})
+    for y in range(1, 15):
+        d.put(0, y, -4, "ladder", bs={"facing_direction": 3})   # against the north wall
+        d.air(0, y, -3)                                          # (where version 1 hung it, on nothing)
     for x in range(-3, 4):   # the old floors, half rotted through
         for z in range(-3, 4):
             for y in (5, 10):
@@ -328,8 +422,73 @@ def corvins_tower():
         for z in (-1, 0, 1): d.put(x, 15, z, "spruce_planks" if d.r(x, 15, z) < 0.85 else "spruce_slab")
     bell_frame(d, 0, 16, 0, w=2, tall=4, wood="oak")
     rubble(d, 0, 0, 10, 26, salt=7)
+    corvins_rooms(d)
     d.meta["mark"] = [0, 1, 6]
     return d
+
+
+def corvins_rooms(d):
+    """What the tower keeps below and behind: the hearth on the ground floor, the room behind it where Corvin hid
+    his map of the thin places, and the cellar under the floor where he was held. Tomes: chron_04 on the ground
+    floor, corv_01 by the bell frame, corv_08 behind the hearth, seal_05 in the cellar."""
+    # the hearth in the west wall: an open fire under a mantle, its back black with soot and, when you stand in
+    # it, open: a passage through the wall into the hidden room
+    for z in (-1, 1):
+        for y in (1, 2, 3): d.put(-4, y, z, "stone_bricks")
+    d.put(-4, 1, 0, "campfire", bs={"extinguished": True}); d.air(-4, 2, 0)
+    d.put(-4, 3, 0, "stone_brick_slab", half="top")
+    for z in (-1, 0, 1): d.put(-3, 4, z, "stone_brick_stairs", facing="w", half="top")
+    for y in (1, 2): d.air(-5, y, 0)
+    for y in range(3, 12): d.put(-5, y, 0, "stone_bricks")
+    d.put(-5, 0, 0, "blackstone")
+    # the hidden room (inside x -8..-6, z -1..1): built against the tower and heaped over with rubble and turf so
+    # from outside it is only a mound at the foot of the wall
+    for x in range(-9, -4):
+        for z in range(-2, 3):
+            for y in range(0, 5):
+                inside = -8 <= x <= -6 and -1 <= z <= 1 and 1 <= y <= 3
+                if inside: d.air(x, y, z)
+                elif (x, z) == (-5, 0) and y in (1, 2): continue      # the way through from the hearth
+                elif x <= -6 or y in (0, 4) or d.get(x, y, z) is None:
+                    d.put(x, y, z, "blackstone" if y == 0 else d.pick(x, y, z, [("cobblestone", 3), ("mossy_cobblestone", 3), ("stone_bricks", 1)], 15))
+    for x in range(-10, -4):                              # the mound over it
+        for z in range(-3, 4):
+            if d.get(x, 4, z) is None and math.hypot(x + 7, z) < 3.6 and x <= -6: d.put(x, 4, z, "mossy_cobblestone")
+            if math.hypot(x + 7, z) < 2.9 and x <= -6: d.put(x, 5, z, "moss_block" if d.r(x, 5, z, 15) < 0.7 else "coarse_dirt")
+            if math.hypot(x + 7.5, z) < 1.6 and x <= -6: d.put(x, 6, z, "moss_block")
+    for x in range(-12, -4):
+        for z in range(-5, 6):
+            if -9 <= x and -2 <= z <= 2: continue
+            dist = math.hypot(max(-9 - x, 0), max(abs(z) - 2, 0))
+            top = round(4.6 - 1.1 * dist + 0.9 * d.r(x, 3, z, 17) - (0.6 if x == -5 else 0))
+            for y in range(1, top + 1):
+                if d.get(x, y, z) is None:
+                    d.put(x, y, z, ("moss_block" if d.r(x, y, z, 18) < 0.75 else "coarse_dirt") if y == top else
+                          d.pick(x, y, z, [("coarse_dirt", 2), ("mossy_cobblestone", 2), ("dirt", 1)], 17))
+            if top >= 1 and d.r(x, 9, z, 19) < 0.18: d.put(x, top + 1, z, "short_grass")
+    d.put(-8, 1, 0, "cartography_table"); d.put(-8, 1, -1, "stripped_spruce_wood"); d.put(-8, 1, 1, "barrel", facing="u")
+    d.put(-6, 1, -1, "spruce_stairs", facing="e")         # where he sat to draw it
+    d.put(-8, 2, 1, "candle"); d.put(-7, 3, 0, "iron_chain", axis="y")
+    # a small table on the ground floor, and the trapdoor down to the cellar
+    d.put(2, 1, -2, "stripped_spruce_wood")
+    d.put(0, 0, 3, "spruce_trapdoor", facing="n", half="top")
+    # the cellar where he was held (inside x -3..3, z -3..3, y -4..-2)
+    for x in range(-4, 5):
+        for z in range(-4, 5):
+            for y in range(-5, 0):
+                edge = max(abs(x), abs(z)) == 4 or y == -5
+                if edge: d.put(x, y, z, d.pick(x, y, z, [("cobblestone", 3), ("mossy_cobblestone", 2), ("stone", 1), ("cobbled_deepslate", 1)], 16))
+                elif y < -1 or (x, z) == (0, 3): d.air(x, y, z)
+                else: d.put(x, y, z, "cobblestone")
+    for y in range(-4, 0): d.put(0, y, 3, "ladder", bs={"facing_direction": 2})   # against the south wall
+    for x in range(-3, 4):                                # bars across the north end: the cell
+        for y in (-4, -3, -2):
+            if x != 1 or y == -2: d.put(x, y, -1, "iron_bars")    # its door long gone
+    d.put(-2, -4, -3, "hay_block"); d.put(-1, -4, -3, "brown_carpet")   # his pallet
+    d.put(2, -4, -3, "cauldron"); d.put(3, -2, -2, "iron_chain", axis="y"); d.put(3, -3, -2, "iron_chain", axis="y")
+    for z in (-3, -2): d.put(-4, -3, z, "chiseled_stone_bricks")      # marks scratched in the wall
+    d.put(-3, -4, 2, "lantern", hanging=False)
+    d.meta.setdefault("tomes", []).extend([[2, 2, -2, "chron_04"], [1, 16, -1, "corv_01"], [-7, 1, 1, "corv_08"], [0, -4, -3, "seal_05"]])
 
 # ---------------------------------------------------------------- the Blackfen
 

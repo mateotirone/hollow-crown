@@ -28,11 +28,11 @@ const PLOT_SITES = {
 // The story's places out in the land (map/structures/landmarks_story.py). `face` fixes which way a turning piece's
 // front looks (n/e/s/w): the Deepforge's door to the open hillside, the Cinder Roost's Span out over the drop.
 const STORY_SITES = [
-  { id: "crownhold", region: "Aldmere Vale", name: "Crownhold", x: -235, z: -345, place: "crownhold", pieces: [{ d: "crownhold_hall" }, { d: "crownhold_walls" }] },
+  { id: "crownhold", version: 2, region: "Aldmere Vale", name: "Crownhold", x: -235, z: -345, place: "crownhold", pieces: [{ d: "crownhold_hall" }, { d: "crownhold_walls" }] },
   { id: "bellhollow", region: "Aldmere Vale", name: "Bellhollow", x: 155, z: -100, place: "bellhollow", pieces: [{ d: "bellhollow_seal" }, { d: "bellhollow_frame", dx: -22 }] },
-  { id: "ashen_chapterhouse", region: "Aldmere Vale", name: "the Ashen Gate chapterhouse", x: 420, z: -170, place: "ashen_chapterhouse", pieces: [{ d: "ashen_chapterhouse" }] },
+  { id: "ashen_chapterhouse", version: 2, region: "Aldmere Vale", name: "the Ashen Gate chapterhouse", x: 420, z: -170, place: "ashen_chapterhouse", pieces: [{ d: "ashen_chapterhouse" }] },
   { id: "ashen_watch", region: "Blackfen", name: "the Ashen Watch", x: 480, z: 560, pieces: [{ d: "ashen_watch" }] },
-  { id: "corvins_tower", region: "Aldmere Vale", name: "Corvin's Tower", x: -416, z: -696, place: "corvins_tower", pieces: [{ d: "corvins_tower" }] },
+  { id: "corvins_tower", version: 2, region: "Aldmere Vale", name: "Corvin's Tower", x: -416, z: -696, place: "corvins_tower", pieces: [{ d: "corvins_tower" }] },
   { id: "mags_hut", region: "Blackfen", name: "Old Mag's hut", x: 4, z: 972, place: "mags_hut", pieces: [{ d: "mags_hut" }] },
   { id: "nell_raft", region: "Blackfen", name: "Nell Sedge's raft-house", x: 26, z: 1001, place: "nell_raft", pieces: [{ d: "nell_raft" }] },
   { id: "deepforge", region: "Frostmarch", name: "the Deepforge", x: -274, z: -938, place: "deepforge", pieces: [{ d: "deepforge", turns: true, face: "e" }] },
