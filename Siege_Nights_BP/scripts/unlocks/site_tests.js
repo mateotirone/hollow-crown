@@ -1,9 +1,11 @@
 // Self-tests for the four set pieces after the Reeve: the puzzles, the plans and the rematch rule. All pure and fast.
 import { addTests, assert, assertEqual } from "../siege/api.js";
-import { makeHunt, huntStep, makePews, pewAnswer, makeStatues, statueStep, makeChangeling, villagerLines, accuse, resting, gladeWave, GLADE_REST_TICKS, BEASTS, AGES, TELLS, VILLAGERS, PEW_ROWS, COOLDOWN_TICKS } from "./puzzles.js";
-import { huntPlan, crackCells, HUNT, chapelPlan, chapelInterior, pewStone, inChapel, CHAPEL, vaultPlan, statueAt, doorCells, inVault, VAULT, cradlePlan, rootCells, inCradle, inGlade, GLADE, CRADLE, mirelightPlan } from "./plans.js";
+import { makeHunt, huntStep, makePews, pewAnswer, makeStatues, statueStep, makeChangeling, villagerLines, accuse, resting, gladeWave, GLADE_REST_TICKS, approachWave, approachCount, APPROACH_REST_TICKS, BEASTS, AGES, TELLS, VILLAGERS, PEW_ROWS, COOLDOWN_TICKS } from "./puzzles.js";
+import { huntPlan, crackCells, HUNT, chapelPlan, chapelInterior, pewStone, inChapel, CHAPEL, vaultPlan, statueAt, doorCells, inVault, VAULT, cradlePlan, rootCells, inCradle, inGlade, GLADE, CRADLE, inIceEdge, ICE_EDGE, inDrownedWater, inAshSand, ASH_SAND, mirelightPlan } from "./plans.js";
 import { socketAnswer } from "./site.js";
 import { stampOps } from "./landmarks.js";
+import { inShaft, stairSpotsBelow, stairSteps, WELL as WELL2 } from "./well_plan.js";
+import { inChamber } from "./reeve.js";
 
 const SECRETS = ["Hollow", "Morvane", "Oswin", "truce", "Choir"];
 const run = (gen) => { let r; do { r = gen.next(); } while (!r.done); return r.value; };
@@ -174,6 +176,39 @@ addTests("unlocks: sites", {
     assert(!inGlade(c, { x: 0.5, y: 70, z: 0.5 }), "the cave is not the glade");
     assert(!inCradle(c, { x: 0.5, y: 70 + CRADLE.floor + 2, z: GLADE.dz + 0.5 }));
     assert(GLADE.dz - GLADE.r > CRADLE.r, "the glade stays clear of the cave");
+  },
+  "approach fights: the rule, the head count, and zones that keep clear of each arena": () => {
+    assert(approachWave({ players: 1, fighting: false, now: 5, last: undefined }));
+    assert(!approachWave({ players: 1, fighting: true, now: 5, last: undefined }));
+    assert(!approachWave({ players: 1, fighting: false, now: APPROACH_REST_TICKS - 1, last: 0 }));
+    assertEqual(approachCount(1), 4);
+    assertEqual(approachCount(5), 6);
+    assertEqual(approachCount(3, { base: 1, per: 1, max: 4 }), 4);
+    const c = { x: 0, y: 64, z: 0 };
+    // Hallowmere: outside the crack ring and the arena
+    assert(inIceEdge(c, { x: 20.5, y: 65, z: 0.5 }));
+    assert(!inIceEdge(c, { x: 10.5, y: 65, z: 0.5 }));
+    assert(ICE_EDGE.r0 >= HUNT.crack + 1 && ICE_EDGE.r0 > HUNT.arena, "outside the ring that cracks");
+    assert(!inIceEdge(c, { x: HUNT.crack + 0.5, y: 65, z: 0.5 }), "not on the crack ring");
+    // Gull Bay: in the water, never in the nave or the tower
+    assert(inDrownedWater(c, { x: 0.5, y: 70, z: 15.5 }, 12));
+    assert(!inDrownedWater(c, { x: 0.5, y: 66, z: 0.5 }, 12), "the nave");
+    assert(!inDrownedWater(c, { x: -12, y: 70, z: 0.5 }, 12), "the tower");
+    assert(!inDrownedWater(c, { x: 0.5, y: 80, z: 15.5 }, 12), "above the sea");
+    for (const [x, y, z] of chapelInterior(12)) assert(!inDrownedWater(c, { x: x + 0.5, y: 64 + y, z: z + 0.5 }, 12), `chapel cell ${x},${y},${z}`);
+    // Sunscar: on the sand south of the stair, never down in the vault
+    assert(inAshSand(c, { x: 0.5, y: 65, z: ASH_SAND.dz + 0.5 }));
+    assert(!inAshSand(c, { x: 0.5, y: 64 + VAULT.floor + 1, z: -20 }));
+    assert(ASH_SAND.dz - ASH_SAND.r >= 2, "clear of the stair top");
+    // Millbrook: in the shaft, above the chamber; the footmen stand on real steps below
+    assert(inShaft(c, { x: 1.5, y: 64 - 6, z: 0.5 }));
+    assert(!inShaft(c, { x: 1.5, y: 64, z: 0.5 }), "the square");
+    assert(!inChamber({ x: 1.5, y: 64 - 6, z: 0.5 }, c), "the shaft is not the chamber");
+    const steps = new Set(stairSteps().map((s) => `${s.dx},${s.dz}`));
+    for (const relY of [-3, -6, -10]) for (const s of stairSpotsBelow(relY, 4)) {
+      assert(steps.has(`${s.dx},${s.dz}`), "on the stair");
+      assert(s.dy < relY - 3 && s.dy >= WELL2.floorY + 1, `below the player, above the floor (${s.dy})`);
+    }
   },
   "Mirelight: five lantern spots, one per villager": () => {
     const plan = run(mirelightPlan(flat, { x: 0, z: 0, y: 64 }, VILLAGERS));
