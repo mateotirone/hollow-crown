@@ -1,0 +1,15 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_smithing_transform": {
+    "description": {
+      "identifier": "siege:choirsteel_saltreach_boots_upgrade"
+    },
+    "tags": [
+      "smithing_table"
+    ],
+    "template": "siege:choirsteel_upgrade_template",
+    "base": "siege:netherite_saltreach_boots",
+    "addition": "siege:tempered_choirsteel",
+    "result": "siege:choirsteel_saltreach_boots"
+  }
+}

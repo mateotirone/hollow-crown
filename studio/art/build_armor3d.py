@@ -306,22 +306,29 @@ def build(name, parts, styles, l1, l2, pieces, attach, leather):
         write(path, att)
 
 PIECES = ['helmet', 'chestplate', 'leggings', 'boots']
-SETS = []
-for reg in ['guard', 'vale', 'frostmarch', 'saltreach', 'emberwaste', 'blackfen']:
-    for tier in ([''] if reg == 'guard' else ['', 'diamond', 'netherite']):
-        flat = 'guard' if reg == 'guard' else f'guard_{reg}' + (f'_{tier}' if tier else '')
-        if not os.path.exists(FLAT + flat + '_layer_1.png'): continue
-        parts, styles = guard_parts(reg, tier)
-        build(flat, parts, styles, FLAT + flat + '_layer_1.png', FLAT + flat + '_layer_2.png', PIECES, lambda p, n=flat: f'{n}_{p}', True)
-        SETS.append(flat)
 
-for relic, piece, img in (('crownless_mantle', 'chestplate', 'siege_b_crownless_mantle'), ('widows_veil', 'helmet', 'siege_b_widows_veil')):
-    src = Image.open(FLAT + img + '.png').convert('RGB')
-    cols = [src.getpixel((x, y)) for y in range(src.height) for x in range(src.width)]
-    avg = [sum(c[i] for c in cols) // len(cols) for i in range(3)]
-    ramp = [tuple(max(0, min(255, int(v * k))) for v in avg) for k in (0.55, 0.72, 0.88, 1.0, 1.12, 1.25)]
-    parts, styles = relic_parts(relic, ramp)
-    build(f'relic_{relic}', parts, styles, FLAT + img + '.png', FLAT + img + '.png', [piece], lambda p, r=relic: f'bestiary_{r}', False)
-    SETS.append(f'relic_{relic}')
 
-print(f'{len(SETS)} sets:', ', '.join(SETS))
+def main():
+    SETS = []
+    for reg in ['guard', 'vale', 'frostmarch', 'saltreach', 'emberwaste', 'blackfen']:
+        for tier in ([''] if reg == 'guard' else ['', 'diamond', 'netherite']):
+            flat = 'guard' if reg == 'guard' else f'guard_{reg}' + (f'_{tier}' if tier else '')
+            if not os.path.exists(FLAT + flat + '_layer_1.png'): continue
+            parts, styles = guard_parts(reg, tier)
+            build(flat, parts, styles, FLAT + flat + '_layer_1.png', FLAT + flat + '_layer_2.png', PIECES, lambda p, n=flat: f'{n}_{p}', True)
+            SETS.append(flat)
+
+    for relic, piece, img in (('crownless_mantle', 'chestplate', 'siege_b_crownless_mantle'), ('widows_veil', 'helmet', 'siege_b_widows_veil')):
+        src = Image.open(FLAT + img + '.png').convert('RGB')
+        cols = [src.getpixel((x, y)) for y in range(src.height) for x in range(src.width)]
+        avg = [sum(c[i] for c in cols) // len(cols) for i in range(3)]
+        ramp = [tuple(max(0, min(255, int(v * k))) for v in avg) for k in (0.55, 0.72, 0.88, 1.0, 1.12, 1.25)]
+        parts, styles = relic_parts(relic, ramp)
+        build(f'relic_{relic}', parts, styles, FLAT + img + '.png', FLAT + img + '.png', [piece], lambda p, r=relic: f'bestiary_{r}', False)
+        SETS.append(f'relic_{relic}')
+
+    print(f'{len(SETS)} sets:', ', '.join(SETS))
+
+
+if __name__ == '__main__':
+    main()
