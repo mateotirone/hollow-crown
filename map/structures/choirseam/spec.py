@@ -24,6 +24,7 @@ import json, math, os, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, ".."))
 from machine_regions import _hash, noise  # noqa: E402
+from barge import barge, spec as barge_spec  # noqa: E402
 
 SKILL = os.path.join(HERE, "..", "..", "..", ".claude", "skills", "minecraft-builder")
 PLOT = (-12, -15, 12, -1)
@@ -33,7 +34,7 @@ STORE = (-11, -9, -7, -3)     # ore store 5 x 7 (levels 1-2), strongroom 7 x 7 a
 STRONG = (-11, -9, -5, -3)
 WINCH = (4, -10, 10, -4)      # winch house 7 x 7 (levels 2-3)
 TOWER = (-2, -10, 2, -6)      # pit-head tower 5 x 5 at the cliff foot (level 3)
-RIVER = (1, 3)                # z rows of the light river, south of the plot
+RIVER = (1, 5)                # z rows of the light river, south of the plot
 JETTY = (-3, 0, 3, 2)         # the landing stage over the river
 STAGES = ["Seam Cut", "Choir Winch", "Singing Gallery"]
 
@@ -94,7 +95,7 @@ def ground(place, keep):
 def river(place):
     """The light river: water over a glowing Glimmerflow bed, dark stone banks"""
     x0, _, x1, _ = PLOT
-    for x in range(x0 - 3, x1 + 4):
+    for x in range(x0 - 3, x1 + 11):        # on past the plot's east edge, where the long barge lies
         for z in range(RIVER[0], RIVER[1] + 1):
             place += [[x, -2, z, "siege:glimmerflow"], [x, -1, z, "water"], [x, 0, z, "water"]]
         place += [[x, 0, 0, "polished_blackstone_bricks" if abs(x) <= 4 else "cobbled_deepslate"], [x, 0, RIVER[1] + 1, "cobbled_deepslate"]]
@@ -110,7 +111,7 @@ def wall(place):
             if post: place.append([x, 3, z, "soul_lantern"])
 
 
-def jetty(place, barge=1):
+def jetty(place, barge_size=1):
     """The landing stage on dark oak piles, mooring posts with soul lanterns, and the ore barge tied alongside"""
     x0, z0, x1, z1 = JETTY
     for x in range(x0, x1 + 1):
@@ -118,16 +119,8 @@ def jetty(place, barge=1):
             place.append([x, 0, z, "dark_oak_planks"])
             if x in (x0, x1) and z in (z0 + 1, z1): place += [[x, -1, z, "dark_oak_log"], [x, -2, z, "dark_oak_log"]]
     for x in (x0, x1): place += [[x, 1, z1, "dark_oak_fence"], [x, 2, z1, "soul_lantern"]]
-    # the barge: a flat hull of dark oak slabs and trapdoor sides lying east of the jetty, ore barrels aboard
-    L = 7 if barge == 1 else 11
-    bx0 = x1 + 1
-    for x in range(bx0, bx0 + L):
-        for z in (1, 2, 3):
-            edge = x in (bx0, bx0 + L - 1) or z in (1, 3)
-            place.append([x, 0, z, "dark_oak_slab", {"half": "top"}] if not edge else [x, 0, z, "dark_oak_planks"])
-            if edge: place.append([x, 1, z, "dark_oak_trapdoor", {"facing": "s" if z == 3 else "n" if z == 1 else ("e" if x > bx0 else "w"), "open": True}])
-    for x in range(bx0 + 1, bx0 + L - 1, 2): place.append([x, 1, 2, "barrel"])
-    place += [[bx0 + L // 2, 1, 2, "dark_oak_fence"], [bx0 + L // 2, 2, 2, "dark_oak_fence"], [bx0 + L // 2, 3, 2, "soul_lantern"]]
+    # the ore barge (barge.py) moored alongside, east of the stage
+    barge(place, x1 + 2, 3, 11 if barge_size == 1 else 15, oy=1)
 
 
 def adit(place):
@@ -255,15 +248,18 @@ def specs(ground_plate=False, skill=SKILL, regions=None):
         shapes = []
         if ground_plate:
             x0, z0, x1, z1 = PLOT
-            shapes = [{"shape": "box", "min": [x0 - 3, -6, z0 - 3], "max": [x1 + 3, -1, RIVER[1] + 2], "material": "deepslate"},
-                      {"shape": "box", "min": [x0 - 3, 0, CLIFF_Z], "max": [x1 + 3, 0, RIVER[1] + 2], "material": "cobbled_deepslate"}]
+            shapes = [{"shape": "box", "min": [x0 - 3, -6, z0 - 3], "max": [x1 + 10, -1, RIVER[1] + 2], "material": "deepslate"},
+                      {"shape": "box", "min": [x0 - 3, 0, CLIFF_Z], "max": [x1 + 10, 0, RIVER[1] + 2], "material": "cobbled_deepslate"}]
         name = f"choirseam_hollow_{lv}"
         out[name] = {"name": name, "edition": "bedrock", "shapes": shapes, "parts": parts, "place": place}
+    out["choir_barge"] = barge_spec()            # the ore barge on its own, for the viewer
     return out
 
 
 def names():
-    return {f"choirseam_hollow_{lv}": {"title": f"Choir Seam {lv}: {s}", "sub": "The Hollow"} for lv, s in enumerate(STAGES, 1)}
+    n = {f"choirseam_hollow_{lv}": {"title": f"Choir Seam {lv}: {s}", "sub": "The Hollow"} for lv, s in enumerate(STAGES, 1)}
+    n["choir_barge"] = {"title": "Choir ore barge (carries the day's ore to the arrival landing)", "sub": ""}
+    return n
 
 
 if __name__ == "__main__":
