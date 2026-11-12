@@ -4,7 +4,7 @@
 
 Every build in The Hollow Crown, designed or not. Add an entry the moment a build is asked for, even with no design yet, and move its status on as it progresses. Run  node tools/build-catalog.mjs  after editing to rewrite builds/CATALOG.md (check.mjs fails if it is stale).
 
-**103 builds:** 1 not started, 25 designed, 14 in viewer, 63 in game.
+**105 builds:** 1 not started, 25 designed, 15 in viewer, 64 in game.
 
 Statuses:
 
@@ -121,6 +121,7 @@ A ★ marks builds that no earlier list had (added in the 2026-11-12 audit).
 
 | Build | Region | Status | Viewer | Owner thread | Source | Notes |
 |---|---|---|---|---|---|---|
+| Boss unlock set pieces (all five, as the game builds them) (5) | One version per overworld region | in game | bossunlocks | Design how regional bosses unlock | `map/structures/boss_unlock_sites.py` | Read straight from unlocks/plans.js and well_plan.js (PR #187); test with /scriptevent siege:unlock <site> here. |
 | Boss site: Reeve's well and chamber (Millbrook) | Aldmere Vale | in game |  | Design how regional bosses unlock | `Siege_Nights_BP/scripts/unlocks/well_plan.js` | Script-built, not in the viewer, not on the building skill. |
 | Boss site: Hunter's Cairn, beast cairns and Old Sigga's lodge (Hallowmere) | Frostmarch | in game | boss_sites | Design how regional bosses unlock | `Siege_Nights_BP/scripts/unlocks/huntsman.js` | Script-built, not in the viewer. Exterior landmark "the Antler Crown" designed in map/structures/boss_landmarks.py (PR #208, viewer boss_sites), placed via unlocks/landmarks.js (PR #187). |
 | Boss site: Gull Bay chapel and altar | Saltreach | in game | boss_sites | Design how regional bosses unlock | `Siege_Nights_BP/scripts/unlocks/bride.js` | Script-built, not in the viewer. Exterior landmark "the Drowned Bell Tower" designed in map/structures/boss_landmarks.py (PR #208, viewer boss_sites), placed via unlocks/landmarks.js (PR #187). |
@@ -128,6 +129,12 @@ A ★ marks builds that no earlier list had (added in the 2026-11-12 audit).
 | Boss site: the Cradle Tree and root cradle (Mirelight) | Blackfen | in game | boss_sites | Design how regional bosses unlock | `Siege_Nights_BP/scripts/unlocks/mother.js` | Script-built, not in the viewer. Exterior landmark "the Cradle Tree" designed in map/structures/boss_landmarks.py (PR #208, viewer boss_sites), placed via unlocks/landmarks.js (PR #187). |
 | ★ Boss site: Vorlund's Muster (Warlord King's ground) | Anywhere / region-neutral | designed | landmarks | Finish the remaining world builds | `map/structures/world_doors.py` | Waiting in PR #208. At (1030, -990); places itself via landmarks/sites.js. |
 | Boss site landmark: the Lantern Mast (Mirelight) | Blackfen | designed | boss_sites | Finish the remaining world builds | `map/structures/boss_landmarks.py` | Waiting in PR #208. Exterior landmark (PR #208); placed via unlocks/landmarks.js (PR #187). |
+
+## Reference
+
+| Build | Region | Status | Viewer | Owner thread | Source | Notes |
+|---|---|---|---|---|---|---|
+| Building skill examples | Anywhere / region-neutral | in viewer | skill | Build a shape-based Minecraft building skill | `.claude/skills/minecraft-builder/scripts/build_examples.py` | Sample shapes and parts from the minecraft-builder skill, not placed in the world. |
 
 ## Travel
 
