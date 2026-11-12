@@ -52,15 +52,19 @@ export function* huntPlan(probe, anchor, hunt) {
   const iceY = here ? anchor.y : mid.water ?? mid.ground;
   const center = { x: ax, y: iceY, z: az };
   const ops = [];
-  // freeze the disc: the top water (or, in a test world, the ground) becomes packed ice
-  for (let dx = -HUNT.disc; dx <= HUNT.disc; dx++) {
-    for (let dz = -HUNT.disc; dz <= HUNT.disc; dz++) {
-      if (Math.hypot(dx, dz) > HUNT.disc) continue;
-      if (here) { ops.push(op(dx, 0, dz, "minecraft:packed_ice")); for (let y = 1; y <= 4; y++) ops.push(op(dx, y, dz, "minecraft:air")); continue; }
-      const p = probe(ax + dx, az + dz);
-      if (p?.water !== undefined) ops.push(op(dx, p.water - iceY, dz, h(dx, dz) < 0.12 ? "minecraft:blue_ice" : "minecraft:packed_ice"));
+  // On the map the area stamp (landmark_stamps.js) lays the lake floor: snow with ice patches, drifts and ridges. The
+  // plan only freezes the ring that cracks when he comes. A flat test build (`here`) still gets a plain ice disc.
+  if (here) {
+    for (let dx = -HUNT.disc; dx <= HUNT.disc; dx++) {
+      for (let dz = -HUNT.disc; dz <= HUNT.disc; dz++) {
+        if (Math.hypot(dx, dz) > HUNT.disc) continue;
+        ops.push(op(dx, 0, dz, "minecraft:packed_ice"));
+        for (let y = 1; y <= 4; y++) ops.push(op(dx, y, dz, "minecraft:air"));
+      }
+      yield;
     }
-    yield;
+  } else {
+    for (const [dx, dz] of crackCells()) ops.push(op(dx, 0, dz, "minecraft:packed_ice"));
   }
   // the Hunter's Cairn in the middle
   for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) ops.push(op(dx, 1, dz, (dx + dz) % 2 ? "minecraft:cobblestone" : "minecraft:mossy_cobblestone"));
