@@ -383,6 +383,27 @@ step("Sounds");
     const n = (readFileSync(file, "utf8").match(/\.playSound\??\.?\(/g) ?? []).length;
     if (n) { direct += n; warnings.push(`${rel(file)}: ${n} direct playSound call(s). Use sfx() from core/sfx.js so the sound gets the house treatment (SOUND-LIST.md).`); }
   }
+  // every sound id the game is asked to play must exist: Bedrock plays nothing (and says nothing) for an unknown id
+  const vanillaFile = join(TOOLS, "vanilla_sounds.json");
+  if (existsSync(vanillaFile)) {
+    const known = new Set([...(parseJson(readFileSync(vanillaFile, "utf8")) ?? []), ...Object.keys(defs)]);
+    const cuesSrc = readFileSync(join(SCRIPTS, "core/sfx_cues.js"), "utf8");
+    const cueNames = new Set([...cuesSrc.matchAll(/^\s*(?:\[BELL\]|"([^"]+)"):\s*\{/gm)].map((m) => m[1] ?? "block.bell.hit"));
+    for (const [, id] of cuesSrc.matchAll(/\[\s*"([a-z0-9_.]+)"\s*,\s*[\d.]+/g)) if (!known.has(id)) fail(`core/sfx_cues.js: a layer plays "${id}", which is not a Bedrock sound`);
+    for (const file of walk(SCRIPTS, ".js")) {
+      for (const [, id] of readFileSync(file, "utf8").matchAll(/\bsfx\([^,()]+,\s*"([a-z0-9_.]+)"/g)) {
+        if (!known.has(id) && !cueNames.has(id)) fail(`${rel(file)}: sfx(..., "${id}") is not a Bedrock sound or a cue in core/sfx_cues.js`);
+      }
+    }
+    const sj = join(RP, "sounds.json");
+    const ents = existsSync(sj) ? parseJson(readFileSync(sj, "utf8"))?.entity_sounds?.entities ?? {} : {};
+    for (const [ent, e] of Object.entries(ents)) {
+      for (const [ev, s] of Object.entries(e.events ?? {})) {
+        const id = typeof s === "string" ? s : s?.sound;
+        if (id && !known.has(id)) fail(`sounds.json: ${ent} ${ev} plays "${id}", which is not a Bedrock sound (studio/bestiary/voices.py)`);
+      }
+    }
+  }
   const listed = spawnSync(process.execPath, [join(TOOLS, "sound-list.mjs"), "--check"]);
   if (listed.status !== 0) fail("SOUND-LIST.md is out of date: run  node tools/sound-list.mjs");
   console.log(`${Object.keys(defs).length} custom sounds defined, ${installed} recordings installed, ${direct} direct playSound calls`);

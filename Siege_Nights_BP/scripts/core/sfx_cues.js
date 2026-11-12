@@ -59,7 +59,7 @@ const NAMED = {
   "cast.ward": { what: "Ward", drift: 0.04, layers: [["chime.amethyst_block", 0.7, 0.9], ["beacon.activate", 1.4, 0.35], [BELL, 1.2, 0.2, 3]] },
   "cast.blink": { what: "Blink", drift: 0.06, layers: [["mob.endermen.portal", 1.2, 0.5], ["chime.amethyst_block", 1.6, 0.4], ["random.orb", 0.5, 0.15, 1]] },
   "cast.echo": { what: "Echo Sight", drift: 0.03, layers: [["chime.amethyst_block", 0.5, 0.8], [BELL, 0.5, 0.35, 4], [BELL, 0.5, 0.12, 14]] },
-  "cast.bind": { what: "Bind", drift: 0.05, layers: [["block.chain.place", 0.6, 1.2], ["block.chain.place", 0.45, 0.8, 3], ["random.anvil_land", 1.8, 0.12, 4]] },
+  "cast.bind": { what: "Bind", drift: 0.05, layers: [["place.chain", 0.6, 1.2], ["place.chain", 0.45, 0.8, 3], ["random.anvil_land", 1.8, 0.12, 4]] },
   "cast.step": { what: "Halfstep", drift: 0.05, layers: [["portal.travel", 2, 0.12], ["mob.endermen.portal", 0.6, 0.3, 1], ["chime.amethyst_block", 0.6, 0.3, 2]] },
   "cast.hollowstep": { what: "Veilstep", drift: 0.03, layers: [["portal.travel", 0.6, 0.2], ["mob.warden.heartbeat", 0.8, 0.8, 4], [BELL, 0.35, 0.5, 8]] },
   "cast.choir": { what: "Choir's Call", drift: 0.02, layers: [[BELL, 0.4, 1], [BELL, 0.3, 0.6, 3], ["ambient.cave", 0.7, 0.3, 6]] },
@@ -83,7 +83,7 @@ const REWORKED = {
   "random.pop": { what: "A small pop", drift: 0.08, layers: [["random.pop", 0.85, 0.7]] },
   "random.click": { what: "A catch or a lever", drift: 0.06, layers: [["random.click", 0.85, 0.8]] },
   "random.break": { what: "Not allowed, or something gave way", drift: 0.06, layers: [["random.break", 0.8, 0.7]] },
-  "ui.toast.challenge_complete": { what: "Something earned", layers: [["ui.toast.challenge_complete", 0.9, 0.7], [BELL, 0.6, 0.3, 8]] },
+  "ui.toast.challenge_complete": { what: "Something earned", layers: [["random.toast", 0.9, 0.7], ["random.levelup", 1.2, 0.25, 2], [BELL, 0.6, 0.3, 8]] },
   "random.totem": { what: "A great change", layers: [["random.totem", 0.8, 0.55], [BELL, 0.5, 0.4, 4]] },
   "item.book.page_turn": { what: "A page", drift: 0.1, layers: [["item.book.page_turn", 0.9, 1]] },
 
@@ -104,6 +104,17 @@ const REWORKED = {
   "portal.travel": { what: "The Hollow pulling", layers: [["portal.travel", 0.9, 1]] },
   "mob.warden.heartbeat": { what: "A heartbeat that is not yours", drift: 0.02, layers: [["mob.warden.heartbeat", 0.9, 1]] },
   "mob.ravager.roar": { what: "Something big", drift: 0.08, layers: [["mob.ravager.roar", 0.9, 0.9]] },
+
+  // Java names that Bedrock does not have: without these lines they played nothing at all.
+  // node tools/check.mjs now fails on any sound id the game does not know (tools/vanilla_sounds.json).
+  "block.amethyst_block.chime": { what: "A crystal note", drift: 0.06, layers: [["chime.amethyst_block", 1, 1]] },
+  "block.amethyst_block.break": { what: "Crystal breaking", drift: 0.06, layers: [["break.amethyst_block", 1, 1]] },
+  "block.amethyst_block.resonate": { what: "Crystal humming", drift: 0.04, layers: [["resonate.amethyst_block", 1, 1]] },
+  "block.bell.resonate": { what: "A bell still ringing", drift: 0.02, layers: [["resonate.amethyst_block", 0.5, 0.6], [BELL, 0.5, 0.25, 2]] },
+  "block.bell.use": { what: "A bell touched", drift: 0.04, layers: [[BELL, 1.2, 0.6]] },
+  "dye.use": { what: "Dye on cloth", drift: 0.08, layers: [["sign.dye.use", 1, 1]] },
+  "mob.ravager.attack": { what: "A heavy bite", drift: 0.08, layers: [["mob.ravager.bite", 0.9, 0.9]] },
+  "mob.wolf.howl": { what: "A howl far off", drift: 0.06, layers: [["mob.wolf.big.whine", 0.6, 0.8], ["mob.wolf.big.whine", 0.5, 0.4, 6]] },
 };
 
 export const CUES = { ...SIGNATURE, ...NAMED, ...REWORKED };
