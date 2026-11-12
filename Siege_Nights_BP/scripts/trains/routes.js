@@ -13,7 +13,7 @@ export const ROUTE = {
   homeRange: 140, // a settlement's home stop is the nearest stop this close to its banner
   layPerTick: 12, // track pieces (each grading its own bed) laid every other tick while a stretch goes down
   missedLooks: 2000, // pieces checked every two seconds for ground that has loaded since
-  clearUp: 4, // air cleared above the track, 3 wide
+  clearUp: 6, // air cleared above the track, 3 wide (6 so tree trunks and low leaves don't hang over it)
   fillDepth: 6, // ground further down than this (or water) gets a bridge deck instead of an embankment
   pierEvery: 4, // a bridge pier under every 4th piece
   pierDepth: 48,
@@ -52,6 +52,11 @@ export function stopSite(data, c, range = ROUTE.homeRange) {
   const forward = along_x ? { x: 0, z: side(c.z - stop.z) } : { x: side(c.x - stop.x), z: 0 };
   return { stop, origin: { x: stop.x, y: stop.y, z: stop.z }, forward };
 }
+
+// Ground and growing things the rail bed may dig through or fill over. Anything else (planks, bricks, glass,
+// cobblestone, our own blocks...) is somebody's building: the bed leaves it standing and the buyer is warned.
+const NATURAL = new RegExp("^(?!.*stripped_)(minecraft:(stone|granite|diorite|andesite|deepslate|tuff|calcite|dripstone_block|pointed_dripstone|dirt|coarse_dirt|rooted_dirt|dirt_with_roots|grass_block|grass|podzol|mycelium|mud|clay|sand|red_sand|sandstone|red_sandstone|gravel|snow|snow_layer|powder_snow|ice|packed_ice|blue_ice|water|flowing_water|lava|flowing_lava|bedrock|moss_block|moss_carpet|cactus|sugar_cane|reeds|pumpkin|melon_block|bamboo|sculk|(\\w+_)?terracotta|hardened_clay|stained_hardened_clay|\\w+_ore|amethyst_block|smooth_basalt|basalt|magma|netherrack|glow_lichen|hanging_roots|mangrove_roots|muddy_mangrove_roots|brown_mushroom_block|red_mushroom_block|mushroom_stem|large_fern|tall_grass|short_grass|fern|vine|deadbush|dead_bush|waterlily|lily_pad|kelp|seagrass|sweet_berry_bush|sapling|\\w+_sapling|\\w+_flower|dandelion|poppy|\\w+_tulip|blue_orchid|allium|azure_bluet|oxeye_daisy|cornflower|lily_of_the_valley|sunflower|lilac|rose_bush|peony|torchflower|pitcher_plant|spore_blossom|azalea|flowering_azalea|big_dripleaf|small_dripleaf_block|cave_vines\\w*)|[a-z_]+:\\w*(_log|_wood|_leaves|_leaves_flowered|_stem|_hyphae|_roots))$");
+export const isNatural = (typeId) => NATURAL.test(typeId);
 
 // Every stop reachable from `home` along laid stretches (a Set of stop ids; empty without a home)
 export function reachable(data, built, home) {
@@ -101,7 +106,12 @@ export function cannotBuy(data, built, home, segId) {
 }
 
 // The track pieces of a stretch as { x, y, z, kind, dir }, in laying order
-export const pieces = (seg) => seg.blocks.map(([x, y, z, kind, dir]) => ({ x, y, z, kind, dir, works: !!seg.works }));
+// works: true where the map's own earthworks stand in for the plain bed: inside the segment's "custom" ranges
+// ([[i0, i1], ...] block indexes, inclusive), or everywhere when it has works but no ranges
+export const pieces = (seg) => {
+  const custom = (i) => (seg.custom ? seg.custom.some(([a, b]) => i >= a && i <= b) : !!seg.works);
+  return seg.blocks.map(([x, y, z, kind, dir], i) => ({ x, y, z, kind, dir, works: custom(i) }));
+};
 
 // Check a route map for mistakes: returns a list of problems (empty when it's fine)
 export function checkRoutes(data) {
@@ -119,6 +129,9 @@ export function checkRoutes(data) {
     if (!ids.has(seg.to)) problems.push(`segment ${seg.id} ends at unknown stop ${seg.to}`);
     if (seg.from === seg.to) problems.push(`segment ${seg.id} goes nowhere`);
     if (!seg.blocks?.length) problems.push(`segment ${seg.id} has no track`);
+    for (const r of seg.custom ?? []) {
+      if (r.length !== 2 || r[0] > r[1] || r[0] < 0 || r[1] >= (seg.blocks?.length ?? 0)) { problems.push(`segment ${seg.id} has a bad custom range ${JSON.stringify(r)}`); break; }
+    }
     for (const w of seg.works ?? []) {
       if (w.length !== 5 || w[2] > w[3] || !seg.works_palette?.[w[4]]) { problems.push(`segment ${seg.id} has a bad work ${JSON.stringify(w)}`); break; }
     }

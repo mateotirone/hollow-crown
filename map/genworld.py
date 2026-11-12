@@ -253,6 +253,9 @@ for n_, x_, z_, r_, _ in TOWNS:
 rail_y = np.full((SIZE, SIZE), -999, np.int32); rail_d = np.full((SIZE, SIZE), 99.0, np.float32)
 rail_t = np.zeros((SIZE, SIZE), bool)          # the nearest line cell runs in a tunnel
 RAIL_R = 48                                    # how far out the banks may reach
+# Mateo 2026-11-12: no rail bed in the world. A line is only a plan (map/rail-segments.json) until a stretch is
+# bought; then the game builds bed, earthworks and track together. RAIL_IN_WORLD=1 brings back the graded beds.
+RAIL_IN_WORLD = os.environ.get("RAIL_IN_WORLD") == "1"
 tun_floor = np.full((SIZE, SIZE), -999, np.int32); br_deck = np.full((SIZE, SIZE), -999, np.int32)
 br_wall = np.zeros((SIZE, SIZE), bool); br_pier = np.zeros((SIZE, SIZE), bool)
 RAILLINES = {}
@@ -262,14 +265,32 @@ def gy(x, z):
     if not (0 <= i < SIZE and 0 <= k < SIZE): return SEA + 4
     return int(max(Y[i, k], water_level[i, k] + 3)) if wet[i, k] else int(Y[i, k])
 stop_y = {}
+def stops_on(P): return [(sid, st) for sid, st in STOPS.items() if np.min(np.hypot(P[:, 0] - st["x"], P[:, 1] - st["z"])) < 30]
+# Mateo 2026-11-12: railways on their own routes, laid out the way 19th-century lines were (gentle gradients along
+# valleys and hillsides, long curves, stations at the edge of town), not beside the roads. The lines.json "roads"
+# only say which stops each line serves and in what order; railroute places the stations and routes the track.
+import railroute
+SEQ = {}
 for lname, pts in L["roads"].items():
     P = np.asarray(pts, float)
-    on = []
-    for sid, st in STOPS.items():
-        dmin = np.min(np.hypot(P[:, 0] - st["x"], P[:, 1] - st["z"]))
-        if dmin < 30: on.append((sid, st))
-    stops_ = [(st["x"], st["z"], "x" if sid == "kingsrest" else None) for sid, st in on]
-    cells, si = railplan.trace(pts, stops_)
+    SEQ[lname] = [sid for sid, st in sorted(stops_on(P), key=lambda t: int(np.argmin(np.hypot(P[:, 0] - t[1]["x"], P[:, 1] - t[1]["z"]))))]
+_foot = {}                                         # how far out each stamped town's blocks reach
+for fn_ in filter(None, os.environ.get("GW_BLOCKS", "").split(":")):
+    d_ = json.load(open(fn_)); b_ = np.array(d_["blocks"], np.int64)[:, [0, 2]]
+    _foot[d_["town"]] = b_
+R_TOWNS = []
+for n_, x_, z_, r_, _ in TOWNS:
+    if n_ in _foot: R_ = int(np.hypot(_foot[n_][:, 0] - x_, _foot[n_][:, 1] - z_).max()) + 6
+    else: R_ = int(r_ * 1.12) + 10
+    R_TOWNS.append((slug(n_), x_, z_, R_))
+AVOID = [(x_, z_, 82) for _, x_, z_ in PLOTS] + [(x_, z_, int(r_ * 0.7)) for _, x_, z_, r_, _ in WARDS[6:]]
+STATION_POS, LINE_PTS = railroute.plan_network(Y, wet, land, X0, Z0, STOPS, SEQ, R_TOWNS, AVOID, log=log)
+for sid_, (x_, z_, _) in STATION_POS.items(): STOPS[sid_].update({"x": x_, "z": z_})
+for lname in SEQ:
+    pts = LINE_PTS[lname]
+    on = [(sid, STOPS[sid]) for sid in SEQ[lname]]
+    stops_ = [(st["x"], st["z"], STATION_POS[sid][2][-1]) for sid, st in on]
+    cells, si = railplan.trace(pts, stops_, routed=True)
     order = sorted(range(len(on)), key=lambda k: si[k]); on = [on[k] for k in order]; si = [si[k] for k in order]
     ground = [gy(x, z) for x, z in cells]
     for (sid, st), i in zip(on, si):
@@ -312,11 +333,12 @@ for lname, pts in L["roads"].items():
         np.minimum.at(rail_d, (X_, Z_), D_.astype(np.float32))
         win = D_ <= rail_d[X_, Z_] + 1e-4
         rail_y[X_[win], Z_[win]] = Yv[win]; rail_t[X_[win], Z_[win]] = T_[win]
+        if not RAIL_IN_WORLD: continue
         t2 = win & T_ & (D_ <= 2.5); tun_floor[X_[t2], Z_[t2]] = Yv[t2] - 1
         b2 = win & W_ & (D_ <= 2.5); br_deck[X_[b2], Z_[b2]] = Yv[b2] - 1
         br_wall[X_[b2 & (D_ > 1.5)], Z_[b2 & (D_ > 1.5)]] = True
     for i in range(0, len(cells), 8):
-        if okc[i] and wt[i]: br_pier[cx[i], cz[i]] = True
+        if okc[i] and wt[i] and RAIL_IN_WORLD: br_pier[cx[i], cz[i]] = True
 # earthworks on land (Mateo 2026-11-11: grade the land round paths, no sheer trenches). The bed and the road
 # beside it are laid first as one flat bench at track level; then banks slope back from the bench edge to the
 # natural ground, about 3 up for every 4 out with a little noise, as far out as they need (up to RAIL_R), for
@@ -325,7 +347,7 @@ for lname, pts in L["roads"].items():
 # nothing is cut over the bore or beside it, so the cutting ends at a portal face; everywhere else is open to the sky.
 bed = rail_y - 1
 bore = tun_floor > -999
-corr = (rail_d <= RAIL_R) & land & ~wet & ~bore & (br_deck == -999)
+corr = (rail_d <= RAIL_R) & land & ~wet & ~bore & (br_deck == -999) & RAIL_IN_WORLD
 flat_ = corr & ((rail_d <= 3.5) | (isroad & (rail_d <= ROADOFF + 5))) & ~rail_t   # over a tunnel the road keeps to the hill
 Y[flat_] = bed[flat_]
 dF = chamfer_b(flat_, RAIL_R)
@@ -380,7 +402,7 @@ for d_ in GW_FILES:
             b2_ = cand < Dn
             if b2_.any(): Dn[b2_] = cand[b2_]; Vn[b2_] = np.roll(np.roll(Vn, dx_, 0), dz_, 1)[b2_]
     Yw = Y[a0_:a1_, c0_:c1_]
-    free = ~f_ & ~wet[a0_:a1_, c0_:c1_] & land[a0_:a1_, c0_:c1_] & (rail_d[a0_:a1_, c0_:c1_] > 4.5) & np.isfinite(Dn)
+    free = ~f_ & ~wet[a0_:a1_, c0_:c1_] & land[a0_:a1_, c0_:c1_] & ((rail_d[a0_:a1_, c0_:c1_] > 4.5) | (not RAIL_IN_WORLD)) & np.isfinite(Dn)
     slack = np.floor(np.where(np.isfinite(Dn), Dn, 0) / 2).astype(np.int32)      # one block up or down per two out
     Yw[free] = np.clip(Yw[free], (Vn - slack)[free], (Vn + slack)[free]); Y[a0_:a1_, c0_:c1_] = Yw
     for sx_, sz_, sy_ in d_.get("tree_seats", []):            # the town's own trees stand on the ground they were planned on
@@ -389,8 +411,8 @@ for d_ in GW_FILES:
             w_ = (slice(i_ - 1, i_ + 2), slice(k_ - 1, k_ + 2)); m_ = ~foot[w_] & ~wet[w_]
             Y[w_][m_] = sy_
     log("graded the land to", d_["town"], "groundwork:", int(foot.sum()), "columns")
-railcore = (rail_d <= 1.5) & ~wet & (tun_floor == -999) & (br_deck == -999)
-railzone = rail_d <= 4.5
+railcore = (rail_d <= 1.5) & ~wet & (tun_floor == -999) & (br_deck == -999) & RAIL_IN_WORLD
+railzone = (rail_d <= 4.5) & RAIL_IN_WORLD
 log("rail lines", len(RAILLINES), "stops", len(STOPS), "tunnel cells", int((tun_floor > -999).sum()), "bridge cells", int((br_deck > -999).sum()))
 # the export: stops (the track block where trains stop, mid-platform) and segments between neighbouring stops,
 # sharing their end blocks

@@ -8,7 +8,7 @@ import { keepCenter } from "./keep.js";
 import { SETTINGS } from "./settings.js";
 import { state } from "./state.js";
 import { settlementAt } from "./territory.js";
-import { isOnline, ownerOf } from "./util.js";
+import { ownerOf, attackable } from "./util.js";
 import { BLAST, DAMAGE, hitWall, lightCharge } from "./walls.js";
 import { sfx } from "../core/sfx.js";
 
@@ -111,7 +111,7 @@ export function swingRam(ram, player) {
   const block = blockAhead(ram, 3, facing(ram)); // the ram is big, the beam reaches 3 blocks out
   if (!block) return sfx(dim, "mob.ravager.attack", ram.location, { volume: 0.6, pitch: 0.6 });
   const owner = dim.id === "minecraft:overworld" ? settlementAt(block.location) : undefined;
-  if (owner && !isOnline(owner)) {
+  if (owner && !attackable(owner)) {
     return player.onScreenDisplay.setActionBar(`§c${state.keeps[owner]?.name ?? "The owner"} is away. Their walls can't be touched.`);
   }
   if (owner) markWanted(player, owner);

@@ -105,11 +105,17 @@ function relicTick() {
 onTick("bestiary_relics", 20, relicTick);
 
 // ---------- Boss keys: use one to call its boss where you stand ----------
-// Crafted at a Siege Workshop from that region's trophies and Veil Ash (recipes/keys/). Until the map's arenas exist, the fight starts right here.
+// No key is crafted any more: each regional boss's key is earned from its region's puzzle and goes into that boss's
+// own lock (scripts/unlocks/: the Reeve's well crank, the Hunter's Cairn, the drowned altar, the vault seal, the root
+// cradle). Those keys are marked "socketed" and do nothing in the open. A key with no lock still calls its boss here.
+const socketed = new Set();
+export const markSocketed = (itemId) => socketed.add(itemId);
+export const isSocketed = (itemId) => socketed.has(itemId);
 world.afterEvents.itemUse.subscribe((event) => {
   const type = SIGILS[event.itemStack?.typeId];
   const player = event.source;
   if (!type || player?.typeId !== "minecraft:player") return;
+  if (socketed.has(event.itemStack.typeId)) return player.onScreenDisplay.setActionBar("§7It wants a lock, not a pocket.");
   const def = bossDefs().find((d) => d.type === type);
   if (!def) return;
   if (activeFights().some((f) => f.def.id === def.id && f.dim.id === player.dimension.id && flat(f.center, player.location) < 96)) {

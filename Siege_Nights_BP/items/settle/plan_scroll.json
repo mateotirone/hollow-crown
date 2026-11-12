@@ -1,0 +1,22 @@
+{
+  "format_version": "1.21.60",
+  "minecraft:item": {
+    "description": {
+      "identifier": "siege:plan_scroll",
+      "menu_category": {
+        "category": "items"
+      }
+    },
+    "components": {
+      "minecraft:icon": "siege_plan_scroll",
+      "minecraft:display_name": {
+        "value": "item.siege:plan_scroll.name"
+      },
+      "minecraft:max_stack_size": 1,
+      "minecraft:use_modifiers": {
+        "use_duration": 0.05,
+        "movement_modifier": 1.0
+      }
+    }
+  }
+}

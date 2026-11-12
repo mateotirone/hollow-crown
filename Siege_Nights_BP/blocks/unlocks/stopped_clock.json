@@ -1,0 +1,124 @@
+{
+  "format_version": "1.21.90",
+  "minecraft:block": {
+    "description": {
+      "identifier": "siege:stopped_clock",
+      "menu_category": {
+        "category": "items"
+      },
+      "states": {
+        "siege:struck": [
+          0,
+          1
+        ]
+      },
+      "traits": {
+        "minecraft:placement_direction": {
+          "enabled_states": [
+            "minecraft:cardinal_direction"
+          ]
+        }
+      }
+    },
+    "components": {
+      "minecraft:display_name": "tile.siege:stopped_clock.name",
+      "minecraft:geometry": "minecraft:geometry.full_block",
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "siege_stopped_clock_case",
+          "render_method": "opaque"
+        },
+        "north": {
+          "texture": "siege_stopped_clock_317",
+          "render_method": "opaque"
+        }
+      },
+      "minecraft:destructible_by_mining": false,
+      "minecraft:destructible_by_explosion": false,
+      "minecraft:map_color": "#e0d0a8",
+      "siege:clickable": {}
+    },
+    "permutations": [
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'north'",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'west'",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              90,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'south'",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              180,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'east'",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              -90,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('siege:struck') == 0",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_stopped_clock_case",
+              "render_method": "opaque"
+            },
+            "north": {
+              "texture": "siege_stopped_clock_317",
+              "render_method": "opaque"
+            }
+          },
+          "minecraft:light_emission": 4
+        }
+      },
+      {
+        "condition": "q.block_state('siege:struck') == 1",
+        "components": {
+          "minecraft:material_instances": {
+            "*": {
+              "texture": "siege_stopped_clock_case",
+              "render_method": "opaque"
+            },
+            "north": {
+              "texture": "siege_stopped_clock_318",
+              "render_method": "opaque"
+            }
+          },
+          "minecraft:light_emission": 7
+        }
+      }
+    ]
+  }
+}

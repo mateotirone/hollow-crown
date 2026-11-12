@@ -159,7 +159,7 @@ export const ENTRIES = [
   {
     id: "keep_menu", ch: "keep", title: "The Keep Banner and its menu",
     tip: "Click your Keep Banner with nothing in hand for the Keep menu: your tier, wins, next siege, guards, allies and more.",
-    page: "Click your Keep Banner (not holding dye) for the §fKeep menu§r: your tier, your wins and what the next tier needs, when the next siege comes, what attacked you last, your guards and allies, your strongbox, your look, and every plot on the map.\n\n"
+    page: "Click your Keep Banner (not holding dye) for the §fKeep menu§r: your tier, your wins and what the next tier needs, when the next siege comes, what attacked you last, your guards and allies, your Regals, your look, and every plot on the map.\n\n"
       + "§fColour:§r every settlement has its own banner colour, and no two can share one. Use a dye on the banner to change it. Your guards, your land's border and your horse cloth follow it.\n\n"
       + "§fGrowing:§r every siege you hold is a win. At 3 wins a Hamlet becomes a Town, at 6 a City, and at 10 wins with 2 warlords slain, a Castle.",
     when: ["place:siege:keep_banner", "event:keepFounded"],
@@ -217,9 +217,17 @@ export const ENTRIES = [
     when: ["event:settlerArrived", "click:siege:plot_marker"],
   },
   {
+    id: "plan_book", ch: "keep", title: "The Plan Book and Plan Scrolls",
+    tip: "Your Plan Book lists the buildings you can raise. Find more plans as Plan Scrolls.",
+    page: "A Plot Marker only offers buildings whose plan you know. Your §fPlan Book§r shows them as cards: open it from your pack or from the §fPlan Book§r button in your Town Hall menu. Found plans are bright, missing ones are grey with where to find them, and clicking a card shows its plot size, price, the worker it brings and the charter it counts toward. Every new town's founder gets a book; craft another from a book and a paper. The Hamlet's homes, well and library are known from the start, and your town hall teaches more as it grows: the market, garden, farmhouse, mint and townhouse at level 2, the smithy, stable and inn at 3, the storehouse and watchtower at 4. Everything a charter asks for is taught in time, so you never need luck to grow.\n\n"
+      + "Everything else comes as §fPlan Scrolls§r: a toppled Rival Lord leaves plans of their town, every boss leaves one for each player at the kill, and a Rumor job sometimes pays one. Use a scroll to learn its plan for good. A plan from another region is in that region's style, and raising it costs half as much again.\n\n"
+      + "To trade a plan, copy it onto a scroll from your Plan Book for a few coins and a paper.",
+    when: ["carry:siege:plan_book", "carry:siege:plan_scroll", "event:planLearned"],
+  },
+  {
     id: "guards", ch: "keep", title: "Guards and the Barracks",
-    tip: "Bring an unemployed villager to your Barracks and click it holding 40 Regals for a Man-at-Arms (sneak + click for an Archer).",
-    page: "Build a §fBarracks§r, bring an unemployed villager to it and click it holding coins (40 Regals) for a §fMan-at-Arms§r. Sneak + click for an §fArcher§r. Click the Barracks without coins for the guard list.\n\n"
+    tip: "Bring an unemployed villager to your Barracks and click it: hire a Man-at-Arms or an Archer for 40 Regals.",
+    page: "Build a §fBarracks§r, bring an unemployed villager to it and click it. Its menu hires a §fMan-at-Arms§r or an §fArcher§r for 40 Regals, and shows the guard list.\n\n"
       + "Sneak + click a guard to pick them up and put them anywhere on your land. Off duty, Archers stay exactly where you set them and Men-at-Arms wait at the Barracks and charge out when raiders come. Better: give them a post (see §fGuard posts§r).\n\n"
       + "§fArmour:§r click a guard holding the next upgrade: 6 iron ingots, then 12 iron ingots, then 4 diamonds, then a netherite ingot. Clicking with anything else opens the guard's orders.\n\n"
       + "§fWanted:§r anyone who attacks you or your guards on your land, lights a charge or rams your walls is Wanted there for 5 minutes, and your guards hunt them.\n\n"
@@ -262,10 +270,11 @@ export const ENTRIES = [
   // ---------------- Coin and trade ----------------
   {
     id: "regals", ch: "coin", title: "Regals",
-    tip: "This is a Regal, the one coin of Aldmere. 64 make a Gold Regal: sneak and use a Gold Regal to break it.",
-    page: "The §fRegal§r is the only coin in Aldmere, and it is backed by iron: one iron ingot is worth 8 Regals. A §fGold Regal§r is 64. Sneak and use a Gold Regal to break it into small coins.\n\n"
+    tip: "This is a Regal, the one coin of Aldmere. Picked up, coins are counted straight into your Regals.",
+    page: "The §fRegal§r is the only coin in Aldmere, and it is backed by iron: one iron ingot is worth 8 Regals. A §fGold Regal§r is 64.\n\n"
       + "You earn Regals by holding sieges, killing warlords and bosses, doing jobs from the Rumor Board and selling goods to the traders in the towns. Emeralds are only a trade good now: the Moneyer buys them.\n\n"
-      + "Coins in your pockets can be lost. Coins in your §fstrongbox§r (on the Keep menu) can't be dropped, lost or taken.",
+      + "All your Regals are one sum. Coins you find are counted in the moment you pick them up, every shop takes from the sum and every reward adds to it, wherever you are. The §fRegals§r button on the Keep menu shows it.\n\n"
+      + "The sum is kept in the §fRegal Safe§r in your vault, once you have one. A thief who breaks into your vault can rob it.",
     when: ["carry:siege:coin", "carry:siege:gold_coin"],
   },
   {
@@ -273,7 +282,7 @@ export const ENTRIES = [
     tip: "Traders buy what their trade needs. Each has only so much appetite a day, and pays less once they've had plenty.",
     page: "Every town has traders: a farmer, woodcutter, quarryman, smith, fisher, hunter, herbalist and the Moneyer, and a Guild Factor with orders. Click one to sell to them or buy from them.\n\n"
       + "Prices differ from region to region. Each trader only wants so much a day: past that they pay less, and in the end they stop buying until tomorrow.\n\n"
-      + "§fThe Moneyer§r changes coins and buys iron ingots and emeralds. He takes every iron ingot you bring at full price, with no daily limit (iron golems never appear, so iron only comes from mining). He also trades metal up one step: 4 iron for a gold ingot, 8 gold for a diamond, 6 diamonds for a netherite scrap. It is dear, but anything can always be bought. Each region's Smith sells that region's Castle Guard armour.",
+      + "§fThe Moneyer§r buys iron ingots and emeralds. He takes every iron ingot you bring at full price, with no daily limit (iron golems never appear, so iron only comes from mining). He also trades metal up one step: 4 iron for a gold ingot, 8 gold for a diamond, 6 diamonds for a netherite scrap. It is dear, but anything can always be bought. Each region's Smith sells that region's Castle Guard armour.",
     when: ["talk:tag:siege_job"],
   },
 
@@ -326,6 +335,17 @@ export const ENTRIES = [
       + "Your settlement's own station rises by itself and is rebuilt bigger as you grow: a Halt, then a Station, a Junction and at last a Grand Station.",
     when: ["click:hc:station_post", "click:siege:rail_depot"],
     needs: "siege:track",
+  },
+
+  {
+    id: "trade_routes", ch: "travel", title: "Trade Outposts and routes",
+    tip: "Click the Trade Board to propose a standing trade. Keep your Exports barrel stocked and collect from Imports.",
+    page: "Once your station is on the line and you own a Train Engine, you can build a §fTrade Outpost§r from the station menu. Inside are the §fTrade Board§r, an §fExports§r barrel and an §fImports§r barrel.\n\n"
+      + "At the board, propose a §fstanding trade§r to any station your laid track reaches: what you send, what you get back, and how often (\"20 iron for 4 gold, every day\"). Both sides must accept the same terms; either can send a counteroffer. A new request shows above the Trade Board in the other settlement's colour.\n\n"
+      + "Your train runs the route while you're away. Each run takes both loads out of both Exports at once and, after the trip, drops each in the other side's Imports. If either side is short, nothing leaves and the route pauses until it's refilled. After 3 days paused it goes dormant: refill it and press Resume.\n\n"
+      + "The further apart the two stations are along the track, the longer each trip takes. Regions are strong in one thing and weak in another, so trading is how you get what your land is short of. Rival Lords and the towns trade too, and §fKingsrest§r buys any trade good for Regals at a set price. Your station grows with your settlement, and so do the routes it runs and what each run carries; §fGoods Wagons§r carry more.",
+    when: ["click:siege:trade_board"],
+    needs: "siege:trade_board",
   },
 
   // ---------------- Growing stronger ----------------
@@ -431,6 +451,13 @@ export const ENTRIES = [
       + "Click a portrait or painting to read about it. Every settlement's Library has portraits of the people who led it before you.",
     when: ["talk:tag:siege_lore_npc_*", "talk:siege:portrait"],
   },
+  {
+    id: "town_folk_streets", ch: "lore", title: "People in the streets",
+    tip: "Townsfolk have five things to say each. Click again to hear the next.",
+    page: "The people walking the streets of Kingsrest and the other towns will stop and talk if you click them. Each one has five things to say, and you hear them in order: click again for the next.\n\n"
+      + "Some of it is gossip, some of it is nonsense, and some of it is worth remembering. They go indoors at night and are back in the morning.",
+    when: ["talk:siege:townsfolk"],
+  },
 
   // ---------------- The wild ----------------
   {
@@ -447,10 +474,10 @@ export const ENTRIES = [
   },
   {
     id: "bosses", ch: "wild", title: "Calling a boss",
-    tip: "This calls something to where you stand when you use it. Be ready, and stand somewhere open.",
-    page: "Each region has something old in it, and each has a token that calls it. Use the token somewhere open and the fight starts where you stand.\n\n"
+    tip: "This belongs somewhere. Something old in this region is waiting for it to be put back.",
+    page: "Each region has something old in it, asleep in a place of its own, and a token that wakes it. The token is earned in that region, from the people and the stones there, and it goes back where it belongs: a lock, an altar, a cairn. Then whatever sleeps there comes out.\n\n"
       + "A boss gets half again as tough for each extra player in the fight, so it is fair alone and fair with friends. Watch for its warnings: every attack is shown before it lands.\n\n"
-      + "Everyone who fought gets the boss's own relic the first time it falls (materials after that), skill points, and a share of the chest it leaves. A boss you have beaten comes back in a different temper each time, and a rank stronger (up to rank V): more health, harder hits, and from rank III two tempers at once. Calling it back costs diamonds as well as the key (2 at rank I, up to 6 at rank V), and every rematch leaves netherite scrap: 1 at ranks I and II, 2 at III and IV, 3 at V. There is no Nether here, so this is where netherite comes from.",
+      + "Everyone who fought gets the boss's own relic the first time it falls (materials after that), skill points, and a share of the chest it leaves. The token stays where you put it. Once a siege night has passed after a boss falls, touch it again and the boss comes back, in a different temper each time and a rank stronger (up to rank V): more health, harder hits, and from rank III two tempers at once. Every rematch leaves netherite scrap: 1 at ranks I and II, 2 at III and IV, 3 at V. There is no Nether here, so this is where netherite comes from.",
     when: ["carry:siege:stopped_clock_key", "carry:siege:pale_horn", "carry:siege:drowned_ring", "carry:siege:faceless_seal", "carry:siege:mire_effigy"],
     hidden: true,
   },
@@ -467,9 +494,34 @@ export const ENTRIES = [
     page: "Make an §fIronworks§r at the Siege Workshop and place it on your land: an §fOre Pit§r is dug behind it and its worker digs about 16 raw iron a day into the storeroom. Click the block to take it.\n\n"
       + "Once you are a §fTown§r, build the §fBloomery§r (384 Regals): it smelts for you, about 40 iron ingots a day, burning one charcoal for every 4 ingots. Feed it from the block's menu; charcoal comes from burning logs, so a tree farm keeps it going. With no charcoal it only digs raw ore.\n\n"
       + "Once you are a §fCity§r, with water within 12 blocks, build the §fTrip-Hammer Forge§r (1,280 Regals): a waterwheel and hammer, about 100 ingots a day.\n\n"
-      + "The storeroom holds three days of work, then the workers wait for you. A siege that goes badly lets raiders carry off part of it. Frosthelm and Gullcliff, with an iron Old Working next door, dig half again as fast.",
+      + "The storeroom holds three days of work, then the workers wait for you. A siege that goes badly lets raiders carry off part of it. Where you live matters: Saltreach sits on rich iron and digs twice as fast, while Frostmarch's iron is poor (a quarter speed), so Frostmarch towns trade for it.",
     when: ["place:siege:ironworks", "carry:siege:ironworks", "click:siege:ironworks"],
     needs: "siege:ironworks",
+  },
+  {
+    id: "vault", ch: "growth", title: "The Vault",
+    tip: "The Vault Key. Use it on the ground where your vault's stairs should start.",
+    page: "Your relics are safest in a §fvault§r. Open the Town Hall menu and choose §fVault§r, then §fAdd Vault§r: it costs 64 planks and 32 cobbled deepslate and gives you the §fVault Key§r.\n\n"
+      + "Walk to where the stairs should start on your own land, face the way they should go down, and use the key on the ground. Stairs are carved down to an entrance hall and a §fWooden Strongroom§r with a 3x3 vault door. The §fVault Lock§r is in the wall beside the door.\n\n"
+      + "Click the lock with the key and the door swings open; click it again to shut it. You and your allies open it with any Vault Key, but a key is cut for one vault, and anyone holding a key cut for yours can open it too. Keep yours safe. Spare keys come from the same menu.\n\n"
+      + "Inside, hold a relic and click one of the plinths at the back: it comes to rest floating over it. Click it to take it again. Whoever gets into your vault can take it too.\n\n"
+      + "To make it stronger, click the lock with the next material: an iron ingot (Iron Strongroom), then a diamond, a netherite ingot and a Choirsteel ingot. Confirm the cost and the room is rebuilt bigger around you, with a tougher door. Take your things out of the barrels first; relics on their stands move with the room.",
+    when: ["carry:siege:vault_key", "event:vaultBuilt"],
+  },
+  {
+    id: "vault_break", ch: "growth", title: "Breaking into a vault",
+    tip: "A Vault Breaker. Set it right against a Vault Lock.",
+    page: "Thieves break in with a §fVault Breaker§r (made at the Siege Workshop) set right against the lock: it chews through it, faster the better the breaker and slower the stronger the vault, and only while you are online. You are told the moment one starts. When the lock gives, the door falls with it. Mend a cracked lock or door by clicking it with the vault's material (planks, iron, diamond, netherite, Choirsteel); if the door falls, rebuild it from the Vault menu.\n\n"
+      + "Stay away a full real day while your vault holds a relic (or you carry one) and it §flies open§r: twice a day, at random times, for half an hour, anyone may break in without you. Everyone is told when it opens. While a window is open your walls can be breached as if you were here, but they, your vault and Keep take twice the blows and your guards fight harder. The rest of the time an away settlement stays untouchable. Log in, even for a moment, and the day starts again.",
+    when: ["carry:siege:vault_breaker_iron", "carry:siege:vault_breaker_diamond", "carry:siege:vault_breaker_netherite", "event:vaultDrilled", "event:vaultWindow"],
+  },
+  {
+    id: "vault_safe", ch: "growth", title: "The Regal Safe",
+    tip: "The Regal Safe holds all your Regals. A thief breaks it open a blow at a time.",
+    page: "Every vault has a §fRegal Safe§r just inside the door, two blocks wide and three high. All your Regals are kept in it: there is nothing to put in or take out, it is simply where your one sum can be stolen. Click it to see how much you have.\n\n"
+      + "A thief who gets into your vault can hit it. Every blow knocks loose a share of what is inside and shows how much; the last blow breaks it open and they take the rest. A wooden vault's safe gives in after 10 blows, a Choirsteel vault's after 70, and each blow takes a smaller share the better the vault. You are told the moment someone starts, and when a safe is broken open the whole server hears who did it.\n\n"
+      + "Click a broken safe to hammer it straight and lock it again.",
+    when: ["click:siege:regal_safe", "event:safeBroken"],
   },
   {
     id: "workings", ch: "wild", title: "Old Workings",

@@ -4,7 +4,7 @@ import { BlockTypes, EntityTypes, ItemTypes } from "@minecraft/server";
 import { addTests, assert, assertEqual } from "../siege/api.js";
 import { SHAPES, layTrack, cursorOn, advance, back, pointAt, follow, KINDS, curvePoints, switchSetting, shapeOf } from "./track.js";
 import { stageFor, stationPlan, siteFor, lineBlocks, rightOf, STAGES, STATION } from "./stations.js";
-import { ROUTE, reachable, buyable, cannotBuy, priceOf, nearestStop, checkRoutes, stopSite } from "./routes.js";
+import { ROUTE, reachable, buyable, cannotBuy, priceOf, nearestStop, checkRoutes, stopSite, pieces, isNatural } from "./routes.js";
 import { ROUTES } from "./routes_data.js";
 import { TRACK, CARS, TRAIN, carPoses, trainLength, stepSpeed, moveTrain, limitAhead, shapesForLoop, showcaseLoop } from "./data.js";
 
@@ -72,6 +72,10 @@ addTests("trains", {
       at.set(k, [...(at.get(k) ?? []), { kind, dir }]);
     }
   },
+  "routes: the bed digs through ground and trees, never through buildings": () => {
+    for (const id of ["minecraft:stone", "minecraft:grass_block", "minecraft:oak_log", "minecraft:spruce_leaves", "siege:old_acacia_log", "minecraft:white_terracotta", "minecraft:iron_ore", "minecraft:short_grass"]) assert(isNatural(id), id);
+    for (const id of ["minecraft:oak_planks", "minecraft:stone_bricks", "minecraft:cobblestone", "minecraft:glass", "minecraft:stripped_oak_log", "siege:castle_stone", "minecraft:stone_brick_stairs", "minecraft:oak_fence", "minecraft:torch"]) assert(!isNatural(id), id);
+  },
   "routes: a settlement's station sits on its stop, building toward the banner": () => {
     const data = routeMap();
     const s = stopSite(data, { x: 10, z: 40 });
@@ -90,6 +94,12 @@ addTests("trains", {
     const bad = { stops: data.stops, segments: [...data.segments, { id: "AB", from: "A", to: "Z", blocks: [] }] };
     assert(checkRoutes(bad).length >= 3, "a doubled id, an unknown stop and no track are caught");
     assertEqual(checkRoutes(ROUTES).length, 0, "the planned railway has no mistakes");
+    const custom = { ...data.segments[0], works: [[0, 0, 60, 63, 1]], works_palette: [{ name: "minecraft:air" }, { name: "minecraft:stone" }], custom: [[10, 20]] };
+    assertEqual(checkRoutes({ stops: data.stops, segments: [custom] }).length, 0);
+    const p = pieces(custom);
+    assert(p[15].works && !p[9].works && !p[21].works, "only the custom range skips the plain bed");
+    assert(pieces({ ...custom, custom: undefined })[0].works, "works without ranges cover the whole stretch");
+    assert(checkRoutes({ stops: data.stops, segments: [{ ...custom, custom: [[5, 9999]] }] }).length, "a range past the end is caught");
   },
 
   "there are 20 track shapes and none repeats": () => {

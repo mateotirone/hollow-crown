@@ -114,6 +114,9 @@
  "hc:station_post": {
   "sound": "stone"
  },
+ "siege:trade_board": {
+  "sound": "wood"
+ },
  "hc:breeder_post": {
   "sound": "wood"
  },
@@ -501,6 +504,12 @@
  "siege:plot_marker": {
   "sound": "wood"
  },
+ "siege:stopped_clock": {
+  "sound": "wood"
+ },
+ "siege:well_crank": {
+  "sound": "wood"
+ },
  "siege:vault_door_wood": {
   "sound": "wood"
  },
@@ -563,5 +572,29 @@
  },
  "siege:ironworks": {
   "sound": "stone"
+ },
+ "siege:hunt_cairn": {
+  "sound": "stone"
+ },
+ "siege:hunters_cairn": {
+  "sound": "stone"
+ },
+ "siege:carved_floor": {
+  "sound": "stone"
+ },
+ "siege:drowned_altar": {
+  "sound": "stone"
+ },
+ "siege:faceless_bust": {
+  "sound": "stone"
+ },
+ "siege:vault_seal": {
+  "sound": "stone"
+ },
+ "siege:root_cradle": {
+  "sound": "wood"
+ },
+ "siege:regal_safe": {
+  "sound": "metal"
  }
 }
