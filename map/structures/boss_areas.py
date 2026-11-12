@@ -518,6 +518,7 @@ def huntsman():
     d = D("boss_huntsman", seed=701)
     R0, R = 60, 76
     CRACK, ARENA = 17, 16
+    WOLF0, WOLF1 = 18, 23          # the night ring where rimewolves come (bosses thread, plans.js ICE_EDGE): flat ice at dy 0
     CAIRNS = [(26, -26), (26, 26), (-34, 34), (-34, -34)]      # where huntPlan's beast cairns land on this map
     LODGE = (0, 30)
     lake = lambda x, z: G.water(x, z) is not None
@@ -560,7 +561,7 @@ def huntsman():
             b = "snow" if t > 0.52 else "packed_ice" if t > 0.3 else "ice" if t > 0.22 else "snow"
             d.put(x, 0, z, b)
             if b == "snow" and d.r(x, 1, z, 10) < 0.45:
-                d.put(x, 1, z, "snow_layer", bs={"height": int(1 + 3 * d.r(x, 2, z, 11)) if r > ARENA + 2 else int(1 + 2 * d.r(x, 2, z, 11))})
+                d.put(x, 1, z, "snow_layer", bs={"height": int(1 + 3 * d.r(x, 2, z, 11)) if r > WOLF1 else int(1 + 2 * d.r(x, 2, z, 11))})
     # drifts: low inside the fight ring (layers only), full banks outside it
     for k in range(26):
         a = d.r(k, 1, 1) * math.tau; rr = 8 + 40 * d.r(k, 2, 1)
@@ -572,7 +573,7 @@ def huntsman():
             for j in range(-3, 4):
                 x, z = round(cx + math.cos(ang) * i - math.sin(ang) * j), round(cz + math.sin(ang) * i + math.cos(ang) * j)
                 r = math.hypot(x, z)
-                if not lake(x, z) or CRACK - 1 <= r < CRACK + 1 or (abs(x) <= 2 and abs(z) <= 2): continue
+                if not lake(x, z) or CRACK - 1 <= r < WOLF1 + 1 or (abs(x) <= 2 and abs(z) <= 2): continue
                 hgt = (1 - (i / (L + 0.5)) ** 2) * (1 - (j / W) ** 2 if abs(j) < W else 0) * (3.2 if r > ARENA + 2 else 0.9)
                 if hgt <= 0.15: continue
                 full = int(hgt)
@@ -582,17 +583,17 @@ def huntsman():
     # pressure ridges: jumbled slabs of ice pushed up along lines out from the crack, outside the fight ring
     for k in range(7):
         a = math.radians(360 / 7 * k + 20 + 15 * d.r(k, 6, 2))
-        for s_ in range(ARENA + 4, 52):
+        for s_ in range(WOLF1 + 2, 52):
             x, z = round(math.sin(a) * s_ + 2 * math.sin(s_ * 0.3 + k)), round(math.cos(a) * s_ + 2 * math.cos(s_ * 0.27 + k))
             if not lake(x, z): break
-            hgt = 1 + int(2.6 * d.r(x, 3, z, 12) * min(1, (s_ - ARENA - 3) / 6))
+            hgt = 1 + int(2.6 * d.r(x, 3, z, 12) * min(1, (s_ - WOLF1 - 1) / 6))
             for y in range(1, hgt + 1):
                 for (dx, dz) in ((0, 0), (1, 0), (0, 1)):
                     if d.r(x + dx, y, z + dz, 13) < 0.75 - 0.2 * y:
                         d.put(x + dx, y, z + dz, d.pick(x + dx, y, z + dz, [("packed_ice", 4), ("blue_ice", 1), ("ice", 1), ("snow", 2)], 14))
     # rocks frozen into the ice near the shore
     for k in range(10):
-        a = d.r(k, 7, 3) * math.tau; rr = 22 + 25 * d.r(k, 8, 3)
+        a = d.r(k, 7, 3) * math.tau; rr = WOLF1 + 5 + 22 * d.r(k, 8, 3)
         cx, cz = round(math.sin(a) * rr), round(math.cos(a) * rr)
         if not lake(cx, cz): continue
         blob(d, cx, 0, cz, 1.5 + 1.5 * d.r(k, 9, 3), [("stone", 3), ("andesite", 2), ("cobblestone", 1), ("mossy_cobblestone", 1)], 15, squash=0.7)
@@ -706,6 +707,14 @@ def seneschal():
     # the gate, the figure and the processional way (Mateo liked these: kept from the first landmark)
     gate = BL.seneschal()
     for c, v in gate.cells.items(): d.cells[c] = v
+    # the scarab court in front of the stair (bosses thread, plans.js ASH_SAND: centre (0, 11), r 9, scarabs on r 6 at
+    # dy 1): its two nearest pairs of statues have fallen, and lie along the precinct sides instead
+    for c in [c for c in d.cells if c[2] in (6, 12) and 4 <= abs(c[0]) <= 6 and c[1] >= 1]: del d.cells[c]
+    for s_ in (-1, 1):
+        for k, z0 in enumerate((6, 12)):
+            x = s_ * (14 + k)
+            for z in range(z0 - 2, z0 + 3): d.put(x, 1, z, "cut_sandstone" if z < z0 + 2 else "smooth_quartz")
+            d.put(x, 1, z0 - 3, "smooth_sandstone_slab", half="bottom"); d.put(x, 2, z0, "sand")
     # obelisks out beyond the south gate
     for s_ in (-1, 1):
         ox, oz = s_ * 8, PZ1 + 6

@@ -45,6 +45,11 @@ These rules hold in every region unless the region's page says otherwise. They a
   region's flavour (woods, rugs, lights: `build-instructions/08-interiors` step 5).
 - **Overhangs and shutters:** every overhang carried; shutters on at most 3 in 10 windows.
 - **Tone:** uneasy at night, never horror and never vanilla.
+- **Ground is a mix, never one block** (Mateo, 2026-11-12, of the Cradle Tree's ground: "that needs to be
+  everywhere"): any ground you lay round a build or an area speckles the region's grounds block by block (Blackfen:
+  grass 7, moss 3, podzol 2, mud 1, muddy roots 1; Vale: grass with coarse dirt, podzol, moss; Saltreach: grass 3,
+  gravel 2, coarse dirt 1, stone 1; snow: snow 12, stone 1, gravel 1, never packed ice). The map generator does the
+  same (`map/genworld.py`, `sprinkle`).
 - **Bushes round the foundation** (Mateo, 2026-11-12): clumps of the region's leaves under the ground-floor
   windows and at some corners, never a strip; on by default in the skill (`bushes`), none in the Emberwaste
   and the Hollow.
