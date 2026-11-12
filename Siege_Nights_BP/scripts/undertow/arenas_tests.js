@@ -1,9 +1,9 @@
 // What the boss fights need from the Drowned Court and the Seat (map/structures/hollow_arenas.py).
 import { addTests, assert } from "../core/tests.js";
 import { COURT_DESIGN, SEAT_DESIGN, APPROACH_DESIGN } from "./arenas_data.js";
-import { heightAt, heartEdge, HEART_EDGE_Z } from "./terrain.js";
+import { heightAt, heartEdge, roofAt, ROOF, HEART_EDGE_Z } from "./terrain.js";
 import { edgeCarveOps } from "./builder.js";
-import { CHASM, inChasm, rimDepth, floorAt, spireOf, chasmColumn, chasmOps, fallAt } from "./chasm.js";
+import { CHASM, VAULT_REACH, inChasm, inWall, vaultFrom, vaultFall, rimDepth, floorAt, spireOf, chasmColumn, chasmOps, fallAt } from "./chasm.js";
 import { stampCells } from "./stamp.js";
 import { COURT, HEART, UNDERTOW_LAYOUT as L } from "./layout.js";
 import { singerSpot, CHOIR } from "./choir.js";
@@ -92,7 +92,7 @@ addTests("hollow arenas", {
       const f = floorAt(x, z), col = chasmColumn(x, z);
       assert(f >= CHASM.floorMin && f < CHASM.killY - 4, `floor ${f} at ${x},${z}`);
       assert(col[0][0] === L.floorY && col[0][1] === f - 1, "solid from the world's floor up");
-      for (const [y0, y1] of col) assert(y0 <= y1 && y1 <= Math.max(CHASM.spireTop, 124), `column piece ${y0}..${y1} at ${x},${z}`);
+      for (const [y0, y1] of col) assert(y0 <= y1 && y1 < ROOF.shell, `column piece ${y0}..${y1} at ${x},${z}`);
       if (f < CHASM.water) wet++; else dry++;
       // water never stands at the outer edge, where it would pour out into the void
       if (f < CHASM.water) for (const [a, b] of [[1, 0], [-1, 0], [0, 1]]) assert(rimDepth(x + a, z + b) > 0, `the pool reaches the edge at ${x},${z}`);
@@ -123,5 +123,25 @@ addTests("hollow arenas", {
     assert(ops.length > 256 && ops.every((o) => o.a[0] >= 0 && o.b[0] <= 15 && o.a[2] >= 2400 && o.b[2] <= 2415 && o.a[1] <= o.b[1]), "chunk 0,150");
     assert(chasmOps(0, 100).length === 0, "nothing far from the Seat");
     assert(ops.every((o) => o.a[1] >= L.floorY), "the chasm never reaches down into the Deep, under the world's floor");
+  },
+  "the cavern: the pit is walled in up to the roof all round, and the wall keeps clear of the Seat": () => {
+    const cz = HEART.center.z;
+    // walk out from the Seat east, west and south: pool, then the leaning wall, then solid rock up to the roof
+    for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [1, 1], [-1, 1]]) {
+      let x = 0, z = cz, met = false;
+      for (let n = 0; n < 220 && !met; n++, x += dx, z += dz) {
+        if (!inWall(x, z)) { assert(inChasm(x, z), `open void at ${x},${z} before any wall`); continue; }
+        const col = chasmColumn(x, z);
+        assert(col.length === 1 && col[0][0] === L.floorY && col[0][1] === roofAt(x, z).bottom - 1, `the wall at ${x},${z} stops short of the roof`);
+        for (let k = 1; k <= 2; k++) assert(inWall(x + dx * k, z + dz * k) || x + dx * k > CHASM.x1 || x + dx * k < CHASM.x0 || z + dz * k > CHASM.z1, `the wall at ${x},${z} is under three thick`);
+        met = true;
+      }
+      assert(met, `no wall ${dx},${dz} of the Seat`);
+    }
+    assert(vaultFrom(0, 0, 1) < vaultFrom(0, 0, VAULT_REACH) - 80, "the wall leans in as it climbs");
+    for (const d of [SEAT_DESIGN, APPROACH_DESIGN]) for (const [x, , z] of stampCells(d)) assert(rimDepth(x, z + cz) > VAULT_REACH + 3, `the Seat's rock at ${x},${z + cz} is under the leaning wall`);
+    let falls = 0;
+    for (let x = -46; x <= 46; x++) for (let z = cz + 38; z <= CHASM.z1; z++) if (vaultFall(x, z)) falls++;
+    assert(falls >= 3 && falls <= 12, `${falls} falls behind the throne`);
   },
 });

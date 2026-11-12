@@ -106,6 +106,9 @@ cracked veinstone and moss.
   falls of light springing from the cliffs, crooked crystal spires (rock below, amethyst above, one clean
   one-block step off true). Nothing in it rises above y 84. Its rim over the void is ragged too. It is not land:
   `heightAt` stays null there and a fall into it kills.
+- **The Seat's cavern is closed.** Outside the pool's rim the pit is walled in: rock from the floor to the cave
+  roof, at least three thick, leaning inward as it climbs until it is the roof (`chasm.js` `inWall`,
+  `vaultFrom`). No void is visible from the Seat. The wall stays more than 15 blocks clear of the Seat's rock.
 
 ## Roofs
 

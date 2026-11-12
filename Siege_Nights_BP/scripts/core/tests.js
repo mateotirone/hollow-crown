@@ -25,6 +25,7 @@ export const OFFLINE_ONLY = new Set([
   "hollow arenas: the Court never writes the gate's cells (the seal and openCourtGate own them)",
   "hollow arenas: the Seat: disc and ring floors, Morvane's spot clear, everything that falls inside the dropped band",
   "hollow arenas: the cliff before the Seat is ragged, and the story path still reaches its edge",
+  "hollow arenas: the cavern: the pit is walled in up to the roof all round, and the wall keeps clear of the Seat",
   "hollow arenas: the chasm under the Seat: a floor everywhere, the pool held in, spires clear of everything above",
   "hollow arenas: the chasm's falls spring from the cliff and its chunk plans stay inside their chunk",
   "hollow arenas: the way to the Seat can be walked from the cliff to the ring without a jump, and none of it falls or sits in the land",

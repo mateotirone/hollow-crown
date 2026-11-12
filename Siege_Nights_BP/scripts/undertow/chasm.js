@@ -8,7 +8,7 @@
 // not land, nothing grows on it, no road or river plans against it, and a fall into it still kills (index.js).
 
 import { UNDERTOW_LAYOUT as L, HEART } from "./layout.js";
-import { heightAt, heartEdge, HEART_EDGE_Z, B } from "./terrain.js";
+import { heightAt, heartEdge, roofAt, HEART_EDGE_Z, B } from "./terrain.js";
 import { hash, fbm, smooth } from "./noise.js";
 
 export const CHASM = {
@@ -23,14 +23,32 @@ const AMETHYST = "minecraft:amethyst_block";
 
 // The pit's own outer edge, where its floor ends over the void to the south and at the Spine's two sides: ragged
 // like every edge here, never a straight line. How far each side is bitten in from the box above.
-const biteS = (x) => Math.floor(fbm(x / 33, 2.2, 851) * 24 + fbm(x / 7, 5.1, 852) * 7 + hash(Math.floor(x / 2), 0, 853) * 3);
-const biteX = (z, side) => Math.floor(fbm(z / 29, side * 3.7, 854) * 22 + fbm(z / 6, side * 1.3, 855) * 6 + hash(Math.floor(z / 2), side, 856) * 3);
+// (Behind the throne the south side keeps close to the box's edge: the Seat's shards reach to within 22 blocks of it.)
+const biteS = (x) => 3 + Math.floor((fbm(x / 33, 2.2, 851) * 24 + fbm(x / 7, 5.1, 852) * 7) * smooth(Math.min(1, Math.abs(x) / 70)) + hash(Math.floor(x / 2), 0, 853) * 3);
+const biteX = (z, side) => 3 + Math.floor(fbm(z / 29, side * 3.7, 854) * 22 + fbm(z / 6, side * 1.3, 855) * 6 + hash(Math.floor(z / 2), side, 856) * 3);
 // How many blocks inside that edge a column is (0 or less: outside).
 export function rimDepth(x, z) {
   if (z < CHASM.z0) return 0;
   return Math.min(x - (CHASM.x0 + biteX(z, -1)), CHASM.x1 - biteX(z, 1) - x, CHASM.z1 - biteS(x) - z) + 1;
 }
 export const inChasm = (x, z) => rimDepth(x, z) > 0 && heightAt(x, z) === null;
+
+// The cavern (Mateo, 2026-11-12: the wall round the water "goes up and connects to the ceiling"). Outside the rim
+// the pit is walled in: solid rock from the world's floor to the cave roof, never less than three blocks thick. For
+// VAULT_REACH blocks inside the rim that wall leans in as it climbs and becomes the roof, so from the Seat there
+// is no void to be seen, only a great closed cavern. The cliff the Long Climb ends in is its open side.
+export const VAULT_REACH = 12;
+const inBox = (x, z) => x >= CHASM.x0 && x <= CHASM.x1 && z >= CHASM.z0 && z <= CHASM.z1;
+export const inWall = (x, z) => inBox(x, z) && rimDepth(x, z) <= 0 && heightAt(x, z) === null;
+// The height at which the leaning wall begins over a column this deep inside the rim.
+export const vaultFrom = (x, z, depth) => Math.round(CHASM.water + 10 + depth * 9.5 + fbm(x / 8, z / 8, 861) * 9 + hash(x, z, 862) * 2);
+const wallRock = (x, z) => { const t = fbm(x / 6, z / 6, 863) + hash(x, z, 864) * 0.16; return t < 0.42 ? B.floor : t < 0.62 ? B.rock : t < 0.74 ? B.basalt : "minecraft:deepslate"; };
+// A fall of light out of the vault behind the throne: true for the few columns one pours down.
+export function vaultFall(x, z) {
+  if (Math.abs(x) > 46 || rimDepth(x, z) !== 6 || rimDepth(x, z + 1) !== 5) return false;
+  const k = Math.floor((x + 200) / 9);
+  return hash(k, 0, 865) < 0.7 && x === k * 9 - 200 + 1 + Math.floor(hash(k, 0, 866) * 7);
+}
 
 // The pit's floor: rolling just above and below the pool's surface, deepest in the well under the Seat, heaped up
 // as scree at the cliff's foot, and raised into a lip along the outer edges so the pool never pours into the void.
@@ -93,6 +111,7 @@ export function fallAt(x) {
 
 // Everything the chasm puts in one column, bottom up: [[y0, y1, block], ...]. Empty outside the chasm.
 export function chasmColumn(x, z) {
+  if (inWall(x, z)) return [[L.floorY, roofAt(x, z).bottom - 1, wallRock(x, z)]];
   if (!inChasm(x, z)) return [];
   const f = floorAt(x, z), out = [[L.floorY, f - 1, f - L.floorY > 6 && hash(x, z, 841) < 0.5 ? B.rock : B.floor]];
   const wet = f < CHASM.water;
@@ -109,6 +128,17 @@ export function chasmColumn(x, z) {
   }
   const fall = fallAt(x);
   if (fall && fall.z === z) out.push([Math.max(f, CHASM.water) + 1, fall.mouth, B.water]);
+  const depth = rimDepth(x, z);
+  if (depth <= VAULT_REACH) {
+    const from = vaultFrom(x, z, depth), roof = roofAt(x, z).bottom;
+    if (from < roof) {
+      out.push([from, roof - 1, wallRock(x, z)]);
+      const t = hash(x, z, 867);
+      if (vaultFall(x, z)) out.push([Math.max(f, CHASM.water) + 1, from - 1, B.water], [from, from, B.flow]);
+      else if (t < 0.16) out.push([from - 1 - Math.floor(hash(x, z, 868) * 6), from - 1, B.strands]);
+      else if (t < 0.2) out.push([from - 1, from - 1, B.glimbulb]);
+    }
+  }
   return out;
 }
 
