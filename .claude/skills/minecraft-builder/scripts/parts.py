@@ -916,7 +916,87 @@ def hanging_lantern(ctx, s):
     ctx.set(x, y - n, z, "details", raw="lantern", hanging=True)
 
 
-PARTS = {"house": house, "arch": arch, "string_course": string_course, "buttress": buttress, "hanging_lantern": hanging_lantern}
+def lean_to(ctx, s):
+    """A lean-to (06-roof skillion): one slope against a wall, on log posts. rect = the covered ground
+    [x0, z0, x1, z1]; against = the side the wall is on (n/s/e/w); top = y of the roof's high edge, just
+    under the wall's eave; pitch 1 (stairs) or "half" (slabs stepping half a block, for shallow sheds).
+    Posts on the open corners and every 4 along the open edge, a tie beam under the low edge, an eave of
+    upside-down trim stairs, barge boards on both ends. Keys: roof, post, trim, floor (optional), y (ground)."""
+    x0, z0, x1, z1 = s["rect"]; side = s.get("against", "n"); top = s["top"]; y0 = s.get("y", 0)
+    pitch = s.get("pitch", 1)
+    st = {"_name": s.get("name", f"lean_to{ctx.n}"), "roof": s.get("roof", {"ladder": "VAL-06"}),
+          "post": s.get("post", "stripped_spruce_log"), "trim": s.get("trim", "spruce_planks")}
+    ctx.n += 1
+    rm, pm, tm = ctx.mat(st, "roof"), ctx.mat(st, "post"), ctx.mat(st, "trim")
+    ox, oz = DIRS[side]                       # towards the wall
+    away = OPP[side]
+    depth = (z1 - z0 + 1) if side in "ns" else (x1 - x0 + 1)
+    span = [(x, z) for x in range(x0, x1 + 1) for z in range(z0, z1 + 1)]
+    def j_of(x, z):                           # 0 next to the wall .. depth-1 at the open edge, +1 = overhang
+        return (z - z0 if side == "n" else z1 - z if side == "s" else x - x0 if side == "w" else x1 - x)
+    lo = top - (depth if pitch == 1 else (depth + 1) // 2)
+    ctx.spec["materials"][rm] = _with_range(ctx.spec["materials"][rm], lo, top)
+    cells = list(span)
+    ex, ez = DIRS[away]
+    edge = [c for c in span if j_of(*c) == depth - 1]
+    cells += [(x + ex, z + ez) for (x, z) in edge]                         # overhang 1 at the low edge
+    ends = (("w", "e") if side in "ns" else ("n", "s"))
+    for e_ in ends:                                                          # verge 1 at both ends
+        dx, dz = DIRS[e_]
+        cells += [(x + dx, z + dz) for (x, z) in list(cells) if (x + dx, z + dz) not in cells and
+                  ((e_ == "w" and x == x0) or (e_ == "e" and x == x1) or (e_ == "n" and z == z0) or (e_ == "s" and z == z1))]
+    roof_y = {}
+    for (x, z) in cells:
+        j = max(0, min(depth, j_of(x, z)))
+        if pitch == 1:
+            roof_y[(x, z)] = top - j
+            ctx.set(x, top - j, z, "roof", "stairs", rm, facing=side, half="bottom")
+        else:
+            hh = 2 * top + 1 - j; roof_y[(x, z)] = hh // 2
+            ctx.set(x, hh // 2, z, "roof", "slab", rm, half="top" if hh % 2 else "bottom")
+    # the low edge: tie beam, posts, eave of upside-down trim stairs; ends: barge boards
+    ax = ALONG_AXIS[side]
+    edge.sort(); n_ = len(edge)
+    for k, (x, z) in enumerate(edge):
+        ry = roof_y[(x, z)]
+        ctx.set(x, ry - 1, z, "frame", "full", pm, axis=ax)
+        if k in (0, n_ - 1) or (k % 4 == 0 and n_ - 1 - k >= 2):
+            for yy in range(y0 + 1, ry - 1): ctx.set(x, yy, z, "frame", "full", pm, axis="y")
+        oy = roof_y.get((x + ex, z + ez))
+        if oy is not None: ctx.setif(x + ex, oy - 1, z + ez, "roof", "stairs", tm, facing=side, half="top")
+    for (x, z), ry in roof_y.items():
+        if side in "ns" and x in (x0 - 1, x1 + 1): inward = "e" if x == x0 - 1 else "w"
+        elif side in "ew" and z in (z0 - 1, z1 + 1): inward = "s" if z == z0 - 1 else "n"
+        else: continue
+        ctx.setif(x, ry - 1, z, "roof", "stairs", tm, facing=inward, half="top")
+    if s.get("floor"):
+        for (x, z) in span: ctx.set(x, y0, z, "foundation", "full", s["floor"])
+
+
+def woodpile(ctx, s):
+    """A log stack (07-detailing dressing): logs lying with their end grain to the front, stepped in at
+    the top, a few stripped logs mixed in by hash, a slab or trapdoor cover. at = [x, y, z] front-left
+    bottom; len along the wall, h high (2-3), facing = the side the end grain shows (n/s/e/w), wood."""
+    x, y, z = s["at"]; L = s.get("len", 3); h = s.get("h", 2); f = s.get("facing", "s"); w = s.get("wood", "spruce")
+    rx, rz = RIGHT_OF[f]
+    ax = "z" if f in "ns" else "x"
+    top = None
+    for j in range(h):
+        inset = 1 if (j == h - 1 and h > 1 and L >= 3) else 0
+        for k in range(inset, L - inset):
+            cx, cz = x + rx * k, z + rz * k
+            stripped = h3(cx, y + j, cz, 61) < 0.2
+            ctx.set(cx, y + j, cz, "details", raw=("stripped_" if stripped else "") + f"{w}_log", axis=ax)
+    for k in range(L):
+        cx, cz = x + rx * k, z + rz * k
+        yy = y + h - (0 if 0 < k < L - 1 or L < 3 or h == 1 else 1)
+        if ctx.free(cx, yy, cz): ctx.set(cx, yy, cz, "details", raw=f"{w}_slab" if s.get("cover", "slab") == "slab" else f"{w}_trapdoor", half="bottom")
+    if s.get("block", True):                 # a chopping block beside it
+        cx, cz = x - rx, z - rz
+        ctx.setif(cx, y, cz, "details", raw=f"stripped_{w}_log", axis="y")
+
+
+PARTS = {"house": house, "lean_to": lean_to, "woodpile": woodpile, "arch": arch, "string_course": string_course, "buttress": buttress, "hanging_lantern": hanging_lantern}
 
 
 def run(ctx, pt):
