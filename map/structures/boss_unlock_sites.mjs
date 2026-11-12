@@ -21,7 +21,7 @@ const sites = {
     ...run(huntPlan(flat, here, makeHunt(7))), spots: { arenaR: HUNT.arena, crackR: HUNT.crack, iceDiscR: HUNT.disc, spawn: [0.5, 1, 9.5] } },
   bride: { title: "Drowned Bride: the Chapel of Saint Brannoc, Gull Bay", map: { x: -690, z: 130 },
     ...run(chapelPlan(flat, here, makePews(7))), spots: { nave: CHAPEL.nave, tower: CHAPEL.tower, altar: CHAPEL.altar, spawn: [CHAPEL.altar.dx - 1.5, 1, 0.5] } },
-  seneschal: { title: "Ash Seneschal: the Faceless Vault under Sunscar", map: { x: 850, z: 516 },
+  seneschal: { title: "Ash Seneschal: the Faceless Vault under Sunscar", map: { x: 850, z: 590 },
     ...run(vaultPlan(flat, here)), spots: { ...VAULT, spawn: [0.5, VAULT.floor + 1, -41.5] } },
   mother: { title: "Mother of Changelings: the cave under the Cradle Tree", map: { x: -120, z: 1060 },
     ...run(cradlePlan(flat, here)), spots: { ...CRADLE, spawn: [0.5, CRADLE.floor + CRADLE.h - 2, 4.5] } },
