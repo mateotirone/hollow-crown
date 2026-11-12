@@ -49,7 +49,7 @@ import { HOLLOW_TREES } from "./trees_data.js";
 import { clearOps } from "./builder.js";
 import { shouldRise, regentOutcome, REGENT, TEMPERS, JOBS } from "./regent.js";
 import { sfx } from "../core/sfx.js";
-import { thinTick, thinCommand, planThinPlace, hillHeight, caveGeometry, setHills, toWorld, THIN_PLACES, CAMP_TOME, CAVES } from "./thinplaces.js";
+import { thinTick, thinCommand, planThinPlace, hillHeight, caveGeometry, setHills, toWorld, THIN_PLACES, CAMP_TOME, CAVES, MOUTH_V } from "./thinplaces.js";
 import { SITE_FEATURES } from "../lore/data/world.js";
 import { canOpen, getRift, dullLeft, BOSSES_TO_OPEN, FORK_DULL_DAYS } from "./source.js";
 import { fallenCount, REGIONAL_BOSSES } from "../lore/data/spine.js";
@@ -506,6 +506,21 @@ addTests("undertow", {
         prev = fy;
       }
       assert(Math.abs(prev - plan.chamber.F) <= 1, `${t.id}: the way in does not meet the chamber floor`);
+    }
+  },
+  "thin places: nothing the planner builds stands in front of a cave mouth": () => {
+    // on flat ground and in a gorge (high ground on both sides of a lane across the mouth): the twelve blocks
+    // straight out of every mouth stay clear, two blocks high (the cave's cover once walled Frostvein Gap and the quarry)
+    const SOFT = /air$|snow_layer|short_grass|fern|flower|carpet|dead_bush|rail$/;
+    for (const t of THIN_PLACES) for (const gorge of [false, true]) {
+      const plan = planThinPlace(t.id, 0, 0, 64, gorge ? { ground: (dx, dz) => (dz < 2 || dz > 16 ? 30 : 0) } : {});
+      const last = new Map();
+      for (const o of plan.ops) last.set(`${o.x},${o.y},${o.z}`, o.block);
+      for (let v = MOUTH_V + 1; v <= MOUTH_V + 12; v++) for (const y of [65, 66]) {
+        const b = last.get(`0,${y},${v}`);
+        if (gorge && v > 16) continue; // the far wall of the gorge is the land's, not ours
+        assert(b === undefined || SOFT.test(b), `${t.id}${gorge ? " (gorge)" : ""}: ${b} in front of the mouth at v ${v}, y ${y - 64}`);
+      }
     }
   },
   "thin places: no two caves are the same, and the land covers every one": () => {

@@ -84,6 +84,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 
 ### Fixed
 - The Rift no longer breaks the first time its veil turns a player back (a missing import in the veil code).
+- The way into the caves at Frostvein Gap and the Sunken Quarry is no longer walled up by the cave's own rock.
 - Trains no longer clip bridge-end parapets, abutments or tunnel arch shoulders: every bought stretch keeps a clear opening 3 wide and 4 high along the whole line.
 - Castle Guard armour icons no longer show as an empty slot or a scrap of cloth: every piece shows whole, in your banner colour.
 - 81 blocks that showed a raw code instead of a name (regional Castle Bricks, Tiles, Cobbled, Smooth and Stone, and the old trees) now have proper names.
