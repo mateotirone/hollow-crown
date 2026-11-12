@@ -578,3 +578,63 @@ addTests("settle charters", {
     }
   },
 });
+
+// ---------- the Plan Book (plandata.js) ----------
+import { knownPlans, planChoices, unknownOf, planKey, parsePlan, planCards, whereFrom } from "./plandata.js";
+import { PLANS as PLAN_RULES, HOMES, CHARTERS } from "./config.js";
+const TIER_NAMES_T = ["Hamlet", "Town", "City", "Castle"];
+addTests("settle plans", {
+  "the Hamlet's basics are known, the hall teaches more, Creative knows everything"() {
+    const designs = BUILDINGS.map((b) => b.id);
+    const start = knownPlans({ hallLevel: 1 });
+    for (const id of PLAN_RULES.basics) assert(start.has(id), `${id} is a basic`);
+    assert(!start.has("smithy"), "the smithy has to be learned");
+    assert(knownPlans({ hallLevel: 3 }).has("smithy"), "a level 3 hall teaches the smithy");
+    assert(designs.every((id) => knownPlans({ creative: true, designs }).has(id)), "Creative knows every plan");
+  },
+  "plans in other regions' styles are offered separately, and only once"() {
+    const designs = BUILDINGS.map((b) => b.id);
+    const known = knownPlans({ stored: [planKey("smithy", "frostmarch"), planKey("cottage", "vale")], hallLevel: 1 });
+    const offers = planChoices(known, "vale", designs);
+    assert(offers.some((o) => o.id === "smithy" && o.style === "frostmarch" && o.foreign), "foreign smithy");
+    assertEqual(offers.filter((o) => o.id === "cottage").length, 1);
+    assert(!offers.some((o) => o.id === "smithy" && !o.foreign), "no home-style smithy without its plan");
+    assertEqual(parsePlan("smithy@frostmarch").style, "frostmarch");
+    assertEqual(unknownOf(known, [{ id: "cottage", style: "vale" }, { id: "stable", style: "vale" }], "vale").map((p) => p.id).join(), "stable");
+  },
+  "every home and every building a charter needs is taught by the hall in time, never only by luck"() {
+    const by = (lvl) => knownPlans({ hallLevel: lvl });
+    // each home is taught by the time it opens (hall level = the tier it opens at + 1), and one home is a basic
+    for (const id of HOMES) assert(by(opensAt(id) + 1).has(id), `${id} is a home, so a level ${opensAt(id) + 1} hall must teach it`);
+    assert(HOMES.some((id) => by(0).has(id)), "at least one home is a basic plan");
+    CHARTERS.forEach((lines, tier) => {
+      const known = by(tier + 1); // the hall can reach level tier + 1 at this tier
+      const named = new Set(lines.filter((l) => !l.more).flatMap((l) => l.ids));
+      for (const line of lines) {
+        // "n more of any of these": enough of them, besides the ones the charter names, must be taught
+        if (line.more) {
+          const spare = line.ids.filter((id) => !named.has(id) && (known.has(id) || PLAN_RULES.noPlan.includes(id)));
+          assert(spare.length >= line.more, `the ${TIER_NAMES_T[tier]} charter's "${line.what}" needs ${line.more} more taught by a level ${tier + 1} hall`);
+          continue;
+        }
+        for (const id of line.ids) {
+        if (PLAN_RULES.noPlan.includes(id)) continue;
+        assert(known.has(id), `the ${TIER_NAMES_T[tier]} charter needs ${id}, so a level ${tier + 1} hall (or the basics) must teach it`);
+        }
+      }
+    });
+  },
+  "the Plan Book cards: bright when found, greyed with a hint when not"() {
+    const designs = BUILDINGS.map((b) => b.id);
+    const styles = ["vale", "frostmarch", "saltreach", "emberwaste", "blackfen"];
+    const known = knownPlans({ stored: [planKey("smithy", "frostmarch")], hallLevel: 1 });
+    const cards = planCards(known, "saltreach", designs, styles);
+    assertEqual(cards.length, designs.length);
+    const by = Object.fromEntries(cards.map((c) => [c.id, c]));
+    assert(by.cottage.home && by.cottage.texture.endsWith("cottage_saltreach"), "a basic shows bright in the town's style");
+    assert(!by.smithy.home && by.smithy.known && by.smithy.texture.endsWith("smithy_frostmarch"), "a foreign-only plan shows in its own style");
+    assert(!by.stable.known && by.stable.texture.endsWith("stable_saltreach_dim"), "an unfound plan is greyed");
+    assertEqual(whereFrom("stable").short, "Hall level 3");
+    assert(whereFrom("cottage").short.length <= 14, "card hints are short");
+  },
+});

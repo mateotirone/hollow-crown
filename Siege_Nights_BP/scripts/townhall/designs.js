@@ -22,6 +22,7 @@ export function optionsFor(name, p) {
   if (name.endsWith("_door")) { st.upper_block_bit = !!p.upper; st.door_hinge_bit = !!p.hinge; st.open_bit = !!p.open; }
   if (name.endsWith("trapdoor")) { o.trap = true; st.open_bit = !!p.open; st.upside_down_bit = p.half === "top"; }
   if (name.endsWith("_slab") && p.half) { delete o.dir; }
+  if (p.raw) Object.assign(st, p.raw); // add-on block states, passed through as they are (the vault's Regal Safe part)
   if (Object.keys(st).length) o.st = st;
   return Object.keys(o).length ? o : undefined;
 }

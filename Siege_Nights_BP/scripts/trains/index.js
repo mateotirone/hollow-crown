@@ -12,6 +12,7 @@ import { onTick, isReady, moduleStore, settlementAt, keepOf, on, emit, COLORS } 
 import { styleOf } from "../settle/plans.js";
 import { shapeOf, layTrack, cursorOn, advance, back, pointAt, flip } from "./track.js";
 import { throwFor } from "./switches.js";
+import { openAhead, watchCars } from "./gates.js";
 import { TRACK, TRAIN, CARS, TRAIN_STYLES, NO_COLOR, carPoses, trainLength, stepSpeed, moveTrain, limitAhead, shapesForLoop, showcaseLoop } from "./data.js";
 import { give } from "../horses/menus.js";
 import { sfx } from "../core/sfx.js";
@@ -299,6 +300,14 @@ function runTick() {
     // a switch just ahead of the leading end: set it so the train runs through
     const lead = train.v >= 0 ? train.head : flip(back(train.head, trainLength(train.cars), get).cursor);
     if (throwFor(dim, lead)) get = reader(dim);
+    // a wall or gate across the line ahead opens for the train (and shuts behind it: gates.js)
+    if ((ticks + train.id) % 4 === 0) {
+      try {
+        openAhead(dim, lead, train.v, get);
+      } catch (e) {
+        console.warn(`[Hollow Crown] rail gate: ${e}`);
+      }
+    }
     const r = moveTrain(train.head, train.cars, train.v, get);
     if (r.v === 0 && Math.abs(before) > 0.3 && driver) {
       sfx(driver, "random.anvil_land");
@@ -452,4 +461,15 @@ onTick("trains_carriages", 100, () => {
     if (t.idle >= TRAIN.carriageIdle) { t.gone = true; gone = true; }
   }
   if (gone) removeTrains((t) => t.gone);
+});
+
+watchCars(() => {
+  const out = [];
+  for (const t of trains()) {
+    for (const c of t.cars) {
+      const e = world.getEntity(c.eid);
+      if (e?.isValid) out.push({ dim: t.dim, x: e.location.x, y: e.location.y, z: e.location.z });
+    }
+  }
+  return out;
 });

@@ -6,7 +6,7 @@ import { applyFilter, emit } from "../core/events.js";
 import { BARRACKS, GUARD_GEAR, GUARD_TYPES, WANTED_TAG } from "./constants.js";
 import { saveState, state, tracked } from "./state.js";
 import { isAlly, settlementAt, tierOf } from "./territory.js";
-import { isOnline, overworld, takeItems } from "./util.js";
+import { overworld, takeItems, attackable } from "./util.js";
 import { fundsE, chargeE } from "../economy/coins.js";
 import { worth } from "../economy/rules.js";
 import { sfx } from "../core/sfx.js";
@@ -263,7 +263,7 @@ export function guardTick() {
         const keep = state.keeps[owner];
         if (!owner) continue;
         // Nobody can hurt your guards while you're away, same as your walls
-        if (!isOnline(owner)) guard.addEffect("resistance", 60, { amplifier: 4, showParticles: false });
+        if (!attackable(owner)) guard.addEffect("resistance", 60, { amplifier: 4, showParticles: false });
         if (keep?.sovereign) guard.addEffect("strength", 60, { amplifier: 0, showParticles: false }); // royal guard
         if (keep && guard.getComponent("minecraft:variant")?.value !== keep.color) guard.triggerEvent(`siege:color_${keep.color ?? 14}`);
 
