@@ -105,5 +105,5 @@ given here.
   default) or to Saltreach terraces on a lower wing.
 - **Now in the skill** (2026-11-12): the Hollow's one-block offset (`offset`), Blackfen stilts and piles,
   Frostmarch snow caps (`snow`) and dragon heads (`gable_horns`), domes on drums (`dome`), mossy and thatch
-  roofs (`moss`, `thatch`). Still by hand: Blackfen boardwalks, Hollow leaning towers, curved roofs.
+  roofs (`moss`, `thatch`). Also in the skill now: Blackfen boardwalks (`boardwalk`), Hollow leaning towers (`lean`), curved roofs (`"type": "curved"`), galleries and round towers joined into a house (`keep` with `"cap": "cone"`).
 

@@ -63,6 +63,11 @@ done.
 7. **Joining.** Where a roof meets the tower wall, its top row tucks tight against the wall (flashing: full
    blocks or upside-down stairs) with no sky between them. A wing's roof runs **into** the tower or a drum.
    It never stops short of it in the air (Mateo, 2026-11-12, capital hall).
+   A round tower joined into a house is the skill's `keep` with `"cap": "cone"`, built after the house so
+   it clears its own shaft and the house roof tucks against it.
+8. **Leaning towers** (the Hollow only): the whole shaft leans in two or three clean one-block steps
+   (`"lean": {"dir": "e", "steps": 2}`), each step carried on brackets. Never a staircase of single-block
+   shifts.
 
 ## 4. The clock (Mateo, 2026-11-12: "there are much better ways that clocks are made")
 
