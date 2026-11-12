@@ -4,7 +4,7 @@
 
 Every build in The Hollow Crown, designed or not. Add an entry the moment a build is asked for, even with no design yet, and move its status on as it progresses. Run  node tools/build-catalog.mjs  after editing to rewrite builds/CATALOG.md (check.mjs fails if it is stale).
 
-**96 builds:** 9 not started, 19 designed, 11 in viewer, 57 in game.
+**96 builds:** 8 not started, 19 designed, 12 in viewer, 57 in game.
 
 Statuses:
 
@@ -69,7 +69,7 @@ A ★ marks builds that no earlier list had (added in the 2026-11-12 audit).
 | Railway station: Halt, Station, Junction, Grand Station (20) | One version per overworld region | in game | settle-* | Design the train system | `map/structures/stations.py` | Waiting in PR #168. Detailed backs in PR #168. |
 | Trade House wing (small, two storeys) (10) | One version per overworld region | in game | settle-* | Design the train system | `map/structures/stations.py` | To be replaced by the Trade Outpost if Mateo approves that design. |
 | Engine shed (5) | One version per overworld region | in game | settle-* | Design the train system | `map/structures/stations.py` |  |
-| ★ Trade Outpost (Exports/Imports crates, trade board), 4 stages | One version per overworld region | not started |  | Design train station trade routes |  | Mateo approved 2026-11-12 ("lets do them all"). Trade routes thread drawing the building; design doc https://claude.ai/artifact/UkR4zp2NL5tzfrZKva2gWX |
+| ★ Trade Outpost (halt 7x5, station 9x5, junction 9x7, grand 9x7 two storeys) (20) | One version per overworld region | in viewer | trade_outpost | Design train station trade routes | `map/structures/trade_outpost.py` | Waiting in PR #192. Beside a settlement's station, on its trade_join mark: the Trade Board and the Exports and Imports barrels inside, a striped awning over the loading hatch. Five regions x four station stages, on the building skill. |
 | Vault strongrooms, 5 tiers x 3 layouts (15) | Anywhere / region-neutral | in viewer | vault | Design sieges on other settlements | `map/structures/vault_rooms.py` | Waiting in PR #180. In game via PR #180 (all treasury layout until Mateo picks). |
 | ★ Regal Safe (2x2 strongbox) | Anywhere / region-neutral | designed |  | Design sieges on other settlements |  | Waiting in PR #180. Block in PR #180, texture awaiting Mateo's review. |
 | ★ Siege Workshop | Anywhere / region-neutral | in game |  | Design sieges on other settlements | `Siege_Nights_BP/blocks/workshop.json` | A single block today, no building around it. |
