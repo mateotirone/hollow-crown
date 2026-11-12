@@ -39,6 +39,10 @@
     "pitch": 1,
     "moss": true
    },
+   "interior": {
+    "use": "farmhouse",
+    "attic": true
+   },
    "dormers": [
     {
      "side": "w",

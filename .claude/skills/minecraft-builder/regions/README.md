@@ -41,7 +41,8 @@ These rules hold in every region unless the region's page says otherwise. They a
 - **Roof surface:** every roof textured with two blocks of the same colour (copper keeps its gradient),
   back-to-back stairs along the ridge, and spikes along the ridge.
 - **Spires:** the add-on's spire top block, never on a slab.
-- **Chimney and interiors:** Mateo's chimney; interiors empty except the inn.
+- **Chimney and interiors:** Mateo's chimney; every building furnished by the skill's interior stage, in the
+  region's flavour (woods, rugs, lights: `build-instructions/08-interiors` step 5).
 - **Overhangs and shutters:** every overhang carried; shutters on at most 3 in 10 windows.
 - **Tone:** uneasy at night, never horror and never vanilla.
 - **Bushes round the foundation** (Mateo, 2026-11-12): clumps of the region's leaves under the ground-floor

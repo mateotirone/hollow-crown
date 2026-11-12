@@ -985,6 +985,10 @@ def house(ctx, s):
     if s.get("piles"): _piles(ctx, s, B, s["piles"])
     if s.get("offset"): _offset(ctx, s, st, B, s["offset"], {c for c, _, _ in chs})
     if s.get("snow") or s.get("roof", {}).get("snow"): _snow(ctx, blocks, s.get("snow") or s["roof"]["snow"])
+    # ---- 8 interiors (08-interiors): stairs, rooms by use, a one-block walkway, light (interiors.py)
+    import interiors
+    ctx.chimneys = {c for c, _, _ in chs}
+    interiors.furnish(ctx, s, st, blocks)
     for bs, bst, bB in blocks:
         ctx.info["houses"].append({"name": bst["_name"], "rect": list(bs["rect"]), "plate": bB["plate"],
                                    "storeys": [{"floor_y": fl, "stand_y": fl + 1, "height": h, "rect": list(rr)}
@@ -1893,6 +1897,14 @@ def curtain(ctx, s):
 
 
 PARTS = {"keep": keep, "curtain": curtain, "house": house, "dome": dome, "lean_to": lean_to, "woodpile": woodpile, "spire": spire, "belfry": belfry, "clock_face": clock_face, "wheel": wheel, "arch": arch, "string_course": string_course, "buttress": buttress, "hanging_lantern": hanging_lantern}
+
+
+def interior(ctx, pt):
+    import interiors
+    interiors.interior_part(ctx, pt)
+
+
+PARTS["interior"] = interior
 
 
 def bridge(ctx, s):
