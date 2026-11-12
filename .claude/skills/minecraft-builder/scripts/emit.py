@@ -111,6 +111,8 @@ def bedrock_state(n, p):
         st["vine_direction_bits"] = {"s": 1, "w": 2, "n": 4, "e": 8}[p.get("attach", "n")]
     elif n in ("end_rod", "lightning_rod"):
         st["facing_direction"] = 1
+    elif n == "snow_layer":
+        st["height"] = int(p.get("height", 0))
     elif n == "bell":          # hanging from the beam above
         st["attachment"] = "hanging"; st["direction"] = {"s": 0, "w": 1, "n": 2, "e": 3}[f or "s"]
     elif n.endswith("_button"):  # stuck to the wall behind it, pointing out of face f
@@ -148,6 +150,7 @@ def java_state(n, p, java_id):
     elif n == "vine": st = {CARD[p.get("attach", "n")]: "true"}
     elif n in ("end_rod", "lightning_rod"): st = {"facing": "up"}
     elif n == "bell": st = {"attachment": "ceiling", "facing": CARD[f or "s"]}
+    elif n == "snow_layer": n = "snow"; st = {"layers": str(int(p.get("height", 0)) + 1)}
     elif n.endswith("_button"): st = {"face": "wall", "facing": CARD[f or "s"]}
     if p.get("axis"): st["axis"] = p["axis"]
     if n == "iron_chain": n = "chain"

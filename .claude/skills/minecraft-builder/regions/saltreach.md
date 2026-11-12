@@ -33,11 +33,12 @@ a dark coast with one lighthouse, where sails come in without wind.
 |---|---|
 | Ground | stony shore, gravel and coarse ground (biome `stone_beach`); in the north white chalk cliffs with grass to the edge, buttresses, flutes and ledges, fallen chalk and flint shingle at the foot; in the south dunes above the shore |
 | Weather | the world's normal weather, with rain and storms off the sea; sieges bring the Long Night's thunderstorm |
+| Region weather | **sea wind**: a light blue-grey haze with spray blowing inland from the west. **Sea fret**: a thick white fog (#c3cbcd) with a buoy bell, mostly at first light (region weather, PR #193: spells of 3 to 16 minutes with 6 to 22 minutes of plain sky between; under a roof it thins to a grey light; never in caves) |
 | Light | bright, bleached, salt-white; the lighthouse's sea lanterns at night |
 | Feel | wind, salt, white walls, blue-green roofs and shutters, gulls, nets drying |
 
 Build for wind and salt. The ground storeys are stone and the roofs low (pitch 1, hipped) so the wind
-slides over. Colours are bleached and pale. Kelp dries on walls.
+slides over. Colours are bleached and pale. Kelp dries on walls. Lanterns that show through fog matter here: light the quay, the harbour steps and doors so they read in a sea fret.
 
 ## Towns and paths
 
@@ -165,7 +166,6 @@ Full table: `build-instructions/palettes/saltreach.md`; ladders SAL-01 to SAL-06
 ```
 
 **Not in the skill yet:**
-- domes;
 - the octagonal lighthouse (build it with shapes: a cylinder at 8 sides);
 - piles and jetties (use `place`).
 

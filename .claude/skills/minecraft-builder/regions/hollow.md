@@ -162,18 +162,18 @@ strands over cliffs.
 
 - **Preset:** `hollow_timber`: dark oak frame, pale ash infill, a deepslate roof, iron-bar windows.
 - **Roof:** `"roof": {"type": "gable", "pitch": 2}`.
+- **The one-block offset:** `"offset": {"storey": 1, "dir": "e"}` moves the upper storey and roof one block
+  as one piece; `{"roof": true, "dir": "e"}` moves only the roof.
 - **Miners' homes:** swap the glass for light in the spec (`"glass": "ochre_froglight"` in the style), or
   use `place`.
 
 ```json
 {"part": "house", "style": {"base": "hollow_timber", "glass": "ochre_froglight"}, "rect": [0, 0, 6, 8],
- "storeys": [5, 4], "door": {"side": "s"}, "roof": {"type": "gable", "pitch": 2, "ridge": "z"}}
+ "storeys": [5, 4], "door": {"side": "s"}, "roof": {"type": "gable", "pitch": 2, "ridge": "z"},
+ "offset": {"storey": 1, "dir": "e"}}
 ```
 
 **Not in the skill yet:**
-- **The one-block offset of a whole storey or roof**, the Hollow's signature. For now build the upper
-  storey as a second house part on top (`y` at the floor, `rect` shifted one block) with its own roof, or
-  ask for an `offset` option.
 - **Leaning towers:** whole towers in a few clean steps.
 - **Curved roofs.**
 

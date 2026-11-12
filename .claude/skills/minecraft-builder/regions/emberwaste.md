@@ -32,12 +32,13 @@ dragon cries at night. It is grand and dangerous rather than gloomy.
 |---|---|
 | Ground | sand over sandstone, red sand drifts, dunes; steep ground shows banded terracotta (mesas); oases with palms; no grass |
 | Biome | `desert`: **it never rains**. Clear skies, heat |
+| Region weather | **dust wind**: an ochre haze with blowing dust. **Sandstorms**: an orange fog (#a8693a) down to 18 blocks with heavy sand (region weather, PR #193: spells of 3 to 16 minutes with 6 to 22 minutes of plain sky between; under a roof it thins to a grey light; never in caves) |
 | Light | harsh white-gold sun, deep shadows under awnings and arcades; warm lanterns and campfires in courtyards at night |
 | Feel | dust, heat, red rock, shade as a luxury |
 
 Build for sun, not rain. Roofs are flat for terraces and sleeping, with parapets. Walls are thick with
 small deep windows. Shade comes from awnings, arcades and courtyards. There are no gutters, no moss and no
-drip lines. Wear shows as dusty edges and a slightly darker band at the base of walls.
+drip lines. Wear shows as dusty edges and a slightly darker band at the base of walls. Shelter matters here: deep shade, arcades, covered walkways and walled yards are wind-breaks against dust and sandstorms.
 
 ## Towns and paths
 
@@ -59,7 +60,7 @@ drip lines. Wear shows as dusty edges and a slightly darker band at the base of 
 |---|---|
 | House | thick painted sandstone walls, a parapet round a flat roof terrace, deep windows behind acacia lattice, projecting roof beams (vigas), a striped awning; 3 in 10 carry a low red roof or a dome instead |
 | Granary | a squat flat-roofed mud-and-sandstone store, a walled yard, hay under an awning |
-| Market hall | a square hall behind an arcade of pointed arches, a drum with windows carrying a blue-green dome (cyan terracotta, oxidized copper near the top, a gold finial), flat parapet roofs round it with corner kiosks, stalls under the arcade |
+| Market hall | a square hall behind an arcade of pointed arches, a drum with windows carrying a blue-green dome (waxed copper, greenest at the top, a gold finial), flat parapet roofs round it with corner kiosks, stalls under the arcade |
 | Caravanserai inn | a two-storey block round an open courtyard with a palm and a well, a tapering corner tower, a striped awning over the gate, rooms off an upstairs gallery |
 | Smithy | a walled forge yard behind a flat-roofed workshop, an open forge under a beam-and-awning shade, a squat chimney |
 | Spice and cloth store | two storeys, flat roof, a deep arched shopfront under a long striped awning, pots and barrels out front, a roof terrace with a cloth shade |
@@ -85,8 +86,8 @@ drip lines. Wear shows as dusty edges and a slightly darker band at the base of 
 
 This is the one region where flat roofs on houses are the rule, not the exception. The refinement thread's
 plot designs (2026-11-12) put a flat roof on **every** building, the stone Mint included. A house with no
-attic gets a low extra storey instead of a pitched roof. The towns mix below still gives Sunscar 3 in 10
-red pitched or domed roofs: see the open questions in the README.
+attic gets a low extra storey instead of a pitched roof. Mateo decided (2026-11-12): **plot buildings are all
+flat; Sunscar and other towns keep the mix** below (3 in 10 red pitched or domed).
 
 **What they carry:**
 - roof terraces;
@@ -102,7 +103,8 @@ red pitched or domed roofs: see the open questions in the README.
 - **Colours:**
   - flat sand roof (`smooth_sandstone` with a slab parapet and `sandstone_wall` corners);
   - red (`red_sandstone`, `smooth_red_sandstone`, `cut_red_sandstone`);
-  - the blue-green dome accent (`cyan_terracotta` body, `waxed_oxidized_cut_copper` near the top).
+  - the blue-green dome accent (waxed weathered cut copper, `waxed_oxidized_cut_copper` near the top;
+    cyan terracotta reads dark grey in game, so keep it to a band at the foot if at all).
 - **Mix (Sunscar, out of 10):** flat sand roof 7, red dome or pitched 3, plus blue-green domes with a gold
   finial on civic buildings.
 - **Texture:** pitched red roofs are textured like everywhere else. Flat roofs are a floor you walk on, so
@@ -167,7 +169,10 @@ still look too round, as flagged in the tree thread.
   glass, acacia trim. Its roof is red sandstone for the pitched share.
 - **Flat roofs:** set `"roof": {"type": "flat", "parapet": "crenel" | "slab" | "wall" | "none", "beams":
   true, "hatch": true}` with `"roof": "smooth_sandstone"` in the style.
-- **Parts that fit:** `arcade` (market fronts), `arch`, `belfry`, `lean_to` (forge shade), `porch`.
+- **Parts that fit:** `arcade` (market fronts), `arch`, `belfry`, `lean_to` (forge shade), `porch`, `dome`.
+- **Civic domes:** `{"part": "dome", "at": [x, z], "r": 4, "drum": {"h": 3, "windows": 4, "glass":
+  "yellow_stained_glass_pane"}, "finial": "gold"}` on the flat roof: a sandstone drum and a blue-green copper
+  dome with a gold finial.
 
 ```json
 {"part": "house", "style": {"base": "ember_sandstone", "roof": "smooth_sandstone"}, "rect": [0, 0, 8, 8],
@@ -175,7 +180,6 @@ still look too round, as flagged in the tree thread.
 ```
 
 **Not in the skill yet:**
-- domes on drums;
 - pointed arches;
 - tapering towers with horns (use shapes);
 - lattice windows set back;
