@@ -6,7 +6,7 @@ import { CHARGE, COLORS, DYE_RGB, KEEP_BANNER } from "./constants.js";
 import { keepFallen } from "./keep.js";
 import { saveState, state } from "./state.js";
 import { foreignSettlement, settlementAt, tierOf, landRadius } from "./territory.js";
-import { isOnline, title } from "./util.js";
+import { isOnline, title, attackable } from "./util.js";
 
 // ---------- Borders: see where land begins, and get told when you cross ----------
 
@@ -80,7 +80,7 @@ world.beforeEvents.playerBreakBlock.subscribe((event) => {
 export function placementAllowed(player, block, typeId) {
   const owner = foreignSettlement(player, block.location, block.dimension.id);
   if (!owner) return true;
-  return typeId === CHARGE && isOnline(owner);
+  return typeId === CHARGE && attackable(owner);
 }
 
 export const placeBefore = world.beforeEvents.playerPlaceBlock;
@@ -101,7 +101,7 @@ world.beforeEvents.explosion?.subscribe((event) => {
   const blocks = event.getImpactedBlocks();
   const safe = blocks.filter((b) => {
     const owner = settlementAt(b.location);
-    return !owner || isOnline(owner);
+    return !owner || attackable(owner);
   });
   if (safe.length !== blocks.length) event.setImpactedBlocks(safe);
 });

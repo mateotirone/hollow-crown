@@ -266,21 +266,31 @@ def gy(x, z):
     return int(max(Y[i, k], water_level[i, k] + 3)) if wet[i, k] else int(Y[i, k])
 stop_y = {}
 def stops_on(P): return [(sid, st) for sid, st in STOPS.items() if np.min(np.hypot(P[:, 0] - st["x"], P[:, 1] - st["z"])) < 30]
-# one platform axis per stop, set by a line running through it: a branch that starts at a junction shares the
-# through line's platform and leaves at a platform end on a switch, never crossing the platform (Millbrook, Reedmoor)
-STOP_AXIS = {"kingsrest": "x"}
-for lname, pts in L["roads"].items():
-    on = stops_on(np.asarray(pts, float))
-    cells, si = railplan.trace(pts, [(st["x"], st["z"], STOP_AXIS.get(sid)) for sid, st in on])
-    for (sid, _), i in zip(on, si):
-        if sid not in STOP_AXIS and 0 < i < len(cells) - 1:
-            a, b = cells[max(0, i - 3)], cells[min(len(cells) - 1, i + 3)]
-            STOP_AXIS[sid] = "x" if a[1] == b[1] else "z"
+# Mateo 2026-11-12: railways on their own routes, laid out the way 19th-century lines were (gentle gradients along
+# valleys and hillsides, long curves, stations at the edge of town), not beside the roads. The lines.json "roads"
+# only say which stops each line serves and in what order; railroute places the stations and routes the track.
+import railroute
+SEQ = {}
 for lname, pts in L["roads"].items():
     P = np.asarray(pts, float)
-    on = stops_on(P)
-    stops_ = [(st["x"], st["z"], STOP_AXIS.get(sid)) for sid, st in on]
-    cells, si = railplan.trace(pts, stops_)
+    SEQ[lname] = [sid for sid, st in sorted(stops_on(P), key=lambda t: int(np.argmin(np.hypot(P[:, 0] - t[1]["x"], P[:, 1] - t[1]["z"]))))]
+_foot = {}                                         # how far out each stamped town's blocks reach
+for fn_ in filter(None, os.environ.get("GW_BLOCKS", "").split(":")):
+    d_ = json.load(open(fn_)); b_ = np.array(d_["blocks"], np.int64)[:, [0, 2]]
+    _foot[d_["town"]] = b_
+R_TOWNS = []
+for n_, x_, z_, r_, _ in TOWNS:
+    if n_ in _foot: R_ = int(np.hypot(_foot[n_][:, 0] - x_, _foot[n_][:, 1] - z_).max()) + 6
+    else: R_ = int(r_ * 1.12) + 10
+    R_TOWNS.append((slug(n_), x_, z_, R_))
+AVOID = [(x_, z_, 82) for _, x_, z_ in PLOTS] + [(x_, z_, int(r_ * 0.7)) for _, x_, z_, r_, _ in WARDS[6:]]
+STATION_POS, LINE_PTS = railroute.plan_network(Y, wet, land, X0, Z0, STOPS, SEQ, R_TOWNS, AVOID, log=log)
+for sid_, (x_, z_, _) in STATION_POS.items(): STOPS[sid_].update({"x": x_, "z": z_})
+for lname in SEQ:
+    pts = LINE_PTS[lname]
+    on = [(sid, STOPS[sid]) for sid in SEQ[lname]]
+    stops_ = [(st["x"], st["z"], STATION_POS[sid][2][-1]) for sid, st in on]
+    cells, si = railplan.trace(pts, stops_, routed=True)
     order = sorted(range(len(on)), key=lambda k: si[k]); on = [on[k] for k in order]; si = [si[k] for k in order]
     ground = [gy(x, z) for x, z in cells]
     for (sid, st), i in zip(on, si):
