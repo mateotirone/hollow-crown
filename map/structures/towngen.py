@@ -1021,7 +1021,7 @@ class Town:
             return int(self.K[i, j]) / 2.0
         def ground(x, z):
             if not self.ok(x, z): return int(self.WL.max()) - 2
-            i, j = self.ij(x, z); return int(self.G0[i, j])
+            i, j = self.ij(x, z); return int(self.G0[i, j]) if self.WET[i, j] else int(self.G[i, j])   # the town's graded ground on land
         def water(x, z):
             if not self.ok(x, z): return None
             i, j = self.ij(x, z)
@@ -1030,21 +1030,30 @@ class Town:
             if not self.ok(x, z): return False
             i, j = self.ij(x, z); return self.K[i, j] >= 0 and not self.WET[i, j]
         self.bridge_plans, quays = [], []
+        self.bridge_clear = {}
         for c in BR.crossings_from_cells(set(wet), walk, lambda x, z: water(x, z) if water(x, z) is not None else int(self.WL[self.ij(x, z)]),
                                          lambda c: wet[c], region=self.region, path="town", rejects=quays):
             c.pop("_cells", None)
             c["ground"] = ground; c["name"] = f"{self.key}_bridge{len(self.bridge_plans)}"
-            for cell, b in BR.to_works(BR.bridge_blocks(c)).items():
-                if b[0] == "air" and cell in self.works and self.works[cell][0] != "air": continue
-                self.works[cell] = b
+            built = {cell: b for cell, b in BR.to_works(BR.bridge_blocks(c)).items() if b[0] != "air"}
+            self.works.update(built)
+            tops = {}
+            for (x, y, z) in built: tops[(x, z)] = max(tops.get((x, z), y), y)
             # Mateo: a bridge never runs into a field. Join each approach end to the nearest street with paving.
             for end in c.get("_ends", []):
                 for x, z in BR.connect_to_paths(end, is_path):
                     if not self.ok(x, z) or self.WET[self.ij(x, z)]: continue
                     i, j = self.ij(x, z); g = int(self.G[i, j])
                     self.works[(x, g, z)] = pave("lane", x, z, False)
-                    for yy in range(g + 1, g + 4): self.works[(x, yy, z)] = ("air", {})
+                    tops[(x, z)] = g
                     self.TAKEN[i, j] = max(int(self.TAKEN[i, j]), 1)
+            # Mateo: everything above the bridge, its approaches and the joining path is open to the sky
+            for (x, z), top in tops.items():
+                hi = top + 5
+                if self.ok(x, z):
+                    i, j = self.ij(x, z); hi = max(hi, int(max(self.G[i, j], self.G0[i, j])) + 5)
+                for yy in range(top + 1, hi): self.works[(x, yy, z)] = ("air", {})
+                self.bridge_clear[(x, z)] = (top + 1, hi)
             self.bridge_plans.append({k: v for k, v in c.items() if k not in ("ground", "_ends")})
         # wet path cells that are no bridge (a street along the bank): a solid stone quay under the paving
         for comp in quays:
@@ -1052,6 +1061,11 @@ class Town:
                 i, j = self.ij(x, z); k = int(self.K[i, j]); y = (k - 1) // 2
                 self.works[(x, y, z)] = pave("main", x, z, k % 2 == 1)
                 for yy in range(int(self.G0[i, j]) + 1, y): self.works[(x, yy, z)] = ("stone_bricks", {})
+
+    def finish_bridges(self):
+        """Last pass, after banks and outlines: nothing stands over a bridge, its approaches or its joining path."""
+        for (x, z), (lo, hi) in getattr(self, "bridge_clear", {}).items():
+            for yy in range(lo, hi): self.works[(x, yy, z)] = ("air", {})
 
     def ground_blocks(self):
         """Every column the town regraded: top block, fill under it, air over a cut."""
@@ -1077,7 +1091,7 @@ class Town:
         self.fields()
         self.dress()
         self.roof_colours()
-        self.path_blocks(); self.ground_blocks(); self.banks()
+        self.path_blocks(); self.ground_blocks(); self.banks(); self.finish_bridges()
         self.works = {(int(x), int(y), int(z)): v for (x, y, z), v in self.works.items()}
         for e in self.plan:
             for k in ('x', 'z', 'ground_y', 'rotation', 'footprint'): e[k] = int(e[k])
