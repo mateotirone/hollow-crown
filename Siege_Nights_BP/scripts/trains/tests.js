@@ -4,8 +4,9 @@ import { BlockTypes, EntityTypes, ItemTypes } from "@minecraft/server";
 import { addTests, assert, assertEqual } from "../siege/api.js";
 import { SHAPES, layTrack, cursorOn, advance, back, pointAt, follow, KINDS, curvePoints, switchSetting, shapeOf } from "./track.js";
 import { stageFor, stationPlan, siteFor, lineBlocks, rightOf, STAGES, STATION } from "./stations.js";
-import { ROUTE, reachable, buyable, cannotBuy, priceOf, nearestStop, checkRoutes, stopSite, pieces } from "./routes.js";
+import { ROUTE, reachable, buyable, cannotBuy, priceOf, nearestStop, checkRoutes, stopSite, pieces, isNatural } from "./routes.js";
 import { ROUTES } from "./routes_data.js";
+import { railRefused } from "./no_hollow.js";
 import { TRACK, CARS, TRAIN, carPoses, trainLength, stepSpeed, moveTrain, limitAhead, shapesForLoop, showcaseLoop } from "./data.js";
 
 // A little fake world of track: lay(x, y, z, yaw) places a piece the way a player would
@@ -72,6 +73,10 @@ addTests("trains", {
       at.set(k, [...(at.get(k) ?? []), { kind, dir }]);
     }
   },
+  "routes: the bed digs through ground and trees, never through buildings": () => {
+    for (const id of ["minecraft:stone", "minecraft:grass_block", "minecraft:oak_log", "minecraft:spruce_leaves", "siege:old_acacia_log", "minecraft:white_terracotta", "minecraft:iron_ore", "minecraft:short_grass"]) assert(isNatural(id), id);
+    for (const id of ["minecraft:oak_planks", "minecraft:stone_bricks", "minecraft:cobblestone", "minecraft:glass", "minecraft:stripped_oak_log", "siege:castle_stone", "minecraft:stone_brick_stairs", "minecraft:oak_fence", "minecraft:torch"]) assert(!isNatural(id), id);
+  },
   "routes: a settlement's station sits on its stop, building toward the banner": () => {
     const data = routeMap();
     const s = stopSite(data, { x: 10, z: 40 });
@@ -96,6 +101,17 @@ addTests("trains", {
     assert(p[15].works && !p[9].works && !p[21].works, "only the custom range skips the plain bed");
     assert(pieces({ ...custom, custom: undefined })[0].works, "works without ranges cover the whole stretch");
     assert(checkRoutes({ stops: data.stops, segments: [{ ...custom, custom: [[5, 9999]] }] }).length, "a range past the end is caught");
+    const [bx, by, bz] = custom.blocks[0];
+    assert(checkRoutes({ stops: data.stops, segments: [{ ...custom, works: [[bx, bz, by - 3, by, 1]] }] }).length, "a solid work in a track cell is caught");
+    assertEqual(checkRoutes({ stops: data.stops, segments: [{ ...custom, works: [[bx, bz, by - 3, by - 1, 1], [bx, bz, by, by + 5, 0]] }] }).length, 0, "works under and clear air over the track are fine");
+  },
+
+  "no rail goes down in the Hollow": () => {
+    for (const id of [TRACK, "hc:station_post", "siege:rail_depot", "minecraft:rail", "minecraft:golden_rail"]) {
+      assert(railRefused("siege:undertow", id), `${id} is refused in the Hollow`);
+      assert(!railRefused("minecraft:overworld", id), `${id} is fine in the overworld`);
+    }
+    assert(!railRefused("siege:undertow", "minecraft:cobblestone"), "other blocks are fine");
   },
 
   "there are 20 track shapes and none repeats": () => {
@@ -199,7 +215,7 @@ addTests("trains", {
     assert(along.every((b) => b.z === 0 && b.y === 64 && b.dir === 2), "the new line runs along the old one");
     const none = siteFor({ x: 0, y: 64, z: 40 }, get, { x: 0.2, z: -0.9 });
     assert(!none.onTrack, "no track near");
-    assertEqual(JSON.stringify([none.origin, none.forward]), JSON.stringify([{ x: 0, y: 64, z: 40 + STATION.noTrackBack }, { x: 0, z: -1 }]));
+    assertEqual(JSON.stringify([none.origin, none.forward]), JSON.stringify([{ x: 0, y: 64 + STATION.noTrackLift, z: 40 + STATION.noTrackBack }, { x: 0, z: -1 }]));
     assertEqual(JSON.stringify(rightOf({ x: 0, z: 1 })), JSON.stringify({ x: -1, z: 0 }));
   },
   "corners and bends are curves: the wheels follow an arc from edge to edge": () => {

@@ -15,7 +15,8 @@ export const SETTLE = {
   firstBuildRenown: 40, // Renown the first time you raise each kind of building
   previewSeconds: 90, // how long the outline of a chosen building stays up
   // What a building costs on a town plot (Plot Marker), in lots, paid from the purse. The library comes free on arrival.
-  plotPrices: { cottage: 6, well: 3, garden: 5, market: 10, library: 8, watchtower: 8, storehouse: 9, smithy: 12, stable: 14 },
+  plotPrices: { cottage: 6, well: 3, garden: 5, market: 10, library: 8, watchtower: 8, storehouse: 9, smithy: 12, stable: 14,
+    house: 9, townhouse: 13, farmhouse: 10, mint: 14, inn: 16 },
 };
 
 // Out in the wilds you can still make camp. Anything matching one of these can be placed anywhere.
@@ -107,7 +108,7 @@ export const MASON_LINES = {
 // The tier each building first opens at (0 Hamlet, 1 Town, 2 City, 3 Castle). This used to be read from the
 // old fixed layout (layout.js). Farmhouse, Mint, Inn and Barracks are listed ahead of their plot designs.
 export const OPENS_AT = {
-  cottage: 0, well: 0, library: 0, market: 1, garden: 1, farmhouse: 1, mint: 1,
+  cottage: 0, house: 0, well: 0, library: 0, townhouse: 1, market: 1, garden: 1, farmhouse: 1, mint: 1,
   smithy: 2, stable: 2, inn: 2, barracks: 2, storehouse: 3, watchtower: 3,
 };
 
@@ -115,14 +116,15 @@ export const OPENS_AT = {
 // G Great 21x21. A building goes on a plot of its own size, or a size listed under PLOT_ALSO.
 export const PLOT_SIZE = {
   cottage: "S", well: "S", garden: "S", watchtower: "S",
-  smithy: "M", farmhouse: "M", mint: "M",
+  house: "M", smithy: "M", farmhouse: "M", mint: "M",
+  townhouse: "ML",
   stable: "ML", storehouse: "ML", library: "ML",
   market: "L", inn: "L", barracks: "L",
 };
 export const PLOT_ALSO = {
   market: ["ML"], // the market may take a long Medium
   barracks: ["ML"],
-  library: ["L"], stable: ["L"], storehouse: ["L"],
+  library: ["L"], stable: ["L"], storehouse: ["L"], townhouse: ["L"],
 };
 // Only when the town has no free plot of the building's own size or PLOT_ALSO sizes left
 export const PLOT_FALLBACK = { barracks: ["M"] }; // the barracks may take a plain Medium
@@ -224,4 +226,24 @@ export const SETTLER_LINES = {
     "Don't stand out here long. It's colder than it ought to be.",
   ],
   idle: "My work's gone. Put it back up and I'll go back to it.",
+};
+
+// ---------- The Plan Book (planbook.js, plandata.js) ----------
+// You can only raise a building on a plot if you know its plan. Plans are learned once and kept for good.
+//   basics: always known (the Hamlet's buildings).  hall: known once your town hall reaches that level.
+//   Everything else is found: Plan Scrolls from toppled Rival Lords, bosses, Rumor jobs (and ruins, traders
+//   and wonders, which call learnPlan / givePlanScroll). A found plan is in its region's style; a style that
+//   isn't your town's own costs foreignMul times as much to raise.
+//   Rule: a player always gets what a charter needs. Every home and every building a charter names is taught by
+//   basics or by the hall level that tier reaches (hall level = tier + 1), never only by a lucky scroll (tested).
+//   noPlan: charter buildings raised from their own block item, which need no plan.
+export const PLANS = {
+  basics: ["cottage", "house", "well", "library"],
+  hall: { 2: ["market", "garden", "farmhouse", "mint", "townhouse"], 3: ["smithy", "stable", "inn"], 4: ["storehouse", "watchtower"] },
+  noPlan: ["barracks"],
+  foreignMul: 1.5,
+  scrollLots: 2, // copying a plan you know onto a Plan Scroll at your Plan Book (plus one paper), to trade
+  lordScrolls: 2, // Plan Scrolls a toppled lord leaves, from the buildings that stood in their town
+  bossScrolls: 1, // for each player at a boss's death
+  rumorChance: 0.25, // chance a finished Rumor job pays a Plan Scroll as well
 };

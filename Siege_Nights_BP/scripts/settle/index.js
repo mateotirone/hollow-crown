@@ -36,6 +36,7 @@ import "./plotmarker.js";
 import "./register.js";
 import "./settlers.js";
 import "./hallmove.js";
+import "./planbook.js";
 import "./arrival.js";
 import "./showcase.js";
 import "./tests.js";
@@ -53,6 +54,7 @@ export { townOf, townSlots, growTown, foundTown, settlementTier, PLOT_MARKER, ch
 export { plotFit, charterCheck, slotClass } from "./charters.js";
 export { plotRegistry, plotAtBlock, runScan } from "./register.js";
 export { settlersOf, freeBeds } from "./settlers.js";
+export { learnPlan, givePlanScroll, randomPlanScroll, plansFor, PLAN_BOOK, PLAN_SCROLL } from "./planbook.js";
 export { townFor, slotsOf, seatOnSlot } from "./towns.js";
 export { choicesFor } from "./plotmarker.js";
 export { OPENS_AT, CHARTERS } from "./config.js";
