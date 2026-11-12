@@ -239,6 +239,24 @@ step("Content log rules");
     }
   }
 
+  // 3c. Held items: every geometry the player entity uses must keep vanilla's bone path to the item bones
+  // (rightItem under rightArm, rightArm under body). Bedrock floats held items at the chest or face otherwise
+  // (playtest 1.2.1116: items under the forearm). See docs/PLAYER-ANIMATIONS.md.
+  {
+    const ep = join(RP, "entity/player.entity.json");
+    const pgeo = new Set(Object.values(readJson(ep)?.["minecraft:client_entity"]?.description?.geometry ?? {}));
+    const PATH = { rightItem: "rightArm", leftItem: "leftArm", rightArm: "body", leftArm: "body" };
+    for (const file of walk(join(RP, "models/entity"), ".json")) {
+      for (const g of readJson(file)?.["minecraft:geometry"] ?? []) {
+        if (!pgeo.has(g?.description?.identifier)) continue;
+        for (const b of g.bones ?? []) {
+          const want = PATH[b.name];
+          if (want && b.parent !== want) fail(`${rel(file)}: ${b.name} hangs on "${b.parent}", must hang on "${want}" or held items float (vanilla bone path)`);
+        }
+      }
+    }
+  }
+
   // 4. Blocks: custom geometry must exist in the resource pack, and one block's materials can't mix opaque with see-through.
   const geometries = new Set();
   for (const file of walk(join(RP, "models"), ".json")) {
