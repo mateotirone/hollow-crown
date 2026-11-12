@@ -108,7 +108,7 @@ Prompt:
 
 Prompt:
 
-> A huge slab of solid rock slowly breaking apart in a cave over fourteen seconds: long deep creaking and groaning of stone under enormous strain, sharp loud cracks splitting upward one after another, each a little higher, gravel and chunks of rock falling and clattering on the cave floor, grinding as the two halves scrape apart, and a final heavy low crack-boom as it splits open. Loud, close, dry and physical. No wind or air rush, no voices, no music.
+> A huge slab of solid rock slowly breaking apart in a cave: long deep creaking and groaning of stone under enormous strain, sharp loud cracks splitting upward one after another, gravel and rock chunks falling and clattering on the floor, grinding as the halves scrape apart, then a final heavy low crack-boom as it splits open. Loud, close, dry and physical. No wind or air rush, no voices, no music.
 
 ### 5. The Rift answers
 
