@@ -2,10 +2,13 @@
 // fresh map without a single /scriptevent (thread "Check the storyline can be played through", 2026-11-12).
 //
 // Characters (all on Bedrock's built-in NPC entity, answered by npcs.js):
-//   in the towns   Elias, Tilly and Holt in Gull's Rest; Sigrun and Jorund in Rimehold; Isolde in Sunscar; Nessa in
-//                  Millbrook; Hesper in Mirelight. Spots: story_spots_data.js (tools/story_spots.py, street cells past
-//                  the townsfolk's own). The Returned cases' suspects (Harl, Bram, Pip, Odo) stand near their askers,
-//                  as ordinary villagers the mobs feature knows (bestiary/returned.js).
+//   in the towns   Elias in the Gull's Rest lighthouse, Ottilie in its harbour office, Tilly on its lowest street;
+//                  Sigrun in the Rimehold longhouse nearest Hallowmere, Jorund in the net sheds; Isolde in the Sunscar
+//                  warden's office; Nessa in the Millbrook bakery; Hesper in the last house in Mirelight before the
+//                  lanterns stop. Spots: story_spots_data.js (tools/story_spots.py: the indoor ones from the baked
+//                  towns, the rest street cells past the townsfolk's own). The Returned cases' suspects (Harl, Bram,
+//                  Pip, Odo) stand in the street near their askers, as ordinary villagers the mobs feature knows
+//                  (bestiary/returned.js). Sister Wren is in Millbrook's chapel (opening/millbrook.js).
 //   Archivist Pell moves into every town hall at Town tier (the hall's "sage" mark) and follows the hall when it grows.
 //   Sir Aldous rides to your keep the morning after your first siege win and stays the day; after that he is at the
 //                  Ashen Gate chapterhouse, beside Brother Cael.
@@ -26,7 +29,7 @@
 import { world, system, GameMode } from "@minecraft/server";
 import { on, addFilter, onTick, moduleStore, keepOf, keepCenter, addTests, assert, assertEqual } from "../siege/api.js";
 import { mapMode } from "../plots/api.js";
-import { spawnNpc, NPC_TYPE } from "./npcs.js";
+import { spawnNpc } from "./npcs.js";
 import { placeCache } from "./caches.js";
 import { markedPlaces } from "./ledger.js";
 import { TOME } from "./logic.js";

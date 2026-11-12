@@ -2,7 +2,7 @@ import { addTests, assert, assertEqual } from "../siege/api.js";
 import { CLOCKS, KEEPERS, POSTS, makePuzzle, solutions, statementText, clockAnswer, fallbackPuzzle, WRONG_COOLDOWN_TICKS } from "./keepers.js";
 import { WELL, RING, wellOps, chamberOps, stairSteps, spindleOps, drainLayers, plugOps, postOps, postSpot, faceToCenter } from "./well_plan.js";
 import { fullPlan, crankAnswer, inChamber, keeperBody, MILLBROOK_SQUARE } from "./reeve.js";
-import { porchBlocks } from "../opening/millbrook.js";
+import { CHAPEL } from "../opening/millbrook.js";
 
 const SECRETS = ["Hollow", "Morvane", "Oswin", "truce", "Choir"];
 const key = (o) => `${o.dx},${o.dy},${o.dz}`;
@@ -98,16 +98,19 @@ addTests("unlocks", {
     assert(inChamber({ x: MILLBROOK_SQUARE.x + 3, y: 100 + WELL.floorY + 1, z: MILLBROOK_SQUARE.z }, { ...MILLBROOK_SQUARE, y: 100 }));
     assert(!inChamber({ x: MILLBROOK_SQUARE.x + 3, y: 101, z: MILLBROOK_SQUARE.z }, { ...MILLBROOK_SQUARE, y: 100 }), "standing in the square is not below");
   },
-  "the set piece keeps clear of Wren's porch, stays in Millbrook, and is an odd size": () => {
+  "the set piece keeps clear of Wren's chapel, stays in Millbrook, and is an odd size": () => {
     const plan = fullPlan(makePuzzle(7));
-    const porch = new Set(porchBlocks().map((b) => key({ dx: b.dx, dy: b.dy, dz: b.dz })));
+    const inChapel = (o) => {
+      const x = MILLBROOK_SQUARE.x + o.dx, z = MILLBROOK_SQUARE.z + o.dz;
+      return x >= CHAPEL.x0 && x <= CHAPEL.x1 && z >= CHAPEL.z0 && z <= CHAPEL.z1;
+    };
     for (const o of plan.ops) {
       if (o.dy < 0) continue;
-      assert(!porch.has(key(o)), `touches Wren's porch at ${key(o)}`);
+      assert(!inChapel(o), `touches Wren's chapel at ${key(o)}`);
       assert(Math.hypot(o.dx, o.dz) < 60, "inside Millbrook");
     }
     for (const post of plan.posts) {
-      assert(!porch.has(key({ ...post.keeper, dy: 1 })), "a keeper stands in the porch");
+      assert(!inChapel(post.keeper), "a keeper stands in the chapel");
       assertEqual(faceToCenter(post.clock.dx, post.clock.dz), post.face);
     }
     const xs = wellOps().map((o) => o.dx);

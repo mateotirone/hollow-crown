@@ -39,8 +39,10 @@ const STORY_SITES = [
   // (ground 69-71 on the map's heights, the pool 58-61 from x 20 east)
   { id: "sedge_graves", region: "Blackfen", name: "Goody Sedge's graves", x: 10, z: 988, pieces: [{ d: "sedge_graves" }] },
   { id: "deepforge", region: "Frostmarch", name: "the Deepforge", x: -274, z: -938, place: "deepforge", pieces: [{ d: "deepforge", turns: true, face: "e" }] },
-  // version 2: built again once: the Span is one block wide with loose stones, and its two ends reach the Rider trial
-  { id: "cinder_roost", region: "Emberwaste", name: "the Cinder Roost", x: 898, z: 346, place: "cinder_roost", version: 2, pieces: [{ d: "cinder_roost", turns: true, face: "s" }] },
+  // version 2: built again once: the Span is one block wide with loose stones, and its two ends reach the Rider trial.
+  // It stands on the north edge of the mesa above Sunscar (moved from 898, 346, where the land under the Span was
+  // nearly flat): the yard on the cliff top at 103, the Span and the perch out over the flats at 96-97.
+  { id: "cinder_roost", region: "Emberwaste", name: "the Cinder Roost", x: 882, z: 310, place: "cinder_roost", version: 2, pieces: [{ d: "cinder_roost", turns: true, face: "n" }] },
 ];
 
 export const LANDMARKS = [

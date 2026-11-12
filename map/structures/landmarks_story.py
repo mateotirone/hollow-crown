@@ -482,6 +482,12 @@ def cinder_roost():
     # together everywhere: two stones are gone (step over), and the plain red sandstone blocks among the slabs are loose
     # (they give way a second after you step on them: roletrials CRUMBLES). Fall and you're washed out for three days.
     GONE, LOOSE = (-6, -12), (-4, -9, -14)
+    # the drop under it: the site stands on a cliff edge (sites.js), so the land under the Span is the flats below,
+    # about seven blocks down. In case the map's edge runs a little different, nothing within four blocks of the Span
+    # is left higher than seven below it: no ledge to step down onto. Fall and you walk out across the flats.
+    for z in range(-1, -17, -1):
+        for x in range(-4, 5):
+            for y in range(-6, 1): d.air(x, y, z)
     for z in range(-1, -17, -1):
         for x in (-1, 1):                  # where the old three-wide Span and its parapets stood (worlds built before)
             for y in (-1, 0, 1): d.air(x, y, z)
