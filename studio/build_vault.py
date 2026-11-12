@@ -545,7 +545,9 @@ def build_key():
         for x in range(16):
             img.putpixel((x, y), tuple(key_icon(x, y, r)))
     os.makedirs(os.path.join(RP, "textures", "items", "vault"), exist_ok=True)
-    img.save(os.path.join(RP, "textures", "items", "vault", "vault_key.png"))
+    key_png = os.path.join(RP, "textures", "items", "vault", "vault_key.png")
+    if not os.path.exists(key_png):  # final art is painted by studio/art/build_audit_icons.py; never overwrite it
+        img.save(key_png)
     write_json(os.path.join(BP, "items", "vault", "vault_key.json"), {"format_version": "1.21.60", "minecraft:item": {
         "description": {"identifier": "siege:vault_key", "menu_category": {"category": "items"}},
         "components": {"minecraft:icon": "siege_vault_key", "minecraft:display_name": {"value": "item.siege:vault_key.name"},
