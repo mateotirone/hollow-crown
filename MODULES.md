@@ -306,5 +306,6 @@ player and vanish a few seconds after everyone walks away; nothing is saved. Don
 `scripts/roletrials/` gives the four regional roles their mentors' trials (words in `lore/data/mentors.js`), sends each mentor's line on every rank-up, and runs the Knight's Stand the Wall and the Eleven. It hooks in through filters, so other features keep working without it:
 `addFilter("roleOffer", (allowed, { player, role }) => ...)` (town hall asks before offering a role; false holds it),
 `addFilter("dragonNestTake", (refusal, { player, block }) => ...)` (dragons: a returned string refuses the egg and is shown),
+`addFilter("dragonCanFly", (reason, { player, rec, entity, flying }) => ...)` (dragons: a returned string grounds her, on take-off or once a second in the air, and is shown),
 `addFilter("treeButtons", (list, { player }) => [...list, { label, icon, open(player, back) }])` (extra pages at the Tree of Oaths), and
 `emit("loreSetFlag", { player, flag })` (lore: set a story flag from another feature).

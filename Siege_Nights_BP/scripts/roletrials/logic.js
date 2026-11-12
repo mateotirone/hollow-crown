@@ -9,7 +9,7 @@ export const SAVE_VERSION = 1;
 export function blankTrials() {
   const roles = {};
   for (const role of TRIAL_ROLES) roles[role] = { started: false, done: [], deed: false, offered: false, washUntil: 0, burnUntil: 0, graves: [], spanFrom: -1 };
-  return { v: SAVE_VERSION, roles, knightWall: false, eleven: 1 };
+  return { v: SAVE_VERSION, roles, knightWall: false, eleven: 1, unflown: -1 };
 }
 
 // Anything older or partial gets the missing fields filled in, never thrown away.
@@ -19,6 +19,7 @@ export function loadTrials(saved) {
   for (const role of TRIAL_ROLES) base.roles[role] = { ...base.roles[role], ...(saved.roles?.[role] ?? {}) };
   base.knightWall = !!saved.knightWall;
   base.eleven = Math.max(1, Math.min(ELEVEN.length, saved.eleven ?? 1));
+  base.unflown = Number.isFinite(saved.unflown) ? saved.unflown : -1;
   return base;
 }
 
@@ -114,4 +115,17 @@ export function trialPage(role, t) {
 export function nextKnight(t) {
   if (!t.knightWall || t.eleven >= ELEVEN.length) return undefined;
   return ELEVEN[t.eleven];
+}
+
+// ---------- the third-night toll (Mateo, 2026-11-12: dragons won't fly only around 3:17 on a siege night) ----------
+// Minecraft's day starts at 06:00, so 03:00 is tick 21000 and 03:17 is about 21283. Grounded from 03:00 to 03:30.
+export const TOLL_WINDOW = [21000, 21500];
+export const inTollWindow = (timeOfDay) => timeOfDay >= TOLL_WINDOW[0] && timeOfDay < TOLL_WINDOW[1];
+
+// May this rider's dragon fly now? "fly" | "unflown" (the Dragonlord's one night, starting now) | "grounded"
+export function tollRule({ siegeNight, timeOfDay, dragonlord, unflownDay, today, takingOff }) {
+  if (!siegeNight || !inTollWindow(timeOfDay)) return "fly";
+  if (unflownDay === today) return "fly"; // the Unflown Night already begun tonight
+  if (dragonlord && unflownDay < 0 && takingOff) return "unflown";
+  return "grounded";
 }
