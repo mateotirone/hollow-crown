@@ -63,7 +63,20 @@ export const B = {
 const SEA = L.seaY;
 const clamp01 = (t) => Math.max(0, Math.min(1, t));
 const inCourt = (x, z) => z >= 1540 && z < 1660;
-const inHeart = (z) => z >= 2330;
+// Where the land breaks off before the Seat (Mateo, 2026-11-12: not a straight, flat line). The Long Climb ends in
+// a ragged, crumbling cliff: bays bitten up to 34 blocks back from z 2330, blunt spurs between them, single-block
+// jags, and the story path running out to the edge on its own spur. The Seat's approach (hollow_arenas.py) starts there.
+export const HEART_EDGE_Z = 2330;
+export function heartEdge(x) {
+  const ax = Math.abs(x);
+  if (ax <= 5) return HEART_EDGE_Z; // the path's spur
+  const jag = Math.floor(hash(Math.floor(x / 3), 0, 98) * 4) + (hash(x, 0, 99) < 0.3 ? 2 : 0);
+  const bite = Math.min(34, 2 + fbm(x / 44, 4.2, 97) * 38 + fbm(x / 9, 8.6, 96) * 13 + jag);
+  const reach = x < 0 ? 6 : 11; // the spur widens back into the cliff, more on one side than the other
+  const spur = Math.max(0, 1 - (ax - 5) / reach);
+  return HEART_EDGE_Z - Math.max(ax <= 7 ? 1 : 2, Math.round(bite * (1 - spur * spur * spur)));
+}
+const inHeart = (x, z) => z >= heartEdge(x);
 const inSpine = (x) => Math.abs(x) <= L.halfWidth;
 // No spires or pillars crowding the Drowned Court or the Seat's landing: they are meant to be seen from far off.
 const arenaView = (x, z) => Math.hypot(x - COURT.center.x, z - COURT.center.z) < 70 || Math.hypot(x - HEART.center.x, z - HEART.center.z) < 110;
@@ -139,7 +152,7 @@ function rimWall(x, z) {
   return smooth(clamp01((fbm(z / 70, side * 3.3, 61) - 0.4) / 0.14));
 }
 function spine(x, z) {
-  if (z < L.zStart || z >= L.zEnd || inHeart(z)) return null; // the final arena floats in the fog; built separately
+  if (z < L.zStart || z >= L.zEnd || inHeart(x, z)) return null; // the final arena floats in the fog; built separately
 
   // The Wound: a ledge at y 100 with a wall behind it and a ramp down along the path.
   if (z < 40) {
@@ -237,7 +250,7 @@ const groundBeforeRoads = (x, z) => beforeRoads(x, z)?.h ?? null;
 export function columnAt(x, z) {
   const c = beforeRoads(x, z);
   if (c === null) return null;
-  if (inSpine(x) && z > 10 && z < 2330 && !inCourt(x, z)) {
+  if (inSpine(x) && z > 10 && z < HEART_EDGE_Z && !inCourt(x, z)) {
     const d = Math.abs(x - pathX(z));
     if (d <= 4) { c.road = d; c.roadS = z; c.paved = d <= ROAD_HALF_WIDTH; return c; }
   }

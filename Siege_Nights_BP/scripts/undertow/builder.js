@@ -4,7 +4,7 @@
 
 import { world, BlockVolume, BlockPermutation } from "@minecraft/server";
 import { UNDERTOW_ID, UNDERTOW_LAYOUT as L, COURT, HEART, pathX } from "./layout.js";
-import { planChunk, chunkInRange, heightAt, columnAt, B, ROOF } from "./terrain.js";
+import { planChunk, chunkInRange, heightAt, columnAt, roofAt, heartEdge, HEART_EDGE_Z, B, ROOF } from "./terrain.js";
 import { planCrack, placeCells } from "./rift.js";
 import { SEAL_RIVER_X } from "./rivers.js";
 import { SITES, signposts } from "./roads.js";
@@ -12,7 +12,7 @@ import { hash } from "./noise.js";
 import { STRUCTURE_IDS, planStructure } from "./structures.js";
 import { SITE_DESIGNS, TOWER_DESIGNS } from "./sites_data.js";
 import { DROWNED_SPOTS } from "./drowned.js";
-import { COURT_DESIGN, SEAT_DESIGN } from "./arenas_data.js";
+import { COURT_DESIGN, SEAT_DESIGN, APPROACH_DESIGN } from "./arenas_data.js";
 import { stamp } from "./stamp.js";
 import { load, save } from "./data.js";
 import { sfx } from "../core/sfx.js";
@@ -273,6 +273,8 @@ export function piecesTick() {
   // The Seat (the Choir's Heart in the code).
   const heartOld = p.heart && (p.heartV ?? 1) < SEAT_DESIGN.v;
   if ((!p.heart || heartOld) && chunksBuilt(-40, 2300, 40, 2440)) buildHeart(d, heartOld);
+  // The way across to it, once the cliff it leaves from and the air it hangs in are built.
+  if ((p.approachV ?? 0) < APPROACH_DESIGN.v && chunksBuilt(-L.halfWidth, HEART_EDGE_Z - 36, L.halfWidth, HEART_EDGE_Z + 40)) buildApproach(d);
   if (changed) savePieces(p);
 }
 
@@ -367,19 +369,51 @@ export function openRiverGate() {
 }
 
 // The Seat (map/structures/hollow_arenas.py): a floating ring of veinstone in the fog, seven Singer pillars with
-// crystal crowns, the central disc with its root hanging below and the throne, and stepping islands leading up from
-// the end of the climb.
+// crystal crowns, the central disc with its root hanging below and the throne.
 function buildHeart(d, over) {
-  if (stamping.has("heart")) return;
-  const { y: cy } = HEART.center;
-  const ops = [];
-  const startY = (heightAt(0, 2328) ?? 115) + 1;
-  for (let k = 0; k < 6; k++) {
-    const z = 2334 + k * 6, y = Math.round(startY + ((cy - 1 - startY) * (k + 1)) / 7), x = Math.round(Math.sin(k) * 3);
-    ops.push({ a: [x - 1, y - 1, z - 1], b: [x + 1, y, z + 1], block: B.basalt }, { a: [x, y, z], b: [x, y, z], block: B.moss });
-  }
-  if (!fillAll(d, ops)) return;
   stampOnce(d, "heart", over ? withClearing(SEAT_DESIGN) : SEAT_DESIGN, HEART.center, (q) => { q.heart = true; q.heartV = SEAT_DESIGN.v; });
+}
+
+// The cliff the Long Climb ends in was a straight line at z 2330 until 2026-11-12. A world that built it that way has
+// the bays of the new ragged edge (terrain.js heartEdge) dug out of it: for one x, air from the new edge to the old
+// one, the whole height of the land. Pure. Empty where the edge has not moved or there was never land.
+export function edgeCarveOps(x) {
+  const z0 = heartEdge(x), ops = [];
+  let from;
+  for (let z = z0; z <= HEART_EDGE_Z; z++) {
+    const open = z < HEART_EDGE_Z && heightAt(x, z) === null;
+    if (open && from === undefined) from = z;
+    if (!open && from !== undefined) {
+      let top = ROOF.maxBottom;
+      for (let k = from; k < z; k++) top = Math.min(top, roofAt(x, k).bottom);
+      ops.push({ a: [x, L.floorY, from], b: [x, top - 1, z - 1], block: "minecraft:air" });
+      from = undefined;
+    }
+  }
+  return ops;
+}
+let carveX = -L.halfWidth;
+// A few columns each call; true once the whole edge is done. Only old rock is dug: a column that is already open
+// 20 blocks down (a world built with the new edge) is left alone, so the moss hanging over its cliffs stays.
+function carveEdge(d) {
+  for (let n = 0; n < 8 && carveX <= L.halfWidth; n++) {
+    for (const op of edgeCarveOps(carveX)) {
+      let rock;
+      try { rock = d.getBlock({ x: carveX, y: 100, z: op.a[2] }); } catch { return false; }
+      if (!rock) return false;
+      if (!rock.isAir && !apply(d, op)) return false;
+    }
+    carveX++;
+  }
+  return carveX > L.halfWidth;
+}
+
+// The way to the Seat (hollow_arenas.py approach()): the Last Step's broken gate on a shelf off the cliff, five
+// floating rocks joined by hollowwood roots, broken rock adrift in the fog round them. It replaces the six stepping
+// stones worlds had before 2026-11-12 (its clear list takes those away).
+function buildApproach(d) {
+  if (stamping.has("approach") || !carveEdge(d)) return;
+  stampOnce(d, "approach", withClearing(APPROACH_DESIGN), HEART.center, (q) => { q.approachV = APPROACH_DESIGN.v; });
 }
 
 // Put the Seat back as new (after a failed attempt, or once the fight is won).

@@ -525,6 +525,18 @@ export const ENTRIES = [
     when: ["near:siege:body"],
   },
   {
+    id: "weather", ch: "wild", title: "Weather",
+    tip: "Every region has its own weather. Thick weather is easier to sit out under a roof.",
+    page: "Each region has weather of its own, on top of the ordinary rain.\n\n"
+      + "§fBlackfen:§r mist comes up off the water, most of all at dusk, at night and in the rain. Some nights small lights move out over the fen.\n"
+      + "§fSaltreach:§r a hard wind off the sea carries spray inland, and at first light a white sea fret can roll in over the cliffs.\n"
+      + "§fEmberwaste:§r the wind lifts the sand into a haze, and now and then into a sandstorm you can barely see through.\n"
+      + "§fFrostmarch:§r snow blows down off the peaks, and blizzards close the passes, most of all when the sky is already snowing.\n"
+      + "§fAldmere Vale:§r rain like anywhere else, and mist lying in the low ground some mornings.\n\n"
+      + "Weather builds up slowly and thins out again after a few minutes. It is only weather: it doesn't hurt you. Under a roof it thins to a grey light, and down in a cave or cellar it can't reach you. Your action bar says when something is coming in.",
+    when: ["event:weatherMet"],
+  },
+  {
     id: "beasts", ch: "wild", title: "Beasts and trophies",
     tip: "A trophy from this region's beasts. The Hunter buys them, and the Siege Workshop's recipe book knows other uses.",
     page: "Every region has its own beasts, and they leave trophies: wight dust, pale antlers, rime pelts, brine scales, wyrm scales, toad venom and more. The Hunter in the towns buys them, and some are worth far more made into something else. Look through the Siege Workshop's recipe book with one in your pack.",
