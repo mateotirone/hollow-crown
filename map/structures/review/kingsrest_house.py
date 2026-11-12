@@ -10,7 +10,7 @@ HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.dirname(HERE)
 sys.path.insert(0, ROOT)
 sys.path.insert(0, os.path.join(ROOT, "..", "..", "build-instructions", "texturing"))
 from bp import Blueprint
-from kit import Building, VALE, mix, h3
+from kit import Building, VALE, mix, h3, texture_roofs
 from doctrine import paint_teeth, family
 
 # ------------------------------------------------------------------ plan numbers (00-planning)
@@ -280,4 +280,5 @@ def build(upto=99, roof_colour="slate"):
         if i >= upto: break
         fn(bp, B)
     bp.markers["door"] = (4, YF, D + 1)
+    if upto >= 6: texture_roofs(bp)
     return bp.finish()

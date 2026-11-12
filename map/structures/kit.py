@@ -66,11 +66,63 @@ STONE_FAMILY = {"stone_bricks", "cracked_stone_bricks", "mossy_stone_bricks", "c
 
 DOCTRINE = dict(dress=True, verge_lanterns=True, arched_jetty=True, panel_trapdoor="dark_oak_trapdoor")
 
+# Mateo, 2026-11-12: "Roofs need texture as well, same two blocks for this color just as random blocks. Same for
+# every roof style and theme." Every roof colour is two colour-close blocks mixed at random cell by cell (no bands).
+# (stairs, slab, block) of the main block -> (stairs, slab, block) of its partner, and the partner's share.
+ROOF_TEXTURE = [
+    (("deepslate_tile_stairs", "deepslate_tile_slab", "deepslate_tiles"), ("deepslate_brick_stairs", "deepslate_brick_slab", "deepslate_bricks"), 0.4),
+    (("brick_stairs", "brick_slab", "brick_block"), ("granite_stairs", "granite_slab", "granite"), 0.35),
+    (("dark_oak_stairs", "dark_oak_slab", "dark_oak_planks"), ("spruce_stairs", "spruce_slab", "spruce_planks"), 0.3),
+    (("spruce_stairs", "spruce_slab", "spruce_planks"), ("dark_oak_stairs", "dark_oak_slab", "dark_oak_planks"), 0.3),
+    (("mangrove_stairs", "mangrove_slab", "mangrove_planks"), ("dark_oak_stairs", "dark_oak_slab", "dark_oak_planks"), 0.25),
+    (("smooth_quartz_stairs", "smooth_quartz_slab", "smooth_quartz"), ("polished_diorite_stairs", "polished_diorite_slab", "polished_diorite"), 0.35),
+    (("dark_prismarine_stairs", "dark_prismarine_slab", "dark_prismarine"), ("warped_stairs", "warped_slab", "warped_planks"), 0.3),
+    (("prismarine_bricks_stairs", "prismarine_brick_slab", "prismarine_bricks"), ("prismarine_stairs", "prismarine_slab", "prismarine"), 0.35),
+    (("smooth_red_sandstone_stairs", "smooth_red_sandstone_slab", "cut_red_sandstone"), ("red_sandstone_stairs", "red_sandstone_slab", "red_sandstone"), 0.35),
+    (("polished_blackstone_brick_stairs", "polished_blackstone_brick_slab", "polished_blackstone_bricks"), ("blackstone_stairs", "blackstone_slab", "blackstone"), 0.35),
+    (("mud_brick_stairs", "mud_brick_slab", "mud_bricks"), ("granite_stairs", "granite_slab", "granite"), 0.2),
+]
+# blocks that were gradient steps of one colour become that colour's pair (the old banded slate, red, white, Hollow roofs)
+_ROOF_ALIAS = {"cobbled_deepslate_stairs": "deepslate_tile_stairs", "cobbled_deepslate_slab": "deepslate_tile_slab",
+               "polished_granite_stairs": "brick_stairs", "polished_granite_slab": "brick_slab",
+               "deepslate_brick_stairs": "deepslate_tile_stairs", "deepslate_brick_slab": "deepslate_tile_slab", "deepslate_bricks": "deepslate_tiles",
+               "polished_diorite_stairs": "smooth_quartz_stairs", "red_sandstone_stairs": "smooth_red_sandstone_stairs",
+               "granite_stairs": "brick_stairs", "granite_slab": "brick_slab", "warped_stairs": "dark_prismarine_stairs",
+               "prismarine_stairs": "prismarine_bricks_stairs", "blackstone_stairs": "polished_blackstone_brick_stairs"}
+_ROOF_PICK, _ROOF_FAMILY = {}, {}
+for i, (main, other, share) in enumerate(ROOF_TEXTURE):
+    for k in range(3):
+        _ROOF_PICK.setdefault(main[k], (main[k], other[k], share)); _ROOF_FAMILY.setdefault(main[k], i)
+
+def texture_roofs(bp, seed=31):
+    """Mix every roof surface from its colour's two blocks at random (ROOF_TEXTURE). A roof cell is a stair, slab or
+    block of a roof colour, open to the sky, on a slope (a cell of the same colour one up or down and one across), so
+    window sills, steps and walls of the same block are left alone. Copper keeps its weathering gradient."""
+    cells = bp.cells
+    def colour(n):
+        n = _ROOF_ALIAS.get(n, n)
+        return _ROOF_FAMILY.get(n)
+    swaps = []
+    for (x, y, z), (n, props) in cells.items():
+        c = colour(n)
+        if not c: continue
+        above = cells.get((x, y + 1, z), ("air", {}))[0]
+        if above not in ("air", "keep", "snow_layer") and not above.endswith(("_stairs", "_slab", "_wall", "fence", "lightning_rod")) and colour(above) is None:
+            continue
+        if not any(colour(cells.get((x + dx, y + dy, z + dz), ("air", {}))[0]) == c
+                   for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)) for dy in (1, -1)):
+            continue
+        main, other, share = _ROOF_PICK[_ROOF_ALIAS.get(n, n)]
+        swaps.append(((x, y, z), other if h3(x, y, z, seed) < share else main, props))
+    for c, n, props in swaps: cells[c] = (n, props)
+    return bp
+
 def finish_doctrine(bp, ladder=VALE_STONE, family=STONE_FAMILY, planters=True, wood="spruce"):
     """Canvas first, paint last: repaint the stone walls by the doctrine, dress the foot of the stone walls
     (07-detailing: sign-boxed bushes and spruce lantern stands), then finish the blueprint."""
     paint_stone(bp, ladder, family)
     if planters: ground_dressing(bp, set(ladder) | set(family), wood)
+    texture_roofs(bp)
     return bp.finish()
 
 def finish_detail(bp, P=None):
@@ -93,6 +145,7 @@ def finish_detail(bp, P=None):
             if core:
                 for c in set(bp.cells) - before:
                     if not (x0 <= c[0] <= x1 and z0 <= c[2] <= z1): del bp.cells[c]
+    texture_roofs(bp)
     return bp.finish()
 
 def smooth_noise(a, b, seed, cell=4.0):
