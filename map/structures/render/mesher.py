@@ -351,6 +351,11 @@ def model(n, p):
     if n == "ladder":
         return [((0, 0, 0, 1, 1, 1 / 16), {"side": "ladder"}, {"cut": 1})]
     if n == "moss_carpet": return [((0, 0, 0, 1, 1 / 16, 1), {"side": "moss_block"}, {})]
+    if n == "pale_moss_carpet": return [((0, 0, 0, 1, 1 / 16, 1), {"side": "pale_moss_block"}, {})]
+    if n == "short_dry_grass": return [("cross", {"side": "short_dry_grass"}, {"cut": 1})]
+    if n == "candle" or n.endswith("_candle"):   # one candle, a 2x6 stick (lit: the wick glows)
+        t = f"candles/{n}{'_lit' if p.get('lit') else ''}"
+        return [((7 / 16, 0, 7 / 16, 9 / 16, 6 / 16, 9 / 16), {"side": f"{t}@0,8,2,14", "top": f"{t}@0,6,2,8"}, {"cut": 1, **({"glow": 1} if p.get("lit") else {})})]
     if n == "snow_layer": return [((0, 0, 0, 1, (2 * (int(p.get("height", 0)) + 1)) / 16, 1), {"side": "snow"}, {})]
     if n == "rail": return [((0, 0, 0, 1, 1 / 16, 1), {"side": "rail_normal"}, {"cut": 1})]
     if n in ("siege:portcullis", "siege:castle_gate"):
