@@ -5,14 +5,14 @@ import { world, ItemStack } from "@minecraft/server";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
 import { applyFilter } from "../core/events.js";
 import { COLORS, GUARD_TYPES } from "./constants.js";
-import { GUARD_ARMOR, GUARD_COST, armorTier, guardCount, guardLimit, guardTag, recruitGuard, upgradeGuard } from "./guards.js";
+import { GUARD_ARMOR, armorTier, guardCount, guardLimit, guardTag, upgradeGuard } from "./guards.js";
 import { keepHealth } from "./keep.js";
 import { nextSiegeDay } from "./siege.js";
 import { state } from "./state.js";
 import { TIERS, settlementAt, tierOf, landRadius } from "./territory.js";
 import { countItem, overworld } from "./util.js";
 import { funds } from "../economy/coins.js";
-import { coins, worth } from "../economy/rules.js";
+import { coins } from "../economy/rules.js";
 
 // ---------- Menus: the Keep, the Barracks ----------
 

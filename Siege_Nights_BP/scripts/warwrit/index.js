@@ -22,17 +22,18 @@
 // demandSent / demandAnswered { from, to, amount, paid }.
 
 import { world, system, GameMode } from "@minecraft/server";
-import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
+import { ActionFormData, MessageFormData, ModalFormData } from "@minecraft/server-ui";
 import { isReady, onTick, moduleStore, emit, on, isAlly, keepOf, addKeepMenuButtons, recordWin } from "../siege/api.js";
 import { addFilter } from "../core/events.js";
 import { charge, giveCoins, banked, robBank } from "../economy/coins.js";
 import { coins } from "../economy/rules.js";
-import { holdWanted } from "../siege/guards.js";
+import { holdWanted, guardCount } from "../siege/guards.js";
 import { barGates } from "../settle/walls.js";
 import { holdsRelic, keeperAway } from "../vault/index.js";
 import { guardTag } from "../siege/guards.js";
 import { settlementAt } from "../siege/territory.js";
 import { WRIT, assaultDay, phase, groundsFor, GROUNDS_TEXT, UNJUST_TEXT, feeFor, pairKey, demandAmount, cantDeclare } from "./rules.js";
+import { ARMY, startMarch, endMarch, resumeMarch, assaultTick, clearTeams, freeSlot, sweepStragglers } from "./army.js";
 import "./tests.js";
 
 const store = moduleStore("siege:warwrit", () => ({ writs: {}, peace: {}, feuds: {}, refused: {}, demands: {}, oaths: {}, ghosts: {} }));
@@ -53,6 +54,8 @@ const sideOf = (lead, id) => id === lead || isAlly(lead, id);
 addFilter("openToAttack", (open, { owner }) => open || phaseOf(S().writs[owner]) === "assault");
 // Its gates stay shut from the declaration to dawn (settle/walls.js), and its Keep Banner can't be carried off
 addFilter("gatesBarred", (barred, { owner }) => barred || !!S().writs[owner]);
+// fallen soldiers of either side wait in the Barracks until the assault is over
+addFilter("guardRetrainHeld", (held, { owner }) => held || Object.entries(S().writs).some(([d, w]) => phaseOf(w) === "assault" && (sideOf(d, owner) || sideOf(w.attacker, owner))));
 addFilter("bannerShielded", (shielded, { owner }) => shielded || !!S().writs[owner]);
 // An unjust war (no grounds): the defender's walls, vault, Keep and guards are twice as strong for it
 // (not on top of the away keeper's doubling, vault/index.js)
@@ -111,9 +114,20 @@ async function declareMenu(player, defender) {
       + "Crack their vault before dawn to win. Their Keep Banner can't be taken, and afterwards there is peace between you for a few days.")
     .button1("Not now").button2(`Declare (${coins(fee)})`).show(player);
   if (res.canceled || res.selection !== 1) return;
+  const slot = freeSlot(s.writs);
+  if (slot === undefined) return say(player, "§7Too many wars are being fought at once. Wait for one to end.");
+  // the army slider: what share of your soldiers rides with you (Mateo: 0, 25, 50, 75 or 100%)
+  const army = new ModalFormData().title("Your army")
+    .slider(`How much of your army marches with you? ${guardCount(attacker)} soldiers. The rest guard home.\nThe marchers ride with you from now until the siege ends.`, 0, 100, { valueStep: 25, defaultValue: 50 });
+  army.submitButton?.(`Declare (${coins(fee)})`);
+  const pick = await army.show(player);
+  if (pick.canceled) return;
+  const picked = Number((pick.formValues ?? []).find((v) => typeof v === "number") ?? 0);
+  const share = ARMY.shares.reduce((best, v) => (Math.abs(v - picked) < Math.abs(best - picked) ? v : best), 0);
   if (cantDeclare({ attacker, defender, hasKeep: true, targetKeep: keepOf(defender), peaceUntil: s.peace[pairKey(attacker, defender)], writs: s.writs, now: now() })) return;
+  if (freeSlot(s.writs) === undefined) return;
   if (!charge(player, fee, "warWrit")) return say(player, `§cThis War Writ costs ${coins(fee)}.`);
-  s.writs[defender] = { attacker, day, grounds: grounds ?? "none", unjust: !grounds, at: now() };
+  s.writs[defender] = { attacker, day, grounds: grounds ?? "none", unjust: !grounds, at: now(), slot, share };
   delete s.feuds[`${attacker}>${defender}`];
   if (!grounds) { s.oaths ??= {}; s.oaths[attacker] = now() + WRIT.oathMs; }
   store.save();
@@ -122,7 +136,11 @@ async function declareMenu(player, defender) {
     ? `§4§l${player.name} has declared war on ${nameOf(defender)}§r§4 (${why}). The assault comes ${when}.`
     : `§4§l${player.name} has declared an unjust war on ${nameOf(defender)}!§r§4 The assault comes ${when}. ${player.name} is an Oathbreaker for three days: anyone may declare war on them.`);
   emit("baseAttacked", { owner: defender, kind: "warWrit", text: `${player.name} has declared war on you. The assault comes ${when}; your gates are shut.`, by: attacker });
-  emit("writDeclared", { attacker, defender, grounds, day });
+  if (share > 0) {
+    const n = startMarch(s.writs[defender], defender, share);
+    say(player, n ? `§6${n} soldiers mount up and ride with you. They follow you until the siege ends.` : "§7None of your soldiers are near enough to ride with you.");
+  }
+  emit("writDeclared", { attacker, defender, grounds, day, share });
 }
 
 // ---------- demands ----------
@@ -224,6 +242,8 @@ on("vaultBreached", ({ owner, by }) => {
 function endWrit(defender, w, how = "dawn") {
   const s = S();
   delete s.writs[defender];
+  endMarch(defender);
+  clearTeams(w.slot ?? 0);
   s.peace[pairKey(w.attacker, defender)] = now() + WRIT.peaceMs;
   store.save();
   const winner = w.cracked ? w.attacker : defender;
@@ -310,6 +330,7 @@ onTick("warwrit", 20, () => {
     if (!keepOf(defender)) { delete s.writs[defender]; store.save(); continue; } // their settlement is gone
     const p = phaseOf(w);
     if (p === "over") { endWrit(defender, w); continue; }
+    if (w.share > 0) resumeMarch(w, defender); // after a restart, pick the marchers up again
     if (p === "assault") {
       if (!w.started) {
         w.started = true;
@@ -320,6 +341,7 @@ onTick("warwrit", 20, () => {
         emit("writAssault", { attacker: w.attacker, defender });
       }
       if (system.currentTick % 40 < 20) siegeBar(defender, w);
+      assaultTick(defender, w, sideOf);
       // the attackers are Wanted on the defender's land: archers and Men-at-Arms go for them
       for (const player of world.getPlayers()) {
         try {
@@ -328,6 +350,7 @@ onTick("warwrit", 20, () => {
       }
     }
   }
+  if (system.currentTick % 200 < 20) sweepStragglers((owner) => Object.values(s.writs).some((w) => w.attacker === owner));
   // demands left unanswered for a real day count as refused; old peace, feud and refusal marks are cleared away
   for (const [to, d] of Object.entries(s.demands)) if (t - d.at > WRIT.demandMs) settleDemand(to, false);
   s.oaths ??= {};

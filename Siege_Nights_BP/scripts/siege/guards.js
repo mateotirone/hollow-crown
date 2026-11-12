@@ -163,8 +163,8 @@ world.afterEvents.entitySpawn.subscribe((event) => {
 // online, and goes to whoever killed the guard (a player, or the owner of the guard that did it) as a bounty.
 // Killed by anything else, the money just leaves the game. If the owner can't pay, the guard is lost for good.
 // It is back after RETRAIN_TICKS, or, while a feature holds it ("guardRetrainHeld", a War Writ siege), once that ends.
-export const RETRAIN_TICKS = 2400;
-export const MARCHING_TAG = "siege_marching"; // a guard away at war with its owner: no post, no Barracks // 2 minutes
+export const RETRAIN_TICKS = 2400; // 2 minutes
+export const MARCHING_TAG = "siege_marching"; // a guard away at war with its owner: no post, no Barracks
 const retrain = moduleStore("siege:guard_retrain", () => ({ queue: [] }));
 
 world.afterEvents.entityDie.subscribe((event) => {
