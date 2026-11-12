@@ -506,6 +506,9 @@ addFilter("wallHp", (hp, { block }) => {
   try { const owner = settlementAt(block.location); return owner && keeperAway(owner) ? hp * 2 : hp; } catch { return hp; }
 });
 addFilter("keepHealth", (hp, { owner }) => (keeperAway(owner) ? hp * 2 : hp));
+// While a window is open the settlement can be attacked at all: walls, gates, guards and engines lose the
+// away protection (siege/util.js attackable) and fight at double strength instead
+addFilter("openToAttack", (open, { owner }) => open || !!vaults()[owner]?.openWindow);
 onTick("vault-away-guards", 200, () => {
   if (!isReady()) return;
   const dim = world.getDimension(OVERWORLD);
