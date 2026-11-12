@@ -16,6 +16,7 @@ palettes, texturing, paths, reference); this page is the short list and where to
 - **Depth comes outward**, never by recessing a panel: at least three depth layers on any face over 5 long.
 - **Every overhang is carried** (bracket, post, corbel, truss).
 - **Nothing floats** (Mateo, 2026-11-12): a roof, canopy or vault sits directly on its beam, wall or posts, with no open row between them. Every hanging lantern hangs from a block or a chain up to one. Stacks start at the roof.
+- **No trees in a build's ground** (Mateo, 2026-11-12, after a playtest): a build stamped on the map clears the map's trees (logs, wood, leaves, vines, hanging roots) from its whole area, 8 blocks round it and 32 above it before its first block, so no trunk stands in its dead space and no crown is left floating. The game does it for every boss site and story landmark (`core/clearing.js`), and the map generator keeps whole trees off every stamped town and bridge (`map/genworld.py`, `stampcol`). A new way of stamping builds must do the same. Builds in a town square keep the town's own trees (stamp `clear: false`).
 - **Shutters on at most about 30%** of windows, in symmetric pairs; planters on about a quarter.
 - **Roofs overhang 1** at eaves and verges; ridge the long way; secondary roofs lower; no flat roofs on houses (Emberwaste and Saltreach terraces excepted)
 - **Every roof is textured**: two blocks of the same colour mixed at random (copper keeps its gradient instead)

@@ -329,7 +329,11 @@ def stamp(name, blocks):
         out["blocks"] = [[x - o[0], y - o[1], z - o[2], i] for x, y, z, i in cells]
     else:
         out["cols"] = encode_cols([(x - o[0], y - o[1], z - o[2], i) for x, y, z, i in cells], len(pal))
+    if name in IN_TOWN: out["clear"] = False     # core/clearing.js: a town square keeps the town's own trees
     return out
+
+
+IN_TOWN = {"boss_mirelight", "boss_reeve"}
 
 
 ALPHA = "".join(chr(c) for c in range(35, 127) if c != 92)   # 91 symbols; "!" is a gap

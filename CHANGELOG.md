@@ -84,6 +84,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - Discord alerts, ready for when the group sets up a Discord: siege nights, fallen Keeps, new settlements, Rival Lords marching, the throne changing hands and more can be posted to a Discord channel, with a ping for whoever it hits, even when nobody is online. A Choirsteel template holder who stays away a full day is announced to everyone. Needs a relay account and a small program on an always-on computer (docs/DISCORD.md); without them nothing changes in game.
 
 ### Fixed
+- Builds no longer have the map's trees growing through them: boss sites and story places clear every tree from their ground and the air above before they build, and the map keeps trees off towns and bridges, so no trunks stand in courtyards and no leaves float over roofs.
 - The Rift no longer breaks the first time its veil turns a player back (a missing import in the veil code).
 - The way into the caves at Frostvein Gap and the Sunken Quarry is no longer walled up by the cave's own rock.
 - Trains no longer clip bridge-end parapets, abutments or tunnel arch shoulders: every bought stretch keeps a clear opening 3 wide and 4 high along the whole line.
