@@ -472,6 +472,14 @@ export const ENTRIES = [
     needs: "siege:ironworks",
   },
   {
+    id: "vault", ch: "growth", title: "The Vault",
+    tip: "The Vault Key. Use it on the ground where your vault's stairs should start.",
+    page: "Your relics are safest in a §fvault§r. Open the Town Hall menu and choose §fVault§r, then §fAdd Vault§r: it costs 64 planks and 32 cobbled deepslate and gives you the §fVault Key§r.\n\n"
+      + "Walk to where the stairs should start on your own land, face the way they should go down, and use the key on the ground. Stairs are carved down to an entrance hall and a §fWooden Strongroom§r with a 3x3 vault door. The §fVault Lock§r is in the wall beside the door.\n\n"
+      + "Anyone holding a Vault Key can open your vault, so keep yours safe. Spare keys come from the same menu.",
+    when: ["carry:siege:vault_key", "event:vaultBuilt"],
+  },
+  {
     id: "workings", ch: "wild", title: "Old Workings",
     tip: "An Old Working: dig the ore out of its walls. It grows back in a few days.",
     page: "Five settlements have one of the old king's mines just outside their land, and it is their strength: §firon§r at Frosthelm and Gullcliff, §fgold§r at Redmesa and Dunehold, §fdiamond§r in the Wolfcairn Deeps. Follow the timbered stair down to the stone chamber and dig the ore out of its walls.\n\n"
