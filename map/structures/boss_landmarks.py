@@ -216,12 +216,8 @@ def seneschal():
     # the processional way to the south, faceless statues either side
     for z in range(2, 30):
         for x in range(-2, 3): d.put(x, 0, z, "smooth_sandstone" if (x + z) % 3 else "cut_red_sandstone")
-    for z in range(6, 30, 6):
-        for s in (-1, 1):
-            X = s * 5
-            for y in (1, 2): d.put(X, y, z, "cut_sandstone")
-            d.put(X, 3, z, "smooth_sandstone"); d.put(X, 4, z, "smooth_sandstone"); d.put(X, 5, z, "smooth_quartz")
-            d.put(X - s, 3, z, "smooth_sandstone_slab", half="top"); d.put(X + s, 3, z, "smooth_sandstone_slab", half="top")
+    import faceless_statues as FS   # robed, hooded, faceless figures on plinths, four standing and four fallen
+    FS.avenue(d)
     for c in list(d.cells.keys()):
         if clear(c[0], c[2]) and c[1] >= 0 and c[1] < 16: del d.cells[c]
     return d
