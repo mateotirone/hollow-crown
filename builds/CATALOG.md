@@ -4,7 +4,7 @@
 
 Every build in The Hollow Crown, designed or not. Add an entry the moment a build is asked for, even with no design yet, and move its status on as it progresses. Run  node tools/build-catalog.mjs  after editing to rewrite builds/CATALOG.md (check.mjs fails if it is stale).
 
-**95 builds:** 16 not started, 12 designed, 10 in viewer, 57 in game.
+**95 builds:** 9 not started, 19 designed, 10 in viewer, 57 in game.
 
 Statuses:
 
@@ -36,8 +36,8 @@ A ★ marks builds that no earlier list had (added in the 2026-11-12 audit).
 | Sunscar market hall | Emberwaste | in viewer | town-sunscar | Procedurally generate terrain-aware towns | `map/structures/regions_towns.py` | Waiting in PR #163. |
 | Gull's Rest quay, lighthouse and boathouse (3) | Saltreach | in viewer | town-gulls_rest | Procedurally generate terrain-aware towns | `map/structures/regions_towns.py` | Gull's Rest has no water in its ward, so these are not placed yet. |
 | Mirelight stilt houses (2) | Blackfen | in viewer | town-mirelight | Procedurally generate terrain-aware towns | `map/structures/regions_towns.py` |  |
-| Field windmills | One version per overworld region | in game |  | Procedurally generate terrain-aware towns | `map/structures/towngen_build.py` | All towns use the Vale look today; regional windmills are an open item. |
-| ★ Regional wells, field fencing and boardwalks | One version per overworld region | not started |  | Procedurally generate terrain-aware towns |  | Towngen falls back to the Vale well/mill; field fencing design is open. |
+| Field windmills | One version per overworld region | in game |  | Finish the remaining world builds | `map/structures/towngen_build.py` | All towns use the Vale look today; regional windmills being built by the remaining world builds thread. |
+| ★ Regional wells and field fencing | One version per overworld region | not started |  | Finish the remaining world builds |  | Mateo approved 2026-11-12 ("lets do them all"). Being built by the remaining world builds thread. |
 
 ## Settlements
 
@@ -65,19 +65,19 @@ A ★ marks builds that no earlier list had (added in the 2026-11-12 audit).
 | Settlement walls, levels 1-10 (50) | One version per overworld region | in game | walls | Build settlement building and mason shop | `Siege_Nights_BP/scripts/settle/walldata.js` | Wall steps and tower ladders PR #161; physics PR #162. |
 | Gates and portcullis (swinging) | One version per overworld region | in game |  | Build settlement building and mason shop | `Siege_Nights_BP/blocks/castle_gate.json` |  |
 | Plot marker (post, sign, lantern, pennant) | Anywhere / region-neutral | in game |  | Design the settlement building placement mechanic | `Siege_Nights_BP/scripts/settle/plotmarker.js` | 3D mock-up https://claude.ai/artifact/7C2eyCUPG5dSEUTE9pWq87 ; in game as a block, the full mock-up look is not built. |
-| ★ Construction site stages (scaffold, staged rise) | Anywhere / region-neutral | not started |  | Design the settlement building placement mechanic |  | Approved in the placement design (crews build alone over minutes); no scaffold look drawn yet. |
+| ★ Construction site stages (scaffold, staged rise) | Anywhere / region-neutral | not started |  | Finish the remaining world builds |  | Mateo approved 2026-11-12 ("lets do them all"). Being built by the remaining world builds thread. |
 | Railway station: Halt, Station, Junction, Grand Station (20) | One version per overworld region | in game | settle-* | Design the train system | `map/structures/stations.py` | Waiting in PR #168. Detailed backs in PR #168. |
 | Trade House wing (small, two storeys) (10) | One version per overworld region | in game | settle-* | Design the train system | `map/structures/stations.py` | To be replaced by the Trade Outpost if Mateo approves that design. |
 | Engine shed (5) | One version per overworld region | in game | settle-* | Design the train system | `map/structures/stations.py` |  |
-| ★ Trade Outpost (Exports/Imports crates, trade board), 4 stages | One version per overworld region | not started |  | Design train station trade routes |  | Design doc https://claude.ai/artifact/UkR4zp2NL5tzfrZKva2gWX awaiting Mateo's OK; no building drawn. |
+| ★ Trade Outpost (Exports/Imports crates, trade board), 4 stages | One version per overworld region | not started |  | Design train station trade routes |  | Mateo approved 2026-11-12 ("lets do them all"). Trade routes thread drawing the building; design doc https://claude.ai/artifact/UkR4zp2NL5tzfrZKva2gWX |
 | Vault strongrooms, 5 tiers x 3 layouts (15) | Anywhere / region-neutral | in viewer | vault | Design sieges on other settlements | `map/structures/vault_rooms.py` | Waiting in PR #180. In game via PR #180 (all treasury layout until Mateo picks). |
 | ★ Regal Safe (2x2 strongbox) | Anywhere / region-neutral | designed |  | Design sieges on other settlements |  | Waiting in PR #180. Block in PR #180, texture awaiting Mateo's review. |
 | ★ Siege Workshop | Anywhere / region-neutral | in game |  | Design sieges on other settlements | `Siege_Nights_BP/blocks/workshop.json` | A single block today, no building around it. |
 | ★ Guild Factor's post / Guild Board | Anywhere / region-neutral | in game |  | Design a repeatable material gathering loop | `Siege_Nights_BP/scripts/guild` | An NPC job in the six towns; no counter or board build. |
 | ★ Forester's Lodge tree farm | One version per overworld region | in game |  | Build custom tree assets | `Siege_Nights_BP/scripts/forestry` | Grove plan in game, not in the viewer and not on the building skill. |
 | Ironworks: Ore Pit, Bloomery, Trip-Hammer Forge (own plot) (3) | One version per overworld region | in viewer | ironworks | Design a repeatable material gathering loop | `map/structures/ironworks/spec.py` | v3 on the skill awaiting Mateo's OK; the game still raises the old hand-drawn design. Only one style so far; regional versions to follow. |
-| ★ Gold Sluice: Panning Sluice, Washing Mill, Assay House (3) | Emberwaste | not started |  | Design a repeatable material gathering loop |  | Design under way in the material-loop thread (2026-11-12 17:05 UTC); move to designed when its spec lands. |
-| ★ Deep Shaft (diamond works) (3) | Frostmarch | not started |  | Design a repeatable material gathering loop |  | Named in the material loop; not asked for yet. |
+| ★ Gold Sluice: Panning Sluice, Washing Mill, Assay House (3) | Emberwaste | designed | goldsluice | Design a repeatable material gathering loop |  | Waiting in PR #190. Designed on the skill in PR #190. |
+| ★ Deep Shaft (diamond works) (3) | Frostmarch | not started |  | Design a repeatable material gathering loop |  | Mateo approved 2026-11-12 ("lets do them all"). Material loop thread designing it. |
 | Guard posts and wall steps | Anywhere / region-neutral | in game |  | Build settlement building and mason shop | `Siege_Nights_BP/scripts/guardposts` | Markers and steps, not a building. |
 
 ## Strongholds
@@ -85,19 +85,19 @@ A ★ marks builds that no earlier list had (added in the 2026-11-12 audit).
 | Build | Region | Status | Viewer | Owner thread | Source | Notes |
 |---|---|---|---|---|---|---|
 | The Citadel (one grand layout), Vale style | Aldmere Vale | designed |  | Redesign the Citadel as one grand layout |  | v3 with gardens, keep and tower interiors on branch claude/project-thread-2u2gp5 (no PR yet); hosted viewer https://claude.ai/artifact/DAH2CsQ3d9L88z9uXC39yY . The game still raises the old crown/layout.js Citadel (shown in viewer 'strongholds'). |
-| The Citadel in Frostmarch, Saltreach, Emberwaste and Blackfen styles (4) | One version per overworld region | not started |  | Redesign the Citadel as one grand layout |  | Next after the Vale version is signed off. |
-| ★ The Hollow's stronghold (Citadel layout in the Hollow kit) | The Hollow | not started |  | Redesign the Citadel as one grand layout |  | Mateo 2026-11-12: same build method as the Citadel, completely different style. |
+| The Citadel in Frostmarch, Saltreach, Emberwaste and Blackfen styles (4) | One version per overworld region | not started |  | Redesign the Citadel as one grand layout |  | Mateo approved 2026-11-12 ("lets do them all"). Citadel thread, after the Vale version. |
+| ★ The Hollow's stronghold (Citadel layout in the Hollow kit) | The Hollow | not started |  | Redesign the Citadel as one grand layout |  | Mateo approved 2026-11-12 ("lets do them all"). Citadel thread: same layout method, Hollow kit. |
 
 ## Wonders
 
 | Build | Region | Status | Viewer | Owner thread | Source | Notes |
 |---|---|---|---|---|---|---|
-| ★ Wonder: Great Lighthouse (6) | Saltreach | not started |  | Add Rival Lord settlers, wonders and events |  | Six fixed map sites (Mateo card 16:45 UTC); six build stages each. |
-| ★ Wonder: King's Bell Tower (6) | Aldmere Vale | not started |  | Add Rival Lord settlers, wonders and events |  |  |
-| ★ Wonder: Rimeforge Hall (6) | Frostmarch | not started |  | Add Rival Lord settlers, wonders and events |  |  |
-| ★ Wonder: Sun Gate Caravanserai (6) | Emberwaste | not started |  | Add Rival Lord settlers, wonders and events |  |  |
-| ★ Wonder: Lantern Spire (6) | Blackfen | not started |  | Add Rival Lord settlers, wonders and events |  |  |
-| ★ Wonder: Great Horse Fair (6) | Aldmere Vale | not started |  | Add Rival Lord settlers, wonders and events |  |  |
+| ★ Wonder: Great Lighthouse (6) | Saltreach | designed | wonders | Add Rival Lord settlers, wonders and events |  | Waiting in PR #181. Six fixed map sites, six build stages each; designs, game code and viewer section in PR #181. |
+| ★ Wonder: High Watch (6) | Aldmere Vale | designed | wonders | Add Rival Lord settlers, wonders and events |  | Waiting in PR #181. Six fixed map sites, six build stages each; designs, game code and viewer section in PR #181. |
+| ★ Wonder: Rimeforge Hall (6) | Frostmarch | designed | wonders | Add Rival Lord settlers, wonders and events |  | Waiting in PR #181. Six fixed map sites, six build stages each; designs, game code and viewer section in PR #181. |
+| ★ Wonder: Sun Gate Caravanserai (6) | Emberwaste | designed | wonders | Add Rival Lord settlers, wonders and events |  | Waiting in PR #181. Six fixed map sites, six build stages each; designs, game code and viewer section in PR #181. |
+| ★ Wonder: Lantern Spire (6) | Blackfen | designed | wonders | Add Rival Lord settlers, wonders and events |  | Waiting in PR #181. Six fixed map sites, six build stages each; designs, game code and viewer section in PR #181. |
+| ★ Wonder: Great Horse Fair (6) | Aldmere Vale | designed | wonders | Add Rival Lord settlers, wonders and events |  | Waiting in PR #181. Six fixed map sites, six build stages each; designs, game code and viewer section in PR #181. |
 
 ## World
 
@@ -107,7 +107,7 @@ A ★ marks builds that no earlier list had (added in the 2026-11-12 audit).
 | Plot relic landmarks (12) (12) | One version per overworld region | designed | landmarks | Finish the remaining world builds |  | Waiting in PR #164. Self-build near players; viewer section 'landmarks' comes with PR #164. |
 | Story places: Crownhold, Bellhollow, Ashen Gate chapterhouse, Ashen Watch, Corvin's Tower, Old Mag's hut, Nell Sedge's raft-house, the Deepforge, the Cinder Roost (9) | One version per overworld region | designed | landmarks | Finish the remaining world builds |  | Waiting in PR #164. |
 | Seven thin-place caves with Fennick's camps (7) | One version per overworld region | in game |  | Settle the road to the Rift | `Siege_Nights_BP/scripts/undertow/thinplaces.js` | Script-built and plain; hosted 3D https://claude.ai/artifact/QFoys3C5GaHFXe415EkJjo . Not in the local viewer or on the building skill. |
-| ★ Sealed ways out: the Shut Pass, the Far Shore, the Horizon Isles (3) | Anywhere / region-neutral | not started |  | Build the plots and world map |  | Reserved in plots/config.js EXPANSION; no door/gate build yet. |
+| ★ Sealed ways out: the Shut Pass, the Far Shore, the Horizon Isles (3) | Anywhere / region-neutral | not started |  | Finish the remaining world builds |  | Mateo approved 2026-11-12 ("lets do them all"). Being built by the remaining world builds thread. |
 | Dragon nest (9x9, natural, unbreakable) | Anywhere / region-neutral | in game |  | Redesign the dragon nest | `Siege_Nights_BP/scripts/dragons/nestplan.js` |  |
 | Custom trees (31 species, six regions) (31) | One version per overworld region | in game | trees | Build custom tree assets | `map/trees/build_trees.py` |  |
 | Welcome hall: map miniature on its cloud | Anywhere / region-neutral | in game | miniature | Build a scaled-down map in the welcome hall | `map/structures/miniature_scene.py` |  |
@@ -122,7 +122,7 @@ A ★ marks builds that no earlier list had (added in the 2026-11-12 audit).
 | Boss site: Gull Bay chapel and altar | Saltreach | in game |  | Design how regional bosses unlock | `Siege_Nights_BP/scripts/unlocks/bride.js` | Script-built, not in the viewer. |
 | Boss site: Sunscar vault with five faceless statues | Emberwaste | in game |  | Design how regional bosses unlock | `Siege_Nights_BP/scripts/unlocks/seneschal.js` | Script-built, not in the viewer. |
 | Boss site: the Cradle Tree and root cradle (Mirelight) | Blackfen | in game |  | Design how regional bosses unlock | `Siege_Nights_BP/scripts/unlocks/mother.js` | Script-built, not in the viewer. |
-| ★ Boss site: Warlord King's ground | Anywhere / region-neutral | not started |  | Design how regional bosses unlock |  | The Warlord King has a fight but no dedicated arena build; needs Mateo's call on whether he gets one. |
+| ★ Boss site: Warlord King's ground | Anywhere / region-neutral | not started |  | Finish the remaining world builds |  | Mateo said yes 2026-11-12; the remaining world builds thread is building it (large landmark, in the viewer). |
 
 ## Travel
 
@@ -132,7 +132,7 @@ A ★ marks builds that no earlier list had (added in the 2026-11-12 audit).
 | Rail tunnel portals | One version per overworld region | designed |  | Build the plots and world map |  | Waiting in PR #164. portal.py on the skill (PR #164); map thread calls it inside rail works. |
 | Rail beds, cuttings and embankments (built on purchase) | Anywhere / region-neutral | in game |  | Design the train system | `Siege_Nights_BP/scripts/trains/route_game.js` |  |
 | Custom 3D track, switches and crossings | Anywhere / region-neutral | in game |  | Design the train system | `Siege_Nights_BP/scripts/trains` |  |
-| ★ Bridleway signposts | One version per overworld region | not started |  | Build the plots and world map |  | In the map plan (bridleways, signposts) but no signpost build found. |
+| ★ Bridleway signposts | One version per overworld region | not started |  | Finish the remaining world builds |  | Mateo approved 2026-11-12 ("lets do them all"). Being built by the remaining world builds thread. |
 
 ## The Hollow
 
