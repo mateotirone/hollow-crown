@@ -275,6 +275,7 @@ export function piecesTick() {
   const heartOld = p.heart && (p.heartV ?? 1) < SEAT_DESIGN.v;
   const heartDue = !p.heart || heartOld, approachDue = (p.approachV ?? 0) < APPROACH_DESIGN.v;
   seatEnd(d, heartDue || approachDue);
+  ranksGround(d, p);
   if (heartDue && chunksBuilt(-40, 2300, 40, 2440)) buildHeart(d, heartOld);
   // The way across to it, once the cliff it leaves from and the air it hangs in are built.
   if (approachDue && chunksBuilt(SEAT_BOX.x1, SEAT_BOX.z1, SEAT_BOX.x2, HEART_EDGE_Z + 40)) buildApproach(d);
@@ -291,38 +292,53 @@ export function piecesTick() {
 // one; then both are stamped. The rest of the cliff edge is carved on its own, as its land gets built.
 export const SEAT_BOX = { x1: -64, z1: HEART_EDGE_Z - 40, x2: 68, z2: HEART.center.z + HEART.outerRadius + 10 };
 export const SEAT_NEAR = 160; // how close to the cliff end (blocks) a player must be for the Seat to be built
-const SEAT_AREA = "hc_undertow_seat";
-let seatHeld; // undefined until the first check this session (an area left from last session is cleared)
-
-// The chunks of SEAT_BOX not built yet, nearest the cliff first. Pure on isBuilt.
-export function seatChunksLeft(built = isBuilt) {
+// The chunks of a box not built yet, in rows from its low-z side. Pure on isBuilt.
+export function boxChunksLeft(box, built = isBuilt) {
   const out = [];
-  for (let cz = Math.floor(SEAT_BOX.z1 / 16); cz <= Math.floor(SEAT_BOX.z2 / 16); cz++)
-    for (let cx = Math.floor(SEAT_BOX.x1 / 16); cx <= Math.floor(SEAT_BOX.x2 / 16); cx++)
+  for (let cz = Math.floor(box.z1 / 16); cz <= Math.floor(box.z2 / 16); cz++)
+    for (let cx = Math.floor(box.x1 / 16); cx <= Math.floor(box.x2 / 16); cx++)
       if (chunkInRange(cx, cz) && !built(cx, cz)) out.push([cx, cz]);
   return out;
 }
+export const seatChunksLeft = (built = isBuilt) => boxChunksLeft(SEAT_BOX, built);
 // Is anyone near enough to the end of the Long Climb to need the Seat? Pure.
 export const nearSeatEnd = (locs) => locs.some((l) => Math.abs(l.x) < L.halfWidth + 40 && l.z > HEART_EDGE_Z - SEAT_NEAR);
 
-function seatEnd(d, due) {
-  const near = due && nearSeatEnd(world.getAllPlayers().filter((pl) => pl.dimension.id === UNDERTOW_ID).map((pl) => pl.location));
+// Hold a box loaded with a ticking area while it is wanted, and build its chunks one at a time.
+const held = {}; // area name -> true/false (undefined until the first check this session: a leftover area is cleared)
+function holdAndBuild(d, area, box, want) {
   const cmd = (c) => { try { d.runCommand(c); } catch { /* no area by that name, or the command is busy */ } };
-  if (!near) {
-    if (seatHeld !== false) { cmd(`tickingarea remove ${SEAT_AREA}`); seatHeld = false; }
+  if (!want) {
+    if (held[area] !== false) { cmd(`tickingarea remove ${area}`); held[area] = false; }
     return;
   }
-  if (!seatHeld) {
-    cmd(`tickingarea remove ${SEAT_AREA}`);
-    cmd(`tickingarea add ${SEAT_BOX.x1} 0 ${SEAT_BOX.z1} ${SEAT_BOX.x2} 0 ${SEAT_BOX.z2} ${SEAT_AREA} true`);
-    seatHeld = true;
+  if (!held[area]) {
+    cmd(`tickingarea remove ${area}`);
+    cmd(`tickingarea add ${box.x1} 0 ${box.z1} ${box.x2} 0 ${box.z2} ${area} true`);
+    held[area] = true;
   }
   if (job) return; // the builder is busy: next time
-  const next = seatChunksLeft()[0];
+  const next = boxChunksLeft(box)[0];
   if (!next) return;
   const ops = planChunk(next[0], next[1]);
   if (builtOld(next[0], next[1])) ops.unshift(...clearOps(next[0], next[1], lowestGround(next[0], next[1])));
   job = { cx: next[0], cz: next[1], ops, i: 0 }; // buildTick carries it out (an unloaded chunk is simply tried again)
+}
+
+const hollowLocs = () => world.getAllPlayers().filter((pl) => pl.dimension.id === UNDERTOW_ID).map((pl) => pl.location);
+function seatEnd(d, due) {
+  holdAndBuild(d, "hc_undertow_seat", SEAT_BOX, due && nearSeatEnd(hollowLocs()));
+}
+
+// The Standing Ranks are stage 2 of Morvane's fight, but they stand out in the open country east of the Spine,
+// where someone who kept to the path has never been, so nothing was built there and the stage was just dark
+// (Mateo, 2026-11-12). Once the Choir is silenced, while anyone is in the Hollow, their ground is built.
+export const RANKS_SITE = SITES.find((s) => s.id === "standing_ranks");
+export const RANKS_BOX = { x1: RANKS_SITE.x - RANKS_SITE.r - 4, z1: RANKS_SITE.z - RANKS_SITE.r - 4, x2: RANKS_SITE.x + RANKS_SITE.r + 4, z2: RANKS_SITE.z + RANKS_SITE.r + 4 };
+export const ranksReady = () => !!pieces().ranks && boxChunksLeft(RANKS_BOX).length === 0;
+function ranksGround(d, p) {
+  const want = !!load("hc:undertow_progress", {}).choir && !(p.ranks && boxChunksLeft(RANKS_BOX).length === 0) && hollowLocs().length > 0;
+  holdAndBuild(d, "hc_undertow_ranks", RANKS_BOX, want);
 }
 
 // The cliff edge outside SEAT_BOX: carved column by column once the land at that column is built.

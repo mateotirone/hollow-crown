@@ -2,7 +2,7 @@
 import { addTests, assert } from "../core/tests.js";
 import { COURT_DESIGN, SEAT_DESIGN, APPROACH_DESIGN } from "./arenas_data.js";
 import { heightAt, heartEdge, HEART_EDGE_Z } from "./terrain.js";
-import { edgeCarveOps, SEAT_BOX, seatChunksLeft, nearSeatEnd } from "./builder.js";
+import { edgeCarveOps, SEAT_BOX, seatChunksLeft, nearSeatEnd, RANKS_BOX, RANKS_SITE, boxChunksLeft } from "./builder.js";
 import { stampCells } from "./stamp.js";
 import { COURT, HEART } from "./layout.js";
 import { singerSpot, CHOIR } from "./choir.js";
@@ -32,6 +32,12 @@ addTests("hollow arenas", {
     assert(left.length === chunks && left[0][1] === Math.floor(SEAT_BOX.z1 / 16), "chunks nearest the cliff first");
     assert(nearSeatEnd([{ x: 0, z: HEART_EDGE_Z - 2 }]) && nearSeatEnd([{ x: 30, z: 2200 }]), "someone at the cliff end or coming up the climb");
     assert(!nearSeatEnd([{ x: 0, z: 1600 }]) && !nearSeatEnd([{ x: 600, z: 2320 }]), "not from the Court, nor far out in the open country");
+  },
+  "the Standing Ranks (Morvane's stage 2) are built from one loadable box (Mateo 2026-11-12)": () => {
+    const r = RANKS_SITE;
+    assert(RANKS_BOX.x1 <= r.x - r.r && RANKS_BOX.x2 >= r.x + r.r && RANKS_BOX.z1 <= r.z - r.r && RANKS_BOX.z2 >= r.z + r.r, "the box covers the whole site");
+    const n = boxChunksLeft(RANKS_BOX, () => false).length;
+    assert(n > 0 && n <= 100, `a ticking area holds at most 100 chunks; the Ranks box is ${n}`);
   },
   "the Court's floor is whole and open to the fight's outer ring, with the Singers' spots clear": () => {
     const s = solidAt(COURT_DESIGN);

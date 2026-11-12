@@ -37,7 +37,7 @@
 import { world, system } from "@minecraft/server";
 import { addTests, assert, assertEqual, hitWall, settlementAt, UNBREAKABLE } from "../siege/api.js";
 import { UNDERTOW_ID } from "../undertow/layout.js";
-import { SEAT, RANKS, FALL_SHAFTS, dropSeatBand, rebuildSeat, ranksSpots, pocket, pocketReady, requestPockets, overworldStage } from "../undertow/finale.js";
+import { SEAT, RANKS, FALL_SHAFTS, dropSeatBand, rebuildSeat, ranksSpots, ranksReady, pocket, pocketReady, requestPockets, overworldStage } from "../undertow/finale.js";
 import { registerBoss, startBoss, fightOf, rebind, stack } from "./bossCore.js";
 import { lance } from "./bosses.js";
 import { playReveal } from "./reveal.js";
@@ -113,6 +113,9 @@ export function finalePlace(key, partySize = 1) {
     return { center: seatCentre(), radius: SEAT.outerRadius + 2, ring: 14, rings: floorRings(SEAT.outerRadius + 1, MORVANE.floor.step, SEAT.innerRadius + 2), drop: dropSeatBand, rebuild: rebuildSeat };
   }
   if (key === "ranks") {
+    // Their ground and armour are built after the Choir falls (builder.js ranksGround). Until then the stage is
+    // fought where he is, never in the empty dark of unbuilt land (Mateo 2026-11-12: "the second stage is just dark").
+    if (!ranksReady()) return undefined;
     const center = { x: RANKS.x + 0.5, y: RANKS.y + 1, z: RANKS.z + 0.5 };
     return { center, radius: RANKS.r, entry: { x: RANKS.x + 3.5, y: RANKS.y + 1, z: RANKS.z - 9.5 },
       suits: ranksSpots().sort((a, b) => flat(a, center) - flat(b, center)).filter((q) => flat(q, center) > 5) };
