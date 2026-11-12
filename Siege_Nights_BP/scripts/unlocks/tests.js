@@ -1,6 +1,6 @@
 import { addTests, assert, assertEqual } from "../siege/api.js";
 import { CLOCKS, KEEPERS, POSTS, makePuzzle, TOWER_POST, solutions, statementText, clockAnswer, fallbackPuzzle, WRONG_COOLDOWN_TICKS } from "./keepers.js";
-import { WELL, RING, wellOps, chamberOps, stairSteps, spindleOps, drainLayers, plugOps, postOps, postSpot, faceToCenter } from "./well_plan.js";
+import { CLOCKTOWER, WELL, RING, wellOps, chamberOps, stairSteps, spindleOps, drainLayers, plugOps, postOps, postSpot, faceToCenter } from "./well_plan.js";
 import { fullPlan, crankAnswer, inChamber, keeperBody, MILLBROOK_SQUARE } from "./reeve.js";
 import { porchBlocks } from "../opening/millbrook.js";
 
@@ -121,6 +121,11 @@ addTests("unlocks", {
     assertEqual((Math.max(...xs) - Math.min(...xs) + 1) % 2, 1);
     assertEqual(new Set(POSTS.map((_, i) => key({ ...postSpot(i), dy: 0 }))).size, 6, "six separate posts");
     assert(!plan.ops.some((o) => o.dy >= 0 && /bell/.test(o.block)), "Millbrook rings no bells");
+    const high = postOps(CLOCKTOWER.post, true, "x", { clocktower: true });
+    assertEqual(high.ops.length, 1, "in the clocktower the Tower clock is just its clock");
+    assertEqual(high.clock, CLOCKTOWER.clock);
+    assertEqual(key({ ...postSpot(CLOCKTOWER.post), dy: 0 }), "10,0,0", "the clocktower stands over the east street");
+    assertEqual(TOWER_POST, CLOCKTOWER.post);
     const tower = postOps(0, true, "x");
     assert(tower.ops.some((o) => o.dy === 7), "the Tower clock stands taller");
   },

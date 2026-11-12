@@ -5,15 +5,15 @@
 import { huntPlan, chapelPlan, vaultPlan, cradlePlan, mirelightPlan, HUNT, CHAPEL, VAULT, CRADLE } from "../../Siege_Nights_BP/scripts/unlocks/plans.js";
 import { makeHunt, makePews, VILLAGERS } from "../../Siege_Nights_BP/scripts/unlocks/puzzles.js";
 import { wellOps, chamberOps, postOps, WELL } from "../../Siege_Nights_BP/scripts/unlocks/well_plan.js";
-import { CLOCKS, KEEPERS, makePuzzle } from "../../Siege_Nights_BP/scripts/unlocks/keepers.js";
+import { CLOCKS, KEEPERS, makePuzzle, TOWER_POST } from "../../Siege_Nights_BP/scripts/unlocks/keepers.js";
 import { LANDMARKS, stampOps } from "../../Siege_Nights_BP/scripts/unlocks/landmarks.js";
 
 const run = (gen) => { let r; do { r = gen.next(); } while (!r.done); return r.value; };
 const flat = () => ({ top: 0, water: undefined, ground: 0 });
 const here = { x: 0, y: 0, z: 0 };
-const p = makePuzzle(7);
+const p = makePuzzle(7, { towerPost: TOWER_POST });
 const reeveOps = [...chamberOps(), ...wellOps()];
-CLOCKS.forEach((c, i) => reeveOps.push(...postOps(p.layout[i], i === 0, `${c.short} Clock\nkept by\n${KEEPERS[i].name}`).ops));
+CLOCKS.forEach((c, i) => reeveOps.push(...postOps(p.layout[i], i === 0, `${c.short} Clock\nkept by\n${KEEPERS[i].name}`, { clocktower: !!LANDMARKS.reeve }).ops));
 const sites = {
   reeve: { title: "Clockwork Reeve: Millbrook well, clock posts and the chamber", map: { x: null, z: null, note: "the Millbrook square" },
     ops: reeveOps, spots: { chamberFloorDy: WELL.floorY, chamberR: WELL.roomR } },

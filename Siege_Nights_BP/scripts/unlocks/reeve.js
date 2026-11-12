@@ -107,7 +107,7 @@ function put(dim, c, o) {
 /** Every block of the set piece, and where the clocks, signs and keepers go, for a square centred on c. */
 export function fullPlan(p) {
   const ops = [...chamberOps(), ...wellOps()];
-  const posts = CLOCKS.map((clock, i) => postOps(p.layout[i], i === 0, `${clock.short} Clock\n§7kept by\n${KEEPERS[i].name}`));
+  const posts = CLOCKS.map((clock, i) => postOps(p.layout[i], i === 0, `${clock.short} Clock\n§7kept by\n${KEEPERS[i].name}`, { clocktower: !!LANDMARKS.reeve }));
   for (const post of posts) ops.push(...post.ops);
   return { ops, posts };
 }
