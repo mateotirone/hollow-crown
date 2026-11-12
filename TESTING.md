@@ -643,6 +643,16 @@ Shortcuts: `/scriptevent siege:hollow_beat <id>` replays one scene, `siege:hollo
 
 Tell me about: a label sitting inside the block or too high above it, a label covering an NPC's name, or anything clickable with no label.
 
+### Hall Map
+1. In a hall of level 1 or more, open the Town Hall menu and choose "Hall map". ✅ A parchment map of the whole realm fills the screen, with fog over most of it and clear land around where you have walked.
+2. ✅ Your settlement has a banner in your colour with a gold ring; other settlements show in their colours, free plots as dashed rings, towns as little houses, even under fog. No players are shown.
+3. Hover a mark (or tap it on a phone). ✅ Its name shows above it; clicking opens a page about it with "Back to the map".
+4. Walk or fly about 300 blocks somewhere new and open the map again. ✅ That land is no longer fogged. Walk into Crownhold. ✅ The action bar says it is on your hall's map, and it appears there as a purple triangle.
+5. Click the Cartographer's Table inside a level 2+ hall. ✅ The Hall Map opens. Sneak-click it. ✅ The normal cartography table opens.
+6. ✅ The map closes with its X in the corner. If the screen looks broken (a long list of buttons instead of a map), tell me.
+
+Tell me about: marks too small to see, names hidden behind other marks, or the screen not fitting.
+
 ### Town hall build animation
 1. Stand at your cornerstone with a Longhouse built and run `/scriptevent siege:townhall_build 3`.
 2. ✅ The title "The Keep rises" shows once, the camera circles, and the action bar shows only a bar with a percentage that climbs steadily.

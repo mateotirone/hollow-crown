@@ -38,6 +38,7 @@ import { rolesTick, roleForStyle, roleForBoss, ROLE_DEEDS } from "./roles.js";
 import { ROLES, RANKS, ROLE_LORE } from "./skills.js";
 import { treeCells, treeLayout, COLS, ROWS } from "./tree_layout.js";
 import { wallMenu } from "./flyby.js";
+import { hallMap, setHallCheck } from "./hallmap.js";
 export { flyby } from "./flyby.js";
 import { rumorMenu, rumorTick, rumorsFor, describe, jobTier, remember, KEEPSAKES, JOB_KIND } from "./rumors.js";
 
@@ -89,6 +90,9 @@ api.addKeepMenuButtons(({ player, owner }) => [
   ...(hallOf(owner)?.level ? [{ label: "Tree of Oaths", icon: "textures/items/siege_hollow_ember", action: () => treeMenu(player, hallOf(owner).level) }] : []),
 ]);
 
+hallMenuExtras.push({ label: "Hall map\n§8settlements and places you have found", icon: "textures/items/map_filled", action: (player, owner) => hallMap(player, owner) });
+// a Cartographer's Table opens the Hall Map when it stands inside a raised hall (the halls are at most ~45 deep)
+setHallCheck((owner, at) => { const h = hallOf(owner); if (!h?.level || h.lost) return false; const c = h.cs ?? h; return Math.abs(at.x - c.x) <= 48 && Math.abs(at.z - c.z) <= 48 && Math.abs(at.y - c.y) <= 40; });
 hallMenuExtras.push({ label: "Settlement wall\n§8raise it and watch it rise", icon: "textures/blocks/stonebrick", action: (player, owner) => wallMenu(player, owner) });
 hallMenuExtras.push({ label: "Who's online\n§8players, roles and rulers", icon: "textures/ui/multiplayer_glyph_color", action: (player) => rosterMenu(player) });
 hallMenuExtras.push({ label: "Rumor Board\n§8jobs for Renown and coins", icon: "textures/items/paper", action: (player) => rumorMenu(player) });

@@ -179,6 +179,14 @@ export const ENTRIES = [
     when: ["carry:siege:hall_cornerstone", "click:siege:hall_cornerstone"],
   },
   {
+    id: "hall_map", ch: "keep", title: "The Hall Map",
+    tip: "Click the Cartographer's Table in your hall to see every settlement and the places your people have found.",
+    page: "Every town hall keeps a §fHall Map§r. Click the hall's Cartographer's Table, or choose \"Hall map\" in the Town Hall menu.\n\n"
+      + "It shows every settlement in its banner colour and who holds it, rival lords, free plots and the towns. Places your settlement has found appear as you find them, and land nobody from your settlement has walked stays under fog. Allies' travels count too. Players themselves never show on it.\n\n"
+      + "Tap a mark to read about it. Mysteries are never marked: you have to work those out yourself. Sneak-click the table to use it as an ordinary cartography table.",
+    when: ["click:minecraft:cartography_table"],
+  },
+  {
     id: "wall_levels", ch: "keep", title: "The settlement wall",
     tip: "",
     page: "Your settlement can have a ring wall round its land, raised in ten levels from your town hall's Settlement wall page. Each level is paid for in stone and rises while you watch.\n\n"

@@ -521,6 +521,11 @@ Made by `tools/minimap_tiles.py` from the top-down render of the generated world
 - `textures/ui/hc/minimap/mxXXzZZ.png`: 1,600 map views, 72x72 RGBA (Bedrock showed palette PNGs black) (3 x 3 tiles of 64 blocks around tile XX,ZZ), slightly darkened, with plot and town markers: generated
 - `textures/ui/hc/minimap/mnone__.png` (uncharted), `aq..ay.png` (player arrow, 12x12, eight directions), `frame.png` (80x80 border): first pass
 
+## Hall Map (2026-11-12)
+Made by `studio/build_hallmap.py` from the same world render as the minimap. Run it again whenever the world map is regenerated.
+- `textures/ui/hc/map/realm.png`: the 2,500 x 2,500 playable map at 384x384, parchment-toned: generated
+- `textures/ui/hc/map/fog.png`, `clear.png`, `hover.png`, and the 24x24 marks `y_<dye>` (your banner, gold ring), `b_<dye>` (another settlement), `npc`, `town`, `place`, `plot`, each also on fog (`_f`): first pass, drawn by the script
+
 ## Boss health bars (2026-11-11)
 Made by `tools/bossbar_ui.py` (which also wires them into `ui/hud_screen.json`). One look per boss: Clockwork Reeve (brass, clock ticks), Pale Huntsman (bone), Drowned Bride (sea green), Ash Seneschal (embers), Mother of Changelings (moss on violet), Warlord King (blood and iron), the Pretender (tarnished silver), the Choir (pale violet), the Hollow Crown regent and Morvane (dark purple, magenta veins, blue glints).
 - `textures/ui/hc/bossbar/<boss>_frame.png` (196x13, frame with end caps and the empty strip) and `<boss>_fill.png` (182x5, the health): first pass, **awaiting your review**, untested in game
