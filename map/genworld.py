@@ -224,8 +224,18 @@ pn = noise(18, 21) + noise(7, 22) * 0.5
 fenpool &= (pn > 0.16) & (Yf < SEA + 9)
 Yf = np.where(fenpool, np.minimum(Yf, SEA - 1 - (pn - 0.16) * 8), Yf)
 
+# the ground each plot's story stands on (map/plotground.py): Harrowford's backwater, Lanternbog's island, Dunehold's
+# oasis and dunes, Redmesa's mesa, Thistledown's knoll, Wolfcairn's edge, Frosthelm's copper crag, the Tidewatch inlet
+# and the Gullcliff zawn. Never on a road, trail, bridge or the rail line (lines.json "roads" are the rail lines).
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import plotground
+israil = raster(list(L["roads"].values()), lambda f: 7)
+Yf, PG = plotground.shape(GX, GZ, Yf, land, isroad | istrail | roadbridge | israil | isriver, SEA)
+pgwater = PG.water & ~islake & ~isriver
+fenpool &= ~PG.water
+log("plot ground:", int(pgwater.sum()), "water columns")
+
 Y = np.round(Yf).astype(np.int32)
-Y[land & ~fenpool & ~islake] = np.maximum(Y[land & ~fenpool & ~islake], SEA + 1)
+Y[land & ~fenpool & ~islake & ~pgwater] = np.maximum(Y[land & ~fenpool & ~islake], SEA + 1)
 Y[~land] = np.minimum(Y[~land], SEA - 1)            # the sea bed stays under water (no grass specks at sea level)
 Y[isriver] -= 3; Y[bank] -= 1
 water_level = np.full((SIZE, SIZE), -999, np.int32)
@@ -233,6 +243,7 @@ water_level[~land] = SEA
 water_level[isriver] = Y[isriver] + 2
 water_level[fenpool] = SEA
 water_level[islake] = lakelevel[islake]
+water_level[pgwater] = PG.level[pgwater]
 wet = water_level > Y
 
 # ---------------------------------------------------------------- road and trail bridges (the one bridge engine:
@@ -623,6 +634,11 @@ m = steep & ~R[EMBER]; surf[m] = np.where(r1[m] < 0.5, ID["stone"], np.where(R[F
 mesa = R[EMBER] & (steep | (Y > 112))
 # chalk cliffs: grass right to the edge over a thin soil, white where a column stands below its neighbours (faces,
 # ledges), flint shingle with fallen chalk blocks at the foot, and a pale platform of chalk, weed and gravel under the water
+# plot ground (map/plotground.py): dune and beach sand, the Gullcliff zawn's chalk, copper in the Frosthelm crag
+m = PG.sand & ~wet & land; surf[m] = np.where(R[EMBER][m] & (r2[m] < 0.3), ID["red_sand"], ID["sand"]); sub[m] = ID["sandstone"]
+chalk |= PG.chalk & land; chalktop = np.where(PG.chalk, PG.top, chalktop)
+m = PG.turf & ~wet & land & ~steep; surf[m] = np.where(r1[m] < 0.85, ID["grass_block"], ID["coarse_dirt"]); sub[m] = ID["dirt"]; subd[m] = 3
+m = PG.copper & ~wet & (steep | (slope > 0.9)); surf[m] = np.select([r1[m] < 0.3, r1[m] < 0.55, r1[m] < 0.75], [ID["copper_ore"], ID["stone"], ID["andesite"]], ID["tuff"]); sub[m] = ID["stone"]; subd[m] = 1
 pY = np.pad(Y, 1, mode='edge'); nbmax = np.maximum.reduce([pY[:-2, 1:-1], pY[2:, 1:-1], pY[1:-1, :-2], pY[1:-1, 2:]])
 m = chalk & ~wet; surf[m] = np.where((Y[m] >= nbmax[m] - 1) & (Y[m] >= chalktop[m] - 3), ID["grass_block"], np.where(r1[m] < 0.8, ID["calcite"], ID["gravel"])); subd[m] = 1
 m = chalkfoot & ~wet; surf[m] = np.select([r1[m] < 0.65, r1[m] < 0.75, r1[m] < 0.85, r1[m] < 0.95], [ID["gravel"], ID["cobblestone"], ID["andesite"], ID["calcite"]], ID["diorite"])

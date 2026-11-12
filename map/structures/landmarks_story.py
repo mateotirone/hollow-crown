@@ -502,4 +502,6 @@ STORY_DESIGNS = {f.__name__: f for f in (
     mags_hut, nell_raft, deepforge, cinder_roost)}
 from world_doors import DOOR_DESIGNS  # noqa: E402  (the sealed ways out and the Warlord King's ground)
 STORY_DESIGNS.update(DOOR_DESIGNS)
+from story_places import DESIGNS as PLACE_DESIGNS  # noqa: E402  (the Frostmarch watchtower, the Hallowmere shrine and ice door)
+STORY_DESIGNS.update(PLACE_DESIGNS)
 STORY_TURNING = {"deepforge", "cinder_roost", "shut_pass_gate", "westwatch", "southmost_light"}

@@ -72,6 +72,7 @@ export const PLACES = {
   bellhollow: { name: "Bellhollow", region: "Aldmere Vale", charted: false, desc: "A valley with a broken bell frame and a roadside shrine where pilgrims leave their bells outside." },
   ashen_chapterhouse: { name: "Chapterhouse of the Ashen Gate", region: "Aldmere Vale", charted: true, desc: "The last house of the Order. Grey banners, cold hearths." },
   burned_archive: { name: "The Burned Archive", region: "Aldmere Vale", charted: false, desc: "Somewhere under the chapterhouse. Brother Cael knows the way, if he decides to trust you." },
+  frost_watchtower: { name: "The Old Border Watchtower", region: "Frostmarch", charted: false, desc: "A ruined watchtower over the pass where the Vale road climbs into the Frostmarch. Half of it has fallen." },
   hollowfast: { name: "Rimehold", region: "Frostmarch", charted: true, desc: "A northern longhouse village, half empty for three hundred years." },
   frozen_lake: { name: "The Lake at Rimehold", region: "Frostmarch", charted: false, desc: "Footprints led out to the middle and stopped. A shrine on the shore is carved with a full moon." },
   gulls_rest: { name: "Gull's Rest", region: "Saltreach", charted: true, desc: "A fishing village under a lighthouse whose lamp has never gone out." },

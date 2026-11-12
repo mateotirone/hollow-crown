@@ -50,7 +50,7 @@ SITES = {
     # map towns (centre = the square genworld writes; town-sites.json)
     "Millbrook": dict(centre=(-60, -470), radius=70, size="town", fixed_square=True, square_r=7, seed=11,
                       roofs={"dark shingle": 5, "slate": 3, "warm red": 2}, accent="slate",
-                      civic=[("chapel", lambda: vale_civic.chapel(name="millbrook_chapel")),
+                      civic=[("chapel", lambda: vale_civic.chapel(name="millbrook_chapel", bells=False)),
                              ("clock tower", vale_civic.clock_tower)]),
     "Kingsrest": dict(centre=(-118, -118), radius=90, size="town", fixed_square=True, square_r=9, seed=7, inn=True,
                       roofs={"slate": 4, "dark shingle": 3, "warm red": 2, "white": 1}, accent="copper",

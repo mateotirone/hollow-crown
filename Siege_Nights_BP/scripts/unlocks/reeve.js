@@ -488,6 +488,39 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
   if (event.id === "siege:reeve_unlock") command(event.sourceEntity, event.message.trim());
 });
 
+// ---------- the held minute: Millbrook's long night ----------
+// The story says it is always night in Millbrook ("It's been dark in Millbrook since before I was born"): the Reeve
+// stopped the clocks at 3:17 and the night stopped with them. Minecraft has one sky for the world, so the night is a
+// dark fog each player sees while they stand inside Millbrook's ward. It lifts for good when the Reeve falls and the
+// minute ends (store.data.wins > 0). After dark Minecraft's own night does the job, so the fog is only pushed by day.
+export const HELD_NIGHT = { fog: "siege:millbrook_night", layer: "hc_millbrook_night", radius: ward.r, dayEnds: 12500, dayStarts: 23500 };
+/** Is a player standing here, at this time of day, in the night the Reeve is holding? (pure, for tests) */
+export function inHeldNight(x, z, timeOfDay, wins) {
+  if (wins > 0) return false;
+  if (Math.hypot(x - MILLBROOK_SQUARE.x, z - MILLBROOK_SQUARE.z) > HELD_NIGHT.radius) return false;
+  return timeOfDay < HELD_NIGHT.dayEnds || timeOfDay >= HELD_NIGHT.dayStarts;
+}
+const heldFor = new Set(); // ids of players whose fog stack has the held night on it
+onTick("reeve held night", 40, () => {
+  let time = 0;
+  try { time = world.getTimeOfDay(); } catch { return; }
+  for (const p of world.getAllPlayers()) {
+    let want = false;
+    try { want = p.dimension.id === OVERWORLD && inHeldNight(p.location.x, p.location.z, time, store.data.wins); } catch { continue; }
+    if (want === heldFor.has(p.id)) continue;
+    try {
+      p.runCommand(want ? `fog @s push ${HELD_NIGHT.fog} ${HELD_NIGHT.layer}` : `fog @s remove ${HELD_NIGHT.layer}`);
+      if (want) heldFor.add(p.id); else heldFor.delete(p.id);
+    } catch { /* left */ }
+  }
+});
+world.afterEvents.playerLeave.subscribe((event) => heldFor.delete(event.playerId));
+world.afterEvents.playerSpawn.subscribe((event) => {
+  if (!event.initialSpawn) return;
+  heldFor.delete(event.player.id);
+  try { event.player.runCommand(`fog @s remove ${HELD_NIGHT.layer}`); } catch { /* a fresh stack */ }
+});
+
 on("siegeEnd", () => {
   if (!store.data.built || store.data.wins === 0) return;
   store.data.siegesSinceWin++;

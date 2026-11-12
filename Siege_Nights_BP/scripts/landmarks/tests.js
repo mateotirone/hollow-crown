@@ -83,4 +83,28 @@ addTests("landmarks", {
     const e = seekSpot({ x: 0, z: 0 }, { kind: "edge", bearing: 270, spread: 20, max: 80 }, (x) => (x < -40 ? 60 : 90));
     assert(e && e.face === "w" && e.x <= -36 && e.x >= -41, JSON.stringify(e));
   },
+  "the door in the Hallowmere ice: walls before the water is cleared, a full moon hatch on the ice": () => {
+    const d = DESIGNS.hallowmere_ice_door;
+    assert(d.mode === "carve" && d.dry, "carve and dry");
+    const { ops, G } = planPiece(d, 40, -1120, () => 112);
+    assertEqual(G, 112);
+    const lastSolid = ops.reduce((m, o, i) => (o[3] !== AIR && !(d.late ?? []).includes(o[3]) ? i : m), -1);
+    const firstAir = ops.findIndex((o) => o[3] === AIR);
+    assert(firstAir > lastSolid, `air at ${firstAir} before the last wall at ${lastSolid}`);
+    const [[dx, dy, dz, carving, wide, tall, long]] = d.doors;
+    assertEqual(carving, "full");
+    const site = LANDMARKS.find((s) => s.id === "hallowmere_shrine");
+    assert(site && site.after === "huntsman" && site.place === "frozen_lake", "placed in the Huntsman's area, after it");
+    for (let i = 0; i < wide; i++) for (let k = 0; k < long; k++) {
+      const op = ops.find((o) => o[0] === 40 + dx + i && o[1] === 112 + dy && o[2] === -1120 + dz + k);
+      assert(op && d.palette[op[3]][0] === "minecraft:ice", `hatch cell ${i},${k} is ice`);
+    }
+    assert(tall === 1, "it lies flat");
+  },
+  "the border watchtower holds the chest Chronicle II is found in": () => {
+    const d = DESIGNS.frost_watchtower;
+    const [mx, my, mz] = d.mark;
+    assert(cellsOf(d).some(([x, y, z, i]) => x === mx && y === my && z === mz && d.palette[i][0] === "minecraft:chest"), "a chest at the mark");
+    assert(LANDMARKS.some((s) => s.place === "frost_watchtower"), "placed on the map");
+  },
 });
