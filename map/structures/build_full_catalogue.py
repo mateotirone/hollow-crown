@@ -209,7 +209,7 @@ def main():
                 add(sec, f"bld-{rid}-{bid}", title, r["name"], blurb, (lambda f=settle_buildings.BLOCK_BUILDERS[bid], r=rid: f(r)), g, extra={"group": "Plot buildings"})
 
         if rid in stations.REGIONS:   # the railway station on the plot (or the Rail Depot), at each settlement tier
-            for st, title, blurb in (("halt", "Halt (Hamlet)", "A waiting shelter with its gable to the line, a ticket counter, a bench and a hitching rail."),
+            for st, title, blurb in (("halt", "Halt (Hamlet)", "A waiting shelter with its eaves to the line, a ticket counter, a bench and a hitching rail."),
                                      ("station", "Station (Town)", "A booking hall along the platform with a centre gable, a long canopy, a parcels corner and stalls."),
                                      ("junction", "Junction (City)", "A two-storey hall with a clock tower on the platform, a stable wing and a parcels wing."),
                                      ("grand", "Grand Station (Castle)", "An arched glass train shed over both lines, a tall centre pavilion and twin clock towers.")):

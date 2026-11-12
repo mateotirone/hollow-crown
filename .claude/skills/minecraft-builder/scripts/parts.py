@@ -294,6 +294,10 @@ def arch(ctx, spec):
     hw = w // 2
     def P(k, dy, dd): return x + ux * k + nx * dd, y + dy, z + uz * k + nz * dd
     left, right = _dir_of(-ux, -uz), _dir_of(ux, uz)
+    for dd in (lo_d - 1, hi_d + 1):   # a window box, sill or shutter left hanging in front of the opening goes (Mateo 2026-11-12)
+        for k in range(-hw, hw + 1):
+            for dy in range(h):
+                if ctx.stage_of.get(P(k, dy, dd)) in ("openings", "details"): ctx.clear(*P(k, dy, dd))
     for dd in range(lo_d, hi_d + 1):
         for k in range(-hw, hw + 1):
             for dy in range(h): ctx.clear(*P(k, dy, dd))
@@ -720,6 +724,18 @@ def _dormer_fields(ctx, d, st, B, Fmain, rmain):
     it, cheeks down to the main roof, its own roof running back into the main roof."""
     side = d.get("side", "s"); w = d.get("w", 3); hd = d.get("h", 3); t = d.get("at", 0)
     top = rmain["rect"]; plate = B["plate"]
+    # 05 windows line up (Mateo 2026-11-12): the dormer's window stands over a window of the storey below
+    if d.get("align", True):
+        i = len(B["storeys"]) - 1
+        ws = ctx.spec_windows.get(side) if getattr(ctx, "spec_windows", None) is not None else None
+        if ws is not None: cs = [wv["at"] for wv in ws if wv.get("storey", 0) == i]
+        else:
+            cs, sz = bay_centres(B["posts_of"].get((i, side), []))
+            cs = [c for c, b in zip(cs, sz) if b >= 3]
+        if cs and t not in cs:
+            t2 = min(cs, key=lambda c: (abs(c - t), abs(c)))
+            ctx.log.append(f"{st['_name']}: dormer on the {side} side moved from {t} to {t2} to stand over the window below")
+            t = t2
     if ALONG_AXIS[side] != rmain["ridge"] or rmain["kind"] != "gable":
         if rmain["kind"] == "gable":
             ctx.log.append(f"{st['_name']}: dormer on the {side} side skipped: dormers stand on an eave side (along the ridge)")
@@ -878,6 +894,7 @@ def house(ctx, s):
     roofs = [(*_roof_of(ctx, bs, bst, bB, k), bst, bB) for k, (bs, bst, bB) in enumerate(blocks)]
     Fmain, rmain = roofs[0][0], roofs[0][1]
     extra = []
+    ctx.spec_windows = s.get("windows") if s.get("windows", "auto") != "auto" else None
     for d in s.get("dormers", []):
         got = _dormer_fields(ctx, d, st, B, Fmain, rmain)
         if got: extra.append(got)

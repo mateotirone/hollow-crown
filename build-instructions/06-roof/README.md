@@ -116,6 +116,11 @@ building (gable wall, barge boards, eave trim, ridge) were left standing inside 
   barge board and the eave row meet) put a full block of the trim wood, so the corner is never left
   empty. Anything that hangs from the roof corner (a chain and lantern, a sign, a bell) hangs from that
   block, never from thin air or from the underside of a single stair.
+- **Hip corners (Mateo, 2026-11-12)**: a hipped or pyramid roof's corner is already a full corner stair, so it
+  gets no block under it; the chain hangs straight from that stair (`settle_halls.pyramid`).
+- **Hip roofs close down to the wall too (Mateo, 2026-11-12)**: the ring over the wall line sits on the wall;
+  one or two rows of air between the wall top and that ring are filled with the wall block
+  (`settle_halls.close_under`, run by `pyramid`). Never leave a slot of sky under a hip.
 
 ## Step 6: Gable walls
 

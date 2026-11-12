@@ -226,8 +226,26 @@ def finish_detail(bp, P=None):
             if core:
                 for c in set(bp.cells) - before:
                     if not (x0 <= c[0] <= x1 and z0 <= c[2] <= z1): del bp.cells[c]
+    clear_doorways(bp)
     texture_roofs(bp)
     return bp.finish()
+
+def clear_doorways(bp):
+    """05 door approach (Mateo 2026-11-12: "the door is blocked"): nothing stands in front of or behind a door at
+    the door's own two rows, and no shelf, sill, box or shutter sticks out beside it. Steps (below) stay."""
+    STEP = {"n": (0, -1), "s": (0, 1), "e": (1, 0), "w": (-1, 0)}
+    snag = lambda n: n.endswith(("_slab", "_trapdoor", "_wall_sign", "_leaves", "_flowered")) or n in ("barrel", "composter", "flower_pot")
+    for (x, y, z), (n, p) in list(bp.cells.items()):
+        if not n.endswith("_door") or p.get("upper") or "trapdoor" in n: continue
+        dx, dz = STEP.get(p.get("facing", "s"), (0, 1))
+        rx, rz = dz, dx
+        for sgn in (1, -1):
+            for dy in (0, 1):
+                c = (x + dx * sgn, y + dy, z + dz * sgn)
+                if c in bp.cells and bp.cells[c][0] not in ("air", "keep") and not bp.cells[c][0].endswith("_door"): bp.cells[c] = ("air", {})
+                for k in (-1, 1):
+                    c2 = (c[0] + rx * k, c[1], c[2] + rz * k)
+                    if c2 in bp.cells and snag(bp.cells[c2][0]): bp.cells[c2] = ("air", {})
 
 def smooth_noise(a, b, seed, cell=4.0):
     """Value noise in 0..1 that forms clusters about `cell` blocks across (never single-block speckle)."""
