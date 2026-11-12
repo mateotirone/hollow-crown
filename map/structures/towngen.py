@@ -51,6 +51,7 @@ SITES = {
     "Millbrook": dict(centre=(-60, -470), radius=70, size="town", fixed_square=True, square_r=7, seed=11,
                       roofs={"dark shingle": 5, "slate": 3, "warm red": 2}, accent="slate",
                       first=("chapel",),        # Sister Wren's chapel claims its place on the square (storyline audit)
+                      first_r=13,               # its door 13 out: the Seneschal's clock posts ring the square at 10 (well_plan.js)
                       civic=[("chapel", lambda: vale_civic.chapel(name="millbrook_chapel")),
                              ("clock tower", vale_civic.clock_tower),
                              ("bakery", lambda: __import__("story_builds").build("bakery"))]),
@@ -1327,6 +1328,7 @@ class Town:
                 for k in range(72):
                     a = 2 * math.pi * k / 72
                     rr = self.sqR + 1 + extra_r
+                    if rr < self.site.get("first_r", 0): continue
                     x, z = int(round(self.sq[0] + math.cos(a) * rr)), int(round(self.sq[1] + math.sin(a) * rr))
                     deg = snap_rot(self.sq[0] - x, self.sq[1] - z)
                     done = self.try_place(bp, deg, (x, z), "civic", gap=1, max_relief=8, need_walk=False)

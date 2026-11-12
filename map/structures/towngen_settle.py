@@ -48,9 +48,10 @@ CLEAR = 3                                       # a slot's far corner stays this
 # others its long variants. Grown to fit the region designs of PR #89 with a block to spare
 # (placement thread 2026-11-11): S 9x13, M 11x15 (long M 13x15, also the Hamlet's library slot),
 # L 15x15, G 21x21; Large and Great may be 2 longer either way.
-SHAPES = {"S": [(9, 13)], "M": [(11, 15), (13, 15)], "L": [(15, 15), (17, 15), (15, 17)], "G": [(21, 21), (23, 21), (21, 23)]}
+SHAPES = {"S": [(9, 13)], "M": [(11, 15), (13, 15)], "L": [(15, 15), (17, 15), (15, 17)], "G": [(21, 21), (23, 21), (21, 23)],
+          "W": [(27, 17)]}                    # Works: the resource yards (Ironworks, Gold Sluice, Deep Shaft; material loop thread)
 SIZES = {k: v[0][0] for k, v in SHAPES.items()}   # frontage of the plain box
-SIZE_NAME = {"S": "Small", "M": "Medium", "L": "Large", "G": "Great"}
+SIZE_NAME = {"S": "Small", "M": "Medium", "L": "Large", "G": "Great", "W": "Works"}
 MINIMUM = [dict(S=4, M=1, L=0, G=0, field=0), dict(S=7, M=4, L=1, G=0, field=1),      # agreed with the placement
            dict(S=10, M=6, L=2, G=0, field=1), dict(S=13, M=8, L=3, G=0, field=1)]     # thread 2026-11-11; Great optional
 HALL_AT = {"Hamlet": 1, "Town": 2, "City": 3, "Castle": 4}   # hall level per tier (5 = Sovereign, reserved anyway)
@@ -452,6 +453,56 @@ class Settlement(Town):
         self.PORT[i - 5:i + 6, j - 5:j + 6] = L; self.PKIND[i - 5:i + 6, j - 5:j + 6] = 2
         self.port[L] = {"kind": "field", "area": 121, "u": 0, "plot": True}
 
+    WORKS = False      # 2026-11-12: a 27 x 17 yard only fits on Castle ground, and costs the City and Castle charters
+    def on_hall4(self, e):
+        return any(self.HALL4[self.ij(x, z)] and not self.HALL3[self.ij(x, z)] for x, z in e["cells"])
+
+    def works_yards(self, C):
+        """Works slots (27 x 17, door on a long side to a road) for the resource yards: one open by the Hamlet
+        if it fits (else by the Town), a second by the City where the land allows; nearest water first."""
+        wet = np.argwhere(self.WET) + np.array([self.X0, self.Z0])
+        def near_water(c):
+            if not len(wet): return self.rng.random()
+            return float(np.min(np.hypot(wet[:, 0] - c[0][0], wet[:, 1] - c[0][1]))) + 3 * self.rng.random()
+        cs = C[:]; self.rng.shuffle(cs); cs.sort(key=near_water)
+        got = []
+        self.in_field = True                           # a yard may take the corner of a field
+        for max_tier in (0, 1, 2):
+            for c in cs:
+                e = self.try_slot("W", c, max_tier)
+                if e: got.append(e); break
+            if got: break
+        for c in cs:
+            if len(got) >= 2: break
+            e = self.try_slot("W", c, 3)
+            if e: got.append(e)
+        self.in_field = False
+        return got
+
+    def farm_field(self, e):
+        """A 9 x 9 field plot (one watered cell's reach) beside a Farmhouse slot, inside the Town wall, so the
+        Farmhouse stands by its field from the start (field_edge). False when there is no room."""
+        xs, zs = zip(*e["cells"]); box = (min(xs), min(zs), max(xs), max(zs))
+        free = (self.K < 0) & (self.TAKEN == 0) & ~self.WET & (self.PKIND == 1) & (self.D <= WALL_R[1] - CLEAR)
+        best = None
+        for cx in range(box[0] - 9, box[2] + 10):
+            for cz in range(box[1] - 9, box[3] + 10):
+                gap = max(box[0] - cx, cx - box[2], box[1] - cz, cz - box[3])
+                if gap < 5 or gap > 7 or not self.ok(cx, cz): continue
+                i, j = self.ij(cx, cz)
+                if i < 5 or j < 5: continue
+                win = (slice(i - 4, i + 5), slice(j - 4, j + 5))
+                if win[0].stop > free.shape[0] or win[1].stop > free.shape[1] or not free[win].all(): continue
+                g = self.G[win]
+                if g.max() - g.min() > 2: continue
+                sc = gap + 0.1 * (g.max() - g.min())
+                if best is None or sc < best[0]: best = (sc, i, j)
+        if not best: return False
+        _, i, j = best; L = int(self.PORT.max()) + 1
+        self.PORT[i - 4:i + 5, j - 4:j + 5] = L; self.PKIND[i - 4:i + 5, j - 4:j + 5] = 2
+        self.port[L] = {"kind": "field", "area": 81, "u": 0, "plot": True}
+        return True
+
     def place_slots(self):
         C = self.candidates()
         self.D53 = self.D > WALL_R[-1] - CLEAR
@@ -489,16 +540,24 @@ class Settlement(Town):
         fc = np.argwhere(fm & (self.D <= WALL_R[1] - CLEAR)) if (fm & (self.D <= WALL_R[1] - CLEAR)).any() else np.argwhere(fm)
         fc = fc + np.array([self.X0, self.Z0])
         near_field = (lambda c: float(np.min(np.abs(fc[:, 0] - c[0][0]) + np.abs(fc[:, 1] - c[0][1]))) + 2 * self.rng.random()) if len(fc) else near_sq
-        self.in_field = True                           # the Farmhouse's box may stand in the field's corner
-        got = 0
-        if len(fc):                                    # as one big), the Farmhouse (a plain Medium by the fields: the
-            for c in sorted(C, key=near_field):        # settlement thread's charter), then the Mint, then homes
+        got = 0; extra = 0                             # as one big), the Farmhouse: a plain Medium with its own
+        if len(fc):                                    # field beside it (field_edge, the settlement thread's charter)
+            for c in sorted(C, key=near_field):
                 if near_field(c) > 12: break
-                if self.try_slot("M", c, 1, square_only=True): got = 1; break
-        self.in_field = False
+                self.in_field = True; e = self.try_slot("M", c, 1, square_only=True); self.in_field = False
+                if e and not self.on_hall4(e): got = 1; break
+        if not got:
+            cs = C[:]; self.rng.shuffle(cs); cs.sort(key=near_sq)
+            for c in cs:
+                e = self.try_slot("M", c, 1, square_only=True)
+                if not e: continue
+                if not self.on_hall4(e) and self.farm_field(e): got = 1; break
+                extra += 1                             # no field room by it: it stays a plain Medium (the Mint's)
+                if extra >= 3: break
         if not got: pass_("M", 1, 1, near_sq)
         pass_("M", 1, 1, near_sq)
         pass_("S", 1, 3, hamlet)
+        if self.WORKS: self.works_yards(C)             # the Works yards (27 x 17): off until the yards are reshaped
         pass_("L", 2, 1, near_sq)                      # City: the inn needs a true Large; the barracks, one more work
         pass_("M", 2, 2, near_sq)                      # building and three more homes
         pass_("S", 2, 3, near_sq)
@@ -550,7 +609,9 @@ class Settlement(Town):
         for e in bigs[:2]: e["opensAt"] = max(e["geo"], 1)
         for e in self.slots:
             if e.get("library"): e["opensAt"] = e["geo"]          # the Hamlet's library slot opens with the Hamlet
-        self.slots.sort(key=lambda e: (e["opensAt"], "GLMS".index(e["size"])))
+        for e in self.slots:
+            if e["size"] == "W": e["opensAt"] = e["geo"]            # a Works yard opens as soon as it is inside the wall
+        self.slots.sort(key=lambda e: (e["opensAt"], "WGLMS".index(e["size"])))
 
     def counts(self):
         out = []
@@ -835,7 +896,7 @@ class Settlement(Town):
             i, j = self.ij(*end); win = self.RID[max(0, i - 5):i + 6, max(0, j - 5):j + 6]
             if len(set(win[win >= 0].tolist())) >= 2: tags.append("corner")
         if near(self.PKIND == 2, 3) and near(self.TAKEN == 3, 3): tags.append("field_edge")
-        if near(self.WET, 4): tags.append("water")
+        if near(self.WET, 12 if e["size"] == "W" else 4): tags.append("water")
         return tags, box
 
     # ---- run
