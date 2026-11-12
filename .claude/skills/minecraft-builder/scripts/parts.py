@@ -58,6 +58,16 @@ STYLES = {
                        roof={"block": "dark_prismarine"}, shutter="warped_planks", door="birch_door", glass="cyan_stained_glass_pane",
                        leaves="azalea_leaves", sign_wood="birch", chimney="brick_block", quoin="cut_sandstone", stone="smooth_sandstone",
                        frame_kind="stone", sill="stair"),
+    # Saltreach's sea-temple look (Atlantean, Mateo 2026-11-12): pale stone walls, quartz-pillar column corners,
+    # a sea-worn prismarine plinth and trim, sea-glass windows; roofs vary (regions/saltreach.md "Atlantean houses")
+    "salt_atlantean": dict(plinth={"ladder": ["prismarine_bricks", "prismarine", "dark_prismarine"], "axis": "noise", "scale": 3},
+                           frame={"block": "quartz_pillar", "forms": {"wall": "diorite_wall", "slab": "smooth_quartz_slab", "stairs": "smooth_quartz_stairs"}},
+                           infill={"ladder": ["polished_diorite", "calcite", "smooth_quartz"], "axis": "y"},
+                           floor="smooth_sandstone", trim={"block": "prismarine_bricks", "forms": {"trapdoor": "warped_trapdoor", "wall": "prismarine_wall"}},
+                           roof={"block": "dark_prismarine"}, shutter="warped_planks", panel=None,
+                           door="warped_door", glass="light_blue_stained_glass_pane", leaves="azalea_leaves", sign_wood="warped",
+                           chimney="prismarine_bricks", quoin={"block": "quartz_pillar", "forms": {"wall": "diorite_wall", "slab": "smooth_quartz_slab", "stairs": "smooth_quartz_stairs"}},
+                           stone={"block": "smooth_quartz", "forms": {"wall": "diorite_wall"}}, frame_kind="stone", sill="stair"),
     "fen_timber": dict(plinth={"ladder": ["mud_bricks", "tuff_bricks"], "axis": "noise", "scale": 3}, frame="mangrove_log",
                        infill={"ladder": ["packed_mud", "mud_bricks"], "axis": "y"}, floor="dark_oak_planks", trim="spruce_planks",
                        roof={"block": "dark_oak_planks"}, shutter="mangrove_planks", door="mangrove_door", glass="brown_stained_glass_pane",
@@ -252,9 +262,9 @@ def window(ctx, rect, side, t, floor, style, w=1, h=2, head_room=9, frame_kind="
         for k in ks: ctx.set(*at(k, 1, 1), S, "slab", trim, half="top")            # the shelf
         if h3(x, floor, z, seed + 9) < 0.34: ctx.set(*at(0, 2, 1), "details", raw="lantern")
         return
-    if frame_kind == "stone":   # dark oak panels either side (05: stone, dark oak, spruce)
+    if frame_kind == "stone" and style.get("panel", "dark_oak_trapdoor"):   # dark oak panels either side (05: stone, dark oak, spruce); style "panel" swaps or drops them
         for k in (-(w // 2) - 1, w // 2 + 1):
-            for dy in range(2, 2 + h): ctx.set(*at(k, dy, 1), S, "trapdoor", "dark_oak_planks", open=True, facing=side)
+            for dy in range(2, 2 + h): ctx.set(*at(k, dy, 1), S, raw=style.get("panel", "dark_oak_trapdoor"), open=True, facing=side)
     # sill
     if sill == "leafbox":     # leaves boxed in by wall signs (05: window boxes, Mateo 2026-11-11)
         sw = style.get("sign_wood", "dark_oak")
@@ -327,7 +337,21 @@ def arch(ctx, spec):
 
 
 # ------------------------------------------------------------------ roofs (06-roof)
-def roof_field(rect, kind, ridge, overhang, verge, pitch, base):
+def rise(pitch, d, profile=None):
+    """Height of a roof row d steps in from the eave: d * pitch, or the sum of a profile of per-row pitches
+    (Saltreach curved roofs, Mateo 2026-11-12: [1, 1, 2] swells into a bell, [2, 1] is a mansard)."""
+    if not profile: return d * pitch
+    return sum(profile[min(i, len(profile) - 1)] for i in range(d))
+
+
+def step_at(r, d):
+    """The pitch of the step just below roof row d (how many full blocks go under its stair)."""
+    pr = r.get("profile")
+    if not pr: return r["pitch"]
+    return pr[min(max(d - 1, 0), len(pr) - 1)]
+
+
+def roof_field(rect, kind, ridge, overhang, verge, pitch, base, profile=None):
     """-> {(x, z): (row, d, dmax)} for one roof. row = the row of the roof surface block at that cell."""
     x0, z0, x1, z1 = rect
     if ridge is None: ridge = "x" if (x1 - x0) >= (z1 - z0) else "z"
@@ -341,7 +365,7 @@ def roof_field(rect, kind, ridge, overhang, verge, pitch, base):
             if kind == "hip": d = min(x - gx0, gx1 - x, z - gz0, gz1 - z); dmax = min(gx1 - gx0, gz1 - gz0) // 2
             elif ridge == "x": d = min(z - gz0, gz1 - z); dmax = (gz1 - gz0) // 2
             else: d = min(x - gx0, gx1 - x); dmax = (gx1 - gx0) // 2
-            F[(x, z)] = (base + d * pitch, d, dmax)
+            F[(x, z)] = (base + rise(pitch, d, profile), d, dmax)
     return F, ridge
 
 
@@ -359,7 +383,7 @@ def build_roofs(ctx, roofs, style, chimneys=()):
     trim = ctx.mat(style, "trim")
     for (x, z), row in H.items():
         r, d, dmax = info[(x, z)]
-        mat = r["mat"]; pitch = r["pitch"]
+        mat = r["mat"]; pitch = step_at(r, d)
         hi = [f for f, (dx, dz) in DIRS.items() if H.get((x + dx, z + dz), -99) > row]
         if (x, z) in chimneys: continue
         if not hi:
@@ -367,6 +391,8 @@ def build_roofs(ctx, roofs, style, chimneys=()):
             if diag:     # hip edge: outer corner towards the higher diagonal
                 dx, dz = diag[0]; f = _dir_of(0, dz); g = _dir_of(dx, 0)
                 ctx.set(x, row, z, S, "stairs", mat, facing=f, half="bottom", corner="outer_left" if g == LEFT[f] else "outer_right")
+                for k in range(1, pitch):    # a steep step on the hip line needs its full blocks too (no hole at the corner)
+                    ctx.set(x, row - k, z, S, "full", mat)
             else:        # ridge: full block with a bottom slab on top (06 step 3)
                 ctx.set(x, row, z, S, "full", mat)
                 if r.get("ridge_cap", style.get("ridge_cap", "stairs")) == "slab":
@@ -401,7 +427,7 @@ def build_roofs(ctx, roofs, style, chimneys=()):
                 gable_end = (ridge == "x" and (x < x0 or x > x1)) or (ridge == "z" and (z < z0 or z > z1))
                 if gable_end:
                     up = [f for f, (dx, dz) in DIRS.items() if H.get((x + dx, z + dz), -99) > row]
-                    if up: ctx.setif(x, row - r["pitch"], z, S, "stairs", trim, facing=OPP[up[0]], half="top")
+                    if up: ctx.setif(x, row - step_at(r, F[(x, z)][1]), z, S, "stairs", trim, facing=OPP[up[0]], half="top")
                     else: ctx.setif(x, row - 1, z, S, "full", trim)
             eave = F[(x, z)][1] == 0 and edge == "full"
             if eave:
@@ -645,8 +671,8 @@ def _roof_of(ctx, s, st, B, k=0):
         F = {(x, z): (plate + 1, 0, 0) for x in range(x0, x1 + 1) for z in range(z0, z1 + 1)}
         ctx.spec["materials"][rmat] = _with_range(ctx.spec["materials"][rmat], plate, plate + 1)
         return F, {"rect": top, "ridge": "x", "base": plate, "kind": "flat", "pitch": 0, "mat": rmat, "flat": rs}
-    F, ridge = roof_field(top, kind, rs.get("ridge"), rs.get("overhang", 1), rs.get("verge", 1), pitch, plate)
-    r = {"rect": top, "ridge": ridge, "base": plate, "kind": kind, "pitch": pitch, "mat": rmat, "cap": rs.get("cap", rmat),
+    F, ridge = roof_field(top, kind, rs.get("ridge"), rs.get("overhang", 1), rs.get("verge", 1), pitch, plate, rs.get("profile"))
+    r = {"rect": top, "ridge": ridge, "base": plate, "kind": kind, "pitch": pitch, "mat": rmat, "cap": rs.get("cap", rmat), "profile": rs.get("profile"),
          "horns": rs.get("gable_horns", False)}
     if not k: ctx.last_roof = {a: b for a, b in raw_roof(ctx, st).items() if a not in ("from", "to")} if isinstance(raw_roof(ctx, st), dict) else raw_roof(ctx, st)
     ctx.spec["materials"][rmat] = _with_range(ctx.spec["materials"][rmat], plate, max(v[0] for v in F.values()))
@@ -823,11 +849,15 @@ def _porch(ctx, p, st, B):
     x, z = wall_cell(rect0, side, t)
     ox, oz = DIRS[side]; rx, rz = RIGHT_OF[side]
     frame, plinth = ctx.mat(st, "frame"), ctx.mat(st, "plinth")
+    if p.get("post"):            # columns instead of log posts (Saltreach porticoes: quartz pillars)
+        frame = f"{st['_name']}.porch_post"; ctx.spec["materials"][frame] = p["post"]
     cells = [(x + rx * k + ox * j, z + rz * k + oz * j) for k in range(-(w // 2), w // 2 + 1) for j in range(1, dpt + 1)]
     for (cx, cz) in cells:
         ctx.set(cx, fl, cz, "foundation", "full", plinth)
         for yy in range(B["y"], fl): ctx.setif(cx, yy, cz, "foundation", "full", plinth)
-    for k in (-(w // 2), w // 2):
+    every = p.get("every")       # a colonnade: a post every n along the front as well as the corners
+    ks = sorted(set([-(w // 2), w // 2] + ([k for k in range(-(w // 2), w // 2 + 1) if (k + w // 2) % every == 0] if every else [])))
+    for k in ks:
         px, pz = x + rx * k + ox * dpt, z + rz * k + oz * dpt
         for yy in range(fl + 1, fl + 1 + h): ctx.set(px, yy, pz, "frame", "full", frame, axis="y")
     xs, zs = [c[0] for c in cells], [c[1] for c in cells]
@@ -882,7 +912,7 @@ def house(ctx, s):
             sty = list(ws.get("storeys", [5])); wy = ws.get("y", 0) + ws.get("plinth", 1) - 1
             wr = ws["rect"]; rs = ws.get("roof", {})
             Fw, _ = roof_field(wr, rs.get("type", "gable"), rs.get("ridge"), rs.get("overhang", 1), rs.get("verge", 1),
-                               rs.get("pitch", 1), wy + sum(sty) - 1)
+                               rs.get("pitch", 1), wy + sum(sty) - 1, rs.get("profile"))
             gap = B["plate"] - max(v[0] for v in Fw.values())
             if gap > 0:
                 sty[-1] += gap; ws = dict(ws, storeys=sty)
