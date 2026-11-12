@@ -24,7 +24,7 @@ export const WANTED_TICKS = 6000; // 5 minutes
 export const wanted = new Map(); // player id -> { owner, until }
 
 export const guardTag = (owner) => `siege_guard_of_${owner}`;
-export const isGuard = (entity) => !!GUARD_TYPES[entity?.typeId];
+export const isGuard = (entity) => !!entity && entity.typeId in GUARD_TYPES;
 
 export function guardOwner(entity) {
   return entity.getTags().find((t) => t.startsWith("siege_guard_of_"))?.slice("siege_guard_of_".length);
@@ -117,6 +117,7 @@ world.afterEvents.playerInteractWithEntity.subscribe((event) => {
     return upgradeGuard(target, player, held);
   }
   if (guardOwner(target) !== player.id) return player.onScreenDisplay.setActionBar("§cThat guard doesn't serve you.");
+  if (!GUARD_TYPES[target.typeId]) return player.onScreenDisplay.setActionBar("§7This soldier can't be carried. Give them a post from the Barracks instead.");
   emit("guardRemoved", { id: target.id, owner: guardOwner(target) });
   const item = new ItemStack(GUARD_TYPES[target.typeId], 1);
   if (target.nameTag) item.nameTag = target.nameTag;
@@ -133,6 +134,7 @@ world.afterEvents.entitySpawn.subscribe((event) => {
   if (!state || !isGuard(guard) || guardOwner(guard)) return; // recruits are enlisted on the spot
   const player = guard.dimension.getPlayers({ location: guard.location, maxDistance: 8, closest: 1 })[0];
   const land = guard.dimension.id === "minecraft:overworld" ? settlementAt(guard.location) : undefined;
+  if (!GUARD_TYPES[guard.typeId]) return; // Barracks-only soldiers are enlisted where they are trained
   if (!player || land !== player.id) {
     const token = new ItemStack(GUARD_TYPES[guard.typeId], 1);
     guard.remove();

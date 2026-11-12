@@ -44,7 +44,12 @@ export const TREBUCHET = "siege:trebuchet_engine";
 export const BALLISTA = "siege:ballista_engine";
 export const DIMENSIONS = ["minecraft:overworld", "minecraft:nether", "minecraft:the_end"];
 export const BARRACKS = "siege:barracks";
-export const GUARD_TYPES = { "siege:archer": "siege:archer_item", "siege:man_at_arms": "siege:man_at_arms_item" };
+// guard type -> the item it becomes when picked up (null: trained at the Barracks only, can't be carried)
+export const GUARD_TYPES = {
+  "siege:archer": "siege:archer_item", "siege:man_at_arms": "siege:man_at_arms_item",
+  "siege:pikeman": null, "siege:shieldbearer": null, "siege:crossbowman": null, "siege:knight": null,
+  "siege:ram_crew": null, "siege:trebuchet_crew": null, "siege:sapper": null,
+};
 export const WANTED_TAG = "siege_wanted";
 export const GUARD_GEAR = "siege:guardgear_";
 export const WEAPONS = ["siege:longsword", "siege:warhammer"];

@@ -20,6 +20,7 @@ import { coins } from "../economy/rules.js";
 import { SOLDIERS, SOLDIER, unlocked, priceOf, retrainOf, trainTicks, upgradeCost, bill, BARRACKS } from "./roster.js";
 import "./idle.js";
 import { armouryMenu, dressForType } from "./armoury.js";
+import { dressRegion } from "./region.js";
 import "./tests.js";
 
 const store = moduleStore("siege:army", () => ({ barracks: {}, queue: {} }));
@@ -121,6 +122,7 @@ onTick("army-train", 20, () => {
         enlist(guard, owner, at);
         guard.setDynamicProperty("siege:barracks", JSON.stringify(at));
         dressForType(guard, owner);
+        dressRegion(guard, owner);
         state.guards[owner] = guardCount(owner) + 1;
         saveState();
         q.shift();
