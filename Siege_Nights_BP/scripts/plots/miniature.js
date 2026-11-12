@@ -35,6 +35,14 @@ const UNDER = {
 // Emberwaste mesas (red sand tops) show banded terracotta down their sides
 const MESA_BANDS = ["minecraft:orange_terracotta", "minecraft:hardened_clay", "minecraft:red_terracotta", "minecraft:orange_terracotta", "minecraft:yellow_terracotta"];
 export const underAtY = (surface, y, under) => (surface === "red_sand" ? MESA_BANDS[y % MESA_BANDS.length] : under);
+// The little plinth round each Map Stone: slabs of its region's stone on the eight columns round its pedestal
+export const PLINTH = {
+  "minecraft:mossy_stone_bricks": "minecraft:mossy_stone_brick_slab",
+  "minecraft:packed_ice": "minecraft:deepslate_tile_slab",
+  "minecraft:prismarine_bricks": "minecraft:prismarine_brick_slab",
+  "minecraft:red_sandstone": "minecraft:red_sandstone_slab",
+  "minecraft:mud_bricks": "minecraft:mud_brick_slab",
+};
 // Older or renamed ids: what to try if a block can't be placed
 const FALLBACK = {
   "minecraft:red_sand": "minecraft:sand",
@@ -46,6 +54,8 @@ const FALLBACK = {
   "minecraft:prismarine_brick_slab": "minecraft:stone_brick_slab",
   "minecraft:red_sandstone_slab": "minecraft:stone_brick_slab",
   "minecraft:mangrove_slab": "minecraft:stone_brick_slab",
+  "minecraft:mossy_stone_brick_slab": "minecraft:stone_brick_slab",
+  "minecraft:mud_brick_slab": "minecraft:stone_brick_slab",
   "minecraft:waxed_oxidized_copper": "minecraft:oxidized_copper",
 };
 export const blockId = (name) => ID[name] ?? `minecraft:${name}`;
@@ -157,6 +167,21 @@ export function* miniatureBlocks(put, o, markers = [], clear) {
         continue;
       }
       c.deco.forEach((name, i) => put(x, o.y + c.h + 1 + i, z, blockId(name), statesOf(blockId(name))));
+    }
+  }
+  // A plinth round each Map Stone: a slab of the region's stone on each neighbouring column that is about level
+  for (const m of markers) {
+    yield;
+    const ground = column(m.dx, m.dz)?.h ?? 1;
+    const slab = PLINTH[m.pedestal] ?? "minecraft:stone_brick_slab";
+    for (let ax = -1; ax <= 1; ax++) for (let az = -1; az <= 1; az++) {
+      if (!ax && !az) continue;
+      const nx = m.dx + ax;
+      const nz = m.dz + az;
+      if (maskAt(nx, nz) !== MAP || inQuay(nx, nz)) continue;
+      const c = column(nx, nz);
+      if (c.water || Math.abs(c.h - ground) > 1) continue;
+      put(o.x + nx, o.y + c.h + 1, o.z + nz, slab);
     }
   }
   // The Waystone on its step

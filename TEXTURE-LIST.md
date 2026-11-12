@@ -189,7 +189,7 @@ Look comes from Mateo's Undertow concept art: purple twilight, dark basalt, holl
 | Asset | File | Status |
 |---|---|---|
 | Plot Stone (claim marker: compass star on top, gold claim band on the sides) | `textures/blocks/siege_plot_stone_top.png`, `siege_plot_stone_side.png`, `siege_plot_stone_bottom.png` | **Final style, awaiting your review** (`studio/art/build_hollowcrown.py`) |
-| Map Stone (plot marker on the welcome hall miniature: green = free, yellow = run by a lord, dark = taken) and the hall Waystone | none of our own: they use the vanilla verdant/ochre froglight, polished blackstone and lodestone textures (terrain_texture.json `siege_map_marker_*`, `siege_hall_waystone_*`) | **Vanilla textures, no art needed** |
+| Map Stone (plot marker on the welcome hall miniature: green = free, amber = run by a lord, dark = taken) and the hall Waystone | `textures/blocks/welcome/map_stone_side_<free/lord/taken>.png`, `map_stone_top_<state>.png`, `hall_waystone_side.png`, `hall_waystone_top.png` | **Final style, awaiting your review** (`studio/art/build_welcome_stones.py`) |
 
 ## Horses and rail (icons and blocks: final art by `studio/art/build_hc_items.py` and `build_hc_blocks.py`; do not regenerate from `studio/build_horses.py`)
 

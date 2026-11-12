@@ -16,6 +16,8 @@ ALPHA = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_"
 ID = {"grass": "grass_block", "deadbush": "dead_bush", "hardened_clay": "terracotta"}
 UNDER = {"grass": "dirt", "grass_path": "dirt", "podzol": "dirt", "moss_block": "dirt", "mud": "dirt", "sand": "sandstone", "red_sand": "sandstone"}
 MESA_BANDS = ["orange_terracotta", "terracotta", "red_terracotta", "orange_terracotta", "yellow_terracotta"]
+PLINTH = {"mossy_stone_bricks": "mossy_stone_brick_slab", "packed_ice": "deepslate_tile_slab", "prismarine_bricks": "prismarine_brick_slab",
+          "red_sandstone": "red_sandstone_slab", "mud_bricks": "mud_brick_slab"}
 REGION_BLOCK = {"Aldmere Vale": "mossy_stone_bricks", "Frostmarch": "packed_ice", "Saltreach": "prismarine_bricks",
                 "Emberwaste": "red_sandstone", "Blackfen": "mud_bricks"}
 
@@ -84,6 +86,15 @@ def build(M):
             if d > 0:
                 for i, n in enumerate(M["decos"][d - 1].split("|")):
                     put(dx, h + 1 + i, dz, n, {"persistent_bit": True} if n.endswith("_leaves") else None)
+    for (mx, mz), ped in markers.items():
+        ground = hof(mx, mz)
+        slab = PLINTH.get(ped, "stone_brick_slab")
+        for ax in (-1, 0, 1):
+            for az in (-1, 0, 1):
+                nx, nz = mx + ax, mz + az
+                if (ax or az) and mask(nx, nz) == 1 and not in_quay(nx, nz) and M["w"][nz + half][nx + half] != "1" \
+                        and abs(hof(nx, nz) - ground) <= 1:
+                    put(nx, hof(nx, nz) + 1, nz, slab, {"type": "bottom"})
     put(q["dx"], q["h"] + 1, q["dz"], "chiseled_stone_bricks")
     put(q["dx"], q["h"] + 2, q["dz"], "siege:hall_waystone")
     return cells
