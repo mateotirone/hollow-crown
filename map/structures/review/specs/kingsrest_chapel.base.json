@@ -95,7 +95,11 @@
      }
     }
    ],
-   "vines": 0.06
+   "vines": 0.06,
+   "interior": {
+    "use": "chapel",
+    "entry": "s"
+   }
   },
   {
    "part": "buttress",
@@ -210,7 +214,8 @@
    },
    "chimney": false,
    "vines": 0.06,
-   "bushes": false
+   "bushes": false,
+   "interior": "tower"
   },
   {
    "part": "belfry",

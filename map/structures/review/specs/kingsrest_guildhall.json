@@ -52,6 +52,13 @@
     }
    ],
    "door": null,
+   "interior": {
+    "use": "guildhall",
+    "rooms": [
+     "open",
+     "hall"
+    ]
+   },
    "windows": {
     "s": [
      {

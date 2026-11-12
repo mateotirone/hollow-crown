@@ -7,6 +7,7 @@ import { keepFallen } from "./keep.js";
 import { saveState, state } from "./state.js";
 import { foreignSettlement, settlementAt, tierOf, landRadius } from "./territory.js";
 import { isOnline, title, attackable } from "./util.js";
+import { applyFilter } from "../core/events.js";
 
 // ---------- Borders: see where land begins, and get told when you cross ----------
 
@@ -68,9 +69,12 @@ world.beforeEvents.playerBreakBlock.subscribe((event) => {
   const owner = foreignSettlement(player, block.location, block.dimension.id);
   if (!owner) return;
   // An enemy can carry off your Keep Banner, but only while you're online to defend it
-  if (block.typeId === KEEP_BANNER && isOnline(owner)) return;
+  // (but never in a War Writ siege: that is won in the vault, and nobody loses their whole settlement to one)
+  const shielded = block.typeId === KEEP_BANNER && !!applyFilter("bannerShielded", false, { owner });
+  if (block.typeId === KEEP_BANNER && isOnline(owner) && !shielded) return;
   event.cancel = true;
   const name = state.keeps[owner]?.name ?? "another player";
+  if (shielded) return void system.run(() => player.onScreenDisplay.setActionBar("§cA War Writ siege is won in the vault, not by taking the Keep Banner."));
   system.run(() => player.onScreenDisplay.setActionBar(isOnline(owner)
     ? `§cThis is ${name}'s land. Use a Breaching Charge or come in through the gate.`
     : `§c${name} is away. Their settlement can't be touched until they return.`));

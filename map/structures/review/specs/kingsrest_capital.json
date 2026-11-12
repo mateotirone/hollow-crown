@@ -103,7 +103,8 @@
     }
    ],
    "vines": 0.03,
-   "dormers": []
+   "dormers": [],
+   "interior": "capital"
   },
   {
    "part": "house",
@@ -189,7 +190,8 @@
    },
    "chimney": false,
    "vines": 0.05,
-   "bushes": false
+   "bushes": false,
+   "interior": "tower"
   },
   {
    "part": "house",
@@ -245,7 +247,8 @@
    },
    "chimney": false,
    "bushes": false,
-   "shutters": 0
+   "shutters": 0,
+   "interior": false
   },
   {
    "part": "spire",
@@ -372,7 +375,8 @@
    },
    "chimney": false,
    "vines": 0.05,
-   "bushes": false
+   "bushes": false,
+   "interior": "tower"
   },
   {
    "part": "house",
@@ -428,7 +432,8 @@
    },
    "chimney": false,
    "bushes": false,
-   "shutters": 0
+   "shutters": 0,
+   "interior": false
   },
   {
    "part": "spire",

@@ -7,7 +7,6 @@
   "kind": "Work",
   "blurb": "Eaves to the road, a stone tap room with the bar, tables and a hearth, three bedrooms above."
  },
- "after": "settle_skill:inn_inside",
  "parts": [
   {
    "part": "house",
@@ -43,6 +42,7 @@
     "parapet": "slab",
     "beams": true
    },
+   "interior": "inn",
    "dormers": [],
    "chimney": false,
    "vines": 0

@@ -119,6 +119,9 @@ def write_scene(out, scene, sea):
         for k, b in blocks.items():
             if b[0] == "air": cells.pop(k, None)
             else: cells[k] = b
+        # local coordinates from the box's corner: the asset viewer's mesher packs positions small (int16)
+        x0, z0 = g["box"][0], g["box"][1]
+        cells = {(x - x0, y, z - z0): b for (x, y, z), b in cells.items()}
         d = os.path.join(out, f"hollow_bridge_{n}"); os.makedirs(d, exist_ok=True)
         sp = os.path.join(d, "scene.json"); emit.save_logical(cells, sp)
         (ax, az), (bx, bz) = cr["a"], cr["b"]; L = math.hypot(bx - ax, bz - az)

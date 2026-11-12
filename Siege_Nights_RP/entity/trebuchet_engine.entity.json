@@ -13,7 +13,8 @@
         "default": "geometry.siege_trebuchet"
       },
       "animations": {
-        "fire": "animation.siege_trebuchet.fire"
+        "fire": "animation.siege_trebuchet.fire",
+        "unfold": "animation.siege_trebuchet.unfold"
       },
       "render_controllers": [
         "controller.render.default"

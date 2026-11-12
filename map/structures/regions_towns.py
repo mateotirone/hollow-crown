@@ -64,7 +64,7 @@ ROOF_SETS = {
     "ember": {"red": ("smooth_red_sandstone_stairs", "smooth_red_sandstone_slab", "cut_red_sandstone", ["red_sandstone_stairs", "smooth_red_sandstone_stairs"]),
               "flat": None},
 }
-ROOF_MIX = {"rimehold": {"dark": 5, "mid": 3, "slate": 2}, "gulls_rest": {"green": 4, "white": 3, "orange": 2, "slate": 1},
+ROOF_MIX = {"rimehold": {"dark": 5, "mid": 3, "slate": 2}, "gulls_rest": {"green": 3, "teal": 3, "white": 3, "orange": 1},
             "mirelight": {"moss": 5, "mangrove": 3, "mud": 2}, "sunscar": {"flat": 7, "red": 3}}
 TOWN_REGION = {"rimehold": "frost", "gulls_rest": "salt", "mirelight": "fen", "sunscar": "ember"}
 
@@ -96,11 +96,23 @@ def recolour_roof(bp, region, colour, seed=0):
             bp.cells[k] = (st, p)
         elif n == "deepslate_tile_slab": bp.cells[k] = (slab, p)
         elif n == "deepslate_tiles": bp.cells[k] = (block, p)
+    tex = ROOF_TEXTURE.get(block)
+    if tex and not ladder:     # every roof is textured (Mateo 2026-11-12): a same-colour partner block mixed in at random
+        share, (ps, pl, pb) = tex
+        for k, (n, p) in list(bp.cells.items()):
+            if h3(seed, k[0] * 3 + k[1], k[2], 17) >= share: continue
+            if n == stair: bp.cells[k] = (ps, p)
+            elif n == slab: bp.cells[k] = (pl, p)
+            elif n == block: bp.cells[k] = (pb, p)
     if region == "fen" and colour == "moss": moss_roof(bp, stair, block, slab, seed)
     if getattr(bp, "roof_untextured", False):    # a skill house: every roof gets its two-block texture (Mateo 2026-11-12)
         from kit import texture_roofs
         texture_roofs(bp, seed); bp.roof_untextured = False
     return bp
+
+# the town's recolour keeps the skill's two-block roof texture (TEXTURE_PAIRS in the skill's materials.py)
+ROOF_TEXTURE = {"dark_prismarine": (0.3, ("warped_stairs", "warped_slab", "warped_planks")),
+                "prismarine_bricks": (0.35, ("prismarine_stairs", "prismarine_slab", "prismarine"))}
 
 def moss_roof(bp, stair, block, slab, seed=0):
     """Mossy dark shingle: moss blocks along the ridge, 10 to 15% moss on the slope (settle_halls.thatch)."""
@@ -267,7 +279,15 @@ def frost_house_kit(seed, rnd, tier, roof=None):
     return bp
 
 def salt_house(seed, rnd, tier, roof=None):
-    """A Gull's Rest house: wind-proof stone ground storey, whitewashed upper storey between pale birch posts,
+    """A Gull's Rest house, Atlantean (Mateo 2026-11-12): pale stone and quartz columns on a prismarine plinth,
+    sea-glass windows, and seven roof forms (hip, mansard, bell, dome, temple, terrace, tower). Built on the
+    building skill: atlantean.py. The old kit house is kept below as salt_house_kit."""
+    import atlantean
+    if tier == 3: return atlantean.store(seed, rnd, roof)
+    return atlantean.house(seed, rnd, tier, roof)
+
+def salt_house_kit(seed, rnd, tier, roof=None):
+    """The first Gull's Rest house (kit build): wind-proof stone ground storey, whitewashed upper storey between pale birch posts,
     a low hipped roof (pitch 1), painted sea-green shutters, a flat roof terrace on some."""
     if tier == 3: return salt_store(seed, rnd, roof, name="gulls_rest_net_store")
     w, d = _sizes(rnd, tier)

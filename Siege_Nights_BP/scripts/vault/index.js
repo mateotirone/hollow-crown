@@ -49,7 +49,6 @@ import { addFilter } from "../core/events.js";
 import { guardTag } from "../siege/guards.js";
 import { VAULT_KEY, TIERS, TIER_NAME, LAYOUT, COSTS, UPGRADE_ITEM, nextTier, worldOf, groundBox, LOCK_HP, DOOR_HP, BREAKER_POWER, MEND, REBUILD } from "./data.js";
 import { registerDamageable, hitWall, workOnWall } from "../siege/walls.js";
-import { isOnline } from "../siege/util.js";
 import "./tests.js";
 
 const OVERWORLD = "minecraft:overworld";
@@ -405,7 +404,7 @@ world.afterEvents.playerPlaceBlock.subscribe(({ block, player }) => {
   const [owner, v] = vaultAtLock(lock);
   if (!owner) return player.onScreenDisplay.setActionBar("§7This lock belongs to no vault.");
   if (player.id === owner || isAlly(owner, player.id)) return player.onScreenDisplay.setActionBar("§7That's your own vault. Use the key.");
-  if (!isOnline(owner) && !v.openWindow) return player.onScreenDisplay.setActionBar("§7The vault's keeper is away. It can only be broken into while they are here, or while it lies open.");
+  if (!attackable(owner)) return player.onScreenDisplay.setActionBar("§7The vault's keeper is away. It can only be broken into while they are here, while it lies open, or in a War Writ siege.");
   drills.set(`${block.location.x},${block.location.y},${block.location.z}`, { at: { ...block.location }, lock: { ...lock.location }, owner, by: player.id });
   emit("vaultDrilled", { owner, by: player.id });
   player.onScreenDisplay.setActionBar("§6The breaker bites into the lock...");
@@ -448,6 +447,18 @@ onTick("vault-locks", 40, () => {
 const awayOf = (owner, v) => awayState(owner, v.leftAt, Date.now(), DISPATCH.vaultOpenHours);
 // Is this settlement's keeper away long enough that its defences stand twice as strong? (Mateo: an AFK village
 // is twice as hard to attack)
+// Does this keeper hold a relic: on a stand in their vault, or carried (grounds for a War Writ, warwrit/index.js)?
+export function holdsRelic(owner) {
+  const v = vaults()[owner];
+  if (v && Object.values(v.stands ?? {}).some(Boolean)) return true;
+  const player = world.getPlayers().find((p) => p.id === owner);
+  if (!player) return !!v?.carried;
+  if (player.hasTag(DISPATCH.holderTag)) return true;
+  const inv = player.getComponent("minecraft:inventory")?.container;
+  for (let i = 0; inv && i < inv.size; i++) if (KIND_OF_ITEM[inv.getItem(i)?.typeId]) return true;
+  return false;
+}
+
 export function keeperAway(owner) {
   const v = vaults()[owner];
   return !!v?.leftAt && awayOf(owner, v).away;

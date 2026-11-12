@@ -101,5 +101,5 @@ ids on full-block cells (`CUSTOM`).
 - The Hollow: `node tools/hollow_bridges_dump.mjs DUMP && python3 tools/hollow_bridges.py DUMP` writes
   `undertow/bridges_data.js`. Only columns over water, or 3+ above dry ground, are bridged. A carried stretch with
   a rejected run of more than 4 cells (a road running along a river) keeps the terrain's own causeway.
-  `terrain.js` stamps the runs per chunk (`planBridges`, before the cart rail so the rail wins) and leaves out the
+  `terrain.js` stamps the runs per chunk (`planBridges`) and leaves out the
   old deck, parapet and lanterns on `covered` columns. Rerun after changing the Hollow's roads, rivers or land.
