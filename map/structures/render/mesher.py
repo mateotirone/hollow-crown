@@ -18,7 +18,8 @@ GRASS = (0x91, 0xBD, 0x59); FOLIAGE = (0x6A, 0x9E, 0x3A); SPRUCE = (0x61, 0x99, 
 WOODS = {"oak": "oak", "spruce": "spruce", "dark_oak": "big_oak", "birch": "birch", "jungle": "jungle", "acacia": "acacia", "mangrove": "mangrove",
          "cherry": "cherry", "pale_oak": "pale_oak", "warped": "warped"}
 # Bedrock names some newer textures differently from the old pattern
-TEX_ALIAS = {"planks_mangrove": "mangrove_planks", "log_mangrove": "mangrove_log_side", "log_mangrove_top": "mangrove_log_top",
+TEX_ALIAS = {"chiseled_deepslate": "deepslate/chiseled_deepslate", "chiseled_red_sandstone": "red_sandstone_carved", "deepslate": "deepslate/deepslate",
+             "planks_mangrove": "mangrove_planks", "log_mangrove": "mangrove_log_side", "log_mangrove_top": "mangrove_log_top",
              "stripped_mangrove_log": "stripped_mangrove_log_side",
              "door_mangrove_lower": "mangrove_door_bottom", "door_big_oak_lower": "door_dark_oak_lower", "door_big_oak_upper": "door_dark_oak_upper", "door_mangrove_upper": "mangrove_door_top",
              "log_cherry": "cherry_log_side", "log_cherry_top": "cherry_log_top", "stripped_cherry_log": "stripped_cherry_log_side",
@@ -163,7 +164,8 @@ MAT = {"stone_brick": "stonebrick", "stone_bricks": "stonebrick", "mossy_stone_b
        "smooth_stone_slab": "stone_slab_top", "normal_stone": "stone", "stone_block": "stone",
        "quartz": "quartz_block_side", "quartz_block": "quartz_block_side", "smooth_quartz": "quartz_block_bottom", "quartz_bricks": "quartz_bricks",
        "dark_prismarine": "prismarine_dark", "prismarine": "prismarine_rough", "gold_block": "gold_block", "snow_layer": "snow", "moss_block": "moss_block", "polished_blackstone_brick": "polished_blackstone_bricks", "polished_blackstone": "polished_blackstone", "blackstone": "blackstone",
-       "blast_furnace": "blast_furnace_side", "cobbled_deepslate_wall": "deepslate/cobbled_deepslate"}
+       "blast_furnace": "blast_furnace_side", "cobbled_deepslate_wall": "deepslate/cobbled_deepslate",
+       "chiseled_red_sandstone": "red_sandstone_carved", "chiseled_deepslate": "deepslate/chiseled_deepslate", "cracked_deepslate_bricks": "deepslate/cracked_deepslate_bricks"}
 for w, t in WOODS.items(): MAT[w] = "planks_" + t; MAT[w + "_planks"] = "planks_" + t
 for _c in ("", "exposed_", "weathered_", "oxidized_"):          # copper roofs (waxed looks the same)
     MAT[_c + "cut_copper"] = MAT["waxed_" + _c + "cut_copper"] = _c + "cut_copper"
@@ -370,6 +372,11 @@ def model(n, p):
     if n == "grindstone":
         return [((4 / 16, 4 / 16, 2 / 16, 12 / 16, 1, 14 / 16), {"side": "grindstone_side.tga", "top": "grindstone_round.tga"}, {}),
                 ((2 / 16, 0, 6 / 16, 4 / 16, 10 / 16, 10 / 16), {"side": "planks_big_oak"}, {}), ((12 / 16, 0, 6 / 16, 14 / 16, 10 / 16, 10 / 16), {"side": "planks_big_oak"}, {})]
+    if n.endswith("_hanging_sign"):     # a board hanging on two short chains under the block above
+        w = wood_of(n); t = {"side": "planks_" + WOODS.get(w, "oak")}
+        fd = (p.get("bs") or {}).get("facing_direction", 2)
+        board = (1 / 16, 0, 7 / 16, 15 / 16, 10 / 16, 9 / 16) if fd in (2, 3) else (7 / 16, 0, 1 / 16, 9 / 16, 10 / 16, 15 / 16)
+        return [(board, t, {}), ("cross", {"side": "chain1"}, {"cut": 1, "scale": 0.3, "y": 10 / 16})]
     if n.endswith("_wall_sign"):        # a thin board on the face of the block behind it
         w = wood_of(n); t = {"side": "planks_" + WOODS.get(w, "oak")}
         f = p.get("facing", "s")
@@ -382,6 +389,11 @@ def model(n, p):
     if n == "ladder":
         return [((0, 0, 0, 1, 1, 1 / 16), {"side": "ladder"}, {"cut": 1})]
     if n == "moss_carpet": return [((0, 0, 0, 1, 1 / 16, 1), {"side": "moss_block"}, {})]
+    if n == "pale_moss_carpet": return [((0, 0, 0, 1, 1 / 16, 1), {"side": "pale_moss_block"}, {})]
+    if n == "short_dry_grass": return [("cross", {"side": "short_dry_grass"}, {"cut": 1})]
+    if n == "candle" or n.endswith("_candle"):   # one candle, a 2x6 stick (lit: the wick glows)
+        t = f"candles/{n}{'_lit' if p.get('lit') else ''}"
+        return [((7 / 16, 0, 7 / 16, 9 / 16, 6 / 16, 9 / 16), {"side": f"{t}@0,8,2,14", "top": f"{t}@0,6,2,8"}, {"cut": 1, **({"glow": 1} if p.get("lit") else {})})]
     if n == "snow_layer": return [((0, 0, 0, 1, (2 * (int(p.get("height", 0)) + 1)) / 16, 1), {"side": "snow"}, {})]
     if n == "rail": return [((0, 0, 0, 1, 1 / 16, 1), {"side": "rail_normal"}, {"cut": 1})]
     if n in ("siege:portcullis", "siege:castle_gate"):

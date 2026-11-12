@@ -21,23 +21,26 @@
 import { world, system } from "@minecraft/server";
 import * as api from "../siege/api.js";
 import { POWER_ORIGINS } from "./skills.js";
-import { SKILLS, SKILL, RINGS, BRANCHES, blockedReason, levelFromRenown, renownForNext, pointsForLevel, rankOf, spentIn, canBranch } from "./skills.js";
+import { SKILLS, SKILL, RINGS, BRANCHES, blockedReason, levelFromRenown, renownForNext, pointsForLevel, rankOf, spentIn, canBranch, coinBlocked, refundable, keptOnUnbind } from "./skills.js";
 import { STYLES, STYLE_IDS, styleFromBiome, styleFromGround } from "./styles.js";
 import { drawHall, frameFor, toWorld, statesFor, buildOrder } from "./halls.js";
 import { buildTick, clearBoxFor, worldCells, progressOf } from "./build.js";
 import { heroOf, saveHero, forgetHero, grantRenown, listenForGrants, blankHero } from "./hero.js";
-import { CORNERSTONE, TREE, hallMenu, hallOf, halls, saveHalls, resumeBuilds, beginBuild, setTreeLook, allowedLevel, HALL_COSTS, hallMenuExtras } from "./townhall.js";
+import { CORNERSTONE, TREE, BOARD, hallMenu, hallOf, halls, saveHalls, resumeBuilds, beginBuild, setTreeLook, allowedLevel, HALL_COSTS, hallMenuExtras } from "./townhall.js";
 import { openTree, choosePath, treeMenu, EMBER, BOUND_EMBER, OATH_BANNER } from "./tree.js";
 import { passiveTick, watchfireTick, dropEmber, nearestClue } from "./progress.js";
 import { knightTick, chargeTick } from "./knight.js";
 import { markedTick } from "./marked.js";
 import "./spellbar.js";
+import "./messenger.js";
 import "./showcase.js";
 import { rosterMenu } from "./roster.js";
 import { rolesTick, roleForStyle, roleForBoss, ROLE_DEEDS } from "./roles.js";
 import { ROLES, RANKS, ROLE_LORE } from "./skills.js";
 import { treeCells, treeLayout, COLS, ROWS } from "./tree_layout.js";
+import { MESSENGER, route, cooling, bucket, heading, wayHome, newsText, keepNews, homecoming } from "./messenger_rules.js";
 import { wallMenu } from "./flyby.js";
+import { hallMap, setHallCheck } from "./hallmap.js";
 export { flyby } from "./flyby.js";
 import { rumorMenu, rumorTick, rumorsFor, describe, jobTier, remember, KEEPSAKES, JOB_KIND } from "./rumors.js";
 
@@ -67,7 +70,7 @@ const lastClick = new Map();
 world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
   const { block, player } = event;
   const type = block.typeId;
-  if (type !== CORNERSTONE && type !== TREE) return;
+  if (type !== CORNERSTONE && type !== TREE && type !== BOARD) return;
   if (event.isFirstEvent === false) return;
   const now = system.currentTick;
   if (now - (lastClick.get(player.id) ?? -100) < 8) return;
@@ -78,7 +81,7 @@ world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
     if (!api.isReady()) return;
     if (type === TREE) return openTree(player, block);
     const owner = block.dimension.id === "minecraft:overworld" ? api.settlementAt(block.location) : undefined;
-    if (!owner) return player.sendMessage("§7This cornerstone stands outside any settlement.");
+    if (!owner) return player.sendMessage(type === BOARD ? "§7Nothing is pinned to this board: it stands outside any settlement." : "§7This cornerstone stands outside any settlement.");
     hallMenu(player, owner);
   });
 });
@@ -89,6 +92,9 @@ api.addKeepMenuButtons(({ player, owner }) => [
   ...(hallOf(owner)?.level ? [{ label: "Tree of Oaths", icon: "textures/items/siege_hollow_ember", action: () => treeMenu(player, hallOf(owner).level) }] : []),
 ]);
 
+hallMenuExtras.push({ label: "Hall map\n§8settlements and places you have found", icon: "textures/items/map_filled", action: (player, owner) => hallMap(player, owner) });
+// a Cartographer's Table opens the Hall Map when it stands inside a raised hall (the halls are at most ~45 deep)
+setHallCheck((owner, at) => { const h = hallOf(owner); if (!h?.level || h.lost) return false; const c = h.cs ?? h; return Math.abs(at.x - c.x) <= 48 && Math.abs(at.z - c.z) <= 48 && Math.abs(at.y - c.y) <= 40; });
 hallMenuExtras.push({ label: "Settlement wall\n§8raise it and watch it rise", icon: "textures/blocks/stonebrick", action: (player, owner) => wallMenu(player, owner) });
 hallMenuExtras.push({ label: "Who's online\n§8players, roles and rulers", icon: "textures/ui/multiplayer_glyph_color", action: (player) => rosterMenu(player) });
 hallMenuExtras.push({ label: "Rumor Board\n§8jobs for Renown and coins", icon: "textures/items/paper", action: (player) => rumorMenu(player) });
@@ -297,6 +303,13 @@ api.addGuardLimitHook((owner, limit) => {
 });
 
 api.addTests("hall build", {
+  "every hall has a Town Board just inside, off the aisle, before the Tree": () => {
+    for (const id of STYLE_IDS) for (let level = 1; level <= 5; level++) {
+      const p = drawHall(level, STYLES[id]), b = p.marks.board, t = p.marks.tree;
+      api.assert(b && p.cells.get(`${b.x},${b.y},${b.z}`)?.role === "board", `${id} ${level} has a board`);
+      api.assert(Math.abs(b.x) >= 2 && b.z <= t.z + 2, `${id} ${level}: board off the aisle, in front of the Tree`);
+    }
+  },
   "the clear box holds every block of the old hall above the ground": () => {
     for (const id of STYLE_IDS) for (const forward of [{ x: 0, z: 1 }, { x: 1, z: 0 }, { x: 0, z: -1 }, { x: -1, z: 0 }]) {
       const plan = drawHall(3, STYLES[id]), origin = { x: 100, y: 64, z: -40 };
@@ -376,5 +389,51 @@ api.addTests("roles", {
     api.assertEqual(roleForBoss("siege:mother_of_changelings"), "witch");
     api.assertEqual(roleForBoss("minecraft:zombie"), undefined);
     api.assertEqual(new Set(Object.values(ROLES).map((r) => r.branch)).size, Object.keys(ROLES).length);
+  },
+});
+
+api.addTests("messenger", {
+  "news goes home, by messenger, or waits": () => {
+    api.assertEqual(route({ online: true, atHome: true, hasMessenger: false }), "home");
+    api.assertEqual(route({ online: true, atHome: false, hasMessenger: true }), "messenger");
+    api.assertEqual(route({ online: true, atHome: false, hasMessenger: false }), "later");
+    api.assertEqual(route({ online: false, atHome: false, hasMessenger: true }), "later");
+  },
+  "one fight is one message, each assault its own": () => {
+    api.assert(cooling({ player: 100 }, "player", 200));
+    api.assert(!cooling({ player: 100 }, "player", 100 + MESSENGER.cooldown.player));
+    api.assert(!cooling({ raid: 100 }, "raid", 100));
+    api.assert(!cooling({ "vault:a": 100 }, "vault", 150, "vault:b"), "different words get through");
+    api.assert(cooling({ "vault:a": 100 }, "vault", 150, "vault:a"));
+    api.assertEqual(bucket("drill"), "vault");
+    api.assertEqual(bucket("nonsense"), "other");
+  },
+  "the messenger points the way home": () => {
+    api.assertEqual(heading({ x: 0, z: 0 }, { x: 0, z: -100 }), "north");
+    api.assertEqual(heading({ x: 0, z: 0 }, { x: 100, z: 100 }), "south-east");
+    api.assertEqual(wayHome({ x: 0, z: 0 }, { x: -300, z: 0 }), "300 blocks to the west");
+    api.assertEqual(wayHome({ x: 0, z: 0 }, { x: 5, z: 5 }), "close by");
+    api.assertEqual(newsText("player", { name: "Oakhold", who: "Sam" }), "Sam is attacking Oakhold.");
+  },
+  "waiting news is kept short and read out once": () => {
+    let list = [];
+    for (let i = 0; i < 12; i++) list = keepNews(list, `line ${i % 10}`, i);
+    api.assertEqual(list.length, MESSENGER.keepNews);
+    api.assertEqual(new Set(list.map((n) => n.text)).size, list.length);
+    api.assertEqual(homecoming([]).length, 0);
+    api.assertEqual(homecoming([{ text: "x" }]).length, 3);
+  },
+  "the Messenger costs a point or Regals, and Regals are not refunded": () => {
+    const m = SKILL[MESSENGER.skill];
+    api.assert(m && m.branch === "keep" && m.ring === 1 && m.cost === 1 && m.coins === MESSENGER.coins);
+    const hero = { ...blankHero(), points: 0, level: 1 };
+    api.assertEqual(blockedReason(m, hero, 1), "Needs 1 point");
+    api.assertEqual(coinBlocked(m, hero, 1), undefined);
+    api.assertEqual(coinBlocked(m, hero, 0), "Needs a Longhouse");
+    api.assertEqual(coinBlocked(SKILL.keep_hearth, hero, 1), "Not for sale");
+    const bought = { ...hero, skills: { keep_messenger: 1, keep_hearth: 2 }, bought: { keep_messenger: 1 } };
+    api.assertEqual(refundable(bought), 2);
+    api.assertEqual(keptOnUnbind(bought), { keep_messenger: 1 });
+    api.assertEqual(refundable({ ...bought, bought: {} }), 3);
   },
 });

@@ -86,6 +86,666 @@
         "minecraft:variant": {
           "value": 15
         }
+      },
+      "siege:fight": {
+        "minecraft:shooter": {
+          "def": "minecraft:arrow"
+        },
+        "minecraft:behavior.ranged_attack": {
+          "priority": 2,
+          "attack_interval_min": 1.5,
+          "attack_interval_max": 2.5,
+          "attack_radius": 20,
+          "speed_multiplier": 0
+        }
+      },
+      "siege:walk_0": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_0"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        },
+        "minecraft:attack": {
+          "damage": 0
+        },
+        "minecraft:behavior.melee_attack": {
+          "priority": 2,
+          "speed_multiplier": 1.1,
+          "track_target": true
+        }
+      },
+      "siege:walk_1": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_1"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        },
+        "minecraft:attack": {
+          "damage": 0
+        },
+        "minecraft:behavior.melee_attack": {
+          "priority": 2,
+          "speed_multiplier": 1.1,
+          "track_target": true
+        }
+      },
+      "siege:walk_2": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_2"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        },
+        "minecraft:attack": {
+          "damage": 0
+        },
+        "minecraft:behavior.melee_attack": {
+          "priority": 2,
+          "speed_multiplier": 1.1,
+          "track_target": true
+        }
+      },
+      "siege:walk_3": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_3"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        },
+        "minecraft:attack": {
+          "damage": 0
+        },
+        "minecraft:behavior.melee_attack": {
+          "priority": 2,
+          "speed_multiplier": 1.1,
+          "track_target": true
+        }
+      },
+      "siege:walk_4": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_4"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        },
+        "minecraft:attack": {
+          "damage": 0
+        },
+        "minecraft:behavior.melee_attack": {
+          "priority": 2,
+          "speed_multiplier": 1.1,
+          "track_target": true
+        }
+      },
+      "siege:walk_5": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_5"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        },
+        "minecraft:attack": {
+          "damage": 0
+        },
+        "minecraft:behavior.melee_attack": {
+          "priority": 2,
+          "speed_multiplier": 1.1,
+          "track_target": true
+        }
+      },
+      "siege:walk_6": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_6"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        },
+        "minecraft:attack": {
+          "damage": 0
+        },
+        "minecraft:behavior.melee_attack": {
+          "priority": 2,
+          "speed_multiplier": 1.1,
+          "track_target": true
+        }
+      },
+      "siege:walk_7": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_7"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        },
+        "minecraft:attack": {
+          "damage": 0
+        },
+        "minecraft:behavior.melee_attack": {
+          "priority": 2,
+          "speed_multiplier": 1.1,
+          "track_target": true
+        }
+      },
+      "siege:walk_8": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_8"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        },
+        "minecraft:attack": {
+          "damage": 0
+        },
+        "minecraft:behavior.melee_attack": {
+          "priority": 2,
+          "speed_multiplier": 1.1,
+          "track_target": true
+        }
+      },
+      "siege:walk_9": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_9"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        },
+        "minecraft:attack": {
+          "damage": 0
+        },
+        "minecraft:behavior.melee_attack": {
+          "priority": 2,
+          "speed_multiplier": 1.1,
+          "track_target": true
+        }
+      },
+      "siege:walk_10": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_10"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        },
+        "minecraft:attack": {
+          "damage": 0
+        },
+        "minecraft:behavior.melee_attack": {
+          "priority": 2,
+          "speed_multiplier": 1.1,
+          "track_target": true
+        }
+      },
+      "siege:walk_11": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_11"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        },
+        "minecraft:attack": {
+          "damage": 0
+        },
+        "minecraft:behavior.melee_attack": {
+          "priority": 2,
+          "speed_multiplier": 1.1,
+          "track_target": true
+        }
+      },
+      "siege:walk_12": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_12"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        },
+        "minecraft:attack": {
+          "damage": 0
+        },
+        "minecraft:behavior.melee_attack": {
+          "priority": 2,
+          "speed_multiplier": 1.1,
+          "track_target": true
+        }
+      },
+      "siege:walk_13": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_13"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        },
+        "minecraft:attack": {
+          "damage": 0
+        },
+        "minecraft:behavior.melee_attack": {
+          "priority": 2,
+          "speed_multiplier": 1.1,
+          "track_target": true
+        }
+      },
+      "siege:walk_14": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_14"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        },
+        "minecraft:attack": {
+          "damage": 0
+        },
+        "minecraft:behavior.melee_attack": {
+          "priority": 2,
+          "speed_multiplier": 1.1,
+          "track_target": true
+        }
+      },
+      "siege:walk_15": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_15"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        },
+        "minecraft:attack": {
+          "damage": 0
+        },
+        "minecraft:behavior.melee_attack": {
+          "priority": 2,
+          "speed_multiplier": 1.1,
+          "track_target": true
+        }
+      },
+      "siege:walk_16": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_16"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        },
+        "minecraft:attack": {
+          "damage": 0
+        },
+        "minecraft:behavior.melee_attack": {
+          "priority": 2,
+          "speed_multiplier": 1.1,
+          "track_target": true
+        }
+      },
+      "siege:walk_17": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_17"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        },
+        "minecraft:attack": {
+          "damage": 0
+        },
+        "minecraft:behavior.melee_attack": {
+          "priority": 2,
+          "speed_multiplier": 1.1,
+          "track_target": true
+        }
+      },
+      "siege:walk_18": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_18"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        },
+        "minecraft:attack": {
+          "damage": 0
+        },
+        "minecraft:behavior.melee_attack": {
+          "priority": 2,
+          "speed_multiplier": 1.1,
+          "track_target": true
+        }
+      },
+      "siege:walk_19": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_19"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        },
+        "minecraft:attack": {
+          "damage": 0
+        },
+        "minecraft:behavior.melee_attack": {
+          "priority": 2,
+          "speed_multiplier": 1.1,
+          "track_target": true
+        }
+      },
+      "siege:walk_20": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_20"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        },
+        "minecraft:attack": {
+          "damage": 0
+        },
+        "minecraft:behavior.melee_attack": {
+          "priority": 2,
+          "speed_multiplier": 1.1,
+          "track_target": true
+        }
+      },
+      "siege:walk_21": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_21"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        },
+        "minecraft:attack": {
+          "damage": 0
+        },
+        "minecraft:behavior.melee_attack": {
+          "priority": 2,
+          "speed_multiplier": 1.1,
+          "track_target": true
+        }
+      },
+      "siege:walk_22": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_22"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        },
+        "minecraft:attack": {
+          "damage": 0
+        },
+        "minecraft:behavior.melee_attack": {
+          "priority": 2,
+          "speed_multiplier": 1.1,
+          "track_target": true
+        }
+      },
+      "siege:walk_23": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_23"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        },
+        "minecraft:attack": {
+          "damage": 0
+        },
+        "minecraft:behavior.melee_attack": {
+          "priority": 2,
+          "speed_multiplier": 1.1,
+          "track_target": true
+        }
       }
     },
     "components": {
@@ -130,7 +790,8 @@
       "minecraft:nameable": {},
       "minecraft:persistent": {},
       "minecraft:follow_range": {
-        "value": 24
+        "value": 48,
+        "max": 48
       },
       "minecraft:equipment": {
         "table": "loot_tables/entities/siege_archer_gear.json"
@@ -231,16 +892,6 @@
             "deals_damage": "no"
           }
         ]
-      },
-      "minecraft:shooter": {
-        "def": "minecraft:arrow"
-      },
-      "minecraft:behavior.ranged_attack": {
-        "priority": 2,
-        "attack_interval_min": 1.5,
-        "attack_interval_max": 2.5,
-        "attack_radius": 20,
-        "speed_multiplier": 0
       }
     },
     "events": {
@@ -660,7 +1311,889 @@
           ]
         }
       },
-      "siege:pick_up": {}
+      "siege:pick_up": {},
+      "siege:walk_0": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_22",
+            "siege:walk_23",
+            "siege:fight"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_0"
+          ]
+        }
+      },
+      "siege:walk_1": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_22",
+            "siege:walk_23",
+            "siege:fight"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_1"
+          ]
+        }
+      },
+      "siege:walk_2": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_22",
+            "siege:walk_23",
+            "siege:fight"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_2"
+          ]
+        }
+      },
+      "siege:walk_3": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_22",
+            "siege:walk_23",
+            "siege:fight"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_3"
+          ]
+        }
+      },
+      "siege:walk_4": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_22",
+            "siege:walk_23",
+            "siege:fight"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_4"
+          ]
+        }
+      },
+      "siege:walk_5": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_22",
+            "siege:walk_23",
+            "siege:fight"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_5"
+          ]
+        }
+      },
+      "siege:walk_6": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_22",
+            "siege:walk_23",
+            "siege:fight"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_6"
+          ]
+        }
+      },
+      "siege:walk_7": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_22",
+            "siege:walk_23",
+            "siege:fight"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_7"
+          ]
+        }
+      },
+      "siege:walk_8": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_22",
+            "siege:walk_23",
+            "siege:fight"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_8"
+          ]
+        }
+      },
+      "siege:walk_9": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_22",
+            "siege:walk_23",
+            "siege:fight"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_9"
+          ]
+        }
+      },
+      "siege:walk_10": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_22",
+            "siege:walk_23",
+            "siege:fight"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_10"
+          ]
+        }
+      },
+      "siege:walk_11": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_22",
+            "siege:walk_23",
+            "siege:fight"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_11"
+          ]
+        }
+      },
+      "siege:walk_12": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_22",
+            "siege:walk_23",
+            "siege:fight"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_12"
+          ]
+        }
+      },
+      "siege:walk_13": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_22",
+            "siege:walk_23",
+            "siege:fight"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_13"
+          ]
+        }
+      },
+      "siege:walk_14": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_22",
+            "siege:walk_23",
+            "siege:fight"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_14"
+          ]
+        }
+      },
+      "siege:walk_15": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_22",
+            "siege:walk_23",
+            "siege:fight"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_15"
+          ]
+        }
+      },
+      "siege:walk_16": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_22",
+            "siege:walk_23",
+            "siege:fight"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_16"
+          ]
+        }
+      },
+      "siege:walk_17": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_22",
+            "siege:walk_23",
+            "siege:fight"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_17"
+          ]
+        }
+      },
+      "siege:walk_18": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_22",
+            "siege:walk_23",
+            "siege:fight"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_18"
+          ]
+        }
+      },
+      "siege:walk_19": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_22",
+            "siege:walk_23",
+            "siege:fight"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_19"
+          ]
+        }
+      },
+      "siege:walk_20": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_21",
+            "siege:walk_22",
+            "siege:walk_23",
+            "siege:fight"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_20"
+          ]
+        }
+      },
+      "siege:walk_21": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_22",
+            "siege:walk_23",
+            "siege:fight"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_21"
+          ]
+        }
+      },
+      "siege:walk_22": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_23",
+            "siege:fight"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_22"
+          ]
+        }
+      },
+      "siege:walk_23": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_22",
+            "siege:fight"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_23"
+          ]
+        }
+      },
+      "siege:fight": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_22",
+            "siege:walk_23"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:fight"
+          ]
+        }
+      },
+      "minecraft:entity_spawned": {
+        "add": {
+          "component_groups": [
+            "siege:fight"
+          ]
+        }
+      }
     }
   }
 }

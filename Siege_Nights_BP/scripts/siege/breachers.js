@@ -1,14 +1,14 @@
 // Battering rams and sappers in raids, and the Battering Ram players drive.
 // Split from the original main.js; the code is unchanged apart from the event/hook calls.
 
-import { world, system } from "@minecraft/server";
+import { world, system, ItemStack } from "@minecraft/server";
 import { CHARGE, RAM_ENGINE, RAM_TAG, SAPPER_TAG, UNBREAKABLE } from "./constants.js";
 import { markWanted } from "./guards.js";
 import { keepCenter } from "./keep.js";
 import { SETTINGS } from "./settings.js";
 import { state } from "./state.js";
 import { settlementAt } from "./territory.js";
-import { isOnline, ownerOf } from "./util.js";
+import { ownerOf, attackable } from "./util.js";
 import { BLAST, DAMAGE, hitWall, lightCharge } from "./walls.js";
 import { sfx } from "../core/sfx.js";
 
@@ -111,7 +111,7 @@ export function swingRam(ram, player) {
   const block = blockAhead(ram, 3, facing(ram)); // the ram is big, the beam reaches 3 blocks out
   if (!block) return sfx(dim, "mob.ravager.attack", ram.location, { volume: 0.6, pitch: 0.6 });
   const owner = dim.id === "minecraft:overworld" ? settlementAt(block.location) : undefined;
-  if (owner && !isOnline(owner)) {
+  if (owner && !attackable(owner)) {
     return player.onScreenDisplay.setActionBar(`§c${state.keeps[owner]?.name ?? "The owner"} is away. Their walls can't be touched.`);
   }
   if (owner) markWanted(player, owner);
@@ -132,15 +132,34 @@ world.afterEvents.entityHitBlock.subscribe((event) => {
   if (ram) swingRam(ram, player);
 });
 
-// A freshly placed ram faces the way its builder is looking
+// A freshly placed ram faces the way its builder is looking, and belongs to them
 world.afterEvents.entitySpawn.subscribe((event) => {
   const ram = event.entity;
-  if (ram?.typeId !== RAM_ENGINE) return;
+  if (ram?.typeId !== RAM_ENGINE || ram.getDynamicProperty("siege:owner")) return;
   const builder = ram.dimension.getPlayers({ location: ram.location, maxDistance: 8, closest: 1 })[0];
-  if (builder) ram.setRotation({ x: 0, y: builder.getRotation().y });
+  if (!builder) return;
+  ram.setRotation({ x: 0, y: builder.getRotation().y });
+  ram.setDynamicProperty("siege:owner", builder.id);
+  builder.sendMessage("§7Battering Ram built. Click to climb on, steer with WASD, punch the wall ahead to ram it. Sneak + click with an empty hand to pack it up.");
 });
 
+export const RAM_ITEM = "siege:battering_ram";
+
 world.afterEvents.playerInteractWithEntity.subscribe((event) => {
-  if (event.target?.typeId !== RAM_ENGINE) return;
-  event.player.onScreenDisplay.setActionBar("§6Steer with WASD. Punch the wall ahead to ram it. Sneak to get off.");
+  const { player, target } = event;
+  if (target?.typeId !== RAM_ENGINE) return;
+  const owner = target.getDynamicProperty("siege:owner");
+  const item = event.beforeItemStack ?? event.itemStack;
+  // Sneak + click with an empty hand packs your ram back into an item (an old ram with no owner: anyone)
+  if (player.isSneaking && !item) {
+    if (owner && owner !== player.id) return player.onScreenDisplay.setActionBar("§cOnly the ram's owner can pack it up.");
+    for (const rider of target.getComponent("minecraft:rideable")?.getRiders() ?? []) {
+      try { rider.runCommand("ride @s stop_riding"); } catch { /* already off */ }
+    }
+    target.remove();
+    const leftover = player.getComponent("minecraft:inventory").container.addItem(new ItemStack(RAM_ITEM, 1));
+    if (leftover) player.dimension.spawnItem(leftover, player.location);
+    return;
+  }
+  player.onScreenDisplay.setActionBar("§6Steer with WASD. Punch the wall ahead to ram it. Sneak to get off. Sneak + click with an empty hand packs it up.");
 });

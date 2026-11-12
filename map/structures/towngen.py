@@ -39,6 +39,7 @@ All sizes are odd (streets 5 / 3 / 1, strips 9, buildings): Mateo's rule.
 """
 import os, sys, json, math, heapq, random, argparse, collections, subprocess
 import numpy as np
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", ".claude", "skills", "minecraft-builder", "scripts"))
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from bp import Blueprint
 from kit import h3, VALE, mix
@@ -1043,16 +1044,14 @@ class Town:
 
     # =========================================================================== paths to blocks
     def path_blocks(self):
+        wet = {}
         for i, j in np.argwhere(self.K >= 0):
             x, z = int(i) + self.X0, int(j) + self.Z0
             k = int(self.K[i, j]); kind = {4: "square", 3: "main", 2: "lane", 1: "walk"}[int(self.KIND[i, j])]
             y = (k - 1) // 2; slab = k % 2 == 1
             g0 = int(self.G0[i, j])
-            if self.WET[i, j]:                                   # a deck over the water on stone piers every few blocks
-                self.works[(x, y, z)] = ("stone_brick_slab", {"half": "bottom"}) if slab else ("stone_bricks", {})
-                if (x + z) % 4 == 0:
-                    for yy in range(g0, y): self.works[(x, yy, z)] = ("stone_bricks", {})
-                continue
+            if self.WET[i, j]:                                   # over water: a real bridge, built after the loop
+                wet[(x, z)] = WIDTH.get(kind, 5); continue
             if kind == "square":
                 r = math.hypot(x - self.sq[0], z - self.sq[1])
                 if abs(r - self.sqR + 0.5) < 0.8: blk = ("polished_andesite_slab", {"half": "bottom"}) if slab else ("polished_andesite", {})
@@ -1062,6 +1061,7 @@ class Town:
             self.works[(x, y, z)] = blk
             for yy in range(g0 + 1, y): self.works[(x, yy, z)] = ("cobblestone" if yy == y - 1 else "dirt", {})
             for yy in range(y + 1, max(g0, y) + 3): self.works.setdefault((x, yy, z), ("air", {}))
+        self.bridges(wet)
         # stairs where a walkway climbs a whole block in one step
         for cells, ks, f in self.walks:
             seq = list(zip(cells, ks))
@@ -1072,6 +1072,67 @@ class Town:
                     fx, fz = hi_c[0] - lo_c[0], hi_c[1] - lo_c[1]
                     face = {(1, 0): "e", (-1, 0): "w", (0, 1): "s", (0, -1): "n"}.get((fx, fz), "n")
                     self.works[(hi_c[0], (hi_k - 1) // 2, hi_c[1])] = ("stone_brick_stairs", {"facing": face})
+
+    region = "vale"
+
+    def bridges(self, wet):
+        """Paths over water get a bridge from the one bridge generator (minecraft-builder skill, bridges.py):
+        arches, cutwaters, parapets, lamps, deck in the town's own paving, humped to clear boats."""
+        if not wet: return
+        import bridges as BR
+        def walk(x, z):
+            if not self.ok(x, z): return None
+            i, j = self.ij(x, z)
+            if self.K[i, j] < 0 or self.WET[i, j]: return None
+            return int(self.K[i, j]) / 2.0
+        def ground(x, z):
+            if not self.ok(x, z): return int(self.WL.max()) - 2
+            i, j = self.ij(x, z); return int(self.G0[i, j]) if self.WET[i, j] else int(self.G[i, j])   # the town's graded ground on land
+        def water(x, z):
+            if not self.ok(x, z): return None
+            i, j = self.ij(x, z)
+            return int(self.WL[i, j]) if self.WL[i, j] > self.G0[i, j] else None
+        def is_path(x, z):
+            if not self.ok(x, z): return False
+            i, j = self.ij(x, z); return self.K[i, j] >= 0 and not self.WET[i, j]
+        self.bridge_plans, quays = [], []
+        self.bridge_clear = {}
+        for c in BR.crossings_from_cells(set(wet), walk, lambda x, z: water(x, z) if water(x, z) is not None else int(self.WL[self.ij(x, z)]),
+                                         lambda c: wet[c], region=self.region, path="town", rejects=quays):
+            c.pop("_cells", None)
+            c["ground"] = ground; c["name"] = f"{self.key}_bridge{len(self.bridge_plans)}"
+            built = {cell: b for cell, b in BR.to_works(BR.bridge_blocks(c)).items() if b[0] != "air"}
+            self.works.update(built)
+            tops = {}
+            for (x, y, z) in built: tops[(x, z)] = max(tops.get((x, z), y), y)
+            # Mateo: a bridge never runs into a field. Join each approach end to the nearest street with paving.
+            for end in c.get("_ends", []):
+                for x, z in BR.connect_to_paths(end, is_path):
+                    if not self.ok(x, z) or self.WET[self.ij(x, z)]: continue
+                    i, j = self.ij(x, z); g = int(self.G[i, j])
+                    self.works[(x, g, z)] = pave("lane", x, z, False)
+                    tops[(x, z)] = g
+                    self.TAKEN[i, j] = max(int(self.TAKEN[i, j]), 1)
+            # Mateo: everything above the bridge, its approaches and the joining path is open to the sky
+            for (x, z), top in tops.items():
+                hi = top + 5
+                if self.ok(x, z):
+                    i, j = self.ij(x, z); hi = max(hi, int(max(self.G[i, j], self.G0[i, j])) + 5)
+                for yy in range(top + 1, hi): self.works[(x, yy, z)] = ("air", {})
+                self.bridge_clear[(x, z)] = (top + 1, hi)
+            self.bridge_plans.append({k: v for k, v in c.items() if k not in ("ground", "_ends")})
+        print(f"{self.name} bridges: {len(self.bridge_plans)} built ({', '.join(str(round(math.dist(b['a'], b['b']))) for b in self.bridge_plans)}), {len(quays)} quays ({sum(len(q) for q in quays)} cells)")
+        # wet path cells that are no bridge (a street along the bank): a solid stone quay under the paving
+        for comp in quays:
+            for x, z in comp:
+                i, j = self.ij(x, z); k = int(self.K[i, j]); y = (k - 1) // 2
+                self.works[(x, y, z)] = pave("main", x, z, k % 2 == 1)
+                for yy in range(int(self.G0[i, j]) + 1, y): self.works[(x, yy, z)] = ("stone_bricks", {})
+
+    def finish_bridges(self):
+        """Last pass, after banks and outlines: nothing stands over a bridge, its approaches or its joining path."""
+        for (x, z), (lo, hi) in getattr(self, "bridge_clear", {}).items():
+            for yy in range(lo, hi): self.works[(x, yy, z)] = ("air", {})
 
     def ground_blocks(self):
         """Every column the town regraded: top block, fill under it, air over a cut."""
@@ -1097,7 +1158,7 @@ class Town:
         self.fields()
         self.dress()
         self.roof_colours()
-        self.path_blocks(); self.ground_blocks(); self.banks()
+        self.path_blocks(); self.ground_blocks(); self.banks(); self.finish_bridges()
         self.works = {(int(x), int(y), int(z)): v for (x, y, z), v in self.works.items()}
         for e in self.plan:
             for k in ('x', 'z', 'ground_y', 'rotation', 'footprint'): e[k] = int(e[k])

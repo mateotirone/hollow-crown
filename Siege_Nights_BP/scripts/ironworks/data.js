@@ -3,7 +3,7 @@
 //   2 Bloomery (Town)             a clay furnace smelts it for you, burning charcoal from your tree farm
 //   3 Trip-Hammer Forge (City)    a waterwheel drives a hammer: needs a river or stream beside it
 // Output piles up in the storeroom (the block's menu) up to a few days' worth; raiders loot it when a siege goes
-// badly. Settlements with an iron Old Working beside them dig faster. Pure numbers and maths (Node and self-tests).
+// badly. How fast depends on the region (economy REGION_RATES): Saltreach x2, Frostmarch x0.25. Pure numbers and maths (Node and self-tests).
 
 export const IRONWORKS_BLOCK = "siege:ironworks";
 export const DAY = 24000;
@@ -20,8 +20,7 @@ export const FUEL = "minecraft:charcoal";
 export const IRONWORKS = {
   capDays: 3, // the storeroom holds this many days of output, then the workers stop
   fuelCap: 256, // charcoal the bunker holds
-  workingTowns: ["Frosthelm", "Gullcliff"], // an iron Old Working next door (workings/data.js): faster
-  workingBonus: 1.5,
+  metal: "iron", // output is scaled by economy/config.js regionRate(region, "iron"): Saltreach x2, Frostmarch x0.25
   waterReach: 12, // the Forge needs water this close to its block
   loot: { won: 0, dawn: 0.25, lost: 0.5 }, // share of the storeroom raiders carry off, by siege outcome
 };

@@ -19,7 +19,8 @@ A 50,000-block castle costs about the same tokens as a hut.
    rule it follows), `reference/colour.md` (materials, gradients, palette, regeneration),
    `reference/house-rules.md` (Mateo's rules, region styles, where build-instructions/ says more),
    `reference/output.md` (commands, editions, limits, in-game checks),
-   `reference/from-picture.md` (rebuilding a building from a screenshot or photo).
+   `reference/from-picture.md` (rebuilding a building from a screenshot or photo),
+   `reference/bridges.md` (part `bridge`: any-angle bridges over water and gaps, sized by span, styled by region).
 3. **Compression.** Never read the `.mcfunction` or `scene.json`, never print block lists. Read the summary,
    look at the PNG, change the spec, rebuild.
 

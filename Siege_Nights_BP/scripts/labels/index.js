@@ -16,6 +16,7 @@ const BLOCKS = [
   ["siege:barracks", "Barracks", "Click: guards"],
   ["siege:hall_cornerstone", "Hall Cornerstone", "Click: town hall"],
   ["siege:tree_of_oaths", "Tree of Oaths", "Click: skills"],
+  ["siege:hall_board", "Town Board", "Click: town hall"],
   ["siege:foundation_stone", "Foundation Stone", "Click: pick a building"],
   ["siege:plot_stone", "Plot Stone", "Click: this plot"],
   ["hc:looking_glass", "Looking Glass", "Click: change your look"],

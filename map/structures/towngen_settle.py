@@ -838,7 +838,7 @@ class Settlement(Town):
                 if fo: fo["windmill"] = f["at"]
         self.dress()
         self.trees()
-        self.path_blocks(); self.ground_blocks(); self.banks()
+        self.path_blocks(); self.ground_blocks(); self.banks(); self.finish_bridges()
         self.works = {(int(x), int(y), int(z)): v for (x, y, z), v in self.works.items()}
 
     def export(self):

@@ -24,7 +24,7 @@
       "geometry": {
         "default": "geometry.humanoid.custom",
         "cape": "geometry.cape",
-        "hc_look": "geometry.humanoid.custom"
+        "hc_look": "geometry.hc.jointed"
       },
       "scripts": {
         "scale": "0.9375",
@@ -48,7 +48,8 @@
           "variable.hc_air_start = 0.0;",
           "variable.hc_land_at = -10.0;",
           "variable.hc_land_pow = 0.0;",
-          "variable.hc_freeb = 1.0;"
+          "variable.hc_freeb = 1.0;",
+          "variable.hc_idle_for = 0.0;"
         ],
         "pre_animation": [
           "variable.helmet_layer_visible = !query.has_head_gear;",
@@ -67,6 +68,10 @@
           "variable.hc_weapon = !(query.has_property('hc:look') ? query.is_item_equipped(0) : 1.0) ? 3.0 : (variable.hc_heavy ? 2.0 : (variable.hc_blade ? 1.0 : 0.0));",
           "variable.hc_rimefang = query.has_property('hc:look') ? query.is_item_name_any('slot.weapon.mainhand', 0, 'siege:rimefang_bow') : 0.0;",
           "variable.hc_bow = variable.hc_rimefang || (query.has_property('hc:look') ? query.is_item_name_any('slot.weapon.mainhand', 0, 'minecraft:bow') : 0.0);",
+          "variable.hc_light_main = query.has_property('hc:look') ? query.is_item_name_any('slot.weapon.mainhand', 0, 'minecraft:torch', 'minecraft:soul_torch', 'minecraft:copper_torch', 'minecraft:lantern', 'minecraft:soul_lantern', 'minecraft:redstone_torch') : 0.0;",
+          "variable.hc_light_off = query.has_property('hc:look') ? query.is_item_name_any('slot.weapon.offhand', 0, 'minecraft:torch', 'minecraft:soul_torch', 'minecraft:copper_torch', 'minecraft:lantern', 'minecraft:soul_lantern', 'minecraft:redstone_torch') : 0.0;",
+          "variable.hc_book = query.has_property('hc:look') ? query.is_item_name_any('slot.weapon.mainhand', 0, 'minecraft:book', 'minecraft:writable_book', 'minecraft:written_book', 'minecraft:enchanted_book', 'siege:almanac', 'siege:kings_journal', 'siege:lore_tome', 'siege:ledger', 'siege:fourteen_arts') : 0.0;",
+          "variable.hc_read = variable.hc_book && variable.attack_time <= 0.0 && !query.is_riding ? 1.0 - math.min(query.modified_move_speed * 2.5, 0.6) : 0.0;",
           "variable.hc_t = math.clamp(variable.attack_time, 0.0, 1.0);",
           "variable.hc_new_swing = variable.attack_time > 0.0 && (variable.hc_last_t <= 0.0 || variable.attack_time < variable.hc_last_t);",
           "variable.hc_combo = variable.hc_new_swing ? ((query.life_time - variable.hc_swing_at > 1.2) ? 0.0 : math.mod(variable.hc_combo + 1.0, 3.0)) : variable.hc_combo;",
@@ -94,11 +99,21 @@
           "variable.hc_land = variable.hc_land_pow * math.clamp(1.0 - (query.life_time - variable.hc_land_at) / 0.3, 0.0, 1.0);",
           "variable.hc_k = math.min(1.0, query.delta_time * 8.0);",
           "variable.hc_sprint = variable.hc_sprint + ((query.is_sprinting && query.is_on_ground && !query.is_riding) - variable.hc_sprint) * variable.hc_k;",
-          "variable.hc_airb = variable.hc_airb + ((variable.hc_in_air && query.life_time - variable.hc_air_start > 0.15) - variable.hc_airb) * variable.hc_k;",
-          "variable.hc_fall = math.clamp(-query.vertical_speed / 20.0, 0.0, 1.0);",
+          "variable.hc_airb = variable.hc_airb + ((variable.hc_in_air && (query.vertical_speed > 3.0 || query.life_time - variable.hc_air_start > 0.15)) - variable.hc_airb) * math.min(1.0, query.delta_time * 14.0);",
+          "variable.hc_fall = math.clamp((-query.vertical_speed - 4.0) / 16.0, 0.0, 1.0);",
+          "variable.hc_rise = variable.hc_airb * math.clamp(query.vertical_speed / 6.0, 0.0, 1.0);",
+          "variable.hc_tuck = variable.hc_airb * math.clamp(1.0 - math.abs(query.vertical_speed) / 6.0, 0.0, 1.0) * (1.0 - variable.hc_fall);",
           "variable.hc_freeb = variable.hc_freeb + ((variable.attack_time <= 0.0 && !variable.hc_drawing && !query.blocking && variable.hc_release <= 0.0) - variable.hc_freeb) * math.min(1.0, query.delta_time * 12.0);",
           "variable.hc_free = variable.hc_freeb;",
-          "variable.hc_live = !query.is_sleeping && !query.is_emoting && !query.is_riding && !query.is_crawling && variable.swim_amount <= 0.0;"
+          "variable.hc_live = !query.is_sleeping && !query.is_emoting && !query.is_riding && !query.is_crawling && variable.swim_amount <= 0.0;",
+          "variable.hc_freel = variable.hc_freeb * (1.0 - variable.hc_light_off);",
+          "variable.hc_still = variable.hc_live && query.is_on_ground && query.modified_move_speed < 0.02 && variable.attack_time <= 0.0 && !variable.hc_drawing && !query.is_sneaking && variable.hc_read <= 0.0;",
+          "variable.hc_idle_for = variable.hc_still ? variable.hc_idle_for + query.delta_time : 0.0;",
+          "variable.hc_fidt = math.mod(math.max(variable.hc_idle_for - 6.0, 0.0), 7.0);",
+          "variable.hc_fidk = math.mod(math.floor(math.max(variable.hc_idle_for - 6.0, 0.0) / 7.0), 3.0);",
+          "variable.hc_fid = variable.hc_idle_for > 6.0 ? math.sin(variable.hc_fidt / 7.0 * 180.0) : 0.0;",
+          "variable.hc_mounted = query.is_riding && (query.has_property('hc:look') ? query.is_riding_any_entity_of_type('minecraft:horse', 'minecraft:donkey', 'minecraft:mule', 'minecraft:skeleton_horse', 'minecraft:zombie_horse', 'minecraft:camel', 'siege:steed', 'siege:dragon') : 0.0);",
+          "variable.hc_hurt = math.clamp(query.hurt_time / 10.0, 0.0, 1.0);"
         ],
         "animate": [
           "root",
@@ -210,7 +225,17 @@
         "hc_attack_fist_jab": "animation.hc.player.attack.fist_jab",
         "hc_fp_fist_jab": "animation.hc.player.fp.fist_jab",
         "hc_attack_fist_hook": "animation.hc.player.attack.fist_hook",
-        "hc_fp_fist_hook": "animation.hc.player.fp.fist_hook"
+        "hc_fp_fist_hook": "animation.hc.player.fp.fist_hook",
+        "hc_sneak": "animation.hc.player.sneak",
+        "hc_idle_look": "animation.hc.player.idle_look",
+        "hc_idle_shift": "animation.hc.player.idle_shift",
+        "hc_idle_stretch": "animation.hc.player.idle_stretch",
+        "hc_idle_blade": "animation.hc.player.idle_blade",
+        "hc_light_main": "animation.hc.player.light_main",
+        "hc_light_off": "animation.hc.player.light_off",
+        "hc_read": "animation.hc.player.read",
+        "hc_reins": "animation.hc.player.reins",
+        "hc_flinch": "animation.hc.player.flinch"
       },
       "render_controllers": [
         {
