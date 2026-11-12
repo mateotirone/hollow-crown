@@ -497,5 +497,8 @@
  },
  "siege:plot_marker": {
   "sound": "wood"
+ },
+ "siege:ironworks": {
+  "sound": "stone"
  }
 }

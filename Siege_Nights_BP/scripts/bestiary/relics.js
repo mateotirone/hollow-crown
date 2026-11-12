@@ -2,9 +2,12 @@
 // The items themselves are data (items/bestiary/*.json); what makes them special is here.
 
 import { world, EquipmentSlot } from "@minecraft/server";
-import { onTick, isNight, addTests, assert, assertEqual } from "../siege/api.js";
+import { onTick, isNight, addTests, assert, assertEqual, countItem, takeItems } from "../siege/api.js";
 import { ITEMS, SIGILS, MOBS } from "./data.js";
-import { bossDefs, startBoss, activeFights } from "./bossCore.js";
+import { bossDefs, startBoss, activeFights, bestiaryStore, rankOf } from "./bossCore.js";
+
+// A rematch costs diamonds on top of the key (Mateo 2026-11-12: netherite must stand on diamonds). Rank 1 = 2 ... rank 5 = 6.
+export const rematchDiamonds = (rank) => (rank > 0 ? rank + 1 : 0);
 import { effect, flat, heal, healthOf, held, heroOf, hurt, particle, ring, shove, sound } from "./util.js";
 
 const offhand = (p) => held(p, EquipmentSlot.Offhand);
@@ -112,6 +115,11 @@ world.afterEvents.itemUse.subscribe((event) => {
   if (activeFights().some((f) => f.def.id === def.id && f.dim.id === player.dimension.id && flat(f.center, player.location) < 96)) {
     return player.onScreenDisplay.setActionBar(`§7${def.name} is already here.`);
   }
+  const creative = player.getGameMode?.() === "Creative";
+  const diamonds = rematchDiamonds(rankOf(bestiaryStore.data.defeated[def.id]));
+  if (diamonds && !creative && countItem(player, "minecraft:diamond") < diamonds) {
+    return player.onScreenDisplay.setActionBar(`§7${def.name} has fallen before. To call it back you need §b${diamonds} diamonds§7 as well as the key.`);
+  }
   const v = player.getViewDirection();
   const d = Math.hypot(v.x, v.z) || 1;
   const at = { x: player.location.x + (v.x / d) * 6, y: player.location.y, z: player.location.z + (v.z / d) * 6 };
@@ -120,7 +128,8 @@ world.afterEvents.itemUse.subscribe((event) => {
   } catch {
     return player.onScreenDisplay.setActionBar("§7Nothing answers. Try somewhere more open.");
   }
-  if (player.getGameMode?.() !== "Creative") {
+  if (!creative) {
+    if (diamonds) takeItems(player, "minecraft:diamond", diamonds);
     const eq = player.getComponent("equippable");
     const stack = eq.getEquipment(EquipmentSlot.Mainhand);
     if (stack?.typeId === event.itemStack.typeId) eq.setEquipment(EquipmentSlot.Mainhand, stack.amount > 1 ? (stack.amount--, stack) : undefined);
@@ -130,6 +139,9 @@ world.afterEvents.itemUse.subscribe((event) => {
 export const pathRelic = (player) => (heroOf(player).path === "marked" ? "siege:crownless_mantle" : "siege:oath_of_oswin");
 
 addTests("bestiary", {
+  "a rematch costs diamonds, more the stronger it has grown": () => {
+    assertEqual([0, 1, 3, 5].map(rematchDiamonds), [0, 2, 4, 6]);
+  },
   "every boss key calls a boss that exists": () => {
     assertEqual(Object.keys(SIGILS).length, 5);
     for (const [item, type] of Object.entries(SIGILS)) {

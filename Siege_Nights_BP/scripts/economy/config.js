@@ -16,7 +16,8 @@ export const ECON = {
   perEmerald: 8, // how many coins an old emerald price becomes
   ironBuys: 8, // the Moneyer pays this per iron ingot
   ironSells: 10, // and charges this for one
-  mintDaily: 64, // ingots per player per day at the full price; after that the Moneyer pays half
+  // No daily limit on iron (Mateo, 2026-11-12): mine all day and sell it all. Iron golems are removed (golems.js),
+  // so there are no iron farms to cheat with.
   // Daily appetite: past a good's `want`, the price drops by `drop` for every `step` more you sell, down to `floor`.
   // It resets each dawn and is counted per player and per region.
   drop: 0.1, floor: 0.3,
@@ -28,8 +29,16 @@ export const ECON = {
   // Hard daily stop (anti-farm): once a trader's price has hit its floor, it buys this many more lots from you that
   // day and then no more. Counted per player, per region, per good, reset each dawn. A good's own `stop` (units) wins.
   stopLots: 4,
-  mintStop: 128, // iron ingots per player per day the Moneyer takes at all (64 full price, then 64 at half)
 };
+
+// The trade-up ladder at the Moneyer (Mateo 2026-11-12): every tier can always be bought with the tier below, at a
+// steep rate, so a pile of netherite stands on a mountain of diamonds, gold and iron. Earning a tier directly
+// (Workings, bosses, the Guild) is always cheaper. Never add the reverse: tiers only go up here.
+export const EXCHANGE = [
+  { from: "minecraft:iron_ingot", n: 4, to: "minecraft:gold_ingot" },
+  { from: "minecraft:gold_ingot", n: 8, to: "minecraft:diamond" },
+  { from: "minecraft:diamond", n: 6, to: "minecraft:netherite_scrap" },
+];
 
 export const REGIONS = ["Aldmere Vale", "Frostmarch", "Saltreach", "Emberwaste", "Blackfen"];
 const [V, F, S, E, B] = REGIONS;
@@ -97,10 +106,12 @@ export const JOBS = {
   // The Mint. Iron both ways at the fixed rate, with a daily limit; gems at a low fixed price. No regional prices.
   moneyer: {
     name: "Moneyer", home: [], scarce: [], mint: true,
-    buys: [g("iron_ingot", 1, ECON.ironBuys, { want: ECON.mintDaily, step: 1, drop: 0.5, floor: 0.5, stop: ECON.mintStop }),
+    buys: [g("iron_ingot", 1, ECON.ironBuys, { want: Infinity, stop: Infinity }),
       g("emerald", 1, 4, { want: 32, step: 8 }), g("diamond", 1, 64, { want: 8, step: 4 })],
     sells: [g("iron_ingot", 1, ECON.ironSells)],
   },
+  // The Guild Factor (guild/): no buying or selling, today's three orders for other regions' goods, paid in metal.
+  factor: { name: "Guild Factor", home: [], scarce: [], guild: true, buys: [], sells: [] },
 };
 
 export const JOB_IDS = Object.keys(JOBS);
@@ -139,6 +150,10 @@ export const LINES = {
     day: ["Eight to the ingot, in. Ten to the ingot, out. It has never been otherwise.", "Every Regal is a promise of iron. Bring me the coin and I'll keep the promise.", "The old king's head is on every one. Nobody has dared strike a new face."],
     night: ["The Mint does not close. Iron doesn't sleep, and neither, they say, does he.", "Count them in the light. At night the heads seem to face the other way."],
   },
+  factor: {
+    day: ["The Guild buys what this country can't make. Bring it from where it's made.", "Three orders a day. Fill one and you're paid in metal, not promises.", "Every road on the map ends at a Guild ledger. Mine just happens to be this one."],
+    night: ["Orders stand until dawn. So do I, apparently.", "The ink keeps running toward the edge of the page tonight. Sign quickly."],
+  },
 };
 
 // ---------- job NPCs in the map's towns (towns.js) ----------
@@ -148,10 +163,10 @@ export const LINES = {
 // Region sets the prices; each town gets its region's trades plus the ones every town needs.
 export const TOWN_RING = 9;
 export const TOWNS = [
-  { name: "Kingsrest", region: V, jobs: ["moneyer", "farmer", "woodcutter", "quarryman", "smith", "fisher", "hunter", "herbalist"] },
-  { name: "Millbrook", region: V, jobs: ["farmer", "woodcutter", "smith", "hunter"] },
-  { name: "Rimehold", region: F, jobs: ["quarryman", "smith", "hunter", "farmer"] },
-  { name: "Gull's Rest", region: S, jobs: ["fisher", "farmer", "smith", "woodcutter"] },
-  { name: "Sunscar", region: E, jobs: ["quarryman", "smith", "hunter", "farmer"] },
-  { name: "Mirelight", region: B, jobs: ["herbalist", "woodcutter", "fisher", "hunter", "farmer", "smith"] },
+  { name: "Kingsrest", region: V, jobs: ["moneyer", "farmer", "woodcutter", "quarryman", "smith", "fisher", "hunter", "herbalist", "factor"] },
+  { name: "Millbrook", region: V, jobs: ["farmer", "woodcutter", "smith", "hunter", "factor"] },
+  { name: "Rimehold", region: F, jobs: ["quarryman", "smith", "hunter", "farmer", "factor"] },
+  { name: "Gull's Rest", region: S, jobs: ["fisher", "farmer", "smith", "woodcutter", "factor"] },
+  { name: "Sunscar", region: E, jobs: ["quarryman", "smith", "hunter", "farmer", "factor"] },
+  { name: "Mirelight", region: B, jobs: ["herbalist", "woodcutter", "fisher", "hunter", "farmer", "smith", "factor"] },
 ];

@@ -119,7 +119,7 @@ def plot_shape(name, theta):
         a = r_.uniform(0.05, 0.22) / (1 + 0.15 * k); ph = r_.uniform(0, 6.283)
         f = f + a * (1 + np.cos(k * theta + ph))
     return f
-# each plot's clearing: no trees inside its wandering edge (never closer than r62, past the r60 land),
+# each plot's clearing: no trees inside its wandering edge (never closer than r76, past the r72 land),
 # then woodland thickens back over a wandering band instead of stopping at a hard ring
 plotfade = np.ones((SIZE, SIZE), np.float32)       # 0 = clear, 1 = natural density
 for n, x, z in PLOTS:
@@ -127,7 +127,7 @@ for n, x, z in PLOTS:
     if x0 >= x1 or z0 >= z1: continue
     dx_ = GX[x0:x1, z0:z1] - x; dz_ = GZ[x0:x1, z0:z1] - z
     th = np.arctan2(dz_, dx_); d = np.hypot(dx_, dz_)
-    rc = 62 * plot_shape(n, th); band = 25 + 45 * (plot_shape(n + "e", th) - 1)
+    rc = 76 * plot_shape(n, th); band = 25 + 45 * (plot_shape(n + "e", th) - 1)
     fade = np.clip((d - rc) / band, 0, 1)
     plotfade[x0:x1, z0:z1] = np.minimum(plotfade[x0:x1, z0:z1], fade * fade)
 plotzone = plotfade < 0.02

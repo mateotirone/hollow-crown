@@ -1,0 +1,7 @@
+{
+  "name": "vale_house",
+  "parts": [
+    {"part": "house", "style": "vale_timber", "rect": [-4, -5, 4, 5], "y": 0, "plinth": 1,
+     "storeys": [5, 5], "jetty": ["n", "s"], "door": {"side": "s"}, "roof": {"type": "gable", "pitch": 1}}
+  ]
+}
