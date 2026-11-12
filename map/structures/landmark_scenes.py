@@ -17,7 +17,7 @@ PAD = {"Blackfen": "mud", "Frostmarch": "snow", "Emberwaste": "sand"}
 REGION = {"tidewatch_posts": "Saltreach", "gullcliff_beacon": "Saltreach", "reedmoor_ring": "Blackfen", "lanternbog_posts": "Blackfen",
           "redmesa_stones": "Emberwaste", "dunehold_hall": "Emberwaste", "dunehold_well": "Emberwaste", "dunehold_palms": "Emberwaste",
           "frosthelm_road": "Frostmarch", "wolfcairn_cairn": "Frostmarch", "deepforge": "Frostmarch", "cinder_roost": "Emberwaste",
-          "mags_hut": "Blackfen", "nell_raft": "Blackfen", "ashen_watch": "Blackfen"}
+          "mags_hut": "Blackfen", "nell_raft": "Blackfen", "sedge_graves": "Blackfen", "ashen_watch": "Blackfen"}
 
 
 def title(name, fn):

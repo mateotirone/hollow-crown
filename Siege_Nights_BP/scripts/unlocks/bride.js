@@ -15,6 +15,8 @@ import { moonPhase } from "../lore/moondoors.js";
 import { defineSite, column, overworld, say, actionbar, sound, abs, setState, give, inventoryHas, nearby, put } from "./site.js";
 import { makePews, pewAnswer, resting, CARVINGS, PEW_ROWS } from "./puzzles.js";
 import { chapelPlan, chapelInterior, pewStone, inChapel, CHAPEL } from "./plans.js";
+import { grantTome } from "../lore/player.js";
+import { TOME_IN_UNLOCKS } from "../lore/places.js";
 
 export const RING = "siege:drowned_ring";
 const DROWNED = "minecraft:drowned";
@@ -119,6 +121,7 @@ function liftStone(site, player, block) {
     for (const dz of [-2, 2]) { try { overworld().spawnEntity(DROWNED, { x: block.location.x + 0.5, y: block.location.y + 1, z: block.location.z + dz + 0.5 }); } catch { /* unloaded */ } }
     return;
   }
+  for (const id of TOME_IN_UNLOCKS.bride) grantTome(player, id); // the Letters were right: more of them are under here
   if (inventoryHas(player, RING) || d.armed) return say(player, "§7Under the gull there's a hollow in the stone, the size of a ring, and nothing in it now.");
   give(player, RING);
   sound("random.orb", block.location, { pitch: 0.6, volume: 1 });

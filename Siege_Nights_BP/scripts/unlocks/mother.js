@@ -12,6 +12,8 @@ import { system } from "@minecraft/server";
 import { defineSite, column, overworld, say, actionbar, sound, abs, mid, setState, give, inventoryHas, nearby, put, talk, removeNpc } from "./site.js";
 import { makeChangeling, villagerLines, accuse, resting, VILLAGERS } from "./puzzles.js";
 import { cradlePlan, mirelightPlan, rootCells, inCradle, CRADLE } from "./plans.js";
+import { grantTome } from "../lore/player.js";
+import { TOME_IN_UNLOCKS } from "../lore/places.js";
 import { BlockPermutation } from "@minecraft/server";
 
 export const EFFIGY = "siege:mire_effigy";
@@ -62,6 +64,7 @@ async function villager(site, player, i) {
   site.save();
   removeNpc(overworld(), `${VTAG}_${i}`, site.data.center);
   sound("block.bell.hit", player.location, { pitch: 1.8, volume: 0.6 });
+  for (const id of TOME_IN_UNLOCKS.mother) grantTome(player, id); // what the shape kept in its stilt house
   if (inventoryHas(player, EFFIGY) || motherSite.data.armed) {
     return say(player, `§7${v.name}'s face goes slack, like a mask with nobody behind it, and then there is nobody there at all.`);
   }

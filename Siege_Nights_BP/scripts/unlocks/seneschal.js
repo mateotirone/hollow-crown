@@ -13,6 +13,8 @@ import { system, BlockPermutation } from "@minecraft/server";
 import { defineSite, column, overworld, say, actionbar, sound, abs, setState, give, inventoryHas, nearby, put } from "./site.js";
 import { makeStatues, statueStep, resting } from "./puzzles.js";
 import { vaultPlan, statueAt, signSpot, doorCells, inVault, VAULT } from "./plans.js";
+import { grantTome } from "../lore/player.js";
+import { TOME_IN_UNLOCKS } from "../lore/places.js";
 
 export const SEAL = "siege:faceless_seal";
 const SCARAB = "siege:ash_scarab";
@@ -99,6 +101,7 @@ function turnStatue(site, player, block) {
   site.save();
   try { put(overworld(), d.center, { dx: VAULT.niche.dx, dy: VAULT.floor + 2, dz: VAULT.niche.dz, block: "minecraft:air" }); } catch { /* unloaded */ }
   sound("tile.piston.in", abs(d.center, { dx: VAULT.niche.dx, dy: VAULT.floor + 2, dz: VAULT.niche.dz }), { pitch: 0.5, volume: 1 });
+  for (const id of TOME_IN_UNLOCKS.seneschal) grantTome(player, id); // papers in the niche under the seal
   if (inventoryHas(player, SEAL)) return say(player, "§7A niche grinds open beside the door. It's empty. You already have what it held.");
   give(player, SEAL);
   say(player, "§6A niche grinds open beside the door. Inside, on a bed of ash: a steward's seal, with no face on it.§r You take the Faceless Seal.");

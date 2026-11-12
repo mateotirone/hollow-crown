@@ -494,10 +494,32 @@ def cinder_roost():
     d.put(0, 1, -21, "campfire", bs={"extinguished": True})
     d.meta["npcs"] = [[0, 1, 8, "kesh"]]
     d.meta["mark"] = [0, 1, 4]
+    # the Rider trial's Span: from the gate's mouth to the last stone before the perch (roletrials marks.js)
+    d.meta["roleMarks"] = [[0, 1, -1, "span_start"], [0, 1, -16, "span_end"]]
+    return d
+
+
+def sedge_graves():
+    """Goody Sedge's three graves, on the last dry ground between Old Mag's hut and Nell's raft: low mounds under thin
+    headstones gone green, a stub of candle on each. The Witch trial asks you to kneel at all three (roletrials).
+    Three graves, 1 wide and 3 long, four blocks apart (odd sizes)."""
+    d = D("sedge_graves", "drape", seed=301)
+    graves = []
+    for k, x in enumerate((-4, 0, 4)):
+        for z in range(0, 3):
+            d.put(x, 0, z, d.pick(x, 0, z, [("coarse_dirt", 3), ("mud", 2), ("moss_block", 1)], k))
+            if d.r(x, 1, z, k) < 0.5: d.put(x, 1, z, "moss_carpet")
+        d.put(x, 0, -1, "mud_bricks")                                   # the headstone's footing
+        d.put(x, 1, -1, "mossy_stone_brick_wall" if k == 1 else "mud_brick_wall")
+        d.put(x, 2, -1, "candle", bs={"candles": 0, "lit": False})
+        graves.append([x, 1, 1, "grave"])
+    for x, z in ((-6, 2), (6, 0), (2, 4)): d.put(x, 1, z, "dead_bush")
+    d.put(-2, 1, -2, "spruce_fence"); d.put(-2, 2, -2, "lantern", hanging=False)
+    d.meta["roleMarks"] = graves
     return d
 
 
 STORY_DESIGNS = {f.__name__: f for f in (
     crownhold_hall, crownhold_walls, bellhollow_seal, bellhollow_frame, ashen_chapterhouse, ashen_watch, corvins_tower,
-    mags_hut, nell_raft, deepforge, cinder_roost)}
+    mags_hut, nell_raft, sedge_graves, deepforge, cinder_roost)}
 STORY_TURNING = {"deepforge", "cinder_roost"}

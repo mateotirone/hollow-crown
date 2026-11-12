@@ -35,8 +35,12 @@ const STORY_SITES = [
   { id: "corvins_tower", region: "Aldmere Vale", name: "Corvin's Tower", x: -416, z: -696, place: "corvins_tower", pieces: [{ d: "corvins_tower" }] },
   { id: "mags_hut", region: "Blackfen", name: "Old Mag's hut", x: 4, z: 972, place: "mags_hut", pieces: [{ d: "mags_hut" }] },
   { id: "nell_raft", region: "Blackfen", name: "Nell Sedge's raft-house", x: 26, z: 1001, place: "nell_raft", pieces: [{ d: "nell_raft" }] },
+  // Goody Sedge's graves (the Witch trial): the last dry ground between Old Mag's hut and the pool Nell's raft lies in
+  // (ground 69-71 on the map's heights, the pool 58-61 from x 20 east)
+  { id: "sedge_graves", region: "Blackfen", name: "Goody Sedge's graves", x: 10, z: 988, pieces: [{ d: "sedge_graves" }] },
   { id: "deepforge", region: "Frostmarch", name: "the Deepforge", x: -274, z: -938, place: "deepforge", pieces: [{ d: "deepforge", turns: true, face: "e" }] },
-  { id: "cinder_roost", region: "Emberwaste", name: "the Cinder Roost", x: 898, z: 346, place: "cinder_roost", pieces: [{ d: "cinder_roost", turns: true, face: "s" }] },
+  // version 2: built again once so the Span's two ends reach the Rider trial (roletrials marks.js)
+  { id: "cinder_roost", region: "Emberwaste", name: "the Cinder Roost", x: 898, z: 346, place: "cinder_roost", version: 2, pieces: [{ d: "cinder_roost", turns: true, face: "s" }] },
 ];
 
 export const LANDMARKS = [

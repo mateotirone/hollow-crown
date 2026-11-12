@@ -7,6 +7,9 @@
 // Pieces that seek a shore or a cliff use the spot worked out from the map (spots_data.js); if a world has none,
 // they look for it themselves inside the loaded area.
 //
+// A design's roleMarks ([dx, dy, dz, kind]) are sent out as landmarkRoleMarks { site, dim, marks: [{ kind, at }] } once it
+// is built: the role trials take the Span's two ends and Goody Sedge's graves from there.
+//
 // Commands (creative/op):
 //   /scriptevent hc:landmark_status            which sites are built
 //   /scriptevent hc:landmark_tp <id>           go to a site
@@ -157,6 +160,10 @@ export function buildSite(site, by) {
         try {
           if (!dim.getEntities({ tags: [`siege_lore_npc_${id}`], location: at, maxDistance: 64 }).length) spawnNpc(dim, at, id);
         } catch { /* unloaded */ }
+      }
+      // places a role trial needs (the Span, Goody Sedge's graves): roletrials/marks.js keeps them
+      if (p.d.roleMarks?.length) {
+        emit("landmarkRoleMarks", { site: `${site.id}#${k}`, dim: OVERWORLD, marks: p.d.roleMarks.map(([dx, dy, dz, kind]) => ({ kind, at: { x: p.x + dx + 0.5, y: yAt(dx, dy, dz), z: p.z + dz + 0.5 } })) });
       }
       if (p.d.mark && site.place) {
         const [dx, dy, dz] = p.d.mark;
