@@ -176,7 +176,7 @@ function layTick() {
     store.data.laying.shift();
     world.sendMessage(`§6The line from ${stopName(seg.from)} to ${stopName(seg.to)} is laid.`);
     const hits = store.data.blocked?.[seg.id] ?? [];
-    if (hits.length) world.sendMessage(`§eBuildings stand in its way at ${hits.slice(0, 4).map((q) => `${q.x}, ${q.z}`).join("; ")}${hits.length > 4 ? " and more" : ""}. They were left standing, so trains can't get past there until they're cleared.`);
+    if (hits.length) world.sendMessage(`§eBuildings stand in its way at ${hits.slice(0, 4).map((q) => `${q.x}, ${q.z}`).join("; ")}${hits.length > 4 ? " and more" : ""}. They were left standing.`);
   }
   store.save();
 }
