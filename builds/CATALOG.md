@@ -4,7 +4,7 @@
 
 Every build in The Hollow Crown, designed or not. Add an entry the moment a build is asked for, even with no design yet, and move its status on as it progresses. Run  node tools/build-catalog.mjs  after editing to rewrite builds/CATALOG.md (check.mjs fails if it is stale).
 
-**101 builds:** 1 not started, 22 designed, 15 in viewer, 63 in game.
+**103 builds:** 1 not started, 25 designed, 14 in viewer, 63 in game.
 
 Statuses:
 
@@ -34,7 +34,9 @@ A ★ marks builds that no earlier list had (added in the 2026-11-12 audit).
 | Region town inns (4) (4) | One version per overworld region | in viewer | town-* | Procedurally generate terrain-aware towns | `map/structures/regions_towns.py` | Waiting in PR #163. Sunscar's is a caravanserai. |
 | Region town smithies and general stores (8) | One version per overworld region | in viewer | town-* | Procedurally generate terrain-aware towns | `map/structures/regions_towns.py` | Waiting in PR #163. |
 | Sunscar market hall | Emberwaste | in viewer | town-sunscar | Procedurally generate terrain-aware towns | `map/structures/regions_towns.py` | Waiting in PR #163. |
-| Gull's Rest quay, lighthouse and boathouse (3) | Saltreach | in viewer | town-gulls_rest | Procedurally generate terrain-aware towns | `map/structures/regions_towns.py` | Gull's Rest has no water in its ward, so these are not placed yet. |
+| Gull's Rest lighthouse | Saltreach | designed | harbour | Procedurally generate terrain-aware towns | `map/structures/harbour_specs/lighthouse.json` | Waiting in PR #209. Harbour of Gull's Rest; town with quay, moles, jetty and crane is in /mnt/project-files/siege-nights/towngen/gulls_rest-harbour/. |
+| Gull's Rest boathouse | Saltreach | designed | harbour | Procedurally generate terrain-aware towns | `map/structures/harbour_specs/boathouse.json` | Waiting in PR #209. Harbour of Gull's Rest. |
+| Gull's Rest harbourmaster's hut | Saltreach | designed | harbour | Procedurally generate terrain-aware towns | `map/structures/harbour_specs/harbourmaster.json` | Waiting in PR #209. Harbour of Gull's Rest. |
 | Mirelight stilt houses (2) | Blackfen | in viewer | town-mirelight | Procedurally generate terrain-aware towns | `map/structures/regions_towns.py` |  |
 | Field windmills | One version per overworld region | in game |  | Finish the remaining world builds | `map/structures/towngen_build.py` | Today towns use the Vale windmill; regional windmills for the five overworld regions are in world_props.py (viewer world_props), not yet placed by towngen. |
 | ★ Regional wells and field fencing | One version per overworld region | in viewer | world_props | Finish the remaining world builds | `map/structures/world_props.py` | Wells and field fencing for all six regions. |
