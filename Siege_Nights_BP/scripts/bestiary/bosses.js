@@ -373,7 +373,7 @@ function masquerade(f) {
   try { f.entity.teleport(f.spot(3, 12)); } catch { /* chunk not ready */ }
   for (let i = 0; i < copies; i++) {
     const e = f.place("siege:mother_echo", f.spot(3, 12));
-    if (e) e.nameTag = `§c${f.def.name}`;
+    if (e) e.nameTag = f.def.name; // no colour code: the boss bar colours the title (tools/bossbar_ui.py)
   }
   for (const p of f.players()) { effect(p, "blindness", 30, 0); sound(f.dim, "mob.witch.celebrate", p.location, 0.6); }
   f.say("§2\"Which of us is your mother, little thing?\"");
