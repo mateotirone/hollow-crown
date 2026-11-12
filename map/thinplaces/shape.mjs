@@ -254,6 +254,8 @@ function witchroot(real, add) {
     const r = real(u, v), d = bowl(u, v);
     const bank = Math.hypot(u / 24, (v + 10) / 16) + (fbm(u * 0.12, v * 0.12, 140) - 0.5) * 0.35;
     if (bank < 1 && v < 3) return Math.max(r, wl + 1, Math.round(fen + 10 * smooth((1 - bank) / 0.45) * smooth((3 - v) / 3) + (fbm(u * 0.2, v * 0.2, 139) - 0.5) * 3)); // the root bank over the cave
+    if (d < 30 && u >= -3 && u <= 5 && v <= 9) return wl; // solid ground from the bank face out under the landing: no swim between the landing and the cave
+    if (u >= 2 && u <= 5 && v >= 43 && d < 44) return Math.min(Math.max(r, wl + 1), wl + Math.floor((v - 43) / 2)); // the boardwalk's far end: a graded cut up through the rim, a block every two
     if (d < 30) return Math.round(lerp(floor - 1 - (hash(u, v, 143) < 0.4 ? 1 : 0), Math.max(r, wl + 1), smooth((d - 22) / 8)));
     return r;
   };
@@ -262,8 +264,19 @@ function witchroot(real, add) {
   // the great tree is a Cradle Tree built in gen_places.py (roots that rest on the bank and run into the water)
   // a rotting boardwalk from the hollow's edge to the mouth, with gaps: top slabs set in the water's top block, so
   // you walk level with the cave floor
-  for (let v = 44; v >= 7; v--) { if (hash(v, 1, 153) < 0.12) continue; add(3, wl, v, "spruce_slab^"); add(4, wl, v, hash(v, 2, 153) < 0.7 ? "spruce_slab^" : "water"); if (v % 4 === 0) add(2, wl + 1, v, "spruce_fence"); }
-  for (let u = -2; u <= 4; u++) for (let v = 7; v <= 9; v++) add(u, wl, v, "spruce_slab^"); // the landing stage at the mouth, level with the cave floor
+  let gap = false;
+  for (let v = 43; v >= 10; v--) {
+    gap = !gap && hash(v, 1, 153) < 0.12; // never two missing boards in a row
+    if (gap) continue;
+    if (h(3, v) < wl) add(3, wl, v, "spruce_slab^");
+    if (h(4, v) < wl) add(4, wl, v, hash(v, 2, 153) < 0.7 ? "spruce_slab^" : "water");
+    if (v % 4 === 0 && h(2, v) < wl) add(2, wl + 1, v, "spruce_fence");
+  }
+  for (let v = 44; v < 70; v += 2) { // a half step on each rise of the cut, so you walk up without jumping
+    if (h(3, v + 1) <= h(3, v)) continue;
+    for (let u = 2; u <= 5; u++) add(u, h(u, v) + 1, v, "spruce_slab");
+  }
+  for (let u = -3; u <= 5; u++) for (let v = 7; v <= 9; v++) add(u, wl, v, "spruce_planks"); // the landing stage at the mouth, on solid ground, level with the cave floor
   return { h, water, top, floor: wl }; // the cave floor starts one above the water, level with the boardwalk
 }
 

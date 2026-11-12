@@ -64,7 +64,7 @@ def shape_sites(Y, water_level, X0, Z0, keep=None, sites=None, log=print, pools=
         pal = o["palette"]
         blocks += [(x + dx, y, z + dz, pal[i]["name"], pal[i]["states"]) for dx, y, dz, i in o["blocks"]]
         facts[sid] = {"x": x, "z": z, "floor": o["floor"], "probes": [[x + dx, z + dz, y] for dx, dz, y in o["probes"]]}
-        log("thin place", name, "floor", o["floor"], "blocks", len(o["blocks"]), "probes", len(o["probes"]), "leaks", o["leaks"])
+        log("thin place", name, "floor", o["floor"], "blocks", len(o["blocks"]), "probes", len(o["probes"]), "leaks", o["leaks"], "causeway", o["causeway"], "paths under water", o["drowned"])
     return shaped, blocks, facts
 
 

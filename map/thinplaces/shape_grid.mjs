@@ -3,10 +3,10 @@
 //      centred on the site: the real ground (top solid block), the real water surface (-999 = none), how much
 //      of the real land must stay (0..1: roads, rivers). path (optional): 1 on a road or trail, which keeps its own
 //      surface wherever it stays dry.
-// out: { floor, heights, water, mix, palette, blocks: [[dx, y, dz, palette index]], probes: [[dx, dz, y]], leaks }
+// out: { floor, heights, water, mix, palette, blocks: [[dx, y, dz, palette index]], probes: [[dx, dz, y]], leaks, causeway, drowned }
 //      heights / water are the new grids. blocks are the surface and face blocks and the set pieces, to be placed
 //      after the terrain ("minecraft:air" digs). probes are up to five columns the game reads to tell that the land
-//      was shaped. leaks counts dry columns that lay under the water next to them and were flooded (should be few).
+//      was shaped. causeway counts path columns raised to cross water, drowned those still under it (must be 0). leaks counts dry columns that lay under the water next to them and were flooded (should be few).
 import { shapeSite } from "./shape.mjs";
 import { hash } from "../../Siege_Nights_BP/scripts/undertow/noise.js";
 
@@ -32,6 +32,10 @@ export function shapeGrid(inp) {
     if (m >= 0.5) W[i] = sw !== undefined && sw > h ? sw : -999; // inside, the place decides where water lies
     else W[i] = rw > h ? rw : -999; // outside, the map's own water stays wherever the ground is still under it
   }
+  // a road or trail that was dry before never ends up under a place's water: it crosses on a causeway, its top
+  // level with the water (found by the trial map run 2026-11-12: trails drowned in the barrow ditch and the hollow)
+  let causeway = 0;
+  if (inp.path) for (let i = 0; i < N * N; i++) if (inp.path[i] && MIX[i] > 0 && W[i] > H[i] && !(inp.water[i] > inp.heights[i])) { H[i] = W[i]; W[i] = -999; causeway++; }
   // water never stands above dry ground beside it: flood any dry column lying under a neighbour's water
   let leaks = 0;
   for (let pass = 0; pass < 2 * N; pass++) {
@@ -77,13 +81,16 @@ export function shapeGrid(inp) {
   // probes: where the shaped land stands furthest from the old land, spread round the place, away from kept ground
   const probes = [], cand = [], busy = new Set();
   for (const [u, , v] of S.extras) { const [dx, dz] = toW(u, v); if (Math.abs(dx) < rad && Math.abs(dz) < rad) busy.add(idx(dx, dz)); }
-  for (let dx = -60; dx <= 60; dx += 3) for (let dz = -60; dz <= 60; dz += 3) {
+  for (let dx = -60; dx <= 60; dx += 2) for (let dz = -60; dz <= 60; dz += 2) {
     const i = idx(dx, dz), [u, v] = toL(dx, dz);
     if (MIX[i] < 0.999 || W[i] > -999 || busy.has(i) || (Math.abs(u) < 12 && v > 0 && v < 30)) continue; // bare ground, off the way in
     const flat = [H[i + 1], H[i - 1], H[i + N], H[i - N]].every((a) => Math.abs(a - H[i]) <= 1);
     if (flat) cand.push([Math.abs(H[i] - inp.heights[i]), dx, dz, H[i]]);
   }
   cand.sort((a, b) => b[0] - a[0]);
-  for (const [d, dx, dz, y] of cand) { if (d < 4 || probes.length >= 5) break; if (probes.every(([a, b]) => Math.hypot(a - dx, b - dz) >= 15)) probes.push([dx, dz, y]); }
-  return ({ floor: S.floor, heights: [...H], water: [...W], mix: [...MIX].map((m) => +m.toFixed(3)), palette, blocks, probes, leaks });
+  // at least 4 blocks off the old land if five such columns can be found, else at least 2 (the game matches within 1)
+  for (const least of [4, 2]) for (const [d, dx, dz, y] of cand) { if (d < least || probes.length >= 5) break; if (probes.every(([a, b]) => Math.hypot(a - dx, b - dz) >= 10)) probes.push([dx, dz, y]); }
+  let drowned = 0;
+  if (inp.path) for (let i = 0; i < N * N; i++) if (inp.path[i] && MIX[i] > 0 && W[i] > H[i] && !(inp.water[i] > inp.heights[i])) drowned++;
+  return ({ causeway, drowned, floor: S.floor, heights: [...H], water: [...W], mix: [...MIX].map((m) => +m.toFixed(3)), palette, blocks, probes, leaks });
 }

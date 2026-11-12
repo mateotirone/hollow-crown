@@ -12,9 +12,10 @@ const LANDS = {
 };
 const problems = [];
 for (const [id, facing] of Object.entries(SITES)) for (const [name, land] of Object.entries(LANDS)) {
-  const heights = [], water = [], keep = [];
-  for (let dx = -rad; dx <= rad; dx++) for (let dz = -rad; dz <= rad; dz++) { heights.push(land(dx, dz)); water.push(-999); keep.push(0); }
-  const o = shapeGrid({ id, facing, rad, heights, water, keep });
+  const heights = [], water = [], keep = [], path = [];
+  // three trails cross every place, straight through its water: one each way and one on the slant
+  for (let dx = -rad; dx <= rad; dx++) for (let dz = -rad; dz <= rad; dz++) { heights.push(land(dx, dz)); water.push(-999); keep.push(0); path.push(Math.abs(dx - 20) <= 1 || Math.abs(dz + 25) <= 1 || Math.abs(dx - dz) <= 1 ? 1 : 0); }
+  const o = shapeGrid({ id, facing, rad, heights, water, keep, path });
   const say = (m) => problems.push(`${id} on ${name}: ${m}`);
   const H = o.heights, W = o.water;
   // 1. water is held: no dry column lies under the water of a column beside it (it would pour out the first time a block changes)
@@ -25,11 +26,14 @@ for (const [id, facing] of Object.entries(SITES)) for (const [name, land] of Obj
   // 2. the cave floor (one above `floor`) is never under water that stands near the mouth
   const [ox, oz] = { north: [0, -1], south: [0, 1], east: [1, 0], west: [-1, 0] }[facing];
   for (let u = -12; u <= 12; u++) for (let v = -30; v <= 14; v++) { const dx = u * oz + v * ox, dz = -u * ox + v * oz, w = W[(dx + rad) * N + dz + rad]; if (w > o.floor) { say(`water at ${w} stands over the cave (floor ${o.floor}) at u ${u}, v ${v}`); u = 99; break; } }
+  // 2b. no trail ends up under a place's water, and at Witchroot you walk dry from the landing to the bank face
+  if (o.drowned) say(`${o.drowned} trail columns lie under water`);
+  if (id === "witchroot_caves") for (let v = 3; v <= 9; v++) { const dx = v * ox, dz = v * oz, i = (dx + rad) * N + dz + rad; if (W[i] > -999 || H[i] !== o.floor) { say(`the way from the landing to the cave is not dry level ground at v ${v}`); break; } }
   // 3. the game can tell the shaped land from the old
-  if (o.probes.length < 3) say(`only ${o.probes.length} probes`);
+  if (o.probes.length < 4) say(`only ${o.probes.length} probes`);
   // 4. every block has a name and sits inside the square
   for (const [dx, , dz, p] of o.blocks) if (!o.palette[p]?.name || Math.abs(dx) > rad || Math.abs(dz) > rad) { say("a bad block entry"); break; }
 }
 for (const p of problems) console.log(p);
 if (problems.length) process.exit(1);
-console.log(`${Object.keys(SITES).length} places on ${Object.keys(LANDS).length} kinds of ground: water held, cave floors dry, probes found`);
+console.log(`${Object.keys(SITES).length} places on ${Object.keys(LANDS).length} kinds of ground: water held, trails dry, cave floors dry, probes found`);
