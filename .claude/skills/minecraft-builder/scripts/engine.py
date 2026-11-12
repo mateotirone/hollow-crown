@@ -41,6 +41,11 @@ def resolve(cells, mats, pal, log):
         if not v.get("mat"):
             if ("nomat", k) not in warned: log.append(f"{k} cell at {x},{y},{z} has no material"); warned.add(("nomat", k))
             continue
+        forms = mats.define(v["mat"]).get("forms") or {}
+        if k in forms or (k == "post" and "wall" in forms):    # a material can name its own partial blocks
+            fb = forms.get(k) or forms["wall"]
+            if k in ("full", "post"): p.pop("axis", None)
+            if k != "full" or "axis" not in fb: out[(x, y, z)] = (fb, p); continue
         b, raw = mats.block(v["mat"], x, y, z)
         if raw:
             out[(x, y, z)] = (b, p); continue

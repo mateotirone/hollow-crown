@@ -23,7 +23,7 @@ spans and footprints it fits, where it goes in town and why). The table below is
 |---|---|---|
 | Vale | gable, pitch 1 | cross gables, jettied gables to the street, hipped on civic, spires on chapels, domes on the capital |
 | Frostmarch | gable, pitch 2 (steep, sheds snow) | tiered stave roofs, skirt roofs round halls, dragon-head finials on the gable peaks |
-| Saltreach | hip, pitch 1 (low) | domes on civic, flat roof terraces on harbour houses |
+| Saltreach | hip, pitch 1 (low) | Gull's Rest houses vary (Mateo 2026-11-12, Atlantean): mansard and bell hips (per-row pitch profiles), domes on a flat deck, temple-front gables over a colonnade, terrace wings, corner towers; domes on civic |
 | Blackfen | gable, pitch 1, mossy/thatch look | low eaves almost to the platform, turf ridges |
 | Emberwaste | flat with parapet and crenels | domes, roof terraces with awnings |
 
@@ -121,6 +121,10 @@ building (gable wall, barge boards, eave trim, ridge) were left standing inside 
 - **Hip roofs close down to the wall too (Mateo, 2026-11-12)**: the ring over the wall line sits on the wall;
   one or two rows of air between the wall top and that ring are filled with the wall block
   (`settle_halls.close_under`, run by `pyramid`). Never leave a slot of sky under a hip.
+- **Steep steps on a hip line (2026-11-12)**: where a hip roof rises 2 in one step (pitch 2, a mansard's lower
+  course, a bell roof's top), the outer-corner stair on the hip line gets full roof blocks under it like every
+  other steep stair. Without them the corner shows a hole you can see sky through (the skill's `build_roofs`
+  does this for every roof).
 
 ## Step 6: Gable walls
 
