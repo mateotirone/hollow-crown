@@ -8,7 +8,7 @@
 
 export const WALLS = {
   radius: 66, // the Castle ring: blocks from the Plot Stone to the outer face (Mateo 2026-11-12: rings 36, 46, 56, 66 by tier). Land ends at radius + landBeyond.
-  landBeyond: 4, // your land reaches this far past the wall from the day it is raised
+  landBeyond: 6, // your land reaches this far past the wall from the day it is raised (66 + 6 = 72, the map's land edge)
   spawnBeyond: 5, // raiders appear this far outside the wall
   reserve: 4, // nothing may be built this close to the line of the wall (either side)
   wobble: { out: 4, in: 2 }, // the wall line wanders: up to this many blocks out (at the Castle ring, less on smaller rings) and in
