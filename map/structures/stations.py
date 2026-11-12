@@ -203,7 +203,7 @@ def louvres(bp, P, xs, ys, lz, out):
 # ---------------------------------------------------------------- the four stages
 
 def halt(region):
-    """Halt: a small waiting shelter with its gable to the line, a ticket counter and a bench, a hitching rail."""
+    """Halt: a small waiting shelter with its eaves to the line, a ticket counter and a bench, a hitching rail."""
     bp, B, P, k, L = start(region, "halt")
     platform(bp, region, k, 7, 2, 6)
     rect = R(-3, 3, 3, 5)
@@ -216,7 +216,8 @@ def halt(region):
     S(bp, 0, 0, 3, plat_mats(region, k)[0])
     side_windows(B, L, rect, 1, sides="ew")
     counter(bp, P, 1, 2, 4); bench(bp, P, -2, 4)
-    roofs(bp, P, L, region, [(rect, "z", 1)], top + (1 if L["roof"] != "flat" else 0))
+    # eaves to the line (Mateo 2026-11-12: a gable to the line on a box three deep read as a house cut in half)
+    roofs(bp, P, L, region, [(rect, "x", 1)], top + (1 if L["roof"] != "flat" else 0))
     hang(bp, [(0, 3, -4)])
     stalls = stalls_shed(bp, P, k, L, -7, -5, 4, 6)
     lamp(bp, P, 6, 4); lamp(bp, P, -4, 6)
@@ -336,6 +337,7 @@ def grand(region):
         for lz in range(-7, 8):
             y = shed_arch(lz)
             ys = range(min(y, prev), max(y, prev) + 1) if prev is not None else [y]
+            if abs(lz) == 7: ys = range(5, y + 1)       # the vault comes down onto the side beam: no open row above it
             for yy in ys:
                 if x in ribs: S(bp, x, yy, lz, rib)
                 else: S(bp, x, yy, lz, "glass")
@@ -479,7 +481,7 @@ def engine_shed(region):
     roofs(bp, P, L, region, [(rect, "x", 1)], base)
     for x in (-4, 4):
         for y in range(base + 2, base + 6):
-            if bp.get(x, y, 0)[0] in ("keep", "air"): S(bp, x, y, 0, k("bricks"))
+            if bp.get(x, y, 0)[0] in ("keep", "air") or "carpet" in bp.get(x, y, 0)[0]: S(bp, x, y, 0, k("bricks"))   # a stack stands on the roof, not on a moss carpet
         S(bp, x, base + 6, 0, "stone_brick_wall")
     for x in (-8, 8):
         for lz in (-3, 3): S(bp, x, 6, lz, k("stone"))

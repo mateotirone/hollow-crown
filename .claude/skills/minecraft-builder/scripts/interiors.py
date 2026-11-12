@@ -584,6 +584,8 @@ def furnish_level(L, kind, doors, region, wood, table):
         _wall_items(L, ["barrel", "cartography_table"], doors)
     elif kind == "mill":
         _wall_items(L, ["grindstone", "barrel", "barrel", "composter", "hay_block", "chest"], doors)
+    elif kind == "open":       # an open arcade or market floor: nothing but light, the walk stays clear
+        return
     elif kind == "stable":
         _wall_items(L, ["hay_block", "hay_block", "barrel", "composter"], doors)
     else:   # storage

@@ -44,8 +44,8 @@
     {}
    ],
    "door": {
-    "side": "n",
-    "at": -6,
+    "side": "s",
+    "at": -10,
     "kind": "house",
     "steps": 3
    },

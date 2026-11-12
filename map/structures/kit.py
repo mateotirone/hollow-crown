@@ -226,8 +226,26 @@ def finish_detail(bp, P=None):
             if core:
                 for c in set(bp.cells) - before:
                     if not (x0 <= c[0] <= x1 and z0 <= c[2] <= z1): del bp.cells[c]
+    clear_doorways(bp)
     texture_roofs(bp)
     return bp.finish()
+
+def clear_doorways(bp):
+    """05 door approach (Mateo 2026-11-12: "the door is blocked"): nothing stands in front of or behind a door at
+    the door's own two rows, and no shelf, sill, box or shutter sticks out beside it. Steps (below) stay."""
+    STEP = {"n": (0, -1), "s": (0, 1), "e": (1, 0), "w": (-1, 0)}
+    snag = lambda n: n.endswith(("_slab", "_trapdoor", "_wall_sign", "_leaves", "_flowered")) or n in ("barrel", "composter", "flower_pot")
+    for (x, y, z), (n, p) in list(bp.cells.items()):
+        if not n.endswith("_door") or p.get("upper") or "trapdoor" in n: continue
+        dx, dz = STEP.get(p.get("facing", "s"), (0, 1))
+        rx, rz = dz, dx
+        for sgn in (1, -1):
+            for dy in (0, 1):
+                c = (x + dx * sgn, y + dy, z + dz * sgn)
+                if c in bp.cells and bp.cells[c][0] not in ("air", "keep") and not bp.cells[c][0].endswith("_door"): bp.cells[c] = ("air", {})
+                for k in (-1, 1):
+                    c2 = (c[0] + rx * k, c[1], c[2] + rz * k)
+                    if c2 in bp.cells and snag(bp.cells[c2][0]): bp.cells[c2] = ("air", {})
 
 def smooth_noise(a, b, seed, cell=4.0):
     """Value noise in 0..1 that forms clusters about `cell` blocks across (never single-block speckle)."""
@@ -769,6 +787,7 @@ class Building:
                         if y == y_from: bp.set(x, y, z, P["frame"], axis="x" if ridge == "z" else "z")
                     else:
                         bp.set(x, y, z, P["stone"])
+        self.close_plate(rect, y_from, style)
         # clear the attic under the roof inside the walls
         for x in range(x0 + 1, x1):
             for z in range(z0 + 1, z1):
@@ -776,6 +795,32 @@ class Building:
                 if h is None: continue
                 for y in range(y_from, h):
                     if bp.get(x, y, z)[0] in ("keep",): bp.set(x, y, z, "air")
+
+    def close_plate(self, rect, y_from, style="timber"):
+        """No open row between the top of a wall and its roof (Mateo 2026-11-12: "why's there a gap here").
+        Round the whole wall outline, any air left between the highest wall block and the roof above it (one or two
+        rows, the wall plate) is filled: a timber wall gets a beam along the wall, a stone wall its stone. Taller
+        openings are left alone (they are arcades, porches or open stalls, not gaps)."""
+        bp, P = self.bp, self.P
+        x0, z0, x1, z1 = rect
+        ring = [(x, z) for x in range(x0, x1 + 1) for z in (z0, z1)] + [(x, z) for z in range(z0 + 1, z1) for x in (x0, x1)]
+        soft = lambda n: n in ("air", "keep")
+        for (x, z) in ring:
+            h, _ = self.H.get((x, z), (None, None))
+            if h is None: continue
+            top = min(h, y_from)
+            ys = [y for y in range(top - 1, top - 4, -1)]
+            gap = []
+            for y in ys:
+                if soft(bp.get(x, y, z)[0]): gap.append(y)
+                else: break
+            else: continue                                   # no wall within three rows: an open side, leave it
+            wall = bp.get(x, gap[-1] - 1 if gap else top - 1, z)[0]
+            if not gap or len(gap) > 2 or any(w in wall for w in ("fence", "pane", "glass", "door", "stairs", "slab", "lantern")): continue
+            along = "x" if z in (z0, z1) else "z"
+            for y in gap:
+                if style == "timber": bp.set(x, y, z, P["frame"], axis=along)
+                else: bp.set(x, y, z, P["stone"])
 
     def eaves(self, rect, ridge, y):
         """Upside-down trim stairs tucked under the eave overhang along the long walls."""

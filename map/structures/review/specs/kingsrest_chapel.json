@@ -210,23 +210,14 @@
  "place": [
   [
    2,
-   19,
+   20,
    18,
    "deepslate_tiles"
   ],
   [
    2,
-   19,
-   19,
-   "deepslate_tile_stairs",
-   {
-    "facing": "e"
-   }
-  ],
-  [
-   2,
-   19,
    20,
+   19,
    "deepslate_tile_stairs",
    {
     "facing": "e"
@@ -234,8 +225,8 @@
   ],
   [
    2,
-   19,
-   21,
+   20,
+   20,
    "deepslate_brick_stairs",
    {
     "facing": "e"
@@ -243,7 +234,16 @@
   ],
   [
    2,
-   19,
+   20,
+   21,
+   "deepslate_tile_stairs",
+   {
+    "facing": "e"
+   }
+  ],
+  [
+   2,
+   20,
    22,
    "deepslate_tile_stairs",
    {
@@ -252,22 +252,22 @@
   ],
   [
    2,
-   19,
+   20,
    23,
-   "deepslate_tile_stairs",
+   "deepslate_brick_stairs",
    {
     "facing": "e"
    }
   ],
   [
    2,
-   19,
+   20,
    24,
    "deepslate_tiles"
   ],
   [
    3,
-   19,
+   20,
    18,
    "deepslate_tile_stairs",
    {
@@ -276,37 +276,37 @@
   ],
   [
    3,
-   19,
+   20,
    19,
    "deepslate_tiles"
   ],
   [
    3,
-   19,
+   20,
    20,
    "deepslate_tiles"
   ],
   [
    3,
-   19,
+   20,
    21,
    "deepslate_tiles"
   ],
   [
    3,
-   19,
+   20,
    22,
    "deepslate_tiles"
   ],
   [
    3,
-   19,
+   20,
    23,
    "deepslate_tiles"
   ],
   [
    3,
-   19,
+   20,
    24,
    "deepslate_tile_stairs",
    {
@@ -315,55 +315,7 @@
   ],
   [
    4,
-   19,
-   18,
-   "deepslate_tile_stairs",
-   {
-    "facing": "s"
-   }
-  ],
-  [
-   4,
-   19,
-   19,
-   "deepslate_tiles"
-  ],
-  [
-   4,
-   19,
    20,
-   "deepslate_tiles"
-  ],
-  [
-   4,
-   19,
-   21,
-   "deepslate_tiles"
-  ],
-  [
-   4,
-   19,
-   22,
-   "deepslate_tiles"
-  ],
-  [
-   4,
-   19,
-   23,
-   "deepslate_tiles"
-  ],
-  [
-   4,
-   19,
-   24,
-   "deepslate_tile_stairs",
-   {
-    "facing": "n"
-   }
-  ],
-  [
-   5,
-   19,
    18,
    "deepslate_brick_stairs",
    {
@@ -371,38 +323,38 @@
    }
   ],
   [
-   5,
-   19,
+   4,
+   20,
    19,
    "deepslate_tiles"
   ],
   [
-   5,
-   19,
+   4,
+   20,
    20,
    "deepslate_tiles"
   ],
   [
-   5,
-   19,
+   4,
+   20,
    21,
    "deepslate_tiles"
   ],
   [
-   5,
-   19,
+   4,
+   20,
    22,
    "deepslate_tiles"
   ],
   [
-   5,
-   19,
+   4,
+   20,
    23,
    "deepslate_tiles"
   ],
   [
-   5,
-   19,
+   4,
+   20,
    24,
    "deepslate_brick_stairs",
    {
@@ -410,8 +362,56 @@
    }
   ],
   [
-   6,
+   5,
+   20,
+   18,
+   "deepslate_tile_stairs",
+   {
+    "facing": "s"
+   }
+  ],
+  [
+   5,
+   20,
    19,
+   "deepslate_tiles"
+  ],
+  [
+   5,
+   20,
+   20,
+   "deepslate_tiles"
+  ],
+  [
+   5,
+   20,
+   21,
+   "deepslate_tiles"
+  ],
+  [
+   5,
+   20,
+   22,
+   "deepslate_tiles"
+  ],
+  [
+   5,
+   20,
+   23,
+   "deepslate_tiles"
+  ],
+  [
+   5,
+   20,
+   24,
+   "deepslate_tile_stairs",
+   {
+    "facing": "n"
+   }
+  ],
+  [
+   6,
+   20,
    18,
    "deepslate_tile_stairs",
    {
@@ -420,37 +420,37 @@
   ],
   [
    6,
-   19,
+   20,
    19,
    "deepslate_tiles"
   ],
   [
    6,
-   19,
+   20,
    20,
    "deepslate_tiles"
   ],
   [
    6,
-   19,
+   20,
    21,
    "deepslate_tiles"
   ],
   [
    6,
-   19,
+   20,
    22,
    "deepslate_tiles"
   ],
   [
    6,
-   19,
+   20,
    23,
    "deepslate_tiles"
   ],
   [
    6,
-   19,
+   20,
    24,
    "deepslate_tile_stairs",
    {
@@ -459,71 +459,62 @@
   ],
   [
    7,
-   19,
+   20,
    18,
-   "deepslate_tile_stairs",
+   "deepslate_brick_stairs",
    {
     "facing": "s"
    }
   ],
   [
    7,
-   19,
+   20,
    19,
    "deepslate_tiles"
   ],
   [
    7,
-   19,
+   20,
    20,
    "deepslate_tiles"
   ],
   [
    7,
-   19,
+   20,
    21,
    "deepslate_tiles"
   ],
   [
    7,
-   19,
+   20,
    22,
    "deepslate_tiles"
   ],
   [
    7,
-   19,
+   20,
    23,
    "deepslate_tiles"
   ],
   [
    7,
-   19,
+   20,
    24,
-   "deepslate_tile_stairs",
+   "deepslate_brick_stairs",
    {
     "facing": "n"
    }
   ],
   [
    8,
-   19,
+   20,
    18,
    "deepslate_tiles"
   ],
   [
    8,
-   19,
-   19,
-   "deepslate_tile_stairs",
-   {
-    "facing": "w"
-   }
-  ],
-  [
-   8,
-   19,
    20,
+   19,
    "deepslate_tile_stairs",
    {
     "facing": "w"
@@ -531,8 +522,8 @@
   ],
   [
    8,
-   19,
-   21,
+   20,
+   20,
    "deepslate_brick_stairs",
    {
     "facing": "w"
@@ -540,7 +531,16 @@
   ],
   [
    8,
-   19,
+   20,
+   21,
+   "deepslate_tile_stairs",
+   {
+    "facing": "w"
+   }
+  ],
+  [
+   8,
+   20,
    22,
    "deepslate_tile_stairs",
    {
@@ -549,207 +549,21 @@
   ],
   [
    8,
-   19,
+   20,
    23,
-   "deepslate_tile_stairs",
+   "deepslate_brick_stairs",
    {
     "facing": "w"
    }
   ],
   [
    8,
-   19,
+   20,
    24,
    "deepslate_tiles"
   ],
   [
    3,
-   20,
-   19,
-   "deepslate_tiles"
-  ],
-  [
-   3,
-   20,
-   20,
-   "deepslate_tile_stairs",
-   {
-    "facing": "e"
-   }
-  ],
-  [
-   3,
-   20,
-   21,
-   "deepslate_tile_stairs",
-   {
-    "facing": "e"
-   }
-  ],
-  [
-   3,
-   20,
-   22,
-   "deepslate_brick_stairs",
-   {
-    "facing": "e"
-   }
-  ],
-  [
-   3,
-   20,
-   23,
-   "deepslate_tiles"
-  ],
-  [
-   4,
-   20,
-   19,
-   "deepslate_tile_stairs",
-   {
-    "facing": "s"
-   }
-  ],
-  [
-   4,
-   20,
-   20,
-   "deepslate_tiles"
-  ],
-  [
-   4,
-   20,
-   21,
-   "deepslate_tiles"
-  ],
-  [
-   4,
-   20,
-   22,
-   "deepslate_tiles"
-  ],
-  [
-   4,
-   20,
-   23,
-   "deepslate_tile_stairs",
-   {
-    "facing": "n"
-   }
-  ],
-  [
-   5,
-   20,
-   19,
-   "deepslate_tile_stairs",
-   {
-    "facing": "s"
-   }
-  ],
-  [
-   5,
-   20,
-   20,
-   "deepslate_tiles"
-  ],
-  [
-   5,
-   20,
-   21,
-   "deepslate_tiles"
-  ],
-  [
-   5,
-   20,
-   22,
-   "deepslate_tiles"
-  ],
-  [
-   5,
-   20,
-   23,
-   "deepslate_brick_stairs",
-   {
-    "facing": "n"
-   }
-  ],
-  [
-   6,
-   20,
-   19,
-   "deepslate_brick_stairs",
-   {
-    "facing": "s"
-   }
-  ],
-  [
-   6,
-   20,
-   20,
-   "deepslate_tiles"
-  ],
-  [
-   6,
-   20,
-   21,
-   "deepslate_tiles"
-  ],
-  [
-   6,
-   20,
-   22,
-   "deepslate_tiles"
-  ],
-  [
-   6,
-   20,
-   23,
-   "deepslate_tile_stairs",
-   {
-    "facing": "n"
-   }
-  ],
-  [
-   7,
-   20,
-   19,
-   "deepslate_tiles"
-  ],
-  [
-   7,
-   20,
-   20,
-   "deepslate_tile_stairs",
-   {
-    "facing": "w"
-   }
-  ],
-  [
-   7,
-   20,
-   21,
-   "deepslate_brick_stairs",
-   {
-    "facing": "w"
-   }
-  ],
-  [
-   7,
-   20,
-   22,
-   "deepslate_tile_stairs",
-   {
-    "facing": "w"
-   }
-  ],
-  [
-   7,
-   20,
-   23,
-   "deepslate_tiles"
-  ],
-  [
-   3,
    21,
    19,
    "deepslate_tiles"
@@ -935,13 +749,22 @@
    "deepslate_tiles"
   ],
   [
-   4,
+   3,
    22,
-   20,
+   19,
    "deepslate_tiles"
   ],
   [
-   4,
+   3,
+   22,
+   20,
+   "deepslate_brick_stairs",
+   {
+    "facing": "e"
+   }
+  ],
+  [
+   3,
    22,
    21,
    "deepslate_tile_stairs",
@@ -950,15 +773,60 @@
    }
   ],
   [
+   3,
+   22,
+   22,
+   "deepslate_tile_stairs",
+   {
+    "facing": "e"
+   }
+  ],
+  [
+   3,
+   22,
+   23,
+   "deepslate_tiles"
+  ],
+  [
+   4,
+   22,
+   19,
+   "deepslate_brick_stairs",
+   {
+    "facing": "s"
+   }
+  ],
+  [
+   4,
+   22,
+   20,
+   "deepslate_tiles"
+  ],
+  [
+   4,
+   22,
+   21,
+   "deepslate_tiles"
+  ],
+  [
    4,
    22,
    22,
    "deepslate_tiles"
   ],
   [
+   4,
+   22,
+   23,
+   "deepslate_tile_stairs",
+   {
+    "facing": "n"
+   }
+  ],
+  [
    5,
    22,
-   20,
+   19,
    "deepslate_tile_stairs",
    {
     "facing": "s"
@@ -967,6 +835,12 @@
   [
    5,
    22,
+   20,
+   "deepslate_tiles"
+  ],
+  [
+   5,
+   22,
    21,
    "deepslate_tiles"
   ],
@@ -974,9 +848,24 @@
    5,
    22,
    22,
+   "deepslate_tiles"
+  ],
+  [
+   5,
+   22,
+   23,
    "deepslate_tile_stairs",
    {
     "facing": "n"
+   }
+  ],
+  [
+   6,
+   22,
+   19,
+   "deepslate_tile_stairs",
+   {
+    "facing": "s"
    }
   ],
   [
@@ -989,15 +878,60 @@
    6,
    22,
    21,
+   "deepslate_tiles"
+  ],
+  [
+   6,
+   22,
+   22,
+   "deepslate_tiles"
+  ],
+  [
+   6,
+   22,
+   23,
+   "deepslate_brick_stairs",
+   {
+    "facing": "n"
+   }
+  ],
+  [
+   7,
+   22,
+   19,
+   "deepslate_tiles"
+  ],
+  [
+   7,
+   22,
+   20,
    "deepslate_tile_stairs",
    {
     "facing": "w"
    }
   ],
   [
-   6,
+   7,
+   22,
+   21,
+   "deepslate_tile_stairs",
+   {
+    "facing": "w"
+   }
+  ],
+  [
+   7,
    22,
    22,
+   "deepslate_brick_stairs",
+   {
+    "facing": "w"
+   }
+  ],
+  [
+   7,
+   22,
+   23,
    "deepslate_tiles"
   ],
   [
@@ -1063,14 +997,74 @@
   [
    6,
    23,
+   22,
+   "deepslate_tiles"
+  ],
+  [
+   4,
+   24,
+   20,
+   "deepslate_tiles"
+  ],
+  [
+   4,
+   24,
+   21,
+   "deepslate_tile_stairs",
+   {
+    "facing": "e"
+   }
+  ],
+  [
+   4,
+   24,
    22,
    "deepslate_tiles"
   ],
   [
    5,
    24,
+   20,
+   "deepslate_tile_stairs",
+   {
+    "facing": "s"
+   }
+  ],
+  [
+   5,
+   24,
    21,
-   "deepslate_tile_wall"
+   "deepslate_tiles"
+  ],
+  [
+   5,
+   24,
+   22,
+   "deepslate_brick_stairs",
+   {
+    "facing": "n"
+   }
+  ],
+  [
+   6,
+   24,
+   20,
+   "deepslate_tiles"
+  ],
+  [
+   6,
+   24,
+   21,
+   "deepslate_brick_stairs",
+   {
+    "facing": "w"
+   }
+  ],
+  [
+   6,
+   24,
+   22,
+   "deepslate_tiles"
   ],
   [
    5,
@@ -1082,11 +1076,17 @@
    5,
    26,
    21,
-   "deepslate_tiles"
+   "deepslate_tile_wall"
   ],
   [
    5,
    27,
+   21,
+   "deepslate_tiles"
+  ],
+  [
+   5,
+   28,
    21,
    "lightning_rod"
   ]

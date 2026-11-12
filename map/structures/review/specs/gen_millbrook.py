@@ -9,55 +9,35 @@ def top_of(spec, x0, z0, x1, z1):
     b, st, _ = engine.compute(spec)
     return max(y for (x, y, z) in b if x0 <= x <= x1 and z0 <= z <= z1 and st.get((x, y, z)) in ("walls", "frame"))
 
-# ---------------- the clock tower: a 7 x 7 stone shaft, clock faces, an open belfry, a slate spire
+# ---------------- the clock tower (build-instructions/towers/README.md, Mateo 2026-11-12): a 7 x 7 stone shaft in
+# two stages marked by string courses, a stripped-spruce clock stage jettied one out on brackets with a framed
+# 5 x 5 clock on every face, a steep slate helm with a flared eave, and an open lantern with its own spire on top.
+SY = 19                                                  # the clock stage's floor (the shaft's plate is 18)
 tower = {"name": "millbrook_clock_tower",
          "card": {"title": "Millbrook clock tower", "sub": "Norman stone", "region": "vale", "where": "Millbrook, the square", "kind": "Civic",
-                  "blurb": "A 7 by 7 stone shaft with string courses, clock faces on all four sides, an open belfry with a bell and a slate spire. Built on the skill."},
-         "parts": [{"part": "house", "style": "vale_stone", "rect": [0, 0, 6, 6], "y": 0, "plinth": 2, "storeys": [5, 5, 6],
-                    "door": {"side": "s", "kind": "house", "steps": 2}, "interior": "tower",
-                    "windows": {s: [{"at": 0, "storey": 1, "w": 1, "h": 2}] for s in "nsew"},
-                    "roof": {"type": "flat"} , "chimney": False, "vines": 0.05}]}
-tower["parts"][0].pop("roof")
-tower["parts"][0]["roof"] = {"type": "hip", "pitch": 1, "overhang": 0}
-top = top_of(tower, 0, 0, 6, 6)
+                  "blurb": "A stone shaft in two stages, a timber clock stage jettied out on brackets with a framed clock on every face, a steep slate helm and an open bell lantern on top. Built on the skill."},
+         "parts": [
+             {"part": "house", "style": "vale_stone", "rect": [0, 0, 6, 6], "y": 0, "plinth": 2, "storeys": [6, 6, 6],
+              "door": {"side": "s", "kind": "house", "steps": 2}, "interior": "tower",
+              "windows": {sd: [{"at": 0, "storey": 1, "w": 1, "h": 2}, {"at": 0, "storey": 2, "w": 1, "h": 3}] for sd in "nsew"},
+              "roof": {"type": "flat"}, "chimney": False, "vines": 0.05, "bushes": False},
+             {"part": "house", "style": {"base": "vale_timber", "frame": "stripped_spruce_log", "infill": "spruce_planks"}, "rect": [-1, -1, 7, 7], "y": SY, "plinth": 1,
+              "storeys": [8], "door": None, "windows": {"n": [], "s": [], "e": [], "w": []}, "roof": {"type": "flat"}, "chimney": False, "bushes": False, "interior": False},
+             {"part": "spire", "rect": [-1, -1, 7, 7], "rows": 3, "overhang": 1, "roof": {"block": "deepslate_tiles"}, "trim": "dark_oak_planks", "finial": "none"},
+             {"part": "belfry", "rect": [2, 2, 4, 4], "y": "roof", "h": 3, "pier": "dark_oak_fence", "deck": "dark_oak_planks", "trim": "dark_oak_planks",
+              "roof": {"block": "deepslate_tiles"}, "cap": "spire", "rows": 2, "finial": "spire_block"},
+         ] + [{"part": "clock_face", "rect": [-1, -1, 7, 7], "side": sd, "y": SY + 4, "size": 5, "time": "3:00", "frame": "stairs", "frame_wood": "dark_oak", "hub": "dark_oak_button"} for sd in "nsew"]}
 pl = []
-cy = top - 3                                           # clock faces in the top storey, 3 x 3 with a hub and hands
-faces = {"s": lambda i, j: (2 + i, cy + j, 6), "n": lambda i, j: (4 - i, cy + j, 0), "e": lambda i, j: (6, cy + j, 4 - i), "w": lambda i, j: (0, cy + j, 2 + i)}
-for side, f in faces.items():
-    for i in range(3):
-        for j in range(3): pl.append([*f(i, j), "calcite"])
-    pl.append([*f(1, 1), "dark_oak_log", {"axis": "z" if side in "ns" else "x"}])
-    pl.append([*f(1, 2), "polished_blackstone"]); pl.append([*f(2, 1), "polished_blackstone"])
-yb = top + 1                                           # open belfry: corner piers, round-angle heads, a bell
-for y in range(yb, yb + 8):                            # the shaft's own hip roof gives way to the belfry and spire
-    for x in range(-2, 9):
-        for z in range(-2, 9): pl.append([x, y, z, "air"])
-for y in range(yb, yb + 3):
-    for x in range(7):
-        for z in range(7):
-            edge = x in (0, 6) or z in (0, 6); corner = x in (0, 1, 5, 6) and z in (0, 1, 5, 6)
-            if edge: pl.append([x, y, z, "stone_bricks" if (corner or y == yb + 2) else "air"])
-            elif y == yb: pl.append([x, y - 1, z, "spruce_planks"])
-for dz in (0, 6):
-    pl += [[2, yb + 1, dz, "stone_brick_stairs", {"facing": "w", "half": "top"}], [4, yb + 1, dz, "stone_brick_stairs", {"facing": "e", "half": "top"}]]
-for x in (0, 6):
-    pl += [[x, yb + 1, 2, "stone_brick_stairs", {"facing": "n", "half": "top"}], [x, yb + 1, 4, "stone_brick_stairs", {"facing": "s", "half": "top"}]]
-pl.append([3, yb + 2, 3, "spruce_planks"]); pl.append([3, yb + 1, 3, "bell", {"attachment": "hanging"}])
-y = yb + 3
-for k in range(5):                                     # stepped slate spire, one ring per row
-    lo, hi = -1 + k, 7 - k
-    if lo > hi: break
-    for x in range(lo, hi + 1):
-        for z in range(lo, hi + 1):
-            if x in (lo, hi) or z in (lo, hi):
-                f = "s" if z == lo else "n" if z == hi else "e" if x == lo else "w"
-                corner = x in (lo, hi) and z in (lo, hi)
-                pl.append([x, y, z, "deepslate_tiles"] if corner else [x, y, z, "deepslate_tile_stairs" if (x * 7 + z + y) % 3 else "deepslate_brick_stairs", {"facing": f}])
-            else: pl.append([x, y, z, "deepslate_tiles"])
-    y += 1
-pl += [[3, y, 3, "stone_brick_wall"], [3, y + 1, 3, "stone_brick_wall"], [3, y + 2, 3, "lightning_rod"]]
+for x in range(-1, 8):                                   # brackets under the jetty: corners and every other block
+    for z in range(-1, 8):
+        if 0 <= x <= 6 and 0 <= z <= 6: continue
+        if (x in (-1, 7)) and (z in (-1, 7)): continue
+        sd = "s" if z == -1 else "n" if z == 7 else "e" if x == -1 else "w"
+        t = x if z in (-1, 7) else z
+        if t % 2 == 0: pl.append([x, SY - 1, z, "dark_oak_stairs", {"facing": sd, "half": "top"}])
 tower["place"] = pl
 json.dump(tower, open(os.path.join(HERE, "millbrook_clock_tower.json"), "w"), indent=1)
+top = SY
 
 # ---------------- the watermill: stone below, timber above, a paddle wheel standing in the brook
 mill = {"name": "millbrook_watermill",

@@ -24,9 +24,10 @@ ATTIC = ("house", "townhouse", "farmhouse")   # buildings whose attic is a room 
 YW = 2                              # walking level of the ground floor (plinth 2)
 
 def farmhouse_inside(bp, B):
-    """The skill furnishes the farmhouse (its interior stage); this adds the hay and compost store by the back wall."""
-    for x, z in ((-3, -10), (-2, -10), (-3, -9)): bp.set(x, 1, z, "hay_block", axis="y")
-    bp.set(-3, 2, -10, "hay_block", axis="y"); bp.set(0, 1, -10, "composter"); bp.set(1, 1, -10, "barrel", facing="up")
+    """The skill furnishes the farmhouse (its interior stage); the lean-to is walked through: hay and barrels keep
+    to its two ends, the middle stays a clear walk."""
+    for z in (-9, -10): bp.set(-3, 1, z, "hay_block", axis="y")
+    bp.set(-3, 2, -10, "hay_block", axis="y"); bp.set(3, 1, -9, "composter"); bp.set(3, 1, -10, "barrel", facing="up")
 
 def bar_ground_windows(bp):
     """The mint's ground-floor windows are barred (the coin is kept there)."""

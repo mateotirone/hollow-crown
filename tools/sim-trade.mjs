@@ -71,10 +71,11 @@ dim.getBlock = (l) => {
   return undefined;
 };
 
+const bag = new Container();
 const player = { id: "p1", name: "Mateo", typeId: "minecraft:player", location: { x: P1.board.x, y: 70, z: P1.board.z - 2 }, dimension: dim, isValid: true, tags: new Set(),
   sendMessage: (t) => say("chat", t), playSound() {}, onScreenDisplay: { setTitle() {}, setActionBar: (t) => say("bar", t) },
   hasTag(t) { return this.tags.has(t); }, addTag(t) { this.tags.add(t); }, removeTag(t) { this.tags.delete(t); }, getTags() { return [...this.tags]; }, getDynamicProperty() {}, setDynamicProperty() {},
-  getGameMode: () => "Creative", getComponent: () => ({ getEquipment() {}, container: { size: 0, getItem() {}, setItem() {}, addItem() {}, emptySlotsCount: 36 } }) };
+  getGameMode: () => "Creative", getComponent: () => ({ getEquipment() {}, container: bag }) };
 world.getPlayers = () => [player];
 world.getAllPlayers = () => [player];
 dim.getPlayers = () => [player];
@@ -193,6 +194,40 @@ check(took2 === need * 3 && took2 > 0, `with Exports empty it took ${took2}: thr
 step(41);
 check(exBarrel.count(IRON) >= took2, `the supplied iron reached the real barrel (${exBarrel.count(IRON)})`);
 check(T.supplyExports("nobody", IRON, 10) === 0, "no Outpost, nothing taken");
+
+section("special offers");
+const events = [];
+api.on("tradeSpecialOffer", (e) => events.push(["offer", e]));
+api.on("tradeSpecialFilled", (e) => events.push(["filled", e]));
+check(T.postSpecial(player, "p:p2", COIN, 10, 99) !== undefined, "Regals can't be asked for");
+check(T.postSpecial(player, "p:p2", GOLD, 8, 100) !== undefined, "the price can't be under the normal worth (256)");
+check(T.postSpecial(player, "p:p2", GOLD, 8, 320) === undefined, "player 2's settlement posts 320 Regals for 8 gold");
+const sp = T.specialsOf("p:p2")[0];
+const ev = events.find((e) => e[0] === "offer")?.[1];
+check(ev && ev.count === 8 && ev.price === 320 && ev.normal === 256 && ev.itemName === "gold ingots" && !/§/.test(ev.name.replace(/§r$/, "")), `the Crier hears of it (${JSON.stringify(ev && { name: ev.name, itemName: ev.itemName, normal: ev.normal })})`);
+check(T.specialsReaching("p:p1").includes(sp), "player 1's track reaches it");
+bag.addItem(new ItemStack(GOLD, 3));
+check(T.fillInPerson(player, sp, 5).problem !== undefined, "can't hand over more than you carry");
+const imBefore = S.outposts["p:p2"].im[GOLD] ?? 0;
+const hand = T.fillInPerson(player, sp, 3);
+check(hand.n === 3 && hand.paid === 120, `in person: 3 gold handed over for ${hand.paid} Regals`);
+check((S.outposts["p:p2"].im[GOLD] ?? 0) - imBefore === 3, "they went straight into player 2's Imports");
+const fev = events.find((e) => e[0] === "filled")?.[1];
+check(fev && fev.by === "Mateo" && fev.count === 3, `the Crier gets a plain name (${fev?.by})`);
+S.outposts["p:p1"].ex[GOLD] = 10;
+exBarrel.addItem(new ItemStack(GOLD, 10));
+step(41);
+const train = T.fillByTrain(player, "p:p1", sp, 10);
+check(train.n === 5 && train.paid === 200, `by train: the last 5 for ${train.paid} Regals (all 320 paid out)`);
+check(!T.specialsOf("p:p2").length, "the filled offer closes");
+const before2 = S.outposts["p:p2"].im[GOLD] ?? 0;
+hours(4);
+check((S.outposts["p:p2"].im[GOLD] ?? 0) - before2 === 5, "the train's 5 gold arrived after the trip");
+const dp = T.postSpecial(player, "p:p1", GOLD, 6, 400);
+check(dp === undefined, `player 1 posts a rich offer for gold (${dp ?? "ok"})`);
+hours(24 * 3 + 1);
+const left = T.specialsOf("p:p1");
+check(!left.length && (S.notices["p:p1"] ?? []).some((n) => /filled \d+ of your special offer/.test(n.text)), "a town the track reaches filled it from its stock");
 
 console.log(log.join("\n"));
 if (warned.some((w) => /trade/i.test(w))) problems.push(...warned.filter((w) => /trade/i.test(w)));

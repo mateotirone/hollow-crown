@@ -128,6 +128,9 @@ def bedrock_state(n, p):
     elif f and n not in ("campfire",):
         st["minecraft:cardinal_direction"] = CARD[f]      # chests, furnaces, lecterns, anvils... (dropped when the block has none)
     if p.get("axis"): st["pillar_axis"] = p["axis"]
+    if n.startswith("siege:"):                                   # the add-on's own blocks: they only turn
+        if f: st["minecraft:cardinal_direction"] = CARD[f]
+        return n, st
     S = bedrock_states()
     if S:
         if n not in S["blocks"]: raise ValueError(f"'{n}' is not a Bedrock block (bedrock_states.json)")

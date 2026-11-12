@@ -3,13 +3,13 @@
 import { world, GameMode, ItemStack } from "@minecraft/server";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
 import * as api from "../siege/api.js";
-import { SKILLS, SKILL, BRANCHES, RINGS, RANKS, ROLES, HALL_NAMES, LEVEL_UNLOCKS, canBranch, blockedReason, spentIn, rankOf, levelFromRenown, levelTitle, POWER_ORIGINS, ROLE_LORE } from "./skills.js";
+import { SKILLS, SKILL, BRANCHES, RINGS, RANKS, ROLES, HALL_NAMES, LEVEL_UNLOCKS, canBranch, blockedReason, spentIn, rankOf, levelFromRenown, levelTitle, POWER_ORIGINS, ROLE_LORE, coinBlocked, refundable, keptOnUnbind } from "./skills.js";
 import { STYLES } from "./styles.js";
 import { treeCells, TREE_FLAG, BRANCH_FLAG, SPACER } from "./tree_layout.js";
 import { heroOf, saveHero, setPath, grantPoints } from "./hero.js";
 import { hallLevelAt, setTreeLook } from "./townhall.js";
-import { chargeE } from "../economy/coins.js";
-import { worth } from "../economy/rules.js";
+import { chargeE, charge, funds } from "../economy/coins.js";
+import { worth, coins } from "../economy/rules.js";
 import { sfx } from "../core/sfx.js";
 import { applyFilter } from "../core/events.js";
 import { ROLE_DEEDS } from "./roles.js";
@@ -40,7 +40,7 @@ export function treeMenu(player, hallLevel) {
     `§lRenown ${hero.level}§r  ${levelTitle(hero.level)}`,
     need ? `${bar(into / need)} ${into}/${need}` : "§6Renown is at its height.",
     `Path: ${pathLine}`,
-    `§bSkill points: ${hero.points}§r   (earned ${hero.earned}, spent ${spentIn(hero.skills)})`,
+    `§bSkill points: ${hero.points}§r   (earned ${hero.earned}, spent ${refundable(hero)})`,
     `This hall: ${HALL_NAMES[hallLevel]}, ${RINGS[Math.max(1, hallLevel)].name}`,
     nextUnlock ? `§7Renown ${nextUnlock[0]}: ${nextUnlock[1]}` : "",
   ];
@@ -70,7 +70,7 @@ export function treeMenu(player, hallLevel) {
       actions.push(() => give(player, item));
     }
   }
-  if (spentIn(hero.skills) > 0) {
+  if (refundable(hero) > 0) {
     form.button("Unbind your oaths\n§8refund every point", "textures/items/shears");
     actions.push(() => respec(player, hallLevel));
   }
@@ -153,6 +153,8 @@ function skillMenu(player, hallLevel, skill) {
     `§7Cost: ${skill.cost} point${skill.cost === 1 ? "" : "s"} per rank. You have ${hero.points}.`,
     why && why !== "Mastered" ? `§c${why}` : why ? "§6Mastered" : "",
   ].join("\n");
+  // Skills with a Regal price (the Messenger) offer both ways to pay
+  if (skill.coins && !have && !coinBlocked(skill, hero, hallLevel)) return buyMenu(player, hallLevel, skill, body, why);
   new MessageFormData().title(skill.name).body(body)
     .button1(why ? "Back" : have ? `Deepen the oath (rank ${have + 1})` : "Swear this oath")
     .button2(why ? "Close" : "Back")
@@ -165,11 +167,36 @@ function skillMenu(player, hallLevel, skill) {
     }).catch(() => {});
 }
 
-export function learn(player, skill, hallLevel) {
+function buyMenu(player, hallLevel, skill, body, why) {
   const hero = heroOf(player);
-  if (blockedReason(skill, hero, hallLevel)) return false;
+  const price = skill.coins;
+  const form = new ActionFormData().title(skill.name)
+    .body(`${body}\n§7Or pay §f${coins(price)}§7 instead of points (you have ${coins(funds(player))}). Regals paid are not given back if you unbind your oaths, and the skill stays.`);
+  const actions = [];
+  if (!why) {
+    form.button(`Swear this oath\n§8${skill.cost} skill point${skill.cost === 1 ? "" : "s"}`, skillIcon(skill));
+    actions.push(() => learn(player, skill, hallLevel));
+  }
+  form.button(`Pay ${coins(price)}\n§8no skill points needed`, "textures/items/siege_coin");
+  actions.push(() => {
+    if (!charge(player, price, skill.id)) return player.sendMessage(`§cYou need ${coins(price)}.`);
+    learn(player, skill, hallLevel, true);
+  });
+  form.button("Back");
+  form.show(player).then((r) => {
+    if (r.canceled) return;
+    if (r.selection < actions.length) actions[r.selection]();
+    branchMenu(player, hallLevel, skill.branch);
+  }).catch(() => {});
+}
+
+// paid = bought with Regals (already charged): no points spent, and kept through unbinding
+export function learn(player, skill, hallLevel, paid = false) {
+  const hero = heroOf(player);
+  if (paid ? coinBlocked(skill, hero, hallLevel) : blockedReason(skill, hero, hallLevel)) return false;
   const before = rankOf(hero.path, hero.skills)?.name;
-  hero.points -= skill.cost;
+  if (paid) hero.bought = { ...(hero.bought ?? {}), [skill.id]: (hero.bought?.[skill.id] ?? 0) + 1 };
+  else hero.points -= skill.cost;
   hero.skills[skill.id] = (hero.skills[skill.id] ?? 0) + 1;
   if (skill.power && hero.skills[skill.id] === 1 && !hero.skills[hero.spell]) hero.spell = skill.id;
   saveHero(player);
@@ -191,7 +218,7 @@ export function learn(player, skill, hallLevel) {
 function respec(player, hallLevel) {
   const hero = heroOf(player);
   const price = player.getGameMode() === GameMode.Creative ? 0 : hero.level >= 10 ? 10 : 20;
-  const refund = spentIn(hero.skills);
+  const refund = refundable(hero);
   new MessageFormData().title("Unbind your oaths")
     .body(`Every skill is forgotten and all ${refund} points come back to spend again. Your path, rank progress and Renown stay.\n\nThe Tree asks ${worth(price)}.`)
     .button1("Unbind").button2("Back")
@@ -199,7 +226,8 @@ function respec(player, hallLevel) {
       if (r.canceled || r.selection !== 0) return treeMenu(player, hallLevel);
       if (price && !chargeE(player, price, "respec")) return player.sendMessage(`§cYou need ${worth(price)}.`);
       hero.points += refund;
-      hero.skills = {};
+      hero.skills = keptOnUnbind(hero); // anything bought with Regals stays
+      hero.bought = { ...hero.skills };
       saveHero(player);
       for (const effect of ["health_boost", "strength", "haste", "speed", "village_hero", "fire_resistance"]) player.removeEffect(effect);
       player.sendMessage(`§7Your oaths are unbound. ${refund} points returned.`);
