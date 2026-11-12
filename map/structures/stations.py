@@ -20,7 +20,7 @@ mark: a one-block step at z = 0, its front wall at z = 1, and the building behin
 Interiors stay empty apart from a booking counter.
 """
 import math
-from kit import Building, h3, finish_detail
+from kit import Building, h3, finish_detail, wool_awning
 from bp import DIRS, OPP
 import settle_halls as SH
 from settle_halls import pyramid, flat_roof, hang, tower, thatch, dragon_heads
@@ -146,6 +146,19 @@ def start(region, stage):
     P["flat_canopy"] = L["roof"] == "flat"
     return bp, B, P, k, L
 
+def hung(bp, reach=6):
+    """Every hanging lantern hangs from something: a chain up to the first solid block above it, or it goes
+    (nothing in a station floats, Mateo 2026-11-12)."""
+    for (x, y, z), (n, p) in list(bp.cells.items()):
+        if n != "lantern" or not p.get("hanging"): continue
+        for d in range(1, reach + 1):
+            a = bp.cells.get((x, y + d, z))
+            if a and a[0] not in ("keep", "air"): break
+        else:
+            del bp.cells[(x, y, z)]; continue
+        for dd in range(1, d): bp.set(x, y + dd, z, "iron_chain")
+    return bp
+
 def end(bp, stage, post, stalls, join):
     mark(bp, "track_centre", 0, 0, 0)
     mark(bp, "platform_edge", 0, 0, 2)
@@ -153,12 +166,57 @@ def end(bp, stage, post, stalls, join):
     mark(bp, "stalls", *stalls)
     mark(bp, "trade_join", *join)
     bp.markers["door"] = (0, 0, -1)
-    return finish_detail(bp, {"planters": False})
+    return hung(finish_detail(bp, {"planters": False}))
+
+# ---------------------------------------------------------------- back detail
+
+def _empty(bp, x, y, z): return bp.get(x, y, z)[0] in ("keep", "air")
+def _solid(n): return n not in ("keep", "air") and not any(w in n for w in ("glass", "pane", "door", "lantern", "stairs", "slab", "fence", "trapdoor"))
+
+def course(bp, P, x0, x1, lz, y):
+    """A string course along a back wall at local z = lz: top-half stairs one out, under every solid wall block."""
+    for x in range(x0, x1 + 1):
+        if _solid(bp.get(x, y, -lz)[0]) and _empty(bp, x, y, -(lz + 1)): S(bp, x, y, lz + 1, P["sill"], facing="s", half="top")
+
+def ring_course(bp, P, rect, y):
+    """The same band round all four faces of a tower or pavilion (blueprint rect)."""
+    x0, z0, x1, z1 = rect
+    for x in range(x0, x1 + 1):
+        for z in range(z0, z1 + 1):
+            if not (x in (x0, x1) or z in (z0, z1)) or not _solid(bp.get(x, y, z)[0]): continue
+            for f, (dx, dz) in (("s", (0, -1)), ("n", (0, 1)), ("e", (-1, 0)), ("w", (1, 0))):
+                if (x + dx, z + dz) == (x, z): continue
+                if not (x0 <= x + dx <= x1 and z0 <= z + dz <= z1) and _empty(bp, x + dx, y, z + dz):
+                    bp.set(x + dx, y, z + dz, P["sill"], facing=f, half="top")
+
+def sills(bp, P, x0, x1, lz, y0, y1):
+    """A bracketed sill (an upside-down stair, one out) under every back window between y0 and y1."""
+    for x in range(x0, x1 + 1):
+        for y in range(y0, y1 + 1):
+            n = bp.get(x, y, -lz)[0]
+            if ("pane" in n or "glass" in n) and "pane" not in bp.get(x, y - 1, -lz)[0] and "glass" not in bp.get(x, y - 1, -lz)[0] \
+                    and _empty(bp, x, y - 1, -(lz + 1)):
+                S(bp, x, y - 1, lz + 1, P["sill"], facing="s", half="top")
+
+def planter(bp, P, x, lz):
+    """A sign-boxed bush against the back wall (07-detailing)."""
+    if not _empty(bp, x, 1, -(lz + 1)): return
+    wood = P["trim"].replace("_stairs", "")
+    S(bp, x, 1, lz + 1, "azalea_leaves" if h3(x, 1, lz, 3) < 0.5 else "oak_leaves", persistent=True)
+    for f, dx in (("e", 1), ("w", -1)):
+        if _empty(bp, x + dx, 1, -(lz + 1)): S(bp, x + dx, 1, lz + 1, wood + "_wall_sign" if wood != "oak" else "oak_wall_sign", facing=f)
+
+def louvres(bp, P, xs, ys, lz, out):
+    """Belfry louvres: the bell openings shut with slatted trapdoors flush to the outer face."""
+    td = P["trim"].replace("_stairs", "_trapdoor")
+    if td in ("stone_brick_trapdoor",) or "stone" in td or "brick" in td: td = "spruce_trapdoor"
+    for x in xs:
+        for y in ys: S(bp, x, y, lz, td, facing="n" if out == "s" else "s", open=True)
 
 # ---------------------------------------------------------------- the four stages
 
 def halt(region):
-    """Halt: a small waiting shelter with its gable to the line, a ticket counter and a bench, a hitching rail."""
+    """Halt: a small waiting shelter with its eaves to the line, a ticket counter and a bench, a hitching rail."""
     bp, B, P, k, L = start(region, "halt")
     platform(bp, region, k, 7, 2, 6)
     rect = R(-3, 3, 3, 5)
@@ -171,10 +229,17 @@ def halt(region):
     S(bp, 0, 0, 3, plat_mats(region, k)[0])
     side_windows(B, L, rect, 1, sides="ew")
     counter(bp, P, 1, 2, 4); bench(bp, P, -2, 4)
-    roofs(bp, P, L, region, [(rect, "z", 1)], top + (1 if L["roof"] != "flat" else 0))
+    # eaves to the line (Mateo 2026-11-12: a gable to the line on a box three deep read as a house cut in half)
+    roofs(bp, P, L, region, [(rect, "x", 1)], top + (1 if L["roof"] != "flat" else 0))
     hang(bp, [(0, 3, -4)])
     stalls = stalls_shed(bp, P, k, L, -7, -5, 4, 6)
     lamp(bp, P, 6, 4); lamp(bp, P, -4, 6)
+    # the back (Mateo 2026-11-12: more detail on the back): a door to the Trade House step, windows either side
+    B.door(0, 1, -5, "n", canopy=False, lanterns=True, frame=P["frame"] if L["wall"] == "timber" else k("stone"))
+    for x in (-2, 2):
+        for y in (2, 3): S(bp, x, y, 5, P["pane"])
+    sills(bp, P, -3, 3, 5, 1, 4)
+    S(bp, 3, 1, 6, "barrel"); S(bp, 3, 2, 6, "barrel")
     return end(bp, "halt", (5, 1, 3), stalls, (0, 0, 7))
 
 def station(region):
@@ -209,6 +274,9 @@ def station(region):
     for (x, lz) in ((-10, 8), (-9, 8), (-10, 9)): S(bp, x, 1, lz, "barrel")
     S(bp, -10, 2, 8, "barrel"); S(bp, -9, 1, 10, "chest", facing="e")
     lamp(bp, P, -11, 10); link(bp, k, 11)
+    sills(bp, P, -7, 7, 10, 1, 6)                   # the back: sills, planters, a lamp at the street door
+    for x in (-6, -4, 4, 6): planter(bp, P, x, 10)
+    lamp(bp, P, 3, 11)
     return end(bp, "station", (4, 1, 3), stalls, (0, 0, 12))
 
 def junction(region):
@@ -250,14 +318,20 @@ def junction(region):
     for y in (1, 2, 3):
         for x in (-1, 0, 1): S(bp, x, y, 11, "air")
     front_door(TB, P, k, L, 0, 7)
-    for x in (-1, 0, 1):
-        for y in (13, 14): S(bp, x, y, 7, "air"); S(bp, x, y, 11, "air")
+    louvres(bp, P, (-1, 0, 1), (13, 14), 7, "s"); louvres(bp, P, (-1, 0, 1), (13, 14), 11, "n")
+    for x in (-1, 0, 1):                            # sills under the louvres, front and back
+        S(bp, x, 12, 6, P["sill"], facing="n", half="top"); S(bp, x, 12, 12, P["sill"], facing="s", half="top")
     hang(bp, [(0, 14, -9)])
+    ring_course(bp, P, (-2, -11, 2, -7), 6); ring_course(bp, P, (-2, -11, 2, -7), 11)
     skip = lambda x, lz: (-2 <= x <= 2 and lz >= 7) or (-8 <= x <= 8 and lz >= 8) or (abs(x) >= 9 and lz >= 9)
     canopy(bp, P, 14, 2, 8, 5, 4, skip=skip)
     for x in (-7, 6): bench(bp, P, x, 7)
     stalls = (-11, 1, 12)
     link(bp, k, 15)
+    course(bp, P, -8, 8, 14, 5)                     # the back: a band at the upper floor, sills, planters, lamps
+    sills(bp, P, -8, 8, 14, 1, 12); sills(bp, P, 9, 13, 13, 1, 5)
+    for x in (-7, -3, 3, 7): planter(bp, P, x, 14)
+    lamp(bp, P, -8, 15); lamp(bp, P, 8, 15)
     return end(bp, "junction", (4, 1, 3), stalls, (0, 0, 16))
 
 def shed_arch(lz):
@@ -272,14 +346,14 @@ def grand(region):
     rib = k("smooth"); col = k("stone")
     ribs = list(range(-22, 23, 4))
     for x in range(-22, 23):
-        prev = None
         for lz in range(-7, 8):
             y = shed_arch(lz)
-            ys = range(min(y, prev), max(y, prev) + 1) if prev is not None else [y]
-            for yy in ys:
+            # each column reaches down to its outer neighbour's height, so the vault has no holes on either side,
+            # and the outermost comes down onto the side beam (y 5): no open row under the roof (Mateo, 2026-11-12)
+            low = 5 if abs(lz) == 7 else min(y, shed_arch(lz + (1 if lz > 0 else -1)))
+            for yy in range(low, y + 1):
                 if x in ribs: S(bp, x, yy, lz, rib)
                 else: S(bp, x, yy, lz, "glass")
-            prev = y
         S(bp, x, 5, -7, rib); S(bp, x, 5, 7, rib)
     for x in ribs:
         for y in range(0, 5): S(bp, x, y, 7, col); S(bp, x, y, -7, col)
@@ -338,6 +412,24 @@ def grand(region):
     for x in (-18, -10, 10, 18): bench(bp, P, x, 8)
     for x in (-20, -6, 6, 20): hang(bp, [(x, 4, -6)])
     link(bp, k, 21)
+    # the back (Mateo 2026-11-12): the pavilion gets the front's tall window, pilasters, two bands and a balcony
+    for x in (-1, 0, 1):
+        for y in range(7, 13): S(bp, x, y, 20, P["pane"])
+    S(bp, 0, 13, 20, P["pane"])
+    for x in (-3, 3):
+        S(bp, x, 1, 21, P["sill"], facing="s")
+        for y in range(2, 15): S(bp, x, y, 21, rib)
+        S(bp, x, 15, 21, P["sill"], facing="s", half="top")
+    course(bp, P, -4, 4, 20, 14); course(bp, P, -11, 11, 19, 6)
+    for x in range(-2, 3):
+        S(bp, x, 6, 21, P["trim_slab"] if "trim_slab" in P else P["roof_slab"], half="top"); S(bp, x, 6, 22, P["trim_slab"] if "trim_slab" in P else P["roof_slab"], half="top")
+        S(bp, x, 7, 22, P["fence"])
+    for x in (-2, 2): S(bp, x, 7, 21, P["fence"]); S(bp, x, 5, 22, P["trim"], facing="s", half="top")
+    sills(bp, P, -11, 11, 19, 1, 12); sills(bp, P, -21, -17, 18, 1, 5); sills(bp, P, 17, 21, 18, 1, 5)
+    for x in (-10, -6, 6, 10): planter(bp, P, x, 19)
+    for cx in (-14, 14):                            # bands round the clock towers at each storey
+        for y in (6, 12, 18): ring_course(bp, P, (cx - 2, -16, cx + 2, -12), y)
+    lamp(bp, P, -5, 21); lamp(bp, P, 5, 21)
     return end(bp, "grand", (6, 1, 3), (-19, 1, 14), (0, 0, 22))
 
 STAGE_BUILDERS = {"halt": halt, "station": station, "junction": junction, "grand": grand}
@@ -365,8 +457,7 @@ def trade_house(region, stage):
     front_door(B, P, k, L, 0, 1)
     for x in range(-hw + 2, hw - 1):                # the serving hatch and counter on the street side
         S(bp, x, 2, d, "air"); S(bp, x, 1, d, P["trim"], facing="n", half="top")
-    for x in range(-hw + 1, hw):
-        S(bp, x, 4, d + 1, a if (x + hw) % 2 == 0 else b)
+    wool_awning(bp, range(-hw + 1, hw), 4, -d, "n", (a, b), depth=1)
     for x in (-hw + 1, hw - 1):
         for y in (1, 2, 3): S(bp, x, y, d + 1, P["fence"])
     roofs(bp, P, L, region, [(rect, "x", 1)], top + (1 if L["roof"] != "flat" else 0))
@@ -378,7 +469,7 @@ def trade_house(region, stage):
     hang(bp, [(0, 3, -(d + 1))])
     mark(bp, "door", 0, 1, 1)
     bp.markers["door"] = (0, 0, -1)
-    return finish_detail(bp, dict(P, planters=False))
+    return hung(finish_detail(bp, dict(P, planters=False)))
 
 # ---------------------------------------------------------------- the Junction's engine shed
 
@@ -401,12 +492,12 @@ def engine_shed(region):
     base = top + (1 if L["roof"] != "flat" else 0)
     roofs(bp, P, L, region, [(rect, "x", 1)], base)
     for x in (-4, 4):
-        for y in range(base + 2, base + 6):
-            if bp.get(x, y, 0)[0] in ("keep", "air"): S(bp, x, y, 0, k("bricks"))
+        for y in range(base + 1, base + 6):   # from the roof up: no gap under a stack on a flat roof
+            if bp.get(x, y, 0)[0] in ("keep", "air") or "carpet" in bp.get(x, y, 0)[0]: S(bp, x, y, 0, k("bricks"))   # a stack stands on the roof, not on a moss carpet
         S(bp, x, base + 6, 0, "stone_brick_wall")
     for x in (-8, 8):
         for lz in (-3, 3): S(bp, x, 6, lz, k("stone"))
     hang(bp, [(-4, 5, 0), (4, 5, 0)])
     mark(bp, "track_centre", 0, 0, 0)
     bp.markers["door"] = (0, 0, -1)
-    return finish_detail(bp, dict(P, planters=False))
+    return hung(finish_detail(bp, dict(P, planters=False)))

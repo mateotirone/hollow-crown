@@ -6,6 +6,8 @@ import { SHAPES, layTrack, cursorOn, advance, back, pointAt, follow, KINDS, curv
 import { stageFor, stationPlan, siteFor, lineBlocks, rightOf, STAGES, STATION } from "./stations.js";
 import { ROUTE, reachable, buyable, cannotBuy, priceOf, nearestStop, checkRoutes, stopSite, pieces, isNatural } from "./routes.js";
 import { ROUTES } from "./routes_data.js";
+import { railRefused } from "./no_hollow.js";
+import { STATION_DESIGNS, TRADE_HOUSE_DESIGNS, ENGINE_SHED_DESIGNS } from "../settle/station_data.js";
 import { TRACK, CARS, TRAIN, carPoses, trainLength, stepSpeed, moveTrain, limitAhead, shapesForLoop, showcaseLoop } from "./data.js";
 
 // A little fake world of track: lay(x, y, z, yaw) places a piece the way a player would
@@ -30,6 +32,22 @@ function routeMap() {
     stops: [stop("A", 0), stop("B", 300), stop("C", 600), { ...stop("D", 300), z: 300 }],
     segments: [seg("AB", "A", "B", 0, 300), seg("BC", "B", "C", 300, 600), { ...seg("BD", "B", "D", 0, 0), blocks: [[300, 64, 1, 0, 0]] }],
   };
+}
+
+// Blocks of a design that touch nothing (not even corner to corner) on a path down to the ground layer (y <= 0)
+function floatingBlocks(d) {
+  const solid = new Set();
+  for (const [y, z, x0, n, i] of d.rows) if (d.palette[i][0] !== "minecraft:air") for (let x = x0; x < x0 + n; x++) solid.add(`${x},${y},${z}`);
+  const seen = new Set(), q = [];
+  for (const k of solid) if (+k.split(",")[1] <= 0) { seen.add(k); q.push(k); }
+  while (q.length) {
+    const [x, y, z] = q.pop().split(",").map(Number);
+    for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) for (let c = -1; c <= 1; c++) {
+      const k = `${x + a},${y + b},${z + c}`;
+      if (solid.has(k) && !seen.has(k)) { seen.add(k); q.push(k); }
+    }
+  }
+  return [...solid].filter((k) => !seen.has(k));
 }
 
 addTests("trains", {
@@ -100,6 +118,29 @@ addTests("trains", {
     assert(p[15].works && !p[9].works && !p[21].works, "only the custom range skips the plain bed");
     assert(pieces({ ...custom, custom: undefined })[0].works, "works without ranges cover the whole stretch");
     assert(checkRoutes({ stops: data.stops, segments: [{ ...custom, custom: [[5, 9999]] }] }).length, "a range past the end is caught");
+    const [bx, by, bz] = custom.blocks[0];
+    assert(checkRoutes({ stops: data.stops, segments: [{ ...custom, works: [[bx, bz, by - 3, by, 1]] }] }).length, "a solid work in a track cell is caught");
+    assertEqual(checkRoutes({ stops: data.stops, segments: [{ ...custom, works: [[bx, bz, by - 3, by - 1, 1], [bx, bz, by, by + 5, 0]] }] }).length, 0, "works under and clear air over the track are fine");
+  },
+
+  "stations: nothing floats (roofs sit on their beams, lanterns hang from something)": () => {
+    const all = [
+      ...Object.entries(STATION_DESIGNS).flatMap(([r, st]) => Object.entries(st).map(([s, d]) => [`${r} ${s}`, d])),
+      ...Object.entries(TRADE_HOUSE_DESIGNS).flatMap(([r, st]) => Object.entries(st).map(([s, d]) => [`${r} trade house ${s}`, d])),
+      ...Object.entries(ENGINE_SHED_DESIGNS).map(([r, d]) => [`${r} engine shed`, d]),
+    ];
+    for (const [name, d] of all) {
+      const f = floatingBlocks(d);
+      assert(!f.length, `${name}: ${f.length} block(s) float, first at ${f[0]}`);
+    }
+  },
+
+  "no rail goes down in the Hollow": () => {
+    for (const id of [TRACK, "hc:station_post", "siege:rail_depot", "minecraft:rail", "minecraft:golden_rail"]) {
+      assert(railRefused("siege:undertow", id), `${id} is refused in the Hollow`);
+      assert(!railRefused("minecraft:overworld", id), `${id} is fine in the overworld`);
+    }
+    assert(!railRefused("siege:undertow", "minecraft:cobblestone"), "other blocks are fine");
   },
 
   "there are 20 track shapes and none repeats": () => {
