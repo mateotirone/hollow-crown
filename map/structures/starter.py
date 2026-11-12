@@ -58,7 +58,7 @@ LANES = [
 WALKS = [  # 1-wide paths from a lane or the square to a door or gate
     [(-7, -8), (-9, -8)], [(7, -8), (9, -8)],
 ]
-WALL_BASE = 32                     # the Hamlet wall's middle radius (outer face)
+WALL_BASE = 36                     # the Hamlet wall ring (outer face); Mateo picked rings 36/46/56/66 (2026-11-12)
 WALL_KEEP = 5                      # the wall stays this far outside anything in the plan
 SLOPE = 0.4                        # graded ground: at most 1 block up per 2.5 across
 
@@ -512,7 +512,7 @@ class Starter:
             "format": "hollow-crown-starter/1", "plot": self.plot["name"], "region": self.region, "wood": self.wood,
             "center": {"x": self.C[0], "y": self.sqY, "z": self.C[1]}, "gate": self.plot["gate"],
             "frame": {"right": list(self.Rt), "ahead": list(self.F)},
-            "wall": {"radii": self.wall_r, "gateAngle": self.wall_ang},
+            "wall": {"radii": self.wall_r, "radiiAt": WALL_BASE, "gateAngle": self.wall_ang},
             "areas": self.areas, "buildings": self.buildings, "fixtures": self.fixtures,
             "columns": cols,   # [dx, dz, top, oldTop, water]
             "blocks": [[x - self.C[0], y, z - self.C[1], n, p] for (x, y, z), (n, p) in sorted(self.blocks.items())],

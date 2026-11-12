@@ -79,7 +79,7 @@ for (const b of P.buildings) {
 }
 
 // 4. the wall, level 1, standing on the graded ground column by column
-const center = { x: 0, y: P.center.y, z: 0, radii: P.wall.radii, radiiAt: 32 };
+const center = { x: 0, y: P.center.y, z: 0, radii: P.wall.radii, radiiAt: P.wall.radiiAt ?? 36 };
 const smooth = new Array(WALLS.stations).fill(P.center.y);
 const kinds = {
   log: short((st.roles.beam ?? ["minecraft:spruce_log"])[0]), fence: short((st.roles.rail ?? ["minecraft:spruce_fence"])[0]),
@@ -89,7 +89,7 @@ const kinds = {
 const level = Number(process.env.WALL_LEVEL ?? 1);
 const L = WALL_LEVELS[level];
 let wallBlocks = 0;
-for (const col of wallColumns({ center, radius: 32, level, gateAngle: P.wall.gateAngle, smooth })) {
+for (const col of wallColumns({ center, radius: P.wall.radiiAt ?? 36, level, gateAngle: P.wall.gateAngle, smooth })) {
   const g = top.get(`${col.x},${col.z}`);
   if (g === undefined) continue;
   const lift = g - col.base;
