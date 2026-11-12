@@ -142,29 +142,12 @@ def clock_tower(seed=13, name="millbrook_clock_tower"):
 
 
 def watermill(seed=17, name="millbrook_watermill"):
-    """Watermill: stone ground floor, timber upper floor under slate, and a 7-block paddle wheel
-    on the west side that stands in the brook. The stamp's wet_ok cells must land in water."""
-    bp = Blueprint(name); P = {**VALE, **DOCTRINE, "pane": "brown_stained_glass_pane"}; B = Building(bp, P, seed)
-    rect = (0, 0, 8, 8)
-    B.foundation(grow(rect, "nsew"), 0); B.floor(rect, 0)
-    B.stone_storey(rect, 1, 4)
-    B.door(4, 1, 8, "s", canopy=False, lanterns=True)
-    B.window(4, 2, 0, "n", 1, 2, kind="stone"); B.window(8, 2, 4, "e", 1, 2, kind="stone")
-    B.floor(rect, 5); B.timber_storey(rect, 5, 5, bay=4)
-    B.bay_windows(rect, 5, "nse")
-    B.roof(rect, "z", 10, overhang=1, verge=1); B.build_roofs(); B.gable_walls(rect, "z", 10)
-    B.chimney(9, 2, 1)
-    # the wheel: plane x = -2, centre y 2, z 4, radius 3; axle through the west wall
-    cy, cz = 2, 4
-    for y in range(cy - 3, cy + 4):
-        for z in range(cz - 3, cz + 4):
-            d2 = (y - cy) ** 2 + (z - cz) ** 2
-            if 6 <= d2 <= 10: bp.set(-2, y, z, "spruce_planks")
-            elif (y == cy or z == cz) and d2 < 6: bp.set(-2, y, z, "spruce_fence")
-    for x in (-2, -1, 0): bp.set(x, cy, cz, "dark_oak_log", axis="x")
-    for y in range(-1, 1):
-        for z in (cz - 4, cz + 4): bp.set(-1, y, z, "stone_bricks")        # wheel pit walls
-    bp.wet_ok = [(-2, z) for z in range(cz - 3, cz + 4)]
-    bp.wet_soft = [(-1, z) for z in range(-1, 10)] + [(-2, z) for z in (-1, 0, 8, 9)]   # the bank strip may be wet; the stamp fills under it
-    bp.markers["door"] = (4, 1, 7); bp.markers["miller"] = (4, 1, 4)
-    return finish_doctrine(bp)
+    """Watermill on the skill (review/specs/millbrook_watermill.json, gen_millbrook.py): stone ground floor,
+    timber floor above under slate, a 7-block paddle wheel on the west side turning in its own stone-lined mill
+    race. The stamp's wet_ok cells must land in water; town.py sets the floor one above the brook's water."""
+    import json, os
+    bp = _skill_spec("millbrook_watermill.json", name)
+    st = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "review", "specs", "millbrook_watermill.json")))["stamp"]
+    bp.wet_ok = [tuple(c) for c in st["wet_ok"]]; bp.wet_soft = [tuple(c) for c in st["wet_soft"]]
+    bp.markers["door"] = (4, 2, 7); bp.markers["miller"] = (4, 2, 4)
+    return bp.finish()

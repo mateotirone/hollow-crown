@@ -120,6 +120,11 @@ def try_place(key, bp, deg, front_pt, style, kind="house", gap=1, steep=3, extra
                 if road(x + dx, z + dz) or (not wetcells and wet(x + dx, z + dz)): return None
     if max(hs) - min(hs) > steep: return None
     y0 = int(round(float(np.median(hs))))
+    if wetcells:                                 # a mill sits on its water: the race's top (local y 0) is the brook's level
+        wl = [int(T["water"][x - X0, z - Z0]) for x, z in wetcells if inmap(x, z) and wet(x, z)]
+        yw = int(round(float(np.median(wl))))
+        if abs(yw - y0) > steep: return None     # the bank must sit close to the water, or the mill hangs or drowns
+        y0 = yw
     for x, z in fp:
         for dx in range(-gap, gap + 1):
             for dz in range(-gap, gap + 1):

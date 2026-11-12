@@ -23,6 +23,13 @@ every post has something solid under it.
    (split levels with a stair inside, or a tall plinth on the low side used as a cellar or a terrace
    wall). Town placement already rejects plots that vary more than 3 (`map/structures/town.py`).
 
+5. **Buildings in water** (a watermill, a boathouse; Mateo, 2026-11-12): `y = 0` comes from the **water
+   level**, not the ground, so the wheel always dips in. List the cells that must stand in water as
+   `stamp.wet_ok` and the cells that may (walls of the race) as `stamp.wet_soft`; `town.py` only places the
+   build where those cells are wet and the bank is within 3 blocks of the water. Dig a **mill race** under
+   the wheel: a channel 3 wide, two deep, with a stone brick floor and end walls, so the wheel turns in its
+   own lined trough and not in a raw cut in the bank (`review/specs/gen_millbrook.py`).
+
 ## Step 2: Footings
 
 - Under every wall line and every post: a solid column from the floor down to 4 blocks below the
