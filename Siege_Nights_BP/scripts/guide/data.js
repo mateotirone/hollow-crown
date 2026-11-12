@@ -217,6 +217,27 @@ export const ENTRIES = [
     when: ["event:settlerArrived", "click:siege:plot_marker"],
   },
   {
+    id: "townsfolk", ch: "keep", title: "Townsfolk in the lords' towns",
+    tip: "Rival Lords' towns have townsfolk too. Take the town and they stay, beds, jobs and all.",
+    page: "A Rival Lord's town fills up the way yours does: the lord's builders put beds in every home they finish, and at dawn a newcomer arrives if there is a free bed, workers first. Their townsfolk talk the way their lord rules: a proud lord's people are stiff with strangers, a kind lord's people are friendly.\n\n"
+      + "When you lay siege to a lord, the townsfolk go to their beds and stay out of the fight. If the lord falls and you take the town, they stay on and work for you, though they are wary of you for a few days.",
+    when: ["event:townAdopted", "event:rivalBesieged"],
+  },
+  {
+    id: "town_events", ch: "keep", title: "Town events",
+    tip: "Something's happening in town. Things like this come every few days; none of them are chores.",
+    page: "Every few days something happens in a settlement: a market fair with traders from another region, travelling players on the square at dusk, a wedding, a traveller who asks to stay, harvest day, a cart of spare timber. Now and then something odder. Rival Lords' towns have their fairs and players too, so it can be worth riding over.\n\n"
+      + "Nothing happens on a siege night or the day after, and the same thing never comes twice in a row. Ignoring one costs you nothing.",
+    when: ["event:townEvent"],
+  },
+  {
+    id: "settler_requests", ch: "keep", title: "Settler requests",
+    tip: "A settler with \"(a request)\" by their name wants a word. Talk to them to hear it.",
+    page: "Now and then one of your settlers asks for something: a well on the square, another home, hay for the winter, a book for the library, a bed for their sister. Their name shows §e(a request)§r. Talk to them to hear it, and talk to them again once it is done (carry anything they asked you to bring).\n\n"
+      + "A request stays open 7 days. Done in time, it pays Renown, and some pay coins. Let it go and nothing bad happens; someone will ask for something else in a few days.",
+    when: ["event:settlerRequestDone", "talk:tag:siege_settler"],
+  },
+  {
     id: "guards", ch: "keep", title: "Guards and the Barracks",
     tip: "Bring an unemployed villager to your Barracks and click it holding 40 Regals for a Man-at-Arms (sneak + click for an Archer).",
     page: "Build a §fBarracks§r, bring an unemployed villager to it and click it holding coins (40 Regals) for a §fMan-at-Arms§r. Sneak + click for an §fArcher§r. Click the Barracks without coins for the guard list.\n\n"

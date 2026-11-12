@@ -17,6 +17,7 @@ import { world, system, GameMode } from "@minecraft/server";
 import { isReady, isNight, onTick, on, emit, moduleStore, keepOf } from "../siege/api.js";
 import { SETTLERS, HOMES } from "./config.js";
 import { lineFor } from "./folk.js";
+import { applyFilter } from "../core/events.js";
 import { townOf, layoutOf, saveTowns, allTowns } from "./founding.js";
 import { slotsOf, townFor } from "./towns.js";
 import { countNow } from "./register.js";
@@ -101,7 +102,13 @@ const entityOf = (dim, s) => dim.getEntities({ type: NPC_TYPE, tags: [tagOf(s.n)
 // A lord's townsfolk say whose they are: "Maud, Smith of Wolfcairn"
 function labelOf(s, owner) {
   const of = owner && isLordTown(owner) ? townFor(townOf(owner)?.plot)?.name : undefined;
-  return `${s.name}${s.role !== "Settler" ? `, ${s.role}` : ""}${of ? ` of ${of}` : ""}${s.idle ? " (idle)" : ""}`;
+  const asks = townOf(owner)?.ev?.ask?.n === s.n;
+  return `${s.name}${s.role !== "Settler" ? `, ${s.role}` : ""}${of ? ` of ${of}` : ""}${s.idle ? " (idle)" : ""}${asks ? " §e(a request)" : ""}`;
+}
+
+export function dressSettler(owner, s) {
+  const dim = world.getDimension(OVERWORLD);
+  for (const e of entityOf(dim, s)) dress(e, s, owner);
 }
 
 function dress(e, s, owner) {
@@ -270,6 +277,7 @@ world.beforeEvents.playerInteractWithEntity.subscribe((event) => {
     const t = townOf(owner);
     const town = keepOf(owner)?.name ?? townFor(t?.plot)?.name ?? "this place";
     const day = world.getDay();
+    if (applyFilter("settlerTalk", false, { player, owner, settler: s, town: t })) return; // a request or a basket (events.js)
     const line = lineFor(s, { night: isNight(), day, temper: t?.lord ? t.temper ?? "steady" : undefined, wary: (t?.waryUntil ?? -1) > day });
     player.sendMessage(`§f${s.name}${s.role !== "Settler" ? ` §7(${s.role})` : ""}§f: §7${line.replace("{town}", town)}`);
   });

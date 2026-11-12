@@ -572,6 +572,47 @@ addTests("settle settlers", {
   },
 });
 
+// ---------- town events and settler requests (events_rules.js) ----------
+import { OPENS_AT } from "./config.js";
+import { eventsFor, requestsFor, gap, quietDay, buildDone, fill } from "./events_rules.js";
+import { TOWN_EVENTS, REQUESTS, SITE_EVENTS, EVENTS } from "./events_data.js";
+addTests("settle events", {
+  "events and requests: unique ids, a kind each, words for each"() {
+    const kinds = new Set(["fight", "mystery", "journey", "quiet", "social", "build"]);
+    for (const list of [TOWN_EVENTS, REQUESTS, SITE_EVENTS]) assertEqual(new Set(list.map((e) => e.id)).size, list.length);
+    for (const e of TOWN_EVENTS) assert(kinds.has(e.kind) && e.name && e.start, e.id);
+    for (const r of REQUESTS) {
+      assert(kinds.has(r.kind) && r.ask && r.thanks && ["build", "bring", "bed"].includes(r.type), r.id);
+      if (r.type === "bring") assert(r.item && r.count > 0, r.id);
+      if (r.type === "build") assert(r.ids.every((id) => OPENS_AT[id] !== undefined), r.id);
+    }
+    for (const t of [...TOWN_EVENTS.map((e) => e.start), ...REQUESTS.map((r) => r.ask)]) assert(!/hollow/i.test(t), "nothing names the Hollow");
+  },
+  "what can happen depends on the town"() {
+    const bare = { tier: 0, counts: {}, settlers: 0, freeBeds: 0 };
+    const ev = eventsFor(bare);
+    assert(ev.includes("market_fair") && !ev.includes("wedding") && !ev.includes("harvest_day"), ev.join());
+    const busy = { tier: 2, counts: { farmhouse: 1, library: 1 }, settlers: 4, freeBeds: 1 };
+    assert(["wedding", "harvest_day", "lost_traveller", "supper_miscount"].every((id) => eventsFor(busy).includes(id)));
+    const lord = eventsFor({ ...busy, lord: true });
+    assert(lord.includes("market_fair") && !lord.includes("harvest_day"), "lords get the public ones");
+    assertEqual(requestsFor({ ...busy, lord: true }).length, 0);
+    const asks = requestsFor(bare, (id) => OPENS_AT[id] ?? 3);
+    assert(asks.includes("well_square") && !asks.includes("watchtower") && !asks.includes("kin") && !asks.includes("book"), asks.join());
+    assert(requestsFor(busy, (id) => OPENS_AT[id] ?? 3).includes("book"), "book once there's a library");
+  },
+  "pacing: gaps in range, quiet round sieges, build requests need one more"() {
+    for (let i = 0; i < 20; i++) { const g = gap(EVENTS.eventGap, () => i / 20); assert(g >= EVENTS.eventGap[0] && g <= EVENTS.eventGap[1], g); }
+    assert(quietDay(10, { siegeTonight: true }));
+    assert(quietDay(10, { lastSiege: 9 }));
+    assert(!quietDay(10, { lastSiege: 7 }));
+    const well = REQUESTS.find((r) => r.id === "well_square");
+    assert(!buildDone(well, { well: 1 }, { well: 1 }));
+    assert(buildDone(well, { well: 1 }, { well: 2 }));
+    assertEqual(fill("{a} in {town} {x}", { a: "Maud", town: "Oakmere" }), "Maud in Oakmere {x}");
+  },
+});
+
 // ---------- the level-5 hall takes its plots (hallmove.js) ----------
 import { HALL_TAKES_AT } from "./hallmove.js";
 addTests("settle charters", {
