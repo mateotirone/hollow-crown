@@ -5,7 +5,7 @@
 // out of the Barracks one after another (a short training time each). A fallen soldier retrains for half his price
 // (siege/guards.js asks the "retrainFee" filter). "Upgrade the Barracks" (levels 1-5) takes 8% off every price per
 // level and trains faster. Types whose creature isn't in the game yet (the art thread makes them) are listed as
-// coming; siege crews are trained at the Siege Workshop once their engines can be crewed.
+// coming. Siege crews train here too and bring their own engine (warwrit/crews.js).
 //
 //   /scriptevent siege:army_status    your Barracks level, the training queue and the prices
 
@@ -58,7 +58,7 @@ async function trainMenu(player, block) {
   const sliders = [];
   for (const s of ready) {
     const room = Math.floor(free / s.slots);
-    const text = `${s.name}  §7(${countOf(owner, s.id)} here)  ${coins(priceOf(s, level))} each${s.slots > 1 ? `, takes ${s.slots} places` : ""}`;
+    const text = `${s.name}  §7(${countOf(owner, s.id)} here)  ${coins(priceOf(s, level))} each${s.slots > 1 ? `, takes ${s.slots} places` : ""}${s.brings ? `, brings ${s.brings}` : ""}`;
     if (room < 1) { form.label?.(`${text}\n§cNo room: grow your settlement or lose a soldier first.`); continue; }
     form.slider(text, 0, room, { valueStep: 1, defaultValue: 0 });
     sliders.push(s);
