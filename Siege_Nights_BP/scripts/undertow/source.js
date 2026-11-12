@@ -57,7 +57,7 @@ export const getSites = () => load(K_SITES, {});
 export function recordSite(id, spot) {
   if (!SOURCE_SITE_IDS.includes(id)) return;
   const sites = getSites();
-  sites[id] = { x: spot.x, y: spot.y, z: spot.z, facing: spot.facing };
+  sites[id] = { x: spot.x, y: spot.y, z: spot.z, facing: spot.facing, ...(spot.h ? { h: spot.h } : {}) }; // h: crack height (thin places)
   save(K_SITES, sites);
 }
 
@@ -111,13 +111,14 @@ export function openRift(by) {
   const rift = getRift();
   if (rift?.open) return { ok: false, why: "the Rift is already open" };
   save(K_RIFT, { open: true, site: id, x: site.x, y: site.y, z: site.z, facing: site.facing, by: by?.name, day: world.getDay?.() });
+  // a thin place's crack runs its chamber's full height and opens on the void; a hand-marked seam keeps the old crack
   tearOpen(world.getDimension(OVERWORLD), site, site.facing, () => {
     world.sendMessage(TEXT.riftOpened);
     for (const p of world.getAllPlayers()) {
       try { sfx(p, "mob.warden.roar", { volume: 0.6, pitch: 0.5 }); } catch {}
     }
     try { system.sendScriptEvent("siege:undertow_rift_opened", JSON.stringify({ site: id, by: by?.name })); } catch {}
-  });
+  }, site.h ? { height: site.h, deep: true } : {});
   return { ok: true };
 }
 
