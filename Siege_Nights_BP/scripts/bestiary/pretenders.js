@@ -186,7 +186,7 @@ function describe(f, fresh) {
   f.data.p = c && typeOf(c) === f.def.type ? c : makePretender(Math.floor(Math.random() * 2 ** 31));
   if (!f.data.p.body) f.data.p.body = f.def.type.slice("siege:pretender_".length);
   const p = f.data.p, claim = CLAIMS[p.claim];
-  try { f.entity.nameTag = `§5${p.name}${f.temper ? `§7, ${f.temper.name}` : ""}${p.houseTitle ? `\n§7${p.houseTitle}` : ""}`; } catch { /* cosmetic */ }
+  try { f.entity.nameTag = `${p.name}${f.temper ? `§7, ${f.temper.name}` : ""}${p.houseTitle ? `\n§7${p.houseTitle}` : ""}`; } catch { /* cosmetic */ }
   f.data.fifths = 4; f.data.twin = false;
   if (fresh) f.say(`§5${p.name}§7 stands at the Seat. §d${claim.name}.§7 ${claim.line} §8(${claim.hint})`);
 }
