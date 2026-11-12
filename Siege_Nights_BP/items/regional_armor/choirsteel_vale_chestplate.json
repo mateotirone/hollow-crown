@@ -1,0 +1,50 @@
+{
+  "format_version": "1.21.60",
+  "minecraft:item": {
+    "description": {
+      "identifier": "siege:choirsteel_vale_chestplate",
+      "menu_category": {
+        "category": "equipment",
+        "group": "minecraft:itemGroup.name.chestplate"
+      }
+    },
+    "components": {
+      "minecraft:icon": "siege_choirsteel_vale_chestplate",
+      "minecraft:display_name": {
+        "value": "item.siege:choirsteel_vale_chestplate.name"
+      },
+      "minecraft:max_stack_size": 1,
+      "minecraft:wearable": {
+        "slot": "slot.armor.chest",
+        "protection": 8
+      },
+      "minecraft:durability": {
+        "max_durability": 890
+      },
+      "minecraft:repairable": {
+        "repair_items": [
+          {
+            "items": [
+              "siege:choirsteel_ingot"
+            ],
+            "repair_amount": "q.max_durability * 0.25"
+          }
+        ]
+      },
+      "minecraft:enchantable": {
+        "slot": "armor_torso",
+        "value": 22
+      },
+      "minecraft:tags": {
+        "tags": [
+          "minecraft:is_armor",
+          "minecraft:trimmable_armors",
+          "siege:regional_armor",
+          "siege:choirsteel"
+        ]
+      },
+      "minecraft:fire_resistant": {},
+      "minecraft:glint": false
+    }
+  }
+}

@@ -100,11 +100,14 @@ function candidates(speaker) {
 /**
  * Make the puzzle for a world. Returns { layout, first, liar, statements }:
  *   layout[clock] = post index, statements[keeper] = what that keeper says.
+ * towerPost pins the Tower clock (CLOCKS[0]) to that post, where the Millbrook landmark's clocktower stands.
  */
-export function makePuzzle(seed) {
+export const TOWER_POST = 1; // east side of the square
+export function makePuzzle(seed, { towerPost } = {}) {
   const r = rng(seed);
   for (let attempt = 0; attempt < 400; attempt++) {
     const layout = shuffle(r, [0, 1, 2, 3, 4, 5]);
+    if (towerPost !== undefined) { const j = layout.indexOf(towerPost); [layout[0], layout[j]] = [layout[j], layout[0]]; } // the Tower clock stays in its tower
     const first = Math.floor(r() * 6);
     let liar = Math.floor(r() * 6);
     if (liar === first && r() < 0.7) liar = (liar + 1 + Math.floor(r() * 5)) % 6; // the first clock's own keeper lies less often

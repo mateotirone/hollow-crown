@@ -1,0 +1,25 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shapeless": {
+    "description": {
+      "identifier": "siege:chainmail_saltreach_chestplate_recipe"
+    },
+    "tags": [
+      "siege_workshop"
+    ],
+    "ingredients": [
+      {
+        "item": "minecraft:chainmail_chestplate"
+      },
+      {
+        "item": "siege:castle_stone_saltreach"
+      }
+    ],
+    "result": {
+      "item": "siege:chainmail_saltreach_chestplate"
+    },
+    "unlock": {
+      "context": "AlwaysUnlocked"
+    }
+  }
+}
