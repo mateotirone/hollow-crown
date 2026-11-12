@@ -1,0 +1,8 @@
+{
+  "name": "hollow-crown-discord-relay",
+  "private": true,
+  "type": "module",
+  "description": "Carries The Hollow Crown's queued alerts to Discord. See docs/DISCORD.md.",
+  "scripts": { "realm": "node relay.mjs --realm", "selftest": "node relay.mjs --selftest" },
+  "dependencies": { "bedrock-protocol": "^3.61.0" }
+}
