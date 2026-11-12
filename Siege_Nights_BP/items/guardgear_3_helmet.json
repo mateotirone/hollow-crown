@@ -8,7 +8,7 @@
       }
     },
     "components": {
-      "minecraft:icon": "siege_guard_helmet",
+      "minecraft:icon": "siege_guardgear_3_helmet",
       "minecraft:display_name": {
         "value": "item.siege:guardgear_3_helmet.name"
       },

@@ -37,6 +37,13 @@ const STORY_SITES = [
   { id: "nell_raft", region: "Blackfen", name: "Nell Sedge's raft-house", x: 26, z: 1001, place: "nell_raft", pieces: [{ d: "nell_raft" }] },
   { id: "deepforge", region: "Frostmarch", name: "the Deepforge", x: -274, z: -938, place: "deepforge", pieces: [{ d: "deepforge", turns: true, face: "e" }] },
   { id: "cinder_roost", region: "Emberwaste", name: "the Cinder Roost", x: 898, z: 346, place: "cinder_roost", pieces: [{ d: "cinder_roost", turns: true, face: "s" }] },
+  // The three sealed ways out (plots/config.js EXPANSION). The Far Shore and Horizon Isles doors are out at sea,
+  // so their landmarks stand on the nearest coast, front out over the water toward the way.
+  { id: "shut_pass", region: "Frostmarch", name: "the Shut Pass", x: 1225, z: -190, pieces: [{ d: "shut_pass_gate", turns: true, face: "w" }] },
+  { id: "far_shore", region: "Saltreach", name: "the Westwatch", x: -850, z: 300, pieces: [{ d: "westwatch", turns: true, seek: { kind: "water", bearing: 270, spread: 40, max: 40 } }] },
+  { id: "horizon_isles", region: "Saltreach", name: "the Southmost Light", x: -725, z: 740, pieces: [{ d: "southmost_light", turns: true, seek: { kind: "water", bearing: 180, spread: 40, max: 40 } }] },
+  // The Warlord King's own ground: the Grey Host's war camp on the north-east Frostmarch plateau (flat at y 115).
+  { id: "vorlunds_muster", region: "Frostmarch", name: "Vorlund's Muster", x: 1030, z: -990, pieces: [{ d: "vorlunds_muster" }] },
 ];
 
 export const LANDMARKS = [

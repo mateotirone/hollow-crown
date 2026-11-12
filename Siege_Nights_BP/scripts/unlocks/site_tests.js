@@ -165,6 +165,15 @@ addTests("unlocks: sites", {
     assertEqual(ops[1].states, { pillar_axis: "y" });
     assertEqual(stampOps(undefined), []);
   },
+  "a big stamp's columns decode to the same cells, gaps skipped": () => {
+    const palette = [{ name: "minecraft:air", states: {} }, { name: "minecraft:stone", states: {} }, { name: "minecraft:dirt", states: {} }];
+    const ops = stampOps({ origin: [0, 0, 0], palette, cols: { w: 1, data: "0,0,-1:$#!%;2,-3,4:$" } });
+    assertEqual(ops.length, 4);
+    assertEqual(ops[0], { dx: 0, dy: -1, dz: 0, block: "minecraft:stone", states: undefined });
+    assertEqual(ops[1], { dx: 0, dy: 2, dz: 0, block: "minecraft:dirt", states: undefined });
+    assertEqual(ops[3], { dx: 0, dy: 0, dz: 0, block: "minecraft:air", states: undefined });
+    assertEqual(stampOps({ palette, cols: { w: 2, data: "1,1,0:#$" } })[0].block, "minecraft:stone");
+  },
   "the Changeling Glade: a wave when someone walks in, never in a fight, then it rests": () => {
     assert(gladeWave({ players: 1, fighting: false, now: 10, last: undefined }));
     assert(!gladeWave({ players: 0, fighting: false, now: 10, last: undefined }));
