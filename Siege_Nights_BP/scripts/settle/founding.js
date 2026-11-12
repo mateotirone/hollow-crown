@@ -137,6 +137,11 @@ function* layOutJob(owner, tier, done) {
 const NATURAL = /(grass_block|dirt|podzol|mycelium|stone$|^minecraft:(andesite|diorite|granite|tuff|deepslate|calcite|gravel|sand|red_sand|clay|mud|snow|snow_block|packed_ice|moss_block|sandstone|red_sandstone|terracotta|cobblestone)$|_terracotta$|coarse|rooted_dirt|short_grass|tall_grass|fern|flower|dandelion|poppy|snow_layer|deadbush|bush$)/;
 const TAPER = 6; // how far out the land is shaped at most
 const slope = (k) => Math.ceil(k / 2); // how far the land may stand above or below the edge, k blocks out
+// The shaping passes yield by block lookups, not loop steps: one step can look at 20 or 30 blocks (the watchdog rule)
+let lookups = 0;
+const look = (dim, x, y, z) => { lookups++; try { return dim.getBlock({ x, y, z }); } catch { return undefined; } };
+const topAt = (dim, x, z, from) => { lookups += 8; return groundTop(dim, x, z, from); };
+const tired = () => { if (lookups < PER_TICK) return false; lookups = 0; return true; };
 
 function* blendGround(dim, town, layout, tier) {
   const cols = new Map(); // "dx,dz" -> { lo, hi } of the blocks this tier lays (air rows don't count)
@@ -150,13 +155,12 @@ function* blendGround(dim, town, layout, tier) {
     else { c.lo = Math.min(c.lo, dy); c.hi = Math.max(c.hi, dy); }
   }
   const dirt = perm("minecraft:dirt"), stone = perm("minecraft:stone"), grass = perm("minecraft:grass_block"), air = perm("minecraft:air");
-  const get = (x, y, z) => { try { return dim.getBlock({ x, y, z }); } catch { return undefined; } };
-  let n = 0;
+  const get = (x, y, z) => look(dim, x, y, z);
   // 1. fill under every column down to the ground
   for (const c of cols.values()) {
     const x = town.x + c.dx, z = town.z + c.dz;
     for (let y = town.y + c.lo - 1, k = 0; k < 16; y--, k++) {
-      if (++n % PER_TICK === 0) yield;
+      if (tired()) yield;
       const b = get(x, y, z);
       if (!b || !/air|water|lava|short_grass|tall_grass|fern|flower|snow_layer|leaves/.test(b.typeId)) break;
       try { b.setPermutation(k < 3 ? dirt : stone); } catch { break; }
@@ -169,9 +173,9 @@ function* blendGround(dim, town, layout, tier) {
       if (member.has(`${c.dx + ux},${c.dz + uz}`)) continue;
       for (let k = 1; k <= TAPER; k++) {
         if (member.has(`${c.dx + ux * k},${c.dz + uz * k}`)) break;
-        if (++n % (PER_TICK >> 2) === 0) yield;
+        if (tired()) yield;
         const x = town.x + c.dx + ux * k, z = town.z + c.dz + uz * k;
-        const top = groundTop(dim, x, z, h + 24);
+        const top = topAt(dim, x, z, h + 24);
         if (top === undefined) break;
         const hiOk = h + slope(k), loOk = h - slope(k);
         if (top > hiOk) {
@@ -219,18 +223,18 @@ function* joinRoad(dim, town, layout) {
   const paths = [...tops.values()].filter((c) => PATHY.test(c.id));
   const end = roadEnd(paths, dir);
   if (!end) return;
-  const get = (x, y, z) => { try { return dim.getBlock({ x, y, z }); } catch { return undefined; } };
+  const get = (x, y, z) => look(dim, x, y, z);
   const h0 = town.y + end.dy;
   // the nearest map road ahead: a road block with at least two road blocks beside it (one stray gravel is not a road)
-  let found, best = Infinity, n = 0;
+  let found, best = Infinity;
   const side = { x: -dir.z, z: dir.x };
   for (let r = 3; r <= ROAD_REACH && r < best; r++) {
     for (let s = -r; s <= r; s++) {
-      if (++n % 64 === 0) yield;
+      if (tired()) yield;
       const lx = end.x + dir.x * r + side.x * s, lz = end.z + dir.z * r + side.z * s;
       if (member.has(`${lx},${lz}`)) continue;
       const x = town.x + lx, z = town.z + lz;
-      const y = groundTop(dim, x, z, h0 + 24);
+      const y = topAt(dim, x, z, h0 + 24);
       if (y === undefined) continue;
       const b = get(x, y, z);
       if (!b || !ROAD_BLOCKS.test(b.typeId)) continue;
@@ -252,7 +256,7 @@ function* joinRoad(dim, town, layout) {
       const cx = lx + side.x * w, cz = lz + side.z * w;
       if (member.has(`${cx},${cz}`) || laid.has(`${cx},${cz}`)) continue;
       laid.add(`${cx},${cz}`);
-      if (++n % 16 === 0) yield;
+      if (tired()) yield;
       const x = town.x + cx, z = town.z + cz;
       const here = get(x, y, z);
       if (!here || (!NATURAL.test(here.typeId) && !here.isAir && !SOFT.test(here.typeId) && !ROAD_BLOCKS.test(here.typeId))) continue; // built: leave it
@@ -277,9 +281,9 @@ function* joinRoad(dim, town, layout) {
     for (const sgn of [-1, 1]) for (let k = 2; k <= 4; k++) {
       const cx = lx + side.x * sgn * k, cz = lz + side.z * sgn * k;
       if (member.has(`${cx},${cz}`) || laid.has(`${cx},${cz}`)) break;
-      if (++n % 16 === 0) yield;
+      if (tired()) yield;
       const x = town.x + cx, z = town.z + cz;
-      const top = groundTop(dim, x, z, y + 12);
+      const top = topAt(dim, x, z, y + 12);
       if (top === undefined) break;
       const lim = k - 1;
       if (top > y + lim) {
