@@ -153,6 +153,9 @@ spruces (tall spruce, grey fir).
 
 **Ground cover:** ferns, sweet berry bushes, snow on roofs and ground. There are few flowers.
 
+**Round the foundation:** clumps of spruce leaves under the ground-floor windows and at some corners, never a
+strip round the house (the skill's `bushes`, on by default).
+
 ## Building it with the skill
 
 - **Presets:**

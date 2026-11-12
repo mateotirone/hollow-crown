@@ -37,15 +37,16 @@ to players before the story does.
 
 | | |
 |---|---|
-| Sky | **none**. A cave roof follows the land 30 to 50 blocks up: domes, mixed rock, hanging rock tipped with amethyst, Veilmoss curtains, basalt pillars, a Veil Rock shell above. No sun, no moon, no weather |
+| Sky | **none**. A cave roof follows the land 30 to 50 blocks up: domes, mixed rock, hanging rock tipped with amethyst, Veilmoss curtains, basalt pillars, a Veil Rock shell above. No sun and no moon |
 | Light | low and even: hidden light blocks keep it from ever going fully dark; the light rivers glow; giant Veilcap mushrooms glow; soul lanterns, ochre froglights and glimbulbs |
 | Fog | purple, render-relative (#1c1230, from about half the view distance); a thicker fog during Flickers |
 | Ground | mixed patches for every kind of land (Deep Veilmoss, Veilmoss variations, dark stone, pale ash), amethyst shard beds, moss strands hanging over cliff edges |
-| Sound | distant thunder with no storm; the Choir singing as the story goes on |
+| Weather | **an eternal thunderstorm with no rain** (Mateo, 2026-11-12): thunder rolls through the stone roof all the time, and now and then a bolt strikes the land far off. It never stops and never rains |
+| Sound | the endless thunder in the stone roof; the Choir singing as the story goes on |
 | Feel | a stone sky, purple haze, glowing water, stillness |
 
 Build for the dark. Light is the material here: warm froglight windows mean people, cold soul light means
-everything else. There is no rain or snow, so there are no drip lines or snow caps. Damp and age show as
+everything else. The storm never rains or snows, so there are no drip lines or snow caps. Damp and age show as
 cracked veinstone and moss.
 
 ## Towns and paths
@@ -158,6 +159,8 @@ pale ash dead trees.
 **Ground plants:** `siege:veilcap`, `siege:undertow_moss`, Deep Veilmoss, glow lichen, amethyst shard beds, moss
 strands over cliffs.
 
+**Round the foundation:** no leaf bushes (the preset plants none); glow lichen and Veilcap instead.
+
 ## Building it with the skill
 
 - **Preset:** `hollow_timber`: dark oak frame, pale ash infill, a deepslate roof, iron-bar windows.
@@ -183,5 +186,5 @@ strands over cliffs.
 - **Tone:** no horror (no gore, no jump scares), and no vanilla Nether or End look.
 - **Colour:** no Crown purple, magenta or blue outside the Seat and Morvane's sites.
 - **Crookedness:** no gradual shears or staircases of one-block shifts.
-- **Weather and ground:** no sky, sun or weather, and no snow or sand.
+- **Weather and ground:** no sky or sun, no rain or snow (the thunderstorm is dry), and no snow or sand on the ground.
 - **Light:** no bright white light; light here is warm froglight or cold soul light.

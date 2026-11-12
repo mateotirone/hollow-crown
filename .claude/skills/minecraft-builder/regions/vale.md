@@ -179,6 +179,9 @@ built on:
 - flower beds of poppy, cornflower, dandelion, azure bluet, oxeye daisy and tulips;
 - vines on shady walls.
 
+**Round the foundation:** clumps of azalea and flowering azalea under the ground-floor windows and at some corners, never a
+strip round the house (the skill's `bushes`, on by default).
+
 ## Building it with the skill
 
 - **Presets:**

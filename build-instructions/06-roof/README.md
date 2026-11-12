@@ -132,6 +132,14 @@ building (gable wall, barge boards, eave trim, ridge) were left standing inside 
 - Small gabled roofs coming out of the main roof slope, 3 wide (odd), with a 1-wide window, on the bay
   centre lines of the wall below so they line up with the windows under them.
 - Dormer ridge at least 1 below the main ridge. Their own verge and barge board.
+- **The dormer's roof stairs face down the main slope**, the same way as every other stair on the roof
+  (Mateo, 2026-11-12). Stairs turned sideways along the dormer read as turned against the main roof.
+- **Carry the dormer's front overhang** (Mateo, 2026-11-12): a bracket under each front corner of the
+  dormer roof, either side of the window, so it frames the window. Use an upside-down trim stair, a
+  fence post or a wall block in the region's material (a mud brick wall in Blackfen). This holds on every
+  house in every region, and for every other overhang too: verge ends and porch roofs.
+- **No open row between the wall top and the roof.** Where one roof's eave passes over another block's
+  wall, fill the one or two rows between the wall plate and the roof with the wall's infill.
 - Use on 1.5-storey cottages and attic floors with living space.
 
 ## Step 8: Trusses

@@ -35,7 +35,8 @@ is the offset from the wall's centre block, positive to the right as seen from o
 | `roof` | gable, long ridge | see Roofs |
 | `chimney` | `auto` | Mateo's chimney through the ridge, 2 in from a gable end; `[[x, z], ...]` to place; `false` for none |
 | `wings` | [] | joined blocks for L, T, U and cross plans: `[{"rect": [...], "storeys": [5, 4], "roof": {"ridge": "z"}}]`. Each wing takes the house's style unless it names its own, gets no door or chimney unless given. Walls, windows and sills between blocks are opened up; all roofs share one height field so valleys close (06 connecting roofs). Make wings narrower or lower than the main block so their roof sits below the main ridge. A wing whose ridge would stay below the main eave has its top storey raised until the roofs meet (`"join": "none"` on the wing to keep it low) |
-| `dormers` | [] | `[{"side": "s", "at": 0, "w": 3, "h": 3}]` on an eave side (along the ridge): front wall on the wall line with posts and a window, cheeks down to the main roof, its own bare gable roof running back into the main roof |
+| `dormers` | [] | `[{"side": "s", "at": 0, "w": 3, "h": 3}]` on an eave side (along the ridge): front wall on the wall line with posts and a window, cheeks down to the main roof, its own bare gable roof running back into the main roof; its roof stairs face down the main slope like the rest of the roof, and a bracket under each front corner of its roof frames the window (style `bracket`: `stairs` default, `fence`, or a block id; `fen_timber` uses `mud_brick_wall`) (Mateo 2026-11-12). A dormer taller than the main roof stops at the ridge with a warning |
+| `bushes` | true | foundation planting: clumps of the style's `bush` leaves (default its `leaves`; none for `ember_sandstone` and `hollow_timber`) on the ground under the ground-floor windows and at about half the corners, gaps between, now and then 2 high below the sill; door and steps clear; off on stilts. `false` turns it off, `{"share": 0.6}` thins it (07, Mateo 2026-11-12) |
 | `porch` | none | `{"side": "s", "at": 0, "w": 5, "d": 3, "h": 3}`: plinth-stone floor, log posts on the outer corners, a tie beam, a small gable roof with barge boards that stops at the wall. Best on a ground floor that is not jettied |
 | `balconies` | [] | `[{"side": "e", "storey": 1, "at": 0, "w": 3, "d": 1}]`: a door out, a trim floor on upside-down stair brackets, a fence rail (`rail` to change it); the window there is left out |
 | `arcade` | none | `true` or `{"sides": "esw", "storey": 0, "height", "style": "round_angle", "material", "trim", "lanterns": true, "pier"}`: every bay between the frame posts of that storey becomes an arch (round angle), so the storey stands open as a market hall; default sides are all but the door's; window dressing in the bays goes; a lantern hangs in each crown. Bays must be odd (`bay` 3 gives 3-wide arches) |
@@ -137,11 +138,16 @@ post (timber) and an attic window when the gable is 5 or more tall. Roof colour 
 ridge, darkest at the ridge, with band edges wobbled ±0.04.
 
 **Flat** (`"type": "flat"`, 06 roof-types 18; the Emberwaste default, Saltreach terraces on a lower wing
-only): a full roof layer on the wall top (never a gap), a parapet one high (`"parapet"`: `slab` default,
-`crenel`, `wall`, `none`; `"parapet_mat"`, default the style's quoin) with posts on the corners,
-`"beams": true` (or a log id) for roof beams sticking out every other block on the long sides, `"hatch": true`
-for a trapdoor in the middle. No auto chimney: give `chimney` cells by hand. Never on Vale, Frostmarch,
-Blackfen or Hollow houses.
+only): the roof layer sits on the wall top (never a gap) and is made of vigas by default (Mateo 2026-11-12):
+spruce logs running right across the building the short way, through the walls and one block out on both
+sides, every other block along its length, with top slabs of the roof block between them (log, slab, log,
+slab). `"beams"`: a log id to change the wood, `false` for a plain full layer. A parapet one high sits on
+top (`"parapet"`: `slab` default, `crenel`, `wall`, `none`; `"parapet_mat"`, default the style's quoin) with
+posts on the corners; `"hatch": true` puts a trapdoor in a slab cell in the middle. No auto chimney: give
+`chimney` cells by hand. Never on Vale, Frostmarch, Blackfen or Hollow houses.
+
+**No open row under a roof:** after the roofs, any one or two free rows between the top storey's wall plate
+and the roof above it (where one block's eave passes over another's wall) are filled with the wall's infill.
 
 **Every roof is textured** (Mateo, 2026-11-12, every style and theme): each roof block is mixed at random,
 cell by cell, with a partner block of the same colour, on stairs, slabs and the ridge alike. Pairs and the

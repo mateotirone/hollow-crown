@@ -150,6 +150,9 @@ Full table: `build-instructions/palettes/saltreach.md`; ladders SAL-01 to SAL-06
 
 **Smaller plants:** flowers in pots and sea pickles. There is little grass in town.
 
+**Round the foundation:** clumps of azalea and flowering azalea under the ground-floor windows and at some corners, never a
+strip round the house (the skill's `bushes`, on by default).
+
 ## Building it with the skill
 
 - **Presets:**
