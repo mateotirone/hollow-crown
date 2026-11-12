@@ -1,6 +1,7 @@
 # Palettes
 
-Every region has its own full block palette. Blocks are chosen **strictly by colour, whatever the block
+The full style guide of each region (what it is, its theme, buildings, roofs, weather, paths, trees) is in
+`.claude/skills/minecraft-builder/regions/`; read it first. Every region has its own full block palette. Blocks are chosen **strictly by colour, whatever the block
 is**, as long as a full-block role uses a solid block (Mateo, 2026-11-11). There is no holdback on which
 blocks can be used: concrete, terracotta, copper, prismarine, froglights, ice, quartz, any wood. Castle
 Stone is one colour option per region, made so each region had a block coloured and textured for it; it

@@ -35,9 +35,11 @@ is the offset from the wall's centre block, positive to the right as seen from o
 | `roof` | gable, long ridge | see Roofs |
 | `chimney` | `auto` | Mateo's chimney through the ridge, 2 in from a gable end; `[[x, z], ...]` to place; `false` for none |
 | `wings` | [] | joined blocks for L, T, U and cross plans: `[{"rect": [...], "storeys": [5, 4], "roof": {"ridge": "z"}}]`. Each wing takes the house's style unless it names its own, gets no door or chimney unless given. Walls, windows and sills between blocks are opened up; all roofs share one height field so valleys close (06 connecting roofs). Make wings narrower or lower than the main block so their roof sits below the main ridge. A wing whose ridge would stay below the main eave has its top storey raised until the roofs meet (`"join": "none"` on the wing to keep it low) |
-| `dormers` | [] | `[{"side": "s", "at": 0, "w": 3, "h": 3}]` on an eave side (along the ridge): front wall on the wall line with posts and a window, cheeks down to the main roof, its own bare gable roof running back into the main roof |
+| `dormers` | [] | `[{"side": "s", "at": 0, "w": 3, "h": 3}]` on an eave side (along the ridge): front wall on the wall line with posts and a window, cheeks down to the main roof, its own bare gable roof running back into the main roof; its roof stairs face down the main slope like the rest of the roof, and a bracket under each front corner of its roof frames the window (style `bracket`: `stairs` default, `fence`, or a block id; `fen_timber` uses `mud_brick_wall`) (Mateo 2026-11-12). A dormer taller than the main roof stops at the ridge with a warning |
+| `bushes` | true | foundation planting: clumps of the style's `bush` leaves (default its `leaves`; none for `ember_sandstone` and `hollow_timber`) on the ground under the ground-floor windows and at about half the corners, gaps between, now and then 2 high below the sill; door and steps clear; off on stilts. `false` turns it off, `{"share": 0.6}` thins it (07, Mateo 2026-11-12) |
 | `porch` | none | `{"side": "s", "at": 0, "w": 5, "d": 3, "h": 3}`: plinth-stone floor, log posts on the outer corners, a tie beam, a small gable roof with barge boards that stops at the wall. Best on a ground floor that is not jettied |
 | `balconies` | [] | `[{"side": "e", "storey": 1, "at": 0, "w": 3, "d": 1}]`: a door out, a trim floor on upside-down stair brackets, a fence rail (`rail` to change it); the window there is left out |
+| `arcade` | none | `true` or `{"sides": "esw", "storey": 0, "height", "style": "round_angle", "material", "trim", "lanterns": true, "pier"}`: every bay between the frame posts of that storey becomes an arch (round angle), so the storey stands open as a market hall; default sides are all but the door's; window dressing in the bays goes; a lantern hangs in each crown. Bays must be odd (`bay` 3 gives 3-wide arches) |
 | (windows) | | a window is left out, with its shutters and sill, when another block's roof is in front of it or above its sill, when a porch roof crosses the glass, when its wall faces another block, or when the storey is too short for it under its own roof; the summary says which when you placed it by hand |
 | `brackets` | `arched` | under jetties: stair under each post, then top slab, then flat trapdoors to mid-bay (02 arched supports); `stairs` for the plain stair under each post only |
 | `trusses` | `auto` | 06 step 8: tie beam at the wall plate on every inner post line, king post to the ridge, braces on spans of 9+. `auto` builds them on spans of 9 or more inside; `true` always; `false` never |
@@ -124,16 +126,28 @@ For a curved arch in a solid mass (bridges, gateways, arcades) use the `arch` sh
 
 ## Roofs (06-roof)
 
-`roof` in a house: `type` gable / hip, `ridge` x / z (default the long way), `pitch` 1 (45°) or 2 (steep:
+`roof` in a house: `type` gable / hip / flat, `gable_horns` (Frostmarch dragon heads: crossed barge boards in a V past the ridge at each gable end), `ridge` x / z (default the long way), `pitch` 1 (45°) or 2 (steep:
 stair on a full block), `overhang` 1, `verge` 1, `cap` (ridge slab material).
 
 How it is built: a height field over the footprint plus overhang; every cell takes a stair facing uphill;
 inner-corner stairs where two higher sides meet (valleys), outer-corner stairs on hip lines; the ridge is a
-full block with a bottom slab on top. Edges open to the sky get: barge boards (upside-down trim stairs under
+full block capped with back-to-back stairs along the spine, tall backs touching in pairs, so the crest reads as a row of small peaks between the spikes (Mateo 2026-11-12; on a two-row ridge each pair sits across the spine; style `"ridge_cap": "slab"` for the old slab row). Edges open to the sky get: barge boards (upside-down trim stairs under
 every verge stair), an eave row of upside-down trim stairs under the overhang, and Mateo's trim-wood corner
 block under the lowest verge stair at every corner. Gable triangles fill after the surface with a centre
 post (timber) and an attic window when the gable is 5 or more tall. Roof colour ladders run eaves to
 ridge, darkest at the ridge, with band edges wobbled ±0.04.
+
+**Flat** (`"type": "flat"`, 06 roof-types 18; the Emberwaste default, Saltreach terraces on a lower wing
+only): the roof layer sits on the wall top (never a gap) and is made of vigas by default (Mateo 2026-11-12):
+spruce logs running right across the building the short way, through the walls and one block out on both
+sides, every other block along its length, with top slabs of the roof block between them (log, slab, log,
+slab). `"beams"`: a log id to change the wood, `false` for a plain full layer. A parapet one high sits on
+top (`"parapet"`: `slab` default, `crenel`, `wall`, `none`; `"parapet_mat"`, default the style's quoin) with
+posts on the corners; `"hatch": true` puts a trapdoor in a slab cell in the middle. No auto chimney: give
+`chimney` cells by hand. Never on Vale, Frostmarch, Blackfen or Hollow houses.
+
+**No open row under a roof:** after the roofs, any one or two free rows between the top storey's wall plate
+and the roof above it (where one block's eave passes over another's wall) are filled with the wall's infill.
 
 **Every roof is textured** (Mateo, 2026-11-12, every style and theme): each roof block is mixed at random,
 cell by cell, with a partner block of the same colour, on stairs, slabs and the ridge alike. Pairs and the
@@ -146,8 +160,41 @@ forms. Copper is the exception and keeps its weathering gradient. `"texture": fa
 turns it off; `{"share": 0.4, "with": {"bricks": "mud_bricks"}}` picks your own. Domes and cones built from
 shapes take the same option on their material (`"texture": true`).
 
+**Roof finishes** (on the house's `roof`):
+- `"snow": true` (Frostmarch): a snow layer replaces the back-to-back ridge cap, and a thin layer sits on every
+  full block open to the sky (steps of a pitch 2 roof, chimney tops). Slopes of stairs stay bare.
+- `"moss": true` or a share (default 0.13) (Blackfen): moss blocks along the ridge with moss carpet on top,
+  and mossy cobblestone stairs in the stairs' shape on about 13% of the slope, half as many again on the
+  shady north side.
+- `"thatch": true` (barns and stores): hay blocks on the slopes, the roof's own stairs kept along the eaves
+  and verges, a moss ridge.
+
 Several roofs passed to `build_roofs` together combine by height (higher roof wins), which closes valleys;
 the `house` part builds one roof per building today, so L and T plans are two houses side by side for now.
+
+## Stilts, piles and the Hollow offset (keys on `house`)
+
+- `"stilts": {"ground": 0}` (Blackfen): give the house `"y"` at the platform (3 or 4 above `ground`). The
+  plinth edge becomes a mangrove plank platform, mangrove log stilts stand under the corners, the frame
+  posts and every second edge block down to the ground, and a stair runs from a 3 x 1 landing at the door
+  to the ground with fences under it. Keys `log`, `platform`, `stair` (false for none), `side`.
+- `"piles": true` (Blackfen plot buildings on the ground): the plinth course's corners and every other
+  edge block become mangrove logs going two below the ground, with mangrove roots between. Keys `log`,
+  `roots`, `depth`.
+- `"offset": {"storey": 1, "dir": "e"}` or `{"roof": true, "dir": "e"}` (the Hollow): everything from that
+  storey (or the roof) up moves one block, as one piece, never a shear. The plinth and ground storey stay
+  true, chimneys stay put, and upside-down trim brackets carry the overhanging side. Not for houses with
+  wings.
+
+## `dome`
+
+`{"part": "dome", "at": [x, z], "r": 4, "drum": {"h": 3, "windows": 4}, "finial": "gold"}`: a dome on a
+drum, sitting on whatever is built under its centre (a flat roof stays as its floor; give `"y"` or
+`"at": [x, y, z]` to place it yourself). `r` the radius (end in .5 for an even width), `shape` hemisphere /
+onion / tall, `material` (default waxed copper from weathered to oxidized, greener at the top), `drum`
+`{"h", "r" (default r), "material" (default the walls of the house built before it), "windows" (4 or 8),
+"glass"}`, `finial` `short` / `gold` (one gold block, Emberwaste civic) / `spire_block` / `none`. Cyan
+terracotta has no stairs, so its curve uses dark prismarine; the copper default reads better in game.
 
 ## Chimney (06 step 9, Mateo's default)
 
@@ -162,6 +209,12 @@ pot on top.
 | `string_course` | `rect`, `y`, `sides`, `material` | upside-down stairs 1 out, corners wrapped with outer-corner stairs (07) |
 | `buttress` | `rect`, `side`, `at` [offsets], `y`, `height`, `depth` | 1 to 2 out at the foot, stepping in with a stair at mid height and a stair cap (02 step 6) |
 | `hanging_lantern` | `at`, `chain` | chain links down to a hanging lantern, from a corner block or bracket (07) |
+| `lean_to` | `rect`, `against` (n/s/e/w), `top`, `pitch` (1 or `"half"`), `y`, `roof`, `post`, `trim`, `floor` | a skillion against a wall: one slope falling away from `against`, starting at `top`, overhang 1 at the low edge and a verge at both ends; tie beam under the low edge, log posts at the ends and every 4, upside-down trim stairs under the overhang, barge boards. Roof gets the two-block texture (06) and, without `roof`, the colour of the house built before it |
+| `woodpile` | `at`, `len`, `h` (2-3), `facing`, `wood`, `cover` (`slab`/`trapdoor`/`none`) | logs lying with the end grain to `facing`, top row stepped in, about 1 in 5 stripped, a slab or trapdoor cover, a chopping block beside it (07 dressing) |
+| `spire` | `rect` (the tower), `y` (`"top"` default), `rows` (3), `kind` (`stepped` / `broach`), `overhang`, `roof`, `trim`, `finial` (`spire_block` default / `rod` / `tall` / `short` / `none`) | sits on the walls of whatever is built in `rect` and replaces its roof: an eave ring over the overhang with upside-down trim under it, the tower's width one row, then rings stepping in one block every `rows` rows (stairs stacked on stairs, full corners), then the add-on's spire top block `siege:spire_roof` on the full top block (or a wall-post finial with a lightning rod). **Never a slab under a spire top** (Mateo 2026-11-12: it floats): the engine swaps any slab under `siege:spire_roof` for the full block, in every build, `place` cells included. `broach` leaves the corners off the upper rings so it turns octagonal (06 steep roofs) |
+| `belfry` | `rect`, `y` (`"top"` on a tower, `"roof"` on a ridge, or a number), `h` (4), `pier`, `deck`, `trim`, `louvres`, `bell` (true), `cap` (`hip` / `spire` / `none`), `roof`, `finial`, `base` | an open bell storey: deck (built up from the roof on a ridge), corner piers (walls when 3 wide), a round-angle head on every face 5 or more wide, a beam ring, a beam across with a hanging bell, louvres of open trapdoors flush to each face, then a spire cap (rows 1 = a hip cap) |
+| `clock_face` | `rect` + `side` + `y` (+ `along`) or `at` + `side`; `size` (3 / 5), `time` ("3:00"), `face` (calcite), `hand` (polished_blackstone), `hub` (button), `frame` | a face flush in the wall, hands from the hub (minute on the 12 for whole hours, both snapped to the nearest eighth), a button hub; a window's sill, shutters or lantern in front go. Keep it clear of the eave row |
+| `wheel` | `at` (axle centre), `axis` (axle direction x / z), `r` (3-5), `width` (1-2), `wood`, `paddles`, `axle` | a waterwheel: plank rim, fence spokes, a paddle at every eighth, a stripped log axle into the wall |
 
 ## Not automated yet (build with shapes and `place`)
 

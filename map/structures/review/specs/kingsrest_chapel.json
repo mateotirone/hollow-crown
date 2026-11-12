@@ -1,0 +1,1092 @@
+{
+ "name": "kingsrest_chapel",
+ "card": {
+  "title": "Kingsrest chapel",
+  "sub": "Norman stone",
+  "region": "vale",
+  "where": "Kingsrest, east of the square",
+  "kind": "Civic",
+  "blurb": "A buttressed stone nave with tall lancets under a steep slate roof, a square bell tower with a spire at the front and a lower chancel at the back. Built on the skill."
+ },
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "vale_stone",
+    "glass": "light_blue_stained_glass_pane",
+    "floor": "polished_andesite"
+   },
+   "rect": [
+    0,
+    0,
+    10,
+    18
+   ],
+   "y": 0,
+   "plinth": 2,
+   "storeys": [
+    8
+   ],
+   "door": {
+    "side": "s",
+    "kind": "grand",
+    "steps": 2
+   },
+   "windows": {
+    "e": [
+     {
+      "at": -6,
+      "storey": 0,
+      "w": 1,
+      "h": 5
+     },
+     {
+      "at": 0,
+      "storey": 0,
+      "w": 1,
+      "h": 5
+     },
+     {
+      "at": 6,
+      "storey": 0,
+      "w": 1,
+      "h": 5
+     }
+    ],
+    "w": [
+     {
+      "at": -6,
+      "storey": 0,
+      "w": 1,
+      "h": 5
+     },
+     {
+      "at": 0,
+      "storey": 0,
+      "w": 1,
+      "h": 5
+     },
+     {
+      "at": 6,
+      "storey": 0,
+      "w": 1,
+      "h": 5
+     }
+    ],
+    "n": []
+   },
+   "roof": {
+    "type": "gable",
+    "ridge": "z",
+    "pitch": 1
+   },
+   "chimney": false,
+   "wings": [
+    {
+     "rect": [
+      2,
+      -5,
+      8,
+      -1
+     ],
+     "storeys": [
+      7
+     ],
+     "roof": {
+      "type": "hip",
+      "pitch": 1
+     }
+    }
+   ],
+   "vines": 0.06
+  },
+  {
+   "part": "buttress",
+   "rect": [
+    0,
+    0,
+    10,
+    18
+   ],
+   "side": "e",
+   "at": [
+    -9,
+    -3,
+    3,
+    9
+   ],
+   "y": 2,
+   "height": 6,
+   "depth": 2
+  },
+  {
+   "part": "buttress",
+   "rect": [
+    0,
+    0,
+    10,
+    18
+   ],
+   "side": "w",
+   "at": [
+    -9,
+    -3,
+    3,
+    9
+   ],
+   "y": 2,
+   "height": 6,
+   "depth": 2
+  },
+  {
+   "part": "house",
+   "style": {
+    "base": "vale_stone",
+    "glass": "light_blue_stained_glass_pane",
+    "roof": "deepslate_tiles"
+   },
+   "rect": [
+    3,
+    19,
+    7,
+    23
+   ],
+   "y": 0,
+   "plinth": 2,
+   "storeys": [
+    6,
+    6,
+    6
+   ],
+   "door": {
+    "side": "s",
+    "kind": "house",
+    "steps": 2
+   },
+   "windows": {
+    "s": [
+     {
+      "at": 0,
+      "storey": 1,
+      "w": 1,
+      "h": 2
+     },
+     {
+      "at": 0,
+      "storey": 2,
+      "w": 1,
+      "h": 3
+     }
+    ],
+    "e": [
+     {
+      "at": 0,
+      "storey": 2,
+      "w": 1,
+      "h": 3
+     }
+    ],
+    "w": [
+     {
+      "at": 0,
+      "storey": 2,
+      "w": 1,
+      "h": 3
+     }
+    ],
+    "n": []
+   },
+   "roof": {
+    "type": "hip",
+    "pitch": 1,
+    "overhang": 1
+   },
+   "chimney": false,
+   "vines": 0.06
+  }
+ ],
+ "place": [
+  [
+   2,
+   19,
+   18,
+   "deepslate_tiles"
+  ],
+  [
+   2,
+   19,
+   19,
+   "deepslate_tile_stairs",
+   {
+    "facing": "e"
+   }
+  ],
+  [
+   2,
+   19,
+   20,
+   "deepslate_tile_stairs",
+   {
+    "facing": "e"
+   }
+  ],
+  [
+   2,
+   19,
+   21,
+   "deepslate_brick_stairs",
+   {
+    "facing": "e"
+   }
+  ],
+  [
+   2,
+   19,
+   22,
+   "deepslate_tile_stairs",
+   {
+    "facing": "e"
+   }
+  ],
+  [
+   2,
+   19,
+   23,
+   "deepslate_tile_stairs",
+   {
+    "facing": "e"
+   }
+  ],
+  [
+   2,
+   19,
+   24,
+   "deepslate_tiles"
+  ],
+  [
+   3,
+   19,
+   18,
+   "deepslate_tile_stairs",
+   {
+    "facing": "s"
+   }
+  ],
+  [
+   3,
+   19,
+   19,
+   "deepslate_tiles"
+  ],
+  [
+   3,
+   19,
+   20,
+   "deepslate_tiles"
+  ],
+  [
+   3,
+   19,
+   21,
+   "deepslate_tiles"
+  ],
+  [
+   3,
+   19,
+   22,
+   "deepslate_tiles"
+  ],
+  [
+   3,
+   19,
+   23,
+   "deepslate_tiles"
+  ],
+  [
+   3,
+   19,
+   24,
+   "deepslate_tile_stairs",
+   {
+    "facing": "n"
+   }
+  ],
+  [
+   4,
+   19,
+   18,
+   "deepslate_tile_stairs",
+   {
+    "facing": "s"
+   }
+  ],
+  [
+   4,
+   19,
+   19,
+   "deepslate_tiles"
+  ],
+  [
+   4,
+   19,
+   20,
+   "deepslate_tiles"
+  ],
+  [
+   4,
+   19,
+   21,
+   "deepslate_tiles"
+  ],
+  [
+   4,
+   19,
+   22,
+   "deepslate_tiles"
+  ],
+  [
+   4,
+   19,
+   23,
+   "deepslate_tiles"
+  ],
+  [
+   4,
+   19,
+   24,
+   "deepslate_tile_stairs",
+   {
+    "facing": "n"
+   }
+  ],
+  [
+   5,
+   19,
+   18,
+   "deepslate_brick_stairs",
+   {
+    "facing": "s"
+   }
+  ],
+  [
+   5,
+   19,
+   19,
+   "deepslate_tiles"
+  ],
+  [
+   5,
+   19,
+   20,
+   "deepslate_tiles"
+  ],
+  [
+   5,
+   19,
+   21,
+   "deepslate_tiles"
+  ],
+  [
+   5,
+   19,
+   22,
+   "deepslate_tiles"
+  ],
+  [
+   5,
+   19,
+   23,
+   "deepslate_tiles"
+  ],
+  [
+   5,
+   19,
+   24,
+   "deepslate_brick_stairs",
+   {
+    "facing": "n"
+   }
+  ],
+  [
+   6,
+   19,
+   18,
+   "deepslate_tile_stairs",
+   {
+    "facing": "s"
+   }
+  ],
+  [
+   6,
+   19,
+   19,
+   "deepslate_tiles"
+  ],
+  [
+   6,
+   19,
+   20,
+   "deepslate_tiles"
+  ],
+  [
+   6,
+   19,
+   21,
+   "deepslate_tiles"
+  ],
+  [
+   6,
+   19,
+   22,
+   "deepslate_tiles"
+  ],
+  [
+   6,
+   19,
+   23,
+   "deepslate_tiles"
+  ],
+  [
+   6,
+   19,
+   24,
+   "deepslate_tile_stairs",
+   {
+    "facing": "n"
+   }
+  ],
+  [
+   7,
+   19,
+   18,
+   "deepslate_tile_stairs",
+   {
+    "facing": "s"
+   }
+  ],
+  [
+   7,
+   19,
+   19,
+   "deepslate_tiles"
+  ],
+  [
+   7,
+   19,
+   20,
+   "deepslate_tiles"
+  ],
+  [
+   7,
+   19,
+   21,
+   "deepslate_tiles"
+  ],
+  [
+   7,
+   19,
+   22,
+   "deepslate_tiles"
+  ],
+  [
+   7,
+   19,
+   23,
+   "deepslate_tiles"
+  ],
+  [
+   7,
+   19,
+   24,
+   "deepslate_tile_stairs",
+   {
+    "facing": "n"
+   }
+  ],
+  [
+   8,
+   19,
+   18,
+   "deepslate_tiles"
+  ],
+  [
+   8,
+   19,
+   19,
+   "deepslate_tile_stairs",
+   {
+    "facing": "w"
+   }
+  ],
+  [
+   8,
+   19,
+   20,
+   "deepslate_tile_stairs",
+   {
+    "facing": "w"
+   }
+  ],
+  [
+   8,
+   19,
+   21,
+   "deepslate_brick_stairs",
+   {
+    "facing": "w"
+   }
+  ],
+  [
+   8,
+   19,
+   22,
+   "deepslate_tile_stairs",
+   {
+    "facing": "w"
+   }
+  ],
+  [
+   8,
+   19,
+   23,
+   "deepslate_tile_stairs",
+   {
+    "facing": "w"
+   }
+  ],
+  [
+   8,
+   19,
+   24,
+   "deepslate_tiles"
+  ],
+  [
+   3,
+   20,
+   19,
+   "deepslate_tiles"
+  ],
+  [
+   3,
+   20,
+   20,
+   "deepslate_tile_stairs",
+   {
+    "facing": "e"
+   }
+  ],
+  [
+   3,
+   20,
+   21,
+   "deepslate_tile_stairs",
+   {
+    "facing": "e"
+   }
+  ],
+  [
+   3,
+   20,
+   22,
+   "deepslate_brick_stairs",
+   {
+    "facing": "e"
+   }
+  ],
+  [
+   3,
+   20,
+   23,
+   "deepslate_tiles"
+  ],
+  [
+   4,
+   20,
+   19,
+   "deepslate_tile_stairs",
+   {
+    "facing": "s"
+   }
+  ],
+  [
+   4,
+   20,
+   20,
+   "deepslate_tiles"
+  ],
+  [
+   4,
+   20,
+   21,
+   "deepslate_tiles"
+  ],
+  [
+   4,
+   20,
+   22,
+   "deepslate_tiles"
+  ],
+  [
+   4,
+   20,
+   23,
+   "deepslate_tile_stairs",
+   {
+    "facing": "n"
+   }
+  ],
+  [
+   5,
+   20,
+   19,
+   "deepslate_tile_stairs",
+   {
+    "facing": "s"
+   }
+  ],
+  [
+   5,
+   20,
+   20,
+   "deepslate_tiles"
+  ],
+  [
+   5,
+   20,
+   21,
+   "deepslate_tiles"
+  ],
+  [
+   5,
+   20,
+   22,
+   "deepslate_tiles"
+  ],
+  [
+   5,
+   20,
+   23,
+   "deepslate_brick_stairs",
+   {
+    "facing": "n"
+   }
+  ],
+  [
+   6,
+   20,
+   19,
+   "deepslate_brick_stairs",
+   {
+    "facing": "s"
+   }
+  ],
+  [
+   6,
+   20,
+   20,
+   "deepslate_tiles"
+  ],
+  [
+   6,
+   20,
+   21,
+   "deepslate_tiles"
+  ],
+  [
+   6,
+   20,
+   22,
+   "deepslate_tiles"
+  ],
+  [
+   6,
+   20,
+   23,
+   "deepslate_tile_stairs",
+   {
+    "facing": "n"
+   }
+  ],
+  [
+   7,
+   20,
+   19,
+   "deepslate_tiles"
+  ],
+  [
+   7,
+   20,
+   20,
+   "deepslate_tile_stairs",
+   {
+    "facing": "w"
+   }
+  ],
+  [
+   7,
+   20,
+   21,
+   "deepslate_brick_stairs",
+   {
+    "facing": "w"
+   }
+  ],
+  [
+   7,
+   20,
+   22,
+   "deepslate_tile_stairs",
+   {
+    "facing": "w"
+   }
+  ],
+  [
+   7,
+   20,
+   23,
+   "deepslate_tiles"
+  ],
+  [
+   3,
+   21,
+   19,
+   "deepslate_tiles"
+  ],
+  [
+   3,
+   21,
+   20,
+   "deepslate_tile_stairs",
+   {
+    "facing": "e"
+   }
+  ],
+  [
+   3,
+   21,
+   21,
+   "deepslate_brick_stairs",
+   {
+    "facing": "e"
+   }
+  ],
+  [
+   3,
+   21,
+   22,
+   "deepslate_tile_stairs",
+   {
+    "facing": "e"
+   }
+  ],
+  [
+   3,
+   21,
+   23,
+   "deepslate_tiles"
+  ],
+  [
+   4,
+   21,
+   19,
+   "deepslate_tile_stairs",
+   {
+    "facing": "s"
+   }
+  ],
+  [
+   4,
+   21,
+   20,
+   "deepslate_tiles"
+  ],
+  [
+   4,
+   21,
+   21,
+   "deepslate_tiles"
+  ],
+  [
+   4,
+   21,
+   22,
+   "deepslate_tiles"
+  ],
+  [
+   4,
+   21,
+   23,
+   "deepslate_brick_stairs",
+   {
+    "facing": "n"
+   }
+  ],
+  [
+   5,
+   21,
+   19,
+   "deepslate_brick_stairs",
+   {
+    "facing": "s"
+   }
+  ],
+  [
+   5,
+   21,
+   20,
+   "deepslate_tiles"
+  ],
+  [
+   5,
+   21,
+   21,
+   "deepslate_tiles"
+  ],
+  [
+   5,
+   21,
+   22,
+   "deepslate_tiles"
+  ],
+  [
+   5,
+   21,
+   23,
+   "deepslate_tile_stairs",
+   {
+    "facing": "n"
+   }
+  ],
+  [
+   6,
+   21,
+   19,
+   "deepslate_tile_stairs",
+   {
+    "facing": "s"
+   }
+  ],
+  [
+   6,
+   21,
+   20,
+   "deepslate_tiles"
+  ],
+  [
+   6,
+   21,
+   21,
+   "deepslate_tiles"
+  ],
+  [
+   6,
+   21,
+   22,
+   "deepslate_tiles"
+  ],
+  [
+   6,
+   21,
+   23,
+   "deepslate_tile_stairs",
+   {
+    "facing": "n"
+   }
+  ],
+  [
+   7,
+   21,
+   19,
+   "deepslate_tiles"
+  ],
+  [
+   7,
+   21,
+   20,
+   "deepslate_brick_stairs",
+   {
+    "facing": "w"
+   }
+  ],
+  [
+   7,
+   21,
+   21,
+   "deepslate_tile_stairs",
+   {
+    "facing": "w"
+   }
+  ],
+  [
+   7,
+   21,
+   22,
+   "deepslate_tile_stairs",
+   {
+    "facing": "w"
+   }
+  ],
+  [
+   7,
+   21,
+   23,
+   "deepslate_tiles"
+  ],
+  [
+   4,
+   22,
+   20,
+   "deepslate_tiles"
+  ],
+  [
+   4,
+   22,
+   21,
+   "deepslate_tile_stairs",
+   {
+    "facing": "e"
+   }
+  ],
+  [
+   4,
+   22,
+   22,
+   "deepslate_tiles"
+  ],
+  [
+   5,
+   22,
+   20,
+   "deepslate_tile_stairs",
+   {
+    "facing": "s"
+   }
+  ],
+  [
+   5,
+   22,
+   21,
+   "deepslate_tiles"
+  ],
+  [
+   5,
+   22,
+   22,
+   "deepslate_tile_stairs",
+   {
+    "facing": "n"
+   }
+  ],
+  [
+   6,
+   22,
+   20,
+   "deepslate_tiles"
+  ],
+  [
+   6,
+   22,
+   21,
+   "deepslate_tile_stairs",
+   {
+    "facing": "w"
+   }
+  ],
+  [
+   6,
+   22,
+   22,
+   "deepslate_tiles"
+  ],
+  [
+   4,
+   23,
+   20,
+   "deepslate_tiles"
+  ],
+  [
+   4,
+   23,
+   21,
+   "deepslate_brick_stairs",
+   {
+    "facing": "e"
+   }
+  ],
+  [
+   4,
+   23,
+   22,
+   "deepslate_tiles"
+  ],
+  [
+   5,
+   23,
+   20,
+   "deepslate_brick_stairs",
+   {
+    "facing": "s"
+   }
+  ],
+  [
+   5,
+   23,
+   21,
+   "deepslate_tiles"
+  ],
+  [
+   5,
+   23,
+   22,
+   "deepslate_tile_stairs",
+   {
+    "facing": "n"
+   }
+  ],
+  [
+   6,
+   23,
+   20,
+   "deepslate_tiles"
+  ],
+  [
+   6,
+   23,
+   21,
+   "deepslate_tile_stairs",
+   {
+    "facing": "w"
+   }
+  ],
+  [
+   6,
+   23,
+   22,
+   "deepslate_tiles"
+  ],
+  [
+   5,
+   24,
+   21,
+   "deepslate_tile_wall"
+  ],
+  [
+   5,
+   25,
+   21,
+   "deepslate_tile_wall"
+  ],
+  [
+   5,
+   26,
+   21,
+   "deepslate_tiles"
+  ],
+  [
+   5,
+   27,
+   21,
+   "lightning_rod"
+  ]
+ ]
+}

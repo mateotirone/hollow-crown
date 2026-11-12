@@ -45,6 +45,15 @@ References: `reference/pictures/window-ideas-four-styles.png` and `window-ideas-
 - Or a porch (a small module, planned in stage 0) with its own posts and roof.
 - Step or landing outside (stage 1) is as wide as the doorway.
 - A wall lantern or a hanging lantern beside or over every main door; a sign or banner for shops.
+- **The way in stays clear (Mateo, 2026-11-12: "the door is blocked", "the slabs make the door hard to get
+  into")**: nothing stands in front of or behind a door at the door's two rows (no post, sill, shelf,
+  barrel, bush), and no sill, window box, shutter or slab sticks out in the cells either side of the
+  doorway at foot or hand height. Steps below the door stay. A window over a door gets no shelf. The skill
+  does this (`parts._openings`, door approach); old builders get it from `kit.clear_doorways` in
+  `finish_detail`.
+- **Every part of a building has a way in (Mateo, 2026-11-12, Kingsrest coaching inn)**: when a carriage
+  arch, passage or wing cuts a range in two, each side gets its own door. Check it from the outside: walk
+  round the build and find a door into every block.
 
 ## Windows
 
@@ -58,6 +67,10 @@ References: `reference/pictures/window-ideas-four-styles.png` and `window-ideas-
 | Hall, chapel | 1 x 3, 3 x 3, tall 1 x 5 to 3 x 7 with an arch top | stained in chapels |
 | Tower, stone fortification | 1 x 2 slit or 1 x 1 | often bars instead of glass |
 | Gable, attic, dormer | 1 x 1 or 1 x 2, on the centre line | |
+
+**Windows line up (Mateo, 2026-11-12)**: every window stands over a window of the storey below, centre
+on centre: upper storeys over ground-floor bays, dormers over the top storey's windows. The skill moves a
+dormer onto the nearest window centre below it (and logs it; `"align": false` keeps it where you put it).
 
 Windows start one block above the floor. Upper windows sit straight above lower openings.
 

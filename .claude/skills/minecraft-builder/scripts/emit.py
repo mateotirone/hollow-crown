@@ -74,6 +74,7 @@ def connect(blocks):
 
 def bedrock_state(n, p):
     """logical -> (bedrock id, {state: value})"""
+    if ":" in n and not n.startswith("minecraft:"): return n, {}      # the add-on's own blocks (siege:spire_roof)
     st = {}
     f = p.get("facing")
     if is_stairs(n):
@@ -110,6 +111,12 @@ def bedrock_state(n, p):
         st["vine_direction_bits"] = {"s": 1, "w": 2, "n": 4, "e": 8}[p.get("attach", "n")]
     elif n in ("end_rod", "lightning_rod"):
         st["facing_direction"] = 1
+    elif n == "snow_layer":
+        st["height"] = int(p.get("height", 0))
+    elif n == "bell":          # hanging from the beam above
+        st["attachment"] = "hanging"; st["direction"] = {"s": 0, "w": 1, "n": 2, "e": 3}[f or "s"]
+    elif n.endswith("_button"):  # stuck to the wall behind it, pointing out of face f
+        st["facing_direction"] = {"n": 2, "s": 3, "w": 4, "e": 5}[f or "s"]
     elif n == "candle" or n.endswith("_candle"):
         st["lit"] = bool(p.get("lit")); st["candles"] = int(p.get("candles", 1)) - 1
     if p.get("axis"): st["pillar_axis"] = p["axis"]
@@ -127,6 +134,7 @@ def bedrock_state(n, p):
 
 
 def java_state(n, p, java_id):
+    if ":" in n and not n.startswith("minecraft:"): return n, {}
     f = p.get("facing"); st = {}
     n = java_id or n
     if is_stairs(n):
@@ -146,6 +154,9 @@ def java_state(n, p, java_id):
     elif n == "azalea_leaves_flowered": n = "flowering_azalea_leaves"; st = {"persistent": "true"}
     elif n == "vine": st = {CARD[p.get("attach", "n")]: "true"}
     elif n in ("end_rod", "lightning_rod"): st = {"facing": "up"}
+    elif n == "bell": st = {"attachment": "ceiling", "facing": CARD[f or "s"]}
+    elif n == "snow_layer": n = "snow"; st = {"layers": str(int(p.get("height", 0)) + 1)}
+    elif n.endswith("_button"): st = {"face": "wall", "facing": CARD[f or "s"]}
     if p.get("axis"): st["axis"] = p["axis"]
     if n == "iron_chain": n = "chain"
     return n, st
@@ -249,9 +260,9 @@ def save_mcstructure(blocks, path, name):
     sys.path.insert(0, os.path.dirname(p))
     import bp as BP
     b = BP.Blueprint(name)
+    from engine import to_bp
     for c, (n, q) in blocks.items():
-        q = dict(q); corner = q.pop("corner", None); q.pop("conn", None); q.pop("post", None)
-        if corner and corner != "none": q.setdefault("raw", {})["minecraft:corner"] = corner
+        n, q = to_bp(n, q)
         if n.endswith("_wall_sign") and n[:-10] == "dark_oak": n = "dark_oak_wall_sign"
         b.cells[c] = (n, q)
     b.finish()
