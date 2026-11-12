@@ -119,7 +119,7 @@ function step(job) {
     return true;
   }
 
-  while (budget-- > 0 && job.index < job.cells.length) {
+  while ((budget-- > 0 || job.cells[job.index - 1]?.pair) && job.index < job.cells.length) { // a door's halves go in one tick
     const c = job.cells[job.index];
     if (!setCell(dim, job, c.x, c.y, c.z, c.role, c.o)) return false;
     job.index++;

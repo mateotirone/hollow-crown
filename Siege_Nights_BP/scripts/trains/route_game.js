@@ -42,10 +42,14 @@ export const reachableFrom = (owner) => reachable(ROUTES, built(), homeStop(owne
 // cleared to 4 above the track (a cutting, or a tunnel through a hill); under it goes gravel ballast on a fill of
 // dirt down to the ground, or, where the ground is too far down or under water, a stone brick deck with a pier every
 // few blocks.
-const AIR = BlockPermutation.resolve("minecraft:air");
-const BALLAST = BlockPermutation.resolve("minecraft:gravel");
-const FILL = BlockPermutation.resolve("minecraft:dirt");
-const DECK = BlockPermutation.resolve("minecraft:stone_bricks");
+// Resolved on first use: BlockPermutation.resolve can't run while scripts load (early execution), and a throw here
+// stopped every script in the pack from loading.
+const perms = {};
+const perm = (id) => (perms[id] ??= BlockPermutation.resolve(id));
+const AIR = () => perm("minecraft:air");
+const BALLAST = () => perm("minecraft:gravel");
+const FILL = () => perm("minecraft:dirt");
+const DECK = () => perm("minecraft:stone_bricks");
 const SOFT = /leaves|grass$|tall_grass|fern|flower|sapling|bush|vine|snow_layer|dandelion|poppy|tulip|orchid|allium|bluet|daisy|cornflower|lily|azure|kelp|seagrass|mushroom|torch/;
 const firm = (b) => !!b && !b.isAir && !b.isLiquid && !SOFT.test(b.typeId);
 const isTrack = (b) => b?.typeId === TRACK;
@@ -76,7 +80,7 @@ function layBed(dim, p, i, segId) {
         if (GATED.test(b.typeId)) continue; // a town's rail gate: it opens for trains (gates.js), so the bed leaves it shut
         if (!isNatural(b.typeId)) { blocked(segId, b); continue; } // somebody's building: never torn down
         if (y === p.y && isTrack(dim.getBlock({ x: p.x + dx, y: y + 1, z: p.z + dz }))) continue;
-        b.setPermutation(AIR);
+        b.setPermutation(AIR());
       }
     }
   }
@@ -89,20 +93,20 @@ function layBed(dim, p, i, segId) {
       if (isTrack(dim.getBlock({ x, y: p.y, z: z })) && (dx || dz)) continue; // another line's track beside us
       const under = dim.getBlock(top);
       if (under && !under.isAir && !under.isLiquid && !isNatural(under.typeId)) { if (dx || dz) continue; blocked(segId, under); continue; }
-      if (bridge) { under?.setPermutation(DECK); continue; }
+      if (bridge) { under?.setPermutation(DECK()); continue; }
       const d = dropAt(dim, x, p.y - 1, z, ROUTE.fillDepth);
       for (let k = Math.min(d, ROUTE.fillDepth); k >= 1; k--) {
         const b = dim.getBlock({ x, y: p.y - 1 - k, z });
-        if (b && !firm(b)) b.setPermutation(FILL);
+        if (b && !firm(b)) b.setPermutation(FILL());
       }
-      dim.getBlock(top)?.setPermutation(BALLAST);
+      dim.getBlock(top)?.setPermutation(BALLAST());
     }
   }
   if (bridge && i % ROUTE.pierEvery === 0) {
     for (let y = p.y - 2, n = 0; n < ROUTE.pierDepth; y--, n++) {
       const b = dim.getBlock({ x: p.x, y, z: p.z });
       if (!b || firm(b)) break;
-      b.setPermutation(DECK);
+      b.setPermutation(DECK());
     }
   }
   return true;
@@ -135,7 +139,7 @@ function startLaying(seg) {
 // The map's own earthworks for a stretch (cuttings, embankments, viaducts, tunnels), if it has them:
 // works [[x, z, y0, y1, palette index], ...] applied in order before the track. Without them each piece grades a
 // plain bed (layBed).
-const worksPalette = (seg) => (seg._perms ??= (seg.works_palette ?? []).map((e, i) => (i === 0 ? AIR : BlockPermutation.resolve(e.name, e.states ?? {}))));
+const worksPalette = (seg) => (seg._perms ??= (seg.works_palette ?? []).map((e, i) => (i === 0 ? AIR() : BlockPermutation.resolve(e.name, e.states ?? {}))));
 function applyWork(dim, seg, w) {
   const [x, z, y0, y1, i] = seg.works[w];
   const perm = worksPalette(seg)[i];

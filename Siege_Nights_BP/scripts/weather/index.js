@@ -21,7 +21,7 @@ import { sfx } from "../core/sfx.js";
 import { regionAt } from "../minimap/data.js";
 import {
   LAYER, KIND, KINDS, REGIONS, REGION_OF_PLACE, SKY, fogId, pickKind, newSpell, between, minutes,
-  fullStep, stepFor, nextShown, windVector,
+  fullStep, stepFor, nextShown, windVector, isCanopy, edgeDistance, edgeStep,
 } from "./data.js";
 import "./tests.js";
 
@@ -104,15 +104,21 @@ function targetFor(p, s) {
   const name = REGION_OF_PLACE[regionAt(p.location.x, p.location.z)];
   const spell = name ? store.data.regions[name]?.spell : undefined;
   if (!spell) return { kind: undefined, step: 0 };
-  return { kind: spell.kind, step: stepFor(fullStep(spell, clock()), s), spell };
+  const max = KIND[spell.kind].steps.length;
+  const placeOf = (x, z) => REGION_OF_PLACE[regionAt(x, z)];
+  const step = edgeStep(fullStep(spell, clock()), max, edgeDistance(p.location.x, p.location.z, name, placeOf));
+  return { kind: spell.kind, step: stepFor(step, s), spell };
 }
 
 function lookUp(p, s) {
   try {
     const head = Math.floor(p.location.y + 1.6);
-    const top = p.dimension.getTopmostBlock({ x: Math.floor(p.location.x), z: Math.floor(p.location.z) });
+    const x = Math.floor(p.location.x), z = Math.floor(p.location.z);
+    let top = p.dimension.getTopmostBlock({ x, z });
+    // Trees are not a roof: walk down through leaves, vines and roots to the first real block over the head
+    while (top && top.location.y > head && isCanopy(top.typeId)) top = top.below();
     s.covered = !!top && top.location.y > head;
-    s.depth = top ? Math.max(0, top.location.y - head) : 0;
+    s.depth = s.covered ? top.location.y - head : 0;
   } catch {
     s.covered = false; s.depth = 0; // not loaded: assume the open sky
   }

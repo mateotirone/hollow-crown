@@ -621,7 +621,8 @@ def recipe(ident, pattern, key, count=1):
     short = ident.split(":")[1]
     RECIPES[short] = {"format_version": "1.20.10", "minecraft:recipe_shaped": {
         "description": {"identifier": f"siege:{short}"}, "tags": ["siege_workshop"], "pattern": pattern,
-        "key": {k: {"item": v} for k, v in key.items()}, "result": {"item": ident, "count": count}}}
+        "key": {k: {"item": v} for k, v in key.items()}, "unlock": {"context": "AlwaysUnlocked"},
+        "result": {"item": ident, "count": count}}}   # 1.20.10+ recipes need unlock data or the game drops them
 
 
 def build_recipes():

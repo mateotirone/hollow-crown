@@ -864,6 +864,18 @@ if BRIDGE_BLOCKS:
     _bb = np.array([(x, y, z) for x, y, z, _, _ in BRIDGE_BLOCKS], np.int64)
     _bi = np.array([B_raw(n, st) if n != "minecraft:air" else -1 for _, _, _, n, st in BRIDGE_BLOCKS], np.int64)
     STAMPED.append((_bb[:, 0], _bb[:, 1], _bb[:, 2], _bi, np.zeros(len(_bi), bool)))
+# no tree in a build's dead space (Mateo 2026-11-12: "in dead space there are trees spawning, so for builds include
+# air blocks that remove trees"): every column a town plan or bridge stamps, with a margin, keeps whole trees out, so
+# no trunk stands in a courtyard and no crown hangs over a roof or floats where a stamp cut it.
+stampcol = np.zeros((SIZE, SIZE), bool)
+for sx_, sy_, sz_, sid_, ss_ in STAMPED:
+    i_ = sx_ - X0; k_ = sz_ - Z0; m_ = (i_ >= 0) & (i_ < SIZE) & (k_ >= 0) & (k_ < SIZE)
+    stampcol[i_[m_], k_[m_]] = True
+stampnear = box(stampcol.astype(np.float32), 2) > 0           # crowns (custom trees, through hard_t below)
+if stampcol.any():
+    far_ = box(stampcol.astype(np.float32), 7)[np.clip(tx - X0, 0, SIZE - 1), np.clip(tz - Z0, 0, SIZE - 1)] == 0   # simple trees: trunks 7 out
+    tx, tz, rg_, yy_, tkind, tvar = tx[far_], tz[far_], rg_[far_], yy_[far_], tkind[far_], tvar[far_]
+    log("trees kept off stamped builds:", int((~far_).sum()), "removed")
 if TREEDB:
     sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "trees"))
     from place import fits, mark, SIZE_ORDER, SIZE_WEIGHT, _grow_mask
@@ -897,7 +909,7 @@ if TREEDB:
               ("open", {"fen_black_alder": 45, "fen_pollard_willow": 35, "fen_bald_cypress": 20})],
         EMBER: [("open", {"ember_umbrella_acacia": 35, "ember_argan": 30, "ember_date_palm": 15, "ember_baobab": 10, "ember_dragon_blood": 10})],
     }
-    hard_t = keepclear | railzone                    # crowns stay off the line (trains need the air above the bed)
+    hard_t = keepclear | railzone | stampnear        # crowns stay off the line (trains need the air above the bed) and off builds
     soft_t = _grow_mask(~open_ | ~land, 1)
     soft_w = _grow_mask((~open_ & ~fenpool & ~bank) | ~land, 1)        # bald cypress and snags may stand in fen water
     taken = np.zeros((SIZE, SIZE), np.int8)

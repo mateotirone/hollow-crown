@@ -517,7 +517,7 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `block.amethyst_block.chime` | A crystal note | `chime.amethyst_block` | 11 | bestiary (4), undertow (4), lore (2), vault |
 | `mob.endermen.portal` | A step between places | `mob.endermen.portal` pitch 0.85 vol 0.8 + `random.orb` pitch 0.4 vol 0.15 after 0.1 s | 10 | bestiary (6), crown, horses, townhall, undertow |
 | `ambient.cave` | Something is wrong | `ambient.cave` pitch 0.85 vol 0.8 | 8 | reach (3), bestiary (2), undertow (2), lore |
-| `ui.toast.challenge_complete` | Something earned | `random.toast` pitch 0.9 vol 0.7 + `random.levelup` pitch 1.2 vol 0.25 after 0.1 s + `block.bell.hit` pitch 0.6 vol 0.3 after 0.4 s | 7 | siege (2), bestiary, crown, rivals, settle, townhall |
+| `ui.toast.challenge_complete` | Something earned (the bell rings three times: Mateo, 2026-11-12) | `random.toast` pitch 0.9 vol 0.7 + `random.levelup` pitch 1.2 vol 0.25 after 0.1 s + `block.bell.hit` pitch 0.6 vol 0.45 after 0.4 s + `block.bell.hit` pitch 0.6 vol 0.4 after 1.4 s + `block.bell.hit` pitch 0.6 vol 0.35 after 2.4 s | 7 | siege (2), bestiary, crown, rivals, settle, townhall |
 | `item.book.page_turn` | A page | `item.book.page_turn` pitch 0.9 | 7 | lore (5), bestiary, guide |
 | `dig.stone` | Stone moving | `dig.stone` pitch 0.9 | 6 | siege (3), crown, graves, townhall |
 | `random.explode` | A blast | `random.explode` pitch 0.85 | 6 | siege (3), bestiary, undertow, vault |
@@ -581,7 +581,6 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `mob.enderdragon.flap` | 1 | roletrials |
 | `mob.enderdragon.growl` | 1 | roletrials |
 | `mob.evocation_illager.cast_spell` | 1 | bestiary |
-| `mob.frog.tongue` | 1 | bestiary |
 | `mob.ghast.scream` | 1 | roletrials |
 | `mob.horse.angry` | 1 | horses |
 | `mob.horse.breathe` | 1 | horses |
