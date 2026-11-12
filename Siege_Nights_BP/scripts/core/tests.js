@@ -16,7 +16,6 @@ const tests = [];
 export const OFFLINE_ONLY = new Set([
   "settle: every building draws in every style with known roles",
   "settle towns: groundwork decodes into rows near the plot, in each tier",
-  "hall build: every hall has a spot for the cornerstone beside the path, never in it",
   "hall build: the clear box holds every block of the old hall above the ground",
   "horses: the stable grows with the Stables and keeps odd sizes",
   "horses: every level has as many stalls as the Stables holds",

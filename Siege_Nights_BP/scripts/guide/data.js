@@ -173,7 +173,7 @@ export const ENTRIES = [
   {
     id: "town_hall", ch: "keep", title: "The town hall",
     tip: "Place the Hall Cornerstone on your land and click it: your town hall rises and grows with your settlement.",
-    page: "Craft a §fHall Cornerstone§r at the Siege Workshop and place it on your land. Click it for the town hall menu.\n\n"
+    page: "Craft a §fHall Cornerstone§r at the Siege Workshop and place it on your land. Click it to raise your first hall. Once the hall stands the stone is gone: open the town hall menu from the Tree of Oaths inside, or from your Keep menu.\n\n"
       + "The hall is built in your region's own style and is rebuilt bigger as your settlement grows. It holds the §fTree of Oaths§r, where you spend skill points.\n\n"
       + "From the hall menu you can also raise your §fsettlement wall§r level by level (and watch it go up), see who is online, and read the §fRumor Board§r for jobs.",
     when: ["carry:siege:hall_cornerstone", "click:siege:hall_cornerstone"],
@@ -192,6 +192,13 @@ export const ENTRIES = [
       + "§fFoundation Stones§r place ready-made buildings: put one on free ground facing the way the building should run, click it, pick a building, look at the outline, then click again to raise it. You pay in planks and stone you carry, and the Mason makes up any shortfall for coins.\n\n"
       + "Or build by hand, anywhere on your land outside the ground kept for your hall.",
     when: ["talk:tag:siege_mason", "carry:siege:mason_bench", "carry:siege:foundation_stone", "click:siege:foundation_stone"],
+  },
+  {
+    id: "town_plots", ch: "keep", title: "Town plots and charters",
+    tip: "Use a Plot Marker to raise a building on a town plot. Each plot only takes buildings of its size.",
+    page: "Every open plot in your town has a §fPlot Marker§r. Use it to see what can go there: only buildings of the plot's size are listed, and some want a certain spot (a watchtower stands by the wall). Good spots are marked. Pick one, walk round the outline, then use the marker again and pay to raise it.\n\n"
+      + "§fCharters:§r siege wins grow your settlement, but it only grows past each tier once that tier's charter stands. A Town needs 3 homes and a market (and a Farmhouse and Mint once they are built); a City needs 6 homes, a barracks and another work building. When the last one is finished, the town grows by itself.",
+    when: ["click:siege:plot_marker", "event:tierUp"],
   },
   {
     id: "guards", ch: "keep", title: "Guards and the Barracks",

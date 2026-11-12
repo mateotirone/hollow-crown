@@ -128,7 +128,7 @@ function attach(entity, def, center, fresh) {
 function nameBoss(f) {
   try {
     const tempers = tempersOf(f).map((t) => t.name).join(" & ");
-    f.entity.nameTag = `§c${f.def.name}${tempers ? `§7, ${tempers}` : ""}${f.rank ? ` §6${ROMAN[f.rank]}` : ""}`;
+    f.entity.nameTag = `${f.def.name}${tempers ? `§7, ${tempers}` : ""}${f.rank ? ` §6${ROMAN[f.rank]}` : ""}`;
   } catch {
     // name is cosmetic
   }

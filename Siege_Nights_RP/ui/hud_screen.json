@@ -771,7 +771,7 @@
             {
               "title": {
                 "type": "label",
-                "text": "#text",
+                "text": "#bossName",
                 "color": [
                   0.91,
                   0.761,
@@ -787,11 +787,6 @@
                     "binding_type": "collection",
                     "binding_collection_name": "boss_bars",
                     "binding_name": "#bossName"
-                  },
-                  {
-                    "binding_type": "view",
-                    "source_property_name": "((#bossName - '\u00a7c') - '\u00a77')",
-                    "target_property_name": "#text"
                   }
                 ]
               }
@@ -868,7 +863,7 @@
             {
               "title": {
                 "type": "label",
-                "text": "#text",
+                "text": "#bossName",
                 "color": [
                   0.875,
                   0.902,
@@ -884,11 +879,6 @@
                     "binding_type": "collection",
                     "binding_collection_name": "boss_bars",
                     "binding_name": "#bossName"
-                  },
-                  {
-                    "binding_type": "view",
-                    "source_property_name": "((#bossName - '\u00a7c') - '\u00a77')",
-                    "target_property_name": "#text"
                   }
                 ]
               }
@@ -965,7 +955,7 @@
             {
               "title": {
                 "type": "label",
-                "text": "#text",
+                "text": "#bossName",
                 "color": [
                   0.561,
                   0.839,
@@ -981,11 +971,6 @@
                     "binding_type": "collection",
                     "binding_collection_name": "boss_bars",
                     "binding_name": "#bossName"
-                  },
-                  {
-                    "binding_type": "view",
-                    "source_property_name": "((#bossName - '\u00a7c') - '\u00a77')",
-                    "target_property_name": "#text"
                   }
                 ]
               }
@@ -1062,7 +1047,7 @@
             {
               "title": {
                 "type": "label",
-                "text": "#text",
+                "text": "#bossName",
                 "color": [
                   0.953,
                   0.604,
@@ -1078,11 +1063,6 @@
                     "binding_type": "collection",
                     "binding_collection_name": "boss_bars",
                     "binding_name": "#bossName"
-                  },
-                  {
-                    "binding_type": "view",
-                    "source_property_name": "((#bossName - '\u00a7c') - '\u00a77')",
-                    "target_property_name": "#text"
                   }
                 ]
               }
@@ -1159,7 +1139,7 @@
             {
               "title": {
                 "type": "label",
-                "text": "#text",
+                "text": "#bossName",
                 "color": [
                   0.718,
                   0.831,
@@ -1175,11 +1155,6 @@
                     "binding_type": "collection",
                     "binding_collection_name": "boss_bars",
                     "binding_name": "#bossName"
-                  },
-                  {
-                    "binding_type": "view",
-                    "source_property_name": "((#bossName - '\u00a7c') - '\u00a77')",
-                    "target_property_name": "#text"
                   }
                 ]
               }
@@ -1256,7 +1231,7 @@
             {
               "title": {
                 "type": "label",
-                "text": "#text",
+                "text": "#bossName",
                 "color": [
                   0.878,
                   0.353,
@@ -1272,11 +1247,6 @@
                     "binding_type": "collection",
                     "binding_collection_name": "boss_bars",
                     "binding_name": "#bossName"
-                  },
-                  {
-                    "binding_type": "view",
-                    "source_property_name": "((#bossName - '\u00a7c') - '\u00a77')",
-                    "target_property_name": "#text"
                   }
                 ]
               }
@@ -1353,7 +1323,7 @@
             {
               "title": {
                 "type": "label",
-                "text": "#text",
+                "text": "#bossName",
                 "color": [
                   0.824,
                   0.839,
@@ -1369,11 +1339,6 @@
                     "binding_type": "collection",
                     "binding_collection_name": "boss_bars",
                     "binding_name": "#bossName"
-                  },
-                  {
-                    "binding_type": "view",
-                    "source_property_name": "((#bossName - '\u00a7c') - '\u00a77')",
-                    "target_property_name": "#text"
                   }
                 ]
               }
@@ -1450,7 +1415,7 @@
             {
               "title": {
                 "type": "label",
-                "text": "#text",
+                "text": "#bossName",
                 "color": [
                   0.839,
                   0.769,
@@ -1466,11 +1431,6 @@
                     "binding_type": "collection",
                     "binding_collection_name": "boss_bars",
                     "binding_name": "#bossName"
-                  },
-                  {
-                    "binding_type": "view",
-                    "source_property_name": "((#bossName - '\u00a7c') - '\u00a77')",
-                    "target_property_name": "#text"
                   }
                 ]
               }
@@ -1547,7 +1507,7 @@
             {
               "title": {
                 "type": "label",
-                "text": "#text",
+                "text": "#bossName",
                 "color": [
                   0.753,
                   0.549,
@@ -1563,11 +1523,6 @@
                     "binding_type": "collection",
                     "binding_collection_name": "boss_bars",
                     "binding_name": "#bossName"
-                  },
-                  {
-                    "binding_type": "view",
-                    "source_property_name": "((#bossName - '\u00a7c') - '\u00a77')",
-                    "target_property_name": "#text"
                   }
                 ]
               }
@@ -1644,7 +1599,7 @@
             {
               "title": {
                 "type": "label",
-                "text": "#text",
+                "text": "#bossName",
                 "color": [
                   1.0,
                   0.353,
@@ -1660,11 +1615,6 @@
                     "binding_type": "collection",
                     "binding_collection_name": "boss_bars",
                     "binding_name": "#bossName"
-                  },
-                  {
-                    "binding_type": "view",
-                    "source_property_name": "((#bossName - '\u00a7c') - '\u00a77')",
-                    "target_property_name": "#text"
                   }
                 ]
               }
