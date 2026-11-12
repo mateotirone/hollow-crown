@@ -352,7 +352,7 @@ export function statesFor(frame, role, o = {}) {
 // (Mateo's playtest 2026-11-12: doors and hanging lanterns broke as buildings rose)
 export const ATTACHED = /(_door|^door|lantern|chain|torch|_sign|^sign|banner|_button|ladder|carpet|bell|lever|candle|flower_pot|vine|_bed|^bed|pressure_plate|rail|hanging_roots|snow_layer|pointed_dripstone|amethyst_cluster|_bud|item_frame|tripwire_hook|sapling|propagule|azalea$)/;
 const HANGS = /chain|hanging_roots|vine/;
-const blockOf = (plan, c) => (c.role === "door" ? "door" : plan.style?.roles?.[c.role]?.[0] ?? c.role);
+export const blockOf = (plan, c) => (c.role === "door" ? "door" : plan.style?.roles?.[c.role]?.[0] ?? c.role);
 const centreOut = (a, b) => Math.abs(a.x) + Math.abs(a.z) - (Math.abs(b.x) + Math.abs(b.z));
 
 // Order cells for a nice rising build: bottom layer first, then up, centre outwards. Everything that needs a block to

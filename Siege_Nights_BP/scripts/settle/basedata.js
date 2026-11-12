@@ -34,3 +34,47 @@ export function bedSpot(plan) {
   }
   return undefined;
 }
+
+// ---------- joining the settlement road to the map's roads (Mateo's playtest 2026-11-12) ----------
+//   gateDir(bearing) -> { x, z } the cardinal way out through the gate (bearings in degrees, 0 = north, 90 = east)
+//   roadEnd(paths, dir) -> { x, z } the path column furthest out that way (paths: [{x, z}] path tops of the groundwork)
+//   roadLine(a, b) -> [{x, z}] every column from a to b, one block at a time, a and b included
+//   gradeLine(h0, h1, n) -> n + 1 heights from h0 to h1, as even as the drop allows (never more than 1 a block
+//     when |h1 - h0| <= n)
+export const ROAD_BLOCKS = /^minecraft:(grass_path|dirt_path|cobblestone|mossy_cobblestone|gravel|coarse_dirt|sandstone|smooth_sandstone)$/;
+export const WEAK_ROAD = /gravel|coarse_dirt|sandstone/; // also found wild, so only taken when nothing better is near
+
+export const gateDir = (bearing) => {
+  const b = ((Number(bearing) || 0) * Math.PI) / 180;
+  return { x: Math.round(Math.sin(b)), z: Math.round(-Math.cos(b)) };
+};
+
+export function roadEnd(paths, dir) {
+  let best, score = -Infinity;
+  for (const p of paths) {
+    const s = (p.x * dir.x + p.z * dir.z) * 4 - Math.abs(p.x * dir.z - p.z * dir.x); // far out, near the middle line
+    if (s > score) { score = s; best = p; }
+  }
+  return best;
+}
+
+export function roadLine(a, b) {
+  const out = [];
+  let x = a.x, z = a.z;
+  const dx = Math.abs(b.x - x), dz = -Math.abs(b.z - z), sx = x < b.x ? 1 : -1, sz = z < b.z ? 1 : -1;
+  let err = dx + dz;
+  for (;;) {
+    out.push({ x, z });
+    if (x === b.x && z === b.z) return out;
+    const e2 = 2 * err;
+    // one axis at a time, so the road never joins only at a corner
+    if (e2 >= dz && (e2 <= dx ? Math.abs(err + dz) <= Math.abs(err + dx) : true)) { err += dz; x += sx; }
+    else { err += dx; z += sz; }
+  }
+}
+
+export function gradeLine(h0, h1, n) {
+  const out = [];
+  for (let i = 0; i <= n; i++) out.push(n ? Math.round(h0 + ((h1 - h0) * i) / n) : h0);
+  return out;
+}

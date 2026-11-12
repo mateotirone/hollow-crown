@@ -29,6 +29,7 @@ import { charterCheck, charterText } from "./charters.js";
 import { BUILDINGS } from "./buildings.js";
 import { raisedCounts } from "./raised.js";
 import { groundTop } from "./ground.js";
+import { ROAD_BLOCKS, WEAK_ROAD, gateDir, roadEnd, roadLine, gradeLine } from "./basedata.js";
 import { BLOCK_BUILDS } from "./blockdesigns.js";
 import { townFor, pickLayout, slotsOf, groundwork, fixturesOf, wallRadius, seatOnSlot, TIER_NAMES } from "./towns.js";
 
@@ -120,6 +121,7 @@ function* layOutJob(owner, tier, done) {
   }
   yield;
   yield* blendGround(dim, town, layout, tier);
+  if (tier === 0) yield* joinRoad(dim, town, layout);
   for (const f of fixturesOf(layout, tier)) {
     try { placeFixture(owner, town, f); } catch (e) { console.warn(`[Hollow Crown] town fixture ${f.kind}: ${e}`); }
     yield;
@@ -191,6 +193,109 @@ function* blendGround(dim, town, layout, tier) {
       }
     }
   }
+}
+
+// ---------- joining the gate road to the map's roads (Mateo's playtest 2026-11-12) ----------
+// The settlement's road runs out through the gate and then stops; the map's own roads go past somewhere near. From
+// the end of the gate road, look out ahead (a widening fan, up to ROAD_REACH blocks) for the nearest map road, then
+// lay a 3-wide road to it at an even grade, the way the map's roads are cut: natural ground above it is cut away,
+// air below it filled, built things left alone, and the land either side stepped down to it by at most 1.
+const ROAD_REACH = 48;
+const PATHY = /grass_path|dirt_path|gravel|cobble|sandstone|planks|_slab|brick|coarse_dirt|packed_mud|mud_bricks/;
+
+function* joinRoad(dim, town, layout) {
+  if (town.roadJoined) return;
+  const tw = townFor(town.plot);
+  if (!tw) return;
+  const dir = gateDir(tw.gate);
+  const member = new Set(), tops = new Map();
+  for (let t = 0; t <= 3; t++) for (const [dx, dy, dz, p] of groundwork(layout, t)) {
+    member.add(`${dx},${dz}`);
+    if (t !== 0) continue;
+    const id = layout.pal[p]?.[0] ?? "";
+    const k = `${dx},${dz}`;
+    if (id !== "minecraft:air" && (!tops.has(k) || tops.get(k).dy < dy)) tops.set(k, { x: dx, z: dz, dy, id });
+  }
+  const paths = [...tops.values()].filter((c) => PATHY.test(c.id));
+  const end = roadEnd(paths, dir);
+  if (!end) return;
+  const get = (x, y, z) => { try { return dim.getBlock({ x, y, z }); } catch { return undefined; } };
+  const h0 = town.y + end.dy;
+  // the nearest map road ahead: a road block with at least two road blocks beside it (one stray gravel is not a road)
+  let found, best = Infinity, n = 0;
+  const side = { x: -dir.z, z: dir.x };
+  for (let r = 3; r <= ROAD_REACH && r < best; r++) {
+    for (let s = -r; s <= r; s++) {
+      if (++n % 64 === 0) yield;
+      const lx = end.x + dir.x * r + side.x * s, lz = end.z + dir.z * r + side.z * s;
+      if (member.has(`${lx},${lz}`)) continue;
+      const x = town.x + lx, z = town.z + lz;
+      const y = groundTop(dim, x, z, h0 + 24);
+      if (y === undefined) continue;
+      const b = get(x, y, z);
+      if (!b || !ROAD_BLOCKS.test(b.typeId)) continue;
+      const near = [[1, 0], [-1, 0], [0, 1], [0, -1]].filter(([ax, az]) => ROAD_BLOCKS.test(get(x + ax, y, z + az)?.typeId ?? "")).length;
+      if (near < 2) continue;
+      const d = Math.hypot(r, s) + (WEAK_ROAD.test(b.typeId) ? 12 : 0);
+      if (d < best) { best = d; found = { x: lx, z: lz, y, perm: b.permutation }; }
+    }
+  }
+  if (!found) { town.roadJoined = "none"; save(); return; }
+  const line = roadLine({ x: end.x, z: end.z }, found);
+  const heights = gradeLine(h0, found.y, line.length - 1);
+  const air = perm("minecraft:air"), dirt = perm("minecraft:dirt"), grass = perm("minecraft:grass_block");
+  const surface = found.perm;
+  const laid = new Set();
+  for (let i = 1; i < line.length; i++) {
+    const { x: lx, z: lz } = line[i], y = heights[i];
+    for (let w = -1; w <= 1; w++) {
+      const cx = lx + side.x * w, cz = lz + side.z * w;
+      if (member.has(`${cx},${cz}`) || laid.has(`${cx},${cz}`)) continue;
+      laid.add(`${cx},${cz}`);
+      if (++n % 16 === 0) yield;
+      const x = town.x + cx, z = town.z + cz;
+      const here = get(x, y, z);
+      if (!here || (!NATURAL.test(here.typeId) && !here.isAir && !SOFT.test(here.typeId) && !ROAD_BLOCKS.test(here.typeId))) continue; // built: leave it
+      // cut natural ground (and plants) above the road, 4 high, so it stays open to the sky
+      let open = true;
+      for (let k = 1; k <= 4; k++) {
+        const b = get(x, y + k, z);
+        if (!b || b.isAir) continue;
+        if (!NATURAL.test(b.typeId) && !SOFT.test(b.typeId)) { open = false; break; }
+      }
+      if (!open) continue;
+      for (let k = 1; k <= 6; k++) { const b = get(x, y + k, z); if (b && !b.isAir && (NATURAL.test(b.typeId) || SOFT.test(b.typeId))) b.setPermutation(air); }
+      // fill below, so nothing floats
+      for (let k = 1; k <= 12; k++) {
+        const b = get(x, y - k, z);
+        if (!b || !/air|water|short_grass|tall_grass|fern|flower|snow_layer|leaves/.test(b.typeId)) break;
+        b.setPermutation(dirt);
+      }
+      here.setPermutation(surface);
+    }
+    // the land either side steps down or up to the road by at most 1 a block
+    for (const sgn of [-1, 1]) for (let k = 2; k <= 4; k++) {
+      const cx = lx + side.x * sgn * k, cz = lz + side.z * sgn * k;
+      if (member.has(`${cx},${cz}`) || laid.has(`${cx},${cz}`)) break;
+      if (++n % 16 === 0) yield;
+      const x = town.x + cx, z = town.z + cz;
+      const top = groundTop(dim, x, z, y + 12);
+      if (top === undefined) break;
+      const lim = k - 1;
+      if (top > y + lim) {
+        let natural = true;
+        for (let yy = top; yy > y + lim; yy--) { const b = get(x, yy, z); if (!b || (!NATURAL.test(b.typeId) && !b.isAir)) { natural = false; break; } }
+        if (!natural) break;
+        for (let yy = top; yy > y + lim; yy--) get(x, yy, z)?.setPermutation(air);
+        const b = get(x, y + lim, z);
+        if (b && /dirt$|stone$|gravel|andesite|diorite|granite|tuff/.test(b.typeId)) b.setPermutation(grass);
+      } else if (top < y - lim) {
+        for (let yy = top + 1; yy <= y - lim; yy++) get(x, yy, z)?.setPermutation(yy === y - lim ? grass : dirt);
+      } else break;
+    }
+  }
+  town.roadJoined = { x: town.x + found.x, z: town.z + found.z, length: line.length };
+  save();
 }
 
 function setAt(dim, at, id, states) {

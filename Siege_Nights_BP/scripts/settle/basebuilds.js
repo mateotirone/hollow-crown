@@ -57,8 +57,9 @@ function masonYard(owner) {
     const slot = { id: "mason_yard", size: "S", tier: 0, tags: [], dy: f.dy ?? 0, side: f.rotation, door: out,
       box: { x0: f.x - 4, z0: f.z - 4, x1: f.x + 4, z1: f.z + 4 } };
     // a 9 x 9 box whose front middle is the fixture
-    slot.box = out.z ? { x0: f.x - 4, x1: f.x + 4, z0: out.z > 0 ? f.z - 8 : f.z, z1: out.z > 0 ? f.z : f.z + 8 }
-      : { z0: f.z - 4, z1: f.z + 4, x0: out.x > 0 ? f.x - 8 : f.x, x1: out.x > 0 ? f.x : f.x + 8 };
+    // (plus the row in front of it on the forecourt: a design's bounds always take in its z = 0 step row)
+    slot.box = out.z ? { x0: f.x - 4, x1: f.x + 4, z0: out.z > 0 ? f.z - 8 : f.z - 1, z1: out.z > 0 ? f.z + 1 : f.z + 8 }
+      : { z0: f.z - 4, z1: f.z + 4, x0: out.x > 0 ? f.x - 8 : f.x - 1, x1: out.x > 0 ? f.x + 1 : f.x + 8 };
     town.extraSlots = { ...(town.extraSlots ?? {}), mason_yard: slot };
     if (raiseBase(owner, "mason_yard", slot, { fixed: true })) return;
   }

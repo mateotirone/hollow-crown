@@ -19,6 +19,10 @@ playing so it has to be perfect." Be harder on it than he would be.
   under it, and every hanging lantern hangs from a block or a chain. Station designs are tested for this
   (`trains/tests.js`, "stations: nothing floats"): any block not joined, even corner to corner, down to the
   ground fails.
+- Doors, lanterns, chains, torches, bells, signs, banners, ladders and carpets were placed after the solid blocks
+  (Mateo, 2026-11-12): watch the build rise once and check no door is broken in half and no lantern dropped.
+- The ground round it (Mateo, 2026-11-12): no groundwork block floats, no edge stands more than 1 above or below the
+  land beside it for every 2 out, and its road reaches the map's road network at the same height.
 - Does it look like the real medieval buildings it is based on, and like Mateo's references
   (`reference/pictures/`)? Put the render next to the reference and name the differences.
 - Is there anything that looks like a hole, a cage, a blotch or a floating block? (Recessed panels and
@@ -35,6 +39,8 @@ playing so it has to be perfect." Be harder on it than he would be.
 
 **Base and frame**
 
+- [ ] Attached blocks (doors, lanterns, signs, ladders) placed last; both door halves whole.
+- [ ] Groundwork filled underneath; edges step at most 1 per 2 out; the road meets the map road.
 - [ ] Nothing floats on the low side; plinth visible; steps match the floor height and the doorway width.
 - [ ] Posts line up storey to storey; beams at every floor line; jetties bracketed.
 
