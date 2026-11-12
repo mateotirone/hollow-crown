@@ -51,7 +51,7 @@ addTests("bestiary", {
   "the showcase shows every mob and boss, with a sign that fits": () => {
     const list = exhibits();
     assert(list.length >= 37, `only ${list.length} exhibits`);
-    assert(list.filter((x) => x.text.includes("BOSS")).length === 10, "seven bosses and three Pretender bodies");
+    assert(list.filter((x) => x.text.includes("BOSS")).length === 11, "eight bosses (with Ulfa, the Deep's bell-wife) and three Pretender bodies");
     for (const x of list) for (const lineText of x.text.split("\n")) assert(lineText.length <= 26, `sign line too long: ${lineText}`);
   },
 });

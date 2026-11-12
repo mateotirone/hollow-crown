@@ -314,6 +314,24 @@ export function* cradlePlan(probe, anchor) {
   // the Cradle Tree itself stands over the cave as the site's landmark (landmark_stamps.js, map/structures/boss_landmarks.py)
   return { center, ops, info: {} };
 }
+// ---------- approach zones (pure) ----------
+// Hallowmere: the clear ice just outside the crack ring, inside the Antler Crown (its bone stands from r 22 out).
+export const ICE_EDGE = { r0: 18, r1: 23 };
+export const inIceEdge = (c, l) => { const d = Math.hypot(l.x - (c.x + 0.5), l.z - (c.z + 0.5)); return d >= ICE_EDGE.r0 && d <= ICE_EDGE.r1 && Math.abs(l.y - c.y) < 5; };
+// Gull Bay: the water round the chapel (not inside the nave or the tower).
+export const DROWNED_WATER = { r: 28 };
+export const inDrownedWater = (c, l, surfaceDy) => {
+  if (Math.hypot(l.x - c.x, l.z - c.z) > DROWNED_WATER.r) return false;
+  if (l.y < c.y + 1 || l.y > c.y + surfaceDy + 0.5) return false;
+  const x = l.x - c.x, z = l.z - c.z, n = CHAPEL.nave, t = CHAPEL.tower;
+  if (x >= n.x0 - 1 && x < n.x1 + 2 && z >= n.z0 - 1 && z < n.z1 + 2 && l.y < c.y + n.h + 2) return false;
+  if (x >= t.x0 && x < t.x1 + 1 && z >= t.z0 && z < t.z1 + 1) return false;
+  return true;
+};
+// Sunscar: the sand in front of the stair down to the vault (the stair runs north from the centre).
+export const ASH_SAND = { dz: 11, r: 9 };
+export const inAshSand = (c, l) => Math.hypot(l.x - (c.x + 0.5), l.z - (c.z + ASH_SAND.dz + 0.5)) <= ASH_SAND.r && Math.abs(l.y - c.y) < 4;
+
 // The Changeling Glade on the way in (drawn by the world builds thread as part of the area stamp): a sunken clearing
 // south of the cave where the Mother's changelings come for whoever walks through.
 export const GLADE = { dz: 47, r: 13, floor: -1, clear: 8 };

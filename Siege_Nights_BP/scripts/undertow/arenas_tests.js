@@ -122,5 +122,6 @@ addTests("hollow arenas", {
     const ops = chasmOps(0, 150);
     assert(ops.length > 256 && ops.every((o) => o.a[0] >= 0 && o.b[0] <= 15 && o.a[2] >= 2400 && o.b[2] <= 2415 && o.a[1] <= o.b[1]), "chunk 0,150");
     assert(chasmOps(0, 100).length === 0, "nothing far from the Seat");
+    assert(ops.every((o) => o.a[1] >= L.floorY), "the chasm never reaches down into the Deep, under the world's floor");
   },
 });

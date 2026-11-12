@@ -1,0 +1,45 @@
+{
+ "format_version": "1.10.0",
+ "minecraft:client_entity": {
+  "description": {
+   "identifier": "siege:bell_wife",
+   "materials": {
+    "default": "entity_alphatest"
+   },
+   "textures": {
+    "default": "textures/entity/siege/bestiary/bell_wife"
+   },
+   "geometry": {
+    "default": "geometry.siege_b.bell_wife"
+   },
+   "animations": {
+    "base": "animation.siege_b.bell_wife",
+    "idle": "animation.siege_b.bell_wife.idle",
+    "walk": "animation.siege_b.bell_wife.walk",
+    "attack": "animation.siege_b.bell_wife.attack",
+    "swing": "controller.animation.siege_b.bell_wife.swing",
+    "aim": "animation.siege_b.bell_wife.aim",
+    "ready": "controller.animation.siege_b.bell_wife.ready",
+    "hurt": "animation.siege_b.bell_wife.hurt",
+    "flinch": "controller.animation.siege_b.bell_wife.flinch"
+   },
+   "scripts": {
+    "animate": [
+     "base",
+     "idle",
+     "walk",
+     "swing",
+     "ready",
+     "flinch"
+    ]
+   },
+   "render_controllers": [
+    "controller.render.siege_bestiary"
+   ],
+   "spawn_egg": {
+    "base_color": "#606c74",
+    "overlay_color": "#78705a"
+   }
+  }
+ }
+}

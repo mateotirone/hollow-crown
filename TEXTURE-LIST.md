@@ -76,7 +76,7 @@ Item icons for these stay vanilla for now. Leather and gold armor are untouched.
 
 ## Guard armor (128×64, in `textures/models/siege_guard_armor/`)
 
-Guards' own armor line, which players can't get (items `siege:guardgear_<tier>_<piece>`, hidden from menus). The chest always leaves the tabard open so the banner color shows. Shapes in `models/entity/guard_armor/`, made by `studio/build_guardgear.py`. Icons reuse the Castle Guard armor icons.
+Guards' own armor line, which players can't get (items `siege:guardgear_<tier>_<piece>`, hidden from menus). The chest always leaves the tabard open so the banner color shows. Shapes in `models/entity/guard_armor/`, made by `studio/build_guardgear.py`. Each tier has its own icons (`textures/items/siege_guardgear_<tier>_<piece>.png`, by `studio/art/build_audit_icons.py`): dark mail, studded leather, bright plate, plate with gold trim.
 
 | Tier | File | Status |
 |---|---|---|
@@ -273,6 +273,7 @@ Every mob has a box model in `models/entity/bestiary/<id>.geo.json` and a genera
 | Stone Vigil (Mob) | `stone_vigil.png` | 128×128 | House style, generated |
 | Seep (Hollow incursion, see-through: keep the alpha) | `seep.png` | 64×64 | House style, generated |
 | Gloamwing (Mob, flyer of the Hollow) | `gloamwing.png` | 128×128 | House style, generated |
+| Ulfa, the Bell-Wife (Boss, the Deep: Grey Host hood and skirts, a big bronze bell on her staff) | `bell_wife.png` | 128×128 | House style, generated |
 | Rival Knight (NPC fighter) | `champion_knight.png` | 128×128 | House style, generated |
 | Rival Sorcerer (NPC fighter) | `champion_sorcerer.png` | 128×128 | House style, generated |
 | Rival Lord (NPC fighter) | `champion_lord.png` | 128×128 | House style, generated |
@@ -338,7 +339,7 @@ Every mob has a box model in `models/entity/bestiary/<id>.geo.json` and a genera
 | Drowned Wedding Ring (boss key) | `drowned_ring.png` | **Final style, awaiting your review** |
 | Faceless Seal (boss key) | `faceless_seal.png` | **Final style, awaiting your review** |
 | Mire Effigy (boss key) | `mire_effigy.png` | **Final style, awaiting your review** |
-| Boss Summon ×9 (creative-only test item: a sealed writ, seal in the boss's colour) | `textures/items/creative/summon_<boss>.png`, made by `studio/build_creative.py` | Placeholder (only playtesters see it) |
+| Boss Summon ×10 (creative-only test item: a sealed writ, seal in the boss's colour) | `textures/items/creative/summon_<boss>.png`, made by `studio/build_creative.py` | Placeholder (only playtesters see it) |
 | Minute Hand (boss relic, sword) | `minute_hand.png` | **Final style, awaiting your review** |
 | Rimefang Bow (boss relic, bow) | `rimefang_bow.png` | **Final style, awaiting your review** |
 | Widow's Veil (boss relic, helmet) | `widows_veil.png` | **Final style, awaiting your review** |
@@ -550,7 +551,7 @@ Made by `tools/bossbar_ui.py` (which also wires them into `ui/hud_screen.json`).
 ## Dyed icon layers (2026-11-11, textures thread)
 Every dyeable item (Castle Guard armour and the regional sets, 64 pieces) uses `minecraft:icon` with `default` and `dyed` textures. `textures/items/<icon>_dyed.png` holds only the tabard cloth in light grey so the game tints it with the dye. Made by `studio/art/build_dyed_icons.py` (re-run after repainting a guard icon or adding a dyeable item). Without the dyed layer the icons showed blank in game.
 
-## Boss unlocks (placeholders by `studio/build_unlocks.py`, 16×16 opaque, in `textures/blocks/unlocks/`; it never overwrites a PNG that exists)
+## Boss unlocks (final art by `studio/art/build_unlocks_art.py` since 2026-11-12, painted over the placeholders from `studio/build_unlocks.py`, which never overwrites a PNG that exists; 16×16 opaque, in `textures/blocks/unlocks/`)
 
 | Asset | File | Status |
 |---|---|---|
@@ -591,3 +592,10 @@ Every dyeable item (Castle Guard armour and the regional sets, 64 pieces) uses `
 | Arcana particle sheet (64×16, four white 16×16 sprites tinted in code: glow, spark, ring, shard) | `textures/particle/hc_arcana.png` | Drawn in code, untested in game |
 | Twelve cast particles `siege:arc_trail`, `arc_burst`, `arc_ward`, `arc_tear`, `arc_ring`, `arc_mark`, `arc_link`, `arc_snare`, `arc_peel`, `arc_rift`, `arc_smoulder`, `arc_halo` (Choirsteel purple, magenta, Crown blue) | `particles/arc_*.particle.json` | Written, untested in game |
 | Spell icons x8 for the magic hotbar | reuse `textures/ui/hc/skill/arc_<power>.png` | Reused from the skill tree |
+
+## Item audit 2026-11-12 (every item and block checked from the files)
+All 187 items and 202 blocks have an icon or texture that exists, is the right size and is not blank, and every one has a name. Fixed in that pass:
+- Dyeable Castle Guard armor (64 pieces): the `_dyed` icon is now the whole piece in greys (`studio/art/build_dyed_icons.py`). The game shows only that texture for a dyeable item with a default colour, and tints all of it, so the icon is one colour (the banner colour), like vanilla dyed leather. The painted full-colour icon is still the `default` one.
+- 81 blocks had no name in the language files (regional Castle Bricks/Tiles/Cobbled/Smooth/Stone and the unbreakable "Old" tree and trim blocks).
+- Boss unlock blocks, guard tier icons, vault key: see above.
+Not tested in game.

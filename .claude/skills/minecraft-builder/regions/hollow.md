@@ -197,6 +197,10 @@ strands over cliffs.
   the whole tower leans in two or three clean one-block steps, with brackets under each step.
 - **Curved roofs** on halls: `"roof": {"type": "curved"}`.
 
+**Sites under the floor:** below y 40 the Hollow is void, so a site hung there (the Deep, `map/structures/hollow_deep.py`)
+carries its own two-block shell: dressed veinstone on the inside face, `siege:veil_rock` behind it. Write no air (the void
+is air already), and keep the whole site within about 60 blocks of where players enter it so it loads while it is stamped.
+
 ## Never
 
 - **Mirroring:** nothing that mirrors or copies an overworld building or room.
