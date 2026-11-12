@@ -497,5 +497,11 @@
  },
  "siege:plot_marker": {
   "sound": "wood"
+ },
+ "siege:stopped_clock": {
+  "sound": "wood"
+ },
+ "siege:well_crank": {
+  "sound": "wood"
  }
 }

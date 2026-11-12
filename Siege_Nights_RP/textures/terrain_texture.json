@@ -1159,5 +1159,23 @@
   "siege_plot_marker": {
    "textures": "textures/blocks/siege_plot_marker"
   }
- }
+ },
+  "siege_stopped_clock_case": {
+   "textures": "textures/blocks/unlocks/siege_stopped_clock_case"
+  },
+  "siege_stopped_clock_317": {
+   "textures": "textures/blocks/unlocks/siege_stopped_clock_317"
+  },
+  "siege_stopped_clock_318": {
+   "textures": "textures/blocks/unlocks/siege_stopped_clock_318"
+  },
+  "siege_well_crank_side": {
+   "textures": "textures/blocks/unlocks/siege_well_crank_side"
+  },
+  "siege_well_crank_keyhole": {
+   "textures": "textures/blocks/unlocks/siege_well_crank_keyhole"
+  },
+  "siege_well_crank_wound": {
+   "textures": "textures/blocks/unlocks/siege_well_crank_wound"
+  }
 }

@@ -121,6 +121,20 @@ Use `hollow-crown-full-map.mcworld`, not a flat test world. That file is saved i
 5. With a second player, choose "Start in Kingsrest without a home" instead: about 30 seconds later a carter should point you to Wren and Millbrook is added to your Ledger.
 6. Builder check: `/scriptevent siege:opening status` should say `map` and 16 of 16 done.
 
+## Waking the Clockwork Reeve (scripts/unlocks/)
+
+On the real map the Millbrook well builds itself the first time someone comes near Millbrook. In a flat Creative test world:
+
+1. `/scriptevent siege:reeve_unlock here` builds the square (six clock posts with keepers, the well, the chamber 22 blocks under it) with its middle where you stand. Give it ten seconds.
+2. Switch to Survival. Talk to the six keepers. Does each answer read clearly, and does the keeper's page repeat what the others said? Can you work out the first clock? (`/scriptevent siege:reeve_unlock status` tells you the answer.)
+3. Open a wrong clock: two footmen should climb out by the well, and the clocks refuse you for five minutes.
+4. Open the right clock: you get the Stopped Clock Key once, and a lead to the well. Using the key in the open should say "It wants a lock, not a pocket."
+5. Hold the key and click the well's crank (the brass block on the rim). Watch the whole scene: three clicks, every clock flips to 3:18, the bell and the darkness, the water draining, the stair laying itself, two lights at the bottom, "You're late." Does it feel right? Too long, too short?
+6. Walk down the stair. The fight should start once you are in the chamber. Win, and the clocks stay at 3:18. Lose, and he waits below for another try.
+7. Click the crank again after a win: it should refuse until a siege night has passed (a real one, or `/scriptevent siege:rivals night` to pretend one just ended), then play the short rematch scene.
+
+Also: `/scriptevent siege:reeve_unlock build` rebuilds and resets it at Millbrook, `tp` takes you there, `key` gives you a key.
+
 ## Town hall, skill tree and paths (The Hollow Crown)
 
 Needs a settlement first (place a Keep Banner). Cheats on for the `/scriptevent` lines.
