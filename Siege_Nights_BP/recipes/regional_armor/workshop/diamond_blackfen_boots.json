@@ -1,0 +1,25 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shapeless": {
+    "description": {
+      "identifier": "siege:diamond_blackfen_boots_recipe"
+    },
+    "tags": [
+      "siege_workshop"
+    ],
+    "ingredients": [
+      {
+        "item": "minecraft:diamond_boots"
+      },
+      {
+        "item": "siege:castle_stone_blackfen"
+      }
+    ],
+    "result": {
+      "item": "siege:diamond_blackfen_boots"
+    },
+    "unlock": {
+      "context": "AlwaysUnlocked"
+    }
+  }
+}
