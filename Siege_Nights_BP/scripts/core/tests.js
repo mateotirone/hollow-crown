@@ -39,6 +39,7 @@ export const OFFLINE_ONLY = new Set([
   "undertow: thin places: each cave shows exactly Fennick's features for it",
   "undertow: thin places: the seam has room to tear open and the camp holds the Field Note",
   "undertow: thin places: every cave is walkable from the mouth down to its chamber, one step at a time",
+  "undertow: thin places: nothing the planner builds stands in front of a cave mouth",
   "undertow: thin places: no two caves are the same, and the land covers every one",
   "undertow: the seep: veins are connected, reach out from the mouth, and growing never moves them",
   "undertow: thin places: low, wide hills, never taller than they are wide",

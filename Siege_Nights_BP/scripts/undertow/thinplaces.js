@@ -261,7 +261,12 @@ export function planThinPlace(id, cx, cz, G, opts = {}) {
   }
   const heightOf = new Map();
   const consider = (u, v) => {
-    const h = Math.max(hillHeight(id, u, v), need.get(`${u},${v}`) ?? 0);
+    // the cover stops at the cliff line like the outcrop does, so it never stands in front of the mouth
+    // (the tall first legs at Frostvein Gap and the Sunken Quarry used to wall their own way in)
+    let cover = need.get(`${u},${v}`) ?? 0;
+    const cl = cliffLine(u);
+    if (cover > 0 && v > cl) cover *= Math.max(0, 1 - (v - cl) / 2);
+    const h = Math.max(hillHeight(id, u, v), cover);
     if (h < 1 || h <= ground(u, v)) return;
     heightOf.set(`${u},${v}`, Math.round(h));
   };
