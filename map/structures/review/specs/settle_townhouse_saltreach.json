@@ -1,0 +1,88 @@
+{
+ "card": {
+  "title": "Townhouse",
+  "sub": "Saltreach, taller",
+  "region": "saltreach",
+  "where": "Settlement plot (long Medium 13 x 15 or Large)",
+  "kind": "House",
+  "blurb": "A taller home of about six beds: a stone ground floor, a floor above jettied over the road, a high attic."
+ },
+ "after": "settle_skill:townhouse_inside",
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "vale_timber",
+    "frame": "stripped_birch_log",
+    "infill": "calcite",
+    "plinth": {
+     "ladder": [
+      "cobblestone",
+      "andesite",
+      "stone_bricks"
+     ],
+     "axis": "noise",
+     "scale": 3
+    },
+    "trim": "birch_planks",
+    "shutter": "warped_planks",
+    "door": "birch_door",
+    "glass": "glass_pane",
+    "chimney": "brick_block",
+    "quoin": "cut_sandstone",
+    "floor": "birch_planks",
+    "sill": "stair",
+    "sign_wood": "birch",
+    "roof": "dark_prismarine"
+   },
+   "rect": [
+    -5,
+    -10,
+    5,
+    0
+   ],
+   "y": 0,
+   "plinth": 2,
+   "storeys": [
+    5,
+    5
+   ],
+   "jetty": [
+    "s"
+   ],
+   "storey_style": [
+    {
+     "frame_kind": "stone",
+     "frame": "cut_sandstone",
+     "infill": {
+      "ladder": [
+       "smooth_sandstone",
+       "sandstone"
+      ],
+      "axis": "noise",
+      "scale": 2
+     }
+    },
+    {}
+   ],
+   "door": {
+    "side": "s",
+    "kind": "house",
+    "steps": 1
+   },
+   "roof": {
+    "type": "hip",
+    "pitch": 1
+   },
+   "dormers": [],
+   "chimney": [
+    [
+     3,
+     -8
+    ]
+   ],
+   "vines": 0
+  }
+ ],
+ "name": "settle_townhouse_saltreach"
+}

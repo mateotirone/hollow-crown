@@ -1,11 +1,11 @@
 {
  "card": {
   "title": "House",
-  "sub": "Vale, warm red roof",
+  "sub": "Vale, one storey and an attic",
   "region": "vale",
   "where": "Settlement plot (Medium 11 x 15)",
   "kind": "House",
-  "blurb": "One storey on a rubble plinth and a tall attic, gable end to the road, a dormer each side, a chimney. About four beds."
+  "blurb": "A home of about four beds: one storey on a plinth and a room under the roof, a chimney."
  },
  "after": "settle_skill:house_inside",
  "parts": [

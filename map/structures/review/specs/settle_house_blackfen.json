@@ -1,0 +1,89 @@
+{
+ "card": {
+  "title": "House",
+  "sub": "Blackfen, one storey and an attic",
+  "region": "blackfen",
+  "where": "Settlement plot (Medium 11 x 15)",
+  "kind": "House",
+  "blurb": "A home of about four beds: one storey on a plinth and a room under the roof, a chimney."
+ },
+ "after": "settle_skill:house_inside",
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "vale_timber",
+    "frame": "mangrove_log",
+    "infill": {
+     "ladder": [
+      "mud_bricks",
+      "packed_mud"
+     ],
+     "axis": "noise",
+     "scale": 2
+    },
+    "plinth": {
+     "ladder": [
+      "mud_bricks",
+      "tuff"
+     ],
+     "axis": "noise",
+     "scale": 3
+    },
+    "trim": "spruce_planks",
+    "shutter": "spruce_planks",
+    "door": "mangrove_door",
+    "glass": "glass_pane",
+    "chimney": "mud_bricks",
+    "quoin": "tuff_bricks",
+    "floor": "dark_oak_planks",
+    "leaves": "mangrove_leaves",
+    "sign_wood": "mangrove",
+    "roof": "dark_oak_planks"
+   },
+   "rect": [
+    -4,
+    -10,
+    4,
+    0
+   ],
+   "y": 0,
+   "plinth": 2,
+   "storeys": [
+    5
+   ],
+   "door": {
+    "side": "s",
+    "kind": "house",
+    "steps": 1
+   },
+   "roof": {
+    "type": "gable",
+    "ridge": "z",
+    "pitch": 1
+   },
+   "dormers": [
+    {
+     "side": "e",
+     "at": 1,
+     "w": 3,
+     "h": 3
+    },
+    {
+     "side": "w",
+     "at": -1,
+     "w": 3,
+     "h": 3
+    }
+   ],
+   "chimney": [
+    [
+     -2,
+     -8
+    ]
+   ],
+   "vines": 0.04
+  }
+ ],
+ "name": "settle_house_blackfen"
+}

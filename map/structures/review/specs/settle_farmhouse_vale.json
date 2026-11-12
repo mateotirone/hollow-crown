@@ -5,7 +5,7 @@
   "region": "vale",
   "where": "Settlement plot (Medium 11 x 15)",
   "kind": "Work",
-  "blurb": "A long low farmhouse in brick-nogged spruce frame with a warm mud-brick roof, and an open lean-to behind for hay, a cart and the woodpile."
+  "blurb": "A long low farmhouse with an open lean-to behind for hay, a cart and the woodpile."
  },
  "after": "settle_skill:farmhouse_inside",
  "parts": [

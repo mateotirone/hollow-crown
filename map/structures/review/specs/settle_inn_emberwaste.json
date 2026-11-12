@@ -1,0 +1,75 @@
+{
+ "card": {
+  "title": "Inn",
+  "sub": "Emberwaste, furnished",
+  "region": "emberwaste",
+  "where": "Settlement plot (Large 15 x 15)",
+  "kind": "Work",
+  "blurb": "Eaves to the road, a stone tap room with the bar, tables and a hearth, three bedrooms above."
+ },
+ "after": "settle_skill:inn_inside",
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "vale_stone",
+    "frame": "cut_sandstone",
+    "infill": {
+     "ladder": [
+      "smooth_sandstone",
+      "sandstone"
+     ],
+     "axis": "noise",
+     "scale": 2
+    },
+    "plinth": {
+     "ladder": [
+      "sandstone",
+      "cut_sandstone"
+     ],
+     "axis": "noise",
+     "scale": 3
+    },
+    "trim": "acacia_planks",
+    "shutter": "acacia_planks",
+    "door": "acacia_door",
+    "glass": "glass_pane",
+    "chimney": "sandstone",
+    "quoin": "chiseled_sandstone",
+    "floor": "acacia_planks",
+    "sign_wood": "acacia",
+    "roof": "smooth_sandstone"
+   },
+   "rect": [
+    -6,
+    -10,
+    6,
+    0
+   ],
+   "y": 0,
+   "plinth": 2,
+   "storeys": [
+    5,
+    5
+   ],
+   "jetty": [],
+   "storey_style": [
+    {},
+    {}
+   ],
+   "door": {
+    "side": "s",
+    "kind": "house",
+    "steps": 1
+   },
+   "roof": {
+    "type": "hip",
+    "pitch": 1
+   },
+   "dormers": [],
+   "chimney": false,
+   "vines": 0
+  }
+ ],
+ "name": "settle_inn_emberwaste"
+}

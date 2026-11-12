@@ -1,11 +1,11 @@
 {
  "card": {
   "title": "Townhouse",
-  "sub": "Vale, old slate roof",
+  "sub": "Vale, taller",
   "region": "vale",
   "where": "Settlement plot (long Medium 13 x 15 or Large)",
   "kind": "House",
-  "blurb": "Stone ground floor, a jettied stripped-spruce floor over the road, a high attic with dormers. About six beds."
+  "blurb": "A taller home of about six beds: a stone ground floor, a floor above jettied over the road, a high attic."
  },
  "after": "settle_skill:townhouse_inside",
  "parts": [

@@ -1,11 +1,11 @@
 {
  "card": {
   "title": "Inn",
-  "sub": "Vale, warm red roof",
+  "sub": "Vale, furnished",
   "region": "vale",
   "where": "Settlement plot (Large 15 x 15)",
   "kind": "Work",
-  "blurb": "Eaves to the road, a stone tap room with the bar, tables and a hearth, a jettied floor of three bedrooms above, a sign over the door."
+  "blurb": "Eaves to the road, a stone tap room with the bar, tables and a hearth, three bedrooms above."
  },
  "after": "settle_skill:inn_inside",
  "parts": [

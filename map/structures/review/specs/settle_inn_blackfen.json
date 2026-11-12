@@ -1,0 +1,118 @@
+{
+ "card": {
+  "title": "Inn",
+  "sub": "Blackfen, furnished",
+  "region": "blackfen",
+  "where": "Settlement plot (Large 15 x 15)",
+  "kind": "Work",
+  "blurb": "Eaves to the road, a stone tap room with the bar, tables and a hearth, three bedrooms above."
+ },
+ "after": "settle_skill:inn_inside",
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "vale_timber",
+    "frame": "mangrove_log",
+    "infill": {
+     "ladder": [
+      "mud_bricks",
+      "packed_mud"
+     ],
+     "axis": "noise",
+     "scale": 2
+    },
+    "plinth": {
+     "ladder": [
+      "mud_bricks",
+      "tuff"
+     ],
+     "axis": "noise",
+     "scale": 3
+    },
+    "trim": "spruce_planks",
+    "shutter": "spruce_planks",
+    "door": "mangrove_door",
+    "glass": "glass_pane",
+    "chimney": "mud_bricks",
+    "quoin": "tuff_bricks",
+    "floor": "dark_oak_planks",
+    "leaves": "mangrove_leaves",
+    "sign_wood": "mangrove",
+    "roof": "dark_oak_planks"
+   },
+   "rect": [
+    -6,
+    -10,
+    6,
+    0
+   ],
+   "y": 0,
+   "plinth": 2,
+   "storeys": [
+    5,
+    5
+   ],
+   "jetty": [
+    "s"
+   ],
+   "storey_style": [
+    {
+     "frame_kind": "stone",
+     "frame": "tuff_bricks",
+     "infill": {
+      "ladder": [
+       "mud_bricks",
+       "packed_mud"
+      ],
+      "axis": "noise",
+      "scale": 2
+     }
+    },
+    {}
+   ],
+   "door": {
+    "side": "s",
+    "kind": "house",
+    "steps": 1
+   },
+   "roof": {
+    "type": "gable",
+    "ridge": "x",
+    "pitch": 1
+   },
+   "dormers": [
+    {
+     "side": "s",
+     "at": -4,
+     "w": 3,
+     "h": 3
+    },
+    {
+     "side": "s",
+     "at": 4,
+     "w": 3,
+     "h": 3
+    },
+    {
+     "side": "n",
+     "at": 0,
+     "w": 3,
+     "h": 3
+    }
+   ],
+   "chimney": [
+    [
+     -6,
+     -6
+    ],
+    [
+     6,
+     -6
+    ]
+   ],
+   "vines": 0.03
+  }
+ ],
+ "name": "settle_inn_blackfen"
+}

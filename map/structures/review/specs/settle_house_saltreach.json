@@ -1,0 +1,69 @@
+{
+ "card": {
+  "title": "House",
+  "sub": "Saltreach, one storey and an attic",
+  "region": "saltreach",
+  "where": "Settlement plot (Medium 11 x 15)",
+  "kind": "House",
+  "blurb": "A home of about four beds: one storey on a plinth and a room under the roof, a chimney."
+ },
+ "after": "settle_skill:house_inside",
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "vale_timber",
+    "frame": "stripped_birch_log",
+    "infill": "calcite",
+    "plinth": {
+     "ladder": [
+      "cobblestone",
+      "andesite",
+      "stone_bricks"
+     ],
+     "axis": "noise",
+     "scale": 3
+    },
+    "trim": "birch_planks",
+    "shutter": "warped_planks",
+    "door": "birch_door",
+    "glass": "glass_pane",
+    "chimney": "brick_block",
+    "quoin": "cut_sandstone",
+    "floor": "birch_planks",
+    "sill": "stair",
+    "sign_wood": "birch",
+    "roof": "dark_prismarine"
+   },
+   "rect": [
+    -4,
+    -10,
+    4,
+    0
+   ],
+   "y": 0,
+   "plinth": 2,
+   "storeys": [
+    5
+   ],
+   "door": {
+    "side": "s",
+    "kind": "house",
+    "steps": 1
+   },
+   "roof": {
+    "type": "hip",
+    "pitch": 1
+   },
+   "dormers": [],
+   "chimney": [
+    [
+     -2,
+     -8
+    ]
+   ],
+   "vines": 0
+  }
+ ],
+ "name": "settle_house_saltreach"
+}

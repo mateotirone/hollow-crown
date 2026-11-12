@@ -1,11 +1,11 @@
 {
  "card": {
   "title": "Mint",
-  "sub": "Vale, stone and slate",
+  "sub": "Vale, stone",
   "region": "vale",
   "where": "Settlement plot (Medium 11 x 15)",
   "kind": "Work",
-  "blurb": "Where the town strikes its Regals: ashlar walls, barred ground-floor windows, a heavy door and a hipped slate roof."
+  "blurb": "Where the town strikes its Regals: stone walls, barred ground-floor windows and a heavy door."
  },
  "after": "settle_skill:mint_inside",
  "parts": [

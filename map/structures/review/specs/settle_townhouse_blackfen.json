@@ -1,0 +1,108 @@
+{
+ "card": {
+  "title": "Townhouse",
+  "sub": "Blackfen, taller",
+  "region": "blackfen",
+  "where": "Settlement plot (long Medium 13 x 15 or Large)",
+  "kind": "House",
+  "blurb": "A taller home of about six beds: a stone ground floor, a floor above jettied over the road, a high attic."
+ },
+ "after": "settle_skill:townhouse_inside",
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "vale_timber",
+    "frame": "mangrove_log",
+    "infill": {
+     "ladder": [
+      "mud_bricks",
+      "packed_mud"
+     ],
+     "axis": "noise",
+     "scale": 2
+    },
+    "plinth": {
+     "ladder": [
+      "mud_bricks",
+      "tuff"
+     ],
+     "axis": "noise",
+     "scale": 3
+    },
+    "trim": "spruce_planks",
+    "shutter": "spruce_planks",
+    "door": "mangrove_door",
+    "glass": "glass_pane",
+    "chimney": "mud_bricks",
+    "quoin": "tuff_bricks",
+    "floor": "dark_oak_planks",
+    "leaves": "mangrove_leaves",
+    "sign_wood": "mangrove",
+    "roof": "mud_bricks"
+   },
+   "rect": [
+    -5,
+    -10,
+    5,
+    0
+   ],
+   "y": 0,
+   "plinth": 2,
+   "storeys": [
+    5,
+    5
+   ],
+   "jetty": [
+    "s"
+   ],
+   "storey_style": [
+    {
+     "frame_kind": "stone",
+     "frame": "tuff_bricks",
+     "infill": {
+      "ladder": [
+       "mud_bricks",
+       "packed_mud"
+      ],
+      "axis": "noise",
+      "scale": 2
+     }
+    },
+    {}
+   ],
+   "door": {
+    "side": "s",
+    "kind": "house",
+    "steps": 1
+   },
+   "roof": {
+    "type": "gable",
+    "ridge": "z",
+    "pitch": 1
+   },
+   "dormers": [
+    {
+     "side": "e",
+     "at": 1,
+     "w": 3,
+     "h": 3
+    },
+    {
+     "side": "w",
+     "at": -1,
+     "w": 3,
+     "h": 3
+    }
+   ],
+   "chimney": [
+    [
+     3,
+     -8
+    ]
+   ],
+   "vines": 0.03
+  }
+ ],
+ "name": "settle_townhouse_blackfen"
+}

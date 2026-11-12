@@ -231,7 +231,7 @@ function library(p) {
 }
 
 // The plot houses and work buildings drawn on the building skill (map/structures/settle_skill.py). These plain
-// versions set their price and stand in for a region whose own design isn't drawn yet.
+// versions set their price (every region has its own drawn design).
 function plainBlock(p, { half, depth, H, floors = 1, door: wide = false }) {
   const x0 = -half, x1 = half, z0 = 1, z1 = depth;
   floor(p, x0, x1, z0, z1);
