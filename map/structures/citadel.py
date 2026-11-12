@@ -458,11 +458,11 @@ class Citadel:
         F.table(bp, kx - 3, y, kz + 6, "nsew", dark); F.table(bp, kx + 3, y, kz + 6, "nsew", dark)
         put(kx, y, kz + 8, "lectern", facing="n")
         ceiling_lights(f3 - 1)
-        # 3. treasury (west) and armoury (east), split by a stone wall with an iron door
+        # 3. treasury (west) and armoury (east), split by a stone wall with a door
         y = f3 + 1
         for z in range(kz - I, kz + I + 1):
             for yy in range(y, f4): bp.set(kx, yy, z, S["smooth"])
-        bp.set(kx, y, kz + 4, "iron_door", facing="e"); bp.set(kx, y + 1, kz + 4, "iron_door", facing="e", upper=True)
+        bp.set(kx, y, kz + 4, f"{dark}_door", facing="e"); bp.set(kx, y + 1, kz + 4, f"{dark}_door", facing="e", upper=True)
         for z in range(kz - I + 1, kz + I, 2):
             for x in (kx - I, kx - 2):
                 put(x, y, z, "chest", facing="e" if x == kx - I else "w"); put(x, y + 1, z, "barrel")
