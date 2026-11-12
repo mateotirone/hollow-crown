@@ -176,6 +176,10 @@ strands over cliffs.
  "offset": {"storey": 1, "dir": "e"}}
 ```
 
+**Sites under the floor:** below y 40 the Hollow is void, so a site hung there (the Deep, `map/structures/hollow_deep.py`)
+carries its own two-block shell: dressed veinstone on the inside face, `siege:veil_rock` behind it. Write no air (the void
+is air already), and keep the whole site within about 60 blocks of where players enter it so it loads while it is stamped.
+
 **Not in the skill yet:**
 - **Leaning towers:** whole towers in a few clean steps.
 - **Curved roofs.**

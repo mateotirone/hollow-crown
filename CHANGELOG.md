@@ -9,6 +9,7 @@ How versions work is in [`docs/RELEASING.md`](docs/RELEASING.md).
 Everything merged to `main` since the last release goes here. Each pull request that changes what players see adds a line under one of these headings.
 
 ### Added
+- After Morvane falls, the Deep Door in the Vault finally opens. Far below, the Grey Host the Hollow swallowed three hundred years ago is still standing in its ranks, held there by Ulfa, the Bell-Wife, who has not stopped ringing. Beat her in the Bell Room (she drops Ulfa's Bell and comes back stronger each day) and the Ranks open: talk to each company's serjeant to lead them out to stand at your keep (2 more guards each), lay them to rest for Veil Ash and a keepsake, or leave them standing.
 - Trains keep apart: a train that comes up behind another on the same track slows and stops a few blocks short of it instead of running through it, and the driver is told a train is on the line ahead.
 - The Changeling Glade: on the way down to the Mother of Changelings' cave, the sunken glade south of the Cradle Tree sends a wave of changelings at whoever walks through it (more for a bigger party), then rests for five minutes.
 - Siege crews go to war with your army, each bringing its own engine: Trebuchet crews set up 40 blocks out, unfold their trebuchet and widen one hole in the wall nearest the vault (a boulder every 45 seconds, never at the gate); Ram crews ram the gate; Sappers plant Breaching Charges and run. Train them at the Barracks.

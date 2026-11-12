@@ -518,7 +518,7 @@ In the real game the first claimant comes 5 days after Morvane falls, then one e
 - Kill it: chat tells everyone, you get a "Seal of <its name>", and the next `siege:pretender_rise` gives a different body, claim and name.
 - Leave one alive for 5 in-game days: a message says the seep is everywhere, and Seeps open more often.
 
-## After Morvane: the Five Chairs and the Homecomings (scripts/after/)
+## After Morvane: the Five Chairs, the Homecomings and the Deep (scripts/after/)
 
 Nothing here happens until Morvane has fallen (`/scriptevent siege:bestiary_summon morvane` and win, or test the pieces with the commands; they work any time in creative).
 
@@ -529,6 +529,15 @@ Nothing here happens until Morvane has fallen (`/scriptevent siege:bestiary_summ
 - On a third night after dark one envoy comes to one player in the overworld; at dawn they leave. The keep menu has "The Five Chairs" board.
 - `/scriptevent siege:homecoming_now` puts a stranger beside you. Click them: who they were, how they went down, who they look for, what they want. Bring it and their story ends one of four ways. Use a number (`siege:homecoming_now 42`) to get the same stranger again. If they are a copy, ring a bell near them: they should turn and walk away.
 - `/scriptevent siege:homecoming` shows who is here and when the next comes.
+
+### The Deep (scripts/after/deep.js)
+
+The Deep Door in the Vault opens only after Morvane has fallen. In creative, `/scriptevent siege:deep_go` takes you down any time (the first time it builds the halls; give it a few seconds).
+- You land on a small landing with a bell on a post. Ringing it takes you back up to the Vault, in front of the Deep Door. Using the Deep Door again takes you straight down.
+- Walk the long hall down three flights to the round Bell Room. A great bronze bell hangs over it. Step onto its floor: Ulfa, the Bell-Wife wakes (Boss Summon in the creative menu also calls her). She should warn before each move: the bell tolls (rings of marked floor with gaps), her breath (a frozen line toward you), from two thirds of her life she calls Grey Host spearmen, from a third she goes quiet and hurts anyone more than 6 blocks from her.
+- Before she falls, the grey seal at the far end of the Bell Room says who is behind it and does not open. When she falls it breaks, and she drops Ulfa's Bell. She comes back, ranked up, from the next day.
+- Beyond it, the Ranks: five companies of the Grey Host standing still on five tiers, facing a flat stone floor with a cracked bell-shaped hollow (kept for Everwake's Hollow Note trial). Click the serjeant in the middle of a company. Before Ulfa falls they only talk. After, choose: lead them out (your keep can hold 2 more guards; check the barracks guard limit), lay them to rest (16 Veil Ash and a named keepsake), or leave them. Either choice removes that company for everyone, and everyone is told.
+- `/scriptevent siege:deep` shows the state, `siege:deep_open` opens the seal without the fight, `siege:deep_reset` puts every company back and shuts the seal.
 
 ### Village happenings (mining villages)
 
