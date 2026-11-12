@@ -158,7 +158,7 @@ registerBoss({
       f.shield(false);
       try { f.entity.removeEffect("slowness"); f.entity.removeEffect("weakness"); } catch { /* gone */ }
       f.busyUntil = f.tick + 60;
-      f.say("§6The Reeve pulls himself back together, slower than before.");
+      f.say("§6The Reeve pulls himself back together, gears grinding. He is open again.");
     }
     if (f.phase >= 2 && f.tick % 200 === 0) f.next.timestop = Math.min(f.next.timestop, 120);
   },
@@ -397,7 +397,7 @@ registerBoss({
   intro: "smiles with someone else's face.",
   phaseNames: ["", "More masks", "The whole brood"],
   onStart: (f) => { f.data.nextMasq = f.tick + 200; },
-  onPhase: (f) => { f.data.nextMasq = f.tick; },
+  onPhase: (f) => { f.data.nextMasq = Math.max(f.tick, f.busyUntil); }, // never cuts short the stun from finding her
   onHurt: (f, event) => {
     if (f.data.masq && event.damageSource.damagingEntity?.typeId === "minecraft:player") endMasquerade(f, true);
   },

@@ -414,7 +414,11 @@ const TICK = {
   2: (f) => {
     const s = f.m.s;
     const left = f.adds().filter((e) => e.hasTag("siege_morvane_court")).length;
-    if (f.m.raged && s.wave < MORVANE.court.length) { while (s.wave < MORVANE.court.length) courtWave(f); return; }
+    if (f.m.raged && s.wave < MORVANE.court.length) {
+      f.say("§4The memory will not wait any longer. The rest of the old court stands at once.");
+      while (s.wave < MORVANE.court.length) courtWave(f);
+      return;
+    }
     if (left) return;
     if (s.wave >= MORVANE.court.length) {
       speak(f, "The lamps go out one at a time. The last thing you see is a chair, pulled out from under someone.");
@@ -524,7 +528,9 @@ const TICK = {
     // the Crown
     if (s.crowned) {
       const staggered = (s.stagger ?? 0) > f.tick;
-      f.shield(hp <= MORVANE.crown.shieldAt && !staggered ? true : false);
+      // Under the line he cannot be hurt while crowned, staggered or not: the stagger is for striking the Crown off,
+      // and a strong party used to kill him through it with the Crown still on (boss walkthrough 2026-11-12)
+      f.shield(hp <= MORVANE.crown.shieldAt);
       if (staggered) f.bar(`§dHe staggers. Strike the Crown!  ${s.hits} / ${crownHitsNeeded(players.length)}`);
       else if (hp <= MORVANE.crown.shieldAt && f.tick % 40 === 0) f.bar("§5He cannot die while he wears the Hollow Crown.");
       return;
@@ -656,7 +662,7 @@ registerBoss({
         moveTo(f, at);
         for (const p of f.players()) if (flat(p.location, at) <= 4) hurt(p, dmg(f, 14), "entityAttack", f.entity);
         f.m.s.stagger = f.tick + 80; f.m.s.hits = 0;
-        f.stun(80); f.shield(false);
+        f.stun(80); if (f.hp() > MORVANE.crown.shieldAt) f.shield(false);
         f.say("§dThe blade bites the floor and sticks. He staggers. Strike the Crown!");
       } },
   ],
