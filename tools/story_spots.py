@@ -42,7 +42,7 @@ PEOPLE = [
     # Sunscar: the warden's office on the avenue of statues
     ("isolde", "Sunscar", "in:891,95,445"),       # the warden's office
     # Millbrook: the bakery
-    ("nessa", "Millbrook", "in:-41,82,-480"),     # the bakery
+    ("nessa", "Millbrook", "in:-62,79,-433"),     # the bakery, north of the square
     ("harl", "Millbrook", "near:nessa"),          # her husband, at the ovens
     # Mirelight: the last house before the lanterns stop
     ("hesper", "Mirelight", "in:-4,75,892"),  # by the Fen Line's east gate, past the last lamp

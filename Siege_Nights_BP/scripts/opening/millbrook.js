@@ -1,7 +1,7 @@
 // Sister Wren in Millbrook. Every plot's first book ends by sending the reader to her, and asking her which
 // clock stopped first is what starts the First Slip, so she has to be there from the first day.
 //
-// She keeps Millbrook's chapel, the stone chapel on the south side of the square (baked with the town: project files
+// She keeps Millbrook's chapel, the stone chapel on the east side of the square (baked with the town: project files
 // siege-nights/towngen/millbrook, towns thread 2026-11-12). She stands at the altar end, WREN_ALTAR. Until the
 // chapel is there (a world whose Millbrook isn't stamped yet) she waits on the square in front of its door.
 // Builders can move her with
@@ -28,10 +28,11 @@ const WREN_TAG = "siege_lore_npc_wren";
 const store = moduleStore("siege:opening_millbrook", () => ({ wren: null, chapel: false }));
 
 // The chapel, in world blocks: its walls (the eaves reach a block further out) and the air cell inside its door.
-// Its front wall faces the square at z -460; Wren stands at the altar end.
-export const CHAPEL = { x0: -62, x1: -52, z0: -460, z1: -442, door: { x: -57, y: 81, z: -459 } };
-export const WREN_ALTAR = { x: -57, y: 81, z: -445 };
-const IN_FRONT = { x: CHAPEL.door.x, z: CHAPEL.door.z - 3 }; // on the square, clear of the steps and eaves
+// Its front faces west onto the square, twelve out from the middle, clear of the Seneschal's clock ring (r 10);
+// Wren stands at the altar end, at the east.
+export const CHAPEL = { x0: -48, x1: -30, z0: -476, z1: -464, door: { x: -47, y: 83, z: -470 } };
+export const WREN_ALTAR = { x: -32, y: 83, z: -470 };
+const IN_FRONT = { x: -52, z: -472 }; // on the square in front of the door, off the clock post at (-50, -470)
 
 function wrenNear(dim, at) {
   try {
