@@ -19,7 +19,8 @@ A 50,000-block castle costs about the same tokens as a hut.
    rule it follows), `reference/colour.md` (materials, gradients, palette, regeneration),
    `reference/house-rules.md` (Mateo's rules, region styles, where build-instructions/ says more),
    `reference/output.md` (commands, editions, limits, in-game checks),
-   `reference/from-picture.md` (rebuilding a building from a screenshot or photo).
+   `reference/from-picture.md` (rebuilding a building from a screenshot or photo),
+   `regions/<region>.md` (the full style guide of each region; read before any build there).
 3. **Compression.** Never read the `.mcfunction` or `scene.json`, never print block lists. Read the summary,
    look at the PNG, change the spec, rebuild.
 
@@ -27,15 +28,17 @@ A 50,000-block castle costs about the same tokens as a hut.
 
 0. **From a picture?** Follow `reference/from-picture.md`: grid, read the parts, measure, sample colours
    with `scripts/picture.py`, then the steps below, comparing against the picture each round.
-1. **Plan (stage 0).** Odd dimensions, storey height 4 or 5, region style, roof type, where the door and
+1. **Region first.** For any build in Mateo's world, read its region's page in `regions/` (index
+   `regions/README.md`): theme, buildings, roofs, weather, paths, blocks, the preset to start from.
+2. **Plan (stage 0).** Odd dimensions, storey height 4 or 5, region style, roof type, where the door and
    chimney go. For a building in the project, read the matching `build-instructions/` stage files first.
-2. **Write the spec** (format below). Massing and curves go in `shapes`; anything a builder does by rule
+3. **Write the spec** (format below). Massing and curves go in `shapes`; anything a builder does by rule
    goes in `parts`; one-off blocks go in `place`.
-3. **Build:** `python3 scripts/build.py spec.json OUT --stages`
-4. **Look.** Open `OUT/preview.png` (two isometric views) and `OUT/stages.png` (one picture per stage:
+4. **Build:** `python3 scripts/build.py spec.json OUT --stages`
+5. **Look.** Open `OUT/preview.png` (two isometric views) and `OUT/stages.png` (one picture per stage:
    foundation, frame, floors, walls, openings, roof, details). In the hollow-crown repo, add
    `--hifi <bedrock textures/blocks> <three@0.170.0>` for real-texture renders.
-5. **Fix and repeat at least 3 times before showing anyone.** Check against `build-instructions/09-final-check`
+6. **Fix and repeat at least 3 times before showing anyone.** Check against `build-instructions/09-final-check`
    and the "look for" list in `reference/house-rules.md`. Then show the preview, not the commands.
 
 ## Spec format

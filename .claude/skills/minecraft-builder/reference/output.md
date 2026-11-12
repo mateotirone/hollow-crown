@@ -48,5 +48,10 @@ state is checked against Mojang's list (`map/structures/bedrock_states.json`) so
     engine.into_blueprint(bp, spec, upto="walls")           # foundation .. walls (stage-by-stage review renders)
     engine.into_blueprint(bp, spec, only="roof")            # one stage, inside a fn(bp, B) stage function
     blocks, stage_of, warnings = engine.compute(spec)        # raw result
+    engine.layout(spec)["houses"][0]["storeys"][1]["stand_y"]   # first air row of storey 1: furniture and feet go here
+
+`layout()` gives each house's rect, plate and per storey `floor_y` (the floor block), `stand_y`
+(`floor_y + 1`) and height. The old map builders counted floors one row lower, so port a furnished
+interior (the inn) by its `stand_y`. `summary.json` lists the same rows as `"floors": {name: [stand_y, ...]}`.
 
 The Blueprint then exports as before (`finish()`, `save_mcstructure`, stamps for genworld).
