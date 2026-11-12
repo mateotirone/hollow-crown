@@ -92,6 +92,16 @@ export const ENTRIES = [
     when: [],
   },
 
+  {
+    id: "graves", ch: "start", title: "Dying and your grave",
+    tip: "When you die, your things go into a gravestone where you fell. Click the headstone to get them back.",
+    page: "When you die, everything you drop goes into a §fgravestone§r where you fell (or on the nearest dry ground). Chat tells you where it is. Walk back and click the headstone to gather your things: armour goes straight back on, the rest into your pack. Anything that doesn't fit stays in the grave until you make room.\n\n"
+      + "§fSealed for 10 minutes.§r Only you can open your own grave at first. While the candle beside it burns, it is sealed; when the candle goes out, anyone can open it, so don't dawdle.\n\n"
+      + "§fKilled by another player?§r Then your grave is open to anyone at once, and your killer is told where it is.\n\n"
+      + "Graves can't be broken or blown up. Once emptied, a grave settles back into the earth. Anything lost to lava or the void is gone before it can reach a grave.",
+    when: ["event:graveDug", "click:siege:gravestone"],
+  },
+
   // ---------------- Siege nights ----------------
   {
     id: "siege_nights", ch: "siege", title: "How siege nights work",
@@ -344,6 +354,13 @@ export const ENTRIES = [
       + "At the board, propose a §fstanding trade§r to any station your laid track reaches: what you send, what you get back, and how often (\"20 iron for 4 gold, every day\"). Both sides must accept the same terms; either can send a counteroffer. A new request shows above the Trade Board in the other settlement's colour.\n\n"
       + "Your train runs the route while you're away. Each run takes both loads out of both Exports at once and, after the trip, drops each in the other side's Imports. If either side is short, nothing leaves and the route pauses until it's refilled. After 3 days paused it goes dormant: refill it and press Resume.\n\n"
       + "The further apart the two stations are along the track, the longer each trip takes. Regions are strong in one thing and weak in another, so trading is how you get what your land is short of. Rival Lords and the towns trade too, and §fKingsrest§r buys any trade good for Regals at a set price. Your station grows with your settlement, and so do the routes it runs and what each run carries; §fGoods Wagons§r carry more.",
+    when: ["click:siege:trade_board"],
+    needs: "siege:trade_board",
+  },
+  {
+    id: "trade_specials", ch: "travel", title: "Special Offers and trading in person",
+    page: "§fSpecial Offers:§r at the board, choose Create Special Offer, pick a good and how many, and you'll see what that amount is worth at the normal rate. Name your price (at least that much) and post it: the Regals are held until it's filled, and the Crier spreads the word. Anyone your track reaches can fill it from their Exports by train, and towns and lords fill offers that are worth their while. Whatever isn't filled within 3 days comes back to you.\n\n"
+      + "§fDeliver in person:§r walk up to another settlement's Trade Board with the goods and click it to see their Special Offers. Hand the goods over from your pack and you're paid on the spot; they go straight into that settlement's Imports. No track needed, and they don't have to be online.",
     when: ["click:siege:trade_board"],
     needs: "siege:trade_board",
   },
