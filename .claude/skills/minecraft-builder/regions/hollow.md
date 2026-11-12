@@ -102,6 +102,10 @@ cracked veinstone and moss.
 - **The Seat's approach** (`hollow_arenas.py` `approach()`): the Last Step's broken gate (two pylons that do not
   match), five rocks curving to the ring's landing, broken rock adrift round it. Nothing of it stands inside
   the ring that falls in the fight (r 32 from the Seat's middle).
+- **Under the Seat is the chasm** (`undertow/chasm.js`), about 70 blocks down: a pool over glimmerflow, shoals,
+  falls of light springing from the cliffs, crooked crystal spires (rock below, amethyst above, one clean
+  one-block step off true). Nothing in it rises above y 84. Its rim over the void is ragged too. It is not land:
+  `heightAt` stays null there and a fall into it kills.
 
 ## Roofs
 

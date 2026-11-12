@@ -14,6 +14,7 @@ import { SITE_DESIGNS, TOWER_DESIGNS } from "./sites_data.js";
 import { DROWNED_SPOTS } from "./drowned.js";
 import { COURT_DESIGN, SEAT_DESIGN, APPROACH_DESIGN } from "./arenas_data.js";
 import { stamp } from "./stamp.js";
+import { chasmOps, chasmChunk, CHASM_CHUNKS } from "./chasm.js";
 import { load, save } from "./data.js";
 import { sfx } from "../core/sfx.js";
 
@@ -163,10 +164,51 @@ export function buildTick(players) {
       markBuilt(job.cx, job.cz);
       job = undefined;
     }
-  }
+  } else chasmTick(d, players);
 }
 
-export function flush() { flushBits(); }
+// ---- the chasm under the Seat (chasm.js) ----------------------------------------------------
+// Built a chunk at a time near players, after that chunk's own land, whenever no land is waiting to be built. Its
+// own list of finished chunks, so a world that built this end of the Hollow before the chasm existed gets it too.
+const K_CHASM = "hc:undertow_chasm1";
+let chasmDone, chasmJob, chasmDirty = false;
+const chasmKey = (cx, cz) => (cx - CHASM_CHUNKS.cx0) * 64 + (cz - CHASM_CHUNKS.cz0);
+function nextChasmChunk(players) {
+  if (!chasmDone) chasmDone = new Set(load(K_CHASM, []));
+  let best, bestD = Infinity;
+  for (const p of players) {
+    const pcx = Math.floor(p.location.x / 16), pcz = Math.floor(p.location.z / 16);
+    if (!chasmChunk(Math.max(CHASM_CHUNKS.cx0, Math.min(CHASM_CHUNKS.cx1, pcx)), Math.max(CHASM_CHUNKS.cz0, Math.min(CHASM_CHUNKS.cz1, pcz + RADIUS)))) continue;
+    for (let dx = -RADIUS; dx <= RADIUS; dx++) for (let dz = -RADIUS; dz <= RADIUS; dz++) {
+      const cx = pcx + dx, cz = pcz + dz, d = dx * dx + dz * dz;
+      if (d >= bestD || !chasmChunk(cx, cz) || chasmDone.has(chasmKey(cx, cz)) || !isBuilt(cx, cz)) continue;
+      // The chunks along the cliff wait until an old world's straight edge has been cut back (buildApproach).
+      if (cz * 16 < HEART_EDGE_Z && !edgeCut()) continue;
+      bestD = d; best = [cx, cz];
+    }
+  }
+  return best;
+}
+let edgeIsCut = false;
+const edgeCut = () => edgeIsCut || (edgeIsCut = (pieces().approachV ?? 0) >= 1);
+function chasmTick(d, players) {
+  if (!chasmJob) {
+    const next = nextChasmChunk(players);
+    if (!next) return;
+    chasmJob = { cx: next[0], cz: next[1], ops: chasmOps(next[0], next[1]), i: 0 };
+  }
+  let budget = OPS_PER_TICK;
+  while (budget-- > 0 && chasmJob.i < chasmJob.ops.length) {
+    if (!apply(d, chasmJob.ops[chasmJob.i])) { chasmJob = undefined; waitUntil = tickNo + 40; return; }
+    chasmJob.i++;
+  }
+  if (chasmJob.i >= chasmJob.ops.length) { chasmDone.add(chasmKey(chasmJob.cx, chasmJob.cz)); chasmDirty = true; chasmJob = undefined; }
+}
+
+export function flush() {
+  flushBits();
+  if (chasmDirty) { save(K_CHASM, [...chasmDone]); chasmDirty = false; }
+}
 
 // The lowest ground in a chunk (where clearing an old chunk starts).
 function lowestGround(cx, cz) {
