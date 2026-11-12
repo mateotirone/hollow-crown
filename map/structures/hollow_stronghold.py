@@ -40,6 +40,12 @@ KEEP = (0, -2)      # the Spire: the throne hall at the foot of the tallest need
 KEEP_REACH = 20     # the cluster stays inside this radius; the lane and the river ring go round it
 MOAT = (R_OUT + 3, R_OUT + 9)
 FIELDS_TO = 100
+# The Hollow's roof: its underside never rises above y 196 (terrain.js ROOF.maxBottom), so on the chosen site
+# (ground y 76, the wood country west of the Long Climb) the tallest tip must stay under about 118 above the
+# ground. Every height below is scaled by this; registered as a site, the roof lifts over it on its own
+# (terrain.js tallThings).
+H_SCALE = 0.74
+SITE = {"x": -380, "z": 2160, "y": 76}
 
 # (angle in degrees: 0 east, 90 south = the gate side; size; height): uneven on purpose
 OUT_TOWERS = [(61, 7.5, 52), (121, 6.5, 40), (24, 5.5, 34), (-11, 8.5, 63), (-49, 6.5, 44), (-93, 7.5, 58),
@@ -47,7 +53,7 @@ OUT_TOWERS = [(61, 7.5, 52), (121, 6.5, 40), (24, 5.5, 34), (-11, 8.5, 63), (-49
 IN_TOWERS = [(44, 6.5, 74), (141, 7.5, 61), (-31, 5.5, 88), (-97, 6.5, 57), (-148, 7.5, 80)]
 # the Spire's needles: (dx, dz from KEEP, size, height, plan, lean steps every)
 SPIRE = [(-12, 4, 6.5, 84, "oct", 14), (11, -9, 5.5, 68, "round", 13), (8, 10, 4.5, 52, "diamond", 11),
-         (0, 0, 10.5, 108, "diamond", 32)]
+         (0, 0, 10.5, 92, "diamond", 26)]
 SHAPES = ("diamond", "oct", "square", "oct")
 
 
@@ -76,9 +82,10 @@ class HollowStronghold(Citadel):
         """Every tower in the stronghold is a needle: the Citadel's tower calls (gatehouses too) land here.
         Its plan, extra height and lean come from where it stands, so no two match."""
         shape = SHAPES[int(h3(cx, 5, cz, 17) * len(SHAPES))]
-        self.needle(cx, cz, r, int(h * (1.25 + h3(cx, 6, cz, 19) * 0.6)), shape, walks=walks, door=door, name=name)
+        self.needle(cx, cz, r, int(h * (1.35 + h3(cx, 6, cz, 19) * 0.6)), shape, walks=walks, door=door, name=name)
 
     def needle(self, cx, cz, r, h, shape, walks=(), door=None, name="needle", every=None, crown=False):
+        h = max(int(h * H_SCALE), max(list(walks) + [0]) + 12)
         """An angular leaning tower. Shell 2 thick, floors every 8 (and at wall walks), a spiral stair up each
         straight run, barred slits lit with soul lanterns, a corbelled parapet with jagged merlons and spiked
         corner pinnacles, then a steep faceted pyramid spire with the spire top."""
@@ -154,7 +161,7 @@ class HollowStronghold(Citadel):
         for k, (dx, dz, m) in enumerate(ring):              # soul fire here and there on the parapet walk
             if h3(cx + dx, 3, cz + dz, 41) < 0.04: self.set(cx + dx + ox, top + 1, cz + dz + oz, "soul_campfire")
         # the spire: a faceted pyramid in the tower's own plan, very steep, hollow inside
-        H = int(round((r + 1) * (3.2 + h3(cx, 9, cz, 7) * 1.4)))
+        H = int(round((r + 1) * (2.7 + h3(cx, 9, cz, 7) * 1.1)))
         y0 = top + 1
         for k in range(H + 1):
             rk = (r + 0.2) * (1 - k / (H + 1))
