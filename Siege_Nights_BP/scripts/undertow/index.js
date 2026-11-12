@@ -11,6 +11,7 @@
 //   /scriptevent hc:mark_source_site <id>   record a candidate shrine by hand (look at the wall)
 //   /scriptevent hc:thin_status             which of the seven thin-place caves are built (thinplaces.js)
 //   /scriptevent hc:thin_tp <id>            go to a thin place;  hc:thin_build <id>  build it now
+//   /scriptevent hc:seep_status             how far the seep has spread;  hc:seep_days <n>  pretend the Rift has been open n days (seep.js)
 //   /scriptevent hc:open_rift               open the Rift at the picked site without a fork
 //   /scriptevent hc:reveal_source           tell only you which site was picked (spoils it!)
 //   /scriptevent hc:undertow_go             go to the Undertow now (testing)
@@ -52,6 +53,7 @@ import { thinTick, thinCommand, planThinPlace, hillHeight, caveGeometry, setHill
 import { SITE_FEATURES } from "../lore/data/world.js";
 import { canOpen, dullLeft, BOSSES_TO_OPEN, FORK_DULL_DAYS } from "./source.js";
 import { fallenCount, REGIONAL_BOSSES } from "../lore/data/spine.js";
+import { seepTick, seepCommand, planVeins, mouthSeeds, reachOn, hollowOf, takesMoss, heldGround, MAX_REACH } from "./seep.js";
 import { progressOf } from "../lore/player.js";
 import { CRACK_HEIGHT, CRACK_DEPTH, OPENING } from "./rift.js";
 import "./story.js";
@@ -383,6 +385,10 @@ system.afterEvents.scriptEventReceive.subscribe((e) => {
       }
       break;
     }
+    case "hc:seep_status":
+    case "hc:seep_days":
+      if (player && isBuilder(player)) seepCommand(e.id, player, e.message);
+      break;
     case "hc:thin_status":
     case "hc:thin_tp":
     case "hc:thin_build":
@@ -431,6 +437,7 @@ on("showcase", ({ player, dim, nextSpot, label }) => {
 onTick("undertow:source", 600, () => sourceSignsTick(isNight()));
 // ---- the seven thin-place caves build themselves when someone first comes near -------------
 onTick("undertow:thin", 40, () => thinTick());
+onTick("undertow:seep", 100, () => seepTick());
 
 // ---- self-tests ---------------------------------------------------------------------------
 addTests("undertow", {
@@ -740,6 +747,38 @@ addTests("undertow", {
   },
   "the opening takes 40 seconds and the tear waits for the hush": () => {
     assert(OPENING.done === 40 && OPENING.answer < OPENING.stir && OPENING.stir < OPENING.hush && OPENING.hush < OPENING.tear && OPENING.tear < OPENING.widen && OPENING.widen < OPENING.breath && OPENING.breath < OPENING.look && OPENING.look < OPENING.done);
+  },
+  "the seep: nothing for a week, the agreed reach at days 14, 21 and 28, then it never stops": () => {
+    assert(reachOn(0) === 0 && reachOn(6) === 0 && reachOn(14) === 16 && reachOn(21) === 30 && reachOn(28) === 48);
+    for (let d = 28; d < 200; d++) assert(reachOn(d + 1) > reachOn(d), `stalls on day ${d}`);
+  },
+  "the seep: veins are connected, reach out from the mouth, and growing never moves them": () => {
+    for (const f of ["south", "north", "east", "west"]) {
+      const near = planVeins(mouthSeeds(f), 48, 601), far = planVeins(mouthSeeds(f), 128, 601);
+      for (const [k, d] of near) if (d <= 48) assert(far.get(k) === d, `${f}: a vein moved when the seep grew`);
+      // connected: every cell touches another cell that is nearer the source (or is at the source)
+      for (const [k, d] of near) {
+        if (d <= 1) continue;
+        const [x, z] = k.split(",").map(Number);
+        let ok = false;
+        for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) { const n = near.get(`${x + a},${z + b}`); if ((a || b) && n !== undefined && n <= d) ok = true; }
+        assert(ok, `${f}: a loose patch at ${k}`);
+      }
+      // veins, not a blanket: well under a third of the ground inside the reach is taken
+      const [fx, fz] = FACING[f];
+      const inReach = [...near].filter(([, d]) => d <= 48).map(([k]) => k.split(",").map(Number));
+      const ahead = inReach.filter(([x, z]) => x * fx + z * fz > 4).length;
+      assert(inReach.length < 48 * 48 * 3.14 * 0.3 && ahead > inReach.length * 0.5, `${f}: ${inReach.length} cells, ${ahead} ahead of the mouth`);
+    }
+    assert(planVeins(mouthSeeds("south"), MAX_REACH, 601).size < 400000, "the full plan is small enough to hold");
+  },
+  "the seep: takes wild ground and wild buildings, never what people use, never held ground": () => {
+    assert(takesMoss("minecraft:grass_block") && takesMoss("minecraft:snow") && !takesMoss("minecraft:oak_planks") && !takesMoss("siege:undertow_moss"));
+    assert(hollowOf("minecraft:stone_bricks").includes("veinstone") && hollowOf("minecraft:oak_planks") === "siege:pale_ash" && hollowOf("minecraft:spruce_log") === "minecraft:dark_oak_log");
+    assert(hollowOf("minecraft:glass_pane") === "minecraft:air" && hollowOf("minecraft:lantern") === "minecraft:soul_lantern");
+    for (const keep of ["minecraft:chest", "minecraft:oak_door", "minecraft:bell", "siege:regal_safe", "minecraft:dark_oak_log", "minecraft:grass_block"]) assert(hollowOf(keep) === undefined, keep);
+    assert(heldGround(-150, -150, []) && !heldGround(115, 510, []), "Kingsrest is held; a thin place is not");
+    assert(heldGround(2000, 2000, [{ x: 2000, y: 70, z: 2000 }]) && !heldGround(2000, 2000, []), "a held plot is held");
   },
   "the veil only takes players who beat all five bosses themselves": () => {
     assert(!mayCrossWith(0, false) && !mayCrossWith(4, false) && mayCrossWith(5, false) && mayCrossWith(0, true));
