@@ -18,18 +18,18 @@ def cross(pts,cx,cz,r):
 res={}
 for n,(cx,cz) in PL.items():
     row={"center":[cx,cz],"centerY":round(float(h(cx,cz)))}
-    for r in (48,64,80):
+    for r in (56,72,88):
         hs=[float(h(cx+r*math.sin(math.radians(a)),cz-r*math.cos(math.radians(a)))) for a in range(0,360,2)]
         step=max(abs(hs[i]-hs[i-1]) for i in range(len(hs)))
         arc=2*math.pi*r/180
         wet=[a*2 for a,v in enumerate(hs) if v<=62.5]
         row[f"r{r}"]={"minY":round(min(hs)),"maxY":round(max(hs)),"range":round(max(hs)-min(hs)),"maxSlope":round(step/arc,2),"wetDeg":len(wet)*2,
           "profile8":{c:round(hs[i*45//2]) for i,c in enumerate(["N","NE","E","SE","S","SW","W","NW"])}}
-    row["crossings_r64"]={}
+    row["crossings_r72"]={}
     for kind in ("rivers","roads","trails"):
         for name,pts in L[kind].items():
-            c=cross(pts,cx,cz,64)
-            if c: row["crossings_r64"][f"{kind[:-1]}:{name}"]=[f"{d}° {comp(d)}" for d in c]
+            c=cross(pts,cx,cz,72)
+            if c: row["crossings_r72"][f"{kind[:-1]}:{name}"]=[f"{d}° {comp(d)}" for d in c]
     res[n]=row
-    print(n,row["centerY"],[ (r,row[f'r{r}']['minY'],row[f'r{r}']['maxY'],row[f'r{r}']['maxSlope'],row[f'r{r}']['wetDeg']) for r in (48,64,80)],row["crossings_r64"])
+    print(n,row["centerY"],[ (r,row[f'r{r}']['minY'],row[f'r{r}']['maxY'],row[f'r{r}']['maxSlope'],row[f'r{r}']['wetDeg']) for r in (56,72,88)],row["crossings_r72"])
 json.dump(res,open('wall-profiles.json','w'),indent=1)

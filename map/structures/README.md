@@ -102,9 +102,9 @@ lays out a player settlement on one of the 12 map plots (slice: `terrain_slice.p
 centred on the Plot Stone). It is the town pipeline plus the settlement rules agreed with the
 building-placement thread:
 
-- The wall grows: Hamlet r32, Town r40, City r48, Castle r56. A slot opens once its whole box is within
+- The wall grows: Hamlet r36, Town r46, City r56, Castle r66 (was 32/40/48/56; --walls tries others). A slot opens once its whole box is within
   wall - 3, and never before the road its walkway reaches.
-- Ring lanes may sit on the old wall lines at r32 and r48 only (templates choose the arcs); they open the
+- Ring lanes may sit on the old wall lines at r36 and r56 only (templates choose the arcs); they open the
   tier after the wall leaves them.
 - The ground every town hall level takes (drawHall bounds per region, from the Hall Cornerstone 5 ahead,
   plus 2) is kept free of roads from the start, and of slots up to level 4; slots may sit on level 5's extra ground (tag hall5).
