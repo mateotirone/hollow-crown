@@ -240,8 +240,9 @@ Yf[~land]=(SEA-1-sstep(dland/220)*29-np.clip(dland/40,0,1)*2)[~land]   # a shelf
 # plot terraces: every plot gets a level patch for its final settlement (hall, buildings, wall at r56),
 # eased back into the natural ground, so a generated wall can follow the ground all the way round.
 # The patch is not a circle (Mateo 2026-11-11): its edge wanders with the bearing, never closer than
-# r64 (raiders gather out to r64) and reaching out to about r100 in places; the easing band wanders too.
-PLOT_FLAT,PLOT_EASE=64,115
+# r74 (the Castle wall wobbles out to about r70, raiders gather from r73) and reaching out to about r118 in places;
+# the easing band wanders too.
+PLOT_FLAT,PLOT_EASE=74,125   # Mateo 2026-11-12: Castle wall r66 (wobbling to ~r70), build land flat to r72+
 def plot_shape(name, theta):
     """Wandering edge factor (>= 1) by bearing; same numbers as genworld.py's clearing."""
     r_=np.random.default_rng(sum(map(ord,name))*7919)
