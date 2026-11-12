@@ -222,6 +222,7 @@ OPP = {"n": "s", "s": "n", "e": "w", "w": "e"}
 class Citadel:
     def __init__(self, style="vale"):
         self.S = STYLES[style]
+        self.style = style
         self.bp = Blueprint(f"citadel_{style}")
         self.plots, self.towers, self.gates, self.fields = [], [], [], []
         self.cone_cache = {}
@@ -973,9 +974,42 @@ class Citadel:
         self.inner_ward()
         self.lay_plots()
         self.farmland()
+        self.station()
         self.weather()
         self.bp.finish()
         return self.bp
+
+    STATION_Z = 126   # the main line, outside the fields on the gate side
+
+    def station(self, stage="grand", region=None):
+        """The Citadel's railway station (Mateo: where is it?). It rises on claim at the plot's own stop
+        (trains/routes_data.js, about 95 to 100 out). In this preview the line passes the gate side: the
+        Grand Station (Castle tier) on the line at z = STATION_Z, its street doors facing the gate, and the
+        gate avenue run on through the fields to its forecourt. In game the same design is turned to face
+        the town from wherever the plot's stop is, with the road laid to it."""
+        import stations as ST
+        region = region or self.style
+        if region not in ST.REGIONS: return
+        b = getattr(ST, stage)(region)
+        Z = self.STATION_Z
+        (lx, _, lz), (hx, _, hz) = b.bounds()
+        for (x, y, z), v in b.cells.items():
+            if v[0] == "keep": continue
+            self.bp.cells[(x, y, z + Z)] = v
+        S = self.S
+        for x in range(-70, 71):                             # the line itself, for the preview (in game: bought, then laid)
+            for z in (Z, Z + 4):
+                if self.bp.get(x, 1, z)[0] in ("keep", "air"):
+                    self.set(x, 0, z, "gravel"); self.set(x, 1, z, "rail", rail_direction=1)
+        a = AVENUE_W // 2
+        for z in range(FARM_TO - 6, Z + lz):                 # the avenue on to the station's forecourt
+            for x in range(-a - 2, a + 3):
+                if self.bp.get(x, 1, z)[0] in ("keep", "air") or abs(x) <= a:
+                    if self.bp.get(x, 1, z)[0] not in ("keep", "air") and abs(x) > a: continue
+                    self.set(x, 0, z, pick(S["street"], x, z, 7) if abs(x) <= a else S["court"])
+                    if self.bp.get(x, 1, z)[0] not in ("keep", "air"): self.bp.cells.pop((x, 1, z), None)
+                    self.street.add((x, z))
+        self.station_at = {"stage": stage, "line_z": Z, "front_z": Z + lz}
 
     PARTIAL = ("_stairs", "_slab", "_wall", "_fence", "_pane", "lantern", "_door", "_carpet", "_trapdoor", "iron_bars",
                "siege:", "ladder", "water", "farmland", "torch", "_leaves", "snow_layer", "grass", "fern", "bush",
