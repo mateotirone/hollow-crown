@@ -477,6 +477,10 @@ for d_ in GW_FILES:
     log("graded the land to", d_["town"], "groundwork:", int(foot.sum()), "columns")
 railcore = (rail_d <= 1.5) & ~wet & (tun_floor == -999) & (br_deck == -999) & RAIL_IN_WORLD
 railzone = (rail_d <= 4.5) & RAIL_IN_WORLD
+# the planned lines keep trees off even with no bed in the world (playtest 2026-11-12: trees stood on the lines, and
+# the track the game lays went round their roots and branches): no trunk within 8 of a line, no crown over its bed
+# and graded sides (the game grades 5 out, rail_bed.js)
+railkeep = rail_d <= 6.5
 log("rail lines", len(RAILLINES), "stops", len(STOPS), "tunnel cells", int((tun_floor > -999).sum()), "bridge cells", int((br_deck > -999).sum()))
 # the export: stops (the track block where trains stop, mid-platform) and segments between neighbouring stops,
 # sharing their end blocks
@@ -488,6 +492,12 @@ try:
     import railworks
 except ImportError:
     railworks = None
+# one height for track two lines share (playtest 2026-11-12: Millbrook's Oakmere branch ran its shared platform a
+# block above the North line's, so buying it stacked a second track on the first): the first line keeps its heights
+import railshare
+_ln = list(RAILLINES)
+for n_, ys_h in zip(_ln, railshare.harmonise([([tuple(map(int, c)) for c in RAILLINES[n_][0]], RAILLINES[n_][1]) for n_ in _ln])):
+    RAILLINES[n_] = ([tuple(map(int, c)) for c in RAILLINES[n_][0]], ys_h, RAILLINES[n_][2])
 segs = []
 for lname, (cells, ys, stops_on) in RAILLINES.items():
     path = [(x, int(y), z) for (x, z), y in zip(cells, ys)]
@@ -845,6 +855,10 @@ for sx_, sy_, sz_, sid_, ss_ in STAMPED:
     i_ = sx_ - X0; k_ = sz_ - Z0; m_ = (i_ >= 0) & (i_ < SIZE) & (k_ >= 0) & (k_ < SIZE)
     stampcol[i_[m_], k_[m_]] = True
 stampnear = box(stampcol.astype(np.float32), 2) > 0           # crowns (custom trees, through hard_t below)
+if True:                                                       # simple trees: trunks 8 out from a planned line
+    far_ = rail_d[np.clip(tx - X0, 0, SIZE - 1), np.clip(tz - Z0, 0, SIZE - 1)] > 8
+    tx, tz, rg_, yy_, tkind, tvar = tx[far_], tz[far_], rg_[far_], yy_[far_], tkind[far_], tvar[far_]
+    log("trees kept off the planned lines:", int((~far_).sum()), "removed")
 if stampcol.any():
     far_ = box(stampcol.astype(np.float32), 7)[np.clip(tx - X0, 0, SIZE - 1), np.clip(tz - Z0, 0, SIZE - 1)] == 0   # simple trees: trunks 7 out
     tx, tz, rg_, yy_, tkind, tvar = tx[far_], tz[far_], rg_[far_], yy_[far_], tkind[far_], tvar[far_]
@@ -882,7 +896,7 @@ if TREEDB:
               ("open", {"fen_black_alder": 45, "fen_pollard_willow": 35, "fen_bald_cypress": 20})],
         EMBER: [("open", {"ember_umbrella_acacia": 35, "ember_argan": 30, "ember_date_palm": 15, "ember_baobab": 10, "ember_dragon_blood": 10})],
     }
-    hard_t = keepclear | railzone | stampnear        # crowns stay off the line (trains need the air above the bed) and off builds
+    hard_t = keepclear | railzone | railkeep | stampnear   # crowns stay off the line (trains need the air above the bed) and off builds
     soft_t = _grow_mask(~open_ | ~land, 1)
     soft_w = _grow_mask((~open_ & ~fenpool & ~bank) | ~land, 1)        # bald cypress and snags may stand in fen water
     taken = np.zeros((SIZE, SIZE), np.int8)
