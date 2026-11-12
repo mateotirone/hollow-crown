@@ -259,7 +259,8 @@ export function foundTown(owner, plot, at, { style, layout, lord = false } = {})
   if (!tw) return "This plot has no town layout.";
   if (!lord) {
     const left = lordTownAt(at.x, at.z);
-    if (left) return adoptTown(left, owner) ? true : "already";
+    if (left) return adoptTown(left, owner) ? true : "That settlement already has a holder.";
+    if (townOf(owner)?.from && townOf(owner).x === at.x && townOf(owner).z === at.z) return true; // already taken over
   }
   const dim = world.getDimension(OVERWORLD);
   if (!dim.getBlock(at)) return "That ground is not loaded yet.";
@@ -290,10 +291,12 @@ export function lordTownAt(x, z) {
 
 // A player takes over a lord's town as it stands: layout, roads, every building on its plot, the tier its
 // buildings and wall reached. Its empty open plots get markers. The wall is handed over by rivals/index.js
-// (adoptWall). Returns false if there was nothing to take.
+// (adoptWall). Returns false if there was nothing to take, or the player already has a town elsewhere.
 export function adoptTown(from, to) {
   const town = store.data.towns[from];
   if (!town || from === to) return false;
+  const mine = store.data.towns[to];
+  if (mine && !(mine.x === town.x && mine.z === town.z)) return false; // they keep the town they already have
   delete store.data.towns[from];
   delete town.lord;
   delete town.hallSeat;

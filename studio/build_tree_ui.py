@@ -7,6 +7,9 @@
 The layout comes from scripts/townhall/tree_layout.js (run through studio/townhall_preview/dumplayout.mjs), so
 rerun this whenever skills are added or moved:   python3 studio/build_tree_ui.py
 Node frames (node_*.png), panel.png and slot.png are the textures thread's (studio/art/build_ui.py).
+
+It also draws the Hall Map (scripts/townhall/hallmap.js): forms whose title carries MAP_FLAG show the painted realm
+with a 16 x 16 grid of cells over it, one form button per cell. Its art comes from studio/build_hallmap.py.
 """
 import json, os, subprocess
 from PIL import Image, ImageDraw
@@ -15,6 +18,9 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RP = os.path.join(ROOT, "Siege_Nights_RP")
 CELL_W, CELL_H = 52, 29            # one grid cell, in UI pixels
 FLAG = "§h§c"
+MAP_FLAG = "§h§m"                  # hallmap.js MAP_FLAG
+MAP_GRID, MAP_CELL = 16, 12        # hallmap.js GRID; UI pixels per cell
+MAP_W = MAP_GRID * MAP_CELL
 BRANCH = {"keep": "§1", "wayfarer": "§2", "blade": "§3", "arcana": "§4", "wing": "§5", "forge": "§6", "helm": "§7", "hex": "§8"}
 TINT = {"keep": (127, 178, 217), "wayfarer": (143, 201, 138), "blade": (217, 121, 106), "arcana": (180, 140, 240),
         "wing": (232, 140, 80), "forge": (150, 200, 225), "helm": (90, 170, 190), "hex": (120, 190, 110)}
@@ -62,9 +68,10 @@ ui = {
                 "$title_text_binding_type": "none",
                 "$child_control": "server_form.long_form_panel",
                 "layer": 2,
-                "bindings": title_bindings(f"((#title_text - '{FLAG}') = #title_text)"),
+                "bindings": title_bindings(f"(((#title_text - '{FLAG}') = #title_text) and ((#title_text - '{MAP_FLAG}') = #title_text))"),
             }},
             {"hc_tree@server_form.hc_tree": {"layer": 2, "bindings": title_bindings(has(FLAG))}},
+            {"hc_map@server_form.hc_map": {"layer": 2, "bindings": title_bindings(has(MAP_FLAG))}},
         ],
     },
     "hc_tree": {
@@ -109,8 +116,52 @@ ui = {
                          "bindings": [{**cell, "binding_name": "#form_button_text"}]}},
         ],
     },
+    # The Hall Map: the realm, the cells over it, a title and a close button. No form button outside the grid.
+    "hc_map": {
+        "type": "panel",
+        "size": [MAP_W + 16, MAP_W + 40],
+        "controls": [
+            {"hc_bg": {"type": "image", "texture": "textures/ui/hc/panel", "nineslice_size": 8, "size": ["100%", "100%"], "layer": 1}},
+            {"hc_title": {"type": "label", "text": "#title_text", "color": [0.89, 0.73, 0.35], "shadow": True, "font_scale_factor": 0.8, "anchor_from": "top_middle", "anchor_to": "top_middle", "offset": [0, 6], "size": [MAP_W - 20, 10], "text_alignment": "center", "layer": 3,
+                          "bindings": [{"binding_name": "#title_text"}]}},
+            {"hc_body": {"type": "label", "text": "#form_text", "font_scale_factor": 0.7, "color": [0.85, 0.83, 0.78], "anchor_from": "top_middle", "anchor_to": "top_middle", "offset": [0, 17], "size": [MAP_W, 8], "text_alignment": "center", "layer": 3,
+                         "bindings": [{"binding_name": "#form_text"}]}},
+            {"hc_close@common.close_button": {"anchor_from": "top_right", "anchor_to": "top_right", "offset": [-3, 3], "layer": 5}},
+            {"hc_realm": {"type": "image", "texture": "textures/ui/hc/map/realm", "size": [MAP_W, MAP_W], "anchor_from": "top_middle", "anchor_to": "top_middle", "offset": [0, 30], "layer": 2}},
+            {"hc_cells": {"type": "grid", "size": [MAP_W, MAP_W], "anchor_from": "top_middle", "anchor_to": "top_middle", "offset": [0, 30], "layer": 4,
+                          "grid_dimensions": [MAP_GRID, MAP_GRID], "grid_item_template": "server_form.hc_mcell", "grid_fill_direction": "horizontal", "grid_rescaling_type": "none",
+                          "collection_name": "form_buttons",
+                          "bindings": [{"binding_name": "#form_button_length", "binding_name_override": "#maximum_grid_items"}]}},
+        ],
+    },
+    # One map cell: its picture (fog, open land or a mark), an invisible button over it, and the mark's name on hover.
+    "hc_mcell": {
+        "type": "panel",
+        "size": [MAP_CELL, MAP_CELL],
+        "controls": [
+            {"hc_mpic": {"type": "image", "size": [MAP_CELL, MAP_CELL], "layer": 1,
+                         "bindings": [{**cell, "binding_name": "#form_button_texture", "binding_name_override": "#texture"},
+                                      {**cell, "binding_name": "#form_button_texture_file_system", "binding_name_override": "#texture_file_system"}]}},
+            {"form_button@common.button": {
+                "$pressed_button_name": "button.form_button_click",
+                "size": [MAP_CELL, MAP_CELL], "layer": 2,
+                "controls": [
+                    {"default": {"type": "panel"}},
+                    {"hover": {"type": "panel", "controls": [
+                        {"hc_frame": {"type": "image", "texture": "textures/ui/hc/map/hover", "size": [MAP_CELL, MAP_CELL], "layer": 1}},
+                        {"hc_tip": {"type": "label", "text": "#form_button_text", "font_scale_factor": 0.7, "color": [1.0, 0.95, 0.82], "shadow": True,
+                                    "anchor_from": "top_middle", "anchor_to": "bottom_middle", "offset": [0, -1], "size": ["default", 8], "layer": 30,
+                                    "bindings": [{**cell, "binding_name": "#form_button_text"}]}},
+                    ]}},
+                    {"pressed": {"type": "image", "texture": "textures/ui/hc/map/hover"}},
+                ],
+                "bindings": [{"binding_type": "collection_details", "binding_collection_name": "form_buttons"}],
+            }},
+        ],
+    },
 }
 os.makedirs(os.path.join(RP, "ui"), exist_ok=True)
 with open(os.path.join(RP, "ui/server_form.json"), "w") as f:
     json.dump(ui, f, indent=2, ensure_ascii=False)
+print("hall map:", MAP_W + 16, "x", MAP_W + 40, "ui pixels")
 print("tree screen:", W + 16, "x", H + 44, "ui pixels;", ", ".join(f"tree_{b}.png" for b in BRANCH))

@@ -545,10 +545,13 @@ onTick("rivals_siege", 20, () => { if (isReady()) siegeTick(); });
 // The buildings and the wall change hands (can happen before the player has a keep)
 function adopt(player, estate) {
   if (estate.adopted) return;
+  const mine = townOf(player.id); // a player who already has a town elsewhere keeps theirs
+  if (estate.town && mine && !(mine.x === estate.x && mine.z === estate.z)) return;
   estate.adopted = player.id;
   const dim = world.getDimension(OVERWORLD);
   const style = REGION_TO_STYLE[allPlots().find((p) => p.name === estate.plot)?.region] ?? "vale";
-  if (estate.town) adoptTown(estate.wall, player.id); // the town record, plots and all (founding.js)
+  // the town record, plots and all (founding.js); a player who already has a town elsewhere keeps theirs
+  if (estate.town) adoptTown(estate.wall, player.id); // false when founding already took it over: fine
   adoptWall(estate.wall, player.id);
   const old = halls()[player.id];
   if (estate.hall > 0 && estate.hallAt && (!old || old.lost)) {

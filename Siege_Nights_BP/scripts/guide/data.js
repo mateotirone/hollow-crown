@@ -174,10 +174,18 @@ export const ENTRIES = [
   {
     id: "town_hall", ch: "keep", title: "The town hall",
     tip: "Place the Hall Cornerstone on your land and click it: your town hall rises and grows with your settlement.",
-    page: "Craft a §fHall Cornerstone§r at the Siege Workshop and place it on your land. Click it to raise your first hall. Once the hall stands the stone is gone: open the town hall menu from the Tree of Oaths inside, or from your Keep menu.\n\n"
+    page: "Craft a §fHall Cornerstone§r at the Siege Workshop and place it on your land. Click it to raise your first hall. Once the hall stands the stone is gone: open the town hall menu from the §fTown Board§r just inside the door, or from your Keep menu.\n\n"
       + "The hall is built in your region's own style and is rebuilt bigger as your settlement grows. It holds the §fTree of Oaths§r, where you spend skill points.\n\n"
       + "From the hall menu you can also raise your §fsettlement wall§r level by level (and watch it go up), see who is online, and read the §fRumor Board§r for jobs.",
     when: ["carry:siege:hall_cornerstone", "click:siege:hall_cornerstone"],
+  },
+  {
+    id: "hall_map", ch: "keep", title: "The Hall Map",
+    tip: "Click the Cartographer's Table in your hall to see every settlement and the places your people have found.",
+    page: "Every town hall keeps a §fHall Map§r. Click the hall's Cartographer's Table, or choose \"Hall map\" in the Town Hall menu.\n\n"
+      + "It shows every settlement in its banner colour and who holds it, rival lords, free plots and the towns. Places your settlement has found appear as you find them, and land nobody from your settlement has walked stays under fog. Allies' travels count too. Players themselves never show on it.\n\n"
+      + "Tap a mark to read about it. Mysteries are never marked: you have to work those out yourself. Sneak-click the table to use it as an ordinary cartography table.",
+    when: ["click:minecraft:cartography_table"],
   },
   {
     id: "wall_levels", ch: "keep", title: "The settlement wall",

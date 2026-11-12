@@ -566,6 +566,7 @@ Things I could not check without the game, so please look closely: that the stee
 11. A claim near a Station Post placed by the map builder (within about 140 blocks of the banner) should raise a Halt by that post.
 12. **Buying the line.** Once the world has its planned railway, `/scriptevent siege:trains routes` should list the stops and say which is your home stop. Click any Station Post: "Extend the line" should only offer stretches that start at a stop you can already reach (at first just the ones out of your home stop). Buy one: the Track should lay itself along the graded bed over a few seconds, and everyone should see "The line from ... to ... is laid". Stretches past it should now show up in the menu.
 13. **Station on claim.** On the real map, found a settlement on a plot. ✅ "A Halt is rising at …" and a Halt builds on the plot's stop by the graded rail bed, the post ending on its platform. The station menu shows "Extend the line" and "Buy an engine", but no carriage yet. Buy the first stretch. ✅ "Call the carriage" appears: it puts one coach on the platform facing the next stop, slow (about 4 blocks a second). Leave it empty for a minute ✅ it goes away. Buy an engine, place it, then pick it up and drop it in lava. ✅ The station menu now says "Take an engine (free)".
+14. **Switches.** Buy two stretches that leave a station the same way (west out of Kingsrest: toward Harrowford and toward Gull's Rest). Where they part, sneak + click the track with an empty hand. ✅ "Switch set: …" and the piece turns to the other line. Drive an engine out: it follows the way the switch is set. Drive back in along the other line ✅ the switch flips itself and the train runs through onto the shared track.
 
 ## Sounds (scripts/sound/, SOUND-LIST.md)
 
@@ -652,9 +653,20 @@ Shortcuts: `/scriptevent siege:hollow_beat <id>` replays one scene, `siege:hollo
 
 Tell me about: a label sitting inside the block or too high above it, a label covering an NPC's name, or anything clickable with no label.
 
+### Hall Map
+1. In a hall of level 1 or more, open the Town Hall menu and choose "Hall map". ✅ A parchment map of the whole realm fills the screen, with fog over most of it and clear land around where you have walked.
+2. ✅ Your settlement has a banner in your colour with a gold ring; other settlements show in their colours, free plots as dashed rings, towns as little houses, even under fog. No players are shown.
+3. Hover a mark (or tap it on a phone). ✅ Its name shows above it; clicking opens a page about it with "Back to the map".
+4. Walk or fly about 300 blocks somewhere new and open the map again. ✅ That land is no longer fogged. Walk into Crownhold. ✅ The action bar says it is on your hall's map, and it appears there as a purple triangle.
+5. Click the Cartographer's Table inside a level 2+ hall. ✅ The Hall Map opens. Sneak-click it. ✅ The normal cartography table opens.
+6. ✅ The map closes with its X in the corner. If the screen looks broken (a long list of buttons instead of a map), tell me.
+
+Tell me about: marks too small to see, names hidden behind other marks, or the screen not fitting.
+
 ### Town hall build animation
 1. Stand at your cornerstone with a Longhouse built and run `/scriptevent siege:townhall_build 3`.
 2. ✅ The title "The Keep rises" shows once, the camera circles, and the action bar shows only a bar with a percentage that climbs steadily.
 3. ✅ The old Longhouse is gone completely before the Keep goes up: no leftover walls, roof or posts in or beside it.
-4. ✅ It is finished in about 15 seconds, and the Hall Cornerstone is gone once the hall stands. The Tree of Oaths' first page has a "Town Hall" button that opens the Town Hall menu (so does the Keep menu).
+4. ✅ It is finished in about 15 seconds and the Hall Cornerstone is gone. Just inside the front door, to one side of the aisle, stands the Town Board (a wide notice board with pinned papers, labelled when you are near). Clicking it opens the Town Hall menu. Check all five styles: `/scriptevent siege:townhall_build 3 frostmarch` and so on.
+   - A hall built before this update gets its Town Board the next time the world loads or you open the Town Hall from the Keep menu.
 5. Town Hall menu → "Move the town hall" → "Move it". ✅ You get a Hall Cornerstone back, the Tree sleeps, and placing the stone elsewhere starts a new hall. Placing a second cornerstone while a hall stands is refused with a message.

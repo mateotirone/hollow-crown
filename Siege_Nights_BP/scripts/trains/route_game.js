@@ -13,6 +13,7 @@ import { allSites } from "./station_sites.js";
 import { ROUTE, buyable, nearestStop, reachable, cannotBuy, priceOf, pieces, otherEnd } from "./routes.js";
 import { ROUTES } from "./routes_data.js";
 import { TRACK, TRAIN, CARS, TRAIN_STYLES } from "./data.js";
+import { addSwitch } from "./switches.js";
 
 // built: { [segmentId]: { by, at } }; laying: [{ seg, i }] (a stretch going down, next piece i);
 // missed: { [segmentId]: [piece index, ...] } (pieces whose ground wasn't loaded, tried again later)
@@ -40,6 +41,11 @@ function layPiece(dim, p) {
     const block = dim.getBlock(p);
     if (!block) return false;
     if (block.typeId !== TRACK) block.setPermutation(BlockPermutation.resolve(TRACK, { "siege:kind": p.kind, "siege:dir": p.dir }));
+    else {
+      // another line already lies here: where the two part, this block becomes a switch holding both shapes
+      const kind = block.permutation.getState("siege:kind"), dir = block.permutation.getState("siege:dir");
+      if (kind !== p.kind || dir !== p.dir) addSwitch(dim.id, p, { kind, dir }, { kind: p.kind, dir: p.dir });
+    }
     return true;
   } catch {
     return false;

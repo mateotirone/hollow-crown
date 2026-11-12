@@ -238,3 +238,11 @@ function freeFor(n, ns, d, get) {
 }
 
 export const trackKey = key;
+
+// A switch: one block where two lines part, holding one of its shapes at a time. Which shape a train entering by
+// link `entry` needs: the current one if it leads on from there, else the first other shape that does (a train
+// coming off a branch sets the switch for itself; at a crossing of two straights each train picks its own), else -1.
+export function switchSetting(shapes, current, entry) {
+  if (shapes[current] && hasLink(shapes[current], entry)) return current;
+  return shapes.findIndex((s) => hasLink(s, entry));
+}
