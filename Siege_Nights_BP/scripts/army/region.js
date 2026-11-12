@@ -1,4 +1,4 @@
-// Every soldier wears his settlement's regional look (Mateo, 2026-11-12: "themed correctly for the region that
+// Every soldier wears his settlement's regional look and his armour tier's look (Mateo, 2026-11-12: "themed correctly for the region that
 // they're in"). The art (PR #210) gives each soldier the int property siege:region and events siege:region_0..5;
 // colour still comes from the Keep Banner (siege:color_N, siege/guards.js).
 import { world } from "@minecraft/server";
@@ -16,6 +16,13 @@ export function dressRegion(guard, owner = guardOwner(guard)) {
   try { if (guard.getProperty("siege:region") !== n) guard.triggerEvent(`siege:region_${n}`); } catch { /* an older model without regions */ }
 }
 
+// Armour look (siege:tier, the art's per-type armour): equipGuard fires siege:tier_N; guards from older worlds
+// carry only the siege:armor dynamic property, so bring their look in line once they load
+export function dressTier(guard) {
+  const tier = Number(guard.getDynamicProperty("siege:armor") ?? 0);
+  try { if (guard.getProperty("siege:tier") !== tier) guard.triggerEvent(`siege:tier_${tier}`); } catch { /* an older model */ }
+}
+
 onTick("army-region", 200, () => {
-  try { for (const g of world.getDimension("minecraft:overworld").getEntities({ families: ["siege_guard"] })) dressRegion(g); } catch { /* fine */ }
+  try { for (const g of world.getDimension("minecraft:overworld").getEntities({ families: ["siege_guard"] })) { dressRegion(g); dressTier(g); } } catch { /* fine */ }
 });

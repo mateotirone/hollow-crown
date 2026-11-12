@@ -14,6 +14,15 @@
           ],
           "default": 0,
           "client_sync": true
+        },
+        "siege:tier": {
+          "type": "int",
+          "range": [
+            0,
+            4
+          ],
+          "default": 0,
+          "client_sync": true
         }
       }
     },
@@ -2346,6 +2355,31 @@
           "component_groups": [
             "siege:walk_23"
           ]
+        }
+      },
+      "siege:tier_0": {
+        "set_property": {
+          "siege:tier": 0
+        }
+      },
+      "siege:tier_1": {
+        "set_property": {
+          "siege:tier": 1
+        }
+      },
+      "siege:tier_2": {
+        "set_property": {
+          "siege:tier": 2
+        }
+      },
+      "siege:tier_3": {
+        "set_property": {
+          "siege:tier": 3
+        }
+      },
+      "siege:tier_4": {
+        "set_property": {
+          "siege:tier": 4
         }
       }
     }

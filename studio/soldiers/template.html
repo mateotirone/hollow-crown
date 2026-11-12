@@ -56,11 +56,11 @@ const DATA = __DATA__;
 const $ = (id) => document.getElementById(id);
 const S = { type: "pikeman", region: 0, color: 14, tier: 0, state: "idle", lineup: false, move: null, moveT: 0 };
 const INFO = {
-  man_at_arms: ["Sword-and-shield melee. Charges raiders and Wanted players.", "40 Regals, Hamlet. Sword is his held item."],
-  archer: ["Holds the wall and shoots far. Weak up close.", "40 Regals, Hamlet. Bow is his held item."],
+  man_at_arms: ["Sword-and-shield melee. Charges raiders and Wanted players.", "40 Regals, Hamlet. Holds the vanilla iron sword (a stand-in shape here)."],
+  archer: ["Holds the wall and shoots far. Weak up close.", "40 Regals, Hamlet. Holds the vanilla bow (a stand-in shape here)."],
   pikeman: ["Long reach. Holds gates and lines, stops horses and Knights.", "50 Regals, Hamlet."],
   shieldbearer: ["Big tower shield that blocks arrows. Walks in front of rams and crews.", "60 Regals, Town."],
-  crossbowman: ["Slow, heavy bolts that punch through armour. Holds the vanilla Minecraft crossbow (in game, not drawn here) and carries a pavise on his back.", "70 Regals, Town."],
+  crossbowman: ["Slow, heavy bolts that punch through armour. Holds the vanilla Minecraft crossbow (a stand-in shape here) and carries a pavise on his back.", "70 Regals, Town."],
   knight: ["Mounted spearman with lance, kite shield and crest. Rides at the head of the march.", "120 Regals, City. Horse from your Stables."],
   ram_crew: ["Three men push the ram to the gate and swing it.", "80 Regals, Town."],
   trebuchet_crew: ["Two men load and aim the trebuchet.", "100 Regals, City."],
@@ -132,6 +132,8 @@ function cubeMesh(c, tw, th, mat) {
   }
   return m;
 }
+const PROXY = { "64,60": 0x6b4a2c, "72,60": 0x8a8d94, "80,60": 0xc9ccd2 };
+function proxyMat(uv) { return new THREE.MeshLambertMaterial({ color: PROXY[uv.join(",")] || 0x999999 }); }
 function buildGeo(geo, texUri, bonesOut, skip) {
   const tw = geo.description ? geo.description.texture_width : geo.texturewidth || 64, th = geo.description ? geo.description.texture_height : geo.textureheight || 64;
   const mat = new THREE.MeshLambertMaterial({ map: tex(texUri), alphaTest: 0.5, side: THREE.DoubleSide });
@@ -140,7 +142,7 @@ function buildGeo(geo, texUri, bonesOut, skip) {
     const g = new THREE.Group(); const p = b.pivot || [0, 0, 0];
     g.userData = { pivot: [-p[0], p[1], p[2]], rest: (b.rotation || [0, 0, 0]).slice() };
     g.rotation.order = "ZYX";
-    if (!(skip && skip(b))) for (const c of b.cubes || []) { const m = cubeMesh(c, tw, th, mat); m.position.x -= -p[0]; m.position.y -= p[1]; m.position.z -= p[2]; g.add(m); }
+    if (!(skip && skip(b))) for (const c of b.cubes || []) { const m = cubeMesh(c, tw, th, c.proxy ? proxyMat(c.proxy) : mat); m.position.x -= -p[0]; m.position.y -= p[1]; m.position.z -= p[2]; g.add(m); }
     map[b.name] = g;
   }
   for (const b of geo.bones) {
@@ -168,21 +170,13 @@ let yaw = 0.55, pitch = 0.12, dist = 92, target = new THREE.Vector3(0, 17, 0);
 const world = new THREE.Group(); scene.add(world);
 let actors = [];
 
-const ARMOR_GEOS = DATA.armor; // tier -> [geo,...]
 function makeActor(type, region, color, tier, x) {
   const T = DATA.types[type]; const bones = {};
   const grp = new THREE.Group();
   const body = buildGeo(T.geo, DATA.skins[type][region * 16 + color], bones);
   grp.add(body);
-  if (tier > 0) for (const g of ARMOR_GEOS[tier]) {
-    // attachable bones follow the wearer's bones of the same name
-    const tmp = {}; const r = buildGeo(g, DATA.armorTex[tier], tmp);
-    for (const [name, gs] of Object.entries(tmp)) {
-      const host = bones[name] && bones[name][0];
-      if (!host) continue;
-      for (const gg of gs) { if (gg.parent && gg.parent !== r) continue; gg.position.set(0, 0, 0); host.add(gg); }
-    }
-  }
+  // armour: the soldier's own armour model for this type and tier, animated with the same bones
+  if (tier > 0) body.add(buildGeo(T.armor[tier], DATA.armorSkins[type][region * 4 + tier - 1], bones));
   let horse = null;
   if (type === "knight" && S.mounted) {
     const hb = {}; horse = buildGeo(DATA.horse.geo, DATA.horse.tex[region], hb);
@@ -250,6 +244,7 @@ function tick(now) {
       if (!anim) continue;
       if (cond && !mol(cond)(q, v)) continue;
       if (anim.loop === false && anim.animation_length) continue; // one-shots only from the buttons
+      for (const bn of anim.reset || []) acc[bn] = { r: [0, 0, 0], p: [0, 0, 0] };
       add(anim, a.life);
     }
     if (S.move && DATA.anims[S.move]) {
@@ -300,7 +295,7 @@ const MOVE_LABEL = (id) => id.split(".").pop().replace(/_/g, " ").replace(/^./, 
 function renderMoves() {
   const T = DATA.types[S.type];
   const ones = Object.values(T.anims).filter((id) => DATA.anims[id] && DATA.anims[id].loop === false);
-  ones.push("animation.hc.guard.salute");
+  if (!ones.includes("animation.hc.guard.salute")) ones.push("animation.hc.guard.salute");
   btns($("moves"), ones.map((id) => ({ id, label: MOVE_LABEL(id) })), (it) => S.move === it.id, (it) => { S.move = it.id; S.moveT = 0; renderMoves(); });
 }
 function renderAll() {

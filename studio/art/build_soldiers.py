@@ -493,23 +493,181 @@ ANIMATE = {
                {"plant_charge": "animation.hc.sapper.plant_charge"}),
 }
 
+
+# ---------------------------------------------------------------- armour (Mateo 2026-11-12: "add variation on the armors")
+# The guard armour tiers 1-4 are drawn by the soldier itself, so they can differ by type and region: a second render
+# controller draws geometry.hc.soldier_armor.<type>.t<tier> with textures/entity/soldiers/<type>/armor/<region>_t<tier>.
+# The tier comes from the int property siege:tier (events siege:tier_0..4); the shapes start from the guardgear tiers
+# (studio/build_guardgear.py, already cut at elbows and knees) plus each type's own pieces. The guardgear items still
+# give the protection, but their attachables now only draw on players, so the armour never shows twice.
+GA = RP + 'textures/models/siege_guard_armor/'
+METAL = {   # region finish: the grey steel is re-toned through these, so mail and plate keep their pattern
+    'vale': None,
+    'frostmarch': fixed('#2a3242', '#4a5870', '#72849e', '#9cb0c8', '#c8d8ea', '#eef6ff'),     # blued steel
+    'saltreach': fixed('#2c3434', '#4c5858', '#76807e', '#a2aca8', '#ccd4d0', '#eef2ee'),      # salt-bleached, faint sea-glass sheen
+    'emberwaste': fixed('#3a2618', '#664630', '#94704c', '#bc9a6c', '#dcc296', '#f6e6c4'),     # lacquered, sand-burnished
+    'blackfen': fixed('#141416', '#222326', '#33353a', '#474a50', '#5e6268', '#7a7e84'),       # blackened against the damp
+    'hollow': fixed('#1a1424', '#2c2240', '#43365e', '#5e4e80', '#7e6ca2', '#a494c4'),         # violet-black
+}
+TRIM = {'vale': GOLD, 'frostmarch': W['frostmarch']['emb'], 'saltreach': W['saltreach']['emb'], 'emberwaste': ramp('#c06a2a', 0.12, 0.72),
+        'blackfen': W['blackfen']['emb'], 'hollow': W['hollow']['emb']}
+
+def lum(c): return (0.3 * c[0] + 0.59 * c[1] + 0.11 * c[2]) / 255
+def tone(rp, l):
+    """Sample a 6-tone ramp smoothly by lightness 0..1."""
+    x = max(0.0, min(4.999, l * 5.4 - 0.4)); i = int(x); f = x - i
+    a, b = rp[i], rp[i + 1]; return tuple(round(a[k] + (b[k] - a[k]) * f) for k in range(3))
+def kind_of(c):
+    r_, g, b = c[:3]
+    if max(c[:3]) < 40: return 'dark'
+    if r_ > 200 and g > 200 and b > 190: return 'white'
+    if r_ - b > 80 and g > 110: return 'gold'
+    if r_ > 90 and g < 75 and r_ - g > 45: return 'cloth'
+    if r_ - b > 35 and r_ < 170: return 'leather'
+    return 'metal'
+
+# where each part sits on the guardgear sheet (x0, y0, x1, y1), from build_guardgear.REGIONS
+ZONE = {'head': (0, 0, 32, 16), 'boot': (0, 16, 16, 32), 'chest': (16, 16, 40, 32), 'arm': (40, 16, 56, 32),
+        'leg': (0, 48, 16, 64), 'belt': (16, 48, 40, 64), 'extra': (64, 0, 128, 32)}
+def zone_of(x, y):
+    for z, (a, b, c, d) in ZONE.items():
+        if a <= x < c and b <= y < d: return z
+    return None
+
+# per type: which parts turn to leather, metal brightness, and a pattern on the plate
+STYLE = {
+    'man_at_arms':   dict(leather=(), k=1.0, pattern=None),
+    'archer':        dict(leather=('chest', 'belt'), k=1.0, pattern='studs'),         # studded leather jack, steel sleeves
+    'pikeman':       dict(leather=(), k=0.96, pattern='splint'),                       # banded splints across the plate
+    'shieldbearer':  dict(leather=(), k=0.9, pattern='rivets'),                        # heavy, dull, riveted
+    'crossbowman':   dict(leather=('arm',), k=1.0, pattern='studs'),                    # leather sleeves to work the crank
+    'knight':        dict(leather=(), k=1.1, pattern='trim'),                          # bright, trimmed edges
+    'ram_crew':      dict(leather=('arm', 'leg'), k=0.92, pattern=None),               # leather where the beam rubs
+    'trebuchet_crew': dict(leather=('arm', 'boot'), k=0.95, pattern=None),
+    'sapper':        dict(leather=('chest', 'arm', 'belt'), k=0.8, pattern='soot'),    # sooty, leather-heavy
+}
+
+# extra pieces per type, worn at every tier: (bone, parent, pivot, [(origin, size, material)])
+ARMOR_EXTRA = {
+    'man_at_arms': [("gorget", "body", [0, 24, 0], [([-4.5, 23.5, -3.5], [9, 1.5, 7], 'metal')])],
+    'archer': [("bracer", "leftForearm", [6, 18, 0], [([3.3, 13, -2.7], [5.4, 3, 5.4], 'leather')])],
+    'pikeman': [("brim", "head", [0, 24, 0], [([-6.5, 28.5, -6.5], [13, 1, 13], 'metal')])],                 # kettle hat
+    'shieldbearer': [("rPauldron", "rightArm", [-5, 22, 0], [([-11.5, 19.5, -4.5], [7.5, 5.5, 9], 'metal')]),
+                     ("lPauldron", "leftArm", [5, 22, 0], [([4, 19.5, -4.5], [7.5, 5.5, 9], 'metal')])],
+    'crossbowman': [("brim", "head", [0, 24, 0], [([-7.5, 27.5, -7.5], [15, 1, 15], 'metal')])],             # wide chapel de fer
+    'knight': [("rRondel", "rightArm", [-5, 22, 0], [([-10.5, 20, -3.5], [6, 4, 7], 'metal')]),
+               ("lRondel", "leftArm", [5, 22, 0], [([4.5, 20, -3.5], [6, 4, 7], 'metal')]),
+               ("faulds", "body", [0, 24, 0], [([-5, 9, -3.6], [10, 3, 7.2], 'metal')])],
+    'ram_crew': [("rPad", "rightArm", [-5, 22, 0], [([-11, 19.5, -4.5], [7, 5, 9], 'leather')]),
+                 ("lPad", "leftArm", [5, 22, 0], [([4, 19.5, -4.5], [7, 5, 9], 'leather')])],
+    'trebuchet_crew': [("apron", "body", [0, 24, 0], [([-4.5, 5, -4.4], [9, 16, 1], 'leather')])],
+    'sapper': [("pouches", "body", [0, 24, 0], [([-4.5, 10.5, -4.3], [2, 2.5, 1.2], 'leather'), ([-1, 10.5, -4.3], [2, 2.5, 1.2], 'leather'),
+                                                ([2.5, 10.5, -4.3], [2, 2.5, 1.2], 'leather')])],
+}
+
+class Atlas2(Atlas):
+    def __init__(self): self.x, self.y, self.row = 64, 32, 0
+
+def armour_geo(kind, t):
+    bones = {}
+    for piece in ('helmet', 'chestplate', 'leggings', 'boots'):
+        g = json.load(open(RP + f'models/entity/guard_armor/tier{t}_{piece}.geo.json'))['minecraft:geometry'][0]
+        for b in g['bones']:
+            nb = bones.setdefault(b['name'], {"name": b['name'], "pivot": b['pivot'], "cubes": []})
+            if b.get('parent'): nb['parent'] = b['parent']
+            nb['cubes'] += copy.deepcopy(b.get('cubes', []))
+    at = Atlas2(); paints = []
+    for name, parent, pivot, cubes in ARMOR_EXTRA[kind]:
+        out = []
+        for o, sz, mat in cubes:
+            w, h, d = ceil(sz[0]), ceil(sz[1]), ceil(sz[2]); uv = at.take(w, h, d)
+            out.append({"origin": o, "size": sz, "uv": uv}); paints.append(((uv[0], uv[1], w, h, d), mat))
+        bones[name] = {"name": name, "parent": parent, "pivot": pivot, "cubes": out}
+    for b in bones.values():
+        if b['name'] in ('head', 'body', 'rightArm', 'leftArm', 'rightLeg', 'leftLeg') and 'parent' not in b:
+            b['parent'] = {'head': 'body', 'rightArm': 'body', 'leftArm': 'body', 'body': 'waist', 'rightLeg': 'root', 'leftLeg': 'root'}[b['name']]
+    order = ['root', 'waist'] + list(bones)
+    out = [{"name": "root", "pivot": [0, 0, 0]}, {"name": "waist", "parent": "root", "pivot": [0, 12, 0]}] + list(bones.values())
+    geo = {"format_version": "1.12.0", "minecraft:geometry": [{
+        "description": {"identifier": f"geometry.hc.soldier_armor.{kind}.t{t}", "texture_width": 128, "texture_height": 64,
+                        "visible_bounds_width": 4, "visible_bounds_height": 4.5, "visible_bounds_offset": [0, 1.5, 0]},
+        "bones": out}]}
+    return geo, paints
+
+def paint_armour(kind, region, t, paints):
+    src = Image.open(GA + f'tier{t}.png').convert('RGBA'); px = src.load()
+    out = Tex(128, 64); st = STYLE[kind]; P = W[region]
+    metal = METAL[region]; trim = TRIM[region]; L = P['lea']
+    for y in range(64):
+        for x in range(128):
+            c = px[x, y]
+            if c[3] == 0: continue
+            k = kind_of(c); z = zone_of(x, y); l = lum(c)
+            if k == 'metal' and z in st['leather']:
+                col = tone(L, l * 0.9)
+                if st['pattern'] == 'studs' and x % 3 == 1 and y % 3 == 1: col = R(IRON, 4)     # iron studs
+            elif k == 'metal':
+                l2 = min(1.0, l * st['k'])
+                col = tone(metal, l2) if metal else tuple(min(255, round(v * st['k'])) for v in c[:3])
+                pat = st['pattern']
+                if pat == 'splint' and z in ('chest', 'leg', 'belt') and y % 3 == 2: col = tone(metal or IRON, l2 * 0.55) if metal else R(IRON, 1)
+                if pat == 'rivets' and z in ('chest', 'arm') and x % 3 == 1 and y % 3 == 1: col = R(trim, 4)
+                if pat == 'trim' and z in ('chest', 'arm', 'head', 'leg') and (y % 16 in (0, 15) or (z == 'chest' and y in (20, 31))): col = R(trim, 4)
+                if pat == 'soot' and (x * 7 + y * 3) % 5 == 0: col = R(M['coal'], 2)
+            elif k == 'gold': col = tone(trim, l)
+            elif k == 'leather': col = tone(L, l * 1.1)
+            elif k == 'cloth': col = tone(P['jerkin'], l * 1.6)
+            elif k == 'white': col = R(trim, 5) if region != 'vale' else c[:3]
+            else: col = c[:3]
+            if region == 'blackfen' and k == 'metal' and (x * 11 + y * 5) % 23 == 0: col = R(ramp('#8a4a24', 0.12, 0.6), 2)   # rust
+            if region == 'hollow' and k == 'metal' and (x + 2 * y) % 31 == 0: col = R(W['hollow']['trim'], 3)                # vein
+            out.set(x, y, col)
+    for (u, v, w, h, d), mat in paints:
+        def fn(f, i, j, fw, fh, mat=mat):
+            if mat == 'leather': return R(L, 3 - (j == fh - 1) + (j == 0) - (i == fw - 1)) if not (i % 4 == 1 and j % 3 == 1) else R(trim, 3)
+            base = tone(metal, 0.7) if metal else R(IRON, 3)
+            if t == 1: base = R(L, 3) if kind in ('pikeman', 'crossbowman') and f in ('top', 'bottom') else base
+            if f == 'top': return tone(metal, 0.85) if metal else R(IRON, 4)
+            if f == 'bottom': return tone(metal, 0.4) if metal else R(IRON, 1)
+            if j == 0 or i == 0: return tone(metal, 0.9) if metal else R(IRON, 4)
+            if t >= 3 and j == fh - 1: return R(trim, 4)
+            return base if not (i == fw - 1 or j == fh - 1) else (tone(metal, 0.5) if metal else R(IRON, 2))
+        part(out, (u, v, w, h, d), fn)
+    return out
+
+def hide_guardgear_on_soldiers():
+    """The guardgear attachables draw only on players (playtests); soldiers draw their own armour."""
+    for t in range(1, 5):
+        for piece in ('helmet', 'chestplate', 'leggings', 'boots'):
+            p = RP + f'attachables/guardgear_{t}_{piece}.json'; d = json.load(open(p))
+            d["minecraft:attachable"]["description"]["render_controllers"] = [{"controller.render.armor": "query.owner_identifier == 'minecraft:player'"}]
+            json.dump(d, open(p, 'w'), indent=2)
+
 # ---------------------------------------------------------------- client entity, render controller
 def client_entity(kind):
     animate, anims = ANIMATE[kind]
     tex = {f"r{ri}c{ci}": f"textures/entity/soldiers/{kind}/{rg}_{c}" for ri, rg in enumerate(REGION_IDS) for ci, c in enumerate(COLORS)}
+    tex.update({f"a{ri}t{t}": f"textures/entity/soldiers/{kind}/armor/{rg}_t{t}" for ri, rg in enumerate(REGION_IDS) for t in range(1, 5)})
+    geos = {"default": f"geometry.hc.soldier.{kind}", **{f"armor_t{t}": f"geometry.hc.soldier_armor.{kind}.t{t}" for t in range(1, 5)}}
     return {"format_version": "1.10.0", "minecraft:client_entity": {"description": {
         "identifier": f"siege:{kind}", "materials": {"default": "entity_alphatest"}, "textures": tex,
-        "geometry": {"default": f"geometry.hc.soldier.{kind}"},
+        "geometry": geos,
         "scripts": {"pre_animation": PRE, "animate": animate},
         "animations": {**COMMON, **anims},
-        "render_controllers": ["controller.render.hc_soldier"],
+        "render_controllers": ["controller.render.hc_soldier", {"controller.render.hc_soldier_armor": "query.property('siege:tier') > 0"}],
         "enable_attachables": True}}}
 
 RC = {"format_version": "1.8.0", "render_controllers": {"controller.render.hc_soldier": {
     "arrays": {"textures": {"Array.skins": [f"Texture.r{ri}c{ci}" for ri in range(6) for ci in range(16)]}},
     "geometry": "Geometry.default",
     "materials": [{"*": "Material.default"}],
-    "textures": ["Array.skins[math.clamp(query.property('siege:region'), 0, 5) * 16 + math.clamp(query.variant, 0, 15)]"]}}}
+    "textures": ["Array.skins[math.clamp(query.property('siege:region'), 0, 5) * 16 + math.clamp(query.variant, 0, 15)]"]},
+  "controller.render.hc_soldier_armor": {
+    "arrays": {"textures": {"Array.armor": [f"Texture.a{ri}t{t}" for ri in range(6) for t in range(1, 5)]},
+               "geometries": {"Array.geos": [f"Geometry.armor_t{t}" for t in range(1, 5)]}},
+    "geometry": "Array.geos[math.clamp(query.property('siege:tier'), 1, 4) - 1]",
+    "materials": [{"*": "Material.default"}],
+    "textures": ["Array.armor[math.clamp(query.property('siege:region'), 0, 5) * 4 + math.clamp(query.property('siege:tier'), 1, 4) - 1]"]}}}
 
 # ---------------------------------------------------------------- behaviour starters
 STARTER = {   # cloned from: stats are a first guess; the sieges thread owns behaviour after this
@@ -519,11 +677,16 @@ STARTER = {   # cloned from: stats are a first guess; the sieges thread owns beh
 }
 REGION_PROP = {"type": "int", "range": [0, 5], "default": 0, "client_sync": True}
 
+TIER_PROP = {"type": "int", "range": [0, 4], "default": 0, "client_sync": True}
+
 def add_region(data):
+    """siege:region (clothes and armour finish) and siege:tier (which armour he draws, 0 = Gambeson)."""
     e = data["minecraft:entity"]
     e["description"].setdefault("properties", {})["siege:region"] = REGION_PROP
+    e["description"]["properties"]["siege:tier"] = TIER_PROP
     ev = e.setdefault("events", {})
     for n in range(6): ev[f"siege:region_{n}"] = {"set_property": {"siege:region": n}}
+    for n in range(5): ev[f"siege:tier_{n}"] = {"set_property": {"siege:tier": n}}
 
 def starters():
     made = []
@@ -573,12 +736,18 @@ def main():
             for c in COLORS:
                 t = paint_skin(kind, rg, c); paint_gear(t, paints, rg, c)
                 t.im.save(d + f'{rg}_{c}.png', optimize=True)
+        os.makedirs(d + 'armor', exist_ok=True); ageos = {}
+        for t in range(1, 5):
+            ag, ap = armour_geo(kind, t)
+            json.dump(ag, open(RP + f'models/entity/soldiers/{kind}_armor_t{t}.geo.json', 'w'), indent=1)
+            ageos[t] = ag["minecraft:geometry"][0]
+            for rg in REGION_IDS: paint_armour(kind, rg, t, ap).im.save(d + f'armor/{rg}_t{t}.png', optimize=True)
         p = RP + f'entity/{kind}.entity.json'
         json.dump(client_entity(kind), open(p, 'w'), indent=2); open(p, 'a').write('\n')
-        preview["types"][kind] = {"name": NAMES[kind], "geo": geo["minecraft:geometry"][0], "anims": ANIMATE[kind][1]}
+        preview["types"][kind] = {"name": NAMES[kind], "geo": geo["minecraft:geometry"][0], "anims": ANIMATE[kind][1], "armor": ageos}
     json.dump(RC, open(RP + 'render_controllers/hc_soldier.render_controllers.json', 'w'), indent=2)
     json.dump({"format_version": "1.8.0", "animations": A}, open(RP + 'animations/soldiers.animation.json', 'w'), indent=1)
-    made = starters(); lang()
+    made = starters(); lang(); hide_guardgear_on_soldiers()
     os.makedirs(ROOT + 'studio/soldiers', exist_ok=True)
     json.dump(preview, open(ROOT + 'studio/soldiers/data.json', 'w'))
     print('soldiers done; new behaviour starters:', made or 'none')
