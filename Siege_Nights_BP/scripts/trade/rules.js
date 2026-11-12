@@ -89,7 +89,6 @@ export function pathLength(data, built, from, to) {
 }
 
 export const travelTicks = (length) => Math.ceil((length / TRADE.trainSpeed + 2 * TRADE.loadSeconds) * SECOND);
-export const freightOf = (length) => TRADE.freightBase + Math.ceil(length / TRADE.freightPer);
 
 // ---------- ledgers ----------
 
@@ -117,23 +116,15 @@ export function takeMoney(ledger, amount, reserve = {}) {
 
 // ---------- a run ----------
 
-// Try to send one run. sides: { a: { ledger, pays (freight it owes) }, b: {...} }. Returns { ok, short: "a"|"b",
-// what } and, when ok, takes both loads (and the freight) out of the ledgers.
+// Try to send one run. sides: { a: { ledger }, b: { ledger } }. Returns { ok, short: "a"|"b", what } and, when ok,
+// takes both loads out of the ledgers. There is no freight charge (Mateo, 2026-11-12).
 export function depart(route, sides) {
   const need = { a: route.give, b: route.get };
   for (const k of ["a", "b"]) {
     const s = sides[k];
     if (!has(s.ledger, need[k].id, need[k].n)) return { ok: false, short: k, what: need[k].id };
-    if (s.pays) {
-      const reserve = { [need[k].id]: need[k].n };
-      const copy = { ...s.ledger };
-      if (!takeMoney(copy, s.pays, reserve)) return { ok: false, short: k, what: "freight" };
-    }
   }
-  for (const k of ["a", "b"]) {
-    add(sides[k].ledger, need[k].id, -need[k].n);
-    if (sides[k].pays) takeMoney(sides[k].ledger, sides[k].pays);
-  }
+  for (const k of ["a", "b"]) add(sides[k].ledger, need[k].id, -need[k].n);
   return { ok: true };
 }
 

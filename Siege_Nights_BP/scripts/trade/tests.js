@@ -2,7 +2,7 @@ import { addTests, assert, assertEqual } from "../core/tests.js";
 import { REGIONS } from "../economy/config.js";
 import { TRADE, GOODS, GOOD_IDS, COIN, GOLD_COIN, DAY, REGION_RATES_DEFAULT } from "./data.js";
 import {
-  valueTo, fairness, offerProblem, pathLength, travelTicks, freightOf, takeMoney, moneyIn, depart, afterTry, finished,
+  valueTo, fairness, offerProblem, pathLength, travelTicks, takeMoney, moneyIn, depart, afterTry, finished,
   npcMake, npcAnswer, capitalAnswer, capitalPrice, npcOffer, needsOf, supplyTake, crateDelta, cargoOf, loadText, regalWorth, balanceText,
 } from "./rules.js";
 
@@ -33,7 +33,7 @@ addTests("trade", {
     assert(offerProblem(offer({ id: IRON, n: 200 }, { id: GOLD, n: 1 }), { cargoFrom: cargoOf("halt"), cargoTo: cargoOf("grand") }), "too big for a halt");
     assertEqual(offerProblem(offer({ id: IRON, n: 20 }, { id: GOLD, n: 4 }), { cargoFrom: 128, cargoTo: 128 }), undefined);
   },
-  "the line: shortest laid path, travel time and freight": () => {
+  "the line: shortest laid path, and travel time by distance": () => {
     const data = { segments: [
       { id: "ab", from: "a", to: "b", length: 400 }, { id: "bc", from: "b", to: "c", length: 300 },
       { id: "ac", from: "a", to: "c", length: 1000 }, { id: "cd", from: "c", to: "d", length: 100 },
@@ -43,7 +43,7 @@ addTests("trade", {
     assertEqual(pathLength(data, { ab: 1, bc: 1 }, "a", "d"), Infinity);
     assertEqual(pathLength(data, {}, "a", "a"), 0);
     assertEqual(travelTicks(1600), (50 + 60) * 20);
-    assertEqual(freightOf(1000), 7);
+    assert(travelTicks(3000) > travelTicks(600), "further takes longer");
   },
   "money comes out of the coins, breaking a Gold Regal for change": () => {
     const l = { [COIN]: 3, [GOLD_COIN]: 1 };
@@ -55,16 +55,14 @@ addTests("trade", {
   },
   "a run is a fair swap: nothing leaves unless both sides can pay": () => {
     const route = { a: "p:a", b: "p:b", give: { id: IRON, n: 20 }, get: { id: GOLD, n: 4 }, every: "day", runs: 2 };
-    const a = { [IRON]: 30, [COIN]: 10 }, b = { [GOLD]: 3 };
-    let r = depart(route, { a: { ledger: a, pays: 4 }, b: { ledger: b } });
+    const a = { [IRON]: 30 }, b = { [GOLD]: 3 };
+    let r = depart(route, { a: { ledger: a }, b: { ledger: b } });
     assert(!r.ok && r.short === "b", "b short");
     assertEqual(a[IRON], 30);
     b[GOLD] = 8;
-    r = depart(route, { a: { ledger: a, pays: 4 }, b: { ledger: b } });
+    r = depart(route, { a: { ledger: a }, b: { ledger: b } });
     assert(r.ok, "sent");
-    assertEqual(a[IRON], 10); assertEqual(a[COIN], 6); assertEqual(b[GOLD], 4);
-    r = depart(route, { a: { ledger: { [IRON]: 20 }, pays: 4 }, b: { ledger: b } });
-    assertEqual(r.what, "freight");
+    assertEqual(a[IRON], 10); assertEqual(b[GOLD], 4);
   },
   "a short route pauses, retries, and goes dormant after three days": () => {
     const route = { every: "day", runs: 2, done: 1 };

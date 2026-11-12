@@ -145,7 +145,7 @@ hours(2);
 const route = T.routesOf("p:p1")[0]; if (!route) { console.log(log.join("\n")); console.log(JSON.stringify(S.routes), JSON.stringify(S.notices), warned.slice(-5)); process.exit(1); }
 check(!!route.onLine || route.done === 1, "the first run left");
 check(exBarrel.count(IRON) === 370, `iron left the real Exports barrel (${exBarrel.count(IRON)})`);
-check(exBarrel.count(COIN) < 300, `freight came out of the Regals (${exBarrel.count(COIN)})`);
+check(exBarrel.count(COIN) === 300, `no freight taken: the Regals are untouched (${exBarrel.count(COIN)})`);
 hours(3);
 check(imBarrel.count(GOLD) === 3, `gold arrived in the real Imports barrel (${imBarrel.count(GOLD)})`);
 check(S.outposts["p:p2"].im[IRON] === 30 && S.outposts["p:p2"].ex[GOLD] === 7, "player 2's ledgers moved while their station is unloaded");

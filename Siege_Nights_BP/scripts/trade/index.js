@@ -34,7 +34,7 @@ import { stationPlan } from "../trains/stations.js";
 import { startBuild, buildFor, worldCells, worldMarks } from "../townhall/build.js";
 import { TRADE, goodOf, DAY, COIN } from "./data.js";
 import {
-  pathLength, travelTicks, freightOf, depart, afterTry, finished, npcMake, npcAnswer, capitalAnswer, npcOffer,
+  pathLength, travelTicks, depart, afterTry, finished, npcMake, npcAnswer, capitalAnswer, npcOffer,
   needsOf, supplyTake, crateDelta, add, stacksOf, cargoOf, routesAllowed, niceGood, rateOf,
 } from "./rules.js";
 import { wingPlan, wingOrigin } from "./wing.js";
@@ -153,7 +153,7 @@ function boardText(block) {
   return undefined;
 }
 addMenuLabel({ block: TRADE_BOARD, name: "Trade Board", hint: "Click: trade routes", text: boardText });
-addMenuLabel({ block: BARREL, name: "Exports", hint: "Goods to send, and Regals for freight", where: (b) => crateKind(b) === "exports" });
+addMenuLabel({ block: BARREL, name: "Exports", hint: "Goods for your routes to send", where: (b) => crateKind(b) === "exports" });
 addMenuLabel({ block: BARREL, name: "Imports", hint: "What your routes bring back", where: (b) => crateKind(b) === "imports" });
 
 function crateKind(block) {
@@ -174,7 +174,7 @@ export function whyText(route, party) {
   if (w.what === "washout") return "a storm closed the line for a day";
   const side = w.short === "a" ? route.a : route.b;
   const who = side === party ? "your" : `${partyName(side)}'s`;
-  return w.what === "freight" ? `${who} Exports have no Regals for freight` : `${who} Exports are out of ${niceGood(w.what)}`;
+  return `${who} Exports are out of ${niceGood(w.what)}`;
 }
 
 // ---------- ledgers and the real crates ----------
@@ -450,12 +450,7 @@ function tryRun(route, t) {
     if (stacksOf({ ...o.im, [load.id]: (o.im?.[load.id] ?? 0) + load.n }) > TRADE.barrelSlots + TRADE.dockStacks) return fail(k, "imports");
   }
   const length = lineLength(route.a, route.b);
-  const pays = freightOf(length);
-  const payer = route.proposer === route.a ? "a" : "b";
-  const sides = {
-    a: { ledger: ledgerFor(route.a, "ex"), pays: payer === "a" && !isNpc(route.a) ? pays : 0 },
-    b: { ledger: ledgerFor(route.b, "ex"), pays: payer === "b" && !isNpc(route.b) ? pays : 0 },
-  };
+  const sides = { a: { ledger: ledgerFor(route.a, "ex") }, b: { ledger: ledgerFor(route.b, "ex") } };
   const result = depart(route, sides);
   afterTry(route, result, t);
   if (!result.ok) {

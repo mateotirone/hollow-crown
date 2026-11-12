@@ -16,8 +16,6 @@ export const TRADE = {
   wagonPrice: 300, // Regals for a Goods Wagon
   trainSpeed: 32, // blocks a second (the same as a real train)
   loadSeconds: 30, // at each end
-  freightBase: 2, // Regals a run, paid by whoever proposed it, out of their Exports crate
-  freightPer: 200, // and 1 more per this many blocks of track
   every: { half: DAY / 2, day: DAY, two: DAY * 2 }, // how often a route runs
   everyNames: { half: "twice a day", day: "every day", two: "every 2 days" },
   retryTicks: DAY / 12, // a paused route tries again this often (2 in-game hours)

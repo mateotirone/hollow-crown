@@ -9,7 +9,7 @@ import { sfx } from "../core/sfx.js";
 import { stationMenuExtras } from "../rails/index.js";
 import { hasUnlocked } from "../trains/index.js";
 import { TRADE, GOODS, COIN } from "./data.js";
-import { balanceText, regalWorth, loadText, niceGood, offerProblem, travelTicks, freightOf, capitalPrice, routesAllowed, moneyIn } from "./rules.js";
+import { balanceText, regalWorth, loadText, niceGood, offerProblem, travelTicks, capitalPrice, routesAllowed } from "./rules.js";
 import {
   TRADE_BOARD, CAPITAL, S_ACCESS, outpostOf, partyName, partyRegion, partyStage, partnersOf, routesOf, waitingFor, noticesOf, clearNotices,
   sendOffer, counterOffer, rejectOffer, acceptOffer, cancelRoute, resumeRoute, whyText, cargoFor, sameRoute, roomFor, isNpc,
@@ -58,7 +58,6 @@ async function board(player, party) {
   const body = [
     `Routes: ${routes.length} of ${routesAllowed(partyStage(party))}`,
     `Train size: up to ${cargoFor(party)} items (${cargoFor(party) / 64} stacks) each way per trip`,
-    `Exports hold ${moneyIn(o.ex ?? {})} Regals for freight.`,
     lines.length ? `\n${lines.join("\n")}` : "\n§7No routes yet. Propose one, or wait for an offer.",
     news ? `\n§fLatest:\n${news}` : "",
   ].join("\n");
@@ -96,7 +95,7 @@ async function howItWorks(player) {
     "",
     "§fKeep your Exports stocked.§r If either side is short, nothing leaves and the route pauses until it's refilled. After 3 days paused it goes dormant: refill and press Resume.",
     "",
-    "§fFreight:§r whoever proposed the route pays a few Regals a run, taken from Regals in their Exports barrel.",
+    "§fDistance matters:§r the further apart the two stations are along the track, the longer each trip takes.",
     "",
     "§fRival Lords and towns§r trade too, and will write to you. §fKingsrest§r buys any trade good for Regals at a set price.",
     "",
@@ -136,7 +135,7 @@ async function review(player, party, o) {
     `§fYou get:§r ${loadText(back)} §7(worth ${regalWorth(back)} Regals)`,
     o.runs ? `For ${o.runs} runs.` : "Until either side ends it.",
     balanceText(mine),
-    Number.isFinite(length) ? `§7Each trip takes about ${minutes(travelTicks(length))}.${o.from !== party ? ` Freight (${coins(freightOf(length))} a run) is theirs to pay.` : ` Freight is ${coins(freightOf(length))} a run, from your Exports.`}` : "§cNo laid track joins you right now.",
+    Number.isFinite(length) ? `§7The stations are ${length} blocks apart by track: each trip takes about ${minutes(travelTicks(length))}.` : "§cNo laid track joins you right now.",
   ].join("\n");
   const res = await new ActionFormData().title("Review the trade").body(body)
     .button("§aAccept").button("Counteroffer").button("§cReject").button("Back").show(player);
@@ -196,7 +195,7 @@ async function propose(player, party) {
     `§fYou get:§r ${loadText(terms.get)} §7(worth ${regalWorth(terms.get)} Regals)`,
     terms.runs ? `For ${terms.runs} runs.` : "Until either side ends it.",
     balanceText(terms),
-    `§7Freight: ${coins(freightOf(length))} a run, from Regals in your Exports. Each trip about ${minutes(travelTicks(length))}.`,
+    `§7${length} blocks apart by track: each trip takes about ${minutes(travelTicks(length))}.`,
     isNpc(pick.party) ? "§7They will answer in a few hours." : "§7They'll see it over their Trade Board.",
   ].join("\n")).button("§aSend").button("Back").show(player);
   if (ok.canceled || ok.selection !== 0) return propose(player, party);
