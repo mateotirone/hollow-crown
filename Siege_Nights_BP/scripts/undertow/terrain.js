@@ -787,4 +787,3 @@ function extraTrees(ops, cx, cz, col) {
     hollowTree(ops, x, c.h, z, k, hash(cx, cz, salt + 30), k === "forest");
   }
 }
-
