@@ -22,13 +22,13 @@ import { isReady, keepOf, on, emit, moduleStore, TIERS, tierOf, getState } from 
 import { CORNERSTONE, halls, saveHalls, beginBuild } from "../townhall/townhall.js";
 import { buildFor } from "../townhall/build.js";
 import { REGION_TO_STYLE, CONTENTS } from "./config.js";
-import { BENCH, registerBench } from "./mason.js";
 import { styleOf } from "./plans.js";
 import { wallOf, raiseWall, moveWall, adoptWall } from "./walls.js";
 import { wallShape } from "./walldata.js";
 import { charterCheck, charterText } from "./charters.js";
 import { BUILDINGS } from "./buildings.js";
 import { raisedCounts } from "./raised.js";
+import { groundTop } from "./ground.js";
 import { BLOCK_BUILDS } from "./blockdesigns.js";
 import { townFor, pickLayout, slotsOf, groundwork, fixturesOf, wallRadius, seatOnSlot, TIER_NAMES } from "./towns.js";
 
@@ -119,12 +119,78 @@ function* layOutJob(owner, tier, done) {
     if (rows.length) for (let i = 0; i < 40; i++) yield; // ~2 s
   }
   yield;
+  yield* blendGround(dim, town, layout, tier);
   for (const f of fixturesOf(layout, tier)) {
     try { placeFixture(owner, town, f); } catch (e) { console.warn(`[Hollow Crown] town fixture ${f.kind}: ${e}`); }
     yield;
   }
   placeMarkers(owner, tier);
   done();
+}
+
+// ---------- blending the groundwork into the land (Mateo's playtest 2026-11-12) ----------
+// Nothing the groundwork lays may float, and its edge may not stand as a cliff over the land beside it: every column
+// is filled down to the ground under its lowest block, and outside the edge the land is cut or built up so it never
+// steps more than 1 block for every 2 outwards (the same rule the map's baked towns follow, map/genworld.py).
+const NATURAL = /(grass_block|dirt|podzol|mycelium|stone$|^minecraft:(andesite|diorite|granite|tuff|deepslate|calcite|gravel|sand|red_sand|clay|mud|snow|snow_block|packed_ice|moss_block|sandstone|red_sandstone|terracotta|cobblestone)$|_terracotta$|coarse|rooted_dirt|short_grass|tall_grass|fern|flower|dandelion|poppy|snow_layer|deadbush|bush$)/;
+const TAPER = 6; // how far out the land is shaped at most
+const slope = (k) => Math.ceil(k / 2); // how far the land may stand above or below the edge, k blocks out
+
+function* blendGround(dim, town, layout, tier) {
+  const cols = new Map(); // "dx,dz" -> { lo, hi } of the blocks this tier lays (air rows don't count)
+  const member = new Set();
+  for (let t = 0; t <= tier; t++) for (const [dx, dy, dz, p] of groundwork(layout, t)) {
+    const k = `${dx},${dz}`;
+    member.add(k);
+    if (t !== tier || layout.pal[p]?.[0] === "minecraft:air") continue;
+    const c = cols.get(k);
+    if (!c) cols.set(k, { dx, dz, lo: dy, hi: dy });
+    else { c.lo = Math.min(c.lo, dy); c.hi = Math.max(c.hi, dy); }
+  }
+  const dirt = perm("minecraft:dirt"), stone = perm("minecraft:stone"), grass = perm("minecraft:grass_block"), air = perm("minecraft:air");
+  const get = (x, y, z) => { try { return dim.getBlock({ x, y, z }); } catch { return undefined; } };
+  let n = 0;
+  // 1. fill under every column down to the ground
+  for (const c of cols.values()) {
+    const x = town.x + c.dx, z = town.z + c.dz;
+    for (let y = town.y + c.lo - 1, k = 0; k < 16; y--, k++) {
+      if (++n % PER_TICK === 0) yield;
+      const b = get(x, y, z);
+      if (!b || !/air|water|lava|short_grass|tall_grass|fern|flower|snow_layer|leaves/.test(b.typeId)) break;
+      try { b.setPermutation(k < 3 ? dirt : stone); } catch { break; }
+    }
+  }
+  // 2. shape the land outside the edge
+  for (const c of cols.values()) {
+    const h = town.y + c.hi; // the top of the edge column
+    for (const [ux, uz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      if (member.has(`${c.dx + ux},${c.dz + uz}`)) continue;
+      for (let k = 1; k <= TAPER; k++) {
+        if (member.has(`${c.dx + ux * k},${c.dz + uz * k}`)) break;
+        if (++n % (PER_TICK >> 2) === 0) yield;
+        const x = town.x + c.dx + ux * k, z = town.z + c.dz + uz * k;
+        const top = groundTop(dim, x, z, h + 24);
+        if (top === undefined) break;
+        const hiOk = h + slope(k), loOk = h - slope(k);
+        if (top > hiOk) {
+          let natural = true;
+          for (let y = top; y > hiOk; y--) {
+            const b = get(x, y, z);
+            if (!b || (!NATURAL.test(b.typeId) && b.typeId !== "minecraft:air")) { natural = false; break; }
+          }
+          if (!natural) break; // something built stands there: leave it
+          for (let y = top; y > hiOk; y--) get(x, y, z)?.setPermutation(air);
+          const b = get(x, hiOk, z);
+          if (b && /dirt$|stone$|gravel|andesite|diorite|granite|tuff/.test(b.typeId)) b.setPermutation(grass);
+        } else if (top < loOk) {
+          const surface = get(x, top, z);
+          const cap = surface && NATURAL.test(surface.typeId) && !/stone$|andesite|diorite|granite|tuff|cobble/.test(surface.typeId) ? surface.permutation : grass;
+          for (let y = top + 1; y <= loOk; y++) get(x, y, z)?.setPermutation(y === loOk ? cap : dirt);
+          if (surface?.typeId === "minecraft:grass_block") surface.setPermutation(dirt);
+        } else break; // the land is already within the slope from here on
+      }
+    }
+  }
 }
 
 function setAt(dim, at, id, states) {
@@ -152,8 +218,9 @@ function placeFixture(owner, town, f) {
     for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) setAt(dim, { x: x + dx, y: y + 3, z: z + dz }, "minecraft:spruce_slab", { "minecraft:vertical_half": "bottom" });
   } else if (f.kind === "mason_bench") {
     if (town.lord) return; // a lord's town has no mason for players
-    const block = dim.getBlock({ x, y, z });
-    if (block && block.typeId !== BENCH) { block.setType(BENCH); registerBench(block, owner); }
+    // the bench goes in the Mason's Yard (basebuilds.js); this spot is kept for when the yard can't be raised
+    town.benchSpot = { x, y, z };
+    save();
   } else if (f.kind === "hall_cornerstone") {
     if (town.lord) town.hallSeat = { x, y, z, ...hallFacing(town, { x, z }) }; // the lord raises it (rivals/index.js)
     else foundHall(owner, town, { x, y, z });
@@ -266,9 +333,14 @@ export function foundTown(owner, plot, at, { style, layout, lord = false } = {})
   if (!dim.getBlock(at)) return "That ground is not loaded yet.";
   const old = townOf(owner);
   if (old && old.plot === plot.name.toLowerCase() && old.x === at.x && old.z === at.z) return "already";
-  const y = squareY(dim, at);
-  if (y === undefined) return "That ground is not loaded yet.";
+  const live = squareY(dim, at);
+  if (live === undefined) return "That ground is not loaded yet.";
   const pick = layout ?? pickLayout(tw, `${owner}:${plot.name}`);
+  // the layout was planned on the map's own heights: lay it from the square's planned height, so it meets the land
+  // it was drawn for (a live median was a block or two off and left shelves and floating paths, playtest 2026-11-12);
+  // a world whose ground was changed (more than 2 off) falls back to the live height
+  const base = tw.variants[pick]?.base;
+  const y = Number.isFinite(base) && Math.abs(base - live) <= 2 ? base : live;
   store.data.towns[owner] = {
     plot: plot.name.toLowerCase(), layout: pick, x: at.x, y, z: at.z, tier: 0, laid: [false, false, false, false], slots: {}, ...(lord ? { lord: true } : {}),
     style: style ?? REGION_TO_STYLE[plot.region] ?? styleOf(owner, dim.getBlock(at)),

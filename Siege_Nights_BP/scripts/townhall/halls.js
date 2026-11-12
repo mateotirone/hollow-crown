@@ -348,7 +348,32 @@ export function statesFor(frame, role, o = {}) {
   return out;
 }
 
-// Order cells for a nice rising build: bottom layer first, then up, centre outwards.
+// Blocks that hang from, stand on or stick to another block and pop off (dropping as items) if it isn't there yet
+// (Mateo's playtest 2026-11-12: doors and hanging lanterns broke as buildings rose)
+export const ATTACHED = /(_door|^door|lantern|chain|torch|_sign|^sign|banner|_button|ladder|carpet|bell|lever|candle|flower_pot|vine|_bed|^bed|pressure_plate|rail|hanging_roots|snow_layer|pointed_dripstone|amethyst_cluster|_bud|item_frame|tripwire_hook|sapling|propagule|azalea$)/;
+const HANGS = /chain|hanging_roots|vine/;
+const blockOf = (plan, c) => (c.role === "door" ? "door" : plan.style?.roles?.[c.role]?.[0] ?? c.role);
+const centreOut = (a, b) => Math.abs(a.x) + Math.abs(a.z) - (Math.abs(b.x) + Math.abs(b.z));
+
+// Order cells for a nice rising build: bottom layer first, then up, centre outwards. Everything that needs a block to
+// hold it comes last, once all its supports stand: hanging things (chains, hanging lanterns) from the top down, then
+// the rest from the bottom up, and each door's two halves one right after the other (pair: placed in the same tick).
 export function buildOrder(plan) {
-  return [...plan.cells.values()].sort((a, b) => a.y - b.y || Math.abs(a.x) + Math.abs(a.z) - (Math.abs(b.x) + Math.abs(b.z)));
+  const solid = [], hang = [], doors = [], rest = [];
+  for (const c of plan.cells.values()) {
+    const id = blockOf(plan, c);
+    if (!ATTACHED.test(id)) solid.push(c);
+    else if (c.o?.hanging || c.o?.st?.hanging || HANGS.test(id)) hang.push(c);
+    else if (/_door$|^door$/.test(id)) doors.push(c);
+    else rest.push(c);
+  }
+  solid.sort((a, b) => a.y - b.y || centreOut(a, b));
+  hang.sort((a, b) => b.y - a.y || centreOut(a, b));
+  rest.sort((a, b) => a.y - b.y || centreOut(a, b));
+  doors.sort((a, b) => a.x - b.x || a.z - b.z || a.y - b.y);
+  const paired = doors.map((c, i) => {
+    const n = doors[i + 1];
+    return n && n.x === c.x && n.z === c.z && n.y === c.y + 1 ? { ...c, pair: true } : c;
+  });
+  return [...solid, ...hang, ...rest, ...paired];
 }

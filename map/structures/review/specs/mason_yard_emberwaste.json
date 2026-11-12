@@ -1,0 +1,278 @@
+{
+ "name": "mason_yard_emberwaste",
+ "card": {
+  "title": "Mason's Yard",
+  "sub": "Emberwaste, workshop and yard",
+  "region": "emberwaste",
+  "where": "Every new base, beside the square",
+  "kind": "Work",
+  "blurb": "The mason's workshop: a small stone shop with his tools inside, and a yard in front where he cuts and sells blocks."
+ },
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "ember_sandstone",
+    "frame": "cut_red_sandstone",
+    "infill": {
+     "ladder": [
+      "smooth_red_sandstone",
+      "red_sandstone"
+     ],
+     "axis": "noise",
+     "scale": 2
+    },
+    "roof": "smooth_sandstone"
+   },
+   "rect": [
+    -3,
+    -7,
+    3,
+    -3
+   ],
+   "y": 0,
+   "plinth": 1,
+   "storeys": [
+    5
+   ],
+   "door": {
+    "side": "s",
+    "kind": "house",
+    "steps": 0
+   },
+   "roof": {
+    "type": "flat",
+    "parapet": "slab",
+    "beams": true
+   },
+   "interior": {
+    "use": "shop",
+    "rooms": [
+     "shop"
+    ]
+   },
+   "chimney": false,
+   "shutters": 0.3,
+   "bushes": false
+  }
+ ],
+ "place": [
+  [
+   -4,
+   0,
+   -2,
+   "red_sandstone"
+  ],
+  [
+   -4,
+   0,
+   -1,
+   "red_sandstone"
+  ],
+  [
+   -4,
+   0,
+   0,
+   "red_sandstone"
+  ],
+  [
+   -3,
+   0,
+   -2,
+   "red_sandstone"
+  ],
+  [
+   -3,
+   0,
+   -1,
+   "red_sandstone"
+  ],
+  [
+   -3,
+   0,
+   0,
+   "red_sandstone"
+  ],
+  [
+   -2,
+   0,
+   -2,
+   "red_sandstone"
+  ],
+  [
+   -2,
+   0,
+   -1,
+   "red_sandstone"
+  ],
+  [
+   -2,
+   0,
+   0,
+   "red_sandstone"
+  ],
+  [
+   -1,
+   0,
+   -2,
+   "red_sandstone"
+  ],
+  [
+   -1,
+   0,
+   -1,
+   "red_sandstone"
+  ],
+  [
+   -1,
+   0,
+   0,
+   "red_sandstone"
+  ],
+  [
+   0,
+   0,
+   -2,
+   "red_sandstone"
+  ],
+  [
+   0,
+   0,
+   -1,
+   "red_sandstone"
+  ],
+  [
+   0,
+   0,
+   0,
+   "red_sandstone"
+  ],
+  [
+   1,
+   0,
+   -2,
+   "red_sandstone"
+  ],
+  [
+   1,
+   0,
+   -1,
+   "red_sandstone"
+  ],
+  [
+   1,
+   0,
+   0,
+   "red_sandstone"
+  ],
+  [
+   2,
+   0,
+   -2,
+   "red_sandstone"
+  ],
+  [
+   2,
+   0,
+   -1,
+   "red_sandstone"
+  ],
+  [
+   2,
+   0,
+   0,
+   "red_sandstone"
+  ],
+  [
+   3,
+   0,
+   -2,
+   "red_sandstone"
+  ],
+  [
+   3,
+   0,
+   -1,
+   "red_sandstone"
+  ],
+  [
+   3,
+   0,
+   0,
+   "red_sandstone"
+  ],
+  [
+   4,
+   0,
+   -2,
+   "red_sandstone"
+  ],
+  [
+   4,
+   0,
+   -1,
+   "red_sandstone"
+  ],
+  [
+   4,
+   0,
+   0,
+   "red_sandstone"
+  ],
+  [
+   -3,
+   1,
+   -1,
+   "stonecutter_block",
+   {
+    "facing": "s"
+   }
+  ],
+  [
+   3,
+   1,
+   -2,
+   "cut_red_sandstone"
+  ],
+  [
+   3,
+   2,
+   -2,
+   "cut_red_sandstone"
+  ],
+  [
+   4,
+   1,
+   -2,
+   "smooth_red_sandstone"
+  ],
+  [
+   4,
+   1,
+   -1,
+   "smooth_red_sandstone"
+  ],
+  [
+   -4,
+   1,
+   -1,
+   "cobblestone_slab",
+   {
+    "half": "bottom"
+   }
+  ],
+  [
+   -4,
+   1,
+   -2,
+   "barrel"
+  ]
+ ],
+ "marks": {
+  "bench": [
+   1,
+   1,
+   -1
+  ]
+ }
+}

@@ -88,6 +88,7 @@ def variant(v):
     assert len(pal) <= len(CHARS), "palette too long"
     return {
         "template": v["template"], "label": v["label"], "charter": v.get("passes_charter", True),
+        "base": base,   # the square's real height on the map: the game lays the groundwork from here (founding.js)
         "square": v["square"]["centre"],
         "hall": [h["box"] for h in v["hall"]],
         "rings": [[r["radius"], TIER[r["opensAt"]]] for r in v["rings"]],
