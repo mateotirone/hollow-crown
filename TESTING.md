@@ -308,6 +308,7 @@ The showcase (`/scriptevent siege:showcase`) puts a Mason's Bench with its mason
 - **Wonders.** On the full map, `/scriptevent siege:wonders tp sun_gate` drops you by the Sun Gate's keeper. ✅ A keeper NPC named Caravan-Master Idris stands there; click it: ✅ a menu with what the wonder gives and "Claim it". `/scriptevent siege:wonders claim sun_gate`, then `finish sun_gate`, and stay close: ✅ the ground is cleared and the caravanserai rises stage by stage (action bar says each stage), and when the sixth stands ✅ chat says you raised it. In Survival, buy a stretch of line: ✅ an action bar says the Sun Gate took a quarter off. Try to break a block of it in Survival: ✅ refused. `/scriptevent siege:wonders challenge high_watch` (gives it to a test lord with one stage): ✅ guards appear around the site; kill them all inside ten minutes: ✅ chat says you took it. Walk away instead: ✅ the challenge fails. With Rival Lords on, `/scriptevent siege:wonders lord lantern_spire`: ✅ the lord holds it and its stages go up every two days while you're near. `/scriptevent siege:wonders list` shows every wonder. Tell me how each building looks in the world, especially that stairs face the right way.
 - **The level-5 hall takes its ground.** In a town, find a plot whose menu says "on ground the hall will need at level 5", raise a building on a plot tagged hall5, then take the hall to level 5 (`/scriptevent siege:townhall_build 5`). ✅ When it starts (or at the latest when it is done) chat says the hall needs that ground, the building is cleared except where the hall stands, the full price comes back, and the next building you raise on a plot of that size says it is free. ✅ The old plot has no marker any more.
 - **Rival Lords on town layouts.** In a fresh map world, `/scriptevent siege:rivals few` then `/scriptevent siege:rivals settle`, and walk to the lord's plot. ✅ Roads, a wall ring and the square go down as in a player's town (no Plot Markers, no mason), the lord's hall rises on the cornerstone, then buildings go up one by one on the plots, cottages first. `/scriptevent siege:rivals grow <id>` a few times: ✅ the wall moves out once the lord's town has 3 cottages and a market. Then pick that lord's plot in the welcome hall (or topple the lord and raise your Keep Banner there). ✅ The town is yours: the same buildings, Plot Markers on the empty plots, `/scriptevent siege:town info` shows it.
+- **The Plan Book.** Found a fresh town (`/scriptevent siege:town found dunehold`) in Survival. ✅ A Plan Book is in your pack. Use a Small plot's marker: ✅ only the cottage and well are offered, with a grey line saying more would suit the plot. Use the Plan Book: ✅ a screen of building cards opens (pictures of the real buildings in your town's style); cottage, well and library are bright, the rest grey with "Hall level 2" or "Lords, bosses" under them. Click a card: ✅ its plot size, price, worker, charter line and the other regions' styles with their price. Open the Town Hall menu: ✅ a Plan Book button opens the same screen. `/scriptevent siege:plans scroll smithy frostmarch`, then use the scroll: ✅ you learn "Smithy (Frostmarch)", the scroll is used up, and a Medium plot now offers it at half as much again. Copy a plan to a scroll in the Plan Book with a paper in your pack: ✅ it costs coins and a paper and the scroll names the plan. Give it to a friend: ✅ they learn it. Take the hall to level 3: ✅ the smithy and stable appear in your own style. In Creative ✅ every building is offered.
 - **Castle Stone family.** Ask the Mason for Castle Stone, Tiles, Bricks, Cobbled and Smooth. In your own region you get your region's stone at the local price; the other regions' stone costs more.
 - **Wall damage and repair.** The generated wall takes damage like any Siege Nights wall: rams and blasts wear blocks down, the stone shows two stages of cracks, then breaks. From level 6 up the wall is as tough as iron-reinforced Castle Stone, level 9 as diamond, level 10 as netherite. Stand by your wall and run `/scriptevent siege:wall_repair break` to rough it up, then talk to the Mason and pick **Mend the wall**: he names a price that follows the damage and the wall is made whole. `/scriptevent siege:wall_repair free` mends without paying. The masons refuse during a siege; patching one block by hand with stone bricks still works then, now on Tiles, Bricks, Cobbled and Smooth too.
 - **Library.** `/scriptevent siege:settle_arrive` (or picking a plot on the real map) now also raises the town's Library near the gate: two storeys of bookshelves, a reading table, a lectern and eight Archive Shelves on the back wall. Click an Archive Shelf with a Lore Tome to check it works. To see just the building: `/scriptevent siege:settle_build library frostmarch`.
@@ -698,6 +699,35 @@ Tell me about: marks too small to see, names hidden behind other marks, or the s
 4. ✅ It is finished in about 15 seconds and the Hall Cornerstone is gone. Just inside the front door, to one side of the aisle, stands the Town Board (a wide notice board with pinned papers, labelled when you are near). Clicking it opens the Town Hall menu. Check all five styles: `/scriptevent siege:townhall_build 3 frostmarch` and so on.
    - A hall built before this update gets its Town Board the next time the world loads or you open the Town Hall from the Keep menu.
 5. Town Hall menu → "Move the town hall" → "Move it". ✅ You get a Hall Cornerstone back, the Tree sleeps, and placing the stone elsewhere starts a new hall. Placing a second cornerstone while a hall stands is refused with a message.
+
+### The Messenger
+You need a settlement (Keep Banner) and a Longhouse or bigger. A second player helps for step 5.
+1. Click the Tree of Oaths → Keep. ✅ "Messenger" sits in the first ring with a sealed-letter icon.
+2. Open it with no skill points and some Regals (in survival). ✅ It offers "Pay 100 Regals"; paying takes the coins and the skill shows 1/1. With a skill point it also offers "Swear this oath". In creative it is free.
+3. Unbind your oaths. ✅ The Messenger stays, and the refund does not count it (if you paid in Regals).
+4. Walk well outside your land and run `/scriptevent siege:messenger_test player`. ✅ The title "Your base is under attack!", a horse gallop and bell, and a chat line from the messenger with which way home lies and how far. Try `raid`, `lord`, `drill`.
+5. Without the Messenger (`/scriptevent siege:townhall_reset` wipes it), stay away and have a friend hit one of your guards. ✅ You hear nothing. Walk back onto your land. ✅ "While you were away:" lists what happened, once.
+6. With the Messenger, have the friend hit your guard while you are away. ✅ The messenger finds you at once; more hits within a minute do not send more messengers.
+7. At home, `/scriptevent siege:messenger_test player`. ✅ A plain red warning line, no messenger.
+
+Tell me about: alerts that come too often or too rarely, and anything the messenger says that reads wrong.
+
+### Letters by messenger
+Needs two players.
+1. Type `/siege:messenger`. ✅ A form opens: pick the other player, write a line, send. You get "A messenger rides out..." with about how long it will take.
+2. ✅ Above your hotbar: "Your message is being delivered 1:29" counting down each second.
+3. ✅ At zero the other player gets "A messenger hands you a letter from <you>" with a gallop sound, and you get "Your letter has reached...". `/scriptevent siege:letters_fast` skips the wait.
+4. Send one to a player who has left. ✅ It waits, and they get it when they log back in.
+5. Keep menu → "Send a messenger". ✅ The same form.
+
+### The Crier
+1. `/scriptevent siege:news_test`. ✅ One sample of every [Crier] line, none naming anything hidden.
+2. Start a boss fight (Creative menu or the showcase). ✅ Everyone sees "[Crier] <boss> has woken near <place>. <you> stands against it."
+3. Walk out of a boss arena after hurting it and wait 30 seconds. ✅ "<boss> has thrown back everyone who came against it."
+4. Plant a new Keep Banner. ✅ "<you> has planted a Keep Banner near <place>."
+
+Tell me about: news that comes too often, news that's missing, and anything the Crier says that gives the story away.
+
 
 ## Townsfolk (scripts/townsfolk/)
 

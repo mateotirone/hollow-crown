@@ -110,7 +110,12 @@ def bedrock_state(n, p):
         st["vine_direction_bits"] = {"s": 1, "w": 2, "n": 4, "e": 8}[p.get("attach", "n")]
     elif n in ("end_rod", "lightning_rod"):
         st["facing_direction"] = 1
+    elif n == "candle" or n.endswith("_candle"):
+        st["lit"] = bool(p.get("lit")); st["candles"] = int(p.get("candles", 1)) - 1
     if p.get("axis"): st["pillar_axis"] = p["axis"]
+    if n.startswith("siege:"):                                   # the add-on's own blocks: they only turn
+        if f: st["minecraft:cardinal_direction"] = CARD[f]
+        return n, st
     S = bedrock_states()
     if S:
         if n not in S["blocks"]: raise ValueError(f"'{n}' is not a Bedrock block (bedrock_states.json)")

@@ -396,19 +396,19 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | Vanilla sound | What it means here | Made of | Places | Used by |
 |---|---|---|---|---|
 | `block.bell.hit` | Any bell | `block.bell.hit` + `block.bell.hit` pitch 0.5 vol 0.4 after 0.05 s + `block.bell.hit` pitch 1.03 vol 0.22 after 0.15 s | 47 | bestiary (15), undertow (15), after (5), lore (4), unlocks (4), crown (2), roletrials, townhall |
-| `random.levelup` | Done, bought, learned | `random.levelup` pitch 0.8 vol 0.5 + `note.harp` pitch 0.6 vol 0.35 after 0.1 s | 29 | horses (7), siege (5), townhall (4), lore (3), dragons (2), settle (2), crown, ironworks, reach, rivals, roletrials, undertow |
-| `random.anvil_land` | A heavy blow | `random.anvil_land` pitch 0.9 vol 0.8 + `dig.stone` pitch 0.5 vol 0.7 | 15 | bestiary (3), undertow (3), siege (2), trains (2), unlocks (2), dragons, roletrials, townhall |
+| `random.levelup` | Done, bought, learned | `random.levelup` pitch 0.8 vol 0.5 + `note.harp` pitch 0.6 vol 0.35 after 0.1 s | 32 | horses (7), siege (5), townhall (4), lore (3), settle (3), dragons (2), crown, ironworks, reach, rivals, roletrials, trade, undertow, vault |
+| `random.orb` | A small yes | `random.orb` pitch 0.75 vol 0.55 | 20 | trade (4), economy (2), townhall (2), unlocks (2), dragons, guild, ironworks, letters, lore, rails, roletrials, settle, undertow, vault |
+| `random.anvil_land` | A heavy blow | `random.anvil_land` pitch 0.9 vol 0.8 + `dig.stone` pitch 0.5 vol 0.7 | 17 | bestiary (3), undertow (3), siege (2), trains (2), unlocks (2), vault (2), dragons, roletrials, townhall |
+| `random.anvil_use` | Building and mending | `random.anvil_use` pitch 0.8 vol 0.55 + `dig.stone` pitch 0.7 vol 0.5 after 0.1 s | 16 | settle (3), townhall (3), vault (3), siege (2), unlocks (2), horses, roletrials, trade |
 | `raid.horn` | A horn | `raid.horn` pitch 0.85 + `raid.horn` pitch 0.64 vol 0.4 after 0.25 s | 14 | bestiary (5), townhall (3), unlocks (3), crown, dragons, rivals |
-| `random.orb` | A small yes | `random.orb` pitch 0.75 vol 0.55 | 14 | economy (2), townhall (2), unlocks (2), dragons, guild, ironworks, lore, rails, roletrials, settle, undertow |
-| `random.anvil_use` | Building and mending | `random.anvil_use` pitch 0.8 vol 0.55 + `dig.stone` pitch 0.7 vol 0.5 after 0.1 s | 12 | settle (3), townhall (3), siege (2), unlocks (2), horses, roletrials |
 | `mob.endermen.portal` | A step between places | `mob.endermen.portal` pitch 0.85 vol 0.8 + `random.orb` pitch 0.4 vol 0.15 after 0.1 s | 10 | bestiary (6), crown, horses, townhall, undertow |
 | `ambient.cave` | Something is wrong | `ambient.cave` pitch 0.85 vol 0.8 | 9 | reach (3), undertow (3), bestiary (2), lore |
 | `ui.toast.challenge_complete` | Something earned | `ui.toast.challenge_complete` pitch 0.9 vol 0.7 + `block.bell.hit` pitch 0.6 vol 0.3 after 0.4 s | 7 | siege (2), bestiary, crown, rivals, settle, townhall |
 | `item.book.page_turn` | A page | `item.book.page_turn` pitch 0.9 | 7 | lore (5), bestiary, guide |
+| `dig.stone` | Stone moving | `dig.stone` pitch 0.9 | 6 | siege (3), crown, graves, townhall |
+| `random.explode` | A blast | `random.explode` pitch 0.85 | 6 | siege (3), bestiary, undertow, vault |
 | `random.glass` | Something breaks that should not | `random.glass` pitch 0.9 vol 0.8 | 6 | bestiary (4), crown, unlocks |
 | `mob.wither.spawn` | Something old arrives | `mob.wither.spawn` pitch 0.85 vol 0.7 + `block.bell.hit` pitch 0.4 vol 0.4 after 0.4 s | 6 | undertow (3), bestiary (2), townhall |
-| `dig.stone` | Stone moving | `dig.stone` pitch 0.9 | 5 | siege (3), crown, townhall |
-| `random.explode` | A blast | `random.explode` pitch 0.85 | 5 | siege (3), bestiary, undertow |
 | `random.totem` | A great change | `random.totem` pitch 0.8 vol 0.55 + `block.bell.hit` pitch 0.5 vol 0.4 after 0.2 s | 4 | townhall (2), crown, horses |
 | `mob.warden.heartbeat` | A heartbeat that is not yours | `mob.warden.heartbeat` pitch 0.9 | 4 | bestiary, crown, roletrials, undertow |
 | `mob.ravager.roar` | Something big | `mob.ravager.roar` pitch 0.9 vol 0.9 | 4 | bestiary (3), undertow |
@@ -425,14 +425,17 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 
 | Vanilla sound | Places | Used by |
 |---|---|---|
-| `block.amethyst_block.chime` | 10 | bestiary (4), undertow (4), lore (2) |
+| `block.amethyst_block.chime` | 11 | bestiary (4), undertow (4), lore (2), vault |
+| `mob.horse.gallop` | 6 | letters (2), townhall (2), horses, roletrials |
 | `item.shield.block` | 4 | bestiary (3), townhall |
 | `armor.equip_leather` | 3 | dragons, horses, looks |
-| `mob.horse.gallop` | 3 | horses, roletrials, townhall |
 | `mob.wolf.howl` | 3 | unlocks (3) |
+| `note.bass` | 3 | townhall (2), dragons |
+| `note.bell` | 3 | rails, roletrials, townhall |
 | `note.flute` | 3 | bestiary, horses, unlocks |
 | `random.eat` | 3 | dragons (2), bestiary |
 | `armor.equip_iron` | 2 | guardposts, horses |
+| `block.amethyst_block.break` | 2 | undertow, vault |
 | `block.bell.resonate` | 2 | lore, undertow |
 | `block.scaffolding.break` | 2 | siege (2) |
 | `bucket.empty_water` | 2 | unlocks (2) |
@@ -444,12 +447,11 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `mob.irongolem.throw` | 2 | bestiary (2) |
 | `mob.villager.no` | 2 | bestiary (2) |
 | `mob.witch.celebrate` | 2 | bestiary (2) |
-| `note.bell` | 2 | rails, roletrials |
 | `random.bow` | 2 | bestiary (2) |
+| `random.door_open` | 2 | siege, vault |
 | `random.drink` | 2 | bestiary, roletrials |
 | `tile.piston.in` | 2 | unlocks (2) |
 | `armor.equip_netherite` | 1 | siege |
-| `block.amethyst_block.break` | 1 | undertow |
 | `block.amethyst_block.resonate` | 1 | undertow |
 | `block.bell.use` | 1 | lore |
 | `block.campfire.crackle` | 1 | dragons |
@@ -479,8 +481,7 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `mob.wither.hurt` | 1 | roletrials |
 | `mob.wither.shoot` | 1 | bestiary |
 | `mob.wolf.growl` | 1 | bestiary |
-| `note.bass` | 1 | dragons |
-| `random.door_open` | 1 | siege |
+| `random.door_close` | 1 | vault |
 | `random.fuse` | 1 | siege |
 | `step.stone` | 1 | bestiary |
 

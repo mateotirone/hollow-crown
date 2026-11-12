@@ -14,7 +14,7 @@ import { isReady, isNight, countItem, takeItems, pick, emit } from "../siege/api
 import { allPlots } from "../plots/claims.js"; // same function plots/api.js re-exports; claims.js exists in every snapshot of the repo
 import { ECON, JOBS, JOB_IDS, LINES, REGIONS, EXCHANGE } from "./config.js";
 import { regional, appetite, payout, cost, coins, niceName, stopAt } from "./rules.js";
-import { funds, charge, pay, carried } from "./coins.js";
+import { funds, charge, pay } from "./coins.js";
 import { sfx } from "../core/sfx.js";
 import { guildMenu } from "../guild/index.js";
 
@@ -219,29 +219,6 @@ async function buyMenu(player, npc, jobId, region) {
   buyMenu(player, npc, jobId, region);
 }
 
-// ---------- the Moneyer's extra: making change ----------
-
-async function changeMenu(player, npc) {
-  const have = carried(player);
-  const form = new ActionFormData().title("Moneyer: change")
-    .body(`One ${ECON.gold} is ${coins(ECON.goldWorth)}. You carry ${coins(have)} in all.`)
-    .button(`Into ${ECON.gold}s\n§8as few coins as possible`).button(`Into ${ECON.many}\n§8break one ${ECON.gold}`).button("Back");
-  const res = await form.show(player);
-  if (res.canceled) return;
-  if (res.selection === 0) {
-    const small = countItem(player, "siege:coin");
-    if (small >= ECON.goldWorth) {
-      const gold = Math.floor(small / ECON.goldWorth);
-      if (takeItems(player, "siege:coin", gold * ECON.goldWorth)) hand(player, "siege:gold_coin", gold);
-    }
-  } else if (res.selection === 1) {
-    if (countItem(player, "siege:gold_coin") > 0 && takeItems(player, "siege:gold_coin", 1)) hand(player, "siege:coin", ECON.goldWorth);
-  }
-  openShop(player, npc);
-}
-
-// ---------- the Moneyer's trade-up ladder (config.js EXCHANGE) ----------
-
 async function exchangeMenu(player, npc) {
   const form = new ActionFormData().title("Moneyer: trade up")
     .body("Any metal can be traded up one step. It is dear: digging it yourself, or winning it, is always cheaper.");
@@ -293,7 +270,6 @@ export async function openShop(player, npc) {
   const acts = [];
   form.button("Sell"); acts.push(() => sellMenu(player, npc, jobId, region));
   if (job.sells.some((good) => forSale(good, region))) { form.button("Buy"); acts.push(() => buyMenu(player, npc, jobId, region)); }
-  if (job.mint) { form.button("Change coins"); acts.push(() => changeMenu(player, npc)); }
   if (job.mint) { form.button("Trade up metal\n§8iron → gold → diamond → netherite"); acts.push(() => exchangeMenu(player, npc)); }
   form.button("Leave");
   const res = await form.show(player);

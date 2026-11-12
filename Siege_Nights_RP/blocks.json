@@ -90,6 +90,9 @@
  "siege:waystone": {
   "sound": "amethyst_block"
  },
+ "siege:gravestone": {
+  "sound": "stone"
+ },
  "siege:court_seal": {
   "sound": "stone"
  },
@@ -113,6 +116,9 @@
  },
  "hc:station_post": {
   "sound": "stone"
+ },
+ "siege:trade_board": {
+  "sound": "wood"
  },
  "hc:breeder_post": {
   "sound": "wood"
@@ -590,5 +596,8 @@
  },
  "siege:root_cradle": {
   "sound": "wood"
+ },
+ "siege:regal_safe": {
+  "sound": "metal"
  }
 }

@@ -271,3 +271,23 @@ export const SETTLER_LINES = {
     "I'll work, same as before. Just don't ask me to cheer.",
   ],
 };
+
+// ---------- The Plan Book (planbook.js, plandata.js) ----------
+// You can only raise a building on a plot if you know its plan. Plans are learned once and kept for good.
+//   basics: always known (the Hamlet's buildings).  hall: known once your town hall reaches that level.
+//   Everything else is found: Plan Scrolls from toppled Rival Lords, bosses, Rumor jobs (and ruins, traders
+//   and wonders, which call learnPlan / givePlanScroll). A found plan is in its region's style; a style that
+//   isn't your town's own costs foreignMul times as much to raise.
+//   Rule: a player always gets what a charter needs. Every home and every building a charter names is taught by
+//   basics or by the hall level that tier reaches (hall level = tier + 1), never only by a lucky scroll (tested).
+//   noPlan: charter buildings raised from their own block item, which need no plan.
+export const PLANS = {
+  basics: ["cottage", "house", "well", "library"],
+  hall: { 2: ["market", "garden", "farmhouse", "mint", "townhouse"], 3: ["smithy", "stable", "inn"], 4: ["storehouse", "watchtower"] },
+  noPlan: ["barracks"],
+  foreignMul: 1.5,
+  scrollLots: 2, // copying a plan you know onto a Plan Scroll at your Plan Book (plus one paper), to trade
+  lordScrolls: 2, // Plan Scrolls a toppled lord leaves, from the buildings that stood in their town
+  bossScrolls: 1, // for each player at a boss's death
+  rumorChance: 0.25, // chance a finished Rumor job pays a Plan Scroll as well
+};

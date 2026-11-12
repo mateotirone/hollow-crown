@@ -1,8 +1,9 @@
-// Coins in hand and in the strongbox.
+// Regals: one number per player (Mateo, 2026-11-12).
 //
-// Coins are real items: the Regal (siege:coin) and the Gold Regal (siege:gold_coin, worth 64). You can drop
-// them, hand them over and lose them. The strongbox is a number kept on the player; it is opened from the
-// Keep Banner menu, and shops on your own land draw on it once your pockets are empty.
+// Every Regal a player owns is one virtual balance, kept in the world (not on the player) so it can be robbed
+// from their vault's Regal Safe while they are away (vault/index.js). There is no deposit or withdrawal: shops,
+// rewards and fees all use the same number. Coin items (siege:coin, siege:gold_coin = 64) still exist as loot on
+// the ground and in chests; picked up, they are counted into the balance straight away (absorb()).
 
 import { GameMode, ItemStack } from "@minecraft/server";
 // siege/ files import this one, so nothing from siege/api.js may be used while this file loads (only inside functions)
@@ -17,13 +18,49 @@ const ledger = moduleStore("siege:economy", () => ({ minted: 0, sunk: 0 })); // 
 
 const creative = (player) => player.getGameMode() === GameMode.Creative;
 
-// Coins carried, counted in Regals
-export const carried = (player) => countItem(player, COIN) + ECON.goldWorth * countItem(player, GOLD);
+// Coin items in the pockets, counted in Regals (only until absorb() turns them into balance)
+const inPockets = (player) => countItem(player, COIN) + ECON.goldWorth * countItem(player, GOLD);
 
-export const banked = (player) => Number(player.getDynamicProperty(BANK) ?? 0);
-const setBank = (player, amount) => player.setDynamicProperty(BANK, Math.max(0, Math.floor(amount)));
+const banks = moduleStore("siege:economy_banks", () => ({ of: {} }));
+const idOf = (who) => (typeof who === "string" ? who : who.id);
+// The balance. Old worlds kept a strongbox number on the player: moved over on first look.
+export function banked(who) {
+  const id = idOf(who), of = banks.data.of;
+  if (of[id] === undefined && typeof who !== "string") {
+    let old = 0;
+    try { old = Number(who.getDynamicProperty(BANK) ?? 0); who.setDynamicProperty(BANK, undefined); } catch { /* fine */ }
+    of[id] = old;
+    banks.save();
+  }
+  return of[id] ?? 0;
+}
+function setBank(who, amount) {
+  banks.data.of[idOf(who)] = Math.max(0, Math.floor(amount));
+  banks.save();
+}
+// Coin items in the pockets become balance. Returns how many Regals came in.
+export function absorb(player) {
+  if (creative(player)) return 0; // takeItems takes nothing in Creative: don't print money
+  const n = inPockets(player);
+  if (n <= 0) return 0;
+  const small = countItem(player, COIN), gold = countItem(player, GOLD);
+  if (small) takeItems(player, COIN, small);
+  if (gold) takeItems(player, GOLD, gold);
+  setBank(player, banked(player) + n);
+  return n;
+}
+// What the player owns: the one balance (any coin items still in the pockets count too)
+export const carried = (player) => banked(player) + inPockets(player);
+export const balance = carried;
+// Take up to amount out of someone's balance (online or not). Returns what came out.
+export function robBank(id, amount) {
+  const have = banks.data.of[id] ?? 0;
+  const take = Math.max(0, Math.min(have, Math.floor(amount)));
+  if (take) setBank(id, have - take);
+  return take;
+}
 
-// On your own land the strongbox is within reach
+// On your own land (kept for callers that ask; the balance itself is reachable anywhere)
 export function atHome(player) {
   try {
     return player.dimension.id === "minecraft:overworld" && !!keepOf(player.id) && settlementAt(player.location) === player.id;
@@ -32,63 +69,43 @@ export function atHome(player) {
   }
 }
 
-// What a shop here can take from you: pockets, plus the strongbox on your own land
-export const funds = (player) => carried(player) + (atHome(player) ? banked(player) : 0);
+// What a shop can take from you: your whole balance
+export const funds = (player) => carried(player);
 
-function hand(player, typeId, count) {
-  const inv = player.getComponent("minecraft:inventory").container;
-  while (count > 0) {
-    const n = Math.min(64, count);
-    count -= n;
-    const left = inv.addItem(new ItemStack(typeId, n));
-    if (left) player.dimension.spawnItem(left, player.location);
-  }
-}
-
-// Puts coins in the player's pockets, as few items as possible. Not counted as new money.
+// Adds to the balance. Not counted as new money.
 export function giveCoins(player, amount) {
   amount = Math.floor(amount);
   if (amount <= 0) return;
-  const { gold, coin } = asCoins(amount);
-  if (gold) hand(player, GOLD, gold);
-  if (coin) hand(player, COIN, coin);
+  setBank(player, banked(player) + amount);
 }
 
-// Takes coins from the pockets, breaking Gold Regals for change. false (and takes nothing) if short.
+// Takes from the balance. false (and takes nothing) if short.
 export function takeCoins(player, amount) {
   amount = Math.floor(amount);
   if (amount <= 0) return true;
-  const have = carried(player);
-  if (have < amount) return false;
-  const small = countItem(player, COIN);
-  if (small >= amount) return takeItems(player, COIN, amount);
-  const gold = countItem(player, GOLD);
-  takeItems(player, COIN, small);
-  takeItems(player, GOLD, gold);
-  giveCoins(player, have - amount);
+  absorb(player);
+  if (banked(player) < amount) return false;
+  setBank(player, banked(player) - amount);
   return true;
 }
 
 // ---------- what every feature uses ----------
 
-// charge(player, amount): takes the price, pockets first and then the strongbox when on your own land.
+// charge(player, amount): takes the price from the balance.
 // true if paid (always true in Creative, which pays nothing). The coins leave the world.
 // A feature may lower or raise the price through the "chargeAmount" filter ({ player, reason }), e.g. a wonder.
 export function charge(player, amount, reason = "shop") {
   amount = Math.ceil(amount);
   if (amount <= 0 || creative(player)) return true;
   amount = Math.max(1, Math.ceil(applyFilter("chargeAmount", amount, { player, reason })));
-  if (funds(player) < amount) return false;
-  const pocket = Math.min(carried(player), amount);
-  takeCoins(player, pocket);
-  if (amount > pocket) setBank(player, banked(player) - (amount - pocket));
+  if (!takeCoins(player, amount)) return false;
   ledger.data.sunk += amount;
   ledger.save();
   emit("coinsSpent", { player, amount, reason });
   return true;
 }
 
-// pay(player, amount): new coins into the player's pockets (a sale, a reward, a bounty).
+// pay(player, amount): new Regals onto the player's balance (a sale, a reward, a bounty).
 // A feature may change the amount through the "payAmount" filter ({ player, reason }), e.g. a wonder.
 export function pay(player, amount, reason = "sale") {
   amount = Math.floor(amount);
@@ -125,21 +142,5 @@ export function coinStacks(amount) {
 export const fundsE = (player) => Math.floor(funds(player) / ECON.perEmerald);
 export const chargeE = (player, emeralds, reason) => charge(player, fromEmeralds(emeralds), reason);
 export const payE = (player, emeralds, reason) => pay(player, fromEmeralds(emeralds), reason);
-
-// Pockets to strongbox and back. Both return the amount actually moved.
-export function deposit(player, amount) {
-  amount = Math.min(Math.floor(amount), carried(player));
-  if (amount <= 0 || !takeCoins(player, amount)) return 0;
-  setBank(player, banked(player) + amount);
-  return amount;
-}
-
-export function withdraw(player, amount) {
-  amount = Math.min(Math.floor(amount), banked(player));
-  if (amount <= 0) return 0;
-  setBank(player, banked(player) - amount);
-  giveCoins(player, amount);
-  return amount;
-}
 
 export const totals = () => ({ ...ledger.data });

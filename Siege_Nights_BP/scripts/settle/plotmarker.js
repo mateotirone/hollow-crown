@@ -11,7 +11,9 @@ import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
 import { isReady, isAlly, on, emit, onTick } from "../siege/api.js";
 import { purse, charge, refund, coins, lot } from "./wallet.js";
 import { STYLES } from "../townhall/styles.js";
-import { SETTLE, TAG_WORDS, HAND_NAMES } from "./config.js";
+import { SETTLE, TAG_WORDS, HAND_NAMES, PLANS } from "./config.js";
+import { planChoices } from "./plandata.js";
+import { plansFor } from "./planbook.js";
 import { BUILDINGS, BUILDING, drawBuilding } from "./buildings.js";
 import { plotFit, opensAt, slotClass, CLASS_NAMES } from "./charters.js";
 import { drawBox } from "./zones.js";
@@ -28,9 +30,9 @@ const isCreative = (player) => player.getGameMode() === GameMode.Creative;
 const slotById = (owner, id) => slotsOf(layoutOf(townOf(owner))).find((s) => s.id === id);
 
 // Where a design stands on a slot, in the world, or undefined if it doesn't fit
-export function seatInWorld(owner, slot, buildingId) {
+export function seatInWorld(owner, slot, buildingId, style) {
   const town = townOf(owner);
-  const plan = drawBuilding(buildingId, town.style);
+  const plan = drawBuilding(buildingId, style ?? town.style);
   const seat = seatOnSlot(slot, plan.bounds());
   if (!seat) return undefined;
   const origin = { x: town.x + seat.origin.dx, y: town.y + seat.origin.dy, z: town.z + seat.origin.dz };
@@ -50,22 +52,30 @@ function freeClasses(owner, except) {
   return out;
 }
 
-// What a player could put on a slot: [{ id, name, fits, open, why, tagged }]. Only buildings of the plot's size
-// class (config.js PLOT_SIZE) that physically fit are listed; one that needs a different spot (PLOT_TAGS) or a
-// later tier is listed greyed with the reason. Good spots for a building come first.
-export function choicesFor(owner, slot) {
-  const tier = townOf(owner)?.tier ?? 0;
+// What a player could put on a slot: [{ id, style, foreign, name, fits, open, why, tagged }]. Only buildings
+// whose plan is known (planbook.js: the player's own plans and the town owner's), of the plot's size class
+// (config.js PLOT_SIZE), that physically fit are listed; one that needs a different spot (PLOT_TAGS) or a later
+// tier is listed greyed with the reason. Good spots for a building come first. A plan in another region's
+// style is offered too, at a higher price. hidden: how many buildings would suit the plot without a plan.
+export function choicesFor(owner, slot, player) {
+  const town = townOf(owner);
+  const tier = town?.tier ?? 0;
   const free = freeClasses(owner, slot.id);
+  const known = plansFor([owner, player?.id].filter(Boolean), player ? isCreative(player) : false);
+  const offers = planChoices(known, town.style, BUILDINGS.map((b) => b.id));
   const out = [];
-  for (const b of BUILDINGS) {
-    const rule = plotFit(b.id, slot, free);
+  for (const { id, style, foreign } of offers) {
+    const b = BUILDING[id];
+    const rule = plotFit(id, slot, free);
     if (!rule.ok && !rule.tagged) continue; // not this plot's size
-    if (!seatInWorld(owner, slot, b.id)) continue;
-    const open = opensAt(b.id) <= tier;
-    const why = !rule.ok ? rule.why : !open ? `opens at ${tierName(opensAt(b.id))}` : "";
-    out.push({ id: b.id, name: b.name, fits: true, open: open && rule.ok, why, tagged: rule.tagged && rule.ok });
+    if (!seatInWorld(owner, slot, id, style)) continue;
+    const open = opensAt(id) <= tier;
+    const why = !rule.ok ? rule.why : !open ? `opens at ${tierName(opensAt(id))}` : "";
+    const name = foreign ? `${b.name} (${STYLES[style]?.name ?? style})` : b.name;
+    out.push({ id, style, foreign, name, fits: true, open: open && rule.ok, why, tagged: rule.tagged && rule.ok });
   }
-  return out.sort((a, b) => (b.open - a.open) || (b.tagged - a.tagged));
+  out.hidden = BUILDINGS.filter((b) => !offers.some((o) => o.id === b.id) && plotFit(b.id, slot, free).ok).length;
+  return out.sort((a, b) => (b.open - a.open) || (b.tagged - a.tagged) || (a.foreign - b.foreign));
 }
 
 // Ground the marker shouldn't stand on: roads, door steps, paving, water
@@ -112,14 +122,14 @@ async function openSlot(player, owner, slot) {
   if (state.building) return builtMenu(player, owner, slot, state);
   if (state.pick && system.currentTick - (state.pickedAt ?? 0) <= SETTLE.previewSeconds * 20 && state.by === player.id) return confirm(player, owner, slot, state);
   const size = `${slot.box.x1 - slot.box.x0 + 1} x ${slot.box.z1 - slot.box.z0 + 1}`;
-  const choices = choicesFor(owner, slot);
+  const choices = choicesFor(owner, slot, player);
   const form = new ActionFormData().title(`${CLASS_NAMES[slotClass(slot)] ?? SIZE_NAMES[slot.size]} plot`)
-    .body(`${size} blocks, door to the road${slot.tags.length ? `, ${slot.tags.map((t) => TAG_WORDS[t]).filter(Boolean).join(", ")}` : ""}.\nBuildings in the §f${STYLES[town.style]?.name ?? town.style}§r style that fit here:`);
+    .body(`${size} blocks, door to the road${slot.tags.length ? `, ${slot.tags.map((t) => TAG_WORDS[t]).filter(Boolean).join(", ")}` : ""}.\nBuildings you have plans for that fit here:${choices.hidden ? `\n§8(${choices.hidden} more would suit this plot. Find their plans: toppled lords, bosses, Rumor jobs, traders.)` : ""}`);
   const own = player.id === owner || isAlly(owner, player.id);
   if (!choices.length && !own) return player.sendMessage("§7Nothing we can raise fits this plot yet.");
   if (own) form.button("§2I built here myself\n§8Have it counted as a building");
   for (const c of choices) {
-    form.button(c.open ? `${c.name}${c.tagged ? " §2(good spot)" : ""}\n§8${coins(plotPrice(c.id))}` : `§8${c.name}\n${c.why}`);
+    form.button(c.open ? `${c.name}${c.tagged ? " §2(good spot)" : ""}\n§8${coins(plotPrice(c.id, c.foreign))}` : `§8${c.name}\n${c.why}`);
   }
   const res = await form.show(player);
   if (res.canceled) return;
@@ -127,25 +137,27 @@ async function openSlot(player, owner, slot) {
   const c = choices[res.selection - (own ? 1 : 0)];
   if (!c) return;
   if (!c.open) return player.sendMessage(`§7The ${c.name} ${c.why}.${/^opens/.test(c.why) ? " Win more sieges to grow the settlement." : " Try another plot."}`);
-  Object.assign(state, { pick: c.id, pickedAt: system.currentTick, by: player.id });
+  Object.assign(state, { pick: c.id, pickStyle: c.style, pickedAt: system.currentTick, by: player.id });
   saveTowns();
   player.sendMessage(`§6${c.name} marked out.§7 Walk round the green outline, then use the marker again to raise it. ${BUILDING[c.id].blurb ?? ""}`);
 }
 
 // What a design costs on a plot, in coins (SETTLE.plotPrices is in lots)
-export const plotPrice = (buildingId) => Math.round((SETTLE.plotPrices[buildingId] ?? 8) * lot());
+export const plotPrice = (buildingId, foreign = false) => Math.round((SETTLE.plotPrices[buildingId] ?? 8) * lot() * (foreign ? PLANS.foreignMul : 1));
 
 async function confirm(player, owner, slot, state) {
   const town = townOf(owner);
   const building = BUILDING[state.pick];
-  const seat = seatInWorld(owner, slot, building.id);
+  const style = state.pickStyle ?? town.style;
+  const foreign = style !== town.style;
+  const seat = seatInWorld(owner, slot, building.id, style);
   if (!seat) { state.pick = undefined; saveTowns(); return player.sendMessage("§cThat building no longer fits here."); }
   const credit = (town.credits?.[slotClass(slot)] ?? 0) > 0; // the hall took a plot of this size: one is on the house
   const free = isCreative(player) || credit;
-  const price = free ? 0 : plotPrice(building.id);
+  const price = free ? 0 : plotPrice(building.id, foreign);
   const have = purse(player);
   const body = [`${building.blurb ?? ""}`, "", credit ? "§aFree: this makes up for the plot your town hall took." : free ? "§aFree in Creative." : `${have >= price ? "§a" : "§c"}${coins(price)}§7 from your purse (you have ${coins(have)}).`, "", "§7Builders raise it for you. It goes up a layer at a time."];
-  const res = await new MessageFormData().title(`Raise the ${building.name}?`).body(body.join("\n"))
+  const res = await new MessageFormData().title(`Raise the ${building.name}${foreign ? ` (${STYLES[style]?.name ?? style})` : ""}?`).body(body.join("\n"))
     .button1("Pick something else").button2(free || have >= price ? "Raise it" : "Not enough yet").show(player);
   if (res.canceled) return;
   if (res.selection === 0) { state.pick = undefined; saveTowns(); return openSlot(player, owner, slot); }
@@ -154,14 +166,14 @@ async function confirm(player, owner, slot, state) {
     if (!charge(player, price)) return;
   }
   clearMarker(owner, slot);
-  const built = raiseOnSlot(owner, player.id, seat.origin, seat.forward, building.id, town.style, slot.id);
+  const built = raiseOnSlot(owner, player.id, seat.origin, seat.forward, building.id, style, slot.id);
   if (!built) {
     placeMarker(owner, slot);
     if (price) refund(player, price);
     return player.sendMessage("§cSomething is already going up there.");
   }
   if (credit) { town.credits[slotClass(slot)]--; if (!town.credits[slotClass(slot)]) delete town.credits[slotClass(slot)]; }
-  Object.assign(state, { building: building.id, style: town.style, origin: seat.origin, forward: seat.forward, box: seat.box, top: seat.plan.bounds().y1 + Math.max(0, built.lift ?? 0), paid: price, by: player.id, pick: undefined, done: false, lift: Math.max(0, built.lift ?? 0) });
+  Object.assign(state, { building: building.id, style, origin: seat.origin, forward: seat.forward, box: seat.box, top: seat.plan.bounds().y1 + Math.max(0, built.lift ?? 0), paid: price, by: player.id, pick: undefined, pickStyle: undefined, done: false, lift: Math.max(0, built.lift ?? 0) });
   saveTowns();
   sfx(player, "random.anvil_use");
   player.sendMessage(`§6The ${building.name} is going up.`);
@@ -352,7 +364,7 @@ function outlines() {
       if (now - (state.pickedAt ?? now) > SETTLE.previewSeconds * 20 || now < (state.pickedAt ?? 0)) { state.pick = undefined; continue; }
       const player = world.getPlayers().find((p) => p.id === state.by);
       const slot = player && slotById(owner, id);
-      const seat = slot && seatInWorld(owner, slot, state.pick);
+      const seat = slot && seatInWorld(owner, slot, state.pick, state.pickStyle);
       if (seat && player.dimension.id === OVERWORLD) drawBox(player, seat.box, "minecraft:villager_happy", 40);
     }
   }
