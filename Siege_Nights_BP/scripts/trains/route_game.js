@@ -34,6 +34,7 @@ export function homeStop(owner) {
 }
 
 export const isBuilt = (segId) => !!built()[segId];
+export const builtRoutes = () => built();
 export const reachableFrom = (owner) => reachable(ROUTES, built(), homeStop(owner));
 
 // ---------- the bed ----------

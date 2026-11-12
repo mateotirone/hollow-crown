@@ -173,7 +173,8 @@ still look too round, as flagged in the tree thread.
   true}` with `"roof": "smooth_sandstone"` in the style. The deck is vigas and slabs by default (`"beams": false`
   for a plain layer).
 - **No bushes:** the preset plants none round the foundation (no grass here); put cactus in pots instead.
-- **Parts that fit:** `arcade` (market fronts), `arch`, `belfry`, `lean_to` (forge shade), `porch`, `dome`.
+- **Parts that fit:** `arcade` (market fronts), `arch`, `belfry`, `lean_to` (forge shade), `porch`, `dome`,
+  `galleries` (the caravanserai's upstairs gallery: `storey` 1; shaded walks: `storey` 0), curved roofs on vaults.
 - **Civic domes:** `{"part": "dome", "at": [x, z], "r": 4, "drum": {"h": 3, "windows": 4, "glass":
   "yellow_stained_glass_pane"}, "finial": "gold"}` on the flat roof: a sandstone drum and a blue-green copper
   dome with a gold finial.
@@ -188,7 +189,7 @@ still look too round, as flagged in the tree thread.
 - tapering towers with horns (use shapes);
 - lattice windows set back;
 - striped awnings;
-- courtyards (build them as wings round an open middle).
+- courtyards (build them as wings round an open middle, with `galleries` on the courtyard sides).
 
 ## Never
 
