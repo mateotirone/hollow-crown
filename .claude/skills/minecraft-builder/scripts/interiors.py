@@ -395,6 +395,7 @@ def _by_far(L, cells, doors):
         for d, (dx, dz) in DIRS.items():
             n = _raw(L.ctx, x - dx, L.y, z - dz)
             if n and n.endswith("_door"): ins.add(d)
+    if not ins and getattr(L, "entry", None): ins.add(OPP[L.entry])
     def far(c): return -min((abs(c[0] - q[0]) + abs(c[1] - q[1]) for q in doors), default=0)
     return sorted(cells, key=lambda c: (0 if (len(c) > 2 and OPP[c[2]] in ins) else 1, far(c), h3(c[0], c[1], L.y, 7)))
 
@@ -667,7 +668,23 @@ def _furnish_levels(ctx, levels, rooms, F, region, wood, table, I, name):
         for dx, dz in DIRS.values():
             n = _raw(ctx, x + dx, G.y, z + dz)
             if n and n.endswith("_door") and (x + dx, z + dz) not in G.area: doors.append((x, z))
+    if not doors and I.get("entry"):     # the way in is through another block (a chapel entered by its tower): the side it comes from
+        xs = [x for x, _ in G.area]; zs = [z for _, z in G.area]
+        cx, cz = (min(xs) + max(xs)) // 2, (min(zs) + max(zs)) // 2
+        e = I["entry"]
+        c = {"n": (cx, min(zs)), "s": (cx, max(zs)), "w": (min(xs), cz), "e": (max(xs), cz)}[e]
+        if c in G.area: doors.append(c)
+    if not doors:              # no door of its own: the way in is an opening (an arch, or a door in the next block)
+        for (x, z) in sorted(G.area):
+            for dx, dz in DIRS.values():
+                q = (x + dx, z + dz)
+                if q in G.area: continue
+                n = _raw(ctx, q[0], G.y, q[1])
+                if (n and n.endswith("_door")) or (ctx.free(q[0], G.y, q[1]) and ctx.free(q[0], G.y + 1, q[1]) and ctx.get(q[0], G.y - 1, q[1]) is not None):
+                    doors.append((x, z)); break
+        doors = doors[:3]
     G.must |= set(doors)
+    for L in Ls: L.entry = I.get("entry")
     # stairs first (they decide where the floors are cut), then rooms bottom up, then lights
     if I.get("stairs", True):
         for lo, hi in zip(Ls, Ls[1:]):
