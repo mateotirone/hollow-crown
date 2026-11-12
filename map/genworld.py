@@ -318,21 +318,37 @@ def stops_on(P): return [(sid, st) for sid, st in STOPS.items() if np.min(np.hyp
 # valleys and hillsides, long curves, stations at the edge of town), not beside the roads. The lines.json "roads"
 # only say which stops each line serves and in what order; railroute places the stations and routes the track.
 import railroute
-SEQ = {}
-for lname, pts in L["roads"].items():
-    P = np.asarray(pts, float)
-    SEQ[lname] = [sid for sid, st in sorted(stops_on(P), key=lambda t: int(np.argmin(np.hypot(P[:, 0] - t[1]["x"], P[:, 1] - t[1]["z"]))))]
 _foot = {}                                         # how far out each stamped town's blocks reach
+FIXED_ST = {}; FIXED_Y = {}                        # stations a town plan already stamped (<town>-plan.json beside it)
 for fn_ in filter(None, os.environ.get("GW_BLOCKS", "").split(":")):
     d_ = json.load(open(fn_)); b_ = np.array(d_["blocks"], np.int64)[:, [0, 2]]
     _foot[d_["town"]] = b_
+    pf_ = fn_.replace("-blocks.json", "-plan.json")
+    if os.path.exists(pf_):
+        for e_ in json.load(open(pf_)).get("buildings", []):
+            if e_.get("kind") == "station":          # track along the stamp's local x at z 0, one above its ground
+                FIXED_ST[slug(d_["town"])] = (int(e_["x"]), int(e_["z"]), "x" if int(e_.get("rotation", 0)) % 180 == 0 else "z")
+                FIXED_Y[slug(d_["town"])] = int(e_["ground_y"]) + 1
+log("rail: stations stamped by town plans", FIXED_ST)
+SEQ = {}                                           # a stop is on a line if its old spot or its stamped station is
+for lname, pts in L["roads"].items():              # near the line's lines.json road
+    P = np.asarray(pts, float); on_ = []
+    for sid, st in STOPS.items():
+        spots_ = [(st["x"], st["z"])] + ([FIXED_ST[sid][:2]] if sid in FIXED_ST else [])
+        dd_ = [np.hypot(P[:, 0] - sx_, P[:, 1] - sz_) for sx_, sz_ in spots_]
+        k_ = min(range(len(dd_)), key=lambda j: dd_[j].min())
+        if dd_[k_].min() < 30: on_.append((int(np.argmin(dd_[k_])), sid))
+    SEQ[lname] = [sid for _, sid in sorted(on_)]
+for sid_, (x_, z_, _) in FIXED_ST.items(): STOPS[sid_].update({"x": x_, "z": z_})
+log("rail: line stops", SEQ)
 R_TOWNS = []
 for n_, x_, z_, r_, _ in TOWNS:
     if n_ in _foot: R_ = int(np.hypot(_foot[n_][:, 0] - x_, _foot[n_][:, 1] - z_).max()) + 6
     else: R_ = int(r_ * 1.12) + 10
     R_TOWNS.append((slug(n_), x_, z_, R_))
 AVOID = [(x_, z_, 82) for _, x_, z_ in PLOTS] + [(x_, z_, int(r_ * 0.7)) for _, x_, z_, r_, _ in WARDS[6:]]
-STATION_POS, LINE_PTS = railroute.plan_network(Y, wet, land, X0, Z0, STOPS, SEQ, R_TOWNS, AVOID, log=log)
+STATION_POS, LINE_PTS = railroute.plan_network(Y, wet, land, X0, Z0, STOPS, SEQ, R_TOWNS, AVOID, log=log, fixed=FIXED_ST)
+stop_y.update(FIXED_Y)
 for sid_, (x_, z_, _) in STATION_POS.items(): STOPS[sid_].update({"x": x_, "z": z_})
 for lname in SEQ:
     pts = LINE_PTS[lname]
@@ -529,7 +545,7 @@ NAMES = ["stone", "grass_block", "dirt", "water", "sand", "gravel", "bedrock", "
          "coal_ore", "iron_ore", "copper_ore", "gold_ore", "redstone_ore", "lapis_ore", "diamond_ore", "emerald_ore",
          "deepslate_coal_ore", "deepslate_iron_ore", "deepslate_copper_ore", "deepslate_gold_ore", "deepslate_redstone_ore",
          "deepslate_lapis_ore", "deepslate_diamond_ore", "deepslate_emerald_ore", "sweet_berry_bush", "seagrass",
-         "orange_terracotta", "red_terracotta", "yellow_terracotta", "white_terracotta", "brown_terracotta", "light_gray_terracotta", "bone_block"]
+         "orange_terracotta", "red_terracotta", "yellow_terracotta", "white_terracotta", "brown_terracotta", "light_gray_terracotta", "bone_block", "moss_carpet"]
 ID = {n: B(n) for n in NAMES}
 for lf in ["oak", "birch", "spruce", "mangrove", "dark_oak", "acacia"]: ID[lf + "_leaves"] = B(lf + "_leaves", LEAF)
 ID["snow_layer"] = B("snow_layer", {"height": IntTag(0), "covered_bit": ByteTag(0)})
@@ -557,7 +573,7 @@ rocky = (Y > 100) & (slope > 0.6) & ~R[EMBER] & ~chalk
 m = rocky; pick_ = r1 + n_patch2 * 0.8
 surf[m] = np.select([pick_[m] < 0.45, pick_[m] < 0.65, pick_[m] < 0.8, pick_[m] < 0.9], [ID["stone"], ID["andesite"], ID["gravel"], ID["cobblestone"]], ID["tuff"]); sub[m] = ID["stone"]
 m = rocky & (Y > 130) & (r2 < 0.12) & R[FROST]; surf[m] = ID["calcite"]
-m = R[FROST] & (Y > snowline) & (slope < 0.9); surf[m] = np.where(r2[m] < 0.85, ID["snow"], ID["packed_ice"]); sub[m] = ID["stone"]
+m = R[FROST] & (Y > snowline) & (slope < 0.9); surf[m] = np.select([r2[m] < 0.86, r2[m] < 0.93], [ID["snow"], ID["stone"]], ID["gravel"]); sub[m] = ID["stone"]   # no packed-ice speckle: it reads as blue dots (Mateo 2026-11-12)
 m = R[FROST] & (Y > snowline + 22) & (slope < 1.4); surf[m] = ID["snow"]
 # tundra between the woods and the peaks: grass, podzol, coarse dirt and stony patches, snow lying only in drifts
 m = R[FROST] & ~rocky & (Y > 100) & (Y < snowline) & (surf == ID["grass_block"]); tp = n_patch * 1.4 + (r1 - 0.5) * 0.4
@@ -573,6 +589,35 @@ sub[m] = np.where(r2[m] < 0.6, ID["mud"], ID["dirt"])
 # Emberwaste: sand over sandstone, red sand drifts
 m = R[EMBER]; red = (noise(90, 33) + n_patch * 0.35 + n_patch2 * 0.15) > 0.12
 surf[m] = np.where(red[m], ID["red_sand"], ID["sand"]); sub[m] = np.where(red[m], ID["red_sandstone"], ID["sandstone"]); subd[m] = 6
+# fine ground mix (Mateo 2026-11-12, of the Cradle Tree's ground: "That needs to be everywhere"). The patches above set
+# each region's ground in broad strokes; this speckles single blocks of the region's other grounds through them, so no
+# stretch reads as one flat colour. Picked by a hash of the world position (no rng draws, so trees and caves stay put,
+# and any slice of the map gets the same blocks), and faded out on plots and towns so their edges still blend.
+def hash01(seed):
+    h = (GX.astype(np.int64) * 73856093) ^ (GZ.astype(np.int64) * 19349663) ^ np.int64(seed * 83492791)
+    h = (h ^ (h >> 13)) * np.int64(1274126177); h = h ^ (h >> 16)
+    return (h & 0xFFFFFF).astype(np.float32) / 16777216.0
+def mix(m, h, opts):
+    """A weighted pick per cell of mask m from opts = [(block, weight)]; a weight may be a map-sized array."""
+    w = [np.broadcast_to(np.asarray(wt[m] if np.ndim(wt) == 2 else wt, np.float32), (int(m.sum()),)) for _, wt in opts]
+    hv = h[m] * sum(w); acc = np.zeros_like(hv); out = np.full(hv.shape, ID[opts[-1][0]], np.uint16)
+    for (n, _), wi in zip(opts, w):
+        out = np.where((hv >= acc) & (hv < acc + wi), ID[n], out); acc = acc + wi
+    return out
+hs, hp = hash01(11), hash01(12)
+speck = plotfade * (1 - np.clip(box(townzone.astype(np.float32), 10) * 3, 0, 1))      # 0 on plots and in towns
+soft = land & ~wet & ~isroad & ~istrail & ~steep & ~rocky & ~chalk
+def sprinkle(m, p, opts):
+    m = m & soft & (hp < p * speck)
+    if m.any(): surf[m] = mix(m, hs, opts)
+woods = forest > 0.05
+sprinkle(R[VALE] & (surf == ID["grass_block"]), 0.3, [("grass_block", 4), ("coarse_dirt", 2), ("podzol", np.where(woods, 3, 1)), ("moss_block", 1), ("gravel", 0.4)])
+sprinkle(R[VALE] & (surf == ID["coarse_dirt"]), 0.45, [("grass_block", 4), ("podzol", 1), ("gravel", 1), ("dirt", 1)])
+sprinkle(R[FEN], 0.45, [("grass_block", 7), ("moss_block", 3), ("podzol", 2), ("mud", 1), ("muddy_mangrove_roots", 1)])   # the Cradle's own mix
+sprinkle(R[SALT] & ~coast, 0.35, [("grass_block", 3), ("gravel", 2), ("coarse_dirt", 1), ("stone", 1)])
+sprinkle(R[FROST] & (Y < snowline), 0.3, [("grass_block", 3), ("podzol", 2), ("coarse_dirt", 2), ("gravel", 1), ("stone", 1), ("snow", 1)])
+sprinkle(R[EMBER] & (surf == ID["sand"]), 0.1, [("sandstone", 3), ("red_sand", 1), ("gravel", 0.3)])
+sprinkle(R[EMBER] & (surf == ID["red_sand"]), 0.1, [("red_sandstone", 3), ("sand", 1), ("coarse_dirt", 0.5)])
 # steep ground shows rock (banded terracotta in the Emberwaste, calcite streaks in the north)
 m = steep & ~R[EMBER]; surf[m] = np.where(r1[m] < 0.5, ID["stone"], np.where(R[FROST][m] & (r2[m] < 0.15), ID["calcite"], ID["andesite"]))
 mesa = R[EMBER] & (steep | (Y > 112))
@@ -616,9 +661,10 @@ pl = open_ & ~keepclear
 plant = np.zeros((SIZE, SIZE), np.uint16)
 k = rng.random((SIZE, SIZE))
 m = pl & R[VALE] & (surf == ID["grass_block"]) & (r2 > 0.72); plant[m] = np.where(k[m] < 0.93, ID["short_grass"], np.where(k[m] < 0.97, ID["dandelion"], ID["poppy"]))
+m = pl & R[VALE] & woods & np.isin(surf, [ID["grass_block"], ID["podzol"], ID["moss_block"]]) & (r2 > 0.8) & (hs < 0.25); plant[m] = np.where(hp[m] < 0.5, ID["fern"], ID["moss_carpet"])
 m = pl & R[FROST] & (Y < 135) & (r2 > 0.93); plant[m] = np.where(k[m] < 0.6, ID["fern"], np.where(k[m] < 0.9, ID["short_grass"], ID["sweet_berry_bush"]))
 m = pl & R[SALT] & (surf == ID["grass_block"]) & (r2 > 0.85); plant[m] = ID["short_grass"]
-m = pl & R[FEN] & ((surf == ID["grass_block"]) | (surf == ID["moss_block"])) & (r2 > 0.75); plant[m] = np.where(k[m] < 0.6, ID["short_grass"], ID["fern"])
+m = pl & R[FEN] & np.isin(surf, [ID["grass_block"], ID["moss_block"], ID["podzol"]]) & (r2 > 0.7); plant[m] = np.select([k[m] < 0.4, k[m] < 0.75], [ID["moss_carpet"], ID["short_grass"]], ID["fern"])   # the Cradle's dressing
 m = pl & R[EMBER] & (r2 > 0.992); plant[m] = ID["deadbush"]
 plant[(plant != 0) & (r2 < 0.85 * (1 - plotfade))] = 0
 lily = fenpool & (r2 > 0.9) & (water_level - Y <= 3)
@@ -1054,7 +1100,7 @@ for tx0 in range(0, SIZE, TILE):
             nonair = vol != AIR
             topi = YR - 1 - np.argmax(nonair[:, ::-1, :], axis=1)
             topb = vol[ix, topi, iz]
-            okb = ft & ~np.isin(topb, [ID["water"], ID["ice"], ID["fern"], ID["short_grass"], ID["sweet_berry_bush"], ID["cactus"], ID["lava"], ID["snow"]]) & (topi + 1 < YR)
+            okb = ft & ~np.isin(topb, [ID["water"], ID["ice"], ID["fern"], ID["short_grass"], ID["sweet_berry_bush"], ID["moss_carpet"], ID["cactus"], ID["lava"], ID["snow"]]) & (topi + 1 < YR)
             vol[ix[okb], topi[okb] + 1, iz[okb]] = ID["snow_layer"]
         if os.environ.get("GW_DUMP"):                                   # debugging: save this tile's blocks for the voxel viewer
             names_ = {int(v): k for k, v in ID.items()}; names_[int(AIR)] = "air"

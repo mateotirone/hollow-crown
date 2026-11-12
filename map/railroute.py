@@ -107,19 +107,30 @@ def _disc(mask, X0, Z0, x, z, r):
     mask[a0:a1, c0:c1] |= (gx - x) ** 2 + (gz - z) ** 2 <= r * r
 
 
-def plan_network(H, wet, land, X0, Z0, stops, seq, towns, avoid, log=print, termini=()):
+def plan_network(H, wet, land, X0, Z0, stops, seq, towns, avoid, log=print, termini=(), fixed=None):
     """Place the stations and route every line.
 
     stops: {sid: {"x", "z"}}; seq: {line: [sid, ...]} in travel order; towns: [(sid, x, z, R)] towns whose station
     goes on their edge (R = how far out their buildings reach; nothing of the line comes inside R); avoid: [(x, z, r)]
     more discs the line keeps out of (plots, story sites). Every other stop keeps its spot and only picks its platform
     axis. termini: stops where every line comes and goes from the same platform end (axis "+x", "-x", "+z" or "-z":
-    the direction trains leave by); buffer stops close the other end. Returns (pos {sid: (x, z, axis)}, lines {line: [(x, z), ...] control points through every stop}).
+    the direction trains leave by); buffer stops close the other end. fixed: {sid: (x, z, axis)} stations a town plan
+    already built (its station stamp): the stop keeps that spot, and a corridor along its axis (15 wide, one coarse grid row plus margin) is opened
+    through the town's disc so the line can reach it (the town plan keeps that corridor clear). Returns (pos {sid: (x, z, axis)}, lines {line: [(x, z), ...] control points through every stop}).
     """
     S0, S1 = H.shape
     blocked = ~land
     for _, x, z, r in towns: _disc(blocked, X0, Z0, x, z, r)
     for x, z, r in avoid: _disc(blocked, X0, Z0, x, z, r)
+    fixed = fixed or {}
+    for sid, (fx, fz, fax) in fixed.items():
+        reach = max([r for s_, _, _, r in towns if s_ == sid] + [0]) * 2 + PLATFORM + 20
+        for t in range(-reach, reach + 1):
+            for w in range(-G - 1, G + 2):             # wide enough for a whole row of the coarse grid
+                qx, qz = (fx + t, fz + w) if fax == "x" else (fx + w, fz + t)
+                i, k = qx - X0, qz - Z0
+                if not (0 <= i < S0 and 0 <= k < S1) or not land[i, k]: continue
+                if any(math.hypot(qx - tx, qz - tz) < r for s_, tx, tz, r in towns if s_ == sid): blocked[i, k] = False
     def h(x, z): return float(H[min(max(x - X0, 0), S0 - 1), min(max(z - Z0, 0), S1 - 1)])
     def free_platform(x, z, ax, m=3):
         for t in range(-PLATFORM - 3, PLATFORM + 4):
@@ -134,7 +145,9 @@ def plan_network(H, wet, land, X0, Z0, stops, seq, towns, avoid, log=print, term
     cand = {}
     tmap = {sid: (x, z, r) for sid, x, z, r in towns}
     for sid, st in stops.items():
-        if sid in tmap:                                     # a station on the town's edge, its platform clear of it
+        if sid in fixed:
+            cand[sid] = [tuple(fixed[sid])]
+        elif sid in tmap:                                     # a station on the town's edge, its platform clear of it
             tx, tz, r = tmap[sid]; cs = []
             for a in range(0, 360, 15):
                 th = math.radians(a)
