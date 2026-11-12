@@ -14,7 +14,7 @@ spec = {
         {"part": "house", "style": {"base": "vale_stone", "roof": COPPER, "floor": {"ladder": ["polished_andesite", "stone_bricks"], "axis": "noise", "scale": 2}, "glass": "light_gray_stained_glass_pane"},
          "rect": [0, 0, 20, 12], "y": 0, "plinth": 3, "storeys": [6, 8], "bay": 3,
          "storey_style": [{}, {"floor": "spruce_planks"}],
-         "door": {"side": "n", "kind": "grand", "steps": 3},
+         "door": {"side": "n", "kind": "grand", "steps": 3}, "interior": "guildhall",
          "windows": {"s": [{"at": a, "storey": 1, "w": 1, "h": 4} for a in (-8, -4, 4, 8)] + [{"at": 0, "storey": 1, "w": 3, "h": 4}],
                      "n": [{"at": a, "storey": 1, "w": 1, "h": 4} for a in (-8, -4, 0, 4, 8)] + [{"at": a, "storey": 0, "w": 1, "h": 2} for a in (-8, -4, 4, 8)],
                      "e": [{"at": a, "storey": 1, "w": 1, "h": 4} for a in (-4, 0, 4)], "w": [{"at": a, "storey": 1, "w": 1, "h": 4} for a in (-4, 0, 4)]},

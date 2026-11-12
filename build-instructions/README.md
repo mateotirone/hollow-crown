@@ -23,7 +23,7 @@ It meticulously goes through every step, making sure everything is in the right 
 | 5 | [05-windows-and-doors](05-windows-and-doors/README.md) | Doorways, door surrounds, windows, sills, lintels, shutters, planters, arches | Every opening finished |
 | 6 | [06-roof](06-roof/README.md) | Roof shape, pitch, overhang, verges, ridges, valleys, dormers, trusses, roof colour and gradients, chimneys | The building is closed in |
 | 7 | [07-detailing](07-detailing/README.md) | Depth with slabs and stairs, fences, arches, lights, greenery, signs, the street edge | The outside is finished |
-| 8 | [08-interiors](08-interiors/README.md) | Empty interiors (default) or full layouts for the inn and custom builds | The inside is finished |
+| 8 | [08-interiors](08-interiors/README.md) | Every building furnished by use: stairs, rooms, a one-block walkway, light (the skill's interior stage) | The inside is finished |
 | 9 | [09-final-check](09-final-check/README.md) | Render, look from the street, run the checklist, fix | A build ready for Mateo's review |
 
 Supporting folders:
@@ -46,8 +46,9 @@ Supporting folders:
    Blocks are chosen strictly by colour, whatever the block is, as long as full-block roles use a solid
    block (Mateo, 2026-11-11). Castle Stone is one colour option per region, not a requirement; player
    settlements use the full palette too (Mateo chose "everything free", 2026-11-11).
-4. **Interiors are empty** except the inn and builds marked custom: floors, stairs or ladders between
-   storeys and nothing else. Players fill them (Mateo, 2026-11-11).
+4. **Every building has an interior** (Mateo, 2026-11-12, replacing the 2026-11-11 "empty" rule): stairs
+   or ladders between storeys, rooms furnished by what the building is for, a one-block walkway everywhere
+   players walk. The skill's interior stage does it (`08-interiors`).
 5. **Every overhang is carried.** Anything sticking out more than one block shows what holds it up
    (bracket, post, brace, corbel). See `02-frame` and `reference/shapes.md`.
 6. **Three depths on every face.** Any wall face longer than 5 blocks has at least three depth layers:

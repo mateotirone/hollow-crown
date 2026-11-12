@@ -98,7 +98,8 @@
      }
     }
    ],
-   "vines": 0.06
+   "vines": 0.06,
+   "interior": "chapel"
   },
   {
    "part": "buttress",
@@ -201,7 +202,8 @@
     "pitch": 2
    },
    "chimney": false,
-   "vines": 0.06
+   "vines": 0.06,
+   "interior": "tower"
   }
  ]
 }

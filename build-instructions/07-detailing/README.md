@@ -61,7 +61,7 @@ flat frame, a shutter, a lip on a planter) and **walls / fences** where you want
   steps and gates; lanterns hung from chains under arches.
 - Lights at regular rhythm on long fronts: every 5 or 7 (odd), on the bay posts.
 - The night should feel uneasy, not black: warm lights on the human scale, no floodlit faces.
-- Hide light blocks for interiors under carpets or behind trapdoors in empty buildings.
+- Interiors are lit by the interior stage's hanging lanterns (`08-interiors`); hide extra light blocks under carpets where a room stays dark.
 
 ## Hanging and spiked details (Mateo, 2026-11-11, `reference/pictures/detailed-hall-hanging-chains.png`)
 

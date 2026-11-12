@@ -38,6 +38,10 @@
     "parapet": "slab",
     "beams": true
    },
+   "interior": {
+    "use": "farmhouse",
+    "attic": false
+   },
    "dormers": [],
    "chimney": false,
    "vines": 0

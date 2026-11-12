@@ -29,4 +29,5 @@ five regions, written by `gen_settle.py`).
 
 - One branch and one PR per piece of work. `node tools/check.mjs` must print ALL OK before you push.
 - Changes players will notice get a line in `CHANGELOG.md`.
-- Every size is odd ("work in threes"). Interiors stay empty except the inn and custom builds.
+- Every size is odd ("work in threes"). Every building has an interior (Mateo 2026-11-12): the skill's interior stage,
+  `build-instructions/08-interiors`.

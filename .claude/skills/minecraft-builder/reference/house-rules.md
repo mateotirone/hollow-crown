@@ -9,7 +9,9 @@ palettes, texturing, paths, reference); this page is the short list and where to
   wide, doorways 3 or 5, gable spans, tower widths. An odd run has a centre block. Radii end in .5.
 - **Storey height 4 or 5** depending on the building's size.
 - **Mateo's chimney** is the default chimney (parts.md).
-- **Interiors empty** (floors and stairs only) except the inn and builds marked custom.
+- **Every building has an interior** (Mateo 2026-11-12, replacing "empty except the inn"): the skill's interior
+  stage furnishes it by use (`"interior": "inn"`, `{"use": "home", "attic": true}`), with stairs between every storey
+  and a one-block walkway everywhere players walk (`build-instructions/08-interiors`).
 - **Glass flush with the wall face**, tinted to the house, never clear everywhere; stained glass in chapels.
 - **Depth comes outward**, never by recessing a panel: at least three depth layers on any face over 5 long.
 - **Every overhang is carried** (bracket, post, corbel, truss).

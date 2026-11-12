@@ -98,7 +98,8 @@
      }
     }
    ],
-   "vines": 0.06
+   "vines": 0.06,
+   "interior": "chapel"
   },
   {
    "part": "buttress",
@@ -202,7 +203,8 @@
     "overhang": 1
    },
    "chimney": false,
-   "vines": 0.06
+   "vines": 0.06,
+   "interior": "tower"
   }
  ],
  "place": [

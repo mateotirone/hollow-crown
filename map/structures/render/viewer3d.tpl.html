@@ -27,6 +27,8 @@
   #status:empty { display: none; }
   #help { position: fixed; left: 16px; bottom: 16px; color: var(--muted); font-size: 12px; background: var(--panel); border-radius: 8px; padding: 4px 8px; }
   #toggle { display: none; }
+  #cuts { margin-top: 6px; } #cuts:empty { display: none; }
+  #cutrow { margin-top: 4px; } #cut { flex: 1; min-width: 120px; accent-color: var(--accent); }
   @media (max-width: 640px) { #ui.small #more { display: none; } #toggle { display: inline-block; } #help { display: none; } }
 </style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
@@ -37,6 +39,8 @@
   <select id="pick" aria-label="Build"></select>
   <div class="row"><button id="prev" aria-label="Previous build">‹ Prev</button><button id="next" aria-label="Next build">Next ›</button>
     <button id="dusk" aria-pressed="false">Dusk</button><button id="toggle">Details</button></div>
+  <div class="row" id="cuts" aria-label="Look inside"></div>
+  <div class="row" id="cutrow"><label for="cut" class="meta">Cut at</label><input id="cut" type="range" min="0" max="40" step="1" value="40" aria-label="Cut height"><span class="meta" id="cutv"></span></div>
   <div id="more">
     <span class="kind" id="kind"></span>
     <h1 id="title"></h1>
@@ -67,6 +71,8 @@ const stage = $("stage");
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); renderer.setSize(innerWidth, innerHeight);
 renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.localClippingEnabled = true;
+const clip = new THREE.Plane(new THREE.Vector3(0, -1, 0), 1e4);   // shows everything below the cut height (roof-off views)
 renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
 stage.appendChild(renderer.domElement);
 const scene = new THREE.Scene();
@@ -149,14 +155,40 @@ async function show(i) {
       const idx = new Uint32Array(nq * 6); for (let q = 0; q < nq; q++) { const s = q * 4; idx.set([s, s + 1, s + 2, s, s + 2, s + 3], q * 6); }
       g.setIndex(new THREE.BufferAttribute(idx, 1));
       const t = texFor(key);
-      const mat = new THREE.MeshLambertMaterial({ map: t, vertexColors: true, alphaTest: m.cut ? 0.5 : 0, transparent: !!m.water, opacity: m.water ? 0.82 : 1 });
+      const mat = new THREE.MeshLambertMaterial({ map: t, vertexColors: true, alphaTest: m.cut ? 0.5 : 0, transparent: !!m.water, opacity: m.water ? 0.82 : 1, clippingPlanes: [clip], side: THREE.DoubleSide, shadowSide: THREE.FrontSide });
       if (m.glow) mat.emissiveMap = t;
       const mesh = new THREE.Mesh(g, mat); mesh.castShadow = !m.water; mesh.receiveShadow = true; mesh.userData.glow = !!m.glow; group.add(mesh);
     }
-    scene.add(group); current = D; bounds = D.bounds; light(); frame(D); status("");
+    scene.add(group); current = D; bounds = D.bounds; light(); frame(D); cuts(b, D); status("");
   } catch (e) { status("Could not load this build. Try again."); }
 }
 
+// ---- look inside: cut the build at a height (each floor's buttons come from the index's levels)
+function setCut(y) {
+  const top = bounds ? bounds[4] : 999;
+  clip.constant = y >= top ? 1e4 : y; $("cut").value = Math.min(y, top);
+  $("cutv").textContent = y >= top ? "whole" : "y " + y;
+  for (const el of $("cuts").children) el.classList.toggle("on", Number(el.dataset.y) === y || (el.dataset.y === "top" && y >= top));
+}
+function look(D, y) {   // a steeper, closer view down into the cut floor
+  const [x0, y0, z0, x1, y1, z1] = D.bounds; const size = Math.max(x1 - x0, z1 - z0);
+  const off = cam.position.clone().sub(controls.target); const az = Math.atan2(off.x, off.z), e = 58 * Math.PI / 180, dist = size * 1.35 + 6;
+  const X = (x0 + x1) / 2, Z = (z0 + z1) / 2;
+  cam.position.set(X + Math.sin(az) * Math.cos(e) * dist, y + Math.sin(e) * dist, Z + Math.cos(az) * Math.cos(e) * dist);
+  controls.target.set(X, y - 2, Z); controls.update();
+}
+function cuts(b, D) {
+  const box = $("cuts"); box.innerHTML = "";
+  $("cut").min = D.bounds[1]; $("cut").max = D.bounds[4];
+  const add = (label, y) => { const el = document.createElement("button"); el.textContent = label; el.dataset.y = y;
+    el.onclick = () => { if (y === "top") { setCut(D.bounds[4]); frame(D); } else { setCut(y); look(D, y); } }; box.appendChild(el); };
+  add("Whole", "top");
+  const lv = b.levels || [];
+  if (lv.length) add("Roof off", lv[lv.length - 1] + 3);
+  lv.forEach((y, i) => add(i === 0 ? "Ground floor" : (b.attic && i === lv.length - 1 ? "Attic" : "Floor " + (i + 1)), y + 3));
+  setCut(b.cut ?? D.bounds[4]); if (b.cut != null) look(D, b.cut);
+}
+$("cut").oninput = (e) => setCut(Number(e.target.value));
 pick.onchange = () => show(Number(pick.value));
 $("prev").onclick = () => show(Number(pick.value) - 1);
 $("next").onclick = () => show(Number(pick.value) + 1);
