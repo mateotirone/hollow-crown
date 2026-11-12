@@ -40,6 +40,16 @@ Build for sun, not rain. Roofs are flat for terraces and sleeping, with parapets
 small deep windows. Shade comes from awnings, arcades and courtyards. There are no gutters, no moss and no
 drip lines. Wear shows as dusty edges and a slightly darker band at the base of walls. Shelter matters here: deep shade, arcades, covered walkways and walled yards are wind-breaks against dust and sandstorms.
 
+- **Cliffs and mesas are real** (Mateo, 2026-11-12: "Is there a real cliff and wall where this story happens?"):
+  when a place is said to stand on a cliff or mesa, raise one in the land. Sheer faces of banded terracotta
+  (orange, terracotta, red, yellow, brown, light grey) about 20 high, an uneven rim and ledges partway down, scree
+  heaped at the foot, red sand with a little red sandstone and coarse dirt on top, and a cut path up the side
+  facing the town. The worked example is the Cinder Roost in `map/structures/story_areas.py`.
+- **Statues** (Mateo, 2026-11-12: the old avenue statues "read like posts"): figures at least 20 blocks tall on
+  a stepped plinth, robed and hooded, with a blank smooth-quartz face (never a carved face). Each holds something
+  different (a staff, a bowl, folded hands), they are worn and chipped, and some have fallen. Use
+  `map/structures/faceless_statues.py`.
+
 ## Towns and paths
 
 **Towns:**
