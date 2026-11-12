@@ -283,6 +283,7 @@ def thin_plate(side, t=3 / 16):
 
 def model(n, p):
     """-> list of (box, texdict, flags)."""
+    if n.startswith("minecraft:"): n = n[10:]          # tree stamps carry full ids
     if is_stairs(n): t = {"side": base_material(n)}; return [(b, t, {}) for b in stair_boxes(p)]
     if is_slab(n):
         t = {"side": base_material(n)}
