@@ -18,6 +18,9 @@
         "item": "siege:vault_breaker_diamond"
       }
     },
+    "unlock": {
+      "context": "AlwaysUnlocked"
+    },
     "result": {
       "item": "siege:vault_breaker_netherite",
       "count": 1
