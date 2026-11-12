@@ -703,6 +703,12 @@
   },
   "siege_vault_key": {
    "textures": "textures/items/vault/vault_key"
+  },
+  "siege_plan_book": {
+   "textures": "textures/items/siege_plan_book"
+  },
+  "siege_plan_scroll": {
+   "textures": "textures/items/siege_plan_scroll"
   }
  }
 }

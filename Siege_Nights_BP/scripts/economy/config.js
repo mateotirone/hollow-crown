@@ -34,6 +34,16 @@ export const ECON = {
 // The trade-up ladder at the Moneyer (Mateo 2026-11-12): every tier can always be bought with the tier below, at a
 // steep rate, so a pile of netherite stands on a mountain of diamonds, gold and iron. Earning a tier directly
 // (Workings, bosses, the Guild) is always cheaper. Never add the reverse: tiers only go up here.
+// Regional metal rates for every machine that makes metal (Ironworks, Gold Sluice, diamond works). Mateo 2026-11-12:
+// each region with a strength has a matching weakness (about 0.25) so it must trade with the region that has it;
+// nobody gets a netherite buff. Regions not listed, and metals not listed, run at 1.
+export const REGION_RATES = {
+  Emberwaste: { gold: 3, diamond: 0.25 },
+  Saltreach: { iron: 2, gold: 0.25 },
+  Frostmarch: { diamond: 2.5, iron: 0.25 },
+};
+export const regionRate = (region, metal) => (metal === "netherite" ? 1 : REGION_RATES[region]?.[metal] ?? 1);
+
 export const EXCHANGE = [
   { from: "minecraft:iron_ingot", n: 4, to: "minecraft:gold_ingot" },
   { from: "minecraft:gold_ingot", n: 8, to: "minecraft:diamond" },

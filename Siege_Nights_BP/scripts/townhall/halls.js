@@ -330,6 +330,7 @@ export function statesFor(frame, role, o = {}) {
     const upside = o.half === "top";
     out.push({ weirdo_direction: WEIRDO[d], upside_down_bit: upside });
     out.push({ "minecraft:cardinal_direction": d, upside_down_bit: upside });
+    out.push({ "minecraft:cardinal_direction": d }); // add-on blocks that only turn (vault doors and locks)
   } else if (o.axis) {
     const axis = o.axis === "y" ? "y" : (o.axis === "x" ? frame.R : frame.F).x !== 0 ? "x" : "z";
     out.push({ pillar_axis: axis });
