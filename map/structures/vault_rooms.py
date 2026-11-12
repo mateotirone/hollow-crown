@@ -56,6 +56,9 @@ def _stairs(floor):
     return stairs_of(floor)
 
 
+ENTRY = 3   # depth of the entrance landing in front of the vault door
+
+
 def shell(b, t, tier, n, h):
     """Floor, walls with an accent band, roof, corner pillars, the 3x3 door with its frame, the Vault Lock,
     and the stair-block staircase climbing south from the door. Returns (W, D, x1, z1, y1, mid)."""
@@ -87,14 +90,42 @@ def shell(b, t, tier, n, h):
     b.set(mid + 3, 2, z1, f"siege:vault_lock_{tier}", facing="s")
     b.markers["lock"] = (mid + 3, 2, z1)
     b.fill(1, 1, 1, x1 - 1, y1 - 1, z1 - 1, "air")
-    # the staircase carved down from the surface: three wide stair blocks climbing south from the door.
+    # the entrance hall: a 7-wide, 3-deep landing in front of the door, so the door and the lock are
+    # reached from flat ground and never from the stairs. Walls, ceiling and corner posts in the tier's style.
+    ex0, ex1 = mid - 4, mid + 4            # its side walls (the lock at mid+3 sits inside the landing)
+    ez0, ez1 = z1 + 1, z1 + ENTRY          # the landing floor rows
+    ezw = ez1 + 1                          # its south wall, with the 3-wide opening to the stairs
+    eh = 5                                 # ceiling height
+    b.fill(ex0, 0, ez0, ex1, 0, ezw, t["floor"])
+    for z in range(ez0, ezw + 1):
+        for y in range(1, eh):
+            for x in (ex0, ex1):
+                b.set(x, y, z, t["band"] if y == 4 else t["wall"], axis="x")
+    for x in range(ex0 + 1, ex1):
+        for y in range(1, eh):
+            b.set(x, y, ezw, "air" if abs(x - mid) <= 1 and y <= 3 else t["wall"], axis="x")
+    b.fill(ex0, eh, ez0, ex1, eh, ezw, t["roof"])
+    for x in (ex0, ex1):
+        b.fill(x, 1, ezw, x, eh, ezw, t["pillar"], axis="y")
+    for x in range(mid - 2, mid + 3):
+        b.set(x, 4, ezw, t["frame"], axis="x")
+    b.set(mid - 2, 1, ezw, t["frame"], axis="y"); b.set(mid + 2, 1, ezw, t["frame"], axis="y")
+    for y in (2, 3):
+        b.set(mid - 2, y, ezw, t["frame"], axis="y"); b.set(mid + 2, y, ezw, t["frame"], axis="y")
+    b.set(ex0 + 1, 1, ez1, t["light"]); b.set(ex1 - 1, 1, ez1, t["light"])
+    if t["carpet"]:
+        for z in range(ez0, ezw + 1):
+            b.set(mid, 1, z, t["carpet"])
+    b.markers["entrance"] = (mid, 1, ez0 + 1)
+    # the staircase carved down from the surface: three wide stair blocks climbing south from the landing.
     # In the world the ground it is cut through is its walls (and what is under the steps).
     steps = h + 2
     st = _stairs(t["floor"])
     for i in range(steps):
         for x in range(mid - 1, mid + 2):
-            b.set(x, i, z1 + 1 + i, st, facing="s", half="bottom")
-    b.markers["stairs_top"] = (mid, steps, z1 + steps)
+            b.set(x, i + 1, ezw + 1 + i, st, facing="s", half="bottom")
+    b.fill(mid - 1, 0, ezw + 1, mid + 1, 0, ezw + 1, t["floor"])
+    b.markers["stairs_top"] = (mid, steps + 1, ezw + steps)
     return W, D, x1, z1, y1, mid
 
 
@@ -205,6 +236,7 @@ def strongroom(tier, layout="treasury", cutaway=False):
             for x in range(W):
                 if not (mid - 2 <= x <= mid + 3):
                     b.set(x, y, z1, "air")
+        b.fill(mid - 4, 5, z1 + 1, mid + 4, 5, z1 + ENTRY + 1, "air")   # and the entrance hall's ceiling
     return b.finish()
 
 
