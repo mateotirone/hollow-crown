@@ -1,0 +1,329 @@
+{
+ "name": "kingsrest_inn",
+ "card": {
+  "title": "Kingsrest coaching inn",
+  "sub": "Furnished",
+  "region": "vale",
+  "where": "Kingsrest, on the square",
+  "kind": "Civic",
+  "blurb": "Cross-wing coaching inn: a long range with a carriage arch through to the yard and a gabled wing to the square with the door. Built on the skill."
+ },
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "vale_timber",
+    "frame": "stripped_spruce_log",
+    "roof": "brick_block"
+   },
+   "rect": [
+    0,
+    0,
+    26,
+    10
+   ],
+   "y": 0,
+   "plinth": 3,
+   "storeys": [
+    5,
+    5
+   ],
+   "jetty": [
+    "n",
+    "s"
+   ],
+   "storey_style": [
+    {
+     "frame_kind": "stone",
+     "frame": "stone_bricks",
+     "infill": {
+      "ladder": "VAL-01",
+      "axis": "y"
+     }
+    },
+    {}
+   ],
+   "door": {
+    "side": "s",
+    "at": -10,
+    "kind": "house",
+    "steps": 3
+   },
+   "roof": {
+    "type": "gable",
+    "ridge": "x",
+    "pitch": 1
+   },
+   "dormers": [
+    {
+     "side": "s",
+     "at": -11,
+     "w": 3,
+     "h": 3
+    },
+    {
+     "side": "s",
+     "at": -1,
+     "w": 3,
+     "h": 3
+    },
+    {
+     "side": "n",
+     "at": 6,
+     "w": 3,
+     "h": 3
+    },
+    {
+     "side": "n",
+     "at": 0,
+     "w": 3,
+     "h": 3
+    },
+    {
+     "side": "n",
+     "at": -6,
+     "w": 3,
+     "h": 3
+    }
+   ],
+   "chimney": [
+    [
+     2,
+     5
+    ],
+    [
+     24,
+     5
+    ]
+   ],
+   "wings": [
+    {
+     "rect": [
+      15,
+      11,
+      23,
+      19
+     ],
+     "storeys": [
+      5,
+      5
+     ],
+     "jetty": [
+      "e",
+      "w"
+     ],
+     "roof": {
+      "ridge": "z"
+     },
+     "door": {
+      "side": "s",
+      "kind": "house",
+      "steps": 3
+     }
+    }
+   ],
+   "vines": 0.04,
+   "interior": {
+    "use": "inn",
+    "furnish": false
+   }
+  },
+  {
+   "part": "arch",
+   "at": [
+    7,
+    1,
+    5
+   ],
+   "axis": "x",
+   "width": 5,
+   "height": 5,
+   "depth": 11,
+   "style": "round_angle",
+   "material": "stone_bricks",
+   "trim": "spruce_planks"
+  }
+ ],
+ "after": "kingsrest_inn:interiors",
+ "after_dy": 1,
+ "place": [
+  [
+   12,
+   3,
+   1,
+   "spruce_stairs",
+   {
+    "facing": "e"
+   }
+  ],
+  [
+   13,
+   4,
+   1,
+   "spruce_stairs",
+   {
+    "facing": "e"
+   }
+  ],
+  [
+   13,
+   3,
+   1,
+   "spruce_planks",
+   {}
+  ],
+  [
+   14,
+   5,
+   1,
+   "spruce_stairs",
+   {
+    "facing": "e"
+   }
+  ],
+  [
+   14,
+   3,
+   1,
+   "spruce_planks",
+   {}
+  ],
+  [
+   14,
+   4,
+   1,
+   "spruce_planks",
+   {}
+  ],
+  [
+   15,
+   6,
+   1,
+   "spruce_stairs",
+   {
+    "facing": "e"
+   }
+  ],
+  [
+   15,
+   3,
+   1,
+   "spruce_planks",
+   {}
+  ],
+  [
+   15,
+   4,
+   1,
+   "spruce_planks",
+   {}
+  ],
+  [
+   15,
+   5,
+   1,
+   "spruce_planks",
+   {}
+  ],
+  [
+   16,
+   7,
+   1,
+   "spruce_stairs",
+   {
+    "facing": "e"
+   }
+  ],
+  [
+   16,
+   3,
+   1,
+   "spruce_planks",
+   {}
+  ],
+  [
+   16,
+   4,
+   1,
+   "spruce_planks",
+   {}
+  ],
+  [
+   16,
+   5,
+   1,
+   "spruce_planks",
+   {}
+  ],
+  [
+   16,
+   6,
+   1,
+   "spruce_planks",
+   {}
+  ],
+  [
+   12,
+   7,
+   1,
+   "air",
+   {}
+  ],
+  [
+   13,
+   7,
+   1,
+   "air",
+   {}
+  ],
+  [
+   14,
+   7,
+   1,
+   "air",
+   {}
+  ],
+  [
+   15,
+   7,
+   1,
+   "air",
+   {}
+  ],
+  [
+   12,
+   8,
+   2,
+   "spruce_fence",
+   {}
+  ],
+  [
+   13,
+   8,
+   2,
+   "spruce_fence",
+   {}
+  ],
+  [
+   14,
+   8,
+   2,
+   "spruce_fence",
+   {}
+  ],
+  [
+   15,
+   8,
+   2,
+   "spruce_fence",
+   {}
+  ],
+  [
+   16,
+   8,
+   2,
+   "spruce_fence",
+   {}
+  ]
+ ]
+}

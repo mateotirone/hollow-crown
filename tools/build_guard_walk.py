@@ -102,6 +102,9 @@ MARKER_RP = {
 if __name__ == "__main__":
     patch("archer", True)
     patch("man_at_arms", False)
+    patch("crossbowman", True)  # shoots like the archer
+    for name in ("pikeman", "shieldbearer", "knight", "ram_crew", "trebuchet_crew", "sapper"):
+        patch(name, False)
     for path, data in ((os.path.join(BP, "entities", "post_marker.json"), MARKER_BP), (os.path.join(RP, "entity", "post_marker.entity.json"), MARKER_RP)):
         with open(path, "w") as f:
             json.dump(data, f, indent=2)

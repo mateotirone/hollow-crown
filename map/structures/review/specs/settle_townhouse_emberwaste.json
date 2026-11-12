@@ -1,0 +1,57 @@
+{
+ "card": {
+  "title": "Townhouse",
+  "sub": "Emberwaste, taller",
+  "region": "emberwaste",
+  "where": "Settlement plot (long Medium 13 x 15 or Large)",
+  "kind": "House",
+  "blurb": "A taller home of about six beds: a stone ground floor, a floor above jettied over the road, a high attic."
+ },
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "ember_sandstone",
+    "roof": "smooth_sandstone",
+    "box_signs": "ns"
+   },
+   "rect": [
+    -5,
+    -10,
+    5,
+    0
+   ],
+   "y": 0,
+   "plinth": 2,
+   "storeys": [
+    5,
+    5,
+    5
+   ],
+   "jetty": [],
+   "storey_style": [
+    {},
+    {},
+    {}
+   ],
+   "door": {
+    "side": "s",
+    "kind": "house",
+    "steps": 1
+   },
+   "roof": {
+    "type": "flat",
+    "parapet": "slab",
+    "beams": true
+   },
+   "interior": {
+    "use": "townhouse",
+    "attic": false
+   },
+   "dormers": [],
+   "chimney": false,
+   "vines": 0
+  }
+ ],
+ "name": "settle_townhouse_emberwaste"
+}

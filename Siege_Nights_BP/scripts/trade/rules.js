@@ -224,6 +224,36 @@ export function npcOffer(npc, player, rates) {
   return { give: { id: surplus.id, n }, get: { id: wants.id, n: getN }, every: "day", runs: 0 };
 }
 
+// ---------- Special Offers ----------
+
+// A special offer: { id, party, item, total, left, price (Regals for all `total`), posted, expires, filled: [{ by, n }] }
+// The normal worth of the whole amount, the premium the poster offers, and the Regals for `n` of it
+export const specialNormal = (sp) => regalWorth({ id: sp.item, n: sp.total });
+export const specialPremium = (sp) => { const n = specialNormal(sp); return n > 0 ? Math.round((sp.price / n - 1) * 100) : 0; };
+export const specialPayFor = (sp, n) => Math.floor((sp.price * n) / sp.total);
+
+// Why this special offer can't be posted, or undefined
+export function specialProblem(sp, ctx = {}) {
+  const g = goodOf(sp.item);
+  if (!g || g.money) return "Pick a trade good.";
+  if (!(sp.total >= 1) || sp.total !== Math.floor(sp.total)) return "Ask for at least 1.";
+  if (sp.total > (ctx.cargo ?? Infinity)) return `Your train carries at most ${ctx.cargo} of a thing on one trip.`;
+  if (!(sp.price >= 1) || sp.price !== Math.floor(sp.price)) return "Offer at least 1 Regal.";
+  if (sp.price < specialNormal(sp) * (1 - TRADE.specialMinPremium)) return `A special offer pays at least the normal worth (${specialNormal(sp)} Regals).`;
+  if ((ctx.open ?? 0) >= TRADE.specialsPerOutpost) return `Your Outpost can have ${TRADE.specialsPerOutpost} special offers open at once.`;
+  if (ctx.funds !== undefined && ctx.funds < sp.price) return `You need ${sp.price} Regals to post it: they're held until it's filled.`;
+  return undefined;
+}
+
+// How many of a special offer an NPC fills: it sells only when the price per item beats what the item is worth to it
+// (plus its margin), and only from stock. 0 = it passes.
+export function npcFill(npc, sp, stock, rates) {
+  const unit = sp.price / sp.total;
+  const wants = valueTo(rates, npc.region, sp.item) * 8 * (1 + (npc.margin ?? TRADE.npcMargin[npc.temperament] ?? 0.1));
+  if (unit < wants) return 0;
+  return Math.max(0, Math.min(sp.left, Math.floor(stock?.[sp.item] ?? 0)));
+}
+
 // ---------- the works' Supply Line ----------
 
 // How much of what each run takes from a party's Exports: { [id]: n }

@@ -1,0 +1,25 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shapeless": {
+    "description": {
+      "identifier": "siege:diamond_emberwaste_boots_recipe"
+    },
+    "tags": [
+      "siege_workshop"
+    ],
+    "ingredients": [
+      {
+        "item": "minecraft:diamond_boots"
+      },
+      {
+        "item": "siege:castle_stone_emberwaste"
+      }
+    ],
+    "result": {
+      "item": "siege:diamond_emberwaste_boots"
+    },
+    "unlock": {
+      "context": "AlwaysUnlocked"
+    }
+  }
+}

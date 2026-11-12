@@ -1,0 +1,25 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shapeless": {
+    "description": {
+      "identifier": "siege:chainmail_blackfen_chestplate_recipe"
+    },
+    "tags": [
+      "siege_workshop"
+    ],
+    "ingredients": [
+      {
+        "item": "minecraft:chainmail_chestplate"
+      },
+      {
+        "item": "siege:castle_stone_blackfen"
+      }
+    ],
+    "result": {
+      "item": "siege:chainmail_blackfen_chestplate"
+    },
+    "unlock": {
+      "context": "AlwaysUnlocked"
+    }
+  }
+}

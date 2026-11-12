@@ -1,0 +1,52 @@
+{
+ "card": {
+  "title": "Inn",
+  "sub": "Emberwaste, furnished",
+  "region": "emberwaste",
+  "where": "Settlement plot (Large 15 x 15)",
+  "kind": "Work",
+  "blurb": "Eaves to the road, a stone tap room with the bar, tables and a hearth, three bedrooms above."
+ },
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "ember_sandstone",
+    "roof": "smooth_sandstone",
+    "box_signs": "ns"
+   },
+   "rect": [
+    -6,
+    -10,
+    6,
+    0
+   ],
+   "y": 0,
+   "plinth": 2,
+   "storeys": [
+    5,
+    5
+   ],
+   "jetty": [],
+   "storey_style": [
+    {},
+    {}
+   ],
+   "door": {
+    "side": "s",
+    "kind": "house",
+    "steps": 1
+   },
+   "roof": {
+    "type": "flat",
+    "parapet": "slab",
+    "beams": true
+   },
+   "interior": "inn",
+   "dormers": [],
+   "chimney": false,
+   "vines": 0
+  }
+ ],
+ "name": "settle_inn_emberwaste"
+}

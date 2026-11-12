@@ -256,6 +256,9 @@
   "siege_waystone": {
    "textures": "textures/blocks/siege_waystone"
   },
+  "siege_gravestone": {
+   "textures": "textures/blocks/graves/gravestone"
+  },
   "siege_court_seal": {
    "textures": "textures/blocks/siege_court_seal"
   },
