@@ -90,6 +90,21 @@ export function chamberOps() {
   return out;
 }
 
+// The approach: the shaft above the chamber, where the footmen climb to meet whoever comes down.
+export const SHAFT_ZONE = { r: 2.6, top: -3, bottom: -10 };
+export const inShaft = (c, l) => Math.hypot(l.x - (c.x + 0.5), l.z - (c.z + 0.5)) <= SHAFT_ZONE.r && l.y <= c.y + SHAFT_ZONE.top && l.y >= c.y + SHAFT_ZONE.bottom;
+/** Where n footmen stand on the stair below someone at height relY (from the square): { dx, dy, dz } standing spots. */
+export function stairSpotsBelow(relY, n) {
+  const out = [], count = (1 - (WELL.floorY + 1)) * 2 - 1;
+  for (let k = 0; k < n; k++) {
+    const surface = Math.floor(relY) - 4 - 2 * k; // four blocks down (one turn of the stair), then two more each
+    const i = Math.min(count - 1, Math.max(0, 2 * (1 - surface) - 1));
+    const [dx, dz] = RING[i % RING.length];
+    out.push({ dx, dy: 1 - 0.5 * (i + 1), dz });
+  }
+  return out;
+}
+
 /** Where each of the 43 half-steps goes, top first: a slab on one of the RING cells round the spindle. */
 export function stairSteps() {
   const steps = [];
@@ -143,9 +158,17 @@ export function postSpot(post) {
 
 /**
  * One clock post: a stone-brick column with the clock on top (its face glows a little) and a slab cap, its name on a sign in
- * front. The Tower clock gets a squat 3 by 3 tower instead. Returns { ops, clock, sign, keeper, face }.
+ * front. The Tower clock gets a squat 3 by 3 tower instead, or, with `clocktower` (the Millbrook area stamp is in
+ * landmarks.js and the Tower clock is pinned to TOWER_POST), sits high in the gate clocktower that stamp builds over
+ * the east street, as the hub of its west face. Returns { ops, clock, sign, keeper, face }.
  */
-export function postOps(post, tower, signText) {
+export const CLOCKTOWER = { post: 1, clock: { dx: 8, dy: 28, dz: 0 }, face: "west", sign: { dx: 7, dy: 1, dz: 0 }, keeper: { dx: 7, dy: 1, dz: -1 } };
+export function postOps(post, tower, signText, { clocktower = false } = {}) {
+  if (tower && clocktower && post === CLOCKTOWER.post) {
+    const { clock, face, sign, keeper } = CLOCKTOWER;
+    const ops = [op(clock.dx, clock.dy, clock.dz, "siege:stopped_clock", { "minecraft:cardinal_direction": face, "siege:struck": 0 })];
+    return { ops, clock, sign: { ...sign, text: signText }, keeper, face, faceIndex: FACES.indexOf(face) };
+  }
   const { dx, dz } = postSpot(post);
   const face = faceToCenter(dx, dz);
   const [fx, fz] = STEP[face];

@@ -122,3 +122,13 @@ export function villagerLines(c, v) {
   return TELL_KINDS.map((k) => TELLS[k][t[k] ? 0 : 1]);
 }
 export const accuse = (c, v) => (v === c.shape ? "shape" : "wrong");
+
+// ================= the approach fights =================
+// Each boss area has a stretch on the way in where its lesser things come for whoever walks through.
+export const APPROACH_REST_TICKS = 6000; // five minutes between waves
+/** Whether an approach sends a wave now: someone is in it, no fight or scene is running, and it has rested. */
+export const approachWave = ({ players, fighting, now, last }) => players > 0 && !fighting && (last === undefined || now - last >= APPROACH_REST_TICKS);
+/** How many come: `base` plus `per` for each player there, never more than `max`. */
+export const approachCount = (players, { base = 2, per = 2, max = 6 } = {}) => Math.min(max, base + per * players);
+export const GLADE_REST_TICKS = APPROACH_REST_TICKS;
+export const gladeWave = approachWave;

@@ -23,6 +23,7 @@ export const SUMMONS = {
   "siege:summon_choir": "choir",
   "siege:summon_morvane": "morvane",
   "siege:summon_pretender": "pretender",
+  "siege:summon_bell_wife": "bell_wife",
 };
 
 const flat = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);

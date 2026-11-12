@@ -1,6 +1,6 @@
 import { addTests, assert, assertEqual } from "../siege/api.js";
-import { CLOCKS, KEEPERS, POSTS, makePuzzle, solutions, statementText, clockAnswer, fallbackPuzzle, WRONG_COOLDOWN_TICKS } from "./keepers.js";
-import { WELL, RING, wellOps, chamberOps, stairSteps, spindleOps, drainLayers, plugOps, postOps, postSpot, faceToCenter } from "./well_plan.js";
+import { CLOCKS, KEEPERS, POSTS, makePuzzle, TOWER_POST, solutions, statementText, clockAnswer, fallbackPuzzle, WRONG_COOLDOWN_TICKS } from "./keepers.js";
+import { CLOCKTOWER, WELL, RING, wellOps, chamberOps, stairSteps, spindleOps, drainLayers, plugOps, postOps, postSpot, faceToCenter } from "./well_plan.js";
 import { fullPlan, crankAnswer, inChamber, keeperBody, MILLBROOK_SQUARE } from "./reeve.js";
 import { porchBlocks } from "../opening/millbrook.js";
 
@@ -17,6 +17,13 @@ addTests("unlocks", {
       assertEqual([...p.layout].sort(), [0, 1, 2, 3, 4, 5], "one clock per post");
     }
     assertEqual(solutions(fallbackPuzzle().statements, fallbackPuzzle().layout).length, 1, "the fallback puzzle");
+  },
+  "with the clocktower pinned, the Tower clock stays in it and the answer is still unique": () => {
+    for (let seed = 1; seed <= 40; seed++) {
+      const p = makePuzzle(seed * 2654435761, { towerPost: TOWER_POST });
+      assertEqual(p.layout[0], TOWER_POST, `seed ${seed}`);
+      assertEqual(solutions(p.statements, p.layout).length, 1, `seed ${seed}`);
+    }
   },
   "the same world always gets the same puzzle, and different worlds differ": () => {
     assertEqual(makePuzzle(1234), makePuzzle(1234));
@@ -114,6 +121,11 @@ addTests("unlocks", {
     assertEqual((Math.max(...xs) - Math.min(...xs) + 1) % 2, 1);
     assertEqual(new Set(POSTS.map((_, i) => key({ ...postSpot(i), dy: 0 }))).size, 6, "six separate posts");
     assert(!plan.ops.some((o) => o.dy >= 0 && /bell/.test(o.block)), "Millbrook rings no bells");
+    const high = postOps(CLOCKTOWER.post, true, "x", { clocktower: true });
+    assertEqual(high.ops.length, 1, "in the clocktower the Tower clock is just its clock");
+    assertEqual(high.clock, CLOCKTOWER.clock);
+    assertEqual(key({ ...postSpot(CLOCKTOWER.post), dy: 0 }), "10,0,0", "the clocktower stands over the east street");
+    assertEqual(TOWER_POST, CLOCKTOWER.post);
     const tower = postOps(0, true, "x");
     assert(tower.ops.some((o) => o.dy === 7), "the Tower clock stands taller");
   },

@@ -29,8 +29,10 @@ import { isBuilder } from "../plots/claims.js";
 import { learnLeads } from "../lore/player.js";
 import { startBoss, fightOf } from "../bestiary/bossCore.js";
 import { markSocketed } from "../bestiary/relics.js";
-import { CLOCKS, KEEPERS, makePuzzle, statementText, clockAnswer } from "./keepers.js";
-import { WELL, CHAMBER_CENTER, wellOps, chamberOps, postOps, stairSteps, spindleOps, drainLayers, plugOps, SIGN_TURN } from "./well_plan.js";
+import { LANDMARKS, stampOps } from "./landmarks.js";
+import { approachWave, approachCount } from "./puzzles.js";
+import { CLOCKS, KEEPERS, makePuzzle, TOWER_POST, statementText, clockAnswer } from "./keepers.js";
+import { inShaft, stairSpotsBelow, SHAFT_ZONE, WELL, CHAMBER_CENTER, wellOps, chamberOps, postOps, stairSteps, spindleOps, drainLayers, plugOps, SIGN_TURN } from "./well_plan.js";
 
 export const KEY = "siege:stopped_clock_key";
 export const CLOCK_BLOCK = "siege:stopped_clock";
@@ -66,7 +68,7 @@ const puzzle = () => {
     store.data.seed = Math.floor(Math.random() * 2 ** 31);
     store.save();
   }
-  return makePuzzle(store.data.seed);
+  return makePuzzle(store.data.seed, { towerPost: store.data.towerPost }); // worlds built before the pin keep their layout
 };
 const at = (c, o) => ({ x: c.x + o.dx, y: c.y + o.dy, z: c.z + o.dz });
 const say = (player, text) => { try { player.sendMessage(text); } catch { /* gone */ } };
@@ -106,7 +108,7 @@ function put(dim, c, o) {
 /** Every block of the set piece, and where the clocks, signs and keepers go, for a square centred on c. */
 export function fullPlan(p) {
   const ops = [...chamberOps(), ...wellOps()];
-  const posts = CLOCKS.map((clock, i) => postOps(p.layout[i], i === 0, `${clock.short} Clock\n§7kept by\n${KEEPERS[i].name}`));
+  const posts = CLOCKS.map((clock, i) => postOps(p.layout[i], i === 0, `${clock.short} Clock\n§7kept by\n${KEEPERS[i].name}`, { clocktower: !!LANDMARKS.reeve }));
   for (const post of posts) ops.push(...post.ops);
   return { ops, posts };
 }
@@ -119,7 +121,9 @@ export function buildWell(center, by) {
   if (y === undefined) return { ok: false, why: "not loaded yet (stand closer)" };
   const c = { x: Math.floor(center.x), y, z: Math.floor(center.z) };
   busy = true;
+  if (store.data.towerPost !== TOWER_POST) { store.data.towerPost = TOWER_POST; store.save(); } // a fresh build pins the Tower clock
   const plan = fullPlan(puzzle());
+  plan.ops = [...stampOps(LANDMARKS.reeve), ...plan.ops]; // the square's landmark first (landmarks.js), the well on top
   let failed = 0;
   system.runJob((function* () {
     let n = 0;
@@ -162,7 +166,7 @@ onTick("unlocks_reeve_build", 100, () => {
   if (!near.length) return;
   const dim = overworld();
   if (!holding) {
-    const r = Math.ceil(WELL.wallR) + 2;
+    const L = LANDMARKS.reeve, r = Math.max(Math.ceil(WELL.wallR) + 2, L?.size ? Math.ceil(Math.max(L.size[0], L.size[2]) / 2) + 2 : 0);
     try { dim.runCommand(`tickingarea add ${MILLBROOK_SQUARE.x - r} 0 ${MILLBROOK_SQUARE.z - r} ${MILLBROOK_SQUARE.x + r} 0 ${MILLBROOK_SQUARE.z + r} ${AREA} true`); } catch { /* full */ }
     holding = true;
   }
@@ -425,10 +429,27 @@ export function inChamber(p, c) {
   return Math.hypot(p.x - (c.x + 0.5), p.z - (c.z + 0.5)) <= WELL.roomR && p.y > floor && p.y < c.y + WELL.plugY;
 }
 
+// The approach: while he waits below, footmen climb the stair to meet whoever comes down the shaft.
+let lastStairWave;
+function stairWave(d) {
+  if (!d.open || !d.pending || d.fighting) return;
+  const c = d.center;
+  const inside = nearby(c, SHAFT_ZONE.r + 2).filter((p) => inShaft(c, p.location));
+  const now = system.currentTick;
+  if (!approachWave({ players: inside.length, fighting: !!scene, now, last: lastStairWave })) return;
+  lastStairWave = now;
+  const lowest = Math.min(...inside.map((p) => p.location.y)) - c.y;
+  for (const p of inside) { say(p, "§7Below you the stair is ticking. No: it is footsteps, keeping time, coming up."); sfx(overworld(), "random.anvil_use", p.location, { pitch: 0.7, volume: 0.6 }); }
+  for (const s of stairSpotsBelow(lowest, approachCount(inside.length, { base: 1, per: 1, max: 4 }))) {
+    try { overworld().spawnEntity(FOOTMAN, { x: c.x + s.dx + 0.5, y: c.y + s.dy, z: c.z + s.dz + 0.5 }); } catch { /* unloaded */ }
+  }
+}
+
 let missing = 0;
 onTick("unlocks_reeve_fight", 10, () => {
   const d = store.data;
   if (!d.built) return;
+  try { stairWave(d); } catch (e) { console.warn(`[Hollow Crown] reeve stair: ${e}`); }
   if (d.pending && !d.fighting) {
     const c = d.center;
     const down = world.getPlayers().some((p) => p.dimension.id === OVERWORLD && inChamber(p.location, c));

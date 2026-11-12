@@ -10,9 +10,9 @@
 //   The seal stays in the wall. Once a siege night has passed after he falls, press it again.
 
 import { system, BlockPermutation } from "@minecraft/server";
-import { defineSite, column, overworld, say, actionbar, sound, abs, setState, give, inventoryHas, nearby, put } from "./site.js";
+import { defineSite, column, overworld, say, actionbar, sound, abs, setState, give, inventoryHas, nearby, put, makeApproach } from "./site.js";
 import { makeStatues, statueStep, resting } from "./puzzles.js";
-import { vaultPlan, statueAt, signSpot, doorCells, inVault, VAULT } from "./plans.js";
+import { vaultPlan, statueAt, signSpot, doorCells, inVault, inAshSand, VAULT, ASH_SAND } from "./plans.js";
 
 export const SEAL = "siege:faceless_seal";
 const SCARAB = "siege:ash_scarab";
@@ -25,7 +25,7 @@ export const seneschalSite = defineSite({
   name: "The Faceless Vault",
   boss: "seneschal",
   key: SEAL,
-  anchor: { x: 850, z: 516 }, // the south edge of Sunscar (its ward is 80 round 850, 450)
+  anchor: { x: 850, z: 590 }, // open desert just south of Sunscar (its houses reach z 531), the gate facing the town
   reach: 40,
   emptyText: "§7A round seal set into the wall, worn perfectly smooth. Something is meant to be pressed into it.",
   *plan(dim, anchor) {
@@ -53,8 +53,22 @@ export const seneschalSite = defineSite({
   inArena: (site, l) => inVault(site.data.center, l),
   spawnAt: (site) => ({ x: site.data.center.x + 0.5, y: site.data.center.y + VAULT.floor + 1, z: site.data.center.z - 41.5 }),
   onWin: () => {},
+  tick: (site) => ashSand(site),
   tpAt: (site) => { const c = site.data.center; return { x: c.x + 0.5, y: c.y + 1, z: c.z + 3.5 }; },
   answer: (site) => `Statue order by spot: ${statues(site).spots.map((age, spot) => [age, spot]).sort((a, b) => a[0] - b[0]).map(([, spot]) => spot).join(", ")}`,
+});
+
+// ---------- the sand before the stair: ash scarabs ----------
+const ashSand = makeApproach({
+  mid: (site) => ({ x: site.data.center.x, z: site.data.center.z + ASH_SAND.dz }), r: ASH_SAND.r + 2,
+  inZone: (site, l) => inAshSand(site.data.center, l),
+  mob: SCARAB, count: { base: 3, per: 2, max: 7 },
+  line: "§7The sand in front of the stair shifts under your boots. Then it is not sand. It is ash, and the ash is moving.",
+  cry: "random.anvil_use", cryOpts: { pitch: 1.6, volume: 0.5 },
+  spots: (site, players, n, now) => Array.from({ length: n }, (_, i) => {
+    const c = site.data.center, a = (i / n) * Math.PI * 2 + now;
+    return { x: c.x + 0.5 + Math.sin(a) * (ASH_SAND.r - 3), y: c.y + 1, z: c.z + ASH_SAND.dz + 0.5 + Math.cos(a) * (ASH_SAND.r - 3) };
+  }),
 });
 
 function spotOf(site, block) {

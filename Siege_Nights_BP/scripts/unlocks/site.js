@@ -13,6 +13,8 @@ import { sfx } from "../core/sfx.js";
 import { OVERWORLD } from "../plots/config.js";
 import { isBuilder } from "../plots/claims.js";
 import { startBoss, fightOf } from "../bestiary/bossCore.js";
+import { LANDMARKS, stampOps } from "./landmarks.js";
+import { approachWave, approachCount } from "./puzzles.js";
 import { markSocketed } from "../bestiary/relics.js";
 
 export const overworld = () => world.getDimension(OVERWORLD);
@@ -102,6 +104,29 @@ export function ring(c, r, y, particle = "minecraft:basic_smoke_particle", n = 2
     const t = (a / n) * Math.PI * 2;
     try { dim.spawnParticle(particle, { x: c.x + 0.5 + Math.sin(t) * r, y, z: c.z + 0.5 + Math.cos(t) * r }); } catch { /* unloaded */ }
   }
+}
+
+// ---------- approach fights ----------
+/**
+ * A stretch on the way in to a boss where its lesser things come for whoever walks through, then rest five minutes.
+ *   mid(site) -> { x, z } and r: where to look for players;  inZone(site, loc);  when?(site) -> bool
+ *   mob, count? ({ base, per, max }), line (chat), cry (sound id), spots(site, players, n, now) -> [{ x, y, z }]
+ * Returns the function to call from the site's tick. Never fires during the summon scene or the fight.
+ */
+export function makeApproach(a) {
+  let last;
+  return (site) => {
+    const d = site.data;
+    if (!d.built || (a.when && !a.when(site))) return;
+    const inside = nearby(a.mid(site), a.r).filter((p) => a.inZone(site, p.location));
+    const now = system.currentTick;
+    if (!approachWave({ players: inside.length, fighting: d.fighting || !!site.scene, now, last })) return;
+    last = now;
+    const n = approachCount(inside.length, a.count);
+    for (const p of inside) { say(p, a.line); if (a.cry) sound(a.cry, p.location, a.cryOpts ?? { volume: 1 }); }
+    const dim = overworld();
+    for (const at of a.spots(site, inside, n, now)) { try { dim.spawnEntity(a.mob, at); } catch { /* unloaded */ } }
+  };
 }
 
 // ---------- the rematch rule (pure) ----------
@@ -208,12 +233,13 @@ export function defineSite(def) {
         if (by) say(by, `§c${def.name}: the ground there is not loaded yet. Stand closer.`);
         return;
       }
+      const ops = [...stampOps(LANDMARKS[def.id]), ...plan.ops]; // the landmark first, the site's own cells on top
       let failed = 0, n = 0;
-      for (const o of plan.ops) {
+      for (const o of ops) {
         try { put(dim, plan.center, o); } catch { failed++; }
         if (++n % 64 === 0) yield;
       }
-      if (failed > plan.ops.length * 0.02) {
+      if (failed > ops.length * 0.02) {
         site.busy = false;
         if (by) say(by, `§c${def.name}: ${failed} blocks were not loaded. It will try again when someone comes near.`);
         return;
@@ -224,7 +250,7 @@ export function defineSite(def) {
       try { def.afterBuild?.(site, dim); } catch (e) { console.warn(`[Hollow Crown] ${def.id} after build: ${e}`); }
       site.keepNpcs();
       site.busy = false;
-      if (by) say(by, `§6${def.name} is built (${plan.ops.length} blocks) at ${plan.center.x} ${plan.center.y} ${plan.center.z}.`);
+      if (by) say(by, `§6${def.name} is built (${ops.length} blocks) at ${plan.center.x} ${plan.center.y} ${plan.center.z}.`);
     })());
     return { ok: true };
   };
@@ -247,7 +273,8 @@ export function defineSite(def) {
     }
     if (!nearby(def.anchor, 56).length) return;
     if (!area) {
-      const r = def.reach ?? 24, a = def.anchor;
+      const L = LANDMARKS[def.id], half = L?.size ? Math.ceil(Math.max(L.size[0], L.size[2]) / 2) + 2 : 0;
+      const r = Math.max(def.reach ?? 24, half), a = def.anchor; // hold the landmark loaded too
       try { dim.runCommand(`tickingarea add ${a.x - r} 0 ${a.z - r} ${a.x + r} 0 ${a.z + r} ${AREA} true`); } catch { /* full */ }
       area = true;
     }

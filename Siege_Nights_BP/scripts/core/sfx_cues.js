@@ -18,6 +18,17 @@ const SIGNATURE = {
   "sig.siege_horn": { custom: "siege.sig.siege_horn", drift: 0.03, what: "The siege horn",
     layers: [["raid.horn", 0.7, 1], ["raid.horn", 0.52, 0.6, 7], ["ambient.weather.thunder", 0.5, 0.25, 12]] },
   "sig.rift_open": { custom: "siege.sig.rift_open", what: "The Rift opening", layers: [] }, // stand-in is the stepped tearing in undertow/rift.js
+  // The rest of the Rift's sounds (recordings from the sounds thread; the layers are the stand-ins until they are installed).
+  "sig.rift_answer": { custom: "siege.sig.rift_answer", what: "The rock answering the Tuning Fork", layers: [["resonate.amethyst_block", 2, 0.35]] },
+  "sig.rift_stir": { custom: "siege.sig.rift_stir", drift: 0.05, what: "The rock stirring before the Rift tears",
+    layers: [["chime.amethyst_block", 1.2, 0.55], [BELL, 0.6, 0.3, 4]] },
+  "sig.rift_hush": { custom: "siege.sig.rift_hush", what: "The hush before the tear", layers: [["resonate.amethyst_block", 0.5, 0.3]] },
+  "sig.rift_breath": { custom: "siege.sig.rift_breath", what: "The Rift's first breath", layers: [["ambient.cave", 2, 0.6]] },
+  "sig.rift_loop": { custom: "siege.sig.rift_loop", what: "The open Rift at rest (loop)", layers: [] }, // not played yet
+  "sig.rift_refuse": { custom: "siege.sig.rift_refuse", what: "The veil turning a player back", layers: [["resonate.amethyst_block", 1.2, 0.4]] },
+  "sig.rift_cross": { custom: "siege.sig.rift_cross", what: "Stepping through the Rift", layers: [["ambient.cave", 1, 0.5]] },
+  "sig.seep_creep": { custom: "siege.sig.seep_creep", drift: 0.06, what: "A seep vein growing", layers: [] }, // not played yet
+  "sig.thin_draught": { custom: "siege.sig.thin_draught", drift: 0.04, what: "The draught at a thin place", layers: [] }, // not played yet
   "sig.hollow_ambience": { custom: "siege.sig.hollow_ambience", what: "The Hollow's ambience (loop)", layers: [] }, // stand-in is the Hollow's own thunder and hum
   "sig.storm_tide": { custom: "siege.sig.storm_tide", what: "A storm tide of the Long Night",
     layers: [["ambient.weather.thunder", 0.55, 0.7], ["raid.horn", 0.5, 0.35, 14], ["ambient.cave", 0.7, 0.4, 30]] },
