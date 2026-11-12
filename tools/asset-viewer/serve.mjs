@@ -339,6 +339,8 @@ const EXTRAS = [
   { id: "graves", title: "Gravestone", marker: "map/structures/gravestone_build.py",
     args: (out) => [out],
     label: { gravestone: "Gravestone (where a player fell; candle lit while sealed)" } },
+  { id: "bridges", title: "Bridges", marker: "map/structures/bridges_gallery.py",
+    args: (out) => [out] },
 ];
 // Builder scripts that live on a branch without the kit: copied from the newest branch that has them into
 // the newest catalogue branch's map/structures and run there.
