@@ -31,7 +31,8 @@ import regions_towns as RT
 # centres and wards from map/town-sites.json (the square genworld writes) and plots/config.js WARDS
 REGION_SITES = {
     "rimehold":   dict(name="Rimehold", centre=(-80, -1080), radius=70, seed=31),
-    "gulls_rest": dict(name="Gull's Rest", centre=(-800, 400), radius=70, seed=41),
+    # Mateo 2026-11-12: Gull's Rest moves down to the coast and gets a real harbour (harbour.py)
+    "gulls_rest": dict(name="Gull's Rest", centre=(-865, 405), radius=85, seed=41, harbour=True, square_at=(-910, 403), build_u=1.6, lanes=12),
     "sunscar":    dict(name="Sunscar", centre=(850, 450), radius=80, seed=61),
     "mirelight":  dict(name="Mirelight", centre=(-60, 900), radius=70, seed=51),
 }
@@ -69,10 +70,24 @@ CROPS = {"frost": [("potatoes", 40, (5, 7)), ("beetroot", 35, (5, 7)), ("wheat",
 class RegionTown(Town):
     def __init__(self, key, T, L, seed=None):
         s = REGION_SITES[key]; self.town = key; self.region = RT.TOWN_REGION[key]
-        site = dict(centre=s["centre"], radius=s["radius"], size="town", fixed_square=True, square_r=6,
-                    seed=s["seed"] if seed is None else seed, region=self.region, civic=[], build_u=0.55)
+        site = dict(centre=s["centre"], radius=s["radius"], size="town", fixed_square=True, square_r=6, square_at=s.get("square_at"),
+                    seed=s["seed"] if seed is None else seed, region=self.region, civic=[], build_u=s.get("build_u", 0.55), lanes=s.get("lanes"))
         super().__init__(s["name"], site, T, L, site["seed"])
         self.key = key
+
+    def u(self, x, z):
+        """A harbour town's square is on its water edge, so the town reaches twice as far from it: tiers by
+        half the distance (houses all the way up the slope, barns only at the top)."""
+        d = super().u(x, z)
+        return d * 0.5 if REGION_SITES[self.key].get("harbour") else d
+
+    def houses(self):
+        super().houses()
+        if REGION_SITES[self.key].get("harbour"):           # a second, tighter sweep: harbour towns are packed
+            for rd in [r for r in self.roads if r["kind"] in ("main", "lane")]:
+                for side in (1, -1):
+                    self.place_along(rd, side, lambda x, z: (0 if self.u(x, z) < 0.3 else 1 if self.u(x, z) < 0.6 else 2) if self.ok(x, z) and self.at(self.PKIND, x, z) == 1 else None,
+                                     setbacks=(1, 2, 3, 5), gap_rng=(0, 1))
 
     # ---- buildings
     def pick_building(self, tier, kinds=None):
@@ -101,11 +116,22 @@ class RegionTown(Town):
             if not done: done = self.civic_on_street(bp, name)
             if not done: print("no room for", name)
 
+    def harbour(self):
+        """Gull's Rest: quay, breakwaters, basin, jetty, lighthouse, hut, crane, boathouse (harbour.py); the
+        promenade along the quay is a main street joined to the square, so the town's streets meet it."""
+        import harbour as HB
+        prom = HB.build(self)
+        self.lay(prom, "main", k_start=2 * HB.TOP + 2, k_end=2 * HB.TOP + 2)
+        sq = min(prom, key=lambda c: abs(c[1] - self.sq[1]))
+        link = [(x, sq[1]) for x in range(sq[0], self.sq[0] - self.sqR + 1)]
+        self.lay(link, "main", k_start=2 * HB.TOP + 2, k_end=self.k_at(*link[-1]) if self.k_at(*link[-1]) >= 0 else 2 * HB.TOP + 2)
+        self.harboured = True
+
     def shore(self):
         """SHORE buildings where land meets water inside the ward: front (land door) away from the water,
         everything past markers["water_edge"] standing over water."""
         makers = RT.SHORE.get(self.town, [])
-        if not makers: return
+        if not makers or getattr(self, "harboured", False): return
         wet = self.WET & self.IN
         if not wet.any(): print("no water inside the ward for", [n for n, _ in makers]); return
         edge = []
@@ -213,6 +239,7 @@ class RegionTown(Town):
 
     def run(self):
         self.square()
+        if REGION_SITES[self.key].get("harbour"): self.harbour()
         self.streets(); self.relax(); self.grade_verges()
         self.portions()
         self.place_square_buildings()
