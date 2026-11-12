@@ -19,6 +19,9 @@ playing so it has to be perfect." Be harder on it than he would be.
   under it, and every hanging lantern hangs from a block or a chain. Station designs are tested for this
   (`trains/tests.js`, "stations: nothing floats"): any block not joined, even corner to corner, down to the
   ground fails.
+- Water stays put (2026-11-12): every water block is sunk into the floor and closed on four sides and below by
+  solid blocks or more water. Water on the walking row of an open floor runs over the whole room in game (the
+  Drowned Court's channels did). `engine.compute` warns about it (`spilling_water`).
 - Doors, lanterns, chains, torches, bells, signs, banners, ladders and carpets were placed after the solid blocks
   (Mateo, 2026-11-12): watch the build rise once and check no door is broken in half and no lantern dropped.
 - The ground round it (Mateo, 2026-11-12): no groundwork block floats, no edge stands more than 1 above or below the

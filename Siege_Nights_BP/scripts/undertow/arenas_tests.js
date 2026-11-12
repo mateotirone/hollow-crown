@@ -5,7 +5,7 @@ import { heightAt, heartEdge, HEART_EDGE_Z } from "./terrain.js";
 import { edgeCarveOps, SEAT_BOX, seatChunksLeft, nearSeatEnd, RANKS_BOX, RANKS_SITE, boxChunksLeft } from "./builder.js";
 import { stampCells } from "./stamp.js";
 import { COURT, HEART } from "./layout.js";
-import { singerSpot, CHOIR } from "./choir.js";
+import { singerSpot, CHOIR, waveSize, waveCaptain } from "./choir.js";
 
 const solidAt = (d) => {
   const s = new Map();
@@ -50,6 +50,31 @@ addTests("hollow arenas", {
       const p = singerSpot(i), x = Math.floor(p.x) - COURT.center.x, z = Math.floor(p.z) - COURT.center.z;
       for (const y of [0, 1]) assert(!blocks(s, `${x},${y},${z}`), `singer ${i} spot blocked`);
     }
+  },
+  "the Court's water stays in its channels: every water block is closed on four sides and below (it once ran over the floor)": () => {
+    const all = new Map();
+    for (const [x, y, z, i] of stampCells(COURT_DESIGN)) all.set(`${x},${y},${z}`, COURT_DESIGN.palette[i][0]);
+    let n = 0;
+    for (const [k, b] of all) {
+      if (b !== "minecraft:water") continue;
+      n++;
+      const [x, y, z] = k.split(",").map(Number);
+      assert(y < 0, `water at the walking row, ${k}`);
+      for (const [dx, dy, dz] of [[1, 0, 0], [-1, 0, 0], [0, 0, 1], [0, 0, -1], [0, -1, 0]]) {
+        const o = all.get(`${x + dx},${y + dy},${z + dz}`);
+        assert(o && o !== "minecraft:air", `water at ${k} is open toward ${dx},${dy},${dz}`);
+      }
+    }
+    assert(n > 0, "the channels are gone");
+  },
+  "the Choir's Echo waves grow, never pass the cap, and bring something worse every few waves": () => {
+    for (let w = 1; w < 30; w++) {
+      assert(waveSize(w + 1, 1) >= waveSize(w, 1), `wave ${w + 1} is smaller than wave ${w}`);
+      assert(waveSize(w, 10) <= CHOIR.waveMax, `wave ${w} passes the cap`);
+      assert(waveSize(w, 1, true) <= waveSize(w, 1), "a wrecked cart makes waves bigger");
+    }
+    assert(waveSize(1, 1) === CHOIR.waveBase, "the first wave");
+    assert(!waveCaptain(1) && waveCaptain(3) && waveCaptain(10), "captains on waves 3 and 10");
   },
   "the Court never writes the gate's cells (the seal and openCourtGate own them)": () => {
     const s = solidAt(COURT_DESIGN), gz = COURT.gateZ - COURT.center.z;

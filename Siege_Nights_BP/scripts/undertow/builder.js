@@ -4,7 +4,7 @@
 
 import { world, BlockVolume, BlockPermutation } from "@minecraft/server";
 import { UNDERTOW_ID, UNDERTOW_LAYOUT as L, COURT, HEART, pathX } from "./layout.js";
-import { planChunk, chunkInRange, heightAt, columnAt, roofAt, heartEdge, HEART_EDGE_Z, B, ROOF } from "./terrain.js";
+import { planChunk, planRoofSwap, chunkInRange, heightAt, columnAt, roofAt, heartEdge, HEART_EDGE_Z, B, ROOF } from "./terrain.js";
 import { planCrack, placeCells } from "./rift.js";
 import { SEAL_RIVER_X } from "./rivers.js";
 import { SITES, signposts } from "./roads.js";
@@ -14,24 +14,40 @@ import { SITE_DESIGNS, TOWER_DESIGNS } from "./sites_data.js";
 import { DROWNED_SPOTS } from "./drowned.js";
 import { COURT_DESIGN, SEAT_DESIGN, APPROACH_DESIGN } from "./arenas_data.js";
 import { stamp } from "./stamp.js";
-import { load, save } from "./data.js";
+import { load, save, runCmd } from "./data.js";
 import { sfx } from "../core/sfx.js";
 
 const K_BUILT = "hc:undertow_built3"; // hex bitset of finished chunks
 // Chunks finished by an older generator (before the roof, the new trees and ground, 2026-11-11). They
 // are cleared from the ground up and built again the new way when someone comes near.
 const K_BUILT_OLD = "hc:undertow_built2";
+// Chunks that have the high roof (2026-11-12). A chunk built before it keeps its land and has only its
+// low roof swapped (terrain.js planRoofSwap). A chunk built from scratch gets the high roof at once.
+const K_ROOF = "hc:undertow_roof4";
 const K_PIECES = "hc:undertow_pieces2"; // { wound, court, heart, waystones: [..] }
 const K_PIECES_OLD = "hc:undertow_pieces"; // the armour stands of the Standing Ranks carry over (they are entities)
 const CX_MIN = -44, CX_MAX = 43, CZ_MIN = -3, CZ_MAX = 153;
 const ROW = CZ_MAX - CZ_MIN + 1;
 const OPS_PER_TICK = 250;
-const RADIUS = 3; // chunks around each player (Realms only keep 4 loaded)
+// Mateo, 2026-11-12: "Why can't I see farther than this?" The Hollow only exists where this script has
+// built it, and it used to build just 3 chunks round each player (a Realm keeps 4 loaded), so past
+// about 48 blocks there was nothing but fog colour. Now:
+//  - NEAR: the chunks round a player come first (always loaded, no ticking area needed);
+//  - FAR: then land out to FAR chunks (about 200 blocks), nearest and in front of the player first;
+//  - then the rest of the Hollow in the background while anyone is down here, until all of it exists.
+// Far land is built one TILE x TILE block of chunks at a time, held loaded by one ticking area, so it
+// never depends on the player's simulation distance (which a Realm locks at 4).
+const RADIUS = 3; // NEAR: chunks round each player
+const FAR = 13; // chunks: built before the background fill
+const TILE = 5; // far tiles are 5x5 chunks (80x80 blocks, well under the 100-chunk ticking area cap)
+const FAR_AREA = "hc_undertow_far";
+const TX_MIN = Math.floor(CX_MIN / TILE), TX_MAX = Math.floor(CX_MAX / TILE);
+const TZ_MIN = Math.floor(CZ_MIN / TILE), TZ_MAX = Math.floor(CZ_MAX / TILE);
 
 export const WAYSTONE = "siege:waystone";
 export const SEAL = "siege:court_seal";
 
-let bits, oldBits; // Uint8Array
+let bits, oldBits, roofBits; // Uint8Array
 let dirty = false;
 const readBits = (key) => {
   const n = Math.ceil(((CX_MAX - CX_MIN + 1) * ROW) / 8);
@@ -43,6 +59,7 @@ const readBits = (key) => {
 function loadBits() {
   bits = readBits(K_BUILT);
   oldBits = readBits(K_BUILT_OLD);
+  roofBits = readBits(K_ROOF);
 }
 // True if this chunk still holds the old generator's land (so it must be cleared before building).
 function builtOld(cx, cz) {
@@ -67,14 +84,26 @@ export function isBuilt(cx, cz) {
   const i = idx(cx, cz);
   return (bits[i >> 3] >> (i & 7)) & 1;
 }
+// True if this chunk still has the low roof of 2026-11-11 over its land.
+function lowRoof(cx, cz) {
+  if (!isBuilt(cx, cz)) return false;
+  if (cx < CX_MIN || cx > CX_MAX || cz < CZ_MIN || cz > CZ_MAX) return false;
+  const i = idx(cx, cz);
+  return !((roofBits[i >> 3] >> (i & 7)) & 1);
+}
+// Work left in this chunk: not built at all, or built under the low roof.
+const needsWork = (cx, cz) => chunkInRange(cx, cz) && (!isBuilt(cx, cz) || lowRoof(cx, cz));
 function markBuilt(cx, cz) {
   const i = idx(cx, cz);
   bits[i >> 3] |= 1 << (i & 7);
+  roofBits[i >> 3] |= 1 << (i & 7);
   dirty = true;
 }
+const hex = (b) => Array.from(b, (v) => v.toString(16).padStart(2, "0")).join("");
 function flushBits() {
   if (!dirty) return;
-  save(K_BUILT, Array.from(bits, (b) => b.toString(16).padStart(2, "0")).join(""));
+  save(K_BUILT, hex(bits));
+  save(K_ROOF, hex(roofBits));
   dirty = false;
 }
 
@@ -99,6 +128,17 @@ function permOf(block, states) {
 // (a light block, a tree, an amethyst drip) never holds a chunk up: if it fails, it is skipped.
 function apply(d, op) {
   const [x1, y1, z1] = op.a, [x2, y2, z2] = op.b;
+  if (op.onlyIf) {
+    // Clear only the blocks that are still op.onlyIf (what hung from the old low roof).
+    try {
+      for (let x = x1; x <= x2; x++) for (let y = y1; y <= y2; y++) for (let z = z1; z <= z2; z++) {
+        const b = d.getBlock({ x, y, z });
+        if (!b) return false;
+        if (b.typeId === op.onlyIf) b.setType(op.block);
+      }
+      return true;
+    } catch { return false; }
+  }
   if (op.optional) {
     // Only skip a failure in a loaded area: an unloaded one is tried again later like any other op.
     let at;
@@ -124,18 +164,86 @@ function apply(d, op) {
 
 let job; // { cx, cz, ops, i }
 
-function nextChunk(players) {
-  // Nearest unbuilt chunk to any player in the Undertow, Wound chunks first.
+// How near a chunk is to a player, counting chunks in front of them as nearer (up to 2.5x), so the
+// land you are looking at is built first.
+function nearness(players, cx, cz) {
+  let best = Infinity;
+  for (const p of players) {
+    const dx = cx + 0.5 - p.location.x / 16, dz = cz + 0.5 - p.location.z / 16;
+    const d2 = dx * dx + dz * dz;
+    let dot = 0;
+    try {
+      const v = p.getViewDirection(), len = Math.hypot(v.x, v.z), dl = Math.sqrt(d2);
+      if (len > 0.01 && dl > 0.01) dot = (v.x * dx + v.z * dz) / (len * dl);
+    } catch { /* no view: plain distance */ }
+    best = Math.min(best, d2 * (1.6 - 0.6 * dot)); // in front: 1.0x, behind: 2.2x
+  }
+  return best;
+}
+
+let far; // { tx, tz, readyAt, recheckAt, fails } the tile held loaded by the ticking area
+const doneTiles = new Set(); // tiles found fully built (skipped by later searches)
+
+function tileOpen(tx, tz) {
+  if (doneTiles.has(tx * 1000 + tz)) return false;
+  for (let i = 0; i < TILE; i++) for (let j = 0; j < TILE; j++) {
+    const cx = tx * TILE + i, cz = tz * TILE + j;
+    if (needsWork(cx, cz)) return true;
+  }
+  doneTiles.add(tx * 1000 + tz);
+  return false;
+}
+
+function releaseFar(d) {
+  if (!far) return;
+  runCmd(d, `tickingarea remove ${FAR_AREA}`);
+  far = undefined;
+}
+
+// The next tile to hold loaded: the nearest unfinished one within FAR, else the nearest anywhere.
+function pickTile(players) {
   let best, bestD = Infinity;
-  const consider = (cx, cz, d) => {
-    if (!chunkInRange(cx, cz) || isBuilt(cx, cz)) return;
-    if (d < bestD) { bestD = d; best = [cx, cz]; }
+  for (let tx = TX_MIN; tx <= TX_MAX; tx++) for (let tz = TZ_MIN; tz <= TZ_MAX; tz++) {
+    const n = nearness(players, tx * TILE + TILE / 2 - 0.5, tz * TILE + TILE / 2 - 0.5);
+    if (n < bestD && tileOpen(tx, tz)) { bestD = n; best = [tx, tz]; }
+  }
+  return best;
+}
+
+function nextChunk(players, d) {
+  // Wound chunks first, then the nearest unbuilt chunk round any player in the Undertow.
+  let best, bestD = Infinity;
+  const consider = (cx, cz, n) => {
+    if (!needsWork(cx, cz)) return;
+    if (n < bestD) { bestD = n; best = [cx, cz]; }
   };
   for (let cx = -2; cx <= 1; cx++) for (let cz = -3; cz <= 2; cz++) consider(cx, cz, -1);
   if (best) return best;
   for (const p of players) {
     const pcx = Math.floor(p.location.x / 16), pcz = Math.floor(p.location.z / 16);
-    for (let dx = -RADIUS; dx <= RADIUS; dx++) for (let dz = -RADIUS; dz <= RADIUS; dz++) consider(pcx + dx, pcz + dz, dx * dx + dz * dz);
+    for (let dx = -RADIUS; dx <= RADIUS; dx++) for (let dz = -RADIUS; dz <= RADIUS; dz++) consider(pcx + dx, pcz + dz, nearness(players, pcx + dx, pcz + dz));
+  }
+  if (best) return best;
+  if (!players.length) { releaseFar(d); return undefined; } // nobody down here: let the far land rest
+  // Far land. Move the ticking area on when its tile is done, or is now far behind a closer open tile.
+  if (far && (!tileOpen(far.tx, far.tz) || far.fails > 30)) releaseFar(d);
+  if (far && tickNo >= far.recheckAt) {
+    far.recheckAt = tickNo + 100;
+    const t = pickTile(players);
+    if (t && (t[0] !== far.tx || t[1] !== far.tz) && nearness(players, far.tx * TILE + 2, far.tz * TILE + 2) > FAR * FAR) releaseFar(d);
+  }
+  if (!far) {
+    const t = pickTile(players);
+    if (!t) return undefined; // the whole Hollow is built
+    const [tx, tz] = t, x0 = tx * TILE * 16, z0 = tz * TILE * 16;
+    runCmd(d, `tickingarea remove ${FAR_AREA}`);
+    runCmd(d, `tickingarea add ${x0} 0 ${z0} ${x0 + TILE * 16 - 1} 0 ${z0 + TILE * 16 - 1} ${FAR_AREA} true`);
+    far = { tx, tz, readyAt: tickNo + 40, recheckAt: tickNo + 100, fails: 0 };
+  }
+  if (tickNo < far.readyAt) return undefined; // the tile is still loading
+  for (let i = 0; i < TILE; i++) for (let j = 0; j < TILE; j++) {
+    const cx = far.tx * TILE + i, cz = far.tz * TILE + j;
+    consider(cx, cz, nearness(players, cx, cz));
   }
   return best;
 }
@@ -146,17 +254,21 @@ export function buildTick(players) {
   if (++tickNo < waitUntil) return;
   const d = dim();
   if (!job) {
-    const next = nextChunk(players);
+    const next = nextChunk(players, d);
     if (next) {
-      const ops = planChunk(next[0], next[1]);
-      if (builtOld(next[0], next[1])) ops.unshift(...clearOps(next[0], next[1], lowestGround(next[0], next[1])));
+      const swap = lowRoof(next[0], next[1]);
+      const ops = swap ? planRoofSwap(next[0], next[1]) : planChunk(next[0], next[1]);
+      if (!swap && builtOld(next[0], next[1])) ops.unshift(...clearOps(next[0], next[1], lowestGround(next[0], next[1])));
       job = { cx: next[0], cz: next[1], ops, i: 0 };
     }
   }
   if (job) {
     let budget = OPS_PER_TICK;
     while (budget-- > 0 && job.i < job.ops.length) {
-      if (!apply(d, job.ops[job.i])) { job = undefined; waitUntil = tickNo + 40; return; } // not loaded yet: retry in 2 s
+      if (!apply(d, job.ops[job.i])) { // not loaded yet: retry in 2 s
+        if (far && Math.floor(job.cx / TILE) === far.tx && Math.floor(job.cz / TILE) === far.tz) far.fails++;
+        job = undefined; waitUntil = tickNo + 40; return;
+      }
       job.i++;
     }
     if (job.i >= job.ops.length) {
