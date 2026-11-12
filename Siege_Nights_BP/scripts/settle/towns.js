@@ -31,7 +31,7 @@ export function pickLayout(town, seed) {
   return from[(h >>> 0) % from.length];
 }
 
-export const wallRadius = (town, tier) => town?.walls?.[Math.max(0, Math.min(3, tier))] ?? 56;
+export const wallRadius = (town, tier) => town?.walls?.[Math.max(0, Math.min(3, tier))] ?? 66;
 
 export function slotsOf(layout) {
   return (layout?.slots ?? []).map(([id, size, x0, z0, x1, z1, dy, side, step, walk, tier, tags, long]) => ({

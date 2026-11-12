@@ -187,11 +187,11 @@ def view_visible(expr):
 
 
 def title(color):
-    # bossCore.js colours the name tag (§c name, §7 temper); drop those codes here so the bar's own colour shows
-    return {"type": "label", "text": "#text", "color": color, "shadow": True, "enable_profanity_filter": True,
-            "anchor_from": "top_middle", "anchor_to": "top_middle", "layer": 3,
-            "bindings": [name_binding(), {"binding_type": "view", "source_property_name": f"(({NAME} - '\u00a7c') - '\u00a77')",
-                                          "target_property_name": "#text"}]}
+    # Text bound straight to #bossName, exactly like the vanilla bar. (The first version computed the text with a
+    # view binding that stripped colour codes; in game that left the title blank, playtest 2026-11-12.) Boss name
+    # tags carry no leading colour code (bossCore.js, pretenders.js) so this colour shows.
+    return {"type": "label", "text": NAME, "color": color, "shadow": True, "enable_profanity_filter": True,
+            "anchor_from": "top_middle", "anchor_to": "top_middle", "layer": 3, "bindings": [name_binding()]}
 
 
 def variant(key, word, color):
