@@ -20,6 +20,9 @@ palettes, texturing, paths, reference); this page is the short list and where to
 - **Texturing**: one material in a few shades, gradients over speckle, clusters with a cause (damp low, wear
   at edges), never skip a ladder step (`build-instructions/texturing/README.md`).
 - **Vanilla blocks** for map buildings, Bedrock 26.30+, no Beta features. Waxed copper for copper roofs.
+- **Paths and water run to the edge** (Mateo 2026-11-12): any path, walkway, slip, channel or water inside a
+  build or plot carries on to the edge of its footprint, so it joins whatever is next to it. A boathouse slip
+  opens through its wall to the footprint edge; a plot's paths reach its border. Stopping short inside is wrong.
 - **Build stage by stage** and check each stage (`--stages`) before the next. Ask Mateo rather than guess;
   he builds well himself and sends pictures.
 
