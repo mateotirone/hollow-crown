@@ -4,7 +4,7 @@
 
 Every build in The Hollow Crown, designed or not. Add an entry the moment a build is asked for, even with no design yet, and move its status on as it progresses. Run  node tools/build-catalog.mjs  after editing to rewrite builds/CATALOG.md (check.mjs fails if it is stale).
 
-**96 builds:** 8 not started, 19 designed, 12 in viewer, 57 in game.
+**96 builds:** 7 not started, 20 designed, 12 in viewer, 57 in game.
 
 Statuses:
 
@@ -77,7 +77,7 @@ A ★ marks builds that no earlier list had (added in the 2026-11-12 audit).
 | ★ Forester's Lodge tree farm | One version per overworld region | in game |  | Build custom tree assets | `Siege_Nights_BP/scripts/forestry` | Grove plan in game, not in the viewer and not on the building skill. |
 | Ironworks: Ore Pit, Bloomery, Trip-Hammer Forge (own plot) (3) | One version per overworld region | in viewer | ironworks | Design a repeatable material gathering loop | `map/structures/ironworks/spec.py` | v3 on the skill awaiting Mateo's OK; the game still raises the old hand-drawn design. Only one style so far; regional versions to follow. |
 | ★ Gold Sluice: Panning Sluice, Washing Mill, Assay House (3) | Emberwaste | designed | goldsluice | Design a repeatable material gathering loop |  | Waiting in PR #190. Designed on the skill in PR #190. |
-| ★ Deep Shaft (diamond works) (3) | Frostmarch | not started |  | Design a repeatable material gathering loop |  | Mateo approved 2026-11-12 ("lets do them all"). Material loop thread designing it. |
+| ★ Deep Shaft: Prospect Shaft, Winding House, Deep Shaft (3) | Frostmarch | designed | deepshaft | Design a repeatable material gathering loop | `map/structures/deepshaft/spec.py` | Waiting in PR #190. Built on the skill in PR #190 (needs skill PR #155 for Frostmarch presets). Hosted 3D https://claude.ai/artifact/D58sGecJoqcFXsYkttAh7C (Deep Shaft tab). |
 | Guard posts and wall steps | Anywhere / region-neutral | in game |  | Build settlement building and mason shop | `Siege_Nights_BP/scripts/guardposts` | Markers and steps, not a building. |
 
 ## Strongholds
