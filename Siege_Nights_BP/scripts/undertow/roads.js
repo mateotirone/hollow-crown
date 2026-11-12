@@ -151,3 +151,32 @@ export function roadAt(x, z, ground, floorY) {
   }
   return best;
 }
+
+// ---- signposts ---------------------------------------------------------------------------
+// Mateo, 2026-11-12: signposts with place names at the junctions. A post at each end of every road,
+// a few steps in from where it leaves the valley road or a site, standing on the road's right-hand
+// verge and turned to face back toward the junction, so you read it before you take the road.
+// { x, z, rot (standing sign ground_sign_direction 0-15, 0 faces south), text, road }. Pure.
+const placeName = (p) => (p?.name ? p.name.replace(/^The /, "the ") : "the valley road");
+// The sign rotation whose face looks along (vx, vz): 0 south, 4 west, 8 north, 12 east.
+export const signRot = (vx, vz) => ((Math.round(Math.atan2(-vx, vz) / (Math.PI / 8)) % 16) + 16) % 16;
+let posts;
+export function signposts() {
+  if (posts) return posts;
+  posts = [];
+  ROADS.forEach((r, k) => {
+    const pts = LINES[k], half = r.narrow ? 1 : ROAD_HALF_WIDTH;
+    const end = (i, toward, dest) => {
+      const j = Math.max(0, Math.min(pts.length - 1, i));
+      const [x, z] = pts[j], [tx, tz] = pts[toward];
+      const nx = pts[Math.min(pts.length - 1, j + 1)], px = pts[Math.max(0, j - 1)];
+      const dx = nx[0] - px[0], dz = nx[1] - px[1], len = Math.hypot(dx, dz) || 1;
+      const side = toward === 0 ? 1 : -1; // the verge on your right as you walk in from the junction
+      const sx = Math.round(x + (-dz / len) * (half + 2) * side), sz = Math.round(z + (dx / len) * (half + 2) * side);
+      posts.push({ x: sx, z: sz, rot: signRot(tx - sx, tz - sz), road: r.id, text: dest ? `§7The road to\n§5${placeName(dest)}` : "§7Back to\n§5the valley road" });
+    };
+    end(r.from ? 4 : 2, 0, r.to); // where it starts: names where it goes
+    end(pts.length - 1 - 4, pts.length - 1, r.from); // where it ends: names where it came from
+  });
+  return posts;
+}

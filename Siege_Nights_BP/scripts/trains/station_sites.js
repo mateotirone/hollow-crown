@@ -8,10 +8,12 @@ import { world, system, BlockPermutation } from "@minecraft/server";
 import { onTick, isReady, moduleStore, keepOf, keepCenter, tierOf, on } from "../siege/api.js";
 import { startBuild, buildFor, worldCells, worldMarks } from "../townhall/build.js";
 import { styleOf } from "../settle/plans.js";
-import { allStations, stationById, moveStation, STATION_POST, RAIL_DEPOT } from "../rails/index.js";
+import { allStations, stationById, moveStation, addStationAt, STATION_POST, RAIL_DEPOT } from "../rails/index.js";
 import { STATION, STAGE_NAMES, STAGES, stageFor, stationPlan, siteFor, lineBlocks, regionOf, cardinal } from "./stations.js";
 import { TRACK } from "./data.js";
 import { reader } from "./index.js";
+import { ROUTES } from "./routes_data.js";
+import { stopSite } from "./routes.js";
 
 // sites: [{ id (the station's id), owner, dim, post {x,y,z}, facing {x,z}, style, stage (wanted), built (stage up, or null),
 //           origin?, forward? (set once the ground was loaded and it was lined up) }]
@@ -139,7 +141,7 @@ on("keepFounded", ({ player, keep, moved }) => {
     const d = Math.hypot(s.x - c.x, s.z - c.z);
     if (d < bestDist) { best = s; bestDist = d; }
   }
-  if (!best) return;
+  if (!best) return stationOnStop(player, keep, c);
   let style = "vale";
   try {
     style = styleOf(player.id, player.dimension.getBlock(keep));
@@ -149,6 +151,29 @@ on("keepFounded", ({ player, keep, moved }) => {
   addSite({ station: best, owner: player.id, facing: { x: c.x - best.x, z: c.z - best.z }, style });
   player.sendMessage(`§6${best.name} is yours: a Halt will rise beside the line there, and grow as your settlement does.`);
 });
+
+// No Station Post near the banner: the station rises on the planned railway's stop for this plot instead, lined up
+// with the line through it and the building on the settlement's side. It has no line yet: the first stretch out of
+// it is bought at the station (route_game.js).
+function stationOnStop(player, keep, c) {
+  const at = stopSite(ROUTES, c);
+  if (!at) return;
+  const { stop, origin, forward } = at;
+  if (allStations().some((s) => s.dim === player.dimension.id && Math.hypot(s.x - stop.x, s.z - stop.z) < 8)) return; // someone's already there
+  let style = "vale";
+  try {
+    style = styleOf(player.id, player.dimension.getBlock(keep));
+  } catch {
+    // the banner's ground isn't loaded: Vale it is
+  }
+  const station = addStationAt({ name: stop.name, region: regionOf(style), x: origin.x, y: origin.y, z: origin.z, dim: player.dimension.id });
+  const site = addSite({ station, owner: player.id, facing: forward, style });
+  if (!site) return;
+  site.origin = origin;
+  site.forward = forward;
+  store.save();
+  player.sendMessage(`§6A Halt is rising at ${stop.name}, on the planned railway. It has no line yet: buy the first stretch at the station to start travelling.`);
+}
 
 on("tierUp", ({ owner, after }) => {
   let changed = false;

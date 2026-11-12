@@ -58,3 +58,10 @@ repo's `map/structures/bedrock_states.json` (repo only, when Mojang adds blocks)
 
 Blocks in the table that may be newer than a world: cinnabar, sulfur, poplar, concrete and wool stairs and
 slabs (Bedrock 26.x). Name a `tags` family or a block list if a world is older.
+
+## Hand-picked substitutes
+
+A block with no slab or stair form normally takes the nearest block that has one. A few pairs are fixed by
+hand in `PREFERRED_SUB` (colour.py) because the nearest by colour reads wrong in a roof or gable:
+`calcite` -> `smooth_quartz` (was `quartz_block`). Add a pair there when a fallback looks off.
+

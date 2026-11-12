@@ -95,6 +95,13 @@ the gate itself, and must never cut through a wall, a field or a plot to reach i
 - The Hollow stronghold has no road network round it (the Hollow has no roads or trains): its one avenue
   runs from the moat bridge to the gate, and paths from the light rivers end at the bridge.
 
+## Yards and walled grounds meet the paths (Mateo, 2026-11-12)
+
+A yard, bailey or walled ground (the Barracks yard) does not have to be a perfect square: it fits the landscaping.
+Where a path already crosses the line of its wall, leave that stretch of wall out so the path runs straight in, and
+keep the path's own surface through the yard. Never pave over or wall across a path that was there first. The game
+does this when it raises the Barracks (`settle/raised.js`, `yardGaps`).
+
 ## Before you finish a path
 
 - [ ] Walking surface is bottom slabs, half a block below the buildings beside it.

@@ -135,5 +135,6 @@ export function takeEstate(lord, estate) {
   lord.tier = estate.tier; lord.wins = Math.max(estate.wins ?? 0, RIVALS.tierWins[estate.tier] ?? 0);
   lord.built = { hall: estate.hall, parts: [...estate.parts] };
   lord.hallAt = estate.hallAt; lord.hallF = estate.hallF; lord.gateDir = estate.gateDir;
+  if (estate.town !== undefined) lord.town = estate.town; // the same town layout, picked up where it was left
   return lord;
 }

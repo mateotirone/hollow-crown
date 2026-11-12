@@ -1,0 +1,2155 @@
+{
+  "format_version": "1.21.60",
+  "minecraft:entity": {
+    "description": {
+      "identifier": "siege:pikeman",
+      "is_spawnable": false,
+      "is_summonable": true,
+      "properties": {
+        "siege:region": {
+          "type": "int",
+          "range": [
+            0,
+            5
+          ],
+          "default": 0,
+          "client_sync": true
+        },
+        "siege:tier": {
+          "type": "int",
+          "range": [
+            0,
+            4
+          ],
+          "default": 0,
+          "client_sync": true
+        }
+      }
+    },
+    "component_groups": {
+      "siege:c0": {
+        "minecraft:variant": {
+          "value": 0
+        }
+      },
+      "siege:c1": {
+        "minecraft:variant": {
+          "value": 1
+        }
+      },
+      "siege:c2": {
+        "minecraft:variant": {
+          "value": 2
+        }
+      },
+      "siege:c3": {
+        "minecraft:variant": {
+          "value": 3
+        }
+      },
+      "siege:c4": {
+        "minecraft:variant": {
+          "value": 4
+        }
+      },
+      "siege:c5": {
+        "minecraft:variant": {
+          "value": 5
+        }
+      },
+      "siege:c6": {
+        "minecraft:variant": {
+          "value": 6
+        }
+      },
+      "siege:c7": {
+        "minecraft:variant": {
+          "value": 7
+        }
+      },
+      "siege:c8": {
+        "minecraft:variant": {
+          "value": 8
+        }
+      },
+      "siege:c9": {
+        "minecraft:variant": {
+          "value": 9
+        }
+      },
+      "siege:c10": {
+        "minecraft:variant": {
+          "value": 10
+        }
+      },
+      "siege:c11": {
+        "minecraft:variant": {
+          "value": 11
+        }
+      },
+      "siege:c12": {
+        "minecraft:variant": {
+          "value": 12
+        }
+      },
+      "siege:c13": {
+        "minecraft:variant": {
+          "value": 13
+        }
+      },
+      "siege:c14": {
+        "minecraft:variant": {
+          "value": 14
+        }
+      },
+      "siege:c15": {
+        "minecraft:variant": {
+          "value": 15
+        }
+      },
+      "siege:walk_0": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_0"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        }
+      },
+      "siege:walk_1": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_1"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        }
+      },
+      "siege:walk_2": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_2"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        }
+      },
+      "siege:walk_3": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_3"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        }
+      },
+      "siege:walk_4": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_4"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        }
+      },
+      "siege:walk_5": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_5"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        }
+      },
+      "siege:walk_6": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_6"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        }
+      },
+      "siege:walk_7": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_7"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        }
+      },
+      "siege:walk_8": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_8"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        }
+      },
+      "siege:walk_9": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_9"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        }
+      },
+      "siege:walk_10": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_10"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        }
+      },
+      "siege:walk_11": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_11"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        }
+      },
+      "siege:walk_12": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_12"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        }
+      },
+      "siege:walk_13": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_13"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        }
+      },
+      "siege:walk_14": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_14"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        }
+      },
+      "siege:walk_15": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_15"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        }
+      },
+      "siege:walk_16": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_16"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        }
+      },
+      "siege:walk_17": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_17"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        }
+      },
+      "siege:walk_18": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_18"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        }
+      },
+      "siege:walk_19": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_19"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        }
+      },
+      "siege:walk_20": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_20"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        }
+      },
+      "siege:walk_21": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_21"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        }
+      },
+      "siege:walk_22": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_22"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        }
+      },
+      "siege:walk_23": {
+        "minecraft:behavior.nearest_prioritized_attackable_target": {
+          "priority": 3,
+          "must_see": false,
+          "reselect_targets": true,
+          "within_radius": 64,
+          "entity_types": [
+            {
+              "filters": {
+                "test": "has_tag",
+                "subject": "other",
+                "value": "siege_mark_23"
+              },
+              "max_dist": 64,
+              "priority": 0
+            }
+          ]
+        }
+      }
+    },
+    "components": {
+      "minecraft:type_family": {
+        "family": [
+          "siege_guard",
+          "villager",
+          "mob"
+        ]
+      },
+      "minecraft:variant": {
+        "value": 14
+      },
+      "minecraft:health": {
+        "value": 34,
+        "max": 34
+      },
+      "minecraft:movement": {
+        "value": 0.3
+      },
+      "minecraft:movement.basic": {},
+      "minecraft:navigation.walk": {
+        "can_open_doors": true,
+        "avoid_damage_blocks": true,
+        "can_path_over_water": false,
+        "avoid_water": true
+      },
+      "minecraft:jump.static": {},
+      "minecraft:can_climb": {},
+      "minecraft:collision_box": {
+        "width": 0.6,
+        "height": 1.9
+      },
+      "minecraft:physics": {},
+      "minecraft:pushable": {
+        "is_pushable": true,
+        "is_pushable_by_piston": true
+      },
+      "minecraft:breathable": {
+        "total_supply": 15,
+        "suffocate_time": 0
+      },
+      "minecraft:nameable": {},
+      "minecraft:persistent": {},
+      "minecraft:follow_range": {
+        "value": 48,
+        "max": 48
+      },
+      "minecraft:equipment": {
+        "table": "loot_tables/entities/siege_pikeman_gear.json"
+      },
+      "minecraft:behavior.float": {
+        "priority": 0
+      },
+      "minecraft:behavior.nearest_attackable_target": {
+        "priority": 1,
+        "must_see": false,
+        "reselect_targets": true,
+        "within_radius": 24,
+        "entity_types": [
+          {
+            "filters": {
+              "any_of": [
+                {
+                  "all_of": [
+                    {
+                      "test": "is_family",
+                      "subject": "other",
+                      "value": "monster"
+                    },
+                    {
+                      "test": "is_family",
+                      "subject": "other",
+                      "operator": "!=",
+                      "value": "creeper"
+                    }
+                  ]
+                },
+                {
+                  "test": "has_tag",
+                  "subject": "other",
+                  "value": "siege_wanted"
+                },
+                {
+                  "all_of": [
+                    {
+                      "test": "has_tag",
+                      "subject": "self",
+                      "value": "siege_w0_a"
+                    },
+                    {
+                      "test": "has_tag",
+                      "subject": "other",
+                      "value": "siege_w0_b"
+                    }
+                  ]
+                },
+                {
+                  "all_of": [
+                    {
+                      "test": "has_tag",
+                      "subject": "self",
+                      "value": "siege_w0_b"
+                    },
+                    {
+                      "test": "has_tag",
+                      "subject": "other",
+                      "value": "siege_w0_a"
+                    }
+                  ]
+                },
+                {
+                  "all_of": [
+                    {
+                      "test": "has_tag",
+                      "subject": "self",
+                      "value": "siege_w1_a"
+                    },
+                    {
+                      "test": "has_tag",
+                      "subject": "other",
+                      "value": "siege_w1_b"
+                    }
+                  ]
+                },
+                {
+                  "all_of": [
+                    {
+                      "test": "has_tag",
+                      "subject": "self",
+                      "value": "siege_w1_b"
+                    },
+                    {
+                      "test": "has_tag",
+                      "subject": "other",
+                      "value": "siege_w1_a"
+                    }
+                  ]
+                },
+                {
+                  "all_of": [
+                    {
+                      "test": "has_tag",
+                      "subject": "self",
+                      "value": "siege_w2_a"
+                    },
+                    {
+                      "test": "has_tag",
+                      "subject": "other",
+                      "value": "siege_w2_b"
+                    }
+                  ]
+                },
+                {
+                  "all_of": [
+                    {
+                      "test": "has_tag",
+                      "subject": "self",
+                      "value": "siege_w2_b"
+                    },
+                    {
+                      "test": "has_tag",
+                      "subject": "other",
+                      "value": "siege_w2_a"
+                    }
+                  ]
+                },
+                {
+                  "all_of": [
+                    {
+                      "test": "has_tag",
+                      "subject": "self",
+                      "value": "siege_w3_a"
+                    },
+                    {
+                      "test": "has_tag",
+                      "subject": "other",
+                      "value": "siege_w3_b"
+                    }
+                  ]
+                },
+                {
+                  "all_of": [
+                    {
+                      "test": "has_tag",
+                      "subject": "self",
+                      "value": "siege_w3_b"
+                    },
+                    {
+                      "test": "has_tag",
+                      "subject": "other",
+                      "value": "siege_w3_a"
+                    }
+                  ]
+                }
+              ]
+            },
+            "max_dist": 24
+          }
+        ]
+      },
+      "minecraft:behavior.look_at_player": {
+        "priority": 7,
+        "look_distance": 6
+      },
+      "minecraft:behavior.random_look_around": {
+        "priority": 8
+      },
+      "minecraft:interact": {
+        "interactions": [
+          {
+            "on_interact": {
+              "filters": {
+                "all_of": [
+                  {
+                    "test": "is_family",
+                    "subject": "other",
+                    "value": "player"
+                  },
+                  {
+                    "test": "is_sneak_held",
+                    "subject": "other",
+                    "value": true
+                  }
+                ]
+              },
+              "event": "siege:pick_up",
+              "target": "self"
+            },
+            "interact_text": "action.interact.siege.pickup"
+          },
+          {
+            "on_interact": {
+              "filters": {
+                "all_of": [
+                  {
+                    "test": "is_family",
+                    "subject": "other",
+                    "value": "player"
+                  },
+                  {
+                    "test": "is_sneak_held",
+                    "subject": "other",
+                    "value": false
+                  }
+                ]
+              }
+            },
+            "interact_text": "action.interact.siege.upgrade"
+          }
+        ]
+      },
+      "minecraft:damage_sensor": {
+        "triggers": [
+          {
+            "cause": "fall",
+            "deals_damage": "no"
+          }
+        ]
+      },
+      "minecraft:attack": {
+        "damage": 6
+      },
+      "minecraft:behavior.melee_attack": {
+        "priority": 2,
+        "speed_multiplier": 1.2,
+        "track_target": true
+      }
+    },
+    "events": {
+      "siege:color_0": {
+        "remove": {
+          "component_groups": [
+            "siege:c1",
+            "siege:c2",
+            "siege:c3",
+            "siege:c4",
+            "siege:c5",
+            "siege:c6",
+            "siege:c7",
+            "siege:c8",
+            "siege:c9",
+            "siege:c10",
+            "siege:c11",
+            "siege:c12",
+            "siege:c13",
+            "siege:c14",
+            "siege:c15"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:c0"
+          ]
+        }
+      },
+      "siege:color_1": {
+        "remove": {
+          "component_groups": [
+            "siege:c0",
+            "siege:c2",
+            "siege:c3",
+            "siege:c4",
+            "siege:c5",
+            "siege:c6",
+            "siege:c7",
+            "siege:c8",
+            "siege:c9",
+            "siege:c10",
+            "siege:c11",
+            "siege:c12",
+            "siege:c13",
+            "siege:c14",
+            "siege:c15"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:c1"
+          ]
+        }
+      },
+      "siege:color_2": {
+        "remove": {
+          "component_groups": [
+            "siege:c0",
+            "siege:c1",
+            "siege:c3",
+            "siege:c4",
+            "siege:c5",
+            "siege:c6",
+            "siege:c7",
+            "siege:c8",
+            "siege:c9",
+            "siege:c10",
+            "siege:c11",
+            "siege:c12",
+            "siege:c13",
+            "siege:c14",
+            "siege:c15"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:c2"
+          ]
+        }
+      },
+      "siege:color_3": {
+        "remove": {
+          "component_groups": [
+            "siege:c0",
+            "siege:c1",
+            "siege:c2",
+            "siege:c4",
+            "siege:c5",
+            "siege:c6",
+            "siege:c7",
+            "siege:c8",
+            "siege:c9",
+            "siege:c10",
+            "siege:c11",
+            "siege:c12",
+            "siege:c13",
+            "siege:c14",
+            "siege:c15"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:c3"
+          ]
+        }
+      },
+      "siege:color_4": {
+        "remove": {
+          "component_groups": [
+            "siege:c0",
+            "siege:c1",
+            "siege:c2",
+            "siege:c3",
+            "siege:c5",
+            "siege:c6",
+            "siege:c7",
+            "siege:c8",
+            "siege:c9",
+            "siege:c10",
+            "siege:c11",
+            "siege:c12",
+            "siege:c13",
+            "siege:c14",
+            "siege:c15"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:c4"
+          ]
+        }
+      },
+      "siege:color_5": {
+        "remove": {
+          "component_groups": [
+            "siege:c0",
+            "siege:c1",
+            "siege:c2",
+            "siege:c3",
+            "siege:c4",
+            "siege:c6",
+            "siege:c7",
+            "siege:c8",
+            "siege:c9",
+            "siege:c10",
+            "siege:c11",
+            "siege:c12",
+            "siege:c13",
+            "siege:c14",
+            "siege:c15"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:c5"
+          ]
+        }
+      },
+      "siege:color_6": {
+        "remove": {
+          "component_groups": [
+            "siege:c0",
+            "siege:c1",
+            "siege:c2",
+            "siege:c3",
+            "siege:c4",
+            "siege:c5",
+            "siege:c7",
+            "siege:c8",
+            "siege:c9",
+            "siege:c10",
+            "siege:c11",
+            "siege:c12",
+            "siege:c13",
+            "siege:c14",
+            "siege:c15"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:c6"
+          ]
+        }
+      },
+      "siege:color_7": {
+        "remove": {
+          "component_groups": [
+            "siege:c0",
+            "siege:c1",
+            "siege:c2",
+            "siege:c3",
+            "siege:c4",
+            "siege:c5",
+            "siege:c6",
+            "siege:c8",
+            "siege:c9",
+            "siege:c10",
+            "siege:c11",
+            "siege:c12",
+            "siege:c13",
+            "siege:c14",
+            "siege:c15"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:c7"
+          ]
+        }
+      },
+      "siege:color_8": {
+        "remove": {
+          "component_groups": [
+            "siege:c0",
+            "siege:c1",
+            "siege:c2",
+            "siege:c3",
+            "siege:c4",
+            "siege:c5",
+            "siege:c6",
+            "siege:c7",
+            "siege:c9",
+            "siege:c10",
+            "siege:c11",
+            "siege:c12",
+            "siege:c13",
+            "siege:c14",
+            "siege:c15"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:c8"
+          ]
+        }
+      },
+      "siege:color_9": {
+        "remove": {
+          "component_groups": [
+            "siege:c0",
+            "siege:c1",
+            "siege:c2",
+            "siege:c3",
+            "siege:c4",
+            "siege:c5",
+            "siege:c6",
+            "siege:c7",
+            "siege:c8",
+            "siege:c10",
+            "siege:c11",
+            "siege:c12",
+            "siege:c13",
+            "siege:c14",
+            "siege:c15"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:c9"
+          ]
+        }
+      },
+      "siege:color_10": {
+        "remove": {
+          "component_groups": [
+            "siege:c0",
+            "siege:c1",
+            "siege:c2",
+            "siege:c3",
+            "siege:c4",
+            "siege:c5",
+            "siege:c6",
+            "siege:c7",
+            "siege:c8",
+            "siege:c9",
+            "siege:c11",
+            "siege:c12",
+            "siege:c13",
+            "siege:c14",
+            "siege:c15"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:c10"
+          ]
+        }
+      },
+      "siege:color_11": {
+        "remove": {
+          "component_groups": [
+            "siege:c0",
+            "siege:c1",
+            "siege:c2",
+            "siege:c3",
+            "siege:c4",
+            "siege:c5",
+            "siege:c6",
+            "siege:c7",
+            "siege:c8",
+            "siege:c9",
+            "siege:c10",
+            "siege:c12",
+            "siege:c13",
+            "siege:c14",
+            "siege:c15"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:c11"
+          ]
+        }
+      },
+      "siege:color_12": {
+        "remove": {
+          "component_groups": [
+            "siege:c0",
+            "siege:c1",
+            "siege:c2",
+            "siege:c3",
+            "siege:c4",
+            "siege:c5",
+            "siege:c6",
+            "siege:c7",
+            "siege:c8",
+            "siege:c9",
+            "siege:c10",
+            "siege:c11",
+            "siege:c13",
+            "siege:c14",
+            "siege:c15"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:c12"
+          ]
+        }
+      },
+      "siege:color_13": {
+        "remove": {
+          "component_groups": [
+            "siege:c0",
+            "siege:c1",
+            "siege:c2",
+            "siege:c3",
+            "siege:c4",
+            "siege:c5",
+            "siege:c6",
+            "siege:c7",
+            "siege:c8",
+            "siege:c9",
+            "siege:c10",
+            "siege:c11",
+            "siege:c12",
+            "siege:c14",
+            "siege:c15"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:c13"
+          ]
+        }
+      },
+      "siege:color_14": {
+        "remove": {
+          "component_groups": [
+            "siege:c0",
+            "siege:c1",
+            "siege:c2",
+            "siege:c3",
+            "siege:c4",
+            "siege:c5",
+            "siege:c6",
+            "siege:c7",
+            "siege:c8",
+            "siege:c9",
+            "siege:c10",
+            "siege:c11",
+            "siege:c12",
+            "siege:c13",
+            "siege:c15"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:c14"
+          ]
+        }
+      },
+      "siege:color_15": {
+        "remove": {
+          "component_groups": [
+            "siege:c0",
+            "siege:c1",
+            "siege:c2",
+            "siege:c3",
+            "siege:c4",
+            "siege:c5",
+            "siege:c6",
+            "siege:c7",
+            "siege:c8",
+            "siege:c9",
+            "siege:c10",
+            "siege:c11",
+            "siege:c12",
+            "siege:c13",
+            "siege:c14"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:c15"
+          ]
+        }
+      },
+      "siege:pick_up": {},
+      "siege:fight": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_22",
+            "siege:walk_23"
+          ]
+        }
+      },
+      "siege:region_0": {
+        "set_property": {
+          "siege:region": 0
+        }
+      },
+      "siege:region_1": {
+        "set_property": {
+          "siege:region": 1
+        }
+      },
+      "siege:region_2": {
+        "set_property": {
+          "siege:region": 2
+        }
+      },
+      "siege:region_3": {
+        "set_property": {
+          "siege:region": 3
+        }
+      },
+      "siege:region_4": {
+        "set_property": {
+          "siege:region": 4
+        }
+      },
+      "siege:region_5": {
+        "set_property": {
+          "siege:region": 5
+        }
+      },
+      "siege:walk_0": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_22",
+            "siege:walk_23"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_0"
+          ]
+        }
+      },
+      "siege:walk_1": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_22",
+            "siege:walk_23"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_1"
+          ]
+        }
+      },
+      "siege:walk_2": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_22",
+            "siege:walk_23"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_2"
+          ]
+        }
+      },
+      "siege:walk_3": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_22",
+            "siege:walk_23"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_3"
+          ]
+        }
+      },
+      "siege:walk_4": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_22",
+            "siege:walk_23"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_4"
+          ]
+        }
+      },
+      "siege:walk_5": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_22",
+            "siege:walk_23"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_5"
+          ]
+        }
+      },
+      "siege:walk_6": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_22",
+            "siege:walk_23"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_6"
+          ]
+        }
+      },
+      "siege:walk_7": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_22",
+            "siege:walk_23"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_7"
+          ]
+        }
+      },
+      "siege:walk_8": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_22",
+            "siege:walk_23"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_8"
+          ]
+        }
+      },
+      "siege:walk_9": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_22",
+            "siege:walk_23"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_9"
+          ]
+        }
+      },
+      "siege:walk_10": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_22",
+            "siege:walk_23"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_10"
+          ]
+        }
+      },
+      "siege:walk_11": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_22",
+            "siege:walk_23"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_11"
+          ]
+        }
+      },
+      "siege:walk_12": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_22",
+            "siege:walk_23"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_12"
+          ]
+        }
+      },
+      "siege:walk_13": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_22",
+            "siege:walk_23"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_13"
+          ]
+        }
+      },
+      "siege:walk_14": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_22",
+            "siege:walk_23"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_14"
+          ]
+        }
+      },
+      "siege:walk_15": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_22",
+            "siege:walk_23"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_15"
+          ]
+        }
+      },
+      "siege:walk_16": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_22",
+            "siege:walk_23"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_16"
+          ]
+        }
+      },
+      "siege:walk_17": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_22",
+            "siege:walk_23"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_17"
+          ]
+        }
+      },
+      "siege:walk_18": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_22",
+            "siege:walk_23"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_18"
+          ]
+        }
+      },
+      "siege:walk_19": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_22",
+            "siege:walk_23"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_19"
+          ]
+        }
+      },
+      "siege:walk_20": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_21",
+            "siege:walk_22",
+            "siege:walk_23"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_20"
+          ]
+        }
+      },
+      "siege:walk_21": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_22",
+            "siege:walk_23"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_21"
+          ]
+        }
+      },
+      "siege:walk_22": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_23"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_22"
+          ]
+        }
+      },
+      "siege:walk_23": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_22"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:walk_23"
+          ]
+        }
+      },
+      "siege:tier_0": {
+        "set_property": {
+          "siege:tier": 0
+        }
+      },
+      "siege:tier_1": {
+        "set_property": {
+          "siege:tier": 1
+        }
+      },
+      "siege:tier_2": {
+        "set_property": {
+          "siege:tier": 2
+        }
+      },
+      "siege:tier_3": {
+        "set_property": {
+          "siege:tier": 3
+        }
+      },
+      "siege:tier_4": {
+        "set_property": {
+          "siege:tier": 4
+        }
+      }
+    }
+  }
+}

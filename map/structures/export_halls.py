@@ -44,7 +44,10 @@ def export(bp):
     xs = [c[0] for c in cells]; zs = [c[2] for c in cells]
     box = {"x0": min(xs), "x1": max(xs), "z0": min(zs), "z1": max(zs), "y1": max(c[1] for c in cells)}
     entry = list(to(*bp.markers["entry"])) if "entry" in bp.markers else [0, dy, 1]
-    return {"palette": pal, "rows": rows, "marks": marks, "box": box, "door": entry}
+    out = {"palette": pal, "rows": rows, "marks": marks, "box": box, "door": entry}
+    if getattr(bp, "yard", None):   # yard wall and floor columns a site can open up for a path (the Barracks)
+        out["yard"] = {k: [[x - dx, dz - z + 1] for x, z in v] for k, v in bp.yard.items()}
+    return out
 
 def main():
     out = {}

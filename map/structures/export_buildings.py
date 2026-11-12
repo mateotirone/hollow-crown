@@ -8,10 +8,12 @@ Same data shape and frame as export_halls.py (the Foundation Stone at (0, 1, 0) 
 import os, sys, json
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 import settle_buildings as SB
+import settle_skill as SK
 from export_halls import export
 
 LIBRARY_MARKS = {f"shelf{i}" for i in range(8)} | {"lectern", "portrait0", "portrait1", "portrait2", "painting0"}
-SIDE, DEEP = 8, 14   # keep every plot building small enough for a settlement plot
+SIDE, DEEP = 8, 14   # keep every plot building small enough for a settlement plot (Large 15 x 15)
+PLOT_WIDE = {"house": 11, "farmhouse": 11, "mint": 11, "townhouse": 13}   # Medium and long Medium plots are narrower
 
 def on_stone(d):
     return any(z == 0 and y in (1, 2) and x0 <= 0 < x0 + n for y, z, x0, n, i in d["rows"])
@@ -31,7 +33,9 @@ def main():
     out, problems = {}, []
     for region in SB.REGIONS:
         out[region] = {}
-        for name, make in SB.BUILDERS.items():
+        makers = dict(SB.BUILDERS)   # plus the plot buildings drawn on the building skill, where the region has a spec
+        makers.update({b: (lambda r, b=b: SK.build(b, r)) for b in SK.IDS if SK.has(b, region)})
+        for name, make in makers.items():
             bp = make(region)
             for _ in range(4):   # move the Foundation Stone out until nothing of the building stands on or before it
                 d = export(bp)
@@ -42,6 +46,8 @@ def main():
             if on_stone(d): problems.append(f"{region} {name}: blocks where the Foundation Stone stands")
             if max(-b["x0"], b["x1"]) > SIDE or b["z1"] > DEEP or b["z0"] < 0:
                 problems.append(f"{region} {name}: too big {b}")
+            if name in PLOT_WIDE and b["x1"] - b["x0"] + 1 > PLOT_WIDE[name]:
+                problems.append(f"{region} {name}: wider than its plot ({b['x1'] - b['x0'] + 1} > {PLOT_WIDE[name]})")
             if name == "library" and LIBRARY_MARKS - set(d["marks"]):
                 problems.append(f"{region} library: missing marks {sorted(LIBRARY_MARKS - set(d['marks']))}")
             print(region, name, "cells", sum(r[3] for r in d["rows"]), "box", b)

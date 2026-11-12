@@ -1,0 +1,392 @@
+{
+ "name": "millbrook_clock_tower",
+ "card": {
+  "title": "Millbrook clock tower",
+  "sub": "Norman stone",
+  "region": "vale",
+  "where": "Millbrook, the square",
+  "kind": "Civic",
+  "blurb": "A stone shaft in two stages, a timber clock stage jettied out on brackets with a framed clock on every face, a steep slate helm and an open bell lantern on top. Built on the skill."
+ },
+ "parts": [
+  {
+   "part": "house",
+   "style": "vale_stone",
+   "rect": [
+    0,
+    0,
+    6,
+    6
+   ],
+   "y": 0,
+   "plinth": 2,
+   "storeys": [
+    6,
+    6,
+    6
+   ],
+   "door": {
+    "side": "s",
+    "kind": "house",
+    "steps": 2
+   },
+   "windows": {
+    "n": [
+     {
+      "at": 0,
+      "storey": 1,
+      "w": 1,
+      "h": 2
+     },
+     {
+      "at": 0,
+      "storey": 2,
+      "w": 1,
+      "h": 3
+     }
+    ],
+    "s": [
+     {
+      "at": 0,
+      "storey": 1,
+      "w": 1,
+      "h": 2
+     },
+     {
+      "at": 0,
+      "storey": 2,
+      "w": 1,
+      "h": 3
+     }
+    ],
+    "e": [
+     {
+      "at": 0,
+      "storey": 1,
+      "w": 1,
+      "h": 2
+     },
+     {
+      "at": 0,
+      "storey": 2,
+      "w": 1,
+      "h": 3
+     }
+    ],
+    "w": [
+     {
+      "at": 0,
+      "storey": 1,
+      "w": 1,
+      "h": 2
+     },
+     {
+      "at": 0,
+      "storey": 2,
+      "w": 1,
+      "h": 3
+     }
+    ]
+   },
+   "roof": {
+    "type": "flat"
+   },
+   "chimney": false,
+   "vines": 0.05,
+   "bushes": false
+  },
+  {
+   "part": "house",
+   "style": {
+    "base": "vale_timber",
+    "frame": "stripped_spruce_log",
+    "infill": "spruce_planks"
+   },
+   "rect": [
+    -1,
+    -1,
+    7,
+    7
+   ],
+   "y": 19,
+   "plinth": 1,
+   "storeys": [
+    8
+   ],
+   "door": null,
+   "windows": {
+    "n": [],
+    "s": [],
+    "e": [],
+    "w": []
+   },
+   "roof": {
+    "type": "flat"
+   },
+   "chimney": false,
+   "bushes": false
+  },
+  {
+   "part": "spire",
+   "rect": [
+    -1,
+    -1,
+    7,
+    7
+   ],
+   "rows": 3,
+   "overhang": 1,
+   "roof": {
+    "block": "deepslate_tiles"
+   },
+   "trim": "dark_oak_planks",
+   "finial": "none"
+  },
+  {
+   "part": "belfry",
+   "rect": [
+    2,
+    2,
+    4,
+    4
+   ],
+   "y": "roof",
+   "h": 3,
+   "pier": "dark_oak_fence",
+   "deck": "dark_oak_planks",
+   "trim": "dark_oak_planks",
+   "roof": {
+    "block": "deepslate_tiles"
+   },
+   "cap": "spire",
+   "rows": 2,
+   "finial": "spire_block"
+  },
+  {
+   "part": "clock_face",
+   "rect": [
+    -1,
+    -1,
+    7,
+    7
+   ],
+   "side": "n",
+   "y": 23,
+   "size": 5,
+   "time": "3:00",
+   "frame": "stairs",
+   "frame_wood": "dark_oak",
+   "hub": "dark_oak_button"
+  },
+  {
+   "part": "clock_face",
+   "rect": [
+    -1,
+    -1,
+    7,
+    7
+   ],
+   "side": "s",
+   "y": 23,
+   "size": 5,
+   "time": "3:00",
+   "frame": "stairs",
+   "frame_wood": "dark_oak",
+   "hub": "dark_oak_button"
+  },
+  {
+   "part": "clock_face",
+   "rect": [
+    -1,
+    -1,
+    7,
+    7
+   ],
+   "side": "e",
+   "y": 23,
+   "size": 5,
+   "time": "3:00",
+   "frame": "stairs",
+   "frame_wood": "dark_oak",
+   "hub": "dark_oak_button"
+  },
+  {
+   "part": "clock_face",
+   "rect": [
+    -1,
+    -1,
+    7,
+    7
+   ],
+   "side": "w",
+   "y": 23,
+   "size": 5,
+   "time": "3:00",
+   "frame": "stairs",
+   "frame_wood": "dark_oak",
+   "hub": "dark_oak_button"
+  }
+ ],
+ "place": [
+  [
+   -1,
+   18,
+   0,
+   "dark_oak_stairs",
+   {
+    "facing": "e",
+    "half": "top"
+   }
+  ],
+  [
+   -1,
+   18,
+   2,
+   "dark_oak_stairs",
+   {
+    "facing": "e",
+    "half": "top"
+   }
+  ],
+  [
+   -1,
+   18,
+   4,
+   "dark_oak_stairs",
+   {
+    "facing": "e",
+    "half": "top"
+   }
+  ],
+  [
+   -1,
+   18,
+   6,
+   "dark_oak_stairs",
+   {
+    "facing": "e",
+    "half": "top"
+   }
+  ],
+  [
+   0,
+   18,
+   -1,
+   "dark_oak_stairs",
+   {
+    "facing": "s",
+    "half": "top"
+   }
+  ],
+  [
+   0,
+   18,
+   7,
+   "dark_oak_stairs",
+   {
+    "facing": "n",
+    "half": "top"
+   }
+  ],
+  [
+   2,
+   18,
+   -1,
+   "dark_oak_stairs",
+   {
+    "facing": "s",
+    "half": "top"
+   }
+  ],
+  [
+   2,
+   18,
+   7,
+   "dark_oak_stairs",
+   {
+    "facing": "n",
+    "half": "top"
+   }
+  ],
+  [
+   4,
+   18,
+   -1,
+   "dark_oak_stairs",
+   {
+    "facing": "s",
+    "half": "top"
+   }
+  ],
+  [
+   4,
+   18,
+   7,
+   "dark_oak_stairs",
+   {
+    "facing": "n",
+    "half": "top"
+   }
+  ],
+  [
+   6,
+   18,
+   -1,
+   "dark_oak_stairs",
+   {
+    "facing": "s",
+    "half": "top"
+   }
+  ],
+  [
+   6,
+   18,
+   7,
+   "dark_oak_stairs",
+   {
+    "facing": "n",
+    "half": "top"
+   }
+  ],
+  [
+   7,
+   18,
+   0,
+   "dark_oak_stairs",
+   {
+    "facing": "w",
+    "half": "top"
+   }
+  ],
+  [
+   7,
+   18,
+   2,
+   "dark_oak_stairs",
+   {
+    "facing": "w",
+    "half": "top"
+   }
+  ],
+  [
+   7,
+   18,
+   4,
+   "dark_oak_stairs",
+   {
+    "facing": "w",
+    "half": "top"
+   }
+  ],
+  [
+   7,
+   18,
+   6,
+   "dark_oak_stairs",
+   {
+    "facing": "w",
+    "half": "top"
+   }
+  ]
+ ]
+}

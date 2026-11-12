@@ -38,7 +38,7 @@ Skill points also come straight from deeds: siege held +2, settlement tier up +2
 
 50 skills in four branches and five rings. A ring opens when your hall is big enough **and** your Renown is high enough (1 / 5 / 12 / 20 / 30).
 
-- **Keep** (everyone): Hearthwarden, Stonewright, Muster Roll, Masonry Wards, Watchfire, Spoils of War, Plunder, Rally the Walls, Master Builder, The Unbreakable Keep, Sovereign's Court.
+- **Keep** (everyone): Hearthwarden, Stonewright, Muster Roll, Messenger (also buyable for 100 Regals; scripts/townhall/messenger.js), Masonry Wards, Watchfire, Spoils of War, Plunder, Rally the Walls, Master Builder, The Unbreakable Keep, Sovereign's Court.
 - **Wayfarer** (everyone): Fleetfoot, Forager, Clue Sense, Horse Whisperer, Pathfinder, Silver Tongue, Night Eyes, Mapwright, Tidewalker, Roadwise, The Long Road Home.
 - **Blade** (Knights): Shield Bash, Lunge, Iron Constitution, Riposte, Rallying Cry, Armor Mastery, Guard Captain, Execution, Warhorse Charge, Banner of the Keep, Second Wind, Oathsworn Champion, Crownbreaker.
 - **Arcana** (Marked): Ember Bolt, Ward, Quiet Mind, Blink, Echo Sight, Bind, Ashen Skin, Halfstep, Choir's Call, Resonant Soul, Choirborn, Veilstep, Crownless, The Last Art.
@@ -109,6 +109,15 @@ One screen listing every player in the world with their role, rank, Renown level
 
 Open it from the Town Hall menu, the keep menu, or anywhere with `/scriptevent siege:who`. Code: `townhall/roster.js`. Other features add a line under a player by listening for `rosterNotes` and calling `notes.add(playerId, "text")`. Rulers are learned from the `wardenChanged`, `crowned` and `stormEnd` events.
 
+## The Hall Map
+
+Every hall has a painted map of the realm (Mateo, 2026-11-12). Open it from the hall's Cartographer's Table (a vanilla cartography table inside a raised hall; sneak-click for the vanilla screen) or "Hall map" in the Town Hall menu. Code: `townhall/hallmap.js`.
+
+- Shows every settlement on a plot in its Keep Banner colour with its holder (your own ringed in gold), rival lords, free plots, the six towns, and found places. Never players.
+- Places: Crownhold, the Ashen Gate Chapterhouse and the Ashen Watch (from `plots/config.js` WARDS), plus the lore's **charted** places once the builder marks them (`/scriptevent siege:lore_mark_place`). Mystery places (`charted: false`, thin places, Bellhollow) are never marked, as the Ledger rule says.
+- Fog: the map is 16 x 16 cells of about 156 blocks. A player charts every cell within 96 blocks of where they walk on the overworld. A settlement knows what its owner and allies have charted and found (saved per player in `siege:hallmap`).
+- Screen: forms titled with `§h§m` are drawn by `ui/server_form.json` as the realm picture with a 16 x 16 grid of cell buttons over it (no other buttons; it closes with its X). Hover shows a mark's name; clicking a mark opens its details. Art: `textures/ui/hc/map/` from `studio/build_hallmap.py` (rerun after the world map is regenerated); UI from `studio/build_tree_ui.py`.
+
 ## The upgrade fly-by, and walls
 
 When a hall is raised or upgraded, the owner's camera lifts off and circles the hall while it rises, then returns (sneak to return early). Code: `townhall/flyby.js`, `flyby(player, { center, radius, height, seconds, title })`, usable by any feature.
@@ -149,3 +158,8 @@ Besides Knight and Marked there are four regional roles, each with a branch of n
 | Witch (`witch`) | Blackfen | Hex | Immune to poison, poisons and rots enemies, heals from kills, curses attackers | Bog-Touched, Herbwife, Witch, Crone, Fen Mother |
 
 Data is in `townhall/skills.js` (ROLES, RANKS, BRANCHES, skills `wing_*`, `forge_*`, `helm_*`, `hex_*`); effects are in `townhall/roles.js`. A role is earned by a deed in its region (`ROLE_DEEDS` in `roles.js`; Mateo's ruling of 2026-11-10): Forgemaster for felling the Pale Huntsman, Captain for the Drowned Bride, Witch for the Mother of Changelings (offered to every player without a role within 64 blocks when the boss dies), and Dragon Rider when the dragons feature reports a first hatching. Hall level no longer offers a role. The story can also offer one with `emit("offerRole", { player, role })` / `emit("grantRole", ...)`. Test: `/scriptevent siege:townhall_path rider` (or forgemaster, captain, witch, none). Names and powers are proposals until Mateo confirms them. Not played in the game yet.
+
+
+## Town Board
+
+Once a hall stands its Hall Cornerstone is taken away (Mateo, 2026-11-12) and the Town Hall menu opens from the **Town Board** (`siege:hall_board`), a wide notice board placed by `boardSpot()` in `halls.js`: just inside the front door, two to six blocks off the aisle, on the floor, under the roof, facing the way in. Every style and level has one (self-test). Halls built earlier get theirs from `addBoard()` on load or when the Town Hall menu opens. To move a hall, use "Move the town hall" in the menu.
