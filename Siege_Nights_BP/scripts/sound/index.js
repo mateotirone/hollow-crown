@@ -105,7 +105,7 @@ addTests("sound", {
     }
   },
   "signature cues map to siege.sig.* recordings": () => {
-    assertEqual(SIGNATURE_CUES.length, 18); // 14, plus four for the role storylines (bell-tongue, roll drum, the forty rowing, the fen)
+    assertEqual(SIGNATURE_CUES.length, 27); // 14, four for the role storylines (bell-tongue, roll drum, the forty rowing, the fen), nine for the Rift opening
     for (const name of SIGNATURE_CUES) assertEqual(CUES[name].custom, `siege.${name}`);
   },
   "installed recordings are all known": () => {

@@ -46,12 +46,12 @@
    "id": "siege.sig.rift_open",
    "path": "sounds/siege/sig/rift_open",
    "name": "The Rift opening",
-   "seconds": 10,
+   "seconds": 14,
    "kind": "one-shot",
    "channels": 1,
    "category": "ambient",
    "where": "The tear of the 40-second Rift opening (undertow/rift.js, at 20 s): rock splitting floor to ceiling, then widening. Played from the crack.",
-   "prompt": "Solid rock tearing open from the floor of a cave up to its ceiling over seven seconds: a chain of sharp stone cracks climbing upward, each one a little higher in pitch than the last, with grit and small stones trickling down. Then three seconds of the split grinding wider and one heavy, low, muffled boom deep in the rock. No wind or air rush, no voices, no music. Close and dry, ends in silence.",
+   "prompt": "A huge slab of solid rock slowly breaking apart in a cave over fourteen seconds: long deep creaking and groaning of stone under enormous strain, sharp loud cracks splitting upward one after another, each a little higher, gravel and chunks of rock falling and clattering on the cave floor, grinding as the two halves scrape apart, and a final heavy low crack-boom as it splits open. Loud, close, dry and physical. No wind or air rush, no voices, no music.",
    "max_distance": 64
   },
   {
@@ -308,7 +308,7 @@
    "channels": 2,
    "category": "ambient",
    "where": "Once per world, at 3:17 on the night something walks up between the soldiers that is not one of them.",
-   "prompt": "Night on a castle wall during a battle that suddenly goes quiet: the wind drops, the distant fighting fades to nothing, and in the silence come slow, even, unhurried footsteps on wet ground getting closer, with a very faint low choir note under them and one slow deep pulse like a heartbeat. It stops before anything happens. Quiet, tense, patient. No sting, no loud hit, no scream, no music."
+   "prompt": "Close, clear footsteps: one person walking slowly and evenly over wet gravel and mud toward the listener, every step distinct and easy to hear, boots squelching, getting closer and louder over ten seconds. Under them a low steady choir note and one slow deep heartbeat thud every two seconds. A faint night wind at the very start that dies away. The steps stop right next to you. Tense and patient, not loud. No sting, no scream, no music."
   },
   {
    "file": "bell_tongue",
@@ -373,7 +373,8 @@
    "signature": true,
    "species": "Cinderwing",
    "where": "The Cinderwing's roar.",
-   "prompt": "The voice of a large fire-breathing dragon with a deep chest and a throat like a furnace: warm, rumbling, with a crackle of embers in the breath. A full roar: starts fast, peaks, and trails off into breath. Powerful and proud, not a monster-movie scream. One animal, close and dry, no echo, no background, no music."
+   "prompt": "The voice of a large fire-breathing dragon with a deep chest and a throat like a furnace: warm, rumbling, with a crackle of embers in the breath. A full roar: starts fast, peaks, and trails off into breath. Powerful and proud, not a monster-movie scream. One animal, close and dry, no echo, no background, no music.",
+   "ask_seconds": 4
   },
   {
    "file": "cinderwing_idle",
@@ -493,7 +494,8 @@
    "signature": true,
    "species": "Ashen Wyvern",
    "where": "The Ashen Wyvern's roar.",
-   "prompt": "The voice of a lean, light wyvern with a high, hoarse, hissing voice like wind through dry reeds, raspy and airy. A full roar: starts fast, peaks, and trails off into breath. Powerful and proud, not a monster-movie scream. One animal, close and dry, no echo, no background, no music."
+   "prompt": "The voice of a lean, light wyvern with a high, hoarse, hissing voice like wind through dry reeds, raspy and airy. A full roar: starts fast, peaks, and trails off into breath. Powerful and proud, not a monster-movie scream. One animal, close and dry, no echo, no background, no music.",
+   "ask_seconds": 4
   },
   {
    "file": "wyvern_idle",
@@ -613,7 +615,8 @@
    "signature": true,
    "species": "Dune Drake",
    "where": "The Dune Drake's roar.",
-   "prompt": "The voice of a heavy, broad desert drake with a very low, slow, gravelly voice like boulders shifting under sand. A full roar: starts fast, peaks, and trails off into breath. Powerful and proud, not a monster-movie scream. One animal, close and dry, no echo, no background, no music."
+   "prompt": "The voice of a heavy, broad desert drake with a very low, slow, gravelly voice like boulders shifting under sand. A full roar: starts fast, peaks, and trails off into breath. Powerful and proud, not a monster-movie scream. One animal, close and dry, no echo, no background, no music.",
+   "ask_seconds": 4
   },
   {
    "file": "drake_idle",
@@ -733,7 +736,8 @@
    "signature": true,
    "species": "Glass Wyrm",
    "where": "The Glass Wyrm's roar.",
-   "prompt": "The voice of a long glass-scaled wyrm whose voice is two tones at once, a fifth apart, with a ringing glassy edge, so it never sounds like a single animal. A full roar: starts fast, peaks, and trails off into breath. Powerful and proud, not a monster-movie scream. One animal, close and dry, no echo, no background, no music."
+   "prompt": "A humpback whale's long moaning call and a bull elk's bugle heard together, two deep tones at once that rise and fall, warm and breathy, with a slow wet breath underneath. Real wildlife field recording made close up with a good microphone: natural, organic, unprocessed, one living animal with real air and wet throat noise. No synth, no growl effects, no echo, no background, no music.",
+   "ask_seconds": 4
   },
   {
    "file": "wyrm_idle",

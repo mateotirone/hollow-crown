@@ -18,6 +18,16 @@ const SIGNATURE = {
   "sig.siege_horn": { custom: "siege.sig.siege_horn", drift: 0.03, what: "The siege horn",
     layers: [["raid.horn", 0.7, 1], ["raid.horn", 0.52, 0.6, 7], ["ambient.weather.thunder", 0.5, 0.25, 12]] },
   "sig.rift_open": { custom: "siege.sig.rift_open", what: "The Rift opening", layers: [] }, // stand-in is the stepped tearing in undertow/rift.js
+  // the 40-second Rift opening (undertow/rift.js plays its own vanilla stand-ins until these recordings are installed)
+  "sig.rift_answer": { custom: "siege.sig.rift_answer", what: "The Rift answers the Tuning Fork", layers: [] },
+  "sig.rift_stir": { custom: "siege.sig.rift_stir", what: "The rock stirs (Rift opening)", layers: [] },
+  "sig.rift_hush": { custom: "siege.sig.rift_hush", what: "The hush before the Rift tears", layers: [] },
+  "sig.rift_breath": { custom: "siege.sig.rift_breath", what: "The Rift breathes", layers: [] },
+  "sig.rift_loop": { custom: "siege.sig.rift_loop", what: "The open Rift (loop)", layers: [] },
+  "sig.rift_refuse": { custom: "siege.sig.rift_refuse", what: "The veil refuses", layers: [] },
+  "sig.rift_cross": { custom: "siege.sig.rift_cross", what: "Crossing the Rift", layers: [] },
+  "sig.seep_creep": { custom: "siege.sig.seep_creep", what: "The seep creeps", layers: [] },
+  "sig.thin_draught": { custom: "siege.sig.thin_draught", what: "A thin place's draught", layers: [] },
   "sig.hollow_ambience": { custom: "siege.sig.hollow_ambience", what: "The Hollow's ambience (loop)", layers: [] }, // stand-in is the Hollow's own thunder and hum
   "sig.storm_tide": { custom: "siege.sig.storm_tide", what: "A storm tide of the Long Night",
     layers: [["ambient.weather.thunder", 0.55, 0.7], ["raid.horn", 0.5, 0.35, 14], ["ambient.cave", 0.7, 0.4, 30]] },

@@ -9,6 +9,7 @@ How versions work is in [`docs/RELEASING.md`](docs/RELEASING.md).
 Everything merged to `main` since the last release goes here. Each pull request that changes what players see adds a line under one of these headings.
 
 ### Added
+- Real recordings replace the stand-in sounds for 29 signature moments: the 3:17 toll, the siege horn, the choir hum, the Hollow's ambience, the storm tide, every boss's arrival, the role storyline sounds, three dragon roars, and the Rift's opening (the Tuning Fork's answer, the rock stirring, the hush, the breath, the open Rift's draught, the veil pushing you back, crossing over, the seep creeping, and the draught at a thin place).
 - Trains keep apart: a train that comes up behind another on the same track slows and stops a few blocks short of it instead of running through it, and the driver is told a train is on the line ahead.
 - The Changeling Glade: on the way down to the Mother of Changelings' cave, the sunken glade south of the Cradle Tree sends a wave of changelings at whoever walks through it (more for a bigger party), then rests for five minutes.
 - Siege crews go to war with your army, each bringing its own engine: Trebuchet crews set up 40 blocks out, unfold their trebuchet and widen one hole in the wall nearest the vault (a boulder every 45 seconds, never at the gate); Ram crews ram the gate; Sappers plant Breaching Charges and run. Train them at the Barracks.
