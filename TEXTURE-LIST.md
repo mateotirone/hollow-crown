@@ -519,3 +519,10 @@ Made by `tools/bossbar_ui.py` (which also wires them into `ui/hud_screen.json`).
 
 ## Dyed icon layers (2026-11-11, textures thread)
 Every dyeable item (Castle Guard armour and the regional sets, 64 pieces) uses `minecraft:icon` with `default` and `dyed` textures. `textures/items/<icon>_dyed.png` holds only the tabard cloth in light grey so the game tints it with the dye. Made by `studio/art/build_dyed_icons.py` (re-run after repainting a guard icon or adding a dyeable item). Without the dyed layer the icons showed blank in game.
+
+## Sorcerer cast effects (2026-11-12, `tools/build_sorcerer_fx.py`)
+| Asset | File | Status |
+|---|---|---|
+| Arcana particle sheet (64×16, four white 16×16 sprites tinted in code: glow, spark, ring, shard) | `textures/particle/hc_arcana.png` | Drawn in code, untested in game |
+| Twelve cast particles `siege:arc_trail`, `arc_burst`, `arc_ward`, `arc_tear`, `arc_ring`, `arc_mark`, `arc_link`, `arc_snare`, `arc_peel`, `arc_rift`, `arc_smoulder`, `arc_halo` (Choirsteel purple, magenta, Crown blue) | `particles/arc_*.particle.json` | Written, untested in game |
+| Spell icons x8 for the magic hotbar | reuse `textures/ui/hc/skill/arc_<power>.png` | Reused from the skill tree |
