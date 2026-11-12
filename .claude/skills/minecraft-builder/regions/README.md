@@ -69,7 +69,7 @@ given here.
 
 - **Region weather** (PR #193, not merged yet): on top of the biome weather, Blackfen gets fen mist and
   marsh lights, Saltreach sea wind and sea fret, the Emberwaste dust wind and sandstorms, Frostmarch
-  flurries and blizzards, the Vale morning mist; the Hollow has none. Each page's weather table has the
+  flurries and blizzards, the Vale morning mist; the Hollow has an eternal thunderstorm with no rain. Each page's weather table has the
   details. For builders: deep eaves, porches, covered walkways and wind-breaks matter in the Emberwaste and
   Frostmarch; lanterns that show through fog matter in Blackfen and Saltreach.
 - **Gull's Rest, the harbour town, has no water inside its town area**, so its quay, lighthouse and
