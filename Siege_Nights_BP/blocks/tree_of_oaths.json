@@ -1,10 +1,10 @@
 {
-  "format_version": "1.21.60",
+  "format_version": "1.21.90",
   "minecraft:block": {
     "description": {
       "identifier": "siege:tree_of_oaths",
       "menu_category": {
-        "category": "none"
+        "category": "construction"
       },
       "states": {
         "siege:look": [
@@ -62,7 +62,8 @@
           14
         ]
       },
-      "minecraft:map_color": "#42803a"
+      "minecraft:map_color": "#42803a",
+      "siege:clickable": {}
     },
     "permutations": [
       {

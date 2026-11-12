@@ -3,6 +3,7 @@
 
 // Core (no gameplay)
 import "./core/selftest.js";
+import "./core/clickable.js";
 import "./core/firstjoin.js";
 import "./core/storyteller.js";
 
@@ -35,11 +36,21 @@ import "./economy/index.js";
 import "./reach/index.js";
 import "./sound/index.js";
 import "./minimap/index.js";
+import "./guide/index.js";
 import "./roletrials/index.js";
 import "./after/index.js";
 import "./opening/index.js";
+import "./unlocks/index.js";
 import "./labels/index.js";
+import "./guardposts/index.js";
 import "./forestry/index.js";
+import "./workings/index.js";
+import "./ironworks/index.js";
+import "./vault/index.js";
+import "./creative/index.js";
+import "./dispatch/index.js";
+import "./trade/index.js";
+import "./townsfolk/index.js";
 
 // Start the shared loop last, once every file has registered its work
 import { startLoop } from "./core/loop.js";

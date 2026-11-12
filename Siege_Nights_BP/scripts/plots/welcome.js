@@ -1,10 +1,11 @@
 // The welcome hall: where a new player arrives, reads how things stand, and picks where they start.
 //
-// It is a round stone terrace in the sky over Gull Bay. In the middle stands the Waystone (click it for the
-// story so far, where you start and how choosing works). Around the rim stand twelve pedestals, one per plot,
-// each set in the direction its plot lies from Kingsrest. Click a pedestal to read about the plot. A free one
-// can be chosen: you are set down beside its Plot Stone, it is held for you, and nobody else can take it.
-// A taken one shows who holds it, their level and their settlement's level.
+// It is the real world map in miniature (1 block for every 25 x 25), built in the sky over Gull Bay (miniature.js
+// builds it; tools/miniature.py makes its data from the world map). Newcomers arrive on a stone quay out in the
+// miniature's sea, where the Waystone stands (click it for the story so far, where you start and how choosing works).
+// Each plot has a glowing Map Stone on its real spot on the miniature: green is free, yellow is run by a lord, dark
+// is taken. Click one to read about the plot. A free one can be chosen: you are set down beside its real Plot Stone,
+// it is held for you, and nobody else can take it. A taken one shows who holds it and how far they have come.
 //
 // Builder commands (Creative):
 //   /scriptevent siege:welcome build        build the hall at its place in the sky (takes you there first)
@@ -13,7 +14,8 @@
 //   /scriptevent siege:welcome testarea     build the test area in the sky and lay the whole showcase out on it
 //   /scriptevent siege:welcome kingsrest    make where you stand the "start without a home" arrival spot
 //   /scriptevent siege:welcome release Name give up Name's pick so the plot is free again
-//   /scriptevent siege:welcome status       list every pedestal and who has it
+//   /scriptevent siege:welcome status       list every plot's Map Stone and who has it
+// A world that still has the old round hall gets it swapped for the miniature by itself.
 //
 // Other features: on("plotChosen", ({ player, plot }) => ...) fires the moment a player picks a plot, before
 // they arrive, so a first building can be raised for them. pickOf(plot) is in plots/api.js.
@@ -22,58 +24,33 @@
 // raiseHall(o, then) builds the hall (spread over ticks) and setKingsrestArrival(spot) moves the homeless arrival
 // spot; the opening feature (scripts/opening/) calls both when a fresh Hollow Crown map first loads.
 
-import { world, system, ItemStack, GameMode } from "@minecraft/server";
+import { world, system, ItemStack, GameMode, MolangVariableMap } from "@minecraft/server";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
 import { isReady, keepOf, tierOf, on, emit, addFoundingCheck, addJoinStep } from "../siege/api.js";
 import { onTick } from "../core/loop.js";
 import { moduleStore } from "../core/store.js";
 import { PLOT_PLAN, REGION_STYLE, REGION_BLOCK, WELCOME, WARDS, PLOT_STONE, KEEP_BANNER, OVERWORLD } from "./config.js";
 import { allPlots, holderOf, npcOf, plotOf, isBuilder, compass, mapMode, releaseNpc } from "./claims.js";
+import { MINI, MINI_VERSION, RIM_TOP, MAP_MARKER, HALL_WAYSTONE, MARKER_STATE, miniSpot, miniatureBlocks, waystoneSpot, arrivalOffset, fallbackOf } from "./miniature.js";
+import { addMenuLabel } from "../core/labels.js";
 
 const store = moduleStore("siege:plots_welcome", () => ({ hall: null, test: null, kingsrest: null, picks: {} }));
 const ARRIVING = "siege_plots_arriving"; // on a player who is in the hall and has not chosen yet
-const WAYSTONE = "minecraft:lodestone";
-const FREE_LIGHT = "minecraft:sea_lantern";
-const TAKEN_BLOCK = "minecraft:polished_blackstone";
-const LORD_LIGHT = "minecraft:glowstone"; // run by a lord of the land: a newcomer can still choose it
+const FREE_LIGHT = "minecraft:sea_lantern"; // the showcase marker
+const BUILD_AREA = "hc_miniature"; // ticking area kept while the miniature is being built
 
 export const hallBuilt = () => !!store.data.hall;
 const overworld = () => world.getDimension(OVERWORLD);
 const KINGSREST = WARDS[0];
 
-// ---------- Where the pedestals stand ----------
-// Each one sits toward its plot as seen from Kingsrest, so the ring is a rough picture of the map.
-// Plots that lie in nearly the same direction are nudged apart until they have room.
+// ---------- Where the Map Stones stand ----------
+// Each plot's stone stands on its real spot, scaled down, on a pedestal of its region's stone.
+// dy is the stone's height above the hall floor; the pedestal is the block under it.
 
 export function pedestalLayout() {
-  const rows = PLOT_PLAN.map((plan) => ({
-    plan,
-    angle: (Math.atan2(plan.x - KINGSREST.x, -(plan.z - KINGSREST.z)) * 180) / Math.PI, // 0 = north, 90 = east
-  })).sort((a, b) => a.angle - b.angle);
-  const gap = WELCOME.pedestalGap;
-  for (let pass = 0; pass < 200; pass++) {
-    let moved = false;
-    for (let i = 0; i < rows.length; i++) {
-      const a = rows[i];
-      const b = rows[(i + 1) % rows.length];
-      const between = (((b.angle - a.angle) % 360) + 360) % 360;
-      if (between >= gap - 0.01) continue;
-      const push = (gap - between) / 2;
-      a.angle -= push;
-      b.angle += push;
-      moved = true;
-    }
-    if (!moved) break;
-  }
-  return rows.map(({ plan, angle }) => {
-    const rad = (angle * Math.PI) / 180;
-    const dx = Math.round(WELCOME.pedestalRadius * Math.sin(rad));
-    const dz = -Math.round(WELCOME.pedestalRadius * Math.cos(rad));
-    // The sign stands one step in toward the middle and faces it
-    const sx = Math.round((WELCOME.pedestalRadius - 1.5) * Math.sin(rad));
-    const sz = -Math.round((WELCOME.pedestalRadius - 1.5) * Math.cos(rad));
-    const rot = ((Math.round((Math.atan2(sx, -sz) / (2 * Math.PI)) * 16) % 16) + 16) % 16; // 0 faces south, 4 west
-    return { name: plan.name, plan, dx, dz, sx, sz, rot };
+  return PLOT_PLAN.map((plan) => {
+    const spot = miniSpot(plan);
+    return { name: plan.name, plan, dx: spot.dx, dz: spot.dz, dy: spot.h + 2 };
   });
 }
 
@@ -133,11 +110,6 @@ function describe(id, fallbackName) {
 
 // ---------- The hall itself ----------
 
-const hash = (x, z) => {
-  const n = Math.sin(x * 127.1 + z * 311.7) * 43758.5453;
-  return n - Math.floor(n);
-};
-
 function put(dim, x, y, z, typeId, states) {
   try {
     const block = dim.getBlock({ x, y, z });
@@ -166,81 +138,116 @@ function writeSign(dim, x, y, z, rot, text) {
   }
 }
 
-function signText(plan, status) {
-  if (status.state === "free") return `${plan.name}\n${plan.region}\n§2Free§r\nClick the stone`;
-  if (status.state === "missing") return `${plan.name}\n${plan.region}\n§8Not on this\nmap yet`;
-  if (status.state === "lord") return `${plan.name}\n${plan.region}\n§6Run by§r\n${status.name}`;
-  return `${plan.name}\n${plan.region}\n§4${status.state === "kept" ? "Chosen by" : "Held by"}§r\n${status.name}`;
+// A block for the miniature, trying an older id if this game version doesn't know the new one
+function putMini(dim, x, y, z, typeId, states) {
+  return put(dim, x, y, z, typeId, states) ?? (fallbackOf(typeId) ? put(dim, x, y, z, fallbackOf(typeId)) : undefined);
 }
 
-// The hall's blocks, one column per step, so system.runJob can spread the work over several ticks (about 7,000
-// blocks: done in one tick it can stall a Realm long enough for the watchdog to shut the world).
-function* hallBlocks(dim, o) {
-  const R = WELCOME.hallRadius;
-  for (let dx = -R - 1; dx <= R + 1; dx++) {
+const R_ALL = MINI.half + 1; // the miniature and its rim, each way from the middle
+const loadedAt = (dim, x, z) => {
+  try {
+    return !!dim.getBlock({ x, y: 0, z });
+  } catch {
+    return false;
+  }
+};
+const allLoaded = (dim, o) => [[-1, -1], [-1, 1], [1, -1], [1, 1], [0, 0]].every(([sx, sz]) => loadedAt(dim, o.x + sx * R_ALL, o.z + sz * R_ALL));
+
+function command(dim, text) {
+  try {
+    dim.runCommand(text);
+  } catch {
+    // an area that is already there or already gone
+  }
+}
+
+// The old round hall (before the miniature): taken away when the miniature replaces it
+function* clearOldHall(dim, old) {
+  for (let dx = -17; dx <= 17; dx++) {
     yield;
-    for (let dz = -R - 1; dz <= R + 1; dz++) {
-      const d = Math.hypot(dx, dz);
-      if (d > R + 1.5) continue;
-      for (let dy = 1; dy <= 6; dy++) put(dim, o.x + dx, o.y + dy, o.z + dz, "minecraft:air");
-      if (d <= R + 0.5) {
-        // Floor: worn stone, a paler ring near the middle, a dark band under the pedestals
-        const h = hash(dx, dz);
-        let floor = h < 0.12 ? "minecraft:cracked_stone_bricks" : h < 0.3 ? "minecraft:mossy_stone_bricks" : "minecraft:stone_bricks";
-        if (d <= 3.5) floor = "minecraft:polished_andesite";
-        else if (Math.abs(d - WELCOME.pedestalRadius) < 0.8) floor = "minecraft:polished_deepslate";
-        put(dim, o.x + dx, o.y, o.z + dz, floor);
-        put(dim, o.x + dx, o.y - 1, o.z + dz, "minecraft:stone_bricks");
-      }
-      if (d > R - 0.5 && d <= R + 0.5) {
-        // Rim: a low wall you can see over, and an unseen one above it so nobody walks off
-        put(dim, o.x + dx, o.y + 1, o.z + dz, "minecraft:cobblestone_wall");
-        for (let dy = 2; dy <= 6; dy++) put(dim, o.x + dx, o.y + dy, o.z + dz, "minecraft:barrier");
+    for (let dz = -17; dz <= 17; dz++) {
+      if (Math.hypot(dx, dz) > 16.6) continue;
+      for (let dy = -1; dy <= 6; dy++) {
+        const b = dim.getBlock({ x: old.x + dx, y: old.y + dy, z: old.z + dz });
+        if (b && b.typeId !== "minecraft:air") b.setType("minecraft:air");
       }
     }
-  }
-  // Lanterns on taller posts round the rim, unevenly spaced
-  for (const deg of [8, 41, 67, 104, 139, 171, 203, 232, 268, 297, 331]) {
-    const rad = (deg * Math.PI) / 180;
-    const x = o.x + Math.round(R * Math.sin(rad));
-    const z = o.z - Math.round(R * Math.cos(rad));
-    put(dim, x, o.y + 1, z, "minecraft:stone_bricks");
-    put(dim, x, o.y + 2, z, "minecraft:cobblestone_wall");
-    put(dim, x, o.y + 3, z, "minecraft:lantern");
-  }
-  // The Waystone on a low step
-  for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) put(dim, o.x + dx, o.y + 1, o.z + dz, "minecraft:stone_brick_slab");
-  put(dim, o.x, o.y + 1, o.z, "minecraft:chiseled_stone_bricks");
-  put(dim, o.x, o.y + 2, o.z, WAYSTONE);
-  writeSign(dim, o.x, o.y + 1, o.z + 2, 0, "The Waystone\nClick it to hear\nhow things stand");
-  writeSign(dim, o.x, o.y + 1, o.z - 2, 8, "Each stone on the\nrim is a place to\nstart. One each.");
-  // Pedestals
-  for (const p of pedestalLayout()) {
-    put(dim, o.x + p.dx, o.y + 1, o.z + p.dz, REGION_BLOCK[p.plan.region] ?? "minecraft:stone_bricks")
-      ?? put(dim, o.x + p.dx, o.y + 1, o.z + p.dz, "minecraft:stone_bricks");
   }
 }
 
-/** Build the hall at o (its chunks must be loaded), spread over ticks. It becomes the arrival point once it stands. */
-export function raiseHall(o, then) {
+let raising = false;
+const alsoWaiting = []; // then() callbacks from calls that came while the miniature was already going up
+/**
+ * Build the hall (the miniature map) at o, spread over ticks. It keeps the whole miniature loaded with one ticking
+ * area while it works, and becomes the arrival point once it stands, Map Stones, Waystone and arrival spot included;
+ * then() runs only after that. A world with the old round hall (old) has it cleared afterwards.
+ */
+export function raiseHall(o, then, old) {
+  if (raising) {
+    if (then) alsoWaiting.push(then);
+    return;
+  }
+  raising = true;
   const dim = overworld();
-  system.runJob((function* () {
-    try {
-      yield* hallBlocks(dim, o);
-    } catch (e) {
-      console.warn(`[Hollow Crown] welcome: building the hall stopped: ${e}`);
-      return;
-    }
-    store.data.hall = { x: o.x, y: o.y, z: o.z };
-    store.save();
-    refreshHall();
-    try {
-      world.setDefaultSpawnLocation({ x: o.x, y: o.y + 1, z: o.z + 4 });
-    } catch {
-      // new players are brought here by script anyway
-    }
-    then?.();
-  })());
+  command(dim, `tickingarea remove ${BUILD_AREA}`);
+  command(dim, `tickingarea add ${o.x - R_ALL} ${o.y} ${o.z - R_ALL} ${o.x + R_ALL} ${o.y} ${o.z + R_ALL} ${BUILD_AREA} true`);
+  let tries = 0;
+  const wait = system.runInterval(() => {
+    if (!allLoaded(dim, o) && ++tries < 90) return;
+    system.clearRun(wait);
+    const markers = pedestalLayout().map((p) => ({ dx: p.dx, dz: p.dz, pedestal: REGION_BLOCK[p.plan.region] ?? "minecraft:stone_bricks" }));
+    system.runJob((function* () {
+      // An old hall in the way of the new one (a test world built "here") goes first; one floating above it goes last
+      const inTheWay = old && old.y - 1 <= o.y + RIM_TOP && old.y + 6 >= o.y - 1;
+      try {
+        if (inTheWay) yield* clearOldHall(dim, old);
+        const clear = (x, y, z) => {
+          const b = dim.getBlock({ x, y, z });
+          if (b && b.typeId !== "minecraft:air") b.setType("minecraft:air");
+        };
+        yield* miniatureBlocks((x, y, z, id, states) => putMini(dim, x, y, z, id, states), o, markers, clear);
+      } catch (e) {
+        console.warn(`[Hollow Crown] welcome: building the hall stopped: ${e}`);
+        raising = false;
+        command(dim, `tickingarea remove ${BUILD_AREA}`);
+        return;
+      }
+      store.data.hall = { x: o.x, y: o.y, z: o.z, mini: MINI_VERSION };
+      store.save();
+      const w = waystoneSpot();
+      writeSign(dim, o.x + w.dx, o.y + w.dy - 1, o.z + w.dz + 1, 0, "The Waystone\nClick it to hear\nhow things stand");
+      writeSign(dim, o.x + w.dx, o.y + w.dy - 1, o.z + w.dz - 1, 8, "The glowing stones\non the map are the\nplaces to start.\nOne each.");
+      refreshHall();
+      try {
+        world.setDefaultSpawnLocation(arrivalPoint(o));
+      } catch {
+        // new players are brought here by script anyway
+      }
+      for (const done of [then, ...alsoWaiting.splice(0)]) {
+        try {
+          done?.();
+        } catch (e) {
+          console.warn(`[Hollow Crown] welcome: after the hall: ${e}`);
+        }
+      }
+      // The old round hall goes last, once everyone waiting on it has been brought down to the quay
+      if (old && !inTheWay) {
+        try {
+          yield* clearOldHall(dim, old);
+        } catch (e) {
+          console.warn(`[Hollow Crown] welcome: clearing the old hall stopped: ${e}`);
+        }
+      }
+      command(dim, `tickingarea remove ${BUILD_AREA}`);
+      raising = false;
+    })());
+  }, 10);
+}
+
+// Where a newcomer stands in the hall: on the quay beside the Waystone
+function arrivalPoint(o) {
+  const a = arrivalOffset();
+  return { x: o.x + a.dx, y: o.y + a.dy, z: o.z + a.dz };
 }
 
 /** Where "start in Kingsrest without a home" sets a player down. */
@@ -249,25 +256,60 @@ export function setKingsrestArrival(spot) {
   store.save();
 }
 
-// Pedestal tops and signs follow who holds what
+// The Map Stones follow who holds what: green free, yellow run by a lord, dark taken
+export const markerState = (state) => (state === "free" ? 0 : state === "lord" ? 1 : 2);
+// Each stone's last known state, kept by refreshHall so the beams don't ask every plot ten times a second
+let stoneStates = [];
+
 function refreshHall() {
   const o = store.data.hall;
-  if (!o) return;
+  if (!o?.mini) return;
   const dim = overworld();
+  stoneStates = [];
   for (const p of pedestalLayout()) {
-    const status = statusOf(p.plan);
-    const top = dim.getBlock({ x: o.x + p.dx, y: o.y + 2, z: o.z + p.dz });
-    if (!top) return; // nobody is up here, so the hall isn't loaded
-    const want = status.state === "free" ? FREE_LIGHT : status.state === "lord" ? LORD_LIGHT : TAKEN_BLOCK;
-    if (top.typeId !== want) top.setType(want);
-    writeSign(dim, o.x + p.sx, o.y + 1, o.z + p.sz, p.rot, signText(p.plan, status));
+    stoneStates.push({ p, state: statusOf(p.plan).state });
+    let top;
+    try {
+      top = dim.getBlock({ x: o.x + p.dx, y: o.y + p.dy, z: o.z + p.dz });
+    } catch {
+      top = undefined;
+    }
+    if (!top) continue; // that corner of the miniature isn't loaded (nobody near it)
+    const want = markerState(stoneStates[stoneStates.length - 1].state);
+    try {
+      if (top.typeId !== MAP_MARKER) top.setType(MAP_MARKER);
+      if (top.permutation.getState(MARKER_STATE) !== want) top.setPermutation(top.permutation.withState(MARKER_STATE, want));
+    } catch {
+      // the stone can't be set right now: next round
+    }
   }
 }
 
+// Inside the hall: over the miniature or its rim, from just under the floor to above the barrier fence
 const inHall = (loc, slack = 2) => {
   const o = store.data.hall;
-  return !!o && Math.hypot(loc.x - o.x, loc.z - o.z) <= WELCOME.hallRadius + slack && loc.y >= o.y - 3 && loc.y <= o.y + 12;
+  if (!o) return false;
+  const reach = o.mini ? R_ALL : WELCOME.hallRadius;
+  return Math.abs(loc.x - o.x) <= reach + slack && Math.abs(loc.z - o.z) <= reach + slack && loc.y >= o.y - 3 && loc.y <= o.y + RIM_TOP + 4;
 };
+
+// Each Map Stone's floating label carries its plot's name; the Waystone's says what it does
+const hallOffset = (block) => {
+  const o = store.data.hall;
+  return o?.mini && block.dimension.id === OVERWORLD
+    ? { dx: block.location.x - o.x, dy: block.location.y - o.y, dz: block.location.z - o.z }
+    : undefined;
+};
+for (const p of pedestalLayout()) {
+  addMenuLabel({
+    block: MAP_MARKER, name: p.plan.name, hint: `${p.plan.region}: click to read`,
+    where: (block) => {
+      const at = hallOffset(block);
+      return !!at && at.dx === p.dx && at.dz === p.dz;
+    },
+  });
+}
+addMenuLabel({ block: HALL_WAYSTONE, name: "Waystone", hint: "Click: how things stand" });
 
 // ---------- The story so far (kept to what a newcomer could know) ----------
 
@@ -288,10 +330,10 @@ const PAGES = [
     + "§fBlackfen§r, the southern marsh, brews and things better left alone.\n\n"
     + "Kingsrest, the crossroads town, sits in the middle, below the ruins of the old capital. Rails and roads run from it to everywhere. Nobody flies here."],
   ["Choosing a home",
-    "The stones round the rim of this hall are the twelve places a settlement can stand. Each sits toward where its land really lies.\n\n"
+    "This hall is all of Aldmere in miniature. The twelve glowing stones on it are the places a settlement can stand, each on the spot where its land really lies.\n\n"
     + "Click a stone to read about the place. If it is free you can take it: you will be set down beside its Plot Stone and it is yours to found. "
     + "§fOnly one person can take each place§r, and the choice stands, so look at all of them first.\n\n"
-    + "A dark stone is already taken. Click it to see who holds it and how far they have come. If you would rather share a settlement with a friend, "
+    + "A green stone is free, a yellow one is kept warm by a lord who will hand it over, and a dark stone is already taken. Click it to see who holds it and how far they have come. If you would rather share a settlement with a friend, "
     + "start without a home and ask them for a Writ of Alliance."],
 ];
 
@@ -474,9 +516,12 @@ on("keepFounded", ({ player }) => {
 
 function toHall(player) {
   const o = store.data.hall;
-  const spot = { x: o.x + 0.5, y: o.y + 1, z: o.z + 4.5 };
+  // On the quay, facing the Waystone with the map beyond it (the old round hall: south of its Waystone)
+  const at = o.mini ? arrivalPoint(o) : { x: o.x, y: o.y + 1, z: o.z + 4 };
+  const w = o.mini ? waystoneSpot() : { dx: 0, dz: 0, dy: 2 };
+  const spot = { x: at.x + 0.5, y: at.y, z: at.z + 0.5 };
   try {
-    player.teleport(spot, { dimension: overworld(), facingLocation: { x: o.x + 0.5, y: o.y + 2, z: o.z + 0.5 } });
+    player.teleport(spot, { dimension: overworld(), facingLocation: { x: o.x + w.dx + 0.5, y: o.y + w.dy, z: o.z + w.dz + 0.5 } });
     player.setSpawnPoint({ dimension: overworld(), x: Math.floor(spot.x), y: spot.y, z: Math.floor(spot.z) });
   } catch {
     // try again on the next check
@@ -519,8 +564,52 @@ onTick("plots_welcome_hold", 20, () => {
   }
 });
 onTick("plots_welcome_signs", 100, () => {
-  if (hallBuilt()) refreshHall();
+  if (!hallBuilt()) return;
+  if ((store.data.hall.mini ?? 0) < MINI_VERSION) return swapOldHall();
+  refreshHall();
 });
+
+// A faint coloured beam over each stone a newcomer can still choose (green free, amber run by a lord), so they are
+// easy to spot across the miniature. Only while someone is in the hall; a few dust motes per stone, climbing.
+const BEAM = { free: { red: 0.35, green: 0.95, blue: 0.4 }, lord: { red: 1, green: 0.72, blue: 0.2 } };
+const BEAM_HEIGHT = 7;
+let beamStep = 0;
+onTick("plots_welcome_beams", 10, () => {
+  const o = store.data.hall;
+  if (!o?.mini || !stoneStates.length) return;
+  if (!world.getPlayers().some((pl) => pl.dimension.id === OVERWORLD && inHall(pl.location))) return;
+  const dim = overworld();
+  beamStep = (beamStep + 1) % BEAM_HEIGHT;
+  for (const { p, state } of stoneStates) {
+    const color = BEAM[state];
+    if (!color) continue;
+    const vars = new MolangVariableMap();
+    vars.setColorRGB("variable.color", color);
+    for (const h of [beamStep, (beamStep + 3) % BEAM_HEIGHT]) {
+      try {
+        dim.spawnParticle("minecraft:redstone_wire_dust_particle", { x: o.x + p.dx + 0.5, y: o.y + p.dy + 1.2 + h, z: o.z + p.dz + 0.5 }, vars);
+      } catch {
+        // that part of the hall isn't loaded: skip it
+      }
+    }
+  }
+});
+
+// A world that built the old round hall (or the first, square miniature) gets the cloud miniature in its place:
+// same spot on the map, lower in the sky
+// (the miniature's mountains and rim must stay under the build limit). Newcomers still waiting there are brought
+// across once it stands; their choices so far are kept.
+function swapOldHall() {
+  if (raising) return;
+  const old = store.data.hall;
+  // An older miniature (the square one) is rebuilt as the cloud in the same spot, its corners cleared
+  const round = !old.mini;
+  const o = round ? { x: old.x, y: Math.min(old.y, WELCOME.hall.y), z: old.z } : { x: old.x, y: old.y, z: old.z };
+  console.warn(`[Hollow Crown] welcome: replacing the ${round ? "old round hall" : "square miniature"} with the cloud miniature`);
+  raiseHall(o, () => {
+    for (const player of world.getPlayers()) if (player.hasTag(ARRIVING)) toHall(player);
+  }, round ? old : undefined);
+}
 
 // ---------- Clicks, and keeping the hall whole ----------
 
@@ -534,9 +623,11 @@ world.afterEvents.playerInteractWithBlock.subscribe((event) => {
   const dz = block.location.z - o.z;
   const dy = block.location.y - o.y;
   let open;
-  if (Math.abs(dx) <= 1 && Math.abs(dz) <= 2 && dy >= 1 && dy <= 2) open = () => waystoneMenu(player);
-  else {
-    const p = pedestalLayout().find((q) => (q.dx === dx && q.dz === dz && (dy === 1 || dy === 2)) || (q.sx === dx && q.sz === dz && dy === 1));
+  const w = o.mini ? waystoneSpot() : { dx: 0, dz: 0, dy: 2 };
+  if (dx === w.dx && Math.abs(dz - w.dz) <= 1 && dy >= w.dy - 1 && dy <= w.dy) open = () => waystoneMenu(player);
+  else if (o.mini) {
+    // the Map Stone or the pedestal under it
+    const p = pedestalLayout().find((q) => q.dx === dx && q.dz === dz && (dy === q.dy || dy === q.dy - 1));
     if (p) open = () => pedestalMenu(player, p);
   }
   if (!open) return;

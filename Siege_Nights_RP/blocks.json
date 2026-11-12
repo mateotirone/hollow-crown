@@ -54,6 +54,9 @@
  "siege:veinstone": {
   "sound": "deepslate"
  },
+ "siege:undertow_moss_deep": {
+  "sound": "moss_block"
+ },
  "siege:undertow_moss": {
   "sound": "moss_block"
  },
@@ -93,6 +96,9 @@
  "siege:hall_cornerstone": {
   "sound": "stone"
  },
+ "siege:hall_board": {
+  "sound": "wood"
+ },
  "siege:tree_of_oaths": {
   "sound": "wood"
  },
@@ -107,6 +113,9 @@
  },
  "hc:station_post": {
   "sound": "stone"
+ },
+ "siege:trade_board": {
+  "sound": "wood"
  },
  "hc:breeder_post": {
   "sound": "wood"
@@ -480,7 +489,112 @@
  "siege:track": {
   "sound": "metal"
  },
+ "hc:nest_weave": {
+  "sound": "wood"
+ },
+ "hc:nest_twigs": {
+  "sound": "wood"
+ },
+ "hc:nest_lining": {
+  "sound": "grass"
+ },
+ "hc:nest_fill": {
+  "sound": "gravel"
+ },
  "siege:plot_marker": {
   "sound": "wood"
+ },
+ "siege:stopped_clock": {
+  "sound": "wood"
+ },
+ "siege:well_crank": {
+  "sound": "wood"
+ },
+ "siege:vault_door_wood": {
+  "sound": "wood"
+ },
+ "siege:vault_door_iron": {
+  "sound": "metal"
+ },
+ "siege:vault_door_diamond": {
+  "sound": "metal"
+ },
+ "siege:vault_door_netherite": {
+  "sound": "metal"
+ },
+ "siege:vault_door_choirsteel": {
+  "sound": "metal"
+ },
+ "siege:vault_stone": {
+  "sound": "stone"
+ },
+ "siege:relic_coffer": {
+  "sound": "wood"
+ },
+ "siege:vault_breaker_iron": {
+  "sound": "metal"
+ },
+ "siege:vault_breaker_diamond": {
+  "sound": "metal"
+ },
+ "siege:vault_breaker_netherite": {
+  "sound": "metal"
+ },
+ "siege:vault_door_plate_wood": {
+  "sound": "wood"
+ },
+ "siege:vault_door_plate_iron": {
+  "sound": "metal"
+ },
+ "siege:vault_door_plate_diamond": {
+  "sound": "metal"
+ },
+ "siege:vault_door_plate_netherite": {
+  "sound": "metal"
+ },
+ "siege:vault_door_plate_choirsteel": {
+  "sound": "metal"
+ },
+ "siege:vault_lock_wood": {
+  "sound": "stone"
+ },
+ "siege:vault_lock_iron": {
+  "sound": "stone"
+ },
+ "siege:vault_lock_diamond": {
+  "sound": "stone"
+ },
+ "siege:vault_lock_netherite": {
+  "sound": "stone"
+ },
+ "siege:vault_lock_choirsteel": {
+  "sound": "stone"
+ },
+ "siege:ironworks": {
+  "sound": "stone"
+ },
+ "siege:hunt_cairn": {
+  "sound": "stone"
+ },
+ "siege:hunters_cairn": {
+  "sound": "stone"
+ },
+ "siege:carved_floor": {
+  "sound": "stone"
+ },
+ "siege:drowned_altar": {
+  "sound": "stone"
+ },
+ "siege:faceless_bust": {
+  "sound": "stone"
+ },
+ "siege:vault_seal": {
+  "sound": "stone"
+ },
+ "siege:root_cradle": {
+  "sound": "wood"
+ },
+ "siege:regal_safe": {
+  "sound": "metal"
  }
 }

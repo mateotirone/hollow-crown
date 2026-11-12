@@ -1,5 +1,5 @@
 {
-  "format_version": "1.21.60",
+  "format_version": "1.21.90",
   "minecraft:block": {
     "description": {
       "identifier": "siege:foundation_stone",
@@ -28,7 +28,8 @@
         "seconds_to_destroy": 1.5
       },
       "minecraft:destructible_by_explosion": false,
-      "minecraft:map_color": "#807e78"
+      "minecraft:map_color": "#807e78",
+      "siege:clickable": {}
     }
   }
 }

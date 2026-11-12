@@ -1,0 +1,40 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "siege:ironworks_recipe"
+    },
+    "tags": [
+      "siege_workshop"
+    ],
+    "pattern": [
+      "SPS",
+      "IFI",
+      "SBS"
+    ],
+    "key": {
+      "S": {
+        "item": "minecraft:cobblestone"
+      },
+      "P": {
+        "item": "minecraft:iron_pickaxe"
+      },
+      "I": {
+        "item": "minecraft:iron_ingot"
+      },
+      "F": {
+        "item": "minecraft:furnace"
+      },
+      "B": {
+        "item": "minecraft:barrel"
+      }
+    },
+    "result": {
+      "item": "siege:ironworks",
+      "count": 1
+    },
+    "unlock": {
+      "context": "AlwaysUnlocked"
+    }
+  }
+}

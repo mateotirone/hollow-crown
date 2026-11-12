@@ -31,7 +31,7 @@ export function pickLayout(town, seed) {
   return from[(h >>> 0) % from.length];
 }
 
-export const wallRadius = (town, tier) => town?.walls?.[Math.max(0, Math.min(3, tier))] ?? 56;
+export const wallRadius = (town, tier) => town?.walls?.[Math.max(0, Math.min(3, tier))] ?? 66;
 
 export function slotsOf(layout) {
   return (layout?.slots ?? []).map(([id, size, x0, z0, x1, z1, dy, side, step, walk, tier, tags, long]) => ({
@@ -41,7 +41,7 @@ export function slotsOf(layout) {
 }
 
 const idx = (c) => TOWN_CHARS.indexOf(c);
-const num2 = (s, i) => ((idx(s[i]) << 6) | idx(s[i + 1])) - 64;
+const num2 = (s, i) => ((idx(s[i]) << 6) | idx(s[i + 1])) - 2048;
 
 // The groundwork rows of one tier, decoded (see tools/export_towns.py pack_groundwork)
 export function groundwork(layout, tier) {

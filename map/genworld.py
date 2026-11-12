@@ -119,7 +119,7 @@ def plot_shape(name, theta):
         a = r_.uniform(0.05, 0.22) / (1 + 0.15 * k); ph = r_.uniform(0, 6.283)
         f = f + a * (1 + np.cos(k * theta + ph))
     return f
-# each plot's clearing: no trees inside its wandering edge (never closer than r62, past the r60 land),
+# each plot's clearing: no trees inside its wandering edge (never closer than r76, past the r72 land),
 # then woodland thickens back over a wandering band instead of stopping at a hard ring
 plotfade = np.ones((SIZE, SIZE), np.float32)       # 0 = clear, 1 = natural density
 for n, x, z in PLOTS:
@@ -127,7 +127,7 @@ for n, x, z in PLOTS:
     if x0 >= x1 or z0 >= z1: continue
     dx_ = GX[x0:x1, z0:z1] - x; dz_ = GZ[x0:x1, z0:z1] - z
     th = np.arctan2(dz_, dx_); d = np.hypot(dx_, dz_)
-    rc = 62 * plot_shape(n, th); band = 25 + 45 * (plot_shape(n + "e", th) - 1)
+    rc = 76 * plot_shape(n, th); band = 25 + 45 * (plot_shape(n + "e", th) - 1)
     fade = np.clip((d - rc) / band, 0, 1)
     plotfade[x0:x1, z0:z1] = np.minimum(plotfade[x0:x1, z0:z1], fade * fade)
 plotzone = plotfade < 0.02
@@ -251,6 +251,11 @@ for n_, x_, z_, r_, _ in TOWNS:
     if n_ == "Kingsrest": x_, z_ = KS
     STOPS[slug(n_)] = {"id": slug(n_), "name": n_, "x": x_, "z": z_, "kind": "village"}
 rail_y = np.full((SIZE, SIZE), -999, np.int32); rail_d = np.full((SIZE, SIZE), 99.0, np.float32)
+rail_t = np.zeros((SIZE, SIZE), bool)          # the nearest line cell runs in a tunnel
+RAIL_R = 48                                    # how far out the banks may reach
+# Mateo 2026-11-12: no rail bed in the world. A line is only a plan (map/rail-segments.json) until a stretch is
+# bought; then the game builds bed, earthworks and track together. RAIL_IN_WORLD=1 brings back the graded beds.
+RAIL_IN_WORLD = os.environ.get("RAIL_IN_WORLD") == "1"
 tun_floor = np.full((SIZE, SIZE), -999, np.int32); br_deck = np.full((SIZE, SIZE), -999, np.int32)
 br_wall = np.zeros((SIZE, SIZE), bool); br_pier = np.zeros((SIZE, SIZE), bool)
 RAILLINES = {}
@@ -260,13 +265,21 @@ def gy(x, z):
     if not (0 <= i < SIZE and 0 <= k < SIZE): return SEA + 4
     return int(max(Y[i, k], water_level[i, k] + 3)) if wet[i, k] else int(Y[i, k])
 stop_y = {}
+def stops_on(P): return [(sid, st) for sid, st in STOPS.items() if np.min(np.hypot(P[:, 0] - st["x"], P[:, 1] - st["z"])) < 30]
+# one platform axis per stop, set by a line running through it: a branch that starts at a junction shares the
+# through line's platform and leaves at a platform end on a switch, never crossing the platform (Millbrook, Reedmoor)
+STOP_AXIS = {"kingsrest": "x"}
+for lname, pts in L["roads"].items():
+    on = stops_on(np.asarray(pts, float))
+    cells, si = railplan.trace(pts, [(st["x"], st["z"], STOP_AXIS.get(sid)) for sid, st in on])
+    for (sid, _), i in zip(on, si):
+        if sid not in STOP_AXIS and 0 < i < len(cells) - 1:
+            a, b = cells[max(0, i - 3)], cells[min(len(cells) - 1, i + 3)]
+            STOP_AXIS[sid] = "x" if a[1] == b[1] else "z"
 for lname, pts in L["roads"].items():
     P = np.asarray(pts, float)
-    on = []
-    for sid, st in STOPS.items():
-        dmin = np.min(np.hypot(P[:, 0] - st["x"], P[:, 1] - st["z"]))
-        if dmin < 30: on.append((sid, st))
-    stops_ = [(st["x"], st["z"], "x" if sid == "kingsrest" else None) for sid, st in on]
+    on = stops_on(P)
+    stops_ = [(st["x"], st["z"], STOP_AXIS.get(sid)) for sid, st in on]
     cells, si = railplan.trace(pts, stops_)
     order = sorted(range(len(on)), key=lambda k: si[k]); on = [on[k] for k in order]; si = [si[k] for k in order]
     ground = [gy(x, z) for x, z in cells]
@@ -274,19 +287,31 @@ for lname, pts in L["roads"].items():
         if sid not in stop_y:
             seg = ground[max(0, i - railplan.PLATFORM):i + railplan.PLATFORM + 1]
             stop_y[sid] = int(round(float(np.median(seg)))) + 1
-    ys = railplan.profile(cells, ground, si, stop_y=[stop_y[sid] for sid, _ in on])
+    # inside towns (and just outside) the track hugs the ground the streets were planned on
+    hold = np.ones(len(cells))
+    for tn_, tx_, tz_, tr_, _ in TOWNS:
+        dd_ = np.hypot(np.array([c[0] for c in cells]) - tx_, np.array([c[1] for c in cells]) - tz_)
+        hold = np.maximum(hold, np.where(dd_ < tr_ + 30, 6.0, 1.0))
+    ys = railplan.profile_dp(cells, ground, si, stop_y=[stop_y[sid] for sid, _ in on], weight=hold)
     RAILLINES[lname] = (cells, ys, [(sid, i) for (sid, _), i in zip(on, si)])
     for sid, _ in on: STOPS[sid].setdefault("lines", []).append(lname)
-    # per path cell: tunnel where the hill stands more than 10 over the bed, bridge where it crosses water
+    # per path cell: tunnel where the hill stands more than 10 over the bed (6 over a 4-high bore), bridge over water
     cx = np.array([c[0] for c in cells]) - X0; cz = np.array([c[1] for c in cells]) - Z0; ys_ = np.asarray(ys)
     okc = (cx >= 0) & (cx < SIZE) & (cz >= 0) & (cz < SIZE)
     gnd = np.where(okc, Y[np.clip(cx, 0, SIZE - 1), np.clip(cz, 0, SIZE - 1)], ys_)
     wt = np.where(okc, wet[np.clip(cx, 0, SIZE - 1), np.clip(cz, 0, SIZE - 1)], False)
     tun = (gnd - (ys_ - 1) > 10) & ~wt
     tun = np.convolve(tun.astype(float), np.ones(7) / 7, 'same') > 0.5
+    run0 = None                                                          # no tunnel shorter than 15 blocks: cut it open
+    for i_ in range(len(tun) + 1):
+        if i_ < len(tun) and tun[i_]:
+            run0 = i_ if run0 is None else run0
+        elif run0 is not None:
+            if i_ - run0 < 15: tun[run0:i_] = False
+            run0 = None
     wtd = np.convolve(wt.astype(float), np.ones(7), 'same') > 0          # a few blocks of approach either side
-    # paint the corridor: nearest path cell's track height for every cell within 24 blocks
-    R = 24; off = np.array([(a, b) for a in range(-R, R + 1) for b in range(-R, R + 1)]); od = np.hypot(off[:, 0], off[:, 1])
+    # paint the corridor: nearest path cell's track height for every cell within RAIL_R blocks
+    R = RAIL_R; off = np.array([(a, b) for a in range(-R, R + 1) for b in range(-R, R + 1)]); od = np.hypot(off[:, 0], off[:, 1])
     keep_ = od <= R; off, od = off[keep_], od[keep_]
     for c0 in range(0, len(cells), 300):
         sl = slice(c0, c0 + 300)
@@ -297,22 +322,87 @@ for lname, pts in L["roads"].items():
         X_, Z_, D_, Yv, T_, W_ = X_[m], Z_[m], D_[m], Yv[m], T_[m], W_[m]
         np.minimum.at(rail_d, (X_, Z_), D_.astype(np.float32))
         win = D_ <= rail_d[X_, Z_] + 1e-4
-        rail_y[X_[win], Z_[win]] = Yv[win]
+        rail_y[X_[win], Z_[win]] = Yv[win]; rail_t[X_[win], Z_[win]] = T_[win]
+        if not RAIL_IN_WORLD: continue
         t2 = win & T_ & (D_ <= 2.5); tun_floor[X_[t2], Z_[t2]] = Yv[t2] - 1
         b2 = win & W_ & (D_ <= 2.5); br_deck[X_[b2], Z_[b2]] = Yv[b2] - 1
         br_wall[X_[b2 & (D_ > 1.5)], Z_[b2 & (D_ > 1.5)]] = True
     for i in range(0, len(cells), 8):
-        if okc[i] and wt[i]: br_pier[cx[i], cz[i]] = True
-# earthworks on land: ballast and benches at the bed, 1:1 cuttings and embankments out to 24 blocks
-corr = (rail_d <= 24) & land & ~wet & (tun_floor == -999) & (br_deck == -999)
+        if okc[i] and wt[i] and RAIL_IN_WORLD: br_pier[cx[i], cz[i]] = True
+# earthworks on land (Mateo 2026-11-11: grade the land round paths, no sheer trenches). The bed and the road
+# beside it are laid first as one flat bench at track level; then banks slope back from the bench edge to the
+# natural ground, about 3 up for every 4 out with a little noise, as far out as they need (up to RAIL_R), for
+# cuttings and embankments alike. Banks are measured from the open bench, so over a tunnel the hill is left whole.
+# Tunnels (see the line loop: at least 6 blocks of hill over a 4-high bore, 15+ blocks long) keep their hill whole:
+# nothing is cut over the bore or beside it, so the cutting ends at a portal face; everywhere else is open to the sky.
 bed = rail_y - 1
-flat_ = corr & (rail_d <= 3.5)
+bore = tun_floor > -999
+corr = (rail_d <= RAIL_R) & land & ~wet & ~bore & (br_deck == -999) & RAIL_IN_WORLD
+flat_ = corr & ((rail_d <= 3.5) | (isroad & (rail_d <= ROADOFF + 5))) & ~rail_t   # over a tunnel the road keeps to the hill
 Y[flat_] = bed[flat_]
-slope_ = corr & (rail_d > 3.5)
-cut = slope_ & (Y > bed + np.floor(rail_d - 3.5)); Y[cut] = (bed + np.floor(rail_d - 3.5)).astype(np.int32)[cut]
-fill = slope_ & (Y < bed - np.floor(rail_d - 3.5)); Y[fill] = (bed - np.floor(rail_d - 3.5)).astype(np.int32)[fill]
-railcore = (rail_d <= 1.5) & ~wet & (tun_floor == -999) & (br_deck == -999)
-railzone = rail_d <= 4.5
+dF = chamfer_b(flat_, RAIL_R)
+rbank = np.floor(dF * 0.75 + np.maximum(dF - 20, 0) * 0.5 + (noise(7, 91) + 0.5) * 1.5).astype(np.int32)   # steeper, rockier far up
+slope_ = corr & ~flat_
+cut = slope_ & ~rail_t & (Y > bed + rbank); Y[cut] = (bed + rbank)[cut]
+fill = slope_ & (Y < bed - rbank); Y[fill] = (bed - rbank)[fill]
+# tunnel lining: stone brick walls and roof round the bore, which also make the portal faces
+tun_wall = np.zeros((SIZE, SIZE), bool); tun_wall_y = np.full((SIZE, SIZE), -999, np.int32)
+_tb = tun_floor > -999
+if _tb.any():
+    _nb = box(_tb.astype(np.float32), 1) > 0
+    tun_wall = _nb & ~_tb & (rail_d <= 4.5) & land & ~wet
+    _tf = tun_floor.copy()
+    for _ in range(2):                                         # walls take the floor level of the bore beside them
+        p_ = np.pad(_tf, 1, constant_values=-999)
+        _tf = np.where(_tf > -999, _tf, np.maximum.reduce([p_[:-2, 1:-1], p_[2:, 1:-1], p_[1:-1, :-2], p_[1:-1, 2:]]))
+    tun_wall_y = np.where(tun_wall, _tf, -999); tun_wall &= tun_wall_y > -999
+# baked town plans (GW_BLOCKS, map/bake_town.py): paths first, then the land graded to them (Mateo 2026-11-11).
+# Every groundwork column sits on ground exactly one block under its lowest block; the land beside it meets its top
+# ground block and may then rise or fall at most one block per two outwards, so no path stands proud or sinks in a trench.
+# the ground as it stands before any town plan is laid (rails, roads and their banks done): town generators plan on this
+np.save(out.rstrip('/') + '-heights-pretown.npy', Y.astype(np.int16))
+GW_FILES = [json.load(open(fn_)) for fn_ in filter(None, os.environ.get("GW_BLOCKS", "").split(":"))]
+for d_ in GW_FILES:
+    b_ = np.array(d_["blocks"][:d_.get("groundwork_blocks", len(d_["blocks"]))], np.int64)
+    air_ = np.array([e["name"] == "minecraft:air" for e in d_["palette"]])[b_[:, 3]]
+    gx_, gz_ = b_[:, 0] - X0, b_[:, 2] - Z0
+    ok_ = (gx_ >= 0) & (gx_ < SIZE) & (gz_ >= 0) & (gz_ < SIZE)
+    if not ok_.any(): continue
+    T_ = np.full((SIZE, SIZE), 9999, np.int32)
+    np.minimum.at(T_, (gx_[ok_ & ~air_], gz_[ok_ & ~air_]), b_[ok_ & ~air_, 1].astype(np.int32) - 1)
+    Ta = np.full((SIZE, SIZE), 9999, np.int32)
+    np.minimum.at(Ta, (gx_[ok_ & air_], gz_[ok_ & air_]), b_[ok_ & air_, 1].astype(np.int32) - 1)
+    T_ = np.where(T_ == 9999, Ta, T_)
+    # the level the land beside each column meets: its top ground block (a sunken path slab, a field's farmland,
+    # a plot's floor), not crops, fences or the air dug out above it
+    over_ = np.array([any(w in e["name"] for w in ("wheat", "carrots", "potatoes", "beetroot", "fence", "_wall", "hay_block", "air"))
+                      for e in d_["palette"]])[b_[:, 3]]
+    Tt = np.full((SIZE, SIZE), -9999, np.int32)
+    np.maximum.at(Tt, (gx_[ok_ & ~over_], gz_[ok_ & ~over_]), b_[ok_ & ~over_, 1].astype(np.int32))
+    Tt = np.where(Tt == -9999, T_, Tt)
+    foot = (T_ < 9999) & ~wet
+    Y[foot] = T_[foot]
+    xs_, zs_ = np.nonzero(foot); M_ = 70
+    a0_, a1_ = max(0, xs_.min() - M_), min(SIZE, xs_.max() + M_ + 1); c0_, c1_ = max(0, zs_.min() - M_), min(SIZE, zs_.max() + M_ + 1)
+    f_ = foot[a0_:a1_, c0_:c1_]
+    Dn = np.where(f_, 0.0, np.inf); Vn = Tt[a0_:a1_, c0_:c1_].astype(np.int32).copy()
+    for _ in range(M_):                                       # distance to, and level of, the nearest groundwork column
+        for dx_, dz_, w_ in ((1, 0, 1), (-1, 0, 1), (0, 1, 1), (0, -1, 1), (1, 1, 1.5), (1, -1, 1.5), (-1, 1, 1.5), (-1, -1, 1.5)):
+            cand = np.roll(np.roll(Dn, dx_, 0), dz_, 1) + w_
+            b2_ = cand < Dn
+            if b2_.any(): Dn[b2_] = cand[b2_]; Vn[b2_] = np.roll(np.roll(Vn, dx_, 0), dz_, 1)[b2_]
+    Yw = Y[a0_:a1_, c0_:c1_]
+    free = ~f_ & ~wet[a0_:a1_, c0_:c1_] & land[a0_:a1_, c0_:c1_] & ((rail_d[a0_:a1_, c0_:c1_] > 4.5) | (not RAIL_IN_WORLD)) & np.isfinite(Dn)
+    slack = np.floor(np.where(np.isfinite(Dn), Dn, 0) / 2).astype(np.int32)      # one block up or down per two out
+    Yw[free] = np.clip(Yw[free], (Vn - slack)[free], (Vn + slack)[free]); Y[a0_:a1_, c0_:c1_] = Yw
+    for sx_, sz_, sy_ in d_.get("tree_seats", []):            # the town's own trees stand on the ground they were planned on
+        i_, k_ = sx_ - X0, sz_ - Z0
+        if 1 <= i_ < SIZE - 1 and 1 <= k_ < SIZE - 1:
+            w_ = (slice(i_ - 1, i_ + 2), slice(k_ - 1, k_ + 2)); m_ = ~foot[w_] & ~wet[w_]
+            Y[w_][m_] = sy_
+    log("graded the land to", d_["town"], "groundwork:", int(foot.sum()), "columns")
+railcore = (rail_d <= 1.5) & ~wet & (tun_floor == -999) & (br_deck == -999) & RAIL_IN_WORLD
+railzone = (rail_d <= 4.5) & RAIL_IN_WORLD
 log("rail lines", len(RAILLINES), "stops", len(STOPS), "tunnel cells", int((tun_floor > -999).sum()), "bridge cells", int((br_deck > -999).sum()))
 # the export: stops (the track block where trains stop, mid-platform) and segments between neighbouring stops,
 # sharing their end blocks
@@ -623,13 +713,12 @@ def B_raw(name, states):
 # ---- baked town plans (map/bake_town.py): world blocks placed last, in order; air digs out, soft (leaves) only fills air
 STAMPED = []        # (x, y, z, id, soft) arrays per town
 STAMPED_TOWNS = set()
-for fn_ in filter(None, os.environ.get("GW_BLOCKS", "").split(":")):
-    d_ = json.load(open(fn_))
+for d_ in GW_FILES:
     pid_ = np.array([B_raw(e["name"], e["states"]) if e["name"] != "minecraft:air" else -1 for e in d_["palette"]], np.int64)
     sf_ = np.array([bool(e.get("soft")) for e in d_["palette"]])
     b_ = np.array(d_["blocks"], np.int64)
     STAMPED.append((b_[:, 0], b_[:, 1], b_[:, 2], pid_[b_[:, 3]], sf_[b_[:, 3]])); STAMPED_TOWNS.add(d_["town"])
-    log("town plan", d_["town"], len(b_), "blocks from", fn_)
+    log("town plan", d_["town"], len(b_), "blocks")
 if TREEDB:
     sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "trees"))
     from place import fits, mark, SIZE_ORDER, SIZE_WEIGHT, _grow_mask
@@ -819,6 +908,10 @@ for tx0 in range(0, SIZE, TILE):
         if tm_.any():
             for h_ in range(1, 5): vol[ix[tm_], tf[tm_] + h_ - YMIN, iz[tm_]] = AIR
             vol[ix[tm_], tf[tm_] - YMIN, iz[tm_]] = ID["gravel"]
+            rf_ = tm_ & (Yt >= tf + 5); vol[ix[rf_], tf[rf_] + 5 - YMIN, iz[rf_]] = ID["stone_bricks"]   # lined roof
+            tw_ = tun_wall[a0:a1, b0:b1]; twy = tun_wall_y[a0:a1, b0:b1]; tw_ = tw_ & (Yt >= twy + 1)
+            for h_ in range(0, 6):                                                # lined walls, which make the portal faces
+                m2_ = tw_ & (Yt >= twy + h_); vol[ix[m2_], twy[m2_] + h_ - YMIN, iz[m2_]] = ID["stone_bricks"]
         bd = br_deck[a0:a1, b0:b1]; bm_ = bd > -999
         if bm_.any():
             vol[ix[bm_], bd[bm_] - YMIN, iz[bm_]] = ID["stone_bricks"]

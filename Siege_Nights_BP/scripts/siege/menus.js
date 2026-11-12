@@ -70,12 +70,16 @@ export function barracksMenu(block, player) {
   form.button(`Recruit a Man-at-Arms\n§8${worth(GUARD_COST)}`, "textures/items/siege_man_at_arms");
   form.button(`Recruit an Archer\n§8${worth(GUARD_COST)}`, "textures/items/siege_archer");
   form.button(`Your guards (${count})`, "textures/items/iron_sword");
+  // features add buttons here: applyFilter("barracksButtons", []) -> [{ label, icon?, run(player, block) }]
+  const extra = applyFilter("barracksButtons", [], { player, block });
+  for (const b of extra) form.button(b.label, b.icon);
   form.button("Close");
   form.show(player).then((r) => {
     if (r.canceled) return;
     if (r.selection === 0) recruitGuard(block, player, undefined, "siege:man_at_arms");
     if (r.selection === 1) recruitGuard(block, player, undefined, "siege:archer");
     if (r.selection === 2) guardList(player);
+    if (r.selection >= 3 && r.selection < 3 + extra.length) extra[r.selection - 3].run(player, block);
   }).catch(() => {});
 }
 
@@ -96,6 +100,7 @@ export function guardList(player) {
 }
 
 export function guardMenu(guard, player) {
+  if (applyFilter("guardMenu", false, { guard, player })) return; // the guard posts menu (guardposts/) takes over
   const tier = armorTier(guard);
   const next = GUARD_ARMOR[tier + 1];
   const health = guard.getComponent("minecraft:health");

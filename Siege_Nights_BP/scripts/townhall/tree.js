@@ -364,6 +364,6 @@ export function acceptVictor(player) {
 // Used by the Tree block and by the Keep Banner button
 export function openTree(player, block) {
   const level = hallLevelAt(block.location, block.dimension.id);
-  if (level < 1) return player.sendMessage("§7The Tree is quiet. It only wakes inside a settlement whose town hall stands on its cornerstone.");
+  if (level < 1) return player.sendMessage("§7The Tree is quiet. It only wakes inside a settlement whose town hall stands.");
   treeMenu(player, level);
 }

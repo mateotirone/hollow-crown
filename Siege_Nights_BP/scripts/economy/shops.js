@@ -12,10 +12,11 @@ import { world, system, GameMode, ItemStack, ItemTypes } from "@minecraft/server
 import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
 import { isReady, isNight, countItem, takeItems, pick, emit } from "../siege/api.js";
 import { allPlots } from "../plots/claims.js"; // same function plots/api.js re-exports; claims.js exists in every snapshot of the repo
-import { ECON, JOBS, JOB_IDS, LINES, REGIONS } from "./config.js";
+import { ECON, JOBS, JOB_IDS, LINES, REGIONS, EXCHANGE } from "./config.js";
 import { regional, appetite, payout, cost, coins, niceName, stopAt } from "./rules.js";
-import { funds, charge, pay, carried } from "./coins.js";
+import { funds, charge, pay } from "./coins.js";
 import { sfx } from "../core/sfx.js";
+import { guildMenu } from "../guild/index.js";
 
 export const JOB_TAG = "siege_job";
 const jobTag = (id) => `siege_job_${id}`;
@@ -218,25 +219,37 @@ async function buyMenu(player, npc, jobId, region) {
   buyMenu(player, npc, jobId, region);
 }
 
-// ---------- the Moneyer's extra: making change ----------
-
-async function changeMenu(player, npc) {
-  const have = carried(player);
-  const form = new ActionFormData().title("Moneyer: change")
-    .body(`One ${ECON.gold} is ${coins(ECON.goldWorth)}. You carry ${coins(have)} in all.`)
-    .button(`Into ${ECON.gold}s\n§8as few coins as possible`).button(`Into ${ECON.many}\n§8break one ${ECON.gold}`).button("Back");
+async function exchangeMenu(player, npc) {
+  const form = new ActionFormData().title("Moneyer: trade up")
+    .body("Any metal can be traded up one step. It is dear: digging it yourself, or winning it, is always cheaper.");
+  for (const step of EXCHANGE) {
+    const have = countItem(player, step.from);
+    form.button(`${step.n} ${niceName(step.from)} → 1 ${niceName(step.to)}\n§8you have ${have}, enough for ${Math.floor(have / step.n)}`);
+  }
+  form.button("Back");
   const res = await form.show(player);
   if (res.canceled) return;
-  if (res.selection === 0) {
-    const small = countItem(player, "siege:coin");
-    if (small >= ECON.goldWorth) {
-      const gold = Math.floor(small / ECON.goldWorth);
-      if (takeItems(player, "siege:coin", gold * ECON.goldWorth)) hand(player, "siege:gold_coin", gold);
-    }
-  } else if (res.selection === 1) {
-    if (countItem(player, "siege:gold_coin") > 0 && takeItems(player, "siege:gold_coin", 1)) hand(player, "siege:coin", ECON.goldWorth);
+  const step = EXCHANGE[res.selection];
+  if (!step) return openShop(player, npc);
+  const most = Math.min(64, Math.floor(countItem(player, step.from) / step.n));
+  if (most < 1) {
+    player.onScreenDisplay.setActionBar(`§7You need ${step.n} ${niceName(step.from)} for one ${niceName(step.to)}.`);
+    return exchangeMenu(player, npc);
   }
-  openShop(player, npc);
+  let count = 1;
+  if (most > 1) {
+    const res2 = await new ModalFormData().title(`Trade up to ${niceName(step.to)}`)
+      .slider(`How many ${niceName(step.to)} (${step.n} ${niceName(step.from)} each)`, 1, most, { valueStep: 1, defaultValue: 1 }).show(player);
+    if (res2.canceled) return exchangeMenu(player, npc);
+    count = Math.max(1, Math.min(most, Math.floor(res2.formValues[0])));
+  }
+  const creative = player.getGameMode() === GameMode.Creative;
+  if (creative) player.runCommand(`clear @s ${step.from} -1 ${count * step.n}`);
+  else if (!takeItems(player, step.from, count * step.n)) return exchangeMenu(player, npc);
+  hand(player, step.to, count);
+  sfx(player, "random.orb");
+  emit("goodsExchanged", { player, from: step.from, to: step.to, count });
+  return exchangeMenu(player, npc);
 }
 
 // ---------- the shop ----------
@@ -246,17 +259,18 @@ export async function openShop(player, npc) {
   const job = JOBS[jobId];
   if (!job) return;
   const region = regionOf(npc);
+  if (job.guild) return guildMenu(player, npc, region);
   const mood = regional(job, region);
   const line = pick(isNight() ? LINES[jobId].night : LINES[jobId].day);
   const note = job.mint
-    ? `Iron in: ${coins(ECON.ironBuys)} an ingot (the first ${ECON.mintDaily} a day, then half). Iron out: ${coins(ECON.ironSells)}.`
+    ? `Iron in: ${coins(ECON.ironBuys)} an ingot, as many as you bring. Iron out: ${coins(ECON.ironSells)}.`
     : mood.pays < 1 ? `§7${region} has plenty of this trade's goods: prices are low here.`
     : mood.pays > 1 ? `§7${region} is short of this trade's goods: prices are high here.` : "";
   const form = new ActionFormData().title(job.name).body(`§o"${line}"§r\n\n${note ? note + "\n\n" : ""}You have ${coins(funds(player))}.`);
   const acts = [];
   form.button("Sell"); acts.push(() => sellMenu(player, npc, jobId, region));
   if (job.sells.some((good) => forSale(good, region))) { form.button("Buy"); acts.push(() => buyMenu(player, npc, jobId, region)); }
-  if (job.mint) { form.button("Change coins"); acts.push(() => changeMenu(player, npc)); }
+  if (job.mint) { form.button("Trade up metal\n§8iron → gold → diamond → netherite"); acts.push(() => exchangeMenu(player, npc)); }
   form.button("Leave");
   const res = await form.show(player);
   if (!res.canceled) await acts[res.selection]?.();

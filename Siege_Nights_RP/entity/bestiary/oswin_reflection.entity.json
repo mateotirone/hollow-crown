@@ -13,11 +13,24 @@
     "default": "geometry.siege_b.oswin_reflection"
    },
    "animations": {
-    "main": "animation.siege_b.oswin_reflection"
+    "base": "animation.siege_b.oswin_reflection",
+    "idle": "animation.siege_b.oswin_reflection.idle",
+    "walk": "animation.siege_b.oswin_reflection.walk",
+    "attack": "animation.siege_b.oswin_reflection.attack",
+    "swing": "controller.animation.siege_b.oswin_reflection.swing",
+    "aim": "animation.siege_b.oswin_reflection.aim",
+    "ready": "controller.animation.siege_b.oswin_reflection.ready",
+    "hurt": "animation.siege_b.oswin_reflection.hurt",
+    "flinch": "controller.animation.siege_b.oswin_reflection.flinch"
    },
    "scripts": {
     "animate": [
-     "main"
+     "base",
+     "idle",
+     "walk",
+     "swing",
+     "ready",
+     "flinch"
     ]
    },
    "render_controllers": [

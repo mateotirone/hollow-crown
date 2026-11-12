@@ -13,11 +13,21 @@
     "default": "geometry.siege_b.rimewolf"
    },
    "animations": {
-    "main": "animation.siege_b.rimewolf"
+    "base": "animation.siege_b.rimewolf",
+    "idle": "animation.siege_b.rimewolf.idle",
+    "walk": "animation.siege_b.rimewolf.walk",
+    "attack": "animation.siege_b.rimewolf.attack",
+    "swing": "controller.animation.siege_b.rimewolf.swing",
+    "hurt": "animation.siege_b.rimewolf.hurt",
+    "flinch": "controller.animation.siege_b.rimewolf.flinch"
    },
    "scripts": {
     "animate": [
-     "main"
+     "base",
+     "idle",
+     "walk",
+     "swing",
+     "flinch"
     ]
    },
    "render_controllers": [

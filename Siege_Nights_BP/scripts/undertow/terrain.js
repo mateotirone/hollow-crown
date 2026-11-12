@@ -11,12 +11,14 @@
 // planChunk(cx, cz) is pure (no Minecraft calls): it returns a list of fill operations. The
 // builder in index.js applies them a few at a time so the server never stalls.
 // Look of the land follows Mateo's concept art: basalt plateaus and spires, giant hollow lattice
-// trees, glowing pink and blue fungi, rivers of pale blue light, fog above and a far ceiling.
+// trees, glowing pink and blue fungi, rivers of pale blue light, all under a low cave roof (ROOF).
 
-import { UNDERTOW_LAYOUT as L, COURT, pathX, stageAt } from "./layout.js";
+import { UNDERTOW_LAYOUT as L, COURT, HEART, pathX, stageAt } from "./layout.js";
 import { hash, fbm, smooth } from "./noise.js";
 import { riverDistance, RIVER_HALF_WIDTH } from "./rivers.js";
-import { siteAt, roadAt, SITE_SKIRT, ROAD_HALF_WIDTH, ROAD_SHOULDER } from "./roads.js";
+import { SITES, ROADS, siteAt, roadAt, roadLines, SITE_SKIRT, ROAD_HALF_WIDTH, ROAD_SHOULDER } from "./roads.js";
+import { SITE_DESIGNS, TOWER_DESIGNS } from "./sites_data.js";
+import { HOLLOW_TREES } from "./trees_data.js";
 
 export { hash, fbm } from "./noise.js";
 
@@ -28,6 +30,7 @@ export const B = {
   polished: "minecraft:polished_basalt",
   tuff: "minecraft:tuff",
   ceiling: "siege:veil_rock",
+  mossDeep: "siege:undertow_moss_deep",
   lattice: "siege:hollowwood_lattice",
   core: "siege:hollowwood_core",
   veilcap: "siege:veilcap",
@@ -312,10 +315,11 @@ const SPIRES = { wood: 0.002, fen: 0.002, high: 0.012, waste: 0.004 };
 export function planChunk(cx, cz) {
   const ops = planLand(cx, cz);
   const X0 = cx * 16, Z0 = cz * 16;
+  planCartRail(ops, X0, Z0);
   // The sealed wall across the whole Hollow behind the Court (its gates open when the Court's boss dies).
   // Added last, so nothing in the chunk overwrites it.
   if (COURT.gateZ >= Z0 && COURT.gateZ <= Z0 + 15 && X0 + 15 >= -L.reach && X0 <= L.reach) {
-    ops.push({ a: [Math.max(X0, -L.reach), L.floorY, COURT.gateZ], b: [Math.min(X0 + 15, L.reach), L.ceilingY + L.ceilingThickness - 1, COURT.gateZ], block: B.seal });
+    ops.push({ a: [Math.max(X0, -L.reach), L.floorY, COURT.gateZ], b: [Math.min(X0 + 15, L.reach), ROOF.top, COURT.gateZ], block: B.seal });
   }
   return ops;
 }
@@ -336,6 +340,8 @@ function planLand(cx, cz) {
     for (let j = -1; j <= 16; j++) C[i + 1][j + 1] = columnAt(X0 + i, Z0 + j);
   }
   const col = (i, j) => C[i + 1][j + 1];
+  // A bridge column with the ordinary road (not bridge) right beside it: the bridge's end.
+  const bridgeEnd = (i, j) => [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([a, b]) => { const n = col(i + a, j + b); return n && n.road !== undefined && n.under === undefined; });
   const h = (i, j) => { const c = col(i, j); return c === null ? null : c.under ?? c.h; };
 
   let minH = Infinity, any = false, full = true;
@@ -344,20 +350,9 @@ function planLand(cx, cz) {
     if (v !== null) { any = true; minH = Math.min(minH, v); } else full = false;
   }
 
-  // Ceiling over the whole Hollow (also above the Heart, where there is no ground).
-  {
-    const x1 = Math.max(X0, -L.reach), x2 = Math.min(X0 + 15, L.reach);
-    const z1 = Math.max(Z0, L.zStart), z2 = Math.min(Z0 + 15, L.zEnd - 1);
-    if (x1 <= x2 && z1 <= z2) {
-      fill(x1, L.ceilingY, z1, x2, L.ceilingY + L.ceilingThickness - 1, z2, B.ceiling);
-      // Hanging basalt spires
-      for (let i = 0; i < 16; i += 2) for (let j = 0; j < 16; j += 2) {
-        const x = X0 + i, z = Z0 + j;
-        if (x < x1 || x > x2 || z < z1 || z > z2) continue;
-        if (hash(x, z, 77) < 0.03) fill(x, L.ceilingY - 4 - Math.floor(hash(x, z, 78) * 22), z, x, L.ceilingY - 1, z, B.basalt);
-      }
-    }
-  }
+  // The roof: a low cave ceiling over the whole Hollow (also above the Heart, where there is no ground).
+  // Added first, so everything under it (spires, pillars, trees) is built into it.
+  planRoof(ops, cx, cz, col);
   if (!any) return ops;
 
   // Solid ground under the whole chunk in two fills where every column has ground.
@@ -381,6 +376,9 @@ function planLand(cx, cz) {
       drop = Math.max(drop, n === null ? 99 : top - n);
     }
     const wound = spineCol && z < 40;
+    // A faint glow over the land (invisible light blocks), so under the roof it is dark but never
+    // pitch black. Pushed first in the column so anything built here later takes its place.
+    if (top + 2 > SEA && ambientLightAt(x, z)) ops.push({ a: [x, top + 2, z], b: [x, top + 2, z], block: AMBIENT.block, optional: true, ifAir: true });
     if (drop >= 3 && !wound && !onWater) {
       fill(x, start, z, x, top, z, kind === "mirror" || kind === "high" ? B.polished : B.basalt);
       // Choir ore shows in the cliff faces, richer the deeper into the Hollow you go.
@@ -405,7 +403,7 @@ function planLand(cx, cz) {
       if (onWater) set(x, top, z, B.flow); // the glowing bed of a light river
       else if (top < SEA) set(x, top, z, B.tuff);
       else if (c.paved) set(x, top, z, hash(x, z, 401) < (c.road < 1.2 ? 0.8 : 0.4) ? B.cobble : B.road); // cobbles, worn away to dirt at the edges
-      else set(x, top, z, wound ? B.rock : kind === "waste" ? B.ash : B.moss);
+      else set(x, top, z, groundAt(x, z, wound ? "wound" : kind, drop, c.river));
     }
     // Everything below the water line is under water: one level across the whole Hollow, so nothing spills.
     if (top < SEA) fill(x, top + 1, z, x, SEA, z, B.water);
@@ -421,7 +419,11 @@ function planLand(cx, cz) {
       }
       fill(x, Math.max(top + 1, c.h - depth), z, x, c.h - 1, z, hash(x, z, 403) < 0.2 ? B.deckCracked : B.deck);
       set(x, c.h, z, c.paved ? (hash(x, z, 401) < 0.3 ? B.cobble : B.deck) : B.deck);
-      if (!c.paved) set(x, c.h + 1, z, B.parapet); // low walls along both sides
+      if (!c.paved) {
+        set(x, c.h + 1, z, B.parapet); // low walls along both sides
+        // Soul lanterns on the parapet at both ends of the bridge (Mateo, 2026-11-12) and every 12 blocks along it.
+        if (bridgeEnd(i, j) || Math.floor(c.roadS) % 12 === 0) set(x, c.h + 2, z, B.lantern);
+      }
       continue;
     }
     // A lantern post beside the road about every 24 blocks.
@@ -473,6 +475,9 @@ function planLand(cx, cz) {
     }
   }
 
+  // Groves and fens get a few more trees than the one landmark below.
+  extraTrees(ops, cx, cz, col);
+
   // One landmark per chunk at most, kept inside the chunk.
   const cxm = X0 + 8, czm = Z0 + 8, mid = col(8, 8);
   if (mid === null || mid.h < SEA || mid.river < 16 || siteAt(cxm, czm) || landmarkNearRoad(cx, cz, col) || (inSpine(cxm) && (czm < 40 || inCourt(cxm, czm) || nearPath(cxm, czm, 12)))) return ops;
@@ -484,9 +489,13 @@ function planLand(cx, cz) {
     const y = heightAt(x, z);
     return [x, y !== null && y >= SEA ? y : null, z];
   };
-  const tree = () => { const [x, y, z] = at(1); if (y !== null) latticeTree(ops, x, y + 1, z, cx, cz); };
+  const tree = () => { const [x, y, z] = at(1); if (y !== null) hollowTree(ops, x, y, z, treeKind(x, z, kind), hash(cx, cz, 107)); };
   const bell = () => { const [x, y, z] = at(2); if (y !== null) brokenBell(ops, x, y + 1, z, cx, cz); };
-  const isle = () => { const [x, , z] = at(3); island(ops, x, 150 + Math.floor(hash(cx, cz, 103) * 25), z, cx, cz); };
+  const isle = () => {
+    // A rock island hanging under the roof, with room above the land beneath it.
+    const [x, , z] = at(3), y = roofAt(x, z).bottom - 9 - Math.floor(hash(cx, cz, 103) * 8);
+    if (y >= (groundBeforeRoads(x, z) ?? L.floorY) + 18) island(ops, x, y, z, cx, cz);
+  };
   if (Math.hypot(cxm - 330, czm - 250) < 120 && !inSpine(cxm)) { if (roll < 0.85) tree(); } // the Lattice Wood: thick forest
   else if (kind === "wood") { if (roll < 0.5) tree(); else if (roll > 0.97) isle(); }
   else if (kind === "fen") { if (roll < 0.1) tree(); else if (roll > 0.95) isle(); }
@@ -497,33 +506,6 @@ function planLand(cx, cz) {
   else if (kind === "bells" && roll < 0.35) bell();
   else if (roll > 0.93) isle();
   return ops;
-}
-
-// A giant hollow lattice tree: open lattice trunk with a glowing core, arching boughs, lacy canopy.
-function latticeTree(ops, x, y, z, cx, cz) {
-  const fill = (a, b, block) => ops.push({ a, b, block });
-  const tall = 12 + Math.floor(hash(cx, cz, 111) * 6);
-  // Trunk: a 3x3 lattice shell with a glowing core inside
-  fill([x - 1, y, z - 1], [x + 1, y + tall, z + 1], B.lattice);
-  fill([x, y + 1, z], [x, y + tall - 1, z], B.core);
-  // Roots flaring out
-  for (const [dx, dz] of [[2, 0], [-2, 0], [0, 2], [0, -2]]) fill([x + dx, y, z + dz], [x + dx, y + 2, z + dz], B.lattice);
-  // Boughs: arcs out to the canopy
-  for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1], [1, -1], [-1, 1]]) {
-    for (let s = 1; s <= 6; s++) {
-      const bx = x + dx * s, bz = z + dz * s, by = y + tall + Math.round(Math.sin((s / 6) * Math.PI) * 3);
-      fill([bx, by, bz], [bx, by, bz], B.lattice);
-    }
-  }
-  // Canopy: a lacy disc with holes, glowing pockets here and there
-  const cy = y + tall + 2;
-  for (let dx = -6; dx <= 6; dx++) for (let dz = -6; dz <= 6; dz++) {
-    const d2 = dx * dx + dz * dz;
-    if (d2 > 36 || d2 < 4) continue;
-    const r = hash(x + dx, z + dz, 113);
-    if (r < 0.35) continue;
-    fill([x + dx, cy, z + dz], [x + dx, cy, z + dz], r > 0.95 ? B.core : B.lattice);
-  }
 }
 
 // Ruined houses of the village that was pulled under.
@@ -567,3 +549,299 @@ export function chunkInRange(cx, cz) {
   const x0 = cx * 16, z0 = cz * 16;
   return x0 + 15 >= -L.reach && x0 <= L.reach && z0 + 15 >= L.zStart && z0 < L.zEnd;
 }
+
+// ---- the roof ------------------------------------------------------------------------------
+// Mateo, 2026-11-11: "needs to be much darker and no sun, what if we boxed the entire thing in" and
+// "the roof cant just be flat either". The Hollow is one enormous cave. Its roof follows the land
+// about 30 to 50 blocks overhead (close enough to always be drawn, so no sky and no sun show), with
+// broad domes and vaults, lumps, hanging rock, amethyst drips, curtains of glowing Veilmoss, a few
+// weeping crying-obsidian stars, and now and then a basalt pillar holding it up. Its rock is a mix
+// like the ground's. The vanilla rock blocks the daylight; the Hollow is lit by what glows in it,
+// plus the faint AMBIENT glow below.
+export const ROOF = {
+  top: 203, // the roof's upper face (the old ceiling's top, inside the dimension's height range)
+  shell: 200, // an unbreakable Veil Rock shell from here up to top, so nobody digs out to the sky
+  maxBottom: 196, // the underside never higher than this (at least 4 rock under the shell)
+  clearance: 36, // the underside's base height above the highest land within WINDOW blocks
+  cell: 24, // the base height is worked out on a 24-block grid and blended in between
+  window: 32,
+  step: 8,
+  heartFloor: 132, // the Choir's Heart floats with no land under it: treat it as land this high
+};
+const ROOF_ROCK = [
+  [0.34, "minecraft:blackstone"],
+  [0.48, "minecraft:deepslate"],
+  [0.6, "minecraft:basalt"],
+  [0.72, "minecraft:tuff"],
+  [1.01, "minecraft:cobbled_deepslate"],
+];
+// Tall things the roof must clear: hand-designed sites and the drowned city's towers.
+let tall;
+function tallThings() {
+  if (tall) return tall;
+  tall = [];
+  const top = (d) => d.rows.reduce((m, r) => Math.max(m, r[0]), 0);
+  for (const s of SITES) if (SITE_DESIGNS[s.id] && s.y !== undefined) tall.push({ x: s.x, z: s.z, r: s.r, y: s.y + top(SITE_DESIGNS[s.id]) });
+  const towers = Object.values(TOWER_DESIGNS).reduce((m, d) => Math.max(m, top(d)), 0);
+  tall.push({ x: -165, z: 1465, r: 60, y: 68 + towers }); // Hallowmere's drowned city (drowned.js DROWNED_AREA)
+  return tall;
+}
+const roofNodes = new Map();
+// Base height of the roof's underside at a grid node: the highest land near it, plus the clearance.
+function roofNode(gx, gz) {
+  const key = gx + "," + gz;
+  let v = roofNodes.get(key);
+  if (v !== undefined) return v;
+  const x0 = gx * ROOF.cell, z0 = gz * ROOF.cell, W = ROOF.window;
+  let m = -Infinity;
+  for (let dx = -W; dx <= W; dx += ROOF.step) for (let dz = -W; dz <= W; dz += ROOF.step) {
+    const n = natural(x0 + dx, z0 + dz);
+    if (n !== null) m = Math.max(m, n.h);
+  }
+  if (z0 + W >= HEART.center.z - HEART.outerRadius - 40) m = Math.max(m, ROOF.heartFloor);
+  for (const t of tallThings()) if (Math.hypot(x0 - t.x, z0 - t.z) <= t.r + W) m = Math.max(m, t.y - 20);
+  if (m === -Infinity) m = 110; // over the void past the edge
+  v = Math.min(ROOF.maxBottom, m + ROOF.clearance);
+  if (roofNodes.size > 20000) roofNodes.clear();
+  roofNodes.set(key, v);
+  return v;
+}
+// The roof over one column: { bottom, block } (the rock runs from bottom up to the shell). Pure.
+export function roofAt(x, z) {
+  const fx = x / ROOF.cell, fz = z / ROOF.cell, gx = Math.floor(fx), gz = Math.floor(fz), tx = fx - gx, tz = fz - gz;
+  const base = (roofNode(gx, gz) * (1 - tx) + roofNode(gx + 1, gz) * tx) * (1 - tz)
+    + (roofNode(gx, gz + 1) * (1 - tx) + roofNode(gx + 1, gz + 1) * tx) * tz;
+  const vault = (fbm(x / 70, z / 70, 601) - 0.5) * 30; // broad domes and low sags
+  const lumps = (fbm(x / 17, z / 17, 602) - 0.5) * 9 + (hash(x, z, 603) < 0.2 ? 1 : 0);
+  const bottom = Math.round(Math.min(ROOF.maxBottom, Math.max(base - 6, base + 4 + vault + lumps)));
+  const p = spread(fbm(x / 13, z / 13, 611));
+  let block = ROOF_ROCK.find(([t]) => p < t)[1];
+  const r = hash(x, z, 612);
+  if (r < 0.006) block = "minecraft:crying_obsidian"; // weeping purple specks overhead
+  else if (r < 0.05) block = B.rock; // veinstone
+  return { bottom, block };
+}
+
+function planRoof(ops, cx, cz, col) {
+  const X0 = cx * 16, Z0 = cz * 16;
+  const x1 = Math.max(X0, -L.reach), x2 = Math.min(X0 + 15, L.reach);
+  const z1 = Math.max(Z0, L.zStart), z2 = Math.min(Z0 + 15, L.zEnd - 1);
+  if (x1 > x2 || z1 > z2) return;
+  ops.push({ a: [x1, ROOF.shell, z1], b: [x2, ROOF.top, z2], block: B.ceiling });
+  const R = [];
+  for (let x = x1; x <= x2; x++) for (let z = z1; z <= z2; z++) {
+    const rf = roofAt(x, z);
+    R.push([x, z, rf]);
+    ops.push({ a: [x, rf.bottom, z], b: [x, ROOF.shell - 1, z], block: rf.block });
+  }
+  // What hangs from it, kept inside the chunk and well above the land.
+  for (const [x, z, rf] of R) {
+    const i = x - X0, j = z - Z0;
+    const ground = col(i, j)?.h ?? L.floorY;
+    const room = rf.bottom - ground - 14; // never hang lower than 14 blocks over the land
+    const r = hash(x, z, 621);
+    if (i >= 2 && i <= 13 && j >= 2 && j <= 13 && r < 0.012 && room > 4) {
+      // Hanging rock: a cone, three wide at the root, tapering to a point, often tipped with amethyst.
+      const len = Math.min(room, 4 + Math.floor(hash(x, z, 622) ** 2 * 20));
+      const root = Math.max(1, Math.floor(len * 0.4));
+      for (const [di, dj] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) ops.push({ a: [x + di, rf.bottom - root, z + dj], b: [x + di, rf.bottom - 1, z + dj], block: rf.block });
+      ops.push({ a: [x, rf.bottom - len, z], b: [x, rf.bottom - 1, z], block: rf.block });
+      if (hash(x, z, 623) < 0.6) ops.push({ a: [x, rf.bottom - len - 1, z], b: [x, rf.bottom - len - 1, z], block: "minecraft:amethyst_cluster", states: { "minecraft:block_face": "down" }, optional: true });
+    } else if (r < 0.022 && room > 2) {
+      ops.push({ a: [x, rf.bottom - 1, z], b: [x, rf.bottom - 1, z], block: "minecraft:amethyst_cluster", states: { "minecraft:block_face": "down" }, optional: true });
+    } else if (r < 0.04 && room > 6) {
+      const len = 2 + Math.floor(hash(x, z, 624) * 5); // a curtain of glowing Veilmoss
+      ops.push({ a: [x, rf.bottom - len, z], b: [x, rf.bottom - 1, z], block: B.strands });
+    }
+  }
+  // Now and then a great basalt pillar from the land to the roof.
+  const pi = 4 + Math.floor(hash(cx, cz, 631) * 8), pj = 4 + Math.floor(hash(cx, cz, 632) * 8);
+  const c = col(pi, pj), px = X0 + pi, pz = Z0 + pj;
+  if (hash(cx, cz, 633) < 0.05 && c && c.h >= SEA && c.road === undefined && !c.site && c.river > RIVER_HALF_WIDTH + 6
+    && !siteAt(px, pz) && !(inSpine(px) && (pz < 60 || inCourt(px, pz) || nearPath(px, pz, 10)))) {
+    const roofY = roofAt(px, pz).bottom;
+    for (let a = -2; a <= 2; a++) for (let b = -2; b <= 2; b++) {
+      const d = a * a + b * b;
+      if (d > 5) continue;
+      const cc = col(pi + a, pj + b);
+      if (!cc) continue;
+      const foot = (cc.under ?? cc.h) - 2;
+      if (d <= 2) ops.push({ a: [px + a, foot, pz + b], b: [px + a, roofY, pz + b], block: d === 0 ? B.basalt : B.polished });
+      else { // the flare at foot and head
+        ops.push({ a: [px + a, foot, pz + b], b: [px + a, foot + 4 + Math.floor(hash(px + a, pz + b, 634) * 4), pz + b], block: B.basalt });
+        ops.push({ a: [px + a, roofY - 3 - Math.floor(hash(px + a, pz + b, 635) * 4), pz + b], b: [px + a, roofY, pz + b], block: B.basalt });
+      }
+    }
+  }
+}
+
+// ---- light -----------------------------------------------------------------------------------
+// The roof shuts out the day, so a faint glow hangs a couple of blocks over the land: invisible light
+// blocks on a staggered grid. Ground between them sits at light 1 to 4, so it reads as dark, things
+// that glow stand out, and nothing ever sits at light 0 (where vanilla monsters would spawn).
+export const AMBIENT = { block: "minecraft:light_block_5", spacing: 6 };
+export function ambientLightAt(x, z) {
+  const s = AMBIENT.spacing, mx = ((x % s) + s) % s, mz = ((z % s) + s) % s;
+  return (mx === 0 && mz === 0) || (mx === s / 2 && mz === s / 2);
+}
+
+// ---- ground ----------------------------------------------------------------------------------
+// Mateo, 2026-11-11: the ground "cant just be one solid block". Every kind of land mixes several
+// blocks: broad patches from slow noise, smaller ones inside them, a scatter of single blocks, and
+// bare rock where the ground slopes.
+// fbm() bunches up around 0.5; this spreads it to roughly even over 0 to 1, so patch thresholds read as shares.
+const spread = (p) => clamp01((p - 0.3) / 0.4);
+const LAND_STYLE = { wound: "wound", shallows: "fen", court: "fen", mirror: "high", climb: "high", bells: "waste", heart: "high" };
+export const GROUND = {
+  //        broad patches by noise (upper limits), small patches, scatter, slopes
+  wood: { patches: [[0.3, B.mossDeep], [0.66, B.moss], [0.8, "minecraft:mycelium"], [1.01, B.moss]], small: [0.9, "minecraft:soul_soil"], scatter: [0.04, "minecraft:blackstone"], slope: "minecraft:tuff" },
+  fen: { patches: [[0.38, B.mossDeep], [0.62, B.moss], [0.76, "minecraft:mud"], [1.01, B.mossDeep]], small: [0.88, "minecraft:sculk"], scatter: [0.04, "minecraft:soul_soil"], slope: "minecraft:mud" },
+  high: { patches: [[0.3, "minecraft:blackstone"], [0.5, B.moss], [0.68, "minecraft:tuff"], [0.84, "minecraft:smooth_basalt"], [1.01, B.mossDeep]], small: [0.86, B.mossDeep], scatter: [0.05, "minecraft:cobbled_deepslate"], slope: "minecraft:blackstone" },
+  waste: { patches: [[0.24, "minecraft:tuff"], [0.66, B.ash], [0.8, "minecraft:gravel"], [1.01, B.ash]], small: [0.9, "minecraft:calcite"], scatter: [0.04, "minecraft:smooth_basalt"], slope: "minecraft:tuff" },
+  wound: { patches: [[0.4, "minecraft:blackstone"], [1.01, B.rock]], small: [0.88, B.mossDeep], scatter: [0.03, "minecraft:cobbled_deepslate"], slope: B.rock },
+};
+// The top block of a column of open land. Pure.
+export function groundAt(x, z, kind, slope = 0, river = Infinity) {
+  const g = GROUND[LAND_STYLE[kind] ?? kind] ?? GROUND.wood;
+  if (slope >= 2 && hash(x, z, 513) < 0.7) return g.slope;
+  if (hash(x, z, 514) < g.scatter[0]) return g.scatter[1];
+  if (spread(fbm(x / 6, z / 6, 512)) > g.small[0]) return g.small[1];
+  const p = spread(fbm(x / 16, z / 16, 511)) + (river < 14 ? -0.15 : 0); // the banks lean to the damp end of the list
+  return g.patches.find(([t]) => p < t)[1];
+}
+
+// ---- trees -----------------------------------------------------------------------------------
+// The Hollow's own species from the tree database (map/trees, exported by tools/hollow_trees.py):
+// Latticewood, the Veilmoss Tree and Ashen Deadwood, in three sizes with several shapes each.
+const TREE_MIX = {
+  forest: [[0.7, "hollow_latticewood"], [1.01, "hollow_veilmoss_tree"]],
+  wood: [[0.55, "hollow_latticewood"], [1.01, "hollow_veilmoss_tree"]],
+  fen: [[0.8, "hollow_veilmoss_tree"], [1.01, "hollow_latticewood"]],
+  high: [[0.5, "hollow_latticewood"], [1.01, "hollow_ash_dead"]],
+  waste: [[1.01, "hollow_ash_dead"]],
+};
+const inLatticeWood = (x, z) => Math.hypot(x - 330, z - 250) < 120 && !inSpine(x);
+export function treeKind(x, z, kind) {
+  if (inLatticeWood(x, z)) return "forest";
+  const s = LAND_STYLE[kind] ?? kind;
+  return TREE_MIX[s] ? s : "wood";
+}
+// Which tree grows here: { species, size, variant }. Pure.
+export function pickTree(kindOfLand, roll, big = true) {
+  const mix = TREE_MIX[kindOfLand] ?? TREE_MIX.wood;
+  const species = mix.find(([t]) => roll < t)[1];
+  const r2 = hash(Math.floor(roll * 1e6), 7, 141);
+  const size = !big ? (r2 < 0.55 ? "young" : "mature") : r2 < (kindOfLand === "forest" ? 0.5 : 0.35) ? "ancient" : r2 < 0.85 ? "mature" : "young";
+  const list = HOLLOW_TREES[species][size];
+  return { species, size, variant: Math.floor(hash(Math.floor(roll * 1e6), 9, 142) * list.length) };
+}
+// One tree with its trunk standing on the ground block at (x, y, z).
+function hollowTree(ops, x, y, z, kindOfLand, roll, big = true) {
+  const { species, size, variant } = pickTree(kindOfLand, roll, big);
+  const t = HOLLOW_TREES[species][size][variant];
+  for (const [dx, dz, y0, y1, i] of t.runs) {
+    const [block, states] = t.palette[i];
+    ops.push({ a: [x + dx, y + y0, z + dz], b: [x + dx, y + y1, z + dz], block, states, optional: true });
+  }
+}
+// A few more, smaller trees in the groves, the Lattice Wood and the fens, away from the chunk's middle.
+const EXTRA = { forest: 3, wood: 2, fen: 1 };
+function extraTrees(ops, cx, cz, col) {
+  for (const [qi, qj, salt] of [[3, 3, 151], [12, 4, 152], [4, 12, 153]]) {
+    const i = qi + Math.round((hash(cx, cz, salt) - 0.5) * 2), j = qj + Math.round((hash(cx, cz, salt + 10) - 0.5) * 2);
+    const c = col(i, j);
+    if (!c || c.h < SEA + 1 || c.road !== undefined || c.site || c.river < RIVER_HALF_WIDTH + 6 || c.under !== undefined) continue;
+    const x = cx * 16 + i, z = cz * 16 + j;
+    if (inSpine(x) && (z < 40 || inCourt(x, z) || nearPath(x, z, 8))) continue;
+    if (siteAt(x, z)) continue;
+    const k = treeKind(x, z, c.region), n = EXTRA[k] ?? 0;
+    if (hash(cx, cz, salt + 20) * 3 >= n) continue;
+    hollowTree(ops, x, c.h, z, k, hash(cx, cz, salt + 30), k === "forest");
+  }
+}
+
+// ---- the cart rail -----------------------------------------------------------------------------
+// Mateo, 2026-11-12: the cart rail along the road from Cartmeet to the Seams. A vanilla rail line
+// on the road's left verge (signposts stand on the right), rideable by minecart: one block a step,
+// climbing at most a block at a time on straight runs, level on every bend, on a cobbled bed with
+// stone piers where the ground dips and a cutting where it rises. Kept off rivers, bridges and sites.
+export const CART_RAIL = { road: "seam_rail", verge: 6, leg: 3, trim: 3 };
+// Bedrock rail_direction: 0 north-south, 1 east-west, 2-5 rising to the east, west, north, south,
+// 6-9 bends joining south+east, south+west, north+west, north+east.
+const RISE = { "1,0": 2, "-1,0": 3, "0,-1": 4, "0,1": 5 };
+const BEND = { "0,1|1,0": 6, "0,1|-1,0": 7, "0,-1|-1,0": 8, "0,-1|1,0": 9 };
+export function railDirection(prev, cur, next) {
+  const a = prev ? [Math.sign(prev.x - cur.x), Math.sign(prev.z - cur.z)] : null;
+  const b = next ? [Math.sign(next.x - cur.x), Math.sign(next.z - cur.z)] : null;
+  if (next && next.y > cur.y) return RISE[b.join()];
+  if (prev && prev.y > cur.y) return RISE[a.join()];
+  const ends = [a, b].filter(Boolean);
+  if (a && b && a[0] * b[0] + a[1] * b[1] === 0) { // a bend: one end north or south, the other east or west
+    const ns = a[1] !== 0 ? a : b, ew = a[0] !== 0 ? a : b;
+    return BEND[`0,${ns[1]}|${ew[0]},0`];
+  }
+  return ends.some((e) => e[0] !== 0) ? 1 : 0;
+}
+let rail;
+export function cartRail() {
+  if (rail) return rail;
+  const k = ROADS.findIndex((r) => r.id === CART_RAIL.road), pts = roadLines()[k];
+  const off = -CART_RAIL.verge;
+  // The road's line moved over to the left verge and walked in whole blocks. Rails only join side to side,
+  // and a rail can only climb in the middle of a straight run, so the line goes in legs of at least LEG
+  // blocks along one axis, then the other, never drifting more than LEG blocks off the verge line.
+  const LEG = CART_RAIL.leg, cells = [];
+  let cx, cz;
+  const step = (ax, n) => { for (let s = 0; s < Math.abs(n); s++) { if (ax) cx += Math.sign(n); else cz += Math.sign(n); cells.push({ x: cx, z: cz }); } };
+  for (let i = CART_RAIL.trim; i + 1 < pts.length - CART_RAIL.trim; i++) {
+    const [x1, z1] = pts[i], [x2, z2] = pts[i + 1], dx = x2 - x1, dz = z2 - z1, len = Math.hypot(dx, dz) || 1;
+    const nx = (-dz / len) * off, nz = (dx / len) * off;
+    for (let t = 0; t <= 1; t += 0.25) {
+      const tx = Math.round(x1 + dx * t + nx), tz = Math.round(z1 + dz * t + nz);
+      if (cx === undefined) { cx = tx; cz = tz; cells.push({ x: cx, z: cz }); continue; }
+      const ex = tx - cx, ez = tz - cz;
+      if (Math.abs(ex) >= LEG && Math.abs(ex) >= Math.abs(ez)) step(true, ex);
+      else if (Math.abs(ez) >= LEG) step(false, ez);
+      else if (Math.abs(ex) >= LEG) step(true, ex);
+    }
+  }
+  // Heights: follow the ground plus one, but change level only in the middle of a straight run (a rising
+  // rail must have the rails before and after it in line), a block at a time. Piers and cuttings take up the rest.
+  const ground = cells.map((c) => columnAt(c.x, c.z));
+  // Over a river the rail crosses beside the road's bridge, at its deck height, on a trestle.
+  const wet = cells.map((c, i) => !!ground[i] && ground[i].river <= RIVER_HALF_WIDTH + 2);
+  const want = ground.map((g, i) => (wet[i] ? (roadAt(cells[i].x, cells[i].z, groundBeforeRoads, SEA + 1)?.y ?? SEA + 5) : g?.h ?? SEA) + 1);
+  const dirOf = (i) => (cells[i + 1] ? `${cells[i + 1].x - cells[i].x},${cells[i + 1].z - cells[i].z}` : "");
+  const straight = (i) => i >= 1 && i + 2 < cells.length && dirOf(i - 1) === dirOf(i) && dirOf(i) === dirOf(i + 1);
+  // Over water the rail must be up at the deck (boats pass under), so work out how early it has to start
+  // climbing, and how long it takes to come down again, counting only the steps where it may change level.
+  const n = cells.length, hard = wet.map((w, i) => (w ? want[i] : -Infinity));
+  for (let i = n - 2; i >= 0; i--) hard[i] = Math.max(hard[i], hard[i + 1] - (straight(i) ? 1 : 0));
+  for (let i = 1; i < n; i++) hard[i] = Math.max(hard[i], hard[i - 1] - (straight(i - 1) ? 1 : 0));
+  let y = Math.max(want[0], hard[0]);
+  cells.forEach((c, i) => {
+    c.y = y;
+    const g = ground[i];
+    c.wet = wet[i];
+    c.skip = !g || g.under !== undefined || !!g.site || !!g.paved;
+    if (i + 1 >= n) return;
+    // look a few blocks ahead so the line starts climbing before the ground does
+    const soft = Math.max(want[i + 1], Math.max(...want.slice(i + 1, i + 4)) - 1);
+    const target = Math.max(soft, hard[i + 1]);
+    if (straight(i) && target !== y) y += Math.sign(target - y);
+  });
+  cells.forEach((c, i) => { c.dir = railDirection(cells[i - 1], c, cells[i + 1]); c.ground = ground[i]?.h ?? SEA; });
+  rail = cells;
+  return rail;
+}
+function planCartRail(ops, X0, Z0) {
+  for (const c of cartRail()) {
+    if (c.skip || c.x < X0 || c.x > X0 + 15 || c.z < Z0 || c.z > Z0 + 15) continue;
+    // a pier where the ground dips; over water only every fourth block, so boats still pass between
+    if (c.ground < c.y - 2 && (!c.wet || ((c.x + c.z) & 3) === 0)) ops.push({ a: [c.x, c.ground + 1, c.z], b: [c.x, c.y - 2, c.z], block: B.deck });
+    ops.push({ a: [c.x, c.y - 1, c.z], b: [c.x, c.y - 1, c.z], block: c.wet ? B.deck : B.cobble }); // the bed
+    ops.push({ a: [c.x, c.y, c.z], b: [c.x, c.y + 2, c.z], block: "minecraft:air" }); // a cutting where it rises
+    ops.push({ a: [c.x, c.y, c.z], b: [c.x, c.y, c.z], block: "minecraft:rail", states: { rail_direction: c.dir } });
+  }
+}
+

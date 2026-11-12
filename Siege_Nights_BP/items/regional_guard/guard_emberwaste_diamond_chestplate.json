@@ -9,7 +9,12 @@
       }
     },
     "components": {
-      "minecraft:icon": "siege_guard_emberwaste_diamond_chestplate",
+      "minecraft:icon": {
+        "textures": {
+          "default": "siege_guard_emberwaste_diamond_chestplate",
+          "dyed": "siege_guard_emberwaste_diamond_chestplate_dyed"
+        }
+      },
       "minecraft:display_name": {
         "value": "item.siege:guard_emberwaste_diamond_chestplate.name"
       },

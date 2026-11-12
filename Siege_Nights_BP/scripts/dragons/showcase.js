@@ -2,19 +2,21 @@
 // as display dragons, and (if you have no dragon yet) a grown, saddled, trained one that is yours to fly.
 
 import { on } from "../siege/api.js";
-import { DRAGON, ROOST, NEST, SPECIES, newDragon } from "./data.js";
+import { DRAGON, ROOST, SPECIES, newDragon } from "./data.js";
 import { store, dragonOf, save, spawnDragon, roostDragon } from "./dragon.js";
+import { buildNest } from "./nests.js";
 
 const TAG = "siege_showcase";
 
-on("showcase", ({ player, dim, nextSpot, label }) => {
+on("showcase", ({ player, dim, origin, nextSpot, label }) => {
   const roost = nextSpot();
-  const nest = nextSpot();
+  // a whole wild nest (9x9) west of the "more" row, sunk into the ground like the wild ones
+  const nest = { x: origin.x - 38, y: origin.y - 1, z: origin.z - 8 };
   try {
     dim.getBlock(roost)?.setType(ROOST);
     label(roost, "Dragon Roost\nclick: train\negg: hatch");
-    dim.getBlock(nest)?.setType(NEST);
-    label(nest, "Dragon Nest\nclick: take\nan egg");
+    buildNest(dim, nest);
+    label({ x: nest.x + 6, y: origin.y, z: nest.z }, "Dragon Nest (9x9)\nclick the eggs:\ntake one");
   } catch (e) {
     console.warn(`[Hollow Crown] dragons showcase blocks: ${e}`);
   }

@@ -21,12 +21,30 @@ nav button .n{color:var(--dim);font-size:12px;margin-left:4px}
 @keyframes p{to{opacity:.3}}
 main{position:absolute;top:var(--top,46px);left:0;right:0;bottom:0;display:flex}
 #side{width:300px;min-width:220px;border-right:1px solid var(--line);display:flex;flex-direction:column;background:var(--panel)}
-#side input{margin:8px;padding:6px 8px;background:#120f17;border:1px solid var(--line);border-radius:6px;color:var(--text);font:inherit}
+#sidetop{padding:8px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:6px}
+#q{padding:7px 9px;background:#120f17;border:1px solid var(--line);border-radius:6px;color:var(--text);font:inherit;width:100%}
+#q:focus{outline:none;border-color:var(--accent)}
+#sidetop .row{display:flex;gap:8px;align-items:center;justify-content:space-between;font-size:12px;color:var(--dim)}
+#sidetop label{display:flex;gap:5px;align-items:center;cursor:pointer}
+#sidetop button{background:none;border:1px solid var(--line);color:var(--dim);border-radius:6px;padding:2px 8px;font:inherit;cursor:pointer}
+#sidetop button:hover{color:var(--text)}
 #list{overflow:auto;flex:1;padding-bottom:20px}
-#list h3{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--dim);margin:12px 12px 4px;font-weight:600}
-#list .it{padding:5px 12px;cursor:pointer;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+#list .sh{all:unset;box-sizing:border-box;width:100%;display:flex;gap:6px;align-items:baseline;padding:8px 10px;cursor:pointer;font-weight:600;font-size:13px;border-top:1px solid var(--line);position:sticky;top:0;background:var(--panel);z-index:1}
+#list .sh:hover{background:#262030}
+#list .sh .car{display:inline-block;width:10px;color:var(--dim);transition:transform .12s}
+#list .sec.open .sh .car{transform:rotate(90deg)}
+#list .sh .n{margin-left:auto;color:var(--dim);font-weight:400;font-size:12px}
+#list .sh small{font-weight:400}
+#list h4{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--dim);margin:10px 12px 3px 26px;font-weight:600}
+#list .it{padding:4px 12px 4px 26px;cursor:pointer;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
 #list .it:hover{background:#262030}#list .it.on{background:#3a2f4d}
 #list .it small{color:var(--dim);font-size:11px;white-space:nowrap}
+#list .chips{display:flex;flex-wrap:wrap;gap:4px;padding:0 12px 6px 26px}
+#list .chips button{background:#26202f;border:1px solid var(--line);color:var(--dim);border-radius:10px;padding:1px 8px;font:inherit;font-size:11px;cursor:pointer}
+#list .chips button:hover{color:var(--text)}#list .chips button.on{background:#3a2f4d;color:var(--text);border-color:var(--accent)}
+#list .none{padding:12px;color:var(--dim)}
+mark{background:none;color:var(--accent);font-weight:600}
+nav button .n.hit{color:var(--accent)}nav button .n.zero{opacity:.45}
 .wip{color:var(--warn)!important}
 #stage{flex:1;position:relative;min-width:0}
 #stage canvas{display:block;width:100%;height:100%}
@@ -46,7 +64,7 @@ main{position:absolute;top:var(--top,46px);left:0;right:0;bottom:0;display:flex}
 #big p{color:var(--text);text-align:center}
 iframe{border:0;width:100%;height:100%;display:none;background:#16131c}
 #msg{position:absolute;inset:0;display:none;place-items:center;color:var(--dim);text-align:center;padding:30px}
-@media (max-width:700px){#side{width:42%;min-width:0}}
+@media (max-width:700px){#side{width:46%;min-width:0}}
 </style>
 <script type="importmap">{"imports":{"three":"/three/build/three.module.js","three/addons/":"/three/examples/jsm/"}}</script>
 </head>
@@ -64,7 +82,13 @@ iframe{border:0;width:100%;height:100%;display:none;background:#16131c}
   </div>
 </header>
 <main>
-  <div id="side"><input id="q" placeholder="Search" autocomplete="off"><div id="list"></div></div>
+  <div id="side">
+    <div id="sidetop">
+      <input id="q" type="search" placeholder="Search everything  ( / )" autocomplete="off" aria-label="Search">
+      <div class="row"><label><input type="checkbox" id="onlynew"> Only new work</label><button id="fold">Collapse all</button></div>
+    </div>
+    <div id="list"></div>
+  </div>
   <div id="stage">
     <canvas id="c"></canvas>
     <div id="info"></div>
@@ -188,8 +212,15 @@ function buildGeo(geo, material, keepBone) {
       const o = c.origin || [0, 0, 0], s = c.size;
       const min = [-(o[0] + s[0]) - inf, o[1] - inf, o[2] - inf], max = [-o[0] + inf, o[1] + s[1] + inf, o[2] + s[2] + inf];
       const mirror = c.mirror ?? b.mirror;
-      const geom = boxGeometry(min, max, faceRects({ ...c, mirror }, tw, th), tw, th);
-      const mesh = new THREE.Mesh(geom, material);
+      const rects = faceRects({ ...c, mirror }, tw, th);
+      let mesh;
+      if (typeof material === "function") {
+        // blocks: each face can name its own material_instance, so build one mesh per material used
+        mesh = new THREE.Group();
+        const byMat = {};
+        for (const [k, r] of Object.entries(rects)) { const m = (!Array.isArray(c.uv) && c.uv?.[k]?.material_instance) || "*"; (byMat[m] ??= {})[k] = r; }
+        for (const [m, rs] of Object.entries(byMat)) mesh.add(new THREE.Mesh(boxGeometry(min, max, rs, tw, th), material(m)));
+      } else mesh = new THREE.Mesh(boxGeometry(min, max, rects, tw, th), material);
       if (c.rotation) {
         const cp = c.pivot || [0, 0, 0], C = [-cp[0], cp[1], cp[2]];
         const holder = new THREE.Group(); holder.position.set(C[0] - P[0], C[1] - P[1], C[2] - P[2]); holder.rotation.copy(euler(c.rotation));
@@ -236,9 +267,22 @@ const es = new EventSource("/events");
 let modelsVersion = null;
 es.addEventListener("models", (e) => { const v = JSON.parse(e.data).version; if (v !== modelsVersion) { modelsVersion = v; loadModels(); } });
 es.addEventListener("state", (e) => { state = JSON.parse(e.data); paintStatus(); });
-es.addEventListener("builds", (e) => { const d = JSON.parse(e.data); buildsCount = d.count; paintTabs(); if (tab === "builds" && d.count && $("builds").dataset.loaded !== "1") openBuilds(); });
+es.addEventListener("builds", (e) => { const d = JSON.parse(e.data); buildsCount = d.count; if (d.count && d.version !== buildsVersion) { buildsVersion = d.version; loadBuilds(); } paintTabs(); if (tab === "builds" && d.count && $("builds").dataset.loaded !== "1") openBuilds(); });
 es.onerror = () => { $("dot").className = "dot err"; $("stext").textContent = "Viewer stopped. Start it again and this page reconnects."; };
-let buildsCount = 0;
+let buildsCount = 0, buildsVersion = null, builds = null;
+async function loadBuilds() {
+  const r = await fetch("/api/builds");
+  if (!r.ok) return;
+  builds = (await r.json()).index;
+  if (tab === "builds") render(false); else paintTabs();
+}
+// The builds page (an iframe) says which build it shows, so its own Prev/Next and arrow keys move the list too.
+addEventListener("message", (e) => {
+  if (e.source !== $("builds").contentWindow || !e.data || e.data.av !== "build" || !e.data.key) return;
+  if (e.data.key === selected.builds) return;
+  selected.builds = e.data.key; localStorageSet("sel.builds", e.data.key);
+  if (tab === "builds") { revealSelected(); paintList(); scrollToSelected(); }
+});
 
 function paintStatus() {
   $("mode").value = state.mode;
@@ -257,40 +301,61 @@ function paintStatus() {
 $("mode").onchange = () => fetch("/api/mode?m=" + $("mode").value, { method: "POST" });
 $("now").onclick = () => { fetch("/api/refresh", { method: "POST" }); $("dot").className = "dot busy"; };
 $("q").oninput = () => { query = $("q").value.toLowerCase(); render(false); };
+$("q").onkeydown = (e) => {
+  if (e.key === "Escape") { $("q").value = ""; query = ""; render(false); }
+  if (e.key === "Enter") { const first = $("list").querySelector(".it"); if (first) first.click(); }
+};
+addEventListener("keydown", (e) => {
+  if (e.key === "/" && !/INPUT|SELECT|TEXTAREA/.test(document.activeElement?.tagName || "")) { e.preventDefault(); ($("side").style.display === "none" ? $("gq") : $("q"))?.focus(); }
+});
+let onlyNew = localStorageGet("onlynew") === "1";
+$("onlynew").checked = onlyNew;
+$("onlynew").onchange = () => { onlyNew = $("onlynew").checked; localStorageSet("onlynew", onlyNew ? "1" : "0"); render(false); };
+$("fold").onclick = () => { open[tab] = new Set(); saveOpen(); paintList(); };
 $("big").onclick = () => { $("big").style.display = "none"; };
 
 // ------------------------------------------------------------ tabs
 function counts() {
-  if (!data) return {};
-  const sets = new Set(data.attachables.map((a) => a.set));
-  return { builds: buildsCount, mobs: data.entities.length, armour: sets.size, blocks: data.blocks.length, items: data.items.length, textures: data.textures.length };
+  const n = { builds: builds ? treeItems("builds").filter(wanted).length : buildsCount };
+  if (!data) return n;
+  for (const t of ["mobs", "armour", "blocks"]) n[t] = treeItems(t).filter(wanted).length;
+  for (const t of ["items", "textures"]) n[t] = gridItems(t).filter((x) => (!onlyNew || isNewRef(x.ref)) && hit(x.name + " " + x.folder)).length;
+  return n;
 }
 function paintTabs() {
-  const n = counts();
-  $("tabs").innerHTML = TABS.map(([k, t]) => `<button data-k="${k}" class="${k === tab ? "on" : ""}">${t}${n[k] ? `<span class="n">${n[k]}</span>` : ""}</button>`).join("");
+  const n = counts(), filtering = !!query || onlyNew;
+  $("tabs").innerHTML = TABS.map(([k, t]) => `<button data-k="${k}" class="${k === tab ? "on" : ""}">${t}${n[k] != null && (n[k] || filtering) ? `<span class="n${filtering ? (n[k] ? " hit" : " zero") : ""}">${n[k]}</span>` : ""}</button>`).join("");
   for (const b of $("tabs").children) b.onclick = () => { tab = b.dataset.k; localStorageSet("tab", tab); render(false); };
 }
-function openBuilds() { const f = $("builds"); f.src = "/builds/"; f.dataset.loaded = "1"; }
+function openBuilds() { const f = $("builds"); f.src = "/builds/" + (selected.builds ? "#" + encodeURIComponent(selected.builds) : ""); f.dataset.loaded = "1"; }
+function goBuild(key) {
+  const f = $("builds");
+  if (f.dataset.loaded !== "1") return openBuilds();
+  try { f.contentWindow.location.hash = encodeURIComponent(key); } catch { f.src = "/builds/#" + encodeURIComponent(key); }
+}
 
 function render(fresh) {
   paintTabs();
   const isBuilds = tab === "builds", isGrid = tab === "items" || tab === "textures";
   $("builds").style.display = isBuilds ? "block" : "none";
-  $("side").style.display = isBuilds || isGrid ? "none" : "flex";
+  $("side").style.display = isGrid ? "none" : "flex";
   $("grid").style.display = isGrid ? "block" : "none";
   canvas.style.display = $("info").style.display = $("controls").style.display = isBuilds || isGrid ? "none" : "";
   $("msg").style.display = "none";
-  if (isBuilds) { if ($("builds").dataset.loaded !== "1") openBuilds(); return; }
-  if (!data) { $("msg").style.display = "grid"; $("msg").textContent = "Reading the packs from git"; return; }
+  if (isBuilds) { if ($("builds").dataset.loaded !== "1") openBuilds(); paintList(); return; }
+  if (!data) { $("list").innerHTML = ""; $("msg").style.display = "grid"; $("msg").textContent = "Reading the packs from git"; return; }
   if (isGrid) return paintGrid();
-  paintList(fresh);
+  if (!selected[tab]) selected[tab] = localStorageGet("sel." + tab) || treeItems(tab)[0]?.key;
+  revealSelected();
+  paintList();
+  draw(fresh);         // a live refresh keeps the camera where it is
   resize();
 }
 
-function entries() {
-  if (tab === "mobs") return data.entities.map((e) => ({ key: e.id, title: e.name, group: e.group, sub: e.id, e }));
-  if (tab === "blocks") return data.blocks.map((b) => ({ key: b.id, title: b.name, group: b.group || "blocks", sub: b.id, b }));
-  if (tab === "armour") {
+function entries(t = tab) {
+  if (t === "mobs") return data.entities.map((e) => ({ key: e.id, title: e.name, group: e.group, sub: e.id, e }));
+  if (t === "blocks") return data.blocks.map((b) => ({ key: b.id, title: b.name, group: b.group || "blocks", sub: b.id, b }));
+  if (t === "armour") {
     const sets = new Map();
     for (const a of data.attachables) { const s = sets.get(a.set) || { key: a.set, title: a.slot ? a.setName : a.name, group: a.group || (a.slot ? "armour" : "held and worn items"), parts: [] }; s.parts.push(a); sets.set(a.set, s); }
     return [...sets.values()].map((s) => ({ ...s, sub: s.parts.map((p) => p.slot || "worn").join(", ") }));
@@ -298,21 +363,90 @@ function entries() {
   return [];
 }
 
-function paintList(fresh) {
-  const all = entries().filter((x) => !query || (x.title + " " + x.sub + " " + x.group).toLowerCase().includes(query));
-  const groups = new Map();
-  for (const x of all) { if (!groups.has(x.group)) groups.set(x.group, []); groups.get(x.group).push(x); }
-  let html = "";
-  for (const [g, xs] of [...groups].sort((a, b) => a[0].localeCompare(b[0]))) {
-    html += `<h3>${esc(g)}</h3>` + xs.sort((a, b) => a.title.localeCompare(b.title)).map((x) => {
-      const ref = x.e?.ref || x.b?.ref || x.parts?.[0]?.ref;
-      return `<div class="it ${selected[tab] === x.key ? "on" : ""}" data-k="${esc(x.key)}"><span>${esc(x.title)}</span>${ref && ref !== "origin/main" ? '<small class="wip">new</small>' : ""}</div>`;
-    }).join("");
+// ------------------------------------------------------------ the side list
+// One list for every tab: sections that fold, sub-groups inside, and builds that come in several looks (styles,
+// regions, roofs) folded into one row with a chip per look. Search matches every word, in any field.
+const isNewRef = (ref) => !!ref && ref !== "origin/main" && ref !== "main" && ref !== "vanilla";
+function treeItems(t) {
+  if (t === "builds") return (builds || []).map((b) => ({ key: b.key, title: b.title, section: b.section, group: b.group || "", sub: b.sub || "", isNew: !!b.fresh, from: b.from }));
+  if (!data) return [];
+  const rows = entries(t).map((x) => {
+    const ref = x.e?.ref || x.b?.ref || x.parts?.[0]?.ref;
+    return { key: x.key, title: x.title, section: x.group, group: "", sub: x.sub || "", isNew: isNewRef(ref) };
+  });
+  return rows.sort((a, b) => a.section.localeCompare(b.section) || a.title.localeCompare(b.title));
+}
+const words = () => query.split(/\s+/).filter(Boolean);
+const hit = (text) => { const h = text.toLowerCase(); return words().every((w) => h.includes(w)); };
+const wanted = (i) => (!onlyNew || i.isNew) && hit(`${i.title} ${i.sub} ${i.section} ${i.group} ${i.key}`);
+const mark = (text) => {   // the search words, highlighted
+  const t = String(text), low = t.toLowerCase(), on = new Uint8Array(t.length);
+  for (const w of words()) for (let i = low.indexOf(w); i >= 0; i = low.indexOf(w, i + 1)) on.fill(1, i, i + w.length);
+  let h = "", run = "";
+  for (let i = 0; i <= t.length; i++) {
+    if (i === t.length || (i > 0 && on[i] !== on[i - 1])) { h += on[i - 1] ? `<mark>${esc(run)}</mark>` : esc(run); run = ""; }
+    if (i < t.length) run += t[i];
   }
-  $("list").innerHTML = html || `<p style="padding:12px;color:var(--dim)">Nothing here${query ? " matches" : " yet"}.</p>`;
-  for (const el of $("list").querySelectorAll(".it")) el.onclick = () => { selected[tab] = el.dataset.k; localStorageSet("sel." + tab, el.dataset.k); paintList(false); draw(false); };
-  if (!selected[tab]) selected[tab] = localStorageGet("sel." + tab) || all[0]?.key;
-  draw(fresh);         // a live refresh keeps the camera where it is
+  return h;
+};
+const open = {}, lastLook = {};
+for (const t of ["builds", "mobs", "armour", "blocks"]) { try { open[t] = new Set(JSON.parse(localStorageGet("open." + t) || "[]")); } catch { open[t] = new Set(); } }
+const saveOpen = () => localStorageSet("open." + tab, JSON.stringify([...open[tab]]));
+function revealSelected() {
+  const i = treeItems(tab).find((x) => x.key === selected[tab]);
+  if (i && !open[tab].has(i.section)) { open[tab].add(i.section); saveOpen(); }
+}
+function scrollToSelected() { $("list").querySelector(".it.on")?.scrollIntoView({ block: "nearest" }); }
+// a look's short name: "Ashford, gable roof" in the Ashford section reads "gable roof"
+const lookName = (v, section) => (v.sub.startsWith(section + ", ") ? v.sub.slice(section.length + 2) : v.sub) || v.key;
+
+function paintList() {
+  const items = treeItems(tab), shown = items.filter(wanted), filtering = words().length > 0 || onlyNew;
+  const secs = new Map();
+  for (const i of shown) {
+    if (!secs.has(i.section)) secs.set(i.section, { total: 0, fresh: 0, groups: new Map() });
+    const s = secs.get(i.section); s.total++; if (i.isNew) s.fresh++;
+    if (!s.groups.has(i.group)) s.groups.set(i.group, new Map());
+    const rows = s.groups.get(i.group);
+    if (!rows.has(i.title)) rows.set(i.title, []);
+    rows.get(i.title).push(i);
+  }
+  let html = "";
+  for (const [name, s] of secs) {
+    const isOpen = filtering || open[tab].has(name);
+    html += `<div class="sec${isOpen ? " open" : ""}"><button class="sh" data-s="${esc(name)}" aria-expanded="${isOpen}"><span class="car">▸</span><span>${mark(name)}</span>${s.fresh ? `<small class="wip">${s.fresh} new</small>` : ""}<span class="n">${s.total}</span></button>`;
+    if (isOpen) for (const [g, rows] of s.groups) {
+      if (g) html += `<h4>${mark(g)}</h4>`;
+      for (const [title, vs] of rows) {
+        const on = vs.some((v) => v.key === selected[tab]);
+        const names = vs.map((v) => lookName(v, name)), dup = names.map((n, k) => names.indexOf(n) !== k || names.lastIndexOf(n) !== k);
+        const counter = {};
+        const label = names.map((n, k) => dup[k] ? `${n} ${(counter[n] = (counter[n] || 0) + 1)}` : n);
+        const one = vs.length === 1 ? (vs[0].sub && vs[0].sub !== name ? `<small>${mark(lookName(vs[0], name))}</small>` : "") : `<small>${vs.length} looks</small>`;
+        html += `<div class="it${on ? " on" : ""}" data-keys="${esc(vs.map((v) => v.key).join("\n"))}" data-looks="${esc(label.join("\n"))}"><span>${mark(title)}${vs.some((v) => v.isNew) ? ` <small class="wip" title="${esc("Changed on " + (vs.find((v) => v.isNew).from || "a branch"))}">new</small>` : ""}</span>${tab === "builds" ? one : ""}</div>`;
+        if (vs.length > 1 && (on || filtering)) html += `<div class="chips">${vs.map((v, k) => `<button data-k="${esc(v.key)}" class="${v.key === selected[tab] ? "on" : ""}${v.isNew ? " wip" : ""}">${mark(label[k])}</button>`).join("")}</div>`;
+      }
+    }
+    html += "</div>";
+  }
+  $("list").innerHTML = html || `<p class="none">${tab === "builds" && !builds ? "Building the catalogue…" : `Nothing here${filtering ? " matches" : " yet"}.`}</p>`;
+  for (const el of $("list").querySelectorAll(".sh")) el.onclick = () => {
+    if (filtering) return;
+    const n = el.dataset.s; open[tab].has(n) ? open[tab].delete(n) : open[tab].add(n); saveOpen(); paintList();
+  };
+  for (const el of $("list").querySelectorAll(".it")) el.onclick = () => {
+    const keys = el.dataset.keys.split("\n"), looks = el.dataset.looks.split("\n");
+    // keep the look you were on: picking another map building after "Norman stone" opens its Norman stone one
+    const k = keys.includes(selected[tab]) ? selected[tab] : keys[looks.indexOf(lastLook[tab])] || keys[0];
+    pick(k, looks[keys.indexOf(k)]);
+  };
+  for (const el of $("list").querySelectorAll(".chips button")) el.onclick = () => pick(el.dataset.k, el.textContent);
+}
+function pick(key, look) {
+  selected[tab] = key; localStorageSet("sel." + tab, key);
+  if (look) lastLook[tab] = look;
+  paintList();
+  if (tab === "builds") goBuild(key); else draw(false);
 }
 
 const choice = {};
@@ -365,7 +499,20 @@ function draw(keepView) {
     const b = x.b, faces = b.faces, star = faces["*"] || Object.values(faces)[0];
     let obj;
     const geo = b.geometry && geoOf(b.geometry);
-    if (geo) obj = buildGeo(geo, matFor(star?.url));
+    if (geo) {
+      const mats = {};
+      const matOf = (name) => mats[name] ??= matFor((faces[name] || star)?.url);
+      // bone_visibility, worked out for the block's default states (q.block_state('x') -> its first value)
+      const vis = b.boneVisibility || {};
+      const shows = (bone) => {
+        const ex = vis[bone]; if (ex === undefined || ex === true) return true; if (ex === false) return false;
+        try {
+          const js = String(ex).replace(/q(?:uery)?\.block_state\(\s*'([^']+)'\s*\)/g, (_, k) => JSON.stringify(b.states?.[k] ?? 0));
+          return !!Function(`"use strict"; return (${js});`)();
+        } catch { return true; }
+      };
+      obj = buildGeo(geo, matOf, shows);
+    }
     else {
       const m = (f) => matFor((faces[f] || star)?.url);
       // three's box face order: +x, -x, +y, -y, +z, -z
@@ -381,10 +528,12 @@ function draw(keepView) {
   }
 }
 
-function paintGrid() {
-  const list = tab === "items" ? data.items.map((i) => ({ name: i.name, url: i.url, ref: i.ref, folder: "item icons", path: i.missing })) :
+function gridItems(t) {
+  return t === "items" ? data.items.map((i) => ({ name: i.name, url: i.url, ref: i.ref, folder: "item icons", path: i.missing })) :
     data.textures.map((t) => ({ name: t.path.split("/").pop().replace(/\.(png|tga)$/i, ""), url: t.url, ref: t.ref, folder: t.path.split("/").slice(0, -1).join("/"), path: t.path }));
-  const shown = list.filter((x) => !query || (x.name + " " + x.folder).toLowerCase().includes(query));
+}
+function paintGrid() {
+  const shown = gridItems(tab).filter((x) => (!onlyNew || isNewRef(x.ref)) && hit(x.name + " " + x.folder));
   const folders = new Map();
   for (const x of shown) { if (!folders.has(x.folder)) folders.set(x.folder, []); folders.get(x.folder).push(x); }
   let html = `<input id="gq" placeholder="Search" value="${esc(query)}" style="padding:6px 8px;background:#120f17;border:1px solid var(--line);border-radius:6px;color:var(--text);font:inherit;width:260px">`;
@@ -393,14 +542,14 @@ function paintGrid() {
       `<div class="tile" data-u="${esc(x.url || "")}" data-n="${esc(x.name)}" data-r="${esc(x.ref || "")}">${x.url ? `<img loading="lazy" src="${esc(x.url)}?v=${data.version}" alt="">` : "<img alt=''>"}<span class="${x.ref && x.ref !== "origin/main" ? "wip" : ""}">${esc(x.name)}</span></div>`).join("") + "</div>";
   }
   $("grid").innerHTML = html;
-  const gq = $("gq"); gq.oninput = () => { query = gq.value.toLowerCase(); $("q").value = gq.value; paintGrid(); const n = $("gq"); n.focus(); n.setSelectionRange(n.value.length, n.value.length); };
+  const gq = $("gq"); gq.oninput = () => { query = gq.value.toLowerCase(); $("q").value = gq.value; paintTabs(); paintGrid(); const n = $("gq"); n.focus(); n.setSelectionRange(n.value.length, n.value.length); };
   for (const t of $("grid").querySelectorAll(".tile")) t.onclick = () => {
     if (!t.dataset.u) return;
     $("bigimg").src = t.dataset.u + "?v=" + data.version; $("bigp").innerHTML = esc(t.dataset.n) + " · " + branchInfo(t.dataset.r); $("big").style.display = "grid";
   };
 }
 
-for (const k of ["mobs", "armour", "blocks"]) selected[k] = localStorageGet("sel." + k);
+for (const k of ["builds", "mobs", "armour", "blocks"]) selected[k] = localStorageGet("sel." + k);
 render(false);
 </script>
 </body>

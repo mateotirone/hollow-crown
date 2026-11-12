@@ -62,10 +62,15 @@ Type the commands in chat (`/` opens it).
 **Battering Ram**
 8. `/give @s siege:battering_ram` and click the ground. ✅ A wooden ram appears.
 9. Click it to climb on, drive with WASD, face your wall, and punch the wall. ✅ The beam swings and the wall cracks, and breaks after a few hits.
+9b. Get off, then sneak + click the ram with an empty hand. ✅ It packs back into a Battering Ram item.
 
 **Siege machines**
 10. `/give @s siege:ballista`, place it inside your settlement, then `/summon zombie ~ ~ ~10`. ✅ The ballista turns to face the zombie, the arms snap and it gets hit.
-11. `/give @s siege:trebuchet` and `/give @s cobblestone 16`. Place it, look at a spot about 30 blocks away, and click the trebuchet holding cobblestone. ✅ It turns, the arm swings over, and a boulder smashes a crater.
+11. `/give @s siege:trebuchet` and `/give @s cobblestone 16`. Place it, look toward a wall about 30 blocks away and a little up, and click the trebuchet holding cobblestone. ✅ It turns, the arm swings over, the action bar says the counterweight, angle and about how far it throws, and a boulder flies in a real arc and smashes a crater. Look higher for a higher lob; sneak + click to change the counterweight (Light, Medium, Heavy) and see the distance change.
+
+**Wall collapse**
+11b. Stand on flat ground and type `/scriptevent siege:collapse_test`. ✅ A stone brick wall appears 6 blocks in front of you; 2 seconds later its base is knocked out, the stone over the hole falls away in a stepped arch shape, falling block by block, and leaves cobblestone and gravel piled in a slope. The top of the wall stays up over the gap.
+11c. Blow a big hole in the base of a tall wall with a Breaching Charge or several trebuchet hits. ✅ Whole sections come down, leaning out to the open side; a house roof built against the wall stays up unless the wall under it falls.
 
 **Guards**
 12. `/give @s siege:barracks`, place it, `/summon villager` next to it, then click the Barracks with coins in hand (`/scriptevent siege:economy_give 200`; a guard is 40 Regals). ✅ The villager becomes a Man-at-Arms.
@@ -88,13 +93,14 @@ Type the commands in chat (`/` opens it).
 - Switch to Survival and try to mine the Plot Stone. ✅ It doesn't break.
 
 **Welcome hall and test area (in the sky)** Creative, after at least one Plot Stone is placed.
-- `/scriptevent siege:welcome build here` on flat ground (or `build` on the real map: it takes you to the hall's place high over Gull Bay). ✅ A round stone terrace with the Waystone in the middle and twelve pedestals round the rim, each with a sign.
-- Click the Waystone. ✅ A menu with "How things stand", "Where you start" and "Choosing a home".
-- Click a pedestal whose plot has a stone. ✅ The plot's region, land and style, and "Free". Pedestals for plots with no stone yet say "Not on this map yet".
-- Switch to Survival, click a free pedestal, choose "Start in ...", confirm. ✅ You land beside that Plot Stone holding a Keep Banner, and everyone is told.
-- `/scriptevent siege:welcome go` (Creative) and click the same pedestal. ✅ Its top has gone dark and it shows who chose it, their level and their settlement level.
-- With a friend (or second account) in Survival with no keep: they join. ✅ They arrive in the hall, can't walk off it, and the taken plot can't be picked.
+- `/scriptevent siege:welcome build here` on flat ground (or `build` on the real map: it takes you to the hall's place high over Gull Bay). ✅ After a few seconds, a block miniature of the whole map (coast, mountains, rivers, towns, forests), about 100 blocks across, sitting on a white cloud with a lumpy cloud-shaped edge (not a square). You stand on a quay out in its sea beside the Waystone, and twelve green glowing Map Stones stand on the plots' real spots, each with its name floating over it when you are close.
+- Click the Waystone with an empty hand. ✅ A menu with "How things stand", "Where you start" and "Choosing a home".
+- Walk over to a Map Stone and click it with an empty hand. ✅ The plot's region, land and style, and "Free". Stones for plots with no Plot Stone yet say "Not on this map yet".
+- Switch to Survival, click a free Map Stone, choose "Start in ...", confirm. ✅ You land beside that Plot Stone holding a Keep Banner, and everyone is told.
+- `/scriptevent siege:welcome go` (Creative) and click the same Map Stone. ✅ It has gone dark and it shows who chose it, their level and their settlement level.
+- With a friend (or second account) in Survival with no keep: they join. ✅ They arrive on the quay, can walk all over the miniature but can't walk off it, and the taken plot can't be picked.
 - `/scriptevent siege:welcome testarea`. ✅ A glass floor in the sky with the whole showcase laid out on it. Running it again just takes you back there.
+- On a world that already had the old round hall: load it. ✅ The miniature goes up in its place (a little lower in the sky), anyone waiting is moved to the quay, then the old terrace disappears. A world that built the first, square miniature gets the cloud in its place and the square corners vanish.
 - `/scriptevent siege:welcome release <name>` frees someone's pick; `status` lists all twelve.
 
 ## What I most want to know
@@ -118,7 +124,31 @@ Use `hollow-crown-full-map.mcworld`, not a flat test world. That file is saved i
 3. All twelve rim stones should be lit (free). Pick one: you land next to its Plot Stone with a Keep Banner, are told what stood there, and about 20 seconds later get the plot's first book. Its last page sends you to Sister Wren in Millbrook.
 4. Ride or walk to Millbrook (north-east of Kingsrest). Wren stands under a small porch on the north side of the square. Ask her "Why is it always night?", then "Which clock was first?": she is cut off and you Slip.
 5. With a second player, choose "Start in Kingsrest without a home" instead: about 30 seconds later a carter should point you to Wren and Millbrook is added to your Ledger.
-6. Builder check: `/scriptevent siege:opening status` should say `map` and 15 of 15 done.
+6. Builder check: `/scriptevent siege:opening status` should say `map` and 16 of 16 done.
+
+## Waking the Clockwork Reeve (scripts/unlocks/)
+
+On the real map the Millbrook well builds itself the first time someone comes near Millbrook. In a flat Creative test world:
+
+1. `/scriptevent siege:reeve_unlock here` builds the square (six clock posts with keepers, the well, the chamber 22 blocks under it) with its middle where you stand. Give it ten seconds.
+2. Switch to Survival. Talk to the six keepers. Does each answer read clearly, and does the keeper's page repeat what the others said? Can you work out the first clock? (`/scriptevent siege:reeve_unlock status` tells you the answer.)
+3. Open a wrong clock: two footmen should climb out by the well, and the clocks refuse you for five minutes.
+4. Open the right clock: you get the Stopped Clock Key once, and a lead to the well. Using the key in the open should say "It wants a lock, not a pocket."
+5. Hold the key and click the well's crank (the brass block on the rim). Watch the whole scene: three clicks, every clock flips to 3:18, the bell and the darkness, the water draining, the stair laying itself, two lights at the bottom, "You're late." Does it feel right? Too long, too short?
+6. Walk down the stair. The fight should start once you are in the chamber. Win, and the clocks stay at 3:18. Lose, and he waits below for another try.
+7. Click the crank again after a win: it should refuse until a siege night has passed (a real one, or `/scriptevent siege:rivals night` to pretend one just ended), then play the short rematch scene.
+
+Also: `/scriptevent siege:reeve_unlock build` rebuilds and resets it at Millbrook, `tp` takes you there, `key` gives you a key.
+
+## Waking the other four regional bosses (scripts/unlocks/)
+
+Each site builds itself the first time someone comes near it on the real map. In a flat Creative test world use `/scriptevent siege:unlock <site> here` to build one where you stand (give it ten seconds). Sites: `huntsman`, `bride`, `seneschal`, `mirelight` (the five villagers) and `mother` (the Cradle Tree). Every site also takes `status` (the answer and the state), `build` (rebuild and reset it at its map spot), `tp` and `item` (gives its key). Switch to Survival to play each one.
+
+1. **Huntsman.** Talk to Old Sigga in the lodge and read the rhyme. In daylight a cairn should say it doesn't wake. After dark (`/time set night`), click a wrong cairn: all go dark, two rimewolves, five minutes' rest. Then click the four in order: each lights, the fourth gives the Pale Horn. Click the Hunter's Cairn in the middle of the ice with the horn on a normal night: "only listens on a siege night". On a siege night: the horn, the answer, hounds, the ice cracking into a ring of water, then the fight. After a win the ice should freeze back.
+2. **Bride.** The chapel is full of water at first. `/scriptevent siege:unlock bride dry` drains it for five minutes (a dark-moon night does it for real). Climb down the tower ladder. Lift a wrong stone: two drowned. Lift the gull at the third pew from the altar: the ring. Lay it on the altar: bells, souls on the pews, she stands up. Does the sea wait until you have left before it comes back?
+3. **Seneschal.** Walk down the stair, read the five inscriptions, turn the statues youngest first. A wrong one resets them all and lets out three ash scarabs. The fifth opens a niche with the Faceless Seal. Press it into the blank seal by the door: the statues turn to face you one by one, the door opens from the top, he is at his desk.
+4. **Mother.** Build `mirelight` and talk to all five villagers. Can you spot the one with all three tells (wrong hand, faces the wall, fears the bell)? Accuse a wrong one: two changelings. Accuse the right one: they vanish and you get the Mire Effigy. Build `mother`, walk down the ramp into the cave and lay the effigy in the cradle: the lullaby, the roots unwinding middle-out, then the fight. After a win the roots grow back.
+5. For each: click the lock again right after a win (it should refuse until a siege night has passed: a real one, or `/scriptevent siege:rivals night`), then the short rematch scene. Using any of the four keys in the open should say "It wants a lock, not a pocket."
 
 ## Town hall, skill tree and paths (The Hollow Crown)
 
@@ -218,7 +248,7 @@ Run the showcase first (`/scriptevent siege:showcase`): the back row has four Ar
 
 Look first, without the game: the 3D viewer at https://claude.ai/artifact/D42qsWXjEcxWAbsYacsw4v shows all four species, every pose and every sound.
 
-In game: Creative, cheats on. `/scriptevent siege:showcase` puts a Roost, a Nest, nine display dragons (the four species, a hatchling, a fledgling, one asleep, one unconscious, one dead) and **Cinder**, a grown Cinderwing that is yours, in the extras row behind you. Take a **Dragon Horn** from the chests, and `/give @s beef 16` and `/give @s golden_apple 4`.
+In game: Creative, cheats on. `/scriptevent siege:showcase` puts a Roost, nine display dragons (the four species, a hatchling, a fledgling, one asleep, one unconscious, one dead) and **Cinder**, a grown Cinderwing that is yours, in the extras row behind you, and a whole 9x9 **Dragon Nest** west of that row. Take a **Dragon Horn** from the chests, and `/give @s beef 16` and `/give @s golden_apple 4`.
 
 **Looks and flying**
 1. Walk along the display dragons. ✅ Four clearly different animals (four-legged Cinderwing, two-legged Ashen Wyvern, squat armoured Dune Drake, long frilled Glass Wyrm). Wings tucked down along the flanks, the outer half folded over the inner (not sticking out sideways or lying flat). The sleeper breathes slowly, the unconscious one breathes fast and drips red, the dead one lies rolled over and does not move.
@@ -246,7 +276,9 @@ In game: Creative, cheats on. `/scriptevent siege:showcase` puts a Roost, a Nest
 19. Knock it down again and, as a second player who is not your ally, hit it five times. ✅ It dies: rolled over, jaw slack, no breathing, no name. The body stays about five minutes (longer during a siege), then crumbles to ash. The owner sees "Cinder is dead".
 20. Shot down: fly over a second player's settlement with a Ballista. ✅ Bolts knock the Flight bar down a quarter each; at empty you get "Shot down", it falls, and it hits the ground unconscious.
 
-**Raising one**: `/scriptevent siege:dragons_reset`, click the **Dragon Nest** ✅ an egg; click the Roost holding it ✅ "The egg settles"; `/scriptevent siege:dragons_grow` ✅ cracking sound, a tiny chirping hatchling of a random species that follows you. Run the grow command twice more ✅ Fledgling (walks with you on its back), then Adult (flies).
+**The nest**: walk to the 9x9 nest west of the extras row ✅ a round nest of woven branches sunk into the ground, rim two to three blocks high with twigs flaring off the top, a straw floor with a bone, ribs, scales or a skull here and there, and three big dark red eggs in the middle. Try to break any part of it in Survival ✅ nothing breaks; set off TNT next to it ✅ it stays. Place a **Dragon Nest** from the creative menu in Creative ✅ a whole nest grows round it; in Survival ✅ it vanishes ("only grow in the wild").
+
+**Raising one**: `/scriptevent siege:dragons_reset`, click the eggs in the **Dragon Nest** ✅ an egg, and the clutch turns to broken shell; click the Roost holding it ✅ "The egg settles"; `/scriptevent siege:dragons_grow` ✅ cracking sound, a tiny chirping hatchling of a random species that follows you. Run the grow command twice more ✅ Fledgling (walks with you on its back), then Adult (flies).
 
 Things I could not check without the game, so please look closely: flying actually steers by camera, flying speed feels right, the hatchling follows you, the sounds are any good in game, and the unconscious dragon really can't be killed by one more hit.
 
@@ -268,7 +300,12 @@ The showcase (`/scriptevent siege:showcase`) puts a Mason's Bench with its mason
 - **Build your wall in any stone.** Raise a level 3 or 4 wall from the town hall paying in plain cobblestone or sandstone: it should be accepted. Then click the Mason and choose "Choose what the wall is built in", pick Deepslate and Blackfen timber, leave "Re-face" on: the standing wall should change over without charging you. Raise the next level: it should come out in deepslate. Tell me if a raider still breaks a deepslate wall faster than a Castle Stone one.
 - **Regional wall blocks.** In `/scriptevent siege:showcase` there are five stacks, one per region: palisade, wall planks, roof shingles, a gate and a portcullis. Each should have its own look, and each gate and portcullis should open on a click and take iron, diamond and netherite like the Vale's. Then `/scriptevent siege:wall 1` in two different regions: the palisades should differ. Tell me if any block shows as pink and black, or a gate does not open.
 - **Arrival.** `/scriptevent siege:settle_arrive` lays out your settlement: the wall, a Longhouse rising behind the banner, a Mason at a bench, and a signpost on every spot where a building will go. On the real map this happens by itself when you pick a plot in the welcome hall.
-- **Town layouts and Plot Markers.** On flat, open ground (Creative is fine for looking, Survival for paying) run `/scriptevent siege:town found dunehold`. ✅ Over a few seconds roads, the town square, lamps and a well appear round you, a Longhouse starts rising, a Mason's Bench stands by the square, a low log palisade rises 32 blocks out (standing on the ground everywhere, never sunk into it), the library goes up on a square plot, and a Plot Marker (a post with a sign) stands at the front of every open plot. Use a marker. ✅ Only buildings that fit that plot are listed; ones your tier has not opened are greyed. Pick one: a green outline shows on the plot. Use the marker again, pay, and it rises; when it is done the marker moves beside its door, and using it offers the owner (not allies) to knock the building down (half the price back to the owner). Then `/scriptevent siege:town tier 1`. ✅ The fence comes down and a new one rises 40 blocks out, the old line becomes a ring road, and new markers appear. `tier 2` and `tier 3` take it to 48 and 56. During a siege `tier` says the town grows when it ends, and it does. `/scriptevent siege:town info` says which layout you got. Try `found harrowford 2` for another layout. On the real map this happens by itself when you pick a plot in the welcome hall. Tell me if the roads float or sink against the real ground, and if a marker ends up somewhere silly.
+- **Town layouts and Plot Markers.** On flat, open ground (Creative is fine for looking, Survival for paying) run `/scriptevent siege:town found dunehold`. ✅ Over a few seconds roads, the town square, lamps and a well appear round you, a Longhouse starts rising, a Mason's Bench stands by the square, a low log palisade rises 36 blocks out (standing on the ground everywhere, never sunk into it), the library goes up on a square plot, and a Plot Marker (a post with a sign) stands at the front of every open plot. Use a marker. ✅ Only buildings that fit that plot are listed; ones your tier has not opened are greyed. Pick one: a green outline shows on the plot. Use the marker again, pay, and it rises; when it is done the marker moves beside its door, and using it offers the owner (not allies) to knock the building down (half the price back to the owner). Then `/scriptevent siege:town tier 1`. ✅ The fence comes down and a new one rises 46 blocks out, the old line becomes a ring road, and new markers appear. `tier 2` and `tier 3` take it to 56 and 66. During a siege `tier` says the town grows when it ends, and it does. `/scriptevent siege:town info` says which layout you got. Try `found harrowford 2` for another layout. On the real map this happens by itself when you pick a plot in the welcome hall. Tell me if the roads float or sink against the real ground, and if a marker ends up somewhere silly.
+- **Plot sizes and charters.** In a fresh town, use markers on plots of different sizes. ✅ A Small plot offers cottage, well, garden; a Medium the smithy; a long Medium the library, stable, storehouse and (from Town) the market; a watchtower is greyed with "needs a plot by the wall" unless the plot touches the wall. Good spots say "(good spot)". `/scriptevent siege:town charter` lists what your tier needs. Win sieges until the keep would be a City while you have fewer than 3 cottages or no market. ✅ Chat says the settlement has won enough but lists the charter, and the wall stays put. Finish the missing buildings. ✅ When the last one is done the town grows by itself. Farmhouse, Mint and Inn have no ready-made design yet: build them by hand and register them (Farmhouse: a composter, 9 farmland and a roof; Mint: 2 chests or barrels and an anvil under a roof; Inn: 3 beds and 2 chests under a roof). `tier N` still skips the charter for testing. When a building finishes, ✅ its marker stands on grass beside the door, not on the road or door step.
+- **Your own builds and settlers.** On an empty Small plot, build a little hut by hand: walls, a roof, a door and a bed. Use the plot's marker and pick "I built here myself". ✅ It counts as a Cottage and the marker moves beside the door. Try it first without the bed: ✅ it says what is missing. Raise or build a cottage with a bed, then `/scriptevent siege:settlers dawn`. ✅ A settler appears at the door and chat says who moved in. Build a smithy (or register one with an anvil and furnace) and a second bed, `dawn` again: ✅ a Smith arrives. `/scriptevent siege:settlers dusk` sends them to bed, `list` shows everyone and the free beds. Talk to one: ✅ a hand-written line. Knock the smithy down and run `dawn`: ✅ the Smith shows "(idle)". Break a bed and run `dawn`: ✅ its settler moves to another free bed, or stays one more dawn and then leaves if there is still none. Tell me if a settler stands somewhere silly.
+- **The level-5 hall takes its ground.** In a town, find a plot whose menu says "on ground the hall will need at level 5", raise a building on a plot tagged hall5, then take the hall to level 5 (`/scriptevent siege:townhall_build 5`). ✅ When it starts (or at the latest when it is done) chat says the hall needs that ground, the building is cleared except where the hall stands, the full price comes back, and the next building you raise on a plot of that size says it is free. ✅ The old plot has no marker any more.
+- **Rival Lords on town layouts.** In a fresh map world, `/scriptevent siege:rivals few` then `/scriptevent siege:rivals settle`, and walk to the lord's plot. ✅ Roads, a wall ring and the square go down as in a player's town (no Plot Markers, no mason), the lord's hall rises on the cornerstone, then buildings go up one by one on the plots, cottages first. `/scriptevent siege:rivals grow <id>` a few times: ✅ the wall moves out once the lord's town has 3 cottages and a market. Then pick that lord's plot in the welcome hall (or topple the lord and raise your Keep Banner there). ✅ The town is yours: the same buildings, Plot Markers on the empty plots, `/scriptevent siege:town info` shows it.
+- **The Plan Book.** Found a fresh town (`/scriptevent siege:town found dunehold`) in Survival. ✅ A Plan Book is in your pack. Use a Small plot's marker: ✅ only the cottage and well are offered, with a grey line saying more would suit the plot. Use the Plan Book: ✅ a screen of building cards opens (pictures of the real buildings in your town's style); cottage, well and library are bright, the rest grey with "Hall level 2" or "Lords, bosses" under them. Click a card: ✅ its plot size, price, worker, charter line and the other regions' styles with their price. Open the Town Hall menu: ✅ a Plan Book button opens the same screen. `/scriptevent siege:plans scroll smithy frostmarch`, then use the scroll: ✅ you learn "Smithy (Frostmarch)", the scroll is used up, and a Medium plot now offers it at half as much again. Copy a plan to a scroll in the Plan Book with a paper in your pack: ✅ it costs coins and a paper and the scroll names the plan. Give it to a friend: ✅ they learn it. Take the hall to level 3: ✅ the smithy and stable appear in your own style. In Creative ✅ every building is offered.
 - **Castle Stone family.** Ask the Mason for Castle Stone, Tiles, Bricks, Cobbled and Smooth. In your own region you get your region's stone at the local price; the other regions' stone costs more.
 - **Wall damage and repair.** The generated wall takes damage like any Siege Nights wall: rams and blasts wear blocks down, the stone shows two stages of cracks, then breaks. From level 6 up the wall is as tough as iron-reinforced Castle Stone, level 9 as diamond, level 10 as netherite. Stand by your wall and run `/scriptevent siege:wall_repair break` to rough it up, then talk to the Mason and pick **Mend the wall**: he names a price that follows the damage and the wall is made whole. `/scriptevent siege:wall_repair free` mends without paying. The masons refuse during a siege; patching one block by hand with stone bricks still works then, now on Tiles, Bricks, Cobbled and Smooth too.
 - **Library.** `/scriptevent siege:settle_arrive` (or picking a plot on the real map) now also raises the town's Library near the gate: two storeys of bookshelves, a reading table, a lectern and eight Archive Shelves on the back wall. Click an Archive Shelf with a Lore Tome to check it works. To see just the building: `/scriptevent siege:settle_build library frostmarch`.
@@ -313,6 +350,8 @@ Rival Lords only settle on a map with Plot Stones. Place three or four Plot Ston
 - `/scriptevent siege:returned_reveal` puts a beam on every Returned near you if you lose track.
 - On their own, villages of five or more get one at night once the first boss is dead (slowly: a small chance every two minutes, one per village).
 
+**Boss Summons (creative menu).** In creative, open the Equipment tab and find the fold-out group "Hollow Crown: Boss Summons": nine sealed writs. Use the Reeve's on flat ground: the Reeve appears 6 blocks in front of you and its fight starts (name, intro line, boss sound), and the writ stays in your hand. Use it again while the fight runs: "already here". The Choir's writ takes you to the Court of the Hollow and wakes the Choir a few seconds later (or says the Court isn't built). The Pretender's rolls a new claimant. Also check the Construction tab has a "Hollow Crown: Locked World Trees" group and the Equipment tab a "Hollow Crown: Guard-only Armour" group, and that the Throne, Fallen Oath Shard, Tree of Oaths, Hollow Crown and Heart of the Hollow can be found with the creative search.
+
 **Morvane, the last fight (seven stages).** On flat open ground run `/scriptevent siege:bestiary_summon morvane`. Away from the Seat all seven stages play on the spot, which is the quick way to check the mechanics. `/scriptevent siege:morvane_skip 4` jumps a running fight to stage 4 (any number 1 to 7).
 
 - Stage 1: two warned blows then a Toll ring you jump; he appears behind whoever hit him last; Tollmen arrive.
@@ -340,7 +379,7 @@ A map of the generated world is in `docs-hollow/hollow-map.png`.
 - Walk the gold path down the valley, or leave it through a gap in the cliffs into the open country. Look for: four kinds of land (lattice groves, basalt highlands, glowing fens, grey flats), nothing lined up in rows, no holes in the ground.
 - Light rivers: from the Wound walk to about x -60, z 130. Put a boat in the pale blue water and follow it. It should never drop or dead-end, and the story path should cross it on a bridge near z 650.
 - Choir ore shows in cliff faces and in veins inside the rock. It needs a diamond or netherite pickaxe.
-- `/scriptevent hc:slip` gives a Slip, `/scriptevent hc:give_crown` gives the Hollow Crown (putting it on warns the whole server), `/scriptevent hc:regent_now` raises the NPC ruler.
+- `/scriptevent hc:slip` gives a Slip, `/scriptevent hc:give_crown` gives the Hollow Crown (putting it on warns the whole server): it should appear on a small floating stand at your feet, with a "Click: take the Hollow Crown" label. Click it to take it; drop it (Q) and it should go onto a new stand where it lands. Leave a stand for more than 5 minutes and it should still be there. After Morvane has fallen, throw it over lava: chat should say it was called home, and it should be back in the chest at the Seat, `/scriptevent hc:regent_now` raises the NPC ruler.
 - `/scriptevent hc:undertow_status` prints what has been built.
 - **The road to the Rift (thin places).** `/scriptevent hc:thin_status` lists the seven thin places. `/scriptevent hc:thin_tp kings_barrow` (or any id it lists) takes you to one; the cave builds itself a few seconds after you arrive. Check: a rock hill with a cave mouth facing south, a tall chamber, a purple seam in the back wall, Fennick's tent outside with a Dusty Tome inside (click it for the Field Note). The Drowned Chapel, the Sunken Quarry and the Witchroot Caves need a short swim; the Bellfounders' Mine and Frostvein Gap have ice and snow; the Saltglass Grotto and the Drowned Chapel have white salt crust; King's Barrow and the Witchroot Caves have hanging roots; the Bellfounders' Mine and the Drowned Chapel have a fallen bell. Then, in survival, hit the seam with a Tuning Fork: with fewer than five bosses down it should only hum; on a wrong seam it should go dull for three days and stay in your hand.
 
@@ -355,6 +394,7 @@ Not yet played in a real game. In a creative test world:
 5. Robbing needs a second player: with the ruler online, "Rob the Tally" hands over ore and the ruler is brought to the village at once. With the ruler offline it is refused and only buying works.
 6. `/scriptevent hc:folk_go vault` takes you to the Vault Stair near the Seat. Stand on the copper pad and sneak to go down. Click the dark block in the middle: the ruler collects, anyone else can try to break it open (20 seconds beside it).
 7. Craft a Latticewood Boat from 5 Latticewood (boat shape) and put it on a light river. `/scriptevent hc:folk_status` prints every Tally and the Vault.
+8. Site finds: open the chest in the Wound landing's boat shed, the Lattice Wood lodge, Pilgrim's Cross shrine, the Cartmeet tally-house and the Seams winch house. Each hands you its find once (a boat, the Woodcutter's Axe, 12 Regals and a Pilgrim's Lantern, 8 raw Choir Ore, the Seamcutter pick); opening it again gives nothing. `/scriptevent hc:finds_reset` lets you collect them again.
 
 Things to look for: villages sitting badly on the bank or in the water, mine mouths hanging in the air, the boat's look and whether it paddles like a normal boat, and what it drops when broken.
 
@@ -431,17 +471,25 @@ the darkness and knockback effects, the storms, and how the hurried evening look
 `/scriptevent siege:choirsteel_kit` gives the full set, the tools, 32 ingots, 8 Gloamquills, 2 templates and 4 Tempered Choirsteel.
 
 - Recipes: Tempered Choirsteel is 4 Choirsteel Ingots and a Gloamquill in a crafting table. At a smithing table, a Choirsteel Upgrade template + a netherite piece + Tempered Choirsteel gives the Choirsteel piece (all nine: four armour, five tools). Check the template and Tempered Choirsteel go into their slots at all (custom smithing items need their tags), and that enchantments and a renamed name carry over.
-- Copying: template in the top middle, Veinstone in the centre, 7 netherite ingots around them in a crafting table gives 2 templates.
+- Copying: template in the top middle, Veinstone in the centre, 7 netherite scrap around them in a crafting table gives 2 templates.
+- Carry a template: chat warns you once that others now have a reason to come for you, and you get the tag siege_template_holder (check with /tag @s list). Drop it in a chest and the tag goes within 5 seconds.
 - The Cold Forge (the Hollow, x 592 z 1080, on the high terraces east of the Seams, no road): an open veinstone smithy with a tall chimney and soul fire on top. The chest at the back holds one template on your first visit. Take it: anvils ring and two Veinsworn and a Stone Vigil come out. Come back three in-game days later and there is a new one. `/scriptevent hc:forge_restock` refills it now.
 - Trims: put each Choirsteel armour piece in a smithing table with any armour trim template and any trim material. The trim should show in its colour, in the same place it sits on netherite, and the crystals, plume, pauldrons, knee cops and fins should stay plain.
 - The first time you carry a Choirsteel Ingot, chat tells you where the forge is.
 - The test world (`/scriptevent siege:showcase`) has a smithing table and a crafting table with chests of everything needed.
 - Helm: you see in the dark. Greaves: slowness never sticks. Treads: jump off something high, you drift down and take no fall damage.
 - Cuirass: let zombies hit you. About one hit in four rings and throws the attacker back.
-- Full set: a chime, then Resistance and four extra hearts. Take one piece off and both go.
+- Full set: a chime, then Speed II, Jump Boost II, Resistance and six extra hearts. Take one piece off and they all go (speed and jump within 2 seconds).
+- Greaves alone: Speed I. Treads alone: Jump Boost I.
 - Blade: hit one mob in a crowd four times. The fourth hit rings and hurts the others near it.
 - Pick: break an ore next to other ore. A line of sparks points to the nearest one. It also mines Choir Ore whole.
 - The first time you wear or hold each piece, chat tells you what it does.
+
+## Mob and boss animations (bestiary)
+
+1. In the showcase world the statues stay in place but now breathe and fidget (the Reeve ticks, Hollow folk twitch). Then spawn a few live mobs with eggs (Tollman, Shieldwall Brute, Grey Host Bowman, Lost Villager, Rimewolf) in Survival. ✅ Each walks differently, leans in when it runs, and swings its own way when it hits you. The Bowman raises and draws its bow while it has you as a target. Every mob flinches when you hit it.
+2. Watch a Lost Villager standing still for 10 seconds. ✅ Its head hangs crooked and now and then snaps sideways.
+3. `/scriptevent siege:bestiary_summon reeve` in Survival. ✅ When a warning comes up he holds a wind-up pose (both arms raised for the time stop, arm drawn back for a cog) and swings through when it lands. At 60% health he rears back with his arms spread. Do the same for the Huntsman, Bride, Seneschal, Mother, Warlord King and Morvane. Anything that looks broken (a limb bending the wrong way, a pose that never lets go): note the boss and the attack name from the warning.
 
 ## Never the same fight twice (bestiary)
 
@@ -542,6 +590,9 @@ Things I could not check without the game, so please look closely: that the stee
 10. **Your own station.** In your settlement, place a Rail Depot a few blocks from a straight line of Track (or on open ground, facing where the building should go). A Halt should rise lined up with that track, and the depot should end up on its platform. Win sieges until the settlement becomes a Town: the Halt should come down and a Station rise in its place.
 11. A claim near a Station Post placed by the map builder (within about 140 blocks of the banner) should raise a Halt by that post.
 12. **Buying the line.** Once the world has its planned railway, `/scriptevent siege:trains routes` should list the stops and say which is your home stop. Click any Station Post: "Extend the line" should only offer stretches that start at a stop you can already reach (at first just the ones out of your home stop). Buy one: the Track should lay itself along the graded bed over a few seconds, and everyone should see "The line from ... to ... is laid". Stretches past it should now show up in the menu.
+13. **Station on claim.** On the real map, found a settlement on a plot. ✅ "A Halt is rising at …" and a Halt builds on the plot's stop by the graded rail bed, the post ending on its platform. The station menu shows "Extend the line" and "Buy an engine", but no carriage yet. Buy the first stretch. ✅ "Call the carriage" appears: it puts one coach on the platform facing the next stop, slow (about 4 blocks a second). Leave it empty for a minute ✅ it goes away. Buy an engine, place it, then pick it up and drop it in lava. ✅ The station menu now says "Take an engine (free)".
+14. **Switches.** Buy two stretches that leave a station the same way (west out of Kingsrest: toward Harrowford and toward Gull's Rest). Where they part, sneak + click the track with an empty hand. ✅ "Switch set: …" and the piece turns to the other line. Drive an engine out: it follows the way the switch is set. Drive back in along the other line ✅ the switch flips itself and the train runs through onto the shared track.
+15. **Rail gates.** Lay a straight run of Track and build a wall of iron bars (or any blocks) across it, 3 wide and 5 high. Walk up to it ✅ it stays shut. Put an engine on the track, drive at the wall ✅ the bars vanish a few blocks before the engine reaches them and come back once the train is about 9 blocks past.
 
 ## Sounds (scripts/sound/, SOUND-LIST.md)
 
@@ -567,6 +618,26 @@ Tell me about: anything too loud, too quiet, silent, or that made you jump. Noth
 2. Walk toward a Dusty Tome you have not clicked (the showcase has some). ✅ Within 16 blocks a page turns softly and the action bar says "Your Ledger whispers: something written, N blocks <direction>". After you copy the tome it goes quiet.
 3. Drop a Lore Tome and walk away and back. ✅ It is sensed the same way. Without the Ledger in your pack nothing happens.
 
+## The Settler's Almanac (scripts/guide/)
+
+Best on the real world map with a fresh player (or `/scriptevent siege:guide reset` first).
+
+1. Join for the first time. ✅ After the journal, chat says a clerk has given you the Settler's Almanac, and it is in your pack. Use it. ✅ A cover page, chapters with page counts, a "Tips in chat" switch. "First days" opens on "This book", "What to do first", "Land and protection" and more.
+2. Read a page, go back. ✅ The gold dot on it is gone and the chapter's "new" count drops.
+3. Raise your Keep Banner. ✅ A second or two later one gold "[Almanac]" line in chat (not on top of a menu), then another a few seconds after, never a burst.
+4. Pick up a Regal, place a Siege Workshop, click the Mason, click a Station Post, carry a Halter. ✅ One tip each, the first time only. Doing it again says nothing.
+5. Turn tips off on the first page and pick up something new. ✅ Silent, but its page still gets its gold dot.
+6. Click your Keep Banner. ✅ An "Almanac" button on the Keep menu. Type `/siege:guide` with cheats off. ✅ The book opens.
+7. Craft one at a normal crafting table: a book and a feather.
+8. Check the secrets stay secret: with a fresh player, no chapter called "Beyond the seam" or "The High Throne", and no page mentions the Hollow. `/scriptevent siege:guide all` shows them all (for proof-reading).
+9. `/scriptevent siege:guide tip <id>` repeats any page's tip.
+
+Tell me: any tip that came at a bad moment or said something wrong, any mechanic you had to ask about that the book doesn't cover, and whether the tips feel like too many or too few.
+### Settlement gates and stripped log walls
+1. `/scriptevent siege:wall 3 saltreach` round your keep. ✅ The stakes are stripped birch, not bark birch. Try `vale`, `frostmarch`, `emberwaste`, `blackfen`: always the stripped log.
+2. With a second player who is not your ally, have them click your gate or portcullis. ✅ It stays shut and the action bar says "The gate is barred. Only <name>'s people can open it." You (and an ally) can open it by clicking.
+3. Recruit a guard at the Barracks, shut the gate, walk up to it from outside. ✅ The gate (and portcullis from level 6) opens by itself; walk 7+ blocks away and it shuts.
+4. Leave the gate open and start a siege. ✅ It slams shut, and it does not open by itself until the siege ends.
 ## Role trials (scripts/roletrials/)
 
 Build the showcase (`/scriptevent siege:showcase`) in a flat Creative world, then switch to Survival. Kesh, Ulla, Holt and Nell stand with the other story characters. A short Span and three graves are 60 blocks behind the exhibit rows.
@@ -585,6 +656,7 @@ Shortcuts: `/scriptevent siege:role_trial <rider|forgemaster|captain|witch> [ste
 10. Turns and stands: reach rank 4 and rank 5 in a regional role (spend points in its branch) and talk to the mentor each time: a new scene each. A Knight reaching Knight-Commander gets a box to name the Order.
 11. The Morvane fight with roles: `/scriptevent siege:bestiary_summon morvane`, then `/scriptevent siege:morvane_skip N` for N = 2 to 7. Alone with no role, a named student is announced at stages 2 to 6 (knights spawn at 3, the river buffs at 4, burns every 16 s at 5, slow falling at 6). With a top-rank role, your name is announced instead.
 12. Ask Kesh "Read me the roll": three names to start, Bram Tallow's after the first hatching in the world, and every dragon that dies after that. Fill a dragon's bond (`/scriptevent siege:dragons_grow`): two Wing points arrive.
+13. The 3:17 toll: `/scriptevent siege:reach_night counted`, then `/time set 20900`, fly a grown dragon. ✅ At 03:00 (21000) she glides down with a "won't fly" line and won't take off until 03:30 (`/time set 21500`). On a normal night she flies. As a Dragonlord (top Wing rank), fly into or take off in the window: ✅ "The Unflown Night" title, the toll, raiders within 256 blocks glow; she keeps flying, with no second title that night, and the same happens on the next siege night.
 ## The Hollow's middle stretch (lore/hollow.js, undertow/story.js)
 
 Mateo approved the beats 2026-11-11 (doc "The Hollow's middle stretch: story beats"). Words: `lore/data/hollow_story.js` and the Carter in `lore/data/dialogue.js`. Places, the Carter's position, the Court door: `undertow/story.js`.
@@ -606,3 +678,30 @@ Shortcuts: `/scriptevent siege:hollow_beat <id>` replays one scene, `siege:hollo
 5. `/scriptevent siege:labels off`. ✅ All labels vanish; `on` brings them back.
 
 Tell me about: a label sitting inside the block or too high above it, a label covering an NPC's name, or anything clickable with no label.
+
+### Hall Map
+1. In a hall of level 1 or more, open the Town Hall menu and choose "Hall map". ✅ A parchment map of the whole realm fills the screen, with fog over most of it and clear land around where you have walked.
+2. ✅ Your settlement has a banner in your colour with a gold ring; other settlements show in their colours, free plots as dashed rings, towns as little houses, even under fog. No players are shown.
+3. Hover a mark (or tap it on a phone). ✅ Its name shows above it; clicking opens a page about it with "Back to the map".
+4. Walk or fly about 300 blocks somewhere new and open the map again. ✅ That land is no longer fogged. Walk into Crownhold. ✅ The action bar says it is on your hall's map, and it appears there as a purple triangle.
+5. Click the Cartographer's Table inside a level 2+ hall. ✅ The Hall Map opens. Sneak-click it. ✅ The normal cartography table opens.
+6. ✅ The map closes with its X in the corner. If the screen looks broken (a long list of buttons instead of a map), tell me.
+
+Tell me about: marks too small to see, names hidden behind other marks, or the screen not fitting.
+
+### Town hall build animation
+1. Stand at your cornerstone with a Longhouse built and run `/scriptevent siege:townhall_build 3`.
+2. ✅ The title "The Keep rises" shows once, the camera circles, and the action bar shows only a bar with a percentage that climbs steadily.
+3. ✅ The old Longhouse is gone completely before the Keep goes up: no leftover walls, roof or posts in or beside it.
+4. ✅ It is finished in about 15 seconds and the Hall Cornerstone is gone. Just inside the front door, to one side of the aisle, stands the Town Board (a wide notice board with pinned papers, labelled when you are near). Clicking it opens the Town Hall menu. Check all five styles: `/scriptevent siege:townhall_build 3 frostmarch` and so on.
+   - A hall built before this update gets its Town Board the next time the world loads or you open the Town Hall from the Keep menu.
+5. Town Hall menu → "Move the town hall" → "Move it". ✅ You get a Hall Cornerstone back, the Tree sleeps, and placing the stone elsewhere starts a new hall. Placing a second cornerstone while a hall stands is refused with a message.
+
+## Townsfolk (scripts/townsfolk/)
+
+On the map world (map mode), in Creative:
+1. Walk into Kingsrest by day. Within a few seconds 20 people should be out on the streets, each strolling a few blocks round their own spot. Check none stand inside a building or on a roof.
+2. Click one. They stop, turn to you, gesture, and a line appears in chat as `Name (Trade): ...`. Click four more times: five different lines, then the first again.
+3. `/scriptevent siege:townsfolk` lists the towns and how many are out. `here` brings the nearest town's folk out now (also at night), `home` sends them in, `heard` resets which lines you have heard.
+4. Hit one: no damage. Set the time to night and walk 25+ blocks away: they go indoors. Set it to day: they come back.
+5. After the town layout changes (a new `map/<town>-blocks.json`), run `python3 tools/townsfolk_spots.py` and commit `scripts/townsfolk/spots_data.js`.

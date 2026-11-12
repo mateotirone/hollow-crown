@@ -8,14 +8,15 @@ import { ECON } from "../economy/config.js";
 import { funds, charge } from "../economy/coins.js";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
 import * as api from "../siege/api.js";
-import { HALL_TIERS, drawHall } from "./halls.js";
+import { HALL_TIERS, drawHall, frameFor } from "./halls.js";
 import { STYLES, STYLE_IDS, styleFromBiome, styleFromGround } from "./styles.js";
-import { startBuild, buildFor, worldCells, worldMarks, worldBox } from "./build.js";
+import { startBuild, buildFor, worldMarks, worldBox, clearBoxFor, resolveRole } from "./build.js";
 import { heroOf, grantPoints, grantRenown, playerById } from "./hero.js";
 import { sfx } from "../core/sfx.js";
 
 export const CORNERSTONE = "siege:hall_cornerstone";
 export const TREE = "siege:tree_of_oaths";
+export const BOARD = "siege:hall_board"; // the Town Board inside every hall: click it for the Town Hall menu
 
 const store = api.moduleStore("siege:townhall", () => ({ halls: {} }));
 export const halls = () => store.data.halls;
@@ -146,9 +147,14 @@ world.afterEvents.playerPlaceBlock.subscribe((event) => {
     const owner = api.settlementAt(at);
     if (!owner || !api.keepOf(owner)) return giveBack(player, placed);
     const old = hallOf(owner);
+    if (old && !old.lost && old.hidden && old.level > 0) {
+      player.sendMessage("§cThis settlement already has a town hall. To move it, choose §fMove the town hall§c in the Town Hall menu first.");
+      return giveBack(player, placed);
+    }
     if (old && !old.lost) {
-      const still = dim.getBlock(old)?.typeId === CORNERSTONE;
-      if (still && !(old.x === at.x && old.y === at.y && old.z === at.z)) {
+      const stone = cornerOf(old);
+      const still = dim.getBlock(stone)?.typeId === CORNERSTONE;
+      if (still && !(stone.x === at.x && stone.y === at.y && stone.z === at.z)) {
         player.sendMessage("§cThis settlement already has a Hall Cornerstone. Break that one first if you want to move the hall.");
         return giveBack(player, placed);
       }
@@ -168,7 +174,8 @@ world.afterEvents.playerBreakBlock.subscribe((event) => {
   if (event.brokenBlockPermutation.type.id !== CORNERSTONE || !api.isReady()) return;
   const at = event.block.location;
   for (const [owner, hall] of Object.entries(halls())) {
-    if (hall.x !== at.x || hall.y !== at.y || hall.z !== at.z) continue;
+    const stone = cornerOf(hall);
+    if (stone.x !== at.x || stone.y !== at.y || stone.z !== at.z) continue;
     hall.lost = true;
     hall.building = null;
     hall.level = 0; // the Tree goes quiet until a cornerstone stands again
@@ -179,7 +186,33 @@ world.afterEvents.playerBreakBlock.subscribe((event) => {
 
 // ---------- building ----------
 
-const RISE_TICKS = [0, 500, 900, 1300, 1800, 1800]; // about how long each tier takes to rise
+const RISE_TICKS = [0, 140, 200, 260, 320, 320]; // about how long each tier's walls take to rise (7 to 16 seconds)
+
+// Where the Hall Cornerstone block stands while a hall is being started. Older builds moved it beside the
+// path (hall.cs). Once a hall stands the stone is taken away (hall.hidden): Mateo found it looked like a
+// stray command block. The Town Hall menu then opens from the Town Board inside the hall, or the Keep menu.
+export const cornerOf = (hall) => hall.cs ?? { x: hall.x, y: hall.y, z: hall.z };
+
+function hideCornerstone(owner) {
+  const hall = hallOf(owner);
+  if (!hall) return;
+  try {
+    const block = world.getDimension("overworld").getBlock(cornerOf(hall));
+    if (!block) return; // not loaded: tidyCornerstone tries again later
+    if (block.typeId === CORNERSTONE) block.setType("minecraft:air");
+  } catch (e) {
+    return console.warn(`[Town Hall] could not take the cornerstone away: ${e}`);
+  }
+  delete hall.cs;
+  hall.hidden = true;
+  saveHalls();
+}
+
+const BAR = 20;
+const bar = (fraction) => {
+  const n = Math.round(fraction * BAR);
+  return `§6${"|".repeat(n)}§8${"|".repeat(BAR - n)} §f${Math.floor(fraction * 100)}%`;
+};
 
 function fits(owner, plan, hall) {
   const box = worldBox(plan, hall, { x: hall.fx, z: hall.fz });
@@ -191,28 +224,22 @@ export function beginBuild(owner, level, style, resumeIndex = 0) {
   if (!hall || buildFor(owner)) return false;
   const forward = { x: hall.fx, z: hall.fz };
   const plan = drawHall(level, STYLES[style]);
-  // clear what the old hall had that the new one doesn't
-  let remove;
-  if (!resumeIndex && hall.level > 0 && (hall.level !== level || hall.style !== style)) {
-    const keepCells = new Set(worldCells(plan, hall, forward).map((c) => `${c.x},${c.y},${c.z}`));
-    remove = worldCells(drawHall(hall.level, STYLES[hall.style]), hall, forward)
-      .filter((c) => !keepCells.has(`${c.x},${c.y},${c.z}`))
-      .sort((a, b) => b.y - a.y);
-  }
+  // take the old hall down completely first, so none of it is left standing in or around the new one
+  const clearBox = !resumeIndex && hall.level > 0 ? clearBoxFor(drawHall(hall.level, STYLES[hall.style]), hall, forward) : undefined;
   const fast = (playerById(owner) && (heroOf(playerById(owner)).skills.keep_masterbuilder ?? 0) > 0) ? 2 : 1;
   const perTick = Math.max(8, Math.ceil(plan.cells.size / RISE_TICKS[level])) * fast;
   hall.building = { level, style, index: resumeIndex };
   saveHalls();
   let lastSaved = resumeIndex;
+  // the settlement feature clears buildings standing where a bigger hall goes (settle/hallmove.js); once per build
+  if (!resumeIndex) api.emit("hallBuildStarted", { owner, level, style });
   startBuild({
     id: owner, dimensionId: "minecraft:overworld", origin: { x: hall.x, y: hall.y, z: hall.z }, forward, plan,
-    style: STYLES[style], perTick, remove, index: resumeIndex,
-    onProgress(done, total) {
+    style: STYLES[style], perTick, clearBox, keep: [cornerOf(hall), { x: hall.x, y: hall.y, z: hall.z }], index: resumeIndex,
+    onProgress(fraction, done) {
+      // the name is said once, by the title when the build starts; after that only a bar
       const player = playerById(owner);
-      if (player && system.currentTick % 10 === 0) {
-        const pct = Math.floor((done / total) * 100);
-        player.onScreenDisplay.setActionBar(`§6${HALL_TIERS[level].name} rising §f${pct}%`);
-      }
+      if (player && system.currentTick % 10 === 0) player.onScreenDisplay.setActionBar(bar(fraction));
       if (done - lastSaved > 2000) { hall.building.index = done; lastSaved = done; saveHalls(); }
     },
     onDone() {
@@ -224,6 +251,7 @@ export function beginBuild(owner, level, style, resumeIndex = 0) {
       hall.lost = false;
       hall.marks = worldMarks(plan, hall, forward);
       saveHalls();
+      hideCornerstone(owner);
       setTreeLook(owner);
       api.emit("hallBuilt", { owner, level, style, marks: hall.marks, first });
       const player = playerById(owner);
@@ -247,10 +275,61 @@ export function beginBuild(owner, level, style, resumeIndex = 0) {
     flyby(watcher, {
       center: { x: hall.x + forward.x * mid, y: hall.y, z: hall.z + forward.z * mid },
       radius: size * 0.75 + 10, height: b.y1 * 0.8 + 8,
-      seconds: Math.min(24, Math.max(8, plan.cells.size / perTick / 20)), title: `§6${HALL_TIERS[level].name} rising`,
+      seconds: Math.min(20, Math.max(8, RISE_TICKS[level] / fast / 20 + (clearBox ? 2 : 0))), title: `§6The ${HALL_TIERS[level].name} rises`,
     });
   }
   return true;
+}
+
+// Halls raised before the stone was taken away still show it: take it now
+// (on load, and again whenever the Town Hall menu opens, in case its chunk was not loaded then)
+export function tidyCornerstone(owner) {
+  const hall = hallOf(owner);
+  if (!hall || hall.lost || hall.building || !(hall.level > 0)) return;
+  if (!hall.hidden) hideCornerstone(owner);
+  if (!hall.marks?.board) addBoard(owner);
+}
+
+// Halls raised before the Town Board existed get one now, where a new hall of that size would have it
+function addBoard(owner) {
+  const hall = hallOf(owner);
+  const plan = drawHall(hall.level, STYLES[hall.style]);
+  const spot = plan.marks.board;
+  if (!spot) return;
+  const forward = { x: hall.fx, z: hall.fz };
+  const at = worldMarks(plan, hall, forward).board;
+  try {
+    const block = world.getDimension("overworld").getBlock(at);
+    if (!block) return; // not loaded: try again later
+    if (block.isAir) {
+      const cell = plan.cells.get(`${spot.x},${spot.y},${spot.z}`);
+      block.setPermutation(resolveRole(STYLES[hall.style], frameFor(forward), "board", cell?.o));
+    }
+    if (block.typeId !== BOARD) return;
+    hall.marks = { ...(hall.marks ?? {}), board: at };
+    saveHalls();
+  } catch (e) {
+    console.warn(`[Town Hall] could not add the Town Board: ${e}`);
+  }
+}
+
+// Moving the hall: the standing building stays, the Tree sleeps, and you get a cornerstone to place again
+function moveHall(player, owner) {
+  new MessageFormData().title("Move the town hall")
+    .body("You get a Hall Cornerstone back to place somewhere else in your land. The building that stands now stays where it is, but it stops being your town hall and the Tree of Oaths sleeps until the new hall rises. Levels you already paid for are free to raise again.")
+    .button1("Keep it here").button2("Move it")
+    .show(player).then((r) => {
+      if (r.canceled || r.selection !== 1) return hallMenu(player, owner);
+      const hall = hallOf(owner);
+      if (!hall || buildFor(owner)) return;
+      hall.lost = true;
+      hall.building = null;
+      hall.level = 0;
+      hall.hidden = false;
+      saveHalls();
+      player.getComponent("minecraft:inventory")?.container?.addItem(new ItemStack(CORNERSTONE, 1));
+      player.sendMessage("§7You have a Hall Cornerstone. Place it where the new front door should be, facing the way the hall should run.");
+    }).catch(() => {});
 }
 
 // The Tree of Oaths shows a banner tree for a Knight's hall and an ember-root for a Marked one
@@ -272,6 +351,7 @@ export function setTreeLook(owner) {
 // Pick up builds that were under way when the world closed
 export function resumeBuilds() {
   for (const [owner, hall] of Object.entries(halls())) {
+    tidyCornerstone(owner);
     if (hall.building && !buildFor(owner)) {
       const { level, style, index } = hall.building;
       hall.building = null;
@@ -297,6 +377,7 @@ export function hallMenu(player, owner) {
       ? "§7You have no town hall yet. Craft a §fHall Cornerstone§7 at the Siege Workshop and place it where the front door should be, facing the way the hall should run."
       : "§7This settlement has no town hall yet.");
   }
+  tidyCornerstone(owner);
   const running = buildFor(owner);
   const allowed = allowedLevel(keep);
   const next = Math.max(hall.level, hall.building?.level ?? 0) + 1;
@@ -335,6 +416,8 @@ export function hallMenu(player, owner) {
     if (hall.level > 0) {
       form.button("Repair the hall\n§8puts every block back", "textures/items/iron_pickaxe");
       actions.push(() => confirmBuild(player, owner, hall.level, hall.style, [], true));
+      form.button("Move the town hall\n§8get the cornerstone back", "textures/items/siege_hall_cornerstone");
+      actions.push(() => moveHall(player, owner));
     }
   }
   if (hall.level >= 1) for (const extra of hallMenuExtras) {

@@ -9,15 +9,18 @@ Same pipeline as the towns (paths first, half-sunk paths, land portions decided 
 field, slope-aware floor heights and foundations, fields watered level by level), with the rules
 a growing settlement adds (worked out with the building-placement thread, 2026-11-11):
 
-  * The wall grows: Hamlet r32, Town r40, City r48, Castle r56 (outer face, blocks from the Plot
+  * The wall grows: Hamlet r36, Town r46, City r56, Castle r66 (outer face, blocks from the Plot
     Stone). The gate keeps its bearing. A slot may only open once the whole box is inside the wall
     with 2 blocks clear (radius <= wall - 3); a slot straddling an old wall line opens later.
-  * Old wall lines at r32 and r48 can become ring roads (templates choose which, and which arc).
-    The r40 and r56 lines just become build land once the wall moves past them.
+  * Old wall lines at r36 and r56 can become ring roads (templates choose which, and which arc).
+    The r46 and r66 lines just become build land once the wall moves past them.
   * The town hall grows too: the ground each hall level takes (drawHall(level) bounds, levels 1-5,
     from the Hall Cornerstone 5 ahead of the Plot Stone, plus 2 clear) is kept free of roads and
-    slots for good, so nothing has to be torn down when the hall grows.
-  * Slots are odd boxes: Small 7, Medium 11, Large 15, Great 21 (the long side may be 2 more),
+    slots for good up to level 4 (the Castle's hall); level 5's extra ground stays free of roads,
+    fields and trees but may hold slots (tagged hall5), which the Sovereign hall takes back.
+  * Slots are odd boxes (width along the door side x depth): Small 9x13, Medium 11x15 (long Medium
+    13x15), Large 15x15, Great 21x21 (Large and Great may be 2 longer); each Hamlet has one long
+    Medium or Large for the library (13 x 14),
     each with an absolute floor height, door side, walkway down to the road, tags and the tier
     that opens it. Fields are whole portions with no slots; they grow with the wall.
   * Minimum slots, cumulative: Hamlet 4 S 1 M; Town 7 S 3 M 1 L and a field; City 10 S 6 M 2 L;
@@ -38,9 +41,14 @@ from towngen import Town, ROT, PRIO, WIDTH
 import dressing
 
 TIERS = ["Hamlet", "Town", "City", "Castle"]
-WALL_R = [32, 40, 48, 56]                       # wall ring (outer face) per tier
+WALL_R = [36, 46, 56, 66]                       # wall ring (outer face) per tier (Mateo 2026-11-12; was 32/40/48/56)
 CLEAR = 3                                       # a slot's far corner stays this far inside the wall line
-SIZES = {"S": 7, "M": 11, "L": 15, "G": 21}
+# (width along the door side, depth into the plot); the first shape is the size's plain box, the
+# others its long variants. Grown to fit the region designs of PR #89 with a block to spare
+# (placement thread 2026-11-11): S 9x13, M 11x15 (long M 13x15, also the Hamlet's library slot),
+# L 15x15, G 21x21; Large and Great may be 2 longer either way.
+SHAPES = {"S": [(9, 13)], "M": [(11, 15), (13, 15)], "L": [(15, 15), (17, 15), (15, 17)], "G": [(21, 21), (23, 21), (21, 23)]}
+SIZES = {k: v[0][0] for k, v in SHAPES.items()}   # frontage of the plain box
 SIZE_NAME = {"S": "Small", "M": "Medium", "L": "Large", "G": "Great"}
 MINIMUM = [dict(S=4, M=1, L=0, G=0, field=0), dict(S=7, M=3, L=1, G=0, field=1),      # agreed with the placement
            dict(S=10, M=6, L=2, G=0, field=1), dict(S=13, M=8, L=3, G=0, field=1)]     # thread 2026-11-11; Great optional
@@ -66,18 +74,18 @@ HALL_CLEAR = 2
 TEMPLATES = {
     "crossroads": dict(label="Crossroads",
                        about="A cross street through the square out to the wall, a ring lane on the old Hamlet wall line round the front, side streets beyond it.",
-                       rings=[(32, -75, 75)],
-                       radials=[(90, 8, 54), (-90, 8, 54), (40, 8, 32), (-40, 8, 32), (40, 32, 54), (-40, 32, 54), (135, 32, 54), (-135, 32, 54)],
+                       rings=[(36, -75, 75)],
+                       radials=[(90, 8, 64), (-90, 8, 64), (40, 8, 36), (-40, 8, 36), (40, 36, 64), (-40, 36, 64), (135, 36, 64), (-135, 36, 64)],
                        square="round", field_share=0.1),
     "twin_rings": dict(label="Twin Rings",
-                       about="Both old wall lines (r32, r48) become ring lanes; streets from the square out to the first ring, staggered cross streets between the rings.",
-                       rings=[(32, -175, 175), (48, -115, 115)],
-                       radials=[(60, 8, 32), (-60, 8, 32), (120, 8, 32), (-120, 8, 32), (30, 32, 48), (-30, 32, 48), (95, 32, 48), (-95, 32, 48), (150, 32, 54), (-150, 32, 54)],
+                       about="The Hamlet and City wall lines (r36, r56) become ring lanes; streets from the square out to the first ring, staggered cross streets between the rings.",
+                       rings=[(36, -175, 175), (56, -115, 115)],
+                       radials=[(60, 8, 36), (-60, 8, 36), (120, 8, 36), (-120, 8, 36), (30, 36, 56), (-30, 36, 56), (95, 36, 56), (-95, 36, 56), (150, 36, 64), (-150, 36, 64)],
                        square="round", field_share=0.1),
     "market_street": dict(label="Market Street",
                           about="A long market runs from the square toward the gate; diagonal streets fan out from it to the outer ring.",
-                          rings=[(48, -150, 150)],
-                          radials=[(50, 8, 48), (-50, 8, 48), (115, 8, 54), (-115, 8, 54), (20, 20, 54), (-20, 20, 54), (85, 30, 48), (-85, 30, 48), (160, 40, 54), (-160, 40, 54)],
+                          rings=[(56, -150, 150)],
+                          radials=[(50, 8, 56), (-50, 8, 56), (115, 8, 64), (-115, 8, 64), (20, 22, 64), (-20, 22, 64), (85, 34, 56), (-85, 34, 56), (160, 46, 64), (-160, 46, 64)],
                           square="long", field_share=0.1),
 }
 
@@ -86,6 +94,18 @@ def tier_of_radius(r, clear=CLEAR):
     for t, w in enumerate(WALL_R):
         if r <= w - clear: return t
     return None
+
+
+def set_walls(walls):
+    """Other wall rings: template radii move with the old wall lines (piecewise linear through the
+    square's edge 8, each wall line, and the outer streets' end 2 inside the last wall)."""
+    global WALL_R
+    old = [0, 8] + WALL_R[:-1] + [WALL_R[-1] - 2]; new = [0, 8] + walls[:-1] + [walls[-1] - 2]
+    f = lambda r: int(round(float(np.interp(r, old, new))))
+    for t in TEMPLATES.values():
+        t["rings"] = [(f(r), a0, a1) for r, a0, a1 in t["rings"]]
+        t["radials"] = [(a, f(r0), f(r1)) for a, r0, r1 in t["radials"]]
+    WALL_R = list(walls)
 
 
 class Settlement(Town):
@@ -130,6 +150,10 @@ class Settlement(Town):
         i0, j0 = self.ij(x0, z0); i1, j1 = self.ij(x1, z1)
         self.HALL[i0:i1 + 1, j0:j1 + 1] = True
         self.TAKEN[self.HALL] = 2
+        _, (x0, z0, x1, z1) = self.halls[-2]                  # the Castle's hall (level 4) is kept for good; level 5's
+        self.HALL4 = np.zeros(self.G0.shape, bool)             # extra ground stays clear of roads, fields and trees but
+        i0, j0 = self.ij(x0, z0); i1, j1 = self.ij(x1, z1)     # may hold slots, taken back when the hall reaches level 5
+        self.HALL4[i0:i1 + 1, j0:j1 + 1] = True
         for name, (r, a) in (("plot_stone", (0, 0)), ("mason_bench", MASON), ("hall_cornerstone", (0, CORNERSTONE_AHEAD))):
             x, z = self.world(r, a); self.fixtures.append({"name": name, "at": [x - self.C[0], z - self.C[1]], "tier": 0})
 
@@ -264,7 +288,7 @@ class Settlement(Town):
         row facing the street, a 1-wide footpath, a second row facing that, and still an open middle
         at least 5 blocks across, a footpath loops round inside the first row and is joined to the
         street. Shallower portions keep one row and an open middle."""
-        need = self.BACK + 1 + SIZES["S"] + 1 + 3
+        need = self.BACK + 1 + SHAPES["S"][0][1] + 1 + 3
         for L, p in list(self.port.items()):
             if p["kind"] != "build": continue
             m = self.PORT == L
@@ -376,10 +400,10 @@ class Settlement(Town):
 
     def try_slot(self, size, cand, max_tier=3, long_only=False, square_only=False):
         door, deg, rid = cand
-        n = SIZES[size]
-        shapes = [(n, n), (n + 2, n), (n, n + 2)]; self.rng.shuffle(shapes)
-        if long_only: shapes = [q for q in shapes if q[0] != q[1]]
-        if square_only: shapes = [(n, n)]
+        plain = SHAPES[size][0]
+        shapes = SHAPES[size][:]; self.rng.shuffle(shapes)
+        if long_only: shapes = [q for q in shapes if q != plain]
+        if square_only: shapes = [plain]
         for w, d in shapes:
             bp = self.slot_bp(w, d)
             dx, dz = self.door_of(bp); rdx, rdz = TG.rot_xz(dx, dz, deg)
@@ -395,7 +419,7 @@ class Settlement(Town):
             nw = len(self.walks)
             e = self.try_place(bp, deg, door, "slot", gap=1 if self.rng.random() < 0.8 else 2, max_relief=5)
             if not e: continue
-            e.update(size=size, geo=t, long=(w != d), dims=(w, d), cells=G, deg=deg, walk=self.walks[-1] if len(self.walks) > nw else None, rid=rid)
+            e.update(size=size, geo=t, long=((w, d) != plain), dims=(w, d), cells=G, deg=deg, walk=self.walks[-1] if len(self.walks) > nw else None, rid=rid)
             self.slots.append(e)
             return e
         return None
@@ -426,6 +450,7 @@ class Settlement(Town):
     def place_slots(self):
         C = self.candidates()
         self.D53 = self.D > WALL_R[-1] - CLEAR
+        self.TAKEN[self.HALL & ~self.HALL4 & (self.K < 0) & (self.TAKEN == 2)] = 0
         self.TAKEN[self.D53 & (self.TAKEN == 0)] = 1
         def big(max_tier, need):
             """Large slots for the market (Town) and barracks (City); a long Medium where no Large fits."""
@@ -433,11 +458,12 @@ class Settlement(Town):
             if have >= need: return
             have += pass_("L", max_tier, need - have, near_sq)
             if have < need: pass_long(max_tier, need - have)
-        def pass_long(max_tier, count):
-            cs = C[:]; self.rng.shuffle(cs); cs.sort(key=near_sq); got = 0
+        def pass_long(max_tier, count, prefer=None):
+            cs = C[:]; self.rng.shuffle(cs); cs.sort(key=prefer or near_sq); got = 0
             for c in cs:
                 if got >= count: break
-                if self.try_slot("M", c, max_tier, long_only=True): got += 1
+                e = self.try_slot("M", c, max_tier, long_only=True)
+                if e: got += 1; e["library"] = max_tier == 0
             return got
         def pass_(size, max_tier, count, prefer=None):
             cs = C[:]; self.rng.shuffle(cs)
@@ -451,15 +477,16 @@ class Settlement(Town):
         near_sq = lambda c: math.hypot(c[0][0] - self.sq[0], c[0][1] - self.sq[1]) + 4 * self.rng.random()
         hamlet = lambda c: math.hypot(c[0][0] - self.sq[0], c[0][1] - self.sq[1]) + 3 * self.rng.random()
         # inner tiers first (their ground is smallest), biggest boxes first within each
-        pass_("M", 0, 1, hamlet)                       # Hamlet first: its ground is the smallest
-        pass_("S", 0, 4, hamlet)
-        big(1, 1)                                      # then the market's slot
-        pass_("S", 0, 1, hamlet)
-        pass_("M", 1, 3, near_sq)
-        pass_("S", 1, 4, near_sq)
-        big(2, 2)                                      # City gets its own batch
-        pass_("M", 2, 3, near_sq)
+        if not pass_long(0, 1, hamlet):                # Hamlet first: its ground is the smallest; its Medium is
+            pass_("M", 0, 1, hamlet)                   # a long one (13 x 15) for the library where it fits
+        big(1, 2)                                      # then the Town charter: the market's slot (the library counts
+        pass_("M", 1, 1, near_sq)                      # as one big), a Medium, then Smalls
+        pass_("S", 1, 3, hamlet)
+        pass_("M", 2, 1, near_sq)                      # City: one more Medium, three more Smalls
         pass_("S", 2, 3, near_sq)
+        pass_("S", 0, 2, hamlet); pass_("S", 1, 2, near_sq)
+        big(2, 3)
+        pass_("M", 2, 2, near_sq)
         pass_("G", 3, 1, far)
         pass_("L", 3, 2, far)
         pass_("M", 3, 3 + self.rng.randint(0, 2))
@@ -477,7 +504,7 @@ class Settlement(Town):
                         door = (int(round(x + nx * (hw + 0.5 + sb))), int(round(z + nz * (hw + 0.5 + sb))))
                         e = self.try_slot("M" if self.rng.random() < 0.3 else "S", (door, deg, n)) or self.try_slot("S", (door, deg, n))
                         if e: break
-                    t += (SIZES[e["size"]] + 1) if e else 1
+                    t += (e["dims"][0] + 1) if e else 1
         self.relax()
 
     def balance(self):
@@ -498,6 +525,8 @@ class Settlement(Town):
         # open as early as their ground allows, never deferred
         bigs = sorted([e for e in self.slots if e["geo"] >= 1 and (e["size"] == "L" or (e["size"] == "M" and e.get("long")))], key=lambda e: e["geo"])
         for e in bigs[:2]: e["opensAt"] = max(e["geo"], 1)
+        for e in self.slots:
+            if e.get("library"): e["opensAt"] = e["geo"]          # the Hamlet's library slot opens with the Hamlet
         self.slots.sort(key=lambda e: (e["opensAt"], "GLMS".index(e["size"])))
 
     def counts(self):
@@ -509,8 +538,22 @@ class Settlement(Town):
             out.append(c)
         return out
 
+    def charter(self):
+        """The tier charters (placement thread, 2026-11-11), cumulative. Town: 3 S, 2 M (Farmhouse,
+        Mint), a big slot for the market (Large or long Medium) and a field. City: 6 S, 4 Medium-or-
+        bigger in all with at least 1 big (the barracks may take a plain Medium). Since the slot resize, also
+        a Hamlet slot for the library (a long Medium or a Large). Returns (passes, shortfall)."""
+        c = {t: self.counts()[n] for n, t in enumerate(TIERS)}
+        H, T, Ci = c["Hamlet"], c["Town"], c["City"]
+        lib = min(1, H["L"] + H["M_long"])                 # the Hamlet's library slot (13 x 14 fits a long Medium)
+        need = [(lib, 1),
+                (T["S"], 3), (T["M"] + T["L"], 3), (T["L"] + T["M_long"] - lib, 1), (T["field"], 1),
+                (Ci["S"], 6), (Ci["M"] + Ci["L"], 4), (Ci["L"] + Ci["M_long"], 1)]
+        short = sum(max(0, b - a) for a, b in need)
+        return short == 0, short
+
     def meets(self):
-        """Minimums, where a Large may be stood in for by a long Medium (13 x 11: the market and the
+        """Minimums, where a Large may be stood in for by a long Medium (13 x 15: the market and the
         barracks may take one when no Large is free; placement thread 2026-11-11)."""
         cs = [dict(c, L=c["L"] + min(c["M_long"], max(0, c["M"] - 1))) for c in self.counts()]
         return all(cs[t][k] >= MINIMUM[t][k] for t in range(4) for k in MINIMUM[t]), cs
@@ -735,14 +778,17 @@ class Settlement(Town):
         else:
             end = (e["door"][0] + ROT[e["deg"]][0], e["door"][1] + ROT[e["deg"]][1])
         ek = int(self.at(self.KIND, *end)) if self.ok(*end) else 0
+        if e.get("library"): tags.append("library")
         if near(self.HALL, 3): tags.append("hall")
+        if e.get("foundation", 0) >= 4: tags.append("tall_foundation")
+        if near(self.HALL & ~self.HALL4, 0): tags.append("hall5")
         if ek == PRIO["square"] or near(self.KIND == PRIO["square"], 2): tags.append("square")
         if ek == PRIO["main"]: tags.append("road_front")
         t = e["opensAt"]; w = WALL_R[t]
         dmax = max(math.hypot(x - self.C[0], z - self.C[1]) for x, z in G)
         if dmax >= w - CLEAR - 4: tags.append("wall")
         gx, gz = self.polar(0, w); cx, cz = (box[0] + box[2]) / 2, (box[1] + box[3]) / 2
-        if math.hypot(cx - gx, cz - gz) <= 16 + SIZES[e["size"]] / 2: tags.append("gate")
+        if math.hypot(cx - gx, cz - gz) <= 16 + max(e["dims"]) / 2: tags.append("gate")
         if self.ok(*end):
             i, j = self.ij(*end); win = self.RID[max(0, i - 5):i + 6, max(0, j - 5):j + 6]
             if len(set(win[win >= 0].tolist())) >= 2: tags.append("corner")
@@ -791,7 +837,7 @@ class Settlement(Town):
             walk = [[x - C[0], z - C[1], *k2(k)] for (x, z), k in zip(e["walk"][0], e["walk"][1])] if e["walk"] else []
             slots.append({"id": f"{e['size'].lower()}{n + 1}", "size": SIZE_NAME[e["size"]], "box": [box[0] - C[0], box[1] - C[1], box[2] - C[0], box[3] - C[1]],
                           "floor_y": int(e["ground_y"]), "door": {"side": side, "step": [e["door"][0] - C[0], e["door"][1] - C[1]], "walk": walk},
-                          "tags": tags, "long": bool(e.get("long")), "opensAt": TIERS[e["opensAt"]]})
+                          "tags": tags, "long": bool(e.get("long")), "foundation": int(e.get("foundation", 0)), "opensAt": TIERS[e["opensAt"]]})
         roads = []
         for i, j in np.argwhere(self.K >= 0):
             x, z = int(i) + self.X0, int(j) + self.Z0
@@ -805,7 +851,8 @@ class Settlement(Town):
         ok, _ = self.meets(); cs = self.counts()
         return {
             "template": self.template, "label": self.tpl["label"], "about": self.tpl["about"], "seed": self.seed, "meets_minimum": ok,
-            "counts_by_tier": {TIERS[t]: cs[t] for t in range(4)}, "meets_minimum_note": "a long Medium (13 x 11) may stand in for a Large",
+            "passes_charter": self.charter()[0],
+            "counts_by_tier": {TIERS[t]: cs[t] for t in range(4)}, "meets_minimum_note": "a long Medium (13 x 15) may stand in for a Large",
             "square": {"centre": list(self.rel(*self.sq)), "y": int(self.sqY), "shape": self.tpl["square"]},
             "gates": self.gates,
             "hall": [{"level": lv, "box": [b[0] - C[0], b[1] - C[1], b[2] - C[0], b[3] - C[1]]} for lv, b in self.halls],
@@ -879,7 +926,9 @@ def main():
     ap.add_argument("--templates", default=",".join(TEMPLATES)); ap.add_argument("--seed", type=int, default=1); ap.add_argument("--tries", type=int, default=8)
     ap.add_argument("--trees", default="", help="trees.json from map/trees/build_trees.py; uses map/trees/place.py to scatter them")
     ap.add_argument("--trees-src", default=os.path.join(HERE, "..", "trees"))
+    ap.add_argument("--walls", default="", help="try other wall rings, e.g. 32,40,48,56: template radii are stretched to match")
     a = ap.parse_args()
+    if a.walls: set_walls([int(v) for v in a.walls.split(",")])
     plot = load_plots(a.config)[a.plot]
     if a.trees:
         Settlement.tree_src = os.path.abspath(a.trees_src); Settlement.tree_index = json.load(open(a.trees))
@@ -891,16 +940,17 @@ def main():
         for k in range(a.tries):
             seed = a.seed * 1000 + n * 97 + k * 13 + sum(map(ord, plot["name"]))
             s = Settlement(plot, tpl, T, L, seed); s.run()
-            ok, cs = s.meets()
+            ok, cs = s.meets(); passes, cshort = s.charter()
             short = sum(max(0, MINIMUM[t][q] - cs[t][q]) for t in range(4) for q in MINIMUM[t])
-            print(plot["name"], tpl, seed, "ok" if ok else f"short {short}", cs[-1], "fields", len(s.field_out), "dry", s.unwatered)
-            if best is None or short < best[0]: best = (short, s)
-            if ok: break
+            print(plot["name"], tpl, seed, "charter" if passes else f"charter short {cshort}", "| minimum", "ok" if ok else f"short {short}", cs[-1], flush=True)
+            lib = any(e.get("library") for e in s.slots)            # a Hamlet library slot is a must
+            if best is None or (not lib, cshort, short) < best[0]: best = ((not lib, cshort, short), s)
+            if passes: break
         s = best[1]
         s.picture_settle(os.path.join(a.out, f"{s.key}-{tpl}.png"))
         variants.append(s.export())
     doc = {"format": "hollow-crown-settlement/1", "plot": plot, "tiers": TIERS, "wall_radius": WALL_R, "clear": CLEAR,
-           "sizes": {SIZE_NAME[k]: v for k, v in SIZES.items()}, "minimum": {TIERS[t]: MINIMUM[t] for t in range(4)},
+           "sizes": {SIZE_NAME[k]: SHAPES[k] for k in SHAPES}, "minimum": {TIERS[t]: MINIMUM[t] for t in range(4)},
            "about": "Coordinates are blocks from the Plot Stone on world axes (dx east, dz south); y is absolute. "
                     "box = [x0, z0, x1, z1] inclusive. roads rows = [dx, dz, y, slab|full, kind, tier index]. "
                     "groundwork rows = [dx, y, dz, palette index, tier index]: place a tier's rows when that tier opens (air = dig). "

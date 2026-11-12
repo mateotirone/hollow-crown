@@ -1,7 +1,7 @@
 // Building pieces shared by every regional hall: the Plan they draw into, and walls, roofs, towers,
 // domes, round huts and the furniture every hall must have. Pure code, runs in Node too.
 //
-// Local frame: the Hall Cornerstone sits at (0, 1, 0), right in front of the door.
+// Local frame: the hall is laid out from (0, 1, 0), right in front of the door, where the Hall Cornerstone is placed. The stone is taken away once the hall stands.
 // +z runs away from the player into the hall, +x is to the player's right, y = 0 is the floor layer
 // (one below the cornerstone), so people stand at y = 1.
 

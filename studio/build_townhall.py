@@ -210,7 +210,7 @@ write_json(os.path.join(BP, "loot_tables", "blocks", "siege_nothing.json"), {"po
 write_json(os.path.join(BP, "blocks", "tree_of_oaths.json"), {
     "format_version": "1.21.60",
     "minecraft:block": {
-        "description": {"identifier": "siege:tree_of_oaths", "menu_category": {"category": "none"},
+        "description": {"identifier": "siege:tree_of_oaths", "menu_category": {"category": "construction"},
                         "states": {"siege:look": [0, 1, 2]}},
         "components": {
             "minecraft:display_name": "tile.siege:tree_of_oaths.name",

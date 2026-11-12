@@ -1,6 +1,7 @@
 import { addTests, assert, assertEqual } from "../core/tests.js";
 import { MAP, PLOT_PLAN, WARDS, WELCOME, REGION_BLOCK, SETTLEMENT, EXPANSION, REGION_BIOME } from "./config.js";
 import { pedestalLayout, arrivalSpot } from "./welcome.js";
+import { MINI } from "./miniature.js";
 import { compass } from "./claims.js";
 import { outsideMap, wardAt } from "./travel.js";
 
@@ -40,31 +41,26 @@ addTests("plots", {
 });
 
 addTests("plots", {
-  "welcome hall has one pedestal per plot, none sharing a spot": () => {
+  "welcome hall has one Map Stone per plot, none sharing a spot": () => {
     const layout = pedestalLayout();
     assertEqual(layout.length, PLOT_PLAN.length);
-    const spots = new Set();
-    for (const p of layout) {
-      spots.add(`${p.dx},${p.dz}`);
-      spots.add(`${p.sx},${p.sz}`);
-      assert(Math.hypot(p.dx, p.dz) < WELCOME.hallRadius - 2, `${p.name} pedestal is off the floor`);
-      assert(Math.hypot(p.sx, p.sz) > 4, `${p.name} sign is on the Waystone`);
-      assert(REGION_BLOCK[p.plan.region], `${p.name} has no pedestal block`);
-    }
-    assertEqual(spots.size, PLOT_PLAN.length * 2);
+    assertEqual(new Set(layout.map((p) => `${p.dx},${p.dz}`)).size, PLOT_PLAN.length);
+    for (const p of layout) assert(REGION_BLOCK[p.plan.region], `${p.name} has no pedestal block`);
   },
-  "pedestals have room between them": () => {
+  "Map Stones have room between them": () => {
     const layout = pedestalLayout();
-    for (const a of layout) for (const b of layout) if (a !== b) assert(Math.hypot(a.dx - b.dx, a.dz - b.dz) >= 3, `${a.name} and ${b.name} pedestals touch`);
+    for (const a of layout) for (const b of layout) if (a !== b) assert(Math.hypot(a.dx - b.dx, a.dz - b.dz) >= 3, `${a.name} and ${b.name} stones touch`);
   },
-  "pedestals point roughly toward their plots": () => {
-    const k = WARDS[0];
+  "each Map Stone stands on its plot's real spot, scaled down": () => {
     for (const p of pedestalLayout()) {
-      const want = Math.atan2(p.plan.x - k.x, -(p.plan.z - k.z));
-      const got = Math.atan2(p.dx, -p.dz);
-      const off = Math.abs(((got - want + Math.PI * 3) % (Math.PI * 2)) - Math.PI) * 180 / Math.PI;
-      assert(off < 40, `${p.name} pedestal is ${Math.round(off)} degrees off`);
+      assert(Math.abs(p.dx * MINI.scale - p.plan.x) <= MINI.scale / 2 + 0.5, `${p.name} is off in x`);
+      assert(Math.abs(p.dz * MINI.scale - p.plan.z) <= MINI.scale / 2 + 0.5, `${p.name} is off in z`);
+      assert(Math.abs(p.dx) <= MINI.half && Math.abs(p.dz) <= MINI.half, `${p.name} is off the miniature`);
     }
+  },
+  "the miniature and the test area in the sky stay clear of each other": () => {
+    const reach = MINI.half + 2;
+    assert(Math.abs(WELCOME.hall.x - WELCOME.testArea.x) > reach + 50 || Math.abs(WELCOME.hall.z - WELCOME.testArea.z) > reach + 50, "they overlap");
   },
   "welcome hall and test area are inside the map, clear of each other": () => {
     for (const spot of [WELCOME.hall, WELCOME.testArea]) assert(!outsideMap(spot) && spot.y >= 280, "bad sky spot");

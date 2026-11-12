@@ -1,5 +1,5 @@
 {
-  "format_version": "1.21.60",
+  "format_version": "1.21.90",
   "minecraft:block": {
     "description": {
       "identifier": "siege:castle_gate",
@@ -70,11 +70,12 @@
           16,
           2
         ]
-      }
+      },
+      "siege:clickable": {}
     },
     "permutations": [
       {
-        "condition": "q.block_state('minecraft:cardinal_direction') == 'north'",
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'north' && !q.block_state('siege:open')",
         "components": {
           "minecraft:transformation": {
             "rotation": [
@@ -86,7 +87,7 @@
         }
       },
       {
-        "condition": "q.block_state('minecraft:cardinal_direction') == 'south'",
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'south' && !q.block_state('siege:open')",
         "components": {
           "minecraft:transformation": {
             "rotation": [
@@ -98,7 +99,7 @@
         }
       },
       {
-        "condition": "q.block_state('minecraft:cardinal_direction') == 'east'",
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'east' && !q.block_state('siege:open')",
         "components": {
           "minecraft:transformation": {
             "rotation": [
@@ -110,12 +111,80 @@
         }
       },
       {
-        "condition": "q.block_state('minecraft:cardinal_direction') == 'west'",
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'west' && !q.block_state('siege:open')",
         "components": {
           "minecraft:transformation": {
             "rotation": [
               0,
               90,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'north' && q.block_state('siege:open')",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "translation": [
+              0,
+              0,
+              -0.4375
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'south' && q.block_state('siege:open')",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "translation": [
+              0,
+              0,
+              0.4375
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'east' && q.block_state('siege:open')",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              90,
+              0
+            ],
+            "translation": [
+              0.4375,
+              0,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'west' && q.block_state('siege:open')",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              90,
+              0
+            ],
+            "translation": [
+              -0.4375,
+              0,
               0
             ]
           }
@@ -166,18 +235,6 @@
           "minecraft:material_instances": {
             "*": {
               "texture": "siege_castle_gate_netherite",
-              "render_method": "alpha_test"
-            }
-          }
-        }
-      },
-      {
-        "condition": "q.block_state('siege:open') == true",
-        "components": {
-          "minecraft:collision_box": false,
-          "minecraft:material_instances": {
-            "*": {
-              "texture": "siege_castle_gate_open",
               "render_method": "alpha_test"
             }
           }

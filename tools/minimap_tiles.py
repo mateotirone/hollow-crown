@@ -9,9 +9,9 @@ Defaults are the files map/genworld.py and map/draw_map.py write in the shared f
 Run it again whenever the world map is regenerated, then commit the changed files.
 
 Writes:
-    Siege_Nights_RP/textures/ui/hc/minimap/mXXZZ.png   one view per 64-block tile: that tile and its 8 neighbours
-    Siege_Nights_RP/textures/ui/hc/minimap/mnone.png   "uncharted" (off the map, other dimensions)
-    Siege_Nights_RP/textures/ui/hc/minimap/a0..a7.png  the player's arrow, north-up, turning clockwise
+    Siege_Nights_RP/textures/ui/hc/minimap/mxXXzZZ.png one view per 64-block tile: that tile and its 8 neighbours
+    Siege_Nights_RP/textures/ui/hc/minimap/mnone__.png "uncharted" (off the map, other dimensions)
+    Siege_Nights_RP/textures/ui/hc/minimap/aq..ay.png  the player's arrow, north-up, turning clockwise
     Siege_Nights_RP/textures/ui/hc/minimap/frame.png   the border
     Siege_Nights_BP/scripts/minimap/regions.js         which region each 32-block cell is in (for the place label)
 
@@ -71,22 +71,25 @@ for x, z in plots:
     d.ellipse([cx - 2.5, cy - 2.5, cx + 2.5, cy + 2.5], fill=(20, 18, 24)); d.ellipse([cx - 1.5, cy - 1.5, cx + 1.5, cy + 1.5], fill=(236, 190, 70))
 
 # ---------------------------------------------------------------- tiles
+# Every PNG is written as plain RGBA, like the rest of the pack: Bedrock showed the first (palette) tiles as black.
 def save(img, name):
-    img.quantize(PALETTE, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE).save(os.path.join(OUT, name), optimize=True)
+    img = img.quantize(PALETTE, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE)   # fewer colours, smaller file
+    img.convert("RGBA").save(os.path.join(OUT, name), optimize=True)
 
 for f in os.listdir(OUT):                                # drop tiles from an older, differently sized map
-    if re.fullmatch(r"m\d{4}\.png", f): os.remove(os.path.join(OUT, f))
+    if re.fullmatch(r"m\d{4}\.png|mx\d\dz\d\d\.png", f): os.remove(os.path.join(OUT, f))
 for tx in range(TILES):
     for tz in range(TILES):
-        save(small.crop((tx * PX, tz * PX, tx * PX + 3 * PX, tz * PX + 3 * PX)), f"m{tx:02d}{tz:02d}.png")
+        save(small.crop((tx * PX, tz * PX, tx * PX + 3 * PX, tz * PX + 3 * PX)), f"mx{tx:02d}z{tz:02d}.png")
 
 none = Image.new("RGB", (3 * PX, 3 * PX), UNCHARTED)
 nd = ImageDraw.Draw(none)
 for i in range(-3 * PX, 3 * PX, 6): nd.line([(i, 3 * PX), (i + 3 * PX, 0)], fill=(46, 41, 54))
-none.save(os.path.join(OUT, "mnone.png"), optimize=True)
+none.convert("RGBA").save(os.path.join(OUT, "mnone__.png"), optimize=True)
 
 # ---------------------------------------------------------------- arrow: drawn big, turned, shrunk
 BIG, ARROW = 120, 12
+DIRS = "qrstuvwy"          # direction letters, north then clockwise (no digits: see tools/minimap_ui.py)
 base = Image.new("RGBA", (BIG, BIG), (0, 0, 0, 0))
 bd = ImageDraw.Draw(base)
 tip, left, notch, right = (60, 4), (14, 112), (60, 88), (106, 112)
@@ -95,7 +98,7 @@ k = 0.6; c = (60, 70)
 inner = [(c[0] + (p[0] - c[0]) * k, c[1] + (p[1] - c[1]) * k) for p in (tip, left, notch, right)]
 bd.polygon(inner, fill=(255, 248, 225, 255))
 for i in range(8):
-    base.rotate(-45 * i, resample=Image.BICUBIC, center=(60, 60)).resize((ARROW, ARROW), Image.BOX).save(os.path.join(OUT, f"a{i}.png"), optimize=True)
+    base.rotate(-45 * i, resample=Image.BICUBIC, center=(60, 60)).resize((ARROW, ARROW), Image.BOX).save(os.path.join(OUT, f"a{DIRS[i]}.png"), optimize=True)
 
 # ---------------------------------------------------------------- frame: dark iron rim with a thin brass line
 F = 3 * PX + 8

@@ -13,11 +13,21 @@
     "default": "geometry.siege_b.champion_retainer"
    },
    "animations": {
-    "main": "animation.siege_b.champion_retainer"
+    "base": "animation.siege_b.champion_retainer",
+    "idle": "animation.siege_b.champion_retainer.idle",
+    "walk": "animation.siege_b.champion_retainer.walk",
+    "attack": "animation.siege_b.champion_retainer.attack",
+    "swing": "controller.animation.siege_b.champion_retainer.swing",
+    "hurt": "animation.siege_b.champion_retainer.hurt",
+    "flinch": "controller.animation.siege_b.champion_retainer.flinch"
    },
    "scripts": {
     "animate": [
-     "main"
+     "base",
+     "idle",
+     "walk",
+     "swing",
+     "flinch"
     ]
    },
    "render_controllers": [

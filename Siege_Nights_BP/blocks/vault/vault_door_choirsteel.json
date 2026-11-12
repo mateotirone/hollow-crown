@@ -1,0 +1,147 @@
+{
+  "format_version": "1.21.90",
+  "minecraft:block": {
+    "description": {
+      "identifier": "siege:vault_door_choirsteel",
+      "menu_category": {
+        "category": "construction"
+      },
+      "states": {
+        "siege:cracks": [
+          0,
+          1,
+          2
+        ]
+      },
+      "traits": {
+        "minecraft:placement_direction": {
+          "enabled_states": [
+            "minecraft:cardinal_direction"
+          ]
+        }
+      }
+    },
+    "components": {
+      "minecraft:display_name": "tile.siege:vault_door_choirsteel.name",
+      "minecraft:geometry": {
+        "identifier": "geometry.siege_vault_door",
+        "bone_visibility": {
+          "cracks_1": "q.block_state('siege:cracks') == 1",
+          "cracks_2": "q.block_state('siege:cracks') == 2"
+        }
+      },
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "siege_vault_door_choirsteel",
+          "render_method": "alpha_test"
+        },
+        "trim": {
+          "texture": "siege_vault_trim_choirsteel",
+          "render_method": "alpha_test"
+        },
+        "frame": {
+          "texture": "siege_vault_stone_plain",
+          "render_method": "alpha_test"
+        },
+        "cracks_1": {
+          "texture": "siege_vault_cracks_1",
+          "render_method": "alpha_test"
+        },
+        "cracks_2": {
+          "texture": "siege_vault_cracks_2",
+          "render_method": "alpha_test"
+        },
+        "gem": {
+          "texture": "siege_vault_glow",
+          "render_method": "alpha_test",
+          "face_dimming": false,
+          "ambient_occlusion": false
+        }
+      },
+      "minecraft:collision_box": {
+        "origin": [
+          -8,
+          0,
+          -8
+        ],
+        "size": [
+          16,
+          16,
+          16
+        ]
+      },
+      "minecraft:selection_box": {
+        "origin": [
+          -8,
+          0,
+          -8
+        ],
+        "size": [
+          16,
+          16,
+          16
+        ]
+      },
+      "minecraft:map_color": "#6a44b0",
+      "minecraft:light_dampening": 0,
+      "minecraft:destructible_by_mining": false,
+      "minecraft:destructible_by_explosion": false,
+      "minecraft:flammable": {
+        "catch_chance_modifier": 0,
+        "destroy_chance_modifier": 0
+      },
+      "siege:clickable": {},
+      "minecraft:light_emission": 6
+    },
+    "permutations": [
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'north'",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'west'",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              90,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'south'",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              180,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "condition": "q.block_state('minecraft:cardinal_direction') == 'east'",
+        "components": {
+          "minecraft:transformation": {
+            "rotation": [
+              0,
+              -90,
+              0
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

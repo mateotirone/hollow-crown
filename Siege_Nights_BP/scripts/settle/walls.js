@@ -14,11 +14,11 @@
 
 import { world, system, BlockPermutation } from "@minecraft/server";
 import { ModalFormData } from "@minecraft/server-ui";
-import { isReady, keepOf, tierOf, TIERS, onTick, moduleStore, on, emit, addFilter, addLandClaim, stoneId, STONE_KINDS, title, CASTLE_BLOCKS, WALL_HP, PORTCULLISES, GATES, regionalId } from "../siege/api.js";
+import { isReady, keepOf, tierOf, TIERS, onTick, moduleStore, on, emit, addFilter, addLandClaim, stoneId, STONE_KINDS, title, CASTLE_BLOCKS, WALL_HP, PORTCULLISES, GATES, regionalId, getState, isAlly, guardCount, setGate, openLeafAt } from "../siege/api.js";
 import { STYLES } from "../townhall/styles.js";
 import { PLOT_PLAN } from "../plots/config.js";
 import { plotAt, mapMode } from "../plots/claims.js";
-import { WALLS, WALL_LEVELS, MAX_WALL, bearingToAngle, wallShape, radiusAt, smoothGround, stationSpots, groundProblem, wallColumns, onWallLine, gateSpot, materialKind, wallArmor, columnKinds, wallSeed, WALL_STONES, WALL_TIMBER, WALL_STONE_IDS } from "./walldata.js";
+import { WALLS, WALL_LEVELS, MAX_WALL, bearingToAngle, wallShape, radiusAt, smoothGround, stationSpots, groundProblem, wallColumns, onWallLine, gateSpot, materialKind, wallArmor, columnKinds, wallSeed, WALL_STONES, WALL_TIMBER, WALL_STONE_IDS, WALL_LOG } from "./walldata.js";
 import { styleOf } from "./plans.js";
 import { sfx } from "../core/sfx.js";
 
@@ -83,8 +83,8 @@ export function palette(style, L, look = {}) {
   const timber = WALL_TIMBER.includes(look.timber) ? look.timber : style;
   const roles = (STYLES[timber] ?? STYLES.vale).roles;
   const kinds = {
-    // the palisade stakes and wall planks, with that region's timber behind them in case the block is missing
-    log: perm(regionalId("palisade", timber)) ?? first(roles.beam ?? ["minecraft:spruce_log"]),
+    // log walls are the timber's stripped log (WALL_LOG); wall planks with that region's timber behind them in case the block is missing
+    log: first([WALL_LOG[timber] ?? WALL_LOG.vale, ...(roles.beam ?? []), "minecraft:spruce_log"]),
     fence: first(roles.rail ?? ["minecraft:spruce_fence"]),
     plank: perm(regionalId("wall_planks", timber)) ?? first(roles.floor ?? ["minecraft:spruce_planks"]),
   };
@@ -110,6 +110,13 @@ export function palette(style, L, look = {}) {
     },
     gate: (dir) => (L.gate === "open" ? undefined : perm(regionalId(L.gate, style), gateStates(dir)) ?? perm(`siege:${L.gate}`, gateStates(dir))),
     port: (dir) => perm(regionalId("portcullis", style), gateStates(dir)) ?? perm("siege:portcullis", gateStates(dir)),
+    // steps up the inside of the wall rise toward dir; wood walls use the timber's stairs, stone walls stone brick stairs
+    stair: (dir, wood) => {
+      const id = (wood ? [...(roles.seat ?? []), "minecraft:spruce_stairs"] : ["minecraft:stone_brick_stairs"]).find((r) => perm(r)) ?? "minecraft:stone_brick_stairs";
+      return perm(id, { weirdo_direction: { e: 0, w: 1, s: 2, n: 3 }[dir], upside_down_bit: false });
+    },
+    // a ladder on a tower's inner face, facing into the town
+    ladder: (dir) => perm("minecraft:ladder", { facing_direction: { n: 2, s: 3, w: 4, e: 5 }[dir] }),
     // an arrow slit looks out along the way its stretch of wall faces (angle 0 = east, a quarter turn = south)
     slit: (angle) => perm("siege:arrow_slit", { "minecraft:cardinal_direction": ["east", "south", "west", "north"][((Math.round(angle / (Math.PI / 2)) % 4) + 4) % 4] }) ?? kinds[L.body],
   };
@@ -156,6 +163,8 @@ export function permFor(P, w, kind, col) {
   if (kind === "slit") return P.slit(col?.a ?? 0);
   if (kind === "roofb") return P.roofb;
   if (kind.startsWith("roof:")) return P.roof(kind.slice(5));
+  if (kind.startsWith("wstair:") || kind.startsWith("sstair:")) return P.stair(kind.slice(7), kind[0] === "w");
+  if (kind.startsWith("ladder:")) return P.ladder(kind.slice(7));
   return P.kinds[kind];
 }
 
@@ -180,7 +189,7 @@ function placeColumn(dim, w, job, col) {
   // Measured once per column and kept on the wall record (w.lifts), so later levels, repairs and taking the ring
   // down all use the same height.
   const lk = `${x},${z}`;
-  let lift = w.lifts?.[lk];
+  let lift = col.role === "stair" || col.role === "ladder" ? 0 : w.lifts?.[lk]; // steps and ladders keep their measured heights
   if (lift === undefined) {
     lift = 0;
     while (lift < 4 && NATURAL.test(dim.getBlock({ x, y: base + 1 + lift, z })?.typeId ?? "")) lift++;
@@ -200,6 +209,21 @@ function placeColumn(dim, w, job, col) {
     n++;
   }
   return n;
+}
+
+// A new level's steps and tower ladders don't always stand where the old level's did: take down the old ones that
+// the new wall won't build over (a few hundred blocks at most)
+const STEP_ROLES = new Set(["stair", "landing", "ladder"]);
+function clearOldSteps(dim, w, job) {
+  if (!(w.level > 0) || w.level === job.level || !WALL_LEVELS[w.level]) return;
+  const keep = new Set(job.cols.map((c) => `${c.x},${c.z}`));
+  const air = perm("minecraft:air");
+  for (const col of wallColumns({ center: w, radius: w.radius, level: w.level, gateAngle: w.gate, smooth: w.ground })) {
+    if (!STEP_ROLES.has(col.role) || keep.has(`${col.x},${col.z}`)) continue;
+    for (const [y] of columnKinds(WALL_LEVELS[w.level], col, wallSeed(w))) {
+      try { setBlock(dim, col.x, y, col.z, air); } catch { /* not loaded */ }
+    }
+  }
 }
 
 function measure(dim, w) {
@@ -229,6 +253,7 @@ function step(id, job) {
       return world.getPlayers().find((p) => p.id === id)?.sendMessage(`§cThe wall can't be raised: ${problem}`);
     }
     job.cols = wallColumns({ center: w, radius: w.radius, level: job.level, gateAngle: w.gate, smooth: w.ground });
+    clearOldSteps(dim, w, job);
     job.index = Math.min(w.building?.index ?? 0, job.cols.length);
     save();
   }
@@ -274,6 +299,7 @@ export function raiseWall(id, level, { center, style, bearing, radius, shape } =
   if (!L) return `There is no wall level ${level}.`;
   if (jobs.has(id)) return "A wall is already rising.";
   let w = walls()[id];
+  if (w?.level > 0 && w.ground) setWallGate(id, w, false); // a swung-open gate shuts before the wall is rebuilt round it
   const moved = w && center && (w.x !== center.x || w.z !== center.z);
   if (!w || moved) {
     if (!center) return "There is no wall line here yet.";
@@ -312,6 +338,7 @@ export function moveWall(id, radius, down = () => {}) {
   if (w.radius === radius) { down(); return "already"; }
   if (jobs.has(id)) { system.runTimeout(() => moveWall(id, radius, down), 100); return "waiting"; }
   const level = Math.max(1, w.level || w.building?.level || 1);
+  if (w.level > 0 && w.ground) setWallGate(id, w, false); // shut the gate before its wall comes down
   const old = { ...w };
   const cols = old.ground && old.level > 0 ? wallColumns({ center: old, radius: old.radius, level: old.level, gateAngle: old.gate, smooth: old.ground }) : [];
   w.radius = radius;
@@ -343,14 +370,101 @@ export function moveWall(id, radius, down = () => {}) {
   return true;
 }
 
+// Walls raised before they had steps (2026-11-12) get their flights, tower ladders and (Palisade and Fieldstone Wall)
+// their new walkway added once, a little at a time
+const STEPS_VERSION = 1;
+function addSteps(id) {
+  const w = walls()[id];
+  if (!w || !(w.level > 0) || !w.ground || (w.steps ?? 0) >= STEPS_VERSION || jobs.has(id)) return;
+  const L = WALL_LEVELS[w.level];
+  const job = { L, palette: palette(w.style, L, w.look) };
+  const want = (c) => STEP_ROLES.has(c.role) || (c.role === "walk" && (w.level === 2 || w.level === 4));
+  const cols = wallColumns({ center: w, radius: w.radius, level: w.level, gateAngle: w.gate, smooth: w.ground }).filter(want);
+  system.runJob((function* () {
+    const dim = world.getDimension(OVERWORLD);
+    for (const col of cols) {
+      for (let tries = 0; tries < 60 && placeColumn(dim, w, job, col) < 0; tries++) for (let i = 0; i < 20; i++) yield; // wait for it to load
+      yield;
+    }
+    w.steps = STEPS_VERSION;
+    save();
+  })());
+}
+on("wallBuilt", ({ id }) => { const w = walls()[id]; if (w) { w.steps = STEPS_VERSION; save(); } });
+
 // Walls that were rising when the world closed carry on
 on("ready", () => {
+  system.runTimeout(() => { for (const id of Object.keys(walls())) addSteps(id); }, 200);
   for (const [id, w] of Object.entries(walls())) {
     if (w.moving && !jobs.has(id)) { delete w.moving; raiseWall(id, Math.max(1, w.level || 1)); continue; }
     if (!w.building || jobs.has(id)) continue;
     const { level, index } = w.building;
     if (raiseWall(id, level) === true) walls()[id].building.index = index;
   }
+});
+
+// ---------- the gate: barred to outsiders, opened by the guard for friends ----------
+// Mateo, 2026-11-11: only the owner, their allies and their guards open a settlement's gates; gates
+// shut when a siege starts. Clicking is checked in siege/block_clicks.js (mayWorkGate). Here, when the
+// owner or an ally walks up to their own gate and the settlement keeps guards, the guard opens the gate
+// and portcullis, and shuts them again once nobody friendly is near. No guard opens anything mid-siege.
+const gateBlocks = new Map(); // `${id}|${level}` -> [{ x, y, z }] one block of each gate and portcullis
+const guardOpened = new Set(); // wall ids whose gate a guard opened
+function findGateBlocks(id, w) {
+  const key = `${id}|${w.level}`;
+  if (gateBlocks.has(key)) return gateBlocks.get(key);
+  const g = gateSpot(w, w.gate, w.ground, w.radius), dim = world.getDimension(OVERWORLD), found = [], kinds = new Set();
+  try {
+    for (let dy = 0; dy <= 6; dy++) for (let dx = -3; dx <= 3; dx++) for (let dz = -3; dz <= 3; dz++) {
+      const b = dim.getBlock({ x: g.x + dx, y: g.y + dy, z: g.z + dz });
+      if (b && (GATES.includes(b.typeId) || PORTCULLISES.includes(b.typeId)) && !kinds.has(b.typeId)) { kinds.add(b.typeId); found.push(b.location); }
+    }
+  } catch {
+    return []; // not loaded: look again next time
+  }
+  if (found.length) gateBlocks.set(key, found);
+  return found;
+}
+function setWallGate(id, w, open) {
+  const dim = world.getDimension(OVERWORLD);
+  const awayFrom = gateSpot(w, w.gate, w.ground, w.radius).outside; // the gate swings in, away from the road
+  let moved = false;
+  for (const loc of findGateBlocks(id, w)) {
+    try {
+      const b = dim.getBlock(loc);
+      // a remembered spot that is no gate and no gateway of a swung-open gate: look for the gate again next time
+      if (b && !GATES.includes(b.typeId) && !openLeafAt(dim, loc)) gateBlocks.delete(`${id}|${w.level}`);
+      if (b && setGate(b, open, { awayFrom })) moved = true;
+    } catch {
+      // not loaded
+    }
+  }
+  return moved;
+}
+const friendOf = (owner, playerId) => playerId === owner || isAlly(owner, playerId);
+export const nearGate = (g, p, reach) => Math.hypot(p.x - (g.x + 0.5), p.z - (g.z + 0.5)) <= reach && Math.abs(p.y - g.y) <= 4;
+
+onTick("settle_gates", 10, () => {
+  if (!isReady() || getState().active) return;
+  const players = world.getDimension(OVERWORLD).getPlayers();
+  for (const [id, w] of Object.entries(walls())) {
+    if (!(w.level > 0) || w.building || WALL_LEVELS[w.level]?.gate === "open" || id.startsWith("npc:")) continue;
+    const g = gateSpot(w, w.gate, w.ground, w.radius);
+    const opened = guardOpened.has(id);
+    const friendNear = players.some((p) => friendOf(id, p.id) && nearGate(g, p.location, opened ? 6 : WALLS.gateGreet));
+    if (friendNear && !opened && guardCount(id) > 0) {
+      if (setWallGate(id, w, true)) guardOpened.add(id);
+    } else if (!friendNear && opened) {
+      setWallGate(id, w, false);
+      guardOpened.delete(id);
+    }
+  }
+});
+
+// A siege bars every gate: anything open slams shut (the owner and allies can still open it by hand to sally out)
+on("siegeStart", () => {
+  guardOpened.clear();
+  for (const [id, w] of Object.entries(walls())) if (w.level > 0 && WALL_LEVELS[w.level]?.gate !== "open") setWallGate(id, w, false);
 });
 
 // ---------- what a wall changes ----------

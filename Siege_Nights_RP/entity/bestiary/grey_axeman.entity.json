@@ -13,11 +13,24 @@
     "default": "geometry.siege_b.grey_axeman"
    },
    "animations": {
-    "main": "animation.siege_b.grey_axeman"
+    "base": "animation.siege_b.grey_axeman",
+    "idle": "animation.siege_b.grey_axeman.idle",
+    "walk": "animation.siege_b.grey_axeman.walk",
+    "attack": "animation.siege_b.grey_axeman.attack",
+    "swing": "controller.animation.siege_b.grey_axeman.swing",
+    "aim": "animation.siege_b.grey_axeman.aim",
+    "ready": "controller.animation.siege_b.grey_axeman.ready",
+    "hurt": "animation.siege_b.grey_axeman.hurt",
+    "flinch": "controller.animation.siege_b.grey_axeman.flinch"
    },
    "scripts": {
     "animate": [
-     "main"
+     "base",
+     "idle",
+     "walk",
+     "swing",
+     "ready",
+     "flinch"
     ]
    },
    "render_controllers": [

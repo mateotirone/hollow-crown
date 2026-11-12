@@ -1,5 +1,5 @@
 {
-  "format_version": "1.21.60",
+  "format_version": "1.21.90",
   "minecraft:block": {
     "description": {
       "identifier": "siege:portcullis_blackfen",
@@ -16,6 +16,10 @@
           1,
           2,
           3
+        ],
+        "siege:hidden": [
+          false,
+          true
         ]
       },
       "traits": {
@@ -66,7 +70,8 @@
           16,
           2
         ]
-      }
+      },
+      "siege:clickable": {}
     },
     "permutations": [
       {
@@ -168,13 +173,20 @@
         }
       },
       {
-        "condition": "q.block_state('siege:open') == true",
+        "condition": "q.block_state('siege:open')",
+        "components": {
+          "minecraft:collision_box": false
+        }
+      },
+      {
+        "condition": "q.block_state('siege:hidden')",
         "components": {
           "minecraft:collision_box": false,
-          "minecraft:material_instances": {
-            "*": {
-              "texture": "siege_portcullis_blackfen_open",
-              "render_method": "alpha_test"
+          "minecraft:selection_box": false,
+          "minecraft:geometry": {
+            "identifier": "geometry.siege_gate_panel",
+            "bone_visibility": {
+              "panel": false
             }
           }
         }

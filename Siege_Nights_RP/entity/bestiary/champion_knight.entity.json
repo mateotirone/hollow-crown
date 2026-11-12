@@ -13,11 +13,21 @@
     "default": "geometry.siege_b.champion_knight"
    },
    "animations": {
-    "main": "animation.siege_b.champion_knight"
+    "base": "animation.siege_b.champion_knight",
+    "idle": "animation.siege_b.champion_knight.idle",
+    "walk": "animation.siege_b.champion_knight.walk",
+    "attack": "animation.siege_b.champion_knight.attack",
+    "swing": "controller.animation.siege_b.champion_knight.swing",
+    "hurt": "animation.siege_b.champion_knight.hurt",
+    "flinch": "controller.animation.siege_b.champion_knight.flinch"
    },
    "scripts": {
     "animate": [
-     "main"
+     "base",
+     "idle",
+     "walk",
+     "swing",
+     "flinch"
     ]
    },
    "render_controllers": [

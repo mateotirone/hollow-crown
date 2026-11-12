@@ -13,11 +13,21 @@
     "default": "geometry.siege_b.mother_of_changelings"
    },
    "animations": {
-    "main": "animation.siege_b.mother_of_changelings"
+    "base": "animation.siege_b.mother_of_changelings",
+    "idle": "animation.siege_b.mother_of_changelings.idle",
+    "walk": "animation.siege_b.mother_of_changelings.walk",
+    "attack": "animation.siege_b.mother_of_changelings.attack",
+    "swing": "controller.animation.siege_b.mother_of_changelings.swing",
+    "hurt": "animation.siege_b.mother_of_changelings.hurt",
+    "flinch": "controller.animation.siege_b.mother_of_changelings.flinch"
    },
    "scripts": {
     "animate": [
-     "main"
+     "base",
+     "idle",
+     "walk",
+     "swing",
+     "flinch"
     ]
    },
    "render_controllers": [

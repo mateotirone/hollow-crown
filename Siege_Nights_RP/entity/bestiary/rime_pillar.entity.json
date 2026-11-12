@@ -13,11 +13,11 @@
     "default": "geometry.siege_b.rime_pillar"
    },
    "animations": {
-    "main": "animation.siege_b.rime_pillar"
+    "base": "animation.siege_b.rime_pillar"
    },
    "scripts": {
     "animate": [
-     "main"
+     "base"
     ]
    },
    "render_controllers": [

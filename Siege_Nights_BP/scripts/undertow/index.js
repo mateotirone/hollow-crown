@@ -26,10 +26,10 @@ import { on, isNight } from "../siege/api.js";
 import { UNDERTOW_ID, UNDERTOW_LAYOUT as L, COURT, HEART, TEXT, stageAt, pathX } from "./layout.js";
 import { getSourceSite, getSites, markSite, openRift, riftExit, sourceSignsTick, SITE_NAMES, SOURCE_SITE_IDS } from "./source.js";
 import { VEIL, planCrack, tearBand, TEAR_STEPS, TEAR_CLIMB } from "./rift.js";
-import { buildTick, piecesTick, flush, pieces, openCourtGate, openRiverGate, rebuildHeart, waystoneSpot, WAYSTONE, isBuilt } from "./builder.js";
-import { heightAt, planChunk, isRiver, regionAt, columnAt } from "./terrain.js";
-import { RIVER_NODES, riverSegments, riverDistance } from "./rivers.js";
-import { SITES, roadLines } from "./roads.js";
+import { buildTick, piecesTick, flush, pieces, openCourtGate, openRiverGate, rebuildHeart, waystoneSpot, WAYSTONE, isBuilt, siteOutdated, withClearing } from "./builder.js";
+import { heightAt, planChunk, isRiver, regionAt, columnAt, cartRail } from "./terrain.js";
+import { RIVER_NODES, riverSegments, riverDistance, RIVER_HALF_WIDTH } from "./rivers.js";
+import { SITES, ROADS, roadLines, signposts, signRot } from "./roads.js";
 import { STRUCTURE_IDS, planStructure } from "./structures.js";
 import { SITE_DESIGNS, TOWER_DESIGNS } from "./sites_data.js";
 import { DROWNED_SPOTS, spotGround } from "./drowned.js";
@@ -41,7 +41,10 @@ import { load, save, say, runCmd, upgradeSteps, DATA_VERSION, FACING } from "./d
 import { choirTick, singerSpot, CHOIR } from "./choir.js";
 import { slipSeconds, slipLanding, isSlipping } from "./slips.js";
 import { shouldAlarm, oreOutcome, noteEntry, crownTick, crownVerdict, CLAIM_SECONDS, WARDEN } from "./warden.js";
-import { oreChance } from "./terrain.js";
+import { crownFate, needsRefresh, standHeight, KEEP } from "./crownkeep.js";
+import { oreChance, roofAt, ROOF, groundAt, GROUND, ambientLightAt, AMBIENT, pickTree, treeKind } from "./terrain.js";
+import { HOLLOW_TREES } from "./trees_data.js";
+import { clearOps } from "./builder.js";
 import { shouldRise, regentOutcome, REGENT, TEMPERS, JOBS } from "./regent.js";
 import { sfx } from "../core/sfx.js";
 import { thinTick, thinCommand, planThinPlace, hillHeight, floorAt, toWorld, THIN_PLACES, CAMP_TOME, SHAPE } from "./thinplaces.js";
@@ -50,6 +53,7 @@ import { canOpen, dullLeft, BOSSES_TO_OPEN, FORK_DULL_DAYS } from "./source.js";
 import { CRACK_HEIGHT } from "./rift.js";
 import "./story.js";
 import "./forge.js";
+import "./finds.js";
 
 const IN_TAG = "siege_undertow_in";
 const FOG_ID = "siege:undertow_fog";
@@ -173,7 +177,13 @@ onTick("undertow:build", 1, () => {
 onTick("undertow:pieces", 40, () => piecesTick());
 // The river's water gate in the sealed wall may be generated long after the Court falls: open it then.
 let riverGateOpen = false;
-onTick("undertow:rivergate", 100, () => { if (!riverGateOpen && progress().oswin) riverGateOpen = openRiverGate(); });
+onTick("undertow:rivergate", 100, () => {
+  if (!progress().oswin) return;
+  if (!riverGateOpen) riverGateOpen = openRiverGate();
+  // A world updated after the Court fell builds its land again (new generator), sealing the wall anew: open it.
+  if (!courtGateOpen && pieces().court && isBuilt(0, Math.floor(COURT.gateZ / 16))) { openCourtGate(true); courtGateOpen = true; }
+});
+let courtGateOpen = false;
 onTick("undertow:save", 200, () => flush());
 
 // ---- atmosphere: lightning in the fog above, blue motes along the rivers --------------------
@@ -278,10 +288,11 @@ on("crownVacant", () => {
   world.sendMessage("§5Far below, something takes its seat again.");
 });
 
-// The Hollow Crown falls from its wearer into a chest at the middle of the Seat. Once.
+// The Hollow Crown falls from its wearer into a chest at the middle of the Seat. Once, unless it is
+// lost (crownkeep.js): then it goes back into that chest.
 function leaveCrown() {
   const prog = progress();
-  if (prog.crownOut) return;
+  if (prog.crownOut && !prog.crownReturning) return;
   const d = undertow(), at = { x: HEART.center.x, y: HEART.center.y, z: HEART.center.z };
   try {
     const crown = new ItemStack("siege:hollow_crown", 1);
@@ -289,11 +300,25 @@ function leaveCrown() {
     d.setBlockType(at, "minecraft:chest");
     const box = d.getBlock(at)?.getComponent("inventory")?.container;
     if (box) box.setItem(13, crown); else d.spawnItem(crown, { x: at.x + 0.5, y: at.y + 1, z: at.z + 0.5 });
+    const back = prog.crownReturning;
     prog.crownOut = true;
+    prog.crownReturning = false;
     save(K_PROGRESS, prog);
+    if (back) world.sendMessage("§5Far below, the Hollow Crown is back in its chest at the Seat.");
   } catch { /* the Seat is not loaded: the tick below tries again when someone is there */ }
 }
-onTick("undertow:crownfall", 100, () => { const p = progress(); if (p.morvane && !p.crownOut) leaveCrown(); });
+onTick("undertow:crownfall", 100, () => { const p = progress(); if ((p.morvane && !p.crownOut) || p.crownReturning) leaveCrown(); });
+
+// The Crown was lying somewhere and is gone (lava, the void, an explosion) with nobody holding it.
+// There is only one, so it goes home. A creative test Crown lost before the real one is out changes nothing.
+on("crownLost", () => {
+  const prog = progress();
+  if (!prog.crownOut) return;
+  prog.crownReturning = true;
+  save(K_PROGRESS, prog);
+  world.sendMessage("§5The Hollow Crown is gone from where it lay. Something below calls it home.");
+  leaveCrown();
+});
 
 function sendEvent(id, message) {
   try { system.sendScriptEvent(id, message); } catch { runCmd(undertow(), `scriptevent ${id} ${message}`); }
@@ -507,6 +532,30 @@ addTests("undertow", {
     }
     assert(bridges >= 5, `only ${bridges} road bridges`);
   },
+  "every road has a signpost at both ends, turned and lettered": () => {
+    const posts = signposts();
+    assert(posts.length === ROADS.length * 2, `${posts.length} signposts for ${ROADS.length} roads`);
+    for (const r of ROADS) assert(posts.filter((p) => p.road === r.id).length === 2, `${r.id} lacks a signpost`);
+    for (const p of posts) assert(Number.isInteger(p.rot) && p.rot >= 0 && p.rot < 16 && p.text.length > 0 && p.text.length < 60, `bad signpost on ${p.road}`);
+    assert(signRot(0, 1) === 0 && signRot(-1, 0) === 4 && signRot(0, -1) === 8 && signRot(1, 0) === 12);
+  },
+  "the Seams cart rail is joined, climbs only on straights and clears the river": () => {
+    const rail = cartRail();
+    assert(rail.length > 100, `cart rail only ${rail.length} long`);
+    for (let i = 1; i < rail.length; i++) {
+      const a = rail[i - 1], b = rail[i];
+      assert(Math.abs(a.x - b.x) + Math.abs(a.z - b.z) === 1, `cart rail breaks at ${b.x},${b.z}`);
+      assert(Math.abs(a.y - b.y) <= 1, `cart rail steps ${a.y - b.y} at ${b.x},${b.z}`);
+    }
+    for (const c of rail) {
+      assert(c.dir >= 0 && c.dir <= 9, `bad rail direction at ${c.x},${c.z}`);
+      if (c.wet) assert(c.y - 1 - L.seaY >= 3, `cart rail too low over the river at ${c.x},${c.z}`);
+    }
+    for (let i = 1; i < rail.length - 1; i++) if (rail[i].dir >= 2 && rail[i].dir <= 5) {
+      const p = rail[i - 1], n = rail[i + 1];
+      assert(p.x - rail[i].x === rail[i].x - n.x && p.z - rail[i].z === rail[i].z - n.z, `cart rail climbs on a bend at ${rail[i].x},${rail[i].z}`);
+    }
+  },
   "every centre structure stays on its site": () => {
     for (const id of STRUCTURE_IDS) {
       const s = SITES.find((x) => x.id === id), ops = planStructure(id);
@@ -518,11 +567,30 @@ addTests("undertow", {
     for (const [id, d] of Object.entries(SITE_DESIGNS)) {
       const s = SITES.find((x) => x.id === id);
       assert(s, `${id} has no site`);
-      for (const [x, , z] of stampCells(d)) assert(Math.hypot(x, z) <= s.r + 4, `${id} builds outside its site`);
+      for (const [x, , z] of stampCells(d)) assert(Math.hypot(x, z) <= Math.max(s.r + 4, d.reach ?? 0), `${id} builds outside its site`);
       for (const t of stateTries(d)) assert(JSON.stringify(t[t.length - 1]) === "{}");
     }
     const t = SITE_DESIGNS.truce_hall;
     assert(stampCells(t).some(([x, y, z, i]) => x === 0 && y === 1 && z === 12 && t.palette[i][0] === "minecraft:lectern"), "the tome's lectern moved");
+  },
+  "rebuilt sites stamp again over the old look, clearing only inside their site, and keep the Carter's spot clear": () => {
+    for (const [id, d] of Object.entries(SITE_DESIGNS)) {
+      if (!d.v) continue;
+      const s = SITES.find((x) => x.id === id);
+      assert(siteOutdated({ sites: [id] }, id) && !siteOutdated({ sites: [id], siteV: { [id]: d.v } }, id), `${id} version check`);
+      const full = withClearing(d), own = new Set(stampCells(d).map(([x, y, z]) => `${x},${y},${z}`));
+      for (const [x, y, z, i] of stampCells(full)) {
+        assert(Math.hypot(x, z) <= Math.max(s.r + 4, d.reach ?? 0), `${id} clears outside its site`);
+        if (i === full.palette.length - 1 && d.clear.length) assert(y >= 1 && !own.has(`${x},${y},${z}`), `${id} clears a block it also builds`);
+      }
+    }
+    const dock = SITE_DESIGNS.wound_dock, at = (x, y, z) => stampCells(dock).find((c) => c[0] === x && c[1] === y && c[2] === z);
+    assert(at(0, 0, -4) && !at(0, 1, -4) && !at(0, 2, -4), "the Carter's place on the landing stage is blocked or has no deck");
+    // the landing stage sits one block above the river: its deck over water, so a boat can come alongside
+    const w = SITES.find((x) => x.id === "wound_dock");
+    const stage = stampCells(dock).filter(([x, y, z]) => y === -3 && z <= -19 && Math.abs(x) <= 2);
+    assert(stage.length > 0 && w.y - 3 === L.seaY + 1, "the landing stage is not one above the water");
+    assert(stage.some(([x, , z]) => riverDistance(w.x + x, w.z + z) <= RIVER_HALF_WIDTH), "the landing stage does not reach the river");
   },
   "the drowned towers stand off the water and the roads, each a different design": () => {
     assert(new Set(DROWNED_SPOTS.map((t) => t.design)).size === DROWNED_SPOTS.length);
@@ -573,6 +641,18 @@ addTests("undertow", {
     assert(CLAIM_SECONDS >= 10, "taking the Crown must be slow enough to contest");
     assert(crownVerdict(false, false, 0) === "warned" && crownVerdict(false, false, 4) === "warned" && crownVerdict(false, false, 5) === "dies");
   },
+  "a dropped Hollow Crown rests on a stand where it fell, and goes home only when truly lost": () => {
+    assert(crownFate({ found: true, held: false, loaded: true, misses: 3 }) === "lying");
+    assert(crownFate({ found: false, held: true, loaded: true, misses: 0 }) === "held", "picked up is not lost");
+    assert(crownFate({ found: false, held: false, loaded: false, misses: 9 }) === "waiting", "out of sight is not lost");
+    assert(crownFate({ found: false, held: false, loaded: true, misses: 0 }) === "missing", "one miss is not enough");
+    assert(crownFate({ found: false, held: false, loaded: true, misses: KEEP.missesToLose - 1 }) === "lost");
+    assert(!needsRefresh(KEEP.refreshSeconds - KEEP.checkSeconds) && needsRefresh(KEEP.refreshSeconds));
+    assert(KEEP.refreshSeconds + KEEP.checkSeconds < 300, "swapped before Minecraft's 5 minute item clean-up");
+    assert(standHeight({ y: 64, typeId: "minecraft:grass_block" }) > 65, "the stand floats above the ground it fell on");
+    assert(standHeight({ y: 30, typeId: "minecraft:lava" }) === undefined, "over lava it goes home");
+    assert(standHeight(undefined) === undefined, "over the void it goes home");
+  },
   "an NPC ruler rises when no player rules, and returns after being killed": () => {
     const none = { active: false, fellOn: undefined };
     assert(!shouldRise({ choirDead: false, playerRules: false, regent: none, day: 99 }), "not while the Choir lives");
@@ -612,3 +692,58 @@ addTests("undertow", {
     assert(Math.min(...ys) === 0 && Math.max(...ys) === 13);
   },
 });
+
+// The roof, the ground, the light and the trees (Mateo, 2026-11-11: darker, no sun, boxed in; the roof
+// and the ground not one flat solid block; the tree update in the Hollow too).
+addTests("undertow", {
+  "the roof covers the land everywhere, 30 or more blocks up, under its unbreakable shell": () => {
+    for (let x = -680; x <= 680; x += 85) for (let z = -40; z <= 2440; z += 155) {
+      const h = heightAt(x, z), r = roofAt(x, z);
+      assert(r.bottom <= ROOF.maxBottom && r.bottom < ROOF.shell, `roof at ${x},${z} reaches the shell`);
+      if (h !== null) assert(r.bottom - h >= 28, `roof only ${r.bottom - h} over the land at ${x},${z}`);
+    }
+    assert(roofAt(0, 2400).bottom >= HEART.center.y + 25, "room over the Choir's Heart");
+  },
+  "the roof is never flat: domes, sags and mixed rock": () => {
+    const ys = new Set(), rock = new Set();
+    for (let x = 200; x < 400; x += 2) { const r = roofAt(x, 600); ys.add(r.bottom); rock.add(r.block); }
+    assert(ys.size >= 12, `only ${ys.size} roof heights`);
+    assert(rock.size >= 4, `only ${rock.size} kinds of roof rock`);
+  },
+  "the ground mixes several blocks in every kind of land": () => {
+    for (const kind of Object.keys(GROUND)) {
+      const n = new Map();
+      for (let x = 0; x < 120; x += 3) for (let z = 0; z < 120; z += 3) { const b = groundAt(x + 1000, z + 300, kind); n.set(b, (n.get(b) ?? 0) + 1); }
+      const top = Math.max(...n.values()), all = [...n.values()].reduce((a, b) => a + b, 0);
+      assert(n.size >= 4 && top / all < 0.7, `${kind}: ${n.size} blocks, the commonest is ${Math.round((100 * top) / all)}%`);
+    }
+  },
+  "a faint light is never more than 3 blocks away across the land": () => {
+    for (let x = 0; x < 24; x++) for (let z = 0; z < 24; z++) {
+      let best = 99;
+      for (let a = -4; a <= 4; a++) for (let b = -4; b <= 4; b++) if (ambientLightAt(x + a, z + b)) best = Math.min(best, Math.abs(a) + Math.abs(b));
+      assert(best <= 3, `${best} from a light at ${x},${z}`);
+    }
+    assert(/^minecraft:light_block_\d+$/.test(AMBIENT.block));
+  },
+  "the Hollow's trees: three species, every shape stands on its trunk, all from the tree blocks": () => {
+    assert(Object.keys(HOLLOW_TREES).length === 3);
+    for (const [sid, sizes] of Object.entries(HOLLOW_TREES)) for (const [size, list] of Object.entries(sizes)) for (const t of list) {
+      const trunk = new Set();
+      for (const [x, z, y0, y1] of t.runs) if (x === 0 && z === 0) for (let y = y0; y <= y1; y++) trunk.add(y);
+      assert(trunk.has(1) && trunk.has(2) && trunk.has(3), `${sid} ${size}: no trunk`);
+      assert(t.palette.every(([id]) => /^(siege|minecraft):/.test(id) && !id.includes("structure_void")), `${sid} ${size}: odd block`);
+      assert(t.runs.every((r) => r[4] < t.palette.length && r[2] >= 0 && r[3] >= r[2]));
+    }
+    const seen = new Set();
+    for (let i = 0; i < 200; i++) { const p = pickTree(treeKind(0, 0, "wood"), (i + 0.5) / 200); seen.add(p.species); assert(HOLLOW_TREES[p.species][p.size][p.variant]); }
+    assert(seen.size === 2, "groves mix Latticewood and Veilmoss Trees");
+    assert(treeKind(330, 250, "wood") === "forest" && treeKind(0, 1200, "bells") === "waste");
+  },
+  "clearing an old chunk stays under the fill limit and reaches the roof": () => {
+    const ops = clearOps(3, 7, 50);
+    for (const op of ops) assert((op.b[0] - op.a[0] + 1) * (op.b[1] - op.a[1] + 1) * (op.b[2] - op.a[2] + 1) <= 32768);
+    assert(ops[0].a[1] === 50 && ops[1].b[1] === ROOF.top);
+  },
+});
+

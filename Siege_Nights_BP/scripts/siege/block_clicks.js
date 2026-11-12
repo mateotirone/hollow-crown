@@ -5,9 +5,9 @@ import { world, system, GameMode } from "@minecraft/server";
 import { BARRACKS, CASTLE_GATES, COLORS, KEEP_BANNER, PORTCULLISES } from "./constants.js";
 import { recruitGuard } from "./guards.js";
 import { barracksMenu, keepMenu } from "./menus.js";
-import { SETTINGS } from "./settings.js";
+import { moveGate } from "./gates.js";
 import { saveState, state } from "./state.js";
-import { colorTaken } from "./territory.js";
+import { colorTaken, foreignSettlement } from "./territory.js";
 import { workOnWall } from "./walls.js";
 import { sfx } from "../core/sfx.js";
 
@@ -24,16 +24,39 @@ Object.assign(DYES, { "minecraft:ink_sac": 15, "minecraft:bone_meal": 0, "minecr
 
 export const lastClick = new Map(); // stops one click from counting twice
 
+// Gates and portcullises: a click always works the gate and never places the held block (Mateo's playtest
+// rule, 2026-11-11), so the click is cancelled before Minecraft can place anything and handled a tick later.
+// Reinforcing (iron, diamond, netherite) and patching (stone bricks) still work as before.
+world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
+  const { block, player } = event;
+  if (!GATE_SOUNDS[block.typeId]) return;
+  event.cancel = true; // every repeat of a held click too, or holding the button would place blocks
+  if (event.isFirstEvent === false) return;
+  const now = system.currentTick;
+  if (now - (lastClick.get(player.id) ?? -100) < 6) return;
+  lastClick.set(player.id, now);
+  const item = event.itemStack;
+  const dim = block.dimension, at = { ...block.location };
+  system.run(() => {
+    if (!state) return;
+    const here = dim.getBlock(at);
+    if (!here || !GATE_SOUNDS[here.typeId]) return;
+    if (workOnWall(here, player, item)) return;
+    if (mayWorkGate(player, here)) toggleGate(here, player);
+    else player.onScreenDisplay.setActionBar(`§cThe gate is barred. Only ${state.keeps[foreignSettlement(player, here.location, here.dimension.id)]?.name ?? "the owner"}'s people can open it.`);
+  });
+});
+
 world.afterEvents.playerInteractWithBlock.subscribe((event) => {
   const { block, player } = event;
   if (event.isFirstEvent === false) return;
+  if (GATE_SOUNDS[block.typeId]) return; // handled above
   const now = system.currentTick;
   if (now - (lastClick.get(player.id) ?? -100) < 6) return;
   lastClick.set(player.id, now);
 
   if (workOnWall(block, player, event.itemStack)) return;
-  if (GATE_SOUNDS[block.typeId]) toggleGate(block);
-  else if (block.typeId === KEEP_BANNER) {
+  if (block.typeId === KEEP_BANNER) {
     if (DYES[event.itemStack?.typeId] !== undefined) dyeBanner(block, player, event.itemStack);
     else keepMenu(block, player);
   } else if (block.typeId === BARRACKS) {
@@ -42,29 +65,28 @@ world.afterEvents.playerInteractWithBlock.subscribe((event) => {
   }
 });
 
-export function toggleGate(block) {
-  const gateType = block.typeId;
-  const open = !block.permutation.getState("siege:open");
-  // Find every gate block of the same kind touching this one, so a big gate moves as one piece
-  const dim = block.dimension;
-  const seen = new Set();
-  const queue = [block.location];
-  const gate = [];
-  while (queue.length > 0 && gate.length < SETTINGS.gateMaxSize) {
-    const loc = queue.shift();
-    const key = `${loc.x},${loc.y},${loc.z}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    const b = dim.getBlock(loc);
-    if (!b || b.typeId !== gateType) continue;
-    gate.push(b);
-    for (const [dx, dy, dz] of [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]]) {
-      queue.push({ x: loc.x + dx, y: loc.y + dy, z: loc.z + dz });
-    }
+// A settlement's gates and portcullises answer only to its owner and their allies (Mateo, 2026-11-11);
+// the owner's guards open them for friends (settle/walls.js). Anyone may work a gate out in the wild.
+export function mayWorkGate(player, block) {
+  if (player.getGameMode() === GameMode.Creative) return true;
+  return !foreignSettlement(player, block.location, block.dimension.id);
+}
+
+export function toggleGate(block, player) {
+  return setGate(block, !block.permutation.getState("siege:open"), { awayFrom: player?.location, player });
+}
+
+// Opens or shuts a whole gate (every touching block of the same kind moves as one piece; see gates.js).
+// block may also be the empty gateway an open gate swung out of. opts: { awayFrom, player }.
+// Returns false if it was already that way or could not move.
+export function setGate(block, open, opts = {}) {
+  const gateType = block?.typeId;
+  const moved = moveGate(block, open, opts);
+  if (moved) {
+    const sounds = GATE_SOUNDS[gateType] ?? GATE_SOUNDS[CASTLE_GATES[0]];
+    sfx(block.dimension, open ? sounds.open : sounds.close, block.location, { volume: 0.6 });
   }
-  for (const b of gate) b.setPermutation(b.permutation.withState("siege:open", open));
-  const sounds = GATE_SOUNDS[gateType];
-  sfx(dim, open ? sounds.open : sounds.close, block.location, { volume: 0.6 });
+  return moved;
 }
 
 export function dyeBanner(block, player, item) {

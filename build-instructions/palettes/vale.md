@@ -14,7 +14,7 @@ most houses, **Norman stone** for important buildings, **brick** for some. (`val
 | quoin | light grey | `polished_andesite`, `siege:castle_stone` |
 | plaster / infill | warm white | `calcite` (default; diorite reads as grey patches), `white_concrete` for a cleaner white; half-timbered panels `siege:timber_frame`, `siege:timber_frame_cross` |
 | brick infill | warm red | `brick_block` 85, `mud_bricks` 15 |
-| frame | dark brown | `stripped_dark_oak_log`, `dark_oak_log`; brick style: `stripped_spruce_log` (pale frame) |
+| frame | warm mid brown | `stripped_spruce_log` (Mateo approved on the Kingsrest street house, 2026-11-12: dark oak frames under slate read gloomy); `stripped_dark_oak_log` for darker accents |
 | trim | dark brown | `dark_oak_stairs`, `dark_oak_slab`, `dark_oak_trapdoor`; brick style `spruce_*` |
 | floor | mid brown field, dark border | field `spruce_slab`, border `dark_oak_slab`; stone floors `stone_bricks`, `polished_andesite` |
 | glass | see below | |

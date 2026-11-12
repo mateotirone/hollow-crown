@@ -9,9 +9,13 @@ OLD = ['#241640', '#42287a', '#6a44b0', '#9a74dc', '#c4a8f4', '#ece0ff']
 NEW = ['#120a22', '#22123f', '#3a1f6a', '#552f94', '#7446b8', '#9a72d6']
 hx = lambda h: tuple(int(h[i:i + 2], 16) for i in (1, 3, 5))
 SWAP = {hx(a): hx(b) for a, b in zip(OLD, NEW)}
+# The upgrade template and Tempered Choirsteel placeholders were drawn from studio/bestiary/choirsteel.py's own
+# palette; their violets go to the same dark ramp (Mateo, 2026-11-12: darken the ingot and Tempered Choirsteel too).
+SWAP.update({hx(a): hx(b) for a, b in [('#1e103a', '#120a22'), ('#542c96', '#3a1f6a'), ('#8454d0', '#552f94'), ('#c4a0fa', '#7446b8'), ('#e8deff', '#9a72d6')]})
 T = 'Siege_Nights_RP/textures/'
 FILES = [f'items/siege_choirsteel_{k}.png' for k in ('helmet', 'chestplate', 'leggings', 'boots', 'sword', 'pickaxe', 'axe', 'shovel', 'hoe')] \
-      + [f'models/armor/choirsteel_layer_{n}.png' for n in (1, 2)]
+      + [f'models/armor/choirsteel_layer_{n}.png' for n in (1, 2)] \
+      + ['items/siege_choirsteel_ingot.png', 'items/siege_choirsteel_tempered.png', 'items/siege_choirsteel_upgrade_template.png']
 for f in FILES:
     im = Image.open(T + f).convert('RGBA'); px = im.load(); n = 0
     for y in range(im.height):

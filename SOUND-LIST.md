@@ -9,7 +9,7 @@ There is no music in version 1.
 
 - **23 signature sounds** are meant to be real recordings made with an AI sound generator. 0 of 23 are installed; the rest play a stand-in built from vanilla sounds, so the game is never silent.
 - **32 more dragon sounds** have synthesized stand-ins and can be replaced the same way.
-- **25 vanilla sounds** are reworked (lower, softer, layered) everywhere the scripts use them, and **3 named cues** are built from vanilla layers.
+- **25 vanilla sounds** are reworked (lower, softer, layered) everywhere the scripts use them, and **16 named cues** are built from vanilla layers.
 - The remaining vanilla sounds are played as they are, because they should sound like what they are (a horse, a bow, a page).
 
 ## How to add a recording
@@ -373,6 +373,19 @@ Built from vanilla layers in `core/sfx_cues.js`. A script plays one with `sfx(pl
 |---|---|---|---|
 | `boss.arrive` | A boss steps out (when it has no sound of its own) | `mob.wither.spawn` pitch 0.6 vol 0.5 + `block.bell.hit` pitch 0.4 vol 0.5 after 0.4 s | - |
 | `boss.warn` | A boss is about to do something | `note.didgeridoo` pitch 0.7 vol 0.9 + `block.bell.hit` pitch 1.2 vol 0.25 after 0.05 s | bestiary |
+| `cast.bolt` | Ember Bolt | `item.trident.throw` pitch 0.8 vol 0.6 + `mob.blaze.shoot` pitch 1.3 vol 0.35 + `block.bell.hit` pitch 1.8 vol 0.15 after 0.05 s | - |
+| `cast.hit` | Ember Bolt lands | `mob.blaze.hit` pitch 0.7 vol 0.4 + `block.bell.hit` pitch 1.5 vol 0.12 | townhall |
+| `cast.ward` | Ward | `chime.amethyst_block` pitch 0.7 vol 0.9 + `beacon.activate` pitch 1.4 vol 0.35 + `block.bell.hit` pitch 1.2 vol 0.2 after 0.15 s | - |
+| `cast.blink` | Blink | `mob.endermen.portal` pitch 1.2 vol 0.5 + `chime.amethyst_block` pitch 1.6 vol 0.4 + `random.orb` pitch 0.5 vol 0.15 after 0.05 s | townhall |
+| `cast.echo` | Echo Sight | `chime.amethyst_block` pitch 0.5 vol 0.8 + `block.bell.hit` pitch 0.5 vol 0.35 after 0.2 s + `block.bell.hit` pitch 0.5 vol 0.12 after 0.7 s | - |
+| `cast.bind` | Bind | `block.chain.place` pitch 0.6 vol 1.2 + `block.chain.place` pitch 0.45 vol 0.8 after 0.15 s + `random.anvil_land` pitch 1.8 vol 0.12 after 0.2 s | - |
+| `cast.step` | Halfstep | `portal.travel` pitch 2 vol 0.12 + `mob.endermen.portal` pitch 0.6 vol 0.3 after 0.05 s + `chime.amethyst_block` pitch 0.6 vol 0.3 after 0.1 s | - |
+| `cast.hollowstep` | Veilstep | `portal.travel` pitch 0.6 vol 0.2 + `mob.warden.heartbeat` pitch 0.8 vol 0.8 after 0.2 s + `block.bell.hit` pitch 0.35 vol 0.5 after 0.4 s | townhall (2) |
+| `cast.choir` | Choir's Call | `block.bell.hit` pitch 0.4 + `block.bell.hit` pitch 0.3 vol 0.6 after 0.15 s + `ambient.cave` pitch 0.7 vol 0.3 after 0.3 s | - |
+| `cast.crescendo` | A Crescendo begins | `block.bell.hit` pitch 1.6 vol 0.8 + `block.bell.hit` pitch 1.2 vol 0.5 after 0.1 s + `chime.amethyst_block` vol 0.6 after 0.2 s | townhall |
+| `cast.overwhelmed` | The Choir is too loud | `mob.warden.sonic_boom` pitch 0.7 vol 0.35 + `block.bell.hit` pitch 0.3 vol 0.5 after 0.2 s | townhall |
+| `cast.open` | The magic hotbar opens | `chime.amethyst_block` pitch 1.2 vol 0.5 + `item.book.page_turn` pitch 0.7 vol 0.4 after 0.05 s | townhall |
+| `cast.close` | The magic hotbar closes | `chime.amethyst_block` pitch 0.8 vol 0.4 + `item.book.page_turn` pitch 0.6 vol 0.4 after 0.05 s | townhall |
 | `horn.assault` | Another assault is coming | `raid.horn` pitch 0.85 vol 0.8 + `raid.horn` pitch 0.64 vol 0.35 after 0.25 s | siege |
 
 ## Reworked vanilla sounds
@@ -382,63 +395,68 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 
 | Vanilla sound | What it means here | Made of | Places | Used by |
 |---|---|---|---|---|
-| `block.bell.hit` | Any bell | `block.bell.hit` + `block.bell.hit` pitch 0.5 vol 0.4 after 0.05 s + `block.bell.hit` pitch 1.03 vol 0.22 after 0.15 s | 46 | bestiary (15), undertow (15), after (5), lore (4), townhall (4), crown (2), roletrials |
-| `random.levelup` | Done, bought, learned | `random.levelup` pitch 0.8 vol 0.5 + `note.harp` pitch 0.6 vol 0.35 after 0.1 s | 26 | horses (7), siege (5), townhall (4), lore (3), dragons (2), crown, reach, rivals, roletrials, settle |
-| `random.anvil_land` | A heavy blow | `random.anvil_land` pitch 0.9 vol 0.8 + `dig.stone` pitch 0.5 vol 0.7 | 12 | undertow (3), bestiary (2), siege (2), trains (2), dragons, roletrials, townhall |
-| `raid.horn` | A horn | `raid.horn` pitch 0.85 + `raid.horn` pitch 0.64 vol 0.4 after 0.25 s | 11 | bestiary (5), townhall (3), crown, dragons, rivals |
-| `mob.endermen.portal` | A step between places | `mob.endermen.portal` pitch 0.85 vol 0.8 + `random.orb` pitch 0.4 vol 0.15 after 0.1 s | 11 | bestiary (6), townhall (2), crown, horses, undertow |
-| `random.orb` | A small yes | `random.orb` pitch 0.75 vol 0.55 | 9 | townhall (2), dragons, economy, lore, rails, roletrials, settle, undertow |
-| `random.anvil_use` | Building and mending | `random.anvil_use` pitch 0.8 vol 0.55 + `dig.stone` pitch 0.7 vol 0.5 after 0.1 s | 9 | settle (3), townhall (3), horses, roletrials, siege |
+| `block.bell.hit` | Any bell | `block.bell.hit` + `block.bell.hit` pitch 0.5 vol 0.4 after 0.05 s + `block.bell.hit` pitch 1.03 vol 0.22 after 0.15 s | 47 | bestiary (15), undertow (15), after (5), lore (4), unlocks (4), crown (2), roletrials, townhall |
+| `random.levelup` | Done, bought, learned | `random.levelup` pitch 0.8 vol 0.5 + `note.harp` pitch 0.6 vol 0.35 after 0.1 s | 32 | horses (7), siege (5), townhall (4), lore (3), settle (3), dragons (2), crown, ironworks, reach, rivals, roletrials, trade, undertow, vault |
+| `random.anvil_land` | A heavy blow | `random.anvil_land` pitch 0.9 vol 0.8 + `dig.stone` pitch 0.5 vol 0.7 | 17 | bestiary (3), undertow (3), siege (2), trains (2), unlocks (2), vault (2), dragons, roletrials, townhall |
+| `random.orb` | A small yes | `random.orb` pitch 0.75 vol 0.55 | 16 | economy (2), townhall (2), unlocks (2), dragons, guild, ironworks, lore, rails, roletrials, settle, trade, undertow, vault |
+| `random.anvil_use` | Building and mending | `random.anvil_use` pitch 0.8 vol 0.55 + `dig.stone` pitch 0.7 vol 0.5 after 0.1 s | 16 | settle (3), townhall (3), vault (3), siege (2), unlocks (2), horses, roletrials, trade |
+| `raid.horn` | A horn | `raid.horn` pitch 0.85 + `raid.horn` pitch 0.64 vol 0.4 after 0.25 s | 14 | bestiary (5), townhall (3), unlocks (3), crown, dragons, rivals |
+| `mob.endermen.portal` | A step between places | `mob.endermen.portal` pitch 0.85 vol 0.8 + `random.orb` pitch 0.4 vol 0.15 after 0.1 s | 10 | bestiary (6), crown, horses, townhall, undertow |
 | `ambient.cave` | Something is wrong | `ambient.cave` pitch 0.85 vol 0.8 | 9 | reach (3), undertow (3), bestiary (2), lore |
 | `ui.toast.challenge_complete` | Something earned | `ui.toast.challenge_complete` pitch 0.9 vol 0.7 + `block.bell.hit` pitch 0.6 vol 0.3 after 0.4 s | 7 | siege (2), bestiary, crown, rivals, settle, townhall |
-| `item.book.page_turn` | A page | `item.book.page_turn` pitch 0.9 | 6 | lore (5), bestiary |
+| `item.book.page_turn` | A page | `item.book.page_turn` pitch 0.9 | 7 | lore (5), bestiary, guide |
+| `random.explode` | A blast | `random.explode` pitch 0.85 | 6 | siege (3), bestiary, undertow, vault |
+| `random.glass` | Something breaks that should not | `random.glass` pitch 0.9 vol 0.8 | 6 | bestiary (4), crown, unlocks |
 | `mob.wither.spawn` | Something old arrives | `mob.wither.spawn` pitch 0.85 vol 0.7 + `block.bell.hit` pitch 0.4 vol 0.4 after 0.4 s | 6 | undertow (3), bestiary (2), townhall |
-| `random.glass` | Something breaks that should not | `random.glass` pitch 0.9 vol 0.8 | 5 | bestiary (4), crown |
+| `dig.stone` | Stone moving | `dig.stone` pitch 0.9 | 5 | siege (3), crown, townhall |
 | `random.totem` | A great change | `random.totem` pitch 0.8 vol 0.55 + `block.bell.hit` pitch 0.5 vol 0.4 after 0.2 s | 4 | townhall (2), crown, horses |
 | `mob.warden.heartbeat` | A heartbeat that is not yours | `mob.warden.heartbeat` pitch 0.9 | 4 | bestiary, crown, roletrials, undertow |
 | `mob.ravager.roar` | Something big | `mob.ravager.roar` pitch 0.9 vol 0.9 | 4 | bestiary (3), undertow |
+| `random.click` | A catch or a lever | `random.click` pitch 0.85 vol 0.8 | 3 | rails, siege, unlocks |
 | `random.break` | Not allowed, or something gave way | `random.break` pitch 0.8 vol 0.7 | 3 | bestiary, plots, siege |
-| `dig.stone` | Stone moving | `dig.stone` pitch 0.9 | 3 | crown, siege, townhall |
-| `random.explode` | A blast | `random.explode` pitch 0.85 | 3 | bestiary, siege, undertow |
 | `ambient.weather.thunder` | Thunder with no sky | `ambient.weather.thunder` pitch 0.9 vol 0.9 | 3 | undertow (2), crown |
 | `mob.wither.ambient` | A breath from below | `mob.wither.ambient` pitch 0.9 vol 0.8 | 3 | bestiary (3) |
 | `random.toast` | A note is added | `random.toast` pitch 0.8 vol 0.7 | 2 | lore (2) |
-| `random.click` | A catch or a lever | `random.click` pitch 0.85 vol 0.8 | 2 | rails, siege |
 | `mob.wither.death` | Something great ends | `mob.wither.death` pitch 0.9 vol 0.8 + `block.bell.hit` pitch 0.35 vol 0.5 after 0.6 s | 2 | crown, siege |
-| `portal.travel` | The Hollow pulling | `portal.travel` pitch 0.9 | 2 | townhall (2) |
 | `random.pop` | A small pop | `random.pop` pitch 0.85 vol 0.7 | 1 | dragons |
+| `portal.travel` | The Hollow pulling | `portal.travel` pitch 0.9 | 0 | - |
 
 ## Vanilla sounds played as they are
 
 | Vanilla sound | Places | Used by |
 |---|---|---|
-| `block.amethyst_block.chime` | 9 | bestiary (4), undertow (3), lore (2) |
+| `block.amethyst_block.chime` | 11 | bestiary (4), undertow (4), lore (2), vault |
 | `item.shield.block` | 4 | bestiary (3), townhall |
 | `armor.equip_leather` | 3 | dragons, horses, looks |
-| `mob.blaze.shoot` | 3 | roletrials (2), townhall |
 | `mob.horse.gallop` | 3 | horses, roletrials, townhall |
+| `mob.wolf.howl` | 3 | unlocks (3) |
+| `note.flute` | 3 | bestiary, horses, unlocks |
 | `random.eat` | 3 | dragons (2), bestiary |
+| `armor.equip_iron` | 2 | guardposts, horses |
+| `block.amethyst_block.break` | 2 | undertow, vault |
 | `block.bell.resonate` | 2 | lore, undertow |
+| `block.scaffolding.break` | 2 | siege (2) |
+| `bucket.empty_water` | 2 | unlocks (2) |
+| `bucket.fill_water` | 2 | roletrials, unlocks |
 | `crossbow.shoot` | 2 | dragons, siege |
+| `dig.grass` | 2 | roletrials, unlocks |
+| `mob.blaze.shoot` | 2 | roletrials (2) |
 | `mob.elderguardian.curse` | 2 | bestiary, undertow |
+| `mob.irongolem.throw` | 2 | bestiary (2) |
 | `mob.villager.no` | 2 | bestiary (2) |
 | `mob.witch.celebrate` | 2 | bestiary (2) |
 | `note.bell` | 2 | rails, roletrials |
-| `note.flute` | 2 | bestiary, horses |
 | `random.bow` | 2 | bestiary (2) |
+| `random.door_open` | 2 | siege, vault |
 | `random.drink` | 2 | bestiary, roletrials |
-| `armor.equip_iron` | 1 | horses |
+| `tile.piston.in` | 2 | unlocks (2) |
 | `armor.equip_netherite` | 1 | siege |
-| `beacon.activate` | 1 | townhall |
 | `block.amethyst_block.resonate` | 1 | undertow |
 | `block.bell.use` | 1 | lore |
 | `block.campfire.crackle` | 1 | dragons |
-| `block.chain.place` | 1 | townhall |
 | `block.end_portal_frame.fill` | 1 | crown |
 | `block.end_portal.spawn` | 1 | undertow |
-| `bucket.fill_water` | 1 | roletrials |
 | `chime.amethyst_block` | 1 | roletrials |
-| `dig.grass` | 1 | roletrials |
 | `dig.gravel` | 1 | roletrials |
 | `dig.sand` | 1 | dragons |
 | `dye.use` | 1 | siege |
@@ -458,13 +476,12 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `mob.villager.death` | 1 | bestiary |
 | `mob.warden.nearby_close` | 1 | bestiary |
 | `mob.warden.roar` | 1 | undertow |
-| `mob.warden.sonic_boom` | 1 | townhall |
 | `mob.witch.ambient` | 1 | roletrials |
 | `mob.wither.hurt` | 1 | roletrials |
 | `mob.wither.shoot` | 1 | bestiary |
 | `mob.wolf.growl` | 1 | bestiary |
 | `note.bass` | 1 | dragons |
-| `random.door_open` | 1 | siege |
+| `random.door_close` | 1 | vault |
 | `random.fuse` | 1 | siege |
 | `step.stone` | 1 | bestiary |
 

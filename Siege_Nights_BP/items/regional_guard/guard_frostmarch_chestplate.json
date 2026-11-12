@@ -9,7 +9,12 @@
       }
     },
     "components": {
-      "minecraft:icon": "siege_guard_frostmarch_chestplate",
+      "minecraft:icon": {
+        "textures": {
+          "default": "siege_guard_frostmarch_chestplate",
+          "dyed": "siege_guard_frostmarch_chestplate_dyed"
+        }
+      },
       "minecraft:display_name": {
         "value": "item.siege:guard_frostmarch_chestplate.name"
       },

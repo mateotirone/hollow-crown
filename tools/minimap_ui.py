@@ -1,4 +1,4 @@
-"""Write Siege_Nights_RP/ui/hud_screen.json: the minimap on the HUD.
+"""Write Siege_Nights_RP/ui/hud_screen.json: the minimap on the HUD (and the boss bars from tools/bossbar_ui.py).
 
     python3 tools/minimap_ui.py
 
@@ -8,11 +8,13 @@ pattern from the Bedrock Wiki), so the map stays up while real titles come and g
 title box ignores titles that start with "hcm:".
 
 The hidden title is fixed width at the front:
-    hcm:  D  P  TTTT  |  label
-    D     arrow direction, "0".."7" (0 = north, clockwise)
-    P     arrow spot inside the middle tile, "a".."p" (row by row, 4 x 4); anything else hides it
-    TTTT  map texture: "XXZZ" tile number, "none" for uncharted, "off_" hides the whole minimap
-    label place name under the map (no digits, so the string cutting below stays safe)
+    hcm:  D  P  TTTTTT  |  label
+    D       arrow direction, "q r s t u v w y" (north, then clockwise)
+    P       arrow spot inside the middle tile, "a".."p" (row by row, 4 x 4); anything else hides it
+    TTTTTT  map texture: "xXXzZZ" tile, "none__" for uncharted, "off___" hides the whole minimap
+    label   place name under the map (no digits)
+No piece that is cut out may be all digits: JSON UI turns a string like "1717" into a number. The first
+version did that and its tiles were also palette PNGs; the map showed black (playtest 2026-11-11).
 """
 import json, os
 
@@ -30,11 +32,11 @@ S = f"(#preserved_text - '{KEY}')"                 # D P TTTT | label
 DP = f"('%.2s' * {S})"
 D = f"('%.1s' * {S})"
 P = f"({DP} - {D})"
-R = f"({S} - {DP})"                                # TTTT | label
-T = f"('%.4s' * {R})"
-LABEL = f"({R} - ('%.5s' * {R}))"
+R = f"({S} - {DP})"                                # TTTTTT | label (the label may lose letters here; unused)
+T = f"('%.6s' * {R})"
+LABEL = f"({S} - ('%.9s' * {S}))"                 # everything after D P TTTTTT |
 HAS = f"(not ({S} = #preserved_text))"
-ON = f"({HAS} and (not ({T} = 'off_')))"
+ON = f"({HAS} and (not ({T} = 'off___')))"
 
 
 def view(expr, target):
@@ -99,6 +101,12 @@ ui = {
          "source_property_name": f"((#hud_title_text_string - '{KEY}') = #hud_title_text_string)"},
     ]},
 }
+
+# the boss health bars live in this file too (tools/bossbar_ui.py draws them and says how they work)
+import sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import bossbar_ui
+ui.update(bossbar_ui.entries())
 
 with open(OUT, "w") as f:
     f.write(json.dumps(ui, indent=2) + "\n")

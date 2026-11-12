@@ -4,7 +4,7 @@
     "description": {
       "identifier": "siege:old_stripped_jungle_log",
       "menu_category": {
-        "category": "none"
+        "category": "construction"
       },
       "states": {
         "siege:axis": [

@@ -13,11 +13,21 @@
     "default": "geometry.siege_b.bell_ringer"
    },
    "animations": {
-    "main": "animation.siege_b.bell_ringer"
+    "base": "animation.siege_b.bell_ringer",
+    "idle": "animation.siege_b.bell_ringer.idle",
+    "walk": "animation.siege_b.bell_ringer.walk",
+    "aim": "animation.siege_b.bell_ringer.aim",
+    "ready": "controller.animation.siege_b.bell_ringer.ready",
+    "hurt": "animation.siege_b.bell_ringer.hurt",
+    "flinch": "controller.animation.siege_b.bell_ringer.flinch"
    },
    "scripts": {
     "animate": [
-     "main"
+     "base",
+     "idle",
+     "walk",
+     "ready",
+     "flinch"
     ]
    },
    "render_controllers": [

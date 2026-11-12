@@ -38,38 +38,11 @@ import { marks } from "./marks.js";
 import "./showcase.js";
 import "./stand.js";
 import "./roost.js";
+import "./thirdnight.js";
+import { trialsOf, save, pathOf, resetTrials } from "./saves.js";
 
-const PROP = "hc:role_trials";
-const HERO_PROP = "siege:townhall_hero"; // written by the town hall
 const DAY = 24000;
 const BELL_NAME = "Hroda's Hand-bell";
-
-// ---------- saves ----------
-const cache = new Map(); // player id -> trials
-function trialsOf(player) {
-  let t = cache.get(player.id);
-  if (t) return t;
-  let saved;
-  try {
-    const raw = player.getDynamicProperty(PROP);
-    if (typeof raw === "string") saved = JSON.parse(raw);
-  } catch { /* unreadable: start fresh, never throw */ }
-  t = loadTrials(saved);
-  cache.set(player.id, t);
-  return t;
-}
-function save(player) {
-  try { player.setDynamicProperty(PROP, JSON.stringify(trialsOf(player))); } catch { /* left the game */ }
-}
-world.afterEvents.playerLeave.subscribe(({ playerId }) => cache.delete(playerId));
-
-function pathOf(player) {
-  try {
-    const raw = player.getDynamicProperty(HERO_PROP);
-    if (typeof raw === "string") return JSON.parse(raw).path ?? "none";
-  } catch { /* no hero yet */ }
-  return "none";
-}
 
 const now = () => world.getAbsoluteTime();
 const loreFlag = (player, flag) => emit("loreSetFlag", { player, flag });
@@ -430,7 +403,7 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
     return player.sendMessage(`§7Spans: ${marks.data.spans.map((s) => `${Math.round(s.start.x)},${Math.round(s.start.z)} to ${Math.round(s.end.x)},${Math.round(s.end.z)}`).join("; ") || "none"}\nGraves: ${marks.data.graves.map((g) => `${Math.round(g.at.x)},${Math.round(g.at.z)}`).join("; ") || "none"}`);
   }
   if (event.id === "siege:role_trial") {
-    if (what === "reset") { cache.set(player.id, blankTrials()); save(player); return player.sendMessage("§aYour role trials are forgotten."); }
+    if (what === "reset") { resetTrials(player, blankTrials()); return player.sendMessage("§aYour role trials are forgotten."); }
     if (!TRIALS[what]) return player.sendMessage(`§7Roles: ${TRIAL_ROLES.join(", ")}`);
     startTrial(player, what);
     if (arg && stepById(what, arg)?.how !== "deed") complete(player, arg);

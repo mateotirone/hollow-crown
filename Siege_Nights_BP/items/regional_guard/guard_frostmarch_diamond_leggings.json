@@ -9,7 +9,12 @@
       }
     },
     "components": {
-      "minecraft:icon": "siege_guard_frostmarch_diamond_leggings",
+      "minecraft:icon": {
+        "textures": {
+          "default": "siege_guard_frostmarch_diamond_leggings",
+          "dyed": "siege_guard_frostmarch_diamond_leggings_dyed"
+        }
+      },
       "minecraft:display_name": {
         "value": "item.siege:guard_frostmarch_diamond_leggings.name"
       },

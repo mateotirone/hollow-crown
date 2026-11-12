@@ -102,14 +102,16 @@ lays out a player settlement on one of the 12 map plots (slice: `terrain_slice.p
 centred on the Plot Stone). It is the town pipeline plus the settlement rules agreed with the
 building-placement thread:
 
-- The wall grows: Hamlet r32, Town r40, City r48, Castle r56. A slot opens once its whole box is within
+- The wall grows: Hamlet r36, Town r46, City r56, Castle r66 (was 32/40/48/56; --walls tries others). A slot opens once its whole box is within
   wall - 3, and never before the road its walkway reaches.
-- Ring lanes may sit on the old wall lines at r32 and r48 only (templates choose the arcs); they open the
+- Ring lanes may sit on the old wall lines at r36 and r56 only (templates choose the arcs); they open the
   tier after the wall leaves them.
 - The ground every town hall level takes (drawHall bounds per region, from the Hall Cornerstone 5 ahead,
-  plus 2) is kept free of roads and slots from the start.
-- Slots are odd boxes (Small 7, Medium 11, Large 15, Great 21; long side up to +2) facing a road, with
-  floor height, walkway, tags (hall, square, road_front, wall, gate, corner, field_edge, water) and opensAt.
+  plus 2) is kept free of roads from the start, and of slots up to level 4; slots may sit on level 5's extra ground (tag hall5).
+- Slots are odd boxes, width along the door side x depth (Small 9x13, Medium 11x15, long Medium 13x15,
+  Large 15x15, Great 21x21; Large and Great up to 2 longer either way) facing a road, with
+  floor height (the highest ground block in the box; stone foundation below, never cut in, so
+  "foundation" is its tallest column; within a block of every path beside it), walkway, tags (library, hall, hall5 = on ground the level-5 hall takes back, tall_foundation = 4+ blocks of foundation, square, road_front, wall, gate, corner, field_edge, water) and opensAt.
 - Fields are whole portions (about 10% of the land, at least one) whose crop area grows with the wall,
   watered level by level as in towns.
 

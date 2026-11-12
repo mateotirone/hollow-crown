@@ -17,7 +17,7 @@ export const UNDERTOW_LAYOUT = {
   zStart: -48,
   zEnd: 2460,
   floorY: 40, // lowest solid layer (blackstone); below it, void
-  ceilingY: 200, // the ceiling slab: see-through to light, so the valley isn't pitch black
+  ceilingY: 200, // the land never rises above ceilingY - 30. The roof itself follows the land (terrain.js ROOF)
   ceilingThickness: 4,
 
   // Arrival: the Wound, a ledge looking out over the valley. The return crack is in the wall behind.
