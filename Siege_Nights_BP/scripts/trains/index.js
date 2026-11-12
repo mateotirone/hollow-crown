@@ -17,8 +17,17 @@ import { sfx } from "../core/sfx.js";
 import "./tests.js";
 
 // trains: [{ id, dim, head: cursor, v, style, cars: [{ kind, eid }] }]
-const store = moduleStore("siege:trains", () => ({ trains: [], next: 1 }));
+// unlocked: { [playerId]: { engine?: true, coach?: true } }: who has owned an engine or coach once (built or bought),
+// and so may take a new one free from any station
+const store = moduleStore("siege:trains", () => ({ trains: [], next: 1, unlocked: {} }));
 const trains = () => store.data.trains;
+export const hasUnlocked = (playerId, kind) => !!store.data.unlocked?.[playerId]?.[kind];
+export function unlock(playerId, kind) {
+  if (hasUnlocked(playerId, kind)) return false;
+  ((store.data.unlocked ??= {})[playerId] ??= {})[kind] = true;
+  store.save();
+  return true;
+}
 export const allTrains = () => trains();
 
 const say = (player, text) => player.onScreenDisplay.setActionBar(text);
@@ -105,29 +114,53 @@ function spawnCar(dim, kind, pose, train) {
   return e;
 }
 
-export function placeEngine(dim, pos, yaw, style, quietPlayer, owner) {
+export function placeEngine(dim, pos, yaw, style, quietPlayer, owner, extra = {}, first = "engine") {
   const get = reader(dim);
   const shape = get(pos.x, pos.y, pos.z);
   if (!shape) return undefined;
   let head = cursorOn(pos, shape, yaw);
-  const cars = [{ kind: "engine" }];
+  const cars = [{ kind: first }];
   for (let tries = 0; back(head, trainLength(cars), get).blocked; tries++) {
     const r = advance(head, 1, get);
     if (r.blocked || tries > 16) {
-      if (quietPlayer) say(quietPlayer, `§cThe engine needs at least ${CARS.engine.length + 1} blocks of track.`);
+      if (quietPlayer) say(quietPlayer, `§cA train needs at least ${CARS[first].length + 1} blocks of track.`);
       return undefined;
     }
     head = r.cursor;
   }
-  const train = { id: store.data.next++, dim: dim.id, head, v: 0, style, owner, color: colorOf(owner), cars };
+  const train = { id: store.data.next++, dim: dim.id, head, v: 0, style, owner, color: colorOf(owner), cars, ...extra };
   const [pose] = carPoses(head, cars, get);
-  cars[0].eid = spawnCar(dim, "engine", pose, train).id;
+  cars[0].eid = spawnCar(dim, first, pose, train).id;
   trains().push(train);
   store.save();
   return train;
 }
 
+// The free carriage a station calls once its line is bought: one coach that drives itself slowly
+// (TRAIN.carriageSpeed), put away when it has stood empty for a minute. One per player.
+export function callCarriage(dim, pos, yaw, style, owner, player) {
+  removeTrains((t) => t.free && t.caller === player.id);
+  return placeEngine(dim, pos, yaw, style, player, owner, { free: true, caller: player.id, maxV: TRAIN.carriageSpeed }, "coach");
+}
+
+function removeTrains(test) {
+  for (let i = trains().length - 1; i >= 0; i--) {
+    const t = trains()[i];
+    if (!test(t)) continue;
+    for (const c of t.cars) {
+      try {
+        world.getEntity(c.eid)?.remove();
+      } catch {
+        // already gone
+      }
+    }
+    trains().splice(i, 1);
+  }
+  store.save();
+}
+
 export function addCoach(train, dim) {
+  if (train.free) return "§cThe station's carriage can't take coaches.";
   if (train.cars.length >= TRAIN.maxCars) return "§cA train can pull at most " + (TRAIN.maxCars - 1) + " coaches.";
   const get = reader(dim);
   const cars = [...train.cars, { kind: "coach" }];
@@ -167,6 +200,7 @@ world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
       const owner = ownerFor(player, block);
       const train = placeEngine(dim, block.location, player.getRotation().y, styleIndexFor(owner, block), player, owner);
       if (!train) return;
+      if (unlock(player.id, "engine")) player.sendMessage("§6Your first engine: from now on any station gives you a new one free if you lose it.");
       const look = train.color === NO_COLOR ? `${TRAIN_STYLES[train.style]} style` : `${TRAIN_STYLES[train.style]} style, in ${COLORS[train.color].replace("_", " ")}`;
       say(player, `§6Engine on the line (${look}). Climb in and hold forward to go, back to brake.`);
     } else {
@@ -175,6 +209,7 @@ world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
       const problem = addCoach(train, dim);
       if (problem) return say(player, problem);
       say(player, `§6Coach coupled. The train has ${train.cars.length} cars.`);
+      if (unlock(player.id, "coach")) player.sendMessage("§6Your first coach: from now on any station gives you a new one free if you lose it.");
     }
     sfx(player, "random.anvil_land");
     if (!isCreative(player)) consumeOne(player, CARS[kind].item);
@@ -254,7 +289,7 @@ function runTick() {
     const here = get(train.head.x, train.head.y, train.head.z);
     const downhill = here?.kind === 3 ? (here.up === train.head.to ? -1 : 1) : 0; // in the train's forward direction
     const look = (train.v * train.v) / (2 * TRAIN.brake) + 2;
-    const limit = train.v > 0 ? limitAhead(train.head, look, get) : Infinity;
+    const limit = Math.min(train.v > 0 ? limitAhead(train.head, look, get) : Infinity, train.maxV ?? Infinity);
     const before = train.v;
     // nobody driving: the brakes go on and it stays put
     train.v = driver ? stepSpeed(train.v, throttle, { downhill, limit }) : Math.sign(train.v) * Math.max(0, Math.abs(train.v) - TRAIN.brake);
@@ -393,4 +428,23 @@ onTick("trains_view", 5, () => {
       console.warn(`[Hollow Crown] train view: ${e}`);
     }
   }
+});
+
+// Every five seconds: put away station carriages that have stood empty for a minute
+onTick("trains_carriages", 100, () => {
+  if (!isReady()) return;
+  let gone = false;
+  for (const t of trains()) {
+    if (!t.free) continue;
+    const aboard = t.cars.some((c) => {
+      try {
+        return (world.getEntity(c.eid)?.getComponent("minecraft:rideable")?.getRiders() ?? []).length > 0;
+      } catch {
+        return false;
+      }
+    });
+    t.idle = aboard ? 0 : (t.idle ?? 0) + 100;
+    if (t.idle >= TRAIN.carriageIdle) { t.gone = true; gone = true; }
+  }
+  if (gone) removeTrains((t) => t.gone);
 });
