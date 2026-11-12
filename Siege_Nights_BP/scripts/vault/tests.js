@@ -1,6 +1,9 @@
 import { addTests, assert, assertEqual } from "../core/tests.js";
 import { VAULT_ROOMS } from "./rooms_data.js";
 import { windowsOn, awayState, WINDOW, SAFE, safeBlow, safeCells } from "./data.js";
+import { drawHall, toWorld, frameFor } from "../townhall/halls.js";
+import { STYLES } from "../townhall/styles.js";
+import { strongroomSpots, spotProblem, toHall, STAIR_TOP, vaultFrameAt, spotOfVault } from "./seat.js";
 import { TIERS, LAYOUT, COSTS, worldOf, groundBox, LOCK_HP, BREAKER_POWER, MEND, REBUILD, breakSeconds } from "./data.js";
 
 addTests("vault", {
@@ -77,5 +80,34 @@ addTests("vault", {
     assertEqual(worldOf(north, 2, 1, 0), { x: 2, y: 64, z: 0 }); // facing north, right is east
     const b = groundBox(north, VAULT_ROOMS.wood.treasury.box);
     assert(b.z1 <= -1 && b.x0 < 0 && b.x1 > 0, "ahead of the player, both sides");
+  },
+  "a stairs spot in a hall lands the vault where the hall puts that spot, facing the same way, and back again": () => {
+    const spot = { x: -3, y: 1, z: 4, d: { x: 0, z: 1 } };
+    for (const [fx, fz] of [[0, 1], [1, 0], [0, -1], [-1, 0]]) {
+      const hall = { x: 100, y: 65, z: -40, fx, fz };
+      const v = vaultFrameAt(hall, spot);
+      const frame = frameFor({ x: fx, z: fz });
+      // the block the player stands in at the top, and the first step, as the hall's own frame puts them
+      assertEqual(worldOf(v, 0, 1, 0), toWorld(frame, hall, spot.x, spot.y, spot.z));
+      assertEqual(worldOf(v, 0, 0, 1), toWorld(frame, hall, spot.x, spot.y - 1, spot.z + 1));
+      assertEqual(spotOfVault(hall, v), spot);
+    }
+  },
+  "every hall of every region and tier has room for the vault's stairs, over its floor and under its roof": () => {
+    for (const [id, style] of Object.entries(STYLES)) {
+      const plans = [1, 2, 3, 4, 5].map((l) => drawHall(l, style));
+      plans.forEach((p, i) => {
+        const spots = strongroomSpots(p, plans.slice(i + 1));
+        assert(spots.length, `${id} level ${i + 1} has no spot for the vault stairs`);
+        const s = spots[0];
+        assertEqual(spotProblem(p, s), undefined);
+        // nothing of the hall is dug away: the hole and its headroom are open in the plan
+        for (const c of STAIR_TOP) {
+          if (!c.air || c.y === 0) continue;
+          const h = toHall(s, c.x, c.y, c.z), cell = p.cells.get(`${h.x},${h.y},${h.z}`);
+          assert(!cell || cell.role === "air", `${id} ${i + 1}: the stairs cut the hall at ${h.x},${h.y},${h.z}`);
+        }
+      });
+    }
   },
 });

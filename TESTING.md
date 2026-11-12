@@ -756,3 +756,11 @@ On the map world (map mode), in Creative:
 3. `/scriptevent siege:townsfolk` lists the towns and how many are out. `here` brings the nearest town's folk out now (also at night), `home` sends them in, `heard` resets which lines you have heard.
 4. Hit one: no damage. Set the time to night and walk 25+ blocks away: they go indoors. Set it to day: they come back.
 5. After the town layout changes (a new `map/<town>-blocks.json`), run `python3 tools/townsfolk_spots.py` and commit `scripts/townsfolk/spots_data.js`.
+
+## The Vault as a town hall add-on (scripts/vault/seat.js)
+
+1. Raise any town hall (`/scriptevent siege:townhall_build`), open the Town Board, choose "Vault" and "Add Vault" (free in creative).
+2. You get the Vault Key and the vault starts digging at once: a 3-wide stair hole opens in the hall's floor, off the centre aisle and clear of the Tree, the board, the hearth and the door. Nothing of the hall is cut away above the floor.
+3. Go down: entrance landing, the 3x3 door with the Vault Lock on its right. The key on the lock still swings the door.
+4. Grow the hall a tier. When it finishes, the stairs are cut again in the same spot (or, if the new hall has something there, the vault moves and you are told so). Set a relic on a stand first to see it move with the room.
+5. Try it in each region style (Vale, Frostmarch, Saltreach, Emberwaste, Blackfen): Blackfen's stairs go down from the stilt floor.
