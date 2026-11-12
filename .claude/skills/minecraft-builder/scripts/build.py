@@ -23,7 +23,8 @@ def build(spec, out_dir, edition=None, stages=False, preview=True, mcstructure=F
     pal = Palette(edition=edition)
     log = []
     name = spec.get("name", "build").replace(" ", "_")
-    cells, stage_of, log = cells_of(spec, log)
+    info = {}
+    cells, stage_of, log = cells_of(spec, log, info)
     mats = Materials(spec.get("materials"), pal, log)
     blocks = resolve(cells, mats, pal, log)
     emit.connect(blocks)
@@ -55,6 +56,8 @@ def build(spec, out_dir, edition=None, stages=False, preview=True, mcstructure=F
         if p: files.append(p)
         else: log.append("mcstructure needs the hollow-crown repo's map/structures/bp.py")
     extra["seconds"] = round(time.time() - t0, 1)
+    if info.get("houses"):        # floor rows per storey, for interiors (engine.layout)
+        extra["floors"] = {h["name"]: [s_["stand_y"] for s_ in h["storeys"]] for h in info["houses"]}
     s = emit.summary(blocks, stage_of, files, ncmd, log, name, extra)
     json.dump(s, open(os.path.join(out_dir, "summary.json"), "w"), indent=1)
     return s

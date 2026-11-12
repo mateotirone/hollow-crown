@@ -50,6 +50,7 @@ class Context:
         self.spec.setdefault("materials", {})
         self.n = 0
         self.roofs = []          # height fields registered by roof parts, built together at the end of each house
+        self.info = {"houses": []}   # layout for code that adds to a build (engine.layout)
 
     # ---- cells
     def set(self, x, y, z, stage, kind=None, mat=None, raw=None, **p):
@@ -766,6 +767,7 @@ def house(ctx, s):
             if j == k: continue
             for c, v in F.items(): Hb[c] = max(Hb.get(c, -99), v[0])
         _openings(ctx, bs, bst, bB, Hb, H_extra, [ob for j, (_a, _b, ob) in enumerate(blocks) if j != k])
+    if s.get("arcade"): _arcade(ctx, s, st, B, s["arcade"])
     # a wing roof that ends against a taller wall: say so (it reads as unfinished; 06 connecting roofs)
     for k, (F, r, bst, bB) in enumerate(roofs[1:], 1):
         top = max(v[0] for v in F.values())
@@ -797,6 +799,10 @@ def house(ctx, s):
         fin = bs.get("finials", s.get("finials", "spikes"))
         if fin: finials(ctx, r, Hf, fin, {c for c, _, _ in chs}, bst)
     if s.get("vines"): vines(ctx, blocks, s["vines"])
+    for bs, bst, bB in blocks:
+        ctx.info["houses"].append({"name": bst["_name"], "rect": list(bs["rect"]), "plate": bB["plate"],
+                                   "storeys": [{"floor_y": fl, "stand_y": fl + 1, "height": h, "rect": list(rr)}
+                                               for fl, h, rr in zip(bB["floors"], bB["storeys"], bB["rects"])]})
     return B
 
 
@@ -996,7 +1002,262 @@ def woodpile(ctx, s):
         ctx.setif(cx, y, cz, "details", raw=f"stripped_{w}_log", axis="y")
 
 
-PARTS = {"house": house, "lean_to": lean_to, "woodpile": woodpile, "arch": arch, "string_course": string_course, "buttress": buttress, "hanging_lantern": hanging_lantern}
+# ------------------------------------------------------------------ towers, civic dressing (06-roof, 07-detailing)
+def _top(ctx, rect, stages=("walls", "frame"), pad=0):
+    """Highest cell of the given stages inside rect (+pad): the top of a tower built by an earlier part."""
+    x0, z0, x1, z1 = rect
+    ys = [y for (x, y, z) in ctx.cells if x0 - pad <= x <= x1 + pad and z0 - pad <= z <= z1 + pad
+          and ctx.stage_of.get((x, y, z)) in stages]
+    return max(ys) if ys else None
+
+
+def _base_y(ctx, s, rect, default="top"):
+    """y of a part that sits on something already built: a number, "top" (above the walls and frame in
+    rect; the old roof there is cleared) or "roof" (on the highest roof cell in rect)."""
+    y = s.get("y", default)
+    if isinstance(y, (int, float)): return int(y)
+    if y == "roof":
+        t = _top(ctx, rect, ("roof",))
+        if t is not None: return t
+    t = _top(ctx, rect)
+    if t is None: ctx.log.append(f"{s.get('part')}: nothing built under {rect}; put it on the ground (y 0) or give y"); return 0
+    pad = s.get("overhang", 1) + 1
+    x0, z0, x1, z1 = rect
+    for c in [c for c in ctx.cells if x0 - pad <= c[0] <= x1 + pad and z0 - pad <= c[2] <= z1 + pad and c[1] > t
+              and ctx.stage_of.get(c) in ("roof", "details")]:
+        ctx.clear(*c)                        # the tower's own roof makes way for the spire or belfry
+    return t + 1
+
+
+def _ring(ctx, X0, Z0, X1, Z1, y, mat, stage="roof", fill=True, corners="stairs"):
+    """One ring of a pyramid: stairs facing in (up the slope) on the edge, outer-corner stairs on the
+    corners, full blocks inside."""
+    for x in range(X0, X1 + 1):
+        for z in range(Z0, Z1 + 1):
+            ex = "w" if x == X0 else "e" if x == X1 else None
+            ez = "n" if z == Z0 else "s" if z == Z1 else None
+            if X0 == X1 or Z0 == Z1:
+                ctx.set(x, y, z, stage, "full", mat); continue
+            if ex and ez:
+                if corners == "none": continue
+                if corners == "full": ctx.set(x, y, z, stage, "full", mat); continue
+                f, cn = corner_stair(ez, ex)
+                ctx.set(x, y, z, stage, "stairs", mat, facing=f, half="bottom", corner=cn)
+            elif ex or ez:
+                ctx.set(x, y, z, stage, "stairs", mat, facing=OPP[ex or ez], half="bottom")
+            elif fill:
+                ctx.set(x, y, z, stage, "full", mat)
+
+
+def _finial(ctx, x, y, z, kind, post_mat, cap_mat, stage="details"):
+    """Spire top: a post of wall blocks, a cap block and a lightning rod (06: finials)."""
+    if kind in (None, "none", False): return y
+    n = 2 if kind == "rod" else 3 if kind == "tall" else 1
+    for k in range(n): ctx.set(x, y + k, z, stage, "post", post_mat)
+    ctx.set(x, y + n, z, stage, "full", cap_mat)
+    ctx.set(x, y + n + 1, z, stage, raw="lightning_rod")
+    return y + n + 2
+
+
+def spire(ctx, s):
+    """A spire on a square tower (06-roof, steep roofs): an eave ring of stairs over the overhang, then
+    rings stepping in one block every `rows` rows (stairs stacked on stairs, corner blocks full, so
+    the slope reads steep and tiled), then a finial. kind "stepped" (default) or "broach" (the corners of the
+    upper rings are left off, so the spire turns octagonal above square broaches). Keys: rect (the tower),
+    y (default "top": on the tower's walls, replacing its roof), rows (3), overhang (1), roof, trim, finial
+    ("rod" / "tall" / "short" / "none")."""
+    rect = list(s["rect"]); x0, z0, x1, z1 = rect
+    y = _base_y(ctx, s, rect)
+    ov = s.get("overhang", 1); rows = s.get("rows", 3); kind = s.get("kind", "stepped")
+    st = {"_name": s.get("name", f"spire{ctx.n}"), "roof": s.get("roof", {"block": "deepslate_tiles"}),
+          "trim": s.get("trim", s.get("roof", {"block": "deepslate_tiles"}))}
+    ctx.n += 1
+    rm = ctx.mat(st, "roof"); tm = ctx.mat(st, "trim")
+    steps = (min(x1 - x0, z1 - z0) // 2) + 1
+    ctx.spec["materials"][rm] = _with_range(ctx.spec["materials"][rm], y, y + 1 + rows * steps)
+    _ring(ctx, x0 - ov, z0 - ov, x1 + ov, z1 + ov, y, rm)            # the eave ring
+    for X0, Z0, X1, Z1 in [(x0 - ov, z0 - ov, x1 + ov, z1 + ov)]:     # an eave of upside-down trim under the overhang
+        for x in range(X0, X1 + 1):
+            for z in range(Z0, Z1 + 1):
+                if not (x0 <= x <= x1 and z0 <= z <= z1):
+                    sd = "n" if z < z0 else "s" if z > z1 else "w" if x < x0 else "e"
+                    if (x < x0 or x > x1) and (z < z0 or z > z1): continue
+                    ctx.setif(x, y - 1, z, "roof", "stairs", tm, facing=OPP[sd], half="top")
+    y += 1
+    k = 0
+    while x0 + k <= x1 - k and z0 + k <= z1 - k:
+        X0, Z0, X1, Z1 = x0 + k, z0 + k, x1 - k, z1 - k
+        for r in range(rows):
+            last = r == rows - 1
+            if k == 0 and not last: continue
+            corners = "none" if (kind == "broach" and k > 0 and r > 0) else "stairs"
+            if kind == "broach" and k == 0: corners = "stairs" if last else "full"
+            if last or X0 == X1 or Z0 == Z1: _ring(ctx, X0, Z0, X1, Z1, y, rm, corners=corners)
+            else:            # lower rows of a step: stairs stacked on stairs, so the steep face reads as tiles, not a box
+                _ring(ctx, X0, Z0, X1, Z1, y, rm, fill=False, corners="none" if corners == "none" else "full")
+            y += 1
+            if X0 == X1 or Z0 == Z1: break
+        if X0 == X1 or Z0 == Z1: break
+        k += 1
+    cx, cz = (x0 + x1) // 2, (z0 + z1) // 2
+    if x1 - x0 == z1 - z0: _finial(ctx, cx, y, cz, s.get("finial", "rod"), tm, rm)
+    return y
+
+
+def belfry(ctx, s):
+    """An open bell storey (07-detailing, towers): a solid deck, corner piers, an arched head on every face
+    (round angle, when the face is 3 or more wide), a beam ring on top, a bell hanging from a beam across the
+    middle, optional louvres (open trapdoors flush to each face) and a cap. Sits on a tower (y "top",
+    replacing its roof), on a ridge (y "roof": the deck is built up from the roof) or at a given y.
+    Keys: rect, y, h (open height, 4), pier, deck, trim, roof, louvres, bell, cap ("hip" / "spire" / "none"),
+    finial, base (rows of deck above the ridge, 1)."""
+    rect = list(s["rect"]); x0, z0, x1, z1 = rect
+    on_roof = s.get("y") == "roof"
+    y = _base_y(ctx, s, rect, "top")
+    h = s.get("h", 4)
+    st = {"_name": s.get("name", f"belfry{ctx.n}"), "pier": s.get("pier", "stone_bricks"), "deck": s.get("deck", s.get("pier", "stone_bricks")),
+          "trim": s.get("trim", "spruce_planks"), "roof": s.get("roof", {"block": "deepslate_tiles"})}
+    ctx.n += 1
+    pm, dm, tm = ctx.mat(st, "pier"), ctx.mat(st, "deck"), ctx.mat(st, "trim")
+    if on_roof:              # build the deck up from the roof surface in every column
+        deck = y + s.get("base", 1) - 1
+        for x in range(x0, x1 + 1):
+            for z in range(z0, z1 + 1):
+                lo = min([yy for (cx, yy, cz) in ctx.cells if cx == x and cz == z and ctx.stage_of.get((cx, yy, cz)) == "roof"] or [deck])
+                for yy in range(lo, deck + 1): ctx.set(x, yy, z, "frame", "full", dm)
+    else:
+        deck = y
+        for x in range(x0, x1 + 1):
+            for z in range(z0, z1 + 1): ctx.set(x, deck, z, "floors", "full", dm)
+    W, D = x1 - x0 + 1, z1 - z0 + 1
+    thin = min(W, D) <= 3
+    for x, z in ((x0, z0), (x1, z0), (x0, z1), (x1, z1)):
+        for yy in range(deck + 1, deck + h + 1): ctx.set(x, yy, z, "frame", "post" if thin else "full", pm)
+    beam = deck + h + 1
+    for x in range(x0, x1 + 1):
+        for z in range(z0, z1 + 1):
+            if x in (x0, x1) or z in (z0, z1): ctx.set(x, beam, z, "frame", "full", tm, axis="x" if z in (z0, z1) else "z")
+    for sd in "nsew":
+        L = side_len(rect, sd)
+        if L - 2 >= 3 and (L - 2) % 2:
+            cx, cz = wall_cell(rect, sd, 0)
+            arch(ctx, {"at": [cx, deck + 1, cz], "axis": ALONG_AXIS[sd], "width": L - 2, "height": h, "style": s.get("arch", "round_angle"),
+                       "material": ctx.mat(st, "pier"), "trim": tm, "stage": "walls"})
+        if s.get("louvres"):
+            for t_ in range(-(L // 2) + 1, L // 2):
+                x, z = wall_cell(rect, sd, t_)
+                for yy in range(deck + 1, deck + h):
+                    if ctx.free(x, yy, z): ctx.set(x, yy, z, "details", "trapdoor", tm, open=True, facing=OPP[sd])
+    cx, cz = (x0 + x1) // 2, (z0 + z1) // 2
+    if s.get("bell", True):
+        ax = "x" if W >= D else "z"
+        for k in range((x0 if ax == "x" else z0) + 1, (x1 if ax == "x" else z1)):
+            ctx.set(k if ax == "x" else cx, beam, cz if ax == "x" else k, "frame", "full", tm, axis=ax)
+        ctx.set(cx, beam - 1, cz, "details", raw="bell", facing="s" if ax == "x" else "e")
+    cap = s.get("cap", "hip")
+    if cap == "none": return beam
+    return spire(ctx, {"rect": rect, "y": beam + 1, "rows": 1 if cap == "hip" else s.get("rows", 3), "overhang": s.get("overhang", 1),
+                       "roof": s.get("roof", {"block": "deepslate_tiles"}), "trim": s.get("cap_trim", st["pier"]),
+                       "finial": s.get("finial", "short" if cap == "hip" else "rod"), "kind": s.get("kind", "stepped"),
+                       "name": st["_name"] + ".cap", "part": "spire"})
+
+
+def clock_face(ctx, s):
+    """A clock on a wall (07-detailing): a 3x3 (or 5, round) face of calcite flush in the wall, hands in a
+    dark block from the hub (minute hand on the 12, hour hand by `time`), a button for the hub and an
+    optional frame. Place it by at = [x, y, z] (the face centre, in the wall) and side (the way it faces),
+    or by rect + side + y (+ "along", offset along the wall like windows' "at")."""
+    sd = s["side"]
+    if "rect" in s:
+        x, z = wall_cell(s["rect"], sd, s.get("along", 0)); y = s["y"]
+    else: x, y, z = s["at"]
+    n = s.get("size", 3); r = n // 2
+    face, hand = s.get("face", "calcite"), s.get("hand", "polished_blackstone")
+    hh, mm = (int(v) for v in str(s.get("time", "3:00")).split(":"))
+    rx, rz = RIGHT_OF[sd]; ox, oz = DIRS[sd]
+    def P(u, v): return x + rx * u, y + v, z + rz * u       # u right, v up, seen from outside
+    def ray(deg, length):
+        import math
+        a = math.radians(round(deg / 45) * 45); du, dv = round(math.sin(a)), round(math.cos(a))
+        return [(du * k, dv * k) for k in range(1, length + 1)]
+    for u in range(-r - 1, r + 2):          # a window's sill, shutters or lantern in front of the face go
+        for v in range(-r - 1, r + 2):
+            c = (P(u, v)[0] + ox, P(u, v)[1], P(u, v)[2] + oz)
+            if ctx.stage_of.get(c) in ("openings", "details"): ctx.clear(*c)
+    hands = {(0, 0)} | set(ray(mm * 6, r)) | set(ray((hh % 12) * 30 + mm / 2, max(1, r - 1)))
+    for u in range(-r, r + 1):
+        for v in range(-r, r + 1):
+            if n >= 5 and abs(u) == r and abs(v) == r: continue      # round the big face's corners
+            ctx.set(*P(u, v), "details", raw=hand if (u, v) in hands else face)
+    fr = s.get("frame")
+    if fr:
+        for u in range(-r - 1, r + 2):
+            for v in range(-r - 1, r + 2):
+                if max(abs(u), abs(v)) == r + 1: ctx.set(*P(u, v), "details", raw=fr)
+    hub = s.get("hub", "polished_blackstone_button")
+    if hub: ctx.set(x + ox, y, z + oz, "details", raw=hub, facing=sd)
+
+
+def wheel(ctx, s):
+    """A waterwheel (mills): a plank rim, spokes of fence from the hub, paddles standing out of the rim at
+    every eighth, and a log axle running into the mill wall. at = the axle centre, axis = the axle's
+    direction (x or z), r = radius (3-5), width 1 or 2 along the axle, axle = blocks of axle each side, wood."""
+    import math
+    x, y, z = s["at"]; ax = s.get("axis", "x"); r = s.get("r", 3); w = s.get("width", 1); wood = s.get("wood", "spruce")
+    rim, spoke, log = s.get("rim", f"{wood}_planks"), s.get("spoke", f"{wood}_fence"), s.get("axle_block", f"stripped_{wood}_log")
+    def P(a, u, v): return (x + a, y + v, z + u) if ax == "x" else (x + u, y + v, z + a)
+    for a in range(w):
+        for u in range(-r - 1, r + 2):
+            for v in range(-r - 1, r + 2):
+                d = math.hypot(u, v)
+                if r - 0.5 <= d < r + 0.5: ctx.set(*P(a, u, v), "details", raw=rim)
+        for du, dv in ((1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)):
+            for k in range(1, r):
+                c = P(a, du * k, dv * k)
+                if math.hypot(du * k, dv * k) < r - 0.5 and ctx.free(*c): ctx.set(*c, "details", raw=spoke)
+            if s.get("paddles", True):
+                k = r + 1 if du == 0 or dv == 0 else round((r + 1) / math.sqrt(2))
+                ctx.set(*P(a, du * k, dv * k), "details", raw=rim)
+    n = s.get("axle", 1)
+    for a in range(-n, w + n): ctx.set(*P(a, 0, 0), "details", raw=log, axis=ax)
+
+
+def _arcade(ctx, s, st, B, a):
+    """An arcade along a house's ground storey (02 arched supports): every bay between the frame posts
+    becomes a round-angle arch, so the storey stands open as a market hall. Keys: sides (default every
+    side but the door's), storey (0), height, style, material, trim, lanterns (one in each crown), pier
+    (a block for the posts between arches)."""
+    a = {} if a is True else a
+    door_side = (s.get("door") or {}).get("side", "s") if s.get("door", {}) is not None else None
+    sides = a.get("sides", "".join(d for d in "nsew" if d != door_side))
+    i = a.get("storey", 0)
+    fl, h, rr = B["floors"][i], B["storeys"][i], B["rects"][i]
+    hgt = a.get("height", h - 1 if i < len(B["storeys"]) - 1 else h - 2)
+    mat = a.get("material") or ctx.mat(st, "plinth"); trim = a.get("trim") or ctx.mat(st, "trim")
+    for sd in sides:
+        L = side_len(rr, sd); ox, oz = DIRS[sd]
+        stops = sorted(set([-(L // 2), L // 2] + list(B["posts_of"][(i, sd)])))
+        for a_, b_ in zip(stops, stops[1:]):
+            w = b_ - a_ - 1
+            if w < 1: continue
+            if w % 2 == 0:
+                ctx.log.append(f"{st['_name']}: arcade bay of {w} on side {sd} is even, left as wall (set bay so posts sit an odd gap apart)"); continue
+            for t_ in range(a_ + 1, b_):          # sills, shutters and boxes of windows in the bay go
+                wx, wz = wall_cell(rr, sd, t_)
+                for yy in range(fl + 1, fl + hgt + 1):
+                    if ctx.stage_of.get((wx + ox, yy, wz + oz)) in ("openings", "details"): ctx.clear(wx + ox, yy, wz + oz)
+            c = (a_ + b_) // 2; x, z = wall_cell(rr, sd, c)
+            arch(ctx, {"at": [x, fl + 1, z], "axis": ALONG_AXIS[sd], "width": w, "height": hgt, "style": a.get("style", "round_angle"),
+                       "material": mat, "trim": trim})
+            if a.get("lanterns", True) and w >= 3: ctx.set(x, fl + hgt, z, "details", raw="lantern", hanging=True)
+        if a.get("pier"):
+            for t_ in stops:
+                if t_ in (-(L // 2), L // 2): continue
+                px, pz = wall_cell(rr, sd, t_)
+                for yy in range(fl + 1, fl + hgt + 1): ctx.set(px, yy, pz, "frame", "full", a["pier"])
+
+
+PARTS = {"house": house, "lean_to": lean_to, "woodpile": woodpile, "spire": spire, "belfry": belfry, "clock_face": clock_face, "wheel": wheel, "arch": arch, "string_course": string_course, "buttress": buttress, "hanging_lantern": hanging_lantern}
 
 
 def run(ctx, pt):
