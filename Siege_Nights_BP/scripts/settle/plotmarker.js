@@ -8,12 +8,12 @@
 
 import { world, system, GameMode } from "@minecraft/server";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
-import { isReady, isAlly, on, onTick } from "../siege/api.js";
+import { isReady, isAlly, on, emit, onTick } from "../siege/api.js";
 import { purse, charge, refund, coins, lot } from "./wallet.js";
 import { STYLES } from "../townhall/styles.js";
-import { SETTLE } from "./config.js";
+import { SETTLE, TAG_WORDS } from "./config.js";
 import { BUILDINGS, BUILDING, drawBuilding } from "./buildings.js";
-import { SLOTS } from "./layout.js";
+import { plotFit, opensAt, slotClass, CLASS_NAMES } from "./charters.js";
 import { drawBox } from "./zones.js";
 import { raiseOnSlot, risingAt, jobOf } from "./plans.js";
 import { PLOT_MARKER, townOf, allTowns, layoutOf, markerAt, registerMarker, forgetMarker, placeMarker, clearMarker, slotState, saveTowns, tierName } from "./founding.js";
@@ -22,9 +22,6 @@ import { sfx } from "../core/sfx.js";
 
 const OVERWORLD = "minecraft:overworld";
 const isCreative = (player) => player.getGameMode() === GameMode.Creative;
-
-// The tier that opens each building: the earliest slot it had in the old fixed layout
-export const OPENS_AT = Object.fromEntries(BUILDINGS.map((b) => [b.id, Math.min(...SLOTS.filter((s) => s.building === b.id).map((s) => s.tier), 3)]));
 
 const slotById = (owner, id) => slotsOf(layoutOf(townOf(owner))).find((s) => s.id === id);
 
@@ -39,29 +36,68 @@ export function seatInWorld(owner, slot, buildingId) {
   return { origin, forward: seat.forward, box: { x0: town.x + box.x0, z0: town.z + box.z0, x1: town.x + box.x1, z1: town.z + box.z1 }, plan };
 }
 
-// What a player could put on a slot: [{ id, name, fits, open, why }]
-export function choicesFor(owner, slot) {
-  const tier = townOf(owner)?.tier ?? 0;
-  return BUILDINGS.map((b) => {
-    const fits = !!seatInWorld(owner, slot, b.id);
-    const open = OPENS_AT[b.id] <= tier;
-    return { id: b.id, name: b.name, fits, open, why: !fits ? "too big for this plot" : !open ? `opens at ${tierName(OPENS_AT[b.id])}` : "" };
-  }).filter((c) => c.fits);
+// The classes of the town's open plots that are still empty (for the barracks' plain-Medium fallback)
+function freeClasses(owner, except) {
+  const town = townOf(owner);
+  const out = new Set();
+  for (const s of slotsOf(layoutOf(town))) {
+    if (s.id === except || s.tier > (town?.tier ?? 0)) continue;
+    const st = town.slots[s.id];
+    if (!st?.building) out.add(slotClass(s));
+  }
+  return out;
 }
 
-// Where the marker goes once a building stands: just outside the plot, two blocks to the side of the door
+// What a player could put on a slot: [{ id, name, fits, open, why, tagged }]. Only buildings of the plot's size
+// class (config.js PLOT_SIZE) that physically fit are listed; one that needs a different spot (PLOT_TAGS) or a
+// later tier is listed greyed with the reason. Good spots for a building come first.
+export function choicesFor(owner, slot) {
+  const tier = townOf(owner)?.tier ?? 0;
+  const free = freeClasses(owner, slot.id);
+  const out = [];
+  for (const b of BUILDINGS) {
+    const rule = plotFit(b.id, slot, free);
+    if (!rule.ok && !rule.tagged) continue; // not this plot's size
+    if (!seatInWorld(owner, slot, b.id)) continue;
+    const open = opensAt(b.id) <= tier;
+    const why = !rule.ok ? rule.why : !open ? `opens at ${tierName(opensAt(b.id))}` : "";
+    out.push({ id: b.id, name: b.name, fits: true, open: open && rule.ok, why, tagged: rule.tagged && rule.ok });
+  }
+  return out.sort((a, b) => (b.open - a.open) || (b.tagged - a.tagged));
+}
+
+// Ground the marker shouldn't stand on: roads, door steps, paving, water
+const NOT_FOR_MARKER = /(path|slab|stairs|gravel|cobble|brick|planks|_wall|fence|water|lava|farmland|tiles|polished)/;
+const SKIP_UP = /(air|grass$|short_grass|tall_grass|flower|fern|snow_layer|lantern|torch)/;
+
+// Where the marker goes once a building stands: just outside the plot beside the door, never on the road or the
+// door path. Tries two blocks either side of the door step, then three, then one block back from the road.
 function besideDoor(owner, slot) {
   const town = townOf(owner);
   const R = { x: -slot.door.z, z: slot.door.x };
-  const x = town.x + slot.step.x + 2 * R.x, z = town.z + slot.step.z + 2 * R.z;
+  const D = slot.door;
+  const sx = town.x + slot.step.x, sz = town.z + slot.step.z;
+  const walk = new Set((slot.walk ?? []).map((w) => `${town.x + w.x},${town.z + w.z}`));
+  const box = { x0: town.x + slot.box.x0, z0: town.z + slot.box.z0, x1: town.x + slot.box.x1, z1: town.z + slot.box.z1 };
+  const tries = [];
+  for (const k of [2, -2, 3, -3, 4, -4]) tries.push({ x: sx + k * R.x, z: sz + k * R.z });
+  for (const k of [2, -2]) tries.push({ x: sx + k * R.x + D.x, z: sz + k * R.z + D.z }); // a step out from the plot
   const dim = world.getDimension(OVERWORLD);
-  try {
-    let block = dim.getTopmostBlock({ x, z });
-    for (let i = 0; block && i < 12 && /(air|grass$|short_grass|flower|fern|snow_layer|lantern|fence)/.test(block.typeId); i++) block = block.below();
-    return block ? { x, y: block.location.y + 1, z } : undefined;
-  } catch {
-    return undefined;
+  let fallback;
+  for (const { x, z } of tries) {
+    if (walk.has(`${x},${z}`) || (x >= box.x0 && x <= box.x1 && z >= box.z0 && z <= box.z1)) continue;
+    try {
+      let block = dim.getTopmostBlock({ x, z });
+      for (let i = 0; block && i < 12 && SKIP_UP.test(block.typeId); i++) block = block.below();
+      if (!block) continue;
+      const spot = { x, y: block.location.y + 1, z };
+      if (!NOT_FOR_MARKER.test(block.typeId)) return spot;
+      fallback ??= spot;
+    } catch {
+      // not loaded
+    }
   }
+  return fallback;
 }
 
 // ---------- the menus ----------
@@ -74,16 +110,16 @@ async function openSlot(player, owner, slot) {
   if (state.pick && system.currentTick - (state.pickedAt ?? 0) <= SETTLE.previewSeconds * 20 && state.by === player.id) return confirm(player, owner, slot, state);
   const size = `${slot.box.x1 - slot.box.x0 + 1} x ${slot.box.z1 - slot.box.z0 + 1}`;
   const choices = choicesFor(owner, slot);
-  const form = new ActionFormData().title(`${SIZE_NAMES[slot.size]} plot`)
-    .body(`${size} blocks, door to the road${slot.tags.length ? ` (${slot.tags.join(", ")})` : ""}.\nBuildings in the §f${STYLES[town.style]?.name ?? town.style}§r style that fit here:`);
+  const form = new ActionFormData().title(`${CLASS_NAMES[slotClass(slot)] ?? SIZE_NAMES[slot.size]} plot`)
+    .body(`${size} blocks, door to the road${slot.tags.length ? `, ${slot.tags.map((t) => TAG_WORDS[t]).filter(Boolean).join(", ")}` : ""}.\nBuildings in the §f${STYLES[town.style]?.name ?? town.style}§r style that fit here:`);
   if (!choices.length) return player.sendMessage("§7Nothing we can raise fits this plot yet. You can build here by hand.");
   for (const c of choices) {
-    form.button(c.open ? `${c.name}\n§8${coins(plotPrice(c.id))}` : `§8${c.name}\n${c.why}`);
+    form.button(c.open ? `${c.name}${c.tagged ? " §2(good spot)" : ""}\n§8${coins(plotPrice(c.id))}` : `§8${c.name}\n${c.why}`);
   }
   const res = await form.show(player);
   if (res.canceled) return;
   const c = choices[res.selection];
-  if (!c.open) return player.sendMessage(`§7The ${c.name} ${c.why}. Win more sieges to grow the settlement.`);
+  if (!c.open) return player.sendMessage(`§7The ${c.name} ${c.why}.${/^opens/.test(c.why) ? " Win more sieges to grow the settlement." : " Try another plot."}`);
   Object.assign(state, { pick: c.id, pickedAt: system.currentTick, by: player.id });
   saveTowns();
   player.sendMessage(`§6${c.name} marked out.§7 Walk round the green outline, then use the marker again to raise it. ${BUILDING[c.id].blurb ?? ""}`);
@@ -116,7 +152,7 @@ async function confirm(player, owner, slot, state) {
     if (price) refund(player, price);
     return player.sendMessage("§cSomething is already going up there.");
   }
-  Object.assign(state, { building: building.id, style: town.style, origin: seat.origin, forward: seat.forward, box: seat.box, top: seat.plan.bounds().y1 + Math.max(0, built.lift ?? 0), paid: price, by: player.id, pick: undefined });
+  Object.assign(state, { building: building.id, style: town.style, origin: seat.origin, forward: seat.forward, box: seat.box, top: seat.plan.bounds().y1 + Math.max(0, built.lift ?? 0), paid: price, by: player.id, pick: undefined, done: false });
   saveTowns();
   sfx(player, "random.anvil_use");
   player.sendMessage(`§6The ${building.name} is going up.`);
@@ -194,6 +230,9 @@ on("settleBuilt", ({ owner, slotId }) => {
   const slot = slotById(owner, slotId);
   const state = slotState(owner, slotId);
   if (!slot || !state.building) return;
+  state.done = true; // counts toward the town's charter now (founding.js)
+  saveTowns();
+  emit("settleCharter", { owner });
   const spot = besideDoor(owner, slot);
   if (!spot) return;
   try {

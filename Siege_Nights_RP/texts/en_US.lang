@@ -437,3 +437,4 @@ tile.siege:vault_breaker_netherite.name=Netherite Vault Breaker
 item.siege:vault_key.name=Vault Key
 entity.siege:heart_stand.name=Heart of the Hollow
 entity.siege:template_stand.name=Choirsteel Upgrade Template
+tile.siege:ironworks.name=Ironworks

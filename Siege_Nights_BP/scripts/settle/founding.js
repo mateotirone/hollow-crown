@@ -1,7 +1,7 @@
 // Founding a town from its layout. When a player picks one of the twelve map plots, the settlement gets one of
 // that plot's three hand-made layouts (towns.js) and the Hamlet part of it is laid out over a few seconds:
 // roads and levelled ground, lamps, the well, the Mason's Bench, the Hall Cornerstone, a plot marker on every
-// open slot, and the Hamlet wall. Each new tier lays out its own band: the wall moves out (32, 40, 48, 56),
+// open slot, and the Hamlet wall. Each new tier lays out its own band: the wall moves out (36, 46, 56, 66),
 // that tier's roads, ground and fixtures go down, and its slots get markers.
 //
 // What other features can use:
@@ -10,7 +10,10 @@
 //   on("settleFixture", ({ owner, kind, species, size, rotation, at, tier }))   trees and windmills, for the tree
 //     and windmill builders (a tree is not planted here; world trees come from the tree thread)
 //   on("townLaidOut", ({ owner, tier }))   a tier's groundwork is down
-// Test: /scriptevent siege:town [info | found <plot> [layout 0-2] | tier <0-3>]
+//   charterOf(owner) -> charterCheck result for the tier the town is at (charters.js)
+// Charters: siege wins decide the tier, but a town only grows past a tier once that tier's charter
+// (config.js CHARTERS) stands. Until then it waits, and grows by itself when the last building is finished.
+// Test: /scriptevent siege:town [info | charter | found <plot> [layout 0-2] | tier <0-3> (skips the charter)]
 
 import { world, system, BlockPermutation } from "@minecraft/server";
 import { isReady, keepOf, on, emit, moduleStore, TIERS, tierOf, getState } from "../siege/api.js";
@@ -21,6 +24,10 @@ import { BENCH, registerBench } from "./mason.js";
 import { styleOf } from "./plans.js";
 import { wallOf, raiseWall, moveWall } from "./walls.js";
 import { wallShape } from "./walldata.js";
+import { charterCheck, charterText } from "./charters.js";
+import { BUILDINGS } from "./buildings.js";
+import { raisedCounts } from "./raised.js";
+import { BLOCK_BUILDS } from "./blockdesigns.js";
 import { townFor, pickLayout, slotsOf, groundwork, fixturesOf, wallRadius, seatOnSlot, TIER_NAMES } from "./towns.js";
 
 export const PLOT_MARKER = "siege:plot_marker";
@@ -249,25 +256,75 @@ export function foundTown(owner, plot, at, { style, layout } = {}) {
   return true;
 }
 
-// Bring a town up to tier t: lay out every band up to it and move the wall out
-export function growTown(owner, tier) {
+// ---------- charters ----------
+
+// Every building the game can raise (plot designs and block buildings), for skipping charter lines not built yet
+const KNOWN = new Set([...BUILDINGS.map((b) => b.id), ...Object.keys(BLOCK_BUILDS).map((t) => t.replace(/^siege:/, ""))]);
+
+// What stands in a town: finished plot buildings plus finished block buildings on its land
+export function builtCounts(owner) {
+  const counts = { ...raisedCounts(owner) };
+  for (const st of Object.values(townOf(owner)?.slots ?? {})) if (st.building && st.done !== false) counts[st.building] = (counts[st.building] ?? 0) + 1;
+  return counts;
+}
+export const charterOf = (owner, tier = townOf(owner)?.tier ?? 0) => charterCheck(tier, builtCounts(owner), KNOWN);
+
+// The highest tier the town may reach towards `tier`: it stops at the first tier whose charter isn't met
+function charterCap(owner, from, tier) {
+  for (let t = from; t < tier; t++) if (!charterOf(owner, t).met) return t;
+  return tier;
+}
+
+function tellCharter(owner, at, wanted) {
+  const player = world.getPlayers().find((p) => p.id === owner);
+  if (!player) return;
+  player.sendMessage(`§6Your settlement has won enough to be a ${tierName(wanted)}§7, but a ${tierName(at)} needs these standing first:`);
+  for (const line of charterText(charterOf(owner, at))) player.sendMessage(`  ${line}`);
+}
+
+// Bring a town up to tier t: lay out every band up to it and move the wall out.
+// force skips the charter (test command only).
+export function growTown(owner, tier, { force = false } = {}) {
   const town = townOf(owner);
   if (!town) return "No town layout here.";
   const tw = townFor(town.plot);
   tier = Math.max(0, Math.min(3, tier));
   if (tier <= town.tier) return "already";
+  if (!force) {
+    const cap = charterCap(owner, town.tier, tier);
+    if (cap < tier) {
+      if (town.heldTier !== tier) { town.heldTier = tier; save(); tellCharter(owner, cap, tier); }
+      if (cap <= town.tier) return `The ${tierName(town.tier)} charter isn't met yet: /scriptevent siege:town charter`;
+      tier = cap;
+    }
+  }
   if (getState().active) { // the wall never moves during a siege: it grows when the siege ends
     town.pendingTier = Math.max(town.pendingTier ?? 0, tier);
     save();
     return "The town grows when the siege ends: the wall never moves during one.";
   }
   delete town.pendingTier;
+  if ((town.heldTier ?? 0) <= tier) delete town.heldTier;
   town.tier = tier;
   save();
   // the old ring comes down first, so the ring road laid where it stood isn't knocked out again
   moveWall(owner, wallRadius(tw, tier), () => { for (let t = 1; t <= tier; t++) layOutTier(owner, t); });
   return true;
 }
+
+// A building finished (or a block building raised): a town held back by its charter may grow now
+on("settleCharter", ({ owner }) => {
+  const town = townOf(owner);
+  if (!town?.heldTier || town.heldTier <= town.tier) return;
+  if (!charterOf(owner).met) return;
+  system.runTimeout(() => {
+    const held = townOf(owner)?.heldTier;
+    if (held && growTown(owner, held) === true) {
+      const player = world.getPlayers().find((p) => p.id === owner);
+      player?.sendMessage(`§6The charter is met. Your settlement grows to a ${tierName(townOf(owner).tier)}.`);
+    }
+  }, 40);
+});
 
 on("siegeEnd", () => {
   system.runTimeout(() => {
@@ -313,9 +370,18 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
     const result = foundTown(player.id, { name: tw.name }, at, { layout: /^[0-2]$/.test(which ?? "") ? Number(which) : undefined });
     return player.sendMessage(result === true ? `§6Laying out ${tw.name} round you.` : `§c${result}`);
   }
+  if (cmd === "charter") {
+    if (!town) return player.sendMessage("§7You have no town layout.");
+    const check = charterOf(player.id);
+    player.sendMessage(town.tier >= 3 ? "§6The full Castle charter:" : `§6To grow past ${tierName(town.tier)}${check.met ? " §a(met)" : ""}:`);
+    const lines = charterText(check);
+    if (!lines.length) player.sendMessage("  §7nothing beyond the library");
+    for (const line of lines) player.sendMessage(`  ${line}`);
+    return;
+  }
   if (cmd === "tier") {
-    const result = growTown(player.id, Number(arg ?? (town?.tier ?? 0) + 1));
+    const result = growTown(player.id, Number(arg ?? (town?.tier ?? 0) + 1), { force: true });
     return player.sendMessage(result === true ? `§6The town grows to ${tierName(townOf(player.id).tier)}.` : `§7${result}`);
   }
-  player.sendMessage("§7/scriptevent siege:town [info | found <plot> [layout 0-2] | tier <0-3>]");
+  player.sendMessage("§7/scriptevent siege:town [info | charter | found <plot> [layout 0-2] | tier <0-3>]");
 });

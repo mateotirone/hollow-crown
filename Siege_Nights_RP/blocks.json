@@ -557,5 +557,8 @@
  },
  "siege:vault_lock_choirsteel": {
   "sound": "stone"
+ },
+ "siege:ironworks": {
+  "sound": "stone"
  }
 }

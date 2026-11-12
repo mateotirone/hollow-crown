@@ -61,8 +61,13 @@ export function effect(entity, name, ticks, amplifier = 0, showParticles = false
   }
 }
 
+// Bosses that come back stronger (bossCore.js, rank) scale what their attacks do to players through this
+let hurtScale = () => 1;
+export const setHurtScale = (fn) => { hurtScale = fn; };
+
 export function hurt(entity, amount, cause = "magic", by) {
   try {
+    if (entity.typeId === "minecraft:player") amount = Math.round(amount * hurtScale() * 10) / 10;
     // Creative players can't be hurt, so playtesters at least see what would have landed
     if (entity.typeId === "minecraft:player" && entity.getGameMode?.() === GameMode.Creative) entity.onScreenDisplay.setActionBar(`§7(Creative) That hit you for §c${amount}§7.`);
     entity.applyDamage(amount, by ? { cause, damagingEntity: by } : { cause });

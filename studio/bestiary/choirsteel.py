@@ -2,7 +2,7 @@
 # Made like netherite gear (Mateo, 2026-11-11): at a smithing table, a netherite piece + a Choirsteel
 # Upgrade template + Tempered Choirsteel (4 ingots and a Gloamquill). The template is found only at the
 # Cold Forge in the Hollow (scripts/undertow/forge.js) and is copied at a crafting table with 7 netherite
-# ingots and a block of Veinstone, the way vanilla copies its templates with diamonds.
+# scrap and a block of Veinstone, the way vanilla copies its templates with diamonds.
 # Writes items, recipes, attachables, placeholder icons and armour layers, lang lines.
 # What the gear DOES (set bonus, Chord, Sounding) is in scripts/bestiary/choirsteel.js.
 # Run:  python3 studio/bestiary/choirsteel.py   (from the repo root). Safe to re-run.
@@ -54,11 +54,11 @@ def material_recipes():
         "description": {"identifier": "siege:tempered_choirsteel_recipe"}, "tags": ["crafting_table"],
         "ingredients": [{"item": "siege:choirsteel_ingot", "count": 4}, {"item": "siege:gloamquill"}],
         "result": {"item": TEMPERED, "count": 1}, "unlock": [{"item": "siege:choirsteel_ingot"}]}}
-    # Vanilla copies a netherite template with 7 diamonds and netherrack; ours takes 7 netherite ingots and Veinstone.
+    # Vanilla copies a netherite template with 7 diamonds and netherrack; ours takes 7 netherite scrap and Veinstone (Mateo, 2026-11-12).
     copy = {"format_version": "1.20.10", "minecraft:recipe_shaped": {
         "description": {"identifier": "siege:choirsteel_upgrade_template_copy"}, "tags": ["crafting_table"],
         "pattern": ["NTN", "NVN", "NNN"],
-        "key": {"N": {"item": "minecraft:netherite_ingot"}, "T": {"item": TEMPLATE}, "V": {"item": "siege:veinstone"}},
+        "key": {"N": {"item": "minecraft:netherite_scrap"}, "T": {"item": TEMPLATE}, "V": {"item": "siege:veinstone"}},
         "result": {"item": TEMPLATE, "count": 2}, "unlock": [{"item": TEMPLATE}]}}
     return {"tempered_choirsteel": tempered, "choirsteel_upgrade_template_copy": copy}
 
@@ -94,6 +94,7 @@ ICONS = {
          "....otso........", "...otso.........", "..otso..........", ".ogso...........", ".ooo............", "................", "................", "................"],
 }
 # The template is a slate tablet like vanilla's, with a violet cuirass cut into it; Tempered Choirsteel is a folded plate.
+MAT_DARK = {"o": (18, 10, 34), "d": (58, 31, 106), "m": (85, 47, 148), "h": (116, 70, 184), "w": (154, 114, 214)}  # 2026-11-12: the dark Choirsteel ramp
 PAL.update({"k": (24, 20, 30), "l": (52, 46, 62), "r": (78, 70, 90), "w": (232, 222, 255)})
 MAT_ICONS = {
  "siege_choirsteel_upgrade_template": ["................", "...kkkkkkkkkk...", "..klllrrrrlllk..", "..klrrrrrrrrlk..", "..krrodrrdorrk..", "..krohmddmmork..", "..krommggmmork..", "..krrommmmmork..",
@@ -102,11 +103,12 @@ MAT_ICONS = {
      ".ohmmmmmmmmddo..", ".ommmmmmmmdddo..", ".oddddddddddo...", "..oooooooooo....", "................", "................", "................", "................"],
 }
 
-def icon(rows):
+def icon(rows, pal=None):
+    pal = {**PAL, **(pal or {})}
     im = Image.new("RGBA", (16, 16), (0, 0, 0, 0)); px = im.load()
     for y, row in enumerate(rows):
         for x, ch in enumerate(row[:16]):
-            if ch in PAL: px[x, y] = PAL[ch] + (255,)
+            if ch in pal: px[x, y] = pal[ch] + (255,)
     return im
 
 def main():
@@ -141,7 +143,7 @@ def main():
         tex["siege_choirsteel_" + iid] = {"textures": f"textures/items/siege_choirsteel_{iid}"}
     for key, rows in MAT_ICONS.items():
         assert len(rows) == 16 and all(len(r) == 16 for r in rows), key
-        save_tex(icon(rows), RP + f"textures/items/{key}.png")
+        save_tex(icon(rows, MAT_DARK), RP + f"textures/items/{key}.png")
         tex[key] = {"textures": f"textures/items/{key}"}
     for layer in (1, 2): save_tex(armor_tex((132, 84, 208)), RP + f"textures/models/armor/choirsteel_layer_{layer}.png")
     p = RP + "textures/item_texture.json"; it = json.load(open(p)); it["texture_data"].update(tex); write(p, it)
