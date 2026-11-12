@@ -1,5 +1,5 @@
 import { addTests, assert, assertEqual } from "../core/tests.js";
-import { WRIT, assaultDay, phase, groundsFor, cantDeclare, demandAmount, pairKey } from "./rules.js";
+import { WRIT, assaultDay, phase, groundsFor, cantDeclare, demandAmount, pairKey, feeFor } from "./rules.js";
 
 addTests("warwrit", {
   "the assault falls on tonight's night if the muster fits, else tomorrow's": () => {
@@ -22,13 +22,18 @@ addTests("warwrit", {
     assertEqual(groundsFor({ relic: true, now: 10 }), "relic");
     assertEqual(groundsFor({ feudUntil: 11, now: 10 }), "feud");
     assertEqual(groundsFor({ feudUntil: 9, refusedUntil: 11, now: 10 }), "refused");
+    assertEqual(groundsFor({ oathUntil: 11, now: 10 }), "oathbreaker", "anyone may declare on an Oathbreaker");
     assertEqual(groundsFor({ feudUntil: 9, now: 10 }), undefined);
   },
-  "a writ needs a keep, grounds, no peace and no other writ": () => {
+  "a war with no grounds is allowed but unjust, at three times the fee": () => {
+    assertEqual(feeFor("relic"), WRIT.fee);
+    assertEqual(feeFor(undefined), WRIT.fee * 3);
+  },
+  "a writ needs a keep, no peace and no other writ": () => {
     const base = { attacker: "a", defender: "b", hasKeep: true, targetKeep: {}, writs: {}, now: 10, grounds: "relic" };
     assertEqual(cantDeclare(base), undefined);
     assert(cantDeclare({ ...base, hasKeep: false }), "no keep");
-    assert(cantDeclare({ ...base, grounds: undefined }), "no grounds");
+    assertEqual(cantDeclare({ ...base, grounds: undefined }), undefined, "no grounds is no bar");
     assert(cantDeclare({ ...base, peaceUntil: 11 }), "peace");
     assert(cantDeclare({ ...base, writs: { b: { attacker: "c" } } }), "one writ per target");
     assert(cantDeclare({ ...base, writs: { c: { attacker: "a" } } }), "one writ per attacker");

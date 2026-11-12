@@ -1,6 +1,8 @@
 // War Writs: declaring a siege on another player's settlement (Mateo, 2026-11-12).
 //
-//   Grounds   they hold a relic, attacked your settlement, or refused your demand (rules.js groundsFor)
+//   Grounds   they hold a relic, attacked your settlement, refused your demand, or are an Oathbreaker
+//             (rules.js groundsFor). No grounds is allowed but unjust: triple fee, the defence twice as strong,
+//             and the attacker an Oathbreaker for 3 real days, whom anyone may declare on.
 //   Declare   click their Keep Banner, "Declare war": pay the fee, the whole server is told
 //   Muster    until the next nightfall (at least 3 real minutes): their gates shut and stay shut
 //   Assault   that one night: their walls, vault, Regal Safe and guards can be attacked whether or not they are
@@ -27,12 +29,13 @@ import { charge, giveCoins, banked, robBank } from "../economy/coins.js";
 import { coins } from "../economy/rules.js";
 import { holdWanted } from "../siege/guards.js";
 import { barGates } from "../settle/walls.js";
-import { holdsRelic } from "../vault/index.js";
+import { holdsRelic, keeperAway } from "../vault/index.js";
+import { guardTag } from "../siege/guards.js";
 import { settlementAt } from "../siege/territory.js";
-import { WRIT, assaultDay, phase, groundsFor, GROUNDS_TEXT, pairKey, demandAmount, cantDeclare } from "./rules.js";
+import { WRIT, assaultDay, phase, groundsFor, GROUNDS_TEXT, UNJUST_TEXT, feeFor, pairKey, demandAmount, cantDeclare } from "./rules.js";
 import "./tests.js";
 
-const store = moduleStore("siege:warwrit", () => ({ writs: {}, peace: {}, feuds: {}, refused: {}, demands: {} }));
+const store = moduleStore("siege:warwrit", () => ({ writs: {}, peace: {}, feuds: {}, refused: {}, demands: {}, oaths: {} }));
 const S = () => store.data;
 const OVERWORLD = "minecraft:overworld";
 
@@ -51,6 +54,21 @@ addFilter("openToAttack", (open, { owner }) => open || phaseOf(S().writs[owner])
 // Its gates stay shut from the declaration to dawn (settle/walls.js), and its Keep Banner can't be carried off
 addFilter("gatesBarred", (barred, { owner }) => barred || !!S().writs[owner]);
 addFilter("bannerShielded", (shielded, { owner }) => shielded || !!S().writs[owner]);
+// An unjust war (no grounds): the defender's walls, vault, Keep and guards are twice as strong for it
+// (not on top of the away keeper's doubling, vault/index.js)
+const unjustOn = (owner) => { const w = S().writs[owner]; return !!w?.unjust && !keeperAway(owner); };
+addFilter("wallHp", (hp, { block }) => { try { const o = settlementAt(block.location); return o && unjustOn(o) ? hp * 2 : hp; } catch { return hp; } });
+addFilter("keepHealth", (hp, { owner }) => (unjustOn(owner) ? hp * 2 : hp));
+onTick("warwrit-unjust-guards", 200, () => {
+  if (!isReady()) return;
+  const dim = world.getDimension(OVERWORLD);
+  for (const owner of Object.keys(S().writs)) {
+    if (!unjustOn(owner)) continue;
+    for (const g of dim.getEntities({ tags: [guardTag(owner)] })) {
+      try { g.addEffect("resistance", 260, { amplifier: 1, showParticles: false }); g.addEffect("strength", 260, { amplifier: 1, showParticles: false }); } catch { /* gone */ }
+    }
+  }
+});
 
 // Attacking someone's settlement gives them grounds on you
 on("settlementAttacked", ({ owner, by }) => {
@@ -64,6 +82,7 @@ function groundsOf(attacker, defender) {
     relic: holdsRelic(defender),
     feudUntil: S().feuds[`${attacker}>${defender}`],
     refusedUntil: S().refused[`${attacker}>${defender}`],
+    oathUntil: S().oaths?.[defender],
     now: now(),
   });
 }
@@ -77,27 +96,31 @@ function announce(text, discord) {
 
 async function declareMenu(player, defender) {
   const attacker = player.id, s = S();
-  const grounds = groundsOf(attacker, defender);
+  const grounds = groundsOf(attacker, defender), fee = feeFor(grounds), why = grounds ? GROUNDS_TEXT[grounds] : UNJUST_TEXT;
   const problem = cantDeclare({
     attacker, defender, hasKeep: !!keepOf(attacker), targetKeep: keepOf(defender),
-    peaceUntil: s.peace[pairKey(attacker, defender)], writs: s.writs, now: now(), grounds,
+    peaceUntil: s.peace[pairKey(attacker, defender)], writs: s.writs, now: now(),
   });
   if (problem) return say(player, `§7${problem}`);
   const c = clock(), day = assaultDay(c.day, c.tod);
   const when = day === c.day ? "tonight at nightfall" : "at nightfall tomorrow";
   const res = await new MessageFormData().title("War Writ")
-    .body(`Declare war on §f${nameOf(defender)}§r?\n\nGrounds: ${GROUNDS_TEXT[grounds]}.\nThe fee: ${coins(WRIT.fee)}.\n\n`
+    .body(`Declare war on §f${nameOf(defender)}§r?\n\nGrounds: ${why}.\nThe fee: ${coins(fee)}.\n\n`
+      + (grounds ? "" : "§cWith no grounds this is an unjust war: it costs three times as much, their walls, vault, Keep and guards are twice as strong for it, and you are branded an Oathbreaker for three days. Anyone may declare war on an Oathbreaker.§r\n\n")
       + `Their gates shut now. The assault comes ${when} and lasts until dawn, whether or not they are here. `
       + "Crack their vault before dawn to win. Their Keep Banner can't be taken, and afterwards there is peace between you for a few days.")
-    .button1("Not now").button2(`Declare (${coins(WRIT.fee)})`).show(player);
+    .button1("Not now").button2(`Declare (${coins(fee)})`).show(player);
   if (res.canceled || res.selection !== 1) return;
-  if (cantDeclare({ attacker, defender, hasKeep: true, targetKeep: keepOf(defender), peaceUntil: s.peace[pairKey(attacker, defender)], writs: s.writs, now: now(), grounds })) return;
-  if (!charge(player, WRIT.fee, "warWrit")) return say(player, `§cA War Writ costs ${coins(WRIT.fee)}.`);
-  s.writs[defender] = { attacker, day, grounds, at: now() };
+  if (cantDeclare({ attacker, defender, hasKeep: true, targetKeep: keepOf(defender), peaceUntil: s.peace[pairKey(attacker, defender)], writs: s.writs, now: now() })) return;
+  if (!charge(player, fee, "warWrit")) return say(player, `§cThis War Writ costs ${coins(fee)}.`);
+  s.writs[defender] = { attacker, day, grounds: grounds ?? "none", unjust: !grounds, at: now() };
   delete s.feuds[`${attacker}>${defender}`];
+  if (!grounds) { s.oaths ??= {}; s.oaths[attacker] = now() + WRIT.oathMs; }
   store.save();
   barGates(defender);
-  announce(`§4§l${player.name} has declared war on ${nameOf(defender)}§r§4 (${GROUNDS_TEXT[grounds]}). The assault comes ${when}.`);
+  announce(grounds
+    ? `§4§l${player.name} has declared war on ${nameOf(defender)}§r§4 (${why}). The assault comes ${when}.`
+    : `§4§l${player.name} has declared an unjust war on ${nameOf(defender)}!§r§4 The assault comes ${when}. ${player.name} is an Oathbreaker for three days: anyone may declare war on them.`);
   emit("baseAttacked", { owner: defender, kind: "warWrit", text: `${player.name} has declared war on you. The assault comes ${when}; your gates are shut.`, by: attacker });
   emit("writDeclared", { attacker, defender, grounds, day });
 }
@@ -156,6 +179,7 @@ async function answerDemand(player) {
 
 function statusLines(viewer) {
   const s = S(), lines = [];
+  if ((s.oaths?.[viewer] ?? 0) > now()) lines.push(`§cYou are an Oathbreaker for ${Math.ceil((s.oaths[viewer] - now()) / 3600000)} more real hours: anyone may declare war on you.§r`);
   for (const [defender, w] of Object.entries(s.writs)) {
     const p = phaseOf(w);
     const what = p === "assault" ? (w.cracked ? "§cassault, vault cracked" : "§cassault under way") : "§6mustering";
@@ -237,7 +261,8 @@ onTick("warwrit", 20, () => {
   }
   // demands left unanswered for a real day count as refused; old peace, feud and refusal marks are cleared away
   for (const [to, d] of Object.entries(s.demands)) if (t - d.at > WRIT.demandMs) settleDemand(to, false);
-  for (const book of ["peace", "feuds", "refused"]) {
+  s.oaths ??= {};
+  for (const book of ["peace", "feuds", "refused", "oaths"]) {
     for (const [k, until] of Object.entries(s[book])) if (until <= t) { delete s[book][k]; store.save(); }
   }
 });

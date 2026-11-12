@@ -565,7 +565,8 @@ export const ENTRIES = [
   {
     id: "warwrit", ch: "keep", title: "War Writs",
     tip: "Click another settlement's Keep Banner to declare war on it, or send a demand.",
-    page: "To besiege another player, click their §fKeep Banner§r and choose §fDeclare war§r. You need grounds: they hold a relic, they attacked your settlement in the last few days, or they refused your demand. A War Writ costs 320 Regals and the whole server is told.\n\n"
+    page: "To besiege another player, click their §fKeep Banner§r and choose §fDeclare war§r. Grounds: they hold a relic, attacked your settlement in the last few days, refused your demand, or are an §fOathbreaker§r. A War Writ costs 320 Regals and the whole server is told.\n\n"
+      + "§fNo grounds?§r You can still declare, but it is an unjust war: it costs three times as much, their defences are twice as strong, and you are an Oathbreaker for three days, whom anyone may declare war on.\n\n"
       + "§fMuster:§r their gates shut at once. The assault comes at the next nightfall, at least three minutes away.\n"
       + "§fAssault:§r one night, to dawn, whether or not they are online. Their walls, vault and Regal Safe can be broken, and their guards go for you. Their Keep Banner can't be taken.\n"
       + "§fWinning:§r crack their vault before dawn and you win; the vault stays open to you until dawn. If dawn comes first, they win. Either way the win counts towards growing your settlement, and there is peace between you for three days.\n\n"
