@@ -3,7 +3,7 @@ import { REGIONS } from "../economy/config.js";
 import { TRADE, GOODS, GOOD_IDS, COIN, GOLD_COIN, DAY, REGION_RATES_DEFAULT } from "./data.js";
 import {
   valueTo, fairness, offerProblem, pathLength, travelTicks, freightOf, takeMoney, moneyIn, depart, afterTry, finished,
-  npcMake, npcAnswer, capitalAnswer, capitalPrice, npcOffer, needsOf, supplyTake, crateDelta, cargoOf,
+  npcMake, npcAnswer, capitalAnswer, capitalPrice, npcOffer, needsOf, supplyTake, crateDelta, cargoOf, loadText,
 } from "./rules.js";
 
 const offer = (give, get, extra = {}) => ({ from: "p:a", to: "l:b", give, get, every: "day", runs: 0, round: 0, ...extra });
@@ -121,6 +121,12 @@ addTests("trade", {
     assertEqual(supplyTake({ [IRON]: 50 }, needs, IRON, 100), 40);
     assertEqual(supplyTake({ [IRON]: 95 }, needs, IRON, 100), 0);
     assertEqual(supplyTake({}, needs, GOLD, 10), 0);
+  },
+  "loads read naturally": () => {
+    assertEqual(loadText({ id: IRON, n: 8 }), "8 iron ingots");
+    assertEqual(loadText({ id: COIN, n: 56 }), "56 Regals");
+    assertEqual(loadText({ id: COIN, n: 1 }), "1 Regal");
+    assertEqual(loadText({ id: "minecraft:wheat", n: 30 }), "30 wheat");
   },
   "a crate is corrected by what changed since the last look": () => {
     assertEqual(crateDelta({ [IRON]: 10, [GOLD]: 8 }, { [IRON]: 30 }), { add: { [GOLD]: 8 }, take: { [IRON]: 20 } });

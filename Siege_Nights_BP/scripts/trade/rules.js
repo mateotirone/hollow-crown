@@ -262,5 +262,6 @@ export function crateDelta(ledger, snap) {
 // ---------- names ----------
 
 export const niceGood = (id) => id.replace(/^[a-z]+:/, "").replace(/^siege:/, "").replace(/_/g, " ").replace(/\bcoin\b/, "Regal").replace(/\bgold Regal\b/, "Gold Regal");
-export const loadText = (load) => `${load.n} ${niceGood(load.id)}`;
+const SAME = /^(wheat|sand|glass|cobblestone|stone|redstone|coal|charcoal|lapis lazuli|quartz|string|sugar cane|white wool|bread|leather|cod|salmon|raw iron|raw gold|netherite scrap|slime ball)$/;
+export const loadText = (load) => { const n = niceGood(load.id); return `${load.n} ${load.n === 1 || SAME.test(n) ? n : `${n}s`}`; };
 export const termsText = (offer, giver = "you", taker = "they") => `${giver} send ${loadText(offer.give)}, ${taker} send ${loadText(offer.get)}, ${TRADE.everyNames[offer.every] ?? offer.every}${offer.runs ? `, for ${offer.runs} runs` : ""}`;
