@@ -47,6 +47,7 @@ G = {
 'pick':   ["..#######...", ".#+++++++#..", "#+###..##+#.", "#-....a..#+#", ".....a....#-", "....a.......", "...a........", "..a.........", ".a..........", "a...........", "............", "............"],
 'ship':   [".....#......", ".....#a.....", ".....#aa....", ".....#aaa...", ".....#aaaa..", ".....#aaaaa.", ".....#......", "############", ".#++++++++#-", "..#######--.", "...-----....", "............"],
 'cauldron':["...a..a.....", "..a..a..a...", "...a..a.....", ".##########.", "#++++++++##-", ".#+######-..", ".#+#######-.", ".#+#######-.", ".#+#######-.", "..#######-..", "..#-...#-...", ".##....##..."],
+'letter': ["............", "............", "############", "#+#++++++#+-", "#++#++++#++-", "#+++#aa#+++-", "#++++aAa+++-", "#+++++a++++-", "#+++++++++#-", "###########-", ".----------.", "............"],
 'fist':   ["............", "..########..", ".#+#+#+#+#-.", ".#+#+#+#+#-.", ".#+#+#+#+#-.", ".#########-.", "##++++++##-.", "#+#######-..", "#+#######-..", ".########-..", "..#aaaa#-...", "..#aaaa#-..."],
 }
 BR = {'keep': fixed('#2a2a34', '#4a4c5c', '#70748a', '#9a9eb4', '#c4c8d8', '#eceef6'), 'wayfarer': fixed('#14301c', '#245234', '#3a7a4e', '#5aa06c', '#8cc698', '#c8ecd0'),
@@ -63,7 +64,7 @@ PICK = dict(
  forge_arm='fist', forge_cold='drop', forge_deep='flame', forge_edge='sword', forge_guardsteel='shield', forge_master='star', forge_mend='hammer', forge_stance='anvil', forge_temper='scale',
  helm_boarding='sword', helm_crew='chain', helm_fleet='ship', helm_legs='boot', helm_purse='coin', helm_storm='bolt', helm_tide='wave', helm_voice='horn', helm_volley='bow',
  hex_bane='skull', hex_blood='drop', hex_contagion='spiral', hex_eye='eye', hex_eyes='cat', hex_leech='heart', hex_rot='leaf', hex_slip='tracks', hex_touch='hand',
- keep_court='crown', keep_hearth='flame', keep_masterbuilder='hammer', keep_muster='banner', keep_plunder='key', keep_rally='horn', keep_spoils='coin', keep_stonewright='wall',
+ keep_court='crown', keep_hearth='flame', keep_masterbuilder='hammer', keep_messenger='letter', keep_muster='banner', keep_plunder='key', keep_rally='horn', keep_spoils='coin', keep_stonewright='wall',
  keep_unbreakable='tower', keep_wards='shield', keep_watchfire='eye',
  way_clue='key', way_fleet='boot', way_forager='leaf', way_homeward='tower', way_horse='horse', way_mapwright='map', way_nighteyes='moon', way_pathfinder='compass',
  way_roadwise='tracks', way_tide='wave', way_tongue='coin',
