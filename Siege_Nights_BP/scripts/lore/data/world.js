@@ -91,6 +91,7 @@ export const PLACES = {
   cinder_roost: { name: "The Cinder Roost", region: "Emberwaste", charted: true, desc: "A rider school cut into the cliff above Sunscar. Its gate is past the Span, and the names of the fallen are on its wall." },
   deepforge: { name: "The Deepforge", region: "Frostmarch", charted: true, desc: "A forge under the mountain above Rimehold. Its fire has burned for four hundred years." },
   harbour_office: { name: "The Harbour Office", region: "Saltreach", charted: true, desc: "On the quay at Gull's Rest. The Debt Book is chained to the desk." },
+  cradle_tree: { name: "The Cradle Tree", region: "Blackfen", charted: false, desc: "A great old tree in the fen, south of Mirelight. There is a cave under it, and the lantern keepers will not walk past it after dark." },
   nell_raft: { name: "Nell Sedge's Raft-house", region: "Blackfen", charted: false, desc: "Moored in the reeds past Mirelight, further out than anyone else lives." },
 };
 

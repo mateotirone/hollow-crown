@@ -536,6 +536,41 @@ Made by `tools/bossbar_ui.py` (which also wires them into `ui/hud_screen.json`).
 ## Dyed icon layers (2026-11-11, textures thread)
 Every dyeable item (Castle Guard armour and the regional sets, 64 pieces) uses `minecraft:icon` with `default` and `dyed` textures. `textures/items/<icon>_dyed.png` holds only the tabard cloth in light grey so the game tints it with the dye. Made by `studio/art/build_dyed_icons.py` (re-run after repainting a guard icon or adding a dyeable item). Without the dyed layer the icons showed blank in game.
 
+## Boss unlocks (placeholders by `studio/build_unlocks.py`, 16×16 opaque, in `textures/blocks/unlocks/`; it never overwrites a PNG that exists)
+
+| Asset | File | Status |
+|---|---|---|
+| Stopped Clock, case (dark spruce boards, brass corners) | `siege_stopped_clock_case.png` | Placeholder |
+| Stopped Clock, face at 3:17 (cream dial in a brass rim, hands at seventeen past three) | `siege_stopped_clock_317.png` | Placeholder |
+| Stopped Clock, face at 3:18 after the Reeve is woken (same dial, a little brighter, hands one minute on, a hairline crack in the glass) | `siege_stopped_clock_318.png` | Placeholder |
+| Well Crank, sides (old timber with iron bands) | `siege_well_crank_side.png` | Placeholder |
+| Well Crank, front with an empty keyhole in a brass plate | `siege_well_crank_keyhole.png` | Placeholder |
+| Well Crank, front with the key wound in, glowing | `siege_well_crank_wound.png` | Placeholder |
+| Carved Cairn Stone, sides with a hare carved in | `siege_hunt_cairn_hare.png` | Placeholder |
+| Carved Cairn Stone, sides with a fox | `siege_hunt_cairn_fox.png` | Placeholder |
+| Carved Cairn Stone, sides with a stag | `siege_hunt_cairn_stag.png` | Placeholder |
+| Carved Cairn Stone, sides with a wolf | `siege_hunt_cairn_wolf.png` | Placeholder |
+| Cairn stone, top and bottom (frosted grey stone) | `siege_cairn_stone.png` | Placeholder |
+| Hunter's Cairn, top with an empty horn-shaped notch | `siege_hunters_cairn_top.png` | Placeholder |
+| Hunter's Cairn, top with the pale horn lying in it | `siege_hunters_cairn_top_horn.png` | Placeholder |
+| Carved Floor Stone, a gull | `siege_carved_floor_gull.png` | Placeholder |
+| Carved Floor Stone, an anchor | `siege_carved_floor_anchor.png` | Placeholder |
+| Carved Floor Stone, a fish | `siege_carved_floor_fish.png` | Placeholder |
+| Carved Floor Stone, a star | `siege_carved_floor_star.png` | Placeholder |
+| Carved Floor Stone, lifted (a dark hollow) | `siege_carved_floor_lifted.png` | Placeholder |
+| Chapel stone (sea-worn green-grey) | `siege_chapel_stone.png` | Placeholder |
+| Drowned Altar, sides | `siege_drowned_altar_side.png` | Placeholder |
+| Drowned Altar, top with a ring-shaped mark | `siege_drowned_altar_top.png` | Placeholder |
+| Drowned Altar, top with the ring laid in it | `siege_drowned_altar_top_ring.png` | Placeholder |
+| Faceless Statue, sides | `siege_faceless_bust_side.png` | Placeholder |
+| Faceless Statue, front with the face chiselled away | `siege_faceless_bust_face.png` | Placeholder |
+| Vault sandstone (around the seal) | `siege_vault_sandstone.png` | Placeholder |
+| Vault Seal, blank round seal | `siege_vault_seal_blank.png` | Placeholder |
+| Vault Seal, with the Faceless Seal pressed in | `siege_vault_seal_pressed.png` | Placeholder |
+| Root Cradle, sides (woven roots) | `siege_root_cradle_side.png` | Placeholder |
+| Root Cradle, top (moss lining, empty) | `siege_root_cradle_top.png` | Placeholder |
+| Root Cradle, top with the effigy laid in it | `siege_root_cradle_top_laid.png` | Placeholder |
+
 ## Sorcerer cast effects (2026-11-12, `tools/build_sorcerer_fx.py`)
 | Asset | File | Status |
 |---|---|---|
