@@ -8,7 +8,7 @@ const src = process.argv[2] ?? "map/rail-segments.json";
 const raw = JSON.parse(readFileSync(src, "utf8"));
 const data = {
   stops: raw.stops.map(({ id, name, x, y, z, kind, plot }) => ({ id, name, x, y, z, kind, ...(plot !== undefined && { plot }) })),
-  segments: raw.segments.map(({ id, line, from, to, blocks, length, works, works_palette }) => ({ id, line, from, to, blocks, length: length ?? blocks.length, ...(works && { works, works_palette }) })),
+  segments: raw.segments.map(({ id, line, from, to, blocks, length, works, works_palette, custom }) => ({ id, line, from, to, blocks, length: length ?? blocks.length, ...(works && { works, works_palette }), ...(custom && { custom }) })),
 };
 const problems = checkRoutes(data);
 if (problems.length) {
