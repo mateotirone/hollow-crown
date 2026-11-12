@@ -16,8 +16,16 @@ import { levelSite, foundationColumns } from "./ground.js";
 import { BLOCK_BUILDS } from "./blockdesigns.js";
 
 const OVERWORLD = "minecraft:overworld";
-// pending: { "x,y,z": { type, fx, fz, style } }
-const store = moduleStore("siege:settle_raised", () => ({ pending: {} }));
+// pending: { "x,y,z": { type, fx, fz, style } }   built: the same, once standing, plus box (its footprint)
+const store = moduleStore("siege:settle_raised", () => ({ pending: {}, built: {} }));
+// The raised buildings that stand: [{ at: {x, y, z}, type, name, forward: {x, z}, box: {x0, z0, x1, z1}, floor }]
+// (guard posts use these; a building whose block was broken drops out when the block is gone)
+export function raisedBuildings() {
+  return Object.entries(store.data.built ?? {}).map(([key, b]) => ({
+    at: locOf(key), type: b.type, name: BLOCK_BUILDS[b.type]?.name ?? "building", forward: { x: b.fx, z: b.fz }, box: b.box, floor: locOf(key).y + (b.lift ?? 0),
+  }));
+}
+export function forgetRaised(key) { if (store.data.built?.[key]) { delete store.data.built[key]; store.save(); } }
 const keyOf = (l) => `${l.x},${l.y},${l.z}`;
 const locOf = (k) => { const [x, y, z] = k.split(",").map(Number); return { x, y, z }; };
 const cardinal = (v) => (Math.abs(v.x) > Math.abs(v.z) ? { x: Math.sign(v.x) || 1, z: 0 } : { x: 0, z: Math.sign(v.z) || 1 });
@@ -41,7 +49,11 @@ function start(key, job) {
     id: `raised:${key}`, dimensionId: OVERWORLD, origin: { ...at, y: at.y + job.lift }, forward,
     plan, style: styleFor(job.style), perTick: Math.max(4, Math.ceil(plan.cells.size / 300)),
     skip: (x, y, z) => x === at.x && y === at.y && z === at.z,
-    onDone() { delete store.data.pending[key]; store.save(); },
+    onDone() {
+      delete store.data.pending[key];
+      (store.data.built ??= {})[key] = { ...job, box: footprint(at, forward, plan.bounds()) };
+      store.save();
+    },
   }).columns.unshift(...foundationColumns(plan));
 }
 

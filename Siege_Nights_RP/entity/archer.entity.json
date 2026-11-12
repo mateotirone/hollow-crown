@@ -29,30 +29,40 @@
       },
       "scripts": {
         "pre_animation": [
-          "variable.tcos0 = (Math.cos(query.modified_distance_moved * 38.17) * query.modified_move_speed / 1.0) * 57.3;"
+          "variable.tcos0 = (Math.cos(query.modified_distance_moved * 38.17) * query.modified_move_speed / 1.0) * 57.3;",
+          "variable.hc_mv = math.min(query.modified_move_speed * 4.0, 1.0);",
+          "variable.hc_rdy = math.lerp(variable.hc_rdy ?? 0.0, query.has_target ? 1.0 : 0.0, 0.12);",
+          "variable.hc_wind = variable.attack_time > 0.0 ? math.clamp(variable.attack_time / 0.3, 0.0, 1.0) : 0.0;",
+          "variable.hc_strike = variable.attack_time > 0.3 ? math.clamp((variable.attack_time - 0.3) / 0.4, 0.0, 1.0) : 0.0;",
+          "variable.hc_draw = math.clamp(math.mod(query.life_time, 2.0) / 1.5, 0.0, 1.0);"
         ],
         "animate": [
           "humanoid_base_pose",
           "look_at_target_default",
-          "move",
-          "bob",
           "holding",
-          {
-            "attack.rotations": "variable.attack_time > 0.0"
-          },
+          "hc_march",
+          "hc_idle",
           {
             "bow_and_arrow": "query.has_target"
+          },
+          {
+            "hc_aim": "query.has_target"
+          },
+          {
+            "hc_hurt": "query.hurt_time > 0"
           }
         ]
       },
       "animations": {
         "humanoid_base_pose": "animation.humanoid.base_pose",
         "look_at_target_default": "animation.humanoid.look_at_target.default",
-        "move": "animation.humanoid.move",
-        "bob": "animation.humanoid.bob",
         "holding": "animation.humanoid.holding",
-        "attack.rotations": "animation.humanoid.attack.rotations",
-        "bow_and_arrow": "animation.humanoid.bow_and_arrow"
+        "hc_march": "animation.hc.guard.march",
+        "hc_idle": "animation.hc.guard.idle",
+        "hc_hurt": "animation.hc.guard.hurt",
+        "hc_salute": "animation.hc.guard.salute",
+        "bow_and_arrow": "animation.humanoid.bow_and_arrow",
+        "hc_aim": "animation.hc.guard.aim"
       },
       "render_controllers": [
         "controller.render.siege_guard"

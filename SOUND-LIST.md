@@ -418,6 +418,7 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `mob.blaze.shoot` | 3 | roletrials (2), townhall |
 | `mob.horse.gallop` | 3 | horses, roletrials, townhall |
 | `random.eat` | 3 | dragons (2), bestiary |
+| `armor.equip_iron` | 2 | guardposts, horses |
 | `block.bell.resonate` | 2 | lore, undertow |
 | `crossbow.shoot` | 2 | dragons, siege |
 | `mob.elderguardian.curse` | 2 | bestiary, undertow |
@@ -428,7 +429,6 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `note.flute` | 2 | bestiary, horses |
 | `random.bow` | 2 | bestiary (2) |
 | `random.drink` | 2 | bestiary, roletrials |
-| `armor.equip_iron` | 1 | horses |
 | `armor.equip_netherite` | 1 | siege |
 | `beacon.activate` | 1 | townhall |
 | `block.amethyst_block.break` | 1 | undertow |
