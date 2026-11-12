@@ -1,0 +1,42 @@
+{
+ "name": "high_watch",
+ "materials": {
+  "wall": {"ladder": "VAL-01", "axis": "y", "noise": 0.12},
+  "tower": {"ladder": ["cobblestone", "andesite", "stone_bricks", "stone_bricks"], "axis": "y", "noise": 0.1},
+  "trim": "polished_andesite",
+  "roof": {"ladder": "VAL-06", "axis": "y", "texture": true},
+  "yard": {"ladder": "VAL-08", "axis": "noise", "scale": 3}
+ },
+ "shapes": [
+  {"shape": "box", "min": [-15, -1, -15], "max": [15, -1, 15], "material": "yard"},
+  {"shape": "box", "min": [-15, 0, -15], "max": [15, 5, 15], "material": "wall"},
+  {"op": "sub", "shape": "box", "min": [-14, 0, -14], "max": [14, 5, 14]},
+  {"shape": "box", "min": [-15, 6, -15], "max": [15, 6, 15], "material": "wall"},
+  {"op": "sub", "shape": "box", "min": [-14, 6, -14], "max": [14, 6, 14]},
+  {"op": "sub", "shape": "arch", "at": [0, 0, 15], "width": 5, "height": 5, "depth": 1, "axis": "x"},
+  {"shape": "box", "min": [-17, 0, -17], "max": [-13, 9, -13], "material": "tower"},
+  {"shape": "box", "min": [13, 0, -17], "max": [17, 9, -13], "material": "tower"},
+  {"shape": "box", "min": [-17, 0, 13], "max": [-13, 9, 17], "material": "tower"},
+  {"shape": "box", "min": [13, 0, 13], "max": [17, 9, 17], "material": "tower"},
+  {"shape": "box", "min": [-5, 0, -5], "max": [5, 27, 5], "material": "tower"},
+  {"shape": "box", "min": [-6, 0, -6], "max": [6, 1, 6], "material": "trim"},
+  {"shape": "box", "min": [-6, 13, -6], "max": [6, 13, 6], "material": "trim"},
+  {"shape": "box", "min": [-6, 27, -6], "max": [6, 28, 6], "material": "trim"},
+  {"op": "sub", "shape": "box", "min": [-5, 29, -5], "max": [5, 29, 5]},
+  {"shape": "extrude", "points": [[-6.5, 29], [6.5, 29], [0, 39]], "axis": "z", "from": -6.5, "to": 6.5, "material": "roof"},
+  {"shape": "extrude", "points": [[-6.5, 29], [6.5, 29], [0, 39]], "axis": "x", "from": -6.5, "to": 6.5, "material": "roof"},
+  {"op": "sub", "shape": "arch", "at": [0, 2, 5], "width": 3, "height": 5, "depth": 2, "axis": "x"},
+  {"op": "sub", "shape": "arch", "at": [0, 16, 5], "width": 1, "height": 3, "depth": 2, "axis": "x"},
+  {"op": "sub", "shape": "arch", "at": [0, 16, -5], "width": 1, "height": 3, "depth": 2, "axis": "x"},
+  {"op": "sub", "shape": "arch", "at": [5, 16, 0], "width": 1, "height": 3, "depth": 2, "axis": "z"},
+  {"op": "sub", "shape": "arch", "at": [-5, 16, 0], "width": 1, "height": 3, "depth": 2, "axis": "z"},
+  {"op": "sub", "shape": "arch", "at": [0, 22, 5], "width": 3, "height": 4, "depth": 2, "axis": "x"},
+  {"op": "sub", "shape": "arch", "at": [0, 22, -5], "width": 3, "height": 4, "depth": 2, "axis": "x"},
+  {"op": "sub", "shape": "arch", "at": [5, 22, 0], "width": 3, "height": 4, "depth": 2, "axis": "z"},
+  {"op": "sub", "shape": "arch", "at": [-5, 22, 0], "width": 3, "height": 4, "depth": 2, "axis": "z"}
+ ],
+ "place": [
+  [0, 39, 0, "lightning_rod"], [2, 0, 16, "lantern"], [-2, 4, 16, "lantern"], [2, 4, 16, "lantern"],
+  [0, 23, 0, "campfire"]
+ ]
+}

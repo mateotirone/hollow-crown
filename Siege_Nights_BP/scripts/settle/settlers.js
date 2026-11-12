@@ -154,6 +154,7 @@ function moveAll(owner, night) {
 function dawn(owner, arrivals = SETTLERS.perDawn) {
   const town = townOf(owner);
   if (!town) return;
+  arrivals = applyFilter("settlerArrivals", arrivals, { owner }); // a wonder can bring more
   const dim = world.getDimension(OVERWORLD);
   const list = settlersOf(owner);
   // beds that are gone: move to another, or leave

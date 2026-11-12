@@ -1,0 +1,39 @@
+{
+ "name": "great_lighthouse",
+ "materials": {
+  "base": {"ladder": ["tuff", "cobblestone", "andesite", "stone_bricks"], "axis": "y", "noise": 0.12},
+  "tower": {"ladder": ["polished_diorite", "calcite", "smooth_quartz"], "axis": "y", "noise": 0.08},
+  "band": {"ladder": ["dark_prismarine", "prismarine_bricks"], "axis": "noise", "scale": 3},
+  "roof": {"ladder": ["waxed_oxidized_cut_copper", "waxed_weathered_cut_copper"], "axis": "y"},
+  "deck": "smooth_stone",
+  "glass": "light_blue_stained_glass"
+ },
+ "shapes": [
+  {"shape": "cylinder", "at": [0, 0, 0], "r": 13.5, "h": 4, "material": "base"},
+  {"shape": "cylinder", "at": [0, 4, 0], "r": 12.5, "h": 1, "material": "deck"},
+  {"shape": "cylinder", "at": [0, 4, 0], "r": 12.5, "h": 1, "material": "base"},
+  {"op": "sub", "shape": "cylinder", "at": [0, 4, 0], "r": 11.5, "h": 1},
+  {"shape": "cylinder", "at": [0, 0, 0], "r": 7.5, "h": 13, "material": "tower"},
+  {"shape": "cylinder", "at": [0, 12, 0], "r": 8.5, "h": 1, "material": "band"},
+  {"shape": "cylinder", "at": [0, 13, 0], "r": 6.5, "h": 11, "material": "tower"},
+  {"shape": "cylinder", "at": [0, 23, 0], "r": 7.5, "h": 1, "material": "band"},
+  {"shape": "cylinder", "at": [0, 24, 0], "r": 5.5, "h": 10, "material": "tower"},
+  {"shape": "cylinder", "at": [0, 33, 0], "r": 7.5, "h": 1, "material": "band"},
+  {"shape": "cylinder", "at": [0, 34, 0], "r": 7.5, "h": 1, "material": "deck"},
+  {"op": "sub", "shape": "cylinder", "at": [0, 34, 0], "r": 6.5, "h": 1},
+  {"shape": "cylinder", "at": [0, 34, 0], "r": 3.5, "h": 5, "material": "glass"},
+  {"shape": "cylinder", "at": [0, 39, 0], "r": 4.5, "h": 1, "material": "band"},
+  {"shape": "cone", "at": [0, 40, 0], "r": 4.5, "h": 5, "material": "roof"},
+  {"op": "sub", "shape": "arch", "at": [0, 5, 7], "width": 3, "height": 5, "depth": 3, "axis": "x"},
+  {"op": "sub", "shape": "arch", "at": [0, 16, -6], "width": 1, "height": 3, "depth": 3, "axis": "x"},
+  {"op": "sub", "shape": "arch", "at": [5, 27, 0], "width": 1, "height": 3, "depth": 3, "axis": "z"},
+  {"op": "sub", "shape": "arch", "at": [-6, 18, 0], "width": 1, "height": 3, "depth": 3, "axis": "z"},
+  {"op": "sub", "shape": "arch", "at": [0, 27, 5], "width": 1, "height": 3, "depth": 3, "axis": "x"},
+  {"op": "sub", "shape": "arch", "at": [0, 0, 13], "width": 3, "height": 4, "depth": 4, "axis": "x"}
+ ],
+ "place": [
+  [0, 34, 0, "sea_lantern"], [0, 35, 0, "sea_lantern"], [0, 36, 0, "sea_lantern"], [0, 37, 0, "sea_lantern"], [0, 38, 0, "sea_lantern"],
+  [0, 45, 0, "lightning_rod"],
+  [7, 5, 7, "lantern"], [-7, 5, 7, "lantern"], [7, 5, -7, "lantern"], [-7, 5, -7, "lantern"]
+ ]
+}

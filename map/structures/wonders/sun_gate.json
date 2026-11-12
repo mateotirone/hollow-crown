@@ -1,0 +1,425 @@
+{
+ "name": "sun_gate",
+ "materials": {
+  "wall": {
+   "ladder": [
+    "sandstone",
+    "cut_sandstone",
+    "smooth_sandstone"
+   ],
+   "axis": "y",
+   "noise": 0.1
+  },
+  "band": {
+   "ladder": [
+    "red_sandstone",
+    "smooth_red_sandstone",
+    "cut_red_sandstone"
+   ],
+   "axis": "noise",
+   "scale": 3
+  },
+  "dome": {
+   "ladder": "EMB-05",
+   "axis": "y"
+  },
+  "court": {
+   "ladder": [
+    "smooth_sandstone",
+    "sandstone",
+    "cut_sandstone"
+   ],
+   "axis": "noise",
+   "scale": 3
+  }
+ },
+ "shapes": [
+  {
+   "shape": "box",
+   "min": [
+    -15,
+    -1,
+    -15
+   ],
+   "max": [
+    15,
+    -1,
+    15
+   ],
+   "material": "court"
+  },
+  {
+   "shape": "box",
+   "min": [
+    -15,
+    0,
+    -15
+   ],
+   "max": [
+    15,
+    7,
+    15
+   ],
+   "material": "wall"
+  },
+  {
+   "op": "sub",
+   "shape": "box",
+   "min": [
+    -11,
+    0,
+    -11
+   ],
+   "max": [
+    11,
+    7,
+    11
+   ]
+  },
+  {
+   "shape": "box",
+   "min": [
+    -15,
+    6,
+    -15
+   ],
+   "max": [
+    15,
+    6,
+    15
+   ],
+   "material": "band"
+  },
+  {
+   "op": "sub",
+   "shape": "box",
+   "min": [
+    -11,
+    6,
+    -11
+   ],
+   "max": [
+    11,
+    6,
+    11
+   ]
+  },
+  {
+   "shape": "box",
+   "min": [
+    -15,
+    8,
+    -15
+   ],
+   "max": [
+    15,
+    8,
+    15
+   ],
+   "material": "wall"
+  },
+  {
+   "op": "sub",
+   "shape": "box",
+   "min": [
+    -14,
+    8,
+    -14
+   ],
+   "max": [
+    14,
+    8,
+    14
+   ]
+  },
+  {
+   "shape": "box",
+   "min": [
+    -7,
+    0,
+    11
+   ],
+   "max": [
+    7,
+    15,
+    16
+   ],
+   "material": "wall"
+  },
+  {
+   "shape": "box",
+   "min": [
+    -7,
+    12,
+    11
+   ],
+   "max": [
+    7,
+    12,
+    16
+   ],
+   "material": "band"
+  },
+  {
+   "op": "sub",
+   "shape": "arch",
+   "at": [
+    0,
+    0,
+    13
+   ],
+   "width": 7,
+   "height": 11,
+   "depth": 7,
+   "axis": "x",
+   "profile": "pointed"
+  },
+  {
+   "shape": "cylinder",
+   "at": [
+    -12,
+    0,
+    -12
+   ],
+   "r": 3.5,
+   "h": 11,
+   "material": "wall"
+  },
+  {
+   "shape": "cylinder",
+   "at": [
+    12,
+    0,
+    -12
+   ],
+   "r": 3.5,
+   "h": 11,
+   "material": "wall"
+  },
+  {
+   "shape": "cylinder",
+   "at": [
+    -12,
+    0,
+    12
+   ],
+   "r": 3.5,
+   "h": 11,
+   "material": "wall"
+  },
+  {
+   "shape": "cylinder",
+   "at": [
+    12,
+    0,
+    12
+   ],
+   "r": 3.5,
+   "h": 11,
+   "material": "wall"
+  },
+  {
+   "shape": "sphere",
+   "at": [
+    -12,
+    11,
+    -12
+   ],
+   "r": 4,
+   "material": "dome"
+  },
+  {
+   "shape": "sphere",
+   "at": [
+    12,
+    11,
+    -12
+   ],
+   "r": 4,
+   "material": "dome"
+  },
+  {
+   "shape": "sphere",
+   "at": [
+    -12,
+    11,
+    12
+   ],
+   "r": 4,
+   "material": "dome"
+  },
+  {
+   "shape": "sphere",
+   "at": [
+    12,
+    11,
+    12
+   ],
+   "r": 4,
+   "material": "dome"
+  },
+  {
+   "shape": "cylinder",
+   "at": [
+    0,
+    0,
+    0
+   ],
+   "r": 2.5,
+   "h": 2,
+   "material": "band"
+  },
+  {
+   "op": "sub",
+   "shape": "cylinder",
+   "at": [
+    0,
+    1,
+    0
+   ],
+   "r": 1.5,
+   "h": 1
+  },
+  {
+   "op": "sub",
+   "shape": "arch",
+   "at": [
+    -6,
+    0,
+    -11
+   ],
+   "width": 3,
+   "height": 5,
+   "depth": 4,
+   "axis": "x"
+  },
+  {
+   "op": "sub",
+   "shape": "arch",
+   "at": [
+    0,
+    0,
+    -11
+   ],
+   "width": 3,
+   "height": 5,
+   "depth": 4,
+   "axis": "x"
+  },
+  {
+   "op": "sub",
+   "shape": "arch",
+   "at": [
+    6,
+    0,
+    -11
+   ],
+   "width": 3,
+   "height": 5,
+   "depth": 4,
+   "axis": "x"
+  },
+  {
+   "op": "sub",
+   "shape": "arch",
+   "at": [
+    -11,
+    0,
+    -4
+   ],
+   "width": 3,
+   "height": 5,
+   "depth": 4,
+   "axis": "z"
+  },
+  {
+   "op": "sub",
+   "shape": "arch",
+   "at": [
+    -11,
+    0,
+    4
+   ],
+   "width": 3,
+   "height": 5,
+   "depth": 4,
+   "axis": "z"
+  },
+  {
+   "op": "sub",
+   "shape": "arch",
+   "at": [
+    11,
+    0,
+    -4
+   ],
+   "width": 3,
+   "height": 5,
+   "depth": 4,
+   "axis": "z"
+  },
+  {
+   "op": "sub",
+   "shape": "arch",
+   "at": [
+    11,
+    0,
+    4
+   ],
+   "width": 3,
+   "height": 5,
+   "depth": 4,
+   "axis": "z"
+  }
+ ],
+ "place": [
+  [
+   0,
+   1,
+   0,
+   "water"
+  ],
+  [
+   -3,
+   10,
+   16,
+   "lantern",
+   {
+    "hanging": true
+   }
+  ],
+  [
+   3,
+   10,
+   16,
+   "lantern",
+   {
+    "hanging": true
+   }
+  ],
+  [
+   -12,
+   15,
+   -12,
+   "lightning_rod"
+  ],
+  [
+   12,
+   15,
+   12,
+   "lightning_rod"
+  ],
+  [
+   12,
+   15,
+   -12,
+   "lightning_rod"
+  ],
+  [
+   -12,
+   15,
+   12,
+   "lightning_rod"
+  ]
+ ]
+}

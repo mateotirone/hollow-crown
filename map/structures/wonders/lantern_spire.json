@@ -1,0 +1,472 @@
+{
+ "name": "lantern_spire",
+ "materials": {
+  "root": {
+   "ladder": [
+    "mangrove_planks",
+    "dark_oak_planks"
+   ],
+   "axis": "noise",
+   "scale": 3
+  },
+  "deck": {
+   "ladder": [
+    "mangrove_planks",
+    "dark_oak_planks",
+    "spruce_planks"
+   ],
+   "axis": "noise",
+   "scale": 3
+  },
+  "mud": {
+   "ladder": [
+    "mud_bricks",
+    "packed_mud",
+    "brown_terracotta"
+   ],
+   "axis": "y",
+   "noise": 0.12
+  },
+  "moss": {
+   "ladder": [
+    "moss_block",
+    "mossy_cobblestone"
+   ],
+   "axis": "noise",
+   "scale": 3
+  },
+  "post": "mangrove_log",
+  "roof": {
+   "ladder": "BLK-05",
+   "axis": "y",
+   "texture": true
+  },
+  "band": "stripped_mangrove_log"
+ },
+ "shapes": [
+  {
+   "shape": "cylinder",
+   "at": [
+    -9,
+    -2,
+    -9
+   ],
+   "r": 1.5,
+   "h": 3,
+   "material": "post"
+  },
+  {
+   "shape": "cylinder",
+   "at": [
+    9,
+    -2,
+    -9
+   ],
+   "r": 1.5,
+   "h": 3,
+   "material": "post"
+  },
+  {
+   "shape": "cylinder",
+   "at": [
+    -9,
+    -2,
+    9
+   ],
+   "r": 1.5,
+   "h": 3,
+   "material": "post"
+  },
+  {
+   "shape": "cylinder",
+   "at": [
+    9,
+    -2,
+    9
+   ],
+   "r": 1.5,
+   "h": 3,
+   "material": "post"
+  },
+  {
+   "shape": "cylinder",
+   "at": [
+    0,
+    -2,
+    -12
+   ],
+   "r": 1.5,
+   "h": 3,
+   "material": "post"
+  },
+  {
+   "shape": "cylinder",
+   "at": [
+    0,
+    -2,
+    12
+   ],
+   "r": 1.5,
+   "h": 3,
+   "material": "post"
+  },
+  {
+   "shape": "cylinder",
+   "at": [
+    -12,
+    -2,
+    0
+   ],
+   "r": 1.5,
+   "h": 3,
+   "material": "post"
+  },
+  {
+   "shape": "cylinder",
+   "at": [
+    12,
+    -2,
+    0
+   ],
+   "r": 1.5,
+   "h": 3,
+   "material": "post"
+  },
+  {
+   "shape": "cylinder",
+   "at": [
+    0,
+    1,
+    0
+   ],
+   "r": 13.5,
+   "h": 1,
+   "material": "deck"
+  },
+  {
+   "shape": "cylinder",
+   "at": [
+    0,
+    2,
+    0
+   ],
+   "r": 7.5,
+   "h": 9,
+   "material": "mud"
+  },
+  {
+   "shape": "cylinder",
+   "at": [
+    0,
+    10,
+    0
+   ],
+   "r": 8.5,
+   "h": 1,
+   "material": "band"
+  },
+  {
+   "shape": "cylinder",
+   "at": [
+    0,
+    11,
+    0
+   ],
+   "r": 6.5,
+   "h": 9,
+   "material": "mud"
+  },
+  {
+   "shape": "cylinder",
+   "at": [
+    0,
+    19,
+    0
+   ],
+   "r": 7.5,
+   "h": 1,
+   "material": "band"
+  },
+  {
+   "shape": "cylinder",
+   "at": [
+    0,
+    20,
+    0
+   ],
+   "r": 5.5,
+   "h": 8,
+   "material": "mud"
+  },
+  {
+   "shape": "cylinder",
+   "at": [
+    0,
+    27,
+    0
+   ],
+   "r": 6.5,
+   "h": 1,
+   "material": "band"
+  },
+  {
+   "op": "paint",
+   "shape": "cylinder",
+   "at": [
+    0,
+    2,
+    0
+   ],
+   "r": 9,
+   "h": 3,
+   "material": "moss"
+  },
+  {
+   "shape": "box",
+   "min": [
+    3,
+    28,
+    3
+   ],
+   "max": [
+    3,
+    32,
+    3
+   ],
+   "material": "post"
+  },
+  {
+   "shape": "box",
+   "min": [
+    -3,
+    28,
+    3
+   ],
+   "max": [
+    -3,
+    32,
+    3
+   ],
+   "material": "post"
+  },
+  {
+   "shape": "box",
+   "min": [
+    3,
+    28,
+    -3
+   ],
+   "max": [
+    3,
+    32,
+    -3
+   ],
+   "material": "post"
+  },
+  {
+   "shape": "box",
+   "min": [
+    -3,
+    28,
+    -3
+   ],
+   "max": [
+    -3,
+    32,
+    -3
+   ],
+   "material": "post"
+  },
+  {
+   "shape": "cylinder",
+   "at": [
+    0,
+    33,
+    0
+   ],
+   "r": 5.5,
+   "h": 1,
+   "material": "band"
+  },
+  {
+   "shape": "cone",
+   "at": [
+    0,
+    34,
+    0
+   ],
+   "r": 5.5,
+   "h": 9,
+   "material": "roof"
+  },
+  {
+   "op": "sub",
+   "shape": "arch",
+   "at": [
+    0,
+    2,
+    7
+   ],
+   "width": 3,
+   "height": 5,
+   "depth": 3,
+   "axis": "x"
+  },
+  {
+   "op": "sub",
+   "shape": "arch",
+   "at": [
+    0,
+    13,
+    -6
+   ],
+   "width": 1,
+   "height": 3,
+   "depth": 3,
+   "axis": "x"
+  },
+  {
+   "op": "sub",
+   "shape": "arch",
+   "at": [
+    5,
+    22,
+    0
+   ],
+   "width": 1,
+   "height": 3,
+   "depth": 3,
+   "axis": "z"
+  },
+  {
+   "op": "sub",
+   "shape": "arch",
+   "at": [
+    -5,
+    22,
+    0
+   ],
+   "width": 1,
+   "height": 3,
+   "depth": 3,
+   "axis": "z"
+  },
+  {
+   "op": "sub",
+   "shape": "arch",
+   "at": [
+    6,
+    13,
+    0
+   ],
+   "width": 1,
+   "height": 3,
+   "depth": 3,
+   "axis": "z"
+  }
+ ],
+ "place": [
+  [
+   0,
+   28,
+   0,
+   "verdant_froglight"
+  ],
+  [
+   0,
+   29,
+   0,
+   "verdant_froglight"
+  ],
+  [
+   0,
+   30,
+   0,
+   "verdant_froglight"
+  ],
+  [
+   -9,
+   0,
+   -9,
+   "lantern"
+  ],
+  [
+   9,
+   0,
+   -9,
+   "lantern"
+  ],
+  [
+   -9,
+   0,
+   9,
+   "lantern"
+  ],
+  [
+   9,
+   0,
+   9,
+   "lantern"
+  ],
+  [
+   5,
+   32,
+   0,
+   "lantern",
+   {
+    "hanging": true
+   }
+  ],
+  [
+   -5,
+   32,
+   0,
+   "lantern",
+   {
+    "hanging": true
+   }
+  ],
+  [
+   0,
+   32,
+   5,
+   "lantern",
+   {
+    "hanging": true
+   }
+  ],
+  [
+   0,
+   32,
+   -5,
+   "lantern",
+   {
+    "hanging": true
+   }
+  ],
+  [
+   7,
+   18,
+   0,
+   "lantern",
+   {
+    "hanging": true
+   }
+  ],
+  [
+   -7,
+   18,
+   0,
+   "lantern",
+   {
+    "hanging": true
+   }
+  ],
+  [
+   0,
+   42,
+   0,
+   "lightning_rod"
+  ]
+ ]
+}

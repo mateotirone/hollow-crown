@@ -1,0 +1,443 @@
+{
+ "name": "rimeforge_hall",
+ "materials": {
+  "plinth": {
+   "ladder": "FRO-01",
+   "axis": "y",
+   "noise": 0.12
+  },
+  "wall": {
+   "ladder": [
+    "spruce_planks",
+    "dark_oak_planks"
+   ],
+   "axis": "noise",
+   "scale": 4
+  },
+  "post": "stripped_dark_oak_log",
+  "roof": {
+   "ladder": "FRO-06",
+   "axis": "y",
+   "texture": true
+  },
+  "stack": {
+   "ladder": [
+    "cobbled_deepslate",
+    "deepslate_bricks",
+    "deepslate_tiles"
+   ],
+   "axis": "y"
+  },
+  "yard": {
+   "ladder": [
+    "coarse_dirt",
+    "cobblestone",
+    "andesite"
+   ],
+   "axis": "noise",
+   "scale": 3
+  }
+ },
+ "shapes": [
+  {
+   "shape": "box",
+   "min": [
+    -13,
+    -1,
+    -15
+   ],
+   "max": [
+    13,
+    -1,
+    15
+   ],
+   "material": "yard"
+  },
+  {
+   "shape": "box",
+   "min": [
+    -8,
+    0,
+    -14
+   ],
+   "max": [
+    8,
+    2,
+    14
+   ],
+   "material": "plinth"
+  },
+  {
+   "shape": "box",
+   "min": [
+    -8,
+    3,
+    -14
+   ],
+   "max": [
+    8,
+    10,
+    14
+   ],
+   "material": "wall"
+  },
+  {
+   "shape": "box",
+   "min": [
+    -8,
+    3,
+    -14
+   ],
+   "max": [
+    -8,
+    10,
+    -14
+   ],
+   "material": "post"
+  },
+  {
+   "shape": "box",
+   "min": [
+    8,
+    3,
+    -14
+   ],
+   "max": [
+    8,
+    10,
+    -14
+   ],
+   "material": "post"
+  },
+  {
+   "shape": "box",
+   "min": [
+    -8,
+    3,
+    14
+   ],
+   "max": [
+    -8,
+    10,
+    14
+   ],
+   "material": "post"
+  },
+  {
+   "shape": "box",
+   "min": [
+    8,
+    3,
+    14
+   ],
+   "max": [
+    8,
+    10,
+    14
+   ],
+   "material": "post"
+  },
+  {
+   "shape": "box",
+   "min": [
+    -8,
+    3,
+    -2
+   ],
+   "max": [
+    8,
+    10,
+    -2
+   ],
+   "material": "post"
+  },
+  {
+   "shape": "box",
+   "min": [
+    -8,
+    3,
+    6
+   ],
+   "max": [
+    8,
+    10,
+    6
+   ],
+   "material": "post"
+  },
+  {
+   "shape": "box",
+   "min": [
+    -8,
+    3,
+    -10
+   ],
+   "max": [
+    8,
+    10,
+    -10
+   ],
+   "material": "post"
+  },
+  {
+   "shape": "extrude",
+   "points": [
+    [
+     -10.5,
+     11
+    ],
+    [
+     10.5,
+     11
+    ],
+    [
+     0,
+     25
+    ]
+   ],
+   "axis": "z",
+   "from": -15.5,
+   "to": 15.5,
+   "material": "roof"
+  },
+  {
+   "op": "sub",
+   "shape": "extrude",
+   "points": [
+    [
+     -8,
+     11
+    ],
+    [
+     8,
+     11
+    ],
+    [
+     0,
+     22
+    ]
+   ],
+   "axis": "z",
+   "from": -14,
+   "to": 14
+  },
+  {
+   "shape": "extrude",
+   "points": [
+    [
+     -8.5,
+     11
+    ],
+    [
+     8.5,
+     11
+    ],
+    [
+     0,
+     22.5
+    ]
+   ],
+   "axis": "z",
+   "from": -14,
+   "to": -14,
+   "material": "wall"
+  },
+  {
+   "shape": "extrude",
+   "points": [
+    [
+     -8.5,
+     11
+    ],
+    [
+     8.5,
+     11
+    ],
+    [
+     0,
+     22.5
+    ]
+   ],
+   "axis": "z",
+   "from": 14,
+   "to": 14,
+   "material": "wall"
+  },
+  {
+   "shape": "cylinder",
+   "at": [
+    0,
+    0,
+    -9
+   ],
+   "r": 3.5,
+   "h": 31,
+   "material": "stack"
+  },
+  {
+   "shape": "cylinder",
+   "at": [
+    0,
+    30,
+    -9
+   ],
+   "r": 4.5,
+   "h": 1,
+   "material": "stack"
+  },
+  {
+   "op": "sub",
+   "shape": "cylinder",
+   "at": [
+    0,
+    27,
+    -9
+   ],
+   "r": 1.5,
+   "h": 5
+  },
+  {
+   "op": "sub",
+   "shape": "arch",
+   "at": [
+    0,
+    3,
+    14
+   ],
+   "width": 5,
+   "height": 6,
+   "depth": 2,
+   "axis": "x"
+  },
+  {
+   "op": "sub",
+   "shape": "arch",
+   "at": [
+    -8,
+    6,
+    2
+   ],
+   "width": 1,
+   "height": 4,
+   "depth": 2,
+   "axis": "z"
+  },
+  {
+   "op": "sub",
+   "shape": "arch",
+   "at": [
+    8,
+    6,
+    2
+   ],
+   "width": 1,
+   "height": 4,
+   "depth": 2,
+   "axis": "z"
+  },
+  {
+   "op": "sub",
+   "shape": "arch",
+   "at": [
+    -8,
+    6,
+    10
+   ],
+   "width": 1,
+   "height": 4,
+   "depth": 2,
+   "axis": "z"
+  },
+  {
+   "op": "sub",
+   "shape": "arch",
+   "at": [
+    8,
+    6,
+    10
+   ],
+   "width": 1,
+   "height": 4,
+   "depth": 2,
+   "axis": "z"
+  },
+  {
+   "op": "sub",
+   "shape": "arch",
+   "at": [
+    -8,
+    6,
+    -6
+   ],
+   "width": 1,
+   "height": 4,
+   "depth": 2,
+   "axis": "z"
+  },
+  {
+   "op": "sub",
+   "shape": "arch",
+   "at": [
+    8,
+    6,
+    -6
+   ],
+   "width": 1,
+   "height": 4,
+   "depth": 2,
+   "axis": "z"
+  },
+  {
+   "op": "sub",
+   "shape": "box",
+   "min": [
+    -2,
+    0,
+    15
+   ],
+   "max": [
+    2,
+    2,
+    15
+   ]
+  }
+ ],
+ "place": [
+  [
+   0,
+   26,
+   -9,
+   "campfire"
+  ],
+  [
+   3,
+   3,
+   15,
+   "lantern"
+  ],
+  [
+   -3,
+   3,
+   15,
+   "lantern"
+  ],
+  [
+   0,
+   3,
+   12,
+   "anvil"
+  ],
+  [
+   2,
+   3,
+   12,
+   "blast_furnace"
+  ],
+  [
+   -2,
+   3,
+   12,
+   "smithing_table"
+  ]
+ ]
+}

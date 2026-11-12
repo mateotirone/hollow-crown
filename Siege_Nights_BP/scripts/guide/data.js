@@ -238,6 +238,14 @@ export const ENTRIES = [
     when: ["event:settlerRequestDone", "talk:tag:siege_settler"],
   },
   {
+    id: "wonders", ch: "keep", title: "Wonders",
+    tip: "Six wonders stand waiting to be raised across the realm. Talk to a wonder's keeper to see what it gives its holder.",
+    page: "There are six wonders, one site each, out in the open country: the Great Lighthouse on the Saltreach cliffs, the High Watch in the Vale, Rimeforge Hall in the Frostmarch snows, the Sun Gate Caravanserai in the Emberwaste, the Lantern Spire over the Blackfen pools and the Great Horse Fair in the Vale meadows. Each site has a keeper.\n\n"
+      + "A City (or bigger) can claim a free wonder and pay for it in six stages, about 2,000 Regals in all. The crew raises each stage while someone is nearby, one wonder at a time per settlement. Once all six stages stand, the holder and their allies get its gift: better prices at the traders, the Smith or the railway, cheaper grooms, a tougher keep heart, or more newcomers each dawn.\n\n"
+      + "Rival Lords race for wonders too. Anyone with a City can challenge for a wonder held by someone else: its guards come out and you have ten minutes to cut them all down. A wonder held by a player can only be challenged while they are in the realm. Beat a lord and take their town, and their wonder comes with it.",
+    when: ["event:wonderClaimed", "event:wonderRaised", "event:wonderTaken"],
+  },
+  {
     id: "guards", ch: "keep", title: "Guards and the Barracks",
     tip: "Bring an unemployed villager to your Barracks and click it holding 40 Regals for a Man-at-Arms (sneak + click for an Archer).",
     page: "Build a §fBarracks§r, bring an unemployed villager to it and click it holding coins (40 Regals) for a §fMan-at-Arms§r. Sneak + click for an §fArcher§r. Click the Barracks without coins for the guard list.\n\n"

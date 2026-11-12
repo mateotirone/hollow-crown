@@ -8,7 +8,7 @@ import { GameMode, ItemStack } from "@minecraft/server";
 // siege/ files import this one, so nothing from siege/api.js may be used while this file loads (only inside functions)
 import { countItem, takeItems, settlementAt, keepOf } from "../siege/api.js";
 import { moduleStore } from "../core/store.js";
-import { emit } from "../core/events.js";
+import { emit, applyFilter } from "../core/events.js";
 import { COIN, GOLD, ECON } from "./config.js";
 import { asCoins, fromEmeralds } from "./rules.js";
 
@@ -73,9 +73,11 @@ export function takeCoins(player, amount) {
 
 // charge(player, amount): takes the price, pockets first and then the strongbox when on your own land.
 // true if paid (always true in Creative, which pays nothing). The coins leave the world.
+// A feature may lower or raise the price through the "chargeAmount" filter ({ player, reason }), e.g. a wonder.
 export function charge(player, amount, reason = "shop") {
   amount = Math.ceil(amount);
   if (amount <= 0 || creative(player)) return true;
+  amount = Math.max(1, Math.ceil(applyFilter("chargeAmount", amount, { player, reason })));
   if (funds(player) < amount) return false;
   const pocket = Math.min(carried(player), amount);
   takeCoins(player, pocket);
@@ -87,9 +89,11 @@ export function charge(player, amount, reason = "shop") {
 }
 
 // pay(player, amount): new coins into the player's pockets (a sale, a reward, a bounty).
+// A feature may change the amount through the "payAmount" filter ({ player, reason }), e.g. a wonder.
 export function pay(player, amount, reason = "sale") {
   amount = Math.floor(amount);
   if (amount <= 0) return;
+  amount = Math.max(0, Math.floor(applyFilter("payAmount", amount, { player, reason })));
   giveCoins(player, amount);
   ledger.data.minted += amount;
   ledger.save();
