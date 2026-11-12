@@ -1,11 +1,12 @@
 import { addTests, assert, assertEqual } from "../core/tests.js";
-import { NEWS, leaks } from "./rules.js";
+import { NEWS, leaks, killerName } from "./rules.js";
 
 const ctx = { where: (dim) => (dim === "minecraft:overworld" ? "near Kingsrest" : "somewhere no map shows"), nameOf: () => "Sam" };
 const player = { id: "p1", name: "Sam", location: { x: 0, y: 64, z: 0 } };
 const sample = { player, owner: "p1", ownerName: "Sam", name: "The Pale Huntsman", first: true, handled: true, level: 3,
   dim: "minecraft:overworld", x: 0, z: 0, players: ["Sam", "Ana"], plot: { name: "Thornfield" }, station: { name: "Kingsrest Station" },
-  lord: { name: "Lord Aldric", plot: "Thornfield" }, winner: { name: "Lord Aldric" }, loser: { name: "Lady Wren" } };
+  lord: { name: "Lord Aldric", plot: "Thornfield" }, winner: { name: "Lord Aldric" }, loser: { name: "Lady Wren" },
+  firstFor: "Sam", victim: "Sam", killer: "The Pale Huntsman", kind: "boss" };
 
 addTests("world news", {
   "every event has a line, and none names what is hidden": () => {
@@ -27,5 +28,13 @@ addTests("world news", {
   },
   "no news of attacks on players' settlements (that is the Messenger's job)": () => {
     for (const event of ["settlementAttacked", "baseAttacked", "lordRaid", "keepFallen", "assaultSpawned", "vaultDrilled", "vaultBreached"]) assert(!NEWS[event], event);
+  },
+  "deaths name the killer, a first train only once": () => {
+    assertEqual(killerName("§cThe Pale Huntsman §7(Rank II)", "siege:pale_huntsman"), "The Pale Huntsman");
+    assertEqual(killerName("", "siege:grey_axeman"), "Grey Axeman");
+    assertEqual(NEWS.playerFell({ ...sample, kind: "creature", killer: "Grey Axeman" }, ctx), "§7Sam fell to a Grey Axeman near Kingsrest.");
+    assertEqual(NEWS.playerFell({ ...sample, kind: "player", killer: "Ana" }, ctx), "§cSam was slain by Ana near Kingsrest.");
+    assert(!leaks(NEWS.playerFell({ ...sample, kind: "creature", killer: "Hollow Footman" }, ctx)));
+    assertEqual(NEWS.enginePlaced({ ...sample, firstFor: undefined }, ctx), null);
   },
 });

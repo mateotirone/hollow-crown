@@ -38,9 +38,27 @@ export const NEWS = {
   rivalFeudEnded: ({ winner, loser }) => (winner?.name && loser?.name ? `§6The feud is over: ${winner.name} has beaten ${loser.name}.` : null),
   dragonBondFull: ({ owner, name }, ctx) => (name ? `§6${name} and ${ctx.nameOf(owner) ?? "its rider"} are bound for life.` : null),
   dragonDied: ({ ownerName, name }) => (name ? `§4${name}, ${ownerName ? `${ownerName}'s dragon, ` : ""}is dead.` : null),
+  // a settlement's very first engine on the line (news/index.js marks firstFor the first time per settlement)
+  enginePlaced: ({ firstFor, dim, x, z }, ctx) => (firstFor ? `§6${firstFor}'s settlement has its first train. §7It stands on the line ${ctx.where(dim, x, z)}.` : null),
+  // made in news/index.js from a player's death: only to a boss, a creature of this world, or another player,
+  // and never inside a player's settlement (that would be news of an attack)
+  playerFell: ({ victim, killer, kind, dim, x, z }, ctx) => {
+    const at = ctx.where(dim, x, z);
+    if (kind === "player") return `§c${victim} was slain by ${killer} ${at}.`;
+    const n = bossName(killer);
+    if (!n) return `§5${victim} fell to something nameless ${at}.`;
+    return kind === "boss" ? `§c${victim} fell to ${n} ${at}.` : `§7${victim} fell to ${/^(the|a|an) /i.test(n) ? n : `a ${n}`} ${at}.`;
+  },
   loreAllSolved: ({ player }) => `§d${player.name} has solved every mystery in their Ledger.`,
   loreThreadSolved: ({ player }) => `§d${player.name} has pieced a mystery together.`,
 };
 
 // Words the news must never print, checked by the tests on every line
+// A killer's name for the news: its name tag without colours or rank, or its kind ("siege:pale_huntsman" -> "Pale Huntsman")
+export function killerName(nameTag, typeId) {
+  const tag = String(nameTag ?? "").replace(/§./g, "").split("\n")[0].replace(/\(.*?\)/g, "").trim();
+  if (tag) return tag;
+  return String(typeId ?? "").replace(/^[a-z_]+:/, "").replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 export const leaks = (text) => HIDDEN.test(String(text ?? "").replace(/§./g, ""));

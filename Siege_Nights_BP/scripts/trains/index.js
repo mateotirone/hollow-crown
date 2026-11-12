@@ -8,7 +8,7 @@
 // /scriptevent siege:trains (report), /scriptevent siege:trains mode velocity|teleport.
 
 import { world, system, GameMode } from "@minecraft/server";
-import { onTick, isReady, moduleStore, settlementAt, keepOf, on, COLORS } from "../siege/api.js";
+import { onTick, isReady, moduleStore, settlementAt, keepOf, on, emit, COLORS } from "../siege/api.js";
 import { styleOf } from "../settle/plans.js";
 import { shapeOf, layTrack, cursorOn, advance, back, pointAt, flip } from "./track.js";
 import { throwFor } from "./switches.js";
@@ -201,6 +201,7 @@ world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
       const owner = ownerFor(player, block);
       const train = placeEngine(dim, block.location, player.getRotation().y, styleIndexFor(owner, block), player, owner);
       if (!train) return;
+      emit("enginePlaced", { player, owner, dim: dim.id, x: block.location.x, z: block.location.z }); // the Crier marks a settlement's first train
       if (unlock(player.id, "engine")) player.sendMessage("§6Your first engine: from now on any station gives you a new one free if you lose it.");
       const look = train.color === NO_COLOR ? `${TRAIN_STYLES[train.style]} style` : `${TRAIN_STYLES[train.style]} style, in ${COLORS[train.color].replace("_", " ")}`;
       say(player, `§6Engine on the line (${look}). Climb in and hold forward to go, back to brake.`);
