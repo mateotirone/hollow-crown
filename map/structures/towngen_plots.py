@@ -153,7 +153,7 @@ class TownPlots(Town):
         self.houses(); self.relax()
         self.field_paths(); self.fences(); self.fields()
         self.dress()
-        self.path_blocks(); self.ground_blocks(); self.banks(); self.outline()
+        self.path_blocks(); self.ground_blocks(); self.banks(); self.outline(); self.finish_bridges()
         self.works = {(int(x), int(y), int(z)): v for (x, y, z), v in self.works.items()}
         c = collections.Counter(e.get("size") for e in self.plan if e["kind"] == "plot")
         print(self.name, "plots", dict(c), "fields", self.nparcel, "dry", self.unwatered, "trees", sum(1 for e in self.plan if e["kind"] == "tree"), "groundwork", len(self.works))

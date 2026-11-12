@@ -911,6 +911,15 @@ def hanging_lantern(ctx, s):
 PARTS = {"house": house, "arch": arch, "string_course": string_course, "buttress": buttress, "hanging_lantern": hanging_lantern}
 
 
+def bridge(ctx, s):
+    """A straight A-to-B bridge at any angle, sized by span, styled by region and use (scripts/bridges.py)."""
+    import bridges
+    return bridges.bridge(ctx, s)
+
+
+PARTS["bridge"] = bridge
+
+
 def run(ctx, pt):
     k = pt.get("part")
     if k == "window":
