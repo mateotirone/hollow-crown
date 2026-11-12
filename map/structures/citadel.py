@@ -43,14 +43,22 @@ KEEP_FLOORS = [12, 21, 30, 39]
 FARM_TO = 100        # farmland runs from the foot of the outer wall out over the plot's edge (MAP.plotRadius is 80)
 DIAG = 2 * OUTER - CHAMFER   # |x| + |z| <= DIAG on the diagonal faces
 
+BASE = dict(   # what every style shares unless it says otherwise
+    cone_k=1.6, tower_roof="cone", keep_roof="cone", keep_roof_mat=None, roof_off=0, finial="siege:spire_roof",
+    snow=False, moss=False, ground="grass_block", under="dirt", cover=["short_grass", "short_grass", "fern"],
+    farm_hedge="oak_leaves", field_soil="farmland", field_water=True, light="lantern", lamp_top=None,
+    cloth="red", dais=("gold_block", "quartz_block"), range_flat=False, gravel="gravel",
+)
+
 STYLES = {
+    # the regular style, built first
     "vale": dict(
         smooth="siege:castle_smooth", stone="siege:castle_stone", band="siege:castle_bricks", plinth="siege:castle_cobbled",
         tiles="siege:castle_tiles", corbel="stone_brick_stairs", slab="stone_brick_slab", wallcap="stone_brick_wall",
         roof={"ladder": "VAL-06", "axis": "y", "texture": True}, pane="glass_pane", wood="spruce", dark="dark_oak",
         street=[("stone_bricks", 40), ("cobblestone", 20), ("andesite", 16), ("cracked_stone_bricks", 10), ("tuff", 6), ("gravel", 8)],
         lane=[("grass_path", 50), ("gravel", 20), ("cobblestone", 15), ("coarse_dirt", 15)],
-        court="polished_andesite", court2="stone_bricks", ground="grass_block", under="dirt",
+        court="polished_andesite", court2="stone_bricks",
         soil=[("grass_block", 62), ("moss_block", 10), ("coarse_dirt", 10), ("podzol", 8), ("gravel", 5)],
         flowers=["poppy", "cornflower", "oxeye_daisy", "allium", "azure_bluet", "red_tulip", "white_tulip", "lily_of_the_valley"],
         bush=["azalea_leaves", "azalea_leaves_flowered", "oak_leaves"], hedge="azalea_leaves",
@@ -59,7 +67,110 @@ STYLES = {
         frame="stripped_spruce_log", infill="calcite", range_roof=["deepslate_tile_stairs", "deepslate_brick_stairs"],
         range_floor="spruce_planks", door="spruce_door", crops=["carrots", "beetroot", "potatoes", "wheat"],
     ),
+    # Norse mountain stronghold: dark deepslate castle stone, steep dark-shingle cones (pitch 2, they shed
+    # snow), a weathered copper cone on the keep, snow on every flat top, frosted glass, spruce and juniper
+    "frostmarch": dict(
+        smooth="siege:castle_smooth_frostmarch", stone="siege:castle_stone_frostmarch", band="siege:castle_bricks_frostmarch",
+        plinth="siege:castle_cobbled_frostmarch", tiles="siege:castle_tiles_frostmarch", corbel="deepslate_brick_stairs",
+        slab="deepslate_brick_slab", wallcap="cobbled_deepslate_wall",
+        roof={"ladder": ["deepslate_tiles", "deepslate_bricks"], "axis": "y", "texture": True}, cone_k=2.4,
+        keep_roof_mat={"ladder": ["waxed_weathered_cut_copper", "waxed_oxidized_cut_copper"], "axis": "y", "texture": True},
+        pane="white_stained_glass_pane", wood="spruce", dark="dark_oak",
+        street=[("cobbled_deepslate", 50), ("stone_bricks", 22), ("andesite", 14), ("gravel", 8), ("tuff", 6)],
+        lane=[("gravel", 40), ("coarse_dirt", 25), ("cobbled_deepslate", 20), ("podzol", 15)],
+        court="polished_deepslate", court2="deepslate_bricks",
+        soil=[("grass_block", 45), ("podzol", 20), ("coarse_dirt", 12), ("gravel", 13), ("stone", 10)],
+        flowers=["fern", "sweet_berry_bush", "fern", "lily_of_the_valley"], cover=["short_grass", "fern", "fern"],
+        bush=["spruce_leaves"], hedge="spruce_leaves", farm_hedge="spruce_leaves",
+        trees={"frost_tall_spruce": 3, "frost_scots_pine": 2, "frost_snow_birch": 2, "frost_juniper": 2, "frost_grey_fir": 2},
+        round="cobbled_deepslate_wall", round_band="deepslate_brick_wall",
+        frame="dark_oak_log", infill="spruce_planks", range_roof=["dark_oak_stairs", "spruce_stairs"],
+        range_floor="spruce_planks", door="dark_oak_door", crops=["potatoes", "beetroot", "wheat", "carrots"],
+        cloth="red", snow=True,
+    ),
+    # sunlit harbour fortress: pale sand and whitewash castle stone, low sea-green cones that the wind
+    # slides over, a copper dome on the keep going green at the top, birch, cypress and olive
+    "saltreach": dict(
+        smooth="siege:castle_smooth_saltreach", stone="siege:castle_stone_saltreach", band="siege:castle_bricks_saltreach",
+        plinth="siege:castle_cobbled_saltreach", tiles="siege:castle_tiles_saltreach", corbel="smooth_sandstone_stairs",
+        slab="smooth_sandstone_slab", wallcap="sandstone_wall",
+        roof={"ladder": ["dark_prismarine", "prismarine_bricks"], "axis": "y", "texture": True}, cone_k=1.0,
+        keep_roof="dome", keep_roof_mat={"ladder": ["waxed_weathered_cut_copper", "waxed_oxidized_cut_copper"], "axis": "y"},
+        pane="light_blue_stained_glass_pane", wood="birch", dark="oak",
+        street=[("smooth_sandstone", 50), ("sandstone", 22), ("cobblestone", 14), ("stone_bricks", 8), ("andesite", 6)],
+        lane=[("gravel", 35), ("sandstone", 25), ("coarse_dirt", 20), ("smooth_sandstone", 20)],
+        court="smooth_sandstone", court2="cut_sandstone",
+        soil=[("grass_block", 45), ("coarse_dirt", 18), ("gravel", 22), ("stone", 15)],
+        flowers=["oxeye_daisy", "cornflower", "azure_bluet", "allium", "white_tulip"], cover=["short_grass", "short_grass", "air"],
+        bush=["birch_leaves", "oak_leaves"], hedge="oak_leaves", farm_hedge="birch_leaves",
+        trees={"salt_italian_cypress": 3, "salt_sea_cypress": 2, "salt_olive": 3, "salt_umbrella_pine": 2, "salt_tamarisk": 2},
+        round="sandstone_wall", round_band="stone_brick_wall",
+        frame="stripped_birch_log", infill="calcite", range_roof=["dark_prismarine_stairs", "prismarine_brick_stairs"],
+        range_floor="birch_planks", door="birch_door", crops=["wheat", "carrots", "beetroot", "wheat"],
+    ),
+    # desert kasbah: sandstone castle stone, flat parapet tops with corner horns on every tower (no cones,
+    # no shingle in the desert), a teal dome with a gold finial on the keep, sand ground, palms
+    "emberwaste": dict(
+        smooth="siege:castle_smooth_emberwaste", stone="siege:castle_stone_emberwaste", band="siege:castle_bricks_emberwaste",
+        plinth="siege:castle_cobbled_emberwaste", tiles="siege:castle_tiles_emberwaste", corbel="smooth_sandstone_stairs",
+        slab="smooth_sandstone_slab", wallcap="sandstone_wall",
+        roof={"ladder": ["red_sandstone", "smooth_red_sandstone"], "axis": "y", "texture": True}, tower_roof="flat",
+        keep_roof="dome", keep_roof_mat={"ladder": ["cyan_terracotta", "waxed_oxidized_cut_copper"], "axis": "y"}, finial="gold_block",
+        pane="orange_stained_glass_pane", wood="acacia", dark="dark_oak",
+        street=[("smooth_red_sandstone", 45), ("smooth_sandstone", 35), ("cut_red_sandstone", 12), ("coarse_dirt", 8)],
+        lane=[("coarse_dirt", 40), ("smooth_sandstone", 20), ("sandstone", 20), ("red_sand", 20)],
+        court="smooth_sandstone", court2="cut_red_sandstone", ground="sand", under="sandstone", gravel="smooth_red_sandstone",
+        soil=[("sand", 40), ("red_sand", 25), ("coarse_dirt", 20), ("sandstone", 10), ("hardened_clay", 5)],
+        flowers=["dead_bush"], cover=["dead_bush", "air", "air"],
+        bush=["acacia_leaves", "cactus"], hedge="acacia_leaves", farm_hedge="acacia_leaves",
+        trees={"ember_date_palm": 4, "ember_argan": 2, "ember_baobab": 1, "ember_umbrella_acacia": 1, "ember_dragon_blood": 1},
+        round="sandstone_wall", round_band="red_sandstone_wall",
+        frame="cut_sandstone", infill="smooth_sandstone", range_roof=["smooth_sandstone_slab", "smooth_sandstone_slab"], range_flat=True,
+        range_floor="acacia_planks", door="acacia_door", crops=["wheat", "beetroot", "potatoes", "wheat"],
+    ),
+    # fen stronghold: mud brick castle stone, low mossy dark-shingle cones, moss creeping up the walls and
+    # over the roofs, froglights on the lamp posts, brown glass, cypress and alder
+    "blackfen": dict(
+        smooth="siege:castle_smooth_blackfen", stone="siege:castle_stone_blackfen", band="siege:castle_bricks_blackfen",
+        plinth="siege:castle_cobbled_blackfen", tiles="siege:castle_tiles_blackfen", corbel="mud_brick_stairs",
+        slab="mud_brick_slab", wallcap="mud_brick_wall",
+        roof={"ladder": ["dark_oak_planks", "spruce_planks"], "axis": "y", "texture": True}, cone_k=1.15,
+        pane="brown_stained_glass_pane", wood="spruce", dark="dark_oak",
+        street=[("mud_bricks", 45), ("packed_mud", 25), ("tuff", 15), ("coarse_dirt", 15)],
+        lane=[("packed_mud", 35), ("coarse_dirt", 25), ("mud", 15), ("moss_block", 10), ("podzol", 15)],
+        court="tuff_bricks", court2="mud_bricks",
+        soil=[("grass_block", 40), ("mud", 15), ("moss_block", 18), ("podzol", 15), ("coarse_dirt", 12)],
+        flowers=["blue_orchid", "fern", "brown_mushroom", "blue_orchid"], cover=["short_grass", "fern", "moss_carpet"],
+        bush=["mangrove_leaves", "azalea_leaves"], hedge="mangrove_leaves", farm_hedge="mangrove_leaves",
+        trees={"fen_bald_cypress": 3, "fen_black_alder": 3, "fen_pollard_willow": 2, "fen_drowned_snag": 1},
+        round="mud_brick_wall", round_band="tuff_brick_wall",
+        frame="mangrove_log", infill="mud_bricks", range_roof=["dark_oak_stairs", "spruce_stairs"],
+        range_floor="dark_oak_planks", door="mangrove_door", crops=["potatoes", "beetroot", "carrots", "wheat"],
+        lamp_top="ochre_froglight", moss=True,
+    ),
+    # the Hollow's own stronghold: the same plan in veinstone and blackstone, tall narrow deepslate cones
+    # that each sit one block off true (the Hollow's crookedness rule), iron-bar windows, soul light,
+    # Veilmoss ground, Veilcap beds where the fields are, the Crown's colours only on the dais
+    "hollow": dict(
+        smooth="siege:veinstone_bricks", stone="polished_blackstone_bricks", band="siege:cracked_veinstone_bricks",
+        plinth="cobbled_deepslate", tiles="deepslate_tiles", corbel="polished_blackstone_brick_stairs",
+        slab="polished_blackstone_brick_slab", wallcap="polished_blackstone_wall",
+        roof={"ladder": ["deepslate_tiles", "cobbled_deepslate"], "axis": "y", "texture": True}, cone_k=2.6, roof_off=1,
+        pane="iron_bars", wood="dark_oak", dark="dark_oak",
+        street=[("cobbled_deepslate", 55), ("polished_blackstone_bricks", 25), ("tuff", 15), ("coarse_dirt", 5)],
+        lane=[("coarse_dirt", 35), ("siege:pale_ash", 25), ("cobbled_deepslate", 25), ("tuff", 15)],
+        court="polished_blackstone", court2="deepslate_tiles", ground="siege:undertow_moss", gravel="tuff",
+        soil=[("siege:undertow_moss", 45), ("moss_block", 15), ("siege:pale_ash", 15), ("tuff", 10), ("coarse_dirt", 15)],
+        flowers=["siege:veilcap", "siege:glimbulb", "siege:veilcap"], cover=["siege:veilcap", "air", "air", "air"],
+        bush=["moss_block"], hedge="moss_block", farm_hedge="moss_block",
+        trees={"hollow_latticewood": 3, "hollow_veilmoss_tree": 3, "hollow_ash_dead": 2},
+        round="polished_blackstone_wall", round_band="deepslate_brick_wall",
+        frame="dark_oak_log", infill="siege:pale_ash", range_roof=["deepslate_tile_stairs", "cobbled_deepslate_stairs"],
+        range_floor="dark_oak_planks", door="dark_oak_door", crops=["siege:veilcap"], field_soil="siege:undertow_moss", field_water=False,
+        light="soul_lantern", cloth="purple", dais=("amethyst_block", "crying_obsidian"),
+    ),
 }
+for _k in STYLES: STYLES[_k] = {**BASE, **STYLES[_k]}
 
 
 def h3(x, y, z, s=0):
@@ -135,11 +246,15 @@ class Citadel:
     def found(self, x, z):
         self.col(x, z, -3, 0, self.S["plinth"])
 
-    def cone(self, cx, y, cz, r, h):
-        key = (r, h)
+    def cone(self, cx, y, cz, r, h, mat=None, dome=False):
+        """An engine cone (or a dome: the top half of a sphere) in the style's roof material, the finial on top."""
+        mat = mat or self.S["roof"]
+        key = (r, h, json.dumps(mat, sort_keys=True), dome)
         if key not in self.cone_cache:
-            spec = {"name": "cone", "materials": {"roof": self.S["roof"]},
-                    "shapes": [{"shape": "cone", "at": [0, 0, 0], "r": r, "h": h, "material": "roof"}]}
+            shapes = ([{"shape": "sphere", "at": [0, 0, 0], "r": r, "material": "roof"},
+                       {"op": "sub", "shape": "box", "min": [-int(r) - 2, -int(r) - 2, -int(r) - 2], "max": [int(r) + 2, -1, int(r) + 2]}]
+                      if dome else [{"shape": "cone", "at": [0, 0, 0], "r": r, "h": h, "material": "roof"}])
+            spec = {"name": "dome" if dome else "cone", "materials": {"roof": mat}, "shapes": shapes}
             self.cone_cache[key] = engine.compute(spec)[0]
         for (x, yy, z), (n, q) in self.cone_cache[key].items():
             bn, bq = engine.to_bp(n, q)
@@ -149,9 +264,9 @@ class Citadel:
     def spire_on(self, cx, cz, y0):
         """The custom spire top sits straight on the roof's top full block (Mateo: never on a slab, it floats)."""
         top = max(yy for (x, yy, z) in self.bp.cells if x == cx and z == cz and yy >= y0 and self.bp.cells[(x, yy, z)][0] not in ("air", "keep"))
-        while top > y0 and (self.bp.cells[(cx, top, cz)][0].endswith("_slab") or self.bp.cells[(cx, top, cz)][0] == "siege:spire_roof"):
+        while top > y0 and (self.bp.cells[(cx, top, cz)][0].endswith("_slab") or self.bp.cells[(cx, top, cz)][0] == self.S["finial"]):
             del self.bp.cells[(cx, top, cz)]; top -= 1
-        self.set(cx, top + 1, cz, "siege:spire_roof")
+        self.set(cx, top + 1, cz, self.S["finial"])
 
     # ---- round tower ---------------------------------------------------------------------------------
     def tower(self, cx, cz, r, h, walks=(), door=None, roof=True, name="tower"):
@@ -177,7 +292,7 @@ class Citadel:
                         self.col(x, z, 1, h - 1, "air")
                         for f in floors: self.set(x, f, z, S["tiles"])
                         self.set(x, 0, z, S["tiles"])
-                elif d <= r + 1 and roof:                     # corbel ring under the roof
+                elif d <= r + 1 and roof and S["tower_roof"] == "cone":   # corbel ring under the roof
                     self.set(x, h, z, S["corbel"], facing=OPP[outward(dx, dz)], half="top")
         for w in walks:                                       # wall walk doorways (3 wide, 3 high) on every side
             for dx in range(-R - 1, R + 2):
@@ -192,9 +307,38 @@ class Citadel:
                     x, z = cx + ox * k + (s if oz else 0), cz + oz * k + (s if ox else 0)
                     self.col(x, z, 1, 4, "air")
         self.spiral(cx, cz, 1, h)
-        if roof:
-            self.cone(cx, h + 1, cz, r + 1.5, int(round((r + 1.5) * 1.6)))
+        if roof and S["tower_roof"] == "flat":
+            self.flat_top(cx, cz, r, h)
+        elif roof:
+            off = S["roof_off"]                               # the Hollow: the roof sits one block off true
+            ox, oz = ((off, 0), (-off, 0), (0, off), (0, -off))[int(h3(cx, h, cz, 61) * 4)] if off else (0, 0)
+            self.cone(cx + ox, h + 1, cz + oz, r + 1.5, int(round((r + 1.5) * S["cone_k"])))
         self.towers.append({"name": name, "x": cx, "z": cz, "r": r, "h": h})
+
+    def flat_top(self, cx, cz, r, h):
+        """A kasbah tower top (Emberwaste): a flat deck behind a crenellated parapet, the four corners rising
+        as horns above it, roof beams sticking out below the deck."""
+        S = self.S
+        R_ = int(r)
+        horns = {}
+        for dx in range(-R_, R_ + 1):
+            for dz in range(-R_, R_ + 1):
+                d = math.hypot(dx, dz)
+                if not (r - 1 < d <= r): continue
+                x, z = cx + dx, cz + dz
+                self.set(x, h + 1, z, S["smooth"])
+                if (dx + dz) % 2 == 0: self.set(x, h + 2, z, S["stone"])
+                if dx and dz:
+                    q = (dx > 0, dz > 0); m = min(abs(dx), abs(dz))
+                    if m > horns.get(q, (-1,))[0]: horns[q] = (m, x, z)
+                if (dx == 0 or dz == 0) and d > r - 0.5:       # beams on the four faces, a block below the deck
+                    ox, oz = (0 if dx == 0 else (1 if dx > 0 else -1)), (0 if dz == 0 else (1 if dz > 0 else -1))
+                    for k in (-2, 2):
+                        bx, bz = (x + k, z + oz) if dx == 0 else (x + ox, z + k)
+                        if self.bp.get(bx, h - 1, bz)[0] in ("keep", "air"):
+                            self.set(bx, h - 1, bz, "spruce_log", axis="z" if dx == 0 else "x")
+        for _, x, z in horns.values():
+            self.col(x, z, h + 1, h + 4, S["stone"]); self.set(x, h + 5, z, S["wallcap"])
 
     # ---- curtain walls -------------------------------------------------------------------------------
     def curtain(self, dist, reach, walk, slit_y):
@@ -253,10 +397,10 @@ class Citadel:
             for k in (-1, 0, 1):
                 tx = sx * (half + 2) + k
                 tz = zf - tower_back + int(tower_r) + 1
-                for y in range(9, tower_h - 4): self.set(tx, y, tz, "red_wool")
+                for y in range(9, tower_h - 4): self.set(tx, y, tz, f"{S['cloth']}_wool")
         # a brazier either side of the gate and a lantern in the arch
         for sx in (-5, 5): self.set(sx, top + 1, zf, "siege:brazier")
-        self.set(0, 11, zf, "lantern", hanging=True); self.set(0, 11, zb, "lantern", hanging=True)
+        self.set(0, 11, zf, self.S["light"], hanging=True); self.set(0, 11, zb, self.S["light"], hanging=True)
         self.gates.append({"name": name, "x": 0, "z": zf, "inner": zb})
         if barbican:
             zo = zf + barbican
@@ -333,8 +477,8 @@ class Citadel:
             for dx in range(-2, 3):
                 self.col(kx + dx, z, 1, {2: 7, 1: 8, 0: 9}[abs(dx)], "air")
         for dx in (-5, -4, 4, 5):                              # ruler's colour hangings on the forebuilding
-            self.col(kx + dx, zf + 10, 5, 16, "red_wool")
-        self.set(kx, 9, zf + 9, "lantern", hanging=True)
+            self.col(kx + dx, zf + 10, 5, 16, f"{S['cloth']}_wool")
+        self.set(kx, 9, zf + 9, self.S["light"], hanging=True)
         # long hangings down the keep's faces
         for t in (-9, 9):
             for side in ("s", "n", "e", "w"):
@@ -343,16 +487,16 @@ class Citadel:
                     elif side == "n": x, z = kx + t + k, kz - H - 1
                     elif side == "e": x, z = kx + H + 1, kz + t + k
                     else: x, z = kx - H - 1, kz + t + k
-                    self.col(x, z, 22, 46, "red_wool")
+                    self.col(x, z, 22, 46, f"{S['cloth']}_wool")
         # the throne hall: two rows of columns, the carpet, the dais and the throne at the north end
         for dz in range(-H + 3, H - 2, 6):
             for sx in (-8, 8):
                 self.col(kx + sx, kz + dz, 1, 12, S["stone"])
                 self.set(kx + sx, 12, kz + dz, S["band"])
-        for dz in range(-H + 6, H - 1): self.set(kx, 1, kz + dz, "red_carpet"); self.set(kx - 1, 1, kz + dz, "red_carpet"); self.set(kx + 1, 1, kz + dz, "red_carpet")
+        for dz in range(-H + 6, H - 1): self.set(kx, 1, kz + dz, f"{self.S['cloth']}_carpet"); self.set(kx - 1, 1, kz + dz, f"{self.S['cloth']}_carpet"); self.set(kx + 1, 1, kz + dz, f"{self.S['cloth']}_carpet")
         for dx in range(-5, 6):
             for dz in range(-H + 3, -H + 6):
-                self.set(kx + dx, 1, kz + dz, "gold_block" if abs(dx) == 5 or dz == -H + 5 else "quartz_block")
+                self.set(kx + dx, 1, kz + dz, S["dais"][0] if abs(dx) == 5 or dz == -H + 5 else S["dais"][1])
         self.set(kx, 2, kz - H + 4, "siege:throne")
         for dx in (-4, 4): self.set(kx + dx, 2, kz - H + 4, "siege:brazier")
         # corner turrets, rising past the roof, ladders up the north-west one
@@ -382,7 +526,11 @@ class Citadel:
                     self.set(x, TOP + 12, z, S["tiles"]); self.set(x, TOP + 22, z, S["tiles"]); self.set(x, TOP + 30, z, S["tiles"])
                 if ring == CT + 1 and not (abs(dx) == CT + 1 and abs(dz) == CT + 1):
                     self.set(x, TOP + 30, z, S["corbel"], facing=OPP[outward(dx, dz)], half="top")
-        self.cone(kx, TOP + 31, kz - 6, 9.5, 19)
+        if S["keep_roof"] == "dome":                           # a dome on the central tower (Saltreach copper, Emberwaste teal)
+            self.cone(kx, TOP + 31, kz - 6, 7.5, 0, mat=S["keep_roof_mat"] or S["roof"], dome=True)
+        else:
+            k = S["cone_k"] / 1.6
+            self.cone(kx, TOP + 31, kz - 6, 9.5, int(round(19 * k)), mat=S["keep_roof_mat"])
         # into the central tower from the roof: a door on its south face, a ladder up its north wall
         for y in range(TOP + 1, TOP + 4): self.set(kx, y, kz - 6 + CT, "air")
         self.col(kx, kz - 6 - CT + 1, TOP + 1, TOP + 29, "ladder", facing="s")
@@ -425,7 +573,7 @@ class Citadel:
             if free(x, y, z): bp.set(x, y, z, n, **p)
         def ceiling_lights(y):
             for dx in range(-I + 3, I - 1, 6):
-                for dz in range(-I + 3, I - 1, 6): put(kx + dx, y, kz + dz, "lantern", hanging=True)
+                for dz in range(-I + 3, I - 1, 6): put(kx + dx, y, kz + dz, self.S["light"], hanging=True)
         f1, f2, f3, f4 = KEEP_FLOORS
         # ground floor: lanterns over the throne hall
         ceiling_lights(f1 - 1)
@@ -440,7 +588,7 @@ class Citadel:
             put(x, y, kz - 9, f"{dark}_fence"); bp.set(x, y + 1, kz - 9, f"{dark}_slab", half="bottom")
             if x % 2 == 0: put(x, y, kz - 10, f"{dark}_stairs", facing="s")
         F.hearth(bp, kx + I, y, kz, "w")
-        for z in range(kz - 6, kz + 9): put(kx, y - 0, z, "red_carpet")
+        for z in range(kz - 6, kz + 9): put(kx, y - 0, z, f"{self.S['cloth']}_carpet")
         ceiling_lights(f2 - 1)
         # 2. the ruler's chambers: bedchamber to the north, solar to the south, a wall with a door between
         y = f2 + 1
@@ -449,9 +597,9 @@ class Citadel:
         for yy in (y, y + 1): bp.set(kx, yy, kz, "air"); bp.set(kx - 1, yy, kz, f"{w}_planks"); bp.set(kx + 1, yy, kz, f"{w}_planks")
         bp.set(kx, y, kz, f"{w}_door", facing="s"); bp.set(kx, y + 1, kz, f"{w}_door", facing="s", upper=True)
         for x in range(kx - 3, kx + 4):
-            for z in range(kz - 9, kz - 3): put(x, y, z, "red_carpet")
+            for z in range(kz - 9, kz - 3): put(x, y, z, f"{self.S['cloth']}_carpet")
         F.bed(bp, kx, y, kz - I, "n") if free(kx, y, kz - I) and free(kx, y, kz - I + 1) else None
-        for ox in (-2, 2): put(kx + ox, y, kz - I, "barrel"); put(kx + ox, y + 1, kz - I, "lantern")
+        for ox in (-2, 2): put(kx + ox, y, kz - I, "barrel"); put(kx + ox, y + 1, kz - I, self.S["light"])
         for z in range(kz - 8, kz - 2, 2): put(kx + I, y, z, "chest", facing="w"); put(kx - I + 5, y, z, "barrel")
         F.hearth(bp, kx - I, y, kz - 5, "e")
         for x in range(kx - I, kx + I + 1):                  # the solar: bookshelves round the walls, a desk, a lectern
@@ -472,7 +620,7 @@ class Citadel:
                 put(x, y, z, "chest", facing="e" if x == kx - I else "w"); put(x, y + 1, z, "barrel")
         for x in range(kx - 9, kx - 3):
             for z in range(kz - 2, kz + 3): put(x, y, z, "gold_block" if (x + z) % 3 == 0 else "air")
-        put(kx - 6, y + 1, kz, "lantern")
+        put(kx - 6, y + 1, kz, self.S["light"])
         for z in range(kz - I + 1, kz + I, 3):
             put(kx + I, y, z, "barrel"); put(kx + I, y + 1, z, "barrel")
         for z, n in ((kz - 6, "anvil"), (kz - 3, "grindstone"), (kz, "smithing_table"), (kz + 3, "anvil"), (kz + 6, "grindstone")):
@@ -523,7 +671,10 @@ class Citadel:
     def lamp(self, x, z):
         w = self.S["wood"]
         if self.bp.get(x, 1, z)[0] not in ("keep", "air"): return
-        self.set(x, 1, z, self.S["wallcap"]); self.set(x, 2, z, f"{w}_fence"); self.set(x, 3, z, f"{w}_fence"); self.set(x, 4, z, "lantern")
+        self.set(x, 1, z, self.S["wallcap"]); self.set(x, 2, z, f"{w}_fence"); self.set(x, 3, z, f"{w}_fence")
+        if self.S["lamp_top"]:                                # Blackfen: a froglight in an iron-bar cage
+            self.set(x, 4, z, "iron_bars"); self.set(x, 5, z, self.S["lamp_top"]); self.set(x, 6, z, self.S["slab"])
+        else: self.set(x, 4, z, self.S["light"])
 
     def blocked(self, x0, z0, x1, z1, margin=1):
         """True if a plot rectangle hits a wall, a tower, the keep, a street or another plot."""
@@ -604,6 +755,12 @@ class Citadel:
         self.trees.append({"x": x, "z": z, "species": name, "size": size})
         return True
 
+    def plant(self, x, z, n):
+        """A plant, bush or hedge block on the ground; leaves are kept from decaying."""
+        if n == "air": return
+        if n.endswith("_leaves") or n.startswith("azalea_leaves"): self.set(x, 1, z, n, raw={"persistent_bit": True})
+        else: self.set(x, 1, z, n)
+
     def free(self, x, z):
         """Inside the walls, nothing built, paved or planned here."""
         if (x, z) in self.street or (x, z) in self.taken: return False
@@ -645,16 +802,17 @@ class Citadel:
             # beside a plot or a wall: a hedge, a bush or a bed of flowers
             near_plot = any((x + dx, z + dz) in self.taken for dx in (-1, 0, 1) for dz in (-1, 0, 1))
             if near_plot:
-                if r < 0.55: self.set(x, 1, z, S["hedge"], raw={"persistent_bit": True})
+                if r < 0.55: self.plant(x, z, S["hedge"])
                 elif r < 0.85: self.set(x, 1, z, S["flowers"][int(r * 997) % len(S["flowers"])])
-                else: self.set(x, 0, z, "grass_block"); self.set(x, 1, z, "short_grass")
-            elif r < 0.12: self.set(x, 1, z, S["bush"][int(r * 997) % len(S["bush"])], raw={"persistent_bit": True})
-            elif r < 0.38: self.set(x, 0, z, "grass_block"); self.set(x, 1, z, S["flowers"][int(r * 997) % len(S["flowers"])])
-            elif r < 0.62: self.set(x, 0, z, "grass_block"); self.set(x, 1, z, "short_grass")
-            elif r < 0.66: self.set(x, 0, z, "grass_block"); self.set(x, 1, z, "fern")
+                else: self.set(x, 0, z, S["ground"]); self.plant(x, z, S["cover"][0])
+            elif r < 0.12: self.plant(x, z, S["bush"][int(r * 997) % len(S["bush"])])
+            elif r < 0.38: self.set(x, 0, z, S["ground"]); self.plant(x, z, S["flowers"][int(r * 997) % len(S["flowers"])])
+            elif r < 0.66: self.set(x, 0, z, S["ground"]); self.plant(x, z, S["cover"][int(r * 991) % len(S["cover"])])
         # lanterns on posts in the bigger open patches, so the corners are lit at night
         for x, z in spots[::37]:
-            if self.bp.get(x, 1, z)[0] in ("keep", "short_grass", "fern") and roomy(x, z, 1): self.lamp(x, z)
+            if self.bp.get(x, 1, z)[0] in ("keep", "air") + tuple(S["cover"]) and roomy(x, z, 1):
+                if self.bp.get(x, 1, z)[0] != "keep": del self.bp.cells[(x, 1, z)]
+                self.lamp(x, z)
 
     # ---- the inner ward: ranges against the curtain, the garden round the keep -----------------------
     def inner_ward(self):
@@ -683,8 +841,8 @@ class Citadel:
             for z in range(-face + 1, kz - H - 5):
                 if self.bp.get(x, 1, z)[0] != "keep": continue
                 if x % 4 == 0: self.set(x, 0, z, pick(S["lane"], x, z, 3)); continue
-                if x % 4 == 2 and z % 4 == 0: self.set(x, 0, z, "water"); continue
-                self.set(x, 0, z, "farmland"); self.set(x, 1, z, S["crops"][(x // 4) % len(S["crops"])])
+                if x % 4 == 2 and z % 4 == 0 and S["field_water"]: self.set(x, 0, z, "water"); continue
+                self.set(x, 0, z, S["field_soil"]); self.set(x, 1, z, S["crops"][(x // 4) % len(S["crops"])])
                 self.taken.add((x, z))
         # parterres either side of the court: box hedges round gravel beds, a fountain in the middle
         cz0, cz1 = kz + H + 10, INNER - 12
@@ -697,10 +855,10 @@ class Citadel:
                     edge = x in (xa, xb) or z in (cz0, cz1)
                     cross = x == mx or z == mz
                     if edge or (abs(x - mx) == 3 and abs(z - mz) <= 3) or (abs(z - mz) == 3 and abs(x - mx) <= 3):
-                        self.set(x, 0, z, "grass_block"); self.set(x, 1, z, S["hedge"], raw={"persistent_bit": True})
-                    elif cross: self.set(x, 0, z, "gravel")
+                        self.set(x, 0, z, S["ground"]); self.plant(x, z, S["hedge"])
+                    elif cross: self.set(x, 0, z, S["gravel"])
                     else:
-                        self.set(x, 0, z, "grass_block")
+                        self.set(x, 0, z, S["ground"])
                         if (x + z) % 2 == 0: self.set(x, 1, z, S["flowers"][(x * 7 + z * 3) % len(S["flowers"])])
                     self.taken.add((x, z))
             # the fountain: a basin of stone with water and a spout
@@ -736,7 +894,17 @@ class Citadel:
             if (z - z0) % 8 == 2:
                 self.set(inner_x, 1, z, S["door"], facing="w" if sx > 0 else "e")
                 self.set(inner_x, 2, z, S["door"], facing="w" if sx > 0 else "e", upper=True)
-                self.set(inner_x, 3, z, "lantern" if False else S["pane"])
+                self.set(inner_x, 3, z, self.S["light"] if False else S["pane"])
+        if S["range_flat"]:                                    # Emberwaste: a flat roof terrace, a slab parapet, beams below
+            for a in range(a0 - 1, a1 + 1):
+                for z in range(z0 - 1, z1 + 2):
+                    self.set(sx * a, 10, z, S["smooth"])
+                    if a == a0 - 1 or z in (z0 - 1, z1 + 1): self.set(sx * a, 11, z, S["slab"])
+            for z in range(z0, z1 + 1, 2): self.set(sx * (a0 - 2), 9, z, "spruce_log", axis="x")
+            for a in range(a0, a1 + 1):
+                for z in (z0, z1): self.set(sx * a, 9, z, S["infill"])
+            self.ranges = getattr(self, "ranges", []) + [{"side": sx, "z0": z0, "z1": z1}]
+            return
         # the lean-to roof: from the ward face (low) up to the curtain (high)
         span = a1 - a0 + 2
         for k in range(span + 1):
@@ -753,7 +921,7 @@ class Citadel:
         """Outside the walls: fields in strips out to the edge of the plot, each strip its own crop,
         watered every ninth row, a farm track round the wall's foot and hedges between the strips."""
         S = self.S
-        CROPS = [("wheat", {}), ("carrots", {}), ("potatoes", {}), ("wheat", {}), ("beetroot", {})]
+        CROPS = [(c, {}) for c in S["crops"]]
         a = AVENUE_W // 2
         n = 0
         for x in range(-FARM_TO, FARM_TO + 1):
@@ -768,11 +936,11 @@ class Citadel:
                 ang = (math.degrees(math.atan2(z, x)) + 360) % 360
                 strip = int(ang // 12)
                 if abs(ang - strip * 12) < 0.6 or abs(ang - (strip + 1) * 12) < 0.6:   # hedge between strips
-                    self.set(x, 0, z, "grass_block"); self.set(x, 1, z, "oak_leaves", raw={"persistent_bit": True}); continue
-                if (x % 9 == 0 and z % 3 == 0) or (z % 9 == 0 and x % 3 == 0 and False):
+                    self.set(x, 0, z, S["ground"]); self.plant(x, z, S["farm_hedge"]); continue
+                if S["field_water"] and x % 9 == 0 and z % 3 == 0:
                     self.set(x, 0, z, "water"); continue
                 crop, q = CROPS[strip % len(CROPS)]
-                self.set(x, 0, z, "farmland"); self.set(x, 1, z, crop, **q); n += 1
+                self.set(x, 0, z, S["field_soil"]); self.set(x, 1, z, crop, **q); n += 1
         self.fields.append({"cells": n})
 
     # ---- the whole thing -----------------------------------------------------------------------------
@@ -803,8 +971,33 @@ class Citadel:
         self.inner_ward()
         self.lay_plots()
         self.farmland()
+        self.weather()
         self.bp.finish()
         return self.bp
+
+    PARTIAL = ("_stairs", "_slab", "_wall", "_fence", "_pane", "lantern", "_door", "_carpet", "_trapdoor", "iron_bars",
+               "siege:", "ladder", "water", "farmland", "torch", "_leaves", "snow_layer", "grass", "fern", "bush",
+               "flower", "sapling", "chain", "_froglight", "mushroom", "orchid", "dead_bush", "cactus")
+
+    def weather(self):
+        """The region's weather on the finished stronghold: Frostmarch snow on every flat top (roof ridges,
+        wall walks, merlons, the ground), Blackfen moss creeping up the plinths and over the tops."""
+        S = self.S
+        if not (S["snow"] or S["moss"]): return
+        tops = {}
+        for (x, y, z), (n, q) in self.bp.cells.items():
+            if n in ("air", "keep"): continue
+            if y > tops.get((x, z), (-99,))[0]: tops[(x, z)] = (y, n, q)
+        for (x, z), (y, n, q) in tops.items():
+            full = not any(k in n for k in self.PARTIAL) or (n.endswith("_slab") and (q or {}).get("half") == "top")
+            if n.endswith("_slab") and (q or {}).get("half") == "top": full = True
+            r = h3(x, y, z, 87)
+            if S["snow"] and full and n != S["field_soil"] and n not in S["crops"]:
+                if y >= 1 or r < (0.35 if (x, z) in self.street else 0.75): self.set(x, y + 1, z, "snow_layer")
+            if S["moss"] and full and y >= 1 and r < 0.22: self.set(x, y + 1, z, "moss_carpet")
+        if S["moss"]:                                          # damp low: moss on the plinth courses
+            for (x, y, z), (n, q) in list(self.bp.cells.items()):
+                if n == S["plinth"] and 1 <= y <= 2 and h3(x, y, z, 89) < 0.3: self.bp.cells[(x, y, z)] = ("mossy_cobblestone", {})
 
     def summary(self):
         from collections import Counter
