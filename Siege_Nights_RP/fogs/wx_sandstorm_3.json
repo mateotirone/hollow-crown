@@ -1,0 +1,22 @@
+{
+  "format_version": "1.16.100",
+  "minecraft:fog_settings": {
+    "description": {
+      "identifier": "siege:wx_sandstorm_3"
+    },
+    "distance": {
+      "air": {
+        "fog_start": 0,
+        "fog_end": 18,
+        "fog_color": "#a8693a",
+        "render_distance_type": "fixed"
+      },
+      "weather": {
+        "fog_start": 0,
+        "fog_end": 18,
+        "fog_color": "#a8693a",
+        "render_distance_type": "fixed"
+      }
+    }
+  }
+}

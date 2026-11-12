@@ -68,6 +68,18 @@ const NAMED = {
   "cast.open": { what: "The magic hotbar opens", drift: 0.06, layers: [["chime.amethyst_block", 1.2, 0.5], ["item.book.page_turn", 0.7, 0.4, 1]] },
   "cast.close": { what: "The magic hotbar closes", drift: 0.06, layers: [["chime.amethyst_block", 0.8, 0.4], ["item.book.page_turn", 0.6, 0.4, 1]] },
   "horn.assault": { what: "Another assault is coming", layers: [["raid.horn", 0.85, 0.8], ["raid.horn", 0.64, 0.35, 5]] },
+  // each region's weather (weather/): low, far off, never sudden
+  "wx.gust": { what: "A gust of wind", drift: 0.12, layers: [["elytra.loop", 0.55, 0.35], ["ambient.weather.rain", 0.5, 0.15, 6]] },
+  "wx.spray": { what: "Sea spray on the wind", drift: 0.1, layers: [["random.splash", 0.6, 0.25], ["ambient.weather.rain", 0.8, 0.2, 2]] },
+  "wx.buoy_bell": { what: "A bell out in the sea fret", drift: 0.03, layers: [["block.bell.hit", 0.45, 0.22], ["block.bell.hit", 0.42, 0.08, 30]] },
+  "wx.drip": { what: "Water dripping in the fog", drift: 0.15, layers: [["cauldron.drip.water.pointed_dripstone", 0.8, 0.5], ["cauldron.drip.water.pointed_dripstone", 0.7, 0.3, 14]] },
+  "wx.sand_hiss": { what: "Sand hissing past", drift: 0.1, layers: [["dig.sand", 0.5, 0.3], ["ambient.weather.rain", 1.3, 0.25], ["dig.sand", 0.45, 0.2, 5]] },
+  "wx.cold_wind": { what: "Cold wind over snow", drift: 0.1, layers: [["elytra.loop", 0.45, 0.3], ["step.snow", 0.6, 0.15, 10]] },
+  "wx.howl": { what: "The blizzard howling", drift: 0.08, layers: [["elytra.loop", 0.4, 0.45], ["mob.wolf.whine", 0.5, 0.06, 12]] },
+  "wx.fen_croak": { what: "Something croaking in the fen", drift: 0.15, layers: [["mob.frog.ambient", 0.6, 0.4], ["mob.frog.ambient", 0.5, 0.2, 12]] },
+  "wx.fen_splash": { what: "A splash somewhere out on the water", drift: 0.12, layers: [["random.splash", 0.45, 0.2], ["bubble.pop", 0.5, 0.25, 8]] },
+  "wx.fen_bell": { what: "A bell under the fen water", drift: 0.02, layers: [["block.bell.hit", 0.32, 0.12], ["bubble.pop", 0.4, 0.2, 10]] },
+  "wx.marsh_hum": { what: "A hum where the marsh lights are", drift: 0.05, layers: [["beacon.ambient", 0.5, 0.15], ["chime.amethyst_block", 0.4, 0.1, 20]] },
 };
 
 // ---------- Vanilla sounds, reworked wherever the scripts play them ----------

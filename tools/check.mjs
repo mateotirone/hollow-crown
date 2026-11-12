@@ -385,6 +385,8 @@ step("Sounds");
   }
   const listed = spawnSync(process.execPath, [join(TOOLS, "sound-list.mjs"), "--check"]);
   if (listed.status !== 0) fail("SOUND-LIST.md is out of date: run  node tools/sound-list.mjs");
+  const weather = spawnSync(process.execPath, [join(TOOLS, "weather_assets.mjs"), "--check"]);
+  if (weather.status !== 0) fail("the weather fogs and particles are out of date: run  node tools/weather_assets.mjs");
   console.log(`${Object.keys(defs).length} custom sounds defined, ${installed} recordings installed, ${direct} direct playSound calls`);
 }
 
