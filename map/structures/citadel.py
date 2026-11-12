@@ -27,19 +27,20 @@ from bp import Blueprint
 import engine
 
 # ---- the plan, in numbers ------------------------------------------------------------------------------
-OUTER = 115          # outer curtain: outer face this far out on the axes
-CHAMFER = 35         # corners cut off: the diagonal faces
+OUTER = 67           # outer curtain: outer face this far out on the axes, on the old Castle wall line (r66)
+CHAMFER = 27         # corners cut off: the diagonal faces
 WALL_T = 5           # curtain thickness
-OUTER_WALK = 17      # wall walk level (top of the solid wall)
-INNER = 57           # inner curtain outer face
-INNER_WALK = 23
-RING = 85            # the ring street's middle line (a square loop through the bailey)
+OUTER_WALK = 15      # wall walk level (top of the solid wall)
+INNER = 35           # inner curtain outer face
+INNER_WALK = 21
+RING = 40            # the ring street's middle line (a square loop round the inner curtain)
 RING_W = 5
 AVENUE_W = 7         # the gate avenue
-KEEP = (0, -15)      # middle of the Great Keep
-KEEP_HALF = 18       # 37 x 37
-KEEP_TOP = 51        # roof level of the keep walls
-KEEP_FLOORS = [13, 23, 33, 43]
+KEEP = (0, -8)       # middle of the Great Keep
+KEEP_HALF = 15       # 31 x 31
+KEEP_TOP = 45        # roof level of the keep walls
+KEEP_FLOORS = [12, 21, 30, 39]
+FARM_TO = 100        # farmland runs from the foot of the outer wall out over the plot's edge (MAP.plotRadius is 80)
 DIAG = 2 * OUTER - CHAMFER   # |x| + |z| <= DIAG on the diagonal faces
 
 STYLES = {
@@ -191,7 +192,7 @@ class Citadel:
                     self.set(x, walk, z, S["tiles"])
 
     # ---- gatehouses ----------------------------------------------------------------------------------
-    def gatehouse(self, zf, zb, half, top, tower_r, tower_h, walk, name, barbican=0):
+    def gatehouse(self, zf, zb, half, top, tower_r, tower_h, walk, name, barbican=0, tower_back=3):
         """A gate passage 7 wide along z from zb (inner) to zf (outer), its block |x| <= half, two
         round towers on the outer corners, portcullises at both ends, a pointed arch 11 high."""
         S = self.S
@@ -220,10 +221,10 @@ class Citadel:
         for x in range(-half + 1, half):
             if abs(x) <= 4: self.set(x, 18, zf, "siege:arrow_slit") if x % 2 == 0 else None
         for sx in (-1, 1):
-            self.tower(sx * (half + 2), zf - 3, tower_r, tower_h, walks=(walk,), name=f"{name} tower")
+            self.tower(sx * (half + 2), zf - tower_back, tower_r, tower_h, walks=(walk,), name=f"{name} tower")
             for k in (-1, 0, 1):
                 tx = sx * (half + 2) + k
-                tz = zf - 3 + int(tower_r) + 1
+                tz = zf - tower_back + int(tower_r) + 1
                 for y in range(9, tower_h - 4): self.set(tx, y, tz, "red_wool")
         # a brazier either side of the gate and a lantern in the arch
         for sx in (-5, 5): self.set(sx, top + 1, zf, "siege:brazier")
@@ -329,7 +330,7 @@ class Citadel:
         # corner turrets, rising past the roof, ladders up the north-west one
         for sx in (-1, 1):
             for sz in (-1, 1):
-                self.tower(kx + sx * H, kz + sz * H, 5.5, TOP + 8, walks=(TOP,), name="keep turret")
+                self.tower(kx + sx * H, kz + sz * H, 4.5, TOP + 8, walks=(TOP,), name="keep turret")
         self.col(kx - H + 3, kz - H + 3, 1, TOP, "ladder", facing="s")
         # the central tower: 15 x 15, up to 73, a cone roof and the tallest spire in the land
         CT = 7
@@ -355,181 +356,159 @@ class Citadel:
 
     # ---- streets, plots, fields ----------------------------------------------------------------------
     def ground(self):
-        """Streets and squares, paved in the style's street mix; lanterns on posts along them."""
+        """Streets and the court, paved in the style's street mix; lanterns on posts along them."""
         S = self.S
         self.street = set()
         def pave(x, z, table=None, seed=3):
             self.set(x, 0, z, pick(table or S["street"], x, z, seed)); self.street.add((x, z))
         h = RING_W // 2
-        # the ring street (a square loop), clipped by nothing: it runs inside the outer wall everywhere
+        # the ring street: a square loop hugging the inner curtain
         for t in range(-RING - h, RING + h + 1):
             for w in range(RING - h, RING + h + 1):
                 for x, z in ((t, w), (t, -w), (w, t), (-w, t)):
-                    pave(x, z)
-        # the gate avenue, inner gate to outer gate, and lanes from the inner towers out to the outer towers
+                    if d_inner(x, z) < 0: pave(x, z)
+        # the gate avenue, inner gate to outer gate, then on out through the barbican and the fields
         a = AVENUE_W // 2
-        for z in range(INNER + 8, OUTER - 4):
+        for z in range(INNER + 1, FARM_TO + 6):
             for x in range(-a, a + 1): pave(x, z)
-        for x in range(-a, a + 1):                               # through the barbican to the outside road
-            for z in range(OUTER, OUTER + 50): pave(x, z)
-        for t in range(INNER + 9, OUTER - 7):
-            for w in (-1, 0, 1):
-                pave(t, w, S["lane"]); pave(-t, w, S["lane"]); pave(w, -t, S["lane"])
-        # the market square by the gate: 31 wide, 13 deep, a market cross in the middle
-        for x in range(-15, 16):
-            for z in range(RING + h + 1, RING + h + 14):
-                pave(x, z, seed=5)
-        mz = RING + h + 7
-        for y in range(1, 4): self.set(0, y, mz, self.S["stone"])
-        self.set(0, 4, mz, self.S["wallcap"]); self.set(0, 5, mz, "lantern")
-        for dx in (-1, 0, 1):
-            for dz in (-1, 0, 1):
-                if dx or dz: self.set(dx, 1, mz + dz, self.S["slab"])
-        # the inner ward: the processional way, the court, lawns either side
-        for z in range(KEEP[1] + KEEP_HALF + 10, INNER + 1):
-            for x in range(-4, 5):
-                self.set(x, 0, z, S["court"] if abs(x) <= 2 else S["court2"]); self.street.add((x, z))
-        for x in range(-13, 14):                                  # the court before the keep's door
-            for z in range(KEEP[1] + KEEP_HALF + 10, KEEP[1] + KEEP_HALF + 23):
+        # the inner ward: the court before the keep's door
+        kz = KEEP[1] + KEEP_HALF + 10
+        for x in range(-13, 14):
+            for z in range(kz, INNER - 11):
                 self.set(x, 0, z, S["court"] if (x + z) % 2 else S["court2"]); self.street.add((x, z))
-        for z in range(KEEP[1] + KEEP_HALF + 26, INNER - 6, 6):   # braziers lining the way
-            for sx in (-6, 6):
-                self.set(sx, 1, z, S["stone"]); self.set(sx, 2, z, "siege:brazier")
-        # lanterns on posts along the ring street, both kerbs, every 12
-        for t in range(-RING + 6, RING - 5, 12):
-            for w in (RING - h - 1, RING + h + 1):
-                for x, z in ((t, w), (t, -w), (w, t), (-w, t)):
-                    if abs(x) <= a + 1 and z > 0: continue
-                    self.lamp(x, z)
+        for sx in (-12, 12):
+            self.set(sx, 1, kz + 2, S["stone"]); self.set(sx, 2, kz + 2, "siege:brazier")
+        # lanterns on posts along the ring street's outer kerb, every 8
+        for t in range(-RING + 4, RING - 3, 8):
+            w = RING + h + 1
+            for x, z in ((t, w), (t, -w), (w, t), (-w, t)):
+                if abs(x) <= a + 1 and z > 0: continue
+                self.lamp(x, z)
 
     def lamp(self, x, z):
         w = self.S["wood"]
         if self.bp.get(x, 1, z)[0] not in ("keep", "air"): return
         self.set(x, 1, z, self.S["wallcap"]); self.set(x, 2, z, f"{w}_fence"); self.set(x, 3, z, f"{w}_fence"); self.set(x, 4, z, "lantern")
 
-    def blocked(self, x0, z0, x1, z1, margin=2):
+    def blocked(self, x0, z0, x1, z1, margin=1):
         """True if a plot rectangle hits a wall, a tower, the keep, a street or another plot."""
         for x in range(x0 - margin, x1 + margin + 1):
             for z in range(z0 - margin, z1 + margin + 1):
-                if d_outer(x, z) < WALL_T + 3: return True
-                if -3 - 0 <= d_inner(x, z) < WALL_T + 3 and abs(x) <= INNER + 3 and abs(z) <= INNER + 3: return True
-                if (x, z) in self.street and x0 <= x <= x1 and z0 <= z <= z1: return True
-                if (x, z) in self.taken: return True
+                if d_outer(x, z) < WALL_T + 1: return True
+                if d_inner(x, z) >= -1: return True
+                if (x, z) in self.street or (x, z) in self.taken: return True
         for t in self.towers:
             cx, cz = min(max(t["x"], x0), x1), min(max(t["z"], z0), z1)
-            if math.hypot(cx - t["x"], cz - t["z"]) <= t["r"] + margin + 1: return True
+            if math.hypot(cx - t["x"], cz - t["z"]) <= t["r"] + margin + 0.5: return True
         return False
 
     def plot(self, size, x0, z0, w, d, door, where):
         x1, z1 = x0 + w - 1, z0 + d - 1
         if self.blocked(x0, z0, x1, z1): return False
-        for x in range(x0 - 1, x1 + 2):
-            for z in range(z0 - 1, z1 + 2): self.taken.add((x, z))
+        for x in range(x0, x1 + 1):
+            for z in range(z0, z1 + 1): self.taken.add((x, z))
         S = self.S
-        # the plot: corner stones flush with the grass, a marker post at the front corner, a path to the street
         for x in range(x0, x1 + 1):                            # the plot's edge, a path you can see from the walls
             for z in range(z0, z1 + 1):
                 if x in (x0, x1) or z in (z0, z1): self.set(x, 0, z, pick(S["lane"], x, z, 11))
         for x, z in ((x0, z0), (x1, z0), (x0, z1), (x1, z1)): self.set(x, 0, z, S["court"])
-        fx, fz = {"s": (x0, z1 + 1), "n": (x1, z0 - 1), "e": (x1 + 1, z1), "w": (x0 - 1, z0)}[door]
-        self.set(fx, 1, fz, "siege:castle_cobbled"); self.set(fx, 2, fz, f"{S['wood']}_fence"); self.set(fx, 3, fz, "lantern")
-        mx, mz = (x0 + x1) // 2, (z0 + z1) // 2
-        step = {"s": (0, 1), "n": (0, -1), "e": (1, 0), "w": (-1, 0)}[door]
-        px, pz = {"s": (mx, z1 + 1), "n": (mx, z0 - 1), "e": (x1 + 1, mz), "w": (x0 - 1, mz)}[door]
-        for _ in range(8):
-            if (px, pz) in self.street: break
-            for k in (-1, 0, 1):
-                qx, qz = px + (k if step[1] else 0), pz + (k if step[0] else 0)
-                self.set(qx, 0, qz, pick(S["lane"], qx, qz, 9))
-            px, pz = px + step[0], pz + step[1]
         self.plots.append({"size": size, "x0": x0, "z0": z0, "x1": x1, "z1": z1, "door": door, "where": where})
         return True
 
     def lay_plots(self):
+        """One row of plots on each side of the bailey, packed a block apart, doors onto the ring street."""
         self.taken = set()
-        SIZES = {"S": (9, 13), "M": (11, 15), "L": (15, 15), "G": (21, 21)}
+        SIZES = {"S": (9, 13), "M": (11, 15), "L": (15, 15)}
         h = RING_W // 2
-        # the inner ward first: two Great plots by the court, two Large plots by the keep, the garden behind
-        for sx in (-1, 1):
-            x0 = 26 if sx > 0 else -26 - 20
-            self.plot("G", x0, 22, 21, 21, "w" if sx > 0 else "e", "inner ward")
-            x0 = 30 if sx > 0 else -30 - 14
-            self.plot("L", x0, -20, 15, 15, "w" if sx > 0 else "e", "inner ward")
-        for x in range(-17, 18):                                 # the walled garden behind the keep
-            for z in range(-INNER + 7, KEEP[1] - KEEP_HALF - 3):
-                edge = abs(x) == 17 or z == -INNER + 7
-                if edge:
-                    self.set(x, 1, z, self.S["smooth"]); self.set(x, 2, z, self.S["wallcap"])
-                else:
-                    self.set(x, 0, z, "grass_block")
-                    if (x % 4 == 0 and z % 4 == 0): self.set(x, 1, z, "azalea_leaves_flowered")
-                    elif abs(x) == 8 or z == -INNER + 14: self.set(x, 0, z, pick(self.S["lane"], x, z))
-                self.taken.add((x, z))
-        # the bailey: rows either side of the ring street on each of the four sides, doors to the street
-        rows = []
-        for side in ("s", "n", "e", "w"):
-            rows.append((side, "inner", RING - h - 2))   # plots just inside the ring street, back toward the inner wall
-            rows.append((side, "outer", RING + h + 2))   # plots just outside it, back toward the outer wall
-        pattern = ["M", "S", "S", "L", "S", "M", "S", "G", "S", "M", "L", "S"]
+        front = RING + h + 2                                   # first plot row starts here (one block of kerb)
+        order = ["S","M","M","L","S","M","S","S","M","L"]
         k = 0
-        for side, row, edge in rows:
-            for t in range(-RING + 3, RING - 2):
-                size = pattern[k % len(pattern)]
-                if row == "inner" and size == "G": size = "M"
-                w, d = SIZES[size]
-                # the plot along the row: front edge on the street side, starting at t
-                if side == "s":
-                    x0 = t; z0 = edge - d + 1 if row == "inner" else edge; door = "s" if row == "inner" else "n"; ww, dd = w, d
-                elif side == "n":
-                    x0 = t; z0 = -edge if row == "inner" else -edge - d + 1; door = "n" if row == "inner" else "s"; ww, dd = w, d
-                elif side == "e":
-                    z0 = t; x0 = edge - d + 1 if row == "inner" else edge; door = "e" if row == "inner" else "w"; ww, dd = d, w
-                else:
-                    z0 = t; x0 = -edge if row == "inner" else -edge - d + 1; door = "w" if row == "inner" else "e"; ww, dd = d, w
-                if self.plot(size, x0, z0, ww, dd, door, f"{side} {row}"): k += 1
-        # the corners of the bailey, where the outer wall cuts across: fields for the farms
-        for sx in (-1, 1):
-            for sz in (-1, 1):
-                n = 0
-                for ax in range(58, OUTER):
-                    for az in range(58, OUTER):
-                        x, z = sx * ax, sz * az
-                        if (x, z) in self.taken or (x, z) in self.street or d_outer(x, z) < WALL_T + 3: continue
-                        if ax <= INNER + 8 and az <= INNER + 8: continue
-                        if min(ax, az) < 66: continue
-                        if any(math.hypot(x - t["x"], z - t["z"]) <= t["r"] + 3 for t in self.towers): continue
-                        if ax % 9 == 4 and az % 2 == 0 and False: pass
-                        if (ax if ax > az else az) % 9 == 0: self.set(x, 0, z, "water")
-                        else: self.set(x, 0, z, "farmland"); self.set(x, 1, z, "wheat")
-                        n += 1
-                if n: self.fields.append({"cells": n, "corner": [sx, sz]})
+        for side in ("s", "e", "n", "w"):
+            t = -OUTER
+            while t <= OUTER:
+                placed = False
+                for j in range(3):
+                    size = order[(k + j) % len(order)] if j == 0 else ("S" if j == 1 else "M")
+                    w, d = SIZES[size]
+                    if side == "s": x0, z0, ww, dd, door = t, front, w, d, "n"
+                    elif side == "n": x0, z0, ww, dd, door = t, -front - d + 1, w, d, "s"
+                    elif side == "e": x0, z0, ww, dd, door = front, t, d, w, "w"
+                    else: x0, z0, ww, dd, door = -front - d + 1, t, d, w, "e"
+                    if self.plot(size, x0, z0, ww, dd, door, f"{side} row"):
+                        t += w + 1; k += 1; placed = True; break
+                if not placed: t += 1
+        self.gardens()
+
+    def gardens(self):
+        """Ground no plot or street takes inside the walls becomes garden: lawn, flower beds and clipped
+        bushes, lanterns, so nothing inside the Citadel is bare."""
+        S = self.S
+        FLOWERS = ["poppy", "cornflower", "oxeye_daisy", "allium", "azure_bluet", "red_tulip", "white_tulip"]
+        for x in range(-OUTER, OUTER + 1):
+            for z in range(-OUTER, OUTER + 1):
+                if d_outer(x, z) < WALL_T or (x, z) in self.street or (x, z) in self.taken: continue
+                if self.bp.get(x, 1, z)[0] != "keep" or self.bp.get(x, 0, z)[0] != "keep": continue
+                if any(math.hypot(x - t["x"], z - t["z"]) <= t["r"] + 0.5 for t in self.towers): continue
+                kx0, kz0, kx1, kz1 = self.keep_box
+                if kx0 - 1 <= x <= kx1 + 1 and kz0 - 1 <= z <= kz1 + 1: continue
+                if d_inner(x, z) >= 0 and d_inner(x, z) < WALL_T: continue
+                r = h3(x, 0, z, 41)
+                if x % 6 == 0 and z % 6 == 0: self.set(x, 1, z, "azalea_leaves_flowered" if r < 0.5 else "azalea_leaves")
+                elif (x + z) % 4 == 0 and r < 0.45: self.set(x, 1, z, FLOWERS[int(r * 100) % len(FLOWERS)])
+                elif r < 0.04: self.set(x, 1, z, "short_grass")
+
+    def farmland(self):
+        """Outside the walls: fields in strips out to the edge of the plot, each strip its own crop,
+        watered every ninth row, a farm track round the wall's foot and hedges between the strips."""
+        S = self.S
+        CROPS = [("wheat", {}), ("carrots", {}), ("potatoes", {}), ("wheat", {}), ("beetroot", {})]
+        a = AVENUE_W // 2
+        n = 0
+        for x in range(-FARM_TO, FARM_TO + 1):
+            for z in range(-FARM_TO, FARM_TO + 1):
+                if math.hypot(x, z) > FARM_TO: continue
+                d = d_outer(x, z)
+                if d >= -2: continue
+                if (x, z) in self.street or self.bp.get(x, 1, z)[0] != "keep": continue
+                if any(math.hypot(x - t["x"], z - t["z"]) <= t["r"] + 1 for t in self.towers): continue
+                if -6 <= d < -2:                               # the track round the wall's foot
+                    self.set(x, 0, z, pick(S["lane"], x, z, 13)); continue
+                ang = (math.degrees(math.atan2(z, x)) + 360) % 360
+                strip = int(ang // 12)
+                if abs(ang - strip * 12) < 0.6 or abs(ang - (strip + 1) * 12) < 0.6:   # hedge between strips
+                    self.set(x, 0, z, "grass_block"); self.set(x, 1, z, "oak_leaves", raw={"persistent_bit": True}); continue
+                if (x % 9 == 0 and z % 3 == 0) or (z % 9 == 0 and x % 3 == 0 and False):
+                    self.set(x, 0, z, "water"); continue
+                crop, q = CROPS[strip % len(CROPS)]
+                self.set(x, 0, z, "farmland"); self.set(x, 1, z, crop, **q); n += 1
+        self.fields.append({"cells": n})
 
     # ---- the whole thing -----------------------------------------------------------------------------
     def build(self):
         S = self.S
-        R = OUTER + 50
-        # outer curtain and its towers
-        self.curtain(d_outer, OUTER + 2, OUTER_WALK, 13)
-        verts = [(80, 115), (115, 80), (115, -80), (80, -115), (-80, -115), (-115, -80), (-115, 80), (-80, 115)]
+        # outer curtain on the old wall line, towers standing out from its face
+        self.curtain(d_outer, OUTER + 2, OUTER_WALK, 12)
+        v = OUTER - CHAMFER
+        verts = [(v, OUTER), (OUTER, v), (OUTER, -v), (v, -OUTER), (-v, -OUTER), (-OUTER, -v), (-OUTER, v), (-v, OUTER)]
         for vx, vz in verts:
-            self.tower(vx - (2 if vx > 0 else -2), vz - (2 if vz > 0 else -2), 10.5, 33, walks=(OUTER_WALK,), name="outer corner tower")
-        for side in ("n", "e", "w", "s"):
-            for t in ((-40, 0, 40) if side != "s" else (-48, 48)):
-                x, z = {"n": (t, -OUTER + 2), "s": (t, OUTER - 2), "e": (OUTER - 2, t), "w": (-OUTER + 2, t)}[side]
-                self.tower(x, z, 7.5 if t else 8.5, 25 if t else 29, walks=(OUTER_WALK,), door=OPP[side] if t == 0 else None, name="outer tower")
-        self.gatehouse(OUTER + 6, OUTER - 14, 11, 29, 9.5, 35, OUTER_WALK, "Great Gatehouse", barbican=19)
+            self.tower(vx - (1 if vx > 0 else -1), vz - (1 if vz > 0 else -1), 7.5, 27, walks=(OUTER_WALK,), name="outer corner tower")
+        for side in ("n", "e", "w"):
+            x, z = {"n": (0, -OUTER), "e": (OUTER, 0), "w": (-OUTER, 0)}[side]
+            self.tower(x, z, 6.5, 25, walks=(OUTER_WALK,), name="outer tower")
+        self.gatehouse(OUTER + 5, OUTER - 9, 9, 25, 7.5, 31, OUTER_WALK, "Great Gatehouse", barbican=11)
         # inner curtain and its towers
-        self.curtain(lambda x, z: d_inner(x, z), INNER + 2, INNER_WALK, 17)
+        self.curtain(lambda x, z: d_inner(x, z), INNER + 2, INNER_WALK, 15)
         for sx in (-1, 1):
             for sz in (-1, 1):
-                self.tower(sx * (INNER - 2), sz * (INNER - 2), 11.5, 43, walks=(INNER_WALK,), name="inner corner tower")
+                self.tower(sx * (INNER - 2), sz * (INNER - 2), 7.5, 35, walks=(INNER_WALK,), name="inner corner tower")
         for side in ("n", "e", "w"):
-            x, z = {"n": (0, -INNER + 2), "e": (INNER - 2, 0), "w": (-INNER + 2, 0)}[side]
-            self.tower(x, z, 8.5, 35, walks=(INNER_WALK,), door=side, name="inner tower")
-        self.gatehouse(INNER + 6, INNER - 12, 11, 33, 8.5, 39, INNER_WALK, "inner gatehouse")
+            x, z = {"n": (0, -INNER + 3), "e": (INNER - 3, 0), "w": (-INNER + 3, 0)}[side]
+            self.tower(x, z, 5.5, 31, walks=(INNER_WALK,), name="inner tower")
+        self.gatehouse(INNER + 1, INNER - 11, 9, 29, 5.5, 35, INNER_WALK, "inner gatehouse", tower_back=5)
         self.keep()
         self.ground()
         self.lay_plots()
+        self.farmland()
         self.bp.finish()
         return self.bp
 
@@ -564,7 +543,6 @@ class Citadel:
         self.filled = []
         for pl in self.plots:
             key = ("inner " + pl["size"]) if pl["where"] == "inner ward" and pl["size"] == "L" else pl["size"]
-            if pl["where"] == "s outer" and abs((pl["x0"] + pl["x1"]) // 2) < 40: key = "market"
             seq = CHOICE.get(key, ["market", "smithy", "market", "cottage"])
             i = count.get(key, 0); count[key] = i + 1
             deg = turn[pl["door"]]
