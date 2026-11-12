@@ -1022,14 +1022,36 @@ class Town:
         def ground(x, z):
             if not self.ok(x, z): return int(self.WL.max()) - 2
             i, j = self.ij(x, z); return int(self.G0[i, j])
-        water = lambda x, z: int(self.WL[self.ij(x, z)])
-        self.bridge_plans = []
-        for c in BR.crossings_from_cells(set(wet), walk, water, lambda c: wet[c], region=self.region, path="town"):
+        def water(x, z):
+            if not self.ok(x, z): return None
+            i, j = self.ij(x, z)
+            return int(self.WL[i, j]) if self.WL[i, j] > self.G0[i, j] else None
+        def is_path(x, z):
+            if not self.ok(x, z): return False
+            i, j = self.ij(x, z); return self.K[i, j] >= 0 and not self.WET[i, j]
+        self.bridge_plans, quays = [], []
+        for c in BR.crossings_from_cells(set(wet), walk, lambda x, z: water(x, z) if water(x, z) is not None else int(self.WL[self.ij(x, z)]),
+                                         lambda c: wet[c], region=self.region, path="town", rejects=quays):
+            c.pop("_cells", None)
             c["ground"] = ground; c["name"] = f"{self.key}_bridge{len(self.bridge_plans)}"
             for cell, b in BR.to_works(BR.bridge_blocks(c)).items():
                 if b[0] == "air" and cell in self.works and self.works[cell][0] != "air": continue
                 self.works[cell] = b
-            self.bridge_plans.append({k: v for k, v in c.items() if k != "ground"})
+            # Mateo: a bridge never runs into a field. Join each approach end to the nearest street with paving.
+            for end in c.get("_ends", []):
+                for x, z in BR.connect_to_paths(end, is_path):
+                    if not self.ok(x, z) or self.WET[self.ij(x, z)]: continue
+                    i, j = self.ij(x, z); g = int(self.G[i, j])
+                    self.works[(x, g, z)] = pave("lane", x, z, False)
+                    for yy in range(g + 1, g + 4): self.works[(x, yy, z)] = ("air", {})
+                    self.TAKEN[i, j] = max(int(self.TAKEN[i, j]), 1)
+            self.bridge_plans.append({k: v for k, v in c.items() if k not in ("ground", "_ends")})
+        # wet path cells that are no bridge (a street along the bank): a solid stone quay under the paving
+        for comp in quays:
+            for x, z in comp:
+                i, j = self.ij(x, z); k = int(self.K[i, j]); y = (k - 1) // 2
+                self.works[(x, y, z)] = pave("main", x, z, k % 2 == 1)
+                for yy in range(int(self.G0[i, j]) + 1, y): self.works[(x, yy, z)] = ("stone_bricks", {})
 
     def ground_blocks(self):
         """Every column the town regraded: top block, fill under it, air over a cut."""

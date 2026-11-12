@@ -205,7 +205,7 @@ def _crossing(samples, a, b, gnd, water_y, kind):
             "ya": gnd[a] + 1, "yb": gnd[b] + 1, "water_y": water_y, "kind": kind}
 
 
-def crossings_from_cells(wet, walk, water, width_of=lambda c: 3, region="vale", path="town", max_across=9):
+def crossings_from_cells(wet, walk, water, width_of=lambda c: 3, region="vale", path="town", max_across=9, rejects=None):
     """Crossings from a raster of path cells over water (town generators, the Hollow's columns).
 
     wet: set of (x, z) path cells over water. walk(x, z): walking-surface y (float, half steps) of a dry path
@@ -248,11 +248,20 @@ def crossings_from_cells(wet, walk, water, width_of=lambda c: 3, region="vale", 
             return None
         ya, yb = bank_y(A, (-dx, -dz)), bank_y(B, (dx, dz))
         wy = max(water(*c) for c in comp)
-        if ya is None: ya = wy + 1
-        if yb is None: yb = wy + 1
         w = max(width_of(c) for c in comp)
+        # a real crossing has a path on dry land at both ends, and the water passes under it: at the middle,
+        # water on both sides of the deck. A path running along a bank or into a pond is not a bridge
+        # (Mateo, 2026-11-12: "it's not even connecting to anything"); it goes back to the caller as a quay.
+        cx_, cz_ = (A[0] + B[0]) / 2, (A[1] + B[1]) / 2; off = w / 2.0 + 2
+        def wet_at(px, pz):
+            try: return water(round(px), round(pz)) is not None
+            except Exception: return False
+        sides = [wet_at(cx_ - dz * off * sg, cz_ + dx * off * sg) for sg in (-1, 1)]
+        if ya is None or yb is None or not all(sides):
+            if rejects is not None: rejects.append(comp)
+            continue
         out.append({"a": [round(A[0], 2), round(A[1], 2)], "b": [round(B[0], 2), round(B[1], 2)], "ya": ya, "yb": yb, "water_y": wy,
-                    "kind": "road" if w >= 5 else "foot", "width": w + 2, "region": region, "path": path, "cells": len(comp)})
+                    "kind": "road" if w >= 5 else "foot", "width": w + 2, "region": region, "path": path, "cells": len(comp), "_cells": comp})
     return out
 
 
@@ -387,7 +396,8 @@ def plan(c):
     return {"kind": kind, "region": region, "style": st, "A": (ax, az), "B": (bx, bz), "L": L, "d": (dx, dz), "n": (-dz, dx),
             "hw": hw, "width": width, "t": t, "abut": abut, "W": W, "Wq": Wq, "water_y": water_y, "floor_at": floor_at,
             "ground": gfun, "ground_u": floor_fn, "low": low, "tier": tier, "under": under, "spans": arches, "piers": piers,
-            "pier_w": pier_w, "lights": lights, "warnings": warnings, "seed": c.get("seed", 0)}
+            "pier_w": pier_w, "lights": lights, "warnings": warnings, "seed": c.get("seed", 0),
+            "approach": c.get("approach", 3)}
 
 
 # ----------------------------------------------------------------------------------------------- step 3+4
@@ -428,6 +438,7 @@ def bridge(ctx, pt):
         _trestle(ctx, P, M)
     else:
         _masonry(ctx, P, M)
+    _approaches(ctx, P, M)
     for role, cu in st.get("_custom", {}).items():
         if role not in M: continue
         for c, v in ctx.cells.items():
@@ -636,6 +647,61 @@ def _abutment_ends(ctx, P, M):
     return
 
 
+def _approaches(ctx, P, M):
+    """Mateo (2026-11-12): a bridge never runs straight into a field. Past each abutment the deck carries on as
+    `approach` blocks of paved path on land (the bridge's own paving, as wide as its walkway), grading from the
+    deck's end height to the ground at the paths rule (half a block per block), filled under to the ground.
+    Its far end is recorded in P["ends"] so the caller joins it to the nearest path (connect_to_paths)."""
+    n = P["approach"]
+    P["ends"] = []
+    if P["kind"] == "rail" or n <= 0: return
+    (ax, az), (dx, dz), (nx, nz), L, abut = P["A"], P["d"], P["n"], P["L"], P["abut"]
+    inner = P["hw"] - 1.0                       # walkway: the band without its parapets
+    deck = M.get("deck")
+    for side in (-1, 1):
+        u_end = -abut if side < 0 else L + abut
+        y0 = P["Wq"](0 if side < 0 else L)
+        for x, z, u, v in _columns(dict(P, abut=abut + n + 1), P["hw"]):
+            k = (u_end - u) if side < 0 else (u - u_end)          # blocks past the abutment
+            if not (0.0 < k <= n + 0.5) or abs(v) >= inner: continue
+            g = _floor(P, x, z, u) if (P["ground"] or P["ground_u"]) else math.ceil(y0) - 1
+            target = g + 1.0
+            w = y0 + max(-0.5 * k, min(0.5 * k, target - y0))      # towards the ground at half a block per block
+            w = math.floor(w * 2 + 1e-6) / 2.0
+            y = _surface(ctx, x, z, w, deck, stage="floors")
+            for yy in range(int(g) + 1, y): ctx.setif(x, yy, z, "foundation", "full", deck)
+        ex = ax + dx * (u_end + side * n); ez = az + dz * (u_end + side * n)
+        P["ends"].append({"x": round(ex, 2), "z": round(ez, 2), "dir": [round(dx * side, 4), round(dz * side, 4)],
+                          "width": int(2 * inner + 1) | 1})
+
+
+def connect_to_paths(end, is_path, max_dist=16):
+    """Cells that join a bridge's approach end to the nearest existing path cell: the nearest path cell within
+    max_dist (preferring ones ahead of the end), then a straight band as wide as the walkway between them.
+    Returns a list of (x, z). is_path(x, z) -> bool. Empty when the approach already touches a path."""
+    ex, ez = end["x"], end["z"]
+    dx, dz = end["dir"]; w = end.get("width", 3); hw = w / 2.0
+    best = None
+    for ox in range(-max_dist, max_dist + 1):
+        for oz in range(-max_dist, max_dist + 1):
+            x, z = round(ex) + ox, round(ez) + oz
+            if not is_path(x, z): continue
+            fwd = (x - ex) * dx + (z - ez) * dz
+            dist = math.hypot(x - ex, z - ez)
+            if dist > max_dist or fwd < -1.5: continue
+            score = dist - 0.5 * max(0.0, fwd) / max(1.0, dist)
+            if best is None or score < best[0]: best = (score, x, z, dist)
+    if best is None or best[3] <= hw + 0.5: return []
+    _, tx, tz, dist = best
+    ux, uz = (tx - ex) / dist, (tz - ez) / dist; px, pz = -uz, ux
+    cells = set()
+    for x in range(math.floor(min(ex, tx) - w), math.ceil(max(ex, tx) + w) + 1):
+        for z in range(math.floor(min(ez, tz) - w), math.ceil(max(ez, tz) + w) + 1):
+            t = (x - ex) * ux + (z - ez) * uz; q = (x - ex) * px + (z - ez) * pz
+            if -0.5 <= t <= dist + 0.5 and abs(q) < hw and not is_path(x, z): cells.add((x, z))
+    return sorted(cells)
+
+
 def _trestle(ctx, P, M):
     """Timber: bents (posts + cap beam + bracing) every 3 (foot) or 5 (rail) blocks along u, stringers under the
     deck edges, plank deck, fence rails or curb. Rail trestles batter their outer legs outward (Western trestles).
@@ -740,11 +806,13 @@ def bridge_blocks(crossing, clear_above=4):
     """World blocks for one crossing. Adds air above the deck where `ground` says the bank rises into it,
     so the path is open to the sky (Mateo's paths rule)."""
     blocks, _, log, P = compute(crossing)
+    crossing["_ends"] = P.get("ends", [])           # the approach ends, for connect_to_paths
     g = crossing.get("ground")
     if g:
-        for x, z, u, v in _columns(P, P["hw"]):
-            if not _in_band(P, u, v): continue
+        for x, z, u, v in _columns(dict(P, abut=P["abut"] + P["approach"]), P["hw"]):
+            if not _in_band(dict(P, abut=P["abut"] + P["approach"]), u, v): continue
             y0 = math.ceil(P["Wq"](u)) + (2 if P["style"]["parapet"] == "solid" else 1)
+            if not (-P["abut"] <= u <= P["L"] + P["abut"]): y0 = max((y for (xx, y, zz) in blocks if xx == x and zz == z), default=y0 - 1) + 1
             for y in range(y0, max(y0, g(x, z) + 1) + clear_above):
                 if (x, y, z) not in blocks: blocks[(x, y, z)] = ("air", {})
     return blocks
