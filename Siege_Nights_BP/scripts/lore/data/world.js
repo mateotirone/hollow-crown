@@ -168,7 +168,7 @@ export const THREADS = [
     id: "where_was_i", name: "Where Was I?", need: 2,
     intro: "For nine heartbeats you were somewhere else.",
     clues: {
-      slip_first: "In Sister Wren's house, the house went away. You stood ankle-deep in black water in the street of a town you have never seen: leaning towers, a moon in the wrong place, people standing with their faces to a wall, humming. Then you were back in the chair, wet to the skin. Where were you? Why did it let you go?",
+      slip_first: "In Sister Wren's chapel, the chapel went away. You stood ankle-deep in black water in the street of a town you have never seen: leaning towers, a moon in the wrong place, people standing with their faces to a wall, humming. Then you were back in the chair, wet to the skin. Where were you? Why did it let you go?",
       undertow_named: "Quill: the mage warned of \"the Hollow beneath, which he said lay under Aldmere as cold water lies under ice, and was no part of our world at all.\"",
       undertow_mirror: "Corvin: \"It is not a copy of ours. Its streets are black water and its towers lean. Its people stand facing the walls. I call it the Hollow.\"",
       lost_face_walls: "Corvin: a returned shape \"turns and faces the wall, toward wherever the Hollow is seeping in nearest.\"",
