@@ -42,7 +42,8 @@ def write_viewer(items, out, textures):
         cams[card["key"]] = sc.camera
         group = card.get("group") or ""
         index.append({"key": card["key"], "bundle": sec["id"], "section": sec["title"], "group": group, "title": card["title"], "sub": card.get("sub", ""),
-                      "blurb": card.get("blurb", ""), "size": size, "blocks": n})
+                      "blurb": card.get("blurb", ""), "size": size, "blocks": n,
+                      **{k: card[k] for k in ("levels", "attic", "cut") if k in card}})   # floors to cut at, for looking inside
         jobs.append((card["key"], sc, textures))
     tex, bundles, at = {}, {}, {b["key"]: b for b in index}
     with ProcessPoolExecutor(4) as ex:

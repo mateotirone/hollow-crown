@@ -67,7 +67,8 @@
      1
     ]
    ],
-   "vines": 0.05
+   "vines": 0.05,
+   "interior": "home"
   },
   {
    "part": "lean_to",

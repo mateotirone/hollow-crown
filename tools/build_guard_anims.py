@@ -10,7 +10,7 @@ animations, so they now have their own:
   aim      (Archer) side-on stance, feet apart, the string hand drawing back and trembling at full draw; the vanilla
            bow pose stays underneath so the bow still points at the target
   hurt     a flinch back when hit
-  salute   fist to chest when sent to a post (played by scripts/guardposts/index.js)
+  salute   hand to the right brow when sent to a post (played by scripts/guardposts/index.js)
 
 Bones are the vanilla humanoid ones (geometry.humanoid.custom): head and arms hang off body, legs off root.
 """
@@ -83,7 +83,8 @@ A["animation.hc.guard.hurt"] = {"loop": True, "bones": {
     "leftArm": {"rotation": r(0, 0, f"-12.0 * {HURT}")},
 }}
 A["animation.hc.guard.salute"] = {"loop": False, "animation_length": 1.3, "bones": {
-    "rightArm": {"rotation": {"0.0": r(), "0.25": r(-78, -42, 0), "0.95": r(-78, -42, 0), "1.3": r()}},
+    # hand up to the right brow (Mateo 2026-11-12: "more up towards the right corner of his head")
+    "rightArm": {"rotation": {"0.0": r(), "0.3": r(-145, 10, 22), "0.95": r(-145, 10, 22), "1.3": r()}},
     "body": {"rotation": {"0.0": r(), "0.25": r(5, 0, 0), "0.95": r(5, 0, 0), "1.3": r()}},
     "head": {"rotation": {"0.0": r(), "0.25": r(12, 0, 0), "0.7": r(12, 0, 0), "1.0": r(-4, 0, 0), "1.3": r()}},
 }}

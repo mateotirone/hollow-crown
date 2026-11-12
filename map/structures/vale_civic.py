@@ -73,34 +73,25 @@ def guildhall(seed=3):
     return finish_doctrine(bp)
 
 
+def _skill_spec(fname, name):
+    """Build a review spec on the skill (the one engine) for a map stamp."""
+    import json, os, sys
+    here = os.path.dirname(os.path.abspath(__file__))
+    sk = os.path.join(here, "..", "..", ".claude", "skills", "minecraft-builder", "scripts")
+    if sk not in sys.path: sys.path.insert(0, sk)
+    import engine
+    spec = json.load(open(os.path.join(here, "review", "specs", fname)))
+    bp = Blueprint(name); engine.into_blueprint(bp, spec)
+    return bp
+
+
 def chapel(seed=5, name="kingsrest_chapel"):
-    """Stone chapel: a buttressed nave with lancet windows, a rose window over the door and a
-    bellcote on the front gable. 11 x 19 (plus buttresses)."""
-    bp = Blueprint(name); P = dict(P_STONE, pane=CHAPEL_GLASS); B = Building(bp, P, seed)
-    rect = (0, 0, 10, 18)
-    B.foundation(grow(rect, "nsew", 2), 0); B.floor(rect, 0, mat="polished_andesite")
-    B.stone_storey(rect, 1, 7)
-    for z in (0, 6, 12, 18):                      # buttresses: bays of 5
-        for x, f in ((-1, "e"), (11, "w")):
-            for y in range(1, 6): bp.set(x, y, z, "stone_bricks")
-            bp.set(x, 6, z, "stone_brick_stairs", facing=f, half="bottom")
-    for z in (3, 9, 15):                          # lancets, one per bay
-        B.window(10, 3, z, "e", 1, 3, kind="stone"); B.window(0, 3, z, "w", 1, 3, kind="stone")
-    B.roof(rect, "z", 8, overhang=1, verge=1)
-    B.build_roofs()
-    B.gable_walls(rect, "z", 8, style="stone")
-    B.door(5, 1, 18, "s", canopy=False, lanterns=True, frame="chiseled_stone_bricks")
-    bp.set(5, 3, 18, "stone_brick_stairs", facing="s", half="top")
-    for dx, dy in ((0, 0), (-1, 1), (0, 1), (1, 1), (0, 2)): bp.set(5 + dx, 9 + dy, 18, P["pane"])   # rose window
-    B.window(5, 9, 0, "n", 1, 3, kind="stone")
-    apex = B.H[(5, 18)][0]
-    for x in (4, 5, 6): bp.set(x, apex, 18, "stone_bricks"); bp.set(x, apex + 1, 18, "stone_bricks") if x != 5 else bp.set(x, apex + 1, 18, "bell")
-    for x in (4, 6): bp.set(x, apex + 2, 18, "stone_brick_wall")
-    for x in (4, 5, 6): bp.set(x, apex + 3, 18, "stone_bricks")
-    bp.set(5, apex + 4, 18, "stone_brick_wall")
-    # inside left empty (Mateo, 2026-11-11)
-    bp.markers["door"] = (5, 1, 17); bp.markers["priest"] = (5, 1, 3)
-    return finish_doctrine(bp)
+    """Stone chapel on the skill (review/specs/kingsrest_chapel.json, gen_chapel.py): a buttressed nave with
+    lancets, a front tower in three stages with the door at its foot, a louvred belfry and a broach spire
+    (build-instructions/towers/README.md), a lower chancel at the back."""
+    bp = _skill_spec("kingsrest_chapel.json", name)
+    bp.markers["door"] = (5, 2, 24); bp.markers["priest"] = (5, 2, 3)
+    return bp.finish()
 
 
 def station(seed=9):
@@ -141,17 +132,11 @@ def station(seed=9):
 
 
 def clock_tower(seed=13, name="millbrook_clock_tower"):
-    """Millbrook's clock tower on the square (the Clockwork Reeve's arena is at its foot), built on the skill
-    from review/specs/millbrook_clock_tower.json (gen_millbrook.py, build-instructions/towers/README.md): a
-    stone shaft in three stages, a jettied timber clock stage with a framed 5 x 5 clock on every face, a steep
-    slate helm and an open bell lantern."""
-    import json, os, sys
-    here = os.path.dirname(os.path.abspath(__file__))
-    sk = os.path.join(here, "..", "..", ".claude", "skills", "minecraft-builder", "scripts")
-    if sk not in sys.path: sys.path.insert(0, sk)
-    import engine
-    spec = json.load(open(os.path.join(here, "review", "specs", "millbrook_clock_tower.json")))
-    bp = Blueprint(name); engine.into_blueprint(bp, spec)
+    """Millbrook's clock tower on the square (the Clockwork Reeve's arena is at its foot), on the skill
+    (review/specs/millbrook_clock_tower.json, gen_millbrook.py, build-instructions/towers/README.md): a stone
+    shaft in three stages, a jettied timber clock stage with a framed 5 x 5 clock on every face, a steep slate
+    helm and an open bell lantern."""
+    bp = _skill_spec("millbrook_clock_tower.json", name)
     bp.markers["door"] = (3, 2, 5); bp.markers["arena"] = (3, 0, 12)
     return bp.finish()
 
