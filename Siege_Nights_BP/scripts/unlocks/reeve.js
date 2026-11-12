@@ -29,6 +29,7 @@ import { isBuilder } from "../plots/claims.js";
 import { learnLeads } from "../lore/player.js";
 import { startBoss, fightOf } from "../bestiary/bossCore.js";
 import { markSocketed } from "../bestiary/relics.js";
+import { LANDMARKS, stampOps } from "./landmarks.js";
 import { CLOCKS, KEEPERS, makePuzzle, statementText, clockAnswer } from "./keepers.js";
 import { WELL, CHAMBER_CENTER, wellOps, chamberOps, postOps, stairSteps, spindleOps, drainLayers, plugOps, SIGN_TURN } from "./well_plan.js";
 
@@ -120,6 +121,7 @@ export function buildWell(center, by) {
   const c = { x: Math.floor(center.x), y, z: Math.floor(center.z) };
   busy = true;
   const plan = fullPlan(puzzle());
+  plan.ops = [...stampOps(LANDMARKS.reeve), ...plan.ops]; // the square's landmark first (landmarks.js), the well on top
   let failed = 0;
   system.runJob((function* () {
     let n = 0;
@@ -162,7 +164,7 @@ onTick("unlocks_reeve_build", 100, () => {
   if (!near.length) return;
   const dim = overworld();
   if (!holding) {
-    const r = Math.ceil(WELL.wallR) + 2;
+    const L = LANDMARKS.reeve, r = Math.max(Math.ceil(WELL.wallR) + 2, L?.size ? Math.ceil(Math.max(L.size[0], L.size[2]) / 2) + 2 : 0);
     try { dim.runCommand(`tickingarea add ${MILLBROOK_SQUARE.x - r} 0 ${MILLBROOK_SQUARE.z - r} ${MILLBROOK_SQUARE.x + r} 0 ${MILLBROOK_SQUARE.z + r} ${AREA} true`); } catch { /* full */ }
     holding = true;
   }
