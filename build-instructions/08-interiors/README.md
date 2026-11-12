@@ -114,6 +114,11 @@ The Kingsrest coaching inn and the Citadel keep were furnished by hand before th
 inn takes `"furnish": false` so the skill adds only its stairs and light. Story sites and boss rooms that
 are gameplay spaces lay out their own insides.
 
+The Barracks (2026-11-12, `map/structures/barracks_skill.py`) is furnished by its own builder too: a mess with a
+long table, grindstone and smithing table on the hall's ground floor, bunks (beds and chests) above, barrels and
+a fletching table in the keep, and in the walled yard a campfire with benches, a trough, straw targets and a clear
+middle where off-duty soldiers wait (marks `yard_a`, `yard_b`, `muster`).
+
 ## Look at it
 
 Every interior is checked in a cut-away 3D view before it is shown:

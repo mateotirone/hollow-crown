@@ -204,7 +204,7 @@ def main():
                                       ("stables_2", "Stables, level 2", "Five stalls and a tack corner, with a cupola on the ridge. Builds over level 1."),
                                       ("stables_3", "Stables, level 3", "Eight stalls, a tack room across the back and a hayloft above. Builds over level 2."),
                                       ("breeder_yard", "Breeder's Yard", "Raised by the Breeder's Post: a fenced paddock with an open shelter, hay and troughs."),
-                                      ("barracks", "Barracks", "The guardhouse: a two-storey hall for the guard with a crenellated watch tower."),
+                                      ("barracks", "Barracks", "Raised by the Barracks block: a timber hall (mess below, bunks above), a round keep with battlements and flags, and a walled yard where off-duty soldiers wait. A banner hangs over the gate."),
                                       ("quartermaster", "Quartermaster's armoury", "A small strong store with a serving hatch under an awning, smithing table and anvil inside.")):
                 add(sec, f"bld-{rid}-{bid}", title, r["name"], blurb, (lambda f=settle_buildings.BLOCK_BUILDERS[bid], r=rid: f(r)), g, extra={"group": "Plot buildings"})
 

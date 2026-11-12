@@ -8,7 +8,7 @@ It is its own dimension (internal id `siege:undertow`) of about 1,400 x 2,500 bl
 hand-designed centre and generated country beyond it, out to a ragged void edge. Its places:
 - **The arrival and the valley spine** with the story path.
 - **The light rivers:** glowing rivers that join everything, travelled in Latticewood boats.
-- **Four mining villages:** Glimwade, Lowseam, Tollrest, Highcut. A cart rail runs from Cartmeet to the Seams.
+- **Four mining villages:** Glimwade, Lowseam, Tollrest, Highcut. The Hollow has no rail lines or trains (Mateo, 2026-11-12).
 - **The vault.**
 - **The centre sites.**
 - **The drowned city**, with its leaning towers.

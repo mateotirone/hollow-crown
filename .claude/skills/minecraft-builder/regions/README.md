@@ -56,6 +56,17 @@ These rules hold in every region unless the region's page says otherwise. They a
   plots (11 wide) keep the box and drop the sign face on the side walls (`"box_signs": "ns"` in the style
   keeps it only on the north and south walls).
 
+## Castle builds in every region (the Barracks, 2026-11-12)
+
+The Barracks keeps one plan everywhere (hall at the back, round keep in its gable, walled yard in front, banner over
+the gate; `map/structures/review/specs/gen_barracks.py`) and takes each region's look: the hall from the region's
+preset and roof (Vale warm granite gable, Frostmarch slate pitch 2 with dragon heads and snow, Saltreach sea-green
+hip, Emberwaste flat with vigas, Blackfen mossy dark oak on piles), the keep and yard wall in the region's stone
+(Vale VAL-01, Frostmarch cobbled deepslate and deepslate bricks, Saltreach and Emberwaste sandstone, Blackfen tuff on
+mud brick). The keep rises one stage clear of the hall ridge, so it is taller where the roof is steep or flat
+(Frostmarch, Emberwaste). Flags and the gate banner are white wool in the build; the game turns them the settlement's
+banner colour once the Barracks stands (`settle/raised.js`).
+
 ## Where the facts come from
 
 These pages draw on the following sources. Each page names its own.

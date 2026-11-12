@@ -27,10 +27,10 @@ const PLANS = {
     m.box(-4, 1, 2, -2, 1, 2, "minecraft:polished_blackstone_brick_slab"); // bench
     m.box(3, 1, 4, 3, 2, 4, "minecraft:chiseled_polished_blackstone");
   },
-  // East crossroads where the ore carts turn: signpost, lamp, a short stub of rail.
+  // East crossroads where the ore carts turned: signpost, lamp, a cobbled strip. (No rail: Mateo, 2026-11-12, no train system in the Hollow.)
   cartmeet: (m) => {
     m.signpost(0, 0); m.lamp(-4, 3);
-    m.box(3, 0, -3, 3, 0, 3, COBBLE); m.box(3, 1, -3, 3, 1, 3, "minecraft:rail");
+    m.box(3, 0, -3, 3, 0, 3, COBBLE);
   },
   // A long stone hall with a broken roof. One table, two seats, one of them knocked over.
   truce_hall: (m, s) => {
@@ -84,7 +84,7 @@ const PLANS = {
     m.box(9, 1, -1, 12, 3, 1, "minecraft:air"); // the mouth
     for (const z of [-2, 2]) m.box(8, 1, z, 8, 4, z, LOG);
     m.box(8, 4, -2, 8, 4, 2, LOG);
-    m.box(-8, 0, 0, 8, 0, 0, COBBLE); m.box(-8, 1, 0, 8, 1, 0, "minecraft:rail"); // the cart rail toward Cartmeet
+    m.box(-8, 0, 0, 8, 0, 0, COBBLE); // the old cart way toward Cartmeet
     m.lamp(6, -4);
   },
   // The Cold Forge: an open-sided smithy of veinstone, 9 by 13, with a dead hearth and a tall chimney

@@ -1708,7 +1708,165 @@ def dome(ctx, s):
     return ytop
 
 
-PARTS = {"house": house, "dome": dome, "lean_to": lean_to, "woodpile": woodpile, "spire": spire, "belfry": belfry, "clock_face": clock_face, "wheel": wheel, "arch": arch, "string_course": string_course, "buttress": buttress, "hanging_lantern": hanging_lantern}
+# ------------------------------------------------------------------ castle parts: round keep, curtain wall (towers/README "Castle / Citadel")
+def _disc(r):
+    """Cells of a round plan of radius r about (0, 0): r 2.5 = 5 wide, 3.5 = 7 wide (radii end in .5, odd widths)."""
+    R = int(r + 0.5)
+    return {(dx, dz) for dx in range(-R, R + 1) for dz in range(-R, R + 1) if dx * dx + dz * dz <= r * r + 0.01}
+
+
+def _toward(dx, dz):
+    """The side of a round plan a cell is on, by its larger offset (ties go to n/s)."""
+    if abs(dz) >= abs(dx): return "s" if dz > 0 else "n"
+    return "e" if dx > 0 else "w"
+
+
+def _merlon(t):
+    """Merlons on even steps of a parapet run, so ends and corners (step 0) always carry one."""
+    return t % 2 == 0
+
+
+def keep(ctx, s):
+    """A round castle keep (towers/README: castle row; Mateo's barracks reference, 2026-11-12). A plinth, a
+    shaft one block thick in the wall material, floors inside with a ladder up the wall, a string course
+    one out at every floor line, 1x2 slits on the given sides, doors, then machicolated battlements: a
+    ring of upside-down stairs one out (the corbels), the roof deck on them, a parapet and merlons on
+    every other block. Flags on poles above the deck.
+
+    at [x, z] centre, r (2.5 = 5 wide; 3.5 = 7), y (ground row, the plinth's first course), h (shaft
+    height, 3 to 5 times the width), floors (rows above y of each floor inside; the deck is y + h),
+    material / plinth / trim (courses, corbels, parapet cap) / floor, slits {"sides": "sen", "glass"},
+    doors [{"side": "w", "floor": 1, "door": "spruce_door"}] (floor = the floor row the door opens on),
+    ladder side (the inside wall it climbs), flags [{"at": [dx, dz], "dir": "e"}] with "flag" material,
+    clear (true: empties the shaft first, so a roof or wall built before it makes way)."""
+    cx, cz = s["at"]; r = s.get("r", 2.5); y0 = s.get("y", 0); h = s["h"]
+    wall = s.get("material", "stone_bricks"); plinth = s.get("plinth", wall); trim = s.get("trim", wall)
+    floor_m = s.get("floor", "spruce_planks"); top = y0 + h
+    body, inner, crown = _disc(r), _disc(r - 1), _disc(r + 1)
+    ring, outer = body - inner, crown - body
+    floors = sorted(y0 + f for f in s.get("floors", []))
+    lad = s.get("ladder", "e"); lx, lz = DIRS[lad]; R1 = int(r - 0.5)
+    lcell = (cx + lx * (R1 - 1), cz + lz * (R1 - 1))           # inside, against the wall on that side
+    if s.get("clear", True):
+        for (dx, dz) in crown:
+            for y in range(y0, top + 3):
+                if (dx, dz) in body or y >= top - 1: ctx.clear(cx + dx, y, cz + dz)
+    for (dx, dz) in body:                                       # 01: plinth, two courses
+        for y in (y0, y0 + 1): ctx.set(cx + dx, y, cz + dz, "foundation", "full", plinth)
+    for (dx, dz) in ring:                                       # 04: the shaft
+        for y in range(y0 + 2, top): ctx.set(cx + dx, y, cz + dz, "walls", "full", wall)
+    for fy in [y0 + 1] + floors:                                # 03: floors, the ladder's hole left open
+        for (dx, dz) in inner:
+            c = (cx + dx, cz + dz)
+            if fy > y0 + 1 and c == lcell: continue
+            ctx.set(c[0], fy, c[1], "floors", "full", floor_m if fy > y0 + 1 else plinth)
+    for fy in floors:                                           # 07: a course one out at each stage line
+        for (dx, dz) in outer:
+            ctx.set(cx + dx, fy, cz + dz, "details", "stairs", trim, facing=OPP[_toward(dx, dz)], half="top")
+    sl = s.get("slits", {"sides": "nesw"})
+    if sl:
+        for fy in [y0 + 1] + floors:
+            if fy + 3 >= top: continue
+            for sd in sl.get("sides", "nesw"):
+                ox, oz = DIRS[sd]
+                if (ox, oz) == (lx, lz): continue
+                for dy in (2, 3):
+                    ctx.set(cx + ox * R1, fy + dy, cz + oz * R1, "openings", raw=sl.get("glass", "gray_stained_glass_pane"))
+    for d in s.get("doors", []):
+        sd = d.get("side", "s"); ox, oz = DIRS[sd]; fy = y0 + 1 if d.get("floor", 0) == 0 else floors[d["floor"] - 1]
+        x, z = cx + ox * R1, cz + oz * R1; dw = d.get("door", "spruce_door")
+        ctx.set(x, fy + 1, z, "openings", raw=dw, facing=sd, hinge=False)
+        ctx.set(x, fy + 2, z, "openings", raw=dw, facing=sd, hinge=False, upper=True)
+        ctx.set(x, fy + 3, z, "openings", "stairs", trim, facing=OPP[sd], half="top")
+        for (dx, dz) in inner:                                  # nothing stands in front of it inside
+            if (cx + dx, cz + dz) == (x - ox, z - oz):
+                for dy in (1, 2): ctx.clear(x - ox, fy + dy, z - oz)
+    for y in range(y0 + 2, top + 1):                            # the ladder, from the ground floor to the deck
+        ctx.set(lcell[0], y, lcell[1], "details", raw="ladder", facing=OPP[lad])
+    # battlements: corbels one out, the deck on them, a parapet, merlons on every other block
+    for (dx, dz) in outer:
+        ctx.set(cx + dx, top - 1, cz + dz, "roof", "stairs", trim, facing=OPP[_toward(dx, dz)], half="top")
+    for (dx, dz) in crown:
+        c = (cx + dx, cz + dz)
+        if c != lcell: ctx.set(c[0], top, c[1], "roof", "full", wall if (dx, dz) in outer or (dx, dz) in ring else trim)
+    rim = sorted(outer, key=lambda c: __import__("math").atan2(c[1], c[0]))
+    for i, (dx, dz) in enumerate(rim):
+        ctx.set(cx + dx, top + 1, cz + dz, "roof", "full", wall)
+        if _merlon(i): ctx.set(cx + dx, top + 2, cz + dz, "roof", "full", wall)
+    ctx.set(lcell[0], top + 1, lcell[1], "details", raw=s.get("hatch", "spruce_trapdoor"), half="bottom", open=False)
+    for f in s.get("flags", []):                                # 07: poles with the flag hung from the top
+        fx, fz = cx + f["at"][0], cz + f["at"][1]; n = f.get("h", 5); ux, uz = DIRS[f.get("dir", "e")]
+        for k in range(n): ctx.set(fx, top + 1 + k, fz, "details", "post", s.get("pole", "spruce_planks"))
+        ctx.set(fx, top + 1 + n, fz, "details", raw="lightning_rod")
+        fm = s.get("flag", "white_wool")
+        for k, rows in enumerate((2, 2, 1)):                  # a pennant: two rows, tapering to one
+            for j in range(rows): ctx.set(fx + ux * (k + 1), top + n - j, fz + uz * (k + 1), "details", raw=fm)
+    ctx.info.setdefault("keeps", []).append({"at": [cx, cz], "r": r, "floors": floors, "deck": top, "ladder": list(lcell)})
+
+
+def curtain(ctx, s):
+    """A curtain wall round a yard (towers/README castle row; build-instructions/07 battlements): a run of
+    straight wall through the points in `path` (axis-aligned steps), a plinth course, the wall, a cap
+    course, merlons on every other block; square turrets that rise above it; a gate with an arched head,
+    a raised crown over it and an optional banner hung one out on the crown's outer face.
+
+    path [[x, z], ...], y (ground row), h (wall rows above the plinth course, 4), material / plinth / cap,
+    turrets [{"at": [x, z], "size": 3, "h": 7}], gate {"at": [x, z], "face": "s", "w": 3, "h": 3,
+    "crown": 3, "banner": "white_wool" | null, "pole": "stripped_spruce_log", "trim"}."""
+    y0 = s.get("y", 0); h = s.get("h", 4); wall = s.get("material", "stone_bricks")
+    plinth = s.get("plinth", wall); cap = s.get("cap", wall)
+    cells = []
+    pts = s["path"]
+    for (ax_, az_), (bx_, bz_) in zip(pts, pts[1:]):
+        if ax_ != bx_ and az_ != bz_: ctx.log.append(f"curtain: {ax_},{az_} to {bx_},{bz_} is not straight; use axis-aligned steps")
+        n = max(abs(bx_ - ax_), abs(bz_ - az_))
+        for k in range(n + 1):
+            c = (ax_ + (bx_ - ax_) * k // max(n, 1), az_ + (bz_ - az_) * k // max(n, 1))
+            if c not in cells: cells.append(c)
+    top = y0 + h
+    for t, (x, z) in enumerate(cells):
+        ctx.set(x, y0, z, "foundation", "full", plinth)
+        for y in range(y0 + 1, top): ctx.set(x, y, z, "walls", "full", wall)
+        ctx.set(x, top, z, "walls", "full", cap)
+        if _merlon(t): ctx.set(x, top + 1, z, "details", "full", wall)
+    for tu in s.get("turrets", []):
+        tx, tz = tu["at"]; n = tu.get("size", 3) // 2; th = y0 + tu.get("h", h + 3)
+        for dx in range(-n, n + 1):
+            for dz in range(-n, n + 1):
+                edge = abs(dx) == n or abs(dz) == n
+                for y in range(y0, th):
+                    if edge or y in (y0, th - 1): ctx.set(tx + dx, y, tz + dz, "foundation" if y == y0 else "walls", "full", plinth if y == y0 else wall)
+                    else: ctx.clear(tx + dx, y, tz + dz)
+                if edge:
+                    ctx.set(tx + dx, th, tz + dz, "details", "full", cap)
+                    if abs(dx) == n and abs(dz) == n: ctx.set(tx + dx, th + 1, tz + dz, "details", "full", wall)   # merlons on the corners
+                else: ctx.set(tx + dx, th - 1, tz + dz, "walls", "full", cap)
+        ctx.set(tx, th, tz, "details", raw="lantern")
+    g = s.get("gate")
+    if g:
+        gx, gz = g["at"]; face = g.get("face", "s"); w = g.get("w", 3); gh = g.get("h", 3); cr = g.get("crown", 3)
+        ax = ALONG_AXIS[face]; ux, uz = (1, 0) if ax == "x" else (0, 1); ox, oz = DIRS[face]; hw = w // 2
+        for k in range(-hw - 1, hw + 2):                    # the crown: the wall raised over the gate, w + 2 wide
+            x, z = gx + ux * k, gz + uz * k
+            ctx.clear(x, top + 1, z)
+            for y in range(top, top + cr): ctx.set(x, y, z, "walls", "full", wall)
+            ctx.set(x, top + cr, z, "walls", "full", cap)
+            if _merlon(k + hw + 1): ctx.set(x, top + cr + 1, z, "details", "full", wall)
+        arch(ctx, {"at": [gx, y0 + 1, gz], "axis": ax, "width": w, "height": gh + 1, "material": cap,
+                   "trim": g.get("trim", "spruce_planks"), "style": "round_angle"})
+        if g.get("banner"):                                  # hung one out on the outer face, under a pole
+            py = top + cr - 1
+            for k in range(-hw - 1, hw + 2):
+                ctx.set(gx + ux * k + ox, py, gz + uz * k + oz, "details", raw=g.get("pole", "stripped_spruce_log"), axis=ax)
+            for row in range(1, 4):
+                for k in range(-hw, hw + 1):
+                    if row == 3 and k != 0: continue        # the banner's point
+                    ctx.set(gx + ux * k + ox, py - row, gz + uz * k + oz, "details", raw=g["banner"])
+            ctx.info["banner"] = [gx + ox, py - 2, gz + oz]
+        ctx.info["gate"] = [gx, y0 + 1, gz]
+
+
+PARTS = {"keep": keep, "curtain": curtain, "house": house, "dome": dome, "lean_to": lean_to, "woodpile": woodpile, "spire": spire, "belfry": belfry, "clock_face": clock_face, "wheel": wheel, "arch": arch, "string_course": string_course, "buttress": buttress, "hanging_lantern": hanging_lantern}
 
 
 def interior(ctx, pt):

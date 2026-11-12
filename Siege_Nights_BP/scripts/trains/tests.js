@@ -6,6 +6,7 @@ import { SHAPES, layTrack, cursorOn, advance, back, pointAt, follow, KINDS, curv
 import { stageFor, stationPlan, siteFor, lineBlocks, rightOf, STAGES, STATION } from "./stations.js";
 import { ROUTE, reachable, buyable, cannotBuy, priceOf, nearestStop, checkRoutes, stopSite, pieces, isNatural } from "./routes.js";
 import { ROUTES } from "./routes_data.js";
+import { railRefused } from "./no_hollow.js";
 import { TRACK, CARS, TRAIN, carPoses, trainLength, stepSpeed, moveTrain, limitAhead, shapesForLoop, showcaseLoop } from "./data.js";
 
 // A little fake world of track: lay(x, y, z, yaw) places a piece the way a player would
@@ -103,6 +104,14 @@ addTests("trains", {
     const [bx, by, bz] = custom.blocks[0];
     assert(checkRoutes({ stops: data.stops, segments: [{ ...custom, works: [[bx, bz, by - 3, by, 1]] }] }).length, "a solid work in a track cell is caught");
     assertEqual(checkRoutes({ stops: data.stops, segments: [{ ...custom, works: [[bx, bz, by - 3, by - 1, 1], [bx, bz, by, by + 5, 0]] }] }).length, 0, "works under and clear air over the track are fine");
+  },
+
+  "no rail goes down in the Hollow": () => {
+    for (const id of [TRACK, "hc:station_post", "siege:rail_depot", "minecraft:rail", "minecraft:golden_rail"]) {
+      assert(railRefused("siege:undertow", id), `${id} is refused in the Hollow`);
+      assert(!railRefused("minecraft:overworld", id), `${id} is fine in the overworld`);
+    }
+    assert(!railRefused("siege:undertow", "minecraft:cobblestone"), "other blocks are fine");
   },
 
   "there are 20 track shapes and none repeats": () => {
