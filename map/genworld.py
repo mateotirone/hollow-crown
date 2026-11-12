@@ -318,21 +318,37 @@ def stops_on(P): return [(sid, st) for sid, st in STOPS.items() if np.min(np.hyp
 # valleys and hillsides, long curves, stations at the edge of town), not beside the roads. The lines.json "roads"
 # only say which stops each line serves and in what order; railroute places the stations and routes the track.
 import railroute
-SEQ = {}
-for lname, pts in L["roads"].items():
-    P = np.asarray(pts, float)
-    SEQ[lname] = [sid for sid, st in sorted(stops_on(P), key=lambda t: int(np.argmin(np.hypot(P[:, 0] - t[1]["x"], P[:, 1] - t[1]["z"]))))]
 _foot = {}                                         # how far out each stamped town's blocks reach
+FIXED_ST = {}; FIXED_Y = {}                        # stations a town plan already stamped (<town>-plan.json beside it)
 for fn_ in filter(None, os.environ.get("GW_BLOCKS", "").split(":")):
     d_ = json.load(open(fn_)); b_ = np.array(d_["blocks"], np.int64)[:, [0, 2]]
     _foot[d_["town"]] = b_
+    pf_ = fn_.replace("-blocks.json", "-plan.json")
+    if os.path.exists(pf_):
+        for e_ in json.load(open(pf_)).get("buildings", []):
+            if e_.get("kind") == "station":          # track along the stamp's local x at z 0, one above its ground
+                FIXED_ST[slug(d_["town"])] = (int(e_["x"]), int(e_["z"]), "x" if int(e_.get("rotation", 0)) % 180 == 0 else "z")
+                FIXED_Y[slug(d_["town"])] = int(e_["ground_y"]) + 1
+log("rail: stations stamped by town plans", FIXED_ST)
+SEQ = {}                                           # a stop is on a line if its old spot or its stamped station is
+for lname, pts in L["roads"].items():              # near the line's lines.json road
+    P = np.asarray(pts, float); on_ = []
+    for sid, st in STOPS.items():
+        spots_ = [(st["x"], st["z"])] + ([FIXED_ST[sid][:2]] if sid in FIXED_ST else [])
+        dd_ = [np.hypot(P[:, 0] - sx_, P[:, 1] - sz_) for sx_, sz_ in spots_]
+        k_ = min(range(len(dd_)), key=lambda j: dd_[j].min())
+        if dd_[k_].min() < 30: on_.append((int(np.argmin(dd_[k_])), sid))
+    SEQ[lname] = [sid for _, sid in sorted(on_)]
+for sid_, (x_, z_, _) in FIXED_ST.items(): STOPS[sid_].update({"x": x_, "z": z_})
+log("rail: line stops", SEQ)
 R_TOWNS = []
 for n_, x_, z_, r_, _ in TOWNS:
     if n_ in _foot: R_ = int(np.hypot(_foot[n_][:, 0] - x_, _foot[n_][:, 1] - z_).max()) + 6
     else: R_ = int(r_ * 1.12) + 10
     R_TOWNS.append((slug(n_), x_, z_, R_))
 AVOID = [(x_, z_, 82) for _, x_, z_ in PLOTS] + [(x_, z_, int(r_ * 0.7)) for _, x_, z_, r_, _ in WARDS[6:]]
-STATION_POS, LINE_PTS = railroute.plan_network(Y, wet, land, X0, Z0, STOPS, SEQ, R_TOWNS, AVOID, log=log)
+STATION_POS, LINE_PTS = railroute.plan_network(Y, wet, land, X0, Z0, STOPS, SEQ, R_TOWNS, AVOID, log=log, fixed=FIXED_ST)
+stop_y.update(FIXED_Y)
 for sid_, (x_, z_, _) in STATION_POS.items(): STOPS[sid_].update({"x": x_, "z": z_})
 for lname in SEQ:
     pts = LINE_PTS[lname]
