@@ -25,6 +25,29 @@ Custom first- and third-person moves for every player. Written by `tools/build_p
   The Rimefang Bow also gets the vanilla aiming pose now (vanilla only gives it to `minecraft:bow`).
 - No 3D held weapons (attachables) are involved: items stay in the hand bone the way vanilla draws them.
 
+## Small things people do
+
+- Idle: after 6 s standing still, every 7 s one of: look around, shift weight onto one leg, stretch (or look
+  over your sword or axe if one is in hand).
+- Torches and lanterns are held up and ahead, in either hand. Books (vanilla books, the Almanac, the King's
+  Journal, lore tomes, the Ledger, the Fourteen Arts) are held open in both hands, head down to read.
+- On a horse, steed, camel or dragon the hands go forward onto the reins. Sneaking bends the knees and brings
+  the hands up. Taking a hit makes you flinch back.
+
+## Elbows and knees
+
+`tools/build_player_joints.py` (run from the repo root, safe to run again):
+
+- writes `geometry.hc.jointed` (`models/entity/hc_jointed.geo.json`): the 64x64 player body with forearm and
+  shin bones (`rightForearm`, `leftForearm`, `rightShin`, `leftShin`, with `...Sleeve`/overlay halves). Held
+  items ride the forearm.
+- uses it for the Looking Glass looks only. Players on their own skin keep Bedrock's skin model (the game
+  swaps it in for every player; slim and Character Creator skins don't fit a fixed layout), so they get the
+  same moves with straight limbs. The bend channels simply do nothing on a body without those bones.
+- cuts every armour geometry (`geometry.siege_*`) at the elbow (y 18) and knee (y 6) so armour bends with
+  the joint. On straight-limbed players the new bones just follow the old ones. **Re-run it after any armour
+  builder**; `check.mjs` fails while any armour cube still crosses a joint.
+
 ## Rules for changes
 
 - Positive y rotation turns toward the player's right; positive x on an arm lowers it, negative raises it
@@ -33,4 +56,5 @@ Custom first- and third-person moves for every player. Written by `tools/build_p
   has no actor.
 - Any other pack that replaces `minecraft:player` in its own `player.entity.json` and sits above this one
   wins the whole file, which turns these moves (and the Looking Glass looks) off for that player.
-- Preview: https://claude.ai/artifact/Sxm8vRMhruye1dw2ig1e5Y runs the same expressions in 3D (third person).
+- Preview: https://claude.ai/artifact/Sxm8vRMhruye1dw2ig1e5Y runs the same expressions on the jointed body with the real Looking Glass textures (third person).
+- Elbows bend with negative x on the forearm; knees with positive x on the shin.
