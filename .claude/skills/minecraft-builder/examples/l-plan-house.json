@@ -2,7 +2,7 @@
  {"part": "house", "style": "vale_timber", "rect": [-6, -4, 6, 4], "plinth": 1, "storeys": [5, 5], "jetty": ["n", "s"],
   "door": {"side": "s", "at": 0, "canopy": false}, "roof": {"type": "gable"}, "finials": "spikes", "vines": 0.2,
   "porch": {"side": "s", "at": 0, "w": 5, "d": 2},
-  "windows": {"s": [{"storey": 0, "at": -4, "sill": "planter"}, {"storey": 0, "at": 4, "sill": "planter"},
+  "windows": {"s": [{"storey": 0, "at": -5, "sill": "planter"}, {"storey": 0, "at": 5, "sill": "planter"},
                     {"storey": 1, "at": -4, "w": 3}, {"storey": 1, "at": 4, "w": 3}]},
   "dormers": [{"side": "s", "at": 0}],
   "wings": [{"rect": [-13, -2, -7, 2], "storeys": [5], "roof": {"type": "gable", "ridge": "x"}, "trusses": true}]}]}

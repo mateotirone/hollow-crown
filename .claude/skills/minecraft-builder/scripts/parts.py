@@ -445,8 +445,16 @@ def _body(ctx, s, st):
         floors.append(f); rects.append(list(r)); f += h
     plate = floors[-1] + storeys[-1] - 1
     posts_of = {}
+    base_M, base_fk, fk_of = M, fk, []
+    sov = s.get("storey_style", [])
     for i, (fl, rr, h) in enumerate(zip(floors, rects, storeys)):
         x0, z0, x1, z1 = rr
+        ov = sov[i] if i < len(sov) and sov[i] else {}
+        if ov:      # this storey in its own materials (a stone ground floor under a timber upper, 02-frame)
+            sst = dict(st); sst.update({k: v for k, v in ov.items() if k != "frame_kind"}); sst["_name"] = f"{st['_name']}.s{i}"
+            M = (lambda sst: (lambda role: ctx.mat(sst, role)))(sst); fk = ov.get("frame_kind", base_fk)
+        else: M, fk = base_M, base_fk
+        fk_of.append(fk)
         # ---- 3 floors: the floor layer (upper floors; ground floor done with the plinth)
         if i > 0:
             for x in range(x0 + 1, x1):
@@ -466,12 +474,14 @@ def _body(ctx, s, st):
                         else:
                             ctx.set(x, yy, z, "walls", "full", M("infill"))
                         continue
-                    if corner or t in posts:
+                    if fk == "piers" and corner:     # stone corner piers, timber posts and logs between
+                        ctx.set(x, yy, z, "frame", "full", M("pier") if "pier" in (ov or st) else M("quoin"))
+                    elif corner or t in posts:
                         ctx.set(x, yy, z, "frame", "full", M("frame"), axis="y")
                     elif beam:
                         ctx.set(x, yy, z, "frame", "full", M("frame"), axis=ax)
                     else:
-                        ctx.set(x, yy, z, "walls", "full", M("infill"))
+                        ctx.set(x, yy, z, "walls", "full", M("infill"), axis="y")   # log infill stands upright
                     if fk == "proud" and (corner or t in posts or beam):
                         ox, oz = DIRS[sd]
                         ctx.set(x + ox, yy, z + oz, "frame", "full", M("frame"), axis="y" if (corner or t in posts) else ax)
@@ -495,13 +505,36 @@ def _body(ctx, s, st):
                             x, z = wall_cell(rr, sd, t)
                             if min(t - a_, b_ - t) == 1: ctx.set(x, fl - 1, z, "frame", "slab", M("trim"), half="top")
                             else: ctx.set(x, fl - 1, z, "frame", "trapdoor", M("trim"), open=False, half="top", facing=sd)
+    M, fk = base_M, base_fk
     if fk == "stone" and len(storeys) > 1:   # string-course corners wrap with outer-corner stairs
         for i in range(1, len(storeys)):
             x0, z0, x1, z1 = rects[i]
             for (cx, cz, fa, fb) in ((x0 - 1, z0 - 1, "n", "w"), (x1 + 1, z0 - 1, "n", "e"), (x0 - 1, z1 + 1, "s", "w"), (x1 + 1, z1 + 1, "s", "e")):
                 fc, cn = corner_stair(fa, fb)
                 ctx.set(cx, floors[i], cz, "details", "stairs", M("infill"), facing=fc, half="top", corner=cn)
-    # ---- 5 openings
+    return {"floors": floors, "rects": rects, "plate": plate, "fk": fk, "y": y, "plinth": plinth, "storeys": storeys,
+            "posts_of": posts_of, "fk_of": fk_of}
+
+
+def _openings(ctx, s, st, B, H_blocks, H_extra, others):
+    """Stage 5 for one block, run once every roof field is known, so no window opens onto a roof: a
+    window is left out when another block's roof is in front of it or above its sill (it would look into
+    that roof or its attic), when a porch roof crosses the glass, when its wall faces another block, and
+    when the storey is too short for it under its own roof (no shutters left standing on a roof)."""
+    floors, rects, storeys, plinth, fk, plate = B["floors"], B["rects"], B["storeys"], B["plinth"], B["fk"], B["plate"]
+    posts_of = B["posts_of"]
+    inside_other = lambda c: any(r[0] <= c[0] <= r[2] and r[1] <= c[1] <= r[3] for ob in others for r in ob["rects"])
+    def blocked(rr, sd, t, fl, ww, wh, dropped):
+        ox, oz = DIRS[sd]; rx, rz = RIGHT_OF[sd]
+        x, z = wall_cell(rr, sd, t); top = fl + 1 + wh
+        if top > (plate if rr is rects[-1] else fl + storeys[rects.index(rr)] - 1): return "runs into its roof"
+        for k in range(-(ww // 2) - 1, ww // 2 + 2):
+            for out in (1, 2, 3):
+                c = (x + rx * k + ox * out, z + rz * k + oz * out)
+                if out == 1 and inside_other(c): return "faces another block"
+                if H_blocks.get(c, -99) >= fl + 1: return "looks onto a roof"
+                if fl + 1 <= H_extra.get(c, -99) <= top + 1: return "a porch roof crosses it"
+        return None
     dspec = s.get("door", {"side": "s"})
     dside, dt = (dspec or {}).get("side", "s"), (dspec or {}).get("at", 0)
     if dspec:
@@ -511,6 +544,7 @@ def _body(ctx, s, st):
     skip = {(b.get("side", "s"), b.get("storey", 1), b.get("at", 0)) for b in s.get("balconies", [])}
     wspec = s.get("windows", "auto")
     shutter_share = s.get("shutters", 0.3 if fk != "proud" else 0.0)
+    y = B["y"]
     for i, (fl, rr, h) in enumerate(zip(floors, rects, storeys)):
         for sd in "nsew":
             if wspec != "auto":
@@ -522,12 +556,15 @@ def _body(ctx, s, st):
                 t = wv["at"]; ww = wv.get("w", 1); wh = wv.get("h", 2)
                 if i == 0 and sd == dside and abs(t - dt) <= 1 + ww // 2: continue
                 if any(sd == bs and i == bi and abs(t - bt) <= 1 + ww // 2 for bs, bi, bt in skip): continue
+                why = blocked(rr, sd, t, fl, ww, wh, None)
+                if why:
+                    if wspec != "auto": ctx.log.append(f"{st['_name']}: window {sd} storey {i} at {t} left out: {why}")
+                    continue
                 head_room = (fl + h) - (fl + 2 + wh)
                 sh = wv.get("shutters")
                 if sh is None:   # symmetric pairs across a front, about 30% (05: shutters)
                     sh = shutter_share > 0 and h3(abs(t), i, "nsew".index(sd), 17) < shutter_share and ww in (1, 3)
-                window(ctx, rr, sd, t, fl, st, ww, wh, head_room, fk, sh, wv.get("sill"))
-    return {"floors": floors, "rects": rects, "plate": plate, "fk": fk, "y": y, "plinth": plinth, "storeys": storeys}
+                window(ctx, rr, sd, t, fl, st, ww, wh, head_room, B["fk_of"][i], sh, wv.get("sill"))
 
 
 def _roof_of(ctx, s, st, B, k=0):
@@ -687,13 +724,22 @@ def house(ctx, s):
     B = _body(ctx, s, st)
     blocks = [(s, st, B)]
     for k, wg in enumerate(s.get("wings", [])):
-        ws = {key: v for key, v in s.items() if key in ("style", "materials", "plinth", "y", "frame", "bay", "shutters", "storeys")}
+        ws = {key: v for key, v in s.items() if key in ("style", "materials", "plinth", "y", "frame", "bay", "shutters", "storeys", "storey_style")}
         ws.update({"door": None, "chimney": None}); ws.update(wg)
         wst = _style(ctx, ws, st if "style" not in wg else None)
+        if ws.get("join", "eave") == "eave":   # a wing's ridge must reach the main eave so the roofs join (06)
+            sty = list(ws.get("storeys", [5])); wy = ws.get("y", 0) + ws.get("plinth", 1) - 1
+            wr = ws["rect"]; rs = ws.get("roof", {})
+            Fw, _ = roof_field(wr, rs.get("type", "gable"), rs.get("ridge"), rs.get("overhang", 1), rs.get("verge", 1),
+                               rs.get("pitch", 1), wy + sum(sty) - 1)
+            gap = B["plate"] - max(v[0] for v in Fw.values())
+            if gap > 0:
+                sty[-1] += gap; ws = dict(ws, storeys=sty)
+                ctx.log.append(f"{st['_name']}: wing {k + 1} top storey raised by {gap} so its ridge meets the main eave (\"join\": \"none\" keeps it low)")
         blocks.append((ws, wst, _body(ctx, ws, wst)))
     if len(blocks) > 1: _join(ctx, blocks)
     for b in s.get("balconies", []): _balcony(ctx, b, st, B)
-    # ---- 6 roof: every block's roof in one height field, so valleys close (06 connecting roofs)
+    # ---- 6 roof fields first (06 connecting roofs), so openings can keep clear of every roof
     roofs = [(*_roof_of(ctx, bs, bst, bB, k), bst, bB) for k, (bs, bst, bB) in enumerate(blocks)]
     Fmain, rmain = roofs[0][0], roofs[0][1]
     extra = []
@@ -701,6 +747,23 @@ def house(ctx, s):
         got = _dormer_fields(ctx, d, st, B, Fmain, rmain)
         if got: extra.append(got)
     if s.get("porch"): extra.append(_porch(ctx, s["porch"] if isinstance(s["porch"], dict) else {}, st, B))
+    H_extra = {}
+    for F, r in extra:
+        if r.get("porch"):
+            for c, v in F.items(): H_extra[c] = max(H_extra.get(c, -99), v[0])
+    # ---- 5 openings, block by block
+    for k, (bs, bst, bB) in enumerate(blocks):
+        Hb = {}
+        for j, (F, r, *_x) in enumerate(roofs):
+            if j == k: continue
+            for c, v in F.items(): Hb[c] = max(Hb.get(c, -99), v[0])
+        _openings(ctx, bs, bst, bB, Hb, H_extra, [ob for j, (_a, _b, ob) in enumerate(blocks) if j != k])
+    # a wing roof that ends against a taller wall: say so (it reads as unfinished; 06 connecting roofs)
+    for k, (F, r, bst, bB) in enumerate(roofs[1:], 1):
+        top = max(v[0] for v in F.values())
+        if top < B["plate"] and any(any(rr[0] - 1 <= c[0] <= rr[2] + 1 and rr[1] - 1 <= c[1] <= rr[3] + 1 for rr in B["rects"]) for c in F):
+            ctx.log.append(f"{st['_name']}: wing {k}'s ridge ({top}) stays below the main eave ({B['plate']}), so its roof stops "
+                           "against the main wall; give the wing the main block's storeys so the roofs join")
     chs = []
     for bs, bst, bB in blocks:
         ch = bs.get("chimney", "auto")
@@ -723,8 +786,8 @@ def house(ctx, s):
     for (F, r, bst, bB), (bs, _, _) in zip(roofs, blocks):
         tr = bs.get("trusses", s.get("trusses", "auto"))
         if tr: trusses(ctx, r, Hf, bst, bB, tr)
-        fin = bs.get("finials", s.get("finials"))
-        if fin: finials(ctx, r, Hf, fin, {c for c, _, _ in chs})
+        fin = bs.get("finials", s.get("finials", "spikes"))
+        if fin: finials(ctx, r, Hf, fin, {c for c, _, _ in chs}, bst)
     if s.get("vines"): vines(ctx, blocks, s["vines"])
     return B
 
@@ -754,24 +817,31 @@ def trusses(ctx, r, H, st, B, mode="auto"):
                     ctx.setif(x, P + 1 + d - (len(cells) // 2 - 2), z, "roof", "stairs", ctx.mat(st, "trim"), facing=f, half="top")
 
 
-def finials(ctx, r, H, kind, skip=()):
-    """07: a spike every 3 or 5 along the ridge, taller finials at the gable peaks. kind: "spikes" (end rods),
-    "rods" (a wall post with a lightning rod), or "peaks" (gable peaks only)."""
+def finials(ctx, r, H, kind, skip=(), st=None):
+    """07 / 06 roof-types (Mateo 2026-11-12: standard on every pitched ridge): a spike every 3 along the
+    ridge, a fence post (wood trim) or wall post (stone trim) with a lightning rod on top, in place of the
+    ridge slab; taller finials (two posts) at the gable peaks. kind: "spikes" (default), "peaks" (peaks
+    only), "endrods" (end rods along the ridge, finials at the peaks), false for none."""
+    if r["kind"] not in ("gable", "hip"): return
     x0, z0, x1, z1 = r["rect"]
-    top = max(H.get(c, -99) for c in H if x0 <= c[0] <= x1 and z0 <= c[1] <= z1)
-    line = [c for c in H if x0 <= c[0] <= x1 and z0 <= c[1] <= z1 and H[c] == top]
-    if not line: return
-    line.sort()
-    ends = {line[0], line[-1]}
+    own = r.get("_F", H)
+    cells = [c for c in own if H.get(c) == own[c][0] if isinstance(own[c], tuple)] if own is not H else list(H)
+    cells = [c for c in cells if x0 - 1 <= c[0] <= x1 + 1 and z0 - 1 <= c[1] <= z1 + 1]
+    if not cells: return
+    top = max(H[c] for c in cells)
+    line = sorted(c for c in cells if H[c] == top)
+    post = ctx.mat(st, "trim") if st else "spruce_planks"
+    n = len(line); mid = n // 2
     for k, (x, z) in enumerate(line):
         if (x, z) in skip: continue
-        peak = (x, z) in ends
-        if kind == "peaks" and not peak: continue
-        if not peak and k % 4: continue
+        peak = k in (0, n - 1)
+        if not peak and (kind == "peaks" or (k - mid) % 3 or k in (1, n - 2)): continue
         y = top + 1                                     # in place of the ridge slab
-        if kind == "rods" or peak:
-            ctx.set(x, y, z, "details", "post", "cobblestone")
-        ctx.set(x, y + (1 if (kind == "rods" or peak) else 0), z, "details", raw="lightning_rod" if (kind == "rods" or peak) else "end_rod")
+        ctx.clear(x, y, z)
+        if kind == "endrods" and not peak:
+            ctx.set(x, y, z, "details", raw="end_rod"); continue
+        for j in range(2 if peak else 1): ctx.set(x, y + j, z, "details", "post", post)
+        ctx.set(x, y + (2 if peak else 1), z, "details", raw="lightning_rod")
 
 
 def vines(ctx, blocks, share=0.15):
