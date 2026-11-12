@@ -106,6 +106,10 @@ def bedrock_state(n, p):
         st["minecraft:cardinal_direction"] = CARD[f or "s"]; st["extinguished"] = False
     elif n.endswith("leaves") or n.endswith("leaves_flowered"):
         st["persistent_bit"] = True
+    elif n == "vine":          # bits: 1 south, 2 west, 4 north, 8 east = the face of the cell it clings to
+        st["vine_direction_bits"] = {"s": 1, "w": 2, "n": 4, "e": 8}[p.get("attach", "n")]
+    elif n in ("end_rod", "lightning_rod"):
+        st["facing_direction"] = 1
     if p.get("axis"): st["pillar_axis"] = p["axis"]
     S = bedrock_states()
     if S:
@@ -135,6 +139,8 @@ def java_state(n, p, java_id):
     elif n == "campfire": st = {"facing": CARD[f or "s"], "lit": "true"}
     elif n.endswith("leaves"): st = {"persistent": "true"}
     elif n == "azalea_leaves_flowered": n = "flowering_azalea_leaves"; st = {"persistent": "true"}
+    elif n == "vine": st = {CARD[p.get("attach", "n")]: "true"}
+    elif n in ("end_rod", "lightning_rod"): st = {"facing": "up"}
     if p.get("axis"): st["axis"] = p["axis"]
     if n == "iron_chain": n = "chain"
     return n, st
@@ -226,7 +232,8 @@ def save_logical(blocks, path):
     xs, ys, zs = zip(*blocks) if blocks else ([0], [0], [0])
     w = max(max(xs) - min(xs), max(zs) - min(zs)) + 1; h = max(ys) - min(ys) + 1
     d = round(1.4 * max(1.0, 1.15 * h / w), 2)          # step back for tall builds so the whole thing is in frame
-    cam = {"views": {"front-left": [-35, 24, d], "front-right": [35, 24, d], "high": [20, 55, d * 1.1], "back": [145, 24, d]}}
+    cam = {"views": {"front-left": [-35, 24, d], "front-right": [35, 24, d], "high": [20, 55, d * 1.1], "back": [145, 24, d],
+                      "front": [0, 10, d], "right": [90, 10, d], "left": [-90, 10, d], "rear": [180, 10, d]}}
     json.dump({"palette": pal, "blocks": out, "camera": cam}, open(path, "w"), separators=(",", ":"))
 
 

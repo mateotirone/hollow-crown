@@ -34,6 +34,14 @@ is the offset from the wall's centre block, positive to the right as seen from o
 | `shutters` | 0.3 (0 on proud frames) | share of windows with shutters, chosen in mirror pairs across each front (05: at most about 30%) |
 | `roof` | gable, long ridge | see Roofs |
 | `chimney` | `auto` | Mateo's chimney through the ridge, 2 in from a gable end; `[[x, z], ...]` to place; `false` for none |
+| `wings` | [] | joined blocks for L, T, U and cross plans: `[{"rect": [...], "storeys": [5, 4], "roof": {"ridge": "z"}}]`. Each wing takes the house's style unless it names its own, gets no door or chimney unless given. Walls, windows and sills between blocks are opened up; all roofs share one height field so valleys close (06 connecting roofs). Make wings narrower or lower than the main block so their roof sits below the main ridge |
+| `dormers` | [] | `[{"side": "s", "at": 0, "w": 3, "h": 3}]` on an eave side (along the ridge): front wall on the wall line with posts and a window, cheeks down to the main roof, its own bare gable roof running back into the main roof |
+| `porch` | none | `{"side": "s", "at": 0, "w": 5, "d": 3, "h": 3}`: plinth-stone floor, log posts on the outer corners, a tie beam, a small gable roof with barge boards that stops at the wall. Best on a ground floor that is not jettied |
+| `balconies` | [] | `[{"side": "e", "storey": 1, "at": 0, "w": 3, "d": 1}]`: a door out, a trim floor on upside-down stair brackets, a fence rail (`rail` to change it); the window there is left out |
+| `brackets` | `arched` | under jetties: stair under each post, then top slab, then flat trapdoors to mid-bay (02 arched supports); `stairs` for the plain stair under each post only |
+| `trusses` | `auto` | 06 step 8: tie beam at the wall plate on every inner post line, king post to the ridge, braces on spans of 9+. `auto` builds them on spans of 9 or more inside; `true` always; `false` never |
+| `finials` | none | `spikes` (end rods every 4 along the ridge, wall post and lightning rod at the gable peaks), `rods` (wall post and lightning rod each time), `peaks` (gable peaks only) |
+| `vines` | none | share of wall cells that start a vine 1 to 3 long (0.15 is plenty); more on the north side, less on the south |
 
 ### What each stage places
 
@@ -41,7 +49,8 @@ is the offset from the wall's centre block, positive to the right as seen from o
    per block of floor height, stairs facing the building, filled under (01 step 5).
 2. **frame**: corner posts (logs, axis y) full height; bay posts; a beam (axis along the wall) at every
    upper floor line and at the wall plate; posts win at corners; jetty brackets: an upside-down trim stair
-   under every upper post on a jettied side (02). Stone: quoins alternating every course.
+   under every upper post on a jettied side, with slabs and flat trapdoors between them so each bay reads
+   as a shallow arch (02 arched supports). Stone: quoins alternating every course.
 3. **floors**: the floor layer inside every storey (03).
 4. **walls**: infill between the frame; stone walls in the wall ladder (04). Stone buildings get a string
    course of upside-down stairs at each upper floor line, wrapping corners with outer-corner stairs (07).
@@ -88,7 +97,9 @@ Doors sit on a bay centre, never on a post, at least 2 from a corner. Never two 
   2 wider than the glass, 1 out. Stone: an upside-down stair of the wall stone above each glass cell, facing out.
 - **Sill** (`sill`): `leafbox` = leaves 1 out under the glass, wall signs on the front and both ends
   (Mateo's window box); `stair` = right-way stairs 1 out, tall side to the wall, slab end caps one wider
-  each side; `slab` = a top-slab ledge 2 wider.
+  each side; `slab` = a top-slab ledge 2 wider; `planter` = a box of open shutter-wood trapdoors 1 out
+  round dirt with flowers (style key `flowers` picks them: region colours from `palettes/`), about a
+  quarter of street windows (05 planters).
 - **Surround**: stone walls get dark oak trapdoors standing either side of the glass (the stone, spruce,
   dark oak pairing).
 - **Shutters**: open trapdoors either side of the glass, 1 out, as tall as the glass, with a trim slab
@@ -152,8 +163,9 @@ pot on top.
 
 ## Not automated yet (build with shapes and `place`)
 
-Dormers, porches and galleries on posts, balconies, trusses inside halls, the arched supports under a floor
-band (slab, stair, trapdoor mirrored), planters of trapdoors, sign-boxed bushes on the ground, vines, beam
-ends on proud frames, ridge spikes and finials, interiors (empty by default anyway). Each is described with
-its exact block pattern in `build-instructions/` (02-frame, 05, 06, 07 and reference/shapes.md): write the
-cells with `place`, or add the part to `parts.py` and this table.
+Galleries on long rows of posts, sign-boxed bushes on the ground, beam ends on proud frames, hammer-beam
+trusses (spans of 15+), hip-roof wings joined to gable roofs at odd angles, round towers joined into a
+house roof (build the tower with shapes: cylinder + cone, see shapes.md, and leave a gap in the house), and
+interiors (empty by default anyway). Each is described with its exact block pattern in `build-instructions/`
+(02-frame, 05, 06, 07 and reference/shapes.md): write the cells with `place`, or add the part to `parts.py`
+and this table. A square tower is a narrow house with `"roof": {"type": "hip", "pitch": 2}`.

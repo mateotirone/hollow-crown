@@ -110,6 +110,8 @@ def main():
     ap.add_argument("--stages", action="store_true", help="also write stages.png, one cumulative view per build stage")
     ap.add_argument("--no-preview", action="store_true")
     ap.add_argument("--mcstructure", action="store_true")
+    ap.add_argument("--shots", default="front-left,back", help="hifi views: front-left, front-right, high, back, "
+                    "front, right, left, rear (straight-on views match a screenshot taken face-on)")
     ap.add_argument("--hifi", nargs=2, metavar=("TEXTURES", "THREE"), help="also shoot real-texture renders with the repo's "
                     "three.js renderer (map/structures/render): Bedrock textures/blocks folder and a three@0.170.0 folder")
     a = ap.parse_args()
@@ -121,8 +123,8 @@ def main():
         else:
             import subprocess
             subprocess.run([sys.executable, r, os.path.join(a.out, "scene.json"), os.path.join(a.out, "hifi"), "--textures", a.hifi[0],
-                            "--three", a.hifi[1], "--shots", "front-left,back", "--title", s["name"]], check=True, stdout=subprocess.DEVNULL)
-            s["files"] += ["hifi/shot-front-left.png", "hifi/shot-back.png", "hifi/viewer.html"]
+                            "--three", a.hifi[1], "--shots", a.shots, "--title", s["name"]], check=True, stdout=subprocess.DEVNULL)
+            s["files"] += [f"hifi/shot-{v}.png" for v in a.shots.split(",")] + ["hifi/viewer.html"]
     print(json.dumps(s, separators=(",", ":")))
 
 
