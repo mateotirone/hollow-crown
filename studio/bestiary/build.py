@@ -6,7 +6,7 @@ import json, os, sys, math
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from PIL import Image
 from models import Model
-import roster, items
+import roster, items, voices
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")) + "/"
 RP = ROOT + "Siege_Nights_RP/"; BP = ROOT + "Siege_Nights_BP/"
 
@@ -130,6 +130,7 @@ def entity_bp(m):
     }
     if sc != 1: c["minecraft:scale"] = {"value": sc}
     c.update(sensor_for(m))
+    if voices.has_ambient(mid): c.update(voices.ambient_component(mid, m.get("boss")))   # idle voice: studio/bestiary/voices.py
     groups = {}; events = {}
     if m.get("static"):
         c["minecraft:movement"] = {"value": 0}; c["minecraft:persistent"] = {}
@@ -463,6 +464,7 @@ def main():
           + "export const MOBS = " + json.dumps(data_mobs, indent=1) + ";\n\nexport const ITEMS = " + json.dumps(data_items, indent=1)
           + ";\n\nexport const SIGILS = " + json.dumps(sig, indent=1)
           + ";\n\n// Which fallen body each mob leaves (see bodies.js): kind picks its shape and skin, size is its scale.\nexport const BODIES = " + json.dumps(bodies, indent=1) + ";\n")
+    voices.write_sounds()
     print(len(roster.MOBS), "entities,", len(all_items), "items")
     return built
 
