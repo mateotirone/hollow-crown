@@ -201,6 +201,7 @@ def cube_tex(n, p):
     simple = {"pumpkin": {"top": "pumpkin_top", "side": "pumpkin_side"},
               "grass_block": {"top": "grass_top#grass", "bottom": "dirt", "side": "grass_side_carried"},
               "podzol": {"top": "dirt_podzol_top", "bottom": "dirt", "side": "dirt_podzol_side"},
+              "bone_block": {"top": "bone_block_top", "bottom": "bone_block_top", "side": "bone_block_side"},
               "ochre_froglight": {"top": "ochre_froglight_top", "bottom": "ochre_froglight_top", "side": "ochre_froglight_side"},
               "verdant_froglight": {"top": "verdant_froglight_top", "bottom": "verdant_froglight_top", "side": "verdant_froglight_side"},
               "mangrove_roots": {"top": "mangrove_roots_top", "side": "mangrove_roots_side"},
