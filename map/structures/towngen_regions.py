@@ -41,7 +41,8 @@ REGION_SITES = {
     # Mateo 2026-11-12: Gull's Rest moves down to the coast and gets a real harbour (harbour.py)
     "gulls_rest": dict(name="Gull's Rest", centre=(-865, 405), radius=85, seed=41, harbour=True, square_at=(-910, 403), build_u=1.6, lanes=12,
                        station=((-781, 400), 270), wall=True),    # where the lines leave east; the map thread fixes the exact spot
-    "sunscar":    dict(name="Sunscar", centre=(850, 450), radius=80, seed=61),
+    "sunscar":    dict(name="Sunscar", centre=(850, 450), radius=80, seed=61, wall=True,
+                       avenue=((850, 457), (850, 547)), avenue_statues=32),   # a walled "desert fortress town"; the statue avenue to the Faceless Gate (z 547)
     "mirelight":  dict(name="Mirelight", centre=(-60, 900), radius=70, seed=51),
 }
 
@@ -299,6 +300,8 @@ class RegionTown(Town):
         st = REGION_SITES[self.key].get("station")
         if st: self.station_site(st[0], st[1], RT_REGION_NAME[self.region])
         self.hall_first()
+        if REGION_SITES[self.key].get("avenue"):
+            self.site.update({k: REGION_SITES[self.key][k] for k in ("avenue", "avenue_statues")}); self.avenue()
         self.streets()
         if st: self.station_road()
         self.hall_road(); self.relax(); self.grade_verges()
@@ -312,8 +315,11 @@ class RegionTown(Town):
         self.fields()
         self.dress()
         self.roof_colours()
-        self.path_blocks(); self.ground_blocks(); self.banks()
-        if REGION_SITES[self.key].get("wall"): self.WALL_STONE = WALL_STONE[self.region]; self.town_wall()
+        self.path_blocks(); self.ground_blocks(); self.banks(); self.avenue_statues()
+        if REGION_SITES[self.key].get("wall"):
+            self.WALL_STONE = WALL_STONE[self.region]
+            if not getattr(self, "wall_region", None): self.wall_region = RT_REGION_NAME[self.region]   # towers and gatehouses in the region's style
+            self.town_wall()
         self.works = {(int(x), int(y), int(z)): v for (x, y, z), v in self.works.items()}
         for e in self.plan:
             for k in ('x', 'z', 'ground_y', 'rotation', 'footprint'): e[k] = int(e[k])

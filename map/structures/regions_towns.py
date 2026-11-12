@@ -1071,9 +1071,11 @@ CIVIC = {
     "rimehold": [("hall", rimehold_hall), ("stave_chapel", rimehold_chapel),
                  ("inn", lambda: inn("frost")), ("smithy", lambda: smithy("frost")), ("store", lambda: store("frost")),
                  ("net sheds", lambda: _story("net_sheds"))],
-    "gulls_rest": [("inn", lambda: inn("salt")), ("smithy", lambda: smithy("salt")), ("store", lambda: store("salt"))],
+    "gulls_rest": [("inn", lambda: inn("salt")), ("smithy", lambda: smithy("salt")), ("store", lambda: store("salt")),
+                   ("chapel", lambda: _story("gulls_chapel")), ("fishmonger's loft", lambda: _story("fishmonger_loft"))],
     "sunscar": [("market_hall", sunscar_market_hall), ("inn", sunscar_inn), ("smithy", sunscar_smithy), ("store", sunscar_store),
-                ("warden's office", lambda: _story("warden_office"))],
+                ("warden's office", lambda: _story("warden_office")), ("library", lambda: _story("sunscar_library")),
+                ("old cistern", lambda: _story("sunscar_cistern")), ("caravan water", lambda: _story("caravan_water"))],
     "mirelight": [("inn", lambda: inn("fen")), ("smithy", lambda: smithy("fen")), ("store", lambda: store("fen"))],
 }
 SHORE = {

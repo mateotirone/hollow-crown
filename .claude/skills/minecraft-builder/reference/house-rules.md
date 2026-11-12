@@ -23,6 +23,15 @@ palettes, texturing, paths, reference); this page is the short list and where to
 - **Paths and water run to the edge** (Mateo 2026-11-12): any path, walkway, slip, channel or water inside a
   build or plot carries on to the edge of its footprint, so it joins whatever is next to it. A boathouse slip
   opens through its wall to the footprint edge; a plot's paths reach its border. Stopping short inside is wrong.
+- **Towns are lit** (Mateo 2026-11-12: "none of the towns have light ... the town generation needs to factor in
+  lamps"): lamps round every square (an arm with a hanging lantern, one every ~8 blocks of its edge) and posts
+  along every street on the verge, sides alternating, every 9 (main) / 11 (lane) / 13 (walk) blocks, none
+  closer than 7 to another. Region style in `map/structures/dressing.py` LAMP_STYLE (stone foot, the region's
+  wood post, a lantern). towngen does this for every town and settlement (`Town.light_town`); a hand-built
+  plot or site lights its own paths the same way. Check: no street block darker than light 4 at night.
+- **Nothing stands on a sunk slab** (Mateo 2026-11-12, "the town well is one block too high"): paths and squares
+  are bottom slabs sunk half a block, so anything built on one (a well rim, a lamp foot, a step, a post)
+  replaces the slab at the slab's own y; setting it on top leaves a half-block gap and reads a block too high.
 - **Build stage by stage** and check each stage (`--stages`) before the next. Ask Mateo rather than guess;
   he builds well himself and sends pictures.
 

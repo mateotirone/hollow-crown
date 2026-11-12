@@ -9,6 +9,9 @@ How versions work is in [`docs/RELEASING.md`](docs/RELEASING.md).
 Everything merged to `main` since the last release goes here. Each pull request that changes what players see adds a line under one of these headings.
 
 ### Added
+- Towns are lit: lamps round every square and along every street, in each region's style (Mateo's playtest: the towns were too dark at night).
+- The town well no longer stands a block too high: its rim replaces the square's half-slab paving instead of sitting on it.
+- Sunscar is a walled desert fortress town: a wall with towers (the east tower among them), a fortress library, the old cistern, a caravan watering place, and a wide avenue south from the square to the Faceless Gate, lined with statues. Gull's Rest gets a chapel with a lectern and a fishmonger's loft; Millbrook gets an Order waystation.
 - New story places in the region towns: the net sheds on Rimehold's lake side, the warden's office in Sunscar and a bakery on the Millbrook square. Millbrook's chapel now stands on the square itself.
 - Kingsrest and Gull's Rest have proper town walls with a gatehouse on every road out, built in the same stone as their train stations and topped with the station's spired towers. Every street runs out through its gate to the edge of town, and the railway runs outside the wall to the station, which stands in the wall line.
 - Two new homes for town plots: the House (a Medium plot, one storey and a tall attic, about four beds) and the taller Townhouse (a long Medium or Large plot, stone below and a jettied floor over the road, about six beds). Each region builds them its own way: timber frames in the Vale, dark oak and slate with dragon-head gables in Frostmarch, sandstone and whitewash under sea-green hipped roofs in Saltreach, flat-roofed sandstone with roof beams in Emberwaste, and mud brick on mangrove piles in Blackfen.

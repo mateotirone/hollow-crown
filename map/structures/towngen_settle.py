@@ -43,6 +43,7 @@ import dressing
 
 TIERS = ["Hamlet", "Town", "City", "Castle"]
 WALL_R = [36, 46, 56, 66]                       # wall ring (outer face) per tier (Mateo 2026-11-12; was 32/40/48/56)
+FIELD_REACH = 5                                 # field_edge: crops within this many blocks of the slot's box (Farmhouse)
 CLEAR = 3                                       # a slot's far corner stays this far inside the wall line
 # (width along the door side, depth into the plot); the first shape is the size's plain box, the
 # others its long variants. Grown to fit the region designs of PR #89 with a block to spare
@@ -403,7 +404,7 @@ class Settlement(Town):
         dmax = max(math.hypot(x - self.C[0] + (0.5 if x >= self.C[0] else -0.5), z - self.C[1] + (0.5 if z >= self.C[1] else -0.5)) for x, z in G)
         return tier_of_radius(dmax)
 
-    def try_slot(self, size, cand, max_tier=3, long_only=False, square_only=False):
+    def try_slot(self, size, cand, max_tier=3, long_only=False, square_only=False, accept=None):
         door, deg, rid = cand
         plain = SHAPES[size][0]
         shapes = SHAPES[size][:]; self.rng.shuffle(shapes)
@@ -417,6 +418,7 @@ class Settlement(Town):
             t = self.box_tier(G)
             if t is None or t > max_tier: continue
             if any(not self.ok(x, z) or (self.at(self.PKIND, x, z) == 2 and not getattr(self, "in_field", False)) for x, z in G): continue
+            if accept and not accept(G): continue
             wk = self.walk_cells(door, ROT[deg])
             if wk is None: continue
             t = max(t, int(self.at(self.OT, *wk[1])))                # never before the road it opens onto
@@ -479,6 +481,77 @@ class Settlement(Town):
         self.in_field = False
         return got
 
+    def field_by(self, e, reach=None, need=3):
+        """True when crop ground (field cells that will be planted) lies within reach of the slot's box,
+        the same test tag() uses for field_edge once the crops are in."""
+        reach = FIELD_REACH if reach is None else reach
+        xs, zs = zip(*e["cells"])
+        crop = (self.PKIND == 2) & (self.K < 0) & ~self.WET & (self.D <= self.LAND_R) & ((self.TAKEN == 0) | (self.TAKEN == 3))
+        n = sum(1 for x in range(min(xs) - reach, max(xs) + reach + 1) for z in range(min(zs) - reach, max(zs) + reach + 1)
+                if self.ok(x, z) and crop[self.ij(x, z)])
+        return n >= need
+
+    def crop_near(self, G, reach=None, need=3):
+        """True when crop ground lies within reach of the box round cells G (tag field_edge's test)."""
+        reach = FIELD_REACH if reach is None else reach
+        xs, zs = zip(*G)
+        crop = (self.PKIND == 2) & (self.K < 0) & ~self.WET & (self.D <= self.LAND_R) & ((self.TAKEN == 0) | (self.TAKEN == 3))
+        n = 0
+        for x in range(min(xs) - reach, max(xs) + reach + 1):
+            for z in range(min(zs) - reach, max(zs) + reach + 1):
+                if self.ok(x, z) and crop[self.ij(x, z)]:
+                    n += 1
+                    if n >= need: return True
+        return False
+
+    def farmhouse(self, C, prefer):
+        """The Farmhouse slot (a Medium, plain or long, on Town ground, field_edge). First a slot by crops already there;
+        else a 9 x 9 field is set aside on free Town ground and a slot looked for beside it, the field given
+        back if none fits. Slots on the hall's level-4 ground never count."""
+        ok = lambda G: self.crop_near(G) and not any(self.HALL4[self.ij(x, z)] and not self.HALL3[self.ij(x, z)] for x, z in G)
+        cs = C[:]; self.rng.shuffle(cs); cs.sort(key=prefer)
+        self.in_field = True
+        try:
+            for c in cs:
+                if self.try_slot("M", c, 1, accept=ok): return True
+            # the field may lie just outside the Town wall (fields outside the walls, the Farmhouse at the wall
+            # by it): that keeps the Town ring's ground for the homes; Town ground is the fallback
+            band = (self.D > WALL_R[1] + 0.5) & (self.D <= WALL_R[1] + 7)
+            town = (self.D <= WALL_R[1] - CLEAR) | band
+            free = (self.K < 0) & (self.TAKEN == 0) & ~self.WET & (self.PKIND == 1) & town
+            road = self._dilate(self.K >= 0, 2)
+            spots = []
+            for i, j in np.argwhere(free):
+                win = (slice(i - 4, i + 5), slice(j - 4, j + 5))
+                if i < 4 or j < 4 or win[0].stop > free.shape[0] or win[1].stop > free.shape[1] or not free[win].all(): continue
+                g = self.G[win]
+                if g.max() - g.min() > 2: continue
+                near = road[max(0, i - 12):i + 13, max(0, j - 12):j + 13].any()
+                if not near: continue
+                spots.append(((100 if band[i, j] else 0) + float(self.D[i, j]) + 3 * self.rng.random(), i, j))
+            spots.sort(reverse=True)                   # outermost first: Hamlet ground is precious
+            tried = []
+            for _, i, j in spots:
+                if any(abs(i - a) < 5 and abs(j - b) < 5 for a, b in tried): continue
+                if not free[i - 4:i + 5, j - 4:j + 5].all(): continue
+                tried.append((i, j))
+                if len(tried) > 30: break
+                win = (slice(i - 4, i + 5), slice(j - 4, j + 5))
+                oP, oK = self.PORT[win].copy(), self.PKIND[win].copy()
+                L = int(self.PORT.max()) + 1
+                self.PORT[win] = L; self.PKIND[win] = 2
+                X, Z = i + self.X0, j + self.Z0
+                near_c = [c for c in cs if abs(c[0][0] - X) + abs(c[0][1] - Z) <= 30]
+                near_c.sort(key=lambda c: abs(c[0][0] - X) + abs(c[0][1] - Z))
+                for c in near_c:
+                    if self.try_slot("M", c, 1, accept=ok):
+                        self.port[L] = {"kind": "field", "area": 81, "u": 0, "plot": True}
+                        return True
+                self.PORT[win] = oP; self.PKIND[win] = oK
+            return False
+        finally:
+            self.in_field = False
+
     def farm_field(self, e):
         """A 9 x 9 field plot (one watered cell's reach) beside a Farmhouse slot, inside the Town wall, so the
         Farmhouse stands by its field from the start (field_edge). False when there is no room."""
@@ -488,7 +561,7 @@ class Settlement(Town):
         for cx in range(box[0] - 9, box[2] + 10):
             for cz in range(box[1] - 9, box[3] + 10):
                 gap = max(box[0] - cx, cx - box[2], box[1] - cz, cz - box[3])
-                if gap < 5 or gap > 7 or not self.ok(cx, cz): continue
+                if gap < 5 or gap > 4 + FIELD_REACH or not self.ok(cx, cz): continue
                 i, j = self.ij(cx, cz)
                 if i < 5 or j < 5: continue
                 win = (slice(i - 4, i + 5), slice(j - 4, j + 5))
@@ -540,20 +613,7 @@ class Settlement(Town):
         fc = np.argwhere(fm & (self.D <= WALL_R[1] - CLEAR)) if (fm & (self.D <= WALL_R[1] - CLEAR)).any() else np.argwhere(fm)
         fc = fc + np.array([self.X0, self.Z0])
         near_field = (lambda c: float(np.min(np.abs(fc[:, 0] - c[0][0]) + np.abs(fc[:, 1] - c[0][1]))) + 2 * self.rng.random()) if len(fc) else near_sq
-        got = 0; extra = 0                             # as one big), the Farmhouse: a plain Medium with its own
-        if len(fc):                                    # field beside it (field_edge, the settlement thread's charter)
-            for c in sorted(C, key=near_field):
-                if near_field(c) > 12: break
-                self.in_field = True; e = self.try_slot("M", c, 1, square_only=True); self.in_field = False
-                if e and not self.on_hall4(e): got = 1; break
-        if not got:
-            cs = C[:]; self.rng.shuffle(cs); cs.sort(key=near_sq)
-            for c in cs:
-                e = self.try_slot("M", c, 1, square_only=True)
-                if not e: continue
-                if not self.on_hall4(e) and self.farm_field(e): got = 1; break
-                extra += 1                             # no field room by it: it stays a plain Medium (the Mint's)
-                if extra >= 3: break
+        got = self.farmhouse(C, near_sq)               # as one big), the Farmhouse: a plain Medium by its own crops
         if not got: pass_("M", 1, 1, near_sq)
         pass_("M", 1, 1, near_sq)
         pass_("S", 1, 3, hamlet)
@@ -586,6 +646,10 @@ class Settlement(Town):
         # short there fails the charter): plain boxes a block apart on slightly steeper ground
         self.tight = True
         pass_("S", 1, 3, near_sq); pass_("M", 1, 2, near_sq); pass_("L", 2, 1, near_sq); pass_("M", 2, 2, near_sq)
+        pass_("S", 1, 4, near_sq); pass_("S", 2, 6, near_sq); pass_("S", 3, 8, far)   # Smalls into what is left (homes, work)
+        self.in_field = True                           # last: a Small may take the corner of a field (fields are
+        pass_("S", 1, 1, near_sq); pass_("S", 2, 1, near_sq)   # wide; the charter still checks 80 crop cells by Town)
+        self.in_field = False
         self.tight = False
         self.relax()
 
@@ -633,7 +697,7 @@ class Settlement(Town):
         [("home", HOME + ("MF",))] * 3 + [("inn", ("L",)), ("barracks", ("L", "ML", "M", "MF")), ("work", ANY + ("MF",))],
         [("home", HOME + ("MF",))] * 4,
     ]
-    FARM_EDGE = True                     # the Farmhouse needs a plain Medium tagged field_edge (settlement thread)
+    FARM_EDGE = True                     # the Farmhouse needs a Medium (plain or long, 2026-11-12) tagged field_edge (settlement thread)
     def charter(self):
         """Do the slots open by each tier hold every building that tier's charter (and the ones before) needs?
         Plus a field by Town (the Farmhouse's). Returns (passes, shortfall: buildings with no slot, summed)."""
@@ -643,11 +707,12 @@ class Settlement(Town):
             for e in self.slots:
                 if e["opensAt"] > t or (t >= 3 and "hall4" in self.tag(e)[0]): continue
                 c = "ML" if e["size"] == "M" and e.get("long") else e["size"]
-                if c == "M" and (not self.FARM_EDGE or "field_edge" in self.tag(e)[0]): c = "MF"
+                if c in ("M", "ML") and (not self.FARM_EDGE or "field_edge" in self.tag(e)[0]): c += "F"
                 sup[c] += 1
             needs = [n for tt in range(t + 1) for n in self.CHARTER_NEEDS[tt]]
             needs.sort(key=lambda n: len(n[1]))                # strictest first, each into its smallest class
             for name, classes in needs:
+                if "ML" in classes or "MF" in classes: classes = classes + ("MLF",)   # a long Medium by crops serves either
                 c = next((c for c in classes if sup[c] > 0), None)
                 if c: sup[c] -= 1
                 else: short += 1; self.missing.append((TIERS[t], name))
@@ -851,20 +916,11 @@ class Settlement(Town):
 
     def dress(self):
         mid = TG.TB.well(self.seed); self.stamp(mid, self.sq[0], self.sq[1], self.sqY, 0, "square")
-        self.fixtures.append({"name": "well", "stamp": mid.name, "at": list(self.rel(*self.sq)), "ground_y": self.sqY, "rotation": 0, "tier": 0})
-        lamp = dressing.lamp()
-        for rd in self.roads:
-            if rd["kind"] not in ("main", "lane"): continue
-            hw = WIDTH[rd["kind"]] / 2.0 + 1
-            for t in range(6, len(rd["pts"]) - 3, 15):
-                x, z = rd["pts"][t]; (x0, z0), (x1, z1) = rd["pts"][t - 1], rd["pts"][t + 1]
-                d = math.hypot(x1 - x0, z1 - z0) or 1; s = 1 if (t // 15) % 2 else -1
-                lx, lz = int(round(x - (z1 - z0) / d * hw * s)), int(round(z + (x1 - x0) / d * hw * s))
-                if not self.inside(lx, lz, 4): continue
-                i, j = self.ij(lx, lz)
-                if self.K[i, j] >= 0 or self.TAKEN[i, j] or self.WET[i, j] or self.HALL[i, j]: continue
-                self.stamp(lamp, lx, lz, int(self.G[i, j]), 0, "lamp"); self.TAKEN[i, j] = 4
-                self.fixtures.append({"name": "lamp", "stamp": lamp.name, "at": list(self.rel(lx, lz)), "ground_y": int(self.G[i, j]), "rotation": 0, "tier": int(self.OT[i, j])})
+        # the square is paved in bottom slabs sunk half a block at sqY: the game builds the well's rim at ground_y + 1,
+        # so ground_y is one under the paving and the rim replaces the slab (Mateo 2026-11-12: "the town well is one
+        # block too high"; it stood on top of the paving with a half-block gap)
+        self.fixtures.append({"name": "well", "stamp": mid.name, "at": list(self.rel(*self.sq)), "ground_y": self.sqY - 1, "rotation": 0, "tier": 0})
+        self.light_town()                              # lamps round the square and along every street (towngen)
 
     # ---- tags
     def tag(self, e):
@@ -895,7 +951,7 @@ class Settlement(Town):
         if self.ok(*end):
             i, j = self.ij(*end); win = self.RID[max(0, i - 5):i + 6, max(0, j - 5):j + 6]
             if len(set(win[win >= 0].tolist())) >= 2: tags.append("corner")
-        if near(self.PKIND == 2, 3) and near(self.TAKEN == 3, 3): tags.append("field_edge")
+        if near(self.PKIND == 2, FIELD_REACH) and near(self.TAKEN == 3, FIELD_REACH): tags.append("field_edge")
         if near(self.WET, 12 if e["size"] == "W" else 4): tags.append("water")
         return tags, box
 

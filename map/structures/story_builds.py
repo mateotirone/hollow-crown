@@ -5,7 +5,10 @@ in story_specs/ built by the minecraft-builder skill's engine; the towns place t
 """
 import harbour
 
-DOORS = {"net_sheds": (0, 7), "warden_office": (0, 6), "bakery": (0, 6)}
+DOORS = {"net_sheds": (0, 7), "warden_office": (0, 6), "bakery": (0, 6),
+         # story-areas thread 2026-11-12: places the story names that the towns lacked
+         "sunscar_library": (0, 8), "sunscar_cistern": (0, 6), "caravan_water": (0, 4),
+         "gulls_chapel": (0, 9), "fishmonger_loft": (0, 6), "waystation": (0, 6)}
 NEAR = {"net sheds": (60, -1130)}            # Hallowmere's middle (map/draw_map.py lakes)
 
 def build(name):

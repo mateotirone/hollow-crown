@@ -54,7 +54,8 @@ SITES = {
                       first_r=13,               # its door 13 out: the Seneschal's clock posts ring the square at 10 (well_plan.js)
                       civic=[("chapel", lambda: vale_civic.chapel(name="millbrook_chapel")),
                              ("clock tower", vale_civic.clock_tower),
-                             ("bakery", lambda: __import__("story_builds").build("bakery"))]),
+                             ("bakery", lambda: __import__("story_builds").build("bakery")),
+                             ("order waystation", lambda: __import__("story_builds").build("waystation"))]),
     "Kingsrest": dict(centre=(-118, -118), radius=90, size="town", fixed_square=True, square_r=9, seed=7, inn=True,
                       roofs={"slate": 4, "dark shingle": 3, "warm red": 2, "white": 1}, accent="copper",
                       civic=[("guildhall", vale_civic.guildhall), ("chapel", vale_civic.chapel)]),
@@ -235,7 +236,7 @@ class Town:
         if math.hypot(out[-1][0] - pts[-1][0], out[-1][1] - pts[-1][1]) > 0.3: out.append(tuple(pts[-1]))
         return out
 
-    def lay(self, cells, kind, k_start=None, k_end=None, beyond=0):
+    def lay(self, cells, kind, k_start=None, k_end=None, beyond=0, width=None):
         """Turn a cell route into a street: smooth it, give it half-block heights that never change
         by more than half a block per block, and paint it `WIDTH[kind]` wide."""
         if len(cells) < 2: return None
@@ -254,18 +255,18 @@ class Town:
                 if not (k_end is not None and i == len(hs) - 1): hs[i] = max(min(hs[i], hs[i - 1] + 1), hs[i - 1] - 1, lo[i])
             for i in range(len(hs) - 2, -1, -1):
                 if not (k_start is not None and i == 0): hs[i] = max(min(hs[i], hs[i + 1] + 1), hs[i + 1] - 1, lo[i])
-        r = WIDTH[kind] / 2.0; p = PRIO[kind]
+        r = (width or WIDTH[kind]) / 2.0; p = PRIO[kind]
         for (x, z), k in zip(pts, hs):
             for dx in range(-int(r) - 1, int(r) + 2):
                 for dz in range(-int(r) - 1, int(r) + 2):
                     cx, cz = int(round(x)) + dx, int(round(z)) + dz
-                    if (cx + 0.0 - x) ** 2 + (cz + 0.0 - z) ** 2 > r * r + 0.15 or not self.inside(cx, cz, -beyond): continue
+                    if (cx + 0.0 - x) ** 2 + (cz + 0.0 - z) ** 2 > r * r + 0.15 or not self.inside(cx, cz, -beyond) or not self.ok(cx, cz): continue
                     i, j = self.ij(cx, cz)
                     if self.KIND[i, j] >= p: continue
                     if self.TAKEN[i, j] >= 2: continue
                     if self.WET[i, j] and not self.at(self.WET, int(round(x)), int(round(z))): continue   # a bank, not a bridge
                     self.K[i, j] = k; self.KIND[i, j] = p
-        rd = {"kind": kind, "pts": pts, "k": hs}
+        rd = {"kind": kind, "pts": pts, "k": hs, "width": width or WIDTH[kind]}
         self.roads.append(rd)
         self._near = self._dilate(self.KIND > 0, 3) & ~(self.KIND > 0)
         return rd
@@ -938,19 +939,7 @@ class Town:
             st = dressing.stall(self.seed + k)
             ox, oz = rot_xz(1, 1, deg)
             self.stamp(st, int(round(x - ox)), int(round(z - oz)), self.sqY, deg, "stall")
-        # lamps along main streets on the verge, trees in the gaps
-        lamp = dressing.lamp()
-        for rd in self.roads:
-            if rd["kind"] not in ("main", "lane"): continue
-            hw = WIDTH[rd["kind"]] / 2.0 + 1
-            for t in range(6, len(rd["pts"]) - 3, 13 if rd["kind"] == "main" else 17):
-                x, z = rd["pts"][t]; (x0, z0), (x1, z1) = rd["pts"][t - 1], rd["pts"][t + 1]
-                d = math.hypot(x1 - x0, z1 - z0) or 1; s = 1 if (t // 13) % 2 else -1
-                lx, lz = int(round(x - (z1 - z0) / d * hw * s)), int(round(z + (x1 - x0) / d * hw * s))
-                if not self.inside(lx, lz, 2): continue
-                i, j = self.ij(lx, lz)
-                if self.K[i, j] >= 0 or self.TAKEN[i, j] or self.WET[i, j]: continue
-                self.stamp(lamp, lx, lz, int(self.G[i, j]), 0, "lamp"); self.TAKEN[i, j] = 4
+        self.light_town()                              # lamps round the square and along every street (Mateo 2026-11-12)
         nt = 0; want = int(26 * (self.R / 70) ** 2)
         if self.tree_index is not None:                # the tree database (map/trees, PR #94) instead of dressing.tree
             self.db_trees(); want = 0
@@ -970,6 +959,99 @@ class Town:
             r = h3(x, 9, z, self.seed)
             if r < 0.06: self.works.setdefault((x, int(self.G[i, j]) + 1, z), ("short_grass", {}))
             elif r < 0.075: self.works.setdefault((x, int(self.G[i, j]) + 1, z), (dressing.FLOWERS[int(h3(x, 1, z, 3) * len(dressing.FLOWERS))], {}))
+
+    def avenue(self):
+        """A straight paved avenue from site["avenue"][0] to [1] (world points), 19 wide: a 9-wide walk and a 5-deep
+        strip either side for the statues site["avenue_statues"] (n) from faceless_statues.avenue_cells (Sunscar's
+        forty faceless statues of King Oswin, story-areas and world builds threads 2026-11-12). Laid before the
+        streets, so they join it; it runs on out past the town's edge to the Faceless Gate's precinct."""
+        a, b = self.site["avenue"]
+        n = max(1, int(math.hypot(b[0] - a[0], b[1] - a[1])))
+        cells = []
+        for t in range(n + 1):
+            c = (int(round(a[0] + (b[0] - a[0]) * t / n)), int(round(a[1] + (b[1] - a[1]) * t / n)))
+            if not cells or c != cells[-1]: cells.append(c)
+        self.avenue_road = self.lay(cells, "main", beyond=40, width=19)
+
+    def avenue_statues(self):
+        """The statues on the avenue's strips, standing on the paving (y 0 = the street block, replacing the slab)."""
+        if not getattr(self, "avenue_road", None) or not self.site.get("avenue_statues"): return
+        try:
+            import faceless_statues
+            cs = faceless_statues.avenue_cells([tuple(p) for p in self.site["avenue"]], n=self.site["avenue_statues"])
+        except (ImportError, AttributeError) as e:
+            print("avenue statues not built yet:", e); return
+        for (x, y, z), (blk, props) in cs.items():
+            if not self.ok(x, z): continue
+            k = int(self.K[self.ij(x, z)])
+            if k < 0: continue
+            self.works[(x, (k - 1) // 2 + y, z)] = (blk, props)
+
+    LAMP_EVERY = {"main": 9, "lane": 11, "walk": 13}   # blocks between lamps along a street, sides alternating
+    LAMP_REACH = 7                                       # no lamp within this of another (a lantern lights ~7 round)
+
+    def lamp_region(self):
+        r = getattr(self, "region", None) or getattr(self, "arch", None) or "vale"
+        return {"frostmarch": "frost", "saltreach": "salt", "emberwaste": "ember", "blackfen": "fen"}.get(r, r)
+
+    def lamp_spot_ok(self, x, z, lamps, margin=1):
+        if not self.inside(x, z, margin): return False
+        i, j = self.ij(x, z)
+        t = int(self.TAKEN[i, j])                 # 1 (a building's gap) and 3 (a field's edge, not its water) take a lamp
+        if self.K[i, j] >= 0 or t in (2, 4) or t > 4 or self.WET[i, j]: return False
+        if t == 3 and self.works.get((x, int(self.G[i, j]), z), ("",))[0] == "water": return False
+        if getattr(self, "EAVES", None) is not None and self.EAVES[i, j]: return False
+        if getattr(self, "HALL", None) is not None and self.HALL[i, j]: return False
+        return all((x - a) ** 2 + (z - b) ** 2 >= self.LAMP_REACH ** 2 for a, b in lamps)
+
+    def put_lamp(self, bp, x, z, y, deg, lamps):
+        self.stamp(bp, x, z, y, deg, "lamp"); self.TAKEN[self.ij(x, z)] = 4; lamps.append((x, z))
+        if hasattr(self, "fixtures"):
+            self.fixtures.append({"name": "lamp", "stamp": bp.name, "at": list(self.rel(x, z)), "ground_y": y, "rotation": deg,
+                                  "tier": int(self.OT[self.ij(x, z)]) if hasattr(self, "OT") else 0})
+
+    def light_town(self):
+        """Light every town (Mateo 2026-11-12: "none of the towns have light ... the town generation needs to
+        factor in lamps"). Lamps with an arm and a hanging lantern round the square's edge, one every ~8 blocks;
+        then posts along every street on the verge, sides alternating, every LAMP_EVERY blocks, shifted a block
+        or two when the spot is taken, and never closer than LAMP_REACH to another lamp. Region style from
+        dressing.LAMP_STYLE. A town can opt out with dark=True on its site (a story place that must stay dark)."""
+        if self.site.get("dark"): return
+        reg = self.lamp_region(); post = dressing.lamp(reg); arm = dressing.lamp(reg, arm=True)
+        lamps = []
+        # the square: just outside its paving, facing in (the arm reaches over the square)
+        n = max(4, int(round(2 * math.pi * (self.sqR + 1) / 8)))
+        a0 = self.rng.random() * 6.28
+        for k in range(n):
+            a = a0 + 2 * math.pi * k / n
+            for dr in (1, 2, 0):
+                x, z = int(round(self.sq[0] + math.cos(a) * (self.sqR + dr))), int(round(self.sq[1] + math.sin(a) * (self.sqR + dr)))
+                if dr == 0:                              # on the paving's edge: the foot replaces the sunk slab
+                    if not self.ok(x, z) or self.K[self.ij(x, z)] < 0: continue
+                    if any((x - p) ** 2 + (z - q) ** 2 < 25 for p, q in lamps): continue
+                    if self.TAKEN[self.ij(x, z)]: continue
+                    self.put_lamp(arm, x, z, int(self.sqY) - 1, snap_rot(self.sq[0] - x, self.sq[1] - z), lamps); break
+                if self.lamp_spot_ok(x, z, [l for l in lamps]) and abs(int(self.G[self.ij(x, z)]) - self.sqY) <= 1:
+                    self.put_lamp(arm, x, z, int(self.G[self.ij(x, z)]), snap_rot(self.sq[0] - x, self.sq[1] - z), lamps); break
+        # the streets
+        for rd in self.roads:
+            every = self.LAMP_EVERY.get(rd["kind"])
+            if not every: continue
+            hw = rd.get("width", WIDTH[rd["kind"]]) / 2.0 + 1
+            pts = rd["pts"]
+            for n_, t in enumerate(range(3, len(pts) - 2, every)):
+                s = 1 if n_ % 2 else -1
+                done = False
+                for dt in (0, 1, -1, 2, -2, 3, -3):
+                    tt = t + dt
+                    if tt < 1 or tt >= len(pts) - 1: continue
+                    x, z = pts[tt]; (x0, z0), (x1, z1) = pts[tt - 1], pts[tt + 1]
+                    d = math.hypot(x1 - x0, z1 - z0) or 1
+                    for side in (s, -s):
+                        lx, lz = int(round(x - (z1 - z0) / d * hw * side)), int(round(z + (x1 - x0) / d * hw * side))
+                        if not self.lamp_spot_ok(lx, lz, lamps): continue
+                        self.put_lamp(post, lx, lz, int(self.G[self.ij(lx, lz)]), 0, lamps); done = True; break
+                    if done: break
 
     tree_index = None; tree_dir = None; tree_src = None
     TOWN_TREES = {"vale": {"vale_great_oak": 2, "vale_ash": 2, "vale_silver_birch": 1, "vale_apple": 1, "vale_hawthorn": 1},
