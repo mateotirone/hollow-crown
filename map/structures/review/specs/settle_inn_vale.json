@@ -1,0 +1,89 @@
+{
+ "card": {
+  "title": "Inn",
+  "sub": "Vale, warm red roof",
+  "region": "vale",
+  "where": "Settlement plot (Large 15 x 15)",
+  "kind": "Work",
+  "blurb": "Eaves to the road, a stone tap room with the bar, tables and a hearth, a jettied floor of three bedrooms above, a sign over the door."
+ },
+ "after": "settle_skill:inn_inside",
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "vale_timber",
+    "frame": "stripped_spruce_log",
+    "roof": "brick_block"
+   },
+   "rect": [
+    -6,
+    -10,
+    6,
+    0
+   ],
+   "y": 0,
+   "plinth": 2,
+   "storeys": [
+    5,
+    5
+   ],
+   "jetty": [
+    "s"
+   ],
+   "storey_style": [
+    {
+     "frame_kind": "stone",
+     "frame": "stone_bricks",
+     "infill": {
+      "ladder": "VAL-01",
+      "axis": "y"
+     }
+    },
+    {}
+   ],
+   "door": {
+    "side": "s",
+    "kind": "house",
+    "steps": 1
+   },
+   "roof": {
+    "type": "gable",
+    "ridge": "x",
+    "pitch": 1
+   },
+   "dormers": [
+    {
+     "side": "s",
+     "at": -4,
+     "w": 3,
+     "h": 3
+    },
+    {
+     "side": "s",
+     "at": 4,
+     "w": 3,
+     "h": 3
+    },
+    {
+     "side": "n",
+     "at": 0,
+     "w": 3,
+     "h": 3
+    }
+   ],
+   "chimney": [
+    [
+     -6,
+     -6
+    ],
+    [
+     6,
+     -6
+    ]
+   ],
+   "vines": 0.03
+  }
+ ],
+ "name": "settle_inn_vale"
+}

@@ -1,0 +1,86 @@
+{
+ "card": {
+  "title": "Townhouse",
+  "sub": "Vale, old slate roof",
+  "region": "vale",
+  "where": "Settlement plot (long Medium 13 x 15 or Large)",
+  "kind": "House",
+  "blurb": "Stone ground floor, a jettied stripped-spruce floor over the road, a high attic with dormers. About six beds."
+ },
+ "after": "settle_skill:townhouse_inside",
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "vale_timber",
+    "frame": "stripped_spruce_log",
+    "roof": {
+     "ladder": [
+      "deepslate_tiles",
+      "cobbled_deepslate"
+     ],
+     "axis": "noise",
+     "scale": 2
+    }
+   },
+   "rect": [
+    -5,
+    -10,
+    5,
+    0
+   ],
+   "y": 0,
+   "plinth": 2,
+   "storeys": [
+    5,
+    5
+   ],
+   "jetty": [
+    "s"
+   ],
+   "storey_style": [
+    {
+     "frame_kind": "stone",
+     "frame": "stone_bricks",
+     "infill": {
+      "ladder": "VAL-01",
+      "axis": "y"
+     }
+    },
+    {}
+   ],
+   "door": {
+    "side": "s",
+    "kind": "house",
+    "steps": 1
+   },
+   "roof": {
+    "type": "gable",
+    "ridge": "z",
+    "pitch": 1
+   },
+   "dormers": [
+    {
+     "side": "e",
+     "at": 1,
+     "w": 3,
+     "h": 3
+    },
+    {
+     "side": "w",
+     "at": -1,
+     "w": 3,
+     "h": 3
+    }
+   ],
+   "chimney": [
+    [
+     3,
+     -8
+    ]
+   ],
+   "vines": 0.03
+  }
+ ],
+ "name": "settle_townhouse_vale"
+}

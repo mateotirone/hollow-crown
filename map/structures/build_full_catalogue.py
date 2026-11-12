@@ -148,6 +148,9 @@ def main():
     sec = {"id": "skill-pass", "title": "Reviewed on the building skill", "blurb": "The run-through pass: each building rebuilt from the current build instructions on the one building engine, checked in 3D, then Mateo's notes.", "cards": []}
     sections.append(sec)
     def from_spec(f):
+        k = os.path.basename(f)[:-5]
+        if k.startswith("settle_"):    # settlement plot buildings: exactly as the game gets them (settle_skill.build)
+            import settle_skill; bid, region = k[7:].rsplit("_", 1); return settle_skill.build(bid, region)
         spec = json.load(open(f)); b = Blueprint(spec["name"]); engine.into_blueprint(b, spec)
         if spec.get("after"):          # a furnished build: the review module's interior stage runs on the skill's shell
             import importlib; mod, fn = spec["after"].split(":"); m = importlib.import_module(mod)

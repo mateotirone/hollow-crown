@@ -15,7 +15,8 @@ export const SETTLE = {
   firstBuildRenown: 40, // Renown the first time you raise each kind of building
   previewSeconds: 90, // how long the outline of a chosen building stays up
   // What a building costs on a town plot (Plot Marker), in lots, paid from the purse. The library comes free on arrival.
-  plotPrices: { cottage: 6, well: 3, garden: 5, market: 10, library: 8, watchtower: 8, storehouse: 9, smithy: 12, stable: 14 },
+  plotPrices: { cottage: 6, well: 3, garden: 5, market: 10, library: 8, watchtower: 8, storehouse: 9, smithy: 12, stable: 14,
+    house: 9, townhouse: 13, farmhouse: 10, mint: 14, inn: 16 },
 };
 
 // Out in the wilds you can still make camp. Anything matching one of these can be placed anywhere.
@@ -107,7 +108,7 @@ export const MASON_LINES = {
 // The tier each building first opens at (0 Hamlet, 1 Town, 2 City, 3 Castle). This used to be read from the
 // old fixed layout (layout.js). Farmhouse, Mint, Inn and Barracks are listed ahead of their plot designs.
 export const OPENS_AT = {
-  cottage: 0, well: 0, library: 0, market: 1, garden: 1, farmhouse: 1, mint: 1,
+  cottage: 0, house: 0, well: 0, library: 0, townhouse: 1, market: 1, garden: 1, farmhouse: 1, mint: 1,
   smithy: 2, stable: 2, inn: 2, barracks: 2, storehouse: 3, watchtower: 3,
 };
 
@@ -115,14 +116,15 @@ export const OPENS_AT = {
 // G Great 21x21. A building goes on a plot of its own size, or a size listed under PLOT_ALSO.
 export const PLOT_SIZE = {
   cottage: "S", well: "S", garden: "S", watchtower: "S",
-  smithy: "M", farmhouse: "M", mint: "M",
+  house: "M", smithy: "M", farmhouse: "M", mint: "M",
+  townhouse: "ML",
   stable: "ML", storehouse: "ML", library: "ML",
   market: "L", inn: "L", barracks: "L",
 };
 export const PLOT_ALSO = {
   market: ["ML"], // the market may take a long Medium
   barracks: ["ML"],
-  library: ["L"], stable: ["L"], storehouse: ["L"],
+  library: ["L"], stable: ["L"], storehouse: ["L"], townhouse: ["L"],
 };
 // Only when the town has no free plot of the building's own size or PLOT_ALSO sizes left
 export const PLOT_FALLBACK = { barracks: ["M"] }; // the barracks may take a plain Medium
