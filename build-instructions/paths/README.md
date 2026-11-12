@@ -113,3 +113,27 @@ does this when it raises the Barracks (`settle/raised.js`, `yardGaps`).
 - [ ] Texture by the recipe, worn in the centre; edges and verges on every street.
 - [ ] Every path ends somewhere.
 - [ ] A road to the Citadel ends on one of its `paths.entries`, never on its walls or fields.
+
+## Rail beds (Mateo, 2026-11-12)
+
+Track is laid in game when a stretch is bought (`Siege_Nights_BP/scripts/trains/rail_bed.js`), never stamped
+into the map. The playtest 1.2.1111 track sat in straight-sided dirt trenches with trees cut in half over it,
+so these rules are strict:
+
+- **Graded, never a trench.** The ballast row is 3 wide (gravel over dirt). Beside it the ground is level with
+  the ballast, then rises or falls **1 block for every 2 out** (the town slope rule), out to 7 blocks each side.
+  Cuttings get turf on their banks; embankments are filled and turfed, never left as pillars.
+- **Open to the sky** over the bed. No overhang of rock or leaves, and the train's 3 by 4 opening is always clear.
+- **Trees come down whole**: every log, branch, fence, leaf and hanging root, and the root pit is filled. A
+  tree that touches a building is a building and stays standing. The map keeps trees 7 blocks off every
+  planned line (`map/genworld.py`, `railkeep`).
+- **Roads and paths are level crossings** (grass path, dirt path, cobble, mud): the bed goes through them.
+- **Buildings are never touched**; the bed stops and reports them.
+- **Track two lines share has one height** (`map/railshare.py`): the first line's height wins on every shared
+  block, and later lines re-fit round it under the climbing rules.
+- Bridges, tunnels and deep cuttings are the map's works (`map/railworks.py`); the bed only clears their
+  opening and seats the track on them.
+
+Test any change on the real map before shipping: export the corridor with `tools/export_rail_corridor.py`
+(amulet) and run `node tools/rail_lay_test.mjs corridor.json`, which lays all 7 lines and must print ALL OK
+(no gaps, no trench walls, nothing in the way, no bare dirt, nothing floating).

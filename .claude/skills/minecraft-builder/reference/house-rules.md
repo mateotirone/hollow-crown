@@ -64,3 +64,4 @@ never to do. Index: `regions/README.md`.
 - [ ] Colour: one family per surface, no band that jumps a step, no single odd block.
 - [ ] Curved shapes read smooth from 30 blocks (preview) and from close (hifi render).
 - [ ] The summary has no surprising warnings (substituted partial blocks, even footprints).
+- [ ] Rail beds graded 1 in 2 beside the ballast, open to the sky, trees felled whole (build-instructions/paths/README.md, Rail beds).
