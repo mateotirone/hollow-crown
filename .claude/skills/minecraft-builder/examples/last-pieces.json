@@ -1,0 +1,11 @@
+{"name":"last_pieces","parts":[
+ {"part":"house","name":"hall","style":"vale_stone","rect":[0,0,14,8],"storeys":[5],"door":{"side":"s"},"roof":{"type":"curved","ridge":"x"}},
+ {"part":"house","name":"inn","style":{"base":"ember_sandstone","roof":"smooth_sandstone"},"rect":[22,0,34,8],"storeys":[5,4],"door":{"side":"s"},
+  "roof":{"type":"flat","parapet":"crenel"},"galleries":[{"side":"s","storey":1,"depth":2},{"side":"s","storey":0,"depth":2,"from":-4,"to":4}]},
+ {"part":"house","name":"manor","style":"vale_timber","rect":[0,20,10,28],"storeys":[5,4],"door":{"side":"s"},"roof":{"type":"gable","ridge":"x"}},
+ {"part":"keep","name":"turret","at":[11,21],"r":2.5,"y":0,"h":14,"floors":[6],"material":"stone_bricks","trim":"spruce_planks","cap":"cone","roof":"deepslate_tiles","doors":[]},
+ {"part":"keep","name":"leaning","at":[25,24],"r":2.5,"y":0,"h":18,"floors":[6,12],"material":"siege:veinstone_bricks","trim":"dark_oak_planks","cap":"cone","roof":"deepslate_tiles","lean":{"dir":"e","steps":2},"doors":[{"side":"s"}]},
+ {"part":"house","name":"fen_a","style":"fen_timber","rect":[0,40,6,46],"y":4,"stilts":{"ground":0},"storeys":[5],"door":{"side":"e"},"roof":{"type":"gable","ridge":"z","moss":true}},
+ {"part":"house","name":"fen_b","style":"fen_timber","rect":[20,40,26,46],"y":4,"stilts":{"ground":0},"storeys":[5],"door":{"side":"w"},"roof":{"type":"gable","ridge":"z","moss":true}},
+ {"part":"boardwalk","path":[[9,43],[17,43]],"y":3,"ground":0}
+]}
