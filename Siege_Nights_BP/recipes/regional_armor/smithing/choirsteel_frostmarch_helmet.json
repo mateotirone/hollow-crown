@@ -1,0 +1,15 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_smithing_transform": {
+    "description": {
+      "identifier": "siege:choirsteel_frostmarch_helmet_upgrade"
+    },
+    "tags": [
+      "smithing_table"
+    ],
+    "template": "siege:choirsteel_upgrade_template",
+    "base": "siege:netherite_frostmarch_helmet",
+    "addition": "siege:tempered_choirsteel",
+    "result": "siege:choirsteel_frostmarch_helmet"
+  }
+}

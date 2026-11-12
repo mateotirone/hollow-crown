@@ -18,14 +18,47 @@ a dark coast with one lighthouse, where sails come in without wind.
 
 ## Theme
 
-**A sunlit harbour town, half Mediterranean and half Atlantic, medieval with no overt fantasy.**
+**A sunlit harbour town, half Mediterranean and half Atlantic, with a drowned-temple air: Atlantean (Mateo
+2026-11-12).**
 - **The town:** wind-proof pale stone ground storeys, whitewashed upper walls between pale birch frames,
   low hipped sea-green roofs, white and orange roofs among them, painted shutters, domes and a lighthouse on
   the civic buildings. Think of a fishing port on the Portuguese or Breton coast with a touch of the Greek
   islands.
 - **The northern coast:** English chalk downs cut off by the sea, like the Seven Sisters and Dover (Mateo
   asked for that coast).
-- **The fantasy:** only in the colour, the sea-green and copper.
+- **The fantasy:** in the colour and the forms: sea-green prismarine, pale stone and quartz columns, domes and
+  temple fronts, sea-glass windows. It should read as a town that remembers a sunken city, never as magic.
+
+## Atlantean houses (Gull's Rest, Mateo 2026-11-12)
+
+Mateo asked for more variation in the roofs and a more Atlantean look. The town houses are built by
+`map/structures/atlantean.py` on the skill (preset `salt_atlantean`), and every new Saltreach house follows it:
+
+- **Walls:** pale stone, never whitewash between timber: `polished_diorite` low to `calcite` and `smooth_quartz`
+  high (one y ladder). `quartz_pillar` columns at the corners (the quoins). No timber frame at all.
+- **Plinth and trim:** sea-worn prismarine (`prismarine_bricks`, `prismarine`, `dark_prismarine` in clusters);
+  eaves, sills and string courses in prismarine brick and smooth quartz stairs.
+- **Glass:** sea-glass, `light_blue_stained_glass_pane` on most houses, `cyan_stained_glass_pane` on some.
+  No dark oak panels beside stone windows here (style `"panel": null`).
+- **Doors and shutters:** warped or birch doors; warped or birch shutters on at most 3 in 10 windows.
+- **Roofs: seven forms, chosen per house by weight and tier, so no street repeats:**
+
+| Form | What it is | Spec |
+|---|---|---|
+| hip | the low Saltreach hip | `{"type": "hip"}` |
+| mansard | a steep lower course under a low top | `{"type": "hip", "profile": [2, 1]}` |
+| bell | a hip that swells into a bell toward the top | `{"type": "hip", "profile": [1, 1, 2]}` |
+| dome | a flat quartz deck behind a parapet carrying a dome on a short drum (teal prismarine or weathered copper) | flat roof + `dome` part, r = half the short side less 0.5 |
+| temple | a low gable turned to the street (a pediment) over a colonnade of quartz pillars as wide as the house | `{"type": "gable", "ridge": "z"}` + `porch` with `"post": "quartz_pillar", "every": 2` |
+| terrace | a hipped main block with a lower wing whose flat roof is a terrace | wing with a flat roof, `"join": "none"` |
+| tower | a slim 5 x 5 tower at a back corner, a storey above the house, under a steep pyramid or a small dome | wing `"storeys": [5, 5, 4]`, `{"type": "hip", "pitch": 2}` or flat + `dome` |
+
+  Tier weights (by the square / street / outer cottage): hip 2/2/3, mansard 2/2/0, bell 1/2/2, dome 3/2/1,
+  temple 2/2/1, terrace 2/1/0, tower 2/1/0. Cottages never get terraces, towers or mansards.
+- **Roof colours:** the pitched roofs are built in the slate sentinel and the town recolours them (sea green 3,
+  teal 3, white 3, orange tile 1 out of 10; no dark slate any more), keeping the two-block texture. Dome
+  houses keep their quartz deck and their dome's own colour.
+- **Net stores:** the same pale stone on prismarine, a low gable, Mateo's big plank door, white glass.
 
 ## Land, weather and light
 
@@ -57,7 +90,7 @@ slides over. Colours are bleached and pale. Kelp dries on walls. Lanterns that s
 
 | Building | What it looks like |
 |---|---|
-| House | a stone ground storey (wind-proof), a whitewashed upper storey between pale birch posts, a low hipped roof (pitch 1), painted sea-green shutters; some have a flat roof terrace on a lower wing |
+| House | Atlantean (above): pale stone and quartz columns on a prismarine plinth, sea-glass windows, one of seven roof forms. Settlement plot houses still use the older look: a stone ground storey, whitewash between pale birch posts above, a low hipped roof |
 | Net store / farm store | stone below, white boards above, a low hipped roof, a hoist beam over a loft door |
 | Quay | a stone quay wall with mooring bollards, a timber jetty on piles, a cargo crane, barrels and nets, the harbourmaster's hut |
 | Lighthouse | an octagonal white tower banded in teal on a stone base at the water's edge, a gallery on brackets, a glass lamp room with sea lanterns, an oxidized copper cap, the keeper's cottage beside it |
@@ -76,7 +109,7 @@ slides over. Colours are bleached and pale. Kelp dries on walls. Lanterns that s
 ## Roofs
 
 **Shapes:**
-- **Default:** hip, pitch 1 (low).
+- **Default:** hip, pitch 1 (low). Gull's Rest houses use the seven Atlantean forms (above).
 - **Also:** low gables on stores, flat roof terraces on the lower wing of harbour houses, domes on civic
   buildings, the lighthouse cap.
 
@@ -84,21 +117,21 @@ slides over. Colours are bleached and pale. Kelp dries on walls. Lanterns that s
 
 **What they carry:**
 - spikes along the ridge (house rule);
-- brick chimneys;
+- brick chimneys (prismarine brick on Gull's Rest Atlantean houses, which carry one only on some low hips);
 - hoist beams on stores;
 - an oxidized copper cap on the lighthouse;
 - copper domes on civic buildings, oxidized at the top.
 
 **Colour and texture:**
 - **Colours (every roof is textured):**
-  - sea green (`dark_prismarine`);
-  - light teal (`prismarine_bricks`);
+  - sea green (`dark_prismarine`, textured with `warped_planks`);
+  - teal (`prismarine_bricks`, textured with `prismarine`);
   - white (`smooth_quartz`, `polished_diorite`);
   - orange tile (`waxed_cut_copper`, `acacia`);
-  - slate (`deepslate_tile`);
+  - slate (`deepslate_tile`): settlement plots only, never in Gull's Rest any more;
   - copper domes as a civic accent.
-- **Mix (Gull's Rest, out of 10):** sea green 4, white 3, orange tile 2, slate 1, plus oxidized copper domes
-  and the lighthouse cap.
+- **Mix (Gull's Rest, out of 10):** sea green 3, teal 3, white 3, orange tile 1, plus the domed houses' teal
+  and copper domes and the lighthouse cap.
 
 **How they are made:**
 - Hip roofs step in from every side, with outer-corner stairs on the hips.
@@ -150,9 +183,13 @@ Full table: `build-instructions/palettes/saltreach.md`; ladders SAL-01 to SAL-06
 
 **Smaller plants:** flowers in pots and sea pickles. There is little grass in town.
 
+**Round the foundation:** clumps of azalea and flowering azalea under the ground-floor windows and at some corners, never a
+strip round the house (the skill's `bushes`, on by default).
+
 ## Building it with the skill
 
 - **Presets:**
+  - `salt_atlantean`: Gull's Rest houses (pale stone, quartz-pillar corners, prismarine plinth and trim, sea-glass);
   - `salt_timber`: whitewash between birch posts, teal shutters;
   - `salt_stone`: pale sandstone, cyan glass, for civic buildings and ground storeys.
 - **A typical house:** a `salt_stone` ground storey under a `salt_timber` upper storey.
@@ -172,7 +209,9 @@ Full table: `build-instructions/palettes/saltreach.md`; ladders SAL-01 to SAL-06
 ## Never
 
 - **Walls and colours:** no dark timber frames and no dark walls; Saltreach is pale.
-- **Roofs:** no dormers, no steep roofs on houses, and no flat roofs over a whole house (terraces only on a lower wing).
+- **Roofs:** no dormers, no steep roofs on houses except a tower's pyramid and the mansard's lower course, and no
+  bare flat roof over a whole house: a whole-house deck must carry a dome (terraces otherwise only on a lower wing).
+- **Atlantean:** no timber frames, no brick chimneys and no dark slate roofs on Gull's Rest houses.
 - **Materials:**
   - no sand in walls, and no sand anywhere it can fall;
   - no unwaxed copper (it turns green on its own).

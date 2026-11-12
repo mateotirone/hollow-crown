@@ -6,8 +6,8 @@ Plot frame (settle_buildings.py): the front faces south (+z), the door is in the
 plinth course sits on the ground (y = 0). The Foundation Stone goes in front of everything (export_buildings.py
 moves it out until it is clear). Sizes are odd, and each fits its plot with the roof: Medium 11 x 15, long Medium
 13 x 15, Large 15 x 15. Every region keeps the Vale footprint of each building, so plot fits and charters hold.
-Interiors stay empty except the stair; the inn is furnished (settle_skill.py, which also does what the skill has
-no part for). Each region starts from its preset (skill regions/<region>.md).
+Every building is furnished by the skill's interior stage ("interior": its use; Mateo 2026-11-12), attics included;
+settle_skill.py does what the skill has no part for. Each region starts from its preset (skill regions/<region>.md).
 
 How each region builds (build-instructions/palettes/<region>.md):
   vale        stripped-spruce frame on rubble, calcite infill, warm red or old slate roofs
@@ -78,19 +78,19 @@ def specs(region):
     house = {
         "card": card(region, "House", "one storey and an attic" if not flat else "two storeys and a roof terrace", "Medium 11 x 15",
                      "A home of about four beds: one storey on a plinth and a room under the roof, a chimney."),
-        "after": "settle_skill:house_inside",
         "parts": [{"part": "house", "style": st(g["timber"], 0), "rect": [-4, -10, 4, 0], "y": 0, "plinth": 2, **pil,
                    "storeys": [5] + extra, "door": {"side": "s", "kind": "house", "steps": 1}, "roof": roof(region, "z"),
+                   "interior": {"use": "home", "attic": not flat},
                    "dormers": dorm({"side": "e", "at": 1, "w": 3, "h": 3}, {"side": "w", "at": -1, "w": 3, "h": 3}),
                    "chimney": chim([[-2, -8]]), "vines": 0.04 if region in ("vale", "blackfen") else 0}],
     }
     town = {
         "card": card(region, "Townhouse", "taller", "long Medium 13 x 15 or Large",
                      "A taller home of about six beds: a stone ground floor, a floor above jettied over the road, a high attic."),
-        "after": "settle_skill:townhouse_inside",
         "parts": [{"part": "house", "style": st(g["timber"], 1), "rect": [-5, -10, 5, 0], "y": 0, "plinth": 2, **pil,
                    "storeys": [5, 5] + extra, "jetty": [] if flat else ["s"], "storey_style": [g["ground"], {}] + ([{}] if flat else []),
                    "door": {"side": "s", "kind": "house", "steps": 1}, "roof": roof(region, "z"),
+                   "interior": {"use": "townhouse", "attic": not flat},
                    "dormers": dorm({"side": "e", "at": 1, "w": 3, "h": 3}, {"side": "w", "at": -1, "w": 3, "h": 3}),
                    "chimney": chim([[3, -8]]), "vines": 0.03 if region in ("vale", "blackfen") else 0}],
     }
@@ -101,6 +101,7 @@ def specs(region):
         "parts": [
             {"part": "house", "style": st(g["farm"] or g["timber"], 2), "rect": [-4, -8, 4, 0], "y": 0, "plinth": 2, **pil,
              "storeys": [5] + extra, "door": {"side": "s", "kind": "house", "steps": 1}, "roof": roof(region, "z"),
+             "interior": {"use": "farmhouse", "attic": not flat},
              "dormers": dorm({"side": "w", "at": 0, "w": 3, "h": 3}), "chimney": chim([[2, -6]]),
              "vines": 0.06 if region in ("vale", "blackfen") else 0},
             {"part": "lean_to", "rect": [-3, -11, 3, -9], "against": "s", "top": 5, "pitch": "half", "y": 0,
@@ -112,19 +113,17 @@ def specs(region):
     mint = {
         "card": card(region, "Mint", "stone", "Medium 11 x 15",
                      "Where the town strikes its Regals: stone walls, barred ground-floor windows and a heavy door.", kind="Work"),
-        "after": "settle_skill:mint_inside",
         "parts": [{"part": "house", "style": st(g["stone"], 3), "rect": [-4, -10, 4, 0], "y": 0, "plinth": 2, **pil,
                    "storeys": [5, 4], "door": {"side": "s", "kind": "grand", "steps": 1},
                    "roof": {"type": "flat", "parapet": "slab", "beams": True} if flat else {"type": "hip", "pitch": 1},
-                   "chimney": chim([[2, -8]]), "shutters": 0}],
+                   "interior": "mint", "chimney": chim([[2, -8]]), "shutters": 0}],
     }
     inn = {
         "card": card(region, "Inn", "furnished", "Large 15 x 15",
                      "Eaves to the road, a stone tap room with the bar, tables and a hearth, three bedrooms above.", kind="Work"),
-        "after": "settle_skill:inn_inside",
         "parts": [{"part": "house", "style": st(g["timber"], 4), "rect": [-6, -10, 6, 0], "y": 0, "plinth": 2, **pil,
                    "storeys": [5, 5], "jetty": [] if flat else ["s"], "storey_style": [g["ground"], {}],
-                   "door": {"side": "s", "kind": "house", "steps": 1}, "roof": roof(region, "x"),
+                   "door": {"side": "s", "kind": "house", "steps": 1}, "roof": roof(region, "x"), "interior": "inn",
                    "dormers": dorm({"side": "s", "at": -4, "w": 3, "h": 3}, {"side": "s", "at": 4, "w": 3, "h": 3}, {"side": "n", "at": 0, "w": 3, "h": 3}),
                    "chimney": chim([[-6, -6], [6, -6]]), "vines": 0.03 if region in ("vale", "blackfen") else 0}],
     }

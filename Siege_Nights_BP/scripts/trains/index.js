@@ -8,15 +8,16 @@
 // /scriptevent siege:trains (report), /scriptevent siege:trains mode velocity|teleport.
 
 import { world, system, GameMode } from "@minecraft/server";
-import { onTick, isReady, moduleStore, settlementAt, keepOf, on, COLORS } from "../siege/api.js";
+import { onTick, isReady, moduleStore, settlementAt, keepOf, on, emit, COLORS } from "../siege/api.js";
 import { styleOf } from "../settle/plans.js";
 import { shapeOf, layTrack, cursorOn, advance, back, pointAt, flip } from "./track.js";
-import { throwFor } from "./switches.js";
+import { throwFor, routeAround } from "./switches.js";
 import { openAhead, watchCars } from "./gates.js";
-import { TRACK, TRAIN, CARS, TRAIN_STYLES, NO_COLOR, carPoses, trainLength, stepSpeed, moveTrain, limitAhead, shapesForLoop, showcaseLoop } from "./data.js";
+import { TRACK, TRAIN, CARS, TRAIN_STYLES, NO_COLOR, carPoses, trainLength, stepSpeed, moveTrain, limitAhead, blocksUnder, clearAhead, speedForGap, shapesForLoop, showcaseLoop } from "./data.js";
 import { give } from "../horses/menus.js";
 import { sfx } from "../core/sfx.js";
 import "./tests.js";
+import "./no_hollow.js";
 
 // trains: [{ id, dim, head: cursor, v, style, cars: [{ kind, eid }] }]
 // unlocked: { [playerId]: { engine?: true, coach?: true } }: who has owned an engine or coach once (built or bought),
@@ -145,7 +146,7 @@ export function callCarriage(dim, pos, yaw, style, owner, player) {
   return placeEngine(dim, pos, yaw, style, player, owner, { free: true, caller: player.id, maxV: TRAIN.carriageSpeed }, "coach");
 }
 
-function removeTrains(test) {
+export function removeTrains(test) {
   for (let i = trains().length - 1; i >= 0; i--) {
     const t = trains()[i];
     if (!test(t)) continue;
@@ -161,8 +162,9 @@ function removeTrains(test) {
   store.save();
 }
 
-export function addCoach(train, dim) {
+export function addCoach(train, dim, own = false) {
   if (train.free) return "§cThe station's carriage can't take coaches.";
+  if (train.line !== undefined && !own) return "§cThe line's own train can't take coaches.";
   if (train.cars.length >= TRAIN.maxCars) return "§cA train can pull at most " + (TRAIN.maxCars - 1) + " coaches.";
   const get = reader(dim);
   const cars = [...train.cars, { kind: "coach" }];
@@ -202,6 +204,7 @@ world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
       const owner = ownerFor(player, block);
       const train = placeEngine(dim, block.location, player.getRotation().y, styleIndexFor(owner, block), player, owner);
       if (!train) return;
+      emit("enginePlaced", { player, owner, dim: dim.id, x: block.location.x, z: block.location.z }); // the Crier marks a settlement's first train
       if (unlock(player.id, "engine")) player.sendMessage("§6Your first engine: from now on any station gives you a new one free if you lose it.");
       const look = train.color === NO_COLOR ? `${TRAIN_STYLES[train.style]} style` : `${TRAIN_STYLES[train.style]} style, in ${COLORS[train.color].replace("_", " ")}`;
       say(player, `§6Engine on the line (${look}). Climb in and hold forward to go, back to brake.`);
@@ -240,6 +243,7 @@ world.beforeEvents.playerInteractWithEntity?.subscribe((event) => {
   system.run(() => {
     const train = trains().find((t) => t.id === target.getDynamicProperty("siege:train"));
     if (!train) return target.isValid && target.remove();
+    if (train.line !== undefined) return say(player, "§7This is the line's own train: it comes and goes by itself.");
     const ents = train.cars.map((c) => world.getEntity(c.eid));
     if (ents.some((e) => (e?.getComponent("minecraft:rideable")?.getRiders() ?? []).length)) return say(player, "§7Someone is still aboard.");
     for (const e of ents) e?.remove();
@@ -269,9 +273,31 @@ function throttleOf(driver) {
 }
 
 let ticks = 0;
+// A line train drives itself: line_trains.js hands the runner its pilot, (train, get) -> { dir, throttle, limit } or undefined
+let pilotOf = () => undefined;
+export const setPilot = (fn) => { pilotOf = fn; };
+export const trainById = (id) => trains().find((t) => t.id === id);
+// The track blocks every other train in this dimension stands on (worked out once a tick, on first ask)
+let underNow = new Map();
+function takenBy(trainId, dimId) {
+  const out = new Set();
+  for (const [id, u] of underNow) if (id !== trainId && u.dim === dimId) for (const k of u.blocks) out.add(k);
+  return out;
+}
+
 function runTick() {
   ticks++;
   let moved = false;
+  underNow = new Map();
+  if (trains().length > 1) {
+    for (const t of trains()) {
+      try {
+        underNow.set(t.id, { dim: t.dim, blocks: blocksUnder(t.head, t.cars, reader(world.getDimension(t.dim))) });
+      } catch {
+        // not loaded: it holds nothing this tick
+      }
+    }
+  }
   for (const train of trains()) {
     let dim;
     try {
@@ -288,13 +314,58 @@ function runTick() {
     const driver = driverOf(ents[0]);
     let throttle = throttleOf(driver);
     if (throttle === "auto") throttle = train.v < TRAIN.autoSpeed ? 1 : 0;
+    // a line train drives itself, either way along its line (the engine pulls one way and pushes the other)
+    let auto;
+    if (train.line !== undefined) {
+      try {
+        auto = pilotOf(train, get);
+      } catch (e) {
+        console.warn(`[Hollow Crown] line train: ${e}`);
+      }
+      auto ??= { dir: 1, throttle: 0, limit: 0 };
+      throttle = auto.throttle * auto.dir;
+    }
     const here = get(train.head.x, train.head.y, train.head.z);
     const downhill = here?.kind === 3 ? (here.up === train.head.to ? -1 : 1) : 0; // in the train's forward direction
     const look = (train.v * train.v) / (2 * TRAIN.brake) + 2;
-    const limit = Math.min(train.v > 0 ? limitAhead(train.head, look, get) : Infinity, train.maxV ?? Infinity);
+    let limit = Math.min(train.v > 0 ? limitAhead(train.head, look, get) : Infinity, train.maxV ?? Infinity);
     const before = train.v;
+    // another train on the track ahead: slow down and stop short of it (never run into it)
+    const heading = train.v !== 0 ? Math.sign(train.v) : throttle < 0 ? -1 : 1;
+    if (auto) {
+      limit = Math.min(limit, auto.limit);
+      if (heading < 0) { // corners count when it is pushed backwards at speed, too
+        try {
+          limit = Math.min(limit, limitAhead(flip(back(train.head, trainLength(train.cars), get).cursor), look, get));
+        } catch {
+          // off the end: the move below stops it
+        }
+      }
+    }
+    const taken = takenBy(train.id, dim.id);
+    let gap = Infinity;
+    if (taken.size) {
+      try {
+        const leadNow = heading > 0 ? train.head : flip(back(train.head, trainLength(train.cars), get).cursor);
+        gap = clearAhead(leadNow, look + TRAIN.keepApart + 2, get, taken);
+        // a passing loop before it with a clear way through: take the loop
+        if (gap !== Infinity && (ticks + train.id) % 5 === 0 && routeAround(dim, leadNow, get, taken)) {
+          get = reader(dim);
+          gap = clearAhead(leadNow, look + TRAIN.keepApart + 2, get, taken);
+        }
+      } catch {
+        gap = Infinity;
+      }
+      limit = Math.min(limit, speedForGap(gap));
+      if (gap <= TRAIN.keepApart && Math.sign(throttle) === heading) throttle = 0;
+    }
     // nobody driving: the brakes go on and it stays put
-    train.v = driver ? stepSpeed(train.v, throttle, { downhill, limit }) : Math.sign(train.v) * Math.max(0, Math.abs(train.v) - TRAIN.brake);
+    if (auto) train.v = auto.dir > 0 ? stepSpeed(train.v, auto.throttle, { downhill, limit }) : -stepSpeed(-train.v, auto.throttle, { downhill: -downhill, limit });
+    else train.v = driver ? stepSpeed(train.v, throttle, { downhill, limit }) : Math.sign(train.v) * Math.max(0, Math.abs(train.v) - TRAIN.brake);
+    if (gap <= TRAIN.keepApart && Math.sign(train.v) === heading) {
+      train.v = 0;
+      if (driver && !auto && before !== 0) say(driver, "§7A train is on the line ahead.");
+    }
     if (train.v === 0 && before === 0) continue;
     // a switch just ahead of the leading end: set it so the train runs through
     const lead = train.v >= 0 ? train.head : flip(back(train.head, trainLength(train.cars), get).cursor);
@@ -308,7 +379,7 @@ function runTick() {
       }
     }
     const r = moveTrain(train.head, train.cars, train.v, get);
-    if (r.v === 0 && Math.abs(before) > 0.3 && driver) {
+    if (r.v === 0 && Math.abs(before) > 0.3 && driver && !auto) {
       sfx(driver, "random.anvil_land");
       say(driver, "§7End of the line.");
     }
@@ -316,7 +387,7 @@ function runTick() {
     train.v = r.v;
     moved = true;
     placeCars(ents, carPoses(train.head, train.cars, get));
-    if (driver && ticks % 10 === 0) say(driver, `§6${Math.round(Math.abs(train.v) * 20)} blocks/s${train.v < 0 ? " §7(reversing)" : ""}`);
+    if (driver && !auto && ticks % 10 === 0) say(driver, `§6${Math.round(Math.abs(train.v) * 20)} blocks/s${train.v < 0 ? " §7(reversing)" : ""}`);
   }
   if (moved && ticks % TRAIN.saveEvery === 0) store.save();
 }

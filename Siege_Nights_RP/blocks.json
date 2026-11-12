@@ -90,6 +90,9 @@
  "siege:waystone": {
   "sound": "amethyst_block"
  },
+ "siege:gravestone": {
+  "sound": "stone"
+ },
  "siege:court_seal": {
   "sound": "stone"
  },

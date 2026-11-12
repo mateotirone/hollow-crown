@@ -1,3 +1,4 @@
+import math
 """Turn a logical blueprint (bp.Blueprint.save_logical) into textured meshes for the
 preview renderer, using Mojang's own Bedrock block textures.
 
@@ -17,7 +18,8 @@ GRASS = (0x91, 0xBD, 0x59); FOLIAGE = (0x6A, 0x9E, 0x3A); SPRUCE = (0x61, 0x99, 
 WOODS = {"oak": "oak", "spruce": "spruce", "dark_oak": "big_oak", "birch": "birch", "jungle": "jungle", "acacia": "acacia", "mangrove": "mangrove",
          "cherry": "cherry", "pale_oak": "pale_oak", "warped": "warped"}
 # Bedrock names some newer textures differently from the old pattern
-TEX_ALIAS = {"planks_mangrove": "mangrove_planks", "log_mangrove": "mangrove_log_side", "log_mangrove_top": "mangrove_log_top",
+TEX_ALIAS = {"chiseled_deepslate": "deepslate/chiseled_deepslate", "chiseled_red_sandstone": "red_sandstone_carved", "deepslate": "deepslate/deepslate",
+             "planks_mangrove": "mangrove_planks", "log_mangrove": "mangrove_log_side", "log_mangrove_top": "mangrove_log_top",
              "stripped_mangrove_log": "stripped_mangrove_log_side",
              "door_mangrove_lower": "mangrove_door_bottom", "door_big_oak_lower": "door_dark_oak_lower", "door_big_oak_upper": "door_dark_oak_upper", "door_mangrove_upper": "mangrove_door_top",
              "log_cherry": "cherry_log_side", "log_cherry_top": "cherry_log_top", "stripped_cherry_log": "stripped_cherry_log_side",
@@ -162,7 +164,8 @@ MAT = {"stone_brick": "stonebrick", "stone_bricks": "stonebrick", "mossy_stone_b
        "smooth_stone_slab": "stone_slab_top", "normal_stone": "stone", "stone_block": "stone",
        "quartz": "quartz_block_side", "quartz_block": "quartz_block_side", "smooth_quartz": "quartz_block_bottom", "quartz_bricks": "quartz_bricks",
        "dark_prismarine": "prismarine_dark", "prismarine": "prismarine_rough", "gold_block": "gold_block", "snow_layer": "snow", "moss_block": "moss_block", "polished_blackstone_brick": "polished_blackstone_bricks", "polished_blackstone": "polished_blackstone", "blackstone": "blackstone",
-       "blast_furnace": "blast_furnace_side", "cobbled_deepslate_wall": "deepslate/cobbled_deepslate"}
+       "blast_furnace": "blast_furnace_side", "cobbled_deepslate_wall": "deepslate/cobbled_deepslate",
+       "chiseled_red_sandstone": "red_sandstone_carved", "chiseled_deepslate": "deepslate/chiseled_deepslate", "cracked_deepslate_bricks": "deepslate/cracked_deepslate_bricks"}
 for w, t in WOODS.items(): MAT[w] = "planks_" + t; MAT[w + "_planks"] = "planks_" + t
 for _c in ("", "exposed_", "weathered_", "oxidized_"):          # copper roofs (waxed looks the same)
     MAT[_c + "cut_copper"] = MAT["waxed_" + _c + "cut_copper"] = _c + "cut_copper"
@@ -198,6 +201,7 @@ def cube_tex(n, p):
     simple = {"pumpkin": {"top": "pumpkin_top", "side": "pumpkin_side"},
               "grass_block": {"top": "grass_top#grass", "bottom": "dirt", "side": "grass_side_carried"},
               "podzol": {"top": "dirt_podzol_top", "bottom": "dirt", "side": "dirt_podzol_side"},
+              "bone_block": {"top": "bone_block_top", "bottom": "bone_block_top", "side": "bone_block_side"},
               "ochre_froglight": {"top": "ochre_froglight_top", "bottom": "ochre_froglight_top", "side": "ochre_froglight_side"},
               "verdant_froglight": {"top": "verdant_froglight_top", "bottom": "verdant_froglight_top", "side": "verdant_froglight_side"},
               "mangrove_roots": {"top": "mangrove_roots_top", "side": "mangrove_roots_side"},
@@ -252,7 +256,7 @@ def cull_group(n):
     if n == "water": return "water"
     return None
 
-PLANTS = {"poppy": "flower_rose", "dandelion": "flower_dandelion", "cornflower": "flower_cornflower", "oxeye_daisy": "flower_oxeye_daisy",
+PLANTS = {"poppy": "flower_rose", "blue_orchid": "flower_blue_orchid", "brown_mushroom": "mushroom_brown", "dandelion": "flower_dandelion", "cornflower": "flower_cornflower", "oxeye_daisy": "flower_oxeye_daisy",
           "azure_bluet": "flower_houstonia", "allium": "flower_allium", "red_tulip": "flower_tulip_red", "white_tulip": "flower_tulip_white",
           "pink_tulip": "flower_tulip_pink", "orange_tulip": "flower_tulip_orange", "lily_of_the_valley": "flower_lily_of_the_valley",
           "short_grass": "tallgrass#grass", "fern": "fern#grass", "sweet_berry_bush": "sweet_berry_bush_stage3",
@@ -283,8 +287,38 @@ def stair_boxes(p):
 def thin_plate(side, t=3 / 16):
     return {"n": (0, 0, 0, 1, 1, t), "s": (0, 0, 1 - t, 1, 1, 1), "e": (1 - t, 0, 0, 1, 1, 1), "w": (0, 0, 0, t, 1, 1)}[side]
 
+_TDX = [0, 1, 1, 1, 0, -1, -1, -1]; _TDZ = [-1, -1, 0, 1, 1, 1, 0, -1]
+def _track_links(kind, d):
+    if kind == 0: return d, d + 4
+    if kind == 1: return d, (d + 3) % 8
+    if kind == 2: return d, (d + 2) % 8
+    return d, d + 4 if d < 4 else d - 4
+def track_preview(kind, d):
+    """siege:track drawn with small upright boxes (the renderer has no rotated cubes): two iron rails and spruce
+    sleepers along the centreline from one link's edge through the middle to the other's, so diagonals and bends
+    read as smooth 45-degree track instead of a staircase."""
+    a, b = _track_links(int(kind), int(d) % 8)
+    ends = [(0.5 + _TDX[a] * 0.5, 0.5 + _TDZ[a] * 0.5), (0.5, 0.5), (0.5 + _TDX[b] * 0.5, 0.5 + _TDZ[b] * 0.5)]
+    out = []; R, T = {"side": "iron_block"}, {"side": "planks_spruce"}
+    for (x0, z0), (x1, z1) in zip(ends, ends[1:]):
+        L = math.hypot(x1 - x0, z1 - z0) or 1; tx, tz = (x1 - x0) / L, (z1 - z0) / L; nx, nz = -tz, tx
+        k = 0
+        while k * 0.16 <= L:
+            cx, cz = x0 + tx * k * 0.16, z0 + tz * k * 0.16
+            if k % 2 == 0:                                   # a sleeper across the line
+                for s in (-0.36, -0.12, 0.12, 0.36):
+                    px, pz = cx + nx * s, cz + nz * s
+                    out.append(((max(0, px - 0.07), 0, max(0, pz - 0.07), min(1, px + 0.07), 1 / 16, min(1, pz + 0.07)), T, {}))
+            for s in (-0.25, 0.25):                          # the rails
+                px, pz = cx + nx * s, cz + nz * s
+                out.append(((max(0, px - 0.05), 1 / 16, max(0, pz - 0.05), min(1, px + 0.05), 3 / 16, min(1, pz + 0.05)), R, {}))
+            k += 1
+    return out
+
 def model(n, p):
     """-> list of (box, texdict, flags)."""
+    if n.startswith("minecraft:"): n = n[10:]          # tree stamps carry full ids
+    if n == "siege:track_preview": return track_preview(p.get("kind", 0), p.get("dir", 0))
     if is_stairs(n): t = {"side": base_material(n)}; return [(b, t, {}) for b in stair_boxes(p)]
     if is_slab(n):
         t = {"side": base_material(n)}
@@ -329,6 +363,10 @@ def model(n, p):
         t = {"side": f"{n}@0,2,6,9", "top": f"{n}@0,9,6,15", "bottom": f"{n}@0,9,6,15"}
         return [((5 / 16, y0, 5 / 16, 11 / 16, y0 + 7 / 16, 11 / 16), t, {"cut": 1, "glow": 1}),
                 ((6 / 16, y0 + 7 / 16, 6 / 16, 10 / 16, y0 + 9 / 16, 10 / 16), t, {"cut": 1, "glow": 1})]
+    if n == "candle" or n.endswith("_candle"):     # one to four little wax sticks (interiors: altars, tables)
+        t = {"side": "candles/" + (n if n != "candle" else "candle") + "_lit@0,8,2,14", "top": "candles/" + (n if n != "candle" else "candle") + "_lit@0,6,2,8"}
+        spots = [(7, 7), (5, 8), (9, 6), (8, 10)][: int(p.get("candles", 1))]
+        return [(((sx) / 16, 0, (sz) / 16, (sx + 2) / 16, 6 / 16, (sz + 2) / 16), t, {"glow": 1}) for sx, sz in spots]
     if n == "flower_pot":
         t = {"side": "flower_pot@5,10,11,16", "top": "dirt"}
         return [((5 / 16, 0, 5 / 16, 11 / 16, 6 / 16, 11 / 16), t, {})] + ([("cross", {"side": PLANTS[p["plant"]]}, {"cut": 1, "scale": 0.7, "y": 4 / 16})] if p.get("plant") else [])
@@ -341,6 +379,11 @@ def model(n, p):
     if n == "grindstone":
         return [((4 / 16, 4 / 16, 2 / 16, 12 / 16, 1, 14 / 16), {"side": "grindstone_side.tga", "top": "grindstone_round.tga"}, {}),
                 ((2 / 16, 0, 6 / 16, 4 / 16, 10 / 16, 10 / 16), {"side": "planks_big_oak"}, {}), ((12 / 16, 0, 6 / 16, 14 / 16, 10 / 16, 10 / 16), {"side": "planks_big_oak"}, {})]
+    if n.endswith("_hanging_sign"):     # a board hanging on two short chains under the block above
+        w = wood_of(n); t = {"side": "planks_" + WOODS.get(w, "oak")}
+        fd = (p.get("bs") or {}).get("facing_direction", 2)
+        board = (1 / 16, 0, 7 / 16, 15 / 16, 10 / 16, 9 / 16) if fd in (2, 3) else (7 / 16, 0, 1 / 16, 9 / 16, 10 / 16, 15 / 16)
+        return [(board, t, {}), ("cross", {"side": "chain1"}, {"cut": 1, "scale": 0.3, "y": 10 / 16})]
     if n.endswith("_wall_sign"):        # a thin board on the face of the block behind it
         w = wood_of(n); t = {"side": "planks_" + WOODS.get(w, "oak")}
         f = p.get("facing", "s")
@@ -353,6 +396,11 @@ def model(n, p):
     if n == "ladder":
         return [((0, 0, 0, 1, 1, 1 / 16), {"side": "ladder"}, {"cut": 1})]
     if n == "moss_carpet": return [((0, 0, 0, 1, 1 / 16, 1), {"side": "moss_block"}, {})]
+    if n == "pale_moss_carpet": return [((0, 0, 0, 1, 1 / 16, 1), {"side": "pale_moss_block"}, {})]
+    if n == "short_dry_grass": return [("cross", {"side": "short_dry_grass"}, {"cut": 1})]
+    if n == "candle" or n.endswith("_candle"):   # one candle, a 2x6 stick (lit: the wick glows)
+        t = f"candles/{n}{'_lit' if p.get('lit') else ''}"
+        return [((7 / 16, 0, 7 / 16, 9 / 16, 6 / 16, 9 / 16), {"side": f"{t}@0,8,2,14", "top": f"{t}@0,6,2,8"}, {"cut": 1, **({"glow": 1} if p.get("lit") else {})})]
     if n == "snow_layer": return [((0, 0, 0, 1, (2 * (int(p.get("height", 0)) + 1)) / 16, 1), {"side": "snow"}, {})]
     if n == "rail": return [((0, 0, 0, 1, 1 / 16, 1), {"side": "rail_normal"}, {"cut": 1})]
     if n in ("siege:portcullis", "siege:castle_gate"):

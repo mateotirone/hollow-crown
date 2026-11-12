@@ -72,8 +72,8 @@ drip lines. Wear shows as dusty edges and a slightly darker band at the base of 
   with cut sandstone at the corners and openings.
 - **Red accents:** smooth and cut red sandstone.
 - **Clay accents:** orange and white terracotta.
-- **Frame:** none. Corners and piers are cut sandstone; roof beams are spruce logs sticking out every other
-  block; doors and windows have stripped acacia lintels.
+- **Frame:** none. Corners and piers are cut sandstone; roof beams are spruce logs running right across
+  the roof and out a block on both sides, every other block; doors and windows have stripped acacia lintels.
 - **Floors:** acacia slab field, dark oak border, or smooth sandstone and cut red sandstone.
 
 ## Roofs
@@ -95,7 +95,7 @@ flat; Sunscar and other towns keep the mix** below (3 in 10 red pitched or domed
 - cloth shades and awnings;
 - corner kiosks on the market hall;
 - corner horns on towers;
-- projecting roof beams below the parapet;
+- vigas: the roof's own logs running across and out a block on both sides, slabs between, under the parapet;
 - squat chimneys;
 - on domes, a single `gold_block` finial (civic only).
 
@@ -113,7 +113,9 @@ flat; Sunscar and other towns keep the mix** below (3 in 10 red pitched or domed
 **How they are made:**
 - The flat roof is a full layer on the top course of the wall, never floating.
 - The parapet is 1 high round the edge, with posts on the corners.
-- Roof beams (vigas) stick out every other block along the long sides, one block below the roof deck.
+- The roof deck is vigas (Mateo, 2026-11-12): logs running right across the building, through the walls and
+  one block out on both sides, every other block, with smooth sandstone top slabs between them (log, slab,
+  log, slab). The parapet sits on top. This is the skill's flat-roof default.
 - Domes sit on a drum with windows, courses stepping in as a circle with no one-cell ribs, and the
   copper gets greener near the top.
 
@@ -167,9 +169,12 @@ still look too round, as flagged in the tree thread.
 
 - **Preset:** `ember_sandstone`: thick sandstone walls on the EMB-01 ladder, cut sandstone corners, orange
   glass, acacia trim. Its roof is red sandstone for the pitched share.
-- **Flat roofs:** set `"roof": {"type": "flat", "parapet": "crenel" | "slab" | "wall" | "none", "beams":
-  true, "hatch": true}` with `"roof": "smooth_sandstone"` in the style.
-- **Parts that fit:** `arcade` (market fronts), `arch`, `belfry`, `lean_to` (forge shade), `porch`, `dome`.
+- **Flat roofs:** set `"roof": {"type": "flat", "parapet": "crenel" | "slab" | "wall" | "none", "hatch":
+  true}` with `"roof": "smooth_sandstone"` in the style. The deck is vigas and slabs by default (`"beams": false`
+  for a plain layer).
+- **No bushes:** the preset plants none round the foundation (no grass here); put cactus in pots instead.
+- **Parts that fit:** `arcade` (market fronts), `arch`, `belfry`, `lean_to` (forge shade), `porch`, `dome`,
+  `galleries` (the caravanserai's upstairs gallery: `storey` 1; shaded walks: `storey` 0), curved roofs on vaults.
 - **Civic domes:** `{"part": "dome", "at": [x, z], "r": 4, "drum": {"h": 3, "windows": 4, "glass":
   "yellow_stained_glass_pane"}, "finial": "gold"}` on the flat roof: a sandstone drum and a blue-green copper
   dome with a gold finial.
@@ -184,7 +189,7 @@ still look too round, as flagged in the tree thread.
 - tapering towers with horns (use shapes);
 - lattice windows set back;
 - striped awnings;
-- courtyards (build them as wings round an open middle).
+- courtyards (build them as wings round an open middle, with `galleries` on the courtyard sides).
 
 ## Never
 

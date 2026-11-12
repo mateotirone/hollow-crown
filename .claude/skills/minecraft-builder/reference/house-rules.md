@@ -9,10 +9,13 @@ palettes, texturing, paths, reference); this page is the short list and where to
   wide, doorways 3 or 5, gable spans, tower widths. An odd run has a centre block. Radii end in .5.
 - **Storey height 4 or 5** depending on the building's size.
 - **Mateo's chimney** is the default chimney (parts.md).
-- **Interiors empty** (floors and stairs only) except the inn and builds marked custom.
+- **Every building has an interior** (Mateo 2026-11-12, replacing "empty except the inn"): the skill's interior
+  stage furnishes it by use (`"interior": "inn"`, `{"use": "home", "attic": true}`), with stairs between every storey
+  and a one-block walkway everywhere players walk (`build-instructions/08-interiors`).
 - **Glass flush with the wall face**, tinted to the house, never clear everywhere; stained glass in chapels.
 - **Depth comes outward**, never by recessing a panel: at least three depth layers on any face over 5 long.
 - **Every overhang is carried** (bracket, post, corbel, truss).
+- **Nothing floats** (Mateo, 2026-11-12): a roof, canopy or vault sits directly on its beam, wall or posts, with no open row between them. Every hanging lantern hangs from a block or a chain up to one. Stacks start at the roof.
 - **Shutters on at most about 30%** of windows, in symmetric pairs; planters on about a quarter.
 - **Roofs overhang 1** at eaves and verges; ridge the long way; secondary roofs lower; no flat roofs on houses (Emberwaste and Saltreach terraces excepted)
 - **Every roof is textured**: two blocks of the same colour mixed at random (copper keeps its gradient instead)
@@ -42,6 +45,7 @@ never to do. Index: `regions/README.md`.
 ## Look for, before showing (09-final-check, short)
 
 - [ ] Every dimension odd; door and windows on bay centres; ridge centred.
+- [ ] Nothing floats: no open row between a roof and its beam or wall, every lantern hung from something.
 - [ ] No stair facing the wrong way on roofs (light lips), no holes at valleys, chimney 2 above the roof.
 - [ ] Barge boards, eave row, corner blocks present; gable triangles filled.
 - [ ] Sills wider than glass; heads where there is room; shutters few and paired.

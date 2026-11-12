@@ -46,6 +46,10 @@
     "gable_horns": true,
     "snow": true
    },
+   "interior": {
+    "use": "farmhouse",
+    "attic": true
+   },
    "dormers": [
     {
      "side": "w",

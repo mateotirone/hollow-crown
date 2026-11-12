@@ -1,0 +1,25 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shapeless": {
+    "description": {
+      "identifier": "siege:diamond_vale_helmet_recipe"
+    },
+    "tags": [
+      "siege_workshop"
+    ],
+    "ingredients": [
+      {
+        "item": "minecraft:diamond_helmet"
+      },
+      {
+        "item": "siege:castle_stone"
+      }
+    ],
+    "result": {
+      "item": "siege:diamond_vale_helmet"
+    },
+    "unlock": {
+      "context": "AlwaysUnlocked"
+    }
+  }
+}

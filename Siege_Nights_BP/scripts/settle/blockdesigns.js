@@ -13,7 +13,10 @@ const { floor, walls, hollow, roof, hang, stair } = pieces;
 // Each region's own design (settle/barn_data.js) when there is one, the plain shared design when not
 function designed(key, styleId, plain) {
   const style = styleFor(styleId), d = BARN_DESIGNS[style.id]?.[key];
-  return d ? drawDesigned(new Plan(style), d, `bn:${style.id}:${key}`) : plain(styleId);
+  if (!d) return plain(styleId);
+  const p = drawDesigned(new Plan(style), d, `bn:${style.id}:${key}`);
+  if (d.yard) p.yard = d.yard; // yard columns a path may run through (settle/raised.js yardGaps)
+  return p;
 }
 
 export const drawGuardhouse = (styleId) => designed("barracks", styleId, plainGuardhouse);

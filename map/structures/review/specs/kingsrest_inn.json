@@ -44,8 +44,8 @@
     {}
    ],
    "door": {
-    "side": "n",
-    "at": -6,
+    "side": "s",
+    "at": -10,
     "kind": "house",
     "steps": 3
    },
@@ -122,7 +122,11 @@
      }
     }
    ],
-   "vines": 0.04
+   "vines": 0.04,
+   "interior": {
+    "use": "inn",
+    "furnish": false
+   }
   },
   {
    "part": "arch",

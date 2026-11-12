@@ -15,6 +15,10 @@ playing so it has to be perfect." Be harder on it than he would be.
 
 - Could it stand? Every post on something, every beam on a post, every overhang carried, the roof on
   the walls.
+- Nothing floats (Mateo, 2026-11-12): no open row between a roof, canopy or vault and the beam or wall
+  under it, and every hanging lantern hangs from a block or a chain. Station designs are tested for this
+  (`trains/tests.js`, "stations: nothing floats"): any block not joined, even corner to corner, down to the
+  ground fails.
 - Does it look like the real medieval buildings it is based on, and like Mateo's references
   (`reference/pictures/`)? Put the render next to the reference and name the differences.
 - Is there anything that looks like a hole, a cage, a blotch or a floating block? (Recessed panels and
@@ -41,6 +45,9 @@ playing so it has to be perfect." Be harder on it than he would be.
 - [ ] Windows stacked; glass flush with the face; sills wider than the glass; heads capped; glass tinted
       to the house; shutters on at most 30%.
 - [ ] Doorway clean: jambs, lintel, canopy or lanterns, not both crowded.
+- [ ] The way in is clear: nothing in front of a door or beside it at foot height; every block of the building has a door.
+- [ ] Every walked space (lean-to, porch, arcade, passage) has a clear walk 1 wide and 2 high; arcades level with the ground.
+- [ ] Windows line up storey to storey; dormers over the windows below.
 
 **Roof**
 
@@ -51,7 +58,7 @@ playing so it has to be perfect." Be harder on it than he would be.
 **Detail and interior**
 
 - [ ] Every detail has a reason; 1 to 3 props per door.
-- [ ] Interior empty (standard) or fully laid out (inn, custom).
+- [ ] Interior furnished by use, every storey reached, a one-block walkway to every room, bed and chest (`08-interiors`).
 
 **Technical**
 

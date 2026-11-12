@@ -99,7 +99,7 @@ def road_cells():
 
 
 OPP = {"n": "s", "s": "n", "e": "w", "w": "e"}
-SLITS = {"base": STYLE, "surround": None, "sill": "none"}     # tower windows: bare slits and lancets
+SLITS = {"base": STYLE, "panel": None, "sill": "none"}     # tower windows: bare slits and lancets
 
 
 def tower(cx, cz, w, storeys, door, top_h=6, rows=3, plinth=2, y=0, wins=None, style=SLITS, finial="spire_block", eave=1):

@@ -23,13 +23,13 @@ CITADEL = {"stone": "siege:castle_stone", "smooth": "siege:castle_smooth", "band
            "throne": "gold_block", "wool": "red_wool", "carpet": "red_carpet", "ladder": "ladder"}
 
 TOWNS = (("rimehold", "Rimehold", "frostmarch", "frost", "The Frostmarch town: dark log frames, plank walls in rows, dark stone bases and steep snow-capped roofs, a longhouse hall and a stave chapel under weathered copper."),
-         ("gulls_rest", "Gull's Rest", "saltreach", "salt", "The Saltreach harbour: pale stone ground floors, whitewash between birch posts, low hipped roofs in sea green, white and orange, a quay, a lighthouse and a boathouse."),
+         ("gulls_rest", "Gull's Rest", "saltreach", "salt", "The Saltreach harbour, Atlantean: pale stone and quartz columns on sea-worn prismarine, sea-glass windows, roofs that never repeat (low hips, mansards, bell roofs, domes, temple fronts, terraces and towers) in sea green, teal, white and copper, a quay, a lighthouse and a boathouse."),
          ("sunscar", "Sunscar", "emberwaste", "ember", "The Emberwaste town: thick sandstone walls, flat roofs behind parapets, lattice windows, striped awnings and a domed market hall."),
          ("mirelight", "Mirelight", "blackfen", "fen", "The Blackfen town: mud brick between mangrove posts, houses up on stilts over the black water, mossy roofs and froglights by the doors."))
 HOUSE_BLURB = {"frost": ["Two storeys, a dark stone ground floor or plank rows to the ground, dragon heads on the gable.", "One or two storeys of plank rows in a spruce frame, a steep roof that sheds snow.",
                          "A small cottage: low walls, a roof nearly to the ground, snow on the ridge.", "A byre: a dark stone base, plank rows and a very steep roof over the cart door."],
-               "salt": ["Stone below, whitewash above, a balcony or a flat roof terrace, painted shutters.", "A stone ground floor against the sea wind, a low hipped roof.",
-                        "A one-storey stone cottage with a hipped roof.", "A net store: stone below, white boards above, a hoist beam over the loft door."],
+               "salt": ["Pale stone and quartz columns on a prismarine plinth, sea-glass windows, a roof from the town's seven forms.", "A pale stone street house with sea-glass windows under a hip, mansard, bell, temple or dome roof.",
+                        "A one-storey pale stone cottage under a low hip, a bell roof or a small dome.", "A net store: pale stone on a prismarine plinth, a low gable, a big plank door."],
                "ember": ["Two storeys of painted sandstone, a roof terrace behind the parapet, lattice windows, roof beams.", "A sandstone house with a striped awning over the door; some carry a red roof or dome.",
                          "A small flat-roofed house with a roof hatch.", "A granary with a walled yard and hay under an awning."],
                "fen": ["Mud brick between mangrove posts, two storeys up on short stilts, a froglight by the stair.", "A stilt house with a stair down to the boardwalk.",
@@ -175,6 +175,16 @@ def main():
             seed = 300 + k * 7
             add(sec, f"town-{tid}-house{k}", title, f"{tname}, {roofs[k]} roof" if roofs[k] != "flat" else tname, HOUSE_BLURB[reg][min(tier, 3)],
                 (lambda f=RT.HOUSES[reg], s=seed, t=tier, r=roofs[k]: f(s, random.Random(s), t, r)), g, extra={"group": "Houses", "kind": "House"})
+        if tid == "gulls_rest":      # every Atlantean roof form, so the town's variety can be checked in one place
+            import atlantean
+            cols = ["green", "teal", "white", "orange"]
+            for j, form in enumerate(atlantean.FORMS):
+                for t in (0, 1):
+                    seed = 500 + j * 11 + t; col = cols[(j + t) % 4]
+                    add(sec, f"town-{tid}-atl-{form}-t{t}", atlantean.TITLES[form], f"{tname}, {'by the square' if t == 0 else 'street house'}"
+                        + (f", {col} roof" if form != "dome" else ""), atlantean.BLURBS[form],
+                        (lambda s=seed, t=t, c=col, f=form: atlantean.house(s, random.Random(s), t, c, f)), g,
+                        extra={"group": "Atlantean houses: every roof form", "kind": "House"})
         for name, mk in RT.CIVIC[tid]:
             add(sec, f"town-{tid}-{name}", CIVIC_TITLE[name], tname, (TOWN_BLURB.get((tid, name)) or (mk.__doc__ or "").split(". ")[0] + "."),
                 mk, g, extra={"group": "On the square", "kind": "Civic"})
@@ -204,12 +214,12 @@ def main():
                                       ("stables_2", "Stables, level 2", "Five stalls and a tack corner, with a cupola on the ridge. Builds over level 1."),
                                       ("stables_3", "Stables, level 3", "Eight stalls, a tack room across the back and a hayloft above. Builds over level 2."),
                                       ("breeder_yard", "Breeder's Yard", "Raised by the Breeder's Post: a fenced paddock with an open shelter, hay and troughs."),
-                                      ("barracks", "Barracks", "The guardhouse: a two-storey hall for the guard with a crenellated watch tower."),
+                                      ("barracks", "Barracks", "Raised by the Barracks block: a timber hall (mess below, bunks above), a round keep with battlements and flags, and a walled yard where off-duty soldiers wait. A banner hangs over the gate."),
                                       ("quartermaster", "Quartermaster's armoury", "A small strong store with a serving hatch under an awning, smithing table and anvil inside.")):
                 add(sec, f"bld-{rid}-{bid}", title, r["name"], blurb, (lambda f=settle_buildings.BLOCK_BUILDERS[bid], r=rid: f(r)), g, extra={"group": "Plot buildings"})
 
         if rid in stations.REGIONS:   # the railway station on the plot (or the Rail Depot), at each settlement tier
-            for st, title, blurb in (("halt", "Halt (Hamlet)", "A waiting shelter with its gable to the line, a ticket counter, a bench and a hitching rail."),
+            for st, title, blurb in (("halt", "Halt (Hamlet)", "A waiting shelter with its eaves to the line, a ticket counter, a bench and a hitching rail."),
                                      ("station", "Station (Town)", "A booking hall along the platform with a centre gable, a long canopy, a parcels corner and stalls."),
                                      ("junction", "Junction (City)", "A two-storey hall with a clock tower on the platform, a stable wing and a parcels wing."),
                                      ("grand", "Grand Station (Castle)", "An arched glass train shed over both lines, a tall centre pavilion and twin clock towers.")):

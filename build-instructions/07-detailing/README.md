@@ -1,5 +1,11 @@
 # Stage 7: Detailing
 
+**Walkways (Mateo, 2026-11-12)**: anywhere meant to be walked in (a lean-to, porch, arcade, passage, yard,
+loggia) keeps at least one block of clear walk, two high, from its open side to the door or the far end.
+No sill, shelf, slab, post, barrel or woodpile in that line; props keep to the ends and corners. An open
+arcade or market hall sits level with the ground (no raised plinth) and can be walked into from every open
+side. The skill's lean-to clears the wall's sills and proud frame inside it.
+
 The building stands and is closed. Now the outside is finished: depth with slabs and stairs, fences,
 arches, lights, greenery, signs, and the edge where the building meets the street. Detailing makes a
 build look lived in. It is also where most clutter comes from, so every detail has a reason.
@@ -24,7 +30,7 @@ Where to add, all one block proud of the face unless said otherwise:
 | Cornice | under the eaves on stone and civic buildings | 1 or 2 rows: upside-down stairs, then top slabs above them |
 | Pilasters | between bays on civic fronts | a column of a contrasting block, 1 proud, the full storey, with a stair cap and base |
 | Buttresses | stone walls over 9 tall or 15 long, every 5 to 7 | 1 to 2 proud at the bottom, stepping in with a stair at mid height and at the top |
-| Corbels / brackets | under jetties, balconies, oriels, bay windows, turrets, eave overhangs of 2 | upside-down stairs, tall side to the wall |
+| Corbels / brackets | under jetties, balconies, oriels, bay windows, turrets, eave overhangs of 2, and either side of every dormer window under its roof (Mateo 2026-11-12: it frames the window; mud brick wall in Blackfen) | upside-down stairs, tall side to the wall |
 | Window caps and sills | every window (stage 5) | |
 | Beam ends | proud-frame timber builds at the floor lines | log ends (axis out of the wall) between posts, every other block or under each post |
 | Round angles | any inside corner that should read as a curve: opening tops, under jetties and eaves, coved ceilings | trapdoor, stair, trapdoor (`reference/shapes.md`, "Round angle") |
@@ -61,7 +67,7 @@ flat frame, a shutter, a lip on a planter) and **walls / fences** where you want
   steps and gates; lanterns hung from chains under arches.
 - Lights at regular rhythm on long fronts: every 5 or 7 (odd), on the bay posts.
 - The night should feel uneasy, not black: warm lights on the human scale, no floodlit faces.
-- Hide light blocks for interiors under carpets or behind trapdoors in empty buildings.
+- Interiors are lit by the interior stage's hanging lanterns (`08-interiors`); hide extra light blocks under carpets where a room stays dark.
 
 ## Hanging and spiked details (Mateo, 2026-11-11, `reference/pictures/detailed-hall-hanging-chains.png`)
 
@@ -89,8 +95,12 @@ detail: `texturing/`).
 Mateo's cottage sheet and alley picture are full of green; it is what makes them warm.
 
 - Vines and glow lichen on the shady side, at corners and over arches; never covering a whole face.
-- Leaves as bushes at the plinth (1 to 2 blocks), flower beds along the front path, berry bushes and
-  flowers in planters.
+- **Bushes round the foundation** (Mateo, 2026-11-12): clumps of leaf blocks on the ground under the
+  ground-floor windows and at about half the corners, 1 to 3 wide, now and then 2 high below the sill.
+  Never one continuous strip round the building: leave the stretches between windows bare. Keep the door
+  and its steps clear and stay inside the roof overhang. The region's leaves: azalea and flowering azalea
+  in the Vale and Saltreach, spruce in Frostmarch, mangrove in Blackfen; none in the Emberwaste and the
+  Hollow. Flower beds along the front path, berry bushes and flowers in planters.
 - A tree near most houses in timber regions (Claude generates the trees, see the map rules); azalea and
   flowering azalea for colour.
 - Moss: only as a light touch in the bottom courses of old stone walls, and on Blackfen roofs. Large green

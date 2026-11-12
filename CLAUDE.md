@@ -18,6 +18,7 @@ a settlement plot or the showcase. Before the first block, read these, in this o
 3. **The staged build instructions:** `build-instructions/README.md`. Go stage by stage, 00-planning to
    09-final-check, and check each stage before the next.
 4. **Mateo's house rules:** `.claude/skills/minecraft-builder/reference/house-rules.md`.
+5. **Towers** (any tower, spire, belfry or clock): `build-instructions/towers/README.md`.
 
 Then check the build in 3D (render it, or use the live asset viewer) before showing Mateo. If your build settles
 a rule the region page doesn't have yet, add it to that page in the same PR.
@@ -29,4 +30,5 @@ five regions, written by `gen_settle.py`).
 
 - One branch and one PR per piece of work. `node tools/check.mjs` must print ALL OK before you push.
 - Changes players will notice get a line in `CHANGELOG.md`.
-- Every size is odd ("work in threes"). Interiors stay empty except the inn and custom builds.
+- Every size is odd ("work in threes"). Every building has an interior (Mateo 2026-11-12): the skill's interior stage,
+  `build-instructions/08-interiors`.

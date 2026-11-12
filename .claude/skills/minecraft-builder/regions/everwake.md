@@ -58,7 +58,7 @@ Every Everwake tower is built by the tower guide, with `tower()` in `spec.py`:
 
 - **Shaft:** plain white stone (`everwake_stone`, stone frame: diorite quoins and a course at every stage
   line), stages 6 high, 3 to 5 times the width. Windows are bare slits (1x2) low and lancets (1x3) in the top
-  stage, stacked centre on centre, with no shutters, sill or surround (style `"surround": null, "sill": "none"`).
+  stage, stacked centre on centre, with no shutters, sill or surround (style `"panel": null, "sill": "none"`).
 - **Top stage:** an open belfry one block wider on every side, quartz-brick piers and a smooth-quartz deck,
   carried on smooth-quartz corbels (upside-down stairs) at each corner and every 3rd block. A bell in every one.
 - **Roof:** a steep waxed copper spire, weathered at the eave to oxidized at the top, with a birch eave ring:

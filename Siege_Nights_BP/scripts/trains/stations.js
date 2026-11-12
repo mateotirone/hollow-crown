@@ -10,6 +10,7 @@ import { Plan } from "../townhall/halls.js";
 import { drawData } from "../townhall/designs.js";
 import { styleFor, spellings } from "../settle/buildings.js";
 import { STATION_DESIGNS } from "../settle/station_data.js";
+import { DX, DZ, flatShapeFor } from "./track.js";
 
 export const STAGES = ["halt", "station", "junction", "grand"];
 export const STAGE_NAMES = { halt: "Halt", station: "Station", junction: "Junction", grand: "Grand Station" };
@@ -22,6 +23,7 @@ export const STATION = {
   findTrack: 8, // a new station lines up with straight track this close to its post (blocks across)
   findTrackUp: 3,
   noTrackBack: 3, // with no track near, the line goes this far behind the post (the building in front)
+  noTrackLift: 1, // and this much higher than the post, so the platform stands on the ground and the track on a bed
   perTick: 48, // blocks placed per tick while it rises
 };
 
@@ -54,6 +56,19 @@ export function stationPlan(style, stage) {
     }
   }
   p.line = { x0, x1 };
+  // from the Station up, a passing loop on the side away from the building: its bed, and clear air over it
+  p.loop = stage !== "halt" && STATION_DESIGNS[region][stage] ? true : false;
+  if (p.loop) {
+    for (const [x, z] of loopPath(p)) {
+      if (z === 0) continue; // the two ends are the line's own blocks
+      if (!p.get(x, 0, z)) p.set(x, 0, z, "foundation");
+      p.column(x, z, "foundation");
+      for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) {
+        if (z + dz >= 0) continue; // the line's own strip is already clear
+        for (let y = 1; y <= STATION.clearUp; y++) if (!p.get(x + dx, y, z + dz)) p.set(x + dx, y, z + dz, "air");
+      }
+    }
+  }
   p.design = d;
   plans.set(key, p);
   return p;
@@ -93,7 +108,7 @@ export function siteFor(post, get, facing) {
     return { origin: { x: best.x, y: best.y, z: best.z }, forward, onTrack: true };
   }
   const f = cardinal(facing);
-  return { origin: { x: post.x - f.x * STATION.noTrackBack, y: post.y, z: post.z - f.z * STATION.noTrackBack }, forward: f, onTrack: false };
+  return { origin: { x: post.x - f.x * STATION.noTrackBack, y: post.y + STATION.noTrackLift, z: post.z - f.z * STATION.noTrackBack }, forward: f, onTrack: false };
 }
 
 // Nearest of north/east/south/west to a direction vector
@@ -101,6 +116,34 @@ export function cardinal(v) {
   const x = v?.x ?? 0, z = v?.z ?? 1;
   if (Math.abs(x) > Math.abs(z)) return { x: Math.sign(x), z: 0 };
   return { x: 0, z: z < 0 ? -1 : 1 };
+}
+
+// The passing loop in the station's own frame: [[x, z], ...] from one end of the line, out along a diagonal to
+// z = LOOP_Z, along the platform and back in to the other end
+export const LOOP_Z = -4;
+export const LOOP_REACH = 22;
+export function loopPath(plan) {
+  // (never further out than the straight the map promises each side of a stop)
+  const x0 = Math.max(plan.line.x0, -LOOP_REACH), x1 = Math.min(plan.line.x1, LOOP_REACH), n = -LOOP_Z, pts = [];
+  for (let k = 0; k < n; k++) pts.push([x0 + k, -k]);
+  for (let x = x0 + n; x <= x1 - n; x++) pts.push([x, LOOP_Z]);
+  for (let k = n - 1; k >= 0; k--) pts.push([x1 - k, -k]);
+  return pts;
+}
+
+// Track pieces for the passing loop: [{ x, y, z, kind, dir, end }] in world coordinates. The two `end` pieces sit on
+// the line itself: there the block becomes a switch holding the line's straight and this bend.
+export function loopBlocks(plan, origin, forward) {
+  if (!plan.loop) return [];
+  const r = rightOf(forward), f = { x: Math.sign(forward.x), z: Math.sign(forward.z) };
+  const at = ([x, z]) => ({ x: origin.x + x * r.x + z * f.x, z: origin.z + x * r.z + z * f.z });
+  const dirTo = (a, b) => DX.findIndex((dx, d) => dx === Math.sign(b.x - a.x) && DZ[d] === Math.sign(b.z - a.z));
+  const path = loopPath(plan), x0 = path[0][0], x1 = path[path.length - 1][0];
+  const pts = [at([x0 - 1, 0]), ...path.map(at), at([x1 + 1, 0])];
+  return path.map((_, i) => {
+    const p = pts[i + 1], shape = flatShapeFor(dirTo(p, pts[i]), dirTo(p, pts[i + 2]));
+    return { x: p.x, y: origin.y, z: p.z, kind: shape.kind, dir: shape.dir, end: i === 0 || i === path.length - 1 };
+  });
 }
 
 // Track pieces for the line through a station: [{ x, y, z, dir }] in world coordinates

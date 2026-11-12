@@ -150,6 +150,11 @@ get dark oak stairs and fences for bark, never mud brick.
 
 **Smaller plants:** mangrove roots, moss carpets, lily pads, hanging roots, vines.
 
+**Round the foundation:** clumps of mangrove leaves under the ground-floor windows and at some corners, never a
+strip round the house (the skill's `bushes`, on by default).
+
+**Dormer brackets:** a mud brick wall either side of each dormer window carries its roof overhang.
+
 ## Building it with the skill
 
 - **Preset:** `fen_timber`: mud brick in a proud mangrove frame, spruce trim, brown glass, a dark oak roof.
@@ -166,8 +171,9 @@ get dark oak stairs and fences for bark, never mud brick.
  "door": {"side": "s"}, "roof": {"type": "gable", "ridge": "x", "moss": true}, "vines": 0.2}
 ```
 
+**Boardwalks:** the `boardwalk` part (mangrove slab deck, log stilts, fence rails, lanterns at the ends and every 8).
+
 **Not in the skill yet:**
-- boardwalks;
 - froglight cages.
 
 ## Never
