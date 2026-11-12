@@ -90,6 +90,16 @@ def _climb_jogs(cells, keep=(), window=15):
     assert res[-1] == cells[-1]
     return res
 
+def _despike(cells, keep=()):
+    """Flatten one-block bumps: a cell stepping out sideways and straight back (the track can't turn 90 degrees on a
+    diagonal) is moved back onto the straight between its neighbours."""
+    cells = list(cells)
+    for i in range(1, len(cells) - 1):
+        (ax, az), (bx, bz) = cells[i - 1], cells[i + 1]
+        if cells[i] not in keep and sorted((abs(bx - ax), abs(bz - az))) == [0, 2]:
+            cells[i] = ((ax + bx) // 2, (az + bz) // 2)
+    return cells
+
 def trace(points, stops=()):
     """points: the line's control points [(x, z), ...] (already smooth); stops: [(x, z, axis or None), ...] that the
     line passes through or starts/ends at. Returns (cells, stop_index) with a straight N/S/E/W run of PLATFORM
@@ -144,6 +154,7 @@ def trace(points, stops=()):
     for _, a, s, b, _ in pieces: keep |= set(_raster([a, s, b]))
     cells = _smooth_turns(cells, keep)
     cells = _climb_jogs(cells, keep)
+    cells = _despike(cells, keep)
     idx = {c: n for n, c in enumerate(cells)}
     found = [idx.get(c, int(np.argmin([math.dist(c, q) for q in cells]))) for c in stop_cells]
     res = [0] * len(ctrl)
