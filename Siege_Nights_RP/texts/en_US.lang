@@ -84,6 +84,7 @@ tile.siege:stables.name=Stables
 tile.siege:foresters_lodge.name=Forester's Lodge
 tile.siege:rail_depot.name=Rail Depot
 tile.hc:station_post.name=Station Post
+tile.siege:trade_board.name=Trade Board
 tile.hc:breeder_post.name=Breeder's Post
 entity.siege:steed.name=Steed
 item.siege:lore_tome.name=Lore Tome
