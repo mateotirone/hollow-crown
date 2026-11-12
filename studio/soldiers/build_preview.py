@@ -36,6 +36,24 @@ payload = {
 }
 for k, e in ent.items():
     payload['types'][k]['anims'] = e['animations']
+
+# Stand-ins for what Minecraft adds on its own in game, so the preview matches what players see:
+#  * held vanilla items (sword, bow, crossbow) as simple shapes on the rightItem bone
+#  * the vanilla poses those items use. "reset" bones start from zero like vanilla's "- this".
+HELD = {
+    'man_at_arms': [([-6.5, 12, -3.5], [1, 1, 3], [64, 60]), ([-8, 11.5, -4.5], [4, 2, 1], [72, 60]), ([-6.5, 12, -14.5], [1, 1, 10], [80, 60])],
+    'archer': [([-6.5, 11.5, -1], [1, 3, 1], [64, 60]), ([-6.5, 12, -8], [1, 1, 7], [64, 60]), ([-6.5, 12, 1], [1, 1, 7], [64, 60]),
+               ([-6.5, 13, -8], [1, 1, 1], [72, 60]), ([-6.5, 13, 7], [1, 1, 1], [72, 60])],
+    'crossbowman': [([-6.5, 3, -0.5], [1, 11, 1], [64, 60]), ([-12.5, 3, -0.5], [13, 1, 1], [80, 60]), ([-7, 1, -0.5], [2, 2, 1], [72, 60])],
+}
+for k, cubes in HELD.items():
+    for b in payload['types'][k]['geo']['bones']:
+        if b['name'] == 'rightItem':
+            b['cubes'] = [{"origin": o, "size": sz, "uv": [0, 0], "proxy": col} for o, sz, col in cubes]
+anims['animation.humanoid.holding'] = {"loop": True, "bones": {"rightArm": {"rotation": [-18, 0, 0]}}}
+anims['animation.humanoid.bow_and_arrow'] = {"loop": True, "reset": ["rightArm", "leftArm"], "bones": {
+    "rightArm": {"rotation": [-90, -5.73, 0]}, "leftArm": {"rotation": [-90, 28.65, 0]}}}
+payload['common']['holding'] = 'animation.humanoid.holding'
 html = open(HERE + '/template.html').read().replace('__DATA__', json.dumps(payload, separators=(',', ':')))
 if '--local-three' in sys.argv:
     p = sys.argv[sys.argv.index('--local-three') + 1]
