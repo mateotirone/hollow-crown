@@ -33,6 +33,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - Discord alerts, ready for when the group sets up a Discord: siege nights, fallen Keeps, new settlements, Rival Lords marching, the throne changing hands and more can be posted to a Discord channel, with a ping for whoever it hits, even when nobody is online. A Choirsteel template holder who stays away a full day is announced to everyone. Needs a relay account and a small program on an always-on computer (docs/DISCORD.md); without them nothing changes in game.
 
 ### Fixed
+- A Rail Depot placed away from any line no longer builds its station a block too low: the platform now stands on the ground and the track on a bed one block up.
 - The Hollow's ruler no longer shows a health bar while sitting and talking. The bar appears when you strike them and the fight to overthrow them begins.
 - Trebuchet: the boulder now flies with real gravity and can't slip through a thin wall. Look where you want to fire; look higher to lob it, level for a flat fast throw. Sneak + click changes the counterweight (Light, Medium, Heavy) instead of the range. Faster landings hit harder. Only the owner and their allies can fire it, and a hit on someone's settlement makes you Wanted there.
 - Battering Ram: it now belongs to whoever placed it, and sneak + click with an empty hand packs it back into an item.
