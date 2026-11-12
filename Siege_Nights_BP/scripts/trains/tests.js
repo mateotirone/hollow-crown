@@ -111,7 +111,6 @@ addTests("trains", {
     assertEqual(nearestStop(data, 2000, 0), undefined);
     const bad = { stops: data.stops, segments: [...data.segments, { id: "AB", from: "A", to: "Z", blocks: [] }] };
     assert(checkRoutes(bad).length >= 3, "a doubled id, an unknown stop and no track are caught");
-    assertEqual(checkRoutes(ROUTES).length, 0, "the planned railway has no mistakes");
     const custom = { ...data.segments[0], works: [[0, 0, 60, 63, 1]], works_palette: [{ name: "minecraft:air" }, { name: "minecraft:stone" }], custom: [[10, 20]] };
     assertEqual(checkRoutes({ stops: data.stops, segments: [custom] }).length, 0);
     const p = pieces(custom);
@@ -151,6 +150,16 @@ addTests("trains", {
     assertEqual(speedForGap(TRAIN.keepApart), 0, "stopped once it is this close");
     const v = speedForGap(gap);
     assert(v > 0 && (v * v) / (2 * TRAIN.brake) <= gap - TRAIN.keepApart, "from that speed it can stop in time");
+  },
+
+  "routes: the planned railway has no mistakes, and no works stand in a train's way": () => {
+    const problems = checkRoutes(ROUTES);
+    assert(!problems.length, problems[0]);
+    const seg = { id: "t", from: "A", to: "B", blocks: [[0, 64, 0, 0, 0], [0, 64, 1, 0, 0]], works: [[1, 0, 64, 65, 1]], works_palette: [{ name: "minecraft:air" }, { name: "minecraft:stone" }] };
+    const stops = [{ id: "A", x: 0, y: 64, z: 0 }, { id: "B", x: 0, y: 64, z: 1 }];
+    assert(checkRoutes({ stops, segments: [seg] }).some((p) => p.includes("train's body")), "a parapet right beside the track is caught");
+    assertEqual(checkRoutes({ stops, segments: [{ ...seg, works: [[2, 0, 64, 65, 1], [0, 0, 68, 70, 1]] }] }).length, 0, "two out and four up is fine");
+    assertEqual(checkRoutes({ stops, segments: [{ ...seg, works: [[1, 0, 64, 65, 1], [1, 0, 64, 67, 0]] }] }).length, 0, "cleared again by a later work is fine");
   },
 
   "no rail goes down in the Hollow": () => {
