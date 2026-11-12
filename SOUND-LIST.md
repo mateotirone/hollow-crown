@@ -7,7 +7,7 @@ Every sound The Hollow Crown plays, and what each one is made of. **This file is
 Tone for all of it: uneasy, especially at night. Not horror, no jump scares, nothing sudden or loud for its own sake.
 There is no music in version 1.
 
-- **23 signature sounds** are meant to be real recordings made with an AI sound generator. 0 of 23 are installed; the rest play a stand-in built from vanilla sounds, so the game is never silent.
+- **27 signature sounds** are meant to be real recordings made with an AI sound generator. 0 of 27 are installed; the rest play a stand-in built from vanilla sounds, so the game is never silent.
 - **32 more dragon sounds** have synthesized stand-ins and can be replaced the same way.
 - **33 vanilla sounds** are reworked (lower, softer, layered) everywhere the scripts use them, and **27 named cues** are built from vanilla layers.
 - The remaining vanilla sounds are played as they are, because they should sound like what they are (a horse, a bow, a page).
@@ -48,10 +48,14 @@ No computer set up for this? Upload the files in the project chat and ask Claude
 | 17 | The roll of the fallen | `roll_drum` | 4 s | one-shot, mono | vanilla stand-in |
 | 18 | The forty rowing | `forty_row` | 10 s | one-shot, stereo | vanilla stand-in |
 | 19 | The fen collects | `fen_debt` | 7 s | one-shot, stereo | vanilla stand-in |
-| 20 | Cinderwing: roar | `cinderwing_roar` | 2.4 s | one-shot, mono | synthesized stand-in |
-| 21 | Ashen Wyvern: roar | `wyvern_roar` | 2.4 s | one-shot, mono | synthesized stand-in |
-| 22 | Dune Drake: roar | `drake_roar` | 2.4 s | one-shot, mono | synthesized stand-in |
-| 23 | Glass Wyrm: roar | `wyrm_roar` | 2.4 s | one-shot, mono | synthesized stand-in |
+| 20 | The castle gate opens | `gate_open` | 3 s | one-shot, mono | vanilla stand-in |
+| 21 | The castle gate shuts | `gate_close` | 3 s | one-shot, mono | vanilla stand-in |
+| 22 | The portcullis rises | `portcullis_open` | 4 s | one-shot, mono | vanilla stand-in |
+| 23 | The portcullis drops | `portcullis_close` | 3 s | one-shot, mono | vanilla stand-in |
+| 24 | Cinderwing: roar | `cinderwing_roar` | 2.4 s | one-shot, mono | synthesized stand-in |
+| 25 | Ashen Wyvern: roar | `wyvern_roar` | 2.4 s | one-shot, mono | synthesized stand-in |
+| 26 | Dune Drake: roar | `drake_roar` | 2.4 s | one-shot, mono | synthesized stand-in |
+| 27 | Glass Wyrm: roar | `wyrm_roar` | 2.4 s | one-shot, mono | synthesized stand-in |
 
 ### 1. The 3:17 toll
 
@@ -281,7 +285,55 @@ Prompt:
 
 > A deep wet marsh sound: bubbles rising and bursting from thick mud, reeds rustling all at once as if a wind passed, and a slow low creak like an old wooden raft taking weight. A faint breathy whisper at the very end, no words. Uneasy, not frightening. Ends in silence.
 
-### 20. Cinderwing: roar
+### 20. The castle gate opens
+
+- **File name:** `gate_open` (installs as `sounds/siege/sig/gate_open.ogg`, sound id `siege.sig.gate_open`)
+- **Length:** about 3 seconds, one-shot, mono
+- **When:** When a settlement's great timber gate swings open. Heard by everyone near the gate.
+- **Stand-in until then:** `random.door_open` pitch 0.5 + `hit.wood` pitch 0.5 vol 0.6 after 0.1 s + `random.wood_click` pitch 0.5 vol 0.5 after 0.6 s
+- **Test:** `/scriptevent siege:sound sig.gate_open`
+
+Prompt:
+
+> A massive medieval oak castle gate, iron-banded, swinging open on huge iron hinges: a deep slow groaning creak of old timber and rusted iron pivots, a heavy wooden thud as the bar lifts at the start, and the low scrape of the gate's foot over stone. Close-miked, outdoor stone courtyard, slight echo. No music, no voices.
+
+### 21. The castle gate shuts
+
+- **File name:** `gate_close` (installs as `sounds/siege/sig/gate_close.ogg`, sound id `siege.sig.gate_close`)
+- **Length:** about 3 seconds, one-shot, mono
+- **When:** When the great timber gate swings shut. Heard by everyone near the gate.
+- **Stand-in until then:** `random.door_close` pitch 0.5 + `hit.wood` pitch 0.45 vol 0.7 after 0.1 s + `random.anvil_land` pitch 0.6 vol 0.25 after 0.1 s
+- **Test:** `/scriptevent siege:sound sig.gate_close`
+
+Prompt:
+
+> A massive iron-banded oak castle gate swinging shut: a short groaning hinge creak, then a deep heavy boom as it meets the stone frame, a rattle of iron fittings, and a heavy wooden bar dropping into its brackets with a solid thunk. Outdoor stone courtyard, short echo. No music, no voices.
+
+### 22. The portcullis rises
+
+- **File name:** `portcullis_open` (installs as `sounds/siege/sig/portcullis_open.ogg`, sound id `siege.sig.portcullis_open`)
+- **Length:** about 4 seconds, one-shot, mono
+- **When:** When a portcullis is winched up. Heard by everyone near the gate.
+- **Stand-in until then:** `hit.chain` pitch 0.6 vol 0.8 + `step.chain` pitch 0.5 vol 0.8 after 0.2 s + `hit.chain` pitch 0.55 vol 0.8 after 0.4 s + `step.chain` pitch 0.5 vol 0.8 after 0.6 s + `random.click` pitch 0.5 vol 0.6 after 1 s
+- **Test:** `/scriptevent siege:sound sig.portcullis_open`
+
+Prompt:
+
+> A heavy iron portcullis being winched up into a stone gatehouse: a wooden ratchet winch clacking steadily, thick iron chain rattling and grinding over a wheel, the iron grille scraping up stone grooves, ending with the click of the pawl catching. Medieval, heavy, mechanical, stone-room echo. No music, no voices.
+
+### 23. The portcullis drops
+
+- **File name:** `portcullis_close` (installs as `sounds/siege/sig/portcullis_close.ogg`, sound id `siege.sig.portcullis_close`)
+- **Length:** about 3 seconds, one-shot, mono
+- **When:** When a portcullis comes down. Heard by everyone near the gate.
+- **Stand-in until then:** `hit.chain` pitch 0.8 vol 0.8 + `step.chain` pitch 0.7 vol 0.8 after 0.1 s + `random.anvil_land` pitch 0.5 vol 0.6 after 0.4 s + `dig.stone` pitch 0.5 vol 0.8 after 0.4 s
+- **Test:** `/scriptevent siege:sound sig.portcullis_close`
+
+Prompt:
+
+> A heavy iron portcullis released and dropping down stone grooves: a fast rush of chain running out over a wheel, iron scraping stone, then a deep heavy iron-on-stone slam as its spikes hit the ground, with a short ringing rattle after. Medieval gatehouse, stone echo. No music, no voices.
+
+### 24. Cinderwing: roar
 
 - **File name:** `cinderwing_roar` (installs as `sounds/siege/dragon/cinderwing_roar.ogg`, sound id `siege.dragon.cinderwing.roar`)
 - **Length:** about 2.4 seconds, one-shot, mono
@@ -292,7 +344,7 @@ Prompt:
 
 > The voice of a large fire-breathing dragon with a deep chest and a throat like a furnace: warm, rumbling, with a crackle of embers in the breath. A full roar: starts fast, peaks, and trails off into breath. Powerful and proud, not a monster-movie scream. One animal, close and dry, no echo, no background, no music.
 
-### 21. Ashen Wyvern: roar
+### 25. Ashen Wyvern: roar
 
 - **File name:** `wyvern_roar` (installs as `sounds/siege/dragon/wyvern_roar.ogg`, sound id `siege.dragon.wyvern.roar`)
 - **Length:** about 2.4 seconds, one-shot, mono
@@ -303,7 +355,7 @@ Prompt:
 
 > The voice of a lean, light wyvern with a high, hoarse, hissing voice like wind through dry reeds, raspy and airy. A full roar: starts fast, peaks, and trails off into breath. Powerful and proud, not a monster-movie scream. One animal, close and dry, no echo, no background, no music.
 
-### 22. Dune Drake: roar
+### 26. Dune Drake: roar
 
 - **File name:** `drake_roar` (installs as `sounds/siege/dragon/drake_roar.ogg`, sound id `siege.dragon.drake.roar`)
 - **Length:** about 2.4 seconds, one-shot, mono
@@ -314,7 +366,7 @@ Prompt:
 
 > The voice of a heavy, broad desert drake with a very low, slow, gravelly voice like boulders shifting under sand. A full roar: starts fast, peaks, and trails off into breath. Powerful and proud, not a monster-movie scream. One animal, close and dry, no echo, no background, no music.
 
-### 23. Glass Wyrm: roar
+### 27. Glass Wyrm: roar
 
 - **File name:** `wyrm_roar` (installs as `sounds/siege/dragon/wyrm_roar.ogg`, sound id `siege.dragon.wyrm.roar`)
 - **Length:** about 2.4 seconds, one-shot, mono
@@ -517,7 +569,7 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `block.amethyst_block.chime` | A crystal note | `chime.amethyst_block` | 11 | bestiary (4), undertow (4), lore (2), vault |
 | `mob.endermen.portal` | A step between places | `mob.endermen.portal` pitch 0.85 vol 0.8 + `random.orb` pitch 0.4 vol 0.15 after 0.1 s | 10 | bestiary (6), crown, horses, townhall, undertow |
 | `ambient.cave` | Something is wrong | `ambient.cave` pitch 0.85 vol 0.8 | 8 | reach (3), bestiary (2), undertow (2), lore |
-| `ui.toast.challenge_complete` | Something earned | `random.toast` pitch 0.9 vol 0.7 + `random.levelup` pitch 1.2 vol 0.25 after 0.1 s + `block.bell.hit` pitch 0.6 vol 0.3 after 0.4 s | 7 | siege (2), bestiary, crown, rivals, settle, townhall |
+| `ui.toast.challenge_complete` | Something earned (the bell rings three times: Mateo, 2026-11-12) | `random.toast` pitch 0.9 vol 0.7 + `random.levelup` pitch 1.2 vol 0.25 after 0.1 s + `block.bell.hit` pitch 0.6 vol 0.45 after 0.4 s + `block.bell.hit` pitch 0.6 vol 0.4 after 1.4 s + `block.bell.hit` pitch 0.6 vol 0.35 after 2.4 s | 7 | siege (2), bestiary, crown, rivals, settle, townhall |
 | `item.book.page_turn` | A page | `item.book.page_turn` pitch 0.9 | 7 | lore (5), bestiary, guide |
 | `dig.stone` | Stone moving | `dig.stone` pitch 0.9 | 6 | siege (3), crown, graves, townhall |
 | `random.explode` | A blast | `random.explode` pitch 0.85 | 6 | siege (3), bestiary, undertow, vault |
@@ -581,7 +633,6 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `mob.enderdragon.flap` | 1 | roletrials |
 | `mob.enderdragon.growl` | 1 | roletrials |
 | `mob.evocation_illager.cast_spell` | 1 | bestiary |
-| `mob.frog.tongue` | 1 | bestiary |
 | `mob.ghast.scream` | 1 | roletrials |
 | `mob.horse.angry` | 1 | horses |
 | `mob.horse.breathe` | 1 | horses |

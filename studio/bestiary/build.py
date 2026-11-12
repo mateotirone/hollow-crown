@@ -159,6 +159,8 @@ def entity_bp(m):
         c["minecraft:movement.basic"] = {}; c["minecraft:jump.static"] = {}
         c["minecraft:behavior.float"] = {"priority": 0}
         c["minecraft:behavior.random_stroll"] = {"priority": 7, "speed_multiplier": 0.8}
+    if m.get("boss"):   # a boss holds its ground until it has someone to fight: wandering off fought the script that walks it in Creative
+        c.pop("minecraft:behavior.random_stroll", None); c.pop("minecraft:behavior.random_hover", None)
     # who it fights
     filt = None
     if fam in ("raider",) or m.get("raider"): filt = roster.RAIDER_TARGETS
@@ -263,7 +265,7 @@ def loot(drops):
 
 def spawn_rule(m):
     s = m["spawn"]; cond = {"minecraft:spawns_on_surface": {}, "minecraft:weight": {"default": s["weight"]},
-        "minecraft:herd": {"min_size": s["herd"][0], "max_size": s["herd"][1]}, "minecraft:density_limit": {"surface": 4},
+        "minecraft:herd": {"min_size": s["herd"][0], "max_size": s["herd"][1]}, "minecraft:density_limit": {"surface": s.get("density", 4)},
         "minecraft:biome_filter": {"any_of": [{"test": "has_biome_tag", "operator": "==", "value": b} for b in s["biomes"]]}}
     if s["light"] is not None: cond["minecraft:brightness_filter"] = {"min": 0, "max": s["light"], "adjust_for_weather": True}
     if s["pop"] == "monster": cond["minecraft:difficulty_filter"] = {"min": "easy", "max": "hard"}
