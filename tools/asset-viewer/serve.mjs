@@ -241,7 +241,7 @@ async function ensurePython() {
 // takes each build from the newest branch that has it, so stations, towns and walls from different threads
 // all show at once.
 const WT = path.join(CACHE, "worktrees"), BOUT = path.join(CACHE, "builds");
-const RECIPE = "r2";         // bump when the way builds are made changes, so builds kept from an earlier run are redone
+const RECIPE = "r3";         // bump when the way builds are made changes, so builds kept from an earlier run are redone
 const built = new Map();     // slug -> {sha, ref, time, ok, index, tpl, error}
 let buildTimer = null, building = false, buildAgain = false;
 const slug = (ref) => ref.replace(/^origin\//, "").replace(/[^A-Za-z0-9._-]+/g, "_");
@@ -347,6 +347,9 @@ const EXTRAS = [
     label: { gravestone: "Gravestone (where a player fell; candle lit while sealed)" } },
   { id: "bridges", title: "Bridges", marker: "map/structures/bridges_gallery.py",
     args: (out) => [out] },
+  { id: "harbour", title: "Harbour: lighthouse, boathouse, harbourmaster", marker: "map/structures/harbour_builds.py",
+    args: (out) => [out],
+    names: (out) => { try { return JSON.parse(fs.readFileSync(path.join(out, "names.json"), "utf8")); } catch { return {}; } } },
 ];
 // Builder scripts that live on a branch without the kit: copied from the newest branch that has them into
 // the newest catalogue branch's map/structures and run there.

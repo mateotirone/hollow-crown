@@ -552,18 +552,18 @@ class Settlement(Town):
     def charter(self):
         """Do the slots open by each tier hold every building that tier's charter (and the ones before) needs?
         Plus a field by Town (the Farmhouse's). Returns (passes, shortfall: buildings with no slot, summed)."""
-        short = 0
+        short = 0; self.missing = []
         for t in range(4):
             sup = collections.Counter()
             for e in self.slots:
                 if e["opensAt"] <= t: sup["ML" if e["size"] == "M" and e.get("long") else e["size"]] += 1
             needs = [n for tt in range(t + 1) for n in self.CHARTER_NEEDS[tt]]
             needs.sort(key=lambda n: len(n[1]))                # strictest first, each into its smallest class
-            for _, classes in needs:
+            for name, classes in needs:
                 c = next((c for c in classes if sup[c] > 0), None)
                 if c: sup[c] -= 1
-                else: short += 1
-            if t >= 1 and self.counts()[t]["field"] < 1: short += 1
+                else: short += 1; self.missing.append((TIERS[t], name))
+            if t >= 1 and self.counts()[t]["field"] < 1: short += 1; self.missing.append((TIERS[t], "field"))
         return short == 0, short
 
     def meets(self):
@@ -956,7 +956,7 @@ def main():
             s = Settlement(plot, tpl, T, L, seed); s.run()
             ok, cs = s.meets(); passes, cshort = s.charter()
             short = sum(max(0, MINIMUM[t][q] - cs[t][q]) for t in range(4) for q in MINIMUM[t])
-            print(plot["name"], tpl, seed, "charter" if passes else f"charter short {cshort}", "| minimum", "ok" if ok else f"short {short}", cs[-1], flush=True)
+            print(plot["name"], tpl, seed, "charter" if passes else f"charter short {cshort} {sorted(set(s.missing))}", "| minimum", "ok" if ok else f"short {short}", cs[-1], flush=True)
             lib = any(e.get("library") for e in s.slots)            # a Hamlet library slot is a must
             if best is None or (not lib, cshort, short) < best[0]: best = ((not lib, cshort, short), s)
             if passes: break
