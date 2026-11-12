@@ -51,7 +51,7 @@ import { shouldRise, regentOutcome, REGENT, TEMPERS, JOBS } from "./regent.js";
 import { sfx } from "../core/sfx.js";
 import { thinTick, thinCommand, planThinPlace, hillHeight, caveGeometry, setHills, toWorld, THIN_PLACES, CAMP_TOME, CAVES } from "./thinplaces.js";
 import { SITE_FEATURES } from "../lore/data/world.js";
-import { canOpen, dullLeft, BOSSES_TO_OPEN, FORK_DULL_DAYS } from "./source.js";
+import { canOpen, getRift, dullLeft, BOSSES_TO_OPEN, FORK_DULL_DAYS } from "./source.js";
 import { fallenCount, REGIONAL_BOSSES } from "../lore/data/spine.js";
 import { seepTick, seepCommand, planVeins, mouthSeeds, reachOn, hollowOf, takesMoss, heldGround, MAX_REACH } from "./seep.js";
 import { progressOf } from "../lore/player.js";
@@ -117,7 +117,7 @@ export const REFUSALS = [
 const NUMBER = ["None", "One", "Two", "Three", "Four", "Five"];
 export const refusalLine = (n, fallen, total) => `§5${REFUSALS[n % REFUSALS.length]} §7${NUMBER[fallen] ?? fallen} of ${NUMBER[total]?.toLowerCase() ?? total} have fallen by your hand.`;
 const refusedTimes = new Map();
-function refuse(player) {
+export function refuse(player) {
   cooldown.set(player.id, system.currentTick + 50);
   const n = refusedTimes.get(player.id) ?? 0;
   refusedTimes.set(player.id, n + 1);
@@ -779,6 +779,12 @@ addTests("undertow", {
     for (const keep of ["minecraft:chest", "minecraft:oak_door", "minecraft:bell", "siege:regal_safe", "minecraft:dark_oak_log", "minecraft:grass_block"]) assert(hollowOf(keep) === undefined, keep);
     assert(heldGround(-150, -150, []) && !heldGround(115, 510, []), "Kingsrest is held; a thin place is not");
     assert(heldGround(2000, 2000, [{ x: 2000, y: 70, z: 2000 }]) && !heldGround(2000, 2000, []), "a held plot is held");
+  },
+  "turning a player back at the veil never throws": () => {
+    // everything refuse() names must be imported (it once called getRift without importing it)
+    let pushed = 0, told = 0;
+    refuse({ id: "veil-test", name: "t", dimension: { id: "minecraft:overworld" }, location: { x: 0, y: 64, z: 0 }, getDynamicProperty: () => undefined, setDynamicProperty: () => {}, hasTag: () => false, getTags: () => [], applyKnockback: () => { pushed++; }, playSound: () => {}, sendMessage: () => { told++; }, onScreenDisplay: { setActionBar: () => { told++; } } });
+    assert(pushed === 1 && told >= 1, `pushed ${pushed}, told ${told}`);
   },
   "the veil only takes players who beat all five bosses themselves": () => {
     assert(!mayCrossWith(0, false) && !mayCrossWith(4, false) && mayCrossWith(5, false) && mayCrossWith(0, true));
