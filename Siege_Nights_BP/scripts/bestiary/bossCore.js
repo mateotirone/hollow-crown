@@ -52,6 +52,8 @@ export const fightOf = (bossId) => activeFights().find((f) => f.def.id === bossI
 export function phaseFor(fraction, thresholds = []) {
   return thresholds.filter((t) => fraction <= t).length;
 }
+// The phases a boss enters going from phase `from` to phase `to`, in order
+export const phasesCrossed = (from, to) => Array.from({ length: Math.max(0, to - from) }, (_, i) => from + 1 + i);
 
 // Every boss is tuned to be beaten alone. Each extra player in the arena makes it half again as tough:
 // 1 player = its real health, 2 = 1.5x, 4 = 2.5x, capped at 10 players. Done by giving back a share of each hit.
@@ -340,6 +342,7 @@ function bossTick() {
     // Phases
     const phase = phaseFor(f.hp(), f.def.phases);
     if (phase > f.phase && !f.paused) {
+      const from = f.phase;
       f.phase = phase;
       effect(f.entity, "resistance", 40, 4);
       bossMove(f.entity, "rage", "strike");
@@ -347,7 +350,8 @@ function bossTick() {
         p.onScreenDisplay.setTitle(`§c${f.def.name}`, { subtitle: `§7${f.def.phaseNames?.[phase] ?? `Phase ${phase + 1}`}`, fadeInDuration: 5, stayDuration: 40, fadeOutDuration: 10 });
         sound(f.dim, "mob.wither.ambient", p.location, 0.6, 0.7);
       }
-      f.def.onPhase?.(f, phase);
+      // One huge blow past two lines still plays every phase it crossed, in order (the Reeve still splits into his Cogs)
+      for (const n of phasesCrossed(from, phase)) safely(f, () => f.def.onPhase?.(f, n));
     }
 
     // Timers and marked zones
@@ -743,5 +747,8 @@ addTests("bestiary", {
     assertEqual(phaseFor(0.45, [0.6, 0.3]), 1);
     assertEqual(phaseFor(0.1, [0.6, 0.3]), 2);
     assertEqual(phaseFor(0.1, undefined), 0);
+    assertEqual(phasesCrossed(0, 2), [1, 2], "a blow past both lines plays both phases");
+    assertEqual(phasesCrossed(1, 2), [2]);
+    assertEqual(phasesCrossed(2, 2), []);
   },
 });
