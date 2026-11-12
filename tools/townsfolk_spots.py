@@ -23,6 +23,9 @@ TOWNS = {  # file stem -> (town name as in plots/config.js WARDS, how many towns
     "mirelight": ("Mirelight", 10),
 }
 PAVING_WORDS = ("_slab", "gravel", "grass_path", "dirt_path")  # full blocks are plot pads and edges, not streets
+FULL_PAVING = {"cobblestone", "mossy_cobblestone", "stone_bricks", "mossy_stone_bricks", "andesite", "polished_andesite",
+               "tuff_bricks", "mud_bricks", "sandstone", "cut_sandstone", "red_sandstone", "smooth_red_sandstone",
+               "cobbled_deepslate", "deepslate_bricks", "diorite", "polished_diorite", "mangrove_planks"}
 NOT_PAVING = ("farmland", "wheat", "potatoes", "carrots", "beetroot", "water", "fence", "wall", "door", "air", "leaves", "log")
 MIN_GAP = 9          # blocks between two townsfolk's spots
 INNER = 0.85         # keep to this share of the town's radius: townsfolk live in the streets, not out by the fields
@@ -50,15 +53,25 @@ def spots_for(path, count, centre):
     for x, y, z, _ in blocks[:g]:
         if (x, y, z) in solid and y >= top.get((x, z), -999):
             top[(x, z)] = y
-    columns = {}
+    open_sky = lambda x, y, z: not any((x, y + k, z) in solid for k in range(1, SKY_CLEAR + 1))
+    columns = {}                                 # slab and path cells: where a townsperson may be placed
+    full = {}                                    # full paving blocks: the half-steps of a sloped street
     for (x, z), y in top.items():
-        if not paving(pal[solid[(x, y, z)]]["name"]):
+        name = pal[solid[(x, y, z)]]["name"]
+        if not open_sky(x, y, z):
             continue
-        if any((x, y + k, z) in solid for k in range(1, SKY_CLEAR + 1)):
-            continue
-        columns[(x, z)] = y
+        if paving(name):
+            columns[(x, z)] = y
+        elif name.split(":")[-1] in FULL_PAVING:
+            full[(x, z)] = y
+    # A full block counts as street when a slab of the same street steps up or down beside it (streets climb
+    # in half-block steps, so every other cell on a slope is a full block). Spots still go only on slabs and paths.
+    ways = dict(columns)
+    for (x, z), y in full.items():
+        if any(columns.get((x + dx, z + dz)) in (y, y + 1) for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1))):
+            ways[(x, z)] = y
     street = [(x, z) for (x, z) in columns
-              if sum((x + dx, z + dz) in columns and abs(columns[(x + dx, z + dz)] - columns[(x, z)]) <= 1
+              if sum((x + dx, z + dz) in ways and abs(ways[(x + dx, z + dz)] - columns[(x, z)]) <= 1
                      for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1))) >= 3]
     if not street:
         return []
