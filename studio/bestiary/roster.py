@@ -382,7 +382,7 @@ mob(id="mire_toad", name="Mire Toad", family="wild_hostile", model=m_toad, plan=
     pal=P(skin={"c": (90, 110, 50), "style": "stone"}, wart=(160, 90, 40), eye=(250, 200, 40)),
     hp=16, speed=0.3, dmg=3, collision=(0.8, 0.6), hops=True, region="Blackfen", egg=("#5a6e32", "#fac828"),
     spawn=dict(biomes=["swamp", "mangrove_swamp"], light=None, herd=(1, 2), weight=6, density=2, pop="monster"),
-    lore="Its tongue reaches six blocks. Its skin is poison, so punching it is a mistake.")
+    lore="It sits so still it looks like a stone in the mud. Its skin is poison, so punching it is a mistake.")
 
 def m_wight(m):
     biped(m, mats={"head": "bone", "body": "mail", "arm": "bone", "leg": "mail", "shoulder": "mail", "bracer": "crown", "belt": "crown"}, face="glow", nose=False)
