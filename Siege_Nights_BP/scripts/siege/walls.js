@@ -7,7 +7,7 @@ import { queueCollapse, setCollapseHooks } from "./collapse.js";
 import { CASTLE_BLOCKS, CASTLE_STONES, CHARGE, GATES, REINFORCEABLE, STONE_FAMILY, UNBREAKABLE } from "./constants.js";
 import { SETTINGS } from "./settings.js";
 import { isAlly, settlementAt } from "./territory.js";
-import { consumeHeld, isOnline } from "./util.js";
+import { consumeHeld, attackable } from "./util.js";
 import { applyFilter } from "../core/events.js";
 import { sfx } from "../core/sfx.js";
 
@@ -195,7 +195,7 @@ function repairDamageable(block, player, item, extra) {
 // Nothing in a settlement whose owner is away can be damaged
 export function offlineSafe(block) {
   const owner = settlementAt(block.location);
-  return !owner || isOnline(owner);
+  return !owner || attackable(owner);
 }
 
 // ---------- Breaching Charge: blows a hole in enemy walls ----------
