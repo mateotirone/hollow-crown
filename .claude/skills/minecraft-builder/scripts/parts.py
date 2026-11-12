@@ -1466,13 +1466,17 @@ def _roof_cells(ctx, F, r, H):
     return [(x, z, H[(x, z)], v[1]) for (x, z), v in own.items() if H.get((x, z)) == v[0]]
 
 
+def _chimney_cell(v):
+    return str(v.get("mat", "")).endswith(".chimney")
+
+
 def _moss(ctx, F, r, H, share=0.13):
     """Blackfen mossy shingle (palettes/blackfen.md, settle_halls.thatch): moss blocks on the ridge, moss on
     about 13% of the slope (more on the north, shady side), moss carpet in place of the ridge cap."""
     share = 0.13 if share is True else share
     for x, z, row, d in _roof_cells(ctx, F, r, H):
         v = ctx.get(x, row, z)
-        if not v or ctx.stage_of.get((x, row, z)) != "roof": continue
+        if not v or ctx.stage_of.get((x, row, z)) != "roof" or _chimney_cell(v): continue   # the chimney stays stone
         shade = 1.5 if v.get("props", {}).get("facing") == "s" else 1.0      # a north-facing slope faces s-up
         if v.get("kind") == "full":
             ctx.set(x, row, z, "roof", raw="moss_block")
@@ -1488,7 +1492,7 @@ def _thatch(ctx, F, r, H):
     x0, z0, x1, z1 = r["rect"]
     for x, z, row, d in _roof_cells(ctx, F, r, H):
         v = ctx.get(x, row, z)
-        if not v or ctx.stage_of.get((x, row, z)) != "roof": continue
+        if not v or ctx.stage_of.get((x, row, z)) != "roof" or _chimney_cell(v): continue   # the chimney stays stone
         edge = d == 0 or not (x0 <= x <= x1 and z0 <= z <= z1)
         if v.get("kind") == "full":
             ctx.set(x, row, z, "roof", raw="moss_block")
