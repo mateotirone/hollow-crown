@@ -43,7 +43,8 @@
     "type": "gable",
     "ridge": "z",
     "pitch": 1,
-    "gable_horns": true
+    "gable_horns": true,
+    "snow": true
    },
    "dormers": [
     {

@@ -24,6 +24,7 @@
    ],
    "y": 0,
    "plinth": 2,
+   "piles": true,
    "storeys": [
     5,
     5
@@ -54,7 +55,8 @@
    "roof": {
     "type": "gable",
     "ridge": "z",
-    "pitch": 1
+    "pitch": 1,
+    "moss": true
    },
    "dormers": [
     {

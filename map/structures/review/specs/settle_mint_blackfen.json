@@ -47,6 +47,7 @@
    ],
    "y": 0,
    "plinth": 2,
+   "piles": true,
    "storeys": [
     5,
     4

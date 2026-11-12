@@ -67,20 +67,6 @@ def inn_inside(bp, B):
         F.bed(bp, x, y, -9, "n")
         F.lantern_ceiling(bp, x, y + 3, -6)
 
-def piles(bp, rect):
-    """Blackfen: the plinth course becomes mangrove piles standing in a tangle of mangrove roots (corner and every
-    other edge block a log driven two below ground, roots between), so the house reads as lifted off the wet ground
-    on the same footprint and door step as the other regions."""
-    x0, z0, x1, z1 = rect
-    door = ((x0 + x1) // 2, z1)
-    for x in range(x0, x1 + 1):
-        for z in range(z0, z1 + 1):
-            if not (x in (x0, x1) or z in (z0, z1)) or (x, z) == door: continue
-            post = (x - x0) % 2 == 0 and (z - z0) % 2 == 0
-            for y in ((-2, -1, 0, 1) if post else (0, 1)):
-                if post: bp.set(x, y, z, "mangrove_log", axis="y")
-                else: bp.set(x, y, z, "mangrove_roots")
-
 def build(bid, region="vale"):
     import engine
     f = os.path.join(SPECS, f"settle_{bid}_{region}.json")
@@ -96,7 +82,6 @@ def build(bid, region="vale"):
     if bid == "mint": bar_ground_windows(bp)
     h = spec["parts"][0]
     x0, z0, x1, z1 = h["rect"]; plate = h.get("y", 0) + h.get("plinth", 1) - 1 + sum(h["storeys"])
-    if region == "blackfen": piles(bp, h["rect"])
     if bid in ATTIC and region != "emberwaste":      # the skill floors each storey; the attic under the roof gets its floor here (the stair comes up through it)
         ya = plate
         for x in range(x0 + 1, x1):
