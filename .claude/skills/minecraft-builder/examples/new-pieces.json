@@ -1,0 +1,234 @@
+{
+ "name": "new_pieces",
+ "parts": [
+  {
+   "part": "house",
+   "name": "frost",
+   "style": "frost_timber",
+   "rect": [
+    0,
+    0,
+    6,
+    8
+   ],
+   "storeys": [
+    5,
+    4
+   ],
+   "door": {
+    "side": "s"
+   },
+   "roof": {
+    "type": "gable",
+    "pitch": 2,
+    "ridge": "z",
+    "gable_horns": true,
+    "snow": true
+   }
+  },
+  {
+   "part": "house",
+   "name": "stilt",
+   "style": "fen_timber",
+   "rect": [
+    12,
+    0,
+    18,
+    6
+   ],
+   "y": 4,
+   "stilts": {
+    "ground": 0
+   },
+   "storeys": [
+    5
+   ],
+   "door": {
+    "side": "s"
+   },
+   "roof": {
+    "type": "gable",
+    "pitch": 1,
+    "ridge": "x",
+    "moss": true
+   }
+  },
+  {
+   "part": "house",
+   "name": "pile",
+   "style": "fen_timber",
+   "rect": [
+    24,
+    0,
+    30,
+    6
+   ],
+   "piles": true,
+   "storeys": [
+    5
+   ],
+   "door": {
+    "side": "s"
+   },
+   "roof": {
+    "type": "gable",
+    "pitch": 1,
+    "ridge": "x",
+    "thatch": true
+   }
+  },
+  {
+   "part": "house",
+   "name": "hollow",
+   "style": "hollow_timber",
+   "rect": [
+    0,
+    14,
+    6,
+    22
+   ],
+   "offset": {
+    "storey": 1,
+    "dir": "e"
+   },
+   "storeys": [
+    5,
+    4
+   ],
+   "door": {
+    "side": "s"
+   },
+   "roof": {
+    "type": "gable",
+    "pitch": 2,
+    "ridge": "z"
+   }
+  },
+  {
+   "part": "house",
+   "name": "hall",
+   "style": {
+    "base": "ember_sandstone",
+    "roof": "smooth_sandstone"
+   },
+   "rect": [
+    14,
+    14,
+    24,
+    24
+   ],
+   "storeys": [
+    5
+   ],
+   "door": {
+    "side": "s"
+   },
+   "roof": {
+    "type": "flat",
+    "parapet": "slab"
+   }
+  },
+  {
+   "part": "dome",
+   "at": [
+    19,
+    19
+   ],
+   "r": 4,
+   "drum": {
+    "h": 3,
+    "windows": 4,
+    "glass": "yellow_stained_glass_pane"
+   },
+   "finial": "gold",
+   "name": "b5"
+  },
+  {
+   "part": "house",
+   "style": "vale_timber",
+   "rect": [
+    0,
+    36,
+    12,
+    44
+   ],
+   "storeys": [
+    5,
+    4
+   ],
+   "door": {
+    "side": "s"
+   },
+   "roof": {
+    "type": "gable",
+    "ridge": "x"
+   },
+   "dormers": [
+    {
+     "side": "s",
+     "at": -4
+    },
+    {
+     "side": "s",
+     "at": 4
+    }
+   ],
+   "name": "b6"
+  },
+  {
+   "part": "house",
+   "style": "fen_timber",
+   "rect": [
+    18,
+    36,
+    26,
+    42
+   ],
+   "storeys": [
+    5
+   ],
+   "piles": true,
+   "door": {
+    "side": "s"
+   },
+   "roof": {
+    "type": "gable",
+    "ridge": "x",
+    "moss": true
+   },
+   "dormers": [
+    {
+     "side": "s",
+     "at": 0
+    }
+   ],
+   "name": "b7"
+  },
+  {
+   "part": "house",
+   "style": {
+    "base": "ember_sandstone",
+    "roof": "smooth_sandstone"
+   },
+   "rect": [
+    40,
+    40,
+    50,
+    48
+   ],
+   "storeys": [
+    5,
+    4
+   ],
+   "door": {
+    "side": "s"
+   },
+   "roof": {
+    "type": "flat",
+    "parapet": "crenel",
+    "hatch": true
+   },
+   "name": "b8"
+  }
+ ]
+}
