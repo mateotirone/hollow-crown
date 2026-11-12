@@ -3,12 +3,22 @@
 // go to get the upgrade template. And then you clone it with netherite").
 //
 // The forge stands high on the eastern terraces past the Seams (site "cold_forge" in roads.js, built
-// by structures.js). Its Coffer holds one template at a time. Take it and the forge wakes: its
-// guards come out of the walls. A new template is sung into the Coffer three in-game days later,
-// so a world of ten players keeps coming back, and copying at a crafting table (7 netherite scrap
-// and Veinstone, studio/bestiary/choirsteel.py) is the quicker way to share.
+// by structures.js). Its Coffer holds ONE template for the whole world. Take it and the forge wakes:
+// its guards come out of the walls. After that the forge stays empty for as long as any template is
+// still around (Mateo, 2026-11-12: one for the world, "so it forces the player who has the template
+// to protect it", and a reason to lay siege to them). Copies are made at a crafting table (7 netherite
+// scrap and Veinstone, studio/bestiary/choirsteel.py).
 //
-// Saved: hc:cold_forge { stocked, takenAt }   (absolute world ticks)
+// Only if every template seems lost does the forge make a new one, so a template burnt in lava or
+// used up at the smithing table can't end Choirsteel for the whole Realm. Scripts can't look inside
+// every chest in the world, so "seems lost" means no template has been seen for LOST_AFTER of world
+// time. A template is seen when someone carries one, when someone opens a chest, barrel or other
+// container holding one, when one lies on the ground near a player, or when another feature calls
+// emit("templateSeen"). A template destroyed on the ground (lava, fire, despawning) cuts the wait to
+// LOST_DESTROYED, unless another template turns up first. So a holder who keeps it in a vault only
+// has to open that vault now and then.
+//
+// Saved: hc:cold_forge { stocked, lastSeen }   (absolute world ticks; older saves had takenAt)
 // Events out: emit("forgeTemplateTaken", { x, y, z, nearest }), emit("templateHolders", { ids, names })
 // Players carrying a template carry the tag siege_template_holder (a reason to be sieged).
 // Test: /scriptevent hc:forge_restock   fills the Coffer now (creative/op)
@@ -27,23 +37,43 @@ export const TEMPLATE = "siege:choirsteel_upgrade_template";
 const INGOT = "siege:choirsteel_ingot";
 const K_FORGE = "hc:cold_forge";
 export const FORGE = {
-  reforgeTicks: 3 * 24000, // three in-game days between templates
+  lostAfter: 30 * 24000, // no template seen anywhere for 30 in-game days (world time only runs while someone plays)
+  lostDestroyed: 3 * 24000, // ...or 3 days after one was destroyed on the ground
   wakeReach: 64, // only tick while someone is this close (the Coffer must be loaded)
   guards: ["siege:veinsworn", "siege:veinsworn", "siege:stone_vigil"],
 };
 const TOLD_TAG = "siege_cold_forge_told";
 
 // Pure: what the forge does this check. inChest = templates in the Coffer right now.
-//   "stock"  put a template in (first visit, or the wait is over)
-//   "taken"  someone has just lifted it: wake the guards and start the wait
-export function forgeStep(state, inChest, now, wait = FORGE.reforgeTicks) {
-  if (state.stocked && inChest === 0) return { state: { stocked: false, takenAt: now }, did: "taken" };
-  if (!state.stocked && inChest > 0) return { state: { stocked: true, takenAt: state.takenAt }, did: null }; // someone put one back
-  if (!state.stocked && (state.takenAt === undefined || now - state.takenAt >= wait)) return { state: { stocked: true, takenAt: state.takenAt }, did: "stock" };
+//   "stock"  put a template in (the very first visit, or every template seems lost)
+//   "taken"  someone has just lifted it: wake the guards
+export const lastSeenOf = (state) => state.lastSeen ?? state.takenAt;
+export function forgeStep(state, inChest, now, lostAfter = FORGE.lostAfter) {
+  if (state.stocked && inChest === 0) return { state: { stocked: false, lastSeen: now }, did: "taken" };
+  if (!state.stocked && inChest > 0) return { state: { stocked: true, lastSeen: now }, did: null }; // someone put one back
+  const seen = lastSeenOf(state);
+  if (!state.stocked && (seen === undefined || now - seen >= lostAfter)) return { state: { stocked: true, lastSeen: now }, did: "stock" };
   return { state, did: null };
+}
+// Pure: the saved state after a template is seen (seen) or destroyed (destroyed) at `now`.
+export function noteTemplate(state, now, kind = "seen") {
+  if (state.stocked) return state;
+  if (kind === "seen") return { ...state, lastSeen: Math.max(lastSeenOf(state) ?? now, now) };
+  // destroyed: the forge refills LOST_DESTROYED from now unless another template is seen first
+  return { ...state, lastSeen: Math.min(lastSeenOf(state) ?? now, now - FORGE.lostAfter + FORGE.lostDestroyed) };
 }
 
 const forgeState = () => load(K_FORGE, { stocked: false });
+let savedSeenAt = -Infinity;
+function sawTemplate(kind = "seen") {
+  try {
+    const now = world.getAbsoluteTime();
+    if (kind === "seen" && now - savedSeenAt < 1200) return; // write at most once a minute
+    const before = forgeState(), after = noteTemplate(before, now, kind);
+    if (after !== before) save(K_FORGE, after);
+    if (kind === "seen") savedSeenAt = now;
+  } catch { /* world not ready */ }
+}
 const countTemplates = (box) => {
   let n = 0;
   for (let i = 0; i < box.size; i++) { const it = box.getItem(i); if (it?.typeId === TEMPLATE) n += it.amount; }
@@ -118,10 +148,35 @@ function holderTick() {
     if (has && !p.hasTag(HOLDER_TAG)) { p.addTag(HOLDER_TAG); say(p, "§5The template is heavy in your pack. Anyone who wants Choirsteel now has a reason to come for you."); }
     if (!has && p.hasTag(HOLDER_TAG)) p.removeTag(HOLDER_TAG);
     if (has) holders.push(p);
+    try { // one lying on the ground nearby counts as seen
+      for (const e of p.dimension.getEntities({ type: "minecraft:item", location: p.location, maxDistance: 32 })) {
+        if (e.getComponent("item")?.itemStack?.typeId === TEMPLATE) { sawTemplate(); break; }
+      }
+    } catch { /* unloaded */ }
   }
+  if (holders.length) sawTemplate();
   const key = holders.map((p) => p.id).sort().join();
   if (key !== lastHolders) { lastHolders = key; emit("templateHolders", { ids: holders.map((p) => p.id), names: holders.map((p) => p.name) }); }
 }
+
+// Opening a chest, barrel or any other container that holds a template keeps it "seen".
+world.afterEvents.playerInteractWithBlock.subscribe((event) => {
+  try {
+    const box = event.block.getComponent("inventory")?.container;
+    if (box && countTemplates(box) > 0) sawTemplate();
+  } catch { /* not a container */ }
+});
+// A template destroyed on the ground (lava, fire, cactus, despawning). Picking one up also removes the
+// item entity, so a player standing right by it means it was picked up, not lost.
+world.beforeEvents.entityRemove.subscribe((event) => {
+  try {
+    const e = event.removedEntity;
+    if (e.typeId !== "minecraft:item" || e.getComponent("item")?.itemStack?.typeId !== TEMPLATE) return;
+    if (e.dimension.getPlayers({ location: e.location, maxDistance: 3 }).length) return;
+    system.run(() => sawTemplate("destroyed"));
+  } catch { /* gone already */ }
+});
+on("templateSeen", () => sawTemplate()); // e.g. a vault feature that checks its own chests
 
 onTick("undertow:forge", 100, forgeTick);
 onTick("undertow:forge_holders", 100, holderTick);
@@ -157,19 +212,31 @@ on("showcase", ({ player, dim, nextSpot, label }) => {
 });
 
 addTests("undertow", {
-  "Cold Forge: first visit stocks, taking wakes it, it restocks after three days": () => {
+  "Cold Forge: one template for the world; it refills only once every template seems lost": () => {
     let r = forgeStep({ stocked: false }, 0, 1000);
-    assertEqual(r.did, "stock");
+    assertEqual(r.did, "stock", "the very first visit fills it");
     r = forgeStep(r.state, 1, 1100);
     assertEqual(r.did, null, "still there: nothing happens");
     r = forgeStep(r.state, 0, 2000);
     assertEqual(r.did, "taken");
-    assertEqual(forgeStep(r.state, 0, 2000 + FORGE.reforgeTicks - 1).did, null, "too soon");
-    assertEqual(forgeStep(r.state, 0, 2000 + FORGE.reforgeTicks).did, "stock");
+    let st = r.state;
+    st = noteTemplate(st, 2000 + 20 * 24000); // someone carried it 20 days later
+    assertEqual(forgeStep(st, 0, 2000 + FORGE.lostAfter).did, null, "seen recently: stays empty");
+    assertEqual(forgeStep(st, 0, 2000 + 20 * 24000 + FORGE.lostAfter).did, "stock", "unseen for 30 days: lost");
   },
-  "Cold Forge: a template put back counts, and is not doubled": () => {
+  "Cold Forge: a destroyed template cuts the wait to three days, unless another turns up": () => {
+    const now = 100 * 24000;
+    let st = noteTemplate({ stocked: false, lastSeen: now }, now, "destroyed");
+    assertEqual(forgeStep(st, 0, now + FORGE.lostDestroyed - 1).did, null);
+    assertEqual(forgeStep(st, 0, now + FORGE.lostDestroyed).did, "stock");
+    st = noteTemplate(st, now + 24000); // a copy is carried the next day
+    assertEqual(forgeStep(st, 0, now + FORGE.lostDestroyed).did, null, "a copy still exists");
+  },
+  "Cold Forge: a template put back counts, and older saves still work": () => {
     const r = forgeStep({ stocked: false, takenAt: 0 }, 1, 10);
     assert(r.state.stocked && r.did === null);
+    assertEqual(forgeStep({ stocked: false, takenAt: 0 }, 0, FORGE.lostAfter).did, "stock");
+    assertEqual(noteTemplate({ stocked: true }, 5), { stocked: true }, "a full Coffer ignores sightings");
   },
   "Cold Forge: a template anywhere in the pack marks its carrier": () => {
     assert(carriesTemplate([undefined, { typeId: "minecraft:dirt" }, { typeId: TEMPLATE }]));
