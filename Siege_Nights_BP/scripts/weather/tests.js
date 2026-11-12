@@ -3,6 +3,7 @@ import { CUES } from "../core/sfx_cues.js";
 import { regionAt } from "../minimap/data.js";
 import {
   KINDS, KIND, REGIONS, REGION_OF_PLACE, SKY, fogId, fogIds, pickKind, newSpell, fullStep, stepFor, nextShown, windVector,
+  isCanopy, edgeDistance, edgeStep,
 } from "./data.js";
 
 const seq = (...xs) => { let i = 0; return () => xs[i++ % xs.length]; };
@@ -63,6 +64,24 @@ addTests("weather", {
     s = nextShown(s, { kind: "sea_fret", step: 2 }); assertEqual(s.step, 0);
     s = nextShown(s, { kind: "sea_fret", step: 2 }); assertEqual(`${s.kind}${s.step}`, "sea_fret1");
     s = nextShown(s, { kind: undefined, step: 0 }); assertEqual(s.step, 0);
+  },
+  "fen mist is hazy, not a wall: every step a share of the render distance with a long fade": () => {
+    for (const st of KIND.fen_mist.steps) assert(st.type === "render" && st.to - st.from >= 0.5 && st.to >= 0.5, "fen mist step too thick");
+  },
+  "trees are not a roof": () => {
+    assert(isCanopy("minecraft:mangrove_leaves") && isCanopy("minecraft:vine") && isCanopy("minecraft:mangrove_roots"), "canopy");
+    assert(!isCanopy("minecraft:spruce_planks") && !isCanopy("minecraft:stone"), "a real roof");
+  },
+  "a spell thins toward its region's border instead of ending in a wall": () => {
+    const half = (x) => (x < 0 ? "Blackfen" : "Aldmere Vale");
+    assertEqual(edgeDistance(-500, 0, "Blackfen", half), SKY.edge, "deep inside");
+    assert(edgeDistance(-30, 0, "Blackfen", half) < 40, "close to the border");
+    assertEqual(edgeStep(3, 3, SKY.edge), 3);
+    assertEqual(edgeStep(3, 3, 12), 1);
+    assertEqual(edgeStep(3, 3, SKY.edge / 2), 2);
+    assertEqual(edgeStep(1, 3, SKY.edge), 1, "never thicker than the spell itself");
+    assertEqual(REGION_OF_PLACE[regionAt(260, 980)], "Blackfen");
+    assertEqual(edgeDistance(260, 980, "Blackfen", (x, z) => REGION_OF_PLACE[regionAt(x, z)]) > 24, true, "Lanternbog sits well inside the fen");
   },
   "wind blows away from where it comes from": () => {
     const north = windVector(0), west = windVector(270);
