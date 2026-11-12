@@ -597,7 +597,29 @@ class Town:
                     done = self.try_place(bp, deg, (int(round(x)), int(round(z))), "civic", gap=1, max_relief=6)
                     if done: done["name"] = name; break
                 if done: break
-            if not done: print("no room on the square for", name)
+            if not done: done = self.civic_on_street(bp, name)
+            if not done: print("no room for", name)
+
+    def civic_on_street(self, bp, name):
+        """Civic buildings that don't fit round the square front the main streets, nearest the square first."""
+        cands = []
+        for rd in self.roads:
+            if rd["kind"] not in ("main", "lane"): continue
+            pts = rd["pts"]; hw = WIDTH[rd["kind"]] / 2.0
+            for t in range(3, len(pts) - 3):
+                x, z = pts[t]; (x0, z0), (x1, z1) = pts[t - 3], pts[t + 3]
+                tx, tz = x1 - x0, z1 - z0; d = math.hypot(tx, tz) or 1; tx, tz = tx / d, tz / d
+                for side in (1, -1):
+                    nx, nz = -tz * side, tx * side
+                    for sb in (1, 2, 3):
+                        door = (int(round(x + nx * (hw + 0.5 + sb))), int(round(z + nz * (hw + 0.5 + sb))))
+                        cands.append((math.hypot(door[0] - self.sq[0], door[1] - self.sq[1]), door, snap_rot(-nx, -nz)))
+        cands.sort()
+        for dist, door, deg in cands:
+            if dist > 0.7 * self.R: break
+            e = self.try_place(bp, deg, door, "civic", gap=1, max_relief=6)
+            if e: e["name"] = name; return e
+        return None
 
     def houses(self):
         def tier(x, z):
@@ -1039,6 +1061,48 @@ class Town:
         print(self.name, dict(c), "portions", collections.Counter(p["kind"] for p in self.port.values()), "water", getattr(self, "nwater", 0), "dry", getattr(self, "unwatered", 0), "roofs", getattr(self, "roof_counts", {}), "fields", self.nparcel, "streets", collections.Counter(r["kind"] for r in self.roads), "groundwork", len(self.works))
 
     # =========================================================================== output
+    def write_worldblocks(self, out):
+        """The whole town as world blocks for genworld (format hollow-crown-worldblocks/1, as map/bake_town.py
+        writes for Kingsrest): groundwork first (streets, levelled plots, foundations, fields), then every
+        building, fixture and tree turned and placed. Tree leaves are soft (they only fill air)."""
+        pal, idx, rows = [], {}, []
+        def pid(name, states, soft=False):
+            key = json.dumps([name, states, soft], sort_keys=True)
+            if key not in idx:
+                idx[key] = len(pal); e = {"name": name, "states": states}
+                if soft: e["soft"] = True
+                pal.append(e)
+            return idx[key]
+        ground = Blueprint(self.key + "_groundwork")
+        for (x, y, z), (n, p) in self.works.items(): ground.set(x, y, z, n, **p)
+        ground.finish()
+        solid = set()
+        for (x, y, z), (n, p) in sorted(ground.cells.items(), key=lambda c: (c[0][1], c[0][0], c[0][2])):
+            rows.append([x, y, z, pid(*ground.to_bedrock(n, p))])
+            if n != "air": solid.add((x, y, z))
+        n_ground = len(rows); seats = []
+        for e in self.plan:
+            if e.get("db_stamp"):
+                st = json.load(open(os.path.join(self.tree_dir, e["db_stamp"] + ".stamp.json"))); seats.append([e["x"], e["z"], e["ground_y"]])
+                ox, _oy, oz = st["origin"]
+                for x, y, z, i in st["blocks"]:
+                    q = st["palette"][i]
+                    rows.append([e["x"] + x + ox, e["ground_y"] + y, e["z"] + z + oz, pid(q["name"], q.get("states") or {}, "leaves" in q["name"])])
+                continue
+            bp = self.designs[e["stamp"]].rotated(e["rotation"]) if e["rotation"] else self.designs[e["stamp"]]
+            bp.finish()
+            for (x, y, z), (n, p) in bp.cells.items():
+                if n == "keep": continue
+                X, Y, Z = x + e["x"], y + e["ground_y"], z + e["z"]
+                if y < 0 and (X, Y, Z) in solid and e["kind"] != "square": continue
+                rows.append([X, Y, Z, pid(*bp.to_bedrock(n, p))])
+        d = {"format": "hollow-crown-worldblocks/1", "town": self.name,
+             "note": "world coordinates, placed in order; soft entries only fill air; the first groundwork_blocks are the "
+                     "groundwork (streets, plots, fields), which the map grades the land to",
+             "groundwork_blocks": n_ground, "tree_seats": seats, "palette": pal, "blocks": rows}
+        with open(os.path.join(out, f"{self.key}-blocks.json"), "w") as fh: json.dump(d, fh, separators=(",", ":"), default=int)
+        return len(rows)
+
     def write(self, out):
         os.makedirs(os.path.join(out, "stamps"), exist_ok=True)
         db = {e["stamp"] for e in self.plan if e.get("db_stamp")}            # tree database stamps live in map/trees' output
@@ -1148,6 +1212,7 @@ def main():
         Town.tree_index = json.load(open(a.trees)); Town.tree_dir = os.path.dirname(os.path.abspath(a.trees)); Town.tree_src = os.path.abspath(a.trees_src)
     t = Town(name, site, T, L, seed); t.run()
     os.makedirs(a.out, exist_ok=True); t.write(a.out); t.picture(a.out)
+    print("world blocks", t.write_worldblocks(a.out))
     print("scene blocks", t.scene(a.out))
     if a.render:
         subprocess.run([sys.executable, os.path.join(HERE, "render", "render.py"), os.path.join(a.out, "scene.json"), a.out,
