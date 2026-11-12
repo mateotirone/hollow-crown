@@ -380,6 +380,7 @@ function creativeChase(f, players) {
   if (f.paused || f.def.noChase || !players.length || !players.every(isCreative)) return;
   const e = f.entity, loc = e.location;
   if ((e.getEffect?.("slowness")?.amplifier ?? 0) >= 200 || e.getComponent("riding")) return; // stunned, or riding a mount
+  try { if (e.target?.isValid) return; } catch { /* no target */ } // it found someone it can really fight (a guard, a Survival player): its own AI leads, or the two pull it back and forth
   const p = players.reduce((a, b) => (flat(b.location, loc) < flat(a.location, loc) ? b : a));
   const keepAt = f.def.standoff ?? MELEE_REACH - 0.6;
   if (!f.def.standoff && flat(p.location, loc) <= MELEE_REACH && Math.abs(p.location.y - loc.y) < 3) {
@@ -391,6 +392,7 @@ function creativeChase(f, players) {
   if (speed <= 0) return; // props and stationary bosses stay put
   let to = chaseStep(loc, p.location, speed, keepAt, flying);
   if (!to) return;
+  if (!f.def.roaming && flat(to, f.center) > (f.radius ?? f.def.radius) - 1) return; // it stops at the edge of its arena: stepping over would have the leash snap it back, again and again
   if (!flying) { // step up one block or down a few, never into a wall
     const open = (y) => { const b = f.dim.getBlock({ x: Math.floor(to.x), y: Math.floor(y), z: Math.floor(to.z) }); return !!b && (b.isAir || !b.isSolid); };
     let y = to.y;
