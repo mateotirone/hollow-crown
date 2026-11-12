@@ -188,8 +188,15 @@ function buildGeo(geo, material, keepBone) {
       const o = c.origin || [0, 0, 0], s = c.size;
       const min = [-(o[0] + s[0]) - inf, o[1] - inf, o[2] - inf], max = [-o[0] + inf, o[1] + s[1] + inf, o[2] + s[2] + inf];
       const mirror = c.mirror ?? b.mirror;
-      const geom = boxGeometry(min, max, faceRects({ ...c, mirror }, tw, th), tw, th);
-      const mesh = new THREE.Mesh(geom, material);
+      const rects = faceRects({ ...c, mirror }, tw, th);
+      let mesh;
+      if (typeof material === "function") {
+        // blocks: each face can name its own material_instance, so build one mesh per material used
+        mesh = new THREE.Group();
+        const byMat = {};
+        for (const [k, r] of Object.entries(rects)) { const m = (!Array.isArray(c.uv) && c.uv?.[k]?.material_instance) || "*"; (byMat[m] ??= {})[k] = r; }
+        for (const [m, rs] of Object.entries(byMat)) mesh.add(new THREE.Mesh(boxGeometry(min, max, rs, tw, th), material(m)));
+      } else mesh = new THREE.Mesh(boxGeometry(min, max, rects, tw, th), material);
       if (c.rotation) {
         const cp = c.pivot || [0, 0, 0], C = [-cp[0], cp[1], cp[2]];
         const holder = new THREE.Group(); holder.position.set(C[0] - P[0], C[1] - P[1], C[2] - P[2]); holder.rotation.copy(euler(c.rotation));
@@ -365,7 +372,20 @@ function draw(keepView) {
     const b = x.b, faces = b.faces, star = faces["*"] || Object.values(faces)[0];
     let obj;
     const geo = b.geometry && geoOf(b.geometry);
-    if (geo) obj = buildGeo(geo, matFor(star?.url));
+    if (geo) {
+      const mats = {};
+      const matOf = (name) => mats[name] ??= matFor((faces[name] || star)?.url);
+      // bone_visibility, worked out for the block's default states (q.block_state('x') -> its first value)
+      const vis = b.boneVisibility || {};
+      const shows = (bone) => {
+        const ex = vis[bone]; if (ex === undefined || ex === true) return true; if (ex === false) return false;
+        try {
+          const js = String(ex).replace(/q(?:uery)?\.block_state\(\s*'([^']+)'\s*\)/g, (_, k) => JSON.stringify(b.states?.[k] ?? 0));
+          return !!Function(`"use strict"; return (${js});`)();
+        } catch { return true; }
+      };
+      obj = buildGeo(geo, matOf, shows);
+    }
     else {
       const m = (f) => matFor((faces[f] || star)?.url);
       // three's box face order: +x, -x, +y, -y, +z, -z

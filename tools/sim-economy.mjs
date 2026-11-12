@@ -49,11 +49,11 @@ p.give("minecraft:wheat", 1);
 eq(shops.sell(p, "farmer", undefined, wheat, 1), 0, "one wheat is not worth a coin and is kept");
 eq(p.count("minecraft:wheat"), 1, "the single wheat is still there");
 p.give("minecraft:iron_ingot", 100);
-eq(shops.sell(p, "moneyer", undefined, iron, 100), 64 * 8 + 36 * 4, "100 ingots: 64 at 8, 36 at 4");
+eq(shops.sell(p, "moneyer", undefined, iron, 100), 100 * 8, "100 ingots, all at 8 (no daily limit)");
 eq(shops.sell(p, "moneyer", undefined, iron, 5), 0, "no ingots left to sell");
-const total = 24 + 9 + 656;
+const total = 24 + 9 + 800;
 eq(coinsMod.carried(p), total, "all of it is in the pockets");
-eq([p.count("siege:gold_coin"), p.count("siege:coin")], [10, total - 640], "paid in Gold Regals and Regals");
+eq([p.count("siege:gold_coin"), p.count("siege:coin")], [12, total - 768], "paid in Gold Regals and Regals");
 eq(coinsMod.charge(p, 100), true, "paying 100 breaks gold for change");
 eq(coinsMod.carried(p), total - 100, "exactly 100 left the pockets");
 eq(coinsMod.charge(p, 5000), false, "cannot pay more than you have");
@@ -68,9 +68,8 @@ eq(coinsMod.charge(c, 50), true, "Creative pays nothing");
 c.give("minecraft:wheat", 32);
 eq(shops.sell(c, "farmer", undefined, wheat, 32), 12, "a Creative sale still pays");
 eq(c.cmds, ["clear @s minecraft:wheat -1 32"], "and clears the goods");
-// the daily stop: the Moneyer takes 128 ingots a day from one player, no more (64 were sold above, 100 in all)
-p.give("minecraft:iron_ingot", 50);
-eq(shops.sell(p, "moneyer", undefined, iron, 50), 28 * 4, "only 28 more ingots: the Moneyer stops at 128 a day");
-eq(p.count("minecraft:iron_ingot"), 22, "the rest stay in the pockets");
-eq(shops.sell(p, "moneyer", undefined, iron, 22), 0, "and he takes nothing more today");
+// no daily limit on iron: the Moneyer keeps paying full price, however much you bring
+p.give("minecraft:iron_ingot", 200);
+eq(shops.sell(p, "moneyer", undefined, iron, 200), 200 * 8, "200 more ingots, all at 8");
+eq(p.count("minecraft:iron_ingot"), 0, "none left in the pockets");
 console.log(`\nALL ${step} STEPS OK`);

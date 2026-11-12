@@ -16,13 +16,21 @@ import { levelSite, foundationColumns } from "./ground.js";
 import { BLOCK_BUILDS } from "./blockdesigns.js";
 
 const OVERWORLD = "minecraft:overworld";
-// pending: { "x,y,z": { type, fx, fz, style, owner } }   built: { "x,y,z": { type, owner } } (finished, for charters)
+// pending: { "x,y,z": { type, fx, fz, style, owner } }   built: the same, once standing, plus box (its footprint)
 const store = moduleStore("siege:settle_raised", () => ({ pending: {}, built: {} }));
+// The raised buildings that stand: [{ at: {x, y, z}, type, name, forward: {x, z}, box: {x0, z0, x1, z1}, floor }]
+// (guard posts use these; a building whose block was broken drops out when the block is gone)
+export function raisedBuildings() {
+  return Object.entries(store.data.built ?? {}).map(([key, b]) => ({
+    at: locOf(key), type: b.type, name: BLOCK_BUILDS[b.type]?.name ?? "building", forward: { x: b.fx, z: b.fz }, box: b.box, floor: locOf(key).y + (b.lift ?? 0),
+  }));
+}
+export function forgetRaised(key) { if (store.data.built?.[key]) { delete store.data.built[key]; store.save(); } }
 
 // Finished block buildings on a settlement's land, by building id ("siege:barracks" -> "barracks")
 export function raisedCounts(owner) {
   const out = {};
-  for (const b of Object.values(store.data.built ?? {})) if (b.owner === owner) { const id = b.type.replace(/^siege:/, ""); out[id] = (out[id] ?? 0) + 1; }
+  for (const b of Object.values(store.data.built ?? {})) if (b.owner && b.owner === owner) { const id = b.type.replace(/^siege:/, ""); out[id] = (out[id] ?? 0) + 1; }
   return out;
 }
 const keyOf = (l) => `${l.x},${l.y},${l.z}`;
@@ -50,7 +58,7 @@ function start(key, job) {
     skip: (x, y, z) => x === at.x && y === at.y && z === at.z,
     onDone() {
       delete store.data.pending[key];
-      if (job.owner) (store.data.built ??= {})[key] = { type: job.type, owner: job.owner };
+      (store.data.built ??= {})[key] = { ...job, box: footprint(at, forward, plan.bounds()) };
       store.save();
       if (job.owner) emit("settleCharter", { owner: job.owner });
     },

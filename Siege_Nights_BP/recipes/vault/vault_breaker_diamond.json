@@ -1,0 +1,31 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "siege:vault_breaker_diamond"
+    },
+    "tags": [
+      "siege_workshop"
+    ],
+    "pattern": [
+      " D ",
+      "DBD",
+      " R "
+    ],
+    "key": {
+      "D": {
+        "item": "minecraft:diamond"
+      },
+      "B": {
+        "item": "siege:vault_breaker_iron"
+      },
+      "R": {
+        "item": "minecraft:redstone_block"
+      }
+    },
+    "result": {
+      "item": "siege:vault_breaker_diamond",
+      "count": 1
+    }
+  }
+}
