@@ -3,7 +3,7 @@
 //
 //  1. every pack JSON file parses
 //  2. every script import points at a real file
-//  3. (if `npm install` was run in tools/) no undefined names and no unused imports in the scripts
+//  3. no undefined names and no unused imports in the scripts (needs `npm ci` in tools/ once; a problem if it can't run)
 //  4. the whole script loads in Node with a fake Minecraft (catches crashes at startup)
 //  5. every loop task runs a few times in an empty world without an error
 //  6. all self-tests pass (the in-game-only ones are skipped here)
@@ -432,7 +432,9 @@ async function deepCheck() {
     acorn = await import(pathToFileURL(require.resolve("acorn")));
     eslintScope = await import(pathToFileURL(require.resolve("eslint-scope")));
   } catch {
-    console.log("skipped (run `npm install` in siege-nights/tools once to turn this on)");
+    // not optional any more: a name used without its import (getRift in the veil gate, PR #225) passed every other check
+    console.log("could not run");
+    fail("the undefined-name check could not run: run `npm ci` in tools/ once, then check again");
     return;
   }
   const globals = new Set(["console", "JSON", "Math", "Object", "Array", "Map", "Set", "WeakMap", "Number", "String",
