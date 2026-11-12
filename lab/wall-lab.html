@@ -164,7 +164,7 @@
           <p class="hint">How much weight a block takes before it crushes. Cracked blocks take far less.</p>
           <div class="row"><label for="hang">Side hold</label><output id="hangOut"></output></div>
           <input type="range" id="hang" min="0.05" max="0.5" step="0.01" value="0.15">
-          <p class="hint">Mortar is weak sideways. A block held only from the side tears away once the weight on it passes this share of its strength.</p>
+          <p class="hint">Mortar is weak in tension. A block held out by mortar alone (not sitting on a shoulder) tears away once the weight on it passes this share of its strength.</p>
           <div class="row"><label for="shock">Crack spread</label><output id="shockOut"></output></div>
           <input type="range" id="shock" min="0" max="0.6" step="0.05" value="0.2">
           <p class="hint">Share of a ram hit that shakes into the blocks around it.</p>
@@ -214,7 +214,7 @@
         <li><b>Resting:</b> a block on the ground, or on a block that is itself held, is safe.</li>
         <li><b>Shoulder:</b> a block next to a resting block sits on its shoulder. Each course over a hole closes in by one block, so the stone above a breach falls away in a stepped triangle and the rest arches over it, the way real masonry fails.</li>
         <li><b>Reach:</b> mortar holds a block or two further out (more with diamond and netherite).</li>
-        <li><b>Side hold:</b> a block held only from the side can't take much weight. Too much on it and it tears away, so big overhangs break off instead of hanging in the air.</li>
+        <li><b>Side hold:</b> a block held out by mortar alone can't take much weight. Too much on it and it tears away, so long overhangs break off instead of hanging in the air.</li>
         <li><b>Weight:</b> every block passes its own weight plus everything above it down to whatever holds it. If that is more than the block's strength it crushes, and the weight moves on to its neighbours. Undermine a tower and it holds for a while, then the last cracked blocks give way and it comes down.</li>
         <li>Gates hold up the stone over the gateway while they stand. Blow the gate and that stone has to hold itself.</li>
         <li>Whatever is left with no support falls as connected chunks that tip toward the open side, then shatter where they land.</li>
@@ -334,11 +334,11 @@
         for (const t of h.to) load.set(t, load.get(t) + share);
       }
     }
-    // Mortar is weak sideways: a block hanging from the side with too much on it tears away,
-    // and everything it was holding has to find another way down
+    // Mortar is weak in tension: a block held out by mortar alone (not sitting on a shoulder) tears away
+    // when too much hangs on it, and everything it was holding has to find another way down
     let tore = false;
     for (const [c, h] of held) {
-      if ((h.by === "shoulder" || h.by === "reach") && load.get(c) > rules.strength(c) * rules.hang) { torn.add(c); tore = true; }
+      if (h.by === "reach" && load.get(c) > rules.strength(c) * rules.hang) { torn.add(c); tore = true; }
     }
     if (!tore) break;
     }

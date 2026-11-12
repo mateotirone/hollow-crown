@@ -3,6 +3,7 @@
 
 import { world, system } from "@minecraft/server";
 import { smash } from "./breachers.js";
+import { queueCollapse, setCollapseHooks } from "./collapse.js";
 import { CASTLE_BLOCKS, CASTLE_STONES, CHARGE, GATES, REINFORCEABLE, STONE_FAMILY, UNBREAKABLE } from "./constants.js";
 import { SETTINGS } from "./settings.js";
 import { isAlly, settlementAt } from "./territory.js";
@@ -63,7 +64,18 @@ export function armorOf(block) {
   return REINFORCEABLE.includes(block.typeId) ? block.permutation.getState("siege:armor") ?? 0 : 0;
 }
 
+// ---------- Other blocks that take siege damage (vault doors and the like) ----------
+// A feature registers its own blocks:
+//   registerDamageable("siege:vault_door_iron", { hp: 16, repair: { "minecraft:iron_ingot": 4 } })
+// hp: blows it takes; repair: item -> damage one click mends. Blocks with a siege:cracks state (0-2) show cracks.
+const DAMAGEABLE = new Map();
+export function registerDamageable(typeId, { hp, repair = {} }) {
+  DAMAGEABLE.set(typeId, { hp, repair });
+}
+
 function baseHp(block) {
+  const extra = DAMAGEABLE.get(block.typeId);
+  if (extra) return extra.hp;
   if (CASTLE_STONES.includes(block.typeId)) return WALL_HP.castle[armorOf(block)];
   if (GATES.includes(block.typeId)) return WALL_HP.gate[armorOf(block)];
   if (CASTLE_BLOCKS.includes(block.typeId)) return WALL_HP.otherCastle;
@@ -76,7 +88,8 @@ export function wallHp(block) {
 }
 
 export function showCracks(block, damage) {
-  if (!STONE_FAMILY.includes(block.typeId)) return;
+  if (!STONE_FAMILY.includes(block.typeId) && !DAMAGEABLE.has(block.typeId)) return;
+  if (block.permutation.getState("siege:cracks") === undefined) return;
   const frac = damage / wallHp(block);
   const cracks = frac >= 0.66 ? 2 : frac >= 0.33 ? 1 : 0;
   if (block.permutation.getState("siege:cracks") !== cracks) {
@@ -95,18 +108,23 @@ export function hitWall(block, amount) {
   if (damage >= wallHp(block)) {
     delete map[key];
     saveDamage();
+    const at = { ...block.location }, typeId = block.typeId;
     smash(block);
+    queueCollapse(dim, at, typeId); // whatever it was holding up may come down now
     return true;
   }
   map[key] = damage;
   saveDamage();
   showCracks(block, damage);
+  queueCollapse(dim, block.location); // a cracked block carries less: the weight on it may now be too much
   return false;
 }
 
 // Returns true if the click was a reinforce or repair (so gates don't also toggle)
 export function workOnWall(block, player, item) {
   if (!item) return false;
+  const extra = DAMAGEABLE.get(block.typeId);
+  if (extra) return repairDamageable(block, player, item, extra);
   const canArmor = REINFORCEABLE.includes(block.typeId);
   if (!canArmor && !CASTLE_BLOCKS.includes(block.typeId)) return false; // the whole Castle Stone family can be patched; only Castle Stone and gates take armor
   const land = settlementAt(block.location);
@@ -150,6 +168,30 @@ export function workOnWall(block, player, item) {
   return false;
 }
 
+function repairDamageable(block, player, item, extra) {
+  const mend = extra.repair[item.typeId];
+  if (!mend) return false;
+  const land = settlementAt(block.location);
+  if (land && land !== player.id && !isAlly(land, player.id)) {
+    player.onScreenDisplay.setActionBar("§cYou can only mend this on your own land.");
+    return true;
+  }
+  const map = damageMap();
+  const key = blockKey(block);
+  if (!map[key]) {
+    player.onScreenDisplay.setActionBar("§7It isn't damaged.");
+    return true;
+  }
+  map[key] = Math.max(0, map[key] - mend);
+  if (map[key] === 0) delete map[key];
+  saveDamage();
+  showCracks(block, map[key] ?? 0);
+  consumeHeld(player);
+  sfx(block.dimension, "random.anvil_use", block.location, { volume: 0.6 });
+  player.onScreenDisplay.setActionBar(map[key] ? `§7Mended, ${Math.ceil(wallHp(block) - map[key])} of ${wallHp(block)} left` : "§aGood as new");
+  return true;
+}
+
 // Nothing in a settlement whose owner is away can be damaged
 export function offlineSafe(block) {
   const owner = settlementAt(block.location);
@@ -181,3 +223,15 @@ export function lightCharge(block, facing, blast = BLAST.charge) {
     }
   }, 10);
 }
+
+// Collapse (collapse.js) reads damage, tiers and land rules through these, so it never imports this file
+setCollapseHooks({
+  damageShare: (block) => (damageMap()[blockKey(block)] ?? 0) / wallHp(block),
+  tierOf: (block) => armorOf(block),
+  canFall: (block) => offlineSafe(block),
+  onRemoved: (c) => {
+    const map = damageMap(), k = `${c.x},${c.y},${c.z}`;
+    if (map[k] !== undefined) { delete map[k]; saveDamage(); }
+  },
+  crushHit: (block, amount) => { if (offlineSafe(block)) hitWall(block, amount); },
+});
