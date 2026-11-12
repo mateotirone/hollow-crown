@@ -9,6 +9,7 @@ How versions work is in [`docs/RELEASING.md`](docs/RELEASING.md).
 Everything merged to `main` since the last release goes here. Each pull request that changes what players see adds a line under one of these headings.
 
 ### Added
+- Buying a stretch of line now builds its bed as well as the track: a cutting or tunnel through high ground, gravel on an embankment, and a stone bridge with piers over deep ground or water. There are no empty rail beds across the map any more.
 - The Hall Map: every town hall has a painted map of the realm. Open it from the hall's Cartographer's Table or "Hall map" in the Town Hall menu. It shows every settlement in its banner colour and who holds it, rival lords, free plots and the towns, plus places your settlement has found (Crownhold, the Order's houses and more). Land nobody from your settlement has walked stays under fog, and your allies' travels count too. Players never show on it, and mystery places are never marked. Tap a mark to read about it. Sneak-click the table for the ordinary cartography table.
 - The Town Board: a big notice board just inside the door of every town hall. Click it to open the Town Hall menu (raise the hall, the wall, the Rumor Board, who's online). Halls that already stand get one too.
 - Jumping looks like a jump now: you spring up with your arms swinging high, tuck your knees at the top and reach down for the ground, and the pose starts the moment you leave the ground. How high you jump is unchanged.
