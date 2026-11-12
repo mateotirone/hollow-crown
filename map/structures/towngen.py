@@ -39,6 +39,7 @@ All sizes are odd (streets 5 / 3 / 1, strips 9, buildings): Mateo's rule.
 """
 import os, sys, json, math, heapq, random, argparse, collections, subprocess
 import numpy as np
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", ".claude", "skills", "minecraft-builder", "scripts"))
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from bp import Blueprint
 from kit import h3, VALE, mix
@@ -977,16 +978,14 @@ class Town:
 
     # =========================================================================== paths to blocks
     def path_blocks(self):
+        wet = {}
         for i, j in np.argwhere(self.K >= 0):
             x, z = int(i) + self.X0, int(j) + self.Z0
             k = int(self.K[i, j]); kind = {4: "square", 3: "main", 2: "lane", 1: "walk"}[int(self.KIND[i, j])]
             y = (k - 1) // 2; slab = k % 2 == 1
             g0 = int(self.G0[i, j])
-            if self.WET[i, j]:                                   # a deck over the water on stone piers every few blocks
-                self.works[(x, y, z)] = ("stone_brick_slab", {"half": "bottom"}) if slab else ("stone_bricks", {})
-                if (x + z) % 4 == 0:
-                    for yy in range(g0, y): self.works[(x, yy, z)] = ("stone_bricks", {})
-                continue
+            if self.WET[i, j]:                                   # over water: a real bridge, built after the loop
+                wet[(x, z)] = WIDTH.get(kind, 5); continue
             if kind == "square":
                 r = math.hypot(x - self.sq[0], z - self.sq[1])
                 if abs(r - self.sqR + 0.5) < 0.8: blk = ("polished_andesite_slab", {"half": "bottom"}) if slab else ("polished_andesite", {})
@@ -996,6 +995,7 @@ class Town:
             self.works[(x, y, z)] = blk
             for yy in range(g0 + 1, y): self.works[(x, yy, z)] = ("cobblestone" if yy == y - 1 else "dirt", {})
             for yy in range(y + 1, max(g0, y) + 3): self.works.setdefault((x, yy, z), ("air", {}))
+        self.bridges(wet)
         # stairs where a walkway climbs a whole block in one step
         for cells, ks, f in self.walks:
             seq = list(zip(cells, ks))
@@ -1006,6 +1006,30 @@ class Town:
                     fx, fz = hi_c[0] - lo_c[0], hi_c[1] - lo_c[1]
                     face = {(1, 0): "e", (-1, 0): "w", (0, 1): "s", (0, -1): "n"}.get((fx, fz), "n")
                     self.works[(hi_c[0], (hi_k - 1) // 2, hi_c[1])] = ("stone_brick_stairs", {"facing": face})
+
+    region = "vale"
+
+    def bridges(self, wet):
+        """Paths over water get a bridge from the one bridge generator (minecraft-builder skill, bridges.py):
+        arches, cutwaters, parapets, lamps, deck in the town's own paving, humped to clear boats."""
+        if not wet: return
+        import bridges as BR
+        def walk(x, z):
+            if not self.ok(x, z): return None
+            i, j = self.ij(x, z)
+            if self.K[i, j] < 0 or self.WET[i, j]: return None
+            return int(self.K[i, j]) / 2.0
+        def ground(x, z):
+            if not self.ok(x, z): return int(self.WL.max()) - 2
+            i, j = self.ij(x, z); return int(self.G0[i, j])
+        water = lambda x, z: int(self.WL[self.ij(x, z)])
+        self.bridge_plans = []
+        for c in BR.crossings_from_cells(set(wet), walk, water, lambda c: wet[c], region=self.region, path="town"):
+            c["ground"] = ground; c["name"] = f"{self.key}_bridge{len(self.bridge_plans)}"
+            for cell, b in BR.to_works(BR.bridge_blocks(c)).items():
+                if b[0] == "air" and cell in self.works and self.works[cell][0] != "air": continue
+                self.works[cell] = b
+            self.bridge_plans.append({k: v for k, v in c.items() if k != "ground"})
 
     def ground_blocks(self):
         """Every column the town regraded: top block, fill under it, air over a cut."""
