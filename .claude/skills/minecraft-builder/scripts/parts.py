@@ -67,6 +67,12 @@ STYLES = {
                             floor="acacia_planks", trim="acacia_planks", roof={"block": "smooth_red_sandstone"}, shutter="acacia_planks",
                             door="acacia_door", glass="orange_stained_glass_pane", leaves="jungle_leaves", sign_wood="acacia",
                             chimney="sandstone", quoin="cut_sandstone", stone="smooth_sandstone", frame_kind="stone", sill="stair"),
+    # Everwake, the city in the sky (regions/everwake.md): white stone, aged copper roofs, gold, pale blue glass
+    "everwake_stone": dict(plinth={"ladder": ["polished_diorite", "calcite"], "axis": "noise", "scale": 3}, frame="smooth_quartz",
+                           infill={"ladder": ["polished_diorite", "calcite"], "axis": "y"}, floor="birch_planks", trim="birch_planks",
+                           roof={"ladder": ["waxed_weathered_cut_copper", "waxed_oxidized_cut_copper"], "axis": "y"}, shutter="birch_planks",
+                           door="birch_door", glass="light_blue_stained_glass_pane", leaves="azalea_leaves", sign_wood="birch",
+                           chimney="quartz_bricks", quoin="diorite", stone="smooth_quartz", surround="birch_planks", frame_kind="stone", sill="stair"),
     "hollow_timber": dict(plinth={"ladder": ["cobbled_deepslate", "polished_blackstone_bricks"], "axis": "noise", "scale": 3},
                           frame="dark_oak_log", infill="siege:pale_ash", floor="dark_oak_planks", trim="dark_oak_planks",
                           roof={"ladder": ["cobbled_deepslate", "deepslate_tiles"], "axis": "y"}, shutter="dark_oak_planks",
@@ -252,9 +258,9 @@ def window(ctx, rect, side, t, floor, style, w=1, h=2, head_room=9, frame_kind="
         for k in ks: ctx.set(*at(k, 1, 1), S, "slab", trim, half="top")            # the shelf
         if h3(x, floor, z, seed + 9) < 0.34: ctx.set(*at(0, 2, 1), "details", raw="lantern")
         return
-    if frame_kind == "stone":   # dark oak panels either side (05: stone, dark oak, spruce)
+    if frame_kind == "stone":   # dark oak panels either side (05: stone, dark oak, spruce); style "surround" overrides
         for k in (-(w // 2) - 1, w // 2 + 1):
-            for dy in range(2, 2 + h): ctx.set(*at(k, dy, 1), S, "trapdoor", "dark_oak_planks", open=True, facing=side)
+            for dy in range(2, 2 + h): ctx.set(*at(k, dy, 1), S, "trapdoor", style.get("surround", "dark_oak_planks"), open=True, facing=side)
     # sill
     if sill == "leafbox":     # leaves boxed in by wall signs (05: window boxes, Mateo 2026-11-11)
         sw = style.get("sign_wood", "dark_oak")

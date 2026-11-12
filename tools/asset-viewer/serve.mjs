@@ -333,6 +333,9 @@ const EXTRAS = [
   { id: "ironworks", title: "Ironworks", marker: "map/structures/ironworks_builds.py",
     args: (out) => [out],
     label: { ironworks_1: "Ironworks 1: Ore Pit", ironworks_2: "Ironworks 2: Bloomery", ironworks_3: "Ironworks 3: Trip-Hammer Forge" } },
+  { id: "everwake", title: "Everwake (the city in the sky)", marker: "map/structures/everwake_builds.py",
+    args: (out) => [out],
+    label: { everwake_city: "Everwake: the city on its cloud (Y 254 to 319)", everwake_needle: "Everwake with the Needle and the cloud sea" } },
 ];
 // Builder scripts that live on a branch without the kit: copied from the newest branch that has them into
 // the newest catalogue branch's map/structures and run there.
