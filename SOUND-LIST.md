@@ -586,9 +586,9 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `random.toast` | A note is added | `random.toast` pitch 0.8 vol 0.7 | 2 | lore (2) |
 | `mob.wither.death` | Something great ends | `mob.wither.death` pitch 0.9 vol 0.8 + `block.bell.hit` pitch 0.35 vol 0.5 after 0.6 s | 2 | crown, siege |
 | `block.amethyst_block.break` | Crystal breaking | `break.amethyst_block` | 2 | undertow, vault |
+| `block.amethyst_block.resonate` | Crystal humming | `resonate.amethyst_block` | 2 | undertow (2) |
 | `block.bell.resonate` | A bell still ringing | `resonate.amethyst_block` pitch 0.5 vol 0.6 + `block.bell.hit` pitch 0.5 vol 0.25 after 0.1 s | 2 | lore, undertow |
 | `random.pop` | A small pop | `random.pop` pitch 0.85 vol 0.7 | 1 | dragons |
-| `block.amethyst_block.resonate` | Crystal humming | `resonate.amethyst_block` | 1 | undertow |
 | `block.bell.use` | A bell touched | `block.bell.hit` pitch 1.2 vol 0.6 | 1 | lore |
 | `dye.use` | Dye on cloth | `sign.dye.use` | 1 | siege |
 | `mob.ravager.attack` | A heavy bite | `mob.ravager.bite` pitch 0.9 vol 0.9 | 1 | siege |
