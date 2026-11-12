@@ -13,6 +13,7 @@ import { sfx } from "../core/sfx.js";
 import { OVERWORLD } from "../plots/config.js";
 import { isBuilder } from "../plots/claims.js";
 import { startBoss, fightOf } from "../bestiary/bossCore.js";
+import { LANDMARKS, stampOps } from "./landmarks.js";
 import { markSocketed } from "../bestiary/relics.js";
 
 export const overworld = () => world.getDimension(OVERWORLD);
@@ -208,12 +209,13 @@ export function defineSite(def) {
         if (by) say(by, `§c${def.name}: the ground there is not loaded yet. Stand closer.`);
         return;
       }
+      const ops = [...stampOps(LANDMARKS[def.id]), ...plan.ops]; // the landmark first, the site's own cells on top
       let failed = 0, n = 0;
-      for (const o of plan.ops) {
+      for (const o of ops) {
         try { put(dim, plan.center, o); } catch { failed++; }
         if (++n % 64 === 0) yield;
       }
-      if (failed > plan.ops.length * 0.02) {
+      if (failed > ops.length * 0.02) {
         site.busy = false;
         if (by) say(by, `§c${def.name}: ${failed} blocks were not loaded. It will try again when someone comes near.`);
         return;
@@ -224,7 +226,7 @@ export function defineSite(def) {
       try { def.afterBuild?.(site, dim); } catch (e) { console.warn(`[Hollow Crown] ${def.id} after build: ${e}`); }
       site.keepNpcs();
       site.busy = false;
-      if (by) say(by, `§6${def.name} is built (${plan.ops.length} blocks) at ${plan.center.x} ${plan.center.y} ${plan.center.z}.`);
+      if (by) say(by, `§6${def.name} is built (${ops.length} blocks) at ${plan.center.x} ${plan.center.y} ${plan.center.z}.`);
     })());
     return { ok: true };
   };

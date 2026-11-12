@@ -6,6 +6,7 @@ import { huntPlan, chapelPlan, vaultPlan, cradlePlan, mirelightPlan, HUNT, CHAPE
 import { makeHunt, makePews, VILLAGERS } from "../../Siege_Nights_BP/scripts/unlocks/puzzles.js";
 import { wellOps, chamberOps, postOps, WELL } from "../../Siege_Nights_BP/scripts/unlocks/well_plan.js";
 import { CLOCKS, KEEPERS, makePuzzle } from "../../Siege_Nights_BP/scripts/unlocks/keepers.js";
+import { LANDMARKS, stampOps } from "../../Siege_Nights_BP/scripts/unlocks/landmarks.js";
 
 const run = (gen) => { let r; do { r = gen.next(); } while (!r.done); return r.value; };
 const flat = () => ({ top: 0, water: undefined, ground: 0 });
@@ -30,6 +31,7 @@ const sites = {
 const out = {};
 for (const [id, s] of Object.entries(sites)) {
   out[id] = { title: s.title, map: s.map, spots: s.spots, info: s.info ?? null,
-    ops: s.ops.map((o) => [o.dx, o.dy, o.dz, o.block, o.states ?? null]) };
+    landmark: stampOps(LANDMARKS[id]).length,
+    ops: [...stampOps(LANDMARKS[id]), ...s.ops].map((o) => [o.dx, o.dy, o.dz, o.block, o.states ?? null]) };
 }
 process.stdout.write(JSON.stringify(out));
