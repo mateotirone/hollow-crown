@@ -322,6 +322,17 @@ export const ENTRIES = [
     hidden: true,
   },
   {
+    id: "spellbar", ch: "growth", title: "Casting with the Bound Ember",
+    tip: "Use the Bound Ember to swap your hotbar for your powers. Use it again to swap back.",
+    page: "§fUse the Bound Ember§r and your hotbar is put away safely: in its place come your powers, one icon each, with the Ember in the last slot.\n\n"
+      + "§fScroll§r to a power and §fuse it§r to cast. The icon greys over while it cools down, and the bar above shows your Resonance.\n\n"
+      + "§fUse the Ember again§r (or sneak and use any power) and your own hotbar comes back exactly as it was. "
+      + "If you die with your powers out, your things fall where you fell like anything else you carry. If you leave the world with them out, they come back when you return.\n\n"
+      + "Learn powers at the Tree of Oaths, in the Arcana branch.",
+    when: ["carry:siege:bound_ember", "use:siege:bound_ember"],
+    hidden: true,
+  },
+  {
     id: "roles", ch: "growth", title: "Roles earned by deeds",
     tip: "A role has been offered to you. Read it at the Tree of Oaths before you take it.",
     page: "Some roles are not chosen but earned: something you did out in the world makes the offer. Each role has its own skills on the Tree of Oaths and its own story to follow.\n\n"

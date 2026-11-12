@@ -31,6 +31,7 @@ import { openTree, choosePath, treeMenu, EMBER, BOUND_EMBER, OATH_BANNER } from 
 import { passiveTick, watchfireTick, dropEmber, nearestClue } from "./progress.js";
 import { knightTick, chargeTick } from "./knight.js";
 import { markedTick } from "./marked.js";
+import "./spellbar.js";
 import "./showcase.js";
 import { rosterMenu } from "./roster.js";
 import { rolesTick, roleForStyle, roleForBoss, ROLE_DEEDS } from "./roles.js";
