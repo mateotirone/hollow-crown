@@ -478,19 +478,27 @@ def cinder_roost():
         d.put(x, 2, 5, "dark_oak_wall_sign", facing="s")
         d.meta["signs"].append([x, 2, 5, names[k]])
     for x in (-8, 8): d.put(x, 1, 13, "lantern", hanging=False)
-    # the Span: a thin arched bridge out over the drop
+    # the Span: one block wide out over the drop, with nothing to hold on to. Older than the town and it doesn't hold
+    # together everywhere: two stones are gone (step over), and the plain red sandstone blocks among the slabs are loose
+    # (they give way a second after you step on them: roletrials CRUMBLES). Fall and you're washed out for three days.
+    GONE, LOOSE = (-6, -12), (-4, -9, -14)
     for z in range(-1, -17, -1):
-        for x in (-1, 0, 1):
-            d.put(x, 0, z, "smooth_red_sandstone_slab" if x == 0 else "cut_red_sandstone", half="top")
-        for x in (-1, 1): d.put(x, 1, z, "red_sandstone_wall")
-        d.put(0, -1, z, "red_sandstone_stairs", facing="n" if z < -8 else "s", half="top")
+        for x in (-1, 1):                  # where the old three-wide Span and its parapets stood (worlds built before)
+            for y in (-1, 0, 1): d.air(x, y, z)
+        d.air(0, -1, z)
+        if z in GONE: d.air(0, 0, z); continue
+        if z in LOOSE: d.put(0, 0, z, "red_sandstone")
+        else: d.put(0, 0, z, "smooth_red_sandstone_slab", half="top")
+        if z not in LOOSE and z != -5 and z != -7 and z != -11 and z != -13:
+            d.put(0, -1, z, "red_sandstone_stairs", facing="n" if z < -8 else "s", half="top")
     # the perch: a round tower at the far end, its top a landing for a dragon
     for x in range(-4, 5):
         for z in range(-25, -16):
             r = math.hypot(x, z + 21)
             if r <= 4.4:
                 for y in range(-14, 1): d.put(x, y, z, d.pick(x, y, z, RS, 5) if r > 3.4 or y in (-14, 0) else "air")
-                if r > 3.6: d.put(x, 1, z, "red_sandstone_wall")
+                if r > 3.6 and not (x == 0 and z == -17): d.put(x, 1, z, "red_sandstone_wall")   # a gap where the Span lands
+    d.air(0, 1, -17)
     d.put(0, 1, -21, "campfire", bs={"extinguished": True})
     d.meta["npcs"] = [[0, 1, 8, "kesh"]]
     d.meta["mark"] = [0, 1, 4]

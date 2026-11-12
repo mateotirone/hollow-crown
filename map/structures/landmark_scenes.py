@@ -43,7 +43,14 @@ def main():
 
         xs = [c[0] for c in blocks]; zs = [c[2] for c in blocks]
         pad = PAD.get(REGION.get(name), "grass_block")
-        if d.meta.get("mode") != "drape" or not d.meta.get("rise"):
+        if d.meta.get("mode") == "drape" and not d.meta.get("rise"):
+            # a draped design's y 0 IS the ground layer (plan.js puts it in place of the top block), so the pad is
+            # drawn at y 0 round it, flush, not a layer below
+            for x in range(min(xs) - 2, max(xs) + 3):
+                for z in range(min(zs) - 2, max(zs) + 3):
+                    if (x, 0, z) not in blocks: rows.append([x, 0, z, ix(pad, {})])
+                    if (x, -1, z) not in blocks: rows.append([x, -1, z, ix("dirt", {})])
+        elif d.meta.get("mode") != "drape":
             for x in range(min(xs) - 2, max(xs) + 3):
                 for z in range(min(zs) - 2, max(zs) + 3):
                     if (x, -1, z) not in blocks and (x, 0, z) not in blocks: rows.append([x, -1, z, ix(pad, {})])
