@@ -837,15 +837,31 @@ def B_raw(name, states):
 # ---- baked town plans (map/bake_town.py): world blocks placed last, in order; air digs out, soft (leaves) only fills air
 STAMPED = []        # (x, y, z, id, soft) arrays per town
 STAMPED_TOWNS = set()
+def _key(x, y, z): return (np.asarray(x, np.int64) + 4096) * 1_000_000_000 + (np.asarray(y, np.int64) + 512) * 100_000 + (np.asarray(z, np.int64) + 4096)
+_trk = []                                          # the train's body along every planned line: track cell and one each
+for cells_, ys_, _ in RAILLINES.values():          # side, 4 high. A town plan or road bridge block left standing in it
+    c_ = np.array(cells_, np.int64); y_ = np.asarray(ys_, np.int64)   # would block the bed the game lays on purchase
+    for dx_ in (-1, 0, 1):
+        for dz_ in (-1, 0, 1):
+            for k_ in range(4): _trk.append(_key(c_[:, 0] + dx_, y_ + k_, c_[:, 1] + dz_))
+_trk = np.unique(np.concatenate(_trk)) if _trk else np.zeros(0, np.int64)
 for d_ in GW_FILES:
     pid_ = np.array([B_raw(e["name"], e["states"]) if e["name"] != "minecraft:air" else -1 for e in d_["palette"]], np.int64)
     sf_ = np.array([bool(e.get("soft")) for e in d_["palette"]])
     b_ = np.array(d_["blocks"], np.int64)
+    off_ = np.isin(_key(b_[:, 0], b_[:, 1], b_[:, 2]), _trk) & (pid_[b_[:, 3]] >= 0)
+    if off_.any():
+        log("town plan", d_["town"], "keeps", int(off_.sum()), "blocks off the track:", sorted({d_["palette"][i]["name"].split(":")[-1] for i in b_[off_, 3]})[:8])
+        b_ = b_[~off_]
     STAMPED.append((b_[:, 0], b_[:, 1], b_[:, 2], pid_[b_[:, 3]], sf_[b_[:, 3]])); STAMPED_TOWNS.add(d_["town"])
     log("town plan", d_["town"], len(b_), "blocks")
 if BRIDGE_BLOCKS:
     _bb = np.array([(x, y, z) for x, y, z, _, _ in BRIDGE_BLOCKS], np.int64)
     _bi = np.array([B_raw(n, st) if n != "minecraft:air" else -1 for _, _, _, n, st in BRIDGE_BLOCKS], np.int64)
+    _off = np.isin(_key(_bb[:, 0], _bb[:, 1], _bb[:, 2]), _trk) & (_bi >= 0)     # a road bridge the line crosses: its
+    if _off.any():                                                               # parapets and lamps stay off the track
+        log("road bridges keep", int(_off.sum()), "blocks off the track")
+        _bb, _bi = _bb[~_off], _bi[~_off]
     STAMPED.append((_bb[:, 0], _bb[:, 1], _bb[:, 2], _bi, np.zeros(len(_bi), bool)))
 # no tree in a build's dead space (Mateo 2026-11-12: "in dead space there are trees spawning, so for builds include
 # air blocks that remove trees"): every column a town plan or bridge stamps, with a margin, keeps whole trees out, so
