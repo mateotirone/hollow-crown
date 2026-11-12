@@ -84,7 +84,7 @@ const PLANS = {
     m.box(9, 1, -1, 12, 3, 1, "minecraft:air"); // the mouth
     for (const z of [-2, 2]) m.box(8, 1, z, 8, 4, z, LOG);
     m.box(8, 4, -2, 8, 4, 2, LOG);
-    m.box(-8, 0, 0, 8, 0, 0, COBBLE); m.box(-8, 1, 0, 8, 1, 0, "minecraft:rail"); // the cart rail toward Cartmeet
+    m.box(-8, 0, 0, 8, 0, 0, COBBLE); // the cobbled way out of the mine toward Cartmeet
     m.lamp(6, -4);
   },
   // The Cold Forge: an open-sided smithy of veinstone, 9 by 13, with a dead hearth and a tall chimney

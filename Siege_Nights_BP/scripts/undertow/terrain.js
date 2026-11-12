@@ -341,7 +341,6 @@ export function planChunk(cx, cz) {
   const ops = planLand(cx, cz);
   const X0 = cx * 16, Z0 = cz * 16;
   planBridges(ops, cx, cz);
-  planCartRail(ops, X0, Z0); // after the bridges, so where the rail passes a bridge's end the rail wins
   // The sealed wall across the whole Hollow behind the Court (its gates open when the Court's boss dies).
   // Added last, so nothing in the chunk overwrites it.
   if (COURT.gateZ >= Z0 && COURT.gateZ <= Z0 + 15 && X0 + 15 >= -L.reach && X0 <= L.reach) {
@@ -786,91 +785,6 @@ function extraTrees(ops, cx, cz, col) {
     const k = treeKind(x, z, c.region), n = EXTRA[k] ?? 0;
     if (hash(cx, cz, salt + 20) * 3 >= n) continue;
     hollowTree(ops, x, c.h, z, k, hash(cx, cz, salt + 30), k === "forest");
-  }
-}
-
-// ---- the cart rail -----------------------------------------------------------------------------
-// Mateo, 2026-11-12: the cart rail along the road from Cartmeet to the Seams. A vanilla rail line
-// on the road's left verge (signposts stand on the right), rideable by minecart: one block a step,
-// climbing at most a block at a time on straight runs, level on every bend, on a cobbled bed with
-// stone piers where the ground dips and a cutting where it rises. Kept off rivers, bridges and sites.
-export const CART_RAIL = { road: "seam_rail", verge: 6, leg: 3, trim: 3 };
-// Bedrock rail_direction: 0 north-south, 1 east-west, 2-5 rising to the east, west, north, south,
-// 6-9 bends joining south+east, south+west, north+west, north+east.
-const RISE = { "1,0": 2, "-1,0": 3, "0,-1": 4, "0,1": 5 };
-const BEND = { "0,1|1,0": 6, "0,1|-1,0": 7, "0,-1|-1,0": 8, "0,-1|1,0": 9 };
-export function railDirection(prev, cur, next) {
-  const a = prev ? [Math.sign(prev.x - cur.x), Math.sign(prev.z - cur.z)] : null;
-  const b = next ? [Math.sign(next.x - cur.x), Math.sign(next.z - cur.z)] : null;
-  if (next && next.y > cur.y) return RISE[b.join()];
-  if (prev && prev.y > cur.y) return RISE[a.join()];
-  const ends = [a, b].filter(Boolean);
-  if (a && b && a[0] * b[0] + a[1] * b[1] === 0) { // a bend: one end north or south, the other east or west
-    const ns = a[1] !== 0 ? a : b, ew = a[0] !== 0 ? a : b;
-    return BEND[`0,${ns[1]}|${ew[0]},0`];
-  }
-  return ends.some((e) => e[0] !== 0) ? 1 : 0;
-}
-let rail;
-export function cartRail() {
-  if (rail) return rail;
-  const k = ROADS.findIndex((r) => r.id === CART_RAIL.road), pts = roadLines()[k];
-  const off = -CART_RAIL.verge;
-  // The road's line moved over to the left verge and walked in whole blocks. Rails only join side to side,
-  // and a rail can only climb in the middle of a straight run, so the line goes in legs of at least LEG
-  // blocks along one axis, then the other, never drifting more than LEG blocks off the verge line.
-  const LEG = CART_RAIL.leg, cells = [];
-  let cx, cz;
-  const step = (ax, n) => { for (let s = 0; s < Math.abs(n); s++) { if (ax) cx += Math.sign(n); else cz += Math.sign(n); cells.push({ x: cx, z: cz }); } };
-  for (let i = CART_RAIL.trim; i + 1 < pts.length - CART_RAIL.trim; i++) {
-    const [x1, z1] = pts[i], [x2, z2] = pts[i + 1], dx = x2 - x1, dz = z2 - z1, len = Math.hypot(dx, dz) || 1;
-    const nx = (-dz / len) * off, nz = (dx / len) * off;
-    for (let t = 0; t <= 1; t += 0.25) {
-      const tx = Math.round(x1 + dx * t + nx), tz = Math.round(z1 + dz * t + nz);
-      if (cx === undefined) { cx = tx; cz = tz; cells.push({ x: cx, z: cz }); continue; }
-      const ex = tx - cx, ez = tz - cz;
-      if (Math.abs(ex) >= LEG && Math.abs(ex) >= Math.abs(ez)) step(true, ex);
-      else if (Math.abs(ez) >= LEG) step(false, ez);
-      else if (Math.abs(ex) >= LEG) step(true, ex);
-    }
-  }
-  // Heights: follow the ground plus one, but change level only in the middle of a straight run (a rising
-  // rail must have the rails before and after it in line), a block at a time. Piers and cuttings take up the rest.
-  const ground = cells.map((c) => columnAt(c.x, c.z));
-  // Over a river the rail crosses beside the road's bridge, at its deck height, on a trestle.
-  const wet = cells.map((c, i) => !!ground[i] && ground[i].river <= RIVER_HALF_WIDTH + 2);
-  const want = ground.map((g, i) => (wet[i] ? (roadAt(cells[i].x, cells[i].z, groundBeforeRoads, SEA + 1)?.y ?? SEA + 5) : g?.h ?? SEA) + 1);
-  const dirOf = (i) => (cells[i + 1] ? `${cells[i + 1].x - cells[i].x},${cells[i + 1].z - cells[i].z}` : "");
-  const straight = (i) => i >= 1 && i + 2 < cells.length && dirOf(i - 1) === dirOf(i) && dirOf(i) === dirOf(i + 1);
-  // Over water the rail must be up at the deck (boats pass under), so work out how early it has to start
-  // climbing, and how long it takes to come down again, counting only the steps where it may change level.
-  const n = cells.length, hard = wet.map((w, i) => (w ? want[i] : -Infinity));
-  for (let i = n - 2; i >= 0; i--) hard[i] = Math.max(hard[i], hard[i + 1] - (straight(i) ? 1 : 0));
-  for (let i = 1; i < n; i++) hard[i] = Math.max(hard[i], hard[i - 1] - (straight(i - 1) ? 1 : 0));
-  let y = Math.max(want[0], hard[0]);
-  cells.forEach((c, i) => {
-    c.y = y;
-    const g = ground[i];
-    c.wet = wet[i];
-    c.skip = !g || g.under !== undefined || !!g.site || !!g.paved;
-    if (i + 1 >= n) return;
-    // look a few blocks ahead so the line starts climbing before the ground does
-    const soft = Math.max(want[i + 1], Math.max(...want.slice(i + 1, i + 4)) - 1);
-    const target = Math.max(soft, hard[i + 1]);
-    if (straight(i) && target !== y) y += Math.sign(target - y);
-  });
-  cells.forEach((c, i) => { c.dir = railDirection(cells[i - 1], c, cells[i + 1]); c.ground = ground[i]?.h ?? SEA; });
-  rail = cells;
-  return rail;
-}
-function planCartRail(ops, X0, Z0) {
-  for (const c of cartRail()) {
-    if (c.skip || c.x < X0 || c.x > X0 + 15 || c.z < Z0 || c.z > Z0 + 15) continue;
-    // a pier where the ground dips; over water only every fourth block, so boats still pass between
-    if (c.ground < c.y - 2 && (!c.wet || ((c.x + c.z) & 3) === 0)) ops.push({ a: [c.x, c.ground + 1, c.z], b: [c.x, c.y - 2, c.z], block: B.deck });
-    ops.push({ a: [c.x, c.y - 1, c.z], b: [c.x, c.y - 1, c.z], block: c.wet ? B.deck : B.cobble }); // the bed
-    ops.push({ a: [c.x, c.y, c.z], b: [c.x, c.y + 2, c.z], block: "minecraft:air" }); // a cutting where it rises
-    ops.push({ a: [c.x, c.y, c.z], b: [c.x, c.y, c.z], block: "minecraft:rail", states: { rail_direction: c.dir } });
   }
 }
 
