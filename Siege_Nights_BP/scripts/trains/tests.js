@@ -100,6 +100,9 @@ addTests("trains", {
     assert(p[15].works && !p[9].works && !p[21].works, "only the custom range skips the plain bed");
     assert(pieces({ ...custom, custom: undefined })[0].works, "works without ranges cover the whole stretch");
     assert(checkRoutes({ stops: data.stops, segments: [{ ...custom, custom: [[5, 9999]] }] }).length, "a range past the end is caught");
+    const [bx, by, bz] = custom.blocks[0];
+    assert(checkRoutes({ stops: data.stops, segments: [{ ...custom, works: [[bx, bz, by - 3, by, 1]] }] }).length, "a solid work in a track cell is caught");
+    assertEqual(checkRoutes({ stops: data.stops, segments: [{ ...custom, works: [[bx, bz, by - 3, by - 1, 1], [bx, bz, by, by + 5, 0]] }] }).length, 0, "works under and clear air over the track are fine");
   },
 
   "there are 20 track shapes and none repeats": () => {
