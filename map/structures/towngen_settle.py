@@ -111,7 +111,7 @@ def set_walls(walls):
 class Settlement(Town):
     def __init__(self, plot, template, T, L, seed):
         self.plot = plot; self.tpl = TEMPLATES[template]; self.template = template
-        site = dict(centre=(plot["x"], plot["z"]), radius=WALL_R[-1] + 2, size="town", fixed_square=True, square_r=6, seed=seed, civic=[])
+        site = dict(centre=(plot["x"], plot["z"]), radius=WALL_R[-1] + 2, size="town", fixed_square=True, square_r=6, seed=seed, civic=[], wobble=0)   # the wall owns the shape
         super().__init__(plot["name"], site, T, L, seed)
         self.key = plot["name"].lower()
         b = math.radians(plot["gate"])

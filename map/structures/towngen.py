@@ -105,7 +105,13 @@ class Town:
         n0, n1 = self.G0.shape
         ii, jj = np.meshgrid(np.arange(n0) + self.X0, np.arange(n1) + self.Z0, indexing="ij")
         self.D = np.hypot(ii - self.C[0], jj - self.C[1])
-        self.IN = self.D <= self.R
+        # the town's edge is not a circle: it wanders in and out by up to `wobble` of the radius (out by at most
+        # 9, the slice ends 20 past R), so fields and verges close on an organic line. E is distance scaled to that edge.
+        self.wob = random.Random(seed * 7919 + 13); w = float(site.get("wobble", 0.12))
+        self.wave = [(k, self.wob.uniform(0.4, 1.0) / k ** 0.7, self.wob.uniform(0, 2 * math.pi)) for k in (2, 3, 4, 5, 7)]
+        tot = sum(a for _, a, _ in self.wave) or 1; self.wave = [(k, a / tot, ph) for k, a, ph in self.wave]; self.wobw = w
+        self.E = self.D * self.R / self.edge_r(np.arctan2(jj - self.C[1], ii - self.C[0])) if w else self.D
+        self.IN = self.E <= self.R
         self.Gs = self._blur(self.G0.astype(np.float32), 3)    # smoothed ground for path costs and heights
         self.G = self.G0.copy()                                 # graded ground (top block y)
         self.K = np.full(self.G0.shape, -1, np.int32)           # path surface in half blocks (slab at (k-1)//2 when odd)
@@ -127,7 +133,14 @@ class Town:
         return (c[k:, k:] - c[:-k, k:] - c[k:, :-k] + c[:-k, :-k]) / (k * k)
     def ij(self, x, z): return x - self.X0, z - self.Z0
     def ok(self, x, z): i, j = self.ij(x, z); return 0 <= i < self.G0.shape[0] and 0 <= j < self.G0.shape[1]
-    def inside(self, x, z, m=0): return self.ok(x, z) and (x - self.C[0]) ** 2 + (z - self.C[1]) ** 2 <= (self.R - m) ** 2
+    def edge_r(self, ang):
+        """Radius of the town's edge at angle ang (radians): R * (1 +- wobble), never more than R + 9."""
+        f = sum(a * np.sin(k * ang + ph) for k, a, ph in self.wave)
+        return np.minimum(self.R * (1 + self.wobw * f), self.R + 9)
+    def inside(self, x, z, m=0):
+        if not self.ok(x, z): return False
+        d = math.hypot(x - self.C[0], z - self.C[1])
+        return d <= (self.edge_r(math.atan2(z - self.C[1], x - self.C[0])) if self.wobw else self.R) - m
     def at(self, A, x, z): i, j = self.ij(x, z); return A[i, j]
     def u(self, x, z): return math.hypot(x - self.sq[0], z - self.sq[1]) / self.R
 
@@ -186,7 +199,7 @@ class Town:
                 if self.WET[a, b]: c += 40 * w
                 if self.KIND[a, b]: c *= 0.35
                 elif near is not None and near[a, b]: c += 2.5 * w
-                if self.D[a, b] > self.R - 3: c += 4
+                if self.E[a, b] > self.R - 3: c += 4
                 nd = d + c
                 if nd < dist.get((a, b), 1e18):
                     dist[(a, b)] = nd; prev[(a, b)] = (i, j)
@@ -652,7 +665,7 @@ class Town:
         each one: a build portion (plots round its edge, free ground in the middle) or a field
         portion (crops on every block). Near the square and small portions build; big ones
         further out farm."""
-        land = self.IN & (self.D <= getattr(self, 'LAND_R', self.R - 4)) & (self.K < 0) & ~self.WET & (self.TAKEN < 2)      # streets end 3 in from the edge: the edge closes the portions
+        land = self.IN & (self.E <= getattr(self, 'LAND_R', self.R - 4)) & (self.K < 0) & ~self.WET & (self.TAKEN < 2)      # streets end 3 in from the edge: the edge closes the portions
         lab = np.zeros(self.G.shape, np.int32); n = 0
         for i, j in np.argwhere(land):
             if lab[i, j]: continue
@@ -764,7 +777,7 @@ class Town:
         levelling). Water then goes into the ground one level at a time: for each height, water
         blocks at that height are added until every crop at that height is within 4 blocks
         (a 9 x 9 square) of one. Water never sits beside a lower block, where it would spill."""
-        self.FIELD = (self.PKIND == 2) & (self.D <= getattr(self, 'LAND_R', self.R - 4)) & (self.K < 0) & (self.TAKEN == 0) & ~self.WET & self.IN
+        self.FIELD = (self.PKIND == 2) & (self.E <= getattr(self, 'LAND_R', self.R - 4)) & (self.K < 0) & (self.TAKEN == 0) & ~self.WET & self.IN
         F = self.FIELD
         # crop patches: a few seeds per portion, nearest seed decides the crop
         crop_of = np.full(self.G.shape, -1, np.int8)
@@ -905,7 +918,7 @@ class Town:
         import place as TP
         hard = self.EAVES | (self.TAKEN == 2) | ~self.IN
         if getattr(self, "RES", None) is not None: hard = hard | self.RES        # reserved corridors (rail): no crowns over them
-        soft = (self.K >= 0) | (self.TAKEN >= 3) | self.WET | (self.D > self.R - 4)
+        soft = (self.K >= 0) | (self.TAKEN >= 3) | self.WET | (self.E > self.R - 4)
         sp = {k: w for k, w in self.TOWN_TREES.get(self.site.get("region", "vale"), self.TOWN_TREES["vale"]).items() if k in self.tree_index["species"]}
         dens = 26 * (self.R / 70) ** 2 / soft.size
         for i, j, f, prof in TP.scatter(self.tree_index, sp, hard, soft, density=dens, seed=self.seed, tries=40000):
@@ -1154,10 +1167,12 @@ class Town:
         img.save(os.path.join(out, f"{self.key}-plan.png"))
 
     def scene(self, out):
-        s = Blueprint(f"{self.key}_scene"); R = self.R + 5
+        s = Blueprint(f"{self.key}_scene"); R = self.R + 20
         for x in range(self.C[0] - R, self.C[0] + R + 1):
             for z in range(self.C[1] - R, self.C[1] + R + 1):
-                if (x - self.C[0]) ** 2 + (z - self.C[1]) ** 2 > R * R or not self.ok(x, z): continue
+                if not self.ok(x, z): continue
+                # the preview shows the land round the town out to a ragged edge, not a cut-out disc
+                if self.E[self.ij(x, z)] > self.R + 8 + 6 * h3(x // 4, 0, z // 4, 5) + 3 * h3(x, 1, z, 6): continue
                 i, j = self.ij(x, z); g = int(self.G[i, j])
                 if self.K[i, j] >= 0: g = (int(self.K[i, j]) - 1) // 2 - 1
                 low = g
