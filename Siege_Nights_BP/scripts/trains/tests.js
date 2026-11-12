@@ -2,8 +2,8 @@
 
 import { BlockTypes, EntityTypes, ItemTypes } from "@minecraft/server";
 import { addTests, assert, assertEqual } from "../siege/api.js";
-import { SHAPES, layTrack, cursorOn, advance, back, pointAt, follow, KINDS, curvePoints, switchSetting, shapeOf } from "./track.js";
-import { stageFor, stationPlan, siteFor, lineBlocks, rightOf, STAGES, STATION } from "./stations.js";
+import { SHAPES, layTrack, cursorOn, advance, back, pointAt, follow, KINDS, curvePoints, switchSetting, shapeOf, DX, DZ } from "./track.js";
+import { stageFor, stationPlan, siteFor, lineBlocks, loopBlocks, rightOf, STAGES, STATION, LOOP_Z } from "./stations.js";
 import { ROUTE, reachable, buyable, cannotBuy, priceOf, nearestStop, checkRoutes, stopSite, pieces, isNatural } from "./routes.js";
 import { ROUTES } from "./routes_data.js";
 import { railRefused } from "./no_hollow.js";
@@ -111,7 +111,6 @@ addTests("trains", {
     assertEqual(nearestStop(data, 2000, 0), undefined);
     const bad = { stops: data.stops, segments: [...data.segments, { id: "AB", from: "A", to: "Z", blocks: [] }] };
     assert(checkRoutes(bad).length >= 3, "a doubled id, an unknown stop and no track are caught");
-    assertEqual(checkRoutes(ROUTES).length, 0, "the planned railway has no mistakes");
     const custom = { ...data.segments[0], works: [[0, 0, 60, 63, 1]], works_palette: [{ name: "minecraft:air" }, { name: "minecraft:stone" }], custom: [[10, 20]] };
     assertEqual(checkRoutes({ stops: data.stops, segments: [custom] }).length, 0);
     const p = pieces(custom);
@@ -151,6 +150,52 @@ addTests("trains", {
     assertEqual(speedForGap(TRAIN.keepApart), 0, "stopped once it is this close");
     const v = speedForGap(gap);
     assert(v > 0 && (v * v) / (2 * TRAIN.brake) <= gap - TRAIN.keepApart, "from that speed it can stop in time");
+  },
+
+  "routes: the planned railway has no mistakes, and no works stand in a train's way": () => {
+    const problems = checkRoutes(ROUTES);
+    assert(!problems.length, problems[0]);
+    const seg = { id: "t", from: "A", to: "B", blocks: [[0, 64, 0, 0, 0], [0, 64, 1, 0, 0]], works: [[1, 0, 64, 65, 1]], works_palette: [{ name: "minecraft:air" }, { name: "minecraft:stone" }] };
+    const stops = [{ id: "A", x: 0, y: 64, z: 0 }, { id: "B", x: 0, y: 64, z: 1 }];
+    assert(checkRoutes({ stops, segments: [seg] }).some((p) => p.includes("train's body")), "a parapet right beside the track is caught");
+    assertEqual(checkRoutes({ stops, segments: [{ ...seg, works: [[2, 0, 64, 65, 1], [0, 0, 68, 70, 1]] }] }).length, 0, "two out and four up is fine");
+    assertEqual(checkRoutes({ stops, segments: [{ ...seg, works: [[1, 0, 64, 65, 1], [1, 0, 64, 67, 0]] }] }).length, 0, "cleared again by a later work is fine");
+  },
+
+  "stations: the passing loop leaves the line at one end, runs beside the platform and rejoins at the other": () => {
+    assertEqual(loopBlocks(stationPlan("vale", "halt"), { x: 0, y: 64, z: 0 }, { x: 0, z: 1 }).length, 0, "a Halt is single track");
+    for (const forward of [{ x: 0, z: 1 }, { x: 0, z: -1 }, { x: 1, z: 0 }, { x: -1, z: 0 }]) {
+      for (const stage of ["station", "junction", "grand"]) {
+        const plan = stationPlan("vale", stage), origin = { x: 100, y: 64, z: -40 };
+        const blocks = new Map(), get = (x, y, z) => blocks.get(`${x},${y},${z}`);
+        const line = lineBlocks(plan, origin, forward), loop = loopBlocks(plan, origin, forward);
+        for (const b of line) blocks.set(`${b.x},${b.y},${b.z}`, shapeOf(0, b.dir));
+        assert(loop.length > 20 && loop[0].end && loop.at(-1).end && loop.filter((b) => b.end).length === 2, "two ends");
+        for (const b of loop) {
+          assert(shapeOf(b.kind, b.dir), "a real track shape");
+          if (b.end) assert(blocks.has(`${b.x},${b.y},${b.z}`), "each end sits on the line");
+          else assert(!blocks.has(`${b.x},${b.y},${b.z}`), "the rest is off the line");
+          blocks.set(`${b.x},${b.y},${b.z}`, shapeOf(b.kind, b.dir)); // both switches set for the loop
+        }
+        const far = Math.max(...loop.map((b) => Math.abs((b.x - origin.x) * forward.x + (b.z - origin.z) * forward.z)));
+        assertEqual(far, -LOOP_Z, "it runs this far from the line, on the side away from the building");
+        assert(loop.every((b) => (b.x - origin.x) * forward.x + (b.z - origin.z) * forward.z <= 0), "never on the building's side");
+        // ride it: from the line's first block, through the loop, out onto the line's last block
+        const end = loop[0], last = loop.at(-1), s0 = get(end.x, end.y, end.z);
+        const inward = DX.findIndex((dx, d) => end.x + dx === line[1].x - (line[0].x - end.x) && end.z + DZ[d] === line[1].z - (line[0].z - end.z));
+        const from = (inward + 4) % 8; // it comes in from outside the station
+        let c = { x: end.x, y: end.y, z: end.z, from, to: s0.links[0] === from ? s0.links[1] : s0.links[0], t: 0 };
+        const seen = new Set();
+        for (let i = 0; i < 200 && !(c.x === last.x && c.z === last.z); i++) {
+          const r = advance(c, 0.5, get);
+          assert(!r.blocked, `the loop is joined all the way (${stage}, stuck at ${c.x},${c.z})`);
+          c = r.cursor;
+          seen.add(`${c.x},${c.y},${c.z}`);
+        }
+        assert(c.x === last.x && c.z === last.z, "it comes out at the far end");
+        assert(loop.every((b) => seen.has(`${b.x},${b.y},${b.z}`)), "by way of every loop block");
+      }
+    }
   },
 
   "no rail goes down in the Hollow": () => {
