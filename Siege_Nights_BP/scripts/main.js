@@ -48,6 +48,7 @@ import "./forestry/index.js";
 import "./workings/index.js";
 import "./ironworks/index.js";
 import "./vault/index.js";
+import "./warwrit/index.js";
 import "./creative/index.js";
 import "./dispatch/index.js";
 import "./letters/index.js";

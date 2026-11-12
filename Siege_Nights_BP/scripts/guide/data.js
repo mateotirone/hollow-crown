@@ -558,9 +558,20 @@ export const ENTRIES = [
   {
     id: "vault_break", ch: "growth", title: "Breaking into a vault",
     tip: "A Vault Breaker. Set it right against a Vault Lock.",
-    page: "Thieves break in with a §fVault Breaker§r (made at the Siege Workshop) set right against the lock: it chews through it, faster the better the breaker and slower the stronger the vault, and only while you are online. You are told the moment one starts. When the lock gives, the door falls with it. Mend a cracked lock or door by clicking it with the vault's material (planks, iron, diamond, netherite, Choirsteel); if the door falls, rebuild it from the Vault menu.\n\n"
+    page: "Thieves break in with a §fVault Breaker§r (made at the Siege Workshop) set right against the lock: it chews through it, faster the better the breaker and slower the stronger the vault, and only while you are online (or in a War Writ siege). You are told the moment one starts. When the lock gives, the door falls with it. Mend a cracked lock or door by clicking it with the vault's material (planks, iron, diamond, netherite, Choirsteel); if the door falls, rebuild it from the Vault menu.\n\n"
       + "Stay away a full real day while your vault holds a relic (or you carry one) and it §flies open§r: twice a day, at random times, for half an hour, anyone may break in without you. Everyone is told when it opens. While a window is open your walls can be breached as if you were here, but they, your vault and Keep take twice the blows and your guards fight harder. The rest of the time an away settlement stays untouchable. Log in, even for a moment, and the day starts again.",
     when: ["carry:siege:vault_breaker_iron", "carry:siege:vault_breaker_diamond", "carry:siege:vault_breaker_netherite", "event:vaultDrilled", "event:vaultWindow"],
+  },
+  {
+    id: "warwrit", ch: "keep", title: "War Writs",
+    tip: "Click another settlement's Keep Banner to declare war on it, or send a demand.",
+    page: "To besiege another player, click their §fKeep Banner§r and choose §fDeclare war§r. You need grounds: they hold a relic, they attacked your settlement in the last few days, or they refused your demand. A War Writ costs 320 Regals and the whole server is told.\n\n"
+      + "§fMuster:§r their gates shut at once. The assault comes at the next nightfall, at least three minutes away.\n"
+      + "§fAssault:§r one night, to dawn, whether or not they are online. Their walls, vault and Regal Safe can be broken, and their guards go for you. Their Keep Banner can't be taken.\n"
+      + "§fWinning:§r crack their vault before dawn and you win; the vault stays open to you until dawn. If dawn comes first, they win. Either way the win counts towards growing your settlement, and there is peace between you for three days.\n\n"
+      + "§fSend a demand§r asks them for a tenth of their Regals. If they pay, there is peace. If they refuse, or say nothing for a real day, you have grounds.\n\n"
+      + "If war is declared on you, answer demands and see every siege from your own Keep Banner menu.",
+    when: ["event:writDeclared", "event:demandSent"],
   },
   {
     id: "vault_safe", ch: "growth", title: "The Regal Safe",

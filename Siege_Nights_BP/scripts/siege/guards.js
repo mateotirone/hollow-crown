@@ -227,6 +227,12 @@ export function markWanted(player, owner) {
   emit("settlementAttacked", { owner, by: player.id }); // the Messenger (townhall/messenger.js) carries word to the keeper
 }
 
+// Keep a player Wanted on one settlement's land without a fresh alert each time (a War Writ's attackers)
+export function holdWanted(player, owner, ticks = WANTED_TICKS) {
+  if (!owner || !state.keeps[owner] || owner === player.id || isAlly(owner, player.id)) return;
+  wanted.set(player.id, { owner, until: system.currentTick + ticks });
+}
+
 world.afterEvents.entityHitEntity.subscribe((event) => {
   const attacker = event.damagingEntity;
   const target = event.hitEntity;
