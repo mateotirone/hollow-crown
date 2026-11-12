@@ -49,6 +49,9 @@ export const NEWS = {
     if (!n) return `§5${victim} fell to something nameless ${at}.`;
     return kind === "boss" ? `§c${victim} fell to ${n} ${at}.` : `§7${victim} fell to ${/^(the|a|an) /i.test(n) ? n : `a ${n}`} ${at}.`;
   },
+  // a special offer posted or filled at a Trade Outpost (scripts/trade/, the trade routes thread)
+  tradeSpecialOffer: ({ name, itemName, count, price, normal }) => (name && itemName ? `§6${name} wants ${count} ${itemName} and will pay ${price} Regals${normal ? ` §7(about ${normal} at the usual rate)` : ""}§6. §7Find the offer at their Trade Outpost.` : null),
+  tradeSpecialFilled: ({ name, itemName, count, by }) => (name && itemName ? `§7${by ? `${by} has filled` : "Someone has filled"} ${name}'s offer for ${count} ${itemName}.` : null),
   loreAllSolved: ({ player }) => `§d${player.name} has solved every mystery in their Ledger.`,
   loreThreadSolved: ({ player }) => `§d${player.name} has pieced a mystery together.`,
 };

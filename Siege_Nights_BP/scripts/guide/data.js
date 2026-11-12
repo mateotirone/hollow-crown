@@ -355,7 +355,7 @@ export const ENTRIES = [
   {
     id: "crier", ch: "start", title: "The Crier: news in chat",
     tip: "Lines marked [Crier] are news from across the realm.",
-    page: "Big moments are read out to everyone in chat, marked §6[Crier]§r. You hear about a boss waking and who stands against it, a boss throwing its challengers back, a new settlement, a newcomer, a plot claimed, a wall going up, a station joining the rails, a lord being called out, a feud ending, a dragon bonding or dying, and a mystery solved.\n\n"
+    page: "Big moments are read out to everyone in chat, marked §6[Crier]§r. You hear about a boss waking and who stands against it, a boss throwing its challengers back, a new settlement, a newcomer, a plot claimed, a wall going up, a station joining the rails, a lord being called out, a feud ending, a dragon bonding or dying, a settlement\'s first train, a special offer posted at a Trade Outpost, a mystery solved, and anyone falling to a boss, a creature of the wild or another player out on the road.\n\n"
       + "The Crier never tells anyone that a settlement is under attack. Only its keeper hears that, and only by Messenger (see §fNews from home§r).",
     when: ["event:joined"],
   },

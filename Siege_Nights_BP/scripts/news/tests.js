@@ -6,7 +6,7 @@ const player = { id: "p1", name: "Sam", location: { x: 0, y: 64, z: 0 } };
 const sample = { player, owner: "p1", ownerName: "Sam", name: "The Pale Huntsman", first: true, handled: true, level: 3,
   dim: "minecraft:overworld", x: 0, z: 0, players: ["Sam", "Ana"], plot: { name: "Thornfield" }, station: { name: "Kingsrest Station" },
   lord: { name: "Lord Aldric", plot: "Thornfield" }, winner: { name: "Lord Aldric" }, loser: { name: "Lady Wren" },
-  firstFor: "Sam", victim: "Sam", killer: "The Pale Huntsman", kind: "boss" };
+  firstFor: "Sam", itemName: "gold ingots", count: 32, price: 600, normal: 300, by: "Ana", victim: "Sam", killer: "The Pale Huntsman", kind: "boss" };
 
 addTests("world news", {
   "every event has a line, and none names what is hidden": () => {

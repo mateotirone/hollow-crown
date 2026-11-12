@@ -68,7 +68,7 @@ system.afterEvents.scriptEventReceive.subscribe((e) => {
   const sample = { player: p, owner: p.id, ownerName: p.name, name: "The Pale Huntsman", first: true, handled: true, level: 3,
     dim: OVERWORLD, x: p.location.x, z: p.location.z, players: [p.name], plot: { name: "Thornfield" }, station: { name: "Kingsrest Station" },
     lord: { name: "Lord Aldric", plot: "Thornfield" }, winner: { name: "Lord Aldric" }, loser: { name: "Lady Wren" },
-    firstFor: p.name, victim: p.name, killer: "The Pale Huntsman", kind: "boss" };
+    firstFor: p.name, itemName: "gold ingots", count: 32, price: 600, normal: 300, by: p.name, victim: p.name, killer: "The Pale Huntsman", kind: "boss" };
   for (const [event, words] of Object.entries(NEWS)) {
     const line = words(sample, ctx);
     if (line) p.sendMessage(`${PREFIX}${line} §8(${event})`);
