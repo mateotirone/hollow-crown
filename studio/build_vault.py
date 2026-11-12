@@ -265,6 +265,28 @@ def door(kind):
     return s
 
 
+def lock():
+    """The Vault Lock: a block of strongroom stone set in the wall beside the door, with a round lock face.
+    The key goes in here, drills bite here, upgrades are clicked here."""
+    s = Shape("vault_lock")
+    s.cube([-8, 0, -8], [16, 16, 16], "frame", "body")
+    # round face plate: a stepped disc of trim
+    for x0, y0, w, h in ((-4, 2, 8, 12), (-6, 4, 12, 8), (-5, 3, 10, 10)):
+        s.cube([x0, y0, -9], [w, h, 1], "trim", "plate")
+    # keyhole: a round top and a slot, dark
+    s.cube([-1.5, 8, -9.3], [3, 3, 0.3], "frame", "keyhole")
+    s.cube([-0.75, 5, -9.3], [1.5, 3.5, 0.3], "frame", "keyhole")
+    # four bolt heads round the rim and a dial ring
+    for x, y in ((-5.5, 7.5), (4.5, 7.5), (-0.5, 12.8), (-0.5, 2.2)):
+        s.cube([x, y, -9.6], [1, 1, 0.6], "*", "bolts")
+    s.cube([-3, 12, -9.4], [6, 0.6, 0.4], "*", "ring")
+    s.cube([-3, 3.4, -9.4], [6, 0.6, 0.4], "*", "ring")
+    # crack overlays for a half-drilled lock
+    s.cube([-6, 3, -9.65], [12, 10, 0.01], "cracks_1", "cracks_1")
+    s.cube([-6, 3, -9.7], [12, 10, 0.01], "cracks_2", "cracks_2")
+    return s
+
+
 def coffer():
     s = Shape("relic_coffer")
     s.cube([-7, 0, -6], [14, 2, 12], "stone", "plinth")
@@ -301,7 +323,7 @@ def breaker():
     return s
 
 
-SHAPES = {"door": door("wheel"), "door_wood": door("lock"), "plate": door("plate"), "coffer": coffer(), "breaker": breaker()}
+SHAPES = {"lock": lock(), "door": door("wheel"), "door_wood": door("lock"), "plate": door("plate"), "coffer": coffer(), "breaker": breaker()}
 
 
 # ---------------------------------------------------------------- blocks
@@ -362,6 +384,15 @@ def build_blocks(t):
               {k: v for k, v in mats.items() if k != "gem"}, states={"siege:cracks": [0, 1, 2]}, color=color, extra=dict(SOLID))
         NAMES[ident] = info["name"].replace("Door", "Door Plate")
         SOUNDS[ident] = "wood" if tier == "wood" else "metal"
+        # the Vault Lock beside the door: key, drills and upgrades all go through this block
+        ident = f"siege:vault_lock_{tier}"
+        block(ident, {"identifier": "geometry.siege_vault_lock", "bone_visibility": cracks},
+              {"*": mat(t[f"door_{tier}"], "alpha_test"), "trim": mat(t[f"trim_{tier}"], "alpha_test"), "frame": mat(t["stone_plain"], "alpha_test"),
+               "cracks_1": mat(t["cracks_1"], "alpha_test"), "cracks_2": mat(t["cracks_2"], "alpha_test")},
+              states={"siege:cracks": [0, 1, 2]}, color=color,
+              extra=dict(extra, **{"minecraft:light_emission": 6} if tier == "choirsteel" else {}))
+        NAMES[ident] = info["name"].replace("Strongroom Door", "Vault Lock")
+        SOUNDS[ident] = "stone"
 
     block("siege:vault_stone", "minecraft:geometry.full_block", {"*": mat(t["stone"])}, turn=False, extra=SOLID)
     NAMES["siege:vault_stone"], SOUNDS["siege:vault_stone"] = "Strongroom Stone", "stone"
@@ -389,6 +420,99 @@ def build_blocks(t):
         NAMES[ident], SOUNDS[ident] = info["name"], "metal"
 
 
+# ---------------------------------------------------------------- the Vault Key and the relic stands
+def key_icon(x, y, r):
+    G = M["gold"]
+    bow = (x - 4.5) ** 2 + (y - 4.5) ** 2
+    if 6 <= bow <= 14:
+        return G[3] if x + y < 9 else G[2]
+    if bow < 6 and bow > 2:
+        return G[1]
+    # the shaft runs down-right from the bow, the bit hangs off its end
+    d = x - y
+    if -1 <= d <= 1 and 7 <= x <= 13:
+        return G[4] if d == -1 else G[3] if d == 0 else G[1]
+    if (x, y) in ((12, 14), (13, 14), (12, 15), (10, 12), (10, 13), (11, 13)):
+        return G[2]
+    return (0, 0, 0, 0)
+
+
+def build_key():
+    img = Image.new("RGBA", (16, 16))
+    r = random.Random(7)
+    for y in range(16):
+        for x in range(16):
+            img.putpixel((x, y), tuple(key_icon(x, y, r)))
+    os.makedirs(os.path.join(RP, "textures", "items", "vault"), exist_ok=True)
+    img.save(os.path.join(RP, "textures", "items", "vault", "vault_key.png"))
+    write_json(os.path.join(BP, "items", "vault", "vault_key.json"), {"format_version": "1.21.60", "minecraft:item": {
+        "description": {"identifier": "siege:vault_key", "menu_category": {"category": "items"}},
+        "components": {"minecraft:icon": "siege_vault_key", "minecraft:display_name": {"value": "item.siege:vault_key.name"},
+                       "minecraft:max_stack_size": 1}}})
+    path = os.path.join(RP, "textures", "item_texture.json")
+    data = json.load(open(path, encoding="utf8"))
+    data["texture_data"]["siege_vault_key"] = {"textures": "textures/items/vault/vault_key"}
+    write_json(path, data, indent=1)
+    lang = os.path.join(RP, "texts", "en_US.lang")
+    lines = [l for l in open(lang, encoding="utf8").read().split("\n") if not l.startswith("item.siege:vault_key.name=")]
+    while lines and lines[-1] == "":
+        lines.pop()
+    open(lang, "w", encoding="utf8").write("\n".join(lines + ["item.siege:vault_key.name=Vault Key"]) + "\n")
+
+
+# Relic stands: the Heart of the Hollow and the Choirsteel template each float, slowly turning, over a small
+# stone stand, like the Crown's stand (studio/build_crown_stand.py). Click to take, set it back to leave it.
+# The relic is drawn as its own item picture on a double-sided card.
+STANDS = {"heart": ("siege:heart_stand", "Heart of the Hollow", "textures/items/siege_heart_of_the_hollow"),
+          "template": ("siege:template_stand", "Choirsteel Upgrade Template", "textures/items/siege_choirsteel_upgrade_template")}
+
+
+def build_stands():
+    for key, (ident, name, relic_tex) in STANDS.items():
+        short = ident.split(":")[1]
+        write_json(os.path.join(BP, "entities", "vault", short + ".json"), {"format_version": "1.21.60", "minecraft:entity": {
+            "description": {"identifier": ident, "is_spawnable": False, "is_summonable": True},
+            "components": {
+                "minecraft:type_family": {"family": ["relic_stand", "inanimate"]},
+                "minecraft:health": {"value": 20, "max": 20},
+                "minecraft:collision_box": {"width": 0.8, "height": 1.5},
+                "minecraft:physics": {"has_gravity": False, "has_collision": False},
+                "minecraft:pushable": {"is_pushable": False, "is_pushable_by_piston": False},
+                "minecraft:knockback_resistance": {"value": 1},
+                "minecraft:movement": {"value": 0},
+                "minecraft:persistent": {},
+                "minecraft:fire_immune": {},
+                "minecraft:breathable": {"breathes_water": True, "breathes_air": True, "suffocate_time": -1},
+                "minecraft:damage_sensor": {"triggers": [{"deals_damage": "no"}]}}}})
+        write_json(os.path.join(RP, "entity", "vault", short + ".entity.json"), {"format_version": "1.10.0", "minecraft:client_entity": {"description": {
+            "identifier": ident,
+            "materials": {"default": "entity_alphatest"},
+            "textures": {"stand": "textures/entity/siege_crown_stand", "relic": relic_tex},
+            "geometry": {"stand": "geometry.siege_relic_stand", "relic": "geometry.siege_relic_card"},
+            "animations": {"float": "animation.siege_crown_stand.float"},
+            "scripts": {"animate": ["float"]},
+            "render_controllers": ["controller.render.siege_crown_stand", "controller.render.siege_relic_card"]}}})
+        lang = os.path.join(RP, "texts", "en_US.lang")
+        lines = [l for l in open(lang, encoding="utf8").read().split("\n") if not l.startswith(f"entity.{ident}.name=")]
+        while lines and lines[-1] == "":
+            lines.pop()
+        open(lang, "w", encoding="utf8").write("\n".join(lines + [f"entity.{ident}.name={name}"]) + "\n")
+    write_json(os.path.join(RP, "render_controllers", "siege_relic_card.render_controllers.json"), {"format_version": "1.8.0", "render_controllers": {
+        "controller.render.siege_relic_card": {"geometry": "Geometry.relic", "materials": [{"*": "Material.default"}], "textures": ["Texture.relic"]}}})
+    bounds = {"visible_bounds_width": 2, "visible_bounds_height": 2.5, "visible_bounds_offset": [0, 1, 0]}
+    # the same floating slab as the Crown's stand, so the vault's stands match it
+    stand = json.load(open(os.path.join(RP, "models", "entity", "crown_stand.geo.json"), encoding="utf8"))["minecraft:geometry"][0]
+    stand = json.loads(json.dumps(stand))
+    stand["description"]["identifier"] = "geometry.siege_relic_stand"
+    write_json(os.path.join(RP, "models", "entity", "relic_stand.geo.json"), {"format_version": "1.12.0", "minecraft:geometry": [stand]})
+    # the relic: a 12x12 card standing on the stand's lip, turning (bone "spin" under "float", like the Crown)
+    write_json(os.path.join(RP, "models", "entity", "relic_card.geo.json"), {"format_version": "1.12.0", "minecraft:geometry": [{
+        "description": {"identifier": "geometry.siege_relic_card", "texture_width": 16, "texture_height": 16, **bounds},
+        "bones": [{"name": "float", "pivot": [0, 0, 0]},
+                  {"name": "spin", "parent": "float", "pivot": [0, 12, 0], "cubes": [
+                      {"origin": [-6, 12, 0], "size": [12, 12, 0], "uv": {"north": {"uv": [0, 0], "uv_size": [16, 16]}, "south": {"uv": [16, 0], "uv_size": [-16, 16]}}}]}]}]})
+
+
 # ---------------------------------------------------------------- recipes (Siege Workshop)
 def recipe(ident, pattern, key, count=1):
     short = ident.split(":")[1]
@@ -399,9 +523,8 @@ def recipe(ident, pattern, key, count=1):
 
 def build_recipes():
     # Only the first door is crafted; the others are upgrades on the placed door (script side).
-    recipe("siege:vault_door_wood", ["PIP", "PCP", "PIP"], {"P": "minecraft:dark_oak_planks", "I": "minecraft:iron_ingot", "C": "minecraft:chest"})
-    recipe("siege:vault_stone", ["SIS", "ISI", "SIS"], {"S": "minecraft:deepslate_bricks", "I": "minecraft:iron_ingot"}, count=4)
-    recipe("siege:relic_coffer", ["IGI", "PCP", "III"], {"I": "minecraft:iron_ingot", "G": "minecraft:gold_ingot", "P": "minecraft:dark_oak_planks", "C": "minecraft:chest"})
+    # The vault itself (room, door, lock, key) comes from the town hall's "Add Vault", not from crafting:
+    # only the attacker's breakers are crafted.
     recipe("siege:vault_breaker_iron", [" I ", "IBI", "PRP"], {"I": "minecraft:iron_block", "B": "minecraft:iron_pickaxe", "P": "minecraft:dark_oak_planks", "R": "minecraft:redstone_block"})
     recipe("siege:vault_breaker_diamond", [" D ", "DBD", " R "], {"D": "minecraft:diamond", "B": "siege:vault_breaker_iron", "R": "minecraft:redstone_block"})
     recipe("siege:vault_breaker_netherite", ["NBN"], {"N": "minecraft:netherite_ingot", "B": "siege:vault_breaker_diamond"})
@@ -438,5 +561,7 @@ if __name__ == "__main__":
     build_blocks(t)
     build_recipes()
     merge_shared(t)
+    build_key()
+    build_stands()
     print(f"vault: {len(NAMES)} blocks, {len(t)} textures, {len(RECIPES)} recipes, "
           + ", ".join(f"{n} {sum(len(c) for c in s.cubes.values())} cubes" for n, s in SHAPES.items()))

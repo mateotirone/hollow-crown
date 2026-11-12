@@ -542,5 +542,20 @@
  },
  "siege:vault_door_plate_choirsteel": {
   "sound": "metal"
+ },
+ "siege:vault_lock_wood": {
+  "sound": "stone"
+ },
+ "siege:vault_lock_iron": {
+  "sound": "stone"
+ },
+ "siege:vault_lock_diamond": {
+  "sound": "stone"
+ },
+ "siege:vault_lock_netherite": {
+  "sound": "stone"
+ },
+ "siege:vault_lock_choirsteel": {
+  "sound": "stone"
  }
 }
