@@ -48,7 +48,24 @@ BASE = dict(   # what every style shares unless it says otherwise
     snow=False, moss=False, ground="grass_block", under="dirt", cover=["short_grass", "short_grass", "fern"],
     farm_hedge="oak_leaves", field_soil="farmland", field_water=True, light="lantern", lamp_top=None,
     cloth="red", dais=("gold_block", "quartz_block"), range_flat=False, gravel="gravel",
+    # walking surfaces: bottom slabs, half a block below the ground (paths README, the sunken half-slab rule)
+    path_slabs=[("cobblestone_slab", 60), ("stone_brick_slab", 25), ("andesite_slab", 15)],
 )
+PATH_SLABS = {
+    "frostmarch": [("cobbled_deepslate_slab", 60), ("stone_brick_slab", 25), ("andesite_slab", 15)],
+    "saltreach": [("smooth_sandstone_slab", 60), ("sandstone_slab", 25), ("cobblestone_slab", 15)],
+    "blackfen": [("mud_brick_slab", 70), ("tuff_slab", 15), ("cobblestone_slab", 15)],
+    "emberwaste": [("smooth_red_sandstone_slab", 50), ("smooth_sandstone_slab", 35), ("cut_red_sandstone_slab", 15)],
+    "hollow": [("cobbled_deepslate_slab", 60), ("polished_blackstone_brick_slab", 25), ("tuff_slab", 15)],
+}
+SLAB_OF = {"stone_bricks": "stone_brick_slab", "cracked_stone_bricks": "stone_brick_slab", "cobblestone": "cobblestone_slab",
+           "andesite": "andesite_slab", "polished_andesite": "polished_andesite_slab", "tuff": "tuff_slab", "stone": "stone_slab",
+           "cobbled_deepslate": "cobbled_deepslate_slab", "polished_deepslate": "polished_deepslate_slab",
+           "deepslate_bricks": "deepslate_brick_slab", "deepslate_tiles": "deepslate_tile_slab",
+           "smooth_sandstone": "smooth_sandstone_slab", "sandstone": "sandstone_slab", "cut_sandstone": "cut_sandstone_slab",
+           "smooth_red_sandstone": "smooth_red_sandstone_slab", "cut_red_sandstone": "cut_red_sandstone_slab",
+           "mud_bricks": "mud_brick_slab", "tuff_bricks": "tuff_brick_slab", "polished_blackstone": "polished_blackstone_slab",
+           "polished_blackstone_bricks": "polished_blackstone_brick_slab", "mossy_cobblestone": "mossy_cobblestone_slab"}
 
 STYLES = {
     # the regular style, built first
@@ -170,7 +187,9 @@ STYLES = {
         light="soul_lantern", cloth="purple", dais=("amethyst_block", "crying_obsidian"),
     ),
 }
-for _k in STYLES: STYLES[_k] = {**BASE, **STYLES[_k]}
+for _k in STYLES:
+    STYLES[_k] = {**BASE, **STYLES[_k]}
+    if _k in PATH_SLABS: STYLES[_k]["path_slabs"] = PATH_SLABS[_k]
 
 
 def h3(x, y, z, s=0):
@@ -227,6 +246,10 @@ class Citadel:
         self.plots, self.towers, self.gates, self.fields = [], [], [], []
         self.cone_cache = {}
         self.dout, self.din, self.reach = d_outer, d_inner, OUTER   # the plan's shape (the Hollow stronghold swaps these)
+        self.lanes = set()          # lanes and tracks: sunk to slabs with the streets at the end
+        self.street = set()
+        self.roads_in = [90]        # where roads reach the plot (degrees, 0 east, 90 south): the gate side by default
+        self.stop_angle = 90        # where the plot's rail stop is (trains/routes_data.js), snapped to a side
 
     # ---- helpers -------------------------------------------------------------------------------------
     def set(self, x, y, z, n, **p): self.bp.set(x, y, z, n, **p)
@@ -699,7 +722,7 @@ class Citadel:
         S = self.S
         for x in range(x0, x1 + 1):                            # the plot's edge, a path you can see from the walls
             for z in range(z0, z1 + 1):
-                if x in (x0, x1) or z in (z0, z1): self.set(x, 0, z, pick(S["lane"], x, z, 11))
+                if x in (x0, x1) or z in (z0, z1): self.set(x, 0, z, pick(S["lane"], x, z, 11)); self.lanes.add((x, z))
         for x, z in ((x0, z0), (x1, z0), (x0, z1), (x1, z1)): self.set(x, 0, z, S["court"])
         self.plots.append({"size": size, "x0": x0, "z0": z0, "x1": x1, "z1": z1, "door": door, "where": where})
         return True
@@ -935,7 +958,7 @@ class Citadel:
                 if (x, z) in self.street or self.bp.get(x, 1, z)[0] != "keep": continue
                 if any(math.hypot(x - t["x"], z - t["z"]) <= t["r"] + 1 for t in self.towers): continue
                 if -6 <= d < -2:                               # the track round the wall's foot
-                    self.set(x, 0, z, pick(S["lane"], x, z, 13)); continue
+                    self.set(x, 0, z, pick(S["lane"], x, z, 13)); self.lanes.add((x, z)); continue
                 ang = (math.degrees(math.atan2(z, x)) + 360) % 360
                 strip = int(ang // 12)
                 if abs(ang - strip * 12) < 0.6 or abs(ang - (strip + 1) * 12) < 0.6:   # hedge between strips
@@ -975,6 +998,8 @@ class Citadel:
         self.lay_plots()
         self.farmland()
         self.station()
+        self.roads()
+        self.sink()
         self.weather()
         self.bp.finish()
         return self.bp
@@ -990,26 +1015,86 @@ class Citadel:
         import stations as ST
         region = region or self.style
         if region not in ST.REGIONS: return
-        b = getattr(ST, stage)(region)
+        side = self.side_of(self.stop_angle)                 # stations need straight track on a side: snap to the nearest
+        b0 = getattr(ST, stage)(region)
+        deg = {"s": 0, "w": 90, "n": 180, "e": 270}[side]    # building toward the middle, the line beyond it
+        b = b0.rotated(deg) if deg else b0
         Z = self.STATION_Z
-        (lx, _, lz), (hx, _, hz) = b.bounds()
+        ox, oz = self.turn(side, 0, Z)
         for (x, y, z), v in b.cells.items():
             if v[0] == "keep": continue
-            self.bp.cells[(x, y, z + Z)] = v
-        S = self.S
-        for x in range(-70, 71):                             # the line itself, for the preview (in game: bought, then laid)
-            for z in (Z, Z + 4):
+            self.bp.cells[(x + ox, y, z + oz)] = v
+        front = Z + b0.bounds()[0][2]                        # the forecourt edge, measured outward
+        for t in range(-70, 71):                             # the line itself, for the preview (in game: bought, then laid)
+            for k in (Z, Z + 4):
+                x, z = self.turn(side, t, k)
                 if self.bp.get(x, 1, z)[0] in ("keep", "air"):
-                    self.set(x, 0, z, "gravel"); self.set(x, 1, z, "rail", rail_direction=1)
-        a = AVENUE_W // 2
-        for z in range(FARM_TO - 6, Z + lz):                 # the avenue on to the station's forecourt
-            for x in range(-a - 2, a + 3):
-                if self.bp.get(x, 1, z)[0] in ("keep", "air") or abs(x) <= a:
-                    if self.bp.get(x, 1, z)[0] not in ("keep", "air") and abs(x) > a: continue
-                    self.set(x, 0, z, pick(S["street"], x, z, 7) if abs(x) <= a else S["court"])
-                    if self.bp.get(x, 1, z)[0] not in ("keep", "air"): self.bp.cells.pop((x, 1, z), None)
-                    self.street.add((x, z))
-        self.station_at = {"stage": stage, "line_z": Z, "front_z": Z + lz}
+                    self.set(x, 0, z, "gravel"); self.set(x, 1, z, "rail", rail_direction=1 if side in "ns" else 0)
+        self.spoke(side, FARM_TO - 6, front, 5)              # the high street from the ring road to the forecourt
+        self.station_at = {"stage": stage, "side": side, "line": Z, "front": front}
+
+    # ---- roads in: a ring road round the fields, spokes to every road that reaches the plot -----------
+    RING_ROAD = FARM_TO + 2
+
+    @staticmethod
+    def side_of(angle):
+        a = angle % 360
+        return "e" if a < 45 or a >= 315 else "s" if a < 135 else "w" if a < 225 else "n"
+
+    @staticmethod
+    def turn(side, x, z):
+        """A point in the south-side frame (x across, z outward) turned to the given side."""
+        return {"s": (x, z), "n": (-x, -z), "e": (z, -x), "w": (-z, x)}[side]
+
+    @staticmethod
+    def unturn(side, x, z):
+        return {"s": (x, z), "n": (-x, -z), "e": (-z, x), "w": (z, -x)}[side]
+
+    def pave_path(self, x, z, width_edge=False):
+        if self.bp.get(x, 1, z)[0] not in ("keep", "air"):
+            n = self.bp.get(x, 1, z)[0]
+            if any(k in n for k in ("wheat", "carrots", "potatoes", "beetroot", "leaves", "veilcap", "grass", "fern")) or n in self.S["crops"]:
+                self.bp.cells.pop((x, 1, z), None)
+            else: return
+        n0 = self.bp.get(x, 0, z)[0]
+        if n0 not in ("keep", "air") and (x, z) not in self.street and not any(k in n0 for k in ("farmland", "water", "grass", "dirt", "sand", "moss", "podzol", "gravel", "mud")) \
+                and n0 not in (self.S["field_soil"], self.S["ground"]) and not n0.startswith("siege:undertow"): return
+        self.set(x, 0, z, pick(self.S["street"], x, z, 7)); self.street.add((x, z))
+
+    def spoke(self, side, r0, r1, width):
+        """A straight road out along a side from radius r0 to r1, width odd."""
+        h = width // 2
+        for t in range(r0, r1 + 1):
+            for w in range(-h, h + 1):
+                x, z = self.turn(side, w, t)
+                self.pave_path(x, z)
+
+    def roads(self):
+        """Every road that reaches the plot joins the ring road round the fields, and the ring road runs to
+        the gate avenue and the station's high street, so a road from any side finds the gate. The gate
+        avenue already runs out through the fields to the ring."""
+        for x in range(-self.RING_ROAD - 2, self.RING_ROAD + 3):
+            for z in range(-self.RING_ROAD - 2, self.RING_ROAD + 3):
+                if abs(math.hypot(x, z) - self.RING_ROAD) <= 1.5: self.pave_path(x, z)
+        for ang in self.roads_in:                             # out to the plot edge where the outside road arrives
+            a = math.radians(ang)
+            for t in range(self.RING_ROAD, self.RING_ROAD + 24):
+                for w in (-2, -1, 0, 1, 2):
+                    self.pave_path(round(math.cos(a) * t - math.sin(a) * w), round(math.sin(a) * t + math.cos(a) * w))
+        self.entries = [{"angle": a, "at": [round(math.cos(math.radians(a)) * (self.RING_ROAD + 23)), round(math.sin(math.radians(a)) * (self.RING_ROAD + 23))],
+                         "width": 5} for a in self.roads_in]
+
+    def sink(self):
+        """The sunken half-slab rule: every street, square, lane and track in the Citadel is a bottom slab,
+        half a block below the ground and the buildings beside it. Blocks with no slab take the region's
+        street slab mix."""
+        S = self.S
+        for x, z in self.street | self.lanes:
+            n, q = self.bp.cells.get((x, 0, z), ("keep", {}))
+            if n in ("keep", "air", "water") or n.endswith("_slab") or n.startswith("siege:glimmer"): continue
+            if self.bp.get(x, 1, z)[0] not in ("keep", "air"): continue
+            slab = SLAB_OF.get(n) or pick(S["path_slabs"], x, z, 3)
+            self.bp.cells[(x, 0, z)] = (slab, {})
 
     PARTIAL = ("_stairs", "_slab", "_wall", "_fence", "_pane", "lantern", "_door", "_carpet", "_trapdoor", "iron_bars",
                "siege:", "ladder", "water", "farmland", "torch", "_leaves", "snow_layer", "grass", "fern", "bush",
@@ -1102,5 +1187,8 @@ if __name__ == "__main__":
     c = build(a.style)
     os.makedirs(a.out, exist_ok=True)
     s = c.summary(); print(json.dumps(s))
-    json.dump({"plots": c.plots, "towers": c.towers, "gates": c.gates, "fields": c.fields, "summary": s},
+    json.dump({"plots": c.plots, "towers": c.towers, "gates": c.gates, "fields": c.fields, "summary": s,
+               # how roads join the Citadel (build-instructions/paths/README.md, "Joining the Citadel")
+               "paths": {"ring_road": c.RING_ROAD, "ring_width": 3, "entries": getattr(c, "entries", []),
+                         "station": getattr(c, "station_at", None), "plot_edge": c.RING_ROAD + 23}},
               open(os.path.join(a.out, "citadel.json"), "w"), indent=1)

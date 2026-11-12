@@ -75,6 +75,26 @@ rustic mixes (more cobble, mossy cobble slabs low and in the shade).
 - Paths cross water on a bridge (Kingsrest needs bridges where two rivers meet) as wide as the path, with
   rails (fence or wall) and the same sunken surface between kerbs. Fords only on lanes.
 
+## Joining the Citadel
+
+The Citadel (map/structures/citadel.py) brings its own road ends, so a road generator never has to find
+the gate itself, and must never cut through a wall, a field or a plot to reach it.
+
+- **Ring road**: a 3-wide sunken road at radius 102 round the farmland (`paths.ring_road` in
+  citadel.json). Every road into the Citadel stops at it.
+- **Entries**: a 5-wide spoke for each side a road arrives from, running from the ring road out to the plot
+  edge at radius 125. Pass the angles in as `roads_in` (0 = +x, 90 = +z, the gate side); the generated
+  `paths.entries` list gives each spoke's angle and end point. An outside road ends on that point, with the
+  same width and the same slab mix, and meets it level (half a block of change per block at most).
+- **Gate avenue**: the gate (angle 90) is always an entry. Its avenue runs through the fields to the ring.
+- **Station**: the Grand Station stands on the line at radius 126 on the side of the plot's rail stop, with a
+  5-wide high street running in to the ring (`paths.station`). Rails cross no road on the level.
+- Roads and tracks inside the Citadel follow the sunken half-slab rule like everywhere else. Bare blocks
+  take the region's slab mix (Vale cobble and stone brick, Frostmarch cobbled deepslate, Saltreach smooth
+  sandstone, Blackfen mud brick, Emberwaste smooth red sandstone).
+- The Hollow stronghold has no road network round it (the Hollow has no roads or trains): its one avenue
+  runs from the moat bridge to the gate, and paths from the light rivers end at the bridge.
+
 ## Before you finish a path
 
 - [ ] Walking surface is bottom slabs, half a block below the buildings beside it.
@@ -82,3 +102,4 @@ rustic mixes (more cobble, mossy cobble slabs low and in the shade).
 - [ ] Height changes at most half a block per block; stairs only on door walkways and steep lanes.
 - [ ] Texture by the recipe, worn in the centre; edges and verges on every street.
 - [ ] Every path ends somewhere.
+- [ ] A road to the Citadel ends on one of its `paths.entries`, never on its walls or fields.
