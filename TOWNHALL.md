@@ -109,6 +109,15 @@ One screen listing every player in the world with their role, rank, Renown level
 
 Open it from the Town Hall menu, the keep menu, or anywhere with `/scriptevent siege:who`. Code: `townhall/roster.js`. Other features add a line under a player by listening for `rosterNotes` and calling `notes.add(playerId, "text")`. Rulers are learned from the `wardenChanged`, `crowned` and `stormEnd` events.
 
+## The Hall Map
+
+Every hall has a painted map of the realm (Mateo, 2026-11-12). Open it from the hall's Cartographer's Table (a vanilla cartography table inside a raised hall; sneak-click for the vanilla screen) or "Hall map" in the Town Hall menu. Code: `townhall/hallmap.js`.
+
+- Shows every settlement on a plot in its Keep Banner colour with its holder (your own ringed in gold), rival lords, free plots, the six towns, and found places. Never players.
+- Places: Crownhold, the Ashen Gate Chapterhouse and the Ashen Watch (from `plots/config.js` WARDS), plus the lore's **charted** places once the builder marks them (`/scriptevent siege:lore_mark_place`). Mystery places (`charted: false`, thin places, Bellhollow) are never marked, as the Ledger rule says.
+- Fog: the map is 16 x 16 cells of about 156 blocks. A player charts every cell within 96 blocks of where they walk on the overworld. A settlement knows what its owner and allies have charted and found (saved per player in `siege:hallmap`).
+- Screen: forms titled with `§h§m` are drawn by `ui/server_form.json` as the realm picture with a 16 x 16 grid of cell buttons over it (no other buttons; it closes with its X). Hover shows a mark's name; clicking a mark opens its details. Art: `textures/ui/hc/map/` from `studio/build_hallmap.py` (rerun after the world map is regenerated); UI from `studio/build_tree_ui.py`.
+
 ## The upgrade fly-by, and walls
 
 When a hall is raised or upgraded, the owner's camera lifts off and circles the hall while it rises, then returns (sneak to return early). Code: `townhall/flyby.js`, `flyby(player, { center, radius, height, seconds, title })`, usable by any feature.
