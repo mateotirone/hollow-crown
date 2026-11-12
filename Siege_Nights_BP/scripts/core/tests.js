@@ -34,6 +34,7 @@ export const OFFLINE_ONLY = new Set([
   "undertow: open country has all four kinds of land",
   "undertow: roads are dry and gentle, and cross rivers on bridges a boat fits under",
   "undertow: terrain is deterministic",
+  "undertow: path is walkable (no step over 1)",
   "undertow: the roof covers the land everywhere, 30 or more blocks up, under its unbreakable shell",
   "undertow: the roof is never flat: domes, sags and mixed rock",
   "undertow: the ground mixes several blocks in every kind of land",
