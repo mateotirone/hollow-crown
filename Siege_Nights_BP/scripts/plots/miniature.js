@@ -32,6 +32,9 @@ const UNDER = {
   grass: "dirt", grass_path: "dirt", podzol: "dirt", moss_block: "dirt", mud: "dirt",
   sand: "sandstone", red_sand: "sandstone",
 };
+// Emberwaste mesas (red sand tops) show banded terracotta down their sides
+const MESA_BANDS = ["minecraft:orange_terracotta", "minecraft:hardened_clay", "minecraft:red_terracotta", "minecraft:orange_terracotta", "minecraft:yellow_terracotta"];
+export const underAtY = (surface, y, under) => (surface === "red_sand" ? MESA_BANDS[y % MESA_BANDS.length] : under);
 // Older or renamed ids: what to try if a block can't be placed
 const FALLBACK = {
   "minecraft:red_sand": "minecraft:sand",
@@ -146,7 +149,7 @@ export function* miniatureBlocks(put, o, markers = [], clear) {
       const surface = blockId(c.surface);
       const under = blockId(UNDER[c.surface] ?? "stone");
       put(x, o.y, z, c.h > 0 ? under : surface);
-      for (let y = 1; y <= c.h; y++) put(x, o.y + y, z, y === c.h ? surface : under);
+      for (let y = 1; y <= c.h; y++) put(x, o.y + y, z, y === c.h ? surface : underAtY(c.surface, y, under));
       const m = markerAt.get(`${dx},${dz}`);
       if (m) {
         put(x, o.y + c.h + 1, z, m.pedestal);

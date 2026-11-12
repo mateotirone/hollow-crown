@@ -325,6 +325,9 @@ const EXTRAS = [
              netherite_strongroom: "Netherite Strongroom", choirsteel_strongroom: "Choirsteel Strongroom",
              inside_wood: "Wooden Strongroom, inside", inside_iron: "Iron Strongroom, inside", inside_diamond: "Diamond Strongroom, inside",
              inside_netherite: "Netherite Strongroom, inside", inside_choirsteel: "Choirsteel Strongroom, inside" } },
+  { id: "miniature", title: "Welcome hall miniature", marker: "map/structures/miniature_scene.py",
+    args: (out) => [out],
+    label: { miniature: "The whole map in miniature, on its cloud (welcome hall)" } },
 ];
 // Builder scripts that live on a branch without the kit: copied from the newest branch that has them into
 // the newest catalogue branch's map/structures and run there.

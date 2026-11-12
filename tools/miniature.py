@@ -169,6 +169,30 @@ for name, pts in L["roads"].items():
     for i, j in raster(pts):
         road[idx(j), idx(i)] = 2
 
+# ---------------------------------------------------------------- the Emberwaste: dunes and mesas (Mateo 2026-11-12)
+# Squeezed 1:10 the desert came out dead flat. Here its red sand drifts stand up as small mesas (banded terracotta
+# sides, red sand on top, a second step in the middle of the bigger ones) and the open sand rolls in low dunes.
+def is_ember_ground(a, b):
+    return 0 <= a < CELLS and 0 <= b < CELLS and land[b, a] and reg[b, a] == EMBER and not water[b, a] and not road[b, a]
+red_patch = np.zeros((CELLS, CELLS), bool)
+for a in range(CELLS):
+    for b in range(CELLS):
+        red_patch[b, a] = is_ember_ground(a, b) and orange[b, a] > 0.35
+lift = np.zeros((CELLS, CELLS), np.int32)
+for a in range(CELLS):
+    for b in range(CELLS):
+        if not is_ember_ground(a, b):
+            continue
+        if red_patch[b, a]:
+            core = all(0 <= a + da < CELLS and 0 <= b + db < CELLS and red_patch[b + db, a + da]
+                       for da in (-1, 0, 1) for db in (-1, 0, 1))
+            lift[b, a] = 2 if core else 1
+        else:
+            dune = math.sin(a * 0.62 + math.sin(b * 0.27) * 2.2) + 0.6 * math.sin(b * 0.41 - a * 0.18)
+            lift[b, a] = 1 if dune > 0.75 else 0
+h += lift
+mesa = red_patch
+
 # ---------------------------------------------------------------- surface and decoration per cell
 def surface(a, b):
     r, y, hh = reg[b, a], ymean[b, a], h[b, a]
@@ -191,7 +215,7 @@ def surface(a, b):
     if hh >= 10:
         return "stone"
     if r == EMBER:
-        return "red_sand" if orange[b, a] > 0.35 else "sand"
+        return "red_sand" if mesa[b, a] else "sand"
     if r == FEN:
         return "mud" if hsh(a, b, 3) < 0.35 else "moss_block"
     if r == SALT:
@@ -217,6 +241,16 @@ for a in range(CELLS):
         if hsh(a, b, 5) < dens:
             leaf = "dark_oak_leaves" if r == VALE and hsh(a, b, 6) < 0.3 else LEAF[r]
             deco[(a, b)] = [leaf] + ([leaf] if hsh(a, b, 7) < 0.15 else [])
+
+# The Emberwaste's few plants: a lone acacia here and there on the sand, dead bushes on sand and mesa tops
+for a in range(CELLS):
+    for b in range(CELLS):
+        if not is_ember_ground(a, b) or (a, b) in deco:
+            continue
+        if not mesa[b, a] and hsh(a, b, 21) < 0.035:
+            deco[(a, b)] = ["acacia_leaves"]
+        elif hsh(a, b, 22) < 0.05:
+            deco[(a, b)] = ["deadbush"]
 
 # Towns: a little paved square and a few roofs; Kingsrest gets its domed hall
 HOUSE = {VALE: ("spruce_planks", "dark_oak_slab"), FROST: ("spruce_planks", "deepslate_tile_slab"),
