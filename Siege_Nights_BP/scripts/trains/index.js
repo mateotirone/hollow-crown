@@ -10,7 +10,8 @@
 import { world, system, GameMode } from "@minecraft/server";
 import { onTick, isReady, moduleStore, settlementAt, keepOf, on, COLORS } from "../siege/api.js";
 import { styleOf } from "../settle/plans.js";
-import { shapeOf, layTrack, cursorOn, advance, back, pointAt } from "./track.js";
+import { shapeOf, layTrack, cursorOn, advance, back, pointAt, flip } from "./track.js";
+import { throwFor } from "./switches.js";
 import { TRACK, TRAIN, CARS, TRAIN_STYLES, NO_COLOR, carPoses, trainLength, stepSpeed, moveTrain, limitAhead, shapesForLoop, showcaseLoop } from "./data.js";
 import { give } from "../horses/menus.js";
 import { sfx } from "../core/sfx.js";
@@ -282,7 +283,7 @@ function runTick() {
       return e?.isValid ? e : undefined;
     });
     if (ents.some((e) => !e)) continue; // part of it isn't loaded: hold still
-    const get = reader(dim);
+    let get = reader(dim);
     const driver = driverOf(ents[0]);
     let throttle = throttleOf(driver);
     if (throttle === "auto") throttle = train.v < TRAIN.autoSpeed ? 1 : 0;
@@ -294,6 +295,9 @@ function runTick() {
     // nobody driving: the brakes go on and it stays put
     train.v = driver ? stepSpeed(train.v, throttle, { downhill, limit }) : Math.sign(train.v) * Math.max(0, Math.abs(train.v) - TRAIN.brake);
     if (train.v === 0 && before === 0) continue;
+    // a switch just ahead of the leading end: set it so the train runs through
+    const lead = train.v >= 0 ? train.head : flip(back(train.head, trainLength(train.cars), get).cursor);
+    if (throwFor(dim, lead)) get = reader(dim);
     const r = moveTrain(train.head, train.cars, train.v, get);
     if (r.v === 0 && Math.abs(before) > 0.3 && driver) {
       sfx(driver, "random.anvil_land");
