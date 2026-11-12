@@ -92,6 +92,16 @@ export const ENTRIES = [
     when: [],
   },
 
+  {
+    id: "graves", ch: "start", title: "Dying and your grave",
+    tip: "When you die, your things go into a gravestone where you fell. Click the headstone to get them back.",
+    page: "When you die, everything you drop goes into a §fgravestone§r where you fell (or on the nearest dry ground). Chat tells you where it is. Walk back and click the headstone to gather your things: armour goes straight back on, the rest into your pack. Anything that doesn't fit stays in the grave until you make room.\n\n"
+      + "§fSealed for 10 minutes.§r Only you can open your own grave at first. While the candle beside it burns, it is sealed; when the candle goes out, anyone can open it, so don't dawdle.\n\n"
+      + "§fKilled by another player?§r Then your grave is open to anyone at once, and your killer is told where it is.\n\n"
+      + "Graves can't be broken or blown up. Once emptied, a grave settles back into the earth. Anything lost to lava or the void is gone before it can reach a grave.",
+    when: ["event:graveDug", "click:siege:gravestone"],
+  },
+
   // ---------------- Siege nights ----------------
   {
     id: "siege_nights", ch: "siege", title: "How siege nights work",
@@ -347,6 +357,13 @@ export const ENTRIES = [
     when: ["click:siege:trade_board"],
     needs: "siege:trade_board",
   },
+  {
+    id: "trade_specials", ch: "travel", title: "Special Offers and trading in person",
+    page: "§fSpecial Offers:§r at the board, choose Create Special Offer, pick a good and how many, and you'll see what that amount is worth at the normal rate. Name your price (at least that much) and post it: the Regals are held until it's filled, and the Crier spreads the word. Anyone your track reaches can fill it from their Exports by train, and towns and lords fill offers that are worth their while. Whatever isn't filled within 3 days comes back to you.\n\n"
+      + "§fDeliver in person:§r walk up to another settlement's Trade Board with the goods and click it to see their Special Offers. Hand the goods over from your pack and you're paid on the spot; they go straight into that settlement's Imports. No track needed, and they don't have to be online.",
+    when: ["click:siege:trade_board"],
+    needs: "siege:trade_board",
+  },
 
   // ---------------- Growing stronger ----------------
   {
@@ -363,6 +380,29 @@ export const ENTRIES = [
     page: "Click the Tree of Oaths in your town hall to swear skills. Two branches are open to everyone: §fKeep§r (your settlement and guards) and §fWayfarer§r (travel and survival). Others belong to a path or a role.\n\n"
       + "Each skill shows what it does before you swear it. Skills you can afford now are lit. If the picture screen ever gives you trouble, switch to plain lists on its first page.",
     when: ["click:siege:tree_of_oaths"],
+  },
+  {
+    id: "letters", ch: "start", title: "Letters by messenger",
+    tip: "To send another player a private letter, type /siege:messenger. A messenger carries it to them.",
+    page: "Type §f/siege:messenger§r (or choose §fSend a messenger§r in the Keep menu). Pick who it is for, write up to 240 letters, and send it.\n\n"
+      + "A messenger rides off with it. It takes a couple of minutes to arrive: a minute and a half next door, up to three minutes across the map. While it is on the road, a small countdown above your hotbar says §fYour message is being delivered§r. When it reaches zero they get it in chat, and you are told it arrived.\n\n"
+      + "If they are away, the messenger waits and hands it over when they come back. You can have three letters on the road at once.",
+    when: ["event:joined"],
+  },
+  {
+    id: "crier", ch: "start", title: "The Crier: news in chat",
+    tip: "Lines marked [Crier] are news from across the realm.",
+    page: "Big moments are read out to everyone in chat, marked §6[Crier]§r. You hear about a boss waking and who stands against it, a boss throwing its challengers back, a new settlement, a newcomer, a plot claimed, a wall going up, a station joining the rails, a lord being called out, a feud ending, a dragon bonding or dying, a settlement\'s first train, a settlement holding 3, 5, 10 or more siege nights in a row (or losing a long streak), a special offer posted at a Trade Outpost, a mystery solved, and anyone falling to a boss, a creature of the wild or another player out on the road.\n\n"
+      + "The Crier never tells anyone that a settlement is under attack. Only its keeper hears that, and only by Messenger (see §fNews from home§r).",
+    when: ["event:joined"],
+  },
+  {
+    id: "messenger", ch: "keep", title: "News from home: the Messenger",
+    tip: "Away from home, you hear nothing of attacks on your settlement. The Messenger, on the Tree of Oaths, changes that.",
+    page: "When you are away from your own land, nobody tells you your settlement is being attacked. You find out when you get back: the moment you step onto your land, you hear everything that happened while you were gone.\n\n"
+      + "Get a §fMessenger§r and that changes. Open the Tree of Oaths, choose the §fKeep§r branch and pick §fMessenger§r (first ring, needs a Longhouse). Swear it for §f1 skill point§r, or pay §f100 Regals§r instead. Regals paid stay paid: unbinding your oaths keeps the Messenger and gives no points back for it.\n\n"
+      + "From then on, the moment anyone attacks your settlement (a player hitting your walls, guards or people, raiders marching on your keep, a rival lord's raid, someone breaking into your vault) a messenger rides up wherever you are. They tell you what is happening and which way home lies. If you were offline, a messenger is waiting when you come back.",
+    when: ["click:siege:tree_of_oaths", "event:keepFounded"],
   },
   {
     id: "ember", ch: "growth", title: "The pale fire and the two paths",
@@ -443,6 +483,13 @@ export const ENTRIES = [
     page: "Some books are in cipher and some are written backwards. Carry the right tool while you read them: a §fCipher Wheel§r for one kind, §fTide Glass§r for the other. Your Library hands them over as it grows.",
     when: ["carry:siege:cipher_wheel", "carry:siege:mirror_glass"],
     hidden: true,
+  },
+  {
+    id: "landmarks", ch: "lore", title: "Old things on the land",
+    tip: "Something old stands here. Your settlement's local papers say what happened at it.",
+    page: "Every plot has something old standing on it, out past where the settlement will grow: a cairn, a ring of posts, an empty bell frame, a ruined hall. They were here long before you, and each one is part of a mystery.\n\n"
+      + "Your plot's §flocal papers§r tell its story. They turn up as your settlement grows: shelve them in your Library, then come back and look at the place again. The Ledger keeps the clues.",
+    when: ["event:landmarkFound"],
   },
   {
     id: "people", ch: "lore", title: "People and portraits",

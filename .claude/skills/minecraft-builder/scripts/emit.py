@@ -117,7 +117,12 @@ def bedrock_state(n, p):
         st["attachment"] = "hanging"; st["direction"] = {"s": 0, "w": 1, "n": 2, "e": 3}[f or "s"]
     elif n.endswith("_button"):  # stuck to the wall behind it, pointing out of face f
         st["facing_direction"] = {"n": 2, "s": 3, "w": 4, "e": 5}[f or "s"]
+    elif n == "candle" or n.endswith("_candle"):
+        st["lit"] = bool(p.get("lit")); st["candles"] = int(p.get("candles", 1)) - 1
     if p.get("axis"): st["pillar_axis"] = p["axis"]
+    if n.startswith("siege:"):                                   # the add-on's own blocks: they only turn
+        if f: st["minecraft:cardinal_direction"] = CARD[f]
+        return n, st
     S = bedrock_states()
     if S:
         if n not in S["blocks"]: raise ValueError(f"'{n}' is not a Bedrock block (bedrock_states.json)")

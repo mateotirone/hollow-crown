@@ -3,17 +3,18 @@
 
 import { world, system } from "@minecraft/server";
 import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
-import { isReady, isAlly, keepOf } from "../siege/api.js";
+import { isReady, isAlly, keepOf, countItem } from "../siege/api.js";
 import { charge, coins, funds } from "../economy/api.js";
 import { sfx } from "../core/sfx.js";
 import { stationMenuExtras } from "../rails/index.js";
 import { hasUnlocked } from "../trains/index.js";
 import { TRADE, GOODS, COIN } from "./data.js";
-import { balanceText, regalWorth, loadText, niceGood, offerProblem, travelTicks, capitalPrice, routesAllowed } from "./rules.js";
+import { balanceText, regalWorth, loadText, niceGood, offerProblem, travelTicks, capitalPrice, routesAllowed, specialNormal, specialPremium, specialPayFor } from "./rules.js";
 import {
   TRADE_BOARD, CAPITAL, S_ACCESS, outpostOf, partyName, partyRegion, partyStage, partnersOf, routesOf, waitingFor, noticesOf, clearNotices,
   sendOffer, counterOffer, rejectOffer, acceptOffer, cancelRoute, resumeRoute, whyText, cargoFor, sameRoute, roomFor, isNpc,
   siteOfOwner, wingProblem, raiseWing, saveTrade, syncOutpost, lineLength,
+  specialsOf, specialsReaching, postSpecial, fillByTrain, fillInPerson, cancelSpecial,
 } from "./index.js";
 
 const say = (player, text) => { try { player.sendMessage(text); } catch {} };
@@ -38,7 +39,8 @@ world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
     const hit = boardOwner(block);
     if (!hit) return player.onScreenDisplay.setActionBar("§7This Trade Board isn't part of a station's Outpost.");
     const [party, o] = hit;
-    if (player.id !== o.owner && !isAlly(o.owner, player.id)) return player.onScreenDisplay.setActionBar("§7Only the settlement's people can use its Trade Board.");
+    // a visitor can only deliver goods for this settlement's Special Offers; the rest of the board stays private
+    if (player.id !== o.owner && !isAlly(o.owner, player.id)) return visitor(player, party).catch((e) => console.warn(`[Hollow Crown] trade board: ${e}`));
     board(player, party).catch((e) => console.warn(`[Hollow Crown] trade board: ${e}`));
   });
 });
@@ -60,6 +62,7 @@ async function board(player, party) {
   const body = [
     `Routes: ${routes.length} of ${routesAllowed(partyStage(party))}`,
     `Train size: up to ${cargoFor(party)} items (${cargoFor(party) / 64} stacks) each way per trip`,
+    ...specialsOf(party).map((sp) => `§6★§r Special offer: ${sp.left} of ${loadText({ id: sp.item, n: sp.total })} still wanted, ${coins(sp.price)} in all`),
     lines.length ? `\n${lines.join("\n")}` : "\n§7No routes yet. Propose one, or wait for an offer.",
     news ? `\n§fLatest:\n${news}` : "",
   ].join("\n");
@@ -67,6 +70,8 @@ async function board(player, party) {
     asks.length && { label: `§e${asks.length === 1 ? "1 trade request" : `${asks.length} trade requests`} waiting`, action: () => requests(player, party) },
     { label: "Propose a trade\n§8pick a partner and terms", action: () => propose(player, party) },
     routes.length && { label: "Your routes\n§8see, resume or end them", action: () => routeList(player, party) },
+    { label: `Special offers (${specialsOf(party).length} of ${TRADE.specialsPerOutpost})\n§8post a price for goods you want`, action: () => specials(player, party) },
+    specialsReaching(party).length && { label: `§6${specialsReaching(party).length} special offer${specialsReaching(party).length === 1 ? "" : "s"} you can fill\n§8send goods by train for Regals`, action: () => fillList(player, party) },
     { label: `Goods Wagons (${o.wagons ?? 0} of ${TRADE.maxWagons})\n§8+${TRADE.wagonStacks} stacks a run each`, action: () => wagons(player, party) },
     { label: "How trade routes work", action: () => howItWorks(player) },
   ].filter(Boolean);
@@ -98,6 +103,8 @@ async function howItWorks(player) {
     "§fKeep your Exports stocked.§r If either side is short, nothing leaves and the route pauses until it's refilled. After 3 days paused it goes dormant: refill and press Resume.",
     "",
     "§fDistance matters:§r the further apart the two stations are along the track, the longer each trip takes.",
+    "",
+    "§fSpecial Offers:§r post a price for goods you want (\"I'll pay 300 Regals for 40 gold\"). The Regals are held until it's filled. Anyone your track reaches can fill it by train, and anyone can walk up to your Trade Board with the goods and hand them over in person.",
     "",
     "§fRival Lords and towns§r trade too, and will write to you. §fKingsrest§r buys any trade good for Regals at a set price.",
     "",
@@ -228,6 +235,131 @@ async function termsForm(player, party, other, start, title) {
     return { give, get: { id: COIN, n: capitalPrice(give) }, every: every[v[2]], runs: TRADE.maxRunsChoice[v[3]] };
   }
   return { give: { id: ids[v[0]], n: num(v[1]) }, get: { id: ids[v[2]], n: num(v[3]) }, every: every[v[4]], runs: TRADE.maxRunsChoice[v[5]] };
+}
+
+// ---------- Special Offers ----------
+
+const goodName = (id, n = 2) => loadText({ id, n }).replace(/^\d+ /, "");
+const timeLeft = (sp) => { const h = Math.max(0, Math.ceil((sp.expires - world.getAbsoluteTime()) / 1000)); return h >= 24 ? `${Math.round(h / 24)} day${Math.round(h / 24) === 1 ? "" : "s"}` : `${h} hour${h === 1 ? "" : "s"}`; };
+const premiumText = (sp) => { const p = specialPremium(sp); return p > 0 ? `§a${p}% over the normal rate` : p < 0 ? `§c${-p}% under the normal rate` : "§7the normal rate"; };
+const offerLine = (sp) => `${sp.left} of ${sp.total} ${goodName(sp.item, sp.total)} wanted · ${coins(sp.price)} in all (normal worth ${coins(specialNormal(sp))}) · ends in ${timeLeft(sp)}`;
+
+async function specials(player, party) {
+  const mine = specialsOf(party);
+  const form = new ActionFormData().title("Special offers").body([
+    "Name a good, how many you want and what you'll pay for them all. Your Regals are held until the offer is filled, and paid out to whoever fills it. The goods arrive in your Imports.",
+    "",
+    mine.length ? mine.map((sp) => `§6★§r ${offerLine(sp)}`).join("\n") : "§7You have no special offers out.",
+  ].join("\n"));
+  const acts = [];
+  if (mine.length < TRADE.specialsPerOutpost) { form.button("§6Create Special Offer"); acts.push(() => createSpecial(player, party)); }
+  for (const sp of mine) { form.button(`Withdraw: ${sp.total} ${goodName(sp.item, sp.total)}\n§8the unpaid Regals come back to you`); acts.push(() => withdraw(player, party, sp)); }
+  form.button("Back"); acts.push(() => board(player, party));
+  const res = await form.show(player);
+  if (res.canceled) return;
+  await acts[res.selection]?.();
+}
+
+async function createSpecial(player, party) {
+  const ids = TRADABLE.map((g) => g.id);
+  const f = await new ModalFormData().title("Create Special Offer")
+    .dropdown("The good you want", TRADABLE.map(goodLabel), { defaultValueIndex: Math.max(0, ids.indexOf("minecraft:gold_ingot")) })
+    .textField(`How many (up to ${cargoFor(party)}, one train load)`, "e.g. 32", { defaultValue: "32" })
+    .show(player);
+  if (f.canceled) return specials(player, party);
+  const item = ids[f.formValues?.[0] ?? 0];
+  const total = Math.max(0, Math.floor(Number(String(f.formValues?.[1] ?? "").trim()) || 0));
+  const normal = regalWorth({ id: item, n: total });
+  // second step: now they can see what that amount is worth at the normal rate
+  const p = await new ModalFormData().title("Your price")
+    .textField(`${total} ${goodName(item, total)} are worth §e${coins(normal)}§r at the normal rate.\n\nWhat will you pay for them all? (You can spend ${coins(funds(player))}.)`, "Regals", { defaultValue: String(Math.max(1, Math.round(normal * 1.25))) })
+    .show(player);
+  if (p.canceled) return specials(player, party);
+  const price = Math.max(0, Math.floor(Number(String(p.formValues?.[0] ?? "").trim()) || 0));
+  const sp = { item, total, price };
+  const ok = await new ActionFormData().title("Post this offer?").body([
+    `§fYou want:§r ${loadText({ id: item, n: total })}`,
+    `§fNormal worth:§r ${coins(normal)}`,
+    `§fYou pay:§r ${coins(price)} §7(${premiumText(sp)}§7)`,
+    "",
+    `The ${coins(price)} leave your balance now and are paid out as the goods come in. Anything not filled within ${TRADE.specialDays} days comes back to you.`,
+    "§7The Crier will spread the word.",
+  ].join("\n")).button("§aPost it").button("Back").show(player);
+  if (ok.canceled || ok.selection !== 0) return specials(player, party);
+  const problem = postSpecial(player, party, item, total, price);
+  if (problem) { say(player, `§c${problem}`); return specials(player, party); }
+  sfx(player, "random.orb");
+  say(player, `§6Special offer posted: ${coins(price)} for ${loadText({ id: item, n: total })}.`);
+}
+
+async function withdraw(player, party, sp) {
+  const res = await new ActionFormData().title("Withdraw the offer?").body(`${offerLine(sp)}\n\nThe Regals not yet paid out come back to your balance. Goods already on their way still arrive.`)
+    .button("§cWithdraw it").button("Back").show(player);
+  if (res.canceled || res.selection !== 0) return specials(player, party);
+  const back = cancelSpecial(player, sp);
+  say(player, `§7Offer withdrawn. ${coins(back)} back in your balance.`);
+}
+
+// Other settlements' offers your track reaches: fill them from your Exports, by train
+async function fillList(player, party) {
+  const list = specialsReaching(party);
+  if (!list.length) return board(player, party);
+  const ex = outpostOf(party)?.ex ?? {};
+  const form = new ActionFormData().title("Special offers you can fill").body("Send the goods from your Exports. You're paid as soon as they leave; they reach the buyer after the trip.");
+  for (const sp of list) form.button(`${partyName(sp.party, { color: false })}: ${sp.left} ${goodName(sp.item, sp.left)}\n§8${coins(specialPayFor(sp, sp.left))} · you have ${ex[sp.item] ?? 0}`);
+  form.button("Back");
+  const res = await form.show(player);
+  if (res.canceled) return;
+  const sp = list[res.selection];
+  if (!sp) return board(player, party);
+  const most = Math.min(sp.left, cargoFor(party), ex[sp.item] ?? 0);
+  const n = await howMany(player, `Fill: ${partyName(sp.party, { color: false })}`, sp, most, `You have ${ex[sp.item] ?? 0} in Exports; your train carries ${cargoFor(party)}.`);
+  if (n === undefined) return fillList(player, party);
+  const out = fillByTrain(player, party, sp, n);
+  if (out.problem) { say(player, `§c${out.problem}`); return fillList(player, party); }
+  sfx(player, "random.orb");
+  const length = lineLength(party, sp.party);
+  say(player, `§6${loadText({ id: sp.item, n: out.n })} are on the line to ${partyName(sp.party)} (about ${minutes(travelTicks(length))}). ${coins(out.paid)} paid to you.`);
+}
+
+async function howMany(player, title, sp, most, note) {
+  if (most < 1) {
+    await new ActionFormData().title(title).body(`You have no ${goodName(sp.item)} to give.\n\n${note}`).button("Back").show(player);
+    return undefined;
+  }
+  if (most === 1) {
+    const one = await new ActionFormData().title(title).body(`Give 1 ${goodName(sp.item, 1)} for ${coins(specialPayFor(sp, 1))}?`).button("§aGive it").button("Back").show(player);
+    return one.canceled || one.selection !== 0 ? undefined : 1;
+  }
+  const res = await new ModalFormData().title(title)
+    .slider(`How many ${goodName(sp.item)}? They pay ${coins(sp.price)} for ${sp.total} (${note})`, 1, most, { valueStep: 1, defaultValue: most })
+    .show(player);
+  if (res.canceled) return undefined;
+  return Math.floor(Number(res.formValues?.[0]) || 0);
+}
+
+// Someone from outside the settlement at its Trade Board: hand over goods for its open Special Offers, in person
+async function visitor(player, party) {
+  const list = specialsOf(party).filter((sp) => sp.left > 0);
+  const who = partyName(party);
+  if (!list.length) {
+    await new ActionFormData().title("Trade Board").body(`${who}'s Trade Board.\n\nThey have no special offers out right now. Their routes and crates are for their own people.\n\n§7To trade with them regularly, propose a route from your own station's Trade Board.`).button("Close").show(player);
+    return;
+  }
+  const form = new ActionFormData().title("Deliver in person").body(`${who} will pay for these goods. Hand them over from your pack and you're paid on the spot; the goods go straight into their Imports.`);
+  for (const sp of list) form.button(`${sp.left} ${goodName(sp.item, sp.left)} wanted\n§8${coins(specialPayFor(sp, sp.left))} · you carry ${countItem(player, sp.item)}`);
+  form.button("Close");
+  const res = await form.show(player);
+  if (res.canceled) return;
+  const sp = list[res.selection];
+  if (!sp) return;
+  const carry = countItem(player, sp.item);
+  const n = await howMany(player, "Deliver in person", sp, Math.min(sp.left, carry), `you carry ${carry}`);
+  if (n === undefined) return visitor(player, party);
+  const out = fillInPerson(player, sp, n);
+  if (out.problem) { say(player, `§c${out.problem}`); return visitor(player, party); }
+  sfx(player, "random.orb");
+  say(player, `§6You hand over ${loadText({ id: sp.item, n: out.n })} to ${who}§6. ${coins(out.paid)} paid to you.`);
 }
 
 // ---------- routes ----------
