@@ -31,13 +31,24 @@ const BUILT = /^minecraft:(?!.*(door|trapdoor|fence_gate|pane|sign|banner|button
 // Things that don't hold anything up and that a falling block passes straight through
 export const PASSABLE = /air$|water|lava|short_grass|tall_grass|^minecraft:fern|large_fern|flower|tulip|poppy|dandelion|orchid|allium|bluet|daisy|cornflower|lily_of|rose_bush|peony|lilac|sunflower|torch|snow_layer|vine|sapling|carpet|rail|button|lever|sign|mushroom$|dead_?bush|seagrass|kelp|cobweb|fire$/;
 
-export function isStructural(typeId) {
-  return CASTLE_BLOCKS.includes(typeId) || GATES.includes(typeId) || BUILT.test(typeId);
+// The add-on's own wall and building blocks (settlement wall planks, palisade, timber, roof shingles)
+const OWN_BUILT = /^siege:(wall_planks|palisade|timber_frame|roof_shingles)/;
+// Blocks that are wall in a settlement but natural rock out in the wild (several wall looks use them)
+export const WALL_OR_ROCK = new Set([
+  "minecraft:tuff", "minecraft:calcite", "minecraft:diorite", "minecraft:andesite", "minecraft:granite",
+  "minecraft:sandstone", "minecraft:red_sandstone", "minecraft:packed_mud", "minecraft:blackstone",
+  "minecraft:gilded_blackstone", "minecraft:stone", "minecraft:spruce_log",
+]);
+
+// inSettlement: the block stands on someone's settlement land (so a tuff wall or a log frame counts, a tuff hill or a wild tree doesn't)
+export function isStructural(typeId, inSettlement = false) {
+  return CASTLE_BLOCKS.includes(typeId) || GATES.includes(typeId) || BUILT.test(typeId) || OWN_BUILT.test(typeId)
+    || (inSettlement && (WALL_OR_ROCK.has(typeId) || /^minecraft:\w+_(log|wood)$/.test(typeId)));
 }
 
 const key = (x, y, z) => `${x},${y},${z}`;
 const pending = new Map(); // dimension id -> [{x, y, z}]
-let hooks = { damageShare: () => 0, tierOf: () => 0, canFall: () => true, onRemoved: () => {}, crushHit: () => {} };
+let hooks = { damageShare: () => 0, tierOf: () => 0, canFall: () => true, onRemoved: () => {}, crushHit: () => {}, inSettlement: () => false };
 
 // walls.js wires this up (damage map, tiers, offline land), so this file never imports walls.js
 export function setCollapseHooks(h) { hooks = { ...hooks, ...h }; }
@@ -84,7 +95,8 @@ function* checkJob(dim, origins) {
     if (++reads % COLLAPSE.readsPerStep === 0) yield;
     let block;
     try { block = dim.getBlock({ x, y, z }); } catch { block = undefined; }
-    if (!block || !isStructural(block.typeId) || UNBREAKABLE.includes(block.typeId)) continue;
+    if (!block || UNBREAKABLE.includes(block.typeId)) continue;
+    if (!isStructural(block.typeId) && !(isStructural(block.typeId, true) && hooks.inSettlement(block))) continue;
     // Out at the edge of what we look at, unloaded, or on an absent owner's land: treat it as solid ground
     if (edge(x, y, z) || !hooks.canFall(block)) continue;
     cells.set(key(x, y, z), {
@@ -105,7 +117,7 @@ function* checkJob(dim, origins) {
   yield;
 
   // 2. Weigh it, before and after the hit
-  const removed = origins.filter((o) => o.typeId && isStructural(o.typeId)).map((o) => ({ x: o.x, y: o.y, z: o.z, gate: GATES.includes(o.typeId) }));
+  const removed = origins.filter((o) => o.typeId && isStructural(o.typeId, true)).map((o) => ({ x: o.x, y: o.y, z: o.z, gate: GATES.includes(o.typeId) }));
   const result = yield* judgeJob(cells, solidBelow, removed);
   yield;
 
@@ -276,7 +288,7 @@ function land(f) {
   for (const c of cells) {
     if (c.y !== bottom) continue;
     const under = readBlock(dim, c.x, c.y - 1, c.z);
-    if (under && isStructural(under.typeId)) hooks.crushHit(under, hitDamage);
+    if (under && isStructural(under.typeId, hooks.inSettlement(under))) hooks.crushHit(under, hitDamage);
   }
   if (f.drop >= 2) {
     try {
@@ -435,5 +447,6 @@ addTests("siege", {
     assert(isStructural("minecraft:stone_bricks") && isStructural("minecraft:cobblestone_wall") && isStructural("minecraft:stripped_oak_log"));
     assert(!isStructural("minecraft:stone") && !isStructural("minecraft:oak_log") && !isStructural("minecraft:dirt") && !isStructural("minecraft:oak_door"));
     assert(!isStructural("minecraft:grass_block") && !isStructural("minecraft:glass_pane"));
+    assert(isStructural("siege:wall_planks_vale") && isStructural("siege:castle_gate"));
   },
 });

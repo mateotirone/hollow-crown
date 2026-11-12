@@ -227,11 +227,18 @@ export function lightCharge(block, facing, blast = BLAST.charge) {
 // Collapse (collapse.js) reads damage, tiers and land rules through these, so it never imports this file
 setCollapseHooks({
   damageShare: (block) => (damageMap()[blockKey(block)] ?? 0) / wallHp(block),
-  tierOf: (block) => armorOf(block),
+  // a block's own reinforcement, or the tier its wall level gives it (wallHp filter), whichever is higher
+  tierOf: (block) => {
+    const hp = wallHp(block);
+    let tier = armorOf(block);
+    for (let i = 0; i < WALL_HP.castle.length; i++) if (hp >= WALL_HP.castle[i]) tier = Math.max(tier, i);
+    return tier;
+  },
   canFall: (block) => offlineSafe(block),
   onRemoved: (c) => {
     const map = damageMap(), k = `${c.x},${c.y},${c.z}`;
     if (map[k] !== undefined) { delete map[k]; saveDamage(); }
   },
   crushHit: (block, amount) => { if (offlineSafe(block)) hitWall(block, amount); },
+  inSettlement: (block) => block.dimension.id === "minecraft:overworld" && !!settlementAt(block.location),
 });
