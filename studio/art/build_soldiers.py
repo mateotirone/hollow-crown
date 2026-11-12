@@ -269,13 +269,7 @@ GEAR = {
             ([9.5, 3, -7], [1, 21, 14], 'shield:tower', {}),
             ([9, 11, -1], [1, 4, 2], 'leather', {}),         # grip strap
         ])],
-    'crossbowman': [
-        ("crossbow", "rightArm", [-6, 13, 0], [
-            ([-6.5, 3, -0.5], [1, 11, 1], 'wood', {}),       # tiller, runs down the forearm and out of the fist
-            ([-12.5, 3, -0.5], [13, 1, 1], 'iron', {}),      # steel prod
-            ([-7, 1, -0.5], [2, 2, 1], 'iron', {}),          # stirrup
-            ([-6.5, 4, -1.5], [1, 8, 1], 'steel_tip', {}),   # bolt in the groove
-        ]),
+    'crossbowman': [   # holds the vanilla crossbow (Mateo 2026-11-12), so only the pavise is modelled
         ("backPavise", "body", [0, 24, 0], [([-4.5, 9, 3.3], [9, 14, 1], 'shield:chevron', {})])],
     'knight': [
         ("lance", "rightArm", [-6, 13, 0], [
@@ -484,7 +478,7 @@ ANIMATE = {
                       {"bash": "variable.attack_time > 0.0"}, HURT],
                      {"carry": "animation.hc.shieldbearer.carry", "stance": "animation.hc.shieldbearer.stance",
                       "bash": "animation.hc.shieldbearer.bash", "raise_shield": "animation.hc.shieldbearer.raise_shield"}),
-    "crossbowman": (["humanoid_base_pose", "look_at_target_default", "hc_march", "hc_idle", "stance", HURT],
+    "crossbowman": (["humanoid_base_pose", "look_at_target_default", "holding", "hc_march", "hc_idle", "stance", HURT],
                     {"stance": "animation.hc.crossbowman.stance", "aim": "animation.hc.crossbowman.aim",
                      "reload": "animation.hc.crossbowman.reload"}),
     "knight": (["humanoid_base_pose", "look_at_target_default", {"hc_march": f"!{RIDING}"}, {"hc_idle": f"!{RIDING}"},
@@ -549,7 +543,9 @@ def starters():
         add_region(data)
         json.dump(data, open(path, 'w'), indent=2); open(path, 'a').write('\n')
         lt = BP + f'loot_tables/entities/siege_{kind}_gear.json'
-        if not os.path.exists(lt):
+        if kind == 'crossbowman':   # the one type that holds a vanilla item
+            json.dump({"pools": [{"rolls": 1, "entries": [{"type": "item", "name": "minecraft:crossbow", "weight": 1}]}]}, open(lt, 'w'), indent=2)
+        elif not os.path.exists(lt):
             json.dump({"pools": []}, open(lt, 'w'), indent=2)
     for kind in ("man_at_arms", "archer"):
         path = BP + f'entities/{kind}.json'; data = json.load(open(path)); add_region(data)
