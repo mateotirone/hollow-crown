@@ -130,7 +130,14 @@ class Citadel:
         for (x, yy, z), (n, q) in self.cone_cache[key].items():
             bn, bq = engine.to_bp(n, q)
             self.bp.cells[(x + cx, yy + y, z + cz)] = (bn, bq)
-        self.set(cx, y + h, cz, "siege:spire_roof")
+        self.spire_on(cx, cz, y)
+
+    def spire_on(self, cx, cz, y0):
+        """The custom spire top sits straight on the roof's top full block (Mateo: never on a slab, it floats)."""
+        top = max(yy for (x, yy, z) in self.bp.cells if x == cx and z == cz and yy >= y0 and self.bp.cells[(x, yy, z)][0] not in ("air", "keep"))
+        while top > y0 and (self.bp.cells[(cx, top, cz)][0].endswith("_slab") or self.bp.cells[(cx, top, cz)][0] == "siege:spire_roof"):
+            del self.bp.cells[(cx, top, cz)]; top -= 1
+        self.set(cx, top + 1, cz, "siege:spire_roof")
 
     # ---- round tower ---------------------------------------------------------------------------------
     def tower(self, cx, cz, r, h, walks=(), door=None, roof=True, name="tower"):
