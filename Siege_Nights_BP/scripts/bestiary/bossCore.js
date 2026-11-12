@@ -393,6 +393,7 @@ function bossTick() {
       }
     }
     safely(f, () => creativeChase(f, players));
+    safely(f, () => helpersChase(f, players));
     for (const t of tempersOf(f)) if (t.act && !f.paused && f.tick % t.every < STEP) safely(f, () => temperAct(f, players, t));
     safely(f, () => f.def.tick?.(f, players));
   }
@@ -437,6 +438,38 @@ function creativeChase(f, players) {
     to = { ...to, y };
   }
   e.teleport(to, { facingLocation: p.location });
+}
+
+// The same for a boss's helpers (Mateo 2026-11-12 boss walkthrough: in Creative every "kill the helpers" phase stood
+// still, because Minecraft's AI ignores Creative players). Anything the fight summoned that walks or flies (not bells,
+// pillars, Singers or a frozen suit) closes in on the nearest Creative player and shows the hit it would have landed.
+// Stops as soon as anyone in Survival or Adventure is in the arena. Their own AI then does the work.
+const STILL_FAMILIES = ["boss", "boss_prop", "projectile"];
+export const HELPER_REACH = 2.2;
+export const helperChases = (family, speed, frozen) => !STILL_FAMILIES.includes(family) && speed > 0 && !frozen;
+function helpersChase(f, players) {
+  if (!players.length || !players.every(isCreative)) return;
+  for (const e of f.adds()) {
+    try {
+      const speed = e.getComponent("movement")?.currentValue ?? 0;
+      const frozen = (e.getEffect?.("slowness")?.amplifier ?? 0) >= 200;
+      if (!helperChases(MOBS[e.typeId]?.family, speed, frozen)) continue;
+      if (e.target?.isValid) continue; // it has someone real to fight (a guard)
+      const loc = e.location;
+      const p = players.reduce((a, b) => (flat(b.location, loc) < flat(a.location, loc) ? b : a));
+      if (flat(p.location, loc) <= HELPER_REACH && Math.abs(p.location.y - loc.y) < 3) {
+        if (f.tick % 20 < STEP) hurt(p, 4, "entityAttack", e);
+        continue;
+      }
+      const flying = !!e.getComponent("can_fly");
+      const to = chaseStep(loc, p.location, Math.min(speed, 0.3), HELPER_REACH - 0.4, flying);
+      if (!to) continue;
+      const stand = flying ? to : footingNear(to, blockKind(f.dim), 1, 3); // never through a wall or off a ledge
+      if (stand) e.teleport(stand, { facingLocation: p.location });
+    } catch {
+      // gone
+    }
+  }
 }
 
 // What a temper adds on top of the boss's own attacks
@@ -696,6 +729,13 @@ addTests("bestiary", {
     assertEqual(bells.length, 3);
     for (const b of bells) assert(room(Math.floor(b.x), Math.floor(b.z)), "every bell is inside the chapel");
     assertEqual(floorUnder(dim, { x: 0.5, y: 71, z: 0.5 }).y, 64, "a boss that drops in from above fights on the floor");
+  },
+  "boss helpers chase Creative playtesters, props stay put": () => {
+    assert(helperChases("wild_hostile", 0.3, false) && helperChases(undefined, 0.25, false), "wolves and vanilla mobs (the drowned, Echoes) chase");
+    assert(helperChases("champion", 0.3, false), "the old court's fighters chase");
+    assert(!helperChases("boss_prop", 0, false) && !helperChases("boss_prop", 0.3, false), "bells and pillars never move");
+    assert(!helperChases("raider", 0.3, true), "a frozen suit stays frozen");
+    assert(!helperChases("projectile", 0.5, false), "a thrown cog flies on its own");
   },
   "boss phases follow health": () => {
     assertEqual(phaseFor(1, [0.6, 0.3]), 0);
