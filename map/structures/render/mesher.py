@@ -1,3 +1,4 @@
+import math
 """Turn a logical blueprint (bp.Blueprint.save_logical) into textured meshes for the
 preview renderer, using Mojang's own Bedrock block textures.
 
@@ -179,6 +180,8 @@ def base_material(n):
     if n == "normal_stone": return "stone"
     if n == "smooth_stone": return "stone_slab_top"
     if n in MAT: return MAT[n]
+    if n.endswith("_wool"): return "wool_colored_" + n[:-5].replace("light_gray", "silver")      # wool and concrete stairs/slabs (2026 drop)
+    if n.endswith("_concrete"): return "concrete_" + n[:-9].replace("light_gray", "silver")
     w = wood_of(n)
     if w: return "planks_" + WOODS[w]
     return None
@@ -198,6 +201,7 @@ def cube_tex(n, p):
     simple = {"pumpkin": {"top": "pumpkin_top", "side": "pumpkin_side"},
               "grass_block": {"top": "grass_top#grass", "bottom": "dirt", "side": "grass_side_carried"},
               "podzol": {"top": "dirt_podzol_top", "bottom": "dirt", "side": "dirt_podzol_side"},
+              "bone_block": {"top": "bone_block_top", "bottom": "bone_block_top", "side": "bone_block_side"},
               "ochre_froglight": {"top": "ochre_froglight_top", "bottom": "ochre_froglight_top", "side": "ochre_froglight_side"},
               "verdant_froglight": {"top": "verdant_froglight_top", "bottom": "verdant_froglight_top", "side": "verdant_froglight_side"},
               "mangrove_roots": {"top": "mangrove_roots_top", "side": "mangrove_roots_side"},
@@ -252,7 +256,7 @@ def cull_group(n):
     if n == "water": return "water"
     return None
 
-PLANTS = {"poppy": "flower_rose", "dandelion": "flower_dandelion", "cornflower": "flower_cornflower", "oxeye_daisy": "flower_oxeye_daisy",
+PLANTS = {"poppy": "flower_rose", "blue_orchid": "flower_blue_orchid", "brown_mushroom": "mushroom_brown", "dandelion": "flower_dandelion", "cornflower": "flower_cornflower", "oxeye_daisy": "flower_oxeye_daisy",
           "azure_bluet": "flower_houstonia", "allium": "flower_allium", "red_tulip": "flower_tulip_red", "white_tulip": "flower_tulip_white",
           "pink_tulip": "flower_tulip_pink", "orange_tulip": "flower_tulip_orange", "lily_of_the_valley": "flower_lily_of_the_valley",
           "short_grass": "tallgrass#grass", "fern": "fern#grass", "sweet_berry_bush": "sweet_berry_bush_stage3",
@@ -283,8 +287,38 @@ def stair_boxes(p):
 def thin_plate(side, t=3 / 16):
     return {"n": (0, 0, 0, 1, 1, t), "s": (0, 0, 1 - t, 1, 1, 1), "e": (1 - t, 0, 0, 1, 1, 1), "w": (0, 0, 0, t, 1, 1)}[side]
 
+_TDX = [0, 1, 1, 1, 0, -1, -1, -1]; _TDZ = [-1, -1, 0, 1, 1, 1, 0, -1]
+def _track_links(kind, d):
+    if kind == 0: return d, d + 4
+    if kind == 1: return d, (d + 3) % 8
+    if kind == 2: return d, (d + 2) % 8
+    return d, d + 4 if d < 4 else d - 4
+def track_preview(kind, d):
+    """siege:track drawn with small upright boxes (the renderer has no rotated cubes): two iron rails and spruce
+    sleepers along the centreline from one link's edge through the middle to the other's, so diagonals and bends
+    read as smooth 45-degree track instead of a staircase."""
+    a, b = _track_links(int(kind), int(d) % 8)
+    ends = [(0.5 + _TDX[a] * 0.5, 0.5 + _TDZ[a] * 0.5), (0.5, 0.5), (0.5 + _TDX[b] * 0.5, 0.5 + _TDZ[b] * 0.5)]
+    out = []; R, T = {"side": "iron_block"}, {"side": "planks_spruce"}
+    for (x0, z0), (x1, z1) in zip(ends, ends[1:]):
+        L = math.hypot(x1 - x0, z1 - z0) or 1; tx, tz = (x1 - x0) / L, (z1 - z0) / L; nx, nz = -tz, tx
+        k = 0
+        while k * 0.16 <= L:
+            cx, cz = x0 + tx * k * 0.16, z0 + tz * k * 0.16
+            if k % 2 == 0:                                   # a sleeper across the line
+                for s in (-0.36, -0.12, 0.12, 0.36):
+                    px, pz = cx + nx * s, cz + nz * s
+                    out.append(((max(0, px - 0.07), 0, max(0, pz - 0.07), min(1, px + 0.07), 1 / 16, min(1, pz + 0.07)), T, {}))
+            for s in (-0.25, 0.25):                          # the rails
+                px, pz = cx + nx * s, cz + nz * s
+                out.append(((max(0, px - 0.05), 1 / 16, max(0, pz - 0.05), min(1, px + 0.05), 3 / 16, min(1, pz + 0.05)), R, {}))
+            k += 1
+    return out
+
 def model(n, p):
     """-> list of (box, texdict, flags)."""
+    if n.startswith("minecraft:"): n = n[10:]          # tree stamps carry full ids
+    if n == "siege:track_preview": return track_preview(p.get("kind", 0), p.get("dir", 0))
     if is_stairs(n): t = {"side": base_material(n)}; return [(b, t, {}) for b in stair_boxes(p)]
     if is_slab(n):
         t = {"side": base_material(n)}
@@ -329,6 +363,10 @@ def model(n, p):
         t = {"side": f"{n}@0,2,6,9", "top": f"{n}@0,9,6,15", "bottom": f"{n}@0,9,6,15"}
         return [((5 / 16, y0, 5 / 16, 11 / 16, y0 + 7 / 16, 11 / 16), t, {"cut": 1, "glow": 1}),
                 ((6 / 16, y0 + 7 / 16, 6 / 16, 10 / 16, y0 + 9 / 16, 10 / 16), t, {"cut": 1, "glow": 1})]
+    if n == "candle" or n.endswith("_candle"):     # one to four little wax sticks (interiors: altars, tables)
+        t = {"side": "candles/" + (n if n != "candle" else "candle") + "_lit@0,8,2,14", "top": "candles/" + (n if n != "candle" else "candle") + "_lit@0,6,2,8"}
+        spots = [(7, 7), (5, 8), (9, 6), (8, 10)][: int(p.get("candles", 1))]
+        return [(((sx) / 16, 0, (sz) / 16, (sx + 2) / 16, 6 / 16, (sz + 2) / 16), t, {"glow": 1}) for sx, sz in spots]
     if n == "flower_pot":
         t = {"side": "flower_pot@5,10,11,16", "top": "dirt"}
         return [((5 / 16, 0, 5 / 16, 11 / 16, 6 / 16, 11 / 16), t, {})] + ([("cross", {"side": PLANTS[p["plant"]]}, {"cut": 1, "scale": 0.7, "y": 4 / 16})] if p.get("plant") else [])

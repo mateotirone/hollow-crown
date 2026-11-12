@@ -236,12 +236,12 @@ export const ENTRIES = [
   },
   {
     id: "guards", ch: "keep", title: "Guards and the Barracks",
-    tip: "Bring an unemployed villager to your Barracks and click it: hire a Man-at-Arms or an Archer for 40 Regals.",
-    page: "Build a §fBarracks§r, bring an unemployed villager to it and click it. Its menu hires a §fMan-at-Arms§r or an §fArcher§r for 40 Regals, and shows the guard list.\n\n"
-      + "Sneak + click a guard to pick them up and put them anywhere on your land. Off duty, Archers stay exactly where you set them and Men-at-Arms wait at the Barracks and charge out when raiders come. Better: give them a post (see §fGuard posts§r).\n\n"
-      + "§fArmour:§r click a guard holding the next upgrade: 6 iron ingots, then 12 iron ingots, then 4 diamonds, then a netherite ingot. Clicking with anything else opens the guard's orders.\n\n"
+    tip: "Click your Barracks and choose Train soldiers.",
+    page: "Build a §fBarracks§r and click it. §fTrain soldiers§r lists every type you have unlocked with how many you have, your cap and the price: pick how many, see the total, press Train, and they come out one after another. §fUpgrade the Barracks§r (to level 5) makes every price 8% cheaper per level and trains faster.\n\n"
+      + "Sneak + click a guard to pick them up and put them anywhere on your land. Off duty, Archers stay exactly where you set them. Men-at-Arms stroll round the Barracks yard and sometimes the town by day, sleep inside the Barracks at night, and turn out at once when raiders come. Better: give them a post (see §fGuard posts§r).\n\n"
+      + "§fArmour:§r click a guard holding the next upgrade: 6 iron ingots, then 12 iron ingots, then 4 diamonds, then a netherite ingot. Clicking with anything else opens the guard's orders. The Barracks §fArmoury§r upgrades a whole type at once (the same materials for each soldier), and those trained later wear it too.\n\n"
       + "§fWanted:§r anyone who attacks you or your guards on your land, lights a charge or rams your walls is Wanted there for 5 minutes, and your guards hunt them.\n\n"
-      + "A Hamlet keeps 4 guards, a Town 8, a City 12. Fallen guards are gone for good.",
+      + "A Hamlet keeps 4 guards, a Town 8, a City 12. A fallen guard goes back to the Barracks and retrains by himself: half his price comes out of your Regals and goes to whoever killed him. If you can't pay, he is lost.",
     when: ["carry:siege:barracks", "click:siege:barracks"],
   },
   {
@@ -292,8 +292,19 @@ export const ENTRIES = [
     tip: "Traders buy what their trade needs. Each has only so much appetite a day, and pays less once they've had plenty.",
     page: "Every town has traders: a farmer, woodcutter, quarryman, smith, fisher, hunter, herbalist and the Moneyer, and a Guild Factor with orders. Click one to sell to them or buy from them.\n\n"
       + "Prices differ from region to region. Each trader only wants so much a day: past that they pay less, and in the end they stop buying until tomorrow.\n\n"
-      + "§fThe Moneyer§r buys iron ingots and emeralds. He takes every iron ingot you bring at full price, with no daily limit (iron golems never appear, so iron only comes from mining). He also trades metal up one step: 4 iron for a gold ingot, 8 gold for a diamond, 6 diamonds for a netherite scrap. It is dear, but anything can always be bought. Each region's Smith sells that region's Castle Guard armour.",
+      + "§fThe Moneyer§r buys iron ingots and emeralds. He takes every iron ingot you bring at full price, with no daily limit (iron golems never appear, so iron only comes from mining). He also trades metal up one step: 4 iron for a gold ingot, 8 gold for a diamond, 6 diamonds for a netherite scrap. It is dear, but anything can always be bought. Each region's Smith sells that region's Castle Guard armour, and reforges any armour you bring in that region's style.",
     when: ["talk:tag:siege_job"],
+  },
+
+  {
+    id: "regional_armour", ch: "coin", title: "Regional armour",
+    tip: "This armour is cut in a region's style. Any Smith can reforge your armour in his own region's look.",
+    page: "Every region dresses its armour its own way: plain bright iron and a red surcoat in the Vale, blued steel and fur in Frostmarch, salt-bleached steel and sea-glass in Saltreach, smoke-dark steel and a face veil in the Emberwaste, blackened lamellar and a hood in Blackfen.\n\n"
+      + "Iron, chainmail, diamond and netherite all come in every region's look. A regional piece protects exactly as much as the plain one: only the look changes.\n\n"
+      + "§fAt a Smith:§r choose Reforge armour, and he reforges any piece you wear or carry in his region's style for a few Regals. It keeps its enchantments, its wear and its name. Armour trims come off in the forge.\n\n"
+      + "§fAt a Workshop:§r the plain piece and that region's Castle Stone make a new regional piece (the Vale uses plain Castle Stone).\n\n"
+      + "Upgrading regional diamond to netherite at a smithing table keeps the region.",
+    when: ["iron", "chainmail", "diamond", "netherite", "choirsteel"].flatMap((m) => ["vale", "frostmarch", "saltreach", "emberwaste", "blackfen"].map((r) => `carry:siege:${m}_${r}_*`)),
   },
 
   // ---------------- Roads, rails and horses ----------------
@@ -558,9 +569,22 @@ export const ENTRIES = [
   {
     id: "vault_break", ch: "growth", title: "Breaking into a vault",
     tip: "A Vault Breaker. Set it right against a Vault Lock.",
-    page: "Thieves break in with a §fVault Breaker§r (made at the Siege Workshop) set right against the lock: it chews through it, faster the better the breaker and slower the stronger the vault, and only while you are online. You are told the moment one starts. When the lock gives, the door falls with it. Mend a cracked lock or door by clicking it with the vault's material (planks, iron, diamond, netherite, Choirsteel); if the door falls, rebuild it from the Vault menu.\n\n"
+    page: "Thieves break in with a §fVault Breaker§r (made at the Siege Workshop) set right against the lock: it chews through it, faster the better the breaker and slower the stronger the vault, and only while you are online (or in a War Writ siege). You are told the moment one starts. When the lock gives, the door falls with it. Mend a cracked lock or door by clicking it with the vault's material (planks, iron, diamond, netherite, Choirsteel); if the door falls, rebuild it from the Vault menu.\n\n"
       + "Stay away a full real day while your vault holds a relic (or you carry one) and it §flies open§r: twice a day, at random times, for half an hour, anyone may break in without you. Everyone is told when it opens. While a window is open your walls can be breached as if you were here, but they, your vault and Keep take twice the blows and your guards fight harder. The rest of the time an away settlement stays untouchable. Log in, even for a moment, and the day starts again.",
     when: ["carry:siege:vault_breaker_iron", "carry:siege:vault_breaker_diamond", "carry:siege:vault_breaker_netherite", "event:vaultDrilled", "event:vaultWindow"],
+  },
+  {
+    id: "warwrit", ch: "keep", title: "War Writs",
+    tip: "Click another settlement's Keep Banner to declare war on it, or send a demand.",
+    page: "To besiege another player, click their §fKeep Banner§r and choose §fDeclare war§r. Grounds: they hold a relic, attacked your settlement in the last few days, refused your demand, or are an §fOathbreaker§r. A War Writ costs 320 Regals and the whole server is told.\n\n"
+      + "§fNo grounds?§r You can still declare, but it is an unjust war: it costs three times as much, their defences are twice as strong, and you are an Oathbreaker for three days, whom anyone may declare war on.\n\n"
+      + "§fYour army:§r when you declare, a slider picks how much of your army rides with you (none, a quarter, half, three quarters or all); the rest guard home. They follow you on horseback until the siege ends, round water by the nearest bridge, get off their horses near the enemy and gather at their gate. Siege crews bring their own engines: trebuchets widen one hole by their vault, rams take the gate, Sappers plant charges.\n"
+      + "§fMuster:§r their gates shut at once. The assault comes at the next nightfall, at least three minutes away.\n"
+      + "§fAssault:§r one night, to dawn, whether or not they are online. Their walls, vault and Regal Safe can be broken, and their guards go for you. Their Keep Banner can't be taken.\n"
+      + "§fWinning:§r crack their vault before dawn and you win; the vault stays open to you until dawn. If dawn comes first, they win. Either way the win counts towards growing your settlement, and there is peace between you for three days.\n\n"
+      + "§fSend a demand§r asks them for a tenth of their Regals. If they pay, there is peace. If they refuse, or say nothing for a real day, you have grounds.\n\n"
+      + "If war is declared on you, answer demands and see every siege from your own Keep Banner menu.",
+    when: ["event:writDeclared", "event:demandSent"],
   },
   {
     id: "vault_safe", ch: "growth", title: "The Regal Safe",

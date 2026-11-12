@@ -64,7 +64,9 @@ function stopWalking(guard, w, arrived) {
 
 // Send a guard walking to dest ({ x, y, z } = the middle of the block it stands on, feet height; yaw = facing on
 // arrival). The caller has already set its post (siege:post) to dest. Returns false if it was put there at once.
-export function walkTo(guard, owner, dest, { salute = false, done } = {}) {
+// noJump (soldiers at war, warwrit/army.js): never put it there by teleport. With no slot free it doesn't start,
+// and stuck or far it just stops where it is.
+export function walkTo(guard, owner, dest, { salute = false, done, noJump = false } = {}) {
   const old = walkers.get(guard.id);
   if (old) stopWalking(guard, old, false);
   const loc = guard.location;
@@ -72,7 +74,8 @@ export function walkTo(guard, owner, dest, { salute = false, done } = {}) {
   if (d <= WALK.arrive + 0.5) { setOn(guard, dest); done?.(true); return false; }
   const slot = slotOwner.indexOf(null);
   const besieged = sieged(owner);
-  if (slot < 0 || (besieged && d > WALK.far)) {
+  if (noJump && slot < 0) return false;
+  if (slot < 0 || (besieged && d > WALK.far && !noJump)) {
     setOn(guard, dest);
     if (salute) try { guard.playAnimation("animation.hc.guard.salute", { blendOutTime: 0.3 }); } catch { /* fine */ }
     done?.(true);
@@ -86,7 +89,7 @@ export function walkTo(guard, owner, dest, { salute = false, done } = {}) {
     setOn(guard, dest); done?.(true); return false;
   }
   slotOwner[slot] = guard.id;
-  walkers.set(guard.id, { owner, dest, slot, marker: marker.id, best: d, bestTick: system.currentTick, paused: false, calmAt: 0, salute, done });
+  walkers.set(guard.id, { owner, dest, slot, marker: marker.id, best: d, bestTick: system.currentTick, paused: false, calmAt: 0, salute, done, noJump });
   guard.setDynamicProperty("siege:walking", 1);
   guard.triggerEvent(`siege:walk_${slot}`);
   return true;
@@ -128,7 +131,7 @@ function step(id, w) {
   const d = Math.hypot(loc.x - w.dest.x, loc.z - w.dest.z);
   if (d <= WALK.arrive && Math.abs(loc.y - w.dest.y) < 2.5) return stopWalking(guard, w, true);
   const besieged = sieged(w.owner);
-  if (besieged && d > WALK.far) return stopWalking(guard, w, true);
+  if (besieged && d > WALK.far && !w.noJump) return stopWalking(guard, w, true);
   // trouble on the way: fight first, then walk on
   if (enemyNear(guard, w.owner)) {
     w.calmAt = now + WALK.calm * 20;
@@ -143,7 +146,7 @@ function step(id, w) {
   }
   if (besieged || underAttack(w.owner)) try { guard.addEffect("speed", WALK.every + 10, { amplifier: 1, showParticles: false }); } catch { /* fine */ }
   if (d < w.best - 1) { w.best = d; w.bestTick = now; }
-  else if (now - w.bestTick > WALK.stuck * 20) return stopWalking(guard, w, true);
+  else if (now - w.bestTick > WALK.stuck * 20) return stopWalking(guard, w, !w.noJump);
   // keep the marker ahead, on the ground
   const p = leadPoint(loc, w.dest);
   let y = w.dest.y;

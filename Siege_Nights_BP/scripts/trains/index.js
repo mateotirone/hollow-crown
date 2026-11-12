@@ -11,12 +11,13 @@ import { world, system, GameMode } from "@minecraft/server";
 import { onTick, isReady, moduleStore, settlementAt, keepOf, on, emit, COLORS } from "../siege/api.js";
 import { styleOf } from "../settle/plans.js";
 import { shapeOf, layTrack, cursorOn, advance, back, pointAt, flip } from "./track.js";
-import { throwFor } from "./switches.js";
+import { throwFor, routeAround } from "./switches.js";
 import { openAhead, watchCars } from "./gates.js";
-import { TRACK, TRAIN, CARS, TRAIN_STYLES, NO_COLOR, carPoses, trainLength, stepSpeed, moveTrain, limitAhead, shapesForLoop, showcaseLoop } from "./data.js";
+import { TRACK, TRAIN, CARS, TRAIN_STYLES, NO_COLOR, carPoses, trainLength, stepSpeed, moveTrain, limitAhead, blocksUnder, clearAhead, speedForGap, shapesForLoop, showcaseLoop } from "./data.js";
 import { give } from "../horses/menus.js";
 import { sfx } from "../core/sfx.js";
 import "./tests.js";
+import "./no_hollow.js";
 
 // trains: [{ id, dim, head: cursor, v, style, cars: [{ kind, eid }] }]
 // unlocked: { [playerId]: { engine?: true, coach?: true } }: who has owned an engine or coach once (built or bought),
@@ -270,9 +271,27 @@ function throttleOf(driver) {
 }
 
 let ticks = 0;
+// The track blocks every other train in this dimension stands on (worked out once a tick, on first ask)
+let underNow = new Map();
+function takenBy(trainId, dimId) {
+  const out = new Set();
+  for (const [id, u] of underNow) if (id !== trainId && u.dim === dimId) for (const k of u.blocks) out.add(k);
+  return out;
+}
+
 function runTick() {
   ticks++;
   let moved = false;
+  underNow = new Map();
+  if (trains().length > 1) {
+    for (const t of trains()) {
+      try {
+        underNow.set(t.id, { dim: t.dim, blocks: blocksUnder(t.head, t.cars, reader(world.getDimension(t.dim))) });
+      } catch {
+        // not loaded: it holds nothing this tick
+      }
+    }
+  }
   for (const train of trains()) {
     let dim;
     try {
@@ -292,10 +311,33 @@ function runTick() {
     const here = get(train.head.x, train.head.y, train.head.z);
     const downhill = here?.kind === 3 ? (here.up === train.head.to ? -1 : 1) : 0; // in the train's forward direction
     const look = (train.v * train.v) / (2 * TRAIN.brake) + 2;
-    const limit = Math.min(train.v > 0 ? limitAhead(train.head, look, get) : Infinity, train.maxV ?? Infinity);
+    let limit = Math.min(train.v > 0 ? limitAhead(train.head, look, get) : Infinity, train.maxV ?? Infinity);
     const before = train.v;
+    // another train on the track ahead: slow down and stop short of it (never run into it)
+    const heading = train.v !== 0 ? Math.sign(train.v) : throttle < 0 ? -1 : 1;
+    const taken = takenBy(train.id, dim.id);
+    let gap = Infinity;
+    if (taken.size) {
+      try {
+        const leadNow = heading > 0 ? train.head : flip(back(train.head, trainLength(train.cars), get).cursor);
+        gap = clearAhead(leadNow, look + TRAIN.keepApart + 2, get, taken);
+        // a passing loop before it with a clear way through: take the loop
+        if (gap !== Infinity && (ticks + train.id) % 5 === 0 && routeAround(dim, leadNow, get, taken)) {
+          get = reader(dim);
+          gap = clearAhead(leadNow, look + TRAIN.keepApart + 2, get, taken);
+        }
+      } catch {
+        gap = Infinity;
+      }
+      limit = Math.min(limit, speedForGap(gap));
+      if (gap <= TRAIN.keepApart && Math.sign(throttle) === heading) throttle = 0;
+    }
     // nobody driving: the brakes go on and it stays put
     train.v = driver ? stepSpeed(train.v, throttle, { downhill, limit }) : Math.sign(train.v) * Math.max(0, Math.abs(train.v) - TRAIN.brake);
+    if (gap <= TRAIN.keepApart && Math.sign(train.v) === heading) {
+      train.v = 0;
+      if (driver && before !== 0) say(driver, "§7A train is on the line ahead.");
+    }
     if (train.v === 0 && before === 0) continue;
     // a switch just ahead of the leading end: set it so the train runs through
     const lead = train.v >= 0 ? train.head : flip(back(train.head, trainLength(train.cars), get).cursor);

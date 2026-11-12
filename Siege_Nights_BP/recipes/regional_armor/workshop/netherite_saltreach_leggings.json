@@ -1,0 +1,25 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shapeless": {
+    "description": {
+      "identifier": "siege:netherite_saltreach_leggings_recipe"
+    },
+    "tags": [
+      "siege_workshop"
+    ],
+    "ingredients": [
+      {
+        "item": "minecraft:netherite_leggings"
+      },
+      {
+        "item": "siege:castle_stone_saltreach"
+      }
+    ],
+    "result": {
+      "item": "siege:netherite_saltreach_leggings"
+    },
+    "unlock": {
+      "context": "AlwaysUnlocked"
+    }
+  }
+}

@@ -106,7 +106,13 @@ class Town:
         n0, n1 = self.G0.shape
         ii, jj = np.meshgrid(np.arange(n0) + self.X0, np.arange(n1) + self.Z0, indexing="ij")
         self.D = np.hypot(ii - self.C[0], jj - self.C[1])
-        self.IN = self.D <= self.R
+        # the town's edge is not a circle: it wanders in and out by up to `wobble` of the radius (out by at most
+        # 9, the slice ends 20 past R), so fields and verges close on an organic line. E is distance scaled to that edge.
+        self.wob = random.Random(seed * 7919 + 13); w = float(site.get("wobble", 0.12))
+        self.wave = [(k, self.wob.uniform(0.4, 1.0) / k ** 0.7, self.wob.uniform(0, 2 * math.pi)) for k in (2, 3, 4, 5, 7)]
+        tot = sum(a for _, a, _ in self.wave) or 1; self.wave = [(k, a / tot, ph) for k, a, ph in self.wave]; self.wobw = w
+        self.E = self.D * self.R / self.edge_r(np.arctan2(jj - self.C[1], ii - self.C[0])) if w else self.D
+        self.IN = self.E <= self.R
         self.Gs = self._blur(self.G0.astype(np.float32), 3)    # smoothed ground for path costs and heights
         self.G = self.G0.copy()                                 # graded ground (top block y)
         self.K = np.full(self.G0.shape, -1, np.int32)           # path surface in half blocks (slab at (k-1)//2 when odd)
@@ -128,7 +134,14 @@ class Town:
         return (c[k:, k:] - c[:-k, k:] - c[k:, :-k] + c[:-k, :-k]) / (k * k)
     def ij(self, x, z): return x - self.X0, z - self.Z0
     def ok(self, x, z): i, j = self.ij(x, z); return 0 <= i < self.G0.shape[0] and 0 <= j < self.G0.shape[1]
-    def inside(self, x, z, m=0): return self.ok(x, z) and (x - self.C[0]) ** 2 + (z - self.C[1]) ** 2 <= (self.R - m) ** 2
+    def edge_r(self, ang):
+        """Radius of the town's edge at angle ang (radians): R * (1 +- wobble), never more than R + 9."""
+        f = sum(a * np.sin(k * ang + ph) for k, a, ph in self.wave)
+        return np.minimum(self.R * (1 + self.wobw * f), self.R + 9)
+    def inside(self, x, z, m=0):
+        if not self.ok(x, z): return False
+        d = math.hypot(x - self.C[0], z - self.C[1])
+        return d <= (self.edge_r(math.atan2(z - self.C[1], x - self.C[0])) if self.wobw else self.R) - m
     def at(self, A, x, z): i, j = self.ij(x, z); return A[i, j]
     def u(self, x, z): return math.hypot(x - self.sq[0], z - self.sq[1]) / self.R
 
@@ -170,6 +183,7 @@ class Town:
         if not gset: return None
         gx = np.mean([g[0] for g in gi]); gz = np.mean([g[1] for g in gi])
         SLOPE = 14.0 if kind == "main" else 10.0
+        xc = getattr(self, "XCOST", None)             # extra cost per cell (e.g. a railway: streets cross it, never run along it)
         while pq:
             _, d, i, j = heapq.heappop(pq)
             if (i, j) in gset:
@@ -187,7 +201,8 @@ class Town:
                 if self.WET[a, b]: c += 40 * w
                 if self.KIND[a, b]: c *= 0.35
                 elif near is not None and near[a, b]: c += 2.5 * w
-                if self.D[a, b] > self.R - 3: c += 4
+                if self.E[a, b] > self.R - 3: c += 4
+                if xc is not None: c += xc[a, b] * w
                 nd = d + c
                 if nd < dist.get((a, b), 1e18):
                     dist[(a, b)] = nd; prev[(a, b)] = (i, j)
@@ -403,7 +418,7 @@ class Town:
         if best: return best
         (lx, _, lz), (hx, _, hz) = bp.bounds(); return (lx + hx) // 2, hz + 1
 
-    def walk_cells(self, start, f, maxlen=6):
+    def walk_cells(self, start, f, maxlen=10):
         """Cells from the door step forward (direction f) until a path is reached."""
         out = []; x, z = start
         for _ in range(maxlen):
@@ -412,6 +427,12 @@ class Town:
                 return out, (x, z)
             out.append((x, z)); x, z = x + f[0], z + f[1]
         return None
+
+    LANDING = 4          # Mateo 2026-11-12: 4 flat blocks in front of every front door, level with the floor,
+                         # then graded off; a door never opens onto a drop (the house turns round instead)
+    LANDING_FILL = 4     # the landing is built up by at most this much (then banked off); more means a cliff
+    def landing_cells(self, door_xz, f):
+        return [(door_xz[0] + f[0] * t - f[1] * s, door_xz[1] + f[1] * t + f[0] * s) for t in range(self.LANDING) for s in (-1, 0, 1)]
 
     FLOOR_HIGHEST = True
     ROAD_FIT = 2         # half blocks: no path beside a plot is more than a block above its floor,
@@ -468,13 +489,36 @@ class Town:
             if yf < hs.min() - 2 or yf > hs.max() + 2: continue
             cost = float(np.abs(hs - yf).sum()) + 0.6 * float(np.maximum(0, yf - hs).sum())   # fill shows; cutting is tidier
             if need_walk:
-                n = len(cells); dk = abs(2 * yf + 1 - k_road)
-                if dk > 2 * n + 2: continue          # too steep even with stairs
+                n = max(0, len(cells) - self.LANDING); dk = abs(2 * yf + 1 - k_road)   # the landing is flat: only the rest climbs
+                if dk > 2 * n + 1: continue          # too steep even with stairs
                 cost += 6 * max(0, dk - n - 1)        # half steps are free; whole steps (stairs) cost a bit
             if best is None or cost < best[0]: best = (cost, yf)
         if best is None: return None
         yf = best[1]
+        # the landing: level with the floor (built up to LANDING_FILL, cut a block at most), paths on it level with the door
+        # (it ends where it meets a street, which must then be level with the door, a slab step at most)
+        f = ROT[deg]; gs = set(G); walk = set(cells) if need_walk else set(); land = []
+        for t in range(self.LANDING):
+            cx, cz = door_xz[0] + f[0] * t, door_xz[1] + f[1] * t
+            if not self.ok(cx, cz): return None
+            ci, cj = self.ij(cx, cz)
+            if self.K[ci, cj] >= 0 and (cx, cz) not in walk:
+                if abs(int(self.K[ci, cj]) - (2 * yf + 1)) > 2: return None
+                break
+            land += [c for c in ((cx - f[1] * s, cz + f[0] * s) for s in (-1, 0, 1)) if c not in gs]
+        for x, z in land:
+            if not self.ok(x, z): return None
+            i, j = self.ij(x, z)
+            if self.WET[i, j]: return None
+            if self.K[i, j] >= 0: continue                     # a street beside the landing keeps its own height
+            if self.TAKEN[i, j] >= 2 or not (yf - self.LANDING_FILL <= self.G[i, j] <= yf + 1): return None
         # commit
+        for x, z in land:
+            i, j = self.ij(x, z)
+            if self.K[i, j] < 0 and (x, z) not in walk:
+                g0 = int(self.G[i, j])
+                for y in range(yf + 1, max(g0, yf) + 1): self.works.setdefault((x, y, z), ("air", {}))
+                self.G[i, j] = yf; self.FIX[i, j] = True; self.TAKEN[i, j] = max(self.TAKEN[i, j], 1)
         for x, z in F:
             i, j = self.ij(x, z); self.EAVES[i, j] = True
             if self.TAKEN[i, j] < 2: self.TAKEN[i, j] = max(self.TAKEN[i, j], 1)
@@ -532,10 +576,10 @@ class Town:
         (slab, block, slab) to the street; a stair where it has to climb faster."""
         n = len(cells); k0 = 2 * yf + 1; ks = []
         if n == 0: return
-        for t in range(n):
-            target = k0 + (k_road - k0) * (t + 1) / (n + 1)
-            ks.append(int(round(target)))
-        ks[0] = k0 if abs(k_road - k0) <= n else ks[0]
+        flat = min(n, self.LANDING); m = n - flat                 # the landing stays level with the door
+        ks = [k0] * flat
+        for t in range(m):
+            ks.append(int(round(k0 + (k_road - k0) * (t + 1) / (m + 1))))
         for (x, z), k in zip(cells, ks):
             i, j = self.ij(x, z)
             self.K[i, j] = k; self.KIND[i, j] = PRIO["walk"]; self.TAKEN[i, j] = max(self.TAKEN[i, j], 1); self.DOORWALK[i, j] = True
@@ -598,7 +642,29 @@ class Town:
                     done = self.try_place(bp, deg, (int(round(x)), int(round(z))), "civic", gap=1, max_relief=6)
                     if done: done["name"] = name; break
                 if done: break
-            if not done: print("no room on the square for", name)
+            if not done: done = self.civic_on_street(bp, name)
+            if not done: print("no room for", name)
+
+    def civic_on_street(self, bp, name):
+        """Civic buildings that don't fit round the square front the main streets, nearest the square first."""
+        cands = []
+        for rd in self.roads:
+            if rd["kind"] not in ("main", "lane"): continue
+            pts = rd["pts"]; hw = WIDTH[rd["kind"]] / 2.0
+            for t in range(3, len(pts) - 3):
+                x, z = pts[t]; (x0, z0), (x1, z1) = pts[t - 3], pts[t + 3]
+                tx, tz = x1 - x0, z1 - z0; d = math.hypot(tx, tz) or 1; tx, tz = tx / d, tz / d
+                for side in (1, -1):
+                    nx, nz = -tz * side, tx * side
+                    for sb in (1, 2, 3):
+                        door = (int(round(x + nx * (hw + 0.5 + sb))), int(round(z + nz * (hw + 0.5 + sb))))
+                        cands.append((math.hypot(door[0] - self.sq[0], door[1] - self.sq[1]), door, snap_rot(-nx, -nz)))
+        cands.sort()
+        for dist, door, deg in cands:
+            if dist > 0.7 * self.R: break
+            e = self.try_place(bp, deg, door, "civic", gap=1, max_relief=6)
+            if e: e["name"] = name; return e
+        return None
 
     def houses(self):
         def tier(x, z):
@@ -616,7 +682,7 @@ class Town:
         self.place_along(sqrd, -1, lambda x, z: 0, setbacks=(1, 2), gap_rng=(0, 1))
         for rd in [r for r in self.roads if r["kind"] == "main"] + [r for r in self.roads if r["kind"] == "lane"]:
             for side in (1, -1):
-                self.place_along(rd, side, tier, setbacks=(1, 2, 3), gap_rng=(1, 2) if rd["kind"] == "main" else (1, 3),
+                self.place_along(rd, side, tier, setbacks=(1, 2, 3, 5, 6, 7), gap_rng=(1, 2) if rd["kind"] == "main" else (1, 3),
                                  kinds=None)
 
     # =========================================================================== 5. windmills, fields
@@ -631,7 +697,7 @@ class Town:
         each one: a build portion (plots round its edge, free ground in the middle) or a field
         portion (crops on every block). Near the square and small portions build; big ones
         further out farm."""
-        land = self.IN & (self.D <= getattr(self, 'LAND_R', self.R - 4)) & (self.K < 0) & ~self.WET & (self.TAKEN < 2)      # streets end 3 in from the edge: the edge closes the portions
+        land = self.IN & (self.E <= getattr(self, 'LAND_R', self.R - 4)) & (self.K < 0) & ~self.WET & (self.TAKEN < 2)      # streets end 3 in from the edge: the edge closes the portions
         lab = np.zeros(self.G.shape, np.int32); n = 0
         for i, j in np.argwhere(land):
             if lab[i, j]: continue
@@ -743,7 +809,7 @@ class Town:
         levelling). Water then goes into the ground one level at a time: for each height, water
         blocks at that height are added until every crop at that height is within 4 blocks
         (a 9 x 9 square) of one. Water never sits beside a lower block, where it would spill."""
-        self.FIELD = (self.PKIND == 2) & (self.D <= getattr(self, 'LAND_R', self.R - 4)) & (self.K < 0) & (self.TAKEN == 0) & ~self.WET & self.IN
+        self.FIELD = (self.PKIND == 2) & (self.E <= getattr(self, 'LAND_R', self.R - 4)) & (self.K < 0) & (self.TAKEN == 0) & ~self.WET & self.IN
         F = self.FIELD
         # crop patches: a few seeds per portion, nearest seed decides the crop
         crop_of = np.full(self.G.shape, -1, np.int8)
@@ -884,7 +950,7 @@ class Town:
         import place as TP
         hard = self.EAVES | (self.TAKEN == 2) | ~self.IN
         if getattr(self, "RES", None) is not None: hard = hard | self.RES        # reserved corridors (rail): no crowns over them
-        soft = (self.K >= 0) | (self.TAKEN >= 3) | self.WET | (self.D > self.R - 4)
+        soft = (self.K >= 0) | (self.TAKEN >= 3) | self.WET | (self.E > self.R - 4)
         sp = {k: w for k, w in self.TOWN_TREES.get(self.site.get("region", "vale"), self.TOWN_TREES["vale"]).items() if k in self.tree_index["species"]}
         dens = 26 * (self.R / 70) ** 2 / soft.size
         for i, j, f, prof in TP.scatter(self.tree_index, sp, hard, soft, density=dens, seed=self.seed, tries=40000):
@@ -1100,6 +1166,48 @@ class Town:
         print(self.name, dict(c), "portions", collections.Counter(p["kind"] for p in self.port.values()), "water", getattr(self, "nwater", 0), "dry", getattr(self, "unwatered", 0), "roofs", getattr(self, "roof_counts", {}), "fields", self.nparcel, "streets", collections.Counter(r["kind"] for r in self.roads), "groundwork", len(self.works))
 
     # =========================================================================== output
+    def write_worldblocks(self, out):
+        """The whole town as world blocks for genworld (format hollow-crown-worldblocks/1, as map/bake_town.py
+        writes for Kingsrest): groundwork first (streets, levelled plots, foundations, fields), then every
+        building, fixture and tree turned and placed. Tree leaves are soft (they only fill air)."""
+        pal, idx, rows = [], {}, []
+        def pid(name, states, soft=False):
+            key = json.dumps([name, states, soft], sort_keys=True)
+            if key not in idx:
+                idx[key] = len(pal); e = {"name": name, "states": states}
+                if soft: e["soft"] = True
+                pal.append(e)
+            return idx[key]
+        ground = Blueprint(self.key + "_groundwork")
+        for (x, y, z), (n, p) in self.works.items(): ground.set(x, y, z, n, **p)
+        ground.finish()
+        solid = set()
+        for (x, y, z), (n, p) in sorted(ground.cells.items(), key=lambda c: (c[0][1], c[0][0], c[0][2])):
+            rows.append([x, y, z, pid(*ground.to_bedrock(n, p))])
+            if n != "air": solid.add((x, y, z))
+        n_ground = len(rows); seats = []
+        for e in self.plan:
+            if e.get("db_stamp"):
+                st = json.load(open(os.path.join(self.tree_dir, e["db_stamp"] + ".stamp.json"))); seats.append([e["x"], e["z"], e["ground_y"]])
+                ox, _oy, oz = st["origin"]
+                for x, y, z, i in st["blocks"]:
+                    q = st["palette"][i]
+                    rows.append([e["x"] + x + ox, e["ground_y"] + y, e["z"] + z + oz, pid(q["name"], q.get("states") or {}, "leaves" in q["name"])])
+                continue
+            bp = self.designs[e["stamp"]].rotated(e["rotation"]) if e["rotation"] else self.designs[e["stamp"]]
+            bp.finish()
+            for (x, y, z), (n, p) in bp.cells.items():
+                if n == "keep": continue
+                X, Y, Z = x + e["x"], y + e["ground_y"], z + e["z"]
+                if y < 0 and (X, Y, Z) in solid and e["kind"] != "square": continue
+                rows.append([X, Y, Z, pid(*bp.to_bedrock(n, p))])
+        d = {"format": "hollow-crown-worldblocks/1", "town": self.name,
+             "note": "world coordinates, placed in order; soft entries only fill air; the first groundwork_blocks are the "
+                     "groundwork (streets, plots, fields), which the map grades the land to",
+             "groundwork_blocks": n_ground, "tree_seats": seats, "palette": pal, "blocks": rows}
+        with open(os.path.join(out, f"{self.key}-blocks.json"), "w") as fh: json.dump(d, fh, separators=(",", ":"), default=int)
+        return len(rows)
+
     def write(self, out):
         os.makedirs(os.path.join(out, "stamps"), exist_ok=True)
         db = {e["stamp"] for e in self.plan if e.get("db_stamp")}            # tree database stamps live in map/trees' output
@@ -1151,10 +1259,12 @@ class Town:
         img.save(os.path.join(out, f"{self.key}-plan.png"))
 
     def scene(self, out):
-        s = Blueprint(f"{self.key}_scene"); R = self.R + 5
+        s = Blueprint(f"{self.key}_scene"); R = self.R + 20
         for x in range(self.C[0] - R, self.C[0] + R + 1):
             for z in range(self.C[1] - R, self.C[1] + R + 1):
-                if (x - self.C[0]) ** 2 + (z - self.C[1]) ** 2 > R * R or not self.ok(x, z): continue
+                if not self.ok(x, z): continue
+                # the preview shows the land round the town out to a ragged edge, not a cut-out disc
+                if self.E[self.ij(x, z)] > self.R + 8 + 6 * h3(x // 4, 0, z // 4, 5) + 3 * h3(x, 1, z, 6): continue
                 i, j = self.ij(x, z); g = int(self.G[i, j])
                 if self.K[i, j] >= 0: g = (int(self.K[i, j]) - 1) // 2 - 1
                 low = g
@@ -1209,6 +1319,7 @@ def main():
         Town.tree_index = json.load(open(a.trees)); Town.tree_dir = os.path.dirname(os.path.abspath(a.trees)); Town.tree_src = os.path.abspath(a.trees_src)
     t = Town(name, site, T, L, seed); t.run()
     os.makedirs(a.out, exist_ok=True); t.write(a.out); t.picture(a.out)
+    print("world blocks", t.write_worldblocks(a.out))
     print("scene blocks", t.scene(a.out))
     if a.render:
         subprocess.run([sys.executable, os.path.join(HERE, "render", "render.py"), os.path.join(a.out, "scene.json"), a.out,

@@ -113,6 +113,13 @@ export const pieces = (seg) => {
   return seg.blocks.map(([x, y, z, kind, dir], i) => ({ x, y, z, kind, dir, works: custom(i) }));
 };
 
+// Works apply in order, so the last one covering a cell decides it: true when that is air
+function airOver(seg, x, y, z) {
+  let last;
+  for (const w of seg.works) if (w[0] === x && w[1] === z && y >= w[2] && y <= w[3]) last = w[4];
+  return last === 0;
+}
+
 // Check a route map for mistakes: returns a list of problems (empty when it's fine)
 export function checkRoutes(data) {
   const problems = [];
@@ -137,6 +144,22 @@ export function checkRoutes(data) {
     }
     for (const b of seg.blocks ?? []) {
       if (b.length !== 5 || b[3] < 0 || b[3] > 3 || b[4] < 0 || b[4] > 7) { problems.push(`segment ${seg.id} has a bad block ${JSON.stringify(b)}`); break; }
+    }
+    // a solid work in a track block's own cell would leave a gap: the bed never builds over a solid block
+    if (seg.works?.length && seg.blocks?.length) {
+      const cols = new Map();
+      for (const w of seg.works) if (w[4] !== 0) (cols.get(`${w[0]},${w[1]}`) ?? cols.set(`${w[0]},${w[1]}`, []).get(`${w[0]},${w[1]}`)).push(w);
+      const hits = seg.blocks.filter(([x, y, z]) => (cols.get(`${x},${z}`) ?? []).some((w) => y >= w[2] && y <= w[3]));
+      if (hits.length) problems.push(`segment ${seg.id}: works fill ${hits.length} track cell(s), first at ${hits[0].slice(0, 3).join(" ")}`);
+      // nor may the works stand in the train's body: one cell each side across the line, 4 high (engine 3.1 x 3.8)
+      const own = new Set(seg.blocks.map(([x, y, z]) => `${x},${y},${z}`));
+      const solidAt = (x, y, z) => !own.has(`${x},${y},${z}`) && (cols.get(`${x},${z}`) ?? []).reduce((v, w) => (y >= w[2] && y <= w[3] ? true : v), false) && !airOver(seg, x, y, z);
+      let side = 0, first;
+      for (const [x, y, z, kind, dir] of seg.blocks) {
+        const offs = kind === 2 || kind === 1 || (kind === 0 && dir % 2 === 1) ? [[1, 0], [-1, 0], [0, 1], [0, -1]] : (kind === 0 ? dir % 4 === 0 : dir % 2 === 0) ? [[1, 0], [-1, 0]] : [[0, 1], [0, -1]];
+        for (const [dx, dz] of [[0, 0], ...offs]) for (let dy = 0; dy < 4; dy++) if (solidAt(x + dx, y + dy, z + dz)) { side++; first ??= [x + dx, y + dy, z + dz]; }
+      }
+      if (side) problems.push(`segment ${seg.id}: works stand in the train's body at ${side} place(s), first at ${first.join(" ")}`);
     }
   }
   return problems;

@@ -4,7 +4,27 @@
     "description": {
       "identifier": "siege:archer",
       "is_spawnable": false,
-      "is_summonable": true
+      "is_summonable": true,
+      "properties": {
+        "siege:region": {
+          "type": "int",
+          "range": [
+            0,
+            5
+          ],
+          "default": 0,
+          "client_sync": true
+        },
+        "siege:tier": {
+          "type": "int",
+          "range": [
+            0,
+            4
+          ],
+          "default": 0,
+          "client_sync": true
+        }
+      }
     },
     "component_groups": {
       "siege:c0": {
@@ -770,7 +790,8 @@
       "minecraft:navigation.walk": {
         "can_open_doors": true,
         "avoid_damage_blocks": true,
-        "can_path_over_water": false
+        "can_path_over_water": false,
+        "avoid_water": true
       },
       "minecraft:jump.static": {},
       "minecraft:can_climb": {},
@@ -827,6 +848,118 @@
                   "test": "has_tag",
                   "subject": "other",
                   "value": "siege_wanted"
+                },
+                {
+                  "all_of": [
+                    {
+                      "test": "has_tag",
+                      "subject": "self",
+                      "value": "siege_w0_a"
+                    },
+                    {
+                      "test": "has_tag",
+                      "subject": "other",
+                      "value": "siege_w0_b"
+                    }
+                  ]
+                },
+                {
+                  "all_of": [
+                    {
+                      "test": "has_tag",
+                      "subject": "self",
+                      "value": "siege_w0_b"
+                    },
+                    {
+                      "test": "has_tag",
+                      "subject": "other",
+                      "value": "siege_w0_a"
+                    }
+                  ]
+                },
+                {
+                  "all_of": [
+                    {
+                      "test": "has_tag",
+                      "subject": "self",
+                      "value": "siege_w1_a"
+                    },
+                    {
+                      "test": "has_tag",
+                      "subject": "other",
+                      "value": "siege_w1_b"
+                    }
+                  ]
+                },
+                {
+                  "all_of": [
+                    {
+                      "test": "has_tag",
+                      "subject": "self",
+                      "value": "siege_w1_b"
+                    },
+                    {
+                      "test": "has_tag",
+                      "subject": "other",
+                      "value": "siege_w1_a"
+                    }
+                  ]
+                },
+                {
+                  "all_of": [
+                    {
+                      "test": "has_tag",
+                      "subject": "self",
+                      "value": "siege_w2_a"
+                    },
+                    {
+                      "test": "has_tag",
+                      "subject": "other",
+                      "value": "siege_w2_b"
+                    }
+                  ]
+                },
+                {
+                  "all_of": [
+                    {
+                      "test": "has_tag",
+                      "subject": "self",
+                      "value": "siege_w2_b"
+                    },
+                    {
+                      "test": "has_tag",
+                      "subject": "other",
+                      "value": "siege_w2_a"
+                    }
+                  ]
+                },
+                {
+                  "all_of": [
+                    {
+                      "test": "has_tag",
+                      "subject": "self",
+                      "value": "siege_w3_a"
+                    },
+                    {
+                      "test": "has_tag",
+                      "subject": "other",
+                      "value": "siege_w3_b"
+                    }
+                  ]
+                },
+                {
+                  "all_of": [
+                    {
+                      "test": "has_tag",
+                      "subject": "self",
+                      "value": "siege_w3_b"
+                    },
+                    {
+                      "test": "has_tag",
+                      "subject": "other",
+                      "value": "siege_w3_a"
+                    }
+                  ]
                 }
               ]
             },
@@ -1312,6 +1445,78 @@
         }
       },
       "siege:pick_up": {},
+      "siege:fight": {
+        "remove": {
+          "component_groups": [
+            "siege:walk_0",
+            "siege:walk_1",
+            "siege:walk_2",
+            "siege:walk_3",
+            "siege:walk_4",
+            "siege:walk_5",
+            "siege:walk_6",
+            "siege:walk_7",
+            "siege:walk_8",
+            "siege:walk_9",
+            "siege:walk_10",
+            "siege:walk_11",
+            "siege:walk_12",
+            "siege:walk_13",
+            "siege:walk_14",
+            "siege:walk_15",
+            "siege:walk_16",
+            "siege:walk_17",
+            "siege:walk_18",
+            "siege:walk_19",
+            "siege:walk_20",
+            "siege:walk_21",
+            "siege:walk_22",
+            "siege:walk_23"
+          ]
+        },
+        "add": {
+          "component_groups": [
+            "siege:fight"
+          ]
+        }
+      },
+      "minecraft:entity_spawned": {
+        "add": {
+          "component_groups": [
+            "siege:fight"
+          ]
+        }
+      },
+      "siege:region_0": {
+        "set_property": {
+          "siege:region": 0
+        }
+      },
+      "siege:region_1": {
+        "set_property": {
+          "siege:region": 1
+        }
+      },
+      "siege:region_2": {
+        "set_property": {
+          "siege:region": 2
+        }
+      },
+      "siege:region_3": {
+        "set_property": {
+          "siege:region": 3
+        }
+      },
+      "siege:region_4": {
+        "set_property": {
+          "siege:region": 4
+        }
+      },
+      "siege:region_5": {
+        "set_property": {
+          "siege:region": 5
+        }
+      },
       "siege:walk_0": {
         "remove": {
           "component_groups": [
@@ -2152,46 +2357,29 @@
           ]
         }
       },
-      "siege:fight": {
-        "remove": {
-          "component_groups": [
-            "siege:walk_0",
-            "siege:walk_1",
-            "siege:walk_2",
-            "siege:walk_3",
-            "siege:walk_4",
-            "siege:walk_5",
-            "siege:walk_6",
-            "siege:walk_7",
-            "siege:walk_8",
-            "siege:walk_9",
-            "siege:walk_10",
-            "siege:walk_11",
-            "siege:walk_12",
-            "siege:walk_13",
-            "siege:walk_14",
-            "siege:walk_15",
-            "siege:walk_16",
-            "siege:walk_17",
-            "siege:walk_18",
-            "siege:walk_19",
-            "siege:walk_20",
-            "siege:walk_21",
-            "siege:walk_22",
-            "siege:walk_23"
-          ]
-        },
-        "add": {
-          "component_groups": [
-            "siege:fight"
-          ]
+      "siege:tier_0": {
+        "set_property": {
+          "siege:tier": 0
         }
       },
-      "minecraft:entity_spawned": {
-        "add": {
-          "component_groups": [
-            "siege:fight"
-          ]
+      "siege:tier_1": {
+        "set_property": {
+          "siege:tier": 1
+        }
+      },
+      "siege:tier_2": {
+        "set_property": {
+          "siege:tier": 2
+        }
+      },
+      "siege:tier_3": {
+        "set_property": {
+          "siege:tier": 3
+        }
+      },
+      "siege:tier_4": {
+        "set_property": {
+          "siege:tier": 4
         }
       }
     }
