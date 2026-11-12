@@ -695,3 +695,12 @@ Tell me about: marks too small to see, names hidden behind other marks, or the s
 4. ✅ It is finished in about 15 seconds and the Hall Cornerstone is gone. Just inside the front door, to one side of the aisle, stands the Town Board (a wide notice board with pinned papers, labelled when you are near). Clicking it opens the Town Hall menu. Check all five styles: `/scriptevent siege:townhall_build 3 frostmarch` and so on.
    - A hall built before this update gets its Town Board the next time the world loads or you open the Town Hall from the Keep menu.
 5. Town Hall menu → "Move the town hall" → "Move it". ✅ You get a Hall Cornerstone back, the Tree sleeps, and placing the stone elsewhere starts a new hall. Placing a second cornerstone while a hall stands is refused with a message.
+
+## Townsfolk (scripts/townsfolk/)
+
+On the map world (map mode), in Creative:
+1. Walk into Kingsrest by day. Within a few seconds 20 people should be out on the streets, each strolling a few blocks round their own spot. Check none stand inside a building or on a roof.
+2. Click one. They stop, turn to you, gesture, and a line appears in chat as `Name (Trade): ...`. Click four more times: five different lines, then the first again.
+3. `/scriptevent siege:townsfolk` lists the towns and how many are out. `here` brings the nearest town's folk out now (also at night), `home` sends them in, `heard` resets which lines you have heard.
+4. Hit one: no damage. Set the time to night and walk 25+ blocks away: they go indoors. Set it to day: they come back.
+5. After the town layout changes (a new `map/<town>-blocks.json`), run `python3 tools/townsfolk_spots.py` and commit `scripts/townsfolk/spots_data.js`.

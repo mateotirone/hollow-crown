@@ -431,6 +431,13 @@ export const ENTRIES = [
       + "Click a portrait or painting to read about it. Every settlement's Library has portraits of the people who led it before you.",
     when: ["talk:tag:siege_lore_npc_*", "talk:siege:portrait"],
   },
+  {
+    id: "town_folk_streets", ch: "lore", title: "People in the streets",
+    tip: "Townsfolk have five things to say each. Click again to hear the next.",
+    page: "The people walking the streets of Kingsrest and the other towns will stop and talk if you click them. Each one has five things to say, and you hear them in order: click again for the next.\n\n"
+      + "Some of it is gossip, some of it is nonsense, and some of it is worth remembering. They go indoors at night and are back in the morning.",
+    when: ["talk:siege:townsfolk"],
+  },
 
   // ---------------- The wild ----------------
   {
