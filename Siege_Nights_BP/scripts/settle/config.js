@@ -175,6 +175,9 @@ export const CHARTERS = [
 // tall: blocks of height above the floor. Checked in this order, so the most particular comes first.
 export const CONTENTS = [
   { id: "library", need: { books: 8 }, roofed: 0.6, says: "8 bookshelves under a roof" },
+  { id: "inn", need: { bed: 3, storage: 2 }, roofed: 0.7, says: "3 beds and 2 chests or barrels under a roof" },
+  { id: "farmhouse", need: { composter: 1, farmland: 9 }, roofed: 0.3, says: "a composter, 9 farmland and a roof" },
+  { id: "mint", need: { storage: 2, anvil: 1 }, roofed: 0.6, says: "2 chests or barrels and an anvil (or smithing table) under a roof" },
   { id: "smithy", need: { anvil: 1, furnace: 1 }, roofed: 0.3, says: "an anvil (or smithing table) and a furnace" },
   { id: "stable", need: { hay: 1, fence: 6 }, roofed: 0.3, says: "a hay bale and stalls (6 fences or gates)" },
   { id: "storehouse", need: { storage: 6 }, roofed: 0.6, says: "6 chests or barrels under a roof" },
@@ -188,8 +191,11 @@ export const BLOCK_GROUPS = {
   books: /bookshelf$/, anvil: /(anvil|smithing_table)$/, furnace: /(^minecraft:furnace|blast_furnace|lit_furnace)$/,
   hay: /hay_block$/, fence: /(fence|fence_gate)$/, storage: /(:chest|barrel|trapped_chest)$/, farmland: /farmland$/,
   water: /^minecraft:(flowing_)?water$/, counter: /(slab|stairs|trapdoor)$/, ladder: /ladder$/, wall: /(_wall|fence)$/,
-  bed: /(^minecraft:|_)bed$/, door: /(?<!trap)door$/,
+  composter: /composter$/, bed: /(^minecraft:|_)bed$/, door: /(?<!trap)door$/,
 };
+
+// Names for buildings that can be built by hand but have no ready-made design yet
+export const HAND_NAMES = { farmhouse: "Farmhouse", mint: "Mint", inn: "Inn" };
 
 // Beds: a bed counts only inside a home (a cottage, raised or registered), at most one per this many covered
 // floor blocks. Every settler needs a bed, worker or not.

@@ -509,3 +509,14 @@ addTests("settle census", {
     assert(!matches(tally(hut())).some((m) => m.ok && m.id !== "well"), "an empty hut is nothing");
   },
 });
+
+addTests("settle census", {
+  "an inn, a farmhouse and a mint can be built by hand"() {
+    const beds = [0, 2, 4].map((x) => ({ x: 1 + x, y: 1, z: 2, id: "minecraft:bed", head: true }));
+    const chests = [{ x: 2, y: 1, z: 5, id: "minecraft:chest" }, { x: 3, y: 1, z: 5, id: "minecraft:barrel" }];
+    assert(matches(tally(hut([...beds, ...chests]))).find((m) => m.id === "inn").ok, "inn");
+    const farm = [{ x: 1, y: 1, z: 1, id: "minecraft:composter" }, ...Array.from({ length: 9 }, (_, i) => ({ x: 1 + (i % 5), y: 0.5, z: 3 + Math.floor(i / 5), id: "minecraft:farmland" }))];
+    assert(matches(tally(hut(farm))).find((m) => m.id === "farmhouse").ok, "farmhouse");
+    assert(matches(tally(hut([...chests, { x: 4, y: 1, z: 4, id: "minecraft:anvil" }]))).find((m) => m.id === "mint").ok, "mint");
+  },
+});

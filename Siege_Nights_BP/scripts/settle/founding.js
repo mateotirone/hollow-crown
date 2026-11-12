@@ -19,7 +19,7 @@ import { world, system, BlockPermutation } from "@minecraft/server";
 import { isReady, keepOf, on, emit, moduleStore, TIERS, tierOf, getState } from "../siege/api.js";
 import { CORNERSTONE, halls, saveHalls, beginBuild } from "../townhall/townhall.js";
 import { buildFor } from "../townhall/build.js";
-import { REGION_TO_STYLE } from "./config.js";
+import { REGION_TO_STYLE, CONTENTS } from "./config.js";
 import { BENCH, registerBench } from "./mason.js";
 import { styleOf } from "./plans.js";
 import { wallOf, raiseWall, moveWall } from "./walls.js";
@@ -259,7 +259,8 @@ export function foundTown(owner, plot, at, { style, layout } = {}) {
 // ---------- charters ----------
 
 // Every building the game can raise (plot designs and block buildings), for skipping charter lines not built yet
-const KNOWN = new Set([...BUILDINGS.map((b) => b.id), ...Object.keys(BLOCK_BUILDS).map((t) => t.replace(/^siege:/, ""))]);
+// (designs, block buildings, and anything that can be built by hand and registered: config.js CONTENTS)
+const KNOWN = new Set([...BUILDINGS.map((b) => b.id), ...Object.keys(BLOCK_BUILDS).map((t) => t.replace(/^siege:/, "")), ...CONTENTS.map((c) => c.id)]);
 
 // What stands in a town: finished plot buildings plus finished block buildings on its land
 export function builtCounts(owner) {

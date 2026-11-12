@@ -2,7 +2,7 @@
 // them at dawn). At dawn, if a home has a free bed, one newcomer arrives: a finished work building's worker
 // first (Smith, Groom, Trader, ...), then plain settlers for the homes. By day they stand by their work or
 // their door; at dusk they go to bed. A worker whose building is knocked down stays, idle, until it's back.
-// A settler whose bed is gone moves to another free bed, or leaves at the next dawn.
+// A settler whose bed is gone moves to another free bed, or leaves if there is still none a dawn later.
 // Settlers are Bedrock's built-in NPC (minecraft:npc), so they work on a Realm.
 //
 //   settlersOf(owner) -> [{ n, name, role, home, work, bed, idle }]
@@ -129,10 +129,11 @@ function dawn(owner) {
   for (const s of [...list]) {
     const st = town.slots[s.home];
     const still = st && HOMES.includes(st.building) && !st.broken && (st.bedSpots ?? []).some((b) => same(b, s.bed));
-    if (still) continue;
-    s.bed = undefined;
-    const spare = freeBeds(owner)[0];
-    if (spare) { s.home = spare.home; s.bed = spare.bed; continue; }
+    if (still) { delete s.homeless; continue; }
+    const spare = freeBeds(owner).find((b) => !list.some((o) => o !== s && same(o.bed, b.bed)));
+    if (spare) { s.home = spare.home; s.bed = spare.bed; delete s.homeless; continue; }
+    s.homeless = (s.homeless ?? 0) + 1; // one dawn's grace: a bed swapped or a room rebuilt overnight
+    if (s.homeless < 2) continue;
     for (const e of entityOf(dim, s)) e.remove();
     list.splice(list.indexOf(s), 1);
     world.getPlayers().find((p) => p.id === owner)?.sendMessage(`§7${s.name} had no bed and has left the settlement.`);

@@ -11,7 +11,7 @@ import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
 import { isReady, isAlly, on, emit, onTick } from "../siege/api.js";
 import { purse, charge, refund, coins, lot } from "./wallet.js";
 import { STYLES } from "../townhall/styles.js";
-import { SETTLE, TAG_WORDS } from "./config.js";
+import { SETTLE, TAG_WORDS, HAND_NAMES } from "./config.js";
 import { BUILDINGS, BUILDING, drawBuilding } from "./buildings.js";
 import { plotFit, opensAt, slotClass, CLASS_NAMES } from "./charters.js";
 import { drawBox } from "./zones.js";
@@ -107,7 +107,7 @@ function besideDoor(owner, slot) {
 async function openSlot(player, owner, slot) {
   const state = slotState(owner, slot.id);
   const town = townOf(owner);
-  if (state.building && risingAt(state.origin)) return player.onScreenDisplay.setActionBar(`§7The ${BUILDING[state.building].name} is still going up.`);
+  if (state.building && risingAt(state.origin)) return player.onScreenDisplay.setActionBar(`§7The ${nameOf(state.building)} is still going up.`);
   if (state.building) return builtMenu(player, owner, slot, state);
   if (state.pick && system.currentTick - (state.pickedAt ?? 0) <= SETTLE.previewSeconds * 20 && state.by === player.id) return confirm(player, owner, slot, state);
   const size = `${slot.box.x1 - slot.box.x0 + 1} x ${slot.box.z1 - slot.box.z0 + 1}`;
@@ -165,6 +165,8 @@ async function confirm(player, owner, slot, state) {
 }
 
 // A building the player made by hand on an empty plot: check what it holds and count it as that building
+const nameOf = (id) => BUILDING[id]?.name ?? HAND_NAMES[id] ?? id;
+
 async function registerOwn(player, owner, slot) {
   player.sendMessage("§7Looking over the plot...");
   const t = await runScan(owner, slot.id);
@@ -175,14 +177,14 @@ async function registerOwn(player, owner, slot) {
   const all = matches(t);
   const good = all.filter((m) => m.ok && fitsHere(m.id));
   if (!good.length) {
-    const near = all.filter((m) => fitsHere(m.id) && BUILDING[m.id]).sort((a, b) => a.missing.length - b.missing.length).slice(0, 3);
-    const lines = near.map((m) => `§f${BUILDING[m.id].name}§7: needs ${m.says} (${m.missing.join(", ")})`);
+    const near = all.filter((m) => fitsHere(m.id)).sort((a, b) => a.missing.length - b.missing.length).slice(0, 3);
+    const lines = near.map((m) => `§f${nameOf(m.id)}§7: needs ${m.says} (${m.missing.join(", ")})`);
     return player.sendMessage(`§7This doesn't count as a building yet.${lines.length ? "\n" + lines.join("\n") : " Nothing that suits this plot could be found."}`);
   }
   let pick = good[0];
   if (good.length > 1) {
     const form = new ActionFormData().title("What is it?").body("What you built here could count as:");
-    for (const m of good) form.button(BUILDING[m.id]?.name ?? m.id);
+    for (const m of good) form.button(nameOf(m.id));
     const res = await form.show(player);
     if (res.canceled) return;
     pick = good[res.selection];
@@ -195,14 +197,14 @@ async function registerOwn(player, owner, slot) {
   Object.assign(state, { building: pick.id, hand: true, done: true, box, origin: { x: box.x0, y: town.y + slot.dy, z: box.z0 }, by: player.id, pick: undefined, paid: 0 });
   saveTowns();
   sfx(player, "random.levelup");
-  player.sendMessage(`§6Your ${BUILDING[pick.id]?.name ?? pick.id} is counted.§7 Keep what it needs inside, or it stops counting.`);
+  player.sendMessage(`§6Your ${nameOf(pick.id)} is counted.§7 Keep what it needs inside, or it stops counting.`);
   markerBesideDoor(owner, slot, state);
   emit("settleCharter", { owner });
 }
 
 async function builtMenu(player, owner, slot, state) {
   if (state.hand) return handMenu(player, owner, slot, state);
-  const name = BUILDING[state.building]?.name ?? "building";
+  const name = nameOf(state.building);
   if (player.id !== owner) return player.sendMessage(`§7This ${name} stands. Only the town's owner can knock it down.`);
   const back = Math.floor((state.paid ?? 0) / 2);
   const res = await new MessageFormData().title(name)
@@ -214,7 +216,7 @@ async function builtMenu(player, owner, slot, state) {
 
 // Your own build: un-count it (the blocks stay) or check it again
 async function handMenu(player, owner, slot, state) {
-  const name = BUILDING[state.building]?.name ?? "building";
+  const name = nameOf(state.building);
   if (player.id !== owner) return player.sendMessage(`§7This ${name} was built by hand${state.broken ? ", and is missing what it needs" : ""}.`);
   const res = await new ActionFormData().title(name)
     .body(`You built this ${name} yourself.${state.broken ? "\n\n§cIt doesn't count right now:§r something it needs is gone." : ""}`)
@@ -358,7 +360,7 @@ function progress() {
       if (!job?.cells?.length) continue;
       const player = world.getPlayers().find((p) => p.id === (state.by ?? owner));
       if (!player || Math.hypot(player.location.x - state.origin.x, player.location.z - state.origin.z) > 64) continue;
-      player.onScreenDisplay.setActionBar(`§6${BUILDING[state.building]?.name ?? "Building"} rising §f${Math.floor((job.index / job.cells.length) * 100)}%`);
+      player.onScreenDisplay.setActionBar(`§6${nameOf(state.building)} rising §f${Math.floor((job.index / job.cells.length) * 100)}%`);
     }
   }
 }
