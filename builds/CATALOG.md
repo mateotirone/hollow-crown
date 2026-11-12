@@ -4,7 +4,7 @@
 
 Every build in The Hollow Crown, designed or not. Add an entry the moment a build is asked for, even with no design yet, and move its status on as it progresses. Run  node tools/build-catalog.mjs  after editing to rewrite builds/CATALOG.md (check.mjs fails if it is stale).
 
-**96 builds:** 7 not started, 20 designed, 12 in viewer, 57 in game.
+**96 builds:** 5 not started, 22 designed, 10 in viewer, 59 in game.
 
 Statuses:
 
@@ -53,9 +53,9 @@ A ★ marks builds that no earlier list had (added in the 2026-11-12 audit).
 | Well (5) | One version per overworld region | in game | settle-* | Refine every building, region by region | `map/structures/settle_buildings.py` |  |
 | Library (lore shelves) (5) | One version per overworld region | in game | settle-* | Refine every building, region by region | `map/structures/settle_buildings.py` | Raised free on arrival; every settlement town needs its own lore and library. |
 | Kitchen garden (5) | One version per overworld region | in game | settle-* | Refine every building, region by region | `map/structures/settle_buildings.py` |  |
-| ★ Farmhouse (with its field) (5) | One version per overworld region | designed |  | Refine every building, region by region |  | Waiting in PR #168. Needed for the Town charter. Specs for all five regions in PR #168; waits in settle WAITING until layouts make room. |
-| ★ Mint (5) | One version per overworld region | designed |  | Refine every building, region by region |  | Waiting in PR #168. Needed for the Town charter. Specs for all five regions in PR #168. |
-| ★ Settlement inn (5) | One version per overworld region | designed |  | Refine every building, region by region |  | Waiting in PR #168. Needed for the City charter. Specs for all five regions in PR #168. |
+| ★ Farmhouse (with its field) (5) | One version per overworld region | designed | skill-pass | Refine every building, region by region |  | Waiting in PR #168. Needed for the Town charter. Specs for all five regions in PR #168; waits in settle WAITING until layouts make room. In viewer section skill-pass (PR #168). |
+| ★ Mint (5) | One version per overworld region | designed | skill-pass | Refine every building, region by region |  | Waiting in PR #168. Needed for the Town charter. Specs for all five regions in PR #168. In viewer section skill-pass (PR #168); waits in settle/buildings.js WAITING until layouts make room. |
+| ★ Settlement inn (5) | One version per overworld region | designed | skill-pass | Refine every building, region by region |  | Waiting in PR #168. Needed for the City charter. Specs for all five regions in PR #168. In viewer section skill-pass (PR #168); waits in settle/buildings.js WAITING until layouts make room. |
 | Stables levels 1-3 (Stables block) (15) | One version per overworld region | in game | settle-* | Build settlement building and mason shop | `map/structures/settle_buildings.py` |  |
 | Breeder's Yard (Breeder's Post) (5) | One version per overworld region | in game | settle-* | Build settlement building and mason shop | `map/structures/settle_buildings.py` |  |
 | Barracks (guardhouse) (5) | One version per overworld region | in game | settle-* | Build settlement building and mason shop | `map/structures/settle_buildings.py` |  |
@@ -69,7 +69,7 @@ A ★ marks builds that no earlier list had (added in the 2026-11-12 audit).
 | Railway station: Halt, Station, Junction, Grand Station (20) | One version per overworld region | in game | settle-* | Design the train system | `map/structures/stations.py` | Waiting in PR #168. Detailed backs in PR #168. |
 | Trade House wing (small, two storeys) (10) | One version per overworld region | in game | settle-* | Design the train system | `map/structures/stations.py` | To be replaced by the Trade Outpost if Mateo approves that design. |
 | Engine shed (5) | One version per overworld region | in game | settle-* | Design the train system | `map/structures/stations.py` |  |
-| ★ Trade Outpost (halt 7x5, station 9x5, junction 9x7, grand 9x7 two storeys) (20) | One version per overworld region | in viewer | trade_outpost | Design train station trade routes | `map/structures/trade_outpost.py` | Waiting in PR #192. Beside a settlement's station, on its trade_join mark: the Trade Board and the Exports and Imports barrels inside, a striped awning over the loading hatch. Five regions x four station stages, on the building skill. |
+| ★ Trade Outpost (halt 7x5, station 9x5, junction 9x7, grand 9x7 two storeys) (20) | One version per overworld region | in game | trade_outpost | Design train station trade routes | `map/structures/trade_outpost.py` | Beside a settlement's station, on its trade_join mark: the Trade Board and the Exports and Imports barrels inside, a striped awning over the loading hatch. Five regions x four station stages; the game raises it from trade/outpost_data.js (PR #192). |
 | Vault strongrooms, 5 tiers x 3 layouts (15) | Anywhere / region-neutral | in viewer | vault | Design sieges on other settlements | `map/structures/vault_rooms.py` | Waiting in PR #180. In game via PR #180 (all treasury layout until Mateo picks). |
 | ★ Regal Safe (2x2 strongbox) | Anywhere / region-neutral | designed |  | Design sieges on other settlements |  | Waiting in PR #180. Block in PR #180, texture awaiting Mateo's review. |
 | ★ Siege Workshop | Anywhere / region-neutral | in game |  | Design sieges on other settlements | `Siege_Nights_BP/blocks/workshop.json` | A single block today, no building around it. |
@@ -85,8 +85,8 @@ A ★ marks builds that no earlier list had (added in the 2026-11-12 audit).
 | Build | Region | Status | Viewer | Owner thread | Source | Notes |
 |---|---|---|---|---|---|---|
 | The Citadel (one grand layout), Vale style | Aldmere Vale | designed |  | Redesign the Citadel as one grand layout |  | v3 with gardens, keep and tower interiors on branch claude/project-thread-2u2gp5 (no PR yet); hosted viewer https://claude.ai/artifact/DAH2CsQ3d9L88z9uXC39yY . The game still raises the old crown/layout.js Citadel (shown in viewer 'strongholds'). |
-| The Citadel in Frostmarch, Saltreach, Emberwaste and Blackfen styles (4) | One version per overworld region | not started |  | Redesign the Citadel as one grand layout |  | Mateo approved 2026-11-12 ("lets do them all"). Citadel thread, after the Vale version. |
-| ★ The Hollow's stronghold (Citadel layout in the Hollow kit) | The Hollow | not started |  | Redesign the Citadel as one grand layout |  | Mateo approved 2026-11-12 ("lets do them all"). Citadel thread: same layout method, Hollow kit. |
+| The Citadel in Frostmarch, Saltreach, Emberwaste and Blackfen styles (4) | One version per overworld region | designed |  | Redesign the Citadel as one grand layout |  | Frostmarch, Saltreach, Emberwaste, Blackfen styles in citadel.py STYLES on branch claude/project-thread-2u2gp5 (no PR yet); hosted 3D https://claude.ai/artifact/DAH2CsQ3d9L88z9uXC39yY |
+| ★ The Hollow's stronghold (Citadel layout in the Hollow kit) | The Hollow | designed |  | Redesign the Citadel as one grand layout |  | hollow_stronghold.py on branch claude/project-thread-2u2gp5: round plan, leaning towers, light-river moat, the Drum keep. Centrepiece may change (built round the floating Seat?). Hosted 3D https://claude.ai/artifact/DAH2CsQ3d9L88z9uXC39yY |
 
 ## Wonders
 
@@ -108,7 +108,7 @@ A ★ marks builds that no earlier list had (added in the 2026-11-12 audit).
 | Story places: Crownhold, Bellhollow, Ashen Gate chapterhouse, Ashen Watch, Corvin's Tower, Old Mag's hut, Nell Sedge's raft-house, the Deepforge, the Cinder Roost (9) | One version per overworld region | designed | landmarks | Finish the remaining world builds |  | Waiting in PR #164. |
 | Seven thin-place caves with Fennick's camps (7) | One version per overworld region | in game |  | Settle the road to the Rift | `Siege_Nights_BP/scripts/undertow/thinplaces.js` | Script-built and plain; hosted 3D https://claude.ai/artifact/QFoys3C5GaHFXe415EkJjo . Not in the local viewer or on the building skill. |
 | ★ Sealed ways out: the Shut Pass, the Far Shore, the Horizon Isles (3) | Anywhere / region-neutral | not started |  | Finish the remaining world builds |  | Mateo approved 2026-11-12 ("lets do them all"). Being built by the remaining world builds thread. |
-| Gravestone (left where a player dies) | Anywhere / region-neutral | in viewer | graves | Add gravestones when players die | `map/structures/gravestone_build.py` | Waiting in PR #194. 3x3 footprint: clickable headstone, pale moss mound, a candle lit while the grave is sealed, dry grass. The game places it when a player dies. |
+| Gravestone (left where a player dies) | Anywhere / region-neutral | in game | graves | Add gravestones when players die | `map/structures/gravestone_build.py` | 3x3 footprint: clickable headstone, pale moss mound, a candle lit while the grave is sealed, dry grass. The game places it when a player dies. |
 | Dragon nest (9x9, natural, unbreakable) | Anywhere / region-neutral | in game |  | Redesign the dragon nest | `Siege_Nights_BP/scripts/dragons/nestplan.js` |  |
 | Custom trees (31 species, six regions) (31) | One version per overworld region | in game | trees | Build custom tree assets | `map/trees/build_trees.py` |  |
 | Welcome hall: map miniature on its cloud | Anywhere / region-neutral | in game | miniature | Build a scaled-down map in the welcome hall | `map/structures/miniature_scene.py` |  |
