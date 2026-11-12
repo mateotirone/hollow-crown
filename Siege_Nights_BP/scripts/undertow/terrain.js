@@ -64,6 +64,8 @@ const clamp01 = (t) => Math.max(0, Math.min(1, t));
 const inCourt = (x, z) => z >= 1540 && z < 1660;
 const inHeart = (z) => z >= 2330;
 const inSpine = (x) => Math.abs(x) <= L.halfWidth;
+// No spires or pillars crowding the Drowned Court or the Seat's landing: they are meant to be seen from far off.
+const arenaView = (x, z) => Math.hypot(x - COURT.center.x, z - COURT.center.z) < 70 || Math.hypot(x - HEART.center.x, z - HEART.center.z) < 110;
 const nearPath = (x, z, d) => inSpine(x) && Math.abs(x - pathX(z)) <= d;
 
 // ---- open country ----------------------------------------------------------------------
@@ -440,7 +442,7 @@ function planLand(cx, cz) {
       continue;
     }
     const r = hash(x, z, 5);
-    if (r < (spineCol ? (kind === "shallows" ? 0 : 0.006) : SPIRES[kind])) {
+    if (r < (arenaView(x, z) ? 0 : spineCol ? (kind === "shallows" ? 0 : 0.006) : SPIRES[kind])) {
       const tall = 8 + Math.floor(hash(x, z, 6) * 22);
       fill(x, top + 1, z, x, top + tall, z, kind === "mirror" ? B.glass : B.basalt);
     } else if (r < (spineCol ? 0.06 : PLANTS[kind])) {
@@ -651,7 +653,8 @@ function planRoof(ops, cx, cz, col) {
   const pi = 4 + Math.floor(hash(cx, cz, 631) * 8), pj = 4 + Math.floor(hash(cx, cz, 632) * 8);
   const c = col(pi, pj), px = X0 + pi, pz = Z0 + pj;
   if (hash(cx, cz, 633) < 0.05 && c && c.h >= SEA && c.road === undefined && !c.site && c.river > RIVER_HALF_WIDTH + 6
-    && !siteAt(px, pz) && !(inSpine(px) && (pz < 60 || inCourt(px, pz) || nearPath(px, pz, 10)))) {
+    && !siteAt(px, pz) && !(inSpine(px) && (pz < 60 || inCourt(px, pz) || nearPath(px, pz, 10)))
+    && !arenaView(px, pz)) { // keep the arenas' views clear
     const roofY = roofAt(px, pz).bottom;
     for (let a = -2; a <= 2; a++) for (let b = -2; b <= 2; b++) {
       const d = a * a + b * b;
