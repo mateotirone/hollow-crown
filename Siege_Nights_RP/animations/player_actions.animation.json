@@ -6,14 +6,14 @@
       "bones": {
         "waist": {
           "rotation": [
-            "variable.hc_sprint * 9.0 + variable.hc_airb * 4.0 + variable.hc_land * 10.0",
+            "variable.hc_sprint * 9.0 - variable.hc_rise * 6.0 + variable.hc_tuck * 8.0 + variable.hc_land * 10.0",
             "-variable.tcos0 * 0.1",
             0.0
           ]
         },
         "head": {
           "rotation": [
-            "-(variable.hc_sprint * 9.0 + variable.hc_airb * 4.0 + variable.hc_land * 10.0) * 0.8",
+            "-(variable.hc_sprint * 9.0 - variable.hc_rise * 6.0 + variable.hc_tuck * 8.0 + variable.hc_land * 10.0) * 0.8",
             "-(-variable.tcos0 * 0.1)",
             0.0
           ]
@@ -27,28 +27,28 @@
         },
         "rightarm": {
           "rotation": [
-            "(-variable.tcos0 * 0.35 * variable.hc_sprint - variable.hc_airb * (12.0 + variable.hc_fall * 20.0)) * variable.hc_free",
+            "(-variable.tcos0 * 0.35 * variable.hc_sprint - variable.hc_rise * 35.0 + variable.hc_tuck * 10.0 + variable.hc_airb * variable.hc_fall * 30.0) * variable.hc_free",
             0.0,
-            "(variable.hc_sprint * 5.0 + variable.hc_airb * (14.0 + variable.hc_fall * 25.0 + math.sin(query.life_time * 500.0) * variable.hc_fall * 6.0) + variable.hc_land * 8.0) * variable.hc_free"
+            "(variable.hc_sprint * 5.0 + variable.hc_rise * 6.0 + variable.hc_tuck * 22.0 + variable.hc_airb * variable.hc_fall * (35.0 + math.sin(query.life_time * 500.0) * 6.0) + variable.hc_land * 8.0) * variable.hc_free"
           ]
         },
         "leftarm": {
           "rotation": [
-            "(variable.tcos0 * 0.35 * variable.hc_sprint - variable.hc_airb * (12.0 + variable.hc_fall * 20.0)) * variable.hc_free",
+            "(variable.tcos0 * 0.35 * variable.hc_sprint - variable.hc_rise * 35.0 + variable.hc_tuck * 10.0 + variable.hc_airb * variable.hc_fall * 30.0) * variable.hc_free",
             0.0,
-            "-(variable.hc_sprint * 5.0 + variable.hc_airb * (14.0 + variable.hc_fall * 25.0 + math.sin(query.life_time * 500.0) * variable.hc_fall * 6.0) + variable.hc_land * 8.0) * variable.hc_free"
+            "-(variable.hc_sprint * 5.0 + variable.hc_rise * 6.0 + variable.hc_tuck * 22.0 + variable.hc_airb * variable.hc_fall * (35.0 + math.sin(query.life_time * 500.0) * 6.0) + variable.hc_land * 8.0) * variable.hc_free"
           ]
         },
         "rightleg": {
           "rotation": [
-            "variable.tcos0 * 0.3 * variable.hc_sprint - variable.hc_airb * 20.0 * (1.0 - variable.hc_fall * 0.5) - variable.hc_land * 25.0",
+            "variable.tcos0 * 0.3 * variable.hc_sprint + variable.hc_rise * 10.0 - variable.hc_tuck * 50.0 - variable.hc_airb * variable.hc_fall * 10.0 - variable.hc_land * 25.0",
             0.0,
             "variable.hc_airb * variable.hc_fall * 6.0"
           ]
         },
         "leftleg": {
           "rotation": [
-            "-variable.tcos0 * 0.3 * variable.hc_sprint + variable.hc_airb * 12.0 - variable.hc_land * 25.0",
+            "-variable.tcos0 * 0.3 * variable.hc_sprint - variable.hc_rise * 12.0 - variable.hc_tuck * 40.0 + variable.hc_airb * variable.hc_fall * 12.0 - variable.hc_land * 25.0",
             0.0,
             "-variable.hc_airb * variable.hc_fall * 6.0"
           ]
@@ -69,14 +69,14 @@
         },
         "rightshin": {
           "rotation": [
-            "math.max(0.0, variable.tcos0) * (0.9 + variable.hc_sprint * 0.8) + math.min(query.modified_move_speed * 4.0, 1.0) * 8.0 + variable.hc_land * 50.0 + variable.hc_airb * 35.0",
+            "math.max(0.0, variable.tcos0) * (0.9 + variable.hc_sprint * 0.8) + math.min(query.modified_move_speed * 4.0, 1.0) * 8.0 + variable.hc_land * 50.0 + variable.hc_rise * 25.0 + variable.hc_tuck * 75.0 + variable.hc_airb * variable.hc_fall * 30.0",
             0.0,
             0.0
           ]
         },
         "leftshin": {
           "rotation": [
-            "math.max(0.0, -variable.tcos0) * (0.9 + variable.hc_sprint * 0.8) + math.min(query.modified_move_speed * 4.0, 1.0) * 8.0 + variable.hc_land * 50.0 + variable.hc_airb * 18.0",
+            "math.max(0.0, -variable.tcos0) * (0.9 + variable.hc_sprint * 0.8) + math.min(query.modified_move_speed * 4.0, 1.0) * 8.0 + variable.hc_land * 50.0 + variable.hc_rise * 5.0 + variable.hc_tuck * 65.0 + variable.hc_airb * variable.hc_fall * 15.0",
             0.0,
             0.0
           ]
