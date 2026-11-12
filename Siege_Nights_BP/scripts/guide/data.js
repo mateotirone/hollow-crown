@@ -345,6 +345,14 @@ export const ENTRIES = [
     when: ["click:siege:tree_of_oaths"],
   },
   {
+    id: "messenger", ch: "keep", title: "News from home: the Messenger",
+    tip: "Away from home, you hear nothing of attacks on your settlement. The Messenger, on the Tree of Oaths, changes that.",
+    page: "When you are away from your own land, nobody tells you your settlement is being attacked. You find out when you get back: the moment you step onto your land, you hear everything that happened while you were gone.\n\n"
+      + "Get a §fMessenger§r and that changes. Open the Tree of Oaths, choose the §fKeep§r branch and pick §fMessenger§r (first ring, needs a Longhouse). Swear it for §f1 skill point§r, or pay §f100 Regals§r instead. Regals paid stay paid: unbinding your oaths keeps the Messenger and gives no points back for it.\n\n"
+      + "From then on, the moment anyone attacks your settlement (a player hitting your walls, guards or people, raiders marching on your keep, a rival lord's raid, someone breaking into your vault) a messenger rides up wherever you are. They tell you what is happening and which way home lies. If you were offline, a messenger is waiting when you come back.",
+    when: ["click:siege:tree_of_oaths", "event:keepFounded"],
+  },
+  {
     id: "ember", ch: "growth", title: "The pale fire and the two paths",
     tip: "Something fell near your keep. Pick it up and read the Almanac before you use it: what you choose is hard to undo.",
     page: "After your first siege held, a shard of pale fire falls near your keep. It is a choice.\n\n"

@@ -427,9 +427,11 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 |---|---|---|
 | `block.amethyst_block.chime` | 10 | bestiary (4), undertow (4), lore (2) |
 | `item.shield.block` | 4 | bestiary (3), townhall |
+| `mob.horse.gallop` | 4 | townhall (2), horses, roletrials |
 | `armor.equip_leather` | 3 | dragons, horses, looks |
-| `mob.horse.gallop` | 3 | horses, roletrials, townhall |
 | `mob.wolf.howl` | 3 | unlocks (3) |
+| `note.bass` | 3 | townhall (2), dragons |
+| `note.bell` | 3 | rails, roletrials, townhall |
 | `note.flute` | 3 | bestiary, horses, unlocks |
 | `random.eat` | 3 | dragons (2), bestiary |
 | `armor.equip_iron` | 2 | guardposts, horses |
@@ -444,7 +446,6 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `mob.irongolem.throw` | 2 | bestiary (2) |
 | `mob.villager.no` | 2 | bestiary (2) |
 | `mob.witch.celebrate` | 2 | bestiary (2) |
-| `note.bell` | 2 | rails, roletrials |
 | `random.bow` | 2 | bestiary (2) |
 | `random.drink` | 2 | bestiary, roletrials |
 | `tile.piston.in` | 2 | unlocks (2) |
@@ -479,7 +480,6 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `mob.wither.hurt` | 1 | roletrials |
 | `mob.wither.shoot` | 1 | bestiary |
 | `mob.wolf.growl` | 1 | bestiary |
-| `note.bass` | 1 | dragons |
 | `random.door_open` | 1 | siege |
 | `random.fuse` | 1 | siege |
 | `step.stone` | 1 | bestiary |

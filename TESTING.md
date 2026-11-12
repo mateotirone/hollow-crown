@@ -694,3 +694,16 @@ Tell me about: marks too small to see, names hidden behind other marks, or the s
 4. ✅ It is finished in about 15 seconds and the Hall Cornerstone is gone. Just inside the front door, to one side of the aisle, stands the Town Board (a wide notice board with pinned papers, labelled when you are near). Clicking it opens the Town Hall menu. Check all five styles: `/scriptevent siege:townhall_build 3 frostmarch` and so on.
    - A hall built before this update gets its Town Board the next time the world loads or you open the Town Hall from the Keep menu.
 5. Town Hall menu → "Move the town hall" → "Move it". ✅ You get a Hall Cornerstone back, the Tree sleeps, and placing the stone elsewhere starts a new hall. Placing a second cornerstone while a hall stands is refused with a message.
+
+### The Messenger
+You need a settlement (Keep Banner) and a Longhouse or bigger. A second player helps for step 5.
+1. Click the Tree of Oaths → Keep. ✅ "Messenger" sits in the first ring with a sealed-letter icon.
+2. Open it with no skill points and some Regals (in survival). ✅ It offers "Pay 100 Regals"; paying takes the coins and the skill shows 1/1. With a skill point it also offers "Swear this oath". In creative it is free.
+3. Unbind your oaths. ✅ The Messenger stays, and the refund does not count it (if you paid in Regals).
+4. Walk well outside your land and run `/scriptevent siege:messenger_test player`. ✅ The title "Your base is under attack!", a horse gallop and bell, and a chat line from the messenger with which way home lies and how far. Try `raid`, `lord`, `drill`.
+5. Without the Messenger (`/scriptevent siege:townhall_reset` wipes it), stay away and have a friend hit one of your guards. ✅ You hear nothing. Walk back onto your land. ✅ "While you were away:" lists what happened, once.
+6. With the Messenger, have the friend hit your guard while you are away. ✅ The messenger finds you at once; more hits within a minute do not send more messengers.
+7. At home, `/scriptevent siege:messenger_test player`. ✅ A plain red warning line, no messenger.
+
+Tell me about: alerts that come too often or too rarely, and anything the messenger says that reads wrong.
+

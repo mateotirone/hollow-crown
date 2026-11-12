@@ -224,6 +224,7 @@ export function markWanted(player, owner) {
     player.onScreenDisplay.setActionBar(`§cYou are Wanted in ${state.keeps[owner].name}'s settlement! Their guards will attack you.`);
   }
   wanted.set(player.id, { owner, until: system.currentTick + WANTED_TICKS });
+  emit("settlementAttacked", { owner, by: player.id }); // the Messenger (townhall/messenger.js) carries word to the keeper
 }
 
 world.afterEvents.entityHitEntity.subscribe((event) => {

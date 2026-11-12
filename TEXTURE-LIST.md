@@ -480,7 +480,7 @@ The Texture Studio now lists every PNG under `textures/` automatically (catch-al
 
 ## Skill icons (2026-11-10, textures thread)
 Painted by `studio/art/build_skill_icons.py`, which reads the skill ids from `Siege_Nights_BP/scripts/townhall/skills.js` so new skills get an icon on the next run (add a glyph to `PICK` first).
-- `textures/ui/hc/skill/<skill id>.png`: 85 icons, 16x16, one glyph per skill, coloured by branch. Not wired: the tree still shows the node state frames (`node_*.png`); the town hall thread decides how to use them.
+- `textures/ui/hc/skill/<skill id>.png`: 86 icons, 16x16 (keep_messenger, a sealed letter, added 2026-11-12), one glyph per skill, coloured by branch. Not wired: the tree still shows the node state frames (`node_*.png`); the town hall thread decides how to use them.
 - Sheet: `art/skill-icons.png`
 Still stand-ins: 49 skill icons, a left-handed Standing Rank, real models for the three reveal-scene actors.
 
