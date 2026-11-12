@@ -162,6 +162,8 @@ pot on top.
 | `string_course` | `rect`, `y`, `sides`, `material` | upside-down stairs 1 out, corners wrapped with outer-corner stairs (07) |
 | `buttress` | `rect`, `side`, `at` [offsets], `y`, `height`, `depth` | 1 to 2 out at the foot, stepping in with a stair at mid height and a stair cap (02 step 6) |
 | `hanging_lantern` | `at`, `chain` | chain links down to a hanging lantern, from a corner block or bracket (07) |
+| `lean_to` | `rect`, `against` (n/s/e/w), `top`, `pitch` (1 or `"half"`), `y`, `roof`, `post`, `trim`, `floor` | a skillion against a wall: one slope falling away from `against`, starting at `top`, overhang 1 at the low edge and a verge at both ends; tie beam under the low edge, log posts at the ends and every 4, upside-down trim stairs under the overhang, barge boards. Roof gets the two-block texture (06) |
+| `woodpile` | `at`, `len`, `h` (2-3), `facing`, `wood`, `cover` (`slab`/`trapdoor`/`none`) | logs lying with the end grain to `facing`, top row stepped in, about 1 in 5 stripped, a slab or trapdoor cover, a chopping block beside it (07 dressing) |
 
 ## Not automated yet (build with shapes and `place`)
 
