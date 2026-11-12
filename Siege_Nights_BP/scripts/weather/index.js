@@ -1,6 +1,7 @@
 // Weather: each region has its own. Mist on the Blackfen, wind and sea fret on the Saltreach coast,
 // dust and sandstorms in the Emberwaste, flurries and blizzards over the Frostmarch, morning mist in the
-// Vale (which otherwise keeps Minecraft's rain). The Hollow has none: its sky is stone.
+// Vale (which otherwise keeps Minecraft's rain). The Hollow's weather is its own, kept in undertow/index.js:
+// an eternal thunderstorm with no rain (thunder in the roof, now and then a bolt striking the land far off).
 // What each kind is and when it comes: data.js. The rules are pure and tested there.
 //
 // It is all fog, particles and sound, seen by each player for where they stand: nothing is placed in
