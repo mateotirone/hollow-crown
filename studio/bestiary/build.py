@@ -159,6 +159,8 @@ def entity_bp(m):
         c["minecraft:movement.basic"] = {}; c["minecraft:jump.static"] = {}
         c["minecraft:behavior.float"] = {"priority": 0}
         c["minecraft:behavior.random_stroll"] = {"priority": 7, "speed_multiplier": 0.8}
+    if m.get("boss"):   # a boss holds its ground until it has someone to fight: wandering off fought the script that walks it in Creative
+        c.pop("minecraft:behavior.random_stroll", None); c.pop("minecraft:behavior.random_hover", None)
     # who it fights
     filt = None
     if fam in ("raider",) or m.get("raider"): filt = roster.RAIDER_TARGETS
