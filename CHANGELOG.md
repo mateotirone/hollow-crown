@@ -82,6 +82,10 @@ Everything merged to `main` since the last release goes here. Each pull request 
 
 ### Fixed
 - Trains no longer clip bridge-end parapets, abutments or tunnel arch shoulders: every bought stretch keeps a clear opening 3 wide and 4 high along the whole line.
+- Castle Guard armour icons no longer show as an empty slot or a scrap of cloth: every piece shows whole, in your banner colour.
+- 81 blocks that showed a raw code instead of a name (regional Castle Bricks, Tiles, Cobbled, Smooth and Stone, and the old trees) now have proper names.
+- The boss puzzle blocks (the drowned chapel floor and altar, the Hallowmere cairns, the Faceless Vault's stone, busts and seal, the root cradle, Millbrook's stopped clocks and well crank) are repainted to match the rest of the world. Every sign and beast on them is the same shape as before.
+- The four guard armour tiers have their own icons, and the Vault Key has a better one.
 - Stations no longer have floating parts: the Grand Station's glass train shed sits on its beam with no gap and no holes on either side, every hanging lantern in a station hangs from a chain or a block, and the Emberwaste engine shed's smoke stacks stand on the roof.
 - There is no railway in the Hollow: Track, Station Posts, Rail Depots and minecart rails can't be placed there, and the Hollow no longer has its cart rail from Cartmeet to the Seams or rails at the mine mouths.
 - Railway stations: the backs of every station (Halt, Station, Junction and Grand Station, in every region) are no longer bare. They get windows, a back door on the Halt, sills, bands at each floor, planters and lamps, and the Grand Station's centre pavilion gets a tall window, pilasters and a balcony. The Junction's clock tower no longer has an open gap high on its front and back: the bell openings are closed with wooden louvres.
