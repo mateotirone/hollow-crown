@@ -18,6 +18,7 @@ import { footprint } from "../settle/rules.js";
 import { plotAt } from "../plots/claims.js";
 import { addMenuLabel } from "../core/labels.js";
 import { sfx } from "../core/sfx.js";
+import { addFilter } from "../core/events.js";
 import { IRONWORKS_BLOCK, LEVELS, MAX_LEVEL, FUEL, IRONWORKS, tierAtLeast, capOf, produce, lootShare } from "./data.js";
 import { drawIronworks } from "./design.js";
 import "./tests.js";
@@ -197,6 +198,14 @@ world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
     if (player.id !== owner && !isAlly(owner, player.id)) return player.onScreenDisplay.setActionBar("§7Not your Ironworks.");
     menu(player, owner, w).catch((e) => console.warn(`[Hollow Crown] ironworks: ${e}`));
   });
+});
+
+// Guard posts round the Ironworks (guardposts/, Station a guard): door, corners and sides like any building
+addFilter("guardPostSites", (sites, { owner }) => {
+  const w = works()[owner];
+  if (!w?.built) return sites;
+  const box = footprint(w, { x: w.fx, z: w.fz }, planFor(w.built, w.style).bounds());
+  return [...sites, { id: "ironworks", name: LEVELS[w.built].name, box, front: { x: -w.fx || 0, z: -w.fz || 0 }, floor: w.y }];
 });
 
 // ---------- raids ----------
