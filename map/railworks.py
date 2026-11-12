@@ -167,6 +167,9 @@ def segment_works(cells, ys, ground, water, region, log=print):
                     elif top < lo:
                         for y in range(top + 1, lo): W.put(cx, y, cz, "dirt", over=False)
                         W.put(cx, lo, cz, "grass_block", over=False)
+    # the track's own cells and the 3 above stay open: the trains lay track only into air, on the deck below
+    for (x, z), y in zip(cells, ys):
+        for k in range(4): W.put(x, y + k, z, "air")
     cols, pal = W.columns()
     return cols, pal, sorted(custom)
 
@@ -186,6 +189,8 @@ def _selftest():
     # the bore is clear 4 high over the bed inside the tunnel
     air = {(x, y, z) for x, z, y0, y1, i in cols if i == 0 for y in range(y0, y1 + 1)}
     assert all((130, y, 0) in air for y in range(71, 75))
+    solid = {(x, y, z) for x, z, y0, y1, i in cols if i != 0 for y in range(y0, y1 + 1)}
+    assert not any((x, y, z) in solid for (x, z), y in zip(cells, ys))   # track cells stay air
     print("railworks: ALL OK", len(cols), "columns", len(pal), "palette")
 
 
