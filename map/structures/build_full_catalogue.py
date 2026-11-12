@@ -22,12 +22,12 @@ CITADEL = {"stone": "siege:castle_stone", "smooth": "siege:castle_smooth", "band
            "battlement": "siege:battlement", "slit": "siege:arrow_slit", "spire": "siege:spire_roof", "brazier": "siege:brazier", "port": "siege:portcullis",
            "throne": "gold_block", "wool": "red_wool", "carpet": "red_carpet", "ladder": "ladder"}
 
-TOWNS = (("rimehold", "Rimehold", "frostmarch", "frost", "The Frostmarch town: dark log frames, plank walls in rows, dark stone bases and steep snow-capped roofs, a longhouse hall and a stave chapel under weathered copper."),
+TOWNS = (("rimehold", "Rimehold", "frostmarch", "frost", "The Frostmarch town: dark log frames, plank walls in rows, dark stone bases and steep snow-capped roofs, a longhouse hall under weathered copper and a stave chapel with a tower climbing out of its roof."),
          ("gulls_rest", "Gull's Rest", "saltreach", "salt", "The Saltreach harbour: pale stone ground floors, whitewash between birch posts, low hipped roofs in sea green, white and orange, a quay, a lighthouse and a boathouse."),
          ("sunscar", "Sunscar", "emberwaste", "ember", "The Emberwaste town: thick sandstone walls, flat roofs behind parapets, lattice windows, striped awnings and a domed market hall."),
          ("mirelight", "Mirelight", "blackfen", "fen", "The Blackfen town: mud brick between mangrove posts, houses up on stilts over the black water, mossy roofs and froglights by the doors."))
-HOUSE_BLURB = {"frost": ["Two storeys, a dark stone ground floor or plank rows to the ground, dragon heads on the gable.", "One or two storeys of plank rows in a spruce frame, a steep roof that sheds snow.",
-                         "A small cottage: low walls, a roof nearly to the ground, snow on the ridge.", "A byre: a dark stone base, plank rows and a very steep roof over the cart door."],
+HOUSE_BLURB = {"frost": ["Two storeys, a dark stone ground floor or plank rows to the ground, dragon heads on the gable.", "One or two storeys of plank rows in a dark oak frame, a steep roof that sheds snow, dragon heads on both gables, a woodpile under the eaves.",
+                         "A small cottage: one storey of plank rows, a steep roof with snow on the ridge, dragon heads and a woodpile.", "A byre: a dark stone base, plank rows and a very steep roof over the cart door."],
                "salt": ["Stone below, whitewash above, a balcony or a flat roof terrace, painted shutters.", "A stone ground floor against the sea wind, a low hipped roof.",
                         "A one-storey stone cottage with a hipped roof.", "A net store: stone below, white boards above, a hoist beam over the loft door."],
                "ember": ["Two storeys of painted sandstone, a roof terrace behind the parapet, lattice windows, roof beams.", "A sandstone house with a striped awning over the door; some carry a red roof or dome.",
@@ -41,7 +41,7 @@ TOWN_BLURB = {("gulls_rest", "quay"): "The quay wall with bollards, a jetty on p
               ("gulls_rest", "boathouse"): "A stone shed straddling the shore, open at the back over a water slip, a net loft above.",
               ("mirelight", "stilt_house"): "Tall stilts down into the mire, the back half over the water, a mooring platform behind.",
               ("mirelight", "stilt_house_big"): "Two storeys on tall stilts over the water.",
-              ("rimehold", "inn"): "Two storeys of dark stone and plank rows, a tap room with a bar and hearth, bedrooms upstairs. The only furnished building.",
+              ("rimehold", "inn"): "Two storeys of dark stone and plank rows, a tap room with a bar and hearth, bedrooms upstairs, a steep shingle roof with dragon heads. Built on the skill.",
               ("gulls_rest", "inn"): "A stone and whitewash inn under an orange hipped roof, a tap room and bedrooms upstairs. The only furnished building.",
               ("mirelight", "inn"): "Mud brick and mangrove under a mossy roof, a tap room and bedrooms upstairs. The only furnished building.",
               ("sunscar", "inn"): "A caravanserai round a courtyard with a palm and a well, a corner tower and a striped gate awning."}

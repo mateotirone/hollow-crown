@@ -171,8 +171,16 @@ strip round the house (the skill's `bushes`, on by default).
  "storey_style": [{"frame_kind": "stone", "infill": "FRO-01"}, {}]}
 ```
 
-**Not in the skill yet:**
-- **Roof forms:** skirt roofs and tiered stave roofs; build the tiers as stacked houses with lean-tos.
+**Skirt roofs and stave tiers** (no part of their own yet): a skirt is four `lean_to`s round the walls, n and s
+full width, on dark oak posts (`skirt()` in `map/structures/review/specs/gen_rimehold.py`). A stave tower is a
+second `house` rising from inside the nave roof, a one-deep skirt round it just above the ridge, then an open
+`belfry` and a slate `spire` (the Rimehold stave chapel).
+
+**Snow** goes on the ridge line only (and on chimney caps and flat tops). On a pitch 2 roof every row is a stair on a
+full block, so snow on every row striped the roofs white; the skill now finds the true ridge (2026-11-12).
+
+**Worked examples:** `review/specs/gen_rimehold.py` (longhouse hall, stave chapel, inn, smithy, store, byre) and
+`regions_towns.frost_house` (the town houses, built per seed on the skill).
 
 ## Never
 

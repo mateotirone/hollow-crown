@@ -1549,11 +1549,20 @@ def _snow(ctx, blocks, how=True):
     tops = {}
     for (x, y, z) in ctx.cells:
         if min(xs) <= x <= max(xs) and min(zs) <= z <= max(zs): tops[(x, z)] = max(tops.get((x, z), y), y)
+    rtops = {}                                    # the roof surface alone (spikes, rods and chimneys left out)
+    for (x, y, z) in ctx.cells:
+        if (x, z) in tops and ctx.stage_of.get((x, y, z)) == "roof" and ctx.get(x, y, z).get("kind") in ("stairs", "full", "slab"):
+            rtops[(x, z)] = max(rtops.get((x, z), y), y)
     for (x, z), y in tops.items():
         v = ctx.get(x, y, z)
+        if v.get("kind") != "stairs" and (x, z) in rtops and rtops[(x, z)] < y:   # a spike or rod stands on the ridge here
+            y = rtops[(x, z)]; v = ctx.get(x, y, z)
         if v.get("kind") == "stairs" and ctx.stage_of.get((x, y, z)) == "roof":
             below = ctx.get(x, y - 1, z)
-            if below and below.get("kind") == "full" and ctx.stage_of.get((x, y - 1, z)) == "roof":   # the ridge cap
+            # the ridge cap: nothing higher beside it. On a pitch 2 roof every row is a stair on a full block, so
+            # that test alone put snow on every row and striped the roof (refinement thread, 2026-11-12)
+            ridge = all(rtops.get((x + dx, z + dz), -999) <= y for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)))
+            if ridge and below and ctx.stage_of.get((x, y - 1, z)) == "roof":
                 ctx.set(x, y, z, "roof", raw="snow_layer", height=1)
         elif v.get("kind") == "full" or (v.get("kind") == "raw" and v.get("name") in ("stone_bricks", "deepslate_bricks")):
             ctx.setif(x, y + 1, z, "details", raw="snow_layer", height=0)

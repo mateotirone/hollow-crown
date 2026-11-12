@@ -97,6 +97,9 @@ def recolour_roof(bp, region, colour, seed=0):
         elif n == "deepslate_tile_slab": bp.cells[k] = (slab, p)
         elif n == "deepslate_tiles": bp.cells[k] = (block, p)
     if region == "fen" and colour == "moss": moss_roof(bp, stair, block, slab, seed)
+    if getattr(bp, "roof_untextured", False):    # a skill house: every roof gets its two-block texture (Mateo 2026-11-12)
+        from kit import texture_roofs
+        texture_roofs(bp, seed); bp.roof_untextured = False
     return bp
 
 def moss_roof(bp, stair, block, slab, seed=0):
@@ -207,7 +210,43 @@ def _sizes(rnd, tier):
     if tier == 1: return rnd.choice([(7, 7), (7, 9), (9, 7), (9, 9), (7, 11)])
     return rnd.choice([(7, 7), (7, 9), (9, 7)])
 
+def _engine():
+    import os, sys
+    sk = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", ".claude", "skills", "minecraft-builder", "scripts")
+    if sk not in sys.path: sys.path.insert(0, sk)
+    import engine
+    return engine
+
 def frost_house(seed, rnd, tier, roof=None):
+    """A Frostmarch house on the skill (regions/frostmarch.md): dark deepslate plinth two courses high, plank rows
+    in a dark oak frame (the bigger ones on a stone ground storey), a steep pitch 2 roof that sheds snow with snow on
+    the ridge, dragon heads on both gables (every gable roof carries them), frosted glass, a woodpile under the
+    eaves. The roof is built in slate so the town can recolour it (recolour_roof)."""
+    if tier == 3: return frost_barn(seed, rnd, roof)
+    w, d = _sizes(rnd, tier)
+    storeys = 2 if (tier == 0 or (tier == 1 and rnd.random() < 0.4)) else 1
+    W, D = w - 1, d - 1; xd = W // 2
+    stone = tier == 0 and rnd.random() < 0.6
+    cside = rnd.choice("we"); cx = W - 1 if cside == "e" else 1
+    hs = {"part": "house", "style": {"base": "frost_timber", "roof": {"block": "deepslate_tiles", "texture": False}},
+          "rect": [0, 0, W, D], "y": 0, "plinth": 2, "storeys": [5] + [4] * (storeys - 1),
+          "door": {"side": "s", "kind": "house", "steps": 1},
+          "roof": {"type": "gable", "ridge": "z", "pitch": 2, "gable_horns": True, "snow": True},
+          "chimney": [[cx, D // 2]], "vines": 0, "seed": seed, "interior": "home"}
+    if stone: hs["storey_style"] = [{"frame_kind": "stone", "frame": "deepslate_bricks", "infill": {"ladder": "FRO-01", "axis": "y"}}] + [{}] * (storeys - 1)
+    if rnd.random() < 0.3: hs["style"]["shutter"] = "dark_oak_planks"
+    else: hs["shutters"] = 0
+    pile = {"part": "woodpile", "at": [-1 if cside == "e" else W + 1, 1, 1 if cside == "e" else D - 1], "len": 3, "h": 2,
+            "facing": "w" if cside == "e" else "e", "wood": "spruce"}
+    bp = Blueprint(f"rimehold_house_{seed}_t{tier}")
+    _engine().into_blueprint(bp, {"name": bp.name, "parts": [hs, pile]})
+    door_marker(bp, xd, 2, D + 1)
+    bp.roof_untextured = True                    # plain slate until the town picks its colour; recolour_roof textures it
+    if roof: recolour_roof(bp, "frost", roof, seed)
+    bp.kind = "house"
+    return bp
+
+def frost_house_kit(seed, rnd, tier, roof=None):
     """A Frostmarch house: dark deepslate base, plank rows in a spruce frame, a steep (pitch 2) roof that sheds
     snow, frosted glass, dragon heads on the gable of the bigger houses."""
     if tier == 3: return frost_barn(seed, rnd, roof)
@@ -392,6 +431,17 @@ def lattice_window(B, x, y, z, side, h=2):
 # Farm buildings (tier 3)
 # =========================================================================================================
 def frost_barn(seed, rnd, roof=None):
+    """A Frostmarch byre on the skill (review/specs/rimehold_barn.json): low dark stone walls, plank rows above, a very
+    steep roof with dragon heads, big cart doors, hay inside."""
+    bp = _skill("rimehold_barn.json", f"rimehold_barn_{seed}", "barn", None)
+    if roof:
+        S = ROOF_SETS["frost"].get(roof)
+        if S and roof != "dark":                 # the spec is in dark shingle; swap it for the town's colour
+            for k, (n, p) in list(bp.cells.items()):
+                if n in ("dark_oak_stairs", "spruce_stairs") and k[1] > 6: bp.cells[k] = (S[0], p)
+    return bp
+
+def frost_barn_kit(seed, rnd, roof=None):
     """A Frostmarch byre: low dark stone walls, plank rows above, a very steep roof down to head height, cart doors."""
     P = frost_P(seed); bp = Blueprint(f"rimehold_barn_{seed}")
     B = Building(bp, P, seed)
@@ -604,7 +654,38 @@ def store(region, seed=25, roof=None):
 # =========================================================================================================
 # Rimehold civic: the longhouse hall and the stave chapel
 # =========================================================================================================
+def _skill(fname, name, kind, door, markers=()):
+    """A civic building on the skill (the one engine, review/specs/<fname>), moved into this module's frame: the
+    door at x 0 on the z 0 wall, the building towards -z, door marker one out. door = the door cell in the spec."""
+    import json, os, sys
+    here = os.path.dirname(os.path.abspath(__file__))
+    sk = os.path.join(here, "..", "..", ".claude", "skills", "minecraft-builder", "scripts")
+    if sk not in sys.path: sys.path.insert(0, sk)
+    import engine
+    spec = json.load(open(os.path.join(here, "review", "specs", fname)))
+    raw = Blueprint(name); engine.into_blueprint(raw, spec)
+    if door is None:                             # the front door: the lowest door cell facing +z, nearest the middle
+        ds = [(y, -z, abs(x), (x, y, z)) for (x, y, z), (n, p) in raw.cells.items() if n.endswith("_door") and not p.get("upper") and p.get("facing") == "s"]
+        door = min(ds)[3] if ds else (0, 2, max(z for (x, y, z) in raw.cells))
+    dx, dy, dz = door
+    bp = Blueprint(name)
+    for (x, y, z), v in raw.cells.items(): bp.cells[(x - dx, y, z - dz)] = v
+    door_marker(bp, 0, dy, 1)
+    for k, (x, y, z) in markers: bp.markers[k] = (x - dx, y, z - dz)
+    bp.kind = kind
+    return bp
+
 def rimehold_hall(seed=31):
+    """The longhouse hall on the skill (review/specs/gen_rimehold.py): dark stone course, plank rows in a dark oak
+    frame, a steep weathered copper roof with dragon heads, a shingle gallery skirt on posts, a ridge lantern."""
+    return _skill("rimehold_hall.json", "rimehold_hall", "hall", (4, 2, 12), [("jarl", (4, 2, 1))])
+
+def rimehold_chapel(seed=33):
+    """The stave chapel on the skill (review/specs/gen_rimehold.py, towers/README.md Frostmarch row)."""
+    return _skill("rimehold_chapel.json", "rimehold_chapel", "chapel", (4, 2, 14))
+
+
+def rimehold_hall_kit(seed=31):
     """Rimehold's longhouse: a stone course and plank rows in a dark frame, a steep weathered-copper roof with a
     gallery skirt roof round it, crossed dragon heads on both gables, a ridge lantern tower, light blue glass."""
     P = frost_P(seed, civic=True); P.update(roof=WEATHERED[0], roof_block="waxed_oxidized_cut_copper",
@@ -648,7 +729,7 @@ def rimehold_hall(seed=31):
     door_marker(bp, 0, 1, 1)
     return finish(bp, P, "frost", "hall")
 
-def rimehold_chapel(seed=33):
+def rimehold_chapel_kit(seed=33):
     """The stave chapel: a tall narrow nave and a lower apse, a gallery skirt roof all round on posts, three
     tiers of steep roofs climbing to a spire, dragon heads on every gable peak, stained glass in cyan, blue
     and white."""
@@ -1054,7 +1135,9 @@ def sunscar_store(seed=67):
 
 CIVIC = {
     "rimehold": [("hall", rimehold_hall), ("stave_chapel", rimehold_chapel),
-                 ("inn", lambda: inn("frost")), ("smithy", lambda: smithy("frost")), ("store", lambda: store("frost"))],
+                 ("inn", lambda: _skill("rimehold_inn.json", "rimehold_inn", "inn", None, [("innkeeper", (3, 2, 2))])),
+                 ("smithy", lambda: _skill("rimehold_smithy.json", "rimehold_smithy", "smithy", None, [("smith", (10, 1, 4))])),
+                 ("store", lambda: _skill("rimehold_store.json", "rimehold_store", "store", None, [("shopkeeper", (4, 2, 2))]))],
     "gulls_rest": [("inn", lambda: inn("salt")), ("smithy", lambda: smithy("salt")), ("store", lambda: store("salt"))],
     "sunscar": [("market_hall", sunscar_market_hall), ("inn", sunscar_inn), ("smithy", sunscar_smithy), ("store", sunscar_store)],
     "mirelight": [("inn", lambda: inn("fen")), ("smithy", lambda: smithy("fen")), ("store", lambda: store("fen"))],
