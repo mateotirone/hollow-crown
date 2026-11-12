@@ -69,6 +69,9 @@ rustic mixes (more cobble, mossy cobble slabs low and in the shade).
 - Junctions are squares or widenings: where two streets meet, widen to the larger width + 2 for 3 blocks.
 - Bends follow the ground and look worn round the inside corner (the second block there).
 - No path ends at nothing: every path ends at a door, a gate, a field, a square or another path.
+- A settlement's road meets the map's roads (Mateo, 2026-11-12): the gate road is carried on to the nearest map road
+  and joins it at that road's own height and surface, graded evenly, with the land either side stepped to it by at
+  most 1 a block. The game does it when a settlement is founded (`settle/founding.js` `joinRoad`).
 
 ## Bridges and fords
 
