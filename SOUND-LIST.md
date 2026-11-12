@@ -9,7 +9,7 @@ There is no music in version 1.
 
 - **23 signature sounds** are meant to be real recordings made with an AI sound generator. 0 of 23 are installed; the rest play a stand-in built from vanilla sounds, so the game is never silent.
 - **32 more dragon sounds** have synthesized stand-ins and can be replaced the same way.
-- **33 vanilla sounds** are reworked (lower, softer, layered) everywhere the scripts use them, and **16 named cues** are built from vanilla layers.
+- **33 vanilla sounds** are reworked (lower, softer, layered) everywhere the scripts use them, and **27 named cues** are built from vanilla layers.
 - The remaining vanilla sounds are played as they are, because they should sound like what they are (a horse, a bow, a page).
 
 ## How to add a recording
@@ -387,6 +387,17 @@ Built from vanilla layers in `core/sfx_cues.js`. A script plays one with `sfx(pl
 | `cast.open` | The magic hotbar opens | `chime.amethyst_block` pitch 1.2 vol 0.5 + `item.book.page_turn` pitch 0.7 vol 0.4 after 0.05 s | townhall |
 | `cast.close` | The magic hotbar closes | `chime.amethyst_block` pitch 0.8 vol 0.4 + `item.book.page_turn` pitch 0.6 vol 0.4 after 0.05 s | townhall |
 | `horn.assault` | Another assault is coming | `raid.horn` pitch 0.85 vol 0.8 + `raid.horn` pitch 0.64 vol 0.35 after 0.25 s | siege |
+| `wx.gust` | A gust of wind | `elytra.loop` pitch 0.55 vol 0.35 + `ambient.weather.rain` pitch 0.5 vol 0.15 after 0.3 s | - |
+| `wx.spray` | Sea spray on the wind | `random.splash` pitch 0.6 vol 0.25 + `ambient.weather.rain` pitch 0.8 vol 0.2 after 0.1 s | - |
+| `wx.buoy_bell` | A bell out in the sea fret | `block.bell.hit` pitch 0.45 vol 0.22 + `block.bell.hit` pitch 0.42 vol 0.08 after 1.5 s | - |
+| `wx.drip` | Water dripping in the fog | `cauldron_drip.water.pointed_dripstone` pitch 0.8 vol 0.5 + `cauldron_drip.water.pointed_dripstone` pitch 0.7 vol 0.3 after 0.7 s | - |
+| `wx.sand_hiss` | Sand hissing past | `dig.sand` pitch 0.5 vol 0.3 + `ambient.weather.rain` pitch 1.3 vol 0.25 + `dig.sand` pitch 0.45 vol 0.2 after 0.25 s | - |
+| `wx.cold_wind` | Cold wind over snow | `elytra.loop` pitch 0.45 vol 0.3 + `step.snow` pitch 0.6 vol 0.15 after 0.5 s | - |
+| `wx.howl` | The blizzard howling | `elytra.loop` pitch 0.4 vol 0.45 + `mob.wolf.whine` pitch 0.5 vol 0.06 after 0.6 s | - |
+| `wx.fen_croak` | Something croaking in the fen | `mob.frog.ambient` pitch 0.6 vol 0.4 + `mob.frog.ambient` pitch 0.5 vol 0.2 after 0.6 s | - |
+| `wx.fen_splash` | A splash somewhere out on the water | `random.splash` pitch 0.45 vol 0.2 + `bubble.pop` pitch 0.5 vol 0.25 after 0.4 s | - |
+| `wx.fen_bell` | A bell under the fen water | `block.bell.hit` pitch 0.32 vol 0.12 + `bubble.pop` pitch 0.4 vol 0.2 after 0.5 s | - |
+| `wx.marsh_hum` | A hum where the marsh lights are | `beacon.ambient` pitch 0.5 vol 0.15 + `chime.amethyst_block` pitch 0.4 vol 0.1 after 1 s | - |
 
 ## Creature voices
 
