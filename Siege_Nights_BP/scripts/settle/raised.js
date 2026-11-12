@@ -9,7 +9,8 @@
 // Test: /scriptevent siege:block_build guardhouse|armoury [style]   raise one where you stand
 
 import { world, system } from "@minecraft/server";
-import { onTick, isReady, settlementAt, moduleStore, addTests, assert, emit, addFilter } from "../siege/api.js";
+import { onTick, isReady, settlementAt, moduleStore, addTests, assert, emit, addFilter, keepOf } from "../siege/api.js";
+import { COLORS } from "../siege/constants.js";
 import { startBuild, buildFor, worldMarks } from "../townhall/build.js";
 import { STYLES, STYLE_IDS } from "../townhall/styles.js";
 import { styleFor } from "./buildings.js";
@@ -80,6 +81,22 @@ function pathAt(dim, from) {
   };
 }
 
+// The banner over the gate and the keep's flags are white wool in the design; once the building stands they take
+// the settlement's banner colour (the Keep Banner's, the same index the soldiers wear).
+export const woolFor = (color) => (Number.isInteger(color) && COLORS[color] ? `minecraft:${COLORS[color]}_wool` : undefined);
+function colourCloth(dim, plan, origin, forward, owner) {
+  const wool = woolFor(owner ? keepOf(owner)?.color : undefined);
+  if (!wool || wool === "minecraft:white_wool") return;
+  const frame = frameFor(forward);
+  for (const c of plan.cells.values()) {
+    if (c.role === "air") continue;
+    try {
+      const b = dim.getBlock(toWorld(frame, origin, c.x, c.y, c.z));
+      if (b?.typeId === "minecraft:white_wool") b.setType(wool);
+    } catch { /* unloaded: stays white */ }
+  }
+}
+
 function start(key, job) {
   if (buildFor(`raised:${key}`)) return;
   const plan = planFor(job.type, job.style);
@@ -96,6 +113,7 @@ function start(key, job) {
     plan, style: styleFor(job.style), perTick: Math.max(4, Math.ceil(plan.cells.size / 300)),
     skip: (x, y, z) => (x === at.x && y === at.y && z === at.z) || gaps.cells.has(`${x},${y},${z}`),
     onDone() {
+      colourCloth(dim, plan, origin, forward, job.owner);
       delete store.data.pending[key];
       (store.data.built ??= {})[key] = { ...job, box: footprint(at, forward, plan.bounds()) };
       store.save();
@@ -174,6 +192,9 @@ addTests("settle", {
     assert(g.cols.has(`${wx},${wz}`) && g.cells.size > 0, "the wall column on the path is left out");
     assert(yardGaps(plan, origin, forward, 4, isPath).cells.size === 0, "a raised yard keeps its whole wall");
     assert(yardGaps(plan, origin, forward, 0, () => false).cells.size === 0, "no path, no gap");
+  },
+  "the gate banner takes the settlement colour"() {
+    assert(woolFor(14) === "minecraft:red_wool" && woolFor(0) === "minecraft:white_wool" && woolFor(undefined) === undefined, "colour index to wool");
   },
   "the Barracks and Quartermaster's buildings draw in every style behind their block": () => {
     for (const type of Object.keys(BLOCK_BUILDS)) for (const id of STYLE_IDS) {

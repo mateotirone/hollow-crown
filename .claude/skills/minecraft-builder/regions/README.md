@@ -63,8 +63,8 @@ preset and roof (Vale warm granite gable, Frostmarch slate pitch 2 with dragon h
 hip, Emberwaste flat with vigas, Blackfen mossy dark oak on piles), the keep and yard wall in the region's stone
 (Vale VAL-01, Frostmarch cobbled deepslate and deepslate bricks, Saltreach and Emberwaste sandstone, Blackfen tuff on
 mud brick). The keep rises one stage clear of the hall ridge, so it is taller where the roof is steep or flat
-(Frostmarch, Emberwaste). Flags and the gate banner are white wool in the build; the `banner` mark lets the game
-recolour them to the settlement's banner colour (not wired yet).
+(Frostmarch, Emberwaste). Flags and the gate banner are white wool in the build; the game turns them the settlement's
+banner colour once the Barracks stands (`settle/raised.js`).
 
 ## Where the facts come from
 
