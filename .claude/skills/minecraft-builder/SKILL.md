@@ -37,6 +37,11 @@ A 50,000-block castle costs about the same tokens as a hut.
    `--hifi <bedrock textures/blocks> <three@0.170.0>` for real-texture renders.
 5. **Fix and repeat at least 3 times before showing anyone.** Check against `build-instructions/09-final-check`
    and the "look for" list in `reference/house-rules.md`. Then show the preview, not the commands.
+6. **Catalog it (hollow-crown repo).** Every build has an entry in `builds/catalog.json`, even one that is
+   only asked for. Add it when the build is first asked for, move its `status` on (not started, designed,
+   in viewer, in game), set `viewer` to its asset viewer section, `thread` to the owning thread and
+   `source` to its builder, then run `node tools/build-catalog.mjs` (check.mjs fails if `builds/CATALOG.md`
+   is stale or a viewer section has no entry).
 
 ## Spec format
 
