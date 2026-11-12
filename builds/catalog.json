@@ -13,6 +13,7 @@
     "ember": "Emberwaste",
     "fen": "Blackfen",
     "hollow": "The Hollow",
+    "everwake": "Everwake, the city in the sky",
     "regional": "One version per overworld region",
     "any": "Anywhere / region-neutral"
   },
@@ -45,6 +46,7 @@
     "lore": ["Write the lore, tomes and library", "cmsg_011t4CdXaQtd99UHuZXQMS7HFZnzvHJX7B8krtFRfGfey5"],
     "crown": ["Design the Crown takeover and Citadel", "cmsg_011t4CdXaQtd99UHuZXQMS7H2G19jYLWaJRgL8ssLQxRp1"],
     "graves": ["Add gravestones when players die", "cmsg_011t4CdXaQtd99UHuZXQMS7H4ArTCpKiakoVQzrgdMDymP"],
+    "cloudcity": ["Design the Cloud City and flight", "cmsg_011t4CdXaQtd99UHuZXQMS7H51qzKtHvAHLjJaS3bk6Raa"],
     "coordinator": ["Project chat (no thread yet)", ""]
   },
   "builds": [
@@ -143,6 +145,9 @@
     {"id": "hollow-drowned-court", "name": "The Drowned Court (Choir fight)", "group": "The Hollow", "region": "hollow", "status": "designed", "viewer": "landmarks", "thread": "world", "source": null, "pr": 164, "notes": "Redesigned on the skill in PR #164 (hollow_arenas.py); old fill shape in game."},
     {"id": "hollow-seat", "name": "The Seat / Heart ring (Morvane)", "group": "The Hollow", "region": "hollow", "status": "designed", "viewer": "landmarks", "thread": "world", "source": null, "pr": 164, "notes": "Redesigned on the skill in PR #164; old fill shape in game."},
     {"id": "hollow-vault", "name": "The Hollow vault under the Seat", "group": "The Hollow", "region": "hollow", "status": "in game", "viewer": null, "thread": "hollowdim", "source": "Siege_Nights_BP/scripts/undertow/builder.js", "new": true, "notes": "Plain gameplay space, never redesigned."},
-    {"id": "hollow-morvane-pockets", "name": "Morvane stage pockets (reveal room, river, fall shafts)", "group": "The Hollow", "region": "hollow", "status": "in game", "viewer": null, "thread": "hollowdim", "source": "Siege_Nights_BP/scripts/undertow/pockets.js", "new": true, "notes": "Plain rooms; not in the viewer."}
+    {"id": "hollow-morvane-pockets", "name": "Morvane stage pockets (reveal room, river, fall shafts)", "group": "The Hollow", "region": "hollow", "status": "in game", "viewer": null, "thread": "hollowdim", "source": "Siege_Nights_BP/scripts/undertow/pockets.js", "new": true, "notes": "Plain rooms; not in the viewer."},
+    {"id": "everwake-city", "name": "Everwake: the city on its cloud", "group": "Everwake", "region": "everwake", "status": "in viewer", "viewer": "everwake", "thread": "cloudcity", "source": "map/structures/everwake/spec.py", "pr": 197, "notes": "Style guide .claude/skills/minecraft-builder/regions/everwake.md."},
+    {"id": "everwake-needle", "name": "Everwake with the Needle and the cloud sea", "group": "Everwake", "region": "everwake", "status": "in viewer", "viewer": "everwake", "thread": "cloudcity", "source": "map/structures/everwake/spec.py", "pr": 197},
+    {"id": "everwake-sky-model", "name": "Everwake sky model (floating entity seen from the ground)", "group": "Everwake", "region": "everwake", "status": "not started", "viewer": null, "thread": "cloudcity", "source": null, "notes": "An entity model, not a block build."}
   ]
 }

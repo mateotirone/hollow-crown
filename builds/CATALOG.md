@@ -4,7 +4,7 @@
 
 Every build in The Hollow Crown, designed or not. Add an entry the moment a build is asked for, even with no design yet, and move its status on as it progresses. Run  node tools/build-catalog.mjs  after editing to rewrite builds/CATALOG.md (check.mjs fails if it is stale).
 
-**96 builds:** 5 not started, 22 designed, 10 in viewer, 59 in game.
+**99 builds:** 6 not started, 22 designed, 12 in viewer, 59 in game.
 
 Statuses:
 
@@ -150,3 +150,11 @@ A ★ marks builds that no earlier list had (added in the 2026-11-12 audit).
 | The Seat / Heart ring (Morvane) | The Hollow | designed | landmarks | Finish the remaining world builds |  | Waiting in PR #164. Redesigned on the skill in PR #164; old fill shape in game. |
 | ★ The Hollow vault under the Seat | The Hollow | in game |  | Build the Hollow dimension and Rift | `Siege_Nights_BP/scripts/undertow/builder.js` | Plain gameplay space, never redesigned. |
 | ★ Morvane stage pockets (reveal room, river, fall shafts) | The Hollow | in game |  | Build the Hollow dimension and Rift | `Siege_Nights_BP/scripts/undertow/pockets.js` | Plain rooms; not in the viewer. |
+
+## Everwake
+
+| Build | Region | Status | Viewer | Owner thread | Source | Notes |
+|---|---|---|---|---|---|---|
+| Everwake: the city on its cloud | Everwake, the city in the sky | in viewer | everwake | Design the Cloud City and flight | `map/structures/everwake/spec.py` | Waiting in PR #197. Style guide .claude/skills/minecraft-builder/regions/everwake.md. |
+| Everwake with the Needle and the cloud sea | Everwake, the city in the sky | in viewer | everwake | Design the Cloud City and flight | `map/structures/everwake/spec.py` | Waiting in PR #197. |
+| Everwake sky model (floating entity seen from the ground) | Everwake, the city in the sky | not started |  | Design the Cloud City and flight |  | An entity model, not a block build. |
