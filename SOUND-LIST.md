@@ -425,7 +425,7 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 
 | Vanilla sound | Places | Used by |
 |---|---|---|
-| `block.amethyst_block.chime` | 10 | bestiary (4), undertow (4), lore (2) |
+| `block.amethyst_block.chime` | 11 | bestiary (4), undertow (4), lore (2), vault |
 | `item.shield.block` | 4 | bestiary (3), townhall |
 | `armor.equip_leather` | 3 | dragons, horses, looks |
 | `mob.horse.gallop` | 3 | horses, roletrials, townhall |
@@ -433,6 +433,7 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `note.flute` | 3 | bestiary, horses, unlocks |
 | `random.eat` | 3 | dragons (2), bestiary |
 | `armor.equip_iron` | 2 | guardposts, horses |
+| `block.amethyst_block.break` | 2 | undertow, vault |
 | `block.bell.resonate` | 2 | lore, undertow |
 | `block.scaffolding.break` | 2 | siege (2) |
 | `bucket.empty_water` | 2 | unlocks (2) |
@@ -450,7 +451,6 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `random.drink` | 2 | bestiary, roletrials |
 | `tile.piston.in` | 2 | unlocks (2) |
 | `armor.equip_netherite` | 1 | siege |
-| `block.amethyst_block.break` | 1 | undertow |
 | `block.amethyst_block.resonate` | 1 | undertow |
 | `block.bell.use` | 1 | lore |
 | `block.campfire.crackle` | 1 | dragons |

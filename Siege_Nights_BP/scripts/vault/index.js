@@ -6,19 +6,22 @@
 // The key on the lock swings the 3x3 door open the way gates swing (siege/gates.js planSwing), and shut again.
 // Keys are cut for one vault: owner and allies open with any key, anyone else only with a key cut for it.
 //
-// Still to come: relic stands, reinforcing to the next tier, Vault Breakers on
+// Relics: holding one, click a plinth in your vault and it floats there on its stand; click the stand to take it.
+//
+// Still to come: reinforcing to the next tier, Vault Breakers on
 // the lock, repair, and the offline open windows.
 //
 // What other features can use:
 //   vaultOf(ownerId)  -> { x, y, z, fx, fz, tier, layout, built, lock: {x,y,z} } or undefined
 //   on("vaultBuilt", ({ owner, tier, lock }))
+//   on("relicTaken", ({ owner, by, kind }))   someone outside the settlement took a relic off a vault stand
 //   on("vaultOpened", ({ owner, by }))   someone outside the settlement opened it with a key cut for it
 //
 // Test: /scriptevent siege:vault_build [tier] [layout]   raise one where you stand, facing the way you look (creative)
 
 import { world, system, GameMode, ItemStack, BlockPermutation } from "@minecraft/server";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
-import { isReady, settlementAt, onTick, moduleStore, emit, isAlly, keepOf } from "../siege/api.js";
+import { isReady, settlementAt, onTick, moduleStore, emit, isAlly, keepOf, addMenuLabel } from "../siege/api.js";
 import { planSwing, SWEPT } from "../siege/gates.js";
 import { startBuild, buildFor } from "../townhall/build.js";
 import { Plan } from "../townhall/halls.js";
@@ -264,6 +267,118 @@ world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
   if (event.isFirstEvent === false || !isReady() || !isLock(block.typeId)) return;
   event.cancel = true;
   system.run(() => useLock(player, block, itemStack));
+});
+
+// ---------- relic stands ----------
+// Holding a relic, click a plinth in your vault: the relic comes to rest floating over it, the way a dropped
+// Crown rests on its stand (the Crown uses that very stand, undertow/crownkeep.js, which also takes it back).
+// Click a Heart or template stand to take the relic. A template on a stand counts as seen for the Cold Forge.
+
+const RELICS = {
+  crown: { item: "siege:hollow_crown", stand: "siege:crown_stand", name: "the Hollow Crown" },
+  heart: { item: "siege:heart_of_the_hollow", stand: "siege:heart_stand", name: "the Heart" },
+  template: { item: "siege:choirsteel_upgrade_template", stand: "siege:template_stand", name: "the Choirsteel template" },
+};
+addMenuLabel({ entity: RELICS.heart.stand, hint: "Click: take the Heart" });
+addMenuLabel({ entity: RELICS.template.stand, hint: "Click: take the Choirsteel template" });
+for (const t of TIERS) addMenuLabel({ block: `siege:vault_lock_${t}`, name: "Vault Lock", hint: "Click with the Vault Key: open or shut" });
+
+const KIND_OF_ITEM = Object.fromEntries(Object.entries(RELICS).map(([k, r]) => [r.item, k]));
+const KIND_OF_STAND = Object.fromEntries(Object.entries(RELICS).map(([k, r]) => [r.stand, k]));
+const LORE = "hc:relic_lore";
+
+// The vault and stand kind whose plinth (the block under a stand mark) this is
+function plinthAt(block) {
+  const l = block.location;
+  for (const [owner, v] of Object.entries(vaults())) {
+    if (!v.built) continue;
+    const marks = roomOf(v.built, v.layout).marks;
+    for (const kind of Object.keys(RELICS)) {
+      const m = marks[`stand_${kind}`];
+      if (!m) continue;
+      const at = worldOf(v, m[0], m[1] - 1, m[2]);
+      if (at.x === l.x && at.y === l.y && at.z === l.z) return { owner, v, kind, spot: worldOf(v, ...m) };
+    }
+  }
+  return undefined;
+}
+
+function standOn(dim, spot) {
+  try {
+    return dim.getEntities({ location: { x: spot.x + 0.5, y: spot.y + 0.5, z: spot.z + 0.5 }, maxDistance: 1.2 })
+      .find((e) => KIND_OF_STAND[e.typeId]);
+  } catch { return undefined; }
+}
+
+function placeRelic(player, block, stack) {
+  const found = plinthAt(block);
+  if (!found) return false;
+  const { owner, v, spot } = found;
+  if (player.id !== owner && !isAlly(owner, player.id)) { player.onScreenDisplay.setActionBar("§7Not your vault."); return true; }
+  const kind = KIND_OF_ITEM[stack?.typeId];
+  if (!kind) { player.onScreenDisplay.setActionBar("§7A relic rests here: the Hollow Crown, the Heart or the Choirsteel template."); return true; }
+  const dim = block.dimension;
+  if (standOn(dim, spot)) { player.onScreenDisplay.setActionBar("§7Something already rests on this plinth."); return true; }
+  const inv = player.getComponent("minecraft:inventory").container;
+  const slot = player.selectedSlotIndex;
+  const held = inv.getItem(slot);
+  if (held?.typeId !== stack.typeId) return true;
+  const where = { x: spot.x + 0.5, y: spot.y + 0.25, z: spot.z + 0.5 };
+  const stand = dim.spawnEntity(RELICS[kind].stand, where);
+  const lore = JSON.stringify(held.getLore() ?? []);
+  try { stand.setDynamicProperty(kind === "crown" ? "hc:crown_lore" : LORE, lore); } catch { /* plain */ }
+  if (held.amount > 1) { held.amount -= 1; inv.setItem(slot, held); } else inv.setItem(slot, undefined);
+  v.stands = { ...(v.stands ?? {}), [kind]: true };
+  store.save();
+  if (kind === "template") emit("templateSeen", { owner });
+  try { sfx(dim, "block.amethyst_block.chime", where, { volume: 1, pitch: 0.7 }); } catch { /* quiet */ }
+  player.onScreenDisplay.setActionBar(`§dYou set ${RELICS[kind].name} to rest in your vault.`);
+  return true;
+}
+
+function takeRelic(player, stand) {
+  if (!stand.isValid) return;
+  const kind = KIND_OF_STAND[stand.typeId];
+  const item = new ItemStack(RELICS[kind].item, 1);
+  try { const lore = JSON.parse(stand.getDynamicProperty(LORE) ?? "[]"); if (lore.length) item.setLore(lore); } catch { /* plain */ }
+  const inv = player.getComponent("minecraft:inventory")?.container;
+  if (!inv || inv.emptySlotsCount === 0) return void player.onScreenDisplay.setActionBar(`§7Your hands are full. Make room to take ${RELICS[kind].name}.`);
+  inv.addItem(item);
+  const at = stand.location;
+  stand.remove();
+  for (const [owner, v] of Object.entries(vaults())) {
+    if (!v.stands?.[kind]) continue;
+    const m = v.built && roomOf(v.built, v.layout).marks[`stand_${kind}`];
+    const spot = m && worldOf(v, ...m);
+    if (spot && Math.abs(spot.x + 0.5 - at.x) < 1.5 && Math.abs(spot.z + 0.5 - at.z) < 1.5) {
+      v.stands[kind] = false;
+      store.save();
+      if (player.id !== owner && !isAlly(owner, player.id)) emit("relicTaken", { owner, by: player.id, kind });
+    }
+  }
+  try { sfx(player.dimension, "block.amethyst_block.break", at, { volume: 1, pitch: 0.5 }); } catch { /* quiet */ }
+  player.onScreenDisplay.setActionBar(`§dYou take ${RELICS[kind].name}.`);
+}
+
+world.beforeEvents.playerInteractWithEntity.subscribe((e) => {
+  if (e.target.typeId !== RELICS.heart.stand && e.target.typeId !== RELICS.template.stand) return;
+  e.cancel = true;
+  const p = e.player, stand = e.target;
+  system.run(() => takeRelic(p, stand));
+});
+
+world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
+  const { block, player, itemStack } = event;
+  if (event.isFirstEvent === false || !isReady() || !KIND_OF_ITEM[itemStack?.typeId] || block.dimension.id !== OVERWORLD) return;
+  if (!plinthAt(block)) return;
+  event.cancel = true;
+  system.run(() => placeRelic(player, block, itemStack));
+});
+
+// A template resting in a vault is not lost: tell the Cold Forge it was seen (undertow/forge.js, PR #144)
+onTick("vault-relics", 1200, () => {
+  if (!isReady()) return;
+  for (const [owner, v] of Object.entries(vaults())) if (v.stands?.template) emit("templateSeen", { owner });
 });
 
 // ---------- test ----------
