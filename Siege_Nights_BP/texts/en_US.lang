@@ -307,3 +307,5 @@ item.siege:summon_pretender.name=Boss Summon: a Pretender
 siege:itemGroup.name.bossSummons=Hollow Crown: Boss Summons
 siege:itemGroup.name.guardGear=Hollow Crown: Guard-only Armour
 siege:itemGroup.name.lockedTrees=Hollow Crown: Locked World Trees
+item.siege:plan_book.name=Plan Book
+item.siege:plan_scroll.name=Plan Scroll

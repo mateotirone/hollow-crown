@@ -217,6 +217,14 @@ export const ENTRIES = [
     when: ["event:settlerArrived", "click:siege:plot_marker"],
   },
   {
+    id: "plan_book", ch: "keep", title: "The Plan Book and Plan Scrolls",
+    tip: "Your Plan Book lists the buildings you can raise. Find more plans as Plan Scrolls.",
+    page: "A Plot Marker only offers buildings whose plan you know. Your §fPlan Book§r lists them (every new town's founder gets one; craft another from a book and a paper). The Hamlet's cottage, well and library are known from the start, and your town hall teaches more as it grows: the market and garden at level 2, the smithy and stable at 3, the storehouse and watchtower at 4.\n\n"
+      + "Everything else comes as §fPlan Scrolls§r: a toppled Rival Lord leaves plans of their town, every boss leaves one for each player at the kill, and a Rumor job sometimes pays one. Use a scroll to learn its plan for good. A plan from another region is in that region's style, and raising it costs half as much again.\n\n"
+      + "To trade a plan, copy it onto a scroll from your Plan Book for a few coins and a paper.",
+    when: ["carry:siege:plan_book", "carry:siege:plan_scroll", "event:planLearned"],
+  },
+  {
     id: "guards", ch: "keep", title: "Guards and the Barracks",
     tip: "Bring an unemployed villager to your Barracks and click it holding 40 Regals for a Man-at-Arms (sneak + click for an Archer).",
     page: "Build a §fBarracks§r, bring an unemployed villager to it and click it holding coins (40 Regals) for a §fMan-at-Arms§r. Sneak + click for an §fArcher§r. Click the Barracks without coins for the guard list.\n\n"

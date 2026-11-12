@@ -578,3 +578,28 @@ addTests("settle charters", {
     }
   },
 });
+
+// ---------- the Plan Book (plandata.js) ----------
+import { knownPlans, planChoices, unknownOf, planKey, parsePlan } from "./plandata.js";
+import { PLANS as PLAN_RULES } from "./config.js";
+addTests("settle plans", {
+  "the Hamlet's basics are known, the hall teaches more, Creative knows everything"() {
+    const designs = BUILDINGS.map((b) => b.id);
+    const start = knownPlans({ hallLevel: 1 });
+    for (const id of PLAN_RULES.basics) assert(start.has(id), `${id} is a basic`);
+    assert(!start.has("smithy"), "the smithy has to be learned");
+    assert(knownPlans({ hallLevel: 3 }).has("smithy"), "a level 3 hall teaches the smithy");
+    assert(designs.every((id) => knownPlans({ creative: true, designs }).has(id)), "Creative knows every plan");
+    for (const ids of Object.values(PLAN_RULES.hall)) for (const id of ids) assert(designs.includes(id), `hall plan ${id} is a design`);
+  },
+  "plans in other regions' styles are offered separately, and only once"() {
+    const designs = BUILDINGS.map((b) => b.id);
+    const known = knownPlans({ stored: [planKey("smithy", "frostmarch"), planKey("cottage", "vale")], hallLevel: 1 });
+    const offers = planChoices(known, "vale", designs);
+    assert(offers.some((o) => o.id === "smithy" && o.style === "frostmarch" && o.foreign), "foreign smithy");
+    assertEqual(offers.filter((o) => o.id === "cottage").length, 1);
+    assert(!offers.some((o) => o.id === "smithy" && !o.foreign), "no home-style smithy without its plan");
+    assertEqual(parsePlan("smithy@frostmarch").style, "frostmarch");
+    assertEqual(unknownOf(known, [{ id: "cottage", style: "vale" }, { id: "stable", style: "vale" }], "vale").map((p) => p.id).join(), "stable");
+  },
+});
