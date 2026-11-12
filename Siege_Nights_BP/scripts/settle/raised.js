@@ -6,7 +6,7 @@
 // Test: /scriptevent siege:block_build guardhouse|armoury [style]   raise one where you stand
 
 import { world, system } from "@minecraft/server";
-import { onTick, isReady, settlementAt, moduleStore, addTests, assert } from "../siege/api.js";
+import { onTick, isReady, settlementAt, moduleStore, addTests, assert, emit } from "../siege/api.js";
 import { startBuild, buildFor } from "../townhall/build.js";
 import { STYLES, STYLE_IDS } from "../townhall/styles.js";
 import { styleFor } from "./buildings.js";
@@ -16,7 +16,7 @@ import { levelSite, foundationColumns } from "./ground.js";
 import { BLOCK_BUILDS } from "./blockdesigns.js";
 
 const OVERWORLD = "minecraft:overworld";
-// pending: { "x,y,z": { type, fx, fz, style } }   built: the same, once standing, plus box (its footprint)
+// pending: { "x,y,z": { type, fx, fz, style, owner } }   built: the same, once standing, plus box (its footprint)
 const store = moduleStore("siege:settle_raised", () => ({ pending: {}, built: {} }));
 // The raised buildings that stand: [{ at: {x, y, z}, type, name, forward: {x, z}, box: {x0, z0, x1, z1}, floor }]
 // (guard posts use these; a building whose block was broken drops out when the block is gone)
@@ -26,6 +26,13 @@ export function raisedBuildings() {
   }));
 }
 export function forgetRaised(key) { if (store.data.built?.[key]) { delete store.data.built[key]; store.save(); } }
+
+// Finished block buildings on a settlement's land, by building id ("siege:barracks" -> "barracks")
+export function raisedCounts(owner) {
+  const out = {};
+  for (const b of Object.values(store.data.built ?? {})) if (b.owner && b.owner === owner) { const id = b.type.replace(/^siege:/, ""); out[id] = (out[id] ?? 0) + 1; }
+  return out;
+}
 const keyOf = (l) => `${l.x},${l.y},${l.z}`;
 const locOf = (k) => { const [x, y, z] = k.split(",").map(Number); return { x, y, z }; };
 const cardinal = (v) => (Math.abs(v.x) > Math.abs(v.z) ? { x: Math.sign(v.x) || 1, z: 0 } : { x: 0, z: Math.sign(v.z) || 1 });
@@ -53,6 +60,7 @@ function start(key, job) {
       delete store.data.pending[key];
       (store.data.built ??= {})[key] = { ...job, box: footprint(at, forward, plan.bounds()) };
       store.save();
+      if (job.owner) emit("settleCharter", { owner: job.owner });
     },
   }).columns.unshift(...foundationColumns(plan));
 }
@@ -69,10 +77,19 @@ world.afterEvents.playerPlaceBlock.subscribe(({ block, player }) => {
   const box = footprint(block.location, f, planFor(block.typeId, style).bounds());
   const problem = siteProblem(owner, box);
   if (problem) return player.sendMessage(`§7No room for a ${build.name} here: ${problem} §8The block works on its own.`);
-  store.data.pending[key] = { type: block.typeId, fx: f.x, fz: f.z, style };
+  store.data.pending[key] = { type: block.typeId, fx: f.x, fz: f.z, style, owner };
   store.save();
   start(key, store.data.pending[key]);
   player.sendMessage(`§6A ${build.name} is going up behind it.`);
+});
+
+// Breaking the block takes the building off the charter count (the walls stay, it is only a house then)
+world.afterEvents.playerBreakBlock.subscribe(({ block, brokenBlockPermutation }) => {
+  if (!BLOCK_BUILDS[brokenBlockPermutation?.type?.id]) return;
+  const key = keyOf(block.location);
+  if (!store.data.built?.[key]) return;
+  delete store.data.built[key];
+  store.save();
 });
 
 onTick("settle_raised", 200, () => {

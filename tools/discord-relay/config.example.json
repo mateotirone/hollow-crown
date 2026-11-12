@@ -1,0 +1,11 @@
+{
+  "webhook": "https://discord.com/api/webhooks/PASTE-YOURS-HERE",
+  "realmInvite": "PASTE-THE-REALM-INVITE-CODE",
+  "realmName": "",
+  "account": "relay",
+  "everyMinutes": 15,
+  "staySeconds": 60,
+  "links": {
+    "ExampleGamertag": "123456789012345678"
+  }
+}

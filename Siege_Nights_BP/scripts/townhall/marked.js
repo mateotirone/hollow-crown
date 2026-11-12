@@ -1,23 +1,23 @@
 // The Marked path: powers of the Arcana branch, and Resonance.
 //
-// Hold the Bound Ember. Use = cast the chosen power. Sneak + use = choose a power.
+// Use the Bound Ember to open the magic hotbar (spellbar.js); each spell icon there casts its power.
 // Every cast raises Resonance (0-100). It fades when you stop casting. At 70+ you are "loud":
 // the tag siege_resonant is on you (Hollow mobs hunt it, people notice it). At 100 it breaks over you.
 
 import { world, system, EntityDamageCause } from "@minecraft/server";
-import { ActionFormData } from "@minecraft/server-ui";
 import * as api from "../siege/api.js";
-import { SKILL, SKILLS } from "./skills.js";
+import { SKILL } from "./skills.js";
 import { heroOf, saveHero } from "./hero.js";
 import { BOUND_EMBER, EMBER, confirmPath } from "./tree.js";
 import { heldType } from "./progress.js";
 import { sfx } from "../core/sfx.js";
+import { castFx, castMove, puff, beads, ring, smoulder } from "./marked_fx.js";
 
 export const RESONANT_TAG = "siege_resonant";
 export const ECHO_TAG = "siege_echo_sight";
 export const LOUD = 70;
 
-const isMarked = (player) => heroOf(player).path === "marked";
+export const isMarkedPlayer = (player) => heroOf(player).path === "marked";
 const fx = (entity, effect, ticks, amplifier = 0) => {
   try {
     entity.addEffect(effect, ticks, { amplifier, showParticles: false });
@@ -26,7 +26,6 @@ const fx = (entity, effect, ticks, amplifier = 0) => {
   }
 };
 
-const POWERS = SKILLS.filter((s) => s.power).map((s) => s.id);
 //                 Resonance cost, cooldown ticks
 const COST = { arc_bolt: [8, 12], arc_ward: [15, 400], arc_blink: [12, 80], arc_echo: [10, 100], arc_bind: [14, 200], arc_step: [20, 600], arc_choir: [30, 1200], arc_hollowstep: [40, 1200] };
 
@@ -51,18 +50,6 @@ const isBoss = (entity) => {
 function might(player) {
   const hero = heroOf(player);
   return hero.resonance >= LOUD ? 1 + 0.25 * (hero.skills.arc_resonant ?? 0) : 1;
-}
-
-function line(dim, from, to, particle, step = 0.6) {
-  const dx = to.x - from.x, dy = to.y - from.y, dz = to.z - from.z;
-  const len = Math.hypot(dx, dy, dz);
-  for (let d = 1; d < len; d += step) {
-    try {
-      dim.spawnParticle(particle, { x: from.x + (dx / len) * d, y: from.y + (dy / len) * d, z: from.z + (dz / len) * d });
-    } catch {
-      return;
-    }
-  }
 }
 
 function lookedAt(player, range) {
@@ -101,9 +88,11 @@ const CAST = {
       const wall = player.getBlockFromViewDirection({ maxDistance: 24 });
       if (wall) end = { x: wall.block.x + 0.5, y: wall.block.y + 0.5, z: wall.block.z + 0.5 };
     }
-    line(dim, from, end, "minecraft:blue_flame_particle");
-    sfx(dim, "mob.blaze.shoot", from, { pitch: 1.6, volume: 0.8 });
+    beads(dim, from, end, "siege:arc_trail", 0.4);
+    puff(dim, "siege:arc_burst", end);
+    castFx(player, "bolt", from);
     if (!target) return true;
+    sfx(dim, "cast.hit", end);
     const dmg = [0, 5, 7, 10][lvl] * might(player);
     hurt(player, target, dmg);
     if (lvl >= 3) target.setOnFire?.(4, true);
@@ -114,7 +103,8 @@ const CAST = {
         if (jumps >= 2) break;
         if (e.id === target.id || friendly(player, e) || !e.getComponent("minecraft:health")) continue;
         const to = { x: e.location.x, y: e.location.y + 1, z: e.location.z };
-        line(dim, from2, to, "minecraft:blue_flame_particle");
+        beads(dim, from2, to, "siege:arc_trail", 0.4);
+        puff(dim, "siege:arc_burst", to);
         hurt(player, e, dmg * 0.6);
         from2 = to;
         jumps++;
@@ -125,7 +115,8 @@ const CAST = {
 
   arc_ward(player, lvl) {
     fx(player, "absorption", 400, Math.min(4, Math.round(lvl * might(player)) - 1));
-    sfx(player.dimension, "beacon.activate", player.location, { pitch: 1.8, volume: 0.6 });
+    puff(player.dimension, "siege:arc_ward", player.location);
+    castFx(player, "ward");
     return true;
   },
 
@@ -145,10 +136,13 @@ const CAST = {
       } catch {
         continue;
       }
-      line(dim, eye(player), { x: to.x, y: to.y + 1, z: to.z }, "minecraft:portal_directional", 1);
+      puff(dim, "siege:arc_tear", from);
+      beads(dim, eye(player), { x: to.x, y: to.y + 1, z: to.z }, "siege:arc_trail", 1);
+      sfx(dim, "cast.blink", from);
       player.teleport(to, { keepVelocity: false, checkForBlocks: false });
       fx(player, "slow_falling", 30, 0);
-      sfx(dim, "mob.endermen.portal", to, { pitch: 1.4, volume: 0.7 });
+      puff(dim, "siege:arc_tear", to);
+      castFx(player, "blink", to);
       return true;
     }
     player.onScreenDisplay.setActionBar("§7No room to step there.");
@@ -160,7 +154,8 @@ const CAST = {
     echo.set(player.id, { until: system.currentTick + ticks, range: [0, 24, 32, 40][lvl] });
     player.addTag(ECHO_TAG);
     fx(player, "night_vision", ticks + 200, 0);
-    sfx(player.dimension, "block.bell.hit", player.location, { pitch: 0.5, volume: 0.5 });
+    ring(player.dimension, player.location, [0, 24, 32, 40][lvl] / 2);
+    castFx(player, "echo");
     return true;
   },
 
@@ -173,8 +168,9 @@ const CAST = {
     const ticks = Math.round([0, 60, 100, 140][lvl] * might(player) * (isBoss(target) ? 0.5 : 1));
     fx(target, "slowness", ticks, 255);
     fx(target, "weakness", ticks, 0);
-    line(player.dimension, eye(player), { x: target.location.x, y: target.location.y + 1, z: target.location.z }, "minecraft:soul_particle");
-    sfx(player.dimension, "block.chain.place", target.location, { pitch: 0.6, volume: 2 });
+    beads(player.dimension, eye(player), { x: target.location.x, y: target.location.y + 1, z: target.location.z }, "siege:arc_link", 0.45);
+    puff(player.dimension, "siege:arc_snare", target.location);
+    castFx(player, "bind", target.location);
     return true;
   },
 
@@ -183,7 +179,8 @@ const CAST = {
     fx(player, "invisibility", ticks, 0);
     fx(player, "resistance", ticks, 4);
     fx(player, "speed", ticks, 2);
-    sfx(player.dimension, "portal.travel", player.location, { volume: 0.15, pitch: 2 });
+    puff(player.dimension, "siege:arc_peel", player.location);
+    castFx(player, "step");
     api.emit("undertowStep", { player, ticks });
     return true;
   },
@@ -192,9 +189,17 @@ const CAST = {
   // once it has moved the player (in, or back out), or request.refused = "why" if it can't right now.
   arc_hollowstep(player) {
     const request = { player, handled: false, refused: undefined };
+    const leaving = { dim: player.dimension, at: { ...player.location } };
     api.emit("hollowStep", request);
     if (request.handled) {
-      sfx(player.dimension, "portal.travel", player.location, { volume: 0.2, pitch: 0.6 });
+      puff(leaving.dim, "siege:arc_rift", leaving.at);
+      sfx(leaving.dim, "cast.hollowstep", leaving.at);
+      castMove(player, "hollowstep");
+      system.runTimeout(() => {
+        if (!player.isValid) return;
+        puff(player.dimension, "siege:arc_rift", player.location);
+        sfx(player.dimension, "cast.hollowstep", player.location, { volume: 0.6 });
+      }, 4);
       return true;
     }
     player.onScreenDisplay.setActionBar(`§7${request.refused ?? "The Hollow does not open. Not yet."}`);
@@ -209,7 +214,8 @@ const CAST = {
       return false;
     }
     choirs.push({ owner: player.id, dim: player.dimension.id, at: { ...player.location }, radius, until: system.currentTick + Math.round([0, 120, 160, 200][lvl] * might(player)) });
-    sfx(player.dimension, "block.bell.hit", player.location, { pitch: 0.4, volume: 6 });
+    ring(player.dimension, player.location, radius * 2);
+    castFx(player, "choir");
     api.title(player, "§5Choir's Call", "§7They hear the bell, and each other");
     return true;
   },
@@ -220,14 +226,23 @@ const CAST = {
 export function cast(player, id) {
   const hero = heroOf(player);
   const lvl = hero.skills[id] ?? 0;
-  if (!lvl) return player.onScreenDisplay.setActionBar("§7You know no power yet. Swear one at the Tree of Oaths (Arcana).");
+  if (!lvl) {
+    player.onScreenDisplay.setActionBar("§7You know no power yet. Swear one at the Tree of Oaths (Arcana).");
+    return false;
+  }
   const now = system.currentTick;
-  if ((silenced.get(player.id) ?? 0) > now) return player.onScreenDisplay.setActionBar("§cThe Ember will not answer. Your head is still ringing.");
+  if ((silenced.get(player.id) ?? 0) > now) {
+    player.onScreenDisplay.setActionBar("§cThe Ember will not answer. Your head is still ringing.");
+    return false;
+  }
   const born = hero.skills.arc_hollowborn ?? 0;
   const key = `${player.id}:${id}`;
   const wait = (cooldowns.get(key) ?? 0) - now;
-  if (wait > 0) return player.onScreenDisplay.setActionBar(`§7${SKILL[id].name} in ${Math.ceil(wait / 20)}s`);
-  if (!CAST[id](player, lvl)) return;
+  if (wait > 0) {
+    player.onScreenDisplay.setActionBar(`§7${SKILL[id].name} in ${Math.ceil(wait / 20)}s`);
+    return false;
+  }
+  if (!CAST[id](player, lvl)) return false;
   const free = (crescendo.get(player.id) ?? 0) > now;
   cooldowns.set(key, now + Math.round(COST[id][1] * (born ? 0.7 : 1)));
   lastCast.set(player.id, now);
@@ -236,6 +251,12 @@ export function cast(player, id) {
     if (hero.resonance >= 100) overflow(player, hero, born);
   }
   saveHero(player);
+  return true;
+}
+
+/** Ticks until a power can be cast again (0 when ready). */
+export function cooldownLeft(player, id) {
+  return Math.max(0, (cooldowns.get(`${player.id}:${id}`) ?? 0) - system.currentTick);
 }
 
 function overflow(player, hero, born) {
@@ -243,7 +264,8 @@ function overflow(player, hero, born) {
   if (born) {
     crescendo.set(player.id, now + 200);
     api.title(player, "§5Crescendo", "§7Ten seconds. Everything is free.");
-    sfx(player.dimension, "block.bell.hit", player.location, { pitch: 1.6, volume: 4 });
+    ring(player.dimension, player.location, 12);
+    sfx(player.dimension, "cast.crescendo", player.location);
     system.runTimeout(() => {
       if (!player.isValid) return;
       hero.resonance = 0;
@@ -261,37 +283,17 @@ function overflow(player, hero, born) {
   fx(player, "darkness", 100, 0);
   fx(player, "wither", 60, 0);
   api.title(player, "§4Overwhelmed", "§7The Choir is too loud");
-  sfx(player.dimension, "mob.warden.sonic_boom", player.location, { volume: 0.4 });
+  sfx(player.dimension, "cast.overwhelmed", player.location);
+  castMove(player, "overwhelmed");
   api.emit("resonanceOverflow", { player });
-}
-
-function powerMenu(player) {
-  const hero = heroOf(player);
-  const known = POWERS.filter((id) => hero.skills[id] > 0);
-  if (!known.length) return player.onScreenDisplay.setActionBar("§7You know no power yet. Swear one at the Tree of Oaths (Arcana).");
-  const form = new ActionFormData().title("The Ember").body(`Resonance ${Math.round(hero.resonance)}/100. Choose the power the Ember casts.`);
-  for (const id of known) form.button(`${id === hero.spell ? "§5" : ""}${SKILL[id].name} ${"I".repeat(hero.skills[id])}\n§8+${COST[id][0]} Resonance`);
-  form.show(player).then((r) => {
-    if (r.canceled) return;
-    hero.spell = known[r.selection];
-    saveHero(player);
-    player.onScreenDisplay.setActionBar(`§5${SKILL[hero.spell].name} readied`);
-  }).catch(() => {});
 }
 
 world.afterEvents.itemUse.subscribe((event) => {
   const player = event.source;
-  const type = event.itemStack?.typeId;
-  if (type === EMBER) {
-    const hero = heroOf(player);
-    if (hero.path !== "none") return player.onScreenDisplay.setActionBar("§7It is only a cold stone to you now.");
-    return confirmPath(player, "marked");
-  }
-  if (type !== BOUND_EMBER) return;
-  if (!isMarked(player)) return player.onScreenDisplay.setActionBar("§7It hums, but not for you.");
-  if (player.isSneaking) return powerMenu(player);
+  if (event.itemStack?.typeId !== EMBER) return; // the Bound Ember and the spell icons: spellbar.js
   const hero = heroOf(player);
-  cast(player, hero.skills[hero.spell] ? hero.spell : POWERS.find((id) => hero.skills[id] > 0) ?? "arc_bolt");
+  if (hero.path !== "none") return player.onScreenDisplay.setActionBar("§7It is only a cold stone to you now.");
+  return confirmPath(player, "marked");
 });
 
 // ---------- every second ----------
@@ -320,7 +322,7 @@ export function markedTick() {
     }
     if (loud && now % 60 < 20) {
       try {
-        player.dimension.spawnParticle("minecraft:soul_particle", { x: player.location.x, y: player.location.y + 2.1, z: player.location.z });
+        player.dimension.spawnParticle("siege:arc_halo", { x: player.location.x, y: player.location.y + 2.15, z: player.location.z });
       } catch {
         // optional
       }
@@ -347,7 +349,7 @@ export function markedTick() {
           if (!nearest || d < nearest.d) nearest = { d, e };
           for (let h = 0; h < 3; h++) {
             try {
-              player.spawnParticle("minecraft:endrod", { x: e.location.x, y: e.location.y + 0.5 + h * 0.6, z: e.location.z });
+              player.spawnParticle("siege:arc_mark", { x: e.location.x, y: e.location.y + 0.5 + h * 0.6, z: e.location.z });
             } catch {
               break;
             }
@@ -360,8 +362,10 @@ export function markedTick() {
       }
     }
 
-    // Resonance bar while the Ember is in hand
-    if (heldType(player) === BOUND_EMBER) {
+    // Resonance bar while the Ember or a spell is in hand, and the Ember smoulders
+    const inHand = heldType(player);
+    if (inHand === BOUND_EMBER || inHand?.startsWith("siege:spell_")) {
+      smoulder(player, hero.resonance);
       const full = Math.round(hero.resonance / 5);
       const color = (crescendo.get(player.id) ?? 0) > now ? "§b" : loud ? "§c" : "§d";
       player.onScreenDisplay.setActionBar(`§5${SKILL[hero.spell]?.name ?? "No power"}  ${color}${"|".repeat(full)}§8${"|".repeat(20 - full)} §7${Math.round(hero.resonance)}`);

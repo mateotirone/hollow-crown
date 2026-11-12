@@ -43,7 +43,10 @@ import "./opening/index.js";
 import "./labels/index.js";
 import "./guardposts/index.js";
 import "./forestry/index.js";
+import "./workings/index.js";
+import "./ironworks/index.js";
 import "./creative/index.js";
+import "./dispatch/index.js";
 
 // Start the shared loop last, once every file has registered its work
 import { startLoop } from "./core/loop.js";
