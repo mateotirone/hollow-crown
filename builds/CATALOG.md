@@ -4,7 +4,7 @@
 
 Every build in The Hollow Crown, designed or not. Add an entry the moment a build is asked for, even with no design yet, and move its status on as it progresses. Run  node tools/build-catalog.mjs  after editing to rewrite builds/CATALOG.md (check.mjs fails if it is stale).
 
-**101 builds:** 1 not started, 29 designed, 12 in viewer, 59 in game.
+**101 builds:** 1 not started, 22 designed, 15 in viewer, 63 in game.
 
 Statuses:
 
@@ -36,8 +36,8 @@ A ★ marks builds that no earlier list had (added in the 2026-11-12 audit).
 | Sunscar market hall | Emberwaste | in viewer | town-sunscar | Procedurally generate terrain-aware towns | `map/structures/regions_towns.py` | Waiting in PR #163. |
 | Gull's Rest quay, lighthouse and boathouse (3) | Saltreach | in viewer | town-gulls_rest | Procedurally generate terrain-aware towns | `map/structures/regions_towns.py` | Gull's Rest has no water in its ward, so these are not placed yet. |
 | Mirelight stilt houses (2) | Blackfen | in viewer | town-mirelight | Procedurally generate terrain-aware towns | `map/structures/regions_towns.py` |  |
-| Field windmills | One version per overworld region | in game |  | Finish the remaining world builds | `map/structures/towngen_build.py` | Today towns use the Vale windmill; regional windmills for the five overworld regions are designed in world_props.py (viewer world_props, PR #164). |
-| ★ Regional wells and field fencing | One version per overworld region | designed | world_props | Finish the remaining world builds | `map/structures/world_props.py` | Waiting in PR #164. Wells and field fencing for all six regions. |
+| Field windmills | One version per overworld region | in game |  | Finish the remaining world builds | `map/structures/towngen_build.py` | Today towns use the Vale windmill; regional windmills for the five overworld regions are in world_props.py (viewer world_props), not yet placed by towngen. |
+| ★ Regional wells and field fencing | One version per overworld region | in viewer | world_props | Finish the remaining world builds | `map/structures/world_props.py` | Wells and field fencing for all six regions. |
 
 ## Settlements
 
@@ -65,7 +65,7 @@ A ★ marks builds that no earlier list had (added in the 2026-11-12 audit).
 | Settlement walls, levels 1-10 (50) | One version per overworld region | in game | walls | Build settlement building and mason shop | `Siege_Nights_BP/scripts/settle/walldata.js` | Wall steps and tower ladders PR #161; physics PR #162. |
 | Gates and portcullis (swinging) | One version per overworld region | in game |  | Build settlement building and mason shop | `Siege_Nights_BP/blocks/castle_gate.json` |  |
 | Plot marker (post, sign, lantern, pennant) | Anywhere / region-neutral | in game |  | Design the settlement building placement mechanic | `Siege_Nights_BP/scripts/settle/plotmarker.js` | 3D mock-up https://claude.ai/artifact/7C2eyCUPG5dSEUTE9pWq87 ; in game as a block, the full mock-up look is not built. |
-| ★ Construction site stages (scaffold, staged rise) (3) | Anywhere / region-neutral | designed | world_props | Finish the remaining world builds | `map/structures/world_props.py` | Waiting in PR #164. Construction-site scaffolds in three stages. |
+| ★ Construction site stages (scaffold, staged rise) (3) | Anywhere / region-neutral | in viewer | world_props | Finish the remaining world builds | `map/structures/world_props.py` | Construction-site scaffolds in three stages. |
 | Railway station: Halt, Station, Junction, Grand Station (20) | One version per overworld region | in game | settle-* | Design the train system | `map/structures/stations.py` | Waiting in PR #168. Detailed backs in PR #168. |
 | Trade House wing (small, two storeys) (10) | One version per overworld region | in game | settle-* | Design the train system | `map/structures/stations.py` | To be replaced by the Trade Outpost if Mateo approves that design. |
 | Engine shed (5) | One version per overworld region | in game | settle-* | Design the train system | `map/structures/stations.py` |  |
@@ -105,10 +105,10 @@ A ★ marks builds that no earlier list had (added in the 2026-11-12 audit).
 | Build | Region | Status | Viewer | Owner thread | Source | Notes |
 |---|---|---|---|---|---|---|
 | Rival Lords' seats and towns | One version per overworld region | in game |  | Build settlement building and mason shop | `Siege_Nights_BP/scripts/rivals/index.js` | Use the same town layouts and buildings as players (PR #173). |
-| Plot relic landmarks (12) (12) | One version per overworld region | designed | landmarks | Finish the remaining world builds |  | Waiting in PR #164. Self-build near players; viewer section 'landmarks' comes with PR #164. |
-| Story places: Crownhold, Bellhollow, Ashen Gate chapterhouse, Ashen Watch, Corvin's Tower, Old Mag's hut, Nell Sedge's raft-house, the Deepforge, the Cinder Roost (9) | One version per overworld region | designed | landmarks | Finish the remaining world builds |  | Waiting in PR #164. |
+| Plot relic landmarks (12) (12) | One version per overworld region | in game | landmarks | Finish the remaining world builds | `Siege_Nights_BP/scripts/landmarks/sites.js` | Self-build near players (PR #164). |
+| Story places: Crownhold, Bellhollow, Ashen Gate chapterhouse, Ashen Watch, Corvin's Tower, Old Mag's hut, Nell Sedge's raft-house, the Deepforge, the Cinder Roost (9) | One version per overworld region | in game | landmarks | Finish the remaining world builds | `Siege_Nights_BP/scripts/landmarks/sites.js` | Self-build near players (PR #164). |
 | Seven thin-place caves with Fennick's camps (7) | One version per overworld region | in game |  | Settle the road to the Rift | `Siege_Nights_BP/scripts/undertow/thinplaces.js` | Script-built and plain; hosted 3D https://claude.ai/artifact/QFoys3C5GaHFXe415EkJjo . Not in the local viewer or on the building skill. |
-| ★ Sealed ways out: the Shut Pass, the Far Shore, the Horizon Isles (3) | Anywhere / region-neutral | designed | landmarks | Finish the remaining world builds | `map/structures/world_doors.py` | Waiting in PR #164. shut_pass_gate (the Shut Pass gate), westwatch (Far Shore coast landmark), southmost_light (Horizon Isles coast landmark); place themselves via landmarks/sites.js. |
+| ★ Sealed ways out: the Shut Pass, the Far Shore, the Horizon Isles (3) | Anywhere / region-neutral | designed | landmarks | Finish the remaining world builds | `map/structures/world_doors.py` | Waiting in PR #208. shut_pass_gate (the Shut Pass gate), westwatch (Far Shore coast landmark), southmost_light (Horizon Isles coast landmark); place themselves via landmarks/sites.js. |
 | Gravestone (left where a player dies) | Anywhere / region-neutral | in game | graves | Add gravestones when players die | `map/structures/gravestone_build.py` | 3x3 footprint: clickable headstone, pale moss mound, a candle lit while the grave is sealed, dry grass. The game places it when a player dies. |
 | Dragon nest (9x9, natural, unbreakable) | Anywhere / region-neutral | in game |  | Redesign the dragon nest | `Siege_Nights_BP/scripts/dragons/nestplan.js` |  |
 | Custom trees (31 species, six regions) (31) | One version per overworld region | in game | trees | Build custom tree assets | `map/trees/build_trees.py` |  |
@@ -120,22 +120,22 @@ A ★ marks builds that no earlier list had (added in the 2026-11-12 audit).
 | Build | Region | Status | Viewer | Owner thread | Source | Notes |
 |---|---|---|---|---|---|---|
 | Boss site: Reeve's well and chamber (Millbrook) | Aldmere Vale | in game |  | Design how regional bosses unlock | `Siege_Nights_BP/scripts/unlocks/well_plan.js` | Script-built, not in the viewer, not on the building skill. |
-| Boss site: Hunter's Cairn, beast cairns and Old Sigga's lodge (Hallowmere) | Frostmarch | in game | boss_sites | Design how regional bosses unlock | `Siege_Nights_BP/scripts/unlocks/huntsman.js` | Script-built, not in the viewer. Exterior landmark "the Antler Crown" designed in map/structures/boss_landmarks.py (PR #164, viewer boss_sites), placed via unlocks/landmarks.js (PR #187). |
-| Boss site: Gull Bay chapel and altar | Saltreach | in game | boss_sites | Design how regional bosses unlock | `Siege_Nights_BP/scripts/unlocks/bride.js` | Script-built, not in the viewer. Exterior landmark "the Drowned Bell Tower" designed in map/structures/boss_landmarks.py (PR #164, viewer boss_sites), placed via unlocks/landmarks.js (PR #187). |
-| Boss site: Sunscar vault with five faceless statues | Emberwaste | in game | boss_sites | Design how regional bosses unlock | `Siege_Nights_BP/scripts/unlocks/seneschal.js` | Script-built, not in the viewer. Exterior landmark "the Faceless Gate" designed in map/structures/boss_landmarks.py (PR #164, viewer boss_sites), placed via unlocks/landmarks.js (PR #187). |
-| Boss site: the Cradle Tree and root cradle (Mirelight) | Blackfen | in game | boss_sites | Design how regional bosses unlock | `Siege_Nights_BP/scripts/unlocks/mother.js` | Script-built, not in the viewer. Exterior landmark "the Cradle Tree" designed in map/structures/boss_landmarks.py (PR #164, viewer boss_sites), placed via unlocks/landmarks.js (PR #187). |
-| ★ Boss site: Vorlund's Muster (Warlord King's ground) | Anywhere / region-neutral | designed | landmarks | Finish the remaining world builds | `map/structures/world_doors.py` | Waiting in PR #164. At (1030, -990); places itself via landmarks/sites.js. |
-| Boss site landmark: the Lantern Mast (Mirelight) | Blackfen | designed | boss_sites | Finish the remaining world builds | `map/structures/boss_landmarks.py` | Waiting in PR #164. Exterior landmark; placed via unlocks/landmarks.js (PR #187). |
+| Boss site: Hunter's Cairn, beast cairns and Old Sigga's lodge (Hallowmere) | Frostmarch | in game | boss_sites | Design how regional bosses unlock | `Siege_Nights_BP/scripts/unlocks/huntsman.js` | Script-built, not in the viewer. Exterior landmark "the Antler Crown" designed in map/structures/boss_landmarks.py (PR #208, viewer boss_sites), placed via unlocks/landmarks.js (PR #187). |
+| Boss site: Gull Bay chapel and altar | Saltreach | in game | boss_sites | Design how regional bosses unlock | `Siege_Nights_BP/scripts/unlocks/bride.js` | Script-built, not in the viewer. Exterior landmark "the Drowned Bell Tower" designed in map/structures/boss_landmarks.py (PR #208, viewer boss_sites), placed via unlocks/landmarks.js (PR #187). |
+| Boss site: Sunscar vault with five faceless statues | Emberwaste | in game | boss_sites | Design how regional bosses unlock | `Siege_Nights_BP/scripts/unlocks/seneschal.js` | Script-built, not in the viewer. Exterior landmark "the Faceless Gate" designed in map/structures/boss_landmarks.py (PR #208, viewer boss_sites), placed via unlocks/landmarks.js (PR #187). |
+| Boss site: the Cradle Tree and root cradle (Mirelight) | Blackfen | in game | boss_sites | Design how regional bosses unlock | `Siege_Nights_BP/scripts/unlocks/mother.js` | Script-built, not in the viewer. Exterior landmark "the Cradle Tree" designed in map/structures/boss_landmarks.py (PR #208, viewer boss_sites), placed via unlocks/landmarks.js (PR #187). |
+| ★ Boss site: Vorlund's Muster (Warlord King's ground) | Anywhere / region-neutral | designed | landmarks | Finish the remaining world builds | `map/structures/world_doors.py` | Waiting in PR #208. At (1030, -990); places itself via landmarks/sites.js. |
+| Boss site landmark: the Lantern Mast (Mirelight) | Blackfen | designed | boss_sites | Finish the remaining world builds | `map/structures/boss_landmarks.py` | Waiting in PR #208. Exterior landmark; placed via unlocks/landmarks.js (PR #187). |
 
 ## Travel
 
 | Build | Region | Status | Viewer | Owner thread | Source | Notes |
 |---|---|---|---|---|---|---|
 | Bridges: road, foot and rail, any angle, per region | One version per overworld region | designed | bridges | Generate custom bridges over water |  | Waiting in PR #183. Generator on the building skill; viewer section 'Bridges' and town river crossings in PR #183. Hollow crossings are this thread's follow-up. Hollow bridge scenes fixed for the viewer in PR #202. |
-| Rail tunnel portals | One version per overworld region | designed |  | Build the plots and world map |  | Waiting in PR #164. portal.py on the skill (PR #164); map thread calls it inside rail works. |
+| Rail tunnel portals | One version per overworld region | designed |  | Build the plots and world map | `.claude/skills/minecraft-builder/scripts/portal.py` | portal.py on the skill; the map thread calls it inside rail works. |
 | Rail beds, cuttings and embankments (built on purchase) | Anywhere / region-neutral | in game |  | Design the train system | `Siege_Nights_BP/scripts/trains/route_game.js` |  |
 | Custom 3D track, switches and crossings | Anywhere / region-neutral | in game |  | Design the train system | `Siege_Nights_BP/scripts/trains` |  |
-| ★ Bridleway signposts | One version per overworld region | designed | world_props | Finish the remaining world builds | `map/structures/world_props.py` | Waiting in PR #164. Vale, Frostmarch, Saltreach, Blackfen, Emberwaste signposts (the Hollow one is in hollow_kit.py). |
+| ★ Bridleway signposts | One version per overworld region | in viewer | world_props | Finish the remaining world builds | `map/structures/world_props.py` | Vale, Frostmarch, Saltreach, Blackfen, Emberwaste signposts (the Hollow one is in hollow_kit.py). |
 
 ## The Hollow
 
@@ -148,8 +148,8 @@ A ★ marks builds that no earlier list had (added in the 2026-11-12 audit).
 | ★ The Cold Forge | The Hollow | in game |  | Rebuild the Hollow's structures | `Siege_Nights_BP/scripts/undertow/structures.js` | Still the old box plan; never moved to the Hollow kit or the viewer. |
 | ★ Drift foot | The Hollow | in game |  | Rebuild the Hollow's structures | `Siege_Nights_BP/scripts/undertow/structures.js` | Kept its box plan; not in the viewer. |
 | ★ The Standing Ranks | The Hollow | in game |  | Build the Hollow dimension and Rift | `Siege_Nights_BP/scripts/undertow/finale.js` | Morvane stage 2; plain, not in the viewer. |
-| The Drowned Court (Choir fight) | The Hollow | designed | landmarks | Finish the remaining world builds |  | Waiting in PR #164. Redesigned on the skill in PR #164 (hollow_arenas.py); old fill shape in game. |
-| The Seat / Heart ring (Morvane) | The Hollow | designed | landmarks | Finish the remaining world builds |  | Waiting in PR #164. Redesigned on the skill in PR #164; old fill shape in game. |
+| The Drowned Court (Choir fight) | The Hollow | in game | landmarks | Finish the remaining world builds | `map/structures/hollow_arenas.py` | Redesigned on the skill (PR #164), placed from undertow/arenas_data.js. |
+| The Seat / Heart ring (Morvane) | The Hollow | in game | landmarks | Finish the remaining world builds | `map/structures/hollow_arenas.py` | Redesigned on the skill (PR #164), placed from undertow/arenas_data.js. |
 | ★ The Hollow vault under the Seat | The Hollow | in game |  | Build the Hollow dimension and Rift | `Siege_Nights_BP/scripts/undertow/builder.js` | Plain gameplay space, never redesigned. |
 | ★ Morvane stage pockets (reveal room, river, fall shafts) | The Hollow | in game |  | Build the Hollow dimension and Rift | `Siege_Nights_BP/scripts/undertow/pockets.js` | Plain rooms; not in the viewer. |
 
