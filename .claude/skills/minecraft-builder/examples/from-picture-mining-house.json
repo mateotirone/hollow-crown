@@ -1,0 +1,12 @@
+{"name": "mining_house",
+ "materials": {"copper": {"ladder": ["waxed_exposed_cut_copper", "waxed_weathered_cut_copper", "waxed_oxidized_cut_copper"], "axis": "y", "jitter": 0.06}},
+ "parts": [
+ {"part": "house", "style": {"base": "vale_timber", "frame": "stripped_spruce_log", "trim": "spruce_planks", "roof": "copper",
+   "infill": "birch_planks", "shutter": "spruce_planks",
+   "plinth": {"ladder": ["cobblestone", "stone_bricks", "andesite"], "axis": "noise", "scale": 3}},
+  "storey_style": [{"frame_kind": "piers", "pier": {"ladder": ["andesite", "stone_bricks", "cracked_stone_bricks"], "axis": "noise", "scale": 2}, "infill": "stripped_spruce_log"}],
+  "rect": [-10, -8, 10, 8], "plinth": 1, "storeys": [5, 5], "jetty": ["n", "s"], "roof": {"type": "gable", "ridge": "x"},
+  "door": {"side": "s", "at": -6}, "chimney": [[7, 0]],
+  "wings": [{"rect": [-18, -2, -10, 10], "storeys": [5], "jetty": [], "roof": {"type": "gable", "ridge": "x"}},
+            {"rect": [1, 9, 7, 13], "storeys": [5], "jetty": [], "roof": {"type": "gable", "ridge": "z"},
+             "door": {"side": "s", "at": 0}}]}]}

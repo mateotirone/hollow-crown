@@ -497,5 +497,68 @@
  },
  "siege:plot_marker": {
   "sound": "wood"
+ },
+ "siege:vault_door_wood": {
+  "sound": "wood"
+ },
+ "siege:vault_door_iron": {
+  "sound": "metal"
+ },
+ "siege:vault_door_diamond": {
+  "sound": "metal"
+ },
+ "siege:vault_door_netherite": {
+  "sound": "metal"
+ },
+ "siege:vault_door_choirsteel": {
+  "sound": "metal"
+ },
+ "siege:vault_stone": {
+  "sound": "stone"
+ },
+ "siege:relic_coffer": {
+  "sound": "wood"
+ },
+ "siege:vault_breaker_iron": {
+  "sound": "metal"
+ },
+ "siege:vault_breaker_diamond": {
+  "sound": "metal"
+ },
+ "siege:vault_breaker_netherite": {
+  "sound": "metal"
+ },
+ "siege:vault_door_plate_wood": {
+  "sound": "wood"
+ },
+ "siege:vault_door_plate_iron": {
+  "sound": "metal"
+ },
+ "siege:vault_door_plate_diamond": {
+  "sound": "metal"
+ },
+ "siege:vault_door_plate_netherite": {
+  "sound": "metal"
+ },
+ "siege:vault_door_plate_choirsteel": {
+  "sound": "metal"
+ },
+ "siege:vault_lock_wood": {
+  "sound": "stone"
+ },
+ "siege:vault_lock_iron": {
+  "sound": "stone"
+ },
+ "siege:vault_lock_diamond": {
+  "sound": "stone"
+ },
+ "siege:vault_lock_netherite": {
+  "sound": "stone"
+ },
+ "siege:vault_lock_choirsteel": {
+  "sound": "stone"
+ },
+ "siege:ironworks": {
+  "sound": "stone"
  }
 }

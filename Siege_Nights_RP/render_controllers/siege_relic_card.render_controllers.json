@@ -1,0 +1,16 @@
+{
+  "format_version": "1.8.0",
+  "render_controllers": {
+    "controller.render.siege_relic_card": {
+      "geometry": "Geometry.relic",
+      "materials": [
+        {
+          "*": "Material.default"
+        }
+      ],
+      "textures": [
+        "Texture.relic"
+      ]
+    }
+  }
+}

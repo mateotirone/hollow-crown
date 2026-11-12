@@ -50,7 +50,7 @@ Exact numbers are in `skills.js`, one line per skill. You can unbind everything 
 After your first siege win the **Ember** falls near your keep. Use it to take it into your hand (Marked), or carry it to the Tree and swear the Squire's Oath (Knight). Permanent.
 
 - **Knight (Oathsworn):** Squire, Man-at-Arms, Knight, Banneret, Knight-Commander, by points sworn in Blade (0 / 3 / 8 / 15 / 26). Techniques trigger from how you fight: sneak + hit with a shield, sprint + hit, being hit while guarding. The **Oath Banner** item rallies (use) or is planted (sneak + use).
-- **Marked:** Touched, Listener, Adept, Hollowborn, Sorcerer. Hold the **Bound Ember**: use casts, sneak + use picks the power. Each cast adds **Resonance**. It fades after 3 quiet seconds. At 70 you are "loud" (Hollow mobs can track you, and Resonant Soul makes powers stronger). At 100 you are Overwhelmed: sick, blind and silenced for 8 seconds. With the Hollowborn capstone, 100 instead starts a 10 second Crescendo of free casting, then a crash.
+- **Marked:** Touched, Listener, Adept, Hollowborn, Sorcerer. Use the **Bound Ember** to swap the hotbar for the magic hotbar (one spell icon per power, the Ember in slot 9); use a spell icon to cast it, the Ember again (or sneak + use a spell) to swap back (`townhall/spellbar.js`). Each cast adds **Resonance**. It fades after 3 quiet seconds. At 70 you are "loud" (Hollow mobs can track you, and Resonant Soul makes powers stronger). At 100 you are Overwhelmed: sick, blind and silenced for 8 seconds. With the Hollowborn capstone, 100 instead starts a 10 second Crescendo of free casting, then a crash.
 
 ## Not built yet
 
