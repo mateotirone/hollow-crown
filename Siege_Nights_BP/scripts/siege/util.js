@@ -2,6 +2,7 @@
 // Split from the original main.js; the code is unchanged apart from the event/hook calls.
 
 import { world, GameMode } from "@minecraft/server";
+import { applyFilter } from "../core/events.js";
 
 export const title = (player, text, subtitle) =>
   player.onScreenDisplay.setTitle(text, { subtitle, fadeInDuration: 10, stayDuration: 60, fadeOutDuration: 20 });
@@ -17,6 +18,10 @@ export function ownerOf(entity) {
 export const pick = (list) => list[Math.floor(Math.random() * list.length)];
 
 export const isOnline = (owner) => world.getPlayers().some((p) => p.id === owner);
+// Can this settlement be attacked right now? While its owner is online, or while a feature opens it to attack
+// with addFilter("openToAttack", (open, { owner }) => ...) (an away keeper's vault window, vault/index.js).
+// Its walls, gates, guards and engines follow this; carrying off the Keep Banner still needs the owner online.
+export const attackable = (owner) => isOnline(owner) || !!applyFilter("openToAttack", false, { owner });
 
 export function consumeHeld(player) {
   if (player.getGameMode() === GameMode.Creative) return;

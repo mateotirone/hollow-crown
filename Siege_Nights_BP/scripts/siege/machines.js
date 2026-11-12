@@ -6,7 +6,7 @@ import { BALLISTA, BALLISTA_HIT, DIMENSIONS, PORTCULLISES, TREBUCHET } from "./c
 import { SETTINGS } from "./settings.js";
 import { state } from "./state.js";
 import { isAlly, settlementAt } from "./territory.js";
-import { isOnline, overworld } from "./util.js";
+import { isOnline, overworld, attackable } from "./util.js";
 import { BLAST, blastDamage, offlineSafe } from "./walls.js";
 import { PASSABLE } from "./collapse.js";
 import { markWanted } from "./guards.js";
@@ -204,7 +204,7 @@ export function machineGuardTick() {
     for (const machine of world.getDimension(id).getEntities({ families: ["siege_engine"] })) {
       try {
         const owner = machine.getDynamicProperty("siege:owner");
-        if (owner && !isOnline(owner)) machine.addEffect("resistance", 60, { amplifier: 4, showParticles: false });
+        if (owner && !attackable(owner)) machine.addEffect("resistance", 60, { amplifier: 4, showParticles: false });
       } catch {
         // gone
       }

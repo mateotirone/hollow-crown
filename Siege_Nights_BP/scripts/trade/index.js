@@ -154,7 +154,7 @@ function boardText(block) {
 }
 addMenuLabel({ block: TRADE_BOARD, name: "Trade Board", hint: "Click: trade routes", text: boardText });
 addMenuLabel({ block: BARREL, name: "Exports", hint: "Goods for your routes to send", where: (b) => crateKind(b) === "exports" });
-addMenuLabel({ block: BARREL, name: "Imports", hint: "What your routes bring back", where: (b) => crateKind(b) === "imports" });
+addMenuLabel({ block: BARREL, name: "Imports", hint: "What your routes bring back (Regals count in when you take them)", where: (b) => crateKind(b) === "imports" });
 
 function crateKind(block) {
   for (const o of Object.values(S().outposts)) {

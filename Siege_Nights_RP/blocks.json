@@ -593,5 +593,8 @@
  },
  "siege:root_cradle": {
   "sound": "wood"
+ },
+ "siege:regal_safe": {
+  "sound": "metal"
  }
 }

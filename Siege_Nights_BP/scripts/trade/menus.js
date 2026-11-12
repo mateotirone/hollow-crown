@@ -17,7 +17,9 @@ import {
 } from "./index.js";
 
 const say = (player, text) => { try { player.sendMessage(text); } catch {} };
-const TRADABLE = GOODS.filter((g) => g.id !== "siege:gold_coin");
+// Regals are one balance per player now (no coin items to put in a barrel), so they are not offered here; only
+// Kingsrest pays in Regals, as coins dropped in your Imports that count into your balance when you pick them up.
+const TRADABLE = GOODS.filter((g) => !g.money);
 const goodLabel = (g) => niceGood(g.id).replace(/\b\w/g, (c) => c.toUpperCase());
 const minutes = (ticks) => { const s = Math.round(ticks / 20); return s < 90 ? `${s} seconds` : `${Math.round(s / 60)} minutes`; };
 const STRONG = { "Aldmere Vale": "farming and timber", Frostmarch: "diamonds (short of iron)", Saltreach: "iron and fish (short of gold)", Emberwaste: "gold (short of diamonds)", Blackfen: "herbs and mushrooms" };
