@@ -122,6 +122,17 @@ block under the lowest verge stair at every corner. Gable triangles fill after t
 post (timber) and an attic window when the gable is 5 or more tall. Roof colour ladders run eaves to
 ridge, darkest at the ridge, with band edges wobbled ±0.04.
 
+**Every roof is textured** (Mateo, 2026-11-12, every style and theme): each roof block is mixed at random,
+cell by cell, with a partner block of the same colour, on stairs, slabs and the ridge alike. Pairs and the
+partner's share come from `TEXTURE_PAIRS` in `scripts/materials.py`, the same table as 06-roof step 10:
+deepslate tiles + deepslate bricks 40%, brick + granite 35%, dark oak + spruce 30%, spruce + dark oak 30%,
+mangrove + dark oak 25%, smooth quartz + polished diorite 35%, dark prismarine + warped planks 30%,
+prismarine bricks + prismarine 35%, smooth red sandstone + red sandstone 35%, polished blackstone bricks +
+blackstone 35%, mud bricks + granite 20%. Other blocks get the nearest same-colour block with stair and slab
+forms. Copper is the exception and keeps its weathering gradient. `"texture": false` on the roof material
+turns it off; `{"share": 0.4, "with": {"bricks": "mud_bricks"}}` picks your own. Domes and cones built from
+shapes take the same option on their material (`"texture": true`).
+
 Several roofs passed to `build_roofs` together combine by height (higher roof wins), which closes valleys;
 the `house` part builds one roof per building today, so L and T plans are two houses side by side for now.
 

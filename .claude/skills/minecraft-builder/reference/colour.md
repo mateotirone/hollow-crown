@@ -18,7 +18,9 @@ the extent of the cells that use the material); `reverse`; `dither` bayer (defau
 (hashed band-edge wobble, the roof-gradient value from 06-roof); `noise` 0.1 (low-frequency wobble of the
 bands); `blend` 0.5 (share of each step that is a dithered seam: solid bands with a dithered join, so a
 wide flat surface does not turn into checkerboard); `tags` (families: stone, terracotta, wood, metal, concrete, wool, natural); `roughness`; `need`
-(forms the blocks must have, default slab and stairs).
+(forms the blocks must have, default slab and stairs); `texture` true / 0.35 / {"share", "with"} (mix each
+block at random with a same-colour partner, see Roofs in parts.md; on by default for every house roof, never
+for copper).
 
 ## The rules the code follows
 

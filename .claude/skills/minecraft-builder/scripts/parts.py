@@ -521,10 +521,15 @@ def house(ctx, s):
 
 
 def _with_range(m, lo, hi):
+    """Roof material: the ladder spans eave to ridge, and every roof is textured (two same-colour blocks
+    mixed at random, Mateo 2026-11-12) unless the spec says "texture": false."""
     if isinstance(m, dict) and ("ladder" in m or "gradient" in m):
         m = dict(m); m.setdefault("from", lo); m.setdefault("to", hi)
     elif isinstance(m, str) and len(m) >= 5 and m[3] == "-" and m[:3].isupper():
         m = {"ladder": m, "axis": "y", "from": lo, "to": hi, "reverse": True}
+    elif isinstance(m, str):
+        m = {"color": m} if m.startswith("#") else {"block": m}
+    if isinstance(m, dict): m = dict(m); m.setdefault("texture", True)
     return m
 
 

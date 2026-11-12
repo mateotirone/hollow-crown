@@ -138,6 +138,8 @@ class Palette:
         idx = [self.ids.index(c) for c in cands]
         d = np.linalg.norm(self.lab[idx] - np.asarray(b["oklab"]), axis=1)
         d = d + 0.02 * np.array([abs(self.rough(c) - self.rough(block)) for c in cands])
+        fam = set(b["tags"]) & {"stone", "terracotta", "wood", "metal", "concrete", "wool", "natural"}
+        d = d + 0.05 * np.array([0 if fam & set(self.blocks[c]["tags"]) else 1 for c in cands])   # stone stays stone
         cache[key] = cands[int(np.argmin(d))]
         return cache[key]
 

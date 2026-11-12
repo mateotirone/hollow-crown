@@ -13,6 +13,10 @@ Gradient options: axis x|y|z|radial|noise (radial: distance from "center" [x, z]
 extent of the cells using the material; "reverse": true; "dither": "bayer" (default) | "none";
 "jitter": 0.04 (hashed band-edge wobble, the roof-gradient value); "noise": 0.1 (low-frequency wobble);
 "blend": 0.5 (share of each step that is a dithered seam; 1 = dither the whole way, 0 = hard bands).
+"texture": true | 0.35 | {"share": 0.35, "with": {"bricks": "granite"}}   every block of the material is mixed
+at random, cell by cell, with a second block of the same colour (TEXTURE_PAIRS, else nearest by OKLab in the
+same family with the same partial forms), so a surface reads as texture, not one repeated block. Every house
+roof has it on (Mateo, 2026-11-12); copper is never paired.
 Ladders never skip a step: neighbouring cells differ by at most one ladder block.
 """
 import json, math, os
@@ -62,6 +66,19 @@ def doctrine_ladder(code):
                 for f in r["families"]: _DOC[f["code"]] = f
     if code not in _DOC: raise KeyError(f"doctrine code {code} not found (build-instructions/texturing/doctrine.json)")
     return list(_DOC[code]["blocks"])
+
+
+# Roof texture pairs: main block -> (partner, partner's share), mixed at random cell by cell. The same table
+# as build-instructions/06-roof step 10 (kit.ROOF_TEXTURE); blocks not listed get the nearest same-colour
+# block. Copper is the exception: it keeps its weathering gradient and is never paired.
+TEXTURE_PAIRS = {
+    "deepslate_tiles": ("deepslate_bricks", 0.40), "brick_block": ("granite", 0.35),
+    "dark_oak_planks": ("spruce_planks", 0.30), "spruce_planks": ("dark_oak_planks", 0.30),
+    "mangrove_planks": ("dark_oak_planks", 0.25), "smooth_quartz": ("polished_diorite", 0.35),
+    "dark_prismarine": ("warped_planks", 0.30), "prismarine_bricks": ("prismarine", 0.35),
+    "smooth_red_sandstone": ("red_sandstone", 0.35), "polished_blackstone_bricks": ("blackstone", 0.35),
+    "mud_bricks": ("granite", 0.20),
+}
 
 
 class Materials:
@@ -119,8 +136,56 @@ class Materials:
             m["_ladder"] = [[k / n, b] for k, b in enumerate(ids)]
         else:
             raise ValueError(f"material {name}: needs block, color, gradient or ladder")
+        if m.get("texture") and "_ladder" in m:
+            m["_pair"] = self.partners(name, m)
         self.cache[name] = m
         return m
+
+    def partner(self, b, need, avoid=()):
+        """The block that textures `b`: nearest other block by OKLab with the same partial forms, same family
+        first (wood and metal never leave their family), never concrete or wool, never its own waxed twin or
+        another step of the same ladder; None when nothing is close enough."""
+        pal = self.pal
+        fam = [t for t in pal.blocks[b]["tags"] if t in ("stone", "terracotta", "wood", "metal", "natural")]
+        bare = lambda i: i.replace("waxed_", "")
+        lim = 0.09 if "wood" in fam else 0.06
+        tries = [(fam or None, lim)]
+        if not set(fam) & {"wood", "metal"}: tries.append((["stone", "terracotta", "natural"], 0.045))
+        for tags, lim in tries:
+            cs = [c for c in pal.candidates(need=need, tags_ok=tags) if bare(c) != bare(b) and bare(c) not in avoid
+                  and not any(t in pal.blocks[c]["tags"] for t in ("concrete", "wool"))
+                  and abs(pal.rough(c) - pal.rough(b)) <= 1]
+            if not cs: continue
+            n, d = pal.nearest(pal.blocks[b]["oklab"], cs)
+            if d[0] <= lim: return n[0]
+        return None
+
+    def partners(self, name, m):
+        """Each ladder block -> (partner, share). The shared table first, then the nearest block of the same
+        colour; failing that the next step of the material's own ladder when it is close, mixed in less."""
+        tx = m["texture"]
+        given = tx.get("with", {}) if isinstance(tx, dict) else {}
+        share = tx if isinstance(tx, (int, float)) and not isinstance(tx, bool) else (tx.get("share", 0.35) if isinstance(tx, dict) else 0.35)
+        need = m.get("need", ["slab", "stairs"])
+        lad = [b for _, b in m["_ladder"]]
+        avoid = {b.replace("waxed_", "") for b in lad}
+        pal, out = self.pal, {}
+        for k, b in enumerate(lad):
+            if "copper" in b: continue                      # copper keeps its weathering gradient
+            if b in given:
+                try: out[b] = (pal.resolve(given[b]), share)
+                except KeyError: self.log.append(f"material {name}: texture partner '{given[b]}' is not in the palette, skipped")
+                continue
+            if b in TEXTURE_PAIRS and TEXTURE_PAIRS[b][0] in pal.blocks:
+                out[b] = TEXTURE_PAIRS[b]; continue
+            p = self.partner(b, need, avoid)
+            if p: out[b] = (p, share); continue
+            near = [lad[j] for j in (k + 1, k - 1) if 0 <= j < len(lad)]
+            near = [(float(np.linalg.norm((np.array(pal.blocks[n]["oklab"]) - pal.blocks[b]["oklab"]) * pal.W)), n) for n in near]
+            near = [t for t in near if t[0] <= 0.17]
+            if near: out[b] = (min(near)[1], share * 0.6)
+            else: self.log.append(f"material {name}: no same-colour block to texture {b} with, left plain")
+        return out
 
     def note_cell(self, name, x, y, z):
         """Called for every cell before resolving, so gradients default to the material's real extent."""
@@ -133,8 +198,14 @@ class Materials:
         """-> (block id, is_raw)"""
         m = self.define(name)
         if "_raw" in m: return m["_raw"], True
+        b = self._pick(name, m, x, y, z)
+        pr = m.get("_pair", {})
+        if b in pr and h3(x, y, z, 23) < pr[b][1]: b = pr[b][0]
+        return b, False
+
+    def _pick(self, name, m, x, y, z):
         lad = m["_ladder"]
-        if len(lad) == 1: return lad[0][1], False
+        if len(lad) == 1: return lad[0][1]
         ax = m.get("axis", "y")
         rng = self.ranges.get(name, [[x, y, z], [x, y, z]])
         if ax == "noise":
@@ -153,4 +224,4 @@ class Materials:
         if m.get("noise"): p += (vnoise(x, y, z, m.get("scale", 4.0), 11) - 0.5) * 2 * m["noise"]
         if m.get("jitter"): p += (h3(x, y, z, 5) - 0.5) * 2 * m["jitter"]
         p = min(1.0, max(0.0, p))
-        return ladder_pick(lad, p, x, y, z, dither=m.get("dither", "bayer") != "none", blend=m.get("blend", 0.5)), False
+        return ladder_pick(lad, p, x, y, z, dither=m.get("dither", "bayer") != "none", blend=m.get("blend", 0.5))

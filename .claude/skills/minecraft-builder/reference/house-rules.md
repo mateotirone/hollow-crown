@@ -15,6 +15,7 @@ palettes, texturing, paths, reference); this page is the short list and where to
 - **Every overhang is carried** (bracket, post, corbel, truss).
 - **Shutters on at most about 30%** of windows, in symmetric pairs; planters on about a quarter.
 - **Roofs overhang 1** at eaves and verges; ridge the long way; secondary roofs lower; no flat roofs on houses
+- **Every roof is textured**: two blocks of the same colour mixed at random (copper keeps its gradient instead)
   outside Emberwaste.
 - **Texturing**: one material in a few shades, gradients over speckle, clusters with a cause (damp low, wear
   at edges), never skip a ladder step (`build-instructions/texturing/README.md`).
