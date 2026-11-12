@@ -38,7 +38,7 @@ edge row (barge board) to define the roof, as the chart says.
 | 15 | **M-shaped** (double gable) | two gables side by side with a valley between | each gable by its own span | total 13 to 21 (two odd spans with a shared wall) | wide deep buildings split into two ranges | inns, warehouses, the guildhall's back ranges, town houses back to back | a wide building without a towering single roof; the valley needs a gutter (stairs both sides) |
 | 16 | **Curved** (round barrel) | stairs and slabs stepping in a quarter circle each side: steep at the eaves, flat at the top | (s+1)/2 | 7 to 13 | halls, chapels, stations, Hollow halls | the station, Emberwaste vaults, the Hollow | a soft, old, almost ship-like shape; the station shed and storehouses |
 | 17 | **Dome** | courses stepping in as a circle, smooth, no one-cell ribs | about radius | 7 to 21, round or square plan | the capital hall, civic accents, Saltreach and Emberwaste civic | the capital, the square in big towns | the one thing seen from far away: a landmark |
-| 18 | **Flat with parapet** | the roof layer on the wall top, parapet 1 high, crenels or slabs | 1 | any | any | Emberwaste houses; Saltreach harbour terraces on a lower wing only | dry country; flat roofs elsewhere look unfinished |
+| 18 | **Flat with parapet** | the roof layer on the wall top, made of vigas: logs running right across the building and one block out on both sides, every other block, with top slabs between them (log, slab, log, slab; Mateo 2026-11-12); parapet 1 high on top, crenels or slabs | 1 | any | any | Emberwaste houses; Saltreach harbour terraces on a lower wing only | dry country; flat roofs elsewhere look unfinished |
 | 19 | **Butterfly** (two slopes falling to a middle valley) | the inverse of a gable | - | - | - | **never** | modern look; nothing in a medieval town has it |
 
 ## Choosing a roof from a footprint
@@ -83,6 +83,10 @@ edge row (barge board) to define the roof, as the chart says.
 - **Ridge spikes** (standard on every pitched ridge, Mateo 2026-11-12: "they add an awesome layer of depth"): a short spike every 3 or 5 blocks along the ridge (odd,
   centred on the ridge's centre block): an end rod or a wall block with a lightning rod or a fence post on
   top, in a dark metal or the trim wood. Taller ones at the gable peaks (finials).
+- **Ridge stairs back to back** (standard, Mateo 2026-11-12: "Nice"): the spine gets a cap of roof stairs set
+  back to back. On a one-block ridge (odd depth) the stairs pair up along the ridge, each pair's tall backs
+  touching, so the crest is a row of small peaks between the spikes; on a two-stair ridge (even depth) one pair
+  sits across the spine. It replaces the flat slab ridge row. Code: `kit.ridge_cap(bp)`, run before `texture_roofs`.
 - **Hanging lanterns at the verge tips**: a chain hanging 2 to 4 blocks from the lowest verge stair with a
   lantern at the end, at both front corners of a gable.
 - **Edge contrast**: use a different block for the verge and eaves row than the roof field (the chart's

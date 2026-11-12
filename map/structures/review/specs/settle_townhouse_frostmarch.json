@@ -1,0 +1,92 @@
+{
+ "card": {
+  "title": "Townhouse",
+  "sub": "Frostmarch, taller",
+  "region": "frostmarch",
+  "where": "Settlement plot (long Medium 13 x 15 or Large)",
+  "kind": "House",
+  "blurb": "A taller home of about six beds: a stone ground floor, a floor above jettied over the road, a high attic."
+ },
+ "after": "settle_skill:townhouse_inside",
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "frost_timber",
+    "roof": {
+     "ladder": [
+      "deepslate_tiles",
+      "deepslate_bricks"
+     ],
+     "axis": "noise",
+     "scale": 2
+    },
+    "box_signs": "ns"
+   },
+   "rect": [
+    -5,
+    -10,
+    5,
+    0
+   ],
+   "y": 0,
+   "plinth": 2,
+   "storeys": [
+    5,
+    5
+   ],
+   "jetty": [
+    "s"
+   ],
+   "storey_style": [
+    {
+     "frame_kind": "stone",
+     "frame": "deepslate_bricks",
+     "infill": {
+      "ladder": [
+       "cobbled_deepslate",
+       "polished_deepslate"
+      ],
+      "axis": "noise",
+      "scale": 3
+     }
+    },
+    {}
+   ],
+   "door": {
+    "side": "s",
+    "kind": "house",
+    "steps": 1
+   },
+   "roof": {
+    "type": "gable",
+    "ridge": "z",
+    "pitch": 1,
+    "gable_horns": true,
+    "snow": true
+   },
+   "dormers": [
+    {
+     "side": "e",
+     "at": 1,
+     "w": 3,
+     "h": 3
+    },
+    {
+     "side": "w",
+     "at": -1,
+     "w": 3,
+     "h": 3
+    }
+   ],
+   "chimney": [
+    [
+     3,
+     -8
+    ]
+   ],
+   "vines": 0
+  }
+ ],
+ "name": "settle_townhouse_frostmarch"
+}
