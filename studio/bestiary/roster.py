@@ -327,7 +327,7 @@ def m_scarab(m):
 mob(id="ash_scarab", name="Ash Scarab", family="wild_hostile", model=m_scarab, plan="bug",
     pal=P(shell={"c": (60, 40, 30), "style": "metal"}, leg=(40, 30, 24), eye=(255, 120, 30)),
     hp=6, speed=0.4, dmg=2, collision=(0.5, 0.35), resist=dict(fire=True), region="Emberwaste", egg=("#3c281e", "#ff781e"),
-    spawn=dict(biomes=["desert", "mesa"], light=None, herd=(4, 7), weight=8, pop="monster"),
+    spawn=dict(biomes=["desert", "mesa"], light=None, herd=(3, 5), weight=8, density=3, pop="monster"),
     lore="One is nothing. They are never one. Their bites smoulder, and their shells are half glass.")
 
 def m_wyrm(m):
@@ -381,7 +381,7 @@ def m_toad(m):
 mob(id="mire_toad", name="Mire Toad", family="wild_hostile", model=m_toad, plan="quad",
     pal=P(skin={"c": (90, 110, 50), "style": "stone"}, wart=(160, 90, 40), eye=(250, 200, 40)),
     hp=16, speed=0.3, dmg=3, collision=(0.8, 0.6), hops=True, region="Blackfen", egg=("#5a6e32", "#fac828"),
-    spawn=dict(biomes=["swamp", "mangrove_swamp"], light=None, herd=(1, 3), weight=6, pop="monster"),
+    spawn=dict(biomes=["swamp", "mangrove_swamp"], light=None, herd=(1, 2), weight=6, density=2, pop="monster"),
     lore="Its tongue reaches six blocks. Its skin is poison, so punching it is a mistake.")
 
 def m_wight(m):
