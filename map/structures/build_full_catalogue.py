@@ -11,7 +11,7 @@ import os, sys, json, base64, argparse, subprocess
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE); sys.path.insert(0, os.path.join(HERE, "render"))
 from bp import Blueprint
 from mesher import Mesher
-import random
+import random, re
 import vale_civic, settle_halls, settle_buildings, hollow_kit, capital, stations, regions_towns as RT
 from build_catalogue import DESIGNS, STYLE_NAMES
 
@@ -104,7 +104,7 @@ def main():
     def add(sec, key, title, sub, blurb, make, ground=("grass_block", "dirt"), view=None, status="new", extra=None):
         card = {"key": key, "title": title, "sub": sub, "blurb": blurb, "image": f"img/{key}.jpg", "status": status, **(extra or {})}
         sec["cards"].append(card)
-        if a.only and not key.startswith(a.only): return
+        if a.only and not re.match(a.only, key): return
         if a.mcstructure:
             structures.append((sec["title"], card, make())); return
         if a.viewer3d:
