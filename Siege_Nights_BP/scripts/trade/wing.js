@@ -1,30 +1,32 @@
-// The Trade Outpost wing: the station's Trade House design (settle/station_data.js, from map/structures/stations.py),
-// raised on the station's trade_join mark, with marks for the Trade Board and the two crates. Pure, so it loads in Node.
+// The Trade Outpost wing: the goods hall built with the minecraft-builder skill (outpost_data.js, from
+// map/structures/trade_outpost.py), in the region's style and the station's stage, raised on the station's trade_join
+// mark, with marks for the Trade Board and the two crates. Pure, so it loads in Node.
 
 import { Plan } from "../townhall/halls.js";
 import { drawData } from "../townhall/designs.js";
 import { styleFor } from "../settle/buildings.js";
-import { TRADE_HOUSE_DESIGNS } from "../settle/station_data.js";
-import { WING_SPOTS } from "./data.js";
+import { TRADE_OUTPOST_DESIGNS } from "./outpost_data.js";
 
 const plans = new Map();
-const regionOf = (style) => (TRADE_HOUSE_DESIGNS[style] ? style : "vale");
+const regionOf = (style) => (TRADE_OUTPOST_DESIGNS[style] ? style : "vale");
+// the design's marks -> the names the Outpost uses
+const SPOTS = { board: "board", exports: "export", imports: "import" };
 
 export function wingPlan(style, stage) {
   const region = regionOf(style);
-  if (!TRADE_HOUSE_DESIGNS[region][stage]) stage = "halt";
+  if (!TRADE_OUTPOST_DESIGNS[region][stage]) stage = "halt";
   const key = `${region}|${stage}`;
   if (plans.has(key)) return plans.get(key);
   const st = styleFor(region);
-  const d = TRADE_HOUSE_DESIGNS[region][stage];
-  const prefix = `th:${region}:${stage}`;
+  const d = TRADE_OUTPOST_DESIGNS[region][stage];
+  const prefix = `to:${region}:${stage}`;
   d.palette.forEach(([id], i) => { st.roles[`${prefix}:${i}`] = [id]; });
   const p = new Plan(st);
   drawData(p, d, prefix);
-  for (const [name, at] of Object.entries(WING_SPOTS)) {
-    const m = at(d.box);
-    p.set(m.x, m.y, m.z, "air"); // kept clear: the board and crates go in after the build
-    p.mark(name, m.x, m.y, m.z);
+  for (const [name, key] of Object.entries(SPOTS)) {
+    const [x, y, z] = d.marks[key];
+    p.set(x, y, z, "air"); // kept clear: the board and crates go in after the build
+    p.mark(name, x, y, z);
   }
   p.design = d;
   plans.set(key, p);

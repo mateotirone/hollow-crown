@@ -17,7 +17,8 @@ GRASS = (0x91, 0xBD, 0x59); FOLIAGE = (0x6A, 0x9E, 0x3A); SPRUCE = (0x61, 0x99, 
 WOODS = {"oak": "oak", "spruce": "spruce", "dark_oak": "big_oak", "birch": "birch", "jungle": "jungle", "acacia": "acacia", "mangrove": "mangrove",
          "cherry": "cherry", "pale_oak": "pale_oak", "warped": "warped"}
 # Bedrock names some newer textures differently from the old pattern
-TEX_ALIAS = {"planks_mangrove": "mangrove_planks", "log_mangrove": "mangrove_log_side", "log_mangrove_top": "mangrove_log_top",
+TEX_ALIAS = {"chiseled_deepslate": "deepslate/chiseled_deepslate", "chiseled_red_sandstone": "red_sandstone_carved", "deepslate": "deepslate/deepslate",
+             "planks_mangrove": "mangrove_planks", "log_mangrove": "mangrove_log_side", "log_mangrove_top": "mangrove_log_top",
              "stripped_mangrove_log": "stripped_mangrove_log_side",
              "door_mangrove_lower": "mangrove_door_bottom", "door_big_oak_lower": "door_dark_oak_lower", "door_big_oak_upper": "door_dark_oak_upper", "door_mangrove_upper": "mangrove_door_top",
              "log_cherry": "cherry_log_side", "log_cherry_top": "cherry_log_top", "stripped_cherry_log": "stripped_cherry_log_side",
@@ -357,6 +358,11 @@ def model(n, p):
     if n == "ladder":
         return [((0, 0, 0, 1, 1, 1 / 16), {"side": "ladder"}, {"cut": 1})]
     if n == "moss_carpet": return [((0, 0, 0, 1, 1 / 16, 1), {"side": "moss_block"}, {})]
+    if n == "pale_moss_carpet": return [((0, 0, 0, 1, 1 / 16, 1), {"side": "pale_moss_block"}, {})]
+    if n == "short_dry_grass": return [("cross", {"side": "short_dry_grass"}, {"cut": 1})]
+    if n == "candle" or n.endswith("_candle"):   # one candle, a 2x6 stick (lit: the wick glows)
+        t = f"candles/{n}{'_lit' if p.get('lit') else ''}"
+        return [((7 / 16, 0, 7 / 16, 9 / 16, 6 / 16, 9 / 16), {"side": f"{t}@0,8,2,14", "top": f"{t}@0,6,2,8"}, {"cut": 1, **({"glow": 1} if p.get("lit") else {})})]
     if n == "snow_layer": return [((0, 0, 0, 1, (2 * (int(p.get("height", 0)) + 1)) / 16, 1), {"side": "snow"}, {})]
     if n == "rail": return [((0, 0, 0, 1, 1 / 16, 1), {"side": "rail_normal"}, {"cut": 1})]
     if n in ("siege:portcullis", "siege:castle_gate"):
