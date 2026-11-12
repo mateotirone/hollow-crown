@@ -305,8 +305,11 @@ def base_bones():
         {"name": "rightItem", "parent": "rightArm", "pivot": [-6, 15, 1]},
         {"name": "leftArm", "parent": "body", "pivot": [5, 22, 0], "cubes": [{"origin": [4, 12, -2], "size": [4, 12, 4], "uv": [32, 48]}]},
         {"name": "leftItem", "parent": "leftArm", "pivot": [6, 15, 1]},
-        {"name": "rightLeg", "parent": "root", "pivot": [-1.9, 12, 0], "cubes": [{"origin": [-3.9, 0, -2], "size": [4, 12, 4], "uv": [0, 16]}]},
-        {"name": "leftLeg", "parent": "root", "pivot": [1.9, 12, 0], "cubes": [{"origin": [-0.1, 0, -2], "size": [4, 12, 4], "uv": [16, 48]}]},
+        # legs cut at the knee (same skin pixels; the armour has matching rightShin/leftShin bones) so soldiers can kneel
+        {"name": "rightLeg", "parent": "root", "pivot": [-1.9, 12, 0], "cubes": [{"origin": [-3.9, 6, -2], "size": [4, 6, 4], "uv": [0, 16]}]},
+        {"name": "rightShin", "parent": "rightLeg", "pivot": [-1.9, 6, 0], "cubes": [{"origin": [-3.9, 0, -2], "size": [4, 6, 4], "uv": [0, 22]}]},
+        {"name": "leftLeg", "parent": "root", "pivot": [1.9, 12, 0], "cubes": [{"origin": [-0.1, 6, -2], "size": [4, 6, 4], "uv": [16, 48]}]},
+        {"name": "leftShin", "parent": "leftLeg", "pivot": [1.9, 6, 0], "cubes": [{"origin": [-0.1, 0, -2], "size": [4, 6, 4], "uv": [16, 54]}]},
     ]
 
 def build_model(kind):
@@ -435,13 +438,16 @@ A["animation.hc.trebuchet_crew.load_trebuchet"] = {"loop": False, "animation_len
     "leftLeg": {"rotation": {"0.0": r(), "0.5": r(20, 0, 0), "1.2": r(), "2.4": r()}}}}
 A["animation.hc.trebuchet_crew.carry"] = {"loop": True, "bones": {"rightArm": {"rotation": r(-14, 0, 0)}, "mallet": {"rotation": r(14, 0, 0)}}}
 
-A["animation.hc.sapper.plant_charge"] = {"loop": False, "animation_length": 2.2, "bones": {   # kneel, set the charge, spring away
-    "root": {"position": {"0.0": r(), "0.35": r(0, -5, 0), "1.5": r(0, -5, 0), "1.8": r(0, 1, 2), "2.2": r()}},
-    "rightLeg": {"rotation": {"0.0": r(), "0.35": r(-90, 0, 0), "1.5": r(-90, 0, 0), "1.8": r(20, 0, 0), "2.2": r()}},
-    "leftLeg": {"rotation": {"0.0": r(), "0.35": r(-10, 0, 0), "1.5": r(-10, 0, 0), "1.8": r(-30, 0, 0), "2.2": r()}},
-    "body": {"rotation": {"0.0": r(), "0.35": r(28, 0, 0), "1.5": r(28, 0, 0), "1.8": r(-6, 0, 0), "2.2": r()}},
-    "rightArm": {"rotation": {"0.0": r(), "0.35": r(-60, 0, 0), "0.8": r(-48, 0, 0), "1.1": r(-60, 0, 0), "1.5": r(-60, 0, 0), "1.8": r(30, 0, 0), "2.2": r()}},
-    "leftArm": {"rotation": {"0.0": r(), "0.35": r(-56, 0, 0), "0.8": r(-62, 0, 0), "1.1": r(-50, 0, 0), "1.5": r(-56, 0, 0), "1.8": r(30, 0, 0), "2.2": r()}}}}
+A["animation.hc.sapper.plant_charge"] = {"loop": False, "animation_length": 2.2, "bones": {   # drop to one knee, set the charge, spring away
+    "root": {"position": {"0.0": r(), "0.35": r(0, -6, 0), "1.5": r(0, -6, 0), "1.8": r(0, 0.5, 2), "2.2": r()}},
+    "rightLeg": {"rotation": {"0.0": r(), "0.35": r(-90, 0, 0), "1.5": r(-90, 0, 0), "1.8": r(-20, 0, 0), "2.2": r()}},     # front thigh level
+    "rightShin": {"rotation": {"0.0": r(), "0.35": r(90, 0, 0), "1.5": r(90, 0, 0), "1.8": r(20, 0, 0), "2.2": r()}},     # front shin straight down
+    "leftLeg": {"rotation": {"0.0": r(), "0.35": r(0, 0, 0), "1.5": r(0, 0, 0), "1.8": r(25, 0, 0), "2.2": r()}},         # back thigh straight down
+    "leftShin": {"rotation": {"0.0": r(), "0.35": r(90, 0, 0), "1.5": r(90, 0, 0), "1.8": r(10, 0, 0), "2.2": r()}},      # knee on the ground, shin behind
+    "body": {"rotation": {"0.0": r(), "0.35": r(22, 0, 0), "1.5": r(22, 0, 0), "1.8": r(-6, 0, 0), "2.2": r()}},
+    "head": {"rotation": {"0.0": r(), "0.35": r(-10, 0, 0), "1.5": r(-10, 0, 0), "2.2": r()}},
+    "rightArm": {"rotation": {"0.0": r(), "0.35": r(-55, 0, 0), "0.8": r(-42, 0, 0), "1.1": r(-55, 0, 0), "1.5": r(-55, 0, 0), "1.8": r(30, 0, 0), "2.2": r()}},
+    "leftArm": {"rotation": {"0.0": r(), "0.35": r(-50, 0, 0), "0.8": r(-58, 0, 0), "1.1": r(-46, 0, 0), "1.5": r(-50, 0, 0), "1.8": r(30, 0, 0), "2.2": r()}}}}
 
 # pre_animation and the shared guard animations (written by tools/build_guard_anims.py)
 PRE = [
