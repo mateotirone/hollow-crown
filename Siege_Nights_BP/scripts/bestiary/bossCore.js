@@ -25,6 +25,7 @@ import { activeDimensions, alive, announce, effect, flat, give, heal, healthOf, 
 import { sfx, hasCue } from "../core/sfx.js";
 import { bossMove } from "./anim.js";
 import { MOVES } from "./moves.js";
+import { layBody } from "./bodies.js";
 
 const STEP = 5; // the framework ticks every 5 game ticks
 const FOREVER = 20000000;
@@ -435,9 +436,11 @@ function safely(f, fn) {
   }
 }
 
-function clearAdds(f) {
+// `fell`: the boss has just died, so its helpers drop where they stand (and leave bodies) instead of vanishing.
+function clearAdds(f, fell = false) {
   for (const e of f.adds()) {
     try {
+      if (fell) layBody(e);
       e.remove();
     } catch {
       // already gone
@@ -509,7 +512,7 @@ world.afterEvents.entityDie.subscribe((event) => {
 
 function finish(f, slayer) {
   fights.delete(f.id);
-  clearAdds(f);
+  clearAdds(f, true);
   const def = f.def, loc = f.lastLoc;
   const online = world.getPlayers();
   let players = online.filter((p) => f.damagers.has(p.id));
