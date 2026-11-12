@@ -171,7 +171,7 @@ function buyMenu(player, hallLevel, skill, body, why) {
   const hero = heroOf(player);
   const price = skill.coins;
   const form = new ActionFormData().title(skill.name)
-    .body(`${body}\n§7Or pay §f${coins(price)}§7 instead of points (you have ${coins(funds(player))} to hand). Regals paid are not given back if you unbind your oaths, and the skill stays.`);
+    .body(`${body}\n§7Or pay §f${coins(price)}§7 instead of points (you have ${coins(funds(player))}). Regals paid are not given back if you unbind your oaths, and the skill stays.`);
   const actions = [];
   if (!why) {
     form.button(`Swear this oath\n§8${skill.cost} skill point${skill.cost === 1 ? "" : "s"}`, skillIcon(skill));
@@ -179,7 +179,7 @@ function buyMenu(player, hallLevel, skill, body, why) {
   }
   form.button(`Pay ${coins(price)}\n§8no skill points needed`, "textures/items/siege_coin");
   actions.push(() => {
-    if (!charge(player, price, skill.id)) return player.sendMessage(`§cYou need ${coins(price)} (in your pockets, or your strongbox on your own land).`);
+    if (!charge(player, price, skill.id)) return player.sendMessage(`§cYou need ${coins(price)}.`);
     learn(player, skill, hallLevel, true);
   });
   form.button("Back");
