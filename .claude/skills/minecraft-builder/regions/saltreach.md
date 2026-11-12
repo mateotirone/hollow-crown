@@ -79,6 +79,8 @@ slides over. Colours are bleached and pale. Kelp dries on walls.
 - **Also:** low gables on stores, flat roof terraces on the lower wing of harbour houses, domes on civic
   buildings, the lighthouse cap.
 
+**No dormers** on Saltreach hipped roofs: the roofs stay low (refinement thread, 2026-11-12).
+
 **What they carry:**
 - spikes along the ridge (house rule);
 - brick chimneys;
@@ -170,7 +172,7 @@ Full table: `build-instructions/palettes/saltreach.md`; ladders SAL-01 to SAL-06
 ## Never
 
 - **Walls and colours:** no dark timber frames and no dark walls; Saltreach is pale.
-- **Roofs:** no steep roofs on houses, and no flat roofs over a whole house (terraces only on a lower wing).
+- **Roofs:** no dormers, no steep roofs on houses, and no flat roofs over a whole house (terraces only on a lower wing).
 - **Materials:**
   - no sand in walls, and no sand anywhere it can fall;
   - no unwaxed copper (it turns green on its own).

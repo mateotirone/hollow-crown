@@ -63,6 +63,12 @@ mud low down). Roofs carry moss.
 | Inn, smithy, store | the region's versions of the town set: mud brick and mangrove, low mossy roofs |
 | Halls | green glass, mossy roofs, more froglight |
 
+**On a plot (refinement thread, 2026-11-12):** buildings on plots keep their footprint and door step.
+The plinth course becomes `mangrove_log` piles at the corners and on every other edge block, driven two
+blocks below the ground, with `mangrove_roots` between them. The house reads as lifted without growing
+deeper. A real lift would push the front step out a row and break the plot's depth. Full stilts are for
+town and waterline houses.
+
 **From the ground up:**
 - **Stilts and platform:** mangrove log stilts (axis y) under every corner and bay, mangrove plank platform,
   no plinth.
@@ -130,7 +136,7 @@ mud low down). Roofs carry moss.
 | infill | `mud_bricks` 70 to 85, `packed_mud` 15 to 30 (lower half) |
 | stone | `tuff_bricks`, `mud_bricks`; courses `mud_brick` stairs and slabs |
 | frame | `mangrove_log`, `stripped_mangrove_log` |
-| trim | `mangrove` stairs, slabs, trapdoors (spruce as a second) |
+| trim | `spruce` stairs, slabs, trapdoors (mangrove trim reads too vivid red against the dark oak roof; mangrove stays for doors, shutters and frames) |
 | light | `verdant_froglight`, `ochre_froglight` in iron-bar cages, `lantern` |
 
 Full table: `build-instructions/palettes/blackfen.md`; ladders BLK-01 to BLK-05:
@@ -145,7 +151,7 @@ get dark oak stairs and fences for bark, never mud brick.
 
 ## Building it with the skill
 
-- **Preset:** `fen_timber`: mud brick in a proud mangrove frame, brown glass, a dark oak roof.
+- **Preset:** `fen_timber`: mud brick in a proud mangrove frame, spruce trim, brown glass, a dark oak roof.
 - **Roof:** `"roof": {"type": "gable"}`, with the house set on stilts by giving it `"y"` 3 or 4 above the
   ground.
 - **Stilts:** build the stilts with `place` (mangrove logs, axis y) under every corner and frame post, down to
@@ -158,7 +164,8 @@ get dark oak stairs and fences for bark, never mud brick.
 ```
 
 **Not in the skill yet:**
-- a stilts part (posts down to the ground, the stair to the landing);
+- a stilts part (posts down to the ground, the stair to the landing) and the plot piles (mangrove log piles
+  and roots in place of the plinth course);
 - the moss on the roof (add it with `place`, or ask for a `moss` roof option);
 - boardwalks;
 - thatch roofs;

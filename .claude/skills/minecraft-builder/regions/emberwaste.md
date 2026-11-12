@@ -83,7 +83,10 @@ drip lines. Wear shows as dusty edges and a slightly darker band at the base of 
 - **Also:** domes on drums for civic buildings, low red pitched or domed roofs on 3 in 10 houses, and curved
   roofs.
 
-This is the one region where flat roofs on houses are the rule, not the exception.
+This is the one region where flat roofs on houses are the rule, not the exception. The refinement thread's
+plot designs (2026-11-12) put a flat roof on **every** building, the stone Mint included. A house with no
+attic gets a low extra storey instead of a pitched roof. The towns mix below still gives Sunscar 3 in 10
+red pitched or domed roofs: see the open questions in the README.
 
 **What they carry:**
 - roof terraces;
@@ -108,7 +111,7 @@ This is the one region where flat roofs on houses are the rule, not the exceptio
 **How they are made:**
 - The flat roof is a full layer on the top course of the wall, never floating.
 - The parapet is 1 high round the edge, with posts on the corners.
-- Beam ends stick out one block below the roof line, every other block along the long sides.
+- Roof beams (vigas) stick out every other block along the long sides, one block below the roof deck.
 - Domes sit on a drum with windows, courses stepping in as a circle with no one-cell ribs, and the
   copper gets greener near the top.
 

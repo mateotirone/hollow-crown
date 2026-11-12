@@ -41,7 +41,7 @@ STYLES = {
                        sign_wood="spruce", chimney="stone_bricks", quoin="polished_andesite", stone="VAL-01", frame_kind="flush", sill="leafbox"),
     # the other regions (regions/<region>.md says when to use each; roof pitch and type stay in the spec)
     "frost_timber": dict(plinth={"ladder": "FRO-01", "axis": "noise", "scale": 3}, frame="dark_oak_log",
-                         infill={"ladder": ["spruce_planks", "stripped_spruce_log"], "axis": "noise", "scale": 2}, floor="spruce_planks",
+                         infill="spruce_planks", floor="spruce_planks",
                          trim="dark_oak_planks", roof={"block": "dark_oak_planks"}, shutter="dark_oak_planks", door="dark_oak_door",
                          glass="white_stained_glass_pane", leaves="spruce_leaves", sign_wood="dark_oak", chimney="deepslate_bricks",
                          quoin="polished_deepslate", stone="FRO-01", frame_kind="flush", sill="stair"),
@@ -59,7 +59,7 @@ STYLES = {
                        leaves="azalea_leaves", sign_wood="birch", chimney="brick_block", quoin="cut_sandstone", stone="smooth_sandstone",
                        frame_kind="stone", sill="stair"),
     "fen_timber": dict(plinth={"ladder": ["mud_bricks", "tuff_bricks"], "axis": "noise", "scale": 3}, frame="mangrove_log",
-                       infill={"ladder": ["packed_mud", "mud_bricks"], "axis": "y"}, floor="dark_oak_planks", trim="mangrove_planks",
+                       infill={"ladder": ["packed_mud", "mud_bricks"], "axis": "y"}, floor="dark_oak_planks", trim="spruce_planks",
                        roof={"block": "dark_oak_planks"}, shutter="mangrove_planks", door="mangrove_door", glass="brown_stained_glass_pane",
                        leaves="mangrove_leaves", sign_wood="mangrove", chimney="mud_bricks", quoin="tuff_bricks", stone="mud_bricks",
                        frame_kind="proud", sill="stair"),
@@ -261,7 +261,7 @@ def window(ctx, rect, side, t, floor, style, w=1, h=2, head_room=9, frame_kind="
         for k in ks:
             leaf = style["leaves"] + ("_flowered" if style["leaves"] == "azalea_leaves" and h3(*at(k, 1, 1), seed) < 0.3 else "")
             ctx.set(*at(k, 1, 1), S, raw=leaf)
-            ctx.setif(*at(k, 1, 2), S, raw=f"{sw}_wall_sign", facing=side)
+            if side in style.get("box_signs", "nsew"): ctx.setif(*at(k, 1, 2), S, raw=f"{sw}_wall_sign", facing=side)
         lk, rk = -(w // 2) - 1, w // 2 + 1
         ctx.setif(*at(lk, 1, 1), S, raw=f"{sw}_wall_sign", facing=_dir_of(-rx, -rz))
         ctx.setif(*at(rk, 1, 1), S, raw=f"{sw}_wall_sign", facing=_dir_of(rx, rz))
@@ -612,6 +612,11 @@ def _openings(ctx, s, st, B, H_blocks, H_extra, others):
                 window(ctx, rr, sd, t, fl, st, ww, wh, head_room, B["fk_of"][i], sh, wv.get("sill"))
 
 
+def raw_roof(ctx, st):
+    raw = st["roof"]
+    return ctx.spec["materials"].get(raw, raw) if isinstance(raw, str) else raw
+
+
 def _roof_of(ctx, s, st, B, k=0):
     """The roof field of one block of a building (06-roof). Wings get their own copy of the roof material,
     so a colour ladder runs eave to ridge on each roof, not over the main roof's heights."""
@@ -629,7 +634,9 @@ def _roof_of(ctx, s, st, B, k=0):
         ctx.spec["materials"][rmat] = _with_range(ctx.spec["materials"][rmat], plate, plate + 1)
         return F, {"rect": top, "ridge": "x", "base": plate, "kind": "flat", "pitch": 0, "mat": rmat, "flat": rs}
     F, ridge = roof_field(top, kind, rs.get("ridge"), rs.get("overhang", 1), rs.get("verge", 1), pitch, plate)
-    r = {"rect": top, "ridge": ridge, "base": plate, "kind": kind, "pitch": pitch, "mat": rmat, "cap": rs.get("cap", rmat)}
+    r = {"rect": top, "ridge": ridge, "base": plate, "kind": kind, "pitch": pitch, "mat": rmat, "cap": rs.get("cap", rmat),
+         "horns": rs.get("gable_horns", False)}
+    if not k: ctx.last_roof = {a: b for a, b in raw_roof(ctx, st).items() if a not in ("from", "to")} if isinstance(raw_roof(ctx, st), dict) else raw_roof(ctx, st)
     ctx.spec["materials"][rmat] = _with_range(ctx.spec["materials"][rmat], plate, max(v[0] for v in F.values()))
     return F, r
 
@@ -928,6 +935,14 @@ def finials(ctx, r, H, kind, skip=(), st=None):
         peak = k in (0, n - 1)
         if not peak and (kind == "peaks" or (k - mid) % 3 or k in (1, n - 2)): continue
         y = top + 1                                     # in place of the ridge slab
+        if peak and r.get("horns") and r["kind"] == "gable":
+            # Frostmarch gable horns (settle_halls.dragon_heads): the verge boards run on past the ridge in a V
+            cx, cz = (0, 1) if r["ridge"] == "x" else (1, 0)
+            for s_ in (-1, 1):
+                for i in (1, 2):
+                    ctx.set(x + cx * s_ * i, top + i - 1, z + cz * s_ * i, "details", "stairs", post,
+                            facing=_dir_of(cx * s_, cz * s_), half="bottom")
+            continue
         ctx.clear(x, y, z)
         if kind == "endrods" and not peak:
             ctx.set(x, y, z, "details", raw="end_rod"); continue
@@ -1007,7 +1022,7 @@ def lean_to(ctx, s):
     upside-down trim stairs, barge boards on both ends. Keys: roof, post, trim, floor (optional), y (ground)."""
     x0, z0, x1, z1 = s["rect"]; side = s.get("against", "n"); top = s["top"]; y0 = s.get("y", 0)
     pitch = s.get("pitch", 1)
-    st = {"_name": s.get("name", f"lean_to{ctx.n}"), "roof": s.get("roof", {"ladder": "VAL-06"}),
+    st = {"_name": s.get("name", f"lean_to{ctx.n}"), "roof": s.get("roof", getattr(ctx, "last_roof", None) or {"ladder": "VAL-06"}),
           "post": s.get("post", "stripped_spruce_log"), "trim": s.get("trim", "spruce_planks")}
     ctx.n += 1
     rm, pm, tm = ctx.mat(st, "roof"), ctx.mat(st, "post"), ctx.mat(st, "trim")

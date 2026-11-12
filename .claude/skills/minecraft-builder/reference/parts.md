@@ -125,7 +125,7 @@ For a curved arch in a solid mass (bridges, gateways, arcades) use the `arch` sh
 
 ## Roofs (06-roof)
 
-`roof` in a house: `type` gable / hip / flat, `ridge` x / z (default the long way), `pitch` 1 (45°) or 2 (steep:
+`roof` in a house: `type` gable / hip / flat, `gable_horns` (Frostmarch dragon heads: crossed barge boards in a V past the ridge at each gable end), `ridge` x / z (default the long way), `pitch` 1 (45°) or 2 (steep:
 stair on a full block), `overhang` 1, `verge` 1, `cap` (ridge slab material).
 
 How it is built: a height field over the footprint plus overhang; every cell takes a stair facing uphill;
@@ -170,7 +170,7 @@ pot on top.
 | `string_course` | `rect`, `y`, `sides`, `material` | upside-down stairs 1 out, corners wrapped with outer-corner stairs (07) |
 | `buttress` | `rect`, `side`, `at` [offsets], `y`, `height`, `depth` | 1 to 2 out at the foot, stepping in with a stair at mid height and a stair cap (02 step 6) |
 | `hanging_lantern` | `at`, `chain` | chain links down to a hanging lantern, from a corner block or bracket (07) |
-| `lean_to` | `rect`, `against` (n/s/e/w), `top`, `pitch` (1 or `"half"`), `y`, `roof`, `post`, `trim`, `floor` | a skillion against a wall: one slope falling away from `against`, starting at `top`, overhang 1 at the low edge and a verge at both ends; tie beam under the low edge, log posts at the ends and every 4, upside-down trim stairs under the overhang, barge boards. Roof gets the two-block texture (06) |
+| `lean_to` | `rect`, `against` (n/s/e/w), `top`, `pitch` (1 or `"half"`), `y`, `roof`, `post`, `trim`, `floor` | a skillion against a wall: one slope falling away from `against`, starting at `top`, overhang 1 at the low edge and a verge at both ends; tie beam under the low edge, log posts at the ends and every 4, upside-down trim stairs under the overhang, barge boards. Roof gets the two-block texture (06) and, without `roof`, the colour of the house built before it |
 | `woodpile` | `at`, `len`, `h` (2-3), `facing`, `wood`, `cover` (`slab`/`trapdoor`/`none`) | logs lying with the end grain to `facing`, top row stepped in, about 1 in 5 stripped, a slab or trapdoor cover, a chopping block beside it (07 dressing) |
 | `spire` | `rect` (the tower), `y` (`"top"` default), `rows` (3), `kind` (`stepped` / `broach`), `overhang`, `roof`, `trim`, `finial` (`spire_block` default / `rod` / `tall` / `short` / `none`) | sits on the walls of whatever is built in `rect` and replaces its roof: an eave ring over the overhang with upside-down trim under it, the tower's width one row, then rings stepping in one block every `rows` rows (stairs stacked on stairs, full corners), then the add-on's spire top block `siege:spire_roof` on the full top block (or a wall-post finial with a lightning rod). **Never a slab under a spire top** (Mateo 2026-11-12: it floats): the engine swaps any slab under `siege:spire_roof` for the full block, in every build, `place` cells included. `broach` leaves the corners off the upper rings so it turns octagonal (06 steep roofs) |
 | `belfry` | `rect`, `y` (`"top"` on a tower, `"roof"` on a ridge, or a number), `h` (4), `pier`, `deck`, `trim`, `louvres`, `bell` (true), `cap` (`hip` / `spire` / `none`), `roof`, `finial`, `base` | an open bell storey: deck (built up from the roof on a ridge), corner piers (walls when 3 wide), a round-angle head on every face 5 or more wide, a beam ring, a beam across with a hanging bell, louvres of open trapdoors flush to each face, then a spire cap (rows 1 = a hip cap) |

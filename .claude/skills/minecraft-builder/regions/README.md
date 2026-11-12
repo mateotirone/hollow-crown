@@ -44,6 +44,11 @@ These rules hold in every region unless the region's page says otherwise. They a
 - **Chimney and interiors:** Mateo's chimney; interiors empty except the inn.
 - **Overhangs and shutters:** every overhang carried; shutters on at most 3 in 10 windows.
 - **Tone:** uneasy at night, never horror and never vanilla.
+- **Lean-tos** take their house's roof colour (a teal lean-to on an orange roof looks wrong); the skill's
+  `lean_to` now follows the last house's roof unless given `roof`.
+- **Narrow plots:** a window box's front sign can stick out past the roof verge on a side wall. On Medium
+  plots (11 wide) keep the box and drop the sign face on the side walls (`"box_signs": "ns"` in the style
+  keeps it only on the north and south walls).
 
 ## Where the facts come from
 
@@ -70,6 +75,9 @@ given here.
 - **Saltreach has two looks**: the Mediterranean and Atlantic harbour town, and the English chalk cliffs
   Mateo asked for on its northern coast. The pages keep both: the cliffs are land, the town is the
   harbour style.
+- **Emberwaste roofs**: the confirmed towns mix gives Sunscar 7 flat and 3 red pitched or domed roofs,
+  while the refinement thread's plot designs make every Emberwaste building flat. The pages say: plots
+  flat, town houses follow the mix. Mateo's call.
 - **Flat roofs**: the house rule "no flat roofs on houses" does not apply to the Emberwaste (flat is its
   default) or to Saltreach terraces on a lower wing.
 - **Still missing from the skill**, so it is built by hand (`place`) for now:

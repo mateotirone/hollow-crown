@@ -68,7 +68,7 @@ snow layers. Plinths are often 2 courses high to stay above the drifts. Snow lay
 - **Plinth:** dark cobbled deepslate, often 2 courses (FRO-01 ladder: `deepslate_bricks`, `cobbled_deepslate`,
   `tuff`, `andesite`, darkest at the base).
 - **Frame:** heavy dark log frame (`dark_oak_log` or `spruce_log`), with big corner posts.
-- **Walls:** spruce plank infill laid in whole rows, about 30% stripped spruce logs lying along the wall.
+- **Walls:** plain spruce plank infill (a row mix with stripped logs looked busy).
 - **Gables:** vertical stripped spruce or planks.
 - **Jetties:** they work on houses but never on halls.
 
@@ -83,7 +83,9 @@ snow layers. Plinths are often 2 courses high to stay above the drifts. Snow lay
   - steep spires.
 
 **What they carry:**
-- **Gable peaks:** dragon heads (`settle_halls.dragon_heads`), crossed on the longhouse.
+- **Gable peaks:** dragon heads: crossed barge boards that run on past the ridge in a V, one block above the
+  ridge at each gable end (`settle_halls.dragon_heads`; in the skill `"gable_horns": true`). Every gable roof
+  carries them (refinement thread, 2026-11-12).
 - **Ridge:** spikes every 3 blocks (house rule).
 - **Snow:** snow layers on the ridge and the top rows of every roof, and on chimney caps.
 - **Chimneys:** dark deepslate brick with a cobbled deepslate wall cap.
@@ -133,7 +135,7 @@ snow layers. Plinths are often 2 courses high to stay above the drifts. Snow lay
 |---|---|
 | plinth | `cobbled_deepslate` 60, `deepslate_bricks` 25, regional castle cobble 15 |
 | stone | `polished_deepslate`, `deepslate_bricks`, `cobbled_deepslate` with `stone_bricks` and `andesite` |
-| plank infill | `spruce_planks` 70, `stripped_spruce_log` 30 (rows, axis along the wall) |
+| plank infill | plain `spruce_planks` (the refinement thread found the spruce and stripped-log row mix busy; keep stripped logs for gables) |
 | light infill | `snow` block, `calcite`, `white_concrete` |
 | frame | `dark_oak_log`, `spruce_log` |
 | trim | `dark_oak` (spruce on dark oak buildings) |
@@ -155,18 +157,17 @@ spruces (tall spruce, grey fir).
 - **Presets:**
   - `frost_timber`: plank rows in a dark log frame, white frosted glass;
   - `frost_stone`: dark deepslate, for towers and halls' ground storeys.
-- **Roof:** always set `"roof": {"type": "gable", "pitch": 2}`.
+- **Roof:** always set `"roof": {"type": "gable", "pitch": 2, "gable_horns": true}`.
 - **Parts that fit:** `woodpile`, `lean_to`, `spire` (stave chapel top), `belfry`, `porch`.
 
 ```json
 {"part": "house", "style": "frost_timber", "rect": [0, 0, 8, 10], "plinth": 2, "storeys": [5, 4],
- "door": {"side": "s"}, "roof": {"type": "gable", "pitch": 2, "ridge": "z"},
+ "door": {"side": "s"}, "roof": {"type": "gable", "pitch": 2, "ridge": "z", "gable_horns": true},
  "storey_style": [{"frame_kind": "stone", "infill": "FRO-01"}, {}]}
 ```
 
 **Not in the skill yet:**
 - **Snow:** snow layers on the ridge and top rows (add them with `place`, or ask for a `snow` roof option).
-- **Dragon heads:** use `place` from `settle_halls.dragon_heads`.
 - **Roof forms:** skirt roofs and tiered stave roofs; build the tiers as stacked houses with lean-tos.
 
 ## Never
