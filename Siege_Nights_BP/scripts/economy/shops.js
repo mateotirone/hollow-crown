@@ -8,15 +8,16 @@
 //   The region (for regional prices) is taken from the nearest Plot Stone, or name it:
 //                 /scriptevent siege:economy_npc farmer Frostmarch
 
-import { world, system, GameMode, ItemStack, ItemTypes } from "@minecraft/server";
+import { world, system, GameMode, ItemStack, ItemTypes, EquipmentSlot } from "@minecraft/server";
 import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
 import { isReady, isNight, countItem, takeItems, pick, emit } from "../siege/api.js";
 import { allPlots } from "../plots/claims.js"; // same function plots/api.js re-exports; claims.js exists in every snapshot of the repo
 import { ECON, JOBS, JOB_IDS, LINES, REGIONS, EXCHANGE } from "./config.js";
 import { regional, appetite, payout, cost, coins, niceName, stopAt } from "./rules.js";
-import { funds, charge, pay, carried } from "./coins.js";
+import { funds, charge, pay } from "./coins.js";
 import { sfx } from "../core/sfx.js";
 import { guildMenu } from "../guild/index.js";
+import { reforgeTarget, reforgePrice, armourName } from "./regional_armor.js";
 
 export const JOB_TAG = "siege_job";
 const jobTag = (id) => `siege_job_${id}`;
@@ -219,29 +220,6 @@ async function buyMenu(player, npc, jobId, region) {
   buyMenu(player, npc, jobId, region);
 }
 
-// ---------- the Moneyer's extra: making change ----------
-
-async function changeMenu(player, npc) {
-  const have = carried(player);
-  const form = new ActionFormData().title("Moneyer: change")
-    .body(`One ${ECON.gold} is ${coins(ECON.goldWorth)}. You carry ${coins(have)} in all.`)
-    .button(`Into ${ECON.gold}s\n§8as few coins as possible`).button(`Into ${ECON.many}\n§8break one ${ECON.gold}`).button("Back");
-  const res = await form.show(player);
-  if (res.canceled) return;
-  if (res.selection === 0) {
-    const small = countItem(player, "siege:coin");
-    if (small >= ECON.goldWorth) {
-      const gold = Math.floor(small / ECON.goldWorth);
-      if (takeItems(player, "siege:coin", gold * ECON.goldWorth)) hand(player, "siege:gold_coin", gold);
-    }
-  } else if (res.selection === 1) {
-    if (countItem(player, "siege:gold_coin") > 0 && takeItems(player, "siege:gold_coin", 1)) hand(player, "siege:coin", ECON.goldWorth);
-  }
-  openShop(player, npc);
-}
-
-// ---------- the Moneyer's trade-up ladder (config.js EXCHANGE) ----------
-
 async function exchangeMenu(player, npc) {
   const form = new ActionFormData().title("Moneyer: trade up")
     .body("Any metal can be traded up one step. It is dear: digging it yourself, or winning it, is always cheaper.");
@@ -275,6 +253,84 @@ async function exchangeMenu(player, npc) {
   return exchangeMenu(player, npc);
 }
 
+// ---------- the Smith's reforge: any armour into this region's style (regional_armor.js) ----------
+
+const WORN = [EquipmentSlot.Head, EquipmentSlot.Chest, EquipmentSlot.Legs, EquipmentSlot.Feet];
+
+// Every piece the player wears or carries that this region's Smith can reforge: { stack, to, price, put(stack) }
+function reforgeable(player, region) {
+  const found = [];
+  const eq = player.getComponent("minecraft:equippable");
+  for (const slot of WORN) {
+    const stack = eq?.getEquipment(slot);
+    const to = stack && reforgeTarget(stack.typeId, region);
+    if (to && known(to)) found.push({ stack, to, price: reforgePrice(stack.typeId), worn: true, put: (s) => eq.setEquipment(slot, s) });
+  }
+  const inv = player.getComponent("minecraft:inventory")?.container;
+  for (let i = 0; inv && i < inv.size; i++) {
+    const stack = inv.getItem(i);
+    const to = stack && reforgeTarget(stack.typeId, region);
+    if (to && known(to)) found.push({ stack, to, price: reforgePrice(stack.typeId), worn: false, put: (s) => inv.setItem(i, s) });
+  }
+  return found;
+}
+
+// The same piece in the new style: enchantments, wear, name and lore come along (trims do not: the API can't read them)
+export function reforged(stack, toId) {
+  const out = new ItemStack(toId, 1);
+  if (stack.nameTag) out.nameTag = stack.nameTag;
+  try {
+    const lore = stack.getLore();
+    if (lore.length) out.setLore(lore);
+  } catch {
+    // no lore
+  }
+  try {
+    const to = out.getComponent("minecraft:enchantable");
+    for (const e of stack.getComponent("minecraft:enchantable")?.getEnchantments() ?? []) {
+      try {
+        to?.addEnchantment(e);
+      } catch {
+        // an enchantment this piece can't hold
+      }
+    }
+  } catch {
+    // not enchantable
+  }
+  try {
+    const from = stack.getComponent("minecraft:durability"), to = out.getComponent("minecraft:durability");
+    if (from && to) to.damage = Math.min(to.maxDurability - 1, Math.round((from.damage / from.maxDurability) * to.maxDurability));
+  } catch {
+    // no wear
+  }
+  return out;
+}
+
+async function reforgeMenu(player, npc, region) {
+  const pieces = reforgeable(player, region);
+  const form = new ActionFormData().title(`Smith: ${region} style`)
+    .body(`Any armour you wear or carry, reforged in the ${region} style. It keeps its enchantments, its wear and its name.\n\nYou have ${coins(funds(player))}.`
+      + (pieces.length ? "" : "\n\n§7You have no armour he could reforge here."));
+  for (const p of pieces) form.button(`${armourName(p.stack.typeId)}${p.worn ? " (worn)" : ""}\n§8${coins(p.price)} → ${armourName(p.to)}`);
+  const total = pieces.reduce((sum, p) => sum + p.price, 0);
+  if (pieces.length > 1) form.button(`Reforge all of it\n§8${coins(total)}`);
+  form.button("Back");
+  const res = await form.show(player);
+  if (res.canceled) return;
+  const chosen = pieces.length > 1 && res.selection === pieces.length ? pieces : pieces[res.selection] ? [pieces[res.selection]] : undefined;
+  if (!chosen) return openShop(player, npc);
+  const price = chosen.reduce((sum, p) => sum + p.price, 0);
+  if (!charge(player, price, "smith")) {
+    player.sendMessage(`§7Smith: §fThat's ${coins(price)}. You have ${coins(funds(player))}.`);
+    return reforgeMenu(player, npc, region);
+  }
+  for (const p of chosen) p.put(reforged(p.stack, p.to));
+  sfx(player, "random.anvil_use");
+  player.onScreenDisplay.setActionBar(`§6Reforged in the ${region} style§7 for ${coins(price)}`);
+  emit("armourReforged", { player, region, count: chosen.length, coins: price });
+  return reforgeMenu(player, npc, region);
+}
+
 // ---------- the shop ----------
 
 export async function openShop(player, npc) {
@@ -293,7 +349,7 @@ export async function openShop(player, npc) {
   const acts = [];
   form.button("Sell"); acts.push(() => sellMenu(player, npc, jobId, region));
   if (job.sells.some((good) => forSale(good, region))) { form.button("Buy"); acts.push(() => buyMenu(player, npc, jobId, region)); }
-  if (job.mint) { form.button("Change coins"); acts.push(() => changeMenu(player, npc)); }
+  if (jobId === "smith" && region) { form.button(`Reforge armour\n§8in the ${region} style`); acts.push(() => reforgeMenu(player, npc, region)); }
   if (job.mint) { form.button("Trade up metal\n§8iron → gold → diamond → netherite"); acts.push(() => exchangeMenu(player, npc)); }
   form.button("Leave");
   const res = await form.show(player);

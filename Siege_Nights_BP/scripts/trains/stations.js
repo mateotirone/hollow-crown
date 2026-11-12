@@ -8,7 +8,7 @@
 
 import { Plan } from "../townhall/halls.js";
 import { drawData } from "../townhall/designs.js";
-import { styleFor } from "../settle/buildings.js";
+import { styleFor, spellings } from "../settle/buildings.js";
 import { STATION_DESIGNS } from "../settle/station_data.js";
 
 export const STAGES = ["halt", "station", "junction", "grand"];
@@ -22,6 +22,7 @@ export const STATION = {
   findTrack: 8, // a new station lines up with straight track this close to its post (blocks across)
   findTrackUp: 3,
   noTrackBack: 3, // with no track near, the line goes this far behind the post (the building in front)
+  noTrackLift: 1, // and this much higher than the post, so the platform stands on the ground and the track on a bed
   perTick: 48, // blocks placed per tick while it rises
 };
 
@@ -39,7 +40,7 @@ export function stationPlan(style, stage) {
   const st = styleFor(region);
   const d = STATION_DESIGNS[region][stage];
   const prefix = `sd:${region}:${stage}`;
-  d.palette.forEach(([id], i) => { st.roles[`${prefix}:${i}`] = [id]; });
+  d.palette.forEach(([id], i) => { st.roles[`${prefix}:${i}`] = spellings(id); });
   const p = new Plan(st);
   drawData(p, d, prefix);
   const x0 = d.box.x0 - STATION.runOn, x1 = d.box.x1 + STATION.runOn;
@@ -93,7 +94,7 @@ export function siteFor(post, get, facing) {
     return { origin: { x: best.x, y: best.y, z: best.z }, forward, onTrack: true };
   }
   const f = cardinal(facing);
-  return { origin: { x: post.x - f.x * STATION.noTrackBack, y: post.y, z: post.z - f.z * STATION.noTrackBack }, forward: f, onTrack: false };
+  return { origin: { x: post.x - f.x * STATION.noTrackBack, y: post.y + STATION.noTrackLift, z: post.z - f.z * STATION.noTrackBack }, forward: f, onTrack: false };
 }
 
 // Nearest of north/east/south/west to a direction vector

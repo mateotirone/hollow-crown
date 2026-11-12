@@ -1,0 +1,55 @@
+{
+ "card": {
+  "title": "Mint",
+  "sub": "Emberwaste, stone",
+  "region": "emberwaste",
+  "where": "Settlement plot (Medium 11 x 15)",
+  "kind": "Work",
+  "blurb": "Where the town strikes its Regals: stone walls, barred ground-floor windows and a heavy door."
+ },
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "ember_sandstone",
+    "frame": "cut_red_sandstone",
+    "infill": {
+     "ladder": [
+      "smooth_red_sandstone",
+      "red_sandstone"
+     ],
+     "axis": "noise",
+     "scale": 2
+    },
+    "roof": "smooth_sandstone",
+    "box_signs": "ns"
+   },
+   "rect": [
+    -4,
+    -10,
+    4,
+    0
+   ],
+   "y": 0,
+   "plinth": 2,
+   "storeys": [
+    5,
+    4
+   ],
+   "door": {
+    "side": "s",
+    "kind": "grand",
+    "steps": 1
+   },
+   "roof": {
+    "type": "flat",
+    "parapet": "slab",
+    "beams": true
+   },
+   "interior": "mint",
+   "chimney": false,
+   "shutters": 0
+  }
+ ],
+ "name": "settle_mint_emberwaste"
+}

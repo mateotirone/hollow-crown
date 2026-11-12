@@ -2,11 +2,13 @@
 
 import { BlockTypes, EntityTypes, ItemTypes } from "@minecraft/server";
 import { addTests, assert, assertEqual } from "../siege/api.js";
-import { SHAPES, layTrack, cursorOn, advance, back, pointAt, follow, KINDS, curvePoints } from "./track.js";
+import { SHAPES, layTrack, cursorOn, advance, back, pointAt, follow, KINDS, curvePoints, switchSetting, shapeOf } from "./track.js";
 import { stageFor, stationPlan, siteFor, lineBlocks, rightOf, STAGES, STATION } from "./stations.js";
-import { ROUTE, reachable, buyable, cannotBuy, priceOf, nearestStop, checkRoutes } from "./routes.js";
+import { ROUTE, reachable, buyable, cannotBuy, priceOf, nearestStop, checkRoutes, stopSite, pieces, isNatural } from "./routes.js";
 import { ROUTES } from "./routes_data.js";
-import { TRACK, CARS, TRAIN, carPoses, trainLength, stepSpeed, moveTrain, limitAhead, shapesForLoop, showcaseLoop } from "./data.js";
+import { railRefused } from "./no_hollow.js";
+import { STATION_DESIGNS, TRADE_HOUSE_DESIGNS, ENGINE_SHED_DESIGNS } from "../settle/station_data.js";
+import { TRACK, CARS, TRAIN, carPoses, trainLength, stepSpeed, moveTrain, limitAhead, blocksUnder, clearAhead, speedForGap, shapesForLoop, showcaseLoop } from "./data.js";
 
 // A little fake world of track: lay(x, y, z, yaw) places a piece the way a player would
 function yard() {
@@ -32,6 +34,22 @@ function routeMap() {
   };
 }
 
+// Blocks of a design that touch nothing (not even corner to corner) on a path down to the ground layer (y <= 0)
+function floatingBlocks(d) {
+  const solid = new Set();
+  for (const [y, z, x0, n, i] of d.rows) if (d.palette[i][0] !== "minecraft:air") for (let x = x0; x < x0 + n; x++) solid.add(`${x},${y},${z}`);
+  const seen = new Set(), q = [];
+  for (const k of solid) if (+k.split(",")[1] <= 0) { seen.add(k); q.push(k); }
+  while (q.length) {
+    const [x, y, z] = q.pop().split(",").map(Number);
+    for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) for (let c = -1; c <= 1; c++) {
+      const k = `${x + a},${y + b},${z + c}`;
+      if (solid.has(k) && !seen.has(k)) { seen.add(k); q.push(k); }
+    }
+  }
+  return [...solid].filter((k) => !seen.has(k));
+}
+
 addTests("trains", {
   "routes: you buy one stop at a time, outward from home": () => {
     const data = routeMap();
@@ -48,6 +66,44 @@ addTests("trains", {
     assert(cannotBuy(data, built, undefined, "AB"), "no home, no buying");
     assert(cannotBuy(data, built, "A", "AB"), "already laid");
   },
+  "switches: a train off a branch sets the switch, one heading in keeps it": () => {
+    const straight = shapeOf(0, 2), bend = SHAPES.find((sh) => sh.kind === 1 && sh.links.includes(2) && !sh.links.includes(6));
+    const shapes = [straight, bend];
+    assertEqual(switchSetting(shapes, 0, 2), 0, "from the shared side: as set");
+    assertEqual(switchSetting(shapes, 1, 2), 1, "from the shared side: as set, the other way");
+    assertEqual(switchSetting(shapes, 0, bend.links.find((l) => l !== 2)), 1, "off the branch: set for it");
+    assertEqual(switchSetting(shapes, 1, 6), 0, "off the straight: set for it");
+    assertEqual(switchSetting(shapes, 0, 0), -1, "not through the switch");
+  },
+  "routes: every overlap between two stretches parts at a switch the track can hold": () => {
+    // where two planned stretches share a block with different shapes, both shapes share a link (the shared side)
+    const at = new Map();
+    for (const seg of ROUTES.segments) for (const [x, y, z, kind, dir] of seg.blocks) {
+      const k = `${x},${y},${z}`;
+      const here = shapeOf(kind, dir);
+      for (const other of at.get(k) ?? []) {
+        if (other.kind === kind && other.dir === dir) continue;
+        const o = shapeOf(other.kind, other.dir);
+        const crossing = kind === 0 && other.kind === 0 && dir % 2 === 0 && other.dir % 2 === 0; // a diamond: the train sets it too
+        assert(crossing || here.links.some((l) => o.links.includes(l)), `${seg.id} at ${k}: two shapes with no shared side`);
+      }
+      at.set(k, [...(at.get(k) ?? []), { kind, dir }]);
+    }
+  },
+  "routes: the bed digs through ground and trees, never through buildings": () => {
+    for (const id of ["minecraft:stone", "minecraft:grass_block", "minecraft:oak_log", "minecraft:spruce_leaves", "siege:old_acacia_log", "minecraft:white_terracotta", "minecraft:iron_ore", "minecraft:short_grass"]) assert(isNatural(id), id);
+    for (const id of ["minecraft:oak_planks", "minecraft:stone_bricks", "minecraft:cobblestone", "minecraft:glass", "minecraft:stripped_oak_log", "siege:castle_stone", "minecraft:stone_brick_stairs", "minecraft:oak_fence", "minecraft:torch"]) assert(!isNatural(id), id);
+  },
+  "routes: a settlement's station sits on its stop, building toward the banner": () => {
+    const data = routeMap();
+    const s = stopSite(data, { x: 10, z: 40 });
+    assertEqual(s.stop.id, "A");
+    assertEqual(JSON.stringify(s.origin), JSON.stringify({ x: 0, y: 64, z: 0 }));
+    assertEqual(JSON.stringify(s.forward), JSON.stringify({ x: 0, z: 1 }), "east-west line, banner to the south");
+    assertEqual(stopSite(data, { x: 10, z: -40 }).forward.z, -1);
+    assertEqual(stopSite(data, { x: 5000, z: 0 }), undefined, "no stop near");
+    for (const stop of ROUTES.stops.filter((st) => st.kind === "plot")) assert(stopSite(ROUTES, { x: stop.x + 30, z: stop.z + 30 }), `${stop.id} has straight track under it`);
+  },
   "routes: prices, home stops and map checks": () => {
     const data = routeMap();
     assertEqual(priceOf(data.segments[0]), ROUTE.basePrice + 301 * ROUTE.perBlock);
@@ -56,6 +112,53 @@ addTests("trains", {
     const bad = { stops: data.stops, segments: [...data.segments, { id: "AB", from: "A", to: "Z", blocks: [] }] };
     assert(checkRoutes(bad).length >= 3, "a doubled id, an unknown stop and no track are caught");
     assertEqual(checkRoutes(ROUTES).length, 0, "the planned railway has no mistakes");
+    const custom = { ...data.segments[0], works: [[0, 0, 60, 63, 1]], works_palette: [{ name: "minecraft:air" }, { name: "minecraft:stone" }], custom: [[10, 20]] };
+    assertEqual(checkRoutes({ stops: data.stops, segments: [custom] }).length, 0);
+    const p = pieces(custom);
+    assert(p[15].works && !p[9].works && !p[21].works, "only the custom range skips the plain bed");
+    assert(pieces({ ...custom, custom: undefined })[0].works, "works without ranges cover the whole stretch");
+    assert(checkRoutes({ stops: data.stops, segments: [{ ...custom, custom: [[5, 9999]] }] }).length, "a range past the end is caught");
+    const [bx, by, bz] = custom.blocks[0];
+    assert(checkRoutes({ stops: data.stops, segments: [{ ...custom, works: [[bx, bz, by - 3, by, 1]] }] }).length, "a solid work in a track cell is caught");
+    assertEqual(checkRoutes({ stops: data.stops, segments: [{ ...custom, works: [[bx, bz, by - 3, by - 1, 1], [bx, bz, by, by + 5, 0]] }] }).length, 0, "works under and clear air over the track are fine");
+  },
+
+  "stations: nothing floats (roofs sit on their beams, lanterns hang from something)": () => {
+    const all = [
+      ...Object.entries(STATION_DESIGNS).flatMap(([r, st]) => Object.entries(st).map(([s, d]) => [`${r} ${s}`, d])),
+      ...Object.entries(TRADE_HOUSE_DESIGNS).flatMap(([r, st]) => Object.entries(st).map(([s, d]) => [`${r} trade house ${s}`, d])),
+      ...Object.entries(ENGINE_SHED_DESIGNS).map(([r, d]) => [`${r} engine shed`, d]),
+    ];
+    for (const [name, d] of all) {
+      const f = floatingBlocks(d);
+      assert(!f.length, `${name}: ${f.length} block(s) float, first at ${f[0]}`);
+    }
+  },
+
+  "trains keep apart: one sees another on its track ahead and may only go as fast as lets it stop short": () => {
+    const { get, lay } = yard();
+    for (let x = 0; x <= 60; x++) lay(x, 0, 0, -90); // an east-west line
+    const cars = [{ kind: "engine" }, { kind: "coach" }];
+    const front = cursorOn({ x: 40, y: 0, z: 0 }, get(40, 0, 0), -90); // heading east
+    const taken = blocksUnder(front, cars, get);
+    assert(taken.has("40,0,0") && taken.has("30,0,0") && !taken.has("41,0,0") && !taken.has("24,0,0"), "it holds the blocks under its length");
+    const behind = cursorOn({ x: 10, y: 0, z: 0 }, get(10, 0, 0), -90);
+    const gap = clearAhead(behind, 40, get, taken);
+    assert(gap > 13 && gap < 17, `the train behind sees it about 15 ahead (got ${gap})`);
+    assertEqual(clearAhead(behind, 8, get, taken), Infinity, "too far to matter yet");
+    assertEqual(clearAhead(front, 30, get, taken), Infinity, "its own blocks are passed in separately, and nothing is ahead of it");
+    assertEqual(speedForGap(Infinity), Infinity);
+    assertEqual(speedForGap(TRAIN.keepApart), 0, "stopped once it is this close");
+    const v = speedForGap(gap);
+    assert(v > 0 && (v * v) / (2 * TRAIN.brake) <= gap - TRAIN.keepApart, "from that speed it can stop in time");
+  },
+
+  "no rail goes down in the Hollow": () => {
+    for (const id of [TRACK, "hc:station_post", "siege:rail_depot", "minecraft:rail", "minecraft:golden_rail"]) {
+      assert(railRefused("siege:undertow", id), `${id} is refused in the Hollow`);
+      assert(!railRefused("minecraft:overworld", id), `${id} is fine in the overworld`);
+    }
+    assert(!railRefused("siege:undertow", "minecraft:cobblestone"), "other blocks are fine");
   },
 
   "there are 20 track shapes and none repeats": () => {
@@ -159,7 +262,7 @@ addTests("trains", {
     assert(along.every((b) => b.z === 0 && b.y === 64 && b.dir === 2), "the new line runs along the old one");
     const none = siteFor({ x: 0, y: 64, z: 40 }, get, { x: 0.2, z: -0.9 });
     assert(!none.onTrack, "no track near");
-    assertEqual(JSON.stringify([none.origin, none.forward]), JSON.stringify([{ x: 0, y: 64, z: 40 + STATION.noTrackBack }, { x: 0, z: -1 }]));
+    assertEqual(JSON.stringify([none.origin, none.forward]), JSON.stringify([{ x: 0, y: 64 + STATION.noTrackLift, z: 40 + STATION.noTrackBack }, { x: 0, z: -1 }]));
     assertEqual(JSON.stringify(rightOf({ x: 0, z: 1 })), JSON.stringify({ x: -1, z: 0 }));
   },
   "corners and bends are curves: the wheels follow an arc from edge to edge": () => {

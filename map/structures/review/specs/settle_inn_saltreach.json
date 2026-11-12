@@ -1,0 +1,73 @@
+{
+ "card": {
+  "title": "Inn",
+  "sub": "Saltreach, furnished",
+  "region": "saltreach",
+  "where": "Settlement plot (Large 15 x 15)",
+  "kind": "Work",
+  "blurb": "Eaves to the road, a stone tap room with the bar, tables and a hearth, three bedrooms above."
+ },
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "salt_timber",
+    "roof": "dark_prismarine",
+    "box_signs": "ns"
+   },
+   "rect": [
+    -6,
+    -10,
+    6,
+    0
+   ],
+   "y": 0,
+   "plinth": 2,
+   "storeys": [
+    5,
+    5
+   ],
+   "jetty": [
+    "s"
+   ],
+   "storey_style": [
+    {
+     "frame_kind": "stone",
+     "frame": "cut_sandstone",
+     "infill": {
+      "ladder": [
+       "smooth_sandstone",
+       "sandstone"
+      ],
+      "axis": "noise",
+      "scale": 2
+     }
+    },
+    {}
+   ],
+   "door": {
+    "side": "s",
+    "kind": "house",
+    "steps": 1
+   },
+   "roof": {
+    "type": "hip",
+    "pitch": 1
+   },
+   "interior": "inn",
+   "dormers": [],
+   "chimney": [
+    [
+     -6,
+     -6
+    ],
+    [
+     6,
+     -6
+    ]
+   ],
+   "vines": 0
+  }
+ ],
+ "name": "settle_inn_saltreach"
+}

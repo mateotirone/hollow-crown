@@ -1,5 +1,11 @@
 # Stage 7: Detailing
 
+**Walkways (Mateo, 2026-11-12)**: anywhere meant to be walked in (a lean-to, porch, arcade, passage, yard,
+loggia) keeps at least one block of clear walk, two high, from its open side to the door or the far end.
+No sill, shelf, slab, post, barrel or woodpile in that line; props keep to the ends and corners. An open
+arcade or market hall sits level with the ground (no raised plinth) and can be walked into from every open
+side. The skill's lean-to clears the wall's sills and proud frame inside it.
+
 The building stands and is closed. Now the outside is finished: depth with slabs and stairs, fences,
 arches, lights, greenery, signs, and the edge where the building meets the street. Detailing makes a
 build look lived in. It is also where most clutter comes from, so every detail has a reason.
@@ -61,7 +67,7 @@ flat frame, a shutter, a lip on a planter) and **walls / fences** where you want
   steps and gates; lanterns hung from chains under arches.
 - Lights at regular rhythm on long fronts: every 5 or 7 (odd), on the bay posts.
 - The night should feel uneasy, not black: warm lights on the human scale, no floodlit faces.
-- Hide light blocks for interiors under carpets or behind trapdoors in empty buildings.
+- Interiors are lit by the interior stage's hanging lanterns (`08-interiors`); hide extra light blocks under carpets where a room stays dark.
 
 ## Hanging and spiked details (Mateo, 2026-11-11, `reference/pictures/detailed-hall-hanging-chains.png`)
 

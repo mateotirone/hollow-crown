@@ -6,24 +6,41 @@ import { BALLISTA, BALLISTA_HIT, DIMENSIONS, PORTCULLISES, TREBUCHET } from "./c
 import { SETTINGS } from "./settings.js";
 import { state } from "./state.js";
 import { isAlly, settlementAt } from "./territory.js";
-import { isOnline, overworld } from "./util.js";
+import { isOnline, overworld, attackable } from "./util.js";
 import { BLAST, blastDamage, offlineSafe } from "./walls.js";
+import { PASSABLE } from "./collapse.js";
+import { markWanted } from "./guards.js";
+import { TREBUCHET as THROW, impactPower, launchVelocity, releaseAngle, stepFlight, throwDistance } from "./structure.js";
 import { sfx } from "../core/sfx.js";
+import { addTests, assert, assertEqual } from "../core/tests.js";
 
 // ---------- Trebuchet: hurl boulders at walls ----------
-// A big machine you place anywhere. Stand behind it and look where you want to fire.
-// Click it holding cobblestone (or stone) to load and fire one boulder. Sneak + click changes the range.
+// A big machine you place anywhere. Stand behind it, look where you want to fire, and click it holding
+// cobblestone. It swings round to face where you look; how high you look sets the release angle
+// (look up to lob it high, level for a flat fast throw). Sneak + click changes the counterweight
+// (Light, Medium, Heavy): heavier throws faster and further. The boulder flies with real gravity
+// (structure.js, same numbers as the Siege Wall Lab) and hits harder the faster it lands.
+// Only the owner and their allies can fire it. Hitting someone's settlement makes you Wanted there.
 
-export const RANGES = [20, 30, 40];
 export const AMMO = ["minecraft:cobblestone", "minecraft:stone", "minecraft:cobbled_deepslate"];
 export const trebuchetReady = new Map(); // trebuchet entity id -> tick when it can fire again
 
+function weightOf(trebuchet) {
+  const w = trebuchet.getDynamicProperty("siege:weight");
+  return typeof w === "number" && w >= 0 && w <= 2 ? w : 1;
+}
+
 export function useTrebuchet(trebuchet, player, item) {
-  const range = trebuchet.getDynamicProperty("siege:range") ?? 1;
+  const owner = trebuchet.getDynamicProperty("siege:owner");
+  if (owner && owner !== player.id && !isAlly(owner, player.id)) {
+    return player.onScreenDisplay.setActionBar("§cThis trebuchet isn't yours. Only its owner and their allies can use it.");
+  }
+  const weight = weightOf(trebuchet);
+  const angle = releaseAngle(player.getRotation().x);
   if (player.isSneaking) {
-    const next = (range + 1) % RANGES.length;
-    trebuchet.setDynamicProperty("siege:range", next);
-    player.onScreenDisplay.setActionBar(`§6Trebuchet range: ${RANGES[next]} blocks`);
+    const next = (weight + 1) % 3;
+    trebuchet.setDynamicProperty("siege:weight", next);
+    player.onScreenDisplay.setActionBar(`§6${THROW.weightNames[next]} counterweight: about ${Math.round(throwDistance(angle, next))} blocks at ${Math.round(angle)}°`);
     sfx(trebuchet.dimension, "random.click", trebuchet.location);
     return;
   }
@@ -31,7 +48,7 @@ export function useTrebuchet(trebuchet, player, item) {
     return player.onScreenDisplay.setActionBar("§7The trebuchet is still winding back...");
   }
   if (!item || !AMMO.includes(item.typeId)) {
-    return player.onScreenDisplay.setActionBar("§7Hold cobblestone to load a boulder. Sneak + click to change range.");
+    return player.onScreenDisplay.setActionBar("§7Hold cobblestone and click to fire. Look higher to throw higher. Sneak + click changes the counterweight.");
   }
   if (player.getGameMode() !== GameMode.Creative) {
     const inv = player.getComponent("minecraft:inventory").container;
@@ -46,50 +63,59 @@ export function useTrebuchet(trebuchet, player, item) {
   trebuchetReady.set(trebuchet.id, system.currentTick + SETTINGS.trebuchetReloadTicks);
 
   // Swing round to face where the player is looking, then let fly
-  const view = player.getViewDirection();
-  const flat = Math.hypot(view.x, view.z) || 1;
-  const dir = { x: view.x / flat, z: view.z / flat };
-  trebuchet.setRotation({ x: 0, y: player.getRotation().y });
+  const yaw = player.getRotation().y;
+  trebuchet.setRotation({ x: 0, y: yaw });
   const dim = trebuchet.dimension;
   const at = trebuchet.location;
+  player.onScreenDisplay.setActionBar(`§6${THROW.weightNames[weight]} counterweight, ${Math.round(angle)}°: about ${Math.round(throwDistance(angle, weight))} blocks`);
   dim.runCommand(`playanimation @e[type=${TREBUCHET},r=0.5,x=${at.x},y=${at.y},z=${at.z}] animation.siege_trebuchet.fire`);
   sfx(dim, "random.door_open", at, { volume: 1, pitch: 0.5 });
+  const shooter = player.id;
   system.runTimeout(() => {
     // the sling lets go near the top of the swing
-    const start = { x: at.x + dir.x, y: at.y + 6, z: at.z + dir.z };
-    launchBoulder(dim, start, dir, RANGES[range]);
+    const vel = launchVelocity(yaw, angle, weight);
+    const flat = Math.hypot(vel.x, vel.z) || 1;
+    const start = { x: at.x + (vel.x / flat) * 1.2, y: at.y + THROW.releaseHeight, z: at.z + (vel.z / flat) * 1.2 };
+    launchBoulder(dim, start, vel, shooter);
   }, 9);
 }
 
-export function launchBoulder(dim, start, dir, range) {
+// vel in blocks per second. shooter: player id (for Wanted), optional.
+export function launchBoulder(dim, start, vel, shooter) {
   sfx(dim, "random.explode", start, { volume: 0.4, pitch: 1.6 });
-  const flightTicks = 30;
-  const apex = range / 3;
+  const pos = { ...start }, v = { ...vel };
+  const dt = 1 / 20 / THROW.substeps;
   let t = 0;
   const flight = system.runInterval(() => {
-    t += 1;
-    const f = t / flightTicks;
-    const pos = {
-      x: start.x + dir.x * range * f,
-      y: start.y + 4 * apex * f * (1 - f),
-      z: start.z + dir.z * range * f,
-    };
+    t++;
     try {
-      dim.spawnParticle("minecraft:large_explosion", pos);
-      const block = dim.getBlock({ x: Math.floor(pos.x), y: Math.floor(pos.y), z: Math.floor(pos.z) });
-      const landed = block && !block.isAir && !block.isLiquid && t > 3;
-      if (!landed && t < flightTicks * 3) return;
-      system.clearRun(flight);
-      if (block) boulderImpact(dim, pos, dir);
+      for (let s = 0; s < THROW.substeps; s++) {
+        stepFlight(pos, v, dt);
+        const block = dim.getBlock({ x: Math.floor(pos.x), y: Math.floor(pos.y), z: Math.floor(pos.z) });
+        if (!block) { system.clearRun(flight); return; } // flew out of the world or into unloaded land
+        if (PASSABLE.test(block.typeId)) continue;
+        system.clearRun(flight);
+        boulderImpact(dim, pos, v, shooter);
+        return;
+      }
+      if (t % 2 === 0) dim.spawnParticle("minecraft:large_explosion", pos);
+      if (t > 200 || pos.y < -64) system.clearRun(flight);
     } catch {
-      system.clearRun(flight); // flew into unloaded land
+      system.clearRun(flight);
     }
   }, 1);
 }
 
-export function boulderImpact(dim, pos, dir) {
+// vel: the boulder's velocity when it hit (blocks per second)
+export function boulderImpact(dim, pos, vel, shooter) {
+  const speed = Math.hypot(vel.x, vel.y, vel.z) || 1;
+  const dir = { x: vel.x / speed, y: vel.y / speed, z: vel.z / speed };
   dim.createExplosion(pos, 2, { breaksBlocks: false, causesFire: false });
-  blastDamage(dim, pos, BLAST.boulder.power, BLAST.boulder.radius, { x: dir.x, y: -0.3, z: dir.z }, offlineSafe);
+  blastDamage(dim, pos, impactPower(BLAST.boulder.power, speed), BLAST.boulder.radius, dir, offlineSafe);
+  // a trebuchet hit on someone's settlement makes the shooter Wanted there, same as ramming their wall
+  const land = dim.id === "minecraft:overworld" ? settlementAt(pos) : undefined;
+  const player = shooter && land ? world.getPlayers().find((p) => p.id === shooter) : undefined;
+  if (player && isOnline(land)) markWanted(player, land);
 }
 
 // ---------- Ballista: turns to face monsters in range and shoots them ----------
@@ -153,7 +179,7 @@ world.afterEvents.entitySpawn.subscribe((event) => {
   machine.setRotation({ x: 0, y: player.getRotation().y });
   player.sendMessage(machine.typeId === BALLISTA
     ? "§7Ballista ready. It turns to face any monster in range and shoots. Sneak + click to pack it up."
-    : "§7Trebuchet built. Hold cobblestone and click it to fire where you're looking. Sneak + click changes range.");
+    : "§7Trebuchet built. Hold cobblestone and click it to fire where you're looking: look higher to throw higher. Sneak + click changes the counterweight.");
 });
 
 world.afterEvents.playerInteractWithEntity.subscribe((event) => {
@@ -178,7 +204,7 @@ export function machineGuardTick() {
     for (const machine of world.getDimension(id).getEntities({ families: ["siege_engine"] })) {
       try {
         const owner = machine.getDynamicProperty("siege:owner");
-        if (owner && !isOnline(owner)) machine.addEffect("resistance", 60, { amplifier: 4, showParticles: false });
+        if (owner && !attackable(owner)) machine.addEffect("resistance", 60, { amplifier: 4, showParticles: false });
       } catch {
         // gone
       }
@@ -214,3 +240,27 @@ export function shoot(dim, from, target) {
   target.addTag(BALLISTA_HIT);
   target.applyDamage(SETTINGS.ballistaDamage, { cause: EntityDamageCause.projectile });
 }
+
+addTests("siege", {
+  "trebuchet: heavier counterweights throw further, and 45° beats a flat throw": () => {
+    const d = [0, 1, 2].map((w) => throwDistance(40, w));
+    assert(d[0] < d[1] && d[1] < d[2], `light ${d[0]}, medium ${d[1]}, heavy ${d[2]}`);
+    assert(d[2] > 45 && d[2] < 60, `heavy reaches about 50 blocks (${d[2]})`);
+    assert(throwDistance(45, 1) > throwDistance(15, 1), "a lob at 45° goes further than a flat throw");
+  },
+  "trebuchet: looking level still throws at the lowest angle, looking straight up is capped": () => {
+    assertEqual(releaseAngle(0), THROW.minAngle);
+    assertEqual(releaseAngle(-90), THROW.maxAngle);
+    assertEqual(releaseAngle(-40), 40);
+  },
+  "trebuchet: it throws the way you face (yaw 0 is south, 90 is west)": () => {
+    const south = launchVelocity(0, 30, 1), west = launchVelocity(90, 30, 1);
+    assert(south.z > 0 && Math.abs(south.x) < 1e-6 && south.y > 0);
+    assert(west.x < 0 && Math.abs(west.z) < 1e-6);
+  },
+  "trebuchet: a faster landing hits harder, within limits": () => {
+    assert(impactPower(6.5, 31) > impactPower(6.5, 22));
+    assertEqual(impactPower(6.5, 1), 6.5 * 0.35);
+    assertEqual(impactPower(6.5, 100), 6.5 * 1.8);
+  },
+});

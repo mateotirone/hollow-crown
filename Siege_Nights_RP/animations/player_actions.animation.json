@@ -6,14 +6,14 @@
       "bones": {
         "waist": {
           "rotation": [
-            "variable.hc_sprint * 9.0 + variable.hc_airb * 4.0 + variable.hc_land * 10.0",
+            "variable.hc_sprint * 9.0 - variable.hc_rise * 6.0 + variable.hc_tuck * 8.0 + variable.hc_land * 10.0",
             "-variable.tcos0 * 0.1",
             0.0
           ]
         },
         "head": {
           "rotation": [
-            "-(variable.hc_sprint * 9.0 + variable.hc_airb * 4.0 + variable.hc_land * 10.0) * 0.8",
+            "-(variable.hc_sprint * 9.0 - variable.hc_rise * 6.0 + variable.hc_tuck * 8.0 + variable.hc_land * 10.0) * 0.8",
             "-(-variable.tcos0 * 0.1)",
             0.0
           ]
@@ -27,30 +27,105 @@
         },
         "rightarm": {
           "rotation": [
-            "(-variable.tcos0 * 0.35 * variable.hc_sprint - variable.hc_airb * (12.0 + variable.hc_fall * 20.0)) * variable.hc_free",
+            "(-variable.tcos0 * 0.35 * variable.hc_sprint - variable.hc_rise * 35.0 + variable.hc_tuck * 10.0 + variable.hc_airb * variable.hc_fall * 30.0) * variable.hc_free",
             0.0,
-            "(variable.hc_sprint * 5.0 + variable.hc_airb * (14.0 + variable.hc_fall * 25.0 + math.sin(query.life_time * 500.0) * variable.hc_fall * 6.0) + variable.hc_land * 8.0) * variable.hc_free"
+            "(variable.hc_sprint * 5.0 + variable.hc_rise * 6.0 + variable.hc_tuck * 22.0 + variable.hc_airb * variable.hc_fall * (35.0 + math.sin(query.life_time * 500.0) * 6.0) + variable.hc_land * 8.0) * variable.hc_free"
           ]
         },
         "leftarm": {
           "rotation": [
-            "(variable.tcos0 * 0.35 * variable.hc_sprint - variable.hc_airb * (12.0 + variable.hc_fall * 20.0)) * variable.hc_free",
+            "(variable.tcos0 * 0.35 * variable.hc_sprint - variable.hc_rise * 35.0 + variable.hc_tuck * 10.0 + variable.hc_airb * variable.hc_fall * 30.0) * variable.hc_free",
             0.0,
-            "-(variable.hc_sprint * 5.0 + variable.hc_airb * (14.0 + variable.hc_fall * 25.0 + math.sin(query.life_time * 500.0) * variable.hc_fall * 6.0) + variable.hc_land * 8.0) * variable.hc_free"
+            "-(variable.hc_sprint * 5.0 + variable.hc_rise * 6.0 + variable.hc_tuck * 22.0 + variable.hc_airb * variable.hc_fall * (35.0 + math.sin(query.life_time * 500.0) * 6.0) + variable.hc_land * 8.0) * variable.hc_free"
           ]
         },
         "rightleg": {
           "rotation": [
-            "variable.tcos0 * 0.3 * variable.hc_sprint - variable.hc_airb * 20.0 * (1.0 - variable.hc_fall * 0.5)",
+            "variable.tcos0 * 0.3 * variable.hc_sprint + variable.hc_rise * 10.0 - variable.hc_tuck * 50.0 - variable.hc_airb * variable.hc_fall * 10.0 - variable.hc_land * 25.0",
             0.0,
             "variable.hc_airb * variable.hc_fall * 6.0"
           ]
         },
         "leftleg": {
           "rotation": [
-            "-variable.tcos0 * 0.3 * variable.hc_sprint + variable.hc_airb * 12.0",
+            "-variable.tcos0 * 0.3 * variable.hc_sprint - variable.hc_rise * 12.0 - variable.hc_tuck * 40.0 + variable.hc_airb * variable.hc_fall * 12.0 - variable.hc_land * 25.0",
             0.0,
             "-variable.hc_airb * variable.hc_fall * 6.0"
+          ]
+        },
+        "rightforearm": {
+          "rotation": [
+            "-(6.0 + math.min(query.modified_move_speed * 4.0, 1.0) * 10.0 + variable.hc_sprint * 65.0 + variable.hc_airb * 18.0 + variable.hc_land * 15.0) * variable.hc_free",
+            0.0,
+            0.0
+          ]
+        },
+        "leftforearm": {
+          "rotation": [
+            "-(6.0 + math.min(query.modified_move_speed * 4.0, 1.0) * 10.0 + variable.hc_sprint * 65.0 + variable.hc_airb * 18.0 + variable.hc_land * 15.0) * variable.hc_freel",
+            0.0,
+            0.0
+          ]
+        },
+        "rightshin": {
+          "rotation": [
+            "math.max(0.0, variable.tcos0) * (0.9 + variable.hc_sprint * 0.8) + math.min(query.modified_move_speed * 4.0, 1.0) * 8.0 + variable.hc_land * 50.0 + variable.hc_rise * 25.0 + variable.hc_tuck * 75.0 + variable.hc_airb * variable.hc_fall * 30.0",
+            0.0,
+            0.0
+          ]
+        },
+        "leftshin": {
+          "rotation": [
+            "math.max(0.0, -variable.tcos0) * (0.9 + variable.hc_sprint * 0.8) + math.min(query.modified_move_speed * 4.0, 1.0) * 8.0 + variable.hc_land * 50.0 + variable.hc_rise * 5.0 + variable.hc_tuck * 65.0 + variable.hc_airb * variable.hc_fall * 15.0",
+            0.0,
+            0.0
+          ]
+        }
+      }
+    },
+    "animation.hc.player.sneak": {
+      "loop": true,
+      "bones": {
+        "rightshin": {
+          "rotation": [
+            25.0,
+            0.0,
+            0.0
+          ]
+        },
+        "leftshin": {
+          "rotation": [
+            25.0,
+            0.0,
+            0.0
+          ]
+        },
+        "rightarm": {
+          "rotation": [
+            "-10.0 * variable.hc_free",
+            0.0,
+            0.0
+          ]
+        },
+        "leftarm": {
+          "rotation": [
+            "-10.0 * variable.hc_freel",
+            0.0,
+            0.0
+          ]
+        },
+        "rightforearm": {
+          "rotation": [
+            "-25.0 * variable.hc_free",
+            0.0,
+            0.0
+          ]
+        },
+        "leftforearm": {
+          "rotation": [
+            "-25.0 * variable.hc_freel",
+            0.0,
+            0.0
           ]
         }
       }
@@ -85,6 +160,13 @@
             "variable.hc_draw * 26.0",
             "-variable.hc_draw * 4.0"
           ]
+        },
+        "leftforearm": {
+          "rotation": [
+            0.0,
+            0.0,
+            "variable.hc_draw * 45.0"
+          ]
         }
       }
     },
@@ -107,6 +189,296 @@
         }
       }
     },
+    "animation.hc.player.idle_look": {
+      "loop": true,
+      "bones": {
+        "head": {
+          "rotation": [
+            "math.sin(variable.hc_fidt * 103.0) * 6.0 * variable.hc_fid",
+            "math.sin(variable.hc_fidt * 51.4) * 40.0 * variable.hc_fid",
+            0.0
+          ]
+        },
+        "waist": {
+          "rotation": [
+            0.0,
+            "math.sin(variable.hc_fidt * 51.4) * 8.0 * variable.hc_fid",
+            0.0
+          ]
+        }
+      }
+    },
+    "animation.hc.player.idle_shift": {
+      "loop": true,
+      "bones": {
+        "waist": {
+          "rotation": [
+            0.0,
+            0.0,
+            "4.0 * variable.hc_fid"
+          ]
+        },
+        "rightleg": {
+          "rotation": [
+            "-6.0 * variable.hc_fid",
+            0.0,
+            "3.0 * variable.hc_fid"
+          ]
+        },
+        "rightshin": {
+          "rotation": [
+            "16.0 * variable.hc_fid",
+            0.0,
+            0.0
+          ]
+        },
+        "leftarm": {
+          "rotation": [
+            0.0,
+            0.0,
+            "-6.0 * variable.hc_fid"
+          ]
+        }
+      }
+    },
+    "animation.hc.player.idle_stretch": {
+      "loop": true,
+      "bones": {
+        "rightarm": {
+          "rotation": [
+            "-150.0 * variable.hc_fid * variable.hc_fid",
+            0.0,
+            "-10.0 * variable.hc_fid"
+          ]
+        },
+        "leftarm": {
+          "rotation": [
+            "-150.0 * variable.hc_fid * variable.hc_fid",
+            0.0,
+            "10.0 * variable.hc_fid"
+          ]
+        },
+        "rightforearm": {
+          "rotation": [
+            "-30.0 * variable.hc_fid",
+            0.0,
+            0.0
+          ]
+        },
+        "leftforearm": {
+          "rotation": [
+            "-30.0 * variable.hc_fid",
+            0.0,
+            0.0
+          ]
+        },
+        "waist": {
+          "rotation": [
+            "-6.0 * variable.hc_fid",
+            0.0,
+            0.0
+          ]
+        },
+        "head": {
+          "rotation": [
+            "-15.0 * variable.hc_fid",
+            0.0,
+            0.0
+          ]
+        }
+      }
+    },
+    "animation.hc.player.idle_blade": {
+      "loop": true,
+      "bones": {
+        "rightarm": {
+          "rotation": [
+            "-45.0 * variable.hc_fid",
+            "-25.0 * variable.hc_fid",
+            0.0
+          ]
+        },
+        "rightforearm": {
+          "rotation": [
+            "-60.0 * variable.hc_fid",
+            0.0,
+            0.0
+          ]
+        },
+        "head": {
+          "rotation": [
+            "25.0 * variable.hc_fid",
+            "-20.0 * variable.hc_fid",
+            0.0
+          ]
+        }
+      }
+    },
+    "animation.hc.player.light_main": {
+      "loop": true,
+      "bones": {
+        "rightarm": {
+          "rotation": [
+            "-50.0 - this * 0.7",
+            "8.0",
+            0.0
+          ]
+        },
+        "rightforearm": {
+          "rotation": [
+            -45.0,
+            0.0,
+            0.0
+          ]
+        }
+      }
+    },
+    "animation.hc.player.light_off": {
+      "loop": true,
+      "bones": {
+        "leftarm": {
+          "rotation": [
+            "-50.0 - this * 0.7",
+            "-8.0",
+            0.0
+          ]
+        },
+        "leftforearm": {
+          "rotation": [
+            -45.0,
+            0.0,
+            0.0
+          ]
+        }
+      }
+    },
+    "animation.hc.player.read": {
+      "loop": true,
+      "bones": {
+        "rightarm": {
+          "rotation": [
+            "(-35.0 - this * 0.8) * variable.hc_read",
+            "-22.0 * variable.hc_read",
+            0.0
+          ]
+        },
+        "leftarm": {
+          "rotation": [
+            "(-35.0 - this * 0.8) * variable.hc_read",
+            "22.0 * variable.hc_read",
+            0.0
+          ]
+        },
+        "rightforearm": {
+          "rotation": [
+            "-50.0 * variable.hc_read",
+            0.0,
+            0.0
+          ]
+        },
+        "leftforearm": {
+          "rotation": [
+            "-50.0 * variable.hc_read",
+            0.0,
+            0.0
+          ]
+        },
+        "head": {
+          "rotation": [
+            "18.0 * variable.hc_read",
+            0.0,
+            0.0
+          ]
+        }
+      }
+    },
+    "animation.hc.player.reins": {
+      "loop": true,
+      "bones": {
+        "rightarm": {
+          "rotation": [
+            "-8.0 * variable.hc_free",
+            "-10.0 * variable.hc_free",
+            0.0
+          ]
+        },
+        "leftarm": {
+          "rotation": [
+            "-8.0 * variable.hc_freel",
+            "10.0 * variable.hc_freel",
+            0.0
+          ]
+        },
+        "rightforearm": {
+          "rotation": [
+            "-40.0 * variable.hc_free",
+            0.0,
+            0.0
+          ]
+        },
+        "leftforearm": {
+          "rotation": [
+            "-40.0 * variable.hc_freel",
+            0.0,
+            0.0
+          ]
+        },
+        "waist": {
+          "rotation": [
+            5.0,
+            0.0,
+            0.0
+          ]
+        }
+      }
+    },
+    "animation.hc.player.flinch": {
+      "loop": true,
+      "bones": {
+        "waist": {
+          "rotation": [
+            "-8.0 * variable.hc_hurt",
+            0.0,
+            0.0
+          ]
+        },
+        "head": {
+          "rotation": [
+            "-10.0 * variable.hc_hurt",
+            0.0,
+            0.0
+          ]
+        },
+        "rightarm": {
+          "rotation": [
+            0.0,
+            0.0,
+            "8.0 * variable.hc_hurt"
+          ]
+        },
+        "leftarm": {
+          "rotation": [
+            0.0,
+            0.0,
+            "-8.0 * variable.hc_hurt"
+          ]
+        },
+        "rightforearm": {
+          "rotation": [
+            "-20.0 * variable.hc_hurt",
+            0.0,
+            0.0
+          ]
+        },
+        "leftforearm": {
+          "rotation": [
+            "-20.0 * variable.hc_hurt",
+            0.0,
+            0.0
+          ]
+        }
+      }
+    },
     "animation.hc.player.attack.blade_forehand": {
       "loop": true,
       "bones": {
@@ -122,6 +494,13 @@
             "variable.hc_e * 15.0 * variable.hc_s",
             0.0,
             "-variable.hc_e * 10.0"
+          ]
+        },
+        "rightforearm": {
+          "rotation": [
+            "-variable.hc_e * (60.0 - 55.0 * variable.hc_s)",
+            0.0,
+            0.0
           ]
         },
         "waist": {
@@ -157,6 +536,13 @@
             "-variable.hc_e * 12.0 * variable.hc_s"
           ]
         },
+        "rightforearm": {
+          "rotation": [
+            "-variable.hc_e * (70.0 - 60.0 * variable.hc_s)",
+            0.0,
+            0.0
+          ]
+        },
         "waist": {
           "rotation": [
             "variable.hc_e * variable.hc_s * 4.0",
@@ -190,6 +576,13 @@
             "-variable.hc_e * 8.0"
           ]
         },
+        "rightforearm": {
+          "rotation": [
+            "-variable.hc_e * (95.0 - 95.0 * variable.hc_s)",
+            0.0,
+            0.0
+          ]
+        },
         "waist": {
           "rotation": [
             "variable.hc_e * variable.hc_s * 10.0",
@@ -217,6 +610,13 @@
             0.0,
             0.0
           ]
+        },
+        "leftshin": {
+          "rotation": [
+            "variable.hc_e * variable.hc_s * 18.0",
+            0.0,
+            0.0
+          ]
         }
       }
     },
@@ -234,6 +634,20 @@
           "rotation": [
             "-variable.hc_e * (160.0 - 125.0 * variable.hc_s)",
             "variable.hc_e * 35.0",
+            0.0
+          ]
+        },
+        "rightforearm": {
+          "rotation": [
+            "-variable.hc_e * (50.0 - 45.0 * variable.hc_s)",
+            0.0,
+            0.0
+          ]
+        },
+        "leftforearm": {
+          "rotation": [
+            "-variable.hc_e * (55.0 - 45.0 * variable.hc_s)",
+            0.0,
             0.0
           ]
         },
@@ -270,6 +684,20 @@
             0.0
           ]
         },
+        "rightforearm": {
+          "rotation": [
+            "-variable.hc_e * (30.0 - 20.0 * variable.hc_s)",
+            0.0,
+            0.0
+          ]
+        },
+        "leftforearm": {
+          "rotation": [
+            "-variable.hc_e * 30.0",
+            0.0,
+            0.0
+          ]
+        },
         "waist": {
           "rotation": [
             "variable.hc_e * variable.hc_s * 6.0",
@@ -303,6 +731,20 @@
             0.0
           ]
         },
+        "rightforearm": {
+          "rotation": [
+            "-variable.hc_e * (110.0 - 105.0 * variable.hc_s)",
+            0.0,
+            0.0
+          ]
+        },
+        "leftforearm": {
+          "rotation": [
+            "-variable.hc_e * 100.0",
+            0.0,
+            0.0
+          ]
+        },
         "waist": {
           "rotation": [
             0.0,
@@ -333,6 +775,20 @@
           "rotation": [
             "-variable.hc_e * 45.0",
             "variable.hc_e * 30.0",
+            0.0
+          ]
+        },
+        "rightforearm": {
+          "rotation": [
+            "-variable.hc_e * 80.0",
+            0.0,
+            0.0
+          ]
+        },
+        "leftforearm": {
+          "rotation": [
+            "-variable.hc_e * 100.0",
+            0.0,
             0.0
           ]
         },

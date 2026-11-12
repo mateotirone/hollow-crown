@@ -90,10 +90,22 @@ def _climb_jogs(cells, keep=(), window=15):
     assert res[-1] == cells[-1]
     return res
 
-def trace(points, stops=()):
+def _despike(cells, keep=()):
+    """Flatten one-block bumps: a cell stepping out sideways and straight back (the track can't turn 90 degrees on a
+    diagonal) is moved back onto the straight between its neighbours."""
+    cells = list(cells)
+    for i in range(1, len(cells) - 1):
+        (ax, az), (bx, bz) = cells[i - 1], cells[i + 1]
+        if cells[i] not in keep and sorted((abs(bx - ax), abs(bz - az))) == [0, 2]:
+            cells[i] = ((ax + bx) // 2, (az + bz) // 2)
+    return cells
+
+def trace(points, stops=(), routed=False):
     """points: the line's control points [(x, z), ...] (already smooth); stops: [(x, z, axis or None), ...] that the
     line passes through or starts/ends at. Returns (cells, stop_index) with a straight N/S/E/W run of PLATFORM
-    blocks each side of every stop (only on the line's side at a line end)."""
+    blocks each side of every stop (only on the line's side at a line end). routed=True: the points already run
+    straight along each platform (map/railroute.py routes from platform end to platform end), so they are followed
+    as they are instead of being thinned out round the platforms."""
     pts = [tuple(map(float, p)) for p in points]
     rough = _raster(pts)
     arr = np.array(rough, float)
@@ -120,8 +132,10 @@ def trace(points, stops=()):
     out = []
     prev_end = None
     prev_u = None
+    if routed: pieces_iter = []
+    else: pieces_iter = pieces
     ahead = lambda c, p, u: (c[0] - p[0]) * u[0] + (c[1] - p[1]) * u[1]
-    for k, (i, a, s, b, u) in enumerate(pieces):
+    for k, (i, a, s, b, u) in enumerate(pieces_iter):
         lo = int(np.argmin(np.hypot(arr[:, 0] - prev_end[0], arr[:, 1] - prev_end[1]))) if prev_end else 0
         # approach: from the previous platform end (or the line start) through the rough cells clear of both platforms
         mid = [c for c in rough[lo:i] if ahead(a, c, u) > PLATFORM * 0.6 and math.dist(c, s) > PLATFORM * 1.5
@@ -132,6 +146,7 @@ def trace(points, stops=()):
         prev_end = b; prev_u = u
     lo = int(np.argmin(np.hypot(arr[:, 0] - prev_end[0], arr[:, 1] - prev_end[1]))) if prev_end else 0
     tail = [c for c in rough[lo:] if prev_end is None or ahead(c, prev_end, prev_u) > PLATFORM * 0.6]
+    if routed: out = list(rough); tail = []
     if tail:
         seg = _raster([out[-1]] + tail[::6] + [rough[-1]]) if out else _raster(tail[::6] + [rough[-1]])
         out += seg[1:] if out else seg
@@ -144,6 +159,7 @@ def trace(points, stops=()):
     for _, a, s, b, _ in pieces: keep |= set(_raster([a, s, b]))
     cells = _smooth_turns(cells, keep)
     cells = _climb_jogs(cells, keep)
+    cells = _despike(cells, keep)
     idx = {c: n for n, c in enumerate(cells)}
     found = [idx.get(c, int(np.argmin([math.dist(c, q) for q in cells]))) for c in stop_cells]
     res = [0] * len(ctrl)

@@ -20,7 +20,9 @@ A 50,000-block castle costs about the same tokens as a hut.
    `reference/house-rules.md` (Mateo's rules, region styles, where build-instructions/ says more),
    `reference/output.md` (commands, editions, limits, in-game checks),
    `reference/from-picture.md` (rebuilding a building from a screenshot or photo),
-   `regions/<region>.md` (the full style guide of each region; read before any build there).
+   `build-instructions/towers/README.md` (every tower: stages, proportions, clocks, the style of each region),
+   `regions/<region>.md` (the full style guide of each region; read before any build there),
+   `reference/bridges.md` (part `bridge`: any-angle bridges over water and gaps, sized by span, styled by region).
 3. **Compression.** Never read the `.mcfunction` or `scene.json`, never print block lists. Read the summary,
    look at the PNG, change the spec, rebuild.
 
@@ -71,6 +73,12 @@ A 50,000-block castle costs about the same tokens as a hut.
   `quality` (samples per block axis, 4), `hollow` (shell thickness in blocks, 1; 0 = solid),
   `thin` (allow trapdoor/wall edges in shapes, false).
 - `parts` run after shapes, in order, and overwrite. `place` runs last.
+- **Interiors** (Mateo 2026-11-12: every building has one): each `house` part ends with the interior stage
+  (`scripts/interiors.py`): stairs between storeys, rooms by `"interior"` use (home, townhouse, farmhouse,
+  inn, shop, mint, smithy, guildhall, hall, chapel, tower, mill, barracks, library, storage), a one-block
+  walkway kept everywhere, lanterns, region flavour. `"attic": true` floors the roof space as a room.
+  Rules and the use table: `build-instructions/08-interiors`. Check them cut open with
+  `map/structures/build_interiors_viewer.py` (Roof off / per-floor buttons).
 - Optional: `offset` [x, y, z] added to every command, `clear` true to air the bounding box first.
 
 ## One engine for every build

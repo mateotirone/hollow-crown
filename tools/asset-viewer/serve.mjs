@@ -21,6 +21,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawn, spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import crypto from "node:crypto";
+import zlib from "node:zlib";
 import { buildIndex } from "./model-index.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -175,7 +177,9 @@ const vanilla = { root: path.join(SAMPLES, "resource_pack"), ready: false };
 
 function run(cmd, a, cwd, extra = {}) {
   return new Promise((resolve) => {
-    const p = spawn(cmd, a, { cwd, shell: process.platform === "win32" && cmd === "npm", ...extra });
+    // PYTHONHASHSEED: some builders seed their dressing from hash(name), which Python changes every run;
+    // fixed, the same code always gives the same build, so only real changes show as new
+    const p = spawn(cmd, a, { cwd, shell: process.platform === "win32" && cmd === "npm", env: { ...process.env, PYTHONHASHSEED: "0" }, ...extra });
     let out = "";
     p.stdout?.on("data", (d) => { out += d; });
     p.stderr?.on("data", (d) => { out += d; });
@@ -237,6 +241,7 @@ async function ensurePython() {
 // takes each build from the newest branch that has it, so stations, towns and walls from different threads
 // all show at once.
 const WT = path.join(CACHE, "worktrees"), BOUT = path.join(CACHE, "builds");
+const RECIPE = "r2";         // bump when the way builds are made changes, so builds kept from an earlier run are redone
 const built = new Map();     // slug -> {sha, ref, time, ok, index, tpl, error}
 let buildTimer = null, building = false, buildAgain = false;
 const slug = (ref) => ref.replace(/^origin\//, "").replace(/[^A-Za-z0-9._-]+/g, "_");
@@ -259,7 +264,7 @@ async function runBuilds() {
     const newest = sources[sources.length - 1], imp = importsFingerprint();
     for (const b of [...sources].reverse()) {          // newest first, so the freshest builds show soonest
       const s = slug(b.ref), prev = built.get(s);
-      const fp = b === newest ? "imports:" + imp : "";   // the newest catalogue branch also runs the imported builders
+      const fp = RECIPE + (b === newest ? ";imports:" + imp : "");   // the newest catalogue branch also runs the imported builders
       if (prev && prev.sha === b.sha && (prev.fp || "") === fp) continue;
       setBuilds("building", `Building ${b.ref.replace("origin/", "")} (${b.subject.slice(0, 70)})`);
       const res = await buildBranch(b, py, b === newest);
@@ -303,7 +308,7 @@ async function buildBranch(b, py, withImports) {
   const index = JSON.parse(html.slice(a.length, html.length - z.length));
   await buildExtras(wt, out, py, pyArgs, index, withImports);
   log(`built ${index.length} builds from ${b.ref} in ${Math.round((Date.now() - t0) / 1000)} s`);
-  fs.writeFileSync(path.join(out, "meta.json"), JSON.stringify({ sha: b.sha, ref: b.ref, index, tpl, fp: withImports ? "imports:" + importsFingerprint() : "" }));
+  fs.writeFileSync(path.join(out, "meta.json"), JSON.stringify({ sha: b.sha, ref: b.ref, index, tpl, fp: RECIPE + (withImports ? ";imports:" + importsFingerprint() : "") }));
   return { ok: true, index, tpl };
 }
 
@@ -322,12 +327,35 @@ const EXTRAS = [
   { id: "skill", title: "Building skill examples", marker: ".claude/skills/minecraft-builder/scripts/build_examples.py",
     args: (out) => [out],
     label: { new_pieces: "New pieces: snow, stilts, piles, moss, thatch, Hollow offset, dome, dormer brackets, bushes, vigas" } },
+  { id: "landmarks", title: "Landmarks and story places", marker: "map/structures/landmark_scenes.py",
+    args: (out) => [out],
+    names: (out) => { try { return JSON.parse(fs.readFileSync(path.join(out, "names.json"), "utf8")); } catch { return {}; } } },
+  { id: "world_props", title: "World props: signposts, wells, fields, windmills, scaffolds", marker: "map/structures/world_props.py",
+    args: (out) => [out],
+    names: (out) => { try { return JSON.parse(fs.readFileSync(path.join(out, "names.json"), "utf8")); } catch { return {}; } } },
+  { id: "boss_sites", title: "Boss site landmarks", marker: "map/structures/boss_landmarks.py",
+    args: (out) => [out],
+    names: (out) => { try { return JSON.parse(fs.readFileSync(path.join(out, "names.json"), "utf8")); } catch { return {}; } } },
   { id: "vault", title: "Vault strongrooms", marker: "map/structures/vault_rooms.py",
     args: (out) => [out],
-    label: { wood_strongroom: "Wooden Strongroom", iron_strongroom: "Iron Strongroom", diamond_strongroom: "Diamond Strongroom",
-             netherite_strongroom: "Netherite Strongroom", choirsteel_strongroom: "Choirsteel Strongroom",
-             inside_wood: "Wooden Strongroom, inside", inside_iron: "Iron Strongroom, inside", inside_diamond: "Diamond Strongroom, inside",
-             inside_netherite: "Netherite Strongroom, inside", inside_choirsteel: "Choirsteel Strongroom, inside" } },
+    names: (out) => { try { return JSON.parse(fs.readFileSync(path.join(out, "names.json"), "utf8")); } catch { return {}; } } },
+  { id: "miniature", title: "Welcome hall miniature", marker: "map/structures/miniature_scene.py",
+    args: (out) => [out],
+    label: { miniature: "The whole map in miniature, on its cloud (welcome hall)" } },
+  { id: "bossunlocks", title: "Boss unlock sites", marker: "map/structures/boss_unlock_sites.py",
+    args: (out) => [out],
+    names: (out) => { try { return JSON.parse(fs.readFileSync(path.join(out, "names.json"), "utf8")); } catch { return {}; } } },
+  { id: "ironworks", title: "Ironworks", marker: "map/structures/ironworks_builds.py",
+    args: (out) => [out],
+    label: { ironworks_1: "Ironworks 1: Ore Pit", ironworks_2: "Ironworks 2: Bloomery", ironworks_3: "Ironworks 3: Trip-Hammer Forge" } },
+  { id: "trade_outpost", title: "Trade Outposts", marker: "map/structures/trade_outpost.py",
+    args: (out) => [out],
+    names: (out) => { try { return JSON.parse(fs.readFileSync(path.join(out, "names.json"), "utf8")); } catch { return {}; } } },
+  { id: "graves", title: "Gravestone", marker: "map/structures/gravestone_build.py",
+    args: (out) => [out],
+    label: { gravestone: "Gravestone (where a player fell; candle lit while sealed)" } },
+  { id: "bridges", title: "Bridges", marker: "map/structures/bridges_gallery.py",
+    args: (out) => [out] },
 ];
 // Builder scripts that live on a branch without the kit: copied from the newest branch that has them into
 // the newest catalogue branch's map/structures and run there.
@@ -398,16 +426,33 @@ async function buildExtras(wt, out, py, pyArgs, index, withImports) {
   }
 }
 
-let merged = { html: null, tex: null };
+let merged = { html: null, tex: null, index: null };
+// A fingerprint of each build's meshes, so the side list can mark only the builds a branch really changed: every
+// branch carries main's builds too. Texture names hold the branch's worktree path, so that part is taken out.
+function buildHashes(s, r) {
+  if (r.hashes) return r.hashes;
+  const h = {}, bufs = {};
+  for (const e of r.index) {
+    try {
+      const b = bufs[e.bundle] ??= Buffer.from(fs.readFileSync(path.join(BOUT, s, "v3d", "data", e.bundle + ".txt"), "utf8").trim(), "base64");
+      const json = zlib.gunzipSync(b.subarray(e.at[0], e.at[0] + e.at[1])).toString("utf8").replaceAll("_worktrees_" + s + "_", "_worktrees_");
+      h[e.key] = crypto.createHash("sha1").update(json).digest("hex");
+    } catch { /* bundle missing: never marked */ }
+  }
+  return (r.hashes = h);
+}
 function publishBuilds(sources) {
   const have = sources.map((b) => ({ b, r: built.get(slug(b.ref)) })).filter((x) => x.r && x.r.ok && x.r.sha === x.b.sha);
   if (!have.length) return;
   const byKey = new Map(), tex = {};
+  const onMain = have.find((x) => x.b.ref === "origin/main"), mainHash = onMain ? buildHashes(slug(onMain.b.ref), onMain.r) : null;
   for (const { b, r } of have) {           // oldest first: a newer branch's build replaces an older one
     Object.assign(tex, JSON.parse(fs.readFileSync(path.join(BOUT, slug(b.ref), "v3d", "tex.json"), "utf8")));
     for (const e of r.index) {
       byKey.delete(e.key);
-      byKey.set(e.key, { ...e, bundle: slug(b.ref) + "/" + e.bundle, sub: e.sub, from: b.ref.replace("origin/", "") });
+      const imported = IMPORTS.some((x) => e.key.startsWith(x.id + "-"));   // only ever built on the newest branch
+      const fresh = !!mainHash && b !== onMain.b && !imported && mainHash[e.key] !== buildHashes(slug(b.ref), r)[e.key];
+      byKey.set(e.key, { ...e, bundle: slug(b.ref) + "/" + e.bundle, sub: e.sub, from: b.ref.replace("origin/", ""), fresh });
     }
   }
   // keep the newest branch's section order
@@ -416,6 +461,7 @@ function publishBuilds(sources) {
   const index = [...byKey.values()].sort((x, y) => (order.get(x.section) ?? 1e9) - (order.get(y.section) ?? 1e9));
   merged.html = injectReload(newest.tpl.replace("__INDEX__", JSON.stringify(index)));
   merged.tex = JSON.stringify(tex);
+  merged.index = JSON.stringify({ version: state.builds.version + 1, index: index.map(({ key, title, section, group, sub, from, fresh }) => ({ key, title, section, group: group || "", sub: sub || "", from, fresh })) });
   state.builds.count = index.length;
   state.builds.version++;
   broadcast("builds", { version: state.builds.version, count: index.length });
@@ -423,7 +469,12 @@ function publishBuilds(sources) {
 
 // Pages served from here reload themselves when their content changes.
 const RELOAD = (event) => `<script>(()=>{const es=new EventSource("/events");let v=null;es.addEventListener(${JSON.stringify(event)},e=>{const d=JSON.parse(e.data);if(v!==null&&d.version!==v)location.reload();v=d.version;});})();</script>`;
-function injectReload(html) { return html.replaceAll("https://cdn.jsdelivr.net/npm/three@0.170.0/", "/three/").replace("</body>", RELOAD("builds") + "</body>"); }
+// Inside the viewer page the side list does the picking, so the build page hides its own drop-down there and
+// tells the list which build it is showing (its Prev/Next and arrow keys move the list too).
+const EMBED = `<style>.embedded #pick{display:none}</style><script>(()=>{if(window.parent===window)return;document.documentElement.classList.add("embedded");
+const t=document.getElementById("title");if(!t)return;const say=()=>parent.postMessage({av:"build",key:decodeURIComponent(location.hash.slice(1))},location.origin);
+new MutationObserver(say).observe(t,{childList:true,characterData:true,subtree:true});say();})();</script>`;
+function injectReload(html) { return html.replaceAll("https://cdn.jsdelivr.net/npm/three@0.170.0/", "/three/").replace("</body>", EMBED + RELOAD("builds") + "</body>"); }
 
 // ---------------------------------------------------------------- http
 const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".mjs": "text/javascript", ".json": "application/json", ".png": "image/png", ".txt": "text/plain", ".css": "text/css", ".tga": "image/x-tga" };
@@ -466,6 +517,7 @@ const server = http.createServer(async (req, res) => {
     if (p === "/builds/" || p === "/builds/index.html") {
       return merged.html ? send(res, 200, merged.html, TYPES[".html"]) : send(res, 200, waitingPage(), TYPES[".html"]);
     }
+    if (p === "/api/builds") return merged.index ? send(res, 200, merged.index, TYPES[".json"]) : send(res, 503, "still building");
     if (p === "/builds/tex.json") return merged.tex ? send(res, 200, merged.tex, TYPES[".json"]) : send(res, 404, "not built");
     if (p.startsWith("/builds/data/")) {
       const [s, bundle] = p.slice(13).split("/");

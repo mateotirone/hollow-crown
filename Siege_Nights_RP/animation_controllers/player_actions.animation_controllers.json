@@ -76,6 +76,36 @@
               "hc_locomotion": "!variable.is_first_person && !variable.is_paperdoll && !variable.map_face_icon && variable.hc_live"
             },
             {
+              "hc_sneak": "!variable.is_first_person && !variable.is_paperdoll && !variable.map_face_icon && variable.hc_live && query.is_sneaking"
+            },
+            {
+              "hc_idle_look": "!variable.is_first_person && !variable.is_paperdoll && !variable.map_face_icon && variable.hc_fid > 0.0 && variable.hc_fidk == 0"
+            },
+            {
+              "hc_idle_shift": "!variable.is_first_person && !variable.is_paperdoll && !variable.map_face_icon && variable.hc_fid > 0.0 && variable.hc_fidk == 1"
+            },
+            {
+              "hc_idle_stretch": "!variable.is_first_person && !variable.is_paperdoll && !variable.map_face_icon && variable.hc_fid > 0.0 && variable.hc_fidk == 2 && variable.hc_weapon != 1 && variable.hc_weapon != 2"
+            },
+            {
+              "hc_idle_blade": "!variable.is_first_person && !variable.is_paperdoll && !variable.map_face_icon && variable.hc_fid > 0.0 && variable.hc_fidk == 2 && (variable.hc_weapon == 1 || variable.hc_weapon == 2)"
+            },
+            {
+              "hc_light_main": "!variable.is_first_person && !variable.is_paperdoll && !variable.map_face_icon && variable.hc_light_main && variable.attack_time <= 0.0 && !query.is_sleeping"
+            },
+            {
+              "hc_light_off": "!variable.is_first_person && !variable.is_paperdoll && !variable.map_face_icon && variable.hc_light_off && !variable.hc_drawing && !query.is_sleeping"
+            },
+            {
+              "hc_read": "!variable.is_first_person && !variable.is_paperdoll && !variable.map_face_icon && variable.hc_read > 0.0"
+            },
+            {
+              "hc_reins": "!variable.is_first_person && !variable.is_paperdoll && !variable.map_face_icon && variable.hc_mounted"
+            },
+            {
+              "hc_flinch": "!variable.is_first_person && !variable.is_paperdoll && !variable.map_face_icon && variable.hc_hurt > 0.0"
+            },
+            {
               "hc_bow_pose": "!variable.is_first_person && !variable.is_paperdoll && !variable.map_face_icon && variable.hc_drawing && variable.hc_rimefang"
             },
             {

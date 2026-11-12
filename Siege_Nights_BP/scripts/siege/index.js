@@ -8,6 +8,7 @@ import "./siege.js";
 import "./warplan.js";
 import "./breachers.js";
 import "./walls.js";
+import "./collapse.js";
 import "./block_clicks.js";
 import "./protection.js";
 import "./placement.js";

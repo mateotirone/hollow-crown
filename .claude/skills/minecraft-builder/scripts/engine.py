@@ -11,7 +11,7 @@ roofs, colour matching and rules:
     engine.into_blueprint(bp, spec, upto="walls")                   # stage by stage: foundation .. upto
     engine.into_blueprint(bp, spec, only="roof")                    # one stage, for fn(bp, B) stage functions
 
-Stages, in order: shapes, foundation, frame, floors, walls, openings, roof, details, place.
+Stages, in order: shapes, foundation, frame, floors, walls, openings, roof, details, interior, place.
 Props follow map/structures/bp.py (facing n/s/e/w, half, open, upper, hinge, hanging, axis); the few the
 kit has no field for (corner stairs, vine sides, rods) go in "raw" as Bedrock states. Blocks are the
 Bedrock ids the kit already uses. compute() caches nothing and is pure: same spec, same blocks.
@@ -25,7 +25,7 @@ from fit import voxelize  # noqa: E402
 from materials import Materials  # noqa: E402
 import emit, parts  # noqa: E402
 
-STAGES = ["shapes", "foundation", "frame", "floors", "walls", "openings", "roof", "details", "place"]
+STAGES = ["shapes", "foundation", "frame", "floors", "walls", "openings", "roof", "details", "interior", "place"]
 
 
 def resolve(cells, mats, pal, log):
@@ -41,6 +41,11 @@ def resolve(cells, mats, pal, log):
         if not v.get("mat"):
             if ("nomat", k) not in warned: log.append(f"{k} cell at {x},{y},{z} has no material"); warned.add(("nomat", k))
             continue
+        forms = mats.define(v["mat"]).get("forms") or {}
+        if k in forms or (k == "post" and "wall" in forms):    # a material can name its own partial blocks
+            fb = forms.get(k) or forms["wall"]
+            if k in ("full", "post"): p.pop("axis", None)
+            if k != "full" or "axis" not in fb: out[(x, y, z)] = (fb, p); continue
         b, raw = mats.block(v["mat"], x, y, z)
         if raw:
             out[(x, y, z)] = (b, p); continue
@@ -129,6 +134,7 @@ def to_bp(n, q):
     if n == "vine": raw["vine_direction_bits"] = {"s": 1, "w": 2, "n": 4, "e": 8}[q.pop("attach", "n")]
     if n in ("end_rod", "lightning_rod"): raw["facing_direction"] = 1
     if n == "bell": raw["attachment"] = "hanging"; raw["direction"] = {"s": 0, "w": 1, "n": 2, "e": 3}[q.pop("facing", "s")]
+    if n == "candle" or n.endswith("_candle"): raw["candles"] = max(0, int(q.pop("candles", 1)) - 1); raw["lit"] = bool(q.pop("lit", True))
     if n.endswith("_button"): raw["facing_direction"] = {"n": 2, "s": 3, "w": 4, "e": 5}[q.pop("facing", "s")]
     if raw: q["raw"] = raw
     return n, q

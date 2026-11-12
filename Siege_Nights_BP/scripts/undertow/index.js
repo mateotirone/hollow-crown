@@ -22,6 +22,7 @@ import { world, system, GameMode } from "@minecraft/server";
 import { ActionFormData } from "@minecraft/server-ui";
 import { onTick } from "../core/loop.js";
 import { addTests, assert } from "../core/tests.js";
+import "./arenas_tests.js";
 import { on, isNight } from "../siege/api.js";
 import { UNDERTOW_ID, UNDERTOW_LAYOUT as L, COURT, HEART, TEXT, stageAt, pathX } from "./layout.js";
 import { getSourceSite, getSites, markSite, openRift, riftExit, sourceSignsTick, SITE_NAMES, SOURCE_SITE_IDS } from "./source.js";
@@ -29,7 +30,7 @@ import { VEIL, planCrack, tearBand, TEAR_STEPS, TEAR_CLIMB } from "./rift.js";
 import { buildTick, piecesTick, flush, pieces, openCourtGate, openRiverGate, rebuildHeart, waystoneSpot, WAYSTONE, isBuilt, siteOutdated, withClearing } from "./builder.js";
 import { heightAt, planChunk, isRiver, regionAt, columnAt } from "./terrain.js";
 import { RIVER_NODES, riverSegments, riverDistance, RIVER_HALF_WIDTH } from "./rivers.js";
-import { SITES, roadLines } from "./roads.js";
+import { SITES, ROADS, roadLines, signposts, signRot } from "./roads.js";
 import { STRUCTURE_IDS, planStructure } from "./structures.js";
 import { SITE_DESIGNS, TOWER_DESIGNS } from "./sites_data.js";
 import { DROWNED_SPOTS, spotGround } from "./drowned.js";
@@ -531,6 +532,13 @@ addTests("undertow", {
       }
     }
     assert(bridges >= 5, `only ${bridges} road bridges`);
+  },
+  "every road has a signpost at both ends, turned and lettered": () => {
+    const posts = signposts();
+    assert(posts.length === ROADS.length * 2, `${posts.length} signposts for ${ROADS.length} roads`);
+    for (const r of ROADS) assert(posts.filter((p) => p.road === r.id).length === 2, `${r.id} lacks a signpost`);
+    for (const p of posts) assert(Number.isInteger(p.rot) && p.rot >= 0 && p.rot < 16 && p.text.length > 0 && p.text.length < 60, `bad signpost on ${p.road}`);
+    assert(signRot(0, 1) === 0 && signRot(-1, 0) === 4 && signRot(0, -1) === 8 && signRot(1, 0) === 12);
   },
   "every centre structure stays on its site": () => {
     for (const id of STRUCTURE_IDS) {

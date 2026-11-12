@@ -83,6 +83,10 @@ edge row (barge board) to define the roof, as the chart says.
 - **Ridge spikes** (standard on every pitched ridge, Mateo 2026-11-12: "they add an awesome layer of depth"): a short spike every 3 or 5 blocks along the ridge (odd,
   centred on the ridge's centre block): an end rod or a wall block with a lightning rod or a fence post on
   top, in a dark metal or the trim wood. Taller ones at the gable peaks (finials).
+- **Ridge stairs back to back** (standard, Mateo 2026-11-12: "Nice"): the spine gets a cap of roof stairs set
+  back to back. On a one-block ridge (odd depth) the stairs pair up along the ridge, each pair's tall backs
+  touching, so the crest is a row of small peaks between the spikes; on a two-stair ridge (even depth) one pair
+  sits across the spine. It replaces the flat slab ridge row. Code: `kit.ridge_cap(bp)`, run before `texture_roofs`.
 - **Hanging lanterns at the verge tips**: a chain hanging 2 to 4 blocks from the lowest verge stair with a
   lantern at the end, at both front corners of a gable.
 - **Edge contrast**: use a different block for the verge and eaves row than the roof field (the chart's

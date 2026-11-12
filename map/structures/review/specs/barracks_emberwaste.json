@@ -1,0 +1,198 @@
+{
+ "name": "barracks_emberwaste",
+ "card": {
+  "title": "Barracks",
+  "sub": "Emberwaste, hall, keep and yard",
+  "region": "emberwaste",
+  "where": "Settlement plot (Large 15 x 15), raised by the Barracks block",
+  "kind": "Work",
+  "blurb": "The guard's hall with bunks above a mess, a round keep with a stair up from the yard, and a walled yard where off-duty soldiers wait. A banner hangs over the gate, ready to take the settlement colour."
+ },
+ "materials": {
+  "keepwall": {
+   "ladder": [
+    "smooth_sandstone",
+    "sandstone"
+   ],
+   "axis": "noise",
+   "scale": 2
+  },
+  "yardwall": {
+   "ladder": [
+    "smooth_sandstone",
+    "sandstone"
+   ],
+   "axis": "noise",
+   "scale": 2
+  },
+  "keepplinth": {
+   "block": "sandstone"
+  }
+ },
+ "after": "barracks_skill:inside",
+ "yard_ground": {
+  "ladder": [
+   "coarse_dirt",
+   "packed_mud"
+  ],
+  "axis": "noise",
+  "scale": 2
+ },
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "ember_sandstone",
+    "frame": "cut_red_sandstone",
+    "infill": {
+     "ladder": [
+      "smooth_red_sandstone",
+      "red_sandstone"
+     ],
+     "axis": "noise",
+     "scale": 2
+    },
+    "roof": "smooth_sandstone"
+   },
+   "rect": [
+    -6,
+    -13,
+    2,
+    -7
+   ],
+   "y": 0,
+   "plinth": 2,
+   "storeys": [
+    5,
+    5
+   ],
+   "storey_style": [
+    {},
+    {}
+   ],
+   "door": {
+    "side": "s",
+    "kind": "house",
+    "steps": 1
+   },
+   "roof": {
+    "type": "flat",
+    "parapet": "slab",
+    "beams": true
+   },
+   "dormers": [],
+   "chimney": false,
+   "shutters": 0.3,
+   "vines": 0
+  },
+  {
+   "part": "curtain",
+   "path": [
+    [
+     -7,
+     -7
+    ],
+    [
+     -7,
+     0
+    ],
+    [
+     7,
+     0
+    ],
+    [
+     7,
+     -9
+    ]
+   ],
+   "y": 0,
+   "h": 4,
+   "material": "yardwall",
+   "plinth": "keepplinth",
+   "cap": "cut_sandstone",
+   "turrets": [
+    {
+     "at": [
+      -6,
+      -1
+     ],
+     "size": 3,
+     "h": 7
+    },
+    {
+     "at": [
+      6,
+      -1
+     ],
+     "size": 3,
+     "h": 7
+    }
+   ],
+   "gate": {
+    "at": [
+     0,
+     0
+    ],
+    "face": "s",
+    "w": 3,
+    "h": 3,
+    "crown": 4,
+    "banner": "white_wool",
+    "trim": "spruce_planks"
+   }
+  },
+  {
+   "part": "keep",
+   "at": [
+    4,
+    -10
+   ],
+   "r": 2.5,
+   "y": 0,
+   "h": 25,
+   "floors": [
+    5,
+    10,
+    15,
+    20
+   ],
+   "material": "keepwall",
+   "plinth": "keepplinth",
+   "trim": "cut_sandstone",
+   "floor": "spruce_planks",
+   "slits": {
+    "sides": "ns",
+    "glass": "gray_stained_glass_pane"
+   },
+   "doors": [
+    {
+     "side": "w",
+     "floor": 0
+    },
+    {
+     "side": "s",
+     "floor": 1
+    }
+   ],
+   "ladder": "e",
+   "flags": [
+    {
+     "at": [
+      1,
+      -1
+     ],
+     "dir": "w"
+    },
+    {
+     "at": [
+      -1,
+      1
+     ],
+     "dir": "w",
+     "h": 3
+    }
+   ],
+   "flag": "white_wool"
+  }
+ ]
+}

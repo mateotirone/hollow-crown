@@ -413,7 +413,7 @@ def cartmeet(seed=0):
     P = hollow_palette(seed); bp = Blueprint("hollow_cartmeet")
     way_marker(bp, -3, 0)
     # the rail and its bed, buffer stops at both ends
-    for z in range(-8, 9): bp.set(5, 0, z, "cobbled_deepslate"); bp.set(5, 1, z, "rail")
+    for z in range(-8, 9): bp.set(5, 0, z, "cobbled_deepslate")  # a cobbled cart way: no rail (no train system in the Hollow)
     for z in (-9, 9):
         bp.set(5, 1, z, "polished_blackstone_bricks"); bp.set(5, 2, z, "polished_blackstone_brick_slab", half="bottom")
         for x in (4, 6): bp.set(x, 1, z, "dark_oak_log", axis="y")
@@ -608,7 +608,7 @@ def the_seams(seed=0):
     for z in (-1, 0, 1): bp.set(8, 4, z, "dark_oak_log", axis="z")
     bp.set(10, 3, 0, "soul_lantern", hanging=True)
     # the rail from the face toward Cartmeet, and the cart on it
-    for x in range(-16, 13): bp.set(x, 0, 0, "cobbled_deepslate"); bp.set(x, 1, 0, "rail")
+    for x in range(-16, 13): bp.set(x, 0, 0, "cobbled_deepslate")  # no rail: no train system in the Hollow
     ore_cart(bp, -6, 1, 0, "x")
     # the winch house: 7 by 7, two storeys (veinstone below, black-and-ash above), a jib out over the rail
     B = Building(bp, P, seed + 5); rect = (-1, -9, 5, -3)

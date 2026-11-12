@@ -1,0 +1,380 @@
+{
+ "name": "kingsrest_chapel",
+ "card": {
+  "title": "Kingsrest chapel",
+  "sub": "Norman stone",
+  "region": "vale",
+  "where": "Kingsrest, east of the square",
+  "kind": "Civic",
+  "blurb": "A buttressed stone nave with tall lancets under a steep slate roof, a square tower at the front in three stages with the door at its foot, a louvred belfry and a tall broach spire, and a lower chancel at the back. Built on the skill."
+ },
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "vale_stone",
+    "glass": "light_blue_stained_glass_pane",
+    "floor": "polished_andesite"
+   },
+   "rect": [
+    0,
+    0,
+    10,
+    18
+   ],
+   "y": 0,
+   "plinth": 2,
+   "storeys": [
+    8
+   ],
+   "door": null,
+   "windows": {
+    "e": [
+     {
+      "at": -6,
+      "storey": 0,
+      "w": 1,
+      "h": 5
+     },
+     {
+      "at": 0,
+      "storey": 0,
+      "w": 1,
+      "h": 5
+     },
+     {
+      "at": 6,
+      "storey": 0,
+      "w": 1,
+      "h": 5
+     }
+    ],
+    "w": [
+     {
+      "at": -6,
+      "storey": 0,
+      "w": 1,
+      "h": 5
+     },
+     {
+      "at": 0,
+      "storey": 0,
+      "w": 1,
+      "h": 5
+     },
+     {
+      "at": 6,
+      "storey": 0,
+      "w": 1,
+      "h": 5
+     }
+    ],
+    "n": [],
+    "s": []
+   },
+   "roof": {
+    "type": "gable",
+    "ridge": "z",
+    "pitch": 1
+   },
+   "chimney": false,
+   "wings": [
+    {
+     "rect": [
+      2,
+      -5,
+      8,
+      -1
+     ],
+     "storeys": [
+      7
+     ],
+     "roof": {
+      "type": "hip",
+      "pitch": 1
+     }
+    }
+   ],
+   "vines": 0.06,
+   "interior": {
+    "use": "chapel",
+    "entry": "s"
+   }
+  },
+  {
+   "part": "buttress",
+   "rect": [
+    0,
+    0,
+    10,
+    18
+   ],
+   "side": "e",
+   "at": [
+    -9,
+    -3,
+    3,
+    9
+   ],
+   "y": 2,
+   "height": 6,
+   "depth": 2
+  },
+  {
+   "part": "buttress",
+   "rect": [
+    0,
+    0,
+    10,
+    18
+   ],
+   "side": "w",
+   "at": [
+    -9,
+    -3,
+    3,
+    9
+   ],
+   "y": 2,
+   "height": 6,
+   "depth": 2
+  },
+  {
+   "part": "house",
+   "style": {
+    "base": "vale_stone",
+    "glass": "light_blue_stained_glass_pane",
+    "roof": "deepslate_tiles"
+   },
+   "rect": [
+    2,
+    19,
+    8,
+    25
+   ],
+   "y": 0,
+   "plinth": 2,
+   "storeys": [
+    6,
+    6,
+    5
+   ],
+   "door": {
+    "side": "s",
+    "kind": "grand",
+    "steps": 2
+   },
+   "windows": {
+    "s": [
+     {
+      "at": 0,
+      "storey": 1,
+      "w": 1,
+      "h": 3
+     },
+     {
+      "at": 0,
+      "storey": 2,
+      "w": 1,
+      "h": 2
+     }
+    ],
+    "e": [
+     {
+      "at": 0,
+      "storey": 1,
+      "w": 1,
+      "h": 2
+     },
+     {
+      "at": 0,
+      "storey": 2,
+      "w": 1,
+      "h": 2
+     }
+    ],
+    "w": [
+     {
+      "at": 0,
+      "storey": 1,
+      "w": 1,
+      "h": 2
+     },
+     {
+      "at": 0,
+      "storey": 2,
+      "w": 1,
+      "h": 2
+     }
+    ],
+    "n": []
+   },
+   "roof": {
+    "type": "flat"
+   },
+   "chimney": false,
+   "vines": 0.06,
+   "bushes": false,
+   "interior": "tower"
+  },
+  {
+   "part": "belfry",
+   "rect": [
+    2,
+    19,
+    8,
+    25
+   ],
+   "y": "top",
+   "h": 5,
+   "pier": "stone_bricks",
+   "deck": "stone_bricks",
+   "trim": "spruce_planks",
+   "louvres": true,
+   "roof": {
+    "ladder": [
+     "deepslate_tiles",
+     "cobbled_deepslate"
+    ],
+    "axis": "noise",
+    "scale": 2
+   },
+   "cap": "spire",
+   "rows": 3,
+   "kind": "broach",
+   "overhang": 1,
+   "finial": "spire_block",
+   "cap_trim": "dark_oak_planks"
+  }
+ ],
+ "place": [
+  [
+   4,
+   2,
+   18,
+   "air"
+  ],
+  [
+   4,
+   2,
+   19,
+   "air"
+  ],
+  [
+   4,
+   3,
+   18,
+   "air"
+  ],
+  [
+   4,
+   3,
+   19,
+   "air"
+  ],
+  [
+   4,
+   4,
+   18,
+   "air"
+  ],
+  [
+   4,
+   4,
+   19,
+   "air"
+  ],
+  [
+   5,
+   2,
+   18,
+   "air"
+  ],
+  [
+   5,
+   2,
+   19,
+   "air"
+  ],
+  [
+   5,
+   3,
+   18,
+   "air"
+  ],
+  [
+   5,
+   3,
+   19,
+   "air"
+  ],
+  [
+   5,
+   4,
+   18,
+   "air"
+  ],
+  [
+   5,
+   4,
+   19,
+   "air"
+  ],
+  [
+   6,
+   2,
+   18,
+   "air"
+  ],
+  [
+   6,
+   2,
+   19,
+   "air"
+  ],
+  [
+   6,
+   3,
+   18,
+   "air"
+  ],
+  [
+   6,
+   3,
+   19,
+   "air"
+  ],
+  [
+   6,
+   4,
+   18,
+   "air"
+  ],
+  [
+   6,
+   4,
+   19,
+   "air"
+  ],
+  [
+   4,
+   5,
+   18,
+   "stone_brick_stairs",
+   {
+    "facing": "w",
+    "half": "top"
+   }
+  ],
+  [
+   6,
+   5,
+   18,
+   "stone_brick_stairs",
+   {
+    "facing": "e",
+    "half": "top"
+   }
+  ]
+ ]
+}

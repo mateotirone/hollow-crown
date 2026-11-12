@@ -242,6 +242,16 @@ Add a line here when you publish one.
   time with ticking areas `hc_open_0..3`. Worlds without the Kingsrest gold block are left alone. Event `openingSetUp {}` when done.
   Builder commands: `/scriptevent siege:opening status|setup`, and `/scriptevent siege:wren` moves Wren to where you stand.
 
+- **landmarks** (`scripts/landmarks/`): fixed old things on the map (each plot's relic now; story sites next) that build
+  themselves the first time a player comes within 96 blocks, on any map world (map mode only), one site at a time with the
+  ticking area `hc_landmark`. Designs are minecraft-builder skill specs in `map/structures/landmarks.py`, exported by
+  `export_landmarks.py` to `designs_data.js` (Bedrock ids + states, rows). Placement on the land is `landmarks/plan.js`
+  (pure): `rigid` designs stand at the median ground and are graded in, `drape` designs follow the ground column by column
+  (`rise`: posts stand up out of water). Pieces that need a shore or cliff edge seek it; their spots are worked out from the
+  map by `map/structures/landmark_preview.mjs` (also writes preview scenes) into `spots_data.js`. Add a site in `sites.js`;
+  raise its `version` to rebuild it in old worlds. Event **`landmarkFound` `{ player, site }`** when someone stands at a
+  built one. Builder commands: `/scriptevent hc:landmark_status`, `hc:landmark_tp <id>`, `hc:landmark_build <id>`.
+
 - **looks** (`scripts/looks/index.js`): `lookOf(player)`, `setLook(player, look)`, `chooseLook(player)`, `looksFor(name)`. The add-on now ships
   `entities/player.json` (BP) and `entity/player.entity.json` (RP), both written by `studio/build_looks.mjs` from vanilla copies
   in `studio/looks/vanilla/`. **Need to change the player entity? Add it to that script, not to the JSON**, or the next run undoes it.
@@ -271,6 +281,11 @@ Add a line here when you publish one.
   `guardOrders { player, guard }`; siege/ hooks it uses: filters `guardMenu` (plain click on a guard, the guard list) and
   `barracksButtons`, event `guardRemoved { id, owner }`, `setPost` with `{ x, y, z, stand: true }` posts (STATION_LEASH).
   Guard animations: `tools/build_guard_anims.py` (rewrites both guard client entities). Marker art: `tools/build_guardposts_art.py`.
+  Walking (`guardposts/walk.js`): a walking guard chases a hidden `siege:post_marker` kept up to 14 blocks ahead, through one of
+  24 walk groups (`tools/build_guard_walk.py` patches both guard BP entities; archers' shooting lives in group `siege:fight`).
+  `walkTo(guard, owner, dest)`, `cancelWalk(id)`. While walking a guard has dynamic property `siege:walking` and siege/guards.js
+  leaves it alone. Watch: `POSTS.watch` in posts.js ("dusk" | "always" | "shifts"). Wall steps: `stairColumns` in settle/walldata.js
+  (roles stair/landing/ladder in `wallColumns`).
 
 ## The minimap and titles
 
@@ -318,5 +333,6 @@ player and vanish a few seconds after everyone walks away; nothing is saved. Don
 `addFilter("roleOffer", (allowed, { player, role }) => ...)` (town hall asks before offering a role; false holds it),
 `addFilter("dragonNestTake", (refusal, { player, block }) => ...)` (dragons: a returned string refuses the egg and is shown),
 `addFilter("dragonCanFly", (reason, { player, rec, entity, flying }) => ...)` (dragons: a returned string grounds her, on take-off or once a second in the air, and is shown),
+`emit("npcDragonFly", { key, name, species, follow | center, radius, height, every, damage, targetType, ttl })` and `emit("npcDragonLand", { key })` (dragons/wingmen.js: an NPC rider's dragon that circles a player or a point and breathes fire; ask again with the same key to keep it up; Overworld only),
 `addFilter("treeButtons", (list, { player }) => [...list, { label, icon, open(player, back) }])` (extra pages at the Tree of Oaths), and
 `emit("loreSetFlag", { player, flag })` (lore: set a story flag from another feature).
