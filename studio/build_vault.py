@@ -113,10 +113,15 @@ def veins(x, y):
 
 
 def trim(T):
+    # smooth worked metal: one tone, a lit top-left edge, a dark bottom-right edge, the odd glint
     def paint(x, y, r):
-        if (x + y) % 6 == 0:
+        if x == 0 or y == 0:
+            return T[4]
+        if x == 15 or y == 15:
+            return T[1]
+        if (x * 7 + y * 3) % 23 == 0:
             return T[5]
-        return T[2] if (x // 2 + y // 2) % 3 == 0 else T[3]
+        return T[3] if (x + y) % 9 else T[2]
     return paint
 
 
@@ -233,9 +238,9 @@ def door(wheel):
     s.cube([-6, 1, -7], [12, 13, 15], "*", "slab")
     # hinges on the left, two locking bars across
     for y in (2.5, 10.5):
-        s.cube([-7, y, -8.5], [2.5, 2.5, 1.5], "trim", "slab")
-    for y in (4, 10):
-        s.cube([-5.5, y, -7.6], [11, 1, 0.6], "trim", "slab")
+        s.cube([-6.5, y, -7.8], [2, 2, 0.8], "trim", "slab")
+    for y in (2, 12):
+        s.cube([-4, y, -7.4], [9.5, 1, 0.4], "trim", "slab")
     # crack overlays just in front of the slab, shown by the door's siege:cracks state (drilled, not yet repaired)
     s.cube([-6, 1, -7.05], [12, 13, 0.01], "cracks_1", "cracks_1")
     s.cube([-6, 1, -7.1], [12, 13, 0.01], "cracks_2", "cracks_2")
@@ -245,21 +250,15 @@ def door(wheel):
         s.cube([-0.5, 6.5, -8.4], [1, 2, 0.3], "frame", "lock")
         s.cube([2, 7.5, -8.6], [2.5, 1, 1.6], "trim", "lock")
         return s
-    # the spoked locking wheel: hub, ring of eight blocks, four spokes, and a jewel (Choirsteel glows)
-    cx, cy, z = 0, 7.5, -9.5
-    s.cube([cx - 1.25, cy - 1.25, z], [2.5, 2.5, 2.5], "trim", "wheel")
-    # no rotated cubes: an axis-aligned pixel ring reads cleanly in game and in every viewer
-    for x0, y0, w, h in ((-2.5, 4, 5, 1), (-2.5, -5, 5, 1), (4, -2.5, 1, 5), (-5, -2.5, 1, 5),          # four sides
-                         (2.5, 3, 1.5, 1.5), (-4, 3, 1.5, 1.5), (2.5, -4.5, 1.5, 1.5), (-4, -4.5, 1.5, 1.5)):  # stepped corners
-        s.cube([cx + x0, cy + y0, z + 0.5], [w, h, 1], "trim", "wheel")
-    s.cube([cx - 4, cy - 0.4, z + 0.8], [8, 0.8, 0.8], "trim", "wheel")      # cross spokes
-    s.cube([cx - 0.4, cy - 4, z + 0.8], [0.8, 8, 0.8], "trim", "wheel")
-    for dx, dy in ((5, 0), (-5, 0), (0, 5), (0, -5)):                         # grip knobs past the rim
-        s.cube([cx + dx - 0.6 - (0.4 if dx > 0 else 0) + (0.4 if dx < 0 else 0), cy + dy - 0.6 - (0.4 if dy > 0 else 0) + (0.4 if dy < 0 else 0), z + 0.3], [1.2, 1.2, 1.4], "trim", "wheel")
-    s.cube([cx - 0.6, cy - 0.6, z - 0.4], [1.2, 1.2, 0.5], "gem", "gem")
-    # bolt housings on the right edge
-    for y in (3, 7, 11):
-        s.cube([4.2, y, -8.3], [1.6, 1.6, 1.3], "trim", "slab")
+    # the locking wheel: a flat pixel ring, a cross of spokes and a hub, kept shallow so it reads as one piece
+    cx, cy, z = 0, 7.5, -8
+    s.cube([cx - 1, cy - 1, z - 0.6], [2, 2, 1.6], "trim", "wheel")
+    for x0, y0, w, h in ((-2, 3, 4, 1), (-2, -4, 4, 1), (3, -2, 1, 4), (-4, -2, 1, 4),
+                         (2, 2, 1, 1), (-3, 2, 1, 1), (2, -3, 1, 1), (-3, -3, 1, 1)):
+        s.cube([cx + x0, cy + y0, z], [w, h, 0.8], "trim", "wheel")
+    s.cube([cx - 3, cy - 0.35, z + 0.2], [6, 0.7, 0.6], "trim", "wheel")
+    s.cube([cx - 0.35, cy - 3, z + 0.2], [0.7, 6, 0.6], "trim", "wheel")
+    s.cube([cx - 0.5, cy - 0.5, z - 0.8], [1, 1, 0.3], "gem", "gem")
     return s
 
 
