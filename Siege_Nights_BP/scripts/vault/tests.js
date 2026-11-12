@@ -15,6 +15,19 @@ addTests("vault", {
     for (let i = 1; i < TIERS.length; i++) assert(VAULT_ROOMS[TIERS[i]].treasury.size > VAULT_ROOMS[TIERS[i - 1]].treasury.size, TIERS[i]);
     for (const tier of TIERS) assert(VAULT_ROOMS[tier].treasury.marks.lock[0] > 0, `${tier} lock on the right`);
   },
+  "the 3x3 door sits two to four blocks left of the lock, centred on its height": () => {
+    for (const tier of TIERS) for (const layout of ["treasury", "hall", "crypt"]) {
+      const d = VAULT_ROOMS[tier][layout];
+      const [lx, ly, lz] = d.marks.lock;
+      const at = new Map();
+      for (const [y, z, x0, n, i] of d.rows) for (let x = x0; x < x0 + n; x++) at.set(`${x},${y},${z}`, d.palette[i][0]);
+      assert(/^siege:vault_lock_/.test(at.get(`${lx},${ly},${lz}`)), `${tier} ${layout} lock block`);
+      for (let dx = -4; dx <= -2; dx++) for (let dy = -1; dy <= 1; dy++) {
+        const id = at.get(`${lx + dx},${ly + dy},${lz}`);
+        assert(/^siege:vault_door_/.test(id ?? ""), `${tier} ${layout} door at ${dx},${dy}: ${id}`);
+      }
+    }
+  },
   "a layout and a cost for every tier": () => {
     for (const tier of TIERS) { assert(VAULT_ROOMS[tier][LAYOUT[tier]], `${tier} layout`); assert(COSTS[tier]?.length, `${tier} cost`); }
   },

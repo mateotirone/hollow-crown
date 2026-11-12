@@ -3,18 +3,23 @@
 // entrance hall and the Wooden Strongroom are built underground, the Vault Lock sits in the wall beside the 3x3
 // door. Rooms: rooms_data.js (map/structures/export_vaults.py). Numbers: data.js.
 //
-// Still to come: the key swinging the door open, relic stands, reinforcing to the next tier, Vault Breakers on
+// The key on the lock swings the 3x3 door open the way gates swing (siege/gates.js planSwing), and shut again.
+// Keys are cut for one vault: owner and allies open with any key, anyone else only with a key cut for it.
+//
+// Still to come: relic stands, reinforcing to the next tier, Vault Breakers on
 // the lock, repair, and the offline open windows.
 //
 // What other features can use:
 //   vaultOf(ownerId)  -> { x, y, z, fx, fz, tier, layout, built, lock: {x,y,z} } or undefined
 //   on("vaultBuilt", ({ owner, tier, lock }))
+//   on("vaultOpened", ({ owner, by }))   someone outside the settlement opened it with a key cut for it
 //
 // Test: /scriptevent siege:vault_build [tier] [layout]   raise one where you stand, facing the way you look (creative)
 
-import { world, system, GameMode, ItemStack } from "@minecraft/server";
+import { world, system, GameMode, ItemStack, BlockPermutation } from "@minecraft/server";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
-import { isReady, settlementAt, onTick, moduleStore, emit } from "../siege/api.js";
+import { isReady, settlementAt, onTick, moduleStore, emit, isAlly, keepOf } from "../siege/api.js";
+import { planSwing, SWEPT } from "../siege/gates.js";
 import { startBuild, buildFor } from "../townhall/build.js";
 import { Plan } from "../townhall/halls.js";
 import { styleFor, drawDesigned } from "../settle/buildings.js";
@@ -34,6 +39,21 @@ const say = (player, text) => { try { player?.sendMessage(text); } catch { /* le
 const cardinal = (v) => (Math.abs(v.x) > Math.abs(v.z) ? { x: Math.sign(v.x) || 1, z: 0 } : { x: 0, z: Math.sign(v.z) || 1 });
 const creative = (player) => player.getGameMode() === GameMode.Creative;
 const roomOf = (tier, layout) => VAULT_ROOMS[tier]?.[layout] ?? VAULT_ROOMS[tier].treasury;
+const KEY_OWNER = "hc:vault_owner";
+
+// A Vault Key is cut for one settlement's vault: the owner and allies open it with any key, anyone else
+// only with a key cut for it (a stolen or spare one).
+function keyFor(owner) {
+  const key = new ItemStack(VAULT_KEY, 1);
+  try { key.setDynamicProperty(KEY_OWNER, owner); } catch { /* old game: an uncut key */ }
+  try { key.setLore([`§7Opens ${keepOf(owner)?.name ?? "a settlement"}'s vault`]); } catch { /* fine */ }
+  return key;
+}
+const giveKey = (player, owner) => player.getComponent("minecraft:inventory").container.addItem(keyFor(owner));
+function keyOpens(player, stack, owner) {
+  if (player.id === owner || isAlly(owner, player.id)) return true;
+  try { return stack?.getDynamicProperty(KEY_OWNER) === owner; } catch { return false; }
+}
 
 export function vaultOf(owner) {
   const v = vaults()[owner];
@@ -99,13 +119,13 @@ function vaultMenu(player, owner) {
     lines.push(`§l${TIER_NAME[tier]}§r`, v.pending ? "§6It is being dug out right now." : `§7Down the stairs at ${v.x}, ${v.z}. Use the Vault Key on the lock to open the door.`);
     if (mine && !v.pending) {
       form.button("A spare Vault Key\n§8for you or a trusted ally", "textures/items/vault/vault_key");
-      actions.push(() => { player.getComponent("minecraft:inventory").container.addItem(new ItemStack(VAULT_KEY, 1)); say(player, "§7Here is a spare Vault Key. Anyone holding one can open your vault."); });
+      actions.push(() => { giveKey(player, owner); say(player, "§7Here is a spare Vault Key, cut for your vault. Anyone holding it can open the door."); });
     }
   } else if (v?.paid) {
     lines.push("§lA vault, paid for§r", "§7Take the Vault Key to where the stairs should start, on your own land, face the way they should go down, and use the key on the ground.");
     if (mine) {
       form.button("I lost the key\n§8get another", "textures/items/vault/vault_key");
-      actions.push(() => player.getComponent("minecraft:inventory").container.addItem(new ItemStack(VAULT_KEY, 1)));
+      actions.push(() => giveKey(player, owner));
     }
   } else {
     lines.push("§lNo vault yet§r", "§7A vault keeps your relics behind a locked door underground. Attackers have to break in to take them.", "", "§lCosts:§r");
@@ -129,7 +149,7 @@ function buy(player, owner, cost) {
   for (const c of cost) takeMatching(player, c.match, c.amount);
   vaults()[owner] = { paid: true };
   store.save();
-  player.getComponent("minecraft:inventory").container.addItem(new ItemStack(VAULT_KEY, 1));
+  giveKey(player, owner);
   sfx(player, "random.orb");
   say(player, "§6Here is your Vault Key. Walk to where the stairs should start, face the way they should go down into the ground, and use the key on the ground there.");
 }
@@ -170,6 +190,80 @@ world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
   if (block.typeId.startsWith("siege:vault_")) return; // the lock and door: their own handler
   event.cancel = true;
   system.run(() => chooseSpot(player, block));
+});
+
+// ---------- the door: the key on the lock swings it open (the gates' swing) ----------
+
+const DOOR = /^siege:vault_door_(plate_)?(wood|iron|diamond|netherite|choirsteel)$/;
+const isLock = (id) => /^siege:vault_lock_/.test(id);
+
+// The vault whose lock this is
+function vaultAtLock(block) {
+  const l = block.location;
+  for (const [owner, v] of Object.entries(vaults())) {
+    if (!v.built) continue;
+    const at = worldOf(v, ...roomOf(v.built, v.layout).marks.lock);
+    if (at.x === l.x && at.y === l.y && at.z === l.z) return [owner, v];
+  }
+  return [];
+}
+
+// The 3x3 door's blocks, closed: the lock is two to the right of the door's edge, at the door's middle height
+function doorCells(v) {
+  const [lx, ly, lz] = roomOf(v.built, v.layout).marks.lock;
+  const out = [];
+  for (let dx = -4; dx <= -2; dx++) for (let dy = -1; dy <= 1; dy++) out.push(worldOf(v, lx + dx, ly + dy, lz));
+  return out;
+}
+
+const freeAt = (dim, p) => {
+  try { const b = dim.getBlock(p); return !!b && (b.isAir || SWEPT.has(b.typeId) || b.typeId.endsWith("_carpet")); } catch { return false; }
+};
+
+function swingDoor(player, owner, v) {
+  const dim = world.getDimension(OVERWORLD);
+  const air = BlockPermutation.resolve("minecraft:air");
+  if (v.open) {
+    const moves = v.open.map(([fx, fy, fz, tx, ty, tz]) => ({ from: { x: fx, y: fy, z: fz }, to: { x: tx, y: ty, z: tz } }));
+    if (moves.some((m) => !freeAt(dim, m.from))) return player.onScreenDisplay.setActionBar("§7Something is standing in the doorway.");
+    const perms = moves.map((m) => { const b = dim.getBlock(m.to); return DOOR.test(b?.typeId ?? "") ? b.permutation : undefined; });
+    moves.forEach((m, i) => { if (perms[i]) dim.getBlock(m.to).setPermutation(air); });
+    moves.forEach((m, i) => { if (perms[i]) dim.getBlock(m.from).setPermutation(perms[i].withState("minecraft:cardinal_direction", v.facing)); });
+    v.open = undefined;
+    store.save();
+    sfx(player, "random.door_close", { volume: 1, pitch: 0.6 });
+    return;
+  }
+  const cells = doorCells(v);
+  const blocks = cells.map((c) => dim.getBlock(c));
+  if (!blocks.some((b) => DOOR.test(b?.typeId ?? ""))) return player.onScreenDisplay.setActionBar("§7The vault door is broken. Repair it at the lock.");
+  const centre = blocks[4];
+  const facing = centre?.permutation.getState("minecraft:cardinal_direction") ?? "south";
+  const plan = planSwing(cells, facing, cells[4], player.location, (p) => freeAt(dim, p));
+  if (!plan) return player.onScreenDisplay.setActionBar("§7Something is in the way of the vault door.");
+  const perms = plan.moves.map((m) => { const b = dim.getBlock(m.from); return DOOR.test(b?.typeId ?? "") ? b.permutation : undefined; });
+  plan.moves.forEach((m, i) => { if (perms[i]) dim.getBlock(m.from).setPermutation(air); });
+  plan.moves.forEach((m, i) => { if (perms[i]) dim.getBlock(m.to).setPermutation(perms[i].withState("minecraft:cardinal_direction", plan.face)); });
+  v.facing = facing;
+  v.open = plan.moves.filter((m, i) => perms[i]).map((m) => [m.from.x, m.from.y, m.from.z, m.to.x, m.to.y, m.to.z]);
+  store.save();
+  sfx(player, "random.door_open", { volume: 1, pitch: 0.6 });
+  if (player.id !== owner && !isAlly(owner, player.id)) emit("vaultOpened", { owner, by: player.id });
+}
+
+function useLock(player, block, stack) {
+  const [owner, v] = vaultAtLock(block);
+  if (!owner) return player.onScreenDisplay.setActionBar("§7This lock belongs to no vault.");
+  if (!stack || stack.typeId !== VAULT_KEY) return player.onScreenDisplay.setActionBar("§7Locked. It takes this vault's key.");
+  if (!keyOpens(player, stack, owner)) return player.onScreenDisplay.setActionBar("§7This key was cut for another vault.");
+  swingDoor(player, owner, v);
+}
+
+world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
+  const { block, player, itemStack } = event;
+  if (event.isFirstEvent === false || !isReady() || !isLock(block.typeId)) return;
+  event.cancel = true;
+  system.run(() => useLock(player, block, itemStack));
 });
 
 // ---------- test ----------

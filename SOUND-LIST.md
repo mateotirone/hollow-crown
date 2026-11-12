@@ -446,6 +446,7 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `mob.witch.celebrate` | 2 | bestiary (2) |
 | `note.bell` | 2 | rails, roletrials |
 | `random.bow` | 2 | bestiary (2) |
+| `random.door_open` | 2 | siege, vault |
 | `random.drink` | 2 | bestiary, roletrials |
 | `tile.piston.in` | 2 | unlocks (2) |
 | `armor.equip_netherite` | 1 | siege |
@@ -480,7 +481,7 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `mob.wither.shoot` | 1 | bestiary |
 | `mob.wolf.growl` | 1 | bestiary |
 | `note.bass` | 1 | dragons |
-| `random.door_open` | 1 | siege |
+| `random.door_close` | 1 | vault |
 | `random.fuse` | 1 | siege |
 | `step.stone` | 1 | bestiary |
 

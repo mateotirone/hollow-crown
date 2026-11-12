@@ -476,7 +476,7 @@ export const ENTRIES = [
     tip: "The Vault Key. Use it on the ground where your vault's stairs should start.",
     page: "Your relics are safest in a §fvault§r. Open the Town Hall menu and choose §fVault§r, then §fAdd Vault§r: it costs 64 planks and 32 cobbled deepslate and gives you the §fVault Key§r.\n\n"
       + "Walk to where the stairs should start on your own land, face the way they should go down, and use the key on the ground. Stairs are carved down to an entrance hall and a §fWooden Strongroom§r with a 3x3 vault door. The §fVault Lock§r is in the wall beside the door.\n\n"
-      + "Anyone holding a Vault Key can open your vault, so keep yours safe. Spare keys come from the same menu.",
+      + "Click the lock with the key and the door swings open; click it again to shut it. You and your allies open it with any Vault Key, but a key is cut for one vault, and anyone holding a key cut for yours can open it too. Keep yours safe. Spare keys come from the same menu.",
     when: ["carry:siege:vault_key", "event:vaultBuilt"],
   },
   {
