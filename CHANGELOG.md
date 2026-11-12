@@ -9,6 +9,7 @@ How versions work is in [`docs/RELEASING.md`](docs/RELEASING.md).
 Everything merged to `main` since the last release goes here. Each pull request that changes what players see adds a line under one of these headings.
 
 ### Added
+- Playing alone, the mentors' students now turn up and fight beside you in the last fight: Hrafn at the Standing Ranks, Dame Orla and a knight of the Eleven on the Night It Ended, Jory Holt with a crossbow at the River, and Senna Vey on her own dragon, circling the Rift and burning Morvane. And when you are the only Dragon Rider about and take to the air on a siege night, Kesh's cadets fly at your wing on their own dragons and burn raiders near you: Senna from the start, Pim Ashgrove too once you are Wing-Sworn.
 - Siege crews go to war with your army, each bringing its own engine: Trebuchet crews set up 40 blocks out, unfold their trebuchet and widen one hole in the wall nearest the vault (a boulder every 45 seconds, never at the gate); Ram crews ram the gate; Sappers plant Breaching Charges and run. Train them at the Barracks.
 - Soldiers fight by role in a siege: Shieldbearers cover the crews, Crossbowmen and Archers hang back, Knights ride down archers, everyone else pours through the breach; defending Pikemen and Shieldbearers brace the gate and breach.
 - New soldiers walk out of the Barracks to the yard; new Archers and Crossbowmen go straight to an empty post on the wall.
