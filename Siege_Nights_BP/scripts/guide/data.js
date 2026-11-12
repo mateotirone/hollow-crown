@@ -240,7 +240,7 @@ export const ENTRIES = [
     tip: "Traders buy what their trade needs. Each has only so much appetite a day, and pays less once they've had plenty.",
     page: "Every town has traders: a farmer, woodcutter, quarryman, smith, fisher, hunter, herbalist and the Moneyer. Click one to sell to them or buy from them.\n\n"
       + "Prices differ from region to region. Each trader only wants so much a day: past that they pay less, and in the end they stop buying until tomorrow.\n\n"
-      + "§fThe Moneyer§r changes coins and buys iron ingots and emeralds. He takes every iron ingot you bring at full price, with no daily limit (iron golems never appear, so iron only comes from mining). Each region's Smith sells that region's Castle Guard armour.",
+      + "§fThe Moneyer§r changes coins and buys iron ingots and emeralds. He takes every iron ingot you bring at full price, with no daily limit (iron golems never appear, so iron only comes from mining). He also trades metal up one step: 4 iron for a gold ingot, 8 gold for a diamond, 6 diamonds for a netherite scrap. It is dear, but anything can always be bought. Each region's Smith sells that region's Castle Guard armour.",
     when: ["talk:tag:siege_job"],
   },
 
@@ -406,7 +406,7 @@ export const ENTRIES = [
     tip: "This calls something to where you stand when you use it. Be ready, and stand somewhere open.",
     page: "Each region has something old in it, and each has a token that calls it. Use the token somewhere open and the fight starts where you stand.\n\n"
       + "A boss gets half again as tough for each extra player in the fight, so it is fair alone and fair with friends. Watch for its warnings: every attack is shown before it lands.\n\n"
-      + "Everyone who fought gets the boss's own relic the first time it falls (materials after that), skill points, and a share of the chest it leaves. A boss you have beaten comes back in a different temper each time.",
+      + "Everyone who fought gets the boss's own relic the first time it falls (materials after that), skill points, and a share of the chest it leaves. A boss you have beaten comes back in a different temper each time, and a rank stronger (up to rank V): more health, harder hits, and from rank III two tempers at once. Calling it back costs diamonds as well as the key (2 at rank I, up to 6 at rank V), and every rematch leaves netherite scrap: 1 at ranks I and II, 2 at III and IV, 3 at V. There is no Nether here, so this is where netherite comes from.",
     when: ["carry:siege:stopped_clock_key", "carry:siege:pale_horn", "carry:siege:drowned_ring", "carry:siege:faceless_seal", "carry:siege:mire_effigy"],
     hidden: true,
   },

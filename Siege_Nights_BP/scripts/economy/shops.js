@@ -12,7 +12,7 @@ import { world, system, GameMode, ItemStack, ItemTypes } from "@minecraft/server
 import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
 import { isReady, isNight, countItem, takeItems, pick, emit } from "../siege/api.js";
 import { allPlots } from "../plots/claims.js"; // same function plots/api.js re-exports; claims.js exists in every snapshot of the repo
-import { ECON, JOBS, JOB_IDS, LINES, REGIONS } from "./config.js";
+import { ECON, JOBS, JOB_IDS, LINES, REGIONS, EXCHANGE } from "./config.js";
 import { regional, appetite, payout, cost, coins, niceName, stopAt } from "./rules.js";
 import { funds, charge, pay, carried } from "./coins.js";
 import { sfx } from "../core/sfx.js";
@@ -239,6 +239,41 @@ async function changeMenu(player, npc) {
   openShop(player, npc);
 }
 
+// ---------- the Moneyer's trade-up ladder (config.js EXCHANGE) ----------
+
+async function exchangeMenu(player, npc) {
+  const form = new ActionFormData().title("Moneyer: trade up")
+    .body("Any metal can be traded up one step. It is dear: digging it yourself, or winning it, is always cheaper.");
+  for (const step of EXCHANGE) {
+    const have = countItem(player, step.from);
+    form.button(`${step.n} ${niceName(step.from)} → 1 ${niceName(step.to)}\n§8you have ${have}, enough for ${Math.floor(have / step.n)}`);
+  }
+  form.button("Back");
+  const res = await form.show(player);
+  if (res.canceled) return;
+  const step = EXCHANGE[res.selection];
+  if (!step) return openShop(player, npc);
+  const most = Math.min(64, Math.floor(countItem(player, step.from) / step.n));
+  if (most < 1) {
+    player.onScreenDisplay.setActionBar(`§7You need ${step.n} ${niceName(step.from)} for one ${niceName(step.to)}.`);
+    return exchangeMenu(player, npc);
+  }
+  let count = 1;
+  if (most > 1) {
+    const res2 = await new ModalFormData().title(`Trade up to ${niceName(step.to)}`)
+      .slider(`How many ${niceName(step.to)} (${step.n} ${niceName(step.from)} each)`, 1, most, { valueStep: 1, defaultValue: 1 }).show(player);
+    if (res2.canceled) return exchangeMenu(player, npc);
+    count = Math.max(1, Math.min(most, Math.floor(res2.formValues[0])));
+  }
+  const creative = player.getGameMode() === GameMode.Creative;
+  if (creative) player.runCommand(`clear @s ${step.from} -1 ${count * step.n}`);
+  else if (!takeItems(player, step.from, count * step.n)) return exchangeMenu(player, npc);
+  hand(player, step.to, count);
+  sfx(player, "random.orb");
+  emit("goodsExchanged", { player, from: step.from, to: step.to, count });
+  return exchangeMenu(player, npc);
+}
+
 // ---------- the shop ----------
 
 export async function openShop(player, npc) {
@@ -257,6 +292,7 @@ export async function openShop(player, npc) {
   form.button("Sell"); acts.push(() => sellMenu(player, npc, jobId, region));
   if (job.sells.some((good) => forSale(good, region))) { form.button("Buy"); acts.push(() => buyMenu(player, npc, jobId, region)); }
   if (job.mint) { form.button("Change coins"); acts.push(() => changeMenu(player, npc)); }
+  if (job.mint) { form.button("Trade up metal\n§8iron → gold → diamond → netherite"); acts.push(() => exchangeMenu(player, npc)); }
   form.button("Leave");
   const res = await form.show(player);
   if (!res.canceled) await acts[res.selection]?.();

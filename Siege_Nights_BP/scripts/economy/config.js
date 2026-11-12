@@ -31,6 +31,15 @@ export const ECON = {
   stopLots: 4,
 };
 
+// The trade-up ladder at the Moneyer (Mateo 2026-11-12): every tier can always be bought with the tier below, at a
+// steep rate, so a pile of netherite stands on a mountain of diamonds, gold and iron. Earning a tier directly
+// (Workings, bosses, the Guild) is always cheaper. Never add the reverse: tiers only go up here.
+export const EXCHANGE = [
+  { from: "minecraft:iron_ingot", n: 4, to: "minecraft:gold_ingot" },
+  { from: "minecraft:gold_ingot", n: 8, to: "minecraft:diamond" },
+  { from: "minecraft:diamond", n: 6, to: "minecraft:netherite_scrap" },
+];
+
 export const REGIONS = ["Aldmere Vale", "Frostmarch", "Saltreach", "Emberwaste", "Blackfen"];
 const [V, F, S, E, B] = REGIONS;
 

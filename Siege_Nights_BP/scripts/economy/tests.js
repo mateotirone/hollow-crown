@@ -1,6 +1,6 @@
 import { addTests, assert, assertEqual } from "../core/tests.js";
 import { ItemTypes } from "@minecraft/server";
-import { ECON, JOBS, JOB_IDS, LINES, REGIONS, COIN, GOLD, TOWNS, TOWN_RING } from "./config.js";
+import { ECON, JOBS, JOB_IDS, LINES, REGIONS, COIN, GOLD, TOWNS, TOWN_RING, EXCHANGE } from "./config.js";
 import { WARDS } from "../plots/config.js";
 import { regional, appetite, payout, cost, asCoins, coins, worth, fromEmeralds, loopholes, stopAt } from "./rules.js";
 
@@ -35,6 +35,18 @@ addTests("economy", {
       assert(TOWN_RING + 2 < ward.r, `${town.name}: traders stand inside the protected town`);
     }
     assertEqual(TOWNS.filter((t) => t.jobs.includes("moneyer")).map((t) => t.name), ["Kingsrest"]);
+  },
+  "the trade-up ladder only goes up, and buying iron to climb it and selling the top never pays": () => {
+    const order = ["minecraft:iron_ingot", "minecraft:gold_ingot", "minecraft:diamond", "minecraft:netherite_scrap"];
+    EXCHANGE.forEach((step, i) => { assertEqual(step.from, order[i]); assertEqual(step.to, order[i + 1]); assert(step.n > 1, "a step up costs more than one"); });
+    let iron = 1; // ingots of iron behind one unit of each tier
+    for (const step of EXCHANGE) {
+      iron *= step.n;
+      for (const job of Object.values(JOBS)) for (const good of job.buys.filter((g) => g.id === step.to)) {
+        const best = (good.price / good.lot) * ECON.scarcePays;
+        assert(best < iron * ECON.ironSells, `${step.to}: ${job.name} pays ${best}, the iron behind it costs ${iron * ECON.ironSells}`);
+      }
+    }
   },
   "job order matches the painted skins": () =>
     assertEqual(JOB_IDS.join(","), "farmer,woodcutter,quarryman,smith,fisher,hunter,herbalist,moneyer"),
