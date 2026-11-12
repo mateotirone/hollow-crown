@@ -1,19 +1,22 @@
-"""Deep Shaft specs for the minecraft-builder skill, one per level, each drawn over the last. Frostmarch style
-(skill regions/frostmarch.md: plinths of cobbled deepslate 2 courses high, dark log frames, spruce plank infill,
-white frosted glass, steep pitch 2 roofs with dragon-head gable horns, snow on ridges and caps, woodpiles,
-weathered copper only on the great building, no bright colours).
+"""Deep Shaft specs for the minecraft-builder skill: three levels, each drawn over the last, in every region's look
+(machine_regions.py; Mateo 2026-11-12: every machine comes in every region's theme). Frostmarch is the home
+style (skill regions/frostmarch.md: cobbled deepslate plinths 2 high, dark log frames, steep pitch 2 roofs with
+dragon-head gable horns, snow on ridges and caps, weathered copper on the great building).
 
-  1 Prospect Shaft (Town)    a deepslate shaft collar under a windlass shed, the miners' hut, a spoil heap and cart rail
+  1 Prospect Shaft (Town)    a stone shaft collar under a windlass shed, the miners' hut, a spoil heap and cart rail
   2 Winding House (City)     a tall timber headframe with a sheave; a stone winding house whose rope runs to it; a sorting shed
-  3 Deep Shaft (Castle)      a deepslate headframe tower with a copper roof over the shaft; a cutters' hall where the hut stood
+  3 Deep Shaft (Castle)      a stone headframe tower over the shaft; a cutters' hall where the hut stood
 
 Skill frame: x east, y up, z south; the front (gate) faces south. The plot is 25 x 15 (x -12..12, z -15..-1),
-walled from level 1; ground later levels build on is spruce, fern and berry scrub until then (Mateo 2026-11-12).
-Snow is added after the build from the engine's own result (ridges, caps and wall tops), as frostmarch.md asks.
+walled from level 1; ground later levels build on is the region's scrub and trees until then (Mateo 2026-11-12).
 
-Usage: python3 spec.py OUTDIR [--ground] [--skill SKILL_DIR]
+Usage: python3 spec.py OUTDIR [--ground] [--skill SKILL_DIR] [--region R|all]
 """
-import json, math, os, sys
+import json, os, sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(HERE, ".."))
+from machine_regions import theme, snow_cap, ORDER, names_json, _hash, noise  # noqa: E402
 
 PLOT = (-12, -15, 12, -1)
 COLLAR = (-2, -9, 2, -5)       # shaft collar 5 x 5, 3 x 3 shaft inside
@@ -23,27 +26,12 @@ SORT = (5, -6, 11, -5)         # sorting lean-to against the winding house (leve
 HALL = (-11, -13, -5, -5)      # cutters' hall 7 x 9 (level 3)
 HEAP = (-5, -14, -1, -12)      # spoil heap
 RAIL_X = 0
+STAGES = ["Prospect Shaft", "Winding House", "Deep Shaft"]
 
 MATERIALS = {"copper": {"ladder": ["waxed_weathered_cut_copper", "waxed_oxidized_cut_copper"], "axis": "y"},
              "slate": {"block": "deepslate_tiles"}, "spruce_roof": {"block": "spruce_planks"}}
 
-HERE = os.path.dirname(os.path.abspath(__file__))
 SKILL = os.path.join(HERE, "..", "..", "..", ".claude", "skills", "minecraft-builder")
-
-
-def _hash(x, z, k):
-    h = (x * 374761393 + z * 668265263 + k * 2147483647) & 0xffffffff
-    h = ((h ^ (h >> 13)) * 1274126177) & 0xffffffff
-    return (h & 0xffff) / 65535
-
-
-def noise(x, z, k, s=3.0):
-    fx, fz = x / s, z / s
-    x0, z0 = math.floor(fx), math.floor(fz)
-    tx, tz = fx - x0, fz - z0
-    tx, tz = tx * tx * (3 - 2 * tx), tz * tz * (3 - 2 * tz)
-    a, b, c, d = _hash(x0, z0, k), _hash(x0 + 1, z0, k), _hash(x0, z0 + 1, k), _hash(x0 + 1, z0 + 1, k)
-    return (a + (b - a) * tx) * (1 - tz) + (c + (d - c) * tx) * tz
 
 
 def inside(x, z, r, pad=0):
@@ -54,38 +42,40 @@ def shaft_cell(x, z):
     return COLLAR[0] < x < COLLAR[2] and COLLAR[1] < z < COLLAR[3]
 
 
+def styled(base, **kw):
+    """A preset (name or {"base": ...} dict) with overrides"""
+    d = dict(base) if isinstance(base, dict) else {"base": base}
+    d.update(kw)
+    return d
+
+
 # ---------- ground ----------
 
 def path_cells(lv):
     cells = set()
     for z in range(-4, 0): cells |= {(x, z) for x in (-1, 0, 1)}                 # gate to the collar
     cells |= {(x, -3) for x in range(-6, 2)} | {(-6, z) for z in range(-8, -2)}  # to the hut / hall door (east side)
-    if lv >= 2: cells |= {(x, -3) for x in range(2, 9)} | {(8, -4)}                         # to the sorting shed
+    if lv >= 2: cells |= {(x, -3) for x in range(2, 9)} | {(8, -4)}             # to the sorting shed
     return cells
 
 
-def ground(place, lv, keep_clear):
-    """Grass under snow, gravel patches, slab paths half a block down (frostmarch.md streets)"""
+def ground(T, place, lv, keep_clear):
+    """The region's ground, path blocks from the gate to each door, snow in Frostmarch"""
     x0, z0, x1, z1 = PLOT
     paths = path_cells(lv)
     for x in range(x0, x1 + 1):
         for z in range(z0, z1 + 1):
             if shaft_cell(x, z): continue
             if (x, z) in paths:
-                k = _hash(x, z, 5)
-                place.append([x, 0, z, "cobbled_deepslate_slab" if k < 0.6 else "stone_brick_slab" if k < 0.85 else "andesite_slab"])
-                continue
-            n = noise(x, z, 1)
+                place.append([x, 0, z, T.path(x, z)]); continue
             verge = any((x + dx, z + dz) in paths for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)))
-            b = "gravel" if verge and _hash(x, z, 6) < 0.45 else "gravel" if n < 0.18 else "podzol" if n > 0.86 else "grass_block"
+            b = T.yard(x, z) if verge and _hash(x, z, 6) < 0.45 else T.ground(x, z)
             place.append([x, 0, z, b])
-            if b != "gravel" and not any(inside(x, z, r) for r in keep_clear) and noise(x, z, 3, 2.2) > 0.3:
-                place.append([x, 1, z, "snow_layer"])
+            if b not in ("gravel", "water") and not any(inside(x, z, r) for r in keep_clear): T.snow_layer(place, x, z)
 
 
-def perimeter(place):
-    """A dry-stone dyke of cobbled deepslate with wall tops, dark oak log posts at the corners and the gate,
-    a lantern on each gate post"""
+def perimeter(T, place):
+    """A low stone dyke with wall tops, log posts at the corners and the gate, a lantern on each gate post"""
     x0, z0, x1, z1 = PLOT
     run = {(x, z1) for x in range(x0, x1 + 1)} | {(x, z0) for x in range(x0, x1 + 1)} | \
           {(x0, z) for z in range(z0, z1 + 1)} | {(x1, z) for z in range(z0, z1 + 1)}
@@ -93,46 +83,17 @@ def perimeter(place):
     for (x, z) in run:
         if abs(x) <= 1 and z == z1: continue
         if (x, z) in posts:
-            place += [[x, 1, z, "cobbled_deepslate"], [x, 2, z, "dark_oak_log"], [x, 3, z, "dark_oak_log"], [x, 4, z, "cobbled_deepslate_wall"]]
+            place += [[x, 1, z, T.stone_full], [x, 2, z, T.log], [x, 3, z, T.log], [x, 4, z, T.stone_wall]]
         else:
             k = _hash(x, z, 9)
-            place += [[x, 1, z, "cobbled_deepslate" if k < 0.65 else "tuff" if k < 0.85 else "andesite"], [x, 2, z, "cobbled_deepslate_wall"]]
+            place += [[x, 1, z, T.stone_full if k < 0.7 else T.stone_brick], [x, 2, z, T.stone_wall]]
     place += [[-2, 5, z1, "lantern"], [2, 5, z1, "lantern"]]
-
-
-# ---------- greenery for ground not built on yet ----------
-
-def spruce(place, x, z, h):
-    """A spruce: trunk, a spire top, then alternating wide and narrow tiers down the trunk"""
-    for y in range(1, h + 1): place.append([x, y, z, "spruce_log"])
-    place += [[x, h + 1, z, "spruce_leaves"], [x, h + 2, z, "spruce_leaves"]]
-    for y in range(3, h + 1):
-        r = 1 if (h - y) % 2 == 0 or y > h - 2 else 2
-        for dx in range(-r, r + 1):
-            for dz in range(-r, r + 1):
-                if dx == dz == 0: continue
-                if abs(dx) == abs(dz) == r and (r == 2 or _hash(x + dx, z + dz + y, 3) < 0.5): continue
-                place.append([x + dx, y, z + dz, "spruce_leaves"])
-
-
-def scrub(place, box, seed, trees=()):
-    """Ferns, sweet berry bushes, a mossy boulder now and then, spruces (no flowers in the north)"""
-    x0, z0, x1, z1 = box
-    for x in range(x0, x1 + 1):
-        for z in range(z0, z1 + 1):
-            if any(abs(x - tx) <= 2 and abs(z - tz) <= 2 for tx, tz, _ in trees): continue
-            k = _hash(x, z, seed)
-            if k < 0.12: place.append([x, 1, z, "fern"])
-            elif k < 0.2: place.append([x, 1, z, "bush"])
-            elif k < 0.26: place += [[x, 1, z, "cobbled_deepslate"], [x, 2, z, "snow_layer"]]
-            elif k < 0.29: place.append([x, 1, z, "mossy_cobblestone"])
-    for t in trees: spruce(place, *t)
 
 
 # ---------- the works ----------
 
-def collar(place):
-    """A deepslate brick ring round a 3 x 3 shaft; ladder down the north side; open to the depth"""
+def collar(T, place):
+    """A brick ring round a 3 x 3 shaft, open to the depth"""
     x0, z0, x1, z1 = COLLAR
     for x in range(x0, x1 + 1):
         for z in range(z0, z1 + 1):
@@ -140,15 +101,15 @@ def collar(place):
                 for y in range(-4, 2): place.append([x, y, z, "air"])
                 place.append([x, -5, z, "black_concrete"])
             else:
-                place += [[x, 0, z, "polished_deepslate"], [x, 1, z, "deepslate_bricks"]]
+                place += [[x, 0, z, T.stone_accent], [x, 1, z, T.stone_brick]]
 
 
 def rails(place, z_from, z_to):
     for z in range(z_to, z_from + 1): place.append([RAIL_X, 1, z, "rail"])
 
 
-def spoil_heap(place):
-    """Grey spoil from the shaft: cobbled deepslate, tuff and gravel in a low heap, snow on top"""
+def spoil_heap(T, place):
+    """Spoil from the shaft in a low heap: gravel, tuff and the region's rough stone"""
     x0, z0, x1, z1 = HEAP
     cx, cz = (x0 + x1) / 2, (z0 + z1) / 2
     for x in range(x0, x1 + 1):
@@ -157,35 +118,36 @@ def spoil_heap(place):
             for y in range(1, max(1, h) + 1):
                 k = _hash(x, y * 7 + z, 11)
                 place.append([x, y, z, "gravel" if k < 0.35 else "tuff" if k < 0.6 else "cobbled_deepslate"])
-            place.append([x, max(1, h) + 1, z, "snow_layer"])
+            if T.snow: place.append([x, max(1, h) + 1, z, "snow_layer"])
 
 
-def hut():
-    return {"part": "house", "style": "frost_timber", "rect": list(HUT), "y": 1, "plinth": 2, "storeys": [5],
-            "door": {"side": "e"}, "shutters": 0.3,
-            "roof": {"type": "gable", "pitch": 2, "ridge": "z", "gable_horns": True}, "chimney": [[-9, -10]]}
+def hut(T):
+    return T.house("timber", rect=list(HUT), y=1, plinth=2, storeys=[5], door={"side": "e"}, shutters=0.3, ridge="z",
+                   chimney=[[-9, -10]])
 
 
-def shed():
-    """Level 1: the windlass shed over the collar, a frost_timber block whose walls are stripped to the frame
-    afterwards (strip_to_frame), so only the posts, beams and the steep roof stand over the shaft"""
-    return {"part": "house", "style": "frost_timber", "rect": list(COLLAR), "y": 1, "plinth": 1, "storeys": [5],
-            "door": {"side": "s"}, "windows": {}, "chimney": False, "shutters": 0, "name": "shaft_shed",
-            "roof": {"type": "gable", "pitch": 2, "ridge": "x", "gable_horns": True}}
+def frame_style(T):
+    """The headframe and windlass shed are timber in every region: the region's timber preset with its log as frame"""
+    return styled(T.timber, frame=T.log, frame_kind="flush")
 
 
-def headframe():
+def shed(T):
+    """Level 1: the windlass shed over the collar, a block whose walls are stripped to the frame afterwards"""
+    return T.house("timber", style=frame_style(T), rect=list(COLLAR), y=1, plinth=1, storeys=[5], door={"side": "s"},
+                   windows={}, chimney=False, shutters=0, name="shaft_shed", ridge="x", bushes=False, piles=False)
+
+
+def headframe(T):
     """Level 2: the tall timber headframe, the same block raised to two storeys and stripped to its frame"""
-    return {"part": "house", "style": "frost_timber", "rect": list(COLLAR), "y": 1, "plinth": 1, "storeys": [5, 5],
-            "door": {"side": "s"}, "windows": {}, "chimney": False, "shutters": 0, "name": "headframe",
-            "roof": {"type": "gable", "pitch": 2, "ridge": "x", "gable_horns": True, "overhang": 1}}
+    return T.house("timber", style=frame_style(T), rect=list(COLLAR), y=1, plinth=1, storeys=[5, 5], door={"side": "s"},
+                   windows={}, chimney=False, shutters=0, name="headframe", ridge="x", bushes=False, piles=False)
 
 
-def windlass(place):
+def windlass(T, place):
     """Level 1: a log drum across the shaft on two posts, a chain down to a hanging bucket barrel"""
     for x in (COLLAR[0], COLLAR[2]):
-        place += [[x, 2, -7, "dark_oak_log"], [x, 3, -7, "dark_oak_log"]]
-    for x in range(COLLAR[0] + 1, COLLAR[2]): place.append([x, 4, -7, "stripped_spruce_log", {"axis": "x"}])
+        place += [[x, 2, -7, T.log], [x, 3, -7, T.log]]
+    for x in range(COLLAR[0] + 1, COLLAR[2]): place.append([x, 4, -7, T.log, {"axis": "x"}])
     for y in range(-1, 4): place.append([0, y, -7, "iron_chain"])
     place.append([0, -2, -7, "barrel"])
 
@@ -197,35 +159,40 @@ def sheave(place, top):
     for x in range(1, WIND[0]): place.append([x, 6, -7, "iron_chain", {"axis": "x"}])
 
 
-def winding_house():
-    return {"part": "house", "style": "frost_stone", "rect": list(WIND), "y": 1, "plinth": 2, "storeys": [5],
-            "door": {"side": "s", "kind": "large"}, "materials": {"roof": "slate"},
-            "roof": {"type": "gable", "pitch": 2, "ridge": "x", "gable_horns": True}, "chimney": [[10, -11]]}
+def winding_house(T):
+    extra = {"materials": {"roof": "slate"}} if T.region == "frostmarch" else {}
+    return T.house("stone", rect=list(WIND), y=1, plinth=2, storeys=[5], door={"side": "s", "kind": "large"}, ridge="x",
+                   chimney=[[10, -11]], **extra)
 
 
-def sorting_shed():
-    return {"part": "lean_to", "rect": list(SORT), "against": "n", "top": 7, "y": 1, "roof": "spruce_roof",
-            "post": "dark_oak_log", "trim": "dark_oak_planks"}
+def sorting_shed(T):
+    s = {"part": "lean_to", "rect": list(SORT), "against": "n", "top": 7, "y": 1, "post": T.log, "trim": T.planks}
+    if T.region == "frostmarch": s["roof"] = "spruce_roof"
+    return s
 
 
-def tower():
-    """Level 3: the deepslate headframe tower over the collar, slit windows, a weathered copper roof"""
+def tower(T):
+    """Level 3: the stone headframe tower over the collar, barred slit windows. Frostmarch and the Vale take a
+    copper spire (the great building's accent); the others keep their own roof (hipped, mossy gable, crenels)."""
     win = {s: [{"at": 0, "storey": k, "w": 1, "h": 2} for k in (1, 2)] for s in "ensw"}
-    return {"part": "house", "style": {"base": "frost_stone", "glass": "iron_bars"}, "rect": list(COLLAR), "y": 1, "plinth": 2,
-            "storeys": [5, 5, 5], "door": {"side": "s", "kind": "large"}, "windows": win, "chimney": False, "shutters": 0,
-            "materials": {"roof": "copper"}, "name": "shaft_tower",
-            "roof": {"type": "gable", "pitch": 2, "ridge": "x", "gable_horns": True}}
+    kw = {"materials": {"roof": "copper"}} if T.region == "frostmarch" else {}
+    if T.region == "saltreach": kw["roof_kw"] = {"pitch": 2}
+    return T.house("stone", style=styled(T.stone, glass="iron_bars"), rect=list(COLLAR), y=1, plinth=2, storeys=[5, 5, 5],
+                   door={"side": "s", "kind": "large"}, windows=win, chimney=False, shutters=0, name="shaft_tower", ridge="x",
+                   bushes=False, **kw)
 
 
-def cutters_hall():
-    return {"part": "house", "style": "frost_timber", "rect": list(HALL), "y": 1, "plinth": 2, "storeys": [5, 4],
-            "door": {"side": "e"}, "shutters": 0.3, "storey_style": [{"frame_kind": "stone", "infill": "FRO-01"}, {}],
-            "roof": {"type": "gable", "pitch": 2, "ridge": "z", "gable_horns": True}, "chimney": [[-8, -12]]}
+def cutters_hall(T):
+    kw = {}
+    if T.region in ("vale", "frostmarch", "saltreach"):
+        kw["storey_style"] = [{"frame_kind": "stone", "infill": T.stone_brick if T.region != "frostmarch" else "FRO-01"}, {}]
+    return T.house("timber", rect=list(HALL), y=1, plinth=2, storeys=[5, 4], door={"side": "e"}, shutters=0.3, ridge="z",
+                   chimney=[[-8, -12]], **kw)
 
 
 # ---------- levels ----------
 
-def level(lv):
+def level(T, lv):
     parts, place, strip = [], [], []
     if lv == 1:
         clear = [HUT, COLLAR, (HUT[0] - 1, HUT[1] - 2, HUT[2] + 1, HUT[3] + 1)]
@@ -234,34 +201,33 @@ def level(lv):
     else:
         clear = [HALL, COLLAR, WIND, SORT, (WIND[0] - 1, WIND[1] - 1, WIND[2] + 1, SORT[3] + 1), (HALL[0] - 1, HALL[1] - 1, HALL[2] + 1, HALL[3] + 1)]
     clear = clear + [HEAP, (COLLAR[0] - 1, COLLAR[1] - 1, COLLAR[2] + 1, COLLAR[3] + 1)]
-    ground(place, lv, clear)
-    perimeter(place)
-    collar(place)
-    spoil_heap(place)
+    ground(T, place, lv, clear)
+    perimeter(T, place)
+    collar(T, place)
+    spoil_heap(T, place)
     rails(place, COLLAR[1] - 1, PLOT[1] + 2)
     if lv < 3:
-        parts.append(hut())
-        parts.append({"part": "woodpile", "at": [HUT[0] + 1, 1, HUT[1] - 1], "len": 3, "h": 2, "facing": "n", "wood": "spruce"})
+        parts.append(hut(T))
+        parts.append({"part": "woodpile", "at": [HUT[0] + 1, 1, HUT[1] - 1], "len": 3, "h": 2, "facing": "n", "wood": T.wood})
         place.append([-6, 1, -10, "barrel"])
-        # the hall's ground, still scrub: the strip north of the hut and the column east of it
-        scrub(place, (HALL[0], HALL[1], HALL[2], HUT[1] - 2), 41)
+        T.green(place, (HALL[0], HALL[1], HALL[2], HUT[1] - 2), 41, ground=False)   # the hall's ground, still scrub
     if lv == 1:
-        parts.append(shed()); strip.append(("frame", COLLAR, 2, 4))
-        windlass(place)
-        # the winding house's ground: spruces and scrub
-        scrub(place, (WIND[0], WIND[1], WIND[2], SORT[3]), 43, trees=[(6, -11, 7), (9, -7, 6)])
-        place += [[4, 1, -3, "barrel"], [3, 1, -4, "cobbled_deepslate"]]
+        parts.append(shed(T)); strip.append((COLLAR, 2, 4))
+        windlass(T, place)
+        T.green(place, (WIND[0], WIND[1], WIND[2], SORT[3]), 43, trees=[(7, -11, 7), (10, -7, 6)], ground=False)
+        place += [[4, 1, -3, "barrel"], [3, 1, -4, T.boulder]]
     if lv >= 2:
-        parts += [winding_house(), sorting_shed()]
+        parts += [winding_house(T), sorting_shed(T)]
         place += [[6, 1, -5, "barrel"], [7, 1, -5, "barrel"], [10, 1, -5, "crafting_table"]]
-        # the winding drum inside, and a hole in the west wall where the rope runs out to the headframe
-        for z in (-9, -8): place.append([8, 3, z, "stripped_spruce_log", {"axis": "z"}])
+        for z in (-9, -8): place.append([8, 3, z, T.log, {"axis": "z"}])            # the winding drum inside
     if lv == 2:
-        parts.append(headframe()); strip.append(("frame", COLLAR, 2, 9))
+        parts.append(headframe(T)); strip.append((COLLAR, 2, 9))
         sheave(place, 12)
     if lv == 3:
-        parts += [tower(), {"part": "spire", "rect": list(COLLAR), "kind": "broach", "rows": 3, "roof": "copper", "trim": "dark_oak_planks"}, cutters_hall(),
-                  {"part": "woodpile", "at": [HALL[0] + 2, 1, HALL[1] - 1], "len": 3, "h": 2, "facing": "n", "wood": "spruce"}]
+        parts.append(tower(T))
+        if T.region in ("frostmarch", "vale"):
+            parts.append({"part": "spire", "rect": list(COLLAR), "kind": "broach", "rows": 3, "roof": "copper", "trim": "dark_oak_planks"})
+        parts += [cutters_hall(T), {"part": "woodpile", "at": [HALL[0] + 2, 1, HALL[1] - 1], "len": 3, "h": 2, "facing": "n", "wood": T.wood}]
         for y in range(-1, 2): place.append([0, y, -7, "iron_chain"])
         for x in range(COLLAR[2] + 1, WIND[0]): place.append([x, 6, -7, "iron_chain", {"axis": "x"}])
         place += [[-4, 1, -4, "barrel"], [3, 1, -4, "lantern"]]
@@ -285,57 +251,55 @@ def strip_to_frame(blocks, rect, y0, y1):
         out.append([x, y, z, "air"])
     for (x, y, z), (n, p) in blocks.items():           # the plate beam at y1 + 1 counts too
         if y == y1 + 1 and n.endswith("_log") and inside(x, z, rect) and (p or {}).get("axis", "y") != "y": beams.add(y)
-    for yb in sorted(beams):
+    return out, sorted(beams)
+
+
+def braces(T, rect, beams):
+    x0, z0, x1, z1 = rect
+    out = []
+    for yb in beams:
         y = yb - 1
         for cx, cz, ux, uz in ((x0, z0, 1, 1), (x1, z0, -1, 1), (x0, z1, 1, -1), (x1, z1, -1, -1)):
-            out.append([cx + ux, y, cz, "dark_oak_stairs", {"facing": "w" if ux > 0 else "e", "half": "top"}])
-            out.append([cx, y, cz + uz, "dark_oak_stairs", {"facing": "n" if uz > 0 else "s", "half": "top"}])
+            out.append([cx + ux, y, cz, T.stairs, {"facing": "w" if ux > 0 else "e", "half": "top"}])
+            out.append([cx, y, cz + uz, T.stairs, {"facing": "n" if uz > 0 else "s", "half": "top"}])
     return out
 
 
-def snow_cap(blocks, place):
-    """frostmarch.md: snow layers on ridges, chimney caps, flat tops and wall tops. A snow layer goes on every
-    topmost full block, wall or bottom slab that is open to the sky."""
-    tops = {}
-    for (x, y, z), (n, p) in blocks.items():
-        if n != "air": tops[(x, z)] = max(tops.get((x, z), y), y)
-    for (x, z), y in tops.items():
-        n, p = blocks[(x, y, z)]
-        if n in ("snow_layer", "lantern", "campfire", "flower_pot", "lightning_rod", "iron_chain", "grindstone", "rail", "fern",
-                 "sweet_berry_bush", "water", "black_concrete") or n.endswith(("_stairs", "_trapdoor", "_door", "_sign", "_fence", "_leaves", "_pane")):
-            continue
-        if n.endswith("_slab"):
-            if (p or {}).get("half") == "top": place.append([x, y + 1, z, "snow_layer"])
-            continue
-        place.append([x, y + 1, z, "snow_layer"])
-
-
-def specs(ground_plate=False, skill=SKILL):
+def specs(ground_plate=False, skill=SKILL, regions=("frostmarch",)):
     sys.path.insert(0, os.path.join(skill, "scripts"))
     from engine import compute  # noqa: E402
     out = {}
-    for lv in (1, 2, 3):
-        parts, place, strip = level(lv)
-        shapes = []
-        if ground_plate:
-            x0, z0, x1, z1 = PLOT
-            shapes = [{"shape": "box", "min": [x0 - 3, -5, z0 - 3], "max": [x1 + 3, -1, z1 + 3], "material": "stone"},
-                      {"shape": "box", "min": [x0 - 3, 0, z0 - 3], "max": [x1 + 3, 0, z1 + 3], "material": "snow"}]
-        spec = {"name": f"deepshaft_{lv}", "edition": "bedrock", "materials": MATERIALS, "shapes": shapes, "parts": parts, "place": place}
-        if strip:
-            blocks, _, _ = compute(spec)
-            for _, r, y0, y1 in strip: place += strip_to_frame(blocks, r, y0, y1)
-            spec["place"] = place
-        blocks, _, _ = compute(spec)
-        snow_cap(blocks, place)
-        spec["place"] = place
-        out[f"deepshaft_{lv}"] = spec
+    for region in regions:
+        T = theme(region)
+        for lv in (1, 2, 3):
+            parts, place, strip = level(T, lv)
+            shapes = []
+            if ground_plate:
+                x0, z0, x1, z1 = PLOT
+                shapes = [{"shape": "box", "min": [x0 - 3, -5, z0 - 3], "max": [x1 + 3, -1, z1 + 3], "material": T.plate[0]},
+                          {"shape": "box", "min": [x0 - 3, 0, z0 - 3], "max": [x1 + 3, 0, z1 + 3], "material": T.plate[1]}]
+            name = f"deepshaft_{region}_{lv}"
+            spec = {"name": name, "edition": "bedrock", "materials": MATERIALS, "shapes": shapes, "parts": parts, "place": place}
+            if strip:
+                blocks, _, _ = compute(spec)
+                for r, y0, y1 in strip:
+                    air, beams = strip_to_frame(blocks, r, y0, y1)
+                    place += air + braces(T, r, beams)
+            if T.snow:
+                blocks, _, _ = compute(spec)
+                snow_cap(blocks, place)
+            out[name] = spec
     return out
+
+
+def names():
+    return names_json("deepshaft", "Deep Shaft", STAGES)
 
 
 if __name__ == "__main__":
     a = sys.argv[1:]
     skill = a[a.index("--skill") + 1] if "--skill" in a else SKILL
-    for name, spec in specs("--ground" in a, skill).items():
+    r = a[a.index("--region") + 1] if "--region" in a else "all"
+    for name, spec in specs("--ground" in a, skill, ORDER if r == "all" else r.split(",")).items():
         json.dump(spec, open(os.path.join(a[0], name + ".json"), "w"))
     print("ok")
