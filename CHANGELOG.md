@@ -13,6 +13,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - Discord alerts, ready for when the group sets up a Discord: siege nights, fallen Keeps, new settlements, Rival Lords marching, the throne changing hands and more can be posted to a Discord channel, with a ping for whoever it hits, even when nobody is online. A Choirsteel template holder who stays away a full day is announced to everyone. Needs a relay account and a small program on an always-on computer (docs/DISCORD.md); without them nothing changes in game.
 
 ### Fixed
+- The Hollow's ruler no longer shows a health bar while sitting and talking. The bar appears when you strike them and the fight to overthrow them begins.
 - Boss bars show the boss's name again. The new custom bars left the title blank.
 - Gates and portcullises: clicking one always opens or shuts it, whatever you are holding, and never places a block against it. A Castle Gate now swings open like a door: all its joined blocks turn together as one leaf on a hinge at one end, away from you (or the other way if something is in the way), and swing back when shut. An open Portcullis rises out of sight so only its top piece shows, and you can walk under it.
 - The Wound landing's dock now reaches the river: a walkway steps down the bank to a landing stage on the water, so you can bring a boat alongside. The crane and a lamp stand out at the end of the stage.
