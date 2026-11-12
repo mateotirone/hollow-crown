@@ -8,14 +8,15 @@ import { ECON } from "../economy/config.js";
 import { funds, charge } from "../economy/coins.js";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
 import * as api from "../siege/api.js";
-import { HALL_TIERS, drawHall } from "./halls.js";
+import { HALL_TIERS, drawHall, frameFor } from "./halls.js";
 import { STYLES, STYLE_IDS, styleFromBiome, styleFromGround } from "./styles.js";
-import { startBuild, buildFor, worldMarks, worldBox, clearBoxFor } from "./build.js";
+import { startBuild, buildFor, worldMarks, worldBox, clearBoxFor, resolveRole } from "./build.js";
 import { heroOf, grantPoints, grantRenown, playerById } from "./hero.js";
 import { sfx } from "../core/sfx.js";
 
 export const CORNERSTONE = "siege:hall_cornerstone";
 export const TREE = "siege:tree_of_oaths";
+export const BOARD = "siege:hall_board"; // the Town Board inside every hall: click it for the Town Hall menu
 
 const store = api.moduleStore("siege:townhall", () => ({ halls: {} }));
 export const halls = () => store.data.halls;
@@ -189,7 +190,7 @@ const RISE_TICKS = [0, 140, 200, 260, 320, 320]; // about how long each tier's w
 
 // Where the Hall Cornerstone block stands while a hall is being started. Older builds moved it beside the
 // path (hall.cs). Once a hall stands the stone is taken away (hall.hidden): Mateo found it looked like a
-// stray command block. The Town Hall menu then opens from the Tree of Oaths or the Keep menu.
+// stray command block. The Town Hall menu then opens from the Town Board inside the hall, or the Keep menu.
 export const cornerOf = (hall) => hall.cs ?? { x: hall.x, y: hall.y, z: hall.z };
 
 function hideCornerstone(owner) {
@@ -230,6 +231,8 @@ export function beginBuild(owner, level, style, resumeIndex = 0) {
   hall.building = { level, style, index: resumeIndex };
   saveHalls();
   let lastSaved = resumeIndex;
+  // the settlement feature clears buildings standing where a bigger hall goes (settle/hallmove.js); once per build
+  if (!resumeIndex) api.emit("hallBuildStarted", { owner, level, style });
   startBuild({
     id: owner, dimensionId: "minecraft:overworld", origin: { x: hall.x, y: hall.y, z: hall.z }, forward, plan,
     style: STYLES[style], perTick, clearBox, keep: [cornerOf(hall), { x: hall.x, y: hall.y, z: hall.z }], index: resumeIndex,
@@ -282,8 +285,32 @@ export function beginBuild(owner, level, style, resumeIndex = 0) {
 // (on load, and again whenever the Town Hall menu opens, in case its chunk was not loaded then)
 export function tidyCornerstone(owner) {
   const hall = hallOf(owner);
-  if (!hall || hall.hidden || hall.lost || hall.building || !(hall.level > 0)) return;
-  hideCornerstone(owner);
+  if (!hall || hall.lost || hall.building || !(hall.level > 0)) return;
+  if (!hall.hidden) hideCornerstone(owner);
+  if (!hall.marks?.board) addBoard(owner);
+}
+
+// Halls raised before the Town Board existed get one now, where a new hall of that size would have it
+function addBoard(owner) {
+  const hall = hallOf(owner);
+  const plan = drawHall(hall.level, STYLES[hall.style]);
+  const spot = plan.marks.board;
+  if (!spot) return;
+  const forward = { x: hall.fx, z: hall.fz };
+  const at = worldMarks(plan, hall, forward).board;
+  try {
+    const block = world.getDimension("overworld").getBlock(at);
+    if (!block) return; // not loaded: try again later
+    if (block.isAir) {
+      const cell = plan.cells.get(`${spot.x},${spot.y},${spot.z}`);
+      block.setPermutation(resolveRole(STYLES[hall.style], frameFor(forward), "board", cell?.o));
+    }
+    if (block.typeId !== BOARD) return;
+    hall.marks = { ...(hall.marks ?? {}), board: at };
+    saveHalls();
+  } catch (e) {
+    console.warn(`[Town Hall] could not add the Town Board: ${e}`);
+  }
 }
 
 // Moving the hall: the standing building stays, the Tree sleeps, and you get a cornerstone to place again

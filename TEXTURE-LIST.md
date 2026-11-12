@@ -129,6 +129,7 @@ Wanted later for this feature: a boss-bar style look for the Throne Seal, a dark
 |---|---|---|
 | Hall Cornerstone block (side, top) and item icon | `textures/blocks/siege_hall_cornerstone_side.png`, `siege_hall_cornerstone_top.png`, `textures/items/siege_hall_cornerstone.png` | **Final style, awaiting your review** |
 | Tree of Oaths bark (plain and Marked), crown (unsworn, Knight, Marked), plinth | `textures/blocks/siege_oath_tree_bark.png`, `_bark_marked.png`, `siege_oath_tree_crown.png`, `_crown_knight.png`, `_crown_marked.png`, `siege_oath_tree_plinth.png` | **Final style, awaiting your review** |
+| Town Board (wide notice board inside every hall; model `models/blocks/hall_board.geo.json`, 30 px wide, board face 24×18 at uv 4,7) | `textures/blocks/siege_hall_board_wood.png` (32×32 frame and posts), `siege_hall_board_notes.png` (32×32, pinned papers) | **Placeholder by the town hall thread, needs real art** |
 | Oath Banner, Warden's Bell (16×16 icons) | `textures/items/siege_oath_banner.png`, `siege_wardens_bell.png` | **Final style, awaiting your review** |
 
 ## Castle Stone family (16×16, final art by `studio/art/build_stone_family.py`; Mateo's rule 2026-11-10)

@@ -26,7 +26,7 @@ import { STYLES, STYLE_IDS, styleFromBiome, styleFromGround } from "./styles.js"
 import { drawHall, frameFor, toWorld, statesFor, buildOrder } from "./halls.js";
 import { buildTick, clearBoxFor, worldCells, progressOf } from "./build.js";
 import { heroOf, saveHero, forgetHero, grantRenown, listenForGrants, blankHero } from "./hero.js";
-import { CORNERSTONE, TREE, hallMenu, hallOf, halls, saveHalls, resumeBuilds, beginBuild, setTreeLook, allowedLevel, HALL_COSTS, hallMenuExtras } from "./townhall.js";
+import { CORNERSTONE, TREE, BOARD, hallMenu, hallOf, halls, saveHalls, resumeBuilds, beginBuild, setTreeLook, allowedLevel, HALL_COSTS, hallMenuExtras } from "./townhall.js";
 import { openTree, choosePath, treeMenu, EMBER, BOUND_EMBER, OATH_BANNER } from "./tree.js";
 import { passiveTick, watchfireTick, dropEmber, nearestClue } from "./progress.js";
 import { knightTick, chargeTick } from "./knight.js";
@@ -68,7 +68,7 @@ const lastClick = new Map();
 world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
   const { block, player } = event;
   const type = block.typeId;
-  if (type !== CORNERSTONE && type !== TREE) return;
+  if (type !== CORNERSTONE && type !== TREE && type !== BOARD) return;
   if (event.isFirstEvent === false) return;
   const now = system.currentTick;
   if (now - (lastClick.get(player.id) ?? -100) < 8) return;
@@ -79,7 +79,7 @@ world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
     if (!api.isReady()) return;
     if (type === TREE) return openTree(player, block);
     const owner = block.dimension.id === "minecraft:overworld" ? api.settlementAt(block.location) : undefined;
-    if (!owner) return player.sendMessage("§7This cornerstone stands outside any settlement.");
+    if (!owner) return player.sendMessage(type === BOARD ? "§7Nothing is pinned to this board: it stands outside any settlement." : "§7This cornerstone stands outside any settlement.");
     hallMenu(player, owner);
   });
 });
@@ -301,6 +301,13 @@ api.addGuardLimitHook((owner, limit) => {
 });
 
 api.addTests("hall build", {
+  "every hall has a Town Board just inside, off the aisle, before the Tree": () => {
+    for (const id of STYLE_IDS) for (let level = 1; level <= 5; level++) {
+      const p = drawHall(level, STYLES[id]), b = p.marks.board, t = p.marks.tree;
+      api.assert(b && p.cells.get(`${b.x},${b.y},${b.z}`)?.role === "board", `${id} ${level} has a board`);
+      api.assert(Math.abs(b.x) >= 2 && b.z <= t.z + 2, `${id} ${level}: board off the aisle, in front of the Tree`);
+    }
+  },
   "the clear box holds every block of the old hall above the ground": () => {
     for (const id of STYLE_IDS) for (const forward of [{ x: 0, z: 1 }, { x: 1, z: 0 }, { x: 0, z: -1 }, { x: -1, z: 0 }]) {
       const plan = drawHall(3, STYLES[id]), origin = { x: 100, y: 64, z: -40 };

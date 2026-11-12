@@ -158,3 +158,8 @@ Besides Knight and Marked there are four regional roles, each with a branch of n
 | Witch (`witch`) | Blackfen | Hex | Immune to poison, poisons and rots enemies, heals from kills, curses attackers | Bog-Touched, Herbwife, Witch, Crone, Fen Mother |
 
 Data is in `townhall/skills.js` (ROLES, RANKS, BRANCHES, skills `wing_*`, `forge_*`, `helm_*`, `hex_*`); effects are in `townhall/roles.js`. A role is earned by a deed in its region (`ROLE_DEEDS` in `roles.js`; Mateo's ruling of 2026-11-10): Forgemaster for felling the Pale Huntsman, Captain for the Drowned Bride, Witch for the Mother of Changelings (offered to every player without a role within 64 blocks when the boss dies), and Dragon Rider when the dragons feature reports a first hatching. Hall level no longer offers a role. The story can also offer one with `emit("offerRole", { player, role })` / `emit("grantRole", ...)`. Test: `/scriptevent siege:townhall_path rider` (or forgemaster, captain, witch, none). Names and powers are proposals until Mateo confirms them. Not played in the game yet.
+
+
+## Town Board
+
+Once a hall stands its Hall Cornerstone is taken away (Mateo, 2026-11-12) and the Town Hall menu opens from the **Town Board** (`siege:hall_board`), a wide notice board placed by `boardSpot()` in `halls.js`: just inside the front door, two to six blocks off the aisle, on the floor, under the roof, facing the way in. Every style and level has one (self-test). Halls built earlier get theirs from `addBoard()` on load or when the Town Hall menu opens. To move a hall, use "Move the town hall" in the menu.
