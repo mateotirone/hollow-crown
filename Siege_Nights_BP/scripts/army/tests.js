@@ -26,3 +26,30 @@ addTests("army", {
     assertEqual(bill({}), { total: 0, slots: 0 });
   },
 });
+
+import { strollSpot, asleepTime, IDLE } from "./idle.js";
+
+addTests("army-idle", {
+  "three strolls in four stay in the Barracks yard, the rest go into town": () => {
+    let seed = 7;
+    const rand = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+    const where = { yard: 0, town: 0 };
+    const barracks = { x: 100, y: 64, z: 100 }, keep = { x: 0, y: 64, z: 0 };
+    for (let n = 0; n < 2000; n++) {
+      const s = strollSpot(rand, { barracks, keep, radius: 60 });
+      where[s.where]++;
+      if (s.where === "yard") assert(Math.hypot(s.x - 100.5, s.z - 100.5) <= IDLE.yardMax + 0.01, "yard spots stay near the Barracks");
+      else assert(Math.hypot(s.x, s.z) <= 60 * IDLE.townShare + 0.01, "town spots stay in town");
+    }
+    assert(Math.abs(where.yard / 2000 - 0.75) < 0.04, `yard share ${where.yard / 2000}`);
+  },
+  "with yard marks the yard is the box between them": () => {
+    const s = strollSpot(() => 0.1, { barracks: { x: 0, y: 0, z: 0 }, yard: { a: { x: 10, z: 10 }, b: { x: 20, z: 16 } }, keep: { x: 0, z: 0 }, radius: 50 });
+    assert(s.where === "yard" && s.x >= 10 && s.x <= 20 && s.z >= 10 && s.z <= 16);
+  },
+  "soldiers sleep from dusk to just before sunrise": () => {
+    assert(!asleepTime(6000));
+    assert(asleepTime(18000));
+    assert(!asleepTime(23500));
+  },
+});

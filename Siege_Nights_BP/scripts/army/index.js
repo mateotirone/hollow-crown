@@ -18,6 +18,7 @@ import { state, saveState } from "../siege/state.js";
 import { charge } from "../economy/coins.js";
 import { coins } from "../economy/rules.js";
 import { SOLDIERS, SOLDIER, unlocked, priceOf, retrainOf, trainTicks, upgradeCost, bill, BARRACKS } from "./roster.js";
+import "./idle.js";
 import "./tests.js";
 
 const store = moduleStore("siege:army", () => ({ barracks: {}, queue: {} }));
