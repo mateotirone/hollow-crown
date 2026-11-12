@@ -11,7 +11,7 @@ import { world, system, GameMode } from "@minecraft/server";
 import { onTick, isReady, moduleStore, settlementAt, keepOf, on, emit, COLORS } from "../siege/api.js";
 import { styleOf } from "../settle/plans.js";
 import { shapeOf, layTrack, cursorOn, advance, back, pointAt, flip } from "./track.js";
-import { throwFor } from "./switches.js";
+import { throwFor, routeAround } from "./switches.js";
 import { openAhead, watchCars } from "./gates.js";
 import { TRACK, TRAIN, CARS, TRAIN_STYLES, NO_COLOR, carPoses, trainLength, stepSpeed, moveTrain, limitAhead, blocksUnder, clearAhead, speedForGap, shapesForLoop, showcaseLoop } from "./data.js";
 import { give } from "../horses/menus.js";
@@ -321,6 +321,11 @@ function runTick() {
       try {
         const leadNow = heading > 0 ? train.head : flip(back(train.head, trainLength(train.cars), get).cursor);
         gap = clearAhead(leadNow, look + TRAIN.keepApart + 2, get, taken);
+        // a passing loop before it with a clear way through: take the loop
+        if (gap !== Infinity && (ticks + train.id) % 5 === 0 && routeAround(dim, leadNow, get, taken)) {
+          get = reader(dim);
+          gap = clearAhead(leadNow, look + TRAIN.keepApart + 2, get, taken);
+        }
       } catch {
         gap = Infinity;
       }
