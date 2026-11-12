@@ -9,7 +9,7 @@ import os, sys
 HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.dirname(HERE)
 sys.path.insert(0, ROOT); sys.path.insert(0, HERE)
 from bp import Blueprint
-from kit import Building, VALE, COPPER_MATS, mix, h3, texture_roofs, paint_stone, ground_dressing, VALE_STONE, STONE_FAMILY
+from kit import Building, VALE, COPPER_MATS, mix, h3, texture_roofs, paint_stone, ground_dressing, VALE_STONE, STONE_FAMILY, ridge_cap
 
 X0, X1, Z0, Z1 = 0, 20, 0, 12            # 21 x 13
 C = 10                                    # front centre line
@@ -238,6 +238,6 @@ def build(upto=99, roof_colour="copper"):
         if i >= upto: break
         fn(bp, B)
     paint_stone(bp, VALE_STONE, STONE_FAMILY)
-    if upto >= 6: texture_roofs(bp)
+    if upto >= 6: ridge_cap(bp); texture_roofs(bp)
     bp.markers["door"] = (C, YF, Z1 + 1)
     return bp.finish()

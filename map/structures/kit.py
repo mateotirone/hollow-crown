@@ -117,6 +117,60 @@ def texture_roofs(bp, seed=31):
     for c, n, props in swaps: cells[c] = (n, props)
     return bp
 
+def ridge_cap(bp):
+    """Mateo 2026-11-12: stairs back to back on the spine of the roof. A ridge cell has open sky above and a roof
+    stair one down on each side whose tall back faces it. On a one-block ridge the cap is a row of stair pairs set
+    back to back along the ridge (a sawtooth crest), broken by spikes; on a two-stair ridge it is one pair across
+    the spine. The cap takes the slope's own stair."""
+    cells = bp.cells
+    get = lambda c: cells.get(c, ("air", {}))
+    def open_above(c):                     # open sky, or the ridge slab the roof stage lays along the spine
+        n, p = get((c[0], c[1] + 1, c[2]))
+        return n in ("air", "keep") or (n.endswith("_slab") and p.get("half", "bottom") == "bottom" and get((c[0], c[1] + 2, c[2]))[0] in ("air", "keep"))
+    OPP = {"n": "s", "s": "n", "e": "w", "w": "e"}
+    def slope(c, d):                       # the roof stair one down and one out on side d, tall back facing the ridge
+        dx, dz = {"n": (0, -1), "s": (0, 1), "e": (1, 0), "w": (-1, 0)}[d]
+        n, p = get((c[0] + dx, c[1] - 1, c[2] + dz))
+        return n if n.endswith("_stairs") and p.get("facing") == OPP[d] and p.get("half", "bottom") == "bottom" else None
+    one, two = {}, []
+    for c, (n, p) in list(cells.items()):
+        if n in ("air", "keep") or not open_above(c): continue
+        for a, b, along in (("n", "s", "x"), ("e", "w", "z")):
+            sa, sb = slope(c, a), slope(c, b)
+            if sa and sb: one[c] = (sa, along)
+        # two-stair ridge: this stair and its neighbour across lean on each other, slopes run down outside both
+        if n.endswith("_stairs") and p.get("half", "bottom") == "bottom":
+            f = p.get("facing"); dx, dz = {"n": (0, -1), "s": (0, 1), "e": (1, 0), "w": (-1, 0)}.get(f, (0, 0))
+            o = (c[0] + dx, c[1], c[2] + dz); on, op = get(o)
+            if on == n and op.get("facing") == OPP[f] and open_above(o) and slope(c, OPP[f]) and c < o: two.append((c, o, n, f))
+    for c, o, n, f in two:
+        bp.set(c[0], c[1] + 1, c[2], n, facing=OPP[f]); bp.set(o[0], o[1] + 1, o[2], n, facing=f)
+    # one-block ridges: walk each run along its axis, pair cells back to back between spikes
+    seen = set()
+    for c in sorted(one):
+        if c in seen: continue
+        st, along = one[c]; ax = 0 if along == "x" else 2
+        step = lambda q, k: tuple(q[i] + (k if i == ax else 0) for i in range(3))
+        start = c
+        while step(start, -1) in one: start = step(start, -1)
+        run = [start]
+        while step(run[-1], 1) in one: run.append(step(run[-1], 1))
+        seen.update(run)
+        if len(run) < 3: continue
+        free = [q for q in run if open_above(q)]
+        seg, segs = [], []
+        for q in run:
+            if q in free: seg.append(q)
+            else: segs.append(seg); seg = []
+        segs.append(seg)
+        lo, hi = ("w", "e") if along == "x" else ("n", "s")
+        for sg in segs:
+            if len(sg) % 2: sg = sg[1:] if sg and sg[0] == run[0] else sg[:-1]     # an odd one out stays bare at the run's end
+            for i in range(0, len(sg) - 1, 2):
+                a, b = sg[i], sg[i + 1]
+                bp.set(a[0], a[1] + 1, a[2], st, facing=hi); bp.set(b[0], b[1] + 1, b[2], st, facing=lo)
+    return bp
+
 def finish_doctrine(bp, ladder=VALE_STONE, family=STONE_FAMILY, planters=True, wood="spruce"):
     """Canvas first, paint last: repaint the stone walls by the doctrine, dress the foot of the stone walls
     (07-detailing: sign-boxed bushes and spruce lantern stands), then finish the blueprint."""
