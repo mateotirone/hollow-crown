@@ -44,6 +44,11 @@ These rules hold in every region unless the region's page says otherwise. They a
 - **Chimney and interiors:** Mateo's chimney; interiors empty except the inn.
 - **Overhangs and shutters:** every overhang carried; shutters on at most 3 in 10 windows.
 - **Tone:** uneasy at night, never horror and never vanilla.
+- **Bushes round the foundation** (Mateo, 2026-11-12): clumps of the region's leaves under the ground-floor
+  windows and at some corners, never a strip; on by default in the skill (`bushes`), none in the Emberwaste
+  and the Hollow.
+- **Dormers:** their roof stairs face down the main slope, and a bracket either side of the window carries
+  the dormer roof's overhang (mud brick wall in Blackfen). Every overhang is carried.
 - **Lean-tos** take their house's roof colour (a teal lean-to on an orange roof looks wrong); the skill's
   `lean_to` now follows the last house's roof unless given `roof`.
 - **Narrow plots:** a window box's front sign can stick out past the roof verge on a side wall. On Medium

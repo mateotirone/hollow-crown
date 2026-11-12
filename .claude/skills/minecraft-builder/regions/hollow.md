@@ -159,6 +159,8 @@ pale ash dead trees.
 **Ground plants:** `siege:veilcap`, `siege:undertow_moss`, Deep Veilmoss, glow lichen, amethyst shard beds, moss
 strands over cliffs.
 
+**Round the foundation:** no leaf bushes (the preset plants none); glow lichen and Veilcap instead.
+
 ## Building it with the skill
 
 - **Preset:** `hollow_timber`: dark oak frame, pale ash infill, a deepslate roof, iron-bar windows.
