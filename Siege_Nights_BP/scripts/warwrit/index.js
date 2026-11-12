@@ -21,7 +21,7 @@
 // writVaultCracked { attacker, defender, by }, writEnded { attacker, defender, winner },
 // demandSent / demandAnswered { from, to, amount, paid }.
 
-import { world, system } from "@minecraft/server";
+import { world, system, GameMode } from "@minecraft/server";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
 import { isReady, onTick, moduleStore, emit, on, isAlly, keepOf, addKeepMenuButtons, recordWin } from "../siege/api.js";
 import { addFilter } from "../core/events.js";
@@ -35,7 +35,7 @@ import { settlementAt } from "../siege/territory.js";
 import { WRIT, assaultDay, phase, groundsFor, GROUNDS_TEXT, UNJUST_TEXT, feeFor, pairKey, demandAmount, cantDeclare } from "./rules.js";
 import "./tests.js";
 
-const store = moduleStore("siege:warwrit", () => ({ writs: {}, peace: {}, feuds: {}, refused: {}, demands: {}, oaths: {} }));
+const store = moduleStore("siege:warwrit", () => ({ writs: {}, peace: {}, feuds: {}, refused: {}, demands: {}, oaths: {}, ghosts: {} }));
 const S = () => store.data;
 const OVERWORLD = "minecraft:overworld";
 
@@ -220,20 +220,88 @@ on("vaultBreached", ({ owner, by }) => {
   emit("writVaultCracked", { attacker: w.attacker, defender: owner, by });
 });
 
-function endWrit(defender, w) {
+// How it ended: "dawn" (the defenders held, unless the vault was cracked) or "leader" (the attacking leader fell)
+function endWrit(defender, w, how = "dawn") {
   const s = S();
   delete s.writs[defender];
   s.peace[pairKey(w.attacker, defender)] = now() + WRIT.peaceMs;
   store.save();
   const winner = w.cracked ? w.attacker : defender;
-  if (!w.cracked) {
-    recordWin(defender);
-    announce(`§6§lDawn: ${nameOf(defender)} held against ${nameOf(w.attacker)}.§r§6 There is peace between them for a few days.`);
-  } else {
-    announce(`§7Dawn ends ${nameOf(w.attacker)}'s siege of ${nameOf(defender)}. There is peace between them for a few days.`);
+  const over = w.cracked ? `${nameOf(w.attacker)} won` : `${nameOf(defender)} held`;
+  if (!w.cracked) recordWin(defender);
+  if (how === "leader" && !w.cracked) announce(`§6§l${nameOf(w.attacker)} has fallen, and the assault on ${nameOf(defender)} collapses.§r§6 The siege is over: ${nameOf(defender)} held.`);
+  else if (!w.cracked) announce(`§6§lDawn. The siege is over: ${nameOf(defender)} held against ${nameOf(w.attacker)}.`);
+  else announce(`§7${how === "leader" ? `${nameOf(w.attacker)} has fallen` : "Dawn"}. The siege of ${nameOf(defender)} is over: ${nameOf(w.attacker)} won.`);
+  for (const p of world.getPlayers()) {
+    if (sideOf(w.attacker, p.id) || sideOf(defender, p.id)) {
+      try { p.onScreenDisplay.setTitle("§6The siege is over", { subtitle: `§7${over}. Peace for three days.`, fadeInDuration: 10, stayDuration: 70, fadeOutDuration: 20 }); } catch { /* left */ }
+    }
   }
-  emit("writEnded", { attacker: w.attacker, defender, winner });
+  // fallen leaders come back
+  for (const id of [w.attacker, defender]) if (s.ghosts[id]) raise(id);
+  emit("writEnded", { attacker: w.attacker, defender, winner, how });
 }
+
+// ---------- fallen leaders stay dead until the siege ends (Mateo, 2026-11-12) ----------
+// The declarer and the defending owner, killed in the assault, watch as ghosts (spectators) until it is over.
+// If the attacking leader falls, the attack collapses and the defenders win.
+
+function raise(id) {
+  const s = S(), g = s.ghosts[id], player = online(id);
+  if (!g || !player) return; // offline: on their next spawn
+  delete s.ghosts[id];
+  store.save();
+  try {
+    player.setGameMode(g.mode === "creative" ? GameMode.Creative : GameMode.Survival);
+    const k = keepOf(id), home = k ? { x: k.x + 0.5, y: k.y + 1, z: k.z + 1.5 } : player.getSpawnPoint?.();
+    if (home) player.teleport(home, { dimension: world.getDimension(OVERWORLD) });
+    player.sendMessage("§7The siege is over. You are back at your keep.");
+  } catch { /* fine */ }
+}
+
+world.afterEvents.entityDie.subscribe(({ deadEntity: dead }) => {
+  if (!isReady()) return;
+  const s = S();
+  for (const [defender, w] of Object.entries(s.writs)) {
+    if (phaseOf(w) !== "assault" || (dead.id !== w.attacker && dead.id !== defender)) continue;
+    let mode = "survival";
+    try { if (dead.getGameMode() === GameMode.Creative) mode = "creative"; } catch { /* fine */ }
+    s.ghosts[dead.id] = { mode, writ: defender };
+    store.save();
+    if (dead.id === w.attacker) {
+      endWrit(defender, w, "leader");
+    } else {
+      announce(`§4${nameOf(defender)} has fallen defending their settlement, and can't return until the siege is over.`);
+    }
+    return;
+  }
+}, { entityTypes: ["minecraft:player"] });
+
+world.afterEvents.playerSpawn.subscribe(({ player, initialSpawn }) => {
+  const s = S(), g = s.ghosts[player.id];
+  if (!g) return;
+  if (!s.writs[g.writ]) return system.run(() => raise(player.id)); // the siege ended while they were away or dead
+  system.run(() => {
+    try {
+      player.setGameMode(GameMode.Spectator);
+      player.onScreenDisplay.setTitle("§4You have fallen", { subtitle: "§7You can watch, but not return, until the siege is over.", fadeInDuration: 10, stayDuration: 80, fadeOutDuration: 20 });
+    } catch { /* fine */ }
+  });
+  void initialSpawn;
+});
+
+// Everyone in a siege sees how long it has left, on the action bar
+function siegeBar(defender, w) {
+  const left = Math.max(0, WRIT.dawn - world.getTimeOfDay());
+  const mins = Math.floor(left / 1200), secs = Math.floor((left % 1200) / 20);
+  const text = `§4Siege of ${nameOf(defender)}§7: ${mins}:${String(secs).padStart(2, "0")} until dawn${w.cracked ? " §c(vault cracked)" : ""}`;
+  for (const p of world.getPlayers()) {
+    if (sideOf(w.attacker, p.id) || sideOf(defender, p.id) || s_ghostOf(p.id) === defender) {
+      try { p.onScreenDisplay.setActionBar(text); } catch { /* left */ }
+    }
+  }
+}
+const s_ghostOf = (id) => S().ghosts[id]?.writ;
 
 onTick("warwrit", 20, () => {
   if (!isReady()) return;
@@ -251,6 +319,7 @@ onTick("warwrit", 20, () => {
         emit("baseAttacked", { owner: defender, kind: "warWrit", text: `${nameOf(w.attacker)}'s assault on your settlement has begun. Hold until dawn.`, by: w.attacker });
         emit("writAssault", { attacker: w.attacker, defender });
       }
+      if (system.currentTick % 40 < 20) siegeBar(defender, w);
       // the attackers are Wanted on the defender's land: archers and Men-at-Arms go for them
       for (const player of world.getPlayers()) {
         try {

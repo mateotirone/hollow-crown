@@ -7,8 +7,9 @@ import { BARRACKS, GUARD_GEAR, GUARD_TYPES, WANTED_TAG } from "./constants.js";
 import { saveState, state, tracked } from "./state.js";
 import { isAlly, settlementAt, tierOf } from "./territory.js";
 import { overworld, takeItems, attackable } from "./util.js";
-import { fundsE, chargeE } from "../economy/coins.js";
-import { worth } from "../economy/rules.js";
+import { fundsE, chargeE, robBank, giveCoins } from "../economy/coins.js";
+import { worth, fromEmeralds, coins } from "../economy/rules.js";
+import { moduleStore } from "../core/store.js";
 import { sfx } from "../core/sfx.js";
 
 // ---------- Guards: Archers hold the walls, Men-at-Arms wait in the Barracks ----------
@@ -93,6 +94,7 @@ export function recruitGuard(block, player, item, chosenType) {
   const guard = dim.spawnEntity(type, at);
   if (name) guard.nameTag = name;
   enlist(guard, player.id, type === "siege:archer" ? at : block.location);
+  guard.setDynamicProperty("siege:barracks", JSON.stringify({ x: block.location.x, y: block.location.y, z: block.location.z }));
   state.guards[player.id] = guardCount(player.id) + 1;
   saveState();
   sfx(dim, "random.levelup", at, { volume: 0.6 });
@@ -156,6 +158,14 @@ world.afterEvents.entitySpawn.subscribe((event) => {
   }
 });
 
+// ---------- A fallen guard goes back to the Barracks and retrains (Mateo, 2026-11-12) ----------
+// Like a camp in Clash of Clans: the hire price comes out of the owner's Regals by itself, whether or not they are
+// online, and goes to whoever killed the guard (a player, or the owner of the guard that did it) as a bounty.
+// Killed by anything else, the money just leaves the game. If the owner can't pay, the guard is lost for good.
+// It is back after RETRAIN_TICKS, or, while a feature holds it ("guardRetrainHeld", a War Writ siege), once that ends.
+export const RETRAIN_TICKS = 2400; // 2 minutes
+const retrain = moduleStore("siege:guard_retrain", () => ({ queue: [] }));
+
 world.afterEvents.entityDie.subscribe((event) => {
   const dead = event.deadEntity;
   const owner = guardOwner(dead);
@@ -168,10 +178,56 @@ world.afterEvents.entityDie.subscribe((event) => {
     }
   }, 2);
   emit("guardRemoved", { id: dead.id, owner });
-  state.guards[owner] = Math.max(0, guardCount(owner) - 1);
-  saveState();
-  world.getPlayers().find((p) => p.id === owner)?.sendMessage("§cOne of your guards has fallen.");
+  const fee = fromEmeralds(GUARD_COST);
+  const keeper = world.getPlayers().find((p) => p.id === owner);
+  const paid = robBank(owner, fee);
+  if (paid < fee) {
+    if (paid) giveCoins(owner, paid);
+    state.guards[owner] = Math.max(0, guardCount(owner) - 1);
+    saveState();
+    keeper?.sendMessage(`§cOne of your guards has fallen, and you couldn't pay ${coins(fee)} to retrain them. They are gone.`);
+    return;
+  }
+  // the bounty
+  const killer = event.damageSource?.damagingEntity;
+  let bountyTo;
+  try { bountyTo = killer?.typeId === "minecraft:player" ? killer.id : killer && isGuard(killer) ? guardOwner(killer) : undefined; } catch { /* gone */ }
+  if (bountyTo && bountyTo !== owner) {
+    giveCoins(bountyTo, fee);
+    try { if (killer.typeId === "minecraft:player") killer.onScreenDisplay.setActionBar(`§6+${coins(fee)} bounty`); } catch { /* fine */ }
+  }
+  let post, barracks, armor = 0;
+  try { post = JSON.parse(dead.getDynamicProperty("siege:post") ?? "null"); barracks = JSON.parse(dead.getDynamicProperty("siege:barracks") ?? "null"); armor = armorTier(dead); } catch { /* fine */ }
+  retrain.data.queue.push({ owner, type: dead.typeId, armor, name: dead.nameTag || undefined, post, barracks, due: system.currentTick + RETRAIN_TICKS });
+  retrain.save();
+  keeper?.sendMessage(`§cOne of your guards has fallen. ${coins(fee)} went to retrain them at the Barracks.`);
 }, { entityTypes: Object.keys(GUARD_TYPES) });
+
+// Retrained guards come back at their Barracks (or their post, for guards hired before Barracks were remembered)
+system.runInterval(() => {
+  if (!state) return;
+  const q = retrain.data.queue, now = system.currentTick;
+  if (!q.length) return;
+  const keep = [];
+  for (const r of q) {
+    const due = r.due <= now || r.due - now > RETRAIN_TICKS * 2; // a restarted world resets the tick count: don't wait forever
+    if (!due || applyFilter("guardRetrainHeld", false, { owner: r.owner }) || !state.keeps[r.owner]) { if (state.keeps[r.owner]) keep.push(r); continue; }
+    const home = r.barracks ?? r.post;
+    if (!home) continue;
+    try {
+      const at = { x: home.x + 0.5, y: home.y + 1, z: home.z + 0.5 };
+      const guard = overworld().spawnEntity(r.type, at);
+      if (r.name) guard.nameTag = r.name;
+      enlist(guard, r.owner, r.post ?? home);
+      if (r.barracks) guard.setDynamicProperty("siege:barracks", JSON.stringify(r.barracks));
+      equipGuard(guard, r.armor);
+      world.getPlayers().find((p) => p.id === r.owner)?.sendMessage("§6A guard has finished retraining at your Barracks.");
+    } catch {
+      keep.push(r); // not loaded yet: try again later
+    }
+  }
+  if (keep.length !== q.length) { retrain.data.queue = keep; retrain.save(); }
+}, 100);
 
 // ---------- Guard armor: click your guard with materials to upgrade them, up to 4 times ----------
 
