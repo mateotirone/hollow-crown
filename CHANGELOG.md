@@ -10,6 +10,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 
 ### Added
 - The Town Board: a big notice board just inside the door of every town hall. Click it to open the Town Hall menu (raise the hall, the wall, the Rumor Board, who's online). Halls that already stand get one too.
+- Switches: where two bought lines share track and then part, the track there becomes a switch. A train coming off a branch sets it for itself; sneak + click it with an empty hand to choose which way a train heading out will go.
 - Trains go four times as fast as a minecart (32 blocks a second flat out), and the free station carriage now runs at minecart speed.
 - The world map now has Rimehold, Gull's Rest, Sunscar, Mirelight and Millbrook built: streets, houses, fields, wells, lamps and trees, with the land graded to the streets. The minimap shows them.
 - Every settlement gets its station when it claims its land: a Halt rises on its plot's stop on the planned railway, with no line yet. Buy the first stretch to start travelling. Once a stretch is laid, the station calls a free, slow carriage that drives itself along the line. Engines and coaches can also be bought at any station, and once you've owned one (built or bought) any station gives you a new one free.
