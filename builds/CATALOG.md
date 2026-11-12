@@ -125,7 +125,7 @@ A ★ marks builds that no earlier list had (added in the 2026-11-12 audit).
 | Boss site: Sunscar vault with five faceless statues | Emberwaste | in game | boss_sites | Design how regional bosses unlock | `Siege_Nights_BP/scripts/unlocks/seneschal.js` | Script-built, not in the viewer. Exterior landmark "the Faceless Gate" designed in map/structures/boss_landmarks.py (PR #208, viewer boss_sites), placed via unlocks/landmarks.js (PR #187). |
 | Boss site: the Cradle Tree and root cradle (Mirelight) | Blackfen | in game | boss_sites | Design how regional bosses unlock | `Siege_Nights_BP/scripts/unlocks/mother.js` | Script-built, not in the viewer. Exterior landmark "the Cradle Tree" designed in map/structures/boss_landmarks.py (PR #208, viewer boss_sites), placed via unlocks/landmarks.js (PR #187). |
 | ★ Boss site: Vorlund's Muster (Warlord King's ground) | Anywhere / region-neutral | designed | landmarks | Finish the remaining world builds | `map/structures/world_doors.py` | Waiting in PR #208. At (1030, -990); places itself via landmarks/sites.js. |
-| Boss site landmark: the Lantern Mast (Mirelight) | Blackfen | designed | boss_sites | Finish the remaining world builds | `map/structures/boss_landmarks.py` | Waiting in PR #208. Exterior landmark; placed via unlocks/landmarks.js (PR #187). |
+| Boss site landmark: the Lantern Mast (Mirelight) | Blackfen | designed | boss_sites | Finish the remaining world builds | `map/structures/boss_landmarks.py` | Waiting in PR #208. Exterior landmark (PR #208); placed via unlocks/landmarks.js (PR #187). |
 
 ## Travel
 
