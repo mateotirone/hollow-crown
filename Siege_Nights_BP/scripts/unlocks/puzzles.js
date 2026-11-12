@@ -122,3 +122,8 @@ export function villagerLines(c, v) {
   return TELL_KINDS.map((k) => TELLS[k][t[k] ? 0 : 1]);
 }
 export const accuse = (c, v) => (v === c.shape ? "shape" : "wrong");
+
+// ================= the Changeling Glade =================
+export const GLADE_REST_TICKS = 6000; // five minutes between waves
+/** Whether the glade sends a wave now: someone is in it, no fight or scene is running, and it has rested. */
+export const gladeWave = ({ players, fighting, now, last }) => players > 0 && !fighting && (last === undefined || now - last >= GLADE_REST_TICKS);

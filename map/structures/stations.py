@@ -358,6 +358,10 @@ def grand(region):
     for x in ribs:
         for y in range(0, 5): S(bp, x, y, 7, col); S(bp, x, y, -7, col)
         S(bp, x, -1, -7, k("cobbled"))
+    for x in ribs[:-1]:                             # an arch between each pair of pillars, both sides (Mateo, 2026-11-12)
+        for lz in (-7, 7):
+            S(bp, x + 1, 4, lz, P["sill"], facing="w", half="top")
+            S(bp, x + 3, 4, lz, P["sill"], facing="e", half="top")
     hall = R(-11, 9, 11, 19); pav = R(-4, 8, 4, 20)
     for r in (hall, pav): B.foundation(r, 0); B.floor(r, 0)
     B.stone_storey(hall, 1, 6, quoins=True)
