@@ -8,7 +8,7 @@
       }
     },
     "components": {
-      "minecraft:icon": "siege_guard_leggings",
+      "minecraft:icon": "siege_guardgear_4_leggings",
       "minecraft:display_name": {
         "value": "item.siege:guardgear_4_leggings.name"
       },

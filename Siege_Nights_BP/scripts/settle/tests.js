@@ -582,6 +582,8 @@ addTests("settle charters", {
 // ---------- the Plan Book (plandata.js) ----------
 import { knownPlans, planChoices, unknownOf, planKey, parsePlan, planCards, whereFrom } from "./plandata.js";
 import { PLANS as PLAN_RULES, HOMES, CHARTERS } from "./config.js";
+import { planCardsHash } from "./plancards.js";
+import { CARDS_DRAWN_FROM } from "./plancards_data.js";
 const TIER_NAMES_T = ["Hamlet", "Town", "City", "Castle"];
 addTests("settle plans", {
   "the Hamlet's basics are known, the hall teaches more, Creative knows everything"() {
@@ -623,6 +625,9 @@ addTests("settle plans", {
         }
       }
     });
+  },
+  "the Plan Book card pictures match the buildings as they are designed now"() {
+    assertEqual(planCardsHash(), CARDS_DRAWN_FROM, "a building design changed: run  python3 studio/build_plans.py  to redraw the Plan Book cards");
   },
   "the Plan Book cards: bright when found, greyed with a hint when not"() {
     const designs = BUILDINGS.map((b) => b.id);

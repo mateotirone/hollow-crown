@@ -30,8 +30,9 @@ import { learnLeads } from "../lore/player.js";
 import { startBoss, fightOf } from "../bestiary/bossCore.js";
 import { markSocketed } from "../bestiary/relics.js";
 import { LANDMARKS, stampOps } from "./landmarks.js";
+import { approachWave, approachCount } from "./puzzles.js";
 import { CLOCKS, KEEPERS, makePuzzle, TOWER_POST, statementText, clockAnswer } from "./keepers.js";
-import { WELL, CHAMBER_CENTER, wellOps, chamberOps, postOps, stairSteps, spindleOps, drainLayers, plugOps, SIGN_TURN } from "./well_plan.js";
+import { inShaft, stairSpotsBelow, SHAFT_ZONE, WELL, CHAMBER_CENTER, wellOps, chamberOps, postOps, stairSteps, spindleOps, drainLayers, plugOps, SIGN_TURN } from "./well_plan.js";
 
 export const KEY = "siege:stopped_clock_key";
 export const CLOCK_BLOCK = "siege:stopped_clock";
@@ -428,10 +429,27 @@ export function inChamber(p, c) {
   return Math.hypot(p.x - (c.x + 0.5), p.z - (c.z + 0.5)) <= WELL.roomR && p.y > floor && p.y < c.y + WELL.plugY;
 }
 
+// The approach: while he waits below, footmen climb the stair to meet whoever comes down the shaft.
+let lastStairWave;
+function stairWave(d) {
+  if (!d.open || !d.pending || d.fighting) return;
+  const c = d.center;
+  const inside = nearby(c, SHAFT_ZONE.r + 2).filter((p) => inShaft(c, p.location));
+  const now = system.currentTick;
+  if (!approachWave({ players: inside.length, fighting: !!scene, now, last: lastStairWave })) return;
+  lastStairWave = now;
+  const lowest = Math.min(...inside.map((p) => p.location.y)) - c.y;
+  for (const p of inside) { say(p, "§7Below you the stair is ticking. No: it is footsteps, keeping time, coming up."); sfx(overworld(), "random.anvil_use", p.location, { pitch: 0.7, volume: 0.6 }); }
+  for (const s of stairSpotsBelow(lowest, approachCount(inside.length, { base: 1, per: 1, max: 4 }))) {
+    try { overworld().spawnEntity(FOOTMAN, { x: c.x + s.dx + 0.5, y: c.y + s.dy, z: c.z + s.dz + 0.5 }); } catch { /* unloaded */ }
+  }
+}
+
 let missing = 0;
 onTick("unlocks_reeve_fight", 10, () => {
   const d = store.data;
   if (!d.built) return;
+  try { stairWave(d); } catch (e) { console.warn(`[Hollow Crown] reeve stair: ${e}`); }
   if (d.pending && !d.fighting) {
     const c = d.center;
     const down = world.getPlayers().some((p) => p.dimension.id === OVERWORLD && inChamber(p.location, c));
