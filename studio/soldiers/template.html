@@ -242,8 +242,13 @@ function tick(now) {
       const id = DATA.common[name] || T.anims[name]; const anim = id && DATA.anims[id];
       if (!anim || anim.loop === false && !cond) { if (!anim || name !== "hc_slash") {} }
       if (!anim) continue;
-      if (cond && !mol(cond)(q, v)) continue;
-      if (anim.loop === false && anim.animation_length) continue; // one-shots only from the buttons
+      a.on = a.on || {};
+      if (cond && !mol(cond)(q, v)) { delete a.on[name]; continue; }
+      if (anim.loop === false && anim.animation_length) {
+        if (!cond) continue; // one-shots with no condition only play from the buttons
+        if (a.on[name] === undefined) a.on[name] = a.life; // like the game: starts again each time its condition turns on
+        add(anim, a.life - a.on[name]); continue;
+      }
       for (const bn of anim.reset || []) acc[bn] = { r: [0, 0, 0], p: [0, 0, 0] };
       add(anim, a.life);
     }
@@ -303,7 +308,7 @@ function renderAll() {
   btns($("regions"), REGION_NAMES.map((n) => ({ label: n })), (it, i) => i === S.region, (it, i) => { S.region = i; renderAll(); rebuild(); });
   btns($("tiers"), TIER_NAMES.map((n, i) => ({ label: n })), (it, i) => !S.lineup && i === S.tier, (it, i) => { S.tier = i; S.lineup = false; renderAll(); rebuild(); });
   btns($("colors"), DATA.colors.map((c) => ({ label: c.replace("_", " "), color: DYE[c] })), (it, i) => i === S.color, (it, i) => { S.color = i; renderAll(); rebuild(); }, "chip");
-  btns($("states"), [["idle", "Standing"], ["walk", "Marching"], ["ready", "Has a target"], ["attack", "Attacking"]].map(([k, label]) => ({ k, label })), (it) => it.k === S.state, (it) => { S.state = it.k; renderAll(); });
+  btns($("states"), [["idle", "Standing"], ["walk", "Marching"], ["ready", "Has a target"], ["attack", "Attacking (hits every 1.2 s)"]].map(([k, label]) => ({ k, label })), (it) => it.k === S.state, (it) => { S.state = it.k; renderAll(); });
   const views = [{ k: "one", label: "One soldier" }, { k: "lineup", label: "All five tiers" }];
   if (S.type === "knight") views.push({ k: "mount", label: S.mounted ? "Dismount" : "On his horse" });
   btns($("views"), views, (it) => (it.k === "lineup") === S.lineup && it.k !== "mount", (it) => {
