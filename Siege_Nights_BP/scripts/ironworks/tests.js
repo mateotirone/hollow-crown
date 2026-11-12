@@ -2,6 +2,7 @@ import { addTests, assert, assertEqual } from "../core/tests.js";
 import { STYLE_IDS } from "../townhall/styles.js";
 import { LEVELS, MAX_LEVEL, IRONWORKS, DAY, produce, capOf, tierAtLeast, lootShare } from "./data.js";
 import { drawIronworks } from "./design.js";
+import { REGION_RATES, regionRate } from "../economy/config.js";
 
 addTests("ironworks", {
   "three stages, each needing a bigger settlement, more Regals and making more": () => {
@@ -26,7 +27,18 @@ addTests("ironworks", {
     assertEqual(full.ingots, capOf(3));
     assertEqual(full.fuel, Math.ceil(capOf(3) / LEVELS[3].fuelEvery)); // no charcoal burnt for nothing
   },
-  "an iron Old Working next door makes it faster": () => assert(produce(1, DAY, 0, undefined, IRONWORKS.workingBonus).raw > 16, "bonus"),
+  "Saltreach digs faster, Frostmarch much slower": () => {
+    assert(produce(1, DAY, 0, undefined, regionRate("Saltreach", "iron")).raw === 32, "saltreach x2");
+    assert(produce(1, DAY, 0, undefined, regionRate("Frostmarch", "iron")).raw === 4, "frostmarch x0.25");
+    assert(produce(1, DAY, 0, undefined, regionRate("Aldmere Vale", "iron")).raw === 16, "vale x1");
+  },
+  "every region buff has a weakness, and nobody is buffed on netherite": () => {
+    for (const [region, rates] of Object.entries(REGION_RATES)) {
+      const v = Object.values(rates);
+      assert(v.some((r) => r > 1) && v.some((r) => r < 1), `${region} needs a strength and a weakness`);
+      assert(regionRate(region, "netherite") === 1, `${region} netherite`);
+    }
+  },
   "raiders take more the worse a siege goes": () => assert(lootShare("won") === 0 && lootShare("dawn") < lootShare("lost"), "loot"),
   "each stage draws in every style, behind its block, odd sizes, known roles": () => {
     for (let lv = 1; lv <= MAX_LEVEL; lv++) for (const id of STYLE_IDS) {

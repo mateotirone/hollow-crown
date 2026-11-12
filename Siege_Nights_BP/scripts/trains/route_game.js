@@ -47,6 +47,7 @@ const DECK = BlockPermutation.resolve("minecraft:stone_bricks");
 const SOFT = /leaves|grass$|tall_grass|fern|flower|sapling|bush|vine|snow_layer|dandelion|poppy|tulip|orchid|allium|bluet|daisy|cornflower|lily|azure|kelp|seagrass|mushroom|torch/;
 const firm = (b) => !!b && !b.isAir && !b.isLiquid && !SOFT.test(b.typeId);
 const isTrack = (b) => b?.typeId === TRACK;
+const GATED = /iron_bars|portcullis/;
 
 // How far below `y` the ground is at (x, z): 0 when (x, y, z) itself is firm, up to `max`, or Infinity
 function dropAt(dim, x, y, z, max) {
@@ -63,6 +64,7 @@ function layBed(dim, p, i) {
       for (let y = p.y + (centre ? 1 : 0); y <= p.y + ROUTE.clearUp; y++) {
         const b = dim.getBlock({ x: p.x + dx, y, z: p.z + dz });
         if (!b || b.isAir || isTrack(b)) continue;
+        if (GATED.test(b.typeId)) continue; // a town's rail gate: it opens for trains (gates.js), so the bed leaves it shut
         if (y === p.y && isTrack(dim.getBlock({ x: p.x + dx, y: y + 1, z: p.z + dz }))) continue;
         b.setPermutation(AIR);
       }
