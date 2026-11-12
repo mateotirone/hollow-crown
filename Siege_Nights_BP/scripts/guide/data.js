@@ -245,9 +245,9 @@ export const ENTRIES = [
   {
     id: "traders", ch: "coin", title: "Traders",
     tip: "Traders buy what their trade needs. Each has only so much appetite a day, and pays less once they've had plenty.",
-    page: "Every town has traders: a farmer, woodcutter, quarryman, smith, fisher, hunter, herbalist and the Moneyer. Click one to sell to them or buy from them.\n\n"
+    page: "Every town has traders: a farmer, woodcutter, quarryman, smith, fisher, hunter, herbalist and the Moneyer, and a Guild Factor with orders. Click one to sell to them or buy from them.\n\n"
       + "Prices differ from region to region. Each trader only wants so much a day: past that they pay less, and in the end they stop buying until tomorrow.\n\n"
-      + "§fThe Moneyer§r changes coins and buys iron ingots and emeralds. Each region's Smith sells that region's Castle Guard armour.",
+      + "§fThe Moneyer§r changes coins and buys iron ingots and emeralds. He takes every iron ingot you bring at full price, with no daily limit (iron golems never appear, so iron only comes from mining). He also trades metal up one step: 4 iron for a gold ingot, 8 gold for a diamond, 6 diamonds for a netherite scrap. It is dear, but anything can always be bought. Each region's Smith sells that region's Castle Guard armour.",
     when: ["talk:tag:siege_job"],
   },
 
@@ -424,9 +424,34 @@ export const ENTRIES = [
     tip: "This calls something to where you stand when you use it. Be ready, and stand somewhere open.",
     page: "Each region has something old in it, and each has a token that calls it. Use the token somewhere open and the fight starts where you stand.\n\n"
       + "A boss gets half again as tough for each extra player in the fight, so it is fair alone and fair with friends. Watch for its warnings: every attack is shown before it lands.\n\n"
-      + "Everyone who fought gets the boss's own relic the first time it falls (materials after that), skill points, and a share of the chest it leaves. A boss you have beaten comes back in a different temper each time.",
+      + "Everyone who fought gets the boss's own relic the first time it falls (materials after that), skill points, and a share of the chest it leaves. A boss you have beaten comes back in a different temper each time, and a rank stronger (up to rank V): more health, harder hits, and from rank III two tempers at once. Calling it back costs diamonds as well as the key (2 at rank I, up to 6 at rank V), and every rematch leaves netherite scrap: 1 at ranks I and II, 2 at III and IV, 3 at V. There is no Nether here, so this is where netherite comes from.",
     when: ["carry:siege:stopped_clock_key", "carry:siege:pale_horn", "carry:siege:drowned_ring", "carry:siege:faceless_seal", "carry:siege:mire_effigy"],
     hidden: true,
+  },
+  {
+    id: "guild", ch: "coin", title: "The Guild Factor",
+    tip: "The Guild Factor posts three orders a day for goods from other regions, and pays in metal.",
+    page: "Every town has a §fGuild Factor§r. Click one for today's three orders: goods this region can't make for itself, from three other regions (pumpkins from the Vale, raw iron from the north, gold from the Emberwaste, slime from the fens and so on).\n\n"
+      + "Bring the goods and you are paid in §fmetal§r: iron, gold, and on big orders a diamond or two. It pays far better than trading metal up at the Moneyer, so carrying your region's goods to another town is the cheap way up the ladder. Each order can be filled once a day; new orders come at dawn.",
+    when: ["talk:tag:siege_job_factor", "event:guildOrderFilled"],
+  },
+  {
+    id: "ironworks", ch: "growth", title: "The Ironworks",
+    tip: "An Ironworks. Click it for its storeroom, its charcoal and its next stage.",
+    page: "Make an §fIronworks§r at the Siege Workshop and place it on your land: an §fOre Pit§r is dug behind it and its worker digs about 16 raw iron a day into the storeroom. Click the block to take it.\n\n"
+      + "Once you are a §fTown§r, build the §fBloomery§r (384 Regals): it smelts for you, about 40 iron ingots a day, burning one charcoal for every 4 ingots. Feed it from the block's menu; charcoal comes from burning logs, so a tree farm keeps it going. With no charcoal it only digs raw ore.\n\n"
+      + "Once you are a §fCity§r, with water within 12 blocks, build the §fTrip-Hammer Forge§r (1,280 Regals): a waterwheel and hammer, about 100 ingots a day.\n\n"
+      + "The storeroom holds three days of work, then the workers wait for you. A siege that goes badly lets raiders carry off part of it. Frosthelm and Gullcliff, with an iron Old Working next door, dig half again as fast.",
+    when: ["place:siege:ironworks", "carry:siege:ironworks", "click:siege:ironworks"],
+    needs: "siege:ironworks",
+  },
+  {
+    id: "workings", ch: "wild", title: "Old Workings",
+    tip: "An Old Working: dig the ore out of its walls. It grows back in a few days.",
+    page: "Five settlements have one of the old king's mines just outside their land, and it is their strength: §firon§r at Frosthelm and Gullcliff, §fgold§r at Redmesa and Dunehold, §fdiamond§r in the Wolfcairn Deeps. Follow the timbered stair down to the stone chamber and dig the ore out of its walls.\n\n"
+      + "The ore grows back: iron every day, gold every two days, diamond every three, as long as nobody is down there. Each week one Working runs rich, with more ore and more of the best kind; word of it goes round at dawn.\n\n"
+      + "The deeper ones draw §cclaim jumpers§r: a band comes down the stair while you dig. Beat them and they hand over what they took. The deeper the Working, the further down and the more often they come.",
+    when: ["event:workingEntered"],
   },
   {
     id: "seeps", ch: "wild", title: "Seeps",
