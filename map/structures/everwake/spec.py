@@ -34,7 +34,7 @@ def inside(x, z, margin=0):
 def towers():
     out = []
     for i in range(7):
-        a = math.radians(i * 360 / 7 - 90 + 360 / 14)       # leave due south free for the gatehouse avenue
+        a = math.radians(i * 360 / 7 - 90)                  # one due north; none due south, where the gatehouse avenue runs
         out.append((round(math.cos(a) * TOWER_R), round(math.sin(a) * TOWER_R)))
     return out
 
@@ -111,8 +111,8 @@ def spire_parts():
          "door": {"side": "s"}, "chimney": False, "bay": 5, "roof": {"type": "flat", "parapet": "none"}},
         {"part": "belfry", "rect": [-7, -7, 7, 7], "y": 44, "h": 8, "pier": "quartz_bricks", "trim": "birch_planks",
          "roof": SPIRE_ROOF, "cap": "spire", "rows": 1, "finial": "spire_block"},
-    ] + [{"part": "buttress", "rect": [x0, z0, x1, z1], "side": sd, "at": [-6, 6], "y": 0, "height": 14, "depth": 2}
-         for sd in "nsew"]
+    ] + [{"part": "buttress", "rect": [x0, z0, x1, z1], "side": sd, "at": [-6, 6], "y": 0, "height": 14, "depth": 2,
+          "material": "smooth_quartz"} for sd in "nsew"]
 
 
 def tower_parts():
@@ -136,12 +136,12 @@ def gate_parts():
         {"part": "house", "style": STYLE, "rect": [-5, z0, 5, z1], "y": 0, "plinth": 1, "storeys": [5, 5],
          "door": {"side": "s", "kind": "grand"}, "chimney": False, "arcade": {"sides": "ew", "storey": 0},
          "roof": {"type": "hip"}},
-        {"part": "house", "style": STYLE, "rect": [-10, z0 + 1, -6, z1 - 1], "y": 0, "plinth": 1, "storeys": [5, 5, 5],
+        {"part": "house", "style": STYLE, "rect": [-10, z0 + 1, -6, z1 - 1], "y": 0, "plinth": 1, "storeys": [5, 5, 5, 5],
          "door": False, "chimney": False, "roof": {"type": "hip", "overhang": 0}},
-        {"part": "spire", "rect": [-10, z0 + 1, -6, z1 - 1], "rows": 3, "roof": SPIRE_ROOF, "trim": "birch_planks"},
-        {"part": "house", "style": STYLE, "rect": [6, z0 + 1, 10, z1 - 1], "y": 0, "plinth": 1, "storeys": [5, 5, 5],
+        {"part": "spire", "rect": [-10, z0 + 1, -6, z1 - 1], "rows": 3, "roof": SPIRE_ROOF, "trim": "birch_planks", "finial": "spire_block"},
+        {"part": "house", "style": STYLE, "rect": [6, z0 + 1, 10, z1 - 1], "y": 0, "plinth": 1, "storeys": [5, 5, 5, 5],
          "door": False, "chimney": False, "roof": {"type": "hip", "overhang": 0}},
-        {"part": "spire", "rect": [6, z0 + 1, 10, z1 - 1], "rows": 3, "roof": SPIRE_ROOF, "trim": "birch_planks"},
+        {"part": "spire", "rect": [6, z0 + 1, 10, z1 - 1], "rows": 3, "roof": SPIRE_ROOF, "trim": "birch_planks", "finial": "spire_block"},
     ]
 
 
