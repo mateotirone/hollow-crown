@@ -138,8 +138,11 @@ export async function buildIndex(layer, readBlob, vanilla) {
       if (typeof bj === "string") faces["*"] = { name: bj, ...terrainTex(bj) };
       else if (bj) for (const [face, n] of Object.entries(bj)) faces[face === "side" ? "*" : face] = { name: n, ...terrainTex(n) };
     }
+    // shown in each state's first value (how it sits in the creative menu); bone_visibility is worked out from that
+    const states = Object.fromEntries(Object.entries(b.description.states || {}).map(([k, v]) => [k, Array.isArray(v) ? v[0] : v?.values?.min ?? 0]));
     blocks.push({ id, name: nameOf("tile", id), group: group(f, BPB), file: f, ref: layer.get(f).ref,
-      geometry: geoId && !geoId.startsWith("minecraft:geometry.full_block") ? geoId : null, faces });
+      geometry: geoId && !geoId.startsWith("minecraft:geometry.full_block") ? geoId : null, faces,
+      boneVisibility: (typeof g === "object" && g?.bone_visibility) || null, states });
   }
 
   // item icons

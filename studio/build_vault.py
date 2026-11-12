@@ -253,7 +253,7 @@ def door(wheel):
         s.cube([cx + math.cos(a) * 4 - 0.75, cy + math.sin(a) * 4 - 0.75, z + 0.4], [1.5, 1.5, 1.2], "trim", "wheel",
                rot=[0, 0, k * 45], pivot=[cx + math.cos(a) * 4, cy + math.sin(a) * 4, z + 1])
     for k in range(4):
-        s.cube([cx - 3.5, cy - 0.4, z + 0.7], [7, 0.8, 0.8], "trim", "wheel", rot=[0, 0, k * 45 + 22.5], pivot=[cx, cy, z + 1.1])
+        s.cube([cx - 3.5, cy - 0.4, z + 0.7], [7, 0.8, 0.8], "trim", "wheel", rot=[0, 0, k * 45], pivot=[cx, cy, z + 1.1])
     s.cube([cx - 0.6, cy - 0.6, z - 0.4], [1.2, 1.2, 0.5], "gem", "gem")
     # bolt housings on the right edge
     for y in (3, 7, 11):
