@@ -139,7 +139,7 @@ export const PLOT_TAGS = {
   inn: { prefer: ["gate", "road_front", "square"] },
   barracks: { prefer: ["gate", "wall"] },
 };
-export const TAG_WORDS = { wall: "by the wall", gate: "by a gate", corner: "on a corner", square: "on the square", road_front: "on the main road", field_edge: "by the fields", hall: "by the hall", library: "set aside for the library" };
+export const TAG_WORDS = { wall: "by the wall", gate: "by a gate", corner: "on a corner", square: "on the square", road_front: "on the main road", field_edge: "by the fields", hall: "by the hall", library: "set aside for the library", hall5: "on ground the hall will need at level 5" };
 
 export const HOMES = ["cottage"];
 export const WORK = ["market", "smithy", "stable", "storehouse", "farmhouse", "mint", "inn", "barracks"];

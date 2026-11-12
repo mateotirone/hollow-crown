@@ -520,3 +520,18 @@ addTests("settle census", {
     assert(matches(tally(hut([...chests, { x: 4, y: 1, z: 4, id: "minecraft:anvil" }]))).find((m) => m.id === "mint").ok, "mint");
   },
 });
+
+// ---------- the level-5 hall takes its plots (hallmove.js) ----------
+import { HALL_TAKES_AT } from "./hallmove.js";
+addTests("settle charters", {
+  "some layouts have hall5 plots, and the hall takes them at level 5"() {
+    assertEqual(HALL_TAKES_AT, 5);
+    let total = 0;
+    for (const name of allTownNames()) for (const v of townByName(name).variants) {
+      if (v.charter === false) continue;
+      const n = slotsOfLayout(v).filter((s) => (s.tags ?? []).includes("hall5")).length;
+      total += n;
+    }
+    assert(total > 0, "some layouts have hall5 plots");
+  },
+});

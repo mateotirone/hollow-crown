@@ -2,7 +2,7 @@
 //
 // What other features can use:
 //   plotRegistry(owner) -> [{ id, cls, tags, tier, open, box (world), floorY, status, building, hand, beds }]
-//       status: "locked" (later tier) | "empty" | "marked" (outline up) | "rising" | "built" | "broken"
+//       status: "closed" (the level-5 hall took it) | "locked" (later tier) | "empty" | "marked" (outline up) | "rising" | "built" | "broken"
 //   plotAtBlock(location) -> { owner, slot } | undefined   the town plot a block stands in
 //   scanPlot(dim, box, floorY, height) -> generator; its return value is a census.js tally, or undefined
 //       when part of the plot isn't loaded. Run it with system.runJob (see runScan).
@@ -31,7 +31,7 @@ export function plotRegistry(owner) {
   return slotsOf(layoutOf(town)).map((s) => {
     const st = town.slots[s.id] ?? {};
     const open = s.tier <= town.tier;
-    const status = !open ? "locked" : st.broken ? "broken" : st.building ? (st.done === false ? "rising" : "built") : st.pick ? "marked" : "empty";
+    const status = st.closed && !st.building ? "closed" : !open ? "locked" : st.broken ? "broken" : st.building ? (st.done === false ? "rising" : "built") : st.pick ? "marked" : "empty";
     return { id: s.id, cls: slotClass(s), tags: s.tags, tier: s.tier, open, box: worldBox(town, s), floorY: floorOf(town, s, st), status, building: st.building, hand: !!st.hand, beds: st.beds ?? 0 };
   });
 }

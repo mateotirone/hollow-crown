@@ -178,8 +178,16 @@ export function markerSpot(town, slot) {
   return { x: town.x + seat.origin.dx, y: town.y + slot.dy + 1, z: town.z + seat.origin.dz };
 }
 
+// A plot that is gone for good: the level-5 town hall took its ground (hallmove.js)
+export function slotClosed(owner, slot) {
+  const town = townOf(owner);
+  if (town?.slots[slot.id]?.closed) return true;
+  return (slot.tags ?? []).includes("hall5") && (halls()[owner]?.level ?? 0) >= 5;
+}
+
 export function placeMarker(owner, slot) {
   const town = townOf(owner);
+  if (slotClosed(owner, slot)) return false;
   const at = markerSpot(town, slot);
   try {
     const block = world.getDimension(OVERWORLD).getBlock(at);

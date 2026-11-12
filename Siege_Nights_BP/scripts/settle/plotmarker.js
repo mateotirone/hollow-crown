@@ -16,7 +16,7 @@ import { BUILDINGS, BUILDING, drawBuilding } from "./buildings.js";
 import { plotFit, opensAt, slotClass, CLASS_NAMES } from "./charters.js";
 import { drawBox } from "./zones.js";
 import { raiseOnSlot, risingAt, jobOf } from "./plans.js";
-import { PLOT_MARKER, townOf, allTowns, layoutOf, markerAt, registerMarker, forgetMarker, placeMarker, clearMarker, slotState, saveTowns, tierName } from "./founding.js";
+import { PLOT_MARKER, townOf, allTowns, layoutOf, markerAt, registerMarker, forgetMarker, placeMarker, clearMarker, slotState, saveTowns, tierName, slotClosed } from "./founding.js";
 import { slotsOf, seatOnSlot, seatedBox, SIZE_NAMES } from "./towns.js";
 import { runScan } from "./register.js";
 import { matches } from "./census.js";
@@ -43,7 +43,7 @@ function freeClasses(owner, except) {
   const town = townOf(owner);
   const out = new Set();
   for (const s of slotsOf(layoutOf(town))) {
-    if (s.id === except || s.tier > (town?.tier ?? 0)) continue;
+    if (s.id === except || s.tier > (town?.tier ?? 0) || slotClosed(owner, s)) continue;
     const st = town.slots[s.id];
     if (!st?.building) out.add(slotClass(s));
   }
@@ -107,6 +107,7 @@ function besideDoor(owner, slot) {
 async function openSlot(player, owner, slot) {
   const state = slotState(owner, slot.id);
   const town = townOf(owner);
+  if (slotClosed(owner, slot) && !state.building) { clearMarker(owner, slot); return player.sendMessage("§7The town hall has taken this ground. The plot is gone."); }
   if (state.building && risingAt(state.origin)) return player.onScreenDisplay.setActionBar(`§7The ${nameOf(state.building)} is still going up.`);
   if (state.building) return builtMenu(player, owner, slot, state);
   if (state.pick && system.currentTick - (state.pickedAt ?? 0) <= SETTLE.previewSeconds * 20 && state.by === player.id) return confirm(player, owner, slot, state);
@@ -139,10 +140,11 @@ async function confirm(player, owner, slot, state) {
   const building = BUILDING[state.pick];
   const seat = seatInWorld(owner, slot, building.id);
   if (!seat) { state.pick = undefined; saveTowns(); return player.sendMessage("§cThat building no longer fits here."); }
-  const free = isCreative(player);
+  const credit = (town.credits?.[slotClass(slot)] ?? 0) > 0; // the hall took a plot of this size: one is on the house
+  const free = isCreative(player) || credit;
   const price = free ? 0 : plotPrice(building.id);
   const have = purse(player);
-  const body = [`${building.blurb ?? ""}`, "", free ? "§aFree in Creative." : `${have >= price ? "§a" : "§c"}${coins(price)}§7 from your purse (you have ${coins(have)}).`, "", "§7Builders raise it for you. It goes up a layer at a time."];
+  const body = [`${building.blurb ?? ""}`, "", credit ? "§aFree: this makes up for the plot your town hall took." : free ? "§aFree in Creative." : `${have >= price ? "§a" : "§c"}${coins(price)}§7 from your purse (you have ${coins(have)}).`, "", "§7Builders raise it for you. It goes up a layer at a time."];
   const res = await new MessageFormData().title(`Raise the ${building.name}?`).body(body.join("\n"))
     .button1("Pick something else").button2(free || have >= price ? "Raise it" : "Not enough yet").show(player);
   if (res.canceled) return;
@@ -158,6 +160,7 @@ async function confirm(player, owner, slot, state) {
     if (price) refund(player, price);
     return player.sendMessage("§cSomething is already going up there.");
   }
+  if (credit) { town.credits[slotClass(slot)]--; if (!town.credits[slotClass(slot)]) delete town.credits[slotClass(slot)]; }
   Object.assign(state, { building: building.id, style: town.style, origin: seat.origin, forward: seat.forward, box: seat.box, top: seat.plan.bounds().y1 + Math.max(0, built.lift ?? 0), paid: price, by: player.id, pick: undefined, done: false, lift: Math.max(0, built.lift ?? 0) });
   saveTowns();
   sfx(player, "random.anvil_use");
@@ -242,8 +245,9 @@ async function handMenu(player, owner, slot, state) {
   player.sendMessage("§7It is just a building again. The plot marker is back.");
 }
 
-export function demolish(owner, slot, state, player) {
-  const back = Math.floor((state.paid ?? 0) / 2);
+// back: coins returned (half the price unless given). keep: a Set of "x,y,z" cells to leave alone (the hall
+// that takes the plot). after: what happens once it is clear (default: the plot marker comes back).
+export function demolish(owner, slot, state, player, { back = Math.floor((state.paid ?? 0) / 2), keep, after } = {}) {
   const { box, origin, top = 12 } = state;
   const spot = state.marker;
   if (spot) {
@@ -266,11 +270,13 @@ export function demolish(owner, slot, state, player) {
         let b;
         try { b = dim.getBlock(at); } catch { b = undefined; }
         if (!b) { later.push(at); continue; }
+        if (keep?.has(`${at.x},${at.y},${at.z}`)) continue;
         try { if (!b.isAir) b.setType("minecraft:air"); } catch { /* protected block */ }
       }
       cells = later;
       if (cells.length) for (let i = 0; i < 40; i++) yield; // ~2 s
     }
+    if (after) { after(); return; }
     placeMarker(owner, slot);
     if (player?.isValid) player.sendMessage("§7The plot is clear.");
   })());
