@@ -53,9 +53,9 @@ A ★ marks builds that no earlier list had (added in the 2026-11-12 audit).
 | Well (5) | One version per overworld region | in game | settle-* | Refine every building, region by region | `map/structures/settle_buildings.py` |  |
 | Library (lore shelves) (5) | One version per overworld region | in game | settle-* | Refine every building, region by region | `map/structures/settle_buildings.py` | Raised free on arrival; every settlement town needs its own lore and library. |
 | Kitchen garden (5) | One version per overworld region | in game | settle-* | Refine every building, region by region | `map/structures/settle_buildings.py` |  |
-| ★ Farmhouse (with its field) (5) | One version per overworld region | designed |  | Refine every building, region by region |  | Waiting in PR #168. Needed for the Town charter. Vale spec only (PR #168), waiting in settle WAITING; four other regions not drawn. |
-| ★ Mint (5) | One version per overworld region | designed |  | Refine every building, region by region |  | Waiting in PR #168. Needed for the Town charter. Vale spec only (PR #168); four other regions not drawn. |
-| ★ Settlement inn (5) | One version per overworld region | designed |  | Refine every building, region by region |  | Waiting in PR #168. Needed for the City charter. Vale spec only (PR #168); four other regions not drawn. |
+| ★ Farmhouse (with its field) (5) | One version per overworld region | designed |  | Refine every building, region by region |  | Waiting in PR #168. Needed for the Town charter. Specs for all five regions in PR #168; waits in settle WAITING until layouts make room. |
+| ★ Mint (5) | One version per overworld region | designed |  | Refine every building, region by region |  | Waiting in PR #168. Needed for the Town charter. Specs for all five regions in PR #168. |
+| ★ Settlement inn (5) | One version per overworld region | designed |  | Refine every building, region by region |  | Waiting in PR #168. Needed for the City charter. Specs for all five regions in PR #168. |
 | Stables levels 1-3 (Stables block) (15) | One version per overworld region | in game | settle-* | Build settlement building and mason shop | `map/structures/settle_buildings.py` |  |
 | Breeder's Yard (Breeder's Post) (5) | One version per overworld region | in game | settle-* | Build settlement building and mason shop | `map/structures/settle_buildings.py` |  |
 | Barracks (guardhouse) (5) | One version per overworld region | in game | settle-* | Build settlement building and mason shop | `map/structures/settle_buildings.py` |  |
@@ -76,7 +76,7 @@ A ★ marks builds that no earlier list had (added in the 2026-11-12 audit).
 | ★ Guild Factor's post / Guild Board | Anywhere / region-neutral | in game |  | Design a repeatable material gathering loop | `Siege_Nights_BP/scripts/guild` | An NPC job in the six towns; no counter or board build. |
 | ★ Forester's Lodge tree farm | One version per overworld region | in game |  | Build custom tree assets | `Siege_Nights_BP/scripts/forestry` | Grove plan in game, not in the viewer and not on the building skill. |
 | Ironworks: Ore Pit, Bloomery, Trip-Hammer Forge (own plot) (3) | One version per overworld region | in viewer | ironworks | Design a repeatable material gathering loop | `map/structures/ironworks/spec.py` | v3 on the skill awaiting Mateo's OK; the game still raises the old hand-drawn design. Only one style so far; regional versions to follow. |
-| ★ Gold Sluice: Panning Sluice, Washing Mill, Assay House (3) | Emberwaste | not started |  | Design a repeatable material gathering loop |  | Proposed, awaiting Mateo's go. |
+| ★ Gold Sluice: Panning Sluice, Washing Mill, Assay House (3) | Emberwaste | not started |  | Design a repeatable material gathering loop |  | Design under way in the material-loop thread (2026-11-12 17:05 UTC); move to designed when its spec lands. |
 | ★ Deep Shaft (diamond works) (3) | Frostmarch | not started |  | Design a repeatable material gathering loop |  | Named in the material loop; not asked for yet. |
 | Guard posts and wall steps | Anywhere / region-neutral | in game |  | Build settlement building and mason shop | `Siege_Nights_BP/scripts/guardposts` | Markers and steps, not a building. |
 
