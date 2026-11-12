@@ -103,12 +103,22 @@ export function makeMock(pack) {
   }
   class MolangVariableMap { setColorRGB() {} setFloat() {} setVector3() {} }
 
+  // Bedrock refuses native calls while the scripts are first loading ("early execution"), and one throw there
+  // stops the whole pack. check.mjs clears `early` once the import is done.
+  const state = { early: true };
+  const native = (name, fn) => (...args) => {
+    if (state.early) throw new ReferenceError(`Native function [${name}] cannot be used in early execution.`);
+    return fn(...args);
+  };
+  const BlockPermutation = { resolve: native("BlockPermutation::resolve", (id) => stub(`BlockPermutation(${id})`)) };
+
   const enumOf = (...names) => Object.fromEntries(names.map((n) => [n, n]));
   const known = {
     world,
     system,
     ItemStack,
     MolangVariableMap,
+    BlockPermutation,
     BlockTypes: typeList(pack.blocks),
     EntityTypes: typeList(pack.entities),
     ItemTypes: typeList(new Set([...pack.items, ...pack.blocks])),
@@ -122,6 +132,7 @@ export function makeMock(pack) {
   };
 
   return {
+    endEarly() { state.early = false; },
     lookup: (name) => (name in known ? known[name] : stub(name)),
     subscriptions,
     intervals,
