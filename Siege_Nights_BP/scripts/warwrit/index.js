@@ -33,7 +33,7 @@ import { holdsRelic, keeperAway } from "../vault/index.js";
 import { guardTag } from "../siege/guards.js";
 import { settlementAt } from "../siege/territory.js";
 import { WRIT, assaultDay, phase, groundsFor, GROUNDS_TEXT, UNJUST_TEXT, feeFor, pairKey, demandAmount, cantDeclare } from "./rules.js";
-import { ARMY, startMarch, endMarch, resumeMarch, assaultTick, clearTeams, freeSlot, sweepStragglers } from "./army.js";
+import { ARMY, startMarch, endMarch, resumeMarch, assaultTick, musterTick, clearTeams, freeSlot, sweepStragglers } from "./army.js";
 import "./tests.js";
 
 const store = moduleStore("siege:warwrit", () => ({ writs: {}, peace: {}, feuds: {}, refused: {}, demands: {}, oaths: {}, ghosts: {} }));
@@ -331,6 +331,7 @@ onTick("warwrit", 20, () => {
     const p = phaseOf(w);
     if (p === "over") { endWrit(defender, w); continue; }
     if (w.share > 0) resumeMarch(w, defender); // after a restart, pick the marchers up again
+    if (p !== "assault") musterTick(defender);
     if (p === "assault") {
       if (!w.started) {
         w.started = true;

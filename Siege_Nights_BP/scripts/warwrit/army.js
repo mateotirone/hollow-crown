@@ -21,6 +21,7 @@ import { keepOf } from "../siege/api.js";
 import { walkTo, cancelWalk, isWalking } from "../guardposts/walk.js";
 import { gateOutside, gateInside } from "./gates.js";
 import { ROUTE, findPath, wetRuns, behind } from "./route.js";
+import { crewTick, crewBusy, packUp, sweepEngines, CREW_TYPES } from "./crews.js";
 
 export const WAR_SLOTS = 4; // keep in step with tools/build_guard_war.py
 export const teamTag = (slot, side) => `siege_w${slot}_${side}`;
@@ -42,7 +43,7 @@ const RIDER = new Set(["siege:knight"]); // stays mounted in battle
 
 // Which soldiers march: share% of the owner's loaded soldiers, Men-at-Arms first
 export function pickMarchers(guards, share) {
-  const order = { "siege:man_at_arms": 0, "siege:knight": 0, "siege:pikeman": 1, "siege:shieldbearer": 1, "siege:crossbowman": 2, "siege:archer": 3 };
+  const order = { "siege:man_at_arms": 0, "siege:knight": 0, "siege:pikeman": 1, "siege:shieldbearer": 1, "siege:crossbowman": 2, "siege:archer": 3, "siege:trebuchet_crew": 1, "siege:ram_crew": 1, "siege:sapper": 1 };
   const sorted = [...guards].sort((a, b) => (order[a.typeId] ?? 4) - (order[b.typeId] ?? 4));
   return sorted.slice(0, Math.round((sorted.length * share) / 100));
 }
@@ -109,6 +110,7 @@ export function resumeMarch(writ, defender) {
 export function sweepStragglers(atWar) {
   const ours = new Set(), horses = new Set();
   for (const m of marches.values()) for (const s of m.soldiers) { ours.add(s.id); if (s.horse) horses.add(s.horse); }
+  sweepEngines(new Set([...marches.values()].flatMap((m) => m.engines ?? [])));
   try {
     for (const g of dim().getEntities({ tags: [MARCHING_TAG] })) {
       if (ours.has(g.id)) continue;
@@ -133,6 +135,7 @@ export function endMarch(defender) {
   const m = marches.get(defender);
   marches.delete(defender);
   if (!m) return;
+  packUp(m);
   for (const s of m.soldiers) {
     const g = entity(s.id), h = s.horse && entity(s.horse);
     try { h?.remove(); } catch { /* gone */ }
@@ -197,7 +200,7 @@ function placeOnTrail(rider, horse, point, facing) {
 // Every 2 ticks: crumbs from the leader, soldiers ride up the trail behind them
 system.runInterval(() => {
   for (const [defender, m] of marches) {
-    if (m.dismounted) continue;
+    if (m.dismounted) { chargeKnights(m); continue; }
     const leader = world.getPlayers().find((p) => p.id === m.attacker);
     if (!leader || leader.dimension.id !== OVERWORLD) continue; // away: the army waits where it is
     addCrumb(m, leader);
@@ -253,29 +256,113 @@ export function assaultTick(defender, writ, sideOf) {
       else if (sideOf(defender, p.id)) p.addTag(b);
     } catch { /* left */ }
   }
-  try { for (const g of dim().getEntities({ tags: [guardTag(defender)] })) g.addTag(b); } catch { /* fine */ }
+  let defenders = [];
+  try { defenders = dim().getEntities({ tags: [guardTag(defender)] }); for (const g of defenders) g.addTag(b); } catch { /* fine */ }
   const m = marches.get(defender);
+  const breach = m ? breachOf(m) : undefined;
+  braceDefenders(defenders, defender, m?.attacker, breach);
   if (!m) return;
+  m.teamA = a; m.teamB = b;
+  if (!m.dismounted) dismount(m, defender);
+  crewTick(m, defender, true);
   const k = keepOf(defender);
+  const crewmen = m.soldiers.map((s) => entity(s.id)).filter((g) => g && CREW_TYPES.has(g.typeId) && crewBusy(m, g.id));
   for (const s of m.soldiers) {
     const g = entity(s.id);
     if (!g) continue;
     try {
       g.addTag(a);
-      if (!m.dismounted) dismount(m, defender);
-      // nobody to fight near them: head for the gate (inside once it is open)
+      if (CREW_TYPES.has(g.typeId) && crewBusy(m, g.id)) continue; // at his engine (crews.js)
+      if (RIDER.has(g.typeId)) continue; // Knights ride at the enemy (chargeKnights)
       const near = dim().getEntities({ location: g.location, maxDistance: 20, tags: [b] }).length;
+      // Shieldbearers walk in front of the crews, between them and the wall
+      if (g.typeId === "siege:shieldbearer" && crewmen.length) {
+        const c = crewmen.reduce((x, y) => (dist(y.location, g.location) < dist(x.location, g.location) ? y : x));
+        const w = gateOutside(defender, c.location) ?? k;
+        const dx = (w?.x ?? c.location.x) - c.location.x, dz = (w?.z ?? c.location.z) - c.location.z, d = Math.hypot(dx, dz) || 1;
+        const cover = { x: c.location.x + (dx / d) * 2, y: c.location.y, z: c.location.z + (dz / d) * 2 };
+        if (dist(g.location, cover) > 2 && !isWalking(g)) walkTo(g, m.attacker, cover, { noJump: true });
+        continue;
+      }
       if (near) { if (isWalking(g)) cancelWalk(g.id); continue; } // enemies close: fight them where they are
+      // Crossbowmen keep back and shoot over the others
+      if (g.typeId === "siege:crossbowman" || g.typeId === "siege:archer") {
+        const out = gateOutside(defender, g.location);
+        if (out && k && !isWalking(g)) {
+          const dx = out.x - k.x, dz = out.z - k.z, d = Math.hypot(dx, dz) || 1;
+          const line = { x: out.x + (dx / d) * 6 + ((s.rank % 5) - 2) * 2, y: out.y, z: out.z + (dz / d) * 6 };
+          if (dist(g.location, line) > 3) walkTo(g, m.attacker, line, { noJump: true });
+        }
+        continue;
+      }
+      // everyone else: through the breach once there is one, otherwise at the gate
       if (!isWalking(g) && k) {
         const out = gateOutside(defender, g.location), gate = gateInside(defender);
-        const dest = out && Math.hypot(g.location.x - out.x, g.location.z - out.z) > 6 ? out : (gate ?? k);
-        if (dest) walkTo(g, m.attacker, { x: dest.x, y: dest.y, z: dest.z }, { noJump: true });
+        const dest = breach ?? (out && dist(g.location, out) > 6 ? out : (gate ?? k));
+        if (dest) walkTo(g, m.attacker, { x: dest.x + 0.5, y: dest.y, z: dest.z + 0.5 }, { noJump: true });
       }
     } catch { /* fine */ }
   }
 }
 
+const dist = (p, q) => Math.hypot(p.x - q.x, p.z - q.z);
+
+// The first opened hole in the wall (a trebuchet crew's first block, once it's gone): { x, y, z } or undefined
+function breachOf(m) {
+  for (const c of Object.values(m.crews ?? {})) {
+    if (!c.base) continue;
+    try { const b = dim().getBlock(c.base); if (b?.isAir) return { ...c.base }; } catch { /* unloaded */ }
+  }
+  return undefined;
+}
+
+// Knights stay on their horses and ride down the nearest enemy, archers first
+function chargeKnights(m) {
+  if (!m.teamB) return;
+  for (const s of m.soldiers) {
+    const g = entity(s.id), h = s.horse && entity(s.horse);
+    if (!g || !h || !RIDER.has(g.typeId)) continue;
+    try {
+      const foes = dim().getEntities({ location: h.location, maxDistance: 32, tags: [m.teamB] });
+      if (!foes.length) continue;
+      const pick = foes.find((f) => /archer|crossbowman/.test(f.typeId)) ?? foes[0];
+      const dx = pick.location.x - h.location.x, dz = pick.location.z - h.location.z, d = Math.hypot(dx, dz);
+      if (d < 2.2) continue; // close enough: the Knight strikes
+      const step = Math.min(0.9, d);
+      placeOnTrail(g, h, { x: h.location.x + (dx / d) * step, y: h.location.y, z: h.location.z + (dz / d) * step }, { x: dx, z: dz });
+    } catch { /* fine */ }
+  }
+}
+
+// Defending Pikemen and Shieldbearers brace across the gate and any breach (from the inside); the rest fight as
+// their posts say. "siege:brace" keeps siege/guards.js from calling them back while they hold.
+const BRACERS = new Set(["siege:pikeman", "siege:shieldbearer"]);
+function braceDefenders(guards, defender, attacker, breach) {
+  const gate = gateInside(defender);
+  const spots = [gate, breach].filter(Boolean);
+  if (!spots.length) return;
+  let n = 0;
+  for (const g of guards) {
+    if (!BRACERS.has(g.typeId)) continue;
+    const at = spots[n % spots.length], k = Math.floor(n / spots.length);
+    n++;
+    const dest = { x: at.x + 0.5 + ((k % 3) - 1), y: at.y, z: at.z + 0.5 + Math.floor(k / 3) };
+    try {
+      g.setDynamicProperty("siege:brace", 1);
+      if (dist(g.location, dest) > 1.5 && !isWalking(g)) walkTo(g, defender, dest, { noJump: true });
+    } catch { /* fine */ }
+  }
+  void attacker;
+}
+
+// Muster (before nightfall): the crews already dismounted walk out and set up
+export function musterTick(defender) {
+  const m = marches.get(defender);
+  if (m?.dismounted) crewTick(m, defender, false);
+}
+
 export function clearTeams(slot) {
+  try { for (const e of dim().getEntities({ families: ["siege_guard"] })) if (e.getDynamicProperty("siege:brace")) { e.setDynamicProperty("siege:brace", undefined); cancelWalk(e.id); } } catch { /* fine */ }
   for (const side of ["a", "b"]) {
     const tag = teamTag(slot, side);
     try { for (const e of dim().getEntities({ tags: [tag] })) e.removeTag(tag); } catch { /* fine */ }
