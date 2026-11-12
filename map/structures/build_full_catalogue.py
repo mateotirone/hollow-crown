@@ -128,6 +128,19 @@ def main():
     add(sec, "map-millbrook_watermill", "Millbrook watermill", "Stone and timber", "Stone ground floor on the river bank, timber above, with a working-looking wheel in the water.",
         lambda: vale_civic.watermill(), extra={"where": "Millbrook, on the river", "kind": "Civic"})
 
+    # ---- 1a. Kingsrest, rebuilt one by one in the build review (map/structures/review/) ----
+    sys.path.insert(0, os.path.join(HERE, "review"))
+    import kingsrest_house, kingsrest_inn, kingsrest_guildhall
+    sec = {"id": "review-kingsrest", "title": "Kingsrest (reviewed)", "blurb": "Kingsrest buildings rebuilt stage by stage from build-instructions in the build review, with Mateo's notes folded in.", "cards": []}
+    sections.append(sec)
+    for roof in ("red", "slate"):
+        add(sec, f"review-kingsrest_house-{roof}", "Street house", f"{roof.capitalize()} roof", "Stone ground floor, jettied stripped-spruce frame above, dormer, lean-to woodshed, leaf boxes and shutters.",
+            (lambda r=roof: kingsrest_house.build(99, r)), extra={"where": "Kingsrest streets", "kind": "House"})
+    add(sec, "review-kingsrest_inn", "Coaching inn", "Furnished", "Cross-wing coaching inn: a long range with a carriage arch through to the yard and a gabled wing to the square with the door.",
+        lambda: kingsrest_inn.build(99, "red"), extra={"where": "Kingsrest, on the square", "kind": "Civic"})
+    add(sec, "review-kingsrest_guildhall", "Guildhall", "Copper roof", "An open market arcade under the guild's hall, a copper roof and a belfry on the ridge.",
+        lambda: kingsrest_guildhall.build(99, "copper"), extra={"where": "Kingsrest, on the square", "kind": "Civic"})
+
     # ---- 1b. The four regional map towns (laid out by the town generator) ----
     for tid, tname, rid, reg, blurb in TOWNS:
         sec = {"id": "town-" + tid, "title": tname, "blurb": blurb, "cards": []}
