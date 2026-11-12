@@ -70,7 +70,16 @@ def _colours(name, palette):
     for key in (k, k.replace("_pane", ""), "glass" if "glass" in k else "", "oak_door" if k.endswith("_door") else ""):
         if key in palette.extras:
             th = palette.extras[key]["thumb"]; return th, th
+    if k in ADDON:                    # the add-on's own blocks: the nearest vanilla look, for previews only
+        return _colours(ADDON[k], palette)
+    if k.endswith("_button") and (k[: -len("_button")]) in palette.blocks:
+        th = palette.blocks[k[: -len("_button")]]["thumb"]; return th["side"], th["top"]
     return ["#ff00ff"] * 16, ["#ff00ff"] * 16
+
+
+ADDON = {"siege:pale_ash": "light_gray_concrete", "siege:veinstone": "blackstone", "siege:veinstone_bricks": "polished_blackstone_bricks",
+         "siege:cracked_veinstone_bricks": "cracked_polished_blackstone_bricks", "siege:spire_roof": "deepslate_tiles",
+         "siege:glimbulb": "orange_concrete", "iron_bars": "iron_block"}
 
 
 def _stamp(face, a):

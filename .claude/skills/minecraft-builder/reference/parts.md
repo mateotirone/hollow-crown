@@ -125,7 +125,7 @@ For a curved arch in a solid mass (bridges, gateways, arcades) use the `arch` sh
 
 ## Roofs (06-roof)
 
-`roof` in a house: `type` gable / hip, `ridge` x / z (default the long way), `pitch` 1 (45°) or 2 (steep:
+`roof` in a house: `type` gable / hip / flat, `ridge` x / z (default the long way), `pitch` 1 (45°) or 2 (steep:
 stair on a full block), `overhang` 1, `verge` 1, `cap` (ridge slab material).
 
 How it is built: a height field over the footprint plus overhang; every cell takes a stair facing uphill;
@@ -135,6 +135,13 @@ every verge stair), an eave row of upside-down trim stairs under the overhang, a
 block under the lowest verge stair at every corner. Gable triangles fill after the surface with a centre
 post (timber) and an attic window when the gable is 5 or more tall. Roof colour ladders run eaves to
 ridge, darkest at the ridge, with band edges wobbled ±0.04.
+
+**Flat** (`"type": "flat"`, 06 roof-types 18; the Emberwaste default, Saltreach terraces on a lower wing
+only): a full roof layer on the wall top (never a gap), a parapet one high (`"parapet"`: `slab` default,
+`crenel`, `wall`, `none`; `"parapet_mat"`, default the style's quoin) with posts on the corners,
+`"beams": true` (or a log id) for roof beams sticking out every other block on the long sides, `"hatch": true`
+for a trapdoor in the middle. No auto chimney: give `chimney` cells by hand. Never on Vale, Frostmarch,
+Blackfen or Hollow houses.
 
 **Every roof is textured** (Mateo, 2026-11-12, every style and theme): each roof block is mixed at random,
 cell by cell, with a partner block of the same colour, on stairs, slabs and the ridge alike. Pairs and the

@@ -25,7 +25,7 @@ ALONG_AXIS = {"n": "x", "s": "x", "e": "z", "w": "z"}
 # From map/structures/kit.py VALE + vale.py STYLES and build-instructions/palettes/vale.md.
 STYLES = {
     "vale_timber": dict(plinth={"ladder": ["mossy_cobblestone", "cobblestone", "andesite"], "axis": "noise", "scale": 3},
-                        frame="stripped_dark_oak_log", infill="calcite", floor="spruce_planks", trim="dark_oak_planks",
+                        frame="stripped_spruce_log", infill="calcite", floor="spruce_planks", trim="dark_oak_planks",
                         roof={"ladder": "VAL-06", "axis": "y", "reverse": True, "jitter": 0.04}, shutter="spruce_planks",
                         door="spruce_door", glass="brown_stained_glass_pane", leaves="azalea_leaves", sign_wood="dark_oak",
                         chimney="stone_bricks", quoin="polished_andesite", stone="VAL-01", frame_kind="flush", sill="leafbox"),
@@ -39,6 +39,40 @@ STYLES = {
                        floor="spruce_planks", trim="spruce_planks", roof={"ladder": ["dark_oak_planks", "spruce_planks"], "axis": "y", "reverse": True},
                        shutter="spruce_planks", door="spruce_door", glass="brown_stained_glass_pane", leaves="azalea_leaves",
                        sign_wood="spruce", chimney="stone_bricks", quoin="polished_andesite", stone="VAL-01", frame_kind="flush", sill="leafbox"),
+    # the other regions (regions/<region>.md says when to use each; roof pitch and type stay in the spec)
+    "frost_timber": dict(plinth={"ladder": "FRO-01", "axis": "noise", "scale": 3}, frame="dark_oak_log",
+                         infill={"ladder": ["spruce_planks", "stripped_spruce_log"], "axis": "noise", "scale": 2}, floor="spruce_planks",
+                         trim="dark_oak_planks", roof={"block": "dark_oak_planks"}, shutter="dark_oak_planks", door="dark_oak_door",
+                         glass="white_stained_glass_pane", leaves="spruce_leaves", sign_wood="dark_oak", chimney="deepslate_bricks",
+                         quoin="polished_deepslate", stone="FRO-01", frame_kind="flush", sill="stair"),
+    "frost_stone": dict(plinth={"ladder": "FRO-01", "axis": "noise", "scale": 3}, frame="deepslate_bricks", infill={"ladder": "FRO-01", "axis": "y"},
+                        floor="spruce_planks", trim="dark_oak_planks", roof={"block": "dark_oak_planks"}, shutter="dark_oak_planks",
+                        door="dark_oak_door", glass="light_blue_stained_glass_pane", leaves="spruce_leaves", sign_wood="dark_oak",
+                        chimney="deepslate_bricks", quoin="polished_deepslate", stone="deepslate_bricks", frame_kind="stone", sill="stair"),
+    "salt_timber": dict(plinth={"ladder": "SAL-05", "axis": "noise", "scale": 3}, frame="stripped_birch_log", infill="calcite",
+                        floor="birch_planks", trim="birch_planks", roof={"block": "dark_prismarine"}, shutter="warped_planks",
+                        door="birch_door", glass="light_blue_stained_glass_pane", leaves="azalea_leaves", sign_wood="birch",
+                        chimney="brick_block", quoin="cut_sandstone", stone="smooth_sandstone", frame_kind="flush", sill="stair"),
+    "salt_stone": dict(plinth={"ladder": "SAL-05", "axis": "noise", "scale": 3}, frame="smooth_sandstone",
+                       infill={"ladder": ["sandstone", "smooth_sandstone"], "axis": "y"}, floor="birch_planks", trim="birch_planks",
+                       roof={"block": "dark_prismarine"}, shutter="warped_planks", door="birch_door", glass="cyan_stained_glass_pane",
+                       leaves="azalea_leaves", sign_wood="birch", chimney="brick_block", quoin="cut_sandstone", stone="smooth_sandstone",
+                       frame_kind="stone", sill="stair"),
+    "fen_timber": dict(plinth={"ladder": ["mud_bricks", "tuff_bricks"], "axis": "noise", "scale": 3}, frame="mangrove_log",
+                       infill={"ladder": ["packed_mud", "mud_bricks"], "axis": "y"}, floor="dark_oak_planks", trim="mangrove_planks",
+                       roof={"block": "dark_oak_planks"}, shutter="mangrove_planks", door="mangrove_door", glass="brown_stained_glass_pane",
+                       leaves="mangrove_leaves", sign_wood="mangrove", chimney="mud_bricks", quoin="tuff_bricks", stone="mud_bricks",
+                       frame_kind="proud", sill="stair"),
+    "ember_sandstone": dict(plinth={"block": "sandstone"}, frame="cut_sandstone", infill={"ladder": "EMB-01", "axis": "y"},
+                            floor="acacia_planks", trim="acacia_planks", roof={"block": "smooth_red_sandstone"}, shutter="acacia_planks",
+                            door="acacia_door", glass="orange_stained_glass_pane", leaves="jungle_leaves", sign_wood="acacia",
+                            chimney="sandstone", quoin="cut_sandstone", stone="smooth_sandstone", frame_kind="stone", sill="stair"),
+    "hollow_timber": dict(plinth={"ladder": ["cobbled_deepslate", "polished_blackstone_bricks"], "axis": "noise", "scale": 3},
+                          frame="dark_oak_log", infill="siege:pale_ash", floor="dark_oak_planks", trim="dark_oak_planks",
+                          roof={"ladder": ["cobbled_deepslate", "deepslate_tiles"], "axis": "y"}, shutter="dark_oak_planks",
+                          door="dark_oak_door", glass="iron_bars", leaves="azalea_leaves", sign_wood="dark_oak",
+                          chimney="polished_blackstone_bricks", quoin="polished_blackstone", stone="polished_blackstone_bricks",
+                          frame_kind="flush", sill="stair"),
 }
 WOOD_OF = lambda b: next((w for w in ("dark_oak", "pale_oak", "spruce", "birch", "jungle", "acacia", "mangrove", "cherry", "poplar", "bamboo",
                                       "crimson", "warped", "oak") if b.startswith(w) or b.startswith("stripped_" + w)), "spruce")
@@ -314,6 +348,7 @@ def build_roofs(ctx, roofs, style, chimneys=()):
     if not roofs: return
     H, info = {}, {}
     for F, r in roofs:
+        if r["kind"] == "flat": continue          # flat roofs are laid by _flat_roof
         for c, (row, d, dmax) in F.items():
             if c not in H or row > H[c]: H[c] = row; info[c] = (r, d, dmax)
     S = "roof"
@@ -351,6 +386,7 @@ def build_roofs(ctx, roofs, style, chimneys=()):
             ctx.set(x, row - k, z, S, "full", mat)
     # edges open to the sky: barge boards under verge stairs, eave row under the overhang, corner blocks
     for F, r in roofs:
+        if r["kind"] == "flat": continue
         x0, z0, x1, z1 = r["rect"]; ridge = r["ridge"]; P = r["base"]
         edge = r.get("edge", "full")         # dormers: none (small roofs read cleaner bare); porches: barge only
         if edge == "none": continue
@@ -587,10 +623,48 @@ def _roof_of(ctx, s, st, B, k=0):
         raw = st["roof"]; raw = ctx.spec["materials"].get(raw, raw) if isinstance(raw, str) else raw
         if isinstance(raw, dict): raw = {a: b for a, b in raw.items() if a not in ("from", "to")}   # the main roof's range
         rmat = f"{st['_name']}.roof{k}"; ctx.spec["materials"][rmat] = raw
+    if kind == "flat":       # a flat roof on the wall top (06 roof-types 18: Emberwaste, harbour terraces)
+        x0, z0, x1, z1 = top
+        F = {(x, z): (plate + 1, 0, 0) for x in range(x0, x1 + 1) for z in range(z0, z1 + 1)}
+        ctx.spec["materials"][rmat] = _with_range(ctx.spec["materials"][rmat], plate, plate + 1)
+        return F, {"rect": top, "ridge": "x", "base": plate, "kind": "flat", "pitch": 0, "mat": rmat, "flat": rs}
     F, ridge = roof_field(top, kind, rs.get("ridge"), rs.get("overhang", 1), rs.get("verge", 1), pitch, plate)
     r = {"rect": top, "ridge": ridge, "base": plate, "kind": kind, "pitch": pitch, "mat": rmat, "cap": rs.get("cap", rmat)}
     ctx.spec["materials"][rmat] = _with_range(ctx.spec["materials"][rmat], plate, max(v[0] for v in F.values()))
     return F, r
+
+
+def _flat_roof(ctx, r, st, H):
+    """06 roof-types 18 / palettes/emberwaste.md: the roof layer on the wall top (no gap), a parapet one high
+    round it (slabs, crenels, walls or none) with posts on the corners, optional projecting roof beams
+    (vigas) every other block on the long sides, an optional hatch. roof keys: parapet, parapet_mat,
+    beams (true or a log), hatch (true)."""
+    f = r["flat"]; x0, z0, x1, z1 = r["rect"]; y = r["base"] + 1; m = r["mat"]
+    for x in range(x0, x1 + 1):
+        for z in range(z0, z1 + 1):
+            ctx.set(x, y, z, "roof", "full", m); H[(x, z)] = max(H.get((x, z), -99), y)
+    par = f.get("parapet", "slab"); pm = f.get("parapet_mat") or ctx.mat(st, "quoin")
+    if par != "none":
+        for x in range(x0, x1 + 1):
+            for z in range(z0, z1 + 1):
+                if not (x in (x0, x1) or z in (z0, z1)): continue
+                corner = x in (x0, x1) and z in (z0, z1)
+                t_ = (x - x0) + (z - z0)
+                if corner: ctx.set(x, y + 1, z, "roof", "post", pm)
+                elif par == "crenel": (t_ % 2 == 0) and ctx.set(x, y + 1, z, "roof", "full", pm)
+                elif par == "wall": ctx.set(x, y + 1, z, "roof", "post", pm)
+                else: ctx.set(x, y + 1, z, "roof", "slab", pm, half="bottom")
+    if f.get("beams"):
+        log = f["beams"] if isinstance(f["beams"], str) else "spruce_log"
+        long_x = (x1 - x0) >= (z1 - z0)
+        for sd in (("n", "s") if long_x else ("w", "e")):
+            L = side_len(r["rect"], sd); ox, oz = DIRS[sd]
+            for t_ in range(-(L // 2) + 1, L // 2, 2):
+                wx, wz = wall_cell(r["rect"], sd, t_)
+                ctx.setif(wx + ox, y - 1, wz + oz, "details", raw=log, axis="z" if long_x else "x")
+    if f.get("hatch"):
+        cx, cz = (x0 + x1) // 2, (z0 + z1) // 2
+        ctx.set(cx, y, cz, "roof", "trapdoor", ctx.mat(st, "trim"), half="bottom")
 
 
 def _join(ctx, blocks):
@@ -780,6 +854,7 @@ def house(ctx, s):
         if not ch: continue
         if ch == "auto":       # through the ridge, two in from a gable end (06 step 9)
             F_, r_ = roofs[blocks.index((bs, bst, bB))][:2]
+            if r_["kind"] == "flat": continue      # flat roofs: give chimneys by hand
             x0, z0, x1, z1 = r_["rect"]
             chs.append(((x1 - 2, (z0 + z1) // 2) if r_["ridge"] == "x" else ((x0 + x1) // 2, z1 - 2), bst, bB))
         else: chs += [(tuple(c), bst, bB) for c in (ch if isinstance(ch[0], list) else [ch])]
@@ -787,7 +862,9 @@ def house(ctx, s):
         for yy in range(bB["plate"] + 1, bB["plate"] + 40): ctx.clear(c[0], yy, c[1])
     for F, r, *_ in roofs + extra: r["_F"] = F          # gable fills stop at their own roof, not a higher one
     Hf = build_roofs(ctx, [(F, r) for F, r, *_ in roofs] + extra, st, chimneys={c for c, _, _ in chs})
-    for F, r, bst, bB in roofs: gable_walls(ctx, r, Hf, bst, bB["fk"])
+    for F, r, bst, bB in roofs:
+        if r["kind"] == "flat": _flat_roof(ctx, r, bst, Hf)
+        gable_walls(ctx, r, Hf, bst, bB["fk"])
     for F, r in extra:
         if "dormer" in r: _dormer_walls(ctx, r, Hf, Fmain, st, B["plate"]); gable_walls(ctx, r, Hf, st, B["fk"])
         elif r.get("porch"): gable_walls(ctx, r, Hf, st, B["fk"])

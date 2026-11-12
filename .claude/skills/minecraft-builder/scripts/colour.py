@@ -68,7 +68,7 @@ ROUGH_ORDER = {"smooth": 0, "medium": 1, "rough": 2}
 
 # Partial forms for blocks that have none, picked by eye where the nearest colour reads wrong:
 # calcite -> smooth quartz (plain like calcite; quartz block shows lines, diorite reads as grey patches).
-PREFERRED_SUB = {"calcite": "smooth_quartz"}
+PREFERRED_SUB = {"calcite": "smooth_quartz", "white_terracotta": "smooth_sandstone"}
 
 
 class Palette:
