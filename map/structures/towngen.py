@@ -1055,6 +1055,7 @@ class Town:
                 for yy in range(top + 1, hi): self.works[(x, yy, z)] = ("air", {})
                 self.bridge_clear[(x, z)] = (top + 1, hi)
             self.bridge_plans.append({k: v for k, v in c.items() if k not in ("ground", "_ends")})
+        print(f"{self.name} bridges: {len(self.bridge_plans)} built ({', '.join(str(round(math.dist(b['a'], b['b']))) for b in self.bridge_plans)}), {len(quays)} quays ({sum(len(q) for q in quays)} cells)")
         # wet path cells that are no bridge (a street along the bank): a solid stone quay under the paving
         for comp in quays:
             for x, z in comp:
