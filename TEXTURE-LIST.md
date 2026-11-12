@@ -129,6 +129,7 @@ Wanted later for this feature: a boss-bar style look for the Throne Seal, a dark
 |---|---|---|
 | Hall Cornerstone block (side, top) and item icon | `textures/blocks/siege_hall_cornerstone_side.png`, `siege_hall_cornerstone_top.png`, `textures/items/siege_hall_cornerstone.png` | **Final style, awaiting your review** |
 | Tree of Oaths bark (plain and Marked), crown (unsworn, Knight, Marked), plinth | `textures/blocks/siege_oath_tree_bark.png`, `_bark_marked.png`, `siege_oath_tree_crown.png`, `_crown_knight.png`, `_crown_marked.png`, `siege_oath_tree_plinth.png` | **Final style, awaiting your review** |
+| Town Board (wide notice board inside every hall; model `models/blocks/hall_board.geo.json`, 30 px wide, board face 24×18 at uv 4,7) | `textures/blocks/siege_hall_board_wood.png` (32×32 frame and posts), `siege_hall_board_notes.png` (32×32, pinned papers) | **Placeholder by the town hall thread, needs real art** |
 | Oath Banner, Warden's Bell (16×16 icons) | `textures/items/siege_oath_banner.png`, `siege_wardens_bell.png` | **Final style, awaiting your review** |
 
 ## Castle Stone family (16×16, final art by `studio/art/build_stone_family.py`; Mateo's rule 2026-11-10)
@@ -520,6 +521,11 @@ Choirsteel's 3D set is `studio/art/build_choirsteel_3d.py` (PR #83). The guard-o
 Made by `tools/minimap_tiles.py` from the top-down render of the generated world (`map/genworld.py`'s preview) and `map/terrain.npz`. Run it again whenever the world map is regenerated; do not paint these by hand.
 - `textures/ui/hc/minimap/mxXXzZZ.png`: 1,600 map views, 72x72 RGBA (Bedrock showed palette PNGs black) (3 x 3 tiles of 64 blocks around tile XX,ZZ), slightly darkened, with plot and town markers: generated
 - `textures/ui/hc/minimap/mnone__.png` (uncharted), `aq..ay.png` (player arrow, 12x12, eight directions), `frame.png` (80x80 border): first pass
+
+## Hall Map (2026-11-12)
+Made by `studio/build_hallmap.py` from the same world render as the minimap. Run it again whenever the world map is regenerated.
+- `textures/ui/hc/map/realm.png`: the 2,500 x 2,500 playable map at 384x384, parchment-toned: generated
+- `textures/ui/hc/map/fog.png`, `clear.png`, `hover.png`, and the 24x24 marks `y_<dye>` (your banner, gold ring), `b_<dye>` (another settlement), `npc`, `town`, `place`, `plot`, each also on fog (`_f`): first pass, drawn by the script
 
 ## Boss health bars (2026-11-11)
 Made by `tools/bossbar_ui.py` (which also wires them into `ui/hud_screen.json`). One look per boss: Clockwork Reeve (brass, clock ticks), Pale Huntsman (bone), Drowned Bride (sea green), Ash Seneschal (embers), Mother of Changelings (moss on violet), Warlord King (blood and iron), the Pretender (tarnished silver), the Choir (pale violet), the Hollow Crown regent and Morvane (dark purple, magenta veins, blue glints).

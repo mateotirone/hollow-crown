@@ -15,6 +15,15 @@ Every build and every 3D model of the add-on in one browser page, kept up to dat
 | Blocks | Every custom block with its shape and textures | `Siege_Nights_BP/blocks`, `terrain_texture.json`, `blocks.json` |
 | Item icons, All textures | Every icon and every texture file, by folder | `item_texture.json`, `Siege_Nights_RP/textures` |
 
+## Finding things
+
+The list on the left works the same on every 3D tab. Sections fold open and shut (click the heading; the page
+remembers which are open), and a build that comes in several looks (the three map-town styles, the five wall
+regions, the roof variants) is one row with a chip per look. Picking another building keeps the look you were on.
+The search box (press `/`) searches every tab at once: each tab shows how many matches it has, every word must
+match (`frost wall`, `salt station`), Enter opens the first match and Esc clears it. "Only new work" hides
+everything that is the same as on main. The build page's own Prev/Next and arrow keys move the list along.
+
 Anything marked **new** (orange) is on a branch that is not merged yet; the info line names the branch and
 its last commit. Switch to "Only what is merged" at the top to see main alone.
 

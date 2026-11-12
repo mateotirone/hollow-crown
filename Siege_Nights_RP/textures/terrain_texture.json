@@ -265,6 +265,12 @@
   "siege_hall_cornerstone_top": {
    "textures": "textures/blocks/siege_hall_cornerstone_top"
   },
+  "siege_hall_board_wood": {
+   "textures": "textures/blocks/siege_hall_board_wood"
+  },
+  "siege_hall_board_notes": {
+   "textures": "textures/blocks/siege_hall_board_notes"
+  },
   "siege_oath_tree_bark": {
    "textures": "textures/blocks/siege_oath_tree_bark"
   },

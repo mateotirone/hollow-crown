@@ -126,6 +126,7 @@ export const ENTRIES = [
     page: "§fReinforce:§r click Castle Stone, a Portcullis or a Castle Gate on your land with an §firon ingot§r, then a §fdiamond§r, then §fnetherite scrap§r (one each, in that order). Each tier shows on the block.\n"
       + "  Castle Stone takes 6 blows, then 10, 16 and 26. A gate takes 2, then 4, 7 and 12.\n\n"
       + "§fRepair:§r click a cracked block with §fstone bricks§r to patch it.\n\n"
+      + "§fWeight:§r walls carry their own weight. Knock a hole in one and the stone above falls away in a stepped arch; knock out too much and whole sections come down, tipping toward the open side, and leave rubble that slides into a slope. Cracked blocks with a lot of wall on top of them can crush. Reinforced walls reach further over a gap and carry more. Nothing falls in a settlement whose owner is away.\n\n"
       + "§fAfter a bad night§r the Mason, or the Settlement wall page in your town hall, will survey the whole wall and mend every hole and crack for a price.\n\n"
       + "§fGates:§r one click opens or shuts the whole gate, whatever you hold (it never places a block). A Castle Gate swings open like a door, all its joined blocks as one leaf, away from you; a Portcullis rises until only its top piece shows.",
     when: ["place:siege:castle_stone*", "place:siege:portcullis*", "place:siege:castle_gate*", "carry:siege:castle_stone*"],
@@ -134,9 +135,9 @@ export const ENTRIES = [
     id: "machines", ch: "siege", title: "Siege machines",
     tip: "Siege machines: sneak and click one with an empty hand to pack it back up.",
     page: "§fBallista§r: place it on your own land. It turns to face monsters within 16 blocks and shoots them, even through Arrow Slits.\n\n"
-      + "§fTrebuchet§r: can stand anywhere. Stand by it, look where you want to fire and click it with §fcobblestone§r: it hurls a boulder (10 s to reload). Sneak + click with cobblestone to change the range (20, 30 or 40 blocks).\n\n"
-      + "§fBattering Ram§r: click it to climb on, steer with the movement keys and punch the wall in front to swing the beam. Sneak to get off; break it to pick it up.\n\n"
-      + "Sneak + click a ballista or trebuchet with an empty hand to pack it up. Raiders aim at the side of your settlement with the fewest ballistas and archers.",
+      + "§fTrebuchet§r: can stand anywhere. Stand by it, look where you want to fire and click it with §fcobblestone§r: it swings round and hurls a boulder (10 s to reload). Look higher to lob it high, level for a flat fast throw. Sneak + click to change the counterweight (Light, Medium, Heavy): heavier throws further. Boulders hit harder the faster they land, and only you and your allies can fire your trebuchet.\n\n"
+      + "§fBattering Ram§r: click it to climb on, steer with the movement keys and punch the wall in front to swing the beam. Sneak to get off.\n\n"
+      + "Sneak + click a ballista, trebuchet or Battering Ram with an empty hand to pack it up. Raiders aim at the side of your settlement with the fewest ballistas and archers.",
     when: ["carry:siege:ballista", "carry:siege:trebuchet", "carry:siege:battering_ram"],
   },
   {
@@ -173,10 +174,18 @@ export const ENTRIES = [
   {
     id: "town_hall", ch: "keep", title: "The town hall",
     tip: "Place the Hall Cornerstone on your land and click it: your town hall rises and grows with your settlement.",
-    page: "Craft a §fHall Cornerstone§r at the Siege Workshop and place it on your land. Click it to raise your first hall. Once the hall stands the stone is gone: open the town hall menu from the Tree of Oaths inside, or from your Keep menu.\n\n"
+    page: "Craft a §fHall Cornerstone§r at the Siege Workshop and place it on your land. Click it to raise your first hall. Once the hall stands the stone is gone: open the town hall menu from the §fTown Board§r just inside the door, or from your Keep menu.\n\n"
       + "The hall is built in your region's own style and is rebuilt bigger as your settlement grows. It holds the §fTree of Oaths§r, where you spend skill points.\n\n"
       + "From the hall menu you can also raise your §fsettlement wall§r level by level (and watch it go up), see who is online, and read the §fRumor Board§r for jobs.",
     when: ["carry:siege:hall_cornerstone", "click:siege:hall_cornerstone"],
+  },
+  {
+    id: "hall_map", ch: "keep", title: "The Hall Map",
+    tip: "Click the Cartographer's Table in your hall to see every settlement and the places your people have found.",
+    page: "Every town hall keeps a §fHall Map§r. Click the hall's Cartographer's Table, or choose \"Hall map\" in the Town Hall menu.\n\n"
+      + "It shows every settlement in its banner colour and who holds it, rival lords, free plots and the towns. Places your settlement has found appear as you find them, and land nobody from your settlement has walked stays under fog. Allies' travels count too. Players themselves never show on it.\n\n"
+      + "Tap a mark to read about it. Mysteries are never marked: you have to work those out yourself. Sneak-click the table to use it as an ordinary cartography table.",
+    when: ["click:minecraft:cartography_table"],
   },
   {
     id: "wall_levels", ch: "keep", title: "The settlement wall",
@@ -197,8 +206,15 @@ export const ENTRIES = [
     id: "town_plots", ch: "keep", title: "Town plots and charters",
     tip: "Use a Plot Marker to raise a building on a town plot. Each plot only takes buildings of its size.",
     page: "Every open plot in your town has a §fPlot Marker§r. Use it to see what can go there: only buildings of the plot's size are listed, and some want a certain spot (a watchtower stands by the wall). Good spots are marked. Pick one, walk round the outline, then use the marker again and pay to raise it.\n\n"
-      + "§fCharters:§r siege wins grow your settlement, but it only grows past each tier once that tier's charter stands. A Town needs 3 homes and a market (and a Farmhouse and Mint once they are built); a City needs 6 homes, a barracks and another work building. When the last one is finished, the town grows by itself.",
+      + "§fCharters:§r siege wins grow your settlement, but it only grows past each tier once that tier's charter stands. A Town needs 3 homes, a Farmhouse, a Mint and a market; a City needs 6 homes, an inn, a barracks and another work building. Buildings with no ready-made design yet (Farmhouse, Mint, Inn) can be built by hand and registered. When the last one is finished, the town grows by itself.",
     when: ["click:siege:plot_marker", "event:tierUp"],
+  },
+  {
+    id: "settlers", ch: "keep", title: "Your own buildings, beds and settlers",
+    tip: "Built something yourself on a plot? Use its Plot Marker and pick \"I built here myself\" to have it counted.",
+    page: "§fYour own buildings:§r build by hand on an empty plot, then use its Plot Marker and pick §fI built here myself§r. It counts as a building if it has what that building needs: a home needs a bed and a door under a roof, a smithy an anvil and a furnace, a library 8 bookshelves, a stable hay and stalls, a storehouse 6 chests or barrels, a farmhouse a composter and 9 farmland, a mint 2 chests and an anvil, an inn 3 beds and 2 chests. Take those away and it stops counting until you put them back.\n\n"
+      + "§fSettlers:§r every settler needs a bed in a home, one bed for every 12 blocks of covered floor. At dawn, if a home has a free bed, someone moves in: a worker for each finished work building first, then settlers for the homes. They go to bed at dusk. A worker whose building is knocked down stays, idle, until it is back.",
+    when: ["event:settlerArrived", "click:siege:plot_marker"],
   },
   {
     id: "guards", ch: "keep", title: "Guards and the Barracks",
@@ -216,6 +232,7 @@ export const ENTRIES = [
     page: "Every building on your land has a few §fposts§r round it (by the door, at the back corners, along the sides of big ones), and your wall has posts all the way round plus one either side of the gate.\n\n"
       + "§fTo station a guard:§r click them and pick §fStation§r. Your view lifts high over your settlement, and every post shows on the ground as a ring with its number: §cred§r is empty, §agreen§r is manned. Pick the wall or a building from the list, then the post. The guard goes straight there. If someone already holds that post, the two swap.\n\n"
       + "A stationed §fArcher§r holds the post and shoots from it. A stationed §fMan-at-Arms§r stands at the post and, in a fight, chases attackers a short way before going back, so posts by your storerooms keep raiders from looting them.\n\n"
+      + "§fThe watch:§r guards walk to their posts at dusk and back to the Barracks at dawn, using the steps up the inside of your wall (towers have ladders). A guard you have just stationed walks there at once and holds the post until the watch changes. If a siege starts, or someone Wanted is on your land, every stationed guard heads for their post straight away, running; anyone who meets an enemy on the way stops to fight, then carries on.\n\n"
       + "The §fBarracks§r menu has a §fGuard posts§r button to see which posts are empty and send a free guard to one. When your town grows and the wall moves out, guards on the wall keep their post on the new wall. If a building comes down, its guards go off duty.",
     when: ["click:siege:barracks", "event:guardOrders", "event:guardStationed"],
   },

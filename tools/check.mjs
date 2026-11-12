@@ -220,6 +220,25 @@ step("Content log rules");
     }
   }
 
+  // 3b. Elbows and knees: armour cubes must be cut at the joint (tools/build_player_joints.py) so they bend with it.
+  {
+    const JOINT = { rightArm: 18, leftArm: 18, rightLeg: 6, leftLeg: 6 };
+    for (const file of walk(join(RP, "models/entity"), ".json")) {
+      if (file.includes(`${"/"}bestiary${"/"}`)) continue;
+      for (const g of readJson(file)?.["minecraft:geometry"] ?? []) {
+        if (!String(g?.description?.identifier ?? "").startsWith("geometry.siege_")) continue;
+        for (const b of g.bones ?? []) {
+          const cut = JOINT[b.name];
+          if (cut === undefined) continue;
+          if ((b.cubes ?? []).some((c) => !c.rotation && c.size?.[1] > 0 && c.origin?.[1] < cut - 1e-6)) {
+            fail(`${rel(file)}: ${b.name} has armour below the ${b.name.endsWith("Arm") ? "elbow" : "knee"}; run python3 tools/build_player_joints.py`);
+            break;
+          }
+        }
+      }
+    }
+  }
+
   // 4. Blocks: custom geometry must exist in the resource pack, and one block's materials can't mix opaque with see-through.
   const geometries = new Set();
   for (const file of walk(join(RP, "models"), ".json")) {
