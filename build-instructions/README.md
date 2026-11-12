@@ -26,6 +26,8 @@ It meticulously goes through every step, making sure everything is in the right 
 | 8 | [08-interiors](08-interiors/README.md) | Empty interiors (default) or full layouts for the inn and custom builds | The inside is finished |
 | 9 | [09-final-check](09-final-check/README.md) | Render, look from the street, run the checklist, fix | A build ready for Mateo's review |
 
+**Towers** (bell, clock, corner, watch, wall towers, lighthouses, wonders) also follow [towers/README.md](towers/README.md): stages, proportions, the clock, and the tower style of each region.
+
 Supporting folders:
 
 - [palettes](palettes/README.md): every region's block palette, chosen by colour, plus the roof colour mix for every town.

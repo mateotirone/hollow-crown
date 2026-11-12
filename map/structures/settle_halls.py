@@ -47,7 +47,7 @@ def pyramid(bp, P, x0, z0, x1, z1, base, pitch=1, mat=None, block=None, finial="
     stair = mat or P["roof"]; solid = block or P["roof_block"]
     ladder = P.get("roof_ladder") if not mat and isinstance(stair, str) and stair in (P.get("roof_ladder") or ()) else None
     rings = max(1, (min(x1 - x0, z1 - z0) + 2) // 2)
-    r = 0; y = base
+    r = 0; y = base; ring1 = {}
     while x0 + r <= x1 - r and z0 + r <= z1 - r:
         a0, b0, a1, b1 = x0 + r, z0 + r, x1 - r, z1 - r
         ring = [(x, z) for x in range(a0, a1 + 1) for z in range(b0, b1 + 1) if x in (a0, a1) or z in (b0, b1)]
@@ -62,6 +62,7 @@ def pyramid(bp, P, x0, z0, x1, z1, base, pitch=1, mat=None, block=None, finial="
             if ladder:      # the doctrine's roof gradient: eaves -> ridge in clean bands, teeth at the band edges
                 st = ladder[band_index(r, 0, rings - 1, len(ladder), x if z in (b0, b1) else z)]
             bp.set(x, y + pitch - 1, z, st, facing=f, half="bottom")
+            if r == 1: ring1[(x, z)] = y + pitch - 1
             if r == 0 and P.get("verge_lanterns") and (x, z) in ((a0, b0), (a1, b0), (a0, b1), (a1, b1)) \
                     and all(bp.get(x, y - k, z)[0] in ("keep", "air") for k in (1, 2, 3, 4)) and y - 3 >= 2:
                 # the chain hangs straight from the corner stair, no block under it (Mateo 2026-11-12, 06-roof)
@@ -70,30 +71,22 @@ def pyramid(bp, P, x0, z0, x1, z1, base, pitch=1, mat=None, block=None, finial="
             if finial: bp.set((a0 + a1) // 2, y + pitch, (b0 + b1) // 2, finial)
             break
         r += 1; y += pitch
-    close_under(bp, x0, z0, x1, z1)
+    close_under(bp, ring1)
     return y + pitch
 
-def close_under(bp, x0, z0, x1, z1):
-    """No open row between a wall top and the hip roof over it (Mateo 2026-11-12, 06-roof wall plate): on the
-    ring one in from the eave (the wall line), one or two rows of air between the roof and a solid wall block
-    below are filled with that wall block. Openings (glass, doors, fences, stairs, slabs) are left alone."""
+def close_under(bp, ring1):
+    """No open row between a wall top and the hip roof over it (Mateo 2026-11-12, 06-roof wall plate): under
+    the ring one in from the eave (the wall line), one or two rows of air between that ring's stair and a solid
+    wall block below are filled with that wall block. Openings (glass, doors, fences, stairs, slabs) stay."""
     soft = lambda n: n in ("air", "keep")
-    open_ = lambda n: any(w in n for w in ("glass", "pane", "door", "fence", "stairs", "slab", "lantern", "chain", "trapdoor", "sign", "leaves", "wall"))
-    a0, b0, a1, b1 = x0 + 1, z0 + 1, x1 - 1, z1 - 1
-    if a0 >= a1 or b0 >= b1: return
-    for x in range(a0, a1 + 1):
-        for z in range(b0, b1 + 1):
-            if x not in (a0, a1) and z not in (b0, b1): continue
-            ys = [y for (cx, y, cz) in bp.cells if cx == x and cz == z and not soft(bp.cells[(cx, y, cz)][0])]
-            if not ys: continue
-            roof = [y for y in ys if "stairs" in bp.cells[(x, y, z)][0] or bp.cells[(x, y, z)][0].endswith("tiles")]
-            ry = max(ys)
-            gap = []; y = ry - 1
-            while y > ry - 4 and soft(bp.get(x, y, z)[0]): gap.append(y); y -= 1
-            if not gap or len(gap) > 2: continue
-            below = bp.get(x, y, z)
-            if soft(below[0]) or open_(below[0]): continue
-            for g in gap: bp.set(x, g, z, below[0], **below[1])
+    open_ = lambda n: any(w in n for w in ("glass", "pane", "door", "fence", "stairs", "slab", "lantern", "chain", "trapdoor", "sign", "leaves", "_wall"))
+    for (x, z), ry in ring1.items():
+        gap = []; y = ry - 1
+        while y > ry - 4 and soft(bp.get(x, y, z)[0]): gap.append(y); y -= 1
+        if not gap or len(gap) > 2: continue
+        below = bp.get(x, y, z)
+        if soft(below[0]) or open_(below[0]): continue
+        for g in gap: bp.set(x, g, z, below[0], **below[1])
 
 def crenels(bp, x0, z0, x1, z1, y, merlon, walk=None):
     """Parapet on a rect's outline at height y: alternate merlons (odd cells) like the walls' battlements."""
