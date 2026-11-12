@@ -9,6 +9,7 @@ How versions work is in [`docs/RELEASING.md`](docs/RELEASING.md).
 Everything merged to `main` since the last release goes here. Each pull request that changes what players see adds a line under one of these headings.
 
 ### Added
+- Rival Lords build their towns the way you do: the same roads, wall rings and plots as a player's town on that map plot, their hall on its cornerstone, and buildings on plots by the same size and charter rules, so a lord's town grows past a tier only once it has its homes and market. Take a lord's plot and the whole town is yours as it stands, with markers on its empty plots.
 - Trains go four times as fast as a minecart (32 blocks a second flat out), and the free station carriage now runs at minecart speed.
 - The world map now has Rimehold, Gull's Rest, Sunscar, Mirelight and Millbrook built: streets, houses, fields, wells, lamps and trees, with the land graded to the streets. The minimap shows them.
 - Every settlement gets its station when it claims its land: a Halt rises on its plot's stop on the planned railway, with no line yet. Buy the first stretch to start travelling. Once a stretch is laid, the station calls a free, slow carriage that drives itself along the line. Engines and coaches can also be bought at any station, and once you've owned one (built or bought) any station gives you a new one free.

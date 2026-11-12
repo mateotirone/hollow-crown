@@ -553,3 +553,28 @@ addTests("settle walls", {
     assertEqual(missing.join(", "), "");
   },
 });
+
+// ---------- Rival Lords on the same plots (charters.js lordPick) ----------
+import { lordPick } from "./charters.js";
+addTests("settle charters", {
+  "a lord fills every layout's plots and meets each charter with the designs there are"() {
+    const designs = new Set(BUILDINGS.map((b) => b.id));
+    for (const name of allTownNames()) for (const v of townByName(name).variants) {
+      if (v.charter === false) continue;
+      const slots = slotsOfLayout(v);
+      const counts = {};
+      const taken = new Set();
+      for (let tier = 0; tier <= 3; tier++) {
+        for (let n = 0; n < 80; n++) {
+          const open = slots.filter((s) => s.tier <= tier && !taken.has(s.id));
+          const pick = lordPick(open, tier, counts, designs, () => true, name);
+          if (!pick) break;
+          taken.add(pick.slot.id);
+          counts[pick.id] = (counts[pick.id] ?? 0) + 1;
+        }
+        if (tier < 3) assert(charterCheck(tier, counts, designs).met, `${name} ${v.label}: lord stuck at ${tier} with ${JSON.stringify(counts)}`);
+      }
+      assert((counts.cottage ?? 0) >= 3, `${name}: a lord's town has homes`);
+    }
+  },
+});

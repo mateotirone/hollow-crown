@@ -46,3 +46,39 @@ export function charterCheck(tier, counts, known) {
 export const charterText = (check) => check.lines.map((l) => (l.skipped
   ? `§8${l.what}: not in the game yet, skipped`
   : `${l.have >= l.need ? "§a" : "§7"}${l.more ? `${l.more} ${l.what}` : l.what}: ${l.have}/${l.need}`));
+
+// What a Rival Lord raises next in their town (the same plots and rules as a player): the charter for the tier
+// they are at comes first, then every open plot is filled with something that suits it.
+//   slots: the open, empty plots. counts: what stands. designs: ids that can be raised (ready-made designs).
+//   fits(id, slot): can the design physically stand there (default yes). Returns { slot, id } or undefined.
+export function lordPick(slots, tier, counts, designs, fits = () => true, seed = "") {
+  if (!slots.length) return undefined;
+  const free = new Set(slots.map(slotClass));
+  const ok = (id, s) => designs.has(id) && opensAt(id) <= tier && plotFit(id, s, free).ok && fits(id, s);
+  // this tier's charter, then a look ahead to the next one, so plots aren't spent on wells while homes are short
+  for (const t of [tier, tier + 1]) {
+    const check = charterCheck(t, counts, designs);
+    for (const [i, line] of (CHARTERS[t] ?? []).entries()) {
+      const l = check.lines[i];
+      if (!l || l.skipped || l.have >= l.need) continue;
+      for (const id of line.ids) {
+        const s = slots.find((x) => ok(id, x) && plotFit(id, x, free).tagged) ?? slots.find((x) => ok(id, x));
+        if (s) return { slot: s, id };
+      }
+    }
+  }
+  for (const s of slots) {
+    const options = [...designs].filter((id) => ok(id, s));
+    if (!options.length) continue;
+    const good = options.filter((id) => plotFit(id, s, free).tagged);
+    const from = good.length ? good : options;
+    return { slot: s, id: from[Math.floor(hash01(`${seed}|${s.id}`) * from.length)] };
+  }
+  return undefined;
+}
+
+function hash01(str) {
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++) h = Math.imul(h ^ str.charCodeAt(i), 16777619);
+  return ((h >>> 0) % 10000) / 10000;
+}
