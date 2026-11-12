@@ -36,7 +36,7 @@ addTests("hollow arenas", {
     for (const y of [0, 1]) assert(!blocks(s, `0,${y},3`), "Morvane's spot");
     for (const [k] of s) {
       const [x, y, z] = k.split(",").map(Number);
-      if (Math.hypot(x, z) >= HEART.innerRadius) assert(y >= -8 && y <= 16, `${k} would not fall with its ring`);
+      if (Math.hypot(x, z) >= HEART.innerRadius) assert(y >= -8 && y <= 34, `${k} would not fall with its ring`);
     }
   },
 });

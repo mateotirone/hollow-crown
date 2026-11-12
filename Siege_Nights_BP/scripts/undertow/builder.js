@@ -365,6 +365,6 @@ export function dropHeartBand(radius) {
   for (let dx = -R; dx <= R; dx++) for (let dz = -R; dz <= R; dz++) {
     const dd = Math.sqrt(dx * dx + dz * dz);
     if (dd < radius || dd > R) continue;
-    apply(d, { a: [cx + dx, cy - 8, cz + dz], b: [cx + dx, cy + 16, cz + dz], block: "minecraft:air" });
+    apply(d, { a: [cx + dx, cy - 8, cz + dz], b: [cx + dx, cy + 34, cz + dz], block: "minecraft:air" });
   }
 }
