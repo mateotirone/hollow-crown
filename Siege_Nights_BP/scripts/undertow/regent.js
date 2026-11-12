@@ -250,6 +250,7 @@ world.afterEvents.entityHurt.subscribe((e) => {
     try {
       const body = spawnChampion(dim, seatAt, { role: "sorcerer", tier: 5, name: `§d${r.name} ${TEMPERS[r.temper].title}`, stance: "hostile", tags: [BODY_TAG] });
       if (!body) return;
+      try { body.triggerEvent("siege:regent_bar_on"); } catch { /* bar is cosmetic */ } // the boss bar shows only in this fight
       e.hurtEntity.remove();
       dim.spawnParticle("minecraft:sonic_explosion", seatAt);
       for (const p of dim.getPlayers({ location: seatAt, maxDistance: 40 })) {
