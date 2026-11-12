@@ -1,0 +1,1100 @@
+{
+ "name": "kingsrest_guildhall",
+ "card": {
+  "title": "Kingsrest guildhall",
+  "sub": "Copper roof",
+  "region": "vale",
+  "where": "Kingsrest, on the square",
+  "kind": "Civic",
+  "blurb": "An open market arcade under the guild's hall, a copper roof and a belfry on the ridge. Built on the skill."
+ },
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "vale_stone",
+    "roof": {
+     "ladder": [
+      "waxed_cut_copper",
+      "waxed_exposed_cut_copper",
+      "waxed_weathered_cut_copper",
+      "waxed_oxidized_cut_copper"
+     ],
+     "axis": "y"
+    },
+    "floor": {
+     "ladder": [
+      "polished_andesite",
+      "stone_bricks"
+     ],
+     "axis": "noise",
+     "scale": 2
+    },
+    "glass": "light_gray_stained_glass_pane"
+   },
+   "rect": [
+    0,
+    0,
+    20,
+    12
+   ],
+   "y": 0,
+   "plinth": 1,
+   "storeys": [
+    6,
+    8
+   ],
+   "bay": 3,
+   "storey_style": [
+    {},
+    {
+     "floor": "spruce_planks"
+    }
+   ],
+   "door": null,
+   "windows": {
+    "s": [
+     {
+      "at": -8,
+      "storey": 1,
+      "w": 1,
+      "h": 4
+     },
+     {
+      "at": -4,
+      "storey": 1,
+      "w": 1,
+      "h": 4
+     },
+     {
+      "at": 4,
+      "storey": 1,
+      "w": 1,
+      "h": 4
+     },
+     {
+      "at": 8,
+      "storey": 1,
+      "w": 1,
+      "h": 4
+     },
+     {
+      "at": 0,
+      "storey": 1,
+      "w": 3,
+      "h": 4
+     }
+    ],
+    "n": [
+     {
+      "at": -8,
+      "storey": 1,
+      "w": 1,
+      "h": 4
+     },
+     {
+      "at": -4,
+      "storey": 1,
+      "w": 1,
+      "h": 4
+     },
+     {
+      "at": 0,
+      "storey": 1,
+      "w": 1,
+      "h": 4
+     },
+     {
+      "at": 4,
+      "storey": 1,
+      "w": 1,
+      "h": 4
+     },
+     {
+      "at": 8,
+      "storey": 1,
+      "w": 1,
+      "h": 4
+     }
+    ],
+    "e": [
+     {
+      "at": -4,
+      "storey": 1,
+      "w": 1,
+      "h": 4
+     },
+     {
+      "at": 0,
+      "storey": 1,
+      "w": 1,
+      "h": 4
+     },
+     {
+      "at": 4,
+      "storey": 1,
+      "w": 1,
+      "h": 4
+     }
+    ],
+    "w": [
+     {
+      "at": -4,
+      "storey": 1,
+      "w": 1,
+      "h": 4
+     },
+     {
+      "at": 0,
+      "storey": 1,
+      "w": 1,
+      "h": 4
+     },
+     {
+      "at": 4,
+      "storey": 1,
+      "w": 1,
+      "h": 4
+     }
+    ]
+   },
+   "roof": {
+    "type": "gable",
+    "ridge": "x",
+    "pitch": 1
+   },
+   "chimney": [
+    [
+     18,
+     3
+    ]
+   ],
+   "vines": 0.03
+  },
+  {
+   "part": "arch",
+   "at": [
+    2,
+    1,
+    0
+   ],
+   "axis": "x",
+   "width": 3,
+   "height": 5,
+   "style": "round_angle",
+   "material": "stone_bricks",
+   "trim": "spruce_planks"
+  },
+  {
+   "part": "arch",
+   "at": [
+    6,
+    1,
+    0
+   ],
+   "axis": "x",
+   "width": 3,
+   "height": 5,
+   "style": "round_angle",
+   "material": "stone_bricks",
+   "trim": "spruce_planks"
+  },
+  {
+   "part": "arch",
+   "at": [
+    10,
+    1,
+    0
+   ],
+   "axis": "x",
+   "width": 3,
+   "height": 5,
+   "style": "round_angle",
+   "material": "stone_bricks",
+   "trim": "spruce_planks"
+  },
+  {
+   "part": "arch",
+   "at": [
+    14,
+    1,
+    0
+   ],
+   "axis": "x",
+   "width": 3,
+   "height": 5,
+   "style": "round_angle",
+   "material": "stone_bricks",
+   "trim": "spruce_planks"
+  },
+  {
+   "part": "arch",
+   "at": [
+    18,
+    1,
+    0
+   ],
+   "axis": "x",
+   "width": 3,
+   "height": 5,
+   "style": "round_angle",
+   "material": "stone_bricks",
+   "trim": "spruce_planks"
+  },
+  {
+   "part": "arch",
+   "at": [
+    2,
+    1,
+    12
+   ],
+   "axis": "x",
+   "width": 3,
+   "height": 5,
+   "style": "round_angle",
+   "material": "stone_bricks",
+   "trim": "spruce_planks"
+  },
+  {
+   "part": "arch",
+   "at": [
+    6,
+    1,
+    12
+   ],
+   "axis": "x",
+   "width": 3,
+   "height": 5,
+   "style": "round_angle",
+   "material": "stone_bricks",
+   "trim": "spruce_planks"
+  },
+  {
+   "part": "arch",
+   "at": [
+    10,
+    1,
+    12
+   ],
+   "axis": "x",
+   "width": 3,
+   "height": 5,
+   "style": "round_angle",
+   "material": "stone_bricks",
+   "trim": "spruce_planks"
+  },
+  {
+   "part": "arch",
+   "at": [
+    14,
+    1,
+    12
+   ],
+   "axis": "x",
+   "width": 3,
+   "height": 5,
+   "style": "round_angle",
+   "material": "stone_bricks",
+   "trim": "spruce_planks"
+  },
+  {
+   "part": "arch",
+   "at": [
+    18,
+    1,
+    12
+   ],
+   "axis": "x",
+   "width": 3,
+   "height": 5,
+   "style": "round_angle",
+   "material": "stone_bricks",
+   "trim": "spruce_planks"
+  },
+  {
+   "part": "arch",
+   "at": [
+    0,
+    1,
+    2
+   ],
+   "axis": "z",
+   "width": 3,
+   "height": 5,
+   "style": "round_angle",
+   "material": "stone_bricks",
+   "trim": "spruce_planks"
+  },
+  {
+   "part": "arch",
+   "at": [
+    0,
+    1,
+    6
+   ],
+   "axis": "z",
+   "width": 3,
+   "height": 5,
+   "style": "round_angle",
+   "material": "stone_bricks",
+   "trim": "spruce_planks"
+  },
+  {
+   "part": "arch",
+   "at": [
+    0,
+    1,
+    10
+   ],
+   "axis": "z",
+   "width": 3,
+   "height": 5,
+   "style": "round_angle",
+   "material": "stone_bricks",
+   "trim": "spruce_planks"
+  },
+  {
+   "part": "arch",
+   "at": [
+    20,
+    1,
+    2
+   ],
+   "axis": "z",
+   "width": 3,
+   "height": 5,
+   "style": "round_angle",
+   "material": "stone_bricks",
+   "trim": "spruce_planks"
+  },
+  {
+   "part": "arch",
+   "at": [
+    20,
+    1,
+    6
+   ],
+   "axis": "z",
+   "width": 3,
+   "height": 5,
+   "style": "round_angle",
+   "material": "stone_bricks",
+   "trim": "spruce_planks"
+  },
+  {
+   "part": "arch",
+   "at": [
+    20,
+    1,
+    10
+   ],
+   "axis": "z",
+   "width": 3,
+   "height": 5,
+   "style": "round_angle",
+   "material": "stone_bricks",
+   "trim": "spruce_planks"
+  }
+ ],
+ "place": [
+  [
+   9,
+   19,
+   5,
+   "polished_andesite"
+  ],
+  [
+   9,
+   20,
+   5,
+   "polished_andesite"
+  ],
+  [
+   9,
+   21,
+   5,
+   "polished_andesite"
+  ],
+  [
+   9,
+   19,
+   6,
+   "polished_andesite"
+  ],
+  [
+   9,
+   20,
+   6,
+   "polished_andesite"
+  ],
+  [
+   9,
+   21,
+   6,
+   "polished_andesite"
+  ],
+  [
+   9,
+   19,
+   7,
+   "polished_andesite"
+  ],
+  [
+   9,
+   20,
+   7,
+   "polished_andesite"
+  ],
+  [
+   9,
+   21,
+   7,
+   "polished_andesite"
+  ],
+  [
+   10,
+   19,
+   5,
+   "polished_andesite"
+  ],
+  [
+   10,
+   20,
+   5,
+   "polished_andesite"
+  ],
+  [
+   10,
+   21,
+   5,
+   "polished_andesite"
+  ],
+  [
+   10,
+   19,
+   6,
+   "polished_andesite"
+  ],
+  [
+   10,
+   20,
+   6,
+   "polished_andesite"
+  ],
+  [
+   10,
+   21,
+   6,
+   "polished_andesite"
+  ],
+  [
+   10,
+   19,
+   7,
+   "polished_andesite"
+  ],
+  [
+   10,
+   20,
+   7,
+   "polished_andesite"
+  ],
+  [
+   10,
+   21,
+   7,
+   "polished_andesite"
+  ],
+  [
+   11,
+   19,
+   5,
+   "polished_andesite"
+  ],
+  [
+   11,
+   20,
+   5,
+   "polished_andesite"
+  ],
+  [
+   11,
+   21,
+   5,
+   "polished_andesite"
+  ],
+  [
+   11,
+   19,
+   6,
+   "polished_andesite"
+  ],
+  [
+   11,
+   20,
+   6,
+   "polished_andesite"
+  ],
+  [
+   11,
+   21,
+   6,
+   "polished_andesite"
+  ],
+  [
+   11,
+   19,
+   7,
+   "polished_andesite"
+  ],
+  [
+   11,
+   20,
+   7,
+   "polished_andesite"
+  ],
+  [
+   11,
+   21,
+   7,
+   "polished_andesite"
+  ],
+  [
+   9,
+   22,
+   5,
+   "stone_brick_wall"
+  ],
+  [
+   9,
+   23,
+   5,
+   "stone_brick_wall"
+  ],
+  [
+   9,
+   24,
+   5,
+   "stone_brick_wall"
+  ],
+  [
+   11,
+   22,
+   5,
+   "stone_brick_wall"
+  ],
+  [
+   11,
+   23,
+   5,
+   "stone_brick_wall"
+  ],
+  [
+   11,
+   24,
+   5,
+   "stone_brick_wall"
+  ],
+  [
+   9,
+   22,
+   7,
+   "stone_brick_wall"
+  ],
+  [
+   9,
+   23,
+   7,
+   "stone_brick_wall"
+  ],
+  [
+   9,
+   24,
+   7,
+   "stone_brick_wall"
+  ],
+  [
+   11,
+   22,
+   7,
+   "stone_brick_wall"
+  ],
+  [
+   11,
+   23,
+   7,
+   "stone_brick_wall"
+  ],
+  [
+   11,
+   24,
+   7,
+   "stone_brick_wall"
+  ],
+  [
+   10,
+   24,
+   6,
+   "spruce_planks"
+  ],
+  [
+   10,
+   23,
+   6,
+   "bell",
+   {
+    "attachment": "hanging"
+   }
+  ],
+  [
+   9,
+   22,
+   6,
+   "air"
+  ],
+  [
+   10,
+   22,
+   5,
+   "air"
+  ],
+  [
+   10,
+   22,
+   7,
+   "air"
+  ],
+  [
+   11,
+   22,
+   6,
+   "air"
+  ],
+  [
+   8,
+   25,
+   4,
+   "waxed_weathered_cut_copper_stairs",
+   {
+    "facing": "s"
+   }
+  ],
+  [
+   8,
+   25,
+   5,
+   "waxed_weathered_cut_copper_stairs",
+   {
+    "facing": "e"
+   }
+  ],
+  [
+   8,
+   25,
+   6,
+   "waxed_weathered_cut_copper_stairs",
+   {
+    "facing": "e"
+   }
+  ],
+  [
+   8,
+   25,
+   7,
+   "waxed_weathered_cut_copper_stairs",
+   {
+    "facing": "e"
+   }
+  ],
+  [
+   8,
+   25,
+   8,
+   "waxed_weathered_cut_copper_stairs",
+   {
+    "facing": "n"
+   }
+  ],
+  [
+   9,
+   25,
+   4,
+   "waxed_weathered_cut_copper_stairs",
+   {
+    "facing": "s"
+   }
+  ],
+  [
+   9,
+   25,
+   5,
+   "waxed_oxidized_cut_copper"
+  ],
+  [
+   9,
+   25,
+   6,
+   "waxed_oxidized_cut_copper"
+  ],
+  [
+   9,
+   25,
+   7,
+   "waxed_oxidized_cut_copper"
+  ],
+  [
+   9,
+   25,
+   8,
+   "waxed_weathered_cut_copper_stairs",
+   {
+    "facing": "n"
+   }
+  ],
+  [
+   10,
+   25,
+   4,
+   "waxed_weathered_cut_copper_stairs",
+   {
+    "facing": "s"
+   }
+  ],
+  [
+   10,
+   25,
+   5,
+   "waxed_oxidized_cut_copper"
+  ],
+  [
+   10,
+   25,
+   6,
+   "waxed_oxidized_cut_copper"
+  ],
+  [
+   10,
+   25,
+   7,
+   "waxed_oxidized_cut_copper"
+  ],
+  [
+   10,
+   25,
+   8,
+   "waxed_weathered_cut_copper_stairs",
+   {
+    "facing": "n"
+   }
+  ],
+  [
+   11,
+   25,
+   4,
+   "waxed_weathered_cut_copper_stairs",
+   {
+    "facing": "s"
+   }
+  ],
+  [
+   11,
+   25,
+   5,
+   "waxed_oxidized_cut_copper"
+  ],
+  [
+   11,
+   25,
+   6,
+   "waxed_oxidized_cut_copper"
+  ],
+  [
+   11,
+   25,
+   7,
+   "waxed_oxidized_cut_copper"
+  ],
+  [
+   11,
+   25,
+   8,
+   "waxed_weathered_cut_copper_stairs",
+   {
+    "facing": "n"
+   }
+  ],
+  [
+   12,
+   25,
+   4,
+   "waxed_weathered_cut_copper_stairs",
+   {
+    "facing": "s"
+   }
+  ],
+  [
+   12,
+   25,
+   5,
+   "waxed_weathered_cut_copper_stairs",
+   {
+    "facing": "w"
+   }
+  ],
+  [
+   12,
+   25,
+   6,
+   "waxed_weathered_cut_copper_stairs",
+   {
+    "facing": "w"
+   }
+  ],
+  [
+   12,
+   25,
+   7,
+   "waxed_weathered_cut_copper_stairs",
+   {
+    "facing": "w"
+   }
+  ],
+  [
+   12,
+   25,
+   8,
+   "waxed_weathered_cut_copper_stairs",
+   {
+    "facing": "n"
+   }
+  ],
+  [
+   9,
+   26,
+   5,
+   "waxed_oxidized_cut_copper_stairs",
+   {
+    "facing": "s"
+   }
+  ],
+  [
+   9,
+   26,
+   6,
+   "waxed_oxidized_cut_copper_stairs",
+   {
+    "facing": "e"
+   }
+  ],
+  [
+   9,
+   26,
+   7,
+   "waxed_oxidized_cut_copper_stairs",
+   {
+    "facing": "n"
+   }
+  ],
+  [
+   10,
+   26,
+   5,
+   "waxed_oxidized_cut_copper_stairs",
+   {
+    "facing": "s"
+   }
+  ],
+  [
+   10,
+   26,
+   7,
+   "waxed_oxidized_cut_copper_stairs",
+   {
+    "facing": "n"
+   }
+  ],
+  [
+   11,
+   26,
+   5,
+   "waxed_oxidized_cut_copper_stairs",
+   {
+    "facing": "s"
+   }
+  ],
+  [
+   11,
+   26,
+   6,
+   "waxed_oxidized_cut_copper_stairs",
+   {
+    "facing": "w"
+   }
+  ],
+  [
+   11,
+   26,
+   7,
+   "waxed_oxidized_cut_copper_stairs",
+   {
+    "facing": "n"
+   }
+  ],
+  [
+   10,
+   26,
+   6,
+   "waxed_oxidized_cut_copper"
+  ],
+  [
+   10,
+   27,
+   6,
+   "lightning_rod"
+  ],
+  [
+   2,
+   4,
+   0,
+   "lantern",
+   {
+    "hanging": true
+   }
+  ],
+  [
+   6,
+   4,
+   0,
+   "lantern",
+   {
+    "hanging": true
+   }
+  ],
+  [
+   10,
+   4,
+   0,
+   "lantern",
+   {
+    "hanging": true
+   }
+  ],
+  [
+   14,
+   4,
+   0,
+   "lantern",
+   {
+    "hanging": true
+   }
+  ],
+  [
+   18,
+   4,
+   0,
+   "lantern",
+   {
+    "hanging": true
+   }
+  ],
+  [
+   2,
+   4,
+   12,
+   "lantern",
+   {
+    "hanging": true
+   }
+  ],
+  [
+   6,
+   4,
+   12,
+   "lantern",
+   {
+    "hanging": true
+   }
+  ],
+  [
+   10,
+   4,
+   12,
+   "lantern",
+   {
+    "hanging": true
+   }
+  ],
+  [
+   14,
+   4,
+   12,
+   "lantern",
+   {
+    "hanging": true
+   }
+  ],
+  [
+   18,
+   4,
+   12,
+   "lantern",
+   {
+    "hanging": true
+   }
+  ],
+  [
+   0,
+   4,
+   2,
+   "lantern",
+   {
+    "hanging": true
+   }
+  ],
+  [
+   0,
+   4,
+   6,
+   "lantern",
+   {
+    "hanging": true
+   }
+  ],
+  [
+   0,
+   4,
+   10,
+   "lantern",
+   {
+    "hanging": true
+   }
+  ],
+  [
+   20,
+   4,
+   2,
+   "lantern",
+   {
+    "hanging": true
+   }
+  ],
+  [
+   20,
+   4,
+   6,
+   "lantern",
+   {
+    "hanging": true
+   }
+  ],
+  [
+   20,
+   4,
+   10,
+   "lantern",
+   {
+    "hanging": true
+   }
+  ]
+ ]
+}

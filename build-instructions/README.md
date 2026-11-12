@@ -4,6 +4,10 @@ How every building in The Hollow Crown is built, one stage at a time. This folde
 the AI (or person) that builds: map towns, settlement buildings, town halls, walls, strongholds and
 the Hollow's sites all follow it. Read a stage, do only that stage, check it, then move on.
 
+**Before any build, read the building skill first** (`.claude/skills/minecraft-builder/SKILL.md`, the one engine every
+build uses) **and the region's style guide** (`.claude/skills/minecraft-builder/regions/<region>.md`). The repo's
+`CLAUDE.md` says the same, so every session sees it.
+
 Mateo's direction (2026-11-11): the builder should not "build a house from the ground up" in one go.
 It meticulously goes through every step, making sure everything is in the right place for what it is.
 
@@ -21,6 +25,8 @@ It meticulously goes through every step, making sure everything is in the right 
 | 7 | [07-detailing](07-detailing/README.md) | Depth with slabs and stairs, fences, arches, lights, greenery, signs, the street edge | The outside is finished |
 | 8 | [08-interiors](08-interiors/README.md) | Empty interiors (default) or full layouts for the inn and custom builds | The inside is finished |
 | 9 | [09-final-check](09-final-check/README.md) | Render, look from the street, run the checklist, fix | A build ready for Mateo's review |
+
+**Towers** (bell, clock, corner, watch, wall towers, lighthouses, wonders) also follow [towers/README.md](towers/README.md): stages, proportions, the clock, and the tower style of each region.
 
 Supporting folders:
 

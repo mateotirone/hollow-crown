@@ -1,0 +1,72 @@
+{
+ "name": "gulls_rest_harbourmaster",
+ "edition": "bedrock",
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "salt_timber",
+    "roof": "dark_prismarine"
+   },
+   "rect": [
+    -3,
+    -4,
+    3,
+    4
+   ],
+   "y": 0,
+   "plinth": 1,
+   "storeys": [
+    5
+   ],
+   "door": {
+    "side": "s",
+    "kind": "house",
+    "steps": 1
+   },
+   "storey_style": [
+    {
+     "frame_kind": "stone",
+     "infill": "SAL-01"
+    }
+   ],
+   "roof": {
+    "type": "hip",
+    "pitch": 1
+   },
+   "chimney": [
+    [
+     -1,
+     -2
+    ]
+   ],
+   "shutters": 0.3
+  }
+ ],
+ "place": [
+  [
+   2,
+   1,
+   6,
+   "barrel",
+   {
+    "facing": "up"
+   }
+  ],
+  [
+   3,
+   1,
+   6,
+   "barrel",
+   {
+    "facing": "up"
+   }
+  ],
+  [
+   -3,
+   1,
+   6,
+   "lantern"
+  ]
+ ]
+}

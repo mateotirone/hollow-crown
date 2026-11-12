@@ -50,7 +50,7 @@ CLEAR = 3                                       # a slot's far corner stays this
 SHAPES = {"S": [(9, 13)], "M": [(11, 15), (13, 15)], "L": [(15, 15), (17, 15), (15, 17)], "G": [(21, 21), (23, 21), (21, 23)]}
 SIZES = {k: v[0][0] for k, v in SHAPES.items()}   # frontage of the plain box
 SIZE_NAME = {"S": "Small", "M": "Medium", "L": "Large", "G": "Great"}
-MINIMUM = [dict(S=4, M=1, L=0, G=0, field=0), dict(S=7, M=3, L=1, G=0, field=1),      # agreed with the placement
+MINIMUM = [dict(S=4, M=1, L=0, G=0, field=0), dict(S=7, M=4, L=1, G=0, field=1),      # agreed with the placement
            dict(S=10, M=6, L=2, G=0, field=1), dict(S=13, M=8, L=3, G=0, field=1)]     # thread 2026-11-11; Great optional
 HALL_AT = {"Hamlet": 1, "Town": 2, "City": 3, "Castle": 4}   # hall level per tier (5 = Sovereign, reserved anyway)
 CORNERSTONE_AHEAD = 5
@@ -111,7 +111,7 @@ def set_walls(walls):
 class Settlement(Town):
     def __init__(self, plot, template, T, L, seed):
         self.plot = plot; self.tpl = TEMPLATES[template]; self.template = template
-        site = dict(centre=(plot["x"], plot["z"]), radius=WALL_R[-1] + 2, size="town", fixed_square=True, square_r=6, seed=seed, civic=[])
+        site = dict(centre=(plot["x"], plot["z"]), radius=WALL_R[-1] + 2, size="town", fixed_square=True, square_r=6, seed=seed, civic=[], wobble=0)   # the wall owns the shape
         super().__init__(plot["name"], site, T, L, seed)
         self.key = plot["name"].lower()
         b = math.radians(plot["gate"])
@@ -480,9 +480,10 @@ class Settlement(Town):
         if not pass_long(0, 1, hamlet):                # Hamlet first: its ground is the smallest; its Medium is
             pass_("M", 0, 1, hamlet)                   # a long one (13 x 15) for the library where it fits
         big(1, 2)                                      # then the Town charter: the market's slot (the library counts
-        pass_("M", 1, 1, near_sq)                      # as one big), a Medium, then Smalls
+        pass_("M", 1, 2, near_sq)                      # as one big), the Farmhouse and the Mint (plain Mediums), then homes
         pass_("S", 1, 3, hamlet)
-        pass_("M", 2, 1, near_sq)                      # City: one more Medium, three more Smalls
+        pass_("L", 2, 1, near_sq)                      # City: the inn needs a true Large; the barracks, one more work
+        pass_("M", 2, 2, near_sq)                      # building and three more homes
         pass_("S", 2, 3, near_sq)
         pass_("S", 0, 2, hamlet); pass_("S", 1, 2, near_sq)
         big(2, 3)
@@ -538,18 +539,31 @@ class Settlement(Town):
             out.append(c)
         return out
 
+    # The charters as the game checks them (settle/config.js CHARTERS + PLOT_SIZE/PLOT_ALSO/PLOT_FALLBACK, PR #168),
+    # cumulative: each tier's buildings must all have a slot of a class they may take, open by that tier.
+    # Classes: S, M (plain Medium), ML (long Medium), L, G. Homes are cottages (S) or houses (M).
+    HOME = ("S", "M"); ANY = ("S", "M", "ML", "L", "G")
+    CHARTER_NEEDS = [
+        [("library", ("ML", "L"))],
+        [("home", HOME)] * 3 + [("farmhouse", ("M",)), ("mint", ("M",)), ("market", ("L", "ML"))],
+        [("home", HOME)] * 3 + [("inn", ("L",)), ("barracks", ("L", "ML", "M")), ("work", ANY)],
+        [("home", HOME)] * 4,
+    ]
     def charter(self):
-        """The tier charters (placement thread, 2026-11-11), cumulative. Town: 3 S, 2 M (Farmhouse,
-        Mint), a big slot for the market (Large or long Medium) and a field. City: 6 S, 4 Medium-or-
-        bigger in all with at least 1 big (the barracks may take a plain Medium). Since the slot resize, also
-        a Hamlet slot for the library (a long Medium or a Large). Returns (passes, shortfall)."""
-        c = {t: self.counts()[n] for n, t in enumerate(TIERS)}
-        H, T, Ci = c["Hamlet"], c["Town"], c["City"]
-        lib = min(1, H["L"] + H["M_long"])                 # the Hamlet's library slot (13 x 14 fits a long Medium)
-        need = [(lib, 1),
-                (T["S"], 3), (T["M"] + T["L"], 3), (T["L"] + T["M_long"] - lib, 1), (T["field"], 1),
-                (Ci["S"], 6), (Ci["M"] + Ci["L"], 4), (Ci["L"] + Ci["M_long"], 1)]
-        short = sum(max(0, b - a) for a, b in need)
+        """Do the slots open by each tier hold every building that tier's charter (and the ones before) needs?
+        Plus a field by Town (the Farmhouse's). Returns (passes, shortfall: buildings with no slot, summed)."""
+        short = 0
+        for t in range(4):
+            sup = collections.Counter()
+            for e in self.slots:
+                if e["opensAt"] <= t: sup["ML" if e["size"] == "M" and e.get("long") else e["size"]] += 1
+            needs = [n for tt in range(t + 1) for n in self.CHARTER_NEEDS[tt]]
+            needs.sort(key=lambda n: len(n[1]))                # strictest first, each into its smallest class
+            for _, classes in needs:
+                c = next((c for c in classes if sup[c] > 0), None)
+                if c: sup[c] -= 1
+                else: short += 1
+            if t >= 1 and self.counts()[t]["field"] < 1: short += 1
         return short == 0, short
 
     def meets(self):

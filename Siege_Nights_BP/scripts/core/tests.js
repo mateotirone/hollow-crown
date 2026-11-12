@@ -15,6 +15,8 @@ const tests = [];
 // tools/check.mjs, which fails if a slow test is missing from this list. Written as "group: name".
 export const OFFLINE_ONLY = new Set([
   "hollow arenas: the Court's floor is whole and open to the fight's outer ring, with the Singers' spots clear",
+  "hollow arenas: the Court never writes the gate's cells (the seal and openCourtGate own them)",
+  "hollow arenas: the Seat: disc and ring floors, Morvane's spot clear, everything that falls inside the dropped band",
   "landmarks: on flat ground a rigid design stands whole at the ground height, clear of trees",
   "landmarks: a rigid design on a slope is filled under and cut into, never floating",
   "hall build: every hall has a Town Board just inside, off the aisle, before the Tree",
