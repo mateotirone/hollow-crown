@@ -70,7 +70,7 @@ class D:
     def spec(self):
         place = [[x, y, z, b, p] for (x, y, z), (b, p) in sorted(self.cells.items()) if b != "air"]
         return {"name": self.name, "edition": "bedrock", "materials": self.materials, "shapes": self.shapes,
-                "quality": 4, "hollow": 0, "place": place}
+                "quality": 4, "hollow": getattr(self, "hollow", 0), "parts": getattr(self, "parts", []), "place": place}
 
     def airs(self):
         return [c for c, (b, _) in self.cells.items() if b == "air"]

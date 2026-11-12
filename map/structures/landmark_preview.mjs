@@ -35,11 +35,11 @@ const REGION_TOP = { "Aldmere Vale": "grass_block", Frostmarch: "snow", Saltreac
 const spots = {};
 for (const site of LANDMARKS) {
   if (only.length && !only.includes(site.id)) continue;
-  const region = PLOT_PLAN.find((p) => p.name === site.plot)?.region;
+  const region = site.region ?? PLOT_PLAN.find((p) => p.name === site.plot)?.region;
   const placed = [];
   spots[site.id] = [];
   for (const piece of site.pieces) {
-    let x = site.x + (piece.dx ?? 0), z = site.z + (piece.dz ?? 0), face;
+    let x = site.x + (piece.dx ?? 0), z = site.z + (piece.dz ?? 0), face = piece.face;
     if (piece.seek) {
       const s = seekSpot({ x, z }, piece.seek, height, water);
       if (!s) { console.log(`${site.id}: ${designFor(piece, "n")} found no ${piece.seek.kind}`); spots[site.id].push(null); continue; }

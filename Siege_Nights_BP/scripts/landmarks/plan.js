@@ -42,7 +42,14 @@ export function planPiece(d, ox, oz, height, water = () => undefined) {
   const clear = [], fill = [], solid = [], hang = [];
   const put = (list, x, y, z, i) => list.push([ox + x, y, oz + z, i]);
   let G;
-  if ((d.mode ?? "rigid") === "rigid") {
+  if (d.mode === "carve") {
+    G = height(ox, oz);
+    if (G === undefined) return { ops: [], G: undefined };
+    for (const [x, y, z, i] of cells) {
+      const name = d.palette[i][0];
+      put(name === "minecraft:air" ? clear : late.has(i) ? hang : solid, x, G + y, z, name === "minecraft:air" ? AIR : i);
+    }
+  } else if ((d.mode ?? "rigid") === "rigid") {
     const hs = [];
     for (const k of cols.keys()) {
       const [x, z] = k.split(",").map(Number);
@@ -87,9 +94,9 @@ export function planPiece(d, ox, oz, height, water = () => undefined) {
       if (g === undefined) continue;
       const w = water(ox + x, oz + z);
       const up = col.filter((c) => c[1] >= 1);
-      if (d.rise && w !== undefined && w >= g && up.length) {
-        // stand it on the water: carry its lowest block down to the bed
-        const base = up.reduce((a, c) => (c[1] < a[1] ? c : a));
+      if (d.rise && w !== undefined && w >= g) {
+        // stand it on the water: the surface is this column's ground, and posts are carried down to the bed
+        const base = col.reduce((a, c) => (c[1] < a[1] ? c : a));
         const g2 = w; // the surface layer counts as this column's ground
         if ((d.piles ?? []).includes(base[3])) for (let y = g + 1; y <= g2; y++) put(fill, x, y, z, base[3]);
         g = g2;

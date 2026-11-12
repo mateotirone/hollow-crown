@@ -15,6 +15,7 @@
 import { world, system, BlockPermutation } from "@minecraft/server";
 import { mapMode } from "../plots/api.js";
 import { markPlace } from "../lore/ledger.js";
+import { spawnNpc } from "../lore/npcs.js";
 import { onTick } from "../core/loop.js";
 import { emit } from "../core/events.js";
 import { load, save, say, runCmd } from "../undertow/data.js";
@@ -68,7 +69,7 @@ const designId = (piece, face) => (piece.turns ? `${piece.d}@${face ?? "n"}` : p
 // where a piece goes: { x, z, d }, or undefined (a seeking piece with no spot that found nothing near)
 function placePiece(site, k, height, water) {
   const piece = site.pieces[k];
-  let x = site.x + (piece.dx ?? 0), z = site.z + (piece.dz ?? 0), face;
+  let x = site.x + (piece.dx ?? 0), z = site.z + (piece.dz ?? 0), face = piece.face;
   if (piece.seek) {
     const s = SPOTS[site.id]?.[k] ?? seekSpot({ x, z }, { ...piece.seek, max: Math.min(piece.seek.max ?? 40, 40) }, height, water);
     if (!s) return undefined;
@@ -149,6 +150,13 @@ export function buildSite(site, by) {
       }
       for (const [dx, dy, dz, type] of p.d.spawns ?? []) {
         try { dim.spawnEntity(type, { x: p.x + dx + 0.5, y: yAt(dx, dy, dz), z: p.z + dz + 0.5 }); } catch { /* unloaded */ }
+      }
+      // story characters who live here: stood there once (never a second one if they are already about)
+      for (const [dx, dy, dz, id] of p.d.npcs ?? []) {
+        const at = { x: p.x + dx + 0.5, y: yAt(dx, dy, dz), z: p.z + dz + 0.5 };
+        try {
+          if (!dim.getEntities({ tags: [`siege_lore_npc_${id}`], location: at, maxDistance: 64 }).length) spawnNpc(dim, at, id);
+        } catch { /* unloaded */ }
       }
       if (p.d.mark && site.place) {
         const [dx, dy, dz] = p.d.mark;

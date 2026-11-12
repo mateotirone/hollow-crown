@@ -4,12 +4,15 @@ import { SPOTS } from "./spots_data.js";
 import { LANDMARKS } from "./sites.js";
 import { planPiece, seekSpot, cellsOf, AIR, KEEP_TOP } from "./plan.js";
 import { PLOT_PLAN } from "../plots/config.js";
+import { PLACES } from "../lore/data/world.js";
+import { NPCS } from "../lore/data/dialogue.js";
 
-const idsOf = (piece) => (piece.turns ? ["n", "e", "s", "w"].map((f) => `${piece.d}@${f}`) : [piece.d]);
+const idsOf = (piece) => (piece.turns ? (piece.face ? [piece.face] : ["n", "e", "s", "w"]).map((f) => `${piece.d}@${f}`) : [piece.d]);
 
 addTests("landmarks", {
   "every plot has its landmark, and every piece has its design": () => {
-    assertEqual(new Set(LANDMARKS.map((s) => s.plot)).size, PLOT_PLAN.length);
+    assertEqual(new Set(LANDMARKS.filter((s) => s.plot).map((s) => s.plot)).size, PLOT_PLAN.length);
+    assertEqual(new Set(LANDMARKS.map((s) => s.id)).size, LANDMARKS.length, "site ids are unique");
     for (const s of LANDMARKS) for (const p of s.pieces) for (const id of idsOf(p)) assert(DESIGNS[id], `${s.id}: no design ${id}`);
   },
   "every seeking piece has a spot from the map, close to its anchor": () => {
@@ -22,11 +25,15 @@ addTests("landmarks", {
       });
     }
   },
+  "story sites point the Ledger at real places, and their people are real lore characters": () => {
+    for (const s of LANDMARKS) if (s.place) assert(PLACES[s.place], `${s.id}: no place ${s.place}`);
+    for (const [id, d] of Object.entries(DESIGNS)) for (const n of d.npcs ?? []) assert(NPCS.some((c) => c.id === n[3]), `${id}: no npc ${n[3]}`);
+  },
   "palettes are Bedrock ids with states, rows point into them": () => {
     for (const [id, d] of Object.entries(DESIGNS)) {
       assert(d.palette.every(([n, st]) => n.startsWith("minecraft:") && typeof st === "object"), id);
       assert(d.rows.every((r) => r.length === 5 && r[4] >= 0 && r[4] < d.palette.length && r[3] > 0), id);
-      assert(["rigid", "drape"].includes(d.mode), `${id} mode`);
+      assert(["rigid", "drape", "carve"].includes(d.mode), `${id} mode`);
     }
   },
   "on flat ground a rigid design stands whole at the ground height, clear of trees": () => {

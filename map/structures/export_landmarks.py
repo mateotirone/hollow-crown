@@ -15,6 +15,7 @@ ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 SKILL = os.path.join(ROOT, ".claude", "skills", "minecraft-builder", "scripts")
 sys.path.insert(0, SKILL)
 import landmarks as LM  # noqa: E402
+import landmarks_story as LS  # noqa: E402
 import emit  # noqa: E402
 
 try:
@@ -124,12 +125,12 @@ def export(d, q=0):
         x, z = turn_cell(v[0], v[2], q)
         return [x, v[1], z] + list(v[3:])
 
-    for k in ("signs", "spawns"): m[k] = [tp(v) for v in m.get(k, [])]
+    for k in ("signs", "spawns", "npcs"): m[k] = [tp(v) for v in m.get(k, [])]
     if "mark" in m: m["mark"] = tp(m["mark"])
     for k in ("fill", "top"):
         if k in m: m[k] = None if m[k] is None else -2 if m[k] == "keep" else index(m[k], {})
     if "piles" in m: m["piles"] = [index(b, {"axis": "y"}) for b in m["piles"]]
-    out.update({k: v for k, v in m.items() if not (k in ("signs", "spawns") and not v)})
+    out.update({k: v for k, v in m.items() if not (k in ("signs", "spawns", "npcs") and not v)})
     out["palette"] = pal
     return out
 
@@ -145,10 +146,11 @@ def main():
     ap = argparse.ArgumentParser(); ap.add_argument("--scenes"); ap.add_argument("--only")
     a = ap.parse_args()
     designs = {}
-    for name, fn in LM.DESIGNS.items():
+    turning = LM.TURNING | LS.STORY_TURNING
+    for name, fn in {**LM.DESIGNS, **LS.STORY_DESIGNS}.items():
         if a.only and name not in a.only.split(","): continue
         d = fn()
-        if name in LM.TURNING:
+        if name in turning:
             for f, q in TURN.items(): designs[f"{name}@{f}"] = export(d, q)
         else:
             designs[name] = export(d)
