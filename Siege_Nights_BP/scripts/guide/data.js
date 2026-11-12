@@ -219,7 +219,7 @@ export const ENTRIES = [
   {
     id: "plan_book", ch: "keep", title: "The Plan Book and Plan Scrolls",
     tip: "Your Plan Book lists the buildings you can raise. Find more plans as Plan Scrolls.",
-    page: "A Plot Marker only offers buildings whose plan you know. Your §fPlan Book§r shows them as cards: open it from your pack or from the §fPlan Book§r button in your Town Hall menu. Found plans are bright, missing ones are grey with where to find them, and clicking a card shows its plot size, price, the worker it brings and the charter it counts toward. Every new town's founder gets a book; craft another from a book and a paper. The Hamlet's cottage, well and library are known from the start, and your town hall teaches more as it grows: the market and garden at level 2, the smithy and stable at 3, the storehouse and watchtower at 4.\n\n"
+    page: "A Plot Marker only offers buildings whose plan you know. Your §fPlan Book§r shows them as cards: open it from your pack or from the §fPlan Book§r button in your Town Hall menu. Found plans are bright, missing ones are grey with where to find them, and clicking a card shows its plot size, price, the worker it brings and the charter it counts toward. Every new town's founder gets a book; craft another from a book and a paper. The Hamlet's homes, well and library are known from the start, and your town hall teaches more as it grows: the market, garden, farmhouse and mint at level 2, the smithy, stable, townhouse and inn at 3, the storehouse and watchtower at 4. Everything a charter asks for is taught in time, so you never need luck to grow.\n\n"
       + "Everything else comes as §fPlan Scrolls§r: a toppled Rival Lord leaves plans of their town, every boss leaves one for each player at the kill, and a Rumor job sometimes pays one. Use a scroll to learn its plan for good. A plan from another region is in that region's style, and raising it costs half as much again.\n\n"
       + "To trade a plan, copy it onto a scroll from your Plan Book for a few coins and a paper.",
     when: ["carry:siege:plan_book", "carry:siege:plan_scroll", "event:planLearned"],
@@ -439,6 +439,13 @@ export const ENTRIES = [
       + "Click a portrait or painting to read about it. Every settlement's Library has portraits of the people who led it before you.",
     when: ["talk:tag:siege_lore_npc_*", "talk:siege:portrait"],
   },
+  {
+    id: "town_folk_streets", ch: "lore", title: "People in the streets",
+    tip: "Townsfolk have five things to say each. Click again to hear the next.",
+    page: "The people walking the streets of Kingsrest and the other towns will stop and talk if you click them. Each one has five things to say, and you hear them in order: click again for the next.\n\n"
+      + "Some of it is gossip, some of it is nonsense, and some of it is worth remembering. They go indoors at night and are back in the morning.",
+    when: ["talk:siege:townsfolk"],
+  },
 
   // ---------------- The wild ----------------
   {
@@ -475,7 +482,7 @@ export const ENTRIES = [
     page: "Make an §fIronworks§r at the Siege Workshop and place it on your land: an §fOre Pit§r is dug behind it and its worker digs about 16 raw iron a day into the storeroom. Click the block to take it.\n\n"
       + "Once you are a §fTown§r, build the §fBloomery§r (384 Regals): it smelts for you, about 40 iron ingots a day, burning one charcoal for every 4 ingots. Feed it from the block's menu; charcoal comes from burning logs, so a tree farm keeps it going. With no charcoal it only digs raw ore.\n\n"
       + "Once you are a §fCity§r, with water within 12 blocks, build the §fTrip-Hammer Forge§r (1,280 Regals): a waterwheel and hammer, about 100 ingots a day.\n\n"
-      + "The storeroom holds three days of work, then the workers wait for you. A siege that goes badly lets raiders carry off part of it. Frosthelm and Gullcliff, with an iron Old Working next door, dig half again as fast.",
+      + "The storeroom holds three days of work, then the workers wait for you. A siege that goes badly lets raiders carry off part of it. Where you live matters: Saltreach sits on rich iron and digs twice as fast, while Frostmarch's iron is poor (a quarter speed), so Frostmarch towns trade for it.",
     when: ["place:siege:ironworks", "carry:siege:ironworks", "click:siege:ironworks"],
     needs: "siege:ironworks",
   },

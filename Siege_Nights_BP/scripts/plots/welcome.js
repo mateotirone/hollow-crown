@@ -24,14 +24,14 @@
 // raiseHall(o, then) builds the hall (spread over ticks) and setKingsrestArrival(spot) moves the homeless arrival
 // spot; the opening feature (scripts/opening/) calls both when a fresh Hollow Crown map first loads.
 
-import { world, system, ItemStack, GameMode } from "@minecraft/server";
+import { world, system, ItemStack, GameMode, MolangVariableMap } from "@minecraft/server";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
 import { isReady, keepOf, tierOf, on, emit, addFoundingCheck, addJoinStep } from "../siege/api.js";
 import { onTick } from "../core/loop.js";
 import { moduleStore } from "../core/store.js";
 import { PLOT_PLAN, REGION_STYLE, REGION_BLOCK, WELCOME, WARDS, PLOT_STONE, KEEP_BANNER, OVERWORLD } from "./config.js";
 import { allPlots, holderOf, npcOf, plotOf, isBuilder, compass, mapMode, releaseNpc } from "./claims.js";
-import { MINI, RIM_TOP, MAP_MARKER, HALL_WAYSTONE, MARKER_STATE, miniSpot, miniatureBlocks, waystoneSpot, arrivalOffset, fallbackOf } from "./miniature.js";
+import { MINI, MINI_VERSION, RIM_TOP, MAP_MARKER, HALL_WAYSTONE, MARKER_STATE, miniSpot, miniatureBlocks, waystoneSpot, arrivalOffset, fallbackOf } from "./miniature.js";
 import { addMenuLabel } from "../core/labels.js";
 
 const store = moduleStore("siege:plots_welcome", () => ({ hall: null, test: null, kingsrest: null, picks: {} }));
@@ -201,14 +201,18 @@ export function raiseHall(o, then, old) {
       const inTheWay = old && old.y - 1 <= o.y + RIM_TOP && old.y + 6 >= o.y - 1;
       try {
         if (inTheWay) yield* clearOldHall(dim, old);
-        yield* miniatureBlocks((x, y, z, id, states) => putMini(dim, x, y, z, id, states), o, markers);
+        const clear = (x, y, z) => {
+          const b = dim.getBlock({ x, y, z });
+          if (b && b.typeId !== "minecraft:air") b.setType("minecraft:air");
+        };
+        yield* miniatureBlocks((x, y, z, id, states) => putMini(dim, x, y, z, id, states), o, markers, clear);
       } catch (e) {
         console.warn(`[Hollow Crown] welcome: building the hall stopped: ${e}`);
         raising = false;
         command(dim, `tickingarea remove ${BUILD_AREA}`);
         return;
       }
-      store.data.hall = { x: o.x, y: o.y, z: o.z, mini: 1 };
+      store.data.hall = { x: o.x, y: o.y, z: o.z, mini: MINI_VERSION };
       store.save();
       const w = waystoneSpot();
       writeSign(dim, o.x + w.dx, o.y + w.dy - 1, o.z + w.dz + 1, 0, "The Waystone\nClick it to hear\nhow things stand");
@@ -254,11 +258,16 @@ export function setKingsrestArrival(spot) {
 
 // The Map Stones follow who holds what: green free, yellow run by a lord, dark taken
 export const markerState = (state) => (state === "free" ? 0 : state === "lord" ? 1 : 2);
+// Each stone's last known state, kept by refreshHall so the beams don't ask every plot ten times a second
+let stoneStates = [];
+
 function refreshHall() {
   const o = store.data.hall;
   if (!o?.mini) return;
   const dim = overworld();
+  stoneStates = [];
   for (const p of pedestalLayout()) {
+    stoneStates.push({ p, state: statusOf(p.plan).state });
     let top;
     try {
       top = dim.getBlock({ x: o.x + p.dx, y: o.y + p.dy, z: o.z + p.dz });
@@ -266,7 +275,7 @@ function refreshHall() {
       top = undefined;
     }
     if (!top) continue; // that corner of the miniature isn't loaded (nobody near it)
-    const want = markerState(statusOf(p.plan).state);
+    const want = markerState(stoneStates[stoneStates.length - 1].state);
     try {
       if (top.typeId !== MAP_MARKER) top.setType(MAP_MARKER);
       if (top.permutation.getState(MARKER_STATE) !== want) top.setPermutation(top.permutation.withState(MARKER_STATE, want));
@@ -556,21 +565,50 @@ onTick("plots_welcome_hold", 20, () => {
 });
 onTick("plots_welcome_signs", 100, () => {
   if (!hallBuilt()) return;
-  if (!store.data.hall.mini) return swapOldHall();
+  if ((store.data.hall.mini ?? 0) < MINI_VERSION) return swapOldHall();
   refreshHall();
 });
 
-// A world that built the old round hall gets the miniature in its place: same spot on the map, lower in the sky
+// A faint coloured beam over each stone a newcomer can still choose (green free, amber run by a lord), so they are
+// easy to spot across the miniature. Only while someone is in the hall; a few dust motes per stone, climbing.
+const BEAM = { free: { red: 0.35, green: 0.95, blue: 0.4 }, lord: { red: 1, green: 0.72, blue: 0.2 } };
+const BEAM_HEIGHT = 7;
+let beamStep = 0;
+onTick("plots_welcome_beams", 10, () => {
+  const o = store.data.hall;
+  if (!o?.mini || !stoneStates.length) return;
+  if (!world.getPlayers().some((pl) => pl.dimension.id === OVERWORLD && inHall(pl.location))) return;
+  const dim = overworld();
+  beamStep = (beamStep + 1) % BEAM_HEIGHT;
+  for (const { p, state } of stoneStates) {
+    const color = BEAM[state];
+    if (!color) continue;
+    const vars = new MolangVariableMap();
+    vars.setColorRGB("variable.color", color);
+    for (const h of [beamStep, (beamStep + 3) % BEAM_HEIGHT]) {
+      try {
+        dim.spawnParticle("minecraft:redstone_wire_dust_particle", { x: o.x + p.dx + 0.5, y: o.y + p.dy + 1.2 + h, z: o.z + p.dz + 0.5 }, vars);
+      } catch {
+        // that part of the hall isn't loaded: skip it
+      }
+    }
+  }
+});
+
+// A world that built the old round hall (or the first, square miniature) gets the cloud miniature in its place:
+// same spot on the map, lower in the sky
 // (the miniature's mountains and rim must stay under the build limit). Newcomers still waiting there are brought
 // across once it stands; their choices so far are kept.
 function swapOldHall() {
   if (raising) return;
   const old = store.data.hall;
-  const o = { x: old.x, y: Math.min(old.y, WELCOME.hall.y), z: old.z };
-  console.warn("[Hollow Crown] welcome: replacing the old round hall with the miniature map");
+  // An older miniature (the square one) is rebuilt as the cloud in the same spot, its corners cleared
+  const round = !old.mini;
+  const o = round ? { x: old.x, y: Math.min(old.y, WELCOME.hall.y), z: old.z } : { x: old.x, y: old.y, z: old.z };
+  console.warn(`[Hollow Crown] welcome: replacing the ${round ? "old round hall" : "square miniature"} with the cloud miniature`);
   raiseHall(o, () => {
     for (const player of world.getPlayers()) if (player.hasTag(ARRIVING)) toHall(player);
-  }, old);
+  }, round ? old : undefined);
 }
 
 // ---------- Clicks, and keeping the hall whole ----------

@@ -96,6 +96,7 @@ Guards' own armor line, which players can't get (items `siege:guardgear_<tier>_<
 | Archer ×16 colors (64×64 player skin layout) | `textures/entity/siege/archer_<color>.png`, hood and mantle in the banner color, green jerkin, quiver | **Final style, awaiting your review** |
 | Man-at-Arms ×16 colors (64×64 player skin layout) | `textures/entity/siege/man_at_arms_<color>.png`, padded gambeson, tabard in the banner color with the gold tower | **Final style, awaiting your review** |
 | Keep heart | `textures/entity/siege_invisible.png` | Stays invisible, no art needed |
+| Townsfolk ×40 (64×64 player skin layout, 8 per region: tunic, apron/vest/fur/stripes/sash, hood/cap/kerchief/headwrap, skirt or breeches, varied skin and hair) | `textures/entity/siege/townsfolk/tf_<region>_<0-7>.png` (by `studio/art/build_townsfolk.py`), worn by `siege:townsfolk` | Placeholder in house palette, awaiting your review |
 
 ## 3D shapes
 
@@ -193,7 +194,7 @@ Look comes from Mateo's Undertow concept art: purple twilight, dark basalt, holl
 | Asset | File | Status |
 |---|---|---|
 | Plot Stone (claim marker: compass star on top, gold claim band on the sides) | `textures/blocks/siege_plot_stone_top.png`, `siege_plot_stone_side.png`, `siege_plot_stone_bottom.png` | **Final style, awaiting your review** (`studio/art/build_hollowcrown.py`) |
-| Map Stone (plot marker on the welcome hall miniature: green = free, yellow = run by a lord, dark = taken) and the hall Waystone | none of our own: they use the vanilla verdant/ochre froglight, polished blackstone and lodestone textures (terrain_texture.json `siege_map_marker_*`, `siege_hall_waystone_*`) | **Vanilla textures, no art needed** |
+| Map Stone (plot marker on the welcome hall miniature: green = free, amber = run by a lord, dark = taken) and the hall Waystone | `textures/blocks/welcome/map_stone_side_<free/lord/taken>.png`, `map_stone_top_<state>.png`, `hall_waystone_side.png`, `hall_waystone_top.png` | **Final style, awaiting your review** (`studio/art/build_welcome_stones.py`) |
 
 ## Horses and rail (icons and blocks: final art by `studio/art/build_hc_items.py` and `build_hc_blocks.py`; do not regenerate from `studio/build_horses.py`)
 

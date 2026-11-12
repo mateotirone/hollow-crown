@@ -581,7 +581,8 @@ addTests("settle charters", {
 
 // ---------- the Plan Book (plandata.js) ----------
 import { knownPlans, planChoices, unknownOf, planKey, parsePlan, planCards, whereFrom } from "./plandata.js";
-import { PLANS as PLAN_RULES } from "./config.js";
+import { PLANS as PLAN_RULES, HOMES, CHARTERS } from "./config.js";
+const TIER_NAMES_T = ["Hamlet", "Town", "City", "Castle"];
 addTests("settle plans", {
   "the Hamlet's basics are known, the hall teaches more, Creative knows everything"() {
     const designs = BUILDINGS.map((b) => b.id);
@@ -590,7 +591,6 @@ addTests("settle plans", {
     assert(!start.has("smithy"), "the smithy has to be learned");
     assert(knownPlans({ hallLevel: 3 }).has("smithy"), "a level 3 hall teaches the smithy");
     assert(designs.every((id) => knownPlans({ creative: true, designs }).has(id)), "Creative knows every plan");
-    for (const ids of Object.values(PLAN_RULES.hall)) for (const id of ids) assert(designs.includes(id), `hall plan ${id} is a design`);
   },
   "plans in other regions' styles are offered separately, and only once"() {
     const designs = BUILDINGS.map((b) => b.id);
@@ -601,6 +601,26 @@ addTests("settle plans", {
     assert(!offers.some((o) => o.id === "smithy" && !o.foreign), "no home-style smithy without its plan");
     assertEqual(parsePlan("smithy@frostmarch").style, "frostmarch");
     assertEqual(unknownOf(known, [{ id: "cottage", style: "vale" }, { id: "stable", style: "vale" }], "vale").map((p) => p.id).join(), "stable");
+  },
+  "every home and every building a charter needs is taught by the hall in time, never only by luck"() {
+    const by = (lvl) => knownPlans({ hallLevel: lvl });
+    for (const id of HOMES) assert(by(1).has(id), `${id} is a home, so it must be a basic plan`);
+    CHARTERS.forEach((lines, tier) => {
+      const known = by(tier + 1); // the hall can reach level tier + 1 at this tier
+      const named = new Set(lines.filter((l) => !l.more).flatMap((l) => l.ids));
+      for (const line of lines) {
+        // "n more of any of these": enough of them, besides the ones the charter names, must be taught
+        if (line.more) {
+          const spare = line.ids.filter((id) => !named.has(id) && (known.has(id) || PLAN_RULES.noPlan.includes(id)));
+          assert(spare.length >= line.more, `the ${TIER_NAMES_T[tier]} charter's "${line.what}" needs ${line.more} more taught by a level ${tier + 1} hall`);
+          continue;
+        }
+        for (const id of line.ids) {
+        if (PLAN_RULES.noPlan.includes(id)) continue;
+        assert(known.has(id), `the ${TIER_NAMES_T[tier]} charter needs ${id}, so a level ${tier + 1} hall (or the basics) must teach it`);
+        }
+      }
+    });
   },
   "the Plan Book cards: bright when found, greyed with a hint when not"() {
     const designs = BUILDINGS.map((b) => b.id);

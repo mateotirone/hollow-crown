@@ -93,14 +93,14 @@ Type the commands in chat (`/` opens it).
 - Switch to Survival and try to mine the Plot Stone. ✅ It doesn't break.
 
 **Welcome hall and test area (in the sky)** Creative, after at least one Plot Stone is placed.
-- `/scriptevent siege:welcome build here` on flat ground (or `build` on the real map: it takes you to the hall's place high over Gull Bay). ✅ After a few seconds, a 101 x 101 block miniature of the whole map (coast, mountains, rivers, towns, forests) with a stone rim. You stand on a quay out in its sea beside the Waystone, and twelve green glowing Map Stones stand on the plots' real spots, each with its name floating over it when you are close.
+- `/scriptevent siege:welcome build here` on flat ground (or `build` on the real map: it takes you to the hall's place high over Gull Bay). ✅ After a few seconds, a block miniature of the whole map (coast, mountains, rivers, towns, forests), about 100 blocks across, sitting on a white cloud with a lumpy cloud-shaped edge (not a square). You stand on a quay out in its sea beside the Waystone, and twelve green glowing Map Stones stand on the plots' real spots, each with its name floating over it when you are close.
 - Click the Waystone with an empty hand. ✅ A menu with "How things stand", "Where you start" and "Choosing a home".
 - Walk over to a Map Stone and click it with an empty hand. ✅ The plot's region, land and style, and "Free". Stones for plots with no Plot Stone yet say "Not on this map yet".
 - Switch to Survival, click a free Map Stone, choose "Start in ...", confirm. ✅ You land beside that Plot Stone holding a Keep Banner, and everyone is told.
 - `/scriptevent siege:welcome go` (Creative) and click the same Map Stone. ✅ It has gone dark and it shows who chose it, their level and their settlement level.
 - With a friend (or second account) in Survival with no keep: they join. ✅ They arrive on the quay, can walk all over the miniature but can't walk off it, and the taken plot can't be picked.
 - `/scriptevent siege:welcome testarea`. ✅ A glass floor in the sky with the whole showcase laid out on it. Running it again just takes you back there.
-- On a world that already had the old round hall: load it. ✅ The miniature goes up in its place (a little lower in the sky), anyone waiting is moved to the quay, then the old terrace disappears.
+- On a world that already had the old round hall: load it. ✅ The miniature goes up in its place (a little lower in the sky), anyone waiting is moved to the quay, then the old terrace disappears. A world that built the first, square miniature gets the cloud in its place and the square corners vanish.
 - `/scriptevent siege:welcome release <name>` frees someone's pick; `status` lists all twelve.
 
 ## What I most want to know
@@ -592,6 +592,7 @@ Things I could not check without the game, so please look closely: that the stee
 12. **Buying the line.** Once the world has its planned railway, `/scriptevent siege:trains routes` should list the stops and say which is your home stop. Click any Station Post: "Extend the line" should only offer stretches that start at a stop you can already reach (at first just the ones out of your home stop). Buy one: the Track should lay itself along the graded bed over a few seconds, and everyone should see "The line from ... to ... is laid". Stretches past it should now show up in the menu.
 13. **Station on claim.** On the real map, found a settlement on a plot. ✅ "A Halt is rising at …" and a Halt builds on the plot's stop by the graded rail bed, the post ending on its platform. The station menu shows "Extend the line" and "Buy an engine", but no carriage yet. Buy the first stretch. ✅ "Call the carriage" appears: it puts one coach on the platform facing the next stop, slow (about 4 blocks a second). Leave it empty for a minute ✅ it goes away. Buy an engine, place it, then pick it up and drop it in lava. ✅ The station menu now says "Take an engine (free)".
 14. **Switches.** Buy two stretches that leave a station the same way (west out of Kingsrest: toward Harrowford and toward Gull's Rest). Where they part, sneak + click the track with an empty hand. ✅ "Switch set: …" and the piece turns to the other line. Drive an engine out: it follows the way the switch is set. Drive back in along the other line ✅ the switch flips itself and the train runs through onto the shared track.
+15. **Rail gates.** Lay a straight run of Track and build a wall of iron bars (or any blocks) across it, 3 wide and 5 high. Walk up to it ✅ it stays shut. Put an engine on the track, drive at the wall ✅ the bars vanish a few blocks before the engine reaches them and come back once the train is about 9 blocks past.
 
 ## Sounds (scripts/sound/, SOUND-LIST.md)
 
@@ -695,3 +696,12 @@ Tell me about: marks too small to see, names hidden behind other marks, or the s
 4. ✅ It is finished in about 15 seconds and the Hall Cornerstone is gone. Just inside the front door, to one side of the aisle, stands the Town Board (a wide notice board with pinned papers, labelled when you are near). Clicking it opens the Town Hall menu. Check all five styles: `/scriptevent siege:townhall_build 3 frostmarch` and so on.
    - A hall built before this update gets its Town Board the next time the world loads or you open the Town Hall from the Keep menu.
 5. Town Hall menu → "Move the town hall" → "Move it". ✅ You get a Hall Cornerstone back, the Tree sleeps, and placing the stone elsewhere starts a new hall. Placing a second cornerstone while a hall stands is refused with a message.
+
+## Townsfolk (scripts/townsfolk/)
+
+On the map world (map mode), in Creative:
+1. Walk into Kingsrest by day. Within a few seconds 20 people should be out on the streets, each strolling a few blocks round their own spot. Check none stand inside a building or on a roof.
+2. Click one. They stop, turn to you, gesture, and a line appears in chat as `Name (Trade): ...`. Click four more times: five different lines, then the first again.
+3. `/scriptevent siege:townsfolk` lists the towns and how many are out. `here` brings the nearest town's folk out now (also at night), `home` sends them in, `heard` resets which lines you have heard.
+4. Hit one: no damage. Set the time to night and walk 25+ blocks away: they go indoors. Set it to day: they come back.
+5. After the town layout changes (a new `map/<town>-blocks.json`), run `python3 tools/townsfolk_spots.py` and commit `scripts/townsfolk/spots_data.js`.

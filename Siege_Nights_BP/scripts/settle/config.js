@@ -232,9 +232,13 @@ export const SETTLER_LINES = {
 //   Everything else is found: Plan Scrolls from toppled Rival Lords, bosses, Rumor jobs (and ruins, traders
 //   and wonders, which call learnPlan / givePlanScroll). A found plan is in its region's style; a style that
 //   isn't your town's own costs foreignMul times as much to raise.
+//   Rule: a player always gets what a charter needs. Every home and every building a charter names is taught by
+//   basics or by the hall level that tier reaches (hall level = tier + 1), never only by a lucky scroll (tested).
+//   noPlan: charter buildings raised from their own block item, which need no plan.
 export const PLANS = {
-  basics: ["cottage", "well", "library"],
-  hall: { 2: ["market", "garden"], 3: ["smithy", "stable"], 4: ["storehouse", "watchtower"] },
+  basics: ["cottage", "house", "well", "library"],
+  hall: { 2: ["market", "garden", "farmhouse", "mint"], 3: ["smithy", "stable", "townhouse", "inn"], 4: ["storehouse", "watchtower"] },
+  noPlan: ["barracks"],
   foreignMul: 1.5,
   scrollLots: 2, // copying a plan you know onto a Plan Scroll at your Plan Book (plus one paper), to trade
   lordScrolls: 2, // Plan Scrolls a toppled lord leaves, from the buildings that stood in their town
