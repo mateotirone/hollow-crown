@@ -1258,8 +1258,134 @@ class Town:
         dr.ellipse([c[0] - self.R * S, c[1] - self.R * S, c[0] + self.R * S, c[1] + self.R * S], outline=(160, 40, 40), width=2)
         img.save(os.path.join(out, f"{self.key}-plan.png"))
 
+    # ------------------------------------------------------------------ a railway station on the town's edge
+    def station_site(self, stop, deg, region):
+        """Stamp the Grand Station (the biggest stage, so it claims the ground) with its stop on the line at
+        stop (x, z) and its street front toward the town (deg turns the station's north-facing front), level
+        its ground, keep houses off it, and offer every stage as levels in the 3D view."""
+        import stations
+        x, z = stop; bp = stations.grand(region); bp.kind = "station"
+        g, _ = self.footprint(bp, deg); cells = [(gx + x, gz + z) for gx, gz in g if self.ok(gx + x, gz + z)]
+        y = int(max(self.at(self.G, cx, cz) for cx, cz in cells))
+        self.stamp(bp, x, z, y, deg, "station"); e = self.plan[-1]; e["name"] = "station"; e["footprint"] = len(cells)
+        self.foundation(cells, y)
+        for cx, cz in cells:
+            for dx in (-2, -1, 0, 1, 2):
+                for dz in (-2, -1, 0, 1, 2):
+                    if self.ok(cx + dx, cz + dz): self.TAKEN[self.ij(cx + dx, cz + dz)] = 2
+        (bx0, _, bz0), _ = bp.bounds(); fx, fz = rot_xz(0, bz0 - 1, deg); f = rot_xz(0, -1, deg)
+        self.station_front = ((x + fx, z + fz), f, y)
+        self.add_levels("station", e, [(st.capitalize(), bp if st == "grand" else getattr(stations, st)(region)) for st in stations.STAGES], align="origin")
+        return e
+
+    def station_road(self, kind="main"):
+        """A street from the station's front straight to the town's streets (or by path search if none ahead)."""
+        if not getattr(self, "station_front", None): return
+        (sx, sz), f, yf = self.station_front
+        for t in range(1, 60):
+            c = (sx + f[0] * t, sz + f[1] * t)
+            if not self.ok(*c) or self.at(self.WET, *c): break
+            if self.at(self.K, *c) >= 0:
+                self.lay([(sx + f[0] * k, sz + f[1] * k) for k in range(t + 1)], kind, k_start=2 * yf + 1, k_end=int(self.at(self.K, *c))); return
+        goals = [(int(i) + self.X0, int(j) + self.Z0) for i, j in np.argwhere((self.K >= 0) & (self.KIND >= PRIO["lane"]))]
+        x, z, n = sx, sz, 0
+        while self.ok(x, z) and self.at(self.TAKEN, x, z) >= 2 and n < 30: x, z = x + f[0], z + f[1]; n += 1
+        p = self.astar((x, z), goals, kind, limit=3000) if goals else None
+        if p and len(p) > 1: self.lay([(sx + f[0] * k, sz + f[1] * k) for k in range(n)] + p, kind, k_start=2 * yf + 1, k_end=self.k_at(*p[-1]))
+        else: print("no station road")
+
+    # ------------------------------------------------------------------ town wall
+    WALL_STONE = [("stone_bricks", 6), ("mossy_stone_bricks", 2), ("cracked_stone_bricks", 1), ("andesite", 1)]
+    def town_wall(self, H=5):
+        """A curtain wall on the town's edge (Mateo 2026-11-12: Gull's Rest needs one): 2 thick, crenellated,
+        a taller tower every ~22 blocks, an arch wherever a street crosses, open over water, and the station
+        standing in the line as its own gatehouse."""
+        band = (self.E > self.R - 1.0) & (self.E <= self.R + 1.0) & ~self.WET
+        for cx, cz in self.footprint_cells("station"):
+            for dx in range(-2, 3):
+                for dz in range(-2, 3):
+                    if self.ok(cx + dx, cz + dz): band[self.ij(cx + dx, cz + dz)] = False
+        road = self.K >= 0
+        near = np.zeros_like(band)
+        for di in range(-3, 4):
+            for dj in range(-3, 4): near |= np.roll(np.roll(road, di, 0), dj, 1)
+        def stone(x, y, z):
+            r = h3(x, y, z, 41) * sum(w for _, w in self.WALL_STONE)
+            for m, w in self.WALL_STONE:
+                r -= w
+                if r < 0: return (m, {})
+            return (self.WALL_STONE[0][0], {})
+        ii, jj = np.nonzero(band)
+        ang = np.degrees(np.arctan2(jj + self.Z0 - self.C[1], ii + self.X0 - self.C[0])) % 360
+        step = 22 / (2 * math.pi * self.R) * 360
+        for i, j, a in zip(ii, jj, ang):
+            x, z = int(i) + self.X0, int(j) + self.Z0
+            g = int(self.G[i, j])
+            if road[i, j]:                                          # gate: an arch over the street
+                base = (int(self.K[i, j]) - 1) // 2 + 5
+                for y in range(base, base + 3): self.works[(x, y, z)] = stone(x, y, z)
+                if (x + z) % 2 == 0: self.works[(x, base + 3, z)] = stone(x, base + 3, z)
+                continue
+            tower = (a % step) < step * 0.12
+            top = g + (H + 3 if (tower or near[i, j]) else H)
+            for y in range(g + 1, top + 1): self.works[(x, y, z)] = stone(x, y, z)
+            if (x * 3 + z) % 2 == 0: self.works[(x, top + 1, z)] = ("stone_brick_wall", {})
+            if (tower or near[i, j]) and (x + z) % 7 == 0: self.works[(x, top, z)] = ("lantern", {})
+            self.TAKEN[i, j] = 2
+
+    def footprint_cells(self, kind):
+        out = []
+        for e in self.plan:
+            if e["kind"] != kind: continue
+            g, _ = self.footprint(self.designs[e["stamp"]], e["rotation"]); out += [(gx + e["x"], gz + e["z"]) for gx, gz in g]
+        return out
+
+    # ------------------------------------------------------------------ levels in the 3D view
+    def add_levels(self, group, e, options, align="door", default=None):
+        """Mateo 2026-11-12: every 3D view lets him level up the town hall and the train station. e is the plan
+        entry of the biggest level (it claimed the ground); options are (label, Blueprint) for every level.
+        align "door" keeps each level's door on e's door cell, "origin" keeps the stamp origin (stations: the
+        stop on the line). The base scene leaves e out; each level is its own little scene (scene_levels)."""
+        big = self.designs[e["stamp"]]
+        deg = e["rotation"]
+        if align == "door":
+            dx, dz = self.door_of(big); rdx, rdz = rot_xz(dx, dz, deg); door = (e["x"] + rdx, e["z"] + rdz)
+        opts = []
+        for label, bp in options:
+            if align == "door":
+                dx, dz = self.door_of(bp); rdx, rdz = rot_xz(dx, dz, deg); ox, oz = door[0] - rdx, door[1] - rdz
+            else: ox, oz = e["x"], e["z"]
+            opts.append((label, bp, ox, oz))
+        if not hasattr(self, "levels"): self.levels = []
+        self.levels.append({"group": group, "entry": e, "options": opts, "default": len(opts) - 1 if default is None else default})
+
+    def scene_levels(self, out):
+        """One scene file per level of every level group: the stamp, plus stone foundation down to the ground
+        under its footprint. Returns [{group, labels, default, files}] for render/compose.py."""
+        res = []
+        for gi, L in enumerate(getattr(self, "levels", [])):
+            e = L["entry"]; files = []
+            for k, (label, bp, ox, oz) in enumerate(L["options"]):
+                s = Blueprint(f"{self.key}_{L['group']}_{k}")
+                r = bp.rotated(e["rotation"]); low = {}
+                for (x, y, z), v in r.cells.items():
+                    if v[0] == "keep": continue
+                    X, Y, Z = x + ox, y + e["ground_y"], z + oz
+                    s.cells[(X, Y, Z)] = v
+                    if (X, Z) not in low or Y < low[(X, Z)]: low[(X, Z)] = Y
+                for (X, Z), y0 in low.items():
+                    if not self.ok(X, Z): continue
+                    g = int(self.at(self.G, X, Z))
+                    for y in range(g + 1, y0): s.cells[(X, y, Z)] = VALE["plinth"](X, y, Z)
+                s.cells = {(int(x), int(y), int(z)): v for (x, y, z), v in s.cells.items()}
+                s.finish(); f = os.path.join(out, f"level_{gi}_{k}.json"); s.save_logical(f); files.append(f)
+            res.append({"group": L["group"], "labels": [o[0] for o in L["options"]], "default": L["default"], "files": files})
+        json.dump(res, open(os.path.join(out, "levels.json"), "w"), indent=1)
+        return res
+
     def scene(self, out):
         s = Blueprint(f"{self.key}_scene"); R = self.R + 20
+        skip = {id(L["entry"]) for L in getattr(self, "levels", [])}
         for x in range(self.C[0] - R, self.C[0] + R + 1):
             for z in range(self.C[1] - R, self.C[1] + R + 1):
                 if not self.ok(x, z): continue
@@ -1278,7 +1404,13 @@ class Town:
         for (x, y, z), v in self.works.items():
             if v[0] == "air": s.cells.pop((x, y, z), None)
             else: s.cells[(x, y, z)] = v
+        for L in getattr(self, "levels", []):                 # a levelled plot shows grass round the smaller levels
+            e = L["entry"]; g, _ = self.footprint(self.designs[e["stamp"]], e["rotation"])
+            for gx, gz in g:
+                X, Z = gx + e["x"], gz + e["z"]
+                if self.ok(X, Z) and self.K[self.ij(X, Z)] < 0: s.cells[(X, int(self.at(self.G, X, Z)), Z)] = ("grass_block", {})
         for e in self.plan:
+            if id(e) in skip: continue
             bp = self.designs[e["stamp"]].rotated(e["rotation"])
             for (x, y, z), v in bp.cells.items():
                 if v[0] == "keep": continue
@@ -1299,6 +1431,7 @@ class Town:
                               "square": [25, 30, 48 if not self.big else 62, cx, y + 2, cz], "street": street, "lane": lane,
                               "lane2": [lane[0] + 180, 13, 24] + lane[3:]}}
         s.save_logical(os.path.join(out, "scene.json"))
+        if getattr(self, "levels", None): self.scene_levels(out)
         return len(s.cells)
 
 

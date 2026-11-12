@@ -27,12 +27,20 @@ from bp import Blueprint
 import towngen as TG
 from towngen import Town, ROT, rot_xz, snap_rot
 import regions_towns as RT
+import settle_halls as SH
+HALLS = {"frost": SH.frost_hall, "salt": SH.salt_hall, "ember": SH.ember_hall, "fen": SH.fen_hall}
+WALL_STONE = {"salt": [("stone_bricks", 4), ("smooth_sandstone", 3), ("andesite", 2), ("cut_sandstone", 1)],
+              "frost": [("cobbled_deepslate", 5), ("deepslate_bricks", 3), ("stone_bricks", 2)],
+              "ember": [("red_sandstone", 5), ("smooth_red_sandstone", 3), ("cut_red_sandstone", 2)],
+              "fen": [("mud_bricks", 5), ("mossy_cobblestone", 3), ("mossy_stone_bricks", 2)]}
+RT_REGION_NAME = {"frost": "frostmarch", "salt": "saltreach", "ember": "emberwaste", "fen": "blackfen"}
 
 # centres and wards from map/town-sites.json (the square genworld writes) and plots/config.js WARDS
 REGION_SITES = {
     "rimehold":   dict(name="Rimehold", centre=(-80, -1080), radius=70, seed=31),
     # Mateo 2026-11-12: Gull's Rest moves down to the coast and gets a real harbour (harbour.py)
-    "gulls_rest": dict(name="Gull's Rest", centre=(-865, 405), radius=85, seed=41, harbour=True, square_at=(-910, 403), build_u=1.6, lanes=12),
+    "gulls_rest": dict(name="Gull's Rest", centre=(-865, 405), radius=85, seed=41, harbour=True, square_at=(-910, 403), build_u=1.6, lanes=12,
+                       station=((-781, 400), 270), wall=True),    # where the lines leave east; the map thread fixes the exact spot
     "sunscar":    dict(name="Sunscar", centre=(850, 450), radius=80, seed=61),
     "mirelight":  dict(name="Mirelight", centre=(-60, 900), radius=70, seed=51),
 }
@@ -97,24 +105,67 @@ class RegionTown(Town):
         if not getattr(bp, "kind", None) or bp.kind not in ("house",): bp.kind = "house" if tier < 3 else "barn"
         return bp
 
+    def hall_first(self):
+        """The town hall claims its ground facing the square before the streets go down (level 5, the biggest,
+        so every level fits), and the streets go round it."""
+        hall = HALLS[self.region]; bp = hall(5); bp.kind = "civic"; self.hall_entry = None
+        best = None
+        for k in range(96):
+            a = 2 * math.pi * (k / 96)
+            for extra_r in range(1, 26, 2):
+                rr = self.sqR + 1 + extra_r
+                x, z = int(round(self.sq[0] + math.cos(a) * rr)), int(round(self.sq[1] + math.sin(a) * rr))
+                deg = snap_rot(self.sq[0] - x, self.sq[1] - z)
+                snap = ({n: getattr(self, n).copy() for n in ("G", "K", "TAKEN", "EAVES", "FIX", "DOORWALK")}, dict(self.works), len(self.plan))
+                e = self.try_place(bp, deg, (x, z), "civic", gap=1, max_relief=8, need_walk=False)
+                if e:
+                    sc = e.get("foundation", 9) + 0.15 * extra_r
+                    if best is None or sc < best[0]: best = (sc, deg, (x, z))
+                arr, works, n_plan = snap
+                for n, v in arr.items(): setattr(self, n, v)
+                self.works = works; del self.plan[n_plan:]
+                if e: break
+        if not best: print("no room for town hall"); return
+        e = self.try_place(bp, best[1], best[2], "civic", gap=1, max_relief=8, need_walk=False)
+        e["name"] = "town hall"; self.hall_entry = (e, best[1], best[2])
+        g, _ = self.footprint(bp, best[1])
+        for gx, gz in g:
+            for dx in (-2, -1, 0, 1, 2):
+                for dz in (-2, -1, 0, 1, 2):
+                    c = (gx + e["x"] + dx, gz + e["z"] + dz)
+                    if self.ok(*c): self.TAKEN[self.ij(*c)] = 2
+        self.add_levels("town hall", e, [(f"Level {L}", hall(L)) for L in range(1, 5)] + [("Level 5", self.designs[e["stamp"]])])
+
+    def hall_road(self):
+        """From the hall's door straight across to the square."""
+        if not getattr(self, "hall_entry", None): return
+        e, deg, door = self.hall_entry; f = ROT[deg]
+        for t in range(1, 40):
+            c = (door[0] + f[0] * t, door[1] + f[1] * t)
+            if not self.ok(*c): break
+            if self.at(self.K, *c) >= 0:
+                self.lay([(door[0] + f[0] * k, door[1] + f[1] * k) for k in range(t + 1)], "main", k_start=2 * e["ground_y"] + 1, k_end=int(self.at(self.K, *c))); return
+
     def place_square_buildings(self):
         """The town's civic buildings round the square, facing in (biggest first)."""
-        makers = list(RT.CIVIC.get(self.town, []))
+        hall = HALLS[self.region]
+        makers = list(RT.CIVIC.get(self.town, []))          # (the town hall claimed its ground first: hall_first)
         built = [(name, mk()) for name, mk in makers]
         built.sort(key=lambda t: -len(t[1].cells))
         for name, bp in built:
             bp.kind = "civic"; done = None
             for k in range(72):
                 a = 2 * math.pi * (k * 0.618 % 1)
-                for extra_r in (1, 2, 3, 5, 7):
+                for extra_r in ((1, 2, 3, 5, 7, 9, 11, 13, 15) if name == "town hall" else (1, 2, 3, 5, 7)):
                     rr = self.sqR + 1 + extra_r
                     x, z = self.sq[0] + math.cos(a) * rr, self.sq[1] + math.sin(a) * rr
                     deg = snap_rot(self.sq[0] - x, self.sq[1] - z)
-                    done = self.try_place(bp, deg, (int(round(x)), int(round(z))), "civic", gap=1, max_relief=6)
+                    done = self.try_place(bp, deg, (int(round(x)), int(round(z))), "civic", gap=1, max_relief=8 if name == "town hall" else 6)
                     if done: done["name"] = name; break
                 if done: break
             if not done: done = self.civic_on_street(bp, name)
             if not done: print("no room for", name)
+            elif name == "town hall": self.add_levels("town hall", done, [(f"Level {L}", hall(L)) for L in range(1, 6)])
 
     def harbour(self):
         """Gull's Rest: quay, breakwaters, basin, jetty, lighthouse, hut, crane, boathouse (harbour.py); the
@@ -240,7 +291,12 @@ class RegionTown(Town):
     def run(self):
         self.square()
         if REGION_SITES[self.key].get("harbour"): self.harbour()
-        self.streets(); self.relax(); self.grade_verges()
+        st = REGION_SITES[self.key].get("station")
+        if st: self.station_site(st[0], st[1], RT_REGION_NAME[self.region])
+        self.hall_first()
+        self.streets()
+        if st: self.station_road()
+        self.hall_road(); self.relax(); self.grade_verges()
         self.portions()
         self.place_square_buildings()
         self.shore()
@@ -252,6 +308,7 @@ class RegionTown(Town):
         self.dress()
         self.roof_colours()
         self.path_blocks(); self.ground_blocks(); self.banks()
+        if REGION_SITES[self.key].get("wall"): self.WALL_STONE = WALL_STONE[self.region]; self.town_wall()
         self.works = {(int(x), int(y), int(z)): v for (x, y, z), v in self.works.items()}
         for e in self.plan:
             for k in ('x', 'z', 'ground_y', 'rotation', 'footprint'): e[k] = int(e[k])

@@ -155,6 +155,8 @@ def build(t):
     x, z, deg = HUT; t.stamp(hb, x, z, TOP, deg, "civic"); t.plan[-1].update(name="harbourmaster", door=[x - 5, z])
     for dx in range(-4, 5):
         for dz in range(-3, 4): col(x + dx, z + dz, TOP - 1); take(x + dx, z + dz)
+    for dx in range(-7, -4):                                            # a level forecourt from its door to the quay
+        for dz in range(-2, 3): col(x + dx, z + dz); take(x + dx, z + dz, 1)
     bb = skill_build("boathouse", (0, 7))
     x, z, deg = BOATHOUSE; t.stamp(bb, x, z, TOP, deg, "civic"); t.plan[-1].update(name="boathouse", door=[x + 7, z])
     # boathouse ground: stone under the land half, piers under the water half, the slip open to the sea
