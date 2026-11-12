@@ -8,7 +8,7 @@ import { ROUTE, reachable, buyable, cannotBuy, priceOf, nearestStop, checkRoutes
 import { ROUTES } from "./routes_data.js";
 import { railRefused } from "./no_hollow.js";
 import { STATION_DESIGNS, TRADE_HOUSE_DESIGNS, ENGINE_SHED_DESIGNS } from "../settle/station_data.js";
-import { TRACK, CARS, TRAIN, carPoses, trainLength, stepSpeed, moveTrain, limitAhead, shapesForLoop, showcaseLoop } from "./data.js";
+import { TRACK, CARS, TRAIN, carPoses, trainLength, stepSpeed, moveTrain, limitAhead, blocksUnder, clearAhead, speedForGap, shapesForLoop, showcaseLoop } from "./data.js";
 
 // A little fake world of track: lay(x, y, z, yaw) places a piece the way a player would
 function yard() {
@@ -133,6 +133,24 @@ addTests("trains", {
       const f = floatingBlocks(d);
       assert(!f.length, `${name}: ${f.length} block(s) float, first at ${f[0]}`);
     }
+  },
+
+  "trains keep apart: one sees another on its track ahead and may only go as fast as lets it stop short": () => {
+    const { get, lay } = yard();
+    for (let x = 0; x <= 60; x++) lay(x, 0, 0, -90); // an east-west line
+    const cars = [{ kind: "engine" }, { kind: "coach" }];
+    const front = cursorOn({ x: 40, y: 0, z: 0 }, get(40, 0, 0), -90); // heading east
+    const taken = blocksUnder(front, cars, get);
+    assert(taken.has("40,0,0") && taken.has("30,0,0") && !taken.has("41,0,0") && !taken.has("24,0,0"), "it holds the blocks under its length");
+    const behind = cursorOn({ x: 10, y: 0, z: 0 }, get(10, 0, 0), -90);
+    const gap = clearAhead(behind, 40, get, taken);
+    assert(gap > 13 && gap < 17, `the train behind sees it about 15 ahead (got ${gap})`);
+    assertEqual(clearAhead(behind, 8, get, taken), Infinity, "too far to matter yet");
+    assertEqual(clearAhead(front, 30, get, taken), Infinity, "its own blocks are passed in separately, and nothing is ahead of it");
+    assertEqual(speedForGap(Infinity), Infinity);
+    assertEqual(speedForGap(TRAIN.keepApart), 0, "stopped once it is this close");
+    const v = speedForGap(gap);
+    assert(v > 0 && (v * v) / (2 * TRAIN.brake) <= gap - TRAIN.keepApart, "from that speed it can stop in time");
   },
 
   "no rail goes down in the Hollow": () => {
