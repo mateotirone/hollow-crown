@@ -10,6 +10,7 @@ import { ActionFormData } from "@minecraft/server-ui";
 import { onTick, isReady, settlementAt, isAlly, keepOf, tierOf, moduleStore, on, countItem, takeItems } from "../siege/api.js";
 import { funds, charge } from "../economy/coins.js";
 import { coins } from "../economy/rules.js";
+import { regionRate } from "../economy/config.js";
 import { startBuild, buildFor } from "../townhall/build.js";
 import { STYLES, STYLE_IDS } from "../townhall/styles.js";
 import { styleFor } from "../settle/buildings.js";
@@ -42,7 +43,7 @@ const planFor = (level, style) => {
   return plans.get(key);
 };
 
-const bonusOf = (w) => (IRONWORKS.workingTowns.includes(plotAt(w)?.name) ? IRONWORKS.workingBonus : 1);
+const bonusOf = (w) => regionRate(plotAt(w)?.region, IRONWORKS.metal);
 
 // Bring the storeroom up to now
 function catchUp(w) {
