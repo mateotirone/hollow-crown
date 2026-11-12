@@ -5,11 +5,12 @@
 // The forge stands high on the eastern terraces past the Seams (site "cold_forge" in roads.js, built
 // by structures.js). Its Coffer holds one template at a time. Take it and the forge wakes: its
 // guards come out of the walls. A new template is sung into the Coffer three in-game days later,
-// so a world of ten players keeps coming back, and copying at a crafting table (7 netherite ingots
+// so a world of ten players keeps coming back, and copying at a crafting table (7 netherite scrap
 // and Veinstone, studio/bestiary/choirsteel.py) is the quicker way to share.
 //
 // Saved: hc:cold_forge { stocked, takenAt }   (absolute world ticks)
-// Event out: emit("forgeTemplateTaken", { x, y, z, nearest })
+// Events out: emit("forgeTemplateTaken", { x, y, z, nearest }), emit("templateHolders", { ids, names })
+// Players carrying a template carry the tag siege_template_holder (a reason to be sieged).
 // Test: /scriptevent hc:forge_restock   fills the Coffer now (creative/op)
 
 import { world, system, ItemStack } from "@minecraft/server";
@@ -100,7 +101,30 @@ function hintTick() {
   }
 }
 
+// Whoever carries a template is marked, so others have a reason to come for them (Mateo, 2026-11-12:
+// "this is a reason another nation or player can lay a siege on a player"). Tag siege_template_holder,
+// and emit("templateHolders", { ids, names }) whenever the list changes, for the siege features to use.
+export const HOLDER_TAG = "siege_template_holder";
+let lastHolders = "";
+export const carriesTemplate = (items) => items.some((it) => it?.typeId === TEMPLATE);
+function holderTick() {
+  const holders = [];
+  for (const p of world.getPlayers()) {
+    const inv = p.getComponent("inventory")?.container;
+    if (!inv) continue;
+    const items = [];
+    for (let i = 0; i < inv.size; i++) items.push(inv.getItem(i));
+    const has = carriesTemplate(items);
+    if (has && !p.hasTag(HOLDER_TAG)) { p.addTag(HOLDER_TAG); say(p, "§5The template is heavy in your pack. Anyone who wants Choirsteel now has a reason to come for you."); }
+    if (!has && p.hasTag(HOLDER_TAG)) p.removeTag(HOLDER_TAG);
+    if (has) holders.push(p);
+  }
+  const key = holders.map((p) => p.id).sort().join();
+  if (key !== lastHolders) { lastHolders = key; emit("templateHolders", { ids: holders.map((p) => p.id), names: holders.map((p) => p.name) }); }
+}
+
 onTick("undertow:forge", 100, forgeTick);
+onTick("undertow:forge_holders", 100, holderTick);
 onTick("undertow:forge_hint", 200, hintTick);
 
 system.afterEvents.scriptEventReceive.subscribe((event) => {
@@ -127,8 +151,8 @@ on("showcase", ({ player, dim, nextSpot, label }) => {
   fill(smith, "minecraft:smithing_table", [[TEMPLATE, 4], ["siege:tempered_choirsteel", 4], ["minecraft:netherite_chestplate", 1], ["minecraft:netherite_sword", 1], [INGOT, 16], ["siege:gloamquill", 4]]);
   label(smith, "Choirsteel upgrade\nTemplate + netherite\n+ Tempered Choirsteel");
   const copy = nextSpot();
-  fill(copy, "minecraft:crafting_table", [[TEMPLATE, 1], ["minecraft:netherite_ingot", 7], ["siege:veinstone", 1]]);
-  label(copy, "Copy the template\n7 netherite ingots\n+ Veinstone");
+  fill(copy, "minecraft:crafting_table", [[TEMPLATE, 1], ["minecraft:netherite_scrap", 7], ["siege:veinstone", 1]]);
+  label(copy, "Copy the template\n7 netherite scrap\n+ Veinstone");
   say(player, "§dChoirsteel:§7 the smithing table and its chest show the upgrade; the crafting table copies a template. The real templates are only in the Cold Forge in the Hollow (§f/scriptevent hc:forge_restock§7).");
 });
 
@@ -146,6 +170,10 @@ addTests("undertow", {
   "Cold Forge: a template put back counts, and is not doubled": () => {
     const r = forgeStep({ stocked: false, takenAt: 0 }, 1, 10);
     assert(r.state.stocked && r.did === null);
+  },
+  "Cold Forge: a template anywhere in the pack marks its carrier": () => {
+    assert(carriesTemplate([undefined, { typeId: "minecraft:dirt" }, { typeId: TEMPLATE }]));
+    assert(!carriesTemplate([undefined, { typeId: INGOT }]));
   },
   "Cold Forge: the Coffer is inside the forge's site": () => {
     const c = coldForgeCoffer();

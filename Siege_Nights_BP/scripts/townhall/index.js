@@ -26,7 +26,7 @@ import { STYLES, STYLE_IDS, styleFromBiome, styleFromGround } from "./styles.js"
 import { drawHall, frameFor, toWorld, statesFor, buildOrder } from "./halls.js";
 import { buildTick, clearBoxFor, worldCells, progressOf } from "./build.js";
 import { heroOf, saveHero, forgetHero, grantRenown, listenForGrants, blankHero } from "./hero.js";
-import { CORNERSTONE, TREE, hallMenu, hallOf, halls, saveHalls, resumeBuilds, beginBuild, setTreeLook, allowedLevel, HALL_COSTS, hallMenuExtras, stoneSpots } from "./townhall.js";
+import { CORNERSTONE, TREE, hallMenu, hallOf, halls, saveHalls, resumeBuilds, beginBuild, setTreeLook, allowedLevel, HALL_COSTS, hallMenuExtras } from "./townhall.js";
 import { openTree, choosePath, treeMenu, EMBER, BOUND_EMBER, OATH_BANNER } from "./tree.js";
 import { passiveTick, watchfireTick, dropEmber, nearestClue } from "./progress.js";
 import { knightTick, chargeTick } from "./knight.js";
@@ -297,13 +297,6 @@ api.addGuardLimitHook((owner, limit) => {
 });
 
 api.addTests("hall build", {
-  "every hall has a spot for the cornerstone beside the path, never in it": () => {
-    for (const id of STYLE_IDS) for (let level = 1; level <= 5; level++) {
-      const spots = stoneSpots(drawHall(level, STYLES[id]));
-      api.assert(spots.length > 0, `${id} ${level} has a cornerstone spot`);
-      api.assert(spots.every(([x]) => Math.abs(x) >= 2), `${id} ${level}: spot clear of the door`);
-    }
-  },
   "the clear box holds every block of the old hall above the ground": () => {
     for (const id of STYLE_IDS) for (const forward of [{ x: 0, z: 1 }, { x: 1, z: 0 }, { x: 0, z: -1 }, { x: -1, z: 0 }]) {
       const plan = drawHall(3, STYLES[id]), origin = { x: 100, y: 64, z: -40 };

@@ -11,7 +11,6 @@ import * as api from "../siege/api.js";
 import { HALL_TIERS, drawHall } from "./halls.js";
 import { STYLES, STYLE_IDS, styleFromBiome, styleFromGround } from "./styles.js";
 import { startBuild, buildFor, worldMarks, worldBox, clearBoxFor } from "./build.js";
-import { frameFor, toWorld } from "./halls.js";
 import { heroOf, grantPoints, grantRenown, playerById } from "./hero.js";
 import { sfx } from "../core/sfx.js";
 
@@ -147,6 +146,10 @@ world.afterEvents.playerPlaceBlock.subscribe((event) => {
     const owner = api.settlementAt(at);
     if (!owner || !api.keepOf(owner)) return giveBack(player, placed);
     const old = hallOf(owner);
+    if (old && !old.lost && old.hidden && old.level > 0) {
+      player.sendMessage("§cThis settlement already has a town hall. To move it, choose §fMove the town hall§c in the Town Hall menu first.");
+      return giveBack(player, placed);
+    }
     if (old && !old.lost) {
       const stone = cornerOf(old);
       const still = dim.getBlock(stone)?.typeId === CORNERSTONE;
@@ -184,44 +187,24 @@ world.afterEvents.playerBreakBlock.subscribe((event) => {
 
 const RISE_TICKS = [0, 140, 200, 260, 320, 320]; // about how long each tier's walls take to rise (7 to 16 seconds)
 
-// Where the Hall Cornerstone block actually stands. The hall is laid out from (x, y, z), right in front of
-// the door; once a hall stands the stone is moved to one side (hall.cs) so it never blocks the way in.
+// Where the Hall Cornerstone block stands while a hall is being started. Older builds moved it beside the
+// path (hall.cs). Once a hall stands the stone is taken away (hall.hidden): Mateo found it looked like a
+// stray command block. The Town Hall menu then opens from the Tree of Oaths or the Keep menu.
 export const cornerOf = (hall) => hall.cs ?? { x: hall.x, y: hall.y, z: hall.z };
 
-// Beside the path, clear of the hall: the first free spot, nearest the door first (local coords)
-const STONE_SPOTS = [[2, 0], [-2, 0], [3, 0], [-3, 0], [2, -1], [-2, -1], [3, -1], [-3, -1], [4, 0], [-4, 0], [2, -2], [-2, -2], [4, -2], [-4, -2]];
-const OPEN = /(air|grass|fern|flower|snow_layer|tallgrass|dandelion|poppy|mushroom)/;
-
-export function stoneSpots(plan) {
-  const taken = (x, y, z) => {
-    const c = plan.cells.get?.(`${x},${y},${z}`) ?? [...plan.cells.values()].find((k) => k.x === x && k.y === y && k.z === z);
-    return (c && c.role !== "air") || [...plan.columns.values()].some((k) => k.x === x && k.z === z && k.top >= y);
-  };
-  return STONE_SPOTS.filter(([x, z]) => !taken(x, 1, z) && !taken(x, 2, z));
-}
-
-function moveCornerstone(owner, plan) {
+function hideCornerstone(owner) {
   const hall = hallOf(owner);
   if (!hall) return;
-  const dim = world.getDimension("overworld");
-  const frame = frameFor({ x: hall.fx, z: hall.fz });
-  const now = cornerOf(hall);
   try {
-    if (dim.getBlock(now)?.typeId !== CORNERSTONE) return; // someone broke it: leave things as they are
-    for (const [x, z] of stoneSpots(plan)) {
-      const at = toWorld(frame, hall, x, 1, z);
-      if (at.x === now.x && at.y === now.y && at.z === now.z) return; // already beside the path
-      const block = dim.getBlock(at), below = dim.getBlock({ x: at.x, y: at.y - 1, z: at.z });
-      if (!block || !below || !OPEN.test(block.typeId) || below.isAir || below.isLiquid) continue;
-      dim.getBlock(now).setType("minecraft:air");
-      block.setType(CORNERSTONE);
-      hall.cs = at;
-      saveHalls();
-      return;
-    }
+    const block = world.getDimension("overworld").getBlock(cornerOf(hall));
+    if (!block) return; // not loaded: tidyCornerstone tries again later
+    if (block.typeId === CORNERSTONE) block.setType("minecraft:air");
   } catch (e) {
-    console.warn(`[Town Hall] could not move the cornerstone: ${e}`);
+    return console.warn(`[Town Hall] could not take the cornerstone away: ${e}`);
   }
+  delete hall.cs;
+  hall.hidden = true;
+  saveHalls();
 }
 
 const BAR = 20;
@@ -265,7 +248,7 @@ export function beginBuild(owner, level, style, resumeIndex = 0) {
       hall.lost = false;
       hall.marks = worldMarks(plan, hall, forward);
       saveHalls();
-      moveCornerstone(owner, plan);
+      hideCornerstone(owner);
       setTreeLook(owner);
       api.emit("hallBuilt", { owner, level, style, marks: hall.marks, first });
       const player = playerById(owner);
@@ -295,12 +278,31 @@ export function beginBuild(owner, level, style, resumeIndex = 0) {
   return true;
 }
 
-// Halls raised before the cornerstone moved aside still have it in front of the door: move it now
+// Halls raised before the stone was taken away still show it: take it now
 // (on load, and again whenever the Town Hall menu opens, in case its chunk was not loaded then)
 export function tidyCornerstone(owner) {
   const hall = hallOf(owner);
-  if (!hall || hall.cs || hall.lost || hall.building || !(hall.level > 0)) return;
-  moveCornerstone(owner, drawHall(hall.level, STYLES[hall.style]));
+  if (!hall || hall.hidden || hall.lost || hall.building || !(hall.level > 0)) return;
+  hideCornerstone(owner);
+}
+
+// Moving the hall: the standing building stays, the Tree sleeps, and you get a cornerstone to place again
+function moveHall(player, owner) {
+  new MessageFormData().title("Move the town hall")
+    .body("You get a Hall Cornerstone back to place somewhere else in your land. The building that stands now stays where it is, but it stops being your town hall and the Tree of Oaths sleeps until the new hall rises. Levels you already paid for are free to raise again.")
+    .button1("Keep it here").button2("Move it")
+    .show(player).then((r) => {
+      if (r.canceled || r.selection !== 1) return hallMenu(player, owner);
+      const hall = hallOf(owner);
+      if (!hall || buildFor(owner)) return;
+      hall.lost = true;
+      hall.building = null;
+      hall.level = 0;
+      hall.hidden = false;
+      saveHalls();
+      player.getComponent("minecraft:inventory")?.container?.addItem(new ItemStack(CORNERSTONE, 1));
+      player.sendMessage("§7You have a Hall Cornerstone. Place it where the new front door should be, facing the way the hall should run.");
+    }).catch(() => {});
 }
 
 // The Tree of Oaths shows a banner tree for a Knight's hall and an ember-root for a Marked one
@@ -387,6 +389,8 @@ export function hallMenu(player, owner) {
     if (hall.level > 0) {
       form.button("Repair the hall\n§8puts every block back", "textures/items/iron_pickaxe");
       actions.push(() => confirmBuild(player, owner, hall.level, hall.style, [], true));
+      form.button("Move the town hall\n§8get the cornerstone back", "textures/items/siege_hall_cornerstone");
+      actions.push(() => moveHall(player, owner));
     }
   }
   if (hall.level >= 1) for (const extra of hallMenuExtras) {

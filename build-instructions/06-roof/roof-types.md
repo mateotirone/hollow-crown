@@ -80,7 +80,7 @@ edge row (barge board) to define the roof, as the chart says.
   Shape not settled: the first try (an upside-down stair one out beside the verge foot) read as a block
   floating off the roof corner, so it is off until Mateo shows how he builds the curl tip.
 - **Dormers** with their own little gable and curled verge, on the bay lines (README step 7).
-- **Ridge spikes**: on halls and grand houses, a short spike every 3 or 5 blocks along the ridge (odd,
+- **Ridge spikes** (standard on every pitched ridge, Mateo 2026-11-12: "they add an awesome layer of depth"): a short spike every 3 or 5 blocks along the ridge (odd,
   centred on the ridge's centre block): an end rod or a wall block with a lightning rod or a fence post on
   top, in a dark metal or the trim wood. Taller ones at the gable peaks (finials).
 - **Hanging lanterns at the verge tips**: a chain hanging 2 to 4 blocks from the lowest verge stair with a
