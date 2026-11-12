@@ -357,6 +357,13 @@ export const ENTRIES = [
     when: ["click:siege:trade_board"],
     needs: "siege:trade_board",
   },
+  {
+    id: "trade_specials", ch: "travel", title: "Special Offers and trading in person",
+    page: "§fSpecial Offers:§r at the board, choose Create Special Offer, pick a good and how many, and you'll see what that amount is worth at the normal rate. Name your price (at least that much) and post it: the Regals are held until it's filled, and the Crier spreads the word. Anyone your track reaches can fill it from their Exports by train, and towns and lords fill offers that are worth their while. Whatever isn't filled within 3 days comes back to you.\n\n"
+      + "§fDeliver in person:§r walk up to another settlement's Trade Board with the goods and click it to see their Special Offers. Hand the goods over from your pack and you're paid on the spot; they go straight into that settlement's Imports. No track needed, and they don't have to be online.",
+    when: ["click:siege:trade_board"],
+    needs: "siege:trade_board",
+  },
 
   // ---------------- Growing stronger ----------------
   {

@@ -39,7 +39,14 @@ export const TRADE = {
   holdUpSeconds: 300, // to reach the wagon and beat the bandits
   rushChance: 0.05, // a run from an NPC has this chance of a market rush offer
   washoutChance: 0.01, // a run has this chance of finding a stretch closed for a day
-  nightChance: 0.06, // a run that leaves at night, once the seep has begun, may come back odd
+  nightChance: 0.06,
+  // Special Offers (Mateo, 2026-11-12): "I'll pay this much for that much of a good". The Regals are held when it's
+  // posted and paid out as it's filled; the goods come by train like any run.
+  specialsPerOutpost: 2, // open Special Offers an Outpost can post at once
+  specialDays: 3, // an offer stands this long, then whatever is left is refunded
+  specialMinPremium: 0, // the price can't be under the normal worth by more than this (0 = at least the normal worth)
+  specialNpcEvery: DAY / 4, // a town or lord looks at the open offers this often
+ // a run that leaves at night, once the seep has begun, may come back odd
 };
 
 // The goods a route may carry, with what each is worth in iron ingots (the Moneyer's ladder: 4 iron = 1 gold,
@@ -99,10 +106,3 @@ export const REGION_RATES_DEFAULT = {
   Blackfen: { iron: 1, gold: 1, diamond: 1 },
 };
 
-// The trade wing's insides, in the Trade House design's own frame (its door at local (0, 1, 1), the back wall at
-// z = box.z1): the Trade Board in the middle of the back, the crates either side of it.
-export const WING_SPOTS = {
-  board: (box) => ({ x: 0, y: 1, z: box.z1 - 1 }),
-  exports: (box) => ({ x: -2, y: 1, z: box.z1 - 1 }),
-  imports: (box) => ({ x: 2, y: 1, z: box.z1 - 1 }),
-};
