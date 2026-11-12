@@ -9,6 +9,7 @@ How versions work is in [`docs/RELEASING.md`](docs/RELEASING.md).
 Everything merged to `main` since the last release goes here. Each pull request that changes what players see adds a line under one of these headings.
 
 ### Added
+- Vault blocks (in the Creative menu; how a vault is added, opened, upgraded and broken into comes next): the Strongroom, a vault room in five tiers that grows with each one (wooden 7x7 inside, iron 9x9, diamond 11x11, netherite 13x13, Choirsteel 15x15), each styled in its material, with a staircase down, a 3x3 door with a locking wheel, the Vault Lock in the wall beside it, Relic Coffers along the walls and floating stands for the Crown, the Heart of the Hollow and the Choirsteel template. Also the Vault Key, iron-banded Strongroom Stone, and the attacker's Vault Breaker auger in iron, diamond and netherite (crafted at the Siege Workshop).
 - Discord alerts, ready for when the group sets up a Discord: siege nights, fallen Keeps, new settlements, Rival Lords marching, the throne changing hands and more can be posted to a Discord channel, with a ping for whoever it hits, even when nobody is online. A Choirsteel template holder who stays away a full day is announced to everyone. Needs a relay account and a small program on an always-on computer (docs/DISCORD.md); without them nothing changes in game.
 
 ### Fixed

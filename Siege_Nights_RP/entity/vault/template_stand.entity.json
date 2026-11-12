@@ -1,0 +1,31 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "siege:template_stand",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "stand": "textures/entity/siege_crown_stand",
+        "relic": "textures/items/siege_choirsteel_upgrade_template"
+      },
+      "geometry": {
+        "stand": "geometry.siege_relic_stand",
+        "relic": "geometry.siege_relic_card"
+      },
+      "animations": {
+        "float": "animation.siege_crown_stand.float"
+      },
+      "scripts": {
+        "animate": [
+          "float"
+        ]
+      },
+      "render_controllers": [
+        "controller.render.siege_crown_stand",
+        "controller.render.siege_relic_card"
+      ]
+    }
+  }
+}

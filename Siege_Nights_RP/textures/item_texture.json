@@ -676,6 +676,9 @@
   },
   "siege_summon_pretender": {
    "textures": "textures/items/creative/summon_pretender"
+  },
+  "siege_vault_key": {
+   "textures": "textures/items/vault/vault_key"
   }
  }
 }
