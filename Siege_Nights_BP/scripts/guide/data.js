@@ -173,7 +173,7 @@ export const ENTRIES = [
   {
     id: "town_hall", ch: "keep", title: "The town hall",
     tip: "Place the Hall Cornerstone on your land and click it: your town hall rises and grows with your settlement.",
-    page: "Craft a §fHall Cornerstone§r at the Siege Workshop and place it on your land. Click it for the town hall menu.\n\n"
+    page: "Craft a §fHall Cornerstone§r at the Siege Workshop and place it on your land. Click it to raise your first hall. Once the hall stands the stone is gone: open the town hall menu from the Tree of Oaths inside, or from your Keep menu.\n\n"
       + "The hall is built in your region's own style and is rebuilt bigger as your settlement grows. It holds the §fTree of Oaths§r, where you spend skill points.\n\n"
       + "From the hall menu you can also raise your §fsettlement wall§r level by level (and watch it go up), see who is online, and read the §fRumor Board§r for jobs.",
     when: ["carry:siege:hall_cornerstone", "click:siege:hall_cornerstone"],
