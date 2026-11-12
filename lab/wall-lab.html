@@ -1022,7 +1022,10 @@
     treb.arm.add(treb.stone);
     scene.add(g);
   })();
-  const ARM_REST = -0.55, ARM_RELEASE = Math.PI * 0.62, ARM_END = Math.PI * 0.85;
+  // At rest the long arm lies down behind the machine with the boulder in the sling near the ground and the
+  // counterweight raised in front. Firing drops the weight, whipping the long arm up over the top toward the wall.
+  const ARM_REST = 0.7, ARM_RELEASE = -2.0, ARM_END = -2.6;
+  const hangWeight = () => { treb.counter.rotation.x = -treb.arm.rotation.x; }; // the box hangs straight down
 
   function trebAim() {
     return { yaw: (+$("tYaw").value * Math.PI) / 180, pitch: (+$("tPitch").value * Math.PI) / 180, speed: TREBUCHET.speeds[treb.weight], dist: +$("tDist").value };
@@ -1031,7 +1034,7 @@
     const a = trebAim();
     treb.group.position.set(0, 0, a.dist);
     treb.group.rotation.y = -a.yaw;
-    if (!treb.firing) treb.arm.rotation.x = ARM_REST;
+    if (!treb.firing) { treb.arm.rotation.x = ARM_REST; hangWeight(); }
     updateGuide();
   }
   function launchState() {
@@ -1309,11 +1312,12 @@
       const swing = Math.min(1, t / 0.75);
       const ease = swing * swing * (3 - 2 * swing);
       treb.arm.rotation.x = ARM_REST + (ARM_END - ARM_REST) * ease;
-      if (!treb.released && treb.arm.rotation.x >= ARM_RELEASE) { treb.released = true; releaseBoulder(); }
+      if (!treb.released && treb.arm.rotation.x <= ARM_RELEASE) { treb.released = true; releaseBoulder(); }
       if (t > 0.75) {
         treb.arm.rotation.x = ARM_END - (ARM_END - ARM_REST) * Math.min(1, (t - 0.75) / 1.2);
         if (t > 1.95) { treb.firing = 0; treb.arm.rotation.x = ARM_REST; treb.reloadUntil = performance.now() + 300; treb.stone.visible = true; }
       }
+      hangWeight();
     }
 
     // boulders in flight
