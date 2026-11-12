@@ -467,7 +467,7 @@ export const ENTRIES = [
     page: "Make an §fIronworks§r at the Siege Workshop and place it on your land: an §fOre Pit§r is dug behind it and its worker digs about 16 raw iron a day into the storeroom. Click the block to take it.\n\n"
       + "Once you are a §fTown§r, build the §fBloomery§r (384 Regals): it smelts for you, about 40 iron ingots a day, burning one charcoal for every 4 ingots. Feed it from the block's menu; charcoal comes from burning logs, so a tree farm keeps it going. With no charcoal it only digs raw ore.\n\n"
       + "Once you are a §fCity§r, with water within 12 blocks, build the §fTrip-Hammer Forge§r (1,280 Regals): a waterwheel and hammer, about 100 ingots a day.\n\n"
-      + "The storeroom holds three days of work, then the workers wait for you. A siege that goes badly lets raiders carry off part of it. Frosthelm and Gullcliff, with an iron Old Working next door, dig half again as fast.",
+      + "The storeroom holds three days of work, then the workers wait for you. A siege that goes badly lets raiders carry off part of it. Where you live matters: Saltreach sits on rich iron and digs twice as fast, while Frostmarch's iron is poor (a quarter speed), so Frostmarch towns trade for it.",
     when: ["place:siege:ironworks", "carry:siege:ironworks", "click:siege:ironworks"],
     needs: "siege:ironworks",
   },
