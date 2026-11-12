@@ -399,7 +399,8 @@ A["animation.hc.shieldbearer.bash"] = {"loop": False, "animation_length": 0.6, "
     "body": {"rotation": {"0.0": r(), "0.15": r(-6, 0, 0), "0.3": r(12, 0, 0), "0.6": r()}},
     "rightLeg": {"rotation": {"0.0": r(), "0.3": r(-22, 0, 0), "0.6": r()}}}}
 
-AIM = {"rightArm": ((-88, -6, 0), None), "leftArm": ((-84, 34, 0), None), "body": ((0, -10, 0), None), "head": ((0, 10, 0), None),
+# right arm -72: the vanilla holding pose adds about -18 while he holds the crossbow, so the bolt flies level
+AIM = {"rightArm": ((-72, -6, 0), None), "leftArm": ((-86, 34, 0), None), "body": ((0, -10, 0), None), "head": ((0, 10, 0), None),
        "rightLeg": ((-6, 0, 5), None), "leftLeg": ((4, 0, -5), None)}
 A["animation.hc.crossbowman.stance"] = scaled(AIM, RDY)
 A["animation.hc.crossbowman.aim"] = held(AIM, 2.0)
@@ -603,12 +604,25 @@ def armour_geo(kind, t):
 def paint_armour(kind, region, t, paints):
     src = Image.open(GA + f'tier{t}.png').convert('RGBA'); px = src.load()
     out = Tex(128, 64); st = STYLE[kind]; P = W[region]
+    def checker(x, y):
+        c = px[x, y]; l = lum(c); n = 0
+        for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            if 0 <= x + dx < 128 and 0 <= y + dy < 64:
+                o = px[x + dx, y + dy]
+                if o[3] and abs(lum(o) - l) > 0.08: n += 1
+        return n >= 3
+    mail = {(x, y) for y in range(64) for x in range(128) if px[x, y][3] and kind_of(px[x, y]) == 'metal' and checker(x, y)}
     metal = METAL[region]; trim = TRIM[region]; L = P['lea']
     for y in range(64):
         for x in range(128):
             c = px[x, y]
             if c[3] == 0: continue
             k = kind_of(c); z = zone_of(x, y); l = lum(c)
+            # finer mail (Mateo 2026-11-12 "any of the chainmail should be thinner"): mail is the 1-pixel checker on the
+            # guardgear sheets, so wherever a pixel differs from all four neighbours its contrast is pulled in hard
+            if k == 'metal' and (x, y) in mail:
+                l = 0.56 + (l - 0.56) * 0.35
+                c = tuple(round(v * l / max(lum(c), 0.01)) for v in c[:3]) + (255,)
             if k == 'metal' and z in st['leather']:
                 col = tone(L, l * 0.9)
                 if st['pattern'] == 'studs' and x % 3 == 1 and y % 3 == 1: col = R(IRON, 4)     # iron studs
