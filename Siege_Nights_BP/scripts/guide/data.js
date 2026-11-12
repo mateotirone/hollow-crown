@@ -204,11 +204,20 @@ export const ENTRIES = [
     id: "guards", ch: "keep", title: "Guards and the Barracks",
     tip: "Bring an unemployed villager to your Barracks and click it holding 40 Regals for a Man-at-Arms (sneak + click for an Archer).",
     page: "Build a §fBarracks§r, bring an unemployed villager to it and click it holding coins (40 Regals) for a §fMan-at-Arms§r. Sneak + click for an §fArcher§r. Click the Barracks without coins for the guard list.\n\n"
-      + "Sneak + click a guard to pick them up and put them anywhere on your land. Archers stay exactly where you set them, so put them on your walls. Men-at-Arms wait at the Barracks and charge out when raiders come.\n\n"
-      + "§fArmour:§r click a guard holding the next upgrade: 6 iron ingots, then 12 iron ingots, then 4 diamonds, then a netherite ingot.\n\n"
+      + "Sneak + click a guard to pick them up and put them anywhere on your land. Off duty, Archers stay exactly where you set them and Men-at-Arms wait at the Barracks and charge out when raiders come. Better: give them a post (see §fGuard posts§r).\n\n"
+      + "§fArmour:§r click a guard holding the next upgrade: 6 iron ingots, then 12 iron ingots, then 4 diamonds, then a netherite ingot. Clicking with anything else opens the guard's orders.\n\n"
       + "§fWanted:§r anyone who attacks you or your guards on your land, lights a charge or rams your walls is Wanted there for 5 minutes, and your guards hunt them.\n\n"
       + "A Hamlet keeps 4 guards, a Town 8, a City 12. Fallen guards are gone for good.",
     when: ["carry:siege:barracks", "click:siege:barracks"],
+  },
+  {
+    id: "guard_posts", ch: "keep", title: "Guard posts",
+    tip: "Click one of your guards and pick Station to send them to a post on your wall or by a building.",
+    page: "Every building on your land has a few §fposts§r round it (by the door, at the back corners, along the sides of big ones), and your wall has posts all the way round plus one either side of the gate.\n\n"
+      + "§fTo station a guard:§r click them and pick §fStation§r. Your view lifts high over your settlement, and every post shows on the ground as a ring with its number: §cred§r is empty, §agreen§r is manned. Pick the wall or a building from the list, then the post. The guard goes straight there. If someone already holds that post, the two swap.\n\n"
+      + "A stationed §fArcher§r holds the post and shoots from it. A stationed §fMan-at-Arms§r stands at the post and, in a fight, chases attackers a short way before going back, so posts by your storerooms keep raiders from looting them.\n\n"
+      + "The §fBarracks§r menu has a §fGuard posts§r button to see which posts are empty and send a free guard to one. When your town grows and the wall moves out, guards on the wall keep their post on the new wall. If a building comes down, its guards go off duty.",
+    when: ["click:siege:barracks", "event:guardOrders", "event:guardStationed"],
   },
   {
     id: "quartermaster", ch: "keep", title: "The Quartermaster",

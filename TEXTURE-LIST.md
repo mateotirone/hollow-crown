@@ -351,6 +351,14 @@ Still to model (no art at all yet): held 3D models for the Seneschal's Greatshie
 
 All models were rebuilt in detail on 2026-11-10 (weapons in the hand, cloaks, horns, shields), so every skin in this section changed size and layout; none had been hand-painted. Morvane wears the Hollow Crown itself (helper `hollow_crown()` in `studio/bestiary/roster.py`, same shape and colours as the wearable `siege_hollow_crown`: violet cracked stone, magenta veins, pale blue gems, amethyst shard, floating crystal), on its own bone so the fight can knock it off. He fights left-handed. Morvane (`oswin_the_last.png`) now has grey eyes, not glowing ones: the story tells players to watch for grey eyes and the right hand. The three reveal figures must keep one identical pose so the scene can swap them in a single shot. New item icon needing art: `textures/items/bestiary/gloamquill.png` (16×16, placeholder; a dark purple flight quill with a magenta vein).
 
+## Guard posts (by `tools/build_guardposts_art.py`, placeholders)
+
+| Asset | File(s) | Status |
+|---|---|---|
+| Post ring (tinted red/green in game) | `textures/particle/hc_post_ring.png` 16×16 | Placeholder |
+| Post numbers 0-9 | `textures/particle/hc_post_digits.png` 160×16 | Placeholder |
+| Menu icons: empty post, manned post, wall | `textures/ui/hc/post_empty.png`, `post_manned.png`, `post_wall.png` 16×16 | Placeholder |
+
 ## For threads adding new assets
 
 Add a row here with the file path, size, what it should look like, and whether it needs transparency. A flat placeholder PNG at the right path is fine. The textures thread paints the final art over it and keeps the file name, size and transparency, so your JSON keeps working. Once a row says "Final style", don't regenerate that PNG from a placeholder script.
