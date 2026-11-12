@@ -183,17 +183,35 @@ How to build one (span = inside width, odd):
   town's majority colour, and then never more than 3 in a row.
 - **Civic accent**: the guildhall, capital, chapel or hall takes the town's accent colour (copper,
   stained or special) so it stands out from above.
-- **Gradients** (Mateo's copper roof reference, `reference/pictures/copper-roof-gradient.png`): the colour
+- **Texture: two blocks, mixed at random (Mateo, 2026-11-12)**: "Roofs need texture as well, same two
+  blocks for this color just as random blocks. Same for every roof style and theme." Every roof colour is
+  laid in two colour-close blocks (stairs, slabs and the ridge block alike), picked at random cell by cell,
+  never in bands. The pairs, main block first with the partner's share (`kit.ROOF_TEXTURE`):
+
+  | Colour | Main | Partner (share) |
+  |---|---|---|
+  | Slate | deepslate tiles | deepslate bricks (40%) |
+  | Warm red | brick | granite (35%) |
+  | Dark shingle | dark oak | spruce (30%) |
+  | Mid shingle | spruce | dark oak (30%) |
+  | Mangrove | mangrove | dark oak (25%) |
+  | White | smooth quartz | polished diorite (35%) |
+  | Sea green | dark prismarine | warped planks (30%) |
+  | Teal | prismarine bricks | prismarine (35%) |
+  | Red sandstone | smooth red sandstone | red sandstone (35%) |
+  | Hollow black | polished blackstone bricks | blackstone (35%) |
+  | Mud tile | mud bricks | granite (20%) |
+
+  Copper is the one exception: it keeps its weathering gradient below. This replaces the old banded
+  slate and Hollow gradients.
+- **Gradients** (copper only now; Mateo's copper roof reference, `reference/pictures/copper-roof-gradient.png`): the colour
   changes in bands from the ridge down to the eaves, darkest/most weathered at the top, warmest at the eaves.
   - Copper: waxed copper so it never changes in game. From the ridge: waxed oxidized (teal) 2 rows,
     waxed weathered 1 to 2 rows, waxed exposed 1 row, waxed cut copper (orange) at the eaves. On short
     slopes compress to 3 bands.
   - Band edges are not ruler straight: dither each cell's band by a small hashed offset (about +/-0.04 of
     the roof height, the value that renders well), so the bands blend without looking noisy.
-  - Other gradients by colour: deepslate tiles to cobbled deepslate to stone at the eaves (old slate);
-    dark oak to spruce (sun-faded shingles); mangrove to moss (Blackfen turf).
-- Weathering: on old buildings up to 10% of roof cells in a colour-close second block (deepslate bricks in
-  deepslate tiles), never a different colour.
+- Weathering is the texture above: the partner block of the same colour, never a different colour.
 
 ## Before you move on
 

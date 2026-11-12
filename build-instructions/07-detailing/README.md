@@ -72,7 +72,7 @@ detail: `texturing/`).
   bracket end. Long chains from the highest corners, short under porches. Odd spacing, symmetric pairs.
 - **Fences as hangers and posts**: a fence post sticking down under a beam end or bracket, with a lantern
   under it; fence posts standing on parapets and balcony corners; never fences as structure (`02-frame`).
-- **Ridge spikes and finials**: a spike every 3 or 5 along the ridge (end rods, or a wall block or fence post
+- **Ridge spikes and finials** (standard on every pitched ridge, Mateo 2026-11-12): a spike every 3 or 5 along the ridge (end rods, or a wall block or fence post
   with a lightning rod on top), taller finials at the gable peaks and tower tops (`06-roof/roof-types.md`).
 - **Layers**: every horizontal line gets two or three layers stacked: beam, then a row of upside-down
   stairs, then trapdoors or slabs under it. Every post gets a base and a capital of stairs or trapdoors.
