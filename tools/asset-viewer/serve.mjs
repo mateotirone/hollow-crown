@@ -345,6 +345,8 @@ const EXTRAS = [
     args: (out) => [out], names: (out) => readNames(out) },
   { id: "deepshaft", title: "Deep Shaft", marker: "map/structures/deepshaft_builds.py",
     args: (out) => [out], names: (out) => readNames(out) },
+  { id: "choirseam", title: "Choir Seam (the Hollow)", marker: "map/structures/choirseam_builds.py",
+    args: (out) => [out], names: (out) => readNames(out) },
   { id: "trade_outpost", title: "Trade Outposts", marker: "map/structures/trade_outpost.py",
     args: (out) => [out],
     names: (out) => { try { return JSON.parse(fs.readFileSync(path.join(out, "names.json"), "utf8")); } catch { return {}; } } },
