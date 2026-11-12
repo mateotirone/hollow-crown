@@ -279,6 +279,7 @@ function keepWatch() {
       }
       if (stationOf(guard) !== key) { delete manned[key]; changed = true; continue; }
       if (!post) { unstation(guard, owner); changed = true; continue; }
+      if (guard.hasTag("siege_marching")) continue; // away at war (warwrit/army.js)
       sendOff(guard, owner, post); // the watch changed, the wall moved out, or a walk was cut short by a restart
     }
     if (changed) save();
