@@ -163,7 +163,8 @@ world.afterEvents.entitySpawn.subscribe((event) => {
 // online, and goes to whoever killed the guard (a player, or the owner of the guard that did it) as a bounty.
 // Killed by anything else, the money just leaves the game. If the owner can't pay, the guard is lost for good.
 // It is back after RETRAIN_TICKS, or, while a feature holds it ("guardRetrainHeld", a War Writ siege), once that ends.
-export const RETRAIN_TICKS = 2400; // 2 minutes
+export const RETRAIN_TICKS = 2400;
+export const MARCHING_TAG = "siege_marching"; // a guard away at war with its owner: no post, no Barracks // 2 minutes
 const retrain = moduleStore("siege:guard_retrain", () => ({ queue: [] }));
 
 world.afterEvents.entityDie.subscribe((event) => {
@@ -178,7 +179,7 @@ world.afterEvents.entityDie.subscribe((event) => {
     }
   }, 2);
   emit("guardRemoved", { id: dead.id, owner });
-  const fee = fromEmeralds(GUARD_COST);
+  const fee = applyFilter("retrainFee", fromEmeralds(GUARD_COST), { owner, type: dead.typeId }); // army/index.js: half the hire price
   const keeper = world.getPlayers().find((p) => p.id === owner);
   const paid = robBank(owner, fee);
   if (paid < fee) {
@@ -330,6 +331,7 @@ export function guardTick() {
         if (keep && guard.getComponent("minecraft:variant")?.value !== keep.color) guard.triggerEvent(`siege:color_${keep.color ?? 14}`);
 
         if (guard.getDynamicProperty("siege:walking")) continue; // walking to its post or the Barracks (guardposts/walk.js)
+        if (guard.hasTag(MARCHING_TAG)) continue; // marching to war with its owner (warwrit/army.js)
         const post = JSON.parse(guard.getDynamicProperty("siege:post") ?? "null");
         if (!post) continue;
         const loc = guard.location;
