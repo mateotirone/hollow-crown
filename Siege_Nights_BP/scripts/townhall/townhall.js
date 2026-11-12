@@ -231,6 +231,8 @@ export function beginBuild(owner, level, style, resumeIndex = 0) {
   hall.building = { level, style, index: resumeIndex };
   saveHalls();
   let lastSaved = resumeIndex;
+  // the settlement feature clears buildings standing where a bigger hall goes (settle/hallmove.js); once per build
+  if (!resumeIndex) api.emit("hallBuildStarted", { owner, level, style });
   startBuild({
     id: owner, dimensionId: "minecraft:overworld", origin: { x: hall.x, y: hall.y, z: hall.z }, forward, plan,
     style: STYLES[style], perTick, clearBox, keep: [cornerOf(hall), { x: hall.x, y: hall.y, z: hall.z }], index: resumeIndex,
