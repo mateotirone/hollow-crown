@@ -87,9 +87,9 @@ A ★ marks builds that no earlier list had (added in the 2026-11-12 audit).
 
 | Build | Region | Status | Viewer | Owner thread | Source | Notes |
 |---|---|---|---|---|---|---|
-| The Citadel (one grand layout), Vale style | Aldmere Vale | designed |  | Redesign the Citadel as one grand layout |  | v3 with gardens, keep and tower interiors on branch claude/project-thread-2u2gp5 (no PR yet); hosted viewer https://claude.ai/artifact/DAH2CsQ3d9L88z9uXC39yY . The game still raises the old crown/layout.js Citadel (shown in viewer 'strongholds'). |
-| The Citadel in Frostmarch, Saltreach, Emberwaste and Blackfen styles (4) | One version per overworld region | designed |  | Redesign the Citadel as one grand layout |  | Frostmarch, Saltreach, Emberwaste, Blackfen styles in citadel.py STYLES on branch claude/project-thread-2u2gp5 (no PR yet); hosted 3D https://claude.ai/artifact/DAH2CsQ3d9L88z9uXC39yY |
-| ★ The Hollow's stronghold (Citadel layout in the Hollow kit) | The Hollow | designed |  | Redesign the Citadel as one grand layout |  | hollow_stronghold.py on branch claude/project-thread-2u2gp5: round plan, leaning towers, light-river moat, the Drum keep. Centrepiece may change (built round the floating Seat?). Hosted 3D https://claude.ai/artifact/DAH2CsQ3d9L88z9uXC39yY |
+| The Citadel (one grand layout), Vale style | Aldmere Vale | designed |  | Redesign the Citadel as one grand layout | `map/structures/citadel.py` | Waiting in PR #214. Merged in PR #214 (citadel.py --style vale), gardens, keep and tower interiors; 3D https://claude.ai/artifact/DAH2CsQ3d9L88z9uXC39yY . The game still raises the old Citadel until it is stamped. |
+| The Citadel in Frostmarch, Saltreach, Emberwaste and Blackfen styles (4) | One version per overworld region | designed |  | Redesign the Citadel as one grand layout | `map/structures/citadel.py` | Waiting in PR #214. Merged in PR #214: citadel.py --style frostmarch\|saltreach\|emberwaste\|blackfen; 3D https://claude.ai/artifact/DAH2CsQ3d9L88z9uXC39yY |
+| ★ The Hollow's stronghold (Citadel layout in the Hollow kit) | The Hollow | designed |  | Redesign the Citadel as one grand layout | `map/structures/hollow_stronghold.py` | Waiting in PR #214. Merged in PR #214: round plan, leaning towers, light-river moat, tall sharp asymmetric keep; 3D https://claude.ai/artifact/DAH2CsQ3d9L88z9uXC39yY |
 
 ## Wonders
 
