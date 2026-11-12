@@ -141,6 +141,20 @@ def main():
     add(sec, "review-kingsrest_guildhall", "Guildhall", "Copper roof", "An open market arcade under the guild's hall, a copper roof and a belfry on the ridge.",
         lambda: kingsrest_guildhall.build(99, "copper"), extra={"where": "Kingsrest, on the square", "kind": "Civic"})
 
+    # ---- 1a'. The run-through pass on the building skill (one engine): every spec in review/specs ----
+    sys.path.insert(0, os.path.join(HERE, "..", "..", ".claude", "skills", "minecraft-builder", "scripts"))
+    import glob, engine
+    from bp import Blueprint
+    sec = {"id": "skill-pass", "title": "Reviewed on the building skill", "blurb": "The run-through pass: each building rebuilt from the current build instructions on the one building engine, checked in 3D, then Mateo's notes.", "cards": []}
+    sections.append(sec)
+    def from_spec(f):
+        spec = json.load(open(f)); b = Blueprint(spec["name"]); engine.into_blueprint(b, spec); return b.finish()
+    for f in sorted(glob.glob(os.path.join(HERE, "review", "specs", "*.json"))):
+        meta = json.load(open(f)).get("card", {})
+        key = os.path.splitext(os.path.basename(f))[0]
+        add(sec, "skill-" + key, meta.get("title", key.replace("_", " ").capitalize()), meta.get("sub", ""), meta.get("blurb", ""),
+            (lambda f=f: from_spec(f)), REGION_GROUND.get(meta.get("region", "vale")), extra={"where": meta.get("where", ""), "kind": meta.get("kind", "")})
+
     # ---- 1b. The four regional map towns (laid out by the town generator) ----
     for tid, tname, rid, reg, blurb in TOWNS:
         sec = {"id": "town-" + tid, "title": tname, "blurb": blurb, "cards": []}
