@@ -411,6 +411,16 @@ step("Sounds");
   console.log(`${Object.keys(defs).length} custom sounds defined, ${installed} recordings installed, ${direct} direct playSound calls`);
 }
 
+// ---------- 2c. the land at the thin places ----------
+// map/thinplaces shapes the map at the seven thin places. Each place must hold its own water and keep it off the
+// cave floor (water written beside lower dry ground pours out in the game the first time a block changes).
+step("Thin place land");
+{
+  const r = spawnSync(process.execPath, [join(ROOT, "map/thinplaces/test_shapes.mjs")], { encoding: "utf8" });
+  if (r.status !== 0) for (const line of ((r.stdout || "") + (r.stderr || "")).split("\n").filter(Boolean).slice(0, 12)) fail(`thin place land: ${line}`);
+  else console.log((r.stdout || "").trim());
+}
+
 // ---------- 2d. build catalog ----------
 // Every build, designed or not, is listed in builds/catalog.json (tools/build-catalog.mjs).
 step("Build catalog");

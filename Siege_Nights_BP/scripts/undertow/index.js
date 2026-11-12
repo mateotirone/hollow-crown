@@ -49,7 +49,8 @@ import { HOLLOW_TREES } from "./trees_data.js";
 import { clearOps } from "./builder.js";
 import { shouldRise, regentOutcome, REGENT, TEMPERS, JOBS } from "./regent.js";
 import { sfx } from "../core/sfx.js";
-import { thinTick, thinCommand, planThinPlace, hillHeight, caveGeometry, setHills, toWorld, THIN_PLACES, CAMP_TOME, CAVES, MOUTH_V } from "./thinplaces.js";
+import { thinTick, thinCommand, planThinPlace, hillHeight, caveGeometry, setHills, toWorld, landOf, THIN_PLACES, CAMP_TOME, CAVES, MOUTH_V } from "./thinplaces.js";
+import { THIN_LAND } from "./thin_land.js";
 import { SITE_FEATURES } from "../lore/data/world.js";
 import { canOpen, getRift, dullLeft, BOSSES_TO_OPEN, FORK_DULL_DAYS } from "./source.js";
 import { fallenCount, REGIONAL_BOSSES } from "../lore/data/spine.js";
@@ -520,6 +521,33 @@ addTests("undertow", {
         const b = last.get(`0,${y},${v}`);
         if (gorge && v > 16) continue; // the far wall of the gorge is the land's, not ours
         assert(b === undefined || SOFT.test(b), `${t.id}${gorge ? " (gorge)" : ""}: ${b} in front of the mouth at v ${v}, y ${y - 64}`);
+      }
+    }
+  },
+  "thin places: the map's shaped land is known by its probes, and other land is not": () => {
+    const table = { x: { floor: 70, probes: [[1, 1, 80], [2, 2, 81], [3, 3, 82], [4, 4, 83], [5, 5, 84]] }, few: { floor: 70, probes: [[1, 1, 80]] } };
+    const world = (off, miss = 0) => (x) => (x <= miss ? undefined : 79 + x + off);
+    assert(landOf("x", world(0), table)?.floor === 70 && landOf("x", world(1), table), "the shaped land, give or take a block");
+    assert(landOf("x", world(0, 2), table) && !landOf("x", world(0, 3), table), "two unreadable columns are forgiven, three are not");
+    assert(!landOf("x", world(5), table) && !landOf("few", world(0), table) && !landOf("nowhere", world(0), table), "other land, too few probes, an unknown site");
+    for (const t of THIN_PLACES) {
+      const L = THIN_LAND[t.id];
+      assert(L && L.probes.length >= 3 && Number.isInteger(L.floor), `${t.id}: no land facts`);
+      for (const [x, z] of L.probes) assert(Math.hypot(x - t.x, z - t.z) <= 80, `${t.id}: a probe out of reach of the build`);
+    }
+  },
+  "thin places: standing water beside a cave is walled off, never left against open air": () => {
+    // a pool three deep lying over and beside the whole way in (ground 4 under, water to the cave floor's level)
+    for (const t of THIN_PLACES) {
+      const pool = (dx, dz) => dz < 5 && Math.abs(dx) < 30;
+      const plan = planThinPlace(t.id, 0, 0, 64, { ground: (dx, dz) => (pool(dx, dz) ? -4 : 0), water: (dx, dz) => (pool(dx, dz) ? 0 : undefined) });
+      const last = new Map();
+      for (const o of plan.ops) last.set(`${o.x},${o.y},${o.z}`, o.block);
+      const isWater = (x, y, z) => !last.has(`${x},${y},${z}`) && pool(x, z) && y > 60 && y <= 64;
+      for (const [k, b] of last) {
+        if (b !== "minecraft:air") continue;
+        const [x, y, z] = k.split(",").map(Number);
+        for (const [dx, dy, dz] of [[1, 0, 0], [-1, 0, 0], [0, 0, 1], [0, 0, -1], [0, 1, 0]]) assert(!isWater(x + dx, y + dy, z + dz), `${t.id}: water against open air at ${x},${y - 64},${z}`);
       }
     }
   },
