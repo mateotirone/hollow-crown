@@ -12,6 +12,7 @@ import { hash } from "./noise.js";
 import { STRUCTURE_IDS, planStructure } from "./structures.js";
 import { SITE_DESIGNS, TOWER_DESIGNS } from "./sites_data.js";
 import { DROWNED_SPOTS } from "./drowned.js";
+import { COURT_DESIGN, SEAT_DESIGN } from "./arenas_data.js";
 import { stamp } from "./stamp.js";
 import { load, save } from "./data.js";
 import { sfx } from "../core/sfx.js";
@@ -259,14 +260,13 @@ export function piecesTick() {
   });
 
   // The Drowned Court and the sealed wall across the valley.
-  if (!p.court && chunksBuilt(-COURT.radius - 2, COURT.center.z - COURT.radius - 2, COURT.radius + 2, COURT.gateZ + 14)) {
-    if (buildCourt(d)) { p.court = true; changed = true; }
-  }
+  // A world that built the first, plain look (before 2026-11-12) has it cleared and the new one stamped over it.
+  const courtOld = p.court && (p.courtV ?? 1) < COURT_DESIGN.v;
+  if ((!p.court || courtOld) && chunksBuilt(-COURT.radius - 2, COURT.center.z - COURT.radius - 12, COURT.radius + 2, COURT.gateZ + 14)) buildCourt(d, courtOld);
 
-  // The Choir's Heart.
-  if (!p.heart && chunksBuilt(-40, 2300, 40, 2440)) {
-    if (buildHeart(d)) { p.heart = true; changed = true; }
-  }
+  // The Seat (the Choir's Heart in the code).
+  const heartOld = p.heart && (p.heartV ?? 1) < SEAT_DESIGN.v;
+  if ((!p.heart || heartOld) && chunksBuilt(-40, 2300, 40, 2440)) buildHeart(d, heartOld);
   if (changed) savePieces(p);
 }
 
@@ -303,43 +303,21 @@ function fillAll(d, ops) {
   return true;
 }
 
-// Oswin's flooded throne hall: a round hall of dark prismarine, knee-deep water channels,
-// pillars, a throne at the far end, and the sealed gate onward in the back wall.
-function buildCourt(d) {
-  const { x: cx, z: cz } = COURT.center, f = COURT.floorY, r = COURT.radius;
+// Oswin's flooded throne hall (map/structures/hollow_arenas.py): a round drowned hall of veinstone and dark
+// prismarine, pilasters and lancet niches, eight columns, knee-deep channels, the throne on its dais before the
+// sealed gate. The hall's air is dug first, then the design goes down a block at a time (stamp.js).
+function buildCourt(d, over) {
+  if (stamping.has("court")) return;
+  const { x: cx, z: cz } = COURT.center, f = COURT.floorY, r = COURT.radius - 2;
   const ops = [];
-  const op = (a, b, block) => ops.push({ a, b, block });
   for (let dx = -r; dx <= r; dx++) {
-    for (let dz = -r; dz <= r; dz++) {
-      const dd = Math.sqrt(dx * dx + dz * dz);
-      const x = cx + dx, z = cz + dz;
-      if (z > COURT.gateZ) continue;
-      if (dd <= r - 1) {
-        op([x, f - 2, z], [x, f - 1, z], "minecraft:dark_prismarine");
-        op([x, f, z], [x, f + 16, z], "minecraft:air");
-        if (Math.abs(dx) % 8 === 4 && dd < r - 4) op([x, f - 1, z], [x, f, z], B.water); // water channels
-      } else if (dd <= r + 0.5) {
-        const door = dz < 0 && Math.abs(dx) <= 3; // entrance on the near side
-        op([x, f - 2, z], [x, f - 1, z], "minecraft:dark_prismarine");
-        op([x, f, z], [x, f + 17, z], door ? "minecraft:air" : "minecraft:prismarine_bricks");
-        if (door) op([x, f + 8, z], [x, f + 17, z], "minecraft:prismarine_bricks");
-      }
-    }
+    const h = Math.floor(Math.sqrt(r * r - dx * dx));
+    ops.push({ a: [cx + dx, f, cz - h], b: [cx + dx, f + 16, Math.min(cz + h, COURT.gateZ - 3)], block: "minecraft:air" });
   }
-  // Pillars with lanterns of sea light
-  for (let a = 0; a < 8; a++) {
-    const px = cx + Math.round(Math.cos((a * Math.PI) / 4) * (r - 7)), pz = cz + Math.round(Math.sin((a * Math.PI) / 4) * (r - 7));
-    op([px, f, pz], [px, f + 14, pz], "minecraft:prismarine_bricks");
-    op([px, f + 15, pz], [px, f + 15, pz], "minecraft:sea_lantern");
-  }
-  // The throne, against the back wall, either side of the gate
-  const tz = cz + r - 6;
-  op([cx - 2, f, tz], [cx + 2, f + 1, tz + 2], "minecraft:dark_prismarine");
-  op([cx - 1, f + 2, tz + 2], [cx + 1, f + 6, tz + 2], "minecraft:dark_prismarine");
-  op([cx, f + 7, tz + 2], [cx, f + 7, tz + 2], "minecraft:sea_lantern");
   // A causeway behind the gate so the climb starts cleanly
-  op([cx - 3, f - 1, COURT.gateZ + 1], [cx + 3, f - 1, COURT.gateZ + 12], "minecraft:polished_blackstone_bricks");
-  return fillAll(d, ops);
+  ops.push({ a: [cx - 3, f - 1, COURT.gateZ + 1], b: [cx + 3, f - 1, COURT.gateZ + 12], block: "minecraft:polished_blackstone_bricks" });
+  if (!fillAll(d, ops)) return;
+  stampOnce(d, "court", over ? withClearing(COURT_DESIGN) : COURT_DESIGN, { x: cx, y: f, z: cz }, (q) => { q.court = true; q.courtV = COURT_DESIGN.v; });
 }
 
 export function openCourtGate(silent = false) {
@@ -360,46 +338,25 @@ export function openRiverGate() {
     && apply(d, { a: [x - 3, y + 1, COURT.gateZ], b: [x + 3, y + 5, COURT.gateZ], block: "minecraft:air" });
 }
 
-// The Choir's Heart: a ring cathedral floating in the fog, 7 Singer pillars, a central disc,
-// and stepping islands leading up from the end of the climb.
-function buildHeart(d) {
-  const { x: cx, y: cy, z: cz } = HEART.center;
+// The Seat (map/structures/hollow_arenas.py): a floating ring of veinstone in the fog, seven Singer pillars with
+// crystal crowns, the central disc with its root hanging below and the throne, and stepping islands leading up from
+// the end of the climb.
+function buildHeart(d, over) {
+  if (stamping.has("heart")) return;
+  const { y: cy } = HEART.center;
   const ops = [];
-  const op = (a, b, block) => ops.push({ a, b, block });
-  for (let dx = -HEART.outerRadius; dx <= HEART.outerRadius; dx++) for (let dz = -HEART.outerRadius; dz <= HEART.outerRadius; dz++) {
-    const dd = Math.sqrt(dx * dx + dz * dz);
-    const x = cx + dx, z = cz + dz;
-    if (dd <= HEART.innerRadius) op([x, cy - 3, z], [x, cy - 1, z], dd < 2 ? B.core : hash(x, z, 404) < 0.2 ? B.deckCracked : B.deck);
-    else if (dd >= HEART.innerRadius + 4 && dd <= HEART.outerRadius) op([x, cy - 2, z], [x, cy - 1, z], dd > HEART.outerRadius - 1.2 ? B.lattice : hash(x, z, 404) < 0.2 ? B.deckCracked : B.deck);
-  }
-  // Bridges from the ring to the disc, at the four corners
-  for (const [ux, uz] of [[1, 1], [-1, 1], [1, -1], [-1, -1]]) {
-    for (let s = HEART.innerRadius; s <= HEART.innerRadius + 5; s++) {
-      const x = cx + Math.round(ux * s * 0.707), z = cz + Math.round(uz * s * 0.707);
-      op([x - 1, cy - 1, z - 1], [x + 1, cy - 1, z + 1], B.deck);
-    }
-  }
-  // 7 Singer pillars with lattice arches
-  for (let i = 0; i < 7; i++) {
-    const a = (i / 7) * Math.PI * 2;
-    const px = cx + Math.round(Math.cos(a) * HEART.singerRadius), pz = cz + Math.round(Math.sin(a) * HEART.singerRadius);
-    op([px - 1, cy, pz - 1], [px + 1, cy + 2, pz + 1], "minecraft:polished_basalt");
-    op([px, cy + 3, pz], [px, cy + 14, pz], B.lattice);
-    op([px, cy + 15, pz], [px, cy + 15, pz], B.core);
-  }
-  // Stepping islands from the end of the climb (about z 2330) up to the ring's near edge
   const startY = (heightAt(0, 2328) ?? 115) + 1;
   for (let k = 0; k < 6; k++) {
     const z = 2334 + k * 6, y = Math.round(startY + ((cy - 1 - startY) * (k + 1)) / 7), x = Math.round(Math.sin(k) * 3);
-    op([x - 1, y - 1, z - 1], [x + 1, y, z + 1], B.basalt);
-    op([x, y, z], [x, y, z], B.moss);
+    ops.push({ a: [x - 1, y - 1, z - 1], b: [x + 1, y, z + 1], block: B.basalt }, { a: [x, y, z], b: [x, y, z], block: B.moss });
   }
-  return fillAll(d, ops);
+  if (!fillAll(d, ops)) return;
+  stampOnce(d, "heart", over ? withClearing(SEAT_DESIGN) : SEAT_DESIGN, HEART.center, (q) => { q.heart = true; q.heartV = SEAT_DESIGN.v; });
 }
 
-// Put the Heart back as new (after a failed attempt, or once the fight is won).
+// Put the Seat back as new (after a failed attempt, or once the fight is won).
 export function rebuildHeart() {
-  try { buildHeart(dim()); } catch { /* not loaded: the next attempt rebuilds it */ }
+  try { buildHeart(dim(), false); } catch { /* not loaded: the next attempt rebuilds it */ }
 }
 
 // The Fall: everything in the Heart at or beyond this radius drops away into the fog.
@@ -408,6 +365,6 @@ export function dropHeartBand(radius) {
   for (let dx = -R; dx <= R; dx++) for (let dz = -R; dz <= R; dz++) {
     const dd = Math.sqrt(dx * dx + dz * dz);
     if (dd < radius || dd > R) continue;
-    apply(d, { a: [cx + dx, cy - 3, cz + dz], b: [cx + dx, cy + 16, cz + dz], block: "minecraft:air" });
+    apply(d, { a: [cx + dx, cy - 8, cz + dz], b: [cx + dx, cy + 16, cz + dz], block: "minecraft:air" });
   }
 }

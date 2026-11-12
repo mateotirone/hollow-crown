@@ -84,6 +84,10 @@ def main():
         os.makedirs(os.path.join(out, key), exist_ok=True)
         json.dump({"name": key, "palette": pal, "blocks": rows}, open(os.path.join(out, key, "scene.json"), "w"), separators=(",", ":"))
         names[key] = f"Rail tunnel portal · {reg}"
+    import subprocess   # the Drowned Court and the Seat (hollow_arenas.py writes their scenes)
+    subprocess.run([sys.executable, os.path.join(HERE, "hollow_arenas.py"), "--scenes", out, "--no-write"], check=True)
+    names["court_design"] = "Hollow · The Drowned Court"
+    names["seat_design"] = "Hollow · The Seat"
     json.dump(names, open(os.path.join(out, "names.json"), "w"), indent=1)
 
 
