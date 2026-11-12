@@ -65,8 +65,11 @@ def goods(place, region, rect, stage):
     wood = STACK[region]
     # loading hatch in the back wall: a 3 wide opening at y 1..2 with a counter (top slab) and the awning above
     for x in (-1, 0, 1):
-        place.append([x, 2, z1, "air"])
+        for y in (2, 3): place.append([x, y, z1, "air"])
         place.append([x, 1, z1, f"{wood}_slab", {"half": "top"}])
+        # a window's box, sill or shutters there would block the hatch
+        for y in (1, 2, 3): place.append([x, y, z1 + 1, "air"])
+        for y in (1, 2): place.append([x, y, z1 + 2, "air"])
     for x in range(-2, 3):
         place.append([x, 4, z1 + 1, a if (x + 2) % 2 == 0 else b])
     for x in (-2, 2):
@@ -180,6 +183,7 @@ def build(region, stage, out):
     sp = os.path.join(d, "scene.json")
     sc = json.load(open(sp))
     sc["blocks"] = [b for b in sc["blocks"] if b[2] >= 0]
+    sc.pop("camera", None)   # the viewer frames it itself
     json.dump(sc, open(sp, "w"), separators=(",", ":"))
     return d, summ
 
