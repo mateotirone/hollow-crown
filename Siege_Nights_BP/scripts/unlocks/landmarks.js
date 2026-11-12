@@ -4,7 +4,7 @@
 // The landmark is placed first and the site's own plan on top, so it can never cover a cell the boss code relies on.
 // Keep a landmark within about 60 blocks of the centre: that is what the build's ticking area holds loaded.
 //
-//   import cradle from "./landmarks/mother.js";   export const LANDMARKS = { mother: cradle };
+//   e.g. a module landmarks/mother.js exporting the stamp, then LANDMARKS = { mother: thatStamp }
 
 export const LANDMARKS = {};
 
