@@ -1,5 +1,5 @@
 import { addTests, assert, assertEqual } from "../siege/api.js";
-import { CLOCKS, KEEPERS, POSTS, makePuzzle, solutions, statementText, clockAnswer, fallbackPuzzle, WRONG_COOLDOWN_TICKS } from "./keepers.js";
+import { CLOCKS, KEEPERS, POSTS, makePuzzle, TOWER_POST, solutions, statementText, clockAnswer, fallbackPuzzle, WRONG_COOLDOWN_TICKS } from "./keepers.js";
 import { WELL, RING, wellOps, chamberOps, stairSteps, spindleOps, drainLayers, plugOps, postOps, postSpot, faceToCenter } from "./well_plan.js";
 import { fullPlan, crankAnswer, inChamber, keeperBody, MILLBROOK_SQUARE } from "./reeve.js";
 import { porchBlocks } from "../opening/millbrook.js";
@@ -17,6 +17,13 @@ addTests("unlocks", {
       assertEqual([...p.layout].sort(), [0, 1, 2, 3, 4, 5], "one clock per post");
     }
     assertEqual(solutions(fallbackPuzzle().statements, fallbackPuzzle().layout).length, 1, "the fallback puzzle");
+  },
+  "with the clocktower pinned, the Tower clock stays in it and the answer is still unique": () => {
+    for (let seed = 1; seed <= 40; seed++) {
+      const p = makePuzzle(seed * 2654435761, { towerPost: TOWER_POST });
+      assertEqual(p.layout[0], TOWER_POST, `seed ${seed}`);
+      assertEqual(solutions(p.statements, p.layout).length, 1, `seed ${seed}`);
+    }
   },
   "the same world always gets the same puzzle, and different worlds differ": () => {
     assertEqual(makePuzzle(1234), makePuzzle(1234));

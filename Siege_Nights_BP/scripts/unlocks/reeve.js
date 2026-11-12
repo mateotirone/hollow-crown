@@ -30,7 +30,7 @@ import { learnLeads } from "../lore/player.js";
 import { startBoss, fightOf } from "../bestiary/bossCore.js";
 import { markSocketed } from "../bestiary/relics.js";
 import { LANDMARKS, stampOps } from "./landmarks.js";
-import { CLOCKS, KEEPERS, makePuzzle, statementText, clockAnswer } from "./keepers.js";
+import { CLOCKS, KEEPERS, makePuzzle, TOWER_POST, statementText, clockAnswer } from "./keepers.js";
 import { WELL, CHAMBER_CENTER, wellOps, chamberOps, postOps, stairSteps, spindleOps, drainLayers, plugOps, SIGN_TURN } from "./well_plan.js";
 
 export const KEY = "siege:stopped_clock_key";
@@ -67,7 +67,7 @@ const puzzle = () => {
     store.data.seed = Math.floor(Math.random() * 2 ** 31);
     store.save();
   }
-  return makePuzzle(store.data.seed);
+  return makePuzzle(store.data.seed, { towerPost: store.data.towerPost }); // worlds built before the pin keep their layout
 };
 const at = (c, o) => ({ x: c.x + o.dx, y: c.y + o.dy, z: c.z + o.dz });
 const say = (player, text) => { try { player.sendMessage(text); } catch { /* gone */ } };
@@ -120,6 +120,7 @@ export function buildWell(center, by) {
   if (y === undefined) return { ok: false, why: "not loaded yet (stand closer)" };
   const c = { x: Math.floor(center.x), y, z: Math.floor(center.z) };
   busy = true;
+  if (store.data.towerPost !== TOWER_POST) { store.data.towerPost = TOWER_POST; store.save(); } // a fresh build pins the Tower clock
   const plan = fullPlan(puzzle());
   plan.ops = [...stampOps(LANDMARKS.reeve), ...plan.ops]; // the square's landmark first (landmarks.js), the well on top
   let failed = 0;
