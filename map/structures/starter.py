@@ -41,10 +41,11 @@ HALL1 = (-7, 7, 3, 21)             # ground the level-1 hall takes (any region),
 AREAS = [
     # kind, label, box, door side (the side facing its lane: "r+" = toward +right ...), extra
     ("yard",      "Mason's yard",     (9, 19, -13, -3),  "r-", {}),
-    ("building",  "Library",          (-19, -9, -13, -3), "r+", {"design": "library"}),
-    ("building",  "Cottage",          (5, 13, -27, -19),  "r-", {"design": "cottage", "slot": (5, 17, -27, -19)}),
-    ("slot",      "Empty plot",       (-17, -5, -27, -19), "r+", {"size": "S"}),
-    ("slot",      "Empty plot",       (-23, -11, -1, 7),  "r+", {"size": "S"}),
+    # buildings give their door cell; the box comes from the design's real size (--sizes, from sizes.mjs)
+    ("building",  "Library",          (-9, -8),           "r+", {"design": "library"}),
+    ("building",  "Cottage",          (5, -23),           "r-", {"design": "cottage", "slot": (5, 17, -28, -18)}),
+    ("building",  "House",            (-5, -23),          "r+", {"design": "house", "slot": (-19, -5, -28, -18)}),
+    ("slot",      "Empty plot",       (-23, -11, 1, 9),   "r+", {"size": "S"}),
     ("field",     "Common field",     (-23, -11, 11, 23), "r+", {}),
     ("woodyard",  "Woodyard",         (11, 21, -1, 9),    "r-", {}),
     ("pen",       "Pen",              (11, 19, 13, 23),   "r-", {}),
@@ -98,8 +99,8 @@ def load_plots(path):
 
 
 class Starter:
-    def __init__(self, plot, T):
-        self.plot = plot
+    def __init__(self, plot, T, sizes=None):
+        self.plot = plot; self.sizes = sizes or {}
         self.region = plot["region"]; self.wood = REGION_WOOD.get(self.region, "oak")
         self.X0, self.Z0 = int(T["X0"]), int(T["Z0"])
         self.G = T["Y"].astype(np.int32)                       # top block y of the untouched ground, [x, z]
@@ -219,12 +220,24 @@ class Starter:
         hall = self.boxmask(HALL1) & (self.KIND == 0)
         self.LEVEL[hall] = self.sqY; self.KIND[hall] = 6
         for kind, label, box, side, extra in AREAS:
+            if kind == "building": box = self.design_box(box, side, extra["design"])
             full = extra.get("slot", box)
+            if kind == "building":   # a slot is never smaller than the building on it
+                full = (min(full[0], box[0]), max(full[1], box[1]), min(full[2], box[2]), max(full[3], box[3]))
             m = self.boxmask(full) & (self.KIND == 0)
             y = self.path_y_near(full, side)
             if y is None: y = int(round(float(np.median(self.G[m]))))
             self.LEVEL[m] = y; self.KIND[m] = 5
-            self.areas.append(dict(kind=kind, label=label, box=list(full), side=side, y=y, **{k: v for k, v in extra.items() if k != "slot"}))
+            self.areas.append(dict(kind=kind, label=label, box=list(full), side=side, y=y, **({"building": list(box)} if kind == "building" else {}), **{k: v for k, v in extra.items() if k != "slot"}))
+
+    def design_box(self, door, side, design):
+        """(r0, r1, a0, a1) a design takes with its door on `side` at cell `door`: wide along the door edge, deep inward."""
+        x0, x1, z0, z1 = self.sizes.get(design, (-4, 4, 0, 8))
+        r, a = door; deep = z1
+        if side == "r+": return (r - deep, r, a + x0, a + x1)
+        if side == "r-": return (r, r + deep, a - x1, a - x0)
+        if side == "a-": return (r + x0, r + x1, a, a + deep)
+        return (r - x1, r - x0, a - deep, a)
 
     # ---- 3. the wall line
     def wall_line(self, N=120):
@@ -378,7 +391,7 @@ class Starter:
     def dress(self):
         W = self.wood
         for ar in self.areas:
-            box = tuple(ar["box"]); side = ar["side"]; kind = ar["kind"]; r0, r1, a0, a1 = box
+            box = tuple(ar.get("building", ar["box"])); side = ar["side"]; kind = ar["kind"]; r0, r1, a0, a1 = box
             fwd = self.side_vec(side)
             dr, da = self.door_cell(box, side)
             if kind == "building":
@@ -522,10 +535,12 @@ class Starter:
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument("plot"); ap.add_argument("slice"); ap.add_argument("out")
     ap.add_argument("--config", default=os.path.join(HERE, "..", "..", "Siege_Nights_BP", "scripts", "plots", "config.js"))
+    ap.add_argument("--sizes", default="", help="design bounds per region from studio/starter_preview/sizes.mjs")
     a = ap.parse_args()
     plot = load_plots(a.config)[a.plot.lower()]
     T = np.load(a.slice)
-    st = Starter(plot, T).run()
+    sizes = json.load(open(a.sizes)).get(plot["region"], {}) if a.sizes else {}
+    st = Starter(plot, T, sizes).run()
     out = st.export()
     json.dump(out, open(a.out, "w"), separators=(",", ":"), default=lambda v: v.item() if hasattr(v, "item") else str(v))
     print(f"{plot['name']}: square y {st.sqY}, wall {min(st.wall_r):.0f}-{max(st.wall_r):.0f}, {len(out['blocks'])} blocks, {len(out['areas'])} areas")
