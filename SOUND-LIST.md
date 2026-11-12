@@ -481,6 +481,7 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `mob.wither.hurt` | 1 | roletrials |
 | `mob.wither.shoot` | 1 | bestiary |
 | `mob.wolf.growl` | 1 | bestiary |
+| `mob.zombie.say` | 1 | unlocks |
 | `random.door_close` | 1 | vault |
 | `random.fuse` | 1 | siege |
 | `step.stone` | 1 | bestiary |

@@ -52,15 +52,19 @@ export function* huntPlan(probe, anchor, hunt) {
   const iceY = here ? anchor.y : mid.water ?? mid.ground;
   const center = { x: ax, y: iceY, z: az };
   const ops = [];
-  // freeze the disc: the top water (or, in a test world, the ground) becomes packed ice
-  for (let dx = -HUNT.disc; dx <= HUNT.disc; dx++) {
-    for (let dz = -HUNT.disc; dz <= HUNT.disc; dz++) {
-      if (Math.hypot(dx, dz) > HUNT.disc) continue;
-      if (here) { ops.push(op(dx, 0, dz, "minecraft:packed_ice")); for (let y = 1; y <= 4; y++) ops.push(op(dx, y, dz, "minecraft:air")); continue; }
-      const p = probe(ax + dx, az + dz);
-      if (p?.water !== undefined) ops.push(op(dx, p.water - iceY, dz, h(dx, dz) < 0.12 ? "minecraft:blue_ice" : "minecraft:packed_ice"));
+  // On the map the area stamp (landmark_stamps.js) lays the lake floor: snow with ice patches, drifts and ridges. The
+  // plan only freezes the ring that cracks when he comes. A flat test build (`here`) still gets a plain ice disc.
+  if (here) {
+    for (let dx = -HUNT.disc; dx <= HUNT.disc; dx++) {
+      for (let dz = -HUNT.disc; dz <= HUNT.disc; dz++) {
+        if (Math.hypot(dx, dz) > HUNT.disc) continue;
+        ops.push(op(dx, 0, dz, "minecraft:packed_ice"));
+        for (let y = 1; y <= 4; y++) ops.push(op(dx, y, dz, "minecraft:air"));
+      }
+      yield;
     }
-    yield;
+  } else {
+    for (const [dx, dz] of crackCells()) ops.push(op(dx, 0, dz, "minecraft:packed_ice"));
   }
   // the Hunter's Cairn in the middle
   for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) ops.push(op(dx, 1, dz, (dx + dz) % 2 ? "minecraft:cobblestone" : "minecraft:mossy_cobblestone"));
@@ -307,19 +311,13 @@ export function* cradlePlan(probe, anchor) {
       for (let y = -k; y <= 2; y++) ops.push(op(x, y, z, side && y <= 0 ? "minecraft:mud_bricks" : "minecraft:air"));
     }
   }
-  // the dead tree over it all
-  for (let y = 1; y <= 16; y++) for (let dx = -2; dx <= 2; dx++) for (let dz = -2; dz <= 2; dz++) {
-    if (Math.abs(dx) === 2 && Math.abs(dz) === 2 && y > 3) continue;
-    if (Math.max(Math.abs(dx), Math.abs(dz)) < 2 && y < 15) continue; // it is hollow
-    ops.push(op(dx, y, dz, "minecraft:mangrove_log", { pillar_axis: "y" }));
-  }
-  for (const [ux, uz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
-    for (let k = 3; k <= 8; k++) ops.push(op(ux * k, 14 + Math.floor(k / 3), uz * k, "minecraft:mangrove_log", { pillar_axis: ux ? "x" : "z" }));
-    ops.push(op(ux * 8, 15, uz * 8, "minecraft:hanging_roots"));
-  }
-  for (const [dx, dz] of [[-3, 0], [3, 0], [0, -3], [0, 3], [-3, 2], [2, -3]]) ops.push(op(dx, 1, dz, "minecraft:mangrove_roots"));
+  // the Cradle Tree itself stands over the cave as the site's landmark (landmark_stamps.js, map/structures/boss_landmarks.py)
   return { center, ops, info: {} };
 }
+// The Changeling Glade on the way in (drawn by the world builds thread as part of the area stamp): a sunken clearing
+// south of the cave where the Mother's changelings come for whoever walks through.
+export const GLADE = { dz: 47, r: 13, floor: -1, clear: 8 };
+export const inGlade = (c, l) => Math.hypot(l.x - (c.x + 0.5), l.z - (c.z + GLADE.dz + 0.5)) <= GLADE.r && l.y >= c.y + GLADE.floor && l.y <= c.y + GLADE.clear;
 export const inCradle = (c, l) => Math.hypot(l.x - (c.x + 0.5), l.z - (c.z + 0.5)) <= CRADLE.r && l.y > c.y + CRADLE.floor && l.y < c.y + CRADLE.floor + CRADLE.h + 1;
 
 // ===================================================================== Mirelight's five villagers
