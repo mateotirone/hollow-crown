@@ -237,7 +237,7 @@ export const SETTLER_LINES = {
 //   noPlan: charter buildings raised from their own block item, which need no plan.
 export const PLANS = {
   basics: ["cottage", "house", "well", "library"],
-  hall: { 2: ["market", "garden", "farmhouse", "mint"], 3: ["smithy", "stable", "townhouse", "inn"], 4: ["storehouse", "watchtower"] },
+  hall: { 2: ["market", "garden", "farmhouse", "mint", "townhouse"], 3: ["smithy", "stable", "inn"], 4: ["storehouse", "watchtower"] },
   noPlan: ["barracks"],
   foreignMul: 1.5,
   scrollLots: 2, // copying a plan you know onto a Plan Scroll at your Plan Book (plus one paper), to trade

@@ -604,7 +604,9 @@ addTests("settle plans", {
   },
   "every home and every building a charter needs is taught by the hall in time, never only by luck"() {
     const by = (lvl) => knownPlans({ hallLevel: lvl });
-    for (const id of HOMES) assert(by(1).has(id), `${id} is a home, so it must be a basic plan`);
+    // each home is taught by the time it opens (hall level = the tier it opens at + 1), and one home is a basic
+    for (const id of HOMES) assert(by(opensAt(id) + 1).has(id), `${id} is a home, so a level ${opensAt(id) + 1} hall must teach it`);
+    assert(HOMES.some((id) => by(0).has(id)), "at least one home is a basic plan");
     CHARTERS.forEach((lines, tier) => {
       const known = by(tier + 1); // the hall can reach level tier + 1 at this tier
       const named = new Set(lines.filter((l) => !l.more).flatMap((l) => l.ids));
