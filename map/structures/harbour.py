@@ -48,12 +48,12 @@ def _skill_scripts():
     raise SystemExit("harbour.py needs the minecraft-builder skill (.claude/skills/minecraft-builder, PR #155) or SKILL_DIR")
 
 
-def skill_build(name, door):
+def skill_build(name, door, folder="harbour_specs"):
     """harbour_specs/<name>.json built by the skill's engine into a Blueprint, door marker given (x, z)."""
     p = _skill_scripts()
     if p not in sys.path: sys.path.insert(0, p)
     import engine
-    spec = json.load(open(os.path.join(HERE, "harbour_specs", name + ".json")))
+    spec = json.load(open(os.path.join(HERE, folder, name + ".json")))
     bp = Blueprint(spec["name"]); engine.into_blueprint(bp, spec)
     bp.cells = {c: v for c, v in bp.cells.items() if v[0] != "air"}
     bp.markers["door"] = (door[0], 0, door[1])

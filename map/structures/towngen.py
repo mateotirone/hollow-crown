@@ -50,8 +50,10 @@ SITES = {
     # map towns (centre = the square genworld writes; town-sites.json)
     "Millbrook": dict(centre=(-60, -470), radius=70, size="town", fixed_square=True, square_r=7, seed=11,
                       roofs={"dark shingle": 5, "slate": 3, "warm red": 2}, accent="slate",
+                      first=("chapel",),        # Sister Wren's chapel claims its place on the square (storyline audit)
                       civic=[("chapel", lambda: vale_civic.chapel(name="millbrook_chapel")),
-                             ("clock tower", vale_civic.clock_tower)]),
+                             ("clock tower", vale_civic.clock_tower),
+                             ("bakery", lambda: __import__("story_builds").build("bakery"))]),
     "Kingsrest": dict(centre=(-118, -118), radius=90, size="town", fixed_square=True, square_r=9, seed=7, inn=True,
                       roofs={"slate": 4, "dark shingle": 3, "warm red": 2, "white": 1}, accent="copper",
                       civic=[("guildhall", vale_civic.guildhall), ("chapel", vale_civic.chapel)]),
@@ -658,14 +660,14 @@ class Town:
     def place_square_buildings(self):
         """Civic buildings and the inn on the square's edge, facing in."""
         out = []
-        makers = list(self.site.get("civic", []))
+        makers = [m for m in self.site.get("civic", []) if m[0] not in self.site.get("first", ())]
         if self.site.get("inn"): makers.insert(0, ("inn", lambda: vale.coaching_inn(style="tudor")))
         for name, mk in makers:
             bp = mk(); bp.kind = "civic"
             done = None
             for k in range(72):
                 a = 2 * math.pi * (k * 0.618 % 1)
-                for extra_r in (1, 2, 3, 5):
+                for extra_r in (1, 2, 3, 5, 7, 9, 11):
                     rr = self.sqR + 1 + extra_r
                     x, z = self.sq[0] + math.cos(a) * rr, self.sq[1] + math.sin(a) * rr
                     deg = snap_rot(self.sq[0] - x, self.sq[1] - z)
@@ -673,9 +675,10 @@ class Town:
                     if done: done["name"] = name; break
                 if done: break
             if not done: done = self.civic_on_street(bp, name)
+            if not done: done = self.civic_on_street(bp, name, near=self.sq, relief=9)   # anywhere on a street, nearest first
             if not done: print("no room for", name)
 
-    def civic_on_street(self, bp, name):
+    def civic_on_street(self, bp, name, near=None, relief=6):
         """Civic buildings that don't fit round the square front the main streets, nearest the square first."""
         cands = []
         for rd in self.roads:
@@ -689,10 +692,11 @@ class Town:
                     for sb in (1, 2, 3):
                         door = (int(round(x + nx * (hw + 0.5 + sb))), int(round(z + nz * (hw + 0.5 + sb))))
                         cands.append((math.hypot(door[0] - self.sq[0], door[1] - self.sq[1]), door, snap_rot(-nx, -nz)))
+        if near: cands = [(math.hypot(d[0] - near[0], d[1] - near[1]), d, g) for _, d, g in cands]
         cands.sort()
         for dist, door, deg in cands:
-            if dist > 0.7 * self.R: break
-            e = self.try_place(bp, deg, door, "civic", gap=1, max_relief=6)
+            if not near and dist > 0.7 * self.R: break
+            e = self.try_place(bp, deg, door, "civic", gap=1, max_relief=relief)
             if e: e["name"] = name; return e
         return None
 
@@ -1128,7 +1132,7 @@ class Town:
         self.bridge_plans, quays = [], []
         self.bridge_clear = {}
         for c in BR.crossings_from_cells(set(wet), walk, lambda x, z: water(x, z) if water(x, z) is not None else int(self.WL[self.ij(x, z)]),
-                                         lambda c: wet[c], region=self.region, path="town", rejects=quays):
+                                         lambda c: wet[c], region={"frost": "frostmarch", "salt": "saltreach", "ember": "emberwaste", "fen": "blackfen"}.get(self.region, self.region), path="town", rejects=quays):
             c.pop("_cells", None)
             c["ground"] = ground; c["name"] = f"{self.key}_bridge{len(self.bridge_plans)}"
             built = {cell: b for cell, b in BR.to_works(BR.bridge_blocks(c)).items() if b[0] != "air"}
@@ -1178,7 +1182,10 @@ class Town:
     # =========================================================================== run
     def run(self):
         self.square()
-        self.streets(); self.relax(); self.grade_verges()
+        self.claim_first()
+        self.streets()
+        for fr in getattr(self, "first_fronts", []): self.front_road(fr)
+        self.relax(); self.grade_verges()
         self.portions()
         self.place_square_buildings()
         self.houses(); self.relax()
@@ -1308,6 +1315,38 @@ class Town:
         self.station_axis = (x, z, deg); self.wall_region = region
         self.add_levels("station", e, [(st.capitalize(), bp if st == "grand" else getattr(stations, st)(region)) for st in stations.STAGES], align="origin")
         return e
+
+    def claim_first(self):
+        """Civic buildings named in site["first"] (Millbrook's chapel: Sister Wren's, on the square) claim their
+        ground facing the square before the streets go down, as the town hall does; a street joins the door."""
+        self.first_fronts = []
+        for name, mk in self.site.get("civic", []):
+            if name not in self.site.get("first", ()): continue
+            bp = mk(); bp.kind = "civic"; done = None
+            for extra_r in range(1, 20, 2):
+                for k in range(72):
+                    a = 2 * math.pi * k / 72
+                    rr = self.sqR + 1 + extra_r
+                    x, z = int(round(self.sq[0] + math.cos(a) * rr)), int(round(self.sq[1] + math.sin(a) * rr))
+                    deg = snap_rot(self.sq[0] - x, self.sq[1] - z)
+                    done = self.try_place(bp, deg, (x, z), "civic", gap=1, max_relief=8, need_walk=False)
+                    if done: break
+                if done: break
+            if not done: print("no room for", name); continue
+            done["name"] = name
+            f = ROT[deg]; self.first_fronts.append(((x, z), f, done["ground_y"]))
+
+    def front_road(self, front, kind="main"):
+        """A street from a door (front = (door xz, facing, floor y)) straight on to the streets, or by path search."""
+        (sx, sz), f, yf = front
+        for t in range(1, 60):
+            c = (sx + f[0] * t, sz + f[1] * t)
+            if not self.ok(*c) or self.at(self.WET, *c): break
+            if self.at(self.K, *c) >= 0:
+                self.lay([(sx + f[0] * k, sz + f[1] * k) for k in range(t + 1)], kind, k_start=2 * yf + 1, k_end=int(self.at(self.K, *c))); return
+        goals = [(int(i) + self.X0, int(j) + self.Z0) for i, j in np.argwhere((self.K >= 0) & (self.KIND >= PRIO["lane"]))]
+        p = self.astar((sx, sz), goals, kind, limit=3000) if goals else None
+        if p and len(p) > 1: self.lay(p, kind, k_start=2 * yf + 1, k_end=self.k_at(*p[-1]))
 
     def station_road(self, kind="main"):
         """A street from the station's front straight to the town's streets (or by path search if none ahead)."""

@@ -1063,11 +1063,17 @@ def sunscar_store(seed=67):
     door_marker(bp, 4, 1, 11); bp.markers["shopkeeper"] = (4, 1, 6)
     return finish(bp, P, "ember", "store")
 
+def _story(name):
+    import story_builds                    # the story places, built on the skill (story_specs/)
+    return story_builds.build(name)
+
 CIVIC = {
     "rimehold": [("hall", rimehold_hall), ("stave_chapel", rimehold_chapel),
-                 ("inn", lambda: inn("frost")), ("smithy", lambda: smithy("frost")), ("store", lambda: store("frost"))],
+                 ("inn", lambda: inn("frost")), ("smithy", lambda: smithy("frost")), ("store", lambda: store("frost")),
+                 ("net sheds", lambda: _story("net_sheds"))],
     "gulls_rest": [("inn", lambda: inn("salt")), ("smithy", lambda: smithy("salt")), ("store", lambda: store("salt"))],
-    "sunscar": [("market_hall", sunscar_market_hall), ("inn", sunscar_inn), ("smithy", sunscar_smithy), ("store", sunscar_store)],
+    "sunscar": [("market_hall", sunscar_market_hall), ("inn", sunscar_inn), ("smithy", sunscar_smithy), ("store", sunscar_store),
+                ("warden's office", lambda: _story("warden_office"))],
     "mirelight": [("inn", lambda: inn("fen")), ("smithy", lambda: smithy("fen")), ("store", lambda: store("fen"))],
 }
 SHORE = {

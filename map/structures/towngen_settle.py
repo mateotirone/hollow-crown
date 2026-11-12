@@ -572,6 +572,7 @@ class Settlement(Town):
         [("home", HOME + ("MF",))] * 3 + [("inn", ("L",)), ("barracks", ("L", "ML", "M", "MF")), ("work", ANY + ("MF",))],
         [("home", HOME + ("MF",))] * 4,
     ]
+    FARM_EDGE = True                     # the Farmhouse needs a plain Medium tagged field_edge (settlement thread)
     def charter(self):
         """Do the slots open by each tier hold every building that tier's charter (and the ones before) needs?
         Plus a field by Town (the Farmhouse's). Returns (passes, shortfall: buildings with no slot, summed)."""
@@ -581,7 +582,7 @@ class Settlement(Town):
             for e in self.slots:
                 if e["opensAt"] > t or (t >= 3 and "hall4" in self.tag(e)[0]): continue
                 c = "ML" if e["size"] == "M" and e.get("long") else e["size"]
-                if c == "M" and "field_edge" in self.tag(e)[0]: c = "MF"
+                if c == "M" and (not self.FARM_EDGE or "field_edge" in self.tag(e)[0]): c = "MF"
                 sup[c] += 1
             needs = [n for tt in range(t + 1) for n in self.CHARTER_NEEDS[tt]]
             needs.sort(key=lambda n: len(n[1]))                # strictest first, each into its smallest class

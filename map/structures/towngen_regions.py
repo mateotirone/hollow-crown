@@ -152,8 +152,13 @@ class RegionTown(Town):
         makers = list(RT.CIVIC.get(self.town, []))          # (the town hall claimed its ground first: hall_first)
         built = [(name, mk()) for name, mk in makers]
         built.sort(key=lambda t: -len(t[1].cells))
+        import story_builds
         for name, bp in built:
             bp.kind = "civic"; done = None
+            if name in story_builds.NEAR:                     # placed by what it serves (the net sheds: the lake)
+                done = self.civic_on_street(bp, name, near=story_builds.NEAR[name])
+                if not done: print("no room for", name)
+                continue
             for k in range(72):
                 a = 2 * math.pi * (k * 0.618 % 1)
                 for extra_r in ((1, 2, 3, 5, 7, 9, 11, 13, 15) if name == "town hall" else (1, 2, 3, 5, 7)):

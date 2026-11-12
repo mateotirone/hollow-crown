@@ -1,0 +1,11 @@
+{"name": "millbrook_bakery", "edition": "bedrock",
+ "parts": [
+  {"part": "house", "style": "vale_brick", "rect": [-4, -5, 4, 5], "storeys": [5, 4], "jetty": ["n", "s"],
+   "door": {"side": "s"}, "roof": {"type": "gable", "ridge": "x"},
+   "storey_style": [{"frame_kind": "stone", "infill": "VAL-01"}, {}]},
+  {"part": "lean_to", "rect": [5, -3, 7, 3], "against": "w", "top": 4}
+ ],
+ "place": [
+  [6, 1, -2, "smoker", {"facing": "e"}], [6, 1, -1, "furnace", {"facing": "e"}], [6, 1, 0, "smoker", {"facing": "e"}],
+  [6, 1, 2, "barrel", {"facing": "up"}], [6, 2, 2, "hay_block"], [7, 1, 3, "barrel", {"facing": "up"}]
+ ]}
