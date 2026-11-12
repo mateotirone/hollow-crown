@@ -779,7 +779,7 @@
     "type": "panel",
     "size": [
       276,
-      158
+      212
     ],
     "controls": [
       {
@@ -868,7 +868,7 @@
           "type": "grid",
           "size": [
             260,
-            108
+            162
           ],
           "anchor_from": "top_middle",
           "anchor_to": "top_middle",
@@ -879,7 +879,7 @@
           "layer": 4,
           "grid_dimensions": [
             5,
-            2
+            3
           ],
           "grid_item_template": "server_form.hc_pcell",
           "grid_fill_direction": "horizontal",

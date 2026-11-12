@@ -30,6 +30,2665 @@
     "events": {
      "step": "mob.ravager.step"
     }
+   },
+   "siege:archer": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "hurt": {
+      "sound": "game.player.hurt",
+      "pitch": [
+       0.85,
+       0.95
+      ],
+      "volume": 0.8
+     },
+     "death": {
+      "sound": "game.player.die",
+      "pitch": [
+       0.82,
+       0.88
+      ],
+      "volume": 0.8
+     }
+    }
+   },
+   "siege:ash_scarab": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": {
+      "sound": "mob.silverfish.say",
+      "pitch": [
+       0.6,
+       0.66
+      ],
+      "volume": 0.5
+     },
+     "hurt": {
+      "sound": "mob.silverfish.hit",
+      "pitch": [
+       0.6,
+       0.66
+      ],
+      "volume": 0.8
+     },
+     "death": {
+      "sound": "mob.silverfish.kill",
+      "pitch": [
+       0.6,
+       0.64
+      ],
+      "volume": 0.8
+     },
+     "step": {
+      "sound": "mob.silverfish.step",
+      "pitch": [
+       0.6,
+       0.66
+      ],
+      "volume": 0.6
+     }
+    }
+   },
+   "siege:ash_seneschal": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": {
+      "sound": "mob.blaze.breathe",
+      "pitch": [
+       0.5,
+       0.55
+      ],
+      "volume": 0.6
+     },
+     "hurt": {
+      "sound": "mob.blaze.hit",
+      "pitch": [
+       0.55,
+       0.6
+      ],
+      "volume": 1.0
+     },
+     "death": {
+      "sound": "mob.blaze.death",
+      "pitch": [
+       0.5,
+       0.54
+      ],
+      "volume": 1.0
+     }
+    }
+   },
+   "siege:ashen_knight": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "hurt": {
+      "sound": "mob.vindicator.hurt",
+      "pitch": [
+       0.86,
+       0.96
+      ],
+      "volume": 0.9
+     },
+     "death": {
+      "sound": "mob.vindicator.death",
+      "pitch": [
+       0.8099999999999999,
+       0.91
+      ],
+      "volume": 0.9
+     },
+     "step": {
+      "sound": "armor.equip_chain",
+      "pitch": [
+       0.8,
+       0.9
+      ],
+      "volume": 0.2
+     }
+    }
+   },
+   "siege:ashen_squire": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "hurt": {
+      "sound": "mob.pillager.hurt",
+      "pitch": [
+       1.0,
+       1.1
+      ],
+      "volume": 0.9
+     },
+     "death": {
+      "sound": "mob.pillager.death",
+      "pitch": [
+       0.95,
+       1.05
+      ],
+      "volume": 0.9
+     }
+    }
+   },
+   "siege:ballista_engine": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "hurt": {
+      "sound": "hit.wood",
+      "pitch": [
+       0.6,
+       0.7
+      ],
+      "volume": 1
+     },
+     "death": {
+      "sound": "block.scaffolding.break",
+      "pitch": [
+       0.5,
+       0.55
+      ],
+      "volume": 1
+     }
+    }
+   },
+   "siege:barrow_wight": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": {
+      "sound": "mob.stray.ambient",
+      "pitch": [
+       0.6,
+       0.66
+      ],
+      "volume": 0.6
+     },
+     "hurt": {
+      "sound": "mob.stray.hurt",
+      "pitch": [
+       0.6,
+       0.66
+      ],
+      "volume": 0.9
+     },
+     "death": {
+      "sound": "mob.stray.death",
+      "pitch": [
+       0.58,
+       0.62
+      ],
+      "volume": 0.9
+     },
+     "step": {
+      "sound": "mob.stray.step",
+      "pitch": [
+       0.7,
+       0.76
+      ],
+      "volume": 0.6
+     }
+    }
+   },
+   "siege:bell_ringer": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": {
+      "sound": "block.bell.hit",
+      "pitch": [
+       0.5,
+       0.56
+      ],
+      "volume": 0.3
+     },
+     "hurt": {
+      "sound": "mob.pillager.hurt",
+      "pitch": [
+       0.7,
+       0.8
+      ],
+      "volume": 0.9
+     },
+     "death": {
+      "sound": "mob.pillager.death",
+      "pitch": [
+       0.62,
+       0.68
+      ],
+      "volume": 0.9
+     }
+    }
+   },
+   "siege:body": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": "",
+     "hurt": "",
+     "death": ""
+    }
+   },
+   "siege:bog_hag": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": {
+      "sound": "mob.witch.ambient",
+      "pitch": [
+       0.7,
+       0.76
+      ],
+      "volume": 0.6
+     },
+     "hurt": {
+      "sound": "mob.witch.hurt",
+      "pitch": [
+       0.7,
+       0.76
+      ],
+      "volume": 0.9
+     },
+     "death": {
+      "sound": "mob.witch.death",
+      "pitch": [
+       0.68,
+       0.72
+      ],
+      "volume": 0.9
+     }
+    }
+   },
+   "siege:brine_lurker": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": {
+      "sound": "mob.guardian.land_idle",
+      "pitch": [
+       0.5,
+       0.56
+      ],
+      "volume": 0.6
+     },
+     "hurt": {
+      "sound": "mob.guardian.land_hit",
+      "pitch": [
+       0.5,
+       0.56
+      ],
+      "volume": 0.9
+     },
+     "death": {
+      "sound": "mob.guardian.land_death",
+      "pitch": [
+       0.5,
+       0.55
+      ],
+      "volume": 0.9
+     },
+     "step": {
+      "sound": "mob.drowned.step",
+      "pitch": [
+       0.6,
+       0.66
+      ],
+      "volume": 0.6
+     }
+    }
+   },
+   "siege:champion_knight": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "hurt": {
+      "sound": "mob.vindicator.hurt",
+      "pitch": [
+       0.9,
+       1.0
+      ],
+      "volume": 0.9
+     },
+     "death": {
+      "sound": "mob.vindicator.death",
+      "pitch": [
+       0.85,
+       0.9500000000000001
+      ],
+      "volume": 0.9
+     }
+    }
+   },
+   "siege:champion_lord": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "hurt": {
+      "sound": "mob.vindicator.hurt",
+      "pitch": [
+       0.78,
+       0.88
+      ],
+      "volume": 0.9
+     },
+     "death": {
+      "sound": "mob.vindicator.death",
+      "pitch": [
+       0.73,
+       0.8300000000000001
+      ],
+      "volume": 0.9
+     }
+    }
+   },
+   "siege:champion_retainer": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "hurt": {
+      "sound": "mob.pillager.hurt",
+      "pitch": [
+       1.0,
+       1.1
+      ],
+      "volume": 0.9
+     },
+     "death": {
+      "sound": "mob.pillager.death",
+      "pitch": [
+       0.95,
+       1.05
+      ],
+      "volume": 0.9
+     }
+    }
+   },
+   "siege:champion_sorcerer": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "hurt": {
+      "sound": "mob.evocation_illager.hurt",
+      "pitch": [
+       0.9,
+       1.0
+      ],
+      "volume": 0.9
+     },
+     "death": {
+      "sound": "mob.evocation_illager.death",
+      "pitch": [
+       0.85,
+       0.9500000000000001
+      ],
+      "volume": 0.9
+     }
+    }
+   },
+   "siege:changeling": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": {
+      "sound": "mob.allay.idle",
+      "pitch": [
+       0.6,
+       0.66
+      ],
+      "volume": 0.5
+     },
+     "hurt": {
+      "sound": "mob.fox.hurt",
+      "pitch": [
+       0.7,
+       0.78
+      ],
+      "volume": 0.8
+     },
+     "death": {
+      "sound": "mob.fox.death",
+      "pitch": [
+       0.6,
+       0.66
+      ],
+      "volume": 0.8
+     }
+    }
+   },
+   "siege:chapel_bell": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "hurt": {
+      "sound": "block.bell.hit",
+      "pitch": [
+       0.6,
+       0.64
+      ],
+      "volume": 0.7
+     },
+     "death": {
+      "sound": "block.bell.hit",
+      "pitch": [
+       0.4,
+       0.42
+      ],
+      "volume": 1
+     }
+    }
+   },
+   "siege:choir_conductor": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "hurt": {
+      "sound": "mob.evocation_illager.hurt",
+      "pitch": [
+       0.6,
+       0.65
+      ],
+      "volume": 1.0
+     },
+     "death": {
+      "sound": "mob.wither.death",
+      "pitch": [
+       0.8,
+       0.85
+      ],
+      "volume": 0.6
+     }
+    }
+   },
+   "siege:choir_singer": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "hurt": {
+      "sound": "mob.allay.hurt",
+      "pitch": [
+       0.5,
+       0.55
+      ],
+      "volume": 0.7
+     },
+     "death": {
+      "sound": "mob.allay.death",
+      "pitch": [
+       0.45,
+       0.5
+      ],
+      "volume": 0.7
+     }
+    }
+   },
+   "siege:clockwork_reeve": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": {
+      "sound": "random.click",
+      "pitch": [
+       0.5,
+       0.56
+      ],
+      "volume": 0.8
+     },
+     "hurt": {
+      "sound": "mob.irongolem.hit",
+      "pitch": [
+       0.7,
+       0.76
+      ],
+      "volume": 1.0
+     },
+     "death": {
+      "sound": "mob.irongolem.death",
+      "pitch": [
+       0.6,
+       0.64
+      ],
+      "volume": 1.0
+     },
+     "step": {
+      "sound": "mob.irongolem.walk",
+      "pitch": [
+       0.7,
+       0.76
+      ],
+      "volume": 0.8
+     }
+    }
+   },
+   "siege:crossbowman": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "hurt": {
+      "sound": "game.player.hurt",
+      "pitch": [
+       0.85,
+       0.95
+      ],
+      "volume": 0.8
+     },
+     "death": {
+      "sound": "game.player.die",
+      "pitch": [
+       0.82,
+       0.88
+      ],
+      "volume": 0.8
+     }
+    }
+   },
+   "siege:crow_mage": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": {
+      "sound": "mob.evocation_illager.ambient",
+      "pitch": [
+       0.7,
+       0.78
+      ],
+      "volume": 0.6
+     },
+     "hurt": {
+      "sound": "mob.evocation_illager.hurt",
+      "pitch": [
+       0.7,
+       0.78
+      ],
+      "volume": 0.9
+     },
+     "death": {
+      "sound": "mob.evocation_illager.death",
+      "pitch": [
+       0.66,
+       0.7
+      ],
+      "volume": 0.9
+     }
+    }
+   },
+   "siege:crown_stand": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": "",
+     "hurt": "",
+     "death": ""
+    }
+   },
+   "siege:drowned_bride": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": {
+      "sound": "mob.allay.idle",
+      "pitch": [
+       0.45,
+       0.5
+      ],
+      "volume": 0.6
+     },
+     "hurt": {
+      "sound": "mob.drowned.hurt_water",
+      "pitch": [
+       0.8,
+       0.86
+      ],
+      "volume": 1.0
+     },
+     "death": {
+      "sound": "mob.elderguardian.death",
+      "pitch": [
+       0.9,
+       0.95
+      ],
+      "volume": 0.8
+     }
+    }
+   },
+   "siege:dune_wyrm": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": {
+      "sound": "mob.sniffer.long_sniff",
+      "pitch": [
+       0.5,
+       0.55
+      ],
+      "volume": 0.6
+     },
+     "hurt": {
+      "sound": "mob.hoglin.hurt",
+      "pitch": [
+       0.6,
+       0.66
+      ],
+      "volume": 0.9
+     },
+     "death": {
+      "sound": "mob.hoglin.death",
+      "pitch": [
+       0.5,
+       0.55
+      ],
+      "volume": 0.9
+     },
+     "step": {
+      "sound": "dig.sand",
+      "pitch": [
+       0.7,
+       0.8
+      ],
+      "volume": 0.6
+     }
+    }
+   },
+   "siege:echo_hound": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": {
+      "sound": "mob.wolf.big.whine",
+      "pitch": [
+       0.6,
+       0.66
+      ],
+      "volume": 0.5
+     },
+     "hurt": {
+      "sound": "mob.wolf.big.hurt",
+      "pitch": [
+       0.68,
+       0.75
+      ],
+      "volume": 0.9
+     },
+     "death": {
+      "sound": "mob.wolf.big.death",
+      "pitch": [
+       0.6,
+       0.65
+      ],
+      "volume": 0.9
+     },
+     "step": {
+      "sound": "mob.wolf.step",
+      "pitch": [
+       0.8,
+       0.9
+      ],
+      "volume": 0.6
+     }
+    }
+   },
+   "siege:frost_stag": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": {
+      "sound": "mob.goat.ambient",
+      "pitch": [
+       0.6,
+       0.66
+      ],
+      "volume": 0.6
+     },
+     "hurt": {
+      "sound": "mob.goat.hurt",
+      "pitch": [
+       0.6,
+       0.66
+      ],
+      "volume": 0.9
+     },
+     "death": {
+      "sound": "mob.goat.death",
+      "pitch": [
+       0.58,
+       0.62
+      ],
+      "volume": 0.9
+     },
+     "step": {
+      "sound": "mob.goat.step",
+      "pitch": [
+       0.8,
+       0.9
+      ],
+      "volume": 0.6
+     }
+    }
+   },
+   "siege:gatebreaker": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": {
+      "sound": "mob.warden.idle",
+      "pitch": [
+       0.8,
+       0.86
+      ],
+      "volume": 0.8
+     },
+     "hurt": {
+      "sound": "mob.warden.hurt",
+      "pitch": [
+       0.85,
+       0.9
+      ],
+      "volume": 1.0
+     },
+     "death": {
+      "sound": "mob.warden.death",
+      "pitch": [
+       0.85,
+       0.9
+      ],
+      "volume": 1.0
+     },
+     "step": {
+      "sound": "mob.warden.step",
+      "pitch": [
+       0.85,
+       0.9
+      ],
+      "volume": 0.8
+     }
+    }
+   },
+   "siege:gloamwing": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": {
+      "sound": "mob.phantom.idle",
+      "pitch": [
+       0.5,
+       0.56
+      ],
+      "volume": 0.4
+     },
+     "hurt": {
+      "sound": "mob.phantom.hurt",
+      "pitch": [
+       0.6,
+       0.66
+      ],
+      "volume": 0.7
+     },
+     "death": {
+      "sound": "mob.phantom.death",
+      "pitch": [
+       0.58,
+       0.62
+      ],
+      "volume": 0.7
+     }
+    }
+   },
+   "siege:grave_keeper": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "hurt": {
+      "sound": "game.player.hurt",
+      "pitch": [
+       1.0,
+       1.1
+      ],
+      "volume": 0.7
+     },
+     "death": {
+      "sound": "game.player.die",
+      "pitch": [
+       1.0,
+       1.05
+      ],
+      "volume": 0.7
+     }
+    }
+   },
+   "siege:grey_axeman": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": {
+      "sound": "mob.vindicator.idle",
+      "pitch": [
+       0.72,
+       0.7999999999999999
+      ],
+      "volume": 0.63
+     },
+     "hurt": {
+      "sound": "mob.vindicator.hurt",
+      "pitch": [
+       0.72,
+       0.82
+      ],
+      "volume": 0.9
+     },
+     "death": {
+      "sound": "mob.vindicator.death",
+      "pitch": [
+       0.6699999999999999,
+       0.77
+      ],
+      "volume": 0.9
+     }
+    }
+   },
+   "siege:grey_bellcutter": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": {
+      "sound": "mob.pillager.idle",
+      "pitch": [
+       0.74,
+       0.82
+      ],
+      "volume": 0.63
+     },
+     "hurt": {
+      "sound": "mob.pillager.hurt",
+      "pitch": [
+       0.74,
+       0.84
+      ],
+      "volume": 0.9
+     },
+     "death": {
+      "sound": "mob.pillager.death",
+      "pitch": [
+       0.69,
+       0.79
+      ],
+      "volume": 0.9
+     }
+    }
+   },
+   "siege:grey_bowman": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": {
+      "sound": "mob.pillager.idle",
+      "pitch": [
+       0.8,
+       0.88
+      ],
+      "volume": 0.63
+     },
+     "hurt": {
+      "sound": "mob.pillager.hurt",
+      "pitch": [
+       0.8,
+       0.9
+      ],
+      "volume": 0.9
+     },
+     "death": {
+      "sound": "mob.pillager.death",
+      "pitch": [
+       0.75,
+       0.8500000000000001
+      ],
+      "volume": 0.9
+     }
+    }
+   },
+   "siege:grey_serjeant": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": {
+      "sound": "mob.vindicator.idle",
+      "pitch": [
+       0.64,
+       0.72
+      ],
+      "volume": 0.63
+     },
+     "hurt": {
+      "sound": "mob.vindicator.hurt",
+      "pitch": [
+       0.64,
+       0.74
+      ],
+      "volume": 0.9
+     },
+     "death": {
+      "sound": "mob.vindicator.death",
+      "pitch": [
+       0.59,
+       0.6900000000000001
+      ],
+      "volume": 0.9
+     },
+     "step": {
+      "sound": "armor.equip_chain",
+      "pitch": [
+       0.7,
+       0.8
+      ],
+      "volume": 0.25
+     }
+    }
+   },
+   "siege:grey_spearman": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": {
+      "sound": "mob.vindicator.idle",
+      "pitch": [
+       0.78,
+       0.86
+      ],
+      "volume": 0.63
+     },
+     "hurt": {
+      "sound": "mob.vindicator.hurt",
+      "pitch": [
+       0.78,
+       0.88
+      ],
+      "volume": 0.9
+     },
+     "death": {
+      "sound": "mob.vindicator.death",
+      "pitch": [
+       0.73,
+       0.8300000000000001
+      ],
+      "volume": 0.9
+     }
+    }
+   },
+   "siege:heart_stand": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": "",
+     "hurt": "",
+     "death": ""
+    }
+   },
+   "siege:hollow_bolt": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": "",
+     "hurt": "",
+     "death": ""
+    }
+   },
+   "siege:hollow_crow": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": {
+      "sound": "mob.parrot.idle",
+      "pitch": [
+       0.5,
+       0.56
+      ],
+      "volume": 0.5
+     },
+     "hurt": {
+      "sound": "mob.parrot.hurt",
+      "pitch": [
+       0.55,
+       0.62
+      ],
+      "volume": 0.8
+     },
+     "death": {
+      "sound": "mob.bat.death",
+      "pitch": [
+       0.5,
+       0.55
+      ],
+      "volume": 0.7
+     }
+    }
+   },
+   "siege:hollow_footman": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": {
+      "sound": "mob.zombie_villager.say",
+      "pitch": [
+       0.62,
+       0.7
+      ],
+      "volume": 0.6
+     },
+     "hurt": {
+      "sound": "mob.zombie_villager.hurt",
+      "pitch": [
+       0.65,
+       0.75
+      ],
+      "volume": 0.9
+     },
+     "death": {
+      "sound": "mob.zombie_villager.death",
+      "pitch": [
+       0.6,
+       0.66
+      ],
+      "volume": 0.9
+     }
+    }
+   },
+   "siege:hollow_regent": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "hurt": {
+      "sound": "mob.evocation_illager.hurt",
+      "pitch": [
+       0.55,
+       0.6
+      ],
+      "volume": 1.0
+     },
+     "death": {
+      "sound": "mob.wither.death",
+      "pitch": [
+       0.6,
+       0.65
+      ],
+      "volume": 0.6
+     }
+    }
+   },
+   "siege:hollow_warlord": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": {
+      "sound": "mob.vindicator.idle",
+      "pitch": [
+       0.6,
+       0.6799999999999999
+      ],
+      "volume": 0.7
+     },
+     "hurt": {
+      "sound": "mob.vindicator.hurt",
+      "pitch": [
+       0.6,
+       0.7
+      ],
+      "volume": 1
+     },
+     "death": {
+      "sound": "mob.vindicator.death",
+      "pitch": [
+       0.5499999999999999,
+       0.65
+      ],
+      "volume": 1
+     },
+     "step": {
+      "sound": "mob.irongolem.walk",
+      "pitch": [
+       0.9,
+       1.0
+      ],
+      "volume": 0.45
+     }
+    }
+   },
+   "siege:inquisitor": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": {
+      "sound": "mob.evocation_illager.ambient",
+      "pitch": [
+       0.86,
+       0.94
+      ],
+      "volume": 0.63
+     },
+     "hurt": {
+      "sound": "mob.evocation_illager.hurt",
+      "pitch": [
+       0.86,
+       0.96
+      ],
+      "volume": 0.9
+     },
+     "death": {
+      "sound": "mob.evocation_illager.death",
+      "pitch": [
+       0.8099999999999999,
+       0.91
+      ],
+      "volume": 0.9
+     }
+    }
+   },
+   "siege:job_npc": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "hurt": {
+      "sound": "game.player.hurt",
+      "pitch": [
+       1.0,
+       1.1
+      ],
+      "volume": 0.7
+     },
+     "death": {
+      "sound": "game.player.die",
+      "pitch": [
+       1.0,
+       1.05
+      ],
+      "volume": 0.7
+     }
+    }
+   },
+   "siege:keep_heart": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "hurt": {
+      "sound": "hit.amethyst_block",
+      "pitch": [
+       0.5,
+       0.56
+      ],
+      "volume": 1
+     },
+     "death": {
+      "sound": "break.amethyst_block",
+      "pitch": [
+       0.4,
+       0.45
+      ],
+      "volume": 1
+     }
+    }
+   },
+   "siege:knight": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "hurt": {
+      "sound": "game.player.hurt",
+      "pitch": [
+       0.85,
+       0.95
+      ],
+      "volume": 0.8
+     },
+     "death": {
+      "sound": "game.player.die",
+      "pitch": [
+       0.82,
+       0.88
+      ],
+      "volume": 0.8
+     }
+    }
+   },
+   "siege:label": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": "",
+     "hurt": "",
+     "death": ""
+    }
+   },
+   "siege:lost_villager": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": {
+      "sound": "mob.villager.idle",
+      "pitch": [
+       0.55,
+       0.62
+      ],
+      "volume": 0.5
+     },
+     "hurt": {
+      "sound": "mob.villager.hit",
+      "pitch": [
+       0.6,
+       0.66
+      ],
+      "volume": 0.8
+     },
+     "death": {
+      "sound": "mob.zombie_villager.death",
+      "pitch": [
+       0.7,
+       0.75
+      ],
+      "volume": 0.8
+     }
+    }
+   },
+   "siege:man_at_arms": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "hurt": {
+      "sound": "game.player.hurt",
+      "pitch": [
+       0.85,
+       0.95
+      ],
+      "volume": 0.8
+     },
+     "death": {
+      "sound": "game.player.die",
+      "pitch": [
+       0.82,
+       0.88
+      ],
+      "volume": 0.8
+     }
+    }
+   },
+   "siege:mire_toad": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": {
+      "sound": "mob.frog.ambient",
+      "pitch": [
+       0.45,
+       0.5
+      ],
+      "volume": 0.9
+     },
+     "hurt": {
+      "sound": "mob.frog.hurt",
+      "pitch": [
+       0.5,
+       0.55
+      ],
+      "volume": 0.9
+     },
+     "death": {
+      "sound": "mob.frog.death",
+      "pitch": [
+       0.48,
+       0.52
+      ],
+      "volume": 0.9
+     },
+     "step": {
+      "sound": "mob.frog.step",
+      "pitch": [
+       0.5,
+       0.56
+      ],
+      "volume": 0.7
+     }
+    }
+   },
+   "siege:mirror_knight": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": {
+      "sound": "chime.amethyst_block",
+      "pitch": [
+       0.6,
+       0.66
+      ],
+      "volume": 0.4
+     },
+     "hurt": {
+      "sound": "hit.amethyst_block",
+      "pitch": [
+       0.7,
+       0.8
+      ],
+      "volume": 1
+     },
+     "death": {
+      "sound": "random.glass",
+      "pitch": [
+       0.7,
+       0.75
+      ],
+      "volume": 0.8
+     },
+     "step": {
+      "sound": "step.amethyst_block",
+      "pitch": [
+       0.8,
+       0.9
+      ],
+      "volume": 0.5
+     }
+    }
+   },
+   "siege:mother_echo": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "hurt": {
+      "sound": "mob.witch.hurt",
+      "pitch": [
+       0.9,
+       1.0
+      ],
+      "volume": 0.5
+     },
+     "death": {
+      "sound": "mob.vex.death",
+      "pitch": [
+       0.5,
+       0.55
+      ],
+      "volume": 0.6
+     }
+    }
+   },
+   "siege:mother_of_changelings": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": {
+      "sound": "mob.witch.ambient",
+      "pitch": [
+       0.5,
+       0.55
+      ],
+      "volume": 0.6
+     },
+     "hurt": {
+      "sound": "mob.witch.hurt",
+      "pitch": [
+       0.55,
+       0.6
+      ],
+      "volume": 1.0
+     },
+     "death": {
+      "sound": "mob.ghast.death",
+      "pitch": [
+       0.5,
+       0.54
+      ],
+      "volume": 0.7
+     }
+    }
+   },
+   "siege:omen_raven": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": {
+      "sound": "mob.parrot.idle",
+      "pitch": [
+       0.42,
+       0.48
+      ],
+      "volume": 0.4
+     },
+     "hurt": {
+      "sound": "mob.parrot.hurt",
+      "pitch": [
+       0.5,
+       0.55
+      ],
+      "volume": 0.6
+     },
+     "death": {
+      "sound": "mob.bat.death",
+      "pitch": [
+       0.45,
+       0.5
+      ],
+      "volume": 0.6
+     }
+    }
+   },
+   "siege:oswin_reflection": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": "",
+     "hurt": {
+      "sound": "mob.vex.hurt",
+      "pitch": [
+       0.4,
+       0.45
+      ],
+      "volume": 0.4
+     },
+     "death": {
+      "sound": "random.glass",
+      "pitch": [
+       0.5,
+       0.55
+      ],
+      "volume": 0.4
+     }
+    }
+   },
+   "siege:oswin_the_last": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": {
+      "sound": "mob.wither.ambient",
+      "pitch": [
+       0.45,
+       0.5
+      ],
+      "volume": 0.4
+     },
+     "hurt": {
+      "sound": "mob.evocation_illager.hurt",
+      "pitch": [
+       0.5,
+       0.55
+      ],
+      "volume": 1.0
+     },
+     "death": {
+      "sound": "mob.wither.death",
+      "pitch": [
+       0.55,
+       0.58
+      ],
+      "volume": 0.7
+     }
+    }
+   },
+   "siege:pale_huntsman": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": {
+      "sound": "mob.horse.skeleton.idle",
+      "pitch": [
+       0.6,
+       0.66
+      ],
+      "volume": 0.6
+     },
+     "hurt": {
+      "sound": "mob.stray.hurt",
+      "pitch": [
+       0.5,
+       0.56
+      ],
+      "volume": 1.0
+     },
+     "death": {
+      "sound": "mob.horse.skeleton.death",
+      "pitch": [
+       0.5,
+       0.55
+      ],
+      "volume": 1.0
+     }
+    }
+   },
+   "siege:pikeman": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "hurt": {
+      "sound": "game.player.hurt",
+      "pitch": [
+       0.85,
+       0.95
+      ],
+      "volume": 0.8
+     },
+     "death": {
+      "sound": "game.player.die",
+      "pitch": [
+       0.82,
+       0.88
+      ],
+      "volume": 0.8
+     }
+    }
+   },
+   "siege:portrait": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": "",
+     "hurt": "",
+     "death": ""
+    }
+   },
+   "siege:post_marker": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": "",
+     "hurt": "",
+     "death": ""
+    }
+   },
+   "siege:pretender_blade": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": {
+      "sound": "mob.pillager.idle",
+      "pitch": [
+       0.82,
+       0.8999999999999999
+      ],
+      "volume": 0.63
+     },
+     "hurt": {
+      "sound": "mob.pillager.hurt",
+      "pitch": [
+       0.82,
+       0.9199999999999999
+      ],
+      "volume": 0.9
+     },
+     "death": {
+      "sound": "mob.pillager.death",
+      "pitch": [
+       0.7699999999999999,
+       0.87
+      ],
+      "volume": 0.9
+     }
+    }
+   },
+   "siege:pretender_brute": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": {
+      "sound": "mob.piglin_brute.ambient",
+      "pitch": [
+       0.55,
+       0.6
+      ],
+      "volume": 0.6
+     },
+     "hurt": {
+      "sound": "mob.piglin_brute.hurt",
+      "pitch": [
+       0.55,
+       0.6
+      ],
+      "volume": 1.0
+     },
+     "death": {
+      "sound": "mob.piglin_brute.death",
+      "pitch": [
+       0.5,
+       0.55
+      ],
+      "volume": 1.0
+     },
+     "step": {
+      "sound": "mob.irongolem.walk",
+      "pitch": [
+       0.9,
+       1.0
+      ],
+      "volume": 0.45
+     }
+    }
+   },
+   "siege:pretender_seer": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": {
+      "sound": "mob.evocation_illager.ambient",
+      "pitch": [
+       0.8,
+       0.88
+      ],
+      "volume": 0.63
+     },
+     "hurt": {
+      "sound": "mob.evocation_illager.hurt",
+      "pitch": [
+       0.8,
+       0.9
+      ],
+      "volume": 0.9
+     },
+     "death": {
+      "sound": "mob.evocation_illager.death",
+      "pitch": [
+       0.75,
+       0.8500000000000001
+      ],
+      "volume": 0.9
+     }
+    }
+   },
+   "siege:quartermaster": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "hurt": {
+      "sound": "game.player.hurt",
+      "pitch": [
+       1.0,
+       1.1
+      ],
+      "volume": 0.7
+     },
+     "death": {
+      "sound": "game.player.die",
+      "pitch": [
+       1.0,
+       1.05
+      ],
+      "volume": 0.7
+     }
+    }
+   },
+   "siege:ram_crew": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "hurt": {
+      "sound": "game.player.hurt",
+      "pitch": [
+       0.85,
+       0.95
+      ],
+      "volume": 0.8
+     },
+     "death": {
+      "sound": "game.player.die",
+      "pitch": [
+       0.82,
+       0.88
+      ],
+      "volume": 0.8
+     }
+    }
+   },
+   "siege:ram_engine": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "hurt": {
+      "sound": "hit.wood",
+      "pitch": [
+       0.6,
+       0.7
+      ],
+      "volume": 1
+     },
+     "death": {
+      "sound": "block.scaffolding.break",
+      "pitch": [
+       0.5,
+       0.55
+      ],
+      "volume": 1
+     }
+    }
+   },
+   "siege:reeve_cog": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "hurt": {
+      "sound": "mob.irongolem.hit",
+      "pitch": [
+       1.3,
+       1.4
+      ],
+      "volume": 0.6
+     },
+     "death": {
+      "sound": "random.anvil_land",
+      "pitch": [
+       1.6,
+       1.7
+      ],
+      "volume": 0.4
+     },
+     "step": {
+      "sound": "mob.irongolem.walk",
+      "pitch": [
+       1.5,
+       1.6
+      ],
+      "volume": 0.35
+     }
+    }
+   },
+   "siege:resting_heart": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": "",
+     "hurt": "",
+     "death": ""
+    }
+   },
+   "siege:reveal_boy": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": "",
+     "hurt": "",
+     "death": ""
+    }
+   },
+   "siege:reveal_king": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": "",
+     "hurt": "",
+     "death": ""
+    }
+   },
+   "siege:reveal_morvane": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": "",
+     "hurt": "",
+     "death": ""
+    }
+   },
+   "siege:rime_pillar": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "hurt": {
+      "sound": "hit.amethyst_block",
+      "pitch": [
+       0.6,
+       0.7
+      ],
+      "volume": 0.8
+     },
+     "death": {
+      "sound": "random.glass",
+      "pitch": [
+       0.6,
+       0.65
+      ],
+      "volume": 0.9
+     }
+    }
+   },
+   "siege:rimewolf": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": {
+      "sound": "mob.wolf.big.growl",
+      "pitch": [
+       0.7,
+       0.76
+      ],
+      "volume": 0.6
+     },
+     "hurt": {
+      "sound": "mob.wolf.big.hurt",
+      "pitch": [
+       0.75,
+       0.82
+      ],
+      "volume": 0.9
+     },
+     "death": {
+      "sound": "mob.wolf.big.death",
+      "pitch": [
+       0.7,
+       0.75
+      ],
+      "volume": 0.9
+     },
+     "step": {
+      "sound": "mob.wolf.step",
+      "pitch": [
+       0.8,
+       0.9
+      ],
+      "volume": 0.6
+     }
+    }
+   },
+   "siege:sapper": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "hurt": {
+      "sound": "game.player.hurt",
+      "pitch": [
+       0.85,
+       0.95
+      ],
+      "volume": 0.8
+     },
+     "death": {
+      "sound": "game.player.die",
+      "pitch": [
+       0.82,
+       0.88
+      ],
+      "volume": 0.8
+     }
+    }
+   },
+   "siege:seep": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": {
+      "sound": "resonate.amethyst_block",
+      "pitch": [
+       0.4,
+       0.45
+      ],
+      "volume": 0.5
+     },
+     "hurt": {
+      "sound": "hit.amethyst_block",
+      "pitch": [
+       0.5,
+       0.56
+      ],
+      "volume": 0.8
+     },
+     "death": {
+      "sound": "break.amethyst_block",
+      "pitch": [
+       0.45,
+       0.5
+      ],
+      "volume": 0.9
+     }
+    }
+   },
+   "siege:shardcaster": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": {
+      "sound": "mob.vex.ambient",
+      "pitch": [
+       0.55,
+       0.62
+      ],
+      "volume": 0.5
+     },
+     "hurt": {
+      "sound": "mob.vex.hurt",
+      "pitch": [
+       0.58,
+       0.64
+      ],
+      "volume": 0.8
+     },
+     "death": {
+      "sound": "random.glass",
+      "pitch": [
+       0.7,
+       0.76
+      ],
+      "volume": 0.6
+     }
+    }
+   },
+   "siege:shieldbearer": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "hurt": {
+      "sound": "game.player.hurt",
+      "pitch": [
+       0.85,
+       0.95
+      ],
+      "volume": 0.8
+     },
+     "death": {
+      "sound": "game.player.die",
+      "pitch": [
+       0.82,
+       0.88
+      ],
+      "volume": 0.8
+     }
+    }
+   },
+   "siege:shieldwall_brute": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": {
+      "sound": "mob.piglin_brute.ambient",
+      "pitch": [
+       0.62,
+       0.7
+      ],
+      "volume": 0.6
+     },
+     "hurt": {
+      "sound": "mob.piglin_brute.hurt",
+      "pitch": [
+       0.6,
+       0.68
+      ],
+      "volume": 1.0
+     },
+     "death": {
+      "sound": "mob.piglin_brute.death",
+      "pitch": [
+       0.55,
+       0.6
+      ],
+      "volume": 1.0
+     },
+     "step": {
+      "sound": "mob.irongolem.walk",
+      "pitch": [
+       0.9,
+       1.0
+      ],
+      "volume": 0.45
+     }
+    }
+   },
+   "siege:siege_ogre": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": {
+      "sound": "mob.ravager.ambient",
+      "pitch": [
+       0.58,
+       0.64
+      ],
+      "volume": 0.7
+     },
+     "hurt": {
+      "sound": "mob.ravager.hurt",
+      "pitch": [
+       0.6,
+       0.66
+      ],
+      "volume": 1.0
+     },
+     "death": {
+      "sound": "mob.ravager.death",
+      "pitch": [
+       0.52,
+       0.56
+      ],
+      "volume": 1.0
+     },
+     "step": {
+      "sound": "mob.ravager.step",
+      "pitch": [
+       0.7,
+       0.76
+      ],
+      "volume": 0.8
+     },
+     "attack.strong": {
+      "sound": "mob.ravager.bite",
+      "pitch": [
+       0.6,
+       0.66
+      ],
+      "volume": 1.0
+     }
+    }
+   },
+   "siege:spell_satchel": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": "",
+     "hurt": "",
+     "death": ""
+    }
+   },
+   "siege:spinning_cog": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": "",
+     "hurt": "",
+     "death": ""
+    }
+   },
+   "siege:stone_vigil": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": {
+      "sound": "resonate.amethyst_block",
+      "pitch": [
+       0.5,
+       0.56
+      ],
+      "volume": 0.5
+     },
+     "hurt": {
+      "sound": "mob.irongolem.hit",
+      "pitch": [
+       1.1,
+       1.2
+      ],
+      "volume": 0.8
+     },
+     "death": {
+      "sound": "mob.irongolem.death",
+      "pitch": [
+       0.9,
+       0.95
+      ],
+      "volume": 0.8
+     },
+     "step": {
+      "sound": "mob.irongolem.walk",
+      "pitch": [
+       1.2,
+       1.3
+      ],
+      "volume": 0.35
+     }
+    }
+   },
+   "siege:template_stand": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": "",
+     "hurt": "",
+     "death": ""
+    }
+   },
+   "siege:throne_seal": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": "",
+     "hurt": "",
+     "death": ""
+    }
+   },
+   "siege:tolling_shade": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": {
+      "sound": "resonate.amethyst_block",
+      "pitch": [
+       0.45,
+       0.5
+      ],
+      "volume": 0.4
+     },
+     "hurt": {
+      "sound": "mob.vex.hurt",
+      "pitch": [
+       0.5,
+       0.56
+      ],
+      "volume": 0.7
+     },
+     "death": {
+      "sound": "mob.vex.death",
+      "pitch": [
+       0.48,
+       0.52
+      ],
+      "volume": 0.7
+     }
+    }
+   },
+   "siege:torchbearer": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": {
+      "sound": "block.campfire.crackle",
+      "pitch": [
+       0.8,
+       1.0
+      ],
+      "volume": 0.6
+     },
+     "hurt": {
+      "sound": "mob.vindicator.hurt",
+      "pitch": [
+       0.82,
+       0.92
+      ],
+      "volume": 0.9
+     },
+     "death": {
+      "sound": "mob.vindicator.death",
+      "pitch": [
+       0.75,
+       0.8
+      ],
+      "volume": 0.9
+     }
+    }
+   },
+   "siege:townsfolk": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "hurt": {
+      "sound": "game.player.hurt",
+      "pitch": [
+       1.0,
+       1.1
+      ],
+      "volume": 0.7
+     },
+     "death": {
+      "sound": "game.player.die",
+      "pitch": [
+       1.0,
+       1.05
+      ],
+      "volume": 0.7
+     }
+    }
+   },
+   "siege:train_coach": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "hurt": {
+      "sound": "hit.anvil",
+      "pitch": [
+       0.7,
+       0.8
+      ],
+      "volume": 0.6
+     },
+     "death": {
+      "sound": "random.anvil_land",
+      "pitch": [
+       0.5,
+       0.55
+      ],
+      "volume": 0.8
+     }
+    }
+   },
+   "siege:train_engine": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "hurt": {
+      "sound": "hit.anvil",
+      "pitch": [
+       0.7,
+       0.8
+      ],
+      "volume": 0.6
+     },
+     "death": {
+      "sound": "random.anvil_land",
+      "pitch": [
+       0.5,
+       0.55
+      ],
+      "volume": 0.8
+     }
+    }
+   },
+   "siege:trebuchet_crew": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "hurt": {
+      "sound": "game.player.hurt",
+      "pitch": [
+       0.85,
+       0.95
+      ],
+      "volume": 0.8
+     },
+     "death": {
+      "sound": "game.player.die",
+      "pitch": [
+       0.82,
+       0.88
+      ],
+      "volume": 0.8
+     }
+    }
+   },
+   "siege:trebuchet_engine": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "hurt": {
+      "sound": "hit.wood",
+      "pitch": [
+       0.6,
+       0.7
+      ],
+      "volume": 1
+     },
+     "death": {
+      "sound": "block.scaffolding.break",
+      "pitch": [
+       0.5,
+       0.55
+      ],
+      "volume": 1
+     }
+    }
+   },
+   "siege:veinsworn": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": {
+      "sound": "mob.husk.ambient",
+      "pitch": [
+       0.6,
+       0.66
+      ],
+      "volume": 0.6
+     },
+     "hurt": {
+      "sound": "mob.husk.hurt",
+      "pitch": [
+       0.6,
+       0.68
+      ],
+      "volume": 0.9
+     },
+     "death": {
+      "sound": "mob.husk.death",
+      "pitch": [
+       0.56,
+       0.6
+      ],
+      "volume": 0.9
+     }
+    }
+   },
+   "siege:warlord_king": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": {
+      "sound": "mob.vindicator.idle",
+      "pitch": [
+       0.55,
+       0.63
+      ],
+      "volume": 0.7
+     },
+     "hurt": {
+      "sound": "mob.vindicator.hurt",
+      "pitch": [
+       0.55,
+       0.65
+      ],
+      "volume": 1
+     },
+     "death": {
+      "sound": "mob.vindicator.death",
+      "pitch": [
+       0.5,
+       0.6000000000000001
+      ],
+      "volume": 1
+     },
+     "step": {
+      "sound": "mob.irongolem.walk",
+      "pitch": [
+       0.9,
+       1.0
+      ],
+      "volume": 0.45
+     }
+    }
+   },
+   "siege:wrongling": {
+    "volume": 1.0,
+    "pitch": [
+     1.0,
+     1.0
+    ],
+    "events": {
+     "ambient": {
+      "sound": "mob.endermen.idle",
+      "pitch": [
+       0.6,
+       0.66
+      ],
+      "volume": 0.5
+     },
+     "hurt": {
+      "sound": "mob.endermen.hit",
+      "pitch": [
+       0.6,
+       0.66
+      ],
+      "volume": 0.8
+     },
+     "death": {
+      "sound": "mob.endermen.death",
+      "pitch": [
+       0.66,
+       0.7
+      ],
+      "volume": 0.8
+     }
+    }
    }
   }
  }

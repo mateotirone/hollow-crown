@@ -14,6 +14,8 @@ const tests = [];
 // trips the watchdog, which shuts the world down (first playtest, 2026-11-11). They still run in
 // tools/check.mjs, which fails if a slow test is missing from this list. Written as "group: name".
 export const OFFLINE_ONLY = new Set([
+  "settle plans: the Plan Book card pictures match the buildings as they are designed now",
+  "after: Deep: the halls are open where players and the Host stand, with floor under them",
   "trains: routes: the planned railway has no mistakes, and no works stand in a train's way",
   "trains: stations: nothing floats (roofs sit on their beams, lanterns hang from something)",
   "warwrit-route: soldiers ride round to the bridge instead of swimming the river",
@@ -36,7 +38,9 @@ export const OFFLINE_ONLY = new Set([
   "settle: the Barracks and Quartermaster's buildings draw in every style behind their block",
   "undertow: thin places: each cave shows exactly Fennick's features for it",
   "undertow: thin places: the seam has room to tear open and the camp holds the Field Note",
-  "undertow: thin places: a dry cave is walkable from the mouth down to the seam",
+  "undertow: thin places: every cave is walkable from the mouth down to its chamber, one step at a time",
+  "undertow: thin places: no two caves are the same, and the land covers every one",
+  "undertow: the seep: veins are connected, reach out from the mouth, and growing never moves them",
   "undertow: thin places: low, wide hills, never taller than they are wide",
   "hollowfolk: giant Veilcaps stand in the fens and groves, rare elsewhere, and are tree sized",
   "undertow: ore is in the cliffs, more of it deeper in",
