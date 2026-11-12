@@ -224,7 +224,7 @@ ARCH_GATE = []
 
 def grand_gate():
     """The Grand Gate on the front: a pointed archway between two spired towers, the herald's gallery above."""
-    z0, z1 = OUT - 5, OUT + 5                         # gatehouse depth, standing proud of the wall
+    z0, z1 = OUT - 1, OUT + 7                         # gatehouse depth: outside the wall, never over the seats
     for x in range(-3, 4):                            # passage walls and vault
         for z in range(R + 1, z1 + 1):
             for y in range(1, 10):
@@ -278,11 +278,11 @@ def horse_gates():
     """At each end a square tower straddles the wall with a passage through it for the horses."""
     for sx in (-1, 1):
         x_in = sx * (LH + R + 1)
-        for x in range(LH + R + 1, OUT + 7):
+        for x in range(LH + R + 1, LH + OUT + 10):
             for z in range(-2, 3):
                 for y in range(1, 7): carve(sx * x, y, z)
                 put(sx * x, 0, z, pick(TRACK))
-        for x in range(OUT + 6, OUT + 12):
+        for x in range(LH + OUT + 9, LH + OUT + 11):
             for z in range(-3, 4): put(sx * x, 0, z, pick(TRACK))
 
 
@@ -296,8 +296,8 @@ def royal_box():
 
 
 def stables():
-    # paddock fence west of the west horse gate
-    xs, xe, zs, ze = -(OUT + 26), -(OUT + 8), -24, -5
+    # paddock fence outside the wall on the front, west of the Grand Gate's approach
+    xs, xe, zs, ze = -46, -26, OUT + 6, OUT + 22
     for x in range(xs, xe + 1):
         for z in (zs, ze):
             put(x, 1, z, "spruce_fence"); put(x, 0, z, "grass_block")
@@ -319,8 +319,9 @@ def write():
     horse_gates()
     stables()
     # parts own their footprints: nothing of the bowl is written inside a tower or the royal box
-    own = [(-12, -4, OUT - 4, OUT + 4), (4, 12, OUT - 4, OUT + 4), (OUT + LH - 5, OUT + LH + 5, -5, 5),
-           (-(OUT + LH + 5), -(OUT + LH - 5), -5, 5), (-6, 6, -(OUT + 14), -(OUT + 2)), (-10, 10, -(OUT + 1), -(R + 4))]
+    own = [(-12, -4, OUT - 1, OUT + 7), (4, 12, OUT - 1, OUT + 7), (OUT + LH - 1, OUT + LH + 9, -5, 5),
+           (-(OUT + LH + 9), -(OUT + LH - 1), -5, 5), (-6, 6, -(OUT + 24), -(OUT + 12)), (-10, 10, -(OUT + 11), -(OUT - 1)),
+           (-44, -28, -(OUT + 16), -(OUT + 4))]
     for k in [k for k in cells if k[1] > 0 and k not in CARVE and any(a <= k[0] <= b and c <= k[2] <= d for a, b, c, d in own)]:
         del cells[k]
     place = []
@@ -342,23 +343,23 @@ def write():
     parts = []
     # Grand Gate towers (9 x 9, 26 high, steep spires), front
     for x0 in (-12, 4):
-        parts.append(gate_tower(x0, x0 + 8, OUT - 4, OUT + 4, 24))
-        parts.append(spire(x0, x0 + 8, OUT - 4, OUT + 4, 3))
+        parts.append(gate_tower(x0, x0 + 8, OUT - 1, OUT + 7, 24))
+        parts.append(spire(x0, x0 + 8, OUT - 1, OUT + 7, 3))
     # horse gate towers at the ends (11 x 11, 18 high)
-    for x0 in (OUT + LH - 5, -(OUT + LH + 5)):
+    for x0 in (OUT + LH - 1, -(OUT + LH + 9)):
         parts.append(gate_tower(x0, x0 + 10, -5, 5, 18))
         parts.append(spire(x0, x0 + 10, -5, 5, 2))
-    # royal box: an open pavilion over the far stand under a red hip roof
-    parts.append({"part": "house", "style": {"base": "vale_stone", "roof": "bricks"}, "rect": [-10, -(OUT + 1), 10, -(R + 4)],
-                  "y": 3 + TIERS, "plinth": 1, "storeys": [7], "frame": "stone", "door": {"side": "n", "kind": "grand"},
-                  "windows": "auto", "arcade": {"sides": "sew", "storey": 0, "lanterns": True}, "chimney": False,
+    # royal box: a pavilion behind the far stand, its open upper storey looking over the field, a red hip roof
+    parts.append({"part": "house", "style": {"base": "vale_stone", "roof": "bricks"}, "rect": [-10, -(OUT + 11), 10, -(OUT - 1)],
+                  "y": 0, "plinth": 2, "storeys": [7, 7], "frame": "stone", "door": {"side": "e", "kind": "grand"},
+                  "windows": "auto", "arcade": {"sides": "sew", "storey": 1, "lanterns": True}, "chimney": False,
                   "bushes": False, "interior": "hall", "roof": {"type": "hip", "pitch": 1}})
     # the King's Tower behind it, the tallest thing in the Fair
-    parts.append(gate_tower(-6, 6, -(OUT + 14), -(OUT + 2), 36))
-    parts.append(spire(-6, 6, -(OUT + 14), -(OUT + 2), 3))
-    # stables outside the west gate
-    parts.append({"part": "house", "style": "vale_timber", "rect": [-(OUT + 26), 7, -(OUT + 10), 19], "y": 0,
-                  "plinth": 1, "storeys": [5], "door": {"side": "n", "kind": "large"}, "windows": "auto",
+    parts.append(gate_tower(-6, 6, -(OUT + 24), -(OUT + 12), 36))
+    parts.append(spire(-6, 6, -(OUT + 24), -(OUT + 12), 3))
+    # stables outside the wall on the far side, by the west end
+    parts.append({"part": "house", "style": "vale_timber", "rect": [-44, -(OUT + 16), -28, -(OUT + 4)], "y": 0,
+                  "plinth": 1, "storeys": [5], "door": {"side": "s", "kind": "large"}, "windows": "auto",
                   "roof": {"type": "gable", "ridge": "x", "pitch": 1}, "interior": "storage", "chimney": False})
     spec = {"name": "great_horse_fair", "edition": "bedrock",
             "materials": {"slate": {"block": "deepslate_tiles"}},

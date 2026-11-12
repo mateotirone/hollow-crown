@@ -1,6 +1,6 @@
 // Wonders: six great buildings, one fixed site each on the map, outside every town. A City's ruler claims a
 // free one from its keeper and pays for it in six stages; the crew raises each stage block by block while
-// someone is near. Once all six stand, the holder (and the holder's allies) get its effect. Rival Lords race for
+// someone is near. Once all six stand, the holder (and the holder's allies) get its effect, and so does every settlement in its region. Rival Lords race for
 // them too. A wonder can be taken from its holder by challenge: cut down its defenders within ten minutes.
 // Numbers and words: data.js. Rules: rules.js. Buildings: designs_data.js (map/structures/export_wonders.py).
 //
@@ -11,9 +11,9 @@
 
 import { world, system, GameMode } from "@minecraft/server";
 import { ActionFormData } from "@minecraft/server-ui";
-import { isReady, onTick, on, emit, moduleStore, addFilter, isAlly, addKeepHealthHook } from "../siege/api.js";
+import { isReady, onTick, on, emit, moduleStore, addFilter, isAlly, addKeepHealthHook, getState } from "../siege/api.js";
 import { applyFilter } from "../core/events.js";
-import { charge, coins, JOBS } from "../economy/api.js";
+import { charge, coins, JOBS, regionAt } from "../economy/api.js";
 import { startBuild, buildFor, clearBoxFor } from "../townhall/build.js";
 import { wonderPlan } from "./plans.js";
 import { groundTop } from "../settle/ground.js";
@@ -46,7 +46,13 @@ const everyone = (text) => { for (const p of world.getPlayers()) p.sendMessage(t
 const near = (site, range) => world.getPlayers().filter((p) => p.dimension.id === OVERWORLD && Math.hypot(p.location.x - site.x, p.location.z - site.z) <= range);
 const stageCost = (n) => WONDER.stageCost[Math.min(WONDER.stageCost.length, Math.max(1, n)) - 1];
 const allyOf = (holder, id) => !isLordKey(holder) && isAlly(holder, id);
-const heldFor = (id) => heldBy(store.data.w, id, allyOf);
+// the region a player's settlement stands in (their own keep, or the keep they are an ally of)
+function homeRegion(id) {
+  const keeps = getState().keeps ?? {};
+  const own = keeps[id] ? id : Object.keys(keeps).find((o) => keeps[o].allies?.includes(id));
+  return own ? regionAt(keeps[own]) : undefined;
+}
+const heldFor = (id) => heldBy(store.data.w, id, allyOf, homeRegion(id));
 
 // Where the keeper waits: in front of the wonder, a few blocks out
 function keeperSpot(w) {

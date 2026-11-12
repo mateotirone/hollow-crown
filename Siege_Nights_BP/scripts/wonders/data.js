@@ -2,7 +2,9 @@
 // Buildings: designs_data.js (map/structures/export_wonders.py, minecraft-builder specs in map/structures/wonders/).
 //
 //   site: { x, z } world block, face: the way the front looks ("n" | "s" | "e" | "w")
-//   effect: what the holder (and the holder's allies) get once all six stages stand
+//   effect: what the holder (and the holder's allies) get once all six stages stand, and every settlement in its
+//           home region too (Mateo 2026-11-12: "the boost to the entire region, not just the plot that grew it")
+//   home: the plot region (economy REGIONS) whose settlements share the effect
 //     { kind: "charge", reasons: [...], by }   prices paid for these reasons are `by` lower (0.25 = a quarter off)
 //     { kind: "pay", jobs: true, by }          coins from selling to job NPCs are `by` higher
 //     { kind: "keep", by }                     the keep heart has `by` more health
@@ -30,42 +32,42 @@ export const WONDER = {
 
 export const WONDERS = [
   {
-    id: "great_lighthouse", name: "Great Lighthouse", region: "Saltreach", style: "saltreach",
+    id: "great_lighthouse", home: "Saltreach", name: "Great Lighthouse", region: "Saltreach", style: "saltreach",
     site: { x: -960, z: -630 }, face: "e", keeper: "Harbourmaster Wenna",
     effect: { kind: "pay", jobs: true, by: 0.15 },
     says: "Goods sold to any trader pay 15% more.",
     blurb: "A white tower on the cliffs, its lamp seen from every ship on the north sea.",
   },
   {
-    id: "high_watch", name: "High Watch", region: "the Vale", style: "vale",
+    id: "high_watch", home: "Aldmere Vale", name: "High Watch", region: "the Vale", style: "vale",
     site: { x: -120, z: -370 }, face: "e", keeper: "Watch-Captain Aldous",
     effect: { kind: "keep", by: 0.2 },
     says: "Your keep heart has 20% more health.",
     blurb: "A tall stone watchtower over the heart of the Vale. Beacons pass word from it to every wall.",
   },
   {
-    id: "rimeforge_hall", name: "Rimeforge Hall", region: "Frostmarch", style: "frostmarch",
+    id: "rimeforge_hall", home: "Frostmarch", name: "Rimeforge Hall", region: "Frostmarch", style: "frostmarch",
     site: { x: -300, z: -1130 }, face: "s", keeper: "Forge-Mother Sigrun",
     effect: { kind: "charge", reasons: ["smith"], by: 0.2 },
     says: "Everything the Smith sells is 20% cheaper.",
     blurb: "A great forge hall in the snow, its fires never let go out.",
   },
   {
-    id: "sun_gate", name: "Sun Gate Caravanserai", region: "the Emberwaste", style: "emberwaste",
+    id: "sun_gate", home: "Emberwaste", name: "Sun Gate Caravanserai", region: "the Emberwaste", style: "emberwaste",
     site: { x: 840, z: 240 }, face: "w", keeper: "Caravan-Master Idris",
     effect: { kind: "charge", reasons: ["railway"], by: 0.25 },
     says: "Track and trains cost a quarter less.",
     blurb: "A walled caravan court under a great sun-arch, where every road east meets.",
   },
   {
-    id: "lantern_spire", name: "Lantern Spire", region: "Blackfen", style: "blackfen",
+    id: "lantern_spire", home: "Blackfen", name: "Lantern Spire", region: "Blackfen", style: "blackfen",
     site: { x: 310, z: 570 }, face: "n", keeper: "Lamplighter Orrin", ground: "water", // stands on piles in the fen: no grading
     effect: { kind: "arrivals", add: 1 },
     says: "One more newcomer comes to your town at each dawn.",
     blurb: "A thin spire of lamps over the fen pools. Lost travellers follow it in.",
   },
   {
-    id: "great_horse_fair", name: "Great Horse Fair", region: "the Vale", style: "vale",
+    id: "great_horse_fair", home: "Aldmere Vale", name: "Great Horse Fair", region: "the Vale", style: "vale",
     site: { x: -440, z: 300 }, face: "w", keeper: "Fair-Warden Bess",
     effect: { kind: "charge", reasons: ["horses"], by: 0.25 },
     says: "Grooms, training and foals cost a quarter less.",

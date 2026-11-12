@@ -6,12 +6,15 @@ character").
 Frostmarch (regions/frostmarch.md: Norse, dark log frames on deepslate, steep pitch 2 roofs that shed snow, a
 longhouse hall with a weathered copper roof and crossed dragon heads, stave towers with skirt roofs, bells).
 
-A cross-shaped longhouse 51 long: a deepslate ground storey with stone piers and a timbered upper storey, a steep
-weathered copper roof with dragon heads crossed over every gable and a lantern belfry on the ridge, a porch on
-the front. Two great forge stacks of dark brick climb past the eaves either side, smoke at the top. In the forge
-court in front: the Rime Anvil on its plinth under a chained hood, blast furnaces and grindstones, a quench trough,
-and a waterwheel on a mill race that drives the trip hammer. To one side the bell tower, a stave tower of three
-tiers each with its own skirt roof, a copper spire on top, because Frostmarch is the land of bells. Front = +z.
+Made bigger again the same day ("I don't know if Rimeforge Hall is big enough either"): a cross-shaped longhouse
+75 long and 31 wide with arms 67 across, three storeys (a deepslate ground storey on stone piers, two timbered
+storeys), a steep weathered copper roof with dragon heads crossed over every gable and a lantern belfry over the
+crossing, a deep porch on the front and a great round window in each end gable. Two great 7 x 7 forge stacks of
+dark brick climb far past the eaves behind the arms, smoke at the top. In the forge court in front: the Rime
+Anvil on its plinth under a chained hood, a row of blast furnaces under a lean-to, grindstones, a quench trough,
+and a waterwheel on a mill race that drives the trip hammer. Two workshop longhouses close the court's sides. Behind
+to the east the bell tower, a stave tower 32 high with a skirt roof at every tier and a copper spire, because
+Frostmarch is the land of bells. Front = +z.
 """
 import json, math, os, random
 
@@ -36,113 +39,127 @@ DARK = [("deepslate_bricks", 0.5), ("cracked_deepslate_bricks", 0.15), ("cobbled
 YARD = [("cobbled_deepslate", 0.35), ("stone", 0.2), ("gravel", 0.2), ("andesite", 0.15), ("snow", 0.1)]
 
 
-def forge_stack(cx, cz, top):
-    """A 5 x 5 forge chimney of dark brick from the ground to `top`, iron bands, a corbelled crown, smoke."""
+def forge_stack(cx, cz, top, hw=3):
+    """A forge chimney of dark brick (2 hw + 1 square) from the ground to `top`, iron bands, a corbelled crown, smoke."""
     for y in range(0, top + 1):
-        for x in range(-2, 3):
-            for z in range(-2, 3):
-                edge = abs(x) == 2 or abs(z) == 2
+        for x in range(-hw, hw + 1):
+            for z in range(-hw, hw + 1):
+                edge = abs(x) == hw or abs(z) == hw
                 if not edge and y > 0: continue
                 b = pick(DARK)
                 if y % 8 == 0 and y > 0: b = "polished_blackstone"
-                if abs(x) == 2 and abs(z) == 2: b = "deepslate_tiles" if y % 2 else "deepslate_bricks"
+                if abs(x) == hw and abs(z) == hw: b = "deepslate_tiles" if y % 2 else "deepslate_bricks"
                 put(cx + x, y, cz + z, b)
-    for x in range(-3, 4):                                   # crown on corbels
-        for z in range(-3, 4):
-            if max(abs(x), abs(z)) == 3:
-                f = ("e" if x > 0 else "w") if abs(x) == 3 else ("s" if z > 0 else "n")
+    c = hw + 1
+    for x in range(-c, c + 1):                               # crown on corbels
+        for z in range(-c, c + 1):
+            if max(abs(x), abs(z)) == c:
+                f = ("e" if x > 0 else "w") if abs(x) == c else ("s" if z > 0 else "n")
                 put(cx + x, top - 1, cz + z, "deepslate_brick_stairs", facing=f, half="top")
                 put(cx + x, top, cz + z, "deepslate_bricks")
                 if (x + z) % 2 == 0: put(cx + x, top + 1, cz + z, "deepslate_brick_wall")
-    for (x, z) in ((-1, -1), (1, 1), (0, 0), (-1, 1), (1, -1)):
-        put(cx + x, top, cz + z, "campfire")
-        put(cx + x, top - 1, cz + z, "deepslate_bricks")
-    # the firebox at the foot opens into the hall's side: an arch of glowing magma behind iron bars
-    return
+    for x in range(-hw + 1, hw):
+        for z in range(-hw + 1, hw):
+            put(cx + x, top - 1, cz + z, "deepslate_bricks")
+            if (x + z) % 2 == 0: put(cx + x, top, cz + z, "campfire")
+            else: put(cx + x, top, cz + z, "deepslate_bricks")
+
+
+SHIFT = -5          # see write()
+Z0 = 29            # the court's back edge (the hall's front wall is at z 27)
+AZ = 43            # the Rime Anvil's centre
 
 
 def forge_court():
-    for x in range(-24, 25):
-        for z in range(27, 47):
+    for x in range(-30, 31):
+        for z in range(Z0, 58):
+            if abs(x) <= 7 and z <= 33: continue             # the porch
             put(x, 0, z, pick(YARD))
     # the Rime Anvil: a stepped plinth, the anvil, blue ice set in the top, a chained hood over it on four posts
-    for x in range(-3, 4):
-        for z in range(33, 40):
-            m = max(abs(x), abs(z - 36))
-            put(x, 1, z, "polished_deepslate" if m == 3 else "deepslate_tiles")
-            if m <= 2: put(x, 2, z, "polished_blackstone" if m == 2 else "deepslate_tiles")
-    for (x, z) in ((-1, 35), (1, 37), (-1, 37), (1, 35)): put(x, 2, z, "blue_ice")
-    put(0, 3, 36, "anvil", facing="e")
-    for (x, z) in ((-3, 33), (3, 33), (-3, 39), (3, 39)):
-        for y in range(2, 9): put(x, y, z, "dark_oak_log")
     for x in range(-4, 5):
-        for z in range(32, 41):
-            m = max(abs(x), abs(z - 36))
-            if m == 4: put(x, 9, z, "spruce_stairs", facing=("e" if x < 0 else "w") if abs(x) == 4 else ("s" if z < 36 else "n"))
-            elif m <= 3: put(x, 10 - (1 if m == 3 else 0), z, "dark_oak_planks")
-            if m <= 1: put(x, 11, z, "dark_oak_planks")
-    for k in range(-3, 4):
-        put(k, 8, 32, "dark_oak_stairs", facing="n", half="top"); put(k, 8, 40, "dark_oak_stairs", facing="s", half="top")
-    put(0, 12, 36, "copper_bulb") if False else None
-    for (x, z) in ((-2, 34), (2, 38)):
-        put(x, 8, z, "iron_chain"); put(x, 7, z, "lantern", hanging=True)
-    # blast furnaces and hearths along the court's west side, grindstones and a quench trough east
-    for z in (30, 34, 38, 42):
-        put(-14, 1, z, "blast_furnace", facing="e"); put(-14, 2, z, "blast_furnace", facing="e")
-        put(-15, 1, z, "deepslate_bricks"); put(-15, 2, z, "deepslate_bricks"); put(-15, 3, z, "campfire")
-        put(-14, 3, z, "deepslate_brick_slab")
-    for z in range(29, 44):
-        put(-16, 1, z, "deepslate_bricks"); put(-16, 2, z, "deepslate_bricks"); put(-16, 3, z, "deepslate_brick_wall")
-        put(-15, 4, z, "spruce_slab", half="bottom") if False else None
-    for z in range(29, 44):                                  # a lean-to shade over the hearths
-        put(-17, 4, z, "dark_oak_log", axis="z") if z in (29, 43) else None
-        put(-16, 5, z, "spruce_stairs", facing="w"); put(-15, 5, z, "spruce_stairs", facing="w") if False else None
-        put(-15, 4, z, "spruce_stairs", facing="w"); put(-14, 4, z, "spruce_slab") if False else None
-    for z in (29, 35, 43):
-        for y in (1, 2, 3): put(-13, y, z, "dark_oak_fence")
-    for (x, z) in ((10, 32), (10, 36)):
-        put(x, 1, z, "grindstone", facing="n"); put(x + 1, 1, z, "smithing_table")
-    for x in range(8, 13):
-        for z in (40, 42):
+        for z in range(AZ - 4, AZ + 5):
+            m = max(abs(x), abs(z - AZ))
+            put(x, 1, z, "polished_deepslate" if m == 4 else "deepslate_tiles")
+            if m <= 3: put(x, 2, z, "polished_blackstone" if m == 3 else "deepslate_tiles")
+            if m <= 1: put(x, 3, z, "deepslate_tiles")
+    for (x, z) in ((-2, AZ - 2), (2, AZ + 2), (-2, AZ + 2), (2, AZ - 2)): put(x, 3, z, "blue_ice")
+    put(0, 4, AZ, "anvil", facing="e")
+    for (x, z) in ((-4, AZ - 4), (4, AZ - 4), (-4, AZ + 4), (4, AZ + 4)):
+        for y in range(2, 11): put(x, y, z, "dark_oak_log")
+    for x in range(-5, 6):
+        for z in range(AZ - 5, AZ + 6):
+            m = max(abs(x), abs(z - AZ))
+            if m == 5: put(x, 11, z, "spruce_stairs", facing=("e" if x < 0 else "w") if abs(x) == 5 else ("s" if z < AZ else "n"))
+            elif m == 4: put(x, 12, z, "dark_oak_planks")
+            elif m <= 3: put(x, 13, z, "dark_oak_planks")
+            if m <= 1: put(x, 14, z, "dark_oak_planks")
+    for k in range(-4, 5):
+        put(k, 10, AZ - 4, "dark_oak_stairs", facing="n", half="top"); put(k, 10, AZ + 4, "dark_oak_stairs", facing="s", half="top")
+    for (x, z) in ((-2, AZ - 2), (2, AZ + 2), (2, AZ - 2), (-2, AZ + 2)):
+        put(x, 12, z, "iron_chain"); put(x, 11, z, "iron_chain"); put(x, 10, z, "lantern", hanging=True)
+    # blast furnaces and hearths along the court's west side under a lean-to, a fence screen in front
+    for z in range(32, 56, 4):
+        put(-20, 1, z, "blast_furnace", facing="e"); put(-20, 2, z, "blast_furnace", facing="e")
+        put(-21, 1, z, "deepslate_bricks"); put(-21, 2, z, "deepslate_bricks"); put(-21, 3, z, "campfire")
+        put(-20, 3, z, "deepslate_brick_slab")
+    for z in range(31, 56):
+        put(-22, 1, z, "deepslate_bricks"); put(-22, 2, z, "deepslate_bricks"); put(-22, 3, z, "deepslate_bricks")
+        put(-22, 4, z, "spruce_stairs", facing="e")
+        put(-21, 4, z, "spruce_stairs", facing="e") if False else None
+        put(-21, 5, z, "spruce_stairs", facing="e"); put(-22, 5, z, "spruce_planks")
+        put(-20, 4, z, "spruce_slab", half="top") if z % 4 == 2 else None
+    for z in (31, 39, 47, 55):
+        for y in (1, 2, 3, 4): put(-18, y, z, "dark_oak_log")
+        put(-18, 5, z, "spruce_stairs", facing="e")
+    for z in range(31, 56): put(-19, 5, z, "spruce_stairs", facing="e"); put(-20, 5, z, "spruce_stairs", facing="e")
+    for z in range(31, 56): put(-21, 5, z, "spruce_planks"); put(-22, 6, z, "spruce_slab")
+    # grindstones, smithing tables and a quench trough on the east side
+    for z in (34, 38, 42):
+        put(12, 1, z, "grindstone", facing="n"); put(13, 1, z, "smithing_table"); put(11, 1, z, "barrel", facing="up")
+    for x in range(9, 16):
+        for z in (48, 50):
             put(x, 1, z, "polished_deepslate")
-        put(x, 1, 41, "water")
-    for z in (40, 41, 42):
-        put(7, 1, z, "polished_deepslate"); put(13, 1, z, "polished_deepslate")
+        put(x, 1, 49, "water")
+    for z in (48, 49, 50):
+        put(8, 1, z, "polished_deepslate"); put(16, 1, z, "polished_deepslate")
     # the mill race along the east of the court and the waterwheel that drives the trip hammer
-    for z in range(25, 47):
-        for x in (20, 21, 22):
-            put(x, 0, z, "water" if x == 21 else "polished_deepslate")
-            if x != 21: put(x, 1, z, "deepslate_brick_slab")
-    # trip hammer: a beam from the wheel's axle across to a hammer head over an anvil
-    for x in range(14, 19): put(x, 6, 36, "stripped_dark_oak_log", axis="x")
-    for y in range(1, 6): put(14, y, 34, "dark_oak_log"); put(14, y, 38, "dark_oak_log")
-    put(15, 4, 36, "polished_blackstone"); put(15, 5, 36, "dark_oak_fence")
-    put(15, 1, 36, "anvil", facing="n"); put(15, 0, 36, "deepslate_bricks")
-    # snow drifted against the court's walls
-    for x in range(-24, 25):
-        put(x, 1, 46, "snow_layer") if rng.random() < 0.6 else None
+    for z in range(Z0 - 4, 58):
+        for x in (25, 26, 27):
+            put(x, 0, z, "water" if x == 26 else "polished_deepslate")
+            if x != 26: put(x, 1, z, "deepslate_brick_slab")
+    for x in range(18, 24): put(x, 7, AZ, "stripped_dark_oak_log", axis="x")
+    for y in range(1, 7): put(18, y, AZ - 2, "dark_oak_log"); put(18, y, AZ + 2, "dark_oak_log")
+    put(19, 5, AZ, "polished_blackstone"); put(19, 6, AZ, "dark_oak_fence")
+    put(19, 1, AZ, "anvil", facing="n"); put(19, 0, AZ, "deepslate_bricks")
+    # a low dark wall closes the court's front, with an open gate in the middle, braziers on the gate piers
+    for x in range(-30, 31):
+        if abs(x) <= 4: continue
+        put(x, 1, 57, pick(DARK)); put(x, 2, 57, "cobbled_deepslate_wall")
+        if rng.random() < 0.5: put(x, 1, 58, "snow_layer")
+    for x in (-5, 5):
+        for y in (1, 2, 3): put(x, y, 57, "polished_deepslate")
+        put(x, 4, 57, "campfire")
 
 
-def bell_tower(cx, cz):
-    """Stave bell tower: 9 x 9 dark stone base, three timber tiers, each tier's foot carries a skirt roof one out."""
-    for (y0, hw) in ((7, 5), (14, 5), (21, 5)):
-        for x in range(-hw, hw + 1):
-            for z in range(-hw, hw + 1):
-                m = max(abs(x), abs(z))
-                if m != hw: continue
-                f = ("e" if x > 0 else "w") if abs(x) == hw and abs(x) >= abs(z) else ("s" if z > 0 else "n")
+def bell_skirts(cx, cz, hw, ys):
+    """Skirt roofs one out from the tower at each tier's foot, dragon horns at the skirt corners."""
+    h = hw + 1
+    for y0 in ys:
+        for x in range(-h, h + 1):
+            for z in range(-h, h + 1):
+                if max(abs(x), abs(z)) != h: continue
+                f = ("e" if x > 0 else "w") if abs(x) == h and abs(x) >= abs(z) else ("s" if z > 0 else "n")
                 f = {"e": "w", "w": "e", "n": "s", "s": "n"}[f]          # tall side to the tower
                 put(cx + x, y0, cz + z, "deepslate_tile_stairs", facing=f)
-                put(cx + x, y0 - 1, cz + z, "dark_oak_stairs", facing={"e": "w", "w": "e", "n": "s", "s": "n"}[f], half="top")
-    # dragon heads at the skirt corners: a stair snout and a fence horn
-    for (x, z) in ((-6, -6), (6, -6), (-6, 6), (6, 6)):
-        put(cx + x, 7, cz + z, "dark_oak_fence"); put(cx + x, 8, cz + z, "dark_oak_fence")
+        for (x, z) in ((-h, -h), (h, -h), (-h, h), (h, h)):
+            put(cx + x, y0 + 1, cz + z, "dark_oak_fence")
 
 
-def gable_window(zf, yc, r=3.5):
-    """A round window in the front gable: light blue glass in a dark oak ring, a cross of mullions."""
-    for x in range(-5, 6):
-        for y in range(-5, 6):
+def gable_window(zf, yc, r=5.5):
+    """A round window in the end gable: light blue glass in a dark oak ring, a cross of mullions."""
+    R = int(r) + 2
+    for x in range(-R, R + 1):
+        for y in range(-R, R + 1):
             d = math.hypot(x, y)
             if d <= r - 1: put(x, yc + y, zf, "dark_oak_planks" if (x == 0 or y == 0) else "light_blue_stained_glass")
             elif d <= r + 0.3: put(x, yc + y, zf, "stripped_dark_oak_log", axis="z")
@@ -150,28 +167,40 @@ def gable_window(zf, yc, r=3.5):
 
 def write():
     forge_court()
-    gable_window(25, 22)
-    gable_window(-25, 22)
-    for sx in (-1, 1): forge_stack(sx * 13, -16, 34)
-    bell_tower(26, -14)
+    gable_window(27, 28)
+    gable_window(-47, 28)
+    for sx in (-1, 1): forge_stack(sx * 22, -32, 60)
+    bell_skirts(41, -36, 5, (12, 17, 22, 27))
     place = [[x, y, z, v[0]] + ([v[1]] if len(v) > 1 else []) for (x, y, z), v in sorted(cells.items())]
 
     hall_style = {"base": "frost_timber", "roof": COPPER}
+    ground = {"frame_kind": "piers", "pier": "deepslate_bricks", "infill": "cobbled_deepslate"}
     parts = [
-        {"part": "house", "style": hall_style, "rect": [-10, -25, 10, 25], "y": 0, "plinth": 2, "storeys": [7, 6],
-         "storey_style": [{"frame_kind": "piers", "pier": "deepslate_bricks", "infill": "cobbled_deepslate"}, {}],
+        {"part": "house", "style": hall_style, "rect": [-15, -47, 15, 27], "y": 0, "plinth": 2, "storeys": [5, 5, 5],
+         "storey_style": [ground, {}, {}],
          "door": {"side": "s", "kind": "grand"}, "windows": "auto", "shutters": 0, "bay": 5,
-         "wings": [{"rect": [-22, -6, 22, 6], "storeys": [7, 4], "roof": {"ridge": "x"}}],
-         "porch": {"side": "s", "at": 0, "w": 9, "d": 5, "h": 5},
+         "wings": [{"rect": [-33, -19, 33, -1], "storeys": [5, 5, 4], "roof": {"ridge": "x"}}],
+         "porch": {"side": "s", "at": 0, "w": 13, "d": 6, "h": 6},
          "roof": {"type": "gable", "ridge": "z", "pitch": 2, "snow": True, "gable_horns": True},
-         "chimney": False, "interior": "smithy", "trusses": True},
-        {"part": "belfry", "rect": [-2, -14, 2, -10], "y": "roof", "h": 4, "cap": "spire", "roof": COPPER},
-        {"part": "house", "style": {"base": "frost_timber", "roof": COPPER}, "rect": [22, -18, 30, -10], "y": 0, "plinth": 2,
-         "storeys": [7, 7, 7, 6], "storey_style": [{"frame_kind": "piers", "pier": "deepslate_bricks", "infill": "cobbled_deepslate"}, {}, {}, {}],
+         "chimney": False, "interior": "hall", "trusses": True},
+        {"part": "belfry", "rect": [-3, -13, 3, -7], "y": "roof", "h": 6, "cap": "spire", "roof": COPPER},
+        {"part": "house", "style": hall_style, "rect": [36, -41, 46, -31], "y": 0, "plinth": 2,
+         "storeys": [5, 5, 5, 5, 5, 5], "storey_style": [ground, {}, {}, {}, {}, {}],
          "door": {"side": "s"}, "windows": "auto", "shutters": 0, "chimney": False, "interior": "tower", "roof": {"type": "hip", "pitch": 2}},
-        {"part": "belfry", "rect": [22, -18, 30, -10], "y": "top", "h": 5, "cap": "spire", "roof": COPPER},
-        {"part": "wheel", "at": [19, 5, 36], "axis": "x", "r": 4, "width": 2},
+        {"part": "belfry", "rect": [36, -41, 46, -31], "y": "top", "h": 6, "cap": "spire", "roof": COPPER},
+        {"part": "wheel", "at": [24, 6, AZ], "axis": "x", "r": 5, "width": 2},
     ]
+    for x0 in (-45, 33):                                     # the two workshop longhouses closing the court
+        parts.append({"part": "house", "style": hall_style, "rect": [x0, 31, x0 + 10, 55], "y": 0, "plinth": 1,
+                      "storeys": [5, 4], "storey_style": [ground, {}], "door": {"side": "e" if x0 < 0 else "w"},
+                      "windows": "auto", "shutters": 0, "interior": "smithy",
+                      "roof": {"type": "gable", "ridge": "z", "pitch": 2, "snow": True, "gable_horns": True}})
+    # the court reaches further than the back: shift the whole place back so it fits within export LIMIT both ways
+    for e in place: e[2] += SHIFT
+    for pt in parts:
+        if "rect" in pt: pt["rect"] = [pt["rect"][0], pt["rect"][1] + SHIFT, pt["rect"][2], pt["rect"][3] + SHIFT]
+        if "at" in pt and isinstance(pt["at"], list): pt["at"][2] += SHIFT
+        for wg in pt.get("wings", []): wg["rect"] = [wg["rect"][0], wg["rect"][1] + SHIFT, wg["rect"][2], wg["rect"][3] + SHIFT]
     spec = {"name": "rimeforge_hall", "edition": "bedrock", "materials": {}, "shapes": [], "parts": parts, "place": place}
     with open(os.path.join(HERE, "rimeforge_hall.json"), "w") as f:
         json.dump(spec, f, separators=(",", ":"))

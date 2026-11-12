@@ -61,6 +61,8 @@ addTests("wonders", {
     const states = { sun_gate: { holder: "A", built: 6, paid: 6 }, great_horse_fair: { holder: "A", built: 5, paid: 6 }, great_lighthouse: { holder: "B", built: 6, paid: 6 } };
     assertEqual(heldBy(states, "A").join(), "sun_gate");
     assertEqual(heldBy(states, "C", (h, id) => h === "B" && id === "C").join(), "great_lighthouse");
+    assertEqual(heldBy(states, "D", () => false, "Saltreach").join(), "great_lighthouse"); // a settlement in its region shares it
+    assertEqual(heldBy(states, "D", () => false, "Blackfen").join(), "");
     assertEqual(adjustCharge(100, "railway", ["sun_gate"]), 75);
     assertEqual(adjustCharge(100, "horses", ["sun_gate"]), 100);
     assertEqual(adjustCharge(1, "railway", ["sun_gate"]), 1);

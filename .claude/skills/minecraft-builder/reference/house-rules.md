@@ -52,3 +52,6 @@ never to do. Index: `regions/README.md`.
 - [ ] Colour: one family per surface, no band that jumps a step, no single odd block.
 - [ ] Curved shapes read smooth from 30 blocks (preview) and from close (hifi render).
 - [ ] The summary has no surprising warnings (substituted partial blocks, even footprints).
+- [ ] No part sits on top of another piece (Mateo 2026-11-12, the Horse Fair's towers and stables over its seating):
+      towers, gatehouses and outbuildings round a bowl, court or wall stand outside it, with their inner face on the
+      wall line at most. Check every part's rect against the seating, walkways and other parts before rendering.

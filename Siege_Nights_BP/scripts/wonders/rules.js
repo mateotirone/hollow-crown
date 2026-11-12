@@ -6,7 +6,8 @@
 //   claimProblem({ tier, rising })        why a settlement can't claim a free wonder, or null
 //   payProblem(w, { tier })               why the next stage can't be paid for now, or null
 //   standing(w)                           every stage built: the effect is on
-//   heldBy(states, id, isAlly)            ids of finished wonders whose effect reaches `id` (holder or ally)
+//   heldBy(states, id, isAlly, home)      ids of finished wonders whose effect reaches `id`: holder, ally, or a
+//                                         settlement in the wonder's home region (`home` = id's region)
 //   adjustCharge(amount, reason, held)    a price after the wonders' discounts
 //   adjustPay(amount, isJobSale, held)    a sale's coins after the wonders' bonus
 //   extraArrivals(held)                   newcomers added at a dawn census
@@ -51,8 +52,9 @@ export function payProblem(w, { tier = 0 } = {}) {
 export const standing = (w) => (w?.built ?? 0) >= WONDER.stages;
 export const rising = (w) => !!w?.holder && !standing(w);
 
-export function heldBy(states, id, isAlly = () => false) {
-  return Object.entries(states ?? {}).filter(([, w]) => w?.holder && standing(w) && (w.holder === id || isAlly(w.holder, id))).map(([k]) => k);
+export function heldBy(states, id, isAlly = () => false, home = undefined) {
+  return Object.entries(states ?? {}).filter(([k, w]) => w?.holder && standing(w) &&
+    (w.holder === id || isAlly(w.holder, id) || (home !== undefined && WONDER_BY_ID[k]?.home === home))).map(([k]) => k);
 }
 
 const effects = (held) => held.map((k) => WONDER_BY_ID[k]?.effect).filter(Boolean);
