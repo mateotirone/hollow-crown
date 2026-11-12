@@ -82,6 +82,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - Discord alerts, ready for when the group sets up a Discord: siege nights, fallen Keeps, new settlements, Rival Lords marching, the throne changing hands and more can be posted to a Discord channel, with a ping for whoever it hits, even when nobody is online. A Choirsteel template holder who stays away a full day is announced to everyone. Needs a relay account and a small program on an always-on computer (docs/DISCORD.md); without them nothing changes in game.
 
 ### Fixed
+- The Rift no longer breaks the first time its veil turns a player back (a missing import in the veil code).
 - Trains no longer clip bridge-end parapets, abutments or tunnel arch shoulders: every bought stretch keeps a clear opening 3 wide and 4 high along the whole line.
 - Castle Guard armour icons no longer show as an empty slot or a scrap of cloth: every piece shows whole, in your banner colour.
 - 81 blocks that showed a raw code instead of a name (regional Castle Bricks, Tiles, Cobbled, Smooth and Stone, and the old trees) now have proper names.
