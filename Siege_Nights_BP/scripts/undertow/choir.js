@@ -21,7 +21,7 @@
 // Numbers to tweak are in CHOIR below.
 
 import { world, system, GameMode } from "@minecraft/server";
-import { registerBoss, fightOf, stack, chaseStep, isCreative } from "../bestiary/bossCore.js";
+import { registerBoss, fightOf, stack } from "../bestiary/bossCore.js";
 import { effect, flat, heal, hurt, ring, shove, sound, particle } from "../bestiary/util.js";
 import { UNDERTOW_ID, COURT } from "./layout.js";
 import { SOURCE_SITE_IDS, SITE_NAMES, getSourceSite } from "./source.js";
@@ -38,7 +38,6 @@ export const CHOIR = {
   wavePerPlayer: 3, // more for every player after the first
   waveMax: 24, // never more than this alive at once (a Realm has to keep up)
   wreckedWaveFactor: 0.75, // the dawn cart was wrecked at the Seams (middle stretch): waves are smaller
-  echoReach: 2.2, // creative playtesters: an Echo this close "hits" (shown, can't hurt)
   glideSpeed: 0.9, // blocks the Conductor drifts each framework step (5 ticks): about 3.6 a second
   glidePause: 40, // ticks it hangs at each spot before it picks the next
   slipNear: 3.5, // a player this close and it slips away...
@@ -151,20 +150,7 @@ function waves(f) {
   wave(f);
 }
 
-// Vanilla mobs ignore Creative players, so for playtesters the Echoes walk at them and show what would have hit.
-function pester(f, players) {
-  const creative = players.filter(isCreative);
-  if (!creative.length || players.some((p) => !isCreative(p))) return;
-  for (const e of echoes(f)) {
-    try {
-      const loc = e.location;
-      const p = creative.reduce((a, b) => (flat(b.location, loc) < flat(a.location, loc) ? b : a));
-      if (flat(p.location, loc) <= CHOIR.echoReach) { if (f.tick % 20 === 0) hurt(p, 4, "entityAttack", e); continue; }
-      const to = chaseStep(loc, p.location, 0.25, CHOIR.echoReach - 0.4, false);
-      if (to) e.teleport({ x: to.x, y: loc.y, z: to.z }, { facingLocation: p.location });
-    } catch { /* gone */ }
-  }
-}
+// Creative playtesters: the Echoes walk at you and show what would have hit, like every boss helper (bossCore.js helpersChase).
 
 // The Conductor glides round the hall, a slow figure-of-eight of spots, and slips away from anyone close.
 // In the Closing it keeps to the middle, where the players have to be.
@@ -280,7 +266,6 @@ registerBoss({
   tick: (f, players = f.players()) => {
     const st = stage(f);
     waves(f);
-    pester(f, players);
     glide(f, players);
     if (st === 1 && f.tick % 60 === 0) f.bar("§dThe Conductor is open: strike it. The last Singer can't be silenced until the song closes in.");
     if (st === 0) {
