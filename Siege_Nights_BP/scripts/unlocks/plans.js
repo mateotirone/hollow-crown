@@ -310,6 +310,10 @@ export function* cradlePlan(probe, anchor) {
   // the Cradle Tree itself stands over the cave as the site's landmark (landmark_stamps.js, map/structures/boss_landmarks.py)
   return { center, ops, info: {} };
 }
+// The Changeling Glade on the way in (drawn by the world builds thread as part of the area stamp): a sunken clearing
+// south of the cave where the Mother's changelings come for whoever walks through.
+export const GLADE = { dz: 47, r: 13, floor: -1, clear: 8 };
+export const inGlade = (c, l) => Math.hypot(l.x - (c.x + 0.5), l.z - (c.z + GLADE.dz + 0.5)) <= GLADE.r && l.y >= c.y + GLADE.floor && l.y <= c.y + GLADE.clear;
 export const inCradle = (c, l) => Math.hypot(l.x - (c.x + 0.5), l.z - (c.z + 0.5)) <= CRADLE.r && l.y > c.y + CRADLE.floor && l.y < c.y + CRADLE.floor + CRADLE.h + 1;
 
 // ===================================================================== Mirelight's five villagers

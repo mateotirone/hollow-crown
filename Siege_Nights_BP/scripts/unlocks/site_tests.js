@@ -1,7 +1,7 @@
 // Self-tests for the four set pieces after the Reeve: the puzzles, the plans and the rematch rule. All pure and fast.
 import { addTests, assert, assertEqual } from "../siege/api.js";
-import { makeHunt, huntStep, makePews, pewAnswer, makeStatues, statueStep, makeChangeling, villagerLines, accuse, resting, BEASTS, AGES, TELLS, VILLAGERS, PEW_ROWS, COOLDOWN_TICKS } from "./puzzles.js";
-import { huntPlan, crackCells, HUNT, chapelPlan, chapelInterior, pewStone, inChapel, CHAPEL, vaultPlan, statueAt, doorCells, inVault, VAULT, cradlePlan, rootCells, inCradle, CRADLE, mirelightPlan } from "./plans.js";
+import { makeHunt, huntStep, makePews, pewAnswer, makeStatues, statueStep, makeChangeling, villagerLines, accuse, resting, gladeWave, GLADE_REST_TICKS, BEASTS, AGES, TELLS, VILLAGERS, PEW_ROWS, COOLDOWN_TICKS } from "./puzzles.js";
+import { huntPlan, crackCells, HUNT, chapelPlan, chapelInterior, pewStone, inChapel, CHAPEL, vaultPlan, statueAt, doorCells, inVault, VAULT, cradlePlan, rootCells, inCradle, inGlade, GLADE, CRADLE, mirelightPlan } from "./plans.js";
 import { socketAnswer } from "./site.js";
 import { stampOps } from "./landmarks.js";
 
@@ -162,6 +162,18 @@ addTests("unlocks: sites", {
     assertEqual(ops[0], { dx: -1, dy: 0, dz: -1, block: "minecraft:stone", states: undefined });
     assertEqual(ops[1].states, { pillar_axis: "y" });
     assertEqual(stampOps(undefined), []);
+  },
+  "the Changeling Glade: a wave when someone walks in, never in a fight, then it rests": () => {
+    assert(gladeWave({ players: 1, fighting: false, now: 10, last: undefined }));
+    assert(!gladeWave({ players: 0, fighting: false, now: 10, last: undefined }));
+    assert(!gladeWave({ players: 2, fighting: true, now: 10, last: undefined }));
+    assert(!gladeWave({ players: 1, fighting: false, now: 100 + GLADE_REST_TICKS - 1, last: 100 }));
+    assert(gladeWave({ players: 1, fighting: false, now: 100 + GLADE_REST_TICKS, last: 100 }));
+    const c = { x: 0, y: 70, z: 0 };
+    assert(inGlade(c, { x: 0.5, y: 70, z: GLADE.dz + 0.5 }));
+    assert(!inGlade(c, { x: 0.5, y: 70, z: 0.5 }), "the cave is not the glade");
+    assert(!inCradle(c, { x: 0.5, y: 70 + CRADLE.floor + 2, z: GLADE.dz + 0.5 }));
+    assert(GLADE.dz - GLADE.r > CRADLE.r, "the glade stays clear of the cave");
   },
   "Mirelight: five lantern spots, one per villager": () => {
     const plan = run(mirelightPlan(flat, { x: 0, z: 0, y: 64 }, VILLAGERS));
