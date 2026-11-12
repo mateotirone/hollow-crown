@@ -55,6 +55,7 @@ STYLES = {
         flowers=["poppy", "cornflower", "oxeye_daisy", "allium", "azure_bluet", "red_tulip", "white_tulip", "lily_of_the_valley"],
         bush=["azalea_leaves", "azalea_leaves_flowered", "oak_leaves"], hedge="azalea_leaves",
         trees={"vale_apple": 3, "vale_hawthorn": 3, "vale_silver_birch": 2, "vale_yew": 2},
+        round="andesite_wall", round_band="tuff_brick_wall",
         frame="stripped_spruce_log", infill="calcite", range_roof=["deepslate_tile_stairs", "deepslate_brick_stairs"],
         range_floor="spruce_planks", door="spruce_door", crops=["carrots", "beetroot", "potatoes", "wheat"],
     ),
@@ -370,13 +371,16 @@ class Citadel:
                     for y in range(TOP + 1, TOP + 31):
                         self.set(x, y, z, S["stone"] if corner and y % 2 else S["smooth"])
                     self.set(x, TOP + 12, z, S["band"]); self.set(x, TOP + 22, z, S["band"]); self.set(x, TOP + 30, z, S["stone"])
+                    if corner:                                  # rounded corners to match the cone roof (Mateo)
+                        for y in range(TOP + 1, TOP + 31):
+                            self.set(x, y, z, S["round_band"] if y in (TOP + 12, TOP + 22) else S["round"])
                     along = dx if abs(dz) == CT else dz
                     if along in (-3, 0, 3) and not corner:
                         for y in list(range(TOP + 15, TOP + 20)) + list(range(TOP + 24, TOP + 28)): self.set(x, y, z, S["pane"])
                 elif ring < CT:
                     self.col(x, z, TOP + 1, TOP + 29, "air")
                     self.set(x, TOP + 12, z, S["tiles"]); self.set(x, TOP + 22, z, S["tiles"]); self.set(x, TOP + 30, z, S["tiles"])
-                if ring == CT + 1:
+                if ring == CT + 1 and not (abs(dx) == CT + 1 and abs(dz) == CT + 1):
                     self.set(x, TOP + 30, z, S["corbel"], facing=OPP[outward(dx, dz)], half="top")
         self.cone(kx, TOP + 31, kz - 6, 9.5, 19)
         # into the central tower from the roof: a door on its south face, a ladder up its north wall
@@ -471,7 +475,7 @@ class Citadel:
         put(kx - 6, y + 1, kz, "lantern")
         for z in range(kz - I + 1, kz + I, 3):
             put(kx + I, y, z, "barrel"); put(kx + I, y + 1, z, "barrel")
-        for z, n in ((kz - 6, "anvil"), (kz - 3, "grindstone"), (kz, "smithing_table"), (kz + 3, "anvil"), (kz + 6, "fletching_table")):
+        for z, n in ((kz - 6, "anvil"), (kz - 3, "grindstone"), (kz, "smithing_table"), (kz + 3, "anvil"), (kz + 6, "grindstone")):
             put(kx + 6, y, z, n)
         ceiling_lights(f4 - 1)
         # 4. the council room: a long table with twelve chairs, the map table, lecterns
