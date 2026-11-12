@@ -345,6 +345,21 @@ export const ENTRIES = [
     when: ["click:siege:tree_of_oaths"],
   },
   {
+    id: "letters", ch: "start", title: "Letters by messenger",
+    tip: "To send another player a private letter, type /siege:messenger. A messenger carries it to them.",
+    page: "Type §f/siege:messenger§r (or choose §fSend a messenger§r in the Keep menu). Pick who it is for, write up to 240 letters, and send it.\n\n"
+      + "A messenger rides off with it. It takes a couple of minutes to arrive: a minute and a half next door, up to three minutes across the map. While it is on the road, a small countdown above your hotbar says §fYour message is being delivered§r. When it reaches zero they get it in chat, and you are told it arrived.\n\n"
+      + "If they are away, the messenger waits and hands it over when they come back. You can have three letters on the road at once.",
+    when: ["event:joined"],
+  },
+  {
+    id: "crier", ch: "start", title: "The Crier: news in chat",
+    tip: "Lines marked [Crier] are news from across the realm.",
+    page: "Big moments are read out to everyone in chat, marked §6[Crier]§r. You hear about a boss waking and who stands against it, a boss throwing its challengers back, a new settlement, a newcomer, a plot claimed, a wall going up, a station joining the rails, a lord being called out, a feud ending, a dragon bonding or dying, and a mystery solved.\n\n"
+      + "The Crier never tells anyone that a settlement is under attack. Only its keeper hears that, and only by Messenger (see §fNews from home§r).",
+    when: ["event:joined"],
+  },
+  {
     id: "messenger", ch: "keep", title: "News from home: the Messenger",
     tip: "Away from home, you hear nothing of attacks on your settlement. The Messenger, on the Tree of Oaths, changes that.",
     page: "When you are away from your own land, nobody tells you your settlement is being attacked. You find out when you get back: the moment you step onto your land, you hear everything that happened while you were gone.\n\n"

@@ -3,7 +3,8 @@
 // MESSENGER.coins Regals at the Tree).
 //
 // Any feature can report an attack on a settlement:
-//   emit("baseAttacked", { owner, kind?, text?, by? })   kind picks the cooldown bucket (rules.js); text overrides the words
+//   emit("baseAttacked", { owner, kind?, text?, by? })   kind picks the cooldown bucket (rules.js); text overrides the words.
+//   Only the keeper hears it, so write text to them: "Someone is robbing your Regal Safe."
 // It already listens to: settlementAttacked (siege/guards.js markWanted: a player hit your guards, walls, people or
 // keep), assaultSpawned, lordRaid, keepFallen, and the vault's vaultDrilled / vaultBreached / relicTaken / vaultOpened.
 //
@@ -63,7 +64,7 @@ export function report(owner, kind, words = {}, text) {
   if (cooling(last, b, now, key)) return;
   last[key] = now;
   sent.set(owner, last);
-  const line = text ?? newsText(kind, { name: api.keepOf(owner).name, ...words });
+  const line = text ?? newsText(kind, words); // only the keeper is told, so it always says "your settlement"
   const player = online(owner);
   const way = route({ online: !!player, atHome: !!player && atHome(player), hasMessenger: !!player && hasMessenger(player) });
   if (way === "home") {

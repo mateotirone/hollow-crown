@@ -707,3 +707,19 @@ You need a settlement (Keep Banner) and a Longhouse or bigger. A second player h
 
 Tell me about: alerts that come too often or too rarely, and anything the messenger says that reads wrong.
 
+### Letters by messenger
+Needs two players.
+1. Type `/siege:messenger`. ✅ A form opens: pick the other player, write a line, send. You get "A messenger rides out..." with about how long it will take.
+2. ✅ Above your hotbar: "Your message is being delivered 1:29" counting down each second.
+3. ✅ At zero the other player gets "A messenger hands you a letter from <you>" with a gallop sound, and you get "Your letter has reached...". `/scriptevent siege:letters_fast` skips the wait.
+4. Send one to a player who has left. ✅ It waits, and they get it when they log back in.
+5. Keep menu → "Send a messenger". ✅ The same form.
+
+### The Crier
+1. `/scriptevent siege:news_test`. ✅ One sample of every [Crier] line, none naming anything hidden.
+2. Start a boss fight (Creative menu or the showcase). ✅ Everyone sees "[Crier] <boss> has woken near <place>. <you> stands against it."
+3. Walk out of a boss arena after hurting it and wait 30 seconds. ✅ "<boss> has thrown back everyone who came against it."
+4. Plant a new Keep Banner. ✅ "<you> has planted a Keep Banner near <place>."
+
+Tell me about: news that comes too often, news that's missing, and anything the Crier says that gives the story away.
+
