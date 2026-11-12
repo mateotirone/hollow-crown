@@ -415,7 +415,7 @@ class Town:
         if best: return best
         (lx, _, lz), (hx, _, hz) = bp.bounds(); return (lx + hx) // 2, hz + 1
 
-    def walk_cells(self, start, f, maxlen=6):
+    def walk_cells(self, start, f, maxlen=10):
         """Cells from the door step forward (direction f) until a path is reached."""
         out = []; x, z = start
         for _ in range(maxlen):
@@ -424,6 +424,12 @@ class Town:
                 return out, (x, z)
             out.append((x, z)); x, z = x + f[0], z + f[1]
         return None
+
+    LANDING = 4          # Mateo 2026-11-12: 4 flat blocks in front of every front door, level with the floor,
+                         # then graded off; a door never opens onto a drop (the house turns round instead)
+    LANDING_FILL = 4     # the landing is built up by at most this much (then banked off); more means a cliff
+    def landing_cells(self, door_xz, f):
+        return [(door_xz[0] + f[0] * t - f[1] * s, door_xz[1] + f[1] * t + f[0] * s) for t in range(self.LANDING) for s in (-1, 0, 1)]
 
     FLOOR_HIGHEST = True
     ROAD_FIT = 2         # half blocks: no path beside a plot is more than a block above its floor,
@@ -480,13 +486,36 @@ class Town:
             if yf < hs.min() - 2 or yf > hs.max() + 2: continue
             cost = float(np.abs(hs - yf).sum()) + 0.6 * float(np.maximum(0, yf - hs).sum())   # fill shows; cutting is tidier
             if need_walk:
-                n = len(cells); dk = abs(2 * yf + 1 - k_road)
-                if dk > 2 * n + 2: continue          # too steep even with stairs
+                n = max(0, len(cells) - self.LANDING); dk = abs(2 * yf + 1 - k_road)   # the landing is flat: only the rest climbs
+                if dk > 2 * n + 1: continue          # too steep even with stairs
                 cost += 6 * max(0, dk - n - 1)        # half steps are free; whole steps (stairs) cost a bit
             if best is None or cost < best[0]: best = (cost, yf)
         if best is None: return None
         yf = best[1]
+        # the landing: level with the floor (built up to LANDING_FILL, cut a block at most), paths on it level with the door
+        # (it ends where it meets a street, which must then be level with the door, a slab step at most)
+        f = ROT[deg]; gs = set(G); walk = set(cells) if need_walk else set(); land = []
+        for t in range(self.LANDING):
+            cx, cz = door_xz[0] + f[0] * t, door_xz[1] + f[1] * t
+            if not self.ok(cx, cz): return None
+            ci, cj = self.ij(cx, cz)
+            if self.K[ci, cj] >= 0 and (cx, cz) not in walk:
+                if abs(int(self.K[ci, cj]) - (2 * yf + 1)) > 2: return None
+                break
+            land += [c for c in ((cx - f[1] * s, cz + f[0] * s) for s in (-1, 0, 1)) if c not in gs]
+        for x, z in land:
+            if not self.ok(x, z): return None
+            i, j = self.ij(x, z)
+            if self.WET[i, j]: return None
+            if self.K[i, j] >= 0: continue                     # a street beside the landing keeps its own height
+            if self.TAKEN[i, j] >= 2 or not (yf - self.LANDING_FILL <= self.G[i, j] <= yf + 1): return None
         # commit
+        for x, z in land:
+            i, j = self.ij(x, z)
+            if self.K[i, j] < 0 and (x, z) not in walk:
+                g0 = int(self.G[i, j])
+                for y in range(yf + 1, max(g0, yf) + 1): self.works.setdefault((x, y, z), ("air", {}))
+                self.G[i, j] = yf; self.FIX[i, j] = True; self.TAKEN[i, j] = max(self.TAKEN[i, j], 1)
         for x, z in F:
             i, j = self.ij(x, z); self.EAVES[i, j] = True
             if self.TAKEN[i, j] < 2: self.TAKEN[i, j] = max(self.TAKEN[i, j], 1)
@@ -544,10 +573,10 @@ class Town:
         (slab, block, slab) to the street; a stair where it has to climb faster."""
         n = len(cells); k0 = 2 * yf + 1; ks = []
         if n == 0: return
-        for t in range(n):
-            target = k0 + (k_road - k0) * (t + 1) / (n + 1)
-            ks.append(int(round(target)))
-        ks[0] = k0 if abs(k_road - k0) <= n else ks[0]
+        flat = min(n, self.LANDING); m = n - flat                 # the landing stays level with the door
+        ks = [k0] * flat
+        for t in range(m):
+            ks.append(int(round(k0 + (k_road - k0) * (t + 1) / (m + 1))))
         for (x, z), k in zip(cells, ks):
             i, j = self.ij(x, z)
             self.K[i, j] = k; self.KIND[i, j] = PRIO["walk"]; self.TAKEN[i, j] = max(self.TAKEN[i, j], 1); self.DOORWALK[i, j] = True
@@ -650,7 +679,7 @@ class Town:
         self.place_along(sqrd, -1, lambda x, z: 0, setbacks=(1, 2), gap_rng=(0, 1))
         for rd in [r for r in self.roads if r["kind"] == "main"] + [r for r in self.roads if r["kind"] == "lane"]:
             for side in (1, -1):
-                self.place_along(rd, side, tier, setbacks=(1, 2, 3), gap_rng=(1, 2) if rd["kind"] == "main" else (1, 3),
+                self.place_along(rd, side, tier, setbacks=(1, 2, 3, 5, 6, 7), gap_rng=(1, 2) if rd["kind"] == "main" else (1, 3),
                                  kinds=None)
 
     # =========================================================================== 5. windmills, fields
