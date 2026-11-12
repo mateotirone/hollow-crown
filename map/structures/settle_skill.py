@@ -38,8 +38,9 @@ def townhouse_inside(bp, B):
 
 def farmhouse_inside(bp, B):
     up_stair(bp, 3, -1, YW, 5, "n")
-    for x, z in ((-3, -10), (-2, -10), (-3, -9)): bp.set(x, 1, z, "hay_block", axis="y")
-    bp.set(-3, 2, -10, "hay_block", axis="y"); bp.set(0, 1, -10, "composter"); bp.set(1, 1, -10, "barrel", facing="up")
+    # the lean-to is walked through: hay and barrels keep to its two ends, the middle stays a clear walk
+    for z in (-9, -10): bp.set(-3, 1, z, "hay_block", axis="y")
+    bp.set(-3, 2, -10, "hay_block", axis="y"); bp.set(3, 1, -9, "composter"); bp.set(3, 1, -10, "barrel", facing="up")
 
 def mint_inside(bp, B):
     up_stair(bp, 3, -2, YW, 5, "n")

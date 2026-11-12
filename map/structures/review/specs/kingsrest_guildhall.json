@@ -39,7 +39,7 @@
     12
    ],
    "y": 0,
-   "plinth": 3,
+   "plinth": 1,
    "storeys": [
     6,
     8
@@ -51,11 +51,7 @@
      "floor": "spruce_planks"
     }
    ],
-   "door": {
-    "side": "n",
-    "kind": "grand",
-    "steps": 3
-   },
+   "door": null,
    "windows": {
     "s": [
      {
@@ -119,30 +115,6 @@
       "storey": 1,
       "w": 1,
       "h": 4
-     },
-     {
-      "at": -8,
-      "storey": 0,
-      "w": 1,
-      "h": 2
-     },
-     {
-      "at": -4,
-      "storey": 0,
-      "w": 1,
-      "h": 2
-     },
-     {
-      "at": 4,
-      "storey": 0,
-      "w": 1,
-      "h": 2
-     },
-     {
-      "at": 8,
-      "storey": 0,
-      "w": 1,
-      "h": 2
      }
     ],
     "e": [
@@ -203,7 +175,77 @@
    "part": "arch",
    "at": [
     2,
-    3,
+    1,
+    0
+   ],
+   "axis": "x",
+   "width": 3,
+   "height": 5,
+   "style": "round_angle",
+   "material": "stone_bricks",
+   "trim": "spruce_planks"
+  },
+  {
+   "part": "arch",
+   "at": [
+    6,
+    1,
+    0
+   ],
+   "axis": "x",
+   "width": 3,
+   "height": 5,
+   "style": "round_angle",
+   "material": "stone_bricks",
+   "trim": "spruce_planks"
+  },
+  {
+   "part": "arch",
+   "at": [
+    10,
+    1,
+    0
+   ],
+   "axis": "x",
+   "width": 3,
+   "height": 5,
+   "style": "round_angle",
+   "material": "stone_bricks",
+   "trim": "spruce_planks"
+  },
+  {
+   "part": "arch",
+   "at": [
+    14,
+    1,
+    0
+   ],
+   "axis": "x",
+   "width": 3,
+   "height": 5,
+   "style": "round_angle",
+   "material": "stone_bricks",
+   "trim": "spruce_planks"
+  },
+  {
+   "part": "arch",
+   "at": [
+    18,
+    1,
+    0
+   ],
+   "axis": "x",
+   "width": 3,
+   "height": 5,
+   "style": "round_angle",
+   "material": "stone_bricks",
+   "trim": "spruce_planks"
+  },
+  {
+   "part": "arch",
+   "at": [
+    2,
+    1,
     12
    ],
    "axis": "x",
@@ -217,7 +259,7 @@
    "part": "arch",
    "at": [
     6,
-    3,
+    1,
     12
    ],
    "axis": "x",
@@ -231,7 +273,7 @@
    "part": "arch",
    "at": [
     10,
-    3,
+    1,
     12
    ],
    "axis": "x",
@@ -245,7 +287,7 @@
    "part": "arch",
    "at": [
     14,
-    3,
+    1,
     12
    ],
    "axis": "x",
@@ -259,7 +301,7 @@
    "part": "arch",
    "at": [
     18,
-    3,
+    1,
     12
    ],
    "axis": "x",
@@ -273,7 +315,7 @@
    "part": "arch",
    "at": [
     0,
-    3,
+    1,
     2
    ],
    "axis": "z",
@@ -287,7 +329,7 @@
    "part": "arch",
    "at": [
     0,
-    3,
+    1,
     6
    ],
    "axis": "z",
@@ -301,7 +343,7 @@
    "part": "arch",
    "at": [
     0,
-    3,
+    1,
     10
    ],
    "axis": "z",
@@ -315,7 +357,7 @@
    "part": "arch",
    "at": [
     20,
-    3,
+    1,
     2
    ],
    "axis": "z",
@@ -329,7 +371,7 @@
    "part": "arch",
    "at": [
     20,
-    3,
+    1,
     6
    ],
    "axis": "z",
@@ -343,7 +385,7 @@
    "part": "arch",
    "at": [
     20,
-    3,
+    1,
     10
    ],
    "axis": "z",
@@ -357,165 +399,177 @@
  "place": [
   [
    9,
-   21,
+   19,
    5,
    "polished_andesite"
   ],
   [
    9,
-   22,
-   5,
-   "polished_andesite"
-  ],
-  [
-   9,
-   23,
+   20,
    5,
    "polished_andesite"
   ],
   [
    9,
    21,
+   5,
+   "polished_andesite"
+  ],
+  [
+   9,
+   19,
    6,
    "polished_andesite"
   ],
   [
    9,
-   22,
-   6,
-   "polished_andesite"
-  ],
-  [
-   9,
-   23,
+   20,
    6,
    "polished_andesite"
   ],
   [
    9,
    21,
+   6,
+   "polished_andesite"
+  ],
+  [
+   9,
+   19,
+   7,
+   "polished_andesite"
+  ],
+  [
+   9,
+   20,
+   7,
+   "polished_andesite"
+  ],
+  [
+   9,
+   21,
+   7,
+   "polished_andesite"
+  ],
+  [
+   10,
+   19,
+   5,
+   "polished_andesite"
+  ],
+  [
+   10,
+   20,
+   5,
+   "polished_andesite"
+  ],
+  [
+   10,
+   21,
+   5,
+   "polished_andesite"
+  ],
+  [
+   10,
+   19,
+   6,
+   "polished_andesite"
+  ],
+  [
+   10,
+   20,
+   6,
+   "polished_andesite"
+  ],
+  [
+   10,
+   21,
+   6,
+   "polished_andesite"
+  ],
+  [
+   10,
+   19,
+   7,
+   "polished_andesite"
+  ],
+  [
+   10,
+   20,
+   7,
+   "polished_andesite"
+  ],
+  [
+   10,
+   21,
+   7,
+   "polished_andesite"
+  ],
+  [
+   11,
+   19,
+   5,
+   "polished_andesite"
+  ],
+  [
+   11,
+   20,
+   5,
+   "polished_andesite"
+  ],
+  [
+   11,
+   21,
+   5,
+   "polished_andesite"
+  ],
+  [
+   11,
+   19,
+   6,
+   "polished_andesite"
+  ],
+  [
+   11,
+   20,
+   6,
+   "polished_andesite"
+  ],
+  [
+   11,
+   21,
+   6,
+   "polished_andesite"
+  ],
+  [
+   11,
+   19,
+   7,
+   "polished_andesite"
+  ],
+  [
+   11,
+   20,
+   7,
+   "polished_andesite"
+  ],
+  [
+   11,
+   21,
    7,
    "polished_andesite"
   ],
   [
    9,
    22,
-   7,
-   "polished_andesite"
+   5,
+   "stone_brick_wall"
   ],
   [
    9,
    23,
-   7,
-   "polished_andesite"
-  ],
-  [
-   10,
-   21,
    5,
-   "polished_andesite"
-  ],
-  [
-   10,
-   22,
-   5,
-   "polished_andesite"
-  ],
-  [
-   10,
-   23,
-   5,
-   "polished_andesite"
-  ],
-  [
-   10,
-   21,
-   6,
-   "polished_andesite"
-  ],
-  [
-   10,
-   22,
-   6,
-   "polished_andesite"
-  ],
-  [
-   10,
-   23,
-   6,
-   "polished_andesite"
-  ],
-  [
-   10,
-   21,
-   7,
-   "polished_andesite"
-  ],
-  [
-   10,
-   22,
-   7,
-   "polished_andesite"
-  ],
-  [
-   10,
-   23,
-   7,
-   "polished_andesite"
-  ],
-  [
-   11,
-   21,
-   5,
-   "polished_andesite"
-  ],
-  [
-   11,
-   22,
-   5,
-   "polished_andesite"
-  ],
-  [
-   11,
-   23,
-   5,
-   "polished_andesite"
-  ],
-  [
-   11,
-   21,
-   6,
-   "polished_andesite"
-  ],
-  [
-   11,
-   22,
-   6,
-   "polished_andesite"
-  ],
-  [
-   11,
-   23,
-   6,
-   "polished_andesite"
-  ],
-  [
-   11,
-   21,
-   7,
-   "polished_andesite"
-  ],
-  [
-   11,
-   22,
-   7,
-   "polished_andesite"
-  ],
-  [
-   11,
-   23,
-   7,
-   "polished_andesite"
+   "stone_brick_wall"
   ],
   [
    9,
@@ -524,14 +578,14 @@
    "stone_brick_wall"
   ],
   [
-   9,
-   25,
+   11,
+   22,
    5,
    "stone_brick_wall"
   ],
   [
-   9,
-   26,
+   11,
+   23,
    5,
    "stone_brick_wall"
   ],
@@ -542,15 +596,15 @@
    "stone_brick_wall"
   ],
   [
-   11,
-   25,
-   5,
+   9,
+   22,
+   7,
    "stone_brick_wall"
   ],
   [
-   11,
-   26,
-   5,
+   9,
+   23,
+   7,
    "stone_brick_wall"
   ],
   [
@@ -560,44 +614,32 @@
    "stone_brick_wall"
   ],
   [
-   9,
-   25,
+   11,
+   22,
    7,
    "stone_brick_wall"
   ],
   [
-   9,
-   26,
+   11,
+   23,
    7,
    "stone_brick_wall"
   ],
   [
    11,
    24,
-   7,
-   "stone_brick_wall"
-  ],
-  [
-   11,
-   25,
-   7,
-   "stone_brick_wall"
-  ],
-  [
-   11,
-   26,
    7,
    "stone_brick_wall"
   ],
   [
    10,
-   26,
+   24,
    6,
    "spruce_planks"
   ],
   [
    10,
-   25,
+   23,
    6,
    "bell",
    {
@@ -606,31 +648,31 @@
   ],
   [
    9,
-   24,
+   22,
    6,
    "air"
   ],
   [
    10,
-   24,
+   22,
    5,
    "air"
   ],
   [
    10,
-   24,
+   22,
    7,
    "air"
   ],
   [
    11,
-   24,
+   22,
    6,
    "air"
   ],
   [
    8,
-   27,
+   25,
    4,
    "waxed_weathered_cut_copper_stairs",
    {
@@ -639,7 +681,7 @@
   ],
   [
    8,
-   27,
+   25,
    5,
    "waxed_weathered_cut_copper_stairs",
    {
@@ -648,7 +690,7 @@
   ],
   [
    8,
-   27,
+   25,
    6,
    "waxed_weathered_cut_copper_stairs",
    {
@@ -657,7 +699,7 @@
   ],
   [
    8,
-   27,
+   25,
    7,
    "waxed_weathered_cut_copper_stairs",
    {
@@ -666,7 +708,7 @@
   ],
   [
    8,
-   27,
+   25,
    8,
    "waxed_weathered_cut_copper_stairs",
    {
@@ -675,7 +717,7 @@
   ],
   [
    9,
-   27,
+   25,
    4,
    "waxed_weathered_cut_copper_stairs",
    {
@@ -684,25 +726,25 @@
   ],
   [
    9,
-   27,
+   25,
    5,
    "waxed_oxidized_cut_copper"
   ],
   [
    9,
-   27,
+   25,
    6,
    "waxed_oxidized_cut_copper"
   ],
   [
    9,
-   27,
+   25,
    7,
    "waxed_oxidized_cut_copper"
   ],
   [
    9,
-   27,
+   25,
    8,
    "waxed_weathered_cut_copper_stairs",
    {
@@ -711,7 +753,7 @@
   ],
   [
    10,
-   27,
+   25,
    4,
    "waxed_weathered_cut_copper_stairs",
    {
@@ -720,25 +762,25 @@
   ],
   [
    10,
-   27,
+   25,
    5,
    "waxed_oxidized_cut_copper"
   ],
   [
    10,
-   27,
+   25,
    6,
    "waxed_oxidized_cut_copper"
   ],
   [
    10,
-   27,
+   25,
    7,
    "waxed_oxidized_cut_copper"
   ],
   [
    10,
-   27,
+   25,
    8,
    "waxed_weathered_cut_copper_stairs",
    {
@@ -747,7 +789,7 @@
   ],
   [
    11,
-   27,
+   25,
    4,
    "waxed_weathered_cut_copper_stairs",
    {
@@ -756,25 +798,25 @@
   ],
   [
    11,
-   27,
+   25,
    5,
    "waxed_oxidized_cut_copper"
   ],
   [
    11,
-   27,
+   25,
    6,
    "waxed_oxidized_cut_copper"
   ],
   [
    11,
-   27,
+   25,
    7,
    "waxed_oxidized_cut_copper"
   ],
   [
    11,
-   27,
+   25,
    8,
    "waxed_weathered_cut_copper_stairs",
    {
@@ -783,7 +825,7 @@
   ],
   [
    12,
-   27,
+   25,
    4,
    "waxed_weathered_cut_copper_stairs",
    {
@@ -792,7 +834,7 @@
   ],
   [
    12,
-   27,
+   25,
    5,
    "waxed_weathered_cut_copper_stairs",
    {
@@ -801,7 +843,7 @@
   ],
   [
    12,
-   27,
+   25,
    6,
    "waxed_weathered_cut_copper_stairs",
    {
@@ -810,7 +852,7 @@
   ],
   [
    12,
-   27,
+   25,
    7,
    "waxed_weathered_cut_copper_stairs",
    {
@@ -819,7 +861,7 @@
   ],
   [
    12,
-   27,
+   25,
    8,
    "waxed_weathered_cut_copper_stairs",
    {
@@ -828,7 +870,7 @@
   ],
   [
    9,
-   28,
+   26,
    5,
    "waxed_oxidized_cut_copper_stairs",
    {
@@ -837,7 +879,7 @@
   ],
   [
    9,
-   28,
+   26,
    6,
    "waxed_oxidized_cut_copper_stairs",
    {
@@ -846,7 +888,7 @@
   ],
   [
    9,
-   28,
+   26,
    7,
    "waxed_oxidized_cut_copper_stairs",
    {
@@ -855,7 +897,7 @@
   ],
   [
    10,
-   28,
+   26,
    5,
    "waxed_oxidized_cut_copper_stairs",
    {
@@ -864,7 +906,7 @@
   ],
   [
    10,
-   28,
+   26,
    7,
    "waxed_oxidized_cut_copper_stairs",
    {
@@ -873,7 +915,7 @@
   ],
   [
    11,
-   28,
+   26,
    5,
    "waxed_oxidized_cut_copper_stairs",
    {
@@ -882,7 +924,7 @@
   ],
   [
    11,
-   28,
+   26,
    6,
    "waxed_oxidized_cut_copper_stairs",
    {
@@ -891,7 +933,7 @@
   ],
   [
    11,
-   28,
+   26,
    7,
    "waxed_oxidized_cut_copper_stairs",
    {
@@ -900,19 +942,64 @@
   ],
   [
    10,
-   28,
+   26,
    6,
    "waxed_oxidized_cut_copper"
   ],
   [
    10,
-   29,
+   27,
    6,
    "lightning_rod"
   ],
   [
    2,
+   4,
+   0,
+   "lantern",
+   {
+    "hanging": true
+   }
+  ],
+  [
    6,
+   4,
+   0,
+   "lantern",
+   {
+    "hanging": true
+   }
+  ],
+  [
+   10,
+   4,
+   0,
+   "lantern",
+   {
+    "hanging": true
+   }
+  ],
+  [
+   14,
+   4,
+   0,
+   "lantern",
+   {
+    "hanging": true
+   }
+  ],
+  [
+   18,
+   4,
+   0,
+   "lantern",
+   {
+    "hanging": true
+   }
+  ],
+  [
+   2,
+   4,
    12,
    "lantern",
    {
@@ -921,7 +1008,7 @@
   ],
   [
    6,
-   6,
+   4,
    12,
    "lantern",
    {
@@ -930,7 +1017,7 @@
   ],
   [
    10,
-   6,
+   4,
    12,
    "lantern",
    {
@@ -939,7 +1026,7 @@
   ],
   [
    14,
-   6,
+   4,
    12,
    "lantern",
    {
@@ -948,7 +1035,7 @@
   ],
   [
    18,
-   6,
+   4,
    12,
    "lantern",
    {
@@ -957,7 +1044,7 @@
   ],
   [
    0,
-   6,
+   4,
    2,
    "lantern",
    {
@@ -966,7 +1053,7 @@
   ],
   [
    0,
-   6,
+   4,
    6,
    "lantern",
    {
@@ -975,7 +1062,7 @@
   ],
   [
    0,
-   6,
+   4,
    10,
    "lantern",
    {
@@ -984,7 +1071,7 @@
   ],
   [
    20,
-   6,
+   4,
    2,
    "lantern",
    {
@@ -993,7 +1080,7 @@
   ],
   [
    20,
-   6,
+   4,
    6,
    "lantern",
    {
@@ -1002,7 +1089,7 @@
   ],
   [
    20,
-   6,
+   4,
    10,
    "lantern",
    {

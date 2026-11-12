@@ -582,9 +582,10 @@ def _openings(ctx, s, st, B, H_blocks, H_extra, others):
         return None
     dspec = s.get("door", {"side": "s"})
     dside, dt = (dspec or {}).get("side", "s"), (dspec or {}).get("at", 0)
+    dwidth = 0
     if dspec:
-        door(ctx, rects[0], dside, dt, floors[0], st, kind=dspec.get("kind", "house"), canopy=dspec.get("canopy", True),
-             steps=dspec.get("steps", plinth), frame_kind=fk)
+        dwidth = door(ctx, rects[0], dside, dt, floors[0], st, kind=dspec.get("kind", "house"), canopy=dspec.get("canopy", True),
+                      steps=dspec.get("steps", plinth), frame_kind=fk)
     else: dside, dt = None, 0
     skip = {(b.get("side", "s"), b.get("storey", 1), b.get("at", 0)) for b in s.get("balconies", [])}
     wspec = s.get("windows", "auto")
@@ -610,6 +611,13 @@ def _openings(ctx, s, st, B, H_blocks, H_extra, others):
                 if sh is None:   # symmetric pairs across a front, about 30% (05: shutters)
                     sh = shutter_share > 0 and h3(abs(t), i, "nsew".index(sd), 17) < shutter_share and ww in (1, 3)
                 window(ctx, rr, sd, t, fl, st, ww, wh, head_room, B["fk_of"][i], sh, wv.get("sill"))
+    if dside:   # 05 door approach (Mateo 2026-11-12): nothing sticks out at foot or hand height beside the door
+        x, z = wall_cell(rects[0], dside, dt); ox, oz = DIRS[dside]; rx, rz = RIGHT_OF[dside]
+        for k in range(-(dwidth // 2) - 1, dwidth // 2 + 2):
+            for dy in (1, 2):
+                c = (x + rx * k + ox, floors[0] + dy, z + rz * k + oz)
+                if ctx.stage_of.get(c) == "openings": ctx.clear(*c)
+                elif k == 0 and ctx.stage_of.get(c) == "frame": ctx.clear(*c)   # a proud post never stands in the doorway
 
 
 def raw_roof(ctx, st):
@@ -1077,6 +1085,12 @@ def lean_to(ctx, s):
         ctx.setif(x, ry - 1, z, "roof", "stairs", tm, facing=inward, half="top")
     if s.get("floor"):
         for (x, z) in span: ctx.set(x, y0, z, "foundation", "full", s["floor"])
+    # 07 walkways (Mateo 2026-11-12): the covered ground is walked in, so window sills, boxes and shutters of
+    # the wall behind do not stick into it; leave at least one block of clear walk (two high) under the roof
+    for (x, z) in span:
+        for yy in range(y0 + 1, y0 + 4):
+            stg = ctx.stage_of.get((x, yy, z))
+            if stg == "openings" or (stg == "frame" and j_of(x, z) == 0): ctx.clear(x, yy, z)   # proud wall frame too
 
 
 def woodpile(ctx, s):

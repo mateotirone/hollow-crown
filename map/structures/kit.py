@@ -769,6 +769,7 @@ class Building:
                         if y == y_from: bp.set(x, y, z, P["frame"], axis="x" if ridge == "z" else "z")
                     else:
                         bp.set(x, y, z, P["stone"])
+        self.close_plate(rect, y_from, style)
         # clear the attic under the roof inside the walls
         for x in range(x0 + 1, x1):
             for z in range(z0 + 1, z1):
@@ -776,6 +777,32 @@ class Building:
                 if h is None: continue
                 for y in range(y_from, h):
                     if bp.get(x, y, z)[0] in ("keep",): bp.set(x, y, z, "air")
+
+    def close_plate(self, rect, y_from, style="timber"):
+        """No open row between the top of a wall and its roof (Mateo 2026-11-12: "why's there a gap here").
+        Round the whole wall outline, any air left between the highest wall block and the roof above it (one or two
+        rows, the wall plate) is filled: a timber wall gets a beam along the wall, a stone wall its stone. Taller
+        openings are left alone (they are arcades, porches or open stalls, not gaps)."""
+        bp, P = self.bp, self.P
+        x0, z0, x1, z1 = rect
+        ring = [(x, z) for x in range(x0, x1 + 1) for z in (z0, z1)] + [(x, z) for z in range(z0 + 1, z1) for x in (x0, x1)]
+        soft = lambda n: n in ("air", "keep")
+        for (x, z) in ring:
+            h, _ = self.H.get((x, z), (None, None))
+            if h is None: continue
+            top = min(h, y_from)
+            ys = [y for y in range(top - 1, top - 4, -1)]
+            gap = []
+            for y in ys:
+                if soft(bp.get(x, y, z)[0]): gap.append(y)
+                else: break
+            else: continue                                   # no wall within three rows: an open side, leave it
+            wall = bp.get(x, gap[-1] - 1 if gap else top - 1, z)[0]
+            if not gap or len(gap) > 2 or any(w in wall for w in ("fence", "pane", "glass", "door", "stairs", "slab", "lantern")): continue
+            along = "x" if z in (z0, z1) else "z"
+            for y in gap:
+                if style == "timber": bp.set(x, y, z, P["frame"], axis=along)
+                else: bp.set(x, y, z, P["stone"])
 
     def eaves(self, rect, ridge, y):
         """Upside-down trim stairs tucked under the eave overhang along the long walls."""

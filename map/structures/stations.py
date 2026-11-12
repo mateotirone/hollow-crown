@@ -336,6 +336,7 @@ def grand(region):
         for lz in range(-7, 8):
             y = shed_arch(lz)
             ys = range(min(y, prev), max(y, prev) + 1) if prev is not None else [y]
+            if abs(lz) == 7: ys = range(5, y + 1)       # the vault comes down onto the side beam: no open row above it
             for yy in ys:
                 if x in ribs: S(bp, x, yy, lz, rib)
                 else: S(bp, x, yy, lz, "glass")
