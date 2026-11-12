@@ -62,10 +62,15 @@ Type the commands in chat (`/` opens it).
 **Battering Ram**
 8. `/give @s siege:battering_ram` and click the ground. ✅ A wooden ram appears.
 9. Click it to climb on, drive with WASD, face your wall, and punch the wall. ✅ The beam swings and the wall cracks, and breaks after a few hits.
+9b. Get off, then sneak + click the ram with an empty hand. ✅ It packs back into a Battering Ram item.
 
 **Siege machines**
 10. `/give @s siege:ballista`, place it inside your settlement, then `/summon zombie ~ ~ ~10`. ✅ The ballista turns to face the zombie, the arms snap and it gets hit.
-11. `/give @s siege:trebuchet` and `/give @s cobblestone 16`. Place it, look at a spot about 30 blocks away, and click the trebuchet holding cobblestone. ✅ It turns, the arm swings over, and a boulder smashes a crater.
+11. `/give @s siege:trebuchet` and `/give @s cobblestone 16`. Place it, look toward a wall about 30 blocks away and a little up, and click the trebuchet holding cobblestone. ✅ It turns, the arm swings over, the action bar says the counterweight, angle and about how far it throws, and a boulder flies in a real arc and smashes a crater. Look higher for a higher lob; sneak + click to change the counterweight (Light, Medium, Heavy) and see the distance change.
+
+**Wall collapse**
+11b. Stand on flat ground and type `/scriptevent siege:collapse_test`. ✅ A stone brick wall appears 6 blocks in front of you; 2 seconds later its base is knocked out, the stone over the hole falls away in a stepped arch shape, falling block by block, and leaves cobblestone and gravel piled in a slope. The top of the wall stays up over the gap.
+11c. Blow a big hole in the base of a tall wall with a Breaching Charge or several trebuchet hits. ✅ Whole sections come down, leaning out to the open side; a house roof built against the wall stays up unless the wall under it falls.
 
 **Guards**
 12. `/give @s siege:barracks`, place it, `/summon villager` next to it, then click the Barracks with coins in hand (`/scriptevent siege:economy_give 200`; a guard is 40 Regals). ✅ The villager becomes a Man-at-Arms.
@@ -557,6 +562,7 @@ Things I could not check without the game, so please look closely: that the stee
 10. **Your own station.** In your settlement, place a Rail Depot a few blocks from a straight line of Track (or on open ground, facing where the building should go). A Halt should rise lined up with that track, and the depot should end up on its platform. Win sieges until the settlement becomes a Town: the Halt should come down and a Station rise in its place.
 11. A claim near a Station Post placed by the map builder (within about 140 blocks of the banner) should raise a Halt by that post.
 12. **Buying the line.** Once the world has its planned railway, `/scriptevent siege:trains routes` should list the stops and say which is your home stop. Click any Station Post: "Extend the line" should only offer stretches that start at a stop you can already reach (at first just the ones out of your home stop). Buy one: the Track should lay itself along the graded bed over a few seconds, and everyone should see "The line from ... to ... is laid". Stretches past it should now show up in the menu.
+13. **Station on claim.** On the real map, found a settlement on a plot. ✅ "A Halt is rising at …" and a Halt builds on the plot's stop by the graded rail bed, the post ending on its platform. The station menu shows "Extend the line" and "Buy an engine", but no carriage yet. Buy the first stretch. ✅ "Call the carriage" appears: it puts one coach on the platform facing the next stop, slow (about 4 blocks a second). Leave it empty for a minute ✅ it goes away. Buy an engine, place it, then pick it up and drop it in lava. ✅ The station menu now says "Take an engine (free)".
 
 ## Sounds (scripts/sound/, SOUND-LIST.md)
 

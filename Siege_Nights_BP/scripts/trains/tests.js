@@ -4,7 +4,7 @@ import { BlockTypes, EntityTypes, ItemTypes } from "@minecraft/server";
 import { addTests, assert, assertEqual } from "../siege/api.js";
 import { SHAPES, layTrack, cursorOn, advance, back, pointAt, follow, KINDS, curvePoints } from "./track.js";
 import { stageFor, stationPlan, siteFor, lineBlocks, rightOf, STAGES, STATION } from "./stations.js";
-import { ROUTE, reachable, buyable, cannotBuy, priceOf, nearestStop, checkRoutes } from "./routes.js";
+import { ROUTE, reachable, buyable, cannotBuy, priceOf, nearestStop, checkRoutes, stopSite } from "./routes.js";
 import { ROUTES } from "./routes_data.js";
 import { TRACK, CARS, TRAIN, carPoses, trainLength, stepSpeed, moveTrain, limitAhead, shapesForLoop, showcaseLoop } from "./data.js";
 
@@ -47,6 +47,16 @@ addTests("trains", {
     assertEqual(buyable(data, built, "C")[0].from, "C");
     assert(cannotBuy(data, built, undefined, "AB"), "no home, no buying");
     assert(cannotBuy(data, built, "A", "AB"), "already laid");
+  },
+  "routes: a settlement's station sits on its stop, building toward the banner": () => {
+    const data = routeMap();
+    const s = stopSite(data, { x: 10, z: 40 });
+    assertEqual(s.stop.id, "A");
+    assertEqual(JSON.stringify(s.origin), JSON.stringify({ x: 0, y: 64, z: 0 }));
+    assertEqual(JSON.stringify(s.forward), JSON.stringify({ x: 0, z: 1 }), "east-west line, banner to the south");
+    assertEqual(stopSite(data, { x: 10, z: -40 }).forward.z, -1);
+    assertEqual(stopSite(data, { x: 5000, z: 0 }), undefined, "no stop near");
+    for (const stop of ROUTES.stops.filter((st) => st.kind === "plot")) assert(stopSite(ROUTES, { x: stop.x + 30, z: stop.z + 30 }), `${stop.id} has straight track under it`);
   },
   "routes: prices, home stops and map checks": () => {
     const data = routeMap();

@@ -29,6 +29,24 @@ export function nearestStop(data, x, z, range = ROUTE.homeRange) {
   return best;
 }
 
+// Where a settlement's station goes on its home stop: the stop's own track block, the line through it (from the
+// stretch that starts or ends there) and the building toward the banner at `c` (x, z). { stop, origin, forward } or
+// undefined when no stop is near or the stop has no straight track under it.
+export function stopSite(data, c, range = ROUTE.homeRange) {
+  const stop = nearestStop(data, c.x, c.z, range);
+  if (!stop) return undefined;
+  let dir;
+  for (const seg of data.segments) {
+    const b = seg.blocks.find(([x, y, z]) => x === stop.x && y === stop.y && z === stop.z);
+    if (b && b[3] === 0 && b[4] % 2 === 0) { dir = b[4]; break; }
+  }
+  if (dir === undefined) return undefined;
+  const along_x = dir === 2 || dir === 6;
+  const side = (v) => (v < 0 ? -1 : 1);
+  const forward = along_x ? { x: 0, z: side(c.z - stop.z) } : { x: side(c.x - stop.x), z: 0 };
+  return { stop, origin: { x: stop.x, y: stop.y, z: stop.z }, forward };
+}
+
 // Every stop reachable from `home` along laid stretches (a Set of stop ids; empty without a home)
 export function reachable(data, built, home) {
   const seen = new Set();

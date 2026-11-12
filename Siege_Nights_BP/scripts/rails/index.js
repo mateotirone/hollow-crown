@@ -83,6 +83,15 @@ function addStation(block, name, region, owner) {
   return station;
 }
 
+// A station with no block yet (trains/station_sites.js raises its building on a planned stop and puts the post on
+// the platform when it's done)
+export function addStationAt({ name, region, x, y, z, dim }) {
+  const station = { id: nextId(stations()), name, region, x, y, z, dim };
+  stations().push(station);
+  store.save();
+  return station;
+}
+
 function undoPlace(player, block, message) {
   const typeId = block.typeId;
   block.setType("minecraft:air");
@@ -197,9 +206,10 @@ async function stationMenu(player, block, station) {
     `§7Stations discovered: §f${found.length}§7 of ${stations().length}`,
     dest ? `§7Destination: §f${dest.name}§7, ${wayTo(player.location, dest)}` : "§7No destination set.",
   ].join("\n");
+  const vanilla = !!findRail(block); // the old minecart line: only where vanilla rails run by the post
   const entries = [
-    { label: "Call a carriage\n§8seats four, faster than a cart", action: () => callCart(player, block, CARRIAGE) },
-    { label: "Call a minecart", action: () => callCart(player, block) },
+    vanilla && { label: "Call a carriage\n§8seats four, faster than a cart", action: () => callCart(player, block, CARRIAGE) },
+    vanilla && { label: "Call a minecart", action: () => callCart(player, block) },
     { label: "Choose a destination", action: () => pickDestination(player, station, again) },
     dest && { label: "Clear destination", action: () => { player.setDynamicProperty(DEST, undefined); return again(); } },
     {

@@ -15,6 +15,7 @@ const tests = [];
 // tools/check.mjs, which fails if a slow test is missing from this list. Written as "group: name".
 export const OFFLINE_ONLY = new Set([
   "hall build: every hall has a Town Board just inside, off the aisle, before the Tree",
+  "guard posts: every wall a guard can stand on has its flights of steps, each top step beside the walk",
   "settle walls: the ring has no holes, one gate, and follows the ground",
   "undertow: rebuilt sites stamp again over the old look, clearing only inside their site, and keep the Carter's spot clear",
   "settle: every building draws in every style with known roles",
