@@ -32,6 +32,7 @@ BOSSES = [
     ("choir", "The Choir", M["purple"]),
     ("morvane", "Morvane", ramp("#b0207a", 0.08, 0.70)),
     ("pretender", "a Pretender", M["royal_blue"]),
+    ("bell_wife", "Ulfa, the Bell-Wife", ramp("#9a6a3a", 0.10, 0.62)),
 ]
 
 

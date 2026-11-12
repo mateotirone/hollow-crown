@@ -1009,6 +1009,9 @@
   },
   "siege_choirsteel_blackfen_boots": {
    "textures": "textures/items/siege_choirsteel_blackfen_boots"
+  },
+  "siege_summon_bell_wife": {
+   "textures": "textures/items/creative/summon_bell_wife"
   }
  }
 }
