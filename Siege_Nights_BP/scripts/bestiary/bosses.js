@@ -10,13 +10,13 @@ import { MOBS, ITEMS } from "./data.js";
 import { alive, effect, flat, heal, hurt, held, isLookingAt, line, particle, ring, shove, sound } from "./util.js";
 
 const perPlayer = (f, base, each) => base + each * Math.max(0, f.players().length - 1);
-const floorOf = (f, p) => ({ x: p.x, y: f.def.roaming ? p.y : f.center.y, z: p.z });
+const floorOf = (f, p) => f.floorOf(p); // the ground under them, in whatever room the fight is in (bossCore.js)
 const hasVeil = (p) => held(p, "Head") === "siege:widows_veil";
 
 // Shared: "stand on the lit tiles" (the Reeve's time-stop and Oswin's toll)
 function tiles(count, onMiss, missText) {
   return {
-    start: (f) => Array.from({ length: count(f) }, () => f.spot(3, Math.min(11, f.def.radius - 4))),
+    start: (f) => f.spots(count(f), 3, Math.min(11, f.def.radius - 4), 4.5), // inside the room, never two on top of each other
     show: (f, spots) => {
       for (const s of spots) {
         ring(f.dim, s, 2.2, "minecraft:villager_happy", 14);
@@ -226,10 +226,7 @@ registerBoss({
     if (n === 1) f.next.pack = 0;
     if (n === 2) {
       f.shield(true); f.data.pillars = true;
-      for (let i = 0; i < 3; i++) {
-        const a = (i / 3) * Math.PI * 2;
-        f.place("siege:rime_pillar", { x: f.center.x + Math.cos(a) * 8, y: f.center.y, z: f.center.z + Math.sin(a) * 8 });
-      }
+      for (const at of f.spots(3, 5, 9, 5)) f.place("siege:rime_pillar", at);
       f.say("§bHe drives three pillars of ice into the ground. Nothing will hurt him while they stand.");
     }
   },
@@ -252,10 +249,9 @@ registerBoss({
   onStart: (f) => {
     f.data.tide = 0; f.data.rung = {};
     if (f.adds("siege:chapel_bell").length) return;
-    for (let i = 0; i < 3; i++) {
-      const a = (i / 3) * Math.PI * 2 + 0.5;
-      f.place("siege:chapel_bell", { x: f.center.x + Math.cos(a) * 9, y: f.center.y, z: f.center.z + Math.sin(a) * 9 });
-    }
+    // Up to 9 blocks out, but inside the chapel: she stands by the altar in a nave only 9 wide, and a fixed circle put
+    // all three bells in the walls or the sea, so the tide could never be turned (boss walkthrough 2026-11-12)
+    for (const at of f.spots(3, 4, 9, 4)) f.place("siege:chapel_bell", at);
   },
   attacks: [
     { id: "wail", every: 190, windup: 30, warn: "She draws breath to wail...",

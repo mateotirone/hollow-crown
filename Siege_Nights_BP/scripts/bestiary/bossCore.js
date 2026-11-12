@@ -21,7 +21,7 @@ import { world, system, GameMode } from "@minecraft/server";
 import { onTick, moduleStore, addTests, assert, assertEqual, note, emit } from "../siege/api.js";
 import { chooseAttack, pickTemper, temperById, TEMPERS } from "./variety.js";
 import { MOBS } from "./data.js";
-import { activeDimensions, alive, announce, effect, flat, give, heal, healthOf, hurt, particle, ring, sound, makeItem, playerList, addToPlayerList, setHurtScale } from "./util.js";
+import { activeDimensions, alive, announce, blockKind, clearBetween, effect, flat, footingNear, give, heal, healthOf, hurt, particle, ring, sound, makeItem, playerList, addToPlayerList, setHurtScale } from "./util.js";
 import { sfx, hasCue } from "../core/sfx.js";
 import { bossMove } from "./anim.js";
 import { MOVES } from "./moves.js";
@@ -92,7 +92,7 @@ function attach(entity, def, center, fresh) {
   }
   const f = {
     def, entity, dim: entity.dimension, id: entity.id,
-    center: saved?.center ?? { x: center.x, y: center.y, z: center.z },
+    center: saved?.center ?? floorUnder(entity.dimension, center, def.roaming),
     phase: 0, data: {}, tick: 0, timers: [], zones: [], damagers: new Set(saved?.damagers ?? []),
     busyUntil: 0, emptySince: undefined, lastLoc: entity.location, next: {}, paused: false,
     addTag: `siege_b_of_${entity.id}`.replace(/[^\w-]/g, "_"),
@@ -125,6 +125,38 @@ function attach(entity, def, center, fresh) {
   }
   def.onStart?.(f, !saved);
   return f;
+}
+
+// The fight's floor: the ground under where the boss appeared. A boss that drops in from above (the Mother lowers
+// herself from the roots) would otherwise lay every marked circle out at the height she came in at, where none can hit.
+function floorUnder(dim, at, roaming) {
+  const c = { x: at.x, y: at.y, z: at.z };
+  if (roaming) return c;
+  const ground = footingNear(c, blockKind(dim), 1, 12);
+  return ground ? { x: c.x, y: ground.y, z: c.z } : c;
+}
+
+// A spot in the same room as `from`, with floor and headroom, between `min` and `max` blocks away. Fights are drawn as
+// circles round the boss, but they are fought in chapels, vaults and chambers: a spot inside a wall, out in the sea or
+// on the far side of a wall is no use to anyone (Mateo 2026-11-12 boss walkthrough: the Bride's bells all landed
+// outside her chapel). Tries random spots, then nearer ones; falls back to `from` itself.
+export function openSpot(dim, from, min, max, ok = () => true, tries = 16) {
+  const kind = blockKind(dim);
+  for (let i = 0; i < tries + 8; i++) {
+    const hi = i < tries ? max : min + (max - min) / 2;
+    const a = Math.random() * Math.PI * 2, d = min + Math.random() * Math.max(0, hi - min);
+    const at = { x: from.x + Math.cos(a) * d, y: from.y, z: from.z + Math.sin(a) * d };
+    const stand = footingNear(at, kind, 2, 4);
+    if (stand && ok(stand) && clearBetween(dim, from, stand)) return stand;
+  }
+  return { x: from.x, y: from.y, z: from.z };
+}
+
+// Several open spots kept at least `gap` apart (bells, pillars, lit tiles)
+export function openSpots(dim, from, n, min, max, gap = 3) {
+  const out = [];
+  for (let i = 0; i < n; i++) out.push(openSpot(dim, from, min, max, (s) => out.every((o) => flat(o, s) >= gap)));
+  return out;
 }
 
 function nameBoss(f) {
@@ -205,10 +237,11 @@ function helpers(f) {
     // Spawn helpers around the boss (or around `at`). They are removed if the fight resets.
     summon: (type, count = 1, spread = 4, at = f.entity.location, tags = []) => {
       const made = [];
+      const from = footingNear(at, blockKind(f.dim), 1, 6) ?? at;
       for (let i = 0; i < count; i++) {
-        const a = Math.random() * Math.PI * 2, d = spread * (0.5 + Math.random() * 0.5);
+        const s = openSpot(f.dim, from, spread * 0.5, spread, undefined, 6); // on the floor, never in a wall
         try {
-          const e = f.dim.spawnEntity(type, { x: at.x + Math.cos(a) * d, y: at.y + 0.2, z: at.z + Math.sin(a) * d });
+          const e = f.dim.spawnEntity(type, { x: s.x, y: s.y + 0.2, z: s.z });
           e.addTag(f.addTag);
           for (const t of tags) e.addTag(t);
           made.push(e);
@@ -239,12 +272,14 @@ function helpers(f) {
       const ps = f.players();
       return ps.length ? ps[Math.floor(Math.random() * ps.length)] : undefined;
     },
-    // A random spot on the arena floor, between `min` and `max` blocks from the centre
+    // A random spot on the arena floor, between `min` and `max` blocks from the centre, in the same room
     spot: (min, max) => {
       const c = f.def.roaming ? f.entity.location : f.center;
-      const a = Math.random() * Math.PI * 2, d = min + Math.random() * (max - min);
-      return { x: c.x + Math.cos(a) * d, y: c.y, z: c.z + Math.sin(a) * d };
+      return openSpot(f.dim, c, min, max);
     },
+    spots: (n, min, max, gap) => openSpots(f.dim, f.def.roaming ? f.entity.location : f.center, n, min, max, gap),
+    // Where a marked circle goes under someone: the floor beneath them, even mid-jump or on a slope
+    floorOf: (loc) => footingNear(loc, blockKind(f.dim), 1, 6) ?? { x: loc.x, y: f.def.roaming ? loc.y : f.center.y, z: loc.z },
     stun: (ticks) => {
       effect(f.entity, "slowness", ticks, 255);
       effect(f.entity, "weakness", ticks, 255);
@@ -636,6 +671,31 @@ addTests("bestiary", {
       for (const a of def.attacks ?? []) assert(MOVES[def.type]?.includes(a.id), `${def.type} has no animation for its "${a.id}" attack`);
       assert(MOVES[def.type]?.includes("rage"), `${def.type} has no rage animation`);
     }
+  },
+  "fight spots stay in the room: never in a wall, the sea or past a wall (boss walkthrough 2026-11-12)": () => {
+    // A chapel nave like the Bride's: floor at y 63, open x -9..9, z -4..4, walls round it, the sea outside
+    const room = (x, z) => x >= -9 && x <= 9 && z >= -4 && z <= 4;
+    const block = (x, y, z) => (y <= 63 ? { isAir: false, isLiquid: false } : room(x, z) ? { isAir: true, isLiquid: false } : { isAir: false, isLiquid: true });
+    const dim = {
+      getBlock: ({ x, y, z }) => block(Math.floor(x), Math.floor(y), Math.floor(z)),
+      getBlockFromRay: (from, dir, { maxDistance }) => {
+        for (let t = 0; t <= maxDistance; t += 0.25) {
+          const b = block(Math.floor(from.x + dir.x * t), Math.floor(from.y + dir.y * t), Math.floor(from.z + dir.z * t));
+          if (!b.isAir && !b.isLiquid) return { block: b };
+          if (b.isLiquid) return { block: b };
+        }
+        return undefined;
+      },
+    };
+    const bride = { x: 6.5, y: 64, z: 0.5 }; // by the altar, 2.5 from the east wall
+    for (let i = 0; i < 40; i++) {
+      const s = openSpot(dim, bride, 4, 9);
+      assert(room(Math.floor(s.x), Math.floor(s.z)) && s.y === 64, `spot ${JSON.stringify(s)} is outside the nave`);
+    }
+    const bells = openSpots(dim, bride, 3, 4, 9, 4);
+    assertEqual(bells.length, 3);
+    for (const b of bells) assert(room(Math.floor(b.x), Math.floor(b.z)), "every bell is inside the chapel");
+    assertEqual(floorUnder(dim, { x: 0.5, y: 71, z: 0.5 }).y, 64, "a boss that drops in from above fights on the floor");
   },
   "boss phases follow health": () => {
     assertEqual(phaseFor(1, [0.6, 0.3]), 0);
