@@ -1,0 +1,24 @@
+{
+ "format_version": "1.21.60",
+ "minecraft:item": {
+  "description": {
+   "identifier": "siege:spell_ward",
+   "menu_category": {
+    "category": "equipment"
+   }
+  },
+  "components": {
+   "minecraft:icon": "siege_spell_ward",
+   "minecraft:display_name": {
+    "value": "item.siege:spell_ward.name"
+   },
+   "minecraft:max_stack_size": 1,
+   "minecraft:glint": true,
+   "minecraft:hand_equipped": false,
+   "minecraft:cooldown": {
+    "category": "siege_spell_ward",
+    "duration": 0.05
+   }
+  }
+ }
+}

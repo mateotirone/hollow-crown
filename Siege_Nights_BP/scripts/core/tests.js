@@ -14,6 +14,9 @@ const tests = [];
 // trips the watchdog, which shuts the world down (first playtest, 2026-11-11). They still run in
 // tools/check.mjs, which fails if a slow test is missing from this list. Written as "group: name".
 export const OFFLINE_ONLY = new Set([
+  "guard posts: every wall a guard can stand on has its flights of steps, each top step beside the walk",
+  "settle walls: the ring has no holes, one gate, and follows the ground",
+  "undertow: rebuilt sites stamp again over the old look, clearing only inside their site, and keep the Carter's spot clear",
   "settle: every building draws in every style with known roles",
   "settle towns: groundwork decodes into rows near the plot, in each tier",
   "hall build: the clear box holds every block of the old hall above the ground",

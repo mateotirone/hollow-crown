@@ -92,9 +92,12 @@ JOBS = [
   dict(hat_rows=3, apron=(196, 186, 164))),                                                                                                # mauve shawl, sprig
  ('moneyer', SKIN[2], (60, 44, 70), (40, 36, 52), (40, 36, 44), ((40, 36, 52), 'cloth'), (120, 116, 120), G,
   [(3, 9, S_), (4, 9, S_), (3, 10, S_), (4, 10, (120, 124, 136)), (5, 12, G), (2, 12, S_), (3, 7, G), (4, 7, G)], dict(hat_rows=2, beard=True)),  # dark coat, gold chain, coins
+ ('factor', SKIN[1], (128, 40, 44), (96, 30, 36), (52, 40, 36), ((52, 40, 36), 'cloth'), (70, 50, 36), G,
+  [(2, 9, W), (3, 9, W), (4, 9, W), (2, 10, W), (3, 10, K), (4, 10, W), (2, 11, W), (3, 11, W), (4, 11, W), (5, 8, Bz), (5, 9, Bz), (5, 10, Bz)],
+  dict(hat_rows=2)),  # Guild Factor: burgundy coat, ledger and quill
 ]
 ims = []
 for (name, skin, shirt, robe, legs, hat, hair, trim, emb, kw) in JOBS: ims.append(npc(name, skin, shirt, robe, legs, hat, hair, trim, emb, **kw))
-sh = Image.new('RGBA', (4 * 264 + 8, 2 * 264 + 8), (38, 34, 46, 255))
+sh = Image.new('RGBA', (4 * 264 + 8, 3 * 264 + 8), (38, 34, 46, 255))
 for i, im in enumerate(ims): sh.alpha_composite(im.resize((256, 256), Image.NEAREST), (8 + (i % 4) * 264, 8 + (i // 4) * 264))
 sh.save(ROOT + 'art/job-npcs.png'); print('ok')

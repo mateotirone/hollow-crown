@@ -74,6 +74,13 @@
    },
    "siege:drink": {
     "minecraft:is_ignited": {}
+   },
+   "siege:regent_bar": {
+    "minecraft:boss": {
+     "name": "The Hollow Crown",
+     "should_darken_sky": false,
+     "hud_range": 48
+    }
    }
   },
   "components": {
@@ -248,6 +255,13 @@
     "remove": {
      "component_groups": [
       "siege:drink"
+     ]
+    }
+   },
+   "siege:regent_bar_on": {
+    "add": {
+     "component_groups": [
+      "siege:regent_bar"
      ]
     }
    }

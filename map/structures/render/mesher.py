@@ -72,6 +72,75 @@ def siege_geo(n):
 def siege_cutout(n):
     return any(isinstance(v, dict) and v.get("render_method") in ("alpha_test", "blend") for v in _siege_block(n).get("minecraft:material_instances", {}).values())
 
+
+# The add-on's own blocks with their own 3D shape (Siege_Nights_RP/models/blocks/*.geo.json): drawn from
+# their cubes, each cube in its material instance's texture, turned so the model's front (-z) faces "facing".
+# Rotated cubes are left out, and bone_visibility is read for the block's default states.
+_SGEOS = None
+def _siege_geos():
+    global _SGEOS
+    if _SGEOS is None:
+        import glob
+        _SGEOS = {}
+        for f in glob.glob(os.path.join(_REPO, "Siege_Nights_RP/models/blocks/**/*.json"), recursive=True):
+            try: gs = json.load(open(f)).get("minecraft:geometry", [])
+            except Exception: continue
+            for g in gs: _SGEOS[g["description"]["identifier"]] = g
+    return _SGEOS
+def _siege_states(n):
+    import glob
+    for f in glob.glob(os.path.join(_REPO, "Siege_Nights_BP/blocks/**/*.json"), recursive=True):
+        try: b = json.load(open(f))["minecraft:block"]
+        except Exception: continue
+        if b["description"]["identifier"] == n:
+            return {k: (v[0] if isinstance(v, list) else 0) for k, v in b["description"].get("states", {}).items()}
+    return {}
+def siege_model(n, p):
+    import re
+    g = _siege_block(n).get("minecraft:geometry")
+    gid = g if isinstance(g, str) else (g or {}).get("identifier")
+    geo = _siege_geos().get(gid)
+    if not geo: return None
+    vis = (g or {}).get("bone_visibility", {}) if isinstance(g, dict) else {}
+    st = _siege_states(n); st.update(p.get("raw", {}))
+    def shown(bone):
+        ex = vis.get(bone, True)
+        if isinstance(ex, bool): return ex
+        py = re.sub(r"q(?:uery)?\.block_state\('([^']+)'\)", lambda m: repr(st.get(m.group(1), 0)), ex)
+        py = py.replace("&&", " and ").replace("||", " or ").replace("!=", "<>").replace("!", " not ").replace("<>", "!=")
+        try: return bool(eval(py, {"true": True, "false": False}))
+        except Exception: return True
+    tex = siege_tex(n)
+    mats = {}
+    td = None
+    for k, v in _siege_block(n).get("minecraft:material_instances", {}).items():
+        if not isinstance(v, dict): continue
+        if td is None:
+            try: td = json.loads(re.sub(r"(?m)^\s*//.*$", "", open(os.path.join(_REPO, "Siege_Nights_RP/textures/terrain_texture.json")).read()))["texture_data"]
+            except Exception: td = {}
+        t = td.get(v.get("texture"), {}).get("textures")
+        t = t[0] if isinstance(t, list) else t
+        if isinstance(t, dict): t = t.get("path")
+        if t: mats[k] = {"side": os.path.join(_REPO, "Siege_Nights_RP", t)}
+    f = p.get("facing") or {"north": "n", "south": "s", "east": "e", "west": "w"}.get(p.get("raw", {}).get("minecraft:cardinal_direction"), "n")
+    def turn(x, z):
+        return {"n": (x, z), "s": (1 - x, 1 - z), "e": (1 - z, x), "w": (z, 1 - x)}[f]
+    out = []
+    for bone in geo.get("bones", []):
+        if not shown(bone.get("name")): continue
+        for c in bone.get("cubes", []):
+            if c.get("rotation") and any(c["rotation"]): continue
+            o, sz = c["origin"], c["size"]
+            x0, x1 = (o[0] + 8) / 16, (o[0] + sz[0] + 8) / 16
+            z0, z1 = (o[2] + 8) / 16, (o[2] + sz[2] + 8) / 16
+            y0, y1 = o[1] / 16, (o[1] + sz[1]) / 16
+            if sz[0] < 0.05 or sz[1] < 0.05 or sz[2] < 0.05: continue
+            ax, az = turn(x0, z0); bx, bz = turn(x1, z1)
+            uv = c.get("uv") if isinstance(c.get("uv"), dict) else {}
+            mname = next((v.get("material_instance") for v in uv.values() if isinstance(v, dict) and v.get("material_instance")), "*")
+            out.append(((min(ax, bx), y0, min(az, bz), max(ax, bx), y1, max(az, bz)), mats.get(mname) or mats.get("*") or tex, {}))
+    return out or None
+
 def wood_of(n):
     for w in sorted(WOODS, key=len, reverse=True):
         if n.startswith(w + "_") or n.startswith("stripped_" + w): return w
@@ -295,6 +364,9 @@ def model(n, p):
         t = siege_tex(n); return [((0, 0, 0, 1, 1, 1), t, {})]
     if n in PLANTS: return [("cross", {"side": PLANTS[n]}, {"cut": 1})]
     if n.startswith("siege:") and siege_geo(n) == "minecraft:geometry.cross": return [("cross", siege_tex(n), {"cut": 1, "glow": 1})]
+    if n.startswith("siege:") and siege_geo(n) and siege_geo(n) != "minecraft:geometry.full_block":
+        m = siege_model(n, p)
+        if m: return m
     if n.startswith("siege:") and siege_cutout(n): return [((0, 0, 0, 1, 1, 1), siege_tex(n), {"cut": 1})]
     if n == "vine":
         bits = p.get("raw", {}).get("vine_direction_bits", 0); out = []

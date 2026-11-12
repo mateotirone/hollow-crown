@@ -76,7 +76,11 @@ async function conduct(player) {
 }
 
 world.afterEvents.playerSpawn.subscribe(({ player, initialSpawn }) => {
-  if (initialSpawn) conduct(player);
+  if (!initialSpawn) return;
+  try {
+    if (player.hasTag("hc_relay")) return; // the Discord relay account (dispatch/) gets no greeting
+  } catch { /* fine */ }
+  conduct(player);
 });
 
 export const joinSteps = () => steps.map(({ order, name, when }) => ({ order, name, when }));

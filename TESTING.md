@@ -62,10 +62,15 @@ Type the commands in chat (`/` opens it).
 **Battering Ram**
 8. `/give @s siege:battering_ram` and click the ground. ✅ A wooden ram appears.
 9. Click it to climb on, drive with WASD, face your wall, and punch the wall. ✅ The beam swings and the wall cracks, and breaks after a few hits.
+9b. Get off, then sneak + click the ram with an empty hand. ✅ It packs back into a Battering Ram item.
 
 **Siege machines**
 10. `/give @s siege:ballista`, place it inside your settlement, then `/summon zombie ~ ~ ~10`. ✅ The ballista turns to face the zombie, the arms snap and it gets hit.
-11. `/give @s siege:trebuchet` and `/give @s cobblestone 16`. Place it, look at a spot about 30 blocks away, and click the trebuchet holding cobblestone. ✅ It turns, the arm swings over, and a boulder smashes a crater.
+11. `/give @s siege:trebuchet` and `/give @s cobblestone 16`. Place it, look toward a wall about 30 blocks away and a little up, and click the trebuchet holding cobblestone. ✅ It turns, the arm swings over, the action bar says the counterweight, angle and about how far it throws, and a boulder flies in a real arc and smashes a crater. Look higher for a higher lob; sneak + click to change the counterweight (Light, Medium, Heavy) and see the distance change.
+
+**Wall collapse**
+11b. Stand on flat ground and type `/scriptevent siege:collapse_test`. ✅ A stone brick wall appears 6 blocks in front of you; 2 seconds later its base is knocked out, the stone over the hole falls away in a stepped arch shape, falling block by block, and leaves cobblestone and gravel piled in a slope. The top of the wall stays up over the gap.
+11c. Blow a big hole in the base of a tall wall with a Breaching Charge or several trebuchet hits. ✅ Whole sections come down, leaning out to the open side; a house roof built against the wall stays up unless the wall under it falls.
 
 **Guards**
 12. `/give @s siege:barracks`, place it, `/summon villager` next to it, then click the Barracks with coins in hand (`/scriptevent siege:economy_give 200`; a guard is 40 Regals). ✅ The villager becomes a Man-at-Arms.
@@ -440,14 +445,16 @@ the darkness and knockback effects, the storms, and how the hurried evening look
 `/scriptevent siege:choirsteel_kit` gives the full set, the tools, 32 ingots, 8 Gloamquills, 2 templates and 4 Tempered Choirsteel.
 
 - Recipes: Tempered Choirsteel is 4 Choirsteel Ingots and a Gloamquill in a crafting table. At a smithing table, a Choirsteel Upgrade template + a netherite piece + Tempered Choirsteel gives the Choirsteel piece (all nine: four armour, five tools). Check the template and Tempered Choirsteel go into their slots at all (custom smithing items need their tags), and that enchantments and a renamed name carry over.
-- Copying: template in the top middle, Veinstone in the centre, 7 netherite ingots around them in a crafting table gives 2 templates.
+- Copying: template in the top middle, Veinstone in the centre, 7 netherite scrap around them in a crafting table gives 2 templates.
+- Carry a template: chat warns you once that others now have a reason to come for you, and you get the tag siege_template_holder (check with /tag @s list). Drop it in a chest and the tag goes within 5 seconds.
 - The Cold Forge (the Hollow, x 592 z 1080, on the high terraces east of the Seams, no road): an open veinstone smithy with a tall chimney and soul fire on top. The chest at the back holds one template on your first visit. Take it: anvils ring and two Veinsworn and a Stone Vigil come out. Come back three in-game days later and there is a new one. `/scriptevent hc:forge_restock` refills it now.
 - Trims: put each Choirsteel armour piece in a smithing table with any armour trim template and any trim material. The trim should show in its colour, in the same place it sits on netherite, and the crystals, plume, pauldrons, knee cops and fins should stay plain.
 - The first time you carry a Choirsteel Ingot, chat tells you where the forge is.
 - The test world (`/scriptevent siege:showcase`) has a smithing table and a crafting table with chests of everything needed.
 - Helm: you see in the dark. Greaves: slowness never sticks. Treads: jump off something high, you drift down and take no fall damage.
 - Cuirass: let zombies hit you. About one hit in four rings and throws the attacker back.
-- Full set: a chime, then Resistance and four extra hearts. Take one piece off and both go.
+- Full set: a chime, then Speed II, Jump Boost II, Resistance and six extra hearts. Take one piece off and they all go (speed and jump within 2 seconds).
+- Greaves alone: Speed I. Treads alone: Jump Boost I.
 - Blade: hit one mob in a crowd four times. The fourth hit rings and hurts the others near it.
 - Pick: break an ore next to other ore. A line of sparks points to the nearest one. It also mines Choir Ore whole.
 - The first time you wear or hold each piece, chat tells you what it does.
@@ -557,6 +564,7 @@ Things I could not check without the game, so please look closely: that the stee
 10. **Your own station.** In your settlement, place a Rail Depot a few blocks from a straight line of Track (or on open ground, facing where the building should go). A Halt should rise lined up with that track, and the depot should end up on its platform. Win sieges until the settlement becomes a Town: the Halt should come down and a Station rise in its place.
 11. A claim near a Station Post placed by the map builder (within about 140 blocks of the banner) should raise a Halt by that post.
 12. **Buying the line.** Once the world has its planned railway, `/scriptevent siege:trains routes` should list the stops and say which is your home stop. Click any Station Post: "Extend the line" should only offer stretches that start at a stop you can already reach (at first just the ones out of your home stop). Buy one: the Track should lay itself along the graded bed over a few seconds, and everyone should see "The line from ... to ... is laid". Stretches past it should now show up in the menu.
+13. **Station on claim.** On the real map, found a settlement on a plot. ✅ "A Halt is rising at …" and a Halt builds on the plot's stop by the graded rail bed, the post ending on its platform. The station menu shows "Extend the line" and "Buy an engine", but no carriage yet. Buy the first stretch. ✅ "Call the carriage" appears: it puts one coach on the platform facing the next stop, slow (about 4 blocks a second). Leave it empty for a minute ✅ it goes away. Buy an engine, place it, then pick it up and drop it in lava. ✅ The station menu now says "Take an engine (free)".
 
 ## Sounds (scripts/sound/, SOUND-LIST.md)
 
@@ -620,6 +628,7 @@ Shortcuts: `/scriptevent siege:role_trial <rider|forgemaster|captain|witch> [ste
 10. Turns and stands: reach rank 4 and rank 5 in a regional role (spend points in its branch) and talk to the mentor each time: a new scene each. A Knight reaching Knight-Commander gets a box to name the Order.
 11. The Morvane fight with roles: `/scriptevent siege:bestiary_summon morvane`, then `/scriptevent siege:morvane_skip N` for N = 2 to 7. Alone with no role, a named student is announced at stages 2 to 6 (knights spawn at 3, the river buffs at 4, burns every 16 s at 5, slow falling at 6). With a top-rank role, your name is announced instead.
 12. Ask Kesh "Read me the roll": three names to start, Bram Tallow's after the first hatching in the world, and every dragon that dies after that. Fill a dragon's bond (`/scriptevent siege:dragons_grow`): two Wing points arrive.
+13. The 3:17 toll: `/scriptevent siege:reach_night counted`, then `/time set 20900`, fly a grown dragon. ✅ At 03:00 (21000) she glides down with a "won't fly" line and won't take off until 03:30 (`/time set 21500`). On a normal night she flies. As a Dragonlord (top Wing rank), fly into or take off in the window: ✅ "The Unflown Night" title, the toll, raiders within 256 blocks glow; she keeps flying, with no second title that night, and the same happens on the next siege night.
 ## The Hollow's middle stretch (lore/hollow.js, undertow/story.js)
 
 Mateo approved the beats 2026-11-11 (doc "The Hollow's middle stretch: story beats"). Words: `lore/data/hollow_story.js` and the Carter in `lore/data/dialogue.js`. Places, the Carter's position, the Court door: `undertow/story.js`.
