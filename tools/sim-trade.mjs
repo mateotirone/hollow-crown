@@ -20,6 +20,8 @@ for (const f of walk(join(ROOT, "Siege_Nights_BP"), ".json")) {
     }
   } catch { /* not ours */ }
 }
+let seed = 12345;
+Math.random = () => ((seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648); // the same run every time
 const mock = makeMock(pack);
 globalThis.__mc = mock;
 globalThis.__siegeOffline = true;
