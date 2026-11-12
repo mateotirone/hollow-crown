@@ -156,6 +156,40 @@ function placeFor(f, stage) {
 }
 
 // ---------- small helpers ----------
+
+// Where he can land near a spot: the first place at or below it (2 up to 8 down) with floor under it and two
+// blocks of air for him, so he is never put inside the floor or dropped into the rock under the Seat. Mateo 2026-11-12: "Morvane is getting stuck in the void. He's lunging at me and falling through
+// the cracks": he used to land exactly where you stood, so a player in the air or at the edge sent him into
+// the drop. Pure: kindAt(x, y, z) is "solid", "open" or undefined (not loaded).
+export function footingNear(at, kindAt) {
+  const x = Math.floor(at.x), z = Math.floor(at.z), y0 = Math.floor(at.y);
+  for (let y = y0 + 2; y >= y0 - 8; y--) {
+    if (kindAt(x, y - 1, z) === "solid" && kindAt(x, y, z) === "open" && kindAt(x, y + 1, z) === "open") return { x: at.x, y, z: at.z };
+  }
+  return undefined;
+}
+const blockKind = (dim) => (x, y, z) => {
+  // Anything that is not air or liquid counts as floor (slabs, lattice, glass and amethyst are not "isSolid",
+  // and treating them as open let him land inside them). Only air is room to stand in.
+  try { const bl = dim.getBlock({ x, y, z }); return bl ? (bl.isAir ? "open" : bl.isLiquid ? "liquid" : "solid") : undefined; } catch { return undefined; }
+};
+// Move him to the nearest footing by a spot; if there is none (over the void) he stays where he is.
+function moveTo(f, at, options) {
+  const to = footingNear(at, blockKind(f.dim));
+  if (!to) return false;
+  try { f.entity.teleport(to, options); return true; } catch { return false; }
+}
+// Pulled back if he still falls (knocked off, or a floor gives under him): to the last ground he stood on.
+function keepFooting(f) {
+  const e = f.entity, m = f.m;
+  try {
+    if (e.isOnGround) { m.foot = { x: e.location.x, y: e.location.y, z: e.location.z }; return; }
+    if (m.foot && STAGES[m.stage].key !== "fall" && e.location.y < m.foot.y - 10) {
+      e.teleport(m.foot);
+      particle(f.dim, "siege:vein_spark", e.getHeadLocation());
+    }
+  } catch { /* gone */ }
+}
 function party(f) {
   return world.getAllPlayers().filter((p) => f.m.party.has(p.id));
 }
@@ -565,7 +599,7 @@ registerBoss({
       hit: (f, at) => {
         f.m.s.blows = (f.m.s.blows ?? 0) + 1;
         if (!at) return;
-        try { f.entity.teleport({ x: at.x, y: at.y, z: at.z }); } catch { /* blocked */ }
+        moveTo(f, at);
         for (const p of f.players()) if (flat(p.location, at) <= 3.2) hurt(p, dmg(f, 10), "entityAttack", f.entity);
       } },
     { id: "blink", every: 180, windup: 30, rest: 20, warn: "He is gone. Move, he comes up behind you!", sound: "mob.endermen.portal",
@@ -582,7 +616,7 @@ registerBoss({
         if (!t) return;
         const v = t.getViewDirection();
         particle(f.dim, "siege:vein_spark", f.entity.getHeadLocation()); // where he was
-        try { f.entity.teleport({ x: t.location.x - v.x * 1.6, y: t.location.y, z: t.location.z - v.z * 1.6 }, { facingLocation: t.location }); } catch { /* blocked */ }
+        moveTo(f, { x: t.location.x - v.x * 1.6, y: t.location.y, z: t.location.z - v.z * 1.6 }, { facingLocation: t.location });
         particle(f.dim, "siege:vein_spark", f.entity.getHeadLocation()); // where he is
         if (flat(t.location, c.at) < 3) hurt(t, dmg(f, 10), "entityAttack", f.entity);
       } },
@@ -612,7 +646,7 @@ registerBoss({
     { id: "lance", every: 120, windup: 30, warn: "Morvane levels his blade. Sidestep!", when: stageIs(4, 6),
       ...lance(18, 10, (f, c) => {
         const reach = Math.max(0, c.reach - 4);
-        try { f.entity.teleport({ x: c.from.x + c.dir.x * reach, y: c.from.y, z: c.from.z + c.dir.z * reach }); } catch { /* blocked */ }
+        moveTo(f, { x: c.from.x + c.dir.x * reach, y: c.from.y, z: c.from.z + c.dir.z * reach });
       }) },
     { id: "quake", every: 200, windup: 30, rest: 30, warn: "The ground heaves. Be in the air!", sound: "mob.ravager.roar",
       when: stageIs(4),
@@ -628,7 +662,7 @@ registerBoss({
       show: (f, at) => at && ring(f.dim, at, 4, "minecraft:redstone_wire_dust_particle", 20),
       hit: (f, at) => {
         if (!at) return;
-        try { f.entity.teleport(at); } catch { /* blocked */ }
+        moveTo(f, at);
         for (const p of f.players()) if (flat(p.location, at) <= 4) hurt(p, dmg(f, 14), "entityAttack", f.entity);
         f.m.s.stagger = f.tick + 80; f.m.s.hits = 0;
         f.stun(80); f.shield(false);
@@ -715,6 +749,7 @@ registerBoss({
     const m = f.m;
     if (!m || m.moving) return;
     for (const p of players) m.party.add(p.id);
+    keepFooting(f);
     const st = STAGES[m.stage];
     if (!m.raged && f.tick - m.started > st.limit && !st.memory) {
       m.raged = true;
@@ -841,6 +876,19 @@ addTests("bestiary", {
     assertEqual(suitCount(10, 5), 14);
     assertEqual(crownHitsNeeded(1), 5);
     assertEqual(crownHitsNeeded(4), 11);
+  },
+  "he lands on floor near you, never in the air or over the void (Mateo 2026-11-12)": () => {
+    const floor = (x, y, z) => (y <= 119 && Math.hypot(x, z) <= 30 ? "solid" : "open"); // a disc, void round it
+    const to = footingNear({ x: 3.5, y: 126, z: 0.5 }, floor); // a player hovering 6 over the Seat
+    assert(to && to.y === 120, "he comes down onto the floor under a flying player");
+    assert(footingNear({ x: 40.5, y: 120, z: 0.5 }, floor) === undefined, "past the edge there is nowhere: he stays put");
+    assert(footingNear({ x: 3.5, y: 140, z: 0.5 }, floor) === undefined, "far above the floor: he does not jump up after you");
+    assert(footingNear({ x: 3.5, y: 120, z: 0.5 }, () => undefined) === undefined, "not loaded: stays put");
+    const layered = (x, y, z) => (y === 119 || y === 110 ? "solid" : "open"); // the floor, and rock 9 under it
+    assert(footingNear({ x: 0.5, y: 120, z: 0.5 }, layered).y === 120, "on the top floor, not the rock under it");
+    const slab = (x, y, z) => (y <= 120 ? "solid" : "open"); // you stand on a slab at 120: he lands on top of it
+    assert(footingNear({ x: 0.5, y: 120.5, z: 0.5 }, slab).y === 121, "never inside the block you stand on");
+    assert(footingNear({ x: 0.5, y: 120, z: 0.5 }, (x, y, z) => (y <= 119 ? "solid" : "liquid")) === undefined, "water is not room to land in");
   },
   "the Seat's floor falls from the outside in and leaves a last stand": () => {
     assertEqual(floorRings(32), [27, 22, 17, 12]);
