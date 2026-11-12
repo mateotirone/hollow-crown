@@ -668,6 +668,14 @@ def _furnish_levels(ctx, levels, rooms, F, region, wood, table, I, name):
         for dx, dz in DIRS.values():
             n = _raw(ctx, x + dx, G.y, z + dz)
             if n and n.endswith("_door") and (x + dx, z + dz) not in G.area: doors.append((x, z))
+    # doorways a spec cuts later with "place" air (place runs after the parts): their inside cells stay open
+    holes = {(e[0], e[1], e[2]) for e in ctx.spec.get("place", []) if len(e) > 3 and str(e[3]).replace("minecraft:", "") == "air"}
+    for L in Ls:
+        for (x, z) in sorted(L.area):
+            for dx, dz in DIRS.values():
+                if (x + dx, L.y, z + dz) in holes and (x + dx, L.y + 1, z + dz) in holes and (x + dx, z + dz) not in L.area:
+                    L.must.add((x, z))
+                    if L is G and (x, z) not in doors: doors.append((x, z))
     if not doors and I.get("entry"):     # the way in is through another block (a chapel entered by its tower): the side it comes from
         xs = [x for x, _ in G.area]; zs = [z for _, z in G.area]
         cx, cz = (min(xs) + max(xs)) // 2, (min(zs) + max(zs)) // 2
