@@ -9,9 +9,8 @@ const wheat = JOBS.farmer.buys.find((g) => g.id === "minecraft:wheat");
 
 addTests("economy", {
   "farms can't print coins: every trader stops buying a good for the day": () => {
-    assertEqual(stopAt(iron), 128); // 64 at 8, 64 at 4
-    assertEqual(payout(iron, stopAt(iron)), 64 * 8 + 64 * 4);
     for (const job of Object.values(JOBS)) for (const good of job.buys) {
+      if (good === iron) continue; // iron has no limit: golems are gone, so it only comes from mining (golems.js)
       const stop = stopAt(good);
       assert(stop > (good.want ?? good.lot * ECON.wantLots), `${good.id}: the stop comes after the full-price share`);
       assertEqual(appetite(good, stop - 1), good.floor ?? ECON.floor);
@@ -44,11 +43,10 @@ addTests("economy", {
     assertEqual(cost(JOBS.moneyer.sells[0], 1), 10);
     assert(ECON.ironSells > ECON.ironBuys, "the Mint must charge more than it pays");
   },
-  "the Mint pays half past the daily limit": () => {
-    assertEqual(payout(iron, 64), 64 * 8);
-    assertEqual(payout(iron, 64, 64), 64 * 4);
-    assertEqual(payout(iron, 128), 64 * 8 + 64 * 4);
-    assertEqual(payout(iron, 1, 5000), 4);
+  "the Mint buys every ingot at full price, with no daily limit": () => {
+    assertEqual(stopAt(iron), Infinity);
+    assertEqual(payout(iron, 64, 64), 64 * 8);
+    assertEqual(payout(iron, 1, 5000), 8);
   },
   "an old emerald is 8 coins, the same as an iron ingot": () => assertEqual(fromEmeralds(1), payout(iron, 1)),
   "wheat pays 6 a lot and less once the farmer has plenty": () => {

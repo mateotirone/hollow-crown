@@ -240,7 +240,7 @@ export const ENTRIES = [
     tip: "Traders buy what their trade needs. Each has only so much appetite a day, and pays less once they've had plenty.",
     page: "Every town has traders: a farmer, woodcutter, quarryman, smith, fisher, hunter, herbalist and the Moneyer. Click one to sell to them or buy from them.\n\n"
       + "Prices differ from region to region. Each trader only wants so much a day: past that they pay less, and in the end they stop buying until tomorrow.\n\n"
-      + "§fThe Moneyer§r changes coins and buys iron ingots and emeralds. Each region's Smith sells that region's Castle Guard armour.",
+      + "§fThe Moneyer§r changes coins and buys iron ingots and emeralds. He takes every iron ingot you bring at full price, with no daily limit (iron golems never appear, so iron only comes from mining). Each region's Smith sells that region's Castle Guard armour.",
     when: ["talk:tag:siege_job"],
   },
 

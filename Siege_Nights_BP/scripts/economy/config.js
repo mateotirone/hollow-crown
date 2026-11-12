@@ -16,7 +16,8 @@ export const ECON = {
   perEmerald: 8, // how many coins an old emerald price becomes
   ironBuys: 8, // the Moneyer pays this per iron ingot
   ironSells: 10, // and charges this for one
-  mintDaily: 64, // ingots per player per day at the full price; after that the Moneyer pays half
+  // No daily limit on iron (Mateo, 2026-11-12): mine all day and sell it all. Iron golems are removed (golems.js),
+  // so there are no iron farms to cheat with.
   // Daily appetite: past a good's `want`, the price drops by `drop` for every `step` more you sell, down to `floor`.
   // It resets each dawn and is counted per player and per region.
   drop: 0.1, floor: 0.3,
@@ -28,7 +29,6 @@ export const ECON = {
   // Hard daily stop (anti-farm): once a trader's price has hit its floor, it buys this many more lots from you that
   // day and then no more. Counted per player, per region, per good, reset each dawn. A good's own `stop` (units) wins.
   stopLots: 4,
-  mintStop: 128, // iron ingots per player per day the Moneyer takes at all (64 full price, then 64 at half)
 };
 
 export const REGIONS = ["Aldmere Vale", "Frostmarch", "Saltreach", "Emberwaste", "Blackfen"];
@@ -97,7 +97,7 @@ export const JOBS = {
   // The Mint. Iron both ways at the fixed rate, with a daily limit; gems at a low fixed price. No regional prices.
   moneyer: {
     name: "Moneyer", home: [], scarce: [], mint: true,
-    buys: [g("iron_ingot", 1, ECON.ironBuys, { want: ECON.mintDaily, step: 1, drop: 0.5, floor: 0.5, stop: ECON.mintStop }),
+    buys: [g("iron_ingot", 1, ECON.ironBuys, { want: Infinity, stop: Infinity }),
       g("emerald", 1, 4, { want: 32, step: 8 }), g("diamond", 1, 64, { want: 8, step: 4 })],
     sells: [g("iron_ingot", 1, ECON.ironSells)],
   },

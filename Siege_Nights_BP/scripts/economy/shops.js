@@ -249,7 +249,7 @@ export async function openShop(player, npc) {
   const mood = regional(job, region);
   const line = pick(isNight() ? LINES[jobId].night : LINES[jobId].day);
   const note = job.mint
-    ? `Iron in: ${coins(ECON.ironBuys)} an ingot (the first ${ECON.mintDaily} a day, then half). Iron out: ${coins(ECON.ironSells)}.`
+    ? `Iron in: ${coins(ECON.ironBuys)} an ingot, as many as you bring. Iron out: ${coins(ECON.ironSells)}.`
     : mood.pays < 1 ? `§7${region} has plenty of this trade's goods: prices are low here.`
     : mood.pays > 1 ? `§7${region} is short of this trade's goods: prices are high here.` : "";
   const form = new ActionFormData().title(job.name).body(`§o"${line}"§r\n\n${note ? note + "\n\n" : ""}You have ${coins(funds(player))}.`);
