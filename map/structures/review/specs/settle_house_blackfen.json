@@ -12,34 +12,9 @@
   {
    "part": "house",
    "style": {
-    "base": "vale_timber",
-    "frame": "mangrove_log",
-    "infill": {
-     "ladder": [
-      "mud_bricks",
-      "packed_mud"
-     ],
-     "axis": "noise",
-     "scale": 2
-    },
-    "plinth": {
-     "ladder": [
-      "mud_bricks",
-      "tuff"
-     ],
-     "axis": "noise",
-     "scale": 3
-    },
-    "trim": "spruce_planks",
-    "shutter": "spruce_planks",
-    "door": "mangrove_door",
-    "glass": "glass_pane",
-    "chimney": "mud_bricks",
-    "quoin": "tuff_bricks",
-    "floor": "dark_oak_planks",
-    "leaves": "mangrove_leaves",
-    "sign_wood": "mangrove",
-    "roof": "dark_oak_planks"
+    "base": "fen_timber",
+    "roof": "dark_oak_planks",
+    "box_signs": "ns"
    },
    "rect": [
     -4,

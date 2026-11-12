@@ -12,29 +12,7 @@
   {
    "part": "house",
    "style": {
-    "base": "vale_stone",
-    "frame": "deepslate_bricks",
-    "infill": {
-     "ladder": [
-      "polished_deepslate",
-      "deepslate_bricks"
-     ],
-     "axis": "noise",
-     "scale": 3
-    },
-    "plinth": {
-     "ladder": [
-      "cobbled_deepslate",
-      "deepslate_bricks"
-     ],
-     "axis": "noise",
-     "scale": 3
-    },
-    "quoin": "polished_deepslate",
-    "chimney": "deepslate_bricks",
-    "door": "dark_oak_door",
-    "shutter": "dark_oak_planks",
-    "glass": "glass_pane",
+    "base": "frost_stone",
     "roof": {
      "ladder": [
       "deepslate_tiles",
@@ -42,7 +20,8 @@
      ],
      "axis": "noise",
      "scale": 2
-    }
+    },
+    "box_signs": "ns"
    },
    "rect": [
     -4,

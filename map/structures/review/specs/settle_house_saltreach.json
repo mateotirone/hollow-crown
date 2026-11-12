@@ -12,28 +12,9 @@
   {
    "part": "house",
    "style": {
-    "base": "vale_timber",
-    "frame": "stripped_birch_log",
-    "infill": "calcite",
-    "plinth": {
-     "ladder": [
-      "cobblestone",
-      "andesite",
-      "stone_bricks"
-     ],
-     "axis": "noise",
-     "scale": 3
-    },
-    "trim": "birch_planks",
-    "shutter": "warped_planks",
-    "door": "birch_door",
-    "glass": "glass_pane",
-    "chimney": "brick_block",
-    "quoin": "cut_sandstone",
-    "floor": "birch_planks",
-    "sill": "stair",
-    "sign_wood": "birch",
-    "roof": "dark_prismarine"
+    "base": "salt_timber",
+    "roof": "dark_prismarine",
+    "box_signs": "ns"
    },
    "rect": [
     -4,

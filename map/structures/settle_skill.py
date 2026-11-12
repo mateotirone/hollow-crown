@@ -67,20 +67,6 @@ def inn_inside(bp, B):
         F.bed(bp, x, y, -9, "n")
         F.lantern_ceiling(bp, x, y + 3, -6)
 
-def flat_roof(bp, rect, plate):
-    """Emberwaste: the skill's roof comes off and a flat sandstone roof with a slab parapet goes on, sandstone-wall
-    corners, and spruce roof beams (vigas) poking out of the side walls every other block under it."""
-    x0, z0, x1, z1 = rect
-    for c in [c for c in bp.cells if c[1] >= plate and x0 - 2 <= c[0] <= x1 + 2 and z0 - 2 <= c[2] <= z1 + 2]: del bp.cells[c]
-    for x in range(x0, x1 + 1):
-        for z in range(z0, z1 + 1):
-            bp.set(x, plate, z, "smooth_sandstone")
-            if x in (x0, x1) or z in (z0, z1):
-                corner = x in (x0, x1) and z in (z0, z1)
-                bp.set(x, plate + 1, z, "sandstone_wall" if corner else "smooth_sandstone_slab", **({} if corner else {"half": "bottom"}))
-    for z in range(z0 + 1, z1, 2):
-        for x, d in ((x0 - 1, "x"), (x1 + 1, "x")): bp.set(x, plate - 1, z, "spruce_log", axis=d)
-
 def piles(bp, rect):
     """Blackfen: the plinth course becomes mangrove piles standing in a tangle of mangrove roots (corner and every
     other edge block a log driven two below ground, roots between), so the house reads as lifted off the wet ground
@@ -94,15 +80,6 @@ def piles(bp, rect):
             for y in ((-2, -1, 0, 1) if post else (0, 1)):
                 if post: bp.set(x, y, z, "mangrove_log", axis="y")
                 else: bp.set(x, y, z, "mangrove_roots")
-
-def dragon_gables(bp, rect, ridge):
-    """Frostmarch: crossed barge boards over each gable end (settle_halls.dragon_heads)."""
-    x0, z0, x1, z1 = rect
-    roofy = lambda n: n.endswith("stairs") or n.endswith("slab")
-    ends = [((x0 + x1) // 2, z) for z in (z0 - 1, z1 + 1)] if ridge == "z" else [(x, (z0 + z1) // 2) for x in (x0 - 1, x1 + 1)]
-    for x, z in ends:
-        ys = [c[1] for c, v in bp.cells.items() if c[0] == x and c[2] == z and roofy(v[0])]
-        if ys: SH.dragon_heads(bp, x, max(ys) + 1, z, along=ridge)
 
 def build(bid, region="vale"):
     import engine
@@ -119,9 +96,7 @@ def build(bid, region="vale"):
     if bid == "mint": bar_ground_windows(bp)
     h = spec["parts"][0]
     x0, z0, x1, z1 = h["rect"]; plate = h.get("y", 0) + h.get("plinth", 1) - 1 + sum(h["storeys"])
-    if region == "emberwaste": flat_roof(bp, h["rect"], plate)
     if region == "blackfen": piles(bp, h["rect"])
-    if region == "frostmarch" and h["roof"].get("type") == "gable": dragon_gables(bp, h["rect"], h["roof"].get("ridge", "z"))
     if bid in ATTIC and region != "emberwaste":      # the skill floors each storey; the attic under the roof gets its floor here (the stair comes up through it)
         ya = plate
         for x in range(x0 + 1, x1):

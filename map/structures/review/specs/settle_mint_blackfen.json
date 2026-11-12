@@ -33,10 +33,11 @@
     "quoin": "polished_tuff",
     "chimney": "mud_bricks",
     "door": "mangrove_door",
-    "shutter": "mangrove_planks",
+    "shutter": "spruce_planks",
     "glass": "glass_pane",
     "floor": "dark_oak_planks",
-    "roof": "dark_oak_planks"
+    "roof": "dark_oak_planks",
+    "box_signs": "ns"
    },
    "rect": [
     -4,

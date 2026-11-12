@@ -12,7 +12,7 @@
   {
    "part": "house",
    "style": {
-    "base": "vale_stone",
+    "base": "ember_sandstone",
     "frame": "cut_red_sandstone",
     "infill": {
      "ladder": [
@@ -22,21 +22,8 @@
      "axis": "noise",
      "scale": 2
     },
-    "plinth": {
-     "ladder": [
-      "sandstone",
-      "cut_sandstone"
-     ],
-     "axis": "noise",
-     "scale": 3
-    },
-    "quoin": "chiseled_sandstone",
-    "trim": "acacia_planks",
-    "shutter": "acacia_planks",
-    "door": "acacia_door",
-    "glass": "glass_pane",
-    "floor": "acacia_planks",
-    "roof": "smooth_sandstone"
+    "roof": "smooth_sandstone",
+    "box_signs": "ns"
    },
    "rect": [
     -4,
@@ -56,8 +43,9 @@
     "steps": 1
    },
    "roof": {
-    "type": "hip",
-    "pitch": 1
+    "type": "flat",
+    "parapet": "slab",
+    "beams": true
    },
    "chimney": false,
    "shutters": 0

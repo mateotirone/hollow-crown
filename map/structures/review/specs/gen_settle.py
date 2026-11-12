@@ -7,7 +7,7 @@ plinth course sits on the ground (y = 0). The Foundation Stone goes in front of 
 moves it out until it is clear). Sizes are odd, and each fits its plot with the roof: Medium 11 x 15, long Medium
 13 x 15, Large 15 x 15. Every region keeps the Vale footprint of each building, so plot fits and charters hold.
 Interiors stay empty except the stair; the inn is furnished (settle_skill.py, which also does what the skill has
-no part for: Emberwaste's flat parapet roofs, Blackfen's mangrove stilts, Frostmarch's dragon-head gables).
+no part for yet: Blackfen's mangrove piles). Each region starts from its preset (skill regions/<region>.md).
 
 How each region builds (build-instructions/palettes/<region>.md):
   vale        stripped-spruce frame on rubble, calcite infill, warm red or old slate roofs
@@ -33,43 +33,25 @@ R = {
         stone={"base": "vale_stone"}, farm={"base": "vale_brick"},
         roofs=[WARM, SLATE, FARM, SLATE, WARM], lean="mud_bricks", kind="gable"),
     "frostmarch": dict(
-        timber={"base": "vale_timber", "frame": "dark_oak_log", "infill": "spruce_planks",
-                "plinth": noise("cobbled_deepslate", "deepslate_bricks"), "trim": "dark_oak_planks", "shutter": "dark_oak_planks",
-                "door": "dark_oak_door", "glass": "glass_pane", "chimney": "deepslate_bricks", "quoin": "polished_deepslate", "sill": "stair",
-                "leaves": "spruce_leaves", "sign_wood": "dark_oak"},
+        timber={"base": "frost_timber"}, stone={"base": "frost_stone"},
         ground={"frame_kind": "stone", "frame": "deepslate_bricks", "infill": noise("cobbled_deepslate", "polished_deepslate")},
-        stone={"base": "vale_stone", "frame": "deepslate_bricks", "infill": noise("polished_deepslate", "deepslate_bricks"),
-               "plinth": noise("cobbled_deepslate", "deepslate_bricks"), "quoin": "polished_deepslate", "chimney": "deepslate_bricks",
-               "door": "dark_oak_door", "shutter": "dark_oak_planks", "glass": "glass_pane"},
         farm=None, roofs=[SLATE, noise("deepslate_tiles", "deepslate_bricks", scale=2), SLATE, SLATE, SLATE],
         lean="deepslate_tiles", kind="gable"),
     "saltreach": dict(
-        timber={"base": "vale_timber", "frame": "stripped_birch_log", "infill": "calcite", "plinth": noise("cobblestone", "andesite", "stone_bricks"),
-                "trim": "birch_planks", "shutter": "warped_planks", "door": "birch_door", "glass": "glass_pane", "chimney": "brick_block",
-                "quoin": "cut_sandstone", "floor": "birch_planks", "sill": "stair", "sign_wood": "birch"},
+        timber={"base": "salt_timber"}, stone={"base": "salt_stone"},
         ground={"frame_kind": "stone", "frame": "cut_sandstone", "infill": noise("smooth_sandstone", "sandstone", scale=2)},
-        stone={"base": "vale_stone", "frame": "cut_sandstone", "infill": noise("smooth_sandstone", "sandstone", scale=2),
-               "plinth": noise("cobblestone", "andesite", "stone_bricks"), "quoin": "cut_sandstone", "chimney": "brick_block",
-               "door": "birch_door", "shutter": "warped_planks", "glass": "glass_pane", "trim": "birch_planks"},
         farm=None, roofs=["dark_prismarine", "dark_prismarine", "red_sandstone", "dark_prismarine", "dark_prismarine"],
         lean="red_sandstone", kind="hip"),
     "emberwaste": dict(
-        timber={"base": "vale_stone", "frame": "cut_sandstone", "infill": noise("smooth_sandstone", "sandstone", scale=2),
-                "plinth": noise("sandstone", "cut_sandstone"), "trim": "acacia_planks", "shutter": "acacia_planks", "door": "acacia_door",
-                "glass": "glass_pane", "chimney": "sandstone", "quoin": "chiseled_sandstone", "floor": "acacia_planks", "sign_wood": "acacia"},
+        timber={"base": "ember_sandstone"},
         ground={},
-        stone={"base": "vale_stone", "frame": "cut_red_sandstone", "infill": noise("smooth_red_sandstone", "red_sandstone", scale=2),
-               "plinth": noise("sandstone", "cut_sandstone"), "quoin": "chiseled_sandstone", "trim": "acacia_planks", "shutter": "acacia_planks",
-               "door": "acacia_door", "glass": "glass_pane", "floor": "acacia_planks"},
+        stone={"base": "ember_sandstone", "frame": "cut_red_sandstone", "infill": noise("smooth_red_sandstone", "red_sandstone", scale=2)},
         farm=None, roofs=["smooth_sandstone"] * 5, lean="acacia_planks", kind="flat"),
     "blackfen": dict(
-        timber={"base": "vale_timber", "frame": "mangrove_log", "infill": noise("mud_bricks", "packed_mud", scale=2),
-                "plinth": noise("mud_bricks", "tuff"), "trim": "spruce_planks", "shutter": "spruce_planks", "door": "mangrove_door",
-                "glass": "glass_pane", "chimney": "mud_bricks", "quoin": "tuff_bricks", "floor": "dark_oak_planks",
-                "leaves": "mangrove_leaves", "sign_wood": "mangrove"},
+        timber={"base": "fen_timber"},
         ground={"frame_kind": "stone", "frame": "tuff_bricks", "infill": noise("mud_bricks", "packed_mud", scale=2)},
         stone={"base": "vale_stone", "frame": "tuff_bricks", "infill": noise("tuff", "tuff_bricks", scale=2), "plinth": noise("mud_bricks", "tuff"),
-               "quoin": "polished_tuff", "chimney": "mud_bricks", "door": "mangrove_door", "shutter": "mangrove_planks", "glass": "glass_pane",
+               "quoin": "polished_tuff", "chimney": "mud_bricks", "door": "mangrove_door", "shutter": "spruce_planks", "glass": "glass_pane",
                "floor": "dark_oak_planks"},
         farm=None, roofs=["dark_oak_planks", "mud_bricks", "mangrove_planks", "dark_oak_planks", "dark_oak_planks"],
         lean="mangrove_planks", kind="gable"),
@@ -81,12 +63,13 @@ def card(region, title, sub, plot, blurb, kind="House"):
 
 def roof(region, ridge, pitch=1):
     k = R[region]["kind"]
-    if k == "gable": return {"type": "gable", "ridge": ridge, "pitch": pitch}
-    return {"type": "hip", "pitch": 1}      # flat roofs start as a hip; settle_skill takes it off and lays the parapet roof
+    if k == "gable": return {"type": "gable", "ridge": ridge, "pitch": pitch, **({"gable_horns": True} if region == "frostmarch" else {})}
+    if k == "flat": return {"type": "flat", "parapet": "slab", "beams": True}
+    return {"type": "hip", "pitch": 1}
 
 def specs(region):
     g = R[region]; flat = g["kind"] == "flat"; gable = g["kind"] == "gable"
-    st = lambda base, i: dict(base, roof=g["roofs"][i])
+    st = lambda base, i: dict(base, roof=g["roofs"][i], **({} if region == "vale" else {"box_signs": "ns"}))
     dorm = (lambda *d: list(d)) if gable else (lambda *d: [])
     chim = (lambda c: c) if not flat else (lambda c: False)
     extra = [5] if flat else []          # flat roofs have no attic: they get a low top storey instead
@@ -130,7 +113,8 @@ def specs(region):
         "after": "settle_skill:mint_inside",
         "parts": [{"part": "house", "style": st(g["stone"], 3), "rect": [-4, -10, 4, 0], "y": 0, "plinth": 2,
                    "storeys": [5, 4], "door": {"side": "s", "kind": "grand", "steps": 1},
-                   "roof": {"type": "hip", "pitch": 1}, "chimney": chim([[2, -8]]), "shutters": 0}],
+                   "roof": {"type": "flat", "parapet": "slab", "beams": True} if flat else {"type": "hip", "pitch": 1},
+                   "chimney": chim([[2, -8]]), "shutters": 0}],
     }
     inn = {
         "card": card(region, "Inn", "furnished", "Large 15 x 15",

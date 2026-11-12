@@ -12,26 +12,7 @@
   {
    "part": "house",
    "style": {
-    "base": "vale_timber",
-    "frame": "dark_oak_log",
-    "infill": "spruce_planks",
-    "plinth": {
-     "ladder": [
-      "cobbled_deepslate",
-      "deepslate_bricks"
-     ],
-     "axis": "noise",
-     "scale": 3
-    },
-    "trim": "dark_oak_planks",
-    "shutter": "dark_oak_planks",
-    "door": "dark_oak_door",
-    "glass": "glass_pane",
-    "chimney": "deepslate_bricks",
-    "quoin": "polished_deepslate",
-    "sill": "stair",
-    "leaves": "spruce_leaves",
-    "sign_wood": "dark_oak",
+    "base": "frost_timber",
     "roof": {
      "ladder": [
       "deepslate_tiles",
@@ -39,7 +20,8 @@
      ],
      "axis": "noise",
      "scale": 2
-    }
+    },
+    "box_signs": "ns"
    },
    "rect": [
     -5,
@@ -79,7 +61,8 @@
    "roof": {
     "type": "gable",
     "ridge": "z",
-    "pitch": 1
+    "pitch": 1,
+    "gable_horns": true
    },
    "dormers": [
     {
