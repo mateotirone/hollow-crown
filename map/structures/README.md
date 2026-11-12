@@ -95,6 +95,16 @@ with rotation, same convention as `town.py`), `<site>-groundwork.json` (every no
 the town changes, world coordinates; apply before the stamps), `stamps/*.json`, a plan picture
 and a preview scene.
 
+### Region towns (towngen_regions.py)
+
+`python3 towngen_regions.py rimehold|gulls_rest|sunscar|mirelight slice.npz lines.json OUT --trees TREEDB/trees.json --trees-src TREES_DIR`
+lays out the four region towns with the regions_towns.py builders (HOUSES, CIVIC, SHORE, BOARDWALK,
+assign_roofs) on top of the towngen pipeline. Run slice_heights.py on the slice first so it plans on the
+world's pre-town ground. Shore buildings (quay, boathouse, stilt houses) go on land cells next to water,
+facing away from it, with a footpath to the street; Mirelight decks over water become mangrove boardwalk.
+Besides the usual outputs it writes `<key>-blocks.json` (hollow-crown-worldblocks/1, the same format as
+Kingsrest's), which genworld stamps through GW_BLOCKS. towngen.py writes the same file for named towns.
+
 ### Settlement layouts (towngen_settle.py)
 
 `python3 towngen_settle.py PLOT slice.npz lines.json OUT [--templates crossroads,twin_rings,market_street] [--tries 3]`
