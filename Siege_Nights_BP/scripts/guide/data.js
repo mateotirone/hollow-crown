@@ -194,6 +194,13 @@ export const ENTRIES = [
     when: ["talk:tag:siege_mason", "carry:siege:mason_bench", "carry:siege:foundation_stone", "click:siege:foundation_stone"],
   },
   {
+    id: "town_plots", ch: "keep", title: "Town plots and charters",
+    tip: "Use a Plot Marker to raise a building on a town plot. Each plot only takes buildings of its size.",
+    page: "Every open plot in your town has a §fPlot Marker§r. Use it to see what can go there: only buildings of the plot's size are listed, and some want a certain spot (a watchtower stands by the wall). Good spots are marked. Pick one, walk round the outline, then use the marker again and pay to raise it.\n\n"
+      + "§fCharters:§r siege wins grow your settlement, but it only grows past each tier once that tier's charter stands. A Town needs 3 homes and a market (and a Farmhouse and Mint once they are built); a City needs 6 homes, a barracks and another work building. When the last one is finished, the town grows by itself.",
+    when: ["click:siege:plot_marker", "event:tierUp"],
+  },
+  {
     id: "guards", ch: "keep", title: "Guards and the Barracks",
     tip: "Bring an unemployed villager to your Barracks and click it holding 40 Regals for a Man-at-Arms (sneak + click for an Archer).",
     page: "Build a §fBarracks§r, bring an unemployed villager to it and click it holding coins (40 Regals) for a §fMan-at-Arms§r. Sneak + click for an §fArcher§r. Click the Barracks without coins for the guard list.\n\n"
