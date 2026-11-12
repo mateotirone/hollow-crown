@@ -1,0 +1,38 @@
+{
+  "format_version": "1.21.90",
+  "minecraft:block": {
+    "description": {
+      "identifier": "siege:ironworks",
+      "menu_category": {
+        "category": "items"
+      }
+    },
+    "components": {
+      "minecraft:display_name": "tile.siege:ironworks.name",
+      "minecraft:geometry": "minecraft:geometry.full_block",
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "siege_ironworks_side",
+          "render_method": "opaque"
+        },
+        "up": {
+          "texture": "siege_ironworks_top",
+          "render_method": "opaque"
+        },
+        "down": {
+          "texture": "siege_ironworks_bottom",
+          "render_method": "opaque"
+        }
+      },
+      "minecraft:map_color": "#5a5450",
+      "minecraft:light_emission": 4,
+      "minecraft:destructible_by_mining": {
+        "seconds_to_destroy": 3.5
+      },
+      "minecraft:destructible_by_explosion": {
+        "explosion_resistance": 8
+      },
+      "siege:clickable": {}
+    }
+  }
+}

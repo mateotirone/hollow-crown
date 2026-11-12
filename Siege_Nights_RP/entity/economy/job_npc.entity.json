@@ -14,7 +14,8 @@
         "fisher": "textures/entity/siege/npc/job_fisher",
         "hunter": "textures/entity/siege/npc/job_hunter",
         "herbalist": "textures/entity/siege/npc/job_herbalist",
-        "moneyer": "textures/entity/siege/npc/job_moneyer"
+        "moneyer": "textures/entity/siege/npc/job_moneyer",
+        "factor": "textures/entity/siege/npc/job_factor"
       },
       "geometry": {
         "default": "geometry.villager.v1.8"

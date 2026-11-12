@@ -1158,6 +1158,15 @@
   },
   "siege_plot_marker": {
    "textures": "textures/blocks/siege_plot_marker"
+  },
+  "siege_ironworks_side": {
+   "textures": "textures/blocks/settle/siege_ironworks_side"
+  },
+  "siege_ironworks_top": {
+   "textures": "textures/blocks/settle/siege_ironworks_top"
+  },
+  "siege_ironworks_bottom": {
+   "textures": "textures/blocks/settle/siege_ironworks_bottom"
   }
  }
 }

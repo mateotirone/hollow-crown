@@ -8,6 +8,9 @@ How versions work is in [`docs/RELEASING.md`](docs/RELEASING.md).
 
 Everything merged to `main` since the last release goes here. Each pull request that changes what players see adds a line under one of these headings.
 
+### Added
+- Discord alerts, ready for when the group sets up a Discord: siege nights, fallen Keeps, new settlements, Rival Lords marching, the throne changing hands and more can be posted to a Discord channel, with a ping for whoever it hits, even when nobody is online. A Choirsteel template holder who stays away a full day is announced to everyone. Needs a relay account and a small program on an always-on computer (docs/DISCORD.md); without them nothing changes in game.
+
 ### Fixed
 - Boss bars show the boss's name again. The new custom bars left the title blank.
 - Gates and portcullises: clicking one always opens or shuts it, whatever you are holding, and never places a block against it. A Castle Gate now swings open like a door: all its joined blocks turn together as one leaf on a hinge at one end, away from you (or the other way if something is in the way), and swing back when shut. An open Portcullis rises out of sight so only its top piece shows, and you can walk under it.
@@ -22,6 +25,10 @@ Everything merged to `main` since the last release goes here. Each pull request 
 
 ### Added
 - Dragons now keep the old fear the Cinder Roost talks about: on a siege night no dragon will fly from 03:00 to 03:30, around the 3:17 toll. One that is up glides down, and none will take off. A Dragonlord's (top-rank Dragon Rider's) dragon flies through it anyway, every siege night. That is the Unflown Night, and the first time each night, every raider in the siege host glows for 30 seconds. Kesh tells you about it when you reach Dragonlord.
+- Guild Factors in every town: three orders a day for goods from other regions, paid in iron, gold and sometimes diamonds.
+- The Ironworks: a settlement iron farm in three stages. The Ore Pit digs raw iron, the Bloomery (Town) smelts it while you feed it charcoal, and the Trip-Hammer Forge (City, beside water) makes about 100 ingots a day. Raiders can loot its storeroom.
+- Old Workings: old mines just outside five settlements whose ore grows back (iron at Frosthelm and Gullcliff, gold at Redmesa and Dunehold, diamond in the Wolfcairn Deeps). One runs rich each week, and the deeper ones draw claim jumpers.
+- The Moneyer trades metal up a step: 4 iron for a gold ingot, 8 gold for a diamond, 6 diamonds for a netherite scrap.
 - Town plots now suit their buildings: each plot lists only buildings of its size, a watchtower needs a plot by the wall, good spots are marked, and a settlement must have its charter standing (homes, a market, later a barracks and more) before sieges can grow it past Town. `/scriptevent siege:town charter` shows what is missing.
 - A Plot Marker no longer lands on the road or the door path when its building is finished.
 - Each of the five rebuilt Hollow sites now has something to find, once for every player: a boat never launched at the Wound landing, the Woodcutter's Axe in the Lattice Wood lodge, pilgrims' coins and a lantern at Pilgrim's Cross, an unchalked load of Choir Ore in the Cartmeet tally-house, and the Seamcutter pick in the Seams winch house.
@@ -119,6 +126,8 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - Regional Castle Guard armor: Vale, Frostmarch, Saltreach, Emberwaste and Blackfen sets with the same stats as the Castle Guard armor and their own look (kettle hat and brigandine, fur hood and quilted wool, bleached sallet and rope belt, blackened scale with a veil, laced leather lamellar). Each keeps the banner-colour tabard. Make one at the siege workshop from a Castle Guard piece and that region's Castle Stone.
 
 ### Changed
+- Bosses you have beaten come back a rank stronger each time (up to rank V): more health, harder hits, and two tempers at once from rank III. A rematch costs diamonds as well as the key, and every rematch leaves netherite scrap, more at higher ranks.
+- The Moneyer now buys every iron ingot you bring at full price, with no daily limit: mine all day and sell it all. In exchange, iron golems no longer appear, so iron only comes from mining.
 - The Hall Cornerstone disappears once your town hall stands, instead of sitting outside it like a stray block. Open the Town Hall menu from the new button on the Tree of Oaths inside the hall, or from your Keep menu. To move the hall, use "Move the town hall" in that menu to get the cornerstone back.
 - Every pitched roof on settlement town halls, plot buildings, stables, guardhouses, stations and the Hollow's buildings is now textured: two blocks of the same colour mixed at random (deepslate tiles with deepslate bricks, brick with granite, dark oak with spruce and so on) instead of one flat colour or stripes.
 - Settlement walls stand further out: 36 blocks at Hamlet, 46 at Town, 56 at City and 66 at Castle (was 32, 40, 48, 56), with more room for plots inside. Your land on a map plot reaches 72 blocks, and raiders gather from about 75. The town plans are regenerated for the bigger rings.
