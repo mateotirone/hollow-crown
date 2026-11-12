@@ -8,7 +8,7 @@
       }
     },
     "components": {
-      "minecraft:icon": "siege_guard_chestplate",
+      "minecraft:icon": "siege_guardgear_2_chestplate",
       "minecraft:display_name": {
         "value": "item.siege:guardgear_2_chestplate.name"
       },

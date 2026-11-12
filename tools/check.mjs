@@ -3,7 +3,7 @@
 //
 //  1. every pack JSON file parses
 //  2. every script import points at a real file
-//  3. (if `npm install` was run in tools/) no undefined names and no unused imports in the scripts
+//  3. no undefined names and no unused imports in the scripts (needs `npm ci` in tools/ once; a problem if it can't run)
 //  4. the whole script loads in Node with a fake Minecraft (catches crashes at startup)
 //  5. every loop task runs a few times in an empty world without an error
 //  6. all self-tests pass (the in-game-only ones are skipped here)
@@ -383,9 +383,42 @@ step("Sounds");
     const n = (readFileSync(file, "utf8").match(/\.playSound\??\.?\(/g) ?? []).length;
     if (n) { direct += n; warnings.push(`${rel(file)}: ${n} direct playSound call(s). Use sfx() from core/sfx.js so the sound gets the house treatment (SOUND-LIST.md).`); }
   }
+  // every sound id the game is asked to play must exist: Bedrock plays nothing (and says nothing) for an unknown id
+  const vanillaFile = join(TOOLS, "vanilla_sounds.json");
+  if (existsSync(vanillaFile)) {
+    const known = new Set([...(parseJson(readFileSync(vanillaFile, "utf8")) ?? []), ...Object.keys(defs)]);
+    const cuesSrc = readFileSync(join(SCRIPTS, "core/sfx_cues.js"), "utf8");
+    const cueNames = new Set([...cuesSrc.matchAll(/^\s*(?:\[BELL\]|"([^"]+)"):\s*\{/gm)].map((m) => m[1] ?? "block.bell.hit"));
+    for (const [, id] of cuesSrc.matchAll(/\[\s*"([a-z0-9_.]+)"\s*,\s*[\d.]+/g)) if (!known.has(id)) fail(`core/sfx_cues.js: a layer plays "${id}", which is not a Bedrock sound`);
+    for (const file of walk(SCRIPTS, ".js")) {
+      for (const [, id] of readFileSync(file, "utf8").matchAll(/\bsfx\([^,()]+,\s*"([a-z0-9_.]+)"/g)) {
+        if (!known.has(id) && !cueNames.has(id)) fail(`${rel(file)}: sfx(..., "${id}") is not a Bedrock sound or a cue in core/sfx_cues.js`);
+      }
+    }
+    const sj = join(RP, "sounds.json");
+    const ents = existsSync(sj) ? parseJson(readFileSync(sj, "utf8"))?.entity_sounds?.entities ?? {} : {};
+    for (const [ent, e] of Object.entries(ents)) {
+      for (const [ev, s] of Object.entries(e.events ?? {})) {
+        const id = typeof s === "string" ? s : s?.sound;
+        if (id && !known.has(id)) fail(`sounds.json: ${ent} ${ev} plays "${id}", which is not a Bedrock sound (studio/bestiary/voices.py)`);
+      }
+    }
+  }
   const listed = spawnSync(process.execPath, [join(TOOLS, "sound-list.mjs"), "--check"]);
   if (listed.status !== 0) fail("SOUND-LIST.md is out of date: run  node tools/sound-list.mjs");
+  const weather = spawnSync(process.execPath, [join(TOOLS, "weather_assets.mjs"), "--check"]);
+  if (weather.status !== 0) fail("the weather fogs and particles are out of date: run  node tools/weather_assets.mjs");
   console.log(`${Object.keys(defs).length} custom sounds defined, ${installed} recordings installed, ${direct} direct playSound calls`);
+}
+
+// ---------- 2d. build catalog ----------
+// Every build, designed or not, is listed in builds/catalog.json (tools/build-catalog.mjs).
+step("Build catalog");
+{
+  const r = spawnSync(process.execPath, [join(TOOLS, "build-catalog.mjs"), "--check"], { encoding: "utf8" });
+  for (const line of (r.stdout || "").split("\n").filter(Boolean)) fail(line);
+  if (r.status !== 0 && !(r.stdout || "").trim()) fail("tools/build-catalog.mjs --check failed: " + (r.stderr || "").trim().split("\n").pop());
+  if (r.status === 0) console.log(`${JSON.parse(readFileSync(join(ROOT, "builds/catalog.json"), "utf8")).builds.length} builds listed, CATALOG.md up to date`);
 }
 
 // ---------- 3. deep check (optional) ----------
@@ -399,7 +432,9 @@ async function deepCheck() {
     acorn = await import(pathToFileURL(require.resolve("acorn")));
     eslintScope = await import(pathToFileURL(require.resolve("eslint-scope")));
   } catch {
-    console.log("skipped (run `npm install` in siege-nights/tools once to turn this on)");
+    // not optional any more: a name used without its import (getRift in the veil gate, PR #225) passed every other check
+    console.log("could not run");
+    fail("the undefined-name check could not run: run `npm ci` in tools/ once, then check again");
     return;
   }
   const globals = new Set(["console", "JSON", "Math", "Object", "Array", "Map", "Set", "WeakMap", "Number", "String",

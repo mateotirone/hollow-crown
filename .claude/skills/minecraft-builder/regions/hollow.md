@@ -90,6 +90,19 @@ cracked veinstone and moss.
 - The offset storey's posts still sit on the beam below.
 - The windows move with their storey.
 
+## Cliffs, floating rock and the way to the Seat (Mateo, 2026-11-12)
+
+- **No straight edges.** Where the land ends it breaks off ragged: bays bitten well back, blunt spurs between
+  them, single-block jags. Never a ruler line (`terrain.js` `heartEdge`).
+- **Floating rock:** a ragged plate on top that tapers underneath to a point hanging off centre. Veilmoss
+  strands, hollowwood roots and glimbulbs hang under it, and a soul lantern on a chain under the bigger ones.
+  No two the same size or height.
+- **A way across open air is walked, never jumped:** three wide, half steps (a bottom slab) at every drop, spans
+  of hollowwood roots between rocks, two blocks of headroom. A self-test walks it.
+- **The Seat's approach** (`hollow_arenas.py` `approach()`): the Last Step's broken gate (two pylons that do not
+  match), five rocks curving to the ring's landing, broken rock adrift round it. Nothing of it stands inside
+  the ring that falls in the fight (r 32 from the Seat's middle).
+
 ## Roofs
 
 **Shapes:**
@@ -179,6 +192,10 @@ strands over cliffs.
 - **Leaning towers:** `"lean": {"dir": "e", "steps": 2}` on a `keep` (round, `"cap": "cone"`) or a `house`:
   the whole tower leans in two or three clean one-block steps, with brackets under each step.
 - **Curved roofs** on halls: `"roof": {"type": "curved"}`.
+
+**Sites under the floor:** below y 40 the Hollow is void, so a site hung there (the Deep, `map/structures/hollow_deep.py`)
+carries its own two-block shell: dressed veinstone on the inside face, `siege:veil_rock` behind it. Write no air (the void
+is air already), and keep the whole site within about 60 blocks of where players enter it so it loads while it is stamped.
 
 ## Never
 

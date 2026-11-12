@@ -941,3 +941,21 @@ def m_bolt(m):
     m.bone("root", [0, 0, 0]); m.box("root", [-1.5, 0, -1.5], [3, 3, 3], "orb")
 mob(id="hollow_bolt", name="Veilbolt", family="projectile", model=m_bolt, plan="none",
     pal=P(orb={"c": (170, 100, 255), "style": "glow"}), hp=1, projectile=True, collision=(0.3, 0.3), egg=None, no_loot=True, lore="")
+
+# ---------- the Deep (scripts/after/deep.js): where the rest of the Host still stands, after Morvane falls ----------
+def m_bell_wife(m):
+    """Ulfa Ice-Tongue: she rang the bell under the ice that called the Host south, and she is still ringing it."""
+    greyhost_base(m, heavy=True)
+    top = m.d["top"]
+    m.box("head", [-5, top - 5, -5], [10, 2, 10], "rime"); m.box("head", [-4.5, top - 9, 3], [9, 6, 2], "rime")      # a frost hood over the helm
+    m.box("body", [-5.5, 0, -3.5], [11, 12, 7], "surcoat"); m.box("body", [-5.5, 11, -3.6], [11, 1, 1], "bronze")     # long skirts to the floor
+    for x in (-3.5, -0.5, 2.5): m.box("body", [x, 1, -3.7], [1, 9, 1], "rime")                                        # icicles hanging from the hem
+    cloak(m, "surcoat", length=26, width=12)
+    hold(m, "staff", bone="pole", haft="wood", long=34)
+    m.bone("bell", [-6, 35, -3.5], "pole")
+    m.box("bell", [-6.5, 33, -4], [1, 2, 1], "wood"); m.box("bell", [-8, 30, -5.5], [4, 3, 4], "bronze"); m.box("bell", [-9.5, 24, -7], [7, 6, 7], "bronze")
+    m.box("bell", [-10, 23, -7.5], [8, 1, 8], "bronze"); m.box("bell", [-6.5, 21, -4], [1, 2, 1], "rime")             # a great bronze bell, and its frozen clapper
+boss(id="bell_wife", name="Ulfa, the Bell-Wife", region="The Deep, after the story", model=m_bell_wife,
+     pal=P(**GREYHOST), hp=480, speed=0.26, dmg=10, kb=1.0, collision=(1.1, 2.7), scale=1.25, egg=("#606c74", "#78705a"),
+     anim_extra=[("bell", "rotation", ["0", "0", "math.sin(query.life_time*240)*14"])],
+     lore="She rang the bell under the ice that called the Host south. Three hundred years later she has not stopped, and they have not stopped standing.")

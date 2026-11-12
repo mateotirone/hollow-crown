@@ -1,0 +1,22 @@
+{
+  "format_version": "1.16.100",
+  "minecraft:fog_settings": {
+    "description": {
+      "identifier": "siege:wx_dawn_mist_1"
+    },
+    "distance": {
+      "air": {
+        "fog_start": 0.15,
+        "fog_end": 0.8,
+        "fog_color": "#d0d4d2",
+        "render_distance_type": "render"
+      },
+      "weather": {
+        "fog_start": 0.15,
+        "fog_end": 0.8,
+        "fog_color": "#d0d4d2",
+        "render_distance_type": "render"
+      }
+    }
+  }
+}

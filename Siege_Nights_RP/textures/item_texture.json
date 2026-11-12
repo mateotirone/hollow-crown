@@ -1010,6 +1010,57 @@
   "siege_choirsteel_blackfen_boots": {
    "textures": "textures/items/siege_choirsteel_blackfen_boots"
   },
+  "siege_guardgear_1_helmet": {
+   "textures": "textures/items/siege_guardgear_1_helmet"
+  },
+  "siege_guardgear_2_helmet": {
+   "textures": "textures/items/siege_guardgear_2_helmet"
+  },
+  "siege_guardgear_3_helmet": {
+   "textures": "textures/items/siege_guardgear_3_helmet"
+  },
+  "siege_guardgear_4_helmet": {
+   "textures": "textures/items/siege_guardgear_4_helmet"
+  },
+  "siege_guardgear_1_chestplate": {
+   "textures": "textures/items/siege_guardgear_1_chestplate"
+  },
+  "siege_guardgear_2_chestplate": {
+   "textures": "textures/items/siege_guardgear_2_chestplate"
+  },
+  "siege_guardgear_3_chestplate": {
+   "textures": "textures/items/siege_guardgear_3_chestplate"
+  },
+  "siege_guardgear_4_chestplate": {
+   "textures": "textures/items/siege_guardgear_4_chestplate"
+  },
+  "siege_guardgear_1_leggings": {
+   "textures": "textures/items/siege_guardgear_1_leggings"
+  },
+  "siege_guardgear_2_leggings": {
+   "textures": "textures/items/siege_guardgear_2_leggings"
+  },
+  "siege_guardgear_3_leggings": {
+   "textures": "textures/items/siege_guardgear_3_leggings"
+  },
+  "siege_guardgear_4_leggings": {
+   "textures": "textures/items/siege_guardgear_4_leggings"
+  },
+  "siege_guardgear_1_boots": {
+   "textures": "textures/items/siege_guardgear_1_boots"
+  },
+  "siege_guardgear_2_boots": {
+   "textures": "textures/items/siege_guardgear_2_boots"
+  },
+  "siege_guardgear_3_boots": {
+   "textures": "textures/items/siege_guardgear_3_boots"
+  },
+  "siege_guardgear_4_boots": {
+   "textures": "textures/items/siege_guardgear_4_boots"
+  },
+  "siege_summon_bell_wife": {
+   "textures": "textures/items/creative/summon_bell_wife"
+  },
   "siege_everwake_wings": {
    "textures": "textures/items/everwake_wings"
   }

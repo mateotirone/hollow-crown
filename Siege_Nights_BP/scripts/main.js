@@ -57,6 +57,7 @@ import "./letters/index.js";
 import "./news/index.js";
 import "./trade/index.js";
 import "./townsfolk/index.js";
+import "./weather/index.js";
 import "./graves/index.js";
 import "./wings/index.js";
 
