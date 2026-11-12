@@ -136,7 +136,7 @@ export const MOBS = {
   "name": "Mire Toad",
   "family": "wild_hostile",
   "hp": 16,
-  "lore": "Its tongue reaches six blocks. Its skin is poison, so punching it is a mistake.",
+  "lore": "It sits so still it looks like a stone in the mud. Its skin is poison, so punching it is a mistake.",
   "region": "Blackfen"
  },
  "siege:barrow_wight": {
