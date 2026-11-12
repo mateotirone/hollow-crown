@@ -325,6 +325,9 @@ const EXTRAS = [
              netherite_strongroom: "Netherite Strongroom", choirsteel_strongroom: "Choirsteel Strongroom",
              inside_wood: "Wooden Strongroom, inside", inside_iron: "Iron Strongroom, inside", inside_diamond: "Diamond Strongroom, inside",
              inside_netherite: "Netherite Strongroom, inside", inside_choirsteel: "Choirsteel Strongroom, inside" } },
+  { id: "ironworks", title: "Ironworks", marker: "map/structures/ironworks_builds.py",
+    args: (out) => [out],
+    label: { ironworks_1: "Ironworks 1: Ore Pit", ironworks_2: "Ironworks 2: Bloomery", ironworks_3: "Ironworks 3: Trip-Hammer Forge" } },
 ];
 // Builder scripts that live on a branch without the kit: copied from the newest branch that has them into
 // the newest catalogue branch's map/structures and run there.
