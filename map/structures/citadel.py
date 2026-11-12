@@ -85,6 +85,19 @@ def d_inner(x, z):
     return min(INNER - abs(x), INNER - abs(z))
 
 
+def unlock(name, st):
+    """A tree-database block's locked states (siege:old_* blocks, map/trees/lock.py) back to the logical
+    properties bp.py builds with, for previews. The game stamps keep the locked blocks."""
+    if not st: return {}
+    if not any(k.startswith("siege:") for k in st): return {"raw": st}
+    p = {}
+    if "siege:axis" in st: p["axis"] = "yxz"[st["siege:axis"]]
+    if "siege:dir" in st: p["facing"] = "nesw"[st["siege:dir"]]
+    if "siege:top" in st: p["half"] = "top" if st["siege:top"] else "bottom"
+    if "siege:open" in st: p["open"] = bool(st["siege:open"])
+    return p
+
+
 def outward(dx, dz):
     """The side a cell faces, seen from a centre (n/s/e/w)."""
     if abs(dx) >= abs(dz): return "e" if dx > 0 else "w"
@@ -145,7 +158,7 @@ class Citadel:
         walks: wall-walk levels that pass through it (doorways there). door: a ground door side."""
         S = self.S
         R = int(r)
-        floors = list(range(9, h - 2, 8)) + [h]
+        floors = sorted({h} | set(walks) | {f for f in range(9, h - 2, 8) if all(abs(f - w) > 3 for w in walks)})
         for dx in range(-R - 2, R + 3):
             for dz in range(-R - 2, R + 3):
                 d = math.hypot(dx, dz)
@@ -177,6 +190,7 @@ class Citadel:
                 for s in (-1, 0, 1):
                     x, z = cx + ox * k + (s if oz else 0), cz + oz * k + (s if ox else 0)
                     self.col(x, z, 1, 4, "air")
+        self.spiral(cx, cz, 1, h)
         if roof:
             self.cone(cx, h + 1, cz, r + 1.5, int(round((r + 1.5) * 1.6)))
         self.towers.append({"name": name, "x": cx, "z": cz, "r": r, "h": h})
@@ -344,7 +358,7 @@ class Citadel:
         for sx in (-1, 1):
             for sz in (-1, 1):
                 self.tower(kx + sx * H, kz + sz * H, 4.5, TOP + 8, walks=(TOP,), name="keep turret")
-        self.col(kx - H + 3, kz - H + 3, 1, TOP, "ladder", facing="s")
+        self.keep_interior(kx, kz, H, TOP)
         # the central tower: 15 x 15, up to 73, a cone roof and the tallest spire in the land
         CT = 7
         for dx in range(-CT, CT + 1):
@@ -365,7 +379,111 @@ class Citadel:
                 if ring == CT + 1:
                     self.set(x, TOP + 30, z, S["corbel"], facing=OPP[outward(dx, dz)], half="top")
         self.cone(kx, TOP + 31, kz - 6, 9.5, 19)
+        # into the central tower from the roof: a door on its south face, a ladder up its north wall
+        for y in range(TOP + 1, TOP + 4): self.set(kx, y, kz - 6 + CT, "air")
+        self.col(kx, kz - 6 - CT + 1, TOP + 1, TOP + 29, "ladder", facing="s")
         self.keep_box = (kx - H, kz - H, kx + H, kz + zf - kz + 9)
+
+    # ---- stairs and interiors ------------------------------------------------------------------------
+    def spiral(self, cx, cz, y0, y1):
+        """A stone spiral stair round a newel post at (cx, cz) from y0 up to the floor at y1: stairs on the
+        four sides, top slabs on the corners, one block up for every two cells, so a turn climbs 4.
+        The floors it passes get a 3 x 3 well cut round the newel."""
+        S = self.S
+        ring = [(1, 0, "s"), (1, 1, None), (0, 1, "w"), (-1, 1, None), (-1, 0, "n"), (-1, -1, None), (0, -1, "e"), (1, -1, None)]
+        for y in range(y0, y1 + 1):
+            for dx, dz, _ in ring: self.set(cx + dx, y, cz + dz, "air")
+            self.set(cx, y, cz, S["stone"])
+        y, i = y0, 0
+        while y < y1:
+            dx, dz, face = ring[i % 8]
+            if face: self.set(cx + dx, y, cz + dz, S["corbel"], facing=face)
+            else: self.set(cx + dx, y, cz + dz, S["slab"], half="top"); y += 1
+            i += 1
+        # land on the top floor: fill the well back in except the last two steps
+        last = {(ring[(i - 1) % 8][0], ring[(i - 1) % 8][1]), (ring[(i - 2) % 8][0], ring[(i - 2) % 8][1])}
+        for dx, dz, _ in ring:
+            if (dx, dz) not in last and self.bp.get(cx + dx, y1, cz + dz)[0] == "air": self.set(cx + dx, y1, cz + dz, S["tiles"])
+
+    def keep_interior(self, kx, kz, H, TOP):
+        """The keep inside: a spiral stair in the north-west corner through every floor to the roof,
+        the great hall, the ruler's chambers, the treasury and armoury, the council room."""
+        import furnish as F
+        S = self.S
+        w = S["wood"]; dark = S["dark"]
+        I = H - 3                                              # interior half-width
+        self.spiral(kx - I + 2, kz - I + 2, 1, TOP)
+        for dx, dz in ((-1, 1), (0, 1), (1, 1)):               # a hatch onto the roof over the last steps
+            pass
+        bp = self.bp
+        def free(x, y, z): return bp.get(x, y, z)[0] in ("air", "keep")
+        def put(x, y, z, n, **p):
+            if free(x, y, z): bp.set(x, y, z, n, **p)
+        def ceiling_lights(y):
+            for dx in range(-I + 3, I - 1, 6):
+                for dz in range(-I + 3, I - 1, 6): put(kx + dx, y, kz + dz, "lantern", hanging=True)
+        f1, f2, f3, f4 = KEEP_FLOORS
+        # ground floor: lanterns over the throne hall
+        ceiling_lights(f1 - 1)
+        # 1. the great hall: two long tables, the high table across the north end, the hearth on the east wall
+        y = f1 + 1
+        for sx in (-4, 4):
+            for z in range(kz - 6, kz + 9):
+                put(kx + sx, y, z, f"{dark}_fence"); bp.set(kx + sx, y + 1, z, f"{dark}_slab", half="bottom")
+                for d, ox in (("e", -1), ("w", 1)):
+                    if (z - kz) % 2 == 0: put(kx + sx + ox, y, z, f"{dark}_stairs", facing=d)
+        for x in range(kx - 5, kx + 6):
+            put(x, y, kz - 9, f"{dark}_fence"); bp.set(x, y + 1, kz - 9, f"{dark}_slab", half="bottom")
+            if x % 2 == 0: put(x, y, kz - 10, f"{dark}_stairs", facing="s")
+        F.hearth(bp, kx + I, y, kz, "w")
+        for z in range(kz - 6, kz + 9): put(kx, y - 0, z, "red_carpet")
+        ceiling_lights(f2 - 1)
+        # 2. the ruler's chambers: bedchamber to the north, solar to the south, a wall with a door between
+        y = f2 + 1
+        for x in range(kx - I, kx + I + 1):
+            for yy in range(y, f3): bp.set(x, yy, kz, f"{w}_planks") if abs(x - kx) > 1 else None
+        for yy in (y, y + 1): bp.set(kx, yy, kz, "air"); bp.set(kx - 1, yy, kz, f"{w}_planks"); bp.set(kx + 1, yy, kz, f"{w}_planks")
+        bp.set(kx, y, kz, f"{w}_door", facing="s"); bp.set(kx, y + 1, kz, f"{w}_door", facing="s", upper=True)
+        for x in range(kx - 3, kx + 4):
+            for z in range(kz - 9, kz - 3): put(x, y, z, "red_carpet")
+        F.bed(bp, kx, y, kz - I, "n") if free(kx, y, kz - I) and free(kx, y, kz - I + 1) else None
+        for ox in (-2, 2): put(kx + ox, y, kz - I, "barrel"); put(kx + ox, y + 1, kz - I, "lantern")
+        for z in range(kz - 8, kz - 2, 2): put(kx + I, y, z, "chest", facing="w"); put(kx - I + 5, y, z, "barrel")
+        F.hearth(bp, kx - I, y, kz - 5, "e")
+        for x in range(kx - I, kx + I + 1):                  # the solar: bookshelves round the walls, a desk, a lectern
+            for yy in (y, y + 1, y + 2):
+                put(x, yy, kz + I, "bookshelf")
+        for z in range(kz + 2, kz + I):
+            for yy in (y, y + 1): put(kx - I, yy, z, "bookshelf"); put(kx + I, yy, z, "bookshelf")
+        F.table(bp, kx - 3, y, kz + 6, "nsew", dark); F.table(bp, kx + 3, y, kz + 6, "nsew", dark)
+        put(kx, y, kz + 8, "lectern", facing="n")
+        ceiling_lights(f3 - 1)
+        # 3. treasury (west) and armoury (east), split by a stone wall with an iron door
+        y = f3 + 1
+        for z in range(kz - I, kz + I + 1):
+            for yy in range(y, f4): bp.set(kx, yy, z, S["smooth"])
+        bp.set(kx, y, kz + 4, "iron_door", facing="e"); bp.set(kx, y + 1, kz + 4, "iron_door", facing="e", upper=True)
+        for z in range(kz - I + 1, kz + I, 2):
+            for x in (kx - I, kx - 2):
+                put(x, y, z, "chest", facing="e" if x == kx - I else "w"); put(x, y + 1, z, "barrel")
+        for x in range(kx - 9, kx - 3):
+            for z in range(kz - 2, kz + 3): put(x, y, z, "gold_block" if (x + z) % 3 == 0 else "air")
+        put(kx - 6, y + 1, kz, "lantern")
+        for z in range(kz - I + 1, kz + I, 3):
+            put(kx + I, y, z, "barrel"); put(kx + I, y + 1, z, "barrel")
+        for z, n in ((kz - 6, "anvil"), (kz - 3, "grindstone"), (kz, "smithing_table"), (kz + 3, "anvil"), (kz + 6, "fletching_table")):
+            put(kx + 6, y, z, n)
+        ceiling_lights(f4 - 1)
+        # 4. the council room: a long table with twelve chairs, the map table, lecterns
+        y = f4 + 1
+        for x in range(kx - 4, kx + 5):
+            for z in (kz - 1, kz, kz + 1):
+                put(x, y, z, f"{dark}_fence"); bp.set(x, y + 1, z, f"{dark}_slab", half="bottom")
+        for x in range(kx - 4, kx + 5, 2):
+            put(x, y, kz - 2, f"{dark}_stairs", facing="s"); put(x, y, kz + 2, f"{dark}_stairs", facing="n")
+        put(kx - 5, y, kz, f"{dark}_stairs", facing="e"); put(kx + 5, y, kz, f"{dark}_stairs", facing="w")
+        put(kx, y, kz - 8, "cartography_table"); put(kx - 3, y, kz - 8, "lectern", facing="s"); put(kx + 3, y, kz - 8, "lectern", facing="s")
+        ceiling_lights(TOP - 1)
 
     # ---- streets, plots, fields ----------------------------------------------------------------------
     def ground(self):
@@ -478,7 +596,7 @@ class Citadel:
             if y <= 0: continue                                 # keep our own ground
             c = (x + dx, y, z + dz)
             if self.bp.cells.get(c, ("keep",))[0] != "keep": continue
-            self.bp.cells[c] = (n, {"raw": st} if st else {})
+            self.bp.cells[c] = (n, unlock(n, st))
         self.trees.append({"x": x, "z": z, "species": name, "size": size})
         return True
 
