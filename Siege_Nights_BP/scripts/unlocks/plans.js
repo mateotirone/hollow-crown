@@ -315,8 +315,8 @@ export function* cradlePlan(probe, anchor) {
   return { center, ops, info: {} };
 }
 // ---------- approach zones (pure) ----------
-// Hallowmere: the outer ice, between the crack ring's floor and the shore.
-export const ICE_EDGE = { r0: 24, r1: 32 };
+// Hallowmere: the clear ice just outside the crack ring, inside the Antler Crown (its bone stands from r 22 out).
+export const ICE_EDGE = { r0: 18, r1: 23 };
 export const inIceEdge = (c, l) => { const d = Math.hypot(l.x - (c.x + 0.5), l.z - (c.z + 0.5)); return d >= ICE_EDGE.r0 && d <= ICE_EDGE.r1 && Math.abs(l.y - c.y) < 5; };
 // Gull Bay: the water round the chapel (not inside the nave or the tower).
 export const DROWNED_WATER = { r: 28 };

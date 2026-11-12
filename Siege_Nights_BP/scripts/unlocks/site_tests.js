@@ -186,9 +186,10 @@ addTests("unlocks: sites", {
     assertEqual(approachCount(3, { base: 1, per: 1, max: 4 }), 4);
     const c = { x: 0, y: 64, z: 0 };
     // Hallowmere: outside the crack ring and the arena
-    assert(inIceEdge(c, { x: 28.5, y: 65, z: 0.5 }));
+    assert(inIceEdge(c, { x: 20.5, y: 65, z: 0.5 }));
     assert(!inIceEdge(c, { x: 10.5, y: 65, z: 0.5 }));
-    assert(ICE_EDGE.r0 > HUNT.crack + 1 && ICE_EDGE.r0 > HUNT.arena);
+    assert(ICE_EDGE.r0 >= HUNT.crack + 1 && ICE_EDGE.r0 > HUNT.arena, "outside the ring that cracks");
+    assert(!inIceEdge(c, { x: HUNT.crack + 0.5, y: 65, z: 0.5 }), "not on the crack ring");
     // Gull Bay: in the water, never in the nave or the tower
     assert(inDrownedWater(c, { x: 0.5, y: 70, z: 15.5 }, 12));
     assert(!inDrownedWater(c, { x: 0.5, y: 66, z: 0.5 }, 12), "the nave");

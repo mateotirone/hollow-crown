@@ -63,7 +63,7 @@ const ashSand = makeApproach({
   mid: (site) => ({ x: site.data.center.x, z: site.data.center.z + ASH_SAND.dz }), r: ASH_SAND.r + 2,
   inZone: (site, l) => inAshSand(site.data.center, l),
   mob: SCARAB, count: { base: 3, per: 2, max: 7 },
-  line: "§7The sand in front of the stair is grey, not gold. It shifts under your boots, and then it is not sand.",
+  line: "§7The sand in front of the stair shifts under your boots. Then it is not sand. It is ash, and the ash is moving.",
   cry: "random.anvil_use", cryOpts: { pitch: 1.6, volume: 0.5 },
   spots: (site, players, n, now) => Array.from({ length: n }, (_, i) => {
     const c = site.data.center, a = (i / n) * Math.PI * 2 + now;
