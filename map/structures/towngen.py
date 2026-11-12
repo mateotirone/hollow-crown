@@ -182,6 +182,7 @@ class Town:
         if not gset: return None
         gx = np.mean([g[0] for g in gi]); gz = np.mean([g[1] for g in gi])
         SLOPE = 14.0 if kind == "main" else 10.0
+        xc = getattr(self, "XCOST", None)             # extra cost per cell (e.g. a railway: streets cross it, never run along it)
         while pq:
             _, d, i, j = heapq.heappop(pq)
             if (i, j) in gset:
@@ -200,6 +201,7 @@ class Town:
                 if self.KIND[a, b]: c *= 0.35
                 elif near is not None and near[a, b]: c += 2.5 * w
                 if self.E[a, b] > self.R - 3: c += 4
+                if xc is not None: c += xc[a, b] * w
                 nd = d + c
                 if nd < dist.get((a, b), 1e18):
                     dist[(a, b)] = nd; prev[(a, b)] = (i, j)
