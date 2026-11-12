@@ -19,12 +19,12 @@ A ★ marks builds that no earlier list had (added in the 2026-11-12 audit).
 
 | Build | Region | Status | Viewer | Owner thread | Source | Notes |
 |---|---|---|---|---|---|---|
-| Kingsrest capital hall | Aldmere Vale | in game | map | Refine every building, region by region | `map/structures/capital.py` | Grand medieval, copper-gradient dome. Waiting its turn in the one-by-one refinement pass. |
+| Kingsrest capital hall | Aldmere Vale | in game | map | Refine every building, region by region | `map/structures/capital.py` | Waiting in PR #205. Rebuilt on the skill (review/specs/kingsrest_capital.json), Mateo has reviewed it; PR #205. The game still has the old hall until it merges. |
 | Kingsrest street house | Aldmere Vale | in game | map | Refine every building, region by region | `map/structures/review/kingsrest_house.py` | Refinement round 1 done; moving onto the building skill (PR #168 specs). |
 | Kingsrest coaching inn | Aldmere Vale | in game | map | Refine every building, region by region | `map/structures/review/kingsrest_inn.py` | The only furnished building. Refinement round 2 done. |
-| Kingsrest guildhall | Aldmere Vale | in game | map | Refine every building, region by region | `map/structures/review/kingsrest_guildhall.py` | Refinement round 3 under way. |
-| Kingsrest chapel | Aldmere Vale | in game | map | Refine every building, region by region | `map/structures/build_catalogue.py` | Not yet refined. |
-| Kingsrest station (where the lines meet) | Aldmere Vale | in game | map | Refine every building, region by region | `map/structures/build_catalogue.py` | Not yet refined. |
+| Kingsrest guildhall | Aldmere Vale | in game | map | Refine every building, region by region | `map/structures/review/kingsrest_guildhall.py` | Waiting in PR #205. Rebuilt on the skill (review/specs/kingsrest_guildhall.json, gen_guildhall.py), Mateo has reviewed it; PR #205. |
+| Kingsrest chapel | Aldmere Vale | in game | map | Refine every building, region by region | `map/structures/build_catalogue.py` | Waiting in PR #205. Rebuilt on the skill (review/specs/kingsrest_chapel.json, gen_chapel.py), Mateo has reviewed it; PR #205. |
+| Kingsrest station (where the lines meet) | Aldmere Vale | in game | map | Refine every building, region by region | `map/structures/build_catalogue.py` | Still on the old stations.py builder; next in the one-by-one pass (2026-11-12). |
 | Vale town houses (4 types) (4) | Aldmere Vale | in game | map | Refine every building, region by region | `map/structures/build_catalogue.py` |  |
 | Millbrook clock tower | Aldmere Vale | in game | map | Refine every building, region by region | `map/structures/vale_civic.py` | Also the Reeve's boss unlock (six clocks round the square). |
 | Millbrook watermill | Aldmere Vale | in game | map | Refine every building, region by region | `map/structures/vale_civic.py` |  |
