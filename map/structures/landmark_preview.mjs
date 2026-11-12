@@ -64,7 +64,8 @@ for (const site of LANDMARKS) {
 function scene(site, region, placed, name) {
   const xs = placed.flatMap((p) => p.ops.map((o) => o[0])), zs = placed.flatMap((p) => p.ops.map((o) => o[2]));
   if (!xs.length) return;
-  const x0 = Math.min(...xs) - 6, x1 = Math.max(...xs) + 6, z0 = Math.min(...zs) - 6, z1 = Math.max(...zs) + 6;
+  const lo = (a) => a.reduce((m, v) => (v < m ? v : m), Infinity), hi = (a) => a.reduce((m, v) => (v > m ? v : m), -Infinity);
+  const x0 = lo(xs) - 6, x1 = hi(xs) + 6, z0 = lo(zs) - 6, z1 = hi(zs) + 6;
   const pal = [], key = new Map(), cells = new Map();
   const ix = (n, p = {}) => { const k = JSON.stringify([n, p]); if (!key.has(k)) { key.set(k, pal.length); pal.push([n, p]); } return key.get(k); };
   const T = ix(REGION_TOP[region] ?? "grass_block"), DIRT = ix(region === "Emberwaste" ? "sandstone" : "dirt"), STONE = ix("stone"), WATER = ix("water");
@@ -105,7 +106,7 @@ function scene(site, region, placed, name) {
   }
   const blocks = [...cells].map(([k, i]) => [...k.split(",").map(Number), i]);
   const ys = blocks.map((b) => b[1]);
-  const ymin = Math.min(...ys);
+  const ymin = lo(ys);
   const cx = Math.round((x0 + x1) / 2), cz = Math.round((z0 + z1) / 2);
   const local = blocks.map(([x, y, z, i]) => [x - cx, y - ymin, z - cz, i]);
   const w = Math.max(x1 - x0, z1 - z0);

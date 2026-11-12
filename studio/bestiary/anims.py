@@ -56,6 +56,7 @@ BOSS_MOVES = {
     "mother_of_changelings": {"roots": "grasp", "brood": "roar", "lullaby": "cradle"},
     "warlord_king": {"warcry": "roar", "lance": "thrust", "toll": "overhead", "quake": "slam"},
     "oswin_the_last": {"toll": "slam", "blow": "sweep", "blink": "vanish", "tollmen": "call", "surface": "call", "lance": "thrust", "quake": "slam", "overhead": "slam"},
+    "bell_wife": {"toll": "slam", "tongue": "cast", "muster": "call", "hush": "point"},
     "pretender_blade": PRETENDER_MOVES, "pretender_seer": PRETENDER_MOVES, "pretender_brute": PRETENDER_MOVES,
 }
 

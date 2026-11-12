@@ -90,6 +90,21 @@ export function chamberOps() {
   return out;
 }
 
+// The approach: the shaft above the chamber, where the footmen climb to meet whoever comes down.
+export const SHAFT_ZONE = { r: 2.6, top: -3, bottom: -10 };
+export const inShaft = (c, l) => Math.hypot(l.x - (c.x + 0.5), l.z - (c.z + 0.5)) <= SHAFT_ZONE.r && l.y <= c.y + SHAFT_ZONE.top && l.y >= c.y + SHAFT_ZONE.bottom;
+/** Where n footmen stand on the stair below someone at height relY (from the square): { dx, dy, dz } standing spots. */
+export function stairSpotsBelow(relY, n) {
+  const out = [], count = (1 - (WELL.floorY + 1)) * 2 - 1;
+  for (let k = 0; k < n; k++) {
+    const surface = Math.floor(relY) - 4 - 2 * k; // four blocks down (one turn of the stair), then two more each
+    const i = Math.min(count - 1, Math.max(0, 2 * (1 - surface) - 1));
+    const [dx, dz] = RING[i % RING.length];
+    out.push({ dx, dy: 1 - 0.5 * (i + 1), dz });
+  }
+  return out;
+}
+
 /** Where each of the 43 half-steps goes, top first: a slab on one of the RING cells round the spindle. */
 export function stairSteps() {
   const steps = [];

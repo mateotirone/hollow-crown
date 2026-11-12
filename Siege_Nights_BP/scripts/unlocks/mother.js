@@ -9,8 +9,8 @@
 //   The effigy stays in the cradle. Once a siege night has passed after she falls, lay your hand in the cradle again.
 
 import { system } from "@minecraft/server";
-import { defineSite, column, overworld, say, actionbar, sound, abs, mid, setState, give, inventoryHas, nearby, put, talk, removeNpc } from "./site.js";
-import { makeChangeling, villagerLines, accuse, resting, gladeWave, VILLAGERS } from "./puzzles.js";
+import { defineSite, column, overworld, say, actionbar, sound, abs, mid, setState, give, inventoryHas, nearby, put, talk, removeNpc, makeApproach } from "./site.js";
+import { makeChangeling, villagerLines, accuse, resting, VILLAGERS } from "./puzzles.js";
 import { cradlePlan, mirelightPlan, rootCells, inCradle, inGlade, CRADLE, GLADE } from "./plans.js";
 import { BlockPermutation } from "@minecraft/server";
 
@@ -97,20 +97,17 @@ export const motherSite = defineSite({
 });
 
 // ---------- the Changeling Glade: a wave on the way in ----------
-let lastWave; // system tick of the last wave (one at a time, then the glade rests)
-function glade(site) {
-  const d = site.data, c = d.center;
-  const inside = nearby({ x: c.x, z: c.z + GLADE.dz }, GLADE.r + 2).filter((p) => inGlade(c, p.location));
-  const now = system.currentTick;
-  if (!gladeWave({ players: inside.length, fighting: d.fighting || !!site.scene, now, last: lastWave })) return;
-  lastWave = now;
-  const dim = overworld(), n = Math.min(6, 2 + inside.length * 2);
-  for (const p of inside) { say(p, "§7The reeds round the glade stop moving all at once. Then they part, low down, in a lot of places."); sound("mob.zombie.say", p.location, { pitch: 1.8, volume: 0.6 }); }
-  for (let i = 0; i < n; i++) {
-    const a = (i / n) * Math.PI * 2 + now;
-    try { dim.spawnEntity(CHANGELING, { x: c.x + 0.5 + Math.sin(a) * (GLADE.r - 2), y: c.y + GLADE.floor + 1, z: c.z + GLADE.dz + 0.5 + Math.cos(a) * (GLADE.r - 2) }); } catch { /* unloaded */ }
-  }
-}
+const glade = makeApproach({
+  mid: (site) => ({ x: site.data.center.x, z: site.data.center.z + GLADE.dz }), r: GLADE.r + 2,
+  inZone: (site, l) => inGlade(site.data.center, l),
+  mob: CHANGELING,
+  line: "§7The reeds round the glade stop moving all at once. Then they part, low down, in a lot of places.",
+  cry: "mob.zombie.say", cryOpts: { pitch: 1.8, volume: 0.6 },
+  spots: (site, players, n, now) => Array.from({ length: n }, (_, i) => {
+    const c = site.data.center, a = (i / n) * Math.PI * 2 + now;
+    return { x: c.x + 0.5 + Math.sin(a) * (GLADE.r - 2), y: c.y + GLADE.floor + 1, z: c.z + GLADE.dz + 0.5 + Math.cos(a) * (GLADE.r - 2) };
+  }),
+});
 
 const LULLABY = [1, 0.89, 0.79, 0.89, 1, 1, 1, 0.89, 0.89, 0.89, 1, 1.19, 1.19];
 function summon(site, first) {

@@ -52,7 +52,8 @@
       "Geometry.g44",
       "Geometry.g45",
       "Geometry.g46",
-      "Geometry.g47"
+      "Geometry.g47",
+      "Geometry.g48"
      ]
     },
     "textures": {
@@ -104,7 +105,8 @@
       "Texture.t44",
       "Texture.t45",
       "Texture.t46",
-      "Texture.t47"
+      "Texture.t47",
+      "Texture.t48"
      ]
     }
    },
