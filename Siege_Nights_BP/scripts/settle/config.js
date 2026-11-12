@@ -102,3 +102,68 @@ export const MASON_LINES = {
   ],
   noLand: "You've no land to lay it on yet. Raise a Keep Banner on a Plot Stone and come back. I'll sell to you all the same.",
 };
+
+// ---------- Town plots and charters (Plot Markers, charters.js) ----------
+// The tier each building first opens at (0 Hamlet, 1 Town, 2 City, 3 Castle). This used to be read from the
+// old fixed layout (layout.js). Farmhouse, Mint, Inn and Barracks are listed ahead of their plot designs.
+export const OPENS_AT = {
+  cottage: 0, well: 0, library: 0, market: 1, garden: 1, farmhouse: 1, mint: 1,
+  smithy: 2, stable: 2, inn: 2, barracks: 2, storehouse: 3, watchtower: 3,
+};
+
+// The plot size each building takes. Plots: S Small 9x13, M Medium 11x15, ML long Medium 13x15, L Large 15x15,
+// G Great 21x21. A building goes on a plot of its own size, or a size listed under PLOT_ALSO.
+export const PLOT_SIZE = {
+  cottage: "S", well: "S", garden: "S", watchtower: "S",
+  smithy: "M", farmhouse: "M", mint: "M",
+  stable: "ML", storehouse: "ML", library: "ML",
+  market: "L", inn: "L", barracks: "L",
+};
+export const PLOT_ALSO = {
+  market: ["ML"], // the market may take a long Medium
+  barracks: ["ML"],
+  library: ["L"], stable: ["L"], storehouse: ["L"],
+};
+// Only when the town has no free plot of the building's own size or PLOT_ALSO sizes left
+export const PLOT_FALLBACK = { barracks: ["M"] }; // the barracks may take a plain Medium
+
+// Where on the map a building wants to be, from the plot's tags (wall, corner, square, gate, road_front,
+// field_edge, hall, library). needs: the plot must have one of them. prefer: listed first in the menu.
+export const PLOT_TAGS = {
+  watchtower: { needs: ["wall", "gate", "corner"] },
+  well: { prefer: ["square"] },
+  market: { prefer: ["gate", "road_front", "square"] },
+  garden: { prefer: ["field_edge"] },
+  farmhouse: { prefer: ["field_edge"] },
+  library: { prefer: ["library", "square"] },
+  inn: { prefer: ["gate", "road_front", "square"] },
+  barracks: { prefer: ["gate", "wall"] },
+};
+export const TAG_WORDS = { wall: "by the wall", gate: "by a gate", corner: "on a corner", square: "on the square", road_front: "on the main road", field_edge: "by the fields", hall: "by the hall", library: "set aside for the library" };
+
+export const HOMES = ["cottage"];
+export const WORK = ["market", "smithy", "stable", "storehouse", "farmhouse", "mint", "inn", "barracks"];
+
+// What a settlement must have standing before it can grow past each tier (index = the tier it is at now).
+// Siege wins still decide the tier; a charter that isn't met holds the town at its tier until it is.
+// count: how many (default 1). more: this many work buildings beyond the ones the charters name.
+// A line whose buildings are not in the game yet is skipped (and said so), so nobody is stuck.
+export const CHARTERS = [
+  [ // Hamlet, to become a Town: nothing beyond the library it starts with
+  ],
+  [ // Town, to become a City
+    { what: "homes", ids: HOMES, count: 3 },
+    { what: "Farmhouse with its field", ids: ["farmhouse"] },
+    { what: "Mint", ids: ["mint"] },
+    { what: "market", ids: ["market"] },
+  ],
+  [ // City, to become a Castle
+    { what: "homes", ids: HOMES, count: 6 },
+    { what: "inn", ids: ["inn"] },
+    { what: "barracks", ids: ["barracks"] },
+    { what: "more work building of any size", ids: WORK, more: 1 },
+  ],
+  [ // Castle: the top tier. Shown as the full Castle charter, it holds nothing back.
+    { what: "homes", ids: HOMES, count: 10 },
+  ],
+];

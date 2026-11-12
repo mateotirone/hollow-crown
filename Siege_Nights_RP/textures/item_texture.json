@@ -676,6 +676,33 @@
   },
   "siege_summon_pretender": {
    "textures": "textures/items/creative/summon_pretender"
+  },
+  "siege_spell_bolt": {
+   "textures": "textures/ui/hc/skill/arc_bolt"
+  },
+  "siege_spell_ward": {
+   "textures": "textures/ui/hc/skill/arc_ward"
+  },
+  "siege_spell_blink": {
+   "textures": "textures/ui/hc/skill/arc_blink"
+  },
+  "siege_spell_echo": {
+   "textures": "textures/ui/hc/skill/arc_echo"
+  },
+  "siege_spell_bind": {
+   "textures": "textures/ui/hc/skill/arc_bind"
+  },
+  "siege_spell_step": {
+   "textures": "textures/ui/hc/skill/arc_step"
+  },
+  "siege_spell_choir": {
+   "textures": "textures/ui/hc/skill/arc_choir"
+  },
+  "siege_spell_hollowstep": {
+   "textures": "textures/ui/hc/skill/arc_hollowstep"
+  },
+  "siege_vault_key": {
+   "textures": "textures/items/vault/vault_key"
   }
  }
 }

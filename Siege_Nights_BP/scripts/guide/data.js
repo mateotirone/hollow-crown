@@ -126,6 +126,7 @@ export const ENTRIES = [
     page: "§fReinforce:§r click Castle Stone, a Portcullis or a Castle Gate on your land with an §firon ingot§r, then a §fdiamond§r, then §fnetherite scrap§r (one each, in that order). Each tier shows on the block.\n"
       + "  Castle Stone takes 6 blows, then 10, 16 and 26. A gate takes 2, then 4, 7 and 12.\n\n"
       + "§fRepair:§r click a cracked block with §fstone bricks§r to patch it.\n\n"
+      + "§fWeight:§r walls carry their own weight. Knock a hole in one and the stone above falls away in a stepped arch; knock out too much and whole sections come down, tipping toward the open side, and leave rubble that slides into a slope. Cracked blocks with a lot of wall on top of them can crush. Reinforced walls reach further over a gap and carry more. Nothing falls in a settlement whose owner is away.\n\n"
       + "§fAfter a bad night§r the Mason, or the Settlement wall page in your town hall, will survey the whole wall and mend every hole and crack for a price.\n\n"
       + "§fGates:§r one click opens or shuts the whole gate, whatever you hold (it never places a block). A Castle Gate swings open like a door, all its joined blocks as one leaf, away from you; a Portcullis rises until only its top piece shows.",
     when: ["place:siege:castle_stone*", "place:siege:portcullis*", "place:siege:castle_gate*", "carry:siege:castle_stone*"],
@@ -134,9 +135,9 @@ export const ENTRIES = [
     id: "machines", ch: "siege", title: "Siege machines",
     tip: "Siege machines: sneak and click one with an empty hand to pack it back up.",
     page: "§fBallista§r: place it on your own land. It turns to face monsters within 16 blocks and shoots them, even through Arrow Slits.\n\n"
-      + "§fTrebuchet§r: can stand anywhere. Stand by it, look where you want to fire and click it with §fcobblestone§r: it hurls a boulder (10 s to reload). Sneak + click with cobblestone to change the range (20, 30 or 40 blocks).\n\n"
-      + "§fBattering Ram§r: click it to climb on, steer with the movement keys and punch the wall in front to swing the beam. Sneak to get off; break it to pick it up.\n\n"
-      + "Sneak + click a ballista or trebuchet with an empty hand to pack it up. Raiders aim at the side of your settlement with the fewest ballistas and archers.",
+      + "§fTrebuchet§r: can stand anywhere. Stand by it, look where you want to fire and click it with §fcobblestone§r: it swings round and hurls a boulder (10 s to reload). Look higher to lob it high, level for a flat fast throw. Sneak + click to change the counterweight (Light, Medium, Heavy): heavier throws further. Boulders hit harder the faster they land, and only you and your allies can fire your trebuchet.\n\n"
+      + "§fBattering Ram§r: click it to climb on, steer with the movement keys and punch the wall in front to swing the beam. Sneak to get off.\n\n"
+      + "Sneak + click a ballista, trebuchet or Battering Ram with an empty hand to pack it up. Raiders aim at the side of your settlement with the fewest ballistas and archers.",
     when: ["carry:siege:ballista", "carry:siege:trebuchet", "carry:siege:battering_ram"],
   },
   {
@@ -173,7 +174,7 @@ export const ENTRIES = [
   {
     id: "town_hall", ch: "keep", title: "The town hall",
     tip: "Place the Hall Cornerstone on your land and click it: your town hall rises and grows with your settlement.",
-    page: "Craft a §fHall Cornerstone§r at the Siege Workshop and place it on your land. Click it for the town hall menu.\n\n"
+    page: "Craft a §fHall Cornerstone§r at the Siege Workshop and place it on your land. Click it to raise your first hall. Once the hall stands the stone is gone: open the town hall menu from the Tree of Oaths inside, or from your Keep menu.\n\n"
       + "The hall is built in your region's own style and is rebuilt bigger as your settlement grows. It holds the §fTree of Oaths§r, where you spend skill points.\n\n"
       + "From the hall menu you can also raise your §fsettlement wall§r level by level (and watch it go up), see who is online, and read the §fRumor Board§r for jobs.",
     when: ["carry:siege:hall_cornerstone", "click:siege:hall_cornerstone"],
@@ -194,14 +195,31 @@ export const ENTRIES = [
     when: ["talk:tag:siege_mason", "carry:siege:mason_bench", "carry:siege:foundation_stone", "click:siege:foundation_stone"],
   },
   {
+    id: "town_plots", ch: "keep", title: "Town plots and charters",
+    tip: "Use a Plot Marker to raise a building on a town plot. Each plot only takes buildings of its size.",
+    page: "Every open plot in your town has a §fPlot Marker§r. Use it to see what can go there: only buildings of the plot's size are listed, and some want a certain spot (a watchtower stands by the wall). Good spots are marked. Pick one, walk round the outline, then use the marker again and pay to raise it.\n\n"
+      + "§fCharters:§r siege wins grow your settlement, but it only grows past each tier once that tier's charter stands. A Town needs 3 homes and a market (and a Farmhouse and Mint once they are built); a City needs 6 homes, a barracks and another work building. When the last one is finished, the town grows by itself.",
+    when: ["click:siege:plot_marker", "event:tierUp"],
+  },
+  {
     id: "guards", ch: "keep", title: "Guards and the Barracks",
     tip: "Bring an unemployed villager to your Barracks and click it holding 40 Regals for a Man-at-Arms (sneak + click for an Archer).",
     page: "Build a §fBarracks§r, bring an unemployed villager to it and click it holding coins (40 Regals) for a §fMan-at-Arms§r. Sneak + click for an §fArcher§r. Click the Barracks without coins for the guard list.\n\n"
-      + "Sneak + click a guard to pick them up and put them anywhere on your land. Archers stay exactly where you set them, so put them on your walls. Men-at-Arms wait at the Barracks and charge out when raiders come.\n\n"
-      + "§fArmour:§r click a guard holding the next upgrade: 6 iron ingots, then 12 iron ingots, then 4 diamonds, then a netherite ingot.\n\n"
+      + "Sneak + click a guard to pick them up and put them anywhere on your land. Off duty, Archers stay exactly where you set them and Men-at-Arms wait at the Barracks and charge out when raiders come. Better: give them a post (see §fGuard posts§r).\n\n"
+      + "§fArmour:§r click a guard holding the next upgrade: 6 iron ingots, then 12 iron ingots, then 4 diamonds, then a netherite ingot. Clicking with anything else opens the guard's orders.\n\n"
       + "§fWanted:§r anyone who attacks you or your guards on your land, lights a charge or rams your walls is Wanted there for 5 minutes, and your guards hunt them.\n\n"
       + "A Hamlet keeps 4 guards, a Town 8, a City 12. Fallen guards are gone for good.",
     when: ["carry:siege:barracks", "click:siege:barracks"],
+  },
+  {
+    id: "guard_posts", ch: "keep", title: "Guard posts",
+    tip: "Click one of your guards and pick Station to send them to a post on your wall or by a building.",
+    page: "Every building on your land has a few §fposts§r round it (by the door, at the back corners, along the sides of big ones), and your wall has posts all the way round plus one either side of the gate.\n\n"
+      + "§fTo station a guard:§r click them and pick §fStation§r. Your view lifts high over your settlement, and every post shows on the ground as a ring with its number: §cred§r is empty, §agreen§r is manned. Pick the wall or a building from the list, then the post. The guard goes straight there. If someone already holds that post, the two swap.\n\n"
+      + "A stationed §fArcher§r holds the post and shoots from it. A stationed §fMan-at-Arms§r stands at the post and, in a fight, chases attackers a short way before going back, so posts by your storerooms keep raiders from looting them.\n\n"
+      + "§fThe watch:§r guards walk to their posts at dusk and back to the Barracks at dawn, using the steps up the inside of your wall (towers have ladders). A guard you have just stationed walks there at once and holds the post until the watch changes. If a siege starts, or someone Wanted is on your land, every stationed guard heads for their post straight away, running; anyone who meets an enemy on the way stops to fight, then carries on.\n\n"
+      + "The §fBarracks§r menu has a §fGuard posts§r button to see which posts are empty and send a free guard to one. When your town grows and the wall moves out, guards on the wall keep their post on the new wall. If a building comes down, its guards go off duty.",
+    when: ["click:siege:barracks", "event:guardOrders", "event:guardStationed"],
   },
   {
     id: "quartermaster", ch: "keep", title: "The Quartermaster",
@@ -238,9 +256,9 @@ export const ENTRIES = [
   {
     id: "traders", ch: "coin", title: "Traders",
     tip: "Traders buy what their trade needs. Each has only so much appetite a day, and pays less once they've had plenty.",
-    page: "Every town has traders: a farmer, woodcutter, quarryman, smith, fisher, hunter, herbalist and the Moneyer. Click one to sell to them or buy from them.\n\n"
+    page: "Every town has traders: a farmer, woodcutter, quarryman, smith, fisher, hunter, herbalist and the Moneyer, and a Guild Factor with orders. Click one to sell to them or buy from them.\n\n"
       + "Prices differ from region to region. Each trader only wants so much a day: past that they pay less, and in the end they stop buying until tomorrow.\n\n"
-      + "§fThe Moneyer§r changes coins and buys iron ingots and emeralds. Each region's Smith sells that region's Castle Guard armour.",
+      + "§fThe Moneyer§r changes coins and buys iron ingots and emeralds. He takes every iron ingot you bring at full price, with no daily limit (iron golems never appear, so iron only comes from mining). He also trades metal up one step: 4 iron for a gold ingot, 8 gold for a diamond, 6 diamonds for a netherite scrap. It is dear, but anything can always be bought. Each region's Smith sells that region's Castle Guard armour.",
     when: ["talk:tag:siege_job"],
   },
 
@@ -319,6 +337,17 @@ export const ENTRIES = [
       + "§fCarry it to the Tree of Oaths§r and you can give it up instead and swear the §fSquire's Oath§r to the Order of the Ashen Gate: steel, shield, horse and command.\n\n"
       + "The Tree of Oaths explains both before you commit. Take your time: you can carry the shard as long as you like.",
     when: ["event:emberFell", "carry:siege:hollow_ember"],
+    hidden: true,
+  },
+  {
+    id: "spellbar", ch: "growth", title: "Casting with the Bound Ember",
+    tip: "Use the Bound Ember to swap your hotbar for your powers. Use it again to swap back.",
+    page: "§fUse the Bound Ember§r and your hotbar is put away safely: in its place come your powers, one icon each, with the Ember in the last slot.\n\n"
+      + "§fScroll§r to a power and §fuse it§r to cast. The icon greys over while it cools down, and the bar above shows your Resonance.\n\n"
+      + "§fUse the Ember again§r (or sneak and use any power) and your own hotbar comes back exactly as it was. "
+      + "If you die with your powers out, your things fall where you fell like anything else you carry. If you leave the world with them out, they come back when you return.\n\n"
+      + "Learn powers at the Tree of Oaths, in the Arcana branch.",
+    when: ["carry:siege:bound_ember", "use:siege:bound_ember"],
     hidden: true,
   },
   {
@@ -406,9 +435,34 @@ export const ENTRIES = [
     tip: "This calls something to where you stand when you use it. Be ready, and stand somewhere open.",
     page: "Each region has something old in it, and each has a token that calls it. Use the token somewhere open and the fight starts where you stand.\n\n"
       + "A boss gets half again as tough for each extra player in the fight, so it is fair alone and fair with friends. Watch for its warnings: every attack is shown before it lands.\n\n"
-      + "Everyone who fought gets the boss's own relic the first time it falls (materials after that), skill points, and a share of the chest it leaves. A boss you have beaten comes back in a different temper each time.",
+      + "Everyone who fought gets the boss's own relic the first time it falls (materials after that), skill points, and a share of the chest it leaves. A boss you have beaten comes back in a different temper each time, and a rank stronger (up to rank V): more health, harder hits, and from rank III two tempers at once. Calling it back costs diamonds as well as the key (2 at rank I, up to 6 at rank V), and every rematch leaves netherite scrap: 1 at ranks I and II, 2 at III and IV, 3 at V. There is no Nether here, so this is where netherite comes from.",
     when: ["carry:siege:stopped_clock_key", "carry:siege:pale_horn", "carry:siege:drowned_ring", "carry:siege:faceless_seal", "carry:siege:mire_effigy"],
     hidden: true,
+  },
+  {
+    id: "guild", ch: "coin", title: "The Guild Factor",
+    tip: "The Guild Factor posts three orders a day for goods from other regions, and pays in metal.",
+    page: "Every town has a §fGuild Factor§r. Click one for today's three orders: goods this region can't make for itself, from three other regions (pumpkins from the Vale, raw iron from the north, gold from the Emberwaste, slime from the fens and so on).\n\n"
+      + "Bring the goods and you are paid in §fmetal§r: iron, gold, and on big orders a diamond or two. It pays far better than trading metal up at the Moneyer, so carrying your region's goods to another town is the cheap way up the ladder. Each order can be filled once a day; new orders come at dawn.",
+    when: ["talk:tag:siege_job_factor", "event:guildOrderFilled"],
+  },
+  {
+    id: "ironworks", ch: "growth", title: "The Ironworks",
+    tip: "An Ironworks. Click it for its storeroom, its charcoal and its next stage.",
+    page: "Make an §fIronworks§r at the Siege Workshop and place it on your land: an §fOre Pit§r is dug behind it and its worker digs about 16 raw iron a day into the storeroom. Click the block to take it.\n\n"
+      + "Once you are a §fTown§r, build the §fBloomery§r (384 Regals): it smelts for you, about 40 iron ingots a day, burning one charcoal for every 4 ingots. Feed it from the block's menu; charcoal comes from burning logs, so a tree farm keeps it going. With no charcoal it only digs raw ore.\n\n"
+      + "Once you are a §fCity§r, with water within 12 blocks, build the §fTrip-Hammer Forge§r (1,280 Regals): a waterwheel and hammer, about 100 ingots a day.\n\n"
+      + "The storeroom holds three days of work, then the workers wait for you. A siege that goes badly lets raiders carry off part of it. Frosthelm and Gullcliff, with an iron Old Working next door, dig half again as fast.",
+    when: ["place:siege:ironworks", "carry:siege:ironworks", "click:siege:ironworks"],
+    needs: "siege:ironworks",
+  },
+  {
+    id: "workings", ch: "wild", title: "Old Workings",
+    tip: "An Old Working: dig the ore out of its walls. It grows back in a few days.",
+    page: "Five settlements have one of the old king's mines just outside their land, and it is their strength: §firon§r at Frosthelm and Gullcliff, §fgold§r at Redmesa and Dunehold, §fdiamond§r in the Wolfcairn Deeps. Follow the timbered stair down to the stone chamber and dig the ore out of its walls.\n\n"
+      + "The ore grows back: iron every day, gold every two days, diamond every three, as long as nobody is down there. Each week one Working runs rich, with more ore and more of the best kind; word of it goes round at dawn.\n\n"
+      + "The deeper ones draw §cclaim jumpers§r: a band comes down the stair while you dig. Beat them and they hand over what they took. The deeper the Working, the further down and the more often they come.",
+    when: ["event:workingEntered"],
   },
   {
     id: "seeps", ch: "wild", title: "Seeps",
@@ -432,7 +486,7 @@ export const ENTRIES = [
       + "§fThe egg:§r wild dragons build great nests of woven branches and bones out in the Emberwaste. Climb in, take an egg from the clutch and set it on a §fDragon Roost§r in your settlement. It hatches in two days.\n"
       + "§fRaising it:§r feed it raw meat or fish and spend time with it to build its bond. A fledgling can carry you on foot with a Dragon Saddle; a grown dragon flies.\n"
       + "§fHandling:§r an empty hand always pets it. Click a saddled dragon holding any item to climb on. Sneak + click with an empty hand for its sheet. Spend its training points at the Roost.\n\n"
-      + "Flights are short bursts. Ballistas and archers of settlements that aren't yours can shoot a dragon down, and a dragon that dies is gone for good.",
+      + "Flights are short bursts. Ballistas and archers of settlements that aren't yours can shoot a dragon down, and a dragon that dies is gone for good. On a siege night no dragon will fly from three until half past three in the morning: she lands and waits it out.",
     when: ["click:hc:dragon_nest", "carry:siege:dragon_egg", "carry:siege:dragon_roost"],
     hidden: true,
   },

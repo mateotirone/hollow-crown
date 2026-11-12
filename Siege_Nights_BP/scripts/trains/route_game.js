@@ -7,10 +7,12 @@ import { ActionFormData } from "@minecraft/server-ui";
 import { onTick, isReady, moduleStore, keepOf, keepCenter } from "../siege/api.js";
 import { charge, coins, funds } from "../economy/api.js";
 import { stationMenuExtras } from "../rails/index.js";
-import { isBuilder } from "../horses/menus.js";
-import { ROUTE, buyable, nearestStop, reachable, cannotBuy, priceOf, pieces } from "./routes.js";
+import { isBuilder, give } from "../horses/menus.js";
+import { callCarriage, hasUnlocked, unlock } from "./index.js";
+import { allSites } from "./station_sites.js";
+import { ROUTE, buyable, nearestStop, reachable, cannotBuy, priceOf, pieces, otherEnd } from "./routes.js";
 import { ROUTES } from "./routes_data.js";
-import { TRACK } from "./data.js";
+import { TRACK, TRAIN, CARS, TRAIN_STYLES } from "./data.js";
 
 // built: { [segmentId]: { by, at } }; laying: [{ seg, i }] (a stretch going down, next piece i);
 // missed: { [segmentId]: [piece index, ...] } (pieces whose ground wasn't loaded, tried again later)
@@ -125,6 +127,51 @@ stationMenuExtras.push({
   label: () => (ROUTES.segments.length ? "Extend the line\n§8buy track to the next stop" : undefined),
   action: (player, station, again) => buyMenu(player, station, again),
 });
+
+// ---------- the free carriage, and engines and coaches ----------
+
+// The planned stop a station stands on, and a laid stretch out of it (undefined until its first line is bought)
+const stopOf = (station) => nearestStop(ROUTES, station.x, station.z, 40);
+const laidOut = (stop) => stop && ROUTES.segments.find((s) => isBuilt(s.id) && (s.from === stop.id || s.to === stop.id));
+const carrying = (player, typeId) => {
+  const inv = player.getComponent("minecraft:inventory")?.container;
+  for (let i = 0; inv && i < inv.size; i++) if (inv.getItem(i)?.typeId === typeId) return true;
+  return false;
+};
+
+stationMenuExtras.push({
+  label: (player, station) => (laidOut(stopOf(station)) ? "Call the carriage\n§8free, slow, drives itself along the line" : undefined),
+  action: (player, station) => {
+    const stop = stopOf(station), seg = laidOut(stop);
+    if (!seg) return;
+    const site = allSites().find((s) => s.id === station.id);
+    const at = site?.origin ?? { x: stop.x, y: stop.y, z: stop.z };
+    const far = stopById(otherEnd(seg, stop.id)) ?? stop;
+    const yaw = (Math.atan2(-(far.x - at.x), far.z - at.z) * 180) / Math.PI;
+    const style = Math.max(0, TRAIN_STYLES.indexOf(site?.style ?? "vale"));
+    const train = callCarriage(world.getDimension(station.dim), at, yaw, style, site?.owner, player);
+    if (train) player.sendMessage(`§6The carriage is on the platform, facing ${far.name}. Climb in: hold forward to go, back to brake.`);
+  },
+});
+
+for (const kind of ["engine", "coach"]) {
+  const name = kind === "engine" ? "an engine" : "a coach";
+  stationMenuExtras.push({
+    label: (player) => (hasUnlocked(player.id, kind) ? `Take ${name}\n§8free: you've owned one before` : `Buy ${name}\n§8${coins(TRAIN.price[kind])}`),
+    action: (player) => {
+      const item = CARS[kind].item;
+      if (hasUnlocked(player.id, kind)) {
+        if (carrying(player, item)) return player.sendMessage(`§7You're already carrying ${name}.`);
+        give(player, item);
+        return player.sendMessage(`§6Here's ${name}. Place it on Track${kind === "coach" ? " right behind an engine" : ""}.`);
+      }
+      if (!charge(player, TRAIN.price[kind], "railway")) return player.sendMessage(`§7${name[0].toUpperCase()}${name.slice(1)} costs ${coins(TRAIN.price[kind])}. You can also build one at the Siege Workshop.`);
+      give(player, item);
+      unlock(player.id, kind);
+      player.sendMessage(`§6You bought ${name}. If you ever lose it, any station gives you a new one free.`);
+    },
+  });
+}
 
 // /scriptevent siege:trains routes: what's planned and what's laid. /scriptevent siege:trains lay <stretch>: a
 // builder lays a stretch for free (testing).
