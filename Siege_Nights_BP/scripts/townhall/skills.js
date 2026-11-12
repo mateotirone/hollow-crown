@@ -9,6 +9,8 @@
 //
 // Branches: keep + wayfarer for everyone, blade for Knights only, arcana for the Marked only.
 // cost = skill points per rank. needs = another skill id that must have at least 1 rank first.
+// coins = it can also be bought for this many Regals instead of points (hero.bought keeps those ranks, and
+// unbinding your oaths neither refunds them as points nor takes them away).
 
 export const RINGS = [
   null,
@@ -38,6 +40,7 @@ export const SKILLS = [
   S("keep_hearth", "keep", 1, "Hearthwarden", 3, 1, ["Regenerate health in your own land when out of combat. Every 6s / 4s / 3s."]),
   S("keep_stonewright", "keep", 1, "Stonewright", 2, 1, ["Haste I / II while standing in your own land."]),
   S("keep_muster", "keep", 1, "Muster Roll", 3, 1, ["+1 guard slot per rank."]),
+  S("keep_messenger", "keep", 1, "Messenger", 1, 1, ["When your settlement is attacked while you are away, a messenger rides out and finds you at once: who is attacking, and which way home.", "Without one you only hear what happened when you get back. Swear it for a skill point, or hire one here for Regals."], { coins: 100 }),
   S("keep_wards", "keep", 2, "Masonry Wards", 3, 2, ["During a siege your keep mends itself: 3 / 6 / 9 health every 2 seconds."], { needs: "keep_hearth" }),
   S("keep_watchfire", "keep", 2, "Watchfire", 1, 2, ["When a siege begins you learn which sides of your land they will hit, and raiders inside your land are marked with a rising flare for the first 20 seconds of every wave."]),
   S("keep_spoils", "keep", 2, "Spoils of War", 2, 2, ["Holding your keep pays 25% / 50% more coin."]),
@@ -243,6 +246,26 @@ export function blockedReason(skill, hero, hallLevel) {
   if (POWER_ORIGINS.gated[skill.id] && !have && !hero.origins?.[skill.id]) return POWER_ORIGINS.gated[skill.id]; // its origin must be found in the world first
   if (hero.points < skill.cost) return `Needs ${skill.cost} point${skill.cost === 1 ? "" : "s"}`;
   return undefined;
+}
+
+// Can this skill be bought for Regals right now? Same gates as points, without the point cost.
+export function coinBlocked(skill, hero, hallLevel) {
+  if (!skill.coins) return "Not for sale";
+  return blockedReason(skill, { ...hero, points: Infinity }, hallLevel);
+}
+
+// Points that unbinding gives back: everything sworn, less the ranks bought with Regals
+export function refundable(hero) {
+  let total = spentIn(hero.skills);
+  for (const [id, rank] of Object.entries(hero.bought ?? {})) if (SKILL[id]) total -= SKILL[id].cost * Math.min(rank, hero.skills[id] ?? 0);
+  return Math.max(0, total);
+}
+
+// The skills that stay after unbinding: the ones bought with Regals
+export function keptOnUnbind(hero) {
+  const kept = {};
+  for (const [id, rank] of Object.entries(hero.bought ?? {})) if (hero.skills[id]) kept[id] = Math.min(rank, hero.skills[id]);
+  return kept;
 }
 
 export const HALL_NAMES = ["no hall", "Longhouse", "Stone Hall", "Keep", "Fortress", "Sovereign's Throne"];

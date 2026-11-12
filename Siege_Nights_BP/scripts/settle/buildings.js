@@ -230,6 +230,36 @@ function library(p) {
   hang(p, 0, H, 3); hang(p, 0, H, 6);
 }
 
+// The plot houses and work buildings drawn on the building skill (map/structures/settle_skill.py). These plain
+// versions set their price (every region has its own drawn design).
+function plainBlock(p, { half, depth, H, floors = 1, door: wide = false }) {
+  const x0 = -half, x1 = half, z0 = 1, z1 = depth;
+  floor(p, x0, x1, z0, z1);
+  walls(p, x0, x1, z0, z1, 1, H * floors, (y) => (y <= 2 ? "wallLow" : "wallUpper"));
+  hollow(p, x0, x1, z0, z1, 1, H * floors);
+  for (let f = 1; f < floors; f++) p.fill(x0 + 1, H * f, z0 + 1, x1 - 1, H * f, z1 - 1, "floor");
+  if (wide) p.fill(-1, 1, z0, 1, 2, z0, "air"); else door(p, 0, z0);
+  for (let f = 0; f < floors; f++) for (let z = 3; z < z1; z += 3) { p.set(x0, H * f + 2, z, "window"); p.set(x1, H * f + 2, z, "window"); }
+  roof(p, x0, x1, z0, z1, H * floors + 1);
+  for (let f = 0; f < floors; f++) hang(p, 0, H * (f + 1) - 1, Math.ceil(depth / 2));
+}
+const house = (p) => plainBlock(p, { half: 4, depth: 11, H: 4 });
+const townhouse = (p) => plainBlock(p, { half: 4, depth: 9, H: 6 });
+function farmhouse(p) {
+  plainBlock(p, { half: 4, depth: 9, H: 4 });
+  p.fill(-3, 0, 10, 3, 0, 11, "path");
+  for (const x of [-3, 3]) p.fill(x, 1, 11, x, 3, 11, "pillar", { axis: "y" });
+  p.fill(-3, 4, 10, 3, 4, 11, "roofSlab");
+  p.set(-2, 1, 11, "hay"); p.set(-1, 1, 11, "hay"); p.set(1, 1, 11, "composter"); p.set(2, 1, 11, "barrel");
+}
+const mint = (p) => plainBlock(p, { half: 4, depth: 9, H: 5, door: true });
+function inn(p) {
+  plainBlock(p, { half: 5, depth: 9, H: 4 });
+  p.fill(-4, 1, 6, 0, 1, 6, "table", { half: "top" }); // the bar
+  for (const [x, z] of [[-2, 3], [2, 4]]) { p.set(x, 1, z, "table", { half: "top" }); p.set(x - 1, 1, z, "seat", stair("+x")); p.set(x + 1, 1, z, "seat", stair("-x")); }
+  p.set(-2, 1, 8, "barrel"); p.set(2, 1, 8, "barrel");
+}
+
 export const BUILDINGS = [
   { id: "cottage", name: "Cottage", blurb: "A small house with a hearth corner, a chest and a workbench.", draw: cottage },
   { id: "smithy", name: "Smithy", blurb: "Stone workshop with a forge porch: anvil, grindstone, furnaces.", draw: smithy },
@@ -240,6 +270,16 @@ export const BUILDINGS = [
   { id: "well", name: "Well", blurb: "A roofed well for the middle of the settlement.", draw: well },
   { id: "library", name: "Library", blurb: "Two storeys of books, a reading table and eight Archive Shelves for the town's own lore.", draw: library, faces: { portraitYaw: -1, paintingYaw: 1 } },
   { id: "garden", name: "Kitchen Garden", blurb: "Fenced beds with a water channel, ready to plant.", draw: garden },
+  { id: "house", name: "House", blurb: "One storey and a tall attic under a steep gable, with a chimney. About four beds.", draw: house },
+  { id: "townhouse", name: "Townhouse", blurb: "A taller house: stone below, a jettied floor over the road, a high attic. About six beds.", draw: townhouse },
+];
+// Drawn and exported, but not offered yet: with them in play the charters need more plots than some layouts open
+// in time (the Farmhouse at Town in lanternbog Market Street, the Mint at Town in dunehold Crossroads, the Inn at
+// City in dunehold Twin Rings). They join BUILDINGS once the layouts or the charters make room.
+export const WAITING = [
+  { id: "farmhouse", name: "Farmhouse", blurb: "A long low farmhouse with an open lean-to behind for hay and the woodpile.", draw: farmhouse },
+  { id: "inn", name: "Inn", blurb: "A tap room with the bar, tables and a hearth, and bedrooms above for travellers.", draw: inn },
+  { id: "mint", name: "Mint", blurb: "A strong stone house with barred windows, where the town strikes its Regals.", draw: mint },
 ];
 export const BUILDING = Object.fromEntries(BUILDINGS.map((b) => [b.id, b]));
 
@@ -253,7 +293,7 @@ export function drawBuilding(id, styleId) {
     if (d) {
       // the region's own design (map/structures/settle_buildings.py); its blocks become roles on this style
       const prefix = `bd:${style.id}:${id}`;
-      d.palette.forEach(([bid], i) => { style.roles[`${prefix}:${i}`] = [bid]; });
+      d.palette.forEach(([bid], i) => { style.roles[`${prefix}:${i}`] = spellings(bid); });
       drawData(p, d, prefix);
       // priced as the plain design it replaces, so the new look doesn't change what a building costs
       p.priceAs = new Plan(style);
@@ -265,8 +305,14 @@ export function drawBuilding(id, styleId) {
 }
 
 // Lay a region's designed build (one entry of a *_data.js table) into a Plan; its blocks become roles on the plan's style
+// Wool and concrete stairs and slabs came in a 2026 drop; on an older game they fall back to the full block
+export function spellings(id) {
+  const m = /^(minecraft:\w+_(?:wool|concrete))_(?:stairs|slab|double_slab)$/.exec(id);
+  return m ? [id, m[1]] : [id];
+}
+
 export function drawDesigned(p, d, prefix) {
-  d.palette.forEach(([bid], i) => { p.style.roles[`${prefix}:${i}`] = [bid]; });
+  d.palette.forEach(([bid], i) => { p.style.roles[`${prefix}:${i}`] = spellings(bid); });
   drawData(p, d, prefix);
   return p;
 }

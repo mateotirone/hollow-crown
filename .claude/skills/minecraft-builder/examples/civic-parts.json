@@ -1,0 +1,166 @@
+{
+ "name": "civic_parts",
+ "parts": [
+  {
+   "part": "house",
+   "name": "tower",
+   "style": "vale_stone",
+   "rect": [
+    0,
+    0,
+    4,
+    4
+   ],
+   "storeys": [
+    5,
+    5,
+    5
+   ],
+   "roof": {
+    "type": "hip",
+    "pitch": 1
+   },
+   "door": {
+    "side": "s"
+   },
+   "chimney": null
+  },
+  {
+   "part": "belfry",
+   "rect": [
+    0,
+    0,
+    4,
+    4
+   ],
+   "y": "top",
+   "h": 4,
+   "louvres": true,
+   "cap": "spire",
+   "roof": {
+    "block": "deepslate_tiles"
+   }
+  },
+  {
+   "part": "clock_face",
+   "rect": [
+    0,
+    0,
+    4,
+    4
+   ],
+   "side": "s",
+   "y": 12,
+   "time": "10:10"
+  },
+  {
+   "part": "house",
+   "name": "hall",
+   "style": "vale_stone",
+   "rect": [
+    10,
+    0,
+    26,
+    8
+   ],
+   "plinth": 1,
+   "storeys": [
+    5,
+    6
+   ],
+   "bay": 3,
+   "storey_style": [
+    {},
+    {
+     "floor": "spruce_planks"
+    }
+   ],
+   "door": {
+    "side": "n",
+    "kind": "grand"
+   },
+   "roof": {
+    "type": "gable",
+    "ridge": "x"
+   },
+   "arcade": {
+    "lanterns": true
+   },
+   "chimney": null
+  },
+  {
+   "part": "belfry",
+   "rect": [
+    17,
+    3,
+    19,
+    5
+   ],
+   "y": "roof",
+   "h": 3,
+   "cap": "hip",
+   "roof": {
+    "block": "waxed_oxidized_cut_copper"
+   }
+  },
+  {
+   "part": "house",
+   "name": "spire_test",
+   "style": "vale_stone",
+   "rect": [
+    -10,
+    0,
+    -4,
+    6
+   ],
+   "storeys": [
+    5,
+    5
+   ],
+   "roof": {
+    "type": "hip"
+   },
+   "chimney": null
+  },
+  {
+   "part": "spire",
+   "rect": [
+    -10,
+    0,
+    -4,
+    6
+   ],
+   "kind": "broach",
+   "rows": 3
+  },
+  {
+   "part": "house",
+   "name": "mill",
+   "style": "vale_timber",
+   "rect": [
+    0,
+    14,
+    8,
+    20
+   ],
+   "storeys": [
+    5
+   ],
+   "roof": {
+    "type": "gable",
+    "ridge": "x"
+   }
+  },
+  {
+   "part": "wheel",
+   "at": [
+    10,
+    3,
+    17
+   ],
+   "axis": "x",
+   "r": 3,
+   "width": 1
+  }
+ ]
+}

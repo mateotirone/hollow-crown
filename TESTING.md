@@ -654,9 +654,10 @@ Build the showcase (`/scriptevent siege:showcase`) in a flat Creative world, the
 
 Shortcuts: `/scriptevent siege:role_trial <rider|forgemaster|captain|witch> [step]` starts a trial or finishes one step; `siege:role_trial reset` forgets them. On the real map, the map builder marks the Span (`/scriptevent siege:role_mark span_start` and `span_end`) and the graves (`siege:role_mark grave`).
 10. Turns and stands: reach rank 4 and rank 5 in a regional role (spend points in its branch) and talk to the mentor each time: a new scene each. A Knight reaching Knight-Commander gets a box to name the Order.
-11. The Morvane fight with roles: `/scriptevent siege:bestiary_summon morvane`, then `/scriptevent siege:morvane_skip N` for N = 2 to 7. Alone with no role, a named student is announced at stages 2 to 6 (knights spawn at 3, the river buffs at 4, burns every 16 s at 5, slow falling at 6). With a top-rank role, your name is announced instead.
+11. The Morvane fight with roles: `/scriptevent siege:bestiary_summon morvane`, then `/scriptevent siege:morvane_skip N` for N = 2 to 7. Alone with no role, a named student is announced at stages 2 to 6 and fights beside you: Hrafn (man-at-arms) at 2, Dame Orla and Sir Benedict (knights) at 3, Jory Holt (crossbowman) and the river buffs at 4, Senna Vey on a dragon circling high and breathing fire on Morvane every 8 s at 5, slow falling at 6. Each leaves when the stage changes; Senna climbs away. With a top-rank role, your name is announced instead.
 12. Ask Kesh "Read me the roll": three names to start, Bram Tallow's after the first hatching in the world, and every dragon that dies after that. Fill a dragon's bond (`/scriptevent siege:dragons_grow`): two Wing points arrive.
 13. The 3:17 toll: `/scriptevent siege:reach_night counted`, then `/time set 20900`, fly a grown dragon. ✅ At 03:00 (21000) she glides down with a "won't fly" line and won't take off until 03:30 (`/time set 21500`). On a normal night she flies. As a Dragonlord (top Wing rank), fly into or take off in the window: ✅ "The Unflown Night" title, the toll, raiders within 256 blocks glow; she keeps flying, with no second title that night, and the same happens on the next siege night.
+14. Cadets at your wing: as the only Dragon Rider online, `/scriptevent siege:reach_night counted`, then fly. ✅ Senna Vey on Wrenna circles close beside you and breathes fire at raiders and monsters near you every few seconds; with 8+ Wing points (Wing-Sworn) Pim Ashgrove on Moss circles wider too. Land and they climb away within about 5 s. On a quiet night, or with a second Dragon Rider online, nobody comes. At 03:00 to 03:30 they leave like any dragon.
 ## The Hollow's middle stretch (lore/hollow.js, undertow/story.js)
 
 Mateo approved the beats 2026-11-11 (doc "The Hollow's middle stretch: story beats"). Words: `lore/data/hollow_story.js` and the Carter in `lore/data/dialogue.js`. Places, the Carter's position, the Court door: `undertow/story.js`.
@@ -696,6 +697,35 @@ Tell me about: marks too small to see, names hidden behind other marks, or the s
 4. ✅ It is finished in about 15 seconds and the Hall Cornerstone is gone. Just inside the front door, to one side of the aisle, stands the Town Board (a wide notice board with pinned papers, labelled when you are near). Clicking it opens the Town Hall menu. Check all five styles: `/scriptevent siege:townhall_build 3 frostmarch` and so on.
    - A hall built before this update gets its Town Board the next time the world loads or you open the Town Hall from the Keep menu.
 5. Town Hall menu → "Move the town hall" → "Move it". ✅ You get a Hall Cornerstone back, the Tree sleeps, and placing the stone elsewhere starts a new hall. Placing a second cornerstone while a hall stands is refused with a message.
+
+### The Messenger
+You need a settlement (Keep Banner) and a Longhouse or bigger. A second player helps for step 5.
+1. Click the Tree of Oaths → Keep. ✅ "Messenger" sits in the first ring with a sealed-letter icon.
+2. Open it with no skill points and some Regals (in survival). ✅ It offers "Pay 100 Regals"; paying takes the coins and the skill shows 1/1. With a skill point it also offers "Swear this oath". In creative it is free.
+3. Unbind your oaths. ✅ The Messenger stays, and the refund does not count it (if you paid in Regals).
+4. Walk well outside your land and run `/scriptevent siege:messenger_test player`. ✅ The title "Your base is under attack!", a horse gallop and bell, and a chat line from the messenger with which way home lies and how far. Try `raid`, `lord`, `drill`.
+5. Without the Messenger (`/scriptevent siege:townhall_reset` wipes it), stay away and have a friend hit one of your guards. ✅ You hear nothing. Walk back onto your land. ✅ "While you were away:" lists what happened, once.
+6. With the Messenger, have the friend hit your guard while you are away. ✅ The messenger finds you at once; more hits within a minute do not send more messengers.
+7. At home, `/scriptevent siege:messenger_test player`. ✅ A plain red warning line, no messenger.
+
+Tell me about: alerts that come too often or too rarely, and anything the messenger says that reads wrong.
+
+### Letters by messenger
+Needs two players.
+1. Type `/siege:messenger`. ✅ A form opens: pick the other player, write a line, send. You get "A messenger rides out..." with about how long it will take.
+2. ✅ Above your hotbar: "Your message is being delivered 1:29" counting down each second.
+3. ✅ At zero the other player gets "A messenger hands you a letter from <you>" with a gallop sound, and you get "Your letter has reached...". `/scriptevent siege:letters_fast` skips the wait.
+4. Send one to a player who has left. ✅ It waits, and they get it when they log back in.
+5. Keep menu → "Send a messenger". ✅ The same form.
+
+### The Crier
+1. `/scriptevent siege:news_test`. ✅ One sample of every [Crier] line, none naming anything hidden.
+2. Start a boss fight (Creative menu or the showcase). ✅ Everyone sees "[Crier] <boss> has woken near <place>. <you> stands against it."
+3. Walk out of a boss arena after hurting it and wait 30 seconds. ✅ "<boss> has thrown back everyone who came against it."
+4. Plant a new Keep Banner. ✅ "<you> has planted a Keep Banner near <place>."
+
+Tell me about: news that comes too often, news that's missing, and anything the Crier says that gives the story away.
+
 
 ## Townsfolk (scripts/townsfolk/)
 

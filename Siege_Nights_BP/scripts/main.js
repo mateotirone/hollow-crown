@@ -38,6 +38,7 @@ import "./sound/index.js";
 import "./minimap/index.js";
 import "./guide/index.js";
 import "./roletrials/index.js";
+import "./landmarks/index.js";
 import "./after/index.js";
 import "./opening/index.js";
 import "./unlocks/index.js";
@@ -47,10 +48,15 @@ import "./forestry/index.js";
 import "./workings/index.js";
 import "./ironworks/index.js";
 import "./vault/index.js";
+import "./warwrit/index.js";
+import "./army/index.js";
 import "./creative/index.js";
 import "./dispatch/index.js";
+import "./letters/index.js";
+import "./news/index.js";
 import "./trade/index.js";
 import "./townsfolk/index.js";
+import "./graves/index.js";
 
 // Start the shared loop last, once every file has registered its work
 import { startLoop } from "./core/loop.js";

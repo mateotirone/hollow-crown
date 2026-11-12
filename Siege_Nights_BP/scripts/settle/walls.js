@@ -15,6 +15,7 @@
 import { world, system, BlockPermutation } from "@minecraft/server";
 import { ModalFormData } from "@minecraft/server-ui";
 import { isReady, keepOf, tierOf, TIERS, onTick, moduleStore, on, emit, addFilter, addLandClaim, stoneId, STONE_KINDS, title, CASTLE_BLOCKS, WALL_HP, PORTCULLISES, GATES, regionalId, getState, isAlly, guardCount, setGate, openLeafAt } from "../siege/api.js";
+import { applyFilter } from "../core/events.js";
 import { STYLES } from "../townhall/styles.js";
 import { PLOT_PLAN } from "../plots/config.js";
 import { plotAt, mapMode } from "../plots/claims.js";
@@ -449,6 +450,10 @@ onTick("settle_gates", 10, () => {
   const players = world.getDimension(OVERWORLD).getPlayers();
   for (const [id, w] of Object.entries(walls())) {
     if (!(w.level > 0) || w.building || WALL_LEVELS[w.level]?.gate === "open" || id.startsWith("npc:")) continue;
+    if (applyFilter("gatesBarred", false, { owner: id })) { // a War Writ is out on them: no guard opens the gate
+      if (guardOpened.has(id)) { setWallGate(id, w, false); guardOpened.delete(id); }
+      continue;
+    }
     const g = gateSpot(w, w.gate, w.ground, w.radius);
     const opened = guardOpened.has(id);
     const friendNear = players.some((p) => friendOf(id, p.id) && nearGate(g, p.location, opened ? 6 : WALLS.gateGreet));
@@ -466,6 +471,14 @@ on("siegeStart", () => {
   guardOpened.clear();
   for (const [id, w] of Object.entries(walls())) if (w.level > 0 && WALL_LEVELS[w.level]?.gate !== "open") setWallGate(id, w, false);
 });
+
+// One settlement's gates slam shut (a War Writ declared on it, warwrit/index.js)
+export function barGates(owner) {
+  const w = walls()[owner];
+  if (!(w?.level > 0) || WALL_LEVELS[w.level]?.gate === "open") return;
+  guardOpened.delete(owner);
+  setWallGate(owner, w, false);
+}
 
 // ---------- what a wall changes ----------
 

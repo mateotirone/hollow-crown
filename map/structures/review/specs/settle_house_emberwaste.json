@@ -1,0 +1,50 @@
+{
+ "card": {
+  "title": "House",
+  "sub": "Emberwaste, two storeys and a roof terrace",
+  "region": "emberwaste",
+  "where": "Settlement plot (Medium 11 x 15)",
+  "kind": "House",
+  "blurb": "A home of about four beds: one storey on a plinth and a room under the roof, a chimney."
+ },
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "ember_sandstone",
+    "roof": "smooth_sandstone",
+    "box_signs": "ns"
+   },
+   "rect": [
+    -4,
+    -10,
+    4,
+    0
+   ],
+   "y": 0,
+   "plinth": 2,
+   "storeys": [
+    5,
+    5
+   ],
+   "door": {
+    "side": "s",
+    "kind": "house",
+    "steps": 1
+   },
+   "roof": {
+    "type": "flat",
+    "parapet": "slab",
+    "beams": true
+   },
+   "interior": {
+    "use": "home",
+    "attic": false
+   },
+   "dormers": [],
+   "chimney": false,
+   "vines": 0
+  }
+ ],
+ "name": "settle_house_emberwaste"
+}
