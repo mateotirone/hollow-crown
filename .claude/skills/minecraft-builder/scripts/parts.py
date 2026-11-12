@@ -258,7 +258,7 @@ def window(ctx, rect, side, t, floor, style, w=1, h=2, head_room=9, frame_kind="
         for k in ks: ctx.set(*at(k, 1, 1), S, "slab", trim, half="top")            # the shelf
         if h3(x, floor, z, seed + 9) < 0.34: ctx.set(*at(0, 2, 1), "details", raw="lantern")
         return
-    if frame_kind == "stone":   # dark oak panels either side (05: stone, dark oak, spruce); style "surround" overrides
+    if frame_kind == "stone" and style.get("surround", "dark_oak_planks"):   # dark oak panels either side (05: stone, dark oak, spruce); style "surround" overrides, None for none (tower slits)
         for k in (-(w // 2) - 1, w // 2 + 1):
             for dy in range(2, 2 + h): ctx.set(*at(k, dy, 1), S, "trapdoor", style.get("surround", "dark_oak_planks"), open=True, facing=side)
     # sill

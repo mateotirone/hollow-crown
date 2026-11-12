@@ -46,11 +46,26 @@ is plain and well made: white stone walls, aged copper roofs, gold only on the b
 
 | Building | Size | What it is |
 |---|---|---|
-| Spire of the Held Note | 21 x 21 base, 5 storeys, paved crenellated terrace; 15 x 15 shaft, 3 storeys; 15 x 15 open belfry (8 high) with a copper hip cap; finial at Y 318 | The landmark. The open belfry is the boss arena (deck about Y 298) |
-| Bell towers (7) | 7 x 7, 5 storeys, windows on storeys 2 and 4, open belfry with a bell, copper spire | One per Note. Each will hold a Gatehouse bell |
-| Gatehouse | 11 x 9 hall with an open arcade on the ground storey, two 5 x 5 towers with copper spires | Where the Needle stair arrives |
+| Spire of the Held Note | 21 x 21 base, 4 storeys, paved crenellated terrace; 15 x 15 shaft, 3 storeys of slits and lancets; 17 x 17 open belfry (6 high) on corbels; copper spire (rows 2) to the finial at Y 316 | The landmark. The open belfry is the boss arena (deck at Y 291) |
+| Bell towers (7) | 7 x 7 shaft of four 6-high stages, 9 x 9 open belfry on corbels, copper spire (rows 3), about 46 high | One per Note. Each will hold a Gatehouse bell |
+| Gatehouse | 11 x 9 hall with an open arcade on the ground storey, two 5 x 5 towers (three 6-high stages, 7 x 7 belfry on corbels, copper spire without a flare) | Where the Needle stair arrives |
 | Houses | 7 x 7 to 11 x 9, one or two storeys (5, 4), hip or gable roofs | Empty inside (house rule). Doors face the Spire |
 | The Last Inn | the first 9 x 9 or larger house inside the ring, two full storeys | The only interior, later |
+
+## Towers (build-instructions/towers, Mateo 2026-11-12)
+
+Every Everwake tower is built by the tower guide, with `tower()` in `spec.py`:
+
+- **Shaft:** plain white stone (`everwake_stone`, stone frame: diorite quoins and a course at every stage
+  line), stages 6 high, 3 to 5 times the width. Windows are bare slits (1x2) low and lancets (1x3) in the top
+  stage, stacked centre on centre, with no shutters, sill or surround (style `"surround": null, "sill": "none"`).
+- **Top stage:** an open belfry one block wider on every side, quartz-brick piers and a smooth-quartz deck,
+  carried on smooth-quartz corbels (upside-down stairs) at each corner and every 3rd block. A bell in every one.
+- **Roof:** a steep waxed copper spire, weathered at the eave to oxidized at the top, with a birch eave ring:
+  rows 3 on the bell towers, rows 2 on the Spire (the Y 319 limit caps it), no flare on the 5-wide gate towers
+  (a 9-wide eave on a 5-wide shaft reads as a mushroom). The spire top block finishes every one.
+- Outline changes four times: plinth, shaft, corbelled belfry, spire. The Spire stays the tallest; the bell
+  towers frame it.
 
 ## Roofs
 

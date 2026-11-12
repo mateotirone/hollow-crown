@@ -1,7 +1,7 @@
 """Everwake, the city in the sky, as minecraft-builder specs (regions/everwake.md).
 
 Local coordinates: the city's paving is y = -1, so houses stand at y = 0. In the world the paving sits at
-Y 254 and the top of the Spire of the Held Note reaches Y 319 (local 64). x east, z south.
+Y 254 and the top of the Spire of the Held Note reaches Y 316 (local 61; nothing may pass local 64, Y 319). x east, z south.
 
 specs() -> {"everwake_city": spec, "everwake_needle": spec}
 """
@@ -98,51 +98,76 @@ def road_cells():
     return {c for c in cells if inside(*c, 1) and not (SPIRE[0] <= c[0] <= SPIRE[2] and SPIRE[1] <= c[1] <= SPIRE[3])}
 
 
+OPP = {"n": "s", "s": "n", "e": "w", "w": "e"}
+SLITS = {"base": STYLE, "surround": None, "sill": "none"}     # tower windows: bare slits and lancets
+
+
+def tower(cx, cz, w, storeys, door, top_h=6, rows=3, plinth=2, y=0, wins=None, style=SLITS, finial="spire_block", eave=1):
+    """A tower by build-instructions/towers (Mateo, 2026-11-12): a plain pale shaft with quoins and a course at
+    every stage line (the house's stone frame does both), slits low and lancets high, then an open bell stage
+    one block wider on every side carried on corbels, then a steep copper spire with a flared birch eave and
+    the spire top block. Four changes of outline: plinth, shaft, belfry, spire. Returns (parts, place)."""
+    h = w // 2
+    r = [cx - h, cz - h, cx + h, cz + h]
+    top = y + plinth + sum(storeys) - 1                   # the shaft's flat top: the belfry deck
+    n = len(storeys)
+    if wins is None:                                      # slits 1x2 low, lancets 1x3 in the top storey, stacked centre on centre
+        wins = {sd: [{"at": 0, "storey": k, "w": 1, "h": 3 if k == n - 1 else 2} for k in range(1, n)] for sd in "nsew"}
+    parts = [{"part": "house", "style": style, "rect": r, "y": y, "plinth": plinth, "storeys": storeys,
+              "door": {"side": door} if door else False, "chimney": False, "shutters": 0,
+              "roof": {"type": "flat", "parapet": "none"}, "windows": wins},
+             {"part": "belfry", "rect": [cx - h - 1, cz - h - 1, cx + h + 1, cz + h + 1], "y": top, "h": top_h,
+              "pier": "quartz_bricks", "deck": "smooth_quartz", "trim": "birch_planks", "roof": SPIRE_ROOF,
+              "cap": "spire", "rows": rows, "overhang": eave, "cap_trim": "birch_planks", "finial": finial}]
+    place = []                                            # corbels under the overhang: each corner and every 3rd block
+    for t in sorted({-(h), 0, h} | set(range(-(h), h + 1, 3))):
+        for sd, (x, z) in {"n": (cx + t, cz - h - 1), "s": (cx + t, cz + h + 1), "w": (cx - h - 1, cz + t), "e": (cx + h + 1, cz + t)}.items():
+            place.append([x, top - 1, z, "smooth_quartz_stairs", {"facing": OPP[sd], "half": "top"}])
+    return parts, place
+
+
 def spire_parts():
-    """The Spire of the Held Note: a 21 x 21 base with a paved terrace, a 15 x 15 shaft, and on top the great
-    open belfry, 15 x 15, where the warden of the note is fought (deck at about Y 298, finial at Y 318)."""
+    """The Spire of the Held Note: a 21 x 21 base with a paved crenellated terrace, a 15 x 15 shaft, and on top
+    the great open belfry, 17 x 17 on corbels, where the warden of the note is fought (deck at Y 291), under a
+    steep copper spire (the build limit caps it at about 1.2 times the shaft's width) to the finial at Y 316."""
     x0, z0, x1, z1 = SPIRE
     paved = {"base": STYLE, "roof": {"block": "polished_diorite"}}
-    return [
-        {"part": "house", "style": paved, "rect": [x0, z0, x1, z1], "y": 0, "plinth": 1, "storeys": [5] * 5,
+    parts = [
+        {"part": "house", "style": paved, "rect": [x0, z0, x1, z1], "y": 0, "plinth": 1, "storeys": [5] * 4,
          "door": {"side": "s", "kind": "grand"}, "chimney": False, "bay": 5,
          "roof": {"type": "flat", "parapet": "crenel", "parapet_mat": "diorite"}},
-        {"part": "house", "style": paved, "rect": [-7, -7, 7, 7], "y": 27, "plinth": 1, "storeys": [5, 5, 5],
-         "door": {"side": "s"}, "chimney": False, "bay": 5, "roof": {"type": "flat", "parapet": "none"}},
-        {"part": "belfry", "rect": [-7, -7, 7, 7], "y": 44, "h": 8, "pier": "quartz_bricks", "trim": "birch_planks",
-         "roof": SPIRE_ROOF, "cap": "spire", "rows": 1, "finial": "spire_block"},
     ] + [{"part": "buttress", "rect": [x0, z0, x1, z1], "side": sd, "at": [-6, 6], "y": 0, "height": 14, "depth": 2,
           "material": "smooth_quartz"} for sd in "nsew"]
+    wins = {sd: [{"at": a, "storey": k, "w": 1, "h": 3} for a in (-4, 0, 4) for k in (1, 2)] for sd in "nsew"}
+    p2, place = tower(0, 0, 15, [5, 5, 5], "s", top_h=6, rows=2, plinth=1, y=21, wins=wins,
+                      style=dict(SLITS, roof={"block": "polished_diorite"}))
+    p2[0]["bay"] = 5
+    return parts + p2, place
 
 
 def tower_parts():
-    parts = []
+    """The seven bell towers: 7 x 7 shafts of four 6-high stages (3.4 times the width), a 9 x 9 bell stage on
+    corbels, a copper spire (rows 3, 13 high over the eave). Doors face the Spire."""
+    parts, place = [], []
     for tx, tz in towers():
-        r = [tx - 3, tz - 3, tx + 3, tz + 3]
         door = "n" if tz > 8 else "s" if tz < -8 else ("w" if tx > 0 else "e")
-        parts += [
-            {"part": "house", "style": STYLE, "rect": r, "y": 0, "plinth": 1, "storeys": [5] * 5,
-             "door": {"side": door}, "chimney": False, "roof": {"type": "hip", "overhang": 0},
-             "windows": {sd: [{"at": 0, "storey": k, "w": 1, "h": 2} for k in (1, 3) if not (sd == door and k == 0)] for sd in "nsew"}},
-            {"part": "belfry", "rect": r, "y": "top", "h": 4, "pier": "quartz_bricks", "trim": "birch_planks",
-             "roof": SPIRE_ROOF, "cap": "spire", "rows": 2, "finial": "spire_block"},
-        ]
-    return parts
+        p, pl = tower(tx, tz, 7, [6, 6, 6, 6], door)
+        parts += p; place += pl
+    return parts, place
 
 
 def gate_parts():
+    """The gatehouse: an 11 x 9 hall open in an arcade on the ground storey, between two 5 x 5 towers of three
+    6-high stages with 7 x 7 bell stages on corbels and copper spires, a full stage clear of the hall's ridge."""
     z0, z1 = GATE_Z
-    return [
-        {"part": "house", "style": STYLE, "rect": [-5, z0, 5, z1], "y": 0, "plinth": 1, "storeys": [5, 5],
-         "door": {"side": "s", "kind": "grand"}, "chimney": False, "arcade": {"sides": "ew", "storey": 0},
-         "roof": {"type": "hip"}},
-        {"part": "house", "style": STYLE, "rect": [-10, z0 + 1, -6, z1 - 1], "y": 0, "plinth": 1, "storeys": [5, 5, 5, 5],
-         "door": False, "chimney": False, "roof": {"type": "hip", "overhang": 0}},
-        {"part": "spire", "rect": [-10, z0 + 1, -6, z1 - 1], "rows": 3, "roof": SPIRE_ROOF, "trim": "birch_planks", "finial": "spire_block"},
-        {"part": "house", "style": STYLE, "rect": [6, z0 + 1, 10, z1 - 1], "y": 0, "plinth": 1, "storeys": [5, 5, 5, 5],
-         "door": False, "chimney": False, "roof": {"type": "hip", "overhang": 0}},
-        {"part": "spire", "rect": [6, z0 + 1, 10, z1 - 1], "rows": 3, "roof": SPIRE_ROOF, "trim": "birch_planks", "finial": "spire_block"},
-    ]
+    parts = [{"part": "house", "style": STYLE, "rect": [-5, z0, 5, z1], "y": 0, "plinth": 1, "storeys": [5, 5],
+              "door": {"side": "s", "kind": "grand"}, "chimney": False, "arcade": {"sides": "ew", "storey": 0},
+              "roof": {"type": "hip"}}]
+    place = []
+    for cx in (-8, 8):
+        p, pl = tower(cx, (z0 + z1) // 2, 5, [6, 6, 6], None, top_h=5, eave=0)   # no flare: a 5-wide shaft under a 9-wide eave reads as a mushroom
+        parts += p; place += pl
+    return parts, place
 
 
 def house_parts(rng, roads):
@@ -222,13 +247,13 @@ def city_spec(rng):
     roads = road_cells()
     place = [[x, -1, z, "polished_andesite"] for (x, z) in sorted(roads)]
     place += stair_from_needle()
-    for tx, tz in towers():                  # a lantern post at each tower's door step
-        pass
+    sp, spl = spire_parts(); tp, tpl = tower_parts(); gp, gpl = gate_parts()
+    place += spl + tpl + gpl
     return {
         "name": "everwake_city", "edition": "bedrock",
         "materials": {"plaza": PLAZA, "parapet": "smooth_quartz", "cloud": CLOUD, "rock": ROCK},
         "shapes": underside_shapes(rng) + platform_shapes(),
-        "parts": spire_parts() + tower_parts() + gate_parts() + house_parts(rng, roads),
+        "parts": sp + tp + gp + house_parts(rng, roads),
         "place": place,
     }
 
