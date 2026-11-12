@@ -831,7 +831,8 @@ def works_columns(blocks):
             n, p = bycol[(x, z)][y]
             if n == "air": i = 0
             else:
-                bn, stt = emit.bedrock_state(n, p)
+                if ":" in n and not n.startswith("minecraft:"): bn, stt = n, {}   # CUSTOM blocks (siege:...) go in as raw ids
+                else: bn, stt = emit.bedrock_state(n, p)
                 key = json.dumps([bn, stt], sort_keys=True)
                 if key not in index:
                     index[key] = len(pal)

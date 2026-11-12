@@ -108,7 +108,17 @@ def main():
     a = ap.parse_args()
     names = [n for n in CASES if not a.only or n in a.only.split(",")]
     info = [build_case(n, CASES[n], a.out) for n in names]
+    os.makedirs(a.out, exist_ok=True)
     json.dump(info, open(os.path.join(a.out, "gallery.json"), "w"), indent=1)
+    # the Hollow's own bridges, where its roads and the story path cross rivers and valleys (tools/hollow_bridges.py)
+    if not a.only or "hollow" in a.only:
+        try:
+            dump = os.path.join(a.out, "hollow-crossings.json")
+            subprocess.run(["node", os.path.join(ROOT, "tools", "hollow_bridges_dump.mjs"), dump], check=True, stdout=subprocess.DEVNULL)
+            sys.path.insert(0, os.path.join(ROOT, "tools")); import hollow_bridges as HB
+            *_, scene, sea = HB.build(dump); HB.write_scene(a.out, scene, sea)
+            names += [f"hollow_bridge_{i}" for i in range(len(scene))]
+        except Exception as e: print("Hollow bridges skipped:", e)
     if a.textures and a.three:
         from concurrent.futures import ThreadPoolExecutor
         r = os.path.join(ROOT, "map", "structures", "render", "render.py")

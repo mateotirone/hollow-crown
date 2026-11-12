@@ -19,6 +19,7 @@ import { riverDistance, RIVER_HALF_WIDTH } from "./rivers.js";
 import { SITES, ROADS, siteAt, roadAt, roadLines, SITE_SKIRT, ROAD_HALF_WIDTH, ROAD_SHOULDER } from "./roads.js";
 import { SITE_DESIGNS, TOWER_DESIGNS } from "./sites_data.js";
 import { HOLLOW_TREES } from "./trees_data.js";
+import { HOLLOW_BRIDGES } from "./bridges_data.js";
 
 export { hash, fbm } from "./noise.js";
 
@@ -308,6 +309,28 @@ const landmarkNearRoad = (cx, cz, col) => {
   return false;
 };
 
+// ---- bridges -----------------------------------------------------------------------------------
+// Where a road or the story path crosses a light river, a lake or a valley, a real bridge from the one
+// bridge generator (minecraft-builder skill; tools/hollow_bridges.py writes bridges_data.js): black pointed
+// arches on piers with cutwaters, veinstone, a humped deck in cobbled deepslate, parapets and soul lanterns,
+// at whatever angle the road crosses. Its columns are listed as covered so the old flat deck is left out.
+let BRIDGED;
+export function bridged(x, z) {
+  if (!BRIDGED) {
+    BRIDGED = new Set();
+    for (const list of Object.values(HOLLOW_BRIDGES.covered)) for (let k = 0; k < list.length; k += 2) BRIDGED.add(list[k] * 4096 + list[k + 1]);
+  }
+  return BRIDGED.has(x * 4096 + z);
+}
+function planBridges(ops, cx, cz) {
+  const runs = HOLLOW_BRIDGES.chunks[`${cx},${cz}`];
+  if (!runs) return;
+  for (const [x, z, y0, y1, i] of runs) {
+    const [block, states] = HOLLOW_BRIDGES.palette[i];
+    ops.push(Object.keys(states).length ? { a: [x, y0, z], b: [x, y1, z], block, states } : { a: [x, y0, z], b: [x, y1, z], block });
+  }
+}
+
 // ---- the plan for one chunk ------------------------------------------------------------
 const PLANTS = { wood: 0.08, fen: 0.1, high: 0.02, waste: 0.012 };
 const SPIRES = { wood: 0.002, fen: 0.002, high: 0.012, waste: 0.004 };
@@ -315,7 +338,8 @@ const SPIRES = { wood: 0.002, fen: 0.002, high: 0.012, waste: 0.004 };
 export function planChunk(cx, cz) {
   const ops = planLand(cx, cz);
   const X0 = cx * 16, Z0 = cz * 16;
-  planCartRail(ops, X0, Z0);
+  planBridges(ops, cx, cz);
+  planCartRail(ops, X0, Z0); // after the bridges, so where the rail passes a bridge's end the rail wins
   // The sealed wall across the whole Hollow behind the Court (its gates open when the Court's boss dies).
   // Added last, so nothing in the chunk overwrites it.
   if (COURT.gateZ >= Z0 && COURT.gateZ <= Z0 + 15 && X0 + 15 >= -L.reach && X0 <= L.reach) {
@@ -407,6 +431,8 @@ function planLand(cx, cz) {
     }
     // Everything below the water line is under water: one level across the whole Hollow, so nothing spills.
     if (top < SEA) fill(x, top + 1, z, x, SEA, z, B.water);
+    // A real bridge stands here (planBridges): the land beneath stays as it is, under the bridge.
+    if (c.under !== undefined && bridged(x, z)) continue;
     // Where the story path crosses a river: a stone deck with the river running beneath.
     if (c.under !== undefined) {
       // The underside is an arch: thin over the water, thickening to solid stone at the banks,

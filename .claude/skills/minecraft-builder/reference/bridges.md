@@ -98,3 +98,8 @@ ids on full-block cells (`CUSTOM`).
 - Town generators: `towngen.Town.bridges()` (called from `path_blocks`) replaces the old flat deck.
 - Map (genworld road and trail crossings) and rail works: the map thread calls `bridge_blocks`.
 - Gallery: `map/structures/bridges_gallery.py OUT` (the asset viewer's "Bridges" section).
+- The Hollow: `node tools/hollow_bridges_dump.mjs DUMP && python3 tools/hollow_bridges.py DUMP` writes
+  `undertow/bridges_data.js`. Only columns over water, or 3+ above dry ground, are bridged. A carried stretch with
+  a rejected run of more than 4 cells (a road running along a river) keeps the terrain's own causeway.
+  `terrain.js` stamps the runs per chunk (`planBridges`, before the cart rail so the rail wins) and leaves out the
+  old deck, parapet and lanterns on `covered` columns. Rerun after changing the Hollow's roads, rivers or land.
