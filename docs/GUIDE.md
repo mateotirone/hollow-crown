@@ -41,6 +41,7 @@ This file is the audit behind `scripts/guide/` (the Settler's Almanac). It lists
 | Settlement wall levels and mending | Hall menu "Settlement wall" | Your settlement: The settlement wall |
 | Mason, Mason's Bench, Foundation Stones | Mason's own lines; Foundation Stone menu | Your settlement: The Mason and ready-made buildings |
 | Barracks, recruiting, placing guards, armour upgrades, Wanted, guard limits | One line when the Barracks is placed | Your settlement: Guards and the Barracks |
+| Guard posts: stationing guards on the wall and by buildings, the sky view, red/green posts | Tip the first time you click your guard or the Barracks | Your settlement: Guard posts |
 | Quartermaster | One line when the desk is placed | Your settlement: The Quartermaster |
 | Forester's Lodge (PR #94) | Lodge menu | Your settlement: The Forester's Lodge (`needs` until merged) |
 | Map trees can't be felled (PR #94) | **None** (the block just won't break) | Your settlement: The old trees (`needs` until merged) |

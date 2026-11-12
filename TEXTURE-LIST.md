@@ -32,6 +32,7 @@ The rules, palette and regional variants are in `art/STYLE-GUIDE.md`. Generators
 | Siege Workshop | `siege_workshop_side.png`, `siege_workshop_top.png` | **Final style, awaiting your review** |
 | Quartermaster's Desk | `siege_desk_side.png`, `siege_desk_top.png`, `siege_desk_bottom.png` | **Final style, awaiting your review** |
 | Breaching Charge | `siege_charge_side.png`, `siege_charge_top.png` | **Final style, awaiting your review** |
+| Vault blocks (Strongroom Doors ×5, Strongroom Stone, Relic Coffer, Vault Breakers ×3) | `textures/blocks/vault/`: `door_<tier>.png` + `trim_<tier>.png` for wood/iron/diamond/netherite/choirsteel, `stone.png`, `stone_plain.png`, `coffer.png`, `glow.png`, `frame_wood.png`, `cracks_1.png`, `cracks_2.png` (transparent overlays), `breaker_<tier>.png` + `bit_<tier>.png` for iron/diamond/netherite. Shapes in `models/blocks/vault.geo.json`. Made by `studio/build_vault.py` | Placeholder |
 
 ## Items (16×16, in `textures/items/`)
 
@@ -350,6 +351,14 @@ Still to model (no art at all yet): held 3D models for the Seneschal's Greatshie
 
 All models were rebuilt in detail on 2026-11-10 (weapons in the hand, cloaks, horns, shields), so every skin in this section changed size and layout; none had been hand-painted. Morvane wears the Hollow Crown itself (helper `hollow_crown()` in `studio/bestiary/roster.py`, same shape and colours as the wearable `siege_hollow_crown`: violet cracked stone, magenta veins, pale blue gems, amethyst shard, floating crystal), on its own bone so the fight can knock it off. He fights left-handed. Morvane (`oswin_the_last.png`) now has grey eyes, not glowing ones: the story tells players to watch for grey eyes and the right hand. The three reveal figures must keep one identical pose so the scene can swap them in a single shot. New item icon needing art: `textures/items/bestiary/gloamquill.png` (16×16, placeholder; a dark purple flight quill with a magenta vein).
 
+## Guard posts (by `tools/build_guardposts_art.py`, placeholders)
+
+| Asset | File(s) | Status |
+|---|---|---|
+| Post ring (tinted red/green in game) | `textures/particle/hc_post_ring.png` 16×16 | Placeholder |
+| Post numbers 0-9 | `textures/particle/hc_post_digits.png` 160×16 | Placeholder |
+| Menu icons: empty post, manned post, wall | `textures/ui/hc/post_empty.png`, `post_manned.png`, `post_wall.png` 16×16 | Placeholder |
+
 ## For threads adding new assets
 
 Add a row here with the file path, size, what it should look like, and whether it needs transparency. A flat placeholder PNG at the right path is fine. The textures thread paints the final art over it and keeps the file name, size and transparency, so your JSON keeps working. Once a row says "Final style", don't regenerate that PNG from a placeholder script.
@@ -357,7 +366,7 @@ Add a row here with the file path, size, what it should look like, and whether i
 | Singer (64×64 box-UV skin; narrow pale robe, head tipped back, mouth a dark hollow) | `textures/entity/siege/undertow/choir_singer.png`, model `models/entity/undertow/choir_singer.geo.json` | Placeholder (flat colour), model is a rough block-out |
 | Choir Ore (repainted 2026-11-10: big bright violet crystals on a calm dark base so it reads from a distance, glows faintly) | `textures/blocks/siege_choir_ore.png` | **Final style, awaiting your review** |
 | Raw Choir Ore (item, violet crystal lump) | `textures/items/siege_raw_choir_ore.png` | **Final style, awaiting your review** |
-| Choirsteel Ingot (item, pale violet metal bar) | `textures/items/siege_choirsteel_ingot.png` | **Final style, awaiting your review** |
+| Choirsteel Ingot (item, dark purple metal bar since 2026-11-12, `studio/art/darken_choirsteel.py`) | `textures/items/siege_choirsteel_ingot.png` | **Final style, awaiting your review** |
 | Raven (omen bird, perched with wings folded; black with a blue-grey sheen, heavy dark beak, grey eye; one in a flock could have a ring of grey round one eye) | `textures/entity/siege/bestiary/omen_raven.png` | **Final style, awaiting your review** (`studio/art/build_raven.py`) |
 | Pretender, blade body (armoured claimant, half a home-made crown, greatsword, a vein of the Hollow up the breastplate) | `textures/entity/siege/bestiary/pretender_blade.png` | **Final style, awaiting your review** (`studio/art/build_pretenders.py`) |
 | Pretender, seer body (hooded robe, shards hanging round the head, staff) | `textures/entity/siege/bestiary/pretender_seer.png` | **Final style, awaiting your review** (`studio/art/build_pretenders.py`) |
@@ -406,6 +415,7 @@ Still to do for dragons: proper modelled 3D shapes (these are block-outs), a wou
 |---|---|---|
 | Mason's Bench (16×16 side + top, opaque; heavy timber workbench, a dressed stone block under it, chisel hanging on the side; top shows a half-cut stone, mallet and iron square) | `textures/blocks/siege_mason_bench_side.png`, `siege_mason_bench_top.png` | Placeholder |
 | Foundation Stone (16×16 side + top, opaque; squared grey stone with a small house chalked on the side and a green marked-out square on top, so it reads as "a building goes here") | `textures/blocks/siege_foundation_stone_side.png`, `siege_foundation_stone_top.png` | Placeholder |
+| Ironworks (16×16 side, top, bottom, opaque; stone bricks with an iron band and a glowing furnace mouth on the side, an anvil from above on top, planks below). The Ore Pit, Bloomery and Trip-Hammer Forge buildings are vanilla blocks in the region's style. | `textures/blocks/settle/siege_ironworks_side.png`, `_top.png`, `_bottom.png` (by `studio/build_ironworks.py`, never overwrites) | Painted in house style, awaiting your review |
 
 No new entity art: the Mason and the Rival Lords use Bedrock's built-in NPC skins for now. If they should have their own look, that is a new 64×64 skin each (not started).
 
@@ -447,6 +457,8 @@ Written by `studio/build_economy.py` (never overwrites a PNG that exists).
 - `textures/items/siege_coin.png` (the Regal: iron-grey coin with the old king's crowned head): painted (`studio/art/build_coins.py`)
 - `textures/items/siege_gold_coin.png` (the Gold Regal, worth 64): painted
 - Job NPCs (Farmer, Woodcutter, Quarryman, Smith, Fisher, Hunter, Herbalist, Moneyer): painted skins `textures/entity/siege/npc/job_<name>.png`, worn by the `siege:job_npc` entity (wired 2026-11-10, not seen in game yet)
+
+| Guild Factor skin (64×64 villager shape: burgundy coat, gold trim, a ledger and quill) | `textures/entity/siege/npc/job_factor.png` (by `studio/art/build_job_npcs.py`) | Painted in house style, awaiting your review |
 
 ## Leader portraits (2026-11-10)
 Brief by the lore thread in `studio/art/PORTRAIT-BRIEF.md`; painted by `studio/art/build_portraits.py` (first pass, awaiting Mateo's review).
@@ -526,3 +538,10 @@ Every dyeable item (Castle Guard armour and the regional sets, 64 pieces) uses `
 | Well Crank, sides (old timber with iron bands) | `siege_well_crank_side.png` | Placeholder |
 | Well Crank, front with an empty keyhole in a brass plate | `siege_well_crank_keyhole.png` | Placeholder |
 | Well Crank, front with the key wound in, glowing | `siege_well_crank_wound.png` | Placeholder |
+
+## Sorcerer cast effects (2026-11-12, `tools/build_sorcerer_fx.py`)
+| Asset | File | Status |
+|---|---|---|
+| Arcana particle sheet (64×16, four white 16×16 sprites tinted in code: glow, spark, ring, shard) | `textures/particle/hc_arcana.png` | Drawn in code, untested in game |
+| Twelve cast particles `siege:arc_trail`, `arc_burst`, `arc_ward`, `arc_tear`, `arc_ring`, `arc_mark`, `arc_link`, `arc_snare`, `arc_peel`, `arc_rift`, `arc_smoulder`, `arc_halo` (Choirsteel purple, magenta, Crown blue) | `particles/arc_*.particle.json` | Written, untested in game |
+| Spell icons x8 for the magic hotbar | reuse `textures/ui/hc/skill/arc_<power>.png` | Reused from the skill tree |

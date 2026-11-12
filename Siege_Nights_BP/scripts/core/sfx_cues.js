@@ -53,6 +53,20 @@ const SIGNATURE = {
 const NAMED = {
   "boss.arrive": { what: "A boss steps out (when it has no sound of its own)", layers: [["mob.wither.spawn", 0.6, 0.5], [BELL, 0.4, 0.5, 8]] },
   "boss.warn": { what: "A boss is about to do something", drift: 0.06, layers: [["note.didgeridoo", 0.7, 0.9], [BELL, 1.2, 0.25, 1]] },
+  // the Sorcerer's powers (townhall/marked_fx.js): each one its own sound, the bell somewhere under it
+  "cast.bolt": { what: "Ember Bolt", drift: 0.06, layers: [["item.trident.throw", 0.8, 0.6], ["mob.blaze.shoot", 1.3, 0.35], [BELL, 1.8, 0.15, 1]] },
+  "cast.hit": { what: "Ember Bolt lands", drift: 0.08, layers: [["mob.blaze.hit", 0.7, 0.4], [BELL, 1.5, 0.12]] },
+  "cast.ward": { what: "Ward", drift: 0.04, layers: [["chime.amethyst_block", 0.7, 0.9], ["beacon.activate", 1.4, 0.35], [BELL, 1.2, 0.2, 3]] },
+  "cast.blink": { what: "Blink", drift: 0.06, layers: [["mob.endermen.portal", 1.2, 0.5], ["chime.amethyst_block", 1.6, 0.4], ["random.orb", 0.5, 0.15, 1]] },
+  "cast.echo": { what: "Echo Sight", drift: 0.03, layers: [["chime.amethyst_block", 0.5, 0.8], [BELL, 0.5, 0.35, 4], [BELL, 0.5, 0.12, 14]] },
+  "cast.bind": { what: "Bind", drift: 0.05, layers: [["block.chain.place", 0.6, 1.2], ["block.chain.place", 0.45, 0.8, 3], ["random.anvil_land", 1.8, 0.12, 4]] },
+  "cast.step": { what: "Halfstep", drift: 0.05, layers: [["portal.travel", 2, 0.12], ["mob.endermen.portal", 0.6, 0.3, 1], ["chime.amethyst_block", 0.6, 0.3, 2]] },
+  "cast.hollowstep": { what: "Veilstep", drift: 0.03, layers: [["portal.travel", 0.6, 0.2], ["mob.warden.heartbeat", 0.8, 0.8, 4], [BELL, 0.35, 0.5, 8]] },
+  "cast.choir": { what: "Choir's Call", drift: 0.02, layers: [[BELL, 0.4, 1], [BELL, 0.3, 0.6, 3], ["ambient.cave", 0.7, 0.3, 6]] },
+  "cast.crescendo": { what: "A Crescendo begins", drift: 0.02, layers: [[BELL, 1.6, 0.8], [BELL, 1.2, 0.5, 2], ["chime.amethyst_block", 1.0, 0.6, 4]] },
+  "cast.overwhelmed": { what: "The Choir is too loud", drift: 0.04, layers: [["mob.warden.sonic_boom", 0.7, 0.35], [BELL, 0.3, 0.5, 4]] },
+  "cast.open": { what: "The magic hotbar opens", drift: 0.06, layers: [["chime.amethyst_block", 1.2, 0.5], ["item.book.page_turn", 0.7, 0.4, 1]] },
+  "cast.close": { what: "The magic hotbar closes", drift: 0.06, layers: [["chime.amethyst_block", 0.8, 0.4], ["item.book.page_turn", 0.6, 0.4, 1]] },
   "horn.assault": { what: "Another assault is coming", layers: [["raid.horn", 0.85, 0.8], ["raid.horn", 0.64, 0.35, 5]] },
 };
 

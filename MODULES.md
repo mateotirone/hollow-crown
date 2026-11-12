@@ -126,6 +126,7 @@ import {
 |---|---|---|
 | `ready` | `{}` | once, on the first tick after the world and saved state are loaded |
 | `siegeStart` | `{ provokedBy }` | a siege night begins (after plans are made) |
+| `discordAlert` | `{ kind, text, ping?, hollow? }` | emit it to post a line to the group's Discord through the relay (docs/DISCORD.md); `hollow: true` holds it back until someone has entered the Hollow |
 | `siegeEnd` | `{ outcome, besieged }` | outcome is `"won"`, `"dawn"` or `"empty"` |
 | `siegeReward` | `{ player, emeralds, threat }` | (`emeralds` is the old unit: 8 coins each) a defender was just paid for holding their keep (after `addRewardHook`) |
 | `keepFounded` | `{ player, keep, moved }` | a Keep Banner founded (or moved) a settlement |
@@ -261,6 +262,16 @@ Add a line here when you publish one.
   instead of doing `day % 3`. It also added hooks to `siege/siege.js` that anyone may use: filters `siegeDue`, `assaultCount`, `assaultDelay`,
   `assaultShare`, `dawnEndsSiege`, `nextSiegeDay`, and events `assaultIncoming` / `assaultSpawned` `{ assault, total }`.
 
+- **guardposts** (`scripts/guardposts/index.js`): guards stationed at fixed posts on the wall and round buildings, picked from
+  a sky view (camera straight down, red/green numbered rings drawn as per-player particles `siege:post_ring` / `siege:post_digit`).
+  `sitesFor(owner)`, `openPosts(player, owner, guard?)`, `station(guard, owner, post)`, `unstation(guard, owner)`.
+  **A building that should be guarded (a storeroom, the Ironworks...) adds its posts** with
+  `addFilter("guardPostSites", (sites, { owner }) => [...sites, { id, name, box, front, floor }])` (or `posts: [{ key, label, x, z, from, out? }]`);
+  town slot buildings, the hall, the Barracks/armoury and the wall already have them. Events `guardStationed { owner, guard, post }`,
+  `guardOrders { player, guard }`; siege/ hooks it uses: filters `guardMenu` (plain click on a guard, the guard list) and
+  `barracksButtons`, event `guardRemoved { id, owner }`, `setPost` with `{ x, y, z, stand: true }` posts (STATION_LEASH).
+  Guard animations: `tools/build_guard_anims.py` (rewrites both guard client entities). Marker art: `tools/build_guardposts_art.py`.
+
 ## The minimap and titles
 
 `scripts/minimap/` draws a HUD minimap by sending each player hidden titles that start with `hcm:`
@@ -306,5 +317,6 @@ player and vanish a few seconds after everyone walks away; nothing is saved. Don
 `scripts/roletrials/` gives the four regional roles their mentors' trials (words in `lore/data/mentors.js`), sends each mentor's line on every rank-up, and runs the Knight's Stand the Wall and the Eleven. It hooks in through filters, so other features keep working without it:
 `addFilter("roleOffer", (allowed, { player, role }) => ...)` (town hall asks before offering a role; false holds it),
 `addFilter("dragonNestTake", (refusal, { player, block }) => ...)` (dragons: a returned string refuses the egg and is shown),
+`addFilter("dragonCanFly", (reason, { player, rec, entity, flying }) => ...)` (dragons: a returned string grounds her, on take-off or once a second in the air, and is shown),
 `addFilter("treeButtons", (list, { player }) => [...list, { label, icon, open(player, back) }])` (extra pages at the Tree of Oaths), and
 `emit("loreSetFlag", { player, flag })` (lore: set a story flag from another feature).

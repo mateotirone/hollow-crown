@@ -211,6 +211,9 @@ def entity_bp(m):
         for flag, comp in (("bow", "minecraft:is_charged"), ("guard", "minecraft:is_saddled"), ("drink", "minecraft:is_ignited")):
             groups[f"siege:{flag}"] = {comp: {}}
             events[f"siege:{flag}_on"] = {"add": {"component_groups": [f"siege:{flag}"]}}; events[f"siege:{flag}_off"] = {"remove": {"component_groups": [f"siege:{flag}"]}}
+        # The Hollow's NPC ruler fights as a champion when overthrown (undertow/regent.js); only that fighter turns its bar on.
+        groups["siege:regent_bar"] = {"minecraft:boss": {"name": "The Hollow Crown", "should_darken_sky": False, "hud_range": 48}}
+        events["siege:regent_bar_on"] = {"add": {"component_groups": ["siege:regent_bar"]}}
         c["minecraft:persistent"] = {}; c.pop("minecraft:despawn", None)
     if m.get("boss"):
         c["minecraft:boss"] = {"name": m["name"], "should_darken_sky": False, "hud_range": 48}  # "name" is the bar title; without it the bar says "Unknown"; c["minecraft:persistent"] = {}
