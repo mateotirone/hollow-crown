@@ -253,7 +253,7 @@ export function drawBuilding(id, styleId) {
     if (d) {
       // the region's own design (map/structures/settle_buildings.py); its blocks become roles on this style
       const prefix = `bd:${style.id}:${id}`;
-      d.palette.forEach(([bid], i) => { style.roles[`${prefix}:${i}`] = [bid]; });
+      d.palette.forEach(([bid], i) => { style.roles[`${prefix}:${i}`] = spellings(bid); });
       drawData(p, d, prefix);
       // priced as the plain design it replaces, so the new look doesn't change what a building costs
       p.priceAs = new Plan(style);
@@ -265,8 +265,14 @@ export function drawBuilding(id, styleId) {
 }
 
 // Lay a region's designed build (one entry of a *_data.js table) into a Plan; its blocks become roles on the plan's style
+// Wool and concrete stairs and slabs came in a 2026 drop; on an older game they fall back to the full block
+export function spellings(id) {
+  const m = /^(minecraft:\w+_(?:wool|concrete))_(?:stairs|slab|double_slab)$/.exec(id);
+  return m ? [id, m[1]] : [id];
+}
+
 export function drawDesigned(p, d, prefix) {
-  d.palette.forEach(([bid], i) => { p.style.roles[`${prefix}:${i}`] = [bid]; });
+  d.palette.forEach(([bid], i) => { p.style.roles[`${prefix}:${i}`] = spellings(bid); });
   drawData(p, d, prefix);
   return p;
 }

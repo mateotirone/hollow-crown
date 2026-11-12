@@ -108,6 +108,8 @@ def base_material(n):
     if n == "normal_stone": return "stone"
     if n == "smooth_stone": return "stone_slab_top"
     if n in MAT: return MAT[n]
+    if n.endswith("_wool"): return "wool_colored_" + n[:-5].replace("light_gray", "silver")      # wool and concrete stairs/slabs (2026 drop)
+    if n.endswith("_concrete"): return "concrete_" + n[:-9].replace("light_gray", "silver")
     w = wood_of(n)
     if w: return "planks_" + WOODS[w]
     return None

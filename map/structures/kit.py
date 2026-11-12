@@ -117,6 +117,33 @@ def texture_roofs(bp, seed=31):
     for c, n, props in swaps: cells[c] = (n, props)
     return bp
 
+def wool_awning(bp, xs, y, z_wall, out, colours, depth=2):
+    """A striped cloth awning off a wall (Mateo 2026-11-12: use the wool and concrete slabs and stairs for depth).
+    The first row is a wool stair with its tall back to the wall, then it falls half a block a row in wool slabs,
+    so it slopes. Stripes run across, alternating the two colours. out is the blueprint direction, "s" or "n"."""
+    dz = 1 if out == "s" else -1
+    back = "n" if out == "s" else "s"
+    for i, x in enumerate(xs):
+        c = colours[i % 2]
+        yy, half = y, None
+        for r in range(1, depth + 1):
+            z = z_wall + dz * r
+            if r == 1: bp.set(x, y, z, c + "_stairs", facing=back); continue
+            half = "top" if (r % 2 == 0) else "bottom"
+            if half == "top": yy -= 1
+            bp.set(x, yy, z, c + "_slab", half=half)
+    return bp
+
+def wool_tent(bp, x0, x1, z_mid, y, colours):
+    """A pitched striped stall roof along x: wool slab ridge, wool stairs either side, top slabs at the eaves."""
+    for i, x in enumerate(range(x0, x1 + 1)):
+        c = colours[i % 2]
+        bp.set(x, y + 1, z_mid, c + "_slab", half="bottom")
+        bp.set(x, y, z_mid, c)
+        bp.set(x, y, z_mid - 1, c + "_stairs", facing="s"); bp.set(x, y, z_mid + 1, c + "_stairs", facing="n")
+        bp.set(x, y - 1, z_mid - 2, c + "_slab", half="top"); bp.set(x, y - 1, z_mid + 2, c + "_slab", half="top")
+    return bp
+
 def ridge_cap(bp):
     """Mateo 2026-11-12: stairs back to back on the spine of the roof. A ridge cell has open sky above and a roof
     stair one down on each side whose tall back faces it. On a one-block ridge the cap is a row of stair pairs set
