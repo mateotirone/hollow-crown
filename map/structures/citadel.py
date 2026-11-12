@@ -51,6 +51,12 @@ STYLES = {
         street=[("stone_bricks", 40), ("cobblestone", 20), ("andesite", 16), ("cracked_stone_bricks", 10), ("tuff", 6), ("gravel", 8)],
         lane=[("grass_path", 50), ("gravel", 20), ("cobblestone", 15), ("coarse_dirt", 15)],
         court="polished_andesite", court2="stone_bricks", ground="grass_block", under="dirt",
+        soil=[("grass_block", 62), ("moss_block", 10), ("coarse_dirt", 10), ("podzol", 8), ("gravel", 5)],
+        flowers=["poppy", "cornflower", "oxeye_daisy", "allium", "azure_bluet", "red_tulip", "white_tulip", "lily_of_the_valley"],
+        bush=["azalea_leaves", "azalea_leaves_flowered", "oak_leaves"], hedge="azalea_leaves",
+        trees={"vale_apple": 3, "vale_hawthorn": 3, "vale_silver_birch": 2, "vale_yew": 2},
+        frame="stripped_spruce_log", infill="calcite", range_roof=["deepslate_tile_stairs", "deepslate_brick_stairs"],
+        range_floor="spruce_planks", door="spruce_door", crops=["carrots", "beetroot", "potatoes", "wheat"],
     ),
 }
 
@@ -417,7 +423,6 @@ class Citadel:
 
     def lay_plots(self):
         """One row of plots on each side of the bailey, packed a block apart, doors onto the ring street."""
-        self.taken = set()
         SIZES = {"S": (9, 13), "M": (11, 15), "L": (15, 15)}
         h = RING_W // 2
         front = RING + h + 2                                   # first plot row starts here (one block of kerb)
@@ -439,23 +444,181 @@ class Citadel:
                 if not placed: t += 1
         self.gardens()
 
+    # ---- dressing: trees, ground, planting ------------------------------------------------------------
+    TREE_DB = os.environ.get("CITADEL_TREES", "/mnt/project-files/trees/db")
+
+    def tree_stamp(self, species, size, variant):
+        key = (species, size, variant)
+        if not hasattr(self, "_trees"): self._trees = {}
+        if key not in self._trees:
+            path = os.path.join(self.TREE_DB, species, f"{species}_{size}_{variant}.stamp.json")
+            if not os.path.exists(path): self._trees[key] = None
+            else:
+                d = json.load(open(path)); o = d["origin"]; pal = d["palette"]
+                self._trees[key] = [(x + o[0], y + o[1], z + o[2], pal[k]["name"].replace("siege:old_", "").replace("minecraft:", ""), pal[k].get("states") or {})
+                                    for x, y, z, k in d["blocks"]]
+        return self._trees[key]
+
+    def plant_tree(self, x, z, seed, size_hint=None):
+        sp = self.S["trees"]; tot = sum(sp.values()); r = h3(x, 0, z, seed) * tot
+        for name, w in sp.items():
+            r -= w
+            if r < 0: break
+        size = size_hint or ("mature" if h3(x, 1, z, seed) < 0.6 else "young")
+        cells = self.tree_stamp(name, size, int(h3(x, 2, z, seed) * 4))
+        if not cells: return False
+        for dx, y, dz, n, st in cells:
+            if y <= 0: continue                                 # keep our own ground
+            c = (x + dx, y, z + dz)
+            if self.bp.cells.get(c, ("keep",))[0] != "keep": continue
+            self.bp.cells[c] = (n, {"raw": st} if st else {})
+        self.trees.append({"x": x, "z": z, "species": name, "size": size})
+        return True
+
+    def free(self, x, z):
+        """Inside the walls, nothing built, paved or planned here."""
+        if (x, z) in self.street or (x, z) in self.taken: return False
+        if self.bp.get(x, 0, z)[0] != "keep" or self.bp.get(x, 1, z)[0] != "keep": return False
+        return True
+
     def gardens(self):
-        """Ground no plot or street takes inside the walls becomes garden: lawn, flower beds and clipped
-        bushes, lanterns, so nothing inside the Citadel is bare."""
+        """Every bit of ground no plot or street takes becomes planted: mixed ground, trees from the tree
+        database, clipped bushes, flower beds and hedges along the plot backs, lanterns in the dark corners.
+        Nothing inside the Citadel is left as bare lawn."""
         S = self.S
-        FLOWERS = ["poppy", "cornflower", "oxeye_daisy", "allium", "azure_bluet", "red_tulip", "white_tulip"]
-        for x in range(-OUTER, OUTER + 1):
-            for z in range(-OUTER, OUTER + 1):
-                if d_outer(x, z) < WALL_T or (x, z) in self.street or (x, z) in self.taken: continue
-                if self.bp.get(x, 1, z)[0] != "keep" or self.bp.get(x, 0, z)[0] != "keep": continue
-                if any(math.hypot(x - t["x"], z - t["z"]) <= t["r"] + 0.5 for t in self.towers): continue
-                kx0, kz0, kx1, kz1 = self.keep_box
-                if kx0 - 1 <= x <= kx1 + 1 and kz0 - 1 <= z <= kz1 + 1: continue
-                if d_inner(x, z) >= 0 and d_inner(x, z) < WALL_T: continue
-                r = h3(x, 0, z, 41)
-                if x % 6 == 0 and z % 6 == 0: self.set(x, 1, z, "azalea_leaves_flowered" if r < 0.5 else "azalea_leaves")
-                elif (x + z) % 4 == 0 and r < 0.45: self.set(x, 1, z, FLOWERS[int(r * 100) % len(FLOWERS)])
-                elif r < 0.04: self.set(x, 1, z, "short_grass")
+        self.trees = []
+        cells = [(x, z) for x in range(-OUTER, OUTER + 1) for z in range(-OUTER, OUTER + 1)
+                 if d_outer(x, z) >= WALL_T and not (0 <= d_inner(x, z) < WALL_T)
+                 and not any(math.hypot(x - t["x"], z - t["z"]) <= t["r"] + 0.5 for t in self.towers)
+                 and self.free(x, z)]
+        free = set(cells)
+        kx0, kz0, kx1, kz1 = self.keep_box
+        # trees where there is room for a crown: three blocks clear of plots, streets, walls and towers
+        def roomy(x, z, r=3):
+            for dx in range(-r, r + 1):
+                for dz in range(-r, r + 1):
+                    if (x + dx, z + dz) not in free and not (abs(dx) + abs(dz) > r + 1): return False
+            return True
+        spots = sorted(cells, key=lambda c: h3(c[0], 5, c[1], 77))
+        placed = []
+        for x, z in spots:
+            if any(abs(x - px) < 7 and abs(z - pz) < 7 for px, pz in placed): continue
+            if not roomy(x, z): continue
+            if self.plant_tree(x, z, 19): placed.append((x, z))
+        for x, z in spots:                                     # smaller trees where only a little crown fits
+            if any(abs(x - px) < 5 and abs(z - pz) < 5 for px, pz in placed): continue
+            if not roomy(x, z, 2): continue
+            if self.plant_tree(x, z, 29, "young" if h3(x, 3, z, 5) < 0.5 else "sapling"): placed.append((x, z))
+        for x, z in cells:
+            if self.bp.get(x, 1, z)[0] != "keep": continue      # a trunk or low branch
+            self.set(x, 0, z, pick(S["soil"], x // 2, z // 2, 23))
+            r = h3(x, 0, z, 41)
+            # beside a plot or a wall: a hedge, a bush or a bed of flowers
+            near_plot = any((x + dx, z + dz) in self.taken for dx in (-1, 0, 1) for dz in (-1, 0, 1))
+            if near_plot:
+                if r < 0.55: self.set(x, 1, z, S["hedge"], raw={"persistent_bit": True})
+                elif r < 0.85: self.set(x, 1, z, S["flowers"][int(r * 997) % len(S["flowers"])])
+                else: self.set(x, 0, z, "grass_block"); self.set(x, 1, z, "short_grass")
+            elif r < 0.12: self.set(x, 1, z, S["bush"][int(r * 997) % len(S["bush"])], raw={"persistent_bit": True})
+            elif r < 0.38: self.set(x, 0, z, "grass_block"); self.set(x, 1, z, S["flowers"][int(r * 997) % len(S["flowers"])])
+            elif r < 0.62: self.set(x, 0, z, "grass_block"); self.set(x, 1, z, "short_grass")
+            elif r < 0.66: self.set(x, 0, z, "grass_block"); self.set(x, 1, z, "fern")
+        # lanterns on posts in the bigger open patches, so the corners are lit at night
+        for x, z in spots[::37]:
+            if self.bp.get(x, 1, z)[0] in ("keep", "short_grass", "fern") and roomy(x, z, 1): self.lamp(x, z)
+
+    # ---- the inner ward: ranges against the curtain, the garden round the keep -----------------------
+    def inner_ward(self):
+        """The inner ward is lived in: two-storey ranges built against the inside of the inner curtain
+        (stone below, timber above, a lean-to roof running up to the wall walk), a paved lane round the
+        keep, parterre gardens either side of the court and a kitchen garden behind the keep."""
+        S = self.S
+        face = INNER - WALL_T                                  # inner face of the inner curtain (x = +-30)
+        D = 6                                                  # range depth
+        kx, kz = KEEP
+        for sx in (-1, 1):
+            for z0, z1 in ((-25, -7), (7, 23)):
+                self.range_block(sx, face - D, face - 1, z0, z1)
+        # the lane round the keep, paved, with lanterns at the corners
+        H = KEEP_HALF
+        for x in range(kx - H - 5, kx + H + 6):
+            for z in range(kz - H - 5, kz + H + 10):
+                if abs(x - kx) <= H + 5 and (abs(x - kx) > H or z < kz - H) and z < kz + H + 10:
+                    if self.bp.get(x, 1, z)[0] == "keep" and self.bp.get(x, 0, z)[0] == "keep" and abs(x) < face - D:
+                        self.set(x, 0, z, pick(S["street"], x, z, 31)); self.street.add((x, z))
+        for x in (kx - H - 3, kx + H + 3):
+            for z in (kz - H - 3, kz + 2, kz + H + 8):
+                self.set(x, 0, z, S["stone"]); self.lamp(x, z) if self.bp.get(x, 1, z)[0] == "keep" else None
+        # the kitchen garden behind the keep: beds of crops in rows with paths between
+        for x in range(-17, 18):
+            for z in range(-face + 1, kz - H - 5):
+                if self.bp.get(x, 1, z)[0] != "keep": continue
+                if x % 4 == 0: self.set(x, 0, z, pick(S["lane"], x, z, 3)); continue
+                if x % 4 == 2 and z % 4 == 0: self.set(x, 0, z, "water"); continue
+                self.set(x, 0, z, "farmland"); self.set(x, 1, z, S["crops"][(x // 4) % len(S["crops"])])
+                self.taken.add((x, z))
+        # parterres either side of the court: box hedges round gravel beds, a fountain in the middle
+        cz0, cz1 = kz + H + 10, INNER - 12
+        for sx in (-1, 1):
+            xa, xb = sorted((sx * 15, sx * (face - D - 2)))
+            mx, mz = (xa + xb) // 2, (cz0 + cz1) // 2
+            for x in range(xa, xb + 1):
+                for z in range(cz0, cz1 + 1):
+                    if self.bp.get(x, 1, z)[0] != "keep" or self.bp.get(x, 0, z)[0] != "keep": continue
+                    edge = x in (xa, xb) or z in (cz0, cz1)
+                    cross = x == mx or z == mz
+                    if edge or (abs(x - mx) == 3 and abs(z - mz) <= 3) or (abs(z - mz) == 3 and abs(x - mx) <= 3):
+                        self.set(x, 0, z, "grass_block"); self.set(x, 1, z, S["hedge"], raw={"persistent_bit": True})
+                    elif cross: self.set(x, 0, z, "gravel")
+                    else:
+                        self.set(x, 0, z, "grass_block")
+                        if (x + z) % 2 == 0: self.set(x, 1, z, S["flowers"][(x * 7 + z * 3) % len(S["flowers"])])
+                    self.taken.add((x, z))
+            # the fountain: a basin of stone with water and a spout
+            for dx in range(-2, 3):
+                for dz in range(-2, 3):
+                    x, z = mx + dx, mz + dz
+                    if max(abs(dx), abs(dz)) == 2: self.set(x, 0, z, S["stone"]); self.set(x, 1, z, S["slab"])
+                    else: self.set(x, 0, z, "water"); self.set(x, 1, z, "air")
+            self.col(mx, mz, 0, 3, S["wallcap"]); self.set(mx, 4, mz, "water")
+
+    def range_block(self, sx, a0, a1, z0, z1):
+        """One range against the curtain on side sx: x from a0 to a1 measured outward (|x|), z0..z1."""
+        S = self.S
+        xs = [sx * a for a in range(a0, a1 + 1)]
+        inner_x = sx * a0                                      # the ward-facing wall
+        for x in xs:
+            for z in range(z0, z1 + 1):
+                edge = x == inner_x or z in (z0, z1)
+                self.found(x, z)
+                self.set(x, 0, z, S["plinth"])
+                if edge:
+                    post = z in (z0, z1) and x == inner_x or (x == inner_x and (z - z0) % 4 == 0)
+                    for y in range(1, 6): self.set(x, y, z, S["stone"] if post else S["smooth"])
+                    self.set(x, 1, z, S["plinth"])
+                    for y in range(6, 10): self.set(x, y, z, S["frame"] if post or y == 6 else S["infill"])
+                    self.set(x, 6, z, S["frame"], axis="z" if x == inner_x else "x")
+                else:
+                    self.col(x, z, 1, 9, "air"); self.set(x, 5, z, S["range_floor"])
+        # windows and doors on the ward face
+        for z in range(z0 + 2, z1 - 1, 4):
+            for y in (3, 8):
+                self.set(inner_x, y, z, S["pane"])
+            if (z - z0) % 8 == 2:
+                self.set(inner_x, 1, z, S["door"], facing="w" if sx > 0 else "e")
+                self.set(inner_x, 2, z, S["door"], facing="w" if sx > 0 else "e", upper=True)
+                self.set(inner_x, 3, z, "lantern" if False else S["pane"])
+        # the lean-to roof: from the ward face (low) up to the curtain (high)
+        span = a1 - a0 + 2
+        for k in range(span + 1):
+            a = a0 - 1 + k
+            y = 10 + k
+            for z in range(z0 - 1, z1 + 2):
+                roof = S["range_roof"][0 if h3(a, y, z, 9) < 0.65 else 1]
+                self.set(sx * a, y, z, roof, facing="e" if sx > 0 else "w")
+                for yy in range(10, y): 
+                    if a > a0 - 1 and (z in (z0, z1)): self.set(sx * a, yy, z, S["infill"])
+        self.ranges = getattr(self, "ranges", []) + [{"side": sx, "z0": z0, "z1": z1}]
 
     def farmland(self):
         """Outside the walls: fields in strips out to the edge of the plot, each strip its own crop,
@@ -507,6 +670,8 @@ class Citadel:
         self.gatehouse(INNER + 1, INNER - 11, 9, 29, 5.5, 35, INNER_WALK, "inner gatehouse", tower_back=5)
         self.keep()
         self.ground()
+        self.taken = set()
+        self.inner_ward()
         self.lay_plots()
         self.farmland()
         self.bp.finish()
