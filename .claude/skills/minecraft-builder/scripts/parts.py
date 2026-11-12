@@ -1422,8 +1422,20 @@ def clock_face(ctx, s):
         for v in range(-r, r + 1):
             if n >= 5 and abs(u) == r and abs(v) == r: continue      # round the big face's corners
             ctx.set(*P(u, v), "details", raw=hand if (u, v) in hands else face)
+    if s.get("marks", n >= 5):          # hour marks at 12, 3, 6 and 9 just inside the rim (towers/README.md, the clock)
+        mk = s.get("mark", hand)
+        for (u, v) in ((0, r), (r, 0), (0, -r), (-r, 0)):
+            if (u, v) not in hands: ctx.set(*P(u, v), "details", raw=mk)
     fr = s.get("frame")
-    if fr:
+    if fr == "stairs":                  # a raised frame one out: stairs along top and bottom, trapdoors up the sides
+        wood = s.get("frame_wood", "dark_oak")
+        for u in range(-r - 1, r + 2):
+            for v, half in ((r + 1, "top"), (-r - 1, "bottom")):
+                c = P(u, v); ctx.set(c[0] + ox, c[1], c[2] + oz, "details", raw=f"{wood}_stairs", facing=OPP[sd], half=half)
+        for v in range(-r, r + 1):
+            for u in (-r - 1, r + 1):
+                c = P(u, v); ctx.set(c[0] + ox, c[1], c[2] + oz, "details", raw=f"{wood}_trapdoor", open=True, facing=sd)
+    elif fr:
         for u in range(-r - 1, r + 2):
             for v in range(-r - 1, r + 2):
                 if max(abs(u), abs(v)) == r + 1: ctx.set(*P(u, v), "details", raw=fr)
