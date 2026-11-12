@@ -87,6 +87,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - Vanilla hostile mobs (zombies, skeletons, creepers, spiders, endermen, witches, slimes, pillagers, drowned, husks, strays, bogged) no longer spawn on their own: only the game's own creatures do. Mobs no longer break blocks and phantoms are off, set once per world when the first player spawns (an admin can turn them back on).
 
 ### Fixed
+- Track now lays properly when you buy a stretch. It used to cut a straight-sided trench with dirt walls, slice trees in half (leaving leaves floating), stop dead at paths and roads, and at Millbrook lay a second line's track on top of the first. Now the bed is graded: level beside the ballast, then banks that rise or fall one block for every two out, open to the sky. Trees on the line come down whole and their root holes are filled, paths and roads become level crossings, buildings are left alone, and lines that share a platform share one height.
 - Builds no longer have the map's trees growing through them: boss sites and story places clear every tree from their ground and the air above before they build, and the map keeps trees off towns and bridges, so no trunks stand in courtyards and no leaves float over roofs.
 - The whole game script failed to load in 1.2.1095 (one railway file asked the game for blocks before the world was ready), so nothing but the map worked. Fixed, and the offline check now fails on that mistake.
 - The Rift no longer breaks the first time its veil turns a player back (a missing import in the veil code).
