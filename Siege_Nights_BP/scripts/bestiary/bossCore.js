@@ -18,7 +18,7 @@
 // Fights never edit blocks (except the vault chest), so they work in any arena the map gives them.
 
 import { world, system, GameMode } from "@minecraft/server";
-import { onTick, moduleStore, addTests, assert, assertEqual, note } from "../siege/api.js";
+import { onTick, moduleStore, addTests, assert, assertEqual, note, emit } from "../siege/api.js";
 import { chooseAttack, pickTemper, temperById, TEMPERS } from "./variety.js";
 import { MOBS } from "./data.js";
 import { activeDimensions, alive, announce, effect, flat, give, heal, healthOf, hurt, particle, ring, sound, makeItem, playerList, addToPlayerList, setHurtScale } from "./util.js";
@@ -120,6 +120,7 @@ function attach(entity, def, center, fresh) {
     for (const t of tempersOf(f)) f.say(`§c${t.name}.§7 ${t.line}`);
     const voice = hasCue(`sig.boss.${def.id}`) ? `sig.boss.${def.id}` : "boss.arrive"; // each boss has its own sound (SOUND-LIST.md)
     for (const p of f.players()) sfx(p, voice);
+    emit("bossFightStarted", { boss: def.id, name: def.name, rank: f.rank, dim: f.dim.id, x: f.center.x, z: f.center.z, players: f.players().map((p) => p.name) }); // world news (news/)
   }
   def.onStart?.(f, !saved);
   return f;
@@ -454,6 +455,7 @@ function reset(f) {
     // boss unloaded
   }
   heal(f.entity, 100000);
+  emit("bossFightReset", { boss: f.def.id, name: f.def.name, dim: f.dim.id, x: f.center.x, z: f.center.z }); // everyone who fought it fell or fled
   f.def.onReset?.(f);
   f.def.onStart?.(f, true);
 }

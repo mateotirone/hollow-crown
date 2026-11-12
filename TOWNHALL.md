@@ -38,7 +38,7 @@ Skill points also come straight from deeds: siege held +2, settlement tier up +2
 
 50 skills in four branches and five rings. A ring opens when your hall is big enough **and** your Renown is high enough (1 / 5 / 12 / 20 / 30).
 
-- **Keep** (everyone): Hearthwarden, Stonewright, Muster Roll, Masonry Wards, Watchfire, Spoils of War, Plunder, Rally the Walls, Master Builder, The Unbreakable Keep, Sovereign's Court.
+- **Keep** (everyone): Hearthwarden, Stonewright, Muster Roll, Messenger (also buyable for 100 Regals; scripts/townhall/messenger.js), Masonry Wards, Watchfire, Spoils of War, Plunder, Rally the Walls, Master Builder, The Unbreakable Keep, Sovereign's Court.
 - **Wayfarer** (everyone): Fleetfoot, Forager, Clue Sense, Horse Whisperer, Pathfinder, Silver Tongue, Night Eyes, Mapwright, Tidewalker, Roadwise, The Long Road Home.
 - **Blade** (Knights): Shield Bash, Lunge, Iron Constitution, Riposte, Rallying Cry, Armor Mastery, Guard Captain, Execution, Warhorse Charge, Banner of the Keep, Second Wind, Oathsworn Champion, Crownbreaker.
 - **Arcana** (Marked): Ember Bolt, Ward, Quiet Mind, Blink, Echo Sight, Bind, Ashen Skin, Halfstep, Choir's Call, Resonant Soul, Choirborn, Veilstep, Crownless, The Last Art.

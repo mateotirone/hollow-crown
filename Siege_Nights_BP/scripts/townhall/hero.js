@@ -17,6 +17,7 @@ export function blankHero() {
     points: 0, // unspent skill points
     earned: 0, // all skill points ever earned
     skills: {}, // id -> rank
+    bought: {}, // id -> ranks paid for in Regals instead of points (kept through unbinding)
     resonance: 0, // 0-100, Marked only
     spell: "arc_bolt", // the Marked player's selected power
     offers: [], // roles the story has offered this player (see "offerRole")

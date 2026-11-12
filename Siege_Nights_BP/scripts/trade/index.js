@@ -20,7 +20,8 @@
 //        /scriptevent siege:trade_reset    forget every offer and route
 
 import { world, system, ItemStack, BlockPermutation } from "@minecraft/server";
-import { onTick, isReady, moduleStore, keepOf, getState, isAlly, on, emit, COLORS, isNight } from "../siege/api.js";
+import { onTick, isReady, moduleStore, keepOf, getState, isAlly, on, emit, COLORS, isNight, countItem, takeItems } from "../siege/api.js";
+import { charge, giveCoins, funds } from "../economy/api.js";
 import { addMenuLabel } from "../core/labels.js";
 import { worldChapter } from "../core/storyteller.js";
 import { TOWNS } from "../economy/config.js";
@@ -35,7 +36,8 @@ import { startBuild, buildFor, worldCells, worldMarks } from "../townhall/build.
 import { TRADE, goodOf, DAY, COIN } from "./data.js";
 import {
   pathLength, travelTicks, depart, afterTry, finished, npcMake, npcAnswer, capitalAnswer, npcOffer,
-  needsOf, supplyTake, crateDelta, add, stacksOf, cargoOf, routesAllowed, niceGood, rateOf,
+  needsOf, supplyTake, crateDelta, add, stacksOf, cargoOf, routesAllowed, niceGood, rateOf, loadText,
+  specialProblem, specialNormal, specialPayFor, npcFill,
 } from "./rules.js";
 import { wingPlan, wingOrigin } from "./wing.js";
 import "./tests.js";
@@ -50,7 +52,7 @@ const rates = () => ECON_CONFIG.REGION_RATES ?? {};
 //             ex, im (ledgers), exSnap, imSnap (what the crates held at the last look) } }
 // offers: [...] (rules.js), routes: [...], notices: { [party]: [{ text, at }] }, npc: { [party]: { stock, at } },
 // pending: { [offer id]: tick } (NPC answers due), seq, nextNpcOffer: { [player party]: tick }, holdUps: { [route id]: {...} }
-const store = moduleStore("siege:trade", () => ({ outposts: {}, offers: [], routes: [], notices: {}, npc: {}, pending: {}, seq: 0, nextNpcOffer: {}, holdUps: {}, seen: {} }));
+const store = moduleStore("siege:trade", () => ({ outposts: {}, offers: [], routes: [], notices: {}, npc: {}, pending: {}, seq: 0, nextNpcOffer: {}, holdUps: {}, seen: {}, specials: [], deliveries: [], refunds: {} }));
 const S = () => store.data;
 export const S_ACCESS = () => store.data;
 export const saveTrade = () => store.save();
@@ -79,10 +81,19 @@ export function partyName(party, { color = true } = {}) {
     const c = color ? DYE_CODE[COLORS[keep?.color]] ?? "§f" : "";
     return `${c}${keep?.name ?? "Someone"}${stop ? ` of ${stop.name}` : ""}§r`;
   }
+  if (party.startsWith("v:")) return `${color ? "§f" : ""}${party.slice(2)}§r`; // a traveller with no settlement
   if (party === CAPITAL) return `${color ? "§6" : ""}the Kingsrest Exchequer§r`;
   if (party.startsWith("t:")) return `${color ? "§e" : ""}${stop?.name ?? party.slice(2)}§r`;
   const lord = rivalById(party.slice(2));
   return `${color ? "§6" : ""}${lord?.name ?? "a lord"}${lord ? ` of ${lord.plot}` : ""}§r`;
+}
+
+// Just the name: a player's gamertag (keep name), a town's or lord's name. For the Crier.
+export function plainName(party) {
+  if (party.startsWith("p:")) return keepOf(party.slice(2))?.name ?? "Someone";
+  if (party.startsWith("v:")) return party.slice(2);
+  if (party.startsWith("l:")) return rivalById(party.slice(2))?.name ?? "a lord";
+  return partyName(party, { color: false }).replace(/§r/g, "");
 }
 
 export function partyRegion(party) {
@@ -596,12 +607,136 @@ function runTick() {
     if (!route.onLine) S().ended = S().ended.filter((r) => r !== route);
   }
   holdUpTick(t);
+  specialsTick(t);
   npcReplies();
   npcProposals();
   expireOffers();
   store.save();
 }
 onTick("trade_runs", 40, runTick);
+
+// ---------- Special Offers ----------
+// "I'll pay P Regals for N of this." The Regals are held when it's posted. Anyone the poster's track reaches can fill
+// it from their Exports (the goods come by train); anyone standing at the poster's Trade Board can fill it from their
+// own pack (the goods go straight in). Towns and lords fill offers that beat what the goods are worth to them.
+
+export const specialsOf = (party) => (S().specials ??= []).filter((sp) => sp.party === party);
+// Open offers a party could fill by train: other settlements' offers its track reaches
+export function specialsReaching(party) {
+  const reach = new Set(partnersOf(party).map((p) => p.party));
+  return (S().specials ??= []).filter((sp) => sp.party !== party && reach.has(sp.party) && sp.left > 0);
+}
+
+const itemName = (id, n = 2) => loadText({ id, n }).replace(/^\d+ /, "");
+
+export function postSpecial(player, party, item, total, price) {
+  const sp = { item, total, left: total, price, paid: 0 };
+  const problem = specialProblem(sp, { cargo: cargoFor(party), open: specialsOf(party).length });
+  if (problem) return problem;
+  const before = funds(player);
+  if (!charge(player, price, "special offer")) return `You need ${price} Regals to post it: they're held until it's filled.`;
+  // what really left the balance (nothing in Creative): only that comes back if it isn't filled
+  Object.assign(sp, { id: newId(), party, posted: now(), expires: now() + TRADE.specialDays * DAY, filled: [], held: Math.max(0, before - funds(player)) });
+  S().specials.push(sp);
+  store.save();
+  emit("tradeSpecialOffer", { party, name: partyName(party, { color: false }), item, itemName: itemName(item, total), count: total, price, normal: specialNormal(sp), region: partyRegion(party), expires: sp.expires });
+  return undefined;
+}
+
+// Pay out a fill and close the offer when it's done
+function filled(sp, by, n, payTo) {
+  const share = sp.left === n ? sp.price - sp.paid : specialPayFor(sp, n);
+  sp.left -= n;
+  sp.paid += share;
+  sp.filled.push({ by, n });
+  if (payTo) giveCoins(payTo, share);
+  notify(sp.party, `${partyName(by)} filled ${n} of your special offer for ${itemName(sp.item, sp.total)}${sp.left ? ` (${sp.left} still wanted)` : ""}.`);
+  emit("tradeSpecialFilled", { party: sp.party, name: partyName(sp.party, { color: false }), itemName: itemName(sp.item, n), count: n, by: plainName(by), price: share });
+  if (sp.left <= 0) S().specials = S().specials.filter((x) => x !== sp);
+  store.save();
+  return share;
+}
+
+// From the filler's Exports, by train
+export function fillByTrain(player, fillerParty, sp, n) {
+  const length = lineLength(fillerParty, sp.party);
+  if (!Number.isFinite(length)) return { problem: "No laid track joins you to them." };
+  syncOutpost(fillerParty);
+  const o = outpostOf(fillerParty);
+  n = Math.min(n, sp.left, cargoFor(fillerParty));
+  if (!(n >= 1)) return { problem: "Fill at least 1." };
+  if ((o?.ex?.[sp.item] ?? 0) < n) return { problem: `Your Exports hold only ${o?.ex?.[sp.item] ?? 0} ${itemName(sp.item)}.` };
+  add(o.ex, sp.item, -n);
+  syncOutpost(fillerParty);
+  S().deliveries.push({ party: sp.party, load: { id: sp.item, n }, arrives: now() + travelTicks(length) });
+  return { paid: filled(sp, fillerParty, n, player), n };
+}
+
+// From the filler's own pack, standing at the poster's Trade Board
+export function fillInPerson(player, sp, n) {
+  n = Math.min(n, sp.left);
+  if (!(n >= 1)) return { problem: "Hand over at least 1." };
+  const have = countItem(player, sp.item);
+  if (have < n) return { problem: `You're carrying only ${have} ${itemName(sp.item)}.` };
+  takeItems(player, sp.item, n);
+  deliver(sp.party, { id: sp.item, n });
+  const by = tradePartyOf(player.id) ?? `v:${player.name}`;
+  return { paid: filled(sp, by, n, player), n };
+}
+
+const unpaid = (sp) => Math.max(0, Math.min(sp.price, sp.held ?? sp.price) - sp.paid);
+export function cancelSpecial(player, sp) {
+  const back = unpaid(sp);
+  S().specials = S().specials.filter((x) => x !== sp);
+  if (back > 0) giveCoins(player, back);
+  store.save();
+  return back;
+}
+
+function refund(owner, amount) {
+  if (amount <= 0 || !owner) return;
+  const p = world.getPlayers().find((x) => x.id === owner);
+  if (p) { giveCoins(p, amount); try { p.sendMessage(`§6[Trade] §r${amount} Regals from an unfilled special offer are back in your balance.`); } catch {} }
+  else S().refunds[owner] = (S().refunds[owner] ?? 0) + amount;
+}
+on("joined", ({ player }) => {
+  const owed = S().refunds?.[player.id];
+  if (!owed) return;
+  delete S().refunds[player.id];
+  giveCoins(player, owed);
+  store.save();
+  player.sendMessage(`§6[Trade] §r${owed} Regals from special offers that ran out are back in your balance.`);
+});
+
+function specialsTick(t) {
+  for (const d of [...(S().deliveries ??= [])]) {
+    if (t < d.arrives) continue;
+    deliver(d.party, d.load);
+    S().deliveries = S().deliveries.filter((x) => x !== d);
+  }
+  for (const sp of [...(S().specials ??= [])]) {
+    if (t >= sp.expires) {
+      S().specials = S().specials.filter((x) => x !== sp);
+      refund(ownerOfParty(sp.party), unpaid(sp));
+      notify(sp.party, `Your special offer for ${itemName(sp.item, sp.total)} ran out${sp.left < sp.total ? ` with ${sp.total - sp.left} delivered` : ""}.`, { chat: false });
+      continue;
+    }
+    // towns and lords the poster's track reaches look at it now and then
+    if (t - (sp.npcAt ?? sp.posted) < TRADE.specialNpcEvery) continue;
+    sp.npcAt = t;
+    for (const { party: npc, length } of partnersOf(sp.party)) {
+      if (!isNpc(npc) || npc === CAPITAL || sp.left <= 0) continue;
+      const view = npcView(npc, sp.party);
+      if (view.refuses) continue;
+      const stock = npcStock(npc);
+      const n = npcFill(view, sp, stock, rates());
+      if (n < 1) continue;
+      add(stock, sp.item, -n);
+      S().deliveries.push({ party: sp.party, load: { id: sp.item, n }, arrives: t + travelTicks(length) });
+      filled(sp, npc, n);
+    }
+  }
+}
 
 // ---------- the works' Supply Line ----------
 

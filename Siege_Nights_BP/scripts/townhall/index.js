@@ -21,7 +21,7 @@
 import { world, system } from "@minecraft/server";
 import * as api from "../siege/api.js";
 import { POWER_ORIGINS } from "./skills.js";
-import { SKILLS, SKILL, RINGS, BRANCHES, blockedReason, levelFromRenown, renownForNext, pointsForLevel, rankOf, spentIn, canBranch } from "./skills.js";
+import { SKILLS, SKILL, RINGS, BRANCHES, blockedReason, levelFromRenown, renownForNext, pointsForLevel, rankOf, spentIn, canBranch, coinBlocked, refundable, keptOnUnbind } from "./skills.js";
 import { STYLES, STYLE_IDS, styleFromBiome, styleFromGround } from "./styles.js";
 import { drawHall, frameFor, toWorld, statesFor, buildOrder } from "./halls.js";
 import { buildTick, clearBoxFor, worldCells, progressOf } from "./build.js";
@@ -32,11 +32,13 @@ import { passiveTick, watchfireTick, dropEmber, nearestClue } from "./progress.j
 import { knightTick, chargeTick } from "./knight.js";
 import { markedTick } from "./marked.js";
 import "./spellbar.js";
+import "./messenger.js";
 import "./showcase.js";
 import { rosterMenu } from "./roster.js";
 import { rolesTick, roleForStyle, roleForBoss, ROLE_DEEDS } from "./roles.js";
 import { ROLES, RANKS, ROLE_LORE } from "./skills.js";
 import { treeCells, treeLayout, COLS, ROWS } from "./tree_layout.js";
+import { MESSENGER, route, cooling, bucket, heading, wayHome, newsText, keepNews, homecoming } from "./messenger_rules.js";
 import { wallMenu } from "./flyby.js";
 import { hallMap, setHallCheck } from "./hallmap.js";
 export { flyby } from "./flyby.js";
@@ -387,5 +389,51 @@ api.addTests("roles", {
     api.assertEqual(roleForBoss("siege:mother_of_changelings"), "witch");
     api.assertEqual(roleForBoss("minecraft:zombie"), undefined);
     api.assertEqual(new Set(Object.values(ROLES).map((r) => r.branch)).size, Object.keys(ROLES).length);
+  },
+});
+
+api.addTests("messenger", {
+  "news goes home, by messenger, or waits": () => {
+    api.assertEqual(route({ online: true, atHome: true, hasMessenger: false }), "home");
+    api.assertEqual(route({ online: true, atHome: false, hasMessenger: true }), "messenger");
+    api.assertEqual(route({ online: true, atHome: false, hasMessenger: false }), "later");
+    api.assertEqual(route({ online: false, atHome: false, hasMessenger: true }), "later");
+  },
+  "one fight is one message, each assault its own": () => {
+    api.assert(cooling({ player: 100 }, "player", 200));
+    api.assert(!cooling({ player: 100 }, "player", 100 + MESSENGER.cooldown.player));
+    api.assert(!cooling({ raid: 100 }, "raid", 100));
+    api.assert(!cooling({ "vault:a": 100 }, "vault", 150, "vault:b"), "different words get through");
+    api.assert(cooling({ "vault:a": 100 }, "vault", 150, "vault:a"));
+    api.assertEqual(bucket("drill"), "vault");
+    api.assertEqual(bucket("nonsense"), "other");
+  },
+  "the messenger points the way home": () => {
+    api.assertEqual(heading({ x: 0, z: 0 }, { x: 0, z: -100 }), "north");
+    api.assertEqual(heading({ x: 0, z: 0 }, { x: 100, z: 100 }), "south-east");
+    api.assertEqual(wayHome({ x: 0, z: 0 }, { x: -300, z: 0 }), "300 blocks to the west");
+    api.assertEqual(wayHome({ x: 0, z: 0 }, { x: 5, z: 5 }), "close by");
+    api.assertEqual(newsText("player", { name: "Oakhold", who: "Sam" }), "Sam is attacking Oakhold.");
+  },
+  "waiting news is kept short and read out once": () => {
+    let list = [];
+    for (let i = 0; i < 12; i++) list = keepNews(list, `line ${i % 10}`, i);
+    api.assertEqual(list.length, MESSENGER.keepNews);
+    api.assertEqual(new Set(list.map((n) => n.text)).size, list.length);
+    api.assertEqual(homecoming([]).length, 0);
+    api.assertEqual(homecoming([{ text: "x" }]).length, 3);
+  },
+  "the Messenger costs a point or Regals, and Regals are not refunded": () => {
+    const m = SKILL[MESSENGER.skill];
+    api.assert(m && m.branch === "keep" && m.ring === 1 && m.cost === 1 && m.coins === MESSENGER.coins);
+    const hero = { ...blankHero(), points: 0, level: 1 };
+    api.assertEqual(blockedReason(m, hero, 1), "Needs 1 point");
+    api.assertEqual(coinBlocked(m, hero, 1), undefined);
+    api.assertEqual(coinBlocked(m, hero, 0), "Needs a Longhouse");
+    api.assertEqual(coinBlocked(SKILL.keep_hearth, hero, 1), "Not for sale");
+    const bought = { ...hero, skills: { keep_messenger: 1, keep_hearth: 2 }, bought: { keep_messenger: 1 } };
+    api.assertEqual(refundable(bought), 2);
+    api.assertEqual(keptOnUnbind(bought), { keep_messenger: 1 });
+    api.assertEqual(refundable({ ...bought, bought: {} }), 3);
   },
 });
