@@ -1132,18 +1132,6 @@
   "hc_nest_scale": {
    "textures": "textures/blocks/dragons/nest/scale"
   },
-  "siege_map_marker_free": {
-   "textures": "textures/blocks/verdant_froglight_side"
-  },
-  "siege_map_marker_lord": {
-   "textures": "textures/blocks/ochre_froglight_side"
-  },
-  "siege_hall_waystone_side": {
-   "textures": "textures/blocks/lodestone_side"
-  },
-  "siege_hall_waystone_top": {
-   "textures": "textures/blocks/lodestone_top"
-  },
   "siege_undertow_moss_deep": {
    "textures": {
     "variations": [
@@ -1242,6 +1230,30 @@
   },
   "siege_ironworks_bottom": {
    "textures": "textures/blocks/settle/siege_ironworks_bottom"
+  },
+  "siege_map_stone_side_free": {
+   "textures": "textures/blocks/welcome/map_stone_side_free"
+  },
+  "siege_map_stone_top_free": {
+   "textures": "textures/blocks/welcome/map_stone_top_free"
+  },
+  "siege_map_stone_side_lord": {
+   "textures": "textures/blocks/welcome/map_stone_side_lord"
+  },
+  "siege_map_stone_top_lord": {
+   "textures": "textures/blocks/welcome/map_stone_top_lord"
+  },
+  "siege_map_stone_side_taken": {
+   "textures": "textures/blocks/welcome/map_stone_side_taken"
+  },
+  "siege_map_stone_top_taken": {
+   "textures": "textures/blocks/welcome/map_stone_top_taken"
+  },
+  "siege_hall_waystone_side": {
+   "textures": "textures/blocks/welcome/hall_waystone_side"
+  },
+  "siege_hall_waystone_top": {
+   "textures": "textures/blocks/welcome/hall_waystone_top"
   },
   "siege_cairn_stone": {
    "textures": "textures/blocks/unlocks/siege_cairn_stone"

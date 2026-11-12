@@ -7,7 +7,11 @@
         "category": "none"
       },
       "states": {
-        "siege:status": [0, 1, 2]
+        "siege:status": [
+          0,
+          1,
+          2
+        ]
       }
     },
     "components": {
@@ -19,7 +23,15 @@
       "minecraft:map_color": "#7fd36b",
       "minecraft:material_instances": {
         "*": {
-          "texture": "siege_map_marker_free",
+          "texture": "siege_map_stone_side_free",
+          "render_method": "opaque"
+        },
+        "up": {
+          "texture": "siege_map_stone_top_free",
+          "render_method": "opaque"
+        },
+        "down": {
+          "texture": "siege_map_stone_top_free",
           "render_method": "opaque"
         }
       },
@@ -33,7 +45,15 @@
           "minecraft:map_color": "#e8b84a",
           "minecraft:material_instances": {
             "*": {
-              "texture": "siege_map_marker_lord",
+              "texture": "siege_map_stone_side_lord",
+              "render_method": "opaque"
+            },
+            "up": {
+              "texture": "siege_map_stone_top_lord",
+              "render_method": "opaque"
+            },
+            "down": {
+              "texture": "siege_map_stone_top_lord",
               "render_method": "opaque"
             }
           }
@@ -42,11 +62,19 @@
       {
         "condition": "q.block_state('siege:status') == 2",
         "components": {
-          "minecraft:light_emission": 0,
+          "minecraft:light_emission": 2,
           "minecraft:map_color": "#2b2830",
           "minecraft:material_instances": {
             "*": {
-              "texture": "siege_old_polished_blackstone",
+              "texture": "siege_map_stone_side_taken",
+              "render_method": "opaque"
+            },
+            "up": {
+              "texture": "siege_map_stone_top_taken",
+              "render_method": "opaque"
+            },
+            "down": {
+              "texture": "siege_map_stone_top_taken",
               "render_method": "opaque"
             }
           }
