@@ -85,8 +85,8 @@ drip lines. Wear shows as dusty edges and a slightly darker band at the base of 
 
 This is the one region where flat roofs on houses are the rule, not the exception. The refinement thread's
 plot designs (2026-11-12) put a flat roof on **every** building, the stone Mint included. A house with no
-attic gets a low extra storey instead of a pitched roof. The towns mix below still gives Sunscar 3 in 10
-red pitched or domed roofs: see the open questions in the README.
+attic gets a low extra storey instead of a pitched roof. Mateo decided (2026-11-12): **plot buildings are all
+flat; Sunscar and other towns keep the mix** below (3 in 10 red pitched or domed).
 
 **What they carry:**
 - roof terraces;

@@ -75,9 +75,8 @@ given here.
 - **Saltreach has two looks**: the Mediterranean and Atlantic harbour town, and the English chalk cliffs
   Mateo asked for on its northern coast. The pages keep both: the cliffs are land, the town is the
   harbour style.
-- **Emberwaste roofs**: the confirmed towns mix gives Sunscar 7 flat and 3 red pitched or domed roofs,
-  while the refinement thread's plot designs make every Emberwaste building flat. The pages say: plots
-  flat, town houses follow the mix. Mateo's call.
+- **Emberwaste roofs** (decided by Mateo, 2026-11-12): plot buildings all flat; Sunscar keeps its towns
+  mix of 7 flat and 3 red pitched or domed roofs.
 - **Flat roofs**: the house rule "no flat roofs on houses" does not apply to the Emberwaste (flat is its
   default) or to Saltreach terraces on a lower wing.
 - **Still missing from the skill**, so it is built by hand (`place`) for now:
