@@ -22,7 +22,7 @@ Y_TOP = 16                                # wall top (cornice under the eaves at
 STONE = "stone_bricks"; DRESSED = "polished_andesite"
 P = dict(VALE); P.update(COPPER_MATS)
 P.update(trim="spruce_stairs", trim_block="spruce_planks", trim_slab="spruce_slab", door="spruce_door",
-         fence="spruce_fence", pane="light_gray_stained_glass_pane", spikes=0, verge_lanterns=False)
+         fence="spruce_fence", pane="light_gray_stained_glass_pane", spikes=5, finial="spruce_fence", finial_top="lightning_rod", spike="spruce_fence", verge_lanterns=False)
 SIGN = "spruce_wall_sign"
 OUT = {"s": (0, 1), "n": (0, -1), "e": (1, 0), "w": (-1, 0)}
 BACK = {"s": "n", "n": "s", "e": "w", "w": "e"}
