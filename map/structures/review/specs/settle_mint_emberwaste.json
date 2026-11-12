@@ -7,7 +7,6 @@
   "kind": "Work",
   "blurb": "Where the town strikes its Regals: stone walls, barred ground-floor windows and a heavy door."
  },
- "after": "settle_skill:mint_inside",
  "parts": [
   {
    "part": "house",
@@ -47,6 +46,7 @@
     "parapet": "slab",
     "beams": true
    },
+   "interior": "mint",
    "chimney": false,
    "shutters": 0
   }

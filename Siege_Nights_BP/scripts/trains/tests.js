@@ -2,12 +2,14 @@
 
 import { BlockTypes, EntityTypes, ItemTypes } from "@minecraft/server";
 import { addTests, assert, assertEqual } from "../siege/api.js";
-import { SHAPES, layTrack, cursorOn, advance, back, pointAt, follow, KINDS, curvePoints, switchSetting, shapeOf } from "./track.js";
-import { stageFor, stationPlan, siteFor, lineBlocks, rightOf, STAGES, STATION } from "./stations.js";
+import { SHAPES, layTrack, cursorOn, advance, back, pointAt, follow, KINDS, curvePoints, switchSetting, shapeOf, DX, DZ } from "./track.js";
+import { stageFor, stationPlan, siteFor, lineBlocks, loopBlocks, rightOf, STAGES, STATION, LOOP_Z } from "./stations.js";
 import { ROUTE, reachable, buyable, cannotBuy, priceOf, nearestStop, checkRoutes, stopSite, pieces, isNatural } from "./routes.js";
 import { ROUTES } from "./routes_data.js";
 import { railRefused } from "./no_hollow.js";
-import { TRACK, CARS, TRAIN, carPoses, trainLength, stepSpeed, moveTrain, limitAhead, shapesForLoop, showcaseLoop } from "./data.js";
+import { STATION_DESIGNS, TRADE_HOUSE_DESIGNS, ENGINE_SHED_DESIGNS } from "../settle/station_data.js";
+import { LINE, chainsOf, nextStop, newService, stepUnseen, indexNear, pilot } from "./line_service.js";
+import { TRACK, CARS, TRAIN, carPoses, trainLength, stepSpeed, moveTrain, limitAhead, blocksUnder, clearAhead, speedForGap, shapesForLoop, showcaseLoop } from "./data.js";
 
 // A little fake world of track: lay(x, y, z, yaw) places a piece the way a player would
 function yard() {
@@ -31,6 +33,22 @@ function routeMap() {
     stops: [stop("A", 0), stop("B", 300), stop("C", 600), { ...stop("D", 300), z: 300 }],
     segments: [seg("AB", "A", "B", 0, 300), seg("BC", "B", "C", 300, 600), { ...seg("BD", "B", "D", 0, 0), blocks: [[300, 64, 1, 0, 0]] }],
   };
+}
+
+// Blocks of a design that touch nothing (not even corner to corner) on a path down to the ground layer (y <= 0)
+function floatingBlocks(d) {
+  const solid = new Set();
+  for (const [y, z, x0, n, i] of d.rows) if (d.palette[i][0] !== "minecraft:air") for (let x = x0; x < x0 + n; x++) solid.add(`${x},${y},${z}`);
+  const seen = new Set(), q = [];
+  for (const k of solid) if (+k.split(",")[1] <= 0) { seen.add(k); q.push(k); }
+  while (q.length) {
+    const [x, y, z] = q.pop().split(",").map(Number);
+    for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) for (let c = -1; c <= 1; c++) {
+      const k = `${x + a},${y + b},${z + c}`;
+      if (solid.has(k) && !seen.has(k)) { seen.add(k); q.push(k); }
+    }
+  }
+  return [...solid].filter((k) => !seen.has(k));
 }
 
 addTests("trains", {
@@ -94,7 +112,6 @@ addTests("trains", {
     assertEqual(nearestStop(data, 2000, 0), undefined);
     const bad = { stops: data.stops, segments: [...data.segments, { id: "AB", from: "A", to: "Z", blocks: [] }] };
     assert(checkRoutes(bad).length >= 3, "a doubled id, an unknown stop and no track are caught");
-    assertEqual(checkRoutes(ROUTES).length, 0, "the planned railway has no mistakes");
     const custom = { ...data.segments[0], works: [[0, 0, 60, 63, 1]], works_palette: [{ name: "minecraft:air" }, { name: "minecraft:stone" }], custom: [[10, 20]] };
     assertEqual(checkRoutes({ stops: data.stops, segments: [custom] }).length, 0);
     const p = pieces(custom);
@@ -104,6 +121,82 @@ addTests("trains", {
     const [bx, by, bz] = custom.blocks[0];
     assert(checkRoutes({ stops: data.stops, segments: [{ ...custom, works: [[bx, bz, by - 3, by, 1]] }] }).length, "a solid work in a track cell is caught");
     assertEqual(checkRoutes({ stops: data.stops, segments: [{ ...custom, works: [[bx, bz, by - 3, by - 1, 1], [bx, bz, by, by + 5, 0]] }] }).length, 0, "works under and clear air over the track are fine");
+  },
+
+  "stations: nothing floats (roofs sit on their beams, lanterns hang from something)": () => {
+    const all = [
+      ...Object.entries(STATION_DESIGNS).flatMap(([r, st]) => Object.entries(st).map(([s, d]) => [`${r} ${s}`, d])),
+      ...Object.entries(TRADE_HOUSE_DESIGNS).flatMap(([r, st]) => Object.entries(st).map(([s, d]) => [`${r} trade house ${s}`, d])),
+      ...Object.entries(ENGINE_SHED_DESIGNS).map(([r, d]) => [`${r} engine shed`, d]),
+    ];
+    for (const [name, d] of all) {
+      const f = floatingBlocks(d);
+      assert(!f.length, `${name}: ${f.length} block(s) float, first at ${f[0]}`);
+    }
+  },
+
+  "trains keep apart: one sees another on its track ahead and may only go as fast as lets it stop short": () => {
+    const { get, lay } = yard();
+    for (let x = 0; x <= 60; x++) lay(x, 0, 0, -90); // an east-west line
+    const cars = [{ kind: "engine" }, { kind: "coach" }];
+    const front = cursorOn({ x: 40, y: 0, z: 0 }, get(40, 0, 0), -90); // heading east
+    const taken = blocksUnder(front, cars, get);
+    assert(taken.has("40,0,0") && taken.has("30,0,0") && !taken.has("41,0,0") && !taken.has("24,0,0"), "it holds the blocks under its length");
+    const behind = cursorOn({ x: 10, y: 0, z: 0 }, get(10, 0, 0), -90);
+    const gap = clearAhead(behind, 40, get, taken);
+    assert(gap > 13 && gap < 17, `the train behind sees it about 15 ahead (got ${gap})`);
+    assertEqual(clearAhead(behind, 8, get, taken), Infinity, "too far to matter yet");
+    assertEqual(clearAhead(front, 30, get, taken), Infinity, "its own blocks are passed in separately, and nothing is ahead of it");
+    assertEqual(speedForGap(Infinity), Infinity);
+    assertEqual(speedForGap(TRAIN.keepApart), 0, "stopped once it is this close");
+    const v = speedForGap(gap);
+    assert(v > 0 && (v * v) / (2 * TRAIN.brake) <= gap - TRAIN.keepApart, "from that speed it can stop in time");
+  },
+
+  "routes: the planned railway has no mistakes, and no works stand in a train's way": () => {
+    const problems = checkRoutes(ROUTES);
+    assert(!problems.length, problems[0]);
+    const seg = { id: "t", from: "A", to: "B", blocks: [[0, 64, 0, 0, 0], [0, 64, 1, 0, 0]], works: [[1, 0, 64, 65, 1]], works_palette: [{ name: "minecraft:air" }, { name: "minecraft:stone" }] };
+    const stops = [{ id: "A", x: 0, y: 64, z: 0 }, { id: "B", x: 0, y: 64, z: 1 }];
+    assert(checkRoutes({ stops, segments: [seg] }).some((p) => p.includes("train's body")), "a parapet right beside the track is caught");
+    assertEqual(checkRoutes({ stops, segments: [{ ...seg, works: [[2, 0, 64, 65, 1], [0, 0, 68, 70, 1]] }] }).length, 0, "two out and four up is fine");
+    assertEqual(checkRoutes({ stops, segments: [{ ...seg, works: [[1, 0, 64, 65, 1], [1, 0, 64, 67, 0]] }] }).length, 0, "cleared again by a later work is fine");
+  },
+
+  "stations: the passing loop leaves the line at one end, runs beside the platform and rejoins at the other": () => {
+    assertEqual(loopBlocks(stationPlan("vale", "halt"), { x: 0, y: 64, z: 0 }, { x: 0, z: 1 }).length, 0, "a Halt is single track");
+    for (const forward of [{ x: 0, z: 1 }, { x: 0, z: -1 }, { x: 1, z: 0 }, { x: -1, z: 0 }]) {
+      for (const stage of ["station", "junction", "grand"]) {
+        const plan = stationPlan("vale", stage), origin = { x: 100, y: 64, z: -40 };
+        const blocks = new Map(), get = (x, y, z) => blocks.get(`${x},${y},${z}`);
+        const line = lineBlocks(plan, origin, forward), loop = loopBlocks(plan, origin, forward);
+        for (const b of line) blocks.set(`${b.x},${b.y},${b.z}`, shapeOf(0, b.dir));
+        assert(loop.length > 20 && loop[0].end && loop.at(-1).end && loop.filter((b) => b.end).length === 2, "two ends");
+        for (const b of loop) {
+          assert(shapeOf(b.kind, b.dir), "a real track shape");
+          if (b.end) assert(blocks.has(`${b.x},${b.y},${b.z}`), "each end sits on the line");
+          else assert(!blocks.has(`${b.x},${b.y},${b.z}`), "the rest is off the line");
+          blocks.set(`${b.x},${b.y},${b.z}`, shapeOf(b.kind, b.dir)); // both switches set for the loop
+        }
+        const far = Math.max(...loop.map((b) => Math.abs((b.x - origin.x) * forward.x + (b.z - origin.z) * forward.z)));
+        assertEqual(far, -LOOP_Z, "it runs this far from the line, on the side away from the building");
+        assert(loop.every((b) => (b.x - origin.x) * forward.x + (b.z - origin.z) * forward.z <= 0), "never on the building's side");
+        // ride it: from the line's first block, through the loop, out onto the line's last block
+        const end = loop[0], last = loop.at(-1), s0 = get(end.x, end.y, end.z);
+        const inward = DX.findIndex((dx, d) => end.x + dx === line[1].x - (line[0].x - end.x) && end.z + DZ[d] === line[1].z - (line[0].z - end.z));
+        const from = (inward + 4) % 8; // it comes in from outside the station
+        let c = { x: end.x, y: end.y, z: end.z, from, to: s0.links[0] === from ? s0.links[1] : s0.links[0], t: 0 };
+        const seen = new Set();
+        for (let i = 0; i < 200 && !(c.x === last.x && c.z === last.z); i++) {
+          const r = advance(c, 0.5, get);
+          assert(!r.blocked, `the loop is joined all the way (${stage}, stuck at ${c.x},${c.z})`);
+          c = r.cursor;
+          seen.add(`${c.x},${c.y},${c.z}`);
+        }
+        assert(c.x === last.x && c.z === last.z, "it comes out at the far end");
+        assert(loop.every((b) => seen.has(`${b.x},${b.y},${b.z}`)), "by way of every loop block");
+      }
+    }
   },
 
   "no rail goes down in the Hollow": () => {
@@ -228,6 +321,71 @@ addTests("trains", {
     assert(Math.hypot(mid.x - 0.5, mid.z - 0.5) > 0.1, "cuts the corner instead of passing the block centre");
     const bend = curvePoints(0, 3);
     assert(near(bend.pts.at(-1)[0], 0.5) && near(bend.pts.at(-1)[1], 0.5), "a bend ends in the diagonal corner");
+  },
+  "line trains: a line's laid stretches join into one run, stop to stop": () => {
+    const line = ROUTES.segments.find((s) => s.line)?.line;
+    const segs = ROUTES.segments.filter((s) => s.line === line);
+    assertEqual(chainsOf(ROUTES, {}).length, 0, "no track, no trains");
+    const all = chainsOf(ROUTES, Object.fromEntries(segs.map((s) => [s.id, {}])));
+    assertEqual(all.length, 1);
+    const c = all[0];
+    assertEqual(c.stops.length, segs.length + 1, "every stop of the line, in order");
+    assertEqual(c.at[0], 0);
+    assertEqual(c.at.at(-1), c.path.length - 1);
+    for (let i = 1; i < c.path.length; i++) {
+      const a = c.path[i - 1], b = c.path[i];
+      assert(Math.max(Math.abs(a.x - b.x), Math.abs(a.z - b.z)) === 1 && Math.abs(a.y - b.y) <= 1, `the run is unbroken at ${b.x},${b.z}`);
+    }
+    for (let k = 0; k < c.stops.length; k++) {
+      const stop = ROUTES.stops.find((s) => s.id === c.stops[k]), p = c.path[c.at[k]];
+      assert(stop && indexNear(c, c.at[k], p.x, p.z) === c.at[k], c.stops[k]);
+    }
+    // only one stretch laid: the train shuttles between its two stops
+    const one = chainsOf(ROUTES, { [segs[0].id]: {} })[0];
+    assertEqual(one.stops.length, 2);
+  },
+  "line trains: unseen, the train calls at every stop, waits, and turns back at each end": () => {
+    const chain = { line: "t", stops: ["a", "b", "c"], path: Array.from({ length: 201 }, (_, x) => ({ x, y: 64, z: 0 })), at: [0, 120, 200] };
+    assertEqual(nextStop(chain, 0, 1), 1);
+    assertEqual(nextStop(chain, 120, 1), 2);
+    assertEqual(nextStop(chain, 200, 1), -1);
+    assertEqual(nextStop(chain, 200, -1), 1);
+    const svc = newService(), calls = [];
+    let standing = true;
+    for (let t = 0; t < 20 * 60 * 6; t += 20) {
+      stepUnseen(svc, chain, 20);
+      assert(svc.pos >= 0 && svc.pos <= 200, "stays on the line");
+      if (svc.dwell > 0 && !standing) calls.push(chain.stops[chain.at.indexOf(svc.pos)]);
+      standing = svc.dwell > 0;
+    }
+    assertEqual(calls.slice(0, 6).join(""), "bcbabc");
+  },
+  "line trains: the real train slows into each stop, stands 20 seconds, and never overruns": () => {
+    const chain = { line: "t", stops: ["a", "b", "c"], path: Array.from({ length: 201 }, (_, x) => ({ x, y: 64, z: 0 })), at: [0, 120, 200] };
+    const svc = newService(), calls = [];
+    let pos = 5, v = 0, top = 0, stood = 0;
+    for (let t = 0; t < 20 * 60 * 4; t++) {
+      const out = pilot(svc, chain, pos, v);
+      if (out.arrived !== undefined) calls.push(chain.stops[out.arrived]);
+      if (svc.dwell > 0) stood++;
+      // the runner: speed up by TRAIN.accel toward the limit, brake by TRAIN.brake when over it
+      const want = out.throttle ? out.limit : 0, s = Math.abs(v);
+      const next = s > want ? Math.max(want, s - TRAIN.brake) : Math.min(want, s + TRAIN.accel);
+      v = next * out.dir;
+      pos += v;
+      top = Math.max(top, Math.abs(v));
+      assert(pos > -2 && pos < 202, `never off the end (${pos})`);
+      if (out.arrived !== undefined) assert(Math.abs(pos - chain.at[out.arrived]) <= 2, "stops at the platform, not past it");
+    }
+    assert(top > LINE.cruise - 0.05 && top <= LINE.cruise + 1e-9, `runs at line speed (${top})`);
+    assertEqual(calls.slice(0, 4).join(""), "bcba");
+    assert(stood >= LINE.dwell * 3, "it stands at each stop");
+    // the track ends short of the next stop: after standing still a while it turns back instead of waiting for ever
+    const cut = newService();
+    cut.dwell = 0;
+    let dir = 1;
+    for (let t = 0; t < 400 && dir === 1; t++) dir = pilot(cut, chain, 60, 0).dir;
+    assertEqual(dir, -1);
   },
   "the pack has the track, the trains and their parts": () => {
     assert(BlockTypes.get(TRACK), TRACK);

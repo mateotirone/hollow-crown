@@ -43,6 +43,10 @@
     "ridge": "z",
     "pitch": 1
    },
+   "interior": {
+    "use": "farmhouse",
+    "attic": true
+   },
    "dormers": [
     {
      "side": "w",
