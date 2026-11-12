@@ -264,7 +264,7 @@ const KNOWN = new Set([...BUILDINGS.map((b) => b.id), ...Object.keys(BLOCK_BUILD
 // What stands in a town: finished plot buildings plus finished block buildings on its land
 export function builtCounts(owner) {
   const counts = { ...raisedCounts(owner) };
-  for (const st of Object.values(townOf(owner)?.slots ?? {})) if (st.building && st.done !== false) counts[st.building] = (counts[st.building] ?? 0) + 1;
+  for (const st of Object.values(townOf(owner)?.slots ?? {})) if (st.building && st.done !== false && !st.broken) counts[st.building] = (counts[st.building] ?? 0) + 1;
   return counts;
 }
 export const charterOf = (owner, tier = townOf(owner)?.tier ?? 0) => charterCheck(tier, builtCounts(owner), KNOWN);

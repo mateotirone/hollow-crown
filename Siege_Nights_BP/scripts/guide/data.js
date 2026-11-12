@@ -201,6 +201,13 @@ export const ENTRIES = [
     when: ["click:siege:plot_marker", "event:tierUp"],
   },
   {
+    id: "settlers", ch: "keep", title: "Your own buildings, beds and settlers",
+    tip: "Built something yourself on a plot? Use its Plot Marker and pick \"I built here myself\" to have it counted.",
+    page: "§fYour own buildings:§r build by hand on an empty plot, then use its Plot Marker and pick §fI built here myself§r. It counts as a building if it has what that building needs: a home needs a bed and a door under a roof, a smithy an anvil and a furnace, a library 8 bookshelves, a stable hay and stalls, a storehouse 6 chests or barrels. Take those away and it stops counting until you put them back.\n\n"
+      + "§fSettlers:§r every settler needs a bed in a home, one bed for every 12 blocks of covered floor. At dawn, if a home has a free bed, someone moves in: a worker for each finished work building first, then settlers for the homes. They go to bed at dusk. A worker whose building is knocked down stays, idle, until it is back.",
+    when: ["event:settlerArrived", "click:siege:plot_marker"],
+  },
+  {
     id: "guards", ch: "keep", title: "Guards and the Barracks",
     tip: "Bring an unemployed villager to your Barracks and click it holding 40 Regals for a Man-at-Arms (sneak + click for an Archer).",
     page: "Build a §fBarracks§r, bring an unemployed villager to it and click it holding coins (40 Regals) for a §fMan-at-Arms§r. Sneak + click for an §fArcher§r. Click the Barracks without coins for the guard list.\n\n"

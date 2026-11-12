@@ -167,3 +167,55 @@ export const CHARTERS = [
     { what: "homes", ids: HOMES, count: 10 },
   ],
 ];
+
+// ---------- Buildings you build yourself, beds and settlers (census.js, settlers.js) ----------
+// Build by hand on an empty plot, then use its Plot Marker and pick "I built here myself": the plot is checked
+// and counts as the first building below whose contents it has (and that suits the plot's size).
+// need: { block group: how many }. Groups are in BLOCK_GROUPS. roofed: share of the floor that must be under cover.
+// tall: blocks of height above the floor. Checked in this order, so the most particular comes first.
+export const CONTENTS = [
+  { id: "library", need: { books: 8 }, roofed: 0.6, says: "8 bookshelves under a roof" },
+  { id: "smithy", need: { anvil: 1, furnace: 1 }, roofed: 0.3, says: "an anvil (or smithing table) and a furnace" },
+  { id: "stable", need: { hay: 1, fence: 6 }, roofed: 0.3, says: "a hay bale and stalls (6 fences or gates)" },
+  { id: "storehouse", need: { storage: 6 }, roofed: 0.6, says: "6 chests or barrels under a roof" },
+  { id: "garden", need: { farmland: 12, water: 1 }, says: "12 farmland and water" },
+  { id: "market", need: { storage: 2, counter: 1 }, says: "2 chests or barrels and a counter (slab, stair or trapdoor)" },
+  { id: "watchtower", need: { ladder: 1 }, tall: 10, says: "a ladder and 10 blocks of height" },
+  { id: "well", need: { water: 1, wall: 4 }, says: "water ringed with walls or fences" },
+  { id: "cottage", need: { bed: 1, door: 1 }, roofed: 0.7, says: "a bed and a door, under a roof" },
+];
+export const BLOCK_GROUPS = {
+  books: /bookshelf$/, anvil: /(anvil|smithing_table)$/, furnace: /(^minecraft:furnace|blast_furnace|lit_furnace)$/,
+  hay: /hay_block$/, fence: /(fence|fence_gate)$/, storage: /(:chest|barrel|trapped_chest)$/, farmland: /farmland$/,
+  water: /^minecraft:(flowing_)?water$/, counter: /(slab|stairs|trapdoor)$/, ladder: /ladder$/, wall: /(_wall|fence)$/,
+  bed: /(^minecraft:|_)bed$/, door: /(?<!trap)door$/,
+};
+
+// Beds: a bed counts only inside a home (a cottage, raised or registered), at most one per this many covered
+// floor blocks. Every settler needs a bed, worker or not.
+export const FLOOR_PER_BED = 12;
+
+// Settlers: at dawn, one newcomer per settlement if a home has a free bed. A finished work building gets its
+// worker first, then the homes fill up. They stand about by day and go to their bed at dusk.
+export const SETTLERS = {
+  perDawn: 1,
+  skins: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 18, 19],
+  workers: { smithy: "Smith", stable: "Groom", storehouse: "Storekeeper", market: "Trader", library: "Archivist", garden: "Gardener", watchtower: "Lookout", farmhouse: "Farmer", mint: "Minter", inn: "Innkeeper", barracks: "Sergeant" },
+  names: ["Alda", "Brannock", "Cressa", "Dunstan", "Elswyth", "Fenn", "Garrow", "Hesketh", "Ilse", "Jory", "Kestrel", "Lovell", "Maud", "Nye", "Osric", "Perrin", "Quenby", "Rowan", "Sabeth", "Tam", "Ulric", "Verity", "Wystan", "Yarrow"],
+};
+// What a settler says when you talk to them (hand-written; {town} is the settlement's name)
+export const SETTLER_LINES = {
+  day: [
+    "Good roof, good bed. That's more than I had on the road.",
+    "{town} is quieter than I was told. I'm not complaining.",
+    "I'll pull my weight. Just tell me the wall holds.",
+    "The mason says you pay fair. That's why I stopped here.",
+    "Somebody's always building something. I like the noise.",
+  ],
+  night: [
+    "I'm for bed. You should be too, by the look of the sky.",
+    "Doors shut after dark. That's the rule I keep.",
+    "Don't stand out here long. It's colder than it ought to be.",
+  ],
+  idle: "My work's gone. Put it back up and I'll go back to it.",
+};

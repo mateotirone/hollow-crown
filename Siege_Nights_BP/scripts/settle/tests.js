@@ -467,3 +467,45 @@ addTests("settle charters", {
     }
   },
 });
+
+// ---------- your own builds and beds (census.js) ----------
+import { tally, matches, bedCap, bedsCounted } from "./census.js";
+
+// A hand-built hut: floor 7x7 at y 0, walls to y 3, a roof at y 4, with what's passed in inside
+function hut(extra = [], { roof = true } = {}) {
+  const cells = [];
+  for (let x = 0; x < 7; x++) for (let z = 0; z < 7; z++) {
+    cells.push({ x, y: 0, z, id: "minecraft:spruce_planks" });
+    if (roof) cells.push({ x, y: 4, z, id: "minecraft:spruce_slab" });
+    if (x === 0 || z === 0 || x === 6 || z === 6) for (let y = 1; y <= 3; y++) cells.push({ x, y, z, id: "minecraft:cobblestone" });
+  }
+  return [...cells, ...extra];
+}
+
+addTests("settle census", {
+  "a hut with a bed and a door counts as a home"() {
+    const t = tally(hut([
+      { x: 2, y: 1, z: 2, id: "minecraft:bed", head: true }, { x: 2, y: 1, z: 3, id: "minecraft:bed" },
+      { x: 3, y: 1, z: 0, id: "minecraft:spruce_door" }, { x: 3, y: 2, z: 0, id: "minecraft:spruce_door", upper: true },
+      { x: 4, y: 1, z: 4, id: "minecraft:spruce_trapdoor" },
+    ]));
+    assertEqual(t.groups.bed, 1);
+    assertEqual(t.groups.door, 1);
+    assert(matches(t).find((m) => m.id === "cottage").ok, "home");
+    assertEqual(bedCap(t), 2); // 25 covered floor inside the walls / 12
+    assertEqual(bedsCounted(t), 1);
+  },
+  "no roof, no home; and it says what's missing"() {
+    const t = tally(hut([{ x: 2, y: 1, z: 2, id: "minecraft:bed", head: true }, { x: 3, y: 1, z: 0, id: "minecraft:wooden_door" }], { roof: false }));
+    const m = matches(t).find((x) => x.id === "cottage");
+    assert(!m.ok && m.missing.includes("more roof"), JSON.stringify(m));
+    assertEqual(bedsCounted(t), 0);
+  },
+  "bookshelves make a library, an anvil and furnace a smithy"() {
+    const books = Array.from({ length: 8 }, (_, i) => ({ x: 1 + (i % 5), y: 1 + Math.floor(i / 5), z: 1, id: "minecraft:bookshelf" }));
+    assert(matches(tally(hut(books))).find((m) => m.id === "library").ok, "library");
+    const forge = [{ x: 2, y: 1, z: 2, id: "minecraft:anvil" }, { x: 3, y: 1, z: 2, id: "minecraft:furnace" }];
+    assert(matches(tally(hut(forge))).find((m) => m.id === "smithy").ok, "smithy");
+    assert(!matches(tally(hut())).some((m) => m.ok && m.id !== "well"), "an empty hut is nothing");
+  },
+});

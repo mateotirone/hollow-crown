@@ -18,6 +18,8 @@ import { drawBox } from "./zones.js";
 import { raiseOnSlot, risingAt, jobOf } from "./plans.js";
 import { PLOT_MARKER, townOf, allTowns, layoutOf, markerAt, registerMarker, forgetMarker, placeMarker, clearMarker, slotState, saveTowns, tierName } from "./founding.js";
 import { slotsOf, seatOnSlot, seatedBox, SIZE_NAMES } from "./towns.js";
+import { runScan } from "./register.js";
+import { matches } from "./census.js";
 import { sfx } from "../core/sfx.js";
 
 const OVERWORLD = "minecraft:overworld";
@@ -112,13 +114,17 @@ async function openSlot(player, owner, slot) {
   const choices = choicesFor(owner, slot);
   const form = new ActionFormData().title(`${CLASS_NAMES[slotClass(slot)] ?? SIZE_NAMES[slot.size]} plot`)
     .body(`${size} blocks, door to the road${slot.tags.length ? `, ${slot.tags.map((t) => TAG_WORDS[t]).filter(Boolean).join(", ")}` : ""}.\nBuildings in the §f${STYLES[town.style]?.name ?? town.style}§r style that fit here:`);
-  if (!choices.length) return player.sendMessage("§7Nothing we can raise fits this plot yet. You can build here by hand.");
+  const own = player.id === owner || isAlly(owner, player.id);
+  if (!choices.length && !own) return player.sendMessage("§7Nothing we can raise fits this plot yet.");
+  if (own) form.button("§2I built here myself\n§8Have it counted as a building");
   for (const c of choices) {
     form.button(c.open ? `${c.name}${c.tagged ? " §2(good spot)" : ""}\n§8${coins(plotPrice(c.id))}` : `§8${c.name}\n${c.why}`);
   }
   const res = await form.show(player);
   if (res.canceled) return;
-  const c = choices[res.selection];
+  if (own && res.selection === 0) return registerOwn(player, owner, slot);
+  const c = choices[res.selection - (own ? 1 : 0)];
+  if (!c) return;
   if (!c.open) return player.sendMessage(`§7The ${c.name} ${c.why}.${/^opens/.test(c.why) ? " Win more sieges to grow the settlement." : " Try another plot."}`);
   Object.assign(state, { pick: c.id, pickedAt: system.currentTick, by: player.id });
   saveTowns();
@@ -152,13 +158,50 @@ async function confirm(player, owner, slot, state) {
     if (price) refund(player, price);
     return player.sendMessage("§cSomething is already going up there.");
   }
-  Object.assign(state, { building: building.id, style: town.style, origin: seat.origin, forward: seat.forward, box: seat.box, top: seat.plan.bounds().y1 + Math.max(0, built.lift ?? 0), paid: price, by: player.id, pick: undefined, done: false });
+  Object.assign(state, { building: building.id, style: town.style, origin: seat.origin, forward: seat.forward, box: seat.box, top: seat.plan.bounds().y1 + Math.max(0, built.lift ?? 0), paid: price, by: player.id, pick: undefined, done: false, lift: Math.max(0, built.lift ?? 0) });
   saveTowns();
   sfx(player, "random.anvil_use");
   player.sendMessage(`§6The ${building.name} is going up.`);
 }
 
+// A building the player made by hand on an empty plot: check what it holds and count it as that building
+async function registerOwn(player, owner, slot) {
+  player.sendMessage("§7Looking over the plot...");
+  const t = await runScan(owner, slot.id);
+  if (!player.isValid) return;
+  if (!t) return player.sendMessage("§7Part of the plot isn't loaded. Stand closer and try again.");
+  const free = freeClasses(owner, slot.id);
+  const fitsHere = (id) => plotFit(id, slot, free).ok && opensAt(id) <= (townOf(owner)?.tier ?? 0);
+  const all = matches(t);
+  const good = all.filter((m) => m.ok && fitsHere(m.id));
+  if (!good.length) {
+    const near = all.filter((m) => fitsHere(m.id) && BUILDING[m.id]).sort((a, b) => a.missing.length - b.missing.length).slice(0, 3);
+    const lines = near.map((m) => `§f${BUILDING[m.id].name}§7: needs ${m.says} (${m.missing.join(", ")})`);
+    return player.sendMessage(`§7This doesn't count as a building yet.${lines.length ? "\n" + lines.join("\n") : " Nothing that suits this plot could be found."}`);
+  }
+  let pick = good[0];
+  if (good.length > 1) {
+    const form = new ActionFormData().title("What is it?").body("What you built here could count as:");
+    for (const m of good) form.button(BUILDING[m.id]?.name ?? m.id);
+    const res = await form.show(player);
+    if (res.canceled) return;
+    pick = good[res.selection];
+  }
+  const town = townOf(owner);
+  const state = slotState(owner, slot.id);
+  if (state.building) return player.sendMessage("§7Something already stands on this plot.");
+  const box = { x0: town.x + slot.box.x0, z0: town.z + slot.box.z0, x1: town.x + slot.box.x1, z1: town.z + slot.box.z1 };
+  clearMarker(owner, slot);
+  Object.assign(state, { building: pick.id, hand: true, done: true, box, origin: { x: box.x0, y: town.y + slot.dy, z: box.z0 }, by: player.id, pick: undefined, paid: 0 });
+  saveTowns();
+  sfx(player, "random.levelup");
+  player.sendMessage(`§6Your ${BUILDING[pick.id]?.name ?? pick.id} is counted.§7 Keep what it needs inside, or it stops counting.`);
+  markerBesideDoor(owner, slot, state);
+  emit("settleCharter", { owner });
+}
+
 async function builtMenu(player, owner, slot, state) {
+  if (state.hand) return handMenu(player, owner, slot, state);
   const name = BUILDING[state.building]?.name ?? "building";
   if (player.id !== owner) return player.sendMessage(`§7This ${name} stands. Only the town's owner can knock it down.`);
   const back = Math.floor((state.paid ?? 0) / 2);
@@ -167,6 +210,34 @@ async function builtMenu(player, owner, slot, state) {
     .button1("Leave it").button2("Knock it down").show(player);
   if (res.canceled || res.selection !== 1) return;
   demolish(owner, slot, state, player);
+}
+
+// Your own build: un-count it (the blocks stay) or check it again
+async function handMenu(player, owner, slot, state) {
+  const name = BUILDING[state.building]?.name ?? "building";
+  if (player.id !== owner) return player.sendMessage(`§7This ${name} was built by hand${state.broken ? ", and is missing what it needs" : ""}.`);
+  const res = await new ActionFormData().title(name)
+    .body(`You built this ${name} yourself.${state.broken ? "\n\n§cIt doesn't count right now:§r something it needs is gone." : ""}`)
+    .button("Check it again").button("Stop counting it\n§8The blocks stay").show(player);
+  if (res.canceled) return;
+  if (res.selection === 0) {
+    const t = await runScan(owner, slot.id);
+    if (!t) return player.sendMessage("§7Part of the plot isn't loaded. Stand closer and try again.");
+    const m = matches(t).find((x) => x.id === state.building);
+    state.broken = !m?.ok;
+    saveTowns();
+    emit("settleCharter", { owner });
+    return player.sendMessage(m?.ok ? `§aThe ${name} counts.` : `§7The ${name} needs ${m?.says} (${m?.missing.join(", ")}).`);
+  }
+  const spot = state.marker;
+  if (spot) {
+    forgetMarker(spot);
+    try { const b = world.getDimension(OVERWORLD).getBlock(spot); if (b?.typeId === PLOT_MARKER) b.setType("minecraft:air"); } catch { /* not loaded */ }
+  }
+  for (const k of Object.keys(state)) delete state[k];
+  saveTowns();
+  placeMarker(owner, slot);
+  player.sendMessage("§7It is just a building again. The plot marker is back.");
 }
 
 export function demolish(owner, slot, state, player) {
@@ -233,17 +304,21 @@ on("settleBuilt", ({ owner, slotId }) => {
   state.done = true; // counts toward the town's charter now (founding.js)
   saveTowns();
   emit("settleCharter", { owner });
+  markerBesideDoor(owner, slot, state);
+});
+
+function markerBesideDoor(owner, slot, state) {
   const spot = besideDoor(owner, slot);
   if (!spot) return;
   try {
     world.getDimension(OVERWORLD).getBlock(spot)?.setType(PLOT_MARKER);
-    registerMarker(spot, owner, slotId);
+    registerMarker(spot, owner, slot.id);
     state.marker = spot;
     saveTowns();
   } catch {
     // not loaded: the plot can still be managed from the town hall later
   }
-});
+}
 
 // Every town starts with its library (the lore feature stocks it from settleBuilt): on the slot tagged for it, else the square
 on("townLaidOut", ({ owner, tier }) => {

@@ -21,6 +21,8 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - Track: diagonal pieces no longer lie across the line, bends turn the right way, and slopes climb toward the higher track instead of away from it. Track already laid fixes itself.
 
 ### Added
+- Settlers move into your settlement. Each needs a bed in a home: at dawn, if there is a free bed, a worker arrives for each finished work building (Smith, Groom, Trader and more), then settlers for the homes. They stand about by day, go to bed at dusk, and say a line or two when you talk to them.
+- Built something yourself on a town plot? Use its Plot Marker and pick "I built here myself": if it has what the building needs (a home needs a bed and a door under a roof, a smithy an anvil and a furnace, and so on) it counts like a bought one.
 - Town plots now suit their buildings: each plot lists only buildings of its size, a watchtower needs a plot by the wall, good spots are marked, and a settlement must have its charter standing (homes, a market, later a barracks and more) before sieges can grow it past Town. `/scriptevent siege:town charter` shows what is missing.
 - A Plot Marker no longer lands on the road or the door path when its building is finished.
 - Each of the five rebuilt Hollow sites now has something to find, once for every player: a boat never launched at the Wound landing, the Woodcutter's Axe in the Lattice Wood lodge, pilgrims' coins and a lantern at Pilgrim's Cross, an unchalked load of Choir Ore in the Cartmeet tally-house, and the Seamcutter pick in the Seams winch house.
