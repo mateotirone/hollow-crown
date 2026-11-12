@@ -2,52 +2,47 @@
 // what other features may use.
 //
 //   /scriptevent siege:economy_npc <job> [region]   place a job NPC (farmer, woodcutter, quarryman, smith, fisher, hunter, herbalist, moneyer)
-//   /scriptevent siege:economy_give <coins>         coins into your pockets (testing)
+//   /scriptevent siege:economy_give <coins>         Regals onto your balance (testing)
 //   /scriptevent siege:economy_stats                coins paid out and taken in so far, world-wide
 //   /scriptevent siege:economy_towns [reset <town|all>]   the traders placed in the map's towns (towns.js)
 
-import { world, system, GameMode } from "@minecraft/server";
-import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
-import { addKeepMenuButtons, takeItems } from "../siege/api.js";
-import { ECON, COIN, GOLD } from "./config.js";
+import { world, system } from "@minecraft/server";
+import { ActionFormData } from "@minecraft/server-ui";
+import { addKeepMenuButtons } from "../siege/api.js";
+import { ECON } from "./config.js";
 import { coins } from "./rules.js";
-import { carried, banked, deposit, withdraw, giveCoins, totals } from "./coins.js";
+import { carried, banked, giveCoins, absorb, totals } from "./coins.js";
 import "./shops.js";
 import "./golems.js";
 import "./towns.js";
 import "./showcase.js";
 import "./tests.js";
 
-// ---------- the strongbox, on the Keep Banner menu ----------
+// ---------- your Regals, on the Keep Banner menu ----------
+// One number, no deposit or withdrawal (Mateo, 2026-11-12). The Regal Safe in your vault is where a thief robs it.
 
 export async function strongbox(player) {
-  const inBox = banked(player), inHand = carried(player);
-  const res = await new ActionFormData().title("Strongbox")
-    .body(`Coins kept here can't be dropped or lost, and shops on your own land draw on them. The strongbox stands in your vault: a thief who gets in can rob it.\n\nIn the strongbox: ${coins(inBox)}\nIn your pockets: ${coins(inHand)}`)
-    .button("Put coins in").button("Take coins out").button("Close").show(player);
-  if (res.canceled || res.selection === 2) return;
-  const putting = res.selection === 0;
-  const most = putting ? inHand : inBox;
-  if (most < 1) {
-    player.onScreenDisplay.setActionBar(putting ? "§7Your pockets are empty." : "§7The strongbox is empty.");
-    return strongbox(player);
-  }
-  const res2 = await new ModalFormData().title(putting ? "Put coins in" : "Take coins out")
-    .slider(`How many ${ECON.many}`, 1, most, { valueStep: 1, defaultValue: most }).show(player);
-  if (!res2.canceled) {
-    const amount = Math.max(1, Math.min(most, Math.floor(res2.formValues[0])));
-    const moved = putting ? deposit(player, amount) : withdraw(player, amount);
-    player.onScreenDisplay.setActionBar(`§6${coins(moved)}§7 ${putting ? "locked away" : "taken out"}`);
-  }
-  strongbox(player);
+  await new ActionFormData().title("Your Regals")
+    .body(`You have ${coins(carried(player))}.\n\nEvery Regal you own is one sum: shops take from it and rewards add to it, wherever you are. Coins you pick up are counted in at once.\n\nYour Regals sit in the Regal Safe in your vault. A thief who breaks in can rob it a blow at a time.`)
+    .button("Close").show(player);
 }
+
+// Coins picked up from loot are counted into the balance
+system.runInterval(() => {
+  for (const player of world.getPlayers()) {
+    try {
+      const n = absorb(player);
+      if (n) player.onScreenDisplay.setActionBar(`§6+${coins(n)}§7  (you have ${coins(banked(player))})`);
+    } catch { /* left */ }
+  }
+}, 20);
 
 // Strongboxes moved from the player to the world (so a vault can be robbed while its keeper is away): move each
 // player's over as soon as they are here
 world.afterEvents.playerSpawn.subscribe(({ player, initialSpawn }) => { if (initialSpawn) try { banked(player); } catch { /* fine */ } });
 
 addKeepMenuButtons(({ player, mine }) => (mine ? [{
-  label: "Strongbox", icon: ECON.icon,
+  label: "Regals", icon: ECON.icon,
   action: () => strongbox(player).catch((e) => console.warn(`[Hollow Crown] strongbox: ${e}`)),
 }] : []));
 
@@ -59,28 +54,9 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
   if (event.id === "siege:economy_give") {
     const amount = Math.max(1, Math.min(64 * 64, parseInt(event.message) || 64));
     giveCoins(player, amount);
-    player.sendMessage(`§a${coins(amount)} in your pockets.`);
+    player.sendMessage(`§a${coins(amount)} added. You have ${coins(banked(player))}.`);
   } else if (event.id === "siege:economy_stats") {
     const t = totals();
-    player.sendMessage(`§6Economy:§7 ${coins(t.minted)} paid out to players, ${coins(t.sunk)} spent at shops. You carry ${coins(carried(player))}, strongbox ${coins(banked(player))}.`);
-  }
-});
-
-// ---------- making change in your hand ----------
-// Sneak + use a Gold Regal to break it into 64 Regals. Sneak + use a full stack of 64 Regals to bind it into a Gold Regal.
-// Villager trades (the Quartermaster) can't make change, so players need a way to do it anywhere.
-
-world.afterEvents.itemUse.subscribe(({ source: player, itemStack }) => {
-  if (player?.typeId !== "minecraft:player" || !itemStack || !player.isSneaking) return;
-  if (itemStack.typeId === GOLD) {
-    if (!takeItems(player, GOLD, 1)) return;
-    if (player.getGameMode() === GameMode.Creative) return; // takeItems is free there: don't print money
-    giveCoins(player, ECON.goldWorth - 1); // 63 + 1 below, so they arrive as small coins, not as the same Gold Regal
-    giveCoins(player, 1);
-    player.onScreenDisplay.setActionBar(`§7One ${ECON.gold} broken into ${coins(ECON.goldWorth)}`);
-  } else if (itemStack.typeId === COIN && itemStack.amount >= ECON.goldWorth) {
-    if (player.getGameMode() === GameMode.Creative || !takeItems(player, COIN, ECON.goldWorth)) return;
-    giveCoins(player, ECON.goldWorth);
-    player.onScreenDisplay.setActionBar(`§7${coins(ECON.goldWorth)} bound into one ${ECON.gold}`);
+    player.sendMessage(`§6Economy:§7 ${coins(t.minted)} paid out to players, ${coins(t.sunk)} spent at shops. You have ${coins(carried(player))}.`);
   }
 });

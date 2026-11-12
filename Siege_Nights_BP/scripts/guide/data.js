@@ -159,7 +159,7 @@ export const ENTRIES = [
   {
     id: "keep_menu", ch: "keep", title: "The Keep Banner and its menu",
     tip: "Click your Keep Banner with nothing in hand for the Keep menu: your tier, wins, next siege, guards, allies and more.",
-    page: "Click your Keep Banner (not holding dye) for the §fKeep menu§r: your tier, your wins and what the next tier needs, when the next siege comes, what attacked you last, your guards and allies, your strongbox, your look, and every plot on the map.\n\n"
+    page: "Click your Keep Banner (not holding dye) for the §fKeep menu§r: your tier, your wins and what the next tier needs, when the next siege comes, what attacked you last, your guards and allies, your Regals, your look, and every plot on the map.\n\n"
       + "§fColour:§r every settlement has its own banner colour, and no two can share one. Use a dye on the banner to change it. Your guards, your land's border and your horse cloth follow it.\n\n"
       + "§fGrowing:§r every siege you hold is a win. At 3 wins a Hamlet becomes a Town, at 6 a City, and at 10 wins with 2 warlords slain, a Castle.",
     when: ["place:siege:keep_banner", "event:keepFounded"],
@@ -218,8 +218,8 @@ export const ENTRIES = [
   },
   {
     id: "guards", ch: "keep", title: "Guards and the Barracks",
-    tip: "Bring an unemployed villager to your Barracks and click it holding 40 Regals for a Man-at-Arms (sneak + click for an Archer).",
-    page: "Build a §fBarracks§r, bring an unemployed villager to it and click it holding coins (40 Regals) for a §fMan-at-Arms§r. Sneak + click for an §fArcher§r. Click the Barracks without coins for the guard list.\n\n"
+    tip: "Bring an unemployed villager to your Barracks and click it: hire a Man-at-Arms or an Archer for 40 Regals.",
+    page: "Build a §fBarracks§r, bring an unemployed villager to it and click it. Its menu hires a §fMan-at-Arms§r or an §fArcher§r for 40 Regals, and shows the guard list.\n\n"
       + "Sneak + click a guard to pick them up and put them anywhere on your land. Off duty, Archers stay exactly where you set them and Men-at-Arms wait at the Barracks and charge out when raiders come. Better: give them a post (see §fGuard posts§r).\n\n"
       + "§fArmour:§r click a guard holding the next upgrade: 6 iron ingots, then 12 iron ingots, then 4 diamonds, then a netherite ingot. Clicking with anything else opens the guard's orders.\n\n"
       + "§fWanted:§r anyone who attacks you or your guards on your land, lights a charge or rams your walls is Wanted there for 5 minutes, and your guards hunt them.\n\n"
@@ -262,10 +262,11 @@ export const ENTRIES = [
   // ---------------- Coin and trade ----------------
   {
     id: "regals", ch: "coin", title: "Regals",
-    tip: "This is a Regal, the one coin of Aldmere. 64 make a Gold Regal: sneak and use a Gold Regal to break it.",
-    page: "The §fRegal§r is the only coin in Aldmere, and it is backed by iron: one iron ingot is worth 8 Regals. A §fGold Regal§r is 64. Sneak and use a Gold Regal to break it into small coins.\n\n"
+    tip: "This is a Regal, the one coin of Aldmere. Picked up, coins are counted straight into your Regals.",
+    page: "The §fRegal§r is the only coin in Aldmere, and it is backed by iron: one iron ingot is worth 8 Regals. A §fGold Regal§r is 64.\n\n"
       + "You earn Regals by holding sieges, killing warlords and bosses, doing jobs from the Rumor Board and selling goods to the traders in the towns. Emeralds are only a trade good now: the Moneyer buys them.\n\n"
-      + "Coins in your pockets can be lost. Coins in your §fstrongbox§r (on the Keep menu) can't be dropped, lost or taken.",
+      + "All your Regals are one sum. Coins you find are counted in the moment you pick them up, every shop takes from the sum and every reward adds to it, wherever you are. The §fRegals§r button on the Keep menu shows it.\n\n"
+      + "The sum is kept in the §fRegal Safe§r in your vault, once you have one. A thief who breaks into your vault can rob it.",
     when: ["carry:siege:coin", "carry:siege:gold_coin"],
   },
   {
@@ -273,7 +274,7 @@ export const ENTRIES = [
     tip: "Traders buy what their trade needs. Each has only so much appetite a day, and pays less once they've had plenty.",
     page: "Every town has traders: a farmer, woodcutter, quarryman, smith, fisher, hunter, herbalist and the Moneyer, and a Guild Factor with orders. Click one to sell to them or buy from them.\n\n"
       + "Prices differ from region to region. Each trader only wants so much a day: past that they pay less, and in the end they stop buying until tomorrow.\n\n"
-      + "§fThe Moneyer§r changes coins and buys iron ingots and emeralds. He takes every iron ingot you bring at full price, with no daily limit (iron golems never appear, so iron only comes from mining). He also trades metal up one step: 4 iron for a gold ingot, 8 gold for a diamond, 6 diamonds for a netherite scrap. It is dear, but anything can always be bought. Each region's Smith sells that region's Castle Guard armour.",
+      + "§fThe Moneyer§r buys iron ingots and emeralds. He takes every iron ingot you bring at full price, with no daily limit (iron golems never appear, so iron only comes from mining). He also trades metal up one step: 4 iron for a gold ingot, 8 gold for a diamond, 6 diamonds for a netherite scrap. It is dear, but anything can always be bought. Each region's Smith sells that region's Castle Guard armour.",
     when: ["talk:tag:siege_job"],
   },
 
@@ -490,9 +491,9 @@ export const ENTRIES = [
   },
   {
     id: "vault_safe", ch: "growth", title: "The Regal Safe",
-    tip: "The Regal Safe. Its keeper clicks it for their strongbox; a thief breaks it open a blow at a time.",
-    page: "Every vault has a §fRegal Safe§r just inside the door. It holds your strongbox: click it to put coins in or take them out (the Keep Banner's Strongbox button reaches the same coins).\n\n"
-      + "A thief who gets into your vault can hit it. Every blow knocks loose a share of what is inside and shows how much; the last blow breaks it open and they take the rest. A wooden vault's safe gives in after 10 blows, a Choirsteel vault's after 70, and each blow takes a smaller share the better the vault. You are told the moment someone starts.\n\n"
+    tip: "The Regal Safe holds all your Regals. A thief breaks it open a blow at a time.",
+    page: "Every vault has a §fRegal Safe§r just inside the door, two blocks wide and three high. All your Regals are kept in it: there is nothing to put in or take out, it is simply where your one sum can be stolen. Click it to see how much you have.\n\n"
+      + "A thief who gets into your vault can hit it. Every blow knocks loose a share of what is inside and shows how much; the last blow breaks it open and they take the rest. A wooden vault's safe gives in after 10 blows, a Choirsteel vault's after 70, and each blow takes a smaller share the better the vault. You are told the moment someone starts, and when a safe is broken open the whole server hears who did it.\n\n"
       + "Click a broken safe to hammer it straight and lock it again.",
     when: ["click:siege:regal_safe", "event:safeBroken"],
   },

@@ -521,7 +521,8 @@ onTick("vault-away-guards", 200, () => {
   }
 });
 
-// ---------- the Regal Safe: the strongbox's Regals, robbed a blow at a time ----------
+// ---------- the Regal Safe: the owner's Regals, robbed a blow at a time ----------
+// Regals are one virtual sum per player (economy/coins.js). The safe exists only so that sum can be robbed.
 
 const SAFE_BLOCK = "siege:regal_safe";
 const lastBlow = new Map(); // player id -> tick of their last blow (one blow counts every 8 ticks)
@@ -551,7 +552,7 @@ world.afterEvents.entityHitBlock.subscribe(({ damagingEntity: player, hitBlock: 
   const found = safeAt(block);
   if (!found) return;
   const { owner, v, cells } = found;
-  if (player.id === owner || isAlly(owner, player.id)) return player.onScreenDisplay.setActionBar("§7Your Regal Safe. Click it to put coins in or take them out.");
+  if (player.id === owner || isAlly(owner, player.id)) return player.onScreenDisplay.setActionBar("§7Your Regal Safe. It holds all your Regals: click it to see how many.");
   if (!attackable(owner)) return player.onScreenDisplay.setActionBar("§7The safe's keeper is away. It can't be touched until they return or the vault lies open.");
   const now = system.currentTick;
   if (now - (lastBlow.get(player.id) ?? -100) < 8) return;
@@ -572,16 +573,17 @@ world.afterEvents.entityHitBlock.subscribe(({ damagingEntity: player, hitBlock: 
     const name = keepOf(owner)?.name ?? "A settlement";
     emit("safeBroken", { owner, by: player.id, took });
     emit("discordAlert", { kind: "safeBroken", text: `${player.name} broke open ${name}'s Regal Safe and took ${took} Regals.`, ping: [], hollow: false });
-    emit("baseAttacked", { owner, kind: "vault", text: `${player.name} broke open the Regal Safe of ${name}.`, by: player.id });
+    emit("baseAttacked", { owner, kind: "vault", text: `${player.name} broke open your Regal Safe.`, by: player.id });
+    world.sendMessage(`§c§l${player.name} broke open the Regal Safe of ${name}§r§c and took ${coins(took)}!`); // the whole server hears it (Mateo, 2026-11-12)
   } else {
     showSafeCracks(cells, v.safe.hits / SAFE[v.built].hits);
     player.onScreenDisplay.setActionBar(`§6+${coins(took)}§7  (blow ${v.safe.hits} of ${SAFE[v.built].hits})`);
-    if (v.safe.hits === 1) emit("baseAttacked", { owner, kind: "vault", text: `Someone is robbing the Regal Safe of ${keepOf(owner)?.name ?? "your settlement"}.`, by: player.id });
+    if (v.safe.hits === 1) emit("baseAttacked", { owner, kind: "vault", text: "Someone is robbing your Regal Safe.", by: player.id });
   }
   store.save();
 });
 
-// The owner (or an ally) clicks it: the strongbox; a broken safe is shut and locked again first
+// The owner (or an ally) clicks it: how many Regals they have; a broken safe is shut and locked again first
 world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
   const { block, player } = event;
   if (event.isFirstEvent === false || !isReady() || block.typeId !== SAFE_BLOCK) return;
@@ -656,7 +658,7 @@ const RELICS = {
   heart: { item: "siege:heart_of_the_hollow", stand: "siege:heart_stand", name: "the Heart" },
   template: { item: "siege:choirsteel_upgrade_template", stand: "siege:template_stand", name: "the Choirsteel template" },
 };
-addMenuLabel({ block: "siege:regal_safe", name: "Regal Safe", hint: "Click: your strongbox" });
+addMenuLabel({ block: "siege:regal_safe", name: "Regal Safe", hint: "Click: your Regals" });
 addMenuLabel({ entity: RELICS.heart.stand, hint: "Click: take the Heart" });
 addMenuLabel({ entity: RELICS.template.stand, hint: "Click: take the Choirsteel template" });
 for (const t of TIERS) addMenuLabel({ block: `siege:vault_lock_${t}`, name: "Vault Lock", hint: "Click with the Vault Key: open or shut" });

@@ -11,7 +11,9 @@
           0,
           1,
           2,
-          3
+          3,
+          4,
+          5
         ],
         "siege:cracks": [
           0,
@@ -43,7 +45,13 @@
           "cracks_2_2": "q.block_state('siege:part') == 2 && q.block_state('siege:cracks') == 2",
           "part3": "q.block_state('siege:part') == 3",
           "cracks_1_3": "q.block_state('siege:part') == 3 && q.block_state('siege:cracks') == 1",
-          "cracks_2_3": "q.block_state('siege:part') == 3 && q.block_state('siege:cracks') == 2"
+          "cracks_2_3": "q.block_state('siege:part') == 3 && q.block_state('siege:cracks') == 2",
+          "part4": "q.block_state('siege:part') == 4",
+          "cracks_1_4": "q.block_state('siege:part') == 4 && q.block_state('siege:cracks') == 1",
+          "cracks_2_4": "q.block_state('siege:part') == 4 && q.block_state('siege:cracks') == 2",
+          "part5": "q.block_state('siege:part') == 5",
+          "cracks_1_5": "q.block_state('siege:part') == 5 && q.block_state('siege:cracks') == 1",
+          "cracks_2_5": "q.block_state('siege:part') == 5 && q.block_state('siege:cracks') == 2"
         }
       },
       "minecraft:material_instances": {
@@ -69,6 +77,14 @@
         },
         "front_3": {
           "texture": "siege_vault_safe_front_3",
+          "render_method": "alpha_test"
+        },
+        "front_4": {
+          "texture": "siege_vault_safe_front_4",
+          "render_method": "alpha_test"
+        },
+        "front_5": {
+          "texture": "siege_vault_safe_front_5",
           "render_method": "alpha_test"
         },
         "cracks_1": {

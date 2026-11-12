@@ -51,7 +51,7 @@ addTests("vault", {
     assert(!awayState("p1", w[0].start - 3600000, w[0].start + 60000).away, "an hour away is not away");
     assert(!awayState("p1", undefined, w[0].start).away, "online is not away");
   },
-  "every room has its 2x2 Regal Safe, and a better vault's safe takes more blows and pays less each": () => {
+  "every room has its 2-wide, 3-high Regal Safe, and a better vault's safe takes more blows and pays less each": () => {
     for (const tier of TIERS) for (const layout of ["treasury", "hall", "crypt"]) {
       const d = VAULT_ROOMS[tier][layout];
       const at = new Map();

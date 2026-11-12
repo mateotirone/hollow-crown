@@ -1362,6 +1362,12 @@
   },
   "siege_vault_safe_gold": {
    "textures": "textures/blocks/vault/safe_gold"
+  },
+  "siege_vault_safe_front_4": {
+   "textures": "textures/blocks/vault/safe_front_4"
+  },
+  "siege_vault_safe_front_5": {
+   "textures": "textures/blocks/vault/safe_front_5"
   }
  },
  "siege_stopped_clock_case": {

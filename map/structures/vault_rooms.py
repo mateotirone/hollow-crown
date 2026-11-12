@@ -227,9 +227,10 @@ def strongroom(tier, layout="treasury", cutaway=False):
     b = Blueprint(f"{NAMES[tier]} ({layout})")
     W, D, x1, z1, y1, mid = shell(b, t, tier, n, h)
     {"treasury": treasury, "hall": hall, "crypt": crypt}[layout](b, t, n, x1, z1, y1, mid)
-    # the Regal Safe (2x2, the strongbox's Regals) against the inside of the front wall, left of the door as you
-    # come in; it faces into the room. part 0 bottom-left, 1 bottom-right, 2 top-left, 3 top-right from its front.
-    for part, (x, y) in {0: (mid - 2, 1), 1: (mid - 3, 1), 2: (mid - 2, 2), 3: (mid - 3, 2)}.items():
+    # the Regal Safe (2 wide, 3 high: the owner's Regals) against the inside of the front wall, left of the door
+    # as you come in; it faces into the room. Parts from its front: 0/1 bottom left/right, 2/3 middle, 4/5 top.
+    for part in range(6):
+        x, y = (mid - 2) - part % 2, 1 + part // 2
         b.set(x, y, z1 - 1, "siege:regal_safe", facing="n", raw={"siege:part": part})
     b.markers["safe"] = (mid - 2, 1, z1 - 1)
     if cutaway:

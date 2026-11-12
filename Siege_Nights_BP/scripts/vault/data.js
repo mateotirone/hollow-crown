@@ -100,7 +100,7 @@ export function awayState(seed, leftAt, now, openHours = 24) {
 }
 
 // ---------- the Regal Safe (Mateo, 2026-11-12) ----------
-// The strongbox's Regals sit in a 2x2 safe in the vault. Every blow a thief lands pays out a share of what is
+// The owner's Regals sit in a safe 2 wide and 3 high in the vault. Every blow a thief lands pays out a share of what is
 // still inside (shown as a number); the last blow breaks it open and pays out the rest. Better vaults: many more
 // blows and a smaller share each. Placeholder numbers.
 export const SAFE = {
@@ -116,5 +116,5 @@ export function safeBlow(tier, inside, hits) {
   if (hits + 1 >= s.hits) return { take: inside, broken: true };
   return { take: inside > 0 ? Math.max(1, Math.floor(inside * s.share)) : 0, broken: false };
 }
-// The safe's four blocks from its part-0 mark (local frame): part 1 to its right as you face it (-x), parts 2-3 on top
-export const safeCells = ([x, y, z]) => [[x, y, z], [x - 1, y, z], [x, y + 1, z], [x - 1, y + 1, z]];
+// The safe's six blocks from its part-0 mark (local frame): odd parts to its right as you face it (-x), rows going up
+export const safeCells = ([x, y, z]) => [0, 1, 2, 3, 4, 5].map((part) => [x - (part % 2), y + Math.floor(part / 2), z]);
