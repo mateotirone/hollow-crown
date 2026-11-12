@@ -31,7 +31,7 @@ import { onTick } from "../core/loop.js";
 import { moduleStore } from "../core/store.js";
 import { PLOT_PLAN, REGION_STYLE, REGION_BLOCK, WELCOME, WARDS, PLOT_STONE, KEEP_BANNER, OVERWORLD } from "./config.js";
 import { allPlots, holderOf, npcOf, plotOf, isBuilder, compass, mapMode, releaseNpc } from "./claims.js";
-import { MINI, RIM_TOP, MAP_MARKER, HALL_WAYSTONE, MARKER_STATE, miniSpot, miniatureBlocks, waystoneSpot, arrivalOffset, fallbackOf } from "./miniature.js";
+import { MINI, MINI_VERSION, RIM_TOP, MAP_MARKER, HALL_WAYSTONE, MARKER_STATE, miniSpot, miniatureBlocks, waystoneSpot, arrivalOffset, fallbackOf } from "./miniature.js";
 import { addMenuLabel } from "../core/labels.js";
 
 const store = moduleStore("siege:plots_welcome", () => ({ hall: null, test: null, kingsrest: null, picks: {} }));
@@ -201,14 +201,18 @@ export function raiseHall(o, then, old) {
       const inTheWay = old && old.y - 1 <= o.y + RIM_TOP && old.y + 6 >= o.y - 1;
       try {
         if (inTheWay) yield* clearOldHall(dim, old);
-        yield* miniatureBlocks((x, y, z, id, states) => putMini(dim, x, y, z, id, states), o, markers);
+        const clear = (x, y, z) => {
+          const b = dim.getBlock({ x, y, z });
+          if (b && b.typeId !== "minecraft:air") b.setType("minecraft:air");
+        };
+        yield* miniatureBlocks((x, y, z, id, states) => putMini(dim, x, y, z, id, states), o, markers, clear);
       } catch (e) {
         console.warn(`[Hollow Crown] welcome: building the hall stopped: ${e}`);
         raising = false;
         command(dim, `tickingarea remove ${BUILD_AREA}`);
         return;
       }
-      store.data.hall = { x: o.x, y: o.y, z: o.z, mini: 1 };
+      store.data.hall = { x: o.x, y: o.y, z: o.z, mini: MINI_VERSION };
       store.save();
       const w = waystoneSpot();
       writeSign(dim, o.x + w.dx, o.y + w.dy - 1, o.z + w.dz + 1, 0, "The Waystone\nClick it to hear\nhow things stand");
@@ -556,21 +560,24 @@ onTick("plots_welcome_hold", 20, () => {
 });
 onTick("plots_welcome_signs", 100, () => {
   if (!hallBuilt()) return;
-  if (!store.data.hall.mini) return swapOldHall();
+  if ((store.data.hall.mini ?? 0) < MINI_VERSION) return swapOldHall();
   refreshHall();
 });
 
-// A world that built the old round hall gets the miniature in its place: same spot on the map, lower in the sky
+// A world that built the old round hall (or the first, square miniature) gets the cloud miniature in its place:
+// same spot on the map, lower in the sky
 // (the miniature's mountains and rim must stay under the build limit). Newcomers still waiting there are brought
 // across once it stands; their choices so far are kept.
 function swapOldHall() {
   if (raising) return;
   const old = store.data.hall;
-  const o = { x: old.x, y: Math.min(old.y, WELCOME.hall.y), z: old.z };
-  console.warn("[Hollow Crown] welcome: replacing the old round hall with the miniature map");
+  // An older miniature (the square one) is rebuilt as the cloud in the same spot, its corners cleared
+  const round = !old.mini;
+  const o = round ? { x: old.x, y: Math.min(old.y, WELCOME.hall.y), z: old.z } : { x: old.x, y: old.y, z: old.z };
+  console.warn(`[Hollow Crown] welcome: replacing the ${round ? "old round hall" : "square miniature"} with the cloud miniature`);
   raiseHall(o, () => {
     for (const player of world.getPlayers()) if (player.hasTag(ARRIVING)) toHall(player);
-  }, old);
+  }, round ? old : undefined);
 }
 
 // ---------- Clicks, and keeping the hall whole ----------

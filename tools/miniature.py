@@ -278,15 +278,75 @@ for i in range(QUAY["dx"] - QUAY["half"], QUAY["dx"] + QUAY["half"] + 1):
         if land[b, a]:
             raise SystemExit(f"the quay reaches land at {i},{j}: move it out to sea")
 
+# ---------------------------------------------------------------- the cloud: the miniature's outline (Mateo 2026-11-12)
+# Not a square: the map sits on a cloud. The outline is a round core with puffs round its edge (overlapping circles),
+# so the edge bulges and dips like a cloud. Every plot, town and the quay stays well inside. Cells outside the cloud
+# are left empty; the ring of cells just outside it is the cloud's rim (white puffs a step above the land, with the
+# barrier fence above), and the cloud bulges a few blocks down under the floor.
+OUT, INSIDE, RIM = 0, 1, 2
+CORE = 37          # radius of the round middle
+REACH = 49         # no puff goes further than this from the middle (the rim must stay inside the array)
+rg = np.random.default_rng(1212)
+puffs = []
+a0 = ang = rg.uniform(0, 2 * math.pi)
+while ang < a0 + 2 * math.pi - 0.3:
+    r = rg.uniform(9.5, 12.5)
+    ring = rg.uniform(34, REACH - r)
+    puffs.append((ring * math.cos(ang), ring * math.sin(ang), r))
+    ang += rg.uniform(0.42, 0.62)
+GX, GZ = np.meshgrid(np.arange(CELLS) - HALF, np.arange(CELLS) - HALF)
+cloud = np.hypot(GX, GZ) <= CORE
+for px_, pz_, r in puffs:
+    cloud |= np.hypot(GX - px_, GZ - pz_) <= r
+# Everything that matters stands at least 3 blocks in from the edge: add a puff wherever something would be too close
+must = [(p["dx"], p["dz"]) for p in plots_out] + [(cell(x), cell(z)) for _, x, z, _ in TOWNS] + [(QUAY["dx"], QUAY["dz"])]
+def clear_of_edge(i, j, m=3 + QUAY["half"]):
+    return all(cloud[idx(j + dj), idx(i + di)] for di in range(-m, m + 1) for dj in range(-m, m + 1)
+               if math.hypot(di, dj) <= m + 0.3 and abs(i + di) <= HALF and abs(j + dj) <= HALF)
+for i, j in must:
+    m = 3 + (QUAY["half"] if (i, j) == (QUAY["dx"], QUAY["dz"]) else 0)
+    if not clear_of_edge(i, j, m):
+        d = math.hypot(i, j) or 1
+        r = 10.5
+        k = min(1.0, (REACH - r) / d)
+        cloud |= np.hypot(GX - i * k, GZ - j * k) <= r
+        if not clear_of_edge(i, j, m):
+            raise SystemExit(f"cannot fit {i},{j} inside the cloud")
+assert not cloud[0, :].any() and not cloud[-1, :].any() and not cloud[:, 0].any() and not cloud[:, -1].any()
+mask = np.where(cloud, INSIDE, OUT)
+grow = np.zeros_like(cloud)
+for da in (-1, 0, 1):
+    for db in (-1, 0, 1):
+        grow |= np.roll(np.roll(cloud, da, 1), db, 0)
+mask[grow & ~cloud] = RIM
+# How far the cloud bulges under the floor: deeper towards the middle, lumpy
+edge_d = np.full((CELLS, CELLS), 0.0)
+inside_pts = cloud.copy()
+for step in range(1, 9):
+    sh = inside_pts.copy()
+    for da, db in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+        sh &= np.roll(np.roll(inside_pts, da, 1), db, 0)
+    edge_d[sh] += 1
+    inside_pts = sh
+under = np.zeros((CELLS, CELLS), np.int32)
+for b in range(CELLS):
+    for a in range(CELLS):
+        if mask[b, a] == INSIDE:
+            under[b, a] = 1 + min(3, int(edge_d[b, a] / 2.5 + hsh(a, b, 9) * 1.4))
+        elif mask[b, a] == RIM:
+            under[b, a] = 1
+
 # ---------------------------------------------------------------- pack it
 SURFACES = sorted({surface(a, b) for a in range(CELLS) for b in range(CELLS)})
 DECOS = sorted({"|".join(v) for v in deco.values()})
 ALPHA = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_"
 assert len(SURFACES) < 64 and len(DECOS) < 63 and h.max() < 64
 cols = []
-grid = {"cells": CELLS, "scale": SCALE, "surfaces": SURFACES, "decos": DECOS, "h": [], "s": [], "w": [], "d": []}
+grid = {"cells": CELLS, "scale": SCALE, "surfaces": SURFACES, "decos": DECOS, "h": [], "s": [], "w": [], "d": [], "m": [], "u": []}
 for b in range(CELLS):
     hs, ss, ws, ds = [], [], [], []
+    grid["m"].append("".join(str(v) for v in mask[b]))
+    grid["u"].append("".join(str(v) for v in under[b]))
     for a in range(CELLS):
         hs.append(ALPHA[h[b, a]])
         ss.append(ALPHA[SURFACES.index(surface(a, b))])
@@ -300,14 +360,14 @@ def check_water():
     bad = []
     for b in range(CELLS):
         for a in range(CELLS):
-            if water[b, a] != WATER:
+            if water[b, a] != WATER or mask[b, a] != INSIDE:
                 continue
             for da, db in ((1, 0), (-1, 0), (0, 1), (0, -1)):
                 na, nb = a + da, b + db
                 if not (0 <= na < CELLS and 0 <= nb < CELLS):
                     continue  # the rim wall closes the edge
-                if water[nb, na] == WATER:
-                    continue
+                if water[nb, na] == WATER or mask[nb, na] == RIM:
+                    continue  # more water, or the cloud's rim
                 if h[nb, na] < 1:
                     bad.append((a - HALF, b - HALF))
     return bad
@@ -322,10 +382,10 @@ with open(OUT_JS, "w") as f:
     out = {"cells": CELLS, "scale": SCALE, "half": HALF, "surfaces": SURFACES, "decos": DECOS, "quay": QUAY,
            "plots": plots_out,
            "towns": [{"name": n, "dx": cell(x), "dz": cell(z), "h": int(h[idx(cell(z)), idx(cell(x))])} for n, x, z, _ in TOWNS],
-           "h": grid["h"], "s": grid["s"], "w": grid["w"], "d": grid["d"]}
+           "h": grid["h"], "s": grid["s"], "w": grid["w"], "d": grid["d"], "m": grid["m"], "u": grid["u"]}
     f.write("export const MINIATURE = " + json.dumps(out, separators=(",", ":")).replace('],"', '],\n"') + ";\n")
 os.makedirs(os.path.dirname(OUT_JSON), exist_ok=True)
 json.dump(out, open(OUT_JSON, "w"))
-blocks = int(h.sum()) + CELLS * CELLS * 2 + sum(len(v) for v in deco.values()) + int((water == WATER).sum())
+blocks = int(h[cloud].sum()) + int(cloud.sum()) + int(under.sum()) + sum(len(v) for v in deco.values()) + int((water == WATER).sum())
 print(f"{CELLS}x{CELLS} cells, max height {h.max()}, {len(deco)} decorations, ~{blocks} blocks, surfaces {SURFACES}")
 print("plots:", [(p["name"], p["dx"], p["dz"], p["h"]) for p in plots_out])
