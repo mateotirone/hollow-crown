@@ -469,5 +469,7 @@ item.siege:spell_step.name=Halfstep
 item.siege:spell_choir.name=Choir's Call
 item.siege:spell_hollowstep.name=Veilstep
 entity.siege:spell_satchel.name=Sorcerer's Satchel
+item.siege:plan_book.name=Plan Book
+item.siege:plan_scroll.name=Plan Scroll
 entity.siege:townsfolk.name=Townsperson
 action.interact.siege.talk=Talk
