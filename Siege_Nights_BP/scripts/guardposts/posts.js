@@ -18,6 +18,11 @@ export const POSTS = {
   markerTicks: 10, // how often markers are redrawn while someone is looking at them
   skyHeight: 96, // how high the sky view camera sits over the settlement
   buildingHeight: 30, // and over one building
+  // When stationed guards are at their posts (Mateo's pick pending, 2026-11-12): "dusk" = dusk till dawn, resting by the
+  // Barracks by day; "always" = day and night; "shifts" = half by day, half by night. A siege or a Wanted player on your
+  // land sends everyone to their post whatever the watch. A guard you just stationed holds the post until the watch changes.
+  watch: "dusk",
+  dusk: 12500, dawn: 23500, // world time of day
 };
 
 const TAU = Math.PI * 2;
