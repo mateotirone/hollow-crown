@@ -1,6 +1,6 @@
 ---
 name: minecraft-builder
-description: Design and build Minecraft structures from a small JSON spec. Shapes as maths (sphere, egg, cylinder, cone, torus, arch, lathe, boxes) with add/subtract, plus building parts that follow The Hollow Crown's build-instructions (plinth, frame, jetties, doors, windows, shutters, arches, roofs, chimney). A script voxelizes, fits slabs and stairs, matches colours in OKLab, and writes a .mcfunction, a JSON summary and an isometric preview. Use for any Minecraft build, house, tower, dome, statue-like shape or palette question.
+description: Design and build Minecraft structures from a small JSON spec. Shapes as maths (sphere, egg, cylinder, cone, torus, arch, lathe, boxes) with add/subtract, plus building parts that follow The Hollow Crown's build-instructions (plinth, frame, jetties, doors, windows, shutters, arches, roofs, chimney). A script voxelizes, fits slabs and stairs, matches colours in OKLab, and writes a .mcfunction, a JSON summary and an isometric preview. Use for any Minecraft build, house, tower, dome, statue-like shape or palette question, and to recreate a building from a screenshot or photo.
 ---
 
 # Minecraft builder
@@ -18,12 +18,15 @@ A 50,000-block castle costs about the same tokens as a hut.
    `reference/shapes.md` (shape maths, CSG, smoothing), `reference/parts.md` (every building part and the
    rule it follows), `reference/colour.md` (materials, gradients, palette, regeneration),
    `reference/house-rules.md` (Mateo's rules, region styles, where build-instructions/ says more),
-   `reference/output.md` (commands, editions, limits, in-game checks).
+   `reference/output.md` (commands, editions, limits, in-game checks),
+   `reference/from-picture.md` (rebuilding a building from a screenshot or photo).
 3. **Compression.** Never read the `.mcfunction` or `scene.json`, never print block lists. Read the summary,
    look at the PNG, change the spec, rebuild.
 
 ## Workflow
 
+0. **From a picture?** Follow `reference/from-picture.md`: grid, read the parts, measure, sample colours
+   with `scripts/picture.py`, then the steps below, comparing against the picture each round.
 1. **Plan (stage 0).** Odd dimensions, storey height 4 or 5, region style, roof type, where the door and
    chimney go. For a building in the project, read the matching `build-instructions/` stage files first.
 2. **Write the spec** (format below). Massing and curves go in `shapes`; anything a builder does by rule
@@ -70,6 +73,7 @@ A 50,000-block castle costs about the same tokens as a hut.
 ## Commands
 
     python3 scripts/build.py SPEC OUT [--stages] [--edition java] [--mcstructure] [--no-preview] [--hifi TEX THREE]
+    python3 scripts/picture.py grid|palette|sample|measure|compare ...                       # from a picture
     python3 scripts/build_palette.py --bedrock <resource pack | textures folder | .mcpack>     # or --java <client.jar>
 
 Outputs in OUT: `<name>.mcfunction` (merged fills, relative coords), `summary.json`, `preview.png`,
