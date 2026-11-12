@@ -19,6 +19,8 @@ export const WALLS = {
   auto: "map", // raise level 1 when a plot is claimed: "map" (only on a map with Plot Stones), "always", "off"
   gateWidth: 3, gateHeight: 4, gateGreet: 4, // a friend this close to their own gate gets it opened by the guard
   tierCap: [3, 5, 8, 10],
+  stairs: 4, // flights of steps up the inside of the wall: one either side of the gate, two more round the ring
+  stairFromGate: 12, // blocks from the middle of the gate to the foot of the flights beside it
   repair: { perBlock: 0.25, perCrack: 0.1, least: 1, perTick: 600 }, // price of a repair in lots (wallet.js): per missing block, per cracked block, and the least it costs. perTick = blocks looked at per tick. // the highest wall level a Hamlet, Town, City and Castle may raise
 };
 
@@ -37,9 +39,9 @@ const cost = (...rows) => rows; // [label, amount, kind]: kind is matched to ite
 export const WALL_LEVELS = [
   null,
   { name: "Low Palisade", h: 2, thick: 1, body: "log", gate: "open", cost: cost() }, // Mateo 2026-11-11: a low wall like level 2, not a fence
-  { name: "Palisade", h: 3, thick: 1, body: "log", gate: "castle_gate", gateH: 3, cost: cost(["logs", 128, "log"]) },
+  { name: "Palisade", h: 3, thick: 1, walk: 2, body: "log", gate: "castle_gate", gateH: 3, cost: cost(["logs", 128, "log"], ["planks", 96, "plank"]) }, // walk added 2026-11-12 (Mateo: guards need to stand on the wall)
   { name: "Braced Palisade", h: 4, thick: 1, walk: 2, body: "log", foot: "cobbled", gate: "castle_gate", gateH: 3, cost: cost(["logs", 96, "log"], ["planks", 128, "plank"], ["stone blocks", 96, "cobbled"]) },
-  { name: "Fieldstone Wall", h: 4, thick: 1, body: "cobbled", cap: "stone", gate: "castle_gate", gateH: 3, cost: cost(["stone blocks", 320, "cobbled"], ["stone blocks", 96, "stone"]) },
+  { name: "Fieldstone Wall", h: 4, thick: 1, walk: 3, body: "cobbled", cap: "stone", gate: "castle_gate", gateH: 3, cost: cost(["stone blocks", 320, "cobbled"], ["stone blocks", 96, "stone"], ["planks", 128, "plank"]) }, // walk added 2026-11-12
   { name: "Stone Wall", h: 5, thick: 1, walk: 3, body: "smooth", quoin: "stone", foot: "cobbled", battlements: true, gate: "castle_gate", gateH: 4, cost: cost(["stone blocks", 384, "smooth"], ["planks", 128, "plank"], ["iron ingots", 8, "iron"]) },
   { name: "Battlement Wall", h: 6, thick: 2, body: "smooth", quoin: "stone", foot: "cobbled", bands: { 4: "bricks" }, battlements: true, gate: "castle_gate", gateArmor: 1, port: true, gateH: 4, cost: cost(["stone blocks", 384, "smooth"], ["stone blocks", 128, "bricks"], ["iron ingots", 24, "iron"]) },
   { name: "Watch Wall", h: 7, thick: 2, body: "smooth", quoin: "stone", foot: "cobbled", bands: { 5: "bricks" }, battlements: true, towers: 4, r: 2, up: 3, gate: "castle_gate", gateArmor: 1, port: true, gateH: 4, cost: cost(["stone blocks", 384, "smooth"], ["stone blocks", 192, "bricks"], ["iron ingots", 32, "iron"]) },
@@ -117,6 +119,21 @@ export const TOWER_ROOF = { vale: true, frostmarch: true, blackfen: true };
 export function columnKinds(L, col, seed = 0, style) {
   const { x, z, base } = col, out = [];
   let top = col.top;
+  if (col.role === "stair") { // a step of a flight up the inside of the wall, on a solid footing
+    const wood = L.body === "log" || L.body === "fence";
+    for (let y = base + 1; y < top; y++) out.push([y, wood ? "plank" : "stone"]);
+    if (top > base) out.push([top, `${wood ? "wstair" : "sstair"}:${col.dir}`]);
+    return out;
+  }
+  if (col.role === "landing") { // the solid top of a flight, out to the walk
+    const wood = L.body === "log" || L.body === "fence";
+    for (let y = base + 1; y <= top; y++) out.push([y, wood ? "plank" : "stone"]);
+    return out;
+  }
+  if (col.role === "ladder") { // up the inner face of a tower, from the ground to the top
+    for (let y = base + 1; y <= top; y++) out.push([y, `ladder:${col.dir}`]);
+    return out;
+  }
   if (col.role === "gap" || col.role === "gate" || col.role === "port") {
     if (L.gate === "open") return out;
     const gateH = Math.min(L.gateH ?? WALLS.gateHeight, Math.max(2, L.h - (L.h > 3 ? 1 : 0)));
@@ -281,8 +298,103 @@ export function wallColumns({ center, radius = WALLS.radius, level, gateAngle, s
       put(cx + dx, cz + dz, { role: "tower", base: g, top: g + L.h + L.up + bump, d: edge ? 0 : 1, a, mid: dx === 0 && dz === 0, tooth: edge && (dx + dz) % 2 === 0, face: edge && (dx === 0 || dz === 0), corner: Math.abs(dx) === L.r && Math.abs(dz) === L.r, dx, dz });
     }
   }
+  // a ladder up the inner face of every tower, from the ground to its top
+  for (const [a, bump] of towers) {
+    const r = radiusAt(center, radius, a);
+    const inward = { x: -Math.cos(a), z: -Math.sin(a) };
+    const step = Math.abs(inward.x) >= Math.abs(inward.z) ? { x: Math.sign(inward.x), z: 0 } : { x: 0, z: Math.sign(inward.z) };
+    const cx = Math.round(center.x + Math.cos(a) * (r - 1)), cz = Math.round(center.z + Math.sin(a) * (r - 1));
+    const x = cx + step.x * (L.r + 1), z = cz + step.z * (L.r + 1);
+    const g = groundAt(smooth, a);
+    if (!cols.has(key(x, z))) cols.set(key(x, z), { x, z, role: "ladder", base: g, top: g + L.h + L.up + bump, d: 9, a, dir: CARD(step.x, step.z) });
+  }
+  // the top step must sit beside the walk: the flight hugs the wall, never through it, a tower or a ladder
+  const flights = stairColumns({ center, radius, L, gateAngle, smooth, taken: (x, z) => cols.has(key(x, z)) });
+  for (const c of flights) cols.set(key(c.x, c.z), { ...c, d: 9 });
+  // where a flight's top step doesn't quite touch the walk, a short solid landing carries on out to it
+  const standOn = (x, z) => { const n = cols.get(key(x, z)); return n && (n.role === "walk" || (n.role === "wall" && !L.walk)); };
+  const SIDES = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+  for (const t of flights.filter((c) => c.last)) {
+    let p = { x: t.x, z: t.z };
+    for (let n = 0; n < 6 && !SIDES.some(([dx, dz]) => standOn(p.x + dx, p.z + dz)); n++) {
+      const out = { x: p.x - center.x, z: p.z - center.z };
+      const tries = Math.abs(out.x) >= Math.abs(out.z) ? [[Math.sign(out.x), 0], [0, Math.sign(out.z) || 1]] : [[0, Math.sign(out.z)], [Math.sign(out.x) || 1, 0]];
+      const go = tries.find(([dx, dz]) => !cols.has(key(p.x + dx, p.z + dz)) || standOn(p.x + dx, p.z + dz));
+      if (!go || standOn(p.x + go[0], p.z + go[1])) break;
+      p = { x: p.x + go[0], z: p.z + go[1] };
+      cols.set(key(p.x, p.z), { x: p.x, z: p.z, role: "landing", base: groundAt(smooth, t.a), top: t.top, d: 9, a: t.a });
+    }
+  }
   const order = (c) => turn(c.a - gateAngle);
   return [...cols.values()].sort((p, q) => order(p) - order(q) || p.d - q.d);
+}
+
+// How high the place a guard (or a player) stands on the wall is above the ground: the walk, or the top of a thick
+// stone wall. 0 = nothing to stand on (the Low Palisade), so no steps.
+export function standHeight(L) {
+  if (!L) return 0;
+  if (L.walk) return L.walk;
+  if (L.body === "log" || L.body === "fence") return 0;
+  return L.h;
+}
+
+const CARD = (dx, dz) => (Math.abs(dx) >= Math.abs(dz) ? (dx > 0 ? "e" : "w") : (dz > 0 ? "s" : "n"));
+
+// Flights of steps up the inside of the wall (Mateo, 2026-11-12: guards and players need a way up). Each flight hugs
+// the inner face, one block in from the innermost wall or walk column, and follows the curve of the ring, rising a
+// block per step until it is level with the walk. Steps always touch side by side (never only at a corner).
+// Returns columns like wallColumns: { x, z, base, top, role: "stair", dir, a } where dir is the way the step rises.
+export function stairColumns({ center, radius, L, gateAngle, smooth, taken = () => false }) {
+  const H = standHeight(L);
+  if (!H) return [];
+  const deep = L.thick + (L.walk ? 1 : 0);
+  const out = [];
+  const used = new Set();
+  const flights = [];
+  const fromGate = WALLS.stairFromGate / radius;
+  flights.push([gateAngle + fromGate, 1], [gateAngle - fromGate, -1]);
+  for (let k = 1; k <= WALLS.stairs - 2; k++) flights.push([gateAngle + (k / (WALLS.stairs - 1)) * TAU, k % 2 ? 1 : -1]);
+  // the path of one flight from angle a0, `inset` blocks in from the innermost wall column
+  const trace = (a0, way, inset) => {
+    const cells = [];
+    const want = (a) => radiusAt(center, radius, a) - deep - inset;
+    const cellAt = (a) => ({ x: Math.round(center.x + Math.cos(a) * want(a)), z: Math.round(center.z + Math.sin(a) * want(a)), a });
+    let a = a0, last;
+    for (let guard = 0; cells.length < H + 1 && guard < 400; guard++) {
+      const c = cellAt(a);
+      a += (way * 0.4) / Math.max(10, radius - deep);
+      if (last && c.x === last.x && c.z === last.z) continue;
+      if (last && c.x !== last.x && c.z !== last.z) {
+        // a corner: put in the cell between that lies nearer the line, so the steps touch side by side
+        const opts = [{ x: c.x, z: last.z }, { x: last.x, z: c.z }];
+        const off = (p) => Math.abs(Math.hypot(p.x - center.x, p.z - center.z) - want(c.a));
+        cells.push({ ...(off(opts[0]) <= off(opts[1]) ? opts[0] : opts[1]), a: c.a });
+        if (cells.length >= H + 1) break;
+      }
+      cells.push(c);
+      last = c;
+    }
+    return cells;
+  };
+  for (const [a, way] of flights) {
+    // slide the flight along the wall (and a little further in) until no step lands on the wall or a tower
+    let cells;
+    for (const inset of [0, 1, 2]) {
+      for (const slide of [0, 3, -3, 6, -6, 9, -9, 12, -12, 16, -16]) {
+        const c = trace(a + (way * slide) / radius, way, inset);
+        if (c.length >= H + 1 && c.every((p) => !taken(p.x, p.z) && !used.has(`${p.x},${p.z}`))) { cells = c; break; }
+      }
+      if (cells) break;
+    }
+    if (!cells) continue;
+    const g0 = groundAt(smooth, cells[0].a);
+    for (let i = 0; i < H; i++) {
+      const c = cells[i], next = cells[i + 1];
+      used.add(`${c.x},${c.z}`);
+      out.push({ x: c.x, z: c.z, base: groundAt(smooth, c.a), top: g0 + i + 1, role: "stair", dir: CARD(next.x - c.x, next.z - c.z), a: c.a, ...(i === H - 1 ? { last: true } : {}) });
+    }
+  }
+  return out;
 }
 
 // Is a spot on the line of the wall (within `reach` blocks of it)?
