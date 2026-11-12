@@ -13,6 +13,8 @@
 //   lift     how far above the block's bottom (or the entity's feet) the label sits
 //   where    (block) => bool, for a block id that only sometimes opens a menu
 //   name     on an entity, adds a name line above the hint (for entities with no nameTag of their own)
+//   text     (block or entity) => string | undefined: the whole label for this one, when it has news to show
+//            (undefined falls back to name and hint)
 //
 // How it works: every second, around each player in turn, one native getBlocks() call looks for the
 // registered block ids within LABEL.range, and one getEntities() call per registered entity type
@@ -65,7 +67,13 @@ export function addMenuLabel(spec) {
 export const labelledBlocks = () => [...blockSpecs.keys()];
 export const labelledEntities = () => [...entitySpecs.keys()];
 
-export function labelText(spec) {
+export function labelText(spec, thing) {
+  if (spec.text && thing) {
+    try {
+      const t = spec.text(thing);
+      if (typeof t === "string" && t) return t;
+    } catch {}
+  }
   if (spec.block) return `${LABEL.nameColor}${spec.name}\n${LABEL.hintColor}${spec.hint}`;
   return spec.name ? `${LABEL.nameColor}${spec.name}\n${LABEL.entityHintColor}${spec.hint}` : `${LABEL.entityHintColor}${spec.hint}`;
 }
@@ -132,7 +140,7 @@ function scanAround(player) {
       const spec = block && specFor(blockSpecs.get(block.typeId), block);
       if (!spec) continue;
       const at = { x: loc.x + 0.5, y: loc.y + (spec.lift ?? LABEL.blockLift), z: loc.z + 0.5 };
-      show(dim, `b:${dim.id}:${loc.x},${loc.y},${loc.z}`, at, labelText(spec));
+      show(dim, `b:${dim.id}:${loc.x},${loc.y},${loc.z}`, at, labelText(spec, block));
     }
   }
   for (const [type, specs] of entitySpecs) {
@@ -142,7 +150,7 @@ function scanAround(player) {
       const spec = specFor(specs, e);
       if (!spec) continue;
       const l = e.location;
-      show(dim, `e:${e.id}`, { x: l.x, y: l.y + (spec.lift ?? LABEL.entityLift), z: l.z }, labelText(spec));
+      show(dim, `e:${e.id}`, { x: l.x, y: l.y + (spec.lift ?? LABEL.entityLift), z: l.z }, labelText(spec, e));
     }
   }
 }

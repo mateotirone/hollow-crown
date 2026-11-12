@@ -313,6 +313,12 @@
   "siege_station_post_top": {
    "textures": "textures/blocks/travel/siege_station_post_top"
   },
+  "siege_trade_board_side": {
+   "textures": "textures/blocks/trade/siege_trade_board_side"
+  },
+  "siege_trade_board_top": {
+   "textures": "textures/blocks/trade/siege_trade_board_top"
+  },
   "siege_breeder_post_side": {
    "textures": "textures/blocks/travel/siege_breeder_post_side"
   },
@@ -1344,6 +1350,30 @@
   },
   "siege_well_crank_wound": {
    "textures": "textures/blocks/unlocks/siege_well_crank_wound"
+  },
+  "siege_vault_safe_front_0": {
+   "textures": "textures/blocks/vault/safe_front_0"
+  },
+  "siege_vault_safe_front_1": {
+   "textures": "textures/blocks/vault/safe_front_1"
+  },
+  "siege_vault_safe_front_2": {
+   "textures": "textures/blocks/vault/safe_front_2"
+  },
+  "siege_vault_safe_front_3": {
+   "textures": "textures/blocks/vault/safe_front_3"
+  },
+  "siege_vault_safe_side": {
+   "textures": "textures/blocks/vault/safe_side"
+  },
+  "siege_vault_safe_gold": {
+   "textures": "textures/blocks/vault/safe_gold"
+  },
+  "siege_vault_safe_front_4": {
+   "textures": "textures/blocks/vault/safe_front_4"
+  },
+  "siege_vault_safe_front_5": {
+   "textures": "textures/blocks/vault/safe_front_5"
   }
  },
  "siege_stopped_clock_case": {
