@@ -43,7 +43,7 @@ AREAS = [
     ("yard",      "Mason's yard",     (9, 19, -13, -3),  "r-", {}),
     # buildings give their door cell; the box comes from the design's real size (--sizes, from sizes.mjs)
     ("building",  "Library",          (-9, -8),           "r+", {"design": "library"}),
-    ("building",  "Cottage",          (5, -23),           "r-", {"design": "cottage", "slot": (5, 17, -28, -18)}),
+    ("building",  "House",            (5, -23),           "r-", {"design": "house", "slot": (5, 19, -28, -18)}),
     ("building",  "House",            (-5, -23),          "r+", {"design": "house", "slot": (-19, -5, -28, -18)}),
     ("slot",      "Empty plot",       (-23, -11, 1, 9),   "r+", {"size": "S"}),
     ("field",     "Common field",     (-23, -11, 11, 23), "r+", {}),

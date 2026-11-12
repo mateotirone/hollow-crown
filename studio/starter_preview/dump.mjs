@@ -8,7 +8,7 @@ const S = new URL("../../Siege_Nights_BP/scripts/", import.meta.url).href;
 const { drawHall, frameFor, toWorld, statesFor } = await import(S + "townhall/halls.js");
 const { STYLES } = await import(S + "townhall/styles.js");
 const { drawBuilding, styleFor } = await import(S + "settle/buildings.js");
-const { WALLS, WALL_LEVELS, wallColumns, columnKinds } = await import(S + "settle/walldata.js");
+const { WALLS, WALL_LEVELS, WALL_LOG, wallColumns, columnKinds } = await import(S + "settle/walldata.js");
 const { REGION_TO_STYLE } = await import(S + "settle/config.js");
 
 const [src, dst = "starter_view.json"] = process.argv.slice(2);
@@ -82,7 +82,8 @@ for (const b of P.buildings) {
 const center = { x: 0, y: P.center.y, z: 0, radii: P.wall.radii, radiiAt: P.wall.radiiAt ?? 36 };
 const smooth = new Array(WALLS.stations).fill(P.center.y);
 const kinds = {
-  log: short((st.roles.beam ?? ["minecraft:spruce_log"])[0]), fence: short((st.roles.rail ?? ["minecraft:spruce_fence"])[0]),
+  log: short(WALL_LOG[styleId] ?? WALL_LOG.vale), // log walls are always the stripped log, as walls.js builds them
+  fence: short((st.roles.rail ?? ["minecraft:spruce_fence"])[0]),
   plank: short((st.roles.floor ?? ["minecraft:spruce_planks"])[0]), stone: "stone_bricks", tiles: "chiseled_stone_bricks", bricks: "polished_andesite", cobbled: "cobblestone", smooth: "smooth_stone",
   tooth: "stone_brick_wall", light: "lantern", gate: "spruce_fence_gate", port: "iron_bars", slit: "stone_bricks",
 };
