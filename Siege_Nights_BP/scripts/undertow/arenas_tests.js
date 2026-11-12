@@ -2,7 +2,7 @@
 import { addTests, assert } from "../core/tests.js";
 import { COURT_DESIGN, SEAT_DESIGN, APPROACH_DESIGN } from "./arenas_data.js";
 import { heightAt, heartEdge, HEART_EDGE_Z } from "./terrain.js";
-import { edgeCarveOps } from "./builder.js";
+import { edgeCarveOps, SEAT_BOX, seatChunksLeft, nearSeatEnd, RANKS_BOX, RANKS_SITE, boxChunksLeft } from "./builder.js";
 import { stampCells } from "./stamp.js";
 import { COURT, HEART } from "./layout.js";
 import { singerSpot, CHOIR, waveSize, waveCaptain } from "./choir.js";
@@ -15,6 +15,30 @@ const solidAt = (d) => {
 const blocks = (s, k) => { const n = s.get(k); return n && n !== "minecraft:air" && n !== "minecraft:water"; };
 
 addTests("hollow arenas", {
+  "the end of the Long Climb: the Seat and the way across are built from one loadable box (Mateo 2026-11-12)": () => {
+    // Both designs fit inside SEAT_BOX, so holding it loaded is enough to stamp them.
+    for (const [name, D] of [["Seat", SEAT_DESIGN], ["approach", APPROACH_DESIGN]]) {
+      for (const [, z, x0, n] of [...D.rows, ...(D.clear ?? [])]) {
+        const wx0 = HEART.center.x + x0, wx1 = wx0 + n - 1, wz = HEART.center.z + z;
+        assert(wx0 >= SEAT_BOX.x1 && wx1 <= SEAT_BOX.x2 && wz >= SEAT_BOX.z1 && wz <= SEAT_BOX.z2, `${name} row at x ${wx0}..${wx1}, z ${wz} is outside SEAT_BOX`);
+      }
+    }
+    // Box the Seat waits for (chunksBuilt(-40, 2300, 40, 2440)) is inside it too.
+    assert(SEAT_BOX.x1 <= -40 && SEAT_BOX.x2 >= 40 && SEAT_BOX.z1 <= 2300 && SEAT_BOX.z2 >= 2440, "the Seat's own wait box is not inside SEAT_BOX");
+    const chunks = (Math.floor(SEAT_BOX.x2 / 16) - Math.floor(SEAT_BOX.x1 / 16) + 1) * (Math.floor(SEAT_BOX.z2 / 16) - Math.floor(SEAT_BOX.z1 / 16) + 1);
+    assert(chunks <= 100, `a ticking area holds at most 100 chunks; SEAT_BOX is ${chunks}`);
+    assert(seatChunksLeft(() => true).length === 0, "nothing left when all is built");
+    const left = seatChunksLeft(() => false);
+    assert(left.length === chunks && left[0][1] === Math.floor(SEAT_BOX.z1 / 16), "chunks nearest the cliff first");
+    assert(nearSeatEnd([{ x: 0, z: HEART_EDGE_Z - 2 }]) && nearSeatEnd([{ x: 30, z: 2200 }]), "someone at the cliff end or coming up the climb");
+    assert(!nearSeatEnd([{ x: 0, z: 1600 }]) && !nearSeatEnd([{ x: 600, z: 2320 }]), "not from the Court, nor far out in the open country");
+  },
+  "the Standing Ranks (Morvane's stage 2) are built from one loadable box (Mateo 2026-11-12)": () => {
+    const r = RANKS_SITE;
+    assert(RANKS_BOX.x1 <= r.x - r.r && RANKS_BOX.x2 >= r.x + r.r && RANKS_BOX.z1 <= r.z - r.r && RANKS_BOX.z2 >= r.z + r.r, "the box covers the whole site");
+    const n = boxChunksLeft(RANKS_BOX, () => false).length;
+    assert(n > 0 && n <= 100, `a ticking area holds at most 100 chunks; the Ranks box is ${n}`);
+  },
   "the Court's floor is whole and open to the fight's outer ring, with the Singers' spots clear": () => {
     const s = solidAt(COURT_DESIGN);
     for (let x = -26; x <= 26; x++) for (let z = -26; z <= 26; z++) {

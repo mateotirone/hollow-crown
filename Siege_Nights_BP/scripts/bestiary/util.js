@@ -68,6 +68,8 @@ export const setHurtScale = (fn) => { hurtScale = fn; };
 export function hurt(entity, amount, cause = "magic", by) {
   try {
     if (entity.typeId === "minecraft:player") amount = Math.round(amount * hurtScale() * 10) / 10;
+    // "void" damage kills through Creative and Spectator, so bosses never deal it: it lands as magic
+    if (cause === "void") cause = "magic";
     // Creative players can't be hurt, so playtesters at least see what would have landed
     if (entity.typeId === "minecraft:player" && entity.getGameMode?.() === GameMode.Creative) entity.onScreenDisplay.setActionBar(`§7(Creative) That hit you for §c${amount}§7.`);
     entity.applyDamage(amount, by ? { cause, damagingEntity: by } : { cause });

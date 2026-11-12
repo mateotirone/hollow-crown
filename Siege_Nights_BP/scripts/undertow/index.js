@@ -379,7 +379,7 @@ system.afterEvents.scriptEventReceive.subscribe((e) => {
           save(K_PROGRESS, prog);
           openCourtGate();
           requestPockets(); // get the last fight's places built while players make the Long Climb
-          world.sendMessage("§5The Court falls silent. Behind the throne, the sealed gate cracks open.");
+          world.sendMessage("§5The Court falls silent. Behind the throne, the sealed gate cracks open. The way on is south, up the Long Climb, to the Seat.");
         }
       }
       if (boss === "morvane") {

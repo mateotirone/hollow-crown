@@ -382,12 +382,89 @@ export function piecesTick() {
   const courtOld = p.court && (p.courtV ?? 1) < COURT_DESIGN.v;
   if ((!p.court || courtOld) && chunksBuilt(-COURT.radius - 2, COURT.center.z - COURT.radius - 12, COURT.radius + 2, COURT.gateZ + 14)) buildCourt(d, courtOld);
 
-  // The Seat (the Choir's Heart in the code).
+  // The Seat (the Choir's Heart in the code). Nobody can stand near enough to build the chunks it hangs in,
+  // so they are built for it (seatEnd below) as soon as anyone comes up the Long Climb.
   const heartOld = p.heart && (p.heartV ?? 1) < SEAT_DESIGN.v;
-  if ((!p.heart || heartOld) && chunksBuilt(-40, 2300, 40, 2440)) buildHeart(d, heartOld);
+  const heartDue = !p.heart || heartOld, approachDue = (p.approachV ?? 0) < APPROACH_DESIGN.v;
+  seatEnd(d, heartDue || approachDue);
+  ranksGround(d, p);
+  if (heartDue && chunksBuilt(-40, 2300, 40, 2440)) buildHeart(d, heartOld);
   // The way across to it, once the cliff it leaves from and the air it hangs in are built.
-  if ((p.approachV ?? 0) < APPROACH_DESIGN.v && chunksBuilt(-L.halfWidth, HEART_EDGE_Z - 36, L.halfWidth, HEART_EDGE_Z + 40)) buildApproach(d);
+  if (approachDue && chunksBuilt(SEAT_BOX.x1, SEAT_BOX.z1, SEAT_BOX.x2, HEART_EDGE_Z + 40)) buildApproach(d);
+  carveRest(d);
   if (changed) savePieces(p);
+}
+
+// ---- the end of the Long Climb -------------------------------------------------------------
+// Mateo, 2026-11-12: "i got to the end of the path and what now?" The path ran out at the cliff with nothing
+// past it. The Seat and the way across waited for every chunk round them to be built, but land is only built
+// round players: the Seat hangs over the void where nobody can stand, and the way across also waited for the
+// whole 300-block cliff edge. Now, whenever someone comes up the end of the Long Climb and either is still
+// missing, the box they stand in (SEAT_BOX) is held loaded by a ticking area and its chunks are built one by
+// one; then both are stamped. The rest of the cliff edge is carved on its own, as its land gets built.
+export const SEAT_BOX = { x1: -64, z1: HEART_EDGE_Z - 40, x2: 68, z2: HEART.center.z + HEART.outerRadius + 10 };
+export const SEAT_NEAR = 160; // how close to the cliff end (blocks) a player must be for the Seat to be built
+// The chunks of a box not built yet, in rows from its low-z side. Pure on isBuilt.
+export function boxChunksLeft(box, built = isBuilt) {
+  const out = [];
+  for (let cz = Math.floor(box.z1 / 16); cz <= Math.floor(box.z2 / 16); cz++)
+    for (let cx = Math.floor(box.x1 / 16); cx <= Math.floor(box.x2 / 16); cx++)
+      if (chunkInRange(cx, cz) && !built(cx, cz)) out.push([cx, cz]);
+  return out;
+}
+export const seatChunksLeft = (built = isBuilt) => boxChunksLeft(SEAT_BOX, built);
+// Is anyone near enough to the end of the Long Climb to need the Seat? Pure.
+export const nearSeatEnd = (locs) => locs.some((l) => Math.abs(l.x) < L.halfWidth + 40 && l.z > HEART_EDGE_Z - SEAT_NEAR);
+
+// Hold a box loaded with a ticking area while it is wanted, and build its chunks one at a time.
+const held = {}; // area name -> true/false (undefined until the first check this session: a leftover area is cleared)
+function holdAndBuild(d, area, box, want) {
+  const cmd = (c) => { try { d.runCommand(c); } catch { /* no area by that name, or the command is busy */ } };
+  if (!want) {
+    if (held[area] !== false) { cmd(`tickingarea remove ${area}`); held[area] = false; }
+    return;
+  }
+  if (!held[area]) {
+    cmd(`tickingarea remove ${area}`);
+    cmd(`tickingarea add ${box.x1} 0 ${box.z1} ${box.x2} 0 ${box.z2} ${area} true`);
+    held[area] = true;
+  }
+  if (job) return; // the builder is busy: next time
+  const next = boxChunksLeft(box)[0];
+  if (!next) return;
+  const ops = planChunk(next[0], next[1]);
+  if (builtOld(next[0], next[1])) ops.unshift(...clearOps(next[0], next[1], lowestGround(next[0], next[1])));
+  job = { cx: next[0], cz: next[1], ops, i: 0 }; // buildTick carries it out (an unloaded chunk is simply tried again)
+}
+
+const hollowLocs = () => world.getAllPlayers().filter((pl) => pl.dimension.id === UNDERTOW_ID).map((pl) => pl.location);
+function seatEnd(d, due) {
+  holdAndBuild(d, "hc_undertow_seat", SEAT_BOX, due && nearSeatEnd(hollowLocs()));
+}
+
+// The Standing Ranks are stage 2 of Morvane's fight, but they stand out in the open country east of the Spine,
+// where someone who kept to the path has never been, so nothing was built there and the stage was just dark
+// (Mateo, 2026-11-12). Once the Choir is silenced, while anyone is in the Hollow, their ground is built.
+export const RANKS_SITE = SITES.find((s) => s.id === "standing_ranks");
+export const RANKS_BOX = { x1: RANKS_SITE.x - RANKS_SITE.r - 4, z1: RANKS_SITE.z - RANKS_SITE.r - 4, x2: RANKS_SITE.x + RANKS_SITE.r + 4, z2: RANKS_SITE.z + RANKS_SITE.r + 4 };
+export const ranksReady = () => !!pieces().ranks && boxChunksLeft(RANKS_BOX).length === 0;
+function ranksGround(d, p) {
+  const want = !!load("hc:undertow_progress", {}).choir && !(p.ranks && boxChunksLeft(RANKS_BOX).length === 0) && hollowLocs().length > 0;
+  holdAndBuild(d, "hc_undertow_ranks", RANKS_BOX, want);
+}
+
+// The cliff edge outside SEAT_BOX: carved column by column once the land at that column is built.
+// A few columns per call, going round the edge, so a column that is built but not loaded never holds up the rest.
+const carvedThisSession = new Set();
+let restX = -L.halfWidth;
+function carveRest(d) {
+  for (let n = 0; n < 8; n++) {
+    const x = restX;
+    restX = restX >= L.halfWidth ? -L.halfWidth : restX + 1;
+    if ((x >= SEAT_BOX.x1 && x <= SEAT_BOX.x2) || carvedThisSession.has(x)) continue;
+    if (!chunksBuilt(x, HEART_EDGE_Z - 36, x, HEART_EDGE_Z)) continue;
+    if (carveColumn(d, x)) carvedThisSession.add(x);
+  }
 }
 
 // True when this world built an older version of a site's design (no saved version means version 1).
@@ -504,20 +581,26 @@ export function edgeCarveOps(x) {
   }
   return ops;
 }
-let carveX = -L.halfWidth;
-// A few columns each call; true once the whole edge is done. Only old rock is dug: a column that is already open
-// 20 blocks down (a world built with the new edge) is left alone, so the moss hanging over its cliffs stays.
+// Dig one column of the old straight edge back to the ragged one; false if it is not loaded yet.
+function carveColumn(d, x) {
+  for (const op of edgeCarveOps(x)) {
+    let rock;
+    try { rock = d.getBlock({ x, y: 100, z: op.a[2] }); } catch { return false; }
+    if (!rock) return false;
+    if (!rock.isAir && !apply(d, op)) return false;
+  }
+  return true;
+}
+let carveX = SEAT_BOX.x1;
+// A few columns each call, across the way to the Seat (the rest of the edge is carveRest's); true once done.
+// Only old rock is dug: a column that is already open 20 blocks down (a world built with the new edge) is left
+// alone, so the moss hanging over its cliffs stays.
 function carveEdge(d) {
-  for (let n = 0; n < 8 && carveX <= L.halfWidth; n++) {
-    for (const op of edgeCarveOps(carveX)) {
-      let rock;
-      try { rock = d.getBlock({ x: carveX, y: 100, z: op.a[2] }); } catch { return false; }
-      if (!rock) return false;
-      if (!rock.isAir && !apply(d, op)) return false;
-    }
+  for (let n = 0; n < 8 && carveX <= SEAT_BOX.x2; n++) {
+    if (!carveColumn(d, carveX)) return false;
     carveX++;
   }
-  return carveX > L.halfWidth;
+  return carveX > SEAT_BOX.x2;
 }
 
 // The way to the Seat (hollow_arenas.py approach()): the Last Step's broken gate on a shelf off the cliff, five
