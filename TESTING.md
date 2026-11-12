@@ -647,5 +647,6 @@ Tell me about: a label sitting inside the block or too high above it, a label co
 1. Stand at your cornerstone with a Longhouse built and run `/scriptevent siege:townhall_build 3`.
 2. ✅ The title "The Keep rises" shows once, the camera circles, and the action bar shows only a bar with a percentage that climbs steadily.
 3. ✅ The old Longhouse is gone completely before the Keep goes up: no leftover walls, roof or posts in or beside it.
-4. ✅ It is finished in about 15 seconds, and the Hall Cornerstone is gone once the hall stands. The Tree of Oaths' first page has a "Town Hall" button that opens the Town Hall menu (so does the Keep menu).
+4. ✅ It is finished in about 15 seconds and the Hall Cornerstone is gone. Just inside the front door, to one side of the aisle, stands the Town Board (a wide notice board with pinned papers, labelled when you are near). Clicking it opens the Town Hall menu. Check all five styles: `/scriptevent siege:townhall_build 3 frostmarch` and so on.
+   - A hall built before this update gets its Town Board the next time the world loads or you open the Town Hall from the Keep menu.
 5. Town Hall menu → "Move the town hall" → "Move it". ✅ You get a Hall Cornerstone back, the Tree sleeps, and placing the stone elsewhere starts a new hall. Placing a second cornerstone while a hall stands is refused with a message.
