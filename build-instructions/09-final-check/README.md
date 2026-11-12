@@ -45,6 +45,7 @@ playing so it has to be perfect." Be harder on it than he would be.
 - [ ] Windows stacked; glass flush with the face; sills wider than the glass; heads capped; glass tinted
       to the house; shutters on at most 30%.
 - [ ] Doorway clean: jambs, lintel, canopy or lanterns, not both crowded.
+- [ ] Stamped on the map: no map tree left inside it, round it or hanging over it (core/clearing.js clears them in game; check the 3D view on the real ground).
 - [ ] The way in is clear: nothing in front of a door or beside it at foot height; every block of the building has a door.
 - [ ] Every walked space (lean-to, porch, arcade, passage) has a clear walk 1 wide and 2 high; arcades level with the ground.
 - [ ] Windows line up storey to storey; dormers over the windows below.
