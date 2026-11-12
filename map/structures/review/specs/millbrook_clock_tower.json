@@ -30,6 +30,7 @@
     "kind": "house",
     "steps": 2
    },
+   "interior": "tower",
    "windows": {
     "n": [
      {
@@ -124,7 +125,8 @@
     "type": "flat"
    },
    "chimney": false,
-   "bushes": false
+   "bushes": false,
+   "interior": false
   },
   {
    "part": "spire",

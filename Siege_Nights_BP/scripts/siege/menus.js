@@ -5,14 +5,14 @@ import { world, ItemStack } from "@minecraft/server";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
 import { applyFilter } from "../core/events.js";
 import { COLORS, GUARD_TYPES } from "./constants.js";
-import { GUARD_ARMOR, GUARD_COST, armorTier, guardCount, guardLimit, guardTag, recruitGuard, upgradeGuard } from "./guards.js";
+import { GUARD_ARMOR, armorTier, guardCount, guardLimit, guardTag, upgradeGuard } from "./guards.js";
 import { keepHealth } from "./keep.js";
 import { nextSiegeDay } from "./siege.js";
 import { state } from "./state.js";
 import { TIERS, settlementAt, tierOf, landRadius } from "./territory.js";
 import { countItem, overworld } from "./util.js";
 import { funds } from "../economy/coins.js";
-import { coins, worth } from "../economy/rules.js";
+import { coins } from "../economy/rules.js";
 
 // ---------- Menus: the Keep, the Barracks ----------
 
@@ -64,22 +64,19 @@ export function barracksMenu(block, player) {
   const form = new ActionFormData().title("Barracks").body([
     `Guards: ${count}/${limit}   You have ${coins(funds(player))}`,
     "",
-    `Recruiting costs ${worth(GUARD_COST)} and needs an unemployed villager standing next to the Barracks.`,
+    "Train soldiers here: pick how many of each type, see the total and press Train.",
     "Men-at-Arms wait here and charge out during sieges. Archers stay wherever you place them.",
   ].join("\n"));
-  form.button(`Recruit a Man-at-Arms\n§8${worth(GUARD_COST)}`, "textures/items/siege_man_at_arms");
-  form.button(`Recruit an Archer\n§8${worth(GUARD_COST)}`, "textures/items/siege_archer");
-  form.button(`Your guards (${count})`, "textures/items/iron_sword");
   // features add buttons here: applyFilter("barracksButtons", []) -> [{ label, icon?, run(player, block) }]
+  // (army/index.js puts "Train soldiers" and "Upgrade the Barracks" first)
   const extra = applyFilter("barracksButtons", [], { player, block });
   for (const b of extra) form.button(b.label, b.icon);
+  form.button(`Your guards (${count})`, "textures/items/iron_sword");
   form.button("Close");
   form.show(player).then((r) => {
     if (r.canceled) return;
-    if (r.selection === 0) recruitGuard(block, player, undefined, "siege:man_at_arms");
-    if (r.selection === 1) recruitGuard(block, player, undefined, "siege:archer");
-    if (r.selection === 2) guardList(player);
-    if (r.selection >= 3 && r.selection < 3 + extra.length) extra[r.selection - 3].run(player, block);
+    if (r.selection < extra.length) extra[r.selection].run(player, block);
+    else if (r.selection === extra.length) guardList(player);
   }).catch(() => {});
 }
 

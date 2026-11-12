@@ -225,6 +225,15 @@ export function unstation(guard, owner) {
   save();
 }
 
+// An unmanned post for a new soldier: the wall first (where Archers belong), then any building. undefined if none
+// is free or loaded.
+export function emptyPost(owner, { wallFirst = true } = {}) {
+  const manned = mannedOf(owner);
+  const free = allPosts(sitesFor(owner, true)).filter((p) => { const id = manned[p.key]; return !id || !entityById(id); });
+  const order = wallFirst ? [...free.filter((p) => p.site?.wall), ...free.filter((p) => !p.site?.wall)] : free;
+  return order.find((p) => standOf(p));
+}
+
 // Send a guard to a post. Returns a line for the player.
 export function station(guard, owner, post) {
   if (!standOf(post)) return "§cThat post isn't loaded right now. Go a little closer and try again.";
@@ -279,6 +288,7 @@ function keepWatch() {
       }
       if (stationOf(guard) !== key) { delete manned[key]; changed = true; continue; }
       if (!post) { unstation(guard, owner); changed = true; continue; }
+      if (guard.hasTag("siege_marching")) continue; // away at war (warwrit/army.js)
       sendOff(guard, owner, post); // the watch changed, the wall moved out, or a walk was cut short by a restart
     }
     if (changed) save();

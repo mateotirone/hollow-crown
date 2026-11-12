@@ -117,8 +117,16 @@ def bedrock_state(n, p):
         st["attachment"] = "hanging"; st["direction"] = {"s": 0, "w": 1, "n": 2, "e": 3}[f or "s"]
     elif n.endswith("_button"):  # stuck to the wall behind it, pointing out of face f
         st["facing_direction"] = {"n": 2, "s": 3, "w": 4, "e": 5}[f or "s"]
+    elif n == "bed":           # Bedrock bed direction: 0 south, 1 west, 2 north, 3 east (the head end), as bp.py
+        st["direction"] = {"s": 0, "w": 1, "n": 2, "e": 3}[f or "s"]; st["head_piece_bit"] = bool(p.get("head"))
+    elif n == "barrel":
+        st["facing_direction"] = 1
+    elif n == "ladder":        # the way the ladder faces (away from the wall it hangs on)
+        st["facing_direction"] = {"n": 2, "s": 3, "w": 4, "e": 5}[f or "s"]
     elif n == "candle" or n.endswith("_candle"):
-        st["lit"] = bool(p.get("lit")); st["candles"] = int(p.get("candles", 1)) - 1
+        st["candles"] = max(0, int(p.get("candles", 1)) - 1); st["lit"] = bool(p.get("lit", True))
+    elif f and n not in ("campfire",):
+        st["minecraft:cardinal_direction"] = CARD[f]      # chests, furnaces, lecterns, anvils... (dropped when the block has none)
     if p.get("axis"): st["pillar_axis"] = p["axis"]
     if n.startswith("siege:"):                                   # the add-on's own blocks: they only turn
         if f: st["minecraft:cardinal_direction"] = CARD[f]
