@@ -271,6 +271,11 @@ Add a line here when you publish one.
   `guardOrders { player, guard }`; siege/ hooks it uses: filters `guardMenu` (plain click on a guard, the guard list) and
   `barracksButtons`, event `guardRemoved { id, owner }`, `setPost` with `{ x, y, z, stand: true }` posts (STATION_LEASH).
   Guard animations: `tools/build_guard_anims.py` (rewrites both guard client entities). Marker art: `tools/build_guardposts_art.py`.
+  Walking (`guardposts/walk.js`): a walking guard chases a hidden `siege:post_marker` kept up to 14 blocks ahead, through one of
+  24 walk groups (`tools/build_guard_walk.py` patches both guard BP entities; archers' shooting lives in group `siege:fight`).
+  `walkTo(guard, owner, dest)`, `cancelWalk(id)`. While walking a guard has dynamic property `siege:walking` and siege/guards.js
+  leaves it alone. Watch: `POSTS.watch` in posts.js ("dusk" | "always" | "shifts"). Wall steps: `stairColumns` in settle/walldata.js
+  (roles stair/landing/ladder in `wallColumns`).
 
 ## The minimap and titles
 

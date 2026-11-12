@@ -18,6 +18,9 @@ export const TRAIN = {
   drive: "velocity", // how cars are moved: "velocity" (smooth) or "teleport" (exact). /scriptevent siege:trains mode <name>
   snapDistance: 2, // a car further than this from where it should be is teleported back
   maxCars: 6,
+  carriageSpeed: 0.2, // the free station carriage: 4 blocks a second
+  price: { engine: 2000, coach: 900 }, // Regals to buy one at a station (building one takes ~24 / ~10 iron blocks)
+  carriageIdle: 1200, // ticks an empty station carriage waits before it's put away
   saveEvery: 100, // ticks
 };
 
