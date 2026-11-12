@@ -18,18 +18,18 @@ export const MAP = {
 // relic: where the plot's own old landmark stands (what it is: lore/data/plots.js, field `build`). It is inside the
 // plot but off the level settlement ground, away from the gate, on the side the story needs (river, lake, sea, high ground).
 export const PLOT_PLAN = [
-  { name: "Harrowford", region: "Aldmere Vale", x: -470, z: -300, gate: 90, relic: { x: -445, z: -232 }, site: "river meadow above the lower Alder" },
-  { name: "Oakmere", region: "Aldmere Vale", x: 260, z: -480, gate: 270, relic: { x: 332, z: -480 }, site: "oak forest between the two rivers" },
-  { name: "Thistledown", region: "Aldmere Vale", x: 300, z: 130, gate: 0, relic: { x: 370, z: 111 }, site: "open downs south of the Greywater" },
-  { name: "Wrenfield", region: "Aldmere Vale", x: -200, z: 220, gate: 90, relic: { x: -164, z: 282 }, site: "lakeside fields by Wren Water" },
-  { name: "Frosthelm", region: "Frostmarch", x: -520, z: -760, gate: 180, relic: { x: -479, z: -819 }, site: "a shelf in the western foothills" },
-  { name: "Wolfcairn", region: "Frostmarch", x: 520, z: -1010, gate: 270, relic: { x: 575, z: -1056 }, site: "high plateau north of the range" },
-  { name: "Gullcliff", region: "Saltreach", x: -760, z: -560, gate: 90, relic: { x: -825, z: -530 }, site: "clifftop over the northern coast" },
-  { name: "Tidewatch", region: "Saltreach", x: -560, z: 650, gate: 0, relic: { x: -596, z: 712 }, site: "dunes above the southern shore" },
-  { name: "Reedmoor", region: "Blackfen", x: -230, z: 560, gate: 90, relic: { x: -230, z: 632 }, site: "the firm northern edge of the fen" },
-  { name: "Lanternbog", region: "Blackfen", x: 260, z: 980, gate: 0, relic: { x: 260, z: 1052 }, site: "a dry island deep in the fen" },
-  { name: "Redmesa", region: "Emberwaste", x: 700, z: 60, gate: 180, relic: { x: 700, z: -12 }, site: "mesa top at the desert's edge" },
-  { name: "Dunehold", region: "Emberwaste", x: 760, z: 860, gate: 90, relic: { x: 688, z: 860 }, site: "an oasis among the dunes" },
+  { name: "Harrowford", region: "Aldmere Vale", x: -470, z: -300, gate: 90, relic: { x: -443, z: -228 }, site: "river meadow above the lower Alder" },
+  { name: "Oakmere", region: "Aldmere Vale", x: 260, z: -480, gate: 270, relic: { x: 337, z: -480 }, site: "oak forest between the two rivers" },
+  { name: "Thistledown", region: "Aldmere Vale", x: 300, z: 130, gate: 0, relic: { x: 374, z: 110 }, site: "open downs south of the Greywater" },
+  { name: "Wrenfield", region: "Aldmere Vale", x: -200, z: 220, gate: 90, relic: { x: -161, z: 287 }, site: "lakeside fields by Wren Water" },
+  { name: "Frosthelm", region: "Frostmarch", x: -520, z: -760, gate: 180, relic: { x: -476, z: -823 }, site: "a shelf in the western foothills" },
+  { name: "Wolfcairn", region: "Frostmarch", x: 520, z: -1010, gate: 270, relic: { x: 579, z: -1059 }, site: "high plateau north of the range" },
+  { name: "Gullcliff", region: "Saltreach", x: -760, z: -560, gate: 90, relic: { x: -830, z: -528 }, site: "clifftop over the northern coast" },
+  { name: "Tidewatch", region: "Saltreach", x: -560, z: 650, gate: 0, relic: { x: -599, z: 717 }, site: "dunes above the southern shore" },
+  { name: "Reedmoor", region: "Blackfen", x: -230, z: 560, gate: 90, relic: { x: -230, z: 637 }, site: "the firm northern edge of the fen" },
+  { name: "Lanternbog", region: "Blackfen", x: 260, z: 980, gate: 0, relic: { x: 260, z: 1057 }, site: "a dry island deep in the fen" },
+  { name: "Redmesa", region: "Emberwaste", x: 700, z: 60, gate: 180, relic: { x: 700, z: -17 }, site: "mesa top at the desert's edge" },
+  { name: "Dunehold", region: "Emberwaste", x: 760, z: 860, gate: 90, relic: { x: 683, z: 860 }, site: "an oasis among the dunes" },
 ];
 
 export const REGION_STYLE = {
@@ -108,10 +108,10 @@ export const REGION_BLOCK = {
 // town hall work; all measured flat from the Plot Stone). The map's ground is level to within a block out to
 // flatRadius at every plot, then eases back into the natural land by easeRadius.
 export const SETTLEMENT = {
-  flatRadius: 64, // level ground
-  easeRadius: 115, // back to natural ground by here
-  wallRadius: 56, // outer face of the generated wall ring (towers on it reach 59)
-  landRadius: 60, // settlement land ends here; raiders gather from 61 out
+  flatRadius: 74, // level ground (Mateo 2026-11-12: bigger wall rings, Castle wall r66 wobbling to ~r70)
+  easeRadius: 125, // back to natural ground by here (further where the land is steep)
+  wallRadius: 66, // the Castle wall ring (it wobbles out to about 70; towers on it reach a little further)
+  landRadius: 72, // settlement land ends here; raiders gather from 73 out
   hallPad: { halfWidth: 22, depth: 50 }, // biggest town hall in any style, behind the stone, away from the gate
   clearHeight: 25, // nothing taller than this within 45 blocks of the hall, so the fly-by camera can see
 };

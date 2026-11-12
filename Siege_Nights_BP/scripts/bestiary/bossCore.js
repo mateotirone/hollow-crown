@@ -98,7 +98,7 @@ function attach(entity, def, center, fresh) {
 
 function nameBoss(f) {
   try {
-    f.entity.nameTag = `§c${f.def.name}${f.temper ? `§7, ${f.temper.name}` : ""}`;
+    f.entity.nameTag = `${f.def.name}${f.temper ? `§7, ${f.temper.name}` : ""}`;
   } catch {
     // name is cosmetic
   }
