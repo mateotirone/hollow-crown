@@ -138,6 +138,13 @@ export function checkRoutes(data) {
     for (const b of seg.blocks ?? []) {
       if (b.length !== 5 || b[3] < 0 || b[3] > 3 || b[4] < 0 || b[4] > 7) { problems.push(`segment ${seg.id} has a bad block ${JSON.stringify(b)}`); break; }
     }
+    // a solid work in a track block's own cell would leave a gap: the bed never builds over a solid block
+    if (seg.works?.length && seg.blocks?.length) {
+      const cols = new Map();
+      for (const w of seg.works) if (w[4] !== 0) (cols.get(`${w[0]},${w[1]}`) ?? cols.set(`${w[0]},${w[1]}`, []).get(`${w[0]},${w[1]}`)).push(w);
+      const hits = seg.blocks.filter(([x, y, z]) => (cols.get(`${x},${z}`) ?? []).some((w) => y >= w[2] && y <= w[3]));
+      if (hits.length) problems.push(`segment ${seg.id}: works fill ${hits.length} track cell(s), first at ${hits[0].slice(0, 3).join(" ")}`);
+    }
   }
   return problems;
 }

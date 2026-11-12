@@ -7,7 +7,7 @@ Same frame as settle_halls.py: front faces south (+z), the door's outside face o
 family. Only the working pieces each building is for go inside (forge, stalls, shelves...).
 """
 from bp import Blueprint, DIRS, OPP, RIGHT
-from kit import Building, mix, grow, h3, finish_detail
+from kit import Building, mix, grow, h3, finish_detail, wool_awning, wool_tent
 import settle_halls as SH
 from settle_halls import castle, pyramid, flat_roof, hang, tower, skirt, thatch, dragon_heads
 
@@ -190,9 +190,7 @@ def market(region):
         for z in range(-2, 1): bp.set(x, 0, z, k("cobbled") if region != "blackfen" else P["floor"])
     for (x, z) in ((-2, 0), (2, 0), (-2, -2), (2, -2)):
         for y in (1, 2, 3): bp.set(x, y, z, P["fence"])
-    for x in range(-3, 4):
-        for z in range(-3, 2):
-            bp.set(x, 4, z, a if (x + 3) % 2 == 0 else b)
+    wool_tent(bp, -3, 3, -1, 4, (a, b))           # a pitched striped roof in wool stairs and slabs
     for x in range(-1, 2): bp.set(x, 1, 0, P["trim"], facing="s", half="top")
     bp.set(-1, 1, -2, "barrel", facing="u"); bp.set(1, 1, -2, "barrel"); bp.set(0, 1, -2, "chest", facing="s")
     hang(bp, [(0, 3, -1)])
@@ -475,9 +473,8 @@ def quartermaster(region):
     side_windows(B, L, rect, 1)
     front_door(B, P, k, L, x=-2)
     for x in (1, 2, 3): bp.set(x, 2, 0, "air"); bp.set(x, 1, 0, P["trim"], facing="s", half="top")   # the hatch and its counter
-    for x in range(0, 5):
-        for z in (1, 2): bp.set(x, 4, z, a if x % 2 == 0 else b)
-    for x in (0, 4): bp.set(x, 1, 2, P["fence"]); bp.set(x, 2, 2, P["fence"]); bp.set(x, 3, 2, P["fence"])
+    for x in (0, 4): bp.set(x, 1, 2, P["fence"]); bp.set(x, 2, 2, P["fence"])
+    wool_awning(bp, range(0, 5), 4, 0, "s", (a, b), depth=2)   # wool stair then a falling slab row, on the posts
     roof(bp, B, P, L, rect, top + 1 if L["roof"] != "flat" else top, ridge="x", region=region)
     dress(bp, k, L, rect, 1, top, region)
     bp.set(-3, 1, -7, "smithing_table"); bp.set(-1, 1, -7, "anvil"); bp.set(1, 1, -7, "grindstone")

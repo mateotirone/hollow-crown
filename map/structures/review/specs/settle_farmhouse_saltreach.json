@@ -1,0 +1,80 @@
+{
+ "card": {
+  "title": "Farmhouse",
+  "sub": "Saltreach, by the fields",
+  "region": "saltreach",
+  "where": "Settlement plot (Medium 11 x 15)",
+  "kind": "Work",
+  "blurb": "A long low farmhouse with an open lean-to behind for hay, a cart and the woodpile."
+ },
+ "after": "settle_skill:farmhouse_inside",
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "salt_timber",
+    "roof": "red_sandstone",
+    "box_signs": "ns"
+   },
+   "rect": [
+    -4,
+    -8,
+    4,
+    0
+   ],
+   "y": 0,
+   "plinth": 2,
+   "storeys": [
+    5
+   ],
+   "door": {
+    "side": "s",
+    "kind": "house",
+    "steps": 1
+   },
+   "roof": {
+    "type": "hip",
+    "pitch": 1
+   },
+   "dormers": [],
+   "chimney": [
+    [
+     2,
+     -6
+    ]
+   ],
+   "vines": 0
+  },
+  {
+   "part": "lean_to",
+   "rect": [
+    -3,
+    -11,
+    3,
+    -9
+   ],
+   "against": "s",
+   "top": 5,
+   "pitch": "half",
+   "y": 0,
+   "roof": "red_sandstone",
+   "post": "stripped_spruce_log",
+   "trim": "dark_oak_planks",
+   "floor": "coarse_dirt"
+  },
+  {
+   "part": "woodpile",
+   "at": [
+    2,
+    1,
+    -11
+   ],
+   "len": 2,
+   "h": 2,
+   "facing": "n",
+   "wood": "spruce_log",
+   "cover": "none"
+  }
+ ],
+ "name": "settle_farmhouse_saltreach"
+}

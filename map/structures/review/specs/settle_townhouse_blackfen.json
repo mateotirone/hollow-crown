@@ -1,0 +1,85 @@
+{
+ "card": {
+  "title": "Townhouse",
+  "sub": "Blackfen, taller",
+  "region": "blackfen",
+  "where": "Settlement plot (long Medium 13 x 15 or Large)",
+  "kind": "House",
+  "blurb": "A taller home of about six beds: a stone ground floor, a floor above jettied over the road, a high attic."
+ },
+ "after": "settle_skill:townhouse_inside",
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "fen_timber",
+    "roof": "mud_bricks",
+    "box_signs": "ns"
+   },
+   "rect": [
+    -5,
+    -10,
+    5,
+    0
+   ],
+   "y": 0,
+   "plinth": 2,
+   "piles": true,
+   "storeys": [
+    5,
+    5
+   ],
+   "jetty": [
+    "s"
+   ],
+   "storey_style": [
+    {
+     "frame_kind": "stone",
+     "frame": "tuff_bricks",
+     "infill": {
+      "ladder": [
+       "mud_bricks",
+       "packed_mud"
+      ],
+      "axis": "noise",
+      "scale": 2
+     }
+    },
+    {}
+   ],
+   "door": {
+    "side": "s",
+    "kind": "house",
+    "steps": 1
+   },
+   "roof": {
+    "type": "gable",
+    "ridge": "z",
+    "pitch": 1,
+    "moss": true
+   },
+   "dormers": [
+    {
+     "side": "e",
+     "at": 1,
+     "w": 3,
+     "h": 3
+    },
+    {
+     "side": "w",
+     "at": -1,
+     "w": 3,
+     "h": 3
+    }
+   ],
+   "chimney": [
+    [
+     3,
+     -8
+    ]
+   ],
+   "vines": 0.03
+  }
+ ],
+ "name": "settle_townhouse_blackfen"
+}

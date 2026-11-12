@@ -17,6 +17,7 @@ import { TRACK, TRAIN, CARS, TRAIN_STYLES, NO_COLOR, carPoses, trainLength, step
 import { give } from "../horses/menus.js";
 import { sfx } from "../core/sfx.js";
 import "./tests.js";
+import "./no_hollow.js";
 
 // trains: [{ id, dim, head: cursor, v, style, cars: [{ kind, eid }] }]
 // unlocked: { [playerId]: { engine?: true, coach?: true } }: who has owned an engine or coach once (built or bought),

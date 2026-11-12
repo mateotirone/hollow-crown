@@ -1,0 +1,57 @@
+{
+ "card": {
+  "title": "Mint",
+  "sub": "Frostmarch, stone",
+  "region": "frostmarch",
+  "where": "Settlement plot (Medium 11 x 15)",
+  "kind": "Work",
+  "blurb": "Where the town strikes its Regals: stone walls, barred ground-floor windows and a heavy door."
+ },
+ "after": "settle_skill:mint_inside",
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "frost_stone",
+    "roof": {
+     "ladder": [
+      "deepslate_tiles",
+      "cobbled_deepslate"
+     ],
+     "axis": "noise",
+     "scale": 2
+    },
+    "box_signs": "ns"
+   },
+   "rect": [
+    -4,
+    -10,
+    4,
+    0
+   ],
+   "y": 0,
+   "plinth": 2,
+   "storeys": [
+    5,
+    4
+   ],
+   "door": {
+    "side": "s",
+    "kind": "grand",
+    "steps": 1
+   },
+   "roof": {
+    "type": "hip",
+    "pitch": 1
+   },
+   "chimney": [
+    [
+     2,
+     -8
+    ]
+   ],
+   "shutters": 0
+  }
+ ],
+ "name": "settle_mint_frostmarch"
+}

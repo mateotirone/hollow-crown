@@ -11,7 +11,7 @@ import os, sys, json, base64, argparse, subprocess
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE); sys.path.insert(0, os.path.join(HERE, "render"))
 from bp import Blueprint
 from mesher import Mesher
-import random
+import random, re
 import vale_civic, settle_halls, settle_buildings, hollow_kit, capital, stations, regions_towns as RT
 from build_catalogue import DESIGNS, STYLE_NAMES
 
@@ -104,7 +104,7 @@ def main():
     def add(sec, key, title, sub, blurb, make, ground=("grass_block", "dirt"), view=None, status="new", extra=None):
         card = {"key": key, "title": title, "sub": sub, "blurb": blurb, "image": f"img/{key}.jpg", "status": status, **(extra or {})}
         sec["cards"].append(card)
-        if a.only and not key.startswith(a.only): return
+        if a.only and not re.match(a.only, key): return
         if a.mcstructure:
             structures.append((sec["title"], card, make())); return
         if a.viewer3d:
@@ -127,6 +127,42 @@ def main():
         lambda: vale_civic.clock_tower(), extra={"where": "Millbrook, the square", "kind": "Civic"})
     add(sec, "map-millbrook_watermill", "Millbrook watermill", "Stone and timber", "Stone ground floor on the river bank, timber above, with a working-looking wheel in the water.",
         lambda: vale_civic.watermill(), extra={"where": "Millbrook, on the river", "kind": "Civic"})
+
+    # ---- 1a. Kingsrest, rebuilt one by one in the build review (map/structures/review/) ----
+    sys.path.insert(0, os.path.join(HERE, "review"))
+    import kingsrest_house, kingsrest_inn, kingsrest_guildhall
+    sec = {"id": "review-kingsrest", "title": "Kingsrest (reviewed)", "blurb": "Kingsrest buildings rebuilt stage by stage from build-instructions in the build review, with Mateo's notes folded in.", "cards": []}
+    sections.append(sec)
+    for roof in ("red", "slate"):
+        add(sec, f"review-kingsrest_house-{roof}", "Street house", f"{roof.capitalize()} roof", "Stone ground floor, jettied stripped-spruce frame above, dormer, lean-to woodshed, leaf boxes and shutters.",
+            (lambda r=roof: kingsrest_house.build(99, r)), extra={"where": "Kingsrest streets", "kind": "House"})
+    add(sec, "review-kingsrest_inn", "Coaching inn", "Furnished", "Cross-wing coaching inn: a long range with a carriage arch through to the yard and a gabled wing to the square with the door.",
+        lambda: kingsrest_inn.build(99, "red"), extra={"where": "Kingsrest, on the square", "kind": "Civic"})
+    add(sec, "review-kingsrest_guildhall", "Guildhall", "Copper roof", "An open market arcade under the guild's hall, a copper roof and a belfry on the ridge.",
+        lambda: kingsrest_guildhall.build(99, "copper"), extra={"where": "Kingsrest, on the square", "kind": "Civic"})
+
+    # ---- 1a'. The run-through pass on the building skill (one engine): every spec in review/specs ----
+    sys.path.insert(0, os.path.join(HERE, "..", "..", ".claude", "skills", "minecraft-builder", "scripts"))
+    import glob, engine
+    from bp import Blueprint
+    sec = {"id": "skill-pass", "title": "Reviewed on the building skill", "blurb": "The run-through pass: each building rebuilt from the current build instructions on the one building engine, checked in 3D, then Mateo's notes.", "cards": []}
+    sections.append(sec)
+    def from_spec(f):
+        k = os.path.basename(f)[:-5]
+        if k.startswith("settle_"):    # settlement plot buildings: exactly as the game gets them (settle_skill.build)
+            import settle_skill; bid, region = k[7:].rsplit("_", 1); return settle_skill.build(bid, region)
+        spec = json.load(open(f)); b = Blueprint(spec["name"]); engine.into_blueprint(b, spec)
+        if spec.get("after"):          # a furnished build: the review module's interior stage runs on the skill's shell
+            import importlib; mod, fn = spec["after"].split(":"); m = importlib.import_module(mod)
+            tmp = Blueprint("after"); getattr(m, fn)(tmp, m.Building(tmp, m.P, 3)); dy = spec.get("after_dy", 0)
+            for (x, y, z), v in tmp.cells.items():
+                if v[0] not in ("keep",): b.cells[(x, y + dy, z)] = v
+        return b.finish()
+    for f in sorted(g for g in glob.glob(os.path.join(HERE, "review", "specs", "*.json")) if not g.endswith(".base.json")):
+        meta = json.load(open(f)).get("card", {})
+        key = os.path.splitext(os.path.basename(f))[0]
+        add(sec, "skill-" + key, meta.get("title", key.replace("_", " ").capitalize()), meta.get("sub", ""), meta.get("blurb", ""),
+            (lambda f=f: from_spec(f)), REGION_GROUND.get(meta.get("region", "vale")), extra={"where": meta.get("where", ""), "kind": meta.get("kind", "")})
 
     # ---- 1b. The four regional map towns (laid out by the town generator) ----
     for tid, tname, rid, reg, blurb in TOWNS:
@@ -173,7 +209,7 @@ def main():
                 add(sec, f"bld-{rid}-{bid}", title, r["name"], blurb, (lambda f=settle_buildings.BLOCK_BUILDERS[bid], r=rid: f(r)), g, extra={"group": "Plot buildings"})
 
         if rid in stations.REGIONS:   # the railway station on the plot (or the Rail Depot), at each settlement tier
-            for st, title, blurb in (("halt", "Halt (Hamlet)", "A waiting shelter with its gable to the line, a ticket counter, a bench and a hitching rail."),
+            for st, title, blurb in (("halt", "Halt (Hamlet)", "A waiting shelter with its eaves to the line, a ticket counter, a bench and a hitching rail."),
                                      ("station", "Station (Town)", "A booking hall along the platform with a centre gable, a long canopy, a parcels corner and stalls."),
                                      ("junction", "Junction (City)", "A two-storey hall with a clock tower on the platform, a stable wing and a parcels wing."),
                                      ("grand", "Grand Station (Castle)", "An arched glass train shed over both lines, a tall centre pavilion and twin clock towers.")):
