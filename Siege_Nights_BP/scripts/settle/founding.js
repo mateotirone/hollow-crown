@@ -1,7 +1,7 @@
 // Founding a town from its layout. When a player picks one of the twelve map plots, the settlement gets one of
 // that plot's three hand-made layouts (towns.js) and the Hamlet part of it is laid out over a few seconds:
 // roads and levelled ground, lamps, the well, the Mason's Bench, the Hall Cornerstone, a plot marker on every
-// open slot, and the Hamlet wall. Each new tier lays out its own band: the wall moves out (32, 40, 48, 56),
+// open slot, and the Hamlet wall. Each new tier lays out its own band: the wall moves out (36, 46, 56, 66),
 // that tier's roads, ground and fixtures go down, and its slots get markers.
 //
 // What other features can use:

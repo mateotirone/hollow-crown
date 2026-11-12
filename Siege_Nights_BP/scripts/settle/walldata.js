@@ -7,11 +7,11 @@
 // replace this table and nothing else needs to change.
 
 export const WALLS = {
-  radius: 56, // blocks from the Plot Stone to the outer face. The biggest hall (its back corners reach about 49) fits inside with room to walk. The map is flat to 60.
+  radius: 66, // the Castle ring: blocks from the Plot Stone to the outer face (Mateo 2026-11-12: rings 36, 46, 56, 66 by tier). Land ends at radius + landBeyond.
   landBeyond: 4, // your land reaches this far past the wall from the day it is raised
   spawnBeyond: 5, // raiders appear this far outside the wall
   reserve: 4, // nothing may be built this close to the line of the wall (either side)
-  wobble: { out: 4, in: 2 }, // the wall line wanders: up to this many blocks out (at radius 56, less on smaller rings) and in
+  wobble: { out: 4, in: 2 }, // the wall line wanders: up to this many blocks out (at the Castle ring, less on smaller rings) and in
   // (in stays under the town layouts' 3-block clearance, so it never cuts a plot)
   stations: 48, // how many points round the ring the ground is measured at
   maxStep: 6, // the ground may differ this much between neighbouring points before the wall refuses to span it

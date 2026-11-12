@@ -108,10 +108,10 @@ export const REGION_BLOCK = {
 // town hall work; all measured flat from the Plot Stone). The map's ground is level to within a block out to
 // flatRadius at every plot, then eases back into the natural land by easeRadius.
 export const SETTLEMENT = {
-  flatRadius: 64, // level ground
+  flatRadius: 70, // level ground (to the edge of the Castle land)
   easeRadius: 115, // back to natural ground by here
-  wallRadius: 56, // outer face of the generated wall ring (towers on it reach 59)
-  landRadius: 60, // settlement land ends here; raiders gather from 61 out
+  wallRadius: 66, // outer face of the Castle wall ring (it wanders up to 4 out; towers reach 69)
+  landRadius: 70, // settlement land ends here; raiders gather from 75 out
   hallPad: { halfWidth: 22, depth: 50 }, // biggest town hall in any style, behind the stone, away from the gate
   clearHeight: 25, // nothing taller than this within 45 blocks of the hall, so the fly-by camera can see
 };
