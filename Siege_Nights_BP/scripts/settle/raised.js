@@ -2,6 +2,9 @@
 // blockdesigns.js), in your settlement's style, running away from where you stood. Free: the block is the
 // price. No room (land edge, ground kept for your hall, another building rising)? The block still works on
 // its own and says why. A build cut short by the world closing carries on when it loads again.
+// A yard (the Barracks) fits the ground it lands on (Mateo 2026-11-12: "it doesn't have to be a perfect square,
+// match the landscaping where the paths are"): where a town path already crosses the yard wall, that stretch of
+// wall is left out so the path runs in, and the path's own surface is kept through the yard floor.
 //
 // Test: /scriptevent siege:block_build guardhouse|armoury [style]   raise one where you stand
 
@@ -12,7 +15,8 @@ import { STYLES, STYLE_IDS } from "../townhall/styles.js";
 import { styleFor } from "./buildings.js";
 import { siteProblem, styleOf } from "./plans.js";
 import { footprint } from "./rules.js";
-import { levelSite, foundationColumns } from "./ground.js";
+import { levelSite, foundationColumns, groundTop } from "./ground.js";
+import { frameFor, toWorld } from "../townhall/halls.js";
 import { BLOCK_BUILDS } from "./blockdesigns.js";
 
 const OVERWORLD = "minecraft:overworld";
@@ -44,6 +48,38 @@ const planFor = (type, style) => {
   return plans.get(key);
 };
 
+// A path surface on the ground: town streets are sunken slabs, lanes and verges dirt path or gravel
+export const PATH_TOP = /^minecraft:(grass_path|dirt_path|gravel|\w+_slab)$/;
+
+// Where a path meets the yard: { cells: Set("x,y,z" world), cols: Set("x,z" plan) } of the yard wall columns and
+// yard floor blocks to leave out. Only on a level site (lift 0 or 1): a raised yard can't meet the path anyway.
+// isPath(x, z) -> true when the world column's top ground is a path (worldTop, from the plan's floor row up 3).
+export function yardGaps(plan, origin, forward, lift, isPath) {
+  const cells = new Set(), cols = new Set();
+  if (!plan.yard || Math.abs(lift ?? 0) > 1) return { cells, cols };
+  const frame = frameFor(forward);
+  const at = (x, y, z) => { const w = toWorld(frame, origin, x, y, z); return `${w.x},${w.y},${w.z}`; };
+  for (const [x, z] of plan.yard.wall) {
+    const w = toWorld(frame, origin, x, 0, z);
+    if (!isPath(w.x, w.z)) continue;
+    cols.add(`${x},${z}`);
+    for (const c of plan.cells.values()) if (c.x === x && c.z === z) cells.add(at(c.x, c.y, c.z));
+  }
+  for (const [x, z] of plan.yard.floor) {
+    const w = toWorld(frame, origin, x, 0, z);
+    if (isPath(w.x, w.z)) { cols.add(`${x},${z}`); cells.add(at(x, 0, z)); }
+  }
+  return { cells, cols };
+}
+
+function pathAt(dim, from) {
+  return (x, z) => {
+    const y = groundTop(dim, x, z, from);
+    if (y === undefined) return false;
+    try { return PATH_TOP.test(dim.getBlock({ x, y, z })?.typeId ?? ""); } catch { return false; }
+  };
+}
+
 function start(key, job) {
   if (buildFor(`raised:${key}`)) return;
   const plan = planFor(job.type, job.style);
@@ -51,18 +87,23 @@ function start(key, job) {
   const forward = { x: job.fx, z: job.fz };
   // on the highest ground under it, never half buried (ground.js); measured once so a restart keeps the height.
   // The block itself stays where it was placed and the building leaves it alone.
-  if (!Number.isFinite(job.lift)) { job.lift = levelSite(world.getDimension(OVERWORLD), plan, at, forward).lift; store.save(); }
-  startBuild({
+  const dim = world.getDimension(OVERWORLD);
+  if (!Number.isFinite(job.lift)) { job.lift = levelSite(dim, plan, at, forward).lift; store.save(); }
+  const origin = { ...at, y: at.y + job.lift };
+  const gaps = yardGaps(plan, origin, forward, job.lift, pathAt(dim, origin.y + 2));
+  const b = startBuild({
     id: `raised:${key}`, dimensionId: OVERWORLD, origin: { ...at, y: at.y + job.lift }, forward,
     plan, style: styleFor(job.style), perTick: Math.max(4, Math.ceil(plan.cells.size / 300)),
-    skip: (x, y, z) => x === at.x && y === at.y && z === at.z,
+    skip: (x, y, z) => (x === at.x && y === at.y && z === at.z) || gaps.cells.has(`${x},${y},${z}`),
     onDone() {
       delete store.data.pending[key];
       (store.data.built ??= {})[key] = { ...job, box: footprint(at, forward, plan.bounds()) };
       store.save();
       if (job.owner) emit("settleCharter", { owner: job.owner });
     },
-  }).columns.unshift(...foundationColumns(plan));
+  });
+  b.columns.unshift(...foundationColumns(plan));
+  if (gaps.cols.size) b.columns = b.columns.filter((c) => !gaps.cols.has(`${c.x},${c.z}`));
 }
 
 world.afterEvents.playerPlaceBlock.subscribe(({ block, player }) => {
@@ -110,6 +151,18 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
 });
 
 addTests("settle", {
+  "a path crossing the Barracks yard wall opens a gap there, and only on a level site"() {
+    const plan = BLOCK_BUILDS["siege:barracks"].draw("vale");
+    assert(plan.yard?.wall?.length && plan.yard.floor.length, "the Barracks design carries its yard columns");
+    const origin = { x: 0, y: 64, z: 0 }, forward = { x: 0, z: 1 };
+    const [wx, wz] = plan.yard.wall[0];
+    const frame = frameFor(forward), w = toWorld(frame, origin, wx, 0, wz);
+    const isPath = (x, z) => x === w.x && z === w.z;
+    const g = yardGaps(plan, origin, forward, 0, isPath);
+    assert(g.cols.has(`${wx},${wz}`) && g.cells.size > 0, "the wall column on the path is left out");
+    assert(yardGaps(plan, origin, forward, 4, isPath).cells.size === 0, "a raised yard keeps its whole wall");
+    assert(yardGaps(plan, origin, forward, 0, () => false).cells.size === 0, "no path, no gap");
+  },
   "the Barracks and Quartermaster's buildings draw in every style behind their block": () => {
     for (const type of Object.keys(BLOCK_BUILDS)) for (const id of STYLE_IDS) {
       const plan = BLOCK_BUILDS[type].draw(id);

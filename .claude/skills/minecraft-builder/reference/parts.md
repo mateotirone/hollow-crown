@@ -219,6 +219,10 @@ terracotta has no stairs, so its curve uses dark prismarine; the copper default 
   above it, hollow, corner merlons, a lantern on top. `gate`: a `w` x `h` opening with a round-angle arch head, the
   wall raised `crown` rows over it, and optionally a `banner` hung one out on the outer face under a log pole
   (layout info `banner` gives its middle, so a script can recolour it to the settlement's banner colour).
+- **Yards fit their site** (Mateo 2026-11-12: "it doesn't have to be a perfect square, match the landscaping where the
+  paths are"): a yard is never forced square over the ground. Where a town path already crosses a yard wall, that
+  stretch is left out so the path runs in, and the path's surface stays through the yard floor. In the game this is
+  done at placement (`settle/raised.js` `yardGaps`, from the `yard` wall and floor columns a design exports).
 
 ## Chimney (06 step 9, Mateo's default)
 

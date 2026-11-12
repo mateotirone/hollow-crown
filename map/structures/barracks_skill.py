@@ -98,7 +98,28 @@ def build(region="vale"):
     bp.marks.update({"yard_a": (-3, 1, -6), "yard_b": (3, 1, -1), "muster": (0, 1, -1),
                      "banner": (0, 5, 1), "hall": (-2, YW, -9), "keep": (4, YW, -10)})
     bp.markers["door"] = (0, 1, 1)
+    bp.yard = yard_columns(spec)
     return finish_detail(bp, None)
+
+def yard_columns(spec):
+    """The curtain's plain wall columns (not the turrets or the gate crown) and the yard's floor columns: where a
+    town path meets the yard on a level site, the game leaves those out so the path runs in (settle/raised.js)."""
+    c = next(p for p in spec["parts"] if p["part"] == "curtain")
+    keep_out = set()
+    for t in c.get("turrets", []):
+        n = t.get("size", 3) // 2; tx, tz = t["at"]
+        keep_out |= {(tx + dx, tz + dz) for dx in range(-n, n + 1) for dz in range(-n, n + 1)}
+    g = c.get("gate")
+    if g: keep_out |= {(g["at"][0] + k, g["at"][1]) for k in range(-(g.get("w", 3) // 2) - 1, g.get("w", 3) // 2 + 2)}
+    wall = []
+    for (ax, az), (bx, bz) in zip(c["path"], c["path"][1:]):
+        n = max(abs(bx - ax), abs(bz - az))
+        for k in range(n + 1):
+            p = (ax + (bx - ax) * k // n, az + (bz - az) * k // n)
+            if p not in keep_out and p not in wall: wall.append(p)
+    x0, z0, x1, z1 = YARD
+    floor = [(x, z) for x in range(x0, x1 + 1) for z in range(z0, z1 + 1) if (x, z) not in keep_out and (z >= -6 or x >= 3)]   # not under the hall
+    return {"wall": wall, "floor": floor}
 
 def has(region): return os.path.exists(os.path.join(SPECS, f"barracks_{region}.json"))
 
