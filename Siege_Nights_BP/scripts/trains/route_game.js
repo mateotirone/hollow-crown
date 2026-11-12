@@ -10,14 +10,15 @@ import { stationMenuExtras } from "../rails/index.js";
 import { isBuilder, give } from "../horses/menus.js";
 import { callCarriage, hasUnlocked, unlock } from "./index.js";
 import { allSites } from "./station_sites.js";
-import { ROUTE, buyable, nearestStop, reachable, cannotBuy, priceOf, pieces, otherEnd } from "./routes.js";
+import { ROUTE, buyable, nearestStop, reachable, cannotBuy, priceOf, pieces, otherEnd, isNatural } from "./routes.js";
 import { ROUTES } from "./routes_data.js";
 import { TRACK, TRAIN, CARS, TRAIN_STYLES } from "./data.js";
 import { addSwitch } from "./switches.js";
 
 // built: { [segmentId]: { by, at } }; laying: [{ seg, i }] (a stretch going down, next piece i);
 // missed: { [segmentId]: [piece index, ...] } (pieces whose ground wasn't loaded, tried again later)
-const store = moduleStore("siege:routes", () => ({ built: {}, laying: [], missed: {}, missedWorks: {} }));
+// blocked: { [segmentId]: [{ x, y, z }] } buildings the bed found in its way and left standing
+const store = moduleStore("siege:routes", () => ({ built: {}, laying: [], missed: {}, missedWorks: {}, blocked: {} }));
 const built = () => store.data.built;
 const segById = (id) => ROUTES.segments.find((s) => s.id === id);
 const stopById = (id) => ROUTES.stops.find((s) => s.id === id);
@@ -55,7 +56,14 @@ function dropAt(dim, x, y, z, max) {
   return Infinity;
 }
 
-function layBed(dim, p, i) {
+// A building in the way of a stretch: left standing, and the buyer told once the stretch is down
+function blocked(segId, b) {
+  const list = ((store.data.blocked ??= {})[segId] ??= []);
+  const at = { x: b.location.x, y: b.location.y, z: b.location.z };
+  if (!list.some((q) => Math.hypot(q.x - at.x, q.z - at.z) < 8)) list.push(at);
+}
+
+function layBed(dim, p, i, segId) {
   if (!dim.getBlock(p)) return false; // not loaded
   // clear the corridor, keeping other track and the ballast under it
   for (let dx = -1; dx <= 1; dx++) {
@@ -65,6 +73,7 @@ function layBed(dim, p, i) {
         const b = dim.getBlock({ x: p.x + dx, y, z: p.z + dz });
         if (!b || b.isAir || isTrack(b)) continue;
         if (GATED.test(b.typeId)) continue; // a town's rail gate: it opens for trains (gates.js), so the bed leaves it shut
+        if (!isNatural(b.typeId)) { blocked(segId, b); continue; } // somebody's building: never torn down
         if (y === p.y && isTrack(dim.getBlock({ x: p.x + dx, y: y + 1, z: p.z + dz }))) continue;
         b.setPermutation(AIR);
       }
@@ -77,7 +86,9 @@ function layBed(dim, p, i) {
     for (let dz = -1; dz <= 1; dz++) {
       const x = p.x + dx, z = p.z + dz, top = { x, y: p.y - 1, z };
       if (isTrack(dim.getBlock({ x, y: p.y, z: z })) && (dx || dz)) continue; // another line's track beside us
-      if (bridge) { dim.getBlock(top)?.setPermutation(DECK); continue; }
+      const under = dim.getBlock(top);
+      if (under && !under.isAir && !under.isLiquid && !isNatural(under.typeId)) { if (dx || dz) continue; blocked(segId, under); continue; }
+      if (bridge) { under?.setPermutation(DECK); continue; }
       const d = dropAt(dim, x, p.y - 1, z, ROUTE.fillDepth);
       for (let k = Math.min(d, ROUTE.fillDepth); k >= 1; k--) {
         const b = dim.getBlock({ x, y: p.y - 1 - k, z });
@@ -97,11 +108,12 @@ function layBed(dim, p, i) {
 }
 
 // Put one piece down, bed first. true when it's there (or was already), false when its ground isn't loaded.
-function layPiece(dim, p, i = 0) {
+function layPiece(dim, p, i = 0, segId = "") {
   try {
     const block = dim.getBlock(p);
     if (!block) return false;
-    if (block.typeId !== TRACK && !p.works && !layBed(dim, p, i)) return false;
+    if (block.typeId !== TRACK && !p.works && !layBed(dim, p, i, segId)) return false;
+    if (block.typeId !== TRACK && !block.isAir && !block.isLiquid && !isNatural(block.typeId)) { blocked(segId, block); return true; } // never over a building
     if (block.typeId !== TRACK) block.setPermutation(BlockPermutation.resolve(TRACK, { "siege:kind": p.kind, "siege:dir": p.dir }));
     else {
       // another line already lies here: where the two part, this block becomes a switch holding both shapes
@@ -131,7 +143,9 @@ function applyWork(dim, seg, w) {
     if (!dim.getBlock({ x, y: y0, z })) return false;
     for (let y = y0; y <= y1; y++) {
       const b = dim.getBlock({ x, y, z });
-      if (b && !isTrack(b)) b.setPermutation(perm);
+      if (!b || isTrack(b)) continue;
+      if (!b.isAir && !b.isLiquid && !isNatural(b.typeId)) { blocked(seg.id, b); continue; } // never over a building
+      b.setPermutation(perm);
     }
     return true;
   } catch {
@@ -156,11 +170,13 @@ function layTick() {
   const all = pieces(seg);
   const end = Math.min(all.length, job.i + ROUTE.layPerTick);
   for (; job.i < end; job.i++) {
-    if (!layPiece(dim, all[job.i], job.i)) (store.data.missed[seg.id] ??= []).push(job.i);
+    if (!layPiece(dim, all[job.i], job.i, seg.id)) (store.data.missed[seg.id] ??= []).push(job.i);
   }
   if (job.i >= all.length) {
     store.data.laying.shift();
     world.sendMessage(`§6The line from ${stopName(seg.from)} to ${stopName(seg.to)} is laid.`);
+    const hits = store.data.blocked?.[seg.id] ?? [];
+    if (hits.length) world.sendMessage(`§eBuildings stand in its way at ${hits.slice(0, 4).map((q) => `${q.x}, ${q.z}`).join("; ")}${hits.length > 4 ? " and more" : ""}. They were left standing, so trains can't get past there until they're cleared.`);
   }
   store.save();
 }
@@ -190,7 +206,7 @@ function missedTick() {
     if (waiting.has(id)) continue;
     const all = pieces(seg);
     for (let k = list.length - 1; k >= 0 && budget > 0 && looks > 0; k--, looks--) {
-      if (layPiece(dim, all[list[k]], list[k])) { list.splice(k, 1); budget--; changed = true; }
+      if (layPiece(dim, all[list[k]], list[k], id)) { list.splice(k, 1); budget--; changed = true; }
     }
     if (!list.length) delete store.data.missed[id];
     if (budget <= 0 || looks <= 0) break;
