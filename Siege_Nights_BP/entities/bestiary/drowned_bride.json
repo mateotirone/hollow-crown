@@ -98,17 +98,6 @@
     "value": 0.3
    },
    "minecraft:can_fly": {},
-   "minecraft:behavior.random_hover": {
-    "priority": 6,
-    "xz_dist": 8,
-    "y_dist": 4,
-    "y_offset": -1,
-    "interval": 1,
-    "hover_height": [
-     1,
-     4
-    ]
-   },
    "minecraft:behavior.nearest_attackable_target": {
     "priority": 2,
     "must_see": false,

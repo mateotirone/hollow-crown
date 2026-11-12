@@ -234,6 +234,54 @@
    "category": "player",
    "where": "When a Fen Mother's hexes all land at once, and at Morvane stage 6 when the fen lends the party a moment.",
    "prompt": "A deep wet marsh sound: bubbles rising and bursting from thick mud, reeds rustling all at once as if a wind passed, and a slow low creak like an old wooden raft taking weight. A faint breathy whisper at the very end, no words. Uneasy, not frightening. Ends in silence."
+  },
+  {
+   "file": "gate_open",
+   "id": "siege.sig.gate_open",
+   "path": "sounds/siege/sig/gate_open",
+   "name": "The castle gate opens",
+   "seconds": 3,
+   "kind": "one-shot",
+   "channels": 1,
+   "category": "block",
+   "where": "When a settlement's great timber gate swings open. Heard by everyone near the gate.",
+   "prompt": "A massive medieval oak castle gate, iron-banded, swinging open on huge iron hinges: a deep slow groaning creak of old timber and rusted iron pivots, a heavy wooden thud as the bar lifts at the start, and the low scrape of the gate's foot over stone. Close-miked, outdoor stone courtyard, slight echo. No music, no voices."
+  },
+  {
+   "file": "gate_close",
+   "id": "siege.sig.gate_close",
+   "path": "sounds/siege/sig/gate_close",
+   "name": "The castle gate shuts",
+   "seconds": 3,
+   "kind": "one-shot",
+   "channels": 1,
+   "category": "block",
+   "where": "When the great timber gate swings shut. Heard by everyone near the gate.",
+   "prompt": "A massive iron-banded oak castle gate swinging shut: a short groaning hinge creak, then a deep heavy boom as it meets the stone frame, a rattle of iron fittings, and a heavy wooden bar dropping into its brackets with a solid thunk. Outdoor stone courtyard, short echo. No music, no voices."
+  },
+  {
+   "file": "portcullis_open",
+   "id": "siege.sig.portcullis_open",
+   "path": "sounds/siege/sig/portcullis_open",
+   "name": "The portcullis rises",
+   "seconds": 4,
+   "kind": "one-shot",
+   "channels": 1,
+   "category": "block",
+   "where": "When a portcullis is winched up. Heard by everyone near the gate.",
+   "prompt": "A heavy iron portcullis being winched up into a stone gatehouse: a wooden ratchet winch clacking steadily, thick iron chain rattling and grinding over a wheel, the iron grille scraping up stone grooves, ending with the click of the pawl catching. Medieval, heavy, mechanical, stone-room echo. No music, no voices."
+  },
+  {
+   "file": "portcullis_close",
+   "id": "siege.sig.portcullis_close",
+   "path": "sounds/siege/sig/portcullis_close",
+   "name": "The portcullis drops",
+   "seconds": 3,
+   "kind": "one-shot",
+   "channels": 1,
+   "category": "block",
+   "where": "When a portcullis comes down. Heard by everyone near the gate.",
+   "prompt": "A heavy iron portcullis released and dropping down stone grooves: a fast rush of chain running out over a wheel, iron scraping stone, then a deep heavy iron-on-stone slam as its spikes hit the ground, with a short ringing rattle after. Medieval gatehouse, stone echo. No music, no voices."
   }
  ],
  "dragons": [
