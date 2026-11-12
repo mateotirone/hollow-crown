@@ -1,0 +1,25 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:attachable": {
+    "description": {
+      "identifier": "siege:diamond_frostmarch_boots",
+      "materials": {
+        "default": "armor",
+        "enchanted": "armor_enchanted"
+      },
+      "textures": {
+        "default": "textures/models/siege_armor/diamond_frostmarch_boots",
+        "enchanted": "textures/misc/enchanted_actor_glint"
+      },
+      "geometry": {
+        "default": "geometry.siege_diamond_frostmarch_boots"
+      },
+      "scripts": {
+        "parent_setup": "variable.boot_layer_visible = 0.0;"
+      },
+      "render_controllers": [
+        "controller.render.armor"
+      ]
+    }
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "format_version": "1.21.60",
+  "minecraft:item": {
+    "description": {
+      "identifier": "siege:choirsteel_frostmarch_boots",
+      "menu_category": {
+        "category": "equipment",
+        "group": "minecraft:itemGroup.name.boots"
+      }
+    },
+    "components": {
+      "minecraft:icon": "siege_choirsteel_frostmarch_boots",
+      "minecraft:display_name": {
+        "value": "item.siege:choirsteel_frostmarch_boots.name"
+      },
+      "minecraft:max_stack_size": 1,
+      "minecraft:wearable": {
+        "slot": "slot.armor.feet",
+        "protection": 3
+      },
+      "minecraft:durability": {
+        "max_durability": 720
+      },
+      "minecraft:repairable": {
+        "repair_items": [
+          {
+            "items": [
+              "siege:choirsteel_ingot"
+            ],
+            "repair_amount": "q.max_durability * 0.25"
+          }
+        ]
+      },
+      "minecraft:enchantable": {
+        "slot": "armor_feet",
+        "value": 22
+      },
+      "minecraft:tags": {
+        "tags": [
+          "minecraft:is_armor",
+          "minecraft:trimmable_armors",
+          "siege:regional_armor",
+          "siege:choirsteel"
+        ]
+      },
+      "minecraft:fire_resistant": {},
+      "minecraft:glint": false
+    }
+  }
+}

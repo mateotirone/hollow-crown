@@ -1,0 +1,48 @@
+{
+  "format_version": "1.21.60",
+  "minecraft:item": {
+    "description": {
+      "identifier": "siege:netherite_frostmarch_chestplate",
+      "menu_category": {
+        "category": "equipment",
+        "group": "minecraft:itemGroup.name.chestplate"
+      }
+    },
+    "components": {
+      "minecraft:icon": "siege_netherite_frostmarch_chestplate",
+      "minecraft:display_name": {
+        "value": "item.siege:netherite_frostmarch_chestplate.name"
+      },
+      "minecraft:max_stack_size": 1,
+      "minecraft:wearable": {
+        "slot": "slot.armor.chest",
+        "protection": 8
+      },
+      "minecraft:durability": {
+        "max_durability": 592
+      },
+      "minecraft:repairable": {
+        "repair_items": [
+          {
+            "items": [
+              "minecraft:netherite_ingot"
+            ],
+            "repair_amount": "q.max_durability * 0.25"
+          }
+        ]
+      },
+      "minecraft:enchantable": {
+        "slot": "armor_torso",
+        "value": 15
+      },
+      "minecraft:tags": {
+        "tags": [
+          "minecraft:is_armor",
+          "minecraft:trimmable_armors",
+          "siege:regional_armor"
+        ]
+      },
+      "minecraft:fire_resistant": {}
+    }
+  }
+}
