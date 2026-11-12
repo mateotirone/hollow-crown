@@ -1,0 +1,80 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "siege:townsfolk",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "s0": "textures/entity/siege/townsfolk/tf_vale_0",
+        "s1": "textures/entity/siege/townsfolk/tf_vale_1",
+        "s2": "textures/entity/siege/townsfolk/tf_vale_2",
+        "s3": "textures/entity/siege/townsfolk/tf_vale_3",
+        "s4": "textures/entity/siege/townsfolk/tf_vale_4",
+        "s5": "textures/entity/siege/townsfolk/tf_vale_5",
+        "s6": "textures/entity/siege/townsfolk/tf_vale_6",
+        "s7": "textures/entity/siege/townsfolk/tf_vale_7",
+        "s8": "textures/entity/siege/townsfolk/tf_frostmarch_0",
+        "s9": "textures/entity/siege/townsfolk/tf_frostmarch_1",
+        "s10": "textures/entity/siege/townsfolk/tf_frostmarch_2",
+        "s11": "textures/entity/siege/townsfolk/tf_frostmarch_3",
+        "s12": "textures/entity/siege/townsfolk/tf_frostmarch_4",
+        "s13": "textures/entity/siege/townsfolk/tf_frostmarch_5",
+        "s14": "textures/entity/siege/townsfolk/tf_frostmarch_6",
+        "s15": "textures/entity/siege/townsfolk/tf_frostmarch_7",
+        "s16": "textures/entity/siege/townsfolk/tf_saltreach_0",
+        "s17": "textures/entity/siege/townsfolk/tf_saltreach_1",
+        "s18": "textures/entity/siege/townsfolk/tf_saltreach_2",
+        "s19": "textures/entity/siege/townsfolk/tf_saltreach_3",
+        "s20": "textures/entity/siege/townsfolk/tf_saltreach_4",
+        "s21": "textures/entity/siege/townsfolk/tf_saltreach_5",
+        "s22": "textures/entity/siege/townsfolk/tf_saltreach_6",
+        "s23": "textures/entity/siege/townsfolk/tf_saltreach_7",
+        "s24": "textures/entity/siege/townsfolk/tf_emberwaste_0",
+        "s25": "textures/entity/siege/townsfolk/tf_emberwaste_1",
+        "s26": "textures/entity/siege/townsfolk/tf_emberwaste_2",
+        "s27": "textures/entity/siege/townsfolk/tf_emberwaste_3",
+        "s28": "textures/entity/siege/townsfolk/tf_emberwaste_4",
+        "s29": "textures/entity/siege/townsfolk/tf_emberwaste_5",
+        "s30": "textures/entity/siege/townsfolk/tf_emberwaste_6",
+        "s31": "textures/entity/siege/townsfolk/tf_emberwaste_7",
+        "s32": "textures/entity/siege/townsfolk/tf_blackfen_0",
+        "s33": "textures/entity/siege/townsfolk/tf_blackfen_1",
+        "s34": "textures/entity/siege/townsfolk/tf_blackfen_2",
+        "s35": "textures/entity/siege/townsfolk/tf_blackfen_3",
+        "s36": "textures/entity/siege/townsfolk/tf_blackfen_4",
+        "s37": "textures/entity/siege/townsfolk/tf_blackfen_5",
+        "s38": "textures/entity/siege/townsfolk/tf_blackfen_6",
+        "s39": "textures/entity/siege/townsfolk/tf_blackfen_7"
+      },
+      "geometry": {
+        "default": "geometry.humanoid.custom"
+      },
+      "scripts": {
+        "pre_animation": [
+          "variable.tcos0 = (Math.cos(query.modified_distance_moved * 38.17) * query.modified_move_speed / 1.0) * 57.3;",
+          "variable.tf_talk = math.lerp(variable.tf_talk ?? 0.0, query.property('siege:talking') ? 1.0 : 0.0, 0.15);",
+          "variable.tf_mv = math.min(query.modified_move_speed * 4.0, 1.0);"
+        ],
+        "animate": [
+          "humanoid_base_pose",
+          "look_at_target_default",
+          "move",
+          "tf_idle",
+          "tf_talk"
+        ]
+      },
+      "animations": {
+        "humanoid_base_pose": "animation.humanoid.base_pose",
+        "look_at_target_default": "animation.humanoid.look_at_target.default",
+        "move": "animation.humanoid.move",
+        "tf_idle": "animation.hc.townsfolk.idle",
+        "tf_talk": "animation.hc.townsfolk.talk"
+      },
+      "render_controllers": [
+        "controller.render.siege_townsfolk"
+      ]
+    }
+  }
+}
