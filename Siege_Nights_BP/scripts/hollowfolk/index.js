@@ -128,10 +128,10 @@ const areaBuilt = (x, z, r) => {
   return true;
 };
 
-// The ground works that follow the land (terrace, yard, mine mouths, rails, the walk to the landing).
+// The ground works that follow the land (terrace, yard, mine mouths, the walk to the landing).
 // The buildings come from map/structures/hollow_kit.py (village_data.js). The look follows Mateo's
 // mining village picture: stone and timber cottages with lit windows and
-// dark tiled roofs, timbered mine mouths cut into the hillside with cart rails running out, an
+// dark tiled roofs, timbered mine mouths cut into the hillside, an
 // ore-sorting shed, a smithy with a smoking chimney, a fire in the middle, lantern posts and fences.
 // Offsets are from the village centre; nothing lines up on purpose.
 const V = {
@@ -162,7 +162,7 @@ function buildVillage(v) {
   // the Tally's copper counting block; everything else built (cottages, smithy, sorting shed, lamps,
   // fences) is the village design from map/structures/hollow_kit.py, stamped over the next few ticks
   fill(dim, x, y, z, x, y, z, B.copper);
-  // two timbered mine mouths in the west face, ore showing inside, cart rails running out to a sorting shed
+  // two timbered mine mouths in the west face, ore showing inside, a sorting shed beyond (no rails: no train system in the Hollow)
   for (const mz of [z - 2, z + 4]) {
     fill(dim, x - 18, y, mz - 1, x - 15, y + 2, mz + 1, V.air);
     fill(dim, x - 19, y, mz - 1, x - 19, y + 2, mz + 1, B.ore);
@@ -170,7 +170,6 @@ function buildVillage(v) {
     fill(dim, x - 15, y, mz + 2, x - 15, y + 3, mz + 2, V.beam);
     fill(dim, x - 15, y + 3, mz - 2, x - 15, y + 3, mz + 2, V.beam);
     fill(dim, x - 16, y + 2, mz, x - 16, y + 2, mz, V.lantern);
-    fill(dim, x - 18, y, mz, x - 11, y, mz, "minecraft:rail");
   }
 
   // a plank walk from the yard down to the landing, ending in a short dock with a lantern

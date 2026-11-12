@@ -141,53 +141,19 @@ def station(seed=9):
 
 
 def clock_tower(seed=13, name="millbrook_clock_tower"):
-    """Millbrook's clock tower on the square (the Clockwork Reeve's arena is at its foot): a 7 x 7
-    stone shaft, clock faces on all four sides, an open belfry and a slate spire."""
-    bp = Blueprint(name); P = dict(P_STONE); B = Building(bp, P, seed)
-    rect = (0, 0, 6, 6)
-    B.foundation(grow(rect, "nsew"), 0); B.floor(rect, 0)
-    for y0 in (1, 6, 11):
-        B.stone_storey(rect, y0, 5, plinth=(y0 == 1))
-    B.stone_storey(rect, 16, 1, plinth=False)
-    for y in (6, 11, 16):                                   # string courses
-        for x in range(-1, 8):
-            for z in (-1, 7): bp.set(x, y, z, "stone_brick_slab", half="top")
-        for z in range(0, 7):
-            for x in (-1, 7): bp.set(x, y, z, "stone_brick_slab", half="top")
-    B.door(3, 1, 6, "s", canopy=False, lanterns=True, frame="chiseled_stone_bricks")
-    for y in (7, 12):                                        # slit windows
-        B.window(3, y, 6, "s", 1, 2, kind="stone"); B.window(3, y, 0, "n", 1, 2, kind="stone")
-        B.window(6, y, 3, "e", 1, 2, kind="stone"); B.window(0, y, 3, "w", 1, 2, kind="stone")
-    faces = {"s": lambda i, j: (2 + i, 13 + j, 6), "n": lambda i, j: (2 + i, 13 + j, 0), "e": lambda i, j: (6, 13 + j, 2 + i), "w": lambda i, j: (0, 13 + j, 2 + i)}
-    for side, f in faces.items():                            # 3 x 3 clock faces with a dark hub
-        for i in range(3):
-            for j in range(3): bp.set(*f(i, j), "calcite")
-        bp.set(*f(1, 1), "dark_oak_log", axis="z" if side in "ns" else "x")
-        bp.set(*f(1, 2), "polished_blackstone") ; bp.set(*f(2, 1), "polished_blackstone")   # the hands at a quarter past
-    for y in range(17, 20):                                  # open belfry: corner piers, 3-wide arches
-        for x in range(0, 7):
-            for z in range(0, 7):
-                edge = x in (0, 6) or z in (0, 6)
-                corner = (x in (0, 1, 5, 6)) and (z in (0, 1, 5, 6))
-                if edge: bp.set(x, y, z, "stone_bricks" if (corner or y == 19) else "air")
-    for side, (dx, dz) in {"s": (0, 6), "n": (0, 0)}.items():
-        bp.set(2, 18, dz, "stone_brick_stairs", facing="w", half="top"); bp.set(4, 18, dz, "stone_brick_stairs", facing="e", half="top")
-    for x in (0, 6):
-        bp.set(x, 18, 2, "stone_brick_stairs", facing="n", half="top"); bp.set(x, 18, 4, "stone_brick_stairs", facing="s", half="top")
-    B.floor(rect, 16)
-    bp.set(3, 17, 3, "bell")
-    for k, y in enumerate(range(20, 24)):                    # spire: stepped slate pyramid
-        lo, hi = -1 + k, 7 - k
-        for x in range(lo, hi + 1):
-            for z in range(lo, hi + 1):
-                if x in (lo, hi) or z in (lo, hi):
-                    f = "s" if z == lo else "n" if z == hi else "e" if x == lo else "w"
-                    bp.set(x, y, z, P["roof"], facing=f, half="bottom")
-                else: bp.set(x, y, z, P["roof_block"])
-    bp.set(3, 24, 3, P["roof_block"]); bp.set(3, 25, 3, "stone_brick_wall"); bp.set(3, 26, 3, "lightning_rod")
-    for y in range(1, 17): bp.set(3, y, 1, "ladder", facing="s")
-    bp.markers["door"] = (3, 1, 5); bp.markers["arena"] = (3, 0, 12)
-    return finish_doctrine(bp)
+    """Millbrook's clock tower on the square (the Clockwork Reeve's arena is at its foot), built on the skill
+    from review/specs/millbrook_clock_tower.json (gen_millbrook.py, build-instructions/towers/README.md): a
+    stone shaft in three stages, a jettied timber clock stage with a framed 5 x 5 clock on every face, a steep
+    slate helm and an open bell lantern."""
+    import json, os, sys
+    here = os.path.dirname(os.path.abspath(__file__))
+    sk = os.path.join(here, "..", "..", ".claude", "skills", "minecraft-builder", "scripts")
+    if sk not in sys.path: sys.path.insert(0, sk)
+    import engine
+    spec = json.load(open(os.path.join(here, "review", "specs", "millbrook_clock_tower.json")))
+    bp = Blueprint(name); engine.into_blueprint(bp, spec)
+    bp.markers["door"] = (3, 2, 5); bp.markers["arena"] = (3, 0, 12)
+    return bp.finish()
 
 
 def watermill(seed=17, name="millbrook_watermill"):

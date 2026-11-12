@@ -1,9 +1,12 @@
 import { addTests, assert, assertEqual } from "../core/tests.js";
 import { REGIONS } from "../economy/config.js";
+import { TRADE_OUTPOST_DESIGNS } from "./outpost_data.js";
+import { wingPlan } from "./wing.js";
 import { TRADE, GOODS, GOOD_IDS, COIN, GOLD_COIN, DAY, REGION_RATES_DEFAULT } from "./data.js";
 import {
   valueTo, fairness, offerProblem, pathLength, travelTicks, takeMoney, moneyIn, depart, afterTry, finished,
   npcMake, npcAnswer, capitalAnswer, capitalPrice, npcOffer, needsOf, supplyTake, crateDelta, cargoOf, loadText, regalWorth, balanceText,
+  specialProblem, specialNormal, specialPremium, specialPayFor, npcFill,
 } from "./rules.js";
 
 const offer = (give, get, extra = {}) => ({ from: "p:a", to: "l:b", give, get, every: "day", runs: 0, round: 0, ...extra });
@@ -135,5 +138,37 @@ addTests("trade", {
   "a crate is corrected by what changed since the last look": () => {
     assertEqual(crateDelta({ [IRON]: 10, [GOLD]: 8 }, { [IRON]: 30 }), { add: { [GOLD]: 8 }, take: { [IRON]: 20 } });
     assertEqual(crateDelta({ [IRON]: 5 }, { [IRON]: 5 }), { add: {}, take: {} });
+  },
+  "special offers: normal worth, premium, fair shares": () => {
+    const sp = { item: GOLD, total: 8, left: 8, price: 320 };
+    assertEqual(specialNormal(sp), 256);
+    assertEqual(specialPremium(sp), 25);
+    assertEqual(specialPayFor(sp, 4), 160);
+    assertEqual(specialPayFor({ ...sp, price: 321 }, 3), 120);
+    assertEqual(specialProblem(sp, { cargo: 128, open: 0 }), undefined);
+    assert(specialProblem({ ...sp, price: 200 }, {}), "under the normal worth");
+    assert(specialProblem({ ...sp, total: 200 }, { cargo: 128 }), "more than a train load");
+    assert(specialProblem({ ...sp, item: COIN, price: 999 }, {}), "money is not a good");
+    assert(specialProblem(sp, { open: TRADE.specialsPerOutpost }), "too many open");
+    assert(specialProblem(sp, { funds: 100 }), "can't afford it");
+  },
+  "towns fill a special offer only when it beats their worth, and only from stock": () => {
+    const npc = { region: "Emberwaste", temperament: "steady" };
+    const cheap = { item: GOLD, total: 10, left: 10, price: regalWorth({ id: GOLD, n: 10 }) };
+    assert(npcFill(npc, cheap, { [GOLD]: 50 }, {}) === 10, "gold is cheap in the Emberwaste, so the normal price is plenty");
+    assertEqual(npcFill({ region: "Saltreach", temperament: "grasping" }, cheap, { [GOLD]: 50 }, {}), 0);
+    assertEqual(npcFill(npc, cheap, { [GOLD]: 4 }, {}), 4);
+    assertEqual(npcFill(npc, { ...cheap, left: 3 }, { [GOLD]: 50 }, {}), 3);
+  },
+  "the Outpost building: every region and stage, marks inside, nothing in front of the step": () => {
+    for (const region of ["vale", "frostmarch", "saltreach", "emberwaste", "blackfen"]) {
+      for (const stage of ["halt", "station", "junction", "grand"]) {
+        const d = TRADE_OUTPOST_DESIGNS[region]?.[stage];
+        assert(d, `${region} ${stage}`);
+        assert(d.box.z0 >= 0, `${region} ${stage} reaches toward the station`);
+        const p = wingPlan(region, stage);
+        for (const k of ["board", "exports", "imports"]) assert(p.marks[k], `${region} ${stage} ${k}`);
+      }
+    }
   },
 });

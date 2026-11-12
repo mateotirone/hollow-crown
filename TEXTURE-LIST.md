@@ -96,6 +96,7 @@ Guards' own armor line, which players can't get (items `siege:guardgear_<tier>_<
 | Ballista (64×64, same atlas layout) | `textures/entity/siege_ballista.png` | **Final style, awaiting your review**, with 3D model `models/entity/ballista.geo.json` (stand, turning turret, bow arms, string, bolt) and fire animation |
 | Archer ×16 colors (64×64 player skin layout) | `textures/entity/siege/archer_<color>.png`, hood and mantle in the banner color, green jerkin, quiver | **Final style, awaiting your review** |
 | Man-at-Arms ×16 colors (64×64 player skin layout) | `textures/entity/siege/man_at_arms_<color>.png`, padded gambeson, tabard in the banner color with the gold tower | **Final style, awaiting your review** |
+| All nine soldiers ×6 regions ×16 colors (128×64: player layout + gear) | `textures/entity/soldiers/<type>/<region>_<color>.png`, painted by `studio/art/build_soldiers.py` (Man-at-Arms, Archer, Pikeman, Shieldbearer, Crossbowman, Knight, Ram Crew, Trebuchet Crew, Sapper); replaces the old guard skins in game | **Final style, awaiting your review** |
 | Keep heart | `textures/entity/siege_invisible.png` | Stays invisible, no art needed |
 | Townsfolk ×40 (64×64 player skin layout, 8 per region: tunic, apron/vest/fur/stripes/sash, hood/cap/kerchief/headwrap, skirt or breeches, varied skin and hair) | `textures/entity/siege/townsfolk/tf_<region>_<0-7>.png` (by `studio/art/build_townsfolk.py`), worn by `siege:townsfolk` | Placeholder in house palette, awaiting your review |
 
@@ -238,6 +239,7 @@ Icons and blocks are painted. The horse coats further down are still to do. Keep
 | Archive Shelf casing (sides, top and bottom) | `textures/blocks/siege_shelf_side.png`, `siege_shelf_top.png` | **Final style, awaiting your review** |
 | Archive Shelf front ×7 (empty, then 1 to 6 tomes: two rows of three slots, one book spine per shelved tome) | `textures/blocks/siege_shelf_front_0.png` to `siege_shelf_front_6.png` | **Final style, awaiting your review**. Could later get a regional variant per build style |
 | Dusty Tome (a closed book lying in the world; 32×16 box-UV for a 10×3×8 book, shape in `models/blocks/tome_cache.geo.json`) | `textures/blocks/hc_tome_cache.png` | **Final style, awaiting your review** |
+| Gravestone (weathered headstone with a carved cross, moss at the foot; 32×16, left half the front face, right half plain stone; shape in `models/blocks/gravestone.geo.json`) | `textures/blocks/graves/gravestone.png` | **First pass, awaiting your review** (`studio/art/build_gravestone.py`) |
 | Lore Tome item (old leather book, gilt bands) | `textures/items/siege_lore_tome.png` | **Final style, awaiting your review**. Nice to have later: one cover per collection (8) |
 | The Old King's Journal item (small cracked red leather book, gold royal seal, the name scraped off the cover, a strap) | `textures/items/siege_kings_journal.png` | **Placeholder**, needs the final item style. Every player starts with this, so it is worth doing well |
 | The Fourteen Arts item (a child's damp grey-green copybook with a paper label and a small pale flame) | `textures/items/siege_fourteen_arts.png` | **Placeholder**, needs the final item style |
@@ -486,7 +488,7 @@ The Texture Studio now lists every PNG under `textures/` automatically (catch-al
 
 ## Skill icons (2026-11-10, textures thread)
 Painted by `studio/art/build_skill_icons.py`, which reads the skill ids from `Siege_Nights_BP/scripts/townhall/skills.js` so new skills get an icon on the next run (add a glyph to `PICK` first).
-- `textures/ui/hc/skill/<skill id>.png`: 85 icons, 16x16, one glyph per skill, coloured by branch. Not wired: the tree still shows the node state frames (`node_*.png`); the town hall thread decides how to use them.
+- `textures/ui/hc/skill/<skill id>.png`: 86 icons, 16x16 (keep_messenger, a sealed letter, added 2026-11-12), one glyph per skill, coloured by branch. Not wired: the tree still shows the node state frames (`node_*.png`); the town hall thread decides how to use them.
 - Sheet: `art/skill-icons.png`
 Still stand-ins: 49 skill icons, a left-handed Standing Rank, real models for the three reveal-scene actors.
 

@@ -75,6 +75,13 @@ rustic mixes (more cobble, mossy cobble slabs low and in the shade).
 - Paths cross water on a bridge (Kingsrest needs bridges where two rivers meet) as wide as the path, with
   rails (fence or wall) and the same sunken surface between kerbs. Fords only on lanes.
 
+## Yards and walled grounds meet the paths (Mateo, 2026-11-12)
+
+A yard, bailey or walled ground (the Barracks yard) does not have to be a perfect square: it fits the landscaping.
+Where a path already crosses the line of its wall, leave that stretch of wall out so the path runs straight in, and
+keep the path's own surface through the yard. Never pave over or wall across a path that was there first. The game
+does this when it raises the Barracks (`settle/raised.js`, `yardGaps`).
+
 ## Before you finish a path
 
 - [ ] Walking surface is bottom slabs, half a block below the buildings beside it.

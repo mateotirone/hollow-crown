@@ -21,7 +21,8 @@ A 50,000-block castle costs about the same tokens as a hut.
    `reference/output.md` (commands, editions, limits, in-game checks),
    `reference/from-picture.md` (rebuilding a building from a screenshot or photo),
    `build-instructions/towers/README.md` (every tower: stages, proportions, clocks, the style of each region),
-   `regions/<region>.md` (the full style guide of each region; read before any build there).
+   `regions/<region>.md` (the full style guide of each region; read before any build there),
+   `reference/bridges.md` (part `bridge`: any-angle bridges over water and gaps, sized by span, styled by region).
 3. **Compression.** Never read the `.mcfunction` or `scene.json`, never print block lists. Read the summary,
    look at the PNG, change the spec, rebuild.
 
