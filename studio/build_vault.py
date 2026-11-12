@@ -248,12 +248,12 @@ def door(wheel):
     # the spoked locking wheel: hub, ring of eight blocks, four spokes, and a jewel (Choirsteel glows)
     cx, cy, z = 0, 7.5, -9.5
     s.cube([cx - 1.25, cy - 1.25, z], [2.5, 2.5, 2.5], "trim", "wheel")
-    for k in range(8):
-        a = k * math.pi / 4
-        s.cube([cx + math.cos(a) * 4 - 0.75, cy + math.sin(a) * 4 - 0.75, z + 0.4], [1.5, 1.5, 1.2], "trim", "wheel",
-               rot=[0, 0, k * 45], pivot=[cx + math.cos(a) * 4, cy + math.sin(a) * 4, z + 1])
-    for k in range(4):
-        s.cube([cx - 3.5, cy - 0.4, z + 0.7], [7, 0.8, 0.8], "trim", "wheel", rot=[0, 0, k * 45], pivot=[cx, cy, z + 1.1])
+    for k in range(8):   # an octagonal rim: eight short bars, each laid along the circle
+        a = k * math.pi / 4 + math.pi / 8
+        mx, my = cx + math.cos(a) * 4.2, cy + math.sin(a) * 4.2
+        s.cube([mx - 1.75, my - 0.5, z + 0.5], [3.5, 1, 1], "trim", "wheel", rot=[0, 0, math.degrees(a) + 90], pivot=[mx, my, z + 1])
+    for k in range(4):   # four spokes through the hub
+        s.cube([cx - 4, cy - 0.35, z + 0.8], [8, 0.7, 0.7], "trim", "wheel", rot=[0, 0, k * 45], pivot=[cx, cy, z + 1.15])
     s.cube([cx - 0.6, cy - 0.6, z - 0.4], [1.2, 1.2, 0.5], "gem", "gem")
     # bolt housings on the right edge
     for y in (3, 7, 11):
