@@ -308,8 +308,8 @@ def roof_field(rect, kind, ridge, overhang, verge, pitch, base):
 
 def build_roofs(ctx, roofs, style, chimneys=()):
     """Combine every roof's height field (higher roof wins, 06 'connecting roofs') and place the surface:
-    stairs facing uphill, inner corners in valleys, outer corners on hips, a full block + bottom slab on
-    the ridge, verge stairs with a barge board under, an eave row, a trim block at each verge corner."""
+    stairs facing uphill, inner corners in valleys, outer corners on hips, a full block on the ridge capped
+    with back-to-back stairs (Mateo 2026-11-12; style "ridge_cap": "slab" for the old slab row), verge stairs with a barge board under, an eave row, a trim block at each verge corner."""
     if not roofs: return
     H, info = {}, {}
     for F, r in roofs:
@@ -329,7 +329,15 @@ def build_roofs(ctx, roofs, style, chimneys=()):
                 ctx.set(x, row, z, S, "stairs", mat, facing=f, half="bottom", corner="outer_left" if g == LEFT[f] else "outer_right")
             else:        # ridge: full block with a bottom slab on top (06 step 3)
                 ctx.set(x, row, z, S, "full", mat)
-                ctx.set(x, row + 1, z, S, "slab", r.get("cap", mat), half="bottom")
+                if r.get("ridge_cap", style.get("ridge_cap", "stairs")) == "slab":
+                    ctx.set(x, row + 1, z, S, "slab", r.get("cap", mat), half="bottom")
+                else:    # back-to-back stairs along the spine (Mateo 2026-11-12): pairs with their tall backs touching
+                    along = x if r["ridge"] == "x" else z
+                    f = ("e" if along % 2 == 0 else "w") if r["ridge"] == "x" else ("s" if along % 2 == 0 else "n")
+                    for g in (("n", "s") if r["ridge"] == "x" else ("w", "e")):   # two-row ridge: the pair sits across
+                        dx, dz = DIRS[g]
+                        if H.get((x + dx, z + dz)) == row: f = g
+                    ctx.set(x, row + 1, z, S, "stairs", r.get("cap", mat), facing=f, half="bottom")
                 if pitch == 2: ctx.set(x, row - 1, z, S, "full", mat)
             continue
         f = hi[0]

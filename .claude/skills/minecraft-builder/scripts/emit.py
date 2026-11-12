@@ -244,9 +244,9 @@ def save_mcstructure(blocks, path, name):
     sys.path.insert(0, os.path.dirname(p))
     import bp as BP
     b = BP.Blueprint(name)
+    from engine import to_bp
     for c, (n, q) in blocks.items():
-        q = dict(q); corner = q.pop("corner", None); q.pop("conn", None); q.pop("post", None)
-        if corner and corner != "none": q.setdefault("raw", {})["minecraft:corner"] = corner
+        n, q = to_bp(n, q)
         if n.endswith("_wall_sign") and n[:-10] == "dark_oak": n = "dark_oak_wall_sign"
         b.cells[c] = (n, q)
     b.finish()

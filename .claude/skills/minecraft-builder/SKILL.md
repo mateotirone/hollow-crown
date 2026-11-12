@@ -70,6 +70,13 @@ A 50,000-block castle costs about the same tokens as a hut.
 - `parts` run after shapes, in order, and overwrite. `place` runs last.
 - Optional: `offset` [x, y, z] added to every command, `clear` true to air the bounding box first.
 
+## One engine for every build
+
+Mateo (2026-11-12): every build in the project uses this skill. Map code calls `scripts/engine.py`
+(`compute(spec)`, `into_blueprint(bp, spec, offset, upto=stage | only=stage)`) instead of placing blocks
+itself, so a rule fixed here reaches every build. New building rules go into `parts.py` and the
+reference files, not into a builder of their own.
+
 ## Commands
 
     python3 scripts/build.py SPEC OUT [--stages] [--edition java] [--mcstructure] [--no-preview] [--hifi TEX THREE]

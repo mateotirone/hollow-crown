@@ -129,7 +129,7 @@ stair on a full block), `overhang` 1, `verge` 1, `cap` (ridge slab material).
 
 How it is built: a height field over the footprint plus overhang; every cell takes a stair facing uphill;
 inner-corner stairs where two higher sides meet (valleys), outer-corner stairs on hip lines; the ridge is a
-full block with a bottom slab on top. Edges open to the sky get: barge boards (upside-down trim stairs under
+full block capped with back-to-back stairs along the spine, tall backs touching in pairs, so the crest reads as a row of small peaks between the spikes (Mateo 2026-11-12; on a two-row ridge each pair sits across the spine; style `"ridge_cap": "slab"` for the old slab row). Edges open to the sky get: barge boards (upside-down trim stairs under
 every verge stair), an eave row of upside-down trim stairs under the overhang, and Mateo's trim-wood corner
 block under the lowest verge stair at every corner. Gable triangles fill after the surface with a centre
 post (timber) and an attic window when the gable is 5 or more tall. Roof colour ladders run eaves to
