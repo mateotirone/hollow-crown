@@ -12,8 +12,8 @@ import { guardTag, onTick, addTests, assert, assertEqual } from "../siege/api.js
 import { sfx } from "../core/sfx.js";
 import { RANKS, rankOf } from "../townhall/skills.js";
 import { ELEVEN } from "./data.js";
+import { heroOf } from "./saves.js";
 
-const HERO_PROP = "siege:townhall_hero";
 const MORVANE = "siege:oswin_the_last";
 const SUIT = "siege:oswin_reflection";
 const REACH = 64; // players this close to the stage's centre are in the fight
@@ -27,14 +27,6 @@ export const STAGE_EDGES = {
   6: { role: "witch", student: "Nell's niece, Rue", what: "and the fen lends you a moment to fall in" },
   7: { role: "marked", student: undefined, what: "can lift the fallen Crown and stop the song" },
 };
-
-function heroOf(player) {
-  try {
-    const raw = player.getDynamicProperty(HERO_PROP);
-    if (typeof raw === "string") return JSON.parse(raw);
-  } catch { /* no hero */ }
-  return {};
-}
 
 // Does this player hold the top rank of this role? (Sorcerer for "marked")
 export function atTop(hero, role) {

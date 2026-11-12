@@ -1,0 +1,26 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "siege:vault_breaker_netherite"
+    },
+    "tags": [
+      "siege_workshop"
+    ],
+    "pattern": [
+      "NBN"
+    ],
+    "key": {
+      "N": {
+        "item": "minecraft:netherite_ingot"
+      },
+      "B": {
+        "item": "siege:vault_breaker_diamond"
+      }
+    },
+    "result": {
+      "item": "siege:vault_breaker_netherite",
+      "count": 1
+    }
+  }
+}

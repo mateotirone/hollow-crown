@@ -700,6 +700,9 @@
   },
   "siege_spell_hollowstep": {
    "textures": "textures/ui/hc/skill/arc_hollowstep"
+  },
+  "siege_vault_key": {
+   "textures": "textures/items/vault/vault_key"
   }
  }
 }

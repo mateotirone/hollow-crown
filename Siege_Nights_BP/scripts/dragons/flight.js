@@ -12,6 +12,7 @@ import { dragonOf, ownerIdOf, valid, save, setFlying, isFlying, canHarness } fro
 import { speak, noise } from "./voice.js";
 import { refusal, tell } from "./mind.js";
 import { sfx } from "../core/sfx.js";
+import { applyFilter } from "../core/events.js";
 
 let crashed = () => {}; // set by index.js: what happens when a shot-down dragon hits the ground
 export const onCrash = (fn) => (crashed = fn);
@@ -75,6 +76,12 @@ export function takeOff(player, entity, rec) {
   if (now < ride.groundedUntil) return say(player, `§c${rec.name} is shaken and won't fly yet (${Math.ceil((ride.groundedUntil - now) / 20)}s).`);
   if (ride.stamina < flightTicks(rec) * S.takeoffAt) return say(player, `§c${rec.name} is spent. Let it rest.`);
   if (now < (ride.balkUntil ?? 0)) return;
+  // Another feature may ground her (the role trials: no dragon flies around 3:17 on a siege night). A reason = no.
+  const grounded = applyFilter("dragonCanFly", "", { player, rec, entity });
+  if (grounded) {
+    ride.balkUntil = now + 100;
+    return say(player, grounded);
+  }
   const no = player.id === rec.owner ? refusal(rec, "fly") : undefined;
   if (no) {
     ride.balkUntil = now + 100;
@@ -191,6 +198,10 @@ export function flightTick() {
         } catch {
           // nobody near
         }
+      }
+      else if (ride.airTicks % 20 < STEP && applyFilter("dragonCanFly", "", { player: pilot, rec, entity, flying: true })) {
+        land(entity, rec, "grounded");
+        say(pilot, applyFilter("dragonCanFly", "", { player: pilot, rec, entity, flying: true }));
       }
       else if (ride.stamina <= 0) {
         ride.stamina = 0;

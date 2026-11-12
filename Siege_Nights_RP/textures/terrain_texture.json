@@ -1159,6 +1159,75 @@
   "siege_plot_marker": {
    "textures": "textures/blocks/siege_plot_marker"
   },
+  "siege_vault_door_wood": {
+   "textures": "textures/blocks/vault/door_wood"
+  },
+  "siege_vault_trim_wood": {
+   "textures": "textures/blocks/vault/trim_wood"
+  },
+  "siege_vault_door_iron": {
+   "textures": "textures/blocks/vault/door_iron"
+  },
+  "siege_vault_trim_iron": {
+   "textures": "textures/blocks/vault/trim_iron"
+  },
+  "siege_vault_door_diamond": {
+   "textures": "textures/blocks/vault/door_diamond"
+  },
+  "siege_vault_trim_diamond": {
+   "textures": "textures/blocks/vault/trim_diamond"
+  },
+  "siege_vault_door_netherite": {
+   "textures": "textures/blocks/vault/door_netherite"
+  },
+  "siege_vault_trim_netherite": {
+   "textures": "textures/blocks/vault/trim_netherite"
+  },
+  "siege_vault_door_choirsteel": {
+   "textures": "textures/blocks/vault/door_choirsteel"
+  },
+  "siege_vault_trim_choirsteel": {
+   "textures": "textures/blocks/vault/trim_choirsteel"
+  },
+  "siege_vault_stone": {
+   "textures": "textures/blocks/vault/stone"
+  },
+  "siege_vault_stone_plain": {
+   "textures": "textures/blocks/vault/stone_plain"
+  },
+  "siege_vault_frame_wood": {
+   "textures": "textures/blocks/vault/frame_wood"
+  },
+  "siege_vault_glow": {
+   "textures": "textures/blocks/vault/glow"
+  },
+  "siege_vault_coffer": {
+   "textures": "textures/blocks/vault/coffer"
+  },
+  "siege_vault_cracks_1": {
+   "textures": "textures/blocks/vault/cracks_1"
+  },
+  "siege_vault_cracks_2": {
+   "textures": "textures/blocks/vault/cracks_2"
+  },
+  "siege_vault_breaker_iron": {
+   "textures": "textures/blocks/vault/breaker_iron"
+  },
+  "siege_vault_bit_iron": {
+   "textures": "textures/blocks/vault/bit_iron"
+  },
+  "siege_vault_breaker_diamond": {
+   "textures": "textures/blocks/vault/breaker_diamond"
+  },
+  "siege_vault_bit_diamond": {
+   "textures": "textures/blocks/vault/bit_diamond"
+  },
+  "siege_vault_breaker_netherite": {
+   "textures": "textures/blocks/vault/breaker_netherite"
+  },
+  "siege_vault_bit_netherite": {
+   "textures": "textures/blocks/vault/bit_netherite"
+  },
   "siege_ironworks_side": {
    "textures": "textures/blocks/settle/siege_ironworks_side"
   },
