@@ -40,7 +40,7 @@ export const BOSS_STEPS = {
     title: "The hunt on Hallowmere", start: town("Rimehold"),
     hint: "Old Sigga keeps the lodge on the lake east of Rimehold. Go after dark.",
     key: "siege:pale_horn", keyTitle: "The Hunter's Cairn", keyAt: at("Hallowmere", 60, -1130),
-    keyHint: "Lay the Pale Horn on the Hunter's Cairn on a siege night.",
+    keyHint: "Lay the Pale Horn on the Hunter's Cairn after dark.",
   },
   bride: {
     title: "The chapel under Gull Bay", start: town("Gull's Rest"),

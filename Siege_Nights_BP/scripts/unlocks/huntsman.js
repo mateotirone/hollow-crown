@@ -4,12 +4,11 @@
 //   2. Four cairns stand on the shore, each topped with a carved beast. After dark, click them in the rhyme's order:
 //      each one lights as it wakes. The wrong one puts them all out, and rimewolves answer. The fourth gives the
 //      Pale Horn, frozen into the stone under it.
-//   3. On a siege night, take the horn out onto the frozen lake and lay it on the Hunter's Cairn in the middle. It
+//   3. After dark (any night, Mateo 2026-11-13), take the horn out onto the frozen lake and lay it on the Hunter's Cairn in the middle. It
 //      sounds; something answers from far off; hounds; the ice cracks in a ring round you. He rides up out of it.
-//   The horn stays on the cairn. Once a siege night has passed after he falls, sound it again on a siege night.
+//   The horn stays on the cairn. Once a siege night has passed after he falls, sound it again after dark.
 
 import { isNight } from "../siege/api.js";
-import { isSiegeNight } from "../reach/api.js";
 import { defineSite, column, overworld, say, actionbar, sound, ring, abs, mid, setState, put, give, inventoryHas, talk, nearby, makeApproach } from "./site.js";
 import { makeHunt, huntStep, resting, BEASTS } from "./puzzles.js";
 import { huntPlan, crackCells, inIceEdge, HUNT, ICE_EDGE } from "./plans.js";
@@ -44,8 +43,8 @@ export const huntsmanSite = defineSite({
   blocks: {
     "siege:hunt_cairn": (site, player, block) => clickCairn(site, player, block),
     "siege:hunters_cairn": (site, player, block) => site.socket(player, block, {
-      whenOk: isSiegeNight(),
-      notNow: "§7The ice is quiet. It only listens on a siege night.",
+      whenOk: isNight(),
+      notNow: "§7The ice is quiet. It only listens after dark.",
       first: () => summon(site, true),
       again: () => summon(site, false),
     }),
