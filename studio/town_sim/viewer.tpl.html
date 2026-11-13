@@ -117,6 +117,7 @@ button.horn { background: var(--bad); color: #fff8ec; border-color: var(--bad); 
     <span class="k">Town hall</span><span class="v" id="r-hall">None</span><span class="pips" id="p-hall"></span>
     <span class="k">Wall</span><span class="v" id="r-wall">None</span><span class="pips" id="p-wall"></span>
     <span class="k">Station</span><span class="v" id="r-station">None</span><span class="pips" id="p-station"></span>
+    <span class="k" id="k-store" hidden>Storehouse</span><span class="v" id="r-store" hidden>None</span><span id="x-store" hidden></span>
     <span class="k">Plots</span><span class="v" id="r-plots">0 built</span><span></span>
   </div>
   <div>
@@ -529,8 +530,8 @@ function designOps(id, offer) {
 }
 
 async function raise(slotId, id, { free = false } = {}) {
-  const s = slotById[slotId] ?? (slotId === "mason_yard" ? D.masonSlot : null);
-  const offer = s === D.masonSlot ? D.masonSlot.seat : s.offers.find((o) => o.id === id);
+  const s = slotById[slotId] ?? (slotId === "mason_yard" ? D.masonSlot : slotId === D.store?.slot.id ? D.store.slot : null);
+  const offer = s === D.masonSlot ? D.masonSlot.seat : D.store?.levels.find((l) => l.id === id)?.seat ?? s.offers.find((o) => o.id === id);
   const st = T.slots[slotId] ?? (T.slots[slotId] = { building: null });
   st.building = id; st.rising = true; st.offer = offer;
   refreshPlots();
@@ -633,6 +634,21 @@ async function found() {
   await Promise.all([wall, station, hall, base]);
 }
 
+// storehouse.js: when the town grows a tier the Storehouse comes down and rises again on the same ground, a level up
+// (in the game its stock waits at the door in keepers and goes back chest for chest)
+async function rebuildStore(t) {
+  const L = D.store?.levels[t], id = D.store?.slot.id, st = id && T.slots[id];
+  if (!L?.seat || !st?.building || st.building === L.id) return;
+  const { ops } = designOps(st.building, st.offer), out = [], rev = [];
+  for (let i = 0; i < ops.length; i += OPLEN[ops[i]]) if (ops[i] === 0 && ops[i + 4]) out.push(ops[i + 1], ops[i + 2], ops[i + 3]);
+  for (let i = out.length - 3; i >= 0; i -= 3) rev.push(0, out[i], out[i + 1], out[i + 2], 0);
+  log(`The ${nameOf(st.building)} comes down: its stock waits at the door`);
+  st.rising = true; refresh();
+  await job(`Taking down the ${nameOf(st.building)}`, rev, { perSec: 1200, min: 1.5 });
+  await raise(id, L.id, { free: true });
+  log(`The ${L.name} holds ${L.chests} chests, the stock carried back in`);
+}
+
 async function growTo(t) {
   if (t <= T.tier || t > 3) return;
   const name = D.tierNames[t];
@@ -653,7 +669,7 @@ async function growTo(t) {
   })();
   const stage = D.stages.indexOf(D.tiers[t].stage);
   const station = stage > T.station ? stationTo(stage) : null;
-  await Promise.all([wall, ground, station]);
+  await Promise.all([wall, ground, station, rebuildStore(t)]);
   T.growing = null;
   log(`${D.plot} is a ${name}`);
   refresh(); refreshPlots();
@@ -662,7 +678,7 @@ async function growTo(t) {
 // ---------------- plots: the game's rules (charters.js, shipped as its own source) ----------------
 function counts({ rising = true } = {}) {
   const c = {};
-  for (const st of Object.values(T.slots)) if (st.building && (rising || !st.rising) && st.building !== "mason_yard") c[st.building] = (c[st.building] ?? 0) + 1;
+  for (const st of Object.values(T.slots)) if (st.building && (rising || !st.rising) && st.building !== "mason_yard" && !/^storehouse_\d$/.test(st.building)) c[st.building] = (c[st.building] ?? 0) + 1;
   return c;
 }
 const openEmpty = () => D.slots.filter((s) => s.tier <= T.tier && !T.slots[s.id].building && !T.slots[s.id].closed);
@@ -754,6 +770,11 @@ function refresh() {
   pips($("p-station"), 4, T.station + 1, T.stationRising >= 0 && T.stationRising !== undefined ? T.stationRising + 1 : -1);
   const built = Object.values(T.slots).filter((s) => s.building && !s.rising).length;
   const rising = Object.values(T.slots).filter((s) => s.building && s.rising).length;
+  if (D.store) {
+    for (const k of ["k-store", "r-store", "x-store"]) $(k).hidden = false;
+    const st = T.slots[D.store.slot.id], L = D.store.levels.find((l) => l.id === st?.building);
+    $("r-store").textContent = L ? `${L.name} · ${L.chests} chests${st.rising ? " (rising)" : ""}` : "None";
+  }
   $("r-plots").textContent = `${built} built${rising ? `, ${rising} rising` : ""} · ${openEmpty().length} open`;
   // charter
   const ch = $("charter"); ch.innerHTML = "";

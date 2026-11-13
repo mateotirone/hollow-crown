@@ -528,6 +528,34 @@ let masonSlot;
 }
 const masonSeat = masonSlot && seatFor(masonSlot, "mason_yard");
 if (masonSeat) baseBuilds.push({ slot: masonSlot.id, id: "mason_yard", why: "The Mason's Yard every new base gets", seat: masonSeat });
+// the Storehouse (storehouse.js, from the Hamlet): on the layout's "storehouse" ground, else the nearest free long
+// Medium or Large plot; rebuilt on the same ground at the next level each time the town grows a tier
+let store = null;
+{
+  const SH = await imp("settle/storehouse_rules.js").catch(() => null); // not in builds from before the Storehouse
+  if (SH && BUILDING[SH.storeId(1)]) {
+    const { STOREHOUSE_DESIGNS } = await imp("settle/storehouse_data.js");
+    const DIRS = { s: { x: 0, z: 1 }, n: { x: 0, z: -1 }, e: { x: 1, z: 0 }, w: { x: -1, z: 0 } };
+    const f = fixturesOf(layout, 0).find((x) => x.kind === SH.STORE.fixture);
+    let slot;
+    if (f) {
+      const out = DIRS[f.rotation] ?? DIRS.s;
+      slot = { id: "storehouse", size: "L", tier: 0, tags: [], dy: f.dy ?? 0, side: f.rotation, door: out, box: SH.fixtureBox(f, out) };
+    } else {
+      slot = SH.pickStoreSlot(slots, taken, 0, (x) => !!seatFor(x, SH.storeId(1)));
+      if (slot) taken.add(slot.id);
+    }
+    const designsFor = STOREHOUSE_DESIGNS[STYLE] ?? STOREHOUSE_DESIGNS.vale;
+    const levels = slot ? Array.from({ length: SH.STORE.levels }, (_, i) => {
+      const id = SH.storeId(i + 1);
+      return { id, name: BUILDING[id].name, chests: SH.chestOrder(designsFor[id]).length, seat: seatFor(slot, id) };
+    }) : [];
+    if (levels[0]?.seat) {
+      store = { slot: { ...slot, own: !f }, levels };
+      baseBuilds.push({ slot: slot.id, id: levels[0].id, why: `The Storehouse every settlement gets: ${levels[0].chests} chests`, seat: levels[0].seat });
+    }
+  }
+}
 if (!founderStart) { // basebuilds.js founderHome: a cottage only when the layout has no founder's house
   const s = pickBaseSlot(slots, taken, { x: 0, z: 0 });
   if (s) { taken.add(s.id); baseBuilds.push({ slot: s.id, id: "cottage", why: "Your own house by the square" }); }
@@ -573,9 +601,11 @@ sieges.names = Object.fromEntries([...new Set(Object.values(sieges.nights).flatM
 
 // ---------- the page's copy of the plot rules and charters (the game's own source) ----------
 const cfg = await imp("settle/config.js");
-const chartersSrc = fs.readFileSync(path.join(SCRIPTS, "settle/charters.js"), "utf8").replace(/^import .*$/m, "").replace(/^export /gm, "");
-const rules = `const { OPENS_AT, PLOT_SIZE, PLOT_ALSO, PLOT_FALLBACK, PLOT_TAGS, TAG_WORDS, CHARTERS, WORK } = ${JSON.stringify({
-  OPENS_AT: cfg.OPENS_AT, PLOT_SIZE: cfg.PLOT_SIZE, PLOT_ALSO: cfg.PLOT_ALSO, PLOT_FALLBACK: cfg.PLOT_FALLBACK, PLOT_TAGS: cfg.PLOT_TAGS, TAG_WORDS: cfg.TAG_WORDS, CHARTERS: cfg.CHARTERS, WORK: cfg.WORK })};\n${chartersSrc}`;
+const chartersRaw = fs.readFileSync(path.join(SCRIPTS, "settle/charters.js"), "utf8");
+// every name charters.js takes from config.js, read off its own import line (so a rule added there comes along)
+const cfgNames = /^import\s*\{([^}]*)\}\s*from\s*["']\.\/config\.js["']/m.exec(chartersRaw)[1].split(",").map((n) => n.trim()).filter(Boolean);
+const chartersSrc = chartersRaw.replace(/^import .*$/gm, "").replace(/^export /gm, "");
+const rules = `const { ${cfgNames.join(", ")} } = ${JSON.stringify(Object.fromEntries(cfgNames.map((n) => [n, cfg[n]])))};\n${chartersSrc}`;
 
 const soft = pal.map(([id]) => (SOFT.test(id) || id === "siege:plot_marker" ? 1 : 0));
 const out = {
@@ -583,7 +613,7 @@ const out = {
   gate: gateDirName, tierNames: TIER_NAMES, walls: tw.walls, wallLevelNames: WALL_LEVELS.map((l) => l?.name ?? null), tierCap: WALLS.tierCap,
   hallTiers: HALL_TIERS, stageNames: STAGE_NAMES, stages: STAGES, buildings: { ...Object.fromEntries(Object.entries(BUILDING).map(([k, b]) => [k, { name: b.name, blurb: b.blurb ?? "" }])), barracks: { name: "Barracks", blurb: "The guardhouse a Barracks block raises: Men-at-Arms wait in it and come out to fight." } },
   ground: { x0: X0 - CX, z0: Z0 - CZ, n: N, h: Array.from(ground) },
-  palette: pal, soft, initial, events, tiers, halls, stations: stationEvents, slots: slotOut, baseBuilds, masonSlot: masonSlot?.id === "mason_yard" ? { ...masonSlot, seat: masonSeat } : null,
+  palette: pal, soft, initial, events, tiers, halls, stations: stationEvents, slots: slotOut, baseBuilds, store, masonSlot: masonSlot?.id === "mason_yard" ? { ...masonSlot, seat: masonSeat } : null,
   designs, trees, rules, sieges, keepHealth: [200, 300, 400, 600], hallTakes: slotOut.filter((s) => s.takenAt).map((s) => [s.id, s.takenAt]),
   station: station ? { origin: [station.origin.x - CX, station.origin.y, station.origin.z - CZ], forward: [station.forward.x, station.forward.z] } : null,
   charterNames: cfg.CHARTERS.map((c) => c.map((l) => l.what)),
