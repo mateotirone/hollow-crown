@@ -86,7 +86,9 @@ class Capital(TG.Town):
                         if self.ok(*c) and self.K[self.ij(*c)] < 0 and self.TAKEN[self.ij(*c)] == 2: self.TAKEN[self.ij(*c)] = 0
         for k, (name, mk, deg, door, _, _) in enumerate(self.claims):
             bp = mk(); bp.kind = "civic"
-            e = self.try_place(bp, deg, door, "civic", gap=1, max_relief=10)
+            if name == "capital hall":   # its claim was tested with these limits (capital_spot): use the same, or it is lost
+                e = TG.Town.try_place(self, bp, deg, door, "civic", gap=1, max_relief=12, need_walk=False) or self.capital_spot(bp)
+            else: e = self.try_place(bp, deg, door, "civic", gap=1, max_relief=10)
             if not e: e = self.search(bp, k, rmax=46 if name == "capital hall" else 24, relief=10)
             if not e: e = self.civic_on_street(bp, name)
             if e:
@@ -240,7 +242,8 @@ class Capital(TG.Town):
 
 site = dict(centre=(-123, -125), radius=82, size="town", square_at=(-123, -96), square_r=9, seed=seed, build_u=2.0, lanes=16,
             roofs={"warm red": 5, "slate": 4, "dark shingle": 1}, accent="copper",
-            civic=[("guildhall", vale_civic.guildhall), ("chapel", vale_civic.chapel)])
+            civic=[("guildhall", vale_civic.guildhall), ("chapel", vale_civic.chapel),
+                   ("breeder's post", lambda: __import__("settle_buildings").town_breeder_yard("vale"))])
 T = np.load(a.slice); L = json.load(open(a.lines))
 if a.trees:
     TG.Town.tree_index = json.load(open(a.trees)); TG.Town.tree_dir = os.path.dirname(os.path.abspath(a.trees)); TG.Town.tree_src = os.path.abspath(a.trees_src)

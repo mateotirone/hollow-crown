@@ -9,6 +9,8 @@ How versions work is in [`docs/RELEASING.md`](docs/RELEASING.md).
 Everything merged to `main` since the last release goes here. Each pull request that changes what players see adds a line under one of these headings.
 
 ### Added
+- Windmills are built in their region's own materials now, not Vale timber everywhere: dark stone and spruce in Frostmarch, pale stone and prismarine in Saltreach, sandstone with a red cap in the Emberwaste, mud brick and mangrove in Blackfen (Mateo's Sunscar screenshot).
+- Every town has a Breeder's Post now, as the guide promised: a fenced breeder's yard in the region's style with the post at its gate, selling that region's foal (Vale Courser in Kingsrest and Millbrook, Frostmarch Destrier in Rimehold, Saltreach Runner in Gull's Rest, Emberwaste Sandstrider in Sunscar, Blackfen Mire-Pony in Mirelight).
 - Towns are lit: lamps round every square and along every street, in each region's style (Mateo's playtest: the towns were too dark at night).
 - The town well no longer stands a block too high: its rim replaces the square's half-slab paving instead of sitting on it.
 - Sunscar is a walled desert fortress town: a wall with towers (the east tower among them), a fortress library, the old cistern, a caravan watering place, and a wide avenue south from the square to the Faceless Gate, lined with statues. Gull's Rest gets a chapel with a lectern and a fishmonger's loft; Millbrook gets an Order waystation.

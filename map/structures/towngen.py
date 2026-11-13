@@ -55,10 +55,12 @@ SITES = {
                       civic=[("chapel", lambda: vale_civic.chapel(name="millbrook_chapel")),
                              ("clock tower", vale_civic.clock_tower),
                              ("bakery", lambda: __import__("story_builds").build("bakery")),
-                             ("order waystation", lambda: __import__("story_builds").build("waystation"))]),
+                             ("order waystation", lambda: __import__("story_builds").build("waystation")),
+                             ("breeder's post", lambda: __import__("settle_buildings").town_breeder_yard("vale"))]),
     "Kingsrest": dict(centre=(-118, -118), radius=90, size="town", fixed_square=True, square_r=9, seed=7, inn=True,
                       roofs={"slate": 4, "dark shingle": 3, "warm red": 2, "white": 1}, accent="copper",
-                      civic=[("guildhall", vale_civic.guildhall), ("chapel", vale_civic.chapel)]),
+                      civic=[("guildhall", vale_civic.guildhall), ("chapel", vale_civic.chapel),
+                             ("breeder's post", lambda: __import__("settle_buildings").town_breeder_yard("vale"))]),
     # a farming village on rolling Vale ground west of Kingsrest, clear of plots, wards and rivers (test site)
     "Alder Combe": dict(centre=(-380, -120), radius=60, size="village", fixed_square=False, square_r=7, seed=23, civic=[],
                         roofs={"dark shingle": 4, "slate": 3, "warm red": 2, "copper": 1}, accent="slate"),
@@ -792,7 +794,7 @@ class Town:
                 q = self.nearest_street(x, z)
                 if not q: break
                 deg = snap_rot(q[0] - x, q[1] - z); f = ROT[deg]
-                bp = TB.windmill(self.seed * 31 + L)
+                bp = TB.windmill(self.seed * 31 + L, getattr(self, "region", "vale"))
                 e = self.try_place(bp, deg, (x + f[0] * 4, z + f[1] * 4), "windmill", gap=2, max_relief=4, need_walk=False)
                 if not e: continue
                 p["windmill"] = [x, z]

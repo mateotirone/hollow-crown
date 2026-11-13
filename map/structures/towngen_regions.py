@@ -171,6 +171,8 @@ class RegionTown(Town):
                     if done: done["name"] = name; break
                 if done: break
             if not done: done = self.civic_on_street(bp, name)
+            if not done and name == "breeder's post":         # a paddock takes rougher ground (Mirelight's fen)
+                done = self.civic_on_street(bp, name, near=self.sq, relief=10)   # near: out to the town edge too
             if not done: print("no room for", name)
             elif name == "town hall": self.add_levels("town hall", done, [(f"Level {L}", hall(L)) for L in range(1, 6)])
 
