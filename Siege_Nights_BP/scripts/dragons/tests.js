@@ -2,11 +2,24 @@
 
 import { addTests, assert, assertEqual } from "../siege/api.js";
 import { BlockTypes, ItemTypes } from "@minecraft/server";
-import { DRAGON_SETTINGS as S, DAY, EGG, SADDLE, HORN, ROOST, NEST, TRAINING, SPECIES, TEMPERS, newDragon, newMind, groundStep, airStep, healthStep, addXp, flightTicks, earnedStage, nextStageNeeds, trainProblem, train } from "./data.js";
+import { DRAGON_SETTINGS as S, DAY, EGG, SADDLE, HORN, ROOST, HATCHERY, NEST, TRAINING, SPECIES, TEMPERS, newDragon, newMind, groundStep, airStep, healthStep, addXp, flightTicks, earnedStage, nextStageNeeds, trainProblem, train } from "./data.js";
+
+import { drawDragonStable, BLOCK_BUILDS } from "../settle/blockdesigns.js";
 
 const hatched = (extra = {}) => Object.assign(newDragon("p1", "Tester", 0), { stage: "hatchling", bornAt: 0, species: 0 }, extra);
 
 addTests("dragons", {
+  "the Dragon Roost raises the Dragon Stable, and its nursery holds three Hatching Braziers": () => {
+    assertEqual(BLOCK_BUILDS[ROOST]?.draw, drawDragonStable, "the Roost is a building block");
+    for (const style of ["emberwaste", "vale"]) {
+      const plan = drawDragonStable(style);
+      const ids = [...plan.cells.values()].map((c) => plan.style.roles[c.role]?.[0]);
+      assertEqual(ids.filter((id) => id === HATCHERY).length, 3, `${style}: three braziers`);
+      assert(!plan.get(0, 1, 0) && !plan.get(0, 2, 0), `${style}: the Roost's own spot is left free`);
+      const b = plan.bounds();
+      assert((b.x1 - b.x0 + 1) % 2 === 1, `${style}: odd width`);
+    }
+  },
   "flight lasts 45 seconds untrained and 60 fully trained": () => {
     const rec = hatched();
     assertEqual(flightTicks(rec), 45 * 20);
@@ -75,6 +88,6 @@ addTests("dragons (species and minds)", {
 addTests("dragons (pack)", {
   "the pack has the dragon's items and blocks": () => {
     for (const id of [EGG, SADDLE, HORN]) assert(ItemTypes.get(id), `missing item ${id}`);
-    for (const id of [ROOST, NEST]) assert(BlockTypes.get(id), `missing block ${id}`);
+    for (const id of [ROOST, NEST, HATCHERY]) assert(BlockTypes.get(id), `missing block ${id}`);
   },
 }, { gameOnly: true });

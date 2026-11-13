@@ -1,8 +1,8 @@
-// Dragons in the test world (/scriptevent siege:showcase): a Roost, a wild Nest, the three growth stages
+// Dragons in the test world (/scriptevent siege:showcase): a Roost, a Hatching Brazier, a wild Nest, the three growth stages
 // as display dragons, and (if you have no dragon yet) a grown, saddled, trained one that is yours to fly.
 
 import { on } from "../siege/api.js";
-import { DRAGON, ROOST, SPECIES, newDragon } from "./data.js";
+import { DRAGON, ROOST, HATCHERY, SPECIES, newDragon } from "./data.js";
 import { store, dragonOf, save, spawnDragon, roostDragon } from "./dragon.js";
 import { buildNest } from "./nests.js";
 
@@ -14,7 +14,10 @@ on("showcase", ({ player, dim, origin, nextSpot, label }) => {
   const nest = { x: origin.x - 38, y: origin.y - 1, z: origin.z - 8 };
   try {
     dim.getBlock(roost)?.setType(ROOST);
-    label(roost, "Dragon Roost\nclick: train\negg: hatch");
+    label(roost, "Dragon Roost\nclick: train\non your land:\nraises the stable");
+    const brazier = nextSpot();
+    dim.getBlock(brazier)?.setType(HATCHERY);
+    label(brazier, "Hatching Brazier\negg: hatch");
     buildNest(dim, nest);
     label({ x: nest.x + 6, y: origin.y, z: nest.z }, "Dragon Nest (9x9)\nclick the eggs:\ntake one");
   } catch (e) {

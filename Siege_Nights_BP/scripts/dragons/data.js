@@ -3,7 +3,7 @@
 
 export const DRAGON_SETTINGS = {
   homeRegion: "Emberwaste", // dragons belong to this region: only players who live there can raise and fly them
-  hatchDays: 2, // in-game days an egg warms on a Roost before it hatches
+  hatchDays: 2, // in-game days an egg warms in a Hatching Brazier before it hatches
   fledgeDays: 3, // days after hatching before it can become a Fledgling (walks with a rider)
   adultDays: 6, // days after hatching before it can become an Adult (flies)
   fledgeBond: 40, // bond needed for Fledgling
@@ -49,7 +49,8 @@ export const DRAGON = "siege:dragon";
 export const EGG = "siege:dragon_egg";
 export const SADDLE = "siege:dragon_saddle";
 export const HORN = "siege:dragon_horn";
-export const ROOST = "siege:dragon_roost";
+export const ROOST = "siege:dragon_roost"; // placed on your land it raises the Dragon Stable (settle/blockdesigns.js)
+export const HATCHERY = "siege:hatching_brazier"; // in the Dragon Stable's nursery: an egg is set in one to hatch
 export const NEST = "hc:dragon_nest"; // placed by the map builder (hc: because Siege Nights refuses siege: blocks off your land)
 export const DAY = 24000;
 

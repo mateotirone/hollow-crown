@@ -678,13 +678,13 @@ export const ENTRIES = [
   },
   {
     id: "dragons", ch: "wild", title: "Dragons",
-    tip: "Set a Dragon Egg on a Dragon Roost in your own settlement and keep it warm. It hatches in two days.",
+    tip: "Set a Dragon Egg in a Hatching Brazier in your Dragon Stable's nursery. It hatches in two days.",
     page: "Dragons live only in the Emberwaste, and only people who settle there can raise one.\n\n"
-      + "§fThe egg:§r wild dragons build great nests of woven branches and bones out in the Emberwaste. Climb in, take an egg from the clutch and set it on a §fDragon Roost§r in your settlement. It hatches in two days.\n"
+      + "§fThe egg:§r wild dragons build great nests of woven branches and bones out in the Emberwaste. Climb in and take an egg from the clutch. Place a §fDragon Roost§r on your land and a §fDragon Stable§r rises behind it, with a nursery of §fHatching Braziers§r: set the egg in one. It hatches in two days, and you see it crack before it does.\n"
       + "§fRaising it:§r feed it raw meat or fish and spend time with it to build its bond. A fledgling can carry you on foot with a Dragon Saddle; a grown dragon flies.\n"
       + "§fHandling:§r an empty hand always pets it. Click a saddled dragon holding any item to climb on. Sneak + click with an empty hand for its sheet. Spend its training points at the Roost.\n\n"
       + "Flights are short bursts. Ballistas and archers of settlements that aren't yours can shoot a dragon down, and a dragon that dies is gone for good. On a siege night no dragon will fly from three until half past three in the morning: she lands and waits it out.",
-    when: ["click:hc:dragon_nest", "carry:siege:dragon_egg", "carry:siege:dragon_roost"],
+    when: ["click:hc:dragon_nest", "carry:siege:dragon_egg", "carry:siege:dragon_roost", "click:siege:hatching_brazier"],
     hidden: true,
   },
   {

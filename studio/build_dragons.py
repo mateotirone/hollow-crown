@@ -388,8 +388,9 @@ def shaped(key, pattern, keys, result):
     write(BP + f"recipes/dragons/{key}.json", {"format_version": "1.20.10", "minecraft:recipe_shaped": {
         "description": {"identifier": f"siege:{key}_recipe"}, "tags": ["siege_workshop"], "pattern": pattern, "key": keys,
         "result": {"item": result, "count": 1}, "unlock": {"context": "AlwaysUnlocked"}}})
-shaped("dragon_roost", ["BGB", "HMH", "SSS"], {"B": I("minecraft:blaze_rod"), "G": I("minecraft:gold_block"), "H": I("minecraft:hay_block"),
-                                               "M": I("minecraft:magma"), "S": I("minecraft:stone_bricks")}, "siege:dragon_roost")
+# no blaze rods or magma: blazes never spawn (the no-monsters rule) and nobody sells magma (2026-11-13)
+shaped("dragon_roost", ["LGL", "HCH", "SSS"], {"L": I("minecraft:stripped_acacia_log"), "G": I("minecraft:gold_block"), "H": I("minecraft:hay_block"),
+                                               "C": I("minecraft:campfire"), "S": I("minecraft:cut_red_sandstone")}, "siege:dragon_roost")
 shaped("dragon_saddle", ["LSL", "CIC", "L L"], {"L": I("minecraft:leather"), "S": I("minecraft:saddle"), "C": I("minecraft:chain"),
                                                "I": I("minecraft:iron_ingot")}, "siege:dragon_saddle")
 shaped("dragon_horn", [" GB", " BB", "S  "], {"G": I("minecraft:gold_ingot"), "B": I("minecraft:bone"), "S": I("minecraft:string")}, "siege:dragon_horn")

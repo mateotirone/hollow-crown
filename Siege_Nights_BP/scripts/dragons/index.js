@@ -1,5 +1,6 @@
 // Dragons for The Hollow Crown: the Emberwaste's own power. Players who live there take an egg from a wild
-// nest, warm it on a Dragon Roost, raise the hatchling by feeding it, train it, and in the end fly it.
+// nest, warm it in a Hatching Brazier in their Dragon Stable's nursery (the Dragon Roost raises the stable),
+// raise the hatchling by feeding it, train it at the Roost, and in the end fly it.
 // Flight comes in stamina bursts, and a defended settlement's ballistas and archers shoot dragons down,
 // so rails and horses stay the way everyone travels. Numbers to tweak: data.js. Flying: flight.js.
 //
@@ -16,7 +17,7 @@ import { world, system, ItemStack, EquipmentSlot } from "@minecraft/server";
 import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
 import { onTick, isReady, settlementAt, isAlly, keepOf, consumeHeld, countItem, emit } from "../siege/api.js";
 import {
-  DRAGON_SETTINGS as S, DRAGON, EGG, SADDLE, HORN, ROOST, NEST, DAY, SPECIES, RESERVE, FOODS, TRAINING, STAGE_NAMES, TEMPERS,
+  DRAGON_SETTINGS as S, DRAGON, EGG, SADDLE, HORN, ROOST, HATCHERY, NEST, DAY, SPECIES, RESERVE, FOODS, TRAINING, STAGE_NAMES, TEMPERS,
   newDragon, newMind, speciesOf, addXp, addBond, flightTicks, nextStageNeeds, trainProblem, train, bar,
 } from "./data.js";
 import { speak, noise, emote } from "./voice.js";
@@ -67,10 +68,21 @@ function takeEgg(player, block) {
   save();
   give(player, EGG);
   sfx(player, "random.pop");
-  player.sendMessage("§6You lift a Dragon Egg from the nest. It is heavier than it looks, and warm on one side. §7Set it on a Dragon Roost in your settlement to hatch it.");
+  player.sendMessage("§6You lift a Dragon Egg from the nest. It is heavier than it looks, and warm on one side. §7Set it in a Hatching Brazier in your Dragon Stable's nursery to hatch it.");
 }
 
-// ---------- The Roost ----------
+// ---------- The nursery's Hatching Braziers, and the Roost ----------
+
+// The egg shows in its brazier: 0 empty, 1 warming, 2 cracking (the last quarter of the wait)
+export function setEgg(block, n) {
+  try {
+    if (block?.typeId === HATCHERY) block.setPermutation(block.permutation.withState("siege:egg", n));
+  } catch {
+    // unloaded or an old brazier
+  }
+}
+const sameSpot = (a, b) => !!a && !!b && a.x === b.x && a.y === b.y && a.z === b.z;
+const warmingAt = (loc) => Object.values(store.data.dragons).find((r) => r.stage === "egg" && r.status === "warming" && sameSpot(r.roost, loc));
 
 function hatchEgg(player, rec, block) {
   consumeHeld(player);
@@ -78,8 +90,35 @@ function hatchEgg(player, rec, block) {
   rec.warmAt = world.getAbsoluteTime();
   rec.roost = { x: block.location.x, y: block.location.y, z: block.location.z };
   save();
+  setEgg(block, 1);
   sfx(block.dimension, "block.campfire.crackle", block.location);
-  player.sendMessage(`§6The egg settles into the Roost. §7It will hatch in about ${S.hatchDays} days. Stay close when it does: it bonds with whoever feeds it.`);
+  player.sendMessage(`§6The egg settles into the coals. §7It will hatch in about ${S.hatchDays} days. Stay close when it does: it bonds with whoever feeds it.`);
+}
+
+// Your own land, or an ally's; in Creative anywhere (playtests), so a brazier set down to try it works
+export function mayHatchHere(player, location, owner = settlementAt(location)) {
+  if (isBuilder(player)) return true;
+  return !!owner && (owner === player.id || isAlly(owner, player.id));
+}
+
+function brazierClick(player, block, held) {
+  const here = warmingAt(block.location);
+  const rec = dragonOf(player.id);
+  const now = world.getAbsoluteTime();
+  if (here) {
+    if (here.owner !== player.id) return say(player, `§7${here.ownerName}'s egg is warming here.`);
+    const left = here.warmAt + S.hatchDays * DAY - now;
+    return say(player, left > 0 ? `§6Your egg is warm. §7About ${days(left)} more day${plural(days(left))}.` : "§6Something moves inside the egg.");
+  }
+  if (held !== EGG) {
+    if (rec?.stage === "egg" && rec.status === "warming") return say(player, "§7Your egg is warming in another brazier.");
+    return say(player, rec?.stage === "egg" ? "§7Hold your Dragon Egg and click the brazier to set it in the coals."
+      : `§7A Hatching Brazier, its coals banked. Eggs come from the wild nests of the ${S.homeRegion}.`);
+  }
+  if (rec?.stage !== "egg") return say(player, "§7That egg has gone cold. Only an egg you took from a nest yourself will hatch.");
+  if (rec.status === "warming") return say(player, "§7Your egg is already warming in a brazier.");
+  if (!mayHatchHere(player, block.location)) return say(player, "§7Set the egg in a Hatching Brazier in your own settlement.");
+  hatchEgg(player, rec, block);
 }
 
 // The Dragon Rider role is earned by a deed: your first dragon hatching. The town hall listens for "offerRole".
@@ -163,11 +202,11 @@ async function roostMenu(player, block) {
   const rec = dragonOf(player.id);
   const now = world.getAbsoluteTime();
   if (!rec) {
-    return say(player, canHarness(player) ? `§7An empty Roost. Bring an egg from a wild nest in the ${S.homeRegion}.`
+    return say(player, canHarness(player) ? `§7An empty Roost. Bring an egg from a wild nest in the ${S.homeRegion} and set it in a Hatching Brazier.`
       : `§7An empty Roost. Only those who live in the ${S.homeRegion} can raise a dragon.`);
   }
   if (rec.stage === "egg") {
-    if (rec.status !== "warming") return say(player, "§7Hold your Dragon Egg and click the Roost to set it down.");
+    if (rec.status !== "warming") return say(player, "§7Set your Dragon Egg in a Hatching Brazier in the nursery.");
     const left = rec.warmAt + S.hatchDays * DAY - now;
     return say(player, left > 0 ? `§6The egg is warm. §7About ${days(left)} more day${plural(days(left))}.` : "§6Something moves inside the egg.");
   }
@@ -205,17 +244,16 @@ async function renameMenu(player, rec) {
 world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
   const { block, player } = event;
   if (event.isFirstEvent === false || !isReady()) return;
-  if (block.typeId !== ROOST && block.typeId !== NEST) return;
+  if (block.typeId !== ROOST && block.typeId !== NEST && block.typeId !== HATCHERY) return;
   event.cancel = true;
   const held = event.itemStack?.typeId;
   system.run(() => {
     if (!block.isValid) return;
     if (block.typeId === NEST) return takeEgg(player, block);
+    if (block.typeId === HATCHERY) return brazierClick(player, block, held);
     const rec = dragonOf(player.id);
     if (held === EGG && rec?.stage === "egg" && rec.status !== "warming") {
-      const owner = settlementAt(block.location);
-      if (owner !== player.id && !isAlly(owner, player.id)) return say(player, "§7Set the egg on a Roost in your own settlement.");
-      return hatchEgg(player, rec, block);
+      return say(player, "§7Eggs hatch in the nursery: set it in a Hatching Brazier. §8The Dragon Stable behind the Roost has three.");
     }
     roostMenu(player, block);
   });
@@ -232,7 +270,8 @@ world.afterEvents.playerPlaceBlock.subscribe(({ block, player }) => {
     buildNest(block.dimension, block.location);
     return say(player, "§7A whole Dragon Nest grows round the clutch (9x9). Wild ones sit a block lower, sunk into the ground.");
   }
-  if (block.typeId === ROOST) player.sendMessage(`§7Dragon Roost built. Set a Dragon Egg on it to hatch it. Eggs come from the wild nests of the ${S.homeRegion}.`);
+  if (block.typeId === ROOST) player.sendMessage(`§7Dragon Roost set down. On your land a Dragon Stable rises behind it, with a nursery of Hatching Braziers. Eggs come from the wild nests of the ${S.homeRegion}.`);
+  if (block.typeId === HATCHERY) player.sendMessage("§7A Hatching Brazier. Set a Dragon Egg in it to hatch it.");
 });
 
 // ---------- Clicking a dragon: feed, saddle, sheet, ride ----------
@@ -517,16 +556,25 @@ function growthTick() {
   offerRider();
   const now = world.getAbsoluteTime();
   for (const rec of Object.values(store.data.dragons)) {
-    if (rec.status === "warming" && now >= rec.warmAt + S.hatchDays * DAY) {
+    if (rec.status === "warming" && now >= rec.warmAt + S.hatchDays * DAY * 0.75 && now < rec.warmAt + S.hatchDays * DAY) {
+      try {
+        const block = world.getDimension("overworld").getBlock(rec.roost);
+        if (block?.typeId === HATCHERY && block.permutation.getState("siege:egg") !== 2) setEgg(block, 2); // it starts to crack
+      } catch {
+        // not loaded: it shows the cracks when it is
+      }
+    } else if (rec.status === "warming" && now >= rec.warmAt + S.hatchDays * DAY) {
       try {
         const dim = world.getDimension("overworld");
-        const block = dim.getBlock(rec.roost); // undefined until its Roost is loaded
-        if (block?.typeId === ROOST) hatch(rec, dim);
-        else if (block) {
-          // the Roost was broken under it: the egg goes back to its owner the next time they touch a nest
+        const block = dim.getBlock(rec.roost); // undefined until its brazier is loaded
+        if (block?.typeId === HATCHERY || block?.typeId === ROOST) { // a Roost: an egg set down before the nursery (old saves)
+          setEgg(block, 0);
+          hatch(rec, dim);
+        } else if (block) {
+          // the brazier was broken under it: the egg goes back to its owner the next time they touch a nest
           rec.status = "carried";
           save();
-          world.getPlayers().find((p) => p.id === rec.owner)?.sendMessage("§cYour Dragon Egg's Roost is gone and the egg has gone cold. §7Fetch it again from a nest and set it on a new Roost.");
+          world.getPlayers().find((p) => p.id === rec.owner)?.sendMessage("§cYour Dragon Egg's brazier is gone and the egg has gone cold. §7Fetch it again from a nest and set it in a Hatching Brazier.");
         }
       } catch {
         // chunk not loaded: try again later
@@ -571,7 +619,7 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
     store.data.dragons[player.id] = newDragon(player.id, player.name, now);
     save();
     give(player, EGG);
-    return player.sendMessage("§7Egg given. Click a Dragon Roost with it, then /scriptevent siege:dragons_grow.");
+    return player.sendMessage("§7Egg given. Click a Hatching Brazier with it, then /scriptevent siege:dragons_grow.");
   }
   if (event.id === "siege:dragons_species") {
     if (!rec) return player.sendMessage("§7No dragon yet.");

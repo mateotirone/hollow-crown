@@ -4,7 +4,7 @@
 
 Every build in The Hollow Crown, designed or not. Add an entry the moment a build is asked for, even with no design yet, and move its status on as it progresses. Run  node tools/build-catalog.mjs  after editing to rewrite builds/CATALOG.md (check.mjs fails if it is stale).
 
-**110 builds:** 1 not started, 26 designed, 17 in viewer, 66 in game.
+**111 builds:** 1 not started, 27 designed, 17 in viewer, 66 in game.
 
 Statuses:
 
@@ -60,6 +60,7 @@ A ★ marks builds that no earlier list had (added in the 2026-11-12 audit).
 | ★ Settlement inn (5) | One version per overworld region | designed | skill-pass | Refine every building, region by region |  | Waiting in PR #168. Needed for the City charter. Specs for all five regions in PR #168. In viewer section skill-pass (PR #168); waits in settle/buildings.js WAITING until layouts make room. |
 | Stables levels 1-3 (Stables block) (15) | One version per overworld region | in game | settle-* | Build settlement building and mason shop | `map/structures/settle_buildings.py` |  |
 | Breeder's Yard (Breeder's Post) (5) | One version per overworld region | in game | settle-* | Build settlement building and mason shop | `map/structures/settle_buildings.py` |  |
+| Dragon Stable and nursery (Hatching Braziers) | Emberwaste | designed |  | Check dragon colours and egg hatching | `map/structures/dragon_stable_skill.py` | Raised by the Dragon Roost on your land (settle/blockdesigns.js). Emberwaste kasbah style wherever it stands. |
 | Barracks (guardhouse) (5) | One version per overworld region | in game | settle-* | Build settlement building and mason shop | `map/structures/settle_buildings.py` |  |
 | Quartermaster's armoury (5) | One version per overworld region | in game | settle-* | Build settlement building and mason shop | `map/structures/settle_buildings.py` |  |
 | ★ Mason's Yard (stone workshop, bench in the front yard, 9x9) (5) | One version per overworld region | in game |  | Build settlement building and mason shop | `map/structures/review/specs/gen_mason.py` | Built on the skill (review/specs/mason_yard_<region>.json); the game raises it with every new base from settle/mason_data.js (map/structures/export_mason.py), on towngen's mason_yard ground or the nearest Small plot. |
