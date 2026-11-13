@@ -15,7 +15,7 @@ import glob, json, os, sys
 
 CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 TIER = {"Hamlet": 0, "Town": 1, "City": 2, "Castle": 3}
-SIZE = {"Small": "S", "Medium": "M", "Large": "L", "Great": "G"}
+SIZE = {"Small": "S", "Medium": "M", "Large": "L", "Great": "G", "Works": "W"}
 STAIR = {"e": 0, "w": 1, "s": 2, "n": 3}       # Bedrock weirdo_direction
 GATE = {"s": 0, "w": 1, "n": 2, "e": 3}        # Bedrock direction
 RENAME = {"dirt_path": "grass_path"}

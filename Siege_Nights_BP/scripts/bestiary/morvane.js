@@ -35,7 +35,7 @@
 // Testing: /scriptevent siege:morvane_skip 5   jumps a running fight to stage 5.
 
 import { world, system } from "@minecraft/server";
-import { addTests, assert, assertEqual, hitWall, settlementAt, UNBREAKABLE } from "../siege/api.js";
+import { addTests, assert, assertEqual, emit, hitWall, settlementAt, UNBREAKABLE } from "../siege/api.js";
 import { UNDERTOW_ID } from "../undertow/layout.js";
 import { SEAT, RANKS, FALL_SHAFTS, dropSeatBand, rebuildSeat, ranksSpots, ranksReady, pocket, pocketReady, requestPockets, overworldStage } from "../undertow/finale.js";
 import { registerBoss, startBoss, fightOf, rebind, stack } from "./bossCore.js";
@@ -309,7 +309,7 @@ function advance(f) {
 
 // ---------- stage set-up ----------
 const SETUP = {
-  0: (f) => speak(f, "\"Sit, then. If you can take it from me.\""),
+  0: (f) => { speak(f, "\"Sit, then. If you can take it from me.\""); voice(f, "seat"); },
 
   1: (f, place) => {
     speak(f, "The hall is lined with armour, rank on rank. He steps back among it and is gone. One by one, the suits stand up.");
@@ -330,7 +330,8 @@ const SETUP = {
 
   4: (f) => {
     f.m.s.nextRaid = f.tick + 100;
-    speak(f, "Open air. Your own sky, gone the wrong colour. \"This was mine first.\"");
+    speak(f, "Open air. Your own sky, gone the wrong colour. \"This was mine first. And thanks to you, it is mine again.\"");
+    voice(f, "stage_sky", 30);
   },
 
   5: (f) => {
@@ -411,7 +412,10 @@ function uncrown(f) {
   s.crownAt = f.spot(6, Math.max(7, Math.min(12, s.safe - 3)));
   s.uncrownedAt = f.tick; s.reach = f.tick + MORVANE.crown.reach;
   f.shield(false);
-  f.say("§dThe Hollow Crown rings off across the floor. He can die now. Keep him from it!");
+  // Above the line he could always be hurt, so "he can die now" would be a lie there (boss walkthrough, Mateo 2026-11-13)
+  f.say(f.hp() <= MORVANE.crown.shieldAt
+    ? "§dThe Hollow Crown rings off across the floor. He can die now. Keep him from it!"
+    : "§dThe Hollow Crown rings off across the floor. Without it he bleeds. Hurt him, and keep him from it!");
   sound(f.dim, "block.bell.hit", f.entity.location, 0.5, 1);
 }
 
@@ -719,6 +723,15 @@ registerBoss({
     enter(f, 0, { quiet: true, restart: lost });
   },
 
+  // After he falls, point the way on: the Deep Door under the Court opens now (after/deep.js)
+  onDeath: (f, players) => {
+    system.runTimeout(() => {
+      for (const p of players) {
+        try { p.sendMessage("§8Far off, under the Court, in the Vault of the Hollow, a seal that has hummed one note for three hundred years goes quiet. The Deep Door will open now."); } catch { /* gone */ }
+      }
+    }, 260);
+  },
+
   // The framework's own reset (everyone walked away): put him back on the Seat
   onReset: (f) => {
     const h = f.m?.home;
@@ -792,7 +805,7 @@ registerBoss({
     } else if (!m.raged && m.stage === 2 && f.tick - m.started > st.limit) m.raged = true;
     TICK[m.stage]?.(f, players);
     if (f.m.stage === m.stage && gateReached(m.stage, f.hp())) {
-      if (m.stage === 4) speak(f, "\"Not here. Not under this sky.\" The ground opens and takes all of you back down.");
+      if (m.stage === 4) { speak(f, "\"Not here. Not under this sky.\" The ground opens and takes all of you back down."); voice(f, "stage_sky_out"); }
       advance(f);
     }
   },
@@ -808,6 +821,12 @@ function sayFall(f, i) {
   const line = REVEAL.fall?.[i];
   if (!line) return;
   for (const p of party(f)) { try { p.sendMessage(`§3"${line.replace(/\{name\}/g, p.name)}"`); } catch { /* offline */ } }
+  voice(f, `fall_${i + 1}`);
+}
+
+// His spoken voice for a line the fight has just printed (lore/morvane_voice.js plays it, if it is recorded)
+function voice(f, id, delay = 0) {
+  emit("morvaneSays", { players: party(f), id, delay });
 }
 
 // ---------- the reveal ----------

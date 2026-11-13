@@ -36,6 +36,18 @@ palettes, texturing, paths, reference); this page is the short list and where to
 - **Texturing**: one material in a few shades, gradients over speckle, clusters with a cause (damp low, wear
   at edges), never skip a ladder step (`build-instructions/texturing/README.md`).
 - **Vanilla blocks** for map buildings, Bedrock 26.30+, no Beta features. Waxed copper for copper roofs.
+- **Paths and water run to the edge** (Mateo 2026-11-12): any path, walkway, slip, channel or water inside a
+  build or plot carries on to the edge of its footprint, so it joins whatever is next to it. A boathouse slip
+  opens through its wall to the footprint edge; a plot's paths reach its border. Stopping short inside is wrong.
+- **Towns are lit** (Mateo 2026-11-12: "none of the towns have light ... the town generation needs to factor in
+  lamps"): lamps round every square (an arm with a hanging lantern, one every ~8 blocks of its edge) and posts
+  along every street on the verge, sides alternating, every 9 (main) / 11 (lane) / 13 (walk) blocks, none
+  closer than 7 to another. Region style in `map/structures/dressing.py` LAMP_STYLE (stone foot, the region's
+  wood post, a lantern). towngen does this for every town and settlement (`Town.light_town`); a hand-built
+  plot or site lights its own paths the same way. Check: no street block darker than light 4 at night.
+- **Nothing stands on a sunk slab** (Mateo 2026-11-12, "the town well is one block too high"): paths and squares
+  are bottom slabs sunk half a block, so anything built on one (a well rim, a lamp foot, a step, a post)
+  replaces the slab at the slab's own y; setting it on top leaves a half-block gap and reads a block too high.
 - **Build stage by stage** and check each stage (`--stages`) before the next. Ask Mateo rather than guess;
   he builds well himself and sends pictures.
 
@@ -59,6 +71,8 @@ never to do. Index: `regions/README.md`.
 
 - [ ] Every dimension odd; door and windows on bay centres; ridge centred.
 - [ ] Nothing floats: no open row between a roof and its beam or wall, every lantern hung from something.
+- [ ] Looked at from where a player stands, not only from above: no flat wall of one block, nothing pasted on a
+      bare face, and no edge that shows the void or the sky behind it (regions/hollow.md, the Wound).
 - [ ] No stair facing the wrong way on roofs (light lips), no holes at valleys, chimney 2 above the roof.
 - [ ] Barge boards, eave row, corner blocks present; gable triangles filled.
 - [ ] Sills wider than glass; heads where there is room; shutters few and paired.
@@ -66,3 +80,11 @@ never to do. Index: `regions/README.md`.
 - [ ] Curved shapes read smooth from 30 blocks (preview) and from close (hifi render).
 - [ ] The summary has no surprising warnings (substituted partial blocks, even footprints).
 - [ ] Rail beds graded 1 in 2 beside the ballast, open to the sky, trees felled whole (build-instructions/paths/README.md, Rail beds).
+
+## Streets reach the ward edge; open ground follows the land (Mateo, 2026-11-13)
+
+- Every street that leaves a town runs on along the map road to the edge of the town's ward
+  (`plots/config.js` WARDS), so it meets the country road. It never stops at the town circle.
+- A building's floor is the highest ground under its own walls. The open ground in its stamp (gardens, yards,
+  paddocks, forecourts) drops to the land or to the street beside it, at most 3 blocks, one block per step
+  (towngen `open_cols` / `open_levels`).

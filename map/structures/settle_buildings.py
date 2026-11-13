@@ -432,6 +432,17 @@ def breeder_yard(region):
     bp.set(3, 1, -5, "cauldron")
     return finish(bp, (0, 1, 0), P=P)
 
+def town_breeder_yard(region):
+    """The towns' Breeder's Post (Mateo 2026-11-13: the guide says the posts stand in the towns): the same
+    Breeder's Yard the settlements raise, with the hc:breeder_post block beside its gate, out on the street side.
+    The game sells the foal of the region the post stands in (horses/index.js, PR #190)."""
+    bp = breeder_yard(region)
+    bp.set(2, 0, 1, bp.get(2, 0, 0)[0])   # its own footing (the town clears the footprint's ground it doesn't stamp)
+    bp.set(2, 1, 1, "hc:breeder_post")
+    bp.markers["door"] = (0, 1, 1)     # the step outside the gate: the town keeps it flat and walks it to a street
+    bp.kind = "civic"
+    return bp
+
 def quartermaster(region):
     """The Quartermaster's armoury: a small strong store, 9 x 9, with a serving hatch under a striped awning,
     a smithing table, anvil, grindstone and racks of barrels and chests inside."""

@@ -476,7 +476,7 @@ fight("bride", { title: "The Drowned Bride, bells ignored", damage: 2, limit: 20
 // The Seneschal: blade until he learns it, then arrows until he learns those
 fight("seneschal", { title: "The Ash Seneschal", damage: 4,
   play: (f, t) => { if (f.data.stance !== "melee") return false; standBy(me(), f.entity, 8); t.hit(f.entity, 4, "projectile"); return true; },
-  expect: { phases: [1], said: ["learned your blade", "learned your arrows", "answers steel with steel", "answers arrows with arrows", "The sand is giving way"], loot: ["siege:seneschal_greatshield"], hoard: ["siege:choir_shard"] } });
+  expect: { phases: [1], said: ["watching how you fight", "learned your blade", "learned your arrows", "answers steel with steel", "answers arrows with arrows", "The sand is giving way"], loot: ["siege:seneschal_greatshield"], hoard: ["siege:choir_shard"] } });
 
 // The Mother: find the real one the first time, burst a copy the second, guess nothing the third
 {
@@ -523,7 +523,7 @@ const choirPlay = (f, t) => {
 const COURT_AT = { x: 0.5, y: 90, z: 1600.5 };
 fight("choir", { title: "The Choir, in the Court", dimension: "siege:undertow", at: COURT_AT, limit: 900, play: choirPlay,
   start: (dim, at) => { core.startBoss("choir", dim, at); },
-  expect: { phases: [1], spawned: { "siege:choir_singer": 7 }, said: ["Singers to silence", "Six voices are silent", "Jump the ring", "Crouch and hold on", "Hold your blows", "The last Singer steps down", "closes to the flames", "The last Singer is feeding it", "Wave 3"] } });
+  expect: { phases: [1], spawned: { "siege:choir_singer": 7 }, said: ["Singers to silence", "Six voices are silent", "Jump the ring", "Crouch and hold on", "Hold your blows", "The last Singer steps down", "closes to the flames", "The last Singer is feeding it", "Wave 3"], loot: ["siege:last_note"] } });
 // summoned on open ground somewhere else: it must be the same fight (Mateo: bosses behave the same wherever summoned)
 fight("choir", { title: "The Choir, summoned elsewhere", limit: 900, play: choirPlay,
   expect: { phases: [1], spawned: { "siege:choir_singer": 7 }, said: ["Six voices are silent", "The last Singer steps down"] } });

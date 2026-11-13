@@ -1,0 +1,8 @@
+{"name": "gulls_rest_fishmonger", "edition": "bedrock",
+ "parts": [
+  {"part": "house", "style": "salt_timber", "rect": [-4, -5, 4, 5], "plinth": 1, "storeys": [4, 4],
+   "door": {"side": "s"}, "roof": {"type": "hip", "pitch": 1}}
+ ],
+ "place": [
+  [3, 2, 6, "barrel", {"facing": "up"}], [-3, 2, 6, "barrel", {"facing": "up"}]
+ ]}

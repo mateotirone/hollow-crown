@@ -629,6 +629,2253 @@
     }
    ],
    "max_distance": 64
+  },
+  "siege.voice.aldous.hub_0": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/aldous/hub_0",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.aldous.hub_1": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/aldous/hub_1",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.aldous.hub_2": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/aldous/hub_2",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.aldous.hub_3": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/aldous/hub_3",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.cael.hub_0": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/cael/hub_0",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.cael.hub_1": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/cael/hub_1",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.cael.hub_2": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/cael/hub_2",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.cael.hub_3": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/cael/hub_3",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.carter.hub_0": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/carter/hub_0",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.carter.hub_1": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/carter/hub_1",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.carter.hub_2": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/carter/hub_2",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.carter.hub_3": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/carter/hub_3",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.carter.named_0": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/carter/named_0",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.carter.named_1": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/carter/named_1",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.carter.named_2": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/carter/named_2",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.carter.named_3": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/carter/named_3",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.corvin.hub_0": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/corvin/hub_0",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.corvin.hub_1": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/corvin/hub_1",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.corvin.hub_2": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/corvin/hub_2",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.corvin.hub_3": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/corvin/hub_3",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.elias.hub_0": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/elias/hub_0",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.elias.hub_1": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/elias/hub_1",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.elias.hub_2": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/elias/hub_2",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.elias.hub_3": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/elias/hub_3",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.hesper.hub_0": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/hesper/hub_0",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.hesper.hub_1": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/hesper/hub_1",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.hesper.hub_2": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/hesper/hub_2",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.hesper.hub_3": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/hesper/hub_3",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.isolde.hub_0": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/isolde/hub_0",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.isolde.hub_1": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/isolde/hub_1",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.isolde.hub_2": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/isolde/hub_2",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.isolde.hub_3": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/isolde/hub_3",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.jorund.hub_0": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/jorund/hub_0",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.jorund.hub_1": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/jorund/hub_1",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.jorund.hub_2": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/jorund/hub_2",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.jorund.hub_3": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/jorund/hub_3",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.kesh.hatchwait_0": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/kesh/hatchwait_0",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.kesh.hatchwait_1": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/kesh/hatchwait_1",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.kesh.hatchwait_2": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/kesh/hatchwait_2",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.kesh.hatchwait_3": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/kesh/hatchwait_3",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.kesh.hub_0": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/kesh/hub_0",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.kesh.hub_1": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/kesh/hub_1",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.kesh.hub_2": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/kesh/hub_2",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.kesh.hub_3": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/kesh/hub_3",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.kesh.spanwait_0": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/kesh/spanwait_0",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.kesh.spanwait_1": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/kesh/spanwait_1",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.kesh.spanwait_2": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/kesh/spanwait_2",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.kesh.spanwait_3": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/kesh/spanwait_3",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.kesh.sworn_0": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/kesh/sworn_0",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.kesh.sworn_1": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/kesh/sworn_1",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.kesh.sworn_2": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/kesh/sworn_2",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.kesh.sworn_3": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/kesh/sworn_3",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.mag.hub_0": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/mag/hub_0",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.mag.hub_1": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/mag/hub_1",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.mag.hub_2": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/mag/hub_2",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.mag.hub_3": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/mag/hub_3",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.nell.cup_0": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/nell/cup_0",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.nell.cup_1": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/nell/cup_1",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.nell.cup_2": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/nell/cup_2",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.nell.cup_3": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/nell/cup_3",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.nell.graveswait_0": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/nell/graveswait_0",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.nell.graveswait_1": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/nell/graveswait_1",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.nell.graveswait_2": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/nell/graveswait_2",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.nell.graveswait_3": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/nell/graveswait_3",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.nell.hub_0": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/nell/hub_0",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.nell.hub_1": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/nell/hub_1",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.nell.hub_2": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/nell/hub_2",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.nell.hub_3": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/nell/hub_3",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.nell.motherwait_0": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/nell/motherwait_0",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.nell.motherwait_1": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/nell/motherwait_1",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.nell.motherwait_2": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/nell/motherwait_2",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.nell.motherwait_3": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/nell/motherwait_3",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.nell.sworn_0": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/nell/sworn_0",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.nell.sworn_1": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/nell/sworn_1",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.nell.sworn_2": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/nell/sworn_2",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.nell.sworn_3": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/nell/sworn_3",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.nessa.hub_0": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/nessa/hub_0",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.nessa.hub_1": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/nessa/hub_1",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.nessa.hub_2": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/nessa/hub_2",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.nessa.hub_3": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/nessa/hub_3",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.ottilie.articleswait_0": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/ottilie/articleswait_0",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.ottilie.articleswait_1": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/ottilie/articleswait_1",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.ottilie.articleswait_2": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/ottilie/articleswait_2",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.ottilie.articleswait_3": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/ottilie/articleswait_3",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.ottilie.bridewait_0": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/ottilie/bridewait_0",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.ottilie.bridewait_1": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/ottilie/bridewait_1",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.ottilie.bridewait_2": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/ottilie/bridewait_2",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.ottilie.bridewait_3": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/ottilie/bridewait_3",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.ottilie.crewwait_0": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/ottilie/crewwait_0",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.ottilie.crewwait_1": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/ottilie/crewwait_1",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.ottilie.crewwait_2": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/ottilie/crewwait_2",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.ottilie.crewwait_3": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/ottilie/crewwait_3",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.ottilie.hub_0": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/ottilie/hub_0",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.ottilie.hub_1": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/ottilie/hub_1",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.ottilie.hub_2": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/ottilie/hub_2",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.ottilie.hub_3": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/ottilie/hub_3",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.ottilie.sworn_0": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/ottilie/sworn_0",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.ottilie.sworn_1": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/ottilie/sworn_1",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.ottilie.sworn_2": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/ottilie/sworn_2",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.ottilie.sworn_3": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/ottilie/sworn_3",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.sage.hub_0": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/sage/hub_0",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.sage.hub_1": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/sage/hub_1",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.sage.hub_2": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/sage/hub_2",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.sage.hub_3": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/sage/hub_3",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.sigrun.hub_0": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/sigrun/hub_0",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.sigrun.hub_1": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/sigrun/hub_1",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.sigrun.hub_2": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/sigrun/hub_2",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.sigrun.hub_3": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/sigrun/hub_3",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.ulla.haulwait_0": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/ulla/haulwait_0",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.ulla.haulwait_1": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/ulla/haulwait_1",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.ulla.haulwait_2": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/ulla/haulwait_2",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.ulla.haulwait_3": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/ulla/haulwait_3",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.ulla.hub_0": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/ulla/hub_0",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.ulla.hub_1": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/ulla/hub_1",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.ulla.hub_2": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/ulla/hub_2",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.ulla.hub_3": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/ulla/hub_3",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.ulla.huntwait_0": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/ulla/huntwait_0",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.ulla.huntwait_1": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/ulla/huntwait_1",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.ulla.huntwait_2": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/ulla/huntwait_2",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.ulla.huntwait_3": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/ulla/huntwait_3",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.ulla.ringwait_0": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/ulla/ringwait_0",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.ulla.ringwait_1": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/ulla/ringwait_1",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.ulla.ringwait_2": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/ulla/ringwait_2",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.ulla.ringwait_3": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/ulla/ringwait_3",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.ulla.sworn_0": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/ulla/sworn_0",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.ulla.sworn_1": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/ulla/sworn_1",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.ulla.sworn_2": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/ulla/sworn_2",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.ulla.sworn_3": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/ulla/sworn_3",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.wren.hub_0": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/wren/hub_0",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.wren.hub_1": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/wren/hub_1",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.wren.hub_2": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/wren/hub_2",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.wren.hub_3": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/wren/hub_3",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.first_dusk": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/first_dusk",
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.journal_done": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/journal_done",
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.siege_first": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/siege_first",
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.siege_held": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/siege_held",
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.ember": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/ember",
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.warlord": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/warlord",
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.fell_reeve": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/fell_reeve",
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.fell_huntsman": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/fell_huntsman",
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.fell_bride": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/fell_bride",
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.fell_seneschal": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/fell_seneschal",
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.fell_mother": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/fell_mother",
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.third_1": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/third_1",
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.third_2": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/third_2",
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.third_3": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/third_3",
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.third_4": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/third_4",
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.third_5": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/third_5",
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.third_6": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/third_6",
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.third_7": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/third_7",
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.third_8": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/third_8",
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.rift_open": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/rift_open",
+     "volume": 0.9,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.hollow_first": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/hollow_first",
+     "volume": 0.9,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.choir_silenced": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/choir_silenced",
+     "volume": 0.9,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.seat": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/seat",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.stage_sky": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/stage_sky",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.stage_sky_out": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/stage_sky_out",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.fall_1": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/fall_1",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.fall_2": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/fall_2",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.fall_3": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/fall_3",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.fall_4": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/fall_4",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.fall_5": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/fall_5",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.fall_6": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/fall_6",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.look_up": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/look_up",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.morvane.last": {
+   "category": "ui",
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/morvane/last",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.vale_theme": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/vale_theme",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.frostmarch_theme": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/frostmarch_theme",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.saltreach_theme": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/saltreach_theme",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.emberwaste_theme": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/emberwaste_theme",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.blackfen_theme": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/blackfen_theme",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.hollow_theme": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/hollow_theme",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.blackfen_day": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/blackfen_day",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.blackfen_night": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/blackfen_night",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.blackfen_wander": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/blackfen_wander",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.boss_bride": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/boss_bride",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.boss_choir": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/boss_choir",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.boss_huntsman": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/boss_huntsman",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.boss_morvane": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/boss_morvane",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.boss_mother": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/boss_mother",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.boss_reeve": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/boss_reeve",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.boss_seneschal": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/boss_seneschal",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.boss_warlord": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/boss_warlord",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.emberwaste_day": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/emberwaste_day",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.emberwaste_night": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/emberwaste_night",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.emberwaste_wander": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/emberwaste_wander",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.frostmarch_day": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/frostmarch_day",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.frostmarch_night": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/frostmarch_night",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.frostmarch_wander": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/frostmarch_wander",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.hollow_deep": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/hollow_deep",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.hollow_village": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/hollow_village",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.main_theme": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/main_theme",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.saltreach_day": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/saltreach_day",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.saltreach_night": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/saltreach_night",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.saltreach_wander": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/saltreach_wander",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.siege_night": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/siege_night",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.vale_day": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/vale_day",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.vale_night": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/vale_night",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.vale_wander": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/vale_wander",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "music.game": {
+   "category": "music",
+   "sounds": [
+    {
+     "name": "sounds/siege/music/silence",
+     "stream": true
+    }
+   ]
+  },
+  "music.game.creative": {
+   "category": "music",
+   "sounds": [
+    {
+     "name": "sounds/siege/music/silence",
+     "stream": true
+    }
+   ]
+  },
+  "music.game.water": {
+   "category": "music",
+   "sounds": [
+    {
+     "name": "sounds/siege/music/silence",
+     "stream": true
+    }
+   ]
+  },
+  "music.overworld.deep_dark": {
+   "category": "music",
+   "sounds": [
+    {
+     "name": "sounds/siege/music/silence",
+     "stream": true
+    }
+   ]
   }
  }
 }

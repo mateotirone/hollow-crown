@@ -14,7 +14,7 @@ const file = args.find((a) => !a.startsWith("--")) ?? "/mnt/project-files/siege-
 const opt = (k) => { const i = args.indexOf(k); return i >= 0 ? args[i + 1] : undefined; };
 const { ROUTES } = await import("../Siege_Nights_BP/scripts/trains/routes_data.js");
 const { pieces, isNatural } = await import("../Siege_Nights_BP/scripts/trains/routes.js");
-const { layBed, trackFits, seatTrack, clearBody, applyWorkColumn, clearTreesInColumn, builtColumns, firm, rise, TRACK } = await import(process.env.RAIL_BED ?? "../Siege_Nights_BP/scripts/trains/rail_bed.js"); // RAIL_BED: compare another bed layer
+const { layBed, trackFits, seatTrack, clearBody, applyWorkColumn, clearTreesInColumn, builtColumns, firm, rise, TRACK, layCrossing } = await import(process.env.RAIL_BED ?? "../Siege_Nights_BP/scripts/trains/rail_bed.js"); // RAIL_BED: compare another bed layer
 
 const C = JSON.parse(fs.readFileSync(file, "utf8"));
 const edits = new Map();
@@ -47,6 +47,8 @@ for (const seg of ROUTES.segments) {
     if (!trackFits(w, p)) { (missing[seg.id] ??= []).push([i, w.get(p.x, p.y, p.z)]); return; }
     w.set(p.x, p.y, p.z, TRACK);
   });
+  // then its level crossings, on the graded ground (route_game.js crossingTick)
+  for (const c of seg.crossings ?? []) if (layCrossing && !layCrossing(w, c, blocked)) (missing[seg.id] ??= []).push(["crossing", c.at]);
 }
 
 // RAIL_PEEK="x,y,z;..." prints an east-west and a north-south slice round each point, before and after
@@ -134,14 +136,28 @@ for (const seg of ROUTES.segments) {
       const over = w.get(x, y + 1, z);
       // (only the soil under the turf: a dirt pocket deep in a rock face is just the rock)
       const soil = !firm(orig(x, y + 3, z));
-      if (isAir(n) && !isAir(n0) && soil && firm(over) && !/(_log|_wood)$/.test(over) && edits.has(`${x + a},${y},${z + b}`)) { note(seg.id, "bare dirt", [x, y, z]); break; }
+      if (isAir(n) && !isAir(n0) && soil && ground(over) && edits.has(`${x + a},${y},${z + b}`)) { note(seg.id, "bare dirt", [x, y, z]); break; }
     }
+  }
+}
+// 6. level crossings: boards under the road, the posts standing, the hut on its plinth (or a reason it isn't there)
+for (const seg of ROUTES.segments) for (const c of seg.crossings ?? []) {
+  const at = seg.blocks[c.at].slice(0, 3).join(" ");
+  const boards = c.deck.filter(([x, z, y]) => w.get(x, y, z) === "minecraft:" + c.deck_block).length;
+  if (boards < c.deck.length * 0.8) note(seg.id, "crossing without its boards", [at, boards, c.deck.length]);
+  const posts = c.posts.filter(([x, z, y, ids]) => { for (let k = y - 4; k <= y + 8; k++) if (w.get(x, k, z) === "minecraft:" + ids[ids.length - 1]) return true; return false; }).length;
+  if (posts < c.posts.length) note(seg.id, "crossing posts missing (info)", [at, posts, c.posts.length]);
+  if (c.hut) {
+    const id0 = c.hut.blocks.find((b) => !/air/.test(b[3]));
+    let found = false;
+    for (let y = c.hut.y - 8; y <= c.hut.y + 14 && !found; y++) if (w.get(c.hut.x + id0[0], y, c.hut.z + id0[2]) === id0[3]) found = true;
+    note(seg.id, found ? "keeper's hut built (info)" : "keeper's hut skipped (info)", [c.hut.x, c.hut.z]);
   }
 }
 // 5. nothing floating: every solid block the laying changed or left beside a change must still reach the ground
 //    through solid blocks (searched up to 40 blocks away)
 const changed = [...edits.keys()].map((k) => k.split(",").map(Number));
-const solid = (t) => !!t && !isAir(t) && !/water|lava|snow_layer|vine|moss_carpet|short_grass|tall_grass|fern|flower/.test(t) && t !== TRACK;
+const solid = (t) => !!t && !isAir(t) && (!/water|lava|snow_layer|vine|moss_carpet|short_grass|tall_grass|fern|flower/.test(t) || /leaves/.test(t)) && t !== TRACK; // (flowering azalea leaves are leaves)
 function anchoredIn(get) {
   const memo = new Map();
   return (x, y, z) => {
