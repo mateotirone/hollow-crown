@@ -18,8 +18,10 @@
     "result": {
       "item": "siege:guard_vale_leggings"
     },
-    "unlock": {
-      "context": "AlwaysUnlocked"
-    }
+    "unlock": [
+      {
+        "item": "minecraft:structure_void"
+      }
+    ]
   }
 }

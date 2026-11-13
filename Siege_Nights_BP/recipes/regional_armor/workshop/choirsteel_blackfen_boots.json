@@ -18,8 +18,10 @@
     "result": {
       "item": "siege:choirsteel_blackfen_boots"
     },
-    "unlock": {
-      "context": "AlwaysUnlocked"
-    }
+    "unlock": [
+      {
+        "item": "minecraft:structure_void"
+      }
+    ]
   }
 }

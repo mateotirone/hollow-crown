@@ -18,8 +18,10 @@
     "result": {
       "item": "siege:choirsteel_vale_leggings"
     },
-    "unlock": {
-      "context": "AlwaysUnlocked"
-    }
+    "unlock": [
+      {
+        "item": "minecraft:structure_void"
+      }
+    ]
   }
 }

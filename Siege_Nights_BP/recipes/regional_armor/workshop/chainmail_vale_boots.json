@@ -18,8 +18,10 @@
     "result": {
       "item": "siege:chainmail_vale_boots"
     },
-    "unlock": {
-      "context": "AlwaysUnlocked"
-    }
+    "unlock": [
+      {
+        "item": "minecraft:structure_void"
+      }
+    ]
   }
 }

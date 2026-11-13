@@ -21,8 +21,10 @@
     "result": {
       "item": "siege:guard_blackfen_netherite_helmet"
     },
-    "unlock": {
-      "context": "AlwaysUnlocked"
-    }
+    "unlock": [
+      {
+        "item": "minecraft:structure_void"
+      }
+    ]
   }
 }

@@ -21,8 +21,10 @@
     "result": {
       "item": "siege:guard_saltreach_netherite_leggings"
     },
-    "unlock": {
-      "context": "AlwaysUnlocked"
-    }
+    "unlock": [
+      {
+        "item": "minecraft:structure_void"
+      }
+    ]
   }
 }
