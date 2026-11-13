@@ -1,0 +1,284 @@
+{
+ "name": "mason_yard_frostmarch",
+ "card": {
+  "title": "Mason's Yard",
+  "sub": "Frostmarch, workshop and yard",
+  "region": "frostmarch",
+  "where": "Every new base, beside the square",
+  "kind": "Work",
+  "blurb": "The mason's workshop: a small stone shop with his tools inside, and a yard in front where he cuts and sells blocks."
+ },
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "frost_stone",
+    "roof": {
+     "ladder": [
+      "deepslate_tiles",
+      "cobbled_deepslate"
+     ],
+     "axis": "noise",
+     "scale": 2
+    }
+   },
+   "rect": [
+    -3,
+    -7,
+    3,
+    -3
+   ],
+   "y": 0,
+   "plinth": 1,
+   "storeys": [
+    5
+   ],
+   "door": {
+    "side": "s",
+    "kind": "house",
+    "steps": 0
+   },
+   "roof": {
+    "type": "gable",
+    "ridge": "x",
+    "pitch": 1,
+    "gable_horns": true,
+    "snow": true,
+    "overhang": 1
+   },
+   "interior": {
+    "use": "shop",
+    "rooms": [
+     "shop"
+    ]
+   },
+   "chimney": [
+    [
+     2,
+     -5
+    ]
+   ],
+   "shutters": 0.3,
+   "bushes": false
+  }
+ ],
+ "place": [
+  [
+   -4,
+   0,
+   -2,
+   "cobbled_deepslate"
+  ],
+  [
+   -4,
+   0,
+   -1,
+   "cobbled_deepslate"
+  ],
+  [
+   -4,
+   0,
+   0,
+   "cobbled_deepslate"
+  ],
+  [
+   -3,
+   0,
+   -2,
+   "cobbled_deepslate"
+  ],
+  [
+   -3,
+   0,
+   -1,
+   "cobbled_deepslate"
+  ],
+  [
+   -3,
+   0,
+   0,
+   "cobbled_deepslate"
+  ],
+  [
+   -2,
+   0,
+   -2,
+   "cobbled_deepslate"
+  ],
+  [
+   -2,
+   0,
+   -1,
+   "cobbled_deepslate"
+  ],
+  [
+   -2,
+   0,
+   0,
+   "cobbled_deepslate"
+  ],
+  [
+   -1,
+   0,
+   -2,
+   "cobbled_deepslate"
+  ],
+  [
+   -1,
+   0,
+   -1,
+   "cobbled_deepslate"
+  ],
+  [
+   -1,
+   0,
+   0,
+   "cobbled_deepslate"
+  ],
+  [
+   0,
+   0,
+   -2,
+   "cobbled_deepslate"
+  ],
+  [
+   0,
+   0,
+   -1,
+   "cobbled_deepslate"
+  ],
+  [
+   0,
+   0,
+   0,
+   "cobbled_deepslate"
+  ],
+  [
+   1,
+   0,
+   -2,
+   "cobbled_deepslate"
+  ],
+  [
+   1,
+   0,
+   -1,
+   "cobbled_deepslate"
+  ],
+  [
+   1,
+   0,
+   0,
+   "cobbled_deepslate"
+  ],
+  [
+   2,
+   0,
+   -2,
+   "cobbled_deepslate"
+  ],
+  [
+   2,
+   0,
+   -1,
+   "cobbled_deepslate"
+  ],
+  [
+   2,
+   0,
+   0,
+   "cobbled_deepslate"
+  ],
+  [
+   3,
+   0,
+   -2,
+   "cobbled_deepslate"
+  ],
+  [
+   3,
+   0,
+   -1,
+   "cobbled_deepslate"
+  ],
+  [
+   3,
+   0,
+   0,
+   "cobbled_deepslate"
+  ],
+  [
+   4,
+   0,
+   -2,
+   "cobbled_deepslate"
+  ],
+  [
+   4,
+   0,
+   -1,
+   "cobbled_deepslate"
+  ],
+  [
+   4,
+   0,
+   0,
+   "cobbled_deepslate"
+  ],
+  [
+   -3,
+   1,
+   -1,
+   "stonecutter_block",
+   {
+    "facing": "s"
+   }
+  ],
+  [
+   3,
+   1,
+   -2,
+   "deepslate_bricks"
+  ],
+  [
+   3,
+   2,
+   -2,
+   "deepslate_bricks"
+  ],
+  [
+   4,
+   1,
+   -2,
+   "cobbled_deepslate"
+  ],
+  [
+   4,
+   1,
+   -1,
+   "cobbled_deepslate"
+  ],
+  [
+   -4,
+   1,
+   -1,
+   "cobblestone_slab",
+   {
+    "half": "bottom"
+   }
+  ],
+  [
+   -4,
+   1,
+   -2,
+   "barrel"
+  ]
+ ],
+ "marks": {
+  "bench": [
+   1,
+   1,
+   -1
+  ]
+ }
+}

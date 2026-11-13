@@ -49,6 +49,34 @@ export function line(dim, from, to, id, step = 0.8) {
   for (let i = 0; i <= n; i++) particle(dim, id, { x: from.x + (dx * i) / n, y: from.y + (dy * i) / n, z: from.z + (dz * i) / n });
 }
 
+// ---------- reading the floor (fights never edit blocks, but they do look at them) ----------
+// What a block is to a fighter: "open" (air: room to stand in), "liquid", "solid" (anything else: slabs, lattice,
+// glass and amethyst are not "isSolid" but you can stand on them), or undefined (not loaded).
+export const blockKind = (dim) => (x, y, z) => {
+  try { const bl = dim.getBlock({ x, y, z }); return bl ? (bl.isAir ? "open" : bl.isLiquid ? "liquid" : "solid") : undefined; } catch { return undefined; }
+};
+// Where something can stand near a spot: the first place from `up` blocks above it to `down` below with floor under
+// it and two blocks of air. Undefined if there is none (inside a wall, in water, over the void, not loaded).
+// Pure: kindAt(x, y, z) is "solid", "open", "liquid" or undefined.
+export function footingNear(at, kindAt, up = 2, down = 8) {
+  const x = Math.floor(at.x), z = Math.floor(at.z), y0 = Math.floor(at.y);
+  for (let y = y0 + up; y >= y0 - down; y--) {
+    if (kindAt(x, y - 1, z) === "solid" && kindAt(x, y, z) === "open" && kindAt(x, y + 1, z) === "open") return { x: at.x, y, z: at.z };
+  }
+  return undefined;
+}
+// Nothing solid on the straight line between two spots, at chest height: the same room, not through a wall
+export function clearBetween(dim, a, b, height = 1.5) {
+  const from = { x: a.x, y: a.y + height, z: a.z }, to = { x: b.x, y: b.y + height, z: b.z };
+  const d = Math.hypot(to.x - from.x, to.y - from.y, to.z - from.z);
+  if (d < 0.5) return true;
+  try {
+    return !dim.getBlockFromRay(from, { x: (to.x - from.x) / d, y: (to.y - from.y) / d, z: (to.z - from.z) / d }, { maxDistance: d, includeLiquidBlocks: true, includePassableBlocks: false });
+  } catch {
+    return false; // the ray left the loaded world
+  }
+}
+
 export function sound(dim, id, loc, pitch = 1, volume = 1) {
   sfx(dim, id, loc, { pitch, volume });
 }
@@ -68,6 +96,8 @@ export const setHurtScale = (fn) => { hurtScale = fn; };
 export function hurt(entity, amount, cause = "magic", by) {
   try {
     if (entity.typeId === "minecraft:player") amount = Math.round(amount * hurtScale() * 10) / 10;
+    // "void" damage kills through Creative and Spectator, so bosses never deal it: it lands as magic
+    if (cause === "void") cause = "magic";
     // Creative players can't be hurt, so playtesters at least see what would have landed
     if (entity.typeId === "minecraft:player" && entity.getGameMode?.() === GameMode.Creative) entity.onScreenDisplay.setActionBar(`§7(Creative) That hit you for §c${amount}§7.`);
     entity.applyDamage(amount, by ? { cause, damagingEntity: by } : { cause });

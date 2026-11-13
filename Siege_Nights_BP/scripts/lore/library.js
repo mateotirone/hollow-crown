@@ -50,7 +50,7 @@ const onLand = (owner, key) => !isReady() || settlementAt(locOf(key)) === owner;
 const shelvesOf = (owner) => Object.entries(libOf(owner)).filter(([key, ids]) => ids.length && onLand(owner, key));
 // Every tome id shelved anywhere in this owner's Library
 export const shelvedIn = (owner) => shelvesOf(owner).flatMap(([, ids]) => ids);
-// local books sit on the shelves but do not count toward the 74 or Library rank
+// local books sit on the shelves but do not count toward the 75 or Library rank
 export const libraryCount = (owner) => (owner ? shelvedIn(owner).filter((id) => !isLocal(id)).length : 0);
 
 function showFill(block, count) {

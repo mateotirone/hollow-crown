@@ -48,12 +48,12 @@ def _skill_scripts():
     raise SystemExit("harbour.py needs the minecraft-builder skill (.claude/skills/minecraft-builder, PR #155) or SKILL_DIR")
 
 
-def skill_build(name, door):
+def skill_build(name, door, folder="harbour_specs"):
     """harbour_specs/<name>.json built by the skill's engine into a Blueprint, door marker given (x, z)."""
     p = _skill_scripts()
     if p not in sys.path: sys.path.insert(0, p)
     import engine
-    spec = json.load(open(os.path.join(HERE, "harbour_specs", name + ".json")))
+    spec = json.load(open(os.path.join(HERE, folder, name + ".json")))
     bp = Blueprint(spec["name"]); engine.into_blueprint(bp, spec)
     bp.cells = {c: v for c, v in bp.cells.items() if v[0] != "air"}
     bp.markers["door"] = (door[0], 0, door[1])
@@ -155,6 +155,8 @@ def build(t):
     x, z, deg = HUT; t.stamp(hb, x, z, TOP, deg, "civic"); t.plan[-1].update(name="harbourmaster", door=[x - 5, z])
     for dx in range(-4, 5):
         for dz in range(-3, 4): col(x + dx, z + dz, TOP - 1); take(x + dx, z + dz)
+    for dx in range(-7, -4):                                            # a level forecourt from its door to the quay
+        for dz in range(-2, 3): col(x + dx, z + dz); take(x + dx, z + dz, 1)
     bb = skill_build("boathouse", (0, 7))
     x, z, deg = BOATHOUSE; t.stamp(bb, x, z, TOP, deg, "civic"); t.plan[-1].update(name="boathouse", door=[x + 7, z])
     # boathouse ground: stone under the land half, piers under the water half, the slip open to the sea

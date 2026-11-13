@@ -1,0 +1,70 @@
+{
+  "format_version": "1.8.0",
+  "render_controllers": {
+    "controller.render.siege_faceless_statue": {
+      "arrays": {
+        "textures": {
+          "Array.skins": [
+            "Texture.t0",
+            "Texture.t1",
+            "Texture.t2",
+            "Texture.t3",
+            "Texture.t4",
+            "Texture.t5"
+          ]
+        },
+        "geometries": {
+          "Array.shapes": [
+            "Geometry.g0",
+            "Geometry.g1",
+            "Geometry.g2",
+            "Geometry.g3",
+            "Geometry.g4",
+            "Geometry.g5"
+          ]
+        }
+      },
+      "geometry": "Array.shapes[q.property('siege:age')]",
+      "materials": [
+        {
+          "*": "Material.default"
+        }
+      ],
+      "textures": [
+        "Array.skins[q.property('siege:age')]"
+      ],
+      "part_visibility": [
+        {
+          "*": true
+        },
+        {
+          "body": "q.property('siege:wear') != 3"
+        },
+        {
+          "head": "q.property('siege:wear') != 1 && q.property('siege:wear') != 3"
+        },
+        {
+          "arm_r": "q.property('siege:wear') != 2"
+        },
+        {
+          "stub": "q.property('siege:wear') == 2"
+        },
+        {
+          "rubble": "q.property('siege:wear') == 3"
+        },
+        {
+          "arms_folded": "q.property('siege:hold') == 0 && q.property('siege:wear') != 2"
+        },
+        {
+          "arms_staff": "q.property('siege:hold') == 1 && q.property('siege:wear') != 2"
+        },
+        {
+          "arms_sword": "q.property('siege:hold') == 2 && q.property('siege:wear') != 2"
+        },
+        {
+          "arms_bowl": "q.property('siege:hold') == 3 && q.property('siege:wear') != 2"
+        }
+      ]
+    }
+  }
+}

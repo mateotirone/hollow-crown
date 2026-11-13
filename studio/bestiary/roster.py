@@ -382,7 +382,7 @@ mob(id="mire_toad", name="Mire Toad", family="wild_hostile", model=m_toad, plan=
     pal=P(skin={"c": (90, 110, 50), "style": "stone"}, wart=(160, 90, 40), eye=(250, 200, 40)),
     hp=16, speed=0.3, dmg=3, collision=(0.8, 0.6), hops=True, region="Blackfen", egg=("#5a6e32", "#fac828"),
     spawn=dict(biomes=["swamp", "mangrove_swamp"], light=None, herd=(1, 2), weight=6, density=2, pop="monster"),
-    lore="Its tongue reaches six blocks. Its skin is poison, so punching it is a mistake.")
+    lore="It sits so still it looks like a stone in the mud. Its skin is poison, so punching it is a mistake.")
 
 def m_wight(m):
     biped(m, mats={"head": "bone", "body": "mail", "arm": "bone", "leg": "mail", "shoulder": "mail", "bracer": "crown", "belt": "crown"}, face="glow", nose=False)
@@ -445,6 +445,7 @@ BOSSES = []
 # Boss heights in blocks are Mateo's picks (2026-11-11; a player is 1.8): Reeve 7, Huntsman 5, Bride 2.2, Seneschal 3, Mother 3,
 # Warlord King 4. collision height = the model's own height (top cube / 16) and scale = target / that, since minecraft:scale
 # grows the model and the hitbox together.
+# Keep the scaled hitbox under 2 blocks wide (a ravager is 1.95): at 3.2 wide the Reeve could never stand on a path point and ran in circles.
 def boss(**kw): kw["boss"] = True; BOSSES.append(kw); MOBS.append(kw); return kw
 
 def m_reeve(m, small=False):
@@ -471,7 +472,7 @@ def m_reeve(m, small=False):
         m.box(nm, [s * 4 - 3, 6, -3], [6, 2, 6], "gear", mirror=s > 0); m.box(nm, [s * 4 - 3.5, 0, -5], [7, 2, 9], "brass", mirror=s > 0)                      # knee collar, cast foot
 REEVE_PAL = P(brass=GOLD, iron=DARKIRON, wood=WOOD, gear={"c": (184, 140, 60), "style": "metal"})
 boss(id="clockwork_reeve", name="The Clockwork Reeve", region="Aldmere Vale", model=m_reeve, pal=REEVE_PAL,
-     hp=320, speed=0.25, dmg=9, kb=1.0, collision=(1.4, 3.06), scale=2.286, egg=("#dab046", "#46464f"),
+     hp=320, speed=0.25, dmg=9, kb=1.0, collision=(0.8, 3.06), scale=2.286, egg=("#dab046", "#46464f"),
      anim_extra=[("gear0", "rotation", ["0", "0", "query.life_time*90"]), ("gear1", "rotation", ["0", "0", "-query.life_time*120"]),
                  ("gear2", "rotation", ["0", "0", "query.life_time*160"]), ("hand_minute", "rotation", ["0", "0", "-query.life_time*360"]),
                  ("hand_hour", "rotation", ["0", "0", "-query.life_time*30"]), ("pendulum", "rotation", ["0", "0", "math.sin(query.life_time*180)*25"])],

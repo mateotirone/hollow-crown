@@ -1,0 +1,158 @@
+<title>Everwake Wings</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@600&family=JetBrains+Mono&display=swap">
+<style>
+:root{--bg:#0f1622;--panel:rgba(16,24,36,.86);--fg:#eef2f7;--dim:#a9b6c7;--accent:#e9d8a6;--line:rgba(233,216,166,.35);color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font:14px/1.45 Inter,system-ui,sans-serif;margin:0;overflow:hidden}
+#c{position:fixed;inset:0;display:block;width:100%;height:100%;touch-action:none}
+.ui{position:fixed;left:0;right:0;bottom:0;padding:12px max(16px,env(safe-area-inset-right,0px)) calc(14px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:8px;pointer-events:none;max-height:70vh}
+.card{pointer-events:auto;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;max-width:700px;backdrop-filter:blur(6px);min-width:0}
+h1{font:600 17px/1.2 "Space Grotesk",Inter,system-ui,sans-serif;margin:0 0 2px}
+.sub{color:var(--dim);font-size:12.5px;margin:0}
+.row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.lab{color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin-right:4px;min-width:52px}
+button{background:transparent;color:var(--fg);border:1px solid var(--line);border-radius:999px;padding:5px 11px;font:500 13px Inter,system-ui,sans-serif;cursor:pointer}
+button.on{background:var(--accent);color:#1b1608;border-color:var(--accent)}
+#note{color:var(--dim);font-size:12.5px;margin:0;min-height:1.4em}
+#hud{font:12px "JetBrains Mono",ui-monospace,monospace;color:var(--accent);margin:0;overflow-wrap:anywhere}
+details summary{cursor:pointer;color:var(--dim);font-size:12.5px}
+pre{font:11px/1.4 "JetBrains Mono",ui-monospace,monospace;max-height:30vh;overflow:auto;background:rgba(0,0,0,.3);padding:8px;border-radius:6px;margin:6px 0 0;white-space:pre}
+</style>
+<canvas id="c"></canvas>
+<div class="ui">
+  <div class="card"><h1>The Everwake Wings</h1>
+    <p class="sub">The game's own player model and skins, the real Choirsteel armour models and textures, and the wing model, moved by the real Bedrock animation files below. Drag to turn, pinch or scroll to zoom.</p></div>
+  <div class="card" style="display:flex;flex-direction:column;gap:8px">
+    <div class="row"><span class="lab">Flight</span>
+      <button data-m="folded">On the ground</button><button data-m="takeoff">Take off</button><button data-m="glide">Glide</button><button data-m="boost">Boost (Use)</button><button data-m="dive">Dive</button><button data-m="land">Land</button></div>
+    <div class="row"><span class="lab">Ground</span><button id="walk">Walk</button><button id="slow">Slow motion</button></div>
+    <div class="row"><span class="lab">Armour</span><button data-a="choir" class="on">Choirsteel</button><button data-a="none">None</button></div>
+    <div class="row" id="looks"><span class="lab">Skin</span></div>
+    <div class="row"><span class="lab">Time</span><button data-t="day" class="on">Day</button><button data-t="dusk">Dusk</button><button data-t="night">Night</button></div>
+    <p id="note"></p>
+    <p id="hud"></p>
+    <details><summary>The animation files (as they go in the pack)</summary>
+      <div class="row" style="margin-top:6px"><button data-f="anim" class="on">everwake_wings.animation.json</button><button data-f="ctrl">…animation_controllers.json</button></div>
+      <pre id="file"></pre></details>
+  </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const DATA=/*DATA*/null;const {GEOS,ARMOR,LOOKS,TEX,ANIMS,CTRL,ALIASES,FILES}=DATA;
+const NOTES={folded:"On the ground the wings fold small and tight on your back, clear of the ground. Walk to see them ride along.",
+takeoff:"Jump, then press jump again in the air: the wings open (the one-shot open animation), then settle into the glide.",
+glide:"Gliding, exactly like an elytra: steer with where you look. Pitch down to gain speed, up to trade it for height.",
+boost:"Press Use with anything in your hand, while not looking at a block: a silent burst of speed. The wings sweep back once.",
+dive:"Look more than 50° down: the controller switches to the dive. The wings sweep back along your body and the beat nearly stops.",
+land:"Pull up near the ground to slow, then land. The wings beat to brake and fold on their own. They never break."};
+// ---------------- MoLang (just what these files use)
+const D=Math.PI/180;
+const M={sin:a=>Math.sin(a*D),cos:a=>Math.cos(a*D),abs:Math.abs,min:Math.min,max:Math.max,clamp:(x,a,b)=>Math.min(Math.max(x,a),b),mod:(a,b)=>a%b};
+const cache=new Map();
+function compile(src){if(typeof src==="number")return()=>src;if(cache.has(src))return cache.get(src);
+  const js=src.replace(/;$/,"").replace(/\bmath\./g,"M.").replace(/\bquery\./g,"q.").replace(/\bvariable\./g,"v.").replace(/\bthis\b/g,"T");
+  const f=new Function("M","q","v","T","return ("+js+");");const g=(T=0)=>{const r=f(M,q,v,T);return r===true?1:r===false?0:(+r||0)};cache.set(src,g);return g}
+const S={prop:1,pitch:0,walk:false,dist:0,slow:false};let time=0;const v={};
+const q={anim_time:0,all_animations_finished:0,target_x_rotation:0,has_property:()=>1,property:()=>S.prop,get life_time(){return time}};
+// vanilla walk + idle bob, copied from the vanilla player animations, for the ground
+const VAN={walk:{leftarm:{rotation:["variable.tcos0",0,0]},rightarm:{rotation:["-variable.tcos0",0,0]},leftleg:{rotation:["variable.tcos0 * -1.4",0,0]},rightleg:{rotation:["variable.tcos0 * 1.4",0,0]}},
+ bob:{leftarm:{rotation:[0,0,"-((math.cos(query.life_time * 103.2) * 2.865) + 2.865)"]},rightarm:{rotation:[0,0,"(math.cos(query.life_time * 103.2) * 2.865) + 2.865"]}}};
+// ---------------- scene
+const cv=document.getElementById('c');const R=new THREE.WebGLRenderer({canvas:cv,antialias:true});R.setPixelRatio(Math.min(devicePixelRatio,2));R.outputEncoding=THREE.sRGBEncoding;
+const scene=new THREE.Scene();const cam=new THREE.PerspectiveCamera(38,1,.1,500);
+const hemi=new THREE.HemisphereLight(0xdfeaff,0x707688,.85);scene.add(hemi);
+const sun=new THREE.DirectionalLight(0xfff1d6,.75);sun.position.set(6,10,8);scene.add(sun);
+const rim=new THREE.DirectionalLight(0xa8c8ff,.35);rim.position.set(-6,4,-8);scene.add(rim);
+const cloudG=new THREE.Group();scene.add(cloudG);const cm=new THREE.MeshLambertMaterial({color:0xffffff});
+let sd=7;const rnd=()=>(sd=(sd*16807)%2147483647)/2147483647;
+for(let i=0;i<70;i++){const b=new THREE.Mesh(new THREE.BoxGeometry(2+rnd()*5,.6+rnd()*1.2,2+rnd()*5),cm);b.position.set((rnd()-.5)*70,-14-rnd()*3,(rnd()-.5)*70);cloudG.add(b)}
+const ground=new THREE.Group();scene.add(ground);{const gm=new THREE.MeshLambertMaterial({color:0x7d9a5a}),pm=new THREE.MeshLambertMaterial({color:0xb9ad8f});
+ for(let x=-6;x<=6;x++)for(let z=-6;z<=6;z++){const b=new THREE.Mesh(new THREE.BoxGeometry(1,1,1),Math.abs(x)<1?pm:gm);b.position.set(x,-.5,z);ground.add(b)}}
+const loader=new THREE.TextureLoader();
+function tex(u){const t=loader.load(u);t.magFilter=t.minFilter=THREE.NearestFilter;t.encoding=THREE.sRGBEncoding;return t}
+const mat=u=>new THREE.MeshLambertMaterial({map:tex(u),alphaTest:.5,side:THREE.DoubleSide});
+const skinTex=Object.fromEntries(Object.entries(LOOKS).map(([k,u])=>[k,tex(u)]));
+const skinMat=new THREE.MeshLambertMaterial({map:Object.values(skinTex)[0],alphaTest:.5,side:THREE.DoubleSide});
+const mWings=mat(TEX.wings),mC1=mat(TEX.choir1),mC2=mat(TEX.choir2);
+// ---------------- Bedrock geometry, same mapping as the player-animation preview (x mirrored, model faces -z)
+function boxUV(g,c,TW,TH){const [u,v_]=c.uv,[w,h,d]=c.size;const Rr={east:[u,v_+d,d,h],north:[u+d,v_+d,w,h],west:[u+d+w,v_+d,d,h],south:[u+2*d+w,v_+d,w,h],up:[u+d,v_,w,d],down:[u+d+w,v_,w,d]};
+  if(c.mirror){const e=Rr.east;Rr.east=Rr.west;Rr.west=e}
+  const uv=g.attributes.uv;["east","west","up","down","south","north"].forEach((f,i)=>{let [x,y,fw,fh]=Rr[f];let u0=x/TW,u1=(x+fw)/TW,v0=1-y/TH,v1=1-(y+fh)/TH;if(c.mirror)[u0,u1]=[u1,u0];if(f==="up")[v0,v1]=[v1,v0];
+    [[u0,v0],[u1,v0],[u0,v1],[u1,v1]].forEach((p,k)=>uv.setXY(i*4+k,p[0],p[1]))});uv.needsUpdate=true}
+const bones={};const holder=new THREE.Group();holder.scale.setScalar(1/16);scene.add(holder);
+function addCubes(g,b,m,TW,TH,list){for(const c of b.cubes||[]){const inf=c.inflate||0;const s=c.size.map(x=>Math.max(x+2*inf,.001));const bg=new THREE.BoxGeometry(...s);boxUV(bg,c,TW,TH);
+  const mesh=new THREE.Mesh(bg,m);const o=c.origin,pv=g.userData.pivot;mesh.position.set(-(o[0]+c.size[0]/2)-pv.x,o[1]+c.size[1]/2-pv.y,o[2]+c.size[2]/2-pv.z);g.add(mesh);list&&list.push(mesh)}}
+function addBones(G,m,list,skip=[]){const TW=G.description.texture_width,TH=G.description.texture_height;
+  for(const b of G.bones){const key=b.name.toLowerCase();
+    if(!bones[key]){const g=new THREE.Group();const pv=new THREE.Vector3(-b.pivot[0],b.pivot[1],b.pivot[2]);g.userData.pivot=pv;
+      const par=b.parent?bones[b.parent.toLowerCase()]:holder;par.add(g);g.position.copy(pv).sub(b.parent?par.userData.pivot:new THREE.Vector3());g.userData.base=g.position.clone();bones[key]=g}
+    if(!skip.includes(key))addCubes(bones[key],b,m,TW,TH,list)}}
+addBones(GEOS.player,skinMat);
+const armour=[];addBones(ARMOR.leggings,mC2,armour);for(const p of ["boots","chestplate","helmet"])addBones(ARMOR[p],mC1,armour);
+addBones(GEOS.wings,mWings,null,["root","waist","body"]);
+// ---------------- the animation controller, run the way the game runs it
+const sts=CTRL["controller.animation.siege.everwake_wings"].states;
+let cur={name:"none",t0:0},prev=null,blendT0=0,blendLen=0;
+function stateAnims(name){return (sts[name].animations||[]).map(a=>typeof a==="string"?a:Object.keys(a)[0])}
+function animTime(def,t){const L=def.animation_length||0;if(def.loop)return L?t%L:t;return L?Math.min(t,L):t}
+function finished(st){return stateAnims(st.name).every(a=>{const d=ANIMS[ALIASES[a]];return !d.loop&&time-st.t0>=(d.animation_length||0)})}
+function evalState(st,acc,w){for(const a of stateAnims(st.name)){const d=ANIMS[ALIASES[a]];q.anim_time=animTime(d,time-st.t0);
+  for(const [b,ch] of Object.entries(d.bones)){const k=b.toLowerCase();acc[k]??={rot:[0,0,0],pos:[0,0,0],sc:[0,0,0],w:0};
+    for(const [key,arr] of [["rot",ch.rotation],["pos",ch.position]]){if(!arr)continue;for(let i=0;i<3;i++)acc[k][key][i]+=w*compile(arr[i])()}
+    if(ch.scale!==undefined){const s=Array.isArray(ch.scale)?ch.scale.map(x=>compile(x)()):[0,1,2].map(()=>compile(ch.scale)());for(let i=0;i<3;i++)acc[k].sc[i]+=w*(s[i]-1)}}}}
+function stepController(){q.target_x_rotation=S.pitch;q.all_animations_finished=finished(cur)?1:0;
+  for(const tr of sts[cur.name].transitions||[]){const [to,cond]=Object.entries(tr)[0];if(compile(cond)()){prev=cur;blendT0=time;blendLen=sts[to].blend_transition||0;cur={name:to,t0:time};break}}}
+function addVan(acc,def){for(const [b,ch] of Object.entries(def)){acc[b]??={rot:[0,0,0],pos:[0,0,0],sc:[0,0,0]};for(let i=0;i<3;i++)acc[b].rot[i]+=compile(ch.rotation[i])()}}
+// ---------------- ui
+let mode='folded',modeT=0;
+const on=(a,val)=>document.querySelectorAll(`[data-${a}]`).forEach(b=>b.classList.toggle('on',b.dataset[a]===val));
+const note=document.getElementById('note'),hud=document.getElementById('hud');
+function setMode(m){mode=m;modeT=time;on('m',m);note.textContent=NOTES[m];
+  if(m==='folded'){S.prop=1;S.pitch=0}else if(m==='takeoff'||m==='glide'){S.prop=2;S.pitch=10}else if(m==='boost'){S.prop=3;S.pitch=10}
+  else if(m==='dive'){S.prop=2;S.pitch=70}else if(m==='land'){S.prop=4;S.pitch=-15}}
+document.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{if(b.dataset.m==='glide'&&['none','folded'].includes(cur.name))return setMode('takeoff');setMode(b.dataset.m)});
+document.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{on('a',b.dataset.a);armour.forEach(m=>m.visible=b.dataset.a==='choir')});
+const wb=document.getElementById('walk');wb.onclick=()=>{S.walk=!S.walk;wb.classList.toggle('on',S.walk);if(S.walk&&cur.name!=='folded')setMode('folded')};
+const sb=document.getElementById('slow');sb.onclick=()=>{S.slow=!S.slow;sb.classList.toggle('on',S.slow)};
+const looksRow=document.getElementById('looks');Object.keys(LOOKS).forEach((k,i)=>{const b=document.createElement('button');b.textContent=k.split('_').map(w=>w[0].toUpperCase()+w.slice(1)).join(' ');if(!i)b.classList.add('on');
+  b.onclick=()=>{skinMat.map=skinTex[k];skinMat.needsUpdate=true;for(const x of looksRow.querySelectorAll('button'))x.classList.toggle('on',x===b)};looksRow.append(b)});
+const fileEl=document.getElementById('file');fileEl.textContent=FILES.anim;document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{on('f',b.dataset.f);fileEl.textContent=FILES[b.dataset.f]});
+const SKY={day:[0x8fb8e8,0xdfeaff,.85,.75],dusk:[0xd99a7a,0xffd0a8,.7,.6],night:[0x0d1530,0x6a7aaa,.5,.25]};
+function setTime(k){const s=SKY[k];scene.background=new THREE.Color(s[0]);scene.fog=new THREE.Fog(s[0],20,60);hemi.color.setHex(s[1]);hemi.intensity=s[2];sun.intensity=s[3];cm.color.setHex(k==='night'?0x7c86a8:k==='dusk'?0xffe2cc:0xffffff);on('t',k)}
+document.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>setTime(b.dataset.t));setTime('day');
+function resize(){R.setSize(innerWidth,innerHeight,false);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix()}addEventListener('resize',resize);resize();
+let yaw=.65,pitch=.22,dist=6.4,drag=null,pinch=null;
+cv.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY};cv.setPointerCapture(e.pointerId)});
+cv.addEventListener('pointermove',e=>{if(!drag)return;yaw-=(e.clientX-drag.x)*.008;pitch=Math.max(-.6,Math.min(1.3,pitch+(e.clientY-drag.y)*.006));drag={x:e.clientX,y:e.clientY}});
+cv.addEventListener('pointerup',()=>drag=null);cv.addEventListener('wheel',e=>{dist=Math.max(2.4,Math.min(12,dist*(1+e.deltaY*.001)));e.preventDefault()},{passive:false});
+cv.addEventListener('touchmove',e=>{if(e.touches.length===2){const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);if(pinch)dist=Math.max(2.4,Math.min(12,dist*pinch/d));pinch=d}},{passive:true});cv.addEventListener('touchend',()=>pinch=null);
+// ---------------- frame
+let alt=0,last=performance.now();
+function frame(dt){dt*=S.slow?.25:1;time+=dt;
+  // what the game script does: the boost pulse, the landing hand-back
+  if(mode==='boost'&&time-modeT>.2){S.prop=2}
+  if(mode==='land'&&time-modeT>2.6){setMode('folded')}
+  if(mode==='takeoff'&&cur.name==='glide'){mode='glide';on('m','glide')}
+  stepController();
+  const acc={},accP={};const w=prev&&blendLen>0?Math.min(1,(time-blendT0)/blendLen):1;
+  if(cur.name!=='none')evalState(cur,acc,1);if(prev&&w<1&&prev.name!=='none')evalState(prev,accP,1);
+  const grounded=['none','folded'].includes(cur.name)&&(!prev||w>=1||['none','folded'].includes(prev.name));
+  const sp=S.walk&&grounded?.42:0;S.dist+=sp*dt*4.3;v.tcos0=Math.cos(S.dist*38.17*D)*sp*57.3;
+  if(grounded){addVan(acc,VAN.walk);addVan(accP,VAN.walk)}addVan(acc,VAN.bob);addVan(accP,VAN.bob);
+  for(const [n,b] of Object.entries(bones)){const z={rot:[0,0,0],pos:[0,0,0],sc:[0,0,0]};const a=acc[n]||z,p=prev&&w<1?(accP[n]||z):a;
+    const mix=(k,i)=>p[k][i]+(a[k][i]-p[k][i])*w;
+    b.rotation.set(-mix('rot',0)*D,-mix('rot',1)*D,mix('rot',2)*D,"ZYX");
+    b.position.set(b.userData.base.x-mix('pos',0),b.userData.base.y+mix('pos',1),b.userData.base.z+mix('pos',2));
+    b.scale.set(1+mix('sc',0),1+mix('sc',1),1+mix('sc',2))}
+  const flying=!grounded;const vel={glide:4,dive:10,boost:14,open:1,flare:1}[cur.name]||0;const vy={glide:-.1,dive:-1,boost:.25,open:.6,flare:-.3}[cur.name]||0;
+  alt+=vy*dt*.6;if(!flying)alt*=Math.max(0,1-dt*3);else if(Math.abs(alt)>1.2)alt*=.96;
+  holder.position.y=(flying?.9:0)*Math.min(1,(time-(cur.name==='open'?cur.t0:-9))/0.6)+alt;
+  cloudG.position.z+=vel*dt;if(cloudG.position.z>35)cloudG.position.z-=70;cloudG.position.y=-alt*.5;
+  ground.visible=!flying||cur.name==="open"||cur.name==="flare";ground.position.y=-Math.max(0,holder.position.y-.9)*3;
+  hud.textContent=`controller state: ${cur.name}${prev&&w<1?`  (blending from ${prev.name})`:''}  ·  ${stateAnims(cur.name).map(a=>ALIASES[a]).join(', ')||'(wings not worn)'}  ·  siege:wings = ${S.prop}  ·  look pitch ${S.pitch}°`}
+function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;frame(dt);
+  const cy=holder.position.y+(cur.name==='folded'||cur.name==='none'?1.1:.7);cam.position.set(Math.sin(yaw)*Math.cos(pitch)*dist,cy+Math.sin(pitch)*dist,Math.cos(yaw)*Math.cos(pitch)*dist);cam.lookAt(0,cy-.3,0);
+  R.render(scene,cam);requestAnimationFrame(loop)}
+setMode('folded');requestAnimationFrame(loop);
+window.__set=(m,t)=>{setMode(m)};window.__frame=frame;window.__cam=(y,p,d)=>{yaw=y;pitch=p;dist=d};window.__cur=()=>cur.name;
+</script>

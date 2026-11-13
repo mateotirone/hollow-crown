@@ -77,13 +77,24 @@ Corvin's rule made real (`scripts/lore/moondoors.js`): a door carved with a full
 
 Mateo's ruling on a decision card, 2026-11-10: in the fight he says outright that he was a king, their king, and **never speaks the name Oswin**. The name is only ever written (the journal's last page) and then said by Brother Cael. His stage 6 lines are `REVEAL.fall` in `data/reveal.js`.
 
+## Morvane pulled the strings, and his voice (heard before he is seen)
+
+Mateo, 2026-11-13: "it's revealed in the end that Morvane has been pulling the strings on everything the entire time. He's the one that sent the bosses etc. He knows that you're a threat to him, but because the rift isn't open, he can't get to you directly. He's been trying to get the rift open for that reason. So then he ends up tricking you into opening it for him."
+
+How the pieces fit: the raids, the five regional bosses and the Ember are all his. The bosses were sent up to kill the player; each carries a Choir Shard, and five shards make the Tuning Fork that opens the Rift. He cannot open it from below, and he cannot reach the player while it is shut. So when the bosses keep losing he lets the player win, and talks to them at night until they forge the fork and strike it. The seep that spreads forever once the Rift is open is the cost.
+
+**His voice** (Mateo: "i want the player to hear him before they know who he is"; "more monster/demony"). Thirty-three hand-written lines voiced by ElevenLabs with a second, lower throat mixed under every line (words in `studio/voices/morvane.json`, played by `scripts/lore/morvane_voice.js`, installed by `tools/install_voices.py`). Before the Rift he is a voice with no speaker, far off, each line heard once by one player, words in grey italics, and he poses as a helper: he tells you who to hunt, to take the shards and keep them safe, and that opening the door will make the knocking stop. Slips for a careful listener: "That is why I chose you", "He kept my keys", "Keep it safe for me", "The ones I... the ones who hunt you". None of those lines says Hollow, king, Crown, Morvane or Oswin (a test enforces it).
+- **The Rift opens:** the mask drops. "There. Thank you. I could not reach you through a closed door, so I sent them up, and you carried every shard to it for me."
+- **The fight:** his printed lines are spoken. Stage 5: "This was mine first. And thanks to you, it is mine again." Stage 6 (`REVEAL.fall`) says it plainly: he was a king, theirs; the five were his, sent to kill you; every shard was a piece of his key; he made you open the door. Then the reveal's "You kept my father's book." As he falls for good: "You opened the door. It does not close."
+- **The journal's last page** now also says he planted the journal so the player would listen to a voice in the dark.
+
 ## The King's hand
 
 Settled 2026-11-10 with the novel thread. At the truce Oswin took the splinter of the Hollow Crown in his **right** hand, and that hand never served him properly again. From then on he wrote, ate and fought with his left. That is why the Chronicles and the lighthouse letters describe a left-handed king, why Edda believed her father was one of the Returned, and why she was "right about everything except me". He was never a copy. **Morvane fights left-handed and is grey-eyed. The boy in the reveal scene writes with his right.**
 
 ## Twelve settlements, twelve ways in
 
-Mateo, 2026-11-10: every settlement needs its own lore and library, "so the game is playable differently 12 times". Each plot has a past, three local books (the Papers of that place), a local Ledger mystery, three prior leaders whose portraits hang in its Library, and a first lead that differs from every other plot. Data: `scripts/lore/data/plots.js` and `data/portraits.js`. The first book is on the Library's bottom shelf on arrival, the second turns up at Town, the third at City. Local books never count toward the 74 or the 16 mysteries.
+Mateo, 2026-11-10: every settlement needs its own lore and library, "so the game is playable differently 12 times". Each plot has a past, three local books (the Papers of that place), a local Ledger mystery, three prior leaders whose portraits hang in its Library, and a first lead that differs from every other plot. Data: `scripts/lore/data/plots.js` and `data/portraits.js`. The first book is on the Library's bottom shelf on arrival, the second turns up at Town, the third at City. Local books never count toward the 75 or the 16 mysteries.
 
 | Plot | What stood there | The door it opens | Its mystery (answer) | Prior leaders |
 |---|---|---|---|---|
@@ -176,7 +187,7 @@ The mysteries "The Missing King", "The Broken Truce" and "Who Is Morvane?" each 
 | Elias Marrow | The Lighthouse Letters (8) | Honest and wrong: he doesn't know he's an echo, or that his lamp guides things ashore. Written in cipher |
 | The Choir | The Sung Verses (8) | True from the Hollow's side: they are the wronged party in their own telling. Written right to left (needs Tide Glass) |
 | Ordinary people | Testimonies of the Lost Days (10) | Mixed. Officials lie, children and old women don't, and one is written by a changeling |
-| The bosses | The Fallen (7) | True. Each boss tome is a confession |
+| The bosses | The Fallen (8) | True. Each boss tome is a confession |
 | King Aldric | The Old King's Journal | Truthful and understands none of it |
 
 ### Deliberate contradictions players can catch

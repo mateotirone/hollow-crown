@@ -129,3 +129,11 @@ Output `<plot>.json` (format `hollow-crown-settlement/1`): per variant `slots`, 
 level, `rings`, `gates` per tier, `fixtures`, `roads` rows `[dx, dz, y, slab|full, kind, tier]` and
 `groundwork` rows `[dx, y, dz, palette, tier]` (place a tier's rows when it opens), all relative to the
 Plot Stone on world axes, y absolute. Plus `<plot>-<template>.png` plans coloured by opening tier.
+
+### Works plot machines (export_machines.py)
+
+`python3 export_machines.py` writes the Ironworks (ironworks/spec.py, every region, three stages) to
+`Siege_Nights_BP/scripts/ironworks/designs_data.js` for the town's Works plots (size letter `W`, 27 wide along the
+road x 17 deep: the 25 x 15 yard plus a block all round for the eaves). Stage 1 is the whole plot; stages 2 and 3
+hold only what changes. The game seats it on a slot like any plot building (settle/buildings.js `addWorks`).
+The Gold Sluice and Deep Shaft go into `MACHINES` the same way once their game code exists.

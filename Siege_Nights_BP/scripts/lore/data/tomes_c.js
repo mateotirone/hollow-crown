@@ -128,7 +128,7 @@ export const TOMES_C = [
   {
     id: "test_02", col: "testimony", n: 2,
     title: "What Happened to Tobin", author: "Wren Ashby, aged nine (now Sister Wren)",
-    where: "Millbrook, Sister Wren's house, in a child's box under the stairs. Wren gives it if you ask about Tobin twice.",
+    where: "Millbrook, Sister Wren's chapel, in a child's box under the stairs to her room. Wren gives it if you ask about Tobin twice.",
     hint: "A child's account. The healer of Millbrook was that child.",
     pages: [
       "My brother Tobin went out to the well on the third night and did not come back till morning. Mam said he was just tired.",
@@ -323,14 +323,27 @@ export const TOMES_C = [
     leads: [],
   },
   {
+    id: "fall_08", col: "fallen", n: 8, boss: "choir",
+    title: "The Conductor's Last Measure", author: "The Conductor of the Court, who leads the Choir",
+    where: "Dropped by the Choir when its Conductor falls, in the Court.",
+    hint: "Carried by whoever leads the singing in the Court below.",
+    pages: [
+      "They take one child a year from Glimwade and Lowseam and Tollrest and Highcut to hold the note. A held note keeps a door open a crack. Every third night we sang, and something up there marched on a keep. We never chose the song. It came down to us from the Chair.",
+      "The one in the Chair sent five up the long stair to kill you, and he grieved for none of them. When the clock-man stopped, he smiled. When the drowned girl went quiet, he hummed along. Every one of them carried a piece of a key, and you took every piece, and he let you. We sang you all the way down. I am sorry. It was the song.",
+      "When I stop, the Singers will get up and walk home with no voices. Let them go. Tell their mothers at the Tally they were good at it. And when you go on to the Chair, do not listen to the kind voice. It is the same voice that taught us the song.",
+    ],
+    clues: ["conductor_chair_sent_five"],
+    leads: [],
+  },
+  {
     id: "fall_07", col: "fallen", n: 7, boss: "morvane",
     title: "The Last Testament", author: "Morvane, the Voice Below, who was Oswin, last King of Aldmere",
     where: "Dropped by the leader of the Hollow (the final boss before the throne).",
     hint: "Carried by whoever sits on the throne at the bottom of the Hollow.",
     pages: [
-      "So you know me now. Morvane is the name they gave me. There is no portrait of me left above, so I will tell you the other: I was Oswin. I made a peace, and my daughter threw me down a hole for it.",
-      "They took me in. I was the only one of yours who had ever kept his word to them, so they crowned me and renamed me, and I have spent three hundred years collecting what was owed. Every third night. Every keep. I taught them your walls. I am not sorry. I am very tired.",
-      "The crown is theirs, not mine. It should have killed me. They put it on me themselves and held me while it took the king out of me, and that is the only way it ever fit one of ours. It will kill you, unless you have the art: it sits only on one who can hear the whole of the Hollow at once and not break. Take what you have won back up into the sun, and leave the seat empty for whoever can bear it. Or do the thing I could not make my own child do, and keep the truce. Tell Edda the door was well made. Tell her I knocked every third night.",
+      "So you know me now. Morvane is the name they gave me. There is no portrait of me left above, so I will tell you the other: I was Oswin. I made a peace, and my daughter threw me down a hole for it. I was the only one of yours who had ever kept his word to them, so they made me their voice, and crowned me.",
+      "Then I stopped keeping my word and started keeping score. The raids were mine. The five who held the door were mine: the clock, the hunter, the bride, my old seneschal, the mother. I sent them up to kill you. When they could not, I let you take what they carried, a shard from each, and I spoke to you at night until you made it into a key. I could not open that door from below. You opened it for me. I am not sorry.",
+      "The crown is theirs, not mine. It should have killed me. They put it on me themselves and held me while it took the king out of me, and that is the only way it ever fits one of ours. It will kill you, unless you have the art: it sits only on one who can hear the whole of the Hollow at once and not break. The door you opened does not close. If you want the knocking to stop, you will have to do what I would not: go back to the empty seat and offer them the old peace again, and mean it. Tell Edda the door was well made. Tell her I found another way through.",
     ],
     clues: ["leader_is_oswin", "third_way_confirmed"],
     leads: [],

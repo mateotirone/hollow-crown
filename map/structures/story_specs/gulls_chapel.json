@@ -1,0 +1,116 @@
+{
+ "name": "gulls_rest_chapel",
+ "edition": "bedrock",
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "salt_stone",
+    "glass": "light_blue_stained_glass_pane"
+   },
+   "rect": [
+    -4,
+    -8,
+    4,
+    8
+   ],
+   "plinth": 2,
+   "storeys": [
+    7
+   ],
+   "door": {
+    "side": "s",
+    "kind": "grand",
+    "steps": 1
+   },
+   "windows": {
+    "e": [
+     {
+      "at": -4,
+      "storey": 0,
+      "w": 1,
+      "h": 4
+     },
+     {
+      "at": 0,
+      "storey": 0,
+      "w": 1,
+      "h": 4
+     },
+     {
+      "at": 4,
+      "storey": 0,
+      "w": 1,
+      "h": 4
+     }
+    ],
+    "w": [
+     {
+      "at": -4,
+      "storey": 0,
+      "w": 1,
+      "h": 4
+     },
+     {
+      "at": 0,
+      "storey": 0,
+      "w": 1,
+      "h": 4
+     },
+     {
+      "at": 4,
+      "storey": 0,
+      "w": 1,
+      "h": 4
+     }
+    ],
+    "n": [
+     {
+      "at": 0,
+      "storey": 0,
+      "w": 1,
+      "h": 4
+     }
+    ]
+   },
+   "roof": {
+    "type": "hip",
+    "pitch": 1
+   },
+   "chimney": false,
+   "shutters": 0
+  },
+  {
+   "part": "belfry",
+   "rect": [
+    -1,
+    6,
+    1,
+    8
+   ],
+   "y": "roof",
+   "h": 4,
+   "cap": "hip"
+  }
+ ],
+ "place": [
+  [
+   0,
+   2,
+   -6,
+   "lectern",
+   {
+    "facing": "s"
+   }
+  ],
+  [
+   0,
+   2,
+   -7,
+   "candle",
+   {
+    "lit": true
+   }
+  ]
+ ]
+}

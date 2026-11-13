@@ -19,7 +19,8 @@
     "attack": "animation.siege_b.gatebreaker.attack",
     "swing": "controller.animation.siege_b.gatebreaker.swing",
     "hurt": "animation.siege_b.gatebreaker.hurt",
-    "flinch": "controller.animation.siege_b.gatebreaker.flinch"
+    "flinch": "controller.animation.siege_b.gatebreaker.flinch",
+    "dead_hide": "animation.siege_b.dead_hide"
    },
    "scripts": {
     "animate": [
@@ -27,7 +28,10 @@
      "idle",
      "walk",
      "swing",
-     "flinch"
+     "flinch",
+     {
+      "dead_hide": "!query.is_alive"
+     }
     ]
    },
    "render_controllers": [

@@ -28,6 +28,7 @@ import { on, isNight } from "../siege/api.js";
 import { UNDERTOW_ID, UNDERTOW_LAYOUT as L, COURT, HEART, TEXT, stageAt, pathX } from "./layout.js";
 import { getSourceSite, getSites, markSite, openRift, riftExit, sourceSignsTick, SITE_NAMES, SOURCE_SITE_IDS } from "./source.js";
 import { VEIL, planCrack, tearBand, TEAR_STEPS, TEAR_CLIMB } from "./rift.js";
+import { CHASM, inChasm } from "./chasm.js";
 import { buildTick, piecesTick, flush, pieces, openCourtGate, openRiverGate, rebuildHeart, waystoneSpot, WAYSTONE, isBuilt, siteOutdated, withClearing } from "./builder.js";
 import { heightAt, planChunk, isRiver, regionAt, columnAt } from "./terrain.js";
 import { RIVER_NODES, riverSegments, riverDistance, RIVER_HALF_WIDTH } from "./rivers.js";
@@ -44,12 +45,15 @@ import { choirTick, singerSpot, CHOIR } from "./choir.js";
 import { slipSeconds, slipLanding, isSlipping } from "./slips.js";
 import { shouldAlarm, oreOutcome, noteEntry, crownTick, crownVerdict, CLAIM_SECONDS, WARDEN } from "./warden.js";
 import { crownFate, needsRefresh, standHeight, KEEP } from "./crownkeep.js";
-import { oreChance, roofAt, ROOF, groundAt, GROUND, ambientLightAt, AMBIENT, pickTree, treeKind } from "./terrain.js";
+import { oreChance, roofAt, ROOF, ROOF_V3, planRoofSwap, groundAt, GROUND, ambientLightAt, AMBIENT, pickTree, treeKind, BACK, backFace, backRock, B } from "./terrain.js";
+import { planWound, planArrival, planArrivalClear, woundAir, WOUND } from "./wound.js";
+import { ARRIVAL, walkCells, kerbAt } from "./arrival.js";
 import { HOLLOW_TREES } from "./trees_data.js";
 import { clearOps } from "./builder.js";
 import { shouldRise, regentOutcome, REGENT, TEMPERS, JOBS } from "./regent.js";
 import { sfx } from "../core/sfx.js";
-import { thinTick, thinCommand, planThinPlace, hillHeight, caveGeometry, setHills, toWorld, THIN_PLACES, CAMP_TOME, CAVES, MOUTH_V } from "./thinplaces.js";
+import { thinTick, thinCommand, planThinPlace, hillHeight, caveGeometry, setHills, toWorld, landOf, THIN_PLACES, CAMP_TOME, CAVES, MOUTH_V } from "./thinplaces.js";
+import { THIN_LAND } from "./thin_land.js";
 import { SITE_FEATURES } from "../lore/data/world.js";
 import { canOpen, getRift, dullLeft, BOSSES_TO_OPEN, FORK_DULL_DAYS } from "./source.js";
 import { fallenCount, REGIONAL_BOSSES } from "../lore/data/spine.js";
@@ -204,6 +208,15 @@ onTick("undertow:build", 1, () => {
   buildTick(players);
 });
 onTick("undertow:pieces", 40, () => piecesTick());
+// A fall into the chasm under the Seat is a fall out of the world, as it was when there was only void there: the
+// pool at the bottom would otherwise break it. Builders (creative) may go down and look. The Deep (after/deep.js)
+// lies under the chasm's floor, below L.floorY, and is left alone.
+onTick("undertow:chasm", 10, () => {
+  for (const p of world.getAllPlayers()) {
+    if (!inUndertow(p) || p.location.y >= CHASM.killY || p.location.y < L.floorY || isBuilder(p) || p.getGameMode() === GameMode.Spectator) continue;
+    if (inChasm(Math.floor(p.location.x), Math.floor(p.location.z))) { try { p.kill(); } catch { /* gone */ } }
+  }
+});
 // The river's water gate in the sealed wall may be generated long after the Court falls: open it then.
 let riverGateOpen = false;
 onTick("undertow:rivergate", 100, () => {
@@ -215,7 +228,7 @@ onTick("undertow:rivergate", 100, () => {
 let courtGateOpen = false;
 onTick("undertow:save", 200, () => flush());
 
-// ---- atmosphere: lightning in the fog above, blue motes along the rivers --------------------
+// ---- atmosphere: lightning and clouds under the roof, blue motes along the rivers ----------
 const nextFlash = new Map();
 onTick("undertow:sky", 20, () => {
   for (const p of world.getAllPlayers()) {
@@ -228,14 +241,29 @@ onTick("undertow:sky", 20, () => {
       if (h === null) continue;
       try { d.spawnParticle(isRiver(Math.floor(x), Math.floor(z)) ? "minecraft:soul_particle" : "minecraft:end_rod", { x, y: h + 1.5 + Math.random() * 6, z }); } catch {}
     }
+    // Floating white specks hanging in the air all round you, drifting slowly every way (Mateo, 2026-11-13:
+    // "floating white particles"). Each puff is 7 specks living 9-15 s, so about 200 hang round a player.
+    for (let i = 0; i < 2; i++) {
+      const ang = Math.random() * Math.PI * 2, r = Math.random() * 18;
+      try { d.spawnParticle("siege:hollow_drift", { x: l.x + Math.cos(ang) * r, y: l.y + 0.5 + Math.random() * 5, z: l.z + Math.sin(ang) * r }); } catch {}
+    }
+    // A cloud layer under the high roof (Mateo, 2026-11-12: more fog, "concentrated up to the top so it
+    // looks like clouds"): slow purple-grey puffs in the top 30 blocks, drifting with the storm.
+    for (let i = 0; i < 5; i++) {
+      const ang = Math.random() * Math.PI * 2, r = 8 + Math.random() * 64;
+      const x = l.x + Math.cos(ang) * r, z = l.z + Math.sin(ang) * r;
+      const y = roofAt(Math.floor(x), Math.floor(z)).bottom - 5 - Math.random() * 26;
+      if (y < l.y + 12) continue; // stays a cloud overhead, never a fog bank round a player up high
+      try { d.spawnParticle("siege:hollow_cloud", { x, y, z }); } catch {}
+    }
     // Lightning in the fog above: thunder, and now and then a real bolt striking the land far off.
     const due = nextFlash.get(p.id) ?? system.currentTick + 200;
     if (system.currentTick < due) { nextFlash.set(p.id, due); continue; }
     nextFlash.set(p.id, system.currentTick + 160 + Math.floor(Math.random() * 340));
     if (columnAt(Math.floor(l.x), Math.floor(l.z))?.site === "standing_ranks") continue; // the Standing Ranks are silent
     sfx(p, "ambient.weather.thunder", { volume: 0.5, pitch: 0.6 + Math.random() * 0.3 });
-    if (Math.random() < 0.4) {
-      const ang = Math.random() * Math.PI * 2, far = 24 + Math.random() * 20;
+    if (Math.random() < 0.6) { // under the high roof a bolt can be seen from far off, so strike wider
+      const ang = Math.random() * Math.PI * 2, far = 30 + Math.random() * 60;
       const x = Math.floor(l.x + Math.cos(ang) * far), z = Math.floor(l.z + Math.sin(ang) * far);
       const h = heightAt(x, z);
       if (h !== null) {
@@ -370,7 +398,7 @@ system.afterEvents.scriptEventReceive.subscribe((e) => {
           save(K_PROGRESS, prog);
           openCourtGate();
           requestPockets(); // get the last fight's places built while players make the Long Climb
-          world.sendMessage("§5The Court falls silent. Behind the throne, the sealed gate cracks open.");
+          world.sendMessage("§5The Court falls silent. Behind the throne, the sealed gate cracks open. The way on is south, up the Long Climb, to the Seat.");
         }
       }
       if (boss === "morvane") {
@@ -523,6 +551,33 @@ addTests("undertow", {
       }
     }
   },
+  "thin places: the map's shaped land is known by its probes, and other land is not": () => {
+    const table = { x: { floor: 70, probes: [[1, 1, 80], [2, 2, 81], [3, 3, 82], [4, 4, 83], [5, 5, 84]] }, few: { floor: 70, probes: [[1, 1, 80]] } };
+    const world = (off, miss = 0) => (x) => (x <= miss ? undefined : 79 + x + off);
+    assert(landOf("x", world(0), table)?.floor === 70 && landOf("x", world(1), table), "the shaped land, give or take a block");
+    assert(landOf("x", world(0, 2), table) && !landOf("x", world(0, 3), table), "two unreadable columns are forgiven, three are not");
+    assert(!landOf("x", world(5), table) && !landOf("few", world(0), table) && !landOf("nowhere", world(0), table), "other land, too few probes, an unknown site");
+    for (const t of THIN_PLACES) {
+      const L = THIN_LAND[t.id];
+      assert(L && L.probes.length >= 3 && Number.isInteger(L.floor), `${t.id}: no land facts`);
+      for (const [x, z] of L.probes) assert(Math.hypot(x - t.x, z - t.z) <= 80, `${t.id}: a probe out of reach of the build`);
+    }
+  },
+  "thin places: standing water beside a cave is walled off, never left against open air": () => {
+    // a pool three deep lying over and beside the whole way in (ground 4 under, water to the cave floor's level)
+    for (const t of THIN_PLACES) {
+      const pool = (dx, dz) => dz < 5 && Math.abs(dx) < 30;
+      const plan = planThinPlace(t.id, 0, 0, 64, { ground: (dx, dz) => (pool(dx, dz) ? -4 : 0), water: (dx, dz) => (pool(dx, dz) ? 0 : undefined) });
+      const last = new Map();
+      for (const o of plan.ops) last.set(`${o.x},${o.y},${o.z}`, o.block);
+      const isWater = (x, y, z) => !last.has(`${x},${y},${z}`) && pool(x, z) && y > 60 && y <= 64;
+      for (const [k, b] of last) {
+        if (b !== "minecraft:air") continue;
+        const [x, y, z] = k.split(",").map(Number);
+        for (const [dx, dy, dz] of [[1, 0, 0], [-1, 0, 0], [0, 0, 1], [0, 0, -1], [0, 1, 0]]) assert(!isWater(x + dx, y + dy, z + dz), `${t.id}: water against open air at ${x},${y - 64},${z}`);
+      }
+    }
+  },
   "thin places: no two caves are the same, and the land covers every one": () => {
     const shapes = new Set(THIN_PLACES.map((t) => JSON.stringify(CAVES[t.id])));
     assert(shapes.size === 7, "two caves share a layout");
@@ -561,6 +616,94 @@ addTests("undertow", {
   },
   "terrain is deterministic": () => assert(JSON.stringify(planChunk(2, 5)) === JSON.stringify(planChunk(2, 5))),
   "arrival ledge is solid": () => assert(heightAt(0, 0) === L.woundLedgeY),
+  // Mateo 2026-11-12, of the first Wound: "This definitely needs a lot of work" (a crack on a flat slab, the void round it)
+  "the Wound: the cliff behind it runs right across the valley, never lower than the first wall, and is built up into the roof": () => {
+    for (let x = -BACK.reach; x <= BACK.reach; x += 3) for (const z of [-47, -44, -30, -18]) {
+      const h = heightAt(x, z);
+      assert(h !== null && h > L.woundLedgeY + 10, `no cliff at ${x},${z}`);
+      if (Math.abs(x) <= 24) assert(h >= 126, `the cliff is lower than the first wall at ${x},${z}`);
+    }
+    const ops = planChunk(0, -3).filter((o) => !o.optional && o.block !== "minecraft:air");
+    const sealed = (x, z) => { for (let y = heightAt(x, z) + 1; y < ROOF.shell; y++) if (!ops.some((o) => o.a[0] <= x && o.b[0] >= x && o.a[2] <= z && o.b[2] >= z && o.a[1] <= y && o.b[1] >= y)) return false; return true; };
+    assert(sealed(3, -46) && sealed(12, -44), "the last rows of the cliff do not reach the roof");
+    assert(L.returnCrack.z === WOUND.wallZ, "the return crack is not at the cave's back wall");
+  },
+  "the Wound: the cave is sealed in rock, you can walk from the ledge to the tear, and the tear runs from the floor to the roof": () => {
+    const cells = new Map(), F = L.woundLedgeY + 1;
+    for (const o of planWound()) for (let y = o.a[1]; y <= o.b[1]; y++) cells.set(`${o.a[0]},${y},${o.a[2]}`, o.block);
+    const open = (b) => b === "minecraft:air" || b === VEIL || b === B.strands || b === B.glint;
+    const solid = (x, y, z) => { const b = cells.get(`${x},${y},${z}`); return b !== undefined ? !open(b) : y <= (heightAt(x, z) ?? -999); };
+    let air = 0;
+    for (const [k, b] of cells) {
+      if (b !== "minecraft:air") continue;
+      const [x, y, z] = k.split(",").map(Number);
+      if (z > WOUND.mouthZ) continue; // the stair outside has its own test
+      air++;
+      for (const [dx, dy, dz] of [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, -1]]) assert(cells.has(`${x + dx},${y + dy},${z + dz}`) || solid(x + dx, y + dy, z + dz), `the cave is open to nothing at ${x + dx},${y + dy},${z + dz}`);
+    }
+    assert(air > 1500, `only ${air} blocks of air`);
+    // the walk: two clear blocks over a floor, from where you arrive to the foot of the tear
+    const seen = new Set(["0,0"]), q = [[0, 0]]; let reached = false;
+    while (q.length) {
+      const [x, z] = q.shift();
+      if (z === WOUND.wallZ + 1 && Math.abs(x) <= 1) { reached = true; break; }
+      for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const nx = x + dx, nz = z + dz, k = `${nx},${nz}`;
+        if (seen.has(k) || Math.abs(nx) > 14 || nz > 2 || nz < WOUND.wallZ || !solid(nx, F - 1, nz) || solid(nx, F, nz) || solid(nx, F + 1, nz)) continue;
+        seen.add(k); q.push([nx, nz]);
+      }
+    }
+    assert(reached, "no way on foot from the ledge to the tear");
+    const veil = [...cells].filter(([, b]) => b === VEIL).map(([k]) => +k.split(",")[1]);
+    assert(Math.min(...veil) === F && Math.max(...veil) >= F + WOUND.h - 2, "the tear does not run from the floor to the roof");
+    for (let y = F; y < F + WOUND.h; y++) assert(woundAir(0, y, WOUND.wallZ + 1) || woundAir(1, y, WOUND.wallZ + 1) || woundAir(-1, y, WOUND.wallZ + 1), `rock in front of the tear at y ${y}`);
+  },
+  // Mateo 2026-11-13, of the first ledge and ramp: "use stairs whenever applicable instead of just straight blocks ... it looks temporary"
+  "the arrival: you can walk from the ledge down to the valley a block at a time, and every step is a stair block": () => {
+    const seen = new Set(["0,14"]), q = [[0, 14]];
+    let out = false;
+    while (q.length) {
+      const [x, z] = q.pop(), h = heightAt(x, z);
+      if (z >= ARRIVAL.z1) { out = true; break; }
+      for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const nx = x + dx, nz = z + dz, k = `${nx},${nz}`, nh = heightAt(nx, nz);
+        if (seen.has(k) || nh === null || Math.abs(nh - h) > 1 || Math.abs(nx) > ARRIVAL.x1 || nz < ARRIVAL.z0 || kerbAt(nx, nz) !== null) continue;
+        seen.add(k); q.push([nx, nz]);
+      }
+    }
+    assert(heightAt(0, 14) === ARRIVAL.top && out, "no way down from the ledge");
+    const top = new Map();
+    for (const o of planArrival()) top.set(`${o.a[0]},${o.b[1]},${o.a[2]}`, o);
+    let steps = 0;
+    for (const [k, c] of walkCells()) {
+      const [x, z] = k.split(",").map(Number);
+      assert(heightAt(x, z) === c.h, `the land at ${k} is not the stair's height`);
+      if (c.kind !== "stair") continue;
+      const o = top.get(`${x},${c.h},${z}`);
+      assert(o && o.block.endsWith("_stairs") && o.states && o.states.upside_down_bit === false, `the step at ${k} is not a stair block`);
+      steps++;
+    }
+    assert(steps > 200, "too few steps");
+  },
+  "the arrival: an old world has the first box and ramp taken away": () => {
+    let n = 0;
+    for (let cx = -5; cx <= 4; cx++) for (let cz = -1; cz <= 4; cz++) for (const o of planArrivalClear(cx, cz)) {
+      assert(o.block === "minecraft:air" && o.a[1] > heightAt(o.a[0], o.a[2]), "the clearing cuts the land");
+      n++;
+    }
+    assert(n > 500, "nothing cleared");
+  },
+  "the Wound: the cliff the mouth opens in is never one flat wall, and its rock is laid in beds": () => {
+    const cells = new Set();
+    for (const o of planWound()) if (o.block !== "minecraft:air") for (let y = o.a[1]; y <= o.b[1]; y++) cells.add(`${o.a[0]},${y},${o.a[2]}`);
+    for (const y of [L.woundLedgeY + 4, L.woundLedgeY + 12, L.woundLedgeY + 20]) {
+      let out = 0, n = 0;
+      for (let x = -36; x <= 36; x++) { if (Math.abs(x) <= 6) continue; n++; if (cells.has(`${x},${y},${backFace(x)}`)) out++; }
+      assert(out >= n * 0.2 && out <= n * 0.9, `row ${y}: ${out} of ${n} columns stand out from the face`);
+    }
+    const kinds = new Set(); for (let y = 100; y < 130; y++) kinds.add(backRock(20, y, -11));
+    assert(kinds.size >= 4, `only ${kinds.size} kinds of rock up the face`);
+  },
   "path is walkable (no step over 1)": () => {
     for (let z = 41; z < 2328; z++) {
       const a = heightAt(pathX(z), z), b = heightAt(pathX(z + 1), z + 1);
@@ -818,9 +961,25 @@ addTests("undertow", {
     for (let x = -680; x <= 680; x += 85) for (let z = -40; z <= 2440; z += 155) {
       const h = heightAt(x, z), r = roofAt(x, z);
       assert(r.bottom <= ROOF.maxBottom && r.bottom < ROOF.shell, `roof at ${x},${z} reaches the shell`);
-      if (h !== null) assert(r.bottom - h >= 28, `roof only ${r.bottom - h} over the land at ${x},${z}`);
+      if (h !== null && z >= BACK.z) assert(r.bottom - h >= 28, `roof only ${r.bottom - h} over the land at ${x},${z}`); // the back cliff runs up into the roof on purpose
     }
     assert(roofAt(0, 2400).bottom >= HEART.center.y + 25, "room over the Choir's Heart");
+  },
+  "the roof stands about as high over the land as the nether's (Mateo 2026-11-12)": () => {
+    const gaps = [];
+    for (let x = -600; x <= 600; x += 150) for (let z = 100; z <= 2300; z += 275) {
+      const h = heightAt(x, z);
+      if (h !== null) gaps.push(roofAt(x, z).bottom - h);
+    }
+    gaps.sort((a, b) => a - b);
+    assert(gaps[Math.floor(gaps.length / 2)] >= 85, `the roof is only ${gaps[Math.floor(gaps.length / 2)]} over the usual land`);
+  },
+  "a chunk built under the low roof has it taken away and the high roof built": () => {
+    const ops = planRoofSwap(4, 30);
+    const air = ops.filter((o) => o.block === "minecraft:air"), put = ops.filter((o) => o.block !== "minecraft:air");
+    assert(air.length > 200 && put.length > 200, `swap ops: ${air.length} cleared, ${put.length} placed`);
+    assert(ops.indexOf(put[0]) > ops.indexOf(air[air.length - 1]), "the old roof is cleared before the new one goes up");
+    assert(air.every((o) => o.b[1] >= ROOF_V3.shell - 1 || o.onlyIf), "what hung from the old roof is only cleared where it is still there");
   },
   "the roof is never flat: domes, sags and mixed rock": () => {
     const ys = new Set(), rock = new Set();

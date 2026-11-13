@@ -2,6 +2,7 @@
 
 import { EntityTypes, ItemTypes, BlockTypes } from "@minecraft/server";
 import { addTests, assert, assertEqual } from "../siege/api.js";
+import { REGIONS } from "../economy/config.js";
 import { upgradeRecord, RECORD_VERSION } from "./store.js";
 import {
   HORSE_SETTINGS as S, BREEDS, REGIONAL_BREEDS, TRAITS, PERKS, SHOES, SADDLES, SPECIALS, STATS, MAX_EFFECTIVE, SPEED_VALUES,
@@ -16,6 +17,9 @@ const seeded = (...values) => {
 };
 
 addTests("horses", {
+  "every region has its own breed, so a town's Breeder's Post knows what it sells without a builder": () => {
+    for (const region of REGIONS) assertEqual(REGIONAL_BREEDS.filter((b) => BREEDS[b].region === region).length, 1, region);
+  },
   "old horse records are upgraded when they load": () => {
     const old = { uid: "a", name: "Bramble", stats: { speed: 3 } };
     assertEqual(upgradeRecord({ ...old }), { ...old, _v: RECORD_VERSION }, "a record saved before versioning counts as version 1 and keeps its data");

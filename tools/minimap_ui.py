@@ -1,4 +1,5 @@
-"""Write Siege_Nights_RP/ui/hud_screen.json: the minimap on the HUD (and the boss bars from tools/bossbar_ui.py).
+"""Write Siege_Nights_RP/ui/hud_screen.json: the minimap and the quest tracker on the HUD (and the boss bars
+from tools/bossbar_ui.py).
 
     python3 tools/minimap_ui.py
 
@@ -13,6 +14,12 @@ The hidden title is fixed width at the front:
     P       arrow spot inside the middle tile, "a".."p" (row by row, 4 x 4); anything else hides it
     TTTTTT  map texture: "xXXzZZ" tile, "none__" for uncharted, "off___" hides the whole minimap
     label   place name under the map (no digits)
+The quest tracker (scripts/quests/) works the same way with titles that start with "hcq:":
+    hcq:  SS  text
+    SS      where the panel sits: "_b" under the minimap, "_t" in its place (minimap hidden), "_h" hidden
+    text    the panel's lines (colour codes and line breaks allowed; it never holds "hcq:" or a spot marker)
+core/hudtitle.js sends both kinds and keeps them from cutting a real title short.
+
 No piece that is cut out may be all digits: JSON UI turns a string like "1717" into a number. The first
 version did that and its tiles were also palette PNGs; the map showed black (playtest 2026-11-11).
 """
@@ -82,8 +89,51 @@ box.append({"hc_minimap_place": {
     "size": [MAP + 2 * RIM + 40, "default"],
     "bindings": [view(ON, "#visible"), view(LABEL, "#text")]}})
 
+# ---------- the quest tracker ----------
+QKEY = "hcq:"
+QW = 168        # panel width; lines wrap inside it
+QS = "(#preserved_text - 'hcq:')"
+QSPOT = f"('%.2s' * {QS})"
+QTEXT = f"(({QS} - '_b') - '_t')"
+QHAS = f"(not ({QS} = #preserved_text))"
+
+
+def qview(expr, target):
+    return {"binding_type": "view", "source_control_name": "hc_quests_data", "resolve_sibling_scope": True,
+            "source_property_name": expr, "target_property_name": target}
+
+
+def quest_label(name, spot, y):
+    return {name: {
+        "type": "label", "text": "#text", "color": [1.0, 1.0, 1.0], "shadow": True, "layer": 5,
+        "font_scale_factor": 0.75, "text_alignment": "right", "localize": False,
+        "anchor_from": "top_right", "anchor_to": "top_right", "offset": [0, y], "size": [QW, "default"],
+        "bindings": [qview(f"({QHAS} and ({QSPOT} = '{spot}'))", "#visible"), qview(QTEXT, "#text")]}}
+
+
+quests = [
+    {"hc_quests_data": {
+        "type": "panel", "size": [0, 0], "$update_string": QKEY,
+        "property_bag": {"#preserved_text": ""},
+        "bindings": [
+            {"binding_name": "#hud_title_text_string"},
+            {"binding_name": "#hud_title_text_string", "binding_name_override": "#preserved_text", "binding_condition": "visibility_changed"},
+            {"binding_type": "view", "target_property_name": "#visible",
+             "source_property_name": "(not (#hud_title_text_string = #preserved_text) and not ((#hud_title_text_string - $update_string) = #hud_title_text_string))"},
+        ]}},
+    quest_label("hc_quests_below", "_b", MAP + 2 * RIM + 14),
+    quest_label("hc_quests_top", "_t", 0),
+]
+
 ui = {
     "namespace": "hud",
+    "hc_quests": {
+        "type": "panel",
+        "controls": [{"hc_quests_box": {
+            "type": "panel", "size": [QW, 200],
+            "anchor_from": "top_right", "anchor_to": "top_right", "offset": [-4, 3],
+            "controls": quests}}],
+    },
     "hc_minimap": {
         "type": "panel",
         "controls": [{"hc_minimap_box": {
@@ -93,12 +143,13 @@ ui = {
     },
     "root_panel": {"modifications": [
         {"array_name": "controls", "operation": "insert_front", "value": {"hc_minimap@hud.hc_minimap": {}}},
+        {"array_name": "controls", "operation": "insert_front", "value": {"hc_quests@hud.hc_quests": {}}},
     ]},
     # the vanilla title box stays hidden while the title is one of ours
     "hud_title_text": {"bindings": [
         {"binding_name": "#hud_title_text_string", "binding_type": "global"},
         {"binding_type": "view", "target_property_name": "#visible",
-         "source_property_name": f"((#hud_title_text_string - '{KEY}') = #hud_title_text_string)"},
+         "source_property_name": f"(((#hud_title_text_string - '{KEY}') = #hud_title_text_string) and ((#hud_title_text_string - '{QKEY}') = #hud_title_text_string))"},
     ]},
 }
 

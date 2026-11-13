@@ -346,6 +346,7 @@ Every mob has a box model in `models/entity/bestiary/<id>.geo.json` and a genera
 | Seneschal's Greatshield (boss relic, shield) | `seneschal_greatshield.png` | **Final style, awaiting your review** |
 | Faceless Crown Shard (boss relic, shard) | `faceless_crown_shard.png` | **Final style, awaiting your review** |
 | Mire Heart (boss relic, charm) | `mire_heart.png` | **Final style, awaiting your review** |
+| The Last Note (Hollow Choir relic, charm: a small violet bell, drawn by `studio/art/build_hc_items.py`) | `last_note.png` | **Final style, awaiting your review** |
 | The Warlord's Brand (boss relic, sword) | `warlords_brand.png` | **Final style, awaiting your review** |
 | Oath of Oswin (boss relic, sword) | `oath_of_oswin.png` | **Final style, awaiting your review** |
 | Crownless Mantle (boss relic, chest) | `crownless_mantle.png` | **Final style, awaiting your review** |
@@ -527,6 +528,13 @@ Made by `studio/art/build_regional_armor.py` (then `tools/build_player_joints.py
 | Worn 3D armour x100 (texture + geometry per piece) | `textures/models/siege_armor/<material>_<region>_<piece>.png`, `models/entity/armor/<material>_<region>_<piece>.geo.json` | **awaiting your review** |
 | Icons x100 (regional guard shapes in each material, region surcoat) | `textures/items/siege_<material>_<region>_<piece>.png` | **awaiting your review** |
 | Sheet | `art/regional-player-armor.png` | |
+## Starter clothes and weapons (2026-11-13, Mateo: "cheap starter armor that looks like clothes ... and a starter weapon")
+Made by `studio/art/build_starter_clothes.py` (then `tools/build_player_joints.py`). Five regional sets of working clothes, items `siege:starter_<region>_<helmet/chestplate/leggings/boots>` (leather-weak), and a starter weapon each, `siege:starter_<region>_weapon` (flat icon, held like a vanilla sword). Vale farmhand (straw hat, jerkin, breeches, field shoes; billhook), Frostmarch trapper (fur-trimmed hood, quilted coat, wrapped trousers, fur boots; hatchet), Saltreach deckhand (knit cap, striped smock, canvas trousers, rope sandals; cutlass), Emberwaste caravaneer (sun wrap, sand tunic, loose trousers, wrapped sandals; sickle-sword), Blackfen fen-walker (oilskin hat, oilskin coat, patched trousers, waders; reed spear). 64x32 vanilla-layout sheets with 3D parts (brims, fur, cap cuff, neck cloth, coat skirts). 3D preview: `studio/starter_clothes/build_preview.py`. Untested in game.
+| Asset | Files | Status |
+|---|---|---|
+| Worn 3D clothes x20 (texture + geometry per piece) | `textures/models/siege_armor/starter_<region>_<piece>.png`, `models/entity/armor/starter_<region>_<piece>.geo.json` | **awaiting your review** |
+| Icons x25 (20 clothes, 5 weapons) | `textures/items/siege_starter_<region>_<piece|weapon>.png` | **awaiting your review** |
+| Sheet | `art/starter-clothes.png` | |
 
 ## Depth pass from the Studio review (2026-11-11, Mateo)
 | What | Files | Made by | Status |
@@ -586,12 +594,30 @@ Every dyeable item (Castle Guard armour and the regional sets, 64 pieces) uses `
 | Root Cradle, top (moss lining, empty) | `siege_root_cradle_top.png` | Placeholder |
 | Root Cradle, top with the effigy laid in it | `siege_root_cradle_top_laid.png` | Placeholder |
 
+## Faceless statues, 3D (2026-11-13, thread "Make the Faceless statues 3D figures"; `studio/statues/build_statues.py`)
+
+The forty statues of King Oswin are one entity (`siege:faceless_statue`) with a model and skin per age. The skins are painted
+from the models by the script: rerun it whenever a model changes (it rewrites the models, skins, entity files and
+`scripts/statues/model_data.js`). To repaint by hand, keep each file's size and its face layout (the script prints them).
+
+| Asset | File | Status |
+|---|---|---|
+| Faceless statue skins ×5 (weathered sandstone robe with folds and chips, blank smooth pale-quartz face in the hood's shadow, pale quartz hands, cut red sandstone crown ring, staff, sword and bowl; per-face UVs, opaque) | `textures/entity/statues/faceless_statue_<age>.png` for boy (128×128), youth, young_king, king, old_king (256×128) | First pass, awaiting your review |
+| Faceless statue models ×5 (Blockbench format; bones root, legs, body, head, crown, arm_r, stub, arms_folded/staff/sword/bowl, rubble) | `models/entity/statues/faceless_statue_<age>.geo.json` | First pass, awaiting your review |
+
 ## Sorcerer cast effects (2026-11-12, `tools/build_sorcerer_fx.py`)
 | Asset | File | Status |
 |---|---|---|
 | Arcana particle sheet (64×16, four white 16×16 sprites tinted in code: glow, spark, ring, shard) | `textures/particle/hc_arcana.png` | Drawn in code, untested in game |
 | Twelve cast particles `siege:arc_trail`, `arc_burst`, `arc_ward`, `arc_tear`, `arc_ring`, `arc_mark`, `arc_link`, `arc_snare`, `arc_peel`, `arc_rift`, `arc_smoulder`, `arc_halo` (Choirsteel purple, magenta, Crown blue) | `particles/arc_*.particle.json` | Written, untested in game |
 | Spell icons x8 for the magic hotbar | reuse `textures/ui/hc/skill/arc_<power>.png` | Reused from the skill tree |
+
+## Everwake Wings (thread "Everwake", generator `studio/wings/`, installed by `tools/build_everwake_wings.py`)
+
+| Asset | File | Status |
+|---|---|---|
+| Wing model texture (64×64, feathers white with gold tips, cloth-wrapped bones, brass mount) | `textures/entity/everwake_wings.png` (model `models/entity/everwake_wings.geo.json`) | Drawn in code, model and animations approved by Mateo 2026-11-12, untested in game |
+| Everwake Wings item icon (16×16) | `textures/items/everwake_wings.png` | Placeholder drawn in code |
 
 ## Item audit 2026-11-12 (every item and block checked from the files)
 All 187 items and 202 blocks have an icon or texture that exists, is the right size and is not blank, and every one has a name. Fixed in that pass:

@@ -109,11 +109,17 @@
     "g48": "geometry.siege_b.bell_wife"
    },
    "animations": {
-    "fall": "animation.siege_b.body.fall",
-    "down": "animation.siege_b.body.down",
-    "sink": "animation.siege_b.body.sink",
     "size": "animation.siege_b.body.size",
-    "life": "controller.animation.siege_b.body"
+    "sink": "animation.siege_b.body.sink",
+    "life": "controller.animation.siege_b.body",
+    "fall_back": "animation.siege_b.body.fall_back",
+    "down_back": "animation.siege_b.body.down_back",
+    "fall_side": "animation.siege_b.body.fall_side",
+    "down_side": "animation.siege_b.body.down_side",
+    "fall_flat": "animation.siege_b.body.fall_flat",
+    "down_flat": "animation.siege_b.body.down_flat",
+    "fall_belly_up": "animation.siege_b.body.fall_belly_up",
+    "down_belly_up": "animation.siege_b.body.down_belly_up"
    },
    "scripts": {
     "animate": [
