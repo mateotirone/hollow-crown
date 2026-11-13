@@ -5,13 +5,14 @@
 //   2. Hollow things: they walk the night once the first boss has fallen, and haunt the Undertow.
 
 import { world, system } from "@minecraft/server";
-import { addRaiderTypeHook, FACTIONS, on, getState, keepOf, isNight, settlementAt, onTick, RAM_TAG, SAPPER_TAG, WARLORD_TAG, KING_TAG, addTests, assert, assertEqual } from "../siege/api.js";
+import { addRaiderTypeHook, FACTIONS, on, getState, keepOf, isNight, onTick, RAM_TAG, SAPPER_TAG, WARLORD_TAG, KING_TAG, addTests, assert, assertEqual } from "../siege/api.js";
 import { UNDERTOW_ID } from "../undertow/layout.js";
 import { bestiaryStore } from "./bossCore.js";
 import { warlordBody } from "./bosses.js";
 import { heroOf, pickOne } from "./util.js";
 import { MOBS } from "./data.js";
 import { shareFor } from "./gentle.js";
+import { shelteredAt } from "./sheltered.js";
 const MOBS_HAVE = (id) => !!MOBS[id];
 
 export const SPAWN_SETTINGS = {
@@ -174,7 +175,7 @@ function hollowTick() {
       const ground = dim.getTopmostBlock({ x, z });
       if (!ground || ground.isLiquid) continue;
       const at = { x: x + 0.5, y: ground.location.y + 1, z: z + 0.5 };
-      if (!undertow && settlementAt(at)) continue; // never inside someone's walls
+      if (shelteredAt(at, dim.id)) continue; // never inside someone's walls or a town
       const type = kind === "hound" ? "siege:echo_hound" : pickOne(kind === "undertow" ? UNDERTOW_HOLLOW : NIGHT_HOLLOW);
       dim.spawnEntity(type, at);
       if (kind === "hound") dim.spawnEntity(type, at); // they hunt in pairs

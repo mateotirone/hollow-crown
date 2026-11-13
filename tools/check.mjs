@@ -409,6 +409,30 @@ step("No vanilla monsters spawned");
   console.log(bad ? `${bad} vanilla monster spawn(s)` : "no script spawns a vanilla monster");
 }
 
+// ---------- 2b4. safe inside the walls ----------
+// Rule (Mateo 2026-11-13): hostile mobs never spawn inside a settlement's walls or a town, only out in the wild.
+// Natural spawns are caught by bestiary/sheltered.js, which knows the wild monsters from gentle.js WILD. So every
+// creature with a "monster" spawn rule must be in WILD, or it could spawn inside the walls unseen.
+step("Hostile mobs stay out of settlements");
+{
+  const gentle = readFileSync(join(SCRIPTS, "bestiary/gentle.js"), "utf8");
+  const wild = new Set([...(gentle.match(/export const WILD = \[([^\]]*)\]/)?.[1] ?? "").matchAll(/"([^"]+)"/g)].map((m) => m[1]));
+  const dir = join(BP, "spawn_rules");
+  let bad = 0, monsters = 0;
+  for (const f of readdirSync(dir).filter((f) => f.endsWith(".json"))) {
+    let rule;
+    try { rule = parseJson(readFileSync(join(dir, f), "utf8"))["minecraft:spawn_rules"]; } catch { continue; } // step 1 reports it
+    const id = rule?.description?.identifier;
+    if (!id || id.startsWith("minecraft:") || !(rule.conditions ?? []).length) continue; // vanilla: core/nomonsters.js
+    if (rule.description.population_control !== "monster") continue;
+    monsters++;
+    if (!wild.has(id)) { bad++; fail(`spawn_rules/${f}: ${id} spawns as a monster but is not in bestiary/gentle.js WILD, so it could spawn inside a settlement's walls (bestiary/sheltered.js).`); }
+  }
+  for (const id of wild) if (!existsSync(join(dir, `bestiary_${id.replace(/^siege:/, "")}.json`))) { bad++; fail(`bestiary/gentle.js WILD lists ${id}, which has no spawn rule.`); }
+  if (!/shelteredAt\(at, dim\.id\)/.test(readFileSync(join(SCRIPTS, "bestiary/spawns.js"), "utf8"))) { bad++; fail("bestiary/spawns.js: Hollow things must ask shelteredAt() before they spawn."); }
+  console.log(bad ? `${bad} problem(s)` : `${monsters} wild monster spawn rule(s), all kept out of settlements and towns`);
+}
+
 // ---------- 2b3. every NPC has its own skin ----------
 // Rule (Mateo 2026-11-13: "make sure everyone has a skin"): no NPC shows Bedrock's default skin. Our packs replace the
 // built-in NPC's skins with ours (core/npc_skins_data.js, painted by studio/art/build_npc_skins.py), every script that
