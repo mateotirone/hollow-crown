@@ -42,7 +42,7 @@ import { MESSENGER, route, cooling, bucket, heading, wayHome, newsText, keepNews
 import { wallMenu } from "./flyby.js";
 import { hallMap, setHallCheck } from "./hallmap.js";
 export { flyby } from "./flyby.js";
-import { rumorMenu, rumorTick, rumorsFor, describe, jobTier, remember, KEEPSAKES, JOB_KIND } from "./rumors.js";
+import { rumorMenu, rumorTick, rumorsFor, bountiesFor, describe, jobTier, remember, KEEPSAKES, JOB_KIND } from "./rumors.js";
 
 export { grantPoints, grantRenown, heroOf } from "./hero.js";
 export { hallOf } from "./townhall.js";
@@ -344,6 +344,16 @@ api.addTests("clue sense", {
 });
 
 api.addTests("rumor board variety", {
+  "bounties hunt our own creatures, the region's own where you live": () => {
+    for (const region of [undefined, "Aldmere Vale", "Frostmarch", "Saltreach", "Emberwaste", "Blackfen", "Kingsrest"]) {
+      const list = bountiesFor(region);
+      api.assert(list.length >= 2, `${region}: at least two kinds to hunt`);
+      for (const [type, , , home] of list) api.assert(type.startsWith("siege:") && (!home || !region || home === region), `${region}: ${type}`);
+    }
+    for (let day = 0; day < 30; day++) for (const job of rumorsFor(day, "hunter", 6, { types: ["bounty", "camp", "supply"], region: "Frostmarch" })) {
+      if (job.type === "bounty") api.assert(["siege:rimewolf", "siege:hollow_footman", "siege:torchbearer"].includes(job.mob), job.mob);
+    }
+  },
   "the Storyteller's choice of jobs is what the board shows": () => {
     const jobs = rumorsFor(5, "tester", 10, { types: ["supply", "rescue", "bounty"] });
     api.assertEqual(jobs.map((j) => j.type).join(), "supply,rescue,bounty");
