@@ -178,10 +178,14 @@ export function spawnWarlord(dim, plan, at, fallbackY, tags) {
   const king = plan.grand;
   const lord = spawnRaider(dim, FACTIONS[plan.faction].warlord, ...at, fallbackY, [...tags, king ? KING_TAG : WARLORD_TAG], `§4${plan.warlord}`);
   if (!lord) return;
-  lord.addEffect("health_boost", 20 * 600, { amplifier: king ? 14 : 4, showParticles: false }); // +60 or +20 health
-  lord.addEffect("instant_health", 1, { amplifier: 9, showParticles: false });
-  lord.addEffect("resistance", 20 * 600, { amplifier: king ? 2 : 1, showParticles: false });
-  lord.addEffect("strength", 20 * 600, { amplifier: 0, showParticles: false });
+  // The Warlord King is a boss: the boss code (bestiary/bosses.js) gives him his health, armour and ogre, so the
+  // fight is the same in a Grand Siege as when summoned (Mateo, 2026-11-12). Only ordinary warlords get siege buffs.
+  if (!king) {
+    lord.addEffect("health_boost", 20 * 600, { amplifier: 4, showParticles: false }); // +20 health
+    lord.addEffect("instant_health", 1, { amplifier: 9, showParticles: false });
+    lord.addEffect("resistance", 20 * 600, { amplifier: 1, showParticles: false });
+    lord.addEffect("strength", 20 * 600, { amplifier: 0, showParticles: false });
+  }
   for (const p of world.getPlayers()) p.sendMessage(`§4${plan.warlord} has taken the field!`);
 }
 

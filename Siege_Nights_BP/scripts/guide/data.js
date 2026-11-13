@@ -61,6 +61,16 @@ export const ENTRIES = [
     when: ["event:keepFounded"],
   },
   {
+    id: "quests", ch: "start", title: "Your next step",
+    tip: "",
+    page: "The lines in the top-right corner, under your minimap, are your §fquest tracker§r. They are always up, and they show the step of the story you are on now: what it is, a hint, and, when it is somewhere you know of, how far away it is and which way to turn (ahead, left, right, behind you).\n\n"
+      + "It changes by itself as you go: when you meet someone, solve a mystery in your Ledger, pick up something that opens a door, or see a great foe fall. Now and then a second line shows something else worth doing alongside.\n\n"
+      + "It only points at towns and places you have already been told about or been to. Some places are hidden on purpose: for those it tells you where to look, and your Ledger's leads say roughly where they are.\n\n"
+      + "Everyone sees their own steps, so friends on the same world can be at different points.\n\n"
+      + "To hide it, type §f/siege:quests§r. Type it again to bring it back. Hiding the minimap (§f/siege:minimap§r) moves the tracker up into its place.",
+    when: [],
+  },
+  {
     id: "land", ch: "start", title: "Land and protection",
     tip: "This land is yours now. Others can't build or break here, and nothing here can be broken while you are offline.",
     page: "Your Keep Banner claims the land around it. When you walk near the edge of anyone's land a line of particles in their banner colour shows where it runs, and you are told when you step in or out.\n\n"
@@ -208,6 +218,7 @@ export const ENTRIES = [
     id: "building_rules", ch: "keep", title: "The Mason and ready-made buildings",
     tip: "The Mason sells building blocks for coins. Your own region's materials are cheaper.",
     page: "§fThe Mason§r sells building blocks, so building doesn't mean weeks of quarrying. Your region's own materials are cheaper. Place a §fMason's Bench§r on your land and a mason sets up beside it (two at most). Towns have their own masons. The Mason can also mend your settlement wall.\n\n"
+      + "§fA new settlement§r comes with its Mason's Yard (a stone workshop, with the bench out front where the Mason works), the library, and a cottage of your own with a bed kept for you, so you can sleep the first night. Its road runs out through the gate to the nearest road.\n\n"
       + "§fFoundation Stones§r place ready-made buildings: put one on free ground facing the way the building should run, click it, pick a building, look at the outline, then click again to raise it. You pay in planks and stone you carry, and the Mason makes up any shortfall for coins.\n\n"
       + "Or build by hand, anywhere on your land outside the ground kept for your hall.",
     when: ["talk:tag:siege_mason", "carry:siege:mason_bench", "carry:siege:foundation_stone", "click:siege:foundation_stone"],
@@ -216,7 +227,7 @@ export const ENTRIES = [
     id: "town_plots", ch: "keep", title: "Town plots and charters",
     tip: "Use a Plot Marker to raise a building on a town plot. Each plot only takes buildings of its size.",
     page: "Every open plot in your town has a §fPlot Marker§r. Use it to see what can go there: only buildings of the plot's size are listed, and some want a certain spot (a watchtower stands by the wall). Good spots are marked. Pick one, walk round the outline, then use the marker again and pay to raise it.\n\n"
-      + "§fCharters:§r siege wins grow your settlement, but it only grows past each tier once that tier's charter stands. A Town needs 3 homes, a Farmhouse, a Mint and a market; a City needs 6 homes, an inn, a barracks and another work building. Buildings with no ready-made design yet (Farmhouse, Mint, Inn) can be built by hand and registered. When the last one is finished, the town grows by itself.",
+      + "§fCharters:§r siege wins grow your settlement, but it only grows past each tier once that tier's charter stands. A Town needs 3 homes (cottages, houses or townhouses), a Farmhouse, a Mint and a market; a City needs 6 homes, an inn, a barracks and another work building. Any of them can also be built by hand and registered. When the last one is finished, the town grows by itself.",
     when: ["click:siege:plot_marker", "event:tierUp"],
   },
   {
@@ -523,6 +534,18 @@ export const ENTRIES = [
     tip: "Bodies lie where they fell while danger is near, then sink into the ground.",
     page: "Many creatures here don't vanish in smoke: they lie where they died. They stay while other monsters are close, then sink into the ground after a while. Ghosts leave nothing.",
     when: ["near:siege:body"],
+  },
+  {
+    id: "weather", ch: "wild", title: "Weather",
+    tip: "Every region has its own weather. Thick weather is easier to sit out under a roof.",
+    page: "Each region has weather of its own, on top of the ordinary rain.\n\n"
+      + "§fBlackfen:§r mist comes up off the water, most of all at dusk, at night and in the rain. Some nights small lights move out over the fen.\n"
+      + "§fSaltreach:§r a hard wind off the sea carries spray inland, and at first light a white sea fret can roll in over the cliffs.\n"
+      + "§fEmberwaste:§r the wind lifts the sand into a haze, and now and then into a sandstorm you can barely see through.\n"
+      + "§fFrostmarch:§r snow blows down off the peaks, and blizzards close the passes, most of all when the sky is already snowing.\n"
+      + "§fAldmere Vale:§r rain like anywhere else, and mist lying in the low ground some mornings.\n\n"
+      + "Weather builds up slowly and thins out again after a few minutes. It is only weather: it doesn't hurt you. Under a roof it thins to a grey light, and down in a cave or cellar it can't reach you. Your action bar says when something is coming in.",
+    when: ["event:weatherMet"],
   },
   {
     id: "beasts", ch: "wild", title: "Beasts and trophies",

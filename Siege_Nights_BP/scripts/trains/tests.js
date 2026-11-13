@@ -6,8 +6,10 @@ import { SHAPES, layTrack, cursorOn, advance, back, pointAt, follow, KINDS, curv
 import { stageFor, stationPlan, siteFor, lineBlocks, loopBlocks, rightOf, STAGES, STATION, LOOP_Z } from "./stations.js";
 import { ROUTE, reachable, buyable, cannotBuy, priceOf, nearestStop, checkRoutes, stopSite, pieces, isNatural } from "./routes.js";
 import { ROUTES } from "./routes_data.js";
+import { layBed, trackFits, fellTree, rise, BED } from "./rail_bed.js";
 import { railRefused } from "./no_hollow.js";
 import { STATION_DESIGNS, TRADE_HOUSE_DESIGNS, ENGINE_SHED_DESIGNS } from "../settle/station_data.js";
+import { LINE, chainsOf, nextStop, newService, stepUnseen, indexNear, pilot } from "./line_service.js";
 import { TRACK, CARS, TRAIN, carPoses, trainLength, stepSpeed, moveTrain, limitAhead, blocksUnder, clearAhead, speedForGap, shapesForLoop, showcaseLoop } from "./data.js";
 
 // A little fake world of track: lay(x, y, z, yaw) places a piece the way a player would
@@ -93,6 +95,46 @@ addTests("trains", {
   "routes: the bed digs through ground and trees, never through buildings": () => {
     for (const id of ["minecraft:stone", "minecraft:grass_block", "minecraft:oak_log", "minecraft:spruce_leaves", "siege:old_acacia_log", "minecraft:white_terracotta", "minecraft:iron_ore", "minecraft:short_grass"]) assert(isNatural(id), id);
     for (const id of ["minecraft:oak_planks", "minecraft:stone_bricks", "minecraft:cobblestone", "minecraft:glass", "minecraft:stripped_oak_log", "siege:castle_stone", "minecraft:stone_brick_stairs", "minecraft:oak_fence", "minecraft:torch"]) assert(!isNatural(id), id);
+  },
+  "routes: the bed is graded, never a trench, and trees on the line come down whole": () => {
+    // grass at y 64 (track sits at 65), with a rise to 65 on the north side and a tree, a road and a house on the line
+    const blocks = new Map();
+    const w = {
+      get: (x, y, z) => (Math.abs(x) > 40 || Math.abs(z) > 40 ? undefined : blocks.get(`${x},${y},${z}`) ?? (y <= 60 ? "minecraft:stone" : y > (z < -3 ? 65 : 64) ? "minecraft:air" : y === (z < -3 ? 65 : 64) ? "minecraft:grass_block" : "minecraft:dirt")),
+      set: (x, y, z, id) => blocks.set(`${x},${y},${z}`, id),
+    };
+    // the ground is a block above the track's bed all along (track y 64: the bed is 63)
+    const all = Array.from({ length: 31 }, (_, i) => ({ x: i - 15, y: 64, z: 0, kind: 0, dir: 2 }));
+    // a tree on the line at x 0: trunk, branch of fences, leaves, a root of stairs sunk into the ground
+    for (let y = 65; y <= 69; y++) w.set(0, y, 0, "minecraft:oak_log");
+    w.set(1, 68, 0, "minecraft:oak_fence"); w.set(2, 68, 1, "minecraft:oak_fence");
+    for (let dx = -1; dx <= 3; dx++) for (let dz = -1; dz <= 2; dz++) w.set(dx, 70, dz, "minecraft:oak_leaves");
+    w.set(0, 64, 0, "minecraft:dark_oak_stairs");
+    // a road crossing at x 8 (path surface), a house wall at x -10, 2 north of the line
+    for (let dz = -6; dz <= 6; dz++) w.set(8, 64, dz, "minecraft:grass_path");
+    w.set(-10, 65, -2, "minecraft:oak_planks"); w.set(-10, 66, -2, "minecraft:oak_planks");
+    const hits = [];
+    all.forEach((p, i) => { assert(layBed(w, all, i, (...a) => hits.push(a)), `piece ${i} laid`); assert(trackFits(w, all[i]), `track fits at ${i}`); w.set(p.x, p.y, p.z, "siege:track"); });
+    for (const p of all) {
+      assertEqual(w.get(p.x, 63, p.z), "minecraft:gravel", `ballast under ${p.x}`);
+      for (let dz = -1; dz <= 1; dz++) for (let y = 64 + (dz ? 0 : 1); y < 68; y++) assertEqual(w.get(p.x, y, dz), "minecraft:air", `clear over the bed at ${p.x} ${y} ${dz}`);
+      // beside the ballast the ground is level with it, then rises one per two out: no trench wall
+      for (const s of [1, -1]) for (let d = 2; d <= 5; d++) {
+        let top = 70; while (top > 55 && !/grass|dirt|stone|path/.test(w.get(p.x, top, s * d) ?? "")) top--;
+        assert(top <= 63 + rise(d), `no trench wall at ${p.x}, ${s * d}: ground ${top}`);
+      }
+    }
+    // the tree is gone, every bit of it, and its root left no pit
+    for (const [k, v] of blocks) assert(!/oak_(log|fence|leaves)|stairs/.test(v), `tree block left at ${k}: ${v}`);
+    // the road crossing kept its surface beside the bed, the house is untouched and reported
+    assertEqual(w.get(8, 64, 4), "minecraft:grass_path", "road surface beside the bed");
+    assertEqual(w.get(-10, 65, -2), "minecraft:oak_planks", "house left standing");
+    assert(BED.side >= 5 && rise(2) === 0 && rise(3) === 1, "banks: level beside the ballast, then 1 in 2");
+    // a tree touching a building is not a tree to fell
+    const yard2 = new Map([["0,65,0", "minecraft:oak_log"], ["0,66,0", "minecraft:oak_leaves"], ["1,66,0", "minecraft:oak_planks"]]);
+    const w2 = { get: (x, y, z) => yard2.get(`${x},${y},${z}`) ?? (y <= 64 ? "minecraft:dirt" : "minecraft:air"), set: (x, y, z, id) => yard2.set(`${x},${y},${z}`, id) };
+    assertEqual(fellTree(w2, 0, 65, 0), false, "a tree against a building stays");
+    assertEqual(w2.get(0, 65, 0), "minecraft:oak_log", "and is untouched");
   },
   "routes: a settlement's station sits on its stop, building toward the banner": () => {
     const data = routeMap();
@@ -320,6 +362,71 @@ addTests("trains", {
     assert(Math.hypot(mid.x - 0.5, mid.z - 0.5) > 0.1, "cuts the corner instead of passing the block centre");
     const bend = curvePoints(0, 3);
     assert(near(bend.pts.at(-1)[0], 0.5) && near(bend.pts.at(-1)[1], 0.5), "a bend ends in the diagonal corner");
+  },
+  "line trains: a line's laid stretches join into one run, stop to stop": () => {
+    const line = ROUTES.segments.find((s) => s.line)?.line;
+    const segs = ROUTES.segments.filter((s) => s.line === line);
+    assertEqual(chainsOf(ROUTES, {}).length, 0, "no track, no trains");
+    const all = chainsOf(ROUTES, Object.fromEntries(segs.map((s) => [s.id, {}])));
+    assertEqual(all.length, 1);
+    const c = all[0];
+    assertEqual(c.stops.length, segs.length + 1, "every stop of the line, in order");
+    assertEqual(c.at[0], 0);
+    assertEqual(c.at.at(-1), c.path.length - 1);
+    for (let i = 1; i < c.path.length; i++) {
+      const a = c.path[i - 1], b = c.path[i];
+      assert(Math.max(Math.abs(a.x - b.x), Math.abs(a.z - b.z)) === 1 && Math.abs(a.y - b.y) <= 1, `the run is unbroken at ${b.x},${b.z}`);
+    }
+    for (let k = 0; k < c.stops.length; k++) {
+      const stop = ROUTES.stops.find((s) => s.id === c.stops[k]), p = c.path[c.at[k]];
+      assert(stop && indexNear(c, c.at[k], p.x, p.z) === c.at[k], c.stops[k]);
+    }
+    // only one stretch laid: the train shuttles between its two stops
+    const one = chainsOf(ROUTES, { [segs[0].id]: {} })[0];
+    assertEqual(one.stops.length, 2);
+  },
+  "line trains: unseen, the train calls at every stop, waits, and turns back at each end": () => {
+    const chain = { line: "t", stops: ["a", "b", "c"], path: Array.from({ length: 201 }, (_, x) => ({ x, y: 64, z: 0 })), at: [0, 120, 200] };
+    assertEqual(nextStop(chain, 0, 1), 1);
+    assertEqual(nextStop(chain, 120, 1), 2);
+    assertEqual(nextStop(chain, 200, 1), -1);
+    assertEqual(nextStop(chain, 200, -1), 1);
+    const svc = newService(), calls = [];
+    let standing = true;
+    for (let t = 0; t < 20 * 60 * 6; t += 20) {
+      stepUnseen(svc, chain, 20);
+      assert(svc.pos >= 0 && svc.pos <= 200, "stays on the line");
+      if (svc.dwell > 0 && !standing) calls.push(chain.stops[chain.at.indexOf(svc.pos)]);
+      standing = svc.dwell > 0;
+    }
+    assertEqual(calls.slice(0, 6).join(""), "bcbabc");
+  },
+  "line trains: the real train slows into each stop, stands 20 seconds, and never overruns": () => {
+    const chain = { line: "t", stops: ["a", "b", "c"], path: Array.from({ length: 201 }, (_, x) => ({ x, y: 64, z: 0 })), at: [0, 120, 200] };
+    const svc = newService(), calls = [];
+    let pos = 5, v = 0, top = 0, stood = 0;
+    for (let t = 0; t < 20 * 60 * 4; t++) {
+      const out = pilot(svc, chain, pos, v);
+      if (out.arrived !== undefined) calls.push(chain.stops[out.arrived]);
+      if (svc.dwell > 0) stood++;
+      // the runner: speed up by TRAIN.accel toward the limit, brake by TRAIN.brake when over it
+      const want = out.throttle ? out.limit : 0, s = Math.abs(v);
+      const next = s > want ? Math.max(want, s - TRAIN.brake) : Math.min(want, s + TRAIN.accel);
+      v = next * out.dir;
+      pos += v;
+      top = Math.max(top, Math.abs(v));
+      assert(pos > -2 && pos < 202, `never off the end (${pos})`);
+      if (out.arrived !== undefined) assert(Math.abs(pos - chain.at[out.arrived]) <= 2, "stops at the platform, not past it");
+    }
+    assert(top > LINE.cruise - 0.05 && top <= LINE.cruise + 1e-9, `runs at line speed (${top})`);
+    assertEqual(calls.slice(0, 4).join(""), "bcba");
+    assert(stood >= LINE.dwell * 3, "it stands at each stop");
+    // the track ends short of the next stop: after standing still a while it turns back instead of waiting for ever
+    const cut = newService();
+    cut.dwell = 0;
+    let dir = 1;
+    for (let t = 0; t < 400 && dir === 1; t++) dir = pilot(cut, chain, 60, 0).dir;
+    assertEqual(dir, -1);
   },
   "the pack has the track, the trains and their parts": () => {
     assert(BlockTypes.get(TRACK), TRACK);

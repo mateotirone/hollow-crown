@@ -4,6 +4,7 @@
 //   slotClass(slot) -> "S" | "M" | "ML" | "L" | "G" | "W" (a Works plot: the machines, buildings.js WORKS)
 //   plotFit(id, slot, freeClasses) -> { ok, tagged, why }   may this building go on this plot?
 //   charterCheck(tier, counts, known) -> { met, lines: [{ what, have, need, skipped }] }
+//   charterKeeps(free, tier, counts, known, slot, id) -> undefined, or { what, tier, ids } the plot is kept for
 
 import { OPENS_AT, PLOT_SIZE, PLOT_ALSO, PLOT_FALLBACK, PLOT_TAGS, TAG_WORDS, CHARTERS, WORK } from "./config.js";
 
@@ -51,23 +52,30 @@ export const charterText = (check) => check.lines.map((l) => (l.skipped
 // they are at comes first, then every open plot is filled with something that suits it.
 //   slots: the open, empty plots. counts: what stands. designs: ids that can be raised (ready-made designs).
 //   fits(id, slot): can the design physically stand there (default yes). Returns { slot, id } or undefined.
-export function lordPick(slots, tier, counts, designs, fits = () => true, seed = "") {
+//   coming: every empty plot, open or opening later (for charterKeeps; default the open ones)
+export function lordPick(slots, tier, counts, designs, fits = () => true, seed = "", coming = slots) {
   if (!slots.length) return undefined;
   const free = new Set(slots.map(slotClass));
-  const ok = (id, s) => designs.has(id) && opensAt(id) <= tier && plotFit(id, s, free).ok && fits(id, s);
+  const ok = (id, s) => designs.has(id) && opensAt(id) <= tier && plotFit(id, s, free).ok && fits(id, s) && !charterKeeps(coming, tier, counts, designs, s, id);
   // this tier's charter, then a look ahead to the next one, so plots aren't spent on wells while homes are short
+  // (the look ahead only takes Small plots: a house there would spend a Medium the next charter's Mint needs)
   for (const t of [tier, tier + 1]) {
     const check = charterCheck(t, counts, designs);
     for (const [i, line] of (CHARTERS[t] ?? []).entries()) {
       const l = check.lines[i];
       if (!l || l.skipped || l.have >= l.need) continue;
       for (const id of line.ids) {
+        if (t > tier && (PLOT_SIZE[id] ?? "S") !== "S") continue;
         const s = slots.find((x) => ok(id, x) && plotFit(id, x, free).tagged) ?? slots.find((x) => ok(id, x));
         if (s) return { slot: s, id };
       }
     }
   }
+  // filling up: a plot bigger than Small stays empty while a later charter still needs a building of its size
+  // (the 2026-11-13 layouts open few Medium and Large plots before the City)
+  const needed = laterNeeds(tier, counts, designs);
   for (const s of slots) {
+    if (slotClass(s) !== "S" && needed.has(slotClass(s))) continue;
     const options = [...designs].filter((id) => ok(id, s));
     if (!options.length) continue;
     const good = options.filter((id) => plotFit(id, s, free).tagged);
@@ -75,6 +83,73 @@ export function lordPick(slots, tier, counts, designs, fits = () => true, seed =
     return { slot: s, id: from[Math.floor(hash01(`${seed}|${s.id}`) * from.length)] };
   }
   return undefined;
+}
+
+// Keeping plots for the charters (2026-11-13, the placement thread's rule, for players and lords alike): a plot is
+// kept when putting building `id` there would leave this tier's or the next tier's charter with no plot it could
+// still be met on. Each unmet charter need is matched to a free plot that opens by that charter's tier and that a
+// building of the need fits (a small bipartite matching); `id` is allowed when the needs still all match after it.
+//   free: the open-or-coming empty plots ({ id, size, long, tier, tags }), counts: what stands, known: ids that
+//   count, slot: the plot asked about, id: the building. -> undefined (allowed) or { what, tier, ids } (kept for it)
+// When the needs can't all be matched even now, nothing is kept (keeping plots then would only block the player).
+export function charterKeeps(free, tier, counts, known, slot, id) {
+  const before = charterUnits(tier, counts, known);
+  if (!before.length || !matchUnits(before, free)) return undefined;
+  const after = charterUnits(tier, { ...counts, [id]: (counts[id] ?? 0) + 1 }, known);
+  const rest = free.filter((s) => s.id !== slot.id);
+  if (matchUnits(after, rest)) return undefined;
+  // name the need this plot is kept for: one that this plot could hold, and without which the rest would still fit
+  const holds = (u) => !u.ids.includes(id) && u.ids.some((i) => plotFit(i, slot).ok);
+  const kept = after.find((u, i) => holds(u) && matchUnits(after.filter((_, j) => j !== i), rest)) ?? after.find(holds) ?? after[0];
+  return { what: kept.what, tier: kept.tier, ids: kept.ids.filter((i) => plotFit(i, slot).ok) };
+}
+
+// The unmet needs of this tier's and the next tier's charters, one unit per building still wanted
+function charterUnits(tier, counts, known) {
+  const units = [], made = new Map();
+  for (const t of [tier, tier + 1]) {
+    if (t >= CHARTERS.length) continue;
+    const check = charterCheck(t, counts, known);
+    for (const [i, line] of CHARTERS[t].entries()) {
+      const l = check.lines[i];
+      if (!l || l.skipped || l.have >= l.need) continue;
+      const key = line.ids.join(",");
+      const already = made.get(key) ?? 0; // the next tier's homes include this tier's
+      const want = l.need - l.have - already;
+      for (let k = 0; k < want; k++) units.push({ what: line.what, tier: t, ids: line.ids.filter((x) => known.has(x)) });
+      made.set(key, already + Math.max(0, want));
+    }
+  }
+  return units;
+}
+
+// Can every unit have a plot of its own? (augmenting paths; a town has a few dozen plots at most)
+function matchUnits(units, free) {
+  const owner = new Map(); // plot id -> unit index
+  const fits = (u, s) => s.tier <= u.tier && u.ids.some((i) => plotFit(i, s).ok);
+  const tryUnit = (ui, seen) => {
+    for (const s of free) {
+      if (seen.has(s.id) || !fits(units[ui], s)) continue;
+      seen.add(s.id);
+      if (!owner.has(s.id) || tryUnit(owner.get(s.id), seen)) { owner.set(s.id, ui); return true; }
+    }
+    return false;
+  };
+  return units.every((u, ui) => tryUnit(ui, new Set()));
+}
+
+// The plot classes the charters after this tier still need for lines not yet met
+function laterNeeds(tier, counts, designs) {
+  const out = new Set();
+  for (let t = tier + 1; t < CHARTERS.length; t++) {
+    const check = charterCheck(t, counts, designs);
+    for (const [i, line] of CHARTERS[t].entries()) {
+      const l = check.lines[i];
+      if (!l || l.skipped || l.have >= l.need) continue;
+      for (const id of line.ids) if (designs.has(id)) for (const c of [PLOT_SIZE[id] ?? "S", ...(PLOT_ALSO[id] ?? [])]) out.add(c);
+    }
+  }
+  return out;
 }
 
 function hash01(str) {

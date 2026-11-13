@@ -39,6 +39,7 @@ import "./register.js";
 import "./settlers.js";
 import "./hallmove.js";
 import "./planbook.js";
+import "./basebuilds.js";
 import "./arrival.js";
 import "./showcase.js";
 import "./tests.js";

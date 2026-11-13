@@ -10,13 +10,13 @@ import { MOBS, ITEMS } from "./data.js";
 import { alive, effect, flat, heal, hurt, held, isLookingAt, line, particle, ring, shove, sound } from "./util.js";
 
 const perPlayer = (f, base, each) => base + each * Math.max(0, f.players().length - 1);
-const floorOf = (f, p) => ({ x: p.x, y: f.def.roaming ? p.y : f.center.y, z: p.z });
+const floorOf = (f, p) => f.floorOf(p); // the ground under them, in whatever room the fight is in (bossCore.js)
 const hasVeil = (p) => held(p, "Head") === "siege:widows_veil";
 
 // Shared: "stand on the lit tiles" (the Reeve's time-stop and Oswin's toll)
 function tiles(count, onMiss, missText) {
   return {
-    start: (f) => Array.from({ length: count(f) }, () => f.spot(3, Math.min(11, f.def.radius - 4))),
+    start: (f) => f.spots(count(f), 3, Math.min(11, f.def.radius - 4), 4.5), // inside the room, never two on top of each other
     show: (f, spots) => {
       for (const s of spots) {
         ring(f.dim, s, 2.2, "minecraft:villager_happy", 14);
@@ -158,7 +158,7 @@ registerBoss({
       f.shield(false);
       try { f.entity.removeEffect("slowness"); f.entity.removeEffect("weakness"); } catch { /* gone */ }
       f.busyUntil = f.tick + 60;
-      f.say("§6The Reeve pulls himself back together, slower than before.");
+      f.say("§6The Reeve pulls himself back together, gears grinding. He is open again.");
     }
     if (f.phase >= 2 && f.tick % 200 === 0) f.next.timestop = Math.min(f.next.timestop, 120);
   },
@@ -226,10 +226,7 @@ registerBoss({
     if (n === 1) f.next.pack = 0;
     if (n === 2) {
       f.shield(true); f.data.pillars = true;
-      for (let i = 0; i < 3; i++) {
-        const a = (i / 3) * Math.PI * 2;
-        f.place("siege:rime_pillar", { x: f.center.x + Math.cos(a) * 8, y: f.center.y, z: f.center.z + Math.sin(a) * 8 });
-      }
+      for (const at of f.spots(3, 5, 9, 5)) f.place("siege:rime_pillar", at);
       f.say("§bHe drives three pillars of ice into the ground. Nothing will hurt him while they stand.");
     }
   },
@@ -243,6 +240,7 @@ registerBoss({
 //    10 seconds of each other to turn it. At full tide, everyone drowns.
 // =====================================================================================
 const TIDE_RATE = [0.35, 0.55, 0.8]; // tide gained per framework step (4 steps a second), by phase
+const bellWindow = (f) => (f.solo() ? 360 : 200); // ticks all three bells must ring within: alone you get 18 seconds to reach them
 export const tideBar = (tide) => `§3Tide §b${"▮".repeat(Math.round(tide / 10))}§8${"▯".repeat(10 - Math.round(tide / 10))} §f${Math.round(tide)}%`;
 
 registerBoss({
@@ -252,10 +250,9 @@ registerBoss({
   onStart: (f) => {
     f.data.tide = 0; f.data.rung = {};
     if (f.adds("siege:chapel_bell").length) return;
-    for (let i = 0; i < 3; i++) {
-      const a = (i / 3) * Math.PI * 2 + 0.5;
-      f.place("siege:chapel_bell", { x: f.center.x + Math.cos(a) * 9, y: f.center.y, z: f.center.z + Math.sin(a) * 9 });
-    }
+    // Up to 9 blocks out, but inside the chapel: she stands by the altar in a nave only 9 wide, and a fixed circle put
+    // all three bells in the walls or the sea, so the tide could never be turned (boss walkthrough 2026-11-12)
+    for (const at of f.spots(3, 4, 9, 4)) f.place("siege:chapel_bell", at);
   },
   attacks: [
     { id: "wail", every: 190, windup: 30, warn: "She draws breath to wail...",
@@ -278,8 +275,11 @@ registerBoss({
     const d = f.data;
     d.tide = Math.min(100, (d.tide ?? 0) + TIDE_RATE[f.phase]);
     if (f.tick % 20 !== 0) return;
+    // one line: the tide, and how many bells are ringing (the bell count used to flash for under a second and be
+    // wiped by the tide, so nobody could tell whether a bell had counted)
+    const ringing = Object.values(d.rung ?? {}).filter((t) => f.tick - t <= bellWindow(f)).length;
     for (const p of players) {
-      p.onScreenDisplay.setActionBar(tideBar(d.tide));
+      f.tell(p, tideBar(d.tide) + (ringing ? `  §6Bells ringing: ${ringing} of 3` : ""));
       if (hasVeil(p)) continue; // the Widow's Veil lets you breathe it
       if (d.tide >= 40) effect(p, "slowness", 30, d.tide >= 70 ? 1 : 0);
       if (d.tide >= 70) effect(p, "mining_fatigue", 30, 1);
@@ -292,8 +292,8 @@ registerBoss({
     f.data.rung[bell.id] = f.tick;
     sound(f.dim, "block.bell.hit", bell.location, 0.8 + Object.keys(f.data.rung).length * 0.15, 2);
     try { bell.triggerEvent("siege:ring"); } catch { /* bell gone */ }
-    const fresh = Object.values(f.data.rung).filter((t) => f.tick - t <= (f.solo() ? 360 : 200)).length; // alone you get 18 seconds to reach all three
-    if (fresh < 3) return player.onScreenDisplay.setActionBar(`§6${fresh} of 3 bells ringing...`);
+    const fresh = Object.values(f.data.rung).filter((t) => f.tick - t <= bellWindow(f)).length;
+    if (fresh < 3) return f.tell(player, `${tideBar(f.data.tide)}  §6Bells ringing: ${fresh} of 3`);
     f.data.tide = 0; f.data.rung = {}; f.data.bellLock = f.tick + 240;
     f.stun(60);
     f.say("§6All three bells ring together. The tide turns!");
@@ -401,13 +401,14 @@ registerBoss({
   intro: "smiles with someone else's face.",
   phaseNames: ["", "More masks", "The whole brood"],
   onStart: (f) => { f.data.nextMasq = f.tick + 200; },
-  onPhase: (f) => { f.data.nextMasq = f.tick; },
+  onPhase: (f) => { f.data.nextMasq = Math.max(f.tick, f.busyUntil); }, // never cuts short the stun from finding her
   onHurt: (f, event) => {
     if (f.data.masq && event.damageSource.damagingEntity?.typeId === "minecraft:player") endMasquerade(f, true);
   },
   onAddDie: (f, add, killer) => {
     if (add.typeId !== "siege:mother_echo") return;
     if (killer) effect(killer, "poison", 100, 1);
+    if (killer?.typeId === "minecraft:player") f.tell(killer, "§2A copy. It bursts, and something crawls out of it."); // it used to burst without a word
     const [child] = f.summon("siege:changeling", 1, 1, add.location);
     try { child?.triggerEvent("siege:reveal"); } catch { /* gone */ }
   },
@@ -455,6 +456,7 @@ registerBoss({
 //    (His crown is NOT the Hollow Crown, which is on Morvane's head until the end. It is a warlord's crown with a splinter of the Hollow in it.)
 //    Siege Nights still decides what his death means (Sovereign); this is only the fight.
 // =====================================================================================
+const onFoot = (f) => f.phase >= 1 || !!f.data.unhorsed;
 const armyTags = (f) => {
   try {
     return f.entity.getTags().filter((t) => t === RAIDER_TAG || t.startsWith("siege_for_"));
@@ -478,15 +480,17 @@ registerBoss({
     }, 5);
   },
   onPhase: (f, n) => {
-    if (n === 1) dismount(f, "§6The Warlord King leaps down, the crown shard blazing.");
+    if (n === 1) dismount(f, f.data.unhorsed ? "§6The crown shard in the Warlord King's crown is blazing now." : "§6The Warlord King leaps down, the crown shard blazing.");
     if (n === 2) { effect(f.entity, "speed", 100000, 0); f.say("§4The shard in his crown opens like an eye."); }
   },
   attacks: [
     { id: "warcry", every: 300, windup: 20, phases: [0], warn: "The Warlord King bellows an order!", sound: "raid.horn",
       hit: (f) => { for (const e of f.dim.getEntities({ families: ["siege_raider"], location: f.entity.location, maxDistance: 16 })) effect(e, "strength", 200, 0, true); } },
-    { id: "lance", every: 130, windup: 40, phases: [1, 2], warn: "The shard takes aim. Sidestep!", ...lance(18, 10) },
-    { id: "toll", every: 480, windup: 30, phases: [1, 2], warn: "The shard tolls. More of them answer.", sound: "block.bell.hit",
-      when: (f) => f.adds("siege:hollow_footman").length < 3,
+    // On foot = below 66%, or as soon as his ogre is dead. (He used to stand there with only his war-cry between the
+    // ogre dying and 66%: half a minute of a boss with no attack of his own.)
+    { id: "lance", every: 130, windup: 40, when: onFoot, warn: "The shard takes aim. Sidestep!", ...lance(18, 10) },
+    { id: "toll", every: 480, windup: 30, warn: "The shard tolls. More of them answer.", sound: "block.bell.hit",
+      when: (f) => onFoot(f) && f.adds("siege:hollow_footman").length < 3,
       hit: (f) => { f.summon("siege:hollow_footman", perPlayer(f, 3, 1), 8, f.entity.location, armyTags(f)); f.summon("siege:bell_ringer", 1, 8, f.entity.location, armyTags(f)); } },
     { id: "quake", every: 150, windup: 30, phases: [2], warn: "The shard strikes the ground. JUMP!",
       show: (f) => ring(f.dim, f.entity.location, 4 + (f.tick % 30) / 3, "minecraft:basic_smoke_particle"),
@@ -501,7 +505,9 @@ registerBoss({
   tick: (f) => {
     const ogre = f.data.ogre;
     if (!ogre) return;
-    if (alive(ogre)) effect(f.entity, "resistance", 15, 2);
+    // He shrugs off most of every blow only while he is up on the ogre. Once he has leapt down (66%) he is as open as
+    // if it were dead: before, a living ogre kept him armoured for the rest of the fight, on foot or not.
+    if (alive(ogre)) { if (f.phase === 0) effect(f.entity, "resistance", 15, 2); }
     else if (f.phase === 0 && !f.data.unhorsed) { f.data.unhorsed = true; f.say("§6The ogre falls, and the Warlord King with it. He gets up angry."); }
   },
   loot: (f, p, first) => (first ? [stack("siege:warlords_brand")] : []).concat(materials(["siege:hollow_ash", 8], ["siege:gold_coin", 2])),

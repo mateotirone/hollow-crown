@@ -114,7 +114,7 @@ Doors sit on a bay centre, never on a post, at least 2 from a corner. Never two 
   round dirt with flowers (style key `flowers` picks them: region colours from `palettes/`), about a
   quarter of street windows (05 planters).
 - **Surround**: stone walls get dark oak trapdoors standing either side of the glass (the stone, spruce,
-  dark oak pairing).
+  dark oak pairing). The style key `panel` changes the trapdoor (`everwake_stone` uses `birch_trapdoor`: no dark timber there). `"panel": null` leaves it off (tower slits and lancets, towers guide).
 - **Shutters**: open trapdoors either side of the glass, 1 out, as tall as the glass, with a trim slab
   shelf under it; about one shuttered window in three has a lantern on the shelf; now and then a single
   shutter (shutter dressing).
@@ -256,11 +256,34 @@ pot on top.
 | `interior` | `use`, `levels` [{`rect` (inside the walls), `floor_y`, `height`}], `region`, `rooms`, `stairs`, `furnish`, `lights` | stage 8 for shells the `house` part did not make: stairs or ladders between the levels, rooms by use, a one-block walkway, lanterns (08-interiors). The `house` part runs the same stage itself from its `interior` key (default `home`; `false` for none; `attic` adds a room under the roof) |
 | `wheel` | `at` (axle centre), `axis` (axle direction x / z), `r` (3-5), `width` (1-2), `wood`, `paddles`, `axle` | a waterwheel: plank rim, fence spokes, a paddle at every eighth, a stripped log axle into the wall |
 
+## Round towers, leaning towers, galleries, boardwalks and curved roofs (2026-11-12)
+
+- **Curved roof:** `"roof": {"type": "curved"}` on a house (or a wing): a barrel roof, a gable whose rows
+  rise steeply at the eaves and flatten towards the top in a quarter circle (06 roof-types 16), never a row
+  with no rise. `"profile": [2, 2, 1, 1]` sets the rises by hand. Halls, chapels, stations, Emberwaste vaults
+  and Hollow halls.
+- **Round tower joined into a house:** a `keep` with `"cap": "cone"` placed after the house, overlapping
+  a corner or a wall. It clears its own shaft first, so the house roof tucks against its wall. The cone has
+  an eave ring one out on brackets, rows stepping in half a block (`"pitch"`: rows per block in, 2), and
+  the spire top block on a full block at the tip (`"finial"`: `spire_block` / `rod` / `none`); `"roof"` is
+  the cone's block. With a cone there are no battlements, hatch or flags.
+- **Leaning tower** (the Hollow): `"lean": {"dir": "e", "steps": 2}` on a `keep` or a `house`. The shaft
+  splits into `steps + 1` equal parts above its base course, and each part sits one block further over, so
+  the whole tower leans in a few clean steps; the cap moves with the top part, and every step's overhang
+  gets upside-down trim brackets. Never more than 3 steps.
+- **Galleries:** `"galleries": [{"side": "s", "storey": 1, "depth": 2, "from": -4, "to": 4, "posts": 3}]` on
+  a house: posts of the frame wood from the ground at both ends and every `posts` blocks, a beam under a
+  ceiling of roof-block slabs at the next floor (or the wall plate), a deck of the floor wood with a fence
+  rail on the outer edge and the ends. On `storey` 0 there is no deck or rail: a covered walk (Emberwaste
+  arcades and shade, Frostmarch covered walks). The caravanserai's upstairs gallery is `storey` 1.
+- **`boardwalk`** (Blackfen): `{"part": "boardwalk", "path": [[9, 43], [17, 43]], "y": 3, "ground": 0}`: a deck
+  of mangrove top slabs `w` (3) wide along axis-aligned runs, mangrove log stilts and a plank cross beam
+  every 4 and at the ends, fence rails on planks along both edges (`"rails"`: `both` / `one` / `none`,
+  `"gaps"` for landings), and a lantern on a rail post at both ends and every 8 so it shows through fen mist.
+
 ## Not automated yet (build with shapes and `place`)
 
-Galleries on long rows of posts, sign-boxed bushes on the ground, beam ends on proud frames, hammer-beam
-trusses (spans of 15+), hip-roof wings joined to gable roofs at odd angles, round towers joined into a
-house roof (build the tower with shapes: cylinder + cone, see shapes.md, and leave a gap in the house), and
-hand-made interiors beyond the interior stage's rooms. Each is described with its exact block pattern in `build-instructions/`
+Sign-boxed bushes on the ground, beam ends on proud frames, hammer-beam trusses (spans of 15+), hip-roof
+wings joined to gable roofs at odd angles, and hand-made interiors beyond the interior stage's rooms. Each is described with its exact block pattern in `build-instructions/`
 (02-frame, 05, 06, 07 and reference/shapes.md): write the cells with `place`, or add the part to `parts.py`
 and this table. A square tower is a narrow house with `"roof": {"type": "hip", "pitch": 2}`.

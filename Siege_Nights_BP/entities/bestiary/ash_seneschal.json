@@ -34,6 +34,11 @@
    "minecraft:knockback_resistance": {
     "value": 1.0
    },
+   "minecraft:ambient_sound_interval": {
+    "value": 8,
+    "range": 10,
+    "event_name": "ambient"
+   },
    "minecraft:scale": {
     "value": 1.2
    },
@@ -121,10 +126,6 @@
    "minecraft:jump.static": {},
    "minecraft:behavior.float": {
     "priority": 0
-   },
-   "minecraft:behavior.random_stroll": {
-    "priority": 7,
-    "speed_multiplier": 0.8
    },
    "minecraft:behavior.nearest_attackable_target": {
     "priority": 2,
