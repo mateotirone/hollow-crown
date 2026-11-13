@@ -46,7 +46,7 @@ def plate(px, f, keep=lambda x, y, w, h: True, tone=3, rime=True):
             c = IRON[max(0, min(5, v))]
             top = y == 0 or not keep(x, y - 1, w, h)
             if rime and top: c = RIME[3 if (x + y) % 3 else 4]
-            elif rime and (x * 5 + y * 3) % 11 == 0 and y < h // 2 + 1: c = RIME[1]
+            elif rime and (x * 5 + y * 3) % 11 == 0 and y == 1: c = RIME[1]                   # a little frost creeping down from the edge
             px[x0 + x, y0 + y] = c + (255,)
 
 
@@ -107,8 +107,10 @@ def flat():
 
 
 # ---- 3D
+KIND = {}
 def cube(o, s, uv, inf=0, mir=False):
-    c = {"origin": o, "size": s, "uv": uv}
+    c = {"origin": o, "size": s, "uv": UV.get(uv, uv) if isinstance(uv, str) else uv}
+    if isinstance(uv, str): KIND[id(c)] = uv
     if inf: c["inflate"] = inf
     if mir: c["mirror"] = True
     return c
@@ -121,7 +123,8 @@ BASE = {
                  "rightLeg": [cube([-3.9, 0, -2], [4, 12, 4], [0, 16], 0.5)], "leftLeg": [cube([-0.1, 0, -2], [4, 12, 4], [0, 16], 0.5, True)]},
     "boots": {"rightLeg": [cube([-3.9, 0, -2], [4, 12, 4], [0, 16], 1)], "leftLeg": [cube([-0.1, 0, -2], [4, 12, 4], [0, 16], 1, True)]},
 }
-SKULL, SNOUT, HORN, COLLAR, PAULDRON, KNEE, CUFF = [32, 0], [50, 0], [50, 7], [32, 0], [32, 9], [32, 0], [32, 0]
+SKULL, SNOUT, HORN, COLLAR, PAULDRON, KNEE, CUFF = 'skull', 'snout', 'horn', 'collar', 'pauldron', 'knee', 'cuff'
+UV = {SKULL: [32, 0], SNOUT: [50, 0], HORN: [50, 7], COLLAR: [32, 0], PAULDRON: [32, 9], KNEE: [32, 0], CUFF: [32, 0]}   # each piece has its own sheet
 EXTRAS = {   # odd sizes ("work in threes")
     "helmet": {"head": [cube([-1.5, 33, -3], [3, 3, 5], SKULL),                 # the dragon's skull along the crown
                         cube([-0.5, 33, -6], [1, 2, 3], SNOUT),                 # its snout over the brow
@@ -135,7 +138,7 @@ EXTRAS = {   # odd sizes ("work in threes")
 
 def extra_px(uv, f, x, y, w, h):
     side = f not in ('top', 'bottom')
-    if uv in (COLLAR, CUFF) and w > 3 or uv == CUFF:
+    if uv in (COLLAR, CUFF):
         return FUR[max(0, min(5, (4 if f == 'top' else 3) + (1 if (x + y * 2) % 3 == 0 else 0) - (1 if (x * 3 + y) % 5 == 0 else 0) - (2 if f == 'bottom' else 1 if side and y == h - 1 else 0)))]
     if uv == SKULL:
         if f in ('right', 'left') and (x, y) == ((1, 1) if f == 'right' else (w - 2, 1)): return RIME[5]       # the eye, a point of frost light
@@ -174,7 +177,7 @@ def build3d(part):
                         for x in range(fw):
                             at = (x0 + x, y0 + y)
                             assert at in painted or px[at][3] == 0, f'{piece}: 3D part would paint over the armour layer at {at}'
-                            px[at] = extra_px(c["uv"], f, x, y, fw, fh) + (255,); painted.add(at)
+                            px[at] = extra_px(KIND[id(c)], f, x, y, fw, fh) + (255,); painted.add(at)
         im.save(T + f'models/siege_armor/rimeforged_{piece}.png')
         bones = {k: list(v) for k, v in BASE[piece].items()}
         for b, cs in EXTRAS[piece].items(): bones.setdefault(b, []).extend(cs)
