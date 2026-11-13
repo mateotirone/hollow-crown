@@ -712,27 +712,9 @@
   {
    "stamp": "lamp_post_salt",
    "kind": "lamp",
-   "x": -787,
-   "z": 428,
+   "x": -790,
+   "z": 429,
    "ground_y": 74,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_salt",
-   "kind": "lamp",
-   "x": -780,
-   "z": 428,
-   "ground_y": 75,
-   "rotation": 0,
-   "footprint": 0
-  },
-  {
-   "stamp": "lamp_post_salt",
-   "kind": "lamp",
-   "x": -779,
-   "z": 410,
-   "ground_y": 76,
    "rotation": 0,
    "footprint": 0
   },
