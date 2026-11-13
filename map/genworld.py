@@ -366,6 +366,9 @@ for n_, x_, z_, r_, _ in TOWNS:
     else: R_ = int(r_ * 1.12) + 10
     R_TOWNS.append((slug(n_), x_, z_, R_))
 AVOID = [(x_, z_, 82) for _, x_, z_ in PLOTS] + [(x_, z_, int(r_ * 0.7)) for _, x_, z_, r_, _ in WARDS[6:]]
+if os.environ.get("GW_SITES", "1") != "0" and shutil.which("node"):   # and the boss sites' whole areas (baked below)
+    _ba = json.loads(__import__("subprocess").check_output(["node", os.path.join(os.path.dirname(os.path.abspath(__file__)), "bake_sites.mjs"), "--anchors"]))
+    AVOID += [(a_["x"], a_["z"], int(_ba["reach"][s_])) for s_, a_ in _ba["anchors"].items() if s_ not in ("reeve", "mirelight")]
 STATION_POS, LINE_PTS = railroute.plan_network(Y, wet, land, X0, Z0, STOPS, SEQ, R_TOWNS, AVOID, log=log, fixed=FIXED_ST)
 stop_y.update(FIXED_Y)
 for sid_, (x_, z_, _) in STATION_POS.items(): STOPS[sid_].update({"x": x_, "z": z_})
@@ -933,6 +936,110 @@ if BRIDGE_BLOCKS:
         log("road bridges keep", int(_off.sum()), "blocks off the track")
         _bb, _bi = _bb[~_off], _bi[~_off]
     STAMPED.append((_bb[:, 0], _bb[:, 1], _bb[:, 2], _bi, np.zeros(len(_bi), bool)))
+# ---- the boss sites, baked (Mateo 2026-11-13: the boss locations are physical places from the start). map/bake_sites.mjs
+# runs the game's own plans against this ground, read the way the game reads it (unlocks/site.js column(), reeve.js
+# groundAt), so the blocks are the ones the game would build on approach. They go on after the towns, as the game's
+# build would. GW_SITES_JS (full map only) rewrites unlocks/baked_sites.js, which tells the game each site is already
+# standing (centre, puzzle seed, check cells) so it only places keepers, signs and fights when a player comes near.
+SITE_FACTS = {}
+if os.environ.get("GW_SITES", "1") != "0" and shutil.which("node"):
+    import subprocess, tempfile
+    _here = os.path.dirname(os.path.abspath(__file__))
+    _anch = json.loads(subprocess.check_output(["node", os.path.join(_here, "bake_sites.mjs"), "--anchors"]))
+    _R = int(_anch["r"])
+    _SOFT = re.compile(r"air|grass(?!_block)|fern|flower|tulip|poppy|dandelion|bush|snow_layer|leaves|log|vine|sapling|mushroom|torch|sign|reeds|sugar_cane|kelp|seagrass|lily|roots|moss_carpet|propagule")
+    _SOFT_R = re.compile(r"air|water|grass(?!_block)|fern|flower|tulip|poppy|dandelion|bush|snow_layer|leaves|log|vine|sapling|mushroom|torch|sign")
+    _cols = {}                                          # (x, z) -> [(y, name, states, soft)] in placing order
+    _boxes = [(a["x"] - _R, a["z"] - _R, a["x"] + _R, a["z"] + _R) for a in _anch["anchors"].values()]
+    def _inbox(x, z): return any(x0 <= x <= x1 and z0 <= z <= z1 for x0, z0, x1, z1 in _boxes)
+    def _gather(entries):
+        for x, y, z, n, st, sf in entries:
+            if _inbox(x, z): _cols.setdefault((x, z), []).append((y, n, st or {}, sf))
+    _gather((x, y, z, n, st, False) for x, y, z, n, st in THIN_BLOCKS)
+    for d_ in GW_FILES:
+        _p = d_["palette"]; _bl = np.array(d_["blocks"], np.int64)
+        _m = np.zeros(len(_bl), bool)
+        for x0, z0, x1, z1 in _boxes: _m |= (_bl[:, 0] >= x0) & (_bl[:, 0] <= x1) & (_bl[:, 2] >= z0) & (_bl[:, 2] <= z1)
+        _gather((int(b[0]), int(b[1]), int(b[2]), _p[b[3]]["name"], _p[b[3]]["states"], bool(_p[b[3]].get("soft"))) for b in _bl[_m])
+    _gather((x, y, z, n, st, False) for x, y, z, n, st in BRIDGE_BLOCKS)
+    def _column(x, z, reeve=False):
+        """The game's view of a column: (ground, water, gold marker ys). Plain ground unless a stamp touches it."""
+        g, w = ground_at(x, z), water_at(x, z)
+        if (x, z) not in _cols: return g, (None if reeve else w), []
+        cells = {y: "ground" for y in range(g - 6, g + 1)}
+        if w is not None:
+            for y in range(g + 1, w + 1): cells[y] = "minecraft:water"
+        states = {}
+        for y, n, st, sf in _cols[(x, z)]:
+            if sf and cells.get(y, "minecraft:air") != "minecraft:air": continue
+            cells[y] = n; states[y] = st
+        gold, water = [], None
+        for y in sorted(cells, reverse=True):
+            n = cells[y]
+            if n == "minecraft:air": continue
+            if n == "minecraft:gold_block": gold.append(y); continue
+            if reeve:
+                if _SOFT_R.search(n): continue
+                half = states.get(y, {}).get("minecraft:vertical_half", "bottom")
+                return (y - 1 if n.endswith("_slab") and "double" not in n and half != "top" else y), None, gold
+            if (("water" in n or "ice" in n) and n not in ("minecraft:packed_ice", "minecraft:blue_ice")) or (n == "minecraft:packed_ice" and water is None):
+                water = y if water is None else water; continue
+            if not _SOFT.search(n): return y, water, gold
+        return g, water, gold
+    _probe = {"seed": int.from_bytes(os.urandom(4), "little") & 0x7FFFFFFF, "sites": {}, "reeve_y": None}
+    _gold = []
+    for sid_, a_ in _anch["anchors"].items():
+        if sid_ == "reeve":
+            y_, _, gl_ = _column(a_["x"], a_["z"], reeve=True); _probe["reeve_y"] = y_
+            _gold += [(a_["x"], gy_, a_["z"]) for gy_ in gl_]; continue
+        n_ = 2 * _R + 1; gr_, wa_ = [], []
+        for x_ in range(a_["x"] - _R, a_["x"] + _R + 1):
+            for z_ in range(a_["z"] - _R, a_["z"] + _R + 1):
+                if not inside(x_, z_): gr_.append(None); wa_.append(None); continue
+                g_, w_, gl_ = _column(x_, z_)
+                gr_.append(g_); wa_.append(w_)
+                if gl_ and math.hypot(x_ - a_["x"], z_ - a_["z"]) <= 24: _gold += [(x_, gy_, z_) for gy_ in gl_]
+        _probe["sites"][sid_] = {"x0": a_["x"] - _R, "z0": a_["z"] - _R, "n": n_, "ground": gr_, "water": wa_}
+    _pf = os.environ.get("GW_SITES_PROBE") or tempfile.mkstemp(suffix=".json")[1]   # GW_SITES_PROBE: keep it, to rerun the bake alone
+    with open(_pf, "w") as f_: json.dump(_probe, f_)
+    _sites = json.loads(subprocess.check_output(["node", os.path.join(_here, "bake_sites.mjs"), _pf]))
+    if not os.environ.get("GW_SITES_PROBE"): os.unlink(_pf)
+    _bid = {}
+    for sid_, s_ in _sites.items():
+        c_ = s_["center"]; ops_ = s_["ops"]
+        xyz_ = np.array([(c_["x"] + o[0], c_["y"] + o[1], c_["z"] + o[2]) for o in ops_], np.int64)
+        ids_ = []
+        for o in ops_:
+            k_ = o[3] + json.dumps(o[4] or {}, sort_keys=True)
+            if k_ not in _bid: _bid[k_] = -1 if o[3] == "minecraft:air" else B_raw(o[3], o[4] or {})
+            ids_.append(_bid[k_])
+        ids_ = np.array(ids_, np.int64)
+        off_ = np.isin(_key(xyz_[:, 0], xyz_[:, 1], xyz_[:, 2]), _trk) & (ids_ >= 0)
+        if off_.any(): log("boss site", sid_, "keeps", int(off_.sum()), "blocks off the track")
+        keep_ = ~off_     # (the game clears trees off its build box first; here stampcol below keeps them off instead)
+        STAMPED.append((xyz_[keep_, 0], xyz_[keep_, 1], xyz_[keep_, 2], ids_[keep_], np.zeros(int(keep_.sum()), bool)))
+        # check cells for the game: the last block at a few distinctive cells, so an older world without the bake builds
+        last_ = {}
+        for o, kp in zip(ops_, keep_):
+            if kp: last_[(o[0], o[1], o[2])] = o[3]
+        cand_ = [(p, n) for p, n in last_.items() if n != "minecraft:air" and (n.startswith("siege:") or n.startswith("hc:"))]
+        cand_ += [(p, n) for p, n in last_.items() if n != "minecraft:air" and not _SOFT.search(n) and "water" not in n and (p, n) not in cand_]
+        cand_.sort(key=lambda pn: (not (pn[1].startswith("siege:") or pn[1].startswith("hc:")), -abs(pn[0][1])))
+        picks_ = []
+        for p, n in cand_:
+            if all(abs(p[0] - q[0]) + abs(p[2] - q[2]) >= 4 for q, _ in picks_): picks_.append((p, n))
+            if len(picks_) == 5: break
+        SITE_FACTS[sid_] = {"anchor": s_["anchor"], "center": c_, "seed": s_["seed"], "info": s_["info"],
+                            "towerPost": s_.get("towerPost"), "check": [[p[0], p[1], p[2], n] for p, n in picks_]}
+        log("boss site", sid_, "baked at", c_["x"], c_["y"], c_["z"], int(keep_.sum()), "blocks")
+    if _gold:
+        _g = np.array(_gold, np.int64); STAMPED.append((_g[:, 0], _g[:, 1], _g[:, 2], np.full(len(_g), -1, np.int64), np.zeros(len(_g), bool)))
+    if os.environ.get("GW_SITES_JS"):
+        with open(os.environ["GW_SITES_JS"], "w") as f_:
+            f_.write("// Made by map/genworld.py (map/bake_sites.mjs). Do not edit by hand: rebuild the map.\n")
+            f_.write("// The boss sites baked into the base map: where each stands, its puzzle seed, and a few cells that show it is\n")
+            f_.write("// really there (an older world without the bake builds the site on approach as before). unlocks/site.js, reeve.js.\n")
+            f_.write("export const BAKED_SITES = " + json.dumps(SITE_FACTS, separators=(",", ":")) + ";\n")
 # no tree in a build's dead space (Mateo 2026-11-12: "in dead space there are trees spawning, so for builds include
 # air blocks that remove trees"): every column a town plan or bridge stamps, with a margin, keeps whole trees out, so
 # no trunk stands in a courtyard and no crown hangs over a roof or floats where a stamp cut it.
@@ -1045,7 +1152,7 @@ ROCK_IDS = [ID[n_] for n_ in ("stone", "deepslate", "granite", "diorite", "andes
 _boss = [(int(a_), int(b_)) for a_, b_ in re.findall(r"anchor: \{ x: (-?\d+), z: (-?\d+)", "".join(
     open(f_).read() for f_ in __import__("glob").glob(os.path.join(os.path.dirname(os.path.abspath(CONFIG)), "..", "unlocks", "*.js"))))]
 _boss += [(x_, z_) for _, x_, z_, _, _ in LAKES[1:2]]                   # Hallowmere (the huntsman's lake)
-nocave = disc_mask([(n, x, z, r + 16) for n, x, z, r, _ in WARDS]) | disc_mask([("b", x, z, 60) for x, z in _boss]) | thin_shaped
+nocave = disc_mask([(n, x, z, r + 16) for n, x, z, r, _ in WARDS]) | disc_mask([("b", x, z, 85) for x, z in _boss]) | thin_shaped   # a baked site reaches 70-80 from its anchor
 _way = isroad | istrail | (rail_d <= 6.5) | stampcol | isriver | bank | wet
 _ckeep = keepclear | stampcol | disc_mask([("b", x, z, 90) for x, z in _boss])
 d_keep = chamfer_b(_ckeep, 40); d_way = chamfer_b(_way, 16); d_wet = chamfer_b(wet, 10)

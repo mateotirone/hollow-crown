@@ -3,6 +3,8 @@ import { CLOCKS, KEEPERS, POSTS, makePuzzle, TOWER_POST, solutions, statementTex
 import { CLOCKTOWER, WELL, RING, wellOps, chamberOps, stairSteps, spindleOps, drainLayers, plugOps, postOps, postSpot, faceToCenter } from "./well_plan.js";
 import { fullPlan, crankAnswer, inChamber, keeperBody, MILLBROOK_SQUARE } from "./reeve.js";
 import { CHAPEL } from "../opening/millbrook.js";
+import { bakedFor, bakedState } from "./baked.js";
+import { BAKED_SITES } from "./baked_sites.js";
 
 const SECRETS = ["Hollow", "Morvane", "Oswin", "truce", "Choir"];
 const key = (o) => `${o.dx},${o.dy},${o.dz}`;
@@ -131,5 +133,21 @@ addTests("unlocks", {
     assertEqual(TOWER_POST, CLOCKTOWER.post);
     const tower = postOps(0, true, "x");
     assert(tower.ops.some((o) => o.dy === 7), "the Tower clock stands taller");
+  },
+  "a baked site is adopted only where its check cells really stand": () => {
+    const bake = { anchor: { x: 1, z: 2 }, center: { x: 10, y: 60, z: 20 }, check: [[0, 0, 0, "a"], [1, 0, 0, "b"], [2, 0, 0, "c"]] };
+    const world = { "10,60,20": "a", "11,60,20": "b", "12,60,20": "c" };
+    const at = (w) => (x, y, z) => w[`${x},${y},${z}`];
+    assertEqual(bakedState(bake, at(world)), "yes");
+    assertEqual(bakedState(bake, at({ ...world, "12,60,20": "minecraft:air" })), "yes", "one cell may differ");
+    assertEqual(bakedState(bake, at({ "10,60,20": "a" })), "wait", "not loaded yet");
+    assertEqual(bakedState(bake, () => "minecraft:grass_block"), "no", "an older world without the bake");
+    assertEqual(bakedState(undefined, at(world)), "no");
+    for (const [id, b] of Object.entries(BAKED_SITES)) {
+      assertEqual(bakedFor(id, b.anchor), b);
+      assertEqual(bakedFor(id, { x: b.anchor.x + 1, z: b.anchor.z }), undefined, "a moved anchor is not adopted");
+      assert(b.check.length >= 3, `${id} has check cells`);
+    }
+    assertEqual(bakedFor("reeve", MILLBROOK_SQUARE)?.anchor ?? MILLBROOK_SQUARE, MILLBROOK_SQUARE);
   },
 });

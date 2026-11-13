@@ -30,6 +30,7 @@ import { learnLeads } from "../lore/player.js";
 import { startBoss, fightOf } from "../bestiary/bossCore.js";
 import { markSocketed } from "../bestiary/relics.js";
 import { LANDMARKS, stampOps } from "./landmarks.js";
+import { bakedFor, bakedState } from "./baked.js";
 import { approachWave, approachCount } from "./puzzles.js";
 import { CLOCKS, KEEPERS, makePuzzle, TOWER_POST, statementText, clockAnswer } from "./keepers.js";
 import { inShaft, stairSpotsBelow, SHAFT_ZONE, WELL, CHAMBER_CENTER, wellOps, chamberOps, postOps, stairSteps, spindleOps, drainLayers, plugOps, SIGN_TURN } from "./well_plan.js";
@@ -120,6 +121,29 @@ export function fullPlan(p) {
   return { ops, posts };
 }
 
+/** After the blocks stand (built here, or baked into the map): signs on the posts, and where the clocks and keepers are. */
+function finishWell(dim, c, plan) {
+  const clocks = [], keepers = [];
+  plan.posts.forEach((post, i) => {
+    clocks.push(at(c, post.clock));
+    keepers.push({ x: c.x + post.keeper.dx + 0.5, y: c.y + post.keeper.dy, z: c.z + post.keeper.dz + 0.5 });
+    try {
+      const sign = dim.getBlock(at(c, post.sign));
+      sign?.setPermutation(BlockPermutation.resolve("minecraft:standing_sign", { ground_sign_direction: SIGN_TURN[post.face] }));
+      sign?.getComponent("minecraft:sign")?.setText(post.sign.text);
+    } catch { /* a sign is only a label */ }
+  });
+  Object.assign(store.data, { built: true, center: c, clocks, keepers, wound: false, open: false, pending: false, fighting: false });
+  store.save();
+}
+
+/** The well baked into the map (baked_sites.js, Mateo 2026-11-13): take its centre and puzzle, add signs and keepers. */
+function adoptWell(dim, bake) {
+  Object.assign(store.data, { seed: bake.seed, towerPost: bake.towerPost ?? TOWER_POST, baked: true });
+  finishWell(dim, { ...bake.center }, fullPlan(puzzle()));
+  placeKeepers(dim);
+}
+
 let busy = false;
 export function buildWell(center, by) {
   if (busy) return { ok: false, why: "it is already being built" };
@@ -143,18 +167,7 @@ export function buildWell(center, by) {
       if (by) say(by, `§cThe Millbrook well: ${failed} blocks were not loaded. It will try again when someone comes near.`);
       return;
     }
-    const clocks = [], keepers = [];
-    plan.posts.forEach((post, i) => {
-      clocks.push(at(c, post.clock));
-      keepers.push({ x: c.x + post.keeper.dx + 0.5, y: c.y + post.keeper.dy, z: c.z + post.keeper.dz + 0.5 });
-      try {
-        const sign = dim.getBlock(at(c, post.sign));
-        sign?.setPermutation(BlockPermutation.resolve("minecraft:standing_sign", { ground_sign_direction: SIGN_TURN[post.face] }));
-        sign?.getComponent("minecraft:sign")?.setText(post.sign.text);
-      } catch { /* a sign is only a label */ }
-    });
-    Object.assign(store.data, { built: true, center: c, clocks, keepers, wound: false, open: false, pending: false, fighting: false });
-    store.save();
+    finishWell(dim, c, plan);
     yield;
     placeKeepers(dim);
     busy = false;
@@ -163,7 +176,7 @@ export function buildWell(center, by) {
   return { ok: true };
 }
 
-let holding = false;
+let holding = false, baked;
 onTick("unlocks_reeve_build", 100, () => {
   if (store.data.built || busy) {
     if (holding && !busy) { try { overworld().runCommand(`tickingarea remove ${AREA}`); } catch { /* none */ } holding = false; }
@@ -172,6 +185,13 @@ onTick("unlocks_reeve_build", 100, () => {
   const near = nearby(MILLBROOK_SQUARE, BUILD_NEAR);
   if (!near.length) return;
   const dim = overworld();
+  const bake = baked === undefined ? bakedFor("reeve", MILLBROOK_SQUARE) : baked;
+  if (bake) {
+    const state = bakedState(bake, (x, y, z) => { try { return dim.getBlock({ x, y, z })?.typeId; } catch { return undefined; } });
+    if (state === "wait") return;
+    if (state === "yes") return adoptWell(dim, bake);
+    baked = null; // not this world's: build it the old way
+  }
   if (!holding) {
     const L = LANDMARKS.reeve, r = Math.max(Math.ceil(WELL.wallR) + 2, L?.size ? Math.ceil(Math.max(L.size[0], L.size[2]) / 2) + 2 : 0);
     try { dim.runCommand(`tickingarea add ${MILLBROOK_SQUARE.x - r} 0 ${MILLBROOK_SQUARE.z - r} ${MILLBROOK_SQUARE.x + r} 0 ${MILLBROOK_SQUARE.z + r} ${AREA} true`); } catch { /* full */ }
