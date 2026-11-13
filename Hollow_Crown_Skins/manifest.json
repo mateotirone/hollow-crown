@@ -1,0 +1,24 @@
+{
+  "format_version": 1,
+  "header": {
+    "name": "The Hollow Crown Skins",
+    "description": "Player skins from The Hollow Crown",
+    "uuid": "e9a1febb-c3b7-4fe1-95b0-8c4ebe64d2cf",
+    "version": [
+      1,
+      0,
+      0
+    ]
+  },
+  "modules": [
+    {
+      "type": "skin_pack",
+      "uuid": "a2a4b879-64ff-4f61-abc5-a3516568cc83",
+      "version": [
+        1,
+        0,
+        0
+      ]
+    }
+  ]
+}
