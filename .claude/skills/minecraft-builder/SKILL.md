@@ -93,6 +93,11 @@ Mateo (2026-11-12): every build in the project uses this skill. Map code calls `
 itself, so a rule fixed here reaches every build. New building rules go into `parts.py` and the
 reference files, not into a builder of their own.
 
+The ground under and round a placed build is the same for everything too (Mateo 2026-11-13): one terraform pass,
+`map/structures/terraform.py` (pad, door-landing connectors, a 4 to 6 block blend skirt, retaining walls only where
+the land can't meet). Give it a `Site` instead of levelling or banking by hand (house rules, "Every placed thing
+is terraformed").
+
 ## Commands
 
     python3 scripts/build.py SPEC OUT [--stages] [--edition java] [--mcstructure] [--no-preview] [--hifi TEX THREE]
