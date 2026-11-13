@@ -11,6 +11,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 ### Added
 - Every player settlement now has its own Farmer, standing outside the second house of your Hamlet. He sells seeds and buys your wheat, so you can earn your first Regals at home. Settlements founded before this get their Farmer the next time you go home.
 - A new step on the quest tracker, "Sell 16 wheat to the Farmer", points you to your Farmer with a pin on the minimap and a gold mark over his head until you've sold him 16 wheat.
+- Starter clothes never wear out now.
 - Every player starts with 50 Regals. Players who already started get them the next time they join.
 - Crops, saplings and sugar cane grow about three times faster: the world's random tick speed is now 3 instead of 1. Grass spreads, leaves decay and fire spreads faster too.
 - Your Regal balance is always on screen now: a small gold Regal and the number, just right of the hotbar. It changes the moment you are paid, spend, pick up coins or get robbed.
