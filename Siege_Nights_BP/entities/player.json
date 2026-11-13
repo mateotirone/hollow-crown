@@ -15,6 +15,15 @@
           ],
           "default": 0,
           "client_sync": true
+        },
+        "siege:wings": {
+          "type": "int",
+          "range": [
+            0,
+            4
+          ],
+          "default": 0,
+          "client_sync": true
         }
       }
     },

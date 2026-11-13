@@ -61,6 +61,7 @@ import "./trade/index.js";
 import "./townsfolk/index.js";
 import "./weather/index.js";
 import "./graves/index.js";
+import "./wings/index.js";
 
 // Start the shared loop last, once every file has registered its work
 import { startLoop } from "./core/loop.js";

@@ -356,6 +356,9 @@ const EXTRAS = [
     label: { gravestone: "Gravestone (where a player fell; candle lit while sealed)" } },
   { id: "bridges", title: "Bridges", marker: "map/structures/bridges_gallery.py",
     args: (out) => [out] },
+  { id: "everwake", title: "Everwake (the city in the sky)", marker: "map/structures/everwake_builds.py",
+    args: (out) => [out],
+    label: { everwake_city: "Everwake: the city on its cloud (Y 254 to 319)", everwake_needle: "Everwake with the Needle and the cloud sea" } },
 ];
 // Builder scripts that live on a branch without the kit: copied from the newest branch that has them into
 // the newest catalogue branch's map/structures and run there.
