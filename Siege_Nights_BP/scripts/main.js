@@ -63,6 +63,7 @@ import "./news/index.js";
 import "./trade/index.js";
 import "./townsfolk/index.js";
 import "./weather/index.js";
+import "./music/index.js";
 import "./graves/index.js";
 import "./wings/index.js";
 import "./battletest/index.js"; // test tool: /scriptevent siege:battle_test attack | defend | raid

@@ -2411,6 +2411,471 @@
      "load_on_low_memory": true
     }
    ]
+  },
+  "siege.music.vale_theme": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/vale_theme",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.frostmarch_theme": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/frostmarch_theme",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.saltreach_theme": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/saltreach_theme",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.emberwaste_theme": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/emberwaste_theme",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.blackfen_theme": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/blackfen_theme",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.hollow_theme": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/hollow_theme",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.blackfen_day": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/blackfen_day",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.blackfen_night": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/blackfen_night",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.blackfen_wander": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/blackfen_wander",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.boss_bride": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/boss_bride",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.boss_choir": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/boss_choir",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.boss_huntsman": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/boss_huntsman",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.boss_morvane": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/boss_morvane",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.boss_mother": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/boss_mother",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.boss_reeve": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/boss_reeve",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.boss_seneschal": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/boss_seneschal",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.boss_warlord": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/boss_warlord",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.emberwaste_day": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/emberwaste_day",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.emberwaste_night": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/emberwaste_night",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.emberwaste_wander": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/emberwaste_wander",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.frostmarch_day": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/frostmarch_day",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.frostmarch_night": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/frostmarch_night",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.frostmarch_wander": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/frostmarch_wander",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.hollow_deep": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/hollow_deep",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.hollow_village": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/hollow_village",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.main_theme": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/main_theme",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.saltreach_day": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/saltreach_day",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.saltreach_night": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/saltreach_night",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.saltreach_wander": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/saltreach_wander",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.siege_night": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/siege_night",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.vale_day": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/vale_day",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.vale_night": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/vale_night",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.music.vale_wander": {
+   "category": "music",
+   "min_distance": 1000,
+   "max_distance": 10000,
+   "sounds": [
+    {
+     "name": "sounds/siege/music/vale_wander",
+     "stream": true,
+     "volume": 0.8,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "music.game": {
+   "category": "music",
+   "sounds": [
+    {
+     "name": "sounds/siege/music/silence",
+     "stream": true
+    }
+   ]
+  },
+  "music.game.creative": {
+   "category": "music",
+   "sounds": [
+    {
+     "name": "sounds/siege/music/silence",
+     "stream": true
+    }
+   ]
+  },
+  "music.game.water": {
+   "category": "music",
+   "sounds": [
+    {
+     "name": "sounds/siege/music/silence",
+     "stream": true
+    }
+   ]
+  },
+  "music.overworld.deep_dark": {
+   "category": "music",
+   "sounds": [
+    {
+     "name": "sounds/siege/music/silence",
+     "stream": true
+    }
+   ]
   }
  }
 }
