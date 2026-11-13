@@ -7,6 +7,8 @@ import { pathX } from "./layout.js";
 import { value } from "./noise.js";
 import { RIVER_NODES, riverDistance } from "./rivers.js";
 import { STRONGHOLD } from "./stronghold.js";
+import { signRot } from "../core/signs.js";
+export { signRot } from "../core/signs.js";
 
 // Ground flattened to y inside the radius, with trees, spires and plants kept out.
 // A site with no y only keeps features out (the ground stays as generated).
@@ -163,8 +165,6 @@ export function roadAt(x, z, ground, floorY) {
 // verge and turned to face back toward the junction, so you read it before you take the road.
 // { x, z, rot (standing sign ground_sign_direction 0-15, 0 faces south), text, road }. Pure.
 const placeName = (p) => (p?.name ? p.name.replace(/^The /, "the ") : "the valley road");
-// The sign rotation whose face looks along (vx, vz): 0 south, 4 west, 8 north, 12 east.
-export const signRot = (vx, vz) => ((Math.round(Math.atan2(-vx, vz) / (Math.PI / 8)) % 16) + 16) % 16;
 let posts;
 export function signposts() {
   if (posts) return posts;
