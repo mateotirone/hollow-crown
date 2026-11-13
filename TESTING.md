@@ -820,3 +820,11 @@ Creative, four players, rank V) and must end with `SIM OK`. Add `--quiet` for on
 another roll of the dice, or a boss id (`morvane`, `bride`) to play only that one. Run it after any change to a
 fight. It checks the logic (phases, shields, warnings, loot, leftovers, errors the game would swallow), not how a
 fight looks, sounds or paths in the real game. The Storm (the fight for the throne) is not in it.
+
+## The Vault as a town hall add-on (scripts/vault/seat.js)
+
+1. Raise any town hall (`/scriptevent siege:townhall_build`), open the Town Board, choose "Vault" and "Add Vault" (free in creative).
+2. You get the Vault Key and the vault starts digging at once: a 3-wide stair hole opens in the hall's floor, off the centre aisle and clear of the Tree, the board, the hearth and the door. Nothing of the hall is cut away above the floor.
+3. Go down: entrance landing, the 3x3 door with the Vault Lock on its right. The key on the lock still swings the door.
+4. Grow the hall a tier. When it finishes, the stairs are cut again in the same spot (or, if the new hall has something there, the vault moves and you are told so). Set a relic on a stand first to see it move with the room.
+5. Try it in each region style (Vale, Frostmarch, Saltreach, Emberwaste, Blackfen): Blackfen's stairs go down from the stilt floor.

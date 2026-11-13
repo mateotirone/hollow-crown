@@ -45,6 +45,18 @@ palettes, texturing, paths, reference); this page is the short list and where to
   closer than 7 to another. Region style in `map/structures/dressing.py` LAMP_STYLE (stone foot, the region's
   wood post, a lantern). towngen does this for every town and settlement (`Town.light_town`); a hand-built
   plot or site lights its own paths the same way. Check: no street block darker than light 4 at night.
+- **Every build is lit** (Mateo 2026-11-13: "we need to go around and light all the builds ... every current build
+  overall"): the engine's last stage, `light` (`scripts/lighting.py`), works out the block light at night on every cell a
+  player can reach in the build and adds lanterns until nothing is dark: rooms at least 7 (a lantern hung from overhead,
+  chained in tall halls, never lower than two rows over the floor; wall-bracket lanterns first in halls over 8 high), every
+  door's outside step 8 (a lantern beside the door under a fence bracket of the build's own wood), built outside floors
+  (courts, yards, decks, wall walks) 4 (a bracket lantern or a lamp post on the verge, never on a one-wide way or by a
+  track). The Hollow: soul lanterns, 5 / 6 / 3. Natural ground under the sky is left to the night; sealed voids are skipped.
+  It never touches a marker, an NPC spot or a door step. Opt out with `"light": false` (a crypt meant to be dark; a ruin is
+  never lit); `"light": {"inside": 6}` changes a target. Map code: `lighting.light_blueprint(bp)` for a bp.Blueprint,
+  `map/light_blocks.py` for a baked town; a fight floor uses `posts=False` (lanterns four rows up, nothing on the floor).
+  Every exporter (export_*.py, boss_landmarks, hollow_arenas, hollow_deep, trade_outpost, towngen, bake_town) calls it.
+  Check: `lighting.report(blocks)` shows no dark cells.
 - **Nothing stands on a sunk slab** (Mateo 2026-11-12, "the town well is one block too high"): paths and squares
   are bottom slabs sunk half a block, so anything built on one (a well rim, a lamp foot, a step, a post)
   replaces the slab at the slab's own y; setting it on top leaves a half-block gap and reads a block too high.
@@ -71,6 +83,7 @@ never to do. Index: `regions/README.md`.
 
 - [ ] Every dimension odd; door and windows on bay centres; ridge centred.
 - [ ] Nothing floats: no open row between a roof and its beam or wall, every lantern hung from something.
+- [ ] Lit at night: the summary's `light` stage count is there and no "no spot for a lantern" warning (look at the dusk render).
 - [ ] Looked at from where a player stands, not only from above: no flat wall of one block, nothing pasted on a
       bare face, and no edge that shows the void or the sky behind it (regions/hollow.md, the Wound).
 - [ ] No stair facing the wrong way on roofs (light lips), no holes at valleys, chimney 2 above the roof.

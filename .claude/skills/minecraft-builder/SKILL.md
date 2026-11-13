@@ -84,6 +84,8 @@ A 50,000-block castle costs about the same tokens as a hut.
   walkway kept everywhere, lanterns, region flavour. `"attic": true` floors the roof space as a room.
   Rules and the use table: `build-instructions/08-interiors`. Check them cut open with
   `map/structures/build_interiors_viewer.py` (Roof off / per-floor buttons).
+- **Light** (Mateo 2026-11-13: every build is lit): the last stage, `light` (`scripts/lighting.py`), adds lanterns until every
+  room, door step and built yard is lit at night (house rules, "Every build is lit"). `"light": false` opts out.
 - Optional: `offset` [x, y, z] added to every command, `clear` true to air the bounding box first.
 
 ## One engine for every build

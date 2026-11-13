@@ -30,9 +30,9 @@ const PLOT_SITES = {
 const STORY_SITES = [
   { id: "crownhold", version: 3, region: "Aldmere Vale", name: "Crownhold", x: -235, z: -345, place: "crownhold", pieces: [{ d: "crownhold_hall" }, { d: "crownhold_walls" }] },
   { id: "bellhollow", region: "Aldmere Vale", name: "Bellhollow", x: 155, z: -100, place: "bellhollow", pieces: [{ d: "bellhollow_seal" }, { d: "bellhollow_frame", dx: -22 }] },
-  { id: "ashen_chapterhouse", version: 2, region: "Aldmere Vale", name: "the Ashen Gate chapterhouse", x: 420, z: -170, place: "ashen_chapterhouse", pieces: [{ d: "ashen_chapterhouse" }] },
+  { id: "ashen_chapterhouse", version: 3, region: "Aldmere Vale", name: "the Ashen Gate chapterhouse", x: 420, z: -170, place: "ashen_chapterhouse", pieces: [{ d: "ashen_chapterhouse" }] },
   { id: "ashen_watch", region: "Blackfen", name: "the Ashen Watch", x: 480, z: 560, pieces: [{ d: "ashen_watch" }] },
-  { id: "corvins_tower", version: 2, region: "Aldmere Vale", name: "Corvin's Tower", x: -416, z: -696, place: "corvins_tower", pieces: [{ d: "corvins_tower" }] },
+  { id: "corvins_tower", version: 3, region: "Aldmere Vale", name: "Corvin's Tower", x: -416, z: -696, place: "corvins_tower", pieces: [{ d: "corvins_tower" }] },
   { id: "mags_hut", region: "Blackfen", name: "Old Mag's hut", x: 4, z: 972, place: "mags_hut", pieces: [{ d: "mags_hut" }] },
   { id: "nell_raft", region: "Blackfen", name: "Nell Sedge's raft-house", x: 26, z: 1001, place: "nell_raft", pieces: [{ d: "nell_raft" }] },
   // Goody Sedge's graves (the Witch trial): the last dry ground between Old Mag's hut and the pool Nell's raft lies in
@@ -55,9 +55,11 @@ const STORY_SITES = [
 export const LANDMARKS = [
   ...Object.entries(PLOT_SITES).map(([plot, pieces]) => {
     const { x, z } = relic(plot);
-    return { id: `relic_${plot.toLowerCase()}`, name: `${plot}'s old landmark`, plot, x, z, pieces, version: 1 };
+    return { id: `relic_${plot.toLowerCase()}`, name: `${plot}'s old landmark`, plot, x, z, pieces, version: 2 };
   }),
-  ...STORY_SITES.map((s) => ({ version: 1, ...s })),
+  // version 2 (2026-11-13): every site lit at night (map/structures lighting), so built worlds put the lanterns up too.
+  // Crownhold and the Cinder Roost are lit by their own thread and keep their versions.
+  ...STORY_SITES.map((s) => ({ version: 2, ...s })),
 ];
 
 // How far from a site's anchor a player must come before it builds, and how far its pieces may reach.
