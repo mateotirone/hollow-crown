@@ -100,6 +100,14 @@ const NAMED = {
   "wx.fen_splash": { what: "A splash somewhere out on the water", drift: 0.12, layers: [["random.splash", 0.45, 0.2], ["bubble.pop", 0.5, 0.25, 8]] },
   "wx.fen_bell": { what: "A bell under the fen water", drift: 0.02, layers: [["block.bell.hit", 0.32, 0.12], ["bubble.pop", 0.4, 0.2, 10]] },
   "wx.marsh_hum": { what: "A hum where the marsh lights are", drift: 0.05, layers: [["beacon.ambient", 0.5, 0.15], ["chime.amethyst_block", 0.4, 0.1, 20]] },
+  // the Hollow's second layer under its ambience bed (undertow/sounds.js): far off, from somewhere you can't see
+  "hollow.far_singing": { what: "Singing a long way off in the Hollow", drift: 0.04, layers: [["siege.choir.hum", 0.5, 0.18], ["siege.choir.hum", 0.75, 0.08, 16]] },
+  "hollow.drip": { what: "Water dripping from the Hollow's roof", drift: 0.15, layers: [["cauldron_drip.water.pointed_dripstone", 0.6, 0.45], ["cauldron_drip.water.pointed_dripstone", 0.55, 0.25, 18]] },
+  "hollow.crack_wind": { what: "Wind breathing through a crack in the rock", drift: 0.1, layers: [["elytra.loop", 0.35, 0.22], ["ambient.cave", 0.5, 0.12, 10]] },
+  "hollow.rock_settle": { what: "Rock settling somewhere far off", drift: 0.1, layers: [["dig.deepslate", 0.45, 0.5], ["dig.stone", 0.4, 0.3, 6], ["dig.gravel", 0.5, 0.2, 14]] },
+  "hollow.river_hum": { what: "The light river humming", drift: 0.05, layers: [["beacon.ambient", 0.6, 0.18], ["bubble.pop", 0.5, 0.15, 12]] },
+  "hollow.sunk_bell": { what: "A bell somewhere under the Court's water", drift: 0.02, layers: [["block.bell.hit", 0.3, 0.14], ["bubble.pop", 0.4, 0.2, 10], ["block.bell.hit", 0.28, 0.05, 40]] },
+  "hollow.seat_hush": { what: "The air at the Seat ringing very faintly", drift: 0.03, layers: [["resonate.amethyst_block", 0.5, 0.12]] },
 };
 
 // ---------- Vanilla sounds, reworked wherever the scripts play them ----------

@@ -9,7 +9,7 @@ There is no music in version 1.
 
 - **36 signature sounds** are meant to be real recordings made with an AI sound generator. 36 of 36 are installed; the rest play a stand-in built from vanilla sounds, so the game is never silent.
 - **32 more dragon sounds** have synthesized stand-ins and can be replaced the same way.
-- **33 vanilla sounds** are reworked (lower, softer, layered) everywhere the scripts use them, and **27 named cues** are built from vanilla layers.
+- **33 vanilla sounds** are reworked (lower, softer, layered) everywhere the scripts use them, and **34 named cues** are built from vanilla layers.
 - The remaining vanilla sounds are played as they are, because they should sound like what they are (a horse, a bow, a page).
 
 ## How to add a recording
@@ -570,6 +570,13 @@ Built from vanilla layers in `core/sfx_cues.js`. A script plays one with `sfx(pl
 | `wx.fen_splash` | A splash somewhere out on the water | `random.splash` pitch 0.45 vol 0.2 + `bubble.pop` pitch 0.5 vol 0.25 after 0.4 s | - |
 | `wx.fen_bell` | A bell under the fen water | `block.bell.hit` pitch 0.32 vol 0.12 + `bubble.pop` pitch 0.4 vol 0.2 after 0.5 s | - |
 | `wx.marsh_hum` | A hum where the marsh lights are | `beacon.ambient` pitch 0.5 vol 0.15 + `chime.amethyst_block` pitch 0.4 vol 0.1 after 1 s | - |
+| `hollow.far_singing` | Singing a long way off in the Hollow | `siege.choir.hum` pitch 0.5 vol 0.18 + `siege.choir.hum` pitch 0.75 vol 0.08 after 0.8 s | - |
+| `hollow.drip` | Water dripping from the Hollow's roof | `cauldron_drip.water.pointed_dripstone` pitch 0.6 vol 0.45 + `cauldron_drip.water.pointed_dripstone` pitch 0.55 vol 0.25 after 0.9 s | - |
+| `hollow.crack_wind` | Wind breathing through a crack in the rock | `elytra.loop` pitch 0.35 vol 0.22 + `ambient.cave` pitch 0.5 vol 0.12 after 0.5 s | - |
+| `hollow.rock_settle` | Rock settling somewhere far off | `dig.deepslate` pitch 0.45 vol 0.5 + `dig.stone` pitch 0.4 vol 0.3 after 0.3 s + `dig.gravel` pitch 0.5 vol 0.2 after 0.7 s | - |
+| `hollow.river_hum` | The light river humming | `beacon.ambient` pitch 0.6 vol 0.18 + `bubble.pop` pitch 0.5 vol 0.15 after 0.6 s | - |
+| `hollow.sunk_bell` | A bell somewhere under the Court's water | `block.bell.hit` pitch 0.3 vol 0.14 + `bubble.pop` pitch 0.4 vol 0.2 after 0.5 s + `block.bell.hit` pitch 0.28 vol 0.05 after 2 s | - |
+| `hollow.seat_hush` | The air at the Seat ringing very faintly | `resonate.amethyst_block` pitch 0.5 vol 0.12 | - |
 
 ## Creature voices
 
