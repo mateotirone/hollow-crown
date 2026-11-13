@@ -18,7 +18,7 @@ GRASS = (0x91, 0xBD, 0x59); FOLIAGE = (0x6A, 0x9E, 0x3A); SPRUCE = (0x61, 0x99, 
 WOODS = {"oak": "oak", "spruce": "spruce", "dark_oak": "big_oak", "birch": "birch", "jungle": "jungle", "acacia": "acacia", "mangrove": "mangrove",
          "cherry": "cherry", "pale_oak": "pale_oak", "warped": "warped"}
 # Bedrock names some newer textures differently from the old pattern
-TEX_ALIAS = {"chiseled_deepslate": "deepslate/chiseled_deepslate", "chiseled_red_sandstone": "red_sandstone_carved", "deepslate": "deepslate/deepslate",
+TEX_ALIAS = {"bricks": "brick", "light_blue_stained_glass": "glass_light_blue", "target": "target_side", "cocoa": "cocoa_stage_2", "chiseled_deepslate": "deepslate/chiseled_deepslate", "chiseled_red_sandstone": "red_sandstone_carved", "deepslate": "deepslate/deepslate",
              "planks_mangrove": "mangrove_planks", "log_mangrove": "mangrove_log_side", "log_mangrove_top": "mangrove_log_top",
              "stripped_mangrove_log": "stripped_mangrove_log_side",
              "door_mangrove_lower": "mangrove_door_bottom", "door_big_oak_lower": "door_dark_oak_lower", "door_big_oak_upper": "door_dark_oak_upper", "door_mangrove_upper": "mangrove_door_top",
