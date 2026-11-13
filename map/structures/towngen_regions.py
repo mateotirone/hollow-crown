@@ -42,7 +42,8 @@ REGION_SITES = {
     "gulls_rest": dict(name="Gull's Rest", centre=(-865, 405), radius=85, seed=41, harbour=True, square_at=(-910, 403), build_u=1.6, lanes=12,
                        station=((-781, 400), 270), wall=True),    # where the lines leave east; the map thread fixes the exact spot
     "sunscar":    dict(name="Sunscar", centre=(850, 450), radius=80, seed=61, wall=True,
-                       avenue=((850, 457), (850, 547)), avenue_statues=32),   # a walled "desert fortress town"; the statue avenue to the Faceless Gate (z 547)
+                       avenue=((850, 457), (850, 547)), avenue_statues=32,
+                       road_to=(734, 450)),   # the station the map thread set west of the ward (2026-11-13): a gate and a street out to it   # a walled "desert fortress town"; the statue avenue to the Faceless Gate (z 547)
     "mirelight":  dict(name="Mirelight", centre=(-60, 900), radius=70, seed=51),
 }
 
@@ -294,6 +295,22 @@ class RegionTown(Town):
                 if v[0] == "stone_brick_slab": self.works[(xx, y, zz)] = (slab, {"half": "bottom"})
                 elif v[0] == "stone_bricks": self.works[(xx, y, zz)] = (log, {"axis": "y"}) if y < (int(self.K[i, j]) - 1) // 2 else (plank, {})
 
+    def road_to(self, target):
+        """A main street from the slice's edge on the way to target (a station outside the ward) in to the town's
+        streets; the wall puts a gate where it crosses, and the map's own road carries on from the edge."""
+        tx, tz = target; cx, cz = self.C
+        d = math.hypot(tx - cx, tz - cz); ux, uz = (tx - cx) / d, (tz - cz) / d
+        f = (-1, 0) if abs(ux) >= abs(uz) and ux > 0 else (1, 0) if abs(ux) >= abs(uz) else (0, -1) if uz > 0 else (0, 1)
+        edge = None
+        for t in range(int(d) + 1):
+            x, z = round(cx + ux * t), round(cz + uz * t)
+            if not self.ok(x, z) or not self.inside(x, z, 2): break
+            edge = (x, z)
+        if not edge: return
+        self.station_front = (edge, f, int(self.G0[self.ij(*edge)]))
+        self.station_road(); self.station_front = None
+        print("road to", target, "from", edge)
+
     def run(self):
         self.square()
         if REGION_SITES[self.key].get("harbour"): self.harbour()
@@ -304,6 +321,7 @@ class RegionTown(Town):
             self.site.update({k: REGION_SITES[self.key][k] for k in ("avenue", "avenue_statues")}); self.avenue()
         self.streets()
         if st: self.station_road()
+        if REGION_SITES[self.key].get("road_to"): self.road_to(REGION_SITES[self.key]["road_to"])
         self.hall_road(); self.relax(); self.grade_verges()
         self.portions()
         self.place_square_buildings()

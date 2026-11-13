@@ -1002,6 +1002,10 @@ class Town:
         if t == 3 and self.works.get((x, int(self.G[i, j]), z), ("",))[0] == "water": return False
         if getattr(self, "EAVES", None) is not None and self.EAVES[i, j]: return False
         if getattr(self, "HALL", None) is not None and self.HALL[i, j]: return False
+        if getattr(self, "station_axis", None):     # never in the railway's space (local z -6..1 behind the station),
+            sx, sz, sdeg = self.station_axis         # with 2 to spare for the lamp's arm (restamp thread, 2026-11-13)
+            nx, nz = rot_xz(0, 1, sdeg)
+            if -8 <= (x - sx) * nx + (z - sz) * nz <= 3: return False
         return all((x - a) ** 2 + (z - b) ** 2 >= self.LAMP_REACH ** 2 for a, b in lamps)
 
     def put_lamp(self, bp, x, z, y, deg, lamps):
