@@ -625,3 +625,9 @@ All 187 items and 202 blocks have an icon or texture that exists, is the right s
 - 81 blocks had no name in the language files (regional Castle Bricks/Tiles/Cobbled/Smooth/Stone and the unbreakable "Old" tree and trim blocks).
 - Boss unlock blocks, guard tier icons, vault key: see above.
 Not tested in game.
+
+## Rimeforged gear (Frostmarch; painted 2026-11-13 by `studio/art/build_rimeforged.py`, items wired by the custom armour thread)
+Dark iron rimed in pale blue, fur collar, dragon-head crest. Sheet: `art/rimeforged-gear.png`. Not tested in game.
+- Worn, 3D, one 64×32 vanilla-layout sheet per piece (trim-safe): `textures/models/siege_armor/rimeforged_<helmet|chestplate|leggings|boots>.png`, shapes `models/entity/armor/rimeforged_<piece>.geo.json`, attachables `attachables/rimeforged_<piece>.json` for `siege:rimeforged_<piece>`. Helm: dragon skull, snout and swept horns. Hauberk: fur collar, pauldrons. Greaves: knee cops. Boots: fur cuffs.
+- Flat sheets: `textures/models/armor/rimeforged_layer_1.png`, `_2.png`.
+- Icons (keys in `item_texture.json`): `siege_rimeforged_<piece>`, `siege_rime_axe`, `siege_rime_spear`, `siege_rime_steel`. The axe and spear have icons only (held like vanilla); a thrown-spear model is not painted.
