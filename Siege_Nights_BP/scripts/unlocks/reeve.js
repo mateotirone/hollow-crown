@@ -77,12 +77,19 @@ const nearby = (center, r = 48) => world.getPlayers().filter((p) => p.dimension.
 
 // ---------- building ----------
 const SOFT = /air|water|grass(?!_block)|fern|flower|tulip|poppy|dandelion|bush|snow_layer|leaves|log|vine|sapling|mushroom|torch|sign/;
+function isBottomSlab(b) {
+  if (!/_slab$/.test(b.typeId) || /double/.test(b.typeId)) return false;
+  try { return b.permutation.getState("minecraft:vertical_half") !== "top"; } catch { return true; }
+}
 function groundAt(dim, x, z) {
   let b;
   try { b = dim.getTopmostBlock({ x, z }); } catch { return undefined; }
   for (let i = 0; b && i < 40; i++) {
     if (b.typeId === "minecraft:gold_block") { b.setType("minecraft:air"); b = b.below(); continue; } // genworld's square marker
-    if (!SOFT.test(b.typeId)) return b.location.y;
+    // a square paved in bottom slabs (sunk half a block): its floor block is the one under the slab, so the rim
+    // (dy 1) replaces the slab instead of standing on it with a half-block gap (Mateo 2026-11-12: "the town well
+    // is one block too high")
+    if (!SOFT.test(b.typeId)) return isBottomSlab(b) ? b.location.y - 1 : b.location.y;
     b = b.below();
   }
   return undefined;

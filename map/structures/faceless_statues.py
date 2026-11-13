@@ -1,26 +1,48 @@
-"""The Faceless Gate's avenue statues (Mateo, 2026-11-12: the old ones were thin 5-block posts): robed, hooded,
-faceless figures twice a man's height and more, worn by the sand, on stepped plinths. Built with the
-minecraft-builder engine from a shape spec, so the robe, hood and sleeves come out in slabs and stairs.
+"""The forty Faceless statues: stepped block plinths in the map, 3D figures stood on them by the game.
 
-    spec(variant)                              the engine spec of one standing figure, facing +z (south)
-    cells(variant, facing, fallen=False)       {(x, y, z): (block, props)} about the plinth's centre, y 0 = ground
-    put(d, cells, x, y, z)                     into a landmarks.D design at (x, y, z)
+Mateo, 2026-11-13: the figures are custom 3D entities (siege:faceless_statue, models by studio/statues/build_statues.py),
+not built blocks. The map bakes only the plinths (and the rubble round a broken one); each statue's spot goes into a
+statue-spot list, and the game (scripts/statues) stands the figure on its plinth when a player comes near.
 
-Variants: "staff" (a tall staff in the right hand), "folded" (hands folded on the chest), "bowl" (a bowl held out),
-"broken" (the hood snapped off at the neck). Every figure is faceless: the hood's opening is a smooth, blank
-quartz plane, the same as the great seated figure. A fallen figure lies on its back along its facing, broken in
-two at the knees, half sunk in the sand.
+The forty (lore: Lord Sorrel, Warden Isolde) are King Oswin at every age, boy to old king: 32 line Sunscar's avenue
+from the square to the Faceless Gate, and the Gate's own 8 make forty. Every one is robed and hooded with a blank
+quartz face, the same pale hands on every one; crowned from the young king on; holding a staff, a sword or a bowl, or
+with hands folded; about a third are broken (headless, armless, or snapped off at the stump), and four at the Gate
+have fallen.
+
+    plinth_cells(half)                   {(x, y, z): (block, props)} of one stepped plinth, y 0 = the ground (2 high)
+    avenue(d, ground)                    the Gate precinct's 4 plinths (boss_landmarks.seneschal)
+    gate_spots(anchor)                   the Gate's 8 statue spots, world x/z (anchor = boss_areas.ANCHORS["seneschal"])
+    avenue_plan(points, n=32)            Sunscar's avenue: where each statue stands and what it is (pure)
+    avenue_cells(points, n=32)           its plinths and rubble for the towns bake (a drape stamp, y 0 = the street)
+    avenue_spots(points, n=32)           its statue spots
+    write_spots(site, spots)             map/statue-spots/<site>.json; export_statues.py turns them into the game's list
+
+A statue spot (one per figure, the format the towns thread and the game share):
+    {"id": "sunscar_07", "x": 857, "z": 470, "face": "w", "age": "young_king", "hold": "sword", "wear": "whole",
+     "size": 5, "plinth": 2}
+    x, z      world block the figure stands on (the plinth's centre column); the game finds the plinth's top itself
+    face      n / e / s / w, the way the figure looks
+    age       boy, youth, young_king, king, old_king
+    hold      folded, staff, sword, bowl
+    wear      whole, headless, armless, stump, fallen (a fallen one lies on its back, feet at x/z, head away from `face`)
+    size      times the model's size: 5 on the avenue (a king about 15 blocks tall), 7.3 at the Gate (about 20)
+    plinth    half-width of the plinth's footing (2 = 5x5, 4 = 9x9), 0 for a fallen one lying on the ground
+    y         optional: the block the figure stands on, if the bake knows it (otherwise the game reads the plinth)
 """
-import math, os, sys
+import json, math, os, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SKILL = os.path.join(HERE, "..", "..", ".claude", "skills", "minecraft-builder", "scripts")
 if SKILL not in sys.path: sys.path.insert(0, SKILL)
+SPOTS_DIR = os.path.join(HERE, "..", "statue-spots")
 
-PLINTH_H = 2          # stepped plinth: 9x9 footing, 7x7 die
-TOP = 22              # the hood's crown, from the ground
+PLINTH_H = 2
 STONE = {"ladder": ["cut_sandstone", "sandstone", "smooth_sandstone"], "axis": "noise", "scale": 3}
-ROBE = {"ladder": ["sandstone", "smooth_sandstone", "cut_sandstone"], "axis": "y", "noise": 0.25, "jitter": 0.08}
+AGES = ["boy", "youth", "young_king", "king", "old_king"]
+HOLDS = ["folded", "staff", "sword", "bowl"]
+WEARS = ["whole", "headless", "armless", "stump", "fallen"]
+AVENUE_SIZE, GATE_SIZE = 5, 7.3
 
 
 def _h(*k):
@@ -30,104 +52,123 @@ def _h(*k):
     return ((x ^ (x >> 16)) & 0xFFFF) / 65535.0
 
 
-def spec(variant="folded", seed=1):
-    y0 = PLINTH_H
-    shapes = [
-        {"shape": "box", "min": [-4, 0, -4], "max": [4, 0, 4], "material": "plinth"},
-        {"shape": "box", "min": [-3, 1, -3], "max": [3, 1, 3], "material": "plinth"},
-        # the robe: wide at the hem, gathered at the waist, out again over the chest
-        {"shape": "lathe", "at": [0, y0, 0], "profile": [[0, 3.2], [1, 3.0], [5, 2.4], [8, 2.2], [11, 2.5], [13, 2.8], [14, 2.0], [14.6, 0]], "material": "robe"},
-        {"shape": "ellipsoid", "at": [0, y0 + 13, 0], "r": [3.8, 1.6, 2.4], "material": "robe"},           # shoulders
-        # the hood: an egg over the head, its opening cut flat and set back, a blank face inside
-        {"shape": "egg", "at": [0, y0 + 16.5, -0.3], "R": 2.3, "H": 3.3, "k": -0.12, "material": "robe"},
-        {"op": "sub", "shape": "box", "min": [-1, y0 + 15, 2], "max": [1, y0 + 17, 4]},
-        # sleeves hanging from the shoulders, the forearms across the chest
-        {"shape": "box", "min": [-4, y0 + 8, -1], "max": [-3, y0 + 12, 1], "material": "robe"},
-        {"shape": "box", "min": [3, y0 + 8, -1], "max": [4, y0 + 12, 1], "material": "robe"},
-        {"shape": "box", "min": [-3, y0 + 8, 2], "max": [3, y0 + 9, 3], "material": "robe"},
-        # folds down the front of the robe
-        {"op": "paint", "shape": "box", "min": [-2, y0, 1], "max": [-2, y0 + 7, 4], "material": "fold"},
-        {"op": "paint", "shape": "box", "min": [1, y0, 1], "max": [1, y0 + 7, 4], "material": "fold"},
-        {"op": "paint", "shape": "box", "min": [-4, 0, -4], "max": [4, y0, 4], "material": "dust"},
-    ]
-    place = [[x, y0 + 15 + j, 1, "smooth_quartz"] for x in (-1, 0, 1) for j in (0, 1, 2)]   # the blank face
-    if variant == "staff":
-        place += [[4, y, 2, "sandstone_wall"] for y in range(y0, y0 + 17)]
-        place += [[4, y0 + 17, 2, "chiseled_sandstone"], [4, y0 + 18, 2, "sandstone_wall"]]
-    elif variant == "bowl":
-        place += [[x, y0 + 9, 4, "smooth_sandstone_slab", {"half": "top"}] for x in (-1, 0, 1)]
-        place += [[x, y0 + 10, 4, "cut_red_sandstone_slab", {"half": "bottom"}] for x in (-1, 1)]
-        place += [[0, y0 + 10, 4, "cut_red_sandstone"]]
-    elif variant == "broken":
-        shapes.append({"op": "sub", "shape": "plane", "at": [0, y0 + 14.2, 0], "normal": [0.3, -1, 0.15]})
-        place = []
-    # wear: a few chips out of the hem and the hood's rim
-    for k in range(5):
-        a = _h(seed, k, 1) * math.tau; hi = k >= 3
-        y = y0 + (14 + 2 * _h(seed, k, 2) if hi else 0.5 + 3 * _h(seed, k, 2)); r = 2.3 if hi else 3.1
-        shapes.append({"op": "sub", "shape": "sphere", "at": [round(math.cos(a) * (r + 0.4), 1), round(y, 1), round(math.sin(a) * (r + 0.4), 1)], "r": 0.8})
-    return {"name": f"faceless_statue_{variant}", "edition": "bedrock",
-            "materials": {"plinth": STONE, "robe": ROBE, "fold": "cut_sandstone", "dust": {"ladder": ["sandstone", "smooth_sandstone"], "axis": "noise", "scale": 2}},
-            "shapes": shapes, "place": place}
+def plinth_spec(half=4):
+    """A stepped plinth: a (2h+1)-square footing and a die one smaller all round, 2 high, the sand drifted on it."""
+    return {"name": f"faceless_plinth_{2 * half + 1}", "edition": "bedrock",
+            "materials": {"plinth": STONE},
+            "shapes": [{"shape": "box", "min": [-half, 0, -half], "max": [half, 0, half], "material": "plinth"},
+                       {"shape": "box", "min": [-half + 1, 1, -half + 1], "max": [half - 1, 1, half - 1], "material": "plinth"}]}
 
 
-_ROT = {"s": 0, "w": 1, "n": 2, "e": 3}
-_DIR = ["s", "w", "n", "e"]
+_PLINTHS = {}
+def plinth_cells(half=4):
+    if half not in _PLINTHS:
+        import engine
+        blocks, _, _ = engine.compute(plinth_spec(half))
+        _PLINTHS[half] = {k: (n, dict(q)) for k, (n, q) in blocks.items()}
+    return _PLINTHS[half]
 
 
-def _turn(x, z, q):
-    """A quarter turn clockwise seen from above: south-facing -> west-facing."""
-    return -z, x, q
-
-
-def cells(variant="folded", facing="s", fallen=False, seed=1):
-    import engine
-    blocks, _, _ = engine.compute(spec(variant, seed))
-    out = {}
-    for (x, y, z), (n, q) in blocks.items():
-        q = dict(q)
-        if fallen:
-            if y < PLINTH_H: continue                                  # the plinth stays behind, elsewhere
-            n = n.replace("_stairs", "").replace("_slab", "").replace("_wall", "")
-            n = {"smooth_sandstone": "smooth_sandstone", "cut_red_sandstone": "cut_red_sandstone", "end_rod": "sand"}.get(n, n)
-            if n == "sandstone_wall": n = "sandstone"
-            q = {}
-            yy = y - PLINTH_H
-            # toppled onto its side, head to the north: height -> -z, width -> up, depth -> x; broken at the knees,
-            # the top half slid a block on; sunk a block into the sand
-            if yy == 4: continue
-            nx, ny, nz = z, x + 3, -yy
-            if yy > 4: nx += 1; nz -= 1
-            out[(nx, ny, nz)] = (n, q)
-            continue
-        out[(x, y, z)] = (n, q)
-    turns = _ROT[facing]
-    for _ in range(turns):
-        nxt = {}
-        for (x, y, z), (n, q) in out.items():
-            q = dict(q)
-            if "facing" in q and q["facing"] in _ROT: q["facing"] = _DIR[(_ROT[q["facing"]] + 1) % 4]
-            if "axis" in q and q["axis"] in ("x", "z"): q["axis"] = "z" if q["axis"] == "x" else "x"
-            nx, nz, _ = _turn(x, z, q)
-            nxt[(nx, y, nz)] = (n, q)
-        out = nxt
-    return out
-
-
-AVENUE = [("staff", "w", 7, 21), ("folded", "e", -7, 21), ("bowl", "w", 7, 29), ("broken", "e", -7, 29)]
+# The Gate's processional way (local to the precinct, boss_areas.seneschal / boss_landmarks.seneschal): four standing
+# either side of it south of the scarab court (plans.js ASH_SAND, (0, 11) r 9, stays open), four fallen along the sides.
+AVENUE = [("staff", "w", 7, 21), ("folded", "e", -7, 21), ("bowl", "w", 7, 29), ("headless", "e", -7, 29)]
 FALLEN = [("folded", 15, -6), ("staff", -15, -6), ("bowl", 15, 33), ("folded", -15, 33)]
 
 
 def avenue(d, ground=lambda x, z: 0):
-    """The eight statues of the processional way: four standing either side of it south of the scarab court
-    (plans.js ASH_SAND, (0, 11) r 9, stays open), four toppled along the precinct's sides."""
+    """The Gate precinct's four plinths (9x9). The figures on them, and the four fallen, are entities (gate_spots)."""
     for k, (v, f, x, z) in enumerate(AVENUE):
-        put(d, cells(v, f, seed=11 + k), x, ground(x, z), z)
-        if v == "broken":   # its hood lies at its feet, face up
-            for (hx, hy, hz), (n, q) in cells("folded", "s", fallen=True, seed=19).items():
-                if hz <= -16: put(d, {(hx, hy, hz): (n, {})}, x + (3 if x < 0 else -3) - hx * 0, ground(x, z), z + 22)
-    for k, (v, x, z) in enumerate(FALLEN):
-        put(d, cells(v, "s", fallen=True, seed=31 + k), x, ground(x, z), z)
+        put(d, plinth_cells(4), x, ground(x, z), z)
+
+
+def gate_spots(anchor=(850, 590)):
+    ax, az = anchor
+    out = []
+    for k, (v, f, x, z) in enumerate(AVENUE):
+        hold, wear = (v, "whole") if v in HOLDS else ("folded", v)
+        out.append({"id": f"gate_{k + 1}", "x": ax + x, "z": az + z, "face": f, "age": "old_king", "hold": hold, "wear": wear,
+                    "size": GATE_SIZE, "plinth": 4})
+    for k, (v, x, z) in enumerate(FALLEN):   # toppled long ago: feet at the spot, head to the north
+        out.append({"id": f"gate_fallen_{k + 1}", "x": ax + x, "z": az + z, "face": "s", "age": "old_king", "hold": v, "wear": "fallen",
+                    "size": GATE_SIZE, "plinth": 0})
+    return out
+
+
+ORDER = ["boy"] * 6 + ["youth"] * 8 + ["young_king"] * 9 + ["king"] * 9 + ["old_king"] * 8     # forty, square to gate
+
+
+def avenue_plan(points, n=32, seed=7, width=9):
+    """Sunscar's avenue: n statues in pairs along a street centreline (world [x, z] points from the square to the
+    Faceless Gate), boy to old king, facing the street, the plinths 5 wide just outside a `width`-wide walk (so the
+    road needs a 19-wide corridor). About a third are broken. -> [{cx, cz, face, age, hold, wear}]"""
+    seg, L = [], 0.0
+    for a, b in zip(points, points[1:]):
+        l = math.hypot(b[0] - a[0], b[1] - a[1]); seg.append((a, b, l, L)); L += l
+    order = [ORDER[round(i * (len(ORDER) - 1) / max(1, n - 1))] for i in range(n)]
+    pairs = (n + 1) // 2
+    out = []
+    for i in range(n):
+        t = (i // 2 + 0.5) / pairs * L; side = 1 if i % 2 == 0 else -1
+        a, b, l, l0 = next(s_ for s_ in seg if s_[3] + s_[2] >= t)
+        u = (t - l0) / l; px, pz = a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u
+        dx, dz = (b[0] - a[0]) / l, (b[1] - a[1]) / l
+        nx, nz = -dz * side, dx * side                                   # out to this statue's side
+        off = width // 2 + 3
+        cx, cz = round(px + nx * off), round(pz + nz * off)
+        face = ("e" if -nx > 0 else "w") if abs(nx) >= abs(nz) else ("s" if -nz > 0 else "n")   # toward the street
+        r_ = _h(seed, i, 9)
+        hold = HOLDS[int(_h(seed, i, 10) * len(HOLDS))]
+        wear = "stump" if r_ < 0.12 else "headless" if r_ < 0.24 else "armless" if r_ < 0.33 else "whole"
+        out.append({"i": i, "cx": cx, "cz": cz, "face": face, "age": order[i], "hold": hold, "wear": wear})
+    return out
+
+
+def avenue_cells(points, n=32, seed=7, width=9):
+    """The avenue's plinths (5x5, 2 high) and, round a statue broken off at the stump, the pieces that fell from it.
+    -> {(x, y, z): (block, props)} in world x/z with y 0 = the street (a drape stamp)."""
+    out = {}
+    for s in avenue_plan(points, n, seed, width):
+        for (x, y, z), v in plinth_cells(2).items(): out[(s["cx"] + x, y, s["cz"] + z)] = v
+        if s["wear"] == "stump":
+            i = s["i"]
+            for j, (x, z) in enumerate(((-3, -1), (-1, 3), (3, 1), (1, -3))):
+                if _h(seed, i, 12 + j) < 0.6:
+                    out[(s["cx"] + x, 0, s["cz"] + z)] = ("sandstone", {}) if j % 2 else ("smooth_sandstone_slab", {"half": "bottom"})
+    return out
+
+
+avenue_plinths = avenue_cells
+
+
+def avenue_spots(points, n=32, seed=7, width=9, site="sunscar"):
+    return [{"id": f"{site}_{s['i'] + 1:02d}", "x": s["cx"], "z": s["cz"], "face": s["face"], "age": s["age"], "hold": s["hold"],
+             "wear": s["wear"], "size": AVENUE_SIZE, "plinth": 2} for s in avenue_plan(points, n, seed, width)]
+
+
+SUNSCAR_AVENUE = [(850, 457), (850, 547)]   # the towns thread's road from Sunscar's square to the Faceless Gate
+
+
+def check_spot(s):
+    """The problems with one statue spot, as a list of strings (empty = fine)."""
+    bad = [f"{k} missing" for k in ("id", "x", "z", "face", "age", "hold", "wear", "size", "plinth") if k not in s]
+    if bad: return bad
+    if s["face"] not in ("n", "e", "s", "w"): bad.append(f"face {s['face']}")
+    if s["age"] not in AGES: bad.append(f"age {s['age']}")
+    if s["hold"] not in HOLDS: bad.append(f"hold {s['hold']}")
+    if s["wear"] not in WEARS: bad.append(f"wear {s['wear']}")
+    if not (0.5 <= s["size"] <= 12): bad.append(f"size {s['size']}")
+    return bad
+
+
+def write_spots(site, spots):
+    for s in spots:
+        bad = check_spot(s)
+        if bad: raise ValueError(f"{site} {s.get('id')}: {', '.join(bad)}")
+    os.makedirs(SPOTS_DIR, exist_ok=True)
+    path = os.path.join(SPOTS_DIR, f"{site}.json")
+    with open(path, "w") as f:
+        f.write("[\n" + ",\n".join(json.dumps(s, separators=(", ", ": ")) for s in spots) + "\n]\n")
+    return path
 
 
 def put(d, cs, x0, y0, z0):
@@ -136,9 +177,6 @@ def put(d, cs, x0, y0, z0):
 
 
 if __name__ == "__main__":
-    import json
-    out = sys.argv[1] if len(sys.argv) > 1 else "statues"
-    os.makedirs(out, exist_ok=True)
-    for v in ("staff", "folded", "bowl", "broken"):
-        json.dump(spec(v), open(os.path.join(out, f"{v}.json"), "w"), indent=1)
-    print("wrote", out)
+    # python3 map/structures/faceless_statues.py   writes the Gate's and Sunscar's statue spots
+    print(write_spots("faceless_gate", gate_spots()))
+    print(write_spots("sunscar", avenue_spots(SUNSCAR_AVENUE)))

@@ -50,6 +50,22 @@ export const ENTRIES = [
     when: [],
   },
   {
+    id: "eating", ch: "start", title: "Food and healing",
+    tip: "Eat on a full hunger bar and food heals you at once: half a heart every half second while the meal lasts.",
+    page: "Food heals §ffast§r here. While your hunger bar is §ffull§r and the meal you ate still has something left in it, you get half a heart back every half second. Top the bar up in a fight and the hearts follow in a few seconds.\n\n"
+      + "Rich food lasts longest: a steak or a cooked porkchop is worth about four hearts, cooked cod or bread about two. Once the meal is used up you heal slowly again, half a heart every four seconds, and not at all below nine drumsticks.\n\n"
+      + "Bread comes from any Farmer, cooked cod from a Fisher and cooked beef from a Hunter, in the six towns. Or grow, fish and raise your own.",
+    when: ["carry:minecraft:bread", "carry:minecraft:cooked_beef", "carry:minecraft:cooked_cod", "carry:minecraft:cooked_porkchop", "carry:minecraft:cooked_chicken", "carry:minecraft:cooked_mutton", "carry:minecraft:baked_potato"],
+  },
+  {
+    id: "starter_clothes", ch: "start", title: "Your starting clothes",
+    tip: "These are your region's working clothes and tool. They keep the weather off, not a sword: a Smith sells real armour.",
+    page: "Everyone starts out dressed in the working clothes of the region they arrive in, with that region's tool for a weapon: a straw hat, jerkin and §fbillhook§r in the Vale, a fur-trimmed hood, quilted coat and §fhatchet§r in Frostmarch, a knit cap, striped smock and §fcutlass§r in Saltreach, a sun wrap, sand tunic and §fsickle-sword§r in the Emberwaste, an oilskin hat, coat, waders and §freed spear§r in Blackfen. Start in Kingsrest and you get the Vale's.\n\n"
+      + "They protect about as well as leather and wear out as fast, and the weapon hits like a wooden sword. Mend the clothes with leather and the weapon with iron nuggets at an anvil, or buy spares cheaply: each region's §fHunter§r sells its clothes and its §fSmith§r its weapon.\n\n"
+      + "Your first real armour is a big step up. Any Smith sells his region's Castle Guard armour.",
+    when: ["carry:siege:starter_*"],
+  },
+  {
     id: "first_days", ch: "start", title: "What to do first",
     tip: "",
     page: "1. §fChoose a place.§r In the hall in the sky (the whole map in miniature), click a green stone to take that plot. (No plot? Start in Kingsrest and claim a free Plot Stone you find on foot, or join a friend.)\n"
@@ -59,6 +75,16 @@ export const ENTRIES = [
       + "5. §fHold the night.§r Each siege you survive is a win, and wins grow your settlement.\n\n"
       + "After that, the land is yours to read. People in the towns talk, and books lie where you would not expect them.",
     when: ["event:keepFounded"],
+  },
+  {
+    id: "quests", ch: "start", title: "Your next step",
+    tip: "",
+    page: "The lines in the top-right corner, under your minimap, are your §fquest tracker§r. They are always up, and they show the step of the story you are on now: what it is, a hint, and, when it is somewhere you know of, how far away it is and which way to turn (ahead, left, right, behind you).\n\n"
+      + "It changes by itself as you go: when you meet someone, solve a mystery in your Ledger, pick up something that opens a door, or see a great foe fall. Now and then a second line shows something else worth doing alongside.\n\n"
+      + "It only points at towns and places you have already been told about or been to. Some places are hidden on purpose: for those it tells you where to look, and your Ledger's leads say roughly where they are.\n\n"
+      + "Everyone sees their own steps, so friends on the same world can be at different points.\n\n"
+      + "To hide it, type §f/siege:quests§r. Type it again to bring it back. Hiding the minimap (§f/siege:minimap§r) moves the tracker up into its place.",
+    when: [],
   },
   {
     id: "land", ch: "start", title: "Land and protection",
@@ -217,7 +243,7 @@ export const ENTRIES = [
     id: "town_plots", ch: "keep", title: "Town plots and charters",
     tip: "Use a Plot Marker to raise a building on a town plot. Each plot only takes buildings of its size.",
     page: "Every open plot in your town has a §fPlot Marker§r. Use it to see what can go there: only buildings of the plot's size are listed, and some want a certain spot (a watchtower stands by the wall). Good spots are marked. Pick one, walk round the outline, then use the marker again and pay to raise it.\n\n"
-      + "§fCharters:§r siege wins grow your settlement, but it only grows past each tier once that tier's charter stands. A Town needs 3 homes, a Farmhouse, a Mint and a market; a City needs 6 homes, an inn, a barracks and another work building. Buildings with no ready-made design yet (Farmhouse, Mint, Inn) can be built by hand and registered. When the last one is finished, the town grows by itself.",
+      + "§fCharters:§r siege wins grow your settlement, but it only grows past each tier once that tier's charter stands. A Town needs 3 homes (cottages, houses or townhouses), a Farmhouse, a Mint and a market; a City needs 6 homes, an inn, a barracks and another work building. Any of them can also be built by hand and registered. When the last one is finished, the town grows by itself.",
     when: ["click:siege:plot_marker", "event:tierUp"],
   },
   {
@@ -298,6 +324,16 @@ export const ENTRIES = [
   },
 
   {
+    id: "upkeep", ch: "coin", title: "Upkeep",
+    tip: "Upkeep is paid at dawn: a sum for your town's size, a little for each building and a wage for each guard.",
+    page: "A settlement costs Regals to keep. Each §fdawn§r you are in the world for, your upkeep is taken from your Regals and the screen says how much: §fUpkeep paid: 46 Regals§r.\n\n"
+      + "It is a sum for your town's size (nothing for a Hamlet, 8 for a Town, 24 for a City, 48 for a Castle), 2 for every building that stands and 3 for every guard. A new settlement pays nothing for its first three days, and days you are away are never charged.\n\n"
+      + "If you can't pay it all, what you have is taken and the rest is forgiven. Nothing is ever knocked down. But until a dawn is paid in full, guards who fall are §fnot retrained§r: they wait at the Barracks.\n\n"
+      + "The Regals leave the kingdom. If another player wears the Crown, a fifth of what you pay goes to them.",
+    when: ["event:upkeepPaid"],
+  },
+
+  {
     id: "regional_armour", ch: "coin", title: "Regional armour",
     tip: "This armour is cut in a region's style. Any Smith can reforge your armour in his own region's look.",
     page: "Every region dresses its armour its own way: plain bright iron and a red surcoat in the Vale, blued steel and fur in Frostmarch, salt-bleached steel and sea-glass in Saltreach, smoke-dark steel and a face veil in the Emberwaste, blackened lamellar and a hood in Blackfen.\n\n"
@@ -330,7 +366,7 @@ export const ENTRIES = [
   {
     id: "breeder", ch: "travel", title: "Breeder's Posts",
     tip: "A Breeder's Post sells foals of its region's breed.",
-    page: "Breeder's Posts stand in the towns. Each sells foals of its own region's breed, and every region's horses are good at something different. A foal is yours from the start; ride it to raise it.",
+    page: "Breeder's Posts stand in the towns, at the breeder's yard. Each sells foals of its own region's breed (192 Regals, one every three days), and every region's horses are good at something different. A foal is yours from the start and grows up in a day; ride it to raise it.\n\nOr go without Regals: tame a wild horse and use a §fHalter§r on it.",
     when: ["click:hc:breeder_post"],
   },
   {
@@ -562,9 +598,10 @@ export const ENTRIES = [
   {
     id: "ironworks", ch: "growth", title: "The Ironworks",
     tip: "An Ironworks. Click it for its storeroom, its charcoal and its next stage.",
-    page: "Make an §fIronworks§r at the Siege Workshop and place it on your land: an §fOre Pit§r is dug behind it and its worker digs about 16 raw iron a day into the storeroom. Click the block to take it.\n\n"
-      + "Once you are a §fTown§r, build the §fBloomery§r (384 Regals): it smelts for you, about 40 iron ingots a day, burning one charcoal for every 4 ingots. Feed it from the block's menu; charcoal comes from burning logs, so a tree farm keeps it going. With no charcoal it only digs raw ore.\n\n"
-      + "Once you are a §fCity§r, with water within 12 blocks, build the §fTrip-Hammer Forge§r (1,280 Regals): a waterwheel and hammer, about 100 ingots a day.\n\n"
+    page: "Your town has a §fWorks plot§r: a big plot kept for a works. Use its marker and pick the §fIronworks§r (160 Regals). The whole plot is fenced, an §fOre Pit§r is dug, and its worker digs about 16 raw iron a day into the storeroom. Click the §fIronworks block§r in the yard to take it. You choose the plot; the works builds itself.\n\n"
+      + "Once you are a §fTown§r, build the §fBloomery§r (384 Regals) from the block: it rises on the same plot and smelts for you, about 40 iron ingots a day, burning one charcoal for every 4 ingots. Feed it from the block's menu; charcoal comes from burning logs, so a tree farm keeps it going. With no charcoal it only digs raw ore.\n\n"
+      + "Once you are a §fCity§r, with water by the plot, build the §fTrip-Hammer Forge§r (1,280 Regals): a waterwheel and hammer, about 100 ingots a day.\n\n"
+      + "§8An older town with no Works plot: craft the Ironworks at the Siege Workshop and place it on your land instead.§r\n\n"
       + "The storeroom holds three days of work, then the workers wait for you. A siege that goes badly lets raiders carry off part of it. Where you live matters: Saltreach sits on rich iron and digs twice as fast, while Frostmarch's iron is poor (a quarter speed), so Frostmarch towns trade for it.",
     when: ["place:siege:ironworks", "carry:siege:ironworks", "click:siege:ironworks"],
     needs: "siege:ironworks",

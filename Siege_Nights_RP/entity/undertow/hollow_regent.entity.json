@@ -16,11 +16,16 @@
     "controller.render.siege_bestiary"
    ],
    "animations": {
-    "idle": "animation.siege_b.hollow_regent.idle"
+    "idle": "animation.siege_b.hollow_regent.idle",
+    "walk": "animation.siege_b.hollow_regent.walk",
+    "hurt": "animation.siege_b.hollow_regent.hurt",
+    "flinch": "controller.animation.siege_b.hollow_regent.flinch"
    },
    "scripts": {
     "animate": [
-     "idle"
+     "idle",
+     "walk",
+     "flinch"
     ]
    }
   }

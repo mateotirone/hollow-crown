@@ -10916,530 +10916,6 @@
     }
    }
   },
-  "animation.siege_b.choir_conductor.move.toll.wind": {
-   "loop": "hold_on_last_frame",
-   "animation_length": 0.35,
-   "bones": {
-    "arm_right": {
-     "rotation": {
-      "0": [
-       0,
-       0,
-       0
-      ],
-      "0.35": [
-       "-150+(math.sin(query.life_time*1900)*1.6)",
-       0,
-       -40
-      ]
-     }
-    },
-    "arm_left": {
-     "rotation": {
-      "0": [
-       0,
-       0,
-       0
-      ],
-      "0.35": [
-       "-150+(math.sin(query.life_time*1900)*1.6)",
-       0,
-       40
-      ]
-     }
-    },
-    "head": {
-     "rotation": {
-      "0": [
-       0,
-       0,
-       0
-      ],
-      "0.35": [
-       -20,
-       0,
-       0
-      ]
-     }
-    }
-   }
-  },
-  "animation.siege_b.choir_conductor.move.toll.strike": {
-   "animation_length": 0.9,
-   "bones": {
-    "arm_right": {
-     "rotation": {
-      "0": [
-       -150.0,
-       0,
-       -40
-      ],
-      "0.12": [
-       -20,
-       0,
-       -30
-      ],
-      "0.5": [
-       -20,
-       0,
-       -30
-      ],
-      "0.9": [
-       0,
-       0,
-       0
-      ]
-     }
-    },
-    "arm_left": {
-     "rotation": {
-      "0": [
-       -150.0,
-       0,
-       40
-      ],
-      "0.12": [
-       -20,
-       0,
-       30
-      ],
-      "0.5": [
-       -20,
-       0,
-       30
-      ],
-      "0.9": [
-       0,
-       0,
-       0
-      ]
-     }
-    },
-    "head": {
-     "rotation": {
-      "0": [
-       -20,
-       0,
-       0
-      ],
-      "0.12": [
-       15,
-       0,
-       0
-      ],
-      "0.5": [
-       15,
-       0,
-       0
-      ],
-      "0.9": [
-       0,
-       0,
-       0
-      ]
-     }
-    },
-    "root": {
-     "position": {
-      "0": [
-       0,
-       0,
-       0
-      ],
-      "0.12": [
-       0,
-       -2,
-       0
-      ],
-      "0.5": [
-       0,
-       -2,
-       0
-      ],
-      "0.9": [
-       0,
-       0,
-       0
-      ]
-     }
-    }
-   }
-  },
-  "animation.siege_b.choir_conductor.move.undertow.wind": {
-   "loop": "hold_on_last_frame",
-   "animation_length": 0.35,
-   "bones": {
-    "arm_right": {
-     "rotation": {
-      "0": [
-       0,
-       0,
-       0
-      ],
-      "0.35": [
-       "-95+(math.sin(query.life_time*1900)*1.6)",
-       0,
-       -45
-      ]
-     }
-    },
-    "arm_left": {
-     "rotation": {
-      "0": [
-       0,
-       0,
-       0
-      ],
-      "0.35": [
-       "-95+(math.sin(query.life_time*1900)*1.6)",
-       0,
-       45
-      ]
-     }
-    },
-    "head": {
-     "rotation": {
-      "0": [
-       0,
-       0,
-       0
-      ],
-      "0.35": [
-       10,
-       0,
-       0
-      ]
-     }
-    }
-   }
-  },
-  "animation.siege_b.choir_conductor.move.undertow.strike": {
-   "animation_length": 0.9,
-   "bones": {
-    "arm_right": {
-     "rotation": {
-      "0": [
-       -95.0,
-       0,
-       -45
-      ],
-      "0.12": [
-       30,
-       0,
-       -20
-      ],
-      "0.5": [
-       30,
-       0,
-       -20
-      ],
-      "0.9": [
-       0,
-       0,
-       0
-      ]
-     }
-    },
-    "arm_left": {
-     "rotation": {
-      "0": [
-       -95.0,
-       0,
-       45
-      ],
-      "0.12": [
-       30,
-       0,
-       20
-      ],
-      "0.5": [
-       30,
-       0,
-       20
-      ],
-      "0.9": [
-       0,
-       0,
-       0
-      ]
-     }
-    },
-    "head": {
-     "rotation": {
-      "0": [
-       10,
-       0,
-       0
-      ],
-      "0.12": [
-       -25,
-       0,
-       0
-      ],
-      "0.5": [
-       -25,
-       0,
-       0
-      ],
-      "0.9": [
-       0,
-       0,
-       0
-      ]
-     }
-    },
-    "root": {
-     "rotation": {
-      "0": [
-       0,
-       0,
-       0
-      ],
-      "0.12": [
-       -12,
-       0,
-       0
-      ],
-      "0.5": [
-       -12,
-       0,
-       0
-      ],
-      "0.9": [
-       0,
-       0,
-       0
-      ]
-     }
-    }
-   }
-  },
-  "animation.siege_b.choir_conductor.move.echo.wind": {
-   "loop": "hold_on_last_frame",
-   "animation_length": 0.35,
-   "bones": {
-    "arm_right": {
-     "rotation": {
-      "0": [
-       0,
-       0,
-       0
-      ],
-      "0.35": [
-       "-30+(math.sin(query.life_time*1900)*1.6)",
-       0,
-       25
-      ]
-     }
-    },
-    "arm_left": {
-     "rotation": {
-      "0": [
-       0,
-       0,
-       0
-      ],
-      "0.35": [
-       "-30+(math.sin(query.life_time*1900)*1.6)",
-       0,
-       -25
-      ]
-     }
-    },
-    "head": {
-     "rotation": {
-      "0": [
-       0,
-       0,
-       0
-      ],
-      "0.35": [
-       -35,
-       0,
-       0
-      ]
-     }
-    }
-   }
-  },
-  "animation.siege_b.choir_conductor.move.echo.strike": {
-   "animation_length": 0.9,
-   "bones": {
-    "arm_right": {
-     "rotation": {
-      "0": [
-       -30.0,
-       0,
-       25
-      ],
-      "0.12": [
-       -90,
-       0,
-       -50
-      ],
-      "0.5": [
-       -90,
-       0,
-       -50
-      ],
-      "0.9": [
-       0,
-       0,
-       0
-      ]
-     }
-    },
-    "arm_left": {
-     "rotation": {
-      "0": [
-       -30.0,
-       0,
-       -25
-      ],
-      "0.12": [
-       -90,
-       0,
-       50
-      ],
-      "0.5": [
-       -90,
-       0,
-       50
-      ],
-      "0.9": [
-       0,
-       0,
-       0
-      ]
-     }
-    },
-    "head": {
-     "rotation": {
-      "0": [
-       -35,
-       0,
-       0
-      ],
-      "0.12": [
-       10,
-       0,
-       0
-      ],
-      "0.5": [
-       10,
-       0,
-       0
-      ],
-      "0.9": [
-       0,
-       0,
-       0
-      ]
-     }
-    }
-   }
-  },
-  "animation.siege_b.choir_conductor.move.rage.strike": {
-   "animation_length": 1.6,
-   "bones": {
-    "arm_right": {
-     "rotation": {
-      "0": [
-       0,
-       0,
-       0
-      ],
-      "0.12": [
-       -60,
-       0,
-       30
-      ],
-      "1.2": [
-       -60,
-       0,
-       30
-      ],
-      "1.6": [
-       0,
-       0,
-       0
-      ]
-     }
-    },
-    "arm_left": {
-     "rotation": {
-      "0": [
-       0,
-       0,
-       0
-      ],
-      "0.12": [
-       -60,
-       0,
-       -30
-      ],
-      "1.2": [
-       -60,
-       0,
-       -30
-      ],
-      "1.6": [
-       0,
-       0,
-       0
-      ]
-     }
-    },
-    "head": {
-     "rotation": {
-      "0": [
-       0,
-       0,
-       0
-      ],
-      "0.12": [
-       "-40+(math.sin(query.life_time*1900)*1.6)*3",
-       0,
-       0
-      ],
-      "1.2": [
-       "-40+(math.sin(query.life_time*1900)*1.6)*3",
-       0,
-       0
-      ],
-      "1.6": [
-       0,
-       0,
-       0
-      ]
-     }
-    },
-    "root": {
-     "position": {
-      "0": [
-       0,
-       0,
-       0
-      ],
-      "0.12": [
-       "(math.sin(query.life_time*1900)*1.6)*0.3",
-       0,
-       0
-      ],
-      "1.2": [
-       "(math.sin(query.life_time*1900)*1.6)*0.3",
-       0,
-       0
-      ],
-      "1.6": [
-       0,
-       0,
-       0
-      ]
-     }
-    }
-   }
-  },
   "animation.siege_b.bell_wife.move.toll.wind": {
    "loop": "hold_on_last_frame",
    "animation_length": 0.35,
@@ -12215,6 +11691,530 @@
       ],
       "1.2": [
        -18,
+       0,
+       0
+      ],
+      "1.6": [
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    "root": {
+     "position": {
+      "0": [
+       0,
+       0,
+       0
+      ],
+      "0.12": [
+       "(math.sin(query.life_time*1900)*1.6)*0.3",
+       0,
+       0
+      ],
+      "1.2": [
+       "(math.sin(query.life_time*1900)*1.6)*0.3",
+       0,
+       0
+      ],
+      "1.6": [
+       0,
+       0,
+       0
+      ]
+     }
+    }
+   }
+  },
+  "animation.siege_b.choir_conductor.move.toll.wind": {
+   "loop": "hold_on_last_frame",
+   "animation_length": 0.35,
+   "bones": {
+    "arm_right": {
+     "rotation": {
+      "0": [
+       0,
+       0,
+       0
+      ],
+      "0.35": [
+       "-150+(math.sin(query.life_time*1900)*1.6)",
+       0,
+       -40
+      ]
+     }
+    },
+    "arm_left": {
+     "rotation": {
+      "0": [
+       0,
+       0,
+       0
+      ],
+      "0.35": [
+       "-150+(math.sin(query.life_time*1900)*1.6)",
+       0,
+       40
+      ]
+     }
+    },
+    "head": {
+     "rotation": {
+      "0": [
+       0,
+       0,
+       0
+      ],
+      "0.35": [
+       -20,
+       0,
+       0
+      ]
+     }
+    }
+   }
+  },
+  "animation.siege_b.choir_conductor.move.toll.strike": {
+   "animation_length": 0.9,
+   "bones": {
+    "arm_right": {
+     "rotation": {
+      "0": [
+       -150.0,
+       0,
+       -40
+      ],
+      "0.12": [
+       -20,
+       0,
+       -30
+      ],
+      "0.5": [
+       -20,
+       0,
+       -30
+      ],
+      "0.9": [
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    "arm_left": {
+     "rotation": {
+      "0": [
+       -150.0,
+       0,
+       40
+      ],
+      "0.12": [
+       -20,
+       0,
+       30
+      ],
+      "0.5": [
+       -20,
+       0,
+       30
+      ],
+      "0.9": [
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    "head": {
+     "rotation": {
+      "0": [
+       -20,
+       0,
+       0
+      ],
+      "0.12": [
+       15,
+       0,
+       0
+      ],
+      "0.5": [
+       15,
+       0,
+       0
+      ],
+      "0.9": [
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    "root": {
+     "position": {
+      "0": [
+       0,
+       0,
+       0
+      ],
+      "0.12": [
+       0,
+       -2,
+       0
+      ],
+      "0.5": [
+       0,
+       -2,
+       0
+      ],
+      "0.9": [
+       0,
+       0,
+       0
+      ]
+     }
+    }
+   }
+  },
+  "animation.siege_b.choir_conductor.move.undertow.wind": {
+   "loop": "hold_on_last_frame",
+   "animation_length": 0.35,
+   "bones": {
+    "arm_right": {
+     "rotation": {
+      "0": [
+       0,
+       0,
+       0
+      ],
+      "0.35": [
+       "-95+(math.sin(query.life_time*1900)*1.6)",
+       0,
+       -45
+      ]
+     }
+    },
+    "arm_left": {
+     "rotation": {
+      "0": [
+       0,
+       0,
+       0
+      ],
+      "0.35": [
+       "-95+(math.sin(query.life_time*1900)*1.6)",
+       0,
+       45
+      ]
+     }
+    },
+    "head": {
+     "rotation": {
+      "0": [
+       0,
+       0,
+       0
+      ],
+      "0.35": [
+       10,
+       0,
+       0
+      ]
+     }
+    }
+   }
+  },
+  "animation.siege_b.choir_conductor.move.undertow.strike": {
+   "animation_length": 0.9,
+   "bones": {
+    "arm_right": {
+     "rotation": {
+      "0": [
+       -95.0,
+       0,
+       -45
+      ],
+      "0.12": [
+       30,
+       0,
+       -20
+      ],
+      "0.5": [
+       30,
+       0,
+       -20
+      ],
+      "0.9": [
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    "arm_left": {
+     "rotation": {
+      "0": [
+       -95.0,
+       0,
+       45
+      ],
+      "0.12": [
+       30,
+       0,
+       20
+      ],
+      "0.5": [
+       30,
+       0,
+       20
+      ],
+      "0.9": [
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    "head": {
+     "rotation": {
+      "0": [
+       10,
+       0,
+       0
+      ],
+      "0.12": [
+       -25,
+       0,
+       0
+      ],
+      "0.5": [
+       -25,
+       0,
+       0
+      ],
+      "0.9": [
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    "root": {
+     "rotation": {
+      "0": [
+       0,
+       0,
+       0
+      ],
+      "0.12": [
+       -12,
+       0,
+       0
+      ],
+      "0.5": [
+       -12,
+       0,
+       0
+      ],
+      "0.9": [
+       0,
+       0,
+       0
+      ]
+     }
+    }
+   }
+  },
+  "animation.siege_b.choir_conductor.move.echo.wind": {
+   "loop": "hold_on_last_frame",
+   "animation_length": 0.35,
+   "bones": {
+    "arm_right": {
+     "rotation": {
+      "0": [
+       0,
+       0,
+       0
+      ],
+      "0.35": [
+       "-30+(math.sin(query.life_time*1900)*1.6)",
+       0,
+       25
+      ]
+     }
+    },
+    "arm_left": {
+     "rotation": {
+      "0": [
+       0,
+       0,
+       0
+      ],
+      "0.35": [
+       "-30+(math.sin(query.life_time*1900)*1.6)",
+       0,
+       -25
+      ]
+     }
+    },
+    "head": {
+     "rotation": {
+      "0": [
+       0,
+       0,
+       0
+      ],
+      "0.35": [
+       -35,
+       0,
+       0
+      ]
+     }
+    }
+   }
+  },
+  "animation.siege_b.choir_conductor.move.echo.strike": {
+   "animation_length": 0.9,
+   "bones": {
+    "arm_right": {
+     "rotation": {
+      "0": [
+       -30.0,
+       0,
+       25
+      ],
+      "0.12": [
+       -90,
+       0,
+       -50
+      ],
+      "0.5": [
+       -90,
+       0,
+       -50
+      ],
+      "0.9": [
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    "arm_left": {
+     "rotation": {
+      "0": [
+       -30.0,
+       0,
+       -25
+      ],
+      "0.12": [
+       -90,
+       0,
+       50
+      ],
+      "0.5": [
+       -90,
+       0,
+       50
+      ],
+      "0.9": [
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    "head": {
+     "rotation": {
+      "0": [
+       -35,
+       0,
+       0
+      ],
+      "0.12": [
+       10,
+       0,
+       0
+      ],
+      "0.5": [
+       10,
+       0,
+       0
+      ],
+      "0.9": [
+       0,
+       0,
+       0
+      ]
+     }
+    }
+   }
+  },
+  "animation.siege_b.choir_conductor.move.rage.strike": {
+   "animation_length": 1.6,
+   "bones": {
+    "arm_right": {
+     "rotation": {
+      "0": [
+       0,
+       0,
+       0
+      ],
+      "0.12": [
+       -60,
+       0,
+       30
+      ],
+      "1.2": [
+       -60,
+       0,
+       30
+      ],
+      "1.6": [
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    "arm_left": {
+     "rotation": {
+      "0": [
+       0,
+       0,
+       0
+      ],
+      "0.12": [
+       -60,
+       0,
+       -30
+      ],
+      "1.2": [
+       -60,
+       0,
+       -30
+      ],
+      "1.6": [
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    "head": {
+     "rotation": {
+      "0": [
+       0,
+       0,
+       0
+      ],
+      "0.12": [
+       "-40+(math.sin(query.life_time*1900)*1.6)*3",
+       0,
+       0
+      ],
+      "1.2": [
+       "-40+(math.sin(query.life_time*1900)*1.6)*3",
        0,
        0
       ],

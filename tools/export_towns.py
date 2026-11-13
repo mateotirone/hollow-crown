@@ -15,7 +15,7 @@ import glob, json, os, sys
 
 CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 TIER = {"Hamlet": 0, "Town": 1, "City": 2, "Castle": 3}
-SIZE = {"Small": "S", "Medium": "M", "Large": "L", "Great": "G"}
+SIZE = {"Small": "S", "Medium": "M", "Large": "L", "Great": "G", "Works": "W"}
 STAIR = {"e": 0, "w": 1, "s": 2, "n": 3}       # Bedrock weirdo_direction
 GATE = {"s": 0, "w": 1, "n": 2, "e": 3}        # Bedrock direction
 RENAME = {"dirt_path": "grass_path"}
@@ -78,7 +78,7 @@ def fixture(f, base):
     if f["name"] == "tree":
         row += [f.get("species"), f.get("size"), f.get("rotation", 0)]
     elif f["name"] == "mason_yard":  # the Mason's yard: side = the way its front faces (n/s/e/w), read as rotation
-        row += [None, f.get("side", f.get("rotation", "s"))]
+        row += [f.get("side", f.get("rotation", "s"))]
     elif "rotation" in f:
         row += [f.get("stamp"), f.get("rotation", 0)]
     return row
@@ -89,7 +89,7 @@ def variant(v):
     pal = v["groundwork"]["palette"]
     assert len(pal) <= len(CHARS), "palette too long"
     return {
-        "template": v["template"], "label": v["label"], "charter": v.get("passes_charter", True),
+        "template": v["template"], "label": v["label"], "seed": v.get("seed"), "charter": v.get("passes_charter", True),
         "base": base,   # the square's real height on the map: the game lays the groundwork from here (founding.js)
         "square": v["square"]["centre"],
         "hall": [h["box"] for h in v["hall"]],

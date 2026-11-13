@@ -19,7 +19,8 @@
     "aim": "animation.siege_b.crow_mage.aim",
     "ready": "controller.animation.siege_b.crow_mage.ready",
     "hurt": "animation.siege_b.crow_mage.hurt",
-    "flinch": "controller.animation.siege_b.crow_mage.flinch"
+    "flinch": "controller.animation.siege_b.crow_mage.flinch",
+    "dead_hide": "animation.siege_b.dead_hide"
    },
    "scripts": {
     "animate": [
@@ -27,7 +28,10 @@
      "idle",
      "walk",
      "ready",
-     "flinch"
+     "flinch",
+     {
+      "dead_hide": "!query.is_alive"
+     }
     ]
    },
    "render_controllers": [
