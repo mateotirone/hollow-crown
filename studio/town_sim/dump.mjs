@@ -550,6 +550,18 @@ for (let tier = 0; tier <= 3; tier++) {
 const halls = [null, { level: 1, name: HALL_TIERS[1].name, ops: events.find((e) => e.id === "hall1").ops }];
 for (let l = 2; l <= 5; l++) halls.push({ level: l, name: HALL_TIERS[l].name, settlement: HALL_TIERS[l].settlement, ops: hallOps(l) });
 
+// ---------- siege nights, played by the game's own siege code (siege_night.mjs) ----------
+const { runSieges } = await import(pathToFileURL(path.join(import.meta.dirname, "siege_night.mjs")).href);
+const LANG = fs.readFileSync(path.join(ROOT, "Siege_Nights_RP/texts/en_US.lang"), "utf8");
+const entityName = (id) => new RegExp(`^entity\\.${id.replace(/[.:]/g, (c) => "\\" + c)}\\.name=(.*)$`, "m").exec(LANG)?.[1]?.trim()
+  ?? id.replace(/^\w+:/, "").replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+const sieges = await runSieges({
+  imp, mock, CX, CZ, BASE, gateAngle: wall.gate, radii: [0, 1, 2, 3].map((t) => wallRadius(tw, t)),
+  homes: [1, 3, 6, 10], // a villager for each home the tier's charter asks for (planSiege counts villagers)
+  wallLevels: WALLS.tierCap,
+});
+sieges.names = Object.fromEntries([...new Set(Object.values(sieges.nights).flatMap((n) => n?.waves.flat().map((e) => e.type) ?? []))].map((t) => [t, entityName(t)]));
+
 // ---------- the page's copy of the plot rules and charters (the game's own source) ----------
 const cfg = await imp("settle/config.js");
 const chartersSrc = fs.readFileSync(path.join(SCRIPTS, "settle/charters.js"), "utf8").replace(/^import .*$/m, "").replace(/^export /gm, "");
@@ -563,7 +575,7 @@ const out = {
   hallTiers: HALL_TIERS, stageNames: STAGE_NAMES, stages: STAGES, buildings: { ...Object.fromEntries(Object.entries(BUILDING).map(([k, b]) => [k, { name: b.name, blurb: b.blurb ?? "" }])), barracks: { name: "Barracks", blurb: "The guardhouse a Barracks block raises: Men-at-Arms wait in it and come out to fight." } },
   ground: { x0: X0 - CX, z0: Z0 - CZ, n: N, h: Array.from(ground) },
   palette: pal, soft, initial, events, tiers, halls, stations: stationEvents, slots: slotOut, baseBuilds, masonSlot: masonSlot?.id === "mason_yard" ? { ...masonSlot, seat: masonSeat } : null,
-  designs, trees, rules, hallTakes: slotOut.filter((s) => s.takenAt).map((s) => [s.id, s.takenAt]),
+  designs, trees, rules, sieges, keepHealth: [200, 300, 400, 600], hallTakes: slotOut.filter((s) => s.takenAt).map((s) => [s.id, s.takenAt]),
   station: station ? { origin: [station.origin.x - CX, station.origin.y, station.origin.z - CZ], forward: [station.forward.x, station.forward.z] } : null,
   charterNames: cfg.CHARTERS.map((c) => c.map((l) => l.what)),
   // how fast each kind of job runs in the game (blocks a tick), so the page can play at the game's own pace
@@ -577,4 +589,5 @@ console.log(`${tw.name} (${layout.label}) style ${STYLE}, base y ${BASE}, ${slot
 console.log("events:", events.map((e) => `${e.id}:${nOps(e.ops)}`).join(" "));
 console.log("tiers:", tiers.map((t) => `${t.name} r${t.radius} gw${nOps(t.ground)} wall L1 ${nOps(t.ring.fresh[1])} L10 ${nOps(t.ring.fresh[10])}`).join(" | "));
 console.log("halls:", halls.slice(1).map((h) => `${h.name}:${nOps(h.ops)}`).join(" "), "stations:", stationEvents.map((s) => `${s.stage}:${nOps(s.ops)}`).join(" "));
+{ const ks = Object.keys(sieges.nights), w = ks.map((k) => sieges.nights[k]?.waves ?? []); console.log("sieges:", ks.length, "nights, waves", w.map((x) => x.length).join(""), "first", JSON.stringify(sieges.nights["1|0|none"]).slice(0, 300)); }
 console.log("base builds:", baseBuilds.map((b) => `${b.id}@${b.slot}`).join(" "), "size", (fs.statSync(OUT).size / 1e6).toFixed(1), "MB");

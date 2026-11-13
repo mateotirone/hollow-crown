@@ -10,9 +10,10 @@ Rows are run-length coded along x: [y, z, x0, count, paletteIndex]. No air is wr
 import os, sys, json
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 import hollow_kit as HK
-from export_halls import KEEP
+from export_halls import KEEP, lighting
 
 def export(bp, air=False):
+    lighting.light_blueprint(bp, kind="hollow")   # every build lit (Mateo 2026-11-13): soul light in the Hollow
     pal, idx, cells = [], {}, {}
     for (x, y, z), (n, p) in bp.cells.items():
         if n == "keep" or (n == "air" and not air): continue

@@ -67,6 +67,15 @@ const SIGNATURE = {
     layers: [["hit.chain", 0.6, 0.8], ["step.chain", 0.5, 0.8, 4], ["hit.chain", 0.55, 0.8, 8], ["step.chain", 0.5, 0.8, 12], ["random.click", 0.5, 0.6, 20]] },
   "sig.portcullis_close": { custom: "siege.sig.portcullis_close", what: "The portcullis drops",
     layers: [["hit.chain", 0.8, 0.8], ["step.chain", 0.7, 0.8, 2], ["random.anvil_land", 0.5, 0.6, 8], ["dig.stone", 0.5, 0.8, 8]] },
+  // the arena crowd (arena/crowd.js): only heard while a fight is on
+  "sig.crowd_murmur": { custom: "siege.sig.crowd_murmur", drift: 0.02, what: "The arena crowd talking among itself (loop)",
+    layers: [["mob.villager.idle", 0.7, 0.25], ["mob.villager.haggle", 0.6, 0.2, 30], ["mob.villager.idle", 0.8, 0.2, 70], ["mob.villager.yes", 0.65, 0.2, 110]] },
+  "sig.crowd_cheer": { custom: "siege.sig.crowd_cheer", drift: 0.05, what: "The arena crowd cheers",
+    layers: [["mob.pillager.celebrate", 0.8, 0.8], ["mob.villager.yes", 0.7, 0.6, 3], ["mob.pillager.celebrate", 0.65, 0.6, 8], ["mob.villager.yes", 0.9, 0.5, 12]] },
+  "sig.crowd_groan": { custom: "siege.sig.crowd_groan", drift: 0.05, what: "The arena crowd groans as a fighter falls",
+    layers: [["mob.villager.no", 0.6, 0.8], ["mob.villager.no", 0.5, 0.6, 4], ["mob.villager.idle", 0.5, 0.4, 10]] },
+  "sig.arena_fanfare": { custom: "siege.sig.arena_fanfare", what: "Horns as the arena gates lift, or for the winner",
+    layers: [["raid.horn", 1.2, 0.5], ["note.trumpet", 1, 0.6, 6], ["note.trumpet", 1.26, 0.6, 12], ["note.trumpet", 1.5, 0.7, 18]] },
 };
 
 // ---------- Named cues that are not recordings ----------
@@ -100,6 +109,14 @@ const NAMED = {
   "wx.fen_splash": { what: "A splash somewhere out on the water", drift: 0.12, layers: [["random.splash", 0.45, 0.2], ["bubble.pop", 0.5, 0.25, 8]] },
   "wx.fen_bell": { what: "A bell under the fen water", drift: 0.02, layers: [["block.bell.hit", 0.32, 0.12], ["bubble.pop", 0.4, 0.2, 10]] },
   "wx.marsh_hum": { what: "A hum where the marsh lights are", drift: 0.05, layers: [["beacon.ambient", 0.5, 0.15], ["chime.amethyst_block", 0.4, 0.1, 20]] },
+  // the Hollow's second layer under its ambience bed (undertow/sounds.js): far off, from somewhere you can't see
+  "hollow.far_singing": { what: "Singing a long way off in the Hollow", drift: 0.04, layers: [["siege.choir.hum", 0.5, 0.18], ["siege.choir.hum", 0.75, 0.08, 16]] },
+  "hollow.drip": { what: "Water dripping from the Hollow's roof", drift: 0.15, layers: [["cauldron_drip.water.pointed_dripstone", 0.6, 0.45], ["cauldron_drip.water.pointed_dripstone", 0.55, 0.25, 18]] },
+  "hollow.crack_wind": { what: "Wind breathing through a crack in the rock", drift: 0.1, layers: [["elytra.loop", 0.35, 0.22], ["ambient.cave", 0.5, 0.12, 10]] },
+  "hollow.rock_settle": { what: "Rock settling somewhere far off", drift: 0.1, layers: [["dig.deepslate", 0.45, 0.5], ["dig.stone", 0.4, 0.3, 6], ["dig.gravel", 0.5, 0.2, 14]] },
+  "hollow.river_hum": { what: "The light river humming", drift: 0.05, layers: [["beacon.ambient", 0.6, 0.18], ["bubble.pop", 0.5, 0.15, 12]] },
+  "hollow.sunk_bell": { what: "A bell somewhere under the Court's water", drift: 0.02, layers: [["block.bell.hit", 0.3, 0.14], ["bubble.pop", 0.4, 0.2, 10], ["block.bell.hit", 0.28, 0.05, 40]] },
+  "hollow.seat_hush": { what: "The air at the Seat ringing very faintly", drift: 0.03, layers: [["resonate.amethyst_block", 0.5, 0.12]] },
 };
 
 // ---------- Vanilla sounds, reworked wherever the scripts play them ----------
