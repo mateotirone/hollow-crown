@@ -207,7 +207,7 @@ function keeperOf(entity) {
   return t === undefined ? undefined : Number(t.slice(KEEPER_TAG.length + 1));
 }
 
-addNpcLook((e) => { const i = keeperOf(e); return i === undefined ? undefined : `clock_${i}`; });
+addNpcLook((e) => { const i = keeperOf(e); return KEEPERS[i] ? { key: `clock_${i}`, name: KEEPERS[i].name } : undefined; });
 
 function placeKeepers(dim) {
   const spots = store.data.keepers;

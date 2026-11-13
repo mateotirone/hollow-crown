@@ -194,7 +194,11 @@ const guestNightNow = () =>
 
 // Each guest has their own face; the Even Market keeper is Seneth, the last guest
 const guestSkin = (market, index) => `guest_${market ? 11 : Math.abs(Number(index) || 0) % 12}`;
-addNpcLook((e) => (e.hasTag(GUEST_NPC_TAG) ? guestSkin(e.hasTag(MARKET_TAG), e.getDynamicProperty(GUEST_PROP)) : undefined));
+addNpcLook((e) => {
+  if (!e.hasTag(GUEST_NPC_TAG)) return undefined;
+  const market = e.hasTag(MARKET_TAG), i = Number(e.getDynamicProperty(GUEST_PROP)) || 0;
+  return { key: guestSkin(market, i), name: `§d${market ? MARKET_KEEPER.name : GUESTS[i % GUESTS.length].name}` };
+});
 
 function spawnGuest(dimension, spot, index, market = false) {
   const top = dimension.getTopmostBlock({ x: spot.x, z: spot.z });

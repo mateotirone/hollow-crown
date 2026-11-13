@@ -282,7 +282,8 @@ world.beforeEvents.playerInteractWithEntity.subscribe((event) => {
 
 addNpcLook((e) => {
   const t = e.getTags().find((x) => x.startsWith(`${KEEPER}_`));
-  return t ? `keeper_${t.slice(KEEPER.length + 1)}` : undefined;
+  const w = t && WONDER_BY_ID?.[t.slice(KEEPER.length + 1)];
+  return t ? { key: `keeper_${t.slice(KEEPER.length + 1)}`, name: w ? `${w.keeper}\n§7${w.name}` : undefined } : undefined;
 });
 
 onTick("wonders_keepers", 100, () => {

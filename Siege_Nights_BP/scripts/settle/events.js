@@ -85,7 +85,7 @@ addNpcLook((e) => {
     const region = String(e.nameTag).replace(/^Trader from /, "");
     return REGION_TO_STYLE[region] ? `fair_${REGION_TO_STYLE[region]}` : "fair_vale";
   }
-  if (e.hasTag(PLAYERS_TAG)) return `mummer_${Math.max(0, TROUPE.indexOf(e.nameTag))}`;
+  if (e.hasTag(PLAYERS_TAG)) { const i = Math.max(0, TROUPE.indexOf(e.nameTag)); return { key: `mummer_${i}`, name: TROUPE[i] }; }
   return undefined;
 });
 
