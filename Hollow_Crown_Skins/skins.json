@@ -1,0 +1,18 @@
+{
+  "serialize_name": "HollowCrown",
+  "localization_name": "HollowCrown",
+  "skins": [
+    {
+      "localization_name": "reikia_cinderhale",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "reikia_cinderhale.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "lorcan_duskmire",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "lorcan_duskmire.png",
+      "type": "free"
+    }
+  ]
+}

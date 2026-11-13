@@ -52,7 +52,7 @@ def shown_version():
 
 count = 0
 with zipfile.ZipFile(OUT, "w", zipfile.ZIP_DEFLATED) as z:
-    for pack in ("Siege_Nights_BP", "Siege_Nights_RP"):
+    for pack in ("Siege_Nights_BP", "Siege_Nights_RP", "Hollow_Crown_Skins"):   # skins: player skin pack
         for folder, _, files in os.walk(os.path.join(ROOT, pack)):
             for f in sorted(files):
                 full = os.path.join(folder, f)
