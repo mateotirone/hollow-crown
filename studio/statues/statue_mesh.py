@@ -11,7 +11,7 @@ import json, math, os
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 GEO = os.path.join(REPO, "Siege_Nights_RP/models/entity/statues/faceless_statue_{}.geo.json")
-AGES = ["boy", "youth", "young_king", "king", "old_king"]
+AGES = ["boy", "youth", "young_king", "king", "old_king", "seated"]
 HOLDS = ["folded", "staff", "sword", "bowl"]
 WEARS = ["whole", "headless", "armless", "stump", "fallen"]
 
