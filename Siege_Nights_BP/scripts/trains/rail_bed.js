@@ -346,3 +346,72 @@ export function clearBody(w, p, blocked, built) {
   }
   return true;
 }
+
+// ---------- level crossings (Mateo 2026-11-13) ----------
+// Where a road crosses the line, the stretch lays a crossing after its track (map/railcross.py plans it, in the
+// region's style): boards in the ballast under the road, setts out to 5 each side, a gate post with a lamp at each
+// corner, a short line fence, and on roads a keeper's hut from the building skill on the highest block of its
+// footprint, stone plinth down to the ground. It sits on the ground the bed graded, so it goes down after the bed.
+// Laying it twice changes nothing. false when the ground isn't loaded (try again later).
+const ns = (id) => (id.includes(":") ? id : "minecraft:" + id);
+const building = (t) => !!t && !isAir(t) && !isLiquid(t) && !SOFT.test(t) && !treeish(t) && !isNatural(t) && !PATHY.test(t) && t !== TRACK;
+export function layCrossing(w, c, blocked) {
+  for (const [x, z, y] of [...c.deck, ...c.road]) if (w.get(x, y, z) === undefined) return false;
+  for (const [x, z, y] of c.deck) {
+    const t = w.get(x, y, z);
+    if (t === BALLAST || t === FILL || TURF.test(t) || PATHY.test(t)) w.set(x, y, z, ns(c.deck_block));
+  }
+  for (const [x, z, y, id] of c.road) {
+    const g = groundAt(w, x, z, y + 3, y - 4);
+    if (!g.id || !(TURF.test(g.id) || PATHY.test(g.id) || g.id === FILL)) continue;
+    const up = w.get(x, g.y + 1, z);
+    if (!isAir(up) && !SOFT.test(up ?? "")) continue;
+    if (SOFT.test(up ?? "")) w.set(x, g.y + 1, z, AIR);
+    w.set(x, g.y, z, ns(id));
+  }
+  for (const [x, z, y, ids] of c.posts) {
+    let there = false;
+    for (let k = y - 4; k <= y + 8 && !there; k++) if (w.get(x, k, z) === ns(ids[0])) there = true;
+    if (there) continue; // this post stands already
+    const g = groundAt(w, x, z, y + 4, y - 4);
+    if (!g.id || isLiquid(g.id)) continue;
+    let open = true;
+    for (let k = 1; k <= ids.length; k++) { const t = w.get(x, g.y + k, z); if (!isAir(t) && !SOFT.test(t ?? "")) open = false; }
+    if (!open) continue; // already stands, or something else does
+    ids.forEach((id, k) => w.set(x, g.y + 1 + k, z, ns(id)));
+  }
+  if (c.hut) return layHut(w, c.hut, blocked);
+  return true;
+}
+
+function layHut(w, h, blocked) {
+  const cols = [];
+  for (let dx = -h.half - 1; dx <= h.half + 1; dx++) for (let dz = -h.half - 1; dz <= h.half + 1; dz++) cols.push([h.x + dx, h.z + dz, Math.abs(dx) <= h.half && Math.abs(dz) <= h.half]);
+  const y0 = h.y ?? 64;
+  for (const [x, z] of cols) if (w.get(x, y0, z) === undefined) return false;
+  // the trees on and round its footprint come down first
+  for (const [x, z] of cols) for (let y = y0 - 6; y <= y0 + 20; y++) {
+    if (treeish(w.get(x, y, z))) { const f = fellTree(w, x, y, z, blocked); if (f === undefined) return false; }
+  }
+  const tops = [];
+  for (const [x, z, foot] of cols) {
+    for (let y = y0 + 20; y >= y0 - 8; y--) {
+      const t = w.get(x, y, z);
+      if (building(t) || treeish(t)) return true; // built already, or a building (or a standing tree) is here: no hut
+      if (foot && firm(t)) { tops.push(y); break; }
+    }
+  }
+  if (tops.length < (2 * h.half + 1) ** 2) return true;
+  const top = Math.max(...tops), low = Math.min(...tops);
+  if (top - low > 4) return true; // too steep for a hut
+  const floor = top + 1;
+  // clear its space, then a stone plinth under every footprint column down to the ground, then the hut
+  for (const [x, z] of cols) for (let y = floor; y <= floor + 12; y++) { const t = w.get(x, y, z); if (t && !isAir(t)) dig(w, x, y, z); }
+  for (const [x, z, foot] of cols) {
+    if (!foot) continue;
+    let y = floor - 1;
+    while (y > floor - 8 && !firm(w.get(x, y, z))) { w.set(x, y, z, h.plinth); y--; }
+  }
+  for (const [dx, dy, dz, id, st] of h.blocks) w.set(h.x + dx, floor + dy, h.z + dz, id, st);
+  return true;
+}
