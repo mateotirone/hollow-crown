@@ -224,6 +224,15 @@ export function wallShape(seedText) {
 
 // How far out the wall stands at angle a (radians): its ring radius, wandered by center.shape (if it has one)
 export function radiusAt(center, radius, a) {
+  // A starter village wall (map/structures/starter.py) carries its whole outline: radii = blocks out at even angles,
+  // worked out from the land and what the wall holds, for a ring of radiiAt. A bigger ring keeps the same outline, moved out.
+  const radii = center?.radii;
+  if (radii?.length) {
+    const f = (turn(a) / TAU) * radii.length;
+    const i = Math.floor(f) % radii.length, t = f - Math.floor(f);
+    const r = radii[i] * (1 - t) + radii[(i + 1) % radii.length] * t + (radius - (center.radiiAt ?? radius));
+    return Math.min(r, WALLS.radius + WALLS.landBeyond - 2);
+  }
   const shape = center?.shape;
   if (!shape?.length) return radius;
   const f = (turn(a) / TAU) * shape.length;

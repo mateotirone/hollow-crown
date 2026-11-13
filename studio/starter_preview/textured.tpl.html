@@ -1,0 +1,205 @@
+<title>Starter Village Preview</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* Layout: a surveyor's sheet. Plot picker on top, the model in the middle, the area register under it. */
+:root {
+  --bg: #eef0eb; --panel: #ffffff; --ink: #1f2620; --muted: #5f6b60; --line: #cfd6cc;
+  --accent: #3d6b45; --accent-ink: #ffffff; --stage: #bcd6ee;
+  --display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --body: Inter, "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #151a16; --panel: #1d241e; --ink: #e5ebe4; --muted: #98a597; --line: #2f3a30;
+  --accent: #8fcf98; --accent-ink: #0f1a11; --stage: #1c2833; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #151a16; --panel: #1d241e; --ink: #e5ebe4; --muted: #98a597; --line: #2f3a30;
+  --accent: #8fcf98; --accent-ink: #0f1a11; --stage: #1c2833; color-scheme: dark }
+html, body { background: var(--bg); color: var(--ink); }
+body { font-family: var(--body); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 1280px; margin: 0 auto; padding-block: 18px 32px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; gap: 12px; }
+h1 { font-family: var(--display); font-size: 1.45rem; margin: 0; text-wrap: balance; }
+.sub { color: var(--muted); margin: 2px 0 0; max-width: 75ch; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center; }
+.group { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.label { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-right: 2px; }
+button.opt { font: 500 0.88rem var(--body); color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 6px 11px; cursor: pointer; }
+button.opt:hover { border-color: var(--accent); }
+button.opt[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+button.opt:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.stage { position: relative; background: var(--stage); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; height: min(74vh, 780px); min-height: 340px; touch-action: none; }
+.stage canvas { display: block; width: 100%; height: 100%; cursor: grab; }
+.tag { position: absolute; transform: translate(-50%, -100%); font: 600 0.74rem var(--body); color: #fff; background: rgba(20, 28, 22, 0.78); padding: 2px 7px; border-radius: 4px; white-space: nowrap; pointer-events: none; }
+.hint { position: absolute; left: 12px; bottom: 10px; font-size: 0.78rem; color: #24302a; background: rgba(255,255,255,0.75); padding: 2px 8px; border-radius: 4px; pointer-events: none; }
+.status[hidden] { display: none; }
+.status { position: absolute; inset: 0; display: grid; place-items: center; padding: 20px; text-align: center; color: #24302a; font-weight: 500; pointer-events: none; }
+.register { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px 28px; border-top: 1px solid var(--line); padding-top: 12px; }
+.register div { min-width: 0; }
+.register h2 { font-family: var(--display); font-size: 1.05rem; margin: 0 0 4px; }
+.register ul { margin: 0; padding-left: 18px; }
+.register li { margin: 2px 0; }
+.register .m { color: var(--muted); font-variant-numeric: tabular-nums; }
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
+
+<div class="wrap">
+  <header>
+    <h1 id="title">Starter village</h1>
+    <p class="sub" id="sub">Real map terrain and real Minecraft block textures. The hall, the buildings and the wall are drawn by the add-on's own code.</p>
+  </header>
+  <div class="controls">
+    <div class="group" id="plots"><span class="label">Plot</span></div>
+    <div class="group"><span class="label">View</span>
+      <button class="opt" id="v-orbit" aria-pressed="true">Orbit</button>
+      <button class="opt" id="v-top" aria-pressed="false">From above</button>
+      <button class="opt" id="v-gate" aria-pressed="false">From the gate</button>
+      <button class="opt" id="v-street" aria-pressed="false">On the lane</button>
+    </div>
+    <div class="group"><span class="label">Light</span>
+      <button class="opt" id="l-day" aria-pressed="true">Day</button>
+      <button class="opt" id="l-dusk" aria-pressed="false">Dusk</button>
+    </div>
+    <div class="group"><span class="label">Labels</span>
+      <button class="opt" id="labels" aria-pressed="true">Shown</button>
+    </div>
+  </div>
+  <div class="stage" id="stage"><div class="status" id="status">Loading the village...</div><div class="hint">Drag to turn, scroll or pinch to zoom, right-drag to pan</div></div>
+  <section class="register" id="register"></section>
+</div>
+
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+const INDEX = /*INDEX*/[];
+const stage = document.getElementById("stage"), status = document.getElementById("status");
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
+stage.prepend(renderer.domElement);
+const scene = new THREE.Scene();
+const cam = new THREE.PerspectiveCamera(34, 1, 0.3, 1200);
+const controls = new OrbitControls(cam, renderer.domElement); controls.enableDamping = true; controls.maxPolarAngle = Math.PI * 0.495;
+const hemi = new THREE.HemisphereLight(0xdfeaff, 0x6b5a45, 1.15); scene.add(hemi);
+const sun = new THREE.DirectionalLight(0xfff1dc, 2.6); scene.add(sun, sun.target);
+sun.castShadow = true; sun.shadow.mapSize.set(4096, 4096); sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.02;
+let group = null, lamps = [], tags = [], showLabels = true, D = null, dusk = false, viewMode = "orbit";
+const cache = new Map();
+
+function sky() {
+  const c = document.createElement("canvas"); c.width = 2; c.height = 256; const g = c.getContext("2d");
+  const gr = g.createLinearGradient(0, 0, 0, 256);
+  if (dusk) { gr.addColorStop(0, "#1c2440"); gr.addColorStop(0.6, "#7a5a6e"); gr.addColorStop(1, "#e6a070"); }
+  else { gr.addColorStop(0, "#6f9fd8"); gr.addColorStop(0.7, "#bcd6ee"); gr.addColorStop(1, "#e4eef6"); }
+  g.fillStyle = gr; g.fillRect(0, 0, 2, 256);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; scene.background = t;
+  scene.fog = new THREE.Fog(dusk ? 0x6a5a70 : 0xd3e3f1, 150, 380);
+  hemi.color.set(dusk ? 0x8090c0 : 0xdfeaff); hemi.groundColor.set(dusk ? 0x403028 : 0x6b5a45); hemi.intensity = dusk ? 0.5 : 1.15;
+  sun.color.set(dusk ? 0xffb070 : 0xfff1dc); sun.intensity = dusk ? 1.1 : 2.6;
+  const dir = dusk ? new THREE.Vector3(-0.8, 0.35, 0.5) : new THREE.Vector3(-0.55, 0.85, 0.45);
+  sun.position.copy(dir.multiplyScalar(140)); sun.target.position.set(0, 0, 0);
+  const sc = sun.shadow.camera; sc.left = -80; sc.right = 80; sc.top = 80; sc.bottom = -80; sc.near = 1; sc.far = 400; sc.updateProjectionMatrix();
+  if (group) group.traverse((o) => { if (o.material?.userData.glow) { o.material.emissive.set(dusk ? 0xffc070 : 0x000000); o.material.emissiveIntensity = dusk ? 1.4 : 0; } });
+  lamps.forEach((L) => (L.visible = dusk));
+}
+
+async function load(i) {
+  const e = INDEX[i];
+  if (!cache.has(e.file)) {
+    status.hidden = false; status.textContent = `Loading ${e.plot}...`;
+    const r = await fetch(e.file);
+    if (!r.ok) throw new Error(`Could not load ${e.file} (${r.status})`);
+    cache.set(e.file, await r.json());
+  }
+  return cache.get(e.file);
+}
+
+function build(data) {
+  D = data;
+  if (group) { scene.remove(group); group.traverse((o) => { o.geometry?.dispose(); o.material?.map?.dispose(); o.material?.dispose(); }); }
+  tags.forEach((t) => t.el.remove()); tags = []; lamps = [];
+  group = new THREE.Group(); scene.add(group);
+  const loader = new THREE.TextureLoader();
+  for (const [key, m] of Object.entries(D.meshes)) {
+    const g = new THREE.BufferGeometry(), nq = m.c.length / 4;
+    g.setAttribute("position", new THREE.Float32BufferAttribute(m.p, 3));
+    g.setAttribute("normal", new THREE.Float32BufferAttribute(m.n, 3));
+    g.setAttribute("uv", new THREE.Float32BufferAttribute(m.uv, 2));
+    const col = new Float32Array(m.c.length * 3); m.c.forEach((a, i) => { col[i * 3] = col[i * 3 + 1] = col[i * 3 + 2] = a; });
+    g.setAttribute("color", new THREE.BufferAttribute(col, 3));
+    const idx = new Uint32Array(nq * 6); for (let i = 0; i < nq; i++) { const b = i * 4; idx.set([b, b + 1, b + 2, b, b + 2, b + 3], i * 6); }
+    g.setIndex(new THREE.BufferAttribute(idx, 1));
+    const t = loader.load(D.tex[key]); t.magFilter = THREE.NearestFilter; t.minFilter = THREE.NearestMipmapLinearFilter; t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
+    const mat = new THREE.MeshLambertMaterial({ map: t, vertexColors: true, alphaTest: m.cut ? 0.5 : 0, transparent: !!m.water, opacity: m.water ? 0.82 : 1 });
+    if (m.glow) { mat.userData.glow = true; mat.emissiveMap = t; }
+    const mesh = new THREE.Mesh(g, mat); mesh.castShadow = !m.water; mesh.receiveShadow = true; group.add(mesh);
+    if (m.glow) {
+      const seen = new Set();
+      for (let i = 0; i < m.p.length; i += 72) {
+        const k = [Math.floor(m.p[i]), Math.floor(m.p[i + 1]), Math.floor(m.p[i + 2])].join();
+        if (seen.has(k) || seen.size > 30) continue; seen.add(k);
+        const L = new THREE.PointLight(0xffb060, 6, 10, 1.6); L.position.set(m.p[i] + 0.3, m.p[i + 1], m.p[i + 2] + 0.3); L.visible = dusk; group.add(L); lamps.push(L);
+      }
+    }
+  }
+  for (const [label, x, y, z] of D.tags) { const el = document.createElement("div"); el.className = "tag"; el.textContent = label; el.hidden = !showLabels; stage.appendChild(el); tags.push({ el, v: new THREE.Vector3(x, y, z) }); }
+  document.getElementById("title").textContent = `${D.plot} starter village`;
+  document.getElementById("sub").textContent = `${D.region}. Real map terrain and real Minecraft block textures. The hall, the buildings and the wall (${D.wall.name}) are drawn by the add-on's own code.`;
+  register();
+  sky(); view(viewMode);
+  status.hidden = true;
+}
+
+function view(mode) {
+  viewMode = mode;
+  for (const id of ["orbit", "top", "gate", "street"]) document.getElementById("v-" + id).setAttribute("aria-pressed", String(id === mode));
+  if (!D) return;
+  const ga = D.gateAngle;
+  controls.target.set(0, 0, 0);
+  if (mode === "top") cam.position.set(0.01, 125, 0.01);
+  else if (mode === "gate") { cam.position.set(Math.cos(ga) * (D.wall.max + 18), 9, Math.sin(ga) * (D.wall.max + 18)); controls.target.set(0, 3, 0); }
+  else if (mode === "street") { // on the lane inside the gate, looking up past the well to the hall
+    const gx = Math.cos(ga), gz = Math.sin(ga), px = -gz, pz = gx;
+    cam.position.set(gx * 25 + px * 2.5, 4.5, gz * 25 + pz * 2.5); controls.target.set(-gx * 6, 4, -gz * 6); }
+  else cam.position.set(Math.cos(ga + 0.8) * 78, 58, Math.sin(ga + 0.8) * 78);
+  controls.update();
+}
+
+function register() {
+  const groups = {}, names = { building: "Standing on arrival", slot: "Empty plots (Plot Marker)", yard: "Yards", woodyard: "Yards", pen: "Yards", field: "Fields", commons: "Greens" };
+  for (const a of D.areas) (groups[names[a.kind] ?? a.kind] ??= []).push(a);
+  groups["Standing on arrival"] = [{ label: "Longhouse (hall level 1)" }, ...(groups["Standing on arrival"] ?? []), { label: "Well" }];
+  const size = (b) => (b ? `${b[1] - b[0] + 1} x ${b[3] - b[2] + 1}` : "");
+  document.getElementById("register").innerHTML = Object.entries(groups).map(([g, list]) => `<div><h2>${g}</h2><ul>${list.map((a) => `<li>${a.label} <span class="m">${size(a.building ?? a.box)}</span></li>`).join("")}</ul></div>`).join("")
+    + `<div><h2>Wall</h2><ul><li>${D.wall.name}</li><li>Wanders from <span class="m">${Math.round(D.wall.min)}</span> to <span class="m">${Math.round(D.wall.max)}</span> blocks out</li><li>Square at y <span class="m">${D.squareY}</span></li></ul></div>`;
+}
+
+function resize() { const w = stage.clientWidth, h = stage.clientHeight; renderer.setSize(w, h); cam.aspect = w / h; cam.updateProjectionMatrix(); }
+new ResizeObserver(resize).observe(stage); resize();
+const v = new THREE.Vector3();
+let frames = 0;
+(function loop() {
+  requestAnimationFrame(loop); controls.update(); renderer.render(scene, cam);
+  if (D && ++frames > 30) window.__ready = true;
+  const w = stage.clientWidth, h = stage.clientHeight;
+  for (const t of tags) {
+    if (!showLabels) continue;
+    v.copy(t.v).project(cam);
+    const off = v.z > 1 || Math.abs(v.x) > 1.05 || Math.abs(v.y) > 1.05;
+    t.el.hidden = off;
+    if (!off) { t.el.style.left = ((v.x + 1) / 2) * w + "px"; t.el.style.top = ((1 - v.y) / 2) * h + "px"; }
+  }
+})();
+
+const plots = document.getElementById("plots");
+async function pick(i) {
+  plots.querySelectorAll("button").forEach((b, j) => b.setAttribute("aria-pressed", String(j === i)));
+  try { build(await load(i)); } catch (err) { status.hidden = false; status.textContent = `${err.message}. Reload the page to try again.`; }
+}
+INDEX.forEach((e, i) => { const b = document.createElement("button"); b.className = "opt"; b.id = "plot-" + i; b.textContent = e.plot; b.onclick = () => pick(i); plots.appendChild(b); });
+for (const id of ["orbit", "top", "gate", "street"]) document.getElementById("v-" + id).onclick = () => view(id);
+for (const id of ["day", "dusk"]) document.getElementById("l-" + id).onclick = () => { dusk = id === "dusk"; document.getElementById("l-day").setAttribute("aria-pressed", String(!dusk)); document.getElementById("l-dusk").setAttribute("aria-pressed", String(dusk)); sky(); };
+document.getElementById("labels").onclick = (e) => { showLabels = !showLabels; e.target.setAttribute("aria-pressed", String(showLabels)); e.target.textContent = showLabels ? "Shown" : "Hidden"; tags.forEach((t) => (t.el.hidden = !showLabels)); };
+const start = Math.max(0, INDEX.findIndex((e) => "#" + e.plot.toLowerCase() === location.hash));
+pick(start);
+</script>

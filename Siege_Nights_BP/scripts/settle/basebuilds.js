@@ -4,7 +4,8 @@
 //     On the layout's own "mason_yard" ground once the town generator reserves it, else on the Small plot nearest
 //     the square. If neither fits, the bench goes where the layout put it, as before.
 //   the founder's house: a cottage in the town's style on a Small plot, free, with a bed of the owner's own that
-//     no settler ever takes ("does a house for me spawn ... cause I can't sleep").
+//     no settler ever takes ("does a house for me spawn ... cause I can't sleep"). On a map plot the starter village's
+//     house tagged "founder" is that house (plotmarker.js raises it), so no cottage is added.
 // Both are raised by the plot building engine (plans.js raise), so they rise like every other building.
 
 import { world, system, BlockPermutation } from "@minecraft/server";
@@ -100,8 +101,8 @@ on("settleBuilt", ({ owner, building, style, origin, forward, marks, slotId }) =
       }
     } catch { benchFallback(owner); }
   }
-  if (building === "cottage" && st.founderHome && !st.ownerBed) {
-    const spot = bedSpot(drawBuilding("cottage", style));
+  if (st.founderHome && !st.ownerBed) { // a cottage, or the starter village's founder's house
+    const spot = bedSpot(drawBuilding(building, style));
     if (!spot) return;
     const frame = frameFor(forward);
     const foot = toWorld(frame, origin, spot.x, spot.y, spot.z), head = toWorld(frame, origin, spot.x, spot.y, spot.z + 1);
