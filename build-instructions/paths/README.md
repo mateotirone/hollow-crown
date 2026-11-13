@@ -92,6 +92,10 @@ the gate itself, and must never cut through a wall, a field or a plot to reach i
 - **Gate avenue**: the gate (angle 90) is always an entry. Its avenue runs through the fields to the ring.
 - **Station**: the Grand Station stands on the line at radius 126 on the side of the plot's rail stop, with a
   5-wide high street running in to the ring (`paths.station`). Rails cross no road on the level.
+- **End of the line**: at a stop only one stretch reaches (Oakmere, Wolfcairn, Frosthelm) the track never just
+  stops in the grass. One block past the last rail at the dead end: a timber buffer beam across the track with a
+  lantern on it. One block behind that: an end wall 3 wide and 2 high in the region's low wall stone, no wider
+  than the track bed, so a road to the platform end gets past it (`trains/stations.js` BUFFER).
 - Roads and tracks inside the Citadel follow the sunken half-slab rule like everywhere else. Bare blocks
   take the region's slab mix (Vale cobble and stone brick, Frostmarch cobbled deepslate, Saltreach smooth
   sandstone, Blackfen mud brick, Emberwaste smooth red sandstone).

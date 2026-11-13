@@ -5,6 +5,7 @@ export const INSTALLED = {
   "siege.choir.hum": { seconds: 7.0 },
   "siege.dragon.cinderwing.roar": { seconds: 2.4 },
   "siege.dragon.drake.roar": { seconds: 2.4 },
+  "siege.dragon.wyrm.roar": { seconds: 3.48 },
   "siege.dragon.wyvern.roar": { seconds: 2.3 },
   "siege.sig.bell_tongue": { seconds: 6.0 },
   "siege.sig.boss.bride": { seconds: 10.0 },

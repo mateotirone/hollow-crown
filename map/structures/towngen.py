@@ -44,6 +44,7 @@ HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from bp import Blueprint
 from kit import h3, VALE, mix
 import towngen_build as TB
+import terraform as TF
 import dressing, vale, vale_civic
 
 SITES = {
@@ -492,6 +493,8 @@ class Town:
         return [(door_xz[0] + f[0] * t - f[1] * s, door_xz[1] + f[1] * t + f[0] * s) for t in range(self.LANDING) for s in (-1, 0, 1)]
 
     FLOOR_HIGHEST = True
+    TERRAFORM = True     # Mateo 2026-11-13 (Enshrouded-style): every placement is a pad + blend skirt + connectors, and the
+                         # land round them is solved once by terraform.py; the floor may cut in up to 3 below the highest block
     ROAD_FIT = 2         # half blocks: no path beside a plot is more than a block above its floor,
     ROAD_DROP = 4        # nor more than two below it (the walkway climbs to the door with a stair)
     def try_place(self, bp, deg, door_xz, kind, gap=1, max_relief=6, need_walk=True, extra=None):
@@ -543,9 +546,12 @@ class Town:
             k_road = self.k_at(*end)
         # floor height: balance digging in against building up, and keep the walkway walkable
         best = None
-        # Mateo 2026-11-11: a building stands on the highest ground block it covers; everything below
-        # is stone foundation (never cut in, so no side is buried)
-        for yf in ([int(hs.max())] if self.FLOOR_HIGHEST else range(y_lo, y_hi + 1)):
+        # terraform (Mateo 2026-11-13): the floor balances cutting in against building up, at most MAX_BELOW under the
+        # highest block, and the skirt blends the land to it. Without it (Mateo 2026-11-11) the floor is the highest
+        # ground block and everything below is stone foundation.
+        top = int(hs.max())
+        cands = range(max(y_lo, top - TF.MAX_BELOW), top + 1) if self.TERRAFORM else [top] if self.FLOOR_HIGHEST else range(y_lo, y_hi + 1)
+        for yf in cands:
             if len(near_k) and ((near_k - (2 * yf + 1)).max() > self.ROAD_FIT or ((2 * yf + 1) - near_k).max() > self.ROAD_DROP): continue
             if yf < hs.min() - 2 or yf > hs.max() + 2: continue
             cost = float(np.abs(hs - yf).sum()) + 0.6 * float(np.maximum(0, yf - hs).sum())   # fill shows; cutting is tidier
@@ -600,7 +606,7 @@ class Town:
         e = {"stamp": bp.name, "kind": kind, "x": ox, "z": oz, "ground_y": yf, "rotation": deg, "footprint": len(G), "foundation": int(yf - hs.min()),
              "door": [door_xz[0], door_xz[1]]}
         self.plan.append(e); self.designs[bp.name] = bp
-        self.foundation(G, yf, extra=[(x + ox, z + oz) for x, z in extra] if extra else None, per=per)
+        self.foundation(G, yf, extra=[(x + ox, z + oz) for x, z in extra] if extra else None, per=per, land=land)
         if need_walk: self.walkway(cells, yf, k_road, ROT[deg])
         return e
 
@@ -656,9 +662,10 @@ class Town:
             if hasattr(bp, k): setattr(out, k, getattr(bp, k))
         return out
 
-    def foundation(self, G, yf, extra=None, per=None):
+    def foundation(self, G, yf, extra=None, per=None, land=None):
         """Cut the plot level with the floor, build a stone foundation down to the ground on the low
-        side, and ease the ground round the building to the floor level (open ground: to its own level)."""
+        side, and ease the ground round the building to the floor level (open ground: to its own level).
+        With TERRAFORM the easing is left to terraform(): the plot becomes a pad and its landing a connector."""
         cells = set(G) | set(extra or []); per = per or {}
         for x, z in cells:
             i, j = self.ij(x, z)
@@ -667,6 +674,11 @@ class Town:
                 for y in range(g0 + 1, yc): self.works[(x, y, z)] = VALE["plinth"](x, y, z)
             for y in range(yc, max(g0, yc) + 1): self.works.setdefault((x, y, z), ("air", {}))
             self.G[i, j] = yc; self.FIX[i, j] = True
+        if self.TERRAFORM:
+            pad = {self.ij(x, z): per.get((x, z), yf) for x, z in cells}
+            con = {self.ij(x, z): int(self.at(self.G, x, z)) for x, z in (land or []) if self.ok(x, z) and self.at(self.K, x, z) < 0}
+            self.__dict__.setdefault("tf_sites", []).append(TF.Site(pad=pad, connectors=con))
+            return
         # apron and banks round it
         ring = set()
         for x, z in cells:
@@ -1250,6 +1262,7 @@ class Town:
 
     # =========================================================================== paths to blocks
     def path_blocks(self):
+        self.terraform()
         wet = {}
         for i, j in np.argwhere(self.K >= 0):
             x, z = int(i) + self.X0, int(j) + self.Z0
@@ -1340,6 +1353,29 @@ class Town:
         for (x, z), (lo, hi) in getattr(self, "bridge_clear", {}).items():
             for yy in range(lo, hi): self.works[(x, yy, z)] = ("air", {})
 
+    def terraform(self):
+        """The one terraform pass (terraform.py) over everything placed so far: each plot a pad, its landing a connector,
+        the streets anchors too (paths first: the skirt meets them, they never move), water and ground outside the town
+        left alone. Runs once, after the buildings and before fields and dressing (path_blocks runs it if a town's
+        run() didn't)."""
+        if not self.TERRAFORM or getattr(self, "_terraformed", False): return
+        self._terraformed = True
+        sites = getattr(self, "tf_sites", [])
+        if not sites: return
+        fixed = (self.K >= 0) | self.WET | ~self.IN
+        own = np.zeros(self.G.shape, bool)
+        for s in sites:
+            for c in {**s.pad, **s.connectors}: own[c] = True
+        built = np.zeros(self.G.shape, bool)
+        for (x, y, z), v in self.works.items():
+            if v[0] != "air" and self.ok(x, z): built[self.ij(x, z)] = True
+        fixed |= built & ~own
+        streets = {(int(i), int(j)): (int(self.K[i, j]) - 1) // 2 for i, j in np.argwhere((self.K >= 0) & ~self.WET)}
+        if streets: sites = sites + [TF.Site(pad={}, connectors=streets, skirt=2, skirt_max=3)]
+        T, wall = TF.solve(self.G.astype(int), sites, fixed)
+        self.tf_report = TF.report(self.G.astype(int), T, wall, sites)
+        self.G = np.where(fixed, self.G, T).astype(self.G.dtype)
+
     def ground_blocks(self):
         """Every column the town regraded: top block, fill under it, air over a cut."""
         for i, j in np.argwhere(self.IN & ~self.WET):
@@ -1362,6 +1398,7 @@ class Town:
         self.place_square_buildings()
         self.houses(); self.relax()
         self.windmills()
+        self.terraform()
         self.field_paths()
         self.fences()
         self.fields()

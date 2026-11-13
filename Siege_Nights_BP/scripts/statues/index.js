@@ -23,7 +23,7 @@ import { SPOTS } from "./spots_data.js";
 import { CORE } from "./model_data.js";
 
 export const STATUE = "siege:faceless_statue";
-export const AGES = ["boy", "youth", "young_king", "king", "old_king"];
+export const AGES = ["boy", "youth", "young_king", "king", "old_king", "seated"]; // seated: the Gate's great figure
 export const HOLDS = ["folded", "staff", "sword", "bowl"];
 export const WEARS = ["whole", "headless", "armless", "stump", "fallen"];
 const YAW = { s: 0, w: 90, n: 180, e: -90 };
@@ -85,12 +85,14 @@ function standAt(dim, s) {
   const around = [[off, 0], [-off, 0], [0, off], [0, -off]].map(([a, b]) => solidTop(dim, s.x + a, s.z + b)).filter((v) => v !== undefined);
   if (!around.length) return undefined;
   const ground = Math.min(...around);
-  if (top - ground > (s.plinth > 0 ? PLINTH_H + 2 : 2)) return { blocked: true };
-  return { y: top + 1 };
+  if (top - ground > (s.plinth > 0 ? (s.rise ?? PLINTH_H) + 2 : 2)) return { blocked: true };
+  let slab = false;
+  try { const b = dim.getBlock({ x: s.x, y: top, z: s.z }); slab = /slab/.test(b.typeId) && b.permutation.getState("minecraft:vertical_half") === "bottom"; } catch { /* a full block */ }
+  return { y: top + (slab ? 0.5 : 1) };
 }
 
 function setCore(dim, spot, at, fill) {
-  for (const [x0, y0, z0, x1, y1, z1] of coreBoxes(spot, at.x, at.y, at.z)) {
+  for (const [x0, y0, z0, x1, y1, z1] of coreBoxes(spot, at.x, Math.ceil(at.y), at.z)) { // on a slab the core starts in the block above
     for (let x = x0; x <= x1; x++) for (let y = y0; y <= y1; y++) for (let z = z0; z <= z1; z++) {
       try {
         const here = dim.getBlock({ x, y, z });
@@ -203,7 +205,7 @@ system.afterEvents.scriptEventReceive.subscribe(({ id, message, sourceEntity: pl
   }
   if (id === "siege:statue_row") {
     const f = inFront(player, 8); const face = faceToward(f.dx, f.dz); const [ax, az] = [-f.dz, f.dx]; // along the row
-    const row = [...AGES.map((age, i) => ({ age, hold: HOLDS[i % 4], wear: "whole" })), ...WEARS.slice(1).map((wear) => ({ age: "king", hold: "staff", wear }))];
+    const row = [...AGES.filter((a) => a !== "seated").map((age, i) => ({ age, hold: HOLDS[i % 4], wear: "whole" })), ...WEARS.slice(1).map((wear) => ({ age: "king", hold: "staff", wear }))];
     row.forEach((r, i) => {
       const k = (i - (row.length - 1) / 2) * 6;
       standStatue(dim, { ...r, size: 3, face }, { x: Math.round(f.x + ax * k), y: f.y, z: Math.round(f.z + az * k) }, [TEST_TAG]);
@@ -225,7 +227,7 @@ system.afterEvents.scriptEventReceive.subscribe(({ id, message, sourceEntity: pl
 
 addTests("statues", {
   "statues: forty spots, every one a real age, hold and break, each id once": () => {
-    assertEqual(SPOTS.length, 40);
+    assertEqual(SPOTS.length, 41); // the forty, and the great seated figure
     assertEqual(new Set(SPOTS.map((s) => s.id)).size, SPOTS.length);
     for (const s of SPOTS) {
       assert(AGES.includes(s.age) && HOLDS.includes(s.hold) && WEARS.includes(s.wear), s.id);
@@ -233,7 +235,8 @@ addTests("statues", {
       assert(s.wear === "fallen" ? s.plinth === 0 : s.plinth >= 2, `${s.id}: a standing statue has a plinth`);
     }
     assertEqual(SPOTS.filter((s) => s.site === "sunscar").length, 32);
-    assertEqual(SPOTS.filter((s) => s.site === "faceless_gate").length, 8);
+    assertEqual(SPOTS.filter((s) => s.site === "faceless_gate").length, 9);
+    assertEqual(SPOTS.filter((s) => s.age === "seated").map((s) => s.id), ["gate_seated"]);
     for (const age of AGES) assert(CORE[age], `model data for ${age}`);
   },
   "statues: facing turns the figure the right way (yaw 0 south, 90 west)": () => {
