@@ -67,6 +67,15 @@ const SIGNATURE = {
     layers: [["hit.chain", 0.6, 0.8], ["step.chain", 0.5, 0.8, 4], ["hit.chain", 0.55, 0.8, 8], ["step.chain", 0.5, 0.8, 12], ["random.click", 0.5, 0.6, 20]] },
   "sig.portcullis_close": { custom: "siege.sig.portcullis_close", what: "The portcullis drops",
     layers: [["hit.chain", 0.8, 0.8], ["step.chain", 0.7, 0.8, 2], ["random.anvil_land", 0.5, 0.6, 8], ["dig.stone", 0.5, 0.8, 8]] },
+  // the arena crowd (arena/crowd.js): only heard while a fight is on
+  "sig.crowd_murmur": { custom: "siege.sig.crowd_murmur", drift: 0.02, what: "The arena crowd talking among itself (loop)",
+    layers: [["mob.villager.idle", 0.7, 0.25], ["mob.villager.haggle", 0.6, 0.2, 30], ["mob.villager.idle", 0.8, 0.2, 70], ["mob.villager.yes", 0.65, 0.2, 110]] },
+  "sig.crowd_cheer": { custom: "siege.sig.crowd_cheer", drift: 0.05, what: "The arena crowd cheers",
+    layers: [["mob.pillager.celebrate", 0.8, 0.8], ["mob.villager.yes", 0.7, 0.6, 3], ["mob.pillager.celebrate", 0.65, 0.6, 8], ["mob.villager.yes", 0.9, 0.5, 12]] },
+  "sig.crowd_groan": { custom: "siege.sig.crowd_groan", drift: 0.05, what: "The arena crowd groans as a fighter falls",
+    layers: [["mob.villager.no", 0.6, 0.8], ["mob.villager.no", 0.5, 0.6, 4], ["mob.villager.idle", 0.5, 0.4, 10]] },
+  "sig.arena_fanfare": { custom: "siege.sig.arena_fanfare", what: "Horns as the arena gates lift, or for the winner",
+    layers: [["raid.horn", 1.2, 0.5], ["note.trumpet", 1, 0.6, 6], ["note.trumpet", 1.26, 0.6, 12], ["note.trumpet", 1.5, 0.7, 18]] },
 };
 
 // ---------- Named cues that are not recordings ----------
