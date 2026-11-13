@@ -1056,6 +1056,36 @@ if os.environ.get("GW_SITES", "1") != "0" and shutil.which("node"):
             f_.write("// The boss sites baked into the base map: where each stands, its puzzle seed, and a few cells that show it is\n")
             f_.write("// really there (an older world without the bake builds the site on approach as before). unlocks/site.js, reeve.js.\n")
             f_.write("export const BAKED_SITES = " + json.dumps(SITE_FACTS, separators=(",", ":")) + ";\n")
+# ---- the Everwake air boat station, a ruin until the story restores it (Mateo picked Wren Water, 2026-11-13). Built
+# with the skill (map/structures/everwake_builds.py), set on this map's own ground by the one terraform pass
+# (map/structures/everwake/site.py world_blocks: pad, blend, the lane out to the road, its trees). GW_EVERWAKE=0: none.
+if os.environ.get("GW_EVERWAKE", "1") != "0":
+    import subprocess, tempfile
+    _st = os.path.join(os.path.dirname(os.path.abspath(__file__)), "structures")
+    sys.path.insert(0, _st); sys.path.insert(0, os.path.join(_st, "everwake"))
+    import importlib.util as _ilu                        # map/structures/everwake/site.py ("site" is a stdlib name)
+    for _m in ("trees", "station", "spec", "terraform"): sys.modules.pop(_m, None)
+    _sp = _ilu.spec_from_file_location("everwake_site", os.path.join(_st, "everwake", "site.py"))
+    _ews = _ilu.module_from_spec(_sp); _sp.loader.exec_module(_ews)
+    from bp import Blueprint as _BP
+    _tmp = tempfile.mkdtemp()
+    subprocess.run([sys.executable, os.path.join(_st, "everwake_builds.py"), _tmp, "--only", "airboat_station_ruin"], check=True, stdout=subprocess.DEVNULL)
+    _R = _ews.R; _ls = np.arange(-_R, _R + 1)
+    _LX, _LZ = np.meshgrid(_ls, _ls, indexing="ij")
+    _gi = np.clip(_ews.CX - _LZ - X0, 0, SIZE - 1); _gk = np.clip(_ews.CZ + _LX - Z0, 0, SIZE - 1)
+    _wb, _py = _ews.world_blocks(os.path.join(_tmp, "airboat_station_ruin", "scene.json"), Y[_gi, _gk].astype(int), wet[_gi, _gk], (isroad | istrail)[_gi, _gk])
+    _bp = _BP("everwake_station"); _ek = {}
+    _ex, _ei, _es = [], [], []
+    for x_, y_, z_, n_, p_ in _wb:
+        k_ = n_ + json.dumps(p_, sort_keys=True)
+        if k_ not in _ek:
+            bn_, bs_ = _bp.to_bedrock(n_, p_)
+            _ek[k_] = (-1 if bn_ == "minecraft:air" else B_raw(bn_, bs_), "leaves" in bn_)
+        _ex.append((x_, y_, z_)); _ei.append(_ek[k_][0]); _es.append(_ek[k_][1])
+    _ex = np.array(_ex, np.int64)
+    STAMPED.append((_ex[:, 0], _ex[:, 1], _ex[:, 2], np.array(_ei, np.int64), np.array(_es, bool)))
+    shutil.rmtree(_tmp, ignore_errors=True)
+    log("everwake station (ruin) at", _ews.CX, _ews.CZ, "floor", _py, len(_wb), "blocks")
 # no tree in a build's dead space (Mateo 2026-11-12: "in dead space there are trees spawning, so for builds include
 # air blocks that remove trees"): every column a town plan or bridge stamps, with a margin, keeps whole trees out, so
 # no trunk stands in a courtyard and no crown hangs over a roof or floats where a stamp cut it.

@@ -118,7 +118,7 @@ class RegionTown(Town):
                 rr = self.sqR + 1 + extra_r
                 x, z = int(round(self.sq[0] + math.cos(a) * rr)), int(round(self.sq[1] + math.sin(a) * rr))
                 deg = snap_rot(self.sq[0] - x, self.sq[1] - z)
-                snap = ({n: getattr(self, n).copy() for n in ("G", "K", "TAKEN", "EAVES", "FIX", "DOORWALK")}, dict(self.works), len(self.plan))
+                snap = ({n: getattr(self, n).copy() for n in ("G", "K", "TAKEN", "EAVES", "FIX", "DOORWALK", "LANDK")}, dict(self.works), len(self.plan))
                 e = self.try_place(bp, deg, (x, z), "civic", gap=1, max_relief=8, need_walk=False)
                 if e:
                     sc = e.get("foundation", 9) + 0.15 * extra_r

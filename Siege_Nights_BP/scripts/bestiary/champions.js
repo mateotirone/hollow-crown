@@ -86,7 +86,7 @@ addFilter("rivalSoldier", (entity, { dim, at, role, tier, name, tags, stance } =
   try {
     return spawnChampion(dim, at, { role, tier, name, stance: stance ?? "hostile", tags: tags ?? [] }); // "realm" = a lord's soldiers sent to help a player
   } catch {
-    return undefined; // they fall back to pillagers
+    return undefined; // they fall back to our own raiders
   }
 });
 

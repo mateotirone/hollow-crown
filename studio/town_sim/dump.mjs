@@ -287,6 +287,7 @@ function fixtureOps(tier) { // founding.js placeFixture
 const CARD = [[0, "north"], [90, "east"], [180, "south"], [270, "west"]];
 const [gateDeg, gateDirName] = CARD.reduce((best, c) => (Math.abs(((tw.gate ?? 180) - c[0] + 540) % 360 - 180) < Math.abs(((tw.gate ?? 180) - best[0] + 540) % 360 - 180) ? c : best));
 const wall = { x: CX, y: BASE, z: CZ, shape: wallShape(tw.name), radius: wallRadius(tw, 0), level: 0, style: STYLE, gate: bearingToAngle(gateDeg), gateDir: gateDirName, ground: undefined, lifts: {} };
+if (tw.outline?.radii?.length) Object.assign(wall, { radii: tw.outline.radii, radiiAt: tw.outline.radiiAt }); // the starter village's wall line (walls.js raiseWall outline)
 function measureWall() {
   wall.ground = smoothGround(stationSpots(wall, wall.radius).map((s) => topY(s.x, s.z, WALL_SOFT)));
 }
@@ -495,11 +496,19 @@ function hallOps(level) {
 }
 ev("hall1", `Town hall level 1: the ${HALL_TIERS[1].name}`, "hall", hallOps(1), { hall: 1 });
 
-// the library, the Mason's Yard and the founder's cottage (plotmarker.js + basebuilds.js, on townLaidOut)
+// the starter village's houses, the library, the Mason's Yard and the founder's house (plotmarker.js + basebuilds.js, on townLaidOut)
 const taken = new Set();
 const baseBuilds = [];
+let founderStart = false;
+for (const s of slots) { // plotmarker.js raiseStart: the houses that stand from the start, one of them the founder's
+  if (s.tier !== 0 || !s.start || !seatFor(s, s.start)) continue;
+  taken.add(s.id);
+  const founder = (s.tags ?? []).includes("founder");
+  founderStart ||= founder;
+  baseBuilds.push({ slot: s.id, id: s.start, why: founder ? "Your own house: it stands from the start, in the starter village" : "A starter village house, standing from the start" });
+}
 {
-  const ok = slots.filter((s) => s.tier === 0 && seatFor(s, "library"));
+  const ok = slots.filter((s) => s.tier === 0 && !taken.has(s.id) && seatFor(s, "library"));
   const s = ok.find((x) => x.tags.includes("library")) ?? ok.find((x) => x.tags.includes("square")) ?? ok[0];
   if (s) { taken.add(s.id); baseBuilds.push({ slot: s.id, id: "library", why: "Every town starts with its library" }); }
 }
@@ -519,7 +528,7 @@ let masonSlot;
 }
 const masonSeat = masonSlot && seatFor(masonSlot, "mason_yard");
 if (masonSeat) baseBuilds.push({ slot: masonSlot.id, id: "mason_yard", why: "The Mason's Yard every new base gets", seat: masonSeat });
-{
+if (!founderStart) { // basebuilds.js founderHome: a cottage only when the layout has no founder's house
   const s = pickBaseSlot(slots, taken, { x: 0, z: 0 });
   if (s) { taken.add(s.id); baseBuilds.push({ slot: s.id, id: "cottage", why: "Your own house by the square" }); }
 }
@@ -550,6 +559,18 @@ for (let tier = 0; tier <= 3; tier++) {
 const halls = [null, { level: 1, name: HALL_TIERS[1].name, ops: events.find((e) => e.id === "hall1").ops }];
 for (let l = 2; l <= 5; l++) halls.push({ level: l, name: HALL_TIERS[l].name, settlement: HALL_TIERS[l].settlement, ops: hallOps(l) });
 
+// ---------- siege nights, played by the game's own siege code (siege_night.mjs) ----------
+const { runSieges } = await import(pathToFileURL(path.join(import.meta.dirname, "siege_night.mjs")).href);
+const LANG = fs.readFileSync(path.join(ROOT, "Siege_Nights_RP/texts/en_US.lang"), "utf8");
+const entityName = (id) => new RegExp(`^entity\\.${id.replace(/[.:]/g, (c) => "\\" + c)}\\.name=(.*)$`, "m").exec(LANG)?.[1]?.trim()
+  ?? id.replace(/^\w+:/, "").replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+const sieges = await runSieges({
+  imp, mock, CX, CZ, BASE, gateAngle: wall.gate, radii: [0, 1, 2, 3].map((t) => wallRadius(tw, t)),
+  homes: [1, 3, 6, 10], // a villager for each home the tier's charter asks for (planSiege counts villagers)
+  wallLevels: WALLS.tierCap, outline: tw.outline,
+});
+sieges.names = Object.fromEntries([...new Set(Object.values(sieges.nights).flatMap((n) => n?.waves.flat().map((e) => e.type) ?? []))].map((t) => [t, entityName(t)]));
+
 // ---------- the page's copy of the plot rules and charters (the game's own source) ----------
 const cfg = await imp("settle/config.js");
 const chartersSrc = fs.readFileSync(path.join(SCRIPTS, "settle/charters.js"), "utf8").replace(/^import .*$/m, "").replace(/^export /gm, "");
@@ -563,7 +584,7 @@ const out = {
   hallTiers: HALL_TIERS, stageNames: STAGE_NAMES, stages: STAGES, buildings: { ...Object.fromEntries(Object.entries(BUILDING).map(([k, b]) => [k, { name: b.name, blurb: b.blurb ?? "" }])), barracks: { name: "Barracks", blurb: "The guardhouse a Barracks block raises: Men-at-Arms wait in it and come out to fight." } },
   ground: { x0: X0 - CX, z0: Z0 - CZ, n: N, h: Array.from(ground) },
   palette: pal, soft, initial, events, tiers, halls, stations: stationEvents, slots: slotOut, baseBuilds, masonSlot: masonSlot?.id === "mason_yard" ? { ...masonSlot, seat: masonSeat } : null,
-  designs, trees, rules, hallTakes: slotOut.filter((s) => s.takenAt).map((s) => [s.id, s.takenAt]),
+  designs, trees, rules, sieges, keepHealth: [200, 300, 400, 600], hallTakes: slotOut.filter((s) => s.takenAt).map((s) => [s.id, s.takenAt]),
   station: station ? { origin: [station.origin.x - CX, station.origin.y, station.origin.z - CZ], forward: [station.forward.x, station.forward.z] } : null,
   charterNames: cfg.CHARTERS.map((c) => c.map((l) => l.what)),
   // how fast each kind of job runs in the game (blocks a tick), so the page can play at the game's own pace
@@ -577,4 +598,5 @@ console.log(`${tw.name} (${layout.label}) style ${STYLE}, base y ${BASE}, ${slot
 console.log("events:", events.map((e) => `${e.id}:${nOps(e.ops)}`).join(" "));
 console.log("tiers:", tiers.map((t) => `${t.name} r${t.radius} gw${nOps(t.ground)} wall L1 ${nOps(t.ring.fresh[1])} L10 ${nOps(t.ring.fresh[10])}`).join(" | "));
 console.log("halls:", halls.slice(1).map((h) => `${h.name}:${nOps(h.ops)}`).join(" "), "stations:", stationEvents.map((s) => `${s.stage}:${nOps(s.ops)}`).join(" "));
+{ const ks = Object.keys(sieges.nights), w = ks.map((k) => sieges.nights[k]?.waves ?? []); console.log("sieges:", ks.length, "nights, waves", w.map((x) => x.length).join(""), "first", JSON.stringify(sieges.nights["1|0|none"]).slice(0, 300)); }
 console.log("base builds:", baseBuilds.map((b) => `${b.id}@${b.slot}`).join(" "), "size", (fs.statSync(OUT).size / 1e6).toFixed(1), "MB");

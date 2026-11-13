@@ -13,6 +13,7 @@ import { heroOf, saveHero, grantPoints, grantRenown } from "./hero.js";
 import { heading } from "./progress.js";
 import { payE } from "../economy/coins.js";
 import { worth } from "../economy/rules.js";
+import { allPlots } from "../plots/claims.js";
 import { sfx } from "../core/sfx.js";
 
 export const JOBS_PER_POINT = 3;
@@ -33,10 +34,23 @@ api.on("rumorParts", (more) => {
   for (const [type, lines] of Object.entries(more?.reasons ?? {})) if (PARTS.reasons[type] && Array.isArray(lines)) PARTS.reasons[type].push(...lines);
 });
 
+// Bounties are on our own creatures: vanilla monsters never spawn in this world (Mateo 2026-11-13).
+// [type, name, scale, region]: a region's own beasts are hunted there; the rest are hunted anywhere.
 const BOUNTIES = [
-  ["minecraft:zombie", "zombies"], ["minecraft:skeleton", "skeletons"], ["minecraft:spider", "spiders"], ["minecraft:creeper", "creepers"],
-  ["minecraft:drowned", "drowned"], ["minecraft:husk", "husks"], ["minecraft:stray", "strays"], ["minecraft:witch", "witches", 0.3], ["minecraft:enderman", "endermen", 0.3],
+  ["siege:barrow_wight", "barrow wights", 0.6, "Aldmere Vale"], ["siege:rimewolf", "rimewolves", 1, "Frostmarch"],
+  ["siege:brine_lurker", "brine lurkers", 0.8, "Saltreach"], ["siege:ash_scarab", "ash scarabs", 1, "Emberwaste"],
+  ["siege:dune_wyrm", "dune wyrms", 0.3, "Emberwaste"], ["siege:mire_toad", "mire toads", 1, "Blackfen"], ["siege:bog_hag", "bog hags", 0.3, "Blackfen"],
+  ["siege:hollow_footman", "stray Tollmen", 0.8], ["siege:torchbearer", "Torchbearers", 0.6],
 ];
+// The region of the nearest Plot Stone (undefined on a world with no map): which beasts the board hunts
+function regionAt(at) {
+  let best, bestD = Infinity;
+  try {
+    for (const p of allPlots()) { const d = (p.x - at.x) ** 2 + (p.z - at.z) ** 2; if (d < bestD && p.region) [best, bestD] = [p.region, d]; }
+  } catch { /* no map yet */ }
+  return best;
+}
+export const bountiesFor = (region) => BOUNTIES.filter((b) => !b[3] || !region || b[3] === region);
 const SUPPLIES = [
   ["minecraft:bread", "loaves of bread", 16], ["minecraft:arrow", "arrows", 32], ["minecraft:iron_ingot", "iron ingots", 6], ["minecraft:cooked_beef", "cooked beef", 10],
   ["minecraft:coal", "coal", 20], ["minecraft:torch", "torches", 32], ["minecraft:leather", "leather", 8], ["minecraft:wheat", "wheat", 24], ["minecraft:cooked_cod", "cooked cod", 10],
@@ -96,7 +110,7 @@ export function rumorsFor(day, playerId, level, memory = {}) {
     job.angle = roll() * Math.PI * 2;
     job.far = 70 + Math.floor(roll() * 70) + tier * 15;
     if (type === "bounty") {
-      const [mob, name, scale = 1] = fresh(BOUNTIES, (b) => b[1]);
+      const [mob, name, scale = 1] = fresh(bountiesFor(memory.region), (b) => b[1]);
       Object.assign(job, { mob, name, need: Math.max(2, Math.round((6 + tier * 2) * scale)), have: 0 });
     } else if (type === "supply") {
       const [item, name, base] = fresh(SUPPLIES, (x) => x[1]);
@@ -155,7 +169,7 @@ function board(player) {
     hero.boardTypes = storyteller() ? api.pickSeveral("rumors", player, 3).map((o) => o.id) : undefined;
     saveHero(player);
   }
-  return rumorsFor(day, player.id, hero.level, { lastType: hero.lastJobType, recent: hero.rumorRecent, types: hero.boardTypes }).filter((j) => !hero.boardTaken.includes(j.slot));
+  return rumorsFor(day, player.id, hero.level, { lastType: hero.lastJobType, recent: hero.rumorRecent, types: hero.boardTypes, region: regionAt(api.keepOf(player.id) ?? player.location) }).filter((j) => !hero.boardTaken.includes(j.slot));
 }
 
 export function rumorMenu(player) {
@@ -195,7 +209,7 @@ function offerMenu(player, job) {
 function take(player, job) {
   const hero = heroOf(player);
   if (hero.job) return;
-  if (job.type === "camp" || job.type === "rescue") {
+  if (job.type === "camp" || job.type === "rescue" || job.type === "bounty") {
     const keep = api.keepOf(player.id);
     const from = keep ?? player.location;
     job.x = Math.floor(from.x + Math.cos(job.angle) * job.far);
@@ -212,7 +226,7 @@ function take(player, job) {
 }
 
 function progressLine(player, job) {
-  if (job.type === "bounty") return `Slain: ${job.have}/${job.need}`;
+  if (job.type === "bounty") return `Slain: ${job.have}/${job.need}.${job.x === undefined ? "" : ` A pack was seen about ${Math.round(Math.hypot(job.x - player.location.x, job.z - player.location.z))} blocks to the ${heading(job.x - player.location.x, job.z - player.location.z)} (x ${job.x}, z ${job.z}).`}`;
   if (job.type === "supply") return `You carry ${api.countItem(player, job.item)}/${job.need}.`;
   const dx = job.x - player.location.x, dz = job.z - player.location.z;
   return `About ${Math.round(Math.hypot(dx, dz))} blocks to the ${heading(dx, dz)} (x ${job.x}, z ${job.z}).${job.spawned ? ` ${job.left ?? job.need} left.` : ""}`;
@@ -313,6 +327,17 @@ function spawnAt(player, job, type, name, dx, dz, extraTag) {
 function setScene(player, job) {
   const ring = (n, i, r) => [Math.round(Math.cos((i / n) * Math.PI * 2) * r), Math.round(Math.sin((i / n) * Math.PI * 2) * r)];
   let made = 0;
+  if (job.type === "bounty") { // the pack the giver saw: any of that kind slain anywhere counts too
+    for (let i = 0; i < job.need - job.have; i++) {
+      const [dx, dz] = ring(job.need, i, 4);
+      if (spawnAt(player, job, job.mob, "Marked", dx, dz, "siege_rumor_foe")) made++;
+    }
+    if (!made) return false;
+    job.spawned = true;
+    saveHero(player);
+    player.sendMessage("§cFresh tracks, and the smell of them. The pack is close.");
+    return true;
+  }
   if (job.type === "camp") {
     try {
       const top = player.dimension.getTopmostBlock({ x: job.x, z: job.z });
@@ -322,14 +347,14 @@ function setScene(player, job) {
     }
     for (let i = 0; i < job.need; i++) {
       const [dx, dz] = ring(job.need, i, 3);
-      const type = job.tier >= 2 && i === 0 ? "minecraft:vindicator" : "minecraft:pillager";
+      const type = job.tier >= 2 && i === 0 ? "siege:shieldwall_brute" : "siege:hollow_footman";
       if (spawnAt(player, job, type, i === 0 ? "Camp Sergeant" : "Camp Raider", dx, dz, "siege_rumor_foe")) made++;
     }
   } else {
     spawnAt(player, job, "minecraft:villager_v2", "Lost Traveller", 0, 0, "siege_rumor_friend");
     for (let i = 0; i < job.need; i++) {
       const [dx, dz] = ring(job.need, i, 4);
-      if (spawnAt(player, job, job.tier >= 3 ? "minecraft:vindicator" : "minecraft:pillager", "Captor", dx, dz, "siege_rumor_foe")) made++;
+      if (spawnAt(player, job, job.tier >= 3 ? "siege:shieldwall_brute" : "siege:hollow_footman", "Captor", dx, dz, "siege_rumor_foe")) made++;
     }
   }
   if (!made) return false;
@@ -344,12 +369,13 @@ export function rumorTick() {
   for (const player of world.getPlayers()) {
     const hero = heroOf(player);
     const job = hero.job;
-    if (!job || (job.type !== "camp" && job.type !== "rescue") || player.dimension.id !== "minecraft:overworld") continue;
+    if (!job || !["camp", "rescue", "bounty"].includes(job.type) || job.x === undefined || player.dimension.id !== "minecraft:overworld") continue;
     const dist = Math.hypot(job.x - player.location.x, job.z - player.location.z);
     if (!job.spawned) {
       if (dist < 40) setScene(player, job);
       continue;
     }
+    if (job.type === "bounty") continue; // done by kills, not by clearing the site
     if (dist > 80) continue; // too far to see what is left
     const there = entitiesOf(player, job);
     const foes = there.filter((e) => e.hasTag("siege_rumor_foe"));

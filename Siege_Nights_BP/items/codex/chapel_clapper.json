@@ -1,0 +1,25 @@
+{
+ "format_version": "1.21.60",
+ "minecraft:item": {
+  "description": {
+   "identifier": "siege:chapel_clapper",
+   "menu_category": {
+    "category": "equipment"
+   }
+  },
+  "components": {
+   "minecraft:icon": "siege_cx_chapel_clapper",
+   "minecraft:display_name": {
+    "value": "item.siege:chapel_clapper.name"
+   },
+   "minecraft:max_stack_size": 1,
+   "minecraft:allow_off_hand": true,
+   "minecraft:glint": true,
+   "minecraft:tags": {
+    "tags": [
+     "siege:codex"
+    ]
+   }
+  }
+ }
+}

@@ -6,10 +6,14 @@
 // (made by tools/minimap_ui.py) and is fed by hidden titles that start with "hcq:" (core/hudtitle.js).
 // Every player sees their own steps, in single player and on a Realm alike.
 //
+// It also puts the step's place on the minimap as a pin (questPin, read by minimap/index.js) and a gold "!" over the
+// person the step sends you to talk to (marks.js). Hiding the tracker hides those too.
+//
 // Each player can hide it: /siege:quests (any player, no cheats needed), or /scriptevent siege:quests on|off.
 // Test: /scriptevent siege:quests show          says your current steps in chat
 //       /scriptevent siege:quests flag <flag>   gives you a story flag (wren_met, fell_reeve ... fell_mother), then says your steps
 
+import { SHARD_IDS } from "../bestiary/shards.js";
 import { world, system, CommandPermissionLevel, CustomCommandStatus } from "@minecraft/server";
 import { onTick } from "../core/loop.js";
 import { on } from "../core/events.js";
@@ -24,7 +28,8 @@ import { load } from "../undertow/data.js";
 import { hasCartsong, carterStation, stationSpot } from "../undertow/story.js";
 import { WARDS } from "../plots/config.js";
 import { firstFacts } from "../newplayer/firstnights.js";
-import { questsFor, panelText, hudString, SPOT, BOSS_STEPS, UNDERTOW } from "./rules.js";
+import { questsFor, panelText, hudString, pinOf, talkOf, SPOT, BOSS_STEPS, UNDERTOW } from "./rules.js";
+import { markTalk, talkSpot, forget } from "./marks.js";
 import "./tests.js";
 
 const OFF = "siege:quests_off";
@@ -35,7 +40,7 @@ const RESEND = 200; // ticks: send the same text again now and then, in case the
 
 const steps = new Map(); // player id -> { quests, at }
 const lastSent = new Map(); // player id -> { text, at }
-const ITEMS = [...new Set([...Object.values(BOSS_STEPS).map((s) => s.key), "siege:tuning_fork", "siege:choir_shard"])];
+const ITEMS = [...new Set([...Object.values(BOSS_STEPS).map((s) => s.key), "siege:tuning_fork", ...SHARD_IDS])];
 
 const isOff = (player) => player.getDynamicProperty(OFF) === true;
 
@@ -118,8 +123,27 @@ function send(player, force = false) {
 onTick("quests", POINT_EVERY, () => {
   for (const player of world.getAllPlayers()) {
     try { send(player); } catch (e) { /* a player mid-respawn or leaving */ }
+    try { mark(player); } catch { /* a player mid-respawn or leaving */ }
   }
 });
+
+// The "!" over the person to talk to. Uses the steps send() just worked out; never works them out itself.
+function mark(player) {
+  const quests = steps.get(player.id)?.quests;
+  if (!quests || isOff(player)) return void forget(player.id);
+  markTalk(player, talkOf(quests));
+}
+
+// The minimap's pin for this player: the person to talk to while they are near, else the step's place in the
+// player's own dimension. undefined when the tracker is hidden or nothing has a place.
+export function questPin(player) {
+  if (isOff(player)) return undefined;
+  const quests = steps.get(player.id)?.quests;
+  if (!quests?.length) return undefined;
+  const talk = talkSpot(player.id);
+  if (talk) return { x: talk.x, z: talk.z, kind: "talk" };
+  return pinOf(quests, player.dimension.id);
+}
 
 // Something in the story moved: work the steps out again at once, not at the next look.
 const refresh = (player) => { if (player?.id) steps.delete(player.id); };
@@ -127,8 +151,8 @@ for (const name of ["loreFlag", "loreThreadSolved", "keepFounded", "siegeReward"
 on("minimapToggled", ({ player }) => { if (player) { lastSent.delete(player.id); try { send(player, true); } catch { /* left */ } } });
 
 world.afterEvents.playerSpawn.subscribe(({ player }) => lastSent.delete(player.id));
-world.afterEvents.playerDimensionChange?.subscribe?.(({ player }) => { steps.delete(player.id); lastSent.delete(player.id); });
-world.afterEvents.playerLeave.subscribe(({ playerId }) => { lastSent.delete(playerId); steps.delete(playerId); });
+world.afterEvents.playerDimensionChange?.subscribe?.(({ player }) => { steps.delete(player.id); lastSent.delete(player.id); forget(player.id); });
+world.afterEvents.playerLeave.subscribe(({ playerId }) => { lastSent.delete(playerId); steps.delete(playerId); forget(playerId); });
 
 export function setTracker(player, show) {
   player.setDynamicProperty(OFF, show ? undefined : true);

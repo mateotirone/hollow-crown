@@ -14,6 +14,7 @@ const tests = [];
 // trips the watchdog, which shuts the world down (first playtest, 2026-11-11). They still run in
 // tools/check.mjs, which fails if a slow test is missing from this list. Written as "group: name".
 export const OFFLINE_ONLY = new Set([
+  "undertow: the Needlehold: its tiles hold every block once, each inside its own tile, all inside its site",
   "wonders: each stage draws into a build plan, every block with a known role",
   "wonders: every wonder has a design, cut into six stages that hold every block",
   "landmarks: tomes laid in designs are real tomes, each laid once, each on something solid",
@@ -46,6 +47,7 @@ export const OFFLINE_ONLY = new Set([
   "landmarks: on flat ground a rigid design stands whole at the ground height, clear of trees",
   "landmarks: a rigid design on a slope is filled under and cut into, never floating",
   "hall build: every hall has a Town Board just inside, off the aisle, before the Tree",
+  "vault: every hall of every region and tier has room for the vault's stairs, over its floor and under its roof",
   "guard posts: every wall a guard can stand on has its flights of steps, each top step beside the walk",
   "settle walls: the ring has no holes, one gate, and follows the ground",
   "undertow: rebuilt sites stamp again over the old look, clearing only inside their site, and keep the Carter's spot clear",

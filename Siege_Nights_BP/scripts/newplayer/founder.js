@@ -71,9 +71,9 @@ function giveFor(owner, st, style) {
   return true;
 }
 
-// After the founder's cottage is up and its bed is in (settle/basebuilds.js does the bed on the same event)
-on("settleBuilt", ({ owner, building, slotId }) => {
-  if (building !== "cottage" || store.data.given[owner] !== undefined) return;
+// After the founder's house (a cottage, or the starter village's house tagged "founder") is up and its bed is in (settle/basebuilds.js does the bed on the same event)
+on("settleBuilt", ({ owner, slotId }) => {
+  if (store.data.given[owner] !== undefined) return;
   const town = townOf(owner);
   const st = slotId && town?.slots[slotId];
   if (!st?.founderHome) return;

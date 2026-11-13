@@ -6,7 +6,8 @@
 //
 //   townFor(plotName) -> the plot's entry, or undefined (the twelve map plots have one)
 //   pickLayout(town, seed) -> layout index
-//   slotsOf(layout) -> [{ id, size, box: {x0, z0, x1, z1}, dy, side, door: {x, z}, step, walk, tier, tags, long }]
+//   slotsOf(layout) -> [{ id, size, box: {x0, z0, x1, z1}, dy, side, door: {x, z}, step, walk, tier, tags, long, start }]
+//     start = the design already standing on the slot when the town is founded (the starter village's houses)
 //   groundwork(layout, tier) -> [[dx, dy, dz, paletteIndex], ...] for that tier only
 //   seatOnSlot(slot, bounds) -> { origin: {dx, dy, dz}, forward } | undefined   where a design fits on a slot
 
@@ -34,9 +35,9 @@ export function pickLayout(town, seed) {
 export const wallRadius = (town, tier) => town?.walls?.[Math.max(0, Math.min(3, tier))] ?? 66;
 
 export function slotsOf(layout) {
-  return (layout?.slots ?? []).map(([id, size, x0, z0, x1, z1, dy, side, step, walk, tier, tags, long]) => ({
+  return (layout?.slots ?? []).map(([id, size, x0, z0, x1, z1, dy, side, step, walk, tier, tags, long, start]) => ({
     id, size, box: { x0, z0, x1, z1 }, dy, side, door: DOOR[side], step: { x: step[0], z: step[1] },
-    walk: walk.map(([x, z, wy]) => ({ x, z, dy: wy })), tier, tags, long: !!long,
+    walk: walk.map(([x, z, wy]) => ({ x, z, dy: wy })), tier, tags, long: !!long, start: start ?? undefined,
   }));
 }
 

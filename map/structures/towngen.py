@@ -126,6 +126,7 @@ class Town:
         self.KIND = np.zeros(self.G0.shape, np.int8)            # path kind (PRIO), 0 = none
         self.KMIN = np.where(self.WET, 2 * (self.WL + 1) + 1, -1)  # paths over water become a raised deck
         self.DOORWALK = np.zeros(self.G0.shape, bool)           # door walkways (their steps are kept)
+        self.LANDK = np.zeros(self.G0.shape, bool)              # door landings: level with the door; a street beside one meets it
         self.TAKEN = np.zeros(self.G0.shape, np.int8)           # 1 margin, 2 building ground, 3 field, 4 dressing
         self.EAVES = np.zeros(self.G0.shape, bool)
         self.FIX = np.zeros(self.G0.shape, bool)                # ground set by a building, field or path: don't regrade
@@ -425,7 +426,8 @@ class Town:
         including where streets cross and widen."""
         M = (self.K >= 0) & ~self.DOORWALK          # door walkways keep their steps and never drag a street
         for _ in range(it):
-            Kp = np.where(M, self.K, -10 ** 6); Km = np.where(M, self.K, 10 ** 6)
+            S = M | self.LANDK                       # landings hold the streets beside them within half a block
+            Kp = np.where(S, self.K, -10 ** 6); Km = np.where(S, self.K, 10 ** 6)
             hi = np.full(self.K.shape, 10 ** 6); lo = np.full(self.K.shape, -10 ** 6)
             for sh in ((1, 0), (-1, 0), (0, 1), (0, -1)):
                 hi = np.minimum(hi, np.roll(Km, sh, (0, 1)) + 1); lo = np.maximum(lo, np.roll(Kp, sh, (0, 1)) - 1)
@@ -497,7 +499,7 @@ class Town:
                          # land round them is solved once by terraform.py; the floor may cut in up to 3 below the highest block
     ROAD_FIT = 2         # half blocks: no path beside a plot is more than a block above its floor,
     ROAD_DROP = 4        # nor more than two below it (the walkway climbs to the door with a stair)
-    def try_place(self, bp, deg, door_xz, kind, gap=1, max_relief=6, need_walk=True, extra=None):
+    def try_place(self, bp, deg, door_xz, kind, gap=1, max_relief=6, need_walk=True, extra=None, yf_want=None):
         dx, dz = self.door_of(bp); rdx, rdz = rot_xz(dx, dz, deg)
         ox, oz = door_xz[0] - rdx, door_xz[1] - rdz
         g, full = self.footprint(bp, deg)
@@ -517,6 +519,8 @@ class Town:
         # Mateo 2026-11-13 (the capital hall's garden stood a block above the street): the floor is the highest
         # ground under the building itself; open ground in the stamp (gardens, yards, paddocks) follows the land
         opn = {(x + ox, z + oz) for x, z in (rot_xz(a, b, deg) for a, b in self.open_cols(bp))}
+        c, gs0, f0 = tuple(door_xz), set(G), ROT[deg]
+        while c in gs0: opn.discard(c); c = (c[0] + f0[0], c[1] + f0[1])     # the door step never drops with the yard
         Gc = [c for c in G if c not in opn] or G
         hs = np.array([self.at(self.G, x, z) for x, z in Gc])
         if hs.max() - hs.min() > max_relief: return None
@@ -551,6 +555,7 @@ class Town:
         # ground block and everything below is stone foundation.
         top = int(hs.max())
         cands = range(max(y_lo, top - TF.MAX_BELOW), top + 1) if self.TERRAFORM else [top] if self.FLOOR_HIGHEST else range(y_lo, y_hi + 1)
+        if yf_want is not None: cands = [yf_want]          # a floor its street was already laid to (the capital hall)
         for yf in cands:
             if len(near_k) and ((near_k - (2 * yf + 1)).max() > self.ROAD_FIT or ((2 * yf + 1) - near_k).max() > self.ROAD_DROP): continue
             if yf < hs.min() - 2 or yf > hs.max() + 2: continue
@@ -570,7 +575,7 @@ class Town:
             if not self.ok(cx, cz): return None
             ci, cj = self.ij(cx, cz)
             if self.K[ci, cj] >= 0 and (cx, cz) not in walk:
-                if abs(int(self.K[ci, cj]) - (2 * yf + 1)) > 2: return None
+                if not 0 <= int(self.K[ci, cj]) - (2 * yf + 1) <= 2: return None   # half a block down to a block up: a slab step at most (door check)
                 break
             land += [c for c in ((cx - f[1] * s, cz + f[0] * s) for s in (-1, 0, 1)) if c not in gs]
         for x, z in land:
@@ -607,7 +612,16 @@ class Town:
              "door": [door_xz[0], door_xz[1]]}
         self.plan.append(e); self.designs[bp.name] = bp
         self.foundation(G, yf, extra=[(x + ox, z + oz) for x, z in extra] if extra else None, per=per, land=land)
-        if need_walk: self.walkway(cells, yf, k_road, ROT[deg])
+        if need_walk: self.walkway(cells, yf, k_road, ROT[deg]); e["walked"] = True
+        else:
+            # every door gets its walkway (Mateo 2026-11-13, "make sure every building generates like this"): a
+            # building placed off the square or in a field still gets the landing paved to the street ahead of it
+            wk2 = self.walk_cells(door_xz, ROT[deg], maxlen=14)
+            if wk2:
+                wc, wend = wk2; out = [c for c in wc if c not in gs]
+                n = max(0, len(wc) - self.LANDING); dk = abs(2 * yf + 1 - self.k_at(*wend))
+                if out and dk <= 2 * n + 2 and all(not self.at(self.WET, *c) and self.at(self.TAKEN, *c) < 2 for c in out):
+                    self.walkway(wc, yf, self.k_at(*wend), ROT[deg]); e["walked"] = True
         return e
 
     OPEN_DROP = 3
@@ -702,19 +716,95 @@ class Town:
                     if c not in cells and self.ok(*c) and c not in cur: nxt[c] = t
             cur = nxt
 
-    def walkway(self, cells, yf, k_road, f):
+    def walkway(self, cells, yf, k_road, f, ks=None):
         """Door step to street: a slab half a block below the floor at the door, then half steps
         (slab, block, slab) to the street; a stair where it has to climb faster."""
-        n = len(cells); k0 = 2 * yf + 1; ks = []
+        n = len(cells); k0 = 2 * yf + 1
         if n == 0: return
-        flat = min(n, self.LANDING); m = n - flat                 # the landing stays level with the door
-        ks = [k0] * flat
-        for t in range(m):
-            ks.append(int(round(k0 + (k_road - k0) * (t + 1) / (m + 1))))
+        if ks is None: ks = self.walk_ks(n, k0, k_road)
         for (x, z), k in zip(cells, ks):
             i, j = self.ij(x, z)
             self.K[i, j] = k; self.KIND[i, j] = PRIO["walk"]; self.TAKEN[i, j] = max(self.TAKEN[i, j], 1); self.DOORWALK[i, j] = True
+            if k == ks[0]: self.LANDK[i, j] = True
         self.walks.append((cells, ks, f))
+
+    def walk_ks(self, n, k0, k_road):
+        """Heights for a walkway of n cells: the landing level with the door (shortened to one cell when the street
+        is far below or above, so the drop has room), then even steps to the street's height."""
+        dk = abs(k_road - k0)
+        flat = max(1, min(n, self.LANDING, n - (dk - 1))); m = n - flat
+        return [k0] * flat + [int(round(k0 + (k_road - k0) * (t + 1) / (m + 1))) for t in range(m)]
+
+    def doorsteps(self):
+        """Every door in the town ends up like a house door (Mateo 2026-11-13): a landing level with the floor in
+        front of it, and a walkway from there to the street. Buildings placed without one (claimed early, on the
+        square, in a field, stamped) get it here, before the land is terraformed round them."""
+        for e in self.plan:
+            if e.get("walked") or not e.get("door") or e["kind"] in ("tree", "lamp", "stall", "square"): continue
+            bp = self.designs[e["stamp"]]; g, _ = self.footprint(bp, e["rotation"])
+            foot = {(a + e["x"], b + e["z"]) for a, b in g}; f = ROT[e["rotation"]]; yf = e["ground_y"]
+            c = tuple(e["door"])
+            while c in foot: c = (c[0] + f[0], c[1] + f[1])
+            wk = self.walk_cells(c, f, maxlen=14)
+            if wk:
+                cells, end = wk
+                if any(self.at(self.WET, *q) or self.at(self.TAKEN, *q) >= 2 and q not in foot for q in cells): wk = None
+                elif abs(self.k_at(*end) - (2 * yf + 1)) > 2 * len(cells): wk = None   # too steep even by stairs
+            if not wk:                                   # nothing straight ahead: a landing, then a footpath round
+                cells = []; beside = False
+                for t in range(self.LANDING):
+                    q = (c[0] + f[0] * t, c[1] + f[1] * t)
+                    if not self.ok(*q) or self.at(self.WET, *q) or self.at(self.K, *q) >= 0 and not self.at(self.DOORWALK, *q): break
+                    cells.append(q)
+                    if any(self.ok(*r) and self.at(self.K, *r) >= 0 and not self.at(self.DOORWALK, *r) for r in ((q[0] - f[1], q[1] + f[0]), (q[0] + f[1], q[1] - f[0]))):
+                        beside = True; break                 # a street runs past the landing: step onto it there
+                if not cells: continue
+                end = None
+            for t, q in enumerate(cells[:self.LANDING]):  # the landing, three wide, level with the floor
+                for s_ in (-1, 0, 1):
+                    r = (q[0] - f[1] * s_, q[1] + f[0] * s_)
+                    if self.ok(*r) and self.at(self.K, *r) < 0 and not self.at(self.WET, *r) and (self.at(self.TAKEN, *r) < 2 or r == q):
+                        i, j = self.ij(*r); g0 = int(self.G[i, j])
+                        for y in range(yf + 1, max(g0, yf) + 1): self.works.setdefault((r[0], y, r[1]), ("air", {}))
+                        self.G[i, j] = yf; self.FIX[i, j] = True
+            if end is not None:
+                self.walkway(cells, yf, self.k_at(*end), f)
+            elif beside:
+                self.walkway(cells, yf, 2 * yf + 1, f, ks=[2 * yf + 1] * len(cells))
+            else:
+                # no street straight ahead: the walkway carries on straight, half a block a step, until it meets the
+                # ground, and a footpath goes round from there
+                ks = [2 * yf + 1] * len(cells); k = ks[-1]; q = cells[-1]
+                for t in range(10):
+                    q = (q[0] + f[0], q[1] + f[1]); kg = 2 * int(round(float(self.at(self.Gs, *q)))) + 1 if self.ok(*q) else k
+                    if abs(kg - k) <= 1 or not self.ok(*q) or self.at(self.WET, *q) or self.at(self.TAKEN, *q) >= 2 or self.at(self.K, *q) >= 0: break
+                    k += 1 if kg > k else -1; cells.append(q); ks.append(k)
+                self.walkway(cells, yf, ks[-1], f, ks=ks)
+                q = self.nearest_street(*cells[-1])
+                if q: self.footpath(cells[-1], q, fence=e.get("fence_path", False), k_start=ks[-1])   # from the walkway's last step
+            e["walked"] = True
+
+    def link_walks(self):
+        """A walkway whose street has gone (built over, or only laid in a trial placement) gets a footpath from its
+        last step to the nearest street, so no door's walk ends in the grass."""
+        for cells, ks, f in self.walks:
+            if not cells: continue
+            x, z = cells[-1]
+            if any(self.ok(x + a, z + b) and self.at(self.K, x + a, z + b) >= 0 and not self.at(self.DOORWALK, x + a, z + b)
+                   for a in (-1, 0, 1) for b in (-1, 0, 1)): continue
+            q = self.nearest_street(x, z)
+            if q: self.footpath((x, z), q, k_start=ks[-1])
+        self.relax()
+
+    def rewalk(self):
+        """Streets settle after the buildings go in (relax): re-grade every walkway to the height its street has
+        now, so the last step is never a cliff (a stair is laid where it still climbs a block at once)."""
+        for n, (cells, ks, f) in enumerate(self.walks):
+            end = (cells[-1][0] + f[0], cells[-1][1] + f[1])
+            if not self.ok(*end) or self.at(self.K, *end) < 0 or self.at(self.DOORWALK, *end): continue
+            ks = self.walk_ks(len(cells), ks[0], int(self.at(self.K, *end)))
+            for (x, z), k in zip(cells, ks): self.K[self.ij(x, z)] = k
+            self.walks[n] = (cells, ks, f)
 
     def place_along(self, rd, side, tier_fn, setbacks=(1, 2), gap_rng=(1, 3), spacing=None, kinds=None):
         pts = rd["pts"]; hw = WIDTH[rd["kind"]] / 2.0 if rd["kind"] in WIDTH else 0.5
@@ -857,10 +947,10 @@ class Town:
         self.PKIND = np.zeros(self.G.shape, np.int8)                              # 1 build, 2 field
         for L, p in self.port.items(): self.PKIND[lab == L] = 1 if p["kind"] == "build" else 2
 
-    def footpath(self, a, b, fence=False):
+    def footpath(self, a, b, fence=False, k_start=None):
         p = self.astar(a, [b], "lane", limit=600)
         if p and len(p) > 1:
-            rd = self.lay(p, "walk", k_end=self.k_at(*b) if self.at(self.K, *b) >= 0 else None)
+            rd = self.lay(p, "walk", k_start=k_start, k_end=self.k_at(*b) if self.at(self.K, *b) >= 0 else None)
             if rd and fence: rd["fence"] = True
             return rd
 
@@ -889,11 +979,13 @@ class Town:
                 q = self.nearest_street(x, z)
                 if not q: break
                 deg = snap_rot(q[0] - x, q[1] - z); f = ROT[deg]
+                ahead = [(x + f[0] * t - f[1] * s_, z + f[1] * t + f[0] * s_) for t in range(9, 16) for s_ in (-1, 0, 1)]
+                if any(not self.ok(*c) or self.at(self.TAKEN, *c) >= 2 or self.at(self.WET, *c) for c in ahead): continue   # its door opens onto open ground
                 bp = TB.windmill(self.seed * 31 + L, getattr(self, "region", "vale"))
                 e = self.try_place(bp, deg, (x + f[0] * 4, z + f[1] * 4), "windmill", gap=2, max_relief=4, need_walk=False)
                 if not e: continue
                 p["windmill"] = [x, z]
-                rd = self.footpath((x + f[0] * 4, z + f[1] * 4), q, fence=True)
+                e["fence_path"] = True                    # its path to the street is laid by doorsteps, fenced
                 break
         self.relax()
 
@@ -1262,7 +1354,7 @@ class Town:
 
     # =========================================================================== paths to blocks
     def path_blocks(self):
-        self.terraform()
+        self.terraform(); self.rewalk()
         wet = {}
         for i, j in np.argwhere(self.K >= 0):
             x, z = int(i) + self.X0, int(j) + self.Z0
@@ -1284,6 +1376,8 @@ class Town:
         # stairs where a walkway climbs a whole block in one step
         for cells, ks, f in self.walks:
             seq = list(zip(cells, ks))
+            end = (cells[-1][0] + f[0], cells[-1][1] + f[1])          # the street it joins: the last step counts too
+            if self.ok(*end) and self.at(self.K, *end) >= 0: seq.append((end, int(self.at(self.K, *end))))
             for t in range(1, len(seq)):
                 (c0, k0), (c1, k1) = seq[t - 1], seq[t]
                 if abs(k1 - k0) >= 2:
@@ -1358,6 +1452,8 @@ class Town:
         the streets anchors too (paths first: the skirt meets them, they never move), water and ground outside the town
         left alone. Runs once, after the buildings and before fields and dressing (path_blocks runs it if a town's
         run() didn't)."""
+        if not getattr(self, "_doorsteps", False): self._doorsteps = True; self.doorsteps(); self.relax()
+        self.rewalk(); self.link_walks()
         if not self.TERRAFORM or getattr(self, "_terraformed", False): return
         self._terraformed = True
         sites = getattr(self, "tf_sites", [])
@@ -1411,11 +1507,59 @@ class Town:
         c = collections.Counter(p["kind"] for p in self.plan)
         print(self.name, dict(c), "portions", collections.Counter(p["kind"] for p in self.port.values()), "water", getattr(self, "nwater", 0), "dry", getattr(self, "unwatered", 0), "roofs", getattr(self, "roof_counts", {}), "fields", self.nparcel, "streets", collections.Counter(r["kind"] for r in self.roads), "groundwork", len(self.works))
 
+    # =========================================================================== checks
+    def door_report(self):
+        """Every door that opens onto the town (Mateo 2026-11-13, "make sure every building generates like this"): the
+        ground in front of it is level with the floor (a half-slab path or the floor's own height), and from there to
+        the street it never climbs more than half a block a step unless a stair is laid there. Returns the failures
+        as [(stamp, door, why)]."""
+        bad = []
+        def hgt(x, z):                                     # walking height in half blocks
+            i, j = self.ij(x, z)
+            return int(self.K[i, j]) if self.K[i, j] >= 0 else 2 * int(self.G[i, j]) + 2
+        for e in self.plan:
+            if not e.get("door") or e["kind"] in ("tree", "lamp", "stall", "square"): continue
+            bp = self.designs[e["stamp"]]; g, _ = self.footprint(bp, e["rotation"])
+            foot = {(a + e["x"], b + e["z"]) for a, b in g}
+            f = ROT[e["rotation"]]; x, z = e["door"]; sill = 2 * e["ground_y"] + 2
+            while (x, z) in foot and not (self.ok(x, z) and self.at(self.K, x, z) >= 0): x, z = x + f[0], z + f[1]   # a path through its own yard counts
+            if not self.ok(x, z): continue
+            prev = sill; exit_ok = False
+            for t in range(12):
+                c = (x + f[0] * t, z + f[1] * t)
+                if not self.ok(*c) or self.at(self.WET, *c): break
+                hc = hgt(*c); step = abs(hc - prev)
+                back = (c[0] - f[0], c[1] - f[1])
+                stair = any(self.works.get((q[0], y, q[1]), ("",))[0].endswith("_stairs") for q in (c, back) for y in range(min(hc, prev) // 2 - 1, max(hc, prev) // 2 + 2))
+                if t == 0 and step > 1: bad.append((e["stamp"], e["door"], f"front step {step} half blocks off the floor", sill, [hgt(x + f[0] * u, z + f[1] * u) for u in range(5)], e["kind"], self.at(self.FIX, *c))); break
+                if step > (2 if stair else 1):
+                    seq = [(hgt(x + f[0] * u, z + f[1] * u), int(self.at(self.K, x + f[0] * u, z + f[1] * u) >= 0), int(self.at(self.DOORWALK, x + f[0] * u, z + f[1] * u))) for u in range(t + 2)]
+                    bad.append((e["stamp"], e["door"], f"{step} half blocks at {t} out", sill, seq)); break
+                if self.at(self.K, *c) >= 0 and not self.at(self.DOORWALK, *c): break   # reached a street (its own grading is relax's)
+                nxt = (c[0] + f[0], c[1] + f[1])
+                if self.at(self.DOORWALK, *c) and any(self.ok(*q) and self.at(self.K, *q) >= 0 and not self.at(self.DOORWALK, *q) and abs(int(self.at(self.K, *q)) - hc) <= 1
+                                                      for q in ((c[0] - f[1], c[1] + f[0]), (c[0] + f[1], c[1] - f[0]))): exit_ok = True
+                if self.at(self.DOORWALK, *c) and not (self.ok(*nxt) and self.at(self.K, *nxt) >= 0):   # the walk turns off sideways
+                    side = [(c[0] + a_, c[1] + b_) for a_ in (-1, 0, 1) for b_ in (-1, 0, 1) if (a_, b_) != (0, 0)]
+                    side = [q for q in side if self.ok(*q) and self.at(self.K, *q) >= 0 and not self.at(self.DOORWALK, *q)]
+                    if side:
+                        st = min(abs(int(self.at(self.K, *q)) - hc) for q in side)
+                        stair = any(self.works.get((q[0], y, q[1]), ("",))[0].endswith("_stairs") for q in side + [c] for y in range(hc // 2 - 2, hc // 2 + 2))
+                        if st > (2 if stair else 1): bad.append((e["stamp"], e["door"], f"{st} half blocks onto the street beside the walk at {t} out", sill))
+                        break
+                    if exit_ok: break                        # it already passed a street it steps onto
+                    if not (self.ok(*nxt) and self.at(self.DOORWALK, *nxt)): bad.append((e["stamp"], e["door"], f"the walk ends at {t} out with no street", sill)); break
+                prev = hc
+        return bad
+
     # =========================================================================== output
     def write_worldblocks(self, out):
         """The whole town as world blocks for genworld (format hollow-crown-worldblocks/1, as map/bake_town.py
         writes for Kingsrest): groundwork first (streets, levelled plots, foundations, fields), then every
         building, fixture and tree turned and placed. Tree leaves are soft (they only fill air)."""
+        bad = self.door_report()
+        print("doors", sum(1 for e in self.plan if e.get("door") and e["kind"] not in ("tree", "lamp", "stall", "square")), "door problems", len(bad))
+        for b in bad[:40]: print("   door:", *b)
         pal, idx, rows = [], {}, []
         def pid(name, states, soft=False):
             key = json.dumps([name, states, soft], sort_keys=True)

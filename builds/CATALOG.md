@@ -4,7 +4,7 @@
 
 Every build in The Hollow Crown, designed or not. Add an entry the moment a build is asked for, even with no design yet, and move its status on as it progresses. Run  node tools/build-catalog.mjs  after editing to rewrite builds/CATALOG.md (check.mjs fails if it is stale).
 
-**113 builds:** 1 not started, 27 designed, 17 in viewer, 68 in game.
+**115 builds:** 1 not started, 29 designed, 17 in viewer, 68 in game.
 
 Statuses:
 
@@ -60,6 +60,7 @@ A ★ marks builds that no earlier list had (added in the 2026-11-12 audit).
 | ★ Settlement inn (5) | One version per overworld region | designed | skill-pass | Refine every building, region by region |  | Waiting in PR #168. Needed for the City charter. Specs for all five regions in PR #168. In viewer section skill-pass (PR #168); waits in settle/buildings.js WAITING until layouts make room. |
 | Stables levels 1-3 (Stables block) (15) | One version per overworld region | in game | settle-* | Build settlement building and mason shop | `map/structures/settle_buildings.py` |  |
 | Breeder's Yard (Breeder's Post) (5) | One version per overworld region | in game | settle-* | Build settlement building and mason shop | `map/structures/settle_buildings.py` |  |
+| Dragon Stable and nursery (Hatching Braziers) | Emberwaste | designed |  | Check dragon colours and egg hatching | `map/structures/dragon_stable_skill.py` | Raised by the Dragon Roost on your land (settle/blockdesigns.js). Emberwaste kasbah style wherever it stands. |
 | Barracks (guardhouse) (5) | One version per overworld region | in game | settle-* | Build settlement building and mason shop | `map/structures/settle_buildings.py` |  |
 | Quartermaster's armoury (5) | One version per overworld region | in game | settle-* | Build settlement building and mason shop | `map/structures/settle_buildings.py` |  |
 | ★ Mason's Yard (stone workshop, bench in the front yard, 9x9) (5) | One version per overworld region | in game |  | Build settlement building and mason shop | `map/structures/review/specs/gen_mason.py` | Built on the skill (review/specs/mason_yard_<region>.json); the game raises it with every new base from settle/mason_data.js (map/structures/export_mason.py), on towngen's mason_yard ground or the nearest Small plot. |
@@ -120,6 +121,7 @@ A ★ marks builds that no earlier list had (added in the 2026-11-12 audit).
 | Custom trees (31 species, six regions) (31) | One version per overworld region | in game | trees | Build custom tree assets | `map/trees/build_trees.py` |  |
 | Welcome hall: map miniature on its cloud | Anywhere / region-neutral | in game | miniature | Build a scaled-down map in the welcome hall | `map/structures/miniature_scene.py` |  |
 | Old Workings (regrowing mines near towns) | One version per overworld region | in game |  | Design a repeatable material gathering loop | `Siege_Nights_BP/scripts/workings` | Being redone on the building skill (mine mouth / portal); not in the viewer. |
+| ★ The Twelve Gates, the arena at Kingsrest: 12 coloured starting rooms, round stands, royal box, gatehouse | Aldmere Vale | designed | arena | Build the grand arena at Kingsrest | `map/structures/arena.py` | Round amphitheatre: a round fighting floor 61 across in a round Norman shell 117 across, south-west of the grand station; 12 rooms every 30 degrees in the settlement colours with portcullis gates, loadout racks and a lectern board; 25 round rows of stands lit for night, royal box, four round stair towers with copper domes on the diagonals, gatehouse with the challenge boards; terraformed, with a paved way to the station. Fight code: arena fights thread (PR #310). World blocks map/arena-blocks.json, positions map/arena-layout.json. |
 
 ## Boss sites
 

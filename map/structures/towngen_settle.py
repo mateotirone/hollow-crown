@@ -30,6 +30,13 @@ a growing settlement adds (worked out with the building-placement thread, 2026-1
 Templates are data (TEMPLATES below): which ring arcs become roads, the radial streets, the shape
 of the square, how much land is farmed. Everything else is read off the ground.
 
+Starter mode (--starter <plot>.json from starter.py, Mateo 2026-11-13: the starter village is every plot's
+Hamlet): the plan starts from the starter village as it stands. Its graded ground is the ground, its paths are
+paths (kept as they are), its plots, yards and hall ground are taken (with the 3-block clearance), and the wall
+rings follow its outline (each ring is the Hamlet outline moved out by 10, 20, 30). Nothing new opens at Hamlet:
+the layout grows round the village from Town up. The main street comes in from the gate to the village's own
+main lane, and streets that started on the square start on the nearest village lane instead.
+
 Writes OUT_DIR/<plot>.json (all variants; format in README.md "Settlement layouts") and a plan
 picture per variant.
 """
@@ -131,6 +138,10 @@ class Settlement(Town):
         self.arch = ARCH.get(plot.get("region"), "vale")
         n0, n1 = self.G0.shape
         ii, jj = np.meshgrid(np.arange(n0) + self.X0, np.arange(n1) + self.Z0, indexing="ij")
+        st = getattr(self, "starter", None)
+        if st:   # every ring follows the starter's wall outline: measure "distance" against it (D <= ring <=> inside that ring)
+            self.D = self.D - (self.outline(np.arctan2(jj - self.C[1], ii - self.C[0])) - st["wall"]["radiiAt"])
+            self.E = self.D; self.IN = self.E <= self.R
         # column tier: inside which wall the column first lies
         self.GEO = np.full(self.G0.shape, 9, np.int8)
         for t in range(len(WALL_R) - 1, -1, -1): self.GEO[self.D <= WALL_R[t] - 1] = t
@@ -142,6 +153,13 @@ class Settlement(Town):
         a = math.radians(theta); dx = math.cos(a) * self.g[0] + math.sin(a) * self.h[0]; dz = math.cos(a) * self.g[1] + math.sin(a) * self.h[1]
         return self.C[0] + dx * r, self.C[1] + dz * r
     def rel(self, x, z): return int(x) - self.C[0], int(z) - self.C[1]
+
+    def outline(self, a):
+        """The starter wall's radius at angle(s) a (radians, walldata.js angles: cos -> x, sin -> z), for its Hamlet ring."""
+        radii = np.asarray(self.starter["wall"]["radii"], float); n = len(radii)
+        f = (np.mod(a, 2 * math.pi) / (2 * math.pi)) * n
+        i = np.floor(f).astype(int) % n; t = f - np.floor(f)
+        return radii[i] * (1 - t) + radii[(i + 1) % n] * t
 
     def hall_boxes(self):
         """World boxes (x0, z0, x1, z1) of each hall level with its clearance."""
@@ -167,9 +185,32 @@ class Settlement(Town):
             m[i0:i1 + 1, j0:j1 + 1] = True; setattr(self, attr, m)
         for name, (r, a) in (("plot_stone", (0, 0)), ("mason_bench", MASON), ("hall_cornerstone", (0, CORNERSTONE_AHEAD))):
             x, z = self.world(r, a); self.fixtures.append({"name": name, "at": [x - self.C[0], z - self.C[1]], "tier": 0})
+        if getattr(self, "starter", None): self.reserve_starter()
+
+    def reserve_starter(self):
+        """The starter village as it stands: its paths stay (heights and all), its plots, yards and hall ground are
+        taken, with the 3-block clearance round them."""
+        area = np.zeros(self.G0.shape, bool)
+        self.STARTER = np.zeros(self.G0.shape, bool)
+        for dx, dz, kind, k in self.starter["used"]:
+            x, z = self.C[0] + dx, self.C[1] + dz
+            if not self.ok(x, z): continue
+            i, j = self.ij(x, z); self.STARTER[i, j] = True
+            if kind >= 5: area[i, j] = True; continue
+            self.K[i, j] = k; self.KIND[i, j] = kind; self.DOORWALK[i, j] = True   # DOORWALK: relax() leaves it as it is
+            self.TAKEN[i, j] = max(self.TAKEN[i, j], 1)
+        near = area.copy()
+        for _ in range(CLEAR - 1):
+            near = near | np.roll(near, 1, 0) | np.roll(near, -1, 0) | np.roll(near, 1, 1) | np.roll(near, -1, 1)
+        self.TAKEN[near & (self.K < 0)] = 2
+        self.FIX |= self.STARTER
 
     # ---- paths
     def square(self):
+        if getattr(self, "starter", None):   # the village's own square (laid in reserve_starter)
+            self.sq = self.world(0, SQUARE_AHEAD); self.sqY = int(self.starter["center"]["y"]); self.sqR = 6
+            self.square_cells = np.argwhere(self.KIND == PRIO["square"])
+            return
         self.site["centre"] = self.world(0, SQUARE_AHEAD)
         super().square()
         self.site["centre"] = (self.plot["x"], self.plot["z"])
@@ -226,16 +267,30 @@ class Settlement(Town):
         ring = [c for c in sqcells if any(self.at(self.KIND, c[0] + dx, c[1] + dz) == 0 for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)))]
         # the main street: straight in through every gate the wall will ever have, then on to the square
         gx, gz = self.polar(0, self.R)
-        inner = [self.polar(0, r) for r in range(self.R, WALL_R[0] - 3, -1)]
-        path = self.astar((int(round(inner[-1][0])), int(round(inner[-1][1]))), ring, "main") or [(int(round(inner[-1][0])), int(round(inner[-1][1])))]
-        cells = [(int(round(x)), int(round(z))) for x, z in inner] + path[1:]
-        self.lay(cells, "main", k_end=self.k_at(*cells[-1]))
+        if getattr(self, "starter", None):   # in from the gate until it meets the village's main lane
+            cells = []
+            for r in range(self.R, 0, -1):
+                c = tuple(int(round(v)) for v in self.polar(0, r))
+                if self.at(self.K, *c) >= 0: break
+                cells.append(c)
+            self.lay(cells + [c], "main", k_end=self.k_at(*c))
+        else:
+            inner = [self.polar(0, r) for r in range(self.R, WALL_R[0] - 3, -1)]
+            path = self.astar((int(round(inner[-1][0])), int(round(inner[-1][1]))), ring, "main") or [(int(round(inner[-1][0])), int(round(inner[-1][1])))]
+            cells = [(int(round(x)), int(round(z))) for x, z in inner] + path[1:]
+            self.lay(cells, "main", k_end=self.k_at(*cells[-1]))
         self.main_rd = self.roads[-1]
         self.gates = [[*self.rel(*self.polar(0, w)), TIERS[t]] for t, w in enumerate(WALL_R)]
         # ring lanes on old wall lines
-        for r, a0, a1 in self.tpl["rings"]:
+        rings = self.tpl["rings"]
+        if getattr(self, "starter", None):   # a ring lane right round the village on the old Hamlet wall line: every street meets it
+            rings = [(WALL_R[0] - 1, -179, 179)] + [q for q in rings if q[0] != WALL_R[0]]
+        for r, a0, a1 in rings:
             n = int(abs(a1 - a0) * math.pi / 180 * r)
             pts = [self.polar(a0 + (a1 - a0) * s / n, r) for s in range(n + 1)]
+            if getattr(self, "starter", None):   # an old wall line follows the starter's outline like the wall did
+                out = self.starter["wall"]["radiiAt"]
+                pts = [self.polar(a0 + (a1 - a0) * s / n, r + float(self.outline(math.atan2(p[1] - self.C[1], p[0] - self.C[0]))) - out) for s, p in enumerate(pts)]
             arc = []
             for p in pts + [None]:
                 bad = p is None or self.at(self.TAKEN, int(round(p[0])), int(round(p[1]))) >= 2
@@ -244,12 +299,16 @@ class Settlement(Town):
                     c0 = (int(round(arc[0][0])), int(round(arc[0][1]))); c1 = (int(round(arc[-1][0])), int(round(arc[-1][1])))
                     rd = self.lay(arc, "lane", k_start=self.k_at(*c0) if self.at(self.K, *c0) >= 0 else None,
                                   k_end=self.k_at(*c1) if self.at(self.K, *c1) >= 0 else None)
-                    if rd: rd["ring"] = r; self.RINGS.append(rd)
+                    if rd: rd["ring"] = min(WALL_R, key=lambda w: abs(w - r)); self.RINGS.append(rd)
                 arc = []
         # radial streets
         for theta, r0, r1 in self.tpl["radials"]:
             end = self.polar(theta, r1); end = (int(round(end[0])), int(round(end[1])))
-            if r0 <= 12:
+            if r0 <= 12 and getattr(self, "starter", None):   # from the ring lane round the village (the old Hamlet wall line)
+                p = self.polar(theta, WALL_R[0])
+                s = self.polar(theta, WALL_R[0] - 1 + float(self.outline(math.atan2(p[1] - self.C[1], p[0] - self.C[0]))) - self.starter["wall"]["radiiAt"])
+                start = (int(round(s[0])), int(round(s[1])))
+            elif r0 <= 12:
                 ring = [(int(i) + self.X0, int(j) + self.Z0) for i, j in np.argwhere(self.KIND == PRIO["square"])]
                 start = min(ring, key=lambda c: math.hypot(c[0] - end[0], c[1] - end[1]))
             else:
@@ -439,6 +498,9 @@ class Settlement(Town):
         return out
 
     def box_tier(self, G):
+        if getattr(self, "starter", None):   # self.D is already measured against the starter's wall outline
+            t = tier_of_radius(max(float(self.D[self.ij(x, z)]) for x, z in G) + 0.7)
+            return None if t is None else max(t, 1)   # the starter village is the whole Hamlet
         dmax = max(math.hypot(x - self.C[0] + (0.5 if x >= self.C[0] else -0.5), z - self.C[1] + (0.5 if z >= self.C[1] else -0.5)) for x, z in G)
         return tier_of_radius(dmax)
 
@@ -718,6 +780,8 @@ class Settlement(Town):
             c = {s: sum(1 for e in self.slots if e["size"] == s and e["opensAt"] <= t) for s in "SMLG"}
             c["M_long"] = sum(1 for e in self.slots if e["size"] == "M" and e.get("long") and e["opensAt"] <= t)
             c["field"] = sum(1 for f in self.field_out if f["area_by_tier"][t] >= 80)
+            if getattr(self, "starter", None):   # the starter village: two houses and the library (long) Medium, one Large
+                c["M"] += 3; c["M_long"] += 1; c["L"] += 1
             out.append(c)
         return out
 
@@ -725,12 +789,13 @@ class Settlement(Town):
     # cumulative: each tier's buildings must all have a slot of a class they may take, open by that tier.
     # Classes: S, M (plain Medium), MF (plain Medium by the fields: the Farmhouse's), ML (long Medium), L, G.
     # Homes are cottages (S) or houses (M). A hall4 slot is gone by the Castle, so it is not counted there.
+    # LD: a deep Large (15 wide x 17 deep or more): the only plot the Barracks takes (settle/config.js PLOT_MIN_BOX, PR #276).
     HOME = ("S", "M", "ML"); ANY = ("S", "M", "ML", "L", "G")
     # a home may take a long Medium too (the townhouse is ML; settlement placement thread 2026-11-13)
     CHARTER_NEEDS = [
         [("library", ("ML", "L"))],
         [("home", HOME + ("MF",))] * 3 + [("farmhouse", ("MF",)), ("mint", ("M", "MF")), ("market", ("L", "ML"))],
-        [("home", HOME + ("MF",))] * 3 + [("inn", ("L",)), ("barracks", ("L", "ML", "M", "MF")), ("work", ANY + ("MF",))],
+        [("home", HOME + ("MF",))] * 3 + [("inn", ("L",)), ("barracks", ("LD",)), ("work", ANY + ("MF",))],
         [("home", HOME + ("MF",))] * 4,
     ]
     FARM_EDGE = True                     # the Farmhouse needs a Medium (plain or long, 2026-11-12) tagged field_edge (settlement thread)
@@ -742,13 +807,16 @@ class Settlement(Town):
             sup = collections.Counter()
             for e in self.slots:
                 if e["opensAt"] > t or (t >= 3 and "hall4" in self.tag(e)[0]): continue
-                c = "ML" if e["size"] == "M" and e.get("long") else e["size"]
+                c = "ML" if e["size"] == "M" and e.get("long") else "LD" if e["size"] == "L" and min(e["dims"]) >= 15 and e["dims"][1] >= 17 else e["size"]
                 if c in ("M", "ML") and (not self.FARM_EDGE or "field_edge" in self.tag(e)[0]): c += "F"
                 sup[c] += 1
+            if getattr(self, "starter", None):   # the starter village's library plot and its open deep Large (its houses stand already)
+                sup["ML"] += 1; sup["LD"] += 1
             needs = [n for tt in range(t + 1) for n in self.CHARTER_NEEDS[tt]]
-            needs.sort(key=lambda n: len(n[1]))                # strictest first, each into its smallest class
+            needs.sort(key=lambda n: (len(n[1]), n[1] != ("LD",)))   # strictest first (the Barracks' deep Large before the inn's Large), each into its smallest class
             for name, classes in needs:
                 if "ML" in classes or "MF" in classes: classes = classes + ("MLF",)   # a long Medium by crops serves either
+                if "L" in classes: classes = classes + ("LD",)                        # a deep Large is a Large too
                 c = next((c for c in classes if sup[c] > 0), None)
                 if c: sup[c] -= 1
                 else: short += 1; self.missing.append((TIERS[t], name))
@@ -1122,12 +1190,20 @@ def main():
     ap.add_argument("--trees", default="", help="trees.json from map/trees/build_trees.py; uses map/trees/place.py to scatter them")
     ap.add_argument("--trees-src", default=os.path.join(HERE, "..", "trees"))
     ap.add_argument("--walls", default="", help="try other wall rings, e.g. 32,40,48,56: template radii are stretched to match")
+    ap.add_argument("--starter", default="", help="the plot's starter village (starter.py OUT.json): plan the Town band and beyond round it")
     a = ap.parse_args()
     if a.walls: set_walls([int(v) for v in a.walls.split(",")])
     plot = load_plots(a.config)[a.plot]
     if a.trees:
         Settlement.tree_src = os.path.abspath(a.trees_src); Settlement.tree_index = json.load(open(a.trees))
     T = np.load(a.slice); L = json.load(open(a.lines))
+    if a.starter:   # the village's graded ground is the ground the rest is planned on
+        st = json.load(open(a.starter)); Settlement.starter = st
+        T = dict(T); Y = T["Y"].copy(); X0, Z0 = int(T["X0"]), int(T["Z0"])
+        for dx, dz, top, *_ in st["columns"]:
+            i, j = plot["x"] + dx - X0, plot["z"] + dz - Z0
+            if 0 <= i < Y.shape[0] and 0 <= j < Y.shape[1]: Y[i, j] = top
+        T["Y"] = Y
     os.makedirs(a.out, exist_ok=True)
     variants = []
     for n, tpl in enumerate(a.templates.split(",")):
@@ -1138,10 +1214,10 @@ def main():
             ok, cs = s.meets(); passes, cshort = s.charter()
             short = sum(max(0, MINIMUM[t][q] - cs[t][q]) for t in range(4) for q in MINIMUM[t])
             print(plot["name"], tpl, seed, "charter" if passes else f"charter short {cshort} {sorted(set(s.missing))}", "| minimum", "ok" if ok else f"short {short}", cs[-1], flush=True)
-            lib = any(e.get("library") for e in s.slots)            # a Hamlet library slot is a must
-            yard = any(f["name"] == "mason_yard" for f in s.fixtures)
+            lib = a.starter or any(e.get("library") for e in s.slots)   # a Hamlet library slot is a must (the starter has one)
+            yard = a.starter or any(f["name"] == "mason_yard" for f in s.fixtures)   # the starter village has its own yard
             if best is None or (not lib, not yard, cshort, short) < best[0]: best = ((not lib, not yard, cshort, short), s)
-            if passes and not any(f["name"] == "mason_yard" for f in s.fixtures): passes = False   # the Mason's yard is a must too
+            if passes and not yard: passes = False   # the Mason's yard is a must too
             if passes: break
         s = best[1]
         s.picture_settle(os.path.join(a.out, f"{s.key}-{tpl}.png"))

@@ -136,6 +136,14 @@ def ids_in(folder, kind):
 guard = sorted(i for i in ids_in("items", "minecraft:item") if i.startswith("siege:guardgear_"))
 trees = sorted(i for i in ids_in("blocks", "minecraft:block") if i.startswith("siege:old_"))
 summons = [f"siege:summon_{b[0]}" for b in BOSSES]
+# the Codex's items (studio/build_codex.py), grouped by the creative tab each one sits in
+codex = {}
+for p in sorted(glob.glob(os.path.join(BP, "items", "codex", "*.json"))):
+    d = json.load(open(p, encoding="utf8"))["minecraft:item"]["description"]
+    codex.setdefault(d.get("menu_category", {}).get("category", "items"), []).append(d["identifier"])
+codex_groups = {cat: {"group_identifier": {"icon": ids[0], "name": f"siege:itemGroup.name.codex_{cat}"}, "items": ids} for cat, ids in codex.items()}
+names = {f"siege:itemGroup.name.codex_{cat}": f"Hollow Crown: Codex {'Arms and Armour' if cat == 'equipment' else 'Goods and Charms'}" for cat in codex}
+add_lang(names)
 
 write_json(os.path.join(BP, "item_catalog", "crafting_item_catalog.json"), {
     "format_version": "1.21.60",
@@ -144,7 +152,8 @@ write_json(os.path.join(BP, "item_catalog", "crafting_item_catalog.json"), {
             {"category_name": "equipment", "groups": [
                 {"group_identifier": {"icon": summons[0], "name": "siege:itemGroup.name.bossSummons"}, "items": summons},
                 {"group_identifier": {"icon": guard[0], "name": "siege:itemGroup.name.guardGear"}, "items": guard},
-            ]},
+            ] + ([codex_groups["equipment"]] if "equipment" in codex_groups else [])},
+            *[{"category_name": cat, "groups": [g]} for cat, g in codex_groups.items() if cat not in ("equipment", "construction")],
             {"category_name": "construction", "groups": [
                 {"group_identifier": {"icon": "siege:old_oak_log", "name": "siege:itemGroup.name.lockedTrees"}, "items": trees},
             ]},

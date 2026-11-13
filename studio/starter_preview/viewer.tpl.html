@@ -1,0 +1,218 @@
+<title>Starter Village Preview</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* Layout: a surveyor's sheet. Plot picker on top, the model in the middle, the area register under it. */
+:root {
+  --bg: #eef0eb; --panel: #ffffff; --ink: #1f2620; --muted: #5f6b60; --line: #cfd6cc;
+  --accent: #3d6b45; --accent-ink: #ffffff; --stage: #c9d8e4;
+  --display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --body: Inter, "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #151a16; --panel: #1d241e; --ink: #e5ebe4; --muted: #98a597; --line: #2f3a30;
+  --accent: #8fcf98; --accent-ink: #0f1a11; --stage: #1c2833; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #151a16; --panel: #1d241e; --ink: #e5ebe4; --muted: #98a597; --line: #2f3a30;
+  --accent: #8fcf98; --accent-ink: #0f1a11; --stage: #1c2833; color-scheme: dark }
+html, body { background: var(--bg); color: var(--ink); }
+body { font-family: var(--body); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 1200px; margin: 0 auto; padding-block: 18px 32px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; gap: 12px; }
+h1 { font-family: var(--display); font-size: 1.45rem; margin: 0; text-wrap: balance; }
+.sub { color: var(--muted); margin: 2px 0 0; max-width: 70ch; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center; }
+.group { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.label { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-right: 2px; }
+button.opt { font: 500 0.88rem var(--body); color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 6px 11px; cursor: pointer; }
+button.opt:hover { border-color: var(--accent); }
+button.opt[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+button.opt:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.stage { position: relative; background: var(--stage); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; height: min(70vh, 720px); min-height: 340px; touch-action: none; }
+.stage canvas { display: block; width: 100%; height: 100%; cursor: grab; }
+.tag { position: absolute; transform: translate(-50%, -100%); font: 600 0.74rem var(--body); color: #fff; background: rgba(20, 28, 22, 0.78); padding: 2px 7px; border-radius: 4px; white-space: nowrap; pointer-events: none; }
+.hint { position: absolute; left: 12px; bottom: 10px; font-size: 0.78rem; color: #24302a; background: rgba(255,255,255,0.7); padding: 2px 8px; border-radius: 4px; pointer-events: none; }
+.fail { position: absolute; inset: 0; display: grid; place-items: center; padding: 20px; text-align: center; color: var(--muted); }
+.register { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px 28px; border-top: 1px solid var(--line); padding-top: 12px; }
+.register div { min-width: 0; }
+.register h2 { font-family: var(--display); font-size: 1.05rem; margin: 0 0 4px; }
+.register ul { margin: 0; padding-left: 18px; color: var(--ink); }
+.register li { margin: 2px 0; }
+.register .m { color: var(--muted); font-variant-numeric: tabular-nums; }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1 id="title">Starter village</h1>
+    <p class="sub" id="sub">Real map terrain, graded around the paths. The hall, the buildings and the wall are drawn by the add-on's own code.</p>
+  </header>
+  <div class="controls">
+    <div class="group" id="plots"><span class="label">Plot</span></div>
+    <div class="group"><span class="label">View</span>
+      <button class="opt" id="v-orbit" aria-pressed="true">Orbit</button>
+      <button class="opt" id="v-top" aria-pressed="false">From above</button>
+      <button class="opt" id="v-gate" aria-pressed="false">From the gate</button>
+    </div>
+    <div class="group"><span class="label">Labels</span>
+      <button class="opt" id="labels" aria-pressed="true">Shown</button>
+    </div>
+  </div>
+  <div class="stage" id="stage"><div class="hint">Drag to turn, scroll or pinch to zoom, right-drag to pan</div></div>
+  <section class="register" id="register"></section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+const DATA = /*DATA*/null;
+
+// block colours, roughly the block's texture average
+const COL = {
+  grass_block: 0x6f9a4a, dirt: 0x86603f, coarse_dirt: 0x775a3e, podzol: 0x6a4b2a, stone: 0x7d7d7d, sand: 0xd8cc94, gravel: 0x8a8580,
+  farmland: 0x5b3b22, water: 0x3d6fd0, cobblestone: 0x7b7b7b, mossy_cobblestone: 0x6e7a62, stone_bricks: 0x7a7a7a, mossy_stone_bricks: 0x6c7865,
+  andesite: 0x8a8a8a, mud_brick: 0x8c6e55, stone_brick: 0x7a7a7a, tuff_brick: 0x666a60, mossy_stone_brick: 0x6c7865, polished_andesite: 0x9a9c9c, tuff_bricks: 0x666a60, mud_bricks: 0x8c6e55, smooth_stone: 0x9e9e9e, chiseled_stone_bricks: 0x777777,
+  wheat: 0xc9b04a, carrots: 0x5e9a2e, potatoes: 0x5f8d32, beetroot: 0x6e8b37, hay_block: 0xb79a2a, composter: 0x7a5530, cauldron: 0x3e3e40, barrel: 0x7a5a33,
+  lantern: 0xf2c25a, poppy: 0xc4302a, dandelion: 0xe8d23a, cornflower: 0x4a6ad0, oxeye_daisy: 0xe8e8dd, azure_bluet: 0xd8dde6, short_grass: 0x6a9a44,
+  azalea_leaves: 0x5b7f2e, plot_marker: 0xffc23a, mason_bench: 0xc94a3a, stonecutter_block: 0x8b8b8b, grindstone: 0x8f8f8f, iron_bars: 0x6b6b6b,
+};
+function colorOf(n) {
+  if (COL[n] !== undefined) return COL[n];
+  n = n.replace(/^siege:/, "");
+  const base = n.replace(/_(slab|stairs|wall|fence_gate|fence|planks|log|wood|door|trapdoor|button|pressure_plate)$/, "");
+  if (COL[base] !== undefined) return COL[base];
+  const kw = [["stripped_spruce", 0x7a5a38], ["stripped_oak", 0xb08f5a], ["stripped_dark_oak", 0x5a4129], ["stripped", 0x9a7a52], ["spruce", 0x6b4d2c], ["dark_oak", 0x47321c], ["birch", 0xc8b77a], ["mangrove", 0x7a3a33], ["acacia", 0xa8582f], ["oak", 0xa7834e], ["cherry", 0xd9a3a0],
+    ["deepslate", 0x4a4a50], ["blackstone", 0x2f2a30], ["brick", 0x94513e], ["sandstone", 0xd5c68e], ["terracotta", 0x9a5c42], ["copper", 0x5ea58a], ["glass", 0xbcd4e0], ["castle", 0x8f8a80], ["wool", 0xd8d8d8], ["tuff", 0x6c6d66], ["calcite", 0xe0e0dc], ["quartz", 0xe8e3da], ["prismarine", 0x5a9a8a], ["mud", 0x6a5a4a], ["basalt", 0x4a4a4e], ["moss", 0x5f7f32], ["leaves", 0x4f7a2c], ["iron", 0xb8b8b8], ["gold", 0xe0c040], ["banner", 0xb03a2e], ["carpet", 0x9a3a3a], ["torch", 0xf0c040], ["chain", 0x404448], ["lantern", 0xf2c25a]];
+  for (const [k, c] of kw) if (n.includes(k)) return c;
+  return 0x9a8f86;
+}
+// shapes: [w, h, d, yOffset]
+function shapeOf(n, p) {
+  if (/_slab$/.test(n)) return p.half === "top" ? [1, 0.5, 1, 0.5] : [1, 0.5, 1, 0];
+  if (/fence_gate$/.test(n)) return [1, 0.75, 0.2, 0.1];
+  if (/_fence$/.test(n) || n === "iron_bars") return [0.3, 1, 0.3, 0];
+  if (/_wall$/.test(n)) return [0.5, 0.85, 0.5, 0];
+  if (/(poppy|dandelion|cornflower|oxeye_daisy|azure_bluet|short_grass)/.test(n)) return [0.35, 0.5, 0.35, 0];
+  if (/(wheat|carrots|potatoes|beetroot)/.test(n)) return [0.8, 0.7, 0.8, 0];
+  if (/lantern/.test(n)) return [0.4, 0.5, 0.4, 0];
+  if (/(torch|chain)/.test(n)) return [0.15, 0.6, 0.15, 0];
+  if (/(door|trapdoor|sign|banner|ladder)$/.test(n)) return [0.9, 1, 0.15, 0];
+  if (/carpet/.test(n)) return [1, 0.07, 1, 0];
+  if (n === "water") return [1, 0.88, 1, 0];
+  if (n === "farmland") return [1, 0.94, 1, 0];
+  return [1, 1, 1, 0];
+}
+
+const stage = document.getElementById("stage");
+let renderer, scene, camera, controls, group, tags = [], showLabels = true, current = 0;
+function init() {
+  if (!window.THREE || !THREE.OrbitControls) { stage.insertAdjacentHTML("beforeend", '<div class="fail">The 3D library did not load. Reload the page to try again.</div>'); return false; }
+  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setPixelRatio(Math.min(2, devicePixelRatio));
+  stage.prepend(renderer.domElement);
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0xbcd3e6);
+  scene.fog = new THREE.Fog(0xbcd3e6, 160, 320);
+  camera = new THREE.PerspectiveCamera(40, 1, 0.5, 1000);
+  controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true; controls.maxPolarAngle = Math.PI * 0.49;
+  scene.add(new THREE.HemisphereLight(0xe8f0ff, 0x5a5040, 0.75));
+  const sun = new THREE.DirectionalLight(0xfff2dd, 0.75); sun.position.set(60, 120, 30); scene.add(sun);
+  new ResizeObserver(resize).observe(stage); resize();
+  (function loop() { requestAnimationFrame(loop); controls.update(); renderer.render(scene, camera); placeTags(); })();
+  return true;
+}
+function resize() { const w = stage.clientWidth, h = stage.clientHeight; renderer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix(); }
+
+function build(i) {
+  current = i;
+  const V = DATA[i];
+  if (group) { scene.remove(group); group.traverse((o) => { if (o.geometry) o.geometry.dispose(); }); }
+  tags.forEach((t) => t.el.remove()); tags = [];
+  group = new THREE.Group(); scene.add(group);
+  const cy = V.center.y;
+  // bucket by shape, colour per instance
+  const buckets = new Map();
+  for (let k = 0; k < V.vox.length; k += 4) {
+    const [n, p] = V.pal[V.vox[k + 3]];
+    const s = shapeOf(n, p), key = s.join(",") + (n === "water" ? "w" : "");
+    if (!buckets.has(key)) buckets.set(key, { s, water: n === "water", items: [] });
+    buckets.get(key).items.push(V.vox[k], V.vox[k + 1], V.vox[k + 2], colorOf(n));
+  }
+  const m4 = new THREE.Matrix4(), c = new THREE.Color();
+  for (const { s, water, items } of buckets.values()) {
+    const geo = new THREE.BoxGeometry(s[0], s[1], s[2]);
+    const mat = new THREE.MeshLambertMaterial(water ? { transparent: true, opacity: 0.7 } : {});
+    const n = items.length / 4, mesh = new THREE.InstancedMesh(geo, mat, n);
+    for (let j = 0; j < n; j++) {
+      const x = items[j * 4], y = items[j * 4 + 1], z = items[j * 4 + 2];
+      m4.makeTranslation(x, y - cy + s[3] + s[1] / 2 - 0.5, z); mesh.setMatrixAt(j, m4);
+      const jitter = 0.94 + ((x * 73856093 ^ y * 19349663 ^ z * 83492791) >>> 0) % 1000 / 8000;
+      c.setHex(items[j * 4 + 3]).multiplyScalar(jitter); mesh.setColorAt(j, c);
+    }
+    group.add(mesh);
+  }
+  // labels over each area
+  const R = V.frame.right, A = V.frame.ahead;
+  const toXZ = (r, a) => [r * R[0] + a * A[0], r * R[1] + a * A[1]];
+  const add = (label, x, y, z) => { const el = document.createElement("div"); el.className = "tag"; el.textContent = label; stage.appendChild(el); tags.push({ el, v: new THREE.Vector3(x, y, z) }); };
+  for (const ar of V.areas) {
+    if (ar.kind === "building") continue;
+    const [x, z] = toXZ((ar.box[0] + ar.box[1]) / 2, (ar.box[2] + ar.box[3]) / 2);
+    add(ar.label, x, ar.y - cy + 3, z);
+  }
+  for (const p of V.placed) add(p.label, p.at[0], p.at[1] - cy + (p.h ?? 6), p.at[2]);
+  const [sx, sz] = toXZ(0, -8); add("Square", sx, 4, sz);
+  const ga = V.wall.gateAngle, gr = V.wall.radii[Math.round(((ga % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI)) / (2 * Math.PI) * V.wall.radii.length) % V.wall.radii.length];
+  add("Gate", Math.cos(ga) * gr, 4, Math.sin(ga) * gr);
+  tags.forEach((t) => (t.el.hidden = !showLabels));
+  document.getElementById("title").textContent = `${V.plot} starter village`;
+  document.getElementById("sub").textContent = `${V.region}. Real map terrain, graded around the paths. The hall, the buildings and the wall (${V.wall.name}) are drawn by the add-on's own code.`;
+  register(V);
+  view(viewMode);
+}
+function placeTags() {
+  const w = stage.clientWidth, h = stage.clientHeight, v = new THREE.Vector3();
+  for (const t of tags) {
+    if (!showLabels) continue;
+    v.copy(t.v).project(camera);
+    const off = v.z > 1 || v.x < -1.1 || v.x > 1.1 || v.y < -1.1 || v.y > 1.1;
+    t.el.hidden = off;
+    if (!off) { t.el.style.left = ((v.x + 1) / 2) * w + "px"; t.el.style.top = ((1 - v.y) / 2) * h + "px"; }
+  }
+}
+let viewMode = "orbit";
+function view(mode) {
+  viewMode = mode;
+  for (const id of ["orbit", "top", "gate"]) document.getElementById("v-" + id).setAttribute("aria-pressed", String(id === mode));
+  const V = DATA[current], ga = V.wall.gateAngle;
+  controls.target.set(0, 0, 0);
+  if (mode === "top") camera.position.set(0.01, 120, 0.01);
+  else if (mode === "gate") { camera.position.set(Math.cos(ga) * 58, 14, Math.sin(ga) * 58); controls.target.set(0, 2, 0); }
+  else camera.position.set(Math.cos(ga + 0.8) * 70, 55, Math.sin(ga + 0.8) * 70);
+  controls.update();
+}
+function register(V) {
+  const by = {};
+  for (const a of V.areas) (by[a.kind] ??= []).push(a);
+  const names = { building: "Buildings standing on arrival", slot: "Empty plots (Plot Marker)", yard: "Yards", field: "Fields", woodyard: "Yards", pen: "Yards", commons: "Greens" };
+  const groups = {};
+  for (const a of V.areas) (groups[names[a.kind] ?? a.kind] ??= []).push(a);
+  groups["Buildings standing on arrival"] = [{ label: "Longhouse (hall level 1)", box: null }, ...(groups["Buildings standing on arrival"] ?? []), { label: "Well", box: null }];
+  const size = (b) => (b ? `${b[1] - b[0] + 1} x ${b[3] - b[2] + 1}` : "");
+  const rs = V.wall.radii;
+  const html = Object.entries(groups).map(([g, list]) => `<div><h2>${g}</h2><ul>${list.map((a) => `<li>${a.label} <span class="m">${size(a.box)}</span></li>`).join("")}</ul></div>`).join("")
+    + `<div><h2>Wall</h2><ul><li>${V.wall.name}</li><li>Line wanders from <span class="m">${Math.round(Math.min(...rs))}</span> to <span class="m">${Math.round(Math.max(...rs))}</span> blocks out</li><li>Square at y <span class="m">${V.center.y}</span></li></ul></div>`;
+  document.getElementById("register").innerHTML = html;
+}
+
+if (init()) {
+  const plots = document.getElementById("plots");
+  DATA.forEach((V, i) => {
+    const b = document.createElement("button"); b.className = "opt"; b.id = "plot-" + i; b.textContent = V.plot; b.setAttribute("aria-pressed", String(i === 0));
+    b.onclick = () => { plots.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b))); build(i); };
+    plots.appendChild(b);
+  });
+  for (const id of ["orbit", "top", "gate"]) document.getElementById("v-" + id).onclick = () => view(id);
+  document.getElementById("labels").onclick = (e) => { showLabels = !showLabels; e.target.setAttribute("aria-pressed", String(showLabels)); e.target.textContent = showLabels ? "Shown" : "Hidden"; tags.forEach((t) => (t.el.hidden = !showLabels)); };
+  build(0);
+}
+</script>

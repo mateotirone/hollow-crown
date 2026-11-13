@@ -15,6 +15,15 @@
      "default": 0,
      "client_sync": true
     },
+    "siege:hue": {
+     "type": "int",
+     "range": [
+      0,
+      2
+     ],
+     "default": 0,
+     "client_sync": true
+    },
     "siege:pose": {
      "type": "int",
      "range": [

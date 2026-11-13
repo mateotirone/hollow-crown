@@ -30,7 +30,7 @@
    "textures": "textures/blocks/siege_brazier_iron"
   },
   "siege_brazier_coals": {
-   "textures": "textures/blocks/siege_brazier_coals"
+   "textures": "textures/blocks/dragons/brazier/coals"
   },
   "siege_brazier_fire": {
    "textures": "textures/blocks/siege_brazier_fire"
@@ -1377,6 +1377,15 @@
   },
   "siege_vault_safe_front_5": {
    "textures": "textures/blocks/vault/safe_front_5"
+  },
+  "siege_brazier_stone": {
+   "textures": "textures/blocks/dragons/brazier/stone"
+  },
+  "siege_brazier_bronze": {
+   "textures": "textures/blocks/dragons/brazier/bronze"
+  },
+  "siege_brazier_egg_cracked": {
+   "textures": "textures/blocks/dragons/brazier/egg_cracked"
   }
  },
  "siege_stopped_clock_case": {

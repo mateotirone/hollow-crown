@@ -233,7 +233,7 @@ function soldier(dim, at, { role, tier, name, tags, lord, stance }) {
   }
   if (e) return e;
   try {
-    e = dim.spawnEntity(stance === "realm" ? "minecraft:iron_golem" : role === "retainer" ? "minecraft:vindicator" : "minecraft:pillager", at);
+    e = dim.spawnEntity(stance === "realm" ? "minecraft:iron_golem" : role === "retainer" ? "siege:shieldwall_brute" : "siege:hollow_footman", at);
     for (const t of tags) e.addTag(t);
     e.addTag("siege_keep_golem"); // economy/golems.js removes any golem without it
     e.nameTag = name;

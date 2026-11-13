@@ -1,0 +1,87 @@
+{
+  "format_version": "1.21.90",
+  "minecraft:block": {
+    "description": {
+      "identifier": "siege:hatching_brazier",
+      "menu_category": {
+        "category": "items"
+      },
+      "states": {
+        "siege:egg": [
+          0,
+          1,
+          2
+        ]
+      }
+    },
+    "components": {
+      "minecraft:display_name": "tile.siege:hatching_brazier.name",
+      "minecraft:geometry": {
+        "identifier": "geometry.siege_hatching_brazier",
+        "bone_visibility": {
+          "egg": "q.block_state('siege:egg') == 1",
+          "cracked": "q.block_state('siege:egg') == 2"
+        }
+      },
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "siege_brazier_stone",
+          "render_method": "opaque"
+        },
+        "rim": {
+          "texture": "siege_brazier_bronze",
+          "render_method": "opaque"
+        },
+        "coals": {
+          "texture": "siege_brazier_coals",
+          "render_method": "opaque",
+          "face_dimming": false
+        },
+        "egg": {
+          "texture": "hc_nest_egg",
+          "render_method": "opaque",
+          "face_dimming": false
+        },
+        "cracked": {
+          "texture": "siege_brazier_egg_cracked",
+          "render_method": "opaque",
+          "face_dimming": false
+        }
+      },
+      "minecraft:collision_box": {
+        "origin": [
+          -7,
+          0,
+          -7
+        ],
+        "size": [
+          14,
+          10,
+          14
+        ]
+      },
+      "minecraft:selection_box": {
+        "origin": [
+          -7,
+          0,
+          -7
+        ],
+        "size": [
+          14,
+          16,
+          14
+        ]
+      },
+      "minecraft:map_color": "#b4532a",
+      "minecraft:light_emission": 9,
+      "minecraft:light_dampening": 0,
+      "minecraft:destructible_by_mining": {
+        "seconds_to_destroy": 2.0
+      },
+      "minecraft:destructible_by_explosion": {
+        "explosion_resistance": 30
+      },
+      "siege:clickable": {}
+    }
+  }
+}

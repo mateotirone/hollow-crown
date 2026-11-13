@@ -1,0 +1,47 @@
+{
+ "format_version": "1.21.60",
+ "minecraft:item": {
+  "description": {
+   "identifier": "siege:rimeforged_boots",
+   "menu_category": {
+    "category": "equipment"
+   }
+  },
+  "components": {
+   "minecraft:icon": "siege_rimeforged_boots",
+   "minecraft:display_name": {
+    "value": "item.siege:rimeforged_boots.name"
+   },
+   "minecraft:max_stack_size": 1,
+   "minecraft:wearable": {
+    "slot": "slot.armor.feet",
+    "protection": 3
+   },
+   "minecraft:durability": {
+    "max_durability": 579
+   },
+   "minecraft:enchantable": {
+    "slot": "armor_feet",
+    "value": 15
+   },
+   "minecraft:repairable": {
+    "repair_items": [
+     {
+      "items": [
+       "siege:rime_steel"
+      ],
+      "repair_amount": "q.max_durability * 0.25"
+     }
+    ]
+   },
+   "minecraft:tags": {
+    "tags": [
+     "siege:codex",
+     "siege:regional_rimeforged",
+     "minecraft:is_armor",
+     "minecraft:trimmable_armors"
+    ]
+   }
+  }
+ }
+}

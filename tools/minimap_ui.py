@@ -9,10 +9,14 @@ pattern from the Bedrock Wiki), so the map stays up while real titles come and g
 title box ignores titles that start with "hcm:".
 
 The hidden title is fixed width at the front:
-    hcm:  D  P  TTTTTT  |  label
+    hcm:  D  P  TTTTTT  C  R  K  |  label
     D       arrow direction, "q r s t u v w y" (north, then clockwise)
     P       arrow spot inside the middle tile, "a".."p" (row by row, 4 x 4); anything else hides it
     TTTTTT  map texture: "xXXzZZ" tile, "none__" for uncharted, "off___" hides the whole minimap
+    C R     quest pin cell on the 9 x 9 grid over the view: column "a".."i", row "j".."r" (own letters, so
+            the row can be cut from the column)
+    K       pin kind and texture pK.png: "g" the quest's place, "e" held on the rim, "t" a person to talk to;
+            "_" no pin
     label   place name under the map (no digits)
 The quest tracker (scripts/quests/) works the same way with titles that start with "hcq:":
     hcq:  SS  text
@@ -41,7 +45,15 @@ D = f"('%.1s' * {S})"
 P = f"({DP} - {D})"
 R = f"({S} - {DP})"                                # TTTTTT | label (the label may lose letters here; unused)
 T = f"('%.6s' * {R})"
-LABEL = f"({S} - ('%.9s' * {S}))"                 # everything after D P TTTTTT |
+LABEL = f"({S} - ('%.12s' * {S}))"                # everything after D P TTTTTT C R K |
+X = f"({S} - ('%.8s' * {S}))"                      # C R K | label
+CR = f"('%.2s' * {X})"
+C = f"('%.1s' * {X})"
+ROW = f"({CR} - {C})"
+K = f"(('%.3s' * {X}) - {CR})"
+PIN = 9          # pin cells per side; must match PIN_COLS in scripts/minimap/data.js
+CELL = MAP // PIN
+PIN_SIZE = 7
 HAS = f"(not ({S} = #preserved_text))"
 ON = f"({HAS} and (not ({T} = 'off___')))"
 
@@ -78,6 +90,21 @@ for i, letter in enumerate(letters):
         view(f"({ON} and ({P} = '{letter}'))", "#visible"),
         view(f"('{TEX}a' + {D})", "#texture"),
     ])})
+# the quest pin (scripts/minimap/data.js pinCode): a column panel per letter, each holding a pin per row
+pin_cols = []
+for ci, col in enumerate("abcdefghi"):
+    rows = []
+    for ri, row in enumerate("jklmnopqr"):
+        off = [CELL * ci + (CELL - PIN_SIZE) / 2, CELL * ri + (CELL - PIN_SIZE) / 2]
+        rows.append({f"hc_minimap_pin_{col}{row}": image("#texture", [PIN_SIZE, PIN_SIZE], off, 3, [
+            view(f"({ROW} = '{row}')", "#visible"),
+            view(f"('{TEX}p' + {K})", "#texture"),
+        ])})
+    pin_cols.append({f"hc_minimap_pins_{col}": {
+        "type": "panel", "size": [MAP, MAP], "offset": [RIM, RIM], "layer": 3,
+        "anchor_from": "top_left", "anchor_to": "top_left", "controls": rows,
+        "bindings": [view(f"({ON} and (not ({K} = '_')) and ({C} = '{col}'))", "#visible")]}})
+box.extend(pin_cols)
 box.append({"hc_minimap_north": {
     "type": "label", "text": "N", "color": [0.93, 0.78, 0.42], "shadow": True, "layer": 5,
     "font_scale_factor": 0.75, "anchor_from": "top_middle", "anchor_to": "top_middle", "offset": [0, 0],

@@ -1,5 +1,5 @@
 import { addTests, assert, assertEqual } from "../core/tests.js";
-import { questsFor, nextBoss, homeBoss, pointer, panelText, hudString, readHud, whereLine, KEY, SPOT, BOSS_STEPS, NOTES, OVERWORLD, UNDERTOW } from "./rules.js";
+import { questsFor, pinOf, talkOf, nextBoss, homeBoss, pointer, panelText, hudString, readHud, whereLine, KEY, SPOT, BOSS_STEPS, NOTES, OVERWORLD, UNDERTOW } from "./rules.js";
 import { REGIONAL_BOSSES } from "../lore/data/spine.js";
 import { WARDS } from "../plots/config.js";
 
@@ -26,7 +26,9 @@ addTests("quests", {
     assertEqual(nextBoss(f), "seneschal");
     const q = questsFor(f)[0];
     assertEqual(q.id, "boss_seneschal_key");
-    assertEqual(q.note, "1 of 5 fallen.");
+    assertEqual(q.note, "1 of 5 fallen. Keep every boss's shard. Not in your pack: the Reeve's (beat it again for another).");
+    const kept = questsFor({ ...f, items: { ...f.items, "siege:choir_shard_reeve": 1 } })[0];
+    assertEqual(kept.note, "1 of 5 fallen. Keep their shards: 1 of 5.");
   },
   "once the home boss is down, the nearest standing boss is next": () => {
     const f = base({ flags: ["wren_met", ...fellAll("reeve")], plot: "Harrowford", pos: { x: -800, z: 380 } });
@@ -45,8 +47,10 @@ addTests("quests", {
     const five = fellAll(...REGIONAL_BOSSES);
     assertEqual(ids(base({ flags: five })), ["field_notes"]);
     assertEqual(ids(base({ flags: five, got: NOTES })), ["name_place"]);
-    const named = base({ flags: five, solved: ["source"], items: { "siege:choir_shard": 3 } });
-    assertEqual(questsFor(named)[0].note, "3 of 5 shards in your pack.");
+    const named = base({ flags: five, solved: ["source"], items: { "siege:choir_shard_reeve": 1, "siege:choir_shard_bride": 2, "siege:choir_shard_mother": 1 } });
+    assertEqual(questsFor(named)[0].note, "3 of 5 shards. Still need the Huntsman's and the Seneschal's.");
+    const doubles = base({ flags: five, solved: ["source"], items: { "siege:choir_shard_reeve": 5 } });
+    assert(questsFor(doubles)[0].note.startsWith("1 of 5"), "five of the same shard is one of five");
     const site = { id: "kings_barrow", name: "The King's Barrow", x: 120, z: 520 };
     const strike = questsFor({ ...named, items: { "siege:tuning_fork": 1 }, site })[0];
     assertEqual(strike.id, "strike");
@@ -96,5 +100,26 @@ addTests("quests", {
     assertEqual(readHud(hudString("")).spot, SPOT.hidden, "no steps: the panel hides");
     assert(!readHud(hudString("a hcq: b _b c")).text.includes("hcq:"), "the text never carries the key");
     assert(!/^[0-9.]+$/.test(readHud(s).spot), "the spot marker never looks like a number");
+  },
+  "the minimap pin is the first step with a place here, and Wren is someone to talk to": () => {
+    const qs = questsFor(base({ keep: false }));
+    const pin = pinOf(qs, OVERWORLD);
+    const mill = WARDS.find((w) => w.name === "Millbrook");
+    assertEqual([pin.x, pin.z, pin.kind], [mill.x, mill.z, "goal"]);
+    assertEqual(pinOf(qs, UNDERTOW), undefined, "nothing in the other world");
+    assertEqual(talkOf(qs).tag, "siege_lore_npc_wren");
+  },
+  "boss steps mark only people the hint already names": () => {
+    const f = (plot) => base({ flags: ["wren_met"], plot });
+    assertEqual(talkOf(questsFor(f("Harrowford"))).tag, "siege_clock_keeper");
+    assertEqual(talkOf(questsFor(f("Frosthelm"))).tag, "siege_lodge_warden");
+    for (const plot of ["Gullcliff", "Redmesa", "Reedmoor"]) assertEqual(talkOf(questsFor(f(plot))), undefined, `${plot}: nobody to mark (the Mirelight changeling must stay unmarked)`);
+    const keyed = base({ flags: ["wren_met"], plot: "Harrowford", items: { "siege:stopped_clock_key": 1 } });
+    assertEqual(talkOf(questsFor(keyed)), undefined, "with the key, the well, not the keepers");
+  },
+  "below, the Carter is marked": () => {
+    const qs = questsFor(base({ dim: UNDERTOW, flags: fellAll(...REGIONAL_BOSSES), hollow: { carter: { x: 10, z: 20 } } }));
+    assertEqual(talkOf(qs).tag, "siege_lore_npc_carter");
+    assertEqual(pinOf(qs, UNDERTOW).x, 10);
   },
 });
