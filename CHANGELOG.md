@@ -9,6 +9,7 @@ How versions work is in [`docs/RELEASING.md`](docs/RELEASING.md).
 Everything merged to `main` since the last release goes here. Each pull request that changes what players see adds a line under one of these headings.
 
 ### Added
+- The Hollow Choir now leaves a confession when its Conductor falls: The Conductor's Last Measure, the eighth of The Fallen. It tells you who gave the Choir its song, without naming him. The Library now counts 75 tomes.
 - The Hollow Choir now drops its own relic the first time it falls: The Last Note, a small violet bell. Hold it in your offhand and things from the Hollow near you falter, slowed and weakened (never a boss).
 - The Ash Seneschal tells you at the start that he is watching how you fight, and when he falls the faceless statues in the antechamber grind round to face the vault door again.
 - After Morvane falls, a line tells you the Deep Door under the Court will open now.
