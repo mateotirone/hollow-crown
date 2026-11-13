@@ -302,7 +302,8 @@ const CARDINALS = [[0, "north"], [90, "east"], [180, "south"], [270, "west"]];
 
 // Raise (or upgrade to) a wall level. center/style/bearing are only needed for the first wall.
 // radius: where a new wall line goes (default WALLS.radius); a town layout starts it at its Hamlet radius.
-export function raiseWall(id, level, { center, style, bearing, radius, shape } = {}) {
+// outline: { radii, radiiAt } from a map plot's starter village (towns_data.js): the wall follows that line at every ring.
+export function raiseWall(id, level, { center, style, bearing, radius, shape, outline } = {}) {
   const L = WALL_LEVELS[level];
   if (!L) return `There is no wall level ${level}.`;
   if (jobs.has(id)) return "A wall is already rising.";
@@ -314,6 +315,7 @@ export function raiseWall(id, level, { center, style, bearing, radius, shape } =
     // gates face one of the four winds so the gate blocks hang straight
     const [deg, dir] = CARDINALS.reduce((best, c) => (Math.abs(((bearing ?? 180) - c[0] + 540) % 360 - 180) < Math.abs(((bearing ?? 180) - best[0] + 540) % 360 - 180) ? c : best));
     w = walls()[id] = { x: center.x, y: center.y, z: center.z, shape: shape ?? wallShape(`${id}:${center.x},${center.z}`), radius: radius ?? WALLS.radius, level: 0, best: 0, style: style ?? "vale", gate: bearingToAngle(deg), gateDir: dir };
+    if (outline?.radii?.length) Object.assign(w, { radii: outline.radii, radiiAt: outline.radiiAt }); // walldata.js radiusAt reads them
   }
   if (style) w.style = style;
   w.building = { level, index: 0 };

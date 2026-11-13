@@ -48,7 +48,7 @@ def siege_tex(n):
                     if not isinstance(v, dict) or v.get("texture") not in td: continue
                     t = td[v["texture"]]["textures"]; t = t[0] if isinstance(t, list) else t
                     if isinstance(t, dict): t = t.get("path") or t["variations"][0]["path"]
-                    out[face] = os.path.join(_REPO, "Siege_Nights_RP", t)
+                    out[face] = os.path.join(_REPO, "Siege_Nights_RP", t) + ("" if os.path.splitext(t)[1] else ".png")
                 if out: _SIEGE[b["description"]["identifier"]] = out
         except Exception as e: print("siege textures:", e)
     t = _SIEGE.get(n, {})
@@ -204,6 +204,7 @@ def cube_tex(n, p):
     simple = {"pumpkin": {"top": "pumpkin_top", "side": "pumpkin_side"},
               "grass_block": {"top": "grass_top#grass", "bottom": "dirt", "side": "grass_side_carried"},
               "podzol": {"top": "dirt_podzol_top", "bottom": "dirt", "side": "dirt_podzol_side"},
+              "stonecutter_block": {"top": "stonecutter2_top", "bottom": "stonecutter2_bottom", "side": "stonecutter2_side"},
               "bone_block": {"top": "bone_block_top", "bottom": "bone_block_top", "side": "bone_block_side"},
               "ochre_froglight": {"top": "ochre_froglight_top", "bottom": "ochre_froglight_top", "side": "ochre_froglight_side"},
               "verdant_froglight": {"top": "verdant_froglight_top", "bottom": "verdant_froglight_top", "side": "verdant_froglight_side"},
