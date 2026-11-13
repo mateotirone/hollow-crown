@@ -63,6 +63,7 @@ import "./townsfolk/index.js";
 import "./weather/index.js";
 import "./graves/index.js";
 import "./wings/index.js";
+import "./battletest/index.js"; // test tool: /scriptevent siege:battle_test attack | defend | raid
 
 // Start the shared loop last, once every file has registered its work
 import { startLoop } from "./core/loop.js";
