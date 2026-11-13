@@ -31,6 +31,7 @@ RELICS = [
     ("seneschal_greatshield", "Seneschal's Greatshield", "shield", (120, 100, 80), dict(durability=1200), "From the Ash Seneschal. Hold it in your offhand and sneak to brace: big resistance and you throw attackers back."),
     ("faceless_crown_shard", "Faceless Crown Shard", "shard", (200, 190, 170), dict(), "A sliver of something that was once worn. It whispers when you hold it."),
     ("mire_heart", "Mire Heart", "charm", (130, 160, 60), dict(), "From the Mother of Changelings. Hold it in your offhand: at night, your hits heal you."),
+    ("last_note", "The Last Note", "charm", (170, 150, 220), dict(), "From the Hollow Choir. Hold it in your offhand: things from the Hollow near you falter, as if they have lost the tune."),
     ("warlords_brand", "The Warlord's Brand", "sword", (180, 40, 30), dict(damage=9, durability=1600), "From the Warlord King. Sets foes alight; every fifth hit lets out a war-cry shockwave."),
     ("oath_of_oswin", "The Kept Oath", "sword", (150, 190, 200), dict(damage=10, durability=2400), "Knight path. A king's oath-blade, still keeping its oath. Executes foes below a fifth of their health and rallies your guards."),
     ("crownless_mantle", "Crownless Mantle", "chest", (40, 60, 80), dict(protection=8, durability=600), "Marked path. Woven from the dark under the crown. Hits sometimes pass straight through you."),

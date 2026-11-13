@@ -241,7 +241,7 @@ async function ensurePython() {
 // takes each build from the newest branch that has it, so stations, towns and walls from different threads
 // all show at once.
 const WT = path.join(CACHE, "worktrees"), BOUT = path.join(CACHE, "builds");
-const RECIPE = "r2";         // bump when the way builds are made changes, so builds kept from an earlier run are redone
+const RECIPE = "r3";         // bump when the way builds are made changes, so builds kept from an earlier run are redone
 const built = new Map();     // slug -> {sha, ref, time, ok, index, tpl, error}
 let buildTimer = null, building = false, buildAgain = false;
 const slug = (ref) => ref.replace(/^origin\//, "").replace(/[^A-Za-z0-9._-]+/g, "_");
@@ -319,6 +319,7 @@ for (const s of fs.existsSync(BOUT) ? fs.readdirSync(BOUT) : []) {
 
 // Other 3D builders whose preview scenes join the catalogue as their own section. Each runs in the branch's
 // worktree; every OUT/**/scene.json it leaves (Blueprint.save_logical) becomes a build in the viewer.
+const readNames = (out) => { try { return JSON.parse(fs.readFileSync(path.join(out, "names.json"), "utf8")); } catch { return {}; } };
 const EXTRAS = [
   { id: "trees", title: "Trees", marker: "map/trees/build_trees.py",
     args: (out) => [out, "--variants", "1", "--render", "--shots", "", "--textures", TEXTURES, "--three", THREE],
@@ -342,12 +343,19 @@ const EXTRAS = [
   { id: "miniature", title: "Welcome hall miniature", marker: "map/structures/miniature_scene.py",
     args: (out) => [out],
     label: { miniature: "The whole map in miniature, on its cloud (welcome hall)" } },
+  // The material-loop machines come in every region's look: names.json gives each build {title, sub}, so a
+  // stage is one row with a chip per region (machine_regions.py).
   { id: "bossunlocks", title: "Boss unlock sites", marker: "map/structures/boss_unlock_sites.py",
     args: (out) => [out],
     names: (out) => { try { return JSON.parse(fs.readFileSync(path.join(out, "names.json"), "utf8")); } catch { return {}; } } },
   { id: "ironworks", title: "Ironworks", marker: "map/structures/ironworks_builds.py",
-    args: (out) => [out],
-    label: { ironworks_1: "Ironworks 1: Ore Pit", ironworks_2: "Ironworks 2: Bloomery", ironworks_3: "Ironworks 3: Trip-Hammer Forge" } },
+    args: (out) => [out], names: (out) => readNames(out) },
+  { id: "goldsluice", title: "Gold Sluice", marker: "map/structures/goldsluice_builds.py",
+    args: (out) => [out], names: (out) => readNames(out) },
+  { id: "deepshaft", title: "Deep Shaft", marker: "map/structures/deepshaft_builds.py",
+    args: (out) => [out], names: (out) => readNames(out) },
+  { id: "choirseam", title: "Choir Seam (the Hollow)", marker: "map/structures/choirseam_builds.py",
+    args: (out) => [out], names: (out) => readNames(out) },
   { id: "trade_outpost", title: "Trade Outposts", marker: "map/structures/trade_outpost.py",
     args: (out) => [out],
     names: (out) => { try { return JSON.parse(fs.readFileSync(path.join(out, "names.json"), "utf8")); } catch { return {}; } } },
@@ -393,7 +401,10 @@ async function addSection(wt, out, py, pyArgs, index, id, title, jobs, titleOf) 
     const r = await run(py, [...pyArgs, path.join(HERE, "run_scenes.py"), j.script, ...j.args(jo)], path.dirname(j.script));
     const scenes = sceneFiles(jo);
     if (!scenes.length) { log(`${title} (${j.name}): no scenes`, r.out.trim().split("\n").slice(-2).join(" ")); continue; }
-    for (const f of scenes) { const k = path.basename(path.dirname(f)); list.push({ key: `${id}-${j.name}-${k}`, title: titleOf(j, k, jo), group: j.group || "", scene: f }); }
+    for (const f of scenes) {
+      const k = path.basename(path.dirname(f)), t = titleOf(j, k, jo);   // a title, or {title, sub} for a build with several looks
+      list.push({ key: `${id}-${j.name}-${k}`, title: typeof t === "object" ? t.title : t, sub: typeof t === "object" ? t.sub || "" : "", group: j.group || "", scene: f });
+    }
   }
   if (!list.length) return;
   fs.writeFileSync(path.join(xo, "scenes.json"), JSON.stringify(list));

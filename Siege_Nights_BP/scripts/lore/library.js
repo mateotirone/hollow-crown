@@ -40,7 +40,7 @@ function saveLib(owner) {
 
 // Every tome id shelved anywhere in this owner's Library
 export const shelvedIn = (owner) => Object.values(libOf(owner)).flat();
-// local books sit on the shelves but do not count toward the 74 or Library rank
+// local books sit on the shelves but do not count toward the 75 or Library rank
 export const libraryCount = (owner) => (owner ? shelvedIn(owner).filter((id) => !isLocal(id)).length : 0);
 
 function showFill(block, count) {
