@@ -1,0 +1,299 @@
+{
+ "name": "mason_yard_blackfen",
+ "card": {
+  "title": "Mason's Yard",
+  "sub": "Blackfen, workshop and yard",
+  "region": "blackfen",
+  "where": "Every new base, beside the square",
+  "kind": "Work",
+  "blurb": "The mason's workshop: a small stone shop with his tools inside, and a yard in front where he cuts and sells blocks."
+ },
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "vale_stone",
+    "frame": "tuff_bricks",
+    "infill": {
+     "ladder": [
+      "tuff",
+      "tuff_bricks"
+     ],
+     "axis": "noise",
+     "scale": 2
+    },
+    "plinth": {
+     "ladder": [
+      "mud_bricks",
+      "tuff"
+     ],
+     "axis": "noise",
+     "scale": 3
+    },
+    "quoin": "polished_tuff",
+    "chimney": "mud_bricks",
+    "door": "mangrove_door",
+    "shutter": "spruce_planks",
+    "glass": "glass_pane",
+    "floor": "dark_oak_planks",
+    "roof": "dark_oak_planks"
+   },
+   "rect": [
+    -3,
+    -7,
+    3,
+    -3
+   ],
+   "y": 0,
+   "plinth": 1,
+   "storeys": [
+    5
+   ],
+   "door": {
+    "side": "s",
+    "kind": "house",
+    "steps": 0
+   },
+   "roof": {
+    "type": "gable",
+    "ridge": "x",
+    "pitch": 1,
+    "moss": true,
+    "overhang": 1
+   },
+   "interior": {
+    "use": "shop",
+    "rooms": [
+     "shop"
+    ]
+   },
+   "chimney": [
+    [
+     2,
+     -5
+    ]
+   ],
+   "shutters": 0.3,
+   "bushes": false
+  }
+ ],
+ "place": [
+  [
+   -4,
+   0,
+   -2,
+   "packed_mud"
+  ],
+  [
+   -4,
+   0,
+   -1,
+   "packed_mud"
+  ],
+  [
+   -4,
+   0,
+   0,
+   "packed_mud"
+  ],
+  [
+   -3,
+   0,
+   -2,
+   "packed_mud"
+  ],
+  [
+   -3,
+   0,
+   -1,
+   "packed_mud"
+  ],
+  [
+   -3,
+   0,
+   0,
+   "packed_mud"
+  ],
+  [
+   -2,
+   0,
+   -2,
+   "packed_mud"
+  ],
+  [
+   -2,
+   0,
+   -1,
+   "packed_mud"
+  ],
+  [
+   -2,
+   0,
+   0,
+   "packed_mud"
+  ],
+  [
+   -1,
+   0,
+   -2,
+   "packed_mud"
+  ],
+  [
+   -1,
+   0,
+   -1,
+   "packed_mud"
+  ],
+  [
+   -1,
+   0,
+   0,
+   "packed_mud"
+  ],
+  [
+   0,
+   0,
+   -2,
+   "packed_mud"
+  ],
+  [
+   0,
+   0,
+   -1,
+   "packed_mud"
+  ],
+  [
+   0,
+   0,
+   0,
+   "packed_mud"
+  ],
+  [
+   1,
+   0,
+   -2,
+   "packed_mud"
+  ],
+  [
+   1,
+   0,
+   -1,
+   "packed_mud"
+  ],
+  [
+   1,
+   0,
+   0,
+   "packed_mud"
+  ],
+  [
+   2,
+   0,
+   -2,
+   "packed_mud"
+  ],
+  [
+   2,
+   0,
+   -1,
+   "packed_mud"
+  ],
+  [
+   2,
+   0,
+   0,
+   "packed_mud"
+  ],
+  [
+   3,
+   0,
+   -2,
+   "packed_mud"
+  ],
+  [
+   3,
+   0,
+   -1,
+   "packed_mud"
+  ],
+  [
+   3,
+   0,
+   0,
+   "packed_mud"
+  ],
+  [
+   4,
+   0,
+   -2,
+   "packed_mud"
+  ],
+  [
+   4,
+   0,
+   -1,
+   "packed_mud"
+  ],
+  [
+   4,
+   0,
+   0,
+   "packed_mud"
+  ],
+  [
+   -3,
+   1,
+   -1,
+   "stonecutter_block",
+   {
+    "facing": "s"
+   }
+  ],
+  [
+   3,
+   1,
+   -2,
+   "mud_bricks"
+  ],
+  [
+   3,
+   2,
+   -2,
+   "mud_bricks"
+  ],
+  [
+   4,
+   1,
+   -2,
+   "tuff_bricks"
+  ],
+  [
+   4,
+   1,
+   -1,
+   "tuff_bricks"
+  ],
+  [
+   -4,
+   1,
+   -1,
+   "cobblestone_slab",
+   {
+    "half": "bottom"
+   }
+  ],
+  [
+   -4,
+   1,
+   -2,
+   "barrel"
+  ]
+ ],
+ "marks": {
+  "bench": [
+   1,
+   1,
+   -1
+  ]
+ }
+}

@@ -37,7 +37,8 @@ export function freeBeds(owner) {
   const out = [];
   for (const [id, st] of Object.entries(town?.slots ?? {})) {
     if (!HOMES.includes(st.building) || st.done === false || st.broken) continue;
-    for (const bed of st.bedSpots ?? []) if (!taken.some((t) => same(t, bed))) out.push({ home: id, bed });
+    // the founder's own bed (basebuilds.js) is never given to a settler
+    for (const bed of st.bedSpots ?? []) if (!taken.some((t) => same(t, bed)) && !(st.ownerBed && same(st.ownerBed, bed))) out.push({ home: id, bed });
   }
   return out;
 }

@@ -185,11 +185,13 @@ export function spawnMason(dim, location, bench) {
 
 const masonsOf = (dim, bench) => dim.getEntities({ type: NPC_TYPE, tags: [benchTag(bench)] });
 
-export function registerBench(block, owner) {
+// stand: where the mason stands (beside the bench in the Mason's Yard); without it, on the bench
+const standOf = (b) => (b.stand ? { x: b.stand.x + 0.5, y: b.stand.y, z: b.stand.z + 0.5 } : { x: b.x + 0.5, y: b.y + 1, z: b.z + 0.5 });
+export function registerBench(block, owner, stand) {
   const at = { x: block.location.x, y: block.location.y, z: block.location.z };
-  if (!benches().some((b) => same(b, at))) benches().push({ ...at, owner });
+  if (!benches().some((b) => same(b, at))) benches().push({ ...at, owner, ...(stand ? { stand } : {}) });
   store.save();
-  if (!masonsOf(block.dimension, at).length) spawnMason(block.dimension, { x: at.x + 0.5, y: at.y + 1, z: at.z + 0.5 }, at);
+  if (!masonsOf(block.dimension, at).length) spawnMason(block.dimension, standOf({ ...at, stand }), at);
 }
 
 world.afterEvents.playerPlaceBlock.subscribe(({ block, player }) => {
@@ -247,7 +249,7 @@ function benchTick() {
     else {
       const n = (missing.get(tag) ?? 0) + 1;
       missing.set(tag, n);
-      if (n >= MISSING_CHECKS) { missing.delete(tag); spawnMason(dim, { x: bench.x + 0.5, y: bench.y + 1, z: bench.z + 0.5 }, bench); }
+      if (n >= MISSING_CHECKS) { missing.delete(tag); spawnMason(dim, standOf(bench), bench); }
     }
     return true;
   });

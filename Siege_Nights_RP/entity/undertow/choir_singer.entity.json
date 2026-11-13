@@ -16,11 +16,16 @@
     "controller.render.siege_bestiary"
    ],
    "animations": {
-    "idle": "animation.siege_b.choir_singer.idle"
+    "idle": "animation.siege_b.choir_singer.idle",
+    "walk": "animation.siege_b.choir_singer.walk",
+    "hurt": "animation.siege_b.choir_singer.hurt",
+    "flinch": "controller.animation.siege_b.choir_singer.flinch"
    },
    "scripts": {
     "animate": [
-     "idle"
+     "idle",
+     "walk",
+     "flinch"
     ]
    }
   }

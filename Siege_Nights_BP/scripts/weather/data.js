@@ -46,8 +46,12 @@ export const KINDS = [
   {
     id: "fen_mist", region: "Blackfen", name: "Fen mist",
     arrive: "§7Mist is coming up off the water.",
-    colour: "#55604f",
-    steps: [render(0.05, 0.6), fixed(2, 48), fixed(0, 28)],
+    // Mateo 2026-11-12 (playtest 1.2.1103): the old fixed 28-block wall was too thick and stood up like a
+    // wall against the clear sky. Hazy, not blind: every step is a share of the render distance (so the
+    // fog always swallows the world's far edge instead of stopping short of it), each fades in from close
+    // by over a long way, and the colour is a paler grey-green that melts into the daytime horizon.
+    colour: "#7d897a",
+    steps: [render(0.1, 0.95), render(0.04, 0.75), render(0, 0.55)],
     particle: { id: "siege:wx_fen_mist", rate: 6, size: 1.6, colour: [0.62, 0.68, 0.6, 0.18], speed: 0.25, fall: 0, life: 7, spread: 12 },
     sounds: [{ cue: "wx.fen_croak", every: [9, 22] }, { cue: "wx.fen_splash", every: [25, 60] }, { cue: "wx.fen_bell", every: [90, 200] }],
     minutes: [6, 16],
@@ -159,7 +163,26 @@ export const SKY = {
   stepTicks: 200, // a spell grows or thins by one step every 10 seconds where you stand
   roofCap: 1, // under a roof you get at most this step (the window light still looks grey)
   deep: 8, // this many blocks under the open sky (a cave, a cellar): no weather at all
+  edge: 96, // a spell thins over this many blocks toward its region's border, so it never ends in a wall
 };
+
+// Leaves, vines and roots overhead are not a roof: under the mangroves the fog stays as thick as outside.
+export const isCanopy = (typeId = "") =>
+  typeId === "minecraft:air" || /leaves|vine|mangrove_roots|propagule|azalea|spore_blossom|hanging_roots|cobweb/.test(typeId);
+
+/** How far (in blocks, at most SKY.edge) the nearest ground of another region is. place(x, z) gives the
+ *  weather region there (REGION_OF_PLACE of the minimap name). Samples rings every 24 blocks. */
+export function edgeDistance(x, z, name, place) {
+  for (let r = 24; r <= SKY.edge; r += 24)
+    for (let a = 0; a < 12; a++) {
+      const t = (a / 12) * Math.PI * 2;
+      if (place(x + Math.cos(t) * r, z + Math.sin(t) * r) !== name) return r - 12;
+    }
+  return SKY.edge;
+}
+
+/** The thickest step allowed this far in from the border: thin at the edge, full a whole `edge` in. */
+export const edgeStep = (step, max, distance) => Math.min(step, Math.max(1, Math.ceil((max * distance) / SKY.edge)));
 
 export const fogId = (kind, step) => `siege:wx_${kind}_${step}`; // step from 1
 export const fogIds = () => KINDS.flatMap((k) => k.steps.map((_, i) => fogId(k.id, i + 1)));

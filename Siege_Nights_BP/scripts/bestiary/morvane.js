@@ -37,13 +37,13 @@
 import { world, system } from "@minecraft/server";
 import { addTests, assert, assertEqual, hitWall, settlementAt, UNBREAKABLE } from "../siege/api.js";
 import { UNDERTOW_ID } from "../undertow/layout.js";
-import { SEAT, RANKS, FALL_SHAFTS, dropSeatBand, rebuildSeat, ranksSpots, pocket, pocketReady, requestPockets, overworldStage } from "../undertow/finale.js";
+import { SEAT, RANKS, FALL_SHAFTS, dropSeatBand, rebuildSeat, ranksSpots, ranksReady, pocket, pocketReady, requestPockets, overworldStage } from "../undertow/finale.js";
 import { registerBoss, startBoss, fightOf, rebind, stack } from "./bossCore.js";
 import { lance } from "./bosses.js";
 import { playReveal } from "./reveal.js";
 import { REVEAL } from "../lore/data/reveal.js";
 import { spawnChampion } from "./champions.js";
-import { announce, effect, flat, heal, healthOf, heroOf, hurt, particle, ring, shove, sound } from "./util.js";
+import { announce, blockKind, effect, flat, footingNear, heal, healthOf, heroOf, hurt, particle, ring, shove, sound } from "./util.js";
 import { sfx } from "../core/sfx.js";
 
 export const MORVANE = {
@@ -113,6 +113,9 @@ export function finalePlace(key, partySize = 1) {
     return { center: seatCentre(), radius: SEAT.outerRadius + 2, ring: 14, rings: floorRings(SEAT.outerRadius + 1, MORVANE.floor.step, SEAT.innerRadius + 2), drop: dropSeatBand, rebuild: rebuildSeat };
   }
   if (key === "ranks") {
+    // Their ground and armour are built after the Choir falls (builder.js ranksGround). Until then the stage is
+    // fought where he is, never in the empty dark of unbuilt land (Mateo 2026-11-12: "the second stage is just dark").
+    if (!ranksReady()) return undefined;
     const center = { x: RANKS.x + 0.5, y: RANKS.y + 1, z: RANKS.z + 0.5 };
     return { center, radius: RANKS.r, entry: { x: RANKS.x + 3.5, y: RANKS.y + 1, z: RANKS.z - 9.5 },
       suits: ranksSpots().sort((a, b) => flat(a, center) - flat(b, center)).filter((q) => flat(q, center) > 5) };
@@ -156,6 +159,28 @@ function placeFor(f, stage) {
 }
 
 // ---------- small helpers ----------
+
+// Where he can land near a spot (util.js footingNear): the first place from 2 up to 8 down with floor under it and two
+// blocks of air for him, so he is never put inside the floor or dropped into the rock under the Seat. Mateo 2026-11-12:
+// "Morvane is getting stuck in the void. He's lunging at me and falling through the cracks": he used to land exactly
+// where you stood, so a player in the air or at the edge sent him into the drop.
+// Move him to the nearest footing by a spot; if there is none (over the void) he stays where he is.
+function moveTo(f, at, options) {
+  const to = footingNear(at, blockKind(f.dim));
+  if (!to) return false;
+  try { f.entity.teleport(to, options); return true; } catch { return false; }
+}
+// Pulled back if he still falls (knocked off, or a floor gives under him): to the last ground he stood on.
+function keepFooting(f) {
+  const e = f.entity, m = f.m;
+  try {
+    if (e.isOnGround) { m.foot = { x: e.location.x, y: e.location.y, z: e.location.z }; return; }
+    if (m.foot && STAGES[m.stage].key !== "fall" && e.location.y < m.foot.y - 10) {
+      e.teleport(m.foot);
+      particle(f.dim, "siege:vein_spark", e.getHeadLocation());
+    }
+  } catch { /* gone */ }
+}
 function party(f) {
   return world.getAllPlayers().filter((p) => f.m.party.has(p.id));
 }
@@ -389,7 +414,11 @@ const TICK = {
   2: (f) => {
     const s = f.m.s;
     const left = f.adds().filter((e) => e.hasTag("siege_morvane_court")).length;
-    if (f.m.raged && s.wave < MORVANE.court.length) { while (s.wave < MORVANE.court.length) courtWave(f); return; }
+    if (f.m.raged && s.wave < MORVANE.court.length) {
+      f.say("§4The memory will not wait any longer. The rest of the old court stands at once.");
+      while (s.wave < MORVANE.court.length) courtWave(f);
+      return;
+    }
     if (left) return;
     if (s.wave >= MORVANE.court.length) {
       speak(f, "The lamps go out one at a time. The last thing you see is a chair, pulled out from under someone.");
@@ -499,7 +528,9 @@ const TICK = {
     // the Crown
     if (s.crowned) {
       const staggered = (s.stagger ?? 0) > f.tick;
-      f.shield(hp <= MORVANE.crown.shieldAt && !staggered ? true : false);
+      // Under the line he cannot be hurt while crowned, staggered or not: the stagger is for striking the Crown off,
+      // and a strong party used to kill him through it with the Crown still on (boss walkthrough 2026-11-12)
+      f.shield(hp <= MORVANE.crown.shieldAt);
       if (staggered) f.bar(`§dHe staggers. Strike the Crown!  ${s.hits} / ${crownHitsNeeded(players.length)}`);
       else if (hp <= MORVANE.crown.shieldAt && f.tick % 40 === 0) f.bar("§5He cannot die while he wears the Hollow Crown.");
       return;
@@ -565,7 +596,7 @@ registerBoss({
       hit: (f, at) => {
         f.m.s.blows = (f.m.s.blows ?? 0) + 1;
         if (!at) return;
-        try { f.entity.teleport({ x: at.x, y: at.y, z: at.z }); } catch { /* blocked */ }
+        moveTo(f, at);
         for (const p of f.players()) if (flat(p.location, at) <= 3.2) hurt(p, dmg(f, 10), "entityAttack", f.entity);
       } },
     { id: "blink", every: 180, windup: 30, rest: 20, warn: "He is gone. Move, he comes up behind you!", sound: "mob.endermen.portal",
@@ -582,7 +613,7 @@ registerBoss({
         if (!t) return;
         const v = t.getViewDirection();
         particle(f.dim, "siege:vein_spark", f.entity.getHeadLocation()); // where he was
-        try { f.entity.teleport({ x: t.location.x - v.x * 1.6, y: t.location.y, z: t.location.z - v.z * 1.6 }, { facingLocation: t.location }); } catch { /* blocked */ }
+        moveTo(f, { x: t.location.x - v.x * 1.6, y: t.location.y, z: t.location.z - v.z * 1.6 }, { facingLocation: t.location });
         particle(f.dim, "siege:vein_spark", f.entity.getHeadLocation()); // where he is
         if (flat(t.location, c.at) < 3) hurt(t, dmg(f, 10), "entityAttack", f.entity);
       } },
@@ -612,7 +643,7 @@ registerBoss({
     { id: "lance", every: 120, windup: 30, warn: "Morvane levels his blade. Sidestep!", when: stageIs(4, 6),
       ...lance(18, 10, (f, c) => {
         const reach = Math.max(0, c.reach - 4);
-        try { f.entity.teleport({ x: c.from.x + c.dir.x * reach, y: c.from.y, z: c.from.z + c.dir.z * reach }); } catch { /* blocked */ }
+        moveTo(f, { x: c.from.x + c.dir.x * reach, y: c.from.y, z: c.from.z + c.dir.z * reach });
       }) },
     { id: "quake", every: 200, windup: 30, rest: 30, warn: "The ground heaves. Be in the air!", sound: "mob.ravager.roar",
       when: stageIs(4),
@@ -628,10 +659,10 @@ registerBoss({
       show: (f, at) => at && ring(f.dim, at, 4, "minecraft:redstone_wire_dust_particle", 20),
       hit: (f, at) => {
         if (!at) return;
-        try { f.entity.teleport(at); } catch { /* blocked */ }
+        moveTo(f, at);
         for (const p of f.players()) if (flat(p.location, at) <= 4) hurt(p, dmg(f, 14), "entityAttack", f.entity);
         f.m.s.stagger = f.tick + 80; f.m.s.hits = 0;
-        f.stun(80); f.shield(false);
+        f.stun(80); if (f.hp() > MORVANE.crown.shieldAt) f.shield(false);
         f.say("§dThe blade bites the floor and sticks. He staggers. Strike the Crown!");
       } },
   ],
@@ -715,6 +746,7 @@ registerBoss({
     const m = f.m;
     if (!m || m.moving) return;
     for (const p of players) m.party.add(p.id);
+    keepFooting(f);
     const st = STAGES[m.stage];
     if (!m.raged && f.tick - m.started > st.limit && !st.memory) {
       m.raged = true;
@@ -841,6 +873,19 @@ addTests("bestiary", {
     assertEqual(suitCount(10, 5), 14);
     assertEqual(crownHitsNeeded(1), 5);
     assertEqual(crownHitsNeeded(4), 11);
+  },
+  "he lands on floor near you, never in the air or over the void (Mateo 2026-11-12)": () => {
+    const floor = (x, y, z) => (y <= 119 && Math.hypot(x, z) <= 30 ? "solid" : "open"); // a disc, void round it
+    const to = footingNear({ x: 3.5, y: 126, z: 0.5 }, floor); // a player hovering 6 over the Seat
+    assert(to && to.y === 120, "he comes down onto the floor under a flying player");
+    assert(footingNear({ x: 40.5, y: 120, z: 0.5 }, floor) === undefined, "past the edge there is nowhere: he stays put");
+    assert(footingNear({ x: 3.5, y: 140, z: 0.5 }, floor) === undefined, "far above the floor: he does not jump up after you");
+    assert(footingNear({ x: 3.5, y: 120, z: 0.5 }, () => undefined) === undefined, "not loaded: stays put");
+    const layered = (x, y, z) => (y === 119 || y === 110 ? "solid" : "open"); // the floor, and rock 9 under it
+    assert(footingNear({ x: 0.5, y: 120, z: 0.5 }, layered).y === 120, "on the top floor, not the rock under it");
+    const slab = (x, y, z) => (y <= 120 ? "solid" : "open"); // you stand on a slab at 120: he lands on top of it
+    assert(footingNear({ x: 0.5, y: 120.5, z: 0.5 }, slab).y === 121, "never inside the block you stand on");
+    assert(footingNear({ x: 0.5, y: 120, z: 0.5 }, (x, y, z) => (y <= 119 ? "solid" : "liquid")) === undefined, "water is not room to land in");
   },
   "the Seat's floor falls from the outside in and leaves a last stand": () => {
     assertEqual(floorRings(32), [27, 22, 17, 12]);

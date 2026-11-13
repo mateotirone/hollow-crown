@@ -541,6 +541,7 @@ console.warn = (...args) => warned.push(args.join(" "));
 let loaded = false;
 try {
   await import(pathToFileURL(entry).href);
+  mock.endEarly();
   loaded = true;
   console.log(`loaded: ${mock.subscriptions.length} event subscriptions, ${mock.intervals.length} loop tasks`);
 } catch (e) {
