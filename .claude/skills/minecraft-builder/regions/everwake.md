@@ -123,6 +123,12 @@ ring, an apple orchard by the hall, birches by the road in.
 - **Specs:** `map/structures/everwake/spec.py` writes the whole city (the Needle is gone in round 2);
   `map/structures/everwake_builds.py OUT` builds it (asset viewer section "Everwake"). The air boat station is
   `map/structures/everwake/station.py` (restored and ruin from one design, the ruin by the engine's `"ruin"` step).
+  Its spot is the north shore of Wren Water, about x -11, z 243, the boat pointing south over the lake (Mateo picked
+  Wren Water 2026-11-13). On the map it NEVER brings its own ground: station.py's round grass rise is only for the
+  standalone preview. `map/structures/everwake/site.py` drops it and sets the yard as a pad through the one terraform
+  pass (`map/structures/terraform.py`), so the land keeps its own shape and is only graded where it meets the yard,
+  the lane runs out to the real road, and the trees stand on the real ground (Mateo: "this is just a circle, gotta
+  mesh w the land").
 - Local y 0 is world Y 255 (the paving is local -1). Nothing may go above local 64 (Y 319).
 
 ```json
