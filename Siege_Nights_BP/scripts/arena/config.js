@@ -12,20 +12,20 @@ export const ARENA_RULES = {
   endHoldSeconds: 6,        // after the result, how long before everyone is sent back
 };
 
-// The arena kit: the same for everyone who takes it. Vanilla iron only (house rule).
+// The arena kit: the game's own gear only (Mateo, 2026-11-13: "needs to be custom items"), in the fighter's own
+// region's look. Everyone gets the same strength: regional iron armour (iron's stats, house rule), the Longsword,
+// the Warhammer, and their region's sidearm (the Billhook, Hatchet, Cutlass, Sickle-Sword or Reed Spear).
 // Every piece is marked "Arena kit" and taken back when the fight ends.
-export const KIT = {
-  armor: { Head: "minecraft:iron_helmet", Chest: "minecraft:iron_chestplate", Legs: "minecraft:iron_leggings", Feet: "minecraft:iron_boots" },
-  offhand: "minecraft:shield",
-  items: [
-    ["minecraft:iron_sword", 1],
-    ["minecraft:bow", 1],
-    ["minecraft:iron_axe", 1],
-    ["minecraft:arrow", 24],
-    ["minecraft:cooked_beef", 8],
-    ["minecraft:golden_apple", 1],
-  ],
-};
+export const KIT_REGIONS = ["vale", "frostmarch", "saltreach", "emberwaste", "blackfen"];
+export function kitFor(region) {
+  const r = KIT_REGIONS.includes(region) ? region : "vale";
+  return {
+    region: r,
+    armor: { Head: `siege:iron_${r}_helmet`, Chest: `siege:iron_${r}_chestplate`, Legs: `siege:iron_${r}_leggings`, Feet: `siege:iron_${r}_boots` },
+    items: [["siege:longsword", 1], ["siege:warhammer", 1], [`siege:starter_${r}_weapon`, 1]],
+  };
+}
+export const KIT_TEXT = "your region's iron armour, a Longsword, a Warhammer and your region's sidearm";
 export const KIT_LORE = "§8Arena kit (handed back when the fight ends)";
 
 // How hard a mob fight is. count: how many of the mob come out; effects: given to each; pay: reward multiplier.

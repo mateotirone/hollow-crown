@@ -1,0 +1,111 @@
+{
+ "name": "storehouse_3_frostmarch",
+ "card": {
+  "title": "Storehouse",
+  "sub": "Frostmarch, level 3 (City)",
+  "region": "frostmarch",
+  "where": "Every settlement, on the starter village's Storehouse ground (15 x 15); rebuilt bigger at each tier",
+  "kind": "Work",
+  "blurb": "Walls of chests turned sideways in 3 x 3 bays between stone pillars, a beam over each bay: the settlement's storage, growing with the town."
+ },
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "frost_timber",
+    "roof": "dark_oak_planks"
+   },
+   "rect": [
+    -6,
+    -12,
+    6,
+    0
+   ],
+   "y": 0,
+   "plinth": 2,
+   "storeys": [
+    5,
+    5
+   ],
+   "storey_style": [
+    {
+     "frame_kind": "stone",
+     "frame": "deepslate_bricks",
+     "infill": {
+      "ladder": [
+       "cobbled_deepslate",
+       "polished_deepslate"
+      ],
+      "axis": "noise",
+      "scale": 3
+     }
+    },
+    {}
+   ],
+   "door": {
+    "side": "s",
+    "kind": "large",
+    "steps": 1
+   },
+   "windows": {
+    "s": [
+     {
+      "at": -3,
+      "storey": 0,
+      "w": 1,
+      "h": 2,
+      "sill": "slab"
+     },
+     {
+      "at": 3,
+      "storey": 0,
+      "w": 1,
+      "h": 2,
+      "sill": "slab"
+     },
+     {
+      "at": -3,
+      "storey": 1,
+      "w": 1,
+      "h": 2,
+      "sill": "slab"
+     },
+     {
+      "at": 0,
+      "storey": 1,
+      "w": 1,
+      "h": 2,
+      "sill": "slab"
+     },
+     {
+      "at": 3,
+      "storey": 1,
+      "w": 1,
+      "h": 2,
+      "sill": "slab"
+     }
+    ],
+    "n": [],
+    "e": [],
+    "w": []
+   },
+   "shutters": 0,
+   "roof": {
+    "type": "gable",
+    "ridge": "z",
+    "pitch": 2,
+    "gable_horns": true,
+    "snow": true
+   },
+   "chimney": false,
+   "interior": {
+    "use": "storehouse",
+    "attic": false,
+    "pillar": "deepslate_bricks",
+    "beam": "polished_deepslate"
+   },
+   "vines": 0,
+   "bushes": false
+  }
+ ]
+}

@@ -15,6 +15,7 @@ import { SETTLE, CATALOG, LOCAL_ROLES, LOCAL_RATE, STONE_RATE, MASON_LINES } fro
 import { purse, charge, coins, coinName, coinIcon, lot } from "./wallet.js";
 import { styleOf, FOUNDATION } from "./plans.js";
 import { sfx } from "../core/sfx.js";
+import { dressNpc, addNpcLook } from "../core/npc_skins.js";
 
 export const BENCH = "siege:mason_bench";
 export const MASON_TAG = "siege_mason";
@@ -158,8 +159,7 @@ world.beforeEvents.playerInteractWithEntity.subscribe((event) => {
 
 // ---------- masons and their benches ----------
 
-const MASON_SKIN = 12;
-// Name and skin. A freshly spawned NPC can reset these as it finishes spawning, so they are set again a moment
+// Name (the skin is dressNpc's: core/npc_skins.js). A freshly spawned NPC can reset these as it finishes spawning, so they are set again a moment
 // later, and the bench check puts them back on any mason that lost them.
 export function dressMason(mason) {
   try {
@@ -168,7 +168,6 @@ export function dressMason(mason) {
     const npc = mason.getComponent("minecraft:npc");
     if (!npc) return;
     if (npc.name !== "Mason") npc.name = "Mason";
-    if (npc.skinIndex !== MASON_SKIN) npc.skinIndex = MASON_SKIN;
   } catch (e) {
     console.warn(`[Hollow Crown] mason looks: ${e}`);
   }
@@ -178,10 +177,13 @@ export function spawnMason(dim, location, bench) {
   const mason = dim.spawnEntity(NPC_TYPE, location);
   mason.addTag(MASON_TAG);
   if (bench) mason.addTag(benchTag(bench));
+  dressNpc(mason, "mason");
   dressMason(mason);
   system.runTimeout(() => dressMason(mason), 10);
   return mason;
 }
+
+addNpcLook((e) => (e.hasTag(MASON_TAG) ? { key: "mason", name: "Mason" } : undefined));
 
 const masonsOf = (dim, bench) => dim.getEntities({ type: NPC_TYPE, tags: [benchTag(bench)] });
 
