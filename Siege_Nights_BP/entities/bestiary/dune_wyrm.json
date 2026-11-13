@@ -14,7 +14,8 @@
      "monster",
      "mob",
      "beast",
-     "siege_scripted"
+     "siege_scripted",
+     "siege_heavy"
     ]
    },
    "minecraft:health": {

@@ -15,6 +15,7 @@
 //   /scriptevent hc:open_rift               open the Rift at the picked site without a fork
 //   /scriptevent hc:reveal_source           tell only you which site was picked (spoils it!)
 //   /scriptevent hc:undertow_go             go to the Undertow now (testing)
+//   /scriptevent hc:undertow_leave          back out to where you came in (anyone in the Hollow; the tear at the back of the Wound does the same)
 //   /scriptevent hc:undertow_status         build progress
 //   /scriptevent hc:slip [seconds]          a Slip: a few seconds in the Hollow, then back where you stood
 //   /scriptevent hc:flicker [seconds]       a Flicker: Hollow fog and shapes, no teleport
@@ -92,6 +93,9 @@ on("ready", () => {
 // ---- going in and out ---------------------------------------------------------------------
 const cooldown = new Map();
 
+// Where a player stepped in from (the overworld spot), so the way out can put them back there when there is no
+// Rift to come out of (a test trip by command, or a world where the Rift is not open yet).
+const FROM = "hc:undertow_from";
 function enter(player) {
   cooldown.set(player.id, system.currentTick + 60);
   if (!isBuilt(0, 0) || !isBuilt(-1, -1)) {
@@ -101,7 +105,13 @@ function enter(player) {
   player.addEffect("slow_falling", 300, { amplifier: 0, showParticles: false });
   player.addEffect("resistance", 300, { amplifier: 4, showParticles: false });
   player.addEffect("darkness", 60, { amplifier: 0, showParticles: false });
+  if (player.dimension.id === "minecraft:overworld") {
+    const l = player.location;
+    try { player.setDynamicProperty(FROM, JSON.stringify({ x: Math.floor(l.x) + 0.5, y: Math.floor(l.y), z: Math.floor(l.z) + 0.5 })); } catch { /* no room */ }
+  }
   player.teleport(L.arrival, { dimension: undertow(), facingLocation: { x: 0, y: 95, z: 60 } });
+  // The fog straight away, not up to two seconds later under an open sky.
+  if (!player.hasTag(IN_TAG)) { player.addTag(IN_TAG); runCmd(player, `fog @s push ${FOG_ID} ${FOG_LAYER}`); }
   noteEntry(player, "rift");
   system.runTimeout(() => {
     player.onScreenDisplay.setTitle("§5" + cap(TEXT.name), { subtitle: "§7The Wound", fadeInDuration: 20, stayDuration: 60, fadeOutDuration: 30 });
@@ -133,13 +143,22 @@ export function refuse(player) {
   say(player, refusalLine(n, fallenCount(progressOf(player).flags), REGIONAL_BOSSES.length));
 }
 
-function leave(player) {
+// Out through the tear at the back of the Wound: to the Rift if it is open, else back where you came in, else
+// the world spawn. backToEntry (the test command) prefers where you came in.
+export function exitFor(rift, from, spawn, backToEntry = false) {
+  if (backToEntry && from) return from;
+  return rift ?? from ?? spawn;
+}
+function leave(player, backToEntry = false) {
   cooldown.set(player.id, system.currentTick + 60);
-  const exit = riftExit();
   const ow = world.getDimension("minecraft:overworld");
+  let from;
+  try { from = JSON.parse(player.getDynamicProperty(FROM) ?? "null"); } catch { from = null; }
+  let spawn = world.getDefaultSpawnLocation();
+  if (spawn.y < -60 || spawn.y > 320) spawn = { ...spawn, y: 100 }; // "no fixed spawn" comes back as y 32767
   player.addEffect("resistance", 100, { amplifier: 4, showParticles: false });
-  if (exit) player.teleport(exit, { dimension: ow });
-  else player.teleport(world.getDefaultSpawnLocation(), { dimension: ow });
+  player.addEffect("slow_falling", 200, { amplifier: 0, showParticles: false });
+  player.teleport(exitFor(riftExit(), from, spawn, backToEntry), { dimension: ow });
 }
 
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -169,7 +188,16 @@ onTick("undertow:contact", 5, () => {
 });
 
 const moodFogs = new Map(); // player id -> the mood fog pushed on MOOD_LAYER (lost on reload: pushed again)
-world.afterEvents.playerSpawn.subscribe((e) => { if (e.initialSpawn) { moodFogs.delete(e.player.id); runCmd(e.player, `fog @s remove ${MOOD_LAYER}`); } });
+// On joining, start the fog over: the tag that says "fog pushed" outlives the session, but the fog may not (Mateo
+// 2026-11-13 came back into the Hollow under a clear lavender sky with no fog at all). The tick pushes it again.
+world.afterEvents.playerSpawn.subscribe((e) => {
+  if (!e.initialSpawn) return;
+  const p = e.player;
+  moodFogs.delete(p.id);
+  runCmd(p, `fog @s remove ${MOOD_LAYER}`);
+  runCmd(p, `fog @s remove ${FOG_LAYER}`);
+  try { p.removeTag(IN_TAG); } catch { /* gone */ }
+});
 
 // Every 2 seconds: fog on/off (catches deaths and any other teleport), beds, stage titles.
 onTick("undertow:fog", 40, () => {
@@ -477,6 +505,10 @@ system.afterEvents.scriptEventReceive.subscribe((e) => {
     case "hc:undertow_go":
       if (player && isBuilder(player)) enter(player);
       break;
+    case "hc:undertow_leave":
+      if (player && inUndertow(player)) leave(player, true);
+      else if (player) say(player, "§7You are not in the Hollow.");
+      break;
     case "hc:undertow_status":
       if (player) {
         const p = pieces(), marked = Object.keys(getSites()).length;
@@ -652,6 +684,11 @@ addTests("undertow", {
     assert(dullLeft(10 + FORK_DULL_DAYS, 10) === FORK_DULL_DAYS && dullLeft(12, 15) === 0 && dullLeft(undefined, 4) === 0);
   },
   "terrain is deterministic": () => assert(JSON.stringify(planChunk(2, 5)) === JSON.stringify(planChunk(2, 5))),
+  "the way out: the Rift if it is open, else where you came in, else spawn; the test command prefers where you came in": () => {
+    const rift = { x: 1, y: 2, z: 3 }, from = { x: 4, y: 5, z: 6 }, spawn = { x: 7, y: 8, z: 9 };
+    assert(exitFor(rift, from, spawn) === rift && exitFor(undefined, from, spawn) === from && exitFor(undefined, null, spawn) === spawn);
+    assert(exitFor(rift, from, spawn, true) === from && exitFor(rift, null, spawn, true) === rift);
+  },
   "arrival ledge is solid": () => assert(heightAt(0, 0) === L.woundLedgeY),
   // Mateo 2026-11-12, of the first Wound: "This definitely needs a lot of work" (a crack on a flat slab, the void round it)
   "the Wound: the cliff behind it runs right across the valley, never lower than the first wall, and is built up into the roof": () => {
