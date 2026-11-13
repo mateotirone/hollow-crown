@@ -17,14 +17,18 @@
     "idle": "animation.siege_b.lost_villager.idle",
     "walk": "animation.siege_b.lost_villager.walk",
     "hurt": "animation.siege_b.lost_villager.hurt",
-    "flinch": "controller.animation.siege_b.lost_villager.flinch"
+    "flinch": "controller.animation.siege_b.lost_villager.flinch",
+    "dead_hide": "animation.siege_b.dead_hide"
    },
    "scripts": {
     "animate": [
      "base",
      "idle",
      "walk",
-     "flinch"
+     "flinch",
+     {
+      "dead_hide": "!query.is_alive"
+     }
     ]
    },
    "render_controllers": [

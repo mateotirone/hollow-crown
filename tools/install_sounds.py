@@ -14,6 +14,7 @@ Other ways to run it:
   python3 tools/install_sounds.py toll_317=/some/where/take3.wav   install one file from anywhere
   python3 tools/install_sounds.py --start 4 choir_hum=choir.mp3    start 4 seconds into the file
   python3 tools/install_sounds.py --status                         what is installed, what is still a stand-in
+  python3 tools/install_sounds.py rift_stir_2=take5.mp3            a sound with variants: the number says which one
   python3 tools/install_sounds.py --remove toll_317                go back to the stand-in
                                                                    (dragon and hum files: restore them with git)
 File names are matched loosely: "Toll 317 (take 2).mp3" and "toll_317_v3.wav" both install as toll_317.
@@ -61,9 +62,22 @@ def duration(path):
 def ff(*args):
     subprocess.run(["ffmpeg", "-nostdin", "-y", "-loglevel", "error", *args], check=True, timeout=300)
 
-def convert(src, entry, start=None):
+def variant_path(entry, n=None):
+    """Where a recording lives in the pack. Sounds with variants keep each one as path1, path2, ..."""
+    return entry["path"] + (str(n) if n else "")
+
+def variant_of(name, key, entry, record):
+    """Which variant a file is (the number after the sound's name), or the next free one."""
+    if not entry.get("variants"): return None
+    m = re.match(r"_(?:v|take)?(\d+)", norm(os.path.splitext(name)[0])[len(key):])
+    if m and 1 <= int(m.group(1)) <= entry["variants"]: return int(m.group(1))
+    have = record.get(key, {}).get("variants", [])
+    free = [n for n in range(1, entry["variants"] + 1) if n not in have]
+    return free[0] if free else 1
+
+def convert(src, entry, start=None, variant=None):
     """Trim, level and encode one file. Returns its final length in seconds."""
-    out = os.path.join(RP, entry["path"] + ".ogg")
+    out = os.path.join(RP, variant_path(entry, variant) + ".ogg")
     os.makedirs(os.path.dirname(out), exist_ok=True)
     tmp = out + ".tmp.wav"
     want, loop = float(entry["seconds"]), entry["kind"] == "loop"
@@ -90,10 +104,16 @@ def convert(src, entry, start=None):
     os.remove(tmp)
     return round(duration(out), 2)
 
-def define(entry):
+def define(entry, variants=None):
     d = load(DEFS, {"format_version": "1.14.0", "sound_definitions": {}})
     defs = d.setdefault("sound_definitions", {})
-    if entry["id"] not in defs:  # ids that already exist (dragons, the hum) keep their definition; only the file changes
+    if variants:  # one definition, every installed variant in it: the game picks one at random each time
+        e = {"category": entry.get("category", "ambient"),
+             "sounds": [{"name": variant_path(entry, n), "volume": 1.0, "load_on_low_memory": True} for n in sorted(variants)]}
+        if entry.get("max_distance"): e["max_distance"] = entry["max_distance"]
+        defs[entry["id"]] = e
+        save(DEFS, d)
+    elif entry["id"] not in defs:  # ids that already exist (dragons, the hum) keep their definition; only the file changes
         e = {"category": entry.get("category", "ambient"),
              "sounds": [{"name": entry["path"], "volume": 1.0, "load_on_low_memory": True}]}
         if entry.get("max_distance"): e["max_distance"] = entry["max_distance"]
@@ -135,7 +155,9 @@ def main(argv):
         if not key or key not in record: sys.exit("that sound is not installed")
         e = table[key]
         if e["id"].startswith("siege.sig."):
-            os.remove(os.path.join(RP, e["path"] + ".ogg")); undefine(e)
+            for n in record[key].get("variants", [None]):
+                os.remove(os.path.join(RP, variant_path(e, n) + ".ogg"))
+            undefine(e)
         else:
             print(f"{key}: the game needs a file here. Restore the old one with:  git checkout main -- Siege_Nights_RP/{e['path']}.ogg")
         del record[key]; save(RECORD, record); write_js(record); refresh_list()
@@ -149,28 +171,37 @@ def main(argv):
             key = match(name, table)
             if not key: sys.exit(f'"{name}" is not a sound in SOUND-LIST.md')
             if not os.path.exists(src): sys.exit(f"no such file: {src}")
-            jobs.append((key, src))
+            jobs.append((key, src, name))
     if not jobs:
         if not os.path.isdir(INBOX): sys.exit("there is no sounds-inbox/ folder")
         for f in sorted(os.listdir(INBOX)):
             if not f.lower().endswith(AUDIO): continue
             key = match(f, table)
-            if key: jobs.append((key, os.path.join(INBOX, f)))
+            if key: jobs.append((key, os.path.join(INBOX, f), f))
             else: print(f'skipped "{f}": the name does not start with a file name from SOUND-LIST.md')
     if not jobs:
         return print("Nothing to install. Put sound files in sounds-inbox/, named as in SOUND-LIST.md, and run this again.")
     done = 0
-    for key, src in jobs:
+    for key, src, name in jobs:
         e = table[key]
+        n = variant_of(name, key, e, record)
         try:
-            secs = convert(src, e, start)
+            secs = convert(src, e, start, n)
         except (RuntimeError, subprocess.CalledProcessError, subprocess.TimeoutExpired) as err:
             print(f"FAILED {key} ({os.path.basename(src)}): {err}"); continue
-        define(e)
-        record[key] = {"id": e["id"], "seconds": secs, "source": os.path.basename(src)}
+        if n:
+            old = record.get(key, {})
+            variants = sorted(set(old.get("variants", [])) | {n})
+            sources = {**old.get("sources", {}), str(n): os.path.basename(src)}
+            define(e, variants)
+            record[key] = {"id": e["id"], "seconds": max(secs, old.get("seconds", 0)), "source": ", ".join(sources[k] for k in sorted(sources)),
+                           "variants": variants, "sources": sources}
+        else:
+            define(e)
+            record[key] = {"id": e["id"], "seconds": secs, "source": os.path.basename(src)}
         done += 1
         off = "" if abs(secs - e["seconds"]) <= max(2, e["seconds"] * 0.5) else f"   (the list asks for about {e['seconds']:g} s)"
-        print(f"installed {key:22} {secs:6.2f} s  {'loop' if e['kind'] == 'loop' else 'one-shot'}  <- {os.path.basename(src)}{off}")
+        print(f"installed {key + (f' #{n}' if n else ''):22} {secs:6.2f} s  {'loop' if e['kind'] == 'loop' else 'one-shot'}  <- {os.path.basename(src)}{off}")
     save(RECORD, record); write_js(record); refresh_list()
     print(f"\n{done} of {len(jobs)} installed. Next: node tools/check.mjs, then python3 tools/build.py for a new hollow-crown.mcaddon.")
     print("In game, /scriptevent siege:sound opens the sound board to hear them.")

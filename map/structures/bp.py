@@ -64,7 +64,7 @@ def solid_full(name, p):
     return True
 
 
-BEDROCK_ALIAS = {"dark_oak_wall_sign": ("darkoak_wall_sign", {}), "oak_wall_sign": ("wall_sign", {}),
+BEDROCK_ALIAS = {"prismarine_brick_stairs": ("prismarine_bricks_stairs", {}), "dark_oak_wall_sign": ("darkoak_wall_sign", {}), "oak_wall_sign": ("wall_sign", {}),
                  "dark_oak_standing_sign": ("darkoak_standing_sign", {}), "oak_sign": ("standing_sign", {}),
                  "water_cauldron": ("cauldron", {"fill_level": 6, "cauldron_liquid": "water"})}
 

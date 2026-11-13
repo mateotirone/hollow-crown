@@ -16,6 +16,19 @@ palettes, texturing, paths, reference); this page is the short list and where to
 - **Depth comes outward**, never by recessing a panel: at least three depth layers on any face over 5 long.
 - **Every overhang is carried** (bracket, post, corbel, truss).
 - **Nothing floats** (Mateo, 2026-11-12): a roof, canopy or vault sits directly on its beam, wall or posts, with no open row between them. Every hanging lantern hangs from a block or a chain up to one. Stacks start at the roof.
+- **Water stays in its basin** (2026-11-12, after the Drowned Court's channels flooded the Choir's hall): water goes a row *into* the floor, never on the row players stand on, and every water block has a solid block or more water on all four sides and under it. A water block with open air beside it is a source that runs 7 blocks across the floor in game. `engine.compute` warns about any that would spill (`spilling_water`); a generator should fail on it (`map/structures/hollow_arenas.py` does).
+- **No trees in a build's ground** (Mateo, 2026-11-12, after a playtest): a build stamped on the map clears the map's trees (logs, wood, leaves, vines, hanging roots) from its whole area, 8 blocks round it and 32 above it before its first block, so no trunk stands in its dead space and no crown is left floating. The game does it for every boss site and story landmark (`core/clearing.js`), and the map generator keeps whole trees off every stamped town and bridge (`map/genworld.py`, `stampcol`). A new way of stamping builds must do the same. Builds in a town square keep the town's own trees (stamp `clear: false`).
+- **Attached blocks go in last** (Mateo, 2026-11-12, after doors and lanterns broke as buildings rose): anything that
+  hangs on, stands on or sticks to another block (doors, lanterns, chains, torches, bells, signs, banners, buttons,
+  levers, ladders, carpets, beds, candles, flower pots, vines, rails) is placed only after every solid block of the
+  build. Hanging pieces go top down, so a lantern's chain is there first, and the two halves of a door go in the same
+  tick. The game's build order does this (`townhall/halls.js` `buildOrder`, `ATTACHED`); a new way of raising builds
+  must too.
+- **Groundwork never floats or makes a cliff** (Mateo, 2026-11-12): every road, pad, yard or path a settlement lays is
+  filled to the ground under it, and the land beside it steps by at most 1 block for every 2 outwards, cut or built up
+  with the region's own ground (`settle/founding.js` `blendGround`). A settlement's gate road is graded out to the map's
+  nearest road and joins it at its own height (`joinRoad`). Buildings on a plot stand on the plot's stone, not on a
+  raised pad.
 - **Shutters on at most about 30%** of windows, in symmetric pairs; planters on about a quarter.
 - **Roofs overhang 1** at eaves and verges; ridge the long way; secondary roofs lower; no flat roofs on houses (Emberwaste and Saltreach terraces excepted)
 - **Every roof is textured**: two blocks of the same colour mixed at random (copper keeps its gradient instead)
@@ -23,6 +36,18 @@ palettes, texturing, paths, reference); this page is the short list and where to
 - **Texturing**: one material in a few shades, gradients over speckle, clusters with a cause (damp low, wear
   at edges), never skip a ladder step (`build-instructions/texturing/README.md`).
 - **Vanilla blocks** for map buildings, Bedrock 26.30+, no Beta features. Waxed copper for copper roofs.
+- **Paths and water run to the edge** (Mateo 2026-11-12): any path, walkway, slip, channel or water inside a
+  build or plot carries on to the edge of its footprint, so it joins whatever is next to it. A boathouse slip
+  opens through its wall to the footprint edge; a plot's paths reach its border. Stopping short inside is wrong.
+- **Towns are lit** (Mateo 2026-11-12: "none of the towns have light ... the town generation needs to factor in
+  lamps"): lamps round every square (an arm with a hanging lantern, one every ~8 blocks of its edge) and posts
+  along every street on the verge, sides alternating, every 9 (main) / 11 (lane) / 13 (walk) blocks, none
+  closer than 7 to another. Region style in `map/structures/dressing.py` LAMP_STYLE (stone foot, the region's
+  wood post, a lantern). towngen does this for every town and settlement (`Town.light_town`); a hand-built
+  plot or site lights its own paths the same way. Check: no street block darker than light 4 at night.
+- **Nothing stands on a sunk slab** (Mateo 2026-11-12, "the town well is one block too high"): paths and squares
+  are bottom slabs sunk half a block, so anything built on one (a well rim, a lamp foot, a step, a post)
+  replaces the slab at the slab's own y; setting it on top leaves a half-block gap and reads a block too high.
 - **Build stage by stage** and check each stage (`--stages`) before the next. Ask Mateo rather than guess;
   he builds well himself and sends pictures.
 
@@ -46,9 +71,35 @@ never to do. Index: `regions/README.md`.
 
 - [ ] Every dimension odd; door and windows on bay centres; ridge centred.
 - [ ] Nothing floats: no open row between a roof and its beam or wall, every lantern hung from something.
+- [ ] Looked at from where a player stands, not only from above: no flat wall of one block, nothing pasted on a
+      bare face, and no edge that shows the void or the sky behind it (regions/hollow.md, the Wound).
 - [ ] No stair facing the wrong way on roofs (light lips), no holes at valleys, chimney 2 above the roof.
 - [ ] Barge boards, eave row, corner blocks present; gable triangles filled.
 - [ ] Sills wider than glass; heads where there is room; shutters few and paired.
 - [ ] Colour: one family per surface, no band that jumps a step, no single odd block.
 - [ ] Curved shapes read smooth from 30 blocks (preview) and from close (hifi render).
 - [ ] The summary has no surprising warnings (substituted partial blocks, even footprints).
+- [ ] Rail beds graded 1 in 2 beside the ballast, open to the sky, trees felled whole (build-instructions/paths/README.md, Rail beds).
+
+## Streets reach the ward edge; open ground follows the land (Mateo, 2026-11-13)
+
+- Every street that leaves a town runs on along the map road to the edge of the town's ward
+  (`plots/config.js` WARDS), so it meets the country road. It never stops at the town circle.
+- The open ground in a stamp (gardens, yards, paddocks, forecourts) drops to the land or to the street beside
+  it, at most 3 blocks, one block per step (towngen `open_cols` / `open_levels`).
+
+## Every placed thing is terraformed (Mateo, 2026-11-13)
+
+One pass, `map/structures/terraform.py` (game copy `Siege_Nights_BP/scripts/settle/terraform.js`), for every
+building, plot, station, wall tower and (next) story site. It replaces "the floor on the highest block, stone
+under everything" (2026-11-11), which stood buildings on stone towers on slopes.
+
+- **Pad:** the floor balances cutting in against building up (`pad_height`), never more than 3 under the highest
+  block of the footprint. Ground above it is cut away, stone foundation fills below it.
+- **Connectors:** the door landing (3 x 4) and every street are anchors at their own height; the land meets them.
+- **Skirt:** round each pad the land is clamped to rise or fall at most 1 in 2 from it (1 in 1 on rough ground),
+  so open land keeps its shape wherever it fits. It reaches 4 to 6 blocks out, a few more to ease a small step.
+- **Retaining walls** in the region's stone only where the land still can't meet (never a bare dirt cliff).
+- Water, streets and other built ground never move. Plan doc: https://claude.ai/artifact/MTfFZZwMhcq66gGjJNmVjE.
+- Check: `python3 map/structures/terraform_test.py` prints TERRAFORM OK; `node tools/check.mjs` compares the game
+  copy against the same cases.

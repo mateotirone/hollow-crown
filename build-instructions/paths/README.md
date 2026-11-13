@@ -69,6 +69,9 @@ rustic mixes (more cobble, mossy cobble slabs low and in the shade).
 - Junctions are squares or widenings: where two streets meet, widen to the larger width + 2 for 3 blocks.
 - Bends follow the ground and look worn round the inside corner (the second block there).
 - No path ends at nothing: every path ends at a door, a gate, a field, a square or another path.
+- A settlement's road meets the map's roads (Mateo, 2026-11-12): the gate road is carried on to the nearest map road
+  and joins it at that road's own height and surface, graded evenly, with the land either side stepped to it by at
+  most 1 a block. The game does it when a settlement is founded (`settle/founding.js` `joinRoad`).
 
 ## Bridges and fords
 
@@ -89,6 +92,10 @@ the gate itself, and must never cut through a wall, a field or a plot to reach i
 - **Gate avenue**: the gate (angle 90) is always an entry. Its avenue runs through the fields to the ring.
 - **Station**: the Grand Station stands on the line at radius 126 on the side of the plot's rail stop, with a
   5-wide high street running in to the ring (`paths.station`). Rails cross no road on the level.
+- **End of the line**: at a stop only one stretch reaches (Oakmere, Wolfcairn, Frosthelm) the track never just
+  stops in the grass. One block past the last rail at the dead end: a timber buffer beam across the track with a
+  lantern on it. One block behind that: an end wall 3 wide and 2 high in the region's low wall stone, no wider
+  than the track bed, so a road to the platform end gets past it (`trains/stations.js` BUFFER).
 - Roads and tracks inside the Citadel follow the sunken half-slab rule like everywhere else. Bare blocks
   take the region's slab mix (Vale cobble and stone brick, Frostmarch cobbled deepslate, Saltreach smooth
   sandstone, Blackfen mud brick, Emberwaste smooth red sandstone).
@@ -110,3 +117,43 @@ does this when it raises the Barracks (`settle/raised.js`, `yardGaps`).
 - [ ] Texture by the recipe, worn in the centre; edges and verges on every street.
 - [ ] Every path ends somewhere.
 - [ ] A road to the Citadel ends on one of its `paths.entries`, never on its walls or fields.
+
+## Rail beds (Mateo, 2026-11-12)
+
+Track is laid in game when a stretch is bought (`Siege_Nights_BP/scripts/trains/rail_bed.js`), never stamped
+into the map. The playtest 1.2.1111 track sat in straight-sided dirt trenches with trees cut in half over it,
+so these rules are strict:
+
+- **Graded, never a trench.** The ballast row is 3 wide (gravel over dirt). Beside it the ground is level with
+  the ballast, then rises or falls **1 block for every 2 out** (the town slope rule), out to 7 blocks each side.
+  Cuttings get turf on their banks; embankments are filled and turfed, never left as pillars.
+- **Open to the sky** over the bed. No overhang of rock or leaves, and the train's 3 by 4 opening is always clear.
+- **Trees come down whole**: every log, branch, fence, leaf and hanging root, and the root pit is filled. A
+  tree that touches a building is a building and stays standing. The map keeps trees 7 blocks off every
+  planned line (`map/genworld.py`, `railkeep`).
+- **Roads and paths are level crossings** (grass path, dirt path, cobble, mud): the bed goes through them.
+- **Buildings are never touched**; the bed stops and reports them.
+- **Track two lines share has one height** (`map/railshare.py`): the first line's height wins on every shared
+  block, and later lines re-fit round it under the climbing rules.
+- Bridges, tunnels and deep cuttings are the map's works (`map/railworks.py`); the bed only clears their
+  opening and seats the track on them.
+
+Test any change on the real map before shipping: export the corridor with `tools/export_rail_corridor.py`
+(amulet) and run `node tools/rail_lay_test.mjs corridor.json`, which lays all 7 lines and must print ALL OK
+(no gaps, no trench walls, nothing in the way, no bare dirt, nothing floating).
+
+### Level crossings (Mateo, 2026-11-13)
+
+Where a road or trail crosses a line, the stretch lays a level crossing straight after its bed (`map/railcross.py`
+plans it, `rail_bed.js` `layCrossing` lays it), in the region's style:
+
+- **Boards** in the ballast under the road and one block each side (Vale spruce, Frostmarch dark oak, Saltreach
+  birch, Blackfen mangrove, Emberwaste smooth sandstone), so the road runs level over the rails.
+- **Setts** for 5 blocks each side of the track, on the graded ground; the road keeps its own surface beyond.
+- **Lamp posts** at each corner of the road, 3 from the track: a stone base, two posts, a lantern (froglight in the
+  Blackfen). A 3-block **line fence** runs from each post along the line. Posts and fences keep 2 off any other
+  line and out of the train's body.
+- **Keeper's hut** on roads with room: 5 by 5, one storey, built by the skill's `house` part with its interior, door
+  toward the road, on the highest block of its footprint with a stone plinth to the ground, 4 or more off every line.
+- Never inside a plot's station site (32 round a plot stop: the station, its platform and passing loop go there) or
+  on a bridge or in a tunnel.

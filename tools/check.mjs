@@ -3,7 +3,7 @@
 //
 //  1. every pack JSON file parses
 //  2. every script import points at a real file
-//  3. (if `npm install` was run in tools/) no undefined names and no unused imports in the scripts
+//  3. no undefined names and no unused imports in the scripts (needs `npm ci` in tools/ once; a problem if it can't run)
 //  4. the whole script loads in Node with a fake Minecraft (catches crashes at startup)
 //  5. every loop task runs a few times in an empty world without an error
 //  6. all self-tests pass (the in-game-only ones are skipped here)
@@ -383,9 +383,52 @@ step("Sounds");
     const n = (readFileSync(file, "utf8").match(/\.playSound\??\.?\(/g) ?? []).length;
     if (n) { direct += n; warnings.push(`${rel(file)}: ${n} direct playSound call(s). Use sfx() from core/sfx.js so the sound gets the house treatment (SOUND-LIST.md).`); }
   }
+  // every sound id the game is asked to play must exist: Bedrock plays nothing (and says nothing) for an unknown id
+  const vanillaFile = join(TOOLS, "vanilla_sounds.json");
+  if (existsSync(vanillaFile)) {
+    const known = new Set([...(parseJson(readFileSync(vanillaFile, "utf8")) ?? []), ...Object.keys(defs)]);
+    const cuesSrc = readFileSync(join(SCRIPTS, "core/sfx_cues.js"), "utf8");
+    const cueNames = new Set([...cuesSrc.matchAll(/^\s*(?:\[BELL\]|"([^"]+)"):\s*\{/gm)].map((m) => m[1] ?? "block.bell.hit"));
+    for (const [, id] of cuesSrc.matchAll(/\[\s*"([a-z0-9_.]+)"\s*,\s*[\d.]+/g)) if (!known.has(id)) fail(`core/sfx_cues.js: a layer plays "${id}", which is not a Bedrock sound`);
+    for (const file of walk(SCRIPTS, ".js")) {
+      for (const [, id] of readFileSync(file, "utf8").matchAll(/\bsfx\([^,()]+,\s*"([a-z0-9_.]+)"/g)) {
+        if (!known.has(id) && !cueNames.has(id)) fail(`${rel(file)}: sfx(..., "${id}") is not a Bedrock sound or a cue in core/sfx_cues.js`);
+      }
+    }
+    const sj = join(RP, "sounds.json");
+    const ents = existsSync(sj) ? parseJson(readFileSync(sj, "utf8"))?.entity_sounds?.entities ?? {} : {};
+    for (const [ent, e] of Object.entries(ents)) {
+      for (const [ev, s] of Object.entries(e.events ?? {})) {
+        const id = typeof s === "string" ? s : s?.sound;
+        if (id && !known.has(id)) fail(`sounds.json: ${ent} ${ev} plays "${id}", which is not a Bedrock sound (studio/bestiary/voices.py)`);
+      }
+    }
+  }
   const listed = spawnSync(process.execPath, [join(TOOLS, "sound-list.mjs"), "--check"]);
   if (listed.status !== 0) fail("SOUND-LIST.md is out of date: run  node tools/sound-list.mjs");
+  const weather = spawnSync(process.execPath, [join(TOOLS, "weather_assets.mjs"), "--check"]);
+  if (weather.status !== 0) fail("the weather fogs and particles are out of date: run  node tools/weather_assets.mjs");
   console.log(`${Object.keys(defs).length} custom sounds defined, ${installed} recordings installed, ${direct} direct playSound calls`);
+}
+
+// ---------- 2c. the land at the thin places ----------
+// map/thinplaces shapes the map at the seven thin places. Each place must hold its own water and keep it off the
+// cave floor (water written beside lower dry ground pours out in the game the first time a block changes).
+step("Thin place land");
+{
+  const r = spawnSync(process.execPath, [join(ROOT, "map/thinplaces/test_shapes.mjs")], { encoding: "utf8" });
+  if (r.status !== 0) for (const line of ((r.stdout || "") + (r.stderr || "")).split("\n").filter(Boolean).slice(0, 12)) fail(`thin place land: ${line}`);
+  else console.log((r.stdout || "").trim());
+}
+
+// ---------- 2d. build catalog ----------
+// Every build, designed or not, is listed in builds/catalog.json (tools/build-catalog.mjs).
+step("Build catalog");
+{
+  const r = spawnSync(process.execPath, [join(TOOLS, "build-catalog.mjs"), "--check"], { encoding: "utf8" });
+  for (const line of (r.stdout || "").split("\n").filter(Boolean)) fail(line);
+  if (r.status !== 0 && !(r.stdout || "").trim()) fail("tools/build-catalog.mjs --check failed: " + (r.stderr || "").trim().split("\n").pop());
+  if (r.status === 0) console.log(`${JSON.parse(readFileSync(join(ROOT, "builds/catalog.json"), "utf8")).builds.length} builds listed, CATALOG.md up to date`);
 }
 
 // ---------- 3. deep check (optional) ----------
@@ -399,7 +442,9 @@ async function deepCheck() {
     acorn = await import(pathToFileURL(require.resolve("acorn")));
     eslintScope = await import(pathToFileURL(require.resolve("eslint-scope")));
   } catch {
-    console.log("skipped (run `npm install` in siege-nights/tools once to turn this on)");
+    // not optional any more: a name used without its import (getRift in the veil gate, PR #225) passed every other check
+    console.log("could not run");
+    fail("the undefined-name check could not run: run `npm ci` in tools/ once, then check again");
     return;
   }
   const globals = new Set(["console", "JSON", "Math", "Object", "Array", "Map", "Set", "WeakMap", "Number", "String",
@@ -506,6 +551,7 @@ console.warn = (...args) => warned.push(args.join(" "));
 let loaded = false;
 try {
   await import(pathToFileURL(entry).href);
+  mock.endEarly();
   loaded = true;
   console.log(`loaded: ${mock.subscriptions.length} event subscriptions, ${mock.intervals.length} loop tasks`);
 } catch (e) {
@@ -546,6 +592,33 @@ if (loaded) {
   for (const name of OFFLINE_ONLY) if (!known.has(name)) fail(`core/tests.js OFFLINE_ONLY lists "${name}", but no test has that name`);
   console.log(`${result.passed} passed, ${result.failed.length} failed, ${result.skipped} in-game only (skipped here)`);
   for (const f of result.failed) fail(`test failed: ${f.group}: ${f.name} (${f.error})`);
+}
+
+// ---------- 7. terraform: the game's copy gives the same ground as the map's ----------
+{
+  step("Terraform: settle/terraform.js against map/structures/terraform_cases.json");
+  const TF = await import(pathToFileURL(join(SCRIPTS, "settle/terraform.js")).href);
+  const cases = JSON.parse(readFileSync(join(ROOT, "map/structures/terraform_cases.json"), "utf8"));
+  const roundEven = (v) => { const f = Math.floor(v), r = v - f; return r > 0.5 ? f + 1 : r < 0.5 ? f : f % 2 === 0 ? f : f + 1; };
+  const LAND = { // terraform_test.py land()
+    flat: () => 64, slope2: (i) => 64 + Math.floor(i / 2), slope1: (i) => 60 + i,
+    bumpy: (i, j) => 64 + roundEven(3 * Math.sin(i / 3) + 2 * Math.cos(j / 4)), cliff: (i) => (i < 15 ? 64 : 72),
+  };
+  let bad = 0;
+  for (const c of cases) {
+    const n = 31, h = Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => LAND[c.land](i, j)));
+    const sites = c.sites.map(({ box: [x0, z0, w, d], fill = "stone", door = true }) => {
+      const cells = [];
+      for (let i = x0; i < x0 + w; i++) for (let j = z0; j < z0 + d; j++) cells.push([i, j]);
+      const y = TF.padHeight(cells.map(([i, j]) => h[i][j]));
+      const con = new Map();
+      if (door) for (const s of [-1, 0, 1]) for (let t = 0; t < 4; t++) con.set(`${x0 + (w >> 1) + s},${z0 + d + t}`, y);
+      return TF.site({ pad: new Map(cells.map(([i, j]) => [`${i},${j}`, y])), connectors: con, padFill: fill });
+    });
+    const { T } = TF.solve(h, sites);
+    if (JSON.stringify(T) !== JSON.stringify(c.expect)) { bad++; fail(`terraform.js: case "${c.name}" gives different ground from terraform.py`); }
+  }
+  if (!bad) console.log(`${cases.length} cases match`);
 }
 
 // ---------- result ----------

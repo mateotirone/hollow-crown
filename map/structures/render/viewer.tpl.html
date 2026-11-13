@@ -14,6 +14,7 @@
   #ui h1 { font-size: 15px; margin: 0 0 4px; }
   #ui p { margin: 0 0 8px; opacity: .8; }
   #ui button { font: inherit; padding: 4px 10px; margin: 0 6px 4px 0; border-radius: 6px; border: 1px solid var(--line); background: transparent; color: inherit; cursor: pointer; }
+  #levels .lvrow { margin-top: 4px; } #levels .lvrow span { display: inline-block; min-width: 82px; font-weight: 600; margin-right: 6px; }
   #ui button.on { background: rgba(80,120,200,.25); }
   body.shot #ui { display: none; }
 </style>
@@ -21,7 +22,7 @@
 </head>
 <body>
 <div id="ui"><h1>__TITLE__</h1><p>__BLURB__ Drag to turn, scroll to zoom, right-drag to move.</p>
-<div id="views"></div></div>
+<div id="views"></div><div id="levels"></div></div>
 <script id="data" type="application/json">__DATA__</script>
 <script id="tex" type="application/json">__TEX__</script>
 <script type="module">
@@ -56,7 +57,7 @@ sun.position.set(cx + sunDir.x * size * 2, y0 + sunDir.y * size * 2, cz + sunDir
 sun.castShadow = true; sun.shadow.mapSize.set(4096, 4096); sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.02;
 const sc = sun.shadow.camera; sc.left = -size; sc.right = size; sc.top = size; sc.bottom = -size; sc.near = 1; sc.far = size * 5;
 scene.add(sun, sun.target);
-const loader = new THREE.TextureLoader();
+const loader = new THREE.TextureLoader(); const LEVEL_MESHES = {};
 for (const [key, m] of Object.entries(D.meshes)) {
   const g = new THREE.BufferGeometry(); const nq = m.c.length / 4;
   g.setAttribute("position", new THREE.Float32BufferAttribute(m.p, 3));
@@ -66,11 +67,23 @@ for (const [key, m] of Object.entries(D.meshes)) {
   g.setAttribute("color", new THREE.BufferAttribute(col, 3));
   const idx = []; for (let i = 0; i < nq; i++) { const b = i * 4; idx.push(b, b + 1, b + 2, b, b + 2, b + 3); }
   g.setIndex(idx);
-  const t = loader.load(TX[key]); t.magFilter = THREE.NearestFilter; t.minFilter = THREE.NearestMipmapLinearFilter; t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
+  const t = loader.load(TX[m.t || key]); t.magFilter = THREE.NearestFilter; t.minFilter = THREE.NearestMipmapLinearFilter; t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
   const mat = new THREE.MeshLambertMaterial({ map: t, vertexColors: true, alphaTest: m.cut ? 0.5 : 0, transparent: !!m.water, opacity: m.water ? 0.82 : 1, side: THREE.FrontSide });
   if (m.glow) { mat.emissive = new THREE.Color(dusk ? 0xffc070 : 0x000000); mat.emissiveMap = t; mat.emissiveIntensity = dusk ? 1.4 : 0; }
   const mesh = new THREE.Mesh(g, mat); mesh.castShadow = !m.water; mesh.receiveShadow = true; scene.add(mesh);
+  if (m.g !== undefined) (LEVEL_MESHES[m.g] ||= []).push([m.o, mesh]);
 }
+// level buttons (town hall 1-5, station halt to grand): only the chosen level's meshes show
+function level(g, o) {
+  for (const [k, mesh] of LEVEL_MESHES[g] || []) mesh.visible = k === o;
+  document.querySelectorAll(`#levels [data-g="${g}"] button`).forEach((b, i) => b.classList.toggle("on", i === o));
+}
+(D.groups || []).forEach((G, g) => {
+  const row = document.createElement("div"); row.dataset.g = g; row.className = "lvrow";
+  const lab = document.createElement("span"); lab.textContent = G.name; row.appendChild(lab);
+  G.labels.forEach((l, o) => { const b = document.createElement("button"); b.textContent = l; b.onclick = () => level(g, o); row.appendChild(b); });
+  document.getElementById("levels").appendChild(row); level(g, q.get("lv" + g) !== null ? Number(q.get("lv" + g)) : G.default);
+});
 if (dusk) { // lantern light
   for (const [key, m] of Object.entries(D.meshes)) if (m.glow) {
     const seen = new Set();

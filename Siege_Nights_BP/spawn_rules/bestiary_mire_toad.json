@@ -13,10 +13,10 @@
     },
     "minecraft:herd": {
      "min_size": 1,
-     "max_size": 3
+     "max_size": 2
     },
     "minecraft:density_limit": {
-     "surface": 4
+     "surface": 2
     },
     "minecraft:biome_filter": {
      "any_of": [

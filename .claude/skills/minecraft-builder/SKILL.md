@@ -42,6 +42,11 @@ A 50,000-block castle costs about the same tokens as a hut.
    `--hifi <bedrock textures/blocks> <three@0.170.0>` for real-texture renders.
 6. **Fix and repeat at least 3 times before showing anyone.** Check against `build-instructions/09-final-check`
    and the "look for" list in `reference/house-rules.md`. Then show the preview, not the commands.
+6. **Catalog it (hollow-crown repo).** Every build has an entry in `builds/catalog.json`, even one that is
+   only asked for. Add it when the build is first asked for, move its `status` on (not started, designed,
+   in viewer, in game), set `viewer` to its asset viewer section, `thread` to the owning thread and
+   `source` to its builder, then run `node tools/build-catalog.mjs` (check.mjs fails if `builds/CATALOG.md`
+   is stale or a viewer section has no entry).
 
 ## Spec format
 
@@ -87,6 +92,11 @@ Mateo (2026-11-12): every build in the project uses this skill. Map code calls `
 (`compute(spec)`, `into_blueprint(bp, spec, offset, upto=stage | only=stage)`) instead of placing blocks
 itself, so a rule fixed here reaches every build. New building rules go into `parts.py` and the
 reference files, not into a builder of their own.
+
+The ground under and round a placed build is the same for everything too (Mateo 2026-11-13): one terraform pass,
+`map/structures/terraform.py` (pad, door-landing connectors, a 4 to 6 block blend skirt, retaining walls only where
+the land can't meet). Give it a `Site` instead of levelling or banking by hand (house rules, "Every placed thing
+is terraformed").
 
 ## Commands
 

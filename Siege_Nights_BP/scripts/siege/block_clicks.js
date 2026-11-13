@@ -14,8 +14,8 @@ import { sfx } from "../core/sfx.js";
 // ---------- Clicking blocks: gates and banner dyeing ----------
 
 export const GATE_SOUNDS = Object.fromEntries([
-  ...PORTCULLISES.map((id) => [id, { open: "random.door_open", close: "random.anvil_land" }]),
-  ...CASTLE_GATES.map((id) => [id, { open: "random.door_open", close: "random.door_close" }]),
+  ...PORTCULLISES.map((id) => [id, { open: "sig.portcullis_open", close: "sig.portcullis_close" }]),
+  ...CASTLE_GATES.map((id) => [id, { open: "sig.gate_open", close: "sig.gate_close" }]),
 ]);
 
 

@@ -40,6 +40,18 @@ Build for sun, not rain. Roofs are flat for terraces and sleeping, with parapets
 small deep windows. Shade comes from awnings, arcades and courtyards. There are no gutters, no moss and no
 drip lines. Wear shows as dusty edges and a slightly darker band at the base of walls. Shelter matters here: deep shade, arcades, covered walkways and walled yards are wind-breaks against dust and sandstorms.
 
+- **Cliffs and mesas are real** (Mateo, 2026-11-12: "Is there a real cliff and wall where this story happens?"):
+  when a place is said to stand on a cliff or mesa, raise one in the land. Sheer faces of banded terracotta
+  (orange, terracotta, red, yellow, brown, light grey) about 20 high, an uneven rim and ledges partway down, scree
+  heaped at the foot, red sand with a little red sandstone and coarse dirt on top, and a cut path up the side
+  facing the town. The worked example is the Cinder Roost in `map/structures/story_areas.py`.
+- **Statues** (Mateo, 2026-11-12: the old avenue statues "read like posts"; 2026-11-13: "3D entities of the statues
+  instead of built blocks"): robed, hooded figures with a blank smooth-quartz face (never a carved face), worn and
+  chipped, some broken or fallen, each holding something different (a staff, a sword, a bowl, folded hands). The
+  figure is the 3D entity `siege:faceless_statue`; only its stepped sandstone plinth is blocks. Bake the plinths with
+  `map/structures/faceless_statues.py` and write each figure into a statue-spot list (`write_spots`, format in that
+  file's docstring); the game stands the figures. Never build a statue figure out of blocks.
+
 ## Towns and paths
 
 **Towns:**
@@ -173,7 +185,8 @@ still look too round, as flagged in the tree thread.
   true}` with `"roof": "smooth_sandstone"` in the style. The deck is vigas and slabs by default (`"beams": false`
   for a plain layer).
 - **No bushes:** the preset plants none round the foundation (no grass here); put cactus in pots instead.
-- **Parts that fit:** `arcade` (market fronts), `arch`, `belfry`, `lean_to` (forge shade), `porch`, `dome`.
+- **Parts that fit:** `arcade` (market fronts), `arch`, `belfry`, `lean_to` (forge shade), `porch`, `dome`,
+  `galleries` (the caravanserai's upstairs gallery: `storey` 1; shaded walks: `storey` 0), curved roofs on vaults.
 - **Civic domes:** `{"part": "dome", "at": [x, z], "r": 4, "drum": {"h": 3, "windows": 4, "glass":
   "yellow_stained_glass_pane"}, "finial": "gold"}` on the flat roof: a sandstone drum and a blue-green copper
   dome with a gold finial.
@@ -188,7 +201,7 @@ still look too round, as flagged in the tree thread.
 - tapering towers with horns (use shapes);
 - lattice windows set back;
 - striped awnings;
-- courtyards (build them as wings round an open middle).
+- courtyards (build them as wings round an open middle, with `galleries` on the courtyard sides).
 
 ## Never
 

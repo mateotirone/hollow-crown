@@ -1,0 +1,22 @@
+{
+  "format_version": "1.16.100",
+  "minecraft:fog_settings": {
+    "description": {
+      "identifier": "siege:wx_flurries_2"
+    },
+    "distance": {
+      "air": {
+        "fog_start": 0.12,
+        "fog_end": 0.65,
+        "fog_color": "#d7dee6",
+        "render_distance_type": "render"
+      },
+      "weather": {
+        "fog_start": 0.12,
+        "fog_end": 0.65,
+        "fog_color": "#d7dee6",
+        "render_distance_type": "render"
+      }
+    }
+  }
+}

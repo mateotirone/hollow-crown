@@ -45,6 +45,11 @@ These rules hold in every region unless the region's page says otherwise. They a
   region's flavour (woods, rugs, lights: `build-instructions/08-interiors` step 5).
 - **Overhangs and shutters:** every overhang carried; shutters on at most 3 in 10 windows.
 - **Tone:** uneasy at night, never horror and never vanilla.
+- **Ground is a mix, never one block** (Mateo, 2026-11-12, of the Cradle Tree's ground: "that needs to be
+  everywhere"): any ground you lay round a build or an area speckles the region's grounds block by block (Blackfen:
+  grass 7, moss 3, podzol 2, mud 1, muddy roots 1; Vale: grass with coarse dirt, podzol, moss; Saltreach: grass 3,
+  gravel 2, coarse dirt 1, stone 1; snow: snow 12, stone 1, gravel 1, never packed ice). The map generator does the
+  same (`map/genworld.py`, `sprinkle`).
 - **Bushes round the foundation** (Mateo, 2026-11-12): clumps of the region's leaves under the ground-floor
   windows and at some corners, never a strip; on by default in the skill (`bushes`), none in the Emberwaste
   and the Hollow.
@@ -100,5 +105,12 @@ given here.
   default) or to Saltreach terraces on a lower wing.
 - **Now in the skill** (2026-11-12): the Hollow's one-block offset (`offset`), Blackfen stilts and piles,
   Frostmarch snow caps (`snow`) and dragon heads (`gable_horns`), domes on drums (`dome`), mossy and thatch
-  roofs (`moss`, `thatch`). Still by hand: Blackfen boardwalks, Hollow leaning towers, curved roofs.
+  roofs (`moss`, `thatch`). Also in the skill now: Blackfen boardwalks (`boardwalk`), Hollow leaning towers (`lean`), curved roofs (`"type": "curved"`), galleries and round towers joined into a house (`keep` with `"cap": "cone"`).
 
+
+## Windmills and the Breeder's Yard in towns (2026-11-13)
+
+- Windmills are built in the region's own materials, never Vale timber everywhere (Mateo's Sunscar screenshot):
+  `towngen_build.MILL` holds each region's base, plinth, upper wall, frame, band stairs, cap roof and sails.
+- Every town has a Breeder's Yard with the `hc:breeder_post` block at its gate (`settle_buildings.town_breeder_yard`),
+  in the region's style; the post sells the foal of the region it stands in.

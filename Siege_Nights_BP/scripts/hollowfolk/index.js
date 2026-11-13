@@ -21,6 +21,7 @@
 
 import { world, system, ItemStack } from "@minecraft/server";
 import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
+import { applyFilter } from "../core/events.js";
 import { on, emit, onTick, moduleStore, addTests, assert, assertEqual, registerDeck, storyPick, note, markDone } from "../siege/api.js";
 import { UNDERTOW_ID, UNDERTOW_LAYOUT as L, HEART, pathX } from "../undertow/layout.js";
 import { RIVER_NODES, riverDistance } from "../undertow/rivers.js";
@@ -242,8 +243,8 @@ function buildVault() {
   store.save();
 }
 
-// The Deep Door: a sealed arch in the Vault's north wall. It does not open. It is a hook for a later
-// expansion (the Deep), so nothing may depend on what is behind it yet.
+// The Deep Door: a sealed arch in the Vault's north wall. It does not open until Morvane falls; then the filter
+// "deepDoor" (false, { player }) lets after/deep.js take the player down instead (return true when handled).
 const DEEP_LINES = [
   "Sealed stone, colder than the rest of the wall. It does not open.",
   "You press your ear to it. Far below, something answers your breathing a moment late.",
@@ -572,6 +573,7 @@ world.beforeEvents.playerInteractWithBlock.subscribe((e) => {
   if (e.block.typeId !== B.seal || e.block.dimension.id !== UNDERTOW_ID || !deepDoorAt(e.block.location)) return;
   if (e.isFirstEvent === false) return;
   e.cancel = true;
+  if (applyFilter("deepDoor", false, { player: e.player })) return; // after Morvane falls the Deep opens (after/deep.js)
   const player = e.player, n = deepTries.get(player.id) ?? 0;
   deepTries.set(player.id, n + 1);
   system.run(() => say(player, `§8${DEEP_LINES[Math.min(n, DEEP_LINES.length - 1)]}`));

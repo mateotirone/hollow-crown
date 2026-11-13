@@ -30,8 +30,10 @@ import { learnLeads } from "../lore/player.js";
 import { startBoss, fightOf } from "../bestiary/bossCore.js";
 import { markSocketed } from "../bestiary/relics.js";
 import { LANDMARKS, stampOps } from "./landmarks.js";
+import { bakedFor, bakedState } from "./baked.js";
+import { approachWave, approachCount } from "./puzzles.js";
 import { CLOCKS, KEEPERS, makePuzzle, TOWER_POST, statementText, clockAnswer } from "./keepers.js";
-import { WELL, CHAMBER_CENTER, wellOps, chamberOps, postOps, stairSteps, spindleOps, drainLayers, plugOps, SIGN_TURN } from "./well_plan.js";
+import { inShaft, stairSpotsBelow, SHAFT_ZONE, WELL, CHAMBER_CENTER, wellOps, chamberOps, postOps, stairSteps, spindleOps, drainLayers, plugOps, SIGN_TURN } from "./well_plan.js";
 
 export const KEY = "siege:stopped_clock_key";
 export const CLOCK_BLOCK = "siege:stopped_clock";
@@ -76,12 +78,19 @@ const nearby = (center, r = 48) => world.getPlayers().filter((p) => p.dimension.
 
 // ---------- building ----------
 const SOFT = /air|water|grass(?!_block)|fern|flower|tulip|poppy|dandelion|bush|snow_layer|leaves|log|vine|sapling|mushroom|torch|sign/;
+function isBottomSlab(b) {
+  if (!/_slab$/.test(b.typeId) || /double/.test(b.typeId)) return false;
+  try { return b.permutation.getState("minecraft:vertical_half") !== "top"; } catch { return true; }
+}
 function groundAt(dim, x, z) {
   let b;
   try { b = dim.getTopmostBlock({ x, z }); } catch { return undefined; }
   for (let i = 0; b && i < 40; i++) {
     if (b.typeId === "minecraft:gold_block") { b.setType("minecraft:air"); b = b.below(); continue; } // genworld's square marker
-    if (!SOFT.test(b.typeId)) return b.location.y;
+    // a square paved in bottom slabs (sunk half a block): its floor block is the one under the slab, so the rim
+    // (dy 1) replaces the slab instead of standing on it with a half-block gap (Mateo 2026-11-12: "the town well
+    // is one block too high")
+    if (!SOFT.test(b.typeId)) return isBottomSlab(b) ? b.location.y - 1 : b.location.y;
     b = b.below();
   }
   return undefined;
@@ -112,6 +121,29 @@ export function fullPlan(p) {
   return { ops, posts };
 }
 
+/** After the blocks stand (built here, or baked into the map): signs on the posts, and where the clocks and keepers are. */
+function finishWell(dim, c, plan) {
+  const clocks = [], keepers = [];
+  plan.posts.forEach((post, i) => {
+    clocks.push(at(c, post.clock));
+    keepers.push({ x: c.x + post.keeper.dx + 0.5, y: c.y + post.keeper.dy, z: c.z + post.keeper.dz + 0.5 });
+    try {
+      const sign = dim.getBlock(at(c, post.sign));
+      sign?.setPermutation(BlockPermutation.resolve("minecraft:standing_sign", { ground_sign_direction: SIGN_TURN[post.face] }));
+      sign?.getComponent("minecraft:sign")?.setText(post.sign.text);
+    } catch { /* a sign is only a label */ }
+  });
+  Object.assign(store.data, { built: true, center: c, clocks, keepers, wound: false, open: false, pending: false, fighting: false });
+  store.save();
+}
+
+/** The well baked into the map (baked_sites.js, Mateo 2026-11-13): take its centre and puzzle, add signs and keepers. */
+function adoptWell(dim, bake) {
+  Object.assign(store.data, { seed: bake.seed, towerPost: bake.towerPost ?? TOWER_POST, baked: true });
+  finishWell(dim, { ...bake.center }, fullPlan(puzzle()));
+  placeKeepers(dim);
+}
+
 let busy = false;
 export function buildWell(center, by) {
   if (busy) return { ok: false, why: "it is already being built" };
@@ -135,18 +167,7 @@ export function buildWell(center, by) {
       if (by) say(by, `§cThe Millbrook well: ${failed} blocks were not loaded. It will try again when someone comes near.`);
       return;
     }
-    const clocks = [], keepers = [];
-    plan.posts.forEach((post, i) => {
-      clocks.push(at(c, post.clock));
-      keepers.push({ x: c.x + post.keeper.dx + 0.5, y: c.y + post.keeper.dy, z: c.z + post.keeper.dz + 0.5 });
-      try {
-        const sign = dim.getBlock(at(c, post.sign));
-        sign?.setPermutation(BlockPermutation.resolve("minecraft:standing_sign", { ground_sign_direction: SIGN_TURN[post.face] }));
-        sign?.getComponent("minecraft:sign")?.setText(post.sign.text);
-      } catch { /* a sign is only a label */ }
-    });
-    Object.assign(store.data, { built: true, center: c, clocks, keepers, wound: false, open: false, pending: false, fighting: false });
-    store.save();
+    finishWell(dim, c, plan);
     yield;
     placeKeepers(dim);
     busy = false;
@@ -155,7 +176,7 @@ export function buildWell(center, by) {
   return { ok: true };
 }
 
-let holding = false;
+let holding = false, baked;
 onTick("unlocks_reeve_build", 100, () => {
   if (store.data.built || busy) {
     if (holding && !busy) { try { overworld().runCommand(`tickingarea remove ${AREA}`); } catch { /* none */ } holding = false; }
@@ -164,6 +185,13 @@ onTick("unlocks_reeve_build", 100, () => {
   const near = nearby(MILLBROOK_SQUARE, BUILD_NEAR);
   if (!near.length) return;
   const dim = overworld();
+  const bake = baked === undefined ? bakedFor("reeve", MILLBROOK_SQUARE) : baked;
+  if (bake) {
+    const state = bakedState(bake, (x, y, z) => { try { return dim.getBlock({ x, y, z })?.typeId; } catch { return undefined; } });
+    if (state === "wait") return;
+    if (state === "yes") return adoptWell(dim, bake);
+    baked = null; // not this world's: build it the old way
+  }
   if (!holding) {
     const L = LANDMARKS.reeve, r = Math.max(Math.ceil(WELL.wallR) + 2, L?.size ? Math.ceil(Math.max(L.size[0], L.size[2]) / 2) + 2 : 0);
     try { dim.runCommand(`tickingarea add ${MILLBROOK_SQUARE.x - r} 0 ${MILLBROOK_SQUARE.z - r} ${MILLBROOK_SQUARE.x + r} 0 ${MILLBROOK_SQUARE.z + r} ${AREA} true`); } catch { /* full */ }
@@ -428,10 +456,27 @@ export function inChamber(p, c) {
   return Math.hypot(p.x - (c.x + 0.5), p.z - (c.z + 0.5)) <= WELL.roomR && p.y > floor && p.y < c.y + WELL.plugY;
 }
 
+// The approach: while he waits below, footmen climb the stair to meet whoever comes down the shaft.
+let lastStairWave;
+function stairWave(d) {
+  if (!d.open || !d.pending || d.fighting) return;
+  const c = d.center;
+  const inside = nearby(c, SHAFT_ZONE.r + 2).filter((p) => inShaft(c, p.location));
+  const now = system.currentTick;
+  if (!approachWave({ players: inside.length, fighting: !!scene, now, last: lastStairWave })) return;
+  lastStairWave = now;
+  const lowest = Math.min(...inside.map((p) => p.location.y)) - c.y;
+  for (const p of inside) { say(p, "§7Below you the stair is ticking. No: it is footsteps, keeping time, coming up."); sfx(overworld(), "random.anvil_use", p.location, { pitch: 0.7, volume: 0.6 }); }
+  for (const s of stairSpotsBelow(lowest, approachCount(inside.length, { base: 1, per: 1, max: 4 }))) {
+    try { overworld().spawnEntity(FOOTMAN, { x: c.x + s.dx + 0.5, y: c.y + s.dy, z: c.z + s.dz + 0.5 }); } catch { /* unloaded */ }
+  }
+}
+
 let missing = 0;
 onTick("unlocks_reeve_fight", 10, () => {
   const d = store.data;
   if (!d.built) return;
+  try { stairWave(d); } catch (e) { console.warn(`[Hollow Crown] reeve stair: ${e}`); }
   if (d.pending && !d.fighting) {
     const c = d.center;
     const down = world.getPlayers().some((p) => p.dimension.id === OVERWORLD && inChamber(p.location, c));

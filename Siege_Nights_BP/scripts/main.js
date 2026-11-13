@@ -4,6 +4,9 @@
 // Core (no gameplay)
 import "./core/selftest.js";
 import "./core/clickable.js";
+import "./core/gamerules.js";
+import "./core/noraids.js";
+import "./core/nomonsters.js";
 import "./core/firstjoin.js";
 import "./core/storyteller.js";
 
@@ -24,6 +27,7 @@ import "./rails/index.js";
 import "./trains/index.js";
 import "./trains/station_sites.js";
 import "./trains/route_game.js";
+import "./trains/line_trains.js";
 import "./bestiary/index.js";
 import "./lore/index.js";
 import "./crown/index.js";
@@ -36,6 +40,7 @@ import "./economy/index.js";
 import "./reach/index.js";
 import "./sound/index.js";
 import "./minimap/index.js";
+import "./quests/index.js";
 import "./guide/index.js";
 import "./roletrials/index.js";
 import "./landmarks/index.js";
@@ -47,16 +52,25 @@ import "./guardposts/index.js";
 import "./forestry/index.js";
 import "./workings/index.js";
 import "./ironworks/index.js";
+import "./upkeep/index.js";
+import "./eating/index.js";
 import "./vault/index.js";
 import "./warwrit/index.js";
 import "./army/index.js";
 import "./creative/index.js";
+import "./starter/index.js";
+import "./newplayer/index.js";
 import "./dispatch/index.js";
 import "./letters/index.js";
 import "./news/index.js";
 import "./trade/index.js";
 import "./townsfolk/index.js";
+import "./weather/index.js";
+import "./music/index.js";
 import "./graves/index.js";
+import "./wings/index.js";
+import "./statues/index.js";
+import "./battletest/index.js"; // test tool: /scriptevent siege:battle_test attack | defend | raid
 
 // Start the shared loop last, once every file has registered its work
 import { startLoop } from "./core/loop.js";

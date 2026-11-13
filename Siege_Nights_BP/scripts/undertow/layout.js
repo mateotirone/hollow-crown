@@ -20,10 +20,10 @@ export const UNDERTOW_LAYOUT = {
   ceilingY: 200, // the land never rises above ceilingY - 30. The roof itself follows the land (terrain.js ROOF)
   ceilingThickness: 4,
 
-  // Arrival: the Wound, a ledge looking out over the valley. The return crack is in the wall behind.
+  // Arrival: the Wound, a ledge looking out over the valley. The return crack is at the back of the cave behind it (wound.js).
   arrival: { x: 0.5, y: 101, z: 0.5 },
   woundLedgeY: 100,
-  returnCrack: { x: 0, y: 101, z: -11, facing: "south" }, // seam bottom; the crack faces +z (toward the ledge)
+  returnCrack: { x: 0, y: 101, z: -29, facing: "south" }, // seam bottom, in the back wall of the Wound's cave (wound.js WOUND.wallZ); the crack faces +z (toward the ledge)
 
   // The route, in order. Waystones sit on the path at these z values.
   stages: [

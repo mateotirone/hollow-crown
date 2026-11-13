@@ -11,7 +11,7 @@
 // planChunk(cx, cz) is pure (no Minecraft calls): it returns a list of fill operations. The
 // builder in index.js applies them a few at a time so the server never stalls.
 // Look of the land follows Mateo's concept art: basalt plateaus and spires, giant hollow lattice
-// trees, glowing pink and blue fungi, rivers of pale blue light, all under a low cave roof (ROOF).
+// trees, glowing pink and blue fungi, rivers of pale blue light, all under a high cave roof (ROOF).
 
 import { UNDERTOW_LAYOUT as L, COURT, HEART, pathX, stageAt } from "./layout.js";
 import { hash, fbm, smooth } from "./noise.js";
@@ -20,6 +20,7 @@ import { SITES, ROADS, siteAt, roadAt, roadLines, SITE_SKIRT, ROAD_HALF_WIDTH, R
 import { SITE_DESIGNS, TOWER_DESIGNS } from "./sites_data.js";
 import { HOLLOW_TREES } from "./trees_data.js";
 import { HOLLOW_BRIDGES } from "./bridges_data.js";
+import { arrivalAt, walkAt, ARRIVAL } from "./arrival.js";
 
 export { hash, fbm } from "./noise.js";
 
@@ -63,7 +64,20 @@ export const B = {
 const SEA = L.seaY;
 const clamp01 = (t) => Math.max(0, Math.min(1, t));
 const inCourt = (x, z) => z >= 1540 && z < 1660;
-const inHeart = (z) => z >= 2330;
+// Where the land breaks off before the Seat (Mateo, 2026-11-12: not a straight, flat line). The Long Climb ends in
+// a ragged, crumbling cliff: bays bitten up to 34 blocks back from z 2330, blunt spurs between them, single-block
+// jags, and the story path running out to the edge on its own spur. The Seat's approach (hollow_arenas.py) starts there.
+export const HEART_EDGE_Z = 2330;
+export function heartEdge(x) {
+  const ax = Math.abs(x);
+  if (ax <= 5) return HEART_EDGE_Z; // the path's spur
+  const jag = Math.floor(hash(Math.floor(x / 3), 0, 98) * 4) + (hash(x, 0, 99) < 0.3 ? 2 : 0);
+  const bite = Math.min(34, 2 + fbm(x / 44, 4.2, 97) * 38 + fbm(x / 9, 8.6, 96) * 13 + jag);
+  const reach = x < 0 ? 6 : 11; // the spur widens back into the cliff, more on one side than the other
+  const spur = Math.max(0, 1 - (ax - 5) / reach);
+  return HEART_EDGE_Z - Math.max(ax <= 7 ? 1 : 2, Math.round(bite * (1 - spur * spur * spur)));
+}
+const inHeart = (x, z) => z >= heartEdge(x);
 const inSpine = (x) => Math.abs(x) <= L.halfWidth;
 // No spires or pillars crowding the Drowned Court or the Seat's landing: they are meant to be seen from far off.
 const arenaView = (x, z) => Math.hypot(x - COURT.center.x, z - COURT.center.z) < 70 || Math.hypot(x - HEART.center.x, z - HEART.center.z) < 110;
@@ -138,12 +152,13 @@ function rimWall(x, z) {
   if (z < 60 || (z > 1500 && z < 1700) || margin(side * (L.halfWidth + 45), z) < 0) return 1;
   return smooth(clamp01((fbm(z / 70, side * 3.3, 61) - 0.4) / 0.14));
 }
-function spine(x, z) {
-  if (z < L.zStart || z >= L.zEnd || inHeart(z)) return null; // the final arena floats in the fog; built separately
+function spine(x, z, first = false) {
+  if (z < L.zStart || z >= L.zEnd || inHeart(x, z)) return null; // the final arena floats in the fog; built separately
 
-  // The Wound: a ledge at y 100 with a wall behind it and a ramp down along the path.
-  if (z < 40) {
-    if (z < -10) return Math.abs(x) <= 24 ? 126 - Math.floor(fbm(x / 9, z / 9, 5) * 6) : null;
+  // The Wound as it was first built: a ledge at y 100 with a wall behind it and a ramp down along the path. Kept so
+  // an old world knows what stands there (wound.js clears what the new arrival no longer has).
+  if (z < 40 && first) {
+    if (z < -10) return Math.abs(x) <= 24 ? 126 - Math.floor(fbm(x / 9, z / 9, 5) * 6) : null; // the first back wall: a slab, the void either side
     if (Math.abs(x) <= 14 && z <= 10) return L.woundLedgeY;
     if (Math.abs(x) <= 3 && z > 10) {
       const foot = spine(pathX(40), 40); // ramp lands exactly on the valley floor
@@ -174,22 +189,58 @@ function spine(x, z) {
 
   const edge = rimAt(x, z) - Math.abs(x);
   if (edge < 22) h += Math.round(((22 - edge) * 1.8 + fbm(x / 7, z / 7, 3) * 6) * rimWall(x, z));
+  // The arrival (arrival.js): the ledge, the stair and its court stand exactly so; the crag round them stands at
+  // least so high over the valley's own ground.
+  if (!first) { const a = arrivalAt(x, z); if (a) h = a.exact ? a.h : Math.max(h, a.h); }
   return Math.max(L.floorY + 4, Math.min(L.ceilingY - 30, h));
 }
+// No tree stands on the arrival or within its canopy's reach of it.
+const arrivalNear = (x, z) => { if (z > ARRIVAL.z1 + 6 || Math.abs(x) > ARRIVAL.x1 + 6) return false; for (let dx = -6; dx <= 6; dx += 3) for (let dz = -6; dz <= 6; dz += 3) if (arrivalAt(x + dx, z + dz)) return true; return false; };
+// The land as the first Wound had it (before the back cliff and the crag): what an old world has standing.
+export function firstHeightAt(x, z) { const n = natural(x, z, true); return n === null ? null : Math.round(n.h); }
 
-// The land before the rivers cut into it: { h, region } or null for void.
-function natural(x, z) {
+// The cliff at the Hollow's near end, behind the Wound (Mateo 2026-11-12, of a screenshot of the first one: "This
+// definitely needs a lot of work"). It was a flat slab 49 wide with the void on both sides and above it, so the sky
+// showed round it. Now it is a cliff right across the valley and out past both rims: its foot wanders, its top
+// steps back in broken ledges, it is laid in beds of mixed rock (backRock), and its last rows are built up into
+// the roof so nothing shows behind it. The Wound's cave is cut into it (wound.js).
+export const BACK = { z: -10, reach: L.halfWidth + 45, seal: -44 };
+export const backFace = (x) => { const ax = Math.abs(x); return ax <= 26 ? BACK.z : BACK.z - Math.round(fbm(x / 21, 0.5, 171) * 9 * smooth(clamp01((ax - 26) / 12))); };
+function backWall(x, z) {
+  if (z >= BACK.z || z < L.zStart || Math.abs(x) > BACK.reach) return null;
+  const d = backFace(x) - z; // blocks in behind the face
+  if (d <= 0) return null; // in front of it: the valley's own ground
+  let h = 136 + fbm(x / 23, z / 23, 5) * 26 + Math.min(d, 30) * 0.7 - 14 * Math.max(0, 1 - d / 5) * fbm(x / 9, 3.3, 172);
+  h = Math.max(h, natural(x, z, true)?.h ?? 0); // never lower than the land that stood here first, so an old world only gains rock
+  return Math.round(Math.min(L.ceilingY - 30, h));
+}
+const BACK_ROCK = ["minecraft:blackstone", "minecraft:deepslate", "siege:veinstone", "minecraft:deepslate", "minecraft:basalt", "minecraft:tuff", "minecraft:cobbled_deepslate", "minecraft:blackstone"];
+// The rock of the back cliff at a cell: beds three blocks thick that rise and dip along the face. Pure.
+export function backRock(x, y, z) {
+  const r = hash(x + y * 7, z - y * 3, 175);
+  if (r < 0.012) return "minecraft:crying_obsidian";
+  if (r < 0.07) return "siege:veinstone";
+  return BACK_ROCK[Math.floor((y + fbm(x / 17, z / 17, 173) * 12) / 3 + 400 + hash(Math.floor(x / 4), Math.floor(z / 4), 174) * 1.4) % BACK_ROCK.length];
+}
+// The land the roof is hung over. Behind the Wound it is still the first wall, so the roof stays exactly where
+// every world already built it.
+const roofLand = (x, z) => natural(x, z, true)?.h ?? null;
+
+// The land before the rivers cut into it: { h, region } or null for void. first: as it was before the back cliff.
+function natural(x, z, first = false) {
   if (z < L.zStart || z >= L.zEnd) return null;
+  const back = first ? null : backWall(x, z);
+  if (back !== null) return { h: back, region: "wound" };
   const ax = Math.abs(x);
   const rimX = ax <= L.halfWidth + 45 ? rimAt(x, z) : L.halfWidth;
   if (ax <= rimX) {
-    const h = spine(x, z);
+    const h = spine(x, z, first);
     return h === null ? null : { h, region: stageAt(z)?.id ?? "wound" };
   }
   const w = wild(x, z);
   if (w === null) return null;
   if (ax < rimX + 40) { // the outer foot of the rim eases into the open country
-    const rim = spine(x < 0 ? -rimX : rimX, z);
+    const rim = spine(x < 0 ? -rimX : rimX, z, first);
     if (rim !== null) w.h = rim + (w.h - rim) * smooth((ax - rimX) / 40);
   }
   w.h = Math.max(L.floorY + 4, Math.min(L.ceilingY - 30, w.h));
@@ -237,7 +288,7 @@ const groundBeforeRoads = (x, z) => beforeRoads(x, z)?.h ?? null;
 export function columnAt(x, z) {
   const c = beforeRoads(x, z);
   if (c === null) return null;
-  if (inSpine(x) && z > 10 && z < 2330 && !inCourt(x, z)) {
+  if (inSpine(x) && z > 10 && z < HEART_EDGE_Z && !inCourt(x, z)) {
     const d = Math.abs(x - pathX(z));
     if (d <= 4) { c.road = d; c.roadS = z; c.paved = d <= ROAD_HALF_WIDTH; return c; }
   }
@@ -337,6 +388,24 @@ function planBridges(ops, cx, cz) {
 const PLANTS = { wood: 0.08, fen: 0.1, high: 0.02, waste: 0.012 };
 const SPIRES = { wood: 0.002, fen: 0.002, high: 0.012, waste: 0.004 };
 
+// For a chunk built under the old low roof: take away everything that belonged to that roof (its rock,
+// what hung from it, its pillars and the islands under it), then build the new high roof's share.
+export function planRoofSwap(cx, cz) {
+  const prev = RP;
+  let old;
+  try { RP = ROOF_V3; old = planChunk(cx, cz); } finally { RP = prev; }
+  const ops = [];
+  // The old roof's rock (columns up to the shell, and the shell) is cleared outright. What hung from it
+  // is cleared only where that block is still there, so a building or tree put over it later is kept.
+  for (const op of old) {
+    if (!op.roof) continue;
+    const up = op.b[1] >= ROOF_V3.shell - 1;
+    ops.push(up ? { a: op.a, b: op.b, block: "minecraft:air" } : { a: op.a, b: op.b, block: "minecraft:air", onlyIf: op.block });
+  }
+  for (const op of planChunk(cx, cz)) if (op.roof) ops.push(op);
+  return ops;
+}
+
 export function planChunk(cx, cz) {
   const ops = planLand(cx, cz);
   const X0 = cx * 16, Z0 = cz * 16;
@@ -378,6 +447,7 @@ function planLand(cx, cz) {
   // The roof: a low cave ceiling over the whole Hollow (also above the Heart, where there is no ground).
   // Added first, so everything under it (spires, pillars, trees) is built into it.
   planRoof(ops, cx, cz, col);
+  for (const op of ops) op.roof = true; // (planRoofSwap picks these out)
   if (!any) return ops;
 
   // Solid ground under the whole chunk in two fills where every column has ground.
@@ -400,10 +470,39 @@ function planLand(cx, cz) {
       const n = h(i + di, j + dj);
       drop = Math.max(drop, n === null ? 99 : top - n);
     }
-    const wound = spineCol && z < 40;
+    const wound = spineCol && (z < 40 || (z <= ARRIVAL.z1 && !!arrivalAt(x, z))); // the arrival's crag and court count as the Wound: no plants, spires or trees on them
     // A faint glow over the land (invisible light blocks), so under the roof it is dark but never
     // pitch black. Pushed first in the column so anything built here later takes its place.
     if (top + 2 > SEA && ambientLightAt(x, z)) ops.push({ a: [x, top + 2, z], b: [x, top + 2, z], block: AMBIENT.block, optional: true, ifAir: true });
+    const backCol = kind === "wound" && z < BACK.z && Math.abs(x) <= BACK.reach && top > L.woundLedgeY;
+    if (backCol) {
+      // the back cliff: beds of mixed rock wherever the face shows, plain rock inside
+      const from = drop >= 3 ? Math.max(start, top - Math.min(drop, 110) - 2) : top - 1;
+      fill(x, start, z, x, from - 1, z, B.rock);
+      const upTo = z <= BACK.seal ? ROOF.shell - 1 : top; // the last rows are built up into the roof: nothing shows behind the cliff
+      for (let y = from, y0 = from, b0 = backRock(x, from, z); y <= upTo + 1; y++) {
+        const b = y <= upTo ? backRock(x, y, z) : null;
+        if (b !== b0) { fill(x, y0, z, x, y - 1, z, b0); y0 = y; b0 = b; }
+      }
+      continue;
+    }
+    if (drop >= 3 && z >= BACK.z && arrivalAt(x, z)) {
+      // the crag under the arrival: the same beds of rock as the back cliff wherever a face shows, veilmoss over its ledges
+      const from = Math.max(start, top - Math.min(drop, 60) - 2);
+      fill(x, start, z, x, from - 1, z, B.rock);
+      for (let y = from, y0 = from, b0 = backRock(x, from, z); y <= top; y++) {
+        const b = y < top ? backRock(x, y, z) : null;
+        if (b !== b0) { fill(x, y0, z, x, y - 1, z, b0); y0 = y; b0 = b; }
+      }
+      set(x, top, z, groundAt(x, z, "wound", drop, c.river));
+      [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(([di, dj], side) => {
+        const n = h(i + di, j + dj);
+        if (n === null || i + di < 0 || i + di > 15 || j + dj < 0 || j + dj > 15 || walkAt(x, z) || walkAt(x + di, z + dj)) return;
+        const len = hash(x * 3 + side, z, 207) < 0.22 ? strandsAt(x, z, side, top - n, "fen") : 0; // a curtain here and there, not a pelt
+        if (len) fill(x + di, top - len + 1, z + dj, x + di, top, z + dj, B.strands);
+      });
+      continue;
+    }
     if (drop >= 3 && !wound && !onWater) {
       fill(x, start, z, x, top, z, kind === "mirror" || kind === "high" ? B.polished : B.basalt);
       // Choir ore shows in the cliff faces, richer the deeper into the Hollow you go.
@@ -507,7 +606,7 @@ function planLand(cx, cz) {
 
   // One landmark per chunk at most, kept inside the chunk.
   const cxm = X0 + 8, czm = Z0 + 8, mid = col(8, 8);
-  if (mid === null || mid.h < SEA || mid.river < 16 || siteAt(cxm, czm) || landmarkNearRoad(cx, cz, col) || (inSpine(cxm) && (czm < 40 || inCourt(cxm, czm) || nearPath(cxm, czm, 12)))) return ops;
+  if (mid === null || mid.h < SEA || mid.river < 16 || siteAt(cxm, czm) || landmarkNearRoad(cx, cz, col) || arrivalNear(cxm, czm) || (inSpine(cxm) && (czm < 40 || inCourt(cxm, czm) || nearPath(cxm, czm, 12)))) return ops;
   const roll = hash(cx, cz, 101), kind = mid.region;
   // Nudge each landmark off the chunk's middle so they don't line up in a grid (still inside the chunk).
   const nudge = (max, salt) => Math.round((hash(cx, cz, salt) - 0.5) * 2 * max);
@@ -521,7 +620,11 @@ function planLand(cx, cz) {
   const isle = () => {
     // A rock island hanging under the roof, with room above the land beneath it.
     const [x, , z] = at(3), y = roofAt(x, z).bottom - 9 - Math.floor(hash(cx, cz, 103) * 8);
-    if (y >= (groundBeforeRoads(x, z) ?? L.floorY) + 18) island(ops, x, y, z, cx, cz);
+    if (y >= (groundBeforeRoads(x, z) ?? L.floorY) + 18) {
+      const n = ops.length;
+      island(ops, x, y, z, cx, cz);
+      for (let i = n; i < ops.length; i++) ops[i].roof = true; // it hangs from the roof, so it moves with it
+    }
   };
   if (Math.hypot(cxm - 330, czm - 250) < 120 && !inSpine(cxm)) { if (roll < 0.85) tree(); } // the Lattice Wood: thick forest
   else if (kind === "wood") { if (roll < 0.5) tree(); else if (roll > 0.97) isle(); }
@@ -585,16 +688,30 @@ export function chunkInRange(cx, cz) {
 // weeping crying-obsidian stars, and now and then a basalt pillar holding it up. Its rock is a mix
 // like the ground's. The vanilla rock blocks the daylight; the Hollow is lit by what glows in it,
 // plus the faint AMBIENT glow below.
+// Mateo, 2026-11-12: "I do want the roof much much much higher, like as high as the nether roof". The
+// roof now vaults round y 172 to 196, about 100 blocks over the usual land (the nether's roof is about as
+// far over its lava sea), and only comes down where the land climbs, never closer than CLEARANCE. Its
+// hanging rock and Veilmoss curtains are longer to match. Chunks built under the old low roof (ROOF_V3)
+// have it swapped for this one (planRoofSwap).
 export const ROOF = {
+  v: 4,
   top: 203, // the roof's upper face (the old ceiling's top, inside the dimension's height range)
   shell: 200, // an unbreakable Veil Rock shell from here up to top, so nobody digs out to the sky
   maxBottom: 196, // the underside never higher than this (at least 4 rock under the shell)
-  clearance: 36, // the underside's base height above the highest land within WINDOW blocks
+  high: 180, // the underside's base height wherever the land is low enough
+  clearance: 40, // and never less than this over the highest land within WINDOW blocks
+  hangBase: 6, hangMax: 34, // hanging rock: 6 to 40 blocks long
+  curtainMax: 12, // Veilmoss curtains: 2 to 13 blocks long
   cell: 24, // the base height is worked out on a 24-block grid and blended in between
   window: 32,
   step: 8,
   heartFloor: 132, // the Choir's Heart floats with no land under it: treat it as land this high
 };
+// The low roof of 2026-11-11 (PR #131), about 30 to 50 blocks over the land. Kept only so chunks built
+// under it can have it taken away again.
+export const ROOF_V3 = { ...ROOF, v: 3, high: -Infinity, clearance: 36, hangBase: 4, hangMax: 20, curtainMax: 5 };
+let RP = ROOF; // the roof being planned (ROOF, or ROOF_V3 while working out what an old chunk holds)
+const roofNodeCache = new Map([[ROOF, new Map()], [ROOF_V3, new Map()]]);
 const ROOF_ROCK = [
   [0.34, "minecraft:blackstone"],
   [0.48, "minecraft:deepslate"],
@@ -613,34 +730,33 @@ function tallThings() {
   tall.push({ x: -165, z: 1465, r: 60, y: 68 + towers }); // Hallowmere's drowned city (drowned.js DROWNED_AREA)
   return tall;
 }
-const roofNodes = new Map();
 // Base height of the roof's underside at a grid node: the highest land near it, plus the clearance.
 function roofNode(gx, gz) {
-  const key = gx + "," + gz;
+  const key = gx + "," + gz, roofNodes = roofNodeCache.get(RP);
   let v = roofNodes.get(key);
   if (v !== undefined) return v;
-  const x0 = gx * ROOF.cell, z0 = gz * ROOF.cell, W = ROOF.window;
+  const x0 = gx * RP.cell, z0 = gz * RP.cell, W = RP.window;
   let m = -Infinity;
-  for (let dx = -W; dx <= W; dx += ROOF.step) for (let dz = -W; dz <= W; dz += ROOF.step) {
-    const n = natural(x0 + dx, z0 + dz);
-    if (n !== null) m = Math.max(m, n.h);
+  for (let dx = -W; dx <= W; dx += RP.step) for (let dz = -W; dz <= W; dz += RP.step) {
+    const n = roofLand(x0 + dx, z0 + dz);
+    if (n !== null) m = Math.max(m, n);
   }
-  if (z0 + W >= HEART.center.z - HEART.outerRadius - 40) m = Math.max(m, ROOF.heartFloor);
+  if (z0 + W >= HEART.center.z - HEART.outerRadius - 40) m = Math.max(m, RP.heartFloor);
   for (const t of tallThings()) if (Math.hypot(x0 - t.x, z0 - t.z) <= t.r + W) m = Math.max(m, t.y - 20);
   if (m === -Infinity) m = 110; // over the void past the edge
-  v = Math.min(ROOF.maxBottom, m + ROOF.clearance);
+  v = Math.min(RP.maxBottom, Math.max(RP.high, m + RP.clearance));
   if (roofNodes.size > 20000) roofNodes.clear();
   roofNodes.set(key, v);
   return v;
 }
 // The roof over one column: { bottom, block } (the rock runs from bottom up to the shell). Pure.
 export function roofAt(x, z) {
-  const fx = x / ROOF.cell, fz = z / ROOF.cell, gx = Math.floor(fx), gz = Math.floor(fz), tx = fx - gx, tz = fz - gz;
+  const fx = x / RP.cell, fz = z / RP.cell, gx = Math.floor(fx), gz = Math.floor(fz), tx = fx - gx, tz = fz - gz;
   const base = (roofNode(gx, gz) * (1 - tx) + roofNode(gx + 1, gz) * tx) * (1 - tz)
     + (roofNode(gx, gz + 1) * (1 - tx) + roofNode(gx + 1, gz + 1) * tx) * tz;
   const vault = (fbm(x / 70, z / 70, 601) - 0.5) * 30; // broad domes and low sags
   const lumps = (fbm(x / 17, z / 17, 602) - 0.5) * 9 + (hash(x, z, 603) < 0.2 ? 1 : 0);
-  const bottom = Math.round(Math.min(ROOF.maxBottom, Math.max(base - 6, base + 4 + vault + lumps)));
+  const bottom = Math.round(Math.min(RP.maxBottom, Math.max(base - 6, base + 4 + vault + lumps)));
   const p = spread(fbm(x / 13, z / 13, 611));
   let block = ROOF_ROCK.find(([t]) => p < t)[1];
   const r = hash(x, z, 612);
@@ -669,7 +785,7 @@ function planRoof(ops, cx, cz, col) {
     const r = hash(x, z, 621);
     if (i >= 2 && i <= 13 && j >= 2 && j <= 13 && r < 0.012 && room > 4) {
       // Hanging rock: a cone, three wide at the root, tapering to a point, often tipped with amethyst.
-      const len = Math.min(room, 4 + Math.floor(hash(x, z, 622) ** 2 * 20));
+      const len = Math.min(room, RP.hangBase + Math.floor(hash(x, z, 622) ** 2 * RP.hangMax));
       const root = Math.max(1, Math.floor(len * 0.4));
       for (const [di, dj] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) ops.push({ a: [x + di, rf.bottom - root, z + dj], b: [x + di, rf.bottom - 1, z + dj], block: rf.block });
       ops.push({ a: [x, rf.bottom - len, z], b: [x, rf.bottom - 1, z], block: rf.block });
@@ -677,7 +793,7 @@ function planRoof(ops, cx, cz, col) {
     } else if (r < 0.022 && room > 2) {
       ops.push({ a: [x, rf.bottom - 1, z], b: [x, rf.bottom - 1, z], block: "minecraft:amethyst_cluster", states: { "minecraft:block_face": "down" }, optional: true });
     } else if (r < 0.04 && room > 6) {
-      const len = 2 + Math.floor(hash(x, z, 624) * 5); // a curtain of glowing Veilmoss
+      const len = 2 + Math.floor(hash(x, z, 624) * RP.curtainMax); // a curtain of glowing Veilmoss
       ops.push({ a: [x, rf.bottom - len, z], b: [x, rf.bottom - 1, z], block: B.strands });
     }
   }
@@ -780,7 +896,7 @@ function extraTrees(ops, cx, cz, col) {
     const c = col(i, j);
     if (!c || c.h < SEA + 1 || c.road !== undefined || c.site || c.river < RIVER_HALF_WIDTH + 6 || c.under !== undefined) continue;
     const x = cx * 16 + i, z = cz * 16 + j;
-    if (inSpine(x) && (z < 40 || inCourt(x, z) || nearPath(x, z, 8))) continue;
+    if (arrivalNear(x, z) || (inSpine(x) && (z < 40 || inCourt(x, z) || nearPath(x, z, 8)))) continue;
     if (siteAt(x, z)) continue;
     const k = treeKind(x, z, c.region), n = EXTRA[k] ?? 0;
     if (hash(cx, cz, salt + 20) * 3 >= n) continue;
