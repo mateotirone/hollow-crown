@@ -7,8 +7,8 @@ import { LOCAL_TOMES, LOCAL_COLLECTIONS, LOCAL_THREADS } from "./data/plots.js";
 import { COLLECTIONS, SITE_FEATURES, SITE_IDS, SURVEY_LINES, THREADS, MILESTONES } from "./data/world.js";
 
 export const TOMES = [...TOMES_A, ...TOMES_B, ...TOMES_C];
-// The 74 tomes are TOMES. Each settlement plot also has three local books (data/plots.js): they can be read,
-// shelved and solved like any other, but they never count toward the 74, the 16 mysteries or Library rank.
+// The 75 tomes are TOMES. Each settlement plot also has three local books (data/plots.js): they can be read,
+// shelved and solved like any other, but they never count toward the 75, the 16 mysteries or Library rank.
 export const ALL_TOMES = [...TOMES, ...LOCAL_TOMES];
 export const ALL_THREADS = [...THREADS, ...LOCAL_THREADS];
 export const isLocal = (id) => String(id).startsWith("loc_") || String(id).startsWith("local_");
