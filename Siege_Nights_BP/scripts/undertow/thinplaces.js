@@ -34,6 +34,7 @@ import { hash, fbm } from "./noise.js";
 import { load, save, say, runCmd, FACING } from "./data.js";
 import { getSites, recordSite } from "./source.js";
 import { SEAM, CRACK_DEPTH } from "./rift.js";
+import { THIN_LAND } from "./thin_land.js";
 
 const OVERWORLD = "minecraft:overworld";
 const K_BUILT = "hc:thin_built"; // { siteId: true }
@@ -94,6 +95,16 @@ export function lobes(id) {
       H.rx * (0.4 + 0.3 * hash(i, salt, 13)), H.rzN * (0.4 + 0.3 * hash(i, salt, 14)), 0.55 + 0.4 * hash(i, salt, 15)]);
   }
   return out;
+}
+// Pure: the shaped land's facts for a site (map/thinplaces, written into thin_land.js by the map generator), or null
+// when the world here is not that land (an older world, a test world): most of the probe columns must stand at
+// their recorded height. groundAt(x, z) is the top solid block, or undefined where it cannot be read.
+export function landOf(id, groundAt, table = THIN_LAND) {
+  const L = table[id];
+  if (!L || L.probes.length < 3) return null;
+  let hit = 0;
+  for (const [x, z, y] of L.probes) { const g = groundAt(x, z); if (g !== undefined && Math.abs(g - y) <= 1) hit++; }
+  return hit >= Math.max(3, L.probes.length - 2) ? L : null;
 }
 let HILLS = true;
 export const setHills = (b) => { HILLS = b; };
@@ -217,6 +228,8 @@ export function caveGeometry(id) {
 // Pure: every block for one site, given ground height G (the top solid block at the build centre).
 // opts.facing: which way the mouth opens. opts.ground(dx, dz): the real ground's top block at that world offset,
 // relative to G (flat 0 when left out), so the hill sits on slopes and the way in meets the real ground.
+// opts.water(dx, dz): the surface of any standing water over that column, relative to G (undefined = dry). Air the
+// planner opens beside such water gets a skin of rock, so a pool, the sea or a flooded sinkhole never runs into the cave.
 // Returns { ops, seam, tome, mouth, camp, route, chamber, crackH } (route and chamber in local coordinates).
 export function planThinPlace(id, cx, cz, G, opts = {}) {
   const facing = opts.facing ?? "south";
@@ -438,6 +451,17 @@ export function planThinPlace(id, cx, cz, G, opts = {}) {
   put(cu, c1, cv - 4, "campfire", 2, { extinguished: true });
   put(cu + 3, c1, cv - 3, "spruce_fence"); put(cu + 3, c1 + 1, cv - 3, "spruce_fence"); put(cu + 3, c1 + 2, cv - 3, "lantern", 2);
 
+  // keep the world's own water out: a cell of standing water touching air we open is turned to rock
+  if (opts.water) {
+    const wAt = new Map();
+    const waterTop = (u, v) => { const k = `${u},${v}`; if (!wAt.has(k)) wAt.set(k, opts.water(...toWorld(u, v, facing)) ?? -999); return wAt.get(k); };
+    const isWater = (u, y, v) => !at(u, y, v) && y > ground(u, v) && y <= waterTop(u, v);
+    for (const c of [...cells.values()]) {
+      if (c.block !== "air") continue;
+      for (const [du, dy, dv] of [[1, 0, 0], [-1, 0, 0], [0, 0, 1], [0, 0, -1], [0, 1, 0]]) if (isWater(c.u + du, c.y + dy, c.v + dv)) put(c.u + du, c.y + dy, c.v + dv, raw(c.u + du, c.y + dy, c.v + dv));
+    }
+  }
+
   const W = (u, y, v) => { const [dx, dz] = toWorld(u, v, facing); return { x: cx + dx, y: G + y, z: cz + dz }; };
   const ops = [...cells.values()]
     .sort((a, b) => a.layer - b.layer)
@@ -471,6 +495,11 @@ function groundY(dim, x, z) {
   return y;
 }
 
+// The surface of standing water over a column (its top water block), or undefined where the column is dry.
+function waterY(dim, x, z) {
+  try { const b = dim.getTopmostBlock({ x, z }); return b?.isLiquid ? b.location.y : undefined; } catch { return undefined; }
+}
+
 function loaded(dim, site) {
   for (const [du, dv] of [[-REACH, -REACH], [REACH, -REACH], [-REACH, REACH], [REACH, REACH], [0, 0]]) {
     try { if (!dim.getBlock({ x: site.x + du, y: 64, z: site.z + dv })) return false; } catch { return false; }
@@ -498,22 +527,29 @@ export function buildSite(site, by) {
   if (busy) return { ok: false, why: "another thin place is still being built" };
   const dim = world.getDimension(OVERWORLD);
   if (!loaded(dim, site)) return { ok: false, why: "not loaded yet (stand closer)" };
-  const G = groundY(dim, site.x, site.z);
+  // on the map's shaped land the cave goes into the land that is there: its floor is the ground outside the mouth,
+  // and the planner adds no hill of its own (only the cover the cave needs)
+  const land = landOf(site.id, (x, z) => groundY(dim, x, z));
+  const G = land ? land.floor : groundY(dim, site.x, site.z);
   if (G === undefined) return { ok: false, why: "could not find the ground" };
   busy = true;
   let failed = 0;
   system.runJob((function* () {
     // 1. read the real ground around it, a row at a time
-    const heights = new Map();
+    const heights = new Map(), waters = new Map();
     for (let dx = -REACH; dx <= REACH; dx++) {
       for (let dz = -REACH; dz <= REACH; dz++) {
         const y = groundY(dim, site.x + dx, site.z + dz);
         if (y !== undefined) heights.set(dx * 1000 + dz, y - G);
+        const w = waterY(dim, site.x + dx, site.z + dz);
+        if (w !== undefined) waters.set(dx * 1000 + dz, w - G);
       }
       yield;
     }
     // 2. plan against it (falls back to the centre's height where a column could not be read)
-    const plan = planThinPlace(site.id, site.x, site.z, G, { facing: site.facing, ground: (dx, dz) => heights.get(dx * 1000 + dz) ?? 0 });
+    let plan;
+    setHills(!land);
+    try { plan = planThinPlace(site.id, site.x, site.z, G, { facing: site.facing, ground: (dx, dz) => heights.get(dx * 1000 + dz) ?? 0, water: (dx, dz) => waters.get(dx * 1000 + dz) }); } finally { setHills(true); }
     yield;
     // 3. place it
     let n = 0;
