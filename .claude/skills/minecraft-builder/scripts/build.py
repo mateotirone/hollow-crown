@@ -28,6 +28,9 @@ def build(spec, out_dir, edition=None, stages=False, preview=True, mcstructure=F
     mats = Materials(spec.get("materials"), pal, log)
     blocks = resolve(cells, mats, pal, log)
     seat_spire_tops(blocks, pal, log)
+    if spec.get("ruin"):
+        from engine import ruin
+        ruin(blocks, spec["ruin"], log)
     emit.connect(blocks)
     files, ncmd = emit.write_functions(blocks, out_dir, name, edition, pal, clear=spec.get("clear", False), offset=tuple(spec.get("offset", (0, 0, 0))))
     extra = {}
