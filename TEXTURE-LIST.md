@@ -626,16 +626,13 @@ All 187 items and 202 blocks have an icon or texture that exists, is the right s
 - Boss unlock blocks, guard tier icons, vault key: see above.
 Not tested in game.
 
-<<<<<<< HEAD
-## Codex regional gear (painted 2026-11-13 by `studio/art/build_codex_art.py`; items, attachables and icon keys by the custom armour thread)
-Sheet: `art/codex-regional-gear.png`. In the Texture Studio under Armor. Not tested in game.
-- Sets: Watchward (Vale), Tidewrought (Saltreach), Sunscale (Emberwaste), Fenlight (Blackfen). Worn, 3D, one 64×32 trim-safe sheet per piece: `textures/models/siege_armor/codex_<set>_<piece>.png`; shapes `models/entity/armor/codex_<set>_<piece>.geo.json` (`geometry.siege_codex_<set>_<piece>`).
-- Icons in `textures/items/codex/`: the 16 armour pieces, `watchmans_glaive`, `watch_crossbow`, `lighthouse_harpoon`, `tidesteel_cutlass`, `sunbrand_sabre`, `sunscale_bow`, `wisp_bow`, `bogsilver_sickle`, and the alloys `watchsteel`, `tidesteel`, `sunsteel`, `bogsilver`.
-- Still stand-ins (next batches): Oathsworn set, boss and rival drops, mythical weapons and tools, charms, caravan goods, the Codex book.
-=======
 ## Rimeforged gear (Frostmarch; painted 2026-11-13 by `studio/art/build_rimeforged.py`, items wired by the custom armour thread)
 Dark iron rimed in pale blue, fur collar, dragon-head crest. Sheet: `art/rimeforged-gear.png`. Not tested in game.
 - Worn, 3D, one 64×32 vanilla-layout sheet per piece (trim-safe): `textures/models/siege_armor/rimeforged_<helmet|chestplate|leggings|boots>.png`, shapes `models/entity/armor/rimeforged_<piece>.geo.json`, attachables `attachables/rimeforged_<piece>.json` for `siege:rimeforged_<piece>`. Helm: dragon skull, snout and swept horns. Hauberk: fur collar, pauldrons. Greaves: knee cops. Boots: fur cuffs.
 - Flat sheets: `textures/models/armor/rimeforged_layer_1.png`, `_2.png`.
 - Icons (keys in `item_texture.json`): `siege_rimeforged_<piece>`, `siege_rime_axe`, `siege_rime_spear`, `siege_rime_steel`. The axe and spear have icons only (held like vanilla); a thrown-spear model is not painted.
->>>>>>> a67bf136f0fc46ad70b85ac00a7e9baac0174490
+## Codex regional gear (painted 2026-11-13 by `studio/art/build_codex_art.py`; items, attachables and icon keys by the custom armour thread)
+Sheet: `art/codex-regional-gear.png`. In the Texture Studio under Armor. Not tested in game.
+- Sets: Watchward (Vale), Tidewrought (Saltreach), Sunscale (Emberwaste), Fenlight (Blackfen). Worn, 3D, one 64×32 trim-safe sheet per piece: `textures/models/siege_armor/codex_<set>_<piece>.png`; shapes `models/entity/armor/codex_<set>_<piece>.geo.json` (`geometry.siege_codex_<set>_<piece>`).
+- Icons in `textures/items/codex/`: the 16 armour pieces, `watchmans_glaive`, `watch_crossbow`, `lighthouse_harpoon`, `tidesteel_cutlass`, `sunbrand_sabre`, `sunscale_bow`, `wisp_bow`, `bogsilver_sickle`, and the alloys `watchsteel`, `tidesteel`, `sunsteel`, `bogsilver`.
+- Still stand-ins (next batches): Oathsworn set, boss and rival drops, mythical weapons and tools, charms, caravan goods, the Codex book.

@@ -109,12 +109,9 @@ textures/blocks/unlocks/*.png
 textures/items/vault/vault_key.png
 textures/items/siege_guardgear_*.png
 textures/items/siege_guard_*_dyed.png
-<<<<<<< HEAD
-textures/models/siege_armor/codex_*.png
-textures/items/codex/*.png
-=======
 textures/models/siege_armor/rimeforged_*.png
 textures/models/armor/rimeforged_layer_*.png
 textures/items/siege_rimeforged_*.png
 textures/items/siege_rime_*.png
->>>>>>> a67bf136f0fc46ad70b85ac00a7e9baac0174490
+textures/models/siege_armor/codex_*.png
+textures/items/codex/*.png
