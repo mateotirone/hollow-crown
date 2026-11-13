@@ -12,6 +12,7 @@ import {
 import { horsesOf, saveRecord, deleteRecord, newUid, meta, stablesLevelFor } from "./store.js";
 import { entityOf, spawnSteed, stallSteed, refresh } from "./steed.js";
 import { sfx } from "../core/sfx.js";
+import { withArticle } from "../core/grammar.js";
 
 export const isBuilder = (player) => player.getGameMode() === GameMode.Creative;
 
@@ -216,7 +217,7 @@ async function rite(player, rec, key, back) {
   if (!pay(player, special.cost)) return player.sendMessage(`§cThe rite needs ${costText(special.cost)}.`);
   rec.special = key;
   refresh(rec);
-  world.sendMessage(`§d${player.name}'s ${rec.name} has become a ${special.name}.`);
+  world.sendMessage(`§d${player.name}'s ${rec.name} has become ${withArticle(special.name)}.`);
   sfx(player, "random.totem");
 }
 
@@ -314,6 +315,6 @@ export function buyFoal(player, breed, at) {
   rec.grownAt = world.getAbsoluteTime() + S.foalGrowTicks;
   spawnSteed(rec, at.dimension, at.location);
   sfx(player, "random.levelup");
-  player.sendMessage(`§6You bought §f${rec.name}§6, a ${BREEDS[breed].name} foal. ${TRAITS[BREEDS[breed].trait].name}: ${TRAITS[BREEDS[breed].trait].desc}`);
+  player.sendMessage(`§6You bought §f${rec.name}§6, ${withArticle(BREEDS[breed].name)} foal. ${TRAITS[BREEDS[breed].trait].name}: ${TRAITS[BREEDS[breed].trait].desc}`);
   return rec;
 }
