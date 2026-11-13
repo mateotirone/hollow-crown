@@ -720,7 +720,8 @@ class Settlement(Town):
     # cumulative: each tier's buildings must all have a slot of a class they may take, open by that tier.
     # Classes: S, M (plain Medium), MF (plain Medium by the fields: the Farmhouse's), ML (long Medium), L, G.
     # Homes are cottages (S) or houses (M). A hall4 slot is gone by the Castle, so it is not counted there.
-    HOME = ("S", "M"); ANY = ("S", "M", "ML", "L", "G")
+    HOME = ("S", "M", "ML"); ANY = ("S", "M", "ML", "L", "G")
+    # a home may take a long Medium too (the townhouse is ML; settlement placement thread 2026-11-13)
     CHARTER_NEEDS = [
         [("library", ("ML", "L"))],
         [("home", HOME + ("MF",))] * 3 + [("farmhouse", ("MF",)), ("mint", ("M", "MF")), ("market", ("L", "ML"))],
