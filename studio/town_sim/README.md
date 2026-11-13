@@ -25,3 +25,7 @@ when the game does: rerun the three steps after a layout, design, hall, wall or 
 
 Not modelled: siege wins (growing is by button, or "Grow anyway" to skip a charter), prices beyond the menu figure,
 NPCs, the Works plots' machines, and the map's own roads (the gate road runs to the station instead).
+
+## Siege night
+
+`siege_night.mjs` plays siege nights through the game's own siege code: `startSiege`/`spawnAssault`, `planSiege`/`buyArmy`, the reach feature's waves, the bestiary's creature swaps and the wall's spawn distance. The fake Minecraft gets one player on the Plot Stone, a Keep Banner, the town's wall record, villagers (one per charter home) and ballistas from a defence preset. Every spawned creature is recorded. Math.random is seeded, which gives 144 fixed nights: siege 1–12 × the four sizes × three defence presets. The page's Siege night card plays one at game pace. The first wave comes 5 s after the horn and the rest 30 s apart. Raiders march to the wall, and rams go round it to the gate.
