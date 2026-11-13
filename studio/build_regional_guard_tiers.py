@@ -62,7 +62,7 @@ for reg, rname in REG.items():
                                        else [{'item': 'minecraft:netherite_ingot'}, {'item': BOSS_MATERIAL[reg]}])
             write(BP + f'recipes/regional_guard/{iid}.json', {'format_version': '1.20.10', 'minecraft:recipe_shapeless': {
                 'description': {'identifier': f'siege:{iid}_recipe'}, 'tags': ['siege_workshop'], 'ingredients': ings,
-                'result': {'item': f'siege:{iid}'}, 'unlock': {'context': 'AlwaysUnlocked'}}})
+                'result': {'item': f'siege:{iid}'}, 'unlock': [{'item': 'minecraft:structure_void'}]}})  # region-locked in the book: scripts/recipebook/
             lang.append(f'item.siege:{iid}.name={rname} {tname} Guard {pname}')
             icons[f'siege_{iid}'] = {'textures': f'textures/items/siege_{iid}'}
             icons[f'siege_{iid}_dyed'] = {'textures': f'textures/items/siege_{iid}_dyed'}

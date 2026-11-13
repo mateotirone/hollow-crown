@@ -9,6 +9,7 @@ How versions work is in [`docs/RELEASING.md`](docs/RELEASING.md).
 Everything merged to `main` since the last release goes here. Each pull request that changes what players see adds a line under one of these headings.
 
 ### Added
+- The recipe book's Equipment tab now lists only the regional armour and guard gear of the region you're standing in, instead of all five regions' near-identical pieces. Walk into another region and its pieces appear instead. Any region's piece can still be crafted by placing the items yourself.
 - Your Regal balance is always on screen now: a small gold Regal and the number, just right of the hotbar. It changes the moment you are paid, spend, pick up coins or get robbed.
 - Two new player skins come with the add-on in their own skin pack, The Hollow Crown: Reikia Cinderhale of the Emberwaste in caravaneer's clothes, and Lorcan Duskmire of the Blackfen in a fen-walker's oilskins. Pick them in the dressing room once the pack is imported.
 - The Faceless Vault's clues now match the vault: the Ledger, the warden, townsfolk and the notebooks put it in the dunes south of Sunscar and tell you to set its five statues in the order of the king's life, instead of rebuilding a face under the town.

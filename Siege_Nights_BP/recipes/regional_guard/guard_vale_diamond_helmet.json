@@ -24,8 +24,10 @@
     "result": {
       "item": "siege:guard_vale_diamond_helmet"
     },
-    "unlock": {
-      "context": "AlwaysUnlocked"
-    }
+    "unlock": [
+      {
+        "item": "minecraft:structure_void"
+      }
+    ]
   }
 }
