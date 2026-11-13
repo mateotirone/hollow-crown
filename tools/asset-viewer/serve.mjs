@@ -370,7 +370,7 @@ const EXTRAS = [
   { id: "harbour", title: "Harbour: lighthouse, boathouse, harbourmaster", marker: "map/structures/harbour_builds.py",
     args: (out) => [out],
     names: (out) => { try { return JSON.parse(fs.readFileSync(path.join(out, "names.json"), "utf8")); } catch { return {}; } } },
-  { id: "arena", title: "The grand arena at Kingsrest", marker: "map/structures/arena.py",
+  { id: "arena", title: "The Twelve Gates (arena at Kingsrest)", marker: "map/structures/arena.py",
     args: (out) => [out], names: (out) => readNames(out) },
   { id: "everwake", title: "Everwake (the city in the sky)", marker: "map/structures/everwake_builds.py",
     args: (out) => [out],

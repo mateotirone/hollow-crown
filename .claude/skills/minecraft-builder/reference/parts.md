@@ -304,6 +304,10 @@ few rows so the tiers read across the floor; everything under the seats is fille
 and corridors out of it with `place` air); `skip` leaves boxes out (a royal box, a stair hall). The layout gets
 `info["stands"]` (standing spots, every other seat) for crowds and `info["stand_rows"]` (each ring's seat row).
 
+**Round** (an amphitheatre; The Twelve Gates): `"round": true, "aisles": 24` makes every row a circle (ring =
+`round(hypot)`), every seat a stair facing its nearest axis, and the aisles `aisles` evenly spaced rays from the centre
+instead of `aisle_every`. `chamfer` is ignored.
+
 ## Not automated yet (build with shapes and `place`)
 
 Sign-boxed bushes on the ground, beam ends on proud frames, hammer-beam trusses (spans of 15+), hip-roof
