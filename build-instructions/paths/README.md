@@ -145,6 +145,14 @@ so these rules are strict:
   block, and later lines re-fit round it under the climbing rules.
 - Bridges, tunnels and deep cuttings are the map's works (`map/railworks.py`); the bed only clears their
   opening and seats the track on them.
+- **Long straights, 45 degree bends, no staircases** (playtest 2026-11-13). Track has only eight directions, so a
+  line at an in-between angle rastered as a sideways step every block or two and read as a zig-zag in game.
+  `map/railplan.py` `_long_runs` re-lays every stretch between platforms as straight runs of at least 12 blocks
+  joined by single 45 degree bends, within 7 blocks of the routed line (tighter where that would stray into a
+  town, plot or story site). To re-plan the track without moving any station, run genworld with
+  `GW_RAIL_KEEP=map/rail-segments.json`.
+- **A bought stretch goes down all the way.** On a Realm only the ground near players is loaded, so the game
+  walks one ticking area (`hc_rail_lay`, 65 x 65) along whatever is still waiting (`trains/route_game.js`).
 
 Test any change on the real map before shipping: export the corridor with `tools/export_rail_corridor.py`
 (amulet) and run `node tools/rail_lay_test.mjs corridor.json`, which lays all 7 lines and must print ALL OK

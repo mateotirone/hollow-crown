@@ -19,6 +19,9 @@ import { onTick } from "../core/loop.js";
 import { on } from "../core/events.js";
 import { sendHidden, titleBusy } from "../core/hudtitle.js";
 import { keepOf } from "../siege/api.js";
+import { allSites } from "../trains/station_sites.js";
+import { stationById, hasFound } from "../rails/index.js";
+import { STAGE_NAMES } from "../trains/stations.js";
 import { plotOf, plotAt } from "../plots/api.js";
 import { progressOf, setFlag } from "../lore/player.js";
 import { LOCAL_THREADS, slugOf } from "../lore/data/plots.js";
@@ -76,6 +79,15 @@ function namedSite(p) {
   return spot ? { id, name: SITE_NAMES[id] ?? ward?.name ?? "the thin place", x: spot.x, z: spot.z } : undefined;
 }
 
+// Your settlement's railway station (trains/station_sites.js), for the "Find your railway station" step
+function stationFacts(player) {
+  const site = allSites().find((s) => s.owner === player.id);
+  const st = site && stationById(site.id);
+  if (!st || st.dim !== player.dimension.id) return undefined;
+  const stage = STAGE_NAMES[site.built ?? site.stage] ?? "Halt";
+  return { name: `${st.name} ${stage}`, x: st.x, z: st.z, built: !!site.built, found: hasFound(player, st.id) };
+}
+
 function factsOf(player) {
   const p = progressOf(player);
   const plot = plotName(player);
@@ -98,6 +110,7 @@ function factsOf(player) {
     hollow: { choir: !!prog.choir || !!reach.choir, cartsong: inHollow && hasCartsong(player.id), carter },
     morvane: !!reach.source || !!prog.morvane,
     first: (() => { try { return firstFacts(player); } catch { return undefined; } })(),
+    station: (() => { try { return stationFacts(player); } catch { return undefined; } })(),
     farmer: (() => { try { return farmerFacts(player); } catch { return undefined; } })(),
   };
 }
