@@ -37,13 +37,26 @@ const recipe = (layers) => layers.length
   ? layers.map(([id, p = 1, v = 1, d = 0]) => `\`${id}\`${p !== 1 ? ` pitch ${p}` : ""}${v !== 1 ? ` vol ${v}` : ""}${d ? ` after ${(d / 20).toFixed(2).replace(/\.?0+$/, "")} s` : ""}`).join(" + ")
   : "nothing extra";
 const shape = (e) => `${e.kind === "loop" ? "loop" : "one-shot"}, ${e.channels === 1 ? "mono" : "stereo"}`;
-const state = (e) => (record[e.file] ? `recording (${record[e.file].seconds} s)` : e.file === "choir_hum" ? "placeholder made in code" : e.id.startsWith("siege.dragon.") ? "synthesized stand-in" : "vanilla stand-in");
+const state = (e) => (record[e.file] ? `recording (${record[e.file].seconds} s${record[e.file].variants ? `, ${record[e.file].variants.length} of ${e.variants} variants` : ""})` : e.file === "choir_hum" ? "placeholder made in code" : e.id.startsWith("siege.dragon.") ? "synthesized stand-in" : "vanilla stand-in");
 const cueOf = (e) => SIGNATURE_CUES.find((n) => CUES[n].custom === e.id);
 
 const sig = manifest.signature, dragons = manifest.dragons;
 const roars = dragons.filter((d) => d.signature);
 const signature = [...sig, ...roars];
 const installedCount = signature.filter((e) => record[e.file]).length;
+
+// ---------- creature voices (Siege_Nights_RP/sounds.json, written by studio/bestiary/voices.py) ----------
+const entitySounds = JSON.parse(readFileSync(join(ROOT, "Siege_Nights_RP/sounds.json"), "utf8")).entity_sounds?.entities ?? {};
+const voiceCell = (s) => {
+  if (s === undefined) return "-";
+  if (s === "" ) return "silent";
+  const id = typeof s === "string" ? s : s.sound;
+  const p = typeof s === "object" && Array.isArray(s.pitch) ? ` ${s.pitch[0]}-${s.pitch[1]}` : "";
+  return id ? `\`${id}\`${p}` : "silent";
+};
+const voiceRows = Object.keys(entitySounds).filter((k) => !["siege:steed", "siege:dragon"].includes(k)).sort()
+  .map((k) => { const ev = entitySounds[k].events ?? {}; return `| ${k.replace("siege:", "")} | ${voiceCell(ev.ambient)} | ${voiceCell(ev.hurt)} | ${voiceCell(ev.death)} | ${voiceCell(ev.step)} |`; })
+  .join("\n");
 
 let md = `# Sound list
 
@@ -85,6 +98,7 @@ signature.forEach((e, i) => {
   md += `- **File name:** \`${e.file}\` (installs as \`${e.path}.ogg\`, sound id \`${e.id}\`)\n`;
   md += `- **Length:** ${e.ask_seconds ? `ask for ${e.ask_seconds} seconds or more; the game uses exactly ${e.seconds}` : `about ${e.seconds} seconds`}, ${shape(e)}${e.kind === "loop" ? `. The installer fades ${e.fade} s at each end and the game overlaps the fades, so it never has a gap` : ""}\n`;
   md += `- **When:** ${e.where}\n`;
+  if (e.variants) md += `- **Variants:** ${e.variants}, named \`${e.file}_1\` to \`${e.file}_${e.variants}\`. The game picks one at random each time\n`;
   if (cue) md += `- **Stand-in until then:** ${recipe(CUES[cue].layers)}${CUES[cue].layers.length ? "" : " (the game's existing sounds for this moment carry on)"}\n`;
   if (e.note) md += `- **Note:** ${e.note}\n`;
   md += `- **Test:** \`/scriptevent siege:sound ${cue ?? e.id}\`\n\n`;
@@ -107,6 +121,16 @@ Built from vanilla layers in \`core/sfx_cues.js\`. A script plays one with \`sfx
 | Cue | What it is | Made of | Used by |
 |---|---|---|---|
 ${NAMED_CUES.map((n) => `| \`${n}\` | ${CUES[n].what} | ${recipe(CUES[n].layers)} | ${where(n)} |`).join("\n")}
+
+## Creature voices
+
+What each creature sounds like when it idles, is hit, dies and walks. Each is one vanilla sound for now, re-pitched so
+no two groups sound alike; change them in \`studio/bestiary/voices.py\` and run \`python3 studio/bestiary/voices.py\`.
+A dash means it keeps the block's own footstep or has no idle sound; "silent" means silent on purpose.
+
+| Creature | Idle | Hurt | Death | Step |
+|---|---|---|---|---|
+${voiceRows}
 
 ## Reworked vanilla sounds
 
@@ -133,7 +157,8 @@ sfx(player, "random.levelup");                          // only that player hear
 sfx(dimension, "block.bell.hit", location, { pitch: 0.5 }); // everyone near that spot
 \`\`\`
 
-A new vanilla sound works straight away and is played as it is. To rework it, or to add a named cue, add a line to
+A new vanilla sound works straight away and is played as it is, as long as Bedrock has it: \`node tools/check.mjs\` fails on
+any id missing from \`tools/vanilla_sounds.json\` (Java names like \`block.amethyst_block.chime\` play nothing on Bedrock). To rework it, or to add a named cue, add a line to
 \`core/sfx_cues.js\` and run \`node tools/sound-list.mjs\`.
 `;
 

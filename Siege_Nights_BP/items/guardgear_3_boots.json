@@ -8,7 +8,7 @@
       }
     },
     "components": {
-      "minecraft:icon": "siege_guard_boots",
+      "minecraft:icon": "siege_guardgear_3_boots",
       "minecraft:display_name": {
         "value": "item.siege:guardgear_3_boots.name"
       },

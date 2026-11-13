@@ -9,6 +9,7 @@
 //   drape  every column follows the land: a block at y sits y above that column's own ground. For things
 //          strewn about (fields, rows of posts, a road). With `rise`, a column standing in water is carried
 //          up to the surface (posts walking out into the sea).
+// A rigid design with `sea` stands on the sea bed: it never clears the water round it, only the air above.
 // Ops come out in a safe order: clearing first, then fill, then solid blocks bottom-up, then the "late"
 // blocks that hang on others (lanterns, signs, trapdoors, torches, chains).
 
@@ -66,6 +67,8 @@ export function planPiece(d, ox, oz, height, water = () => undefined) {
         const out = Math.max(b.x0 - x, x - b.x1, b.z0 - z, z - b.z1, 0); // 0 inside the box
         const t = out === 0 ? G : Math.round(G + (r - G) * (out / (ease + 1)));
         const col = cols.get(`${x},${z}`) ?? [];
+        const wet = d.sea ? water(ox + x, oz + z) : undefined; // a design standing in the sea never clears its water
+        const dry = (y) => wet === undefined || y > wet;
         const ownsTop = col.some((c) => c[1] <= 0);
         const lowest = col.length ? Math.min(...col.map((c) => c[1])) : 1;
         // fill up from the real ground to the target (stopping under the design's own lowest block)
@@ -77,12 +80,12 @@ export function planPiece(d, ox, oz, height, water = () => undefined) {
         // cut down to the target: air above it, its top block becomes the ground top
         if (r > t) {
           if (!ownsTop) put(fill, x, t, z, d.top);
-          for (let y = t + 1; y <= r; y++) if (!col.some((c) => c[1] === y - G)) put(clear, x, y, z, AIR);
+          for (let y = t + 1; y <= r; y++) if (!col.some((c) => c[1] === y - G) && dry(y)) put(clear, x, y, z, AIR);
         }
         // air over the design (inside the box only), so trees and grass do not grow through it
         if (out === 0) {
           const have = new Set(col.map((c) => c[1]));
-          for (let y = Math.max(t, r) + 1; y <= G + top; y++) if (!have.has(y - G)) put(clear, x, y, z, AIR);
+          for (let y = Math.max(t, r) + 1; y <= G + top; y++) if (!have.has(y - G) && dry(y)) put(clear, x, y, z, AIR);
         }
       }
     }

@@ -17,7 +17,8 @@ PAD = {"Blackfen": "mud", "Frostmarch": "snow", "Emberwaste": "sand"}
 REGION = {"tidewatch_posts": "Saltreach", "gullcliff_beacon": "Saltreach", "reedmoor_ring": "Blackfen", "lanternbog_posts": "Blackfen",
           "redmesa_stones": "Emberwaste", "dunehold_hall": "Emberwaste", "dunehold_well": "Emberwaste", "dunehold_palms": "Emberwaste",
           "frosthelm_road": "Frostmarch", "wolfcairn_cairn": "Frostmarch", "deepforge": "Frostmarch", "cinder_roost": "Emberwaste",
-          "mags_hut": "Blackfen", "nell_raft": "Blackfen", "sedge_graves": "Blackfen", "ashen_watch": "Blackfen"}
+          "mags_hut": "Blackfen", "nell_raft": "Blackfen", "sedge_graves": "Blackfen", "ashen_watch": "Blackfen",
+          "shut_pass_gate": "Frostmarch", "vorlunds_muster": "Frostmarch"}
 
 
 def title(name, fn):
@@ -63,7 +64,9 @@ def main():
             if n != "air": rows.append([x, y, z, ix(n, p)])
         os.makedirs(os.path.join(out, name), exist_ok=True)
         json.dump({"name": name, "palette": pal, "blocks": rows}, open(os.path.join(out, name, "scene.json"), "w"), separators=(",", ":"))
-        names[name] = ("Story place · " if name in LS.STORY_DESIGNS else "Plot landmark · ") + title(name, fn)
+        kind = ("Boss arena · " if name == "vorlunds_muster" else "Sealed way out · " if name in LS.DOOR_DESIGNS
+                else "Story place · " if name in LS.STORY_DESIGNS else "Plot landmark · ")
+        names[name] = kind + title(name, fn)
         print(name, len(rows))
     import portal   # the rail tunnel portals, one per region, in a bit of hillside
     for reg in portal.REGIONS:

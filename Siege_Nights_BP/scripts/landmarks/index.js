@@ -26,6 +26,7 @@ import { DESIGNS } from "./designs_data.js";
 import { SPOTS } from "./spots_data.js";
 import { LANDMARKS, BUILD_NEAR } from "./sites.js";
 import { planPiece, seekSpot, AIR, KEEP_TOP } from "./plan.js";
+import { clearTrees } from "../core/clearing.js";
 import "./tests.js";
 
 const OVERWORLD = "minecraft:overworld";
@@ -130,7 +131,12 @@ export function buildSite(site, by) {
       const pal = p.d.palette.map(([id, st]) => perm(id, st));
       const near = (x, z) => tops.get(x * 4096 + z) ?? tops.get(p.x * 4096 + p.z);
       yield;
-      // 3. place it
+      // 3. clear the map's trees out of its ground and the air over it (Mateo 2026-11-12: none in its dead space,
+      //    nothing left floating), then place it
+      if (G !== undefined && p.d.clearTrees !== false) {
+        const b = p.d.box;
+        yield* clearTrees(dim, { x0: p.x + b.x0, z0: p.z + b.z0, x1: p.x + b.x1, z1: p.z + b.z1, y0: G + Math.min(0, b.y0), y1: G + Math.max(b.y1, p.d.clearTo ?? 0) });
+      }
       let n = 0;
       for (const [x, y, z, i] of ops) {
         total++;

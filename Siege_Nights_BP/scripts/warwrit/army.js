@@ -76,7 +76,9 @@ function mount(g, attacker) {
   } catch { return undefined; }
 }
 
-export function startMarch(writ, defender, share) {
+// dismounted: the soldiers start where they stand, already off their horses (Knights keep theirs), and walk to the
+// enemy gate at once (a Rival Lord's or a test army with no leader on the road, battletest/)
+export function startMarch(writ, defender, share, { dismounted = false } = {}) {
   const attacker = writ.attacker;
   let guards = [];
   try { guards = dim().getEntities({ tags: [guardTag(attacker)] }).filter((g) => !g.hasTag(MARCHING_TAG)); } catch { /* fine */ }
@@ -85,10 +87,12 @@ export function startMarch(writ, defender, share) {
     try {
       cancelWalk(g.id);
       g.addTag(MARCHING_TAG);
-      soldiers.push({ id: g.id, horse: mount(g, attacker), rank: soldiers.length, home: g.getDynamicProperty("siege:post") });
+      soldiers.push({ id: g.id, horse: dismounted && !RIDER.has(g.typeId) ? undefined : mount(g, attacker), rank: soldiers.length, home: g.getDynamicProperty("siege:post") });
     } catch { /* gone */ }
   });
-  marches.set(defender, { attacker, slot: writ.slot ?? 0, trail: [], soldiers, dismounted: false });
+  const m = { attacker, slot: writ.slot ?? 0, trail: [], soldiers, dismounted: false };
+  marches.set(defender, m);
+  if (dismounted) dismount(m, defender);
   return soldiers.length;
 }
 

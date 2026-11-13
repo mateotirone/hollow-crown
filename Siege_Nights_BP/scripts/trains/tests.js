@@ -6,6 +6,7 @@ import { SHAPES, layTrack, cursorOn, advance, back, pointAt, follow, KINDS, curv
 import { stageFor, stationPlan, siteFor, lineBlocks, loopBlocks, rightOf, STAGES, STATION, LOOP_Z } from "./stations.js";
 import { ROUTE, reachable, buyable, cannotBuy, priceOf, nearestStop, checkRoutes, stopSite, pieces, isNatural } from "./routes.js";
 import { ROUTES } from "./routes_data.js";
+import { layBed, trackFits, fellTree, rise, BED, layCrossing } from "./rail_bed.js";
 import { railRefused } from "./no_hollow.js";
 import { STATION_DESIGNS, TRADE_HOUSE_DESIGNS, ENGINE_SHED_DESIGNS } from "../settle/station_data.js";
 import { LINE, chainsOf, nextStop, newService, stepUnseen, indexNear, pilot } from "./line_service.js";
@@ -94,6 +95,70 @@ addTests("trains", {
   "routes: the bed digs through ground and trees, never through buildings": () => {
     for (const id of ["minecraft:stone", "minecraft:grass_block", "minecraft:oak_log", "minecraft:spruce_leaves", "siege:old_acacia_log", "minecraft:white_terracotta", "minecraft:iron_ore", "minecraft:short_grass"]) assert(isNatural(id), id);
     for (const id of ["minecraft:oak_planks", "minecraft:stone_bricks", "minecraft:cobblestone", "minecraft:glass", "minecraft:stripped_oak_log", "siege:castle_stone", "minecraft:stone_brick_stairs", "minecraft:oak_fence", "minecraft:torch"]) assert(!isNatural(id), id);
+  },
+  "routes: the bed is graded, never a trench, and trees on the line come down whole": () => {
+    // grass at y 64 (track sits at 65), with a rise to 65 on the north side and a tree, a road and a house on the line
+    const blocks = new Map();
+    const w = {
+      get: (x, y, z) => (Math.abs(x) > 40 || Math.abs(z) > 40 ? undefined : blocks.get(`${x},${y},${z}`) ?? (y <= 60 ? "minecraft:stone" : y > (z < -3 ? 65 : 64) ? "minecraft:air" : y === (z < -3 ? 65 : 64) ? "minecraft:grass_block" : "minecraft:dirt")),
+      set: (x, y, z, id) => blocks.set(`${x},${y},${z}`, id),
+    };
+    // the ground is a block above the track's bed all along (track y 64: the bed is 63)
+    const all = Array.from({ length: 31 }, (_, i) => ({ x: i - 15, y: 64, z: 0, kind: 0, dir: 2 }));
+    // a tree on the line at x 0: trunk, branch of fences, leaves, a root of stairs sunk into the ground
+    for (let y = 65; y <= 69; y++) w.set(0, y, 0, "minecraft:oak_log");
+    w.set(1, 68, 0, "minecraft:oak_fence"); w.set(2, 68, 1, "minecraft:oak_fence");
+    for (let dx = -1; dx <= 3; dx++) for (let dz = -1; dz <= 2; dz++) w.set(dx, 70, dz, "minecraft:oak_leaves");
+    w.set(0, 64, 0, "minecraft:dark_oak_stairs");
+    // a road crossing at x 8 (path surface), a house wall at x -10, 2 north of the line
+    for (let dz = -6; dz <= 6; dz++) w.set(8, 64, dz, "minecraft:grass_path");
+    w.set(-10, 65, -2, "minecraft:oak_planks"); w.set(-10, 66, -2, "minecraft:oak_planks");
+    const hits = [];
+    all.forEach((p, i) => { assert(layBed(w, all, i, (...a) => hits.push(a)), `piece ${i} laid`); assert(trackFits(w, all[i]), `track fits at ${i}`); w.set(p.x, p.y, p.z, "siege:track"); });
+    for (const p of all) {
+      assertEqual(w.get(p.x, 63, p.z), "minecraft:gravel", `ballast under ${p.x}`);
+      for (let dz = -1; dz <= 1; dz++) for (let y = 64 + (dz ? 0 : 1); y < 68; y++) assertEqual(w.get(p.x, y, dz), "minecraft:air", `clear over the bed at ${p.x} ${y} ${dz}`);
+      // beside the ballast the ground is level with it, then rises one per two out: no trench wall
+      for (const s of [1, -1]) for (let d = 2; d <= 5; d++) {
+        let top = 70; while (top > 55 && !/grass|dirt|stone|path/.test(w.get(p.x, top, s * d) ?? "")) top--;
+        assert(top <= 63 + rise(d), `no trench wall at ${p.x}, ${s * d}: ground ${top}`);
+      }
+    }
+    // the tree is gone, every bit of it, and its root left no pit
+    for (const [k, v] of blocks) assert(!/oak_(log|fence|leaves)|stairs/.test(v), `tree block left at ${k}: ${v}`);
+    // the road crossing kept its surface beside the bed, the house is untouched and reported
+    assertEqual(w.get(8, 64, 4), "minecraft:grass_path", "road surface beside the bed");
+    assertEqual(w.get(-10, 65, -2), "minecraft:oak_planks", "house left standing");
+    assert(BED.side >= 5 && rise(2) === 0 && rise(3) === 1, "banks: level beside the ballast, then 1 in 2");
+    // a tree touching a building is not a tree to fell
+    const yard2 = new Map([["0,65,0", "minecraft:oak_log"], ["0,66,0", "minecraft:oak_leaves"], ["1,66,0", "minecraft:oak_planks"]]);
+    const w2 = { get: (x, y, z) => yard2.get(`${x},${y},${z}`) ?? (y <= 64 ? "minecraft:dirt" : "minecraft:air"), set: (x, y, z, id) => yard2.set(`${x},${y},${z}`, id) };
+    assertEqual(fellTree(w2, 0, 65, 0), false, "a tree against a building stays");
+    assertEqual(w2.get(0, 65, 0), "minecraft:oak_log", "and is untouched");
+  },
+  "routes: a level crossing lays its boards, setts, lamp posts and keeper's hut on the graded ground": () => {
+    const blocks = new Map();
+    const w = {
+      get: (x, y, z) => (Math.abs(x) > 30 || Math.abs(z) > 30 ? undefined : blocks.get(`${x},${y},${z}`) ?? (y < 64 ? "minecraft:dirt" : y === 64 ? (Math.abs(x) <= 2 ? "minecraft:grass_path" : "minecraft:grass_block") : y === 65 && x === 7 && z === 7 ? "minecraft:short_grass" : "minecraft:air")),
+      set: (x, y, z, id) => blocks.set(`${x},${y},${z}`, id),
+    };
+    const all = Array.from({ length: 21 }, (_, i) => ({ x: i - 10, y: 65, z: 0, kind: 0, dir: 2 }));
+    all.forEach((p, i) => { layBed(w, all, i, () => {}); w.set(p.x, p.y, p.z, "siege:track"); });
+    const c = {
+      deck_block: "spruce_planks", deck: [[0, 0, 64], [0, 1, 64], [0, -1, 64]], road: [[0, 3, 64, "cobblestone"]],
+      posts: [[3, 3, 64, ["stone_brick_wall", "birch_fence", "lantern"]]],
+      hut: { x: 7, z: 7, y: 65, half: 1, plinth: "minecraft:cobblestone", blocks: [[0, 0, 0, "minecraft:cobblestone"], [0, 1, 0, "minecraft:oak_planks"]] },
+    };
+    assert(layCrossing(w, c, () => {}), "laid");
+    assertEqual(w.get(0, 64, 0), "minecraft:spruce_planks", "boards under the track");
+    assertEqual(w.get(0, 64, 3), "minecraft:cobblestone", "setts on the road");
+    assertEqual(w.get(3, 65, 3), "minecraft:stone_brick_wall", "post base on the ground");
+    assertEqual(w.get(3, 67, 3), "minecraft:lantern", "lamp on top");
+    assertEqual(w.get(7, 66, 7), "minecraft:oak_planks", "hut on the highest block, grass under it cleared");
+    const n = blocks.size;
+    assert(layCrossing(w, c, () => {}), "laid again");
+    assertEqual(blocks.size, n, "laying it twice changes nothing");
+    assertEqual(w.get(3, 68, 3), "minecraft:air", "no second post on the first");
   },
   "routes: a settlement's station sits on its stop, building toward the banner": () => {
     const data = routeMap();

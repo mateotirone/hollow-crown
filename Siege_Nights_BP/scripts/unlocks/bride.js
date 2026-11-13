@@ -12,9 +12,9 @@
 import { system } from "@minecraft/server";
 import { isNight } from "../siege/api.js";
 import { moonPhase } from "../lore/moondoors.js";
-import { defineSite, column, overworld, say, actionbar, sound, abs, setState, give, inventoryHas, nearby, put } from "./site.js";
+import { defineSite, column, overworld, say, actionbar, sound, abs, setState, give, inventoryHas, nearby, put, makeApproach } from "./site.js";
 import { makePews, pewAnswer, resting, CARVINGS, PEW_ROWS } from "./puzzles.js";
-import { chapelPlan, chapelInterior, pewStone, inChapel, CHAPEL } from "./plans.js";
+import { chapelPlan, chapelInterior, pewStone, inChapel, inDrownedWater, CHAPEL, DROWNED_WATER } from "./plans.js";
 import { grantTome } from "../lore/player.js";
 import { TOME_IN_UNLOCKS } from "../lore/places.js";
 
@@ -47,7 +47,7 @@ export const brideSite = defineSite({
   },
   inArena: (site, l) => inChapel(site.data.center, l),
   spawnAt: (site) => ({ x: site.data.center.x + CHAPEL.altar.dx - 1.5, y: site.data.center.y + 1, z: site.data.center.z + 0.5 }),
-  tick: (site) => tide(site),
+  tick: (site) => { tide(site); drownedWater(site); },
   tpAt: (site) => { const c = site.data.center; return { x: c.x - 11.5, y: c.y + site.data.info.surfaceDy + 5, z: c.z + 0.5 }; },
   command: (site, cmd, player) => {
     if (cmd !== "dry") return false;
@@ -56,6 +56,20 @@ export const brideSite = defineSite({
     return true;
   },
   answer: (site) => `The ring is under the ${pews(site).ring.side ? "right" : "left"} stone (facing the altar) at pew 3. Dark moon now: ${darkMoon()}, chapel dry: ${!!site.data.state.dry}`,
+});
+
+// ---------- the water round the chapel: the drowned of Brannoc ----------
+const drownedWater = makeApproach({
+  mid: (site) => site.data.center, r: DROWNED_WATER.r + 2,
+  inZone: (site, l) => inDrownedWater(site.data.center, l, site.data.info.surfaceDy ?? 12),
+  mob: DROWNED, count: { base: 2, per: 1, max: 5 },
+  line: "§7Below you the village is still there, roofs and all. On one of the roofs, something lets go and starts to swim up.",
+  cry: "bucket.empty_water", cryOpts: { pitch: 0.4, volume: 2 },
+  // they rise from the street below whoever is in the water
+  spots: (site, players, n, now) => Array.from({ length: n }, (_, i) => {
+    const c = site.data.center, p = players[i % players.length].location, a = (i / n) * Math.PI * 2 + now;
+    return { x: p.x + Math.sin(a) * 6, y: Math.max(c.y + 2, p.y - 4), z: p.z + Math.cos(a) * 6 };
+  }),
 });
 
 // ---------- the tide ----------

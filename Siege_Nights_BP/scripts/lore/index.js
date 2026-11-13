@@ -59,6 +59,7 @@ import { PLOT_PLAN } from "../plots/config.js";
 import "./cases.js";
 import "./places.js";
 import "./singing.js";
+import "./morvane_voice.js"; // Morvane's voice: heard long before he is seen
 import "./truce.js"; // the hidden third ending: the truce renewed at the empty Seat
 import { REVEAL } from "./data/reveal.js";
 import { ART_IDS, GATED } from "./arts.js";

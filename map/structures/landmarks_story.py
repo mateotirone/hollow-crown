@@ -536,4 +536,6 @@ def sedge_graves():
 STORY_DESIGNS = {f.__name__: f for f in (
     crownhold_hall, crownhold_walls, bellhollow_seal, bellhollow_frame, ashen_chapterhouse, ashen_watch, corvins_tower,
     mags_hut, nell_raft, sedge_graves, deepforge, cinder_roost)}
-STORY_TURNING = {"deepforge", "cinder_roost"}
+from world_doors import DOOR_DESIGNS  # noqa: E402  (the sealed ways out and the Warlord King's ground)
+STORY_DESIGNS.update(DOOR_DESIGNS)
+STORY_TURNING = {"deepforge", "cinder_roost", "shut_pass_gate", "westwatch", "southmost_light"}
