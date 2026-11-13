@@ -224,8 +224,18 @@ pn = noise(18, 21) + noise(7, 22) * 0.5
 fenpool &= (pn > 0.16) & (Yf < SEA + 9)
 Yf = np.where(fenpool, np.minimum(Yf, SEA - 1 - (pn - 0.16) * 8), Yf)
 
+# the ground each plot's story stands on (map/plotground.py): Harrowford's backwater, Lanternbog's island, Dunehold's
+# oasis and dunes, Redmesa's mesa, Thistledown's knoll, Wolfcairn's edge, Frosthelm's copper crag, the Tidewatch inlet
+# and the Gullcliff zawn. Never on a road, trail, bridge or the rail line (lines.json "roads" are the rail lines).
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import plotground
+israil = raster(list(L["roads"].values()), lambda f: 7)
+Yf, PG = plotground.shape(GX, GZ, Yf, land, isroad | istrail | roadbridge | israil | isriver, SEA)
+pgwater = PG.water & ~islake & ~isriver
+fenpool &= ~PG.water
+log("plot ground:", int(pgwater.sum()), "water columns")
+
 Y = np.round(Yf).astype(np.int32)
-Y[land & ~fenpool & ~islake] = np.maximum(Y[land & ~fenpool & ~islake], SEA + 1)
+Y[land & ~fenpool & ~islake & ~pgwater] = np.maximum(Y[land & ~fenpool & ~islake], SEA + 1)
 Y[~land] = np.minimum(Y[~land], SEA - 1)            # the sea bed stays under water (no grass specks at sea level)
 Y[isriver] -= 3; Y[bank] -= 1
 water_level = np.full((SIZE, SIZE), -999, np.int32)
@@ -233,6 +243,7 @@ water_level[~land] = SEA
 water_level[isriver] = Y[isriver] + 2
 water_level[fenpool] = SEA
 water_level[islake] = lakelevel[islake]
+water_level[pgwater] = PG.level[pgwater]
 wet = water_level > Y
 
 # ---------------------------------------------------------------- the seven thin places: designed land
@@ -698,6 +709,11 @@ m = steep & ~R[EMBER]; surf[m] = np.where(r1[m] < 0.5, ID["stone"], np.where(R[F
 mesa = R[EMBER] & (steep | (Y > 112))
 # chalk cliffs: grass right to the edge over a thin soil, white where a column stands below its neighbours (faces,
 # ledges), flint shingle with fallen chalk blocks at the foot, and a pale platform of chalk, weed and gravel under the water
+# plot ground (map/plotground.py): dune and beach sand, the Gullcliff zawn's chalk, copper in the Frosthelm crag
+m = PG.sand & ~wet & land; surf[m] = np.where(R[EMBER][m] & (r2[m] < 0.3), ID["red_sand"], ID["sand"]); sub[m] = ID["sandstone"]
+chalk |= PG.chalk & land; chalktop = np.where(PG.chalk, PG.top, chalktop)
+m = PG.turf & ~wet & land & ~steep; surf[m] = np.where(r1[m] < 0.85, ID["grass_block"], ID["coarse_dirt"]); sub[m] = ID["dirt"]; subd[m] = 3
+m = PG.copper & ~wet & (steep | (slope > 0.9)); surf[m] = np.select([r1[m] < 0.3, r1[m] < 0.55, r1[m] < 0.75], [ID["copper_ore"], ID["stone"], ID["andesite"]], ID["tuff"]); sub[m] = ID["stone"]; subd[m] = 1
 pY = np.pad(Y, 1, mode='edge'); nbmax = np.maximum.reduce([pY[:-2, 1:-1], pY[2:, 1:-1], pY[1:-1, :-2], pY[1:-1, 2:]])
 m = chalk & ~wet; surf[m] = np.where((Y[m] >= nbmax[m] - 1) & (Y[m] >= chalktop[m] - 3), ID["grass_block"], np.where(r1[m] < 0.8, ID["calcite"], ID["gravel"])); subd[m] = 1
 m = chalkfoot & ~wet; surf[m] = np.select([r1[m] < 0.65, r1[m] < 0.75, r1[m] < 0.85, r1[m] < 0.95], [ID["gravel"], ID["cobblestone"], ID["andesite"], ID["calcite"]], ID["diorite"])
@@ -1040,6 +1056,36 @@ if os.environ.get("GW_SITES", "1") != "0" and shutil.which("node"):
             f_.write("// The boss sites baked into the base map: where each stands, its puzzle seed, and a few cells that show it is\n")
             f_.write("// really there (an older world without the bake builds the site on approach as before). unlocks/site.js, reeve.js.\n")
             f_.write("export const BAKED_SITES = " + json.dumps(SITE_FACTS, separators=(",", ":")) + ";\n")
+# ---- the Everwake air boat station, a ruin until the story restores it (Mateo picked Wren Water, 2026-11-13). Built
+# with the skill (map/structures/everwake_builds.py), set on this map's own ground by the one terraform pass
+# (map/structures/everwake/site.py world_blocks: pad, blend, the lane out to the road, its trees). GW_EVERWAKE=0: none.
+if os.environ.get("GW_EVERWAKE", "1") != "0":
+    import subprocess, tempfile
+    _st = os.path.join(os.path.dirname(os.path.abspath(__file__)), "structures")
+    sys.path.insert(0, _st); sys.path.insert(0, os.path.join(_st, "everwake"))
+    import importlib.util as _ilu                        # map/structures/everwake/site.py ("site" is a stdlib name)
+    for _m in ("trees", "station", "spec", "terraform"): sys.modules.pop(_m, None)
+    _sp = _ilu.spec_from_file_location("everwake_site", os.path.join(_st, "everwake", "site.py"))
+    _ews = _ilu.module_from_spec(_sp); _sp.loader.exec_module(_ews)
+    from bp import Blueprint as _BP
+    _tmp = tempfile.mkdtemp()
+    subprocess.run([sys.executable, os.path.join(_st, "everwake_builds.py"), _tmp, "--only", "airboat_station_ruin"], check=True, stdout=subprocess.DEVNULL)
+    _R = _ews.R; _ls = np.arange(-_R, _R + 1)
+    _LX, _LZ = np.meshgrid(_ls, _ls, indexing="ij")
+    _gi = np.clip(_ews.CX - _LZ - X0, 0, SIZE - 1); _gk = np.clip(_ews.CZ + _LX - Z0, 0, SIZE - 1)
+    _wb, _py = _ews.world_blocks(os.path.join(_tmp, "airboat_station_ruin", "scene.json"), Y[_gi, _gk].astype(int), wet[_gi, _gk], (isroad | istrail)[_gi, _gk])
+    _bp = _BP("everwake_station"); _ek = {}
+    _ex, _ei, _es = [], [], []
+    for x_, y_, z_, n_, p_ in _wb:
+        k_ = n_ + json.dumps(p_, sort_keys=True)
+        if k_ not in _ek:
+            bn_, bs_ = _bp.to_bedrock(n_, p_)
+            _ek[k_] = (-1 if bn_ == "minecraft:air" else B_raw(bn_, bs_), "leaves" in bn_)
+        _ex.append((x_, y_, z_)); _ei.append(_ek[k_][0]); _es.append(_ek[k_][1])
+    _ex = np.array(_ex, np.int64)
+    STAMPED.append((_ex[:, 0], _ex[:, 1], _ex[:, 2], np.array(_ei, np.int64), np.array(_es, bool)))
+    shutil.rmtree(_tmp, ignore_errors=True)
+    log("everwake station (ruin) at", _ews.CX, _ews.CZ, "floor", _py, len(_wb), "blocks")
 # no tree in a build's dead space (Mateo 2026-11-12: "in dead space there are trees spawning, so for builds include
 # air blocks that remove trees"): every column a town plan or bridge stamps, with a margin, keeps whole trees out, so
 # no trunk stands in a courtyard and no crown hangs over a roof or floats where a stamp cut it.

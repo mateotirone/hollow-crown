@@ -23,7 +23,7 @@ import * as api from "../siege/api.js";
 import { POWER_ORIGINS } from "./skills.js";
 import { SKILLS, SKILL, RINGS, BRANCHES, blockedReason, levelFromRenown, renownForNext, pointsForLevel, rankOf, spentIn, canBranch, coinBlocked, refundable, keptOnUnbind } from "./skills.js";
 import { STYLES, STYLE_IDS, styleFromBiome, styleFromGround } from "./styles.js";
-import { drawHall, frameFor, toWorld, statesFor, buildOrder } from "./halls.js";
+import { drawHall, frameFor, toWorld, statesFor, buildOrder, boardDir } from "./halls.js";
 import { buildTick, clearBoxFor, worldCells, progressOf } from "./build.js";
 import { heroOf, saveHero, forgetHero, grantRenown, listenForGrants, blankHero } from "./hero.js";
 import { CORNERSTONE, TREE, BOARD, hallMenu, hallOf, halls, saveHalls, resumeBuilds, beginBuild, setTreeLook, allowedLevel, HALL_COSTS, hallMenuExtras } from "./townhall.js";
@@ -42,7 +42,7 @@ import { MESSENGER, route, cooling, bucket, heading, wayHome, newsText, keepNews
 import { wallMenu } from "./flyby.js";
 import { hallMap, setHallCheck } from "./hallmap.js";
 export { flyby } from "./flyby.js";
-import { rumorMenu, rumorTick, rumorsFor, describe, jobTier, remember, KEEPSAKES, JOB_KIND } from "./rumors.js";
+import { rumorMenu, rumorTick, rumorsFor, bountiesFor, describe, jobTier, remember, KEEPSAKES, JOB_KIND } from "./rumors.js";
 
 export { grantPoints, grantRenown, heroOf } from "./hero.js";
 export { hallOf } from "./townhall.js";
@@ -308,6 +308,7 @@ api.addTests("hall build", {
       const p = drawHall(level, STYLES[id]), b = p.marks.board, t = p.marks.tree;
       api.assert(b && p.cells.get(`${b.x},${b.y},${b.z}`)?.role === "board", `${id} ${level} has a board`);
       api.assert(Math.abs(b.x) >= 2 && b.z <= t.z + 2, `${id} ${level}: board off the aisle, in front of the Tree`);
+      api.assert(p.cells.get(`${b.x},${b.y},${b.z}`)?.o?.dir === boardDir(b.x), `${id} ${level}: board faces the aisle`);
     }
   },
   "the clear box holds every block of the old hall above the ground": () => {
@@ -344,6 +345,16 @@ api.addTests("clue sense", {
 });
 
 api.addTests("rumor board variety", {
+  "bounties hunt our own creatures, the region's own where you live": () => {
+    for (const region of [undefined, "Aldmere Vale", "Frostmarch", "Saltreach", "Emberwaste", "Blackfen", "Kingsrest"]) {
+      const list = bountiesFor(region);
+      api.assert(list.length >= 2, `${region}: at least two kinds to hunt`);
+      for (const [type, , , home] of list) api.assert(type.startsWith("siege:") && (!home || !region || home === region), `${region}: ${type}`);
+    }
+    for (let day = 0; day < 30; day++) for (const job of rumorsFor(day, "hunter", 6, { types: ["bounty", "camp", "supply"], region: "Frostmarch" })) {
+      if (job.type === "bounty") api.assert(["siege:rimewolf", "siege:hollow_footman", "siege:torchbearer"].includes(job.mob), job.mob);
+    }
+  },
   "the Storyteller's choice of jobs is what the board shows": () => {
     const jobs = rumorsFor(5, "tester", 10, { types: ["supply", "rescue", "bounty"] });
     api.assertEqual(jobs.map((j) => j.type).join(), "supply,rescue,bounty");

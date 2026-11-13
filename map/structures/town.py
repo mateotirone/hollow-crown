@@ -42,7 +42,7 @@ TOWNS = {
                       bridges=[[(-97, -470), (-69, -470)]],                   # the High Road over the brook
                       high=None,
                       civic=[("Clock tower", vale_civic.clock_tower, (-60, -480), "square"),
-                             ("Chapel", lambda: vale_civic.chapel(name="millbrook_chapel"), (-44, -462), "square"),
+                             ("Chapel", lambda: vale_civic.chapel(name="millbrook_chapel", bells=False), (-44, -462), "square"),
                              ("Watermill", vale_civic.watermill, (-98, -492), "river")],
                       roads=("North Line", "Oakmere Branch"), trails=("High Road",), seed=11),
 }

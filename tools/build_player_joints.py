@@ -116,6 +116,10 @@ def crossing(g):
     return bad
 
 
+CARRIER = "controller.render.hc_look.item_carrier"
+LOOK_ON = "(query.has_property('hc:look') ? query.property('hc:look') : 0) >= 1"
+
+
 def jointed_geometry():
     def cube(o, s, uv, inflate=0.0):
         c = {"origin": o, "size": s, "uv": uv}
@@ -208,7 +212,22 @@ def main():
         for name in extra:
             if name not in have:
                 fp.append({name: cond})
+    # Item carrier: Bedrock places held items from the player's DEFAULT geometry (their skin model), not from
+    # the look's geometry. With only the look drawn, the default model is never posed, so items stayed put
+    # while the arm swung (playtest 1.2.1519). Draw the default model too, every part hidden, so the same
+    # animations pose it and the item follows the arm. It must come before the look's own controllers.
+    rc["render_controllers"][CARRIER] = {
+        "geometry": "Geometry.default",
+        "materials": [{"*": "Material.default"}],
+        "textures": ["Texture.default"],
+        "part_visibility": [{"*": False}],
+    }
     dump(rp, rc)
+    rcs = [e for e in ent["minecraft:client_entity"]["description"]["render_controllers"] if CARRIER not in (e if isinstance(e, dict) else {e: 1})]
+    first_look = next(i for i, e in enumerate(rcs) if isinstance(e, dict) and any(k.startswith("controller.render.hc_look.") for k in e))
+    rcs.insert(first_look, {CARRIER: f"!query.is_spectator && !variable.map_face_icon && {LOOK_ON}"})
+    ent["minecraft:client_entity"]["description"]["render_controllers"] = rcs
+    dump(ep, ent)
     print(f"geometry.hc.jointed written; {n} armour geometries cut at the elbow/knee")
 
 

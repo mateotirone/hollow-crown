@@ -3,7 +3,7 @@ import { ARENA, ringLayout, ROOM_COLORS } from "./layout.js";
 import { ARENA_MOBS, DIFFICULTIES, KIT } from "./config.js";
 import { spreadRooms, assignRooms, verdict, mobReward, hasLeft, gateRows, inBox, flat } from "./rules.js";
 import { pickSeats } from "./crowd.js";
-import { MONSTERS, shouldClear } from "../core/nomonsters.js";
+import { MONSTERS } from "../core/nomonsters.js";
 
 addTests("arena", {
   "twelve rooms, one per colour, none sharing a spot": () => {
@@ -70,10 +70,8 @@ addTests("arena", {
     }
     assertEqual(mobReward("minecraft:pig", "squire"), 0);
   },
-  "arena mobs are tagged, so the no-monsters rule leaves them": () => {
-    for (const m of ARENA_MOBS.filter((x) => MONSTERS.has(x.type))) {
-      assert(!shouldClear({ typeId: m.type, cause: "Spawned", tags: ["hc_arena_mob"], nearestPlayer: 99 }), m.type);
-    }
+  "arena mobs are all our own creatures, never vanilla monsters": () => {
+    for (const m of ARENA_MOBS) assert(m.type.startsWith("siege:") && !MONSTERS.has(m.type), m.type);
   },
   "the kit is vanilla iron only": () => {
     for (const id of [...Object.values(KIT.armor), ...KIT.items.map((i) => i[0])]) {

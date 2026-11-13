@@ -46,7 +46,18 @@ export const allTowns = () => store.data.towns;
 export const markerAt = (loc) => store.data.markers[`${loc.x},${loc.y},${loc.z}`];
 export function registerMarker(at, owner, slot) { store.data.markers[keyOf(at)] = { owner, slot }; save(); }
 export function forgetMarker(at) { delete store.data.markers[keyOf(at)]; save(); }
+/** Every registered plot marker: [{ x, y, z, owner, slot }] */
+export const allMarkers = () => Object.entries(store.data.markers).map(([k, m]) => { const [x, y, z] = k.split(",").map(Number); return { x, y, z, ...m }; });
 const keyOf = (loc) => `${loc.x},${loc.y},${loc.z}`;
+
+// The plot marker's board faces out of its slot, toward the street the slot's door opens on (slot.door). Set down
+// with setType it took the block's default turn and often stood edge-on to the lane (Mateo, 2026-11-13).
+export const markerFacing = (door) => (door?.x > 0 ? "east" : door?.x < 0 ? "west" : door?.z < 0 ? "north" : "south");
+export function setMarkerBlock(block, door) {
+  const dir = markerFacing(door);
+  if (block.typeId === PLOT_MARKER && block.permutation.getState("minecraft:cardinal_direction") === dir) return;
+  block.setPermutation(BlockPermutation.resolve(PLOT_MARKER, { "minecraft:cardinal_direction": dir }));
+}
 // A town keeps the layout it was laid out with. Layouts are re-exported now and then (a plot's list can change), so
 // the town also remembers which one it got (template and seed): when its index now points at another layout, or past
 // the end, the same layout is found by that key; a town saved before keys existed gets one the first time it is read.
@@ -394,7 +405,7 @@ export function placeMarker(owner, slot) {
   try {
     const block = world.getDimension(OVERWORLD).getBlock(at);
     if (!block) return false;
-    if (block.typeId !== PLOT_MARKER) block.setType(PLOT_MARKER);
+    setMarkerBlock(block, slot.door);
   } catch {
     return false;
   }
@@ -473,7 +484,7 @@ export function foundTown(owner, plot, at, { style, layout, lord = false } = {})
   save();
   const town = townOf(owner);
   if (!wallOf(owner) || wallOf(owner).x !== at.x || wallOf(owner).z !== at.z) {
-    raiseWall(owner, 1, { center: { x: at.x, y: at.y, z: at.z }, style: town.style, bearing: tw.gate, radius: wallRadius(tw, 0), shape: wallShape(tw.name) });
+    raiseWall(owner, 1, { center: { x: at.x, y: at.y, z: at.z }, style: town.style, bearing: tw.gate, radius: wallRadius(tw, 0), shape: wallShape(tw.name), outline: tw.outline });
   }
   layOutTier(owner, 0);
   return true;

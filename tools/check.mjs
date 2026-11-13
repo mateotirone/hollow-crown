@@ -245,6 +245,13 @@ step("Content log rules");
   {
     const ep = join(RP, "entity/player.entity.json");
     const pgeo = new Set(Object.values(readJson(ep)?.["minecraft:client_entity"]?.description?.geometry ?? {}));
+    // Held items are placed from the DEFAULT geometry, so while a look is drawn the hidden item carrier
+    // (default geometry, every part hidden) must be drawn too, or items stay still while the arm moves.
+    const prc = readJson(ep)?.["minecraft:client_entity"]?.description?.render_controllers ?? [];
+    const names = prc.map((e) => (typeof e === "string" ? e : Object.keys(e)[0]));
+    const firstLook = names.findIndex((n) => n.startsWith("controller.render.hc_look.") && n !== "controller.render.hc_look.item_carrier");
+    const carrier = names.indexOf("controller.render.hc_look.item_carrier");
+    if (firstLook >= 0 && (carrier < 0 || carrier > firstLook)) fail(`${rel(ep)}: the hidden item carrier must come before the look render controllers; run python3 tools/build_player_joints.py`);
     const PATH = { rightItem: "rightArm", leftItem: "leftArm", rightArm: "body", leftArm: "body" };
     for (const file of walk(join(RP, "models/entity"), ".json")) {
       for (const g of readJson(file)?.["minecraft:geometry"] ?? []) {
@@ -373,6 +380,33 @@ step("Saved data versions");
     }
   }
   console.log(raw ? `${raw} file(s) save unversioned data (see notes)` : "every saved store is versioned");
+}
+
+// ---------- 2b2. no vanilla monsters ----------
+// Rule (Mateo 2026-11-13): vanilla monsters never spawn; our own creatures (siege:*) are this world's monsters.
+// So no script may hand a vanilla monster straight to spawnEntity() or summon(), as a string or through a const.
+// (Sieges plan with vanilla ids and spawnRaider() swaps every one for ours: see bestiary/spawns.js.)
+step("No vanilla monsters spawned");
+{
+  const MONSTER = /^minecraft:(zombie|zombie_villager(_v2)?|husk|drowned|skeleton|stray|bogged|parched|creeper|spider|cave_spider|enderman|endermite|silverfish|witch|slime|phantom|pillager|vindicator|evoker|evocation_illager|vex|ravager|guardian|elder_guardian|zombie_horse|skeleton_horse|camel_husk|zombie_nautilus|zombie_pigman|piglin|piglin_brute|hoglin|zoglin|blaze|ghast|magma_cube|wither_skeleton)$/;
+  let bad = 0;
+  for (const file of scripts) {
+    const src = readFileSync(file, "utf8");
+    const consts = Object.fromEntries([...src.matchAll(/const\s+(\w+)\s*=\s*["'`]([^"'`]+)["'`]/g)].map((m) => [m[1], m[2]]));
+    for (const m of src.matchAll(/(?:spawnEntity|\.summon)\(/g)) {
+      // the first argument: up to the first comma or close bracket outside brackets (a ternary counts too)
+      let i = m.index + m[0].length, depth = 0, arg = "";
+      for (; i < src.length && arg.length < 300; i++) {
+        const c = src[i];
+        if ("([{".includes(c)) depth++;
+        else if (")]}".includes(c)) { if (!depth) break; depth--; } else if (c === "," && !depth) break;
+        arg += c;
+      }
+      const ids = [...arg.matchAll(/["'`]([^"'`]+)["'`]/g)].map((x) => x[1]).concat([...arg.matchAll(/\b([A-Z_][A-Z0-9_]*)\b/g)].map((x) => consts[x[1]]).filter(Boolean));
+      for (const id of ids) if (MONSTER.test(id)) { bad++; failIn(file, `${rel(file)}: spawns the vanilla monster ${id}. Use one of our own creatures (siege:*).`); }
+    }
+  }
+  console.log(bad ? `${bad} vanilla monster spawn(s)` : "no script spawns a vanilla monster");
 }
 
 // ---------- 2c. sounds ----------

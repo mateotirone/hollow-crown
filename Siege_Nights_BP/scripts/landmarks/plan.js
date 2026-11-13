@@ -11,7 +11,8 @@
 //          up to the surface (posts walking out into the sea).
 // A rigid design with `sea` stands on the sea bed: it never clears the water round it, only the air above.
 // Ops come out in a safe order: clearing first, then fill, then solid blocks bottom-up, then the "late"
-// blocks that hang on others (lanterns, signs, trapdoors, torches, chains).
+// blocks that hang on others (lanterns, signs, trapdoors, torches, chains). A `dry` design (a room under water)
+// sets its solid blocks first and clears after, so its walls stand before the water inside them is taken out.
 
 export const AIR = -1;
 export const KEEP_TOP = -2; // "the ground's own top block here" (grass, snow, sand...), read from the world
@@ -113,6 +114,7 @@ export function planPiece(d, ox, oz, height, water = () => undefined) {
   clear.sort((a, b) => b[1] - a[1]);
   solid.sort((a, b) => a[1] - b[1]);
   hang.sort((a, b) => a[1] - b[1]);
+  if (d.dry) return { ops: [...solid, ...fill, ...clear, ...hang], G };
   return { ops: [...clear, ...fill, ...solid, ...hang], G };
 }
 

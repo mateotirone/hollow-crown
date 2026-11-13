@@ -1,0 +1,22 @@
+{
+  "format_version": "1.16.100",
+  "minecraft:fog_settings": {
+    "description": {
+      "identifier": "siege:millbrook_night"
+    },
+    "distance": {
+      "air": {
+        "fog_start": 0.0,
+        "fog_end": 0.45,
+        "fog_color": "#0d1120",
+        "render_distance_type": "render"
+      },
+      "weather": {
+        "fog_start": 0.0,
+        "fog_end": 0.35,
+        "fog_color": "#0b0e1a",
+        "render_distance_type": "render"
+      }
+    }
+  }
+}

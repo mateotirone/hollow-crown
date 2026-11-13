@@ -76,6 +76,7 @@ addTests("hollow arenas", {
     }
     assert(waveSize(1, 1) === CHOIR.waveBase, "the first wave");
     assert(!waveCaptain(1) && waveCaptain(3) && waveCaptain(10), "captains on waves 3 and 10");
+    for (let w = 1; w <= 7; w++) assert(!waveCaptain(w) || waveCaptain(w).startsWith("siege:"), `captain of wave ${w} is ours`);
   },
   "the Court never writes the gate's cells (the seal and openCourtGate own them)": () => {
     const s = solidAt(COURT_DESIGN), gz = COURT.gateZ - COURT.center.z;

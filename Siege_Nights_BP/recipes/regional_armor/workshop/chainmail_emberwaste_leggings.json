@@ -18,8 +18,10 @@
     "result": {
       "item": "siege:chainmail_emberwaste_leggings"
     },
-    "unlock": {
-      "context": "AlwaysUnlocked"
-    }
+    "unlock": [
+      {
+        "item": "minecraft:structure_void"
+      }
+    ]
   }
 }

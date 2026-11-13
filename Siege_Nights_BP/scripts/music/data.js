@@ -2,8 +2,12 @@
 //
 // Mateo, 2026-11-13: a soundtrack per region, real songs with a tune you remember, catchy but never repetitive or
 // annoying. So each region has a small pool of pieces built on its own theme, picked at random (never the same one
-// twice running), with a few minutes of silence between them, the way Minecraft spaces its music. A boss fight or a
-// siege night takes over with its own piece, looped, and stops the moment it is over.
+// twice running). A boss fight or a siege night takes over with its own piece, looped, and stops the moment it is over.
+//
+// Mateo, 2026-11-13 playtest: the music must keep going. The first cut left two to five minutes of silence after each
+// piece (and Minecraft's own music is switched off), so after the main theme it sounded like the music had stopped
+// for good. Now there is only a short breath between pieces, and walking into another region (or the Hollow) moves
+// you onto that region's pool within a few seconds instead of waiting out the old piece.
 //
 // The recordings are in Siege_Nights_RP/sounds/siege/music (tools/install_music.py). A piece that is not installed
 // is simply skipped, so the soundtrack can grow one piece at a time.
@@ -29,9 +33,12 @@ export const MAIN_THEME = "main_theme"; // heard once, the first time a player j
 
 export const MUSIC = {
   checkTicks: 40,            // look at each player's situation every 2 seconds
-  firstGap: [30, 90],        // seconds of quiet before the first piece after joining
-  gap: [120, 300],           // seconds of quiet between pieces: music should feel like an event, not wallpaper
-  afterFight: [45, 90],      // quiet after a fight or a siege before the region's music comes back
+  firstGap: [3, 8],          // seconds of quiet before the first piece after joining
+  gap: [8, 20],              // a short breath between pieces, never dead silence (Mateo 2026-11-13: keep it looping)
+  afterFight: [5, 10],       // quiet after a fight or a siege before the region's music comes back
+  regionSettle: 8,           // seconds you must stay in a new region before its music takes over (no flicker at borders)
+  switchGap: [2, 4],         // the beat of quiet between leaving one region's piece and starting the next region's
+  afterDimension: [2, 4],    // changing dimension cuts every sound, so the music starts again this soon after
 };
 
 export const soundId = (track) => `siege.music.${track}`;
@@ -42,6 +49,12 @@ export function poolFor({ hollow, region, timeOfDay }) {
   if (hollow) return HOLLOW_POOL;
   const pool = REGION_POOLS[region] ?? HOME_POOL;
   return isNight(timeOfDay) ? pool.night : pool.day;
+}
+
+/** Which pool a player is in, ignoring day and night: a change of this means they walked somewhere new. */
+export function poolKey({ hollow, region }) {
+  if (hollow) return "hollow";
+  return REGION_POOLS[region] ? region : "home";
 }
 
 /** What must play right now regardless of the pool: a fight or a siege (looped), else undefined. */

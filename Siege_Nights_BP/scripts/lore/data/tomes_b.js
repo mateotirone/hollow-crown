@@ -61,7 +61,7 @@ export const TOMES_B = [
     id: "corv_05", col: "corvin", n: 5,
     title: "Notebook V: On the Truce", author: "Corvin Hale",
     where: "Sunscar, the faceless vault (opened by the statue puzzle).",
-    hint: "Sealed in a desert vault that only opens for someone who remembers a face.",
+    hint: "Sealed in a desert vault that only opens for someone who remembers a king's life in order.",
     pages: [
       "I have the terms by heart, for I held the lamp while they were spoken. There were five of them and one of him, at a table of wet stone.",
       "The Hollow shall call off the Grey Host, whom it called. The Host shall trouble Aldmere no more. In return, every third night belongs to the Hollow. On that night no bell shall be rung in Aldmere, and the people of the Hollow may walk above as guests, and any of ours who wish to walk below may go.",

@@ -1,5 +1,5 @@
-// The minimap: a small north-up map in the top-right corner of the HUD with the player's arrow and
-// the name of the place they are in. No Beta features: the map pictures are pre-painted from the
+// The minimap: a small north-up map in the top-right corner of the HUD with the player's arrow, the
+// name of the place they are in, and a pin for their quest (quests/index.js questPin). No Beta features: the map pictures are pre-painted from the
 // generated world (tools/minimap_tiles.py) and the HUD (Siege_Nights_RP/ui/hud_screen.json, made by
 // tools/minimap_ui.py) is told what to show through a hidden title that starts with "hcm:".
 //
@@ -10,7 +10,11 @@ import { world, system, CommandPermissionLevel, CustomCommandStatus } from "@min
 import { onTick } from "../core/loop.js";
 import { sendHidden, titleBusy } from "../core/hudtitle.js";
 import { hudString } from "./data.js";
+import { hollowHud } from "./hollow.js";
+import { UNDERTOW_ID } from "../undertow/layout.js";
+import { isSlipping } from "../undertow/slips.js";
 import { emit } from "../core/events.js";
+import { questPin } from "../quests/index.js";
 import "./tests.js";
 
 const OFF = "siege:minimap_off";
@@ -29,10 +33,14 @@ function send(player, force = false) {
   const now = system.currentTick;
   if (titleBusy(player)) return;
   const loc = player.location;
-  const text = hudString({
-    x: loc.x, z: loc.z, yaw: player.getRotation().y,
-    charted: player.dimension.id === OVERWORLD, off: isOff(player),
-  });
+  // Down in the Hollow its own map (hollow.js); none during a Slip, when they shouldn't know where they are.
+  const pin = questPin(player);
+  const text = player.dimension.id === UNDERTOW_ID && !isOff(player)
+    ? hollowHud({ x: loc.x, z: loc.z, yaw: player.getRotation().y, hidden: isSlipping(player), pin })
+    : hudString({
+      x: loc.x, z: loc.z, yaw: player.getRotation().y,
+      charted: player.dimension.id === OVERWORLD, off: isOff(player), pin,
+    });
   const last = lastSent.get(player.id);
   if (!force && last && last.text === text && now - last.at < RESEND) return;
   sendHidden(player, text);

@@ -4,7 +4,7 @@
 
 Every build in The Hollow Crown, designed or not. Add an entry the moment a build is asked for, even with no design yet, and move its status on as it progresses. Run  node tools/build-catalog.mjs  after editing to rewrite builds/CATALOG.md (check.mjs fails if it is stale).
 
-**112 builds:** 1 not started, 27 designed, 17 in viewer, 67 in game.
+**116 builds:** 1 not started, 29 designed, 17 in viewer, 69 in game.
 
 Statuses:
 
@@ -112,6 +112,9 @@ A ★ marks builds that no earlier list had (added in the 2026-11-12 audit).
 | Rival Lords' seats and towns | One version per overworld region | in game |  | Build settlement building and mason shop | `Siege_Nights_BP/scripts/rivals/index.js` | Use the same town layouts and buildings as players (PR #173). |
 | Plot relic landmarks (12) (12) | One version per overworld region | in game | landmarks | Finish the remaining world builds | `Siege_Nights_BP/scripts/landmarks/sites.js` | Self-build near players (PR #164). |
 | Story places: Crownhold, Bellhollow, Ashen Gate chapterhouse, Ashen Watch, Corvin's Tower, Old Mag's hut, Nell Sedge's raft-house, the Deepforge, the Cinder Roost (9) | One version per overworld region | in game | landmarks | Finish the remaining world builds | `Siege_Nights_BP/scripts/landmarks/sites.js` | Self-build near players (PR #164). |
+| Old border watchtower (Chronicle II's chest) | Frostmarch | in game | landmarks | Match story areas to the map | `map/structures/story_places.py` | Ruined seven-wide tower on the north pass, -130 -748. 3D https://claude.ai/artifact/KZppb7WBJGS9PepAxusack |
+| Hallowmere full-moon shrine, ice hut and moon door in the ice (3) | Frostmarch | in game | landmarks | Match story areas to the map | `map/structures/story_places.py` | Inside the Huntsman area, built after its stamp (after: huntsman): shrine 107 -1102, hut 97 -1133, door 33 -1108. 3D https://claude.ai/artifact/KZppb7WBJGS9PepAxusack |
+| Plot landmark ground: Harrowford river bend, Lanternbog moat, Dunehold oasis, Redmesa mesa, Thistledown knoll, Wolfcairn edge, Frosthelm crag, Tidewatch and Gullcliff inlets (9) | One version per overworld region | designed | map | Match story areas to the map | `map/plotground.py` | A genworld step; lands on the next map regeneration. 3D https://claude.ai/artifact/KZppb7WBJGS9PepAxusack |
 | Seven thin-place caves with Fennick's camps (7) | One version per overworld region | in game |  | Settle the road to the Rift | `Siege_Nights_BP/scripts/undertow/thinplaces.js` | Script-built and plain; hosted 3D https://claude.ai/artifact/QFoys3C5GaHFXe415EkJjo . Not in the local viewer or on the building skill. |
 | ★ Sealed ways out: the Shut Pass, the Far Shore, the Horizon Isles (3) | Anywhere / region-neutral | designed | landmarks | Finish the remaining world builds | `map/structures/world_doors.py` | Waiting in PR #208. shut_pass_gate (the Shut Pass gate), westwatch (Far Shore coast landmark), southmost_light (Horizon Isles coast landmark); place themselves via landmarks/sites.js. |
 | Gravestone (left where a player dies) | Anywhere / region-neutral | in game | graves | Add gravestones when players die | `map/structures/gravestone_build.py` | 3x3 footprint: clickable headstone, pale moss mound, a candle lit while the grave is sealed, dry grass. The game places it when a player dies. |
@@ -119,6 +122,7 @@ A ★ marks builds that no earlier list had (added in the 2026-11-12 audit).
 | Custom trees (31 species, six regions) (31) | One version per overworld region | in game | trees | Build custom tree assets | `map/trees/build_trees.py` |  |
 | Welcome hall: map miniature on its cloud | Anywhere / region-neutral | in game | miniature | Build a scaled-down map in the welcome hall | `map/structures/miniature_scene.py` |  |
 | Old Workings (regrowing mines near towns) | One version per overworld region | in game |  | Design a repeatable material gathering loop | `Siege_Nights_BP/scripts/workings` | Being redone on the building skill (mine mouth / portal); not in the viewer. |
+| ★ The Twelve Gates, the arena at Kingsrest: 12 coloured starting rooms, round stands, royal box, gatehouse | Aldmere Vale | designed | arena | Build the grand arena at Kingsrest | `map/structures/arena.py` | Round amphitheatre: a round fighting floor 61 across in a round Norman shell 117 across, south-west of the grand station; 12 rooms every 30 degrees in the settlement colours with portcullis gates, loadout racks and a lectern board; 25 round rows of stands lit for night, royal box, four round stair towers with copper domes on the diagonals, gatehouse with the challenge boards; terraformed, with a paved way to the station. Fight code: arena fights thread (PR #310). World blocks map/arena-blocks.json, positions map/arena-layout.json. |
 
 ## Boss sites
 

@@ -411,7 +411,7 @@ export const TOWNSFOLK = {
         "We don't travel on a third night. Not even the bandits do. The desert goes very still.",
         "A camel spat on a lord once. I've never been prouder of anything in my life.",
         "Spices east, iron west. Sometimes it's the other way round.",
-        "There's a vault under Sunscar with no keyhole. Old men say you open it with the order of a king's life. Nonsense, probably.",
+        "There's a vault out in the dunes south of Sunscar with no keyhole. Old men say you open it with the order of a king's life. Nonsense, probably.",
       ] },
       { name: "Leyla Fenn", trade: "Spice Seller", skin: 3, lines: [
         "Saffron, cumin, ember-pepper. Ember-pepper makes you see the past. Or just cry. Usually cry.",

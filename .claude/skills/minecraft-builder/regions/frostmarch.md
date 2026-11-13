@@ -130,6 +130,12 @@ snow layers. Plinths are often 2 courses high to stay above the drifts. Snow lay
 - campfires in hearths;
 - snow layers beside every step.
 
+**On or beside ice** (huts on a frozen lake, shrines on the shore): Bedrock melts ice next to block light of 12 or
+more, so light these with soul lanterns or candles (10 or less), never lanterns, torches or campfires. A room under
+the water (a shaft down through a lake) is walled in packed ice or stone and set with `dry: true`, so the landmark
+planner puts the walls in before it clears the water inside them (`map/structures/story_places.py`, the Hallowmere
+ice door).
+
 ## Colour and blocks (short)
 
 | Role | Blocks |

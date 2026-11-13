@@ -105,9 +105,9 @@ export const ENTRIES = [
     when: ["place:siege:workshop", "carry:siege:workshop"],
   },
   {
-    id: "no_elytra", ch: "start", title: "No wings, and the edge of the map",
-    tip: "Nobody flies in Aldmere. Elytra crumble and pay you 3 Gold Regals instead.",
-    page: "Aldmere is crossed by road, rail and horse. An elytra crumbles the moment it is in your pack, and you are paid 3 Gold Regals for it.\n\n"
+    id: "no_elytra", ch: "start", title: "No elytra, and the edge of the map",
+    tip: "Elytra don't work in Aldmere. They crumble and pay you 3 Gold Regals instead.",
+    page: "Aldmere is crossed by road, rail and horse, and by dragon for those who earn one. An elytra crumbles the moment it is in your pack, and you are paid 3 Gold Regals for it.\n\n"
       + "The map has an edge: you can't go more than 1,250 blocks from its centre.",
     when: ["carry:minecraft:elytra"],
   },
@@ -284,6 +284,26 @@ export const ENTRIES = [
     when: ["event:tierUp", "event:wonderClaimed", "event:wonderRaised", "event:wonderTaken"],
   },
   {
+    id: "codex", ch: "growth", title: "The Codex",
+    tip: "Your Codex draws every rare thing you pick up. Open it to see what's still out there.",
+    page: "The §fCodex§r is a book of every rare thing in the realm: the arms of the five regions, the boss relics, the mythical weapons and tools, the caravan goods and the charms. Anything in it that you hold in your pack, even for a moment, is drawn in full with what it does. Anything you haven't held shows only its shape and a hint about where it is. A green dot marks a page you haven't read yet.\n\n"
+      + "Open it by using the book, from your Keep menu, or by typing §f/siege:codex§r. Every ten things you find, the Kingsrest clerks send 50 Regals. Fill a whole chapter for a title. Lost the book? Craft another from a book and an item frame.",
+    when: ["carry:siege:codex", "event:codexFound"],
+  },
+  {
+    id: "region_arms", ch: "growth", title: "Regional arms and Kin-Writs",
+    tip: "Regional armour only answers to those who live in its region, or carry its Kin-Writ.",
+    page: "Five of the wonders have a forge: the Rime Anvil at Rimeforge Hall (Frostmarch), the Armoury at the High Watch (Aldmere Vale), the Lamp Room at the Great Lighthouse (Saltreach), the Caravan Smithy at the Sun Gate (Emberwaste) and the Lamplighter's Kiln at the Lantern Spire (Blackfen). Talk to the wonder's keeper and pick the forge. First make the region's alloy from a diamond and that region's trophies, then turn a diamond piece and four ingots into the region's armour or weapons. A wonder held by a Rival Lord still forges, at double the price.\n\n"
+      + "Each region's arms only answer to people whose settlement stands in that region. Wear them anywhere else and the land turns on you: a warning, then you're slowed, then it hurts, until you take them off. To wear another region's arms you need its §fKin-Writ§r. The wonder's holder, or anyone settled in that region, can give one (or take it back) at the forge. Playing alone, the keeper will write you one for ten of the region's trophies, or sell you one for 200 Regals if a lord holds the wonder.",
+    when: ["event:codexForge"],
+  },
+  {
+    id: "caravan_market", ch: "coin", title: "The caravan market",
+    tip: "The Sun Gate's caravan market sells four goods you can't get anywhere else. The stalls change every three days.",
+    page: "Inside the finished Sun Gate Caravanserai, Caravan-Master Idris keeps a market of goods from past the end of every road: four at a time, and new stalls every three days, the same for everyone. Ember tea and caravan rations come four to a purchase. Hang a §fCaravan Banner§r inside your own settlement and a caravan trader stops by your keep once a week.",
+    when: ["event:codexCaravan"],
+  },
+  {
     id: "plan_book", ch: "keep", title: "The Plan Book and Plan Scrolls",
     tip: "Your Plan Book lists the buildings you can raise. Find more plans as Plan Scrolls.",
     page: "A Plot Marker only offers buildings whose plan you know. Your §fPlan Book§r shows them as cards: open it from your pack or from the §fPlan Book§r button in your Town Hall menu. Found plans are bright, missing ones are grey with where to find them, and clicking a card shows its plot size, price, the worker it brings and the charter it counts toward. Every new town's founder gets a book; craft another from a book and a paper. The Hamlet's homes, well and library are known from the start, and your town hall teaches more as it grows: the market, garden, farmhouse, mint and townhouse at level 2, the smithy, stable and inn at 3, the storehouse and watchtower at 4. Everything a charter asks for is taught in time, so you never need luck to grow.\n\n"
@@ -369,7 +389,7 @@ export const ENTRIES = [
     page: "Every region dresses its armour its own way: plain bright iron and a red surcoat in the Vale, blued steel and fur in Frostmarch, salt-bleached steel and sea-glass in Saltreach, smoke-dark steel and a face veil in the Emberwaste, blackened lamellar and a hood in Blackfen.\n\n"
       + "Iron, chainmail, diamond and netherite all come in every region's look. A regional piece protects exactly as much as the plain one: only the look changes.\n\n"
       + "§fAt a Smith:§r choose Reforge armour, and he reforges any piece you wear or carry in his region's style for a few Regals. It keeps its enchantments, its wear and its name. Armour trims come off in the forge.\n\n"
-      + "§fAt a Workshop:§r the plain piece and that region's Castle Stone make a new regional piece (the Vale uses plain Castle Stone).\n\n"
+      + "§fAt a Workshop:§r the plain piece and that region's Castle Stone make a new regional piece (the Vale uses plain Castle Stone). The recipe book only lists the region you are standing in; walk into another region and its pieces show instead. You can still craft any region's piece by placing the items yourself.\n\n"
       + "Upgrading regional diamond to netherite at a smithing table keeps the region.",
     when: ["iron", "chainmail", "diamond", "netherite", "choirsteel"].flatMap((m) => ["vale", "frostmarch", "saltreach", "emberwaste", "blackfen"].map((r) => `carry:siege:${m}_${r}_*`)),
   },

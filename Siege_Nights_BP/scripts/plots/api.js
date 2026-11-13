@@ -12,6 +12,7 @@ export { allPlots, plotAt, holderOf, npcOf, isFree, plotOf, freePlots, giveToNpc
 export { outsideMap, wardAt, openZone, zoneOpen } from "./travel.js"; // openZone(id): an update opens a sealed EXPANSION zone
 export { MAP, PLOT_PLAN, REGION_STYLE, PLOT_STONE, WARDS, WELCOME, SETTLEMENT, EXPANSION } from "./config.js";
 // Welcome hall: pickOf(plot) -> { id, name } of the player who chose that plot as their start (it is kept for them),
-// statusOf(plan) -> { state: "free" | "taken" | "kept" | "lord" | "missing", plot?, id?, name? }, hallBuilt().
+// statusOf(plan) -> { state: "free" | "taken" | "kept" | "lord" | "missing", plot?, id?, name? }, hallBuilt(),
+// inWelcomeHall(player) -> true while they are still up in the hall and have not been set down in the world.
 // Event "plotChosen" { player, plot } fires when a player picks a plot, just before they are set down beside its stone.
-export { pickOf, statusOf, hallBuilt, pedestalLayout, arrivalSpot, raiseHall, setKingsrestArrival } from "./welcome.js";
+export { pickOf, statusOf, hallBuilt, inWelcomeHall, pedestalLayout, arrivalSpot, raiseHall, setKingsrestArrival } from "./welcome.js";

@@ -5,7 +5,8 @@
 // It runs when walls are automatic (a map with Plot Stones). Test anywhere:
 //   /scriptevent siege:settle_arrive      lay your settlement out round your keep now
 
-import { world, system } from "@minecraft/server";
+import { world, system, BlockPermutation } from "@minecraft/server";
+import { signToward } from "../core/signs.js";
 import { isReady, keepOf, on, onTick, TIERS, addTests, assertEqual } from "../siege/api.js";
 import { buildFor } from "../townhall/build.js";
 import { CORNERSTONE, halls, saveHalls, beginBuild } from "../townhall/townhall.js";
@@ -33,13 +34,18 @@ function standY(dim, x, z) {
   }
 }
 
-function signpost(dim, at, text) {
+// A signpost turned to face rot (ground_sign_direction). One laid out before is turned round if it faces
+// another way (they all faced south before, so most stood edge-on or backwards to the keep).
+function signpost(dim, at, text, rot = 0) {
   try {
     const below = dim.getBlock({ x: at.x, y: at.y - 1, z: at.z });
-    if (below?.typeId === "minecraft:standing_sign") return below.getComponent("minecraft:sign")?.setText(text); // laid out before
+    if (below?.typeId === "minecraft:standing_sign") {
+      if (below.permutation.getState("ground_sign_direction") !== rot) below.setPermutation(BlockPermutation.resolve("minecraft:standing_sign", { ground_sign_direction: rot }));
+      return below.getComponent("minecraft:sign")?.setText(text); // laid out before
+    }
     const block = dim.getBlock(at);
     if (!block || !SOFT.test(block.typeId)) return; // something already stands here
-    block.setType("minecraft:standing_sign");
+    block.setPermutation(BlockPermutation.resolve("minecraft:standing_sign", { ground_sign_direction: rot }));
     block.getComponent("minecraft:sign")?.setText(text);
   } catch {
     // signs are a nicety
@@ -156,7 +162,7 @@ export function layOut(player, { force = false, at, style: wanted } = {}) {
       continue;
     }
     const when = slot.tier === 0 ? "Open now" : `Opens: ${TIERS[slot.tier]?.name ?? "later"}`;
-    signpost(dim, { x: spot.x, y: sy, z: spot.z }, `${BUILDING[slot.building].name}\n${when}\n(${slot.who})`);
+    signpost(dim, { x: spot.x, y: sy, z: spot.z }, `${BUILDING[slot.building].name}\n${when}\n(${slot.who})`, signToward(spot, center)); // facing the keep
   }
   return fresh ? true : "already";
 }

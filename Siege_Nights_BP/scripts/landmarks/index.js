@@ -20,6 +20,8 @@
 import { world, system, BlockPermutation } from "@minecraft/server";
 import { mapMode } from "../plots/api.js";
 import { markPlace } from "../lore/ledger.js";
+import { addDoor } from "../lore/moondoors.js";
+import { allSites } from "../unlocks/site.js";
 import { spawnNpc } from "../lore/npcs.js";
 import { placeCache } from "../lore/caches.js";
 import "./life.js";
@@ -171,6 +173,12 @@ export function buildSite(site, by) {
           if (!dim.getEntities({ tags: [`siege_lore_npc_${id}`], location: at, maxDistance: 64 }).length) spawnNpc(dim, at, id);
         } catch { /* unloaded */ }
       }
+      // moon doors the piece carries (a hatch in the ice): x runs east, long runs south, tall runs up
+      (p.d.doors ?? []).forEach(([dx, dy, dz, carving, wide, tall, long], n) => {
+        try {
+          addDoor({ id: `${site.id}_${k}_${n}`, carving, x: p.x + dx, y: yAt(dx, dy, dz), z: p.z + dz, rx: 1, rz: 0, lx: 0, lz: 1, wide, tall, long });
+        } catch (e) { console.warn(`[Hollow Crown] ${site.id}: moon door: ${e}`); }
+      });
       // places a role trial needs (the Span, Goody Sedge's graves): roletrials/marks.js keeps them
       if (p.d.roleMarks?.length) {
         emit("landmarkRoleMarks", { site: `${site.id}#${k}`, dim: OVERWORLD, marks: p.d.roleMarks.map(([dx, dy, dz, kind]) => ({ kind, at: { x: p.x + dx + 0.5, y: yAt(dx, dy, dz), z: p.z + dz + 0.5 } })) });
@@ -217,6 +225,9 @@ function tick() {
   }
   for (const site of LANDMARKS) {
     if (built[site.id] === site.version) continue;
+    // a landmark inside a boss site's area (`after`: that site's id) waits until the area is built, so the area's
+    // ground and dressing go down first and the landmark stands on them
+    if (site.after && !allSites().some((s) => s.def.id === site.after && s.data.built)) continue;
     if (!players.some((p) => Math.hypot(p.location.x - site.x, p.location.z - site.z) < BUILD_NEAR)) continue;
     buildSite(site);
     retryAt = system.currentTick + 1200; // if it could not finish, try again in a minute

@@ -1,25 +1,32 @@
 {
  "format_version": "1.20.10",
- "minecraft:recipe_shaped": {
+ "minecraft:recipe_shapeless": {
   "description": {
    "identifier": "siege:tuning_fork_recipe"
   },
   "tags": [
    "siege_workshop"
   ],
-  "pattern": [
-   "S S",
-   "SSS",
-   " A "
-  ],
-  "key": {
-   "S": {
-    "item": "siege:choir_shard"
+  "ingredients": [
+   {
+    "item": "siege:choir_shard_reeve"
    },
-   "A": {
+   {
+    "item": "siege:choir_shard_huntsman"
+   },
+   {
+    "item": "siege:choir_shard_bride"
+   },
+   {
+    "item": "siege:choir_shard_seneschal"
+   },
+   {
+    "item": "siege:choir_shard_mother"
+   },
+   {
     "item": "minecraft:amethyst_shard"
    }
-  },
+  ],
   "result": {
    "item": "siege:tuning_fork",
    "count": 1

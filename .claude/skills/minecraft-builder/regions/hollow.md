@@ -154,6 +154,17 @@ looked like a floating slab. The rules that came out of it (`terrain.js` `backWa
 - **A change to land already built only adds rock,** so an old world can plan the chunks again over what stands
   there (`builder.js` `planAgain`), and the roof is still hung over the first land so it never moves.
 
+## The Needlehold and any build too big to stamp at once (2026-11-13)
+
+- **The stronghold** (`map/structures/hollow_stronghold.py`, exported by `export_stronghold.py`) stands at (-380, 76, 2160)
+  in the wood country west of the Long Climb, on a flattened pad (`roads.js` SITES, r 104) with a road to its south gate.
+  The roof is lifted over it (`terrain.js` tallThings) and nothing hangs from the roof into it.
+- **A build wider than about 64 blocks is stamped in tiles** (`undertow/stronghold.js` `strongholdTiles`, 32 x 32 columns),
+  each once its land is built and loaded, never in one go: one layer of it alone spans more chunks than a Realm keeps loaded.
+- **A change that takes land away** (a new flat pad where land already stands) clears those chunks and builds them again
+  from scratch (`builder.js` `buildFresh`), the way the old generator's chunks are; `planAgain` only adds rock.
+- **Every tower floor is a room:** furniture against the inner face, clear of the spiral and the slits (`furnish_rooms`).
+
 ## Roofs
 
 **Shapes:**

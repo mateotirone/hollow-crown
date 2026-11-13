@@ -18,8 +18,10 @@
     "result": {
       "item": "siege:diamond_emberwaste_boots"
     },
-    "unlock": {
-      "context": "AlwaysUnlocked"
-    }
+    "unlock": [
+      {
+        "item": "minecraft:structure_void"
+      }
+    ]
   }
 }

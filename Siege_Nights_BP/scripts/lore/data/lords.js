@@ -179,7 +179,7 @@ export const RIVAL_LORDS = [
       beaten: "Then you keep it. Write down everything it does. Everything. Promise me that.",
       won: "I have taken only the one thing. I will return it if I am wrong. I do not think I am wrong.",
       third: "I chose a place with no water and no bells. They still come. So it is not the water and it is not the bells. It is us.",
-      rumor: "There is a vault at Sunscar that opens only for someone who remembers a face. I stood before it a day. I could not think whose.",
+      rumor: "There is a vault in the dunes past Sunscar that opens only for someone who remembers a king's life. I stood before it a day. I could not think whose.",
     },
   },
   {
