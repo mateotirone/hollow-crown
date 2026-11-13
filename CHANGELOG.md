@@ -9,6 +9,11 @@ How versions work is in [`docs/RELEASING.md`](docs/RELEASING.md).
 Everything merged to `main` since the last release goes here. Each pull request that changes what players see adds a line under one of these headings.
 
 ### Added
+- Every player settlement now has its own Farmer, standing outside the second house of your Hamlet. He sells seeds and buys your wheat, so you can earn your first Regals at home. Settlements founded before this get their Farmer the next time you go home.
+- A new step on the quest tracker, "Sell 16 wheat to the Farmer", points you to your Farmer with a pin on the minimap and a gold mark over his head until you've sold him 16 wheat.
+- Starter clothes never wear out now.
+- Every player starts with 50 Regals. Players who already started get them the next time they join.
+- Crops, saplings and sugar cane grow about three times faster: the world's random tick speed is now 3 instead of 1. Grass spreads, leaves decay and fire spreads faster too.
 - The recipe book's Equipment tab now lists only the regional armour and guard gear of the region you're standing in, instead of all five regions' near-identical pieces. Walk into another region and its pieces appear instead. Any region's piece can still be crafted by placing the items yourself.
 - Your Regal balance is always on screen now: a small gold Regal and the number, just right of the hotbar. It changes the moment you are paid, spend, pick up coins or get robbed.
 - Two new player skins come with the add-on in their own skin pack, The Hollow Crown: Reikia Cinderhale of the Emberwaste in caravaneer's clothes, and Lorcan Duskmire of the Blackfen in a fen-walker's oilskins. Pick them in the dressing room once the pack is imported.
