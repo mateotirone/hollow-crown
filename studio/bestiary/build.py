@@ -25,11 +25,12 @@ FAMILIES = {
 # mobs whose abilities are run by scripts/bestiary/mobs.js
 SCRIPTED = {"bell_ringer", "torchbearer", "crow_mage", "lost_villager", "changeling", "wrongling", "stone_vigil", "echo_hound", "tolling_shade",
             "dune_wyrm", "bog_hag", "mire_toad", "inquisitor"}
+# vanilla monsters never spawn (spawn_rules/vanilla_*.json), so string, gunpowder, spider eyes and rotten flesh come from these
 DROPS = {
-    "hollow_footman": [("siege:hollow_ash", 0, 2, 1), ("minecraft:iron_nugget", 0, 3, 1)],
+    "hollow_footman": [("siege:hollow_ash", 0, 2, 1), ("minecraft:iron_nugget", 0, 3, 1), ("minecraft:rotten_flesh", 0, 1, 1)],
     "bell_ringer": [("siege:hollow_ash", 1, 2, 1), ("minecraft:gold_nugget", 2, 5, 1), ("minecraft:bell", 1, 1, 0.05)],
     "shieldwall_brute": [("siege:hollow_ash", 1, 3, 1), ("minecraft:iron_ingot", 0, 2, 1)],
-    "torchbearer": [("minecraft:coal", 0, 2, 1), ("minecraft:torch", 1, 3, 1)],
+    "torchbearer": [("minecraft:coal", 0, 2, 1), ("minecraft:torch", 1, 3, 1), ("minecraft:gunpowder", 0, 1, 1)],
     "siege_ogre": [("siege:coin", 16, 40, 1), ("minecraft:leather", 2, 4, 1), ("siege:hollow_ash", 2, 4, 1)],
     "crow_mage": [("minecraft:feather", 1, 3, 1), ("minecraft:amethyst_shard", 0, 2, 1), ("siege:hollow_ash", 1, 2, 1)],
     "lost_villager": [("siege:hollow_ash", 0, 1, 1), ("siege:coin", 0, 8, 1)],
@@ -57,11 +58,11 @@ DROPS = {
     "frost_stag": [("siege:pale_antler", 1, 2, 1), ("minecraft:leather", 1, 2, 1)],
     "rimewolf": [("siege:rime_pelt", 1, 1, 0.5), ("minecraft:bone", 0, 2, 1)],
     "brine_lurker": [("siege:brine_scale", 1, 2, 1), ("minecraft:cod", 0, 2, 1), ("minecraft:prismarine_shard", 1, 1, 0.4)],
-    "ash_scarab": [("siege:ash_glass", 1, 1, 0.25)],
+    "ash_scarab": [("siege:ash_glass", 1, 1, 0.25), ("minecraft:gunpowder", 0, 2, 1)],
     "dune_wyrm": [("siege:wyrm_scale", 3, 6, 1), ("siege:ash_glass", 2, 4, 1), ("minecraft:diamond", 1, 1, 0.5)],
-    "bog_hag": [("siege:toad_venom", 1, 1, 0.5), ("minecraft:glowstone_dust", 0, 2, 1), ("minecraft:redstone", 0, 2, 1), ("minecraft:glass_bottle", 0, 2, 1)],
-    "mire_toad": [("siege:toad_venom", 1, 1, 0.5), ("minecraft:slime_ball", 0, 2, 1)],
-    "barrow_wight": [("siege:wight_dust", 1, 2, 1), ("minecraft:bone", 0, 2, 1), ("minecraft:iron_ingot", 1, 1, 0.3), ("minecraft:gold_nugget", 0, 3, 1)],
+    "bog_hag": [("siege:toad_venom", 1, 1, 0.5), ("minecraft:glowstone_dust", 0, 2, 1), ("minecraft:redstone", 0, 2, 1), ("minecraft:glass_bottle", 0, 2, 1), ("minecraft:string", 0, 2, 1), ("minecraft:spider_eye", 1, 1, 0.5)],
+    "mire_toad": [("siege:toad_venom", 1, 1, 0.5), ("minecraft:slime_ball", 0, 2, 1), ("minecraft:spider_eye", 0, 1, 1)],
+    "barrow_wight": [("siege:wight_dust", 1, 2, 1), ("minecraft:bone", 0, 2, 1), ("minecraft:iron_ingot", 1, 1, 0.3), ("minecraft:gold_nugget", 0, 3, 1), ("minecraft:rotten_flesh", 0, 2, 1), ("minecraft:string", 0, 2, 1)],
     "ashen_squire": [("minecraft:iron_nugget", 2, 5, 1)],
     "ashen_knight": [("minecraft:iron_ingot", 1, 3, 1), ("siege:coin", 0, 16, 1)],
     "inquisitor": [("minecraft:arrow", 2, 6, 1), ("siege:coin", 8, 24, 1), ("minecraft:crossbow", 1, 1, 0.05)],
