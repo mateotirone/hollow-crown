@@ -1,8 +1,8 @@
 {
  "_about": "Morvane's spoken lines (hand-written; ElevenLabs only reads them). Source of truth for tools/install_voices.py, which writes scripts/lore/data/morvane_lines.js and installs the picked takes. fx: far = before the Rift (filtered, distant), mid = in the Hollow, dry = in the fight. The fight lines (act 'The fight') are voiced without the player's name; their chat text stays in lore/data/reveal.js and bestiary/morvane.js.",
  "voice": {
-  "name": "",
-  "voice_id": "",
+  "name": "Morvane D",
+  "voice_id": "HJFW7LmDRlaU67nGImxY",
   "description": "A monstrous, demonic male voice: something that was once a man and has been hollowed out by centuries in the dark. Extremely deep, rasping, guttural bass with a growl under every word and a faint inhuman double tone, as if two throats speak at once. Slow, cold, deliberate and in total control, old-fashioned precise English. Breathy menace, never shouting; each word dragged up from deep in the chest."
  },
  "lines": [
