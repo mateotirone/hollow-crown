@@ -36,6 +36,10 @@ export const LABEL = {
   keepTicks: 60, // a label not seen again for this long goes away
   blockLift: 1.05, // label height over a block's bottom corner
   entityLift: 2.25, // label height over an entity's feet (above its own name)
+  // Bedrock's NPC is taller (2.1) and its name sits higher, so its label goes above that name, one line higher for
+  // each extra line of the name (Mateo's photo 2026-11-13: "Click to talk" was printed over "NPC")
+  npcLift: 2.6,
+  lineLift: 0.27,
   nameColor: "§6",
   hintColor: "§7",
   entityHintColor: "§e",
@@ -65,6 +69,13 @@ export function addMenuLabel(spec) {
 }
 
 export const labelledBlocks = () => [...blockSpecs.keys()];
+// how high an entity's label sits: over its own name, however many lines that name has
+export function entityLiftOf(spec, e) {
+  if (spec.lift !== undefined) return spec.lift;
+  if (e?.typeId !== "minecraft:npc") return LABEL.entityLift;
+  const lines = String(e.nameTag ?? "").split("\n").length;
+  return LABEL.npcLift + LABEL.lineLift * (lines - 1);
+}
 export const labelledEntities = () => [...entitySpecs.keys()];
 
 export function labelText(spec, thing) {
@@ -150,7 +161,7 @@ function scanAround(player) {
       const spec = specFor(specs, e);
       if (!spec) continue;
       const l = e.location;
-      show(dim, `e:${e.id}`, { x: l.x, y: l.y + (spec.lift ?? LABEL.entityLift), z: l.z }, labelText(spec, e));
+      show(dim, `e:${e.id}`, { x: l.x, y: l.y + entityLiftOf(spec, e), z: l.z }, labelText(spec, e));
     }
   }
 }
@@ -218,6 +229,13 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
 addTests("labels", {
   "a block label is a gold name over a grey hint": () => {
     assertEqual(labelText({ block: "x:y", name: "Stables", hint: "Click: your horses" }), "§6Stables\n§7Click: your horses");
+  },
+  "an NPC's label sits above its whole name": () => {
+    const one = entityLiftOf({ hint: "x" }, { typeId: "minecraft:npc", nameTag: "Mason" });
+    const two = entityLiftOf({ hint: "x" }, { typeId: "minecraft:npc", nameTag: "Fair-Warden Bess\n§7Great Horse Fair" });
+    assert(one > LABEL.entityLift + 0.3, "an NPC label must clear the NPC's own name");
+    assert(two > one, "a two-line name pushes the label up");
+    assertEqual(entityLiftOf({ hint: "x" }, { typeId: "siege:job_npc", nameTag: "Smith" }), LABEL.entityLift);
   },
   "an entity label is just the hint, unless it asks for a name": () => {
     assertEqual(labelText({ entity: "minecraft:npc", hint: "Click to trade" }), "§eClick to trade");
