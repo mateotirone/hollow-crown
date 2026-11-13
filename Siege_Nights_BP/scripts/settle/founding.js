@@ -47,7 +47,22 @@ export const markerAt = (loc) => store.data.markers[`${loc.x},${loc.y},${loc.z}`
 export function registerMarker(at, owner, slot) { store.data.markers[keyOf(at)] = { owner, slot }; save(); }
 export function forgetMarker(at) { delete store.data.markers[keyOf(at)]; save(); }
 const keyOf = (loc) => `${loc.x},${loc.y},${loc.z}`;
-export const layoutOf = (town) => townFor(town?.plot)?.variants?.[town.layout];
+// A town keeps the layout it was laid out with. Layouts are re-exported now and then (a plot's list can change), so
+// the town also remembers which one it got (template and seed): when its index now points at another layout, or past
+// the end, the same layout is found by that key; a town saved before keys existed gets one the first time it is read.
+export const layoutKey = (v) => (v ? `${v.template}|${v.seed ?? v.label}` : undefined);
+export function layoutOf(town) {
+  const variants = townFor(town?.plot)?.variants;
+  if (!variants?.length) return undefined;
+  if (town.layoutKey) {
+    if (layoutKey(variants[town.layout]) === town.layoutKey) return variants[town.layout];
+    const i = variants.findIndex((v) => layoutKey(v) === town.layoutKey);
+    if (i >= 0) { town.layout = i; return variants[i]; }
+  }
+  const i = Number.isInteger(town.layout) && town.layout >= 0 && town.layout < variants.length ? town.layout : 0;
+  if (!town.layoutKey || i !== town.layout) { town.layout = i; town.layoutKey = layoutKey(variants[i]); }
+  return variants[i];
+}
 
 export function townSlots(owner) {
   const town = townOf(owner);
@@ -452,7 +467,7 @@ export function foundTown(owner, plot, at, { style, layout, lord = false } = {})
   const base = tw.variants[pick]?.base;
   const y = Number.isFinite(base) && Math.abs(base - live) <= 2 ? base : live;
   store.data.towns[owner] = {
-    plot: plot.name.toLowerCase(), layout: pick, x: at.x, y, z: at.z, tier: 0, laid: [false, false, false, false], slots: {}, ...(lord ? { lord: true } : {}),
+    plot: plot.name.toLowerCase(), layout: pick, layoutKey: layoutKey(tw.variants[pick]), x: at.x, y, z: at.z, tier: 0, laid: [false, false, false, false], slots: {}, ...(lord ? { lord: true } : {}),
     style: style ?? REGION_TO_STYLE[plot.region] ?? styleOf(owner, dim.getBlock(at)),
   };
   save();
