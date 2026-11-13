@@ -654,6 +654,14 @@ export const ENTRIES = [
     when: ["event:workingEntered"],
   },
   {
+    id: "plot_caves", ch: "wild", title: "Your mine",
+    tip: "Your plot's mine. Dig what you like: tonight the cave puts itself back, with the ore in new places.",
+    page: "Every plot has a §fmine shaft§r out past its wall, with a headframe over it and a ladder down to a cave. Dig anything down there, ore and stone alike.\n\n"
+      + "Each night, while nobody is inside, the cave goes back to the shape it had, and the ore comes back §fsomewhere else§r. So it is never in the same place two days running. A Hamlet's mine has about §f12 iron§r a night, with coal and copper.\n\n"
+      + "The deeper levels are behind §fcave-ins§r. Each time your settlement grows (Town, City, Castle), the next cave-in comes down and a deeper level opens, with more iron. Gold starts at City, and diamonds lie in the deepest level at Castle.",
+    when: ["event:plotCaveEntered"],
+  },
+  {
     id: "seeps", ch: "wild", title: "Seeps",
     tip: "A Seep. Kill what guards it, then break it, or it will widen.",
     page: "Now and then a §fSeep§r opens in the ground near someone. Things climb out of it and guard it. Kill them, then break the Seep to close it.\n\n"
