@@ -63,7 +63,7 @@ export function choicesFor(owner, slot, player) {
   const free = freeClasses(owner, slot.id);
   if (slotClass(slot) === "W") return worksChoices(owner, slot, tier, free);
   const known = plansFor([owner, player?.id].filter(Boolean), player ? isCreative(player) : false);
-  const offers = planChoices(known, town.style, BUILDINGS.map((b) => b.id));
+  const offers = planChoices(new Set([...known, ...PLANS.noPlan]), town.style, BUILDINGS.map((b) => b.id)); // noPlan: no plan needed (the Barracks)
   const out = [];
   for (const { id, style, foreign } of offers) {
     const b = BUILDING[id];

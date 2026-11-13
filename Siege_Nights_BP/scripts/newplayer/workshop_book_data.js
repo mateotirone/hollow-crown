@@ -4,12 +4,6 @@ export const WORKSHOP_BOOK = [
   "name": "Army and defence",
   "items": [
    {
-    "id": "siege:barracks",
-    "name": "Barracks",
-    "what": "Raises a guardhouse. Click it to train guards (40 Regals each).",
-    "needs": "5 any planks, 3 stone bricks, 1 barrel"
-   },
-   {
     "id": "siege:ballista",
     "name": "Ballista",
     "what": "Shoots monsters within 16 blocks by itself, even through Arrow Slits.",

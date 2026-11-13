@@ -45,6 +45,14 @@ export function saveState() {
   world.setDynamicProperty("siege:state", JSON.stringify(state));
 }
 
+// A machine block the game set down itself (the Barracks block at the front of a plot-built guardhouse)
+export function trackMachine(dimId, loc, typeId) {
+  if (!tracked[typeId]) return;
+  if (tracked[typeId].some((t) => t.dim === dimId && t.x === loc.x && t.y === loc.y && t.z === loc.z)) return;
+  tracked[typeId].push({ dim: dimId, x: loc.x, y: loc.y, z: loc.z });
+  saveTracked();
+}
+
 export function saveTracked() {
   if (isTesting()) return;
   world.setDynamicProperty("siege:machines", JSON.stringify(tracked));

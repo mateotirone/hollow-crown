@@ -809,6 +809,7 @@ import { pickBaseSlot, bedSpot, bedSpots, gateDir, roadEnd, roadLine, gradeLine,
 import { ROAD_JOINS } from "./roadjoin_data.js";
 import { PLOT_PLAN as JOIN_PLOTS, SETTLEMENT as JOIN_SETTLEMENT } from "../plots/config.js";
 import { needsRoad } from "./founding.js";
+import { REGION_TO_STYLE as REGION_TO_STYLE_T } from "./config.js";
 import { MASON_DESIGNS } from "./mason_data.js";
 
 
@@ -992,5 +993,18 @@ addTests("settle storehouse", {
     assertEqual(JSON.stringify(crateSpot(post, forward, () => true)), JSON.stringify({ x: 10, y: 64, z: 11 }));
     assertEqual(JSON.stringify(crateSpot(post, forward, (p) => p.z === 10)), JSON.stringify({ x: 9, y: 64, z: 10 }));
     assertEqual(crateSpot(post, forward, () => false), undefined);
+  },
+  // Mateo 2026-11-13: the Barracks unlocks with the Hamlet and goes on a plot that fits it (no crafting)
+  "every layout's Hamlet has a plot the Barracks seats on"() {
+    assertEqual(opensAt("barracks"), 0, "opens with the Hamlet");
+    assert(BUILDING.barracks && PLAN_RULES.noPlan.includes("barracks"), "a plot building that needs no plan");
+    for (const [name, town] of Object.entries(TOWNS)) {
+      for (const [i, v] of town.variants.entries()) {
+        const style = REGION_TO_STYLE_T[townFor(name).region] ?? "vale";
+        const b = drawBuilding("barracks", style).bounds();
+        const ok = slotsOf(v).some((s) => s.tier === 0 && plotFit("barracks", s).ok && seatOnSlot(s, b));
+        assert(ok, `${name} layout ${i}: no Hamlet plot fits the Barracks`);
+      }
+    }
   },
 });

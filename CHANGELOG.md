@@ -9,6 +9,8 @@ How versions work is in [`docs/RELEASING.md`](docs/RELEASING.md).
 Everything merged to `main` since the last release goes here. Each pull request that changes what players see adds a line under one of these headings.
 
 ### Added
+- The Barracks is no longer crafted: it opens with your Hamlet and you raise it from the Plot Marker on your big empty plot (every Hamlet has one that fits), for 16 Regals. The working Barracks block stands by its door when it's built. Barracks blocks already placed keep working.
+- The first-nights tracker spells out every step on screen, with a pin to the plot for your Barracks: build it from its Plot Marker, wait for it to go up, click its Barracks block to train guards, then hold the first siege.
 - A way home from the Hollow: walk into the tear at the back of the Wound and you come out at the Rift, or back where you came in if the Rift isn't open. Testers can type `/scriptevent hc:undertow_leave`.
 - **"You are entering ..."** A title card now shows the place's name and a short line when you walk into one of the six towns (Kingsrest, Millbrook, Rimehold, Gull's Rest, Sunscar, Mirelight), one of the Order's houses, Bellhollow, Crownhold, a story landmark such as the Cinder Roost or the Deepforge, a Wonder, or another player's settlement ("Ada's Village"). Walking into your own settlement says "You are home". It shows once on the way in, never while you walk along an edge, and the same place waits a minute and a half before it shows again. It replaces the old action-bar line for settlements; free plots and the Citadel keep theirs.
 - No NPC reads just "NPC" any more: each one gets its own name back (or a plain one like Settler or Miner), and the "Click to talk" label now sits above an NPC's name instead of on top of it.

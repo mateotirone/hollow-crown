@@ -29,6 +29,8 @@ export const OFFLINE_ONLY = new Set([
   "undertow: the arrival: an old world has the first box and ramp taken away",
   "undertow: the Wound: the cliff the mouth opens in is never one flat wall, and its rock is laid in beds",
   "settle charters: a lord fills every layout's plots and meets each charter with the designs there are",
+  "settle towns: a building seated on a slot stays inside it, front on the door side",
+  "settle storehouse: every layout's Hamlet has a plot the Barracks seats on",
   "undertow: a chunk built under the low roof has it taken away and the high roof built",
   "settle plans: the Plan Book card pictures match the buildings as they are designed now",
   "after: Deep: the halls are open where players and the Host stand, with floor under them",
