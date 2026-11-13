@@ -33,6 +33,7 @@ import {
 } from "../siege/api.js";
 import { bestiaryStore } from "../bestiary/bossCore.js";
 import * as troops from "../bestiary/spawns.js";
+import { shelteredAt } from "../bestiary/sheltered.js";
 import * as rivals from "../rivals/index.js";
 import * as riftSite from "../undertow/source.js";
 import {
@@ -701,7 +702,7 @@ function picketTick() {
       for (let i = 0; i < 3; i++) {
         const x = Math.floor(p.location.x + Math.cos(a) * 22) + i, z = Math.floor(p.location.z + Math.sin(a) * 22);
         const ground = dim.getTopmostBlock({ x, z });
-        if (!ground || ground.isLiquid || settlementAt(ground.location)) continue;
+        if (!ground || ground.isLiquid || shelteredAt(ground.location, dim.id)) continue;
         dim.spawnEntity(soldierType("picket", false), { x: x + 0.5, y: ground.location.y + 1, z: z + 0.5 }).addTag(PICKET_TAG);
       }
     } catch { /* that spot wasn't loaded */ }

@@ -333,7 +333,7 @@ const lordSkin = (lord) => `lord_${REGION_TO_STYLE[lord?.region] ?? "vale"}_${lo
 addNpcLook((e) => {
   if (!e.hasTag(LORD_TAG)) return undefined;
   const lord = lords().find((l) => e.hasTag(lordTag(l)));
-  return lord ? lordSkin(lord) : undefined;
+  return lord ? { key: lordSkin(lord), name: lord.name } : undefined;
 });
 
 function keepLordHome(dim, lord) {

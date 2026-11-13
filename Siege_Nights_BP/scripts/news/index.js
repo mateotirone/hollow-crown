@@ -3,9 +3,9 @@
 // Test: /scriptevent siege:news_test   reads one sample of every line to you
 
 import { world, system } from "@minecraft/server";
-import { on, emit } from "../core/events.js";
+import { on } from "../core/events.js";
 import { placeName } from "../minimap/data.js";
-import { NEWS, PREFIX, killerName, STREAK_LOSS } from "./rules.js";
+import { NEWS, PREFIX, killerName, deathLine, STREAK_LOSS } from "./rules.js";
 import { moduleStore } from "../core/store.js";
 import { settlementAt, keepOf } from "../siege/api.js";
 
@@ -59,20 +59,32 @@ on("siegeEnd", ({ besieged = [] }) => system.runTimeout(() => {
   store.save();
 }, 2));
 
-// Notable deaths: to a boss, a creature of this add-on, or another player. Vanilla chat already reports the rest.
+// Every player death, once. The game's own death messages are off (core/gamerules.js), so this line is the only one.
+// Killed inside a settlement: everyone else hears only that they died (an attack is the Messenger's news), and the
+// victim is told what killed them.
 world.afterEvents.entityDie.subscribe(({ deadEntity, damageSource }) => {
   if (deadEntity?.typeId !== "minecraft:player") return;
+  let data;
   try {
-    const killer = damageSource.damagingEntity;
-    if (!killer || killer.id === deadEntity.id) return;
-    const isPlayer = killer.typeId === "minecraft:player";
-    if (!isPlayer && !killer.typeId.startsWith("siege:")) return;
-    const dim = deadEntity.dimension.id, { x, z } = deadEntity.location;
-    if (dim === OVERWORLD && settlementAt(deadEntity.location)) return; // a fight on someone's land is the Messenger's news, not the Crier's
-    let kind = isPlayer ? "player" : "creature";
-    try { if (!isPlayer && killer.matches?.({ families: ["siege_boss"] })) kind = "boss"; } catch { /* old API */ }
-    emit("playerFell", { victim: deadEntity.name, killer: isPlayer ? killer.name : killerName(killer.nameTag, killer.typeId), kind, dim, x, z });
-  } catch { /* the killer is already gone */ }
+    const victim = deadEntity.name, dim = deadEntity.dimension.id, { x, z } = deadEntity.location;
+    data = { victim, cause: damageSource?.cause, dim, x, z, home: dim === OVERWORLD && !!settlementAt(deadEntity.location) };
+    let killer;
+    try { killer = damageSource?.damagingEntity; if (killer && !killer.isValid) killer = undefined; } catch { killer = undefined; }
+    if (killer && killer.id !== deadEntity.id) {
+      const isPlayer = killer.typeId === "minecraft:player";
+      data.kind = isPlayer ? "player" : "creature";
+      data.killer = isPlayer ? killer.name : killerName(killer.nameTag, killer.typeId);
+      try { if (!isPlayer && killer.matches?.({ families: ["siege_boss"] })) data.kind = "boss"; } catch { /* old API */ }
+    }
+  } catch (e) { console.warn(`[Hollow Crown] news death: ${e}`); }
+  if (!data) return;
+  const id = deadEntity.id;
+  system.run(() => {
+    const all = deathLine(data, ctx), own = deathLine(data, ctx, { full: true });
+    for (const p of world.getAllPlayers()) {
+      try { p.sendMessage(PREFIX + (p.id === id ? own : all)); } catch { /* left */ }
+    }
+  });
 });
 
 system.afterEvents.scriptEventReceive.subscribe((e) => {
@@ -87,4 +99,6 @@ system.afterEvents.scriptEventReceive.subscribe((e) => {
     const line = words(sample, ctx);
     if (line) p.sendMessage(`${PREFIX}${line} §8(${event})`);
   }
+  for (const d of [{ kind: "creature", killer: "Ash Scarab" }, { kind: "boss", killer: "The Pale Huntsman" }, { kind: "player", killer: p.name }, { cause: "fall" }, { cause: "drowning" }])
+    p.sendMessage(`${PREFIX}${deathLine({ ...sample, ...d, victim: p.name }, ctx)} §8(death)`);
 });

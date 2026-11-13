@@ -354,7 +354,7 @@ export function statesFor(frame, role, o = {}) {
 
 // Blocks that hang from, stand on or stick to another block and pop off (dropping as items) if it isn't there yet
 // (Mateo's playtest 2026-11-12: doors and hanging lanterns broke as buildings rose)
-export const ATTACHED = /(_door|^door|lantern|chain|torch|_sign|^sign|banner|_button|ladder|carpet|bell|lever|candle|flower_pot|vine|_bed|^bed|pressure_plate|rail|hanging_roots|snow_layer|pointed_dripstone|amethyst_cluster|_bud|item_frame|tripwire_hook|sapling|propagule|azalea$)/;
+export const ATTACHED = /(_door|^door|lantern|chain|torch|_sign|^sign|banner|_button|ladder|carpet|bell|lever|candle|flower_pot|vine|_bed|^bed|pressure_plate|rail|hanging_roots|snow_layer|pointed_dripstone|amethyst_cluster|_bud|item_frame|(^|:)frame$|glow_frame|tripwire_hook|sapling|propagule|azalea$)/;
 const HANGS = /chain|hanging_roots|vine/;
 export const blockOf = (plan, c) => (c.role === "door" ? "door" : plan.style?.roles?.[c.role]?.[0] ?? c.role);
 const centreOut = (a, b) => Math.abs(a.x) + Math.abs(a.z) - (Math.abs(b.x) + Math.abs(b.z));
