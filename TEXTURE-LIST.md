@@ -346,6 +346,7 @@ Every mob has a box model in `models/entity/bestiary/<id>.geo.json` and a genera
 | Seneschal's Greatshield (boss relic, shield) | `seneschal_greatshield.png` | **Final style, awaiting your review** |
 | Faceless Crown Shard (boss relic, shard) | `faceless_crown_shard.png` | **Final style, awaiting your review** |
 | Mire Heart (boss relic, charm) | `mire_heart.png` | **Final style, awaiting your review** |
+| The Last Note (Hollow Choir relic, charm: a small violet bell, drawn by `studio/art/build_hc_items.py`) | `last_note.png` | **Final style, awaiting your review** |
 | The Warlord's Brand (boss relic, sword) | `warlords_brand.png` | **Final style, awaiting your review** |
 | Oath of Oswin (boss relic, sword) | `oath_of_oswin.png` | **Final style, awaiting your review** |
 | Crownless Mantle (boss relic, chest) | `crownless_mantle.png` | **Final style, awaiting your review** |
