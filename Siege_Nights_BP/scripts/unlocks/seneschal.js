@@ -1,6 +1,6 @@
-// Waking the Ash Seneschal, in the Faceless Vault under Sunscar.
+// Waking the Ash Seneschal, in the Faceless Vault in the desert south of Sunscar.
 //
-//   A sandstone stair at the south edge of Sunscar goes down to an antechamber. Five statues of one king stand in
+//   A sandstone stair in a sunken courtyard among the dunes south of Sunscar goes down to an antechamber. Five statues of one king stand in
 //   it with their faces chiselled off, each with a line carved under it about when it was made.
 //   1. Turn the statues to face the vault door in the order of the king's life, youngest first. A wrong one and they
 //      all grind back, and ash scarabs pour out of the cracks. The fifth opens a niche beside the door: the

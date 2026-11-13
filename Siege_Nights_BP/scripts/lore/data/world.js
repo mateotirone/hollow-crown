@@ -79,7 +79,7 @@ export const PLACES = {
   lighthouse: { name: "The Lighthouse at Gull's Rest", region: "Saltreach", charted: false, desc: "The keeper is in the lamp room. He is always in the lamp room." },
   sunken_chapel: { name: "Chapel of Saint Brannoc", region: "Saltreach", charted: false, desc: "Under the sea off Gull's Rest. Its tower shows above the water only when the moon is dark." },
   sunscar: { name: "Sunscar", region: "Emberwaste", charted: true, desc: "A desert fortress town where every statue has had its face removed." },
-  faceless_vault: { name: "The Faceless Vault", region: "Emberwaste", charted: false, desc: "Under Sunscar. It opens for someone who can rebuild a king's face." },
+  faceless_vault: { name: "The Faceless Vault", region: "Emberwaste", charted: false, desc: "Down a stair in a sunken courtyard among the dunes south of Sunscar. Five statues of one king guard its door, their faces cut away. It opens for someone who can put his life in order." },
   mirelight: { name: "Mirelight", region: "Blackfen", charted: true, desc: "Huts on stilts and hanging lanterns. Some of the villagers have lost days." },
   mags_hut: { name: "Old Mag's Hut", region: "Blackfen", charted: false, desc: "Past the last lantern of Mirelight, where the frogs stop singing." },
   drowned_chapel: { name: "The Drowned Chapel", region: "Saltreach", charted: false, desc: "A thin place. A chapel the sea took long ago, its caves cut into the chalk cliffs of the north coast, a long way west of Rimehold. Nobody remembers whose it was." },
