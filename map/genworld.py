@@ -350,6 +350,30 @@ AVOID = [(x_, z_, 82) for _, x_, z_ in PLOTS] + [(x_, z_, int(r_ * 0.7)) for _, 
 STATION_POS, LINE_PTS = railroute.plan_network(Y, wet, land, X0, Z0, STOPS, SEQ, R_TOWNS, AVOID, log=log, fixed=FIXED_ST)
 stop_y.update(FIXED_Y)
 for sid_, (x_, z_, _) in STATION_POS.items(): STOPS[sid_].update({"x": x_, "z": z_})
+# a station road (towns thread 2026-11-13): a village station the map placed itself gets a 5-wide road from the
+# platform's town side to the town's nearest street end (a paved groundwork cell of its plan). Stamped stations
+# (FIXED_ST) already come with their own street.
+_paved = ("slab", "path", "gravel", "cobblestone", "stone_bricks", "sandstone")
+for n_, tx_, tz_, _r, _ in TOWNS:
+    sid_ = slug(n_)
+    if sid_ in FIXED_ST or sid_ not in STATION_POS: continue
+    fn_ = next((f for f in filter(None, os.environ.get("GW_BLOCKS", "").split(":")) if json.load(open(f)).get("town") == n_), None)
+    if not fn_: continue
+    d_ = json.load(open(fn_)); pal_ = d_["palette"]; gw_ = d_["groundwork_blocks"]
+    sx_, sz_, ax_ = STATION_POS[sid_]; ax_ = ax_[-1]
+    px_, pz_ = (0, 1) if ax_ == "x" else (1, 0)                    # across the track, toward the town
+    if (tx_ - sx_) * px_ + (tz_ - sz_) * pz_ < 0: px_, pz_ = -px_, -pz_
+    fx_, fz_ = sx_ + px_ * 4, sz_ + pz_ * 4
+    top_ = {}
+    for x_, y_, z_, i_ in d_["blocks"][:gw_]:                  # the top solid block (air entries only dig out)
+        if "air" not in pal_[i_]["name"] and y_ >= top_.get((x_, z_), (-999, ""))[0]: top_[(x_, z_)] = (y_, pal_[i_]["name"])
+    ends_ = [(math.hypot(x_ - fx_, z_ - fz_), x_, z_) for (x_, z_), (_, nm_) in top_.items()
+             if any(w_ in nm_ for w_ in _paved) and "wall" not in nm_ and (x_ - sx_) * px_ + (z_ - sz_) * pz_ > 4]
+    if not ends_: continue
+    _, ex_, ez_ = min(ends_)
+    rd_ = raster([[(fx_, fz_), (ex_, ez_)]], lambda f: 5) & land & ~isriver
+    isroad |= rd_; istrail &= ~rd_
+    log("station road", n_, (fx_, fz_), "->", (ex_, ez_), int(rd_.sum()), "cells")
 for lname in SEQ:
     pts = LINE_PTS[lname]
     on = [(sid, STOPS[sid]) for sid in SEQ[lname]]
