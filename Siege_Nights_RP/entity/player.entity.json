@@ -261,6 +261,9 @@
           "controller.render.player.first_person": "(variable.is_first_person && !query.is_spectator) && (query.has_property('hc:look') ? query.property('hc:look') : 0) < 1"
         },
         {
+          "controller.render.hc_look.item_carrier": "!query.is_spectator && !variable.map_face_icon && (query.has_property('hc:look') ? query.property('hc:look') : 0) >= 1"
+        },
+        {
           "controller.render.hc_look.first_person": "(variable.is_first_person && !query.is_spectator) && (query.has_property('hc:look') ? query.property('hc:look') : 0) >= 1"
         },
         {

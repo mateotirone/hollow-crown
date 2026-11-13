@@ -47,6 +47,11 @@ Custom first- and third-person moves for every player. Written by `tools/build_p
   `node tools/check.mjs` now fails on it. So that items stay in the hand, `fold_elbows` in
   `build_player_anims.py` moves a forearm's bend to the shoulder while that hand holds something
   (`variable.hc_rbend` / `hc_lbend`); empty hands still bend at the elbow.
+- **Held items are placed from the player's default (skin) geometry, not the look's.** With only the look drawn,
+  the default model was never posed, so items stayed still while the arm swung (playtest 1.2.1519).
+  `build_player_joints.py` adds `controller.render.hc_look.item_carrier`: the default geometry with every part
+  hidden, drawn before the look's controllers, so the same animations pose it and the item follows. check.mjs
+  fails if it is missing or comes after the look controllers (re-run the tool after `studio/build_looks.mjs`).
 - uses it for the Looking Glass looks only. Players on their own skin keep Bedrock's skin model (the game
   swaps it in for every player; slim and Character Creator skins don't fit a fixed layout), so they get the
   same moves with straight limbs. The bend channels simply do nothing on a body without those bones.
