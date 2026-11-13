@@ -114,7 +114,7 @@ Doors sit on a bay centre, never on a post, at least 2 from a corner. Never two 
   round dirt with flowers (style key `flowers` picks them: region colours from `palettes/`), about a
   quarter of street windows (05 planters).
 - **Surround**: stone walls get dark oak trapdoors standing either side of the glass (the stone, spruce,
-  dark oak pairing).
+  dark oak pairing). The style key `panel` changes the trapdoor (`everwake_stone` uses `birch_trapdoor`: no dark timber there). `"panel": null` leaves it off (tower slits and lancets, towers guide).
 - **Shutters**: open trapdoors either side of the glass, 1 out, as tall as the glass, with a trim slab
   shelf under it; about one shuttered window in three has a lantern on the shelf; now and then a single
   shutter (shutter dressing).

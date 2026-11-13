@@ -516,198 +516,296 @@ export const SIGILS = {
 export const BODIES = {
  "siege:hollow_footman": {
   "kind": 0,
-  "size": 1
+  "size": 1,
+  "pose": 0,
+  "lift": 5.78
  },
  "siege:bell_ringer": {
   "kind": 1,
-  "size": 1
+  "size": 1,
+  "pose": 0,
+  "lift": 6.15
  },
  "siege:shieldwall_brute": {
   "kind": 2,
-  "size": 1.15
+  "size": 1.15,
+  "pose": 0,
+  "lift": 7.7
  },
  "siege:torchbearer": {
   "kind": 3,
-  "size": 1
+  "size": 1,
+  "pose": 0,
+  "lift": 4.73
  },
  "siege:siege_ogre": {
   "kind": 4,
-  "size": 1
+  "size": 1,
+  "pose": 0,
+  "lift": 7.51
  },
  "siege:crow_mage": {
   "kind": 5,
-  "size": 1
+  "size": 1,
+  "pose": 0,
+  "lift": 6.15
  },
  "siege:lost_villager": {
   "kind": 6,
-  "size": 1
+  "size": 1,
+  "pose": 0,
+  "lift": 4.2
  },
  "siege:changeling": {
   "kind": 7,
-  "size": 1
+  "size": 1,
+  "pose": 0,
+  "lift": 4.2
  },
  "siege:wrongling": {
   "kind": 8,
-  "size": 1
+  "size": 1,
+  "pose": 0,
+  "lift": 3.68
  },
  "siege:stone_vigil": {
   "kind": 9,
-  "size": 1
+  "size": 1,
+  "pose": 0,
+  "lift": 6.4
  },
  "siege:echo_hound": {
   "kind": 10,
-  "size": 1
+  "size": 1,
+  "pose": 1,
+  "lift": 4.0
  },
  "siege:mirror_knight": {
   "kind": 11,
-  "size": 1
+  "size": 1,
+  "pose": 0,
+  "lift": 4.73
  },
  "siege:frost_stag": {
   "kind": 12,
-  "size": 1
+  "size": 1,
+  "pose": 1,
+  "lift": 8.5
  },
  "siege:rimewolf": {
   "kind": 13,
-  "size": 1
+  "size": 1,
+  "pose": 1,
+  "lift": 4.5
  },
  "siege:brine_lurker": {
   "kind": 14,
-  "size": 1
+  "size": 1,
+  "pose": 1,
+  "lift": 11.0
  },
  "siege:ash_scarab": {
   "kind": 15,
-  "size": 1
+  "size": 1,
+  "pose": 3,
+  "lift": 5.2
  },
  "siege:dune_wyrm": {
   "kind": 16,
-  "size": 1
+  "size": 1,
+  "pose": 1,
+  "lift": 8.0
  },
  "siege:bog_hag": {
   "kind": 17,
-  "size": 1
+  "size": 1,
+  "pose": 0,
+  "lift": 5.68
  },
  "siege:mire_toad": {
   "kind": 18,
-  "size": 1
+  "size": 1,
+  "pose": 1,
+  "lift": 8.5
  },
  "siege:barrow_wight": {
   "kind": 19,
-  "size": 1
+  "size": 1,
+  "pose": 0,
+  "lift": 4.73
  },
  "siege:ashen_squire": {
   "kind": 20,
-  "size": 1
+  "size": 1,
+  "pose": 0,
+  "lift": 4.73
  },
  "siege:ashen_knight": {
   "kind": 21,
-  "size": 1
+  "size": 1,
+  "pose": 0,
+  "lift": 6.52
  },
  "siege:inquisitor": {
   "kind": 22,
-  "size": 1
+  "size": 1,
+  "pose": 0,
+  "lift": 6.31
  },
  "siege:clockwork_reeve": {
   "kind": 23,
-  "size": 2.286
+  "size": 2.286,
+  "pose": 0,
+  "lift": 14.19
  },
  "siege:reeve_cog": {
   "kind": 24,
-  "size": 0.55
+  "size": 0.55,
+  "pose": 0,
+  "lift": 14.19
  },
  "siege:pale_huntsman": {
   "kind": 25,
-  "size": 1.481
+  "size": 1.481,
+  "pose": 0,
+  "lift": 7.1
  },
  "siege:ash_seneschal": {
   "kind": 26,
-  "size": 1.2
+  "size": 1.2,
+  "pose": 0,
+  "lift": 8.64
  },
  "siege:mother_of_changelings": {
   "kind": 27,
-  "size": 0.906
+  "size": 0.906,
+  "pose": 0,
+  "lift": 7.07
  },
  "siege:mother_echo": {
   "kind": 28,
-  "size": 0.906
+  "size": 0.906,
+  "pose": 0,
+  "lift": 7.07
  },
  "siege:warlord_king": {
   "kind": 29,
-  "size": 1.455
+  "size": 1.455,
+  "pose": 0,
+  "lift": 5.6
  },
  "siege:pretender_blade": {
   "kind": 30,
-  "size": 1.05
+  "size": 1.05,
+  "pose": 0,
+  "lift": 5.07
  },
  "siege:pretender_seer": {
   "kind": 31,
-  "size": 1
+  "size": 1,
+  "pose": 0,
+  "lift": 6.15
  },
  "siege:pretender_brute": {
   "kind": 32,
-  "size": 1.1
+  "size": 1.1,
+  "pose": 0,
+  "lift": 5.53
  },
  "siege:oswin_the_last": {
   "kind": 33,
-  "size": 1.05
+  "size": 1.05,
+  "pose": 0,
+  "lift": 8.01
  },
  "siege:grey_axeman": {
   "kind": 34,
-  "size": 1
+  "size": 1,
+  "pose": 0,
+  "lift": 4.73
  },
  "siege:grey_bellcutter": {
   "kind": 35,
-  "size": 1
+  "size": 1,
+  "pose": 0,
+  "lift": 4.73
  },
  "siege:grey_spearman": {
   "kind": 36,
-  "size": 1
+  "size": 1,
+  "pose": 0,
+  "lift": 6.54
  },
  "siege:grey_bowman": {
   "kind": 37,
-  "size": 1
+  "size": 1,
+  "pose": 0,
+  "lift": 6.8
  },
  "siege:grey_serjeant": {
   "kind": 38,
-  "size": 1
+  "size": 1,
+  "pose": 0,
+  "lift": 5.44
  },
  "siege:veinsworn": {
   "kind": 39,
-  "size": 1.05
+  "size": 1.05,
+  "pose": 0,
+  "lift": 2.6
  },
  "siege:shardcaster": {
   "kind": 40,
-  "size": 1
+  "size": 1,
+  "pose": 0,
+  "lift": 6.52
  },
  "siege:gatebreaker": {
   "kind": 41,
-  "size": 1
+  "size": 1,
+  "pose": 0,
+  "lift": 6.46
  },
  "siege:hollow_warlord": {
   "kind": 42,
-  "size": 1
+  "size": 1,
+  "pose": 0,
+  "lift": 5.6
  },
  "siege:champion_knight": {
   "kind": 43,
-  "size": 1
+  "size": 1,
+  "pose": 0,
+  "lift": 5.79
  },
  "siege:champion_sorcerer": {
   "kind": 44,
-  "size": 1
+  "size": 1,
+  "pose": 0,
+  "lift": 6.15
  },
  "siege:champion_lord": {
   "kind": 45,
-  "size": 1
+  "size": 1,
+  "pose": 0,
+  "lift": 5.79
  },
  "siege:champion_retainer": {
   "kind": 46,
-  "size": 1
+  "size": 1,
+  "pose": 0,
+  "lift": 6.54
  },
  "siege:gloamwing": {
   "kind": 47,
-  "size": 1
+  "size": 1,
+  "pose": 2,
+  "lift": -1.82
  },
  "siege:bell_wife": {
   "kind": 48,
-  "size": 1.25
+  "size": 1.25,
+  "pose": 0,
+  "lift": 5.25
  }
 };

@@ -28,6 +28,7 @@ import { on, isNight } from "../siege/api.js";
 import { UNDERTOW_ID, UNDERTOW_LAYOUT as L, COURT, HEART, TEXT, stageAt, pathX } from "./layout.js";
 import { getSourceSite, getSites, markSite, openRift, riftExit, sourceSignsTick, SITE_NAMES, SOURCE_SITE_IDS } from "./source.js";
 import { VEIL, planCrack, tearBand, TEAR_STEPS, TEAR_CLIMB } from "./rift.js";
+import { CHASM, inChasm } from "./chasm.js";
 import { buildTick, piecesTick, flush, pieces, openCourtGate, openRiverGate, rebuildHeart, waystoneSpot, WAYSTONE, isBuilt, siteOutdated, withClearing } from "./builder.js";
 import { heightAt, planChunk, isRiver, regionAt, columnAt } from "./terrain.js";
 import { RIVER_NODES, riverSegments, riverDistance, RIVER_HALF_WIDTH } from "./rivers.js";
@@ -44,7 +45,7 @@ import { choirTick, singerSpot, CHOIR } from "./choir.js";
 import { slipSeconds, slipLanding, isSlipping } from "./slips.js";
 import { shouldAlarm, oreOutcome, noteEntry, crownTick, crownVerdict, CLAIM_SECONDS, WARDEN } from "./warden.js";
 import { crownFate, needsRefresh, standHeight, KEEP } from "./crownkeep.js";
-import { oreChance, roofAt, ROOF, groundAt, GROUND, ambientLightAt, AMBIENT, pickTree, treeKind, BACK, backFace, backRock, B } from "./terrain.js";
+import { oreChance, roofAt, ROOF, ROOF_V3, planRoofSwap, groundAt, GROUND, ambientLightAt, AMBIENT, pickTree, treeKind, BACK, backFace, backRock, B } from "./terrain.js";
 import { planWound, woundAir, WOUND } from "./wound.js";
 import { HOLLOW_TREES } from "./trees_data.js";
 import { clearOps } from "./builder.js";
@@ -206,6 +207,15 @@ onTick("undertow:build", 1, () => {
   buildTick(players);
 });
 onTick("undertow:pieces", 40, () => piecesTick());
+// A fall into the chasm under the Seat is a fall out of the world, as it was when there was only void there: the
+// pool at the bottom would otherwise break it. Builders (creative) may go down and look. The Deep (after/deep.js)
+// lies under the chasm's floor, below L.floorY, and is left alone.
+onTick("undertow:chasm", 10, () => {
+  for (const p of world.getAllPlayers()) {
+    if (!inUndertow(p) || p.location.y >= CHASM.killY || p.location.y < L.floorY || isBuilder(p) || p.getGameMode() === GameMode.Spectator) continue;
+    if (inChasm(Math.floor(p.location.x), Math.floor(p.location.z))) { try { p.kill(); } catch { /* gone */ } }
+  }
+});
 // The river's water gate in the sealed wall may be generated long after the Court falls: open it then.
 let riverGateOpen = false;
 onTick("undertow:rivergate", 100, () => {
@@ -217,7 +227,7 @@ onTick("undertow:rivergate", 100, () => {
 let courtGateOpen = false;
 onTick("undertow:save", 200, () => flush());
 
-// ---- atmosphere: lightning in the fog above, blue motes along the rivers --------------------
+// ---- atmosphere: lightning and clouds under the roof, blue motes along the rivers ----------
 const nextFlash = new Map();
 onTick("undertow:sky", 20, () => {
   for (const p of world.getAllPlayers()) {
@@ -230,14 +240,23 @@ onTick("undertow:sky", 20, () => {
       if (h === null) continue;
       try { d.spawnParticle(isRiver(Math.floor(x), Math.floor(z)) ? "minecraft:soul_particle" : "minecraft:end_rod", { x, y: h + 1.5 + Math.random() * 6, z }); } catch {}
     }
+    // A cloud layer under the high roof (Mateo, 2026-11-12: more fog, "concentrated up to the top so it
+    // looks like clouds"): slow purple-grey puffs in the top 30 blocks, drifting with the storm.
+    for (let i = 0; i < 5; i++) {
+      const ang = Math.random() * Math.PI * 2, r = 8 + Math.random() * 64;
+      const x = l.x + Math.cos(ang) * r, z = l.z + Math.sin(ang) * r;
+      const y = roofAt(Math.floor(x), Math.floor(z)).bottom - 5 - Math.random() * 26;
+      if (y < l.y + 12) continue; // stays a cloud overhead, never a fog bank round a player up high
+      try { d.spawnParticle("siege:hollow_cloud", { x, y, z }); } catch {}
+    }
     // Lightning in the fog above: thunder, and now and then a real bolt striking the land far off.
     const due = nextFlash.get(p.id) ?? system.currentTick + 200;
     if (system.currentTick < due) { nextFlash.set(p.id, due); continue; }
     nextFlash.set(p.id, system.currentTick + 160 + Math.floor(Math.random() * 340));
     if (columnAt(Math.floor(l.x), Math.floor(l.z))?.site === "standing_ranks") continue; // the Standing Ranks are silent
     sfx(p, "ambient.weather.thunder", { volume: 0.5, pitch: 0.6 + Math.random() * 0.3 });
-    if (Math.random() < 0.4) {
-      const ang = Math.random() * Math.PI * 2, far = 24 + Math.random() * 20;
+    if (Math.random() < 0.6) { // under the high roof a bolt can be seen from far off, so strike wider
+      const ang = Math.random() * Math.PI * 2, far = 30 + Math.random() * 60;
       const x = Math.floor(l.x + Math.cos(ang) * far), z = Math.floor(l.z + Math.sin(ang) * far);
       const h = heightAt(x, z);
       if (h !== null) {
@@ -372,7 +391,7 @@ system.afterEvents.scriptEventReceive.subscribe((e) => {
           save(K_PROGRESS, prog);
           openCourtGate();
           requestPockets(); // get the last fight's places built while players make the Long Climb
-          world.sendMessage("§5The Court falls silent. Behind the throne, the sealed gate cracks open.");
+          world.sendMessage("§5The Court falls silent. Behind the throne, the sealed gate cracks open. The way on is south, up the Long Climb, to the Seat.");
         }
       }
       if (boss === "morvane") {
@@ -901,6 +920,22 @@ addTests("undertow", {
       if (h !== null && z >= BACK.z) assert(r.bottom - h >= 28, `roof only ${r.bottom - h} over the land at ${x},${z}`); // the back cliff runs up into the roof on purpose
     }
     assert(roofAt(0, 2400).bottom >= HEART.center.y + 25, "room over the Choir's Heart");
+  },
+  "the roof stands about as high over the land as the nether's (Mateo 2026-11-12)": () => {
+    const gaps = [];
+    for (let x = -600; x <= 600; x += 150) for (let z = 100; z <= 2300; z += 275) {
+      const h = heightAt(x, z);
+      if (h !== null) gaps.push(roofAt(x, z).bottom - h);
+    }
+    gaps.sort((a, b) => a - b);
+    assert(gaps[Math.floor(gaps.length / 2)] >= 85, `the roof is only ${gaps[Math.floor(gaps.length / 2)]} over the usual land`);
+  },
+  "a chunk built under the low roof has it taken away and the high roof built": () => {
+    const ops = planRoofSwap(4, 30);
+    const air = ops.filter((o) => o.block === "minecraft:air"), put = ops.filter((o) => o.block !== "minecraft:air");
+    assert(air.length > 200 && put.length > 200, `swap ops: ${air.length} cleared, ${put.length} placed`);
+    assert(ops.indexOf(put[0]) > ops.indexOf(air[air.length - 1]), "the old roof is cleared before the new one goes up");
+    assert(air.every((o) => o.b[1] >= ROOF_V3.shell - 1 || o.onlyIf), "what hung from the old roof is only cleared where it is still there");
   },
   "the roof is never flat: domes, sags and mixed rock": () => {
     const ys = new Set(), rock = new Set();
