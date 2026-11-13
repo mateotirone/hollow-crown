@@ -730,3 +730,20 @@ addTests("settle base", {
     assertEqual(h[0], 70); assertEqual(h[11], 64);
   },
 });
+
+import { layoutOf as townLayoutOf, layoutKey } from "./founding.js";
+addTests("settle layouts saved", {
+  "a saved town keeps its layout when the layouts are re-exported, and a bad index falls back"() {
+    const vs = townByName("dunehold").variants;
+    const last = vs.length - 1;
+    const moved = { plot: "dunehold", layout: 0, layoutKey: layoutKey(vs[last]) };
+    assertEqual(townLayoutOf(moved), vs[last], "found again by its key");
+    assertEqual(moved.layout, last, "and its index is put right");
+    const past = { plot: "dunehold", layout: 99 };
+    assertEqual(townLayoutOf(past), vs[0], "an index past the end falls back to the first layout");
+    assertEqual(past.layoutKey, layoutKey(vs[0]), "and remembers it from then on");
+    const old = { plot: "dunehold", layout: 1 };
+    assertEqual(townLayoutOf(old), vs[1], "a town saved before keys keeps its index");
+    assert(new Set(vs.map(layoutKey)).size === vs.length, "every layout of a plot has its own key");
+  },
+});
