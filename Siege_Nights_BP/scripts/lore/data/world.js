@@ -82,7 +82,7 @@ export const PLACES = {
   faceless_vault: { name: "The Faceless Vault", region: "Emberwaste", charted: false, desc: "Under Sunscar. It opens for someone who can rebuild a king's face." },
   mirelight: { name: "Mirelight", region: "Blackfen", charted: true, desc: "Huts on stilts and hanging lanterns. Some of the villagers have lost days." },
   mags_hut: { name: "Old Mag's Hut", region: "Blackfen", charted: false, desc: "Past the last lantern of Mirelight, where the frogs stop singing." },
-  drowned_chapel: { name: "The Drowned Chapel", region: "Saltreach", charted: false, desc: "A thin place. The caves under the sunken chapel of Saint Brannoc, up on the chalk cliffs of the north coast, a long way west of Rimehold." },
+  drowned_chapel: { name: "The Drowned Chapel", region: "Saltreach", charted: false, desc: "A thin place. A chapel the sea took long ago, its caves cut into the chalk cliffs of the north coast, a long way west of Rimehold. Nobody remembers whose it was." },
   bellfounders_mine: { name: "The Bellfounders' Mine", region: "Frostmarch", charted: false, desc: "A thin place. Where Queen Maelis dug the bronze for the Founding Bell, up where the Vale climbs into the snow, far east of Millbrook." },
   kings_barrow: { name: "King's Barrow", region: "Blackfen", charted: false, desc: "A thin place. The royal burial mound, with birches growing over it, where the Vale gives way to the fen, south and a little east of Kingsrest." },
   saltglass_grotto: { name: "The Saltglass Grotto", region: "Emberwaste", charted: false, desc: "A thin place. A cave of fused salt out on the flats, south-east of Sunscar." },
