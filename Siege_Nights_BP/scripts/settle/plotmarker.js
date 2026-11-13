@@ -18,7 +18,7 @@ import { BUILDINGS, BUILDING, WORKS, drawBuilding } from "./buildings.js";
 import { plotFit, opensAt, slotClass, CLASS_NAMES } from "./charters.js";
 import { drawBox } from "./zones.js";
 import { raiseOnSlot, risingAt, jobOf } from "./plans.js";
-import { PLOT_MARKER, townOf, allTowns, layoutOf, markerAt, registerMarker, forgetMarker, placeMarker, clearMarker, slotState, saveTowns, tierName, slotClosed, keptFor } from "./founding.js";
+import { PLOT_MARKER, townOf, allTowns, layoutOf, markerAt, registerMarker, forgetMarker, placeMarker, clearMarker, setMarkerBlock, allMarkers, slotState, saveTowns, tierName, slotClosed, keptFor } from "./founding.js";
 import { slotsOf, seatOnSlot, seatedBox, SIZE_NAMES } from "./towns.js";
 import { runScan } from "./register.js";
 import { matches } from "./census.js";
@@ -361,7 +361,8 @@ function markerBesideDoor(owner, slot, state) {
   const spot = besideDoor(owner, slot);
   if (!spot) return;
   try {
-    world.getDimension(OVERWORLD).getBlock(spot)?.setType(PLOT_MARKER);
+    const block = world.getDimension(OVERWORLD).getBlock(spot);
+    if (block) setMarkerBlock(block, slot.door);
     registerMarker(spot, owner, slot.id);
     state.marker = spot;
     saveTowns();
@@ -423,6 +424,22 @@ function progress() {
     }
   }
 }
+// Markers set down before they were turned to face the street are turned round once their ground is loaded
+onTick("settle_marker_facing", 200, () => {
+  if (!isReady()) return;
+  const dim = world.getDimension(OVERWORLD);
+  for (const m of allMarkers()) {
+    try {
+      const block = dim.getBlock(m);
+      if (block?.typeId !== PLOT_MARKER) continue;
+      const slot = slotById(m.owner, m.slot);
+      if (slot?.door) setMarkerBlock(block, slot.door);
+    } catch {
+      // not loaded, or a town that is gone: next round
+    }
+  }
+});
+
 onTick("settle_plot_outlines", 20, () => {
   if (!isReady()) return;
   outlines();

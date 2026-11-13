@@ -260,7 +260,8 @@ export function drawHall(level, style) {
 
 // The Town Board: a big notice board inside every hall that opens the Town Hall menu (Mateo, 2026-11-12:
 // "a big bulletin board-style thing that's inside the Town Hall"). It stands on the floor just inside the
-// front door, off the centre aisle, under the roof, facing the way in. Its wide frame may tuck into a wall.
+// front door, off the centre aisle, under the roof. Its face turns to the aisle (Mateo's playtest 2026-11-13: facing
+// the door it stood edge-on to everyone in the room), so you read it as you walk in and from the hall itself.
 export function boardSpot(p) {
   const tree = p.marks.tree;
   if (!tree) return undefined;
@@ -288,10 +289,13 @@ export function boardSpot(p) {
   return undefined;
 }
 
+// The Town Board faces the centre aisle: toward -x on the right of it, +x on the left
+export const boardDir = (x) => (x > 0 ? "-x" : "+x");
+
 function placeBoard(p) {
   const s = boardSpot(p);
   if (!s) return;
-  p.set(s.x, s.y, s.z, "board", { dir: "-z" });
+  p.set(s.x, s.y, s.z, "board", { dir: boardDir(s.x) });
   p.mark("board", s.x, s.y, s.z);
 }
 
