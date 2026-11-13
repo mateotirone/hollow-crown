@@ -18,8 +18,10 @@
     "result": {
       "item": "siege:guard_blackfen_leggings"
     },
-    "unlock": {
-      "context": "AlwaysUnlocked"
-    }
+    "unlock": [
+      {
+        "item": "minecraft:structure_void"
+      }
+    ]
   }
 }

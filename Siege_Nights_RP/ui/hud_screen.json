@@ -1,5 +1,122 @@
 {
   "namespace": "hud",
+  "hc_regals": {
+    "type": "panel",
+    "controls": [
+      {
+        "hc_regals_box": {
+          "type": "panel",
+          "size": [
+            92,
+            10
+          ],
+          "anchor_from": "bottom_middle",
+          "anchor_to": "bottom_left",
+          "offset": [
+            96,
+            -6
+          ],
+          "controls": [
+            {
+              "hc_regals_data": {
+                "type": "panel",
+                "size": [
+                  0,
+                  0
+                ],
+                "$update_string": "hcr:",
+                "property_bag": {
+                  "#preserved_text": ""
+                },
+                "bindings": [
+                  {
+                    "binding_name": "#hud_title_text_string"
+                  },
+                  {
+                    "binding_name": "#hud_title_text_string",
+                    "binding_name_override": "#preserved_text",
+                    "binding_condition": "visibility_changed"
+                  },
+                  {
+                    "binding_type": "view",
+                    "target_property_name": "#visible",
+                    "source_property_name": "(not (#hud_title_text_string = #preserved_text) and not ((#hud_title_text_string - $update_string) = #hud_title_text_string))"
+                  }
+                ]
+              }
+            },
+            {
+              "hc_regals_coin": {
+                "type": "image",
+                "texture": "textures/ui/hc/coin",
+                "size": [
+                  8,
+                  8
+                ],
+                "offset": [
+                  0,
+                  1
+                ],
+                "layer": 4,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_regals_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((not ((#preserved_text - 'hcr:') = #preserved_text)) and (('%.2s' * (#preserved_text - 'hcr:')) = '_s'))",
+                    "target_property_name": "#visible"
+                  }
+                ]
+              }
+            },
+            {
+              "hc_regals_amount": {
+                "type": "label",
+                "text": "#text",
+                "color": [
+                  1.0,
+                  0.85,
+                  0.35
+                ],
+                "shadow": true,
+                "layer": 5,
+                "text_alignment": "left",
+                "localize": false,
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  11,
+                  0
+                ],
+                "size": [
+                  80,
+                  "default"
+                ],
+                "bindings": [
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_regals_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "((not ((#preserved_text - 'hcr:') = #preserved_text)) and (('%.2s' * (#preserved_text - 'hcr:')) = '_s'))",
+                    "target_property_name": "#visible"
+                  },
+                  {
+                    "binding_type": "view",
+                    "source_control_name": "hc_regals_data",
+                    "resolve_sibling_scope": true,
+                    "source_property_name": "(((#preserved_text - 'hcr:') - '_s') - '_h')",
+                    "target_property_name": "#text"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
   "hc_quests": {
     "type": "panel",
     "controls": [
@@ -3534,6 +3651,13 @@
         "value": {
           "hc_quests@hud.hc_quests": {}
         }
+      },
+      {
+        "array_name": "controls",
+        "operation": "insert_front",
+        "value": {
+          "hc_regals@hud.hc_regals": {}
+        }
       }
     ]
   },
@@ -3546,7 +3670,7 @@
       {
         "binding_type": "view",
         "target_property_name": "#visible",
-        "source_property_name": "(((#hud_title_text_string - 'hcm:') = #hud_title_text_string) and ((#hud_title_text_string - 'hcq:') = #hud_title_text_string))"
+        "source_property_name": "(((#hud_title_text_string - 'hcm:') = #hud_title_text_string) and ((#hud_title_text_string - 'hcq:') = #hud_title_text_string) and ((#hud_title_text_string - 'hcr:') = #hud_title_text_string))"
       }
     ]
   },
