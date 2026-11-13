@@ -49,6 +49,7 @@ import { levelSite, foundationColumns, Groundwork } from "../settle/ground.js";
 import { RIVALS, TIER_NAMES, LINES, STAGES, makeLord, radiusOf, wanted, night, nextPiece, partKey, hallSpot, partSpot, estateOf, winsForEstate, takeEstate } from "./data.js";
 import "./tests.js";
 import { sfx } from "../core/sfx.js";
+import { dressNpc, addNpcLook } from "../core/npc_skins.js";
 import "./court.js"; // what lords do: marches, feuds, trade, oaths
 
 const OVERWORLD = "minecraft:overworld";
@@ -327,6 +328,14 @@ function wallTick() {
   }
 }
 
+// A lord dresses for their region and their oath: lord_<style>_<knight|marked>
+const lordSkin = (lord) => `lord_${REGION_TO_STYLE[lord?.region] ?? "vale"}_${lord?.role === "marked" ? "marked" : "knight"}`;
+addNpcLook((e) => {
+  if (!e.hasTag(LORD_TAG)) return undefined;
+  const lord = lords().find((l) => e.hasTag(lordTag(l)));
+  return lord ? lordSkin(lord) : undefined;
+});
+
 function keepLordHome(dim, lord) {
   try {
     if (dim.getEntities({ type: NPC_TYPE, tags: [lordTag(lord)] }).length) return;
@@ -337,13 +346,8 @@ function keepLordHome(dim, lord) {
     npc.addTag(LORD_TAG);
     npc.addTag(lordTag(lord));
     npc.nameTag = lord.name;
-    try {
-      const c = npc.getComponent("minecraft:npc");
-      c.name = lord.name;
-      c.skinIndex = 20 + (lords().indexOf(lord) % 10) * 2;
-    } catch {
-      // looks are optional
-    }
+    try { npc.getComponent("minecraft:npc").name = lord.name; } catch { /* looks are optional */ }
+    dressNpc(npc, lordSkin(lord));
   } catch {
     // not loaded yet
   }

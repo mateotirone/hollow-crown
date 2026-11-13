@@ -8,6 +8,7 @@ import "./core/gamerules.js";
 import "./core/noraids.js";
 import "./core/nomonsters.js";
 import "./core/firstjoin.js";
+import "./core/npc_skins.js";
 import "./core/storyteller.js";
 
 // Siege Nights

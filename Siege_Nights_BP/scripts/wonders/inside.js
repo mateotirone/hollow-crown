@@ -25,10 +25,15 @@ import { groundTop } from "../settle/ground.js";
 import { WONDER, WONDER_BY_ID, SPIRE, FAIR, INSIDE_LINES } from "./data.js";
 import { standing, specToWorld, travellersFor, raceStep, racePurse } from "./rules.js";
 import { stateOf, heldFor, keeperSpot, near } from "./index.js";
+import { dressNpc, addNpcLook } from "../core/npc_skins.js";
 
 const OVERWORLD = "minecraft:overworld";
 const NPC_TYPE = "minecraft:npc";
 const TRAVELLER = "siege_spire_traveller";
+addNpcLook((e) => {
+  const t = e.getTags().find((x) => new RegExp(`^${TRAVELLER}_\\d+$`).test(x));
+  return t ? `traveller_${Number(t.slice(TRAVELLER.length + 1)) % 4}` : undefined;
+});
 const CHAMPION = "siege_fair_champion";
 const store = moduleStore("siege:wonders_inside", () => ({ spire: { day: -1, list: [] }, fair: { record: null, recordName: null, day: -1, pursed: {} } }));
 const save = () => store.save();
@@ -152,6 +157,7 @@ onTick("wonders_spire", 100, () => {
       const e = dim.spawnEntity(NPC_TYPE, { x: x + 0.5, y: top + 1, z: z + 0.5 });
       for (const tg of [TRAVELLER, `${TRAVELLER}_${i}`, `${TRAVELLER}_day_${sp.day}`]) e.addTag(tg);
       e.nameTag = `${t.name}\n§7free to take on`;
+      dressNpc(e, `traveller_${i % 4}`);
     });
   } catch {
     // not loaded yet
