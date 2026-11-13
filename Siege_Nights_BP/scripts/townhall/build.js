@@ -32,7 +32,8 @@ export function resolveRole(style, frame, role, o) {
 const jobs = []; // running builds
 
 // job: { id, dimensionId, origin, forward, plan, style, perTick, clearBox?: { min, max } (world coords, inclusive),
-//        keep?: [{x,y,z}] (cornerstone spots the clear must not lose), remove?: [{x,y,z}] (world coords, taken down first), index?, onProgress?(fraction, done, total), onDone?(),
+//        keep?: [{x,y,z}] (cornerstone spots the clear must not lose), remove?: [{x,y,z}] (world coords, taken down first),
+//        removeAs?(at, block) (fills a removed block with something other than air, or null keeps it), skip?(x, y, z) (cells left alone), index?, onProgress?(fraction, done, total), onDone?(),
 //        ground?: { step(dim, budget) -> "wait" | "more" | "done" } (groundwork round the build, e.g. settle/ground.js
 //        Groundwork: the terraform pad and skirt), run after clearing and before the footings }
 // clearBox: everything in it is taken down first (top layer first), except a Hall Cornerstone, so an old
@@ -103,7 +104,9 @@ function step(job) {
       const at = job.remove[job.cursor];
       const block = dim.getBlock(at);
       if (!block) return false;
-      if (!(at.x === job.origin.x && at.y === job.origin.y && at.z === job.origin.z) && block.typeId !== CORNERSTONE) block.setPermutation(air);
+      // removeAs(at, block): what goes there instead of air (a permutation), or null to leave it as it is
+      const to = job.removeAs ? job.removeAs(at, block) : air;
+      if (to && !(at.x === job.origin.x && at.y === job.origin.y && at.z === job.origin.z) && block.typeId !== CORNERSTONE) block.setPermutation(to);
       job.cursor++;
     }
     if (job.cursor >= job.remove.length) { job.stage = job.ground ? "ground" : "columns"; job.cursor = 0; }

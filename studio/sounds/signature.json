@@ -405,6 +405,54 @@
    "category": "block",
    "where": "When a portcullis comes down. Heard by everyone near the gate.",
    "prompt": "A heavy iron portcullis slamming down: one quick, hard, metallic crash like an iron anvil dropped onto stone, a short sharp clang with a brief ringing rattle of iron bars, then silence. Fast and punchy, close and dry, no chain run-out, no echo, no music."
+  },
+  {
+   "file": "crowd_murmur",
+   "id": "siege.sig.crowd_murmur",
+   "path": "sounds/siege/sig/crowd_murmur",
+   "name": "The arena crowd talking among itself (loop)",
+   "seconds": 8,
+   "kind": "loop",
+   "channels": 2,
+   "category": "ambient",
+   "where": "Loops from the middle of the arena while a fight is on. Heard across the arena.",
+   "prompt": "A large medieval crowd of a few hundred people seated in a huge open-air stone arena, waiting and watching: a steady warm murmur of many indistinct voices talking at once, scattered shouts and whistles, a few claps, feet shuffling on stone benches. Even and continuous from start to end so it can loop, no peaks, no single clear words, no music."
+  },
+  {
+   "file": "crowd_cheer",
+   "id": "siege.sig.crowd_cheer",
+   "path": "sounds/siege/sig/crowd_cheer",
+   "name": "The arena crowd cheers",
+   "seconds": 4,
+   "kind": "one-shot",
+   "channels": 2,
+   "category": "ambient",
+   "where": "When the gates lift, a big hit lands, a beast falls or someone wins. Heard across the arena.",
+   "prompt": "A big medieval crowd in a stone arena erupting into a cheer: a sudden roar of hundreds of voices, whistles, stamping feet and fists pounding on wooden barriers, swelling for two seconds and then settling back down. Excited and joyful, open-air with a little stone echo, no single clear words, no music."
+  },
+  {
+   "file": "crowd_groan",
+   "id": "siege.sig.crowd_groan",
+   "path": "sounds/siege/sig/crowd_groan",
+   "name": "The arena crowd groans as a fighter falls",
+   "seconds": 3,
+   "kind": "one-shot",
+   "channels": 2,
+   "category": "ambient",
+   "where": "When a fighter falls. Heard across the arena.",
+   "prompt": "A big medieval crowd in a stone arena reacting as a fighter goes down: a loud collective 'ohhh' of sympathy and shock from hundreds of voices, falling in pitch, followed by scattered murmurs. Open-air with a little stone echo, no single clear words, no music."
+  },
+  {
+   "file": "arena_fanfare",
+   "id": "siege.sig.arena_fanfare",
+   "path": "sounds/siege/sig/arena_fanfare",
+   "name": "Horns as the arena gates lift, or for the winner",
+   "seconds": 4,
+   "kind": "one-shot",
+   "channels": 2,
+   "category": "ambient",
+   "where": "When the arena gates lift, and for the winner. Heard across the arena.",
+   "prompt": "A short medieval tournament fanfare: two long brass herald trumpets playing a bold rising three-note call together, the last note held, ringing out over a huge open-air stone arena with a natural echo. Proud and bright, no drums, no voices, no crowd."
   }
  ],
  "dragons": [

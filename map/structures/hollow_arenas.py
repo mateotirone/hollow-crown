@@ -23,6 +23,7 @@ HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 import export_landmarks as X  # noqa: E402  (the skill's compute)
 from landmarks import D  # noqa: E402
 from engine import spilling_water  # noqa: E402  (the skill: water that would run out of its basin)
+import emit, lighting  # noqa: E402  (the skill: connections, the light stage)
 
 VEIN = [("siege:veinstone_bricks", 6), ("siege:cracked_veinstone_bricks", 2), ("polished_blackstone_bricks", 2)]
 SEA = [("dark_prismarine", 6), ("prismarine_bricks", 3), ("siege:cracked_veinstone_bricks", 1)]
@@ -630,8 +631,11 @@ def old_stones():
 
 
 def export(d, old, keep_out=(), v=2):
-    blocks = X.compute(d.spec())
+    spec = dict(d.spec()); spec["light"] = False
+    blocks = X.compute(spec)
     for c in d.airs(): blocks[c] = ("air", {})
+    # every build lit (Mateo 2026-11-13): soul light, hung overhead or from walls, nothing on the fight floor
+    lighting.light(blocks, kind="hollow", posts=False, avoid=list(keep_out)); emit.connect(blocks)
     spill = spilling_water(blocks)
     if spill: raise SystemExit(f"{d.name}: {len(spill)} water block(s) would spill, first at {spill[0]}")
     pal, idx, cells = [], {}, {}
@@ -659,8 +663,8 @@ def main():
     ap = argparse.ArgumentParser(); ap.add_argument("--scenes"); ap.add_argument("--no-write", action="store_true"); a = ap.parse_args()
     gate = {(x, y, z) for x in range(-3, 4) for y in range(0, 9) for z in (31, 32)}
     ap_d = approach()
-    designs = {"COURT_DESIGN": export(court(), old_court(), gate, v=3), "SEAT_DESIGN": export(seat(), old_seat(), v=3),
-               "APPROACH_DESIGN": export(ap_d, old_stones(), v=1)}
+    designs = {"COURT_DESIGN": export(court(), old_court(), gate, v=4), "SEAT_DESIGN": export(seat(), old_seat(), v=4),
+               "APPROACH_DESIGN": export(ap_d, old_stones(), v=2)}   # v +1 2026-11-13: lit
     designs["APPROACH_DESIGN"]["way"] = [list(c) for c in ap_d.way]
     for k, v in designs.items():
         print(k, sum(r[3] for r in v["rows"]), "blocks,", sum(r[3] for r in v["clear"]), "to clear,", v["box"])
