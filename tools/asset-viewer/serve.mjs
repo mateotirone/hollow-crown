@@ -369,7 +369,7 @@ const EXTRAS = [
     names: (out) => { try { return JSON.parse(fs.readFileSync(path.join(out, "names.json"), "utf8")); } catch { return {}; } } },
   { id: "everwake", title: "Everwake (the city in the sky)", marker: "map/structures/everwake_builds.py",
     args: (out) => [out],
-    label: { everwake_city: "Everwake: the city on its cloud (Y 254 to 319)", everwake_needle: "Everwake with the Needle and the cloud sea", everwake_airboat: "The air boat (moored at the station and the sky dock)" } },
+    label: { everwake_city: "Everwake: the city on its cloud (its own world, Y 254 to 319)", airboat_station_restored: "Air boat station, restored (the air boat at the mast)", airboat_station_ruin: "Air boat station, the ruin it starts as", everwake_airboat: "The air boat (moored at the station and the sky dock)" } },
 ];
 // Builder scripts that live on a branch without the kit: copied from the newest branch that has them into
 // the newest catalogue branch's map/structures and run there.
