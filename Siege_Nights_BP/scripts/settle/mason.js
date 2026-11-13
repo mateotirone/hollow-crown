@@ -183,7 +183,7 @@ export function spawnMason(dim, location, bench) {
   return mason;
 }
 
-addNpcLook((e) => (e.hasTag(MASON_TAG) ? "mason" : undefined));
+addNpcLook((e) => (e.hasTag(MASON_TAG) ? { key: "mason", name: "Mason" } : undefined));
 
 const masonsOf = (dim, bench) => dim.getEntities({ type: NPC_TYPE, tags: [benchTag(bench)] });
 
