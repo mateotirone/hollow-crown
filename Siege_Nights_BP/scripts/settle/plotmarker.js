@@ -370,19 +370,29 @@ function markerBesideDoor(owner, slot, state) {
   }
 }
 
-// Every town starts with its library (the lore feature stocks it from settleBuilt): on the slot tagged for it, else the square
+// Every town starts with its library (the lore feature stocks it from settleBuilt): on the slot tagged for it, else the
+// square. The starter village's houses stand from the start too (slots with a start design), free.
+function raiseStart(owner, slot, id) {
+  const town = townOf(owner);
+  const seat = seatInWorld(owner, slot, id);
+  if (!seat) return false;
+  clearMarker(owner, slot);
+  const built = raiseOnSlot(owner, owner, seat.origin, seat.forward, id, town.style, slot.id, { quiet: true });
+  if (!built) { placeMarker(owner, slot); return false; }
+  Object.assign(slotState(owner, slot.id), { building: id, style: town.style, origin: seat.origin, forward: seat.forward, box: seat.box, top: seat.plan.bounds().y1 + Math.max(0, built.lift ?? 0), paid: 0 });
+  saveTowns();
+  return true;
+}
+
 on("townLaidOut", ({ owner, tier }) => {
   const town = townOf(owner);
-  if (tier !== 0 || !town || !BUILDING.library || Object.values(town.slots).some((s) => s.building === "library")) return;
-  const slots = slotsOf(layoutOf(town)).filter((s) => s.tier === 0 && !town.slots[s.id]?.building && seatInWorld(owner, s, "library"));
+  if (tier !== 0 || !town) return;
+  const open = slotsOf(layoutOf(town)).filter((s) => s.tier === 0 && !town.slots[s.id]?.building);
+  for (const slot of open) if (slot.start && BUILDING[slot.start]) raiseStart(owner, slot, slot.start);
+  if (!BUILDING.library || Object.values(town.slots).some((s) => s.building === "library")) return;
+  const slots = open.filter((s) => !s.start && !town.slots[s.id]?.building && seatInWorld(owner, s, "library"));
   const slot = slots.find((s) => s.tags.includes("library")) ?? slots.find((s) => s.tags.includes("square")) ?? slots[0];
-  if (!slot) return;
-  const seat = seatInWorld(owner, slot, "library");
-  clearMarker(owner, slot);
-  const built = raiseOnSlot(owner, owner, seat.origin, seat.forward, "library", town.style, slot.id, { quiet: true });
-  if (!built) return placeMarker(owner, slot);
-  Object.assign(slotState(owner, slot.id), { building: "library", style: town.style, origin: seat.origin, forward: seat.forward, box: seat.box, top: seat.plan.bounds().y1 + Math.max(0, built.lift ?? 0), paid: 0 });
-  saveTowns();
+  if (slot) raiseStart(owner, slot, "library");
 });
 
 // The outline of a picked building, for the player who picked it

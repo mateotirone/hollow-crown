@@ -42,11 +42,12 @@ AREAS = [
     # kind, label, box, door side (the side facing its lane: "r+" = toward +right ...), extra
     ("yard",      "Mason's yard",     (9, 19, -13, -3),  "r-", {}),
     # buildings give their door cell; the box comes from the design's real size (--sizes, from sizes.mjs)
-    ("building",  "Library",          (-9, -8),           "r+", {"design": "library"}),
+    ("building",  "Library",          (-9, -8),           "r+", {"design": "library", "slot": (-23, -9, -14, -2)}),   # a long Medium, 13 x 15
     ("building",  "House",            (5, -23),           "r-", {"design": "house", "slot": (5, 19, -28, -18)}),
     ("building",  "House",            (-5, -23),          "r+", {"design": "house", "slot": (-19, -5, -28, -18)}),
-    ("slot",      "Empty plot",       (-23, -11, 1, 9),   "r+", {"size": "S"}),
-    ("field",     "Common field",     (-23, -11, 11, 23), "r+", {}),
+    # the open plot is a deep Large (15 wide x 17 deep): the Barracks needs it later (settlement thread, PR #276)
+    ("slot",      "Empty plot",       (-27, -11, 0, 14),  "r+", {"size": "L"}),
+    ("field",     "Common field",     (-23, -11, 16, 26), "r+", {}),
     ("woodyard",  "Woodyard",         (11, 21, -1, 9),    "r-", {}),
     ("pen",       "Pen",              (11, 19, 13, 23),   "r-", {}),
     ("commons",   "Hall green",       (-6, 6, 23, 29),    "a-", {}),
@@ -514,6 +515,26 @@ class Starter:
         self.smooth_ground(); self.lay_paths(); self.level_areas(); self.wall_line(); self.grade(); self.write_ground(); self.dress()
         return self
 
+    def used_cells(self):
+        return [[int(self.WX[i, j]) - self.C[0], int(self.WZ[i, j]) - self.C[1], int(self.KIND[i, j]), int(self.K[i, j])]
+                for i, j in np.argwhere((self.KIND > 0) & self.INSIDE)]
+
+    def doors(self):
+        """Where each area's door is, in world terms: the door cell on its edge, the step outside it and the
+        height of the path there, and the side of the box it is on as a compass letter (n, s, e, w)."""
+        out = []
+        for ar in self.areas:
+            side = ar["side"]; box = tuple(ar["box"])
+            dr, da = self.door_cell(box, side)
+            fr, fa = {"r-": (-1, 0), "r+": (1, 0), "a-": (0, -1), "a+": (0, 1)}[side]   # outward
+            ox, oz = fr * self.Rt[0] + fa * self.F[0], fr * self.Rt[1] + fa * self.F[1]
+            x, z = self.world(dr, da); sx, sz = x + ox, z + oz
+            k = int(self.K[self.ij(sx, sz)])
+            sy = (k - 1) // 2 if k >= 0 else int(self.TOP[self.ij(sx, sz)])
+            letter = {(0, -1): "n", (0, 1): "s", (1, 0): "e", (-1, 0): "w"}[(ox, oz)]
+            out.append({"cell": [x - self.C[0], z - self.C[1]], "step": [sx - self.C[0], sz - self.C[1]], "stepY": sy, "side": letter})
+        return out
+
     def export(self):
         m = self.reach
         cols = []
@@ -527,6 +548,9 @@ class Starter:
             "frame": {"right": list(self.Rt), "ahead": list(self.F)},
             "wall": {"radii": self.wall_r, "radiiAt": WALL_BASE, "gateAngle": self.wall_ang},
             "areas": self.areas, "buildings": self.buildings, "fixtures": self.fixtures,
+            "used": self.used_cells(),   # [dx, dz, kind, k] of every planned cell inside the wall: kind 1 walk, 2 lane,
+                                         # 3 main, 4 square, 5 area, 6 hall ground; k = path surface in half blocks (-1 off paths)
+            "doors": self.doors(),       # per area index: {cell, step, stepY, side} in world dx, dz (for the game's slots)
             "columns": cols,   # [dx, dz, top, oldTop, water]
             "blocks": [[x - self.C[0], y, z - self.C[1], n, p] for (x, y, z), (n, p) in sorted(self.blocks.items())],
         }
