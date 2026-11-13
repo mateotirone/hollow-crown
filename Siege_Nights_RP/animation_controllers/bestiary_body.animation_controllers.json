@@ -2,21 +2,85 @@
  "format_version": "1.10.0",
  "animation_controllers": {
   "controller.animation.siege_b.body": {
-   "initial_state": "lying",
+   "initial_state": "start",
    "states": {
-    "lying": {
-     "animations": [
-      "fall"
-     ],
+    "start": {
      "transitions": [
       {
-       "fading": "query.property('siege:fading')"
+       "lying_back": "query.property('siege:pose') == 0"
+      },
+      {
+       "lying_side": "query.property('siege:pose') == 1"
+      },
+      {
+       "lying_flat": "query.property('siege:pose') == 2"
+      },
+      {
+       "lying_belly_up": "query.property('siege:pose') == 3"
       }
      ]
     },
-    "fading": {
+    "lying_back": {
      "animations": [
-      "down",
+      "fall_back"
+     ],
+     "transitions": [
+      {
+       "fading_back": "query.property('siege:fading')"
+      }
+     ]
+    },
+    "fading_back": {
+     "animations": [
+      "down_back",
+      "sink"
+     ]
+    },
+    "lying_side": {
+     "animations": [
+      "fall_side"
+     ],
+     "transitions": [
+      {
+       "fading_side": "query.property('siege:fading')"
+      }
+     ]
+    },
+    "fading_side": {
+     "animations": [
+      "down_side",
+      "sink"
+     ]
+    },
+    "lying_flat": {
+     "animations": [
+      "fall_flat"
+     ],
+     "transitions": [
+      {
+       "fading_flat": "query.property('siege:fading')"
+      }
+     ]
+    },
+    "fading_flat": {
+     "animations": [
+      "down_flat",
+      "sink"
+     ]
+    },
+    "lying_belly_up": {
+     "animations": [
+      "fall_belly_up"
+     ],
+     "transitions": [
+      {
+       "fading_belly_up": "query.property('siege:fading')"
+      }
+     ]
+    },
+    "fading_belly_up": {
+     "animations": [
+      "down_belly_up",
       "sink"
      ]
     }

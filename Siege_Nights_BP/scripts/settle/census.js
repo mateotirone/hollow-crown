@@ -7,7 +7,7 @@
 //   matches(t) -> [{ id, ok, missing }]   every CONTENTS rule, checked
 //   bedCap(t) -> how many beds may count
 
-import { CONTENTS, BLOCK_GROUPS, FLOOR_PER_BED } from "./config.js";
+import { CONTENTS, BLOCK_GROUPS, FLOOR_PER_BED, SETTLERS } from "./config.js";
 
 export function tally(cells) {
   const groups = Object.fromEntries(Object.keys(BLOCK_GROUPS).map((g) => [g, 0]));
@@ -49,3 +49,46 @@ export function matches(t) {
 
 export const bedCap = (t) => Math.floor(t.roofed / FLOOR_PER_BED);
 export const bedsCounted = (t) => Math.min(t.groups.bed ?? 0, bedCap(t));
+
+// Where a Rival Lord's crew puts beds in a home they finished (players furnish their own). Pure, Node-tested.
+// cells: scan cells as for tally(). Returns up to `cap` beds as [{ foot, head, dir }] relative to the box corner
+// and floor (y 1 = standing on the floor). A bed needs both halves on floor, two blocks of headroom, a roof
+// overhead, at least two blocks from a door, and never touches another bed. Spots against a wall go first.
+// dir is the bed block's "direction" state: the head lies that way from the foot (0 +z, 1 -x, 2 -z, 3 +x).
+const BED_STEP = [[0, 1], [-1, 0], [0, -1], [1, 0]];
+export function bedPlaces(cells, cap) {
+  if (!(cap > 0)) return [];
+  const at = new Set(cells.map((c) => `${c.x},${c.y},${c.z}`));
+  const covered = new Set(cells.filter((c) => c.y >= 3).map((c) => `${c.x},${c.z}`));
+  const doors = cells.filter((c) => c.y === 1 && BLOCK_GROUPS.door.test(c.id));
+  const has = (x, y, z) => at.has(`${x},${y},${z}`);
+  const free = (x, z) => has(x, 0, z) && !has(x, 1, z) && !has(x, 2, z) && covered.has(`${x},${z}`) && !doors.some((d) => Math.abs(d.x - x) <= 2 && Math.abs(d.z - z) <= 2);
+  const wallBy = (x, z) => BED_STEP.filter(([dx, dz]) => has(x + dx, 1, z + dz)).length;
+  const spots = [];
+  for (const c of cells) {
+    if (c.y !== 0 || !free(c.x, c.z)) continue;
+    for (let dir = 0; dir < 4; dir++) {
+      const [dx, dz] = BED_STEP[dir];
+      const hx = c.x + dx, hz = c.z + dz;
+      if (!free(hx, hz)) continue;
+      // head against a wall reads as a bed; foot sides against walls are fine too
+      const score = (has(hx + dx, 1, hz + dz) ? 4 : 0) + wallBy(c.x, c.z) + wallBy(hx, hz);
+      spots.push({ foot: { x: c.x, y: 1, z: c.z }, head: { x: hx, y: 1, z: hz }, dir, score });
+    }
+  }
+  spots.sort((a, b) => b.score - a.score || a.foot.x - b.foot.x || a.foot.z - b.foot.z || a.dir - b.dir);
+  const taken = [];
+  const near = (p) => taken.some((q) => Math.abs(q.x - p.x) + Math.abs(q.z - p.z) <= 1);
+  const out = [];
+  for (const s of spots) {
+    if (out.length >= cap) break;
+    if (near(s.foot) || near(s.head)) continue;
+    out.push({ foot: s.foot, head: s.head, dir: s.dir });
+    taken.push(s.foot, s.head);
+  }
+  return out;
+}
+
+// How many newcomers a Rival Lord's town takes when a player comes near: one a dawn since it was last counted,
+// at most SETTLERS.lordCatchUp (a town first seen today takes one)
+export const lordArrivals = (lastDawn, day) => Math.max(1, Math.min(SETTLERS.lordCatchUp, Number.isFinite(lastDawn) ? day - lastDawn : 1));

@@ -33,7 +33,9 @@ const jobs = []; // running builds
 
 // job: { id, dimensionId, origin, forward, plan, style, perTick, clearBox?: { min, max } (world coords, inclusive),
 //        keep?: [{x,y,z}] (cornerstone spots the clear must not lose), remove?: [{x,y,z}] (world coords, taken down first),
-//        removeAs?(at, block) (fills a removed block with something other than air, or null keeps it), skip?(x, y, z) (cells left alone), index?, onProgress?(fraction, done, total), onDone?() }
+//        removeAs?(at, block) (fills a removed block with something other than air, or null keeps it), skip?(x, y, z) (cells left alone), index?, onProgress?(fraction, done, total), onDone?(),
+//        ground?: { step(dim, budget) -> "wait" | "more" | "done" } (groundwork round the build, e.g. settle/ground.js
+//        Groundwork: the terraform pad and skirt), run after clearing and before the footings }
 // clearBox: everything in it is taken down first (top layer first), except a Hall Cornerstone, so an old
 // hall never leaves pieces behind.
 export function startBuild(job) {
@@ -42,7 +44,7 @@ export function startBuild(job) {
   job.columns = [...job.plan.columns.values()];
   job.index ??= 0;
   job.layer = job.clearBox ? job.clearBox.max.y : undefined;
-  job.stage = job.index ? "cells" : job.clearBox ? "clear" : job.remove?.length ? "remove" : "columns";
+  job.stage = job.index ? "cells" : job.clearBox ? "clear" : job.remove?.length ? "remove" : job.ground ? "ground" : "columns";
   job.cursor = 0;
   job.lastLayer = -1;
   job.waited = 0;
@@ -92,7 +94,7 @@ function step(job) {
       job.layer--;
     }
     report(job);
-    if (job.layer < min.y) { job.stage = job.remove?.length ? "remove" : "columns"; job.cursor = 0; }
+    if (job.layer < min.y) { job.stage = job.remove?.length ? "remove" : job.ground ? "ground" : "columns"; job.cursor = 0; }
     return true;
   }
 
@@ -107,7 +109,14 @@ function step(job) {
       if (to && !(at.x === job.origin.x && at.y === job.origin.y && at.z === job.origin.z) && block.typeId !== CORNERSTONE) block.setPermutation(to);
       job.cursor++;
     }
-    if (job.cursor >= job.remove.length) { job.stage = "columns"; job.cursor = 0; }
+    if (job.cursor >= job.remove.length) { job.stage = job.ground ? "ground" : "columns"; job.cursor = 0; }
+    return true;
+  }
+
+  if (job.stage === "ground") {
+    const r = job.ground.step(dim, budget);
+    if (r === "wait") return false;
+    if (r === "done") { job.stage = "columns"; job.cursor = 0; }
     return true;
   }
 
@@ -122,7 +131,7 @@ function step(job) {
     return true;
   }
 
-  while (budget-- > 0 && job.index < job.cells.length) {
+  while ((budget-- > 0 || job.cells[job.index - 1]?.pair) && job.index < job.cells.length) { // a door's halves go in one tick
     const c = job.cells[job.index];
     if (!setCell(dim, job, c.x, c.y, c.z, c.role, c.o)) return false;
     job.index++;

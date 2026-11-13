@@ -44,17 +44,24 @@ HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from bp import Blueprint
 from kit import h3, VALE, mix
 import towngen_build as TB
+import terraform as TF
 import dressing, vale, vale_civic
 
 SITES = {
     # map towns (centre = the square genworld writes; town-sites.json)
     "Millbrook": dict(centre=(-60, -470), radius=70, size="town", fixed_square=True, square_r=7, seed=11,
                       roofs={"dark shingle": 5, "slate": 3, "warm red": 2}, accent="slate",
+                      first=("chapel",),        # Sister Wren's chapel claims its place on the square (storyline audit)
+                      first_r=13,               # its door 13 out: the Seneschal's clock posts ring the square at 10 (well_plan.js)
                       civic=[("chapel", lambda: vale_civic.chapel(name="millbrook_chapel")),
-                             ("clock tower", vale_civic.clock_tower)]),
+                             ("clock tower", vale_civic.clock_tower),
+                             ("bakery", lambda: __import__("story_builds").build("bakery")),
+                             ("order waystation", lambda: __import__("story_builds").build("waystation")),
+                             ("breeder's post", lambda: __import__("settle_buildings").town_breeder_yard("vale"))]),
     "Kingsrest": dict(centre=(-118, -118), radius=90, size="town", fixed_square=True, square_r=9, seed=7, inn=True,
                       roofs={"slate": 4, "dark shingle": 3, "warm red": 2, "white": 1}, accent="copper",
-                      civic=[("guildhall", vale_civic.guildhall), ("chapel", vale_civic.chapel)]),
+                      civic=[("guildhall", vale_civic.guildhall), ("chapel", vale_civic.chapel),
+                             ("breeder's post", lambda: __import__("settle_buildings").town_breeder_yard("vale"))]),
     # a farming village on rolling Vale ground west of Kingsrest, clear of plots, wards and rivers (test site)
     "Alder Combe": dict(centre=(-380, -120), radius=60, size="village", fixed_square=False, square_r=7, seed=23, civic=[],
                         roofs={"dark shingle": 4, "slate": 3, "warm red": 2, "copper": 1}, accent="slate"),
@@ -232,7 +239,7 @@ class Town:
         if math.hypot(out[-1][0] - pts[-1][0], out[-1][1] - pts[-1][1]) > 0.3: out.append(tuple(pts[-1]))
         return out
 
-    def lay(self, cells, kind, k_start=None, k_end=None):
+    def lay(self, cells, kind, k_start=None, k_end=None, beyond=0, width=None):
         """Turn a cell route into a street: smooth it, give it half-block heights that never change
         by more than half a block per block, and paint it `WIDTH[kind]` wide."""
         if len(cells) < 2: return None
@@ -251,18 +258,18 @@ class Town:
                 if not (k_end is not None and i == len(hs) - 1): hs[i] = max(min(hs[i], hs[i - 1] + 1), hs[i - 1] - 1, lo[i])
             for i in range(len(hs) - 2, -1, -1):
                 if not (k_start is not None and i == 0): hs[i] = max(min(hs[i], hs[i + 1] + 1), hs[i + 1] - 1, lo[i])
-        r = WIDTH[kind] / 2.0; p = PRIO[kind]
+        r = (width or WIDTH[kind]) / 2.0; p = PRIO[kind]
         for (x, z), k in zip(pts, hs):
             for dx in range(-int(r) - 1, int(r) + 2):
                 for dz in range(-int(r) - 1, int(r) + 2):
                     cx, cz = int(round(x)) + dx, int(round(z)) + dz
-                    if (cx + 0.0 - x) ** 2 + (cz + 0.0 - z) ** 2 > r * r + 0.15 or not self.inside(cx, cz): continue
+                    if (cx + 0.0 - x) ** 2 + (cz + 0.0 - z) ** 2 > r * r + 0.15 or not self.inside(cx, cz, -beyond) or not self.ok(cx, cz): continue
                     i, j = self.ij(cx, cz)
                     if self.KIND[i, j] >= p: continue
                     if self.TAKEN[i, j] >= 2: continue
                     if self.WET[i, j] and not self.at(self.WET, int(round(x)), int(round(z))): continue   # a bank, not a bridge
                     self.K[i, j] = k; self.KIND[i, j] = p
-        rd = {"kind": kind, "pts": pts, "k": hs}
+        rd = {"kind": kind, "pts": pts, "k": hs, "width": width or WIDTH[kind]}
         self.roads.append(rd)
         self._near = self._dilate(self.KIND > 0, 3) & ~(self.KIND > 0)
         return rd
@@ -280,14 +287,20 @@ class Town:
         sqcells = [(int(i) + self.X0, int(j) + self.Z0) for i, j in self.square_cells]
         ring = [c for c in sqcells if any(self.at(self.KIND, c[0] + dx, c[1] + dz) == 0 for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)))]
         # gates: where the map's roads leave the circle
-        gates = []
+        gates = []; self.gate_out = {}
         for name, pts in list(self.L["roads"].items()) + list(self.L["trails"].items()):
             pts = self.resample(pts, 1.0)
             ins = [self.inside(int(round(x)), int(round(z)), 3) for x, z in pts]
             for t in range(1, len(pts)):
                 if ins[t] != ins[t - 1]:
                     x, z = pts[t] if ins[t] else pts[t - 1]
-                    gates.append((int(round(x)), int(round(z)), name, "trail" if name in self.L["trails"] else "road"))
+                    g = (int(round(x)), int(round(z)), name, "trail" if name in self.L["trails"] else "road")
+                    gates.append(g)
+                    # the map road on out past the edge (Mateo 2026-11-12: paths run to the plot's edge, and
+                    # through the wall, where the gate goes)
+                    run = pts[t:] if ins[t - 1] else pts[t - 1::-1]
+                    out = [(int(round(a)), int(round(b))) for a, b in run[:120]]
+                    self.gate_out[g[:2]] = [c for k, c in enumerate(out) if k == 0 or c != out[k - 1]]
         merged = []
         for g in gates:
             if all(math.hypot(g[0] - m[0], g[1] - m[1]) > 14 for m in merged): merged.append(g)
@@ -299,10 +312,14 @@ class Town:
             if not self.at(self.WET, x, z) and all(math.hypot(x - m[0], z - m[1]) > 20 for m in merged): merged.append((x, z, "country lane", "lane"))
             else: ang0 += 17
         self.gates = merged
-        # main streets: each gate in to the square
+        # main streets: each gate in to the square, and on out through the edge
         for gx, gz, name, kind in merged:
             path = self.astar((gx, gz), ring, "main")
-            if path: self.lay(path[::-1], "main" if kind == "road" else "lane", k_start=self.k_at(*path[-1]))
+            if not path: print("no street from gate", (gx, gz), name); continue
+            rk = "main" if kind == "road" else "lane"
+            rd = self.lay(path[::-1], rk, k_start=self.k_at(*path[-1]))
+            self.street_out((gx, gz), rk)
+
         # a back lane ringing the middle of town: with the streets running in, it boxes the land
         # into portions (inner blocks to build on, outer sectors for fields)
         self.ring_lane()
@@ -340,6 +357,47 @@ class Town:
             path = path + tail[1:]; ke = self.k_at(*tail[-1])
             rd = self.lay(path, "lane", k_start=self.k_at(sx, sz), k_end=ke)
             if rd: mains.append(rd); nl -= 1
+
+
+    def street_out(self, gate, kind):
+        """Carry a street from its gate (3 inside the edge) out past the edge, along the map road where there is
+        one, else straight out from the centre, so it crosses the wall line (an arch) and meets the country."""
+        gx, gz = gate
+        out = self.gate_out.get((gx, gz)) if hasattr(self, "gate_out") else None
+        if not out:
+            dx, dz = gx - self.C[0], gz - self.C[1]; d = math.hypot(dx, dz) or 1
+            out = [(int(round(gx + dx / d * t)), int(round(gz + dz / d * t))) for t in range(0, 16)]
+        # Mateo 2026-11-13 (Kingsrest playtest): a street runs right out to the end of the town's ward (the map
+        # plot, plots/config.js WARDS), where the map's road picks it up; stopping at the town circle left a grass gap
+        ward = self.ward()
+        def out_of_ward(c):
+            if ward: return math.hypot(c[0] - ward[0], c[1] - ward[1]) > ward[2] + 2 and not self.inside(c[0], c[1], -4)
+            return not self.inside(c[0], c[1], -4)
+        if out and not out_of_ward(out[-1]):        # the map road's run stops short of the ward edge: carry on straight
+            (ax, az), (bx, bz) = out[max(0, len(out) - 6)], out[-1]; d = math.hypot(bx - ax, bz - az) or 1
+            out = out + [(int(round(bx + (bx - ax) / d * t)), int(round(bz + (bz - az) / d * t))) for t in range(1, 80)]
+        cells = [(gx, gz)]
+        for c in out:
+            if c == (gx, gz) or c == cells[-1]: continue
+            if not self.ok(*c) or self.at(self.WET, *c): break
+            cells.append(c)
+            if out_of_ward(c): break
+        if len(cells) < 3 or self.inside(cells[-1][0], cells[-1][1], -2): print("no way out from gate", gate, len(cells)); return None
+        k0 = int(self.at(self.K, gx, gz)) if self.at(self.K, gx, gz) >= 0 else None
+        reach = max(6, int(max(math.hypot(c[0] - self.C[0], c[1] - self.C[1]) for c in cells) - self.R) + 3)
+        rd = self.lay(cells, kind, k_start=k0, beyond=reach)
+        return rd
+
+    _WARDS = None
+    def ward(self):
+        """(x, z, r) of this town's ward in plots/config.js WARDS, or None."""
+        if Town._WARDS is None:
+            import re
+            try: src = open(os.path.join(HERE, "..", "..", "Siege_Nights_BP", "scripts", "plots", "config.js"), encoding="utf8").read()
+            except OSError: src = ""
+            Town._WARDS = {m[0]: (int(m[1]), int(m[2]), int(m[3])) for m in
+                           re.findall(r'\{ name: "([^"]+)", x: (-?\d+), z: (-?\d+), r: (\d+)', src)}
+        return Town._WARDS.get(self.name)
 
     def ring_lane(self):
         rr = self.R * (0.5 if self.big else 0.46)
@@ -435,6 +493,8 @@ class Town:
         return [(door_xz[0] + f[0] * t - f[1] * s, door_xz[1] + f[1] * t + f[0] * s) for t in range(self.LANDING) for s in (-1, 0, 1)]
 
     FLOOR_HIGHEST = True
+    TERRAFORM = True     # Mateo 2026-11-13 (Enshrouded-style): every placement is a pad + blend skirt + connectors, and the
+                         # land round them is solved once by terraform.py; the floor may cut in up to 3 below the highest block
     ROAD_FIT = 2         # half blocks: no path beside a plot is more than a block above its floor,
     ROAD_DROP = 4        # nor more than two below it (the walkway climbs to the door with a stair)
     def try_place(self, bp, deg, door_xz, kind, gap=1, max_relief=6, need_walk=True, extra=None):
@@ -454,7 +514,11 @@ class Town:
             for x, z in extra:
                 i, j = self.ij(x + ox, z + oz)
                 if not self.inside(x + ox, z + oz, 2) or self.K[i, j] >= 0 or self.WET[i, j] or self.TAKEN[i, j]: return None
-        hs = np.array([self.at(self.G, x, z) for x, z in G])
+        # Mateo 2026-11-13 (the capital hall's garden stood a block above the street): the floor is the highest
+        # ground under the building itself; open ground in the stamp (gardens, yards, paddocks) follows the land
+        opn = {(x + ox, z + oz) for x, z in (rot_xz(a, b, deg) for a, b in self.open_cols(bp))}
+        Gc = [c for c in G if c not in opn] or G
+        hs = np.array([self.at(self.G, x, z) for x, z in Gc])
         if hs.max() - hs.min() > max_relief: return None
         # paths first (Mateo 2026-11-11): the floor is graded to the paths round the plot, never left
         # a block or more above or below them
@@ -482,9 +546,12 @@ class Town:
             k_road = self.k_at(*end)
         # floor height: balance digging in against building up, and keep the walkway walkable
         best = None
-        # Mateo 2026-11-11: a building stands on the highest ground block it covers; everything below
-        # is stone foundation (never cut in, so no side is buried)
-        for yf in ([int(hs.max())] if self.FLOOR_HIGHEST else range(y_lo, y_hi + 1)):
+        # terraform (Mateo 2026-11-13): the floor balances cutting in against building up, at most MAX_BELOW under the
+        # highest block, and the skirt blends the land to it. Without it (Mateo 2026-11-11) the floor is the highest
+        # ground block and everything below is stone foundation.
+        top = int(hs.max())
+        cands = range(max(y_lo, top - TF.MAX_BELOW), top + 1) if self.TERRAFORM else [top] if self.FLOOR_HIGHEST else range(y_lo, y_hi + 1)
+        for yf in cands:
             if len(near_k) and ((near_k - (2 * yf + 1)).max() > self.ROAD_FIT or ((2 * yf + 1) - near_k).max() > self.ROAD_DROP): continue
             if yf < hs.min() - 2 or yf > hs.max() + 2: continue
             cost = float(np.abs(hs - yf).sum()) + 0.6 * float(np.maximum(0, yf - hs).sum())   # fill shows; cutting is tidier
@@ -512,6 +579,10 @@ class Town:
             if self.WET[i, j]: return None
             if self.K[i, j] >= 0: continue                     # a street beside the landing keeps its own height
             if self.TAKEN[i, j] >= 2 or not (yf - self.LANDING_FILL <= self.G[i, j] <= yf + 1): return None
+        # open ground: down to the land (or the street beside it), at most OPEN_DROP, a block a step at most
+        per = self.open_levels(opn & set(G), set(G), yf) if opn else {}
+        if any(v < yf for v in per.values()):
+            bp = self.dropped(bp, deg, ox, oz, {c: yf - v for c, v in per.items() if v < yf})
         # commit
         for x, z in land:
             i, j = self.ij(x, z)
@@ -535,28 +606,88 @@ class Town:
         e = {"stamp": bp.name, "kind": kind, "x": ox, "z": oz, "ground_y": yf, "rotation": deg, "footprint": len(G), "foundation": int(yf - hs.min()),
              "door": [door_xz[0], door_xz[1]]}
         self.plan.append(e); self.designs[bp.name] = bp
-        self.foundation(G, yf, extra=[(x + ox, z + oz) for x, z in extra] if extra else None)
+        self.foundation(G, yf, extra=[(x + ox, z + oz) for x, z in extra] if extra else None, per=per, land=land)
         if need_walk: self.walkway(cells, yf, k_road, ROT[deg])
         return e
 
-    def foundation(self, G, yf, extra=None):
+    OPEN_DROP = 3
+    OPEN_NAMES = ("leaves", "wall", "fence", "lantern", "grass", "flower", "tulip", "poppy", "dandelion", "cornflower",
+                  "daisy", "allium", "bluet", "lily_of", "rose_bush", "lilac", "peony", "fern", "sapling", "hay_block",
+                  "cauldron", "torch", "gravel", "path", "carpet", "air", "keep")
+    def open_cols(self, bp):
+        """Local columns of a stamp that are open ground: nothing above the ground but garden things (beds, hedges,
+        low walls and fences, lamps, trees, troughs). Cached on the blueprint."""
+        if getattr(bp, "_open_cols", None) is not None: return bp._open_cols
+        cols = {}
+        for (x, y, z), (n, p) in bp.cells.items():
+            if y < 1: cols.setdefault((x, z), True); continue
+            ok = any(t in n for t in self.OPEN_NAMES) or (n.endswith("_log") and not n.startswith("stripped") and y >= 1)
+            cols[(x, z)] = cols.get((x, z), True) and ok
+        opn = {c for c, ok in cols.items() if ok}
+        # a stamp that is all open ground (a landing proxy, keep_floor) has no building to stand on: leave it whole
+        bp._open_cols = opn if len(opn) < len(cols) and not any(n.startswith("keep_") for n, _ in bp.cells.values()) else set()
+        return bp._open_cols
+
+    def open_levels(self, opn, cells, yf):
+        """Ground level for each open column: the land, or a street beside it, never more than OPEN_DROP below the
+        floor, and a block a step at most from its neighbours (the building's own cells stay at the floor)."""
+        t = {}
+        for x, z in opn:
+            i, j = self.ij(x, z)
+            h = int(self.G[i, j])
+            for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                c = (x + dx, z + dz)
+                if c not in cells and self.ok(*c) and self.at(self.K, *c) >= 0: h = (int(self.at(self.K, *c)) - 1) // 2
+            t[(x, z)] = int(np.clip(h, yf - self.OPEN_DROP, yf))
+        for _ in range(2 * self.OPEN_DROP + 2):
+            ch = False
+            for (x, z), v in t.items():
+                m = v
+                for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                    c = (x + dx, z + dz)
+                    if c in t: m = max(m, t[c] - 1)
+                    elif c in cells: m = max(m, yf - 1)
+                if m != v: t[(x, z)] = m; ch = True
+            if not ch: break
+        return t
+
+    def dropped(self, bp, deg, ox, oz, drop):
+        """A copy of bp for this one placement with its open columns lowered (drop: world cell -> blocks down)."""
+        out = Blueprint(f"{bp.name}_d{ox}_{oz}"); out.notes = list(getattr(bp, "notes", []))
+        out.kind = getattr(bp, "kind", None); out.markers = dict(bp.markers)
+        for (x, y, z), v in bp.cells.items():
+            a, b = rot_xz(x, z, deg); d = drop.get((a + ox, b + oz), 0)
+            out.cells[(x, y - d, z)] = v
+        for k in ("levels",):
+            if hasattr(bp, k): setattr(out, k, getattr(bp, k))
+        return out
+
+    def foundation(self, G, yf, extra=None, per=None, land=None):
         """Cut the plot level with the floor, build a stone foundation down to the ground on the low
-        side, and ease the ground round the building to the floor level."""
-        cells = set(G) | set(extra or [])
+        side, and ease the ground round the building to the floor level (open ground: to its own level).
+        With TERRAFORM the easing is left to terraform(): the plot becomes a pad and its landing a connector."""
+        cells = set(G) | set(extra or []); per = per or {}
         for x, z in cells:
             i, j = self.ij(x, z)
-            g0 = int(self.G[i, j])
-            if g0 < yf:                                            # foundation shows above the slope: dressed stone
-                for y in range(g0 + 1, yf): self.works[(x, y, z)] = VALE["plinth"](x, y, z)
-            for y in range(yf, max(g0, yf) + 1): self.works.setdefault((x, y, z), ("air", {}))
-            self.G[i, j] = yf; self.FIX[i, j] = True
+            g0 = int(self.G[i, j]); yc = per.get((x, z), yf)
+            if g0 < yc:                                            # foundation shows above the slope: dressed stone
+                for y in range(g0 + 1, yc): self.works[(x, y, z)] = VALE["plinth"](x, y, z)
+            for y in range(yc, max(g0, yc) + 1): self.works.setdefault((x, y, z), ("air", {}))
+            self.G[i, j] = yc; self.FIX[i, j] = True
+        if self.TERRAFORM:
+            pad = {self.ij(x, z): per.get((x, z), yf) for x, z in cells}
+            con = {self.ij(x, z): int(self.at(self.G, x, z)) for x, z in (land or []) if self.ok(x, z) and self.at(self.K, x, z) < 0}
+            self.__dict__.setdefault("tf_sites", []).append(TF.Site(pad=pad, connectors=con))
+            return
         # apron and banks round it
         ring = set()
         for x, z in cells:
             for d in ((1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)):
                 c = (x + d[0], z + d[1])
                 if c not in cells and self.ok(*c): ring.add(c)
-        cur = {c: yf for c in ring}
+        cur = {c: min([per.get(n, yf) for n in ((c[0] + 1, c[1]), (c[0] - 1, c[1]), (c[0], c[1] + 1), (c[0], c[1] - 1),
+                                                    (c[0] + 1, c[1] + 1), (c[0] - 1, c[1] - 1), (c[0] + 1, c[1] - 1), (c[0] - 1, c[1] + 1)) if n in cells] or [yf])
+               for c in ring}
         for step in range(4):
             nxt = {}
             for (x, z), h in cur.items():
@@ -628,14 +759,14 @@ class Town:
     def place_square_buildings(self):
         """Civic buildings and the inn on the square's edge, facing in."""
         out = []
-        makers = list(self.site.get("civic", []))
+        makers = [m for m in self.site.get("civic", []) if m[0] not in self.site.get("first", ())]
         if self.site.get("inn"): makers.insert(0, ("inn", lambda: vale.coaching_inn(style="tudor")))
         for name, mk in makers:
             bp = mk(); bp.kind = "civic"
             done = None
             for k in range(72):
                 a = 2 * math.pi * (k * 0.618 % 1)
-                for extra_r in (1, 2, 3, 5):
+                for extra_r in (1, 2, 3, 5, 7, 9, 11):
                     rr = self.sqR + 1 + extra_r
                     x, z = self.sq[0] + math.cos(a) * rr, self.sq[1] + math.sin(a) * rr
                     deg = snap_rot(self.sq[0] - x, self.sq[1] - z)
@@ -643,9 +774,10 @@ class Town:
                     if done: done["name"] = name; break
                 if done: break
             if not done: done = self.civic_on_street(bp, name)
+            if not done: done = self.civic_on_street(bp, name, near=self.sq, relief=9)   # anywhere on a street, nearest first
             if not done: print("no room for", name)
 
-    def civic_on_street(self, bp, name):
+    def civic_on_street(self, bp, name, near=None, relief=6):
         """Civic buildings that don't fit round the square front the main streets, nearest the square first."""
         cands = []
         for rd in self.roads:
@@ -659,10 +791,11 @@ class Town:
                     for sb in (1, 2, 3):
                         door = (int(round(x + nx * (hw + 0.5 + sb))), int(round(z + nz * (hw + 0.5 + sb))))
                         cands.append((math.hypot(door[0] - self.sq[0], door[1] - self.sq[1]), door, snap_rot(-nx, -nz)))
+        if near: cands = [(math.hypot(d[0] - near[0], d[1] - near[1]), d, g) for _, d, g in cands]
         cands.sort()
         for dist, door, deg in cands:
-            if dist > 0.7 * self.R: break
-            e = self.try_place(bp, deg, door, "civic", gap=1, max_relief=6)
+            if not near and dist > 0.7 * self.R: break
+            e = self.try_place(bp, deg, door, "civic", gap=1, max_relief=relief)
             if e: e["name"] = name; return e
         return None
 
@@ -756,7 +889,7 @@ class Town:
                 q = self.nearest_street(x, z)
                 if not q: break
                 deg = snap_rot(q[0] - x, q[1] - z); f = ROT[deg]
-                bp = TB.windmill(self.seed * 31 + L)
+                bp = TB.windmill(self.seed * 31 + L, getattr(self, "region", "vale"))
                 e = self.try_place(bp, deg, (x + f[0] * 4, z + f[1] * 4), "windmill", gap=2, max_relief=4, need_walk=False)
                 if not e: continue
                 p["windmill"] = [x, z]
@@ -903,19 +1036,7 @@ class Town:
             st = dressing.stall(self.seed + k)
             ox, oz = rot_xz(1, 1, deg)
             self.stamp(st, int(round(x - ox)), int(round(z - oz)), self.sqY, deg, "stall")
-        # lamps along main streets on the verge, trees in the gaps
-        lamp = dressing.lamp()
-        for rd in self.roads:
-            if rd["kind"] not in ("main", "lane"): continue
-            hw = WIDTH[rd["kind"]] / 2.0 + 1
-            for t in range(6, len(rd["pts"]) - 3, 13 if rd["kind"] == "main" else 17):
-                x, z = rd["pts"][t]; (x0, z0), (x1, z1) = rd["pts"][t - 1], rd["pts"][t + 1]
-                d = math.hypot(x1 - x0, z1 - z0) or 1; s = 1 if (t // 13) % 2 else -1
-                lx, lz = int(round(x - (z1 - z0) / d * hw * s)), int(round(z + (x1 - x0) / d * hw * s))
-                if not self.inside(lx, lz, 2): continue
-                i, j = self.ij(lx, lz)
-                if self.K[i, j] >= 0 or self.TAKEN[i, j] or self.WET[i, j]: continue
-                self.stamp(lamp, lx, lz, int(self.G[i, j]), 0, "lamp"); self.TAKEN[i, j] = 4
+        self.light_town()                              # lamps round the square and along every street (Mateo 2026-11-12)
         nt = 0; want = int(26 * (self.R / 70) ** 2)
         if self.tree_index is not None:                # the tree database (map/trees, PR #94) instead of dressing.tree
             self.db_trees(); want = 0
@@ -935,6 +1056,103 @@ class Town:
             r = h3(x, 9, z, self.seed)
             if r < 0.06: self.works.setdefault((x, int(self.G[i, j]) + 1, z), ("short_grass", {}))
             elif r < 0.075: self.works.setdefault((x, int(self.G[i, j]) + 1, z), (dressing.FLOWERS[int(h3(x, 1, z, 3) * len(dressing.FLOWERS))], {}))
+
+    def avenue(self):
+        """A straight paved avenue from site["avenue"][0] to [1] (world points), 19 wide: a 9-wide walk and a 5-deep
+        strip either side for the statues site["avenue_statues"] (n) from faceless_statues.avenue_cells (Sunscar's
+        forty faceless statues of King Oswin, story-areas and world builds threads 2026-11-12). Laid before the
+        streets, so they join it; it runs on out past the town's edge to the Faceless Gate's precinct."""
+        a, b = self.site["avenue"]
+        n = max(1, int(math.hypot(b[0] - a[0], b[1] - a[1])))
+        cells = []
+        for t in range(n + 1):
+            c = (int(round(a[0] + (b[0] - a[0]) * t / n)), int(round(a[1] + (b[1] - a[1]) * t / n)))
+            if not cells or c != cells[-1]: cells.append(c)
+        self.avenue_road = self.lay(cells, "main", beyond=40, width=19)
+
+    def avenue_statues(self):
+        """The statues on the avenue's strips, standing on the paving (y 0 = the street block, replacing the slab)."""
+        if not getattr(self, "avenue_road", None) or not self.site.get("avenue_statues"): return
+        try:
+            import faceless_statues
+            cs = faceless_statues.avenue_cells([tuple(p) for p in self.site["avenue"]], n=self.site["avenue_statues"])
+        except (ImportError, AttributeError) as e:
+            print("avenue statues not built yet:", e); return
+        for (x, y, z), (blk, props) in cs.items():
+            if not self.ok(x, z): continue
+            k = int(self.K[self.ij(x, z)])
+            if k < 0: continue
+            self.works[(x, (k - 1) // 2 + y, z)] = (blk, props)
+
+    LAMP_EVERY = {"main": 9, "lane": 11, "walk": 13}   # blocks between lamps along a street, sides alternating
+    LAMP_REACH = 7                                       # no lamp within this of another (a lantern lights ~7 round)
+
+    def lamp_region(self):
+        r = getattr(self, "region", None) or getattr(self, "arch", None) or "vale"
+        return {"frostmarch": "frost", "saltreach": "salt", "emberwaste": "ember", "blackfen": "fen"}.get(r, r)
+
+    def lamp_spot_ok(self, x, z, lamps, margin=1):
+        if not self.inside(x, z, margin): return False
+        i, j = self.ij(x, z)
+        t = int(self.TAKEN[i, j])                 # 1 (a building's gap) and 3 (a field's edge, not its water) take a lamp
+        if self.K[i, j] >= 0 or t in (2, 4) or t > 4 or self.WET[i, j]: return False
+        if t == 3 and self.works.get((x, int(self.G[i, j]), z), ("",))[0] == "water": return False
+        if getattr(self, "EAVES", None) is not None and self.EAVES[i, j]: return False
+        if getattr(self, "HALL", None) is not None and self.HALL[i, j]: return False
+        if getattr(self, "station_axis", None):     # never in the railway's space (local z -6..1 behind the station),
+            sx, sz, sdeg = self.station_axis         # with 2 to spare for the lamp's arm (restamp thread, 2026-11-13)
+            nx, nz = rot_xz(0, 1, sdeg)
+            if -8 <= (x - sx) * nx + (z - sz) * nz <= 3: return False
+        return all((x - a) ** 2 + (z - b) ** 2 >= self.LAMP_REACH ** 2 for a, b in lamps)
+
+    def put_lamp(self, bp, x, z, y, deg, lamps):
+        self.stamp(bp, x, z, y, deg, "lamp"); self.TAKEN[self.ij(x, z)] = 4; lamps.append((x, z))
+        if hasattr(self, "fixtures"):
+            self.fixtures.append({"name": "lamp", "stamp": bp.name, "at": list(self.rel(x, z)), "ground_y": y, "rotation": deg,
+                                  "tier": min(3, int(self.OT[self.ij(x, z)])) if hasattr(self, "OT") else 0})
+
+    def light_town(self):
+        """Light every town (Mateo 2026-11-12: "none of the towns have light ... the town generation needs to
+        factor in lamps"). Lamps with an arm and a hanging lantern round the square's edge, one every ~8 blocks;
+        then posts along every street on the verge, sides alternating, every LAMP_EVERY blocks, shifted a block
+        or two when the spot is taken, and never closer than LAMP_REACH to another lamp. Region style from
+        dressing.LAMP_STYLE. A town can opt out with dark=True on its site (a story place that must stay dark)."""
+        if self.site.get("dark"): return
+        reg = self.lamp_region(); post = dressing.lamp(reg); arm = dressing.lamp(reg, arm=True)
+        lamps = []
+        # the square: just outside its paving, facing in (the arm reaches over the square)
+        n = max(4, int(round(2 * math.pi * (self.sqR + 1) / 8)))
+        a0 = self.rng.random() * 6.28
+        for k in range(n):
+            a = a0 + 2 * math.pi * k / n
+            for dr in (1, 2, 0):
+                x, z = int(round(self.sq[0] + math.cos(a) * (self.sqR + dr))), int(round(self.sq[1] + math.sin(a) * (self.sqR + dr)))
+                if dr == 0:                              # on the paving's edge: the foot replaces the sunk slab
+                    if not self.ok(x, z) or self.K[self.ij(x, z)] < 0: continue
+                    if any((x - p) ** 2 + (z - q) ** 2 < 25 for p, q in lamps): continue
+                    if self.TAKEN[self.ij(x, z)]: continue
+                    self.put_lamp(arm, x, z, int(self.sqY) - 1, snap_rot(self.sq[0] - x, self.sq[1] - z), lamps); break
+                if self.lamp_spot_ok(x, z, [l for l in lamps]) and abs(int(self.G[self.ij(x, z)]) - self.sqY) <= 1:
+                    self.put_lamp(arm, x, z, int(self.G[self.ij(x, z)]), snap_rot(self.sq[0] - x, self.sq[1] - z), lamps); break
+        # the streets
+        for rd in self.roads:
+            every = self.LAMP_EVERY.get(rd["kind"])
+            if not every: continue
+            hw = rd.get("width", WIDTH[rd["kind"]]) / 2.0 + 1
+            pts = rd["pts"]
+            for n_, t in enumerate(range(3, len(pts) - 2, every)):
+                s = 1 if n_ % 2 else -1
+                done = False
+                for dt in (0, 1, -1, 2, -2, 3, -3):
+                    tt = t + dt
+                    if tt < 1 or tt >= len(pts) - 1: continue
+                    x, z = pts[tt]; (x0, z0), (x1, z1) = pts[tt - 1], pts[tt + 1]
+                    d = math.hypot(x1 - x0, z1 - z0) or 1
+                    for side in (s, -s):
+                        lx, lz = int(round(x - (z1 - z0) / d * hw * side)), int(round(z + (x1 - x0) / d * hw * side))
+                        if not self.lamp_spot_ok(lx, lz, lamps): continue
+                        self.put_lamp(post, lx, lz, int(self.G[self.ij(lx, lz)]), 0, lamps); done = True; break
+                    if done: break
 
     tree_index = None; tree_dir = None; tree_src = None
     TOWN_TREES = {"vale": {"vale_great_oak": 2, "vale_ash": 2, "vale_silver_birch": 1, "vale_apple": 1, "vale_hawthorn": 1},
@@ -1044,6 +1262,7 @@ class Town:
 
     # =========================================================================== paths to blocks
     def path_blocks(self):
+        self.terraform()
         wet = {}
         for i, j in np.argwhere(self.K >= 0):
             x, z = int(i) + self.X0, int(j) + self.Z0
@@ -1098,7 +1317,7 @@ class Town:
         self.bridge_plans, quays = [], []
         self.bridge_clear = {}
         for c in BR.crossings_from_cells(set(wet), walk, lambda x, z: water(x, z) if water(x, z) is not None else int(self.WL[self.ij(x, z)]),
-                                         lambda c: wet[c], region=self.region, path="town", rejects=quays):
+                                         lambda c: wet[c], region={"frost": "frostmarch", "salt": "saltreach", "ember": "emberwaste", "fen": "blackfen"}.get(self.region, self.region), path="town", rejects=quays):
             c.pop("_cells", None)
             c["ground"] = ground; c["name"] = f"{self.key}_bridge{len(self.bridge_plans)}"
             built = {cell: b for cell, b in BR.to_works(BR.bridge_blocks(c)).items() if b[0] != "air"}
@@ -1134,6 +1353,29 @@ class Town:
         for (x, z), (lo, hi) in getattr(self, "bridge_clear", {}).items():
             for yy in range(lo, hi): self.works[(x, yy, z)] = ("air", {})
 
+    def terraform(self):
+        """The one terraform pass (terraform.py) over everything placed so far: each plot a pad, its landing a connector,
+        the streets anchors too (paths first: the skirt meets them, they never move), water and ground outside the town
+        left alone. Runs once, after the buildings and before fields and dressing (path_blocks runs it if a town's
+        run() didn't)."""
+        if not self.TERRAFORM or getattr(self, "_terraformed", False): return
+        self._terraformed = True
+        sites = getattr(self, "tf_sites", [])
+        if not sites: return
+        fixed = (self.K >= 0) | self.WET | ~self.IN
+        own = np.zeros(self.G.shape, bool)
+        for s in sites:
+            for c in {**s.pad, **s.connectors}: own[c] = True
+        built = np.zeros(self.G.shape, bool)
+        for (x, y, z), v in self.works.items():
+            if v[0] != "air" and self.ok(x, z): built[self.ij(x, z)] = True
+        fixed |= built & ~own
+        streets = {(int(i), int(j)): (int(self.K[i, j]) - 1) // 2 for i, j in np.argwhere((self.K >= 0) & ~self.WET)}
+        if streets: sites = sites + [TF.Site(pad={}, connectors=streets, skirt=2, skirt_max=3)]
+        T, wall = TF.solve(self.G.astype(int), sites, fixed)
+        self.tf_report = TF.report(self.G.astype(int), T, wall, sites)
+        self.G = np.where(fixed, self.G, T).astype(self.G.dtype)
+
     def ground_blocks(self):
         """Every column the town regraded: top block, fill under it, air over a cut."""
         for i, j in np.argwhere(self.IN & ~self.WET):
@@ -1148,11 +1390,15 @@ class Town:
     # =========================================================================== run
     def run(self):
         self.square()
-        self.streets(); self.relax(); self.grade_verges()
+        self.claim_first()
+        self.streets()
+        for fr in getattr(self, "first_fronts", []): self.front_road(fr)
+        self.relax(); self.grade_verges()
         self.portions()
         self.place_square_buildings()
         self.houses(); self.relax()
         self.windmills()
+        self.terraform()
         self.field_paths()
         self.fences()
         self.fields()
@@ -1205,6 +1451,10 @@ class Town:
              "note": "world coordinates, placed in order; soft entries only fill air; the first groundwork_blocks are the "
                      "groundwork (streets, plots, fields), which the map grades the land to",
              "groundwork_blocks": n_ground, "tree_seats": seats, "palette": pal, "blocks": rows}
+        if not self.site.get("dark"):            # every build lit at night (Mateo 2026-11-13): rooms, doors, yards
+            sys.path.insert(0, os.path.join(HERE, ".."))
+            import light_blocks
+            light_blocks.light_worldblocks(d)
         with open(os.path.join(out, f"{self.key}-blocks.json"), "w") as fh: json.dump(d, fh, separators=(",", ":"), default=int)
         return len(rows)
 
@@ -1258,8 +1508,239 @@ class Town:
         dr.ellipse([c[0] - self.R * S, c[1] - self.R * S, c[0] + self.R * S, c[1] + self.R * S], outline=(160, 40, 40), width=2)
         img.save(os.path.join(out, f"{self.key}-plan.png"))
 
+    # ------------------------------------------------------------------ a railway station on the town's edge
+    def station_site(self, stop, deg, region):
+        """Stamp the Grand Station (the biggest stage, so it claims the ground) with its stop on the line at
+        stop (x, z) and its street front toward the town (deg turns the station's north-facing front), level
+        its ground, keep houses off it, and offer every stage as levels in the 3D view."""
+        import stations
+        x, z = stop; bp = stations.grand(region); bp.kind = "station"
+        g, _ = self.footprint(bp, deg); cells = [(gx + x, gz + z) for gx, gz in g if self.ok(gx + x, gz + z)]
+        y = int(max(self.at(self.G, cx, cz) for cx, cz in cells))
+        self.stamp(bp, x, z, y, deg, "station"); e = self.plan[-1]; e["name"] = "station"; e["footprint"] = len(cells)
+        self.foundation(cells, y)
+        for cx, cz in cells:
+            for dx in (-2, -1, 0, 1, 2):
+                for dz in (-2, -1, 0, 1, 2):
+                    if self.ok(cx + dx, cz + dz): self.TAKEN[self.ij(cx + dx, cz + dz)] = 2
+        (bx0, _, bz0), _ = bp.bounds(); fx, fz = rot_xz(0, bz0 - 1, deg); f = rot_xz(0, -1, deg)
+        self.station_front = ((x + fx, z + fz), f, y)
+        self.station_axis = (x, z, deg); self.wall_region = region
+        self.add_levels("station", e, [(st.capitalize(), bp if st == "grand" else getattr(stations, st)(region)) for st in stations.STAGES], align="origin")
+        return e
+
+    def claim_first(self):
+        """Civic buildings named in site["first"] (Millbrook's chapel: Sister Wren's, on the square) claim their
+        ground facing the square before the streets go down, as the town hall does; a street joins the door."""
+        self.first_fronts = []
+        for name, mk in self.site.get("civic", []):
+            if name not in self.site.get("first", ()): continue
+            bp = mk(); bp.kind = "civic"; done = None
+            for extra_r in range(1, 20, 2):
+                for k in range(72):
+                    a = 2 * math.pi * k / 72
+                    rr = self.sqR + 1 + extra_r
+                    if rr < self.site.get("first_r", 0): continue
+                    x, z = int(round(self.sq[0] + math.cos(a) * rr)), int(round(self.sq[1] + math.sin(a) * rr))
+                    deg = snap_rot(self.sq[0] - x, self.sq[1] - z)
+                    done = self.try_place(bp, deg, (x, z), "civic", gap=1, max_relief=8, need_walk=False)
+                    if done: break
+                if done: break
+            if not done: print("no room for", name); continue
+            done["name"] = name
+            f = ROT[deg]; self.first_fronts.append(((x, z), f, done["ground_y"]))
+
+    def front_road(self, front, kind="main"):
+        """A street from a door (front = (door xz, facing, floor y)) straight on to the streets, or by path search."""
+        (sx, sz), f, yf = front
+        for t in range(1, 60):
+            c = (sx + f[0] * t, sz + f[1] * t)
+            if not self.ok(*c) or self.at(self.WET, *c): break
+            if self.at(self.K, *c) >= 0:
+                self.lay([(sx + f[0] * k, sz + f[1] * k) for k in range(t + 1)], kind, k_start=2 * yf + 1, k_end=int(self.at(self.K, *c))); return
+        goals = [(int(i) + self.X0, int(j) + self.Z0) for i, j in np.argwhere((self.K >= 0) & (self.KIND >= PRIO["lane"]))]
+        p = self.astar((sx, sz), goals, kind, limit=3000) if goals else None
+        if p and len(p) > 1: self.lay(p, kind, k_start=2 * yf + 1, k_end=self.k_at(*p[-1]))
+
+    def station_road(self, kind="main"):
+        """A street from the station's front straight to the town's streets (or by path search if none ahead)."""
+        if not getattr(self, "station_front", None): return
+        (sx, sz), f, yf = self.station_front
+        for t in range(1, 60):
+            c = (sx + f[0] * t, sz + f[1] * t)
+            if not self.ok(*c) or self.at(self.WET, *c): break
+            if self.at(self.K, *c) >= 0:
+                self.lay([(sx + f[0] * k, sz + f[1] * k) for k in range(t + 1)], kind, k_start=2 * yf + 1, k_end=int(self.at(self.K, *c))); return
+        goals = [(int(i) + self.X0, int(j) + self.Z0) for i, j in np.argwhere((self.K >= 0) & (self.KIND >= PRIO["lane"]))]
+        x, z, n = sx, sz, 0
+        while self.ok(x, z) and self.at(self.TAKEN, x, z) >= 2 and n < 30: x, z = x + f[0], z + f[1]; n += 1
+        p = self.astar((x, z), goals, kind, limit=3000) if goals else None
+        if p and len(p) > 1: self.lay([(sx + f[0] * k, sz + f[1] * k) for k in range(n)] + p, kind, k_start=2 * yf + 1, k_end=self.k_at(*p[-1]))
+        else: print("no station road")
+
+    # ------------------------------------------------------------------ town wall
+    WALL_STONE = [("stone_bricks", 6), ("mossy_stone_bricks", 2), ("cracked_stone_bricks", 1), ("andesite", 1)]
+    def town_wall(self, H=5):
+        """A curtain wall on the town's edge (Mateo 2026-11-12: Gull's Rest needs one): 2 thick, crenellated,
+        a taller tower every ~22 blocks, an arch wherever a street crosses, open over water, and the station
+        standing in the line as its own gatehouse."""
+        band = (self.E > self.R - 1.0) & (self.E <= self.R + 1.0) & ~self.WET
+        if getattr(self, "station_axis", None):
+            # the railway runs along the station's back (local z -6..1 kept clear for the passing loop): the
+            # wall never runs beside the track; it turns in and runs straight along the town side of it, meeting
+            # the station as its gatehouse, the way Kingsrest's does (map thread 2026-11-12)
+            sx, sz, sdeg = self.station_axis
+            nx, nz = rot_xz(0, 1, sdeg)
+            ii0, jj0 = np.indices(band.shape)
+            lz = (ii0 + self.X0 - sx) * nx + (jj0 + self.Z0 - sz) * nz
+            band &= ~((lz >= -9) & (lz <= 12))
+            band |= (lz >= -11) & (lz < -9) & (self.E <= self.R + 1.0) & ~self.WET & (self.TAKEN < 2) & (self.K < 0)
+        for cx, cz in self.footprint_cells("station"):
+            for dx in range(-2, 3):
+                for dz in range(-2, 3):
+                    if self.ok(cx + dx, cz + dz): band[self.ij(cx + dx, cz + dz)] = False
+        road = self.K >= 0
+        near = np.zeros_like(band)
+        for di in range(-3, 4):
+            for dj in range(-3, 4): near |= np.roll(np.roll(road, di, 0), dj, 1)
+        kit = self.wall_kit()
+        WS = kit["stone"] if kit else self.WALL_STONE
+        cap = kit["cap"] if kit else "stone_brick_wall"
+        def stone(x, y, z):
+            r = h3(x, y, z, 41) * sum(w for _, w in WS)
+            for m, w in WS:
+                r -= w
+                if r < 0: return (m, {})
+            return (WS[0][0], {})
+        if kit: step = 1e9                                      # towers are the station's own (wall_towers)
+        ii, jj = np.nonzero(band)
+        ang = np.degrees(np.arctan2(jj + self.Z0 - self.C[1], ii + self.X0 - self.C[0])) % 360
+        step = 22 / (2 * math.pi * self.R) * 360 if not kit else 1e9
+        line = []
+        for i, j, a in zip(ii, jj, ang):
+            x, z = int(i) + self.X0, int(j) + self.Z0
+            g = int(self.G[i, j])
+            if road[i, j]:                                          # gate: an arch over the street
+                base = (int(self.K[i, j]) - 1) // 2 + 5
+                for y in range(base, base + 3): self.works[(x, y, z)] = stone(x, y, z)
+                if (x + z) % 2 == 0: self.works[(x, base + 3, z)] = stone(x, base + 3, z)
+                continue
+            tower = (a % step) < step * 0.12
+            top = g + (H + 3 if (tower or near[i, j]) and not kit else H)
+            for y in range(g + 1, top + 1): self.works[(x, y, z)] = stone(x, y, z)
+            if (x * 3 + z) % 2 == 0: self.works[(x, top + 1, z)] = (cap, {})
+            if (tower or near[i, j]) and (x + z) % 7 == 0 and not kit: self.works[(x, top, z)] = ("lantern", {})
+            self.TAKEN[i, j] = 2; line.append((x, z))
+        self.wall_towers(line, H)
+
+    # Mateo 2026-11-12: "a castle-style train station, but not a castle-style wall": a town whose station
+    # stands in its wall builds the wall in the station's own stone, capped like it, and its towers are the
+    # station's towers (stations.py / settle_halls.tower): spires in the region's roof, flanking every gate
+    def wall_kit(self):
+        region = getattr(self, "wall_region", None)
+        if not region: return None
+        import stations
+        _, _, P, k, _ = stations.start(region, "grand")
+        return {"stone": [(k("stone"), 7), (P.get("quoin2", k("stone")), 2), (k("cobbled"), 1)],
+                "cap": P.get("chimney_cap", "stone_brick_wall")}
+
+    def wall_tower_bp(self, h):
+        import settle_buildings as SB, settle_halls as SH
+        bp, B, P, k, L = SB.new(f"wall_tower_{h}", self.wall_region)
+        SH.tower(B, 0, 0, 2, 1, h, top="spire" if L["roof"] != "flat" else "crenel")
+        bp.kind = "civic"; bp.markers["door"] = (0, 0, 3)
+        return bp
+
+    def wall_towers(self, line, H, gap=22):
+        """Towers on the wall line: one each side of every gate (a gatehouse), then one every ~gap blocks.
+        A tower's 5 x 5 never sits on a street, water or another building."""
+        if not getattr(self, "wall_region", None) or not line: return
+        lineset = set(line)
+        road = [(int(i) + self.X0, int(j) + self.Z0) for i, j in np.argwhere(self.K >= 0)]
+        roadset = set(road)
+        def fits(x, z):
+            for dx in range(-2, 3):
+                for dz in range(-2, 3):
+                    c = (x + dx, z + dz)
+                    if not self.ok(*c) or c in roadset or self.at(self.WET, *c): return False
+                    if self.at(self.TAKEN, *c) >= 2 and c not in lineset: return False
+            return True
+        gates = [c for c in roadset if any((c[0] + dx, c[1] + dz) in lineset for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)))]
+        chosen = []
+        def far(c, d): return all(math.hypot(c[0] - q[0], c[1] - q[1]) >= d for q in chosen)
+        if gates:
+            gx = np.array(gates)
+            for c in sorted(line, key=lambda c: (h3(c[0], 0, c[1], 7))):
+                dmin = float(np.min(np.hypot(gx[:, 0] - c[0], gx[:, 1] - c[1])))
+                if 4.0 <= dmin <= 6.5 and far(c, 9) and fits(*c): chosen.append(c)
+        for c in sorted(line, key=lambda c: math.atan2(c[1] - self.C[1], c[0] - self.C[0])):
+            if far(c, gap) and fits(*c): chosen.append(c)
+        h = H + 7
+        bp = self.wall_tower_bp(h)
+        for x, z in chosen:
+            cells = [(x + dx, z + dz) for dx in range(-2, 3) for dz in range(-2, 3)]
+            y = int(max(self.at(self.G, *c) for c in cells))
+            for cx, cz in cells:
+                for yy in range(y + 1, y + h + 12): self.works.pop((cx, yy, cz), None)
+            self.foundation(cells, y)
+            self.stamp(bp, x, z, y, 0, "civic"); self.plan[-1]["name"] = "wall tower"
+            for c in cells: self.TAKEN[self.ij(*c)] = 2
+
+    def footprint_cells(self, kind):
+        out = []
+        for e in self.plan:
+            if e["kind"] != kind: continue
+            g, _ = self.footprint(self.designs[e["stamp"]], e["rotation"]); out += [(gx + e["x"], gz + e["z"]) for gx, gz in g]
+        return out
+
+    # ------------------------------------------------------------------ levels in the 3D view
+    def add_levels(self, group, e, options, align="door", default=None):
+        """Mateo 2026-11-12: every 3D view lets him level up the town hall and the train station. e is the plan
+        entry of the biggest level (it claimed the ground); options are (label, Blueprint) for every level.
+        align "door" keeps each level's door on e's door cell, "origin" keeps the stamp origin (stations: the
+        stop on the line). The base scene leaves e out; each level is its own little scene (scene_levels)."""
+        big = self.designs[e["stamp"]]
+        deg = e["rotation"]
+        if align == "door":
+            dx, dz = self.door_of(big); rdx, rdz = rot_xz(dx, dz, deg); door = (e["x"] + rdx, e["z"] + rdz)
+        opts = []
+        for label, bp in options:
+            if align == "door":
+                dx, dz = self.door_of(bp); rdx, rdz = rot_xz(dx, dz, deg); ox, oz = door[0] - rdx, door[1] - rdz
+            else: ox, oz = e["x"], e["z"]
+            opts.append((label, bp, ox, oz))
+        if not hasattr(self, "levels"): self.levels = []
+        self.levels.append({"group": group, "entry": e, "options": opts, "default": len(opts) - 1 if default is None else default})
+
+    def scene_levels(self, out):
+        """One scene file per level of every level group: the stamp, plus stone foundation down to the ground
+        under its footprint. Returns [{group, labels, default, files}] for render/compose.py."""
+        res = []
+        for gi, L in enumerate(getattr(self, "levels", [])):
+            e = L["entry"]; files = []
+            for k, (label, bp, ox, oz) in enumerate(L["options"]):
+                s = Blueprint(f"{self.key}_{L['group']}_{k}")
+                r = bp.rotated(e["rotation"]); low = {}
+                for (x, y, z), v in r.cells.items():
+                    if v[0] == "keep": continue
+                    X, Y, Z = x + ox, y + e["ground_y"], z + oz
+                    s.cells[(X, Y, Z)] = v
+                    if (X, Z) not in low or Y < low[(X, Z)]: low[(X, Z)] = Y
+                for (X, Z), y0 in low.items():
+                    # foundation only under what stands on the ground: a column whose lowest block is a roof or an
+                    # arch (the train shed over the line, Mateo 2026-11-13) stays open underneath
+                    if not self.ok(X, Z) or y0 > e["ground_y"] + 1: continue
+                    g = int(self.at(self.G, X, Z))
+                    for y in range(g + 1, y0): s.cells[(X, y, Z)] = VALE["plinth"](X, y, Z)
+                s.cells = {(int(x), int(y), int(z)): v for (x, y, z), v in s.cells.items()}
+                s.finish(); f = os.path.join(out, f"level_{gi}_{k}.json"); s.save_logical(f); files.append(f)
+            res.append({"group": L["group"], "labels": [o[0] for o in L["options"]], "default": L["default"], "files": files})
+        json.dump(res, open(os.path.join(out, "levels.json"), "w"), indent=1)
+        return res
+
     def scene(self, out):
         s = Blueprint(f"{self.key}_scene"); R = self.R + 20
+        skip = {id(L["entry"]) for L in getattr(self, "levels", [])}
         for x in range(self.C[0] - R, self.C[0] + R + 1):
             for z in range(self.C[1] - R, self.C[1] + R + 1):
                 if not self.ok(x, z): continue
@@ -1278,7 +1759,13 @@ class Town:
         for (x, y, z), v in self.works.items():
             if v[0] == "air": s.cells.pop((x, y, z), None)
             else: s.cells[(x, y, z)] = v
+        for L in getattr(self, "levels", []):                 # a levelled plot shows grass round the smaller levels
+            e = L["entry"]; g, _ = self.footprint(self.designs[e["stamp"]], e["rotation"])
+            for gx, gz in g:
+                X, Z = gx + e["x"], gz + e["z"]
+                if self.ok(X, Z) and self.K[self.ij(X, Z)] < 0: s.cells[(X, int(self.at(self.G, X, Z)), Z)] = ("grass_block", {})
         for e in self.plan:
+            if id(e) in skip: continue
             bp = self.designs[e["stamp"]].rotated(e["rotation"])
             for (x, y, z), v in bp.cells.items():
                 if v[0] == "keep": continue
@@ -1299,6 +1786,7 @@ class Town:
                               "square": [25, 30, 48 if not self.big else 62, cx, y + 2, cz], "street": street, "lane": lane,
                               "lane2": [lane[0] + 180, 13, 24] + lane[3:]}}
         s.save_logical(os.path.join(out, "scene.json"))
+        if getattr(self, "levels", None): self.scene_levels(out)
         return len(s.cells)
 
 

@@ -13,7 +13,7 @@ from colour import Palette  # noqa: E402
 from fit import voxelize  # noqa: E402
 from materials import Materials  # noqa: E402
 import emit, parts  # noqa: E402
-from engine import STAGES, resolve, cells_of, seat_spire_tops  # noqa: E402  (engine.py is the one engine; this is its CLI)
+from engine import STAGES, resolve, cells_of, seat_spire_tops, check_water, light_stage  # noqa: E402  (engine.py is the one engine; this is its CLI)
 
 
 def build(spec, out_dir, edition=None, stages=False, preview=True, mcstructure=False):
@@ -28,6 +28,11 @@ def build(spec, out_dir, edition=None, stages=False, preview=True, mcstructure=F
     mats = Materials(spec.get("materials"), pal, log)
     blocks = resolve(cells, mats, pal, log)
     seat_spire_tops(blocks, pal, log)
+    if spec.get("ruin"):
+        from engine import ruin
+        ruin(blocks, spec["ruin"], log)
+    check_water(blocks, log)
+    light_stage(spec, blocks, stage_of, log)
     emit.connect(blocks)
     files, ncmd = emit.write_functions(blocks, out_dir, name, edition, pal, clear=spec.get("clear", False), offset=tuple(spec.get("offset", (0, 0, 0))))
     extra = {}

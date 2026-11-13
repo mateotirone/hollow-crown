@@ -14,6 +14,7 @@
 import { BOSS_LEADS, CONVERGE, OPEN_AT, fallenCount } from "./data/spine.js";
 import { world, system, GameMode } from "@minecraft/server";
 import { on, moduleStore } from "../siege/api.js";
+import { applyFilter } from "../core/events.js";
 import { TOME, TOMES, COLLECTION, tomesOf, blankProgress } from "./logic.js";
 import { PLACES } from "./data/world.js";
 import { tomeIdOf, makeTome, grantTome, giveItem, progressOf, saveProgress, setFlag, learnLeads } from "./player.js";
@@ -68,6 +69,7 @@ world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
       const id = caches.data.at[key];
       if (!id) return player.onScreenDisplay.setActionBar(creative ? "§eNot bound yet. Click it holding a Lore Tome." : "§7The pages have rotted away.");
       if (creative) return player.sendMessage(`§7This Dusty Tome gives: §f${TOME[id]?.title}§7 (${id}). Click with another tome to change it.`);
+      if (!applyFilter("tomeCacheOpen", true, { player, id })) return; // a late book that will not open yet (places.js)
       if (!grantTome(player, id)) player.onScreenDisplay.setActionBar("§7You have already copied this one out.");
     } catch (e) {
       console.warn(`[Lore] tome cache: ${e}`);

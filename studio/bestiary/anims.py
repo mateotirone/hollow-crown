@@ -223,6 +223,23 @@ def build_set(m, model, bp):
     for bone, ch, val in m.get("anim_extra", []):
         if bone in n: base.setdefault(bone, {})[ch] = val
     anims[P] = anim(base, loop=True); amap["base"] = P; animate.append("base")
+    if m.get("glider"):   # the Gloamwing: its wings and tail beat in base; here it banks, dives on its swoop and recoils when hit
+        S = SPEED
+        anims[P + ".walk"] = anim({"body": {"rotation": [f"{S}*10", 0, f"math.sin(query.life_time*70)*6*{S}"]}}, loop=True); amap["walk"] = P + ".walk"; animate.append("walk")
+        fold, snap = ({"body": {"rotation": [-22, 0, 0]}, "head": {"rotation": [-12, 0, 0]}, "wing_r": {"rotation": [0, 0, 38]}, "wing_l": {"rotation": [0, 0, -38]}, "tail": {"rotation": [-25, 0, 0]}},
+                      {"body": {"rotation": [38, 0, 0]}, "head": {"rotation": [14, 0, 0]}, "wing_r": {"rotation": [0, 0, -24]}, "wing_l": {"rotation": [0, 0, 24]}, "tail": {"rotation": [30, 0, 0]}, "tail2": {"rotation": [35, 0, 0]}})
+        anims[P + ".attack"] = anim(timeline([(0, {}), (0.14, fold), (0.28, snap), (0.6, {})], merge_keys(fold, snap)), animation_length=0.6); amap["attack"] = P + ".attack"
+        amap["swing"] = f"controller.animation.siege_b.{mid}.swing"; animate.append("swing")
+        ctrls[amap["swing"]] = {"initial_state": "default", "states": {
+            "default": {"transitions": [{"swinging": "variable.attack_time > 0"}]},
+            "swinging": {"animations": ["attack"], "transitions": [{"default": "query.all_animations_finished"}], "blend_transition": 0.1}}}
+        hurt = {"body": {"rotation": [-18, 0, 14], "position": [0, -1.5, 1]}, "head": {"rotation": [-20, 0, 0]}, "wing_r": {"rotation": [0, 0, 30]}, "wing_l": {"rotation": [0, 0, -30]}}
+        anims[P + ".hurt"] = anim(timeline([(0, {}), (0.08, hurt), (0.4, {})], merge_keys(hurt)), animation_length=0.4); amap["hurt"] = P + ".hurt"
+        amap["flinch"] = f"controller.animation.siege_b.{mid}.flinch"; animate.append("flinch")
+        ctrls[amap["flinch"]] = {"initial_state": "default", "states": {
+            "default": {"transitions": [{"flinching": "query.hurt_time > 0"}]},
+            "flinching": {"animations": ["hurt"], "transitions": [{"default": "query.all_animations_finished && query.hurt_time <= 0"}]}}}
+        return anims, ctrls, amap, animate, []
     if plan == "none":
         idle = still_idle(mid, n)
         if idle:
@@ -434,7 +451,22 @@ def choir_set(name):
         end = (1.2, 1.6) if move == "rage" else (0.5, 0.9)
         anims[f"{P}.move.{move}.strike"] = anim(timeline([(0, wf), (0.12, st), (end[0], st), (end[1], {})], keys), animation_length=end[1])
         moves.append(move)
-    return anims, amap, ["idle"], moves
+    # they have no legs under the robe: moving, the whole figure leans into it and the robe trails; hit, it recoils
+    S = SPEED
+    walk = {"root": {"rotation": [f"{S}*14", 0, f"math.sin({T}*200)*3*{S}"]}, "head": {"rotation": [f"-{S}*8", 0, 0]}}
+    hurt = {"root": {"rotation": [-10, 0, 0], "position": [0, 0, 1]}, "head": {"rotation": [-16, 0, 8]}}
+    if "arm_left" in spec["idle"]:
+        walk["arm_left"] = {"rotation": [f"{S}*20", 0, 0]}; walk["arm_right"] = {"rotation": [f"{S}*20", 0, 0]}
+        hurt["arm_left"] = {"rotation": [-20, 0, -14]}; hurt["arm_right"] = {"rotation": [-20, 0, 14]}
+    anims[P + ".walk"] = anim(walk, loop=True); amap["walk"] = P + ".walk"
+    anims[P + ".hurt"] = anim(timeline([(0, {}), (0.08, hurt), (0.35, {})], merge_keys(hurt)), animation_length=0.35); amap["hurt"] = P + ".hurt"
+    amap["flinch"] = f"controller.animation.siege_b.{name}.flinch"
+    return anims, amap, ["idle", "walk", "flinch"], moves
+
+def choir_ctrls(name):
+    return {f"controller.animation.siege_b.{name}.flinch": {"initial_state": "default", "states": {
+        "default": {"transitions": [{"flinching": "query.hurt_time > 0"}]},
+        "flinching": {"animations": ["hurt"], "transitions": [{"default": "query.all_animations_finished && query.hurt_time <= 0"}]}}}}
 
 def choir_client(name, client):
     """Adds the Choir entity's animations to the client entity build_undertow_choir.py writes."""
@@ -460,6 +492,7 @@ def write_all(RP, BP, mobs_models, entity_bp, client_entity, write):
         a, _, _, mv = choir_set(name)
         for k, v in a.items(): (moves_ if ".move." in k else motion_)[k] = v
         if mv: moves[CHOIR_TYPE[name]] = mv
+        ctrls.update(choir_ctrls(name))
         path = RP + f"entity/undertow/{name}.entity.json"
         if os.path.exists(path): write(path, choir_client(name, json.load(open(path))))
     write(RP + "animations/bestiary.animation.json", {"format_version": "1.8.0", "animations": base})

@@ -20,13 +20,16 @@ export const REVEAL = {
   bells: "Every bell in Aldmere is ringing. Nobody is ringing them.",
   // Stage 6, The Fall: each player is alone with him and he speaks to them by name ({name}).
   // Mateo's ruling (decision card, 2026-11-10): he says outright that he was a king, their king,
-  // and never speaks the name Oswin. In order; the last is for when the stage breaks.
+  // and never speaks the name Oswin. Mateo, 2026-11-13: it is revealed at the end that he pulled the strings the
+  // whole time: he sent the five bosses, and could not reach the player while the Rift was shut, so he tricked
+  // them into opening it (each boss carried a Choir Shard; five make the Tuning Fork). In order; the last is for
+  // when the stage breaks.
   fall: [
     "{name}. Sit, if you like. There is only the one chair, and I have had it three hundred years.",
-    "I was a king, {name}. Yours. Your walls stand on my roads. Did nobody up there tell you there had been one?",
-    "I made a peace, and I kept it. I am the only one on either side of that door who did.",
-    "There is no portrait of me left above. Forty-one, and she burned them all. You would not have known my face. You have known my nights.",
-    "Tell my daughter the door was well made. Tell her I knocked every third night.",
+    "I was a king, {name}. Yours. They threw me down here, and I have been pulling at your world ever since.",
+    "The Reeve, the Huntsman, the Bride, the Seneschal, the Mother. Mine, every one. I sent them up to kill you.",
+    "And when you kept winning, I let you. Every shard you took from them was a piece of my key.",
+    "I could not reach you through a closed door. So I made you open it. You did it so well.",
     "Good. You did not come down here to talk either.",
   ],
   // The page that is in the journal afterwards
@@ -37,9 +40,10 @@ export const REVEAL = {
       "I did what his last line told me. I listened before I rang. What I heard was not an army. It was a people shut out of a place that had been half theirs, asking for one night in three. I gave it to them. I thought it cheap. I think so still.\n\n" +
       "My daughter thought it treason. She was seventeen and she was right about everything except me. I do not hold the door against her. It was well made.\n\n" +
       "I took their pledge in my right hand, and that hand has not closed properly since. I have done everything with the other, and they said up there that I was not myself. I was never anything else.\n\n" +
-      "I knocked on it every third night for three hundred years. Nobody came down. So I stopped being the king they threw away and became the one who was needed here, and I am told I have not been kind.\n\n" +
+      "I knocked on it every third night for three hundred years. Nobody came down. So I stopped knocking and began to pull. The raids were mine. The five who kept the door were mine. The pale fire that fell at your gate was a splinter of my own crown.\n\n" +
+      "I could not reach you through a shut door, and I could not open it from this side. It needed someone from above, strong enough to take a shard from each of the five. I sent them up to kill you. When they could not, I let you take what they carried, and I spoke to you at night until you used it.\n\n" +
       "They have no names below. They made one for me, because mine had been burned, and a thing without a name cannot be bargained with. In their speech it means the one who stayed.\n\n" +
-      "You did not pack this book. I did. Whoever came down to end me should know that it was a king, and whose son.\n\n" +
+      "You did not pack this book. I did. I put it in your pack so you would listen to a voice in the dark, and you did. Whoever came down to end me should know that it was a king, and whose son.\n\n" +
       "Listen before you ring.",
     sign: "Oswin, son of Aldric,\nlast King of Aldmere",
   },

@@ -58,6 +58,9 @@ hearth), while the walkway is checked across the whole floor.
   chimney breast free for the hearth.
 - The well on the upper floor is guarded with a fence along its open side.
 - Where no flight fits (a narrow tower), a ladder against a blank wall with a hole above.
+- **A roof you walk on is reached** (Mateo 2026-11-13, the air boat mast: "how do you get up to the top?"): a
+  tower with a flat top players use (a mooring deck, a lookout, a belfry deck) gets a ladder from its top storey
+  up through a closed top trapdoor hatch in the roof: `"interior": {"use": "tower", "hatch": true}`.
 - An attic (`"attic": true`) gets a floor on the wall plate wherever two rows of air stand over it, and the
   stair comes up into it.
 
@@ -127,7 +130,9 @@ Every interior is checked in a cut-away 3D view before it is shown:
 
 ## Before you move on
 
-- [ ] Every storey reached by a stair or ladder, the well guarded.
+- [ ] Every storey reached by a stair or ladder, the well guarded; a walked-on roof reached through a hatch.
 - [ ] A one-block walkway from the door to every room, stair end, bed, chest and work block.
-- [ ] Each room has its centre piece, wall pieces and light; nothing floats or blocks a window.
+- [ ] Each room has its centre piece, wall pieces and light; nothing floats or blocks a window. In a hand-drawn design
+      the floor block is y 0, so furniture starts at y 1: check one column of the room before placing anything.
+- [ ] Every ladder hangs on a solid block behind it (check the cell its facing points away from), right under its hatch.
 - [ ] Region woods, rugs and lights; nothing sits on a stair, a well or in a doorway.

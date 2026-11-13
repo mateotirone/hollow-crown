@@ -28,15 +28,21 @@ const PLOT_SITES = {
 // The story's places out in the land (map/structures/landmarks_story.py). `face` fixes which way a turning piece's
 // front looks (n/e/s/w): the Deepforge's door to the open hillside, the Cinder Roost's Span out over the drop.
 const STORY_SITES = [
-  { id: "crownhold", region: "Aldmere Vale", name: "Crownhold", x: -235, z: -345, place: "crownhold", pieces: [{ d: "crownhold_hall" }, { d: "crownhold_walls" }] },
+  { id: "crownhold", version: 3, region: "Aldmere Vale", name: "Crownhold", x: -235, z: -345, place: "crownhold", pieces: [{ d: "crownhold_hall" }, { d: "crownhold_walls" }] },
   { id: "bellhollow", region: "Aldmere Vale", name: "Bellhollow", x: 155, z: -100, place: "bellhollow", pieces: [{ d: "bellhollow_seal" }, { d: "bellhollow_frame", dx: -22 }] },
-  { id: "ashen_chapterhouse", region: "Aldmere Vale", name: "the Ashen Gate chapterhouse", x: 420, z: -170, place: "ashen_chapterhouse", pieces: [{ d: "ashen_chapterhouse" }] },
+  { id: "ashen_chapterhouse", version: 3, region: "Aldmere Vale", name: "the Ashen Gate chapterhouse", x: 420, z: -170, place: "ashen_chapterhouse", pieces: [{ d: "ashen_chapterhouse" }] },
   { id: "ashen_watch", region: "Blackfen", name: "the Ashen Watch", x: 480, z: 560, pieces: [{ d: "ashen_watch" }] },
-  { id: "corvins_tower", region: "Aldmere Vale", name: "Corvin's Tower", x: -416, z: -696, place: "corvins_tower", pieces: [{ d: "corvins_tower" }] },
+  { id: "corvins_tower", version: 3, region: "Aldmere Vale", name: "Corvin's Tower", x: -416, z: -696, place: "corvins_tower", pieces: [{ d: "corvins_tower" }] },
   { id: "mags_hut", region: "Blackfen", name: "Old Mag's hut", x: 4, z: 972, place: "mags_hut", pieces: [{ d: "mags_hut" }] },
   { id: "nell_raft", region: "Blackfen", name: "Nell Sedge's raft-house", x: 26, z: 1001, place: "nell_raft", pieces: [{ d: "nell_raft" }] },
+  // Goody Sedge's graves (the Witch trial): the last dry ground between Old Mag's hut and the pool Nell's raft lies in
+  // (ground 69-71 on the map's heights, the pool 58-61 from x 20 east)
+  { id: "sedge_graves", region: "Blackfen", name: "Goody Sedge's graves", x: 10, z: 988, pieces: [{ d: "sedge_graves" }] },
   { id: "deepforge", region: "Frostmarch", name: "the Deepforge", x: -274, z: -938, place: "deepforge", pieces: [{ d: "deepforge", turns: true, face: "e" }] },
-  { id: "cinder_roost", region: "Emberwaste", name: "the Cinder Roost", x: 898, z: 346, place: "cinder_roost", pieces: [{ d: "cinder_roost", turns: true, face: "s" }] },
+  // version 2: built again once: the Span is one block wide with loose stones, and its two ends reach the Rider trial.
+  // It stands on the north edge of the mesa above Sunscar (moved from 898, 346, where the land under the Span was
+  // nearly flat): the yard on the cliff top at 103, the Span and the perch out over the flats at 96-97.
+  { id: "cinder_roost", region: "Emberwaste", name: "the Cinder Roost", x: 882, z: 310, place: "cinder_roost", version: 3, pieces: [{ d: "cinder_roost", turns: true, face: "n" }] },
   // The three sealed ways out (plots/config.js EXPANSION). The Far Shore and Horizon Isles doors are out at sea,
   // so their landmarks stand on the nearest coast, front out over the water toward the way.
   { id: "shut_pass", region: "Frostmarch", name: "the Shut Pass", x: 1225, z: -190, pieces: [{ d: "shut_pass_gate", turns: true, face: "w" }] },
@@ -49,9 +55,11 @@ const STORY_SITES = [
 export const LANDMARKS = [
   ...Object.entries(PLOT_SITES).map(([plot, pieces]) => {
     const { x, z } = relic(plot);
-    return { id: `relic_${plot.toLowerCase()}`, name: `${plot}'s old landmark`, plot, x, z, pieces, version: 1 };
+    return { id: `relic_${plot.toLowerCase()}`, name: `${plot}'s old landmark`, plot, x, z, pieces, version: 2 };
   }),
-  ...STORY_SITES.map((s) => ({ version: 1, ...s })),
+  // version 2 (2026-11-13): every site lit at night (map/structures lighting), so built worlds put the lanterns up too.
+  // Crownhold and the Cinder Roost are lit by their own thread and keep their versions.
+  ...STORY_SITES.map((s) => ({ version: 2, ...s })),
 ];
 
 // How far from a site's anchor a player must come before it builds, and how far its pieces may reach.

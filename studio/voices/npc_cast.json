@@ -1,0 +1,113 @@
+{
+ "_comment": "The ElevenLabs voice Mateo picked for each story character (designed with text-to-voice, saved in his ElevenLabs account). tools/install_npc_voices.py installs takes read in these voices.",
+ "voices": {
+  "aldous": {
+   "name": "Sir Aldous Vane",
+   "voice_id": "HoiJactNUT3UkDYeD0B6",
+   "take": 3,
+   "description": "An earnest young knight in his early twenties, formal upper-class English accent, clear bright baritone, upright and polite, a little stiff, sincere."
+  },
+  "cael": {
+   "name": "Brother Cael",
+   "voice_id": "rMvvGecIgwevIrNmxrLO",
+   "take": 1,
+   "description": "An old tired monk-archivist in his seventies, quiet formal English accent, soft dry low voice, measured and precise, guarded, gentle."
+  },
+  "carter": {
+   "name": "The Carter",
+   "voice_id": "CHFV1XH65lcoOIKi0ZfF",
+   "take": 2,
+   "description": "A young cart driver in his late teens from a dark otherworld, soft accent hard to place, light quiet voice, quick and nervous, earnest."
+  },
+  "corvin": {
+   "name": "A Voice in the Water",
+   "voice_id": "eKlrbAAOnhKyC5gqEIW8",
+   "take": 1,
+   "description": "A disembodied voice heard from underwater, an old man, sardonic and impatient, refined old-fashioned English accent, close and soft with a slight echo, irritable, clever."
+  },
+  "elias": {
+   "name": "The Lighthouse Keeper",
+   "voice_id": "ZHHMvu3C19l9KQ7qWHPq",
+   "take": 2,
+   "description": "An old man who has kept a lighthouse alone for centuries, gentle and distracted, soft Cornish accent, thin breathy voice, slow, melancholy and kind."
+  },
+  "hesper": {
+   "name": "Hesper Lowe",
+   "voice_id": "yD5tl7fsg3KAyjOKBkWl",
+   "take": 3,
+   "description": "A chatty, anxious woman in her fifties from a marsh village, East Anglian accent, warm quick voice, a little breathless, polite but frightened."
+  },
+  "isolde": {
+   "name": "Warden Isolde",
+   "voice_id": "AyI27uBTc1tMzq3zqMQz",
+   "take": 1,
+   "description": "A proud town warden, a woman in her fifties, crisp Welsh accent, confident clear mid voice, polished and official, a rehearsed public manner."
+  },
+  "jorund": {
+   "name": "Jorund Kell",
+   "voice_id": "3LhDhdM1UMdXHkekUU8v",
+   "take": 3,
+   "description": "A rough fisherman in his thirties from the frozen north, Northern English Yorkshire accent, deep gruff voice, tense and blunt, holding back fear."
+  },
+  "kesh": {
+   "name": "Kesh Cinder",
+   "voice_id": "Y5Lfl6IxSbcQWKUdVz1X",
+   "take": 3,
+   "description": "A tough rider-instructor woman in her forties, burn-scarred, Welsh accent, low husky voice, blunt and wry, a teacher who has lost something."
+  },
+  "mag": {
+   "name": "Old Mag",
+   "voice_id": "ZAQoSTfMRPLDbToRS2m2",
+   "take": 3,
+   "description": "A very old fenland witch woman, sharp and bossy, East Anglian rural English accent, cracked reedy voice with real strength behind it, mischievous, quick."
+  },
+  "nell": {
+   "name": "Nell Sedge",
+   "voice_id": "YINvJZ2FJKKwJNVfxBzs",
+   "take": 3,
+   "description": "A small cheerful woman in her thirties living on a raft in the reeds, East Anglian accent, light bright voice, chatty and friendly, quick laugh in it."
+  },
+  "nessa": {
+   "name": "Nessa Dunn",
+   "voice_id": "H0QDyWzBbWimoQb4OaXG",
+   "take": 1,
+   "description": "A worried village baker's wife in her thirties, soft rural West Country English accent, warm voice kept low and hushed, nervous, kind."
+  },
+  "ottilie": {
+   "name": "Harbourmistress Holt",
+   "voice_id": "TEY2vWoxGOSE4CkaJu68",
+   "take": 1,
+   "description": "A brisk, fair harbourmistress in her forties, Cornish accent, clear crisp efficient mid voice, businesslike, a hint of dry humour."
+  },
+  "sage": {
+   "name": "Archivist Pell",
+   "voice_id": "hz6C1EYBGW75DC8qpcyH",
+   "take": 2,
+   "description": "A cheerful, bookish young woman in her late twenties, quick and bright, standard southern English accent, light voice that speeds up when excited, warm."
+  },
+  "sigrun": {
+   "name": "Sigrun Ashby",
+   "voice_id": "0TSW2qrrsDNlQFqEg3v9",
+   "take": 3,
+   "description": "A blunt, practical Northern woman in her forties, Yorkshire accent with a hard edge, firm low voice, few words, no warmth wasted, dry."
+  },
+  "ulla": {
+   "name": "Ulla Deepforge",
+   "voice_id": "FJ78rxrqhHLMp33PhIJV",
+   "take": 2,
+   "description": "A huge, slow-speaking woman blacksmith in her fifties, Northern English accent, very deep warm voice, slow and calm, gentle strength."
+  },
+  "wren": {
+   "name": "Sister Wren",
+   "voice_id": "SyXxNocff884N6Fuq55J",
+   "take": 3,
+   "description": "A kind, tired woman in her sixties, a village healer. Soft rural English West Country-Midlands accent, low warm alto, unhurried, slightly hoarse, dry humour under the weariness."
+  },
+  "tilly": {
+   "name": "Tilly",
+   "voice_id": "3bMMFnv44fDwVPsFtKwZ",
+   "take": 2,
+   "description": "Stock ElevenLabs library voice Elowen (young British girl, cheeky), picked by Mateo 2026-11-13."
+  }
+ }
+}

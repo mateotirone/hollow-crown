@@ -12,6 +12,8 @@ game needs to set it on the land (scripts/landmarks/plan.js):
     signs   [[x, y, z, text]]  sign texts the game writes after placing
     spawns  [[x, y, z, entity]]  animals let loose once, when it is built
     mark    [x, y, z]  where the lore's Ledger points (lore/ledger.js markPlace)
+    tomes   [[x, y, z, tome id]]  Dusty Tomes the game lays there, bound to their tome (lore/caches.js placeCache):
+            put them where the tome's "where" says (lore/data/tomes_*.js), on a table, shelf or floor, never in the air
 
 Coordinates: x east, y up, z south, y = 0 the ground layer. Designs that turn (pieces that seek water or a cliff
 edge) are drawn with their front to the north (-z), the water or the drop beyond z = 0.

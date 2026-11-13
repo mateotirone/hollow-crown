@@ -81,6 +81,11 @@ addTests("vault", {
     const b = groundBox(north, VAULT_ROOMS.wood.treasury.box);
     assert(b.z1 <= -1 && b.x0 < 0 && b.x1 > 0, "ahead of the player, both sides");
   },
+  "nothing of a vault room stands above the ground except its stairwell (no lamp posts poking up through the hall floor)": () => {
+    for (const tier of TIERS) for (const layout of ["treasury", "hall", "crypt"])
+      for (const [y, z, x0, n] of VAULT_ROOMS[tier][layout].rows)
+        if (y >= 0) assert(z <= 7 && x0 >= -2 && x0 + n - 1 <= 2, `${tier} ${layout}: block above ground at ${x0},${y},${z}`);
+  },
   "a stairs spot in a hall lands the vault where the hall puts that spot, facing the same way, and back again": () => {
     const spot = { x: -3, y: 1, z: 4, d: { x: 0, z: 1 } };
     for (const [fx, fz] of [[0, 1], [1, 0], [0, -1], [-1, 0]]) {

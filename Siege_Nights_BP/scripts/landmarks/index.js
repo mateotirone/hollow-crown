@@ -7,6 +7,11 @@
 // Pieces that seek a shore or a cliff use the spot worked out from the map (spots_data.js); if a world has none,
 // they look for it themselves inside the loaded area.
 //
+// A design's life ([dx, dy, dz, kind]) is sent out as landmarkLife { site, dim, spots: [{ kind, at }] } once it is
+// built; life.js keeps those dragons and people about.
+// A design's roleMarks ([dx, dy, dz, kind]) are sent out as landmarkRoleMarks { site, dim, marks: [{ kind, at }] } once it
+// is built: the role trials take the Span's two ends and Goody Sedge's graves from there.
+//
 // Commands (creative/op):
 //   /scriptevent hc:landmark_status            which sites are built
 //   /scriptevent hc:landmark_tp <id>           go to a site
@@ -16,13 +21,15 @@ import { world, system, BlockPermutation } from "@minecraft/server";
 import { mapMode } from "../plots/api.js";
 import { markPlace } from "../lore/ledger.js";
 import { spawnNpc } from "../lore/npcs.js";
+import { placeCache } from "../lore/caches.js";
+import "./life.js";
 import { onTick } from "../core/loop.js";
 import { emit } from "../core/events.js";
 import { load, save, say, runCmd } from "../undertow/data.js";
 import { DESIGNS } from "./designs_data.js";
 import { SPOTS } from "./spots_data.js";
 import { LANDMARKS, BUILD_NEAR } from "./sites.js";
-import { planPiece, seekSpot, AIR, KEEP_TOP } from "./plan.js";
+import { planPiece, seekSpot, reachOf, AIR, KEEP_TOP } from "./plan.js";
 import { clearTrees } from "../core/clearing.js";
 import "./tests.js";
 
@@ -91,7 +98,6 @@ function loaded(dim, x0, z0, x1, z1) {
 }
 
 let busy = false;
-const R = 44; // ground held loaded round each piece's spot while it builds (every design fits inside)
 
 export function buildSite(site, by) {
   if (busy) return { ok: false, why: "another landmark is still being built" };
@@ -103,6 +109,7 @@ export function buildSite(site, by) {
     for (let k = 0; k < site.pieces.length; k++) {
       // 0. hold this piece's ground loaded, and wait for it (about a minute at most)
       const c = spotOf(site, k);
+      const R = reachOf(DESIGNS[designId(site.pieces[k], c.face)] ?? DESIGNS[designId(site.pieces[k], "n")] ?? {}); // ground held loaded round the spot while it builds
       runCmd(dim, `tickingarea remove ${AREA}`);
       runCmd(dim, `tickingarea add ${c.x - R} 0 ${c.z - R} ${c.x + R} 0 ${c.z + R} ${AREA} true`);
       let waited = 0;
@@ -163,6 +170,18 @@ export function buildSite(site, by) {
         try {
           if (!dim.getEntities({ tags: [`siege_lore_npc_${id}`], location: at, maxDistance: 64 }).length) spawnNpc(dim, at, id);
         } catch { /* unloaded */ }
+      }
+      // places a role trial needs (the Span, Goody Sedge's graves): roletrials/marks.js keeps them
+      if (p.d.roleMarks?.length) {
+        emit("landmarkRoleMarks", { site: `${site.id}#${k}`, dim: OVERWORLD, marks: p.d.roleMarks.map(([dx, dy, dz, kind]) => ({ kind, at: { x: p.x + dx + 0.5, y: yAt(dx, dy, dz), z: p.z + dz + 0.5 } })) });
+      }
+      // the life of the place (dragons in the sky and the yards, its people): life.js keeps it about while players are near
+      if (p.d.life?.length) {
+        emit("landmarkLife", { site: `${site.id}#${k}`, dim: OVERWORLD, spots: p.d.life.map(([dx, dy, dz, kind]) => ({ kind, at: { x: p.x + dx + 0.5, y: yAt(dx, dy, dz), z: p.z + dz + 0.5 } })) });
+      }
+      // Dusty Tomes lying where their books say they lie (lore/data/tomes_*.js "where"), bound to their tome
+      for (const [dx, dy, dz, id] of p.d.tomes ?? []) {
+        try { placeCache(dim.getBlock({ x: p.x + dx, y: yAt(dx, dy, dz), z: p.z + dz }), id); } catch { /* unloaded */ }
       }
       if (p.d.mark && site.place) {
         const [dx, dy, dz] = p.d.mark;

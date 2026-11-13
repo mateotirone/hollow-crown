@@ -14,12 +14,22 @@ export function quartermasterTick() {
     const t = block.location;
     const center = { x: t.x + 0.5, y: t.y + 0.5, z: t.z + 0.5 };
     if (dim.getEntities({ type: QUARTERMASTER, location: center, maxDistance: 8 }).length > 0) return;
+    // An unemployed villager nearby takes the job; on the map, where no villagers live, one turns up by himself
+    // (new-player audit, Mateo 2026-11-13: the desk was a dead end without villagers)
     const recruit = dim.getEntities({ type: "minecraft:villager_v2", families: ["unskilled"], location: center, maxDistance: 3 })[0];
-    if (!recruit) return;
-
-    const at = { ...recruit.location };
-    const name = recruit.nameTag;
-    recruit.remove();
+    let at, name;
+    if (recruit) {
+      at = { ...recruit.location };
+      name = recruit.nameTag;
+      recruit.remove();
+    } else {
+      const side = [[1, 0], [-1, 0], [0, 1], [0, -1]].find(([dx, dz]) => {
+        const b = dim.getBlock({ x: t.x + dx, y: t.y, z: t.z + dz });
+        return b?.isAir && dim.getBlock({ x: t.x + dx, y: t.y + 1, z: t.z + dz })?.isAir;
+      });
+      if (!side) return;
+      at = { x: t.x + side[0] + 0.5, y: t.y, z: t.z + side[1] + 0.5 };
+    }
     const qm = dim.spawnEntity(QUARTERMASTER, at);
     if (name) qm.nameTag = name;
     qm.setDynamicProperty("siege:desk", JSON.stringify({ x: t.x, y: t.y, z: t.z }));
