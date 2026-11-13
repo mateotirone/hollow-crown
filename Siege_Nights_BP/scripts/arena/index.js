@@ -25,12 +25,14 @@
 
 import { world, system, GameMode } from "@minecraft/server";
 import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
-import { isReady, onTick, moduleStore, on, addFilter, setGate } from "../siege/api.js";
+import { isReady, onTick, moduleStore, on, addFilter, setGate, keepOf } from "../siege/api.js";
 import { addMenuLabel } from "../core/labels.js";
 import { sfx } from "../core/sfx.js";
 import { pay, coins } from "../economy/api.js";
 import { ARENA, ringLayout, COLOR_CODE, colorName, GATE_BLOCK } from "./layout.js";
-import { ARENA_RULES as R, ARENA_MOBS, DIFFICULTIES } from "./config.js";
+import { ARENA_RULES as R, ARENA_MOBS, DIFFICULTIES, KIT_TEXT } from "./config.js";
+import { starterRegion } from "../starter/index.js";
+import { regionAt } from "../economy/api.js";
 import { FORMATS, spreadRooms, verdict, mobReward, hasLeft, dayOf, inBox, flat } from "./rules.js";
 import { stash, giveKit, stripKit, restore, sweepDrops, clearLooseKit } from "./locker.js";
 import { fillStands, emptyStands, roar, crowdTick, CROWD } from "./crowd.js";
@@ -294,7 +296,7 @@ async function roomMenu(player) {
     if (!r.canceled && r.selection === 1 && match?.fighters[player.id] && match.phase !== "countdown") { f.ready = false; tellAll(`§7${player.name} isn't ready yet.`); }
     return;
   }
-  const kitText = "Iron armour, iron sword and axe, bow and 24 arrows, a shield, food and a golden apple";
+  const kitText = KIT_TEXT[0].toUpperCase() + KIT_TEXT.slice(1);
   const form = new ActionFormData().title(`${Title()}: ${colorName(layout().rooms[f.room].color)} room`)
     .body([
       match.kind === "mob" ? `You'll fight ${mobName(match.mob.type)} (${diffName(match.mob.difficulty)}).` : `${Object.values(match.fighters).map((x) => x.name).join(", ")} ${match.phase === "invite" ? "(more may still be coming)" : ""}`,
@@ -318,7 +320,7 @@ async function roomMenu(player) {
       try {
         stash(player, arenaDim(), layout().rooms[f.room].spawn);
         markLocker(player.id, true);
-        giveKit(player);
+        giveKit(player, fighterRegion(player));
         f.kit = true;
       } catch (e) {
         console.warn(`[Hollow Crown] arena: kit: ${e}`);
@@ -335,6 +337,17 @@ async function roomMenu(player) {
     return maybeStart();
   }
   if (r.selection === 3) return leave(player, "left before it began");
+}
+
+// The fighter's own region (for the kit's look): where their settlement is, else the region of their starter clothes.
+function fighterRegion(player) {
+  try {
+    const keep = keepOf(player.id);
+    if (keep) return starterRegion(regionAt(keep));
+    return starterRegion(player.getDynamicProperty("hc:starter_kit"));
+  } catch {
+    return "vale";
+  }
 }
 
 function takeKitBack(player, f) {
@@ -406,7 +419,7 @@ function openGates() {
   for (const room of usedRooms()) liftGate(dim, room);
   for (const id of fighterIds()) { const p = online(id); if (p) p.onScreenDisplay.setTitle("§cFight!", { subtitle: match.kind === "mob" ? mobName(match.mob.type) : "", fadeInDuration: 0, stayDuration: 30, fadeOutDuration: 10 }); }
   roar(dim, a, "fanfare", 4);
-  if (match.kind === "mob") system.runTimeout(spawnMobs, 30);
+  if (match.kind === "mob") system.runTimeout(spawnMobs, 30); // the win check waits for match.mobsOut
   system.runTimeout(dropGatesBehind, R.gateCloseSeconds * 20);
 }
 
@@ -428,6 +441,13 @@ function spawnMobs() {
       console.warn(`[Hollow Crown] arena: couldn't spawn ${match.mob.type}: ${err}`);
     }
   }
+  if (!match.mobs.length) { // nothing came out: no fight, no prize
+    tellAll(`§c${mobName(match.mob.type)} didn't come out. The fight is off; try again.`);
+    return finishMatch(dim, true);
+  }
+  match.mobsOut = true;
+  match.killed = [];
+  match.missing = {};
   try { dim.spawnParticle("minecraft:huge_explosion_emitter", { x: a.center.x + 0.5, y: a.center.y + 1, z: a.center.z + 0.5 }); } catch { /* cosmetic */ }
   sfx(dim, "mob.ravager.roar", mid(a.center), { volume: 3, pitch: 0.8 });
 }
@@ -444,15 +464,32 @@ function dropGatesBehind() {
   for (const room of usedRooms()) closeGate(dim, room);
 }
 
+// Beasts still to beat. Only ones that DIED count as beaten (entityDie below): one that vanished some other way
+// (removed by another system, its chunk unloaded) is sent in again, so a fight is never won by a beast going missing.
+// Before the beasts are out there are none left to beat yet, so this is Infinity.
 function mobsLeft() {
+  if (!match.mobsOut) return Infinity;
   const dim = arenaDim(), a = layout();
-  let n = 0;
+  const seen = new Set();
   for (const e of dim?.getEntities({ tags: [MOB_TAG] }) ?? []) {
     if (!match.mobs.includes(e.id)) continue;
-    n++;
+    seen.add(e.id);
     if (flat(e.location, a.center) > a.floorRadius + 12) e.teleport(mid(a.center)); // wandered off: back in you go
   }
-  return n;
+  const diff = DIFFICULTIES.find((d) => d.id === match.mob.difficulty);
+  for (const id of [...match.mobs]) {
+    if (seen.has(id) || match.killed.includes(id)) { delete match.missing[id]; continue; }
+    match.missing[id] = (match.missing[id] ?? 0) + 1;
+    if (match.missing[id] < 3) continue; // give it a few seconds (a death being reported, a chunk loading)
+    delete match.missing[id];
+    try {
+      const e = dim.spawnEntity(match.mob.type, { x: a.center.x + 0.5, y: a.center.y, z: a.center.z + 0.5 });
+      e.addTag(MOB_TAG);
+      for (const [effect, amp] of diff.effects) e.addEffect(effect, 20 * 60 * 20, { amplifier: amp, showParticles: false });
+      match.mobs[match.mobs.indexOf(id)] = e.id;
+    } catch { /* try again next second */ }
+  }
+  return match.mobs.filter((id) => !match.killed.includes(id)).length;
 }
 
 function fallOut(id, why) {
@@ -688,7 +725,7 @@ world.afterEvents.entityDie.subscribe(({ deadEntity }) => {
   let id, type;
   try { id = deadEntity.id; type = deadEntity.typeId; } catch { return; }
   if (type !== "minecraft:player") {
-    if (match.mobs.includes(id)) roar(arenaDim(), layout(), "cheer", 3);
+    if (match.mobs.includes(id)) { if (!match.killed.includes(id)) match.killed?.push(id); roar(arenaDim(), layout(), "cheer", 3); }
     return;
   }
   const f = match.fighters[id];
@@ -791,7 +828,7 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
       const lines = [`§6${Title()}§r at ${a.center.x} ${a.center.y} ${a.center.z}${store.data.testCenter ? " §e(test arena)" : ""}`];
       if (!match) lines.push("No fight on.");
       else {
-        lines.push(`${match.kind} fight, ${match.phase}${match.mob ? `: ${mobName(match.mob.type)} (${diffName(match.mob.difficulty)}), ${mobsLeft()} left` : ""}`);
+        lines.push(`${match.kind} fight, ${match.phase}${match.mob ? `: ${mobName(match.mob.type)} (${diffName(match.mob.difficulty)}), ${match.mobsOut ? mobsLeft() : "not out yet,"} left` : ""}`);
         for (const f of Object.values(match.fighters)) lines.push(` ${roomLabel(f.room)} ${f.name}: ${f.kit === true ? "kit" : f.kit === false ? "own things" : "picking"}${f.ready ? ", ready" : ""}${f.out ? `, out (${f.why})` : ""}`);
         for (const inv of Object.values(match.invites)) lines.push(` §8invited ${inv.name}`);
       }
