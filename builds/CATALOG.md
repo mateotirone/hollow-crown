@@ -4,7 +4,7 @@
 
 Every build in The Hollow Crown, designed or not. Add an entry the moment a build is asked for, even with no design yet, and move its status on as it progresses. Run  node tools/build-catalog.mjs  after editing to rewrite builds/CATALOG.md (check.mjs fails if it is stale).
 
-**106 builds:** 1 not started, 25 designed, 15 in viewer, 65 in game.
+**107 builds:** 1 not started, 26 designed, 15 in viewer, 65 in game.
 
 Statuses:
 
@@ -80,6 +80,7 @@ A ★ marks builds that no earlier list had (added in the 2026-11-12 audit).
 | Ironworks: Ore Pit, Bloomery, Trip-Hammer Forge (own plot) (3) | One version per overworld region | in viewer | ironworks | Design a repeatable material gathering loop | `map/structures/ironworks/spec.py` | v3 on the skill awaiting Mateo's OK; the game still raises the old hand-drawn design. Only one style so far; regional versions to follow. |
 | ★ Gold Sluice: Panning Sluice, Washing Mill, Assay House (3) | Emberwaste | designed | goldsluice | Design a repeatable material gathering loop |  | Waiting in PR #190. Designed on the skill in PR #190. |
 | ★ Deep Shaft: Prospect Shaft, Winding House, Deep Shaft (3) | Frostmarch | designed | deepshaft | Design a repeatable material gathering loop | `map/structures/deepshaft/spec.py` | Waiting in PR #190. Built on the skill in PR #190 (needs skill PR #155 for Frostmarch presets). Hosted 3D https://claude.ai/artifact/D58sGecJoqcFXsYkttAh7C (Deep Shaft tab). |
+| ★ Choir Seam: Seam Cut, Choir Winch, Singing Gallery, and the ore barge (4) | The Hollow | designed | choirseam | Design a repeatable material gathering loop | `map/structures/choirseam/spec.py` | Waiting in PR #190. The Choir Ore mine on a Hollow cliff, built on the skill in PR #190; the ore barge (choirseam/barge.py) moors at its jetty. Hosted 3D https://claude.ai/artifact/D58sGecJoqcFXsYkttAh7C (Choir Seam tab). |
 | Guard posts and wall steps | Anywhere / region-neutral | in game |  | Build settlement building and mason shop | `Siege_Nights_BP/scripts/guardposts` | Markers and steps, not a building. |
 | Interiors for every building on the skill (stairs, rooms by use, attics, lights) | One version per overworld region | designed |  | Add interiors to every building |  | Waiting in PR #207. A skill stage furnishing all 25 plot buildings (house, townhouse, farmhouse, inn, mint x 5 regions), the Kingsrest capital, chapel, guildhall, houses and inn, and Millbrook's clock tower and watermill. Other builds get interiors as they move onto the skill. Hosted 3D with roof-off and floor cuts https://claude.ai/artifact/9rUS3eguTn9VJhK9asKHG4 |
 

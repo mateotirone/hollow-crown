@@ -286,8 +286,22 @@ export const FIXED_BUILDINGS = [
 ];
 export const BUILDING = Object.fromEntries([...BUILDINGS, ...FIXED_BUILDINGS].map((b) => [b.id, b]));
 
+// The machines of the town's Works plots (the Ironworks; Mateo 2026-11-12: the town generator makes the plots, the
+// player picks one and the machine builds itself there). They are raised and knocked down like any plot building,
+// but only ever on a Works plot: never from a Foundation Stone, a plan or by a Rival Lord, so they stay out of
+// BUILDINGS. A feature adds its own:
+//   addWorks({ id, name, blurb, coins, plan(styleId) -> Plan, dig?, taken?(owner) -> why not, or undefined })
+// coins: the price of the first stage. dig: how far it digs below the plot (filled in again when knocked down).
+// Its plot size, tier and tags are in config.js (PLOT_SIZE "W", OPENS_AT, PLOT_TAGS) like every building's.
+export const WORKS = [];
+export function addWorks(entry) {
+  if (!BUILDING[entry.id]) WORKS.push(entry);
+  BUILDING[entry.id] = entry;
+}
+
 const plans = new Map();
 export function drawBuilding(id, styleId) {
+  if (BUILDING[id]?.plan) return BUILDING[id].plan(styleId);
   const key = `${id}|${styleId}`;
   if (!plans.has(key)) {
     const style = styleFor(styleId);

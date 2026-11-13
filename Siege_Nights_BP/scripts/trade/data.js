@@ -33,6 +33,7 @@ export const TRADE = {
   relationBonus: 0.05, // per step, up to
   relationMax: 0.15,
   capitalRate: 7, // Kingsrest pays this many Regals per iron's worth of anything (the Moneyer pays 8, with daily limits)
+  capitalUnderShop: 0.8, // and never more than this share of the cheapest shop price, for goods a town trader sells
   supplyRuns: 3, // the works' Supply Line fills Exports up to what the routes need for this many runs
   holdUpChance: 0.04, // a run on a route longer than holdUpMin has this chance of a hold-up (owner online only)
   holdUpMin: 600,

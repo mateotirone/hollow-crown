@@ -110,16 +110,18 @@ export const MASON_LINES = {
 export const OPENS_AT = {
   cottage: 0, house: 0, well: 0, library: 0, townhouse: 1, market: 1, garden: 1, farmhouse: 1, mint: 1,
   smithy: 2, stable: 2, inn: 2, barracks: 2, storehouse: 3, watchtower: 3,
+  ironworks: 0,
 };
 
 // The plot size each building takes. Plots: S Small 9x13, M Medium 11x15, ML long Medium 13x15, L Large 15x15,
-// G Great 21x21. A building goes on a plot of its own size, or a size listed under PLOT_ALSO.
+// G Great 21x21, W Works 27x17. A building goes on a plot of its own size, or a size listed under PLOT_ALSO.
 export const PLOT_SIZE = {
   cottage: "S", well: "S", garden: "S", watchtower: "S",
   house: "M", smithy: "M", farmhouse: "M", mint: "M",
   townhouse: "ML",
   stable: "ML", storehouse: "ML", library: "ML",
   market: "L", inn: "L", barracks: "L",
+  ironworks: "W", // Works plots (27 x 17) take the machines and nothing else (buildings.js WORKS)
 };
 export const PLOT_ALSO = {
   market: ["ML"], // the market may take a long Medium
@@ -140,10 +142,11 @@ export const PLOT_TAGS = {
   garden: { prefer: ["field_edge"] },
   farmhouse: { prefer: ["field_edge"] },
   library: { prefer: ["library", "square"] },
+  ironworks: { prefer: ["water"] }, // its last stage turns a waterwheel
   inn: { prefer: ["gate", "road_front", "square"] },
   barracks: { prefer: ["gate", "wall"] },
 };
-export const TAG_WORDS = { wall: "by the wall", gate: "by a gate", corner: "on a corner", square: "on the square", road_front: "on the main road", field_edge: "by the fields", hall: "by the hall", library: "set aside for the library", hall4: "on ground the hall will need at level 4", hall5: "on ground the hall will need at level 5" };
+export const TAG_WORDS = { wall: "by the wall", gate: "by a gate", corner: "on a corner", square: "on the square", road_front: "on the main road", field_edge: "by the fields", hall: "by the hall", library: "set aside for the library", hall4: "on ground the hall will need at level 4", hall5: "on ground the hall will need at level 5", water: "by water" };
 
 export const HOMES = ["cottage", "house", "townhouse"];
 export const WORK = ["market", "smithy", "stable", "storehouse", "farmhouse", "mint", "inn", "barracks"];
