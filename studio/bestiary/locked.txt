@@ -113,3 +113,5 @@ textures/models/siege_armor/rimeforged_*.png
 textures/models/armor/rimeforged_layer_*.png
 textures/items/siege_rimeforged_*.png
 textures/items/siege_rime_*.png
+textures/models/siege_armor/codex_*.png
+textures/items/codex/*.png
