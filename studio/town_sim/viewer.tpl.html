@@ -33,6 +33,9 @@ h2 { font-size: 1.02rem; }
 h3 { font-size: 0.82rem; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; font-weight: 500; }
 #ledger { top: calc(12px + env(safe-area-inset-top, 0px)); left: max(12px, env(safe-area-inset-left, 0px)); width: min(330px, calc(100vw - 24px)); padding: 12px 14px; display: grid; gap: 8px; }
 #ledger .sub { color: var(--muted); font-size: 0.86rem; }
+#ledger .head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+#plot-pick { font: inherit; font-size: 0.86rem; border-radius: 7px; border: 1px solid var(--line); background: var(--chip); color: var(--ink); padding: 4px 6px; max-width: 55%; }
+#plot-pick[hidden] { display: none; }
 .rows { display: grid; grid-template-columns: auto 1fr auto; gap: 4px 10px; align-items: center; font-size: 0.92rem; }
 .rows .k { color: var(--muted); }
 .rows .v { font-weight: 600; min-width: 0; }
@@ -106,7 +109,7 @@ button.horn { background: var(--bad); color: #fff8ec; border-color: var(--bad); 
 
 <section id="ledger" class="card" aria-label="Where the settlement stands">
   <div>
-    <h1 id="t-name">Oakmere</h1>
+    <div class="head"><h1 id="t-name">Oakmere</h1><select id="plot-pick" aria-label="Plot" hidden></select></div>
     <div class="sub" id="t-sub"></div>
   </div>
   <div class="rows">
@@ -166,13 +169,32 @@ button.horn { background: var(--bad); color: #fff8ec; border-color: var(--bad); 
 { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }
 </script>
 <script id="data" type="application/octet-stream">__DATA__</script>
+<script id="plots" type="application/json">__PLOTS__</script>
+<script id="home" type="application/json">__HOME__</script>
 <script type="module">
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
 // ---------------- data ----------------
+// The page carries one plot; the others sit beside it as plots/<id>.txt (mkpage.py). The pick lives in the address
+// (#plot=id) and, as a convenience, in this browser's storage.
+const PLOTS = JSON.parse(document.getElementById("plots").textContent || "[]");
+const HOME = JSON.parse(document.getElementById("home").textContent || "\"\"");
+function wantedPlot() {
+  let id = new URLSearchParams(location.hash.slice(1)).get("plot");
+  if (!id) try { id = localStorage.getItem("town-sim-plot"); } catch { /* storage off */ }
+  return PLOTS.some((p) => p.id === id) ? id : HOME;
+}
 async function loadData() {
-  const b64 = document.getElementById("data").textContent.trim();
+  let b64 = document.getElementById("data").textContent.trim();
+  const want = wantedPlot();
+  if (want !== HOME) {
+    document.getElementById("loading").textContent = `Fetching ${PLOTS.find((p) => p.id === want).name}…`;
+    try {
+      const r = await fetch(`plots/${want}.txt`);
+      if (r.ok) b64 = (await r.text()).trim();
+    } catch { /* stay on the plot the page carries */ }
+  }
   const bin = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
   const stream = new Blob([bin]).stream().pipeThrough(new DecompressionStream("gzip"));
   return JSON.parse(await new Response(stream).text());
@@ -697,6 +719,21 @@ async function playStory() {
 // ---------------- interface ----------------
 const $ = (id) => document.getElementById(id);
 $("t-name").textContent = D.plot;
+if (PLOTS.length > 1) {
+  const pick = $("plot-pick");
+  const regions = [...new Set(PLOTS.map((p) => p.region ?? "Other"))];
+  for (const region of regions) {
+    const g = document.createElement("optgroup"); g.label = region;
+    for (const p of PLOTS.filter((x) => (x.region ?? "Other") === region)) g.append(new Option(p.name, p.id, false, p.name === D.plot));
+    pick.append(g);
+  }
+  pick.hidden = false;
+  pick.addEventListener("change", () => {
+    try { localStorage.setItem("town-sim-plot", pick.value); } catch { /* storage off */ }
+    location.hash = `plot=${pick.value}`;
+    location.reload();
+  });
+}
 $("t-sub").textContent = `${D.region} · layout "${D.layout}" · gate to the ${D.gate} · real map ground`;
 function pips(el, n, on, busy = -1) { el.innerHTML = ""; for (let i = 1; i <= n; i++) { const s = document.createElement("span"); s.className = "pip" + (i <= on ? " on" : "") + (i === busy ? " busy" : ""); el.append(s); } }
 function btn(label, why, fn, { primary = false, disabled = false } = {}) {
