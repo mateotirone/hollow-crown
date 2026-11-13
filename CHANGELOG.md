@@ -139,6 +139,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - Vanilla hostile mobs (zombies, skeletons, creepers, spiders, endermen, witches, slimes, pillagers, drowned, husks, strays, bogged) no longer spawn on their own: only the game's own creatures do. Mobs no longer break blocks and phantoms are off, set once per world when the first player spawns (an admin can turn them back on).
 
 ### Fixed
+- The great seated figure behind the Faceless Gate is no longer a lumpy block sculpture: the stamp keeps only its stepped plinth, and the 3D seated statue stands on it.
 - Plot Markers no longer offer the Barracks on Medium plots it never fit; it needs a Large plot 15 wide and 17 deep, and Rival Lords and the charter plot-keeping now know that too.
 - Kingsrest no longer pays more by train than a town shop charges. Bread, coal, charcoal and wheat could be bought from a trader and shipped to Kingsrest at a profit, over and over; now anything a trader sells is bought at no more than four fifths of the cheapest shop price.
 - The Pale Horn now calls the Pale Huntsman on any night, not only on a siege night. In Morvane's last stage, knocking the Hollow Crown off above his last stretch of health no longer claims "He can die now".
