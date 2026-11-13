@@ -29,6 +29,13 @@ const walls = () => store.data.walls;
 const save = () => store.save();
 
 export const wallOf = (id) => walls()[id];
+// Put back (or forget, with no record) a settlement's wall record as it was (the battle test, battletest/). Blocks stay.
+export function setWallRecord(id, record) {
+  if (jobs.has(id)) return false;
+  if (record) walls()[id] = record; else delete walls()[id];
+  save();
+  return true;
+}
 export function wallRing(id) {
   const w = walls()[id];
   if (!w?.ground) return undefined;

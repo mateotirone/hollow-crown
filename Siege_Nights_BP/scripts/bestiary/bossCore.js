@@ -187,6 +187,9 @@ export function rebind(f, entity) {
   saveFight(f);
 }
 
+// The warning of the attack that is winding up right now, as the first line of the action bar ("" when none is)
+export const warningLine = (f) => (f.warn && f.warn.until > f.tick ? `§c⚠ ${f.warn.text}§r\n` : "");
+
 function helpers(f) {
   return {
     hp: () => {
@@ -204,8 +207,17 @@ function helpers(f) {
     say: (text) => {
       for (const p of f.players(24)) p.sendMessage(text);
     },
+    // A line on the action bar for everyone. Many fights keep a status line up every second (the tide, a countdown,
+    // "Singers to silence"), and the action bar only holds one message: a warning used to be wiped by the status line
+    // in the same second it appeared. While an attack is winding up its warning now stays on top of whatever else
+    // is shown (boss review 2026-11-13).
     bar: (text) => {
-      for (const p of f.players()) p.onScreenDisplay.setActionBar(text);
+      const w = warningLine(f);
+      for (const p of f.players()) p.onScreenDisplay.setActionBar(w + text);
+    },
+    // The same for one player (their own status line: how many bells they have rung, that the river took them)
+    tell: (player, text) => {
+      try { player.onScreenDisplay.setActionBar(warningLine(f) + text); } catch { /* gone */ }
     },
     solo: () => f.players().length <= 1,
     // Move the whole fight somewhere else (another arena, even another dimension). The boss and the
@@ -381,7 +393,11 @@ function bossTick() {
       for (const a of (f.def.attacks ?? []).filter((x) => x.id === chosen)) {
         f.lastAttack = a.id;
         f.next[a.id] = Math.round(a.every * temperMul(f, "pace"));
-        if (a.warn) f.bar(`§c⚠ ${a.warn}`);
+        if (a.warn) {
+          f.warn = undefined;
+          f.bar(`§c⚠ ${a.warn}`);
+          f.warn = { text: a.warn, until: f.tick + Math.max(a.windup ?? 0, 30) }; // kept on top of status lines until it lands
+        }
         for (const p of players) {
           if (a.sound) sound(f.dim, a.sound, p.location, 0.5, 0.8);
           else sfx(p, "boss.warn");
@@ -522,7 +538,7 @@ function clearAdds(f, fell = false) {
 
 function reset(f) {
   clearAdds(f);
-  f.phase = 0; f.timers = []; f.zones = []; f.data = {}; f.paused = false; f.busyUntil = 0;
+  f.phase = 0; f.timers = []; f.zones = []; f.data = {}; f.paused = false; f.busyUntil = 0; f.warn = undefined;
   f.damagers.clear();
   f.shield(false);
   try {

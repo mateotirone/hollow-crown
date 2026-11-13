@@ -4,7 +4,7 @@
 
 Every build in The Hollow Crown, designed or not. Add an entry the moment a build is asked for, even with no design yet, and move its status on as it progresses. Run  node tools/build-catalog.mjs  after editing to rewrite builds/CATALOG.md (check.mjs fails if it is stale).
 
-**105 builds:** 1 not started, 25 designed, 15 in viewer, 64 in game.
+**106 builds:** 1 not started, 25 designed, 15 in viewer, 65 in game.
 
 Statuses:
 
@@ -141,6 +141,7 @@ A ★ marks builds that no earlier list had (added in the 2026-11-12 audit).
 | Build | Region | Status | Viewer | Owner thread | Source | Notes |
 |---|---|---|---|---|---|---|
 | Bridges: road, foot and rail, any angle, per region | One version per overworld region | designed | bridges | Generate custom bridges over water |  | Waiting in PR #183. Generator on the building skill; viewer section 'Bridges' and town river crossings in PR #183. Hollow crossings are this thread's follow-up. Hollow bridge scenes fixed for the viewer in PR #202. |
+| ★ Level crossings: boards, setts, lamp posts, line fence, keeper's hut (per region) | One version per overworld region | in game |  | Design the train system | `map/railcross.py` | Planned by map/railcross.py (the hut through the building engine), laid by the game after a bought stretch's bed (rail_bed.js layCrossing). 3D: https://claude.ai/artifact/QX36T3oyockdLjp1KxG58K |
 | Rail tunnel portals | One version per overworld region | designed |  | Build the plots and world map | `.claude/skills/minecraft-builder/scripts/portal.py` | portal.py on the skill; the map thread calls it inside rail works. |
 | Rail beds, cuttings and embankments (built on purchase) | Anywhere / region-neutral | in game |  | Design the train system | `Siege_Nights_BP/scripts/trains/route_game.js` |  |
 | Custom 3D track, switches and crossings | Anywhere / region-neutral | in game |  | Design the train system | `Siege_Nights_BP/scripts/trains` |  |

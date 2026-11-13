@@ -61,6 +61,16 @@ export const ENTRIES = [
     when: ["event:keepFounded"],
   },
   {
+    id: "quests", ch: "start", title: "Your next step",
+    tip: "",
+    page: "The lines in the top-right corner, under your minimap, are your §fquest tracker§r. They are always up, and they show the step of the story you are on now: what it is, a hint, and, when it is somewhere you know of, how far away it is and which way to turn (ahead, left, right, behind you).\n\n"
+      + "It changes by itself as you go: when you meet someone, solve a mystery in your Ledger, pick up something that opens a door, or see a great foe fall. Now and then a second line shows something else worth doing alongside.\n\n"
+      + "It only points at towns and places you have already been told about or been to. Some places are hidden on purpose: for those it tells you where to look, and your Ledger's leads say roughly where they are.\n\n"
+      + "Everyone sees their own steps, so friends on the same world can be at different points.\n\n"
+      + "To hide it, type §f/siege:quests§r. Type it again to bring it back. Hiding the minimap (§f/siege:minimap§r) moves the tracker up into its place.",
+    when: [],
+  },
+  {
     id: "land", ch: "start", title: "Land and protection",
     tip: "This land is yours now. Others can't build or break here, and nothing here can be broken while you are offline.",
     page: "Your Keep Banner claims the land around it. When you walk near the edge of anyone's land a line of particles in their banner colour shows where it runs, and you are told when you step in or out.\n\n"

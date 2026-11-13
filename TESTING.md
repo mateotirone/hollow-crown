@@ -42,6 +42,41 @@ Then type `/scriptevent siege:showcase siege` to make it night and start a siege
 
 Walk around, click things, and tell me what looks wrong or does nothing. The list below is the same things done by hand, if you want to check a step on its own.
 
+## 4b. The full-castle battle test (scripts/battletest/)
+
+One command builds a Castle-tier settlement (the Crown Wall with towers, gatehouse and portcullis, nine buildings, an Iron Strongroom, a Barracks and four ballistas), puts an army on each side and runs the siege. Use a **flat Creative world** and stand where the castle's middle should be: it clears about 145 x 145 blocks round you and a field 135 blocks south to the attackers' camp. Building takes a minute or two. It moves your Keep Banner (like the showcase); `clear` puts it back.
+
+- `/scriptevent siege:battle_test attack` You attack the Test Castle. You start at the camp on a horse with 23 soldiers of every kind (Knights, Men-at-Arms, Pikemen, Shieldbearers, Crossbowmen, Archers, two Trebuchet crews, a Ram crew, two Sappers). War is declared for you; ride north to the castle and they follow. Nightfall comes in about 3 minutes. You get Vault Breakers, Breaching Charges, a Trebuchet and a Battering Ram.
+  - `attack manual` leaves the declaring to you: click the Test Castle's Keep Banner, Declare war, slide the army to 100%.
+  - `attack unjust` (or `defend unjust`) declares with no grounds: triple fee, the defence twice as strong, the attacker an Oathbreaker.
+- `/scriptevent siege:battle_test defend` The Test Warband (same 23, led by a named Warlord on a horse) attacks your castle, defended by your 22 soldiers. You start inside the gate. Nightfall in about 100 seconds.
+- `/scriptevent siege:battle_test raid` A Siege Night on your castle: blow the War Horn you are given. As a Castle you get the Grand Siege of the Warlord King, with rams and sappers from the first wave and a wingman dragon over the keep.
+- `/scriptevent siege:battle_test status` who is left on each side, the writ's phase, the vault and wall. `watch` repeats the list below. `clear` ends the siege, removes the soldiers and stand-ins, and puts your keep, wall and vault records back (the castle's blocks stay).
+
+Skip the wait for nightfall with `/scriptevent siege:writ_night`. To see a fallen leader, switch to Survival during the assault and `/kill @s`.
+
+**Attack, check that:**
+1. ✅ Your soldiers mount up and ride behind you two abreast; about 40 blocks from the castle's land they get off their horses (Knights stay mounted).
+2. ✅ Both Trebuchet crews walk out about 40 blocks from the wall and unfold their trebuchets before nightfall.
+3. ✅ The castle gate is barred from the declaration until dawn; at nightfall the action bar counts down to dawn.
+4. ✅ The Ram crew rams the gate every few seconds; Sappers plant charges well away from the gate; each trebuchet keeps hitting one spot until the hole is 3 wide and 2 high, and holds fire when your soldiers are at the wall there.
+5. ✅ Shieldbearers walk in front of the crews; Crossbowmen and Archers hang back in a line and shoot; the rest go for the gate, then through the breach.
+6. ✅ Their Pikemen and Shieldbearers brace across the gate (and the breach); their bowmen hold the wall posts; their Men-at-Arms come out of the Barracks.
+7. ✅ You are Wanted on their land and their soldiers come for you. Walls crack, chunks fall and leave rubble.
+8. ✅ A soldier you kill pays you a bounty; the fallen on both sides wait to retrain until the siege is over.
+9. ✅ Break the vault lock (stairs go down east of the keep) with a Vault Breaker: you win and the vault stays open until dawn. Or die (Survival): the assault collapses and they win.
+
+**Defend, check that:**
+1. ✅ "The Test Warband has declared war": your gate shuts; their crews set up while it is still day.
+2. ✅ At nightfall your Men-at-Arms leave the Barracks even though no attacking player is online, and your bowmen hold the wall.
+3. ✅ Your Pikemen and Shieldbearers brace across the gate and the breach; their Knights ride at your archers first.
+4. ✅ Their soldiers can be hurt (they used to be untouchable while their lord was offline).
+5. ✅ Kill the Warlord (the named Knight): the attack collapses and you win. Or hold until dawn.
+
+**Raid, check that:** the Grand Siege title, three assaults from two sides, a ravager ram and sappers, the Keep Heart and the sidebar, ballistas shooting raiders, the wingman dragon burning them, the Warlord King in the last wave, and "Siege Broken" with pay when it ends. For the Hollow's nights first set the Reach (`/scriptevent siege:reach_stage 4`, `reach_night <kind>`, see the Siege nights section).
+
+**Not in this test:** ballistas and the wingman only shoot monsters, so they sit out a War Writ (raid mode shows them); an army with no player can't crack a vault (only a Vault Breaker in a player's hands can); Rival Lords' sieges and marches need a lord settled on the real map (`/scriptevent siege:rivals deed march <id>`, see Rival Lords); the Crown's Storm has its own test (`siege:crown_showcase`).
+
 ## 5. Test list by hand
 
 Type the commands in chat (`/` opens it).
@@ -115,6 +150,15 @@ Type the commands in chat (`/` opens it).
 - Put on full iron, diamond and netherite armor (`/give @s diamond_helmet` and so on). Do the new 3D shapes show, and do they move with you?
 - Did guards hold their posts and fight?
 - Was the siege too easy, too hard, or about right?
+
+## The quest tracker (scripts/quests/)
+
+1. Join in Survival. In the top-right corner, under the minimap, you should see "Find Sister Wren" with how far Millbrook is and which way to turn; turn around and the heading should change within half a second.
+2. Without a Keep Banner raised there is a second line, "Found your settlement". Raise the banner: it goes away within two seconds.
+3. Type `/siege:minimap`: the tracker moves up into the map's place. Type `/siege:quests`: it hides; again, it comes back.
+4. Show a real title (`/title @s title Hello`): it shows normally and the tracker stays up and keeps its text.
+5. `/scriptevent siege:quests show` says your steps in chat. `/scriptevent siege:quests flag wren_met`, then `flag fell_reeve`, `flag fell_huntsman` and so on, should walk the tracker through the story (after three, Fennick's notes appear as a second line; after five, the notes, the fork and the Rift); carrying a boss key (`/scriptevent siege:unlock seneschal item`) should switch the step to that key's lock.
+6. With two players, check each sees their own step.
 
 ## The story opening on the real map (scripts/opening/)
 
@@ -217,6 +261,7 @@ Run the showcase first (`/scriptevent siege:showcase`): the back row has four Ar
 0. Use the Old King's Journal. **Expect:** a cover page, then 12 entries; after the last, "Ledger updated: The Old King's Journal". In a brand new world you should get the journal by yourself about 5 seconds after first joining, with the message "There is an old journal in your pack." Show it to Sister Wren ("I have an old journal").
 0c. Run `/scriptevent siege:hum`. **Expect:** a low held note for about 7 seconds (placeholder sound). Then stand in the Hollow, or wait for a third night, or spawn a Returned with `/scriptevent siege:returned_spawn` and stand next to it: the same note, quietly, with no gaps. `/scriptevent siege:hum off` should silence it for you only.
 0d. Run `/scriptevent siege:journal_last_page`, then read the journal to the end. **Expect:** "The old journal in your pack is heavier than it was", and a 13th page in another hand, signed.
+0e. Morvane's voice: `/scriptevent siege:morvane_voice first_dusk` (or any line id; `siege:morvane_voice` alone lists them). **Expect:** a quiet, filtered man's voice and the words in dark grey italics, no name. `siege:morvane_voice list` shows what you have heard; `siege:morvane_voice forget` makes every line new again. In a fresh world you should hear him once at your first dusk, again when you finish the journal, at your first siege night and when you hold it, when the Ember falls, after each boss. Tell me about: a line you hear twice, a line that talks over another, or one too loud or too quiet next to the game.
 0e. Hidden Returned: `/scriptevent siege:lore_case harl` then ring a bell within 16 blocks. **Expect:** Harl Dunn stops and walks off, and talking to Nessa afterwards gets her "after" scene. `siege:lore_case bram` and a bell: nothing happens (he is himself). Ring a bell beside Hesper (not the showcase one): she speaks, walks off and is gone.
 0f. Talk to Brother Cael ("The portraits you burned"), Sigrun ("Why did the Grey Host come?", "Is it still being rung?", "Say it outdoors, then.") and Old Mag ("The day they took the king."). Then talk to Archivist Pell. **Expect:** he opens with three "cards" and will not say the name.
 0g. Local books: `/scriptevent siege:local_lore harrowford`. **Expect:** what stood at Harrowford, a builder note, and three books in your pack; reading two of them opens the Ledger page "The Field Without Bones", which accepts 3:17. On a real plot, picking it at the welcome hall should tell you its past after a few seconds, and the Library should have one book on its bottom shelf.
@@ -758,3 +803,12 @@ On the map world (map mode), in Creative:
 3. `/scriptevent siege:townsfolk` lists the towns and how many are out. `here` brings the nearest town's folk out now (also at night), `home` sends them in, `heard` resets which lines you have heard.
 4. Hit one: no damage. Set the time to night and walk 25+ blocks away: they go indoors. Set it to day: they come back.
 5. After the town layout changes (a new `map/<town>-blocks.json`), run `python3 tools/townsfolk_spots.py` and commit `scripts/townsfolk/spots_data.js`.
+
+## Boss fights, offline
+
+`node tools/sim-bosses.mjs` plays every boss fight from start to finish in a fake world (the regional bosses, the
+Warlord King, Ulfa, the Choir, all seven of Morvane's stages with wipes, every Pretender claim and power; Survival,
+Creative, four players, rank V) and must end with `SIM OK`. Add `--quiet` for one line per fight, `--seed=N` for
+another roll of the dice, or a boss id (`morvane`, `bride`) to play only that one. Run it after any change to a
+fight. It checks the logic (phases, shields, warnings, loot, leftovers, errors the game would swallow), not how a
+fight looks, sounds or paths in the real game. The Storm (the fight for the throne) is not in it.

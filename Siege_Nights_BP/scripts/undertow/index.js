@@ -28,6 +28,7 @@ import { on, isNight } from "../siege/api.js";
 import { UNDERTOW_ID, UNDERTOW_LAYOUT as L, COURT, HEART, TEXT, stageAt, pathX } from "./layout.js";
 import { getSourceSite, getSites, markSite, openRift, riftExit, sourceSignsTick, SITE_NAMES, SOURCE_SITE_IDS } from "./source.js";
 import { VEIL, planCrack, tearBand, TEAR_STEPS, TEAR_CLIMB } from "./rift.js";
+import { CHASM, inChasm } from "./chasm.js";
 import { buildTick, piecesTick, flush, pieces, openCourtGate, openRiverGate, rebuildHeart, waystoneSpot, WAYSTONE, isBuilt, siteOutdated, withClearing } from "./builder.js";
 import { heightAt, planChunk, isRiver, regionAt, columnAt } from "./terrain.js";
 import { RIVER_NODES, riverSegments, riverDistance, RIVER_HALF_WIDTH } from "./rivers.js";
@@ -204,6 +205,15 @@ onTick("undertow:build", 1, () => {
   buildTick(players);
 });
 onTick("undertow:pieces", 40, () => piecesTick());
+// A fall into the chasm under the Seat is a fall out of the world, as it was when there was only void there: the
+// pool at the bottom would otherwise break it. Builders (creative) may go down and look. The Deep (after/deep.js)
+// lies under the chasm's floor, below L.floorY, and is left alone.
+onTick("undertow:chasm", 10, () => {
+  for (const p of world.getAllPlayers()) {
+    if (!inUndertow(p) || p.location.y >= CHASM.killY || p.location.y < L.floorY || isBuilder(p) || p.getGameMode() === GameMode.Spectator) continue;
+    if (inChasm(Math.floor(p.location.x), Math.floor(p.location.z))) { try { p.kill(); } catch { /* gone */ } }
+  }
+});
 // The river's water gate in the sealed wall may be generated long after the Court falls: open it then.
 let riverGateOpen = false;
 onTick("undertow:rivergate", 100, () => {
@@ -227,6 +237,12 @@ onTick("undertow:sky", 20, () => {
       const h = heightAt(Math.floor(x), Math.floor(z));
       if (h === null) continue;
       try { d.spawnParticle(isRiver(Math.floor(x), Math.floor(z)) ? "minecraft:soul_particle" : "minecraft:end_rod", { x, y: h + 1.5 + Math.random() * 6, z }); } catch {}
+    }
+    // Floating white specks hanging in the air all round you, drifting slowly every way (Mateo, 2026-11-13:
+    // "floating white particles"). Each puff is 7 specks living 9-15 s, so about 200 hang round a player.
+    for (let i = 0; i < 2; i++) {
+      const ang = Math.random() * Math.PI * 2, r = Math.random() * 18;
+      try { d.spawnParticle("siege:hollow_drift", { x: l.x + Math.cos(ang) * r, y: l.y + 0.5 + Math.random() * 5, z: l.z + Math.sin(ang) * r }); } catch {}
     }
     // A cloud layer under the high roof (Mateo, 2026-11-12: more fog, "concentrated up to the top so it
     // looks like clouds"): slow purple-grey puffs in the top 30 blocks, drifting with the storm.

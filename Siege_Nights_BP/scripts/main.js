@@ -6,6 +6,7 @@ import "./core/selftest.js";
 import "./core/clickable.js";
 import "./core/gamerules.js";
 import "./core/noraids.js";
+import "./core/nomonsters.js";
 import "./core/firstjoin.js";
 import "./core/storyteller.js";
 
@@ -39,6 +40,7 @@ import "./economy/index.js";
 import "./reach/index.js";
 import "./sound/index.js";
 import "./minimap/index.js";
+import "./quests/index.js";
 import "./guide/index.js";
 import "./roletrials/index.js";
 import "./landmarks/index.js";
@@ -61,6 +63,8 @@ import "./trade/index.js";
 import "./townsfolk/index.js";
 import "./weather/index.js";
 import "./graves/index.js";
+import "./wings/index.js";
+import "./battletest/index.js"; // test tool: /scriptevent siege:battle_test attack | defend | raid
 
 // Start the shared loop last, once every file has registered its work
 import { startLoop } from "./core/loop.js";
