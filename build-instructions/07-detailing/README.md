@@ -68,6 +68,9 @@ flat frame, a shutter, a lip on a planter) and **walls / fences** where you want
 - Lights at regular rhythm on long fronts: every 5 or 7 (odd), on the bay posts.
 - The night should feel uneasy, not black: warm lights on the human scale, no floodlit faces.
 - Interiors are lit by the interior stage's hanging lanterns (`08-interiors`); hide extra light blocks under carpets where a room stays dark.
+- **Every build is lit** (Mateo 2026-11-13, "light all the builds"): the engine's light stage (`scripts/lighting.py`) runs last on every
+  build and adds what is missing until every room is at light 7, every door step at 8 and every built yard, court or deck at 4
+  (the Hollow: 5, 6 and 3, in soul light). Wild ground under the sky (grass, sand, ice, a field) is the land's and stays dark.
 
 ## Hanging and spiked details (Mateo, 2026-11-11, `reference/pictures/detailed-hall-hanging-chains.png`)
 

@@ -116,7 +116,9 @@
           "variable.hc_fidk = math.mod(math.floor(math.max(variable.hc_idle_for - 6.0, 0.0) / 7.0), 3.0);",
           "variable.hc_fid = variable.hc_idle_for > 6.0 ? math.sin(variable.hc_fidt / 7.0 * 180.0) : 0.0;",
           "variable.hc_mounted = query.is_riding && (query.has_property('hc:look') ? query.is_riding_any_entity_of_type('minecraft:horse', 'minecraft:donkey', 'minecraft:mule', 'minecraft:skeleton_horse', 'minecraft:zombie_horse', 'minecraft:camel', 'siege:steed', 'siege:dragon') : 0.0);",
-          "variable.hc_hurt = math.clamp(query.hurt_time / 10.0, 0.0, 1.0);"
+          "variable.hc_hurt = math.clamp(query.hurt_time / 10.0, 0.0, 1.0);",
+          "variable.hc_rbend = query.has_property('hc:look') ? !query.is_item_equipped(0) : 1.0;",
+          "variable.hc_lbend = query.has_property('hc:look') ? !query.is_item_equipped(1) : 1.0;"
         ],
         "animate": [
           "root",

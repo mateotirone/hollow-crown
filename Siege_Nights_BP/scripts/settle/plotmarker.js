@@ -40,7 +40,7 @@ export function seatInWorld(owner, slot, buildingId, style) {
   return { origin, forward: seat.forward, box: { x0: town.x + box.x0, z0: town.z + box.z0, x1: town.x + box.x1, z1: town.z + box.z1 }, plan };
 }
 
-// The classes of the town's open plots that are still empty (for the barracks' plain-Medium fallback)
+// The classes of the town's open plots that are still empty (for PLOT_FALLBACK, empty for now)
 function freeClasses(owner, except) {
   const town = townOf(owner);
   const out = new Set();

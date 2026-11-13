@@ -88,6 +88,22 @@ async function trainMenu(player, block) {
   say(player, `§6Training ${Object.values(order).reduce((a, b) => a + b, 0)} soldiers for ${coins(total)}. The first is out in ${trainTicks(level) / 20} seconds.`);
 }
 
+// A soldier who joins for nothing (the Lantern Spire's lost travellers): he goes in the training queue, ready at
+// once, and steps out of your Barracks (or your keep, if you've never used a Barracks). Returns a problem or null:
+// "unknown" | "noKeep" | "locked" | "full".
+export function enlistFree(owner, type) {
+  const s = SOLDIER[type];
+  if (!s) return "unknown";
+  const keep = state.keeps[owner];
+  if (!keep) return "noKeep";
+  if (!unlocked(s, tierName(owner))) return "locked";
+  if (freeSlots(owner) < s.slots) return "full";
+  if (!S().barracks[owner]?.at) S().barracks[owner] = { ...(S().barracks[owner] ?? {}), at: { x: Math.floor(keep.x), y: Math.floor(keep.y), z: Math.floor(keep.z) } };
+  (S().queue[owner] ??= []).push({ type, ready: system.currentTick + 40 });
+  store.save();
+  return null;
+}
+
 async function upgradeMenu(player) {
   const owner = player.id, level = barracksLevel(owner), cost = upgradeCost(level);
   if (cost === undefined) return say(player, "§7Your Barracks are as good as they get.");
