@@ -147,7 +147,7 @@ export const MENTOR_NPCS = [
         opts: [["Eating an army?", "turn2"]],
       },
       turn2: {
-        text: "That's the word she used. The songs say the grey army died of cold in a pass. Ysolt says it was taken, all of it, in one breath, by something that doesn't live under our sky.\n\nThe elders know. They've known for three hundred years. They teach cadets that dragons are lazy on a third night, because the truth is worse for recruiting.\n\nNow you know too. Don't tell the cadets. Tell them when they're you.",
+        text: "That's the word she used. The songs say the grey army died of cold in a pass. Ysolt says it was taken, all of it, in one breath, by something that doesn't live under our sky.\n\nThe elders know. They've known for three hundred years. They teach cadets that dragons are lazy on a third night, because the truth is worse for recruiting.\n\nNow you know too. Don't tell the cadets. Tell them when they're you.\n\nThere's one more line, smaller, at the bottom of her page. I've never known what to do with it: \"It wasn't hungry. It picked them.\"",
         opts: [["I won't.", "sworn", ["flag:kesh_turn", "sp:1"]]],
       },
       stand: {
@@ -295,7 +295,7 @@ export const MENTOR_NPCS = [
         opts: [["Rang what out?", "turn2"]],
       },
       turn2: {
-        text: "My grandmother said: the same thing the first bell rang out, when there was a queen and the country had another name. Bells don't keep out cold or wolves. They never did. Every bell in the north was made to keep something on the far side of a door.\n\nThat's why the grey army cut them. That's why the brothers hid the moulds instead of melting them. You don't melt a key you might need.",
+        text: "My grandmother said: the same thing the first bell rang out, when there was a queen and the country had another name. Bells don't keep out cold or wolves. They never did. Every bell in the north was made to keep something on the far side of a door.\n\nThat's why the grey army cut them. That's why the brothers hid the moulds instead of melting them. You don't melt a key you might need.\n\nAnd mark this. The Huntsman came the first night you rang the bell, as if he'd been stood by the door waiting for somebody to knock. Things that come that quick don't wander. They're sent.",
         opts: [["We'll need it.", "sworn", ["flag:ulla_turn", "lead:ashen_chapterhouse", "sp:1"]]],
       },
       stand: {
@@ -449,7 +449,7 @@ export const MENTOR_NPCS = [
         opts: [["You think they're alive.", "turn3"]],
       },
       turn3: {
-        text: "I think they're somewhere. I think the lamp at the lighthouse hasn't gone out in three hundred years because somebody is still at sea.\n\nDon't repeat that in the Gull. They'll take my chain off.",
+        text: "I think they're somewhere. I think the lamp at the lighthouse hasn't gone out in three hundred years because somebody is still at sea.\n\nDon't repeat that in the Gull. They'll take my chain off.\n\nAnd the Bride. She's on the chapel register, a Saltreach girl drowned on her wedding day, just like the song. But the drowned don't come back up on their own. Something dressed her for a wedding and sat her across the only safe channel, the year the boats started trading again. That's not grief. That's somebody wanting the harbour shut.",
         opts: [["I won't.", "sworn", ["flag:ottilie_turn", "sp:1"]]],
       },
       stand: {
@@ -608,7 +608,7 @@ export const MENTOR_NPCS = [
         opts: [["Why tell me?", "turn3"]],
       },
       turn3: {
-        text: "Because Magda borrows from it and won't say so, and the Order pretends it never was, and somebody ought to know the truth without being frightened of it.\n\nBe kind to it, when you meet it. It isn't wicked. It's owed.",
+        text: "Because Magda borrows from it and won't say so, and the Order pretends it never was, and somebody ought to know the truth without being frightened of it.\n\nBe kind to the old ground, when you meet it. It isn't wicked. It's owed.\n\nBut mind this, because Goody Sedge wrote it twice and underlined it: the ground doesn't talk. If something speaks to you out of the dark, kindly, and says it's on your side, that isn't the fen. The fen only ever asks for payment. It has never once said please.",
         opts: [["I'll remember.", "sworn", ["flag:nell_turn", "sp:1"]]],
       },
       stand: {
