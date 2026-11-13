@@ -206,6 +206,19 @@ strip round the house (the skill's `bushes`, on by default).
 - jerkinhead roofs;
 - carriage arches through a range (use `arch` cut into the wall).
 
+## Arenas and grand civic sites (the Kingsrest arena, Mateo 2026-11-13)
+
+- **Norman, not Roman:** a square shell in the VAL-01 stone with a two-course plinth, pilasters one out on the piers,
+  string courses at each storey, a polished andesite cornice and battlements; an open round-arched arcade on the ground
+  storey with an ambulatory behind it, an open gallery storey, lancets above. Copper only on domes, cones and the gatehouse
+  roof (Kingsrest's civic accent).
+- **Seating** is the skill's `stands` part: stone brick seats, polished andesite aisles and every fourth row lighter.
+- **The twelve settlement colours** (red, orange, yellow, lime, green, cyan, light blue, blue, purple, magenta, pink,
+  white, clockwise from north) show as wool and concrete: pennants on poles over every bay, a panel over each gate, a
+  roll of colours in the entrance hall and the royal box. Never coloured stone on the shell itself.
+- **The floor stays flat:** lights go flush in it (ochre froglight), never on posts in the middle.
+- Source: `map/structures/arena.py`.
+
 ## Never
 
 - **Frames and plaster:** no dark oak frames on whole slate-roofed streets (gloomy), and no diorite
