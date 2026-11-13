@@ -9,8 +9,9 @@
 // The Seep itself is an entity (siege:seep), so nothing is written into the map and no blocks change.
 
 import { world, ItemStack } from "@minecraft/server";
-import { on, onTick, settlementAt, addTests, assert, assertEqual, registerDeck, storyPick, note } from "../siege/api.js";
+import { on, onTick, addTests, assert, assertEqual, registerDeck, storyPick, note } from "../siege/api.js";
 import { bestiaryStore } from "./bossCore.js";
+import { shelteredAt } from "./sheltered.js";
 import { announce, effect, flat, healthOf, heal, particle, pickOne, ring, sound } from "./util.js";
 
 export const SEEP_SETTINGS = {
@@ -97,7 +98,7 @@ function groundNear(dim, from, min, max) {
   const ground = dim.getTopmostBlock({ x, z });
   if (!ground || ground.isLiquid) return undefined;
   const at = { x: x + 0.5, y: ground.location.y + 1, z: z + 0.5 };
-  return settlementAt(at) ? undefined : at; // never inside someone's walls
+  return shelteredAt(at, dim.id) ? undefined : at; // never inside someone's walls or a town
 }
 
 function openTick() {
