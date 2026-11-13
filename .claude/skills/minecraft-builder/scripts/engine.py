@@ -11,7 +11,7 @@ roofs, colour matching and rules:
     engine.into_blueprint(bp, spec, upto="walls")                   # stage by stage: foundation .. upto
     engine.into_blueprint(bp, spec, only="roof")                    # one stage, for fn(bp, B) stage functions
 
-Stages, in order: shapes, foundation, frame, floors, walls, openings, roof, details, interior, place.
+Stages, in order: shapes, foundation, frame, floors, walls, openings, roof, details, interior, place, light.
 Props follow map/structures/bp.py (facing n/s/e/w, half, open, upper, hinge, hanging, axis); the few the
 kit has no field for (corner stairs, vine sides, rods) go in "raw" as Bedrock states. Blocks are the
 Bedrock ids the kit already uses. compute() caches nothing and is pure: same spec, same blocks.
@@ -23,9 +23,9 @@ if HERE not in sys.path: sys.path.insert(0, HERE)
 from colour import Palette  # noqa: E402
 from fit import voxelize  # noqa: E402
 from materials import Materials  # noqa: E402
-import emit, parts  # noqa: E402
+import emit, lighting, parts  # noqa: E402
 
-STAGES = ["shapes", "foundation", "frame", "floors", "walls", "openings", "roof", "details", "interior", "place"]
+STAGES = ["shapes", "foundation", "frame", "floors", "walls", "openings", "roof", "details", "interior", "place", "light"]
 
 
 def resolve(cells, mats, pal, log):
@@ -104,8 +104,20 @@ def compute(spec, edition=None, pal=None):
     blocks = resolve(cells, mats, pal, log)
     seat_spire_tops(blocks, pal, log)
     check_water(blocks, log)
+    light_stage(spec, blocks, stage_of, log)
     emit.connect(blocks)
     return blocks, stage_of, log
+
+
+def light_stage(spec, blocks, stage_of, log):
+    """Mateo 2026-11-13 ("light all the builds"): every build is lit at night. lighting.py adds lanterns until every
+    room, door and yard the build lays reaches its light (house rules, "Every build is lit"). "light": false opts a
+    spec out (a deliberately dark crypt); a dict changes the targets; a Hollow style gets soul light."""
+    opt = spec.get("light", True)
+    if opt is False or not blocks: return
+    styles = [str(p.get("style", "")) for p in spec.get("parts", [])]
+    kind = spec.get("light_kind") or ("hollow" if any(s.startswith("hollow") for s in styles) else None)
+    lighting.light(blocks, targets=opt if isinstance(opt, dict) else None, log=log, stage_of=stage_of, kind=kind)
 
 
 SPIRE_TOPS = ("siege:spire_roof",)
