@@ -7,17 +7,22 @@
 //     no settler ever takes ("does a house for me spawn ... cause I can't sleep"). On a map plot the starter village's
 //     house tagged "founder" is that house (plotmarker.js raises it), so no cottage is added.
 // Both are raised by the plot building engine (plans.js raise), so they rise like every other building.
+// The founder's bed is checked every ten seconds while the owner is on (Mateo 2026-11-13: "my house doesn't have a
+// bed in it"): a town with no founder's house adopts its finished house nearest the square (the starter village's
+// "founder" one first), and a finished founder's house with no bed gets one, on the first spot free in the world.
+// Test: /scriptevent siege:founder_bed   put your own bed back in your founder's house (and set your spawn there)
 
 import { world, system, BlockPermutation } from "@minecraft/server";
-import { on, emit } from "../siege/api.js";
+import { on, emit, onTick } from "../siege/api.js";
 import { frameFor, toWorld } from "../townhall/halls.js";
 import { BENCH, registerBench } from "./mason.js";
 import { drawBuilding } from "./buildings.js";
-import { raiseOnSlot } from "./plans.js";
-import { townOf, layoutOf, clearMarker, placeMarker, slotState, saveTowns } from "./founding.js";
+import { raiseOnSlot, risingAt } from "./plans.js";
+import { townOf, allTowns, layoutOf, clearMarker, placeMarker, slotState, saveTowns } from "./founding.js";
 import { slotsOf, fixturesOf } from "./towns.js";
 import { seatInWorld } from "./plotmarker.js";
-import { pickBaseSlot, bedSpot } from "./basedata.js";
+import { pickBaseSlot, bedSpots } from "./basedata.js";
+import { HOMES } from "./config.js";
 
 const OVERWORLD = "minecraft:overworld";
 const DIRS = { s: { x: 0, z: 1 }, n: { x: 0, z: -1 }, e: { x: 1, z: 0 }, w: { x: -1, z: 0 } };
@@ -85,7 +90,7 @@ on("townLaidOut", ({ owner, tier }) => {
 
 const bedDir = (f) => (f.z === 1 ? 0 : f.x === -1 ? 1 : f.z === -1 ? 2 : 3); // Bedrock: the way the head points
 
-on("settleBuilt", ({ owner, building, style, origin, forward, marks, slotId }) => {
+on("settleBuilt", ({ owner, building, forward, marks, slotId }) => {
   const town = townOf(owner);
   const st = slotId && town?.slots[slotId];
   if (!st) return;
@@ -101,20 +106,94 @@ on("settleBuilt", ({ owner, building, style, origin, forward, marks, slotId }) =
       }
     } catch { benchFallback(owner); }
   }
-  if (st.founderHome && !st.ownerBed) { // a cottage, or the starter village's founder's house
-    const spot = bedSpot(drawBuilding(building, style));
-    if (!spot) return;
-    const frame = frameFor(forward);
-    const foot = toWorld(frame, origin, spot.x, spot.y, spot.z), head = toWorld(frame, origin, spot.x, spot.y, spot.z + 1);
-    const direction = bedDir(forward);
+  if (st.founderHome && !st.ownerBed) placeOwnerBed(owner, st); // a cottage, or the starter village's founder's house
+});
+
+// ---------- the founder's own bed ----------
+
+const BED_FACE = ["south", "west", "north", "east"];
+function bedPerm(direction, head) {
+  try { return BlockPermutation.resolve("minecraft:bed", { direction, head_piece_bit: head }); } catch { /* newer state names */ }
+  return BlockPermutation.resolve("minecraft:bed", { "minecraft:cardinal_direction": BED_FACE[direction], head_piece_bit: head });
+}
+const isAir = (b) => b && (b.isAir || b.typeId === "minecraft:air");
+
+// Put the founder's bed in their house, on the first spot the design leaves free that is still free in the world, and
+// make it their spawn. true once it is in; false when the house isn't loaded or every spot is taken.
+export function placeOwnerBed(owner, st) {
+  if (!st?.origin || !st.forward || !st.building) return false;
+  const dim = world.getDimension(OVERWORLD);
+  const frame = frameFor(st.forward);
+  const direction = bedDir(st.forward);
+  for (const spot of bedSpots(drawBuilding(st.building, st.style))) {
+    const foot = toWorld(frame, st.origin, spot.x, spot.y, spot.z), head = toWorld(frame, st.origin, spot.x, spot.y, spot.z + 1);
+    let fb, hb;
+    try { fb = dim.getBlock(foot); hb = dim.getBlock(head); } catch { return false; }
+    if (!fb || !hb) return false; // not loaded
+    if (!isAir(fb) || !isAir(hb)) continue; // something the player put there
     try {
-      dim.getBlock(foot)?.setPermutation(BlockPermutation.resolve("minecraft:bed", { direction, head_piece_bit: false }));
-      dim.getBlock(head)?.setPermutation(BlockPermutation.resolve("minecraft:bed", { direction, head_piece_bit: true }));
-      st.ownerBed = foot;
-      saveTowns();
-      world.getPlayers().find((p) => p.id === owner)?.sendMessage("§6Your own house is ready by the square.§7 The bed in it is yours: sleep there and you wake there.");
-      emit("settleCharter", { owner });
-    } catch { /* not loaded: the house still stands */ }
+      fb.setPermutation(bedPerm(direction, false));
+      hb.setPermutation(bedPerm(direction, true));
+    } catch (e) { console.warn(`[Hollow Crown] founder bed: ${e}`); return false; }
+    if (dim.getBlock(foot)?.typeId !== "minecraft:bed") continue;
+    st.ownerBed = foot;
+    st.ownerHead = head;
+    saveTowns();
+    const player = world.getPlayers().find((p) => p.id === owner);
+    if (player) {
+      try { player.setSpawnPoint({ dimension: dim, x: foot.x, y: foot.y, z: foot.z }); } catch { /* the bed still works when slept in */ }
+      player.sendMessage(`§6Your own house is ready by the square (${foot.x}, ${foot.z}).§7 The bed in it is yours: you wake there, and it is never given to a settler.`);
+    }
+    emit("settleCharter", { owner });
+    return true;
+  }
+  return false;
+}
+
+// The founder's house of a town: the slot marked for it, else (a town founded before it was marked) the finished home
+// nearest the square, the starter village's "founder" house first. Marks it. [slotId, state] or undefined.
+function founderSlot(owner, town) {
+  const own = Object.entries(town.slots).find(([, s]) => s.founderHome);
+  if (own) return own;
+  const layout = slotsOf(layoutOf(town));
+  const tagged = new Set(layout.filter((s) => (s.tags ?? []).includes("founder")).map((s) => s.id));
+  const mid = (id) => { const b = layout.find((s) => s.id === id)?.box; return b ? Math.hypot((b.x0 + b.x1) / 2, (b.z0 + b.z1) / 2) : 1e9; };
+  const homes = Object.entries(town.slots).filter(([, s]) => HOMES.includes(s.building) && s.origin && s.done !== false && !s.broken)
+    .sort(([a], [b]) => (tagged.has(b) - tagged.has(a)) || mid(a) - mid(b));
+  if (!homes.length) return undefined;
+  homes[0][1].founderHome = true;
+  saveTowns();
+  return homes[0];
+}
+
+function checkFounderBed(owner, town) {
+  if (town.lord || String(owner).startsWith("npc:") || !town.laid?.[0]) return;
+  const found = founderSlot(owner, town);
+  if (!found) {
+    if (!town.founderCottageTried) { town.founderCottageTried = true; saveTowns(); founderHome(owner); }
+    return;
+  }
+  const [, st] = found;
+  if (st.ownerBed || risingAt(st.origin)) return;
+  placeOwnerBed(owner, st);
+}
+
+onTick("settle_founder_bed", 200, () => {
+  const online = new Set(world.getPlayers().map((p) => p.id));
+  for (const [owner, town] of Object.entries(allTowns() ?? {})) {
+    if (!online.has(owner)) continue;
+    try { checkFounderBed(owner, town); } catch (e) { console.warn(`[Hollow Crown] founder bed: ${e}`); }
   }
 });
 
+system.afterEvents.scriptEventReceive.subscribe((e) => {
+  if (e.id !== "siege:founder_bed") return;
+  const player = e.sourceEntity;
+  if (player?.typeId !== "minecraft:player") return;
+  const town = townOf(player.id);
+  const found = town && founderSlot(player.id, town);
+  if (!found) return player.sendMessage("§7You have no founder's house yet. Found a settlement first.");
+  const st = found[1];
+  st.ownerBed = undefined; st.ownerHead = undefined;
+  if (!placeOwnerBed(player.id, st)) player.sendMessage("§7No free spot for a bed in your house (or it isn't loaded). Clear a 1 x 2 patch of floor and try again.");
+});

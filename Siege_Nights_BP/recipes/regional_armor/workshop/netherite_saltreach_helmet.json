@@ -18,8 +18,10 @@
     "result": {
       "item": "siege:netherite_saltreach_helmet"
     },
-    "unlock": {
-      "context": "AlwaysUnlocked"
-    }
+    "unlock": [
+      {
+        "item": "minecraft:structure_void"
+      }
+    ]
   }
 }

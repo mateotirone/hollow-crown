@@ -18,8 +18,10 @@
     "result": {
       "item": "siege:choirsteel_emberwaste_chestplate"
     },
-    "unlock": {
-      "context": "AlwaysUnlocked"
-    }
+    "unlock": [
+      {
+        "item": "minecraft:structure_void"
+      }
+    ]
   }
 }

@@ -27,8 +27,10 @@
     "result": {
       "item": "siege:guard_blackfen_diamond_chestplate"
     },
-    "unlock": {
-      "context": "AlwaysUnlocked"
-    }
+    "unlock": [
+      {
+        "item": "minecraft:structure_void"
+      }
+    ]
   }
 }
