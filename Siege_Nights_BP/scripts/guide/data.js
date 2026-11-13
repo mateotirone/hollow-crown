@@ -255,6 +255,35 @@ export const ENTRIES = [
     when: ["event:settlerArrived", "click:siege:plot_marker"],
   },
   {
+    id: "townsfolk", ch: "keep", title: "Townsfolk in the lords' towns",
+    tip: "Rival Lords' towns have townsfolk too. Take the town and they stay, beds, jobs and all.",
+    page: "A Rival Lord's town fills up the way yours does: the lord's builders put beds in every home they finish, and at dawn a newcomer arrives if there is a free bed, workers first. Their townsfolk talk the way their lord rules: a proud lord's people are stiff with strangers, a kind lord's people are friendly.\n\n"
+      + "When you lay siege to a lord, the townsfolk go to their beds and stay out of the fight. If the lord falls and you take the town, they stay on and work for you, though they are wary of you for a few days.",
+    when: ["event:townAdopted", "event:rivalBesieged"],
+  },
+  {
+    id: "town_events", ch: "keep", title: "Town events",
+    tip: "Something's happening in town. Things like this come every few days; none of them are chores.",
+    page: "Every few days something happens in a settlement: a market fair with traders from another region, travelling players on the square at dusk, a wedding, a traveller who asks to stay, harvest day, a cart of spare timber. Now and then something odder. Rival Lords' towns have their fairs and players too, so it can be worth riding over.\n\n"
+      + "Nothing happens on a siege night or the day after, and the same thing never comes twice in a row. Ignoring one costs you nothing.",
+    when: ["event:townEvent"],
+  },
+  {
+    id: "settler_requests", ch: "keep", title: "Settler requests",
+    tip: "A settler with \"(a request)\" by their name wants a word. Talk to them to hear it.",
+    page: "Now and then one of your settlers asks for something: a well on the square, another home, hay for the winter, a book for the library, a bed for their sister. Their name shows §e(a request)§r. Talk to them to hear it, and talk to them again once it is done (carry anything they asked you to bring).\n\n"
+      + "A request stays open 7 days. Done in time, it pays Renown, and some pay coins. Let it go and nothing bad happens; someone will ask for something else in a few days.",
+    when: ["event:settlerRequestDone", "talk:tag:siege_settler"],
+  },
+  {
+    id: "wonders", ch: "keep", title: "Wonders",
+    tip: "Six wonders stand waiting to be raised across the realm. Talk to a wonder's keeper to see what it gives its holder.",
+    page: "There are six wonders, one site each, out in the open country: the Great Lighthouse on the Saltreach cliffs, the High Watch in the Vale, Rimeforge Hall in the Frostmarch snows, the Sun Gate Caravanserai in the Emberwaste, the Lantern Spire over the Blackfen pools and the Great Horse Fair in the Vale meadows. Each site has a keeper.\n\n"
+      + "A City (or bigger) can claim a free wonder and pay for it in six stages, about 2,000 Regals in all. The crew raises each stage while someone is nearby, one wonder at a time per settlement. Once all six stages stand, the holder and their allies get its gift: better prices at the traders, the Smith or the railway, cheaper grooms, a tougher keep heart, or more newcomers each dawn.\n\n"
+      + "Rival Lords race for wonders too. Anyone with a City can challenge for a wonder held by someone else: its guards come out and you have ten minutes to cut them all down. A wonder held by a player can only be challenged while they are in the realm. Beat a lord and take their town, and their wonder comes with it. Inside a finished wonder: lost travellers wait at the Lantern Spire each morning, free to take on; the Great Horse Fair runs races round its track and jousts against its champion, for a purse.",
+    when: ["event:tierUp", "event:wonderClaimed", "event:wonderRaised", "event:wonderTaken"],
+  },
+  {
     id: "plan_book", ch: "keep", title: "The Plan Book and Plan Scrolls",
     tip: "Your Plan Book lists the buildings you can raise. Find more plans as Plan Scrolls.",
     page: "A Plot Marker only offers buildings whose plan you know. Your §fPlan Book§r shows them as cards: open it from your pack or from the §fPlan Book§r button in your Town Hall menu. Found plans are bright, missing ones are grey with where to find them, and clicking a card shows its plot size, price, the worker it brings and the charter it counts toward. Every new town's founder gets a book; craft another from a book and a paper. The Hamlet's homes, well and library are known from the start, and your town hall teaches more as it grows: the market, garden, farmhouse, mint and townhouse at level 2, the smithy, stable and inn at 3, the storehouse and watchtower at 4. Everything a charter asks for is taught in time, so you never need luck to grow.\n\n"

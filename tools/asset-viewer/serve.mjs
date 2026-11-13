@@ -343,6 +343,9 @@ const EXTRAS = [
   { id: "miniature", title: "Welcome hall miniature", marker: "map/structures/miniature_scene.py",
     args: (out) => [out],
     label: { miniature: "The whole map in miniature, on its cloud (welcome hall)" } },
+  { id: "wonders", title: "Wonders", marker: "map/structures/wonder_scenes.py",
+    args: (out) => [out],
+    names: (out) => { try { return JSON.parse(fs.readFileSync(path.join(out, "names.json"), "utf8")); } catch { return {}; } } },
   // The material-loop machines come in every region's look: names.json gives each build {title, sub}, so a
   // stage is one row with a chip per region (machine_regions.py).
   { id: "bossunlocks", title: "Boss unlock sites", marker: "map/structures/boss_unlock_sites.py",
