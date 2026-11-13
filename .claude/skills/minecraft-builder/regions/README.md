@@ -107,3 +107,10 @@ given here.
   Frostmarch snow caps (`snow`) and dragon heads (`gable_horns`), domes on drums (`dome`), mossy and thatch
   roofs (`moss`, `thatch`). Also in the skill now: Blackfen boardwalks (`boardwalk`), Hollow leaning towers (`lean`), curved roofs (`"type": "curved"`), galleries and round towers joined into a house (`keep` with `"cap": "cone"`).
 
+
+## Windmills and the Breeder's Yard in towns (2026-11-13)
+
+- Windmills are built in the region's own materials, never Vale timber everywhere (Mateo's Sunscar screenshot):
+  `towngen_build.MILL` holds each region's base, plinth, upper wall, frame, band stairs, cap roof and sails.
+- Every town has a Breeder's Yard with the `hc:breeder_post` block at its gate (`settle_buildings.town_breeder_yard`),
+  in the region's style; the post sells the foal of the region it stands in.
