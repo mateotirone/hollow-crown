@@ -842,7 +842,7 @@
       {
         "scene_tag": "siege_lore_aldous_commander",
         "npc_name": "Sir Aldous Vane",
-        "text": "Knight-Commander. There were four of those when we were eleven hundred. Now there's you.\n\nThe Eleven are yours. Every one of us who's left. We'll hold whatever wall you put us on, and when the worst night comes, the one we were all sworn for and never told about, we'll be on it with you.\n\nWhatever you call us now. The name matters less than I thought it would.",
+        "text": "Knight-Commander. There were four of those when we were eleven hundred. Now there's you.\n\nThe Eleven are yours. Every one of us who's left. We'll hold whatever wall you put us on, and when the worst night comes, the one we were all sworn for and never told about, we'll be on it with you.\n\nOne thing the Rule never needed to say, so I'll say it. Every one of those things we've buried came up the same season the knocking got louder. Somebody is sending them, and they keep sending them at you. I'd like to know who before they stop needing to.\n\nWhatever you call us now. The name matters less than I thought it would.",
         "buttons": [
           {
             "name": "Then hold the wall with me.",
@@ -1054,7 +1054,7 @@
       {
         "scene_tag": "siege_lore_mag_adept3",
         "npc_name": "Old Mag",
-        "text": "It always is, the first time. That's the trap.\n\nGo and be loud when it matters, and quiet all the rest. And carry something from home in your pocket. You'll know why.",
+        "text": "It always is, the first time. That's the trap.\n\nGo and be loud when it matters, and quiet all the rest. And carry something from home in your pocket. You'll know why.\n\nOne more thing. If it ever speaks to you kindly, by name, like it's glad of you, come straight here. It never once spoke kindly to him.",
         "buttons": [
           {
             "name": "I'll remember.",
@@ -5163,7 +5163,7 @@
       {
         "scene_tag": "siege_lore_kesh_turn2",
         "npc_name": "Kesh Cinder",
-        "text": "That's the word she used. The songs say the grey army died of cold in a pass. Ysolt says it was taken, all of it, in one breath, by something that doesn't live under our sky.\n\nThe elders know. They've known for three hundred years. They teach cadets that dragons are lazy on a third night, because the truth is worse for recruiting.\n\nNow you know too. Don't tell the cadets. Tell them when they're you.",
+        "text": "That's the word she used. The songs say the grey army died of cold in a pass. Ysolt says it was taken, all of it, in one breath, by something that doesn't live under our sky.\n\nThe elders know. They've known for three hundred years. They teach cadets that dragons are lazy on a third night, because the truth is worse for recruiting.\n\nNow you know too. Don't tell the cadets. Tell them when they're you.\n\nThere's one more line, smaller, at the bottom of her page. I've never known what to do with it: \"It wasn't hungry. It picked them.\"",
         "buttons": [
           {
             "name": "I won't.",
@@ -5859,7 +5859,7 @@
       {
         "scene_tag": "siege_lore_ulla_turn2",
         "npc_name": "Ulla Deepforge",
-        "text": "My grandmother said: the same thing the first bell rang out, when there was a queen and the country had another name. Bells don't keep out cold or wolves. They never did. Every bell in the north was made to keep something on the far side of a door.\n\nThat's why the grey army cut them. That's why the brothers hid the moulds instead of melting them. You don't melt a key you might need.",
+        "text": "My grandmother said: the same thing the first bell rang out, when there was a queen and the country had another name. Bells don't keep out cold or wolves. They never did. Every bell in the north was made to keep something on the far side of a door.\n\nThat's why the grey army cut them. That's why the brothers hid the moulds instead of melting them. You don't melt a key you might need.\n\nAnd mark this. The Huntsman came the first night you rang the bell, as if he'd been stood by the door waiting for somebody to knock. Things that come that quick don't wander. They're sent.",
         "buttons": [
           {
             "name": "We'll need it.",
@@ -6539,7 +6539,7 @@
       {
         "scene_tag": "siege_lore_ottilie_turn3",
         "npc_name": "Harbourmistress Holt",
-        "text": "I think they're somewhere. I think the lamp at the lighthouse hasn't gone out in three hundred years because somebody is still at sea.\n\nDon't repeat that in the Gull. They'll take my chain off.",
+        "text": "I think they're somewhere. I think the lamp at the lighthouse hasn't gone out in three hundred years because somebody is still at sea.\n\nDon't repeat that in the Gull. They'll take my chain off.\n\nAnd the Bride. She's on the chapel register, a Saltreach girl drowned on her wedding day, just like the song. But the drowned don't come back up on their own. Something dressed her for a wedding and sat her across the only safe channel, the year the boats started trading again. That's not grief. That's somebody wanting the harbour shut.",
         "buttons": [
           {
             "name": "I won't.",
@@ -7286,7 +7286,7 @@
       {
         "scene_tag": "siege_lore_nell_turn3",
         "npc_name": "Nell Sedge",
-        "text": "Because Magda borrows from it and won't say so, and the Order pretends it never was, and somebody ought to know the truth without being frightened of it.\n\nBe kind to it, when you meet it. It isn't wicked. It's owed.",
+        "text": "Because Magda borrows from it and won't say so, and the Order pretends it never was, and somebody ought to know the truth without being frightened of it.\n\nBe kind to the old ground, when you meet it. It isn't wicked. It's owed.\n\nBut mind this, because Goody Sedge wrote it twice and underlined it: the ground doesn't talk. If something speaks to you out of the dark, kindly, and says it's on your side, that isn't the fen. The fen only ever asks for payment. It has never once said please.",
         "buttons": [
           {
             "name": "I'll remember.",

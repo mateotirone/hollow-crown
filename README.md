@@ -164,14 +164,14 @@ Test commands (cheats on): `/scriptevent siege:crown_me` makes you the Heartbear
 
 ## Lore, the Library and the Ledger (The Hollow Crown)
 
-The story is written in **74 Lore Tomes** in 8 collections, scattered over the map. Some of them lie. The whole truth is in `LORE-BIBLE.md` (spoilers).
+The story is written in **75 Lore Tomes** in 8 collections, scattered over the map. Some of them lie. The whole truth is in `LORE-BIBLE.md` (spoilers).
 
 - **The Old King's Journal.** Every player has it from their first minute: a past king's journal about strange things he never understood. It is an ordinary book and reading it is optional (use it). Lost it? `/scriptevent siege:journal`.
 - **The Fourteen Arts.** A child's copybook about the fourteen Sorcerer powers, given by Old Mag in Mirelight to anyone who has taken the Ember. One page per power: where it comes from, hinted and never explained, and what happened to people who could do it. Four powers (Echo Sight, Halfstep, Choir's Call, Veilstep) stay unknown at the Tree of Oaths until you have been somewhere or met someone; the book says where, if you squint. `/scriptevent siege:arts` gives a copy.
 - **Lore Tomes.** Use one to read it. Reading to the last page copies its clues into your Ledger. Lighthouse letters are in cipher (carry a **Cipher Wheel**) and Choir hymns are written right to left (carry **Tide Glass**, or be Marked, or stand in the Hollow).
 - **Dusty Tomes** are books lying in the world. Click one for your own copy. Every player gets one copy from each, so nobody can strip the map. Bosses drop their own tome to everyone who fought, and some night creatures drop rare ones.
 - **Archive Shelf** (Siege Workshop: planks, book, Castle Stone, book, planks → 2). Hold a tome and click a shelf to shelve it: each shelf holds 6 and shows a spine per tome. Click a shelf without a tome for the **catalog**: read anything shelved, see hints for what's missing, take tomes back, and claim rewards. Breaking a shelf spills its tomes.
-- **Rewards.** Finishing a collection (and having read it) gives skill points and a secret. The Library also grows at 5, 10, 25, 40, 60 and 74 tomes: the Cipher Wheel turns up at 10 and the Tide Glass at 25.
+- **Rewards.** Finishing a collection (and having read it) gives skill points and a secret. The Library also grows at 5, 10, 25, 40, 60 and 75 tomes: the Cipher Wheel turns up at 10 and the Tide Glass at 25.
 - **Ledger of Whispers.** Your notebook: 16 mysteries, each filling with clues word for word, plus your leads. With enough clues you answer the mystery. Some answers you have to type. A wrong answer closes that mystery for a day.
 - **Name the Thin Place.** Six Surveyor's Field Notes each say one true thing about the cave that hides the Rift. Shelve all six, read them, and name the place in your catalog. Wrong costs 3 days.
 - **Characters.** Eight hand-written characters on the built-in NPC, who say different things depending on what you've read, solved and become, and who point you to places. Asking Sister Wren which clock was first triggers the First Slip.

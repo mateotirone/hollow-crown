@@ -42,9 +42,9 @@ export const COLLECTIONS = [
     reward: { sp: 2, renown: 40, flag: "col_testimony", text: "Wrong hand. Faces the wall. Fears a bell. You know how to tell the Returned now, and so do your guards: Lost Villagers and Changelings near your keep are marked for you." },
   },
   {
-    id: "fallen", name: "The Fallen", color: "§4", count: 7,
+    id: "fallen", name: "The Fallen", color: "§4", count: 8,
     blurb: "The last words of the great enemies of the land, taken from them when they fell.",
-    reward: { sp: 5, renown: 120, flag: "col_fallen", text: "Seven enemies, seven confessions. Not one of them chose to be what they became. Remember that at the throne." },
+    reward: { sp: 5, renown: 120, flag: "col_fallen", text: "Eight enemies, eight confessions. Not one of them chose to be what they became. Remember that at the throne." },
   },
 ];
 
@@ -55,7 +55,7 @@ export const MILESTONES = [
   { at: 25, name: "Library", items: ["siege:mirror_glass"], sp: 2, text: "Twenty-five tomes. A sliver of Tide Glass falls out of a binding. Carry it and the Hollow's right-to-left writing reads plainly." },
   { at: 40, name: "Archive", items: [], sp: 2, text: "Forty tomes. Scholars would cross the kingdom for this, if there were any scholars left." },
   { at: 60, name: "Great Archive", items: [], sp: 3, text: "Sixty tomes. The Order's own archive holds fewer." },
-  { at: 74, name: "The Unburned Library", items: [], sp: 5, flag: "loremaster", text: "Every tome in Aldmere. Everything they burned, you put back. You are Loremaster." },
+  { at: 75, name: "The Unburned Library", items: [], sp: 5, flag: "loremaster", text: "Every tome in Aldmere. Everything they burned, you put back. You are Loremaster." },
 ];
 
 // ---------- Places the lore points at ----------
@@ -168,7 +168,7 @@ export const THREADS = [
     id: "where_was_i", name: "Where Was I?", need: 2,
     intro: "For nine heartbeats you were somewhere else.",
     clues: {
-      slip_first: "In Sister Wren's house, the house went away. You stood ankle-deep in black water in the street of a town you have never seen: leaning towers, a moon in the wrong place, people standing with their faces to a wall, humming. Then you were back in the chair, wet to the skin. Where were you? Why did it let you go?",
+      slip_first: "In Sister Wren's chapel, the chapel went away. You stood ankle-deep in black water in the street of a town you have never seen: leaning towers, a moon in the wrong place, people standing with their faces to a wall, humming. Then you were back in the chair, wet to the skin. Where were you? Why did it let you go?",
       undertow_named: "Quill: the mage warned of \"the Hollow beneath, which he said lay under Aldmere as cold water lies under ice, and was no part of our world at all.\"",
       undertow_mirror: "Corvin: \"It is not a copy of ours. Its streets are black water and its towers lean. Its people stand facing the walls. I call it the Hollow.\"",
       lost_face_walls: "Corvin: a returned shape \"turns and faces the wall, toward wherever the Hollow is seeping in nearest.\"",
@@ -456,6 +456,7 @@ export const THREADS = [
       named_by_them: "Sigrun: those below have no names. If there is a name down there, they made it for somebody who came to them having lost his own.",
       walked_in: "Old Mag, who was there: \"She didn't throw him. He asked them to cut the rope, and he walked in. Upright. No scream. No fall.\"",
       leader_is_oswin: "\"I was the only one of yours who had ever kept his word to them, so they made me their voice.\"",
+      conductor_chair_sent_five: "The Choir's Conductor: \"The one in the Chair sent five up the long stair to kill you. Every one of them carried a piece of a key, and he let you take them.\"",
     },
     kind: "text",
     question: "Who was Morvane, before the Hollow gave him that name?",
