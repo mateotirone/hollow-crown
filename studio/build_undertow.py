@@ -81,7 +81,7 @@ def block_json(name, display, color, o):
 
 ITEMS = {
     "tuning_fork": ("Tuning Fork", 1),
-    "choir_shard": ("Choir Shard", 16),
+    "choir_shard": ("Faded Choir Shard", 16),  # the old one-size shard: scripts/bestiary/shards.js turns it into a boss's own
     "raw_choir_ore": ("Raw Choir Ore", 64),
     "choirsteel_ingot": ("Choirsteel Ingot", 64),
     "wardens_bell": ("The Deep Bell", 1),
@@ -97,11 +97,11 @@ def item_json(name, stack):
             "minecraft:glint": True,
         }}}
 
-FORK_RECIPE = {"format_version": "1.20.10", "minecraft:recipe_shaped": {
+# One Choir Shard from each of the five regional bosses (studio/build_codex.py makes them), never two of the same
+FORK_RECIPE = {"format_version": "1.20.10", "minecraft:recipe_shapeless": {
     "description": {"identifier": "siege:tuning_fork_recipe"},
     "tags": ["siege_workshop"],
-    "pattern": ["S S", "SAS", "SAS"],
-    "key": {"S": {"item": "siege:choir_shard"}, "A": {"item": "minecraft:amethyst_shard"}},
+    "ingredients": [{"item": f"siege:choir_shard_{b}"} for b in ("reeve", "huntsman", "bride", "seneschal", "mother")] + [{"item": "minecraft:amethyst_shard"}],
     "result": {"item": "siege:tuning_fork", "count": 1},
     "unlock": {"context": "AlwaysUnlocked"}}}
 

@@ -1,0 +1,33 @@
+{
+ "format_version": "1.21.60",
+ "minecraft:item": {
+  "description": {
+   "identifier": "siege:wennas_line",
+   "menu_category": {
+    "category": "equipment"
+   }
+  },
+  "components": {
+   "minecraft:icon": "siege_cx_wennas_line",
+   "minecraft:display_name": {
+    "value": "item.siege:wennas_line.name"
+   },
+   "minecraft:max_stack_size": 1,
+   "minecraft:glint": true,
+   "minecraft:hand_equipped": true,
+   "minecraft:durability": {
+    "max_durability": 600
+   },
+   "minecraft:cooldown": {
+    "category": "siege_rod",
+    "duration": 1.0
+   },
+   "minecraft:tags": {
+    "tags": [
+     "siege:codex",
+     "siege:mythical"
+    ]
+   }
+  }
+ }
+}
