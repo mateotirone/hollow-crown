@@ -28,6 +28,7 @@ import { on, isNight } from "../siege/api.js";
 import { UNDERTOW_ID, UNDERTOW_LAYOUT as L, COURT, HEART, TEXT, stageAt, pathX } from "./layout.js";
 import { getSourceSite, getSites, markSite, openRift, riftExit, sourceSignsTick, SITE_NAMES, SOURCE_SITE_IDS } from "./source.js";
 import { VEIL, planCrack, tearBand, TEAR_STEPS, TEAR_CLIMB } from "./rift.js";
+import { CHASM, inChasm } from "./chasm.js";
 import { buildTick, piecesTick, flush, pieces, openCourtGate, openRiverGate, rebuildHeart, waystoneSpot, WAYSTONE, isBuilt, siteOutdated, withClearing } from "./builder.js";
 import { heightAt, planChunk, isRiver, regionAt, columnAt } from "./terrain.js";
 import { RIVER_NODES, riverSegments, riverDistance, RIVER_HALF_WIDTH } from "./rivers.js";
@@ -204,6 +205,15 @@ onTick("undertow:build", 1, () => {
   buildTick(players);
 });
 onTick("undertow:pieces", 40, () => piecesTick());
+// A fall into the chasm under the Seat is a fall out of the world, as it was when there was only void there: the
+// pool at the bottom would otherwise break it. Builders (creative) may go down and look. The Deep (after/deep.js)
+// lies under the chasm's floor, below L.floorY, and is left alone.
+onTick("undertow:chasm", 10, () => {
+  for (const p of world.getAllPlayers()) {
+    if (!inUndertow(p) || p.location.y >= CHASM.killY || p.location.y < L.floorY || isBuilder(p) || p.getGameMode() === GameMode.Spectator) continue;
+    if (inChasm(Math.floor(p.location.x), Math.floor(p.location.z))) { try { p.kill(); } catch { /* gone */ } }
+  }
+});
 // The river's water gate in the sealed wall may be generated long after the Court falls: open it then.
 let riverGateOpen = false;
 onTick("undertow:rivergate", 100, () => {
