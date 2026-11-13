@@ -94,8 +94,8 @@ the gate itself, and must never cut through a wall, a field or a plot to reach i
   5-wide high street running in to the ring (`paths.station`). Rails cross no road on the level.
 - **End of the line**: at a stop only one stretch reaches (Oakmere, Wolfcairn, Frosthelm) the track never just
   stops in the grass. One block past the last rail at the dead end: a timber buffer beam across the track with a
-  lantern on it. One block behind that: a 5-wide end wall, 2 high, in the region's low wall stone. Keep both
-  clear of roads and plots (`trains/stations.js` BUFFER).
+  lantern on it. One block behind that: an end wall 3 wide and 2 high in the region's low wall stone, no wider
+  than the track bed, so a road to the platform end gets past it (`trains/stations.js` BUFFER).
 - Roads and tracks inside the Citadel follow the sunken half-slab rule like everywhere else. Bare blocks
   take the region's slab mix (Vale cobble and stone brick, Frostmarch cobbled deepslate, Saltreach smooth
   sandstone, Blackfen mud brick, Emberwaste smooth red sandstone).

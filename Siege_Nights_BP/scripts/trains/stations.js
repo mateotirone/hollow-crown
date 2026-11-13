@@ -30,7 +30,7 @@ export const STATION = {
 // The end of the line (a stop only one stretch of the railway reaches: Oakmere, Wolfcairn, Frosthelm): the track
 // stops at a buffer, not in the grass. Counted out from the last rail at the dead end of the platform: a timber
 // buffer beam across the track (dx 1) with a lantern on it, and a low wall in the region's stone behind it (dx 2).
-export const BUFFER = { beamAt: 1, wallAt: 2, beamHalf: 1, wallHalf: 2, wallUp: 2 };
+export const BUFFER = { beamAt: 1, wallAt: 2, beamHalf: 1, wallHalf: 1, wallUp: 2 }; // the wall only as wide as the track bed, so a road to the platform end gets past it
 
 export const regionOf = (style) => (STATION_DESIGNS[style] ? style : "vale");
 
