@@ -164,6 +164,25 @@ for did, name, kind, dmg, base, pal, by, how, does, hint in DROPS:
         k.update(piece="helmet", slot="slot.armor.head", protection=3, durability=480, enchant="armor_head", sheet="netherite_frostmarch_helmet")
     add(**k)
 
+# The five Choir Shards: one from each regional boss, every time it falls. The Tuning Fork takes one of each
+# (scripts/bestiary/shards.js holds the same list for the scripts).
+SHARDS = [
+    ("choir_shard_reeve", "Choir Shard of the Stopped Clock", "gold", "siege:clockwork_reeve", "The Clockwork Reeve",
+     "It ticks, very faintly, a minute behind.", "Carried by the keeper of six stopped clocks."),
+    ("choir_shard_huntsman", "Choir Shard of the Frozen Lake", "glass", "siege:pale_huntsman", "The Pale Huntsman",
+     "Cold enough to frost your fingers. It hums like wind over ice.", "Carried by a hunter under the ice."),
+    ("choir_shard_bride", "Choir Shard of the Drowned Altar", "tide", "siege:drowned_bride", "The Drowned Bride",
+     "Always wet. Hold it to your ear and there is a bell under the water.", "Carried by a bride still waiting at a drowned altar."),
+    ("choir_shard_seneschal", "Choir Shard of the Faceless Vault", "sun", "siege:ash_seneschal", "The Ash Seneschal",
+     "Warm as a hearthstone. It sings one long, patient note.", "Carried by a steward still at his post under the sand."),
+    ("choir_shard_mother", "Choir Shard of the Cradle Tree", "fen", "siege:mother_of_changelings", "The Mother of Changelings",
+     "It hums a lullaby, if you listen for long enough.", "Carried by the one under the fen who raises the ones who come back."),
+]
+for sid, name, pal, by, who, line, hint in SHARDS:
+    add(id=sid, name=name, kind="shard", chapter="relics", by=by, how="boss", icon="siege_choir_shard.png", pal=pal, line=line,
+        does="Keep it. One shard from each of the five, set on an amethyst shard at a Siege Workshop, makes the Tuning Fork. Two of the same shard won't do.",
+        hint=hint, source=f"{who}, every time it falls.")
+
 # Mythical weapons and tools (once per player, from a place or a mystery; they go dull instead of breaking)
 MYTH = [
     ("maelis_clapper", "Maelis's Clapper", "mace", 8, "siege_warhammer.png", "bell", "Queen Maelis, from the Founding Bell",
@@ -327,6 +346,10 @@ def item_json(s):
         cat = "items"
     elif k == "material":
         c["minecraft:max_stack_size"] = 64
+        cat = "items"
+    elif k == "shard":
+        c["minecraft:max_stack_size"] = 16; c["minecraft:glint"] = True
+        tags.append("siege:choir_shard")
         cat = "items"
     c["minecraft:tags"] = {"tags": tags}
     return {"format_version": "1.21.60", "minecraft:item": {"description": {"identifier": ident, "menu_category": {"category": cat}}, "components": c}}

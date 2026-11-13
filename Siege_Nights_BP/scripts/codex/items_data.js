@@ -682,6 +682,66 @@ export const ITEMS = [
   "source": "Taken from a ruler of the ore, overthrown."
  },
  {
+  "id": "siege:choir_shard_reeve",
+  "name": "Choir Shard of the Stopped Clock",
+  "kind": "shard",
+  "chapter": "relics",
+  "by": "siege:clockwork_reeve",
+  "how": "boss",
+  "does": "Keep it. One shard from each of the five, set on an amethyst shard at a Siege Workshop, makes the Tuning Fork. Two of the same shard won't do.",
+  "hint": "Carried by the keeper of six stopped clocks.",
+  "source": "The Clockwork Reeve, every time it falls.",
+  "line": "It ticks, very faintly, a minute behind."
+ },
+ {
+  "id": "siege:choir_shard_huntsman",
+  "name": "Choir Shard of the Frozen Lake",
+  "kind": "shard",
+  "chapter": "relics",
+  "by": "siege:pale_huntsman",
+  "how": "boss",
+  "does": "Keep it. One shard from each of the five, set on an amethyst shard at a Siege Workshop, makes the Tuning Fork. Two of the same shard won't do.",
+  "hint": "Carried by a hunter under the ice.",
+  "source": "The Pale Huntsman, every time it falls.",
+  "line": "Cold enough to frost your fingers. It hums like wind over ice."
+ },
+ {
+  "id": "siege:choir_shard_bride",
+  "name": "Choir Shard of the Drowned Altar",
+  "kind": "shard",
+  "chapter": "relics",
+  "by": "siege:drowned_bride",
+  "how": "boss",
+  "does": "Keep it. One shard from each of the five, set on an amethyst shard at a Siege Workshop, makes the Tuning Fork. Two of the same shard won't do.",
+  "hint": "Carried by a bride still waiting at a drowned altar.",
+  "source": "The Drowned Bride, every time it falls.",
+  "line": "Always wet. Hold it to your ear and there is a bell under the water."
+ },
+ {
+  "id": "siege:choir_shard_seneschal",
+  "name": "Choir Shard of the Faceless Vault",
+  "kind": "shard",
+  "chapter": "relics",
+  "by": "siege:ash_seneschal",
+  "how": "boss",
+  "does": "Keep it. One shard from each of the five, set on an amethyst shard at a Siege Workshop, makes the Tuning Fork. Two of the same shard won't do.",
+  "hint": "Carried by a steward still at his post under the sand.",
+  "source": "The Ash Seneschal, every time it falls.",
+  "line": "Warm as a hearthstone. It sings one long, patient note."
+ },
+ {
+  "id": "siege:choir_shard_mother",
+  "name": "Choir Shard of the Cradle Tree",
+  "kind": "shard",
+  "chapter": "relics",
+  "by": "siege:mother_of_changelings",
+  "how": "boss",
+  "does": "Keep it. One shard from each of the five, set on an amethyst shard at a Siege Workshop, makes the Tuning Fork. Two of the same shard won't do.",
+  "hint": "Carried by the one under the fen who raises the ones who come back.",
+  "source": "The Mother of Changelings, every time it falls.",
+  "line": "It hums a lullaby, if you listen for long enough."
+ },
+ {
   "id": "siege:maelis_clapper",
   "name": "Maelis's Clapper",
   "kind": "mace",

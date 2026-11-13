@@ -1289,6 +1289,21 @@
   "siege_cx_regents_seal_ring": {
    "textures": "textures/items/codex/regents_seal_ring"
   },
+  "siege_cx_choir_shard_reeve": {
+   "textures": "textures/items/codex/choir_shard_reeve"
+  },
+  "siege_cx_choir_shard_huntsman": {
+   "textures": "textures/items/codex/choir_shard_huntsman"
+  },
+  "siege_cx_choir_shard_bride": {
+   "textures": "textures/items/codex/choir_shard_bride"
+  },
+  "siege_cx_choir_shard_seneschal": {
+   "textures": "textures/items/codex/choir_shard_seneschal"
+  },
+  "siege_cx_choir_shard_mother": {
+   "textures": "textures/items/codex/choir_shard_mother"
+  },
   "siege_cx_maelis_clapper": {
    "textures": "textures/items/codex/maelis_clapper"
   },
