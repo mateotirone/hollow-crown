@@ -217,6 +217,7 @@ def cube_tex(n, p):
               "hay_block": {"top": "hay_block_top", "side": "hay_block_side"},
               "farmland": {"top": "farmland_wet", "side": "dirt", "bottom": "dirt"},
               "barrel": {"top": "barrel_top", "bottom": "barrel_bottom", "side": "barrel_side"},
+              "stonecutter_block": {"top": "stonecutter2_top", "bottom": "stonecutter2_bottom", "side": "stonecutter2_side"},
               "crafting_table": {"top": "crafting_table_top", "side": "crafting_table_side", "bottom": "planks_oak"},
               "oak_leaves": {"side": "leaves_oak.tga#foliage"}, "spruce_leaves": {"side": "leaves_spruce.tga#spruce"},
               "dark_oak_leaves": {"side": "leaves_big_oak.tga#foliage"}, "birch_leaves": {"side": "leaves_birch.tga#birch"},
