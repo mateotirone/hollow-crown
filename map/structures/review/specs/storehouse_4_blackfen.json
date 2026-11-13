@@ -1,0 +1,132 @@
+{
+ "name": "storehouse_4_blackfen",
+ "card": {
+  "title": "Great Storehouse",
+  "sub": "Blackfen, level 4 (Castle)",
+  "region": "blackfen",
+  "where": "Every settlement, on the starter village's Storehouse ground (15 x 15); rebuilt bigger at each tier",
+  "kind": "Work",
+  "blurb": "Walls of chests turned sideways in 3 x 3 bays between stone pillars, a beam over each bay: the settlement's storage, growing with the town."
+ },
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "fen_timber"
+   },
+   "rect": [
+    -6,
+    -12,
+    6,
+    0
+   ],
+   "y": 0,
+   "plinth": 2,
+   "storeys": [
+    5,
+    5,
+    5
+   ],
+   "storey_style": [
+    {
+     "frame_kind": "stone",
+     "frame": "tuff_bricks",
+     "infill": {
+      "ladder": [
+       "mud_bricks",
+       "packed_mud"
+      ],
+      "axis": "noise",
+      "scale": 2
+     }
+    },
+    {}
+   ],
+   "door": {
+    "side": "s",
+    "kind": "large",
+    "steps": 1
+   },
+   "windows": {
+    "s": [
+     {
+      "at": -3,
+      "storey": 0,
+      "w": 1,
+      "h": 2,
+      "sill": "slab"
+     },
+     {
+      "at": 3,
+      "storey": 0,
+      "w": 1,
+      "h": 2,
+      "sill": "slab"
+     },
+     {
+      "at": -3,
+      "storey": 1,
+      "w": 1,
+      "h": 2,
+      "sill": "slab"
+     },
+     {
+      "at": 0,
+      "storey": 1,
+      "w": 1,
+      "h": 2,
+      "sill": "slab"
+     },
+     {
+      "at": 3,
+      "storey": 1,
+      "w": 1,
+      "h": 2,
+      "sill": "slab"
+     },
+     {
+      "at": -3,
+      "storey": 2,
+      "w": 1,
+      "h": 2,
+      "sill": "slab"
+     },
+     {
+      "at": 0,
+      "storey": 2,
+      "w": 1,
+      "h": 2,
+      "sill": "slab"
+     },
+     {
+      "at": 3,
+      "storey": 2,
+      "w": 1,
+      "h": 2,
+      "sill": "slab"
+     }
+    ],
+    "n": [],
+    "e": [],
+    "w": []
+   },
+   "shutters": 0,
+   "roof": {
+    "type": "gable",
+    "ridge": "z",
+    "pitch": 1,
+    "thatch": true
+   },
+   "chimney": false,
+   "interior": {
+    "use": "storehouse",
+    "attic": false,
+    "pillar": "tuff_bricks",
+    "beam": "polished_tuff"
+   },
+   "vines": 0.04,
+   "bushes": false,
+   "piles": true
+  }
+ ]
+}

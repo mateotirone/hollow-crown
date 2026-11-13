@@ -186,6 +186,10 @@ Full table: `build-instructions/palettes/saltreach.md`; ladders SAL-01 to SAL-06
 **Round the foundation:** clumps of azalea and flowering azalea under the ground-floor windows and at some corners, never a
 strip round the house (the skill's `bushes`, on by default).
 
+## The Storehouse (Mateo, 2026-11-13)
+
+Every settlement's Storehouse (`map/structures/review/specs/gen_storehouse.py`, four levels: Hamlet 9 x 9, Town 11 x 11, City 13 x 13 on two storeys, Castle 13 x 13 on three) is the net-store look: pale stone on prismarine, a low sea-green gable, the big plank door; inside, `prismarine_bricks` pillars with `smooth_quartz` beams. The inside is the skill's `storehouse` interior: chests turned sideways in 3 x 3 bays between stone pillars, a beam over each bay (Mateo's reference). No flower boxes or bushes: the door opens on a working yard.
+
 ## Building it with the skill
 
 - **Presets:**
