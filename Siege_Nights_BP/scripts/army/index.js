@@ -5,14 +5,17 @@
 // out of the Barracks one after another (a short training time each). A fallen soldier retrains for half his price
 // (siege/guards.js asks the "retrainFee" filter). "Upgrade the Barracks" (levels 1-5) takes 8% off every price per
 // level and trains faster. Types whose creature isn't in the game yet (the art thread makes them) are listed as
-// coming; siege crews are trained at the Siege Workshop once their engines can be crewed.
+// coming. Siege crews train here too and bring their own engine (warwrit/crews.js).
 //
 //   /scriptevent siege:army_status    your Barracks level, the training queue and the prices
 
 import { world, system, EntityTypes } from "@minecraft/server";
 import { ModalFormData, MessageFormData } from "@minecraft/server-ui";
 import { isReady, onTick, moduleStore, keepOf, tierOf, emit } from "../siege/api.js";
-import { addFilter } from "../core/events.js";
+import { addFilter, applyFilter } from "../core/events.js";
+import { emptyPost, station } from "../guardposts/index.js";
+import { walkTo } from "../guardposts/walk.js";
+import { standY } from "../guardposts/ground.js";
 import { enlist, guardCount, guardLimit } from "../siege/guards.js";
 import { state, saveState } from "../siege/state.js";
 import { charge } from "../economy/coins.js";
@@ -55,7 +58,7 @@ async function trainMenu(player, block) {
   const sliders = [];
   for (const s of ready) {
     const room = Math.floor(free / s.slots);
-    const text = `${s.name}  §7(${countOf(owner, s.id)} here)  ${coins(priceOf(s, level))} each${s.slots > 1 ? `, takes ${s.slots} places` : ""}`;
+    const text = `${s.name}  §7(${countOf(owner, s.id)} here)  ${coins(priceOf(s, level))} each${s.slots > 1 ? `, takes ${s.slots} places` : ""}${s.brings ? `, brings ${s.brings}` : ""}`;
     if (room < 1) { form.label?.(`${text}\n§cNo room: grow your settlement or lose a soldier first.`); continue; }
     form.slider(text, 0, room, { valueStep: 1, defaultValue: 0 });
     sliders.push(s);
@@ -106,6 +109,27 @@ addFilter("barracksButtons", (buttons, { player }) => [
   ...buttons,
 ]);
 
+// A new soldier's first steps (Mateo, 2026-11-12): bowmen go to an empty post on the wall (or a building) if there
+// is one; everyone else walks out of the Barracks to its muster mark in the yard, and is off duty from there
+// (army/idle.js). Returns a few words for the owner, or undefined.
+const BOWMEN = new Set(["siege:archer", "siege:crossbowman"]);
+function stepOut(guard, owner, at) {
+  if (BOWMEN.has(guard.typeId)) {
+    try {
+      const post = emptyPost(owner);
+      if (post) { station(guard, owner, post); return `off to post ${post.n} (${post.site?.name ?? "the wall"})`; }
+    } catch { /* no posts */ }
+  }
+  let yard;
+  try { yard = applyFilter("barracksYard", null, { owner, barracks: at }); } catch { /* no yard */ }
+  const m = yard?.muster ?? (yard?.a && yard?.b ? { x: (yard.a.x + yard.b.x) / 2, y: at.y, z: (yard.a.z + yard.b.z) / 2 } : undefined);
+  if (!m) return undefined;
+  const x = Math.floor(m.x), z = Math.floor(m.z), y = standY(x, z, Math.floor(m.y ?? at.y) + 4) ?? at.y + 1;
+  guard.setDynamicProperty("siege:idle", 1); // off duty in the yard: guards.js leaves it be (army/idle.js)
+  walkTo(guard, owner, { x: x + 0.5, y, z: z + 0.5, yaw: 0 }, { noJump: true });
+  return "out to the yard";
+}
+
 // Trained soldiers step out of the Barracks
 onTick("army-train", 20, () => {
   if (!isReady()) return;
@@ -123,11 +147,12 @@ onTick("army-train", 20, () => {
         guard.setDynamicProperty("siege:barracks", JSON.stringify(at));
         dressForType(guard, owner);
         dressRegion(guard, owner);
+        const job = stepOut(guard, owner, at);
         state.guards[owner] = guardCount(owner) + 1;
         saveState();
         q.shift();
         store.save();
-        world.getPlayers().find((p) => p.id === owner)?.onScreenDisplay.setActionBar(`§6A ${SOLDIER[order.type]?.name ?? "soldier"} has finished training.`);
+        world.getPlayers().find((p) => p.id === owner)?.onScreenDisplay.setActionBar(`§6A ${SOLDIER[order.type]?.name ?? "soldier"} has finished training${job ? `: ${job}` : "."}`);
         emit("soldierTrained", { owner, type: order.type });
       } catch {
         break; // the Barracks isn't loaded: they wait inside

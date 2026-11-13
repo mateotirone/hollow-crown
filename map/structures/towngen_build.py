@@ -287,63 +287,94 @@ def barn(seed, width=9, depth=13):
     return bp
 
 
-def windmill(seed):
-    """A post-and-tower windmill: octagonal stone base, framed timber upper, hipped cap, four
-    sails on the front (south) face. 7 x 7 footprint, about 19 high."""
+# Mateo 2026-11-13 (Sunscar screenshot): the windmills were Vale everywhere. Each region's mill in its own
+# materials (regions/<region>.md): base, plinth, upper wall, frame, band stairs, cap roof, sail lattice and cloth
+MILL = {
+    "vale":  dict(base=None, found="cobblestone", plinth=None, upper="spruce_planks", frame="stripped_dark_oak_log",
+                  band="stone_brick_stairs", roofs=["dark_oak", "spruce", "slate"], pitch=1, wood="dark_oak", lattice="spruce_planks",
+                  cloth=["white_wool"], door="spruce_door"),
+    "frost": dict(base="cobbled_deepslate", found="cobbled_deepslate", plinth="deepslate_bricks", upper="spruce_planks",
+                  frame="stripped_dark_oak_log", band="deepslate_brick_stairs", roofs=["spruce", "dark_oak"], pitch=2,
+                  wood="dark_oak", lattice="spruce_planks", cloth=["white_wool"], door="spruce_door"),
+    "salt":  dict(base="polished_diorite", found="stone_bricks", plinth="prismarine_bricks", upper="calcite", frame="quartz_pillar",
+                  band="prismarine_brick_stairs", roofs=["sea"], pitch=1, wood="birch", lattice="birch_planks",
+                  cloth=["white_wool"], door="birch_door"),
+    "ember": dict(base="sandstone", found="sandstone", plinth="cut_red_sandstone", upper="smooth_sandstone", frame="stripped_acacia_log",
+                  band="smooth_red_sandstone_stairs", roofs=["sand"], pitch=1, wood="acacia", lattice="dark_oak_planks",
+                  cloth=["white_wool"], door="acacia_door"),
+    "fen":   dict(base="mud_bricks", found="mossy_cobblestone", plinth="mossy_stone_bricks", upper="mangrove_planks", frame="mangrove_log",
+                  band="mud_brick_stairs", roofs=["fen"], pitch=1, wood="mangrove", lattice="dark_oak_planks",
+                  cloth=["white_wool", "light_gray_wool"], door="mangrove_door"),
+}
+MILL_ROOFS = {
+    "sea":  dict(roof="prismarine_brick_stairs", roof_block="prismarine_bricks", roof_slab="prismarine_brick_slab",
+                 trim="birch_stairs", trim_block="birch_planks", trim_slab="birch_slab"),
+    "sand": dict(roof="smooth_red_sandstone_stairs", roof_block="smooth_red_sandstone", roof_slab="smooth_red_sandstone_slab",
+                 trim="acacia_stairs", trim_block="acacia_planks", trim_slab="acacia_slab"),
+    "fen":  dict(roof="mossy_cobblestone_stairs", roof_block="mossy_cobblestone", roof_slab="mossy_cobblestone_slab",
+                 trim="mangrove_stairs", trim_block="mangrove_planks", trim_slab="mangrove_slab"),
+}
+
+
+def windmill(seed, region="vale"):
+    """A post-and-tower windmill: octagonal stone base, framed upper, hipped cap, four sails on the front
+    (south) face, in the region's materials (MILL). 7 x 7 footprint, about 19 high."""
     rnd = random.Random(seed)
-    bp = Blueprint(f"tg_windmill_{seed}")
-    P = dict(VALE); P.update(ROOFS[rnd.choice(["dark_oak", "spruce", "slate"])])
+    M = MILL.get(region, MILL["vale"])
+    bp = Blueprint(f"tg_windmill_{region}_{seed}")
+    rk = rnd.choice(M["roofs"])
+    P = dict(VALE); P.update(MILL_ROOFS.get(rk) or ROOFS[rk])
     oct_ = lambda x, z, r: abs(x) <= r and abs(z) <= r and abs(x) + abs(z) <= r + r // 2 + 1
-    stone = VALE["stone"]
+    stone = M["base"] or VALE["stone"]
     for x in range(-4, 5):
         for z in range(-4, 5):
-            if oct_(x, z, 4): bp.set(x, -1, z, "cobblestone"); bp.set(x, 0, z, VALE["plinth"])
+            if oct_(x, z, 4): bp.set(x, -1, z, M["found"]); bp.set(x, 0, z, M["plinth"] or VALE["plinth"])
     for y in range(1, 13):
         r = 3
         for x in range(-r, r + 1):
             for z in range(-r, r + 1):
                 if not oct_(x, z, r): continue
                 edge = not oct_(x + 1, z, r) or not oct_(x - 1, z, r) or not oct_(x, z + 1, r) or not oct_(x, z - 1, r)
-                if not edge: bp.set(x, y, z, "air" if y > 0 else "spruce_planks"); continue
+                if not edge: bp.set(x, y, z, "air"); continue
                 if y <= 6: bp.set(x, y, z, stone)
                 else:
                     corner = abs(x) + abs(z) == r + r // 2 + 1 or (abs(x) == r and abs(z) == r)
-                    bp.set(x, y, z, "stripped_dark_oak_log" if (corner or y in (7, 12)) else "spruce_planks", axis="y")
+                    bp.set(x, y, z, M["frame"] if (corner or y in (7, 12)) else M["upper"], axis="y")
         if y == 6:
             for x in range(-3, 4):
                 for z in range(-3, 4):
                     if oct_(x, z, 3) and not oct_(x, z, 2): pass
     for x in range(-2, 3):
         for z in range(-2, 3):
-            if oct_(x, z, 2): bp.set(x, 7, z, "spruce_planks")       # mill floor
+            if oct_(x, z, 2): bp.set(x, 7, z, M["lattice"])       # mill floor
     # a band of upside-down stairs where the stone gives way to timber
     for side in "nsew":
         dx, _, dz = DIRS[side]
         for t in range(-1, 2):
             x, z = (t, dz * 4) if side in "ns" else (dx * 4, t)
-            bp.set(x, 6, z, "stone_brick_stairs", facing=OPP[side], half="top")
+            bp.set(x, 6, z, M["band"], facing=OPP[side], half="top")
     # windows and door
-    bp.set(0, 1, 3, "spruce_door", facing="n"); bp.set(0, 2, 3, "spruce_door", facing="n", upper=True)
-    bp.set(0, 3, 3, "stone_bricks")
+    bp.set(0, 1, 3, M["door"], facing="n"); bp.set(0, 2, 3, M["door"], facing="n", upper=True)
+    bp.set(0, 3, 3, M["plinth"] or "stone_bricks")
     for (x, y, z) in ((-3, 3, 0), (3, 3, 0), (0, 4, -3), (-3, 9, 0), (3, 9, 0), (0, 9, -3)):
         bp.set(x, y, z, "glass_pane")
     bp.set(-1, 1, 4, "lantern"); bp.set(1, 2, 4, "barrel")
     # cap
     B = TownBuilding(bp, P, seed)
-    B.roof((-3, -3, 3, 3), "hip", 13, overhang=1, pitch=1)
+    B.roof((-3, -3, 3, 3), "hip", 13, overhang=1, pitch=M["pitch"])
     B.build_roofs()
     # axle and sails on the front
     hub_y = 11
-    bp.set(0, hub_y, 4, "dark_oak_log", axis="z"); bp.set(0, hub_y, 5, "dark_oak_log", axis="z")
+    bp.set(0, hub_y, 4, M["wood"] + "_log", axis="z"); bp.set(0, hub_y, 5, M["wood"] + "_log", axis="z")
     arm = 8
     for i, (ax, ay) in enumerate(((0, 1), (1, 0), (0, -1), (-1, 0))):
         cx, cy = -ay, ax                                   # the side the sail cloth hangs on (turns with the arm)
         for t in range(1, arm + 1):
             x, y = ax * t, hub_y + ay * t
-            bp.set(x, y, 5, "stripped_dark_oak_log", axis="x" if ax else "y")
+            bp.set(x, y, 5, "stripped_" + M["wood"] + "_log", axis="x" if ax else "y")
             if t >= 2:                                     # cloth three wide on a lattice: a crossbar every third block
                 for c in (1, 2, 3):
-                    bp.set(x + cx * c, y + cy * c, 5, "spruce_planks" if t % 3 == 2 else "white_wool")
+                    bp.set(x + cx * c, y + cy * c, 5, M["lattice"] if t % 3 == 2 else M["cloth"][(i + c) % len(M["cloth"])])
     bp.markers["door"] = (0, 1, 4)
     bp.finish(); bp.kind = "windmill"
     return bp

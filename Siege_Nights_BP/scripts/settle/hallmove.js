@@ -1,6 +1,6 @@
-// The level-5 town hall needs more ground than levels 1-4. The town layouts keep the hall's ground for levels
-// 1-4 free; plots on level 5's extra ground carry the tag "hall5" (about one per layout). Mateo's rule
-// (2026-11-12): when the hall goes up to level 5, a building on a hall5 plot comes down with its FULL price
+// The bigger town halls need more ground. The town layouts keep the hall's ground free up to a level; plots on the
+// ground a later level takes carry the tag "hall4" or "hall5" (2026-11-13 layouts). Mateo's rule (2026-11-12):
+// when the hall goes up to that level, a building on such a plot comes down with its FULL price
 // back, the owner gets a free plot of the same size (the next building they raise on a plot of that size costs
 // nothing: town.credits), and the hall5 plot closes for good.
 //
@@ -21,7 +21,9 @@ import { BUILDING } from "./buildings.js";
 import { HAND_NAMES } from "./config.js";
 
 const OVERWORLD = "minecraft:overworld";
-export const HALL_TAKES_AT = 5;
+export const HALL_TAKES_AT = 4; // the first level that takes any plots
+// The hall level that takes this plot, or undefined when the hall never needs it
+export const takenAt = (slot) => ((slot.tags ?? []).includes("hall4") ? 4 : (slot.tags ?? []).includes("hall5") ? 5 : undefined);
 const nameOf = (id) => BUILDING[id]?.name ?? HAND_NAMES[id] ?? id;
 
 // The cells of the hall at this level, so clearing a plot never touches it
@@ -36,7 +38,7 @@ function hallCells(owner, level, style) {
   }
 }
 
-// Close every hall5 plot of this town; a building on one comes down, paid back in full, with a free plot owed
+// Close every plot this hall level needs (hall4 at level 4, hall4 and hall5 at level 5); a building on one comes down, paid back in full, with a free plot owed
 export function hallTakesPlots(owner, level, style) {
   const town = townOf(owner);
   if (!town || level < HALL_TAKES_AT) return [];
@@ -44,7 +46,8 @@ export function hallTakesPlots(owner, level, style) {
   const keep = hallCells(owner, level, style);
   const moved = [];
   for (const slot of slotsOf(layoutOf(town))) {
-    if (!(slot.tags ?? []).includes("hall5")) continue;
+    const at = takenAt(slot);
+    if (!at || level < at) continue;
     const state = slotState(owner, slot.id);
     if (state.closed && !state.building) continue;
     if (state.building && state.done === false) { state.closeWhenDone = true; continue; } // still rising: when it's done
@@ -82,7 +85,7 @@ export function hallTakesPlots(owner, level, style) {
 on("hallBuildStarted", ({ owner, level, style }) => { if (level >= HALL_TAKES_AT) hallTakesPlots(owner, level, style); });
 on("hallBuilt", ({ owner, level, style }) => { if (level >= HALL_TAKES_AT) hallTakesPlots(owner, level, style); });
 
-// A building that was still rising on a hall5 plot when the hall took it makes way as soon as it is done
+// A building that was still rising on a hall4/hall5 plot when the hall took it makes way as soon as it is done
 on("settleBuilt", ({ owner, slotId }) => {
   if (!slotId) return;
   const st = townOf(owner)?.slots?.[slotId];

@@ -3,7 +3,7 @@
 
 import { world, system, ItemStack } from "@minecraft/server";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
-import { emit, keepOf, isAlly, isReady, onTick } from "../siege/api.js";
+import { emit, keepOf, isAlly, isReady, onTick, settlementAt } from "../siege/api.js";
 import { isTesting } from "../core/tests.js";
 import { TOME, TOMES, COLLECTION, tomesOf, hasReadAll, libraryRank, isLocal, loadSaved, stampSaved } /* saves carry a version: SAVE_VERSION in logic.js */ from "./logic.js";
 import { COLLECTIONS, MILESTONES, PLACES, SITE_IDS, THREADS } from "./data/world.js";
@@ -38,9 +38,19 @@ function saveLib(owner) {
   world.setDynamicProperty(propOf(owner), Object.keys(lib).length ? stampSaved("library", lib) : undefined);
 }
 
+const locOf = (key) => {
+  const [x, y, z] = key.split(",").map(Number);
+  return { x, y, z };
+};
+// A shelf only counts toward an owner's Library while it stands on that owner's land. Shelves stocked
+// somewhere else (the showcase puts full shelves wherever you stand) or left behind on land that is no
+// longer theirs used to count too, so a tome sitting out there blocked shelving the real one at home.
+const onLand = (owner, key) => !isReady() || settlementAt(locOf(key)) === owner;
+// [key, tome ids] for every shelf in this owner's Library
+const shelvesOf = (owner) => Object.entries(libOf(owner)).filter(([key, ids]) => ids.length && onLand(owner, key));
 // Every tome id shelved anywhere in this owner's Library
-export const shelvedIn = (owner) => Object.values(libOf(owner)).flat();
-// local books sit on the shelves but do not count toward the 74 or Library rank
+export const shelvedIn = (owner) => shelvesOf(owner).flatMap(([, ids]) => ids);
+// local books sit on the shelves but do not count toward the 75 or Library rank
 export const libraryCount = (owner) => (owner ? shelvedIn(owner).filter((id) => !isLocal(id)).length : 0);
 
 function showFill(block, count) {
@@ -49,23 +59,54 @@ function showFill(block, count) {
   } catch {}
 }
 
+// Make sure a saved shelf is still real. A shelf that is gone (broken by a command, a stamp or an
+// explosion since the last sweep) spills its tomes and stops counting. One that was put back by a
+// rebuild shows empty although the save still holds its tomes, so its front is redrawn to match.
+// Returns true if the shelf is (as far as we can tell) still standing.
+function checkShelf(dimension, owner, key) {
+  const loc = locOf(key);
+  let block;
+  try {
+    block = dimension.getBlock(loc);
+  } catch {}
+  if (!block) return true; // not loaded: trust the save
+  if (block.typeId !== SHELF) {
+    spill(dimension, loc, owner);
+    return false;
+  }
+  const count = libOf(owner)[key]?.length ?? 0;
+  let shown;
+  try {
+    shown = block.permutation.getState("siege:fill");
+  } catch {}
+  if (shown !== Math.min(SHELF_SIZE, count)) showFill(block, count);
+  return true;
+}
+
 // ---------- Shelving ----------
 function shelve(player, block, owner, id) {
   const lib = libOf(owner);
   const key = keyOf(block.location);
-  const here = (lib[key] ??= []);
-  if (shelvedIn(owner).includes(id)) return player.onScreenDisplay.setActionBar("§eThis Library already holds a copy of that tome.");
-  if (here.length >= SHELF_SIZE) return player.onScreenDisplay.setActionBar("§eThis shelf is full. Build another Archive Shelf.");
-
+  const tome = TOME[id];
+  if (!tome) return;
   const container = player.getComponent("minecraft:inventory").container;
   const slot = player.selectedSlotIndex;
-  if (tomeIdOf(container.getItem(slot)) !== id) return;
+  if (tomeIdOf(container.getItem(slot)) !== id) return; // the tome already left their hand
+  // Only a copy on a shelf that is really still there counts as "already shelved"
+  const holder = shelvesOf(owner).find(([k, ids]) => ids.includes(id) && checkShelf(block.dimension, owner, k));
+  if (holder) {
+    const where = holder[0] === key ? "on this shelf" : `on the shelf at ${holder[0].replaceAll(",", " ")}`;
+    return player.onScreenDisplay.setActionBar(`§eYour Library already has §f${tome.title}§e, ${where}.`);
+  }
+  const here = lib[key] ?? [];
+  if (here.length >= SHELF_SIZE) return player.onScreenDisplay.setActionBar("§eThis shelf is full. Build another Archive Shelf.");
+
   container.setItem(slot, undefined);
+  lib[key] = here;
   here.push(id);
   saveLib(owner);
   showFill(block, here.length);
 
-  const tome = TOME[id];
   const col = COLLECTION[tome.col];
   const have = tomesOf(tome.col).filter((t) => shelvedIn(owner).includes(t.id)).length;
   const total = libraryCount(owner);
@@ -166,6 +207,7 @@ world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
       const owner = landOwnerAt(block);
       if (!owner) return player.onScreenDisplay.setActionBar("§eAn Archive Shelf only works on settlement land.");
       const mine = owner === player.id || isAlly(owner, player.id);
+      if (libOf(owner)[keyOf(block.location)]) checkShelf(block.dimension, owner, keyOf(block.location)); // redraw a shelf a rebuild emptied
       if (heldId) {
         if (!mine) return player.onScreenDisplay.setActionBar("§eOnly the owner and their allies can shelve tomes here.");
         return shelve(player, block, owner, heldId);

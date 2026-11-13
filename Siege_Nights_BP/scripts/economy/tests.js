@@ -2,12 +2,31 @@ import { addTests, assert, assertEqual } from "../core/tests.js";
 import { ItemTypes } from "@minecraft/server";
 import { ECON, JOBS, JOB_IDS, LINES, REGIONS, COIN, GOLD, TOWNS, TOWN_RING, EXCHANGE } from "./config.js";
 import { WARDS } from "../plots/config.js";
+import { armourOf, plainArmour, reforgeTarget, reforgePrice, armourName, ARMOUR_MATERIALS, ARMOUR_REGIONS, ARMOUR_PIECES, REGION_KEY } from "./regional_armor.js";
 import { regional, appetite, payout, cost, asCoins, coins, worth, fromEmeralds, loopholes, stopAt } from "./rules.js";
 
 const iron = JOBS.moneyer.buys.find((g) => g.id === "minecraft:iron_ingot");
 const wheat = JOBS.farmer.buys.find((g) => g.id === "minecraft:wheat");
 
 addTests("economy", {
+  "regional player armour: every Smith reforges any armour into his region's look, never into the same one": () => {
+    for (const region of REGIONS) assert(REGION_KEY[region], `${region} has a key`);
+    assertEqual(reforgeTarget("minecraft:iron_helmet", "Frostmarch"), "siege:iron_frostmarch_helmet");
+    assertEqual(reforgeTarget("siege:diamond_vale_boots", "Blackfen"), "siege:diamond_blackfen_boots");
+    assertEqual(reforgeTarget("siege:choirsteel_chestplate", "Aldmere Vale"), "siege:choirsteel_vale_chestplate");
+    assertEqual(reforgeTarget("siege:netherite_saltreach_leggings", "Saltreach"), undefined);
+    assertEqual(reforgeTarget("minecraft:golden_helmet", "Saltreach"), undefined);
+    assertEqual(reforgeTarget("siege:guard_vale_helmet", "Saltreach"), undefined, "guard sets have their own regional line");
+    assertEqual(reforgeTarget("minecraft:iron_helmet", undefined), undefined);
+    assertEqual(plainArmour("siege:chainmail_emberwaste_chestplate"), "minecraft:chainmail_chestplate");
+    assertEqual(armourName("siege:choirsteel_frostmarch_helmet"), "Frostmarch Choirsteel Helm");
+    for (const mat of ARMOUR_MATERIALS) for (const region of ARMOUR_REGIONS) for (const piece of ARMOUR_PIECES) {
+      const id = `siege:${mat}_${region}_${piece}`;
+      assertEqual(armourOf(id)?.region, region, id);
+      assert(reforgePrice(id) > 0, id);
+      if (ItemTypes.get("siege:castle_stone")) assert(ItemTypes.get(id), `${id} is in the pack`);
+    }
+  },
   "farms can't print coins: every trader stops buying a good for the day": () => {
     for (const job of Object.values(JOBS)) for (const good of job.buys) {
       if (good === iron) continue; // iron has no limit: golems are gone, so it only comes from mining (golems.js)
@@ -18,12 +37,20 @@ addTests("economy", {
   },
   // the job's place in this list is its skin (siege:job on siege:job_npc, written by studio/build_economy.py): only add at the end
   "each region's Smith sells its own Castle Guard set, a little over the plain one": () => {
-    for (const region of REGIONS) assertEqual(JOBS.smith.sells.filter((good) => good.region === region).length, 4);
+    const guard = (good) => good.id.startsWith("siege:guard_");
+    for (const region of REGIONS) assertEqual(JOBS.smith.sells.filter((good) => good.region === region && guard(good)).length, 4);
     const plain = { helmet: 40, chestplate: 72, leggings: 56, boots: 40 }; // Quartermaster, trading/quartermaster_trades.json
-    for (const good of JOBS.smith.sells.filter((g) => g.region)) {
+    for (const good of JOBS.smith.sells.filter((g) => g.region && guard(g))) {
       const piece = good.id.split("_").pop();
       assert(good.flat && good.price > plain[piece] && good.price <= plain[piece] * 1.5, good.id);
     }
+  },
+  "each region's Hunter sells its starter clothes and its Smith its starter weapon, cheap": () => {
+    for (const region of REGIONS) {
+      assertEqual(JOBS.hunter.sells.filter((good) => good.region === region && good.id.startsWith("siege:starter_")).length, 4);
+      assertEqual(JOBS.smith.sells.filter((good) => good.region === region && good.id.endsWith("_weapon")).length, 1);
+    }
+    for (const good of [...JOBS.hunter.sells, ...JOBS.smith.sells].filter((g) => g.id.startsWith("siege:starter_"))) assert(good.flat && good.price <= 10, good.id);
   },
   "every town of the map has traders, inside the town, and only Kingsrest has the Moneyer": () => {
     for (const town of TOWNS) {

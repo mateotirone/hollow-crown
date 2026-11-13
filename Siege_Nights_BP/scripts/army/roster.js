@@ -5,7 +5,7 @@
 
 export const TIERS = ["Hamlet", "Town", "City", "Castle"];
 
-// at: "barracks" (fighting soldiers) or "workshop" (siege crews, Siege Workshop). slots: room taken in the cap.
+// at: "barracks" (all train there; Mateo 2026-11-12). brings: a siege crew's own engine, part of his price. slots: room taken in the cap.
 export const SOLDIERS = [
   { id: "siege:man_at_arms", name: "Man-at-Arms", cost: 40, unlock: "Hamlet", slots: 1, at: "barracks", job: "Sword and shield. Charges whoever attacks a friend; pours through a breach." },
   { id: "siege:archer", name: "Archer", cost: 40, unlock: "Hamlet", slots: 1, at: "barracks", job: "Longbow. Holds his spot on the wall or behind the line." },
@@ -13,9 +13,9 @@ export const SOLDIERS = [
   { id: "siege:shieldbearer", name: "Shieldbearer", cost: 60, unlock: "Town", slots: 1, at: "barracks", job: "Tower shield. Walks between crews and enemy archers, soaking arrows." },
   { id: "siege:crossbowman", name: "Crossbowman", cost: 70, unlock: "Town", slots: 1, at: "barracks", job: "Heavy crossbow. Slow bolts through armour; picks off Knights." },
   { id: "siege:knight", name: "Knight", cost: 120, unlock: "City", slots: 2, at: "barracks", job: "Lance and horse. Rides at the head of the march, charges archers." },
-  { id: "siege:ram_crew", name: "Ram crew", cost: 80, unlock: "Town", slots: 1, at: "workshop", job: "Push your battering ram to the gate and swing it." },
-  { id: "siege:trebuchet_crew", name: "Trebuchet crew", cost: 100, unlock: "City", slots: 1, at: "workshop", job: "Load and aim your trebuchet at the wall." },
-  { id: "siege:sapper", name: "Sapper", cost: 90, unlock: "City", slots: 1, at: "workshop", job: "Plants Breaching Charges on the wall, then runs." },
+  { id: "siege:ram_crew", name: "Ram crew", cost: 80, unlock: "Town", slots: 1, at: "barracks", brings: "a battering ram", job: "Pushes the ram he brings to the gate and swings it every 6 seconds." },
+  { id: "siege:trebuchet_crew", name: "Trebuchet crew", cost: 100, unlock: "City", slots: 1, at: "barracks", brings: "a trebuchet", job: "Sets up the trebuchet he brings 40 blocks from the wall and widens one hole, a boulder every 45 seconds." },
+  { id: "siege:sapper", name: "Sapper", cost: 90, unlock: "City", slots: 1, at: "barracks", brings: "three Breaching Charges", job: "Plants a Breaching Charge on the wall, runs, and comes back a minute later with the next." },
 ];
 export const SOLDIER = Object.fromEntries(SOLDIERS.map((s) => [s.id, s]));
 

@@ -152,14 +152,7 @@ const TRICKS = {
     sound(dim, "mob.witch.celebrate", e.location, 0.8);
   },
 
-  // Tongue: yanks you in from up to six blocks
-  "siege:mire_toad": (e, dim, players) => {
-    if (!every(80, e)) return;
-    const prey = players.find((p) => { const d = flat(p.location, e.location); return d > 2 && d < 6.5; });
-    if (!prey) return;
-    shove(prey, e.location.x - prey.location.x, e.location.z - prey.location.z, 1.3, 0.25);
-    sound(dim, "mob.frog.tongue", e.location, 0.7);
-  },
+  // (The Mire Toad used to yank players in with its tongue. Mateo had it removed, 2026-11-12: it only hops, bites and poisons whoever punches it.)
 
   // Anti-magic aura: Marked players nearby are silenced (the spell code reads the tag)
   "siege:inquisitor": (e, dim, players) => {

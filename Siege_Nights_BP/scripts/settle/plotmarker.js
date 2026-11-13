@@ -14,11 +14,11 @@ import { STYLES } from "../townhall/styles.js";
 import { SETTLE, TAG_WORDS, HAND_NAMES, PLANS } from "./config.js";
 import { planChoices } from "./plandata.js";
 import { plansFor } from "./planbook.js";
-import { BUILDINGS, BUILDING, drawBuilding } from "./buildings.js";
+import { BUILDINGS, BUILDING, WORKS, drawBuilding } from "./buildings.js";
 import { plotFit, opensAt, slotClass, CLASS_NAMES } from "./charters.js";
 import { drawBox } from "./zones.js";
 import { raiseOnSlot, risingAt, jobOf } from "./plans.js";
-import { PLOT_MARKER, townOf, allTowns, layoutOf, markerAt, registerMarker, forgetMarker, placeMarker, clearMarker, slotState, saveTowns, tierName, slotClosed } from "./founding.js";
+import { PLOT_MARKER, townOf, allTowns, layoutOf, markerAt, registerMarker, forgetMarker, placeMarker, clearMarker, slotState, saveTowns, tierName, slotClosed, keptFor } from "./founding.js";
 import { slotsOf, seatOnSlot, seatedBox, SIZE_NAMES } from "./towns.js";
 import { runScan } from "./register.js";
 import { matches } from "./census.js";
@@ -40,7 +40,7 @@ export function seatInWorld(owner, slot, buildingId, style) {
   return { origin, forward: seat.forward, box: { x0: town.x + box.x0, z0: town.z + box.z0, x1: town.x + box.x1, z1: town.z + box.z1 }, plan };
 }
 
-// The classes of the town's open plots that are still empty (for the barracks' plain-Medium fallback)
+// The classes of the town's open plots that are still empty (for PLOT_FALLBACK, empty for now)
 function freeClasses(owner, except) {
   const town = townOf(owner);
   const out = new Set();
@@ -61,6 +61,7 @@ export function choicesFor(owner, slot, player) {
   const town = townOf(owner);
   const tier = town?.tier ?? 0;
   const free = freeClasses(owner, slot.id);
+  if (slotClass(slot) === "W") return worksChoices(owner, slot, tier, free);
   const known = plansFor([owner, player?.id].filter(Boolean), player ? isCreative(player) : false);
   const offers = planChoices(known, town.style, BUILDINGS.map((b) => b.id));
   const out = [];
@@ -70,12 +71,31 @@ export function choicesFor(owner, slot, player) {
     if (!rule.ok && !rule.tagged) continue; // not this plot's size
     if (!seatInWorld(owner, slot, id, style)) continue;
     const open = opensAt(id) <= tier;
-    const why = !rule.ok ? rule.why : !open ? `opens at ${tierName(opensAt(id))}` : "";
+    const kept = rule.ok && open ? keptFor(owner, slot, id) : undefined; // the plot is the last one a charter need can use
+    const why = !rule.ok ? rule.why : !open ? `opens at ${tierName(opensAt(id))}` : kept ?? "";
     const name = foreign ? `${b.name} (${STYLES[style]?.name ?? style})` : b.name;
-    out.push({ id, style, foreign, name, fits: true, open: open && rule.ok, why, tagged: rule.tagged && rule.ok });
+    out.push({ id, style, foreign, name, fits: true, open: open && rule.ok && !kept, why, tagged: rule.tagged && rule.ok });
   }
   out.hidden = BUILDINGS.filter((b) => !offers.some((o) => o.id === b.id) && plotFit(b.id, slot, free).ok).length;
   return out.sort((a, b) => (b.open - a.open) || (b.tagged - a.tagged) || (a.foreign - b.foreign));
+}
+
+// A Works plot takes the machines (buildings.js WORKS) and nothing else. No plan is needed for one; a machine
+// the town already has, or that opens at a later tier, is listed greyed with the reason.
+function worksChoices(owner, slot, tier, free) {
+  const town = townOf(owner);
+  const out = [];
+  for (const w of WORKS) {
+    const rule = plotFit(w.id, slot, free);
+    if (!rule.ok && !rule.tagged) continue;
+    if (!seatInWorld(owner, slot, w.id, town.style)) continue;
+    const open = opensAt(w.id) <= tier;
+    const taken = w.taken?.(owner);
+    const why = taken ?? (!rule.ok ? rule.why : !open ? `opens at ${tierName(opensAt(w.id))}` : "");
+    out.push({ id: w.id, style: town.style, foreign: false, name: w.name, fits: true, open: !why, why, tagged: rule.tagged && rule.ok });
+  }
+  out.hidden = 0;
+  return out.sort((a, b) => (b.open - a.open) || (b.tagged - a.tagged));
 }
 
 // Ground the marker shouldn't stand on: roads, door steps, paving, water
@@ -123,9 +143,10 @@ async function openSlot(player, owner, slot) {
   if (state.pick && system.currentTick - (state.pickedAt ?? 0) <= SETTLE.previewSeconds * 20 && state.by === player.id) return confirm(player, owner, slot, state);
   const size = `${slot.box.x1 - slot.box.x0 + 1} x ${slot.box.z1 - slot.box.z0 + 1}`;
   const choices = choicesFor(owner, slot, player);
+  const works = slotClass(slot) === "W";
   const form = new ActionFormData().title(`${CLASS_NAMES[slotClass(slot)] ?? SIZE_NAMES[slot.size]} plot`)
-    .body(`${size} blocks, door to the road${slot.tags.length ? `, ${slot.tags.map((t) => TAG_WORDS[t]).filter(Boolean).join(", ")}` : ""}.\nBuildings you have plans for that fit here:${choices.hidden ? `\n§8(${choices.hidden} more would suit this plot. Find their plans: toppled lords, bosses, Rumor jobs, traders.)` : ""}`);
-  const own = player.id === owner || isAlly(owner, player.id);
+    .body(`${size} blocks, ${works ? "gate" : "door"} to the road${slot.tags.length ? `, ${slot.tags.map((t) => TAG_WORDS[t]).filter(Boolean).join(", ")}` : ""}.\n${works ? "Ground kept for a works. It is fenced at its full size from the first day and grows into it. What to raise here:" : "Buildings you have plans for that fit here:"}${choices.hidden ? `\n§8(${choices.hidden} more would suit this plot. Find their plans: toppled lords, bosses, Rumor jobs, traders.)` : ""}`);
+  const own = !works && (player.id === owner || isAlly(owner, player.id)); // a works can't be built by hand
   if (!choices.length && !own) return player.sendMessage("§7Nothing we can raise fits this plot yet.");
   if (own) form.button("§2I built here myself\n§8Have it counted as a building");
   for (const c of choices) {
@@ -136,14 +157,15 @@ async function openSlot(player, owner, slot) {
   if (own && res.selection === 0) return registerOwn(player, owner, slot);
   const c = choices[res.selection - (own ? 1 : 0)];
   if (!c) return;
-  if (!c.open) return player.sendMessage(`§7The ${c.name} ${c.why}.${/^opens/.test(c.why) ? " Win more sieges to grow the settlement." : " Try another plot."}`);
+  if (!c.open) return player.sendMessage(/^Kept/.test(c.why) ? `§7${c.why}: this is the last plot it can go on. Raise that here, or another building on a different plot.` : `§7The ${c.name} ${c.why}.${/^opens/.test(c.why) ? " Win more sieges to grow the settlement." : works ? "" : " Try another plot."}`);
   Object.assign(state, { pick: c.id, pickStyle: c.style, pickedAt: system.currentTick, by: player.id });
   saveTowns();
   player.sendMessage(`§6${c.name} marked out.§7 Walk round the green outline, then use the marker again to raise it. ${BUILDING[c.id].blurb ?? ""}`);
 }
 
 // What a design costs on a plot, in coins (SETTLE.plotPrices is in lots)
-export const plotPrice = (buildingId, foreign = false) => Math.round((SETTLE.plotPrices[buildingId] ?? 8) * lot() * (foreign ? PLANS.foreignMul : 1));
+export const plotPrice = (buildingId, foreign = false) => BUILDING[buildingId]?.coins
+  ?? Math.round((SETTLE.plotPrices[buildingId] ?? 8) * lot() * (foreign ? PLANS.foreignMul : 1));
 
 async function confirm(player, owner, slot, state) {
   const town = townOf(owner);
@@ -190,7 +212,9 @@ async function registerOwn(player, owner, slot) {
   const free = freeClasses(owner, slot.id);
   const fitsHere = (id) => plotFit(id, slot, free).ok && opensAt(id) <= (townOf(owner)?.tier ?? 0);
   const all = matches(t);
-  const good = all.filter((m) => m.ok && fitsHere(m.id));
+  const fitting = all.filter((m) => m.ok && fitsHere(m.id));
+  const good = fitting.filter((m) => !keptFor(owner, slot, m.id)); // the same rule as the plot menu
+  if (!good.length && fitting.length) return player.sendMessage(`§7This plot can't count as ${fitting.map((m) => nameOf(m.id)).join(" or ")}: ${keptFor(owner, slot, fitting[0].id)}, and it is the last plot that can hold it.`);
   if (!good.length) {
     const near = all.filter((m) => fitsHere(m.id)).sort((a, b) => a.missing.length - b.missing.length).slice(0, 3);
     const lines = near.map((m) => `§f${nameOf(m.id)}§7: needs ${m.says} (${m.missing.join(", ")})`);
@@ -261,6 +285,8 @@ async function handMenu(player, owner, slot, state) {
 // that takes the plot). after: what happens once it is clear (default: the plot marker comes back).
 export function demolish(owner, slot, state, player, { back = Math.floor((state.paid ?? 0) / 2), keep, after } = {}) {
   const { box, origin, top = 12 } = state;
+  const dig = BUILDING[state.building]?.dig ?? 0; // a works' pit and race are filled in again
+  const built = state.building;
   const spot = state.marker;
   if (spot) {
     forgetMarker(spot);
@@ -273,7 +299,7 @@ export function demolish(owner, slot, state, player, { back = Math.floor((state.
   system.runJob((function* clear() {
     const dim = world.getDimension(OVERWORLD);
     let cells = [];
-    for (let y = origin.y; y <= origin.y + top + 1; y++) for (let x = box.x0; x <= box.x1; x++) for (let z = box.z0; z <= box.z1; z++) cells.push({ x, y, z });
+    for (let y = origin.y - (dig ? dig + 1 : 0); y <= origin.y + top + 1; y++) for (let x = box.x0; x <= box.x1; x++) for (let z = box.z0; z <= box.z1; z++) cells.push({ x, y, z });
     let n = 0;
     for (let pass = 0; pass < 60 && cells.length; pass++) { // unloaded chunks: try again a little later
       const later = [];
@@ -283,11 +309,15 @@ export function demolish(owner, slot, state, player, { back = Math.floor((state.
         try { b = dim.getBlock(at); } catch { b = undefined; }
         if (!b) { later.push(at); continue; }
         if (keep?.has(`${at.x},${at.y},${at.z}`)) continue;
-        try { if (!b.isAir) b.setType("minecraft:air"); } catch { /* protected block */ }
+        try {
+          if (at.y < origin.y) { if (b.isAir || b.isLiquid || /ladder|chain/.test(b.typeId)) b.setType(at.y === origin.y - 1 ? "minecraft:coarse_dirt" : "minecraft:dirt"); }
+          else if (!b.isAir) b.setType("minecraft:air");
+        } catch { /* protected block */ }
       }
       cells = later;
       if (cells.length) for (let i = 0; i < 40; i++) yield; // ~2 s
     }
+    emit("settleCleared", { owner, building: built, slotId: slot.id });
     if (after) { after(); return; }
     placeMarker(owner, slot);
     if (player?.isValid) player.sendMessage("§7The plot is clear.");
@@ -324,7 +354,7 @@ on("settleBuilt", ({ owner, slotId }) => {
   state.done = true; // counts toward the town's charter now (founding.js)
   saveTowns();
   emit("settleCharter", { owner });
-  markerBesideDoor(owner, slot, state);
+  if (!state.fixed) markerBesideDoor(owner, slot, state); // the Mason's Yard stays (basebuilds.js)
 });
 
 function markerBesideDoor(owner, slot, state) {

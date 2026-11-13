@@ -7,6 +7,9 @@
 // Pieces that seek a shore or a cliff use the spot worked out from the map (spots_data.js); if a world has none,
 // they look for it themselves inside the loaded area.
 //
+// A design's roleMarks ([dx, dy, dz, kind]) are sent out as landmarkRoleMarks { site, dim, marks: [{ kind, at }] } once it
+// is built: the role trials take the Span's two ends and Goody Sedge's graves from there.
+//
 // Commands (creative/op):
 //   /scriptevent hc:landmark_status            which sites are built
 //   /scriptevent hc:landmark_tp <id>           go to a site
@@ -23,6 +26,7 @@ import { DESIGNS } from "./designs_data.js";
 import { SPOTS } from "./spots_data.js";
 import { LANDMARKS, BUILD_NEAR } from "./sites.js";
 import { planPiece, seekSpot, AIR, KEEP_TOP } from "./plan.js";
+import { clearTrees } from "../core/clearing.js";
 import "./tests.js";
 
 const OVERWORLD = "minecraft:overworld";
@@ -127,7 +131,12 @@ export function buildSite(site, by) {
       const pal = p.d.palette.map(([id, st]) => perm(id, st));
       const near = (x, z) => tops.get(x * 4096 + z) ?? tops.get(p.x * 4096 + p.z);
       yield;
-      // 3. place it
+      // 3. clear the map's trees out of its ground and the air over it (Mateo 2026-11-12: none in its dead space,
+      //    nothing left floating), then place it
+      if (G !== undefined && p.d.clearTrees !== false) {
+        const b = p.d.box;
+        yield* clearTrees(dim, { x0: p.x + b.x0, z0: p.z + b.z0, x1: p.x + b.x1, z1: p.z + b.z1, y0: G + Math.min(0, b.y0), y1: G + Math.max(b.y1, p.d.clearTo ?? 0) });
+      }
       let n = 0;
       for (const [x, y, z, i] of ops) {
         total++;
@@ -157,6 +166,10 @@ export function buildSite(site, by) {
         try {
           if (!dim.getEntities({ tags: [`siege_lore_npc_${id}`], location: at, maxDistance: 64 }).length) spawnNpc(dim, at, id);
         } catch { /* unloaded */ }
+      }
+      // places a role trial needs (the Span, Goody Sedge's graves): roletrials/marks.js keeps them
+      if (p.d.roleMarks?.length) {
+        emit("landmarkRoleMarks", { site: `${site.id}#${k}`, dim: OVERWORLD, marks: p.d.roleMarks.map(([dx, dy, dz, kind]) => ({ kind, at: { x: p.x + dx + 0.5, y: yAt(dx, dy, dz), z: p.z + dz + 0.5 } })) });
       }
       if (p.d.mark && site.place) {
         const [dx, dy, dz] = p.d.mark;

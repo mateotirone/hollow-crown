@@ -235,6 +235,25 @@ water_level[fenpool] = SEA
 water_level[islake] = lakelevel[islake]
 wet = water_level > Y
 
+# ---------------------------------------------------------------- the seven thin places: designed land
+# (Mateo 2026-11-12: "it's designing the actual map itself".) Each thin place gets its own land from
+# map/thinplaces/shape.mjs, the one approved in the 3D view: a long barrow in a wet ditch, a mine escarpment, a
+# gorge, a chalk headland with a flooded sinkhole, a flooded hollow, a salt pan, a stepped quarry pit. Fully shaped
+# out to ~62 blocks, blended back into the plan by 96. Roads and rivers keep their ground; trails ride the new land.
+# The add-on builds each cave into this land (undertow/thinplaces.js reads thin_land.js to know it is there).
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "thinplaces"))
+from land import shape_sites, write_js
+_riv = (isriver | bank).astype(np.float32)
+_keep = np.maximum.reduce([np.clip(box(isroad.astype(np.float32), 8) * 6, 0, 1), np.clip(box(_riv, 30) * 8, 0, 1), _riv])
+thin_shaped, THIN_BLOCKS, THIN_FACTS = shape_sites(Y, water_level, X0, Z0, _keep, log=log, pools=fenpool, paths=isroad | istrail)
+if thin_shaped.any():
+    Yf = np.where(thin_shaped, Y, Yf).astype(np.float32)     # slopes and steep faces are read from Yf further down
+    wet = water_level > Y
+    fenpool &= wet & ~thin_shaped                             # pools filled in near a place are gone; a place's own water is not a fen pool
+    isroad &= ~(thin_shaped & wet); istrail &= ~(thin_shaped & wet)
+    keepclear |= thin_shaped                                  # no map trees, plants or cave mouths on designed land
+    if os.environ.get("GW_THIN_JS"): write_js(THIN_FACTS, os.environ["GW_THIN_JS"])   # refresh the add-on's copy (full map only)
+
 # ---------------------------------------------------------------- road and trail bridges (the one bridge engine:
 # .claude/skills/minecraft-builder/scripts/bridges.py). Mateo 2026-11-12: a bridge never runs into a field; each
 # carries a paved approach onto land and is joined to its path. Rail bridges are built in game with the stretch
@@ -318,22 +337,65 @@ def stops_on(P): return [(sid, st) for sid, st in STOPS.items() if np.min(np.hyp
 # valleys and hillsides, long curves, stations at the edge of town), not beside the roads. The lines.json "roads"
 # only say which stops each line serves and in what order; railroute places the stations and routes the track.
 import railroute
-SEQ = {}
-for lname, pts in L["roads"].items():
-    P = np.asarray(pts, float)
-    SEQ[lname] = [sid for sid, st in sorted(stops_on(P), key=lambda t: int(np.argmin(np.hypot(P[:, 0] - t[1]["x"], P[:, 1] - t[1]["z"]))))]
 _foot = {}                                         # how far out each stamped town's blocks reach
+FIXED_ST = {}; FIXED_Y = {}                        # stations a town plan already stamped (<town>-plan.json beside it)
 for fn_ in filter(None, os.environ.get("GW_BLOCKS", "").split(":")):
     d_ = json.load(open(fn_)); b_ = np.array(d_["blocks"], np.int64)[:, [0, 2]]
     _foot[d_["town"]] = b_
+    pf_ = fn_.replace("-blocks.json", "-plan.json")
+    if os.path.exists(pf_):
+        for e_ in json.load(open(pf_)).get("buildings", []):
+            if e_.get("kind") == "station":          # track along the stamp's local x at z 0, one above its ground
+                FIXED_ST[slug(d_["town"])] = (int(e_["x"]), int(e_["z"]), "x" if int(e_.get("rotation", 0)) % 180 == 0 else "z")
+                FIXED_Y[slug(d_["town"])] = int(e_["ground_y"]) + 1
+log("rail: stations stamped by town plans", FIXED_ST)
+SEQ = {}                                           # a stop is on a line if its old spot or its stamped station is
+for lname, pts in L["roads"].items():              # near the line's lines.json road
+    P = np.asarray(pts, float); on_ = []
+    for sid, st in STOPS.items():
+        spots_ = [(st["x"], st["z"])] + ([FIXED_ST[sid][:2]] if sid in FIXED_ST else [])
+        dd_ = [np.hypot(P[:, 0] - sx_, P[:, 1] - sz_) for sx_, sz_ in spots_]
+        k_ = min(range(len(dd_)), key=lambda j: dd_[j].min())
+        if dd_[k_].min() < 30: on_.append((int(np.argmin(dd_[k_])), sid))
+    SEQ[lname] = [sid for _, sid in sorted(on_)]
+for sid_, (x_, z_, _) in FIXED_ST.items(): STOPS[sid_].update({"x": x_, "z": z_})
+log("rail: line stops", SEQ)
 R_TOWNS = []
 for n_, x_, z_, r_, _ in TOWNS:
     if n_ in _foot: R_ = int(np.hypot(_foot[n_][:, 0] - x_, _foot[n_][:, 1] - z_).max()) + 6
     else: R_ = int(r_ * 1.12) + 10
     R_TOWNS.append((slug(n_), x_, z_, R_))
 AVOID = [(x_, z_, 82) for _, x_, z_ in PLOTS] + [(x_, z_, int(r_ * 0.7)) for _, x_, z_, r_, _ in WARDS[6:]]
-STATION_POS, LINE_PTS = railroute.plan_network(Y, wet, land, X0, Z0, STOPS, SEQ, R_TOWNS, AVOID, log=log)
+if os.environ.get("GW_SITES", "1") != "0" and shutil.which("node"):   # and the boss sites' whole areas (baked below)
+    _ba = json.loads(__import__("subprocess").check_output(["node", os.path.join(os.path.dirname(os.path.abspath(__file__)), "bake_sites.mjs"), "--anchors"]))
+    AVOID += [(a_["x"], a_["z"], int(_ba["reach"][s_])) for s_, a_ in _ba["anchors"].items() if s_ not in ("reeve", "mirelight")]
+STATION_POS, LINE_PTS = railroute.plan_network(Y, wet, land, X0, Z0, STOPS, SEQ, R_TOWNS, AVOID, log=log, fixed=FIXED_ST)
+stop_y.update(FIXED_Y)
 for sid_, (x_, z_, _) in STATION_POS.items(): STOPS[sid_].update({"x": x_, "z": z_})
+# a station road (towns thread 2026-11-13): a village station the map placed itself gets a 5-wide road from the
+# platform's town side to the town's nearest street end (a paved groundwork cell of its plan). Stamped stations
+# (FIXED_ST) already come with their own street.
+_paved = ("slab", "path", "gravel", "cobblestone", "stone_bricks", "sandstone")
+for n_, tx_, tz_, _r, _ in TOWNS:
+    sid_ = slug(n_)
+    if sid_ in FIXED_ST or sid_ not in STATION_POS: continue
+    fn_ = next((f for f in filter(None, os.environ.get("GW_BLOCKS", "").split(":")) if json.load(open(f)).get("town") == n_), None)
+    if not fn_: continue
+    d_ = json.load(open(fn_)); pal_ = d_["palette"]; gw_ = d_["groundwork_blocks"]
+    sx_, sz_, ax_ = STATION_POS[sid_]; ax_ = ax_[-1]
+    px_, pz_ = (0, 1) if ax_ == "x" else (1, 0)                    # across the track, toward the town
+    if (tx_ - sx_) * px_ + (tz_ - sz_) * pz_ < 0: px_, pz_ = -px_, -pz_
+    fx_, fz_ = sx_ + px_ * 4, sz_ + pz_ * 4
+    top_ = {}
+    for x_, y_, z_, i_ in d_["blocks"][:gw_]:                  # the top solid block (air entries only dig out)
+        if "air" not in pal_[i_]["name"] and y_ >= top_.get((x_, z_), (-999, ""))[0]: top_[(x_, z_)] = (y_, pal_[i_]["name"])
+    ends_ = [(math.hypot(x_ - fx_, z_ - fz_), x_, z_) for (x_, z_), (_, nm_) in top_.items()
+             if any(w_ in nm_ for w_ in _paved) and "wall" not in nm_ and (x_ - sx_) * px_ + (z_ - sz_) * pz_ > 4]
+    if not ends_: continue
+    _, ex_, ez_ = min(ends_)
+    rd_ = raster([[(fx_, fz_), (ex_, ez_)]], lambda f: 5) & land & ~isriver
+    isroad |= rd_; istrail &= ~rd_
+    log("station road", n_, (fx_, fz_), "->", (ex_, ez_), int(rd_.sum()), "cells")
 for lname in SEQ:
     pts = LINE_PTS[lname]
     on = [(sid, STOPS[sid]) for sid in SEQ[lname]]
@@ -461,6 +523,10 @@ for d_ in GW_FILES:
     log("graded the land to", d_["town"], "groundwork:", int(foot.sum()), "columns")
 railcore = (rail_d <= 1.5) & ~wet & (tun_floor == -999) & (br_deck == -999) & RAIL_IN_WORLD
 railzone = (rail_d <= 4.5) & RAIL_IN_WORLD
+# the planned lines keep trees off even with no bed in the world (playtest 2026-11-12: trees stood on the lines, and
+# the track the game lays went round their roots and branches): no trunk within 8 of a line, no crown over its bed
+# and graded sides (the game grades 5 out, rail_bed.js)
+railkeep = rail_d <= 6.5
 log("rail lines", len(RAILLINES), "stops", len(STOPS), "tunnel cells", int((tun_floor > -999).sum()), "bridge cells", int((br_deck > -999).sum()))
 # the export: stops (the track block where trains stop, mid-platform) and segments between neighbouring stops,
 # sharing their end blocks
@@ -472,7 +538,25 @@ try:
     import railworks
 except ImportError:
     railworks = None
+try:
+    import railcross              # level crossings where roads and trails cross a line (Mateo 2026-11-13)
+except ImportError:
+    railcross = None
+# one height for track two lines share (playtest 2026-11-12: Millbrook's Oakmere branch ran its shared platform a
+# block above the North line's, so buying it stacked a second track on the first): the first line keeps its heights
+import railshare
+_ln = list(RAILLINES)
+for n_, ys_h in zip(_ln, railshare.harmonise([([tuple(map(int, c)) for c in RAILLINES[n_][0]], RAILLINES[n_][1]) for n_ in _ln])):
+    RAILLINES[n_] = ([tuple(map(int, c)) for c in RAILLINES[n_][0]], ys_h, RAILLINES[n_][2])
 segs = []
+_alltrack = {tuple(map(int, c)) for cells_, _, _ in RAILLINES.values() for c in cells_}
+_plotstops = [(st_["x"], st_["z"]) for st_ in STOPS.values() if st_["kind"] == "plot" and "x" in st_]
+def _pathw(x, z):
+    i, j = _cl(x - X0), _cl(z - Z0)
+    return 5 if isroad[i, j] else 3 if istrail[i, j] else 0
+def _hutfree(x, z):
+    i, j = _cl(x - X0), _cl(z - Z0)
+    return bool(land[i, j] and not (isriver[i, j] or isroad[i, j] or istrail[i, j] or townzone[i, j] or plotzone[i, j]))
 for lname, (cells, ys, stops_on) in RAILLINES.items():
     path = [(x, int(y), z) for (x, z), y in zip(cells, ys)]
     blocks = None
@@ -487,6 +571,12 @@ for lname, (cells, ys, stops_on) in RAILLINES.items():
                 w_, wp_, cu_ = railworks.segment_works([(b[0], b[2]) for b in part], [b[1] for b in part], ground_at, water_at, region_at, log=log)
                 if w_: seg_.update(works=w_, works_palette=wp_, custom=cu_)
             except Exception as e_: log("rail works failed", seg_["id"], e_)
+        if railcross and blocks:
+            try:
+                xs_ = railcross.segment_crossings([(b[0], b[2]) for b in part], [b[1] for b in part], _pathw, region_at, log=log,
+                                                  custom=seg_.get("custom", []), side_free=_hutfree, lines=_alltrack, stations=_plotstops)
+                if xs_: seg_["crossings"] = xs_
+            except Exception as e_: log("rail crossings failed", seg_["id"], e_)
         segs.append(seg_)
     for sid, i in stops_on:
         x, y, z = path[i]; STOPS[sid].update({"x": x, "y": y, "z": z})
@@ -529,7 +619,8 @@ NAMES = ["stone", "grass_block", "dirt", "water", "sand", "gravel", "bedrock", "
          "coal_ore", "iron_ore", "copper_ore", "gold_ore", "redstone_ore", "lapis_ore", "diamond_ore", "emerald_ore",
          "deepslate_coal_ore", "deepslate_iron_ore", "deepslate_copper_ore", "deepslate_gold_ore", "deepslate_redstone_ore",
          "deepslate_lapis_ore", "deepslate_diamond_ore", "deepslate_emerald_ore", "sweet_berry_bush", "seagrass",
-         "orange_terracotta", "red_terracotta", "yellow_terracotta", "white_terracotta", "brown_terracotta", "light_gray_terracotta", "bone_block"]
+         "orange_terracotta", "red_terracotta", "yellow_terracotta", "white_terracotta", "brown_terracotta", "light_gray_terracotta", "bone_block", "moss_carpet",
+         "raw_iron_block", "raw_copper_block"]
 ID = {n: B(n) for n in NAMES}
 for lf in ["oak", "birch", "spruce", "mangrove", "dark_oak", "acacia"]: ID[lf + "_leaves"] = B(lf + "_leaves", LEAF)
 ID["snow_layer"] = B("snow_layer", {"height": IntTag(0), "covered_bit": ByteTag(0)})
@@ -557,7 +648,7 @@ rocky = (Y > 100) & (slope > 0.6) & ~R[EMBER] & ~chalk
 m = rocky; pick_ = r1 + n_patch2 * 0.8
 surf[m] = np.select([pick_[m] < 0.45, pick_[m] < 0.65, pick_[m] < 0.8, pick_[m] < 0.9], [ID["stone"], ID["andesite"], ID["gravel"], ID["cobblestone"]], ID["tuff"]); sub[m] = ID["stone"]
 m = rocky & (Y > 130) & (r2 < 0.12) & R[FROST]; surf[m] = ID["calcite"]
-m = R[FROST] & (Y > snowline) & (slope < 0.9); surf[m] = np.where(r2[m] < 0.85, ID["snow"], ID["packed_ice"]); sub[m] = ID["stone"]
+m = R[FROST] & (Y > snowline) & (slope < 0.9); surf[m] = np.select([r2[m] < 0.86, r2[m] < 0.93], [ID["snow"], ID["stone"]], ID["gravel"]); sub[m] = ID["stone"]   # no packed-ice speckle: it reads as blue dots (Mateo 2026-11-12)
 m = R[FROST] & (Y > snowline + 22) & (slope < 1.4); surf[m] = ID["snow"]
 # tundra between the woods and the peaks: grass, podzol, coarse dirt and stony patches, snow lying only in drifts
 m = R[FROST] & ~rocky & (Y > 100) & (Y < snowline) & (surf == ID["grass_block"]); tp = n_patch * 1.4 + (r1 - 0.5) * 0.4
@@ -573,6 +664,35 @@ sub[m] = np.where(r2[m] < 0.6, ID["mud"], ID["dirt"])
 # Emberwaste: sand over sandstone, red sand drifts
 m = R[EMBER]; red = (noise(90, 33) + n_patch * 0.35 + n_patch2 * 0.15) > 0.12
 surf[m] = np.where(red[m], ID["red_sand"], ID["sand"]); sub[m] = np.where(red[m], ID["red_sandstone"], ID["sandstone"]); subd[m] = 6
+# fine ground mix (Mateo 2026-11-12, of the Cradle Tree's ground: "That needs to be everywhere"). The patches above set
+# each region's ground in broad strokes; this speckles single blocks of the region's other grounds through them, so no
+# stretch reads as one flat colour. Picked by a hash of the world position (no rng draws, so trees and caves stay put,
+# and any slice of the map gets the same blocks), and faded out on plots and towns so their edges still blend.
+def hash01(seed):
+    h = (GX.astype(np.int64) * 73856093) ^ (GZ.astype(np.int64) * 19349663) ^ np.int64(seed * 83492791)
+    h = (h ^ (h >> 13)) * np.int64(1274126177); h = h ^ (h >> 16)
+    return (h & 0xFFFFFF).astype(np.float32) / 16777216.0
+def mix(m, h, opts):
+    """A weighted pick per cell of mask m from opts = [(block, weight)]; a weight may be a map-sized array."""
+    w = [np.broadcast_to(np.asarray(wt[m] if np.ndim(wt) == 2 else wt, np.float32), (int(m.sum()),)) for _, wt in opts]
+    hv = h[m] * sum(w); acc = np.zeros_like(hv); out = np.full(hv.shape, ID[opts[-1][0]], np.uint16)
+    for (n, _), wi in zip(opts, w):
+        out = np.where((hv >= acc) & (hv < acc + wi), ID[n], out); acc = acc + wi
+    return out
+hs, hp = hash01(11), hash01(12)
+speck = plotfade * (1 - np.clip(box(townzone.astype(np.float32), 10) * 3, 0, 1))      # 0 on plots and in towns
+soft = land & ~wet & ~isroad & ~istrail & ~steep & ~rocky & ~chalk
+def sprinkle(m, p, opts):
+    m = m & soft & (hp < p * speck)
+    if m.any(): surf[m] = mix(m, hs, opts)
+woods = forest > 0.05
+sprinkle(R[VALE] & (surf == ID["grass_block"]), 0.3, [("grass_block", 4), ("coarse_dirt", 2), ("podzol", np.where(woods, 3, 1)), ("moss_block", 1), ("gravel", 0.4)])
+sprinkle(R[VALE] & (surf == ID["coarse_dirt"]), 0.45, [("grass_block", 4), ("podzol", 1), ("gravel", 1), ("dirt", 1)])
+sprinkle(R[FEN], 0.45, [("grass_block", 7), ("moss_block", 3), ("podzol", 2), ("mud", 1), ("muddy_mangrove_roots", 1)])   # the Cradle's own mix
+sprinkle(R[SALT] & ~coast, 0.35, [("grass_block", 3), ("gravel", 2), ("coarse_dirt", 1), ("stone", 1)])
+sprinkle(R[FROST] & (Y < snowline), 0.3, [("grass_block", 3), ("podzol", 2), ("coarse_dirt", 2), ("gravel", 1), ("stone", 1), ("snow", 1)])
+sprinkle(R[EMBER] & (surf == ID["sand"]), 0.1, [("sandstone", 3), ("red_sand", 1), ("gravel", 0.3)])
+sprinkle(R[EMBER] & (surf == ID["red_sand"]), 0.1, [("red_sandstone", 3), ("sand", 1), ("coarse_dirt", 0.5)])
 # steep ground shows rock (banded terracotta in the Emberwaste, calcite streaks in the north)
 m = steep & ~R[EMBER]; surf[m] = np.where(r1[m] < 0.5, ID["stone"], np.where(R[FROST][m] & (r2[m] < 0.15), ID["calcite"], ID["andesite"]))
 mesa = R[EMBER] & (steep | (Y > 112))
@@ -616,9 +736,10 @@ pl = open_ & ~keepclear
 plant = np.zeros((SIZE, SIZE), np.uint16)
 k = rng.random((SIZE, SIZE))
 m = pl & R[VALE] & (surf == ID["grass_block"]) & (r2 > 0.72); plant[m] = np.where(k[m] < 0.93, ID["short_grass"], np.where(k[m] < 0.97, ID["dandelion"], ID["poppy"]))
+m = pl & R[VALE] & woods & np.isin(surf, [ID["grass_block"], ID["podzol"], ID["moss_block"]]) & (r2 > 0.8) & (hs < 0.25); plant[m] = np.where(hp[m] < 0.5, ID["fern"], ID["moss_carpet"])
 m = pl & R[FROST] & (Y < 135) & (r2 > 0.93); plant[m] = np.where(k[m] < 0.6, ID["fern"], np.where(k[m] < 0.9, ID["short_grass"], ID["sweet_berry_bush"]))
 m = pl & R[SALT] & (surf == ID["grass_block"]) & (r2 > 0.85); plant[m] = ID["short_grass"]
-m = pl & R[FEN] & ((surf == ID["grass_block"]) | (surf == ID["moss_block"])) & (r2 > 0.75); plant[m] = np.where(k[m] < 0.6, ID["short_grass"], ID["fern"])
+m = pl & R[FEN] & np.isin(surf, [ID["grass_block"], ID["moss_block"], ID["podzol"]]) & (r2 > 0.7); plant[m] = np.select([k[m] < 0.4, k[m] < 0.75], [ID["moss_carpet"], ID["short_grass"]], ID["fern"])   # the Cradle's dressing
 m = pl & R[EMBER] & (r2 > 0.992); plant[m] = ID["deadbush"]
 plant[(plant != 0) & (r2 < 0.85 * (1 - plotfade))] = 0
 lily = fenpool & (r2 > 0.9) & (water_level - Y <= 3)
@@ -781,16 +902,160 @@ def B_raw(name, states):
 # ---- baked town plans (map/bake_town.py): world blocks placed last, in order; air digs out, soft (leaves) only fills air
 STAMPED = []        # (x, y, z, id, soft) arrays per town
 STAMPED_TOWNS = set()
+def _key(x, y, z): return (np.asarray(x, np.int64) + 4096) * 1_000_000_000 + (np.asarray(y, np.int64) + 512) * 100_000 + (np.asarray(z, np.int64) + 4096)
+_trk = []                                          # the train's body along every planned line: track cell and one each
+for cells_, ys_, _ in RAILLINES.values():          # side, 4 high. A town plan or road bridge block left standing in it
+    c_ = np.array(cells_, np.int64); y_ = np.asarray(ys_, np.int64)   # would block the bed the game lays on purchase
+    for dx_ in (-1, 0, 1):
+        for dz_ in (-1, 0, 1):
+            for k_ in range(4): _trk.append(_key(c_[:, 0] + dx_, y_ + k_, c_[:, 1] + dz_))
+_trk = np.unique(np.concatenate(_trk)) if _trk else np.zeros(0, np.int64)
 for d_ in GW_FILES:
     pid_ = np.array([B_raw(e["name"], e["states"]) if e["name"] != "minecraft:air" else -1 for e in d_["palette"]], np.int64)
     sf_ = np.array([bool(e.get("soft")) for e in d_["palette"]])
     b_ = np.array(d_["blocks"], np.int64)
+    off_ = np.isin(_key(b_[:, 0], b_[:, 1], b_[:, 2]), _trk) & (pid_[b_[:, 3]] >= 0)
+    if off_.any():
+        log("town plan", d_["town"], "keeps", int(off_.sum()), "blocks off the track:", sorted({d_["palette"][i]["name"].split(":")[-1] for i in b_[off_, 3]})[:8])
+        b_ = b_[~off_]
     STAMPED.append((b_[:, 0], b_[:, 1], b_[:, 2], pid_[b_[:, 3]], sf_[b_[:, 3]])); STAMPED_TOWNS.add(d_["town"])
     log("town plan", d_["town"], len(b_), "blocks")
+if THIN_BLOCKS:   # the thin places' own ground, faces and set pieces: first, so towns and bridges win over them
+    _tb = np.array([(x, y, z) for x, y, z, _, _ in THIN_BLOCKS], np.int64); _tk = {}
+    for _, _, _, n, st in THIN_BLOCKS:
+        k_ = n + json.dumps(st, sort_keys=True)
+        if k_ not in _tk: _tk[k_] = B_raw(n, st) if n != "minecraft:air" else -1
+    _ti = np.array([_tk[n + json.dumps(st, sort_keys=True)] for _, _, _, n, st in THIN_BLOCKS], np.int64)
+    STAMPED.insert(0, (_tb[:, 0], _tb[:, 1], _tb[:, 2], _ti, np.zeros(len(_ti), bool)))
+    log("thin places", len(_ti), "blocks")
 if BRIDGE_BLOCKS:
     _bb = np.array([(x, y, z) for x, y, z, _, _ in BRIDGE_BLOCKS], np.int64)
     _bi = np.array([B_raw(n, st) if n != "minecraft:air" else -1 for _, _, _, n, st in BRIDGE_BLOCKS], np.int64)
+    _off = np.isin(_key(_bb[:, 0], _bb[:, 1], _bb[:, 2]), _trk) & (_bi >= 0)     # a road bridge the line crosses: its
+    if _off.any():                                                               # parapets and lamps stay off the track
+        log("road bridges keep", int(_off.sum()), "blocks off the track")
+        _bb, _bi = _bb[~_off], _bi[~_off]
     STAMPED.append((_bb[:, 0], _bb[:, 1], _bb[:, 2], _bi, np.zeros(len(_bi), bool)))
+# ---- the boss sites, baked (Mateo 2026-11-13: the boss locations are physical places from the start). map/bake_sites.mjs
+# runs the game's own plans against this ground, read the way the game reads it (unlocks/site.js column(), reeve.js
+# groundAt), so the blocks are the ones the game would build on approach. They go on after the towns, as the game's
+# build would. GW_SITES_JS (full map only) rewrites unlocks/baked_sites.js, which tells the game each site is already
+# standing (centre, puzzle seed, check cells) so it only places keepers, signs and fights when a player comes near.
+SITE_FACTS = {}
+if os.environ.get("GW_SITES", "1") != "0" and shutil.which("node"):
+    import subprocess, tempfile
+    _here = os.path.dirname(os.path.abspath(__file__))
+    _anch = json.loads(subprocess.check_output(["node", os.path.join(_here, "bake_sites.mjs"), "--anchors"]))
+    _R = int(_anch["r"])
+    _SOFT = re.compile(r"air|grass(?!_block)|fern|flower|tulip|poppy|dandelion|bush|snow_layer|leaves|log|vine|sapling|mushroom|torch|sign|reeds|sugar_cane|kelp|seagrass|lily|roots|moss_carpet|propagule")
+    _SOFT_R = re.compile(r"air|water|grass(?!_block)|fern|flower|tulip|poppy|dandelion|bush|snow_layer|leaves|log|vine|sapling|mushroom|torch|sign")
+    _cols = {}                                          # (x, z) -> [(y, name, states, soft)] in placing order
+    _boxes = [(a["x"] - _R, a["z"] - _R, a["x"] + _R, a["z"] + _R) for a in _anch["anchors"].values()]
+    def _inbox(x, z): return any(x0 <= x <= x1 and z0 <= z <= z1 for x0, z0, x1, z1 in _boxes)
+    def _gather(entries):
+        for x, y, z, n, st, sf in entries:
+            if _inbox(x, z): _cols.setdefault((x, z), []).append((y, n, st or {}, sf))
+    _gather((x, y, z, n, st, False) for x, y, z, n, st in THIN_BLOCKS)
+    for d_ in GW_FILES:
+        _p = d_["palette"]; _bl = np.array(d_["blocks"], np.int64)
+        _m = np.zeros(len(_bl), bool)
+        for x0, z0, x1, z1 in _boxes: _m |= (_bl[:, 0] >= x0) & (_bl[:, 0] <= x1) & (_bl[:, 2] >= z0) & (_bl[:, 2] <= z1)
+        _gather((int(b[0]), int(b[1]), int(b[2]), _p[b[3]]["name"], _p[b[3]]["states"], bool(_p[b[3]].get("soft"))) for b in _bl[_m])
+    _gather((x, y, z, n, st, False) for x, y, z, n, st in BRIDGE_BLOCKS)
+    def _column(x, z, reeve=False):
+        """The game's view of a column: (ground, water, gold marker ys). Plain ground unless a stamp touches it."""
+        g, w = ground_at(x, z), water_at(x, z)
+        if (x, z) not in _cols: return g, (None if reeve else w), []
+        cells = {y: "ground" for y in range(g - 6, g + 1)}
+        if w is not None:
+            for y in range(g + 1, w + 1): cells[y] = "minecraft:water"
+        states = {}
+        for y, n, st, sf in _cols[(x, z)]:
+            if sf and cells.get(y, "minecraft:air") != "minecraft:air": continue
+            cells[y] = n; states[y] = st
+        gold, water = [], None
+        for y in sorted(cells, reverse=True):
+            n = cells[y]
+            if n == "minecraft:air": continue
+            if n == "minecraft:gold_block": gold.append(y); continue
+            if reeve:
+                if _SOFT_R.search(n): continue
+                half = states.get(y, {}).get("minecraft:vertical_half", "bottom")
+                return (y - 1 if n.endswith("_slab") and "double" not in n and half != "top" else y), None, gold
+            if (("water" in n or "ice" in n) and n not in ("minecraft:packed_ice", "minecraft:blue_ice")) or (n == "minecraft:packed_ice" and water is None):
+                water = y if water is None else water; continue
+            if not _SOFT.search(n): return y, water, gold
+        return g, water, gold
+    _probe = {"seed": int.from_bytes(os.urandom(4), "little") & 0x7FFFFFFF, "sites": {}, "reeve_y": None}
+    _gold = []
+    for sid_, a_ in _anch["anchors"].items():
+        if sid_ == "reeve":
+            y_, _, gl_ = _column(a_["x"], a_["z"], reeve=True); _probe["reeve_y"] = y_
+            _gold += [(a_["x"], gy_, a_["z"]) for gy_ in gl_]; continue
+        n_ = 2 * _R + 1; gr_, wa_ = [], []
+        for x_ in range(a_["x"] - _R, a_["x"] + _R + 1):
+            for z_ in range(a_["z"] - _R, a_["z"] + _R + 1):
+                if not inside(x_, z_): gr_.append(None); wa_.append(None); continue
+                g_, w_, gl_ = _column(x_, z_)
+                gr_.append(g_); wa_.append(w_)
+                if gl_ and math.hypot(x_ - a_["x"], z_ - a_["z"]) <= 24: _gold += [(x_, gy_, z_) for gy_ in gl_]
+        _probe["sites"][sid_] = {"x0": a_["x"] - _R, "z0": a_["z"] - _R, "n": n_, "ground": gr_, "water": wa_}
+    _pf = os.environ.get("GW_SITES_PROBE") or tempfile.mkstemp(suffix=".json")[1]   # GW_SITES_PROBE: keep it, to rerun the bake alone
+    with open(_pf, "w") as f_: json.dump(_probe, f_)
+    _sites = json.loads(subprocess.check_output(["node", os.path.join(_here, "bake_sites.mjs"), _pf]))
+    if not os.environ.get("GW_SITES_PROBE"): os.unlink(_pf)
+    _bid = {}
+    for sid_, s_ in _sites.items():
+        c_ = s_["center"]; ops_ = s_["ops"]
+        xyz_ = np.array([(c_["x"] + o[0], c_["y"] + o[1], c_["z"] + o[2]) for o in ops_], np.int64)
+        ids_ = []
+        for o in ops_:
+            k_ = o[3] + json.dumps(o[4] or {}, sort_keys=True)
+            if k_ not in _bid: _bid[k_] = -1 if o[3] == "minecraft:air" else B_raw(o[3], o[4] or {})
+            ids_.append(_bid[k_])
+        ids_ = np.array(ids_, np.int64)
+        off_ = np.isin(_key(xyz_[:, 0], xyz_[:, 1], xyz_[:, 2]), _trk) & (ids_ >= 0)
+        if off_.any(): log("boss site", sid_, "keeps", int(off_.sum()), "blocks off the track")
+        keep_ = ~off_     # (the game clears trees off its build box first; here stampcol below keeps them off instead)
+        STAMPED.append((xyz_[keep_, 0], xyz_[keep_, 1], xyz_[keep_, 2], ids_[keep_], np.zeros(int(keep_.sum()), bool)))
+        # check cells for the game: the last block at a few distinctive cells, so an older world without the bake builds
+        last_ = {}
+        for o, kp in zip(ops_, keep_):
+            if kp: last_[(o[0], o[1], o[2])] = o[3]
+        cand_ = [(p, n) for p, n in last_.items() if n != "minecraft:air" and (n.startswith("siege:") or n.startswith("hc:"))]
+        cand_ += [(p, n) for p, n in last_.items() if n != "minecraft:air" and not _SOFT.search(n) and "water" not in n and (p, n) not in cand_]
+        cand_.sort(key=lambda pn: (not (pn[1].startswith("siege:") or pn[1].startswith("hc:")), -abs(pn[0][1])))
+        picks_ = []
+        for p, n in cand_:
+            if all(abs(p[0] - q[0]) + abs(p[2] - q[2]) >= 4 for q, _ in picks_): picks_.append((p, n))
+            if len(picks_) == 5: break
+        SITE_FACTS[sid_] = {"anchor": s_["anchor"], "center": c_, "seed": s_["seed"], "info": s_["info"],
+                            "towerPost": s_.get("towerPost"), "check": [[p[0], p[1], p[2], n] for p, n in picks_]}
+        log("boss site", sid_, "baked at", c_["x"], c_["y"], c_["z"], int(keep_.sum()), "blocks")
+    if _gold:
+        _g = np.array(_gold, np.int64); STAMPED.append((_g[:, 0], _g[:, 1], _g[:, 2], np.full(len(_g), -1, np.int64), np.zeros(len(_g), bool)))
+    if os.environ.get("GW_SITES_JS"):
+        with open(os.environ["GW_SITES_JS"], "w") as f_:
+            f_.write("// Made by map/genworld.py (map/bake_sites.mjs). Do not edit by hand: rebuild the map.\n")
+            f_.write("// The boss sites baked into the base map: where each stands, its puzzle seed, and a few cells that show it is\n")
+            f_.write("// really there (an older world without the bake builds the site on approach as before). unlocks/site.js, reeve.js.\n")
+            f_.write("export const BAKED_SITES = " + json.dumps(SITE_FACTS, separators=(",", ":")) + ";\n")
+# no tree in a build's dead space (Mateo 2026-11-12: "in dead space there are trees spawning, so for builds include
+# air blocks that remove trees"): every column a town plan or bridge stamps, with a margin, keeps whole trees out, so
+# no trunk stands in a courtyard and no crown hangs over a roof or floats where a stamp cut it.
+stampcol = np.zeros((SIZE, SIZE), bool)
+for sx_, sy_, sz_, sid_, ss_ in STAMPED:
+    i_ = sx_ - X0; k_ = sz_ - Z0; m_ = (i_ >= 0) & (i_ < SIZE) & (k_ >= 0) & (k_ < SIZE)
+    stampcol[i_[m_], k_[m_]] = True
+stampnear = box(stampcol.astype(np.float32), 2) > 0           # crowns (custom trees, through hard_t below)
+if True:                                                       # simple trees: trunks 8 out from a planned line
+    far_ = rail_d[np.clip(tx - X0, 0, SIZE - 1), np.clip(tz - Z0, 0, SIZE - 1)] > 8
+    tx, tz, rg_, yy_, tkind, tvar = tx[far_], tz[far_], rg_[far_], yy_[far_], tkind[far_], tvar[far_]
+    log("trees kept off the planned lines:", int((~far_).sum()), "removed")
+if stampcol.any():
+    far_ = box(stampcol.astype(np.float32), 7)[np.clip(tx - X0, 0, SIZE - 1), np.clip(tz - Z0, 0, SIZE - 1)] == 0   # simple trees: trunks 7 out
+    tx, tz, rg_, yy_, tkind, tvar = tx[far_], tz[far_], rg_[far_], yy_[far_], tkind[far_], tvar[far_]
+    log("trees kept off stamped builds:", int((~far_).sum()), "removed")
 if TREEDB:
     sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "trees"))
     from place import fits, mark, SIZE_ORDER, SIZE_WEIGHT, _grow_mask
@@ -824,7 +1089,7 @@ if TREEDB:
               ("open", {"fen_black_alder": 45, "fen_pollard_willow": 35, "fen_bald_cypress": 20})],
         EMBER: [("open", {"ember_umbrella_acacia": 35, "ember_argan": 30, "ember_date_palm": 15, "ember_baobab": 10, "ember_dragon_blood": 10})],
     }
-    hard_t = keepclear | railzone                    # crowns stay off the line (trains need the air above the bed)
+    hard_t = keepclear | railzone | railkeep | stampnear   # crowns stay off the line (trains need the air above the bed) and off builds
     soft_t = _grow_mask(~open_ | ~land, 1)
     soft_w = _grow_mask((~open_ & ~fenpool & ~bank) | ~land, 1)        # bald cypress and snags may stand in fen water
     taken = np.zeros((SIZE, SIZE), np.int8)
@@ -858,39 +1123,78 @@ if TREEDB:
 TREEM = 18 if TREEDB else 6                           # how far outside a tile a tree's trunk may stand and still reach in
 log("trees placed", tx.size)
 
-# ---------------------------------------------------------------- caves: winding tunnels, sealed under the ground
-crg = np.random.default_rng(123)
-area_cells = (SIZE // 48) ** 2
-worms = []
-for _ in range(int(area_cells * 5)):
-    x = X0 + crg.random() * SIZE; z = Z0 + crg.random() * SIZE; y = crg.uniform(-50, 60)
-    yaw = crg.random() * 6.28; pitch = crg.uniform(-0.3, 0.3); rad = crg.uniform(1.6, 3.2)
-    big = crg.random() < 0.08
-    pts = []
-    for s in range(int(crg.integers(60, 200))):
-        x += math.cos(yaw) * math.cos(pitch) * 1.4; z += math.sin(yaw) * math.cos(pitch) * 1.4; y += math.sin(pitch) * 1.2
-        yaw += crg.normal(0, 0.18); pitch = pitch * 0.85 + crg.normal(0, 0.12)
-        r = rad + math.sin(s * 0.21) * 0.7 + (2.5 if big and 20 < s < 50 else 0)
-        pts.append((x, y, z, r))
-    worms.append(np.array(pts, np.float32))
-caves = np.concatenate(worms) if worms else np.zeros((0, 4), np.float32)
-# never reach within 7 blocks of the surface, or under water within 10
-ci = np.clip(np.round(caves[:, 0] - X0).astype(int), 0, SIZE - 1); ck = np.clip(np.round(caves[:, 2] - Z0).astype(int), 0, SIZE - 1)
-ceiling = Y[ci, ck] - 7 - caves[:, 3] - np.where(wet[ci, ck], 4, 0)
-caves[:, 1] = np.minimum(caves[:, 1], ceiling); caves[:, 1] = np.maximum(caves[:, 1], -58)
-log("cave points", len(caves))
+# ---------------------------------------------------------------- caves (map/caves.py): vanilla's cave types
+# Mateo 2026-11-13: "generate all the caves correctly, same as the vanilla game". Cheese caverns, spaghetti and noodle
+# tunnels, carver caves, ravines, aquifers, lava at the bottom, lush and dripstone caves, big ore veins, and cave mouths
+# a player can walk into. Openings only in open country: never in towns, plots, roads, trails, rail, water, bridges,
+# boss sites, wards or the Rift's thin places. A starter mouth on a hillside near every plot and two near Kingsrest
+# (iron before the day-5 siege). Towns, wards, boss sites and thin places have no caves under them at all (the add-on
+# builds its own rooms there: the Millbrook well chamber, the Deep, the thin places' caves).
+import caves as CV
+CAVE_IDS = {}
+for k_, (n_, st_) in {"moss_block": ("moss_block", {}), "moss_carpet": ("moss_carpet", {}), "clay": ("clay", {}),
+                      "azalea": ("azalea", {}), "flowering_azalea": ("flowering_azalea", {}), "spore_blossom": ("spore_blossom", {}),
+                      "dirt_with_roots": ("dirt_with_roots", {}), "hanging_roots": ("hanging_roots", {}),
+                      "cave_vines": ("cave_vines", {"growing_plant_age": 25}),
+                      "cave_vines_body_with_berries": ("cave_vines_body_with_berries", {"growing_plant_age": 25}),
+                      "cave_vines_head_with_berries": ("cave_vines_head_with_berries", {"growing_plant_age": 25}),
+                      "dripstone_block": ("dripstone_block", {}),
+                      "glow_lichen_down": ("glow_lichen", {"multi_face_direction_bits": 1}),
+                      "glow_lichen_up": ("glow_lichen", {"multi_face_direction_bits": 2}),
+                      **{f"pd_{t_}_{h_}": ("pointed_dripstone", {"dripstone_thickness": t_, "hanging": h_ == "h"})
+                         for t_ in ("tip", "frustum", "middle", "base") for h_ in ("h", "u")}}.items():
+    try: CAVE_IDS[k_] = B_raw("minecraft:" + n_, st_)
+    except Exception as e_: log("cave block missing", n_, e_)
+ROCK_IDS = [ID[n_] for n_ in ("stone", "deepslate", "granite", "diorite", "andesite", "tuff", "calcite", "dirt", "sandstone",
+                              "red_sandstone", "hardened_clay", "orange_terracotta", "red_terracotta", "yellow_terracotta",
+                              "brown_terracotta", "white_terracotta", "light_gray_terracotta", "grass_block", "coarse_dirt",
+                              "podzol", "mud", "moss_block")]
+_boss = [(int(a_), int(b_)) for a_, b_ in re.findall(r"anchor: \{ x: (-?\d+), z: (-?\d+)", "".join(
+    open(f_).read() for f_ in __import__("glob").glob(os.path.join(os.path.dirname(os.path.abspath(CONFIG)), "..", "unlocks", "*.js"))))]
+_boss += [(x_, z_) for _, x_, z_, _, _ in LAKES[1:2]]                   # Hallowmere (the huntsman's lake)
+nocave = disc_mask([(n, x, z, r + 16) for n, x, z, r, _ in WARDS]) | disc_mask([("b", x, z, 85) for x, z in _boss]) | thin_shaped   # a baked site reaches 70-80 from its anchor
+_way = isroad | istrail | (rail_d <= 6.5) | stampcol | isriver | bank | wet
+_ckeep = keepclear | stampcol | disc_mask([("b", x, z, 90) for x, z in _boss])
+d_keep = chamfer_b(_ckeep, 40); d_way = chamfer_b(_way, 16); d_wet = chamfer_b(wet, 10)
+cave_cover = np.full((SIZE, SIZE), 4.0, np.float32)                  # blocks of ground every sealed cave keeps over it
+cave_cover = np.where(d_way < 12, np.maximum(cave_cover, 8 + (12 - d_way) / 3), cave_cover)
+cave_cover = np.where(d_keep < 30, np.maximum(cave_cover, 12 - np.maximum(d_keep - 10, 0) / 2.5), cave_cover)
+cave_cover = np.where(wet, 10.0, cave_cover)
+mouth_ok = land & ~wet & (d_keep >= 40) & (d_way >= 14) & (d_wet >= 8) & ~nocave & (Y > SEA + 2)
+_e = noise(170, 61) + noise(60, 62) * 0.4                            # entrance patches, more on hillsides
+_patch = mouth_ok & ((_e > 0.12) | ((_e > -0.02) & steep))
+cave_cover = np.where(_patch, np.clip((0.12 - _e) * 20, 0, 4) * (~steep), cave_cover).astype(np.float32)
+cave_cover = np.where(_patch & steep, 0.0, cave_cover).astype(np.float32)
+_starts = [(n, x, z, 1) for n, x, z in PLOTS] + [("Kingsrest", PLAZA["Kingsrest"][0], PLAZA["Kingsrest"][1], 2)] if "Kingsrest" in PLAZA else [(n, x, z, 1) for n, x, z in PLOTS]
+CAV = CV.Caves(Y, X0, Z0, cave_cover, nocave, reg, mouth_ok, _starts, sea=SEA, log=log, regions=(VALE, FROST, SALT, FEN, EMBER),
+               deep_only=plotzone)
+if os.environ.get("GW_CAVES_JSON"):                                    # mouths and near-plot tunnels for other threads
+    json.dump({"mouths": [dict(x=int(x_), y=int(y_), z=int(z_), kind=k_) for x_, y_, z_, k_ in CAV.mouths],
+               "starter_ore": [dict(x=round(float(x_), 1), y=round(float(y_), 1), z=round(float(z_), 1), kind=k_) for x_, y_, z_, k_ in CAV.ore_spots]},
+              open(os.environ["GW_CAVES_JSON"], "w"), indent=0)
 
-ORES = [  # name, deepslate twin, veins per 16x16 column, y low, y high, vein size
-    ("coal_ore", "deepslate_coal_ore", 14, 0, 140, 10), ("iron_ore", "deepslate_iron_ore", 9, -40, 80, 7),
-    ("copper_ore", "deepslate_copper_ore", 6, -10, 90, 8), ("gold_ore", "deepslate_gold_ore", 2.2, -60, 30, 6),
-    ("redstone_ore", "deepslate_redstone_ore", 3, -60, -20, 6), ("lapis_ore", "deepslate_lapis_ore", 1.6, -50, 30, 5),
-    ("diamond_ore", "deepslate_diamond_ore", 1.0, -60, -15, 4),
+ORES = [  # name, deepslate twin, veins per 16x16 column, y low, y peak, y high, vein size (vanilla 1.18+ spreads: triangles)
+    ("coal_ore", "deepslate_coal_ore", 16, 0, 96, 192, 12), ("coal_ore", "deepslate_coal_ore", 6, 136, 200, 320, 12),
+    ("iron_ore", "deepslate_iron_ore", 8, -24, None, 56, 7), ("iron_ore", "deepslate_iron_ore", 6, -64, 16, 72, 8),
+    ("iron_ore", "deepslate_iron_ore", 10, 80, 232, 384, 8), ("copper_ore", "deepslate_copper_ore", 10, -16, 48, 112, 9),
+    ("gold_ore", "deepslate_gold_ore", 3, -64, -16, 32, 8), ("redstone_ore", "deepslate_redstone_ore", 3, -64, None, 15, 7),
+    ("redstone_ore", "deepslate_redstone_ore", 5, -64, -64, -32, 7), ("lapis_ore", "deepslate_lapis_ore", 2, -32, 0, 32, 6),
+    ("lapis_ore", "deepslate_lapis_ore", 3, -64, None, 64, 6), ("diamond_ore", "deepslate_diamond_ore", 3.5, -64, -64, 16, 4),
 ]
 BLOBS = [("granite", 1.2, -20, 120, 3.5), ("diorite", 1.2, -20, 120, 3.5), ("andesite", 1.4, -20, 120, 3.5), ("gravel", 0.8, -40, 100, 2.5),
          ("dirt", 0.8, 0, 120, 2.5), ("tuff", 1.2, -60, 0, 3.5)]
 
 # ---------------------------------------------------------------- write tiles
 TOP = int(Y.max()) + 45; YR = TOP - YMIN
+# which columns a cave mouth opens, for the whole square first, so a tree is skipped whichever tile draws its crown
+OPENED = np.zeros((SIZE, SIZE), bool)
+_mayopen = (cave_cover < 0.5) | (box(mouth_ok.astype(np.float32), 1) > 0)
+for tx0 in range(0, SIZE, TILE):
+    for tz0 in range(0, SIZE, TILE):
+        if not _mayopen[tx0:tx0 + TILE, tz0:tz0 + TILE].any(): continue
+        OPENED[tx0:tx0 + TILE, tz0:tz0 + TILE] = CAV.opened(X0 + tx0, Z0 + tz0, Y[tx0:tx0 + TILE, tz0:tz0 + TILE], YR)
+OPENED &= ~wet
+log("cave mouths: open columns", int(OPENED.sum()))
 yy = np.arange(YMIN, TOP, dtype=np.int32)[None, :, None]
 pv = np.zeros((SIZE, SIZE), np.uint16)            # top block per column, for the preview
 nchunks = 0
@@ -904,10 +1208,11 @@ for tx0 in range(0, SIZE, TILE):
         deep = yy < (noise_d := (np.random.default_rng(1000 + tx0 * 7 + tz0).integers(-3, 3, (W, 1, D))))
         vol[solid & ~deep] = ID["stone"]; vol[solid & deep] = ID["deepslate"]
         trg2 = np.random.default_rng(5000 + tx0 * 131 + tz0)
-        def blob_fill(name, n, ylo, yhi, rad, only=(ID["stone"], ID["deepslate"]), alt=None, size=None):
+        def blob_fill(name, n, ylo, yhi, rad, only=(ID["stone"], ID["deepslate"]), alt=None, size=None, peak=None):
             cnt = trg2.poisson(n * W * D / 256)
             if not cnt: return
-            bx = trg2.integers(0, W, cnt); bz = trg2.integers(0, D, cnt); by = trg2.integers(ylo, yhi, cnt) - YMIN
+            bx = trg2.integers(0, W, cnt); bz = trg2.integers(0, D, cnt)
+            by = (trg2.integers(ylo, yhi, cnt) if peak is None else np.round(trg2.triangular(ylo, peak, yhi, cnt)).astype(np.int64)) - YMIN
             r = int(math.ceil(rad)); off = np.array([(i, j, k) for i in range(-r, r + 1) for j in range(-r, r + 1) for k in range(-r, r + 1) if i * i + j * j + k * k <= rad * rad])
             keep_ = trg2.random((cnt, len(off))) < (0.75 if size is None else min(1.0, size / len(off)))
             px_ = (bx[:, None] + off[None, :, 0])[keep_]; py_ = (by[:, None] + off[None, :, 1])[keep_]; pz_ = (bz[:, None] + off[None, :, 2])[keep_]
@@ -920,7 +1225,14 @@ for tx0 in range(0, SIZE, TILE):
                 m_ = cur == ID["stone"]; vol[px_[m_], py_[m_], pz_[m_]] = ID[name]
                 m_ = cur == ID["deepslate"]; vol[px_[m_], py_[m_], pz_[m_]] = ID[alt]
         for name, n, lo, hi, rad in BLOBS: blob_fill(name, n, lo, hi, rad, only=(ID["stone"],) if name != "tuff" else (ID["deepslate"],))
-        for name, alt, n, lo, hi, size in ORES: blob_fill(name, n, lo, hi, 1.5, alt=alt, size=size)
+        for name, alt, n, lo, pk, hi, size in ORES: blob_fill(name, n, lo, hi, 1.5, alt=alt, size=size, peak=pk)
+        # large ore veins (vanilla 1.18): copper in granite up high, iron in tuff down deep, with the odd raw block
+        v_cu, v_fe, v_raw, v_fill, _ = CAV.veins(X0 + a0, Z0 + b0, W, D, YR)
+        rock_ = (vol == ID["stone"]) | (vol == ID["deepslate"])
+        vol[v_fill & rock_ & (yy >= 0)] = ID["granite"]; vol[v_fill & rock_ & (yy < 0)] = ID["tuff"]
+        vol[v_cu & rock_] = ID["copper_ore"]; vol[v_fe & rock_] = ID["deepslate_iron_ore"]
+        vol[v_raw & rock_ & (yy >= 0)] = ID["raw_copper_block"]; vol[v_raw & rock_ & (yy < 0)] = ID["raw_iron_block"]
+        del v_cu, v_fe, v_raw, v_fill, rock_
         # emeralds in the northern mountains, more gold in the waste
         frost_t = (reg[a0:a1, b0:b1] == FROST).mean(); ember_t = (reg[a0:a1, b0:b1] == EMBER).mean()
         if frost_t > 0.05: blob_fill("emerald_ore", 3 * frost_t, 60, 200, 1.0, alt="deepslate_emerald_ore", size=1)
@@ -953,18 +1265,6 @@ for tx0 in range(0, SIZE, TILE):
             vol[cm_ & flint] = ID["andesite"]
             sp_ = cm_ & splash; pick_s = crg.random(vol.shape, dtype=np.float32)
             vol[sp_ & (pick_s < 0.25)] = ID["mossy_cobblestone"]; vol[sp_ & (pick_s >= 0.25) & (pick_s < 0.4)] = ID["andesite"]; vol[sp_ & (pick_s >= 0.4) & (pick_s < 0.5)] = ID["stone"]
-        # caves
-        cm = (caves[:, 0] >= X0 + a0 - 6) & (caves[:, 0] < X0 + a1 + 6) & (caves[:, 2] >= Z0 + b0 - 6) & (caves[:, 2] < Z0 + b1 + 6)
-        for cx_, cy_, cz_, cr_ in caves[cm]:
-            lx_, ly_, lz_ = cx_ - X0 - a0, cy_ - YMIN, cz_ - Z0 - b0; ri = int(math.ceil(cr_))
-            i0, i1 = max(0, int(lx_) - ri), min(W, int(lx_) + ri + 2); j0, j1 = max(1, int(ly_) - ri), min(YR, int(ly_) + ri + 2); k0, k1 = max(0, int(lz_) - ri), min(D, int(lz_) + ri + 2)
-            if i0 >= i1 or k0 >= k1 or j0 >= j1: continue
-            ii, jj, kk = np.ogrid[i0:i1, j0:j1, k0:k1]
-            sm = (ii - lx_) ** 2 + ((jj - ly_) * 1.3) ** 2 + (kk - lz_) ** 2 <= cr_ * cr_
-            sub_ = vol[i0:i1, j0:j1, k0:k1]
-            sub_[sm & (sub_ != AIR)] = AIR
-        lava = (vol == AIR) & (yy < -54) & solid
-        vol[lava] = ID["lava"]
         # surface, water, ice
         ix, iz = np.indices((W, D))
         vol[ix, Yt - YMIN, iz] = surf[a0:a1, b0:b1]
@@ -974,6 +1274,24 @@ for tx0 in range(0, SIZE, TILE):
         rt_ = reg[a0:a1, b0:b1]; wett = wet[a0:a1, b0:b1]
         icy = wett & (rt_ == FROST) & (wl > -999) & (land[a0:a1, b0:b1] | (box((land[a0:a1, b0:b1]).astype(np.float32), 10) > 0.3))
         vol[ix[icy], wl[icy] - YMIN, iz[icy]] = ID["ice"]
+        # caves (map/caves.py): carve, fill aquifers and lava, iron on the starter caves' walls, then dress them
+        cv_, aq_ = CAV.tile(X0 + a0, Z0 + b0, Yt, YR, None)
+        cv_ &= (vol != ID["water"]) & (vol != ID["ice"]) & (vol != ID["bedrock"])
+        vol[cv_] = AIR
+        cvy_ = np.broadcast_to(yy, vol.shape)
+        vol[cv_ & (cvy_ <= aq_[:, None, :]) & (aq_[:, None, :] > CV.LAVA_Y)] = ID["water"]      # aquifers
+        vol[cv_ & (cvy_ <= CV.LAVA_Y) & (aq_[:, None, :] <= CV.LAVA_Y)] = ID["lava"]            # lava at the bottom
+        for ox_, oy_, oz_, ok_ in CAV.ore_spots:
+            i_, j_, k_ = int(round(ox_)) - X0 - a0, int(round(oy_)) - YMIN, int(round(oz_)) - Z0 - b0
+            if not (1 <= i_ < W - 1 and 2 <= j_ < YR - 1 and 1 <= k_ < D - 1): continue
+            blk_ = vol[i_ - 1:i_ + 2, j_ - 1:j_ + 2, k_ - 1:k_ + 2]
+            pick_ = np.isin(blk_, ROCK_IDS) & (np.random.default_rng(i_ * 7 + j_ * 13 + k_).random(blk_.shape) < 0.55)
+            blk_[pick_] = ID[("deepslate_" if oy_ < 0 else "") + ok_ + "_ore"]
+        cave_stats_ = CAV.dress(vol, cv_, Yt, X0 + a0, Z0 + b0, reg[a0:a1, b0:b1], CAVE_IDS, AIR, ID["water"], ID["lava"], ROCK_IDS,
+                                np.random.default_rng(31000 + tx0 * 7 + tz0))
+        CV.no_falling(vol, AIR, [(ID["sand"], ID["sandstone"]), (ID["red_sand"], ID["red_sandstone"]), (ID["gravel"], ID["stone"])])
+        opened_ = OPENED[a0:a1, b0:b1]
+        del cv_, cvy_
         # rail tunnels (air 4 high over a gravel floor, the hill left above) and bridges (stone deck, low parapets,
         # piers every 8 blocks); road bridges a block over the river
         tf = tun_floor[a0:a1, b0:b1]; tm_ = tf > -999
@@ -1005,12 +1323,13 @@ for tx0 in range(0, SIZE, TILE):
         br = np.random.default_rng(9000 + tx0 + tz0 * 3).random((W, 4, D)) < np.array([0.8, 0.6, 0.4, 0.2])[None, :, None]
         vol[:, 1:5, :][br] = ID["bedrock"]
         # plants
-        p_ = plant[a0:a1, b0:b1]; pm = p_ > 0; vol[ix[pm], Yt[pm] + 1 - YMIN, iz[pm]] = p_[pm]
+        p_ = plant[a0:a1, b0:b1]; pm = (p_ > 0) & ~opened_; vol[ix[pm], Yt[pm] + 1 - YMIN, iz[pm]] = p_[pm]
         # trees whose base is in this tile or its margin
         tm = (tx >= X0 + a0 - TREEM) & (tx < X0 + a1 + TREEM) & (tz >= Z0 + b0 - TREEM) & (tz < Z0 + b1 + TREEM)
         for x_, z_, kk_, vv_ in zip(tx[tm], tz[tm], tkind[tm], tvar[tm]):
             off, ids, isleaf, isg = TEMPL[KLIST[kk_]][vv_]
             gy = Y[x_ - X0, z_ - Z0] + 1
+            if OPENED[x_ - X0, z_ - Z0]: continue                                  # a cave mouth took its ground
             px_ = x_ - X0 - a0 + off[:, 0]; py_ = gy - YMIN + off[:, 1]; pz_ = z_ - Z0 - b0 + off[:, 2]
             ok_ = (px_ >= 0) & (px_ < W) & (pz_ >= 0) & (pz_ < D) & (py_ > 0) & (py_ < YR)
             if isg.any():                                                      # ground cells follow each column's own surface
@@ -1054,9 +1373,9 @@ for tx0 in range(0, SIZE, TILE):
             nonair = vol != AIR
             topi = YR - 1 - np.argmax(nonair[:, ::-1, :], axis=1)
             topb = vol[ix, topi, iz]
-            okb = ft & ~np.isin(topb, [ID["water"], ID["ice"], ID["fern"], ID["short_grass"], ID["sweet_berry_bush"], ID["cactus"], ID["lava"], ID["snow"]]) & (topi + 1 < YR)
+            okb = ft & ~np.isin(topb, [ID["water"], ID["ice"], ID["fern"], ID["short_grass"], ID["sweet_berry_bush"], ID["moss_carpet"], ID["cactus"], ID["lava"], ID["snow"]]) & (topi + 1 < YR)
             vol[ix[okb], topi[okb] + 1, iz[okb]] = ID["snow_layer"]
-        if os.environ.get("GW_DUMP"):                                   # debugging: save this tile's blocks for the voxel viewer
+        if os.environ.get("GW_DUMP") and (not os.environ.get("GW_DUMP_TILES") or f"{tx0},{tz0}" in os.environ["GW_DUMP_TILES"].split(";")):   # debugging: save this tile's blocks for the voxel viewer
             names_ = {int(v): k for k, v in ID.items()}; names_[int(AIR)] = "air"
             names_.update({int(i): k[:k.index("{")].split(":")[1] for k, i in _pal.items()})
             np.savez_compressed(f"{os.environ['GW_DUMP']}-{tx0}-{tz0}.npz", vol=vol[tx0 - a0:tx0 - a0 + min(TILE, SIZE - tx0), :, tz0 - b0:tz0 - b0 + min(TILE, SIZE - tz0)],

@@ -12,8 +12,8 @@ import { world, system, GameMode, ItemStack } from "@minecraft/server";
 import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
 import { isReady, settlementAt, isAlly, keepOf, onTick, moduleStore, on, emit } from "../siege/api.js";
 import { purse, charge, coins, lot } from "./wallet.js";
-import { startBuild, buildFor, worldMarks, resolveRole } from "../townhall/build.js";
-import { levelSite, foundationColumns } from "./ground.js";
+import { startBuild, buildFor, worldMarks, resolveRole, clearBoxFor } from "../townhall/build.js";
+import { levelSite, foundationColumns, Groundwork } from "./ground.js";
 import { hallOf } from "../townhall/townhall.js";
 import { STYLES, STYLE_IDS, styleFromGround } from "../townhall/styles.js";
 import { plotAt } from "../plots/claims.js";
@@ -110,11 +110,15 @@ export function raise(key, stone, buildingId, style, { quiet = false, onDone: af
   const plan = drawBuilding(buildingId, style);
   const stoneAt = locOf(key);
   const forward = { x: stone.fx, z: stone.fz };
-  // on the highest ground under it, with foundation below (ground.js); the stone keeps its own spot
+  // on a terraformed pad (ground.js, terraform.js: cut in at most 3, the land round it blended), with foundation
+  // below; the stone keeps its own spot
   // a build picked up again after a restart keeps the height it started at
-  const { origin, lift } = stone.building === buildingId && Number.isFinite(stone.lift)
+  // on a town plot the floor goes on the plot's levelled pad, never lifted onto a bump of grass the groundwork left;
+  // anything natural standing in its box is cleared first (Mateo's playtest 2026-11-12: a library on a dirt shelf)
+  const resumed = stone.building === buildingId && Number.isFinite(stone.lift);
+  const { origin, lift } = resumed
     ? { origin: { ...stoneAt, y: stoneAt.y + stone.lift }, lift: stone.lift }
-    : levelSite(world.getDimension(OVERWORLD), plan, stoneAt, forward);
+    : stone.slot ? { origin: stoneAt, lift: 0 } : levelSite(world.getDimension(OVERWORLD), plan, stoneAt, forward, { terraform: true });
   stone.building = buildingId;
   stone.style = style;
   stone.lift = lift;
@@ -122,6 +126,8 @@ export function raise(key, stone, buildingId, style, { quiet = false, onDone: af
   store.save();
   const job = startBuild({
     id: jobId(key), dimensionId: OVERWORLD, origin, forward, plan, style: styleFor(style),
+    ...(stone.slot && !resumed ? { clearBox: clearBoxFor(plan, origin, forward, 0) } : {}),
+    ...(!stone.slot && !resumed ? { ground: new Groundwork(plan, origin, forward, style) } : {}),
     perTick: Math.max(4, Math.ceil(plan.cells.size / SETTLE.riseTicks)),
     onDone() {
       const dim = world.getDimension(OVERWORLD);

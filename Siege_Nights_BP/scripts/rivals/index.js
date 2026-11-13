@@ -274,7 +274,8 @@ function townTick(dim, lord, id) {
   if (!job) {
     const open = slots.filter((s) => s.tier <= town.tier && town.laid[s.tier] && !town.slots[s.id]?.building && !slotClosed(key, s));
     const fits = (bid, s) => !!seatOnSlot(s, drawBuilding(bid, style).bounds());
-    const pick = lordPick(open, town.tier, builtCounts(key), DESIGNS, fits, lord.id);
+    const coming = slots.filter((s) => !town.slots[s.id]?.building && !slotClosed(key, s));
+    const pick = lordPick(open, town.tier, builtCounts(key), DESIGNS, fits, lord.id, coming);
     if (!pick) return;
     job = lord.plotJob = { slot: pick.slot.id, building: pick.id };
     save();

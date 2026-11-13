@@ -206,6 +206,13 @@ world.afterEvents.entityDie.subscribe((event) => {
   keeper?.sendMessage(`§cOne of your guards has fallen. ${coins(fee)} went to retrain them at the Barracks.`);
 }, { entityTypes: Object.keys(GUARD_TYPES) });
 
+// Forget queued retrains that match (the battle test clearing its soldiers, battletest/)
+export function dropRetrain(match) {
+  const before = retrain.data.queue.length;
+  retrain.data.queue = retrain.data.queue.filter((r) => !match(r));
+  if (retrain.data.queue.length !== before) retrain.save();
+}
+
 // Retrained guards come back at their Barracks (or their post, for guards hired before Barracks were remembered)
 system.runInterval(() => {
   if (!state) return;
@@ -308,7 +315,7 @@ world.afterEvents.entityHitEntity.subscribe((event) => {
 export function underAttack(owner) {
   if (state.active && state.besieged.includes(owner)) return true;
   for (const [id, w] of wanted) if (w.owner === owner && w.until > system.currentTick && world.getPlayers().some((p) => p.id === id)) return true;
-  return false;
+  return !!applyFilter("underAttack", false, { owner }); // a War Writ assault calls them out even with no attacker online (warwrit/)
 }
 
 export function guardTick() {
@@ -329,12 +336,14 @@ export function guardTick() {
         const keep = state.keeps[owner];
         if (!owner) continue;
         // Nobody can hurt your guards while you're away, same as your walls
-        if (!attackable(owner)) guard.addEffect("resistance", 60, { amplifier: 4, showParticles: false });
+        // (soldiers marching to war are in the field, owner online or not: fair game)
+        if (!attackable(owner) && !guard.hasTag(MARCHING_TAG)) guard.addEffect("resistance", 60, { amplifier: 4, showParticles: false });
         if (keep?.sovereign) guard.addEffect("strength", 60, { amplifier: 0, showParticles: false }); // royal guard
         if (keep && guard.getComponent("minecraft:variant")?.value !== keep.color) guard.triggerEvent(`siege:color_${keep.color ?? 14}`);
 
         if (guard.getDynamicProperty("siege:walking")) continue; // walking to its post or the Barracks (guardposts/walk.js)
         if (guard.hasTag(MARCHING_TAG)) continue; // marching to war with its owner (warwrit/army.js)
+        if (guard.getDynamicProperty("siege:brace")) continue; // bracing a gate or breach in a War Writ (warwrit/army.js)
         if (guard.getDynamicProperty("siege:idle") && !underAttack(owner)) continue; // strolling or going to bed (army/idle.js)
         const post = JSON.parse(guard.getDynamicProperty("siege:post") ?? "null");
         if (!post) continue;

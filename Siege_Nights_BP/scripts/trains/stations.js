@@ -10,6 +10,7 @@ import { Plan } from "../townhall/halls.js";
 import { drawData } from "../townhall/designs.js";
 import { styleFor, spellings } from "../settle/buildings.js";
 import { STATION_DESIGNS } from "../settle/station_data.js";
+import { DX, DZ, flatShapeFor } from "./track.js";
 
 export const STAGES = ["halt", "station", "junction", "grand"];
 export const STAGE_NAMES = { halt: "Halt", station: "Station", junction: "Junction", grand: "Grand Station" };
@@ -26,16 +27,24 @@ export const STATION = {
   perTick: 48, // blocks placed per tick while it rises
 };
 
+// The end of the line (a stop only one stretch of the railway reaches: Oakmere, Wolfcairn, Frosthelm): the track
+// stops at a buffer, not in the grass. Counted out from the last rail at the dead end of the platform: a timber
+// buffer beam across the track (dx 1) with a lantern on it, and a low wall in the region's stone behind it (dx 2).
+export const BUFFER = { beamAt: 1, wallAt: 2, beamHalf: 1, wallHalf: 1, wallUp: 2 }; // the wall only as wide as the track bed, so a road to the platform end gets past it
+
 export const regionOf = (style) => (STATION_DESIGNS[style] ? style : "vale");
 
 const plans = new Map();
 
 // The plan for one region's station at one stage: the design, a bed under the line and clear air above it.
-// plan.line = { x0, x1 }: where the track goes (local x, at y 1, z 0).
-export function stationPlan(style, stage) {
+// plan.line = { x0, x1 }: where the track goes (local x, at y 1, z 0). `end` is the side of the platform (local x,
+// +1 or -1) where the line stops at a terminus, which gets a buffer and an end wall; 0 (the default) for a through
+// station.
+export function stationPlan(style, stage, end = 0) {
   const region = regionOf(style);
   if (!STATION_DESIGNS[region][stage]) stage = "halt";
-  const key = `${region}|${stage}`;
+  end = Math.sign(end || 0);
+  const key = `${region}|${stage}|${end}`;
   if (plans.has(key)) return plans.get(key);
   const st = styleFor(region);
   const d = STATION_DESIGNS[region][stage];
@@ -55,9 +64,49 @@ export function stationPlan(style, stage) {
     }
   }
   p.line = { x0, x1 };
+  // from the Station up, a passing loop on the side away from the building: its bed, and clear air over it
+  p.loop = stage !== "halt" && STATION_DESIGNS[region][stage] ? true : false;
+  if (p.loop) {
+    for (const [x, z] of loopPath(p)) {
+      if (z === 0) continue; // the two ends are the line's own blocks
+      if (!p.get(x, 0, z)) p.set(x, 0, z, "foundation");
+      p.column(x, z, "foundation");
+      for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) {
+        if (z + dz >= 0) continue; // the line's own strip is already clear
+        for (let y = 1; y <= STATION.clearUp; y++) if (!p.get(x + dx, y, z + dz)) p.set(x + dx, y, z + dz, "air");
+      }
+    }
+  }
+  p.end = end;
+  if (end) drawBuffer(p, end);
   p.design = d;
   plans.set(key, p);
   return p;
+}
+
+// The buffer and end wall past the dead end of the line (see BUFFER)
+function drawBuffer(p, end) {
+  const xe = end > 0 ? p.line.x1 : p.line.x0;
+  const B = BUFFER, beam = xe + end * B.beamAt, wall = xe + end * B.wallAt;
+  p.style.roles["sd:buffer:beam"] ??= ["minecraft:stripped_dark_oak_log", "minecraft:dark_oak_log"];
+  p.style.roles["sd:buffer:lamp"] ??= ["minecraft:lantern"];
+  for (let z = -B.beamHalf; z <= B.beamHalf; z++) {
+    p.set(beam, 0, z, "foundation");
+    p.column(beam, z, "foundation");
+    p.set(beam, 1, z, "sd:buffer:beam", { axis: "z" });
+  }
+  p.set(beam, 2, 0, "sd:buffer:lamp");
+  for (let z = -B.wallHalf; z <= B.wallHalf; z++) {
+    p.set(wall, 0, z, "foundation");
+    p.column(wall, z, "foundation");
+    for (let y = 1; y <= B.wallUp; y++) p.set(wall, y, z, "wallLow");
+  }
+  // clear air over both, so nothing grows or hangs there
+  for (const x of [beam, wall]) {
+    for (let z = -B.wallHalf; z <= B.wallHalf; z++) {
+      for (let y = 1; y <= STATION.clearUp; y++) if (!p.get(x, y, z)) p.set(x, y, z, "air");
+    }
+  }
 }
 
 // World offset of a local (x, z) for a forward direction (same maths as the build engine's frame)
@@ -102,6 +151,34 @@ export function cardinal(v) {
   const x = v?.x ?? 0, z = v?.z ?? 1;
   if (Math.abs(x) > Math.abs(z)) return { x: Math.sign(x), z: 0 };
   return { x: 0, z: z < 0 ? -1 : 1 };
+}
+
+// The passing loop in the station's own frame: [[x, z], ...] from one end of the line, out along a diagonal to
+// z = LOOP_Z, along the platform and back in to the other end
+export const LOOP_Z = -4;
+export const LOOP_REACH = 22;
+export function loopPath(plan) {
+  // (never further out than the straight the map promises each side of a stop)
+  const x0 = Math.max(plan.line.x0, -LOOP_REACH), x1 = Math.min(plan.line.x1, LOOP_REACH), n = -LOOP_Z, pts = [];
+  for (let k = 0; k < n; k++) pts.push([x0 + k, -k]);
+  for (let x = x0 + n; x <= x1 - n; x++) pts.push([x, LOOP_Z]);
+  for (let k = n - 1; k >= 0; k--) pts.push([x1 - k, -k]);
+  return pts;
+}
+
+// Track pieces for the passing loop: [{ x, y, z, kind, dir, end }] in world coordinates. The two `end` pieces sit on
+// the line itself: there the block becomes a switch holding the line's straight and this bend.
+export function loopBlocks(plan, origin, forward) {
+  if (!plan.loop) return [];
+  const r = rightOf(forward), f = { x: Math.sign(forward.x), z: Math.sign(forward.z) };
+  const at = ([x, z]) => ({ x: origin.x + x * r.x + z * f.x, z: origin.z + x * r.z + z * f.z });
+  const dirTo = (a, b) => DX.findIndex((dx, d) => dx === Math.sign(b.x - a.x) && DZ[d] === Math.sign(b.z - a.z));
+  const path = loopPath(plan), x0 = path[0][0], x1 = path[path.length - 1][0];
+  const pts = [at([x0 - 1, 0]), ...path.map(at), at([x1 + 1, 0])];
+  return path.map((_, i) => {
+    const p = pts[i + 1], shape = flatShapeFor(dirTo(p, pts[i]), dirTo(p, pts[i + 2]));
+    return { x: p.x, y: origin.y, z: p.z, kind: shape.kind, dir: shape.dir, end: i === 0 || i === path.length - 1 };
+  });
 }
 
 // Track pieces for the line through a station: [{ x, y, z, dir }] in world coordinates

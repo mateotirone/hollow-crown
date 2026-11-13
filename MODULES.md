@@ -287,13 +287,18 @@ Add a line here when you publish one.
   leaves it alone. Watch: `POSTS.watch` in posts.js ("dusk" | "always" | "shifts"). Wall steps: `stairColumns` in settle/walldata.js
   (roles stair/landing/ladder in `wallColumns`).
 
-## The minimap and titles
+## The minimap, the quest tracker and titles
 
-`scripts/minimap/` draws a HUD minimap by sending each player hidden titles that start with `hcm:`
-(`Siege_Nights_RP/ui/hud_screen.json` hides those from the normal title box). Keep using
-`player.onScreenDisplay.setTitle` (or `title()` from api.js) as usual: the minimap notices real titles and waits
-until they have faded before it sends again. Never start a real title with `hcm:`. Map pictures:
-`python3 tools/minimap_tiles.py` after the world map changes; HUD layout: `python3 tools/minimap_ui.py`.
+`scripts/minimap/` (a HUD minimap) and `scripts/quests/` (the always-on quest tracker under it) talk to the HUD with
+hidden titles that start with `hcm:` and `hcq:`, sent through `sendHidden()` in `core/hudtitle.js`
+(`Siege_Nights_RP/ui/hud_screen.json` hides any `hc<letter>:` title we use from the normal title box). Keep using
+`player.onScreenDisplay.setTitle` (or `title()` from api.js) as usual: `core/hudtitle.js` notices real titles and
+holds hidden ones until they have faded, and lets the panels take turns. Never start a real title with `hc` + a
+letter + `:`. Map pictures: `python3 tools/minimap_tiles.py` after the world map changes; HUD layout (both panels):
+`python3 tools/minimap_ui.py`.
+
+The quest tracker's steps are in `scripts/quests/rules.js` (pure, tested). When a story step changes (a new boss
+key, a new place, a new flag), update its step there so the tracker keeps pointing the right way.
 
 ## Menu labels: `addMenuLabel`
 
@@ -333,5 +338,6 @@ player and vanish a few seconds after everyone walks away; nothing is saved. Don
 `addFilter("roleOffer", (allowed, { player, role }) => ...)` (town hall asks before offering a role; false holds it),
 `addFilter("dragonNestTake", (refusal, { player, block }) => ...)` (dragons: a returned string refuses the egg and is shown),
 `addFilter("dragonCanFly", (reason, { player, rec, entity, flying }) => ...)` (dragons: a returned string grounds her, on take-off or once a second in the air, and is shown),
+`emit("npcDragonFly", { key, name, species, follow | center, radius, height, every, damage, targetType, ttl })` and `emit("npcDragonLand", { key })` (dragons/wingmen.js: an NPC rider's dragon that circles a player or a point and breathes fire; ask again with the same key to keep it up; Overworld only),
 `addFilter("treeButtons", (list, { player }) => [...list, { label, icon, open(player, back) }])` (extra pages at the Tree of Oaths), and
 `emit("loreSetFlag", { player, flag })` (lore: set a story flag from another feature).
