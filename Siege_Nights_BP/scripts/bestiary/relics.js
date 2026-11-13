@@ -96,6 +96,12 @@ function relicTick() {
           p.spawnParticle("minecraft:sculk_soul_particle", { x: e.location.x, y: e.location.y + 2.4, z: e.location.z });
         }
       }
+      if (offhand(p) === "siege:last_note") { // things from the Hollow near you lose the tune: slowed and weakened (never a boss)
+        for (const e of p.dimension.getEntities({ location: p.location, maxDistance: 8, families: ["hollow"], excludeFamilies: ["siege_boss"] })) {
+          effect(e, "slowness", 30, 0, true); effect(e, "weakness", 30, 0, true);
+          if (clock % 60 === 0) particle(p.dimension, "minecraft:note_particle", e.getHeadLocation());
+        }
+      }
       if (held(p) === "siege:faceless_crown_shard" && clock % 400 === 0) p.onScreenDisplay.setActionBar(`§8§o${WHISPERS[Math.floor(Math.random() * WHISPERS.length)]}`);
     } catch {
       // player leaving

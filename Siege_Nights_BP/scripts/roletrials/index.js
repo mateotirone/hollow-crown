@@ -204,6 +204,10 @@ world.afterEvents.playerPlaceBlock.subscribe(({ block, player }) => {
 // ---------- the Span and the graves (places the map builder marks) ----------
 const crumbling = new Map(); // "x,y,z" -> tick it comes back
 
+// Stones on the Span that give way a second after you step on them, and are back four minutes later. The Cinder Roost's
+// Span is red sandstone slabs with plain red sandstone blocks for the loose ones (map/structures/landmarks_story.py).
+const CRUMBLES = new Set(["minecraft:cracked_stone_bricks", "minecraft:red_sandstone"]);
+
 function spanTick(player, t) {
   if (t.done.includes("span")) return;
   const time = now();
@@ -233,15 +237,16 @@ function spanTick(player, t) {
       // stones that crumble under you, and wind up the gorge
       try {
         const under = player.dimension.getBlock({ x: Math.floor(at.x), y: Math.floor(at.y) - 1, z: Math.floor(at.z) });
-        if (under?.typeId === "minecraft:cracked_stone_bricks") {
+        const kind = under?.typeId;
+        if (CRUMBLES.has(kind)) {
           const key = `${under.x},${under.y},${under.z}`;
           if (!crumbling.has(key)) {
             crumbling.set(key, system.currentTick + 240);
             sfx(player, "dig.gravel", { pitch: 0.6 });
-            system.runTimeout(() => { try { if (under.isValid && under.typeId === "minecraft:cracked_stone_bricks") under.setType("minecraft:air"); } catch { /* unloaded */ } }, 20);
+            system.runTimeout(() => { try { if (under.isValid && under.typeId === kind) under.setType("minecraft:air"); } catch { /* unloaded */ } }, 20);
             system.runTimeout(() => {
               crumbling.delete(key);
-              try { const b = player.dimension.getBlock({ x: under.x, y: under.y, z: under.z }); if (b?.isAir) b.setType("minecraft:cracked_stone_bricks"); } catch { /* unloaded */ }
+              try { const b = player.dimension.getBlock({ x: under.x, y: under.y, z: under.z }); if (b?.isAir) b.setType(kind); } catch { /* unloaded */ }
             }, 240);
           }
         }

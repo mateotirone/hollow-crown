@@ -546,7 +546,7 @@ export const NPCS = [
     start: [
       [["flag:morning_after", "flag:pell_met", "!flag:sage_saw"], "saw"],
       [["flag:heard_no_body", "flag:heard_named", "flag:heard_walked_in", "!flag:pell_summed"], "sum"],
-      [["shelved:74"], "all"],
+      [["shelved:75"], "all"],
       [["flag:pell_met"], "hub"],
       [[], "first"],
     ],

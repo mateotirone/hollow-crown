@@ -6,7 +6,7 @@ import { SHAPES, layTrack, cursorOn, advance, back, pointAt, follow, KINDS, curv
 import { stageFor, stationPlan, siteFor, lineBlocks, loopBlocks, rightOf, STAGES, STATION, LOOP_Z } from "./stations.js";
 import { ROUTE, reachable, buyable, cannotBuy, priceOf, nearestStop, checkRoutes, stopSite, pieces, isNatural } from "./routes.js";
 import { ROUTES } from "./routes_data.js";
-import { layBed, trackFits, fellTree, rise, BED } from "./rail_bed.js";
+import { layBed, trackFits, fellTree, rise, BED, layCrossing } from "./rail_bed.js";
 import { railRefused } from "./no_hollow.js";
 import { STATION_DESIGNS, TRADE_HOUSE_DESIGNS, ENGINE_SHED_DESIGNS } from "../settle/station_data.js";
 import { LINE, chainsOf, nextStop, newService, stepUnseen, indexNear, pilot } from "./line_service.js";
@@ -135,6 +135,30 @@ addTests("trains", {
     const w2 = { get: (x, y, z) => yard2.get(`${x},${y},${z}`) ?? (y <= 64 ? "minecraft:dirt" : "minecraft:air"), set: (x, y, z, id) => yard2.set(`${x},${y},${z}`, id) };
     assertEqual(fellTree(w2, 0, 65, 0), false, "a tree against a building stays");
     assertEqual(w2.get(0, 65, 0), "minecraft:oak_log", "and is untouched");
+  },
+  "routes: a level crossing lays its boards, setts, lamp posts and keeper's hut on the graded ground": () => {
+    const blocks = new Map();
+    const w = {
+      get: (x, y, z) => (Math.abs(x) > 30 || Math.abs(z) > 30 ? undefined : blocks.get(`${x},${y},${z}`) ?? (y < 64 ? "minecraft:dirt" : y === 64 ? (Math.abs(x) <= 2 ? "minecraft:grass_path" : "minecraft:grass_block") : y === 65 && x === 7 && z === 7 ? "minecraft:short_grass" : "minecraft:air")),
+      set: (x, y, z, id) => blocks.set(`${x},${y},${z}`, id),
+    };
+    const all = Array.from({ length: 21 }, (_, i) => ({ x: i - 10, y: 65, z: 0, kind: 0, dir: 2 }));
+    all.forEach((p, i) => { layBed(w, all, i, () => {}); w.set(p.x, p.y, p.z, "siege:track"); });
+    const c = {
+      deck_block: "spruce_planks", deck: [[0, 0, 64], [0, 1, 64], [0, -1, 64]], road: [[0, 3, 64, "cobblestone"]],
+      posts: [[3, 3, 64, ["stone_brick_wall", "birch_fence", "lantern"]]],
+      hut: { x: 7, z: 7, y: 65, half: 1, plinth: "minecraft:cobblestone", blocks: [[0, 0, 0, "minecraft:cobblestone"], [0, 1, 0, "minecraft:oak_planks"]] },
+    };
+    assert(layCrossing(w, c, () => {}), "laid");
+    assertEqual(w.get(0, 64, 0), "minecraft:spruce_planks", "boards under the track");
+    assertEqual(w.get(0, 64, 3), "minecraft:cobblestone", "setts on the road");
+    assertEqual(w.get(3, 65, 3), "minecraft:stone_brick_wall", "post base on the ground");
+    assertEqual(w.get(3, 67, 3), "minecraft:lantern", "lamp on top");
+    assertEqual(w.get(7, 66, 7), "minecraft:oak_planks", "hut on the highest block, grass under it cleared");
+    const n = blocks.size;
+    assert(layCrossing(w, c, () => {}), "laid again");
+    assertEqual(blocks.size, n, "laying it twice changes nothing");
+    assertEqual(w.get(3, 68, 3), "minecraft:air", "no second post on the first");
   },
   "routes: a settlement's station sits on its stop, building toward the banner": () => {
     const data = routeMap();

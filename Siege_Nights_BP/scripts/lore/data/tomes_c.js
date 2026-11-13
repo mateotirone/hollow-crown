@@ -128,7 +128,7 @@ export const TOMES_C = [
   {
     id: "test_02", col: "testimony", n: 2,
     title: "What Happened to Tobin", author: "Wren Ashby, aged nine (now Sister Wren)",
-    where: "Millbrook, Sister Wren's house, in a child's box under the stairs. Wren gives it if you ask about Tobin twice.",
+    where: "Millbrook, Sister Wren's chapel, in a child's box under the stairs to her room. Wren gives it if you ask about Tobin twice.",
     hint: "A child's account. The healer of Millbrook was that child.",
     pages: [
       "My brother Tobin went out to the well on the third night and did not come back till morning. Mam said he was just tired.",
@@ -320,6 +320,19 @@ export const TOMES_C = [
       "Every third night Morvane tells me where to march. I have never seen him. I know the voice. I have led your enemies for three hundred years and never once chosen where to go. Kill me, and see if they let me stay dead.",
     ],
     clues: ["warlord_is_vorlund"],
+    leads: [],
+  },
+  {
+    id: "fall_08", col: "fallen", n: 8, boss: "choir",
+    title: "The Conductor's Last Measure", author: "The Conductor of the Court, who leads the Choir",
+    where: "Dropped by the Choir when its Conductor falls, in the Court.",
+    hint: "Carried by whoever leads the singing in the Court below.",
+    pages: [
+      "They take one child a year from Glimwade and Lowseam and Tollrest and Highcut to hold the note. A held note keeps a door open a crack. Every third night we sang, and something up there marched on a keep. We never chose the song. It came down to us from the Chair.",
+      "The one in the Chair sent five up the long stair to kill you, and he grieved for none of them. When the clock-man stopped, he smiled. When the drowned girl went quiet, he hummed along. Every one of them carried a piece of a key, and you took every piece, and he let you. We sang you all the way down. I am sorry. It was the song.",
+      "When I stop, the Singers will get up and walk home with no voices. Let them go. Tell their mothers at the Tally they were good at it. And when you go on to the Chair, do not listen to the kind voice. It is the same voice that taught us the song.",
+    ],
+    clues: ["conductor_chair_sent_five"],
     leads: [],
   },
   {

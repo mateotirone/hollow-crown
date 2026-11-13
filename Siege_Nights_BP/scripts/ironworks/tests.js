@@ -1,7 +1,11 @@
 import { addTests, assert, assertEqual } from "../core/tests.js";
 import { STYLE_IDS } from "../townhall/styles.js";
 import { LEVELS, MAX_LEVEL, IRONWORKS, DAY, produce, capOf, tierAtLeast, lootShare } from "./data.js";
-import { drawIronworks } from "./design.js";
+import { drawIronworks, drawWorks, worksShape, WORKS_PLOT } from "./design.js";
+import { BUILDINGS, BUILDING, WORKS, drawBuilding } from "../settle/buildings.js";
+import { plotFit, opensAt } from "../settle/charters.js";
+import { seatOnSlot, seatedBox } from "../settle/towns.js";
+import { plotPrice } from "../settle/plotmarker.js";
 import { REGION_RATES, regionRate } from "../economy/config.js";
 
 addTests("ironworks", {
@@ -40,7 +44,51 @@ addTests("ironworks", {
     }
   },
   "raiders take more the worse a siege goes": () => assert(lootShare("won") === 0 && lootShare("dawn") < lootShare("lost"), "loot"),
-  "each stage draws in every style, behind its block, odd sizes, known roles": () => {
+  "the Ironworks is a Works plot machine: only there, nothing else there, never from a Foundation Stone": () => {
+    const works = { size: "W", tags: [] };
+    assert(WORKS.some((w) => w.id === "ironworks") && BUILDING.ironworks, "registered");
+    assert(!BUILDINGS.some((b) => b.id === "ironworks"), "not a Foundation Stone or plan building");
+    assert(plotFit("ironworks", works).ok && opensAt("ironworks") === 0, "a Hamlet may raise it on a Works plot");
+    for (const size of ["S", "M", "L", "G"]) assert(!plotFit("ironworks", { size, tags: [] }).ok, `not on a ${size} plot`);
+    for (const b of BUILDINGS) assert(!plotFit(b.id, works).ok, `${b.id} must not take a Works plot`);
+    assert(plotFit("ironworks", { size: "W", tags: ["water"] }).tagged, "a plot by water is the good spot");
+    assertEqual(plotPrice("ironworks"), IRONWORKS.plotCost);
+    assert(drawBuilding("ironworks", "vale") === drawWorks(1, "vale"), "the plot raises stage 1");
+  },
+  "on a Works plot: every stage in every region stays inside the plot whichever way it faces, known roles, its block in the yard": () => {
+    const half = (WORKS_PLOT.wide - 1) / 2;
+    assertEqual(WORKS_PLOT.wide % 2, 1); assertEqual(WORKS_PLOT.deep % 2, 1);
+    for (const id of STYLE_IDS) {
+      for (let lv = 1; lv <= MAX_LEVEL; lv++) {
+        const p = drawWorks(lv, id);
+        for (const c of p.cells.values()) {
+          assert(p.style.roles[c.role] || c.role === "air", `level ${lv} (${id}) uses unknown role ${c.role}`);
+          assert(Math.abs(c.x) <= half && c.z >= 1 && c.z <= WORKS_PLOT.deep - 1, `level ${lv} (${id}) leaves the plot at ${c.x},${c.z}`);
+        }
+        assert(!p.get(0, 1, 0), "the plot's front row stays clear");
+        assert(worksShape(lv, id).top >= worksShape(Math.max(1, lv - 1), id).top, "it only grows");
+      }
+      const p1 = drawWorks(1, id), m = p1.marks.works;
+      assertEqual(p1.style.roles[p1.get(m.x, m.y, m.z).role][0], "siege:ironworks");
+      const b = p1.bounds();
+      assert(b.x1 - b.x0 + 1 >= WORKS_PLOT.wide - 2 && b.z1 >= WORKS_PLOT.deep - 2, `${id}: stage 1 fences the whole plot`);
+      assert(drawWorks(2, id).cells.size < p1.cells.size && drawWorks(3, id).cells.size < p1.cells.size, "an upgrade only adds, it never rebuilds the plot");
+      assert(!drawWorks(2, id).get(m.x, m.y, m.z) && !drawWorks(3, id).get(m.x, m.y, m.z), "the block is never touched by an upgrade");
+    }
+    // seated on a 27 x 17 slot facing each way, the first stage sits inside it with room for the later ones
+    for (const [side, door] of [["s", { x: 0, z: 1 }], ["n", { x: 0, z: -1 }], ["e", { x: 1, z: 0 }], ["w", { x: -1, z: 0 }]]) {
+      const along = door.x ? "z" : "x";
+      const box = along === "x" ? { x0: 10, z0: 20, x1: 10 + WORKS_PLOT.wide - 1, z1: 20 + WORKS_PLOT.deep - 1 } : { x0: 10, z0: 20, x1: 10 + WORKS_PLOT.deep - 1, z1: 20 + WORKS_PLOT.wide - 1 };
+      const slot = { box, door, dy: 0 };
+      const seat = seatOnSlot(slot, drawWorks(1, "vale").bounds());
+      assert(seat, `fits a Works plot facing ${side}`);
+      for (let lv = 1; lv <= MAX_LEVEL; lv++) for (const id of STYLE_IDS) {
+        const sb = seatedBox(seat, drawWorks(lv, id).bounds());
+        assert(sb.x0 >= box.x0 && sb.x1 <= box.x1 && sb.z0 >= box.z0 && sb.z1 <= box.z1, `level ${lv} (${id}) facing ${side} leaves the slot: ${JSON.stringify(sb)}`);
+      }
+    }
+  },
+  "the old hand-placed yard: each stage draws in every style, behind its block, odd sizes, known roles": () => {
     for (let lv = 1; lv <= MAX_LEVEL; lv++) for (const id of STYLE_IDS) {
       const p = drawIronworks(lv, id), b = p.bounds();
       for (const c of p.cells.values()) assert(p.style.roles[c.role], `level ${lv} (${id}) uses unknown role ${c.role}`);

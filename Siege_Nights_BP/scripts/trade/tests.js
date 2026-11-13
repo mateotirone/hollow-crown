@@ -1,8 +1,9 @@
 import { addTests, assert, assertEqual } from "../core/tests.js";
-import { REGIONS } from "../economy/config.js";
+import { REGIONS, JOBS, ECON } from "../economy/config.js";
+import { cost } from "../economy/rules.js";
 import { TRADE_OUTPOST_DESIGNS } from "./outpost_data.js";
 import { wingPlan } from "./wing.js";
-import { TRADE, GOODS, GOOD_IDS, COIN, GOLD_COIN, DAY, REGION_RATES_DEFAULT } from "./data.js";
+import { TRADE, GOODS, GOOD_IDS, COIN, GOLD_COIN, DAY, REGION_RATES_DEFAULT, goodOf } from "./data.js";
 import {
   valueTo, fairness, offerProblem, pathLength, travelTicks, takeMoney, moneyIn, depart, afterTry, finished,
   npcMake, npcAnswer, capitalAnswer, capitalPrice, npcOffer, needsOf, supplyTake, crateDelta, cargoOf, loadText, regalWorth, balanceText,
@@ -102,6 +103,15 @@ addTests("trade", {
   },
   "Kingsrest buys anything for Regals at the set price": () => {
     assertEqual(capitalPrice({ id: GOLD, n: 2 }), 56);
+    // nothing a shop sells can be shipped to Kingsrest at a profit, whichever region you buy it in
+    for (const job of Object.values(JOBS)) for (const g of job.sells) {
+      if (!goodOf(g.id)) continue;
+      for (const charges of [1, ECON.homeCharges]) {
+        const paid = cost(g, 32, g.flat ? 1 : charges);
+        assert(capitalPrice({ id: g.id, n: g.lot * 32 }) < paid, `${g.id}: a shop charges ${paid}, Kingsrest pays ${capitalPrice({ id: g.id, n: g.lot * 32 })}`);
+      }
+    }
+    assertEqual(capitalPrice({ id: "minecraft:bread", n: 64 }), 43); // was 134, for bread a Vale farmer sells at 55
     assertEqual(capitalAnswer(offer({ id: GOLD, n: 2 }, { id: COIN, n: 50 })).kind, "accept");
     const c = capitalAnswer(offer({ id: GOLD, n: 2 }, { id: COIN, n: 90 }));
     assertEqual(c.kind, "counter"); assertEqual(c.get.n, 56);
