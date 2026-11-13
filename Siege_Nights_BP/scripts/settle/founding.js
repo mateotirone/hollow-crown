@@ -25,7 +25,7 @@ import { REGION_TO_STYLE, CONTENTS } from "./config.js";
 import { styleOf } from "./plans.js";
 import { wallOf, raiseWall, moveWall, adoptWall } from "./walls.js";
 import { wallShape } from "./walldata.js";
-import { charterCheck, charterText } from "./charters.js";
+import { charterCheck, charterText, charterKeeps } from "./charters.js";
 import { BUILDINGS } from "./buildings.js";
 import { raisedCounts } from "./raised.js";
 import { groundTop } from "./ground.js";
@@ -509,6 +509,18 @@ export function builtCounts(owner) {
 // A Rival Lord can only raise ready-made designs, so their charter skips what has none yet
 const DESIGNED = new Set(BUILDINGS.map((b) => b.id));
 export const charterOf = (owner, tier = townOf(owner)?.tier ?? 0) => charterCheck(tier, builtCounts(owner), townOf(owner)?.lord ? DESIGNED : KNOWN);
+
+// Is this plot kept for a charter need, so `id` may not go there? (charters.js charterKeeps; the same rule the
+// Rival Lords follow.) -> undefined, or the words for the plot menu: "Kept for the Mint (Town charter)"
+export function keptFor(owner, slot, id) {
+  const town = townOf(owner);
+  if (!town) return undefined;
+  const counts = { ...raisedCounts(owner) };
+  for (const st of Object.values(town.slots ?? {})) if (st.building && !st.broken) counts[st.building] = (counts[st.building] ?? 0) + 1; // rising ones too
+  const free = slotsOf(layoutOf(town)).filter((s) => !town.slots[s.id]?.building && !slotClosed(owner, s));
+  const k = charterKeeps(free, town.tier ?? 0, counts, town.lord ? DESIGNED : KNOWN, slot, id);
+  return k && `Kept for the ${k.what} (${tierName(k.tier)} charter)`;
+}
 
 // The highest tier the town may reach towards `tier`: it stops at the first tier whose charter isn't met
 function charterCap(owner, from, tier) {
