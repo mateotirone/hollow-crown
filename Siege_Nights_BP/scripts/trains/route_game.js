@@ -14,7 +14,7 @@ import { ROUTE, buyable, nearestStop, reachable, cannotBuy, priceOf, pieces, oth
 import { ROUTES } from "./routes_data.js";
 import { TRACK, TRAIN, CARS, TRAIN_STYLES } from "./data.js";
 import { addSwitch } from "./switches.js";
-import { layBed, trackFits, seatTrack, clearBody, applyWorkColumn, clearTreesInColumn, builtColumns } from "./rail_bed.js";
+import { layBed, trackFits, seatTrack, clearBody, applyWorkColumn, clearTreesInColumn, builtColumns, layCrossing } from "./rail_bed.js";
 
 // built: { [segmentId]: { by, at } }; laying: [{ seg, i }] (a stretch going down, next piece i);
 // missed: { [segmentId]: [piece index, ...] } (pieces whose ground wasn't loaded, tried again later)
@@ -56,8 +56,8 @@ function blocksOf(dim) {
     get(x, y, z) {
       try { return dim.getBlock({ x, y, z })?.typeId; } catch { return undefined; }
     },
-    set(x, y, z, id) {
-      try { dim.getBlock({ x, y, z })?.setPermutation(perm(id)); } catch { /* out of the world */ }
+    set(x, y, z, id, states) {
+      try { dim.getBlock({ x, y, z })?.setPermutation(states ? BlockPermutation.resolve(id, states) : perm(id)); } catch { /* out of the world */ }
     },
   };
 }
@@ -148,6 +148,13 @@ function layTick() {
   for (; job.i < end; job.i++) {
     if (!layPiece(dim, seg, all, job.i)) (store.data.missed[seg.id] ??= []).push(job.i);
   }
+  if (job.i >= all.length && (job.c ?? 0) < (seg.crossings?.length ?? 0)) {
+    // then the level crossings, one a tick, on the ground the bed has graded
+    crossingTick(dim, seg, job.c ?? 0);
+    job.c = (job.c ?? 0) + 1;
+    store.save();
+    return;
+  }
   if (job.i >= all.length) {
     store.data.laying.shift();
     world.sendMessage(`§6The line from ${stopName(seg.from)} to ${stopName(seg.to)} is laid.`);
@@ -157,6 +164,18 @@ function layTick() {
   store.save();
 }
 onTick("route_lay", 2, layTick);
+
+// A level crossing (map/railcross.py, rail_bed.js layCrossing): waits while a piece near it is still unlaid
+// (unloaded ground), so it always sits on graded ground
+function crossingTick(dim, seg, c) {
+  const near = (store.data.missed[seg.id] ?? []).some((i) => Math.abs(i - seg.crossings[c].at) <= 10);
+  if (near || !layCrossing(blocksOf(dim), seg.crossings[c], (bx, by, bz) => blocked(seg.id, { x: bx, y: by, z: bz }))) {
+    const list = ((store.data.missedCross ??= {})[seg.id] ??= []);
+    if (!list.includes(c)) list.push(c);
+    return false;
+  }
+  return true;
+}
 
 // Every two seconds: try again the pieces that were out of loaded ground
 function missedTick() {
@@ -186,6 +205,15 @@ function missedTick() {
     }
     if (!list.length) delete store.data.missed[id];
     if (budget <= 0 || looks <= 0) break;
+  }
+  for (const [id, list] of Object.entries(store.data.missedCross ?? {})) {
+    const seg = segById(id);
+    if (!seg?.crossings) { delete store.data.missedCross[id]; changed = true; continue; }
+    for (let k = list.length - 1; k >= 0 && looks > 0; k--, looks--) {
+      const c = list[k]; list.splice(k, 1); changed = true;
+      crossingTick(dim, seg, c); // puts it back if it still can't go down
+    }
+    if (!store.data.missedCross[id]?.length) delete store.data.missedCross[id];
   }
   if (changed) store.save();
 }
