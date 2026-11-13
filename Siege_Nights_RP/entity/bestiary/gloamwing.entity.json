@@ -14,14 +14,19 @@
    },
    "animations": {
     "base": "animation.siege_b.gloamwing",
+    "walk": "animation.siege_b.gloamwing.walk",
+    "attack": "animation.siege_b.gloamwing.attack",
+    "swing": "controller.animation.siege_b.gloamwing.swing",
+    "hurt": "animation.siege_b.gloamwing.hurt",
+    "flinch": "controller.animation.siege_b.gloamwing.flinch",
     "dead_hide": "animation.siege_b.dead_hide"
    },
    "scripts": {
     "animate": [
      "base",
-     {
-      "dead_hide": "!query.is_alive"
-     }
+     "walk",
+     "swing",
+     "flinch"
     ]
    },
    "render_controllers": [

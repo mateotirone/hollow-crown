@@ -1060,6 +1060,9 @@
   },
   "siege_summon_bell_wife": {
    "textures": "textures/items/creative/summon_bell_wife"
+  },
+  "siege_everwake_wings": {
+   "textures": "textures/items/everwake_wings"
   }
  }
 }
