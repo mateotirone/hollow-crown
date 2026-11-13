@@ -1,0 +1,26 @@
+{
+ "format_version": "1.21.60",
+ "minecraft:item": {
+  "description": {
+   "identifier": "siege:hatching_brazier",
+   "menu_category": {
+    "category": "items"
+   }
+  },
+  "components": {
+   "minecraft:icon": "siege_cx_hatching_brazier",
+   "minecraft:display_name": {
+    "value": "item.siege:hatching_brazier.name"
+   },
+   "minecraft:max_stack_size": 16,
+   "minecraft:block_placer": {
+    "block": "minecraft:campfire"
+   },
+   "minecraft:tags": {
+    "tags": [
+     "siege:codex"
+    ]
+   }
+  }
+ }
+}

@@ -43,6 +43,8 @@ const OVERWORLD = "minecraft:overworld";
 // sites: { plot: { x, y, z, region, v, night, tier, box, door?, trig?, landing?, override? } }   (world coords)
 // mouth: { site, landing, trig } once the tunnel mouth beside the Rift is cut
 const store = moduleStore("siege:plotcaves", () => ({ sites: {}, mouth: null }));
+// A plot's mine as last written (the Codex reads the sealed door's spot for Hroda's Pick)
+export const caveSiteOf = (plot) => store.data.sites?.[plot];
 const busy = new Set();
 const caves = new Map(); // plot -> generated cave (the last few only; they are big)
 const told = new Map(); // "player|what" -> tick, so lines are not repeated every check
