@@ -708,13 +708,7 @@ def seneschal():
     gate = BL.seneschal()
     for c, v in gate.cells.items(): d.cells[c] = v
     # the scarab court in front of the stair (bosses thread, plans.js ASH_SAND: centre (0, 11), r 9, scarabs on r 6 at
-    # dy 1): its two nearest pairs of statues have fallen, and lie along the precinct sides instead
-    for c in [c for c in d.cells if c[2] in (6, 12) and 4 <= abs(c[0]) <= 6 and c[1] >= 1]: del d.cells[c]
-    for s_ in (-1, 1):
-        for k, z0 in enumerate((6, 12)):
-            x = s_ * (14 + k)
-            for z in range(z0 - 2, z0 + 3): d.put(x, 1, z, "cut_sandstone" if z < z0 + 2 else "smooth_quartz")
-            d.put(x, 1, z0 - 3, "smooth_sandstone_slab", half="bottom"); d.put(x, 2, z0, "sand")
+    # dy 1) stays open: faceless_statues.AVENUE stands the statues south of it and lays four along the sides
     # obelisks out beyond the south gate
     for s_ in (-1, 1):
         ox, oz = s_ * 8, PZ1 + 6

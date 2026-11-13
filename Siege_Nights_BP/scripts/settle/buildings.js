@@ -8,6 +8,7 @@ import { Plan } from "../townhall/halls.js";
 import { STYLES } from "../townhall/styles.js";
 import { drawData } from "../townhall/designs.js";
 import { BUILDING_DESIGNS } from "./designs_data.js";
+import { MASON_DESIGNS } from "./mason_data.js";
 
 const W = (...ids) => ids.map((id) => `minecraft:${id}`);
 
@@ -272,16 +273,18 @@ export const BUILDINGS = [
   { id: "garden", name: "Kitchen Garden", blurb: "Fenced beds with a water channel, ready to plant.", draw: garden },
   { id: "house", name: "House", blurb: "One storey and a tall attic under a steep gable, with a chimney. About four beds.", draw: house },
   { id: "townhouse", name: "Townhouse", blurb: "A taller house: stone below, a jettied floor over the road, a high attic. About six beds.", draw: townhouse },
-];
-// Drawn and exported, but not offered yet: with them in play the charters need more plots than some layouts open
-// in time (the Farmhouse at Town in lanternbog Market Street, the Mint at Town in dunehold Crossroads, the Inn at
-// City in dunehold Twin Rings). They join BUILDINGS once the layouts or the charters make room.
-export const WAITING = [
   { id: "farmhouse", name: "Farmhouse", blurb: "A long low farmhouse with an open lean-to behind for hay and the woodpile.", draw: farmhouse },
   { id: "inn", name: "Inn", blurb: "A tap room with the bar, tables and a hearth, and bedrooms above for travellers.", draw: inn },
   { id: "mint", name: "Mint", blurb: "A strong stone house with barred windows, where the town strikes its Regals.", draw: mint },
 ];
-export const BUILDING = Object.fromEntries(BUILDINGS.map((b) => [b.id, b]));
+// Nothing waiting now: the farmhouse, inn and mint joined BUILDINGS when the 2026-11-13 layouts made room for them.
+export const WAITING = [];
+// Raised by the game itself, never offered on a plot or in the Plan Book: the Mason's Yard every new base gets
+// (basebuilds.js; Mateo's playtest 2026-11-12). Designed on the building skill (map/structures/export_mason.py).
+export const FIXED_BUILDINGS = [
+  { id: "mason_yard", name: "Mason's Yard", blurb: "The mason's workshop, with a yard in front where he cuts and sells blocks.", draw: (p) => floor(p, -4, 4, 1, 9), designs: MASON_DESIGNS },
+];
+export const BUILDING = Object.fromEntries([...BUILDINGS, ...FIXED_BUILDINGS].map((b) => [b.id, b]));
 
 const plans = new Map();
 export function drawBuilding(id, styleId) {
@@ -289,7 +292,7 @@ export function drawBuilding(id, styleId) {
   if (!plans.has(key)) {
     const style = styleFor(styleId);
     const p = new Plan(style);
-    const d = BUILDING_DESIGNS[style.id]?.[id];
+    const d = (BUILDING[id]?.designs ?? BUILDING_DESIGNS)[style.id]?.[id] ?? BUILDING[id]?.designs?.[style.id];
     if (d) {
       // the region's own design (map/structures/settle_buildings.py); its blocks become roles on this style
       const prefix = `bd:${style.id}:${id}`;

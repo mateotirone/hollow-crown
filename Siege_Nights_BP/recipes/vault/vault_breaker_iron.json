@@ -26,6 +26,9 @@
         "item": "minecraft:redstone_block"
       }
     },
+    "unlock": {
+      "context": "AlwaysUnlocked"
+    },
     "result": {
       "item": "siege:vault_breaker_iron",
       "count": 1

@@ -3,9 +3,13 @@
 // own fight, before the last one). Built on the shared boss framework (bestiary/bossCore.js).
 // The boss entity is the Conductor; 7 Singers stand around the hall.
 //
-//   The Hymn     The Singers shield the Conductor. Kill six of them. Every verse still singing
-//                calls phantom raiders: the same armies that lay siege to the keeps above.
-//                The seventh Singer (the one bound to the real Source) cannot be hurt yet.
+//   The Hymn     The Singers shield the Conductor. Kill six of them. The seventh Singer (the one
+//                bound to the real Source) cannot be hurt yet, and says so.
+//   All fight    Echoes of the Siege come in waves: phantom copies of the armies that lay siege to
+//                the keeps above. Kill a whole wave and the next, bigger one rises (Mateo 2026-11-12:
+//                "a LOT more", "annoying", "they spawn more when the last one dies").
+//                The Conductor never stands still: it glides round the hall and slips away from
+//                anyone who gets close (Mateo 2026-11-12: "the choir main guy has to move").
 //   The Toll     The Conductor can be hurt. Toll: a shockwave you jump. Undertow: a pull toward
 //                the walls you crouch against. Echo: your hits come back at you, so hold them.
 //   The Closing  At a quarter health the song closes in from the walls, ring by ring: stand outside
@@ -27,9 +31,17 @@ import { courtOpenFor, cartWrecked, cartsongHolders } from "./story.js";
 
 export const CHOIR = {
   singersToSilence: 6, // of 7; the last one is bound to the Source
-  raidEvery: 400, // ticks between phantom raids while verses still sing (20 s)
-  wreckedRaidFactor: 2, // the dawn cart was wrecked at the Seams (middle stretch): raids come half as often
-  maxPhantoms: 10,
+  firstWave: 60, // ticks before the first wave of Echoes rises
+  waveGap: 60, // ticks between the last Echo of a wave falling and the next wave rising (3 s)
+  waveBase: 6, // Echoes in the first wave
+  waveGrowth: 2, // more each wave after
+  wavePerPlayer: 3, // more for every player after the first
+  waveMax: 24, // never more than this alive at once (a Realm has to keep up)
+  wreckedWaveFactor: 0.75, // the dawn cart was wrecked at the Seams (middle stretch): waves are smaller
+  glideSpeed: 0.9, // blocks the Conductor drifts each framework step (5 ticks): about 3.6 a second
+  glidePause: 40, // ticks it hangs at each spot before it picks the next
+  slipNear: 3.5, // a player this close and it slips away...
+  slipEvery: 100, // ...at most this often (5 s)
   tollDamage: 9,
   echoTicks: 80,
   fallAt: 0.25, // health fraction where the song starts to close in
@@ -53,10 +65,24 @@ const SINGER = "siege:choir_singer";
 const ROOT_TAG = "siege_choir_root";
 const K_PROGRESS = "hc:undertow_progress";
 const PHANTOMS = [
-  ["minecraft:pillager", "minecraft:vindicator"], // the Warband
-  ["minecraft:zombie", "minecraft:skeleton"], // the Undead Horde
-  ["minecraft:vindicator", "minecraft:pillager"], // the Mercenary Host
+  ["minecraft:pillager", "minecraft:vindicator", "minecraft:pillager"], // the Warband
+  ["minecraft:zombie", "minecraft:skeleton", "minecraft:husk", "minecraft:stray"], // the Undead Horde
+  ["minecraft:vindicator", "minecraft:pillager", "minecraft:vindicator"], // the Mercenary Host
 ];
+// Every few waves something worse walks with the Echoes.
+const CAPTAINS = { 3: "minecraft:vex", 5: "minecraft:ravager", 7: "minecraft:witch" };
+const ECHO_TAG = "siege_choir_echo";
+
+// How many Echoes the next wave brings. Pure (tested).
+export function waveSize(wave, players = 1, wrecked = false) {
+  const n = CHOIR.waveBase + CHOIR.waveGrowth * Math.max(0, wave - 1) + CHOIR.wavePerPlayer * Math.max(0, players - 1);
+  return Math.max(1, Math.min(CHOIR.waveMax, Math.round(n * (wrecked ? CHOIR.wreckedWaveFactor : 1))));
+}
+// The worse thing that walks with wave n, if any (every 3rd, 5th and 7th wave, then round again). Pure.
+export function waveCaptain(wave) {
+  const k = ((wave - 1) % 7) + 1;
+  return CAPTAINS[k];
+}
 
 const centre = () => ({ x: HEART.center.x + 0.5, y: HEART.center.y, z: HEART.center.z + 0.5 });
 export function singerSpot(i) {
@@ -72,7 +98,7 @@ function placeSingers(f) {
     if (!s) continue;
     try {
       s.nameTag = `§dSinger of ${SITE_NAMES[SOURCE_SITE_IDS[i]].replace(/^The /, "the ")}`;
-      if (i === root) { s.addTag(ROOT_TAG); s.addTag("siege_boss_shielded"); }
+      if (i === root) { s.addTag(ROOT_TAG); s.addTag("siege_boss_shielded"); s.nameTag += "\n§7(bound to the Source: can't be silenced yet)"; }
     } catch { /* gone */ }
   }
 }
@@ -89,25 +115,72 @@ function title(f, sub) {
   for (const p of f.players()) p.onScreenDisplay.setTitle("§5The Choir", { subtitle: `§7${sub}`, fadeInDuration: 5, stayDuration: 50, fadeOutDuration: 15 });
 }
 
-function raid(f) {
-  const living = verses(f);
-  const have = f.adds().filter((e) => e.typeId.startsWith("minecraft:")).length;
-  const want = Math.min(CHOIR.maxPhantoms - have, Math.min(4, living) + f.players().length);
+const echoes = (f) => f.adds().filter((e) => e.hasTag(ECHO_TAG));
+
+// A wave of Echoes rises from the edges of the hall, all at once.
+function wave(f) {
+  f.data.wave = (f.data.wave ?? 0) + 1;
+  const n = f.data.wave, ps = f.players();
+  const want = Math.min(waveSize(n, ps.length, cartWrecked()), CHOIR.waveMax - echoes(f).length);
   if (want <= 0) return;
   const army = PHANTOMS[Math.floor(Math.random() * PHANTOMS.length)];
-  f.bar("§5A verse rises. You have fought these armies before.");
-  for (let i = 0; i < want; i++) {
+  const kinds = Array.from({ length: want }, (_, i) => army[i % army.length]);
+  const captain = waveCaptain(n);
+  if (captain) kinds[0] = captain;
+  for (const p of ps) p.onScreenDisplay.setTitle(" ", { subtitle: `§5Wave ${n}§7: the Echoes of the Siege rise`, fadeInDuration: 5, stayDuration: 30, fadeOutDuration: 10 });
+  f.say(n === 1 ? "§5The verse rises, and with it the armies you have fought before. Kill them all and more will come." : `§5Wave ${n}. ${want} Echoes of the Siege${captain ? ", and something worse walks with them" : ""}.`);
+  for (const kind of kinds) {
     const at = f.spot(HEART.innerRadius + 6, HEART.outerRadius - 4);
-    for (const e of f.summon(army[i % army.length], 1, 1, at)) {
+    for (const e of f.summon(kind, 1, 1, at, [ECHO_TAG])) {
       try { e.nameTag = "§7Echo of the Siege"; } catch { /* gone */ }
       effect(e, "fire_resistance", 20000, 0); // no sunlight here, but be safe
+      effect(e, "speed", 20000, 0); // they are quick, and they keep coming
       particle(f.dim, "minecraft:knockback_roar_particle", at);
     }
   }
 }
 
+// Waves: the next one rises a breath after the last Echo of this one falls.
+function waves(f) {
+  if (f.tick < (f.data.nextWave ?? 0)) return;
+  const left = echoes(f).length;
+  if (left > 0) { f.data.nextWave = undefined; return; }
+  if (f.data.nextWave === undefined) { f.data.nextWave = f.tick + CHOIR.waveGap; if (f.data.wave) f.bar("§5The last Echo falls. Another verse is gathering..."); return; }
+  f.data.nextWave = undefined;
+  wave(f);
+}
+
+// Creative playtesters: the Echoes walk at you and show what would have hit, like every boss helper (bossCore.js helpersChase).
+
+// The Conductor glides round the hall, a slow figure-of-eight of spots, and slips away from anyone close.
+// In the Closing it keeps to the middle, where the players have to be.
+function glide(f, players) {
+  const e = f.entity, loc = e.location, c = centre();
+  const near = players.find((p) => flat(p.location, loc) < CHOIR.slipNear);
+  if (near && f.tick >= (f.data.nextSlip ?? 0) && stage(f) < 2) {
+    f.data.nextSlip = f.tick + CHOIR.slipEvery;
+    const to = f.spot(HEART.innerRadius + 2, HEART.singerRadius - 6);
+    particle(f.dim, "siege:vein_spark", { x: loc.x, y: loc.y + 1.5, z: loc.z });
+    ringAt(f, loc, 0.3);
+    try { e.teleport({ x: to.x, y: c.y, z: to.z }, { facingLocation: near.location }); } catch { /* not loaded */ }
+    sound(f.dim, "block.amethyst_block.resonate", to, 0.7, 1);
+    f.data.goal = undefined;
+    return;
+  }
+  if (!f.data.goal) {
+    if (f.tick < (f.data.hangUntil ?? 0)) return;
+    const to = stage(f) === 2 ? f.spot(1, HEART.innerRadius - 2) : f.spot(HEART.innerRadius - 3, HEART.singerRadius - 6);
+    f.data.goal = { x: to.x, z: to.z };
+  }
+  const g = f.data.goal, d = Math.hypot(g.x - loc.x, g.z - loc.z);
+  if (d <= CHOIR.glideSpeed) { f.data.goal = undefined; f.data.hangUntil = f.tick + CHOIR.glidePause; return; }
+  const k = CHOIR.glideSpeed / d;
+  const face = players.length ? players.reduce((a, b) => (flat(b.location, loc) < flat(a.location, loc) ? b : a)).location : undefined;
+  try { e.teleport({ x: loc.x + (g.x - loc.x) * k, y: c.y, z: loc.z + (g.z - loc.z) * k }, face ? { facingLocation: face } : undefined); } catch { /* not loaded */ }
+}
+
 registerBoss({
-  id: "choir", type: CONDUCTOR, name: "The Choir", radius: HEART.outerRadius + 2, phases: [CHOIR.fallAt], points: 25,
+  id: "choir", type: CONDUCTOR, name: "The Choir", radius: HEART.outerRadius + 2, phases: [CHOIR.fallAt], points: 25, noChase: true, // it glides on its own (glide below)
   intro: "turns toward you. Seven voices begin to sing.",
   phaseNames: ["", "The Closing"],
   attacks: [
@@ -152,7 +225,8 @@ registerBoss({
 
   onStart: (f, fresh) => {
     f.data.stage = 0;
-    f.data.nextRaid = 100;
+    f.data.wave = 0;
+    f.data.nextWave = CHOIR.firstWave;
     f.data.band = 0;
     f.shield(true);
     if (fresh || !singers(f).length) {
@@ -182,27 +256,27 @@ registerBoss({
       try {
         root.teleport({ x: centre().x + 4, y: HEART.center.y, z: centre().z });
         root.removeTag("siege_boss_shielded");
+        root.nameTag = root.nameTag.split("\n")[0];
       } catch { /* gone */ }
     }
     f.say("§5The last Singer steps down to the centre. Its voice is one you have heard before.");
     f.say("§cThe song is closing in from the walls. Get to the middle!");
   },
 
-  tick: (f) => {
+  tick: (f, players = f.players()) => {
     const st = stage(f);
+    waves(f);
+    glide(f, players);
+    if (st === 1 && f.tick % 60 === 0) f.bar("§dThe Conductor is open: strike it. The last Singer can't be silenced until the song closes in.");
     if (st === 0) {
       const left = verses(f);
-      f.bar(`§dVerses still singing: §f${left}`);
+      if (f.tick % 20 === 0) f.bar(`§dSingers to silence: §f${left} of ${CHOIR.singersToSilence}§7 (the bound one can't be hurt yet)`);
       if (left === 0) {
         f.data.stage = 1;
         f.shield(false);
         title(f, "The Toll");
-        f.say("§5Six voices are silent. The seventh will not stop, but the Conductor is laid bare.");
+        f.say("§5Six voices are silent. The seventh is bound to the Source: no blade can touch it yet. Bring the Conductor low and it will come down to you.");
         return;
-      }
-      if (f.tick >= f.data.nextRaid) {
-        f.data.nextRaid = f.tick + CHOIR.raidEvery * (cartWrecked() ? CHOIR.wreckedRaidFactor : 1);
-        raid(f);
       }
       // A thread of light from each living Singer to the Conductor shows what is shielding it.
       if (f.tick % 20 === 0) for (const s of singers(f)) particle(f.dim, "minecraft:villager_happy", { x: s.location.x, y: s.location.y + 2.6, z: s.location.z });

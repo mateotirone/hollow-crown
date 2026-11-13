@@ -19,7 +19,8 @@
     "attack": "animation.siege_b.shardcaster.attack",
     "swing": "controller.animation.siege_b.shardcaster.swing",
     "hurt": "animation.siege_b.shardcaster.hurt",
-    "flinch": "controller.animation.siege_b.shardcaster.flinch"
+    "flinch": "controller.animation.siege_b.shardcaster.flinch",
+    "dead_hide": "animation.siege_b.dead_hide"
    },
    "scripts": {
     "animate": [
@@ -27,7 +28,10 @@
      "idle",
      "walk",
      "swing",
-     "flinch"
+     "flinch",
+     {
+      "dead_hide": "!query.is_alive"
+     }
     ]
    },
    "render_controllers": [

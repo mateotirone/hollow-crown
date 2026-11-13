@@ -208,6 +208,7 @@ export const ENTRIES = [
     id: "building_rules", ch: "keep", title: "The Mason and ready-made buildings",
     tip: "The Mason sells building blocks for coins. Your own region's materials are cheaper.",
     page: "§fThe Mason§r sells building blocks, so building doesn't mean weeks of quarrying. Your region's own materials are cheaper. Place a §fMason's Bench§r on your land and a mason sets up beside it (two at most). Towns have their own masons. The Mason can also mend your settlement wall.\n\n"
+      + "§fA new settlement§r comes with its Mason's Yard (a stone workshop, with the bench out front where the Mason works), the library, and a cottage of your own with a bed kept for you, so you can sleep the first night. Its road runs out through the gate to the nearest road.\n\n"
       + "§fFoundation Stones§r place ready-made buildings: put one on free ground facing the way the building should run, click it, pick a building, look at the outline, then click again to raise it. You pay in planks and stone you carry, and the Mason makes up any shortfall for coins.\n\n"
       + "Or build by hand, anywhere on your land outside the ground kept for your hall.",
     when: ["talk:tag:siege_mason", "carry:siege:mason_bench", "carry:siege:foundation_stone", "click:siege:foundation_stone"],
@@ -216,7 +217,7 @@ export const ENTRIES = [
     id: "town_plots", ch: "keep", title: "Town plots and charters",
     tip: "Use a Plot Marker to raise a building on a town plot. Each plot only takes buildings of its size.",
     page: "Every open plot in your town has a §fPlot Marker§r. Use it to see what can go there: only buildings of the plot's size are listed, and some want a certain spot (a watchtower stands by the wall). Good spots are marked. Pick one, walk round the outline, then use the marker again and pay to raise it.\n\n"
-      + "§fCharters:§r siege wins grow your settlement, but it only grows past each tier once that tier's charter stands. A Town needs 3 homes, a Farmhouse, a Mint and a market; a City needs 6 homes, an inn, a barracks and another work building. Buildings with no ready-made design yet (Farmhouse, Mint, Inn) can be built by hand and registered. When the last one is finished, the town grows by itself.",
+      + "§fCharters:§r siege wins grow your settlement, but it only grows past each tier once that tier's charter stands. A Town needs 3 homes (cottages, houses or townhouses), a Farmhouse, a Mint and a market; a City needs 6 homes, an inn, a barracks and another work building. Any of them can also be built by hand and registered. When the last one is finished, the town grows by itself.",
     when: ["click:siege:plot_marker", "event:tierUp"],
   },
   {

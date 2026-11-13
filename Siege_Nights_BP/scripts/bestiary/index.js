@@ -11,6 +11,7 @@
 //   seeps.js     Seep sites: random Hollow incursions in the overworld that widen until someone closes them
 //   ravens.js    the omen ravens: perchRavens / rowSpots / clearRavens for lore/ravens.js to call
 //   pretenders.js  generated claimants who rise in the Hollow after Morvane falls (events: siege:pretender_risen / _marching / _fallen)
+//   gentle.js    the gentle start: a new player's first days are free of our wild monsters, then they come in step by step
 //   gloam.js     Gloamwings: flyers that build up the longer a visitor stays in the Hollow
 //   champions.js NPC stand-ins for players that fight like one (spawnChampion, setStance)
 //   anim.js      boss moves: wind-up pose while the warning is up, strike when the hit lands, rage at each phase
@@ -41,6 +42,7 @@ import "./seeps.js";
 import "./ravens.js";
 import "./pretenders.js";
 import "./gloam.js";
+import "./gentle.js";
 import "./champions.js";
 import "./bodies.js";
 import "./showcase.js";

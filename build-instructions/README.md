@@ -82,6 +82,20 @@ The same frame as `map/structures/` (`bp.py`, `kit.py`):
 - Block states are written the `bp.py` way (`facing`, `half`, `axis`, `open`); see
   `reference/block-states.md` for what they mean in Bedrock.
 
+## What every new settlement raises (Mateo, 2026-11-12)
+
+A base is founded with its working buildings standing, never a bare block waiting for one:
+
+- **The Mason's Yard** (`map/structures/review/specs/gen_mason.py`, 9 by 9, one per region): a stone workshop with
+  the Mason's Bench in its open front yard. The Mason works the bench from the yard. It goes on the layout's
+  reserved `mason_yard` ground beside the square (the town generator, `towngen_settle.py`), or on the nearest Small
+  plot while a layout has none. The Mason never stands on a bare bench.
+- **The founder's cottage**, with a bed kept for the owner, so they can sleep the first night.
+- **The library**, on its square plot.
+
+The game raises all three when the Hamlet is laid out (`Siege_Nights_BP/scripts/settle/basebuilds.js`). A new kind
+of base must raise them too.
+
 ## Who uses this
 
 - `map/structures/` (kit.py, vale.py, regions.py, settle_halls.py, settle_buildings.py, hollow_kit.py):
