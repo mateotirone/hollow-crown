@@ -113,6 +113,24 @@ No trees. Azalea leaves in window boxes, and later small hanging gardens on the 
 **Not in the skill yet:** the cloud-shaped platform and parapet, the cloud belly and the Needle are shapes in
 `spec.py`; the stair to the gate and the street paint are `place` cells.
 
+## The air boat (Mateo OK 2026-11-13)
+
+The blimp that carries players to Everwake (in lore; the station's Gate teleports them). One build,
+`map/structures/everwake/airboat.py`: `cells(ring_at, heading)` places it with its copper nose ring at a mooring,
+nose pointing e/w/n/s; `MOORING` gives the deck (20 under the ring), the bow rail gap and the starboard door.
+
+- Envelope 61 x 19: white wool with a light grey belly (two-row dithered seam), weathered copper ribs every 8,
+  cut copper caps on nose and tail. A long tapering tail, never a blunt egg end.
+- Fins: four in a cross growing out of the taper, white canvas with birch spars and edge, a 2-block weathered
+  copper rudder or elevator on the trailing edge behind a stripped birch hinge. Never flat plank boards.
+- Stern: two copper nacelles on dark oak struts with open-trapdoor propellers, and an X-bladed pusher prop
+  behind the tail (clear of the cross of fins).
+- Gondola 7 x 15 cabin on a curved dark oak hull: dark oak base row, a band of light blue glass panes between
+  stripped birch posts, copper roof with an upside-down-stair eave. Inside: benches, chart table, bell,
+  lanterns. Hung on iron chains from a dark oak keel beam.
+- The envelope is fitted ring by ring with the skill part `envelope` (parts.py), not a `lathe` shape: the
+  lathe fit is jaggy and holed on a horizontal axis.
+
 ## Never
 
 - Nothing above Y 319, and no build that lets a player tower up to the sky model (it is an illusion).
