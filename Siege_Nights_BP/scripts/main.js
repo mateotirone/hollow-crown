@@ -53,6 +53,7 @@ import "./forestry/index.js";
 import "./workings/index.js";
 import "./ironworks/index.js";
 import "./upkeep/index.js";
+import "./eating/index.js";
 import "./vault/index.js";
 import "./warwrit/index.js";
 import "./army/index.js";
@@ -63,8 +64,10 @@ import "./news/index.js";
 import "./trade/index.js";
 import "./townsfolk/index.js";
 import "./weather/index.js";
+import "./music/index.js";
 import "./graves/index.js";
 import "./wings/index.js";
+import "./statues/index.js";
 import "./battletest/index.js"; // test tool: /scriptevent siege:battle_test attack | defend | raid
 
 // Start the shared loop last, once every file has registered its work

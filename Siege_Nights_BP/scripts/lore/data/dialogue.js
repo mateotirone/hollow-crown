@@ -263,7 +263,7 @@ export const NPCS = [
         opts: [["I'll find them.", "end", ["lead:corvins_tower"]]],
       },
       commander: {
-        text: "Knight-Commander. There were four of those when we were eleven hundred. Now there's you.\n\nThe Eleven are yours. Every one of us who's left. We'll hold whatever wall you put us on, and when the worst night comes, the one we were all sworn for and never told about, we'll be on it with you.\n\nWhatever you call us now. The name matters less than I thought it would.",
+        text: "Knight-Commander. There were four of those when we were eleven hundred. Now there's you.\n\nThe Eleven are yours. Every one of us who's left. We'll hold whatever wall you put us on, and when the worst night comes, the one we were all sworn for and never told about, we'll be on it with you.\n\nOne thing the Rule never needed to say, so I'll say it. Every one of those things we've buried came up the same season the knocking got louder. Somebody is sending them, and they keep sending them at you. I'd like to know who before they stop needing to.\n\nWhatever you call us now. The name matters less than I thought it would.",
         opts: [["Then hold the wall with me.", "end", ["flag:aldous_commander", "sp:2"]]],
       },
       after: {
@@ -348,7 +348,7 @@ export const NPCS = [
         opts: [["I'll pick something.", "hub", ["flag:mag_adept", "sp:1"]]],
       },
       adept3: {
-        text: "It always is, the first time. That's the trap.\n\nGo and be loud when it matters, and quiet all the rest. And carry something from home in your pocket. You'll know why.",
+        text: "It always is, the first time. That's the trap.\n\nGo and be loud when it matters, and quiet all the rest. And carry something from home in your pocket. You'll know why.\n\nOne more thing. If it ever speaks to you kindly, by name, like it's glad of you, come straight here. It never once spoke kindly to him.",
         opts: [["I'll remember.", "hub", ["flag:mag_adept", "sp:1"]]],
       },
       saw: {

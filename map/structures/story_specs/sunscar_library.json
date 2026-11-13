@@ -1,0 +1,183 @@
+{
+ "name": "sunscar_fortress_library",
+ "edition": "bedrock",
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "ember_sandstone",
+    "roof": "smooth_sandstone",
+    "glass": "orange_stained_glass_pane"
+   },
+   "rect": [
+    -6,
+    -7,
+    6,
+    7
+   ],
+   "plinth": 2,
+   "storeys": [
+    5,
+    5
+   ],
+   "door": {
+    "side": "s",
+    "kind": "grand",
+    "steps": 1
+   },
+   "roof": {
+    "type": "flat",
+    "parapet": "crenel",
+    "beams": true,
+    "hatch": true
+   },
+   "chimney": false,
+   "shutters": 0
+  },
+  {
+   "part": "dome",
+   "at": [
+    0,
+    0
+   ],
+   "r": 4,
+   "drum": {
+    "h": 3,
+    "windows": 4,
+    "glass": "yellow_stained_glass_pane"
+   },
+   "finial": "gold"
+  }
+ ],
+ "place": [
+  [
+   -5,
+   2,
+   -6,
+   "bookshelf"
+  ],
+  [
+   -4,
+   2,
+   -6,
+   "bookshelf"
+  ],
+  [
+   -3,
+   2,
+   -6,
+   "bookshelf"
+  ],
+  [
+   3,
+   2,
+   -6,
+   "bookshelf"
+  ],
+  [
+   4,
+   2,
+   -6,
+   "bookshelf"
+  ],
+  [
+   5,
+   2,
+   -6,
+   "bookshelf"
+  ],
+  [
+   -5,
+   3,
+   -6,
+   "bookshelf"
+  ],
+  [
+   -4,
+   3,
+   -6,
+   "bookshelf"
+  ],
+  [
+   -3,
+   3,
+   -6,
+   "bookshelf"
+  ],
+  [
+   3,
+   3,
+   -6,
+   "bookshelf"
+  ],
+  [
+   4,
+   3,
+   -6,
+   "bookshelf"
+  ],
+  [
+   5,
+   3,
+   -6,
+   "bookshelf"
+  ],
+  [
+   -5,
+   2,
+   -3,
+   "bookshelf"
+  ],
+  [
+   -5,
+   2,
+   -2,
+   "bookshelf"
+  ],
+  [
+   -5,
+   2,
+   2,
+   "bookshelf"
+  ],
+  [
+   -5,
+   2,
+   3,
+   "bookshelf"
+  ],
+  [
+   5,
+   2,
+   -3,
+   "bookshelf"
+  ],
+  [
+   5,
+   2,
+   -2,
+   "bookshelf"
+  ],
+  [
+   5,
+   2,
+   2,
+   "bookshelf"
+  ],
+  [
+   5,
+   2,
+   3,
+   "bookshelf"
+  ],
+  [
+   0,
+   2,
+   -5,
+   "lectern",
+   {
+    "facing": "s"
+   }
+  ]
+ ]
+}

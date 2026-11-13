@@ -50,6 +50,14 @@ export const ENTRIES = [
     when: [],
   },
   {
+    id: "eating", ch: "start", title: "Food and healing",
+    tip: "Eat on a full hunger bar and food heals you at once: half a heart every half second while the meal lasts.",
+    page: "Food heals §ffast§r here. While your hunger bar is §ffull§r and the meal you ate still has something left in it, you get half a heart back every half second. Top the bar up in a fight and the hearts follow in a few seconds.\n\n"
+      + "Rich food lasts longest: a steak or a cooked porkchop is worth about four hearts, cooked cod or bread about two. Once the meal is used up you heal slowly again, half a heart every four seconds, and not at all below nine drumsticks.\n\n"
+      + "Bread comes from any Farmer, cooked cod from a Fisher and cooked beef from a Hunter, in the six towns. Or grow, fish and raise your own.",
+    when: ["carry:minecraft:bread", "carry:minecraft:cooked_beef", "carry:minecraft:cooked_cod", "carry:minecraft:cooked_porkchop", "carry:minecraft:cooked_chicken", "carry:minecraft:cooked_mutton", "carry:minecraft:baked_potato"],
+  },
+  {
     id: "first_days", ch: "start", title: "What to do first",
     tip: "",
     page: "1. §fChoose a place.§r In the hall in the sky (the whole map in miniature), click a green stone to take that plot. (No plot? Start in Kingsrest and claim a free Plot Stone you find on foot, or join a friend.)\n"
