@@ -469,8 +469,6 @@ item.siege:spell_step.name=Halfstep
 item.siege:spell_choir.name=Choir's Call
 item.siege:spell_hollowstep.name=Veilstep
 entity.siege:spell_satchel.name=Sorcerer's Satchel
-item.siege:plan_book.name=Plan Book
-item.siege:plan_scroll.name=Plan Scroll
 entity.siege:townsfolk.name=Townsperson
 action.interact.siege.talk=Talk
 
@@ -685,6 +683,8 @@ item.siege:starter_blackfen_chestplate.name=Blackfen Oilskin Coat
 item.siege:starter_blackfen_leggings.name=Blackfen Patched Trousers
 item.siege:starter_blackfen_boots.name=Blackfen Waders
 item.siege:starter_blackfen_weapon.name=Blackfen Reed Spear
+item.siege:plan_book.name=Plan Book
+item.siege:plan_scroll.name=Plan Scroll
 ## codex items (studio/build_codex.py)
 item.siege:rimeforged_helmet.name=Rimeforged Helm
 item.siege:rimeforged_chestplate.name=Rimeforged Hauberk
