@@ -134,7 +134,7 @@ export function playReveal(players, { dim, center, openGround = false, onStage, 
   // Everyone has seen it before: the short cut. Black, his one line, and on.
   if (players.every(seen)) {
     each(players, (p) => { lock(p, true); fade(p, 0.5, SCENE.shortCut / 20 - 1.5, 1); });
-    at(30, () => each(players, (p) => p.onScreenDisplay.setTitle("§r", { subtitle: `§7${words.lookUp ?? ""}`, fadeInDuration: 10, stayDuration: 50, fadeOutDuration: 10 })));
+    at(30, () => { each(players, (p) => p.onScreenDisplay.setTitle("§r", { subtitle: `§7${words.lookUp ?? ""}`, fadeInDuration: 10, stayDuration: 50, fadeOutDuration: 10 })); emit("morvaneSays", { players, id: "look_up" }); });
     at(SCENE.shortCut, () => finish(done));
     return true;
   }
@@ -186,6 +186,7 @@ export function playReveal(players, { dim, center, openGround = false, onStage, 
     beat("look_up");
     try { if (stage && s.actor) s.actor.setRotation({ x: -12, y: yawOf(stage.fwd) }); } catch { /* gone */ }
     each(players, (p) => p.onScreenDisplay.setTitle("§r", { subtitle: `§f${words.lookUp ?? ""}`, fadeInDuration: 10, stayDuration: 60, fadeOutDuration: 15 }));
+    emit("morvaneSays", { players, id: "look_up" }); // his voice, the same one they have heard since their first dusk
   });
 
   // the journal changes
