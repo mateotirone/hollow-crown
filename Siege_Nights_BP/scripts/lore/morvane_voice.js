@@ -2,7 +2,9 @@
 // before they know who he is".
 //
 // Before the Rift he is a voice with no speaker: far off and filtered, heard by one player at a time, each line
-// once, with the words in grey italics and no name on them. Nothing he says up here names the Hollow, a king,
+// once, and only by a player who is down in the world (never on the welcome hall's quay, where a newcomer is still
+// choosing where to start: a line earned up there, like finishing the journal, waits until they land). A siege line
+// is for the players whose own keep is attacked, not for everyone online, with the words in grey italics and no name on them. Nothing he says up here names the Hollow, a king,
 // Morvane or Oswin (a self-test checks), but every line echoes his father's journal or his own last page, so it
 // clicks when he looks up in the reveal and says "You kept my father's book." In the Hollow he is closer. In the
 // fight the voice belongs to the one in front of you: bestiary/morvane.js and reveal.js emit("morvaneSays", { players, id }).
@@ -19,6 +21,7 @@ import { on, onTick, isNight, addTests, assert, assertEqual } from "../siege/api
 import { progressOf, setFlag, saveProgress } from "./player.js";
 import { isThirdNight } from "./singing.js";
 import { storyOver } from "../reach/api.js";
+import { inWelcomeHall } from "../plots/api.js";
 import { fallenCount } from "./data/spine.js";
 import { REVEAL } from "./data/reveal.js";
 import { MORVANE_LINES, VOICE_PREFIX } from "./data/morvane_lines.js";
@@ -44,31 +47,61 @@ export function subtitle(line) {
 }
 
 const heard = (player, id) => progressOf(player).flags.includes(FLAG(id));
+const WAITING = (id) => `mvw_${id}`; // a line earned on the welcome hall's quay, said once they are down in the world
+// Lines that only make sense at the moment they are earned: on the quay these are skipped, not saved for later
+export const OF_THE_MOMENT = new Set(["first_dusk", "siege_first", "siege_held", "warlord", ...THIRD]);
+
+/** Can this player hear him at all right now? Not before they have left the welcome hall. */
+export function canHear(player, line) {
+  if (!player?.isValid) return false;
+  if (line?.fx !== "far") return true; // the Hollow and the fight: they are already where he is
+  let hall = false;
+  try { hall = inWelcomeHall(player); } catch { /* plots not ready: no hall */ }
+  return !hall;
+}
+
+function unflag(player, flag) {
+  const p = progressOf(player);
+  if (!p.flags.includes(flag)) return;
+  p.flags = p.flags.filter((f) => f !== flag);
+  saveProgress(player);
+}
 const busy = new Map(); // player id -> tick until which he is talking
 
-function play(player, id) {
+function play(player, id, once = false) {
   const line = LINE[id];
   if (!line || !player?.isValid) return;
+  // They may have been sent up to the hall since the line was queued: keep it for later (or drop it) instead
+  if (once && !canHear(player, line)) {
+    unflag(player, FLAG(id));
+    if (!OF_THE_MOMENT.has(id)) setFlag(player, WAITING(id));
+    return;
+  }
   if (line.seconds > 0) sfx(player, VOICE_PREFIX + id);
   const text = subtitle(line);
   if (text) { try { player.sendMessage(text); } catch { /* offline */ } }
 }
 
 // Say a line to one player after `delay` ticks, never over another of his lines
-function queue(player, id, delay = 0) {
+function queue(player, id, delay = 0, once = false) {
   const line = LINE[id];
   if (!line) return;
   const now = system.currentTick;
   const at = Math.max(now + delay, busy.get(player.id) ?? 0);
   busy.set(player.id, at + Math.ceil((line.seconds || 3) * 20) + VOICE.gap);
-  system.runTimeout(() => play(player, id), Math.max(0, at - now));
+  system.runTimeout(() => play(player, id, once), Math.max(0, at - now));
 }
 
 /** Say a line to a player once in their whole game. Returns true if it will be said. */
 export function speakOnce(player, id, delay = 0) {
   if (!player?.isValid || !LINE[id] || heard(player, id)) return false;
+  if (!canHear(player, LINE[id])) {
+    if (!OF_THE_MOMENT.has(id)) setFlag(player, WAITING(id)); // e.g. the journal finished on the quay
+    return false;
+  }
+  unflag(player, WAITING(id));
   setFlag(player, FLAG(id));
-  queue(player, id, delay);
+  queue(player, id, delay, true);
   return true;
 }
 
@@ -91,15 +124,21 @@ on("loreFlag", ({ player, flag }) => {
   if (BOSSES.includes(boss)) speakOnce(player, `fell_${boss}`, 200);
 });
 on("emberFell", ({ player }) => speakOnce(player, "ember", 120));
-on("warlordSlain", ({ king }) => { if (king) for (const p of inDim(OVERWORLD)) speakOnce(p, "warlord", 100); });
+// The Warlord King is said only to the one whose keep he marched on (not to everyone online)
+on("warlordSlain", ({ king, owner }) => {
+  const p = king && owner ? playerOf(owner) : undefined;
+  if (p) speakOnce(p, "warlord", 100);
+});
 
 const spokeTonight = new Map(); // player id -> the day he last spoke to them at night
-on("siegeStart", () => {
-  for (const p of inDim(OVERWORLD)) if (speakOnce(p, "siege_first", 100)) spokeTonight.set(p.id, world.getDay());
+// Siege lines go to the players whose own keep is attacked, not to a newcomer who happens to be online
+const defendersOf = (ids) => (ids ?? []).map(playerOf).filter((p) => p && inDim(OVERWORLD).includes(p));
+on("siegeStart", ({ defenders }) => {
+  for (const p of defendersOf(defenders)) if (speakOnce(p, "siege_first", 100)) spokeTonight.set(p.id, world.getDay());
 });
-on("siegeEnd", ({ outcome }) => {
+on("siegeEnd", ({ outcome, besieged }) => {
   if (outcome !== "won") return;
-  for (const p of inDim(OVERWORLD)) if (heard(p, "siege_first")) speakOnce(p, "siege_held", 200);
+  for (const p of defendersOf(besieged)) if (heard(p, "siege_first")) speakOnce(p, "siege_held", 200);
 });
 
 // The next third-night line for a player, or undefined when he has said them all (then he is quiet on those nights)
@@ -116,7 +155,9 @@ onTick("morvane voice", 100, () => {
     let dim;
     try { dim = p.dimension.id; } catch { continue; }
     if (dim === HOLLOW) { speakOnce(p, "hollow_first", 100); continue; }
-    if (dim !== OVERWORLD) continue;
+    if (dim !== OVERWORLD || !canHear(p, { fx: "far" })) continue; // still on the welcome hall's quay
+    // a line they earned up there (the journal) is said now that they have landed
+    for (const f of progressOf(p).flags.filter((x) => x.startsWith("mvw_"))) speakOnce(p, f.slice(4), 60);
     if (time >= VOICE.dusk[0] && time <= VOICE.dusk[1]) speakOnce(p, "first_dusk", 40);
     if (!third || rolled.get(p.id) === day) continue;
     rolled.set(p.id, day);
@@ -155,7 +196,7 @@ system.afterEvents.scriptEventReceive.subscribe(({ id, message, sourceEntity }) 
   }
   if (arg === "forget") {
     const p = progressOf(player);
-    p.flags = p.flags.filter((f) => !f.startsWith("mv_"));
+    p.flags = p.flags.filter((f) => !f.startsWith("mv_") && !f.startsWith("mvw_"));
     saveProgress(player);
     return void player.sendMessage("§7You will hear every line again, as if new.");
   }
@@ -187,6 +228,12 @@ addTests("lore", {
     const flags = [];
     for (let i = 0; i < THIRD.length; i++) { const id = nextThird(flags, 0.5); assert(id && !flags.includes(FLAG(id))); flags.push(FLAG(id)); }
     assertEqual(nextThird(flags), undefined);
+  },
+  "Morvane's voice: lines of the moment are real lines, and the Hollow and the fight are never held back": () => {
+    for (const id of OF_THE_MOMENT) assert(LINE[id], `${id} is not a line`);
+    assert(!OF_THE_MOMENT.has("journal_done"), "finishing the journal on the quay is kept for later, not lost");
+    assert(canHear({ isValid: true }, { fx: "mid" }) && canHear({ isValid: true }, { fx: "dry" }));
+    assert(!canHear(undefined, { fx: "far" }));
   },
   "Morvane's voice: subtitles are grey and nameless up top, absent in the fight": () => {
     assertEqual(subtitle({ fx: "far", text: "x" }), '§8§o"x"');
