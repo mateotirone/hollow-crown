@@ -64,6 +64,7 @@ import { CRACK_HEIGHT, CRACK_DEPTH, OPENING } from "./rift.js";
 import "./story.js";
 import "./forge.js";
 import "./finds.js";
+import "./sounds.js";
 
 const IN_TAG = "siege_undertow_in";
 const FOG_ID = "siege:undertow_fog";

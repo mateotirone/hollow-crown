@@ -65,12 +65,12 @@ const SINGER = "siege:choir_singer";
 const ROOT_TAG = "siege_choir_root";
 const K_PROGRESS = "hc:undertow_progress";
 const PHANTOMS = [
-  ["minecraft:pillager", "minecraft:vindicator", "minecraft:pillager"], // the Warband
-  ["minecraft:zombie", "minecraft:skeleton", "minecraft:husk", "minecraft:stray"], // the Undead Horde
-  ["minecraft:vindicator", "minecraft:pillager", "minecraft:vindicator"], // the Mercenary Host
+  ["siege:hollow_footman", "siege:shieldwall_brute", "siege:torchbearer"], // the Choir's own
+  ["siege:grey_spearman", "siege:grey_bowman", "siege:grey_axeman", "siege:grey_bellcutter"], // the Grey Host
+  ["siege:veinsworn", "siege:shardcaster", "siege:veinsworn"], // the Hollow's own soldiers
 ];
 // Every few waves something worse walks with the Echoes.
-const CAPTAINS = { 3: "minecraft:vex", 5: "minecraft:ravager", 7: "minecraft:witch" };
+const CAPTAINS = { 3: "siege:crow_mage", 5: "siege:siege_ogre", 7: "siege:bell_ringer" }; // never vanilla (Mateo 2026-11-13)
 const ECHO_TAG = "siege_choir_echo";
 
 // How many Echoes the next wave brings. Pure (tested).
