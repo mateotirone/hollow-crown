@@ -42,7 +42,17 @@ def room(tier, layout):
     # room coordinates are world-style (x east, z south) with the player facing north down the stairs: their
     # right is +x and forward is -z. The build engine's toWorld puts local y = 1 on the origin (feet) level.
     to = lambda x, y, z: (x - ox, y - oy + 1, oz - z)
+    before = dict(b.cells)
     lighting.light_blueprint(b, avoid=[(ox, oy, oz)])   # every build lit (Mateo 2026-11-13); the frame origin stays clear
+    # the room is underground: the lighting sees its roof as an open yard and stands lamp posts on it, which would
+    # poke up out of the ground (and through the town hall's floor over it). Take back anything it added at or above
+    # the ground (frame y >= 0), with the post's foot just below.
+    added = [c for c, v in b.cells.items() if before.get(c) != v]
+    up = {(x, z) for (x, y, z) in added if to(x, y, z)[1] >= 0}
+    for (x, y, z) in added:
+        if (x, z) in up and to(x, y, z)[1] >= -1:
+            if (x, y, z) in before: b.cells[(x, y, z)] = before[(x, y, z)]
+            else: del b.cells[(x, y, z)]
     pal, idx, cells = [], {}, {}
     for (x, y, z), (n, p) in b.cells.items():
         if n == "keep": continue

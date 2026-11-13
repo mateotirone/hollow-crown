@@ -10,7 +10,15 @@
     "cinderwing": "textures/entity/siege/dragons/cinderwing",
     "wyvern": "textures/entity/siege/dragons/wyvern",
     "drake": "textures/entity/siege/dragons/drake",
-    "wyrm": "textures/entity/siege/dragons/wyrm"
+    "wyrm": "textures/entity/siege/dragons/wyrm",
+    "cinderwing_1": "textures/entity/siege/dragons/cinderwing_1",
+    "cinderwing_2": "textures/entity/siege/dragons/cinderwing_2",
+    "wyvern_1": "textures/entity/siege/dragons/wyvern_1",
+    "wyvern_2": "textures/entity/siege/dragons/wyvern_2",
+    "drake_1": "textures/entity/siege/dragons/drake_1",
+    "drake_2": "textures/entity/siege/dragons/drake_2",
+    "wyrm_1": "textures/entity/siege/dragons/wyrm_1",
+    "wyrm_2": "textures/entity/siege/dragons/wyrm_2"
    },
    "geometry": {
     "cinderwing": "geometry.siege_dragon.cinderwing",

@@ -6,9 +6,17 @@
     "textures": {
      "Array.skins": [
       "Texture.cinderwing",
+      "Texture.cinderwing_1",
+      "Texture.cinderwing_2",
       "Texture.wyvern",
+      "Texture.wyvern_1",
+      "Texture.wyvern_2",
       "Texture.drake",
-      "Texture.wyrm"
+      "Texture.drake_1",
+      "Texture.drake_2",
+      "Texture.wyrm",
+      "Texture.wyrm_1",
+      "Texture.wyrm_2"
      ]
     },
     "geometries": {
@@ -27,7 +35,7 @@
     }
    ],
    "textures": [
-    "Array.skins[query.property('siege:species')]"
+    "Array.skins[query.property('siege:species') * 3 + query.property('siege:hue')]"
    ],
    "part_visibility": [
     {
