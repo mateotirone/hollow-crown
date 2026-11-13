@@ -42,6 +42,17 @@ Then type `/scriptevent siege:showcase siege` to make it night and start a siege
 
 Walk around, click things, and tell me what looks wrong or does nothing. The list below is the same things done by hand, if you want to check a step on its own.
 
+## 4a. The arena (scripts/arena/)
+
+Until the real arena is built at Kingsrest, test on a **flat Creative world**: stand in the open and type `/scriptevent siege:arena_test`. A rough test arena goes up around you (sand floor, twelve coloured concrete rooms with castle portcullis gates, a ring of stands). `/scriptevent siege:arena_test clear` goes back to the real arena's numbers (`scripts/arena/layout.js`).
+
+- Click the lectern north of the ring (or type `/scriptevent siege:arena`). Read "How it works" the first time.
+- **Battle a mob**: pick a beast and Squire. You're taken to your room. Take the arena kit: your own things vanish into the locker and you're in iron. Start Battle: 3, 2, 1, the gate lifts, the crowd fills the stands and cheers, the beast comes out in the middle, and the gate drops behind you. Kill it: you're paid Regals and sent back with your own things, health and game mode. Do it again: it pays less the same day.
+- Lose on purpose (let a Legend Gatebreaker kill you, with your own things on): no gravestone, and when you respawn you're back in your room to watch, then home with everything you had.
+- **Battle a King** (needs a second player): invite them; they get a message wherever they are; Accept takes them to the room opposite yours. Try one with the kit and one with their own things. Last one standing wins; the records board counts it.
+- Log off mid-fight, then back on: you're out, back in your room, and get your things back when it ends.
+- `/scriptevent siege:arena_status` shows the fight; `/scriptevent siege:arena_end` stops it and sends everyone home.
+
 ## 4b. The full-castle battle test (scripts/battletest/)
 
 One command builds a Castle-tier settlement (the Crown Wall with towers, gatehouse and portcullis, nine buildings, an Iron Strongroom, a Barracks and four ballistas), puts an army on each side and runs the siege. Use a **flat Creative world** and stand where the castle's middle should be: it clears about 145 x 145 blocks round you and a field 135 blocks south to the attackers' camp. Building takes a minute or two. It moves your Keep Banner (like the showcase); `clear` puts it back.
@@ -295,7 +306,7 @@ Run the showcase first (`/scriptevent siege:showcase`): the back row has four Ar
 
 Look first, without the game: the 3D viewer at https://claude.ai/artifact/D42qsWXjEcxWAbsYacsw4v shows all four species, every pose and every sound.
 
-In game: Creative, cheats on. `/scriptevent siege:showcase` puts a Roost, nine display dragons (the four species, a hatchling, a fledgling, one asleep, one unconscious, one dead) and **Cinder**, a grown Cinderwing that is yours, in the extras row behind you, and a whole 9x9 **Dragon Nest** west of that row. Take a **Dragon Horn** from the chests, and `/give @s beef 16` and `/give @s golden_apple 4`.
+In game: Creative, cheats on. `/scriptevent siege:showcase` puts a Roost, a Hatching Brazier, nine display dragons (the four species, a hatchling, a fledgling, one asleep, one unconscious, one dead) and **Cinder**, a grown Cinderwing that is yours, in the extras row behind you, and a whole 9x9 **Dragon Nest** west of that row. Take a **Dragon Horn** from the chests, and `/give @s beef 16` and `/give @s golden_apple 4`.
 
 **Looks and flying**
 1. Walk along the display dragons. ✅ Four clearly different animals (four-legged Cinderwing, two-legged Ashen Wyvern, squat armoured Dune Drake, long frilled Glass Wyrm). Wings tucked down along the flanks, the outer half folded over the inner (not sticking out sideways or lying flat). The sleeper breathes slowly, the unconscious one breathes fast and drips red, the dead one lies rolled over and does not move.
@@ -325,7 +336,11 @@ In game: Creative, cheats on. `/scriptevent siege:showcase` puts a Roost, nine d
 
 **The nest**: walk to the 9x9 nest west of the extras row ✅ a round nest of woven branches sunk into the ground, rim two to three blocks high with twigs flaring off the top, a straw floor with a bone, ribs, scales or a skull here and there, and three big dark red eggs in the middle. Try to break any part of it in Survival ✅ nothing breaks; set off TNT next to it ✅ it stays. Place a **Dragon Nest** from the creative menu in Creative ✅ a whole nest grows round it; in Survival ✅ it vanishes ("only grow in the wild").
 
-**Raising one**: `/scriptevent siege:dragons_reset`, click the eggs in the **Dragon Nest** ✅ an egg, and the clutch turns to broken shell; click the Roost holding it ✅ "The egg settles"; `/scriptevent siege:dragons_grow` ✅ cracking sound, a tiny chirping hatchling of a random species that follows you. Run the grow command twice more ✅ Fledgling (walks with you on its back), then Adult (flies).
+**Raising one**: `/scriptevent siege:dragons_reset`, click the eggs in the **Dragon Nest** ✅ an egg, and the clutch turns to broken shell; click the Hatching Brazier holding it ✅ "The egg settles into the coals" and a dark red egg sits in the brazier's coals (clicking the Roost with the egg only tells you to use a brazier); `/scriptevent siege:dragons_grow` ✅ cracking sound, a tiny chirping hatchling of a random species that follows you. Run the grow command twice more ✅ Fledgling (walks with you on its back), then Adult (flies).
+
+**The Dragon Stable**: claim land (any settlement of yours), then place a **Dragon Roost** facing away from you. ✅ "A dragon stable is going up behind it", and a sandstone kasbah stable rises: a wide red-framed arch in front with the Roost standing just outside it, four stalls with straw, hay and water troughs off a sandstone aisle, a tack corner and feed store by the arch, a ladder to the hay loft, a ladder from the loft to the flat roof terrace, and the domed nursery on the east side through an arch. ✅ Three Hatching Braziers glow against the nursery's east wall. Set an egg in one and wait ✅ the egg sits in the coals; with about half a day left (or `/time add` to get there) ✅ it shows glowing cracks; it hatches out of the brazier. Click a brazier holding someone else's egg ✅ "<name>'s egg is warming here". Craft a Roost at the Workshop ✅ acacia logs, a gold block, hay, a campfire and red sandstone (no blaze rods).
+
+**Dragon colours**: run `/scriptevent siege:showcase` ✅ a row of fledglings shows the two extra colours of each species, each named like "Copper Cinderwing". Hatch a few eggs ✅ the hatch message and the sheet name the colour, and they are not all the same colour. With your dragon out, run `/scriptevent siege:dragons_hue 1` then `2` then `0` ✅ it changes colour each time.
 
 Things I could not check without the game, so please look closely: flying actually steers by camera, flying speed feels right, the hatchling follows you, the sounds are any good in game, and the unconscious dragon really can't be killed by one more hit.
 
