@@ -54,6 +54,7 @@ WALKS = [44, 45, 55, 56]         # level walkways: between the tiers, and the pr
 CORR0, CORR1 = 46, 48            # the inner corridor behind the rooms
 AMB0, AMB1 = 52, 56              # the outer ambulatory, behind the ground arcade
 SH0, S_OUT = 57, 58              # the shell's rings (S_OUT its outer face)
+CLEAR_UP = 8                     # dig the map's ground out this far above the pad over the whole footprint
 GAL_FLOOR = 10                   # the gallery storey's floor
 NBAYS = 40                       # arches round the shell, 9 degrees apart
 TOWER = (47, 47)                 # the south-east stair tower's centre (the others turned)
@@ -873,6 +874,12 @@ def main():
     if a.bake:
         cx, cz = CENTRE
         world = Blueprint("arena_world")
+        # the map's own ground under the whole footprint is dug out above the pad (playtest 2026-11-13: dirt, grass
+        # and tall grass were left standing on the gatehouse floor where the land was a block or two above the pad).
+        # These air entries go in the groundwork, so genworld also levels its ground there to the pad.
+        for (x, z) in {(x, z) for (x, y, z) in blocks}:
+            for y in range(1, CLEAR_UP + 1):
+                if (x, y, z) not in blocks: gw.setdefault((x + cx, y + padY, z + cz), ("air", {}))
         for c, v in gw.items(): world.cells[c] = (v[0], v[1])
         for (x, y, z), q in blocks.items():
             world.cells[(x + cx, y + padY, z + cz)] = engine.to_bp(*q)

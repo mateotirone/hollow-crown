@@ -117,6 +117,7 @@ class Blueprint:
         for (x, y, z), (n, p) in self.cells.items():
             q = dict(p)
             if "facing" in q and q["facing"] in DIRS: q["facing"] = rf(q["facing"])
+            if "attach" in q and q["attach"] in DIRS: q["attach"] = rf(q["attach"])      # a vine's wall turns too
             if k % 2 and q.get("axis") in ("x", "z"): q["axis"] = "z" if q["axis"] == "x" else "x"
             q.pop("conn", None); q.pop("post", None)
             nx, nz = rp(x, z); out.cells[(nx, y, nz)] = (n, q)
@@ -191,8 +192,12 @@ class Blueprint:
         if "persistent_bit" in st: st["persistent_bit"] = True
         if "extinguished" in st: st["extinguished"] = bool(p.get("out", False))
         if "facing_direction" in st and name in ("barrel",): st["facing_direction"] = 1
-        if "facing_direction" in st and (name.endswith("wall_sign") or name == "ladder") and f:
-            st["facing_direction"] = {"n": 2, "s": 3, "w": 4, "e": 5}[f]     # the way the sign or ladder faces
+        if "facing_direction" in st and (name.endswith("wall_sign") or name in ("ladder", "frame", "glow_frame") or name.endswith("_button")) and f:
+            st["facing_direction"] = {"n": 2, "s": 3, "w": 4, "e": 5}[f]     # the way the sign, ladder, item frame or button faces
+            # (an item frame left on 0 hangs from the block above and pops off: the arena racks, 2026-11-13)
+        if name == "vine" and p.get("attach") in DIRS:   # bits: 1 south, 2 west, 4 north, 8 east = the side it clings to
+            st["vine_direction_bits"] = {"s": 1, "w": 2, "n": 4, "e": 8}[p["attach"]]
+        if name == "bell" and f: st["direction"] = {"s": 0, "w": 1, "n": 2, "e": 3}[f]
         c = p.get("conn")
         if c and is_fence(name):
             for d, w in (("n", "north"), ("s", "south"), ("e", "east"), ("w", "west")): st["minecraft:connection_" + w] = c[d]

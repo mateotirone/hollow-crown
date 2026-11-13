@@ -792,6 +792,7 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `bucket.fill_water` | 2 | roletrials, unlocks |
 | `crossbow.shoot` | 2 | dragons, siege |
 | `dig.grass` | 2 | roletrials, unlocks |
+| `dig.sand` | 2 | bestiary, dragons |
 | `mob.elderguardian.curse` | 2 | bestiary, undertow |
 | `mob.enderdragon.flap` | 2 | codex, roletrials |
 | `mob.evocation_illager.cast_spell` | 2 | bestiary, codex |
@@ -809,7 +810,6 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `block.end_portal.spawn` | 1 | undertow |
 | `chime.amethyst_block` | 1 | roletrials |
 | `dig.gravel` | 1 | roletrials |
-| `dig.sand` | 1 | dragons |
 | `elytra.loop` | 1 | roletrials |
 | `item.book.put` | 1 | lore |
 | `item.trident.throw` | 1 | codex |
@@ -820,6 +820,7 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `mob.horse.breathe` | 1 | horses |
 | `mob.horse.idle` | 1 | horses |
 | `mob.phantom.swoop` | 1 | bestiary |
+| `mob.ravager.stun` | 1 | bestiary |
 | `mob.villager.death` | 1 | bestiary |
 | `mob.warden.nearby_close` | 1 | bestiary |
 | `mob.warden.roar` | 1 | undertow |
