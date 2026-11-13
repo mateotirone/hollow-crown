@@ -14,7 +14,8 @@
      "monster",
      "mob",
      "hollow",
-     "siege_raider"
+     "siege_raider",
+     "siege_heavy"
     ]
    },
    "minecraft:health": {
