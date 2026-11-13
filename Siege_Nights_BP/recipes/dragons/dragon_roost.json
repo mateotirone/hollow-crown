@@ -8,13 +8,13 @@
    "siege_workshop"
   ],
   "pattern": [
-   "BGB",
-   "HMH",
+   "LGL",
+   "HCH",
    "SSS"
   ],
   "key": {
-   "B": {
-    "item": "minecraft:blaze_rod"
+   "L": {
+    "item": "minecraft:stripped_acacia_log"
    },
    "G": {
     "item": "minecraft:gold_block"
@@ -22,11 +22,11 @@
    "H": {
     "item": "minecraft:hay_block"
    },
-   "M": {
-    "item": "minecraft:magma"
+   "C": {
+    "item": "minecraft:campfire"
    },
    "S": {
-    "item": "minecraft:stone_bricks"
+    "item": "minecraft:cut_red_sandstone"
    }
   },
   "result": {

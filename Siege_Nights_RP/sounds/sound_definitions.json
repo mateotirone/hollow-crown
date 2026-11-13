@@ -2981,6 +2981,46 @@
      "load_on_low_memory": true
     }
    ]
+  },
+  "siege.sig.arena_fanfare": {
+   "category": "ambient",
+   "sounds": [
+    {
+     "name": "sounds/siege/sig/arena_fanfare",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.sig.crowd_cheer": {
+   "category": "ambient",
+   "sounds": [
+    {
+     "name": "sounds/siege/sig/crowd_cheer",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.sig.crowd_groan": {
+   "category": "ambient",
+   "sounds": [
+    {
+     "name": "sounds/siege/sig/crowd_groan",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.sig.crowd_murmur": {
+   "category": "ambient",
+   "sounds": [
+    {
+     "name": "sounds/siege/sig/crowd_murmur",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
   }
  }
 }
