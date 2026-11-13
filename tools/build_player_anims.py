@@ -342,7 +342,33 @@ PRE = [
     # mounted on something with reins, and taking a hit
     f"variable.hc_mounted = query.is_riding && ({ACTOR} ? query.is_riding_any_entity_of_type('minecraft:horse', 'minecraft:donkey', 'minecraft:mule', 'minecraft:skeleton_horse', 'minecraft:zombie_horse', 'minecraft:camel', 'siege:steed', 'siege:dragon') : 0.0);",
     "variable.hc_hurt = math.clamp(query.hurt_time / 10.0, 0.0, 1.0);",
+    # a hand that holds something keeps its elbow straight (see fold_elbows)
+    f"variable.hc_rbend = {ACTOR} ? !query.is_item_equipped(0) : 1.0;",
+    f"variable.hc_lbend = {ACTOR} ? !query.is_item_equipped(1) : 1.0;",
 ]
+
+# ---------- held items: no elbow bend in a hand that holds something ----------
+# The item bones hang on the upper arm (Bedrock floats held items if the bone path to rightItem differs from
+# vanilla), so a hand that holds something must not bend at the elbow, or the item would hang in the air
+# beside a bent forearm. While a hand holds an item, its forearm turn moves to the shoulder instead.
+BEND = {"right": "variable.hc_rbend", "left": "variable.hc_lbend"}
+
+def fold_elbows(anims):
+    for a in anims.values():
+        bones = a.get("bones", {})
+        for side, flag in BEND.items():
+            fore = bones.get(f"{side}forearm", {}).get("rotation")
+            if not fore:
+                continue
+            arm = bones.setdefault(f"{side}arm", {}).setdefault("rotation", r())
+            for i in range(3):
+                f = fore[i]
+                if f == 0.0:
+                    continue
+                arm[i] = f"({arm[i]}) + ({f}) * (1.0 - {flag})" if arm[i] != 0.0 else f"({f}) * (1.0 - {flag})"
+                fore[i] = f"({f}) * {flag}"
+
+fold_elbows(A)
 
 def dump(path, data):
     with open(path, "w") as f:
