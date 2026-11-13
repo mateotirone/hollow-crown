@@ -49,7 +49,7 @@ export function startSiege(provokedBy) {
     else title(player, "§cSiege Night", "§7The settlements are under attack!");
     sfx(player, "sig.siege_horn");
   }
-  emit("siegeStart", { provokedBy });
+  emit("siegeStart", { provokedBy, defenders: Object.keys(state.plans) }); // defenders: ids of the players whose keeps are attacked
 }
 
 export function spawnRaider(dim, type, x, z, fallbackY, tags, name) {
