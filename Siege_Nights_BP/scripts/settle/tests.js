@@ -3,7 +3,7 @@ import { BlockTypes } from "@minecraft/server";
 import { drawHall } from "../townhall/halls.js";
 import { STYLES, STYLE_IDS } from "../townhall/styles.js";
 import { SETTLE, CATALOG, MASON_LINES } from "./config.js";
-import { BUILDINGS, drawBuilding, styleFor } from "./buildings.js";
+import { BUILDINGS, BUILDING, drawBuilding, styleFor } from "./buildings.js";
 import { hallReserve, hallReach, inBox, footprint, boxesTouch, placeVerdict, bill, priceOf, isCampKit } from "./rules.js";
 import { localStock, stoneStock, wallStock, niceName } from "./mason.js";
 import { STONE_FAMILY, STONE_KINDS, CASTLE_STONES, stoneId, regionalId, GATES, PORTCULLISES, REINFORCEABLE, CASTLE_BLOCKS, isStructural } from "../siege/api.js";
@@ -181,7 +181,7 @@ addTests("settle walls", {
       const boxes = STYLE_IDS.map((style) => hallReserve({ x: hallAt.x, z: hallAt.z, fx: hallAt.forward.x, fz: hallAt.forward.z, style }, 1));
       assert(!boxes.some((b) => inBox(b, center)), `${gateDir}: the hall would cover the Keep Banner`);
       for (const slot of SLOTS) {
-        assert(BUILDINGS.some((b) => b.id === slot.building), slot.building);
+        assert(BUILDING[slot.building], slot.building); // the old fixed layout still names the retired plot Storehouse
         const at = place(center, gateDir, slot);
         const box = footprint(at, at.forward, drawBuilding(slot.building, "vale").bounds());
         for (const hall of boxes) assert(!boxesTouch(box, hall), `${gateDir}: ${slot.id} stands where the hall grows`);
@@ -878,5 +878,76 @@ addTests("settle layouts saved", {
     const old = { plot: "dunehold", layout: 1 };
     assertEqual(townLayoutOf(old), vs[1], "a town saved before keys keeps its index");
     assert(new Set(vs.map(layoutKey)).size === vs.length, "every layout of a plot has its own key");
+  },
+});
+
+import { STOREHOUSE_DESIGNS } from "./storehouse_data.js";
+import { STORE, levelFor, levelOf, storeId, chestOrder, fixtureBox, pickStoreSlot, crateSpot } from "./storehouse_rules.js";
+import { SETTLERS as SETTLER_CFG } from "./config.js";
+
+addTests("settle storehouse", {
+  "every settlement's Storehouse has four levels in every region, each holding more chests than the last": () => {
+    for (const region of STYLE_IDS.filter((s) => STOREHOUSE_DESIGNS[s])) {
+      let last = 0;
+      for (let level = 1; level <= STORE.levels; level++) {
+        const d = STOREHOUSE_DESIGNS[region][storeId(level)];
+        assert(d, `${region} level ${level}`);
+        const n = chestOrder(d).length;
+        assertEqual(n, d.chests, `${region} level ${level}: chest count`);
+        assert(n > last, `${region} level ${level}: ${n} chests, not more than ${last}`);
+        assert(d.marks.goods, `${region} level ${level}: the goods spot`);
+        last = n;
+      }
+    }
+    assertEqual(Object.keys(STOREHOUSE_DESIGNS).length, 5);
+  },
+  "a level follows the town's tier and is raised as a fixed building with a Storekeeper": () => {
+    assertEqual([0, 1, 2, 3, 9].map(levelFor).join(), "1,2,3,4,4");
+    assertEqual(levelOf("storehouse_3"), 3); assertEqual(levelOf("storehouse"), 0); assertEqual(levelOf(undefined), 0);
+    for (let level = 1; level <= STORE.levels; level++) {
+      assert(BUILDING[storeId(level)], storeId(level));
+      assert(!BUILDINGS.some((b) => b.id === storeId(level)), "never offered on a plot");
+      assertEqual(SETTLER_CFG.workers[storeId(level)], "Storekeeper");
+    }
+    assert(!BUILDINGS.some((b) => b.id === "storehouse") && BUILDING.storehouse, "the old plot Storehouse is retired, not forgotten");
+  },
+  "every level sits on the village's 15 x 15 ground with its front on the walk, whichever way the door faces": () => {
+    for (const [side, out] of Object.entries({ s: { x: 0, z: 1 }, n: { x: 0, z: -1 }, e: { x: 1, z: 0 }, w: { x: -1, z: 0 } })) {
+      const f = { x: 30, z: -10 };
+      const box = fixtureBox(f, out);
+      const slot = { id: "storehouse", size: "L", tier: 0, dy: 0, door: out, box };
+      const origins = new Set();
+      for (const region of Object.keys(STOREHOUSE_DESIGNS)) {
+        for (let level = 1; level <= STORE.levels; level++) {
+          const plan = drawBuilding(storeId(level), region);
+          const seat = seatOnSlot(slot, plan.bounds());
+          assert(seat, `${side} ${region} level ${level} doesn't fit the ground`);
+          origins.add(`${seat.origin.dx},${seat.origin.dz}`);
+          const sb = seatedBox(seat, plan.bounds());
+          assert(sb.x0 >= box.x0 && sb.x1 <= box.x1 && sb.z0 >= box.z0 && sb.z1 <= box.z1, `${side} ${region} level ${level} spills`);
+        }
+      }
+      assertEqual(origins.size, 1, `${side}: every level stands on the same spot, so a rebuild covers the last one`);
+    }
+  },
+  "chests keep their order across a rebuild: the old level's chests are the first of the new one's count": () => {
+    const d = STOREHOUSE_DESIGNS.vale.storehouse_2;
+    const a = chestOrder(d), b = chestOrder(d);
+    assertEqual(JSON.stringify(a), JSON.stringify(b));
+    for (let i = 1; i < a.length; i++) assert(a[i - 1][1] < a[i][1] || (a[i - 1][1] === a[i][1] && (a[i - 1][2] < a[i][2] || (a[i - 1][2] === a[i][2] && a[i - 1][0] < a[i][0]))), "sorted");
+  },
+  "with no Storehouse ground it takes a free long Medium before a Large, never the Barracks' deep Large": () => {
+    const s = (id, size, w, d, tier = 0, x = 20) => ({ id, size, tier, box: { x0: x, z0: 0, x1: x + w - 1, z1: d - 1 } });
+    const slots = [s("deep", "L", 15, 17), s("big", "L", 15, 15, 0, 10), s("long", "ML", 13, 15, 0, 40), s("later", "ML", 13, 15, 1, 5)];
+    assertEqual(pickStoreSlot(slots, new Set(), 0).id, "long");
+    assertEqual(pickStoreSlot(slots, new Set(["long"]), 0).id, "big");
+    assertEqual(pickStoreSlot(slots, new Set(["long", "big"]), 0), undefined);
+    assertEqual(pickStoreSlot(slots, new Set(["long", "big"]), 1).id, "later");
+  },
+  "a station's Goods Crate goes beside the post, away from the track first": () => {
+    const post = { x: 10, y: 64, z: 10 }, forward = { x: 0, z: 1 };
+    assertEqual(JSON.stringify(crateSpot(post, forward, () => true)), JSON.stringify({ x: 10, y: 64, z: 11 }));
+    assertEqual(JSON.stringify(crateSpot(post, forward, (p) => p.z === 10)), JSON.stringify({ x: 9, y: 64, z: 10 }));
+    assertEqual(crateSpot(post, forward, () => false), undefined);
   },
 });

@@ -23,6 +23,7 @@ import { townOf, layoutOf, saveTowns, allTowns } from "./founding.js";
 import { slotsOf, townFor } from "./towns.js";
 import { countNow } from "./register.js";
 import { countLordTown } from "./lordfolk.js";
+import { dressNpc, addNpcLook } from "../core/npc_skins.js";
 
 const NPC_TYPE = "minecraft:npc";
 const OVERWORLD = "minecraft:overworld";
@@ -108,6 +109,13 @@ function labelOf(s, owner) {
   return `${s.name}${s.role !== "Settler" ? `, ${s.role}` : ""}${of ? ` of ${of}` : ""}${s.idle ? " (idle)" : ""}${asks ? " §e(a request)" : ""}`;
 }
 
+// Eight settler faces, by settler number; old settlers find theirs by their number tag
+const settlerSkin = (n) => `settler_${Math.abs(Number(n) || 0) % 8}`;
+addNpcLook((e) => {
+  const t = e.getTags().find((x) => /^siege_settler_\d+$/.test(x));
+  return t ? settlerSkin(t.slice("siege_settler_".length)) : undefined;
+});
+
 export function dressSettler(owner, s) {
   const dim = world.getDimension(OVERWORLD);
   for (const e of entityOf(dim, s)) dress(e, s, owner);
@@ -119,7 +127,6 @@ function dress(e, s, owner) {
     const label = labelOf(s, owner);
     if (e.nameTag !== label) e.nameTag = label;
     const npc = e.getComponent("minecraft:npc");
-    if (npc && npc.skinIndex !== s.skin) npc.skinIndex = s.skin;
     if (npc && npc.name !== label) npc.name = label;
   } catch (err) {
     console.warn(`[Hollow Crown] settler looks: ${err}`);
@@ -134,6 +141,7 @@ function spawn(owner, s, at) {
     e.addTag(SETTLER_TAG);
     e.addTag(tagOf(s.n));
     e.addTag(ownerTag(owner));
+    dressNpc(e, settlerSkin(s.n));
     dress(e, s, owner);
     system.runTimeout(() => dress(e, s, owner), 10);
     return e;
@@ -186,7 +194,7 @@ function dawn(owner, arrivals = SETTLERS.perDawn, exact = false) {
     const used = new Set(list.map((s) => s.name));
     const names = SETTLERS.names.filter((x) => !used.has(x));
     const name = names.length ? names[(n * 7) % names.length] : `${SETTLERS.names[n % SETTLERS.names.length]} ${n}`;
-    const s = { n, name, role: next.role, work: next.work, home: next.home, bed: next.bed, skin: SETTLERS.skins[(n * 5) % SETTLERS.skins.length], idle: false };
+    const s = { n, name, role: next.role, work: next.work, home: next.home, bed: next.bed, idle: false };
     list.push(s);
     spawn(owner, s, dayPlace(owner, s));
     emit("settlerArrived", { owner, name, role: s.role });

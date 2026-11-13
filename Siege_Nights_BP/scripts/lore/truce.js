@@ -32,6 +32,7 @@ import {
   TRUCE, STATES, nameIsSpoken, offerVerdict, isGuestNight, guestsFor, guestSpot, WARES, waresOf, freshPick,
   SEAT_PROMPT, REPLIES, answerFor, KEPT_NEWS, BREAK_ASK, BROKEN_NEWS, DUSK_GUEST, DAWN_GUEST, GUESTS, MARKET_KEEPER, EXPLAIN,
 } from "./data/truce.js";
+import { dressNpc, addNpcLook } from "../core/npc_skins.js";
 
 const NPC_TYPE = "minecraft:npc";
 const GUEST_NPC_TAG = "siege_truce_guest_npc"; // on the guests themselves
@@ -191,6 +192,10 @@ world.afterEvents.playerInteractWithBlock.subscribe(({ player, block }) => {
 const guestNightNow = () =>
   isGuestNight(world.getDay(), truceState(), { firstDay: SETTINGS.firstSiegeDay, every: SETTINGS.siegeEveryNNights });
 
+// Each guest has their own face; the Even Market keeper is Seneth, the last guest
+const guestSkin = (market, index) => `guest_${market ? 11 : Math.abs(Number(index) || 0) % 12}`;
+addNpcLook((e) => (e.hasTag(GUEST_NPC_TAG) ? guestSkin(e.hasTag(MARKET_TAG), e.getDynamicProperty(GUEST_PROP)) : undefined));
+
 function spawnGuest(dimension, spot, index, market = false) {
   const top = dimension.getTopmostBlock({ x: spot.x, z: spot.z });
   if (!top) return false;
@@ -199,6 +204,7 @@ function spawnGuest(dimension, spot, index, market = false) {
   if (market) e.addTag(MARKET_TAG);
   e.setDynamicProperty(GUEST_PROP, index);
   e.nameTag = `§d${market ? MARKET_KEEPER.name : GUESTS[index].name}`;
+  dressNpc(e, guestSkin(market, index));
   return true;
 }
 function removeGuests() {

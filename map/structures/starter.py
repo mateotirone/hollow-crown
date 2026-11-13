@@ -53,6 +53,9 @@ AREAS = [
     ("woodyard",  "Woodyard",         (22, 32, 1, 11),    "r-", {}),
     ("field",     "Common field",     (22, 34, 14, 24),   "r-", {}),
     ("commons",   "Hall green",       (-6, 6, 23, 29),    "a-", {}),   # the hall's own green: the hall grows over it
+    # the Storehouse's ground (15 x 15, door on its lane side): the game raises it on arrival and rebuilds it bigger
+    # at every tier on the same ground (Storehouse thread, 2026-11-13); a walk runs to it beside the Mason's yard
+    ("storehouse", "Storehouse",      (22, 36, -17, -3),  "r-", {}),
 ]
 # lanes: (kind, width, [(r, a), ...]) starting at the square; the main lane runs out through the gate.
 # The back lanes run either side of the hall's ground (r = +-19), so the hall never builds over them.
@@ -61,7 +64,7 @@ LANES = [
     ("lane", 3, [(5, -4), (9, 0), (19, 0), (19, 27)]),
 ]
 WALKS = [  # 1-wide paths from a lane or the square to a door or gate
-    [(-7, -8), (-9, -8)], [(7, -8), (9, -8)], [(-20, 8), (-22, 8)], [(20, 6), (22, 6)], [(20, 19), (22, 19)], [(-20, 22), (-22, 22)],
+    [(-7, -8), (-9, -8)], [(7, -8), (9, -8)], [(-20, 8), (-22, 8)], [(20, 6), (22, 6)], [(20, 19), (22, 19)], [(-20, 22), (-22, 22)], [(20, -1), (20, -10), (22, -10)],
 ]
 HALL_REACH = 21                    # the widest level-5 hall (Blackfen) with its 2 clear: r = -21 .. 21 behind the square
 WALL_BASE = 36                     # the Hamlet wall ring (outer face). Rings 36/54/60/66 (Mateo 2026-11-13: the Town ring moved

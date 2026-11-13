@@ -42,7 +42,7 @@ export const mirelightSite = defineSite({
       } catch { /* words only */ }
     });
   },
-  npcs: (site) => VILLAGERS.map((v, i) => ({ tag: `${VTAG}_${i}`, name: v.name, skin: 40 + i * 2, spot: mid(site.data.center, site.data.info.spots[i].npc) }))
+  npcs: (site) => VILLAGERS.map((v, i) => ({ tag: `${VTAG}_${i}`, name: v.name, skin: `mire_${i}`, spot: mid(site.data.center, site.data.info.spots[i].npc) }))
     .filter((_, i) => !(site.data.state.unmasked && i === mire(site).shape)),
   onNpc: Object.fromEntries(VILLAGERS.map((_, i) => [`${VTAG}_${i}`, (site, player) => villager(site, player, i)])),
   answer: (site) => `The changeling is ${VILLAGERS[mire(site).shape].name}${site.data.state.unmasked ? " (unmasked)" : ""}`,

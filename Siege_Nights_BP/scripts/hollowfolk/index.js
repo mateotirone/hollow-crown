@@ -42,6 +42,7 @@ import { ECON } from "../economy/config.js";
 
 export { setFolkVoice } from "./rules.js";
 import { setHollowAir } from "./ambience.js";
+import { dressNpc, addNpcLook } from "../core/npc_skins.js";
 export { setHollowAir } from "./ambience.js";
 
 const RAW = "siege:raw_choir_ore";
@@ -212,16 +213,24 @@ function staffVillage(v) {
   try { here = dim.getEntities({ type: NPC, tags: [TAG, `hollowfolk_${v.id}`] }); } catch { return; }
   if (here.length >= FOLK_SPOTS.length) return;
   for (const e of here) try { e.remove(); } catch { /* gone */ }
-  for (const s of FOLK_SPOTS) {
+  FOLK_SPOTS.forEach((s, i) => {
     try {
       const e = dim.spawnEntity(NPC, { x: c.x + s.dx + 0.5, y: c.y, z: c.z + s.dz + 0.5 });
       e.addTag(TAG);
       e.addTag(`hollowfolk_${v.id}`);
       if (s.foreman) e.addTag(TAG_FOREMAN);
       e.nameTag = s.foreman ? `§bForeman of ${v.name}` : "§7Miner";
+      dressNpc(e, s.foreman ? "hollow_foreman" : `hollow_miner_${(i - 1 + 3) % 3}`);
     } catch { /* the chunk is not loaded yet; the next pass tries again */ }
-  }
+  });
 }
+// Foremen and miners from before skin tags: miners get one of three faces from their id
+addNpcLook((e) => {
+  if (e.hasTag(TAG_FOREMAN)) return "hollow_foreman";
+  if (!e.hasTag(TAG)) return undefined;
+  const n = [...String(e.id)].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 0);
+  return `hollow_miner_${n % 3}`;
+});
 
 function buildVault() {
   const dim = hollow(), v = VAULT;
@@ -652,6 +661,7 @@ on("showcase", ({ player, dim, nextSpot, label }) => {
     const e = dim.spawnEntity(NPC, { x: at.x + 0.5, y: at.y, z: at.z + 0.5 });
     e.addTag("siege_showcase");
     e.nameTag = "§bForeman";
+    dressNpc(e, "hollow_foreman");
   } catch { /* entity missing */ }
   label(at, "Mining village\nForeman");
   const b = nextSpot();
