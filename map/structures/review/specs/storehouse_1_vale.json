@@ -1,0 +1,84 @@
+{
+ "name": "storehouse_1_vale",
+ "card": {
+  "title": "Store Shed",
+  "sub": "Vale, level 1 (Hamlet)",
+  "region": "vale",
+  "where": "Every settlement, on the starter village's Storehouse ground (15 x 15); rebuilt bigger at each tier",
+  "kind": "Work",
+  "blurb": "Walls of chests turned sideways in 3 x 3 bays between stone pillars, a beam over each bay: the settlement's storage, growing with the town."
+ },
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "vale_timber",
+    "frame": "stripped_spruce_log",
+    "roof": "dark_oak_planks"
+   },
+   "rect": [
+    -4,
+    -8,
+    4,
+    0
+   ],
+   "y": 0,
+   "plinth": 2,
+   "storeys": [
+    5
+   ],
+   "storey_style": [
+    {
+     "frame_kind": "stone",
+     "frame": "stone_bricks",
+     "infill": {
+      "ladder": "VAL-01",
+      "axis": "y"
+     }
+    },
+    {}
+   ],
+   "door": {
+    "side": "s",
+    "kind": "large",
+    "steps": 1
+   },
+   "windows": {
+    "s": [
+     {
+      "at": -3,
+      "storey": 0,
+      "w": 1,
+      "h": 2,
+      "sill": "slab"
+     },
+     {
+      "at": 3,
+      "storey": 0,
+      "w": 1,
+      "h": 2,
+      "sill": "slab"
+     }
+    ],
+    "n": [],
+    "e": [],
+    "w": []
+   },
+   "shutters": 0,
+   "roof": {
+    "type": "gable",
+    "ridge": "z",
+    "pitch": 1
+   },
+   "chimney": false,
+   "interior": {
+    "use": "storehouse",
+    "attic": false,
+    "pillar": "stone_bricks",
+    "beam": "stone_bricks"
+   },
+   "vines": 0.04,
+   "bushes": false
+  }
+ ]
+}

@@ -155,6 +155,10 @@ strip round the house (the skill's `bushes`, on by default).
 
 **Dormer brackets:** a mud brick wall either side of each dormer window carries its roof overhang.
 
+## The Storehouse (Mateo, 2026-11-13)
+
+Every settlement's Storehouse (`map/structures/review/specs/gen_storehouse.py`, four levels: Hamlet 9 x 9, Town 11 x 11, City 13 x 13 on two storeys, Castle 13 x 13 on three) is mud brick in a mangrove frame on a tuff ground storey with log piles, a thatched gable (stores take thatch); inside, `tuff_bricks` pillars with `polished_tuff` beams. The inside is the skill's `storehouse` interior: chests turned sideways in 3 x 3 bays between stone pillars, a beam over each bay (Mateo's reference). No flower boxes or bushes: the door opens on a working yard.
+
 ## Building it with the skill
 
 - **Preset:** `fen_timber`: mud brick in a proud mangrove frame, spruce trim, brown glass, a dark oak roof.
