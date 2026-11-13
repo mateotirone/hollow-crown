@@ -427,7 +427,7 @@ def model(n, p):
         if m: return m
     if n.startswith("siege:") and siege_cutout(n): return [((0, 0, 0, 1, 1, 1), siege_tex(n), {"cut": 1})]
     if n == "vine":
-        bits = p.get("raw", {}).get("vine_direction_bits", 0); out = []
+        bits = p.get("raw", {}).get("vine_direction_bits", {"s": 1, "w": 2, "n": 4, "e": 8}.get(p.get("attach"), 0)); out = []
         for bit, side in ((1, "s"), (2, "w"), (4, "n"), (8, "e")):
             if bits & bit: out.append((thin_plate(side, 1 / 16), {"side": "vine#foliage"}, {"cut": 1}))
         return out

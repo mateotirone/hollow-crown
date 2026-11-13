@@ -47,7 +47,7 @@ def solid_full(n, p):
     if not n or n == "air": return False
     if is_stairs(n) or is_slab(n) or is_wall(n) or is_fence(n) or is_pane(n) or is_trapdoor(n): return False
     if n.endswith("_door") or n.endswith("_sign") or n in ("lantern", "soul_lantern", "campfire", "flower_pot", "iron_chain", "torch",
-                                                            "end_rod", "lightning_rod", "vine", "water") or n.endswith("leaves") or n.endswith("leaves_flowered"):
+                                                            "end_rod", "lightning_rod", "vine", "water", "frame", "glow_frame") or n.endswith("leaves") or n.endswith("leaves_flowered"):
         return False
     return True
 
@@ -115,6 +115,9 @@ def bedrock_state(n, p):
         st["height"] = int(p.get("height", 0))
     elif n == "bell":          # hanging from the beam above
         st["attachment"] = "hanging"; st["direction"] = {"s": 0, "w": 1, "n": 2, "e": 3}[f or "s"]
+    elif n in ("frame", "glow_frame"):  # item frame: hangs on the wall behind it, facing out of face f. Without this it
+        st["facing_direction"] = {"n": 2, "s": 3, "w": 4, "e": 5}[f or "s"]   # fell back to 0 (hung from the block above) and popped off
+        st["item_frame_map_bit"] = False; st["item_frame_photo_bit"] = False   # the arena racks, 2026-11-13
     elif n.endswith("_button"):  # stuck to the wall behind it, pointing out of face f
         st["facing_direction"] = {"n": 2, "s": 3, "w": 4, "e": 5}[f or "s"]
     elif n == "bed":           # Bedrock bed direction: 0 south, 1 west, 2 north, 3 east (the head end), as bp.py

@@ -383,8 +383,8 @@ def ember_house(seed, rnd, tier, roof=None):
             if (x in (0, W) or z in (0, D)) and bp.get(x, roof_y, z)[0] in ("keep", "air"):
                 corner = x in (0, W) and z in (0, D)
                 bp.set(x, roof_y, z, "sandstone_wall" if corner else "smooth_sandstone_slab", half="bottom")
-    bp.set(1, roof_y - 1, 1, "acacia_trapdoor", facing="s")
-    for y in range(1, roof_y - 1): bp.set(1, y, 2, "ladder", facing="s")
+    bp.set(1, roof_y - 1, 2, "acacia_trapdoor", facing="s")     # the hatch right over the ladder
+    for y in range(1, roof_y - 1): bp.set(1, y, 2, "ladder", facing="e")   # on the west wall (facing "s" hung on air and dropped)
     colour = rnd.choice(["orange", "red", "yellow", "white"])
     for i, x in enumerate(range(W // 2 - 1, W // 2 + 2)):        # striped awning on posts over the door
         bp.set(x, 4, D + 1, f"{colour}_wool" if i % 2 == 0 else "white_wool")

@@ -804,6 +804,7 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `random.drink` | 2 | bestiary, roletrials |
 | `tile.piston.in` | 2 | unlocks (2) |
 | `armor.equip_diamond` | 1 | codex |
+| `armor.equip_elytra` | 1 | looks |
 | `armor.equip_netherite` | 1 | siege |
 | `block.campfire.crackle` | 1 | dragons |
 | `block.end_portal_frame.fill` | 1 | crown |

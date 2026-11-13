@@ -1854,7 +1854,9 @@ def keep(ctx, s):
         for (dx, dz) in inner:                                  # nothing stands in front of it inside
             if (cx + dx, cz + dz) == (x - ox, z - oz):
                 for dy in (1, 2): ctx.clear(x - ox, fy + dy, z - oz)
-    for y in range(y0 + 2, top + 1):                            # the ladder, from the ground floor to the deck
+    # the ladder, from the ground floor to the deck; under a cone cap it stops a block lower, where the wall
+    # behind it ends (the top rung hung on air and dropped, the arena's gate towers 2026-11-13)
+    for y in range(y0 + 2, top + (0 if s.get("cap") == "cone" else 1)):
         ctx.set(lcell[0], y, lcell[1], "details", raw="ladder", facing=OPP[lad])
     if s.get("cap") == "cone":                                 # a round tower's conical cap (towers/README 5)
         _cone_cap(ctx, cx, cz, r, top, s); s = dict(s, flags=[])
