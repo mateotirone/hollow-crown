@@ -1,6 +1,6 @@
 // A rough test arena (/scriptevent siege:arena_test), so the fights can be tried before the real build lands.
 // It is NOT the arena: plain blocks in the shape layout.js's ringLayout() describes (a sand floor, twelve
-// concrete rooms in the settlement colours with iron-bar gates and a lectern each, a ring of standing room for the
+// concrete rooms in the settlement colours with castle portcullises and a lectern each, a ring of standing room for the
 // crowd, and the "Start a battle" lectern north of it all). Built a few dozen blocks a tick (system.runJob).
 
 import { system, BlockPermutation } from "@minecraft/server";
@@ -42,10 +42,15 @@ export function buildTestArena(dim, a) {
         }
       }
       set(rx, cy + top - 1, rz, "minecraft:lantern");
-      const g = room.gate;
+      // the castle portcullis, shut, facing along the wall it sits in
+      const g = room.gate, spansX = g.from.x !== g.to.x;
+      let shut;
+      try { shut = BlockPermutation.resolve(GATE_BLOCK, { "minecraft:cardinal_direction": spansX ? "south" : "east" }); } catch { shut = undefined; }
       for (let x = Math.min(g.from.x, g.to.x); x <= Math.max(g.from.x, g.to.x); x++)
         for (let y = g.from.y; y <= g.to.y; y++)
-          for (let z = Math.min(g.from.z, g.to.z); z <= Math.max(g.from.z, g.to.z); z++) set(x, y, z, GATE_BLOCK);
+          for (let z = Math.min(g.from.z, g.to.z); z <= Math.max(g.from.z, g.to.z); z++) {
+            try { if (shut) dim.getBlock({ x, y, z })?.setPermutation(shut); else set(x, y, z, GATE_BLOCK); } catch { /* unloaded */ }
+          }
       set(room.board.x, room.board.y, room.board.z, "minecraft:lectern");
       yield;
     }

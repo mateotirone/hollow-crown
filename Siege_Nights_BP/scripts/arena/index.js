@@ -25,13 +25,13 @@
 
 import { world, system, GameMode } from "@minecraft/server";
 import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
-import { isReady, onTick, moduleStore, on } from "../siege/api.js";
+import { isReady, onTick, moduleStore, on, addFilter, setGate } from "../siege/api.js";
 import { addMenuLabel } from "../core/labels.js";
 import { sfx } from "../core/sfx.js";
 import { pay, coins } from "../economy/api.js";
 import { ARENA, ringLayout, COLOR_CODE, colorName, GATE_BLOCK } from "./layout.js";
 import { ARENA_RULES as R, ARENA_MOBS, DIFFICULTIES } from "./config.js";
-import { FORMATS, spreadRooms, verdict, mobReward, hasLeft, dayOf, gateRows, flat } from "./rules.js";
+import { FORMATS, spreadRooms, verdict, mobReward, hasLeft, dayOf, inBox, flat } from "./rules.js";
 import { stash, giveKit, stripKit, restore, sweepDrops, clearLooseKit } from "./locker.js";
 import { fillStands, emptyStands, roar, crowdTick, CROWD } from "./crowd.js";
 import { buildTestArena } from "./scaffold.js";
@@ -104,20 +104,37 @@ function sendToRoom(player, room) {
   try { player.setGameMode(GameMode.Adventure); } catch { /* fine */ }
 }
 
+// The room's portcullis, worked the way every castle portcullis is (siege/gates.js setGate: it rises leaving its
+// top row in sight, with the portcullis sounds). Any one of its blocks moves the whole thing.
+function gateBlock(dim, room) {
+  const g = layout().rooms[room].gate;
+  try {
+    return dim.getBlock({ x: Math.min(g.from.x, g.to.x), y: Math.max(g.from.y, g.to.y), z: Math.min(g.from.z, g.to.z) });
+  } catch {
+    return undefined; // unloaded
+  }
+}
+const isGate = (b) => b?.typeId === GATE_BLOCK;
+
 function closeGate(dim, room) {
-  const rows = gateRows(layout().rooms[room].gate).reverse(); // top row first, as it drops
-  rows.forEach((row, i) => system.runTimeout(() => {
-    for (const c of row) { try { dim.getBlock(c)?.setType(GATE_BLOCK); } catch { /* unloaded */ } }
-  }, i * 3));
+  const b = gateBlock(dim, room);
+  if (isGate(b)) setGate(b, false);
 }
 
 function liftGate(dim, room) {
-  const g = layout().rooms[room].gate;
-  sfx(dim, "sig.portcullis_open", mid(g.from), { volume: 1.5 });
-  gateRows(g).forEach((row, i) => system.runTimeout(() => {
-    for (const c of row) { try { dim.getBlock(c)?.setType("minecraft:air"); } catch { /* unloaded */ } }
-  }, 8 + i * 12));
+  const b = gateBlock(dim, room);
+  if (isGate(b)) setGate(b, true);
 }
+
+// Is this block part of one of the arena's room gates?
+function arenaGateAt(block) {
+  const a = layout();
+  if (block.dimension.id !== a.dim || block.typeId !== GATE_BLOCK) return false;
+  return a.rooms.some((r) => inBox(block.location, r.gate.from, r.gate.to));
+}
+
+// Nobody clicks an arena gate open: it lifts when the fight starts and drops behind the fighters.
+addFilter("gateLock", (why, { block }) => (why ?? (arenaGateAt(block) ? `The ${arenaName()} gates lift when the fight starts.` : undefined)));
 
 const usedRooms = () => [...new Set([...Object.values(match?.fighters ?? {}), ...Object.values(match?.invites ?? {})].map((f) => f.room))];
 
@@ -422,7 +439,6 @@ function dropGatesBehind() {
     if (p && flat(p.location, r.spawn) <= 5) p.teleport(mid(r.out), { dimension: dim, facingLocation: mid(a.center) });
   }
   for (const room of usedRooms()) closeGate(dim, room);
-  sfx(dim, "sig.portcullis_close", mid(a.center), { volume: 3 });
 }
 
 function mobsLeft() {

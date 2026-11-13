@@ -12,7 +12,7 @@
 //     color     Bedrock dye name (the same names keep banners use)
 //     spawn     where fighters stand in the room (a team of up to 6 shares it)
 //     board     the block they click to pick their kit and say they are ready (a lectern, or any clickable block)
-//     gate      { from, to }: the 3 wide x 3 high box of iron bars that lifts to let them out
+//     gate      { from, to }: the 3 wide x 4 high siege:portcullis that rises to let them out
 //     out       a floor spot just past the gate
 //   seats       standing spots on the tiers; the crowd uses a share of them, only while a fight is on
 //   sign        the "Start a battle" block in the entrance hall (a lectern, or any clickable block)
@@ -27,7 +27,10 @@ export const COLOR_CODE = {
 
 export const colorName = (c) => c.split("_").map((w) => w[0].toUpperCase() + w.slice(1)).join(" ");
 
-export const GATE_BLOCK = "minecraft:iron_bars";
+// The room gates are the castle portcullis (Mateo, 2026-11-13: "the same mechanic as the castle metal gate"):
+// opened and shut with setGate() like any castle gate, so it rises leaving only its top row in sight. Make it
+// 4 high so the way out under the raised top row is 3 high. Players can't click it open; the arena works it.
+export const GATE_BLOCK = "siege:portcullis";
 
 // The test arena (and the placeholder) as numbers: rooms in a ring around the floor, gates facing the middle.
 export const RING = { floorRadius: 21, roomRing: 28, roomHalf: 4, wallHeight: 5, seatRing: 40, seatRise: 4 };
@@ -47,8 +50,8 @@ export function ringLayout(center, name = "the Arena", dim = "minecraft:overworl
     const sx = alongX ? -Math.sign(dx) : 0, sz = alongX ? 0 : -Math.sign(dz);
     const gx = rx + sx * (roomHalf + 1), gz = rz + sz * (roomHalf + 1);
     const gate = alongX
-      ? { from: { x: gx, y: cy, z: gz - 1 }, to: { x: gx, y: cy + 2, z: gz + 1 } }
-      : { from: { x: gx - 1, y: cy, z: gz }, to: { x: gx + 1, y: cy + 2, z: gz } };
+      ? { from: { x: gx, y: cy, z: gz - 1 }, to: { x: gx, y: cy + 3, z: gz + 1 } }
+      : { from: { x: gx - 1, y: cy, z: gz }, to: { x: gx + 1, y: cy + 3, z: gz } };
     return {
       color,
       spawn: { x: rx, y: cy, z: rz },

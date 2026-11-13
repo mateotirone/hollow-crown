@@ -14,11 +14,11 @@ addTests("arena", {
       assertEqual(new Set(a.rooms.map((r) => `${r.spawn.x},${r.spawn.z}`)).size, 12);
     }
   },
-  "each test-arena gate is 3x3, between its room and the floor": () => {
+  "each test-arena gate is 3 wide and 4 high, between its room and the floor": () => {
     const a = ringLayout({ x: 0, y: 64, z: 0 });
     for (const r of a.rooms) {
       const rows = gateRows(r.gate);
-      assertEqual(rows.length, 3);
+      assertEqual(rows.length, 4);
       for (const row of rows) assertEqual(row.length, 3);
       const g = rows[1][1];
       assert(flat(g, a.center) < flat(r.spawn, a.center), `${r.color} gate faces the middle`);

@@ -44,7 +44,7 @@ Walk around, click things, and tell me what looks wrong or does nothing. The lis
 
 ## 4a. The arena (scripts/arena/)
 
-Until the real arena is built at Kingsrest, test on a **flat Creative world**: stand in the open and type `/scriptevent siege:arena_test`. A rough test arena goes up around you (sand floor, twelve coloured concrete rooms with iron-bar gates, a ring of stands). `/scriptevent siege:arena_test clear` goes back to the real arena's numbers (`scripts/arena/layout.js`).
+Until the real arena is built at Kingsrest, test on a **flat Creative world**: stand in the open and type `/scriptevent siege:arena_test`. A rough test arena goes up around you (sand floor, twelve coloured concrete rooms with castle portcullis gates, a ring of stands). `/scriptevent siege:arena_test clear` goes back to the real arena's numbers (`scripts/arena/layout.js`).
 
 - Click the lectern north of the ring (or type `/scriptevent siege:arena`). Read "How it works" the first time.
 - **Battle a mob**: pick a beast and Squire. You're taken to your room. Take the arena kit: your own things vanish into the locker and you're in iron. Start Battle: 3, 2, 1, the gate lifts, the crowd fills the stands and cheers, the beast comes out in the middle, and the gate drops behind you. Kill it: you're paid Regals and sent back with your own things, health and game mode. Do it again: it pays less the same day.
