@@ -124,6 +124,7 @@ export const PLOT_SIZE = {
 export const PLOT_ALSO = {
   market: ["ML"], // the market may take a long Medium
   farmhouse: ["ML"],
+  house: ["ML"],
   barracks: ["ML"],
   library: ["L"], stable: ["L"], storehouse: ["L"], townhouse: ["L"],
 };
