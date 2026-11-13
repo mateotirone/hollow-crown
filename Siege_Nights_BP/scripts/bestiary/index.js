@@ -19,6 +19,7 @@
 //   moves.js     GENERATED list of boss move animations (from studio/bestiary/anims.py, which makes every mob's animations)
 //   bodies.js    the dead fall and lie on the field until the fight is over, then sink away
 //   showcase.js  our exhibits in the /scriptevent siege:showcase test world
+//   stagger.js   bosses and heavy creatures rock back a little when hit (everything else gets vanilla knockback)
 //
 // Other features hear from us by script event:
 //   siege:boss_defeated       {"boss","x","y","z","dimension","players":[ids],"temper"?}
@@ -48,3 +49,4 @@ import "./gentle.js";
 import "./champions.js";
 import "./bodies.js";
 import "./showcase.js";
+import "./stagger.js";
