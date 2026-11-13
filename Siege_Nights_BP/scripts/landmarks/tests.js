@@ -2,7 +2,7 @@ import { addTests, assert, assertEqual } from "../core/tests.js";
 import { DESIGNS } from "./designs_data.js";
 import { SPOTS } from "./spots_data.js";
 import { LANDMARKS } from "./sites.js";
-import { planPiece, seekSpot, cellsOf, AIR, KEEP_TOP } from "./plan.js";
+import { planPiece, seekSpot, cellsOf, reachOf, REACH_MAX, AIR, KEEP_TOP } from "./plan.js";
 import { PLOT_PLAN } from "../plots/config.js";
 import { PLACES } from "../lore/data/world.js";
 import { NPCS } from "../lore/data/dialogue.js";
@@ -59,7 +59,8 @@ addTests("landmarks", {
       assertEqual(G, 70, id);
       const placed = new Map(ops.filter((o) => o[3] !== AIR).map((o) => [`${o[0]},${o[1]},${o[2]}`, o[3]]));
       for (const [x, y, z, i] of cellsOf(d)) assertEqual(placed.get(`${100 + x},${70 + y},${200 + z}`), i, `${id} ${x},${y},${z}`);
-      assert(ops.every((o) => Math.abs(o[0] - 100) <= 44 && Math.abs(o[2] - 200) <= 44), `${id} reaches too far`);
+      const R = reachOf(d);
+      assert(R <= REACH_MAX && ops.every((o) => Math.abs(o[0] - 100) <= R && Math.abs(o[2] - 200) <= R), `${id} reaches too far`);
     }
   },
   "a rigid design on a slope is filled under and cut into, never floating": () => {
