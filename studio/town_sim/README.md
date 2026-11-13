@@ -12,6 +12,11 @@ when the game does: rerun the three steps after a layout, design, hall, wall or 
     python3 studio/town_sim/mesh.py studio/town_sim/out/sim.json <bedrock-samples>/resource_pack/textures/blocks studio/town_sim/out/lib.json
     python3 studio/town_sim/mkpage.py studio/town_sim/out/sim.json studio/town_sim/out/lib.json <page.html>
 
+For the page with every plot (the picker), run dump.mjs and mesh.py once per plot into `<dir>/<plot>/sim.json` and
+`<dir>/<plot>/lib.json`, then `mkpage.py <home sim.json> <home lib.json> <page.html> <dir>`: it writes `plots/<id>.txt`
+next to the page, to publish with it. Map plots are founded as their starter village (the layout's `start` slots
+stand from the start, the one tagged `founder` is your house, and the wall follows the town's `outline`).
+
 - `dump.mjs` reads the map's pre-town heights (`HEIGHTS`, default the project file `hollow-crown-full-map-heights-pretown.npy`)
   and plays the founding the way `founding.js` does it: wall level 1, groundwork, blendGround, the gate road, fixtures,
   plot markers, the hall from its cornerstone, the library, Mason's Yard and founder's cottage, then each tier's ring

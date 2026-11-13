@@ -28,19 +28,23 @@ const town = (name) => {
   return { name, x: w.x, z: w.z, dim: OVERWORLD };
 };
 const at = (name, x, z, dim = OVERWORLD) => ({ name, x, z, dim });
+// The person a step sends you to talk to: the tag their NPC carries (story characters: lore/npcs.js; the clock
+// keepers: unlocks/reeve.js; Old Sigga: unlocks/huntsman.js). marks.js puts a marker over them and on the minimap.
+// Only for people the step already names: a puzzle's answer (the Mirelight changeling) is never marked.
+const npc = (id, name) => ({ tag: `siege_lore_npc_${id}`, name });
 
 // Each regional boss: where its puzzle starts (always a town), the hint for the last stretch, and what to do
 // with the key once the puzzle hands it over. Keys come from unlocks/ (one file per boss).
 export const BOSS_STEPS = {
   reeve: {
     title: "The six clocks of Millbrook", start: town("Millbrook"),
-    hint: "Ask the clock keepers which clock stopped first.",
+    hint: "Ask the clock keepers which clock stopped first.", npc: { tag: "siege_clock_keeper", name: "a clock keeper" },
     key: "siege:stopped_clock_key", keyTitle: "The well in Millbrook", keyAt: town("Millbrook"),
     keyHint: "Turn the Stopped Clock Key in the crank on the well.",
   },
   huntsman: {
     title: "The hunt on Hallowmere", start: town("Rimehold"),
-    hint: "Old Sigga keeps the lodge on the lake east of Rimehold. Go after dark.",
+    hint: "Old Sigga keeps the lodge on the lake east of Rimehold. Go after dark.", npc: { tag: "siege_lodge_warden", name: "Old Sigga" },
     key: "siege:pale_horn", keyTitle: "The Hunter's Cairn", keyAt: at("Hallowmere", 60, -1130),
     keyHint: "Lay the Pale Horn on the Hunter's Cairn after dark.",
   },
@@ -98,7 +102,7 @@ const bossQuest = (f, boss) => {
   const down = fallen(f.flags).length;
   const tally = down ? `${down} of 5 fallen. ${shardNote(f)}`.trim() : "";
   if (f.items?.[s.key]) return { id: `boss_${boss}_key`, title: s.keyTitle, hint: s.keyHint, target: s.keyAt, note: tally };
-  return { id: `boss_${boss}`, title: s.title, hint: s.hint, target: s.start, note: tally };
+  return { id: `boss_${boss}`, title: s.title, hint: s.hint, target: s.start, note: tally, npc: s.npc };
 };
 
 const notesQuest = (f) => {
@@ -140,7 +144,7 @@ function mainQuest(f) {
     if (h.choir) return { id: "seat", title: "The Seat", hint: "South, up the Long Climb. He is waiting there.", target: at("The Seat", HEART.center.x, HEART.center.z, UNDERTOW) };
     if (!h.cartsong) {
       return { id: "carter", title: "Find the Carter", hint: "He drives the ore cart, and knows how the carts get into the Court.",
-        target: h.carter ? at("The Carter", h.carter.x, h.carter.z, UNDERTOW) : undefined };
+        target: h.carter ? at("The Carter", h.carter.x, h.carter.z, UNDERTOW) : undefined, npc: npc("carter", "The Carter") };
     }
     return { id: "court", title: "The Drowned Court", hint: "Follow the valley south. The Court will let you in now.", target: at("The Court", COURT.center.x, COURT.center.z, UNDERTOW) };
   }
@@ -160,7 +164,7 @@ function mainQuest(f) {
     return { id: "strike", title: "Strike the fork", hint: "On the seam in the cave at the place you named.", target: siteTarget(f.site) };
   }
   if (down === 0 && !f.flags.includes("wren_met")) {
-    return { id: "wren", title: "Find Sister Wren", hint: "She keeps the chapel in Millbrook, where it is always night.", target: town("Millbrook") };
+    return { id: "wren", title: "Find Sister Wren", hint: "She keeps the chapel in Millbrook, where it is always night.", target: town("Millbrook"), npc: npc("wren", "Sister Wren") };
   }
   if (down === 0 && f.plot && f.mystery && !f.solved.includes(f.mystery.id)) {
     return { id: "mystery", title: f.mystery.name, hint: "Read your settlement's books, then answer it in your Ledger." };
@@ -175,6 +179,15 @@ function sideQuest(f, main) {
   if (down >= 3 && down < 5 && !f.solved.includes("source") && main?.id?.startsWith("boss_")) return notesQuest(f);
   return undefined;
 }
+
+// ---------- where it is, on the minimap ----------
+// The quest pin: the first step with a place in this dimension, the same one the tracker's first heading is for.
+export function pinOf(quests, dim) {
+  const q = quests.find((x) => x.target && x.target.dim === dim);
+  return q ? { x: q.target.x, z: q.target.z, kind: "goal", name: q.target.name } : undefined;
+}
+// The person to talk to next: the first step that names one (marks.js finds them in the world).
+export const talkOf = (quests) => quests.find((x) => x.npc)?.npc;
 
 // ---------- where it is, in words ----------
 // Which way to turn, from where a player stands and the way they face (Minecraft yaw: 0 is south, 90 west).

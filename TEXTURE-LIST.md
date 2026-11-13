@@ -12,6 +12,12 @@ The rules, palette and regional variants are in `art/STYLE-GUIDE.md`. Generators
 
 **Regional Castle Stone (textures ready, blocks not wired yet):** `textures/blocks/regional/siege_castle_stone_<region>[_<tier>_<cracks>].png` and `siege_mossy_castle_stone_<region>.png`, `siege_cracked_castle_stone_<region>.png` for frostmarch, saltreach, emberwaste, blackfen, undertow. The Vale look is the default `siege_castle_stone`.
 
+## Player skins (64×64, in `Hollow_Crown_Skins/`)
+
+| Asset | File(s) | Status |
+|---|---|---|
+| Reikia Cinderhale (Emberwaste, slim arms), Lorcan Duskmire (Blackfen) | `reikia_cinderhale.png`, `lorcan_duskmire.png`, made by `studio/art/build_photo_skins.py`; 3D preview `studio/photo_skins/build_preview.py` | **Approved by Mateo 2026-11-13** |
+
 ## Blocks (16×16, in `textures/blocks/`)
 
 | Asset | File(s) | Status |
@@ -548,6 +554,7 @@ Made by `studio/art/build_starter_clothes.py` (then `tools/build_player_joints.p
 Made by `tools/minimap_tiles.py` from the top-down render of the generated world (`map/genworld.py`'s preview) and `map/terrain.npz`. Run it again whenever the world map is regenerated; do not paint these by hand.
 - `textures/ui/hc/minimap/mxXXzZZ.png`: 1,600 map views, 72x72 RGBA (Bedrock showed palette PNGs black) (3 x 3 tiles of 64 blocks around tile XX,ZZ), slightly darkened, with plot and town markers: generated
 - `textures/ui/hc/minimap/mnone__.png` (uncharted), `aq..ay.png` (player arrow, 12x12, eight directions), `frame.png` (80x80 border): first pass
+- `textures/ui/hc/minimap/pg.png`, `pe.png`, `pt.png` (quest pins, 14x14: the quest's place, held on the rim when further, a person to talk to) and `textures/particle/hc_quest_mark.png` (16x16 gold "!" floating over that person): drawn by `tools/minimap_pins.py`, first pass
 
 ## Hall Map (2026-11-12)
 Made by `studio/build_hallmap.py` from the same world render as the minimap. Run it again whenever the world map is regenerated.

@@ -9,8 +9,9 @@
 //   /scriptevent siege:moon_door remove                unmark the nearest door (it is closed first)
 //   /scriptevent siege:moon_door list
 //   /scriptevent siege:moon_door test                  open every door near you for 30 seconds
-// Ledger mystery "The Wrong Moon" teaches the rule. Places that should use it: the lake at Rimehold (full
-// moon carved on the shrine, opens the ice on the dark moon) and the Chapel of Saint Brannoc.
+// Ledger mystery "The Wrong Moon" teaches the rule. Places that use it: the lake at Rimehold (full moon carved
+// on the shrine; a 3x3 hatch in the ice that opens on the dark moon, map/structures/story_places.py, marked by
+// the landmark itself when it builds) and the Chapel of Saint Brannoc.
 
 import { world, system, BlockPermutation, GameMode } from "@minecraft/server";
 import { onTick, isNight, moduleStore, addTests, assert, assertEqual } from "../siege/api.js";
@@ -27,11 +28,27 @@ export const moonPhase = () => {
 // What the carving shows, the sky must not
 export const doorOpens = (carving, phase, night) => !!night && (carving === "full" ? phase === DARK : phase === FULL);
 export const nightsUntil = (carving, phase) => ((carving === "full" ? DARK : FULL) - phase + 8) % 8;
-// The blocks of a door: `wide` to the viewer's right along the wall, `tall` upward, from the bottom-left block
+// The blocks of a door: `wide` to the viewer's right along the wall, `tall` upward, from the bottom-left block.
+// A door lying flat (a hatch in the ice) also has `long` rows along (lx, lz).
 export function doorBlocks(door) {
   const out = [];
-  for (let i = 0; i < door.wide; i++) for (let j = 0; j < door.tall; j++) out.push({ x: door.x + door.rx * i, y: door.y + j, z: door.z + door.rz * i });
+  const long = door.long ?? 1, lx = door.lx ?? 0, lz = door.lz ?? 0;
+  for (let i = 0; i < door.wide; i++) for (let j = 0; j < door.tall; j++) for (let k = 0; k < long; k++) {
+    out.push({ x: door.x + door.rx * i + lx * k, y: door.y + j, z: door.z + door.rz * i + lz * k });
+  }
   return out;
+}
+// A door the map builds itself (a landmark's `doors`, landmarks/index.js). Marked once by its id: building the
+// landmark again moves it rather than adding a second.
+export function addDoor(door) {
+  const doors = store.data.doors;
+  const old = doors.find((d) => d.id === door.id);
+  if (old) {
+    if (old.saved) return old; // open right now: leave it until it closes
+    Object.assign(old, door);
+  } else doors.push({ ...door });
+  store.save();
+  return door;
 }
 
 const testing = new Map(); // door id -> tick until which it is forced open
@@ -143,6 +160,13 @@ system.afterEvents.scriptEventReceive.subscribe(({ id, message, sourceEntity: pl
 });
 
 addTests("lore", {
+  "moon doors: a hatch lying flat in the ice covers all of it": () => {
+    const cells = doorBlocks({ x: 10, y: 112, z: -5, rx: 1, rz: 0, lx: 0, lz: 1, wide: 3, tall: 1, long: 3 });
+    assertEqual(cells.length, 9);
+    assert(cells.every((c) => c.y === 112 && c.x >= 10 && c.x <= 12 && c.z >= -5 && c.z <= -3), JSON.stringify(cells));
+    assertEqual(new Set(cells.map((c) => `${c.x},${c.z}`)).size, 9, "no cell twice");
+    assertEqual(doorBlocks({ x: 0, y: 0, z: 0, rx: 1, rz: 0, wide: 2, tall: 3 }).length, 6, "an upright door is unchanged");
+  },
   "moon doors: what the carving shows, the sky must not": () => {
     assert(doorOpens("full", 4, true), "full carving, dark moon");
     assert(!doorOpens("full", 0, true), "full carving does not open under a full moon");

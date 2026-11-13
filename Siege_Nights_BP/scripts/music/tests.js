@@ -1,6 +1,6 @@
 import { addTests, assert, assertEqual } from "../siege/api.js";
 import { INSTALLED_MUSIC } from "./installed.js";
-import { REGION_POOLS, HOLLOW_POOL, FIGHT_TRACKS, SIEGE_TRACK, MAIN_THEME, soundId, poolFor, overrideFor, pickTrack, isNight } from "./data.js";
+import { REGION_POOLS, HOLLOW_POOL, FIGHT_TRACKS, SIEGE_TRACK, MAIN_THEME, soundId, poolFor, poolKey, overrideFor, pickTrack, isNight, MUSIC } from "./data.js";
 
 const all = (...names) => Object.fromEntries(names.map((n) => [soundId(n), { seconds: 100 }]));
 
@@ -28,6 +28,15 @@ addTests("music", {
     for (let i = 0; i < 20; i++) assertEqual(pickTrack(["a", "b", "c"], "a", installed, i / 20), "b");
     assertEqual(pickTrack(["a"], "a", installed, 0.5), "a"); // a pool of one may repeat
     assertEqual(pickTrack(["c"], undefined, installed, 0.5), undefined);
+  },
+  "the music keeps going: only a short breath between pieces, never minutes of silence": () => {
+    for (const k of ["firstGap", "gap", "afterFight", "switchGap", "afterDimension"]) assert(MUSIC[k][1] <= 30, `${k} must stay under 30 s`);
+  },
+  "walking into another region or the Hollow changes the pool key, day and night do not": () => {
+    assertEqual(poolKey({ region: "Frostmarch", timeOfDay: 6000 }), poolKey({ region: "Frostmarch", timeOfDay: 18000 }));
+    assert(poolKey({ region: "Frostmarch" }) !== poolKey({ region: "Saltreach" }));
+    assertEqual(poolKey({ hollow: true, region: "" }), "hollow");
+    assertEqual(poolKey({ region: "" }), "home");
   },
   "every installed piece is one the soundtrack knows": () => {
     const known = new Set([...Object.values(REGION_POOLS).flatMap((p) => [...p.day, ...p.night]), ...HOLLOW_POOL, ...Object.values(FIGHT_TRACKS), SIEGE_TRACK, MAIN_THEME].map(soundId));

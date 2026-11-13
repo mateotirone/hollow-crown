@@ -21,7 +21,7 @@ const PLOT_SITES = {
   Tidewatch: [{ d: "tidewatch_posts", turns: true, seek: { kind: "water", bearing: 202, spread: 60, max: 200 } }],
   Reedmoor: [{ d: "reedmoor_ring" }],
   Lanternbog: [{ d: "lanternbog_posts" }],
-  Redmesa: [{ d: "redmesa_stones" }],
+  Redmesa: [{ d: "redmesa_stones", dz: -14 }], // on the mesa top behind its south lip (map/plotground.py)
   Dunehold: [{ d: "dunehold_hall" }, { d: "dunehold_well", dx: -30 }, { d: "dunehold_palms", dx: -30 }],
 };
 
@@ -43,6 +43,14 @@ const STORY_SITES = [
   // It stands on the north edge of the mesa above Sunscar (moved from 898, 346, where the land under the Span was
   // nearly flat): the yard on the cliff top at 103, the Span and the perch out over the flats at 96-97.
   { id: "cinder_roost", region: "Emberwaste", name: "the Cinder Roost", x: 882, z: 310, place: "cinder_roost", version: 3, pieces: [{ d: "cinder_roost", turns: true, face: "n" }] },
+  // Places the lore names (map/structures/story_places.py). The watchtower holds Chronicle II ("a ruined watchtower
+  // on the Frostmarch border, in a chest"), on the west shoulder of the north pass above the line.
+  { id: "frost_watchtower", region: "Frostmarch", name: "the old border watchtower", x: -130, z: -748, place: "frost_watchtower", pieces: [{ d: "frost_watchtower" }] },
+  // The Hallowmere shrine, its ice hut and the moon door in the ice, inside the Pale Huntsman's area: they wait for
+  // its stamp (`after`), on patches the stamp leaves plain floor (world builds thread, 2026-11-12): the shrine on the
+  // south-east shore with the lake 8 to its north, the hut on the ice, the door on the lake surface 25+ from the cairn.
+  { id: "hallowmere_shrine", region: "Frostmarch", name: "the shrine at Hallowmere", x: 107, z: -1102, place: "frozen_lake", after: "huntsman",
+    pieces: [{ d: "hallowmere_shrine" }, { d: "hallowmere_ice_hut", dx: -10, dz: -31 }, { d: "hallowmere_ice_door", dx: -74, dz: -6 }] },
   // The three sealed ways out (plots/config.js EXPANSION). The Far Shore and Horizon Isles doors are out at sea,
   // so their landmarks stand on the nearest coast, front out over the water toward the way.
   { id: "shut_pass", region: "Frostmarch", name: "the Shut Pass", x: 1225, z: -190, pieces: [{ d: "shut_pass_gate", turns: true, face: "w" }] },

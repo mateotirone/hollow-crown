@@ -165,7 +165,8 @@ MAT = {"stone_brick": "stonebrick", "stone_bricks": "stonebrick", "mossy_stone_b
        "quartz": "quartz_block_side", "quartz_block": "quartz_block_side", "smooth_quartz": "quartz_block_bottom", "quartz_bricks": "quartz_bricks",
        "dark_prismarine": "prismarine_dark", "prismarine": "prismarine_rough", "gold_block": "gold_block", "snow_layer": "snow", "moss_block": "moss_block", "polished_blackstone_brick": "polished_blackstone_bricks", "polished_blackstone": "polished_blackstone", "blackstone": "blackstone",
        "blast_furnace": "blast_furnace_side", "cobbled_deepslate_wall": "deepslate/cobbled_deepslate",
-       "chiseled_red_sandstone": "red_sandstone_carved", "chiseled_deepslate": "deepslate/chiseled_deepslate", "cracked_deepslate_bricks": "deepslate/cracked_deepslate_bricks"}
+       "chiseled_red_sandstone": "red_sandstone_carved", "chiseled_deepslate": "deepslate/chiseled_deepslate", "cracked_deepslate_bricks": "deepslate/cracked_deepslate_bricks",
+       "cracked_deepslate_tiles": "deepslate/cracked_deepslate_tiles"}
 for w, t in WOODS.items(): MAT[w] = "planks_" + t; MAT[w + "_planks"] = "planks_" + t
 for _c in ("", "exposed_", "weathered_", "oxidized_"):          # copper roofs (waxed looks the same)
     MAT[_c + "cut_copper"] = MAT["waxed_" + _c + "cut_copper"] = _c + "cut_copper"
@@ -239,6 +240,7 @@ def cube_tex(n, p):
     if n in simple: return simple[n]
     if n.endswith("_glazed_terracotta"): return {"side": "glazed_terracotta_" + n[:-18].replace("light_gray", "silver")}
     if n == "scaffolding": return {"side": "scaffolding_side", "top": "scaffolding_top", "bottom": "scaffolding_bottom"}
+    if n == "terracotta": return {"side": "hardened_clay"}
     if n.endswith("_terracotta") and not n.startswith("glazed"):
         c = n[:-11].replace("light_gray", "silver")
         return {"side": "hardened_clay_stained_" + c if c else "hardened_clay"}
@@ -323,6 +325,7 @@ def track_preview(kind, d):
 def model(n, p):
     """-> list of (box, texdict, flags)."""
     if n.startswith("minecraft:"): n = n[10:]          # tree stamps carry full ids
+    if n == "fence_gate": n = "oak_fence_gate"            # Bedrock's id for the oak gate
     if n == "siege:track_preview": return track_preview(p.get("kind", 0), p.get("dir", 0))
     if is_stairs(n): t = {"side": base_material(n)}; return [(b, t, {}) for b in stair_boxes(p)]
     if is_slab(n):
@@ -353,7 +356,7 @@ def model(n, p):
                                 "e": (9 / 16, 0, 7 / 16, 1, 1, 9 / 16), "w": (0, 0, 7 / 16, 7 / 16, 1, 9 / 16)}[d], t, {"cut": 1}))
         return out
     if n.endswith("trapdoor"):
-        w = wood_of(n); t = {"side": f"{w}_trapdoor" if w != "oak" else "trapdoor"}
+        w = wood_of(n); t = {"side": "iron_trapdoor" if n == "iron_trapdoor" else f"{w}_trapdoor" if w != "oak" else "trapdoor"}
         if p.get("open"):
             side = {"n": "s", "s": "n", "e": "w", "w": "e"}[p.get("facing", "n")]
             return [(thin_plate(side), t, {"cut": 1})]

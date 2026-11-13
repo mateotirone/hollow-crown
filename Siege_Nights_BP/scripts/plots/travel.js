@@ -16,7 +16,7 @@ function payForElytra(player) {
     if (leftover) player.dimension.spawnItem(leftover, player.location);
   }
   const what = MAP.elytraReward.map((r) => `${r.count} ${r.name ?? r.item.replace("minecraft:", "").replaceAll("_", " ")}`).join(" and ");
-  player.sendMessage(`§6The wings crumble to dust. Nobody flies in this land, but you get ${what} for them.`);
+  player.sendMessage(`§6The wings crumble to dust. Elytra don't hold up in this land, but you get ${what} for them.`);
   sfx(player, "random.break");
 }
 

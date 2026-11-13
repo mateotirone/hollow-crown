@@ -7,7 +7,7 @@
 import { SITES } from "../undertow/roads.js";
 import { UNDERTOW_LAYOUT as L, stageAt } from "../undertow/layout.js";
 import { HOLLOW_TILES } from "./hollow_tiles.js";
-import { KEY, SPOTS, arrowDir, cleanLabel } from "./data.js";
+import { KEY, SPOTS, arrowDir, cleanLabel, pinCode, NO_PIN } from "./data.js";
 
 export const HOLLOW_MAP = { x0: -704, z0: -64, tile: 64, cols: 22, rows: 40 };
 
@@ -36,12 +36,12 @@ export function hollowPlace(x, z) {
 }
 
 // The HUD title for a player in the Hollow, in the same shape data.js hudString makes for the overworld
-// (readHud reads both): direction letter, spot letter, tile code, "|", label.
+// (readHud reads both): direction letter, spot letter, tile code, quest pin (data.js pinCode, on this grid), "|", label.
 const LETTERS = "abcdefghijklmnop", DIRS = "qrstuvwy"; // as in data.js
-export function hollowHud({ x, z, yaw, hidden = false }, M = HOLLOW_MAP) {
+export function hollowHud({ x, z, yaw, hidden = false, pin }, M = HOLLOW_MAP) {
   const t = hidden ? null : hollowTile(x, z, M);
-  if (!t) return `${KEY}qznone__|${hidden ? "Uncharted" : "Beyond the map"}`;
+  if (!t) return `${KEY}qznone__${NO_PIN}|${hidden ? "Uncharted" : "Beyond the map"}`;
   const step = M.tile / SPOTS;
   const sx = Math.floor((x - M.x0 - t.tx * M.tile) / step), sz = Math.floor((z - M.z0 - t.tz * M.tile) / step);
-  return `${KEY}${DIRS[arrowDir(yaw)]}${LETTERS[sz * SPOTS + sx]}${t.code}|${cleanLabel(hollowPlace(x, z))}`;
+  return `${KEY}${DIRS[arrowDir(yaw)]}${LETTERS[sz * SPOTS + sx]}${t.code}${pinCode(x, z, t.tx, t.tz, pin, { x: M.x0, z: M.z0 })}|${cleanLabel(hollowPlace(x, z))}`;
 }

@@ -16,6 +16,7 @@ import "./shops.js";
 import "./golems.js";
 import "./towns.js";
 import "./showcase.js";
+import "./hud.js";
 import "./tests.js";
 
 // ---------- your Regals, on the Keep Banner menu ----------

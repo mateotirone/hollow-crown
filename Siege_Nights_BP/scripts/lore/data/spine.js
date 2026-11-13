@@ -42,7 +42,7 @@ export const REGION_BOSS = {
   Saltreach: { boss: "bride", place: "sunken_chapel",
     line: "Your papers all point one way in the end. Off Gull's Rest a chapel tower shows above the water when the moon is dark, and a woman in a wedding dress is still waiting at its altar. The coast has been told not to look." },
   Emberwaste: { boss: "seneschal", place: "faceless_vault",
-    line: "Your papers all point one way in the end. Under Sunscar there is a vault the faceless statues were set to guard, and the steward who gave the order to cut them is still at his post. He has had three hundred years to get the order exactly right." },
+    line: "Your papers all point one way in the end. South of Sunscar, under the dunes, there is a vault the faceless statues were set to guard, and the steward who gave the order to cut them is still at his post. He has had three hundred years to get the order exactly right." },
   Blackfen: { boss: "mother", place: "cradle_tree",
     line: "Your papers all point one way in the end. Under the fen, something is raising the ones who come back. The lantern keepers called her the Mother, and did not say it loudly." },
 };

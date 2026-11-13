@@ -32,7 +32,7 @@ const loose = (base) => new Proxy(base, {
   apply: () => undefined,
 });
 
-export async function runSieges({ imp, mock, CX, CZ, BASE, gateAngle, radii, homes, wallLevels, siegeCount = 12 }) {
+export async function runSieges({ imp, mock, CX, CZ, BASE, gateAngle, radii, homes, wallLevels, outline, siegeCount = 12 }) {
   const world = mock.lookup("world");
   const S = await imp("siege/state.js"); // `state` is a live binding, set by loadState
   S.loadState();
@@ -87,7 +87,7 @@ export async function runSieges({ imp, mock, CX, CZ, BASE, gateAngle, radii, hom
           };
           state.guards = { [OWNER]: Math.round((GUARD_LIMIT[TIERS[tier].name] ?? 4) * preset.guards) };
           state.plans = {}; state.kills = {};
-          setWallRecord(OWNER, { level: wallLevels[tier], radius: r, cx: CX, cz: CZ, y: BASE });
+          setWallRecord(OWNER, { level: wallLevels[tier], radius: r, cx: CX, cz: CZ, y: BASE, ...(outline ? { radii: outline.radii, radiiAt: outline.radiiAt } : {}) });
           ballistas = preset.ballistas.map((s, i) => loose({ typeId: BALLISTA, location: { x: CX + Math.cos(sideAngle[s] + i * 0.15) * (r - 3), y: BASE + 1, z: CZ + Math.sin(sideAngle[s] + i * 0.15) * (r - 3) } }));
           villagers = Array.from({ length: homes[tier] }, () => loose({ typeId: "minecraft:villager_v2" }));
           spawned = [];
