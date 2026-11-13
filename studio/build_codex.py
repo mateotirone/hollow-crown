@@ -382,6 +382,37 @@ def main():
     open(lp, "w").write(text)
     os.makedirs(os.path.dirname(STANDIN), exist_ok=True)
     json.dump(sorted(standins), open(STANDIN, "w"), indent=1)
+    # the Codex book's pictures: textures/ui/codex/<id>.png (found) and <id>_outline.png (not found yet: a dark
+    # silhouette with a pale rim, so you can tell the shape but not the colours)
+    ui_dir = os.path.join(RP, "textures/ui/codex"); os.makedirs(ui_dir, exist_ok=True)
+    keys = it["texture_data"]
+    icon_of = {}
+    for root, _, files in os.walk(os.path.join(BP, "items")):
+        for f in files:
+            if not f.endswith(".json"): continue
+            try: d = json.load(open(os.path.join(root, f)))["minecraft:item"]
+            except Exception: continue
+            ic = d.get("components", {}).get("minecraft:icon")
+            ic = ic.get("texture") if isinstance(ic, dict) else ic
+            if ic: icon_of[d["description"]["identifier"]] = ic
+    book = [f"siege:{x['id']}" for x in SPEC if x.get("chapter")] + [f"siege:{e[0]}" for e in EXISTING]
+    for ident in book:
+        tex = keys.get(icon_of.get(ident, ""), {}).get("textures")
+        tex = tex[0] if isinstance(tex, list) else tex
+        src = tex and os.path.join(RP, tex + ".png")
+        if not src or not os.path.exists(src):
+            print("no icon for", ident); continue
+        im = Image.open(src).convert("RGBA")
+        short = ident.split(":", 1)[1]
+        im.save(os.path.join(ui_dir, f"{short}.png"))
+        w, h = im.size; a = im.getchannel("A"); px = a.load()
+        out = Image.new("RGBA", (w, h)); op = out.load()
+        for y in range(h):
+            for x in range(w):
+                if px[x, y] < 128: continue
+                edge = any(not (0 <= x + dx < w and 0 <= y + dy < h) or px[x + dx, y + dy] < 128 for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)))
+                op[x, y] = (200, 190, 160, 255) if edge else (40, 36, 44, 200)
+        out.save(os.path.join(ui_dir, f"{short}_outline.png"))
     # the scripts' copy
     keep = ("id", "name", "kind", "chapter", "set", "region", "wonder", "forge", "alloy", "piece", "boss", "by", "how", "site", "plot", "place",
             "price", "does", "hint", "source", "whose", "line", "mythical")

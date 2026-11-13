@@ -72,6 +72,7 @@ import "./music/index.js";
 import "./graves/index.js";
 import "./wings/index.js";
 import "./statues/index.js";
+import "./codex/index.js"; // the Codex, the regional arms, mythical finds, the wonders' forges and the caravan market
 import "./battletest/index.js"; // test tool: /scriptevent siege:battle_test attack | defend | raid
 
 // Start the shared loop last, once every file has registered its work

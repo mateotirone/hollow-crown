@@ -395,7 +395,7 @@ function use(p, id) {
     case "siege:map_of_lost_things": return pointToNearest(p, { charmsOnly: true, consume: true });
     case "siege:mirage_flask":
       effect(p, "invisibility", 100);
-      sfx(p, "mob.illusioner.cast_spell");
+      sfx(p, "mob.evocation_illager.cast_spell");
       return consumeOne(p, id);
     case "siege:wennas_line": return cast(p);
     default:
