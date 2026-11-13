@@ -1,0 +1,258 @@
+{
+ "_about": "Morvane's spoken lines (hand-written; ElevenLabs only reads them). Source of truth for tools/install_voices.py, which writes scripts/lore/data/morvane_lines.js and installs the picked takes. fx: far = before the Rift (filtered, distant), mid = in the Hollow, dry = in the fight. The fight lines (act 'The fight') are voiced without the player's name; their chat text stays in lore/data/reveal.js and bestiary/morvane.js.",
+ "voice": {
+  "name": "",
+  "voice_id": "",
+  "description": "A man who sounds about sixty but is far older, once a king, worn thin by centuries alone underground. Low, quiet, grave baritone with a little hoarseness, very calm and courteous, old-fashioned precise English with a received pronunciation accent softened by tiredness. Never raises his voice; speaks close and unhurried, as if from just behind you in the dark, with sorrow and patience under the authority."
+ },
+ "lines": [
+  {
+   "id": "first_dusk",
+   "act": "Before you know him",
+   "when": "Your first dusk in the world, once.",
+   "text": "You do not remember packing it. That is all right. Read it when you cannot sleep.",
+   "fx": "far",
+   "why": "Echoes the journal's first line. The last page ends: You did not pack this book. I did."
+  },
+  {
+   "id": "journal_done",
+   "act": "Before you know him",
+   "when": "The first time you finish the Old King's Journal.",
+   "text": "He wrote that last line for his son. His son listened. Nobody else did.",
+   "fx": "far",
+   "why": "The last page: I did what his last line told me. I listened before I rang."
+  },
+  {
+   "id": "siege_first",
+   "act": "Before you know him",
+   "when": "Dusk of your first siege night.",
+   "text": "Third night. Light your lamps; they come for the brightest. I am sorry. It was agreed long before you.",
+   "fx": "far",
+   "why": "He runs the sieges, and the truce gave the third night away."
+  },
+  {
+   "id": "siege_held",
+   "act": "Before you know him",
+   "when": "The morning after your first siege is held.",
+   "text": "Well held. They will remember your walls now. So will I.",
+   "fx": "far",
+   "why": "He taught the Hollow our walls."
+  },
+  {
+   "id": "ember",
+   "act": "Before you know him",
+   "when": "When the Ember falls near your keep.",
+   "text": "Careful with that. I held one once, and the hand never closed again.",
+   "fx": "far",
+   "why": "He took the Crown's splinter in his right hand and fights left-handed."
+  },
+  {
+   "id": "warlord",
+   "act": "Before you know him",
+   "when": "The first time you bring down the Warlord King.",
+   "text": "Up you get, Vorlund. They are not finished with you. Neither am I.",
+   "fx": "far",
+   "why": "Vorlund's Ledger clue: I have never seen him. I know the voice."
+  },
+  {
+   "id": "fell_reeve",
+   "act": "Before you know him",
+   "when": "When the Clockwork Reeve falls.",
+   "text": "Seventeen minutes past three. I remember that minute too. Let it go now.",
+   "fx": "far",
+   "why": "The Grey Host was taken at 3:17, under his truce."
+  },
+  {
+   "id": "fell_huntsman",
+   "act": "Before you know him",
+   "when": "When the Pale Huntsman falls.",
+   "text": "He walked off the ice alone and never forgave it for letting him. I know the feeling.",
+   "fx": "far",
+   "why": "He walked into the Hollow alone, upright."
+  },
+  {
+   "id": "fell_bride",
+   "act": "Before you know him",
+   "when": "When the Drowned Bride falls.",
+   "text": "Someone up there still writes to her. Three hundred years, and nobody ever wrote to me.",
+   "fx": "far",
+   "why": "The Order erased him; no portrait, no grave."
+  },
+  {
+   "id": "fell_seneschal",
+   "act": "Before you know him",
+   "when": "When the Ash Seneschal falls.",
+   "text": "He kept my keys a long time. Longer than I asked him to.",
+   "fx": "far",
+   "why": "A seneschal keeps his lord's keys. The statues show the king's life."
+  },
+  {
+   "id": "fell_mother",
+   "act": "Before you know him",
+   "when": "When the Mother of Changelings falls.",
+   "text": "She would kill to keep her name. I should have liked the chance.",
+   "fx": "far",
+   "why": "His name was burned; the Hollow made him a new one."
+  },
+  {
+   "id": "third_1",
+   "act": "Third nights (each once, now and then)",
+   "when": "Faint, inside the singing on a third night.",
+   "text": "Every third night. Somebody has to knock.",
+   "fx": "far",
+   "why": "I knocked on it every third night for three hundred years."
+  },
+  {
+   "id": "third_2",
+   "act": "Third nights (each once, now and then)",
+   "when": "Faint, inside the singing on a third night.",
+   "text": "Your bells are louder than ours were. Ours were better made.",
+   "fx": "far"
+  },
+  {
+   "id": "third_3",
+   "act": "Third nights (each once, now and then)",
+   "when": "Faint, inside the singing on a third night.",
+   "text": "Somebody up there is ringing too soon. Listen first.",
+   "fx": "far",
+   "why": "Listen before you ring."
+  },
+  {
+   "id": "third_4",
+   "act": "Third nights (each once, now and then)",
+   "when": "Faint, inside the singing on a third night.",
+   "text": "It was never the dark you ought to fear. It was the quiet after.",
+   "fx": "far"
+  },
+  {
+   "id": "third_5",
+   "act": "Third nights (each once, now and then)",
+   "when": "Faint, inside the singing on a third night.",
+   "text": "You sleep with your boots on now. Good.",
+   "fx": "far"
+  },
+  {
+   "id": "third_6",
+   "act": "Third nights (each once, now and then)",
+   "when": "Faint, inside the singing on a third night.",
+   "text": "I used to count the nights. Then I counted the bells. Now I only listen.",
+   "fx": "far"
+  },
+  {
+   "id": "third_7",
+   "act": "Third nights (each once, now and then)",
+   "when": "Faint, inside the singing on a third night.",
+   "text": "Mind the wells. Water goes down, and it remembers the way.",
+   "fx": "far",
+   "why": "Corvin's ashes went into running water, and water runs down."
+  },
+  {
+   "id": "third_8",
+   "act": "Third nights (each once, now and then)",
+   "when": "Faint, inside the singing on a third night.",
+   "text": "My father heard this too. He thought it was the wind.",
+   "fx": "far",
+   "why": "Aldric's journal: singing under the floor every third night."
+  },
+  {
+   "id": "rift_open",
+   "act": "The door opens",
+   "when": "When you strike the Tuning Fork and the Rift opens.",
+   "text": "There. You found the door. I knocked on it for a very long time.",
+   "fx": "mid"
+  },
+  {
+   "id": "hollow_first",
+   "act": "The door opens",
+   "when": "Your first steps in the Hollow.",
+   "text": "Come down, then. Mind the light. It runs downhill here, like everything else.",
+   "fx": "mid"
+  },
+  {
+   "id": "choir_silenced",
+   "act": "The door opens",
+   "when": "When the Choir is silenced.",
+   "text": "You stopped their singing. It is very quiet without it. Come up. I have kept the chair.",
+   "fx": "mid",
+   "why": "Stage 6: There is only the one chair."
+  },
+  {
+   "id": "seat",
+   "act": "The fight",
+   "when": "He rises from the Seat. The first time you see who has been talking.",
+   "text": "Sit, then. If you can take it from me.",
+   "fx": "dry"
+  },
+  {
+   "id": "stage_sky",
+   "act": "The fight",
+   "when": "Stage 4, under your own sky gone the wrong colour.",
+   "text": "This was mine first.",
+   "fx": "dry"
+  },
+  {
+   "id": "stage_sky_out",
+   "act": "The fight",
+   "when": "Stage 4 breaks and the ground takes you back down.",
+   "text": "Not here. Not under this sky.",
+   "fx": "dry"
+  },
+  {
+   "id": "fall_1",
+   "act": "The fight",
+   "when": "Stage 6, the Fall: alone with him.",
+   "text": "Sit, if you like. There is only the one chair, and I have had it three hundred years.",
+   "fx": "dry"
+  },
+  {
+   "id": "fall_2",
+   "act": "The fight",
+   "when": "Stage 6.",
+   "text": "I was a king. Yours. Your walls stand on my roads. Did nobody up there tell you there had been one?",
+   "fx": "dry"
+  },
+  {
+   "id": "fall_3",
+   "act": "The fight",
+   "when": "Stage 6.",
+   "text": "I made a peace, and I kept it. I am the only one on either side of that door who did.",
+   "fx": "dry"
+  },
+  {
+   "id": "fall_4",
+   "act": "The fight",
+   "when": "Stage 6.",
+   "text": "There is no portrait of me left above. Forty-one, and she burned them all. You would not have known my face. You have known my nights.",
+   "fx": "dry"
+  },
+  {
+   "id": "fall_5",
+   "act": "The fight",
+   "when": "Stage 6.",
+   "text": "Tell my daughter the door was well made. Tell her I knocked every third night.",
+   "fx": "dry"
+  },
+  {
+   "id": "fall_6",
+   "act": "The fight",
+   "when": "Stage 6 breaks.",
+   "text": "Good. You did not come down here to talk either.",
+   "fx": "dry"
+  },
+  {
+   "id": "look_up",
+   "act": "The fight",
+   "when": "The reveal: the boy at the desk ages into him and looks up. The only spoken line in the scene.",
+   "text": "You kept my father's book.",
+   "fx": "dry"
+  },
+  {
+   "id": "last",
+   "act": "The fight",
+   "when": "New: as he falls for good.",
+   "text": "Listen before you ring.",
+   "fx": "dry",
+   "why": "The journal's last line, and the last line of his own page."
+  }
+ ]
+}
