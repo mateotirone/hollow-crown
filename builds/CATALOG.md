@@ -4,7 +4,7 @@
 
 Every build in The Hollow Crown, designed or not. Add an entry the moment a build is asked for, even with no design yet, and move its status on as it progresses. Run  node tools/build-catalog.mjs  after editing to rewrite builds/CATALOG.md (check.mjs fails if it is stale).
 
-**107 builds:** 1 not started, 26 designed, 15 in viewer, 65 in game.
+**108 builds:** 1 not started, 26 designed, 15 in viewer, 66 in game.
 
 Statuses:
 
@@ -126,6 +126,7 @@ A ★ marks builds that no earlier list had (added in the 2026-11-12 audit).
 | Boss site: Reeve's well and chamber (Millbrook) | Aldmere Vale | in game |  | Design how regional bosses unlock | `Siege_Nights_BP/scripts/unlocks/well_plan.js` | Script-built, not in the viewer, not on the building skill. |
 | Boss site: Hunter's Cairn, beast cairns and Old Sigga's lodge (Hallowmere) | Frostmarch | in game | boss_sites | Design how regional bosses unlock | `Siege_Nights_BP/scripts/unlocks/huntsman.js` | Script-built, not in the viewer. Exterior landmark "the Antler Crown" designed in map/structures/boss_landmarks.py (PR #208, viewer boss_sites), placed via unlocks/landmarks.js (PR #187). |
 | Boss site: Gull Bay chapel and altar | Saltreach | in game | boss_sites | Design how regional bosses unlock | `Siege_Nights_BP/scripts/unlocks/bride.js` | Script-built, not in the viewer. Exterior landmark "the Drowned Bell Tower" designed in map/structures/boss_landmarks.py (PR #208, viewer boss_sites), placed via unlocks/landmarks.js (PR #187). |
+| The forty Faceless statues: 3D figures of King Oswin on block plinths (32 on Sunscar's avenue, 8 at the Faceless Gate) | Emberwaste | in game |  | Make the Faceless statues 3D figures | `Siege_Nights_BP/scripts/statues/index.js` | Entity siege:faceless_statue (models by studio/statues/build_statues.py, 5 ages x 4 holds x 5 breaks). The map bakes the plinths (map/structures/faceless_statues.py); the game stands the figures from map/statue-spots/*.json. 3D: the main builds page, section Faceless statues. |
 | Boss site: Sunscar vault with five faceless statues | Emberwaste | in game | boss_sites | Design how regional bosses unlock | `Siege_Nights_BP/scripts/unlocks/seneschal.js` | Script-built, not in the viewer. Exterior landmark "the Faceless Gate" designed in map/structures/boss_landmarks.py (PR #208, viewer boss_sites), placed via unlocks/landmarks.js (PR #187). |
 | Boss site: the Cradle Tree and root cradle (Mirelight) | Blackfen | in game | boss_sites | Design how regional bosses unlock | `Siege_Nights_BP/scripts/unlocks/mother.js` | Script-built, not in the viewer. Exterior landmark "the Cradle Tree" designed in map/structures/boss_landmarks.py (PR #208, viewer boss_sites), placed via unlocks/landmarks.js (PR #187). |
 | ★ Boss site: Vorlund's Muster (Warlord King's ground) | Anywhere / region-neutral | designed | landmarks | Finish the remaining world builds | `map/structures/world_doors.py` | Waiting in PR #208. At (1030, -990); places itself via landmarks/sites.js. |
