@@ -9,6 +9,7 @@ How versions work is in [`docs/RELEASING.md`](docs/RELEASING.md).
 Everything merged to `main` since the last release goes here. Each pull request that changes what players see adds a line under one of these headings.
 
 ### Added
+- The castle gate and portcullis make real sounds now: the gate creaks open and thuds shut, the portcullis winches up and slams down like a dropped anvil. The Rift's opening (with the rock cracking apart) and the first glimpse of the Hollow have their new recordings too.
 - Tilly speaks her greetings now, like the other story characters, and the Wyrm has a new roar.
 - A new settlement's first days are now playable from nothing (new-player audit): your house has a founder's chest with logs and saplings of your region's wood, a stone pickaxe and axe, bread, torches and 48 Regals, and a Siege Workshop stands ready in the Mason's Yard.
 - The quest tracker's top line now walks you to your first siege: get a pickaxe, open the Workshop, build a Barracks, train guards, hold the night, with the days left until it comes. Founding your settlement lists the same steps in chat, and the day before each of your first three siege nights you are warned.
