@@ -625,3 +625,9 @@ All 187 items and 202 blocks have an icon or texture that exists, is the right s
 - 81 blocks had no name in the language files (regional Castle Bricks/Tiles/Cobbled/Smooth/Stone and the unbreakable "Old" tree and trim blocks).
 - Boss unlock blocks, guard tier icons, vault key: see above.
 Not tested in game.
+
+## Codex regional gear (painted 2026-11-13 by `studio/art/build_codex_art.py`; items, attachables and icon keys by the custom armour thread)
+Sheet: `art/codex-regional-gear.png`. In the Texture Studio under Armor. Not tested in game.
+- Sets: Watchward (Vale), Tidewrought (Saltreach), Sunscale (Emberwaste), Fenlight (Blackfen). Worn, 3D, one 64×32 trim-safe sheet per piece: `textures/models/siege_armor/codex_<set>_<piece>.png`; shapes `models/entity/armor/codex_<set>_<piece>.geo.json` (`geometry.siege_codex_<set>_<piece>`).
+- Icons in `textures/items/codex/`: the 16 armour pieces, `watchmans_glaive`, `watch_crossbow`, `lighthouse_harpoon`, `tidesteel_cutlass`, `sunbrand_sabre`, `sunscale_bow`, `wisp_bow`, `bogsilver_sickle`, and the alloys `watchsteel`, `tidesteel`, `sunsteel`, `bogsilver`.
+- Still stand-ins (next batches): Oathsworn set, boss and rival drops, mythical weapons and tools, charms, caravan goods, the Codex book.

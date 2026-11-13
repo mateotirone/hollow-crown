@@ -152,6 +152,17 @@ def _choir_worn():
             gm[d['geometry']['default']]=d['textures']['default']+'.png'
         return [{"label":"Worn (full set, 3D)","model":"armor3d","geos":list(gm),"geoMats":gm,"mats":{"*":list(gm.values())[-1]}}]
     return [{"label":"Worn (full set)","model":"armor","mats":{"layer1":'textures/models/armor/choirsteel_layer_1.png',"layer2":'textures/models/armor/choirsteel_layer_2.png'}}]
+# Codex regional sets (studio/art/build_codex_art.py): worn 3D straight from the geos, icons from textures/items/codex/
+_CX={"watchward":("Watchward gear","The Vale. Steel-blue plate, green surcoat, gold beacon trim.",["watchmans_glaive","watch_crossbow","watchsteel"]),
+     "tidewrought":("Tidewrought gear","Saltreach. Sea-green plate, pearl studs, a lit lighthouse lamp on the helm.",["lighthouse_harpoon","tidesteel_cutlass","tidesteel"]),
+     "sunscale":("Sunscale gear","Emberwaste. Bronze scale over sand cloth, sun discs.",["sunbrand_sabre","sunscale_bow","sunsteel"]),
+     "fenlight":("Fenlight gear","Blackfen. Dark moss leather and bogsilver, little lantern charms.",["wisp_bow","bogsilver_sickle","bogsilver"])}
+for _n,(_t,_note,_w) in _CX.items():
+    if not os.path.exists(RP+f'models/entity/armor/codex_{_n}_helmet.geo.json'): continue
+    _gm={f"geometry.siege_codex_{_n}_{p}":f"textures/models/siege_armor/codex_{_n}_{p}.png" for p in ["leggings","boots","chestplate","helmet"]}
+    g("cx_"+_n,_t,"Armor",[{"label":"Worn (full set, 3D)","model":"armor3d","skin":'textures/entity/siege/man_at_arms_red.png',"geos":list(_gm),"geoMats":_gm,"mats":{"*":list(_gm.values())[-1]}},
+        {"label":"Armour only","model":"armor3d","geos":list(_gm),"geoMats":_gm,"mats":{"*":list(_gm.values())[-1]}}]
+        +[{"label":k.replace("_"," ").title(),"model":"item","mats":{"*":I+f'codex/{k}.png'}} for k in [f"{_n}_{p}" for p in ("helmet","chestplate","leggings","boots")]+_w],_note)
 g("ut_choirsteel","Choirsteel gear","The Hollow",[{"label":n.title(),"model":"item","mats":{"*":I+'siege_choirsteel_%s.png'%n}} for n in ("sword","pickaxe","axe","shovel","hoe","helmet","chestplate","leggings","boots")]+_choir_worn(),"Dark violet forged metal with a pale blue gem or band. All nine pieces, plus the full set as worn.")
 g("ut_veilcap_giant","Giant Veilcap","The Hollow",[cube("Cap",one('siege_veilcap_cap')),cube("Stem",one('siege_veilcap_stem'))],"The giant pink mushroom trees. The cap gives a soft glow.")
 g("ut_veilmoss_strands","Veilmoss Strands","The Hollow",[{"label":"Strands","model":"item","mats":{"*":B+'siege_veilmoss_strands.png'}}],"Hangs down cliff edges, one to three blocks long. Cross-shaped in game, shown flat here.")
