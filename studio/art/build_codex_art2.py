@@ -32,7 +32,7 @@ PAL = {k: hx(v) for k, v in {
     'K': '#a4a6a8', 'k': '#6a6c70', 'm': '#44464a',                          # stone
     'D': '#dba848', 'd': '#905a1a',                                          # bronze
     'C': '#58b5a6', 't': '#22696a',                                          # sea green
-    'h': '#f0a0c0', 'X': '#ffffff', 'x': '#221c28'}.items()}
+    'h': '#f0a0c0', 'X': '#ffffff', 'x': '#221c28', 'V': '#ecd8ff', 'U': '#a05cf0'}.items()}
 INK = (34, 28, 40)
 
 ICONS = {
@@ -111,8 +111,6 @@ ICONS = {
                       '.....jiij.......', '......ii........', '.....jiij.......', '....j.ii.j......', '...j..jj..j.....'],
  'map_of_lost_things': ['................', '..aAAAa.aAAAa...', '..AAAAAaAAAAAc..', '..AAcAAaAeeAAc..', '..AcAcAaAAeAAc..', '..AAcAAaAAAAAc..', '..AAAAcaccAAAc..',
                         '..AbbAAaAAcRAc..', '..AAbbAaARAcAc..', '..AAAAAaAAcRAc..', '..aAAAa.aAAAac..'],
- 'sunsilk_dyes': ['................', '....RR..FF..BB..', '...RRrRFFoFBBbB.', '...RrrRFooFBbbB.', '...zzzzzzzzzzzz.', '..SssSsSssSsSssz', '..SsRrsSFosSBbsz',
-                  '..SsrrsSoosSbbsz', '..SsssSsssSssssz', '...zzzzzzzzzzzZ.'],
  'ashglass_lantern': ['.......kk.......', '......k..k......', '......mkkm......', '.....mKkkkm.....', '.....kzFFzk.....', '.....kFXFok.....', '.....kzFozk.....',
                       '.....kzzzzk.....', '.....mKkkkm.....', '......mmmm......'],
  'desert_rose': ['................', '......aAa.......', '....aAAhAAa.....', '...aAhAAAhAa....', '...AAAhhAAAa....', '..aAhAhAhAhAa...', '...AAAhAhAAAc...',
@@ -121,6 +119,17 @@ ICONS = {
                   '....zBhBBBBz....', '....zBBPBBbz....', '.....zbbbbz.....', '......zzzz......'],
  'caravan_banner': ['...y............', '..yYy...........', '...WoFoFoFoO....', '...WFoFYFoFO....', '...WoFYyYFoO....', '...WFoFYFoFO....', '...WoFoFoFO.....',
                     '...WFoFoFO......', '...WoFoO........', '...W............', '...W............', '...w............', '...w............'],
+ # ---- the five Choir Shards, one from each regional boss: the same violet stone, grown through what each boss was
+ 'choir_shard_reeve': ['........V.......', '.......VPU......', '.......VPUp.....', '......VPUUp.....', '...y.yVPUppy.y..', '..yYyDDDDDDDyuy.', '..yDDdxdddxdDdu.',     # Stopped Clock: a brass cog locked round it, two hands
+                       '...u.uPUxplu.u..', '......VPUpl.....', '......VUUpl.....', '.......Upl......', '.......Upl......', '........l.......'],
+ 'choir_shard_huntsman': ['..X.......X.....', '..XB.....XB.....', '..XBb...XBb.....', '...XBb.XBbn.....', '...XBBVBBbn.....', '....XBVPUbn.....', '....XBVPUbn.....',   # Frozen Lake: forked like an antler, clear ice over the violet
+                          '.....XVPUbn.....', '.....XBPUbn.....', '......XBUbn.....', '......XBbn......', '.......Bbn......', '.......bn.......'],
+ 'choir_shard_bride': ['.......cc.......', '.......CC.......', '......CVPt......', '.....CVPUpt.....', '.....CVPUpt.....', '....CVPPUppt....', '....CVPUUplt....',     # Drowned Altar: bell-shaped, sea-green and wet, a drop falling
+                       '...CCVPUUpltt...', '...Ctttttttttt...', '.......Ct.......', '................', '.......B........', '.......b........'],
+ 'choir_shard_seneschal': ['.........a......', '........aVa.....', '.......aVPUc....', '.......aPoUc....', '......aVPFUpc...', '......aVoUUpc...', '.....aVPFUopc...',   # Faceless Vault: sand-crusted, ember running in its cracks
+                           '.....aVPUoUpc...', '....aAVPUFppc...', '....aAaPUopc....', '...aAAaaUpc.....', '...aaAAaacc.....', '....cccccc......'],
+ 'choir_shard_mother': ['........V.......', '.......VPU......', '..v....VPUp.....', '..wv..VPUUp..v..', '...wvVPUUpp.vw..', '....wWPUEpvvw...', '.....VwWUvwp....',     # Cradle Tree: roots grip it, fen-light where they cross
+                        '.....VPwWwpl....', '....vwVwEWwl....', '...vw.wUplWv....', '..vw..vUpl.wv...', '..v....vl...v...', '................'],
  'caravan_rations': ['................', '.....cccccc.....', '....cAAAAAAc....', '...cAAaAAaAAc...', '...cccRcccccc...', '...cAAaRAaAAc...', '...cAAAaRAAAc...',
                      '...cAaAARAaAc...', '....cAAAAAAc....', '.....cccccc.....'],                                                         # a waxed-cloth bundle, tied with red cord
  'codex': ['................', '...fffffffffff..', '..feeeeeeeeeefy.', '..feyyyyyyyeefA.', '..feyeeYeeyeefA.', '..feyeYeYeyeeyy.', '..feyeeYeeyeeyu.',
