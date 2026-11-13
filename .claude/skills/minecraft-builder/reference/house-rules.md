@@ -85,6 +85,21 @@ never to do. Index: `regions/README.md`.
 
 - Every street that leaves a town runs on along the map road to the edge of the town's ward
   (`plots/config.js` WARDS), so it meets the country road. It never stops at the town circle.
-- A building's floor is the highest ground under its own walls. The open ground in its stamp (gardens, yards,
-  paddocks, forecourts) drops to the land or to the street beside it, at most 3 blocks, one block per step
-  (towngen `open_cols` / `open_levels`).
+- The open ground in a stamp (gardens, yards, paddocks, forecourts) drops to the land or to the street beside
+  it, at most 3 blocks, one block per step (towngen `open_cols` / `open_levels`).
+
+## Every placed thing is terraformed (Mateo, 2026-11-13)
+
+One pass, `map/structures/terraform.py` (game copy `Siege_Nights_BP/scripts/settle/terraform.js`), for every
+building, plot, station, wall tower and (next) story site. It replaces "the floor on the highest block, stone
+under everything" (2026-11-11), which stood buildings on stone towers on slopes.
+
+- **Pad:** the floor balances cutting in against building up (`pad_height`), never more than 3 under the highest
+  block of the footprint. Ground above it is cut away, stone foundation fills below it.
+- **Connectors:** the door landing (3 x 4) and every street are anchors at their own height; the land meets them.
+- **Skirt:** round each pad the land is clamped to rise or fall at most 1 in 2 from it (1 in 1 on rough ground),
+  so open land keeps its shape wherever it fits. It reaches 4 to 6 blocks out, a few more to ease a small step.
+- **Retaining walls** in the region's stone only where the land still can't meet (never a bare dirt cliff).
+- Water, streets and other built ground never move. Plan doc: https://claude.ai/artifact/MTfFZZwMhcq66gGjJNmVjE.
+- Check: `python3 map/structures/terraform_test.py` prints TERRAFORM OK; `node tools/check.mjs` compares the game
+  copy against the same cases.
