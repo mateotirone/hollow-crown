@@ -166,6 +166,13 @@ function placeFor(f, stage) {
 // where you stood, so a player in the air or at the edge sent him into the drop.
 // Move him to the nearest footing by a spot; if there is none (over the void) he stays where he is.
 function moveTo(f, at, options) {
+  // Stage 7: never past the edge of the floor that is left. On the real Seat there is nothing out there to land on;
+  // on open ground (a test summon) there is, and he used to lunge out to where standing hurts and wait there.
+  const safe = f.m?.stage === 6 ? f.m.s.safe : undefined;
+  if (safe !== undefined && flat(at, f.center) > safe - 1.5) {
+    const d = flat(at, f.center) || 1, k = Math.max(0, safe - 1.5) / d;
+    at = { x: f.center.x + (at.x - f.center.x) * k, y: at.y, z: f.center.z + (at.z - f.center.z) * k };
+  }
   const to = footingNear(at, blockKind(f.dim));
   if (!to) return false;
   try { f.entity.teleport(to, options); return true; } catch { return false; }
@@ -216,6 +223,32 @@ const freeze = (e, on) => {
   }
 };
 
+// He follows the players to a new place a moment after them, once it has loaded round them. The players have just
+// left where he is standing, and Minecraft stops keeping a place loaded once nobody is near it: if his chunk went
+// before he was moved, he was left behind for good and the fight stopped. So the ground under him is held loaded
+// until he has gone, and the move is tried again until it works (boss review 2026-11-13).
+const HOLD = "hc_morvane_hold";
+function holdGround(f, on) {
+  try {
+    const e = f.entity, d = e.dimension, l = e.location;
+    d.runCommand(`tickingarea remove ${HOLD}`);
+    if (on) d.runCommand(`tickingarea add circle ${Math.floor(l.x)} ${Math.floor(l.y)} ${Math.floor(l.z)} 1 ${HOLD} true`);
+  } catch { /* he is not loaded: onLost looks for him */ }
+}
+function sendBoss(f, at, dim, delay, done) {
+  const from = f.entity.dimension;
+  holdGround(f, true);
+  let tries = 0;
+  const go = () => {
+    let moved = false;
+    try { f.entity.teleport({ x: at.x, y: at.y + 0.2, z: at.z }, { dimension: dim }); moved = true; } catch { /* not ready yet */ }
+    if (!moved && ++tries < 15) return system.runTimeout(go, 20);
+    try { from.runCommand(`tickingarea remove ${HOLD}`); } catch { /* nothing held */ }
+    done?.(moved);
+  };
+  system.runTimeout(go, delay);
+}
+
 // Bring every party member who is alive and not already in the arena to the stage's place
 function bringIn(f, place, everyone = false) {
   const inside = new Set(f.players().map((p) => p.id));
@@ -252,11 +285,7 @@ function enter(f, n, { restart = false, quiet = false } = {}) {
     m.moving = true;
     bringIn(f, place, true);
     // He follows a moment later, once the place has loaded around the players
-    system.runTimeout(() => {
-      const at = place.boss ?? place.center;
-      try { f.entity.teleport({ x: at.x, y: at.y + 0.2, z: at.z }, { dimension: place.dim }); } catch { /* onLost picks him up */ }
-      m.moving = false;
-    }, 30);
+    sendBoss(f, place.boss ?? place.center, place.dim, 30, () => { m.moving = false; });
   }
   if (!quiet) {
     for (const p of party(f)) {
@@ -270,7 +299,13 @@ function enter(f, n, { restart = false, quiet = false } = {}) {
   SETUP[n]?.(f, place);
 }
 
-const advance = (f) => enter(f, Math.min(STAGES.length - 1, f.m.stage + 1));
+// Each stage starts at its own health line. One very heavy blow used to carry on through the next gate, so the stage
+// after it lasted a single tick and was never seen (the Standing Ranks could be skipped whole).
+function advance(f) {
+  const n = Math.min(STAGES.length - 1, f.m.stage + 1);
+  if (f.hp() < STAGES[n].from) setHp(f.entity, STAGES[n].from);
+  enter(f, n);
+}
 
 // ---------- stage set-up ----------
 const SETUP = {
@@ -288,7 +323,7 @@ const SETUP = {
   },
 
   3: (f) => {
-    hide(f, true);
+    hide(f, true); freeze(f.entity, true); // under the water he is not there to fight: he used to walk about unseen and hit people
     f.m.s.nextWings = f.tick + 200;
     speak(f, "Cold light runs under you like a river. He is somewhere in it.");
   },
@@ -430,7 +465,7 @@ const TICK = {
 
   3: (f, players) => {
     const s = f.m.s, place = placeFor(f, 3);
-    if (s.up && f.tick >= s.up) { s.up = 0; hide(f, true); f.say("§3He goes under."); }
+    if (s.up && f.tick >= s.up) { s.up = 0; hide(f, true); freeze(f.entity, true); f.say("§3He goes under."); }
     if (f.tick >= s.nextWings) {
       s.nextWings = f.tick + MORVANE.river.wings;
       const have = f.adds("siege:gloamwing").length;
@@ -629,7 +664,7 @@ registerBoss({
       hit: (f, at) => {
         if (!at) return;
         try { f.entity.teleport(at); } catch { /* blocked */ }
-        hide(f, false);
+        hide(f, false); freeze(f.entity, false);
         f.m.s.up = f.tick + MORVANE.river.up;
         for (const p of f.players()) {
           if (flat(p.location, at) > 3) continue;
@@ -677,7 +712,9 @@ registerBoss({
       lost = atSeat && !(f.dim.id === UNDERTOW_ID && flat(f.center, SEAT.center) < 40);
     } catch { /* arenas unavailable: fight where he stands */ }
     const home = f.m?.home ?? (atSeat ? { dimension: UNDERTOW_ID, center: seatCentre() } : { dimension: f.dim.id, center: { ...f.center } });
-    f.m = { home, atSeat, party: f.m?.party ?? new Set(), down: new Set(), tries: {}, wind: {}, stage: 0, s: {}, started: 0, away: lost, floorGone: f.m?.floorGone };
+    // whoever is standing there when he rises is in the fight from his first word (his opening line used to be said to nobody)
+    const here = new Set([...(f.m?.party ?? []), ...f.players().map((p) => p.id)]);
+    f.m = { home, atSeat, party: here, down: new Set(), tries: {}, wind: {}, stage: 0, s: {}, started: 0, away: lost, floorGone: f.m?.floorGone };
     if (atSeat) { try { requestPockets(); } catch { /* arenas unavailable */ } }
     enter(f, 0, { quiet: true, restart: lost });
   },
@@ -788,8 +825,9 @@ function reveal(f) {
     onStage: (stage) => {
       if (!stage.park) return;
       went = true;
+      holdGround(f, true); // the players are about to be taken to the room: keep him loaded until he has followed
       f.moveTo(stage.dim, stage.park, 48);
-      try { f.entity.teleport(stage.park, { dimension: stage.dim }); } catch { /* onLost finds him */ }
+      sendBoss(f, stage.park, stage.dim, 1);
     },
     done: () => {
       m.scene = false; m.moving = false;
