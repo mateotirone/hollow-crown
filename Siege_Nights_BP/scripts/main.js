@@ -51,6 +51,7 @@ import "./labels/index.js";
 import "./guardposts/index.js";
 import "./forestry/index.js";
 import "./workings/index.js";
+import "./plotcaves/index.js";
 import "./ironworks/index.js";
 import "./upkeep/index.js";
 import "./eating/index.js";
