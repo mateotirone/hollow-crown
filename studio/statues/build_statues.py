@@ -30,7 +30,7 @@ REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 RP = os.path.join(REPO, "Siege_Nights_RP")
 BP = os.path.join(REPO, "Siege_Nights_BP")
 
-AGES = ["boy", "youth", "young_king", "king", "old_king"]
+AGES = ["boy", "youth", "young_king", "king", "old_king", "seated"]   # seated: the Gate's great figure
 HOLDS = ["folded", "staff", "sword", "bowl"]
 WEARS = ["whole", "headless", "armless", "stump", "fallen"]
 
@@ -53,6 +53,8 @@ MATS = {
     "bowl": ((168, 88, 46), 0.8),
     "rubble": ((204, 188, 138), 1.2),
     "shadow": ((150, 134, 96), 0.8),
+    "nemes": ((168, 86, 40), 0.5),      # the headdress: orange and cyan terracotta stripes (painted in rows)
+    "gold": ((232, 184, 64), 0.4),
 }
 
 
@@ -79,7 +81,52 @@ class Model:
 def r(v): return round(v * 2) / 2   # half pixels keep the model tidy
 
 
+def seated():
+    """The great seated figure behind the Faceless Gate: robed, on a stone throne, hands flat on his knees, a smooth
+    pale head with no face at all under a striped headdress, a gold point on top. Facing -z; the throne is centred on
+    the entity (x 0, z 0), the feet forward of it. 48 px tall: the Gate's stands at size 10, about 30 blocks."""
+    m = Model("seated")
+    root = m.bone("root")
+    throne = m.bone("throne", "root")
+    m.cube(throne, -10, 0, -3, 10, 10, 9)                                       # the throne's seat
+    m.cube(throne, -10.5, 0, -3.5, 10.5, 1.5, 9.5, "fold")                      # its base course
+    m.cube(throne, -10, 10, 7, 10, 30, 10)                                      # the high back
+    m.cube(throne, -11, 0, -3, -9, 14, 7); m.cube(throne, 9, 0, -3, 11, 14, 7)  # the arms of the throne
+    body = m.bone("body", "root")
+    for y0_, y1_, hx, z0, z1 in ((10, 15, 7.5, -3, 7), (15, 22, 7, -2, 7), (22, 27, 7.5, -2, 7), (27, 30, 8.5, -2, 7), (30, 32, 7, -1, 6.5)):
+        m.cube(body, -hx, y0_, z0, hx, y1_, z1)                                # the robed torso, sitting back
+    m.cube(body, -1, 15, -2.5, 1, 22, -2, "fold")                               # the robe's front fold
+    legs = m.bone("legs", "root")
+    for sx in (-1, 1):
+        x0, x1 = sorted((sx * 0.5, sx * 7))
+        m.cube(legs, x0, 9, -13, x1, 14, -3)                                    # the thigh under the robe
+        m.cube(legs, x0, 0, -14, x1, 9, -9)                                     # the shin, straight down
+        m.cube(legs, x0 - 0.5 * (sx < 0), 0, -16, x1 + 0.5 * (sx > 0), 2, -13)  # the foot
+    m.cube(legs, -0.5, 1, -13, 0.5, 13, -9, "fold")                             # the robe falling between the knees
+    arms = m.bone("arms", "body")
+    for sx in (-1, 1):
+        x0, x1 = sorted((sx * 7, sx * 10))
+        m.cube(arms, x0, 17, -2, x1, 30, 4)                                     # the upper arm at his side
+        f0, f1 = sorted((sx * 3.5, sx * 9.5))
+        m.cube(arms, f0, 14, -9, f1, 17, -1)                                    # the forearm along the thigh
+        h0, h1 = sorted((sx * 3, sx * 8))
+        m.cube(arms, h0, 14, -13, h1, 15.5, -9, "pale")                         # the hand flat on the knee
+    head = m.bone("head", "body", (0, 32, 0))
+    m.cube(head, -4.5, 31, -3.5, 4.5, 32.5, 5, "nemes")                        # the headdress's band over the shoulders
+    m.cube(head, -3.5, 32, -3, 3.5, 42, 4, "pale")                              # the head: smooth, white, no face at all
+    m.cube(head, -4.5, 36, -1.5, 4.5, 43, 5, "nemes")                           # the headdress over the crown of the head
+    m.cube(head, -3.5, 43, -0.5, 3.5, 44, 4, "nemes")
+    for sx in (-1, 1):
+        x0, x1 = sorted((sx * 3.5, sx * 5.5))
+        m.cube(head, x0, 28, -2.5, x1, 40, 1.5, "nemes")                        # its lappets hanging beside the head to the chest
+    m.cube(head, -3.5, 26, 4, 3.5, 36, 6.5, "nemes")                            # and its tail down the back
+    m.cube(head, -1, 44, 0.5, 1, 46.5, 2.5, "gold")                             # the gold point on top
+    m.cube(head, -0.5, 46.5, 1, 0.5, 48, 2, "gold")
+    return m
+
+
 def figure(age):
+    if age == "seated": return seated()
     s = AGE_SHAPE[age]; k = s["k"]; sl = s["slim"]; hd = s["head"]
     m = Model(age)
     K = lambda v: r(v * k)                 # heights
@@ -206,6 +253,7 @@ def paint(m, W, H, seed):
                         if fn == "up": f += 0.04
                         if fn == "down": f -= 0.08
                         if grain >= 0.8 and rnd.random() < 0.035: f -= 0.14              # a chip
+                        if mat == "nemes" and fn not in ("up", "down") and (int(yy) // 2) % 2: px[u + i, v + j] = tuple(max(0, min(255, round(ch * f))) for ch in (78, 104, 108)) + (255,); continue
                         if mat == "pale" and fn == "north": f -= 0.16 * max(0.0, 1 - j / max(1, h * 0.6))   # the hood's shadow over the face
                         px[u + i, v + j] = tuple(max(0, min(255, round(ch * f))) for ch in base) + (255,)
     # spread each face's edge into the empty skin round it, so a mipmap never mixes black into an edge
@@ -231,13 +279,15 @@ def geo(m, W, H):
     return {"format_version": "1.12.0", "minecraft:geometry": [{
         "description": {"identifier": f"geometry.siege_faceless_statue_{m.name}", "texture_width": W, "texture_height": H,
                         # in blocks, round the entity, covering the biggest statue standing (the Gate's, 7.3x) or lying down
-                        "visible_bounds_width": 44, "visible_bounds_height": 34, "visible_bounds_offset": [0, 14, 0]},
+                        "visible_bounds_width": 44, "visible_bounds_height": 48, "visible_bounds_offset": [0, 22, 0]},
         "bones": bones}]}
 
 
 def core(m):
     """The solid core the game fills with barrier blocks so nobody walks through the figure: half-width of the skirt and
     the height of the shoulders, in model pixels (the script turns them into blocks at the statue's size)."""
+    if m.name == "seated":   # the throne and the body on it, up to his shoulders
+        return {"half": 9.5, "knee": 10, "shoulder": 30, "top": 46, "depth": 4}
     s = AGE_SHAPE[m.name]; k = s["k"]; sl = s["slim"]
     return {"half": r(5 * k * sl), "knee": r(13 * k), "shoulder": r(31 * k), "top": r((31 + 11.5 * s["head"]) * k), "depth": r(4.5 * k * sl)}
 

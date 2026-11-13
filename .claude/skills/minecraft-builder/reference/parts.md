@@ -207,6 +207,17 @@ onion / tall, `material` (default waxed copper from weathered to oxidized, green
 "glass"}`, `finial` `short` / `gold` (one gold block, Emberwaste civic) / `spire_block` / `none`. Cyan
 terracotta has no stairs, so its curve uses dark prismarine; the copper default reads better in game.
 
+## `envelope`: a body of revolution lying on its side (air boat, 2026-11-13)
+
+`{"part": "envelope", "at": [x, y, z], "heading": "e", "profile": [[0, 0.8], [32, 9.5], [60, 1.2]], "rib": "waxed_weathered_cut_copper", "cap": "waxed_cut_copper"}`:
+`at` is the tail-end centre block of the axis, `heading` the way the nose points, `profile` [[u, r], ...] from the
+tail. Each slice across the axis is fitted as a circle (full blocks, upright stairs above the axis, upside-down
+below, slabs at crown and keel), radii held to half blocks so rings run in clean bands. Keys `belly` / `top`
+(blocks with stair and slab forms, default light grey and white wool), `belly_rows` (5), `rib_every` (8),
+`cap_len` ([2, 4]). Use it instead of a `lathe` shape for anything on a horizontal axis: the shape fitter's
+height field leaves those jaggy and holed. From Python, `envelope_cells()` gives local cells and `turn_cell()`
+places any local cell list at a point facing e/w/n/s (stairs, doors and log axes turn with it).
+
 ## Castle parts: `keep` and `curtain` (towers/README castle row; the Barracks, 2026-11-12)
 
 ```json

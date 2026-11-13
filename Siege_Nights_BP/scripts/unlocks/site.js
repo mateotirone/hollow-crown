@@ -1,4 +1,5 @@
-// Shared machinery for the boss unlocks after the Reeve: a set piece that builds itself near players, NPCs that
+// Shared machinery for the boss unlocks after the Reeve: a set piece that builds itself near players (or, on the
+// full map, is already baked into it: baked.js, map/bake_sites.mjs, and is only finished off on approach), NPCs that
 // stay at their spots, a summon scene played as timed cues, and the fight gate (start the fight once someone is in
 // the arena, count wins, allow a rematch once a siege night has passed after a win).
 //
@@ -17,6 +18,7 @@ import { LANDMARKS, stampOps } from "./landmarks.js";
 import { clearTrees } from "../core/clearing.js";
 import { approachWave, approachCount } from "./puzzles.js";
 import { markSocketed } from "../bestiary/relics.js";
+import { bakedFor, bakedState } from "./baked.js";
 
 export const overworld = () => world.getDimension(OVERWORLD);
 export const say = (player, text) => { try { player.sendMessage(text); } catch { /* gone */ } };
@@ -275,8 +277,18 @@ export function defineSite(def) {
     for (const n of def.npcs(site)) keepNpc(dim, n);
   };
 
+  // A site baked into the map: its blocks already stand. Take its centre and seed and finish it as a build would.
+  site.adopt = (bake) => {
+    const dim = overworld();
+    Object.assign(store.data, { built: true, center: { ...bake.center }, seed: bake.seed ?? store.data.seed, info: bake.info ?? {},
+      armed: false, pending: false, fighting: false, state: {}, baked: true });
+    store.save();
+    try { def.afterBuild?.(site, dim); } catch (e) { console.warn(`[Hollow Crown] ${def.id} after build: ${e}`); }
+    site.keepNpcs();
+  };
+
   // Build the first time someone comes near; keep NPCs in place
-  let area = false;
+  let area = false, baked;
   const AREA = `hc_unlock_${def.id}`;
   onTick(`unlock_${def.id}_build`, 100, () => {
     const dim = overworld();
@@ -286,6 +298,14 @@ export function defineSite(def) {
       return;
     }
     if (!nearby(def.anchor, 56).length) return;
+    // baked into the map (baked_sites.js): take it as it stands, add only its signs, keepers and fight
+    const bake = baked === undefined ? bakedFor(def.id, def.anchor) : baked;
+    if (bake) {
+      const state = bakedState(bake, (x, y, z) => { try { return dim.getBlock({ x, y, z })?.typeId; } catch { return undefined; } });
+      if (state === "wait") return;
+      if (state === "yes") return site.adopt(bake);
+      baked = null; // not this world's: build it the old way
+    }
     if (!area) {
       const L = LANDMARKS[def.id], half = L?.size ? Math.ceil(Math.max(L.size[0], L.size[2]) / 2) + 2 : 0;
       const r = Math.max(def.reach ?? 24, half), a = def.anchor; // hold the landmark loaded too

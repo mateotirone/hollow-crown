@@ -4,7 +4,7 @@ Code: `Siege_Nights_BP/scripts/townhall/`. Pictures: `art/townhall/`. How to tes
 
 ## The town hall
 
-Craft a **Hall Cornerstone** at the Siege Workshop (3 logs over cobblestone, emerald, cobblestone over 3 cobblestone). Place it inside your settlement where the front door should be, facing the way the hall should run. Click it to build. One hall per settlement.
+Craft a **Hall Cornerstone** at the Siege Workshop (3 logs over cobblestone, an iron ingot, cobblestone over 3 cobblestone). Place it inside your settlement where the front door should be, facing the way the hall should run. Click it to build. One hall per settlement.
 
 | Hall | Needs settlement | Size (wide × deep × tall) | Cost | Gives |
 |---|---|---|---|---|

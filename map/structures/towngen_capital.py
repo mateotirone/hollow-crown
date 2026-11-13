@@ -234,7 +234,7 @@ class Capital(TG.Town):
         self.square(); self.station(); self.claim()
         self.streets(); self.avenues(); self.relax(); self.grade_verges()
         self.portions(); self.place_square_buildings()
-        self.houses(); self.relax(); self.windmills(); self.field_paths(); self.fences(); self.fields()
+        self.houses(); self.relax(); self.windmills(); self.terraform(); self.field_paths(); self.fences(); self.fields()
         self.dress(); self.roof_colours(); self.path_blocks(); self.ground_blocks(); self.banks(); self.wall()
         self.works = {(int(x), int(y), int(z)): v for (x, y, z), v in self.works.items()}
         for e in self.plan:

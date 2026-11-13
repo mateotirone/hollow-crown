@@ -10,10 +10,11 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "everwake"))
 from spec import specs as city_specs  # noqa: E402
 from station import specs as station_specs  # noqa: E402
+from airboat import specs as airboat_specs  # noqa: E402
 
 
 def specs():
-    return {**city_specs(), **station_specs()}
+    return {**city_specs(), **station_specs(), **airboat_specs()}
 
 BUILD = os.path.join(HERE, "..", "..", ".claude", "skills", "minecraft-builder", "scripts", "build.py")
 

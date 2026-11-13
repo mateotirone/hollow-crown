@@ -528,6 +528,13 @@ Made by `studio/art/build_regional_armor.py` (then `tools/build_player_joints.py
 | Worn 3D armour x100 (texture + geometry per piece) | `textures/models/siege_armor/<material>_<region>_<piece>.png`, `models/entity/armor/<material>_<region>_<piece>.geo.json` | **awaiting your review** |
 | Icons x100 (regional guard shapes in each material, region surcoat) | `textures/items/siege_<material>_<region>_<piece>.png` | **awaiting your review** |
 | Sheet | `art/regional-player-armor.png` | |
+## Starter clothes and weapons (2026-11-13, Mateo: "cheap starter armor that looks like clothes ... and a starter weapon")
+Made by `studio/art/build_starter_clothes.py` (then `tools/build_player_joints.py`). Five regional sets of working clothes, items `siege:starter_<region>_<helmet/chestplate/leggings/boots>` (leather-weak), and a starter weapon each, `siege:starter_<region>_weapon` (flat icon, held like a vanilla sword). Vale farmhand (straw hat, jerkin, breeches, field shoes; billhook), Frostmarch trapper (fur-trimmed hood, quilted coat, wrapped trousers, fur boots; hatchet), Saltreach deckhand (knit cap, striped smock, canvas trousers, rope sandals; cutlass), Emberwaste caravaneer (sun wrap, sand tunic, loose trousers, wrapped sandals; sickle-sword), Blackfen fen-walker (oilskin hat, oilskin coat, patched trousers, waders; reed spear). 64x32 vanilla-layout sheets with 3D parts (brims, fur, cap cuff, neck cloth, coat skirts). 3D preview: `studio/starter_clothes/build_preview.py`. Untested in game.
+| Asset | Files | Status |
+|---|---|---|
+| Worn 3D clothes x20 (texture + geometry per piece) | `textures/models/siege_armor/starter_<region>_<piece>.png`, `models/entity/armor/starter_<region>_<piece>.geo.json` | **awaiting your review** |
+| Icons x25 (20 clothes, 5 weapons) | `textures/items/siege_starter_<region>_<piece|weapon>.png` | **awaiting your review** |
+| Sheet | `art/starter-clothes.png` | |
 
 ## Depth pass from the Studio review (2026-11-11, Mateo)
 | What | Files | Made by | Status |
