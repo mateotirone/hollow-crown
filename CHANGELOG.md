@@ -149,6 +149,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - Vanilla hostile mobs (zombies, skeletons, creepers, spiders, endermen, witches, slimes, pillagers, drowned, husks, strays, bogged) no longer spawn on their own: only the game's own creatures do. Mobs no longer break blocks and phantoms are off, set once per world when the first player spawns (an admin can turn them back on).
 
 ### Changed
+- Sieges send only the realm's own creatures, from the very first night: no vanilla pillagers, vindicators, ravagers, witches or evokers ever come over the wall. Rams arrive as Siege Ogres, sappers and warlords as the Grey Host's own, and after the story only the Choir comes.
 - The Vault is now an add-on to your town hall: buy it from the Town Hall menu and it is dug out by itself, with the stairs going down through the hall's own floor. You no longer pick a spot with the Vault Key (the key still opens the door). When the hall grows the stairs stay where they are if they still fit; if the bigger hall has something there, the vault moves to a spot that fits and your relics on their stands move with it (barrels come back empty). Vaults already dug by hand stay where they are.
 
 ### Fixed
