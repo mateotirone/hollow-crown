@@ -155,5 +155,40 @@
   "id": "siege.dragon.wyvern.roar",
   "seconds": 2.3,
   "source": "wyvern_roar_take2.mp3"
+ },
+ "wyrm_roar": {
+  "id": "siege.dragon.wyrm.roar",
+  "seconds": 3.48,
+  "source": "wyrm_roar_take4.mp3"
+ },
+ "first_glimpse": {
+  "id": "siege.sig.first_glimpse",
+  "seconds": 12.0,
+  "source": "first_glimpse_take2.mp3"
+ },
+ "rift_open": {
+  "id": "siege.sig.rift_open",
+  "seconds": 14.0,
+  "source": "rift_open_take2.mp3"
+ },
+ "gate_open": {
+  "id": "siege.sig.gate_open",
+  "seconds": 3.0,
+  "source": "gate_open_take2.mp3"
+ },
+ "gate_close": {
+  "id": "siege.sig.gate_close",
+  "seconds": 3.0,
+  "source": "gate_close_take2.mp3"
+ },
+ "portcullis_open": {
+  "id": "siege.sig.portcullis_open",
+  "seconds": 4.0,
+  "source": "portcullis_open_take3.mp3"
+ },
+ "portcullis_close": {
+  "id": "siege.sig.portcullis_close",
+  "seconds": 2.0,
+  "source": "portcullis_close_take3.mp3"
  }
 }

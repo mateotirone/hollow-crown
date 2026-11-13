@@ -4,7 +4,7 @@
 
 Every build in The Hollow Crown, designed or not. Add an entry the moment a build is asked for, even with no design yet, and move its status on as it progresses. Run  node tools/build-catalog.mjs  after editing to rewrite builds/CATALOG.md (check.mjs fails if it is stale).
 
-**108 builds:** 1 not started, 26 designed, 15 in viewer, 66 in game.
+**110 builds:** 1 not started, 26 designed, 17 in viewer, 66 in game.
 
 Statuses:
 
@@ -169,6 +169,8 @@ A ★ marks builds that no earlier list had (added in the 2026-11-12 audit).
 
 | Build | Region | Status | Viewer | Owner thread | Source | Notes |
 |---|---|---|---|---|---|---|
-| Everwake: the city on its cloud | Everwake, the city in the sky | in viewer | everwake | Design the Cloud City and flight | `map/structures/everwake/spec.py` | Waiting in PR #197. Style guide .claude/skills/minecraft-builder/regions/everwake.md. |
-| Everwake with the Needle and the cloud sea | Everwake, the city in the sky | in viewer | everwake | Design the Cloud City and flight | `map/structures/everwake/spec.py` | Waiting in PR #197. |
+| Everwake: the city on its cloud | Everwake, the city in the sky | in viewer | everwake | Design the Cloud City and flight | `map/structures/everwake/spec.py` | Waiting in PR #197. Round 2 (2026-11-13): own world, bigger and dense, rocky island underneath, air boat dock. Style guide .claude/skills/minecraft-builder/regions/everwake.md. 3D https://claude.ai/artifact/Nta25jXtY8KV5nKpX89TpU |
+| Air boat station (restored, with the air boat at the mast) | Aldmere Vale | in viewer | everwake | Design the Cloud City and flight | `map/structures/everwake/station.py` | How players reach Everwake: walk through the Gate on the mast deck (a portal). Site on the map not picked yet. 3D https://claude.ai/artifact/FMsPEnYSySaimmZz7YaU1X |
+| Air boat station ruin (before the story brings Everwake in) | Aldmere Vale | in viewer | everwake | Design the Cloud City and flight | `map/structures/everwake/station.py` | The restored design run through the engine's ruin step. |
+| Everwake air boat (blimp and gondola) | Everwake, the city in the sky | in viewer | everwake | Design the Cloud City and flight | `map/structures/everwake/airboat.py` | Mateo OK 2026-11-13. cells(ring_at, heading) places it at a mooring; MOORING gives the deck, bow gate and side door from the nose ring. |
 | Everwake sky model (floating entity seen from the ground) | Everwake, the city in the sky | not started |  | Design the Cloud City and flight |  | An entity model, not a block build. |

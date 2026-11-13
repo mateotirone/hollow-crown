@@ -13,13 +13,21 @@ export const LANDMARKS = STAMPS;
 // Big stamps (a whole boss area runs to 100k+ cells) carry their cells as columns instead of `blocks`:
 // cols = { w, data: "x,z,y0:<symbols going up>;..." }, one symbol per cell (w = 2: two), "!" for a skipped cell
 // (map/structures/boss_landmarks.py encode_cols).
+const HEAD = /^-?\d+,-?\d+,-?\d+:/;
 const ALPHA = Array.from({ length: 92 }, (_, k) => String.fromCharCode(35 + k)).filter((c) => c !== "\\").join("");
 export function stampCells(stamp) {
   if (stamp?.blocks) return stamp.blocks;
   const c = stamp?.cols;
   if (!c?.data) return [];
   const out = [], w = c.w ?? 1, at = (ch) => ALPHA.indexOf(ch);
-  for (const col of c.data.split(";")) {
+  // ";" is also one of the cell symbols (palette index 24), so a split on it can cut a column in two: glue any piece
+  // that does not start with a column head back onto the one before it.
+  const cols = [];
+  for (const piece of c.data.split(";")) {
+    if (cols.length && !HEAD.test(piece)) cols[cols.length - 1] += ";" + piece;
+    else cols.push(piece);
+  }
+  for (const col of cols) {
     const k = col.indexOf(":");
     const [x, z, y0] = col.slice(0, k).split(",").map(Number);
     const run = col.slice(k + 1);

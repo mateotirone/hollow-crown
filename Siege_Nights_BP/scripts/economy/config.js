@@ -83,7 +83,9 @@ export const JOBS = {
   woodcutter: {
     name: "Woodcutter", home: [V, B], scarce: [E],
     buys: [...LOGS.map((id) => g(id, 16, 8)), g("oak_sapling", 16, 2), g("spruce_sapling", 16, 2), g("stick", 64, 2)],
-    sells: [g("oak_planks", 32, 8), g("spruce_planks", 32, 8), g("charcoal", 16, 14)],
+    sells: [g("oak_planks", 32, 8), g("spruce_planks", 32, 8), g("charcoal", 16, 14),
+      // saplings: the old trees can't be felled, so this is where new wood starts (new-player audit, 2026-11-13)
+      g("oak_sapling", 4, 4), g("spruce_sapling", 4, 4), g("birch_sapling", 4, 4), g("acacia_sapling", 4, 4), g("dark_oak_sapling", 4, 4)],
   },
   quarryman: {
     name: "Quarryman", home: [F], scarce: [B, S],
@@ -95,7 +97,7 @@ export const JOBS = {
     name: "Smith", home: [F], scarce: [B],
     buys: [g("coal", 16, 8), g("raw_copper", 16, 6), g("copper_ingot", 16, 8), g("raw_gold", 4, 16), g("gold_ingot", 1, 5, { want: 16, step: 8 }),
       g("redstone", 16, 6), g("lapis_lazuli", 16, 8)],
-    sells: [g("coal", 16, 14), g("iron_pickaxe", 1, 34), g("iron_axe", 1, 34), g("iron_shovel", 1, 14), g("iron_sword", 1, 24),
+    sells: [g("coal", 16, 14), g("iron_pickaxe", 1, 34), g("iron_axe", 1, 34), g("iron_shovel", 1, 14), g("iron_sword", 1, 24), g("shield", 1, 20),
       g("shears", 1, 24), g("bucket", 1, 34), g("rail", 16, 64), g("anvil", 1, 320), ...REGIONAL_GUARD, ...STARTER(["weapon"])],
   },
   fisher: {

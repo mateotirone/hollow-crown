@@ -6,11 +6,18 @@
 //   charterCheck(tier, counts, known) -> { met, lines: [{ what, have, need, skipped }] }
 //   charterKeeps(free, tier, counts, known, slot, id) -> undefined, or { what, tier, ids } the plot is kept for
 
-import { OPENS_AT, PLOT_SIZE, PLOT_ALSO, PLOT_FALLBACK, PLOT_TAGS, TAG_WORDS, CHARTERS, WORK } from "./config.js";
+import { OPENS_AT, PLOT_SIZE, PLOT_ALSO, PLOT_FALLBACK, PLOT_MIN_BOX, PLOT_TAGS, TAG_WORDS, CHARTERS, WORK } from "./config.js";
 
 export const CLASS_NAMES = { S: "Small", M: "Medium", ML: "long Medium", L: "Large", G: "Great", W: "Works" };
 
 export const slotClass = (slot) => (slot.size === "M" && slot.long ? "ML" : slot.size);
+// [width along the door side, depth] of a slot with a box and door (undefined without them)
+export function slotDims(slot) {
+  const b = slot?.box, d = slot?.door;
+  if (!b || !d) return undefined;
+  const wx = b.x1 - b.x0 + 1, wz = b.z1 - b.z0 + 1;
+  return d.z ? [wx, wz] : [wz, wx];
+}
 
 export const opensAt = (id) => OPENS_AT[id] ?? 3;
 
@@ -21,6 +28,8 @@ export function plotFit(id, slot, freeClasses = new Set()) {
   let ok = own.includes(cls);
   if (!ok && (PLOT_FALLBACK[id] ?? []).includes(cls)) ok = !own.some((c) => freeClasses.has(c));
   if (!ok) return { ok: false, tagged: false, why: `needs a ${CLASS_NAMES[PLOT_SIZE[id] ?? "S"]} plot` };
+  const min = PLOT_MIN_BOX[id], dims = slotDims(slot);
+  if (min && dims && (dims[0] < min[0] || dims[1] < min[1])) return { ok: false, tagged: false, why: `needs a deeper ${CLASS_NAMES[PLOT_SIZE[id] ?? "S"]} plot (${min[0]} x ${min[1]})` };
   const tags = slot.tags ?? [];
   const rule = PLOT_TAGS[id] ?? {};
   if (rule.needs && !rule.needs.some((t) => tags.includes(t))) return { ok: false, tagged: true, why: `needs a plot ${rule.needs.map((t) => TAG_WORDS[t] ?? t).join(" or ")}` };

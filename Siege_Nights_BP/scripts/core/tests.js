@@ -15,6 +15,7 @@ const tests = [];
 // tools/check.mjs, which fails if a slow test is missing from this list. Written as "group: name".
 export const OFFLINE_ONLY = new Set([
   "landmarks: tomes laid in designs are real tomes, each laid once, each on something solid",
+  "plot caves: a plot cave: each tier opens more, all of it reached from the shaft, ore only on open faces, a door at Castle",
   "trains: stations: at the end of a line the track stops at a buffer and an end wall, on the side away from the line",
   "settle ground: terraform: a floor on a slope cuts in at most 3, and the groundwork blends the land round it",
   "undertow: the Wound: the cliff behind it runs right across the valley, never lower than the first wall, and is built up into the roof",

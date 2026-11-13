@@ -127,11 +127,13 @@ export const PLOT_ALSO = {
   market: ["ML"], // the market may take a long Medium
   farmhouse: ["ML"],
   house: ["ML"],
-  barracks: ["ML"],
   library: ["L"], stable: ["L"], storehouse: ["L"], townhouse: ["L"],
 };
 // Only when the town has no free plot of the building's own size or PLOT_ALSO sizes left
-export const PLOT_FALLBACK = { barracks: ["M"] }; // the barracks may take a plain Medium
+export const PLOT_FALLBACK = {}; // (the barracks' plain-Medium fallback is gone: the guardhouse never fit one, 2026-11-13)
+// The smallest plot box a building stands on: [width along the door side, depth]. The guardhouse (every region,
+// barn_data.js) is 15 x 17, so only a deep Large holds it (the town generator gives every layout one by the City).
+export const PLOT_MIN_BOX = { barracks: [15, 17] };
 
 // Where on the map a building wants to be, from the plot's tags (wall, corner, square, gate, road_front,
 // field_edge, hall, library). needs: the plot must have one of them. prefer: listed first in the menu.

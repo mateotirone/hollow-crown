@@ -29,6 +29,10 @@ A statue spot (one per figure, the format the towns thread and the game share):
     size      times the model's size: 5 on the avenue (a king about 15 blocks tall), 7.3 at the Gate (about 20)
     plinth    half-width of the plinth's footing (2 = 5x5, 4 = 9x9), 0 for a fallen one lying on the ground
     y         optional: the block the figure stands on, if the bake knows it (otherwise the game reads the plinth)
+    rise      optional: how many blocks the plinth stands above the ground round it (default 2); a bottom slab on top
+              is fine, the figure then stands on the slab
+    age "seated" is the Gate's great seated figure on its throne (hold and wear are ignored; the throne is part of the
+    model, centred on x/z, his feet forward of it toward `face`)
 """
 import json, math, os, sys
 
@@ -39,10 +43,10 @@ SPOTS_DIR = os.path.join(HERE, "..", "statue-spots")
 
 PLINTH_H = 2
 STONE = {"ladder": ["cut_sandstone", "sandstone", "smooth_sandstone"], "axis": "noise", "scale": 3}
-AGES = ["boy", "youth", "young_king", "king", "old_king"]
+AGES = ["boy", "youth", "young_king", "king", "old_king", "seated"]
 HOLDS = ["folded", "staff", "sword", "bowl"]
 WEARS = ["whole", "headless", "armless", "stump", "fallen"]
-AVENUE_SIZE, GATE_SIZE = 5, 7.3
+AVENUE_SIZE, GATE_SIZE, SEATED_SIZE = 5, 7.3, 10
 
 
 def _h(*k):
@@ -88,6 +92,10 @@ def gate_spots(anchor=(850, 590)):
         hold, wear = (v, "whole") if v in HOLDS else ("folded", v)
         out.append({"id": f"gate_{k + 1}", "x": ax + x, "z": az + z, "face": f, "age": "old_king", "hold": hold, "wear": wear,
                     "size": GATE_SIZE, "plinth": 4})
+    # the great seated figure behind the pylons, on its three-tier stepped plinth (boss_landmarks.seneschal: centre
+    # (0, -26), radius 11.5, top a slab layer at y 10), about 30 blocks tall, looking south down the processional way
+    out.append({"id": "gate_seated", "x": ax, "z": az - 26, "face": "s", "age": "seated", "hold": "folded", "wear": "whole",
+                "size": SEATED_SIZE, "plinth": 11, "rise": 10})
     for k, (v, x, z) in enumerate(FALLEN):   # toppled long ago: feet at the spot, head to the north
         out.append({"id": f"gate_fallen_{k + 1}", "x": ax + x, "z": az + z, "face": "s", "age": "old_king", "hold": v, "wear": "fallen",
                     "size": GATE_SIZE, "plinth": 0})
@@ -157,6 +165,7 @@ def check_spot(s):
     if s["hold"] not in HOLDS: bad.append(f"hold {s['hold']}")
     if s["wear"] not in WEARS: bad.append(f"wear {s['wear']}")
     if not (0.5 <= s["size"] <= 12): bad.append(f"size {s['size']}")
+    if "rise" in s and not (0 <= s["rise"] <= 40): bad.append(f"rise {s['rise']}")
     return bad
 
 
