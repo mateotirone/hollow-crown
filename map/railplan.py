@@ -90,6 +90,151 @@ def _climb_jogs(cells, keep=(), window=15):
     assert res[-1] == cells[-1]
     return res
 
+MIN_RUN = 12           # shortest straight between two 45 degree bends on open line (long straights, no wiggles)
+RUN_TOL = 7            # how far the straightened line may stray from the routed one (blocks)
+RUN_LOOK = 24          # how far ahead along the routed line the straightener aims
+
+
+def _u(d): return DX[d], DZ[d]
+
+
+def _hdiff(a, b):
+    """Signed heading change from a to b in 45 degree steps, -3..4."""
+    return (b - a + 3) % 8 - 3
+
+
+def _connect(p, h, r, b, hb, ref, n_max, tol=RUN_TOL, min_run=MIN_RUN):
+    """Runs from p (arriving with heading h, r blocks since the last bend) to b, arriving at b with heading hb:
+    up to three straight runs with 45 degree bends between them. Returns the cells after p up to b (best fit to the
+    routed cells `ref`), or None. Runs shorter than MIN_RUN are allowed but cost a lot."""
+    ref = np.asarray(ref, float)
+    best = None
+    for h1 in (h, (h + 1) % 8, (h - 1) % 8):
+        for h2 in (hb, (hb + 1) % 8, (hb - 1) % 8):
+            if abs(_hdiff(h1, h2)) > 1: continue
+            u1, u2, u3 = _u(h1), _u(h2), _u(hb)
+            for n1 in range(0, n_max + 1):
+                q = (p[0] + u1[0] * n1, p[1] + u1[1] * n1)
+                dx, dz = b[0] - q[0], b[1] - q[1]
+                if h2 == hb:
+                    n2 = 0
+                    k = dx * u3[0] + dz * u3[1]
+                    if k < 1 or (u3[0] * k, u3[1] * k) != (dx, dz): continue
+                    n3 = k
+                else:
+                    det = u2[0] * u3[1] - u2[1] * u3[0]
+                    if det == 0: continue
+                    n2f = (dx * u3[1] - dz * u3[0]) / det; n3f = (u2[0] * dz - u2[1] * dx) / det
+                    n2, n3 = int(round(n2f)), int(round(n3f))
+                    if abs(n2 - n2f) > 1e-9 or abs(n3 - n3f) > 1e-9 or n2 < 0 or n3 < 1: continue
+                runs = [(h1, n1), (h2, n2), (hb, n3)]
+                live = [(hh, n) for hh, n in runs if n > 0]
+                prev, ok, cost = h, True, 0.0
+                since = r
+                for k_, (hh, n) in enumerate(live):
+                    t = abs(_hdiff(prev, hh))
+                    if t > 1: ok = False; break
+                    if t == 1 and since < min_run: cost += 60.0 * (min_run - since)
+                    since = n if t == 1 else since + n
+                    prev = hh
+                if not ok: continue
+                if live[-1][1] < min_run and live[-1][0] != h: cost += 60.0 * (min_run - live[-1][1])
+                cells, c = [], p
+                for hh, n in live:
+                    for _ in range(n):
+                        c = (c[0] + DX[hh], c[1] + DZ[hh]); cells.append(c)
+                arr = np.asarray(cells, float)
+                dev = np.sqrt(((arr[:, None, :] - ref[None, :, :]) ** 2).sum(-1)).min(1)
+                cost += float(np.maximum(dev - tol, 0).sum()) * 4 + float(dev.sum()) * 0.05 + 2.0 * (len(live) - 1)
+                if best is None or cost < best[0]: best = (cost, cells)
+    return best
+
+
+def _straighten(stretch, h0, hb, tol=RUN_TOL, min_run=MIN_RUN, look=RUN_LOOK):
+    """One free stretch of line (the cells between two platforms, ends included) as long straight runs with 45
+    degree bends that keep within RUN_TOL of it, instead of the staircase an angled line rasters into (one sideways
+    step every block or two, which read as a zig-zag in game: playtest 2026-11-13). h0: heading arriving at the first
+    cell (None: free); hb: heading leaving the last (None: free)."""
+    a, b = tuple(stretch[0]), tuple(stretch[-1])
+    n = len(stretch)
+    if n < 3: return list(stretch)
+    ref = np.asarray(stretch, float)
+    if h0 is None: h0 = _dir(stretch[0], stretch[1])
+    finals = [hb] if hb is not None else list(range(8))
+    out, p, h, r, k = [a], a, h0, min_run, 0
+    while True:
+        rem = math.dist(p, b)
+        if rem <= 4 * min_run + look:
+            tries = [x for x in (_connect(p, h, r, b, f, ref[max(0, k - 4):], int(rem * 1.5) + 2, tol, min_run) for f in finals) if x]
+            if tries:
+                cost, cells = min(tries, key=lambda t: t[0])
+                if cost < 30 or rem <= min_run:
+                    return out + cells
+        if len(out) > 2 * n + 50:
+            return list(stretch)                        # never a worse line than the routed one
+        lo = k; hi = min(n, k + 40)
+        k = lo + int(np.argmin(np.hypot(ref[lo:hi, 0] - p[0], ref[lo:hi, 1] - p[1])))
+        t = ref[min(n - 1, k + look)]
+        vx, vz = t[0] - p[0], t[1] - p[1]
+        if vx or vz:
+            ux, uz = _u(h); m = math.hypot(ux, uz) * math.hypot(vx, vz)
+            ang = math.degrees(math.acos(max(-1.0, min(1.0, (ux * vx + uz * vz) / m))))
+            off = float(np.hypot(ref[lo:hi, 0] - p[0], ref[lo:hi, 1] - p[1]).min())
+            if r >= min_run and (ang > 30 or (ang > 15 and off > tol)):
+                cross = ux * vz - uz * vx                 # +: the target is clockwise (DX/DZ go clockwise from north)
+                h = (h + (1 if cross > 0 else -1)) % 8; r = 0
+        p = (p[0] + DX[h], p[1] + DZ[h]); out.append(p); r += 1
+
+
+def _straighten_clear(stretch, h0, hb, blocked=None):
+    """_straighten, tightened step by step where the straighter line would stray into ground the route kept out of
+    (blocked(x, z) -> True: a town, a plot, a story site); the routed stretch itself if even the tightest strays."""
+    ref = np.asarray(stretch, float)
+    for tol, run, look in ((RUN_TOL, MIN_RUN, RUN_LOOK), (4, 8, 16), (2, 5, 10)):
+        seg = _straighten(stretch, h0, hb, tol, run, look)
+        if blocked is None: return seg
+        arr = np.asarray(seg, float)
+        bad = [i for i, c in enumerate(seg) if blocked(*c)]
+        if not bad: return seg
+        far = np.sqrt(((arr[bad][:, None, :] - ref[None, :, :]) ** 2).sum(-1)).min(1)
+        if (far <= 1.5).all(): return seg              # no further in than the route itself went
+    return list(stretch)
+
+
+def _long_runs(cells, keep=(), blocked=None):
+    """Straighten every stretch of a line between its platforms (keep: platform cells, left exactly as they are).
+    Where the route itself threads ground it otherwise keeps out of (the corridor through a town to its stamped
+    station), that part stays as routed too."""
+    keep = set(keep)
+    if blocked is not None: keep |= {c for c in cells if blocked(*c)}
+    fixed = [i for i, c in enumerate(cells) if c in keep]
+    if not fixed: fixed = []
+    bounds = []
+    prev = 0
+    i = 0
+    # free stretches: maximal runs of non-keep cells, with the keep cell (or line end) on each side
+    while i < len(cells):
+        if cells[i] in keep: i += 1; continue
+        j = i
+        while j < len(cells) and cells[j] not in keep: j += 1
+        bounds.append((max(0, i - 1), min(len(cells) - 1, j)))
+        i = j
+    out = []
+    last = 0
+    for s, e in bounds:
+        out += cells[last:s]
+        h0 = _dir(cells[s - 1], cells[s]) if s > 0 and cells[s] in keep else None
+        hb = _dir(cells[e], cells[e + 1]) if e + 1 < len(cells) and cells[e] in keep else None
+        seg = _straighten_clear(cells[s:e + 1], h0, hb, blocked)
+        out += seg[:-1] if e < len(cells) - 1 else seg
+        last = e if e < len(cells) - 1 else len(cells)
+    out += cells[last:]
+    res = [out[0]]
+    for c in out[1:]:
+        if c != res[-1]: res.append(c)
+    return res
+
+
 def _despike(cells, keep=()):
     """Flatten one-block bumps: a cell stepping out sideways and straight back (the track can't turn 90 degrees on a
     diagonal) is moved back onto the straight between its neighbours."""
@@ -100,7 +245,7 @@ def _despike(cells, keep=()):
             cells[i] = ((ax + bx) // 2, (az + bz) // 2)
     return cells
 
-def trace(points, stops=(), routed=False):
+def trace(points, stops=(), routed=False, blocked=None):
     """points: the line's control points [(x, z), ...] (already smooth); stops: [(x, z, axis or None), ...] that the
     line passes through or starts/ends at. Returns (cells, stop_index) with a straight N/S/E/W run of PLATFORM
     blocks each side of every stop (only on the line's side at a line end). routed=True: the points already run
@@ -158,7 +303,7 @@ def trace(points, stops=(), routed=False):
     keep = set()
     for _, a, s, b, _ in pieces: keep |= set(_raster([a, s, b]))
     cells = _smooth_turns(cells, keep)
-    cells = _climb_jogs(cells, keep)
+    cells = _long_runs(cells, keep, blocked)   # long straights and 45 degree bends, not a staircase (was _climb_jogs)
     cells = _despike(cells, keep)
     idx = {c: n for n, c in enumerate(cells)}
     found = [idx.get(c, int(np.argmin([math.dist(c, q) for q in cells]))) for c in stop_cells]
