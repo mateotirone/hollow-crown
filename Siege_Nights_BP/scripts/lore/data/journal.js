@@ -6,7 +6,7 @@
 
 export const JOURNAL = {
   title: "The Old King's Journal",
-  cover: "A small book bound in cracked red leather. The royal seal is on the cover. Under it a name has been scraped away with a knife, down to the board.",
+  cover: "A small book bound in cracked red leather. The royal seal is on the cover. Under it someone has scraped a name off with a knife, so deep that only the bare wood under the leather shows.",
   entries: [
     {
       date: "The 21st year of my reign. Thaw.",
@@ -26,7 +26,7 @@ export const JOURNAL = {
     },
     {
       date: "The 24th year. First frost.",
-      text: "I saw the moon tonight over the west marsh. It was full and very low.\n\nThe moon set in the east an hour before, a thin new sliver. I watched it go down myself.\n\nI sent for the astronomer and pointed. He would not turn his head. He said, \"Sire, if I do not look, I will not have seen it,\" and I found that I could not order him to.",
+      text: "I saw two moons tonight.\n\nAt dusk I watched our own moon go down, a thin new sliver, as it ought to be at this turn of the month. I saw it set myself.\n\nAn hour later a second moon stood over the west marsh, full and white and very low. There is one moon. There has only ever been one moon.\n\nI sent for the astronomer and pointed. He would not turn his head. He said, \"Sire, if I do not look, I will not have seen it,\" and I found that I could not order him to.",
     },
     {
       date: "The 25th year. High summer.",
