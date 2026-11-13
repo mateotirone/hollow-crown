@@ -5,21 +5,26 @@ Y 254 and the top of the Spire of the Held Note reaches Y 316 (local 61; nothing
 
 specs() -> {"everwake_city": spec, "everwake_needle": spec}
 """
-import math, random
+import math, os, random, sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from airboat import cells as boat_cells, MOORING  # noqa: E402  (the air boat, PR #305)
+from parts import turn_cell  # noqa: E402  (airboat.py puts the skill's scripts on the path)
 
 WORLD_Y = 255            # world Y of local y = 0
 STYLE = "everwake_stone"
 COPPER = {"ladder": ["waxed_weathered_cut_copper", "waxed_oxidized_cut_copper"], "axis": "y"}
 SPIRE_ROOF = {"ladder": ["waxed_weathered_cut_copper", "waxed_oxidized_cut_copper"], "axis": "y"}
 PLAZA = {"ladder": ["polished_diorite", "calcite", "smooth_quartz"], "axis": "noise", "scale": 4}
-CLOUD = {"ladder": ["light_gray_wool", "white_concrete", "white_wool"], "axis": "y", "texture": False}
+CLOUD = {"ladder": ["light_gray_wool", "white_concrete", "white_wool", "white_wool", "white_wool"], "axis": "y", "texture": False}
 ROCK = {"ladder": ["tuff", "andesite", "diorite", "calcite"], "axis": "y"}
 
-R_CITY = 60              # radius of the main disc
-LOBES = [(a, 52, 17.5) for a in (90, 141, 193, 244, 296, 347, 39)]   # cloud-shaped edge (degrees, centre r, radius)
-TOWER_R = 44             # the seven bell towers
+R_CITY = 88              # radius of the main disc (round 2, Mateo 2026-11-13: "much more dense ... maybe bigger")
+LOBES = [(a, 78, 24.5) for a in (90, 141, 193, 244, 296, 347, 39)]   # cloud-shaped edge (degrees, centre r, radius)
+TOWER_R = 64             # the seven bell towers
+RINGS = (30, 54, 78)     # ring streets
 SPIRE = (-10, -10, 10, 10)
-GATE_Z = (49, 57)
+GATE_Z = (93, 101)       # the gatehouse, at the tip of the south lobe
 
 
 def lobe_centres():
@@ -40,49 +45,71 @@ def towers():
 
 
 def platform_shapes():
+    """The paved deck: the disc and its lobes, 3 thick, with a low parapet round the outer edge."""
     sh = [{"shape": "cylinder", "at": [0, -3, 0], "r": R_CITY + 0.5, "h": 3, "material": "plaza", "hollow": 0}]
     for cx, cz, rr in lobe_centres():
         sh.append({"shape": "cylinder", "at": [cx, -3, cz], "r": rr, "h": 3, "material": "plaza", "hollow": 0})
-    # a low parapet round the outer edge only: the same discs one higher, minus the discs shrunk by one
     sh.append({"shape": "cylinder", "at": [0, 0, 0], "r": R_CITY + 0.5, "h": 1, "material": "parapet"})
     for cx, cz, rr in lobe_centres():
         sh.append({"shape": "cylinder", "at": [cx, 0, cz], "r": rr, "h": 1, "material": "parapet"})
     sh.append({"op": "sub", "shape": "cylinder", "at": [0, 0, 0], "r": R_CITY - 0.5, "h": 1})
     for cx, cz, rr in lobe_centres():
         sh.append({"op": "sub", "shape": "cylinder", "at": [cx, 0, cz], "r": rr - 1, "h": 1})
-    # the gate in the parapet, due south
-    sh.append({"op": "sub", "shape": "box", "min": [-2, 0, 55], "max": [2, 0, 72]})
+    sh.append({"op": "sub", "shape": "box", "min": [-2, 0, 98], "max": [2, 0, 112]})     # the gate in the parapet
     return sh
 
 
 def underside_shapes(rng):
+    """Round 2 (Mateo: "the platform itself needs some work"). The deck sits on the torn-up hill it was rung up
+    with: a floating island of rock, broad under the deck and narrowing in lumps to a ragged point far below,
+    with lesser crags and roots hanging off it. Cloud wraps the rim and the island's shoulders in round puffs,
+    white on top, only the undersides grey, so from the side the city reads as resting on a cloud."""
     sh = []
-    # the cloud the city sits in: a broad belly under the disc, puffs round the rim
-    sh.append({"shape": "ellipsoid", "at": [0, -14, 0], "r": [R_CITY + 2, 12, R_CITY + 2], "material": "cloud"})
-    for cx, cz, rr in lobe_centres():
-        sh.append({"shape": "ellipsoid", "at": [cx, -11, cz], "r": [rr + 3, 8, rr + 3], "material": "cloud"})
-    for k in range(34):
-        a = rng.uniform(0, 2 * math.pi); r = rng.uniform(R_CITY - 6, R_CITY + 8)
+    R = R_CITY
+    # the main crag: a lumpy inverted cone (a lathe, so it stays a shell)
+    prof = [[0, 1.5], [10, 9], [22, 20], [34, 34], [44, 50], [52, 64], [58, 76], [62, R - 4], [63.5, R - 10]]
+    sh.append({"shape": "lathe", "at": [0, -66, 0], "material": "rock", "profile": prof})
+    for cx, cz, rr in lobe_centres():                          # each lobe on its own shoulder of rock
+        p2 = [[0, 1.5], [8, rr * 0.35], [16, rr * 0.7], [22, rr * 0.95], [24, rr - 3]]
+        sh.append({"shape": "lathe", "at": [cx, -27, cz], "material": "rock", "profile": p2})
+    for k in range(14):                                        # lumps on the crag, so it is not a smooth cone
+        a = rng.uniform(0, 2 * math.pi); dep = rng.uniform(8, 44)
+        rad = (R - 6) * (1 - dep / 64) ** 1.15
+        x, z = math.cos(a) * rad, math.sin(a) * rad
+        sh.append({"shape": "ellipsoid", "at": [round(x), -dep - 4, round(z)], "material": "rock",
+                   "r": [rng.uniform(9, 16), rng.uniform(7, 12), rng.uniform(9, 16)]})
+    for k in range(11):                                        # lesser crags hanging off the shoulders
+        a = rng.uniform(0, 2 * math.pi); r = rng.uniform(20, 66)
         x, z = round(math.cos(a) * r), round(math.sin(a) * r)
-        if abs(x) < 7 and z > 40: continue                   # keep the gate and the cloud stair clear
-        rr = rng.choice([4.5, 5.5, 6.5, 7.5])
-        sh.append({"shape": "sphere", "at": [x, rng.choice([-6, -5, -4]), z], "r": rr, "material": "cloud"})
-    for k in range(10):                                      # lower puffs under the belly
-        a = rng.uniform(0, 2 * math.pi); r = rng.uniform(5, 40)
-        sh.append({"shape": "ellipsoid", "at": [round(math.cos(a) * r), -24, round(math.sin(a) * r)],
-                   "r": [rng.uniform(9, 15), rng.uniform(4, 6), rng.uniform(9, 15)], "material": "cloud"})
-    # stone roots hanging out of the cloud: what the city tore out of the ground when it was rung up
-    for k in range(9):
-        a = math.radians(k * 40 + rng.uniform(-12, 12)); r = rng.uniform(12, 42)
-        x, z = round(math.cos(a) * r), round(math.sin(a) * r)
-        top = -20; ln = rng.choice([18, 22, 26, 30])
+        top = -int(8 + 50 * (r / R) ** 0.5 * 0.6) - 6
+        top = -int(64 * (1 - r / (R + 4)) ** 0.9) - 2
+        ln = rng.choice([14, 18, 22, 28, 34])
+        w = rng.uniform(3.5, 7.5)
         sh.append({"shape": "lathe", "at": [x, top - ln, z], "material": "rock",
-                   "profile": [[0, 0.5], [ln * 0.35, 1.5], [ln * 0.7, 2.5], [ln, 3.5]]})
+                   "profile": [[0, 0.5], [ln * 0.3, w * 0.4], [ln * 0.7, w * 0.8], [ln, w]]})
+    # cloud: a ring of round puffs round the rim, banked up to the parapet and spilling under it
+    for k in range(64):
+        a = k * 2 * math.pi / 64 + rng.uniform(-0.04, 0.04)
+        x, z = math.cos(a) * R, math.sin(a) * R
+        best = min(lobe_centres(), key=lambda c: math.hypot(x - c[0], z - c[1]))
+        for cx, cz, rr in [best]:                          # push out to the edge of a lobe where there is one
+            if math.hypot(cx, cz) and math.hypot(x - cx, z - cz) < rr + 6:
+                d = math.hypot(x - cx, z - cz) or 1
+                x, z = cx + (x - cx) / d * (rr - 1), cz + (z - cz) / d * (rr - 1)
+        if abs(x) < 9 and z > 80: continue                    # keep the gate clear
+        sh.append({"shape": "sphere", "at": [round(x), rng.choice([-10, -11, -12]), round(z)], "r": rng.choice([5.5, 6.5, 7.5, 8.5]), "material": "cloud"})
+    for k in range(40):                                        # the cloud bank on the island's shoulders
+        a = rng.uniform(0, 2 * math.pi); dep = rng.uniform(10, 30)
+        rad = (R - 2) * (1 - dep / 64) ** 1.15 + rng.uniform(2, 8)
+        x, z = round(math.cos(a) * rad), round(math.sin(a) * rad)
+        sh.append({"shape": "ellipsoid", "at": [x, -dep, z], "material": "cloud",
+                   "r": [rng.uniform(8, 14), rng.uniform(4.5, 7), rng.uniform(8, 14)]})
     return sh
 
 
 def road_cells():
-    """Seven avenues from the Spire to the towers, one due south to the gate, and a ring street (paint on the paving)."""
+    """Round 2 street plan: avenues from the Spire to the seven towers and on to the edge, a wide avenue due south
+    to the gate, three ring streets, and lanes between the avenues from the first ring out (paint on the paving)."""
     cells = set()
     def line(x0, z0, x1, z1, w):
         n = int(max(abs(x1 - x0), abs(z1 - z0))) + 1
@@ -91,11 +118,24 @@ def road_cells():
             for dx in range(-w, w + 1):
                 for dz in range(-w, w + 1):
                     cells.add((round(x + dx), round(z + dz)))
-    for tx, tz in towers(): line(0, 0, tx, tz, 1)
-    line(0, 0, 0, 62, 2)
-    for k in range(360):
-        a = math.radians(k); line(math.cos(a) * 28, math.sin(a) * 28, math.cos(a) * 28, math.sin(a) * 28, 1)
-    return {c for c in cells if inside(*c, 1) and not (SPIRE[0] <= c[0] <= SPIRE[2] and SPIRE[1] <= c[1] <= SPIRE[3])}
+    for tx, tz in towers():
+        d = math.hypot(tx, tz); line(0, 0, tx / d * (R_CITY + 26), tz / d * (R_CITY + 26), 1)
+    line(0, 0, 0, 112, 2)
+    for i in range(7):                                         # lanes halfway between the avenues
+        a = math.radians(i * 360 / 7 - 90 + 360 / 14)
+        if abs(math.degrees(a) % 360 - 90) < 20: continue      # the gate avenue already runs there
+        line(math.cos(a) * RINGS[0], math.sin(a) * RINGS[0], math.cos(a) * (R_CITY + 26), math.sin(a) * (R_CITY + 26), 0)
+    for i in range(14):                                        # and quarter lanes in the outer band
+        a = math.radians(i * 360 / 14 - 90 + 360 / 28)
+        line(math.cos(a) * RINGS[1], math.sin(a) * RINGS[1], math.cos(a) * (R_CITY + 26), math.sin(a) * (R_CITY + 26), 0)
+    for rr, w in ((RINGS[0], 1), (RINGS[1], 1), (RINGS[2], 0)):
+        for k in range(720):
+            a = math.radians(k / 2); line(math.cos(a) * rr, math.sin(a) * rr, math.cos(a) * rr, math.sin(a) * rr, w)
+    for cx, cz, rr in lobe_centres():                          # a loop street round each lobe
+        for k in range(720):
+            a = math.radians(k / 2); x, z = cx + math.cos(a) * (rr - 9), cz + math.sin(a) * (rr - 9)
+            if math.hypot(x, z) > RINGS[2]: line(x, z, x, z, 0)
+    return {c for c in cells if inside(*c, 1) and not (SPIRE[0] - 2 <= c[0] <= SPIRE[2] + 2 and SPIRE[1] - 2 <= c[1] <= SPIRE[3] + 2)}
 
 
 OPP = {"n": "s", "s": "n", "e": "w", "w": "e"}
@@ -158,11 +198,12 @@ def tower_parts():
 
 def gate_parts():
     """The gatehouse: an 11 x 9 hall open in an arcade on the ground storey, between two 5 x 5 towers of three
-    6-high stages with 7 x 7 bell stages on corbels and copper spires, a full stage clear of the hall's ridge."""
+    6-high stages with 7 x 7 bell stages on corbels and copper spires, a full stage clear of the hall's ridge.
+    Round 2: it stands at the tip of the south lobe, where the sky dock comes in."""
     z0, z1 = GATE_Z
     parts = [{"part": "house", "style": STYLE, "rect": [-5, z0, 5, z1], "y": 0, "plinth": 1, "storeys": [5, 5],
               "door": {"side": "s", "kind": "grand"}, "chimney": False, "arcade": {"sides": "ew", "storey": 0},
-              "roof": {"type": "hip"}}]
+              "roof": {"type": "hip"}, "interior": "hall"}]
     place = []
     for cx in (-8, 8):
         p, pl = tower(cx, (z0 + z1) // 2, 5, [6, 6, 6], None, top_h=5, eave=0)   # no flare: a 5-wide shaft under a 9-wide eave reads as a mushroom
@@ -170,49 +211,120 @@ def gate_parts():
     return parts, place
 
 
+ROOFS = [STYLE, STYLE, STYLE, {"base": STYLE, "roof": {"ladder": ["waxed_exposed_cut_copper", "waxed_weathered_cut_copper"], "axis": "y"}},
+         {"base": STYLE, "roof": {"block": "smooth_quartz", "texture": True}}]
+CIVIC = [("the_bell_foundry", 17, 13, [6, 5], "smithy"), ("the_bellkeepers_hall", 15, 13, [5, 5, 4], "hall"),
+         ("the_market_hall", 15, 11, [5, 5], "shop"), ("the_last_inn", 13, 11, [5, 5, 4], "inn"),
+         ("the_chapter_house", 13, 13, [5, 5], "library"), ("the_ringers_lodge", 13, 9, [5, 5], "barracks")]
+
+
 def house_parts(rng, roads):
-    taken = [(SPIRE[0] - 3, SPIRE[1] - 3, SPIRE[2] + 3, SPIRE[3] + 3), (-13, GATE_Z[0] - 3, 13, GATE_Z[1] + 3)]
-    taken += [(tx - 6, tz - 6, tx + 6, tz + 6) for tx, tz in towers()]
-    sizes = [(7, 9), (9, 7), (9, 11), (11, 9), (7, 7), (9, 9)]
-    parts, inn = [], None
-    tries = 0
-    while len(parts) < 40 and tries < 6000:
-        tries += 1
-        w, d = rng.choice(sizes)
-        a = rng.uniform(0, 2 * math.pi); r = rng.uniform(15, 56)
-        cx, cz = round(math.cos(a) * r), round(math.sin(a) * r)
-        x0, z0 = cx - w // 2, cz - d // 2; x1, z1 = x0 + w - 1, z0 + d - 1
-        box = (x0 - 2, z0 - 2, x1 + 2, z1 + 2)          # 1 of roof overhang + a lane
-        if not all(inside(x, z, 2) for x in (box[0], box[2]) for z in (box[1], box[3])): continue
-        if any(not (box[2] < t[0] or box[0] > t[2] or box[3] < t[1] or box[1] > t[3]) for t in taken): continue
-        if any((x, z) in roads for x in range(box[0], box[2] + 1) for z in range(box[1], box[3] + 1)): continue
-        taken.append(box)
-        dx, dz = -cx, -cz                                # door toward the Spire, the way people walk
-        door = ("e" if dx > 0 else "w") if abs(dx) > abs(dz) else ("s" if dz > 0 else "n")
-        tall = rng.random() < 0.45
-        roofc = rng.random()
-        style = STYLE if roofc < 0.55 else {"base": STYLE, "roof": {"ladder": ["waxed_exposed_cut_copper", "waxed_weathered_cut_copper"], "axis": "y"}} if roofc < 0.8 else \
-            {"base": STYLE, "roof": {"block": "smooth_quartz", "texture": True}}
-        p = {"part": "house", "style": style, "rect": [x0, z0, x1, z1], "y": 0, "plinth": 1,
-             "storeys": [5, 4] if tall else [5], "door": {"side": door}, "chimney": False,
-             "roof": {"type": rng.choice(["hip", "hip", "gable"])}, "shutters": 0.25, "vines": 0}
-        if inn is None and r < 30 and w * d >= 81:
-            p["storeys"] = [5, 5]; p["name"] = "the_last_inn"; inn = p
-        parts.append(p)
+    """Round 2 (Mateo, 2026-11-13: "much more dense, more buildings, more roads"): every block between the streets
+    is filled. Plots are packed from the street edge inwards, each house fronting the nearest street with its door
+    on it, two blocks between walls (their eaves meet over a gutter lane). Six civic buildings go first, in the
+    inner bands. Taller (three storeys) toward the Spire, lower toward the rim."""
+    W = int(R_CITY + 30)
+    road = roads
+    dist = {}                                              # steps from the nearest street, over the paving
+    from collections import deque
+    q = deque()
+    for c in road: dist[c] = 0; q.append(c)
+    while q:
+        x, z = q.popleft()
+        for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            n = (x + dx, z + dz)
+            if n in dist or not inside(*n, 1): continue
+            dist[n] = dist[(x, z)] + 1; q.append(n)
+    taken = set()
+    def block(x0, z0, x1, z1):
+        for x in range(x0, x1 + 1):
+            for z in range(z0, z1 + 1): taken.add((x, z))
+    block(SPIRE[0] - 4, SPIRE[1] - 4, SPIRE[2] + 4, SPIRE[3] + 4)
+    block(-14, GATE_Z[0] - 3, 14, GATE_Z[1] + 12)
+    for tx, tz in towers(): block(tx - 6, tz - 6, tx + 6, tz + 6)
+    def fits(x0, z0, x1, z1):
+        for x in range(x0 - 1, x1 + 2):                    # the eave ring must be paving, off the streets, unclaimed
+            for z in range(z0 - 1, z1 + 2):
+                if (x, z) in taken or (x, z) in road or not inside(x, z, 2): return False
+        return True
+    def door_side(x0, z0, x1, z1):
+        best = None
+        for sd, (x, z) in {"n": ((x0 + x1) // 2, z0 - 2), "s": ((x0 + x1) // 2, z1 + 2), "w": (x0 - 2, (z0 + z1) // 2), "e": (x1 + 2, (z0 + z1) // 2)}.items():
+            d = dist.get((x, z), 99)
+            if best is None or d < best[0]: best = (d, sd)
+        return best
+    parts = []
+    def place_one(x0, z0, w, d, name=None, storeys=None, use="home"):
+        x1, z1 = x0 + w - 1, z0 + d - 1
+        if not fits(x0, z0, x1, z1): return False
+        dd, sd = door_side(x0, z0, x1, z1)
+        if dd > 2: return False                            # every door opens on a street (or a step from one)
+        block(x0 - 1, z0 - 1, x1 + 1, z1 + 1)
+        r = math.hypot((x0 + x1) / 2, (z0 + z1) / 2)
+        if storeys is None:
+            storeys = [5, 4, 4] if r < 40 and rng.random() < 0.6 else [5, 4] if r < 70 or rng.random() < 0.6 else [5]
+        p = {"part": "house", "style": rng.choice(ROOFS), "rect": [x0, z0, x1, z1], "y": 0, "plinth": 1, "storeys": storeys,
+             "door": {"side": sd}, "chimney": False, "roof": {"type": rng.choice(["hip", "hip", "gable"])}, "shutters": 0.25,
+             "vines": 0, "finials": False, "interior": use}
+        if name: p["name"] = name; p["door"]["kind"] = "grand"
+        parts.append(p); return True
+    cells = sorted((c for c in dist if dist[c] in (1, 2)), key=lambda c: (math.hypot(*c), c))
+    for name, w, d, st, use in CIVIC:                      # civic buildings first, in the inner two bands
+        ok = False
+        for c in cells[rng.randrange(len(cells) // 3):] + cells:
+            if not (18 < math.hypot(*c) < 70): continue
+            for ww, dd in ((w, d), (d, w)):
+                for ox, oz in ((0, 0), (-ww + 1, 0), (0, -dd + 1), (-ww + 1, -dd + 1)):
+                    if place_one(c[0] + ox, c[1] + oz, ww, dd, name, st, use): ok = True; break
+                if ok: break
+            if ok: break
+    sizes = [(9, 7), (7, 9), (9, 9), (11, 7), (7, 11), (7, 7), (11, 9), (9, 11), (5, 7), (7, 5)]
+    for k in range(4):                                     # several sweeps: the street edge first, then inwards
+        order = sorted(dist, key=lambda c: (dist[c] if dist[c] > 0 else 99, rng.random()))
+        for c in order:
+            if dist[c] == 0 or c in taken: continue
+            rng.shuffle(sizes)
+            for w, d in sizes:
+                done = False
+                for ox, oz in ((0, 0), (-w + 1, 0), (0, -d + 1), (-w + 1, -d + 1)):
+                    if place_one(c[0] + ox, c[1] + oz, w, d): done = True; break
+                if done: break
     return parts
 
 
-def stair_from_needle():
-    """The last climb: a stone stair from the top of the Needle (under the cloud, due south) up to the gate."""
-    pl = []
-    for i in range(15):
-        z = 74 - i; y = -15 + i
-        for x in (-1, 0, 1):
-            pl.append([x, y, z, "polished_diorite_stairs", {"facing": "n"}])
-            pl.append([x, y - 1, z, "polished_diorite"])
-        for x in (-2, 2):
-            pl.append([x, y, z, "diorite_wall"])
-    return pl
+def sky_dock(rng):
+    """Round 2: where the air boat comes in (Mateo, 2026-11-13: you reach Everwake by air boat; in game the Gate in
+    Aldmere is a portal). A stone pier runs on south from the gatehouse over the cloud, carried on corbel brackets,
+    to a small mooring mast; the air boat lies along its east side, a gangway across to its gondola."""
+    pl, parts, sh = [], [], []
+    z0, z1 = GATE_Z[1] + 1, GATE_Z[1] + 46
+    for z in range(z0, z1 + 1):
+        for x in range(-3, 4):
+            pl.append([x, -1, z, "polished_andesite" if abs(x) <= 1 else "polished_diorite"])
+            pl.append([x, -2, z, "smooth_quartz"])
+        for x in (-4, 4):
+            pl.append([x, -1, z, "smooth_quartz"]); pl.append([x, 0, z, "diorite_wall"])
+            if (z - z0) % 3 == 0:
+                pl.append([x, -2, z, "smooth_quartz_stairs", {"facing": "n" if False else ("e" if x < 0 else "w"), "half": "top"}])
+        if (z - z0) % 6 == 0:                                # brackets under the deck
+            for x in range(-3, 4):
+                pl.append([x, -3, z, "smooth_quartz_stairs", {"facing": "s", "half": "top"}])
+            for x in (-4, 4):
+                pl += [[x, 1, z, "diorite_wall"], [x, 2, z, "lantern"]]
+    mz = z1 - 3
+    p, pll = tower(0, mz, 5, [5, 5], "n", top_h=4, eave=0, rows=2)   # the mooring mast at the pier's end
+    parts += p; pl += pll
+    for z in range(z0 + 8, z1 - 4):                          # clear the parapet walk where the gangway leaves
+        pass
+    ring = (20, -1 - MOORING["deck_y"], GATE_Z[1] + 69)       # the air boat (airboat.py), nose to the south, deck level with the pier
+    pl += boat_cells(ring, "s")
+    door = turn_cell(list(MOORING["side_door"]) + ["x"], ring, "s")   # its starboard door faces the pier (west)
+    gw = door[2]
+    for x in range(5, door[0]):                                # the gangway, pier to the door
+        for z in (gw - 1, gw, gw + 1): pl.append([x, -1, z, "spruce_planks"])
+        pl += [[x, 0, gw - 2, "spruce_fence"], [x, 0, gw + 2, "spruce_fence"]]
+    for z in (gw - 1, gw, gw + 1): pl.append([4, 0, z, "air"])
+    return sh, parts, pl
 
 
 def needle_shapes(rng):
@@ -246,24 +358,19 @@ def cloud_sea(rng):
 def city_spec(rng):
     roads = road_cells()
     place = [[x, -1, z, "polished_andesite"] for (x, z) in sorted(roads)]
-    place += stair_from_needle()
     sp, spl = spire_parts(); tp, tpl = tower_parts(); gp, gpl = gate_parts()
-    place += spl + tpl + gpl
+    dsh, dparts, dpl = sky_dock(rng)
+    place += spl + tpl + gpl + dpl
     return {
         "name": "everwake_city", "edition": "bedrock",
-        "materials": {"plaza": PLAZA, "parapet": "smooth_quartz", "cloud": CLOUD, "rock": ROCK},
-        "shapes": underside_shapes(rng) + platform_shapes(),
-        "parts": sp + tp + gp + house_parts(rng, roads),
+        "materials": {"plaza": PLAZA, "parapet": "smooth_quartz", "cloud": CLOUD, "rock": ROCK,
+},
+        "shapes": underside_shapes(rng) + platform_shapes() + dsh,
+        "parts": sp + tp + gp + house_parts(rng, roads) + dparts,
         "place": place,
     }
 
 
 def specs():
-    rng = random.Random(1319)
-    city = city_spec(rng)
-    needle = dict(city)
-    needle["name"] = "everwake_needle"
-    needle["materials"] = dict(city["materials"], rock_tall={"ladder": ["tuff", "andesite", "diorite", "calcite"], "axis": "y"},
-                               ledge="polished_diorite", cloudsea={"block": "white_wool", "texture": False})
-    needle["shapes"] = city["shapes"] + needle_shapes(rng) + cloud_sea(rng)
-    return {"everwake_city": city, "everwake_needle": needle}
+    """Round 2: Everwake is its own world (Mateo, 2026-11-13), reached by air boat, so the Needle scene is gone."""
+    return {"everwake_city": city_spec(random.Random(1319))}

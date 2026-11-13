@@ -1429,7 +1429,8 @@ def belfry(ctx, s):
     else:
         deck = y
         for x in range(x0, x1 + 1):
-            for z in range(z0, z1 + 1): ctx.set(x, deck, z, "floors", "full", dm)
+            for z in range(z0, z1 + 1):
+                if (x, deck, z) not in getattr(ctx, "hatches", ()): ctx.set(x, deck, z, "floors", "full", dm)   # keep the tower's roof hatch
     W, D = x1 - x0 + 1, z1 - z0 + 1
     thin = min(W, D) <= 3
     for x, z in ((x0, z0), (x1, z0), (x0, z1), (x1, z1)):

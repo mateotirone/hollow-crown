@@ -1,6 +1,6 @@
 # Everwake (the city in the sky)
 
-Read this before you build anything for Everwake: the city itself, the Needle, the cloud sea, or the sky
+Read this before you build anything for Everwake: the city itself, the island under it, the air boat station, or the sky
 model of it. The plan behind it is the Claude Doc "Cloud City and Flight: Plan" (Mateo, 2026-11-12).
 
 ## What the region is
@@ -8,8 +8,11 @@ model of it. The plan behind it is the Claude Doc "Cloud City and Flight: Plan" 
 Everwake is the bellfounders' town that Queen Maelis's Founding Bell rang *up* on the night it rang the
 Hollow out. It has hung on that held note for 700 years, watching the Gate. It shows itself to a player only
 once they open the Gate. It comes closer like a falling star, and after Morvane falls it stays where it is.
-Each player sees it at their own stage of the story. The real block city stands at the far south end of the
-Horizon Isles, on top of the Needle, above a sea of cloud. It is where players earn the Everwake Wings.
+Each player sees it at their own stage of the story. The real block city is **its own world** (a custom
+dimension, like the Hollow; Mateo 2026-11-13), hanging over a far-off copy of Aldmere's own land. Players reach
+it by **air boat**: the air boat station in Aldmere is a ruin until the story brings the city in, then it is
+rebuilt and an air boat moors at its mast. Walking through the Gate on the mast deck (a portal) takes the player
+to Everwake; in the story they are simply riding the air boat. It is where players earn the Everwake Wings.
 
 Mood: beautiful and wrong at once. Sunlit, silent, a city that should have fallen long ago. Uneasy, not
 horror. Almost nobody lives there: a handful of Bellkeepers who never sleep.
@@ -22,25 +25,35 @@ is plain and well made: white stone walls, aged copper roofs, gold only on the b
 
 ## Land, weather and light
 
-- **Ground:** the city's paving at Y 254 is a cloud-shaped disc: a main disc of radius 60 with seven lobes.
-  Under it is a belly of cloud (white and light grey wool and concrete, darker underneath), with stone
-  roots (tuff to calcite) hanging out of it.
-- **The Needle:** a sea stack of tuff, andesite, diorite and calcite, from the sea (Y 62) to about Y 245,
-  south of the city. It has wind-cut ledges and three wind shrines on the climbing line. Its top sits under
-  the cloud sea. A stone stair climbs the last 15 blocks to the city's gate.
-- **Cloud sea:** about Y 238 to 242 all around, hiding the ground. In the finished world it will be a custom
-  cloud block you fall through. Builds and viewer scenes use white wool as a stand-in.
+- **Ground:** the city's paving at Y 254 is a cloud-shaped disc: a main disc of radius 88 with seven lobes
+  (about 210 across, round 2, Mateo 2026-11-13: "much more dense ... maybe bigger").
+- **Underneath (round 2, Mateo: "the platform itself needs some work"):** the deck sits on the hill it was rung
+  up with: a floating island of rock (tuff at the tip to calcite under the deck), broad under the deck and
+  narrowing in lumps to a ragged point about 66 below, with a shoulder of rock under each lobe and lesser crags
+  hanging off. Cloud wraps the rim and the island's shoulders in round puffs, white on top and grey only on the
+  undersides. No loose floating puffs below: from the side they read as flying stones.
+- **Below:** far down (about 180 blocks) lies Aldmere's real land, cut from the map's terrain (the viewer uses
+  the country round Wren Water). Looking off the edge you see fields, forest and rivers through the haze.
+- **Air boat dock:** a stone pier runs on south from the gatehouse over the cloud, on corbel brackets, to a
+  small mooring mast; the air boat lies along its east side with a gangway across to its gondola. (The boat
+  itself is designed in its own thread.)
 - **Weather:** always clear. Wind and chimes by day; at night a full sky of stars and almost no sound. No
   rain, no snow.
 
 ## Towns and paths
 
-- One city. The Spire of the Held Note stands in the middle, with seven bell towers in a ring at radius 44.
-- **Streets:** seven avenues run from the Spire to the towers, with a wider one due south to the gate, and
-  a ring street at radius 28. Streets are polished andesite and the plazas are a noisy mix of polished diorite,
-  calcite and smooth quartz.
+- One city, dense (round 2). The Spire of the Held Note stands in the middle, with seven bell towers in a ring at
+  radius 64.
+- **Streets:** seven avenues (3 wide) run from the Spire past the towers to the edge, with a wider one (5) due
+  south to the gate; three ring streets at radius 30, 54 and 78; lanes (1 wide) halfway between the avenues from
+  the first ring out, and quarter lanes in the outer band; a loop lane round each lobe. Streets are polished
+  andesite and the plazas are a noisy mix of polished diorite, calcite and smooth quartz.
 - A low parapet runs round the outer edge, one block high, with a gap at the gate.
-- Houses fill the spaces between the streets, each with its door toward the Spire.
+- **Blocks between the streets are full:** houses are packed from the street edge inwards, each fronting its
+  nearest street with the door on it, two blocks between walls so the eaves meet over a gutter lane. Three
+  storeys toward the Spire, two in the middle band, some one-storey at the rim. Six civic buildings go in first
+  (bell foundry, Bellkeepers' hall, market hall, the Last Inn, chapter house, ringers' lodge). No ridge spikes
+  on houses (`"finials": false`).
 
 ## Buildings
 
@@ -48,9 +61,10 @@ is plain and well made: white stone walls, aged copper roofs, gold only on the b
 |---|---|---|
 | Spire of the Held Note | 21 x 21 base, 4 storeys, paved crenellated terrace; 15 x 15 shaft, 3 storeys of slits and lancets; 17 x 17 open belfry (6 high) on corbels; copper spire (rows 2) to the finial at Y 316 | The landmark. The open belfry is the boss arena (deck at Y 291) |
 | Bell towers (7) | 7 x 7 shaft of four 6-high stages, 9 x 9 open belfry on corbels, copper spire (rows 3), about 46 high | One per Note. Each will hold a Gatehouse bell |
-| Gatehouse | 11 x 9 hall with an open arcade on the ground storey, two 5 x 5 towers (three 6-high stages, 7 x 7 belfry on corbels, copper spire without a flare) | Where the Needle stair arrives |
-| Houses | 7 x 7 to 11 x 9, one or two storeys (5, 4), hip or gable roofs | Empty inside (house rule). Doors face the Spire |
-| The Last Inn | the first 9 x 9 or larger house inside the ring, two full storeys | The only interior, later |
+| Gatehouse | 11 x 9 hall with an open arcade on the ground storey, two 5 x 5 towers (three 6-high stages, 7 x 7 belfry on corbels, copper spire without a flare) | Where the air boat pier arrives |
+| Houses | 5 x 7 to 11 x 9, one to three storeys (5, 4, 4), hip or gable roofs | Interiors by the skill (every building has one). Doors on the street |
+| Civic | bell foundry 17 x 13, Bellkeepers' hall 15 x 13, market hall 15 x 11, the Last Inn 13 x 11, chapter house 13 x 13, ringers' lodge 13 x 9 | Grand doors on the street |
+| Air boat dock | 7-wide pier, 40 long, a 5 x 5 mooring mast at the end | Where players arrive |
 
 ## Towers (build-instructions/towers, Mateo 2026-11-12)
 
@@ -96,13 +110,19 @@ Every Everwake tower is built by the tower guide, with `tower()` in `spec.py`:
 
 ## Trees and greenery
 
-No trees. Azalea leaves in window boxes, and later small hanging gardens on the terraces.
+Mateo 2026-11-13 ("we need some trees", card: station and cloud city): a few small trees stand in the city's
+squares, courtyards and street corners, never a grove: young silver birch (the white bark suits the city) with
+some young hawthorn, from the tree database (`map/trees`), on open paving at least 3 blocks from any wall and
+11 apart (`map/structures/everwake/trees.py`). Azalea leaves in window boxes, and later small hanging gardens
+on the terraces. The air boat station in Aldmere has Vale trees round its grounds: old oaks and ash in a loose
+ring, an apple orchard by the hall, birches by the road in.
 
 ## Building it with the skill
 
 - **Preset:** `everwake_stone` (in `scripts/parts.py`).
-- **Specs:** `map/structures/everwake/spec.py` writes the whole city and the Needle; `map/structures/everwake_builds.py OUT`
-  builds them (asset viewer section "Everwake").
+- **Specs:** `map/structures/everwake/spec.py` writes the whole city (the Needle is gone in round 2);
+  `map/structures/everwake_builds.py OUT` builds it (asset viewer section "Everwake"). The air boat station is
+  `map/structures/everwake/station.py` (restored and ruin from one design, the ruin by the engine's `"ruin"` step).
 - Local y 0 is world Y 255 (the paving is local -1). Nothing may go above local 64 (Y 319).
 
 ```json
@@ -110,8 +130,8 @@ No trees. Azalea leaves in window boxes, and later small hanging gardens on the 
  "chimney": false, "roof": {"type": "hip"}, "shutters": 0.25}
 ```
 
-**Not in the skill yet:** the cloud-shaped platform and parapet, the cloud belly and the Needle are shapes in
-`spec.py`; the stair to the gate and the street paint are `place` cells.
+**Not in the skill yet:** the cloud-shaped platform and parapet, the island and cloud underneath are shapes in
+`spec.py`; the pier and the street paint are `place` cells.
 
 ## The air boat (Mateo OK 2026-11-13)
 
@@ -133,7 +153,7 @@ nose pointing e/w/n/s; `MOORING` gives the deck (20 under the ring), the bow rai
 
 ## Never
 
-- Nothing above Y 319, and no build that lets a player tower up to the sky model (it is an illusion).
+- Nothing above Y 319 (Everwake's own world has the same height limit).
 - No dark timber, no dark walls, no chimneys, no coloured concrete roofs.
-- No trees, no farms, no signs of daily life beyond the Bellkeepers.
+- No farms, no signs of daily life beyond the Bellkeepers; trees only as above (a few, small, in the open).
 - No vanilla particles on the city later: its glow and chimes are custom.

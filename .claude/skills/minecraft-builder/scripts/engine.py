@@ -103,9 +103,84 @@ def compute(spec, edition=None, pal=None):
     mats = Materials(spec.get("materials"), pal, log)
     blocks = resolve(cells, mats, pal, log)
     seat_spire_tops(blocks, pal, log)
+    if spec.get("ruin"): ruin(blocks, spec["ruin"], log)
     check_water(blocks, log)
     emit.connect(blocks)
     return blocks, stage_of, log
+
+
+AGE = {   # what time does to a block in a ruin: (share swapped, to)
+    "stone_bricks": (0.45, ["mossy_stone_bricks", "cracked_stone_bricks"]), "cobblestone": (0.4, ["mossy_cobblestone"]),
+    "stone_brick_stairs": (0.35, ["mossy_stone_brick_stairs"]), "stone_brick_slab": (0.35, ["mossy_stone_brick_slab"]),
+    "cobblestone_stairs": (0.35, ["mossy_cobblestone_stairs"]), "cobblestone_slab": (0.35, ["mossy_cobblestone_slab"]),
+    "stone_brick_wall": (0.35, ["mossy_stone_brick_wall"]), "cobblestone_wall": (0.35, ["mossy_cobblestone_wall"]),
+    "deepslate_tiles": (0.4, ["cracked_deepslate_tiles"]), "deepslate_bricks": (0.4, ["cracked_deepslate_bricks"]),
+    "polished_blackstone_bricks": (0.4, ["cracked_polished_blackstone_bricks"]), "nether_bricks": (0.4, ["cracked_nether_bricks"]),
+}
+GONE = ("glass", "door", "lantern", "torch", "bell", "chain", "carpet", "bed", "banner", "sign", "flower_pot", "campfire", "barrel",
+        "chest", "bookshelf", "crafting", "furnace", "lectern", "candle", "painting", "item_frame")
+ROT = ("planks", "_log", "stripped_", "_wood", "fence", "trapdoor", "wool")
+RUBBLE = ["cobblestone", "mossy_cobblestone", "cobblestone_slab", "mossy_cobblestone_slab", "gravel", "stone_brick_slab", "andesite", "moss_block"]
+
+
+def ruin(blocks, opt, log=None):
+    """Turn a finished build into its ruin (Mateo 2026-11-13, the air boat station: "ruins" and "restored" from
+    one design). Build the restored spec, add "ruin": {...}, and this runs after resolve, before connections:
+      cap:   [[x0, z0, x1, z1, top, jag], ...]  everything in the box above top + up to jag (noise) falls
+      holes: share of wall blocks knocked out, in clumps (0.06)
+      seed:  noise seed
+    Then glass, doors, lanterns, bells and furniture go; timber and cloth mostly rot away; stone ages (AGE);
+    what fell lies as rubble round the foot of the walls; and anything left hanging with no path to the ground
+    is dropped too, so nothing floats (house rule)."""
+    import random as _r
+    rnd = _r.Random(opt.get("seed", 7))
+    def h(x, z, k=0):
+        n = (x * 73856093) ^ (z * 19349663) ^ (k * 83492791) ^ opt.get("seed", 7)
+        return ((n * 2654435761) & 0xffffffff) / 0xffffffff
+    def smooth(x, z, k):                                     # blocky value noise, 3-block cells
+        return (h(x // 3, z // 3, k) * 2 + h(x // 2, z // 2, k + 1)) / 3
+    ground = min(c[1] for c in blocks)
+    fallen = 0
+    for x0, z0, x1, z1, top, jag in opt.get("cap", []):
+        for c in [c for c in blocks if x0 <= c[0] <= x1 and z0 <= c[2] <= z1]:
+            if c[1] > top + int(smooth(c[0], c[2], 3) * (jag + 1)): del blocks[c]; fallen += 1
+    hole = opt.get("holes", 0.06)
+    seeds = [c for c in blocks if c[1] > ground + 3 and rnd.random() < hole / 9]
+    for x, y, z in seeds:                                    # clumps, wider than tall, more near the top of a wall
+        for dx in range(-1, 2):
+            for dy in range(-1, 1 + (rnd.random() < 0.5)):
+                for dz in range(-1, 2):
+                    if blocks.pop((x + dx, y + dy, z + dz), None): fallen += 1
+    for c, (n, p) in list(blocks.items()):
+        if any(g in n for g in GONE): del blocks[c]; continue
+        if any(g in n for g in ROT) and h(*c[::2], c[1]) < 0.55: del blocks[c]; fallen += 1; continue
+        if "copper" in n and "oxidized" not in n:
+            blocks[c] = (n.replace("exposed_", "").replace("weathered_", "").replace("waxed_", "waxed_oxidized_", 1) if n.startswith("waxed_") else n, p)
+        a = AGE.get(n)
+        if a and rnd.random() < a[0]: blocks[c] = (rnd.choice(a[1]), p)
+    # nothing floats: keep only what joins the ground through faces
+    keep, todo = set(), [c for c in blocks if c[1] <= ground + 1]
+    keep.update(todo)
+    while todo:
+        x, y, z = todo.pop()
+        for d in ((1, 0, 0), (-1, 0, 0), (0, 1, 0), (0, -1, 0), (0, 0, 1), (0, 0, -1)):
+            q = (x + d[0], y + d[1], z + d[2])
+            if q in blocks and q not in keep: keep.add(q); todo.append(q)
+    for c in [c for c in blocks if c not in keep]: del blocks[c]; fallen += 1
+    # rubble at the foot of what stands: on the ground row, beside walls
+    tops = {}
+    for (x, y, z) in blocks: tops[(x, z)] = max(tops.get((x, z), -999), y)
+    walls = [(x, z) for (x, z), t in tops.items() if t > ground + 4]
+    for k in range(min(fallen // 6, 4000)):
+        if not walls: break
+        x, z = rnd.choice(walls)
+        x += rnd.randint(-3, 3); z += rnd.randint(-3, 3)
+        t = tops.get((x, z))
+        if t is None or t > ground + 6: continue
+        if (x, t + 1, z) not in blocks and (x, t, z) in blocks and not blocks[(x, t, z)][0].endswith("slab"):
+            blocks[(x, t + 1, z)] = (rnd.choice(RUBBLE), {}); tops[(x, z)] = t + 1
+    if log is not None: log.append(f"ruin: {fallen} blocks fell")
+    return blocks
 
 
 SPIRE_TOPS = ("siege:spire_roof",)
