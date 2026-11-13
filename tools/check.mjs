@@ -245,6 +245,13 @@ step("Content log rules");
   {
     const ep = join(RP, "entity/player.entity.json");
     const pgeo = new Set(Object.values(readJson(ep)?.["minecraft:client_entity"]?.description?.geometry ?? {}));
+    // Held items are placed from the DEFAULT geometry, so while a look is drawn the hidden item carrier
+    // (default geometry, every part hidden) must be drawn too, or items stay still while the arm moves.
+    const prc = readJson(ep)?.["minecraft:client_entity"]?.description?.render_controllers ?? [];
+    const names = prc.map((e) => (typeof e === "string" ? e : Object.keys(e)[0]));
+    const firstLook = names.findIndex((n) => n.startsWith("controller.render.hc_look.") && n !== "controller.render.hc_look.item_carrier");
+    const carrier = names.indexOf("controller.render.hc_look.item_carrier");
+    if (firstLook >= 0 && (carrier < 0 || carrier > firstLook)) fail(`${rel(ep)}: the hidden item carrier must come before the look render controllers; run python3 tools/build_player_joints.py`);
     const PATH = { rightItem: "rightArm", leftItem: "leftArm", rightArm: "body", leftArm: "body" };
     for (const file of walk(join(RP, "models/entity"), ".json")) {
       for (const g of readJson(file)?.["minecraft:geometry"] ?? []) {
