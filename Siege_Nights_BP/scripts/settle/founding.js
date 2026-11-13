@@ -25,7 +25,7 @@ import { REGION_TO_STYLE, CONTENTS } from "./config.js";
 import { styleOf } from "./plans.js";
 import { wallOf, raiseWall, moveWall, adoptWall } from "./walls.js";
 import { wallShape } from "./walldata.js";
-import { charterCheck, charterText } from "./charters.js";
+import { charterCheck, charterText, charterKeeps } from "./charters.js";
 import { BUILDINGS } from "./buildings.js";
 import { raisedCounts } from "./raised.js";
 import { groundTop } from "./ground.js";
@@ -47,7 +47,22 @@ export const markerAt = (loc) => store.data.markers[`${loc.x},${loc.y},${loc.z}`
 export function registerMarker(at, owner, slot) { store.data.markers[keyOf(at)] = { owner, slot }; save(); }
 export function forgetMarker(at) { delete store.data.markers[keyOf(at)]; save(); }
 const keyOf = (loc) => `${loc.x},${loc.y},${loc.z}`;
-export const layoutOf = (town) => townFor(town?.plot)?.variants?.[town.layout];
+// A town keeps the layout it was laid out with. Layouts are re-exported now and then (a plot's list can change), so
+// the town also remembers which one it got (template and seed): when its index now points at another layout, or past
+// the end, the same layout is found by that key; a town saved before keys existed gets one the first time it is read.
+export const layoutKey = (v) => (v ? `${v.template}|${v.seed ?? v.label}` : undefined);
+export function layoutOf(town) {
+  const variants = townFor(town?.plot)?.variants;
+  if (!variants?.length) return undefined;
+  if (town.layoutKey) {
+    if (layoutKey(variants[town.layout]) === town.layoutKey) return variants[town.layout];
+    const i = variants.findIndex((v) => layoutKey(v) === town.layoutKey);
+    if (i >= 0) { town.layout = i; return variants[i]; }
+  }
+  const i = Number.isInteger(town.layout) && town.layout >= 0 && town.layout < variants.length ? town.layout : 0;
+  if (!town.layoutKey || i !== town.layout) { town.layout = i; town.layoutKey = layoutKey(variants[i]); }
+  return variants[i];
+}
 
 export function townSlots(owner) {
   const town = townOf(owner);
@@ -452,7 +467,7 @@ export function foundTown(owner, plot, at, { style, layout, lord = false } = {})
   const base = tw.variants[pick]?.base;
   const y = Number.isFinite(base) && Math.abs(base - live) <= 2 ? base : live;
   store.data.towns[owner] = {
-    plot: plot.name.toLowerCase(), layout: pick, x: at.x, y, z: at.z, tier: 0, laid: [false, false, false, false], slots: {}, ...(lord ? { lord: true } : {}),
+    plot: plot.name.toLowerCase(), layout: pick, layoutKey: layoutKey(tw.variants[pick]), x: at.x, y, z: at.z, tier: 0, laid: [false, false, false, false], slots: {}, ...(lord ? { lord: true } : {}),
     style: style ?? REGION_TO_STYLE[plot.region] ?? styleOf(owner, dim.getBlock(at)),
   };
   save();
@@ -509,6 +524,18 @@ export function builtCounts(owner) {
 // A Rival Lord can only raise ready-made designs, so their charter skips what has none yet
 const DESIGNED = new Set(BUILDINGS.map((b) => b.id));
 export const charterOf = (owner, tier = townOf(owner)?.tier ?? 0) => charterCheck(tier, builtCounts(owner), townOf(owner)?.lord ? DESIGNED : KNOWN);
+
+// Is this plot kept for a charter need, so `id` may not go there? (charters.js charterKeeps; the same rule the
+// Rival Lords follow.) -> undefined, or the words for the plot menu: "Kept for the Mint (Town charter)"
+export function keptFor(owner, slot, id) {
+  const town = townOf(owner);
+  if (!town) return undefined;
+  const counts = { ...raisedCounts(owner) };
+  for (const st of Object.values(town.slots ?? {})) if (st.building && !st.broken) counts[st.building] = (counts[st.building] ?? 0) + 1; // rising ones too
+  const free = slotsOf(layoutOf(town)).filter((s) => !town.slots[s.id]?.building && !slotClosed(owner, s));
+  const k = charterKeeps(free, town.tier ?? 0, counts, town.lord ? DESIGNED : KNOWN, slot, id);
+  return k && `Kept for the ${k.what} (${tierName(k.tier)} charter)`;
+}
 
 // The highest tier the town may reach towards `tier`: it stops at the first tier whose charter isn't met
 function charterCap(owner, from, tier) {

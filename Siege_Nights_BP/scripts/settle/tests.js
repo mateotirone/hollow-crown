@@ -420,7 +420,7 @@ addTests("settle ground", {
 });
 
 // ---------- plot rules and charters (charters.js, config.js) ----------
-import { plotFit, charterCheck, slotClass, opensAt } from "./charters.js";
+import { plotFit, charterCheck, charterKeeps, slotClass, opensAt } from "./charters.js";
 import { PLOT_SIZE as PSIZE, CHARTERS as CHARTER_LIST } from "./config.js";
 import { townNames as allTownNames, townFor as townByName, slotsOf as slotsOfLayout } from "./towns.js";
 import { BLOCK_BUILDS as BLOCK_BUILD_LIST } from "./blockdesigns.js";
@@ -544,6 +544,21 @@ addTests("settle charters", {
     }
     assert(total[4] > 0 && total[5] > 0, "some passing layouts have hall4 and hall5 plots");
   },
+  "a plot that is the last one a charter need can use is kept for it, for players and lords alike"() {
+    const v = townByName("gullcliff").variants.find((x) => x.label === "Crossroads");
+    const slots = slotsOfLayout(v);
+    const known = new Set(BUILDINGS.map((b) => b.id));
+    const m2 = slots.find((s) => s.id === "m2");
+    const free = slots.filter((s) => s.id !== "m1"); // the library stands on m1
+    const kept = charterKeeps(free, 0, { library: 1 }, known, m2, "house");
+    assert(kept, "a house on gullcliff's only other Medium at Hamlet would leave the Town charter without a plot");
+    assert(["Mint", "Farmhouse with its field"].includes(kept.what), `kept for ${kept?.what}`);
+    assert(kept.ids.length && kept.ids.every((id) => plotFit(id, m2).ok), "it names what may go there");
+    assert(!charterKeeps(free, 0, { library: 1 }, known, m2, kept.ids[0]), "the building it is kept for is allowed");
+    const s5 = slots.find((s) => s.id === "s5");
+    assert(!charterKeeps(free, 0, { library: 1 }, known, s5, "cottage"), "a cottage on a Small plot is fine");
+    assert(!charterKeeps(free, 0, { library: 1, cottage: 9, farmhouse: 1, mint: 1, market: 1, inn: 1, barracks: 1, smithy: 1 }, known, m2, "house"), "nothing is kept once the charters are met");
+  },
   "every passing layout reserves a Mason's yard by the forecourt"() {
     for (const name of allTownNames()) for (const v of townByName(name).variants) {
       if (v.charter === false) continue;
@@ -583,7 +598,7 @@ addTests("settle charters", {
       for (let tier = 0; tier <= 3; tier++) {
         for (let n = 0; n < 80; n++) {
           const open = slots.filter((s) => s.tier <= tier && !taken.has(s.id));
-          const pick = lordPick(open, tier, counts, designs, () => true, name);
+          const pick = lordPick(open, tier, counts, designs, () => true, name, slots.filter((s) => !taken.has(s.id)));
           if (!pick) break;
           taken.add(pick.slot.id);
           counts[pick.id] = (counts[pick.id] ?? 0) + 1; dbg.push(pick.slot.id + ":" + pick.id);
@@ -713,5 +728,22 @@ addTests("settle base", {
     const h = gradeLine(70, 64, 11);
     for (let i = 1; i < h.length; i++) assert(Math.abs(h[i] - h[i - 1]) <= 1, "never more than 1 a block");
     assertEqual(h[0], 70); assertEqual(h[11], 64);
+  },
+});
+
+import { layoutOf as townLayoutOf, layoutKey } from "./founding.js";
+addTests("settle layouts saved", {
+  "a saved town keeps its layout when the layouts are re-exported, and a bad index falls back"() {
+    const vs = townByName("dunehold").variants;
+    const last = vs.length - 1;
+    const moved = { plot: "dunehold", layout: 0, layoutKey: layoutKey(vs[last]) };
+    assertEqual(townLayoutOf(moved), vs[last], "found again by its key");
+    assertEqual(moved.layout, last, "and its index is put right");
+    const past = { plot: "dunehold", layout: 99 };
+    assertEqual(townLayoutOf(past), vs[0], "an index past the end falls back to the first layout");
+    assertEqual(past.layoutKey, layoutKey(vs[0]), "and remembers it from then on");
+    const old = { plot: "dunehold", layout: 1 };
+    assertEqual(townLayoutOf(old), vs[1], "a town saved before keys keeps its index");
+    assert(new Set(vs.map(layoutKey)).size === vs.length, "every layout of a plot has its own key");
   },
 });
