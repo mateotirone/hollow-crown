@@ -79,5 +79,5 @@ export function ringLayout(center, name = "the Arena", dim = "minecraft:overworl
 }
 
 // The live arena: the real build at Kingsrest (layout_data.js, copied from the build's map/arena-layout.json).
-// Its name stays "the Arena" until Mateo picks one: set it in ARENA_DATA.name (or here).
-export const ARENA = { ...ARENA_DATA, name: ARENA_DATA.name ?? "the Arena" };
+// Its name is the Twelve Gates (Mateo, 2026-11-13); ARENA_DATA.name overrides it if the build sets one.
+export const ARENA = { ...ARENA_DATA, name: ARENA_DATA.name ?? "the Twelve Gates" };
