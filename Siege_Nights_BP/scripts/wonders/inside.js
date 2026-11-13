@@ -236,7 +236,7 @@ function startJoust(player, w) {
   let champion;
   try { champion = applyFilter("rivalSoldier", undefined, { dim, at, role: "knight", tier: 3, name: "Champion of the Fair", tags: [CHAMPION] }); } catch { champion = undefined; }
   if (!champion) {
-    try { champion = dim.spawnEntity("minecraft:vindicator", at); champion.addTag(CHAMPION); champion.nameTag = "Champion of the Fair"; } catch { champion = undefined; }
+    try { champion = dim.spawnEntity("siege:shieldwall_brute", at); champion.addTag(CHAMPION); champion.nameTag = "Champion of the Fair"; } catch { champion = undefined; }
   }
   if (!champion) { pay(player, FAIR.joustEntry, "fair"); return say(player, w.keeper, "fairBusy"); }
   joust = { by: player.id, until: system.currentTick + FAIR.joustMinutes * 1200, champion };

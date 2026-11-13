@@ -7,9 +7,9 @@ Every sound The Hollow Crown plays, and what each one is made of. **This file is
 Tone for all of it: uneasy, especially at night. Not horror, no jump scares, nothing sudden or loud for its own sake.
 There is no music in version 1.
 
-- **36 signature sounds** are meant to be real recordings made with an AI sound generator. 36 of 36 are installed; the rest play a stand-in built from vanilla sounds, so the game is never silent.
+- **40 signature sounds** are meant to be real recordings made with an AI sound generator. 40 of 40 are installed; the rest play a stand-in built from vanilla sounds, so the game is never silent.
 - **32 more dragon sounds** have synthesized stand-ins and can be replaced the same way.
-- **33 vanilla sounds** are reworked (lower, softer, layered) everywhere the scripts use them, and **27 named cues** are built from vanilla layers.
+- **33 vanilla sounds** are reworked (lower, softer, layered) everywhere the scripts use them, and **34 named cues** are built from vanilla layers.
 - The remaining vanilla sounds are played as they are, because they should sound like what they are (a horse, a bow, a page).
 
 ## How to add a recording
@@ -61,10 +61,14 @@ No computer set up for this? Upload the files in the project chat and ask Claude
 | 30 | The castle gate shuts | `gate_close` | 3 s | one-shot, mono | recording (3 s) |
 | 31 | The portcullis rises | `portcullis_open` | 4 s | one-shot, mono | recording (4 s) |
 | 32 | The portcullis drops | `portcullis_close` | 3 s | one-shot, mono | recording (2 s) |
-| 33 | Cinderwing: roar | `cinderwing_roar` | 4 s | one-shot, mono | recording (2.4 s) |
-| 34 | Ashen Wyvern: roar | `wyvern_roar` | 4 s | one-shot, mono | recording (2.3 s) |
-| 35 | Dune Drake: roar | `drake_roar` | 4 s | one-shot, mono | recording (2.4 s) |
-| 36 | Glass Wyrm: roar | `wyrm_roar` | 4 s | one-shot, mono | recording (3.48 s) |
+| 33 | The arena crowd talking among itself (loop) | `crowd_murmur` | 8 s | loop, stereo | recording (8 s) |
+| 34 | The arena crowd cheers | `crowd_cheer` | 4 s | one-shot, stereo | recording (4 s) |
+| 35 | The arena crowd groans as a fighter falls | `crowd_groan` | 3 s | one-shot, stereo | recording (3 s) |
+| 36 | Horns as the arena gates lift, or for the winner | `arena_fanfare` | 4 s | one-shot, stereo | recording (4 s) |
+| 37 | Cinderwing: roar | `cinderwing_roar` | 4 s | one-shot, mono | recording (2.4 s) |
+| 38 | Ashen Wyvern: roar | `wyvern_roar` | 4 s | one-shot, mono | recording (2.3 s) |
+| 39 | Dune Drake: roar | `drake_roar` | 4 s | one-shot, mono | recording (2.4 s) |
+| 40 | Glass Wyrm: roar | `wyrm_roar` | 4 s | one-shot, mono | recording (3.48 s) |
 
 ### 1. The 3:17 toll
 
@@ -453,7 +457,55 @@ Prompt:
 
 > A heavy iron portcullis slamming down: one quick, hard, metallic crash like an iron anvil dropped onto stone, a short sharp clang with a brief ringing rattle of iron bars, then silence. Fast and punchy, close and dry, no chain run-out, no echo, no music.
 
-### 33. Cinderwing: roar
+### 33. The arena crowd talking among itself (loop)
+
+- **File name:** `crowd_murmur` (installs as `sounds/siege/sig/crowd_murmur.ogg`, sound id `siege.sig.crowd_murmur`)
+- **Length:** about 8 seconds, loop, stereo. The installer fades undefined s at each end and the game overlaps the fades, so it never has a gap
+- **When:** Loops from the middle of the arena while a fight is on. Heard across the arena.
+- **Stand-in until then:** `mob.villager.idle` pitch 0.7 vol 0.25 + `mob.villager.haggle` pitch 0.6 vol 0.2 after 1.5 s + `mob.villager.idle` pitch 0.8 vol 0.2 after 3.5 s + `mob.villager.yes` pitch 0.65 vol 0.2 after 5.5 s
+- **Test:** `/scriptevent siege:sound sig.crowd_murmur`
+
+Prompt:
+
+> A large medieval crowd of a few hundred people seated in a huge open-air stone arena, waiting and watching: a steady warm murmur of many indistinct voices talking at once, scattered shouts and whistles, a few claps, feet shuffling on stone benches. Even and continuous from start to end so it can loop, no peaks, no single clear words, no music.
+
+### 34. The arena crowd cheers
+
+- **File name:** `crowd_cheer` (installs as `sounds/siege/sig/crowd_cheer.ogg`, sound id `siege.sig.crowd_cheer`)
+- **Length:** about 4 seconds, one-shot, stereo
+- **When:** When the gates lift, a big hit lands, a beast falls or someone wins. Heard across the arena.
+- **Stand-in until then:** `mob.pillager.celebrate` pitch 0.8 vol 0.8 + `mob.villager.yes` pitch 0.7 vol 0.6 after 0.15 s + `mob.pillager.celebrate` pitch 0.65 vol 0.6 after 0.4 s + `mob.villager.yes` pitch 0.9 vol 0.5 after 0.6 s
+- **Test:** `/scriptevent siege:sound sig.crowd_cheer`
+
+Prompt:
+
+> A big medieval crowd in a stone arena erupting into a cheer: a sudden roar of hundreds of voices, whistles, stamping feet and fists pounding on wooden barriers, swelling for two seconds and then settling back down. Excited and joyful, open-air with a little stone echo, no single clear words, no music.
+
+### 35. The arena crowd groans as a fighter falls
+
+- **File name:** `crowd_groan` (installs as `sounds/siege/sig/crowd_groan.ogg`, sound id `siege.sig.crowd_groan`)
+- **Length:** about 3 seconds, one-shot, stereo
+- **When:** When a fighter falls. Heard across the arena.
+- **Stand-in until then:** `mob.villager.no` pitch 0.6 vol 0.8 + `mob.villager.no` pitch 0.5 vol 0.6 after 0.2 s + `mob.villager.idle` pitch 0.5 vol 0.4 after 0.5 s
+- **Test:** `/scriptevent siege:sound sig.crowd_groan`
+
+Prompt:
+
+> A big medieval crowd in a stone arena reacting as a fighter goes down: a loud collective 'ohhh' of sympathy and shock from hundreds of voices, falling in pitch, followed by scattered murmurs. Open-air with a little stone echo, no single clear words, no music.
+
+### 36. Horns as the arena gates lift, or for the winner
+
+- **File name:** `arena_fanfare` (installs as `sounds/siege/sig/arena_fanfare.ogg`, sound id `siege.sig.arena_fanfare`)
+- **Length:** about 4 seconds, one-shot, stereo
+- **When:** When the arena gates lift, and for the winner. Heard across the arena.
+- **Stand-in until then:** `raid.horn` pitch 1.2 vol 0.5 + `note.trumpet` vol 0.6 after 0.3 s + `note.trumpet` pitch 1.26 vol 0.6 after 0.6 s + `note.trumpet` pitch 1.5 vol 0.7 after 0.9 s
+- **Test:** `/scriptevent siege:sound sig.arena_fanfare`
+
+Prompt:
+
+> A short medieval tournament fanfare: two long brass herald trumpets playing a bold rising three-note call together, the last note held, ringing out over a huge open-air stone arena with a natural echo. Proud and bright, no drums, no voices, no crowd.
+
+### 37. Cinderwing: roar
 
 - **File name:** `cinderwing_roar` (installs as `sounds/siege/dragon/cinderwing_roar.ogg`, sound id `siege.dragon.cinderwing.roar`)
 - **Length:** ask for 4 seconds or more; the game uses exactly 2.4, one-shot, mono
@@ -464,7 +516,7 @@ Prompt:
 
 > The voice of a large fire-breathing dragon with a deep chest and a throat like a furnace: warm, rumbling, with a crackle of embers in the breath. A full roar: starts fast, peaks, and trails off into breath. Powerful and proud, not a monster-movie scream. One animal, close and dry, no echo, no background, no music.
 
-### 34. Ashen Wyvern: roar
+### 38. Ashen Wyvern: roar
 
 - **File name:** `wyvern_roar` (installs as `sounds/siege/dragon/wyvern_roar.ogg`, sound id `siege.dragon.wyvern.roar`)
 - **Length:** ask for 4 seconds or more; the game uses exactly 2.4, one-shot, mono
@@ -475,7 +527,7 @@ Prompt:
 
 > The voice of a lean, light wyvern with a high, hoarse, hissing voice like wind through dry reeds, raspy and airy. A full roar: starts fast, peaks, and trails off into breath. Powerful and proud, not a monster-movie scream. One animal, close and dry, no echo, no background, no music.
 
-### 35. Dune Drake: roar
+### 39. Dune Drake: roar
 
 - **File name:** `drake_roar` (installs as `sounds/siege/dragon/drake_roar.ogg`, sound id `siege.dragon.drake.roar`)
 - **Length:** ask for 4 seconds or more; the game uses exactly 2.4, one-shot, mono
@@ -486,7 +538,7 @@ Prompt:
 
 > The voice of a heavy, broad desert drake with a very low, slow, gravelly voice like boulders shifting under sand. A full roar: starts fast, peaks, and trails off into breath. Powerful and proud, not a monster-movie scream. One animal, close and dry, no echo, no background, no music.
 
-### 36. Glass Wyrm: roar
+### 40. Glass Wyrm: roar
 
 - **File name:** `wyrm_roar` (installs as `sounds/siege/dragon/wyrm_roar.ogg`, sound id `siege.dragon.wyrm.roar`)
 - **Length:** ask for 4 seconds or more; the game uses exactly 2.4, one-shot, mono
@@ -570,6 +622,13 @@ Built from vanilla layers in `core/sfx_cues.js`. A script plays one with `sfx(pl
 | `wx.fen_splash` | A splash somewhere out on the water | `random.splash` pitch 0.45 vol 0.2 + `bubble.pop` pitch 0.5 vol 0.25 after 0.4 s | - |
 | `wx.fen_bell` | A bell under the fen water | `block.bell.hit` pitch 0.32 vol 0.12 + `bubble.pop` pitch 0.4 vol 0.2 after 0.5 s | - |
 | `wx.marsh_hum` | A hum where the marsh lights are | `beacon.ambient` pitch 0.5 vol 0.15 + `chime.amethyst_block` pitch 0.4 vol 0.1 after 1 s | - |
+| `hollow.far_singing` | Singing a long way off in the Hollow | `siege.choir.hum` pitch 0.5 vol 0.18 + `siege.choir.hum` pitch 0.75 vol 0.08 after 0.8 s | - |
+| `hollow.drip` | Water dripping from the Hollow's roof | `cauldron_drip.water.pointed_dripstone` pitch 0.6 vol 0.45 + `cauldron_drip.water.pointed_dripstone` pitch 0.55 vol 0.25 after 0.9 s | - |
+| `hollow.crack_wind` | Wind breathing through a crack in the rock | `elytra.loop` pitch 0.35 vol 0.22 + `ambient.cave` pitch 0.5 vol 0.12 after 0.5 s | - |
+| `hollow.rock_settle` | Rock settling somewhere far off | `dig.deepslate` pitch 0.45 vol 0.5 + `dig.stone` pitch 0.4 vol 0.3 after 0.3 s + `dig.gravel` pitch 0.5 vol 0.2 after 0.7 s | - |
+| `hollow.river_hum` | The light river humming | `beacon.ambient` pitch 0.6 vol 0.18 + `bubble.pop` pitch 0.5 vol 0.15 after 0.6 s | - |
+| `hollow.sunk_bell` | A bell somewhere under the Court's water | `block.bell.hit` pitch 0.3 vol 0.14 + `bubble.pop` pitch 0.4 vol 0.2 after 0.5 s + `block.bell.hit` pitch 0.28 vol 0.05 after 2 s | - |
+| `hollow.seat_hush` | The air at the Seat ringing very faintly | `resonate.amethyst_block` pitch 0.5 vol 0.12 | - |
 
 ## Creature voices
 
@@ -681,9 +740,9 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | Vanilla sound | What it means here | Made of | Places | Used by |
 |---|---|---|---|---|
 | `block.bell.hit` | Any bell | `block.bell.hit` + `block.bell.hit` pitch 0.5 vol 0.4 after 0.05 s + `block.bell.hit` pitch 1.03 vol 0.22 after 0.15 s | 50 | bestiary (15), undertow (15), after (7), lore (4), unlocks (4), crown (2), codex, roletrials, townhall |
-| `random.levelup` | Done, bought, learned | `random.levelup` pitch 0.8 vol 0.5 + `note.harp` pitch 0.6 vol 0.35 after 0.1 s | 35 | horses (7), siege (5), townhall (4), codex (3), lore (3), settle (3), dragons (2), crown, ironworks, reach, rivals, roletrials, trade, undertow, vault |
-| `random.orb` | A small yes | `random.orb` pitch 0.75 vol 0.55 | 22 | trade (4), economy (2), townhall (2), unlocks (2), codex, dragons, guild, ironworks, letters, lore, rails, roletrials, settle, undertow, upkeep, vault |
-| `random.anvil_use` | Building and mending | `random.anvil_use` pitch 0.8 vol 0.55 + `dig.stone` pitch 0.7 vol 0.5 after 0.1 s | 20 | unlocks (4), settle (3), townhall (3), vault (3), siege (2), codex, economy, horses, roletrials, trade |
+| `random.levelup` | Done, bought, learned | `random.levelup` pitch 0.8 vol 0.5 + `note.harp` pitch 0.6 vol 0.35 after 0.1 s | 36 | horses (7), siege (5), townhall (4), codex (3), lore (3), settle (3), dragons (2), arena, crown, ironworks, reach, rivals, roletrials, trade, undertow, vault |
+| `random.orb` | A small yes | `random.orb` pitch 0.75 vol 0.55 | 23 | trade (4), economy (2), townhall (2), unlocks (2), arena, codex, dragons, guild, ironworks, letters, lore, rails, roletrials, settle, undertow, upkeep, vault |
+| `random.anvil_use` | Building and mending | `random.anvil_use` pitch 0.8 vol 0.55 + `dig.stone` pitch 0.7 vol 0.5 after 0.1 s | 21 | unlocks (4), settle (3), townhall (3), vault (3), siege (2), arena, codex, economy, horses, roletrials, trade |
 | `random.anvil_land` | A heavy blow | `random.anvil_land` pitch 0.9 vol 0.8 + `dig.stone` pitch 0.5 vol 0.7 | 19 | bestiary (3), undertow (3), siege (2), trains (2), unlocks (2), vault (2), dragons, plotcaves, roletrials, townhall, warwrit |
 | `raid.horn` | A horn | `raid.horn` pitch 0.85 + `raid.horn` pitch 0.64 vol 0.4 after 0.25 s | 14 | bestiary (5), townhall (3), unlocks (3), crown, dragons, rivals |
 | `block.amethyst_block.chime` | A crystal note | `chime.amethyst_block` | 11 | bestiary (4), undertow (4), lore (2), vault |
@@ -695,9 +754,9 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `random.explode` | A blast | `random.explode` pitch 0.85 | 6 | siege (3), bestiary, undertow, vault |
 | `random.glass` | Something breaks that should not | `random.glass` pitch 0.9 vol 0.8 | 6 | bestiary (4), crown, unlocks |
 | `mob.wither.spawn` | Something old arrives | `mob.wither.spawn` pitch 0.85 vol 0.7 + `block.bell.hit` pitch 0.4 vol 0.4 after 0.4 s | 6 | undertow (3), bestiary (2), townhall |
+| `mob.ravager.roar` | Something big | `mob.ravager.roar` pitch 0.9 vol 0.9 | 5 | bestiary (3), arena, undertow |
 | `random.totem` | A great change | `random.totem` pitch 0.8 vol 0.55 + `block.bell.hit` pitch 0.5 vol 0.4 after 0.2 s | 4 | townhall (2), crown, horses |
 | `mob.warden.heartbeat` | A heartbeat that is not yours | `mob.warden.heartbeat` pitch 0.9 | 4 | bestiary, crown, roletrials, undertow |
-| `mob.ravager.roar` | Something big | `mob.ravager.roar` pitch 0.9 vol 0.9 | 4 | bestiary (3), undertow |
 | `random.toast` | A note is added | `random.toast` pitch 0.8 vol 0.7 | 3 | lore (2), codex |
 | `random.click` | A catch or a lever | `random.click` pitch 0.85 vol 0.8 | 3 | rails, siege, unlocks |
 | `random.break` | Not allowed, or something gave way | `random.break` pitch 0.8 vol 0.7 | 3 | bestiary, plots, siege |
@@ -767,6 +826,7 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `mob.wither.hurt` | 1 | roletrials |
 | `mob.wither.shoot` | 1 | bestiary |
 | `mob.wolf.growl` | 1 | bestiary |
+| `note.pling` | 1 | arena |
 | `random.door_close` | 1 | vault |
 | `random.fuse` | 1 | siege |
 | `random.splash` | 1 | codex |

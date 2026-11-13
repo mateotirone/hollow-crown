@@ -269,9 +269,9 @@ registerBoss({
       start: (f) => {
         for (const p of f.players()) f.zone(floorOf(f, p.location), 2, 30, (q) => { effect(q, "slowness", 60, 255); hurt(q, 4, "drowning"); }, "minecraft:water_splash_particle");
       } },
-    { id: "drowned", every: 400, windup: 20, phases: [1, 2], warn: "The drowned climb out of the water.",
-      when: (f) => f.adds("minecraft:drowned").length < 4,
-      hit: (f) => f.summon("minecraft:drowned", perPlayer(f, 2, 1), 8, f.center) },
+    { id: "drowned", every: 400, windup: 20, phases: [1, 2], warn: "Brine Lurkers climb out of the water.",
+      when: (f) => f.adds("siege:brine_lurker").length < 4,
+      hit: (f) => f.summon("siege:brine_lurker", perPlayer(f, 2, 1), 8, f.center) },
   ],
   tick: (f, players) => {
     const d = f.data;

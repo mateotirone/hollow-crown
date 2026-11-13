@@ -27,6 +27,7 @@ const BLOCKS = [
   ["siege:stables", "Stables", "Click: your horses"],
   ["hc:breeder_post", "Breeder's Post", "Click: breeding"],
   ["siege:dragon_roost", "Dragon Roost", "Click: your dragon"],
+  ["siege:hatching_brazier", "Hatching Brazier", "Egg: set it to hatch"],
   // the crown
   ["siege:citadel_cornerstone", "Citadel Cornerstone", "Click: the Citadel"],
   ["siege:throne", "The Throne", "Click: the throne"],

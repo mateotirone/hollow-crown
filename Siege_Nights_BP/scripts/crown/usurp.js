@@ -304,11 +304,11 @@ function spawnHost(spot) {
     for (let i = 1; i <= CROWN.npcHost; i++) add("retainer", 3, "§cThrone Host", i);
   } catch { // champions missing or that spot isn't loaded: plain soldiers
     try {
-      const lord = put("minecraft:vindicator", `§4${r.title} ${r.name}`, 0);
+      const lord = put("siege:shieldwall_brute", `§4${r.title} ${r.name}`, 0);
       lord.addEffect("health_boost", 20000000, { amplifier: CROWN.npcLordHealthBoost, showParticles: false });
       lord.addEffect("instant_health", 20, { amplifier: 10, showParticles: false });
       lord.addEffect("strength", 20000000, { amplifier: 1, showParticles: false });
-      for (let i = 1; i <= CROWN.npcHost; i++) put(i % 2 ? "minecraft:vindicator" : "minecraft:pillager", "§cThrone Host", i);
+      for (let i = 1; i <= CROWN.npcHost; i++) put(i % 2 ? "siege:shieldwall_brute" : "siege:hollow_footman", "§cThrone Host", i);
     } catch { /* not loaded */ }
   }
 }

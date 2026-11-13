@@ -3,7 +3,7 @@
 
 export const DRAGON_SETTINGS = {
   homeRegion: "Emberwaste", // dragons belong to this region: only players who live there can raise and fly them
-  hatchDays: 2, // in-game days an egg warms on a Roost before it hatches
+  hatchDays: 2, // in-game days an egg warms in a Hatching Brazier before it hatches
   fledgeDays: 3, // days after hatching before it can become a Fledgling (walks with a rider)
   adultDays: 6, // days after hatching before it can become an Adult (flies)
   fledgeBond: 40, // bond needed for Fledgling
@@ -49,7 +49,8 @@ export const DRAGON = "siege:dragon";
 export const EGG = "siege:dragon_egg";
 export const SADDLE = "siege:dragon_saddle";
 export const HORN = "siege:dragon_horn";
-export const ROOST = "siege:dragon_roost";
+export const ROOST = "siege:dragon_roost"; // placed on your land it raises the Dragon Stable (settle/blockdesigns.js)
+export const HATCHERY = "siege:hatching_brazier"; // in the Dragon Stable's nursery: an egg is set in one to hatch
 export const NEST = "hc:dragon_nest"; // placed by the map builder (hc: because Siege Nights refuses siege: blocks off your land)
 export const DAY = 24000;
 
@@ -57,16 +58,21 @@ export const RESERVE = 30; // hidden health under every dragon (studio/build_dra
 
 // The four species. Shifts move it up or down the speed and health ladders (one step = one training level).
 export const SPECIES = [
-  { key: "cinderwing", name: "Cinderwing", flight: 0, ground: 0, air: 0, vigor: 0, breath: "fire", breathBonus: 3, gift: "minecraft:blaze_powder",
+  { key: "cinderwing", name: "Cinderwing", colours: ["Ember Red", "Ash Black", "Copper"], flight: 0, ground: 0, air: 0, vigor: 0, breath: "fire", breathBonus: 3, gift: "minecraft:blaze_powder",
     blurb: "Four-legged, broad-winged. The all-rounder, with the hottest fire." },
-  { key: "wyvern", name: "Ashen Wyvern", flight: 0, ground: -1, air: 1, vigor: -1, breath: "ash", breathBonus: 0, gift: "minecraft:feather",
+  { key: "wyvern", name: "Ashen Wyvern", colours: ["Ashen Grey", "Bone White", "Soot"], flight: 0, ground: -1, air: 1, vigor: -1, breath: "ash", breathBonus: 0, gift: "minecraft:feather",
     blurb: "Two legs and wings for arms. The fastest flier, easily hurt. Breathes blinding ash." },
-  { key: "drake", name: "Dune Drake", flight: -10, ground: 1, air: -1, vigor: 1, breath: "sand", breathBonus: 0, gift: "minecraft:gold_nugget",
+  { key: "drake", name: "Dune Drake", colours: ["Dune Gold", "Rust", "Pale Sand"], flight: -10, ground: 1, air: -1, vigor: 1, breath: "sand", breathBonus: 0, gift: "minecraft:gold_nugget",
     blurb: "Low, wide and armoured. Hard to bring down, quick on foot, tires fast in the air. Its sandblast throws things back." },
-  { key: "wyrm", name: "Glass Wyrm", flight: 10, ground: -1, air: 0, vigor: -1, breath: "glass", breathBonus: 0, gift: "minecraft:amethyst_shard",
+  { key: "wyrm", name: "Glass Wyrm", colours: ["Amethyst Glass", "Sea Glass", "Frost Glass"], flight: 10, ground: -1, air: 0, vigor: -1, breath: "glass", breathBonus: 0, gift: "minecraft:amethyst_shard",
     blurb: "A long frilled serpent with four narrow wings. Stays up longest, frail. Its breath leaves things slow and weak." },
 ];
 export const speciesOf = (rec) => SPECIES[rec.species] ?? SPECIES[0];
+// Every species hatches in one of three hides (Mateo 2026-11-13: "Do the dragons have different colors?"). 0 is the
+// species' own skin, 1 and 2 are studio/art/dragon_colours.py, in the same order. Entity property siege:hue.
+export const HUES = 3;
+export const colourOf = (rec) => speciesOf(rec).colours[rec.hue ?? 0] ?? speciesOf(rec).colours[0];
+export const kindOf = (rec) => `${colourOf(rec)} ${speciesOf(rec).name}`; // "Ash Black Cinderwing"
 const step = (level, shift) => Math.max(0, Math.min(7, level + 1 + shift));
 export const groundStep = (rec) => step(rec.stats.speed, speciesOf(rec).ground);
 export const airStep = (rec) => step(rec.stats.speed, speciesOf(rec).air);
@@ -101,7 +107,7 @@ export const TRAINING = {
 };
 
 export const newDragon = (owner, ownerName, now) => ({
-  owner, ownerName, name: "Dragon Egg", species: Math.floor(Math.random() * SPECIES.length),
+  owner, ownerName, name: "Dragon Egg", species: Math.floor(Math.random() * SPECIES.length), hue: Math.floor(Math.random() * HUES),
   stage: "egg", status: "carried", // carried -> warming -> out | roosted | wounded
   bond: 0, level: 1, xp: 0, tp: 0, stats: { wings: 0, speed: 0, vigor: 0, breath: 0 },
   saddled: false, order: "follow", gen: 0, takenAt: now,

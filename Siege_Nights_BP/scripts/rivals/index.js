@@ -404,7 +404,7 @@ function laySiege(player, lord) {
       spawned++;
     } else {
       try {
-        const e = dim.spawnEntity(i % 3 === 0 ? "minecraft:pillager" : "minecraft:vindicator", at); // plain soldiers if champions are missing
+        const e = dim.spawnEntity(i % 3 === 0 ? "siege:hollow_footman" : "siege:shieldwall_brute", at); // our own raiders if champions are missing
         for (const t of tags) e.addTag(t);
         e.nameTag = name;
         spawned++;
