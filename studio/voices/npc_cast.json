@@ -102,6 +102,12 @@
    "voice_id": "SyXxNocff884N6Fuq55J",
    "take": 3,
    "description": "A kind, tired woman in her sixties, a village healer. Soft rural English West Country-Midlands accent, low warm alto, unhurried, slightly hoarse, dry humour under the weariness."
+  },
+  "tilly": {
+   "name": "Tilly",
+   "voice_id": "3bMMFnv44fDwVPsFtKwZ",
+   "take": 2,
+   "description": "Stock ElevenLabs library voice Elowen (young British girl, cheeky), picked by Mateo 2026-11-13."
   }
  }
 }

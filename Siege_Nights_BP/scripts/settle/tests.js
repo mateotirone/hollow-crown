@@ -462,8 +462,12 @@ addTests("settle charters", {
     assertEqual(slotClass(ML), "ML");
     assert(plotFit("cottage", S).ok && !plotFit("cottage", M).ok, "cottage takes Small only");
     assert(plotFit("market", L).ok && plotFit("market", ML).ok && !plotFit("market", M).ok, "market: Large or long Medium");
-    assert(!plotFit("barracks", M, new Set(["L"])).ok, "barracks waits for the free Large");
-    assert(plotFit("barracks", M, new Set(["M", "S"])).ok, "barracks takes a plain Medium when no Large or long Medium is free");
+    assert(!plotFit("barracks", M, new Set(["M", "S"])).ok && !plotFit("barracks", ML).ok, "barracks: never a Medium (the guardhouse is 15 x 17)");
+    const deep = { size: "L", tags: [], box: { x0: 0, z0: 0, x1: 14, z1: 16 }, door: { x: 0, z: -1 } };
+    const flat = { size: "L", tags: [], box: { x0: 0, z0: 0, x1: 14, z1: 14 }, door: { x: 0, z: -1 } };
+    const side = { size: "L", tags: [], box: { x0: 0, z0: 0, x1: 16, z1: 14 }, door: { x: -1, z: 0 } };
+    assert(plotFit("barracks", deep).ok && plotFit("barracks", side).ok, "barracks on a 15 x 17 Large, either way round");
+    assert(!plotFit("barracks", flat).ok && plotFit("market", flat).ok, "a 15 x 15 Large is too shallow for the barracks only");
     assert(plotFit("library", ML).ok, "library on the long Medium");
   },
   "location tags: the watchtower needs the wall, good spots are marked"() {
@@ -551,6 +555,97 @@ addTests("settle census", {
     const farm = [{ x: 1, y: 1, z: 1, id: "minecraft:composter" }, ...Array.from({ length: 9 }, (_, i) => ({ x: 1 + (i % 5), y: 0.5, z: 3 + Math.floor(i / 5), id: "minecraft:farmland" }))];
     assert(matches(tally(hut(farm))).find((m) => m.id === "farmhouse").ok, "farmhouse");
     assert(matches(tally(hut([...chests, { x: 4, y: 1, z: 4, id: "minecraft:anvil" }]))).find((m) => m.id === "mint").ok, "mint");
+  },
+});
+
+// ---------- a lord's crew furnishes the homes it finishes (census.js bedPlaces) ----------
+import { bedPlaces } from "./census.js";
+addTests("settle census", {
+  "a lord's crew fits beds that count, clear of the door and of each other"() {
+    const door = [{ x: 3, y: 1, z: 0, id: "minecraft:spruce_door" }, { x: 3, y: 2, z: 0, id: "minecraft:spruce_door", upper: true }];
+    const cells = hut(door);
+    const cap = bedCap(tally(cells));
+    const beds = bedPlaces(cells, cap);
+    assertEqual(beds.length, cap);
+    const placed = beds.flatMap((b) => [{ ...b.head, id: "minecraft:bed", head: true }, { ...b.foot, id: "minecraft:bed" }]);
+    assertEqual(bedsCounted(tally([...cells, ...placed])), cap, "every bed it places counts");
+    const STEP = [[0, 1], [-1, 0], [0, -1], [1, 0]];
+    for (const b of beds) {
+      assertEqual(b.head.x - b.foot.x, STEP[b.dir][0]); assertEqual(b.head.z - b.foot.z, STEP[b.dir][1]);
+      for (const p of [b.foot, b.head]) assert(Math.abs(p.x - 3) > 2 || Math.abs(p.z) > 2, "clear of the door");
+    }
+    const cellsOf = beds.flatMap((b) => [b.foot, b.head]);
+    for (let i = 0; i < beds.length; i++) for (let j = i + 1; j < beds.length; j++)
+      for (const p of [beds[i].foot, beds[i].head]) for (const q of [beds[j].foot, beds[j].head]) assert(Math.abs(p.x - q.x) + Math.abs(p.z - q.z) > 1, "beds don't touch");
+    assertEqual(new Set(cellsOf.map((p) => `${p.x},${p.z}`)).size, cellsOf.length);
+  },
+  "no roof or no room, no beds"() {
+    assertEqual(bedPlaces(hut([], { roof: false }), 2).length, 0);
+    assertEqual(bedPlaces(hut(), 0).length, 0);
+  },
+});
+
+// ---------- townsfolk in Rival Lords' towns (folk.js, census.js lordArrivals) ----------
+import { lineFor } from "./folk.js";
+import { lordArrivals } from "./census.js";
+import { SETTLER_LINES, SETTLERS as FOLK } from "./config.js";
+addTests("settle settlers", {
+  "a lord's townsfolk talk the lord's way, and every temper has lines"() {
+    for (const t of ["proud", "grasping", "devout", "wary", "bold", "kind", "steady"]) assert(SETTLER_LINES.lord[t]?.length >= 2, t);
+    const proud = new Set(Array.from({ length: 9 }, (_, d) => lineFor({ n: 1 }, { day: d, temper: "proud" })));
+    assert([...proud].some((l) => SETTLER_LINES.lord.proud.includes(l)), "proud lines heard");
+    assert(SETTLER_LINES.lord.steady.includes(lineFor({ n: 1 }, { day: 1, temper: "who knows" })) || SETTLER_LINES.day.includes(lineFor({ n: 1 }, { day: 1, temper: "who knows" })));
+    assert(SETTLER_LINES.wary.includes(lineFor({ n: 2 }, { day: 3, temper: "kind", wary: true })), "wary after a takeover");
+    assertEqual(lineFor({ n: 2, idle: true }, { temper: "kind" }), SETTLER_LINES.idle);
+    assert(SETTLER_LINES.night.includes(lineFor({ n: 4 }, { night: true, temper: "bold" })), "night is night everywhere");
+  },
+  "a lord's town takes one newcomer a dawn it missed, up to the catch-up cap"() {
+    assertEqual(lordArrivals(undefined, 10), 1);
+    assertEqual(lordArrivals(9, 10), 1);
+    assertEqual(lordArrivals(8, 10), 2);
+    assertEqual(lordArrivals(0, 40), FOLK.lordCatchUp);
+    assertEqual(lordArrivals(10, 10), 1);
+  },
+});
+
+// ---------- town events and settler requests (events_rules.js) ----------
+import { OPENS_AT } from "./config.js";
+import { eventsFor, requestsFor, gap, quietDay, buildDone, fill } from "./events_rules.js";
+import { TOWN_EVENTS, REQUESTS, SITE_EVENTS, EVENTS } from "./events_data.js";
+addTests("settle events", {
+  "events and requests: unique ids, a kind each, words for each"() {
+    const kinds = new Set(["fight", "mystery", "journey", "quiet", "social", "build"]);
+    for (const list of [TOWN_EVENTS, REQUESTS, SITE_EVENTS]) assertEqual(new Set(list.map((e) => e.id)).size, list.length);
+    for (const e of TOWN_EVENTS) assert(kinds.has(e.kind) && e.name && e.start, e.id);
+    for (const r of REQUESTS) {
+      assert(kinds.has(r.kind) && r.ask && r.thanks && ["build", "bring", "bed"].includes(r.type), r.id);
+      if (r.type === "bring") assert(r.item && r.count > 0, r.id);
+      if (r.type === "build") assert(r.ids.every((id) => OPENS_AT[id] !== undefined), r.id);
+    }
+    for (const t of [...TOWN_EVENTS.map((e) => e.start), ...REQUESTS.map((r) => r.ask)]) assert(!/hollow/i.test(t), "nothing names the Hollow");
+  },
+  "what can happen depends on the town"() {
+    const bare = { tier: 0, counts: {}, settlers: 0, freeBeds: 0 };
+    const ev = eventsFor(bare);
+    assert(ev.includes("market_fair") && !ev.includes("wedding") && !ev.includes("harvest_day"), ev.join());
+    const busy = { tier: 2, counts: { farmhouse: 1, library: 1 }, settlers: 4, freeBeds: 1 };
+    assert(["wedding", "harvest_day", "lost_traveller", "supper_miscount"].every((id) => eventsFor(busy).includes(id)));
+    const lord = eventsFor({ ...busy, lord: true });
+    assert(lord.includes("market_fair") && !lord.includes("harvest_day"), "lords get the public ones");
+    assertEqual(requestsFor({ ...busy, lord: true }).length, 0);
+    const asks = requestsFor(bare, (id) => OPENS_AT[id] ?? 3);
+    assert(asks.includes("well_square") && !asks.includes("watchtower") && !asks.includes("kin") && !asks.includes("book"), asks.join());
+    assert(requestsFor(busy, (id) => OPENS_AT[id] ?? 3).includes("book"), "book once there's a library");
+  },
+  "pacing: gaps in range, quiet round sieges, build requests need one more"() {
+    for (let i = 0; i < 20; i++) { const g = gap(EVENTS.eventGap, () => i / 20); assert(g >= EVENTS.eventGap[0] && g <= EVENTS.eventGap[1], g); }
+    assert(quietDay(10, { siegeTonight: true }));
+    assert(quietDay(10, { lastSiege: 9 }));
+    assert(!quietDay(10, { lastSiege: 7 }));
+    const well = REQUESTS.find((r) => r.id === "well_square");
+    assert(!buildDone(well, { well: 1 }, { well: 1 }));
+    assert(buildDone(well, { well: 1 }, { well: 2 }));
+    assertEqual(fill("{a} in {town} {x}", { a: "Maud", town: "Oakmere" }), "Maud in Oakmere {x}");
   },
 });
 

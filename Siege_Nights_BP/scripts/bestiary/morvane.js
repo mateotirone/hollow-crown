@@ -693,7 +693,8 @@ registerBoss({
 
     // Stage 7: the blow that leaves him open
     { id: "overhead", every: 240, windup: 30, rest: 10, warn: "He lifts the blade over his head. Get out from under it!", sound: "mob.wither.shoot",
-      when: (f) => stageIs(6)(f) && f.m.s.crowned,
+      // Only once he is down to the line, so striking the Crown off is the finishing move (Mateo 2026-11-13)
+      when: (f) => stageIs(6)(f) && f.m.s.crowned && f.hp() <= MORVANE.crown.shieldAt,
       start: (f) => { const t = f.target(); return t ? { x: t.location.x, y: t.location.y, z: t.location.z } : undefined; },
       show: (f, at) => at && ring(f.dim, at, 4, "minecraft:redstone_wire_dust_particle", 20),
       hit: (f, at) => {

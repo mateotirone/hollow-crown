@@ -1,4 +1,4 @@
-"""Everwake, the city in the sky, built with the minecraft-builder skill for the live asset viewer
+"""Everwake, the city in the sky, and the air boat station that takes players there (restored and ruin), built with the minecraft-builder skill for the live asset viewer
 (tools/asset-viewer EXTRAS "everwake") and for pictures.
 
     python3 map/structures/everwake_builds.py OUT [--only everwake_city] [--preview]
@@ -8,7 +8,13 @@ import json, os, subprocess, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "everwake"))
-from spec import specs  # noqa: E402
+from spec import specs as city_specs  # noqa: E402
+from station import specs as station_specs  # noqa: E402
+from airboat import specs as airboat_specs  # noqa: E402
+
+
+def specs():
+    return {**city_specs(), **station_specs(), **airboat_specs()}
 
 BUILD = os.path.join(HERE, "..", "..", ".claude", "skills", "minecraft-builder", "scripts", "build.py")
 

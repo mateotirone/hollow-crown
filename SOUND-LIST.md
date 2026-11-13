@@ -7,7 +7,7 @@ Every sound The Hollow Crown plays, and what each one is made of. **This file is
 Tone for all of it: uneasy, especially at night. Not horror, no jump scares, nothing sudden or loud for its own sake.
 There is no music in version 1.
 
-- **36 signature sounds** are meant to be real recordings made with an AI sound generator. 29 of 36 are installed; the rest play a stand-in built from vanilla sounds, so the game is never silent.
+- **36 signature sounds** are meant to be real recordings made with an AI sound generator. 36 of 36 are installed; the rest play a stand-in built from vanilla sounds, so the game is never silent.
 - **32 more dragon sounds** have synthesized stand-ins and can be replaced the same way.
 - **33 vanilla sounds** are reworked (lower, softer, layered) everywhere the scripts use them, and **27 named cues** are built from vanilla layers.
 - The remaining vanilla sounds are played as they are, because they should sound like what they are (a horse, a bow, a page).
@@ -32,7 +32,7 @@ No computer set up for this? Upload the files in the project chat and ask Claude
 | 1 | The 3:17 toll | `toll_317` | 14 s | one-shot, stereo | recording (14 s) |
 | 2 | The siege horn | `siege_horn` | 9 s | one-shot, stereo | recording (9 s) |
 | 3 | The choir hum (the singing) | `choir_hum` | 15 s | loop, mono | recording (7 s) |
-| 4 | The Rift opening | `rift_open` | 14 s | one-shot, mono | vanilla stand-in |
+| 4 | The Rift opening | `rift_open` | 14 s | one-shot, mono | recording (14 s) |
 | 5 | The Rift answers | `rift_answer` | 5 s | one-shot, mono | recording (5 s) |
 | 6 | The rock stirs | `rift_stir` | 3 s | one-shot, mono | recording (2.76 s, 1 of 3 variants) |
 | 7 | The hush | `rift_hush` | 2 s | one-shot, mono | recording (2 s) |
@@ -52,19 +52,19 @@ No computer set up for this? Upload the files in the project chat and ask Claude
 | 21 | The Ash Seneschal | `boss_seneschal` | 9 s | one-shot, stereo | recording (9 s) |
 | 22 | The Mother of Changelings | `boss_mother` | 10 s | one-shot, stereo | recording (9.63 s) |
 | 23 | The Warlord King | `boss_warlord_king` | 10 s | one-shot, stereo | recording (10 s) |
-| 24 | The first glimpse | `first_glimpse` | 12 s | one-shot, stereo | vanilla stand-in |
+| 24 | The first glimpse | `first_glimpse` | 12 s | one-shot, stereo | recording (12 s) |
 | 25 | The Forgemaster's bell-tongue | `bell_tongue` | 6 s | one-shot, stereo | recording (6 s) |
 | 26 | The roll of the fallen | `roll_drum` | 4 s | one-shot, mono | recording (4 s) |
 | 27 | The forty rowing | `forty_row` | 10 s | one-shot, stereo | recording (9.98 s) |
 | 28 | The fen collects | `fen_debt` | 7 s | one-shot, stereo | recording (6.97 s) |
-| 29 | The castle gate opens | `gate_open` | 3 s | one-shot, mono | vanilla stand-in |
-| 30 | The castle gate shuts | `gate_close` | 3 s | one-shot, mono | vanilla stand-in |
-| 31 | The portcullis rises | `portcullis_open` | 4 s | one-shot, mono | vanilla stand-in |
-| 32 | The portcullis drops | `portcullis_close` | 3 s | one-shot, mono | vanilla stand-in |
+| 29 | The castle gate opens | `gate_open` | 3 s | one-shot, mono | recording (3 s) |
+| 30 | The castle gate shuts | `gate_close` | 3 s | one-shot, mono | recording (3 s) |
+| 31 | The portcullis rises | `portcullis_open` | 4 s | one-shot, mono | recording (4 s) |
+| 32 | The portcullis drops | `portcullis_close` | 3 s | one-shot, mono | recording (2 s) |
 | 33 | Cinderwing: roar | `cinderwing_roar` | 4 s | one-shot, mono | recording (2.4 s) |
 | 34 | Ashen Wyvern: roar | `wyvern_roar` | 4 s | one-shot, mono | recording (2.3 s) |
 | 35 | Dune Drake: roar | `drake_roar` | 4 s | one-shot, mono | recording (2.4 s) |
-| 36 | Glass Wyrm: roar | `wyrm_roar` | 4 s | one-shot, mono | synthesized stand-in |
+| 36 | Glass Wyrm: roar | `wyrm_roar` | 4 s | one-shot, mono | recording (3.48 s) |
 
 ### 1. The 3:17 toll
 
@@ -451,7 +451,7 @@ Prompt:
 
 Prompt:
 
-> A heavy iron portcullis released and dropping down stone grooves: a fast rush of chain running out over a wheel, iron scraping stone, then a deep heavy iron-on-stone slam as its spikes hit the ground, with a short ringing rattle after. Medieval gatehouse, stone echo. No music, no voices.
+> A heavy iron portcullis slamming down: one quick, hard, metallic crash like an iron anvil dropped onto stone, a short sharp clang with a brief ringing rattle of iron bars, then silence. Fast and punchy, close and dry, no chain run-out, no echo, no music.
 
 ### 33. Cinderwing: roar
 
@@ -684,7 +684,7 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `random.levelup` | Done, bought, learned | `random.levelup` pitch 0.8 vol 0.5 + `note.harp` pitch 0.6 vol 0.35 after 0.1 s | 32 | horses (7), siege (5), townhall (4), lore (3), settle (3), dragons (2), crown, ironworks, reach, rivals, roletrials, trade, undertow, vault |
 | `random.orb` | A small yes | `random.orb` pitch 0.75 vol 0.55 | 21 | trade (4), economy (2), townhall (2), unlocks (2), dragons, guild, ironworks, letters, lore, rails, roletrials, settle, undertow, upkeep, vault |
 | `random.anvil_use` | Building and mending | `random.anvil_use` pitch 0.8 vol 0.55 + `dig.stone` pitch 0.7 vol 0.5 after 0.1 s | 19 | unlocks (4), settle (3), townhall (3), vault (3), siege (2), economy, horses, roletrials, trade |
-| `random.anvil_land` | A heavy blow | `random.anvil_land` pitch 0.9 vol 0.8 + `dig.stone` pitch 0.5 vol 0.7 | 18 | bestiary (3), undertow (3), siege (2), trains (2), unlocks (2), vault (2), dragons, roletrials, townhall, warwrit |
+| `random.anvil_land` | A heavy blow | `random.anvil_land` pitch 0.9 vol 0.8 + `dig.stone` pitch 0.5 vol 0.7 | 19 | bestiary (3), undertow (3), siege (2), trains (2), unlocks (2), vault (2), dragons, plotcaves, roletrials, townhall, warwrit |
 | `raid.horn` | A horn | `raid.horn` pitch 0.85 + `raid.horn` pitch 0.64 vol 0.4 after 0.25 s | 14 | bestiary (5), townhall (3), unlocks (3), crown, dragons, rivals |
 | `block.amethyst_block.chime` | A crystal note | `chime.amethyst_block` | 11 | bestiary (4), undertow (4), lore (2), vault |
 | `mob.endermen.portal` | A step between places | `mob.endermen.portal` pitch 0.85 vol 0.8 + `random.orb` pitch 0.4 vol 0.15 after 0.1 s | 10 | bestiary (6), crown, horses, townhall, undertow |

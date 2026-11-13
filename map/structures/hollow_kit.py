@@ -641,7 +641,7 @@ def the_seams(seed=0):
 
 # Sites rebuilt after their first version went into worlds (export_hollow.py writes the version; the game
 # re-stamps a site whose saved version is older, clearing what the old one left: hollow_sites_v1.json).
-SITE_VERSION = {"pilgrims_cross": 3, "cartmeet": 3, "lattice_gate": 3, "wound_dock": 4, "the_seams": 3}
+SITE_VERSION = {"pilgrims_cross": 4, "cartmeet": 4, "lattice_gate": 4, "wound_dock": 5, "the_seams": 4}   # +1 2026-11-13: lit
 
 # Sites whose build runs past r + 4 of the site's middle (the Wound landing's walkway goes down the bank to
 # the river): how far it reaches. The game waits for that much ground before stamping.

@@ -343,6 +343,9 @@ const EXTRAS = [
   { id: "miniature", title: "Welcome hall miniature", marker: "map/structures/miniature_scene.py",
     args: (out) => [out],
     label: { miniature: "The whole map in miniature, on its cloud (welcome hall)" } },
+  { id: "wonders", title: "Wonders", marker: "map/structures/wonder_scenes.py",
+    args: (out) => [out],
+    names: (out) => { try { return JSON.parse(fs.readFileSync(path.join(out, "names.json"), "utf8")); } catch { return {}; } } },
   // The material-loop machines come in every region's look: names.json gives each build {title, sub}, so a
   // stage is one row with a chip per region (machine_regions.py).
   { id: "bossunlocks", title: "Boss unlock sites", marker: "map/structures/boss_unlock_sites.py",
@@ -369,7 +372,7 @@ const EXTRAS = [
     names: (out) => { try { return JSON.parse(fs.readFileSync(path.join(out, "names.json"), "utf8")); } catch { return {}; } } },
   { id: "everwake", title: "Everwake (the city in the sky)", marker: "map/structures/everwake_builds.py",
     args: (out) => [out],
-    label: { everwake_city: "Everwake: the city on its cloud (Y 254 to 319)", everwake_needle: "Everwake with the Needle and the cloud sea" } },
+    label: { everwake_city: "Everwake: the city on its cloud (its own world, Y 254 to 319)", airboat_station_restored: "Air boat station, restored (the air boat at the mast)", airboat_station_ruin: "Air boat station, the ruin it starts as", everwake_airboat: "The air boat (moored at the station and the sky dock)" } },
 ];
 // Builder scripts that live on a branch without the kit: copied from the newest branch that has them into
 // the newest catalogue branch's map/structures and run there.
