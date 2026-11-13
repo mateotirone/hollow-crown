@@ -59,6 +59,7 @@ import "./warwrit/index.js";
 import "./army/index.js";
 import "./creative/index.js";
 import "./starter/index.js";
+import "./newplayer/index.js";
 import "./dispatch/index.js";
 import "./letters/index.js";
 import "./news/index.js";

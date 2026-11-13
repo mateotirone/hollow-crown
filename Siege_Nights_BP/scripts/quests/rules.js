@@ -13,6 +13,7 @@
 import { PLOT_REGION, REGION_BOSS, REGIONAL_BOSSES } from "../lore/data/spine.js";
 import { WARDS } from "../plots/config.js";
 import { COURT, HEART } from "../undertow/layout.js";
+import { firstStep } from "../newplayer/firstnights.js";
 
 export const KEY = "hcq:"; // hidden titles that start with this feed the HUD tracker (tools/minimap_ui.py)
 export const SPOT = { below: "_b", top: "_t", hidden: "_h" }; // where the panel sits: under the minimap, in its place, or not at all
@@ -112,9 +113,12 @@ const siteTarget = (site) => (site ? at(site.name, site.x, site.z) : undefined);
 // }
 export function questsFor(f) {
   const out = [];
+  // Until the first siege is held, getting ready for it comes first (newplayer/firstnights.js)
+  const first = f.dim !== UNDERTOW && !f.morvane ? firstStep(f.first) : undefined;
+  if (first) out.push(first);
   const main = mainQuest(f);
   if (main) out.push(main);
-  const side = sideQuest(f, main);
+  const side = first ? undefined : sideQuest(f, main);
   if (side) out.push(side);
   return out;
 }

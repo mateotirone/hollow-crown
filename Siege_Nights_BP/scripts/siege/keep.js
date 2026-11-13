@@ -64,11 +64,25 @@ world.afterEvents.entityDie.subscribe((event) => {
   if (state?.active && owner) keepFallen(owner);
 }, { entityTypes: [KEEP_HEART] });
 
+// What a fallen keep keeps for its next banner: one win fewer, never below the wins its tier needs
+export function fallenRecord(keep) {
+  const floor = tierOf(keep).wins ?? 0;
+  return {
+    wins: Math.max(floor, (keep.wins ?? 0) - 1), warlordsSlain: keep.warlordsSlain ?? 0, sieges: keep.sieges ?? 0,
+    color: keep.color, allies: keep.allies ?? [], sovereign: keep.sovereign,
+  };
+}
+
 export function keepFallen(owner) {
   const keep = state.keeps[owner];
   if (keep) {
     const block = keepBlock(keep);
     if (block) overworld().runCommand(`setblock ${keep.x} ${keep.y} ${keep.z} air destroy`);
+  }
+  // Losing costs one win, never a tier (new-player audit, Mateo 2026-11-13): the record waits for the next banner
+  if (keep) {
+    state.fallenKeeps ??= {};
+    state.fallenKeeps[owner] = fallenRecord(keep);
   }
   delete state.keeps[owner];
   if (!state.fallen.includes(owner)) state.fallen.push(owner);
@@ -78,7 +92,7 @@ export function keepFallen(owner) {
   for (const raider of overworld().getEntities({ tags: [ownerTag(owner)] })) raider.remove(); // they loot and leave
   for (const player of world.getPlayers()) {
     if (player.id === owner) {
-      title(player, "§4Your Keep has fallen", "§7Raise a new Keep Banner and rebuild");
+      title(player, "§4Your Keep has fallen", "§7Raise your Keep Banner again. You keep your tier; one win is lost");
       sfx(player, "mob.wither.death", { volume: 0.5 });
     } else {
       player.sendMessage(`§c${keep?.name ?? "A"}'s keep has fallen to the raiders!`);
