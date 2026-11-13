@@ -1,0 +1,29 @@
+{
+  "format_version": "1.21.60",
+  "minecraft:entity": {
+    "description": {
+      "identifier": "siege:arena_crowd",
+      "is_spawnable": false,
+      "is_summonable": true,
+      "is_experimental": false,
+      "properties": {
+        "siege:skin": { "type": "int", "range": [0, 39], "default": 0, "client_sync": true },
+        "siege:phase": { "type": "int", "range": [0, 7], "default": 0, "client_sync": true },
+        "siege:roar": { "type": "bool", "default": false, "client_sync": true }
+      }
+    },
+    "components": {
+      "minecraft:type_family": { "family": ["siege_arena_crowd", "inanimate"] },
+      "minecraft:health": { "value": 20, "max": 20 },
+      "minecraft:collision_box": { "width": 0.01, "height": 0.01 },
+      "minecraft:physics": { "has_gravity": false, "has_collision": false },
+      "minecraft:pushable": { "is_pushable": false, "is_pushable_by_piston": false },
+      "minecraft:knockback_resistance": { "value": 1 },
+      "minecraft:damage_sensor": { "triggers": [{ "cause": "all", "deals_damage": "no" }] },
+      "minecraft:fire_immune": {},
+      "minecraft:breathable": { "breathes_water": true, "breathes_air": true, "breathes_solids": true },
+      "minecraft:nameable": { "always_show": false, "allow_name_tag_renaming": false },
+      "minecraft:conditional_bandwidth_optimization": {}
+    }
+  }
+}

@@ -297,9 +297,15 @@ def _areas():
 
 
 def blocks_of(d):
+    """The area's blocks, lit (Mateo 2026-11-13, every build lit at night) once the dug air is in. Lanterns hang
+    overhead or from walls only: no post or floor lantern ever stands on a fight floor."""
     import export_landmarks as X
-    b = X.compute(d.spec())
+    import lighting, emit
+    spec = dict(d.spec()); spec["light"] = False
+    b = X.compute(spec)
     for c in d.airs(): b[c] = ("air", {})
+    lighting.light(b, posts=False)
+    emit.connect(b)
     return b
 
 

@@ -190,5 +190,25 @@
   "id": "siege.sig.portcullis_close",
   "seconds": 2.0,
   "source": "portcullis_close_take3.mp3"
+ },
+ "arena_fanfare": {
+  "id": "siege.sig.arena_fanfare",
+  "seconds": 4.0,
+  "source": "arena_fanfare.mp3"
+ },
+ "crowd_cheer": {
+  "id": "siege.sig.crowd_cheer",
+  "seconds": 4.0,
+  "source": "crowd_cheer.mp3"
+ },
+ "crowd_groan": {
+  "id": "siege.sig.crowd_groan",
+  "seconds": 3.0,
+  "source": "crowd_groan.mp3"
+ },
+ "crowd_murmur": {
+  "id": "siege.sig.crowd_murmur",
+  "seconds": 8.0,
+  "source": "crowd_murmur.mp3"
  }
 }
