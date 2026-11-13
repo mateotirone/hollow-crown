@@ -11,6 +11,8 @@
 //
 // ctx = { where(dim, x, z) -> "near Kingsrest" style text, nameOf(id) -> player name }
 
+import { withArticle } from "../core/grammar.js";
+
 const HIDDEN = /hollow|morvane|oswin|choir|undertow/i; // names the news never says out loud
 
 export const PREFIX = "§8[§6Crier§8]§r ";
@@ -40,15 +42,6 @@ export const NEWS = {
   dragonDied: ({ ownerName, name }) => (name ? `§4${name}, ${ownerName ? `${ownerName}'s dragon, ` : ""}is dead.` : null),
   // a settlement's very first engine on the line (news/index.js marks firstFor the first time per settlement)
   enginePlaced: ({ firstFor, dim, x, z }, ctx) => (firstFor ? `§6${firstFor}'s settlement has its first train. §7It stands on the line ${ctx.where(dim, x, z)}.` : null),
-  // made in news/index.js from a player's death: only to a boss, a creature of this world, or another player,
-  // and never inside a player's settlement (that would be news of an attack)
-  playerFell: ({ victim, killer, kind, dim, x, z }, ctx) => {
-    const at = ctx.where(dim, x, z);
-    if (kind === "player") return `§c${victim} was slain by ${killer} ${at}.`;
-    const n = bossName(killer);
-    if (!n) return `§5${victim} fell to something nameless ${at}.`;
-    return kind === "boss" ? `§c${victim} fell to ${n} ${at}.` : `§7${victim} fell to ${/^(the|a|an) /i.test(n) ? n : `a ${n}`} ${at}.`;
-  },
   // a special offer posted or filled at a Trade Outpost (scripts/trade/, the trade routes thread)
   tradeSpecialOffer: ({ name, itemName, count, price, normal }) => (name && itemName ? `§6${name} wants ${count} ${itemName} and will pay ${price} Regals${normal ? ` §7(about ${normal} at the usual rate)` : ""}§6. §7Find the offer at their Trade Outpost.` : null),
   tradeSpecialFilled: ({ name, itemName, count, by }) => (name && itemName ? `§7${by ? `${by} has filled` : "Someone has filled"} ${name}'s offer for ${count} ${itemName}.` : null),
@@ -72,6 +65,37 @@ export function killerName(nameTag, typeId) {
   const tag = String(nameTag ?? "").replace(/§./g, "").split("\n")[0].replace(/\(.*?\)/g, "").trim();
   if (tag) return tag;
   return String(typeId ?? "").replace(/^[a-z_]+:/, "").replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+// Every player death, told once (Mateo 2026-11-13, "Duplicate messages": the game's own death line and the Crier's
+// both printed). The game's death messages are off (core/gamerules.js, showDeathMessages), so this is the only one.
+// It says where, gets "a"/"an" right, and never names what is hidden, which the game's own line did.
+// d = { victim, killer, kind: "player" | "boss" | "creature" | undefined, cause, dim, x, z, home }
+//  - home: the death was inside a player's settlement. Everyone else hears only that the player died (news of an
+//    attack comes only by Messenger); the victim's own line (full: true) still says what killed them.
+const CAUSE = {
+  fall: "fell from a height", void: "fell out of the world", lava: "was lost in lava", fire: "burned to death",
+  fireTick: "burned to death", campfire: "burned to death", magma: "burned on hot stone", drowning: "drowned",
+  suffocation: "was buried alive", starve: "starved to death", freezing: "froze to death", temperature: "froze to death",
+  lightning: "was struck by lightning", magic: "was undone by magic", wither: "withered away", contact: "was pricked to death",
+  fallingBlock: "was crushed", anvil: "was crushed", stalactite: "was crushed by falling rock", stalagmite: "was impaled on rock",
+  flyIntoWall: "flew into a wall", blockExplosion: "was blown apart", entityExplosion: "was blown apart",
+  fireworks: "went up with the fireworks", piston: "was crushed", sonicBoom: "was torn apart by a scream",
+};
+export function deathLine({ victim, killer, kind, cause, dim, x, z, home }, ctx, { full = false } = {}) {
+  if (!victim) return null;
+  const at = ctx.where(dim, x, z);
+  if (home && !full && (kind === "player" || kind === "boss" || kind === "creature")) return `§7${victim} has died.`;
+  if (kind === "player") return `§c${victim} was slain by ${killer} ${at}.`;
+  if (kind === "boss" || kind === "creature") {
+    const n = bossName(killer);
+    if (!n) return `§5${victim} fell to something nameless ${at}.`;
+    const who = kind === "boss" ? n : withArticle(n), c = kind === "boss" ? "§c" : "§7";
+    if (cause === "projectile") return `${c}${victim} was shot down by ${who} ${at}.`;
+    if (cause === "entityExplosion" || cause === "blockExplosion") return `${c}${victim} was blown up by ${who} ${at}.`;
+    return `${c}${victim} fell to ${who} ${at}.`;
+  }
+  return `§7${victim} ${CAUSE[cause] ?? "died"} ${at}.`;
 }
 
 export const leaks = (text) => HIDDEN.test(String(text ?? "").replace(/§./g, ""));
