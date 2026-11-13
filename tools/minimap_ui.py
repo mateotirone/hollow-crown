@@ -1,4 +1,4 @@
-"""Write Siege_Nights_RP/ui/hud_screen.json: the minimap and the quest tracker on the HUD (and the boss bars
+"""Write Siege_Nights_RP/ui/hud_screen.json: the minimap, the quest tracker and the Regal balance on the HUD (and the boss bars
 from tools/bossbar_ui.py).
 
     python3 tools/minimap_ui.py
@@ -22,7 +22,11 @@ The quest tracker (scripts/quests/) works the same way with titles that start wi
     hcq:  SS  text
     SS      where the panel sits: "_b" under the minimap, "_t" in its place (minimap hidden), "_h" hidden
     text    the panel's lines (colour codes and line breaks allowed; it never holds "hcq:" or a spot marker)
-core/hudtitle.js sends both kinds and keeps them from cutting a real title short.
+The Regal balance (scripts/economy/hud.js) sits right of the hotbar, fed by titles that start with "hcr:":
+    hcr:  SS  text
+    SS      "_s" shown, "_h" hidden
+    text    the coloured number, e.g. "\u00a761,234" (always starts with a colour code, so never all digits)
+core/hudtitle.js sends all three kinds and keeps them from cutting a real title short.
 
 No piece that is cut out may be all digits: JSON UI turns a string like "1717" into a number. The first
 version did that and its tiles were also palette PNGs; the map showed black (playtest 2026-11-11).
@@ -147,8 +151,48 @@ quests = [
     quest_label("hc_quests_top", "_t", 0),
 ]
 
+# ---------- the Regal balance ----------
+RKEY = "hcr:"
+RS = "(#preserved_text - 'hcr:')"
+RSPOT = f"('%.2s' * {RS})"
+RTEXT = f"(({RS} - '_s') - '_h')"
+RON = f"((not ({RS} = #preserved_text)) and ({RSPOT} = '_s'))"
+COIN = 8         # the 8x8 menu coin, shown 1:1
+HOTBAR = 182     # the vanilla hotbar's width; the balance sits just right of it
+
+
+def rview(expr, target):
+    return {"binding_type": "view", "source_control_name": "hc_regals_data", "resolve_sibling_scope": True,
+            "source_property_name": expr, "target_property_name": target}
+
+
+regals = [
+    {"hc_regals_data": {
+        "type": "panel", "size": [0, 0], "$update_string": RKEY,
+        "property_bag": {"#preserved_text": ""},
+        "bindings": [
+            {"binding_name": "#hud_title_text_string"},
+            {"binding_name": "#hud_title_text_string", "binding_name_override": "#preserved_text", "binding_condition": "visibility_changed"},
+            {"binding_type": "view", "target_property_name": "#visible",
+             "source_property_name": "(not (#hud_title_text_string = #preserved_text) and not ((#hud_title_text_string - $update_string) = #hud_title_text_string))"},
+        ]}},
+    {"hc_regals_coin": {**image("textures/ui/hc/coin", [COIN, COIN], [0, 1], 4, [rview(RON, "#visible")])}},
+    {"hc_regals_amount": {
+        "type": "label", "text": "#text", "color": [1.0, 0.85, 0.35], "shadow": True, "layer": 5,
+        "text_alignment": "left", "localize": False,
+        "anchor_from": "top_left", "anchor_to": "top_left", "offset": [COIN + 3, 0], "size": [80, "default"],
+        "bindings": [rview(RON, "#visible"), rview(RTEXT, "#text")]}},
+]
+
 ui = {
     "namespace": "hud",
+    "hc_regals": {
+        "type": "panel",
+        "controls": [{"hc_regals_box": {
+            "type": "panel", "size": [92, 10],
+            "anchor_from": "bottom_middle", "anchor_to": "bottom_left", "offset": [HOTBAR // 2 + 5, -6],
+            "controls": regals}}],
+    },
     "hc_quests": {
         "type": "panel",
         "controls": [{"hc_quests_box": {
@@ -166,12 +210,13 @@ ui = {
     "root_panel": {"modifications": [
         {"array_name": "controls", "operation": "insert_front", "value": {"hc_minimap@hud.hc_minimap": {}}},
         {"array_name": "controls", "operation": "insert_front", "value": {"hc_quests@hud.hc_quests": {}}},
+        {"array_name": "controls", "operation": "insert_front", "value": {"hc_regals@hud.hc_regals": {}}},
     ]},
     # the vanilla title box stays hidden while the title is one of ours
     "hud_title_text": {"bindings": [
         {"binding_name": "#hud_title_text_string", "binding_type": "global"},
         {"binding_type": "view", "target_property_name": "#visible",
-         "source_property_name": f"(((#hud_title_text_string - '{KEY}') = #hud_title_text_string) and ((#hud_title_text_string - '{QKEY}') = #hud_title_text_string))"},
+         "source_property_name": f"(((#hud_title_text_string - '{KEY}') = #hud_title_text_string) and ((#hud_title_text_string - '{QKEY}') = #hud_title_text_string) and ((#hud_title_text_string - '{RKEY}') = #hud_title_text_string))"},
     ]},
 }
 
