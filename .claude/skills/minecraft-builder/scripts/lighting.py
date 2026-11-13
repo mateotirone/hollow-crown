@@ -337,6 +337,8 @@ def light(blocks, targets=None, log=None, stage_of=None, kind=None, avoid=(), po
         if stage_of is not None: stage_of[c] = "light"
         g.put(*c, n, p); added.append(c)
 
+    low = 2 if posts else 4                   # rows kept clear over a floor: heads, or a whole fight (posts=False)
+
     def empty(c): return c not in reserved and _name(blocks, c) in (None, "air", "keep", "cave_air")
 
     def hang(x, y, z):
@@ -345,10 +347,10 @@ def light(blocks, targets=None, log=None, stage_of=None, kind=None, avoid=(), po
         top = None
         for yy in range(y + 2, y + 26):
             if not empty((x, yy, z)): top = yy; break
-        if top is None or top - 1 < y + 2: return False
+        if top is None or top - 1 < y + low: return False
         tb = _name(blocks, (x, top, z))
         if not (opaque(tb) or re.search(r"(_slab$|_stairs$|_fence$|_wall$|chain$|trapdoor$)", tb or "")): return False
-        lant = min(top - 1, y + (3 if top - y <= 7 else 4))   # close enough to light the floor under it
+        lant = min(top - 1, y + max(low, 3 if top - y <= 7 else 4))   # close enough to light the floor under it
         if not empty((x, lant, z)) or (x, lant, z) in reserved: return False
         for yy in range(top - 1, lant, -1): setb((x, yy, z), "iron_chain", {"axis": "y"})
         setb((x, lant, z), st["lantern"], {"hanging": True})
@@ -356,13 +358,13 @@ def light(blocks, targets=None, log=None, stage_of=None, kind=None, avoid=(), po
 
     def bracket(x, y, z):
         """A lantern hung one block out from a wall beside feet cell (x, y, z), under a fence bracket."""
-        if not (empty((x, y + 2, z)) and empty((x, y + 3, z))): return False
-        if (x, y + 2, z) in reserved or (x, y + 3, z) in reserved: return False
+        a, b = y + low, y + low + 1                   # the lantern's row and its bracket's
+        if not (empty((x, a, z)) and empty((x, b, z))): return False
         for dx, dz in DIRS4:
-            w = (x + dx, y + 3, z + dz)
-            if opaque(_name(blocks, w) or "air") and _name(blocks, w) is not None and opaque(_name(blocks, (x + dx, y + 2, z + dz)) or "air"):
-                setb((x, y + 3, z), st["fence"])
-                setb((x, y + 2, z), st["lantern"], {"hanging": True})
+            w = (x + dx, b, z + dz)
+            if opaque(_name(blocks, w) or "air") and _name(blocks, w) is not None and opaque(_name(blocks, (x + dx, a, z + dz)) or "air"):
+                setb((x, b, z), st["fence"])
+                setb((x, a, z), st["lantern"], {"hanging": True})
                 return True
         return False
 
