@@ -439,6 +439,10 @@ addTests("settle ground", {
     assertEqual(r, "done");
     assert(g.todo.length > 0, "nothing regraded on a slope");
     assert(g.todo.every((t) => Math.abs(t.x) <= 20 && Math.abs(t.z) <= 20), "regraded too far out");
+    // the door landing: 4 out and 3 wide in front of the door (world -z here), level with the floor
+    assertEqual(g.landing.length, 12);
+    assert(g.landing.every(([x, z]) => z < 0 && Math.abs(x) <= 1), "landing not in front of the door");
+    for (const [x, z] of g.landing) assertEqual(g.T[x - g.x0][z - g.z0], g.floor, `landing ${x},${z}`);
   },
   "the level 1 wall is a low log palisade, not a fence": () => {
     assertEqual(WALL_LEVELS[1].body, "log");

@@ -739,10 +739,10 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 
 | Vanilla sound | What it means here | Made of | Places | Used by |
 |---|---|---|---|---|
-| `block.bell.hit` | Any bell | `block.bell.hit` + `block.bell.hit` pitch 0.5 vol 0.4 after 0.05 s + `block.bell.hit` pitch 1.03 vol 0.22 after 0.15 s | 49 | bestiary (15), undertow (15), after (7), lore (4), unlocks (4), crown (2), roletrials, townhall |
-| `random.levelup` | Done, bought, learned | `random.levelup` pitch 0.8 vol 0.5 + `note.harp` pitch 0.6 vol 0.35 after 0.1 s | 33 | horses (7), siege (5), townhall (4), lore (3), settle (3), dragons (2), arena, crown, ironworks, reach, rivals, roletrials, trade, undertow, vault |
-| `random.orb` | A small yes | `random.orb` pitch 0.75 vol 0.55 | 22 | trade (4), economy (2), townhall (2), unlocks (2), arena, dragons, guild, ironworks, letters, lore, rails, roletrials, settle, undertow, upkeep, vault |
-| `random.anvil_use` | Building and mending | `random.anvil_use` pitch 0.8 vol 0.55 + `dig.stone` pitch 0.7 vol 0.5 after 0.1 s | 20 | unlocks (4), settle (3), townhall (3), vault (3), siege (2), arena, economy, horses, roletrials, trade |
+| `block.bell.hit` | Any bell | `block.bell.hit` + `block.bell.hit` pitch 0.5 vol 0.4 after 0.05 s + `block.bell.hit` pitch 1.03 vol 0.22 after 0.15 s | 50 | bestiary (15), undertow (15), after (7), lore (4), unlocks (4), crown (2), codex, roletrials, townhall |
+| `random.levelup` | Done, bought, learned | `random.levelup` pitch 0.8 vol 0.5 + `note.harp` pitch 0.6 vol 0.35 after 0.1 s | 36 | horses (7), siege (5), townhall (4), codex (3), lore (3), settle (3), dragons (2), arena, crown, ironworks, reach, rivals, roletrials, trade, undertow, vault |
+| `random.orb` | A small yes | `random.orb` pitch 0.75 vol 0.55 | 23 | trade (4), economy (2), townhall (2), unlocks (2), arena, codex, dragons, guild, ironworks, letters, lore, rails, roletrials, settle, undertow, upkeep, vault |
+| `random.anvil_use` | Building and mending | `random.anvil_use` pitch 0.8 vol 0.55 + `dig.stone` pitch 0.7 vol 0.5 after 0.1 s | 21 | unlocks (4), settle (3), townhall (3), vault (3), siege (2), arena, codex, economy, horses, roletrials, trade |
 | `random.anvil_land` | A heavy blow | `random.anvil_land` pitch 0.9 vol 0.8 + `dig.stone` pitch 0.5 vol 0.7 | 19 | bestiary (3), undertow (3), siege (2), trains (2), unlocks (2), vault (2), dragons, plotcaves, roletrials, townhall, warwrit |
 | `raid.horn` | A horn | `raid.horn` pitch 0.85 + `raid.horn` pitch 0.64 vol 0.4 after 0.25 s | 14 | bestiary (5), townhall (3), unlocks (3), crown, dragons, rivals |
 | `block.amethyst_block.chime` | A crystal note | `chime.amethyst_block` | 11 | bestiary (4), undertow (4), lore (2), vault |
@@ -757,17 +757,17 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `mob.ravager.roar` | Something big | `mob.ravager.roar` pitch 0.9 vol 0.9 | 5 | bestiary (3), arena, undertow |
 | `random.totem` | A great change | `random.totem` pitch 0.8 vol 0.55 + `block.bell.hit` pitch 0.5 vol 0.4 after 0.2 s | 4 | townhall (2), crown, horses |
 | `mob.warden.heartbeat` | A heartbeat that is not yours | `mob.warden.heartbeat` pitch 0.9 | 4 | bestiary, crown, roletrials, undertow |
+| `random.toast` | A note is added | `random.toast` pitch 0.8 vol 0.7 | 3 | lore (2), codex |
 | `random.click` | A catch or a lever | `random.click` pitch 0.85 vol 0.8 | 3 | rails, siege, unlocks |
 | `random.break` | Not allowed, or something gave way | `random.break` pitch 0.8 vol 0.7 | 3 | bestiary, plots, siege |
 | `ambient.weather.thunder` | Thunder with no sky | `ambient.weather.thunder` pitch 0.9 vol 0.9 | 3 | undertow (2), crown |
 | `mob.wither.ambient` | A breath from below | `mob.wither.ambient` pitch 0.9 vol 0.8 | 3 | bestiary (3) |
 | `mob.wolf.howl` | A howl far off | `mob.wolf.big.whine` pitch 0.6 vol 0.8 + `mob.wolf.big.whine` pitch 0.5 vol 0.4 after 0.3 s | 3 | unlocks (3) |
-| `random.toast` | A note is added | `random.toast` pitch 0.8 vol 0.7 | 2 | lore (2) |
+| `random.pop` | A small pop | `random.pop` pitch 0.85 vol 0.7 | 2 | codex, dragons |
 | `mob.wither.death` | Something great ends | `mob.wither.death` pitch 0.9 vol 0.8 + `block.bell.hit` pitch 0.35 vol 0.5 after 0.6 s | 2 | crown, siege |
 | `block.amethyst_block.break` | Crystal breaking | `break.amethyst_block` | 2 | undertow, vault |
 | `block.amethyst_block.resonate` | Crystal humming | `resonate.amethyst_block` | 2 | undertow (2) |
 | `block.bell.resonate` | A bell still ringing | `resonate.amethyst_block` pitch 0.5 vol 0.6 + `block.bell.hit` pitch 0.5 vol 0.25 after 0.1 s | 2 | lore, undertow |
-| `random.pop` | A small pop | `random.pop` pitch 0.85 vol 0.7 | 1 | dragons |
 | `block.bell.use` | A bell touched | `block.bell.hit` pitch 1.2 vol 0.6 | 1 | lore |
 | `dye.use` | Dye on cloth | `sign.dye.use` | 1 | siege |
 | `mob.ravager.attack` | A heavy bite | `mob.ravager.bite` pitch 0.9 vol 0.9 | 1 | siege |
@@ -793,12 +793,15 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `crossbow.shoot` | 2 | dragons, siege |
 | `dig.grass` | 2 | roletrials, unlocks |
 | `mob.elderguardian.curse` | 2 | bestiary, undertow |
+| `mob.enderdragon.flap` | 2 | codex, roletrials |
+| `mob.evocation_illager.cast_spell` | 2 | bestiary, codex |
 | `mob.irongolem.throw` | 2 | bestiary (2) |
 | `mob.villager.no` | 2 | bestiary (2) |
 | `mob.witch.celebrate` | 2 | bestiary (2) |
 | `random.bow` | 2 | bestiary (2) |
 | `random.drink` | 2 | bestiary, roletrials |
 | `tile.piston.in` | 2 | unlocks (2) |
+| `armor.equip_diamond` | 1 | codex |
 | `armor.equip_netherite` | 1 | siege |
 | `block.campfire.crackle` | 1 | dragons |
 | `block.end_portal_frame.fill` | 1 | crown |
@@ -808,10 +811,9 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `dig.sand` | 1 | dragons |
 | `elytra.loop` | 1 | roletrials |
 | `item.book.put` | 1 | lore |
+| `item.trident.throw` | 1 | codex |
 | `mob.allay.idle` | 1 | roletrials |
-| `mob.enderdragon.flap` | 1 | roletrials |
 | `mob.enderdragon.growl` | 1 | roletrials |
-| `mob.evocation_illager.cast_spell` | 1 | bestiary |
 | `mob.ghast.scream` | 1 | roletrials |
 | `mob.horse.angry` | 1 | horses |
 | `mob.horse.breathe` | 1 | horses |
@@ -827,6 +829,7 @@ for still apply on top, and every play drifts a few percent in pitch so nothing 
 | `note.pling` | 1 | arena |
 | `random.door_close` | 1 | vault |
 | `random.fuse` | 1 | siege |
+| `random.splash` | 1 | codex |
 | `step.stone` | 1 | bestiary |
 
 ## For anyone adding code

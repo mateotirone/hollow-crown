@@ -1,0 +1,37 @@
+{
+ "format_version": "1.21.60",
+ "minecraft:item": {
+  "description": {
+   "identifier": "siege:maelis_clapper",
+   "menu_category": {
+    "category": "equipment"
+   }
+  },
+  "components": {
+   "minecraft:icon": "siege_cx_maelis_clapper",
+   "minecraft:display_name": {
+    "value": "item.siege:maelis_clapper.name"
+   },
+   "minecraft:max_stack_size": 1,
+   "minecraft:glint": true,
+   "minecraft:hand_equipped": true,
+   "minecraft:damage": 8,
+   "minecraft:durability": {
+    "max_durability": 2400
+   },
+   "minecraft:enchantable": {
+    "slot": "sword",
+    "value": 15
+   },
+   "minecraft:tags": {
+    "tags": [
+     "siege:codex",
+     "siege:mythical",
+     "minecraft:is_tool",
+     "minecraft:diamond_tier",
+     "minecraft:is_sword"
+    ]
+   }
+  }
+ }
+}
