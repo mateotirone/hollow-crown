@@ -599,5 +599,8 @@
  },
  "siege:regal_safe": {
   "sound": "metal"
+ },
+ "siege:hatching_brazier": {
+  "sound": "stone"
  }
 }
