@@ -58,6 +58,16 @@ STYLES = {
                        roof={"block": "dark_prismarine"}, shutter="warped_planks", door="birch_door", glass="cyan_stained_glass_pane",
                        leaves="azalea_leaves", sign_wood="birch", chimney="brick_block", quoin="cut_sandstone", stone="smooth_sandstone",
                        frame_kind="stone", sill="stair"),
+    # Saltreach's sea-temple look (Atlantean, Mateo 2026-11-12): pale stone walls, quartz-pillar column corners,
+    # a sea-worn prismarine plinth and trim, sea-glass windows; roofs vary (regions/saltreach.md "Atlantean houses")
+    "salt_atlantean": dict(plinth={"ladder": ["prismarine_bricks", "prismarine", "dark_prismarine"], "axis": "noise", "scale": 3},
+                           frame={"block": "quartz_pillar", "forms": {"wall": "diorite_wall", "slab": "smooth_quartz_slab", "stairs": "smooth_quartz_stairs"}},
+                           infill={"ladder": ["polished_diorite", "calcite", "smooth_quartz"], "axis": "y"},
+                           floor="smooth_sandstone", trim={"block": "prismarine_bricks", "forms": {"trapdoor": "warped_trapdoor", "wall": "prismarine_wall"}},
+                           roof={"block": "dark_prismarine"}, shutter="warped_planks", panel=None,
+                           door="warped_door", glass="light_blue_stained_glass_pane", leaves="azalea_leaves", sign_wood="warped",
+                           chimney="prismarine_bricks", quoin={"block": "quartz_pillar", "forms": {"wall": "diorite_wall", "slab": "smooth_quartz_slab", "stairs": "smooth_quartz_stairs"}},
+                           stone={"block": "smooth_quartz", "forms": {"wall": "diorite_wall"}}, frame_kind="stone", sill="stair"),
     "fen_timber": dict(plinth={"ladder": ["mud_bricks", "tuff_bricks"], "axis": "noise", "scale": 3}, frame="mangrove_log",
                        infill={"ladder": ["packed_mud", "mud_bricks"], "axis": "y"}, floor="dark_oak_planks", trim="spruce_planks",
                        roof={"block": "dark_oak_planks"}, shutter="mangrove_planks", door="mangrove_door", glass="brown_stained_glass_pane",
@@ -252,9 +262,9 @@ def window(ctx, rect, side, t, floor, style, w=1, h=2, head_room=9, frame_kind="
         for k in ks: ctx.set(*at(k, 1, 1), S, "slab", trim, half="top")            # the shelf
         if h3(x, floor, z, seed + 9) < 0.34: ctx.set(*at(0, 2, 1), "details", raw="lantern")
         return
-    if frame_kind == "stone":   # dark oak panels either side (05: stone, dark oak, spruce)
+    if frame_kind == "stone" and style.get("panel", "dark_oak_trapdoor"):   # dark oak panels either side (05: stone, dark oak, spruce); style "panel" swaps or drops them
         for k in (-(w // 2) - 1, w // 2 + 1):
-            for dy in range(2, 2 + h): ctx.set(*at(k, dy, 1), S, "trapdoor", "dark_oak_planks", open=True, facing=side)
+            for dy in range(2, 2 + h): ctx.set(*at(k, dy, 1), S, raw=style.get("panel", "dark_oak_trapdoor"), open=True, facing=side)
     # sill
     if sill == "leafbox":     # leaves boxed in by wall signs (05: window boxes, Mateo 2026-11-11)
         sw = style.get("sign_wood", "dark_oak")
@@ -327,8 +337,42 @@ def arch(ctx, spec):
 
 
 # ------------------------------------------------------------------ roofs (06-roof)
-def roof_field(rect, kind, ridge, overhang, verge, pitch, base):
-    """-> {(x, z): (row, d, dmax)} for one roof. row = the row of the roof surface block at that cell."""
+def rise(pitch, d, profile=None):
+    """Height of a roof row d steps in from the eave: d * pitch, or the sum of a profile of per-row pitches
+    (Saltreach curved roofs, Mateo 2026-11-12: [1, 1, 2] swells into a bell, [2, 1] is a mansard)."""
+    if not profile: return d * pitch
+    return sum(profile[min(i, len(profile) - 1)] for i in range(d))
+
+
+def step_at(r, d):
+    """The pitch of the step just below roof row d (how many full blocks go under its stair)."""
+    pr = r.get("profile")
+    if not pr: return r["pitch"]
+    return pr[min(max(d - 1, 0), len(pr) - 1)]
+
+
+def curve_profile(rect, ridge, overhang=1):
+    """Per-row pitches of a curved (barrel) roof (06 roof-types 16): a quarter circle each side, steep at
+    the eaves and nearly flat at the top, never a row with no rise (that would read as a flat band)."""
+    import math
+    x0, z0, x1, z1 = rect
+    if ridge is None: ridge = "x" if (x1 - x0) >= (z1 - z0) else "z"
+    n = ((z1 - z0) if ridge == "x" else (x1 - x0)) // 2 + overhang     # rows from the eave to the ridge
+    R = n + 0.5
+    h = [R * math.sqrt(max(0.0, 1 - ((R - d) / R) ** 2)) for d in range(n + 1)]
+    h = [x * (n * 1.1) / max(h[-1], 1) for x in h]                       # about as tall as a pitch 1 roof
+    out, acc = [], 0
+    for d in range(n):
+        step = max(1, min(3, round(h[d + 1] - acc)))
+        out.append(step); acc += step
+    return out
+
+
+def roof_field(rect, kind, ridge, overhang, verge, pitch, base, profile=None):
+    """-> {(x, z): (row, d, dmax)} for one roof. row = the row of the roof surface block at that cell.
+    kind "curved" is a gable with a quarter-circle profile (curve_profile)."""
+    if kind == "curved":
+        kind = "gable"; profile = profile or curve_profile(rect, ridge, overhang)
     x0, z0, x1, z1 = rect
     if ridge is None: ridge = "x" if (x1 - x0) >= (z1 - z0) else "z"
     F = {}
@@ -341,7 +385,7 @@ def roof_field(rect, kind, ridge, overhang, verge, pitch, base):
             if kind == "hip": d = min(x - gx0, gx1 - x, z - gz0, gz1 - z); dmax = min(gx1 - gx0, gz1 - gz0) // 2
             elif ridge == "x": d = min(z - gz0, gz1 - z); dmax = (gz1 - gz0) // 2
             else: d = min(x - gx0, gx1 - x); dmax = (gx1 - gx0) // 2
-            F[(x, z)] = (base + d * pitch, d, dmax)
+            F[(x, z)] = (base + rise(pitch, d, profile), d, dmax)
     return F, ridge
 
 
@@ -359,7 +403,7 @@ def build_roofs(ctx, roofs, style, chimneys=()):
     trim = ctx.mat(style, "trim")
     for (x, z), row in H.items():
         r, d, dmax = info[(x, z)]
-        mat = r["mat"]; pitch = r["pitch"]
+        mat = r["mat"]; pitch = step_at(r, d)
         hi = [f for f, (dx, dz) in DIRS.items() if H.get((x + dx, z + dz), -99) > row]
         if (x, z) in chimneys: continue
         if not hi:
@@ -367,6 +411,8 @@ def build_roofs(ctx, roofs, style, chimneys=()):
             if diag:     # hip edge: outer corner towards the higher diagonal
                 dx, dz = diag[0]; f = _dir_of(0, dz); g = _dir_of(dx, 0)
                 ctx.set(x, row, z, S, "stairs", mat, facing=f, half="bottom", corner="outer_left" if g == LEFT[f] else "outer_right")
+                for k in range(1, pitch):    # a steep step on the hip line needs its full blocks too (no hole at the corner)
+                    ctx.set(x, row - k, z, S, "full", mat)
             else:        # ridge: full block with a bottom slab on top (06 step 3)
                 ctx.set(x, row, z, S, "full", mat)
                 if r.get("ridge_cap", style.get("ridge_cap", "stairs")) == "slab":
@@ -401,7 +447,7 @@ def build_roofs(ctx, roofs, style, chimneys=()):
                 gable_end = (ridge == "x" and (x < x0 or x > x1)) or (ridge == "z" and (z < z0 or z > z1))
                 if gable_end:
                     up = [f for f, (dx, dz) in DIRS.items() if H.get((x + dx, z + dz), -99) > row]
-                    if up: ctx.setif(x, row - r["pitch"], z, S, "stairs", trim, facing=OPP[up[0]], half="top")
+                    if up: ctx.setif(x, row - step_at(r, F[(x, z)][1]), z, S, "stairs", trim, facing=OPP[up[0]], half="top")
                     else: ctx.setif(x, row - 1, z, S, "full", trim)
             eave = F[(x, z)][1] == 0 and edge == "full"
             if eave:
@@ -645,8 +691,11 @@ def _roof_of(ctx, s, st, B, k=0):
         F = {(x, z): (plate + 1, 0, 0) for x in range(x0, x1 + 1) for z in range(z0, z1 + 1)}
         ctx.spec["materials"][rmat] = _with_range(ctx.spec["materials"][rmat], plate, plate + 1)
         return F, {"rect": top, "ridge": "x", "base": plate, "kind": "flat", "pitch": 0, "mat": rmat, "flat": rs}
-    F, ridge = roof_field(top, kind, rs.get("ridge"), rs.get("overhang", 1), rs.get("verge", 1), pitch, plate)
-    r = {"rect": top, "ridge": ridge, "base": plate, "kind": kind, "pitch": pitch, "mat": rmat, "cap": rs.get("cap", rmat),
+    prof = rs.get("profile")
+    if kind == "curved":     # a barrel roof (06 roof-types 16): a gable whose rows rise steep then flatten
+        prof = prof or curve_profile(top, rs.get("ridge"), rs.get("overhang", 1)); kind = "gable"
+    F, ridge = roof_field(top, kind, rs.get("ridge"), rs.get("overhang", 1), rs.get("verge", 1), pitch, plate, prof)
+    r = {"rect": top, "ridge": ridge, "base": plate, "kind": kind, "pitch": pitch, "mat": rmat, "cap": rs.get("cap", rmat), "profile": prof,
          "horns": rs.get("gable_horns", False)}
     if not k: ctx.last_roof = {a: b for a, b in raw_roof(ctx, st).items() if a not in ("from", "to")} if isinstance(raw_roof(ctx, st), dict) else raw_roof(ctx, st)
     ctx.spec["materials"][rmat] = _with_range(ctx.spec["materials"][rmat], plate, max(v[0] for v in F.values()))
@@ -823,11 +872,15 @@ def _porch(ctx, p, st, B):
     x, z = wall_cell(rect0, side, t)
     ox, oz = DIRS[side]; rx, rz = RIGHT_OF[side]
     frame, plinth = ctx.mat(st, "frame"), ctx.mat(st, "plinth")
+    if p.get("post"):            # columns instead of log posts (Saltreach porticoes: quartz pillars)
+        frame = f"{st['_name']}.porch_post"; ctx.spec["materials"][frame] = p["post"]
     cells = [(x + rx * k + ox * j, z + rz * k + oz * j) for k in range(-(w // 2), w // 2 + 1) for j in range(1, dpt + 1)]
     for (cx, cz) in cells:
         ctx.set(cx, fl, cz, "foundation", "full", plinth)
         for yy in range(B["y"], fl): ctx.setif(cx, yy, cz, "foundation", "full", plinth)
-    for k in (-(w // 2), w // 2):
+    every = p.get("every")       # a colonnade: a post every n along the front as well as the corners
+    ks = sorted(set([-(w // 2), w // 2] + ([k for k in range(-(w // 2), w // 2 + 1) if (k + w // 2) % every == 0] if every else [])))
+    for k in ks:
         px, pz = x + rx * k + ox * dpt, z + rz * k + oz * dpt
         for yy in range(fl + 1, fl + 1 + h): ctx.set(px, yy, pz, "frame", "full", frame, axis="y")
     xs, zs = [c[0] for c in cells], [c[1] for c in cells]
@@ -882,7 +935,7 @@ def house(ctx, s):
             sty = list(ws.get("storeys", [5])); wy = ws.get("y", 0) + ws.get("plinth", 1) - 1
             wr = ws["rect"]; rs = ws.get("roof", {})
             Fw, _ = roof_field(wr, rs.get("type", "gable"), rs.get("ridge"), rs.get("overhang", 1), rs.get("verge", 1),
-                               rs.get("pitch", 1), wy + sum(sty) - 1)
+                               rs.get("pitch", 1), wy + sum(sty) - 1, rs.get("profile"))
             gap = B["plate"] - max(v[0] for v in Fw.values())
             if gap > 0:
                 sty[-1] += gap; ws = dict(ws, storeys=sty)
@@ -953,8 +1006,16 @@ def house(ctx, s):
         if rs.get("moss"): _moss(ctx, F, r, Hf, rs["moss"])
     if s.get("stilts"): _stilts(ctx, s, st, B, s["stilts"])
     if s.get("piles"): _piles(ctx, s, B, s["piles"])
+    for g in s.get("galleries", []): _gallery(ctx, g, st, B)
     if s.get("offset"): _offset(ctx, s, st, B, s["offset"], {c for c, _, _ in chs})
+    if s.get("lean"):
+        x0_, z0_, x1_, z1_ = B["rects"][0]
+        _lean(ctx, (x0_ - 3, z0_ - 3, x1_ + 3, z1_ + 3), B["y"], B["plate"], s["lean"], ctx.mat(st, "trim"))
     if s.get("snow") or s.get("roof", {}).get("snow"): _snow(ctx, blocks, s.get("snow") or s["roof"]["snow"])
+    # ---- 8 interiors (08-interiors): stairs, rooms by use, a one-block walkway, light (interiors.py)
+    import interiors
+    ctx.chimneys = {c for c, _, _ in chs}
+    interiors.furnish(ctx, s, st, blocks)
     for bs, bst, bB in blocks:
         ctx.info["houses"].append({"name": bst["_name"], "rect": list(bs["rect"]), "plate": bB["plate"],
                                    "storeys": [{"floor_y": fl, "stand_y": fl + 1, "height": h, "rect": list(rr)}
@@ -1509,13 +1570,17 @@ def _roof_cells(ctx, F, r, H):
     return [(x, z, H[(x, z)], v[1]) for (x, z), v in own.items() if H.get((x, z)) == v[0]]
 
 
+def _chimney_cell(v):
+    return str(v.get("mat", "")).endswith(".chimney")
+
+
 def _moss(ctx, F, r, H, share=0.13):
     """Blackfen mossy shingle (palettes/blackfen.md, settle_halls.thatch): moss blocks on the ridge, moss on
     about 13% of the slope (more on the north, shady side), moss carpet in place of the ridge cap."""
     share = 0.13 if share is True else share
     for x, z, row, d in _roof_cells(ctx, F, r, H):
         v = ctx.get(x, row, z)
-        if not v or ctx.stage_of.get((x, row, z)) != "roof": continue
+        if not v or ctx.stage_of.get((x, row, z)) != "roof" or _chimney_cell(v): continue   # the chimney stays stone
         shade = 1.5 if v.get("props", {}).get("facing") == "s" else 1.0      # a north-facing slope faces s-up
         if v.get("kind") == "full":
             ctx.set(x, row, z, "roof", raw="moss_block")
@@ -1531,7 +1596,7 @@ def _thatch(ctx, F, r, H):
     x0, z0, x1, z1 = r["rect"]
     for x, z, row, d in _roof_cells(ctx, F, r, H):
         v = ctx.get(x, row, z)
-        if not v or ctx.stage_of.get((x, row, z)) != "roof": continue
+        if not v or ctx.stage_of.get((x, row, z)) != "roof" or _chimney_cell(v): continue   # the chimney stays stone
         edge = d == 0 or not (x0 <= x <= x1 and z0 <= z <= z1)
         if v.get("kind") == "full":
             ctx.set(x, row, z, "roof", raw="moss_block")
@@ -1704,7 +1769,311 @@ def dome(ctx, s):
     return ytop
 
 
-PARTS = {"house": house, "dome": dome, "lean_to": lean_to, "woodpile": woodpile, "spire": spire, "belfry": belfry, "clock_face": clock_face, "wheel": wheel, "arch": arch, "string_course": string_course, "buttress": buttress, "hanging_lantern": hanging_lantern}
+# ------------------------------------------------------------------ castle parts: round keep, curtain wall (towers/README "Castle / Citadel")
+def _disc(r):
+    """Cells of a round plan of radius r about (0, 0): r 2.5 = 5 wide, 3.5 = 7 wide (radii end in .5, odd widths)."""
+    R = int(r + 0.5)
+    return {(dx, dz) for dx in range(-R, R + 1) for dz in range(-R, R + 1) if dx * dx + dz * dz <= r * r + 0.01}
+
+
+def _toward(dx, dz):
+    """The side of a round plan a cell is on, by its larger offset (ties go to n/s)."""
+    if abs(dz) >= abs(dx): return "s" if dz > 0 else "n"
+    return "e" if dx > 0 else "w"
+
+
+def _merlon(t):
+    """Merlons on even steps of a parapet run, so ends and corners (step 0) always carry one."""
+    return t % 2 == 0
+
+
+def keep(ctx, s):
+    """A round castle keep (towers/README: castle row; Mateo's barracks reference, 2026-11-12). A plinth, a
+    shaft one block thick in the wall material, floors inside with a ladder up the wall, a string course
+    one out at every floor line, 1x2 slits on the given sides, doors, then machicolated battlements: a
+    ring of upside-down stairs one out (the corbels), the roof deck on them, a parapet and merlons on
+    every other block. Flags on poles above the deck.
+
+    at [x, z] centre, r (2.5 = 5 wide; 3.5 = 7), y (ground row, the plinth's first course), h (shaft
+    height, 3 to 5 times the width), floors (rows above y of each floor inside; the deck is y + h),
+    material / plinth / trim (courses, corbels, parapet cap) / floor, slits {"sides": "sen", "glass"},
+    doors [{"side": "w", "floor": 1, "door": "spruce_door"}] (floor = the floor row the door opens on),
+    ladder side (the inside wall it climbs), flags [{"at": [dx, dz], "dir": "e"}] with "flag" material,
+    clear (true: empties the shaft first, so a roof or wall built before it makes way)."""
+    cx, cz = s["at"]; r = s.get("r", 2.5); y0 = s.get("y", 0); h = s["h"]
+    wall = s.get("material", "stone_bricks"); plinth = s.get("plinth", wall); trim = s.get("trim", wall)
+    floor_m = s.get("floor", "spruce_planks"); top = y0 + h
+    body, inner, crown = _disc(r), _disc(r - 1), _disc(r + 1)
+    ring, outer = body - inner, crown - body
+    floors = sorted(y0 + f for f in s.get("floors", []))
+    lad = s.get("ladder", "e"); lx, lz = DIRS[lad]; R1 = int(r - 0.5)
+    lcell = (cx + lx * (R1 - 1), cz + lz * (R1 - 1))           # inside, against the wall on that side
+    if s.get("clear", True):
+        for (dx, dz) in crown:
+            for y in range(y0, top + 3):
+                if (dx, dz) in body or y >= top - 1: ctx.clear(cx + dx, y, cz + dz)
+    for (dx, dz) in body:                                       # 01: plinth, two courses
+        for y in (y0, y0 + 1): ctx.set(cx + dx, y, cz + dz, "foundation", "full", plinth)
+    for (dx, dz) in ring:                                       # 04: the shaft
+        for y in range(y0 + 2, top): ctx.set(cx + dx, y, cz + dz, "walls", "full", wall)
+    for fy in [y0 + 1] + floors:                                # 03: floors, the ladder's hole left open
+        for (dx, dz) in inner:
+            c = (cx + dx, cz + dz)
+            if fy > y0 + 1 and c == lcell: continue
+            ctx.set(c[0], fy, c[1], "floors", "full", floor_m if fy > y0 + 1 else plinth)
+    for fy in floors:                                           # 07: a course one out at each stage line
+        for (dx, dz) in outer:
+            ctx.set(cx + dx, fy, cz + dz, "details", "stairs", trim, facing=OPP[_toward(dx, dz)], half="top")
+    sl = s.get("slits", {"sides": "nesw"})
+    if sl:
+        for fy in [y0 + 1] + floors:
+            if fy + 3 >= top: continue
+            for sd in sl.get("sides", "nesw"):
+                ox, oz = DIRS[sd]
+                if (ox, oz) == (lx, lz): continue
+                for dy in (2, 3):
+                    ctx.set(cx + ox * R1, fy + dy, cz + oz * R1, "openings", raw=sl.get("glass", "gray_stained_glass_pane"))
+    for d in s.get("doors", []):
+        sd = d.get("side", "s"); ox, oz = DIRS[sd]; fy = y0 + 1 if d.get("floor", 0) == 0 else floors[d["floor"] - 1]
+        x, z = cx + ox * R1, cz + oz * R1; dw = d.get("door", "spruce_door")
+        ctx.set(x, fy + 1, z, "openings", raw=dw, facing=sd, hinge=False)
+        ctx.set(x, fy + 2, z, "openings", raw=dw, facing=sd, hinge=False, upper=True)
+        ctx.set(x, fy + 3, z, "openings", "stairs", trim, facing=OPP[sd], half="top")
+        for (dx, dz) in inner:                                  # nothing stands in front of it inside
+            if (cx + dx, cz + dz) == (x - ox, z - oz):
+                for dy in (1, 2): ctx.clear(x - ox, fy + dy, z - oz)
+    for y in range(y0 + 2, top + 1):                            # the ladder, from the ground floor to the deck
+        ctx.set(lcell[0], y, lcell[1], "details", raw="ladder", facing=OPP[lad])
+    if s.get("cap") == "cone":                                 # a round tower's conical cap (towers/README 5)
+        _cone_cap(ctx, cx, cz, r, top, s); s = dict(s, flags=[])
+        ctx.info.setdefault("keeps", []).append({"at": [cx, cz], "r": r, "floors": floors, "deck": top, "ladder": list(lcell), "cap": "cone"})
+        if s.get("lean"): _lean(ctx, (cx - int(r) - 3, cz - int(r) - 3, cx + int(r) + 3, cz + int(r) + 3), y0, top, s["lean"], trim)
+        return
+    # battlements: corbels one out, the deck on them, a parapet, merlons on every other block
+    for (dx, dz) in outer:
+        ctx.set(cx + dx, top - 1, cz + dz, "roof", "stairs", trim, facing=OPP[_toward(dx, dz)], half="top")
+    for (dx, dz) in crown:
+        c = (cx + dx, cz + dz)
+        if c != lcell: ctx.set(c[0], top, c[1], "roof", "full", wall if (dx, dz) in outer or (dx, dz) in ring else trim)
+    rim = sorted(outer, key=lambda c: __import__("math").atan2(c[1], c[0]))
+    for i, (dx, dz) in enumerate(rim):
+        ctx.set(cx + dx, top + 1, cz + dz, "roof", "full", wall)
+        if _merlon(i): ctx.set(cx + dx, top + 2, cz + dz, "roof", "full", wall)
+    ctx.set(lcell[0], top + 1, lcell[1], "details", raw=s.get("hatch", "spruce_trapdoor"), half="bottom", open=False)
+    for f in s.get("flags", []):                                # 07: poles with the flag hung from the top
+        fx, fz = cx + f["at"][0], cz + f["at"][1]; n = f.get("h", 5); ux, uz = DIRS[f.get("dir", "e")]
+        for k in range(n): ctx.set(fx, top + 1 + k, fz, "details", "post", s.get("pole", "spruce_planks"))
+        ctx.set(fx, top + 1 + n, fz, "details", raw="lightning_rod")
+        fm = s.get("flag", "white_wool")
+        for k, rows in enumerate((2, 2, 1)):                  # a pennant: two rows, tapering to one
+            for j in range(rows): ctx.set(fx + ux * (k + 1), top + n - j, fz + uz * (k + 1), "details", raw=fm)
+    ctx.info.setdefault("keeps", []).append({"at": [cx, cz], "r": r, "floors": floors, "deck": top, "ladder": list(lcell)})
+    if s.get("lean"): _lean(ctx, (cx - int(r) - 3, cz - int(r) - 3, cx + int(r) + 3, cz + int(r) + 3), y0, top, s["lean"], trim)
+
+
+def _gallery(ctx, g, st, B):
+    """A gallery on a row of posts along one side (07; the caravanserai's upstairs gallery, covered walkways
+    in the Emberwaste and Frostmarch). g = {"side": "s", "storey": 1, "depth": 2, "from": t0, "to": t1,
+    "posts": 3}. Posts of the frame wood stand on the ground at both ends and every `posts` blocks along the
+    outer edge, up to the gallery's ceiling: the next floor, or the wall plate on the top storey. A deck of
+    the floor wood at the storey's floor with a fence rail on the outer edge (none on the ground storey,
+    which makes a covered walk), a ceiling of bottom slabs of the roof block, a beam of the frame wood along
+    the outer edge under it, and upside-down trim stairs under the ceiling's outer edge."""
+    sd = g.get("side", "s"); i = g.get("storey", 1); dep = g.get("depth", 2); every = g.get("posts", 3)
+    i = min(i, len(B["floors"]) - 1)
+    rr = B["rects"][i]; fy = B["floors"][i]
+    cy = B["floors"][i + 1] if i + 1 < len(B["floors"]) else B["plate"] + 1
+    L = side_len(rr, sd); t0 = g.get("from", -(L // 2)); t1 = g.get("to", L // 2)
+    ox, oz = DIRS[sd]; gy = B["y"]
+    frame, floor_m, trim = ctx.mat(st, "frame"), ctx.mat(st, "floor"), ctx.mat(st, "trim")
+    roof = ctx.mat(st, "roof"); ax = ALONG_AXIS[sd]
+    ts = list(range(t0, t1 + 1)); posts = {t0, t1} | {t_ for t_ in ts if (t_ - t0) % every == 0 and t1 - t_ >= 2}
+    for t_ in ts:
+        wx, wz = wall_cell(rr, sd, t_)
+        for j in range(1, dep + 1):
+            x, z = wx + ox * j, wz + oz * j
+            for y in range(fy + 1 if i else gy, cy):         # the walk stays clear under the ceiling
+                if ctx.stage_of.get((x, y, z)) in ("details", "openings"): ctx.clear(x, y, z)
+            if i: ctx.set(x, fy, z, "floors", "full", floor_m)
+            ctx.setif(x, cy, z, "roof", "slab", roof, half="bottom")
+            if j == dep:
+                ctx.set(x, cy - 1, z, "frame", "full", frame, axis=ax)          # the beam on the posts
+                if t_ in posts:
+                    for y in range(gy, cy - 1): ctx.set(x, y, z, "frame", "full", frame, axis="y")
+                elif i: ctx.set(x, fy + 1, z, "details", "post", trim)          # the rail
+                ctx.setif(x + ox, cy - 1, z + oz, "roof", "stairs", trim, facing=OPP[sd], half="top")
+        if i and t_ in (t0, t1):                                                  # rails closing the gallery's ends
+            for j in range(1, dep): ctx.setif(wx + ox * j, fy + 1, wz + oz * j, "details", "post", trim)
+
+
+def _cone_cap(ctx, cx, cz, r, top, s):
+    """A steep cone on a round shaft: an eave ring one out with upside-down trim under it, then rings
+    stepping in half a block a row (stairs facing up the slope on the edge, full blocks behind), the
+    add-on's spire top block on a full block at the tip (never on a slab). Keys: roof (material), trim,
+    finial ("spire_block" default / "rod" / "none"), pitch (rows per block in, 2)."""
+    roof = s.get("roof", "deepslate_tiles"); trim = s.get("trim", s.get("material", "stone_bricks"))
+    per = s.get("pitch", 2)
+    rk = r + 1; y = top; k = 0
+    for (dx, dz) in _disc(r + 1) - _disc(r):                  # the eave carried on brackets
+        ctx.set(cx + dx, top - 1, cz + dz, "roof", "stairs", trim, facing=OPP[_toward(dx, dz)], half="top")
+    while rk >= 0.5:
+        D, Din = _disc(rk), _disc(rk - 1.0 / per - 0.5)
+        for (dx, dz) in D:
+            if (dx, dz) == (0, 0) and rk < 1.5: continue
+            if (dx, dz) not in _disc(rk - 1.0 / per):          # the edge of this row: a stair facing up
+                ctx.set(cx + dx, y, cz + dz, "roof", "stairs", roof, facing=OPP[_toward(dx, dz)], half="bottom")
+            elif (dx, dz) not in Din: ctx.set(cx + dx, y, cz + dz, "roof", "full", roof)
+        y += 1; k += 1; rk -= 1.0 / per
+    ctx.set(cx, y - 1, cz, "roof", "full", roof); ctx.set(cx, y, cz, "roof", "full", roof)
+    fin = s.get("finial", "spire_block")
+    if fin == "spire_block": ctx.set(cx, y + 1, cz, "details", raw="siege:spire_roof")
+    elif fin == "rod": ctx.set(cx, y + 1, cz, "details", raw="lightning_rod")
+
+
+def _lean(ctx, box, y0, y1, o, trim):     # y1: the top of the shaft (the cap above moves with the last step)
+    """The Hollow's leaning towers (regions/hollow.md): the whole shaft leans in a few clean steps, each a
+    one-block shift of everything above a line, never a staircase of single-block shifts. o = {"dir": "e",
+    "steps": 2 (1 to 3)}: the shaft splits into steps + 1 equal parts above its base course. Every
+    overhang left by a step is carried on upside-down trim stairs (07)."""
+    sd = o.get("dir", "e"); dx, dz = DIRS[sd]; n = max(1, min(3, o.get("steps", 2)))
+    hi = y1; base = y0 + 2                                    # the steps split the shaft (base course to y1)
+    lines = [base + (hi - base) * k // (n + 1) for k in range(1, n + 1)]
+    for k, ly in enumerate(reversed(lines)):                  # top line first, so each shift carries the rest
+        bx = (box[0] - n, box[1] - n, box[2] + n, box[3] + n)
+        moving = [c for c in ctx.cells if bx[0] <= c[0] <= bx[2] and bx[1] <= c[2] <= bx[3] and c[1] >= ly]
+        saved = {c: (ctx.cells[c], ctx.stage_of.get(c)) for c in moving}
+        for c in moving: ctx.clear(*c)
+        for (x, y, z), (v, stg) in saved.items(): ctx.cells[(x + dx, y, z + dz)] = v; ctx.stage_of[(x + dx, y, z + dz)] = stg
+    for ly in lines:                                            # brackets under each overhang
+        row = [c for c in ctx.cells if c[1] == ly and bx[0] <= c[0] <= bx[2] and bx[1] <= c[2] <= bx[3]
+               and ctx.stage_of.get(c) in ("walls", "foundation", "frame")]
+        for (x, y, z) in row:
+            if ctx.free(x, y - 1, z): ctx.set(x, y - 1, z, "details", "stairs", trim, facing=OPP[sd], half="top")
+
+
+def curtain(ctx, s):
+    """A curtain wall round a yard (towers/README castle row; build-instructions/07 battlements): a run of
+    straight wall through the points in `path` (axis-aligned steps), a plinth course, the wall, a cap
+    course, merlons on every other block; square turrets that rise above it; a gate with an arched head,
+    a raised crown over it and an optional banner hung one out on the crown's outer face.
+
+    path [[x, z], ...], y (ground row), h (wall rows above the plinth course, 4), material / plinth / cap,
+    turrets [{"at": [x, z], "size": 3, "h": 7}], gate {"at": [x, z], "face": "s", "w": 3, "h": 3,
+    "crown": 3, "banner": "white_wool" | null, "pole": "stripped_spruce_log", "trim"}."""
+    y0 = s.get("y", 0); h = s.get("h", 4); wall = s.get("material", "stone_bricks")
+    plinth = s.get("plinth", wall); cap = s.get("cap", wall)
+    cells = []
+    pts = s["path"]
+    for (ax_, az_), (bx_, bz_) in zip(pts, pts[1:]):
+        if ax_ != bx_ and az_ != bz_: ctx.log.append(f"curtain: {ax_},{az_} to {bx_},{bz_} is not straight; use axis-aligned steps")
+        n = max(abs(bx_ - ax_), abs(bz_ - az_))
+        for k in range(n + 1):
+            c = (ax_ + (bx_ - ax_) * k // max(n, 1), az_ + (bz_ - az_) * k // max(n, 1))
+            if c not in cells: cells.append(c)
+    top = y0 + h
+    for t, (x, z) in enumerate(cells):
+        ctx.set(x, y0, z, "foundation", "full", plinth)
+        for y in range(y0 + 1, top): ctx.set(x, y, z, "walls", "full", wall)
+        ctx.set(x, top, z, "walls", "full", cap)
+        if _merlon(t): ctx.set(x, top + 1, z, "details", "full", wall)
+    for tu in s.get("turrets", []):
+        tx, tz = tu["at"]; n = tu.get("size", 3) // 2; th = y0 + tu.get("h", h + 3)
+        for dx in range(-n, n + 1):
+            for dz in range(-n, n + 1):
+                edge = abs(dx) == n or abs(dz) == n
+                for y in range(y0, th):
+                    if edge or y in (y0, th - 1): ctx.set(tx + dx, y, tz + dz, "foundation" if y == y0 else "walls", "full", plinth if y == y0 else wall)
+                    else: ctx.clear(tx + dx, y, tz + dz)
+                if edge:
+                    ctx.set(tx + dx, th, tz + dz, "details", "full", cap)
+                    if abs(dx) == n and abs(dz) == n: ctx.set(tx + dx, th + 1, tz + dz, "details", "full", wall)   # merlons on the corners
+                else: ctx.set(tx + dx, th - 1, tz + dz, "walls", "full", cap)
+        ctx.set(tx, th, tz, "details", raw="lantern")
+    g = s.get("gate")
+    if g:
+        gx, gz = g["at"]; face = g.get("face", "s"); w = g.get("w", 3); gh = g.get("h", 3); cr = g.get("crown", 3)
+        ax = ALONG_AXIS[face]; ux, uz = (1, 0) if ax == "x" else (0, 1); ox, oz = DIRS[face]; hw = w // 2
+        for k in range(-hw - 1, hw + 2):                    # the crown: the wall raised over the gate, w + 2 wide
+            x, z = gx + ux * k, gz + uz * k
+            ctx.clear(x, top + 1, z)
+            for y in range(top, top + cr): ctx.set(x, y, z, "walls", "full", wall)
+            ctx.set(x, top + cr, z, "walls", "full", cap)
+            if _merlon(k + hw + 1): ctx.set(x, top + cr + 1, z, "details", "full", wall)
+        arch(ctx, {"at": [gx, y0 + 1, gz], "axis": ax, "width": w, "height": gh + 1, "material": cap,
+                   "trim": g.get("trim", "spruce_planks"), "style": "round_angle"})
+        if g.get("banner"):                                  # hung one out on the outer face, under a pole
+            py = top + cr - 1
+            for k in range(-hw - 1, hw + 2):
+                ctx.set(gx + ux * k + ox, py, gz + uz * k + oz, "details", raw=g.get("pole", "stripped_spruce_log"), axis=ax)
+            for row in range(1, 4):
+                for k in range(-hw, hw + 1):
+                    if row == 3 and k != 0: continue        # the banner's point
+                    ctx.set(gx + ux * k + ox, py - row, gz + uz * k + oz, "details", raw=g["banner"])
+            ctx.info["banner"] = [gx + ox, py - 2, gz + oz]
+        ctx.info["gate"] = [gx, y0 + 1, gz]
+
+
+PARTS = {"keep": keep, "curtain": curtain, "house": house, "dome": dome, "lean_to": lean_to, "woodpile": woodpile, "spire": spire, "belfry": belfry, "clock_face": clock_face, "wheel": wheel, "arch": arch, "string_course": string_course, "buttress": buttress, "hanging_lantern": hanging_lantern}
+
+
+def boardwalk(ctx, s):
+    """Blackfen boardwalk (regions/blackfen.md, paths/README, regions_towns.BOARDWALK): a deck of top slabs
+    on mangrove log stilts over wet ground or water, with fence rails and lanterns that show through fen mist.
+    path [[x, z], ...] in axis-aligned runs, y (deck row), ground (where the stilts stop, 0), w (3), deck
+    ("mangrove_slab"), beam ("mangrove_planks"), stilt ("mangrove_log"), rail ("mangrove_fence"),
+    rails ("both" / "one" / "none"), gaps [[x, z], ...] (openings in the rail for landings and stairs),
+    light ("lantern"; every 8 and at both ends, on a rail post; null for none)."""
+    y = s["y"]; g = s.get("ground", 0); w = s.get("w", 3); hw = w // 2
+    deck = s.get("deck", "mangrove_slab"); beam = s.get("beam", "mangrove_planks")
+    stilt = s.get("stilt", "mangrove_log"); rail = s.get("rail", "mangrove_fence"); light = s.get("light", "lantern")
+    rails = s.get("rails", "both"); gaps = {tuple(c) for c in s.get("gaps", [])}
+    pts = s["path"]; line = []                                  # centre cells with their run direction
+    for (ax_, az_), (bx_, bz_) in zip(pts, pts[1:]):
+        if ax_ != bx_ and az_ != bz_: ctx.log.append(f"boardwalk: {ax_},{az_} to {bx_},{bz_} is not straight; use axis-aligned runs")
+        n = max(abs(bx_ - ax_), abs(bz_ - az_)); d = "x" if bx_ != ax_ else "z"
+        for k in range(n + 1):
+            c = (ax_ + (bx_ - ax_) * k // max(n, 1), az_ + (bz_ - az_) * k // max(n, 1))
+            if not line or line[-1][0] != c: line.append((c, d))
+    deckc, edges = set(), {}
+    for (cx, cz), d in line:
+        ux, uz = (0, 1) if d == "x" else (1, 0)                # across the run
+        for k in range(-hw, hw + 1): deckc.add((cx + ux * k, cz + uz * k))
+    for (cx, cz), d in line:
+        ux, uz = (0, 1) if d == "x" else (1, 0)
+        for sgn in ((-1, 1) if rails == "both" else (1,) if rails == "one" else ()):
+            e = (cx + ux * (hw + 1) * sgn, cz + uz * (hw + 1) * sgn)
+            if e not in deckc: edges[e] = d
+    for (x, z) in deckc: ctx.set(x, y, z, "floors", raw=deck, half="top")
+    n_ = len(line)
+    for k, ((cx, cz), d) in enumerate(line):                    # stilts and a cross beam every 4 and at the ends
+        if not (k in (0, n_ - 1) or k % 4 == 0 and n_ - 1 - k >= 2): continue
+        ux, uz = (0, 1) if d == "x" else (1, 0)
+        for j in range(-hw, hw + 1):
+            ctx.set(cx + ux * j, y - 1, cz + uz * j, "frame", raw=beam)
+        for j in (-hw, hw):
+            for yy in range(g, y - 1): ctx.set(cx + ux * j, yy, cz + uz * j, "foundation", raw=stilt, axis="y")
+    for i, ((x, z), d) in enumerate(sorted(edges.items())):
+        if (x, z) in gaps: continue
+        ctx.setif(x, y, z, "details", raw=beam)                 # the rail stands on an edge plank
+        ctx.setif(x, y + 1, z, "details", raw=rail)
+    if light:
+        for k, ((cx, cz), d) in enumerate(line):
+            if not (k in (0, n_ - 1) or k % 8 == 0): continue
+            ux, uz = (0, 1) if d == "x" else (1, 0)
+            e = (cx + ux * (hw + 1), cz + uz * (hw + 1))
+            if e in edges and e not in gaps:
+                ctx.set(e[0], y + 2, e[1], "details", raw=rail); ctx.set(e[0], y + 3, e[1], "details", raw=light)
+
+
+PARTS["boardwalk"] = boardwalk
+
+
+def interior(ctx, pt):
+    import interiors
+    interiors.interior_part(ctx, pt)
+
+
+PARTS["interior"] = interior
 
 
 def bridge(ctx, s):
@@ -1718,6 +2087,11 @@ PARTS["bridge"] = bridge
 
 def run(ctx, pt):
     k = pt.get("part")
+    nm = pt.get("name")
+    if nm:                                       # materials are named after the part: two parts, one name, one look
+        seen = ctx.__dict__.setdefault("_names", set())
+        if nm in seen: ctx.log.append(f"two parts are named {nm!r}: the second takes the first's materials; give each part its own name")
+        seen.add(nm)
     if k == "window":
         st = dict(STYLES[pt.get("style", "vale_timber")]); st.update(pt.get("materials", {})); st["_name"] = pt.get("name", f"window{ctx.n}"); ctx.n += 1
         window(ctx, pt["rect"], pt["side"], pt.get("at", 0), pt["floor"], st, pt.get("w", 1), pt.get("h", 2), pt.get("head_room", 9),

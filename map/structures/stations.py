@@ -146,6 +146,19 @@ def start(region, stage):
     P["flat_canopy"] = L["roof"] == "flat"
     return bp, B, P, k, L
 
+def hung(bp, reach=6):
+    """Every hanging lantern hangs from something: a chain up to the first solid block above it, or it goes
+    (nothing in a station floats, Mateo 2026-11-12)."""
+    for (x, y, z), (n, p) in list(bp.cells.items()):
+        if n != "lantern" or not p.get("hanging"): continue
+        for d in range(1, reach + 1):
+            a = bp.cells.get((x, y + d, z))
+            if a and a[0] not in ("keep", "air"): break
+        else:
+            del bp.cells[(x, y, z)]; continue
+        for dd in range(1, d): bp.set(x, y + dd, z, "iron_chain")
+    return bp
+
 def end(bp, stage, post, stalls, join):
     mark(bp, "track_centre", 0, 0, 0)
     mark(bp, "platform_edge", 0, 0, 2)
@@ -153,7 +166,7 @@ def end(bp, stage, post, stalls, join):
     mark(bp, "stalls", *stalls)
     mark(bp, "trade_join", *join)
     bp.markers["door"] = (0, 0, -1)
-    return finish_detail(bp, {"planters": False})
+    return hung(finish_detail(bp, {"planters": False}))
 
 # ---------------------------------------------------------------- back detail
 
@@ -333,19 +346,22 @@ def grand(region):
     rib = k("smooth"); col = k("stone")
     ribs = list(range(-22, 23, 4))
     for x in range(-22, 23):
-        prev = None
         for lz in range(-7, 8):
             y = shed_arch(lz)
-            ys = range(min(y, prev), max(y, prev) + 1) if prev is not None else [y]
-            if abs(lz) == 7: ys = range(5, y + 1)       # the vault comes down onto the side beam: no open row above it
-            for yy in ys:
+            # each column reaches down to its outer neighbour's height, so the vault has no holes on either side,
+            # and the outermost comes down onto the side beam (y 5): no open row under the roof (Mateo, 2026-11-12)
+            low = 5 if abs(lz) == 7 else min(y, shed_arch(lz + (1 if lz > 0 else -1)))
+            for yy in range(low, y + 1):
                 if x in ribs: S(bp, x, yy, lz, rib)
                 else: S(bp, x, yy, lz, "glass")
-            prev = y
         S(bp, x, 5, -7, rib); S(bp, x, 5, 7, rib)
     for x in ribs:
         for y in range(0, 5): S(bp, x, y, 7, col); S(bp, x, y, -7, col)
         S(bp, x, -1, -7, k("cobbled"))
+    for x in ribs[:-1]:                             # an arch between each pair of pillars, both sides (Mateo, 2026-11-12)
+        for lz in (-7, 7):
+            S(bp, x + 1, 4, lz, P["sill"], facing="w", half="top")
+            S(bp, x + 3, 4, lz, P["sill"], facing="e", half="top")
     hall = R(-11, 9, 11, 19); pav = R(-4, 8, 4, 20)
     for r in (hall, pav): B.foundation(r, 0); B.floor(r, 0)
     B.stone_storey(hall, 1, 6, quoins=True)
@@ -457,7 +473,7 @@ def trade_house(region, stage):
     hang(bp, [(0, 3, -(d + 1))])
     mark(bp, "door", 0, 1, 1)
     bp.markers["door"] = (0, 0, -1)
-    return finish_detail(bp, dict(P, planters=False))
+    return hung(finish_detail(bp, dict(P, planters=False)))
 
 # ---------------------------------------------------------------- the Junction's engine shed
 
@@ -480,7 +496,7 @@ def engine_shed(region):
     base = top + (1 if L["roof"] != "flat" else 0)
     roofs(bp, P, L, region, [(rect, "x", 1)], base)
     for x in (-4, 4):
-        for y in range(base + 2, base + 6):
+        for y in range(base + 1, base + 6):   # from the roof up: no gap under a stack on a flat roof
             if bp.get(x, y, 0)[0] in ("keep", "air") or "carpet" in bp.get(x, y, 0)[0]: S(bp, x, y, 0, k("bricks"))   # a stack stands on the roof, not on a moss carpet
         S(bp, x, base + 6, 0, "stone_brick_wall")
     for x in (-8, 8):
@@ -488,4 +504,4 @@ def engine_shed(region):
     hang(bp, [(-4, 5, 0), (4, 5, 0)])
     mark(bp, "track_centre", 0, 0, 0)
     bp.markers["door"] = (0, 0, -1)
-    return finish_detail(bp, dict(P, planters=False))
+    return hung(finish_detail(bp, dict(P, planters=False)))

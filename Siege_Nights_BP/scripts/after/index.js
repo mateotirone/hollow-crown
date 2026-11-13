@@ -1,6 +1,6 @@
 // Act V: The Quiet After. What happens once Morvane has fallen.
 // Plan (Claude Doc, "After the Crown Falls"): https://claude.ai/artifact/78C56Bv59qVa1krcbKFBxm
-// Built so far: arc 1, the Five Chairs (chairs.js), and the Homecomings (homecomings.js).
+// Built so far: arc 1, the Five Chairs (chairs.js), the Homecomings (homecomings.js), and arc 2, the Deep (deep.js).
 // The truce itself (Guest Nights) is the lore feature's (lore/truce.js); this folder only listens to it.
 
 import { addTests, assert, assertEqual } from "../siege/api.js";
@@ -8,8 +8,12 @@ import { TEMPERS } from "../undertow/regent.js";
 import { HOUSES } from "./data/houses.js";
 import { WHEN, ASK, SEEK, ENDING, KEEPSAKE, TWIST } from "./data/homecomings.js";
 import { AFTER, HOUSE_IDS, startStandings, seatOf, houseForPretender, afterFall, afterSat, afterSwitch, envoyHouse, freshLine, isThirdNight, makeStranger, strangerStory, fill, nextHomecoming } from "./rules.js";
+import { COMPANIES, ULFA, DOOR_OPENS, DOOR_AGAIN } from "./data/deep.js";
+import { DEEP_DESIGN } from "./data/deep_design.js";
+import { DEEP, toWorld, toLocal, inDeep, inBellRoom, companySpots, companyBodies, SERJEANT, guardBonus, standingCompanies, ulfaMayRise } from "./deep_rules.js";
 import "./chairs.js";
 import "./homecomings.js";
+import "./deep.js";
 
 const POOLS = ["pitch", "backed", "refused", "guest", "unbidden"];
 const SINGLE = ["seatGained", "seatLost", "champion"];
@@ -102,5 +106,55 @@ addTests("after", {
     for (const pool of ["thanks", "stay", "noItem", "back"]) assert(ENDING[pool].length >= 3, `${pool} needs three wordings`);
     assertEqual(nextHomecoming(10, 0), 15);
     assertEqual(nextHomecoming(10, 0.999), 19);
+  },
+  "Deep: five companies, each with a serjeant, lines for every choice, and no bowman statues": () => {
+    assertEqual(COMPANIES.length, 5);
+    assertEqual(new Set(COMPANIES.map((c) => c.id)).size, 5);
+    for (const c of COMPANIES) {
+      assert(c.name && c.serjeant && c.free && c.led && c.rest && c.keepsake && c.held.length >= 2, c.id);
+      assert(c.statues.length && c.statues.every((t) => t.startsWith("siege:grey_") && t !== "siege:grey_bowman"), `${c.id} statues`);
+      const bodies = companyBodies(c);
+      assertEqual(bodies.length, DEEP.companyX.length);
+      assertEqual(bodies[SERJEANT], "siege:grey_serjeant");
+    }
+  },
+  "Deep: nobody names him, and no name clashes with Everwake's people": () => {
+    const text = JSON.stringify({ COMPANIES, ULFA, DOOR_OPENS, DOOR_AGAIN });
+    assert(!/oswin|morvane/i.test(text), "the Deep names him");
+    assert(!/ansel|tamsin|hedda|corvin|orrin|wren/i.test(text), "a name Everwake already uses");
+  },
+  "Deep: spots go to the world and back, and the box knows who is inside": () => {
+    const w = toWorld(DEEP.note);
+    assertEqual(toLocal(w), DEEP.note);
+    assert(inDeep(toWorld(DEEP.arrive)) && inDeep(toWorld(DEEP.arena)) && !inDeep(DEEP.up), "the Vault is not the Deep");
+    assert(inBellRoom(toWorld(DEEP.arena)) && !inBellRoom(toWorld(DEEP.note)) && !inBellRoom(toWorld(DEEP.arrive)));
+    assert(DEEP.origin.y + DEEP.box.y1 < 40, "the Deep must stay below the Hollow's lowest floor");
+  },
+  "Deep: leading a company out is worth two guards to whoever led, nobody else": () => {
+    assertEqual(guardBonus({ a: 2 }, "a"), 4);
+    assertEqual(guardBonus({ a: 2 }, "b"), 0);
+    assertEqual(guardBonus(undefined, "a"), 0);
+    assertEqual(standingCompanies({ rope: { fate: "led" }, thane: { fate: "rest" } }).map((c) => c.id), ["shield", "fell", "cutters"]);
+  },
+  "Deep: Ulfa wakes the first time, then not again until the next day, and never twice at once": () => {
+    assert(ulfaMayRise({ defeated: 0 }));
+    assert(!ulfaMayRise({ defeated: 0, fighting: true }));
+    assert(!ulfaMayRise({ defeated: 1, fellOnDay: 9, today: 9 }));
+    assert(ulfaMayRise({ defeated: 1, fellOnDay: 9, today: 10 }));
+  },
+  "Deep: the halls are open where players and the Host stand, with floor under them": () => {
+    const solid = new Set();
+    for (const [y, z, x0, n] of DEEP_DESIGN.rows) for (let x = x0; x < x0 + n; x++) solid.add(`${x},${y},${z}`);
+    const open = (p, dy = 0) => !solid.has(`${p.x},${p.y + dy},${p.z}`);
+    const spots = [DEEP.arrive, DEEP.arena, { ...DEEP.note, z: DEEP.note.z - 4 }];
+    for (let k = 0; k < COMPANIES.length; k++) spots.push(...companySpots(k));
+    for (const p of spots) {
+      assert(open(p) && open(p, 1), `blocked at ${JSON.stringify(p)}`);
+      assert(!open(p, -1), `nothing under ${JSON.stringify(p)}`);
+    }
+    assert(!open(DEEP.bell), "the bell that takes you up");
+    for (let y = DEEP.seal.y0; y <= DEEP.seal.y1; y++) assert(!open({ x: 0, y, z: DEEP.seal.z }), "the Seal is drawn shut");
+    const b = DEEP_DESIGN.box;
+    assertEqual([b.x0, b.x1, b.y0, b.y1, b.z0, b.z1], [DEEP.box.x0, DEEP.box.x1, DEEP.box.y0, DEEP.box.y1, DEEP.box.z0, DEEP.box.z1]);
   },
 });

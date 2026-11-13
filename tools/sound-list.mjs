@@ -45,6 +45,19 @@ const roars = dragons.filter((d) => d.signature);
 const signature = [...sig, ...roars];
 const installedCount = signature.filter((e) => record[e.file]).length;
 
+// ---------- creature voices (Siege_Nights_RP/sounds.json, written by studio/bestiary/voices.py) ----------
+const entitySounds = JSON.parse(readFileSync(join(ROOT, "Siege_Nights_RP/sounds.json"), "utf8")).entity_sounds?.entities ?? {};
+const voiceCell = (s) => {
+  if (s === undefined) return "-";
+  if (s === "" ) return "silent";
+  const id = typeof s === "string" ? s : s.sound;
+  const p = typeof s === "object" && Array.isArray(s.pitch) ? ` ${s.pitch[0]}-${s.pitch[1]}` : "";
+  return id ? `\`${id}\`${p}` : "silent";
+};
+const voiceRows = Object.keys(entitySounds).filter((k) => !["siege:steed", "siege:dragon"].includes(k)).sort()
+  .map((k) => { const ev = entitySounds[k].events ?? {}; return `| ${k.replace("siege:", "")} | ${voiceCell(ev.ambient)} | ${voiceCell(ev.hurt)} | ${voiceCell(ev.death)} | ${voiceCell(ev.step)} |`; })
+  .join("\n");
+
 let md = `# Sound list
 
 Every sound The Hollow Crown plays, and what each one is made of. **This file is generated**: change
@@ -108,6 +121,16 @@ Built from vanilla layers in \`core/sfx_cues.js\`. A script plays one with \`sfx
 |---|---|---|---|
 ${NAMED_CUES.map((n) => `| \`${n}\` | ${CUES[n].what} | ${recipe(CUES[n].layers)} | ${where(n)} |`).join("\n")}
 
+## Creature voices
+
+What each creature sounds like when it idles, is hit, dies and walks. Each is one vanilla sound for now, re-pitched so
+no two groups sound alike; change them in \`studio/bestiary/voices.py\` and run \`python3 studio/bestiary/voices.py\`.
+A dash means it keeps the block's own footstep or has no idle sound; "silent" means silent on purpose.
+
+| Creature | Idle | Hurt | Death | Step |
+|---|---|---|---|---|
+${voiceRows}
+
 ## Reworked vanilla sounds
 
 Whenever a script plays one of these, it comes out as the recipe on the right. The pitch and volume the script asks
@@ -133,7 +156,8 @@ sfx(player, "random.levelup");                          // only that player hear
 sfx(dimension, "block.bell.hit", location, { pitch: 0.5 }); // everyone near that spot
 \`\`\`
 
-A new vanilla sound works straight away and is played as it is. To rework it, or to add a named cue, add a line to
+A new vanilla sound works straight away and is played as it is, as long as Bedrock has it: \`node tools/check.mjs\` fails on
+any id missing from \`tools/vanilla_sounds.json\` (Java names like \`block.amethyst_block.chime\` play nothing on Bedrock). To rework it, or to add a named cue, add a line to
 \`core/sfx_cues.js\` and run \`node tools/sound-list.mjs\`.
 `;
 

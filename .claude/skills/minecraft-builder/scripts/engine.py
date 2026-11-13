@@ -11,7 +11,7 @@ roofs, colour matching and rules:
     engine.into_blueprint(bp, spec, upto="walls")                   # stage by stage: foundation .. upto
     engine.into_blueprint(bp, spec, only="roof")                    # one stage, for fn(bp, B) stage functions
 
-Stages, in order: shapes, foundation, frame, floors, walls, openings, roof, details, place.
+Stages, in order: shapes, foundation, frame, floors, walls, openings, roof, details, interior, place.
 Props follow map/structures/bp.py (facing n/s/e/w, half, open, upper, hinge, hanging, axis); the few the
 kit has no field for (corner stairs, vine sides, rods) go in "raw" as Bedrock states. Blocks are the
 Bedrock ids the kit already uses. compute() caches nothing and is pure: same spec, same blocks.
@@ -25,7 +25,7 @@ from fit import voxelize  # noqa: E402
 from materials import Materials  # noqa: E402
 import emit, parts  # noqa: E402
 
-STAGES = ["shapes", "foundation", "frame", "floors", "walls", "openings", "roof", "details", "place"]
+STAGES = ["shapes", "foundation", "frame", "floors", "walls", "openings", "roof", "details", "interior", "place"]
 
 
 def resolve(cells, mats, pal, log):
@@ -41,6 +41,11 @@ def resolve(cells, mats, pal, log):
         if not v.get("mat"):
             if ("nomat", k) not in warned: log.append(f"{k} cell at {x},{y},{z} has no material"); warned.add(("nomat", k))
             continue
+        forms = mats.define(v["mat"]).get("forms") or {}
+        if k in forms or (k == "post" and "wall" in forms):    # a material can name its own partial blocks
+            fb = forms.get(k) or forms["wall"]
+            if k in ("full", "post"): p.pop("axis", None)
+            if k != "full" or "axis" not in fb: out[(x, y, z)] = (fb, p); continue
         b, raw = mats.block(v["mat"], x, y, z)
         if raw:
             out[(x, y, z)] = (b, p); continue
@@ -98,11 +103,37 @@ def compute(spec, edition=None, pal=None):
     mats = Materials(spec.get("materials"), pal, log)
     blocks = resolve(cells, mats, pal, log)
     seat_spire_tops(blocks, pal, log)
+    check_water(blocks, log)
     emit.connect(blocks)
     return blocks, stage_of, log
 
 
 SPIRE_TOPS = ("siege:spire_roof",)
+WATERS = ("water", "minecraft:water", "flowing_water", "minecraft:flowing_water")
+
+
+def spilling_water(blocks):
+    """Water that will run out of its basin in game: a water block with air, or nothing at all, beside it
+    (n, s, e, w) or under it. A source block there flows up to 7 blocks across the floor (the Drowned Court's
+    channels, 2026-11-12: water put at the walking row ran over the whole hall). Returns the cells."""
+    out = []
+    for (x, y, z), (n, _q) in blocks.items():
+        if n not in WATERS: continue
+        for dx, dy, dz in ((1, 0, 0), (-1, 0, 0), (0, 0, 1), (0, 0, -1), (0, -1, 0)):
+            b = blocks.get((x + dx, y + dy, z + dz))
+            if b is None or b[0] in ("air", "minecraft:air"):
+                out.append((x, y, z)); break
+    return out
+
+
+def check_water(blocks, log=None):
+    """Warn about every water block that would spill (see spilling_water). Water sits a row below the floor
+    it runs through, walled on four sides and floored, never at the row players stand on."""
+    bad = spilling_water(blocks)
+    if bad and log is not None:
+        log.append(f"{len(bad)} water block(s) would spill out of their basin, first at {bad[0]}: "
+                   "sink water a row into the floor and close every side and the bottom")
+    return bad
 
 
 def seat_spire_tops(blocks, pal, log=None):
@@ -129,6 +160,7 @@ def to_bp(n, q):
     if n == "vine": raw["vine_direction_bits"] = {"s": 1, "w": 2, "n": 4, "e": 8}[q.pop("attach", "n")]
     if n in ("end_rod", "lightning_rod"): raw["facing_direction"] = 1
     if n == "bell": raw["attachment"] = "hanging"; raw["direction"] = {"s": 0, "w": 1, "n": 2, "e": 3}[q.pop("facing", "s")]
+    if n == "candle" or n.endswith("_candle"): raw["candles"] = max(0, int(q.pop("candles", 1)) - 1); raw["lit"] = bool(q.pop("lit", True))
     if n.endswith("_button"): raw["facing_direction"] = {"n": 2, "s": 3, "w": 4, "e": 5}[q.pop("facing", "s")]
     if raw: q["raw"] = raw
     return n, q

@@ -8,7 +8,7 @@ It is its own dimension (internal id `siege:undertow`) of about 1,400 x 2,500 bl
 hand-designed centre and generated country beyond it, out to a ragged void edge. Its places:
 - **The arrival and the valley spine** with the story path.
 - **The light rivers:** glowing rivers that join everything, travelled in Latticewood boats.
-- **Four mining villages:** Glimwade, Lowseam, Tollrest, Highcut. A cart rail runs from Cartmeet to the Seams.
+- **Four mining villages:** Glimwade, Lowseam, Tollrest, Highcut. The Hollow has no rail lines or trains (Mateo, 2026-11-12).
 - **The vault.**
 - **The centre sites.**
 - **The drowned city**, with its leaning towers.
@@ -48,6 +48,9 @@ to players before the story does.
 Build for the dark. Light is the material here: warm froglight windows mean people, cold soul light means
 everything else. The storm never rains or snows, so there are no drip lines or snow caps. Damp and age show as
 cracked veinstone and moss.
+
+Drowned and flooded places (the Drowned Court, the drowned city) show their water as channels and pools sunk a row
+into the floor, walled and floored all round; never water standing on the floor players walk, which floods the room.
 
 ## Towns and paths
 
@@ -89,6 +92,19 @@ cracked veinstone and moss.
 - The plinth and the ground storey stay true.
 - The offset storey's posts still sit on the beam below.
 - The windows move with their storey.
+
+## Cliffs, floating rock and the way to the Seat (Mateo, 2026-11-12)
+
+- **No straight edges.** Where the land ends it breaks off ragged: bays bitten well back, blunt spurs between
+  them, single-block jags. Never a ruler line (`terrain.js` `heartEdge`).
+- **Floating rock:** a ragged plate on top that tapers underneath to a point hanging off centre. Veilmoss
+  strands, hollowwood roots and glimbulbs hang under it, and a soul lantern on a chain under the bigger ones.
+  No two the same size or height.
+- **A way across open air is walked, never jumped:** three wide, half steps (a bottom slab) at every drop, spans
+  of hollowwood roots between rocks, two blocks of headroom. A self-test walks it.
+- **The Seat's approach** (`hollow_arenas.py` `approach()`): the Last Step's broken gate (two pylons that do not
+  match), five rocks curving to the ring's landing, broken rock adrift round it. Nothing of it stands inside
+  the ring that falls in the fight (r 32 from the Seat's middle).
 
 ## Roofs
 
@@ -176,9 +192,13 @@ strands over cliffs.
  "offset": {"storey": 1, "dir": "e"}}
 ```
 
-**Not in the skill yet:**
-- **Leaning towers:** whole towers in a few clean steps.
-- **Curved roofs.**
+- **Leaning towers:** `"lean": {"dir": "e", "steps": 2}` on a `keep` (round, `"cap": "cone"`) or a `house`:
+  the whole tower leans in two or three clean one-block steps, with brackets under each step.
+- **Curved roofs** on halls: `"roof": {"type": "curved"}`.
+
+**Sites under the floor:** below y 40 the Hollow is void, so a site hung there (the Deep, `map/structures/hollow_deep.py`)
+carries its own two-block shell: dressed veinstone on the inside face, `siege:veil_rock` behind it. Write no air (the void
+is air already), and keep the whole site within about 60 blocks of where players enter it so it loads while it is stamped.
 
 ## Never
 

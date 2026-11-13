@@ -4,6 +4,8 @@
 // Core (no gameplay)
 import "./core/selftest.js";
 import "./core/clickable.js";
+import "./core/gamerules.js";
+import "./core/noraids.js";
 import "./core/firstjoin.js";
 import "./core/storyteller.js";
 
@@ -24,6 +26,7 @@ import "./rails/index.js";
 import "./trains/index.js";
 import "./trains/station_sites.js";
 import "./trains/route_game.js";
+import "./trains/line_trains.js";
 import "./bestiary/index.js";
 import "./lore/index.js";
 import "./crown/index.js";
@@ -48,12 +51,15 @@ import "./forestry/index.js";
 import "./workings/index.js";
 import "./ironworks/index.js";
 import "./vault/index.js";
+import "./warwrit/index.js";
+import "./army/index.js";
 import "./creative/index.js";
 import "./dispatch/index.js";
 import "./letters/index.js";
 import "./news/index.js";
 import "./trade/index.js";
 import "./townsfolk/index.js";
+import "./weather/index.js";
 import "./graves/index.js";
 
 // Start the shared loop last, once every file has registered its work

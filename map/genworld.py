@@ -318,21 +318,37 @@ def stops_on(P): return [(sid, st) for sid, st in STOPS.items() if np.min(np.hyp
 # valleys and hillsides, long curves, stations at the edge of town), not beside the roads. The lines.json "roads"
 # only say which stops each line serves and in what order; railroute places the stations and routes the track.
 import railroute
-SEQ = {}
-for lname, pts in L["roads"].items():
-    P = np.asarray(pts, float)
-    SEQ[lname] = [sid for sid, st in sorted(stops_on(P), key=lambda t: int(np.argmin(np.hypot(P[:, 0] - t[1]["x"], P[:, 1] - t[1]["z"]))))]
 _foot = {}                                         # how far out each stamped town's blocks reach
+FIXED_ST = {}; FIXED_Y = {}                        # stations a town plan already stamped (<town>-plan.json beside it)
 for fn_ in filter(None, os.environ.get("GW_BLOCKS", "").split(":")):
     d_ = json.load(open(fn_)); b_ = np.array(d_["blocks"], np.int64)[:, [0, 2]]
     _foot[d_["town"]] = b_
+    pf_ = fn_.replace("-blocks.json", "-plan.json")
+    if os.path.exists(pf_):
+        for e_ in json.load(open(pf_)).get("buildings", []):
+            if e_.get("kind") == "station":          # track along the stamp's local x at z 0, one above its ground
+                FIXED_ST[slug(d_["town"])] = (int(e_["x"]), int(e_["z"]), "x" if int(e_.get("rotation", 0)) % 180 == 0 else "z")
+                FIXED_Y[slug(d_["town"])] = int(e_["ground_y"]) + 1
+log("rail: stations stamped by town plans", FIXED_ST)
+SEQ = {}                                           # a stop is on a line if its old spot or its stamped station is
+for lname, pts in L["roads"].items():              # near the line's lines.json road
+    P = np.asarray(pts, float); on_ = []
+    for sid, st in STOPS.items():
+        spots_ = [(st["x"], st["z"])] + ([FIXED_ST[sid][:2]] if sid in FIXED_ST else [])
+        dd_ = [np.hypot(P[:, 0] - sx_, P[:, 1] - sz_) for sx_, sz_ in spots_]
+        k_ = min(range(len(dd_)), key=lambda j: dd_[j].min())
+        if dd_[k_].min() < 30: on_.append((int(np.argmin(dd_[k_])), sid))
+    SEQ[lname] = [sid for _, sid in sorted(on_)]
+for sid_, (x_, z_, _) in FIXED_ST.items(): STOPS[sid_].update({"x": x_, "z": z_})
+log("rail: line stops", SEQ)
 R_TOWNS = []
 for n_, x_, z_, r_, _ in TOWNS:
     if n_ in _foot: R_ = int(np.hypot(_foot[n_][:, 0] - x_, _foot[n_][:, 1] - z_).max()) + 6
     else: R_ = int(r_ * 1.12) + 10
     R_TOWNS.append((slug(n_), x_, z_, R_))
 AVOID = [(x_, z_, 82) for _, x_, z_ in PLOTS] + [(x_, z_, int(r_ * 0.7)) for _, x_, z_, r_, _ in WARDS[6:]]
-STATION_POS, LINE_PTS = railroute.plan_network(Y, wet, land, X0, Z0, STOPS, SEQ, R_TOWNS, AVOID, log=log)
+STATION_POS, LINE_PTS = railroute.plan_network(Y, wet, land, X0, Z0, STOPS, SEQ, R_TOWNS, AVOID, log=log, fixed=FIXED_ST)
+stop_y.update(FIXED_Y)
 for sid_, (x_, z_, _) in STATION_POS.items(): STOPS[sid_].update({"x": x_, "z": z_})
 for lname in SEQ:
     pts = LINE_PTS[lname]
@@ -461,6 +477,10 @@ for d_ in GW_FILES:
     log("graded the land to", d_["town"], "groundwork:", int(foot.sum()), "columns")
 railcore = (rail_d <= 1.5) & ~wet & (tun_floor == -999) & (br_deck == -999) & RAIL_IN_WORLD
 railzone = (rail_d <= 4.5) & RAIL_IN_WORLD
+# the planned lines keep trees off even with no bed in the world (playtest 2026-11-12: trees stood on the lines, and
+# the track the game lays went round their roots and branches): no trunk within 8 of a line, no crown over its bed
+# and graded sides (the game grades 5 out, rail_bed.js)
+railkeep = rail_d <= 6.5
 log("rail lines", len(RAILLINES), "stops", len(STOPS), "tunnel cells", int((tun_floor > -999).sum()), "bridge cells", int((br_deck > -999).sum()))
 # the export: stops (the track block where trains stop, mid-platform) and segments between neighbouring stops,
 # sharing their end blocks
@@ -472,6 +492,12 @@ try:
     import railworks
 except ImportError:
     railworks = None
+# one height for track two lines share (playtest 2026-11-12: Millbrook's Oakmere branch ran its shared platform a
+# block above the North line's, so buying it stacked a second track on the first): the first line keeps its heights
+import railshare
+_ln = list(RAILLINES)
+for n_, ys_h in zip(_ln, railshare.harmonise([([tuple(map(int, c)) for c in RAILLINES[n_][0]], RAILLINES[n_][1]) for n_ in _ln])):
+    RAILLINES[n_] = ([tuple(map(int, c)) for c in RAILLINES[n_][0]], ys_h, RAILLINES[n_][2])
 segs = []
 for lname, (cells, ys, stops_on) in RAILLINES.items():
     path = [(x, int(y), z) for (x, z), y in zip(cells, ys)]
@@ -529,7 +555,7 @@ NAMES = ["stone", "grass_block", "dirt", "water", "sand", "gravel", "bedrock", "
          "coal_ore", "iron_ore", "copper_ore", "gold_ore", "redstone_ore", "lapis_ore", "diamond_ore", "emerald_ore",
          "deepslate_coal_ore", "deepslate_iron_ore", "deepslate_copper_ore", "deepslate_gold_ore", "deepslate_redstone_ore",
          "deepslate_lapis_ore", "deepslate_diamond_ore", "deepslate_emerald_ore", "sweet_berry_bush", "seagrass",
-         "orange_terracotta", "red_terracotta", "yellow_terracotta", "white_terracotta", "brown_terracotta", "light_gray_terracotta", "bone_block"]
+         "orange_terracotta", "red_terracotta", "yellow_terracotta", "white_terracotta", "brown_terracotta", "light_gray_terracotta", "bone_block", "moss_carpet"]
 ID = {n: B(n) for n in NAMES}
 for lf in ["oak", "birch", "spruce", "mangrove", "dark_oak", "acacia"]: ID[lf + "_leaves"] = B(lf + "_leaves", LEAF)
 ID["snow_layer"] = B("snow_layer", {"height": IntTag(0), "covered_bit": ByteTag(0)})
@@ -557,7 +583,7 @@ rocky = (Y > 100) & (slope > 0.6) & ~R[EMBER] & ~chalk
 m = rocky; pick_ = r1 + n_patch2 * 0.8
 surf[m] = np.select([pick_[m] < 0.45, pick_[m] < 0.65, pick_[m] < 0.8, pick_[m] < 0.9], [ID["stone"], ID["andesite"], ID["gravel"], ID["cobblestone"]], ID["tuff"]); sub[m] = ID["stone"]
 m = rocky & (Y > 130) & (r2 < 0.12) & R[FROST]; surf[m] = ID["calcite"]
-m = R[FROST] & (Y > snowline) & (slope < 0.9); surf[m] = np.where(r2[m] < 0.85, ID["snow"], ID["packed_ice"]); sub[m] = ID["stone"]
+m = R[FROST] & (Y > snowline) & (slope < 0.9); surf[m] = np.select([r2[m] < 0.86, r2[m] < 0.93], [ID["snow"], ID["stone"]], ID["gravel"]); sub[m] = ID["stone"]   # no packed-ice speckle: it reads as blue dots (Mateo 2026-11-12)
 m = R[FROST] & (Y > snowline + 22) & (slope < 1.4); surf[m] = ID["snow"]
 # tundra between the woods and the peaks: grass, podzol, coarse dirt and stony patches, snow lying only in drifts
 m = R[FROST] & ~rocky & (Y > 100) & (Y < snowline) & (surf == ID["grass_block"]); tp = n_patch * 1.4 + (r1 - 0.5) * 0.4
@@ -573,6 +599,35 @@ sub[m] = np.where(r2[m] < 0.6, ID["mud"], ID["dirt"])
 # Emberwaste: sand over sandstone, red sand drifts
 m = R[EMBER]; red = (noise(90, 33) + n_patch * 0.35 + n_patch2 * 0.15) > 0.12
 surf[m] = np.where(red[m], ID["red_sand"], ID["sand"]); sub[m] = np.where(red[m], ID["red_sandstone"], ID["sandstone"]); subd[m] = 6
+# fine ground mix (Mateo 2026-11-12, of the Cradle Tree's ground: "That needs to be everywhere"). The patches above set
+# each region's ground in broad strokes; this speckles single blocks of the region's other grounds through them, so no
+# stretch reads as one flat colour. Picked by a hash of the world position (no rng draws, so trees and caves stay put,
+# and any slice of the map gets the same blocks), and faded out on plots and towns so their edges still blend.
+def hash01(seed):
+    h = (GX.astype(np.int64) * 73856093) ^ (GZ.astype(np.int64) * 19349663) ^ np.int64(seed * 83492791)
+    h = (h ^ (h >> 13)) * np.int64(1274126177); h = h ^ (h >> 16)
+    return (h & 0xFFFFFF).astype(np.float32) / 16777216.0
+def mix(m, h, opts):
+    """A weighted pick per cell of mask m from opts = [(block, weight)]; a weight may be a map-sized array."""
+    w = [np.broadcast_to(np.asarray(wt[m] if np.ndim(wt) == 2 else wt, np.float32), (int(m.sum()),)) for _, wt in opts]
+    hv = h[m] * sum(w); acc = np.zeros_like(hv); out = np.full(hv.shape, ID[opts[-1][0]], np.uint16)
+    for (n, _), wi in zip(opts, w):
+        out = np.where((hv >= acc) & (hv < acc + wi), ID[n], out); acc = acc + wi
+    return out
+hs, hp = hash01(11), hash01(12)
+speck = plotfade * (1 - np.clip(box(townzone.astype(np.float32), 10) * 3, 0, 1))      # 0 on plots and in towns
+soft = land & ~wet & ~isroad & ~istrail & ~steep & ~rocky & ~chalk
+def sprinkle(m, p, opts):
+    m = m & soft & (hp < p * speck)
+    if m.any(): surf[m] = mix(m, hs, opts)
+woods = forest > 0.05
+sprinkle(R[VALE] & (surf == ID["grass_block"]), 0.3, [("grass_block", 4), ("coarse_dirt", 2), ("podzol", np.where(woods, 3, 1)), ("moss_block", 1), ("gravel", 0.4)])
+sprinkle(R[VALE] & (surf == ID["coarse_dirt"]), 0.45, [("grass_block", 4), ("podzol", 1), ("gravel", 1), ("dirt", 1)])
+sprinkle(R[FEN], 0.45, [("grass_block", 7), ("moss_block", 3), ("podzol", 2), ("mud", 1), ("muddy_mangrove_roots", 1)])   # the Cradle's own mix
+sprinkle(R[SALT] & ~coast, 0.35, [("grass_block", 3), ("gravel", 2), ("coarse_dirt", 1), ("stone", 1)])
+sprinkle(R[FROST] & (Y < snowline), 0.3, [("grass_block", 3), ("podzol", 2), ("coarse_dirt", 2), ("gravel", 1), ("stone", 1), ("snow", 1)])
+sprinkle(R[EMBER] & (surf == ID["sand"]), 0.1, [("sandstone", 3), ("red_sand", 1), ("gravel", 0.3)])
+sprinkle(R[EMBER] & (surf == ID["red_sand"]), 0.1, [("red_sandstone", 3), ("sand", 1), ("coarse_dirt", 0.5)])
 # steep ground shows rock (banded terracotta in the Emberwaste, calcite streaks in the north)
 m = steep & ~R[EMBER]; surf[m] = np.where(r1[m] < 0.5, ID["stone"], np.where(R[FROST][m] & (r2[m] < 0.15), ID["calcite"], ID["andesite"]))
 mesa = R[EMBER] & (steep | (Y > 112))
@@ -616,9 +671,10 @@ pl = open_ & ~keepclear
 plant = np.zeros((SIZE, SIZE), np.uint16)
 k = rng.random((SIZE, SIZE))
 m = pl & R[VALE] & (surf == ID["grass_block"]) & (r2 > 0.72); plant[m] = np.where(k[m] < 0.93, ID["short_grass"], np.where(k[m] < 0.97, ID["dandelion"], ID["poppy"]))
+m = pl & R[VALE] & woods & np.isin(surf, [ID["grass_block"], ID["podzol"], ID["moss_block"]]) & (r2 > 0.8) & (hs < 0.25); plant[m] = np.where(hp[m] < 0.5, ID["fern"], ID["moss_carpet"])
 m = pl & R[FROST] & (Y < 135) & (r2 > 0.93); plant[m] = np.where(k[m] < 0.6, ID["fern"], np.where(k[m] < 0.9, ID["short_grass"], ID["sweet_berry_bush"]))
 m = pl & R[SALT] & (surf == ID["grass_block"]) & (r2 > 0.85); plant[m] = ID["short_grass"]
-m = pl & R[FEN] & ((surf == ID["grass_block"]) | (surf == ID["moss_block"])) & (r2 > 0.75); plant[m] = np.where(k[m] < 0.6, ID["short_grass"], ID["fern"])
+m = pl & R[FEN] & np.isin(surf, [ID["grass_block"], ID["moss_block"], ID["podzol"]]) & (r2 > 0.7); plant[m] = np.select([k[m] < 0.4, k[m] < 0.75], [ID["moss_carpet"], ID["short_grass"]], ID["fern"])   # the Cradle's dressing
 m = pl & R[EMBER] & (r2 > 0.992); plant[m] = ID["deadbush"]
 plant[(plant != 0) & (r2 < 0.85 * (1 - plotfade))] = 0
 lily = fenpool & (r2 > 0.9) & (water_level - Y <= 3)
@@ -781,16 +837,48 @@ def B_raw(name, states):
 # ---- baked town plans (map/bake_town.py): world blocks placed last, in order; air digs out, soft (leaves) only fills air
 STAMPED = []        # (x, y, z, id, soft) arrays per town
 STAMPED_TOWNS = set()
+def _key(x, y, z): return (np.asarray(x, np.int64) + 4096) * 1_000_000_000 + (np.asarray(y, np.int64) + 512) * 100_000 + (np.asarray(z, np.int64) + 4096)
+_trk = []                                          # the train's body along every planned line: track cell and one each
+for cells_, ys_, _ in RAILLINES.values():          # side, 4 high. A town plan or road bridge block left standing in it
+    c_ = np.array(cells_, np.int64); y_ = np.asarray(ys_, np.int64)   # would block the bed the game lays on purchase
+    for dx_ in (-1, 0, 1):
+        for dz_ in (-1, 0, 1):
+            for k_ in range(4): _trk.append(_key(c_[:, 0] + dx_, y_ + k_, c_[:, 1] + dz_))
+_trk = np.unique(np.concatenate(_trk)) if _trk else np.zeros(0, np.int64)
 for d_ in GW_FILES:
     pid_ = np.array([B_raw(e["name"], e["states"]) if e["name"] != "minecraft:air" else -1 for e in d_["palette"]], np.int64)
     sf_ = np.array([bool(e.get("soft")) for e in d_["palette"]])
     b_ = np.array(d_["blocks"], np.int64)
+    off_ = np.isin(_key(b_[:, 0], b_[:, 1], b_[:, 2]), _trk) & (pid_[b_[:, 3]] >= 0)
+    if off_.any():
+        log("town plan", d_["town"], "keeps", int(off_.sum()), "blocks off the track:", sorted({d_["palette"][i]["name"].split(":")[-1] for i in b_[off_, 3]})[:8])
+        b_ = b_[~off_]
     STAMPED.append((b_[:, 0], b_[:, 1], b_[:, 2], pid_[b_[:, 3]], sf_[b_[:, 3]])); STAMPED_TOWNS.add(d_["town"])
     log("town plan", d_["town"], len(b_), "blocks")
 if BRIDGE_BLOCKS:
     _bb = np.array([(x, y, z) for x, y, z, _, _ in BRIDGE_BLOCKS], np.int64)
     _bi = np.array([B_raw(n, st) if n != "minecraft:air" else -1 for _, _, _, n, st in BRIDGE_BLOCKS], np.int64)
+    _off = np.isin(_key(_bb[:, 0], _bb[:, 1], _bb[:, 2]), _trk) & (_bi >= 0)     # a road bridge the line crosses: its
+    if _off.any():                                                               # parapets and lamps stay off the track
+        log("road bridges keep", int(_off.sum()), "blocks off the track")
+        _bb, _bi = _bb[~_off], _bi[~_off]
     STAMPED.append((_bb[:, 0], _bb[:, 1], _bb[:, 2], _bi, np.zeros(len(_bi), bool)))
+# no tree in a build's dead space (Mateo 2026-11-12: "in dead space there are trees spawning, so for builds include
+# air blocks that remove trees"): every column a town plan or bridge stamps, with a margin, keeps whole trees out, so
+# no trunk stands in a courtyard and no crown hangs over a roof or floats where a stamp cut it.
+stampcol = np.zeros((SIZE, SIZE), bool)
+for sx_, sy_, sz_, sid_, ss_ in STAMPED:
+    i_ = sx_ - X0; k_ = sz_ - Z0; m_ = (i_ >= 0) & (i_ < SIZE) & (k_ >= 0) & (k_ < SIZE)
+    stampcol[i_[m_], k_[m_]] = True
+stampnear = box(stampcol.astype(np.float32), 2) > 0           # crowns (custom trees, through hard_t below)
+if True:                                                       # simple trees: trunks 8 out from a planned line
+    far_ = rail_d[np.clip(tx - X0, 0, SIZE - 1), np.clip(tz - Z0, 0, SIZE - 1)] > 8
+    tx, tz, rg_, yy_, tkind, tvar = tx[far_], tz[far_], rg_[far_], yy_[far_], tkind[far_], tvar[far_]
+    log("trees kept off the planned lines:", int((~far_).sum()), "removed")
+if stampcol.any():
+    far_ = box(stampcol.astype(np.float32), 7)[np.clip(tx - X0, 0, SIZE - 1), np.clip(tz - Z0, 0, SIZE - 1)] == 0   # simple trees: trunks 7 out
+    tx, tz, rg_, yy_, tkind, tvar = tx[far_], tz[far_], rg_[far_], yy_[far_], tkind[far_], tvar[far_]
+    log("trees kept off stamped builds:", int((~far_).sum()), "removed")
 if TREEDB:
     sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "trees"))
     from place import fits, mark, SIZE_ORDER, SIZE_WEIGHT, _grow_mask
@@ -824,7 +912,7 @@ if TREEDB:
               ("open", {"fen_black_alder": 45, "fen_pollard_willow": 35, "fen_bald_cypress": 20})],
         EMBER: [("open", {"ember_umbrella_acacia": 35, "ember_argan": 30, "ember_date_palm": 15, "ember_baobab": 10, "ember_dragon_blood": 10})],
     }
-    hard_t = keepclear | railzone                    # crowns stay off the line (trains need the air above the bed)
+    hard_t = keepclear | railzone | railkeep | stampnear   # crowns stay off the line (trains need the air above the bed) and off builds
     soft_t = _grow_mask(~open_ | ~land, 1)
     soft_w = _grow_mask((~open_ & ~fenpool & ~bank) | ~land, 1)        # bald cypress and snags may stand in fen water
     taken = np.zeros((SIZE, SIZE), np.int8)
@@ -1054,7 +1142,7 @@ for tx0 in range(0, SIZE, TILE):
             nonair = vol != AIR
             topi = YR - 1 - np.argmax(nonair[:, ::-1, :], axis=1)
             topb = vol[ix, topi, iz]
-            okb = ft & ~np.isin(topb, [ID["water"], ID["ice"], ID["fern"], ID["short_grass"], ID["sweet_berry_bush"], ID["cactus"], ID["lava"], ID["snow"]]) & (topi + 1 < YR)
+            okb = ft & ~np.isin(topb, [ID["water"], ID["ice"], ID["fern"], ID["short_grass"], ID["sweet_berry_bush"], ID["moss_carpet"], ID["cactus"], ID["lava"], ID["snow"]]) & (topi + 1 < YR)
             vol[ix[okb], topi[okb] + 1, iz[okb]] = ID["snow_layer"]
         if os.environ.get("GW_DUMP"):                                   # debugging: save this tile's blocks for the voxel viewer
             names_ = {int(v): k for k, v in ID.items()}; names_[int(AIR)] = "air"

@@ -21,6 +21,7 @@
 
 import { world, system, ItemStack } from "@minecraft/server";
 import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
+import { applyFilter } from "../core/events.js";
 import { on, emit, onTick, moduleStore, addTests, assert, assertEqual, registerDeck, storyPick, note, markDone } from "../siege/api.js";
 import { UNDERTOW_ID, UNDERTOW_LAYOUT as L, HEART, pathX } from "../undertow/layout.js";
 import { RIVER_NODES, riverDistance } from "../undertow/rivers.js";
@@ -128,10 +129,10 @@ const areaBuilt = (x, z, r) => {
   return true;
 };
 
-// The ground works that follow the land (terrace, yard, mine mouths, rails, the walk to the landing).
+// The ground works that follow the land (terrace, yard, mine mouths, the walk to the landing).
 // The buildings come from map/structures/hollow_kit.py (village_data.js). The look follows Mateo's
 // mining village picture: stone and timber cottages with lit windows and
-// dark tiled roofs, timbered mine mouths cut into the hillside with cart rails running out, an
+// dark tiled roofs, timbered mine mouths cut into the hillside, an
 // ore-sorting shed, a smithy with a smoking chimney, a fire in the middle, lantern posts and fences.
 // Offsets are from the village centre; nothing lines up on purpose.
 const V = {
@@ -162,7 +163,7 @@ function buildVillage(v) {
   // the Tally's copper counting block; everything else built (cottages, smithy, sorting shed, lamps,
   // fences) is the village design from map/structures/hollow_kit.py, stamped over the next few ticks
   fill(dim, x, y, z, x, y, z, B.copper);
-  // two timbered mine mouths in the west face, ore showing inside, cart rails running out to a sorting shed
+  // two timbered mine mouths in the west face, ore showing inside, a sorting shed beyond (no rails: no train system in the Hollow)
   for (const mz of [z - 2, z + 4]) {
     fill(dim, x - 18, y, mz - 1, x - 15, y + 2, mz + 1, V.air);
     fill(dim, x - 19, y, mz - 1, x - 19, y + 2, mz + 1, B.ore);
@@ -170,7 +171,6 @@ function buildVillage(v) {
     fill(dim, x - 15, y, mz + 2, x - 15, y + 3, mz + 2, V.beam);
     fill(dim, x - 15, y + 3, mz - 2, x - 15, y + 3, mz + 2, V.beam);
     fill(dim, x - 16, y + 2, mz, x - 16, y + 2, mz, V.lantern);
-    fill(dim, x - 18, y, mz, x - 11, y, mz, "minecraft:rail");
   }
 
   // a plank walk from the yard down to the landing, ending in a short dock with a lantern
@@ -243,8 +243,8 @@ function buildVault() {
   store.save();
 }
 
-// The Deep Door: a sealed arch in the Vault's north wall. It does not open. It is a hook for a later
-// expansion (the Deep), so nothing may depend on what is behind it yet.
+// The Deep Door: a sealed arch in the Vault's north wall. It does not open until Morvane falls; then the filter
+// "deepDoor" (false, { player }) lets after/deep.js take the player down instead (return true when handled).
 const DEEP_LINES = [
   "Sealed stone, colder than the rest of the wall. It does not open.",
   "You press your ear to it. Far below, something answers your breathing a moment late.",
@@ -573,6 +573,7 @@ world.beforeEvents.playerInteractWithBlock.subscribe((e) => {
   if (e.block.typeId !== B.seal || e.block.dimension.id !== UNDERTOW_ID || !deepDoorAt(e.block.location)) return;
   if (e.isFirstEvent === false) return;
   e.cancel = true;
+  if (applyFilter("deepDoor", false, { player: e.player })) return; // after Morvane falls the Deep opens (after/deep.js)
   const player = e.player, n = deepTries.get(player.id) ?? 0;
   deepTries.set(player.id, n + 1);
   system.run(() => say(player, `§8${DEEP_LINES[Math.min(n, DEEP_LINES.length - 1)]}`));

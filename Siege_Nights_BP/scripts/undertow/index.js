@@ -11,6 +11,7 @@
 //   /scriptevent hc:mark_source_site <id>   record a candidate shrine by hand (look at the wall)
 //   /scriptevent hc:thin_status             which of the seven thin-place caves are built (thinplaces.js)
 //   /scriptevent hc:thin_tp <id>            go to a thin place;  hc:thin_build <id>  build it now
+//   /scriptevent hc:seep_status             how far the seep has spread;  hc:seep_days <n>  pretend the Rift has been open n days (seep.js)
 //   /scriptevent hc:open_rift               open the Rift at the picked site without a fork
 //   /scriptevent hc:reveal_source           tell only you which site was picked (spoils it!)
 //   /scriptevent hc:undertow_go             go to the Undertow now (testing)
@@ -28,7 +29,7 @@ import { UNDERTOW_ID, UNDERTOW_LAYOUT as L, COURT, HEART, TEXT, stageAt, pathX }
 import { getSourceSite, getSites, markSite, openRift, riftExit, sourceSignsTick, SITE_NAMES, SOURCE_SITE_IDS } from "./source.js";
 import { VEIL, planCrack, tearBand, TEAR_STEPS, TEAR_CLIMB } from "./rift.js";
 import { buildTick, piecesTick, flush, pieces, openCourtGate, openRiverGate, rebuildHeart, waystoneSpot, WAYSTONE, isBuilt, siteOutdated, withClearing } from "./builder.js";
-import { heightAt, planChunk, isRiver, regionAt, columnAt, cartRail } from "./terrain.js";
+import { heightAt, planChunk, isRiver, regionAt, columnAt } from "./terrain.js";
 import { RIVER_NODES, riverSegments, riverDistance, RIVER_HALF_WIDTH } from "./rivers.js";
 import { SITES, ROADS, roadLines, signposts, signRot } from "./roads.js";
 import { STRUCTURE_IDS, planStructure } from "./structures.js";
@@ -43,15 +44,18 @@ import { choirTick, singerSpot, CHOIR } from "./choir.js";
 import { slipSeconds, slipLanding, isSlipping } from "./slips.js";
 import { shouldAlarm, oreOutcome, noteEntry, crownTick, crownVerdict, CLAIM_SECONDS, WARDEN } from "./warden.js";
 import { crownFate, needsRefresh, standHeight, KEEP } from "./crownkeep.js";
-import { oreChance, roofAt, ROOF, groundAt, GROUND, ambientLightAt, AMBIENT, pickTree, treeKind } from "./terrain.js";
+import { oreChance, roofAt, ROOF, ROOF_V3, planRoofSwap, groundAt, GROUND, ambientLightAt, AMBIENT, pickTree, treeKind } from "./terrain.js";
 import { HOLLOW_TREES } from "./trees_data.js";
 import { clearOps } from "./builder.js";
 import { shouldRise, regentOutcome, REGENT, TEMPERS, JOBS } from "./regent.js";
 import { sfx } from "../core/sfx.js";
-import { thinTick, thinCommand, planThinPlace, hillHeight, floorAt, toWorld, THIN_PLACES, CAMP_TOME, SHAPE } from "./thinplaces.js";
+import { thinTick, thinCommand, planThinPlace, hillHeight, caveGeometry, setHills, toWorld, THIN_PLACES, CAMP_TOME, CAVES, MOUTH_V } from "./thinplaces.js";
 import { SITE_FEATURES } from "../lore/data/world.js";
-import { canOpen, dullLeft, BOSSES_TO_OPEN, FORK_DULL_DAYS } from "./source.js";
-import { CRACK_HEIGHT } from "./rift.js";
+import { canOpen, getRift, dullLeft, BOSSES_TO_OPEN, FORK_DULL_DAYS } from "./source.js";
+import { fallenCount, REGIONAL_BOSSES } from "../lore/data/spine.js";
+import { seepTick, seepCommand, planVeins, mouthSeeds, reachOn, hollowOf, takesMoss, heldGround, MAX_REACH } from "./seep.js";
+import { progressOf } from "../lore/player.js";
+import { CRACK_HEIGHT, CRACK_DEPTH, OPENING } from "./rift.js";
 import "./story.js";
 import "./forge.js";
 import "./finds.js";
@@ -95,8 +99,32 @@ function enter(player) {
   noteEntry(player, "rift");
   system.runTimeout(() => {
     player.onScreenDisplay.setTitle("§5" + cap(TEXT.name), { subtitle: "§7The Wound", fadeInDuration: 20, stayDuration: 60, fadeOutDuration: 30 });
-    sfx(player, "ambient.cave", { volume: 1, pitch: 0.5 });
+    sfx(player, "sig.rift_cross");
   }, 20);
+}
+
+// The veil only takes those who earned the way (Mateo 2026-11-12): a player crosses from our side only once all
+// five regional bosses have fallen by their own hand. Standing beside someone who has does not count. Anyone
+// else finds the veil hard as glass: it pushes them back a step, hums, and says why. Coming back out is free.
+export const mayCrossWith = (fallen, creative) => creative || canOpen(fallen);
+const mayCross = (p) => mayCrossWith(fallenCount(progressOf(p).flags), isBuilder(p));
+export const REFUSALS = [
+  "The veil does not know you yet.",
+  "It holds. Whatever waits beyond has not finished weighing you.",
+  "Not yet. The road here is longer than the one you walked.",
+  "The veil lets others through and closes behind them. Your own work is not done.",
+];
+const NUMBER = ["None", "One", "Two", "Three", "Four", "Five"];
+export const refusalLine = (n, fallen, total) => `§5${REFUSALS[n % REFUSALS.length]} §7${NUMBER[fallen] ?? fallen} of ${NUMBER[total]?.toLowerCase() ?? total} have fallen by your hand.`;
+const refusedTimes = new Map();
+export function refuse(player) {
+  cooldown.set(player.id, system.currentTick + 50);
+  const n = refusedTimes.get(player.id) ?? 0;
+  refusedTimes.set(player.id, n + 1);
+  const r = getRift(), [fx, fz] = FACING[r?.facing] ?? [0, 0];
+  try { player.applyKnockback({ x: fx * 1.2, z: fz * 1.2 }, 0.25); } catch { try { player.applyKnockback(fx, fz, 1.2, 0.25); } catch {} }
+  try { sfx(player, "sig.rift_refuse"); } catch {}
+  say(player, refusalLine(n, fallenCount(progressOf(player).flags), REGIONAL_BOSSES.length));
 }
 
 function leave(player) {
@@ -126,7 +154,7 @@ onTick("undertow:contact", 5, () => {
     const touching = feet?.typeId === VEIL || head?.typeId === VEIL;
     if (touching && !isSlipping(p) && (cooldown.get(p.id) ?? 0) < system.currentTick) {
       if (inUndertow(p)) leave(p);
-      else if (p.dimension.id === "minecraft:overworld") enter(p);
+      else if (p.dimension.id === "minecraft:overworld") { if (mayCross(p)) enter(p); else refuse(p); }
     }
     if (inUndertow(p) && (feet?.typeId === FLOW || head?.typeId === FLOW)) {
       p.addEffect("slowness", 30, { amplifier: 1, showParticles: false });
@@ -187,7 +215,7 @@ onTick("undertow:rivergate", 100, () => {
 let courtGateOpen = false;
 onTick("undertow:save", 200, () => flush());
 
-// ---- atmosphere: lightning in the fog above, blue motes along the rivers --------------------
+// ---- atmosphere: lightning and clouds under the roof, blue motes along the rivers ----------
 const nextFlash = new Map();
 onTick("undertow:sky", 20, () => {
   for (const p of world.getAllPlayers()) {
@@ -200,14 +228,23 @@ onTick("undertow:sky", 20, () => {
       if (h === null) continue;
       try { d.spawnParticle(isRiver(Math.floor(x), Math.floor(z)) ? "minecraft:soul_particle" : "minecraft:end_rod", { x, y: h + 1.5 + Math.random() * 6, z }); } catch {}
     }
+    // A cloud layer under the high roof (Mateo, 2026-11-12: more fog, "concentrated up to the top so it
+    // looks like clouds"): slow purple-grey puffs in the top 30 blocks, drifting with the storm.
+    for (let i = 0; i < 5; i++) {
+      const ang = Math.random() * Math.PI * 2, r = 8 + Math.random() * 64;
+      const x = l.x + Math.cos(ang) * r, z = l.z + Math.sin(ang) * r;
+      const y = roofAt(Math.floor(x), Math.floor(z)).bottom - 5 - Math.random() * 26;
+      if (y < l.y + 12) continue; // stays a cloud overhead, never a fog bank round a player up high
+      try { d.spawnParticle("siege:hollow_cloud", { x, y, z }); } catch {}
+    }
     // Lightning in the fog above: thunder, and now and then a real bolt striking the land far off.
     const due = nextFlash.get(p.id) ?? system.currentTick + 200;
     if (system.currentTick < due) { nextFlash.set(p.id, due); continue; }
     nextFlash.set(p.id, system.currentTick + 160 + Math.floor(Math.random() * 340));
     if (columnAt(Math.floor(l.x), Math.floor(l.z))?.site === "standing_ranks") continue; // the Standing Ranks are silent
     sfx(p, "ambient.weather.thunder", { volume: 0.5, pitch: 0.6 + Math.random() * 0.3 });
-    if (Math.random() < 0.4) {
-      const ang = Math.random() * Math.PI * 2, far = 24 + Math.random() * 20;
+    if (Math.random() < 0.6) { // under the high roof a bolt can be seen from far off, so strike wider
+      const ang = Math.random() * Math.PI * 2, far = 30 + Math.random() * 60;
       const x = Math.floor(l.x + Math.cos(ang) * far), z = Math.floor(l.z + Math.sin(ang) * far);
       const h = heightAt(x, z);
       if (h !== null) {
@@ -342,7 +379,7 @@ system.afterEvents.scriptEventReceive.subscribe((e) => {
           save(K_PROGRESS, prog);
           openCourtGate();
           requestPockets(); // get the last fight's places built while players make the Long Climb
-          world.sendMessage("§5The Court falls silent. Behind the throne, the sealed gate cracks open.");
+          world.sendMessage("§5The Court falls silent. Behind the throne, the sealed gate cracks open. The way on is south, up the Long Climb, to the Seat.");
         }
       }
       if (boss === "morvane") {
@@ -357,6 +394,10 @@ system.afterEvents.scriptEventReceive.subscribe((e) => {
       }
       break;
     }
+    case "hc:seep_status":
+    case "hc:seep_days":
+      if (player && isBuilder(player)) seepCommand(e.id, player, e.message);
+      break;
     case "hc:thin_status":
     case "hc:thin_tp":
     case "hc:thin_build":
@@ -405,6 +446,7 @@ on("showcase", ({ player, dim, nextSpot, label }) => {
 onTick("undertow:source", 600, () => sourceSignsTick(isNight()));
 // ---- the seven thin-place caves build themselves when someone first comes near -------------
 onTick("undertow:thin", 40, () => thinTick());
+onTick("undertow:seep", 100, () => seepTick());
 
 // ---- self-tests ---------------------------------------------------------------------------
 addTests("undertow", {
@@ -439,35 +481,80 @@ addTests("undertow", {
       for (const o of plan.ops) last.set(`${o.x},${o.y},${o.z}`, o.block);
       const s = plan.seam, [fx, fz] = FACING[t.facing];
       assert(s.facing === t.facing && last.get(`${s.x},${s.y},${s.z}`) === "siege:rift_seam", `${t.id} seam`);
-      for (let row = 0; row < CRACK_HEIGHT; row++) {
+      assert(plan.crackH >= 7 && plan.crackH <= 30, `${t.id}: crack ${plan.crackH} tall`);
+      for (let row = 0; row < plan.crackH; row++) {
         assert(last.get(`${s.x + fx},${s.y + row},${s.z + fz}`) === "minecraft:air", `${t.id}: crack row ${row} opens onto the chamber`);
         const back = `${s.x - fx * 4},${s.y + row},${s.z - fz * 4}`;
         assert(last.get(back) !== "minecraft:air" && last.has(back), `${t.id}: rock behind the crack at row ${row}`);
       }
+      // the crack runs floor to ceiling: the chamber's roof is right above its top row
+      const over = `${s.x + fx},${s.y + plan.crackH},${s.z + fz}`;
+      assert(last.has(over) && last.get(over) !== "minecraft:air", `${t.id}: the crack stops short of the ceiling`);
+      // every cell of the deep crack (the void behind the veil) has rock to sit in, and land over it
+      for (const c of planCrack(s, t.facing, { height: plan.crackH, deep: true })) {
+        if (c.depth < 1) continue;
+        const k = `${c.x},${c.y},${c.z}`;
+        assert(c.depth > 4 || (last.has(k) && last.get(k) !== "minecraft:air"), `${t.id}: the void breaks into the open at depth ${c.depth}`);
+      }
       assert(last.get(`${plan.tome.x},${plan.tome.y},${plan.tome.z}`) === "minecraft:air" && plan.tome.id, `${t.id} tent`);
-      assert(plan.ops.length < 30000, `${t.id}: ${plan.ops.length} blocks`);
+      assert(plan.ops.length < 90000, `${t.id}: ${plan.ops.length} blocks`);
     }
   },
-  "thin places: a dry cave is walkable from the mouth down to the seam": () => {
-    for (const t of THIN_PLACES.filter((x) => !SITE_FEATURES[x.id][0])) {
+  "thin places: every cave is walkable from the mouth down to its chamber, one step at a time": () => {
+    for (const t of THIN_PLACES) {
       const plan = planThinPlace(t.id, 0, 0, 64);
       const last = new Map();
       for (const o of plan.ops) last.set(`${o.x},${o.y},${o.z}`, o.block);
       let prev;
-      for (let z = SHAPE.tunnel.v1; z > SHAPE.wallV; z--) {
-        const fy = 64 + (z < SHAPE.chamber.v1 + 1 ? 1 - SHAPE.depth : floorAt(z));
-        assert(last.get(`0,${fy},${z}`) === "minecraft:air" && last.get(`0,${fy + 1},${z}`) === "minecraft:air", `${t.id}: blocked at z ${z}`);
-        assert(last.get(`0,${fy - 1},${z}`) !== "minecraft:air", `${t.id}: hole in the floor at z ${z}`);
-        assert(prev === undefined || Math.abs(prev - fy) <= 1, `${t.id}: step too high at z ${z}`);
+      for (const [u, fy, v, , sump] of plan.route) {
+        const y = 64 + fy;
+        if (sump) { assert(SITE_FEATURES[t.id][0], `${t.id}: a drowned stretch in a dry cave`); prev = fy; continue; }
+        assert(last.get(`${u},${y},${v}`) === "minecraft:air" && last.get(`${u},${y + 1},${v}`) === "minecraft:air", `${t.id}: blocked at ${u},${v}`);
+        assert(last.get(`${u},${y - 1},${v}`) !== "minecraft:air", `${t.id}: hole in the floor at ${u},${v}`);
+        assert(prev === undefined || Math.abs(prev - fy) <= 1, `${t.id}: step too high at ${u},${v}`);
         prev = fy;
       }
+      assert(Math.abs(prev - plan.chamber.F) <= 1, `${t.id}: the way in does not meet the chamber floor`);
+    }
+  },
+  "thin places: nothing the planner builds stands in front of a cave mouth": () => {
+    // on flat ground and in a gorge (high ground on both sides of a lane across the mouth): the twelve blocks
+    // straight out of every mouth stay clear, two blocks high (the cave's cover once walled Frostvein Gap and the quarry)
+    const SOFT = /air$|snow_layer|short_grass|fern|flower|carpet|dead_bush|rail$/;
+    for (const t of THIN_PLACES) for (const gorge of [false, true]) {
+      const plan = planThinPlace(t.id, 0, 0, 64, gorge ? { ground: (dx, dz) => (dz < 2 || dz > 16 ? 30 : 0) } : {});
+      const last = new Map();
+      for (const o of plan.ops) last.set(`${o.x},${o.y},${o.z}`, o.block);
+      for (let v = MOUTH_V + 1; v <= MOUTH_V + 12; v++) for (const y of [65, 66]) {
+        const b = last.get(`0,${y},${v}`);
+        if (gorge && v > 16) continue; // the far wall of the gorge is the land's, not ours
+        assert(b === undefined || SOFT.test(b), `${t.id}${gorge ? " (gorge)" : ""}: ${b} in front of the mouth at v ${v}, y ${y - 64}`);
+      }
+    }
+  },
+  "thin places: no two caves are the same, and the land covers every one": () => {
+    const shapes = new Set(THIN_PLACES.map((t) => JSON.stringify(CAVES[t.id])));
+    assert(shapes.size === 7, "two caves share a layout");
+    for (const t of THIN_PLACES) {
+      setHills(false); // judge the cover on its own, without the outcrop's cliffs
+      let plan;
+      try { plan = planThinPlace(t.id, 0, 0, 64); } finally { setHills(true); }
+      const g = caveGeometry(t.id), top = new Map();
+      for (const o of plan.ops) if (o.block !== "minecraft:air" && !/leaves|_log|snow_layer|grass$|fern|bush|wool|fence|lantern/.test(o.block)) { const k = `${o.x},${o.z}`; top.set(k, Math.max(top.get(k) ?? -999, o.y)); }
+      for (const k of g.air) {
+        const [u, y, v] = k.split(",").map(Number);
+        if (v > 0) continue; // the first stretch is an open cut
+        assert(Math.max(top.get(`${u},${v}`) ?? -999, 64) >= 64 + y + 2, `${t.id}: cave open to the sky at ${u},${v}`);
+      }
+      // a hill, not a box: beside the highest cover the land steps down no more than 3 at a time
+      for (const [k, h] of top) { const [x, z] = k.split(",").map(Number); if (h < 64 + 6 || z > -2) continue; for (const [a, b] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const n = top.get(`${x + a},${z + b}`); assert(n === undefined ? h <= 64 + 3 : h - n <= 4, `${t.id}: a wall of rock ${h - (n ?? 64)} high at ${x},${z}`); } }
     }
   },
   "thin places: low, wide hills, never taller than they are wide": () => {
     for (const t of THIN_PLACES) {
       let top = 0, w = 0;
       for (let u = -40; u <= 40; u++) for (let v = -50; v <= 30; v++) { const h = hillHeight(t.id, u, v); if (h > 0) { top = Math.max(top, h); w = Math.max(w, Math.abs(u)); } }
-      assert(top <= 26 && top * 1.6 < w * 2, `${t.id}: ${top} tall, ${w * 2} wide`);
+      assert(top <= 30 && top * 1.6 < w * 2, `${t.id}: ${top} tall, ${w * 2} wide`);
     }
   },
   "thin places: every facing is a proper turn, and each site faces the way the map picked": () => {
@@ -539,23 +626,6 @@ addTests("undertow", {
     for (const r of ROADS) assert(posts.filter((p) => p.road === r.id).length === 2, `${r.id} lacks a signpost`);
     for (const p of posts) assert(Number.isInteger(p.rot) && p.rot >= 0 && p.rot < 16 && p.text.length > 0 && p.text.length < 60, `bad signpost on ${p.road}`);
     assert(signRot(0, 1) === 0 && signRot(-1, 0) === 4 && signRot(0, -1) === 8 && signRot(1, 0) === 12);
-  },
-  "the Seams cart rail is joined, climbs only on straights and clears the river": () => {
-    const rail = cartRail();
-    assert(rail.length > 100, `cart rail only ${rail.length} long`);
-    for (let i = 1; i < rail.length; i++) {
-      const a = rail[i - 1], b = rail[i];
-      assert(Math.abs(a.x - b.x) + Math.abs(a.z - b.z) === 1, `cart rail breaks at ${b.x},${b.z}`);
-      assert(Math.abs(a.y - b.y) <= 1, `cart rail steps ${a.y - b.y} at ${b.x},${b.z}`);
-    }
-    for (const c of rail) {
-      assert(c.dir >= 0 && c.dir <= 9, `bad rail direction at ${c.x},${c.z}`);
-      if (c.wet) assert(c.y - 1 - L.seaY >= 3, `cart rail too low over the river at ${c.x},${c.z}`);
-    }
-    for (let i = 1; i < rail.length - 1; i++) if (rail[i].dir >= 2 && rail[i].dir <= 5) {
-      const p = rail[i - 1], n = rail[i + 1];
-      assert(p.x - rail[i].x === rail[i].x - n.x && p.z - rail[i].z === rail[i].z - n.z, `cart rail climbs on a bend at ${rail[i].x},${rail[i].z}`);
-    }
   },
   "every centre structure stays on its site": () => {
     for (const id of STRUCTURE_IDS) {
@@ -688,6 +758,62 @@ addTests("undertow", {
     assert(cells.filter((c) => c.side).every((c) => tearBand(c) >= TEAR_CLIMB), "it widens only after the split reaches the top");
     for (let s = 0; s <= TEAR_STEPS; s++) assert(cells.some((c) => tearBand(c) === s), `burst ${s} is empty`);
   },
+  "a deep crack: full height, veil sheets with air between, black behind, and it still tears floor to top": () => {
+    for (const H of [7, 12, 26]) {
+      const cells = planCrack({ x: 0, y: 0, z: 0 }, "south", { height: H, deep: true });
+      const veil = cells.filter((c) => c.block === VEIL);
+      assert(Math.min(...veil.map((c) => c.y)) === 0 && Math.max(...cells.filter((c) => c.block === "minecraft:air" && c.depth === 0).map((c) => c.y)) === H - 1, `height ${H}`);
+      assert(veil.every((c) => c.depth % 2 === 1) && Math.max(...veil.map((c) => c.depth)) >= Math.min(CRACK_DEPTH - 2, H - 1), "sheets of veil every other block, far back");
+      assert(cells.some((c) => c.block === "minecraft:black_concrete") && cells.filter((c) => c.depth === 0 && c.block !== "minecraft:air").every((c) => c.block === "siege:rift_edge"), "rim at the face, black behind");
+      assert(new Set(cells.map((c) => `${c.x},${c.y},${c.z}`)).size === cells.length, "a cell placed twice");
+      for (let s2 = 0; s2 <= TEAR_STEPS; s2++) assert(cells.some((c) => tearBand(c, H) === s2), `height ${H}: burst ${s2} is empty`);
+    }
+  },
+  "the opening takes 40 seconds and the tear waits for the hush": () => {
+    assert(OPENING.done === 40 && OPENING.answer < OPENING.stir && OPENING.stir < OPENING.hush && OPENING.hush < OPENING.tear && OPENING.tear < OPENING.widen && OPENING.widen < OPENING.breath && OPENING.breath < OPENING.look && OPENING.look < OPENING.done);
+  },
+  "the seep: nothing for a week, the agreed reach at days 14, 21 and 28, then it never stops": () => {
+    assert(reachOn(0) === 0 && reachOn(6) === 0 && reachOn(14) === 16 && reachOn(21) === 30 && reachOn(28) === 48);
+    for (let d = 28; d < 200; d++) assert(reachOn(d + 1) > reachOn(d), `stalls on day ${d}`);
+  },
+  "the seep: veins are connected, reach out from the mouth, and growing never moves them": () => {
+    for (const f of ["south", "north", "east", "west"]) {
+      const near = planVeins(mouthSeeds(f), 48, 601), far = planVeins(mouthSeeds(f), 128, 601);
+      for (const [k, d] of near) if (d <= 48) assert(far.get(k) === d, `${f}: a vein moved when the seep grew`);
+      // connected: every cell touches another cell that is nearer the source (or is at the source)
+      for (const [k, d] of near) {
+        if (d <= 1) continue;
+        const [x, z] = k.split(",").map(Number);
+        let ok = false;
+        for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) { const n = near.get(`${x + a},${z + b}`); if ((a || b) && n !== undefined && n <= d) ok = true; }
+        assert(ok, `${f}: a loose patch at ${k}`);
+      }
+      // veins, not a blanket: well under a third of the ground inside the reach is taken
+      const [fx, fz] = FACING[f];
+      const inReach = [...near].filter(([, d]) => d <= 48).map(([k]) => k.split(",").map(Number));
+      const ahead = inReach.filter(([x, z]) => x * fx + z * fz > 4).length;
+      assert(inReach.length < 48 * 48 * 3.14 * 0.3 && ahead > inReach.length * 0.5, `${f}: ${inReach.length} cells, ${ahead} ahead of the mouth`);
+    }
+    assert(planVeins(mouthSeeds("south"), MAX_REACH, 601).size < 400000, "the full plan is small enough to hold");
+  },
+  "the seep: takes wild ground and wild buildings, never what people use, never held ground": () => {
+    assert(takesMoss("minecraft:grass_block") && takesMoss("minecraft:snow") && !takesMoss("minecraft:oak_planks") && !takesMoss("siege:undertow_moss"));
+    assert(hollowOf("minecraft:stone_bricks").includes("veinstone") && hollowOf("minecraft:oak_planks") === "siege:pale_ash" && hollowOf("minecraft:spruce_log") === "minecraft:dark_oak_log");
+    assert(hollowOf("minecraft:glass_pane") === "minecraft:air" && hollowOf("minecraft:lantern") === "minecraft:soul_lantern");
+    for (const keep of ["minecraft:chest", "minecraft:oak_door", "minecraft:bell", "siege:regal_safe", "minecraft:dark_oak_log", "minecraft:grass_block"]) assert(hollowOf(keep) === undefined, keep);
+    assert(heldGround(-150, -150, []) && !heldGround(115, 510, []), "Kingsrest is held; a thin place is not");
+    assert(heldGround(2000, 2000, [{ x: 2000, y: 70, z: 2000 }]) && !heldGround(2000, 2000, []), "a held plot is held");
+  },
+  "turning a player back at the veil never throws": () => {
+    // everything refuse() names must be imported (it once called getRift without importing it)
+    let pushed = 0, told = 0;
+    refuse({ id: "veil-test", name: "t", dimension: { id: "minecraft:overworld" }, location: { x: 0, y: 64, z: 0 }, getDynamicProperty: () => undefined, setDynamicProperty: () => {}, hasTag: () => false, getTags: () => [], applyKnockback: () => { pushed++; }, playSound: () => {}, sendMessage: () => { told++; }, onScreenDisplay: { setActionBar: () => { told++; } } });
+    assert(pushed === 1 && told >= 1, `pushed ${pushed}, told ${told}`);
+  },
+  "the veil only takes players who beat all five bosses themselves": () => {
+    assert(!mayCrossWith(0, false) && !mayCrossWith(4, false) && mayCrossWith(5, false) && mayCrossWith(0, true));
+    assert(refusalLine(0, 3, 5).includes("Three of five") && refusalLine(0, 3, 5) !== refusalLine(1, 3, 5) && REFUSALS.length >= 4);
+  },
   "rift crack is 14 tall": () => {
     const ys = planCrack({ x: 0, y: 0, z: 0 }, "south").filter((c) => c.block === VEIL).map((c) => c.y);
     assert(Math.min(...ys) === 0 && Math.max(...ys) === 13);
@@ -704,6 +830,22 @@ addTests("undertow", {
       if (h !== null) assert(r.bottom - h >= 28, `roof only ${r.bottom - h} over the land at ${x},${z}`);
     }
     assert(roofAt(0, 2400).bottom >= HEART.center.y + 25, "room over the Choir's Heart");
+  },
+  "the roof stands about as high over the land as the nether's (Mateo 2026-11-12)": () => {
+    const gaps = [];
+    for (let x = -600; x <= 600; x += 150) for (let z = 100; z <= 2300; z += 275) {
+      const h = heightAt(x, z);
+      if (h !== null) gaps.push(roofAt(x, z).bottom - h);
+    }
+    gaps.sort((a, b) => a - b);
+    assert(gaps[Math.floor(gaps.length / 2)] >= 85, `the roof is only ${gaps[Math.floor(gaps.length / 2)]} over the usual land`);
+  },
+  "a chunk built under the low roof has it taken away and the high roof built": () => {
+    const ops = planRoofSwap(4, 30);
+    const air = ops.filter((o) => o.block === "minecraft:air"), put = ops.filter((o) => o.block !== "minecraft:air");
+    assert(air.length > 200 && put.length > 200, `swap ops: ${air.length} cleared, ${put.length} placed`);
+    assert(ops.indexOf(put[0]) > ops.indexOf(air[air.length - 1]), "the old roof is cleared before the new one goes up");
+    assert(air.every((o) => o.b[1] >= ROOF_V3.shell - 1 || o.onlyIf), "what hung from the old roof is only cleared where it is still there");
   },
   "the roof is never flat: domes, sags and mixed rock": () => {
     const ys = new Set(), rock = new Set();

@@ -41,9 +41,15 @@ These rules hold in every region unless the region's page says otherwise. They a
 - **Roof surface:** every roof textured with two blocks of the same colour (copper keeps its gradient),
   back-to-back stairs along the ridge, and spikes along the ridge.
 - **Spires:** the add-on's spire top block, never on a slab.
-- **Chimney and interiors:** Mateo's chimney; interiors empty except the inn.
+- **Chimney and interiors:** Mateo's chimney; every building furnished by the skill's interior stage, in the
+  region's flavour (woods, rugs, lights: `build-instructions/08-interiors` step 5).
 - **Overhangs and shutters:** every overhang carried; shutters on at most 3 in 10 windows.
 - **Tone:** uneasy at night, never horror and never vanilla.
+- **Ground is a mix, never one block** (Mateo, 2026-11-12, of the Cradle Tree's ground: "that needs to be
+  everywhere"): any ground you lay round a build or an area speckles the region's grounds block by block (Blackfen:
+  grass 7, moss 3, podzol 2, mud 1, muddy roots 1; Vale: grass with coarse dirt, podzol, moss; Saltreach: grass 3,
+  gravel 2, coarse dirt 1, stone 1; snow: snow 12, stone 1, gravel 1, never packed ice). The map generator does the
+  same (`map/genworld.py`, `sprinkle`).
 - **Bushes round the foundation** (Mateo, 2026-11-12): clumps of the region's leaves under the ground-floor
   windows and at some corners, never a strip; on by default in the skill (`bushes`), none in the Emberwaste
   and the Hollow.
@@ -54,6 +60,17 @@ These rules hold in every region unless the region's page says otherwise. They a
 - **Narrow plots:** a window box's front sign can stick out past the roof verge on a side wall. On Medium
   plots (11 wide) keep the box and drop the sign face on the side walls (`"box_signs": "ns"` in the style
   keeps it only on the north and south walls).
+
+## Castle builds in every region (the Barracks, 2026-11-12)
+
+The Barracks keeps one plan everywhere (hall at the back, round keep in its gable, walled yard in front, banner over
+the gate; `map/structures/review/specs/gen_barracks.py`) and takes each region's look: the hall from the region's
+preset and roof (Vale warm granite gable, Frostmarch slate pitch 2 with dragon heads and snow, Saltreach sea-green
+hip, Emberwaste flat with vigas, Blackfen mossy dark oak on piles), the keep and yard wall in the region's stone
+(Vale VAL-01, Frostmarch cobbled deepslate and deepslate bricks, Saltreach and Emberwaste sandstone, Blackfen tuff on
+mud brick). The keep rises one stage clear of the hall ridge, so it is taller where the roof is steep or flat
+(Frostmarch, Emberwaste). Flags and the gate banner are white wool in the build; the game turns them the settlement's
+banner colour once the Barracks stands (`settle/raised.js`).
 
 ## Where the facts come from
 
@@ -88,5 +105,5 @@ given here.
   default) or to Saltreach terraces on a lower wing.
 - **Now in the skill** (2026-11-12): the Hollow's one-block offset (`offset`), Blackfen stilts and piles,
   Frostmarch snow caps (`snow`) and dragon heads (`gable_horns`), domes on drums (`dome`), mossy and thatch
-  roofs (`moss`, `thatch`). Still by hand: Blackfen boardwalks, Hollow leaning towers, curved roofs.
+  roofs (`moss`, `thatch`). Also in the skill now: Blackfen boardwalks (`boardwalk`), Hollow leaning towers (`lean`), curved roofs (`"type": "curved"`), galleries and round towers joined into a house (`keep` with `"cap": "cone"`).
 

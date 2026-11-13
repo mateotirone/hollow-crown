@@ -904,6 +904,25 @@
   "animation.siege_b.hollow_bolt": {
    "loop": true,
    "animation_length": 1.0
+  },
+  "animation.siege_b.bell_wife": {
+   "loop": true,
+   "bones": {
+    "head": {
+     "rotation": [
+      "query.target_x_rotation",
+      "query.target_y_rotation",
+      0
+     ]
+    },
+    "bell": {
+     "rotation": [
+      "0",
+      "0",
+      "math.sin(query.life_time*240)*14"
+     ]
+    }
+   }
   }
  }
 }

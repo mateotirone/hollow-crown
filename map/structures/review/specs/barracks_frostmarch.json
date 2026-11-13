@@ -1,0 +1,223 @@
+{
+ "name": "barracks_frostmarch",
+ "card": {
+  "title": "Barracks",
+  "sub": "Frostmarch, hall, keep and yard",
+  "region": "frostmarch",
+  "where": "Settlement plot (Large 15 x 15), raised by the Barracks block",
+  "kind": "Work",
+  "blurb": "The guard's hall with bunks above a mess, a round keep with a stair up from the yard, and a walled yard where off-duty soldiers wait. A banner hangs over the gate, ready to take the settlement colour."
+ },
+ "materials": {
+  "keepwall": {
+   "ladder": [
+    "cobbled_deepslate",
+    "deepslate_bricks"
+   ],
+   "axis": "noise",
+   "scale": 3
+  },
+  "yardwall": {
+   "ladder": [
+    "cobbled_deepslate",
+    "deepslate_bricks"
+   ],
+   "axis": "noise",
+   "scale": 3
+  },
+  "keepplinth": {
+   "ladder": "FRO-01",
+   "axis": "noise",
+   "scale": 3
+  }
+ },
+ "after": "barracks_skill:inside",
+ "yard_ground": {
+  "ladder": [
+   "gravel",
+   "coarse_dirt"
+  ],
+  "axis": "noise",
+  "scale": 2
+ },
+ "parts": [
+  {
+   "part": "house",
+   "style": {
+    "base": "frost_timber",
+    "roof": {
+     "ladder": [
+      "deepslate_tiles",
+      "cobbled_deepslate"
+     ],
+     "axis": "noise",
+     "scale": 2
+    }
+   },
+   "rect": [
+    -6,
+    -13,
+    2,
+    -7
+   ],
+   "y": 0,
+   "plinth": 2,
+   "storeys": [
+    5,
+    4
+   ],
+   "storey_style": [
+    {
+     "frame_kind": "stone",
+     "frame": "deepslate_bricks",
+     "infill": {
+      "ladder": [
+       "cobbled_deepslate",
+       "polished_deepslate"
+      ],
+      "axis": "noise",
+      "scale": 3
+     }
+    },
+    {}
+   ],
+   "door": {
+    "side": "s",
+    "kind": "house",
+    "steps": 1
+   },
+   "roof": {
+    "type": "gable",
+    "ridge": "x",
+    "pitch": 2,
+    "gable_horns": true,
+    "snow": true
+   },
+   "dormers": [
+    {
+     "side": "s",
+     "at": -2,
+     "w": 3,
+     "h": 2
+    }
+   ],
+   "chimney": [
+    [
+     -4,
+     -11
+    ]
+   ],
+   "shutters": 0,
+   "vines": 0
+  },
+  {
+   "part": "curtain",
+   "path": [
+    [
+     -7,
+     -7
+    ],
+    [
+     -7,
+     0
+    ],
+    [
+     7,
+     0
+    ],
+    [
+     7,
+     -9
+    ]
+   ],
+   "y": 0,
+   "h": 4,
+   "material": "yardwall",
+   "plinth": "keepplinth",
+   "cap": "polished_deepslate",
+   "turrets": [
+    {
+     "at": [
+      -6,
+      -1
+     ],
+     "size": 3,
+     "h": 7
+    },
+    {
+     "at": [
+      6,
+      -1
+     ],
+     "size": 3,
+     "h": 7
+    }
+   ],
+   "gate": {
+    "at": [
+     0,
+     0
+    ],
+    "face": "s",
+    "w": 3,
+    "h": 3,
+    "crown": 4,
+    "banner": "white_wool",
+    "trim": "spruce_planks"
+   }
+  },
+  {
+   "part": "keep",
+   "at": [
+    4,
+    -10
+   ],
+   "r": 2.5,
+   "y": 0,
+   "h": 25,
+   "floors": [
+    5,
+    10,
+    15,
+    20
+   ],
+   "material": "keepwall",
+   "plinth": "keepplinth",
+   "trim": "polished_deepslate",
+   "floor": "spruce_planks",
+   "slits": {
+    "sides": "ns",
+    "glass": "gray_stained_glass_pane"
+   },
+   "doors": [
+    {
+     "side": "w",
+     "floor": 0
+    },
+    {
+     "side": "s",
+     "floor": 1
+    }
+   ],
+   "ladder": "e",
+   "flags": [
+    {
+     "at": [
+      1,
+      -1
+     ],
+     "dir": "w"
+    },
+    {
+     "at": [
+      -1,
+      1
+     ],
+     "dir": "w",
+     "h": 3
+    }
+   ],
+   "flag": "white_wool"
+  }
+ ]
+}

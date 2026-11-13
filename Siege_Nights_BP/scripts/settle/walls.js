@@ -15,6 +15,7 @@
 import { world, system, BlockPermutation } from "@minecraft/server";
 import { ModalFormData } from "@minecraft/server-ui";
 import { isReady, keepOf, tierOf, TIERS, onTick, moduleStore, on, emit, addFilter, addLandClaim, stoneId, STONE_KINDS, title, CASTLE_BLOCKS, WALL_HP, PORTCULLISES, GATES, regionalId, getState, isAlly, guardCount, setGate, openLeafAt } from "../siege/api.js";
+import { applyFilter } from "../core/events.js";
 import { STYLES } from "../townhall/styles.js";
 import { PLOT_PLAN } from "../plots/config.js";
 import { plotAt, mapMode } from "../plots/claims.js";
@@ -410,6 +411,9 @@ on("ready", () => {
 // and portcullis, and shuts them again once nobody friendly is near. No guard opens anything mid-siege.
 const gateBlocks = new Map(); // `${id}|${level}` -> [{ x, y, z }] one block of each gate and portcullis
 const guardOpened = new Set(); // wall ids whose gate a guard opened
+const gateGreeted = new Set(); // wall ids whose guard has already opened up for the friend standing there
+// Pure: what the guard does this step. He opens only on the step a friend arrives.
+export const gateGuardStep = ({ friendNear, greeted, opened, guards }) => (friendNear && !greeted && !opened && guards > 0 ? "open" : friendNear ? "wait" : opened ? "shut" : "idle");
 function findGateBlocks(id, w) {
   const key = `${id}|${w.level}`;
   if (gateBlocks.has(key)) return gateBlocks.get(key);
@@ -449,14 +453,22 @@ onTick("settle_gates", 10, () => {
   const players = world.getDimension(OVERWORLD).getPlayers();
   for (const [id, w] of Object.entries(walls())) {
     if (!(w.level > 0) || w.building || WALL_LEVELS[w.level]?.gate === "open" || id.startsWith("npc:")) continue;
+    if (applyFilter("gatesBarred", false, { owner: id })) { // a War Writ is out on them: no guard opens the gate
+      if (guardOpened.has(id)) { setWallGate(id, w, false); guardOpened.delete(id); }
+      continue;
+    }
     const g = gateSpot(w, w.gate, w.ground, w.radius);
     const opened = guardOpened.has(id);
-    const friendNear = players.some((p) => friendOf(id, p.id) && nearGate(g, p.location, opened ? 6 : WALLS.gateGreet));
-    if (friendNear && !opened && guardCount(id) > 0) {
+    const greeted = gateGreeted.has(id);
+    const friendNear = players.some((p) => friendOf(id, p.id) && nearGate(g, p.location, opened || greeted ? 6 : WALLS.gateGreet));
+    // The guard opens the gate once, as a friend arrives. After that the gate is the friend's to work: shut it by
+    // hand and it stays shut until they have walked away and come back (it used to swing open again at once).
+    if (gateGuardStep({ friendNear, greeted, opened, guards: guardCount(id) }) === "open") {
+      gateGreeted.add(id);
       if (setWallGate(id, w, true)) guardOpened.add(id);
-    } else if (!friendNear && opened) {
-      setWallGate(id, w, false);
-      guardOpened.delete(id);
+    } else if (!friendNear) {
+      gateGreeted.delete(id);
+      if (opened) { setWallGate(id, w, false); guardOpened.delete(id); }
     }
   }
 });
@@ -466,6 +478,14 @@ on("siegeStart", () => {
   guardOpened.clear();
   for (const [id, w] of Object.entries(walls())) if (w.level > 0 && WALL_LEVELS[w.level]?.gate !== "open") setWallGate(id, w, false);
 });
+
+// One settlement's gates slam shut (a War Writ declared on it, warwrit/index.js)
+export function barGates(owner) {
+  const w = walls()[owner];
+  if (!(w?.level > 0) || WALL_LEVELS[w.level]?.gate === "open") return;
+  guardOpened.delete(owner);
+  setWallGate(owner, w, false);
+}
 
 // ---------- what a wall changes ----------
 

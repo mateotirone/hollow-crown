@@ -545,7 +545,9 @@ def build_key():
         for x in range(16):
             img.putpixel((x, y), tuple(key_icon(x, y, r)))
     os.makedirs(os.path.join(RP, "textures", "items", "vault"), exist_ok=True)
-    img.save(os.path.join(RP, "textures", "items", "vault", "vault_key.png"))
+    key_png = os.path.join(RP, "textures", "items", "vault", "vault_key.png")
+    if not os.path.exists(key_png):  # final art is painted by studio/art/build_audit_icons.py; never overwrite it
+        img.save(key_png)
     write_json(os.path.join(BP, "items", "vault", "vault_key.json"), {"format_version": "1.21.60", "minecraft:item": {
         "description": {"identifier": "siege:vault_key", "menu_category": {"category": "items"}},
         "components": {"minecraft:icon": "siege_vault_key", "minecraft:display_name": {"value": "item.siege:vault_key.name"},
@@ -619,7 +621,8 @@ def recipe(ident, pattern, key, count=1):
     short = ident.split(":")[1]
     RECIPES[short] = {"format_version": "1.20.10", "minecraft:recipe_shaped": {
         "description": {"identifier": f"siege:{short}"}, "tags": ["siege_workshop"], "pattern": pattern,
-        "key": {k: {"item": v} for k, v in key.items()}, "result": {"item": ident, "count": count}}}
+        "key": {k: {"item": v} for k, v in key.items()}, "unlock": {"context": "AlwaysUnlocked"},
+        "result": {"item": ident, "count": count}}}   # 1.20.10+ recipes need unlock data or the game drops them
 
 
 def build_recipes():

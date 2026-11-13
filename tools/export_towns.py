@@ -75,10 +75,10 @@ def fixture(f, base):
     x, z = f["at"]
     dy = f["ground_y"] - base if "ground_y" in f else None
     row = [f["name"], x, z, tier, dy]
-    if f["name"] == "mason_yard":                       # ["mason_yard", x, z, tier, dy, front side] (settlement thread)
-        return row + [f.get("rotation")]
     if f["name"] == "tree":
         row += [f.get("species"), f.get("size"), f.get("rotation", 0)]
+    elif f["name"] == "mason_yard":  # the Mason's yard: side = the way its front faces (n/s/e/w), read as rotation
+        row += [f.get("side", f.get("rotation", "s"))]
     elif "rotation" in f:
         row += [f.get("stamp"), f.get("rotation", 0)]
     return row
@@ -90,6 +90,7 @@ def variant(v):
     assert len(pal) <= len(CHARS), "palette too long"
     return {
         "template": v["template"], "label": v["label"], "charter": v.get("passes_charter", True),
+        "base": base,   # the square's real height on the map: the game lays the groundwork from here (founding.js)
         "square": v["square"]["centre"],
         "hall": [h["box"] for h in v["hall"]],
         "rings": [[r["radius"], TIER[r["opensAt"]]] for r in v["rings"]],

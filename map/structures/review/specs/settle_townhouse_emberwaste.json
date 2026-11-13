@@ -7,7 +7,6 @@
   "kind": "House",
   "blurb": "A taller home of about six beds: a stone ground floor, a floor above jettied over the road, a high attic."
  },
- "after": "settle_skill:townhouse_inside",
  "parts": [
   {
    "part": "house",
@@ -44,6 +43,10 @@
     "type": "flat",
     "parapet": "slab",
     "beams": true
+   },
+   "interior": {
+    "use": "townhouse",
+    "attic": false
    },
    "dormers": [],
    "chimney": false,

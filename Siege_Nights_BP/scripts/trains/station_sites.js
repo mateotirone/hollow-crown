@@ -9,9 +9,10 @@ import { onTick, isReady, moduleStore, keepOf, keepCenter, tierOf, on } from "..
 import { startBuild, buildFor, worldCells, worldMarks } from "../townhall/build.js";
 import { styleOf } from "../settle/plans.js";
 import { allStations, stationById, moveStation, addStationAt, STATION_POST, RAIL_DEPOT } from "../rails/index.js";
-import { STATION, STAGE_NAMES, STAGES, stageFor, stationPlan, siteFor, lineBlocks, regionOf, cardinal } from "./stations.js";
+import { STATION, STAGE_NAMES, STAGES, stageFor, stationPlan, siteFor, lineBlocks, loopBlocks, regionOf, cardinal } from "./stations.js";
 import { TRACK } from "./data.js";
 import { reader } from "./index.js";
+import { addSwitch } from "./switches.js";
 import { ROUTES } from "./routes_data.js";
 import { stopSite } from "./routes.js";
 
@@ -83,6 +84,22 @@ function finish(site, plan) {
       if (block && block.typeId !== TRACK) place(dim, b, TRACK, { "siege:kind": 0, "siege:dir": b.dir });
     } catch {
       // unloaded at the far end: the owner can lay that piece by hand
+    }
+  }
+  // and the passing loop beside it, with a switch at each end
+  for (const b of loopBlocks(plan, site.origin, site.forward)) {
+    try {
+      const block = dim.getBlock(b);
+      if (!block) continue;
+      if (!b.end) {
+        if (block.typeId !== TRACK) place(dim, b, TRACK, { "siege:kind": b.kind, "siege:dir": b.dir });
+        continue;
+      }
+      if (block.typeId !== TRACK) continue; // the line's end isn't down: no switch without it
+      const kind = block.permutation.getState("siege:kind"), dir = block.permutation.getState("siege:dir");
+      if (kind !== b.kind || dir !== b.dir) addSwitch(dim.id, { x: b.x, y: b.y, z: b.z }, { kind, dir }, { kind: b.kind, dir: b.dir });
+    } catch {
+      // unloaded: laid the next time the station is rebuilt
     }
   }
   const was = site.built;

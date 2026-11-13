@@ -69,11 +69,41 @@ rustic mixes (more cobble, mossy cobble slabs low and in the shade).
 - Junctions are squares or widenings: where two streets meet, widen to the larger width + 2 for 3 blocks.
 - Bends follow the ground and look worn round the inside corner (the second block there).
 - No path ends at nothing: every path ends at a door, a gate, a field, a square or another path.
+- A settlement's road meets the map's roads (Mateo, 2026-11-12): the gate road is carried on to the nearest map road
+  and joins it at that road's own height and surface, graded evenly, with the land either side stepped to it by at
+  most 1 a block. The game does it when a settlement is founded (`settle/founding.js` `joinRoad`).
 
 ## Bridges and fords
 
 - Paths cross water on a bridge (Kingsrest needs bridges where two rivers meet) as wide as the path, with
   rails (fence or wall) and the same sunken surface between kerbs. Fords only on lanes.
+
+## Joining the Citadel
+
+The Citadel (map/structures/citadel.py) brings its own road ends, so a road generator never has to find
+the gate itself, and must never cut through a wall, a field or a plot to reach it.
+
+- **Ring road**: a 3-wide sunken road at radius 102 round the farmland (`paths.ring_road` in
+  citadel.json). Every road into the Citadel stops at it.
+- **Entries**: a 5-wide spoke for each side a road arrives from, running from the ring road out to the plot
+  edge at radius 125. Pass the angles in as `roads_in` (0 = +x, 90 = +z, the gate side); the generated
+  `paths.entries` list gives each spoke's angle and end point. An outside road ends on that point, with the
+  same width and the same slab mix, and meets it level (half a block of change per block at most).
+- **Gate avenue**: the gate (angle 90) is always an entry. Its avenue runs through the fields to the ring.
+- **Station**: the Grand Station stands on the line at radius 126 on the side of the plot's rail stop, with a
+  5-wide high street running in to the ring (`paths.station`). Rails cross no road on the level.
+- Roads and tracks inside the Citadel follow the sunken half-slab rule like everywhere else. Bare blocks
+  take the region's slab mix (Vale cobble and stone brick, Frostmarch cobbled deepslate, Saltreach smooth
+  sandstone, Blackfen mud brick, Emberwaste smooth red sandstone).
+- The Hollow stronghold has no road network round it (the Hollow has no roads or trains): its one avenue
+  runs from the moat bridge to the gate, and paths from the light rivers end at the bridge.
+
+## Yards and walled grounds meet the paths (Mateo, 2026-11-12)
+
+A yard, bailey or walled ground (the Barracks yard) does not have to be a perfect square: it fits the landscaping.
+Where a path already crosses the line of its wall, leave that stretch of wall out so the path runs straight in, and
+keep the path's own surface through the yard. Never pave over or wall across a path that was there first. The game
+does this when it raises the Barracks (`settle/raised.js`, `yardGaps`).
 
 ## Before you finish a path
 
@@ -82,3 +112,28 @@ rustic mixes (more cobble, mossy cobble slabs low and in the shade).
 - [ ] Height changes at most half a block per block; stairs only on door walkways and steep lanes.
 - [ ] Texture by the recipe, worn in the centre; edges and verges on every street.
 - [ ] Every path ends somewhere.
+- [ ] A road to the Citadel ends on one of its `paths.entries`, never on its walls or fields.
+
+## Rail beds (Mateo, 2026-11-12)
+
+Track is laid in game when a stretch is bought (`Siege_Nights_BP/scripts/trains/rail_bed.js`), never stamped
+into the map. The playtest 1.2.1111 track sat in straight-sided dirt trenches with trees cut in half over it,
+so these rules are strict:
+
+- **Graded, never a trench.** The ballast row is 3 wide (gravel over dirt). Beside it the ground is level with
+  the ballast, then rises or falls **1 block for every 2 out** (the town slope rule), out to 7 blocks each side.
+  Cuttings get turf on their banks; embankments are filled and turfed, never left as pillars.
+- **Open to the sky** over the bed. No overhang of rock or leaves, and the train's 3 by 4 opening is always clear.
+- **Trees come down whole**: every log, branch, fence, leaf and hanging root, and the root pit is filled. A
+  tree that touches a building is a building and stays standing. The map keeps trees 7 blocks off every
+  planned line (`map/genworld.py`, `railkeep`).
+- **Roads and paths are level crossings** (grass path, dirt path, cobble, mud): the bed goes through them.
+- **Buildings are never touched**; the bed stops and reports them.
+- **Track two lines share has one height** (`map/railshare.py`): the first line's height wins on every shared
+  block, and later lines re-fit round it under the climbing rules.
+- Bridges, tunnels and deep cuttings are the map's works (`map/railworks.py`); the bed only clears their
+  opening and seats the track on them.
+
+Test any change on the real map before shipping: export the corridor with `tools/export_rail_corridor.py`
+(amulet) and run `node tools/rail_lay_test.mjs corridor.json`, which lays all 7 lines and must print ALL OK
+(no gaps, no trench walls, nothing in the way, no bare dirt, nothing floating).

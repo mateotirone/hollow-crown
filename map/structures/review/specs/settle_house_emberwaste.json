@@ -7,7 +7,6 @@
   "kind": "House",
   "blurb": "A home of about four beds: one storey on a plinth and a room under the roof, a chimney."
  },
- "after": "settle_skill:house_inside",
  "parts": [
   {
    "part": "house",
@@ -37,6 +36,10 @@
     "type": "flat",
     "parapet": "slab",
     "beams": true
+   },
+   "interior": {
+    "use": "home",
+    "attic": false
    },
    "dormers": [],
    "chimney": false,

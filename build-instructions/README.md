@@ -23,7 +23,7 @@ It meticulously goes through every step, making sure everything is in the right 
 | 5 | [05-windows-and-doors](05-windows-and-doors/README.md) | Doorways, door surrounds, windows, sills, lintels, shutters, planters, arches | Every opening finished |
 | 6 | [06-roof](06-roof/README.md) | Roof shape, pitch, overhang, verges, ridges, valleys, dormers, trusses, roof colour and gradients, chimneys | The building is closed in |
 | 7 | [07-detailing](07-detailing/README.md) | Depth with slabs and stairs, fences, arches, lights, greenery, signs, the street edge | The outside is finished |
-| 8 | [08-interiors](08-interiors/README.md) | Empty interiors (default) or full layouts for the inn and custom builds | The inside is finished |
+| 8 | [08-interiors](08-interiors/README.md) | Every building furnished by use: stairs, rooms, a one-block walkway, light (the skill's interior stage) | The inside is finished |
 | 9 | [09-final-check](09-final-check/README.md) | Render, look from the street, run the checklist, fix | A build ready for Mateo's review |
 
 **Towers** (bell, clock, corner, watch, wall towers, lighthouses, wonders) also follow [towers/README.md](towers/README.md): stages, proportions, the clock, and the tower style of each region.
@@ -48,8 +48,9 @@ Supporting folders:
    Blocks are chosen strictly by colour, whatever the block is, as long as full-block roles use a solid
    block (Mateo, 2026-11-11). Castle Stone is one colour option per region, not a requirement; player
    settlements use the full palette too (Mateo chose "everything free", 2026-11-11).
-4. **Interiors are empty** except the inn and builds marked custom: floors, stairs or ladders between
-   storeys and nothing else. Players fill them (Mateo, 2026-11-11).
+4. **Every building has an interior** (Mateo, 2026-11-12, replacing the 2026-11-11 "empty" rule): stairs
+   or ladders between storeys, rooms furnished by what the building is for, a one-block walkway everywhere
+   players walk. The skill's interior stage does it (`08-interiors`).
 5. **Every overhang is carried.** Anything sticking out more than one block shows what holds it up
    (bracket, post, brace, corbel). See `02-frame` and `reference/shapes.md`.
 6. **Three depths on every face.** Any wall face longer than 5 blocks has at least three depth layers:
@@ -80,6 +81,20 @@ The same frame as `map/structures/` (`bp.py`, `kit.py`):
   blocks inclusive: a wall from `x = 0` to `x = 8` is 9 wide.
 - Block states are written the `bp.py` way (`facing`, `half`, `axis`, `open`); see
   `reference/block-states.md` for what they mean in Bedrock.
+
+## What every new settlement raises (Mateo, 2026-11-12)
+
+A base is founded with its working buildings standing, never a bare block waiting for one:
+
+- **The Mason's Yard** (`map/structures/review/specs/gen_mason.py`, 9 by 9, one per region): a stone workshop with
+  the Mason's Bench in its open front yard. The Mason works the bench from the yard. It goes on the layout's
+  reserved `mason_yard` ground beside the square (the town generator, `towngen_settle.py`), or on the nearest Small
+  plot while a layout has none. The Mason never stands on a bare bench.
+- **The founder's cottage**, with a bed kept for the owner, so they can sleep the first night.
+- **The library**, on its square plot.
+
+The game raises all three when the Hamlet is laid out (`Siege_Nights_BP/scripts/settle/basebuilds.js`). A new kind
+of base must raise them too.
 
 ## Who uses this
 

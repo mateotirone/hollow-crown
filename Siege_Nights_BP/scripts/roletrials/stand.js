@@ -3,12 +3,15 @@
 // siege:morvane_stage {"stage","key","x","y","z","dimension"}, and we listen. Nothing here can stop the fight
 // being won without these roles: each just makes its stage easier.
 //
-// Alone (one player in the fight), a role nobody there holds is filled by the mentor's student: the same help,
-// announced by name (Mateo's rule: a stand-in for every player role). Not for the Sorcerer: no one stands in
-// for the only person who can lift the Crown.
+// Alone (one player in the fight), a role nobody there holds is filled by the mentor's student, who turns up and
+// fights beside you (Mateo's rule: a stand-in for every player role, fighting like players): Hrafn with his
+// hammer at the Standing Ranks, Dame Orla and the knights at the Night, Jory Holt with a crossbow at the River,
+// Senna Vey on her dragon over the Rift (flown by dragons/wingmen.js). Rue lends the fall at stage 6 from the
+// fen, unseen, since the Fall is a memory. Not for the Sorcerer: no one stands in for the only person who can
+// lift the Crown.
 
 import { world, system, EntityDamageCause } from "@minecraft/server";
-import { guardTag, onTick, addTests, assert, assertEqual } from "../siege/api.js";
+import { guardTag, onTick, emit, addTests, assert, assertEqual } from "../siege/api.js";
 import { sfx } from "../core/sfx.js";
 import { RANKS, rankOf } from "../townhall/skills.js";
 import { ELEVEN } from "./data.js";
@@ -19,11 +22,12 @@ const SUIT = "siege:oswin_reflection";
 const REACH = 64; // players this close to the stage's centre are in the fight
 
 // stage number (1-7) -> the role that matters there, and the student who stands in when you are alone
+// (fighter: the soldier they fight as; dragon: they fly in on one instead)
 export const STAGE_EDGES = {
-  2: { role: "forgemaster", student: "Ulla's apprentice, Hrafn", what: "rings a new bell-tongue, and the Standing Ranks break step" },
+  2: { role: "forgemaster", student: "Ulla's apprentice, Hrafn", fighter: { type: "siege:man_at_arms", name: "Hrafn" }, what: "rings a new bell-tongue, and the Standing Ranks break step" },
   3: { role: "knight", student: "Dame Orla Penhallow", what: "and the knights of the Gate hold the wall with you" },
-  4: { role: "captain", student: "Ottilie's bosun, Jory Holt", what: "and the forty row you down the river" },
-  5: { role: "rider", student: "Senna Vey, Kesh's last cadet", what: "burns what climbs out of the Rift from the air" },
+  4: { role: "captain", student: "Ottilie's bosun, Jory Holt", fighter: { type: "siege:crossbowman", name: "Jory Holt" }, what: "and the forty row you down the river" },
+  5: { role: "rider", student: "Senna Vey, Kesh's last cadet", dragon: { name: "Senna Vey on Wrenna", species: "cinderwing" }, what: "burns what climbs out of the Rift from the air" },
   6: { role: "witch", student: "Nell's niece, Rue", what: "and the fen lends you a moment to fall in" },
   7: { role: "marked", student: undefined, what: "can lift the fallen Crown and stop the song" },
 };
@@ -55,9 +59,25 @@ function inFight() {
   } catch { return []; }
 }
 
+const SENNA = "stand_senna";
 function dismissAllies() {
   for (const ally of current.allies) { try { ally.remove(); } catch { /* already gone */ } }
   current.allies = [];
+  emit("npcDragonLand", { key: SENNA });
+}
+
+// A stand-in who fights: a soldier on your side, named, beside the player
+function spawnAlly(dim, type, near, name, ownerId, i = 0, of = 1) {
+  try {
+    const angle = (i / of) * Math.PI * 2;
+    const ally = dim.spawnEntity(type, { x: near.x + Math.cos(angle) * 3, y: near.y, z: near.z + Math.sin(angle) * 3 });
+    ally.nameTag = name;
+    if (ownerId) ally.addTag(guardTag(ownerId));
+    ally.addTag("siege_stand_ally");
+    try { ally.addEffect("resistance", 6000, { amplifier: 1, showParticles: false }); } catch { /* fine */ }
+    current.allies.push(ally);
+    return ally;
+  } catch (e) { console.warn(`[Role trials] stand-in ${name}: ${e}`); }
 }
 
 function say(players, text) { for (const p of players) { try { p.sendMessage(text); } catch { /* gone */ } } }
@@ -72,6 +92,11 @@ function onStage(stage, at, dimId) {
   const edge = STAGE_EDGES[stage];
   say(players, `§6${answer.name}§7 ${edge.what}.`);
   const dim = world.getDimension(dimId);
+  const near = players[0]?.location ?? at;
+  if (answer.by === "student" && edge.fighter) spawnAlly(dim, edge.fighter.type, near, edge.fighter.name, players[0]?.id);
+  if (answer.by === "student" && edge.dragon) {
+    emit("npcDragonFly", { key: SENNA, name: edge.dragon.name, species: edge.dragon.species, dimension: dimId, center: at, radius: 14, height: 9, every: 160, damage: 8, targetType: MORVANE, ttl: 3600 });
+  }
   if (stage === 2) {
     system.runTimeout(() => {
       sfx(dim, "sig.bell_tongue", at);
@@ -82,16 +107,7 @@ function onStage(stage, at, dimId) {
   } else if (stage === 3) {
     const owner = answer.by === "player" ? current.heroes.find((h) => h.name === answer.name)?.id : players[0]?.id;
     const count = answer.by === "player" ? Math.min(4, Math.max(1, Math.floor(trialsEleven(owner) / 3))) : 2;
-    ELEVEN.slice(1, 1 + count).forEach((knight, i) => {
-      try {
-        const angle = (i / count) * Math.PI * 2;
-        const ally = dim.spawnEntity("siege:man_at_arms", { x: at.x + Math.cos(angle) * 4, y: at.y, z: at.z + Math.sin(angle) * 4 });
-        ally.nameTag = knight.name;
-        if (owner) ally.addTag(guardTag(owner));
-        ally.addTag("siege_stand_ally");
-        current.allies.push(ally);
-      } catch (e) { console.warn(`[Role trials] stage 3 knight: ${e}`); }
-    });
+    ELEVEN.slice(1, 1 + count).forEach((knight, i) => spawnAlly(dim, "siege:knight", near, knight.name, owner, i, count));
   } else if (stage === 4) {
     sfx(dim, "sig.forty_row", at);
     for (const p of players) { fx(p, "resistance", 3000, 0); fx(p, "water_breathing", 3000, 0); fx(p, "speed", 3000, 0); }
@@ -125,18 +141,14 @@ world.afterEvents.entityDie.subscribe(({ deadEntity }) => {
   try { if (deadEntity.typeId === MORVANE) { dismissAllies(); current.stage = 0; } } catch { /* gone */ }
 });
 
-// Stage 5: a Dragonlord on the wing (or Senna, alone) burns him every few seconds
+// Stage 5: a Dragonlord on the wing burns him every few seconds (Senna, alone, flies her own dragon: see onStage)
 // Stage 7: a Sorcerer's blows land harder, because the song stops while they hold the Crown's attention
-let tick5 = 0;
 onTick("roletrials_stand", 160, () => {
   if (current.stage !== 5) return;
-  tick5++;
   const answer = answerFor(5, current.heroes);
-  if (!answer) return;
-  const every = answer.by === "player" ? 1 : 2;
-  if (tick5 % every) return;
+  if (answer?.by !== "player") return;
   const players = inFight();
-  const flying = answer.by === "student" || players.some((p) => {
+  const flying = players.some((p) => {
     try { return atTop(heroOf(p), "rider") && /dragon/.test(p.getComponent("minecraft:riding")?.entityRidingOn?.typeId ?? ""); } catch { return false; }
   });
   if (!flying) return;

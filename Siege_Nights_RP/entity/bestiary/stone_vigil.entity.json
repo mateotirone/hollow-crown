@@ -13,11 +13,15 @@
     "default": "geometry.siege_b.stone_vigil"
    },
    "animations": {
-    "base": "animation.siege_b.stone_vigil"
+    "base": "animation.siege_b.stone_vigil",
+    "dead_hide": "animation.siege_b.dead_hide"
    },
    "scripts": {
     "animate": [
-     "base"
+     "base",
+     {
+      "dead_hide": "!query.is_alive"
+     }
     ]
    },
    "render_controllers": [
