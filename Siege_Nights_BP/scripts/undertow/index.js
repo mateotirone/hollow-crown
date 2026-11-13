@@ -240,6 +240,12 @@ onTick("undertow:sky", 20, () => {
       if (h === null) continue;
       try { d.spawnParticle(isRiver(Math.floor(x), Math.floor(z)) ? "minecraft:soul_particle" : "minecraft:end_rod", { x, y: h + 1.5 + Math.random() * 6, z }); } catch {}
     }
+    // Floating white specks hanging in the air all round you, drifting slowly every way (Mateo, 2026-11-13:
+    // "floating white particles"). Each puff is 7 specks living 9-15 s, so about 200 hang round a player.
+    for (let i = 0; i < 2; i++) {
+      const ang = Math.random() * Math.PI * 2, r = Math.random() * 18;
+      try { d.spawnParticle("siege:hollow_drift", { x: l.x + Math.cos(ang) * r, y: l.y + 0.5 + Math.random() * 5, z: l.z + Math.sin(ang) * r }); } catch {}
+    }
     // A cloud layer under the high roof (Mateo, 2026-11-12: more fog, "concentrated up to the top so it
     // looks like clouds"): slow purple-grey puffs in the top 30 blocks, drifting with the storm.
     for (let i = 0; i < 5; i++) {

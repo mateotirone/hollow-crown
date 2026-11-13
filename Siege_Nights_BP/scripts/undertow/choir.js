@@ -84,17 +84,21 @@ export function waveCaptain(wave) {
   return CAPTAINS[k];
 }
 
-const centre = () => ({ x: HEART.center.x + 0.5, y: HEART.center.y, z: HEART.center.z + 0.5 });
-export function singerSpot(i) {
+// The middle of the fight: the Court's centre when it starts there, and wherever it was summoned otherwise. Every
+// ring, Singer and glide is measured from here. (They used to be fixed to the Court: a Choir summoned anywhere else
+// put its Singers back in the Court, so the Hymn was skipped, and the Conductor glided at the Court's height.)
+const COURT_CENTRE = { x: HEART.center.x + 0.5, y: HEART.center.y, z: HEART.center.z + 0.5 };
+const centre = (f) => (f ? { x: f.center.x, y: f.center.y, z: f.center.z } : { ...COURT_CENTRE });
+export function singerSpot(i, c = COURT_CENTRE) {
   const a = (i / 7) * Math.PI * 2, r = HEART.singerRadius - 3;
-  return { x: HEART.center.x + Math.round(Math.cos(a) * r) + 0.5, y: HEART.center.y, z: HEART.center.z + Math.round(Math.sin(a) * r) + 0.5 };
+  return { x: Math.floor(c.x) + Math.round(Math.cos(a) * r) + 0.5, y: c.y, z: Math.floor(c.z) + Math.round(Math.sin(a) * r) + 0.5 };
 }
 
 
 function placeSingers(f) {
   const root = SOURCE_SITE_IDS.indexOf(getSourceSite());
   for (let i = 0; i < 7; i++) {
-    const s = f.place(SINGER, singerSpot(i));
+    const s = f.place(SINGER, f.floorOf(singerSpot(i, centre(f)))); // on the floor there, whatever the ground does
     if (!s) continue;
     try {
       s.nameTag = `§dSinger of ${SITE_NAMES[SOURCE_SITE_IDS[i]].replace(/^The /, "the ")}`;
@@ -155,7 +159,7 @@ function waves(f) {
 // The Conductor glides round the hall, a slow figure-of-eight of spots, and slips away from anyone close.
 // In the Closing it keeps to the middle, where the players have to be.
 function glide(f, players) {
-  const e = f.entity, loc = e.location, c = centre();
+  const e = f.entity, loc = e.location, c = centre(f);
   const near = players.find((p) => flat(p.location, loc) < CHOIR.slipNear);
   if (near && f.tick >= (f.data.nextSlip ?? 0) && stage(f) < 2) {
     f.data.nextSlip = f.tick + CHOIR.slipEvery;
@@ -187,7 +191,7 @@ registerBoss({
     { id: "toll", show: windUp, every: 200, windup: 30, rest: 50, warn: "The Toll! Jump the ring!", sound: "block.bell.hit",
       when: (f) => stage(f) >= 1,
       hit: (f) => {
-        const c = centre();
+        const c = centre(f);
         for (let step = 0; step * 2 + 3 <= HEART.outerRadius + 2; step++) {
           f.after(step * 5, () => {
             const r = step * 2 + 3;
@@ -204,7 +208,7 @@ registerBoss({
     { id: "undertow", show: windUp, every: 320, windup: 40, rest: 70, warn: "The Hollow pulls! Crouch and hold on!", sound: "mob.elderguardian.curse",
       when: (f) => stage(f) >= 1,
       hit: (f) => {
-        const c = centre();
+        const c = centre(f);
         for (let t = 0; t < 60; t += 5) {
           f.after(t, () => {
             for (const p of f.players()) {
@@ -254,7 +258,7 @@ registerBoss({
     const root = rootSinger(f);
     if (root) {
       try {
-        root.teleport({ x: centre().x + 4, y: HEART.center.y, z: centre().z });
+        root.teleport(f.floorOf({ x: centre(f).x + 4, y: centre(f).y, z: centre(f).z }));
         root.removeTag("siege_boss_shielded");
         root.nameTag = root.nameTag.split("\n")[0];
       } catch { /* gone */ }
@@ -285,13 +289,14 @@ registerBoss({
     }
     if (st === 2) {
       // The song closes in, ring by ring, each one warned first. Outside the ring it hurts.
-      const c = centre();
+      const c = centre(f);
+      let closing = ""; // one status line for the Closing: the countdown and the Singer used to overwrite each other every tick
       if (f.data.band < CHOIR.fallBands.length) {
         const r = CHOIR.fallBands[f.data.band];
         const left = f.data.nextBand - f.tick;
         if (left <= 120 && left > 0) {
           if (left % 20 === 0) ring(f.dim, { x: c.x, y: c.y + 0.2, z: c.z }, r, "minecraft:basic_flame_particle", r * 4);
-          f.bar(`§cThe song closes to the flames in ${Math.ceil(left / 20)}`);
+          closing = `§cThe song closes to the flames in ${Math.ceil(left / 20)}`;
         }
         if (left <= 0) {
           for (const p of f.players()) sound(f.dim, "block.bell.hit", p.location, 0.5, 1);
@@ -309,8 +314,9 @@ registerBoss({
       if (root && f.tick % 20 === 0) {
         heal(f.entity, CHOIR.rootFeed);
         particle(f.dim, "minecraft:heart_particle", { x: f.entity.location.x, y: f.entity.location.y + 3.6, z: f.entity.location.z });
-        f.bar("§dThe last Singer is feeding it. Silence the Singer!");
       }
+      const feeding = root ? "§dThe last Singer is feeding it. Silence the Singer!" : "";
+      if ((closing || feeding) && (closing ? f.tick % 5 === 0 : f.tick % 20 === 0)) f.bar([feeding, closing].filter(Boolean).join("  §8·  "));
     }
   },
 

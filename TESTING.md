@@ -116,6 +116,15 @@ Type the commands in chat (`/` opens it).
 - Did guards hold their posts and fight?
 - Was the siege too easy, too hard, or about right?
 
+## The quest tracker (scripts/quests/)
+
+1. Join in Survival. In the top-right corner, under the minimap, you should see "Find Sister Wren" with how far Millbrook is and which way to turn; turn around and the heading should change within half a second.
+2. Without a Keep Banner raised there is a second line, "Found your settlement". Raise the banner: it goes away within two seconds.
+3. Type `/siege:minimap`: the tracker moves up into the map's place. Type `/siege:quests`: it hides; again, it comes back.
+4. Show a real title (`/title @s title Hello`): it shows normally and the tracker stays up and keeps its text.
+5. `/scriptevent siege:quests show` says your steps in chat. `/scriptevent siege:quests flag wren_met`, then `flag fell_reeve`, `flag fell_huntsman` and so on, should walk the tracker through the story (after three, Fennick's notes appear as a second line; after five, the notes, the fork and the Rift); carrying a boss key (`/scriptevent siege:unlock seneschal item`) should switch the step to that key's lock.
+6. With two players, check each sees their own step.
+
 ## The story opening on the real map (scripts/opening/)
 
 Use `hollow-crown-full-map.mcworld`, not a flat test world. That file is saved in **Creative**, so switch the world (or the Realm) to **Survival** before anyone joins for the first time: Creative players count as builders and skip the hall. Time is stopped in the file; the setup starts the day/night cycle.
@@ -760,3 +769,12 @@ On the map world (map mode), in Creative:
 3. `/scriptevent siege:townsfolk` lists the towns and how many are out. `here` brings the nearest town's folk out now (also at night), `home` sends them in, `heard` resets which lines you have heard.
 4. Hit one: no damage. Set the time to night and walk 25+ blocks away: they go indoors. Set it to day: they come back.
 5. After the town layout changes (a new `map/<town>-blocks.json`), run `python3 tools/townsfolk_spots.py` and commit `scripts/townsfolk/spots_data.js`.
+
+## Boss fights, offline
+
+`node tools/sim-bosses.mjs` plays every boss fight from start to finish in a fake world (the regional bosses, the
+Warlord King, Ulfa, the Choir, all seven of Morvane's stages with wipes, every Pretender claim and power; Survival,
+Creative, four players, rank V) and must end with `SIM OK`. Add `--quiet` for one line per fight, `--seed=N` for
+another roll of the dice, or a boss id (`morvane`, `bride`) to play only that one. Run it after any change to a
+fight. It checks the logic (phases, shields, warnings, loot, leftovers, errors the game would swallow), not how a
+fight looks, sounds or paths in the real game. The Storm (the fight for the throne) is not in it.
