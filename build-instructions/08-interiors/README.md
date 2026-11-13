@@ -44,9 +44,19 @@ The use names the rooms storey by storey, ground first; the last one repeats upw
 | barracks | guard room | bunks | |
 | library | library | library | |
 | storage, stable | store / stable | | |
+| storehouse | chest store | chest store | chest store |
 
 A building with wings: each block's storey is its own room (a wing gets its own long table, its own
 hearth), while the walkway is checked across the whole floor.
+
+### The chest store (Mateo, 2026-11-13)
+
+`"interior": {"use": "storehouse", "pillar": "stone_bricks", "beam": "stone_bricks"}` (the Storehouse): chests turned
+sideways (facing along the wall, so you see their side; side by side along their own facing they never join into
+double chests) in 3 x 3 bays between pillars of the region's stone, with a beam of stone over each bay. Neighbouring bays
+share a pillar, so a wall run of 4n + 1 holds n bays. A bay goes only on a blank wall (no glass or door behind it), keeps
+clear of the stairs and the door, and keeps every chest front on the walkway. Rooms 11 or more wide also get free-standing
+racks 3 in from each long wall, open both sides, with cross aisles at the ends. A roof's tie beam over a bay is its beam.
 
 ## The rules the skill follows
 

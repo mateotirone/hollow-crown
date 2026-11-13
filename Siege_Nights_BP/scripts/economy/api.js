@@ -12,6 +12,7 @@
 //   carried/balance, giveCoins, takeCoins   lower level: the balance, not counted as new or spent money
 //   WALLET                   ready for the Mason's setWallet(): setWallet(WALLET), then multiply its prices by 8
 //   ECON, COIN, GOLD, JOBS   the numbers and item ids
+//   farmerOf(owner), farmerFacts(player)   the Farmer in a player's Hamlet (hamlet.js), for the quest tracker
 //   spawnJobNpc(dim, location, jobId, region?)   put a Farmer, Moneyer ... somewhere (map builders: /scriptevent siege:economy_npc farmer)
 // Events (on() from siege/api.js): "coinsPaid" and "coinsSpent" { player, amount, reason }, "goodsSold" { player, job, region, id, count, coins }.
 
@@ -22,5 +23,6 @@ export { ECON, COIN, GOLD, JOBS, JOB_IDS, REGIONS } from "./config.js";
 export { coins, worth, fromEmeralds, payout, cost, regional } from "./rules.js";
 export { funds, charge, pay, fundsE, chargeE, payE, dropCoins, coinStacks, carried, balance, banked, robBank, absorb, giveCoins, takeCoins, atHome, totals } from "./coins.js";
 export { spawnJobNpc, regionAt, JOB_TAG } from "./shops.js";
+export { farmerOf, farmerFacts, FARMER_TAG } from "./hamlet.js";
 
 export const WALLET = { one: ECON.one, many: ECON.many, icon: ECON.icon, count: funds, take: (player, amount) => charge(player, amount, "mason") };
