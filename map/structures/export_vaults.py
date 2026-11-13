@@ -14,7 +14,7 @@ Rows are run-length coded along x: [y, z, x0, count, paletteIndex].
 import os, sys, json
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 import vault_rooms as V
-from export_halls import KEEP
+from export_halls import KEEP, lighting
 
 HEADROOM = 4   # air above each tread
 
@@ -42,6 +42,7 @@ def room(tier, layout):
     # room coordinates are world-style (x east, z south) with the player facing north down the stairs: their
     # right is +x and forward is -z. The build engine's toWorld puts local y = 1 on the origin (feet) level.
     to = lambda x, y, z: (x - ox, y - oy + 1, oz - z)
+    lighting.light_blueprint(b, avoid=[(ox, oy, oz)])   # every build lit (Mateo 2026-11-13); the frame origin stays clear
     pal, idx, cells = [], {}, {}
     for (x, y, z), (n, p) in b.cells.items():
         if n == "keep": continue
