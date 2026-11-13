@@ -70,7 +70,7 @@ export const CONVERGE = {
 // Mateo, 2026-11-11: hint at three, open at five. When the fifth falls, say how the door is opened.
 export const OPEN_AT = {
   at: 5, flag: "leads_fork",
-  line: "The last of the five is down, and the shards they kept ring faintly in your pack, all on the same note.\n§7Bellfounders tuned bronze with a fork. Five shards on an amethyst stem, made at a Workshop, would hold that note. Struck on the right stone, it might be answered. Struck on the wrong one, it goes dull for days.",
+  line: "The last of the five is down, and the shards they kept ring faintly in your pack, five different voices on the same note.\n§7Bellfounders tuned bronze with a fork. One shard from each of the five on an amethyst stem, made at a Workshop, would hold that note. Lose one, and its keeper must be beaten again for another. Struck on the right stone, it might be answered. Struck on the wrong one, it goes dull for days.",
 };
 export const REGIONAL_BOSSES = Object.keys(BOSS_LEADS);
 export const fallenCount = (flags) => REGIONAL_BOSSES.filter((b) => flags.includes(`fell_${b}`)).length;

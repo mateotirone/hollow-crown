@@ -6,6 +6,7 @@
 import { system } from "@minecraft/server";
 import { RAIDER_TAG, WARLORD_TAG, KING_TAG, addTests, assert, assertEqual } from "../siege/api.js";
 import { registerBoss, bossDefs, stack } from "./bossCore.js";
+import { giveShards } from "./shards_live.js";
 import { MOBS, ITEMS } from "./data.js";
 import { alive, effect, flat, heal, hurt, held, isLookingAt, line, particle, ring, shove, sound } from "./util.js";
 
@@ -97,11 +98,12 @@ export function distanceToLine(p, from, dir, reach) {
 export const mirrorPoint = (p, c) => ({ x: 2 * c.x - p.x, y: p.y, z: 2 * c.z - p.z });
 
 const materials = (...pairs) => pairs.map(([id, n]) => stack(id, n));
-const regionalHoard = (extra) => (f, players) => [
-  stack("siege:choir_shard", 1), // the Undertow thread's item: five of these make the Tuning Fork
-  stack("siege:gold_coin", 3 + players.length), stack("minecraft:diamond", 3 + players.length),
-  stack("siege:hollow_ash", 12), ...extra,
-];
+// Each regional boss gives everyone who fought it that boss's own Choir Shard (shards_live.js); one of each of the
+// five makes the Tuning Fork. The rest goes in the shared chest.
+const regionalHoard = (extra) => (f, players) => {
+  giveShards(players, f.def.id);
+  return [stack("siege:gold_coin", 3 + players.length), stack("minecraft:diamond", 3 + players.length), stack("siege:hollow_ash", 12), ...extra];
+};
 
 // =====================================================================================
 // 1. The Clockwork Reeve (Millbrook, Aldmere Vale)
@@ -267,9 +269,9 @@ registerBoss({
       start: (f) => {
         for (const p of f.players()) f.zone(floorOf(f, p.location), 2, 30, (q) => { effect(q, "slowness", 60, 255); hurt(q, 4, "drowning"); }, "minecraft:water_splash_particle");
       } },
-    { id: "drowned", every: 400, windup: 20, phases: [1, 2], warn: "The drowned climb out of the water.",
-      when: (f) => f.adds("minecraft:drowned").length < 4,
-      hit: (f) => f.summon("minecraft:drowned", perPlayer(f, 2, 1), 8, f.center) },
+    { id: "drowned", every: 400, windup: 20, phases: [1, 2], warn: "Brine Lurkers climb out of the water.",
+      when: (f) => f.adds("siege:brine_lurker").length < 4,
+      hit: (f) => f.summon("siege:brine_lurker", perPlayer(f, 2, 1), 8, f.center) },
   ],
   tick: (f, players) => {
     const d = f.data;

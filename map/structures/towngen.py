@@ -1595,6 +1595,10 @@ class Town:
              "note": "world coordinates, placed in order; soft entries only fill air; the first groundwork_blocks are the "
                      "groundwork (streets, plots, fields), which the map grades the land to",
              "groundwork_blocks": n_ground, "tree_seats": seats, "palette": pal, "blocks": rows}
+        if not self.site.get("dark"):            # every build lit at night (Mateo 2026-11-13): rooms, doors, yards
+            sys.path.insert(0, os.path.join(HERE, ".."))
+            import light_blocks
+            light_blocks.light_worldblocks(d)
         with open(os.path.join(out, f"{self.key}-blocks.json"), "w") as fh: json.dump(d, fh, separators=(",", ":"), default=int)
         return len(rows)
 

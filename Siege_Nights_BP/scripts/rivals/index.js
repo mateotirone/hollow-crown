@@ -36,7 +36,7 @@ import { startBuild, buildFor, worldCells } from "../townhall/build.js";
 import { CORNERSTONE, halls, saveHalls, beginBuild } from "../townhall/townhall.js";
 import { drawHall } from "../townhall/halls.js";
 import { STYLES } from "../townhall/styles.js";
-import { REGION_TO_STYLE } from "../settle/config.js";
+import { REGION_TO_STYLE, HOMES } from "../settle/config.js";
 import { drawBuilding, styleFor, BUILDING } from "../settle/buildings.js";
 import { wallOf, wallRising, raiseWall, bearingFor, gateDirFor, adoptWall } from "../settle/walls.js";
 import { WALL_LEVELS } from "../settle/walldata.js";
@@ -252,6 +252,7 @@ function townTick(dim, lord, id) {
     foundTown(key, plot, { x: lord.x, y: lord.y, z: lord.z }, { lord: true, style });
     return;
   }
+  if (town.temper !== lord.temperament) { town.temper = lord.temperament; saveTowns(); } // their townsfolk talk the lord's way
   if (lord.built.hall < town.tier + 1) {
     if (!town.hallSeat) return; // the roads are still going down
     const level = lord.built.hall + 1;
@@ -303,6 +304,7 @@ function townTick(dim, lord, id) {
           box: { x0: t.x + box.x0, z0: t.z + box.z0, x1: t.x + box.x1, z1: t.z + box.z1 } };
         saveTowns();
         emit("settleCharter", { owner: key }); // a lord's town grows past a tier on the same charter
+        if (HOMES.includes(job.building)) emit("lordHomeBuilt", { owner: key, slot: job.slot }); // the crew puts beds in it (settle/lordfolk.js)
       }
       lord.built.parts.push(`plot:${job.slot}`);
       delete lord.plotJob;
@@ -408,7 +410,7 @@ function laySiege(player, lord) {
       spawned++;
     } else {
       try {
-        const e = dim.spawnEntity(i % 3 === 0 ? "minecraft:pillager" : "minecraft:vindicator", at); // plain soldiers if champions are missing
+        const e = dim.spawnEntity(i % 3 === 0 ? "siege:hollow_footman" : "siege:shieldwall_brute", at); // our own raiders if champions are missing
         for (const t of tags) e.addTag(t);
         e.nameTag = name;
         spawned++;

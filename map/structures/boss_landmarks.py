@@ -194,25 +194,13 @@ def seneschal():
         d.put(x, 17, -3, "chiseled_red_sandstone")
     for s in (-1, 1): d.put(s * 2, 19, 0, "campfire")
     # the seated faceless figure behind the gate, over the vault (on top of the ground, z -12..-30)
-    fx, fz, FY = 0, -26, 7   # raised on a tall stepped plinth so it shows over the pylons
+    fx, fz = 0, -26   # raised on a tall stepped plinth so it shows over the pylons
     for step, rr in enumerate((11.5, 10.5, 9.5)):   # a stepped plinth, three tiers
         for (x, z) in disc(rr):
             for y in range(1 + step * 3, 4 + step * 3): d.put(fx + x, y, fz + z, d.pick(fx + x, y, fz + z, RED, 2))
     for (x, z) in disc(8.5):
         d.put(fx + x, 10, fz + z, "smooth_red_sandstone_slab", half="bottom")
-    blob(d, fx, 14 + FY, fz - 2, 7.5, SAND, 3, squash=1.6)          # the body, robed
-    blob(d, fx, 6 + FY, fz + 3, 6.5, SAND, 3, squash=0.6)           # the lap
-    for s in (-1, 1):
-        tube(d, [(fx + s * 6, 20 + FY, fz - 2), (fx + s * 7, 13 + FY, fz + 1), (fx + s * 5, 8 + FY, fz + 5)], 2.0, 1.6, SAND, 4)   # arms
-        blob(d, fx + s * 4, 4 + FY, fz + 6, 2.6, SAND, 4)          # knees
-        blob(d, fx + s * 5, 7 + FY, fz + 6, 1.8, "cut_sandstone", 4)   # hands on the knees
-    blob(d, fx, 27 + FY, fz - 2, 4.6, "smooth_quartz", 5, squash=1.25)   # the head: smooth and white, no face at all
-    for x in range(-5, 6):   # the headdress, striped
-        for y in range(23 + FY, 31 + FY):
-            for z in range(-3, 2):
-                if d.get(fx + x, y, fz - 2 + z - 2) is None and abs(x) >= 4 and (z <= 0):
-                    d.put(fx + x, y, fz - 4 + z, "orange_terracotta" if y % 2 else "cyan_terracotta")
-    d.put(fx, 32 + FY, fz - 2, "gold_block"); d.put(fx, 33 + FY, fz - 2, "lightning_rod", bs={"facing_direction": 1})
+    # the figure itself is a 3D entity (statue spot gate_seated, faceless_statues.gate_spots) standing on the slab
     # the processional way to the south, faceless statues either side
     for z in range(2, 30):
         for x in range(-2, 3): d.put(x, 0, z, "smooth_sandstone" if (x + z) % 3 else "cut_red_sandstone")
@@ -309,9 +297,15 @@ def _areas():
 
 
 def blocks_of(d):
+    """The area's blocks, lit (Mateo 2026-11-13, every build lit at night) once the dug air is in. Lanterns hang
+    overhead or from walls only: no post or floor lantern ever stands on a fight floor."""
     import export_landmarks as X
-    b = X.compute(d.spec())
+    import lighting, emit
+    spec = dict(d.spec()); spec["light"] = False
+    b = X.compute(spec)
     for c in d.airs(): b[c] = ("air", {})
+    lighting.light(b, posts=False)
+    emit.connect(b)
     return b
 
 

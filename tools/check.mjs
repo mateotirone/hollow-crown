@@ -239,6 +239,24 @@ step("Content log rules");
     }
   }
 
+  // 3c. Held items: every geometry the player entity uses must keep vanilla's bone path to the item bones
+  // (rightItem under rightArm, rightArm under body). Bedrock floats held items at the chest or face otherwise
+  // (playtest 1.2.1116: items under the forearm). See docs/PLAYER-ANIMATIONS.md.
+  {
+    const ep = join(RP, "entity/player.entity.json");
+    const pgeo = new Set(Object.values(readJson(ep)?.["minecraft:client_entity"]?.description?.geometry ?? {}));
+    const PATH = { rightItem: "rightArm", leftItem: "leftArm", rightArm: "body", leftArm: "body" };
+    for (const file of walk(join(RP, "models/entity"), ".json")) {
+      for (const g of readJson(file)?.["minecraft:geometry"] ?? []) {
+        if (!pgeo.has(g?.description?.identifier)) continue;
+        for (const b of g.bones ?? []) {
+          const want = PATH[b.name];
+          if (want && b.parent !== want) fail(`${rel(file)}: ${b.name} hangs on "${b.parent}", must hang on "${want}" or held items float (vanilla bone path)`);
+        }
+      }
+    }
+  }
+
   // 4. Blocks: custom geometry must exist in the resource pack, and one block's materials can't mix opaque with see-through.
   const geometries = new Set();
   for (const file of walk(join(RP, "models"), ".json")) {
@@ -355,6 +373,33 @@ step("Saved data versions");
     }
   }
   console.log(raw ? `${raw} file(s) save unversioned data (see notes)` : "every saved store is versioned");
+}
+
+// ---------- 2b2. no vanilla monsters ----------
+// Rule (Mateo 2026-11-13): vanilla monsters never spawn; our own creatures (siege:*) are this world's monsters.
+// So no script may hand a vanilla monster straight to spawnEntity() or summon(), as a string or through a const.
+// (Sieges plan with vanilla ids and spawnRaider() swaps every one for ours: see bestiary/spawns.js.)
+step("No vanilla monsters spawned");
+{
+  const MONSTER = /^minecraft:(zombie|zombie_villager(_v2)?|husk|drowned|skeleton|stray|bogged|parched|creeper|spider|cave_spider|enderman|endermite|silverfish|witch|slime|phantom|pillager|vindicator|evoker|evocation_illager|vex|ravager|guardian|elder_guardian|zombie_horse|skeleton_horse|camel_husk|zombie_nautilus|zombie_pigman|piglin|piglin_brute|hoglin|zoglin|blaze|ghast|magma_cube|wither_skeleton)$/;
+  let bad = 0;
+  for (const file of scripts) {
+    const src = readFileSync(file, "utf8");
+    const consts = Object.fromEntries([...src.matchAll(/const\s+(\w+)\s*=\s*["'`]([^"'`]+)["'`]/g)].map((m) => [m[1], m[2]]));
+    for (const m of src.matchAll(/(?:spawnEntity|\.summon)\(/g)) {
+      // the first argument: up to the first comma or close bracket outside brackets (a ternary counts too)
+      let i = m.index + m[0].length, depth = 0, arg = "";
+      for (; i < src.length && arg.length < 300; i++) {
+        const c = src[i];
+        if ("([{".includes(c)) depth++;
+        else if (")]}".includes(c)) { if (!depth) break; depth--; } else if (c === "," && !depth) break;
+        arg += c;
+      }
+      const ids = [...arg.matchAll(/["'`]([^"'`]+)["'`]/g)].map((x) => x[1]).concat([...arg.matchAll(/\b([A-Z_][A-Z0-9_]*)\b/g)].map((x) => consts[x[1]]).filter(Boolean));
+      for (const id of ids) if (MONSTER.test(id)) { bad++; failIn(file, `${rel(file)}: spawns the vanilla monster ${id}. Use one of our own creatures (siege:*).`); }
+    }
+  }
+  console.log(bad ? `${bad} vanilla monster spawn(s)` : "no script spawns a vanilla monster");
 }
 
 // ---------- 2c. sounds ----------

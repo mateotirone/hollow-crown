@@ -9,10 +9,11 @@ import { planCrack, placeCells } from "./rift.js";
 import { planWound, planArrivalClear, WOUND } from "./wound.js";
 import { ARRIVAL } from "./arrival.js";
 import { SEAL_RIVER_X } from "./rivers.js";
-import { SITES, signposts } from "./roads.js";
+import { SITES, signposts, SITE_SKIRT } from "./roads.js";
 import { hash } from "./noise.js";
 import { STRUCTURE_IDS, planStructure } from "./structures.js";
 import { SITE_DESIGNS, TOWER_DESIGNS } from "./sites_data.js";
+import { STRONGHOLD, strongholdTiles, tileBox, strongholdDone } from "./stronghold.js";
 import { DROWNED_SPOTS } from "./drowned.js";
 import { COURT_DESIGN, SEAT_DESIGN, APPROACH_DESIGN } from "./arenas_data.js";
 import { stamp } from "./stamp.js";
@@ -173,7 +174,21 @@ let woundQueued = false;
 const K_AGAIN = "hc:undertow_again1"; // [chunk index]
 let again;
 const againSet = () => again ?? (again = new Set(load(K_AGAIN, [])));
-const toRedo = (cx, cz) => cx >= CX_MIN && cx <= CX_MAX && cz >= CZ_MIN && cz <= CZ_MAX && againSet().has(idx(cx, cz));
+const toRedo = (cx, cz) => cx >= CX_MIN && cx <= CX_MAX && cz >= CZ_MIN && cz <= CZ_MAX && (againSet().has(idx(cx, cz)) || freshSet().has(idx(cx, cz)));
+// Chunks built before a change that takes land AWAY (the Needlehold's pad, 2026-11-13): cleared from the ground up
+// and built again from scratch, the way the old generator's chunks are.
+const K_FRESH = "hc:undertow_fresh1"; // [chunk index]
+let fresh;
+const freshSet = () => fresh ?? (fresh = new Set(load(K_FRESH, [])));
+const isFresh = (cx, cz) => cx >= CX_MIN && cx <= CX_MAX && cz >= CZ_MIN && cz <= CZ_MAX && freshSet().has(idx(cx, cz));
+function buildFresh(x1, z1, x2, z2) {
+  for (let cx = Math.floor(x1 / 16); cx <= Math.floor(x2 / 16); cx++) for (let cz = Math.floor(z1 / 16); cz <= Math.floor(z2 / 16); cz++) {
+    if (cx < CX_MIN || cx > CX_MAX || cz < CZ_MIN || cz > CZ_MAX || !isBuilt(cx, cz)) continue;
+    freshSet().add(idx(cx, cz));
+  }
+  doneTiles.clear();
+  save(K_FRESH, [...freshSet()]);
+}
 function planAgain(x1, z1, x2, z2) {
   for (let cx = Math.floor(x1 / 16); cx <= Math.floor(x2 / 16); cx++) for (let cz = Math.floor(z1 / 16); cz <= Math.floor(z2 / 16); cz++) {
     if (cx < CX_MIN || cx > CX_MAX || cz < CZ_MIN || cz > CZ_MAX || !isBuilt(cx, cz)) continue;
@@ -281,7 +296,8 @@ export function buildTick(players) {
       // (and at the arrival, the first ledge's box and ramp and the trees that stood where the stair is now)
       const ops = redo ? [...(swap ? planRoofSwap(next[0], next[1]).filter((o) => o.block === "minecraft:air") : []), ...planArrivalClear(next[0], next[1]), ...planChunk(next[0], next[1])]
         : swap ? planRoofSwap(next[0], next[1]) : planChunk(next[0], next[1]);
-      if (!swap && builtOld(next[0], next[1])) ops.unshift(...clearOps(next[0], next[1], lowestGround(next[0], next[1])));
+      if (isFresh(next[0], next[1])) { ops.length = 0; ops.push(...clearOps(next[0], next[1], lowestGround(next[0], next[1])), ...planChunk(next[0], next[1])); }
+      else if (!swap && builtOld(next[0], next[1])) ops.unshift(...clearOps(next[0], next[1], lowestGround(next[0], next[1])));
       job = { cx: next[0], cz: next[1], ops, i: 0 };
     }
   }
@@ -296,7 +312,11 @@ export function buildTick(players) {
     }
     if (job.i >= job.ops.length) {
       if (job.done) job.done();
-      else { markBuilt(job.cx, job.cz); if (toRedo(job.cx, job.cz)) { againSet().delete(idx(job.cx, job.cz)); save(K_AGAIN, [...againSet()]); } }
+      else {
+        markBuilt(job.cx, job.cz);
+        if (againSet().delete(idx(job.cx, job.cz))) save(K_AGAIN, [...againSet()]);
+        if (freshSet().delete(idx(job.cx, job.cz))) save(K_FRESH, [...freshSet()]);
+      }
       job = undefined;
     }
   } else chasmTick(d, players);
@@ -447,6 +467,9 @@ export function piecesTick() {
     if (fillAll(d, planStructure(id))) { p.sites = [...(p.sites ?? []), id]; changed = true; }
   }
 
+  // The Needlehold (stronghold.js): stamped a tile at a time, each once its land is built and loaded.
+  strongholdTick(d, p);
+
   // Hallowmere's drowned city: leaning towers on the marsh banks by the Court landing.
   DROWNED_SPOTS.forEach((t, i) => {
     if ((p.drowned ?? []).includes(i) || !chunksBuilt(t.x - 8, t.z - 8, t.x + 8, t.z + 8)) return;
@@ -554,6 +577,37 @@ export function withClearing(design) {
   if (!design.clear?.length) return design;
   const air = design.palette.length;
   return { palette: [...design.palette, ["minecraft:air", {}]], rows: [...design.clear.map(([y, z, x0, n]) => [y, z, x0, n, air]), ...design.rows] };
+}
+
+// The stronghold's tiles. A newer design version stamps every tile again (its air clears what moved).
+function strongholdTick(d, p) {
+  if (!p.strongholdLand) { // a world whose land there was built before the Needlehold: build it again, flattened for it
+    const reach = STRONGHOLD.r + SITE_SKIRT;
+    buildFresh(STRONGHOLD.x - reach, STRONGHOLD.z - reach, STRONGHOLD.x + reach, STRONGHOLD.z + reach);
+    p.strongholdLand = 1;
+    savePieces(p);
+  }
+  if (strongholdDone(p)) return;
+  const fresh = (p.strongholdV ?? 0) < STRONGHOLD.v;
+  const done = new Set(fresh ? [] : p.strongholdTiles ?? []);
+  let busy = [...stamping].filter((k) => k.startsWith("stronghold:")).length;
+  for (const t of strongholdTiles()) {
+    if (busy >= STRONGHOLD.maxStamping) return;
+    if (done.has(t.key) || stamping.has(`stronghold:${t.key}`)) continue;
+    const b = tileBox(t);
+    if (!chunksBuilt(b.x0, b.z0, b.x1, b.z1)) continue;
+    let loaded = true;
+    for (const [x, z] of [[b.x0, b.z0], [b.x1, b.z0], [b.x0, b.z1], [b.x1, b.z1]]) {
+      try { if (!d.getBlock({ x, y: STRONGHOLD.y, z })) loaded = false; } catch { loaded = false; }
+    }
+    if (!loaded) continue;
+    busy++;
+    stampOnce(d, `stronghold:${t.key}`, t.design, STRONGHOLD, (q) => {
+      const had = (q.strongholdV ?? 0) < STRONGHOLD.v ? [] : q.strongholdTiles ?? [];
+      q.strongholdTiles = [...new Set([...had, t.key])];
+      q.strongholdV = STRONGHOLD.v;
+    });
+  }
 }
 
 // Designed buildings (map/structures/hollow_kit.py) go down a block a tick; each is marked done in the

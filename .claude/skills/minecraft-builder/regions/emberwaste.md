@@ -36,7 +36,7 @@ dragon cries at night. It is grand and dangerous rather than gloomy.
 | Light | harsh white-gold sun, deep shadows under awnings and arcades; warm lanterns and campfires in courtyards at night |
 | Feel | dust, heat, red rock, shade as a luxury |
 
-Build for sun, not rain. Roofs are flat for terraces and sleeping, with parapets. Walls are thick with
+Build for sun, not rain. Roofs are flat for terraces and sleeping, with parapets. On a house part's flat roof pass `"beams": "stripped_acacia_log"`: the default spruce beams read as black stripes from above (Cinder Roost, 2026-11-13). Walls are thick with
 small deep windows. Shade comes from awnings, arcades and courtyards. There are no gutters, no moss and no
 drip lines. Wear shows as dusty edges and a slightly darker band at the base of walls. Shelter matters here: deep shade, arcades, covered walkways and walled yards are wind-breaks against dust and sandstorms.
 
@@ -77,6 +77,7 @@ drip lines. Wear shows as dusty edges and a slightly darker band at the base of 
 | Smithy | a walled forge yard behind a flat-roofed workshop, an open forge under a beam-and-awning shade, a squat chimney |
 | Spice and cloth store | two storeys, flat roof, a deep arched shopfront under a long striped awning, pots and barrels out front, a roof terrace with a cloth shade |
 | Towers | tapering kasbah towers with corner horns (the corners rise above the parapet) |
+| Dragon Stable | raised by the Dragon Roost on a settlement's land (Mateo, 2026-11-13: "a custom building for settlements in emberwaste as a dragon stable ... an attached nursery ... where the dragon hatching blocks are"): a 15 x 15 two-storey hall with a 5-wide round-angle arch in a proud red sandstone surround (a grown dragon walks in), stalls 4 deep off a 5-wide aisle, the hall's corners rising as horns; the nursery a lower 7 x 11 wing on the east under a small blue-green dome, three Hatching Braziers on a red sandstone floor. Built the Emberwaste way wherever it stands (`map/structures/dragon_stable_skill.py`) |
 
 **From the ground up:**
 - **Base:** a thick sandstone base flush with the wall; raised terraces in front of homes.

@@ -362,7 +362,7 @@ function arrive(player, v) {
     note(player, "quiet");
   } else if (h.id === "seam_mites") {
     const c = villageSpot(v.id);
-    for (let i = 0; i < 3; i++) try { hollow().spawnEntity("minecraft:endermite", { x: c.x - 11 + i, y: c.y + 1, z: c.z + 9 }); } catch { /* chunk not ready */ }
+    for (let i = 0; i < 3; i++) try { hollow().spawnEntity("siege:ash_scarab", { x: c.x - 11 + i, y: c.y + 1, z: c.z + 9 }); } catch { /* chunk not ready */ }
     say(player, `§cA shout from the seam at ${v.name}: the picks have broken into a nest. Things are coming out of the rock.`);
     note(player, "fight");
   } else if (h.id === "bound_scrap") {

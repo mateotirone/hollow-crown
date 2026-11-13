@@ -377,6 +377,29 @@ def _stair_between(lo, hi, rise, door_cells, wood):
     return None
 
 
+def _roof_hatch(L, door_cells, wood):
+    """Mateo 2026-11-13 ("how do you get up to the top?"): a tower whose flat top is walked on (a mooring deck,
+    a lookout, a belfry deck) gets a ladder from its top storey up through a trapdoor hatch in the roof. Ask
+    for it with "interior": {"use": "tower", "hatch": true}. The hatch is a closed top trapdoor, so the deck
+    stays walkable; a belfry built on top later leaves it in place (ctx.hatches)."""
+    ctx = L.ctx
+    for (x, z, d) in L.wall_cells():
+        f = _fwd(x, z, d)
+        if f in L.taken or (x, z) in L.taken or (x, z) in L.must: continue
+        top = next((yy for yy in range(L.y, L.y + 16) if not ctx.free(x, yy, z)), None)
+        if top is None or top - L.y > 12: continue
+        if any(_see_through(L.behind(x, z, d, dy)) for dy in range(0, top - L.y)): continue
+        if any(abs(x - q[0]) + abs(z - q[1]) <= 1 for q in door_cells): continue
+        if not L.ok_with([(x, z)], must=[f]): continue
+        for yy in range(L.y, top): ctx.set(x, yy, z, S, raw="ladder", facing=d)
+        ctx.clear(x, top, z); ctx.set(x, top, z, S, raw=f"{wood}_trapdoor", facing=OPP[d], half="top", open=False)
+        if not hasattr(ctx, "hatches"): ctx.hatches = set()
+        ctx.hatches.add((x, top, z))
+        L.taken.add((x, z)); L.must.add(f)
+        return True
+    return False
+
+
 # ---------------------------------------------------------------- rooms
 def _room_box(L):
     xs = [x for x, _ in L.zone]; zs = [z for _, z in L.zone]
@@ -698,6 +721,9 @@ def _furnish_levels(ctx, levels, rooms, F, region, wood, table, I, name):
         for lo, hi in zip(Ls, Ls[1:]):
             got = _stair_between(lo, hi, hi.y - lo.y, doors, wood)
             if not got: ctx.log.append(f"{name}: no room for a stair or ladder from y {lo.y} to y {hi.y} (08-interiors)")
+        if I.get("hatch") and Ls:
+            if not _roof_hatch(Ls[-1], doors if len(Ls) == 1 else list(Ls[-1].must), wood):
+                ctx.log.append(f"{name}: no room for a ladder up to the roof hatch (08-interiors)")
     if I.get("furnish", True):
         for k, L in enumerate(Ls):
             kind = rooms[min(k, len(rooms) - 1)]

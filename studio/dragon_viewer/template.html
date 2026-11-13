@@ -65,6 +65,7 @@ li b { color: var(--ember); font-weight: 600; }
         <p class="blurb" id="blurb"></p>
       </div>
       <dl class="stats" id="stats"></dl>
+      <div><h3>Colour</h3><div class="row" id="colours" role="group" aria-label="Colour"></div></div>
       <div><h3>What it is doing</h3><div class="row" id="poses" role="group" aria-label="Pose"></div></div>
       <div><h3>Age</h3><div class="row" id="ages" role="group" aria-label="Age"></div></div>
       <div><h3>Options</h3><div class="row">
@@ -118,7 +119,7 @@ const POSES = [
   { key: "tilt", label: "Head tilt", text: "Curious about what you are holding." },
 ];
 const AGES = [["hatchling", "Hatchling"], ["fledgling", "Fledgling"], ["adult", "Adult"]];
-const state = { species: 0, pose: "stand", age: "adult", saddle: true, spin: true };
+const state = { species: 0, hue: 0, pose: "stand", age: "adult", saddle: true, spin: true };
 
 // Which animations run, exactly as the entity file decides it in game
 function active() {
@@ -165,7 +166,7 @@ function build() {
   if (rig) holder.remove(rig);
   const sp = DATA.species[state.species], geo = sp.geo;
   const W = geo.description.texture_width, H = geo.description.texture_height;
-  const tex = new THREE.TextureLoader().load(sp.texture);
+  const tex = new THREE.TextureLoader().load(sp.colours?.[state.hue]?.texture ?? sp.texture);
   tex.magFilter = THREE.NearestFilter; tex.minFilter = THREE.NearestFilter;
   const mat = new THREE.MeshLambertMaterial({ map: tex, alphaTest: 0.5 });
   bones = {}; rig = new THREE.Group();
@@ -282,6 +283,7 @@ function play(file) {
 function refresh() {
   const sp = DATA.species[state.species], info = INFO.species[state.species];
   buttons($("species"), DATA.species.map((s, i) => [i, s.name]), () => state.species, (k) => { const changed = k !== state.species; state.species = k; if (changed) build(); });
+  buttons($("colours"), (sp.colours ?? [{ name: sp.name }]).map((c, i) => [i, c.name]), () => state.hue, (k) => { const changed = k !== state.hue; state.hue = k; if (changed) build(); });
   buttons($("poses"), POSES.map((p) => [p.key, p.label]), () => state.pose, (k) => state.pose = k);
   buttons($("ages"), AGES, () => state.age, (k) => state.age = k);
   $("name").textContent = sp.name; $("blurb").textContent = info.blurb;
