@@ -12,7 +12,7 @@
     "enchanted": "textures/misc/enchanted_actor_glint"
    },
    "geometry": {
-    "default": "geometry.siege_netherite_saltreach_leggings"
+    "default": "geometry.siege_codex_tidewrought_leggings"
    },
    "scripts": {
     "parent_setup": "variable.leg_layer_visible = 0.0;"

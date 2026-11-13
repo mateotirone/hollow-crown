@@ -358,7 +358,9 @@ def main():
             out = os.path.join(RP, out_rel + ".png")
             if not os.path.exists(out) or out_rel in standins:
                 recolour(Image.open(sheet), s["pal"]).save(out); standins.add(out_rel)
-            geo = "geometry.siege_" + s["sheet"]
+            # the texture thread's own model, once painted (models/entity/armor/codex_<id>.geo.json), else the stand-in's
+            own = os.path.join(RP, "models/entity/armor", f"codex_{s['id']}.geo.json")
+            geo = f"geometry.siege_codex_{s['id']}" if os.path.exists(own) else "geometry.siege_" + s["sheet"]
             write_json(os.path.join(RP, "attachables/codex", f"{s['id']}.json"), {"format_version": "1.10.0", "minecraft:attachable": {"description": {
                 "identifier": f"siege:{s['id']}", "materials": {"default": "armor", "enchanted": "armor_enchanted"},
                 "textures": {"default": out_rel, "enchanted": "textures/misc/enchanted_actor_glint"}, "geometry": {"default": geo},
