@@ -8,7 +8,7 @@
 import { world } from "@minecraft/server";
 import { moduleStore, isAlly } from "../siege/api.js";
 import { isTesting } from "../core/tests.js";
-import { rosterCap } from "./data.js";
+import { rosterCap, countsToRoster } from "./data.js";
 
 const PREFIX = "siege:horses_r_";
 export const RECORD_VERSION = 1;
@@ -78,4 +78,6 @@ export function stablesLevelFor(playerId) {
   return best;
 }
 
-export const rosterRoom = (playerId, level = stablesLevelFor(playerId)) => rosterCap(level) - horsesOf(playerId).length;
+// Horses that take a stall (a starter cob doesn't)
+export const stalledOf = (owner) => horsesOf(owner).filter(countsToRoster);
+export const rosterRoom = (playerId, level = stablesLevelFor(playerId)) => rosterCap(level) - stalledOf(playerId).length;

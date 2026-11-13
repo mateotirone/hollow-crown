@@ -2,7 +2,7 @@
 // a foal and a Breeder's Post, all yours, with a level 3 Stables so every menu option is open.
 
 import { on } from "../siege/api.js";
-import { BREEDS, REGIONAL_BREEDS, TRAITS, newRecord, breedFoal, HORSE_SETTINGS as S } from "./data.js";
+import { BREEDS, REGIONAL_BREEDS, TRAITS, newRecord, breedFoal, newCob, STARTER_COBS, HORSE_SETTINGS as S } from "./data.js";
 import { horsesOf, deleteRecord, newUid, meta } from "./store.js";
 import { spawnSteed, bannerColorOf } from "./steed.js";
 
@@ -43,6 +43,11 @@ on("showcase", ({ player, dim, nextSpot, label }) => {
   show(Object.assign(make("common", "Sprout"), born, { foal: true, grownAt: Number.MAX_SAFE_INTEGER / 2 }),
     "Crossbred foal\nCourser x\nDestrier");
 
+  // The five starter cobs, one per region (the one a new player is given)
+  for (const region of Object.keys(STARTER_COBS)) {
+    show(newCob({ uid: newUid(), owner: player.id, ownerName: player.name, region }), `${STARTER_COBS[region].name}\nstarter horse\nslow, low jump`);
+  }
+
   const post = nextSpot();
   try {
     dim.getBlock(post)?.setType("hc:breeder_post");
@@ -52,5 +57,5 @@ on("showcase", ({ player, dim, nextSpot, label }) => {
     console.warn(`[Hollow Crown] showcase breeder post: ${e}`);
   }
   meta.save();
-  player.sendMessage("§6Horses: 8 steeds behind you are yours (5 breeds, a Warhorse, a Glimstrider, a foal). Use the Riding Crop from the item chests to gallop, and click the Stables block to train them.");
+  player.sendMessage("§6Horses: 13 steeds behind you are yours (5 breeds, a Warhorse, a Glimstrider, a foal, and the 5 starter cobs). Use the Riding Crop from the item chests to gallop, and click the Stables block to train them.");
 });

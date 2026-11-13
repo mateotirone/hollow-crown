@@ -15,6 +15,10 @@ rnd = random.Random(7)
 SPEED = [0.19, 0.22, 0.25, 0.28, 0.31, 0.335, 0.36, 0.385, 0.41]
 JUMP = [0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1]
 HEALTH = [18, 22, 26, 30, 34, 40, 46]
+# Level 0: the starter cob every new rider is given (COB in data.js). Slower than any horse you can earn, and too
+# weak a jump for a fence.
+COB_SPEED, COB_JUMP = 0.15, 0.4
+COBS = ["vale", "frostmarch", "saltreach", "emberwaste", "blackfen"]  # siege:breed 7..11, data.js STARTER_COBS
 
 def write(path, data):
     os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -25,14 +29,14 @@ def write(path, data):
 # ---------------------------------------------------------------- the steed entity (behavior)
 groups, events = {}, {}
 
-def ladder(prefix, values, component):
-    names = [f"siege:{prefix}_{i + 1}" for i in range(len(values))]
+def ladder(prefix, values, component, first=1):
+    names = [f"siege:{prefix}_{i + first}" for i in range(len(values))]
     for name, value in zip(names, values):
         groups[name] = {component: {"value": value, "max": value} if prefix == "health" else {"value": value}}
         events[name] = {"sequence": [{"remove": {"component_groups": [n for n in names if n != name]}}, {"add": {"component_groups": [name]}}]}
 
-ladder("speed", SPEED, "minecraft:movement")
-ladder("jump", JUMP, "minecraft:horse.jump_strength")
+ladder("speed", [COB_SPEED] + SPEED, "minecraft:movement", first=0)
+ladder("jump", [COB_JUMP] + JUMP, "minecraft:horse.jump_strength", first=0)
 ladder("health", HEALTH, "minecraft:health")
 
 def choice(prefix, options):
@@ -101,7 +105,7 @@ steed = {
             "properties": {
                 "siege:coat": {"type": "int", "range": [0, 6], "default": 3, "client_sync": True},
                 "siege:mark": {"type": "int", "range": [0, 4], "default": 0, "client_sync": True},
-                "siege:breed": {"type": "int", "range": [0, 6], "default": 0, "client_sync": True},  # BREEDS[..].prop in data.js
+                "siege:breed": {"type": "int", "range": [0, 6 + len(COBS)], "default": 0, "client_sync": True},  # BREEDS[..].prop / STARTER_COBS[..].prop in data.js
                 "siege:special": {"type": "int", "range": [0, 2], "default": 0, "client_sync": True},
                 "siege:cap": {"type": "bool", "default": False, "client_sync": True},
                 "siege:cap_r": {"type": "float", "range": [0.0, 1.0], "default": 1.0, "client_sync": True},
@@ -175,6 +179,7 @@ write(RP + "entity/steed.entity.json", {
             "coat_vale": "textures/entity/siege/steed_vale", "coat_frostmarch": "textures/entity/siege/steed_frostmarch",
             "coat_saltreach": "textures/entity/siege/steed_saltreach", "coat_emberwaste": "textures/entity/siege/steed_emberwaste",
             "coat_blackfen": "textures/entity/siege/steed_blackfen", "coat_crossbred": "textures/entity/siege/steed_crossbred",
+            **{f"coat_cob_{r}": f"textures/entity/siege/steed_cob_{r}" for r in COBS},
             "glimstrider": "textures/entity/siege/steed_hollow",
             "barding": "textures/entity/siege/steed_warhorse",
             "caparison": "textures/entity/siege/steed_caparison",
@@ -221,7 +226,8 @@ write(RP + "render_controllers/siege_steed.render_controllers.json", {
                             "Texture.armor_diamond", "Texture.armor_copper", "Texture.armor_netherite"],
             # index = siege:breed (0 is a common horse, which keeps its vanilla coat and markings)
             "Array.breed": ["Texture.markings_none", "Texture.coat_vale", "Texture.coat_frostmarch", "Texture.coat_saltreach",
-                            "Texture.coat_emberwaste", "Texture.coat_blackfen", "Texture.coat_crossbred"],
+                            "Texture.coat_emberwaste", "Texture.coat_blackfen", "Texture.coat_crossbred"]
+                           + [f"Texture.coat_cob_{r}" for r in COBS],
         }},
         "geometry": "Geometry.default",
         "materials": [{"*": "Material.default"}],

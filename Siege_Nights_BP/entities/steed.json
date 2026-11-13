@@ -29,7 +29,7 @@
           "type": "int",
           "range": [
             0,
-            6
+            11
           ],
           "default": 0,
           "client_sync": true
@@ -78,6 +78,11 @@
       }
     },
     "component_groups": {
+      "siege:speed_0": {
+        "minecraft:movement": {
+          "value": 0.15
+        }
+      },
       "siege:speed_1": {
         "minecraft:movement": {
           "value": 0.19
@@ -121,6 +126,11 @@
       "siege:speed_9": {
         "minecraft:movement": {
           "value": 0.41
+        }
+      },
+      "siege:jump_0": {
+        "minecraft:horse.jump_strength": {
+          "value": 0.4
         }
       },
       "siege:jump_1": {
@@ -442,11 +452,38 @@
       }
     },
     "events": {
+      "siege:speed_0": {
+        "sequence": [
+          {
+            "remove": {
+              "component_groups": [
+                "siege:speed_1",
+                "siege:speed_2",
+                "siege:speed_3",
+                "siege:speed_4",
+                "siege:speed_5",
+                "siege:speed_6",
+                "siege:speed_7",
+                "siege:speed_8",
+                "siege:speed_9"
+              ]
+            }
+          },
+          {
+            "add": {
+              "component_groups": [
+                "siege:speed_0"
+              ]
+            }
+          }
+        ]
+      },
       "siege:speed_1": {
         "sequence": [
           {
             "remove": {
               "component_groups": [
+                "siege:speed_0",
                 "siege:speed_2",
                 "siege:speed_3",
                 "siege:speed_4",
@@ -472,6 +509,7 @@
           {
             "remove": {
               "component_groups": [
+                "siege:speed_0",
                 "siege:speed_1",
                 "siege:speed_3",
                 "siege:speed_4",
@@ -497,6 +535,7 @@
           {
             "remove": {
               "component_groups": [
+                "siege:speed_0",
                 "siege:speed_1",
                 "siege:speed_2",
                 "siege:speed_4",
@@ -522,6 +561,7 @@
           {
             "remove": {
               "component_groups": [
+                "siege:speed_0",
                 "siege:speed_1",
                 "siege:speed_2",
                 "siege:speed_3",
@@ -547,6 +587,7 @@
           {
             "remove": {
               "component_groups": [
+                "siege:speed_0",
                 "siege:speed_1",
                 "siege:speed_2",
                 "siege:speed_3",
@@ -572,6 +613,7 @@
           {
             "remove": {
               "component_groups": [
+                "siege:speed_0",
                 "siege:speed_1",
                 "siege:speed_2",
                 "siege:speed_3",
@@ -597,6 +639,7 @@
           {
             "remove": {
               "component_groups": [
+                "siege:speed_0",
                 "siege:speed_1",
                 "siege:speed_2",
                 "siege:speed_3",
@@ -622,6 +665,7 @@
           {
             "remove": {
               "component_groups": [
+                "siege:speed_0",
                 "siege:speed_1",
                 "siege:speed_2",
                 "siege:speed_3",
@@ -647,6 +691,7 @@
           {
             "remove": {
               "component_groups": [
+                "siege:speed_0",
                 "siege:speed_1",
                 "siege:speed_2",
                 "siege:speed_3",
@@ -667,11 +712,36 @@
           }
         ]
       },
+      "siege:jump_0": {
+        "sequence": [
+          {
+            "remove": {
+              "component_groups": [
+                "siege:jump_1",
+                "siege:jump_2",
+                "siege:jump_3",
+                "siege:jump_4",
+                "siege:jump_5",
+                "siege:jump_6",
+                "siege:jump_7"
+              ]
+            }
+          },
+          {
+            "add": {
+              "component_groups": [
+                "siege:jump_0"
+              ]
+            }
+          }
+        ]
+      },
       "siege:jump_1": {
         "sequence": [
           {
             "remove": {
               "component_groups": [
+                "siege:jump_0",
                 "siege:jump_2",
                 "siege:jump_3",
                 "siege:jump_4",
@@ -695,6 +765,7 @@
           {
             "remove": {
               "component_groups": [
+                "siege:jump_0",
                 "siege:jump_1",
                 "siege:jump_3",
                 "siege:jump_4",
@@ -718,6 +789,7 @@
           {
             "remove": {
               "component_groups": [
+                "siege:jump_0",
                 "siege:jump_1",
                 "siege:jump_2",
                 "siege:jump_4",
@@ -741,6 +813,7 @@
           {
             "remove": {
               "component_groups": [
+                "siege:jump_0",
                 "siege:jump_1",
                 "siege:jump_2",
                 "siege:jump_3",
@@ -764,6 +837,7 @@
           {
             "remove": {
               "component_groups": [
+                "siege:jump_0",
                 "siege:jump_1",
                 "siege:jump_2",
                 "siege:jump_3",
@@ -787,6 +861,7 @@
           {
             "remove": {
               "component_groups": [
+                "siege:jump_0",
                 "siege:jump_1",
                 "siege:jump_2",
                 "siege:jump_3",
@@ -810,6 +885,7 @@
           {
             "remove": {
               "component_groups": [
+                "siege:jump_0",
                 "siege:jump_1",
                 "siege:jump_2",
                 "siege:jump_3",
