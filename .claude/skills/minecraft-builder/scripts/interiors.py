@@ -50,6 +50,7 @@ USES = {
     "barracks":  ["guard", "bunks"],
     "library":   ["library", "library"],
     "stable":    ["stable"],
+    "storehouse": ["chest_store"],   # walls of sideways chests in 3 x 3 bays between stone pillars (Mateo 2026-11-13)
 }
 
 # ---- region flavour (08-interiors step 3; regions/<region>.md "inside")
@@ -549,6 +550,89 @@ def _pews(L, doors, wood, cloth):
         if c not in L.taken and c in L.area and L.free3(*c): L.ctx.set(c[0], L.y, c[1], S, raw=f"{cloth}_carpet")
 
 
+# ---------------------------------------------------------------- the storehouse's chest walls (Mateo 2026-11-13)
+# Mateo's reference: chests turned sideways (you see their side, not the lid's latch) in 3 x 3 bays between stone
+# pillars, a stone beam across the top of each bay. A bay is pillar, 3 chests, pillar along a wall; neighbouring
+# bays share their pillar, so a run of 4n + 1 cells holds n bays (9 cells: 2, 13: 3). Chests face along the wall:
+# side by side along their own facing they never join into double chests, so every chest is its own 27 slots.
+# A bay goes up only where the wall behind it is blank (no glass, no door), it keeps clear of stairs and door
+# insides, and the walkway rule holds (every chest front stays reachable). Big rooms also get free-standing racks
+# down the middle, open both sides.
+CHEST_ROWS = 3                     # chests high in a bay; the beam row goes on top (4 clear rows in a storey of 5)
+
+def _runs(L):
+    """Straight wall runs: (d, [cells in order along the wall]) for each wall direction and line."""
+    by = {}
+    for (x, z, d) in L.wall_cells():
+        key = (d, x if d in "ew" else z)
+        by.setdefault(key, []).append((x, z))
+    out = []
+    for (d, _), cells in sorted(by.items()):
+        along = 1 if d in "ew" else 0                       # the coordinate that runs along the wall
+        cells.sort(key=lambda c: c[along])
+        run = [cells[0]]
+        for c in cells[1:]:
+            if c[along] == run[-1][along] + 1: run.append(c)
+            else: out.append((d, run)); run = [c]
+        out.append((d, run))
+    return out
+
+def _bay(L, d, cells, pillar, beam, facing, back=True):
+    """One bay: cells = [pillar, c, c, c, pillar] along the line. back = it stands against a wall (checked blank)."""
+    rows = CHEST_ROWS + 1
+    pil = [cells[0], cells[-1]]; mid = cells[1:-1]
+    if back and not all(_clear_behind(L, x, z, d, range(rows)) for (x, z) in cells): return 0
+    for (x, z) in pil:                                   # a pillar may already stand there (the bay beside it)
+        here = _raw(L.ctx, x, L.y, z)
+        if here != pillar and (any(not L.ctx.free(x, L.y + dy, z) for dy in range(CHEST_ROWS)) or (x, z) in L.taken or (x, z) in L.must): return 0
+    for (x, z) in mid:   # the top row may already hold a beam (a roof's tie beam): it is the bay's beam then
+        if any(not L.ctx.free(x, L.y + dy, z) for dy in range(CHEST_ROWS)) or (x, z) in L.taken or (x, z) in L.must: return 0
+    block = [c for c in cells if c not in L.taken]
+    fronts = [_fwd(x, z, d) for (x, z) in mid] if back else []
+    if not L.ok_with(block, need=fronts): return 0
+    for (x, z) in pil:
+        for dy in range(rows):
+            if L.ctx.free(x, L.y + dy, z): L.ctx.set(x, L.y + dy, z, S, raw=pillar)
+    for (x, z) in mid:
+        for dy in range(CHEST_ROWS): L.ctx.set(x, L.y + dy, z, S, raw="chest", facing=facing)
+        if L.ctx.free(x, L.y + CHEST_ROWS, z): L.ctx.set(x, L.y + CHEST_ROWS, z, S, raw=beam)
+    L.taken |= set(cells)
+    if fronts: L.needs.append(set(fronts))
+    return len(mid) * CHEST_ROWS
+
+def _chest_walls(L, pillar, beam):
+    n = 0
+    for d, run in _runs(L):
+        if len(run) < 5: continue
+        bays = (len(run) - 1) // 4
+        off = (len(run) - (4 * bays + 1)) // 2
+        facing = RIGHT[d]                                # along the wall: you see the chest's side
+        for b in range(bays):
+            n += _bay(L, d, run[off + 4 * b: off + 4 * b + 5], pillar, beam, facing)
+    return n
+
+def _chest_racks(L, pillar, beam, doors):
+    """Free-standing racks down a wide room: a line 3 in from each long wall (a 2-wide aisle behind it), pillar
+    and 3 chests along it, open both sides, the ends kept 2 clear for cross aisles. Only where the room is 11+ wide."""
+    x0, z0, x1, z1 = _room_box(L)
+    w, dz = x1 - x0 + 1, z1 - z0 + 1
+    long_z = dz >= w                                     # racks run along the long side
+    span = w if long_z else dz
+    if span < 11: return 0
+    n = 0
+    for k in (3, span - 4):                              # 3 in from each wall: wall row, 2 aisle, the rack
+        line = []
+        lo, hi = (z0, z1) if long_z else (x0, x1)
+        for a in range(lo + 2, hi - 1):
+            line.append((x0 + k, a) if long_z else (a, z0 + k))
+        bays = (len(line) - 1) // 4
+        off = (len(line) - (4 * bays + 1)) // 2
+        facing = "s" if long_z else "e"
+        for b in range(bays):
+            n += _bay(L, "e" if long_z else "s", line[off + 4 * b: off + 4 * b + 5], pillar, beam, facing, back=False)
+    return n
+
+
 def furnish_level(L, kind, doors, region, wood, table):
     F = L.F
     rug = F["rug"]
@@ -612,6 +696,13 @@ def furnish_level(L, kind, doors, region, wood, table):
         return
     elif kind == "stable":
         _wall_items(L, ["hay_block", "hay_block", "barrel", "composter"], doors)
+    elif kind == "chest_store":
+        I = getattr(L, "I", {}) or {}
+        pillar = I.get("pillar", F["stone"]); beam = I.get("beam", pillar)
+        L.chests = _chest_walls(L, pillar, beam)
+        if I.get("racks", True): L.chests += _chest_racks(L, pillar, beam, doors)
+        _wall_items(L, ["barrel", "crafting_table", "barrel"], doors)
+        return
     else:   # storage
         _wall_items(L, ["barrel", "chest", "barrel", "barrel", "chest", "barrel"], doors)
     if big or kind in ("living", "bedroom", "hall", "council", "taproom", "cottage"):
@@ -682,6 +773,7 @@ def _furnish_levels(ctx, levels, rooms, F, region, wood, table, I, name):
         if not v["cells"]: continue
         L = Level(ctx, v["cells"], y, v["h"], F, name)
         L.zones = sorted([z for z in v.get("zones", [v["cells"]]) if z], key=len, reverse=True)
+        L.I = I
         Ls.append(L)
     if not Ls: return
     # doors on the ground level: any door block in a wall next to an open cell

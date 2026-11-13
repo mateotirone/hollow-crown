@@ -23,6 +23,7 @@ import { opensAt } from "./charters.js";
 import { BUILDING } from "./buildings.js";
 import { settlersOf, freeBeds, townsNear, dressSettler } from "./settlers.js";
 import { charge, refund, coins } from "./wallet.js";
+import { dressNpc, addNpcLook } from "../core/npc_skins.js";
 
 const OVERWORLD = "minecraft:overworld";
 const NPC_TYPE = "minecraft:npc";
@@ -65,17 +66,28 @@ function squareSpot(town, dx = 2, dz = 2) {
   return undefined;
 }
 
-function spawnNpc(at, name, tags, skin) {
+function spawnNpc(at, name, tags, skin) { // skin: a key from core/npc_skins_data.js
   try {
     const e = world.getDimension(OVERWORLD).spawnEntity(NPC_TYPE, at);
     for (const t of tags) e.addTag(t);
     e.nameTag = name;
-    system.runTimeout(() => { try { const npc = e.getComponent("minecraft:npc"); if (npc) { npc.name = name; npc.skinIndex = skin; } } catch { /* gone */ } }, 5);
+    dressNpc(e, skin);
+    system.runTimeout(() => { try { const npc = e.getComponent("minecraft:npc"); if (npc) npc.name = name; } catch { /* gone */ } }, 5);
     return e;
   } catch {
     return undefined;
   }
 }
+
+// Fair traders and players spawned before they carried a skin tag: told apart by their names
+addNpcLook((e) => {
+  if (e.hasTag(FAIR_TAG)) {
+    const region = String(e.nameTag).replace(/^Trader from /, "");
+    return REGION_TO_STYLE[region] ? `fair_${REGION_TO_STYLE[region]}` : "fair_vale";
+  }
+  if (e.hasTag(PLAYERS_TAG)) return `mummer_${Math.max(0, TROUPE.indexOf(e.nameTag))}`;
+  return undefined;
+});
 
 function removeTagged(tag) {
   try { for (const e of world.getDimension(OVERWORLD).getEntities({ type: NPC_TYPE, tags: [tag] })) e.remove(); } catch { /* not loaded */ }
@@ -109,7 +121,7 @@ function startEvent(owner, id) {
       const at = squareSpot(town);
       if (!at) return false;
       ev.open = { id, until: day + 1, style };
-      spawnNpc(at, `Trader from ${STYLE_REGION[style]}`, [FAIR_TAG, `${FAIR_TAG}_${owner}`], 6);
+      spawnNpc(at, `Trader from ${STYLE_REGION[style]}`, [FAIR_TAG, `${FAIR_TAG}_${owner}`], `fair_${style}`);
       w.region = STYLE_REGION[style];
       break;
     }
@@ -188,7 +200,7 @@ function play(owner) {
   if (!at) return;
   open.played = true;
   saveTowns();
-  TROUPE.forEach((name, i) => spawnNpc({ x: at.x + i - 1, y: at.y, z: at.z }, name, [PLAYERS_TAG, `${PLAYERS_TAG}_${owner}`], 12 + i));
+  TROUPE.forEach((name, i) => spawnNpc({ x: at.x + i - 1, y: at.y, z: at.z }, name, [PLAYERS_TAG, `${PLAYERS_TAG}_${owner}`], `mummer_${i}`));
   PLAY_LINES.forEach((line, i) => system.runTimeout(() => {
     const t = townOf(owner);
     if (!t) return;

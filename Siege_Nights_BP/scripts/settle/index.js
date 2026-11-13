@@ -42,6 +42,8 @@ import "./events.js";
 import "./hallmove.js";
 import "./planbook.js";
 import "./basebuilds.js";
+import "./storehouse.js";
+import "./storecrates.js";
 import "./arrival.js";
 import "./showcase.js";
 import "./tests.js";
