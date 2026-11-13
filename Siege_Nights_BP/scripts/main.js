@@ -34,6 +34,7 @@ import "./crown/index.js";
 import "./dragons/index.js";
 import "./settle/index.js";
 import "./rivals/index.js";
+import "./wonders/index.js";
 import "./hollowfolk/index.js";
 import "./looks/index.js";
 import "./economy/index.js";
