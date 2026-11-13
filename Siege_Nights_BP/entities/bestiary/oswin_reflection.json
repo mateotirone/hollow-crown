@@ -18,7 +18,8 @@
      "monster",
      "mob",
      "hollow",
-     "siege_boss_add"
+     "siege_boss_add",
+     "siege_heavy"
     ]
    },
    "minecraft:health": {
