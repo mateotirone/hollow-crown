@@ -75,6 +75,8 @@ def fixture(f, base):
     x, z = f["at"]
     dy = f["ground_y"] - base if "ground_y" in f else None
     row = [f["name"], x, z, tier, dy]
+    if f["name"] == "mason_yard":                       # ["mason_yard", x, z, tier, dy, front side] (settlement thread)
+        return row + [f.get("rotation")]
     if f["name"] == "tree":
         row += [f.get("species"), f.get("size"), f.get("rotation", 0)]
     elif "rotation" in f:

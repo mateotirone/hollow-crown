@@ -182,6 +182,39 @@ class Settlement(Town):
             if self.HALL[i, j]: continue
             self.K[i, j] = k; self.KIND[i, j] = PRIO["square"]
         self.square_cells = np.argwhere(self.KIND == PRIO["square"])
+        self.mason_yard()
+
+    MASON_YARD = (9, 9)                             # width along its front x depth (settlement building thread 2026-11-12)
+    def mason_yard(self):
+        """The Mason's yard, reserved in every layout at tier 0 before roads and slots: 9 x 9, its front on the
+        forecourt (or the square), ground levelled to the square, the Mason's Bench 3 in from the front middle.
+        Tried beside the forecourt on either side, then beside the square; flattest ground wins."""
+        W, D = self.MASON_YARD; hw = W // 2
+        best = None
+        for side in (1, -1):                         # right / left of the forecourt and square, front facing in
+            for a0 in range(-16, 3):
+                for r0 in (6, 7, 8, 9):
+                    front = [self.world(side * (r0 - 1), a0 + w) for w in range(-hw, hw + 1)]
+                    if sum(1 for x, z in front if self.ok(x, z) and self.KIND[self.ij(x, z)] > 0) < 5: continue   # opens onto paving
+                    cells = [self.world(side * (r0 + d), a0 + w) for d in range(D) for w in range(-hw, hw + 1)]
+                    if not all(self.inside(x, z, 2) and self.ok(x, z) for x, z in cells): continue
+                    ij = [self.ij(x, z) for x, z in cells]
+                    if any(self.HALL[i, j] or self.WET[i, j] or self.KIND[i, j] > 0 for i, j in ij): continue
+                    g = np.array([self.G0[i, j] for i, j in ij]); rel = float(g.max() - g.min()) + abs(float(np.median(g)) - self.sqY)
+                    sc = rel + 0.15 * abs(a0 - MASON[1]) + (0 if side == 1 else 0.5)
+                    if best is None or sc < best[0]: best = (sc, side, a0, r0, cells)
+        if best is None:
+            print("no room for the Mason's yard"); return
+        _, side, a0, r0, cells = best
+        for x, z in cells:
+            i, j = self.ij(x, z); self.TAKEN[i, j] = 2; self.G[i, j] = self.sqY
+        fx, fz = self.world(side * r0, a0); bx, bz = self.world(side * (r0 + 3), a0)
+        nx, nz = self.world(side * (r0 - 1), a0); f = (int(round(nx - fx)), int(round(nz - fz)))
+        face = {(0, 1): "s", (-1, 0): "w", (0, -1): "n", (1, 0): "e"}.get(f, "s")
+        self.mason_box = cells
+        self.fixtures = [q for q in self.fixtures if q["name"] != "mason_bench"]
+        self.fixtures.append({"name": "mason_yard", "at": list(self.rel(fx, fz)), "ground_y": self.sqY, "rotation": face, "tier": 0})
+        self.fixtures.append({"name": "mason_bench", "at": list(self.rel(bx, bz)), "ground_y": self.sqY, "tier": 0})
 
     def streets(self):
         sqcells = [(int(i) + self.X0, int(j) + self.Z0) for i, j in self.square_cells]
@@ -647,9 +680,6 @@ class Settlement(Town):
         self.tight = True
         pass_("S", 1, 3, near_sq); pass_("M", 1, 2, near_sq); pass_("L", 2, 1, near_sq); pass_("M", 2, 2, near_sq)
         pass_("S", 1, 4, near_sq); pass_("S", 2, 6, near_sq); pass_("S", 3, 8, far)   # Smalls into what is left (homes, work)
-        self.in_field = True                           # last: a Small may take the corner of a field (fields are
-        pass_("S", 1, 1, near_sq); pass_("S", 2, 1, near_sq)   # wide; the charter still checks 80 crop cells by Town)
-        self.in_field = False
         self.tight = False
         self.relax()
 
@@ -1103,7 +1133,9 @@ def main():
             short = sum(max(0, MINIMUM[t][q] - cs[t][q]) for t in range(4) for q in MINIMUM[t])
             print(plot["name"], tpl, seed, "charter" if passes else f"charter short {cshort} {sorted(set(s.missing))}", "| minimum", "ok" if ok else f"short {short}", cs[-1], flush=True)
             lib = any(e.get("library") for e in s.slots)            # a Hamlet library slot is a must
-            if best is None or (not lib, cshort, short) < best[0]: best = ((not lib, cshort, short), s)
+            yard = any(f["name"] == "mason_yard" for f in s.fixtures)
+            if best is None or (not lib, not yard, cshort, short) < best[0]: best = ((not lib, not yard, cshort, short), s)
+            if passes and not any(f["name"] == "mason_yard" for f in s.fixtures): passes = False   # the Mason's yard is a must too
             if passes: break
         s = best[1]
         s.picture_settle(os.path.join(a.out, f"{s.key}-{tpl}.png"))

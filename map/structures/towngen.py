@@ -1008,7 +1008,7 @@ class Town:
         self.stamp(bp, x, z, y, deg, "lamp"); self.TAKEN[self.ij(x, z)] = 4; lamps.append((x, z))
         if hasattr(self, "fixtures"):
             self.fixtures.append({"name": "lamp", "stamp": bp.name, "at": list(self.rel(x, z)), "ground_y": y, "rotation": deg,
-                                  "tier": int(self.OT[self.ij(x, z)]) if hasattr(self, "OT") else 0})
+                                  "tier": min(3, int(self.OT[self.ij(x, z)])) if hasattr(self, "OT") else 0})
 
     def light_town(self):
         """Light every town (Mateo 2026-11-12: "none of the towns have light ... the town generation needs to
