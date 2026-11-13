@@ -152,10 +152,10 @@ function moveAll(owner, night) {
 
 // ---------- dawn: settle up, then one arrives ----------
 
-function dawn(owner, arrivals = SETTLERS.perDawn) {
+function dawn(owner, arrivals = SETTLERS.perDawn, exact = false) {
   const town = townOf(owner);
   if (!town) return;
-  arrivals = applyFilter("settlerArrivals", arrivals, { owner }); // a wonder can bring more
+  if (!exact) arrivals = applyFilter("settlerArrivals", arrivals, { owner }); // a wonder can bring more (not to one who was sent)
   const dim = world.getDimension(OVERWORLD);
   const list = settlersOf(owner);
   // beds that are gone: move to another, or leave
@@ -195,8 +195,8 @@ function dawn(owner, arrivals = SETTLERS.perDawn) {
   moveAll(owner, false);
 }
 
-on("settleCensus", ({ owner, arrivals }) => {
-  try { dawn(owner, arrivals); } catch (e) { console.warn(`[Hollow Crown] settlers: ${e}`); }
+on("settleCensus", ({ owner, arrivals, exact }) => {
+  try { dawn(owner, arrivals, exact); } catch (e) { console.warn(`[Hollow Crown] settlers: ${e}`); }
 });
 
 // ---------- dusk, and settlers that went missing ----------

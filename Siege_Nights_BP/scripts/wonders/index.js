@@ -29,6 +29,7 @@ import {
   extraArrivals, keepBonus, lordDue, challengeProblem, defendersFor, inGuard, reachOf, guardOf, levelOf, gradeTarget,
 } from "./rules.js";
 import "./tests.js";
+import { insideActions } from "./inside.js";
 
 const OVERWORLD = "minecraft:overworld";
 const NPC_TYPE = "minecraft:npc";
@@ -54,8 +55,17 @@ function homeRegion(id) {
 }
 const heldFor = (id) => heldBy(store.data.w, id, allyOf, homeRegion(id));
 
+// Who holds a wonder, for other modules (the Codex's forges): { playerId, lordId, name, standing } or null if free
+export function wonderHolder(id) {
+  const s = store.data.w[id];
+  if (!s?.holder) return null;
+  const lord = isLordKey(s.holder);
+  return { playerId: lord ? null : s.holder, lordId: lord ? String(s.holder).slice(4) : null, name: s.holderName ?? null, standing: standing(s) };
+}
+export { heldFor, stateOf, near };
+
 // Where the keeper waits: in front of the wonder, a few blocks out
-function keeperSpot(w) {
+export function keeperSpot(w) {
   const d = WONDER_DESIGNS[w.id];
   const out = -d.box.z0 + 3;
   const f = forwardOf(w.face);
@@ -250,6 +260,7 @@ function keeperMenu(player, w) {
   if (!s.holder) actions.push([`Claim it (${coins(stageCost(s.built + 1))})`, () => tryClaim(player, w)]);
   if (mine && s.paid < WONDER.stages) actions.push([`Pay for stage ${s.paid + 1} (${coins(stageCost(s.paid + 1))})`, () => tryPay(player, w)]);
   if (s.holder && !mine && !challenges.has(w.id)) actions.push(["Challenge for it", () => tryChallenge(player, w)]);
+  actions.push(...insideActions(player, w)); // what happens inside (inside.js): travellers, racing, the forge
   for (const [label] of actions) form.button(label);
   form.button("Close");
   form.show(player).then((res) => {

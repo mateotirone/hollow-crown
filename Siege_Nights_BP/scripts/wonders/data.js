@@ -91,3 +91,54 @@ export const WONDER_LINES = {
   challenge: "{player} has challenged for the {name}.",
   defended: "The {name} holds. {player}'s challenge has failed.",
 };
+
+// What happens inside (Mateo 2026-11-13). Only once a wonder stands.
+//   Lantern Spire: lost travellers come in by its light each dawn and wait on the deck. Anyone the Spire's gift
+//   reaches (holder, allies, settlements in Blackfen) can take one on for nothing: a soldier walks to your
+//   Barracks, a settler to a free bed in your town. First come, first served.
+//   Great Horse Fair: ride the course (laps of the track, checkpoints in order, against a par time and the Fair's
+//   record) or joust the Fair's champion in the ring, for an entry fee and a purse.
+export const SPIRE = {
+  perDawn: 3,
+  soldierShare: 0.6, // the rest are settlers
+  // who comes in, by weight; a soldier your settlement hasn't unlocked yet won't follow you
+  soldiers: [["siege:man_at_arms", 5], ["siege:archer", 5], ["siege:pikeman", 4], ["siege:shieldbearer", 3], ["siege:crossbowman", 2], ["siege:knight", 1]],
+  standOut: [-6, -3, 3, 6], // where they wait: this far either side of the keeper, along the front
+};
+
+export const FAIR = {
+  // spec coords of make_arena.py (front +z = the Grand Gate): the middle of the track, start/finish first
+  checkpoints: [[0, 11], [31, 0], [0, -11], [-31, 0]],
+  reach: 6, // blocks from a checkpoint that count as passing it
+  laps: 3,
+  par: 70, // seconds; beat it for the purse
+  raceMinutes: 4,
+  raceEntry: 10, racePurse: 30, recordPurse: 60, // Regals
+  joustEntry: 25, joustPurse: 90, joustMinutes: 2,
+  champion: { x: 0, z: 0 }, // spec coords where the champion rides in
+  pursesPerDay: 3, // purses a player can win in a day (races and jousts together)
+};
+
+export const INSIDE_LINES = {
+  spireNone: "No one came in by the light last night. Try again after dawn.",
+  spireNotYet: "The Spire's lamps aren't lit yet. When it's finished, lost travellers will follow them in.",
+  spireNotYours: "These folk will only follow someone the Spire's light shines for: its holder, their allies, or a settlement in Blackfen.",
+  spireNoBarracks: "You'll need a settlement with soldiers' room for them first.",
+  spireFull: "Your settlement has no room for another soldier. Grow it, or lose one first.",
+  spireLocked: "They won't follow a settlement as small as yours yet.",
+  spireNoBed: "There's no free bed in your town for them. Build another home first.",
+  spireNoTown: "They're looking for a town with homes. Lay yours out first.",
+  fairNotYet: "The Fair isn't finished. When it is, there'll be racing and jousting here.",
+  fairMount: "You'll need to be on a horse for that.",
+  fairBusy: "Someone's in the ring already. Wait your turn.",
+  fairStart: "Ride to the start line by the Grand Gate. The clock starts when you cross it. {laps} laps, checkpoints in order.",
+  fairOff: "You came off your horse. That's the end of the run.",
+  fairSlow: "Time's up. Better luck next time.",
+  fairPar: "{time}! Under the par of {par}. The Fair pays you {purse}.",
+  fairRecord: "{time}! A new record for the Great Horse Fair. The Fair pays you {purse}.",
+  fairOver: "{time}. Over the par of {par}, no purse this time.",
+  fairPursed: "{time}. You've had all the purses you'll get today.",
+  joustStart: "The Fair's champion rides in. Unseat him within {mins} minutes, and stay in the saddle.",
+  joustWon: "You've beaten the Fair's champion! The Fair pays you {purse}.",
+  joustLost: "The champion keeps his title.",
+};

@@ -1,6 +1,7 @@
 import { addTests, assert, assertEqual } from "../core/tests.js";
 import { WONDER_DESIGNS } from "./designs_data.js";
-import { WONDER, WONDERS } from "./data.js";
+import { WONDER, WONDERS, SPIRE, FAIR } from "./data.js";
+import { specToWorld, travellersFor, raceStep, racePurse } from "./rules.js";
 import { wonderPlan } from "./plans.js";
 import {
   forwardOf, stageRows, stageBlocks, perTickFor, claimProblem, payProblem, heldBy, adjustCharge, adjustPay, extraArrivals,
@@ -110,5 +111,42 @@ addTests("wonders", {
       assert(t >= last, "a cut eases back steadily"); last = t;
     }
     assert(gradeTarget(100, 60, 1) <= 60 + WONDER.easeFill, "a cliff edge is never built out more than easeFill");
+  },
+});
+
+addTests("wonders inside", {
+  "a spec point lands where the wonder's front faces": () => {
+    assertEqual(JSON.stringify(specToWorld("s", { x: 0, z: 0 }, 0, 5)), JSON.stringify({ x: 0, z: 5 }));
+    assertEqual(JSON.stringify(specToWorld("w", { x: 10, z: 0 }, 0, 5)), JSON.stringify({ x: 5, z: 0 }));
+    assertEqual(JSON.stringify(specToWorld("e", { x: 0, z: 0 }, 0, 5)), JSON.stringify({ x: 5, z: 0 }));
+  },
+  "the Lantern Spire's travellers are the same all day, soldiers and settlers, never a siege crew": () => {
+    assertEqual(JSON.stringify(travellersFor(9)), JSON.stringify(travellersFor(9)));
+    let soldiers = 0, all = 0;
+    for (let d = 0; d < 200; d++) for (const t of travellersFor(d)) {
+      all++;
+      if (t.k === "soldier") { soldiers++; assert(SPIRE.soldiers.some(([id]) => id === t.type), t.type); }
+      else assertEqual(t.k, "settler");
+    }
+    assertEqual(all, 200 * SPIRE.perDawn);
+    assert(soldiers > all * 0.45 && soldiers < all * 0.75, `soldiers ${soldiers}/${all}`);
+  },
+  "a race starts at the line, counts checkpoints in order and ends after the laps": () => {
+    const pts = FAIR.checkpoints;
+    let run = { points: pts, next: 0 };
+    run = raceStep(run, { x: pts[2][0], z: pts[2][1] }, 1); // out of order: nothing
+    assertEqual(run.start, undefined);
+    run = raceStep(run, { x: pts[0][0], z: pts[0][1] }, 2);
+    assertEqual(run.start, 2);
+    let t = 2;
+    for (let lap = 0; lap < FAIR.laps; lap++) for (const k of [1, 2, 3, 0]) run = raceStep(run, { x: pts[k][0] + 2, z: pts[k][1] }, (t += 5));
+    assert(run.done, "finished");
+    assertEqual(run.seconds, FAIR.laps * 20);
+  },
+  "the purse: a record pays most, under par pays, over par or too many today pays nothing": () => {
+    assertEqual(racePurse(80, undefined, 0).purse, FAIR.recordPurse);
+    assertEqual(racePurse(60, 55, 0).purse, FAIR.racePurse);
+    assertEqual(racePurse(FAIR.par + 5, 55, 0).purse, 0);
+    assertEqual(racePurse(40, 55, FAIR.pursesPerDay).purse, 0);
   },
 });

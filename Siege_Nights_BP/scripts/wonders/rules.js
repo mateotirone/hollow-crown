@@ -21,7 +21,7 @@
 //   levelOf(heights)                      the ground level a wonder is graded to: the median of the ground under it
 //   gradeTarget(G, r, out, w?)            where a column's ground goes: G under the wonder, eased back to r round it
 
-import { WONDER, WONDER_BY_ID } from "./data.js";
+import { WONDER, WONDER_BY_ID, SPIRE, FAIR } from "./data.js";
 
 const FACE = { n: { x: 0, z: -1 }, s: { x: 0, z: 1 }, e: { x: 1, z: 0 }, w: { x: -1, z: 0 } };
 export const forwardOf = (face) => ({ x: -FACE[face].x, z: -FACE[face].z });
@@ -107,4 +107,54 @@ export function gradeTarget(G, r, out) {
   if (out > WONDER.ease) return r;
   const t = Math.round(G + (r - G) * (out / (WONDER.ease + 1)));
   return t > r ? Math.min(t, r + WONDER.easeFill) : t;
+}
+
+// ---------- what happens inside (data.js SPIRE, FAIR) ----------
+//   specToWorld(face, site, x, z)       a point of a wonder's spec (front +z) on the map
+//   travellersFor(day, rnd?)            the lost travellers who come in to the Lantern Spire at a dawn
+//   raceStep(run, pos, t)               a run after the rider is at pos at time t (seconds): next checkpoint, lap, done
+//   racePurse(seconds, record, pursed)  { purse, record: bool, line } for a finished run
+
+
+const ROT = { s: (x, z) => [x, z], e: (x, z) => [z, -x], w: (x, z) => [-z, x], n: (x, z) => [-x, -z] };
+export function specToWorld(face, site, x, z) {
+  const [dx, dz] = ROT[face](x, z);
+  return { x: site.x + dx, z: site.z + dz };
+}
+
+// A seeded pick, so every player sees the same travellers that day
+const seeded = (seed) => () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff; };
+export function travellersFor(day, rnd = seeded(day * 7919 + 13)) {
+  const out = [];
+  const total = SPIRE.soldiers.reduce((n, [, w]) => n + w, 0);
+  for (let i = 0; i < SPIRE.perDawn; i++) {
+    if (rnd() < SPIRE.soldierShare) {
+      let r = rnd() * total, type = SPIRE.soldiers[0][0];
+      for (const [t, w] of SPIRE.soldiers) { if ((r -= w) < 0) { type = t; break; } }
+      out.push({ k: "soldier", type });
+    } else out.push({ k: "settler" });
+  }
+  return out;
+}
+
+export function raceStep(run, pos, t) {
+  if (run.done) return run;
+  const [cx, cz] = run.points[run.next];
+  if (Math.hypot(pos.x - cx, pos.z - cz) > FAIR.reach) return run;
+  const r = { ...run };
+  if (r.start === undefined) { r.start = t; r.next = 1; return r; }   // crossed the start line: the clock runs
+  r.next = (r.next + 1) % r.points.length;
+  if (r.next === 1) {                                                 // back over the line: a lap
+    r.lap = (r.lap ?? 0) + 1;
+    if (r.lap >= FAIR.laps) { r.done = true; r.seconds = t - r.start; }
+  }
+  return r;
+}
+
+export function racePurse(seconds, record, pursed) {
+  const s = Math.round(seconds * 10) / 10;
+  if (pursed >= FAIR.pursesPerDay) return { purse: 0, record: false, line: "fairPursed", time: s };
+  if (record === undefined || s < record) return { purse: FAIR.recordPurse, record: true, line: "fairRecord", time: s };
+  if (s <= FAIR.par) return { purse: FAIR.racePurse, record: false, line: "fairPar", time: s };
+  return { purse: 0, record: false, line: "fairOver", time: s };
 }
