@@ -53,7 +53,7 @@ SITES = {
                       roofs={"dark shingle": 5, "slate": 3, "warm red": 2}, accent="slate",
                       first=("chapel",),        # Sister Wren's chapel claims its place on the square (storyline audit)
                       first_r=13,               # its door 13 out: the Seneschal's clock posts ring the square at 10 (well_plan.js)
-                      civic=[("chapel", lambda: vale_civic.chapel(name="millbrook_chapel")),
+                      civic=[("chapel", lambda: vale_civic.chapel(name="millbrook_chapel", bells=False)),
                              ("clock tower", vale_civic.clock_tower),
                              ("bakery", lambda: __import__("story_builds").build("bakery")),
                              ("order waystation", lambda: __import__("story_builds").build("waystation")),

@@ -1,7 +1,7 @@
 import { addTests, assert, assertEqual } from "../siege/api.js";
 import { CLOCKS, KEEPERS, POSTS, makePuzzle, TOWER_POST, solutions, statementText, clockAnswer, fallbackPuzzle, WRONG_COOLDOWN_TICKS } from "./keepers.js";
 import { CLOCKTOWER, WELL, RING, wellOps, chamberOps, stairSteps, spindleOps, drainLayers, plugOps, postOps, postSpot, faceToCenter } from "./well_plan.js";
-import { fullPlan, crankAnswer, inChamber, keeperBody, MILLBROOK_SQUARE } from "./reeve.js";
+import { fullPlan, crankAnswer, inChamber, keeperBody, MILLBROOK_SQUARE, inHeldNight, HELD_NIGHT } from "./reeve.js";
 import { CHAPEL } from "../opening/millbrook.js";
 import { bakedFor, bakedState } from "./baked.js";
 import { BAKED_SITES } from "./baked_sites.js";
@@ -10,6 +10,15 @@ const SECRETS = ["Hollow", "Morvane", "Oswin", "truce", "Choir"];
 const key = (o) => `${o.dx},${o.dy},${o.dz}`;
 
 addTests("unlocks", {
+  "Millbrook is in the Reeve's long night by day until he falls, and only inside the town": () => {
+    const { x, z } = MILLBROOK_SQUARE;
+    assert(inHeldNight(x, z, 6000, 0), "noon in the square, the minute held");
+    assert(inHeldNight(x + HELD_NIGHT.radius - 1, z, 1000, 0), "the edge of the town");
+    assert(!inHeldNight(x + HELD_NIGHT.radius + 5, z, 6000, 0), "outside the town the day is ordinary");
+    assert(!inHeldNight(x, z, 18000, 0), "after dark Minecraft's own night does it");
+    assert(inHeldNight(x, z, 23800, 0), "the dawn never comes");
+    assert(!inHeldNight(x, z, 6000, 1), "the Reeve has fallen: the minute ended");
+  },
   "the keepers' puzzle always has exactly one answer, and it is the planted one": () => {
     for (let seed = 1; seed <= 60; seed++) {
       const p = makePuzzle(seed * 2654435761);

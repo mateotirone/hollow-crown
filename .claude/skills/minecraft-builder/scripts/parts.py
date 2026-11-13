@@ -1410,7 +1410,8 @@ def belfry(ctx, s):
     (round angle, when the face is 3 or more wide), a beam ring on top, a bell hanging from a beam across the
     middle, optional louvres (open trapdoors flush to each face) and a cap. Sits on a tower (y "top",
     replacing its roof), on a ridge (y "roof": the deck is built up from the roof) or at a given y.
-    Keys: rect, y, h (open height, 4), pier, deck, trim, roof, louvres, bell, cap ("hip" / "spire" / "none"),
+    Keys: rect, y, h (open height, 4), pier, deck, trim, roof, louvres, bell (true, false, or "empty": beam and a bare
+    chain where the bell was taken down), cap ("hip" / "spire" / "none"),
     finial, base (rows of deck above the ridge, 1)."""
     rect = list(s["rect"]); x0, z0, x1, z1 = rect
     on_roof = s.get("y") == "roof"
@@ -1455,7 +1456,10 @@ def belfry(ctx, s):
         ax = "x" if W >= D else "z"
         for k in range((x0 if ax == "x" else z0) + 1, (x1 if ax == "x" else z1)):
             ctx.set(k if ax == "x" else cx, beam, cz if ax == "x" else k, "frame", "full", tm, axis=ax)
-        ctx.set(cx, beam - 1, cz, "details", raw="bell", facing="s" if ax == "x" else "e")
+        if s.get("bell") == "empty":   # a bell taken down: the beam and a bare chain (Millbrook, where every bell came down)
+            ctx.set(cx, beam - 1, cz, "details", raw="iron_chain", axis="y")
+        else:
+            ctx.set(cx, beam - 1, cz, "details", raw="bell", facing="s" if ax == "x" else "e")
     cap = s.get("cap", "hip")
     if cap == "none": return beam
     return spire(ctx, {"rect": rect, "y": beam + 1, "rows": 1 if cap == "hip" else s.get("rows", 3), "overhang": s.get("overhang", 1),

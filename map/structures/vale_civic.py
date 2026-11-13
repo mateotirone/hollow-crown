@@ -73,23 +73,27 @@ def guildhall(seed=3):
     return finish_doctrine(bp)
 
 
-def _skill_spec(fname, name):
-    """Build a review spec on the skill (the one engine) for a map stamp."""
+def _skill_spec(fname, name, bells=True):
+    """Build a review spec on the skill (the one engine) for a map stamp. bells=False takes every bell down:
+    each belfry keeps its beam and a bare chain (Millbrook: "they have taken down every bell", the story)."""
     import json, os, sys
     here = os.path.dirname(os.path.abspath(__file__))
     sk = os.path.join(here, "..", "..", ".claude", "skills", "minecraft-builder", "scripts")
     if sk not in sys.path: sys.path.insert(0, sk)
     import engine
     spec = json.load(open(os.path.join(here, "review", "specs", fname)))
+    if not bells:
+        for part in spec.get("parts", []):
+            if part.get("part") == "belfry" and part.get("bell", True): part["bell"] = "empty"
     bp = Blueprint(name); engine.into_blueprint(bp, spec)
     return bp
 
 
-def chapel(seed=5, name="kingsrest_chapel"):
+def chapel(seed=5, name="kingsrest_chapel", bells=True):
     """Stone chapel on the skill (review/specs/kingsrest_chapel.json, gen_chapel.py): a buttressed nave with
     lancets, a front tower in three stages with the door at its foot, a louvred belfry and a broach spire
-    (build-instructions/towers/README.md), a lower chancel at the back."""
-    bp = _skill_spec("kingsrest_chapel.json", name)
+    (build-instructions/towers/README.md), a lower chancel at the back. bells=False: the belfry stands empty."""
+    bp = _skill_spec("kingsrest_chapel.json", name, bells)
     bp.markers["door"] = (5, 2, 24); bp.markers["priest"] = (5, 2, 3)
     return bp.finish()
 
@@ -131,12 +135,12 @@ def station(seed=9):
     return finish_doctrine(bp)
 
 
-def clock_tower(seed=13, name="millbrook_clock_tower"):
+def clock_tower(seed=13, name="millbrook_clock_tower", bells=False):
     """Millbrook's clock tower on the square (the Clockwork Reeve's arena is at its foot), on the skill
     (review/specs/millbrook_clock_tower.json, gen_millbrook.py, build-instructions/towers/README.md): a stone
     shaft in three stages, a jettied timber clock stage with a framed 5 x 5 clock on every face, a steep slate
-    helm and an open bell lantern."""
-    bp = _skill_spec("millbrook_clock_tower.json", name)
+    helm and an open bell lantern. Its bell is down (bells=False) like every bell in Millbrook (the story)."""
+    bp = _skill_spec("millbrook_clock_tower.json", name, bells)
     bp.markers["door"] = (3, 2, 5); bp.markers["arena"] = (3, 0, 12)
     return bp.finish()
 

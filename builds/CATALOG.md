@@ -4,7 +4,7 @@
 
 Every build in The Hollow Crown, designed or not. Add an entry the moment a build is asked for, even with no design yet, and move its status on as it progresses. Run  node tools/build-catalog.mjs  after editing to rewrite builds/CATALOG.md (check.mjs fails if it is stale).
 
-**112 builds:** 1 not started, 28 designed, 17 in viewer, 66 in game.
+**115 builds:** 1 not started, 29 designed, 17 in viewer, 68 in game.
 
 Statuses:
 
@@ -111,6 +111,9 @@ A ★ marks builds that no earlier list had (added in the 2026-11-12 audit).
 | Rival Lords' seats and towns | One version per overworld region | in game |  | Build settlement building and mason shop | `Siege_Nights_BP/scripts/rivals/index.js` | Use the same town layouts and buildings as players (PR #173). |
 | Plot relic landmarks (12) (12) | One version per overworld region | in game | landmarks | Finish the remaining world builds | `Siege_Nights_BP/scripts/landmarks/sites.js` | Self-build near players (PR #164). |
 | Story places: Crownhold, Bellhollow, Ashen Gate chapterhouse, Ashen Watch, Corvin's Tower, Old Mag's hut, Nell Sedge's raft-house, the Deepforge, the Cinder Roost (9) | One version per overworld region | in game | landmarks | Finish the remaining world builds | `Siege_Nights_BP/scripts/landmarks/sites.js` | Self-build near players (PR #164). |
+| Old border watchtower (Chronicle II's chest) | Frostmarch | in game | landmarks | Match story areas to the map | `map/structures/story_places.py` | Ruined seven-wide tower on the north pass, -130 -748. 3D https://claude.ai/artifact/KZppb7WBJGS9PepAxusack |
+| Hallowmere full-moon shrine, ice hut and moon door in the ice (3) | Frostmarch | in game | landmarks | Match story areas to the map | `map/structures/story_places.py` | Inside the Huntsman area, built after its stamp (after: huntsman): shrine 107 -1102, hut 97 -1133, door 33 -1108. 3D https://claude.ai/artifact/KZppb7WBJGS9PepAxusack |
+| Plot landmark ground: Harrowford river bend, Lanternbog moat, Dunehold oasis, Redmesa mesa, Thistledown knoll, Wolfcairn edge, Frosthelm crag, Tidewatch and Gullcliff inlets (9) | One version per overworld region | designed | map | Match story areas to the map | `map/plotground.py` | A genworld step; lands on the next map regeneration. 3D https://claude.ai/artifact/KZppb7WBJGS9PepAxusack |
 | Seven thin-place caves with Fennick's camps (7) | One version per overworld region | in game |  | Settle the road to the Rift | `Siege_Nights_BP/scripts/undertow/thinplaces.js` | Script-built and plain; hosted 3D https://claude.ai/artifact/QFoys3C5GaHFXe415EkJjo . Not in the local viewer or on the building skill. |
 | ★ Sealed ways out: the Shut Pass, the Far Shore, the Horizon Isles (3) | Anywhere / region-neutral | designed | landmarks | Finish the remaining world builds | `map/structures/world_doors.py` | Waiting in PR #208. shut_pass_gate (the Shut Pass gate), westwatch (Far Shore coast landmark), southmost_light (Horizon Isles coast landmark); place themselves via landmarks/sites.js. |
 | Gravestone (left where a player dies) | Anywhere / region-neutral | in game | graves | Add gravestones when players die | `map/structures/gravestone_build.py` | 3x3 footprint: clickable headstone, pale moss mound, a candle lit while the grave is sealed, dry grass. The game places it when a player dies. |

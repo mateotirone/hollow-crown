@@ -43,7 +43,7 @@ export const TRIALS = {
     call: "kesh_call",
     where: "the Cinder Roost, in the cliff above Sunscar",
     steps: [
-      { id: "span", how: "place", marker: "span", title: "Cross the Span", hint: "Walk the Span over the Saltglass gorge, from one end to the other, without falling." },
+      { id: "span", how: "place", marker: "span", title: "Cross the Span", hint: "Walk the Span over the gorge under the Cinder Roost, from one end to the other, without falling." },
       { id: "choosing", how: "act", title: "The Choosing", hint: "Walk into the nesting field and take an egg. Empty hands, slow feet. The dragons are watching how you come." },
       { id: "hatch", how: "deed", title: "The Hatching", hint: "Set the egg on your Roost and stay with it. When it hatches, it has chosen you." },
     ],
