@@ -56,18 +56,24 @@ export function lordPick(slots, tier, counts, designs, fits = () => true, seed =
   const free = new Set(slots.map(slotClass));
   const ok = (id, s) => designs.has(id) && opensAt(id) <= tier && plotFit(id, s, free).ok && fits(id, s);
   // this tier's charter, then a look ahead to the next one, so plots aren't spent on wells while homes are short
+  // (the look ahead only takes Small plots: a house there would spend a Medium the next charter's Mint needs)
   for (const t of [tier, tier + 1]) {
     const check = charterCheck(t, counts, designs);
     for (const [i, line] of (CHARTERS[t] ?? []).entries()) {
       const l = check.lines[i];
       if (!l || l.skipped || l.have >= l.need) continue;
       for (const id of line.ids) {
+        if (t > tier && (PLOT_SIZE[id] ?? "S") !== "S") continue;
         const s = slots.find((x) => ok(id, x) && plotFit(id, x, free).tagged) ?? slots.find((x) => ok(id, x));
         if (s) return { slot: s, id };
       }
     }
   }
+  // filling up: a plot bigger than Small stays empty while a later charter still needs a building of its size
+  // (the 2026-11-13 layouts open few Medium and Large plots before the City)
+  const needed = laterNeeds(tier, counts, designs);
   for (const s of slots) {
+    if (slotClass(s) !== "S" && needed.has(slotClass(s))) continue;
     const options = [...designs].filter((id) => ok(id, s));
     if (!options.length) continue;
     const good = options.filter((id) => plotFit(id, s, free).tagged);
@@ -75,6 +81,20 @@ export function lordPick(slots, tier, counts, designs, fits = () => true, seed =
     return { slot: s, id: from[Math.floor(hash01(`${seed}|${s.id}`) * from.length)] };
   }
   return undefined;
+}
+
+// The plot classes the charters after this tier still need for lines not yet met
+function laterNeeds(tier, counts, designs) {
+  const out = new Set();
+  for (let t = tier + 1; t < CHARTERS.length; t++) {
+    const check = charterCheck(t, counts, designs);
+    for (const [i, line] of CHARTERS[t].entries()) {
+      const l = check.lines[i];
+      if (!l || l.skipped || l.have >= l.need) continue;
+      for (const id of line.ids) if (designs.has(id)) for (const c of [PLOT_SIZE[id] ?? "S", ...(PLOT_ALSO[id] ?? [])]) out.add(c);
+    }
+  }
+  return out;
 }
 
 function hash01(str) {

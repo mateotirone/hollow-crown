@@ -364,11 +364,12 @@ export function markerSpot(town, slot) {
   return { x: town.x + seat.origin.dx, y: town.y + slot.dy + 1, z: town.z + seat.origin.dz };
 }
 
-// A plot that is gone for good: the level-5 town hall took its ground (hallmove.js)
+// A plot that is gone for good: the level-4 or level-5 town hall took its ground (hallmove.js)
 export function slotClosed(owner, slot) {
   const town = townOf(owner);
   if (town?.slots[slot.id]?.closed) return true;
-  return (slot.tags ?? []).includes("hall5") && (halls()[owner]?.level ?? 0) >= 5;
+  const tags = slot.tags ?? [], level = halls()[owner]?.level ?? 0;
+  return (tags.includes("hall4") && level >= 4) || (tags.includes("hall5") && level >= 5);
 }
 
 export function placeMarker(owner, slot) {

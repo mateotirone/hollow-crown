@@ -529,18 +529,27 @@ addTests("settle census", {
   },
 });
 
-// ---------- the level-5 hall takes its plots (hallmove.js) ----------
-import { HALL_TAKES_AT } from "./hallmove.js";
+// ---------- the level-4 and level-5 halls take their plots (hallmove.js) ----------
+import { HALL_TAKES_AT, takenAt } from "./hallmove.js";
 addTests("settle charters", {
-  "some layouts have hall5 plots, and the hall takes them at level 5"() {
-    assertEqual(HALL_TAKES_AT, 5);
-    let total = 0;
+  "layouts have hall4 and hall5 plots, and the hall takes them at levels 4 and 5"() {
+    assertEqual(HALL_TAKES_AT, 4);
+    assertEqual(takenAt({ tags: ["hall4"] }), 4);
+    assertEqual(takenAt({ tags: ["corner", "hall5"] }), 5);
+    assertEqual(takenAt({ tags: ["corner"] }), undefined);
+    const total = { 4: 0, 5: 0 };
     for (const name of allTownNames()) for (const v of townByName(name).variants) {
       if (v.charter === false) continue;
-      const n = slotsOfLayout(v).filter((s) => (s.tags ?? []).includes("hall5")).length;
-      total += n;
+      for (const s of slotsOfLayout(v)) if (takenAt(s)) total[takenAt(s)]++;
     }
-    assert(total > 0, "some layouts have hall5 plots");
+    assert(total[4] > 0 && total[5] > 0, "some passing layouts have hall4 and hall5 plots");
+  },
+  "every passing layout reserves a Mason's yard by the forecourt"() {
+    for (const name of allTownNames()) for (const v of townByName(name).variants) {
+      if (v.charter === false) continue;
+      const f = fixturesOf(v, 0).find((x) => x.kind === "mason_yard");
+      assert(f && "nsew".includes(f.rotation), `${name} ${v.label} has a mason_yard fixture with a side`);
+    }
   },
 });
 
@@ -570,16 +579,16 @@ addTests("settle charters", {
       if (v.charter === false) continue;
       const slots = slotsOfLayout(v);
       const counts = {};
-      const taken = new Set();
+      const taken = new Set(); const dbg = [];
       for (let tier = 0; tier <= 3; tier++) {
         for (let n = 0; n < 80; n++) {
           const open = slots.filter((s) => s.tier <= tier && !taken.has(s.id));
           const pick = lordPick(open, tier, counts, designs, () => true, name);
           if (!pick) break;
           taken.add(pick.slot.id);
-          counts[pick.id] = (counts[pick.id] ?? 0) + 1;
+          counts[pick.id] = (counts[pick.id] ?? 0) + 1; dbg.push(pick.slot.id + ":" + pick.id);
         }
-        if (tier < 3) assert(charterCheck(tier, counts, designs).met, `${name} ${v.label}: lord stuck at ${tier} with ${JSON.stringify(counts)}`);
+        if (tier < 3) assert(charterCheck(tier, counts, designs).met, `${name} ${v.label}: lord stuck at ${tier} with ${JSON.stringify(counts)} (picks ${dbg.join(" ")})`);
       }
       assert((counts.cottage ?? 0) >= 3, `${name}: a lord's town has homes`);
     }
