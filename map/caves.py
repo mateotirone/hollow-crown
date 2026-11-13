@@ -334,7 +334,8 @@ class Caves:
         for dx, dz in ((2, 0), (-2, 0), (0, 2), (0, -2)):
             sh = np.roll(np.roll(cid, dx, 0), dz, 1); shl = np.roll(np.roll(lv, dx, 0), dz, 1)
             diff = (sh != cid) & (shl != lv)
-            lo = np.where(diff, np.minimum(lo, np.minimum(lv, shl)), lo); hi = np.where(diff, np.maximum(hi, np.maximum(lv, shl)), hi)
+            low = np.where(np.minimum(lv, shl) <= LAVA_Y, YMIN, np.minimum(lv, shl))     # beside a dry cell: rock right down,
+            lo = np.where(diff, np.minimum(lo, low), lo); hi = np.where(diff, np.maximum(hi, np.maximum(lv, shl)), hi)   # so no lava meets water
         yy = np.arange(YMIN, YMIN + YR)[None, :, None]
         carve &= ~((yy > lo[:, None, :]) & (yy <= hi[:, None, :] + 1))
         carve[:, 0, :] = False
