@@ -47,7 +47,15 @@ const ENTITIES = [
   { entity: "siege:quartermaster", hint: "Click to trade" },
 ];
 
-for (const [block, name, hint] of BLOCKS) addMenuLabel({ block, name, hint });
+// Mateo 2026-11-13: the labels over a claimed Plot Stone stood too high, the Plot Stone's under the Keep Banner's
+// with the banner's well above it. With a banner raised on the stone only the banner's label shows, low down,
+// just over the stone, at eye height.
+const hasBanner = (block) => { try { return block.above()?.typeId === "siege:keep_banner"; } catch { return false; } };
+const EXTRA = {
+  "siege:keep_banner": { lift: 0.25 },
+  "siege:plot_stone": { where: (block) => !hasBanner(block) },
+};
+for (const [block, name, hint] of BLOCKS) addMenuLabel({ block, name, hint, ...EXTRA[block] });
 
 // Archive Shelves stand in walls of many, so one label per wall, not one per shelf (Mateo's playtest photo,
 // 2026-11-13: eight labels piled up into an unreadable heap). The labelled shelf is the top one at the west/north
