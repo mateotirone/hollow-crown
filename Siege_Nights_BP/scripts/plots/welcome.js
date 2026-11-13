@@ -328,7 +328,8 @@ const PAGES = [
     + "§fSaltreach§r, the western coast, ships and trade.\n"
     + "§fEmberwaste§r, the desert in the east, and what nests there.\n"
     + "§fBlackfen§r, the southern marsh, brews and things better left alone.\n\n"
-    + "Kingsrest, the crossroads town, sits in the middle, below the ruins of the old capital. Rails and roads run from it to everywhere. Nobody flies here."],
+    + "Kingsrest, the crossroads town, sits in the middle. Crownhold, the ruined old capital, stands on the rise to its north-west. "
+    + "Rails and roads run from Kingsrest to everywhere. The only wings over Aldmere belong to the dragons of the Emberwaste and the few riders they let up."],
   ["Choosing a home",
     "This hall is all of Aldmere in miniature. The twelve glowing stones on it are the places a settlement can stand, each on the spot where its land really lies.\n\n"
     + "Click a stone to read about the place. If it is free you can take it: you will be set down beside its Plot Stone and it is yours to found. "
