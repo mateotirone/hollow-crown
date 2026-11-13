@@ -490,6 +490,10 @@ export const ITEMS = {
   "name": "Mire Heart",
   "lore": "From the Mother of Changelings. Hold it in your offhand: at night, your hits heal you."
  },
+ "siege:last_note": {
+  "name": "The Last Note",
+  "lore": "From the Hollow Choir. Hold it in your offhand: things from the Hollow near you falter, as if they have lost the tune."
+ },
  "siege:warlords_brand": {
   "name": "The Warlord's Brand",
   "lore": "From the Warlord King. Sets foes alight; every fifth hit lets out a war-cry shockwave."

@@ -154,6 +154,7 @@ BELL = ["................", ".......oo.......", "......oLMo......", "......oMDo.
         "...ohllmmddo....", "...ohlmmmddo....", "...olmmmdddo....", "..ohlmmmdddso...", "..olmmmddddso...", ".oHHLLLMMMDDSo..", ".ooooooLMooooo..", ".......oo......."]
 grid(LUMP, 'siege_raw_choir_ore', REGIONS['undertow']['stone'], VIOLET)
 grid(INGOT, 'siege_choirsteel_ingot', CHOIR)
+grid(BELL, 'bestiary/last_note', CHOIR, PEARL)  # the Hollow Choir's relic
 grid(BELL, 'siege_wardens_bell', fixed('#120a1c', '#22143a', '#382258', '#523678', '#74529c', '#a07ec4'), BRASS)
 
 import build_crown_art; build_crown_art.icon()   # the Hollow Crown icon follows Mateo's reference

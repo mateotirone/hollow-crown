@@ -412,7 +412,10 @@ function uncrown(f) {
   s.crownAt = f.spot(6, Math.max(7, Math.min(12, s.safe - 3)));
   s.uncrownedAt = f.tick; s.reach = f.tick + MORVANE.crown.reach;
   f.shield(false);
-  f.say("§dThe Hollow Crown rings off across the floor. He can die now. Keep him from it!");
+  // Above the line he could always be hurt, so "he can die now" would be a lie there (boss walkthrough, Mateo 2026-11-13)
+  f.say(f.hp() <= MORVANE.crown.shieldAt
+    ? "§dThe Hollow Crown rings off across the floor. He can die now. Keep him from it!"
+    : "§dThe Hollow Crown rings off across the floor. Without it he bleeds. Hurt him, and keep him from it!");
   sound(f.dim, "block.bell.hit", f.entity.location, 0.5, 1);
 }
 
@@ -718,6 +721,15 @@ registerBoss({
     f.m = { home, atSeat, party: here, down: new Set(), tries: {}, wind: {}, stage: 0, s: {}, started: 0, away: lost, floorGone: f.m?.floorGone };
     if (atSeat) { try { requestPockets(); } catch { /* arenas unavailable */ } }
     enter(f, 0, { quiet: true, restart: lost });
+  },
+
+  // After he falls, point the way on: the Deep Door under the Court opens now (after/deep.js)
+  onDeath: (f, players) => {
+    system.runTimeout(() => {
+      for (const p of players) {
+        try { p.sendMessage("§8Far off, under the Court, in the Vault of the Hollow, a seal that has hummed one note for three hundred years goes quiet. The Deep Door will open now."); } catch { /* gone */ }
+      }
+    }, 260);
   },
 
   // The framework's own reset (everyone walked away): put him back on the Seat
