@@ -54,7 +54,7 @@ export const seneschalSite = defineSite({
   },
   inArena: (site, l) => inVault(site.data.center, l),
   spawnAt: (site) => ({ x: site.data.center.x + 0.5, y: site.data.center.y + VAULT.floor + 1, z: site.data.center.z - 41.5 }),
-  onWin: () => {},
+  onWin: (site) => turnAway(site),
   tick: (site) => ashSand(site),
   tpAt: (site) => { const c = site.data.center; return { x: c.x + 0.5, y: c.y + 1, z: c.z + 3.5 }; },
   answer: (site) => `Statue order by spot: ${statues(site).spots.map((age, spot) => [age, spot]).sort((a, b) => a[0] - b[0]).map(([, spot]) => spot).join(", ")}`,
@@ -150,4 +150,19 @@ function summon(site, first, player) {
   }
   cues.push([first ? 175 : 120, () => toAll((p) => say(p, "§6The vault is open. At the far end, someone is sitting at a desk, writing. He does not look up."))]);
   site.summon(cues);
+}
+
+// When he falls, the statues grind round one by one and turn their faces back to the vault door, as they stood for
+// whoever solved them: the vault is empty again (boss walkthrough, Mateo 2026-11-13)
+function turnAway(site) {
+  const c = site.data.center;
+  if (!c) return;
+  const cues = VAULT.spots.map((_, i) => [40 + i * 16, () => {
+    setFace(site, i, "north");
+    sound("random.anvil_use", abs(c, statueAt(i)), { pitch: 0.35 + i * 0.05, volume: 0.6 });
+  }]);
+  cues.push([40 + VAULT.spots.length * 16 + 10, () => {
+    for (const p of nearby(c, 64)) { try { say(p, "§7Out in the antechamber, stone grinds on stone. One by one, the faceless statues turn back to face the vault door, as if to see him out."); } catch { /* gone */ } }
+  }]);
+  for (const [t, fn] of cues) system.runTimeout(() => { try { fn(); } catch { /* unloaded */ } }, t);
 }

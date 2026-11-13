@@ -320,7 +320,7 @@ registerBoss({
     }
   },
 
-  loot: (f, player, first) => [stack("minecraft:netherite_ingot", first ? 4 : 1), stack("minecraft:diamond", first ? 16 : 4)],
+  loot: (f, player, first) => (first ? [stack("siege:last_note")] : []).concat([stack("minecraft:netherite_ingot", first ? 4 : 1), stack("minecraft:diamond", first ? 16 : 4)]),
   hoard: () => [stack("minecraft:enchanted_golden_apple", 2), stack("siege:gold_coin", 18)],
 });
 
