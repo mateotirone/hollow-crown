@@ -594,6 +594,33 @@ if (loaded) {
   for (const f of result.failed) fail(`test failed: ${f.group}: ${f.name} (${f.error})`);
 }
 
+// ---------- 7. terraform: the game's copy gives the same ground as the map's ----------
+{
+  step("Terraform: settle/terraform.js against map/structures/terraform_cases.json");
+  const TF = await import(pathToFileURL(join(SCRIPTS, "settle/terraform.js")).href);
+  const cases = JSON.parse(readFileSync(join(ROOT, "map/structures/terraform_cases.json"), "utf8"));
+  const roundEven = (v) => { const f = Math.floor(v), r = v - f; return r > 0.5 ? f + 1 : r < 0.5 ? f : f % 2 === 0 ? f : f + 1; };
+  const LAND = { // terraform_test.py land()
+    flat: () => 64, slope2: (i) => 64 + Math.floor(i / 2), slope1: (i) => 60 + i,
+    bumpy: (i, j) => 64 + roundEven(3 * Math.sin(i / 3) + 2 * Math.cos(j / 4)), cliff: (i) => (i < 15 ? 64 : 72),
+  };
+  let bad = 0;
+  for (const c of cases) {
+    const n = 31, h = Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => LAND[c.land](i, j)));
+    const sites = c.sites.map(({ box: [x0, z0, w, d], fill = "stone", door = true }) => {
+      const cells = [];
+      for (let i = x0; i < x0 + w; i++) for (let j = z0; j < z0 + d; j++) cells.push([i, j]);
+      const y = TF.padHeight(cells.map(([i, j]) => h[i][j]));
+      const con = new Map();
+      if (door) for (const s of [-1, 0, 1]) for (let t = 0; t < 4; t++) con.set(`${x0 + (w >> 1) + s},${z0 + d + t}`, y);
+      return TF.site({ pad: new Map(cells.map(([i, j]) => [`${i},${j}`, y])), connectors: con, padFill: fill });
+    });
+    const { T } = TF.solve(h, sites);
+    if (JSON.stringify(T) !== JSON.stringify(c.expect)) { bad++; fail(`terraform.js: case "${c.name}" gives different ground from terraform.py`); }
+  }
+  if (!bad) console.log(`${cases.length} cases match`);
+}
+
 // ---------- result ----------
 console.log("");
 for (const w of warnings) console.log(`note: ${w}`);
