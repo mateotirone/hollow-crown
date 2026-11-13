@@ -219,7 +219,7 @@ export function blocks(h, T, wall, sites, region = "vale", x0 = 0, z0 = 0, fixed
     for (let y = g + 1; y < t; y++) set(x, y, z, t - y <= SOIL ? R.sub : "stone");
     for (let y = t + 1; y <= g; y++) set(x, y, z, "air");
     if (t < g) for (let y = Math.max(t - SOIL, t - (g - t)); y < t; y++) set(x, y, z, R.sub);
-    set(x, t, z, hash(x >> 1, z >> 1, 3) * R.patch[1] < 1 ? R.patch[0] : R.top);
+    set(x, t, z, hash(x >> 1, z >> 1, 3) * R.patch[1] < 1 && gap[i][j] === 0 ? R.patch[0] : R.top); // patches on level ground only
     if (wall[i][j]) for (let y = t - gap[i][j] + 1; y <= t; y++) set(x, y, z, hash(x, z + y, 7) < 0.25 ? R.wall[1] : R.wall[0]);
   }
   return [...out.values()];

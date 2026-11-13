@@ -9,7 +9,8 @@
             "Texture.t1",
             "Texture.t2",
             "Texture.t3",
-            "Texture.t4"
+            "Texture.t4",
+            "Texture.t5"
           ]
         },
         "geometries": {
@@ -18,7 +19,8 @@
             "Geometry.g1",
             "Geometry.g2",
             "Geometry.g3",
-            "Geometry.g4"
+            "Geometry.g4",
+            "Geometry.g5"
           ]
         }
       },

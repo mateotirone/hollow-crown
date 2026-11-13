@@ -69,6 +69,7 @@ onTick("upkeep", 100, () => {
     rec.day = day; // one bill a day, and none for the days spent away
     store.save();
     if (day - rec.since < UPKEEP.graceDays) continue;
+    if (UPKEEP.freeUntilFirstWin && !(keepOf(player.id).wins > 0)) continue; // a Hamlet that hasn't held a night yet pays nothing
     try { bill(player); } catch (e) { console.warn(`[Hollow Crown] upkeep: ${e}`); }
   }
 });
@@ -86,5 +87,6 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
     store.data.of[player.id] ??= { day: world.getDay(), since: world.getDay() };
     return bill(player);
   }
-  player.sendMessage(`§6Upkeep a day: §f${coins(owed.total)}§7 (${breakdown(owed, counts) || "nothing yet"}).${inArrears(player.id) ? " §cThe last dawn went unpaid." : ""}`);
+  const free = UPKEEP.freeUntilFirstWin && !(keepOf(player.id).wins > 0) ? " §aNothing is charged until you hold your first siege." : "";
+  player.sendMessage(`§6Upkeep a day: §f${coins(owed.total)}§7 (${breakdown(owed, counts) || "nothing yet"}).${free}${inArrears(player.id) ? " §cThe last dawn went unpaid." : ""}`);
 });

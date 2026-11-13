@@ -53,6 +53,25 @@ def scene_avenue():
     return cells, figs
 
 
+def seated_plinth(cells, cx, cz):
+    """The great figure's three-tier stepped plinth (boss_landmarks.seneschal), top a slab layer at y 10."""
+    import math
+    for step, rr in enumerate((11.5, 10.5, 9.5)):
+        n = int(rr) + 1
+        for x in range(-n, n + 1):
+            for z in range(-n, n + 1):
+                if math.hypot(x, z) > rr: continue
+                for y in range(step * 3, 3 + step * 3): cells[(cx + x, y, cz + z)] = (("smooth_red_sandstone", "cut_red_sandstone", "red_sandstone")[(x * 7 + z * 3 + y) % 3], {})
+                if step == 2 and math.hypot(x, z) <= 8.5: cells[(cx + x, 9, cz + z)] = ("smooth_red_sandstone_slab", {"half": "bottom"})
+
+
+def scene_seated():
+    cells = {}
+    seated_plinth(cells, 0, 0)
+    sand(cells, -22, 22, -22, 26)
+    return cells, [("seated", "folded", "whole", FS.SEATED_SIZE, 0, (0.5, 9.5, 0.5))]
+
+
 def scene_gate():
     """The Faceless Gate's processional way: four on 9x9 plinths either side of it, four fallen along the sides."""
     ax, az = 850, 590
@@ -61,10 +80,11 @@ def scene_gate():
         for x in range(-2, 3): cells[(x, -1, z)] = ("smooth_sandstone" if (x + z) % 3 else "cut_red_sandstone", {})
     for v, f, x, z in FS.AVENUE:
         for (px, py, pz), b in FS.plinth_cells(4).items(): cells[(x + px, py, z + pz)] = b
-    sand(cells, -22, 22, -30, 40, "smooth_sandstone")
+    seated_plinth(cells, 0, -26)
+    sand(cells, -22, 22, -40, 40, "smooth_sandstone")
     figs = []
     for s in FS.gate_spots((ax, az)):
-        y = FS.PLINTH_H if s["plinth"] else 0
+        y = s["rise"] - 0.5 if "rise" in s else FS.PLINTH_H if s["plinth"] else 0
         figs.append((s["age"], s["hold"], s["wear"], s["size"], YAW[s["face"]], (s["x"] - ax + 0.5, y, s["z"] - az + 0.5)))
     return cells, figs
 
@@ -82,12 +102,15 @@ SCENES = [
      "About a third of the avenue is broken: the hood gone at the neck, the right arm gone at the shoulder, or snapped off at the knees with the pieces round the plinth. Four at the Gate have fallen on their backs, broken at the knees, half sunk in the sand.",
      lambda: scene_row([("king", "staff", "headless", 5), ("young_king", "sword", "armless", 5), ("king", "bowl", "stump", 5), ("old_king", "folded", "fallen", 5)], 13),
      [-24, 22, 74, -4, 4, 2]),
+    ("statues-seated", "The great seated figure", "Behind the Faceless Gate",
+     "The colossus over the vault: robed, on a stone throne, hands flat on his knees, a smooth pale head with no face at all under a striped headdress and a gold point. About 30 blocks tall (size 10) on the three-tier stepped plinth, which stays blocks.",
+     scene_seated, [-28, 16, 95, 0.5, 15, 0]),
     ("statues-avenue", "Sunscar's statue avenue", "32 statues, boy to old king",
      "The road from Sunscar's square south to the Faceless Gate: 32 plinths 5 to 9 blocks out from the centreline, the figures facing the walk and ageing as you go. The map bakes the plinths; the game stands the figures on them.",
      scene_avenue, [-35, 28, 120, 0.5, 4, 46]),
-    ("statues-gate", "The Faceless Gate's statues", "Four standing, four fallen",
-     "The Gate's own eight (with the avenue's 32 they make forty): old kings about 20 blocks tall (size 7.3) on 9x9 plinths either side of the processional way, one headless, and four fallen along the precinct's sides.",
-     scene_gate, [-35, 26, 105, 0.5, 6, 12]),
+    ("statues-gate", "The Faceless Gate's statues", "Four standing, four fallen, the seated figure",
+     "The Gate's own eight (with the avenue's 32 they make forty): old kings about 20 blocks tall (size 7.3) on 9x9 plinths either side of the processional way, one headless, and four fallen along the precinct's sides. The great seated figure looks down the way from its stepped plinth at the north end (the gate's pylons are left out here).",
+     scene_gate, [32, 24, 130, 0.5, 10, -4]),
 ]
 
 
