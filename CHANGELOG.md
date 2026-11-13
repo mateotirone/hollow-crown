@@ -301,6 +301,7 @@ Everything merged to `main` since the last release goes here. Each pull request 
 - Regional Castle Guard armor: Vale, Frostmarch, Saltreach, Emberwaste and Blackfen sets with the same stats as the Castle Guard armor and their own look (kettle hat and brigandine, fur hood and quilted wool, bleached sallet and rope belt, blackened scale with a veil, laced leather lamellar). Each keeps the banner-colour tabard. Make one at the siege workshop from a Castle Guard piece and that region's Castle Stone.
 
 ### Changed
+- Morvane's overhead blow, the one that lets you strike the Hollow Crown off, now only comes once he is down to his last stretch of health (12%), so knocking the Crown off is how you finish him.
 - The Barracks is crafted from 3 stone bricks, 5 planks and a barrel (it needed an iron sword and a shield). The Hall Cornerstone, Mason's Bench and Quartermaster's Desk take an iron ingot instead of an emerald.
 - Losing a siege costs one win and never your tier: the Keep Banner drops, the raiders leave, and when you raise it again your settlement keeps its record, colour and allies (it used to start again from no wins).
 - No upkeep is charged until a settlement has held its first siege.
