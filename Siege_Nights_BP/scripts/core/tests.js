@@ -15,6 +15,7 @@ const tests = [];
 // tools/check.mjs, which fails if a slow test is missing from this list. Written as "group: name".
 export const OFFLINE_ONLY = new Set([
   "trains: stations: at the end of a line the track stops at a buffer and an end wall, on the side away from the line",
+  "settle ground: terraform: a floor on a slope cuts in at most 3, and the groundwork blends the land round it",
   "undertow: the Wound: the cliff behind it runs right across the valley, never lower than the first wall, and is built up into the roof",
   "undertow: the Wound: the cave is sealed in rock, you can walk from the ledge to the tear, and the tear runs from the floor to the roof",
   "undertow: the arrival: you can walk from the ledge down to the valley a block at a time, and every step is a stair block",
