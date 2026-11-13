@@ -42,6 +42,17 @@ Then type `/scriptevent siege:showcase siege` to make it night and start a siege
 
 Walk around, click things, and tell me what looks wrong or does nothing. The list below is the same things done by hand, if you want to check a step on its own.
 
+## 4a. The arena (scripts/arena/)
+
+Until the real arena is built at Kingsrest, test on a **flat Creative world**: stand in the open and type `/scriptevent siege:arena_test`. A rough test arena goes up around you (sand floor, twelve coloured concrete rooms with castle portcullis gates, a ring of stands). `/scriptevent siege:arena_test clear` goes back to the real arena's numbers (`scripts/arena/layout.js`).
+
+- Click the lectern north of the ring (or type `/scriptevent siege:arena`). Read "How it works" the first time.
+- **Battle a mob**: pick a beast and Squire. You're taken to your room. Take the arena kit: your own things vanish into the locker and you're in iron. Start Battle: 3, 2, 1, the gate lifts, the crowd fills the stands and cheers, the beast comes out in the middle, and the gate drops behind you. Kill it: you're paid Regals and sent back with your own things, health and game mode. Do it again: it pays less the same day.
+- Lose on purpose (let a Legend Gatebreaker kill you, with your own things on): no gravestone, and when you respawn you're back in your room to watch, then home with everything you had.
+- **Battle a King** (needs a second player): invite them; they get a message wherever they are; Accept takes them to the room opposite yours. Try one with the kit and one with their own things. Last one standing wins; the records board counts it.
+- Log off mid-fight, then back on: you're out, back in your room, and get your things back when it ends.
+- `/scriptevent siege:arena_status` shows the fight; `/scriptevent siege:arena_end` stops it and sends everyone home.
+
 ## 4b. The full-castle battle test (scripts/battletest/)
 
 One command builds a Castle-tier settlement (the Crown Wall with towers, gatehouse and portcullis, nine buildings, an Iron Strongroom, a Barracks and four ballistas), puts an army on each side and runs the siege. Use a **flat Creative world** and stand where the castle's middle should be: it clears about 145 x 145 blocks round you and a field 135 blocks south to the attackers' camp. Building takes a minute or two. It moves your Keep Banner (like the showcase); `clear` puts it back.

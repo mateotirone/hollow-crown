@@ -483,6 +483,7 @@ item.siege:spell_choir.name=Choir's Call
 item.siege:spell_hollowstep.name=Veilstep
 entity.siege:spell_satchel.name=Sorcerer's Satchel
 entity.siege:townsfolk.name=Townsperson
+entity.siege:arena_crowd.name=Arena crowd
 action.interact.siege.talk=Talk
 
 ## Regional player armour (studio/art/build_regional_armor.py)
