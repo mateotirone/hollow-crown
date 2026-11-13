@@ -244,11 +244,13 @@ def to_bp(n, q):
     q = dict(q); corner = q.pop("corner", None); q.pop("conn", None); q.pop("post", None)
     raw = dict(q.pop("raw", {}) or {})
     if corner and corner != "none": raw["minecraft:corner"] = corner
-    if n == "vine": raw["vine_direction_bits"] = {"s": 1, "w": 2, "n": 4, "e": 8}[q.pop("attach", "n")]
+    # vines, bells and buttons keep their logical "attach"/"facing", so bp.rotated turns them with the building and
+    # bp.to_bedrock writes the states (as raw states they stayed put and a turned stamp hung them on air, 2026-11-13)
+    if n == "vine": q.setdefault("attach", "n")
     if n in ("end_rod", "lightning_rod"): raw["facing_direction"] = 1
-    if n == "bell": raw["attachment"] = "hanging"; raw["direction"] = {"s": 0, "w": 1, "n": 2, "e": 3}[q.pop("facing", "s")]
+    if n == "bell": raw["attachment"] = "hanging"; q.setdefault("facing", "s")
     if n == "candle" or n.endswith("_candle"): raw["candles"] = max(0, int(q.pop("candles", 1)) - 1); raw["lit"] = bool(q.pop("lit", True))
-    if n.endswith("_button"): raw["facing_direction"] = {"n": 2, "s": 3, "w": 4, "e": 5}[q.pop("facing", "s")]
+    if n.endswith("_button"): q.setdefault("facing", "s")
     if raw: q["raw"] = raw
     return n, q
 
