@@ -46,7 +46,7 @@ export const JOURNAL = {
     },
     {
       date: "The 29th year. A night I did not sleep.",
-      text: "I dreamed I stood in a street, ankle-deep in black water. There were people all along it with their faces to the walls, humming. One of them turned and bowed to me. It was not how a subject bows. It was how one neighbour greets another over a fence.\n\nI woke in my own bed. My feet were wet to the ankle and the sheets were dry.\n\nI have told no one. I have had the cellar bricked up.",
+      text: "I dreamed I stood in a street, ankle-deep in black water. There was no sky over it, only a roof too far up to see, as the miller's child told me. There were people all along it with their faces to the walls, humming. One of them turned and bowed to me. It was not how a subject bows. It was how one neighbour greets another over a fence.\n\nI woke in my own bed. My feet were wet to the ankle and the sheets were dry.\n\nI have told no one. I have had the cellar bricked up.",
     },
     {
       date: "The 30th year. Lambing.",
