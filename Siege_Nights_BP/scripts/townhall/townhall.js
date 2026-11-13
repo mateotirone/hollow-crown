@@ -288,6 +288,27 @@ export function tidyCornerstone(owner) {
   if (!hall || hall.lost || hall.building || !(hall.level > 0)) return;
   if (!hall.hidden) hideCornerstone(owner);
   if (!hall.marks?.board) addBoard(owner);
+  else turnBoard(owner);
+}
+
+// A Town Board set down before it was turned to face the aisle is turned round where it stands
+function turnBoard(owner) {
+  const hall = hallOf(owner);
+  const plan = drawHall(hall.level, STYLES[hall.style]);
+  const spot = plan.marks.board;
+  if (!spot) return;
+  const forward = { x: hall.fx, z: hall.fz };
+  const at = worldMarks(plan, hall, forward).board;
+  if (!at || at.x !== hall.marks.board.x || at.y !== hall.marks.board.y || at.z !== hall.marks.board.z) return;
+  try {
+    const block = world.getDimension("overworld").getBlock(at);
+    if (block?.typeId !== BOARD) return;
+    const want = resolveRole(STYLES[hall.style], frameFor(forward), "board", plan.cells.get(`${spot.x},${spot.y},${spot.z}`)?.o);
+    const dir = want.getState("minecraft:cardinal_direction");
+    if (want.type.id === BOARD && dir && block.permutation.getState("minecraft:cardinal_direction") !== dir) block.setPermutation(want);
+  } catch {
+    // not loaded: next time
+  }
 }
 
 // Halls raised before the Town Board existed get one now, where a new hall of that size would have it

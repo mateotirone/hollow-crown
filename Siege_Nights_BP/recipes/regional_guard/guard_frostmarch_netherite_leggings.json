@@ -21,8 +21,10 @@
     "result": {
       "item": "siege:guard_frostmarch_netherite_leggings"
     },
-    "unlock": {
-      "context": "AlwaysUnlocked"
-    }
+    "unlock": [
+      {
+        "item": "minecraft:structure_void"
+      }
+    ]
   }
 }

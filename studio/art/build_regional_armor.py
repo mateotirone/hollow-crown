@@ -208,6 +208,10 @@ def attachable_stub(mat, reg, piece):
         "render_controllers": ["controller.render.armor"]}}}
 
 
+# A recipe nobody unlocks by playing (structure void can't be picked up): only /recipe give shows it in the book
+REGION_LOCKED = [{"item": "minecraft:structure_void"}]
+
+
 def recipes():
     out = {}
     for mat in MATS:
@@ -217,7 +221,8 @@ def recipes():
                 out[f'workshop/{rid(mat, reg, piece)}.json'] = {"format_version": "1.20.10", "minecraft:recipe_shapeless": {
                     "description": {"identifier": f"{ident}_recipe"}, "tags": ["siege_workshop"],
                     "ingredients": [{"item": base_id(mat, piece)}, {"item": STONE[reg]}],
-                    "result": {"item": ident}, "unlock": {"context": "AlwaysUnlocked"}}}
+                    # shown in the recipe book only in the region you stand in: scripts/recipebook/ gives and takes it
+                    "result": {"item": ident}, "unlock": REGION_LOCKED}}
     for reg in REG:   # upgrades keep the region: diamond -> netherite (vanilla template), netherite -> Choirsteel
         for piece in PIECES:
             for frm, to, template, addition in (('diamond', 'netherite', 'minecraft:netherite_upgrade_smithing_template', 'minecraft:netherite_ingot'),
