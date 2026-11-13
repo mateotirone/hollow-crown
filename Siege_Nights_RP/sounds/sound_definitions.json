@@ -2876,6 +2876,50 @@
      "stream": true
     }
    ]
+  },
+  "siege.voice.tilly.hub_0": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/tilly/hub_0",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.tilly.hub_1": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/tilly/hub_1",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.tilly.hub_2": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/tilly/hub_2",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
+  },
+  "siege.voice.tilly.hub_3": {
+   "category": "neutral",
+   "max_distance": 16,
+   "sounds": [
+    {
+     "name": "sounds/siege/voice/tilly/hub_3",
+     "volume": 1.0,
+     "load_on_low_memory": true
+    }
+   ]
   }
  }
 }

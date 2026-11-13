@@ -7,7 +7,7 @@ Every sound The Hollow Crown plays, and what each one is made of. **This file is
 Tone for all of it: uneasy, especially at night. Not horror, no jump scares, nothing sudden or loud for its own sake.
 There is no music in version 1.
 
-- **36 signature sounds** are meant to be real recordings made with an AI sound generator. 29 of 36 are installed; the rest play a stand-in built from vanilla sounds, so the game is never silent.
+- **36 signature sounds** are meant to be real recordings made with an AI sound generator. 30 of 36 are installed; the rest play a stand-in built from vanilla sounds, so the game is never silent.
 - **32 more dragon sounds** have synthesized stand-ins and can be replaced the same way.
 - **33 vanilla sounds** are reworked (lower, softer, layered) everywhere the scripts use them, and **27 named cues** are built from vanilla layers.
 - The remaining vanilla sounds are played as they are, because they should sound like what they are (a horse, a bow, a page).
@@ -64,7 +64,7 @@ No computer set up for this? Upload the files in the project chat and ask Claude
 | 33 | Cinderwing: roar | `cinderwing_roar` | 4 s | one-shot, mono | recording (2.4 s) |
 | 34 | Ashen Wyvern: roar | `wyvern_roar` | 4 s | one-shot, mono | recording (2.3 s) |
 | 35 | Dune Drake: roar | `drake_roar` | 4 s | one-shot, mono | recording (2.4 s) |
-| 36 | Glass Wyrm: roar | `wyrm_roar` | 4 s | one-shot, mono | synthesized stand-in |
+| 36 | Glass Wyrm: roar | `wyrm_roar` | 4 s | one-shot, mono | recording (3.48 s) |
 
 ### 1. The 3:17 toll
 
